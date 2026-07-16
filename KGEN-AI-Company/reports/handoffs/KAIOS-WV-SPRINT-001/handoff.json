@@ -1,0 +1,102 @@
+{
+  "task_id": "KAIOS-WV-SPRINT-001",
+  "human_decision_id": "HUMAN-PHASE-SHIFT-001",
+  "handoff_id": "HANDOFF-KAIOS-WV-SPRINT-001-20260716",
+  "branch": "codex/world-viewer-sprint-001",
+  "worktree": "CODEX_MANAGED_ISOLATED_WORKTREE",
+  "base_sha": "16f15981673e8dd2678db985b7a35486f130cafd",
+  "head_sha": "6fbf7ce77cc1475655fb4367cbd794f12ccc1465",
+  "claim_id": "CLAIM-KAIOS-WV-SPRINT-001-20260716-CODEX-GM-01",
+  "fencing_token": "CODEX-MANUAL-WV-SPRINT-001-001",
+  "worker_id": "codex-gm-01",
+  "review_owner": "codex-gm-01",
+  "files_changed": [
+    "KGEN-KAIOS/world-viewer/",
+    "KGEN-KAIOS/README.md",
+    "KGEN_MASTER_LIBRARY_INDEX.md",
+    "README.md"
+  ],
+  "files_added": [
+    "KGEN-KAIOS/world-viewer/app.js",
+    "KGEN-KAIOS/world-viewer/camera/",
+    "KGEN-KAIOS/world-viewer/renderer/",
+    "KGEN-KAIOS/world-viewer/selection/",
+    "KGEN-KAIOS/world-viewer/inspector/",
+    "KGEN-KAIOS/world-viewer/lod/",
+    "KGEN-KAIOS/world-viewer/input/",
+    "KGEN-KAIOS/world-viewer/life/",
+    "KGEN-KAIOS/world-viewer/ui/",
+    "KGEN-KAIOS/world-viewer/data/world-store.js",
+    "KGEN-KAIOS/world-viewer/tasks/KAIOS-WV-SPRINT-001.task-envelope.json",
+    "KGEN-KAIOS/world-viewer/tests/evidence/"
+  ],
+  "files_deleted": [
+    "KGEN-KAIOS/world-viewer/assets/accessibility.js",
+    "KGEN-KAIOS/world-viewer/assets/app.js",
+    "KGEN-KAIOS/world-viewer/assets/camera.js",
+    "KGEN-KAIOS/world-viewer/assets/context-menu.js",
+    "KGEN-KAIOS/world-viewer/assets/coordinate.js",
+    "KGEN-KAIOS/world-viewer/assets/data-loader.js",
+    "KGEN-KAIOS/world-viewer/assets/inspector.js",
+    "KGEN-KAIOS/world-viewer/assets/selection.js",
+    "KGEN-KAIOS/world-viewer/assets/styles.css"
+  ],
+  "tests_run": [
+    "STATIC_PACKAGE_ACCEPTANCE",
+    "ES_MODULE_SYNTAX",
+    "STRICT_JSON_PARSE",
+    "DESKTOP_BROWSER_INTERACTION",
+    "MOBILE_BROWSER_INTERACTION",
+    "CANVAS_PIXEL_CHECK",
+    "RESPONSIVE_SCREENSHOTS",
+    "TOUCH_TARGET_CHECK",
+    "PERMISSION_BOUNDARY_CHECK",
+    "LINK_AND_HTML_CHECK",
+    "SECRET_SCAN",
+    "PROTECTED_PATH_DIFF"
+  ],
+  "test_results": {
+    "status": "PASS",
+    "six_level_navigation": true,
+    "desktop_interaction": true,
+    "mobile_interaction": true,
+    "life_os_viewer": true,
+    "console_errors": 0,
+    "touch_targets_under_44px": 0,
+    "protected_path_violations": 0
+  },
+  "evidence": [
+    {
+      "path": "KGEN-KAIOS/world-viewer/tests/evidence/desktop-1440x900.png",
+      "sha256": "505434117192F075A710B7FAB50E4F9211EA48F69C7C402492A9D76614354E51"
+    },
+    {
+      "path": "KGEN-KAIOS/world-viewer/tests/evidence/mobile-390x844@2x.png",
+      "sha256": "7B74023C83926A9C012B724A1D3B1333C37CF46B16F96E4BB5BDC38946A34829"
+    }
+  ],
+  "known_issues": [
+    "Synthetic static data only",
+    "No authoritative Land Registry adapter",
+    "No real identity, GPS, payment or persistence"
+  ],
+  "risks": [
+    "Client data is explicitly non-authoritative",
+    "Production write commands remain forbidden"
+  ],
+  "protected_path_violations": 0,
+  "runtime_current_modified": false,
+  "universe_map_modified": false,
+  "token_contract_modified": false,
+  "implementation_scope": "WORLD_VIEWER_SPRINT_001_SYNTHETIC_STATIC_UI",
+  "out_of_scope_observations": [
+    "Global tile service",
+    "Real Land Registry integration",
+    "Backend authorization and settlement"
+  ],
+  "recommended_next_action": "MERGE_REVIEWED_PRODUCT_AND_VERIFY_GITHUB_PAGES",
+  "review_status": "APPROVED",
+  "claim_state": "CLOSED",
+  "lease_state": "RELEASED",
+  "created_at": "2026-07-16T18:30:00+08:00"
+}

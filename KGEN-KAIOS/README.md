@@ -55,6 +55,7 @@ Kernel V1 is `UNDER_REVIEW / RESEARCH_ONLY`. The independent Review Resolution i
 | KAIOS Dashboard | https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/dashboard/ | Read-only worker, task, report and health dashboard |
 | General Manager Decision Center | https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/decision/ | Daily Operation gate, manager decisions, network health and readiness |
 | KAIOS Constitution | https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/constitution/KAIOS_CONSTITUTION.md | Permanent KAIOS governance below Human Final Authority |
+| KAIOS World Viewer | https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/world-viewer/ | Sprint 001 synthetic K280 map, parcel Inspector, Life OS view and local proposal flow |
 | AI Company | https://klineodyssey.github.io/kline-odyssey/ai-company/ | Codex / Cursor company workflow |
 | WorkQueue | https://klineodyssey.github.io/kline-odyssey/workqueue/ | Official task queue entry |
 | PrimeForge Boot CURRENT | https://klineodyssey.github.io/kline-odyssey/boot/ | Stable Boot source of truth |
@@ -90,7 +91,7 @@ Human Decision `HUMAN-PRIMEFORGE-FULL-AUTOPILOT-001` delegates bounded Level A a
 | `../company/` | Architecture proposal under review | Future single company command control plane, typed Inbox, sole Dispatcher and provider-neutral Message Contract; cutover not authorized |
 | `boot-runtime/` | Architecture proposal under review | Fail-closed player Boot, Species OS and Life Integrity contracts |
 | `life/` | `LIFE-OS-V1.0` frozen Architecture | Species-scoped Life OS, state machine, API, events, review and baseline manifest |
-| `world-viewer/` | `WORLD-VIEWER-V1.0` frozen Architecture | Reviewed 2D Web-first World Viewer and synthetic sandbox plan; no runtime implementation yet |
+| `world-viewer/` | `WORLD-VIEWER-V1.0` + Sprint 001 | Frozen Architecture plus executable synthetic 2D Viewer; no real ownership, KYC, GPS or settlement |
 | `ui-governor/` | Architecture proposal under review | Permanent UI inspection, Style Canon, visual regression and bounded remediation contracts; automation not enabled |
 
 The Canonical Atomic Claim Authority remains a proposal. Until its transactional service is reviewed and implemented, Codex dispatch is explicit and recorded but is not represented as fully atomic distributed scheduling. No entry in this section changes Runtime CURRENT, Universe Map CURRENT, protected paths, Token behavior, real identity, real location, or real financial state.
@@ -176,427 +177,4 @@ Implementation Planning, WorkQueue, real KGEN settlement, real tax, and real mil
 
 Can Claude, Gemini, OpenHands, GitHub Copilot, ChatGPT, Deep Research, Cursor, Codex, and Human Engineers join the same AI company without redesigning the system?
 
-**Architecture answer:** Yes, if each actor is registered as a Worker and communicates through KAIOS interfaces: Worker Registry, Task Dispatcher, Message Bus, Review Pipeline, Dashboard, Recovery, and Security.
-
-## V7.0 Architecture Files
-
-| File | Purpose |
-|---|---|
-| `KAIOS_ARCHITECTURE.md` | System architecture and boundaries |
-| `KAIOS_MASTER_PLAN.md` | V7 architecture plan and staged rollout |
-| `KAIOS_COMPONENTS.md` | Component inventory |
-| `KAIOS_ROADMAP.md` | Architecture roadmap |
-| `KAIOS_GLOSSARY.md` | Common terms |
-| `AI_RUNTIME_BUS.md` | Runtime coordination concept |
-| `WORKER_REGISTRY.md` | Worker identity and status model |
-| `TASK_DISPATCHER.md` | Task lifecycle and routing model |
-| `TASK_CLAIM_PROTOCOL.md` | Claim and lease protocol |
-| `REVIEW_PIPELINE.md` | Review, merge, push pipeline |
-| `MESSAGE_BUS.md` | GitHub-based communication model |
-| `EVENT_MODEL.md` | Event names and payload intent |
-| `STATE_MACHINE.md` | Worker, task, review, and recovery states |
-| `DASHBOARD_MODEL.md` | Company dashboard data model |
-| `RECOVERY_MODEL.md` | Failure and recovery architecture |
-| `SECURITY_MODEL.md` | Role and permission architecture |
-
-## V7.1 Minimal Worker Layer Files
-
-| File | Purpose |
-|---|---|
-| `WORKER_REGISTRY.md` | Human-readable registry rules and worker field definitions |
-| `GENERIC_WORKER_PROTOCOL.md` | Shared worker protocol for Cursor, Claude, Gemini, OpenHands, Copilot, ChatGPT, Deep Research, and Human Engineer |
-| `TASK_CLAIM_LEASE_PROTOCOL.md` | Claim lease rules that prevent two workers from taking the same WorkOrder |
-| `STALE_HANDOFF_BRANCH_POLICY.md` | Recovery policy for missing branches, invisible commits, missing reports, old bases, advanced main, disappeared workers, and timeout |
-| `CODEX_PRE_MERGE_CHECKLIST.md` | Required Codex checklist before merge to main |
-| `READINESS_STANDARD.md` | Distinguishes SYSTEM_DIRTY, REPORT_GENERATION_DIRTY, isolated Human Main, handoff disposition, and READY gates |
-| `worker_registry.json` | Machine-readable worker registry seed |
-| `task_claim_schema.json` | Machine-readable JSON Schema for task claims and lease records |
-| `worker_status_schema.json` | Machine-readable JSON Schema for worker status records |
-
-## R&D Provenance And Biological Evolution Governance
-
-KAIOS includes a first-stage governance layer for task source tracing, AI / Human authorship, formal file metadata, biological taxonomy, organism manifests, evolution lineage, and Cursor R&D suggestions.
-
-| File | Purpose |
-|---|---|
-| `VERSIONING_STANDARD.md` | Stable formal filename and metadata version rules |
-| `FILE_HEADER_STANDARD.md` | Metadata header formats for Markdown, JSON, HTML, JS, and CSS |
-| `CHANGELOG_STANDARD.md` | Changelog evidence requirements |
-| `BIOLOGICAL_TAXONOMY_STANDARD.md` | Domain / Kingdom / Phylum / Class / Order / Family / Genus / Species |
-| `EVOLUTION_LINEAGE_STANDARD.md` | Governed evolution event rules |
-| `ORGANISM_MANIFEST_STANDARD.md` | Required organism manifest fields |
-| `provenance/` | Author registry, file ownership registry, contribution logs, and schemas |
-| `examples/organisms/` | Temple, App, and Land organism examples |
-
-## Workforce Governance
-
-KAIOS now requires formal worker registration before any AI or Human worker can claim a task or edit official files. Worker authorization is decided by `KGEN-KAIOS/worker_registry.json` plus the machine-readable schemas under `KGEN-KAIOS/workforce/`.
-
-| File | Purpose |
-|---|---|
-| `workforce/README.md` | Formal employee rule and governance overview |
-| `workforce/WORKER_BOOT_SOP.md` | Required visible BOOT, MUST READ, protected path, task plan, execution, and final report flow for every task |
-| `workforce/WORKER_EXECUTION_REPORT_TEMPLATE.md` | Standard execution report template for Codex, Cursor, Generic Worker, and Human Engineer tasks |
-| `worker_registry.json` | Active worker status, trust level, branch and reviewer registry |
-| `workforce/WORKER_CREDENTIAL_SCHEMA.json` | Required start-day and task-claim credential |
-| `workforce/WORKER_TRUST_SCHEMA.json` | T0-T5 trust level profile |
-| `workforce/WORKER_PERFORMANCE_SCHEMA.json` | Worker quality and promotion metrics |
-| `workforce/WORKER_VIOLATION_SCHEMA.json` | Violation event record |
-| `workforce/WORKER_AUDIT_LOG.json` | Baseline audit log |
-| `workforce/employee_roster.json` | Current employee roster and duty status |
-| `workforce/office_desks.json` | Logical workspace and desk registry |
-| `workforce/tool_access_matrix.json` | Tool permission matrix |
-| `workforce/attendance_snapshot.json` | Current attendance snapshot |
-| `workforce/recruitment_queue.json` | Candidate hiring queue |
-| `workforce/agent_registry.json` | Workforce V2 Agent-per-employee registry |
-| `workforce/desk_registry.json` | Workforce V2 logical desk registry |
-| `workforce/department_registry.json` | Workforce V2 department staffing registry |
-| `workforce/agent_runtime_status.json` | Workforce V2 runtime status snapshot |
-| `workforce/agent_daily_report.json` | Workforce V2 daily status report |
-| `workforce/COMPENSATION_STANDARD.md` | Workforce V3 salary, reward, penalty and Human approval standard |
-| `workforce/payroll_policy.json` | Workforce V3 payroll unit, claim option and approval policy |
-| `workforce/payroll_snapshot.json` | Workforce V3 payroll dashboard summary |
-| `bank/8888/EMPLOYEE_ACCOUNT_STANDARD.md` | 8888 People Bank prototype employee account rules |
-| `bank/8888/employee_accounts.json` | 8888 prototype employee account ledger |
-| `bank/8888/payroll_reserve.json` | 8888 prototype payroll reserve record |
-| `bank/8888/ROBO_ADVISOR_STANDARD.md` | 8888 Robo simulation and advisory-only limits |
-| `game/AUTO_MISSION_REWARD_STANDARD.md` | Workforce game mission budget and reward boundary |
-| `operations/GITHUB_CONNECTIVITY_RUNBOOK.md` | Safe GitHub 443 / fetch / push diagnostic runbook |
-
-**Public URL:** https://klineodyssey.github.io/kline-odyssey/workforce/
-
-Workforce V3 keeps 12345 as civilization heart and reward source, and uses 8888 People Bank as a prototype internal payroll ledger. It does not enable real banking, real investment, autonomous token transfer, private-key access, or guaranteed return.
-
-## General Manager Decision Engine V4
-
-Decision Engine V4 is a subsystem of the current KAIOS operating system; it does not replace or downgrade KAIOS V10. Codex completes Daily Operation before starting new Human work and records every Approve, Reject, Merge, Rollback, Suspend, Promote, Recruit, and Payroll decision in a GitHub-visible log.
-
-| File | Purpose |
-|---|---|
-| `decision/DECISION_ENGINE_STANDARD.md` | Daily Operation, blocking gate, risk, rollback and decision-record standard |
-| `decision/decision_log.jsonl` | Append-only manager decision history |
-| `decision/decision_snapshot.json` | Current readiness, attendance, WorkQueue and blocking state |
-| `decision/decision_queue.json` | Pending manager decisions only |
-| `decision/decision_dashboard.json` | Read-only network, Pages and dashboard status source |
-| `decision/index.html` | General Manager Decision Center |
-
-**Public URL:** https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/decision/
-
-## Official Video Library
-
-KAIOS video planning is stored under `video/`. It defines the first official season of KAIOS / KGEN / KLINE Odyssey videos, including storyboard, shot list, voiceover, subtitles, cover, end card, BGM, assets, review and release records.
-
-**Public URL:** https://klineodyssey.github.io/kline-odyssey/video/
-
-## V7.2 Read-Only Operations Dashboard
-
-| File | Purpose |
-|---|---|
-| `dashboard/index.html` | GitHub Pages dashboard entry |
-| `dashboard/dashboard.js` | Read-only data loader and renderer |
-| `dashboard/dashboard.css` | Responsive operations dashboard styling |
-| `dashboard/dashboard.config.json` | Source paths, status order, readiness score, protected paths |
-| `dashboard/README.md` | Dashboard purpose, data sources, and read-only rules |
-
-**Public URL:** https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/dashboard/
-
-The dashboard reads Worker Registry, WorkQueue, Codex Review Log, KAIOS reports, AI Company reports, and KAIOS schemas. It does not write to GitHub, does not claim tasks, does not merge, and does not use a GitHub token.
-## V7.1 Dry Run Files
-
-| File | Purpose |
-|---|---|
-| `DRY_RUN_PROTOCOL.md` | Minimal V7.1 dry run procedure for Worker Claim, Cursor Handoff Branch, and Codex Review |
-| `reports/README.md` | KAIOS report storage rules and expected dry run report path |
-
-## V7.1 Dry Run Task
-
-| Task ID | Status | Owner | Reviewer | Branch | Output Report |
-|---|---|---|---|---|---|
-| KAIOS-DRYRUN-001 | DONE | Cursor | Codex | `cursor-handoff/KAIOS-DRYRUN-001` | `KGEN-KAIOS/reports/KAIOS-DRYRUN-001_REPORT.md` |
-## Worker Types Supported
-
-- Codex
-- Cursor
-- Claude
-- Gemini
-- OpenHands
-- GitHub Copilot
-- ChatGPT
-- Deep Research
-- Human Engineer
-
-
-## V8.0 One Picture One Temple Economy System
-
-V8.0 adds the first KAIOS application layer for one picture one temple, land, residence, commerce, bank simulation, 11520 exchange, and real-world link standards. It lets Codex read a player's current asset state and generate a governed construction roadmap while preserving Concept / Prototype / Runtime / Production / Regulated boundaries.
-
-| File | Purpose |
-|---|---|
-| `V8/README.md` | V8 entry and file map |
-| `V8/index.html` | Read-only player roadmap demo |
-| `V8/KAIOS_V8_MASTER_SPEC.md` | Official V8 master specification |
-| `V8/KAIOS_V8_PLAYER_ENTRY_MODEL.md` | Picture, Land, Residence, Temple, App, Real Business and Civilization Node entry rules |
-| `V8/KAIOS_V8_ASSET_LIFECYCLE.md` | Wild Land to Cross-Universe Node lifecycle |
-| `V8/KAIOS_V8_TASK_GENERATOR.md` | Codex task generator and WorkOrder fields |
-| `V8/KAIOS_V8_ECONOMY_RUNTIME.md` | Civilization economy runtime and bank concept boundary |
-| `V8/KAIOS_V8_REAL_WORLD_LINK_STANDARD.md` | Real-world business virtual twin adapters and compliance gates |
-| `V8/KAIOS_V8_LISTING_STANDARD.md` | Land, temple, building, App, AI, DNA, membership, and regulated listing boundary |
-| `V8/runtime/HUAGUO_EXCHANGE_11520_RUNTIME.md` | Huaguo Mountain Exchange 11520 runtime |
-| `V8/runtime/KAIOS_V8_BANK_RUNTIME.md` | Bank simulation runtime |
-| `V8/schemas/` | Thirteen JSON Schemas |
-| `V8/examples/` | Six JSON examples |
-| `V8/workorders/V8_WORKORDERS.md` | V8-P0 through V8-P15 Cursor handoff WorkOrders |
-| `V8/reports/KAIOS_V8_QA_REPORT.md` | V8 baseline QA report |
-
-**Public URL:** https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V8/
-
-## V8.1 Universe Data Layer
-
-V8.1 adds the living data layer for the KGEN Universe. It defines unique IDs, entity relationships, citizen and profession records, lifecycle events, world state snapshots, runtime relationship maps, parseable JSON Schemas, examples and a read-only Universe Viewer.
-
-| File | Purpose |
-|---|---|
-| `V8.1/README.md` | V8.1 entry and file map |
-| `V8.1/index.html` | Read-only Universe Viewer |
-| `V8.1/UNIVERSE_DATA_LAYER.md` | Master data-layer specification |
-| `V8.1/UNIVERSE_GRAPH.md` | Universe Graph backbone and entity roles |
-| `V8.1/ENTITY_RELATIONSHIP.md` | Entity relationship envelope and relationship record rules |
-| `V8.1/UNIQUE_ID_STANDARD.md` | Stable ID format for all Universe entities |
-| `V8.1/WORLD_STATE_MODEL.md` | Snapshot model for world, civilization, temple, economy, citizen and market state |
-| `V8.1/CITIZEN_STANDARD.md` | Citizen as civilization life standard |
-| `V8.1/PROFESSION_STANDARD.md` | Profession library and economic output model |
-| `V8.1/LIFE_CYCLE_STANDARD.md` | Create, Grow, Learn, Work, Trade, Build, Upgrade, Reproduce, Retire, Archive and Delete stages |
-| `V8.1/runtime/` | Runtime Relationship Map, Temple, Citizen, Economy, Player and AI runtime documents |
-| `V8.1/schemas/` | Eight JSON Schemas |
-| `V8.1/examples/` | Eight parseable examples |
-| `V8.1/reports/KAIOS_V8_1_QA_REPORT.md` | V8.1 QA report |
-
-**Public URL:** https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V8.1/
-
-## V8.2 Civilization Economy Engine
-
-V8.2 adds the first full civilization economy layer on top of the V8.1 Universe Data Layer. It defines how Temple, Land, Residence, Citizen, Profession, Production, Business, Market, Exchange, Bank, Investment, Governance and Civilization Growth form a readable simulation loop.
-
-| File | Purpose |
-|---|---|
-| `V8.2/README.md` | V8.2 overview and file map |
-| `V8.2/index.html` | Read-only Economy Viewer |
-| `V8.2/dashboard/index.html` | Read-only Civilization Economy Dashboard |
-| `V8.2/ECONOMY_ENGINE.md` | Master economy engine specification |
-| `V8.2/RESOURCE_STANDARD.md` | Food, Wood, Stone, Metal, Energy, Knowledge, Data, AI Compute, Gold, KGEN, Temple Point and Civilization Point model |
-| `V8.2/BUSINESS_STANDARD.md` | 23-type Business Library and business record rules |
-| `V8.2/MARKET_STANDARD.md` | Market operations and price discovery simulation |
-| `V8.2/BANK_STANDARD.md` | Bank and treasury simulation boundary |
-| `V8.2/EXCHANGE_STANDARD.md` | Huaguo Mountain Exchange 11520 and asset market boundary |
-| `V8.2/GOVERNANCE_SIGNAL_STANDARD.md` | GDP, population, employment, temple activity, market activity, civilization health and AI activity |
-| `V8.2/runtime/` | Six runtime documents for economy, business, market, bank, exchange and governance signals |
-| `V8.2/schemas/` | Eight JSON Schemas |
-| `V8.2/examples/` | Eight parseable examples |
-| `V8.2/reports/KAIOS_V8_2_QA_REPORT.md` | V8.2 QA report |
-| `V8.2/reports/KAIOS_V8_2_RELEASE_REPORT.md` | V8.2 release report and V8.3 recommendation |
-
-**Public URL:** https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V8.2/
-
-**Dashboard URL:** https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V8.2/dashboard/
-
-## V8.3 Civilization Time Engine
-
-V8.3 adds time to the KGEN civilization stack. It defines World Clock, Simulation Tick, Day/Night Cycle, Season System, Citizen Behavior, Business Behavior, Temple Activity, Resource Regeneration, Population Growth, Event Engine, Disaster Standard, Governance Response and a read-only Simulation Viewer.
-
-| File | Purpose |
-|---|---|
-| `V8.3/README.md` | V8.3 overview and file map |
-| `V8.3/index.html` | Read-only Simulation, Timeline and World Clock Viewer |
-| `V8.3/dashboard/index.html` | Read-only Time Dashboard |
-| `V8.3/TIME_ENGINE.md` | Master Civilization Time Engine specification |
-| `V8.3/WORLD_CLOCK_STANDARD.md` | Universe, Civilization, World, Temple, Business and Citizen time layers |
-| `V8.3/SIMULATION_TICK_STANDARD.md` | Tick scale and execution order |
-| `V8.3/DAY_NIGHT_CYCLE.md` | Day and night behavior model |
-| `V8.3/SEASON_SYSTEM.md` | Season cycle and economy impact |
-| `V8.3/CITIZEN_BEHAVIOR.md` | Citizen actions per Tick |
-| `V8.3/BUSINESS_BEHAVIOR.md` | Business actions per Tick |
-| `V8.3/TEMPLE_ACTIVITY.md` | Temple services, faith value, population attraction and civilization impact |
-| `V8.3/RESOURCE_REGENERATION.md` | Natural recovery, consumption and regeneration |
-| `V8.3/EVENT_ENGINE.md` | Festival, War concept, Disaster, Discovery, Technology, Migration, Economic Boom and Recession |
-| `V8.3/GOVERNANCE_RESPONSE.md` | Governance signal evaluation and response |
-| `V8.3/SIMULATION_RUNTIME.md` | Runtime flow from clock to timeline snapshot |
-| `V8.3/schemas/` | Ten JSON Schemas |
-| `V8.3/examples/` | Ten parseable examples |
-| `V8.3/reports/KAIOS_V8_3_QA_REPORT.md` | V8.3 QA report |
-| `V8.3/reports/KAIOS_V8_3_RELEASE_REPORT.md` | V8.3 release report and V9.0 recommendation |
-
-**Public URL:** https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V8.3/
-
-**Dashboard URL:** https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V8.3/dashboard/
-
-## V9.0 Civilization AI Engine
-
-V9.0 adds the Civilization AI Engine. It lets AI read Universe State, Civilization State, World Clock, Citizen State, Profession State, Business State, Market State, Exchange State, Bank State, Resource State, Temple Activity, Land Development, Governance Signals, Event Stream, Worker Reports and Codex Review Log, then produce explainable decisions and Draft WorkOrders.
-
-| File | Purpose |
-|---|---|
-| `V9.0/README.md` | V9.0 overview and file map |
-| `V9.0/index.html` | Read-only Civilization AI Viewer |
-| `V9.0/dashboard/index.html` | Read-only Civilization AI Dashboard |
-| `V9.0/CIVILIZATION_AI_ENGINE.md` | Master AI Engine specification |
-| `V9.0/AI_OBSERVATION_MODEL.md` | Observation sources and source quality |
-| `V9.0/AI_REASONING_MODEL.md` | Explainable reasoning procedure |
-| `V9.0/AI_DECISION_MODEL.md` | Decision contract and decision types |
-| `V9.0/AI_MEMORY_MODEL.md` | Short-Term, Task, Civilization, Canon, Decision, Failure and Review Memory |
-| `V9.0/AI_POLICY_MODEL.md` | Allowed and prohibited AI actions |
-| `V9.0/AI_RISK_MODEL.md` | R0 to R4 risk levels |
-| `V9.0/AI_WORKORDER_GENERATOR.md` | Draft WorkOrder generation rules |
-| `V9.0/AI_HUMAN_OVERRIDE.md` | Human override record model |
-| `V9.0/AI_CODEX_REVIEW_BOUNDARY.md` | Codex review checks before work proceeds |
-| `V9.0/runtime/` | Eight advisor runtime documents |
-| `V9.0/schemas/` | Eight JSON Schemas |
-| `V9.0/examples/` | Eight parseable examples |
-| `V9.0/workorders/V9_DRAFT_WORKORDERS.md` | Three V9 dry run Draft WorkOrders |
-| `V9.0/reports/V9-DRYRUN-001_REPORT.md` | V9 dry run report |
-| `V9.0/reports/KAIOS_V9_0_QA_REPORT.md` | V9.0 QA report |
-| `V9.0/reports/KAIOS_V9_0_RELEASE_REPORT.md` | V9.0 release report and V9.1 recommendation |
-
-**Public URL:** https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V9.0/
-
-**Dashboard URL:** https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V9.0/dashboard/
-
-## V9.1 AI WorkOrder Review Loop
-
-V9.1 adds the formal review loop for AI-generated DRAFT WorkOrders. It prevents AI from directly promoting DRAFT tasks to OPEN, gives Codex the required promotion checklist, gates R3 through Human review, blocks R4 execution, and records audit events for every review decision.
-
-| File | Purpose |
-|---|---|
-| `V9.1/README.md` | V9.1 overview and file map |
-| `V9.1/index.html` | Read-only V9.1 entry page |
-| `V9.1/dashboard/index.html` | Read-only WorkOrder Review Dashboard |
-| `V9.1/AI_WORKORDER_REVIEW_LOOP.md` | Formal DRAFT review state machine |
-| `V9.1/DRAFT_WORKORDER_STANDARD.md` | Required fields for AI-generated DRAFT WorkOrders |
-| `V9.1/CODEX_PROMOTION_PROTOCOL.md` | Codex 15-point promotion checklist |
-| `V9.1/CODEX_REJECTION_PROTOCOL.md` | Rejection and archive rules |
-| `V9.1/CODEX_REVISION_PROTOCOL.md` | Revision request rules |
-| `V9.1/HUMAN_REVIEW_GATE.md` | Human review and override gate |
-| `V9.1/DUPLICATE_TASK_DETECTION.md` | Duplicate and merge-candidate detection |
-| `V9.1/DEPENDENCY_VALIDATION.md` | Dependency checks before promotion |
-| `V9.1/RISK_PROMOTION_MATRIX.md` | R0-R4 promotion matrix |
-| `V9.1/schemas/` | Nine JSON Schemas |
-| `V9.1/examples/` | Nine parseable examples |
-| `V9.1/runtime/` | Eight review runtime documents |
-| `V9.1/reviews/` | Codex review decisions for V9.0 DRAFT WorkOrders |
-| `V9.1/reports/KAIOS_V9_1_QA_REPORT.md` | V9.1 QA report |
-| `V9.1/reports/KAIOS_V9_1_RELEASE_REPORT.md` | V9.1 release report |
-
-**Public URL:** https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V9.1/
-
-**Dashboard URL:** https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V9.1/dashboard/
-
-## V9.2 Approved Draft to OPEN WorkQueue Sync
-
-V9.2 adds the Codex-only sync layer that converts V9.1 `APPROVED_FOR_OPEN` decisions into official `OPEN` WorkQueue tasks. It validates promotion records, allocates formal `AI-<DOMAIN>-<YEAR>-<SEQUENCE>` IDs, checks conflicts, inserts WorkQueue blocks, supports Human Pause and records rollback/audit events.
-
-| File | Purpose |
-|---|---|
-| `V9.2/README.md` | V9.2 overview and file map |
-| `V9.2/index.html` | Read-only V9.2 entry page |
-| `V9.2/dashboard/index.html` | Read-only sync dashboard |
-| `V9.2/APPROVED_DRAFT_SYNC_STANDARD.md` | Sync state machine and boundaries |
-| `V9.2/CODEX_WORKQUEUE_SYNC_PROTOCOL.md` | Codex 17-point sync checklist |
-| `V9.2/WORKORDER_ID_ALLOCATION_STANDARD.md` | Formal AI WorkOrder ID rules |
-| `V9.2/WORKQUEUE_CONFLICT_POLICY.md` | Conflict detection rules |
-| `V9.2/WORKQUEUE_INSERTION_POLICY.md` | Safe WorkQueue insertion rules |
-| `V9.2/WORKQUEUE_ROLLBACK_POLICY.md` | Rollback from OPEN to APPROVED_FOR_OPEN |
-| `V9.2/HUMAN_PAUSE_GATE.md` | Human pause, reject, archive and priority gate |
-| `V9.2/schemas/` | Eight JSON Schemas |
-| `V9.2/examples/` | Eight parseable examples |
-| `V9.2/runtime/` | Eight sync runtime documents |
-| `V9.2/sync/` | Actual sync artifacts for `AI-ECONOMY-2026-0001` |
-| `V9.2/reports/KAIOS_V9_2_QA_REPORT.md` | V9.2 QA report |
-| `V9.2/reports/KAIOS_V9_2_RELEASE_REPORT.md` | V9.2 release report |
-
-**Public URL:** https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V9.2/
-
-**Dashboard URL:** https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V9.2/dashboard/
-
-## V9.3 Dispatch Hold Release Protocol
-
-V9.3 adds the Codex-only release layer for tasks that are already synced into the WorkQueue as `OPEN` but remain protected by `Dispatch Hold: true`. It releases the task only after dependency, risk, worker eligibility, human pause and audit gates pass.
-
-| File | Purpose |
-|---|---|
-| `V9.3/README.md` | V9.3 overview and file map |
-| `V9.3/index.html` | Read-only V9.3 entry page |
-| `V9.3/dashboard/index.html` | Read-only dispatch dashboard |
-| `V9.3/DISPATCH_HOLD_STANDARD.md` | Meaning of dispatch hold and release |
-| `V9.3/CODEX_RELEASE_PROTOCOL.md` | Codex 20-point release checklist |
-| `V9.3/WORKER_ELIGIBILITY_PROTOCOL.md` | Worker eligibility rules |
-| `V9.3/DISPATCH_DEPENDENCY_GATE.md` | Dependency gate |
-| `V9.3/DISPATCH_RISK_GATE.md` | R0-R4 risk gate |
-| `V9.3/schemas/` | Nine JSON Schemas |
-| `V9.3/examples/` | Nine parseable examples |
-| `V9.3/runtime/` | Nine dispatch runtime documents |
-| `V9.3/release/` | Actual release artifacts for `AI-ECONOMY-2026-0001` |
-| `V9.3/reports/KAIOS_V9_3_QA_REPORT.md` | V9.3 QA report |
-| `V9.3/reports/KAIOS_V9_3_RELEASE_REPORT.md` | V9.3 release report |
-
-**Public URL:** https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V9.3/
-
-**Dashboard URL:** https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V9.3/dashboard/
-
-## V10.0 KAIOS Operating System
-
-V10 defines KAIOS as the operating system for all KGEN modules: Universe, Temple, Land, Residence, Citizen, Business, Market, Exchange, Bank, Wallet, Membership, AI Company, Portal, Game, App, Frontend, Backend, API, GitHub and Blockchain.
-
-| File | Purpose |
-|---|---|
-| `V10/README.md` | V10 overview and file map |
-| `V10/index.html` | Read-only V10 entry page |
-| `V10/dashboard/index.html` | Read-only operating dashboard |
-| `V10/KAIOS_OPERATING_SYSTEM.md` | OS constitution |
-| `V10/SYSTEM_ARCHITECTURE.md` | Browser to AI Company architecture |
-| `V10/MICROSERVICE_STANDARD.md` | Logical service boundary standard |
-| `V10/API_GATEWAY_STANDARD.md` | API Gateway standard |
-| `V10/FRONTEND_STANDARD.md` | Portal, UI and dashboard standard |
-| `V10/BACKEND_STANDARD.md` | Service layer standard |
-| `V10/MEMBERSHIP_STANDARD.md` | Membership role model |
-| `V10/WALLET_STANDARD.md` | Wallet prototype boundary |
-| `V10/PAYMENT_STANDARD.md` | Payment concept/prototype boundary |
-| `V10/SECURITY_STANDARD.md` | Identity, secrets, rate limit and risk |
-| `V10/AUDIT_STANDARD.md` | System-wide audit standard |
-| `V10/schemas/` | Twelve JSON Schemas |
-| `V10/examples/` | Twelve parseable examples |
-| `V10/runtime/` | Nine runtime maps |
-| `V10/reports/V10_DRYRUN_001_REPORT.md` | Operating dry run |
-| `V10/reports/KAIOS_V10_QA_REPORT.md` | V10 QA report |
-| `V10/reports/KAIOS_V10_RELEASE_REPORT.md` | V10 release report |
-
-**Public URL:** https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V10/
-
-**Dashboard URL:** https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V10/dashboard/
-
-## Genesis DNA Evolution Architecture
-
-`genesis-dna/` contains the architecture-only proposal authorized by `HUMAN-GENESIS-DNA-EVOLUTION-001`. It separates Genesis Capability Atom count (`0..108`) from Evolution XP, Genome Generation, DNA Quality Grade and Training Level (`LV1..LV1000`).
-
-| File | Purpose |
-|---|---|
-| `genesis-dna/README.md` | Proposal entry, package index and authorization boundary |
-| `genesis-dna/SOURCE_AUDIT.md` | Existing DNA/GA source classification and semantic conflicts |
-| `genesis-dna/GENESIS_DNA_EVOLUTION_RUNTIME.md` | Cross-layer Species Genome and DNA evolution architecture |
-| `genesis-dna/GENESIS_ATOM_001_108_CATALOG.md` | Public 12-domain, 108-atom catalog |
-| `genesis-dna/genesis_atom_catalog.json` | Machine-readable atom catalog |
-| `genesis-dna/DNA_PRIVACY_AND_HEAVEN_SECRET.md` | Public/private/Heaven Secret boundary |
-
-Status is `ARCHITECTURE_PROPOSAL_UNDER_REVIEW`; implementation, WorkQueue and deployment are not started.
-
-## Protected Systems
-
-KAIOS V10 does not modify:
-
-- `contracts`
-- `Kç·šè¥¿éŠè¨˜/temples/12345`
-- `wallet`
-- `bridge`
-- `PRIMEFORGE_GENESIS_BOOT_SEQUENCE.md`
-- `PRIMEFORGE_GENESIS_BOOT_SEQUENCE_V1_4.md` as preserved ancestor history
-- `docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md`
-- `docs/physics/final-whitepaper/`
-- `KGEN/contracts/KGEN_Token_V7_5_2.sol`
+**Architecture answer:** Yes, if eß6¶‰ËkºwµçIĞğ4(4(¨©AÕ‰±¥ŒUI0è¨¨¡ÑÑÁÌè¼½­±¥¹•½‘åÍÍ•ä¹¥Ñ¡Õˆ¹¥¼½­±¥¹”µ½‘åÍÍ•ä½-8µ-%=L½Xà¼4(4(ŒŒXà¸ÄU¹¥Ù•ÉÍ”…Ñ„1…å•È4(4)Xà¸Ä…‘‘ÌÑ¡”±¥Ù¥¹œ‘…Ñ„±…å•È™½ÈÑ¡”-8U¹¥Ù•ÉÍ”¸%Ğ‘•™¥¹•ÌÕ¹¥ÅÕ”%Ì°•¹Ñ¥ÑäÉ•±…Ñ¥½¹Í¡¥ÁÌ°¥Ñ¥é•¸…¹ÁÉ½™•ÍÍ¥½¸É•½É‘Ì°±¥™•å±”•Ù•¹ÑÌ°İ½É±ÍÑ…Ñ”Í¹…ÁÍ¡½ÑÌ°ÉÕ¹Ñ¥µ”É•±…Ñ¥½¹Í¡¥Àµ…ÁÌ°Á…ÉÍ•…‰±”)M=8M¡•µ…Ì°•á…µÁ±•Ì…¹„É•…µ½¹±äU¹¥Ù•ÉÍ”Y¥•İ•È¸4(4)ğ¥±”ğAÕÉÁ½Í”ğ4)ğ´´µğ´´µğ4)ğXà¸Ä½I5¹µ‘€ğXà¸Ä•¹ÑÉä…¹™¥±”µ…Àğ4)ğXà¸Ä½¥¹‘•à¹¡Ñµ±€ğI•…µ½¹±äU¹¥Ù•ÉÍ”Y¥•İ•Èğ4)ğXà¸Ä½U9%YIM}Q}1eH¹µ‘€ğ5…ÍÑ•È‘…Ñ„µ±…å•ÈÍÁ•¥™¥…Ñ¥½¸ğ4)ğXà¸Ä½U9%YIM}IA ¹µ‘€ğU¹¥Ù•ÉÍ”É…Á ‰…­‰½¹”…¹•¹Ñ¥ÑäÉ½±•Ìğ4)ğXà¸Ä½9Q%Qe}I1Q%=9M!%@¹µ‘€ğ¹Ñ¥ÑäÉ•±…Ñ¥½¹Í¡¥À•¹Ù•±½Á”…¹É•±…Ñ¥½¹Í¡¥ÀÉ•½ÉÉÕ±•Ìğ4)ğXà¸Ä½U9%EU}%}MQ9I¹µ‘€ğMÑ…‰±”%™½Éµ…Ğ™½È…±°U¹¥Ù•ÉÍ”•¹Ñ¥Ñ¥•Ìğ4)ğXà¸Ä½]=I1}MQQ}5=0¹µ‘€ğM¹…ÁÍ¡½Ğµ½‘•°™½Èİ½É±°¥Ù¥±¥é…Ñ¥½¸°Ñ•µÁ±”°•½¹½µä°¥Ñ¥é•¸…¹µ…É­•ĞÍÑ…Ñ”ğ4)ğXà¸Ä½%Q%i9}MQ9I¹µ‘€ğ¥Ñ¥é•¸…Ì¥Ù¥±¥é…Ñ¥½¸±¥™”ÍÑ…¹‘…Éğ4)ğXà¸Ä½AI=MM%=9}MQ9I¹µ‘€ğAÉ½™•ÍÍ¥½¸±¥‰É…Éä…¹•½¹½µ¥Œ½ÕÑÁÕĞµ½‘•°ğ4)ğXà¸Ä½1%}e1}MQ9I¹µ‘€ğÉ•…Ñ”°É½Ü°1•…É¸°]½É¬°QÉ…‘”°	Õ¥±°UÁÉ…‘”°I•ÁÉ½‘Õ”°I•Ñ¥É”°É¡¥Ù”…¹•±•Ñ”ÍÑ…•Ìğ4)ğXà¸Ä½ÉÕ¹Ñ¥µ”½€ğIÕ¹Ñ¥µ”I•±…Ñ¥½¹Í¡¥À5…À°Q•µÁ±”°¥Ñ¥é•¸°½¹½µä°A±…å•È…¹$ÉÕ¹Ñ¥µ”‘½Õµ•¹ÑÌğ4)ğXà¸Ä½Í¡•µ…Ì½€ğ¥¡Ğ)M=8M¡•µ…Ìğ4)ğXà¸Ä½•á…µÁ±•Ì½€ğ¥¡ĞÁ…ÉÍ•…‰±”•á…µÁ±•Ìğ4)ğXà¸Ä½É•Á½ÉÑÌ½-%=M}Xá|Å}E}IA=IP¹µ‘€ğXà¸ÄEÉ•Á½ÉĞğ4(4(¨©AÕ‰±¥ŒUI0è¨¨¡ÑÑÁÌè¼½­±¥¹•½‘åÍÍ•ä¹¥Ñ¡Õˆ¹¥¼½­±¥¹”µ½‘åÍÍ•ä½-8µ-%=L½Xà¸Ä¼4(4(ŒŒXà¸È¥Ù¥±¥é…Ñ¥½¸½¹½µä¹¥¹”4(4)Xà¸È…‘‘ÌÑ¡”™¥ÉÍĞ™Õ±°¥Ù¥±¥é…Ñ¥½¸•½¹½µä±…å•È½¸Ñ½À½˜Ñ¡”Xà¸ÄU¹¥Ù•ÉÍ”…Ñ„1…å•È¸%Ğ‘•™¥¹•Ì¡½ÜQ•µÁ±”°1…¹°I•Í¥‘•¹”°¥Ñ¥é•¸°AÉ½™•ÍÍ¥½¸°AÉ½‘ÕÑ¥½¸°	ÕÍ¥¹•ÍÌ°5…É­•Ğ°á¡…¹”°	…¹¬°%¹Ù•ÍÑµ•¹Ğ°½Ù•É¹…¹”…¹¥Ù¥±¥é…Ñ¥½¸É½İÑ ™½É´„É•…‘…‰±”Í¥µÕ±…Ñ¥½¸±½½À¸4(4)ğ¥±”ğAÕÉÁ½Í”ğ4)ğ´´µğ´´µğ4)ğXà¸È½I5¹µ‘€ğXà¸È½Ù•ÉÙ¥•Ü…¹™¥±”µ…Àğ4)ğXà¸È½¥¹‘•à¹¡Ñµ±€ğI•…µ½¹±ä½¹½µäY¥•İ•Èğ4)ğXà¸È½‘…Í¡‰½…É½¥¹‘•à¹¡Ñµ±€ğI•…µ½¹±ä¥Ù¥±¥é…Ñ¥½¸½¹½µä…Í¡‰½…Éğ4)ğXà¸È½=9=5e}9%9¹µ‘€ğ5…ÍÑ•È•½¹½µä•¹¥¹”ÍÁ•¥™¥…Ñ¥½¸ğ4)ğXà¸È½IM=UI}MQ9I¹µ‘€ğ½½°]½½°MÑ½¹”°5•Ñ…°°¹•Éä°-¹½İ±•‘”°…Ñ„°$½µÁÕÑ”°½±°-8°Q•µÁ±”A½¥¹Ğ…¹¥Ù¥±¥é…Ñ¥½¸A½¥¹Ğµ½‘•°ğ4)ğXà¸È½	UM%9MM}MQ9I¹µ‘€ğ€ÈÌµÑåÁ”	ÕÍ¥¹•ÍÌ1¥‰É…Éä…¹‰ÕÍ¥¹•ÍÌÉ•½ÉÉÕ±•Ìğ4)ğXà¸È½5I-Q}MQ9I¹µ‘€ğ5…É­•Ğ½Á•É…Ñ¥½¹Ì…¹ÁÉ¥”‘¥Í½Ù•ÉäÍ¥µÕ±…Ñ¥½¸ğ4)ğXà¸È½	9-}MQ9I¹µ‘€ğ	…¹¬…¹ÑÉ•…ÍÕÉäÍ¥µÕ±…Ñ¥½¸‰½Õ¹‘…Éäğ4)ğXà¸È½a!9}MQ9I¹µ‘€ğ!Õ…Õ¼5½Õ¹Ñ…¥¸á¡…¹”€ÄÄÔÈÀ…¹…ÍÍ•Ğµ…É­•Ğ‰½Õ¹‘…Éäğ4)ğXà¸È½=YI99}M%91}MQ9I¹µ‘€ğ@°Á½ÁÕ±…Ñ¥½¸°•µÁ±½åµ•¹Ğ°Ñ•µÁ±”…Ñ¥Ù¥Ñä°µ…É­•Ğ…Ñ¥Ù¥Ñä°¥Ù¥±¥é…Ñ¥½¸¡•…±Ñ …¹$…Ñ¥Ù¥Ñäğ4)ğXà¸È½ÉÕ¹Ñ¥µ”½€ğM¥àÉÕ¹Ñ¥µ”‘½Õµ•¹ÑÌ™½È•½¹½µä°‰ÕÍ¥¹•ÍÌ°µ…É­•Ğ°‰…¹¬°•á¡…¹”…¹½Ù•É¹…¹”Í¥¹…±Ìğ4)ğXà¸È½Í¡•µ…Ì½€ğ¥¡Ğ)M=8M¡•µ…Ìğ4)ğXà¸È½•á…µÁ±•Ì½€ğ¥¡ĞÁ…ÉÍ•…‰±”•á…µÁ±•Ìğ4)ğXà¸È½É•Á½ÉÑÌ½-%=M}Xá|É}E}IA=IP¹µ‘€ğXà¸ÈEÉ•Á½ÉĞğ4)ğXà¸È½É•Á½ÉÑÌ½-%=M}Xá|É}I1M}IA=IP¹µ‘€ğXà¸ÈÉ•±•…Í”É•Á½ÉĞ…¹Xà¸ÌÉ•½µµ•¹‘…Ñ¥½¸ğ4(4(¨©AÕ‰±¥ŒUI0è¨¨¡ÑÑÁÌè¼½­±¥¹•½‘åÍÍ•ä¹¥Ñ¡Õˆ¹¥¼½­±¥¹”µ½‘åÍÍ•ä½-8µ-%=L½Xà¸È¼4(4(¨©…Í¡‰½…ÉUI0è¨¨¡ÑÑÁÌè¼½­±¥¹•½‘åÍÍ•ä¹¥Ñ¡Õˆ¹¥¼½­±¥¹”µ½‘åÍÍ•ä½-8µ-%=L½Xà¸È½‘…Í¡‰½…É¼4(4(ŒŒXà¸Ì¥Ù¥±¥é…Ñ¥½¸Q¥µ”¹¥¹”4(4)Xà¸Ì…‘‘ÌÑ¥µ”Ñ¼Ñ¡”-8¥Ù¥±¥é…Ñ¥½¸ÍÑ…¬¸%Ğ‘•™¥¹•Ì]½É±±½¬°M¥µÕ±…Ñ¥½¸Q¥¬°…ä½9¥¡Ğå±”°M•…Í½¸MåÍÑ•´°¥Ñ¥é•¸	•¡…Ù¥½È°	ÕÍ¥¹•ÍÌ	•¡…Ù¥½È°Q•µÁ±”Ñ¥Ù¥Ñä°I•Í½ÕÉ”I••¹•É…Ñ¥½¸°A½ÁÕ±…Ñ¥½¸É½İÑ °Ù•¹Ğ¹¥¹”°¥Í…ÍÑ•ÈMÑ…¹‘…É°½Ù•É¹…¹”I•ÍÁ½¹Í”…¹„É•…µ½¹±äM¥µÕ±…Ñ¥½¸Y¥•İ•È¸4(4)ğ¥±”ğAÕÉÁ½Í”ğ4)ğ´´µğ´´µğ4)ğXà¸Ì½I5¹µ‘€ğXà¸Ì½Ù•ÉÙ¥•Ü…¹™¥±”µ…Àğ4)ğXà¸Ì½¥¹‘•à¹¡Ñµ±€ğI•…µ½¹±äM¥µÕ±…Ñ¥½¸°Q¥µ•±¥¹”…¹]½É±±½¬Y¥•İ•Èğ4)ğXà¸Ì½‘…Í¡‰½…É½¥¹‘•à¹¡Ñµ±€ğI•…µ½¹±äQ¥µ”…Í¡‰½…Éğ4)ğXà¸Ì½Q%5}9%9¹µ‘€ğ5…ÍÑ•È¥Ù¥±¥é…Ñ¥½¸Q¥µ”¹¥¹”ÍÁ•¥™¥…Ñ¥½¸ğ4)ğXà¸Ì½]=I1}1=-}MQ9I¹µ‘€ğU¹¥Ù•ÉÍ”°¥Ù¥±¥é…Ñ¥½¸°]½É±°Q•µÁ±”°	ÕÍ¥¹•ÍÌ…¹¥Ñ¥é•¸Ñ¥µ”±…å•ÉÌğ4)ğXà¸Ì½M%5U1Q%=9}Q%-}MQ9I¹µ‘€ğQ¥¬Í…±”…¹•á•ÕÑ¥½¸½É‘•Èğ4)ğXà¸Ì½e}9%!Q}e1¹µ‘€ğ…ä…¹¹¥¡Ğ‰•¡…Ù¥½Èµ½‘•°ğ4)ğXà¸Ì½MM=9}MeMQ4¹µ‘€ğM•…Í½¸å±”…¹•½¹½µä¥µÁ…Ğğ4)ğXà¸Ì½%Q%i9}	!Y%=H¹µ‘€ğ¥Ñ¥é•¸…Ñ¥½¹ÌÁ•ÈQ¥¬ğ4)ğXà¸Ì½	UM%9MM}	!Y%=H¹µ‘€ğ	ÕÍ¥¹•ÍÌ…Ñ¥½¹ÌÁ•ÈQ¥¬ğ4)ğXà¸Ì½Q5A1}Q%Y%Qd¹µ‘€ğQ•µÁ±”Í•ÉÙ¥•Ì°™…¥Ñ Ù…±Õ”°Á½ÁÕ±…Ñ¥½¸…ÑÑÉ…Ñ¥½¸…¹¥Ù¥±¥é…Ñ¥½¸¥µÁ…Ğğ4)ğXà¸Ì½IM=UI}I9IQ%=8¹µ‘€ğ9…ÑÕÉ…°É•½Ù•Éä°½¹ÍÕµÁÑ¥½¸…¹É••¹•É…Ñ¥½¸ğ4)ğXà¸Ì½Y9Q}9%9¹µ‘€ğ•ÍÑ¥Ù…°°]…È½¹•ÁĞ°¥Í…ÍÑ•È°¥Í½Ù•Éä°Q•¡¹½±½ä°5¥É…Ñ¥½¸°½¹½µ¥Œ	½½´…¹I••ÍÍ¥½¸ğ4)ğXà¸Ì½=YI99}IMA=9M¹µ‘€ğ½Ù•É¹…¹”Í¥¹…°•Ù…±Õ…Ñ¥½¸…¹É•ÍÁ½¹Í”ğ4)ğXà¸Ì½M%5U1Q%=9}IU9Q%5¹µ‘€ğIÕ¹Ñ¥µ”™±½Ü™É½´±½¬Ñ¼Ñ¥µ•±¥¹”Í¹…ÁÍ¡½Ğğ4)ğXà¸Ì½Í¡•µ…Ì½€ğQ•¸)M=8M¡•µ…Ìğ4)ğXà¸Ì½•á…µÁ±•Ì½€ğQ•¸Á…ÉÍ•…‰±”•á…µÁ±•Ìğ4)ğXà¸Ì½É•Á½ÉÑÌ½-%=M}Xá|Í}E}IA=IP¹µ‘€ğXà¸ÌEÉ•Á½ÉĞğ4)ğXà¸Ì½É•Á½ÉÑÌ½-%=M}Xá|Í}I1M}IA=IP¹µ‘€ğXà¸ÌÉ•±•…Í”É•Á½ÉĞ…¹Xä¸ÀÉ•½µµ•¹‘…Ñ¥½¸ğ4(4(¨©AÕ‰±¥ŒUI0è¨¨¡ÑÑÁÌè¼½­±¥¹•½‘åÍÍ•ä¹¥Ñ¡Õˆ¹¥¼½­±¥¹”µ½‘åÍÍ•ä½-8µ-%=L½Xà¸Ì¼4(4(¨©…Í¡‰½…ÉUI0è¨¨¡ÑÑÁÌè¼½­±¥¹•½‘åÍÍ•ä¹¥Ñ¡Õˆ¹¥¼½­±¥¹”µ½‘åÍÍ•ä½-8µ-%=L½Xà¸Ì½‘…Í¡‰½…É¼4(4(ŒŒXä¸À¥Ù¥±¥é…Ñ¥½¸$¹¥¹”4(4)Xä¸À…‘‘ÌÑ¡”¥Ù¥±¥é…Ñ¥½¸$¹¥¹”¸%Ğ±•ÑÌ$É•…U¹¥Ù•ÉÍ”MÑ…Ñ”°¥Ù¥±¥é…Ñ¥½¸MÑ…Ñ”°]½É±±½¬°¥Ñ¥é•¸MÑ…Ñ”°AÉ½™•ÍÍ¥½¸MÑ…Ñ”°	ÕÍ¥¹•ÍÌMÑ…Ñ”°5…É­•ĞMÑ…Ñ”°á¡…¹”MÑ…Ñ”°	…¹¬MÑ…Ñ”°I•Í½ÕÉ”MÑ…Ñ”°Q•µÁ±”Ñ¥Ù¥Ñä°1…¹•Ù•±½Áµ•¹Ğ°½Ù•É¹…¹”M¥¹…±Ì°Ù•¹ĞMÑÉ•…´°]½É­•ÈI•Á½ÉÑÌ…¹½‘•àI•Ù¥•Ü1½œ°Ñ¡•¸ÁÉ½‘Õ”•áÁ±…¥¹…‰±”‘•¥Í¥½¹Ì…¹É…™Ğ]½É­=É‘•ÉÌ¸4(4)ğ¥±”ğAÕÉÁ½Í”ğ4)ğ´´µğ´´µğ4)ğXä¸À½I5¹µ‘€ğXä¸À½Ù•ÉÙ¥•Ü…¹™¥±”µ…Àğ4)ğXä¸À½¥¹‘•à¹¡Ñµ±€ğI•…µ½¹±ä¥Ù¥±¥é…Ñ¥½¸$Y¥•İ•Èğ4)ğXä¸À½‘…Í¡‰½…É½¥¹‘•à¹¡Ñµ±€ğI•…µ½¹±ä¥Ù¥±¥é…Ñ¥½¸$…Í¡‰½…Éğ4)ğXä¸À½%Y%1%iQ%=9}%}9%9¹µ‘€ğ5…ÍÑ•È$¹¥¹”ÍÁ•¥™¥…Ñ¥½¸ğ4)ğXä¸À½%}=	MIYQ%=9}5=0¹µ‘€ğ=‰Í•ÉÙ…Ñ¥½¸Í½ÕÉ•Ì…¹Í½ÕÉ”ÅÕ…±¥Ñäğ4)ğXä¸À½%}IM=9%9}5=0¹µ‘€ğáÁ±…¥¹…‰±”É•…Í½¹¥¹œÁÉ½•‘ÕÉ”ğ4)ğXä¸À½%}%M%=9}5=0¹µ‘€ğ•¥Í¥½¸½¹ÑÉ…Ğ…¹‘•¥Í¥½¸ÑåÁ•Ìğ4)ğXä¸À½%}55=Ie}5=0¹µ‘€ğM¡½ÉĞµQ•É´°Q…Í¬°¥Ù¥±¥é…Ñ¥½¸°…¹½¸°•¥Í¥½¸°…¥±ÕÉ”…¹I•Ù¥•Ü5•µ½Éäğ4)ğXä¸À½%}A=1%e}5=0¹µ‘€ğ±±½İ•…¹ÁÉ½¡¥‰¥Ñ•$…Ñ¥½¹Ìğ4)ğXä¸À½%}I%M-}5=0¹µ‘€ğHÀÑ¼HĞÉ¥Í¬±•Ù•±Ìğ4)ğXä¸À½%}]=I-=II}9IQ=H¹µ‘€ğÉ…™Ğ]½É­=É‘•È•¹•É…Ñ¥½¸ÉÕ±•Ìğ4)ğXä¸À½%}!U59}=YII%¹µ‘€ğ!Õµ…¸½Ù•ÉÉ¥‘”É•½Éµ½‘•°ğ4)ğXä¸À½%}=a}IY%]}	=U9Id¹µ‘€ğ½‘•àÉ•Ù¥•Ü¡•­Ì‰•™½É”İ½É¬ÁÉ½••‘Ìğ4)ğXä¸À½ÉÕ¹Ñ¥µ”½€ğ¥¡Ğ…‘Ù¥Í½ÈÉÕ¹Ñ¥µ”‘½Õµ•¹ÑÌğ4)ğXä¸À½Í¡•µ…Ì½€ğ¥¡Ğ)M=8M¡•µ…Ìğ4)ğXä¸À½•á…µÁ±•Ì½€ğ¥¡ĞÁ…ÉÍ•…‰±”•á…µÁ±•Ìğ4)ğXä¸À½İ½É­½É‘•ÉÌ½Xå}IQ}]=I-=IIL¹µ‘€ğQ¡É•”Xä‘ÉäÉÕ¸É…™Ğ]½É­=É‘•ÉÌğ4)ğXä¸À½É•Á½ÉÑÌ½XäµIeIU8´ÀÀÅ}IA=IP¹µ‘€ğXä‘ÉäÉÕ¸É•Á½ÉĞğ4)ğXä¸À½É•Á½ÉÑÌ½-%=M}Xå|Á}E}IA=IP¹µ‘€ğXä¸ÀEÉ•Á½ÉĞğ4)ğXä¸À½É•Á½ÉÑÌ½-%=M}Xå|Á}I1M}IA=IP¹µ‘€ğXä¸ÀÉ•±•…Í”É•Á½ÉĞ…¹Xä¸ÄÉ•½µµ•¹‘…Ñ¥½¸ğ4(4(¨©AÕ‰±¥ŒUI0è¨¨¡ÑÑÁÌè¼½­±¥¹•½‘åÍÍ•ä¹¥Ñ¡Õˆ¹¥¼½­±¥¹”µ½‘åÍÍ•ä½-8µ-%=L½Xä¸À¼4(4(¨©…Í¡‰½…ÉUI0è¨¨¡ÑÑÁÌè¼½­±¥¹•½‘åÍÍ•ä¹¥Ñ¡Õˆ¹¥¼½­±¥¹”µ½‘åÍÍ•ä½-8µ-%=L½Xä¸À½‘…Í¡‰½…É¼4(4(ŒŒXä¸Ä$]½É­=É‘•ÈI•Ù¥•Ü1½½À4(4)Xä¸Ä…‘‘ÌÑ¡”™½Éµ…°É•Ù¥•Ü±½½À™½È$µ•¹•É…Ñ•IP]½É­=É‘•ÉÌ¸%ĞÁÉ•Ù•¹ÑÌ$™É½´‘¥É•Ñ±äÁÉ½µ½Ñ¥¹œIPÑ…Í­ÌÑ¼=A8°¥Ù•Ì½‘•àÑ¡”É•ÅÕ¥É•ÁÉ½µ½Ñ¥½¸¡•­±¥ÍĞ°…Ñ•ÌHÌÑ¡É½Õ !Õµ…¸É•Ù¥•Ü°‰±½­ÌHĞ•á•ÕÑ¥½¸°…¹É•½É‘Ì…Õ‘¥Ğ•Ù•¹ÑÌ™½È•Ù•ÉäÉ•Ù¥•Ü‘•¥Í¥½¸¸4(4)ğ¥±”ğAÕÉÁ½Í”ğ4)ğ´´µğ´´µğ4)ğXä¸Ä½I5¹µ‘€ğXä¸Ä½Ù•ÉÙ¥•Ü…¹™¥±”µ…Àğ4)ğXä¸Ä½¥¹‘•à¹¡Ñµ±€ğI•…µ½¹±äXä¸Ä•¹ÑÉäÁ…”ğ4)ğXä¸Ä½‘…Í¡‰½…É½¥¹‘•à¹¡Ñµ±€ğI•…µ½¹±ä]½É­=É‘•ÈI•Ù¥•Ü…Í¡‰½…Éğ4)ğXä¸Ä½%}]=I-=II}IY%]}1==@¹µ‘€ğ½Éµ…°IPÉ•Ù¥•ÜÍÑ…Ñ”µ…¡¥¹”ğ4)ğXä¸Ä½IQ}]=I-=II}MQ9I¹µ‘€ğI•ÅÕ¥É•™¥•±‘Ì™½È$µ•¹•É…Ñ•IP]½É­=É‘•ÉÌğ4)ğXä¸Ä½=a}AI=5=Q%=9}AI=Q==0¹µ‘€ğ½‘•à€ÄÔµÁ½¥¹ĞÁÉ½µ½Ñ¥½¸¡•­±¥ÍĞğ4)ğXä¸Ä½=a}I)Q%=9}AI=Q==0¹µ‘€ğI•©•Ñ¥½¸…¹…É¡¥Ù”ÉÕ±•Ìğ4)ğXä¸Ä½=a}IY%M%=9}AI=Q==0¹µ‘€ğI•Ù¥Í¥½¸É•ÅÕ•ÍĞÉÕ±•Ìğ4)ğXä¸Ä½!U59}IY%]}Q¹µ‘€ğ!Õµ…¸É•Ù¥•Ü…¹½Ù•ÉÉ¥‘”…Ñ”ğ4)ğXä¸Ä½UA1%Q}QM-}QQ%=8¹µ‘€ğÕÁ±¥…Ñ”…¹µ•É”µ…¹‘¥‘…Ñ”‘•Ñ•Ñ¥½¸ğ4)ğXä¸Ä½A99e}Y1%Q%=8¹µ‘€ğ•Á•¹‘•¹ä¡•­Ì‰•™½É”ÁÉ½µ½Ñ¥½¸ğ4)ğXä¸Ä½I%M-}AI=5=Q%=9}5QI%`¹µ‘€ğHÀµHĞÁÉ½µ½Ñ¥½¸µ…ÑÉ¥àğ4)ğXä¸Ä½Í¡•µ…Ì½€ğ9¥¹”)M=8M¡•µ…Ìğ4)ğXä¸Ä½•á…µÁ±•Ì½€ğ9¥¹”Á…ÉÍ•…‰±”•á…µÁ±•Ìğ4)ğXä¸Ä½ÉÕ¹Ñ¥µ”½€ğ¥¡ĞÉ•Ù¥•ÜÉÕ¹Ñ¥µ”‘½Õµ•¹ÑÌğ4)ğXä¸Ä½É•Ù¥•İÌ½€ğ½‘•àÉ•Ù¥•Ü‘•¥Í¥½¹Ì™½ÈXä¸ÀIP]½É­=É‘•ÉÌğ4)ğXä¸Ä½É•Á½ÉÑÌ½-%=M}Xå|Å}E}IA=IP¹µ‘€ğXä¸ÄEÉ•Á½ÉĞğ4)ğXä¸Ä½É•Á½ÉÑÌ½-%=M}Xå|Å}I1M}IA=IP¹µ‘€ğXä¸ÄÉ•±•…Í”É•Á½ÉĞğ4(4(¨©AÕ‰±¥ŒUI0è¨¨¡ÑÑÁÌè¼½­±¥¹•½‘åÍÍ•ä¹¥Ñ¡Õˆ¹¥¼½­±¥¹”µ½‘åÍÍ•ä½-8µ-%=L½Xä¸Ä¼4(4(¨©…Í¡‰½…ÉUI0è¨¨¡ÑÑÁÌè¼½­±¥¹•½‘åÍÍ•ä¹¥Ñ¡Õˆ¹¥¼½­±¥¹”µ½‘åÍÍ•ä½-8µ-%=L½Xä¸Ä½‘…Í¡‰½…É¼4(4(ŒŒXä¸ÈÁÁÉ½Ù•É…™ĞÑ¼=A8]½É­EÕ•Õ”Må¹Œ4(4)Xä¸È…‘‘ÌÑ¡”½‘•àµ½¹±äÍå¹Œ±…å•ÈÑ¡…Ğ½¹Ù•ÉÑÌXä¸ÄAAI=Y}=I}=A9€‘•¥Í¥½¹Ì¥¹Ñ¼½™™¥¥…°=A9€]½É­EÕ•Õ”Ñ…Í­Ì¸%ĞÙ…±¥‘…Ñ•ÌÁÉ½µ½Ñ¥½¸É•½É‘Ì°…±±½…Ñ•Ì™½Éµ…°$´ñ=5%8ø´ñeHø´ñMEU9ù€%Ì°¡•­Ì½¹™±¥ÑÌ°¥¹Í•ÉÑÌ]½É­EÕ•Õ”‰±½­Ì°ÍÕÁÁ½ÉÑÌ!Õµ…¸A…ÕÍ”…¹É•½É‘ÌÉ½±±‰…¬½…Õ‘¥Ğ•Ù•¹ÑÌ¸4(4)ğ¥±”ğAÕÉÁ½Í”ğ4)ğ´´µğ´´µğ4)ğXä¸È½I5¹µ‘€ğXä¸È½Ù•ÉÙ¥•Ü…¹™¥±”µ…Àğ4)ğXä¸È½¥¹‘•à¹¡Ñµ±€ğI•…µ½¹±äXä¸È•¹ÑÉäÁ…”ğ4)ğXä¸È½‘…Í¡‰½…É½¥¹‘•à¹¡Ñµ±€ğI•…µ½¹±äÍå¹Œ‘…Í¡‰½…Éğ4)ğXä¸È½AAI=Y}IQ}Me9}MQ9I¹µ‘€ğMå¹ŒÍÑ…Ñ”µ…¡¥¹”…¹‰½Õ¹‘…É¥•Ìğ4)ğXä¸È½=a}]=I-EUU}Me9}AI=Q==0¹µ‘€ğ½‘•à€ÄÜµÁ½¥¹ĞÍå¹Œ¡•­±¥ÍĞğ4)ğXä¸È½]=I-=II}%}11=Q%=9}MQ9I¹µ‘€ğ½Éµ…°$]½É­=É‘•È%ÉÕ±•Ìğ4)ğXä¸È½]=I-EUU}=91%Q}A=1%d¹µ‘€ğ½¹™±¥Ğ‘•Ñ•Ñ¥½¸ÉÕ±•Ìğ4)ğXä¸È½]=I-EUU}%9MIQ%=9}A=1%d¹µ‘€ğM…™”]½É­EÕ•Õ”¥¹Í•ÉÑ¥½¸ÉÕ±•Ìğ4)ğXä¸È½]=I-EUU}I=11	-}A=1%d¹µ‘€ğI½±±‰…¬™É½´=A8Ñ¼AAI=Y}=I}=A8ğ4)ğXä¸È½!U59}AUM}Q¹µ‘€ğ!Õµ…¸Á…ÕÍ”°É•©•Ğ°…É¡¥Ù”…¹ÁÉ¥½É¥Ñä…Ñ”ğ4)ğXä¸È½Í¡•µ…Ì½€ğ¥¡Ğ)M=8M¡•µ…Ìğ4)ğXä¸È½•á…µÁ±•Ì½€ğ¥¡ĞÁ…ÉÍ•…‰±”•á…µÁ±•Ìğ4)ğXä¸È½ÉÕ¹Ñ¥µ”½€ğ¥¡ĞÍå¹ŒÉÕ¹Ñ¥µ”‘½Õµ•¹ÑÌğ4)ğXä¸È½Íå¹Œ½€ğÑÕ…°Íå¹Œ…ÉÑ¥™…ÑÌ™½È$µ=9=5d´ÈÀÈØ´ÀÀÀÅ€ğ4)ğXä¸È½É•Á½ÉÑÌ½-%=M}Xå|É}E}IA=IP¹µ‘€ğXä¸ÈEÉ•Á½ÉĞğ4)ğXä¸È½É•Á½ÉÑÌ½-%=M}Xå|É}I1M}IA=IP¹µ‘€ğXä¸ÈÉ•±•…Í”É•Á½ÉĞğ4(4(¨©AÕ‰±¥ŒUI0è¨¨¡ÑÑÁÌè¼½­±¥¹•½‘åÍÍ•ä¹¥Ñ¡Õˆ¹¥¼½­±¥¹”µ½‘åÍÍ•ä½-8µ-%=L½Xä¸È¼4(4(¨©…Í¡‰½…ÉUI0è¨¨¡ÑÑÁÌè¼½­±¥¹•½‘åÍÍ•ä¹¥Ñ¡Õˆ¹¥¼½­±¥¹”µ½‘åÍÍ•ä½-8µ-%=L½Xä¸È½‘…Í¡‰½…É¼4(4(ŒŒXä¸Ì¥ÍÁ…Ñ !½±I•±•…Í”AÉ½Ñ½½°4(4)Xä¸Ì…‘‘ÌÑ¡”½‘•àµ½¹±äÉ•±•…Í”±…å•È™½ÈÑ…Í­ÌÑ¡…Ğ…É”…±É•…‘äÍå¹•¥¹Ñ¼Ñ¡”]½É­EÕ•Õ”…Ì=A9€‰ÕĞÉ•µ…¥¸ÁÉ½Ñ•Ñ•‰ä¥ÍÁ…Ñ !½±èÑÉÕ•€¸%ĞÉ•±•…Í•ÌÑ¡”Ñ…Í¬½¹±ä…™Ñ•È‘•Á•¹‘•¹ä°É¥Í¬°İ½É­•È•±¥¥‰¥±¥Ñä°¡Õµ…¸Á…ÕÍ”…¹…Õ‘¥Ğ…Ñ•ÌÁ…ÍÌ¸4(4)ğ¥±”ğAÕÉÁ½Í”ğ4)ğ´´µğ´´µğ4)ğXä¸Ì½I5¹µ‘€ğXä¸Ì½Ù•ÉÙ¥•Ü…¹™¥±”µ…Àğ4)ğXä¸Ì½¥¹‘•à¹¡Ñµ±€ğI•…µ½¹±äXä¸Ì•¹ÑÉäÁ…”ğ4)ğXä¸Ì½‘…Í¡‰½…É½¥¹‘•à¹¡Ñµ±€ğI•…µ½¹±ä‘¥ÍÁ…Ñ ‘…Í¡‰½…Éğ4)ğXä¸Ì½%MAQ!}!=1}MQ9I¹µ‘€ğ5•…¹¥¹œ½˜‘¥ÍÁ…Ñ ¡½±…¹É•±•…Í”ğ4)ğXä¸Ì½=a}I1M}AI=Q==0¹µ‘€ğ½‘•à€ÈÀµÁ½¥¹ĞÉ•±•…Í”¡•­±¥ÍĞğ4)ğXä¸Ì½]=I-I}1%%	%1%Qe}AI=Q==0¹µ‘€ğ]½É­•È•±¥¥‰¥±¥ÑäÉÕ±•Ìğ4)ğXä¸Ì½%MAQ!}A99e}Q¹µ‘€ğ•Á•¹‘•¹ä…Ñ”ğ4)ğXä¸Ì½%MAQ!}I%M-}Q¹µ‘€ğHÀµHĞÉ¥Í¬…Ñ”ğ4)ğXä¸Ì½Í¡•µ…Ì½€ğ9¥¹”)M=8M¡•µ…Ìğ4)ğXä¸Ì½•á…µÁ±•Ì½€ğ9¥¹”Á…ÉÍ•…‰±”•á…µÁ±•Ìğ4)ğXä¸Ì½ÉÕ¹Ñ¥µ”½€ğ9¥¹”‘¥ÍÁ…Ñ ÉÕ¹Ñ¥µ”‘½Õµ•¹ÑÌğ4)ğXä¸Ì½É•±•…Í”½€ğÑÕ…°É•±•…Í”…ÉÑ¥™…ÑÌ™½È$µ=9=5d´ÈÀÈØ´ÀÀÀÅ€ğ4)ğXä¸Ì½É•Á½ÉÑÌ½-%=M}Xå|Í}E}IA=IP¹µ‘€ğXä¸ÌEÉ•Á½ÉĞğ4)ğXä¸Ì½É•Á½ÉÑÌ½-%=M}Xå|Í}I1M}IA=IP¹µ‘€ğXä¸ÌÉ•±•…Í”É•Á½ÉĞğ4(4(¨©AÕ‰±¥ŒUI0è¨¨¡ÑÑÁÌè¼½­±¥¹•½‘åÍÍ•ä¹¥Ñ¡Õˆ¹¥¼½­±¥¹”µ½‘åÍÍ•ä½-8µ-%=L½Xä¸Ì¼4(4(¨©…Í¡‰½…ÉUI0è¨¨¡ÑÑÁÌè¼½­±¥¹•½‘åÍÍ•ä¹¥Ñ¡Õˆ¹¥¼½­±¥¹”µ½‘åÍÍ•ä½-8µ-%=L½Xä¸Ì½‘…Í¡‰½…É¼4(4(ŒŒXÄÀ¸À-%=L=Á•É…Ñ¥¹œMåÍÑ•´4(4)XÄÀ‘•™¥¹•Ì-%=L…ÌÑ¡”½Á•É…Ñ¥¹œÍåÍÑ•´™½È…±°-8µ½‘Õ±•ÌèU¹¥Ù•ÉÍ”°Q•µÁ±”°1…¹°I•Í¥‘•¹”°¥Ñ¥é•¸°	ÕÍ¥¹•ÍÌ°5…É­•Ğ°á¡…¹”°	…¹¬°]…±±•Ğ°5•µ‰•ÉÍ¡¥À°$½µÁ…¹ä°A½ÉÑ…°°…µ”°ÁÀ°É½¹Ñ•¹°	…­•¹°A$°¥Ñ!Õˆ…¹	±½­¡…¥¸¸4(4)ğ¥±”ğAÕÉÁ½Í”ğ4)ğ´´µğ´´µğ4)ğXÄÀ½I5¹µ‘€ğXÄÀ½Ù•ÉÙ¥•Ü…¹™¥±”µ…Àğ4)ğXÄÀ½¥¹‘•à¹¡Ñµ±€ğI•…µ½¹±äXÄÀ•¹ÑÉäÁ…”ğ4)ğXÄÀ½‘…Í¡‰½…É½¥¹‘•à¹¡Ñµ±€ğI•…µ½¹±ä½Á•É…Ñ¥¹œ‘…Í¡‰½…Éğ4)ğXÄÀ½-%=M}=AIQ%9}MeMQ4¹µ‘€ğ=L½¹ÍÑ¥ÑÕÑ¥½¸ğ4)ğXÄÀ½MeMQ5}I!%QQUI¹µ‘€ğ	É½İÍ•ÈÑ¼$½µÁ…¹ä…É¡¥Ñ•ÑÕÉ”ğ4)ğXÄÀ½5%I=MIY%}MQ9I¹µ‘€ğ1½¥…°Í•ÉÙ¥”‰½Õ¹‘…ÉäÍÑ…¹‘…Éğ4)ğXÄÀ½A%}Q]e}MQ9I¹µ‘€ğA$…Ñ•İ…äÍÑ…¹‘…Éğ4)ğXÄÀ½I=9Q9}MQ9I¹µ‘€ğA½ÉÑ…°°U$…¹‘…Í¡‰½…ÉÍÑ…¹‘…Éğ4)ğXÄÀ½	-9}MQ9I¹µ‘€ğM•ÉÙ¥”±…å•ÈÍÑ…¹‘…Éğ4)ğXÄÀ½55	IM!%A}MQ9I¹µ‘€ğ5•µ‰•ÉÍ¡¥ÀÉ½±”µ½‘•°ğ4)ğXÄÀ½]11Q}MQ9I¹µ‘€ğ]…±±•ĞÁÉ½Ñ½ÑåÁ”‰½Õ¹‘…Éäğ4)ğXÄÀ½Ae59Q}MQ9I¹µ‘€ğA…åµ•¹Ğ½¹•ÁĞ½ÁÉ½Ñ½ÑåÁ”‰½Õ¹‘…Éäğ4)ğXÄÀ½MUI%Qe}MQ9I¹µ‘€ğ%‘•¹Ñ¥Ñä°Í•É•ÑÌ°É…Ñ”±¥µ¥Ğ…¹É¥Í¬ğ4)ğXÄÀ½U%Q}MQ9I¹µ‘€ğMåÍÑ•´µİ¥‘”…Õ‘¥ĞÍÑ…¹‘…Éğ4)ğXÄÀ½Í¡•µ…Ì½€ğQİ•±Ù”)M=8M¡•µ…Ìğ4)ğXÄÀ½•á…µÁ±•Ì½€ğQİ•±Ù”Á…ÉÍ•…‰±”•á…µÁ±•Ìğ4)ğXÄÀ½ÉÕ¹Ñ¥µ”½€ğ9¥¹”ÉÕ¹Ñ¥µ”µ…ÁÌğ4)ğXÄÀ½É•Á½ÉÑÌ½XÄÁ}IeIU9|ÀÀÅ}IA=IP¹µ‘€ğ=Á•É…Ñ¥¹œ‘ÉäÉÕ¸ğ4)ğXÄÀ½É•Á½ÉÑÌ½-%=M}XÄÁ}E}IA=IP¹µ‘€ğXÄÀEÉ•Á½ÉĞğ4)ğXÄÀ½É•Á½ÉÑÌ½-%=M}XÄÁ}I1M}IA=IP¹µ‘€ğXÄÀÉ•±•…Í”É•Á½ÉĞğ4(4(¨©AÕ‰±¥ŒUI0è¨¨¡ÑÑÁÌè¼½­±¥¹•½‘åÍÍ•ä¹¥Ñ¡Õˆ¹¥¼½­±¥¹”µ½‘åÍÍ•ä½-8µ-%=L½XÄÀ¼4(4(¨©…Í¡‰½…ÉUI0è¨¨¡ÑÑÁÌè¼½­±¥¹•½‘åÍÍ•ä¹¥Ñ¡Õˆ¹¥¼½­±¥¹”µ½‘åÍÍ•ä½-8µ-%=L½XÄÀ½‘…Í¡‰½…É¼4(4(ŒŒ•¹•Í¥Ì9Ù½±ÕÑ¥½¸É¡¥Ñ•ÑÕÉ”4(4)•¹•Í¥Ìµ‘¹„½€½¹Ñ…¥¹ÌÑ¡”…É¡¥Ñ•ÑÕÉ”µ½¹±äÁÉ½Á½Í…°…ÕÑ¡½É¥é•‰ä!U58µ9M%Lµ9µY=1UQ%=8´ÀÀÅ€¸%ĞÍ•Á…É…Ñ•Ì•¹•Í¥Ì…Á…‰¥±¥ÑäÑ½´½Õ¹Ğ€¡€À¸¸ÄÀá€¤™É½´Ù½±ÕÑ¥½¸a@°•¹½µ”•¹•É…Ñ¥½¸°9EÕ…±¥ÑäÉ…‘”…¹QÉ…¥¹¥¹œ1•Ù•°€¡1XÄ¸¹1XÄÀÀÁ€¤¸4(4)ğ¥±”ğAÕÉÁ½Í”ğ4)ğ´´µğ´´µğ4)ğ•¹•Í¥Ìµ‘¹„½I5¹µ‘€ğAÉ½Á½Í…°•¹ÑÉä°Á…­…”¥¹‘•à…¹…ÕÑ¡½É¥é…Ñ¥½¸‰½Õ¹‘…Éäğ4)ğ•¹•Í¥Ìµ‘¹„½M=UI}U%P¹µ‘€ğá¥ÍÑ¥¹œ9½Í½ÕÉ”±…ÍÍ¥™¥…Ñ¥½¸…¹Í•µ…¹Ñ¥Œ½¹™±¥ÑÌğ4)ğ•¹•Í¥Ìµ‘¹„½9M%M}9}Y=1UQ%=9}IU9Q%5¹µ‘€ğÉ½ÍÌµ±…å•ÈMÁ•¥•Ì•¹½µ”…¹9•Ù½±ÕÑ¥½¸…É¡¥Ñ•ÑÕÉ”ğ4)ğ•¹•Í¥Ìµ‘¹„½9M%M}Q=5|ÀÀÅ|ÄÀá}Q1=¹µ‘€ğAÕ‰±¥Œ€ÄÈµ‘½µ…¥¸°€ÄÀàµ…Ñ½´…Ñ…±½œğ4)ğ•¹•Í¥Ìµ‘¹„½•¹•Í¥Í}…Ñ½µ}…Ñ…±½œ¹©Í½¹€ğ5…¡¥¹”µÉ•…‘…‰±”…Ñ½´…Ñ…±½œğ4)ğ•¹•Í¥Ìµ‘¹„½9}AI%Ye}9}!Y9}MIP¹µ‘€ğAÕ‰±¥Œ½ÁÉ¥Ù…Ñ”½!•…Ù•¸M•É•Ğ‰½Õ¹‘…Éäğ4(4)MÑ…ÑÕÌ¥ÌI!%QQUI}AI=A=M1}U9I}IY%]€ì¥µÁ±•µ•¹Ñ…Ñ¥½¸°]½É­EÕ•Õ”…¹‘•Á±½åµ•¹Ğ…É”¹½ĞÍÑ…ÉÑ•¸4(4(ŒŒAÉ½Ñ•Ñ•MåÍÑ•µÌ4(4)-%=LXÄÀ‘½•Ì¹½Ğµ½‘¥™äè4(4(´½¹ÑÉ…ÑÍ€4(´/Şk¢–ÿ¦+¢¢`½Ñ•µÁ±•Ì¼ÄÈÌĞÕ€4(´İ…±±•Ñ€4(´‰É¥‘•€4(´AI%5=I}9M%M}	==Q}MEU9¹µ‘€4(´AI%5=I}9M%M}	==Q}MEU9}XÅ|Ğ¹µ‘€…ÌÁÉ•Í•ÉÙ•…¹•ÍÑ½È¡¥ÍÑ½Éä4(´‘½Ì½Á¡åÍ¥Ì½-9}U¹¥Ù•ÉÍ•}A¡åÍ¥Í}IÕ¹Ñ¥µ•}UII9P¹µ‘€4(´‘½Ì½Á¡åÍ¥Ì½™¥¹…°µİ¡¥Ñ•Á…Á•È½€4(´-8½½¹ÑÉ…ÑÌ½-9}Q½­•¹}Xİ|Õ|È¹Í½±€4(

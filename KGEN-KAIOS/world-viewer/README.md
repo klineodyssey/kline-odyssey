@@ -1,19 +1,19 @@
 ---
 TITLE: "KAIOS World Viewer Architecture Package"
-VERSION: "1.0.0"
-REVISION: "2026-07-16.1"
-STATUS: "ARCHITECTURE_BASELINE_FROZEN"
-ARCHITECTURE: "ONLY"
-IMPLEMENTATION: "NOT_STARTED"
-WORKQUEUE: "SANDBOX_TASK_ENVELOPE_PREPARED"
-DEPLOYMENT: "NOT_STARTED"
-LAST_UPDATED: "2026-07-15"
+VERSION: "1.1.0"
+REVISION: "2026-07-16.2"
+STATUS: "SPRINT_001_IMPLEMENTED"
+ARCHITECTURE: "BASELINE_FROZEN_V1.0"
+IMPLEMENTATION: "SYNTHETIC_VIEWER_V1"
+WORKQUEUE: "KAIOS-WV-SPRINT-001_DONE"
+DEPLOYMENT: "STATIC_PAGES_COMPATIBLE"
+LAST_UPDATED: "2026-07-16"
 UPDATED_BY: "Codex / codex-gm-01"
 REVIEWED_BY: "Codex internal independent UI review; Human delegated approval"
-SOURCE_COMMIT: "ORIGIN_MAIN_7a692c34df50861ab10f8bd80959d95251b1071c"
-TASK_ID: "HUMAN-WORLD-VIEWER-001"
-HUMAN_DECISION_ID: "HUMAN-WORLD-VIEWER-001; HUMAN-WORLD-VIEWER-INDEPENDENT-REVIEW-001; HUMAN-PRIMEFORGE-FULL-AUTOPILOT-001"
-CHANGE_REASON: "Freeze the reviewed Web-first map interaction architecture and prepare an isolated synthetic sandbox task without changing land state."
+SOURCE_COMMIT: "ORIGIN_MAIN_16f15981673e8dd2678db985b7a35486f130cafd"
+TASK_ID: "KAIOS-WV-SPRINT-001"
+HUMAN_DECISION_ID: "HUMAN-WORLD-VIEWER-001; HUMAN-WORLD-VIEWER-INDEPENDENT-REVIEW-001; HUMAN-PRIMEFORGE-FULL-AUTOPILOT-001; HUMAN-PHASE-SHIFT-001"
+CHANGE_REASON: "Implement the approved synthetic World Viewer Sprint 001 while preserving the frozen architecture and read-only land boundary."
 ANCESTOR: "KGEN-KAIOS/V8.1/index.html; KGEN-KAIOS/land/LAND_RUNTIME_ARCHITECTURE_BASELINE.md"
 SOURCE_OF_TRUTH: false
 DOMAIN: KGENVERSE
@@ -35,19 +35,19 @@ CANONICAL_FILE: "KGEN-KAIOS/world-viewer/README.md"
 |---|---|
 | Human Decision | `HUMAN-WORLD-VIEWER-001` |
 | Architecture | `BASELINE_FROZEN_V1.0` |
-| Implementation | `NOT_STARTED` |
-| Sandbox Task Envelope | `PREPARED_NOT_CLAIMED` |
-| Deployment | `NOT_STARTED` |
-| Executable `index.html` | `NOT_CREATED` |
+| Implementation | `SPRINT_001_SYNTHETIC_VIEWER_COMPLETE` |
+| Sprint Task Envelope | `DONE` |
+| Deployment | `STATIC_GITHUB_PAGES_COMPATIBLE` |
+| Executable `index.html` | `CREATED` |
 | Art / 3D / animation | `OUT_OF_SCOPE` |
 
-This package defines the first KAIOS map control surface for land. It does not create a working map, modify a registry, grant land, authenticate a player, request GPS, or deploy a Pages route.
+This package now includes the first working KAIOS map control surface for land. It uses synthetic public fixtures and local-only proposal drafts; it does not modify a registry, grant land, perform real authentication, request real GPS, or create authoritative ownership state.
 
 ## 2. Architecture Verdict
 
 Create a separate, versionless World Viewer architecture rather than extending the V8.1 card viewer in place.
 
-The future runtime will have one executable entry:
+The runtime has one executable entry:
 
 ```text
 KGEN-KAIOS/world-viewer/index.html
@@ -59,7 +59,7 @@ The intended permanent public alias is:
 /world-viewer/
 ```
 
-Neither entry is created in this architecture phase. Future JavaScript, CSS, worker and data assets are subordinate resources; they are not alternate application entry points.
+JavaScript, CSS and synthetic data are subordinate resources; they are not alternate application entry points. The repository path is directly compatible with static HTTP hosting and GitHub Pages.
 
 ## 3. Required Navigation Hierarchy
 
@@ -122,6 +122,16 @@ World Viewer V1 therefore defines adapter boundaries and draft projections. It d
 | `world_viewer_v1_architecture_baseline.json` | Baseline manifest and SHA-256 evidence |
 | `WORLD_VIEWER_V1_SANDBOX_IMPLEMENTATION_PLAN.md` | Bounded synthetic-demo plan |
 | `tasks/KAIOS-WV-SBX-001.task-envelope.json` | Single-task Cursor execution envelope |
+| `tasks/KAIOS-WV-SPRINT-001.task-envelope.json` | Sprint 001 execution and closeout envelope |
+| `index.html` | Unique executable World Viewer entry |
+| `app.js` | Application orchestration and read-only proposal flow |
+| `camera/`, `renderer/`, `lod/` | Bounded camera, Canvas renderer and six-level semantic navigation |
+| `input/`, `selection/` | Mouse, touch, keyboard and selection state controllers |
+| `inspector/`, `life/` | Canonical-data inspector and Life OS status projection |
+| `ui/` | Responsive shell, context menu and visual system |
+| `data/` | Validated synthetic world fixture and loader |
+| `tests/acceptance_static.py` | Offline package, fixture and safety validation |
+| `tests/evidence/` | Reviewed desktop and mobile screenshots for Sprint 001 |
 
 ## 7. Implementation Boundary
 
@@ -129,13 +139,10 @@ GitHub Pages can safely serve public snapshots and the read-only interaction she
 
 Until that gate exists, context-menu actions produce a previewable `LAND_USE_PROPOSAL` intent only.
 
-## 8. Next Gate
+## 8. Sprint 001 Result
 
-The 88/100 `APPROVE_WITH_AMENDMENTS` review was resolved under the World Viewer-specific Level B delegation in `HUMAN-PRIMEFORGE-FULL-AUTOPILOT-001`. Architecture publication and an isolated synthetic sandbox task are authorized. The next operational gate is Codex closeout of the existing Cursor Claim followed by one atomic/manual task assignment.
+Sprint 001 implements Earth K280 through Room navigation, Canvas drag and zoom, desktop and mobile input, a responsive Inspector, local `LAND_USE_PROPOSAL` drafts, Mock Login/GPS focus, and a first Life OS Viewer. Browser verification covers desktop and mobile interactions, Canvas pixels, overlay layout and console errors.
 
-- `APPROVE_FOR_INDEPENDENT_UI_ARCHITECTURE_REVIEW`
-- `REQUEST_UI_ARCHITECTURE_REVISION`
-- `HOLD_WORLD_VIEWER`
-- `REJECT_WORLD_VIEWER_ARCHITECTURE`
+The next product gate is Land Runtime integration through a separately authorized, non-authoritative adapter. Real ownership, KYC, GPS, backend writes and settlement remain outside this implementation.
 
-No decision in this package authorizes real land, KYC, GPS, ownership mutation, backend write service or production deployment.
+No decision in this package authorizes real land, KYC, GPS, ownership mutation, backend write service, financial settlement or production authority.
