@@ -1,0 +1,23 @@
+{
+  "task_id": "ORG-P2-003F-FIX1",
+  "status": "COMPLETE",
+  "reviewed_by": "codex-gm-01",
+  "reviewed_at": "2026-07-16T02:12:41Z",
+  "branch_count": 8,
+  "approved_source_count": 1,
+  "superseded_count": 7,
+  "remote_branches_deleted": 0,
+  "records": [
+    {"branch":"origin/cursor-handoff/ORG-P2-003F-FIX1","tip_sha":"e6e5d2fa251ba84b0f49eff1bd341329b381dc67","base_sha":"7a692c34df50861ab10f8bd80959d95251b1071c","report_blob":"434cc1ff971052a5999795233c6a866e9fc02806","decision":"APPROVED_SOURCE_EVIDENCE"},
+    {"branch":"origin/cursor-handoff/ORG-P2-003F-FIX1-20260715r2","tip_sha":"2790a395fc3a66911532a9ceb7fad0cc6cd202a1","base_sha":"7a692c34df50861ab10f8bd80959d95251b1071c","report_blob":"ffa8c59489b570a5f0047e4f93f9353980c6f041","decision":"SUPERSEDED_EVIDENCE_ONLY"},
+    {"branch":"origin/cursor/org-p2-003f-fix1-12345-naming-998e","tip_sha":"fe235872368ac44c0ea95a4a05d14bae5ed3a4a3","base_sha":"7a692c34df50861ab10f8bd80959d95251b1071c","report_blob":"fa204dfc3d8b873ff68f043307278685a5c06463","decision":"SUPERSEDED_EVIDENCE_ONLY"},
+    {"branch":"origin/cursor/org-p2-003f-fix1-1eb2","tip_sha":"3bf200714838a49a6ab36aa6b4a4367db0b319f4","base_sha":"7a692c34df50861ab10f8bd80959d95251b1071c","report_blob":"ab5f5ffc9c86b28abdbdf53ef3f0908938c486b1","decision":"SUPERSEDED_EVIDENCE_ONLY"},
+    {"branch":"origin/cursor/org-p2-003f-fix1-3898","tip_sha":"dbdd905ccf06eeb0f52356b3457d52c5bba7239d","base_sha":"bf1a46f2dcc32af41c9a57ca2a38ce30aa82c7e7","report_blob":"27fdee406ff6df6f4dfb1dc643e1b5ca59b24cff","decision":"SUPERSEDED_REJECT_NO_CLAIM"},
+    {"branch":"origin/cursor/org-p2-003f-fix1-a008","tip_sha":"9d4ba602bb7e16987bd623c467add878cf28a448","base_sha":"7a692c34df50861ab10f8bd80959d95251b1071c","report_blob":"3bfc7246f73237a56c733533e9d4867af55e96d4","decision":"SUPERSEDED_EVIDENCE_ONLY"},
+    {"branch":"origin/cursor/org-p2-003f-fix1-claim-f2d4","tip_sha":"c231d6ee7e0383f76b692e0a446059f55796c384","base_sha":"7a692c34df50861ab10f8bd80959d95251b1071c","report_blob":null,"decision":"SUPERSEDED_CLAIM_ONLY"},
+    {"branch":"origin/cursor/org-p2-003f-fix1-d550","tip_sha":"63c8a855a0b5828e3101d210f9d2fc85ede6efd3","base_sha":"7a692c34df50861ab10f8bd80959d95251b1071c","report_blob":"c732f8d307951bcafee0b8e12d5ac8715eff8e1e","decision":"SUPERSEDED_EVIDENCE_ONLY"}
+  ],
+  "final_claim_status": "CLOSED",
+  "review_custody": "RELEASED",
+  "protected_path_violations": 0
+}

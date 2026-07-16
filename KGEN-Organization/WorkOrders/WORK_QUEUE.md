@@ -121,7 +121,7 @@ These rows classify remote submissions, not the underlying OPEN WorkOrders. Visi
 | ORG-P2-003E-FIX1 | `5cd4cf3b` | REJECT_UNAUTHORIZED | OPEN |
 | ORG-P2-003E-FIX1 (authorized resubmission) | `ce910e8` | APPROVED_CLEAN_TREE_EQUIVALENT | DONE |
 | ORG-P2-003F | `e9429d66` | ARCHIVE_EVIDENCE_ONLY | REJECTED |
-| ORG-P2-003F-FIX1 | `dbdd905c` | REJECT_NO_CLAIM | OPEN |
+| ORG-P2-003F-FIX1 | `e6e5d2fa` | APPROVED_SOURCE_EVIDENCE; 7 duplicate branches SUPERSEDED | DONE |
 | ORG-P2-004 | `7fdb716f` | ARCHIVE_EVIDENCE_ONLY | OPEN |
 | ORG-P2-005 | `b7c7e864` | ARCHIVE_EVIDENCE_ONLY | OPEN |
 | ORG-P2-006 | `1b6ed85e` | ARCHIVE_EVIDENCE_ONLY | OPEN |
@@ -202,7 +202,7 @@ Full branch, claim, base, report, purity, protected-path, and age evidence is re
 | ORG-P2-003E | REJECTED | Cursor | Codex | P2 | Documentation | KGEN-AI-Company/reports/ORG-P2-003E_MASTER_INDEX_ALIAS_PLAN.md |
 | ORG-P2-003E-FIX1 | DONE | Cursor | Codex | P2 | Documentation | KGEN-AI-Company/reports/ORG-P2-003E_FIX1_MASTER_INDEX_ALIAS_PLAN.md |
 | ORG-P2-003F | REJECTED | Cursor | Codex | P2 | Runtime | KGEN-AI-Company/reports/ORG-P2-003F_12345_MODULE_NAMING_MIGRATION_PLAN.md |
-| ORG-P2-003F-FIX1 | REVIEW | Cursor | Codex | P2 | Runtime | KGEN-AI-Company/reports/ORG-P2-003F_FIX1_12345_MODULE_NAMING_MIGRATION_PLAN.md |
+| ORG-P2-003F-FIX1 | DONE | Cursor | Codex | P2 | Runtime | KGEN-AI-Company/reports/ORG-P2-003F_FIX1_12345_MODULE_NAMING_MIGRATION_PLAN.md |
 | ORG-P2-004 | OPEN | Cursor | Codex | P0 | Canon | KGEN-AI-Company/reports/ORG-P2-004_CANON_ALIGNMENT.md |
 | ORG-P2-005 | OPEN | Cursor | Codex | P2 | Universe | KGEN-AI-Company/reports/ORG-P2-005_UNIVERSE_REFERENCE_CHECK.md |
 | ORG-P2-006 | OPEN | Cursor | Codex | P1 | Civilization | KGEN-AI-Company/reports/ORG-P2-006_CIVILIZATION_STAGE_MAP.md |
@@ -542,7 +542,7 @@ Full branch, claim, base, report, purity, protected-path, and age evidence is re
 
 ### ORG-P2-003F-FIX1 - Rebase 12345 module naming migration plan on current main
 
-- Status: REVIEW
+- Status: DONE
 - Owner: Cursor
 - Reviewer: Codex
 - Priority: P2
@@ -554,6 +554,11 @@ Full branch, claim, base, report, purity, protected-path, and age evidence is re
 - Lease Expires At: `2026-07-15T06:05:59Z`
 - Heartbeat: `2026-07-15T02:38:29Z`
 - Base Commit: `7a692c34df50861ab10f8bd80959d95251b1071c`
+- Source Handoff Tip: `e6e5d2fa251ba84b0f49eff1bd341329b381dc67`
+- Review Result: `APPROVED`
+- Claim / Review Custody: `CLOSED / RELEASED`
+- Closed At: `2026-07-16T02:12:41Z`
+- Closeout Evidence: `KGEN-AI-Company/reports/ORG-P2-003F-FIX1_CODEX_CLOSEOUT_REVIEW.md`
 - Input files:
   - KGEN-AI-Company/reports/ORG-P2-003F_CODEX_REVIEW.md
   - KGEN-AI-Company/reports/ORG-P2-003_ARCHITECTURE_DECISION.md
@@ -576,6 +581,11 @@ Full branch, claim, base, report, purity, protected-path, and age evidence is re
   - Preserve all current official public routes and manifests.
   - Submit one WorkOrder only on `cursor-handoff/ORG-P2-003F-FIX1`.
   - Include full Worker Boot SOP evidence in the report.
+- Codex review result:
+  - APPROVED on 2026-07-16 after rebuilding first-class Task Envelope and task-specific Handoff evidence.
+  - Original handoff tip `e6e5d2fa` was based directly on current main `7a692c34`; single-task purity, Worker identity, report, routes, module inventory and protected-path checks passed.
+  - Seven duplicate/reclaim branches remain remote as `SUPERSEDED_EVIDENCE_ONLY`; no remote branch was deleted.
+  - This closes only the report-only naming plan. It does not authorize any change under `K線西遊記/temples/12345/`.
 
 ### ORG-P2-004 - Verify Civilization Core Canon against Genesis Library and Canon JSON
 
