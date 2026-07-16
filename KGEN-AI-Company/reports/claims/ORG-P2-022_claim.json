@@ -1,0 +1,21 @@
+{
+  "task_id": "ORG-P2-022",
+  "worker_id": "cursor-01",
+  "worker_agent_id": "cursor-agent-0011",
+  "session_id": "SESSION-20260716-12-EPHEMERAL",
+  "spawned_by": "本尊",
+  "worker_type": "Cursor",
+  "status": "REVIEW",
+  "branch": "cursor-handoff/ORG-P2-022-20260716",
+  "base_commit": "89f3c351c488a0705f514adba974dd6c3dd3cb3a",
+  "base_commit_short": "89f3c35",
+  "claimed_at": "2026-07-16T06:24:09Z",
+  "lease_expires_at": "2026-07-16T10:24:09Z",
+  "heartbeat": "2026-07-16T06:24:09Z",
+  "report_path": "KGEN-AI-Company/reports/ORG-P2-022_DOCUMENTATION_INDEX_QA.md",
+  "handoff_path": "KGEN-AI-Company/reports/handoffs/ORG-P2-022/handoff.json",
+  "reviewer": "codex-gm-01",
+  "claim_id": "CLAIM-ORG-P2-022-20260716T0624-cursor-01",
+  "supersedes_archive_tips": ["8ba69c1"],
+  "notes": "Documentation index QA reissue from origin/main @ 89f3c35; report-only; no protected edits"
+}
