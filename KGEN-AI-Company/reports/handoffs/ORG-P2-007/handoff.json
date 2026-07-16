@@ -1,0 +1,69 @@
+{
+  "schema_version": "1.1",
+  "task_id": "ORG-P2-007",
+  "worker_id": "cursor-01",
+  "worker_agent_id": "cursor-agent-0004",
+  "session_id": "SESSION-20260716-04-EPHEMERAL",
+  "spawned_by": "本尊 (Sun Wukong / parent Cursor session)",
+  "clone_id": null,
+  "claim_id": "CLAIM-ORG-P2-007-20260716T0416-cursor-01",
+  "reserved_branch": "cursor-handoff/ORG-P2-007-20260716",
+  "evidence_branch": "cursor-handoff/ORG-P2-007-20260716",
+  "base_sha": "89f3c351c488a0705f514adba974dd6c3dd3cb3a",
+  "claimed_at": "2026-07-16T04:16:29Z",
+  "handoff_submitted_at": "2026-07-16T04:16:29Z",
+  "execution_lease_expires_at": "2026-07-16T08:16:29Z",
+  "supersedes_archive_tips": [
+    "c8ca9ea1"
+  ],
+  "files_changed": [
+    "KGEN-AI-Company/reports/ORG-P2-007_ECONOMY_LOOP_QA.md",
+    "KGEN-AI-Company/reports/handoffs/ORG-P2-007/HANDOFF.md",
+    "KGEN-AI-Company/reports/handoffs/ORG-P2-007/handoff.json"
+  ],
+  "files_added": [
+    "KGEN-AI-Company/reports/ORG-P2-007_ECONOMY_LOOP_QA.md",
+    "KGEN-AI-Company/reports/handoffs/ORG-P2-007/HANDOFF.md",
+    "KGEN-AI-Company/reports/handoffs/ORG-P2-007/handoff.json"
+  ],
+  "files_deleted": [],
+  "tests_run": [
+    "CURSOR_PREFLIGHT_PASS",
+    "CANON_JSON_PARSE",
+    "CORE_CANON_LOOP_MATCH_JSON",
+    "ORG_LOOP_SECTIONS",
+    "WILD_LAND_ENDPOINT",
+    "CROSS_UNIVERSE_ENDPOINT",
+    "LOOP_CLOSURE",
+    "V8_LIFECYCLE_ENDPOINTS",
+    "EXCHANGE_11520",
+    "NO_TOKEN_CONTRADICTION",
+    "PROTECTED_PATH_DIFF",
+    "SINGLE_TASK_PURITY",
+    "SECRET_SCAN"
+  ],
+  "test_results": "ALL_PASS",
+  "task_result": "PASS_ECONOMY_LOOP_CANON_CONSISTENT",
+  "gap_count": 5,
+  "hard_conflicts_count": 0,
+  "protected_path_violations": 0,
+  "runtime_current_modified": false,
+  "universe_map_modified": false,
+  "work_queue_modified": false,
+  "worker_registry_modified": false,
+  "implementation_scope": "report_only_economy_loop_qa",
+  "status": "REVIEW",
+  "known_issues": [
+    "ATOMIC_CLAIM_REGISTRY_NOT_IMPLEMENTED",
+    "WORK_QUEUE_NOT_UPDATED_HANDOFF_ONLY"
+  ],
+  "risks": [
+    "R1_APP_AI_DNA_COMPRESSION",
+    "R2_CROSS_UNIVERSE_MATURITY_UNDEFINED",
+    "R3_V8_FINANCIAL_NODE_SUMMARY",
+    "R4_SIMULATED_BANK_DISCLOSURE",
+    "R5_NON_ATOMIC_PARALLEL_CLAIMS"
+  ],
+  "recommended_next_action": "Codex approve; merge handoff; close ORG-P2-007 on main; supersede archive tip c8ca9ea1; consider PROPOSED 007A/B/C.",
+  "review_status": "PENDING_CODEX_REVIEW"
+}
