@@ -1,0 +1,188 @@
+{
+  "meta": {
+    "synthetic": true,
+    "non_authoritative": true,
+    "version": "1.0.0",
+    "fixture_id": "KAIOS-WV-SBX-001-SYNTHETIC"
+  },
+  "earth": {
+    "id": "earth-k280",
+    "label": "Earth K280",
+    "coordinate_frame": "K280_GEODETIC",
+    "canonical": { "lat": 0, "lon": 0, "alt_m": 0 }
+  },
+  "region": {
+    "id": "region-huaguo-01",
+    "label": "Huaguo Sector",
+    "parent_id": "earth-k280",
+    "coordinate_frame": "K280_GEODETIC"
+  },
+  "cityOverlay": {
+    "id": "city-overlay-demo",
+    "label": "Demo City Overlay",
+    "parent_id": "region-huaguo-01",
+    "viewer_only": true
+  },
+  "homeParcelId": "parcel-01",
+  "unknownParcelId": "parcel-12",
+  "proposalActions": [
+    { "id": "act-residential", "label": "Propose Residential", "land_use": "RESIDENTIAL" },
+    { "id": "act-farm", "label": "Propose Farm", "land_use": "FARM" },
+    { "id": "act-forest", "label": "Propose Forest", "land_use": "FOREST" },
+    { "id": "act-commercial", "label": "Propose Commercial", "land_use": "COMMERCIAL" },
+    { "id": "act-industrial", "label": "Propose Industrial", "land_use": "INDUSTRIAL" },
+    { "id": "act-park", "label": "Propose Park", "land_use": "PARK" },
+    { "id": "act-temple", "label": "Propose Temple Node", "land_use": "TEMPLE_SERVICE" },
+    { "id": "act-research", "label": "Propose Research Plot", "land_use": "RESEARCH" }
+  ],
+  "parcels": [
+    {
+      "id": "parcel-01",
+      "label": "Home Parcel (Synthetic)",
+      "land_use": "RESIDENTIAL",
+      "owner": "mock-player-01",
+      "status": "ACTIVE",
+      "viewer": { "x": 40, "y": 40, "w": 160, "h": 120 },
+      "canonical": { "parcel_id": "K280-DEMO-0001", "ground_m2": 1200 },
+      "capabilities": ["VIEW", "PROPOSE", "NAVIGATE"]
+    },
+    {
+      "id": "parcel-02",
+      "label": "Farm Plot A",
+      "land_use": "FARM",
+      "owner": "mock-coop",
+      "status": "ACTIVE",
+      "viewer": { "x": 220, "y": 40, "w": 160, "h": 120 },
+      "canonical": { "parcel_id": "K280-DEMO-0002", "ground_m2": 2400 },
+      "capabilities": ["VIEW", "PROPOSE"]
+    },
+    {
+      "id": "parcel-03",
+      "label": "Forest Reserve",
+      "land_use": "FOREST",
+      "owner": "mock-guild",
+      "status": "ACTIVE",
+      "viewer": { "x": 400, "y": 40, "w": 160, "h": 120 },
+      "canonical": { "parcel_id": "K280-DEMO-0003", "ground_m2": 3600 },
+      "capabilities": ["VIEW", "PROPOSE"]
+    },
+    {
+      "id": "parcel-04",
+      "label": "Parcel 04",
+      "land_use": "UNASSIGNED",
+      "owner": "—",
+      "status": "ACTIVE",
+      "viewer": { "x": 580, "y": 40, "w": 160, "h": 120 },
+      "canonical": { "parcel_id": "K280-DEMO-0004", "ground_m2": 800 },
+      "capabilities": ["VIEW", "PROPOSE"]
+    },
+    {
+      "id": "parcel-05",
+      "label": "Parcel 05",
+      "land_use": "UNASSIGNED",
+      "owner": "mock-npc-01",
+      "status": "ACTIVE",
+      "viewer": { "x": 40, "y": 180, "w": 160, "h": 120 },
+      "canonical": { "parcel_id": "K280-DEMO-0005", "ground_m2": 900 },
+      "capabilities": ["VIEW", "PROPOSE"],
+      "building_id": "building-01"
+    },
+    {
+      "id": "parcel-06",
+      "label": "Parcel 06",
+      "land_use": "UNASSIGNED",
+      "owner": "—",
+      "status": "RESTRICTED",
+      "viewer": { "x": 220, "y": 180, "w": 160, "h": 120 },
+      "canonical": { "parcel_id": "K280-DEMO-0006", "ground_m2": null },
+      "capabilities": ["VIEW"]
+    },
+    {
+      "id": "parcel-07",
+      "label": "Parcel 07",
+      "land_use": "UNASSIGNED",
+      "owner": "mock-ai-01",
+      "status": "ACTIVE",
+      "viewer": { "x": 400, "y": 180, "w": 160, "h": 120 },
+      "canonical": { "parcel_id": "K280-DEMO-0007", "ground_m2": 1100 },
+      "capabilities": ["VIEW", "PROPOSE"],
+      "building_id": "building-02"
+    },
+    {
+      "id": "parcel-08",
+      "label": "Parcel 08",
+      "land_use": "UNASSIGNED",
+      "owner": "—",
+      "status": "STALE",
+      "viewer": { "x": 580, "y": 180, "w": 160, "h": 120 },
+      "canonical": { "parcel_id": "K280-DEMO-0008", "ground_m2": 750 },
+      "capabilities": ["VIEW", "PROPOSE"]
+    },
+    {
+      "id": "parcel-09",
+      "label": "Parcel 09",
+      "land_use": "UNASSIGNED",
+      "owner": "—",
+      "status": "ACTIVE",
+      "viewer": { "x": 40, "y": 320, "w": 160, "h": 120 },
+      "canonical": { "parcel_id": "K280-DEMO-0009", "ground_m2": 600 },
+      "capabilities": ["VIEW", "PROPOSE"]
+    },
+    {
+      "id": "parcel-10",
+      "label": "Parcel 10",
+      "land_use": "UNASSIGNED",
+      "owner": "—",
+      "status": "ACTIVE",
+      "viewer": { "x": 220, "y": 320, "w": 160, "h": 120 },
+      "canonical": { "parcel_id": "K280-DEMO-0010", "ground_m2": 650 },
+      "capabilities": ["VIEW", "PROPOSE"]
+    },
+    {
+      "id": "parcel-11",
+      "label": "Parcel 11",
+      "land_use": "UNASSIGNED",
+      "owner": "—",
+      "status": "ACTIVE",
+      "viewer": { "x": 400, "y": 320, "w": 160, "h": 120 },
+      "canonical": { "parcel_id": "K280-DEMO-0011", "ground_m2": 700 },
+      "capabilities": ["VIEW", "PROPOSE"]
+    },
+    {
+      "id": "parcel-12",
+      "label": "Unknown Survey Block",
+      "land_use": "UNKNOWN",
+      "owner": "UNKNOWN",
+      "status": "UNKNOWN",
+      "viewer": { "x": 580, "y": 320, "w": 160, "h": 120 },
+      "canonical": { "parcel_id": null, "ground_m2": null },
+      "capabilities": ["VIEW"],
+      "data_quality": "UNKNOWN"
+    }
+  ],
+  "buildings": [
+    {
+      "id": "building-01",
+      "label": "House Alpha",
+      "parcel_id": "parcel-05",
+      "rooms": ["room-01", "room-02"]
+    },
+    {
+      "id": "building-02",
+      "label": "Shop Beta",
+      "parcel_id": "parcel-07",
+      "rooms": ["room-03"]
+    }
+  ],
+  "rooms": [
+    { "id": "room-01", "label": "Living Room", "building_id": "building-01" },
+    { "id": "room-02", "label": "Workshop", "building_id": "building-01" },
+    { "id": "room-03", "label": "Counter Floor", "building_id": "building-02" }
+  ],
+  "aiWorkers": [
+    { "id": "mock-ai-01", "label": "Survey Drone (Synthetic)", "parcel_id": "parcel-07" }
+  ],
+  "npcs": [
+    { "id": "mock-npc-01", "label": "Village Guide (Synthetic)", "parcel_id": "parcel-05" }
+  ]
+}

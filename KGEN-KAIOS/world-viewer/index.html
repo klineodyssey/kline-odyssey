@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="KAIOS World Viewer V1 synthetic sandbox — non-authoritative demo fixture." />
+  <title>KAIOS World Viewer — Synthetic Sandbox</title>
+  <link rel="stylesheet" href="./assets/styles.css" />
+</head>
+<body>
+  <header class="top-strip">
+    <div class="brand">KAIOS World Viewer</div>
+    <div class="breadcrumb" id="breadcrumb">Earth</div>
+    <div class="top-actions">
+      <button type="button" id="btn-login">Mock Login</button>
+      <button type="button" id="btn-zoom-in" aria-label="Zoom in">+</button>
+      <button type="button" id="btn-zoom-out" aria-label="Zoom out">−</button>
+      <button type="button" id="btn-reset-view">Reset view</button>
+    </div>
+  </header>
+  <p id="proposal-banner" hidden></p>
+  <p id="load-error" hidden role="alert"></p>
+  <div id="a11y-live" class="visually-hidden" aria-live="polite"></div>
+  <main class="layout">
+    <section class="map-panel" aria-label="Map surface">
+      <svg id="map-svg" viewBox="0 0 800 480" preserveAspectRatio="xMidYMid meet"></svg>
+    </section>
+    <aside class="inspector-panel" id="inspector" aria-label="Inspector"></aside>
+  </main>
+  <script type="module" src="./assets/app.js"></script>
+</body>
+</html>
