@@ -1,0 +1,87 @@
+{
+  "schema_version": "1.1",
+  "task_id": "ORG-P2-019",
+  "worker_id": "cursor-01",
+  "worker_agent_id": "cursor-agent-0007",
+  "session_id": "SESSION-20260716-07-EPHEMERAL",
+  "spawned_by": "本尊 (Sun Wukong / parent Cursor session)",
+  "clone_id": null,
+  "claim_id": "CLAIM-ORG-P2-019-20260716T0509-cursor-01",
+  "reserved_branch": "cursor-handoff/ORG-P2-019",
+  "evidence_branch": "cursor-handoff/ORG-P2-019-20260716",
+  "worktree": "cursor-task-ORG-P2-019",
+  "base_sha": "89f3c351c488a0705f514adba974dd6c3dd3cb3a",
+  "observed_origin_main": "89f3c351c488a0705f514adba974dd6c3dd3cb3a",
+  "claimed_at": "2026-07-16T05:09:33Z",
+  "handoff_submitted_at": "2026-07-16T05:09:33Z",
+  "execution_lease_expires_at": "2026-07-16T09:09:33Z",
+  "supersedes_archive_tips": [
+    "fa22c12"
+  ],
+  "files_changed": [
+    "KGEN-AI-Company/reports/ORG-P2-019_SECURITY_PROTECTED_PATHS.md",
+    "KGEN-AI-Company/reports/handoffs/ORG-P2-019/HANDOFF.md",
+    "KGEN-AI-Company/reports/handoffs/ORG-P2-019/handoff.json"
+  ],
+  "files_added": [
+    "KGEN-AI-Company/reports/ORG-P2-019_SECURITY_PROTECTED_PATHS.md",
+    "KGEN-AI-Company/reports/handoffs/ORG-P2-019/HANDOFF.md",
+    "KGEN-AI-Company/reports/handoffs/ORG-P2-019/handoff.json"
+  ],
+  "files_deleted": [],
+  "tests_run": [
+    "CURSOR_PREFLIGHT_PASS",
+    "SOURCE_EXISTENCE",
+    "CANON_JSON_PARSE",
+    "PROTECTED_PATH_EXISTENCE_MATRIX",
+    "WORK_QUEUE_VARIANT_SCAN",
+    "CROSS_DOC_MATRIX",
+    "REPORT_SECTION_COMPLETENESS",
+    "SINGLE_TASK_PURITY",
+    "PROTECTED_PATH_DIFF",
+    "SECRET_SCAN"
+  ],
+  "test_results": "ALL_CONTENT_GATES_PASS",
+  "task_result": "PASS_WITH_WARNINGS",
+  "findings_count": 12,
+  "hard_conflicts_count": 0,
+  "protected_path_violations": 0,
+  "runtime_current_modified": false,
+  "universe_map_modified": false,
+  "implementation_scope": "report_only_security_audit",
+  "protection_sources_loaded": [
+    "KGEN-Agent-Office/DO_NOT_TOUCH.md",
+    "KGEN-Canon/KGEN_CANON_MASTER.json",
+    "KGEN-AI-Company/WORKSPACE_POLICY.md",
+    "KGEN-Organization/WorkOrders/WORK_QUEUE.md",
+    "KGEN-Organization/WorkOrders/KGEN_WORKORDER_STANDARD.md",
+    "KGEN-Organization/Security/README.md",
+    "KGEN-Organization/Security/ROLE.md",
+    "KGEN-Organization/Security/RESPONSIBILITY.md",
+    "PRIMEFORGE_GENESIS_BOOT_SEQUENCE.md",
+    "KGEN-KAIOS/governance/cursor/cursor_boot_manifest.json",
+    "KGEN-KAIOS/governance/cursor/CURSOR_PROTECTED_PATH_POLICY.md",
+    "KGEN-KAIOS/governance/architecture_governance_board.json"
+  ],
+  "known_issues": [
+    "ATOMIC_CLAIM_REGISTRY_NOT_IMPLEMENTED",
+    "SESSION_ID_EPHEMERAL",
+    "WORK_QUEUE_MOJIBAKE_TEMPLE_PATHS_S6",
+    "ARCHIVE_TIP_fa22c12_SUPERSEDED"
+  ],
+  "risks": [
+    "R2_KGEN_contracts_under_protection_S1",
+    "R2_canon_symbolic_temple_id_S3",
+    "R2_missing_bridge_path_S2",
+    "R1_duplicate_claim_pre_atomic_cutover"
+  ],
+  "review": {
+    "reviewer": "codex-gm-01",
+    "decision": "PENDING",
+    "claim_status": "REVIEW",
+    "review_custody": "HELD_BY_WORKER_SUBMISSION"
+  },
+  "recommended_next_action": "Approve audit evidence; consider PROPOSED fix WorkOrders for WORK_QUEUE UTF-8 (S6) and path-reality alignment (S1/S2/S3).",
+  "review_status": "REVIEW",
+  "closeout_status": "PENDING_CODEX_REVIEW"
+}
