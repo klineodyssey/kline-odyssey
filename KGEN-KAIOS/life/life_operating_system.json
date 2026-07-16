@@ -1,0 +1,591 @@
+{
+  "metadata": {
+    "title": "KAIOS Life Operating System Architecture",
+    "version": "1.0.0",
+    "revision": "2026-07-16.1",
+    "status": "ARCHITECTURE_BASELINE_FROZEN",
+    "architecture": "ONLY",
+    "implementation": "NOT_STARTED",
+    "implementation_planning": "NOT_AUTHORIZED",
+    "workqueue": "NOT_CREATED",
+    "deployment": "NOT_STARTED",
+    "last_updated": "2026-07-15",
+    "updated_by": "Codex / codex-gm-01",
+    "reviewed_by": "Codex delegated GM internal independent review",
+    "source_commit": "ORIGIN_MAIN_7a692c34df50861ab10f8bd80959d95251b1071c",
+    "task_id": "HUMAN-LIFE-OS-ARCHITECTURE-001",
+    "human_decision_id": "HUMAN-LIFE-OS-ARCHITECTURE-001; HUMAN-KAIOS-BOOT-RUNTIME-001; HUMAN-PRIMEFORGE-FULL-AUTOPILOT-001",
+    "change_reason": "Separate species-scoped life maintenance from body structure, thought, citizenship, civilization and company operations.",
+    "ancestor": [
+      "docs/biology/KGEN_Civilization_Biology_Runtime_V1_0.md",
+      "KGEN-KAIOS/civilization/BIOLOGY_TAXONOMY_STANDARD.md"
+    ],
+    "source_of_truth": false,
+    "canonical_file": "KGEN-KAIOS/life/LIFE_OPERATING_SYSTEM.md"
+  },
+  "taxonomy": {
+    "domain": "KGENVERSE",
+    "kingdom": "CivilizationLifeform",
+    "phylum": "RuntimeArchitecture",
+    "class": "LifeMaintenanceLayer",
+    "order": "CrossKernelRuntimeReference",
+    "family": "KAIOS",
+    "genus": "LifeOS",
+    "species": "LifeOperatingSystemArchitecture"
+  },
+  "architecture_decision": {
+    "decision": "ESTABLISH_INDEPENDENT_ARCHITECTURE_PROPOSAL",
+    "reason": "Existing biology, life-cycle, agent-kernel and citizen documents do not isolate life-maintenance responsibilities from mind, social and company behavior.",
+    "is_civilization_runtime": false,
+    "is_ai_runtime": false,
+    "is_company_os": false,
+    "is_seventh_kernel": false,
+    "modifies_existing_six_kernels": false,
+    "runtime_current_modified": false,
+    "frozen_baseline_modified": false
+  },
+  "layer_order": [
+    "UNIVERSE_PHYSICS",
+    "LIFE_BODY",
+    "SPECIES_OS",
+    "INDIVIDUAL_LIFE_OS",
+    "MIND_RUNTIME",
+    "CITIZEN_RUNTIME",
+    "CIVILIZATION_RUNTIME"
+  ],
+  "layer_contract": {
+    "universe_physics": {
+      "responsibility": "Provide time, environment, energy and physical constraints.",
+      "may_call_life_os": false
+    },
+    "life_body": {
+      "responsibility": "Provide inert structure, sensors, storage and effectors.",
+      "is_alive_by_itself": false
+    },
+    "species_os": {
+      "responsibility": "Define immutable species capability, lifecycle, compatibility and migration policy.",
+      "is_running_individual": false,
+      "required_fields": [
+        "species_os_id",
+        "species_code",
+        "species_os_version",
+        "schema_version",
+        "body_profile_ref",
+        "capability_applicability",
+        "growth_rules",
+        "death_rules",
+        "repair_rules",
+        "reproduction_rules",
+        "nutrition_rules",
+        "environment_tolerance_rules",
+        "required_organs_or_modules",
+        "compatible_mind_profiles",
+        "migration_policy",
+        "integrity_policy",
+        "content_hash",
+        "review_status",
+        "approval_ref"
+      ]
+    },
+    "individual_life_os": {
+      "responsibility": "Maintain one individual's viability and execute Species-OS-bounded life-cycle transitions.",
+      "may_depend_on": [
+        "UNIVERSE_PHYSICS_INPUT",
+        "LIFE_BODY",
+        "SPECIES_OS"
+      ],
+      "may_know_upper_layers": false
+    },
+    "mind_runtime": {
+      "responsibility": "Provide memory, learning, emotion, reasoning, personality, dream, faith, mission, knowledge, behavior and decision.",
+      "optional": true
+    },
+    "citizen_runtime": {
+      "responsibility": "Provide occupation, family, marriage, property, payroll, attendance, mission, company, government, military, temple and market roles.",
+      "optional": true
+    },
+    "civilization_runtime": {
+      "responsibility": "Coordinate eligible citizens, institutions, resources and governance.",
+      "optional": true
+    }
+  },
+  "species_os_boundary": {
+    "shared_contract_not_shared_implementation": true,
+    "one_universal_executable_life_os": false,
+    "profile_is_immutable": true,
+    "individual_mutates_profile": false,
+    "migration_requires": [
+      "FROM_SPECIES_OS_VERSION",
+      "TO_SPECIES_OS_VERSION",
+      "COMPATIBILITY_RESULT",
+      "MIGRATION_PLAN",
+      "ROLLBACK_POLICY",
+      "REVIEW_APPROVAL"
+    ],
+    "cross_species_secret_inheritance": false,
+    "cross_species_private_memory_inheritance": false
+  },
+  "life_body_contract": {
+    "is_life": false,
+    "required_before_life_os": true,
+    "components": [
+      "DNA",
+      "CELLS",
+      "ORGANS",
+      "SKELETON_OR_STRUCTURE",
+      "BLOOD_OR_TRANSPORT_MEDIUM",
+      "ENERGY_STORAGE",
+      "SENSORS",
+      "BODY_STRUCTURE",
+      "ROBOT_HARDWARE",
+      "PLANT_STRUCTURE"
+    ],
+    "required_fields": [
+      "body_id",
+      "body_type",
+      "species_code",
+      "individual_id",
+      "structure_manifest",
+      "sensor_manifest",
+      "energy_store_manifest",
+      "resource_channels",
+      "integrity_state",
+      "body_revision"
+    ]
+  },
+  "capability_catalog": [
+    {"capability_id": "HEARTBEAT", "purpose": "Maintain the profile-specific viability pulse."},
+    {"capability_id": "BLOOD_CIRCULATION", "purpose": "Move profile-specific transport medium through the body."},
+    {"capability_id": "BREATHING", "purpose": "Exchange gases or profile-equivalent operating media."},
+    {"capability_id": "DIGESTION", "purpose": "Transform accepted inputs into usable resources."},
+    {"capability_id": "NUTRITION", "purpose": "Acquire and allocate required nutrients or equivalents."},
+    {"capability_id": "GROWTH", "purpose": "Apply governed structural development."},
+    {"capability_id": "REPAIR", "purpose": "Restore damaged structure within profile limits."},
+    {"capability_id": "SLEEP", "purpose": "Enter a reduced-activity maintenance state."},
+    {"capability_id": "WAKE", "purpose": "Return from reduced activity to operational readiness."},
+    {"capability_id": "PAIN", "purpose": "Emit damage or distress signals without interpreting emotion."},
+    {"capability_id": "HEALTH", "purpose": "Calculate bounded viability and integrity status."},
+    {"capability_id": "DISEASE", "purpose": "Represent adverse internal conditions and progression."},
+    {"capability_id": "IMMUNE_SYSTEM", "purpose": "Detect and respond to profile-specific internal threats."},
+    {"capability_id": "ENERGY_CONSUMPTION", "purpose": "Account for energy use without economic pricing."},
+    {"capability_id": "TEMPERATURE_CONTROL", "purpose": "Maintain profile-specific thermal operating range."},
+    {"capability_id": "WATER_BALANCE", "purpose": "Maintain water or profile-equivalent fluid balance."},
+    {"capability_id": "WASTE", "purpose": "Track and discharge metabolic or operational waste."},
+    {"capability_id": "REPRODUCTION", "purpose": "Coordinate profile-permitted reproduction prerequisites."},
+    {"capability_id": "PREGNANCY", "purpose": "Maintain a profile-permitted gestation process."},
+    {"capability_id": "BIRTH", "purpose": "Create a governed transition to a unique living individual."},
+    {"capability_id": "AGING", "purpose": "Advance bounded biological or service-life stage."},
+    {"capability_id": "DEATH", "purpose": "Finalize loss of viability without deleting identity or evidence."},
+    {"capability_id": "LIFE_CYCLE", "purpose": "Coordinate life-stage progression and terminal state."}
+  ],
+  "forbidden_knowledge": [
+    "MARKETPLACE",
+    "COMPANY",
+    "TEMPLE",
+    "BANK",
+    "SALARY",
+    "LAND",
+    "MISSION",
+    "REVIEW",
+    "KERNEL",
+    "PAYROLL",
+    "WORKQUEUE",
+    "GOVERNMENT",
+    "CIVILIZATION_POLICY"
+  ],
+  "mind_boundary": {
+    "owned_by_mind_runtime": [
+      "MEMORY",
+      "LEARNING",
+      "EMOTION",
+      "REASONING",
+      "PERSONALITY",
+      "DREAM",
+      "FAITH",
+      "MISSION",
+      "KNOWLEDGE",
+      "BEHAVIOR",
+      "DECISION"
+    ],
+    "clarifications": [
+      "SLEEP is a Life OS activity state; DREAM is a Mind Runtime process.",
+      "PAIN is a Life OS signal; emotional interpretation belongs to Mind Runtime.",
+      "Life OS exposes observations but never issues social or economic decisions."
+    ]
+  },
+  "citizen_boundary": {
+    "owned_by_citizen_runtime": [
+      "OCCUPATION",
+      "FAMILY",
+      "MARRIAGE",
+      "PROPERTY",
+      "PAYROLL",
+      "ATTENDANCE",
+      "MISSION",
+      "COMPANY",
+      "GOVERNMENT",
+      "MILITARY",
+      "TEMPLE",
+      "MARKET"
+    ],
+    "inheritance_is_upper_layer": true
+  },
+  "state_model": {
+    "model": "ORTHOGONAL_REGIONS",
+    "regions": {
+      "existence": [
+        "BODY_ONLY",
+        "LIFE_INITIALIZING",
+        "GESTATING",
+        "BIRTH_TRANSITION",
+        "ALIVE",
+        "DYING",
+        "DEAD"
+      ],
+      "activity": [
+        "AWAKE",
+        "RESTING",
+        "SLEEP_REQUESTED",
+        "ASLEEP",
+        "WAKING",
+        "DORMANT",
+        "NOT_APPLICABLE"
+      ],
+      "health": [
+        "HEALTHY",
+        "STRESSED",
+        "INJURED",
+        "DISEASED",
+        "REPAIRING",
+        "CRITICAL"
+      ],
+      "life_stage": [
+        "PRE_BIRTH",
+        "JUVENILE",
+        "MATURE",
+        "AGING",
+        "END_OF_LIFE"
+      ],
+      "reproduction": [
+        "NOT_APPLICABLE",
+        "INACTIVE",
+        "ELIGIBLE",
+        "AUTHORIZED",
+        "GESTATING",
+        "BIRTH_READY",
+        "POST_BIRTH_RECOVERY"
+      ]
+    },
+    "dead_is_terminal": true,
+    "revival_policy": "A governed revival creates a new individual identity and lineage record; it does not mutate DEAD back to ALIVE.",
+    "state_version_required": true,
+    "compare_and_swap_required": true
+  },
+  "archetype_profiles": [
+    {
+      "profile_id": "HUMAN",
+      "composition": ["LIFE_BODY", "LIFE_OPERATING_SYSTEM", "MIND_RUNTIME", "CITIZEN_RUNTIME"],
+      "mind_runtime": "REQUIRED",
+      "citizen_runtime": "ELIGIBLE"
+    },
+    {
+      "profile_id": "ANIMAL",
+      "composition": ["LIFE_BODY", "LIFE_OPERATING_SYSTEM", "MIND_RUNTIME"],
+      "mind_runtime": "PROFILE_DEFINED",
+      "citizen_runtime": "OPTIONAL_OR_NOT_APPLICABLE"
+    },
+    {
+      "profile_id": "FISH",
+      "composition": ["LIFE_BODY", "LIFE_OPERATING_SYSTEM", "MIND_RUNTIME"],
+      "mind_runtime": "PROFILE_DEFINED",
+      "citizen_runtime": "OPTIONAL_OR_NOT_APPLICABLE"
+    },
+    {
+      "profile_id": "BIRD",
+      "composition": ["LIFE_BODY", "LIFE_OPERATING_SYSTEM", "MIND_RUNTIME"],
+      "mind_runtime": "PROFILE_DEFINED",
+      "citizen_runtime": "OPTIONAL_OR_NOT_APPLICABLE"
+    },
+    {
+      "profile_id": "INSECT",
+      "composition": ["LIFE_BODY", "LIFE_OPERATING_SYSTEM", "MIND_RUNTIME"],
+      "mind_runtime": "PROFILE_DEFINED",
+      "citizen_runtime": "OPTIONAL_OR_NOT_APPLICABLE"
+    },
+    {
+      "profile_id": "PLANT",
+      "composition": ["LIFE_BODY", "LIFE_OPERATING_SYSTEM"],
+      "mind_runtime": "NOT_APPLICABLE",
+      "behavior_runtime": "PLANT_BEHAVIOR_OPTIONAL",
+      "citizen_runtime": "NOT_APPLICABLE"
+    },
+    {
+      "profile_id": "ROBOT",
+      "composition": ["ROBOT_HARDWARE", "LIFE_OPERATING_SYSTEM_ROBOT_PROFILE", "MIND_RUNTIME_AI_PROFILE"],
+      "mind_runtime": "PROFILE_DEFINED",
+      "human_emotion_required": false,
+      "citizen_runtime": "OPTIONAL"
+    },
+    {
+      "profile_id": "PLAYER_OWNED_AI",
+      "composition": ["COMPUTE_BODY", "LIFE_OPERATING_SYSTEM_DIGITAL_PROFILE", "MIND_RUNTIME_AI_PROFILE"],
+      "mind_runtime": "REQUIRED",
+      "citizen_runtime": "OPTIONAL_BY_GOVERNANCE"
+    },
+    {
+      "profile_id": "ALIEN",
+      "composition": ["LIFE_BODY", "LIFE_OPERATING_SYSTEM", "MIND_RUNTIME_OPTIONAL", "CITIZEN_RUNTIME_OPTIONAL"],
+      "mind_runtime": "PROFILE_DEFINED",
+      "citizen_runtime": "PROFILE_DEFINED"
+    },
+    {
+      "profile_id": "FUTURE_SPECIES",
+      "composition": ["LIFE_BODY", "LIFE_OPERATING_SYSTEM", "MIND_RUNTIME_DECLARATION", "CITIZEN_RUNTIME_DECLARATION"],
+      "mind_runtime": "MUST_DECLARE_REQUIRED_OPTIONAL_OR_NOT_APPLICABLE",
+      "citizen_runtime": "MUST_DECLARE_REQUIRED_OPTIONAL_OR_NOT_APPLICABLE"
+    }
+  ],
+  "api_contract": {
+    "transport": "TRANSPORT_NEUTRAL_DRAFT",
+    "commands": [
+      "INITIALIZE_LIFE",
+      "START_GESTATION",
+      "ADVANCE_GESTATION",
+      "REQUEST_BIRTH_TRANSITION",
+      "COMPLETE_BIRTH",
+      "APPLY_PHYSICS_TICK",
+      "REPORT_BODY_SIGNAL",
+      "SUPPLY_ENERGY",
+      "SUPPLY_NUTRITION",
+      "SUPPLY_WATER",
+      "REQUEST_REPAIR",
+      "REPORT_DISEASE_OR_FAULT_SIGNAL",
+      "REQUEST_IMMUNE_RESPONSE",
+      "REQUEST_REST",
+      "REQUEST_SLEEP",
+      "REQUEST_WAKE",
+      "REQUEST_DORMANCY",
+      "REQUEST_DORMANCY_END",
+      "ADVANCE_GROWTH",
+      "ADVANCE_AGE",
+      "REPORT_VIABILITY_LOSS",
+      "REQUEST_END_OF_LIFE_EVALUATION",
+      "CONFIRM_DEATH"
+    ],
+    "queries": [
+      "GET_LIFE_STATE",
+      "GET_PUBLIC_LIFE_STATUS",
+      "GET_BODY_STATUS",
+      "GET_RESOURCE_BALANCE",
+      "GET_CAPABILITY_PROFILE",
+      "GET_EVENT_RANGE",
+      "GET_LIFE_SNAPSHOT",
+      "GET_HEALTH_PROJECTION"
+    ],
+    "forbidden_commands": [
+      "KILL",
+      "DELETE_IDENTITY",
+      "SET_HEALTHY",
+      "SET_AGE",
+      "SET_PREGNANT",
+      "REVIVE"
+    ],
+    "required_command_fields": [
+      "command_id",
+      "life_id",
+      "species_os_id",
+      "species_os_version",
+      "command_type",
+      "expected_state_version",
+      "occurred_at",
+      "actor_type",
+      "authorization_reference",
+      "input",
+      "idempotency_key"
+    ]
+  },
+  "event_contract": {
+    "immutable": true,
+    "ordered_per_life_id": true,
+    "idempotent": true,
+    "required_fields": [
+      "event_id",
+      "life_id",
+      "individual_id",
+      "species_code",
+      "species_os_id",
+      "species_os_version",
+      "profile_id",
+      "event_type",
+      "sequence",
+      "state_version_before",
+      "state_version_after",
+      "occurred_at",
+      "recorded_at",
+      "causation_id",
+      "correlation_id",
+      "actor_type",
+      "body_revision",
+      "payload_schema_version",
+      "payload",
+      "privacy_class",
+      "evidence_refs",
+      "integrity_hash"
+    ],
+    "event_types": [
+      "HEARTBEAT_RECORDED",
+      "HEARTBEAT_MISSED",
+      "CIRCULATION_CYCLE_RECORDED",
+      "CIRCULATION_DEGRADED",
+      "BREATH_CYCLE_RECORDED",
+      "GAS_EXCHANGE_DEGRADED",
+      "DIGESTION_STARTED",
+      "DIGESTION_COMPLETED",
+      "DIGESTION_FAILED",
+      "NUTRITION_ABSORBED",
+      "NUTRITION_DEFICIT_DETECTED",
+      "GROWTH_ADVANCED",
+      "GROWTH_BLOCKED",
+      "REPAIR_STARTED",
+      "REPAIR_PROGRESS_RECORDED",
+      "REPAIR_COMPLETED",
+      "REPAIR_FAILED",
+      "SLEEP_REQUESTED",
+      "SLEEP_STARTED",
+      "SLEEP_MAINTENANCE_RECORDED",
+      "WAKE_REQUESTED",
+      "WAKE_STARTED",
+      "WAKE_COMPLETED",
+      "WAKE_FAILED",
+      "PAIN_SIGNAL_EMITTED",
+      "PAIN_SIGNAL_CLEARED",
+      "HEALTH_STATE_CHANGED",
+      "HEALTH_THRESHOLD_CROSSED",
+      "DISEASE_OR_FAULT_DETECTED",
+      "DISEASE_OR_FAULT_PROGRESS_RECORDED",
+      "DISEASE_OR_FAULT_RESOLVED",
+      "IMMUNE_RESPONSE_STARTED",
+      "IMMUNE_RESPONSE_UPDATED",
+      "IMMUNE_RESPONSE_ENDED",
+      "ENERGY_CONSUMED",
+      "ENERGY_SUPPLIED",
+      "ENERGY_DEFICIT_DETECTED",
+      "TEMPERATURE_ADJUSTED",
+      "TEMPERATURE_LIMIT_CROSSED",
+      "WATER_ABSORBED",
+      "WATER_CONSUMED",
+      "WATER_IMBALANCE_DETECTED",
+      "WASTE_PRODUCED",
+      "WASTE_RELEASED",
+      "WASTE_ACCUMULATION_DETECTED",
+      "REPRODUCTION_ELIGIBILITY_CHANGED",
+      "REPRODUCTION_AUTHORIZED",
+      "REPRODUCTION_CANCELLED",
+      "GESTATION_STARTED",
+      "GESTATION_PROGRESS_RECORDED",
+      "GESTATION_COMPLICATION_DETECTED",
+      "GESTATION_ENDED",
+      "BIRTH_READY",
+      "BIRTH_STARTED",
+      "BIRTH_COMPLETED",
+      "BIRTH_FAILED",
+      "AGE_ADVANCED",
+      "LIFE_STAGE_CHANGED",
+      "DYING_STARTED",
+      "VIABILITY_RESTORED",
+      "DEATH_CONFIRMED",
+      "LIFE_INITIALIZATION_REQUESTED",
+      "LIFE_INITIALIZED",
+      "LIFE_CYCLE_TRANSITIONED"
+    ],
+    "forbidden_payload": [
+      "SECRETS",
+      "PRIVATE_KEYS",
+      "AUTH_TOKENS",
+      "RAW_KYC",
+      "PRECISE_PRIVATE_LOCATION",
+      "BANK_BALANCE",
+      "SALARY",
+      "MISSION_CONTENT"
+    ]
+  },
+  "host_integration": {
+    "model": "HOST_OWNED_KERNEL_PLUGIN_ADAPTER",
+    "life_os_knows_kernel": false,
+    "new_kernel_created": false,
+    "existing_six_kernels_modified": false,
+    "adapters": [
+      "PHYSICS_ENVIRONMENT_INPUT_ADAPTER",
+      "LIFE_BODY_ADAPTER",
+      "RESOURCE_INPUT_ADAPTER",
+      "LIFE_EVENT_OUTPUT_ADAPTER",
+      "MIND_OBSERVATION_ADAPTER",
+      "CITIZEN_VITAL_STATUS_ADAPTER"
+    ]
+  },
+  "invariants": [
+    "LIFE_IDENTITY_UNIQUE",
+    "STATE_VERSION_MONOTONIC",
+    "EVENT_TIME_ORDERED_PER_LIFE",
+    "RESOURCE_CONSERVATION_ACCOUNTED",
+    "NO_UNAUTHORIZED_STATE_MUTATION",
+    "BIRTH_CREATES_UNIQUE_INDIVIDUAL",
+    "DEAD_IS_TERMINAL_FOR_THE_SAME_INDIVIDUAL",
+    "BODY_REQUIRED_BEFORE_LIFE_INITIALIZATION",
+    "UPPER_LAYER_FAILURE_CANNOT_BYPASS_LIFE_INTEGRITY",
+    "PRIVATE_BIOLOGICAL_DATA_MINIMIZED",
+    "FAIL_CLOSED_ON_PROFILE_OR_SCHEMA_MISMATCH"
+  ],
+  "scale_architecture": {
+    "lod_levels": {
+      "LOD0": "IDENTITY_AND_TERMINAL_STATE_ONLY",
+      "LOD1": "COARSE_VIABILITY_AND_RESOURCE_TOTALS",
+      "LOD2": "ACTIVE_REGION_MAINTENANCE",
+      "LOD3": "FULL_CAPABILITY_SIMULATION"
+    },
+    "partition_key": "life_id",
+    "event_sourcing": "PROPOSED",
+    "snapshotting": "PROPOSED",
+    "cold_archive": "PROPOSED",
+    "implementation_selected": false
+  },
+  "proposal_files": [
+    "KGEN-KAIOS/life/README.md",
+    "KGEN-KAIOS/life/LIFE_OPERATING_SYSTEM.md",
+    "KGEN-KAIOS/life/life_operating_system.json",
+    "KGEN-KAIOS/life/LIFE_STATE_MACHINE.md",
+    "KGEN-KAIOS/life/LIFE_API.md",
+    "KGEN-KAIOS/life/LIFE_EVENT_CONTRACT.md"
+  ],
+  "source_quality_risks": [
+    {
+      "source": "docs/maps/UniverseMap_V10_2_DISTANCE_COMPLETE_ALL_POINTS.json",
+      "status": "PASS_UTF8_JSON_VALIDATION",
+      "action": "READ_ONLY_DO_NOT_MODIFY_CURRENT_OR_HISTORICAL_MAP",
+      "notes": "An earlier default-encoding validation produced a false failure; UTF-8 parsing is authoritative for this audit."
+    },
+    {
+      "source": "KGEN-KAIOS/kernel/kernel_runtime.json",
+      "status": "PASS_UTF8_JSON_VALIDATION",
+      "action": "READ_ONLY_DO_NOT_MODIFY_KERNEL_PROPOSAL",
+      "notes": "An earlier default-encoding validation produced a false failure; UTF-8 parsing is authoritative for this audit."
+    }
+  ],
+  "review_gate": {
+    "human_review_required_for_baseline": false,
+    "external_review_required_before_implementation": true,
+    "allowed_next_decisions": [
+      "APPROVE_FOR_INDEPENDENT_ARCHITECTURE_REVIEW",
+      "REQUEST_REVISION",
+      "HOLD",
+      "REJECT"
+    ],
+    "implementation_started": false,
+    "implementation_workqueue_created": false,
+    "deployment_started": false,
+    "delegated_baseline_authority": "HUMAN-PRIMEFORGE-FULL-AUTOPILOT-001_LEVEL_B",
+    "baseline_frozen": true,
+    "commit_authorized": true,
+    "push_authorized": true
+  }
+}

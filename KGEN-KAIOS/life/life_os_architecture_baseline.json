@@ -1,0 +1,77 @@
+{
+  "metadata": {
+    "title": "KAIOS Life OS Architecture Baseline",
+    "version": "LIFE-OS-V1.0",
+    "revision": "2026-07-16.1",
+    "status": "ARCHITECTURE_BASELINE_FROZEN",
+    "last_updated": "2026-07-16",
+    "updated_by": "Codex / codex-gm-01",
+    "reviewed_by": "Codex delegated GM internal independent review",
+    "source_commit": "BASE_ORIGIN_MAIN_7a692c34df50861ab10f8bd80959d95251b1071c",
+    "task_id": "HUMAN-LIFE-OS-ARCHITECTURE-001",
+    "human_decision_id": "HUMAN-PRIMEFORGE-FULL-AUTOPILOT-001",
+    "canonical_file": "KGEN-KAIOS/life/LIFE_OS_ARCHITECTURE_BASELINE.md",
+    "source_of_truth": true
+  },
+  "approval": {
+    "decision_id": "DEC-CODEX-DELEGATED-LIFE-OS-BASELINE-001",
+    "approver": "CODEX_DELEGATED_GM",
+    "delegated_authority": "HUMAN-PRIMEFORGE-FULL-AUTOPILOT-001_LEVEL_B_LIFE_OS",
+    "review_score": 89,
+    "risk_level": "R1_ARCHITECTURE_DOCUMENTATION",
+    "human_override_available": true,
+    "rollback_plan": "Revert the scoped Life OS documentation commit."
+  },
+  "architecture_chain": [
+    "UNIVERSE_PHYSICS",
+    "LIFE_BODY",
+    "SPECIES_OS",
+    "INDIVIDUAL_LIFE_OS",
+    "MIND_RUNTIME",
+    "CITIZEN_RUNTIME",
+    "CIVILIZATION_RUNTIME"
+  ],
+  "frozen_invariants": [
+    "SHARED_CONTRACT_NOT_SHARED_IMPLEMENTATION",
+    "IMMUTABLE_VERSIONED_SPECIES_OS",
+    "ONE_INDIVIDUAL_LIFE_OS_PER_LIFE_IDENTITY",
+    "ORDERED_VERSIONED_IDEMPOTENT_EVIDENCE_BEARING_MUTATIONS",
+    "NO_UPPER_LAYER_DIRECT_LIFE_STATE_MUTATION",
+    "NO_SECRET_KYC_PRIVATE_GPS_WALLET_OR_SALARY_EVENT_DATA",
+    "DEATH_TERMINAL_FOR_ONE_IDENTITY",
+    "NO_UNREVIEWED_CROSS_SPECIES_SECRET_OR_PRIVATE_MEMORY_TRANSFER",
+    "PROTECTED_RUNTIME_AND_EXISTING_BASELINES_UNCHANGED"
+  ],
+  "frozen_files": [
+    {"path":"KGEN-KAIOS/life/README.md","sha256":"cd56927bba9d54375e54887d64b952cef553c67783b6161c30a5814c87672490"},
+    {"path":"KGEN-KAIOS/life/LIFE_OPERATING_SYSTEM.md","sha256":"8cf21fbffc8865a5be5cf4dd79b8d7d877f11b481f76d08ba1af35ec69ea2846"},
+    {"path":"KGEN-KAIOS/life/life_operating_system.json","sha256":"ec6010c1aa32eda036576d64bcea59d073a8ec713bd61f8a7289555da17c57dc"},
+    {"path":"KGEN-KAIOS/life/LIFE_STATE_MACHINE.md","sha256":"42d12d81cd5077fe8248f39f36fa7844b7043b5157eab554aadd0078d9415950"},
+    {"path":"KGEN-KAIOS/life/LIFE_API.md","sha256":"77047ec71717a085fe4607407479e5f75b65e8adcd9028977b52391475b2ce69"},
+    {"path":"KGEN-KAIOS/life/LIFE_EVENT_CONTRACT.md","sha256":"c4e0069f72b31c1832be6225b78c75b4b09bca490c8bd3b8609bd4a454a0fb88"},
+    {"path":"KGEN-KAIOS/life/LIFE_OS_ARCHITECTURE_REVIEW.md","sha256":"eb627d946f7c8a948534543e9e5f841bd6cf8610ff9e208fd9c87f7c0a563a44"},
+    {"path":"KGEN-KAIOS/life/life_os_architecture_review.json","sha256":"3c165cf23922aee655f8f991bcfee8a3baf9407bcab73384f15a4cb042f1630b"},
+    {"path":"KGEN-KAIOS/life/LIFE_OS_ARCHITECTURE_RESOLUTION.md","sha256":"f7705b789081431ebdc995b74d2e10c08c0eaca1d1ba30edd2de392e365f75f8"},
+    {"path":"KGEN-KAIOS/life/life_os_architecture_resolution.json","sha256":"0d8c8b64349906ccc812862d62439a57add65d6c90907adb0ad6effb6f175b4e"},
+    {"path":"KGEN-KAIOS/life/ADR/ADR-LIFE-001-SPECIES-SCOPED-LIFE-OS.md","sha256":"abad0e83189bb7c7dac6d843d1e3f0a612934c863005cb3dfaa128b72e2ce291"},
+    {"path":"KGEN-KAIOS/life/LIFE_OS_ARCHITECTURE_BASELINE.md","sha256":"fef4253c5557a9fec73c4ca334cb3493d6ca4e6306743037f8c0ed00355e9bdc"},
+    {"path":"KGEN-KAIOS/life/life_os_architecture_evolution_log.jsonl","sha256":"45c20e77b73ec7af567d1abe6a0699dc40ef6615e01d30ac0c8ee5488cdf55ef"}
+  ],
+  "verification": {
+    "hash_algorithm": "SHA-256",
+    "manifest_self_hash_included": false,
+    "json_validation": "PASS",
+    "jsonl_validation": "PASS",
+    "protected_path_violations": 0,
+    "runtime_current_modified": false,
+    "universe_map_modified": false,
+    "token_contract_modified": false
+  },
+  "gates": {
+    "external_review_required_before_implementation": true,
+    "implementation_planning_authorized": false,
+    "implementation_started": false,
+    "workqueue_created": false,
+    "deployment_started": false
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "resolution_id": "RES-LIFE-OS-20260716-001",
+  "decision_ids": [
+    "HUMAN-LIFE-OS-ARCHITECTURE-001",
+    "HUMAN-KAIOS-BOOT-RUNTIME-001",
+    "HUMAN-PRIMEFORGE-FULL-AUTOPILOT-001"
+  ],
+  "status": "ACCEPT_WITH_RESOLVED_AMENDMENTS",
+  "approver": "CODEX_DELEGATED_GM",
+  "delegated_authority": "LEVEL_B_LIFE_OS_SPECIFIC",
+  "review_score": 89,
+  "risk_level": "R1_ARCHITECTURE_DOCUMENTATION",
+  "human_override_available": true,
+  "chosen_option": "SHARED_CONTRACT_WITH_SPECIES_OS_AND_INDIVIDUAL_LIFE_OS",
+  "rejected_option": "ONE_UNIVERSAL_EXECUTABLE_LIFE_OS",
+  "rollback_plan": "Revert the scoped Life OS documentation commit.",
+  "protected_path_violations": 0,
+  "runtime_current_modified": false,
+  "universe_map_modified": false,
+  "token_contract_modified": false,
+  "implementation_started": false,
+  "workqueue_created": false,
+  "deployment_started": false,
+  "resolved_at": "2026-07-16T00:00:00+08:00"
+}
