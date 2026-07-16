@@ -271,7 +271,8 @@
       "risk_level": "LEVEL_B_R2_ARCHITECTURE",
       "protected_path_status": "PASS_ZERO",
       "implementation_status": "NOT_STARTED",
-      "commit_status": "LOCAL_PROPOSAL",
+      "commit_status": "COMMITTED_REVIEW_CANDIDATE",
+      "commit_sha": "e6d7a967da302da94b5a35bd72e07b05b5f4325b",
       "push_status": "PENDING_SESSION_VALIDATION",
       "baseline_status": "NOT_FROZEN",
       "next_action": "INDEPENDENT_ARCHITECTURE_REVIEW"
