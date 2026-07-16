@@ -1,0 +1,76 @@
+{
+  "metadata": {
+    "title": "KAIOS World Viewer V1 Architecture Baseline",
+    "version": "WORLD-VIEWER-V1.0",
+    "revision": "2026-07-16.1",
+    "status": "ARCHITECTURE_BASELINE_FROZEN",
+    "last_updated": "2026-07-16",
+    "updated_by": "Codex / codex-gm-01",
+    "reviewed_by": "Codex internal independent UI review; Human delegated approval",
+    "source_commit": "BASE_ORIGIN_MAIN_7a692c34df50861ab10f8bd80959d95251b1071c",
+    "task_id": "HUMAN-WORLD-VIEWER-001",
+    "human_decision_id": "HUMAN-PRIMEFORGE-FULL-AUTOPILOT-001",
+    "canonical_file": "KGEN-KAIOS/world-viewer/WORLD_VIEWER_V1_ARCHITECTURE_BASELINE.md",
+    "source_of_truth": true
+  },
+  "approval": {
+    "decision_id": "DEC-CODEX-DELEGATED-WORLD-VIEWER-BASELINE-001",
+    "approver": "CODEX_DELEGATED_GM",
+    "delegated_authority": "HUMAN-PRIMEFORGE-FULL-AUTOPILOT-001_LEVEL_B_WORLD_VIEWER",
+    "review_result": "APPROVE_WITH_AMENDMENTS_RESOLVED",
+    "review_score": 88,
+    "risk_level": "R1_LOW_RISK_SYNTHETIC_UI",
+    "human_override_available": true,
+    "rollback_plan": "Revert the scoped World Viewer architecture commit."
+  },
+  "frozen_invariants": [
+    "EARTH_TO_ROOM_SEMANTIC_ZOOM",
+    "CITY_IS_VIEWER_OVERLAY_NOT_OWNERSHIP_PARENT",
+    "CANONICAL_GEODETIC_COORDINATE_SEPARATE_FROM_SCREEN_COORDINATE",
+    "UNTRUSTED_CLIENT_NOT_REGISTRY_AUTHORITY",
+    "ALL_CONTEXT_ACTIONS_CREATE_LAND_USE_PROPOSAL_ONLY",
+    "UNKNOWN_RESTRICTED_STALE_DATA_EXPLICIT",
+    "DESKTOP_TOUCH_KEYBOARD_ASSISTIVE_PARITY",
+    "VIEWPORT_AND_LOD_BOUNDED_LOADING",
+    "MOCK_LOGIN_MOCK_GPS_SYNTHETIC_LAND_ONLY",
+    "NO_PROTECTED_RUNTIME_MAP_TOKEN_OR_REAL_OWNERSHIP_CHANGE"
+  ],
+  "frozen_files": [
+    {"path":"KGEN-KAIOS/world-viewer/README.md","sha256":"27cf0edcc099a3955b370a2ede8d5246ea4e30aabb941224333ff49d322f82ee"},
+    {"path":"KGEN-KAIOS/world-viewer/WORLD_VIEWER_ARCHITECTURE.md","sha256":"46a53dea5abc5a6ccdab7fd2a38ef18fc5ef4eb1f2318364cd7f73bde7287767"},
+    {"path":"KGEN-KAIOS/world-viewer/WORLD_VIEWER_RUNTIME.md","sha256":"b538faa93c5e1e6c4c2b6707e35b62add555cb1e6de37b83ac95bec277091135"},
+    {"path":"KGEN-KAIOS/world-viewer/CAMERA_STANDARD.md","sha256":"0872356c40c2f1b8a59878cebbe64a3dc570d798ce58033df7278414c251a6f2"},
+    {"path":"KGEN-KAIOS/world-viewer/SELECTION_STANDARD.md","sha256":"aa915d638466a856bd02f0c88093158697a8aec48656948d7b5a25156ea9d78b"},
+    {"path":"KGEN-KAIOS/world-viewer/COORDINATE_MAPPING_STANDARD.md","sha256":"d37784e7d090d29804151d02e8f56fc17ae4cb8404a997c2cc95ddf6e846ce31"},
+    {"path":"KGEN-KAIOS/world-viewer/UI_LAYOUT_STANDARD.md","sha256":"8837948fd38658ad5e935c6bebdb9727397355aa0f4283d8886705bafc9e010a"},
+    {"path":"KGEN-KAIOS/world-viewer/world_viewer_architecture.json","sha256":"f7d2952957a131005ecd6ed74f82edef867bbf7c0135818a49c18ab76633dcec"},
+    {"path":"KGEN-KAIOS/world-viewer/WORLD_VIEWER_V1_ARCHITECTURE_REVIEW.md","sha256":"c2b0fdf76fe3c86969e8e1a370790baedd93ce0e902c4989a4f775dde2350b65"},
+    {"path":"KGEN-KAIOS/world-viewer/world_viewer_v1_architecture_review.json","sha256":"4aec137af4d9f73672e37df9a4b5839d3a94aad82f2e833ec5ad7a406a4666c3"},
+    {"path":"KGEN-KAIOS/world-viewer/WORLD_VIEWER_INPUT_COMPATIBILITY_MATRIX.md","sha256":"c59fd1accc767f06c4d6e3c3b91bfc13971e99fcd10415293fd1c1bdb1e4f482"},
+    {"path":"KGEN-KAIOS/world-viewer/WORLD_VIEWER_LOD_AND_PERFORMANCE_REVIEW.md","sha256":"2fc39286696476a2e8b277cec657e3ad0a0162cf767fb3f24d0f9420c3edb370"},
+    {"path":"KGEN-KAIOS/world-viewer/WORLD_VIEWER_SECURITY_AND_PRIVACY_REVIEW.md","sha256":"a6adf64d6d10a64c3ff69df8dab0502d00ef69f05bb59cc03e67a572d54d8bce"},
+    {"path":"KGEN-KAIOS/world-viewer/WORLD_VIEWER_V1_ARCHITECTURE_RESOLUTION.md","sha256":"df259c5c4a9d533b286506fc8b5eab8c89fa1fbf40f230d7baf2c46c46cd573f"},
+    {"path":"KGEN-KAIOS/world-viewer/world_viewer_v1_architecture_resolution.json","sha256":"f51a41817013b81881146dad5de96d2a321f40db7d6620930859388acc4e171c"},
+    {"path":"KGEN-KAIOS/world-viewer/ADR/ADR-WV-001-WEB-FIRST-SYNTHETIC-VIEWER.md","sha256":"4f56a08210f454b44042cf57b704528bf9f16da7178fa5223b852f95e1400d36"},
+    {"path":"KGEN-KAIOS/world-viewer/WORLD_VIEWER_V1_ARCHITECTURE_BASELINE.md","sha256":"a3b9441947ea07894f45b650e960167ecdd43a80943c758a1935be190b4e117a"},
+    {"path":"KGEN-KAIOS/world-viewer/world_viewer_v1_architecture_evolution_log.jsonl","sha256":"5fae11f8767112c4ff56d778ccb2303ebbdd5a3909cab59cf7844c3bebafc930"}
+  ],
+  "verification": {
+    "hash_algorithm": "SHA-256",
+    "manifest_self_hash_included": false,
+    "json_validation": "PASS",
+    "jsonl_validation": "PASS",
+    "protected_path_violations": 0,
+    "runtime_current_modified": false,
+    "universe_map_modified": false,
+    "token_contract_modified": false
+  },
+  "sandbox_gate": {
+    "implementation_plan_authorized": true,
+    "task_envelope_prepared": true,
+    "claim_created": false,
+    "implementation_started": false,
+    "production_deployment_authorized": false,
+    "real_land_or_identity_integration": false
+  }
+}

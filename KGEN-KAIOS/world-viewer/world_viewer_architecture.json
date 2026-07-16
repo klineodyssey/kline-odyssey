@@ -1,0 +1,542 @@
+{
+  "metadata": {
+    "title": "KAIOS World Viewer V1 Architecture",
+    "version": "1.0.0",
+    "revision": "2026-07-16.1",
+    "status": "ARCHITECTURE_BASELINE_FROZEN",
+    "architecture": "ONLY",
+    "implementation": "NOT_STARTED",
+    "implementation_planning": "NOT_AUTHORIZED",
+    "workqueue": "NOT_CREATED",
+    "deployment": "NOT_STARTED",
+    "last_updated": "2026-07-15",
+    "updated_by": "Codex / codex-gm-01",
+    "reviewed_by": "Codex internal independent UI review; Human delegated approval",
+    "source_commit": "ORIGIN_MAIN_7a692c34df50861ab10f8bd80959d95251b1071c",
+    "task_id": "HUMAN-WORLD-VIEWER-001",
+    "human_decision_id": "HUMAN-WORLD-VIEWER-001; HUMAN-WORLD-VIEWER-INDEPENDENT-REVIEW-001; HUMAN-PRIMEFORGE-FULL-AUTOPILOT-001",
+    "change_reason": "Define a Web-first map interaction architecture for K280 land without implementing UI or changing land state.",
+    "ancestor": [
+      "KGEN-KAIOS/V8.1/index.html",
+      "KGEN-KAIOS/land/LAND_RUNTIME_ARCHITECTURE_BASELINE.md"
+    ],
+    "source_of_truth": false,
+    "canonical_file": "KGEN-KAIOS/world-viewer/WORLD_VIEWER_ARCHITECTURE.md"
+  },
+  "taxonomy": {
+    "domain": "KGENVERSE",
+    "kingdom": "CivilizationInterface",
+    "phylum": "WebRuntimeArchitecture",
+    "class": "WorldViewer",
+    "order": "LandInteraction",
+    "family": "KAIOS",
+    "genus": "WorldViewer",
+    "species": "WorldViewerV1Architecture"
+  },
+  "decision": {
+    "architecture_decision": "APPROVE_FOR_UI_ARCHITECTURE_PROPOSAL",
+    "architecture_status": "BASELINE_FROZEN_V1_0",
+    "create_separate_versionless_architecture": true,
+    "overwrite_v81_viewer": false,
+    "modify_land_baseline": false,
+    "modify_runtime_current": false,
+    "modify_universe_map": false,
+    "implementation_authorized": false,
+    "synthetic_sandbox_planning_authorized": true,
+    "review_score": 88,
+    "amendments_resolved": true
+  },
+  "entry_contract": {
+    "future_source_entry": "KGEN-KAIOS/world-viewer/index.html",
+    "future_public_alias": "/world-viewer/",
+    "entry_is_versionless": true,
+    "alternate_application_entries_allowed": false,
+    "entry_created_in_this_phase": false,
+    "pages_route_created_in_this_phase": false
+  },
+  "source_audit": [
+    {
+      "source": "HUMAN-WORLD-VIEWER-001",
+      "classification": "HUMAN_DECISION",
+      "authority": "CURRENT_TASK_AUTHORITY"
+    },
+    {
+      "source": "KGEN-KAIOS/constitution/KAIOS_CONSTITUTION.md",
+      "classification": "CURRENT_CONSTITUTION",
+      "authority": "MANDATORY"
+    },
+    {
+      "source": "docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md",
+      "classification": "PROTECTED_CURRENT_RUNTIME",
+      "authority": "READ_ONLY_REFERENCE"
+    },
+    {
+      "source": "docs/maps/README.md",
+      "classification": "CURRENT_MAP_SELECTOR",
+      "authority": "SELECTOR"
+    },
+    {
+      "source": "docs/maps/UniverseMap_V10_2_DISTANCE_COMPLETE_ALL_POINTS.json",
+      "classification": "CURRENT_SHARED_COORDINATE_MAP",
+      "authority": "COORDINATE_CONTEXT_NOT_LAND_REGISTRY"
+    },
+    {
+      "source": "KGEN-KAIOS/land/LAND_RUNTIME_ARCHITECTURE_BASELINE.md",
+      "classification": "FROZEN_ARCHITECTURE_BASELINE",
+      "authority": "K280_PARCEL_RIGHTS_AND_GEOMETRY_OWNER"
+    },
+    {
+      "source": "KGEN-KAIOS/V8.1/index.html",
+      "classification": "HISTORICAL_READ_ONLY_VIEWER",
+      "authority": "PRESERVE_NO_OVERWRITE"
+    },
+    {
+      "source": "KGEN-KAIOS/V8/schemas/land.schema.json",
+      "classification": "HISTORICAL_SCHEMA",
+      "authority": "COMPATIBILITY_INPUT_ONLY"
+    },
+    {
+      "source": "KGEN-KAIOS/V8/schemas/building.schema.json",
+      "classification": "HISTORICAL_SCHEMA",
+      "authority": "COMPATIBILITY_INPUT_ONLY"
+    },
+    {
+      "source": "isolated K280 proposal worktree",
+      "classification": "CANDIDATE_EVIDENCE",
+      "authority": "INFORMATIVE_FROZEN_BASELINE_WINS"
+    }
+  ],
+  "product_boundary": {
+    "web_first": true,
+    "github_pages_read_runtime": true,
+    "map_first": true,
+    "three_dimensional": false,
+    "art_direction_selected": false,
+    "large_animation_system": false,
+    "real_authentication": false,
+    "real_gps_collection": false,
+    "registry_write": false,
+    "blockchain": false,
+    "wallet_signing": false
+  },
+  "hierarchy": [
+    {
+      "level": "EARTH",
+      "parent": null,
+      "coordinate_frame": "K280_GEODETIC",
+      "requires_parent_selection": false
+    },
+    {
+      "level": "REGION",
+      "parent": "EARTH",
+      "coordinate_frame": "K280_GEODETIC",
+      "requires_parent_selection": false
+    },
+    {
+      "level": "CITY",
+      "parent": "REGION",
+      "coordinate_frame": "K280_GEODETIC",
+      "requires_parent_selection": false
+    },
+    {
+      "level": "LAND_PARCEL",
+      "parent": "CITY",
+      "coordinate_frame": "K280_GEODETIC_POLYGON",
+      "requires_parent_selection": false
+    },
+    {
+      "level": "BUILDING",
+      "parent": "LAND_PARCEL",
+      "coordinate_frame": "PARCEL_LOCAL_ENU",
+      "requires_parent_selection": true
+    },
+    {
+      "level": "ROOM",
+      "parent": "BUILDING",
+      "coordinate_frame": "BUILDING_LOCAL_2D",
+      "requires_parent_selection": true
+    }
+  ],
+  "runtime_modules": [
+    "VIEWER_BOOT",
+    "STATIC_SNAPSHOT_LOADER",
+    "MAP_ENGINE_ADAPTER",
+    "CAMERA_CONTROLLER",
+    "SEMANTIC_LEVEL_RESOLVER",
+    "LAYER_CONTROLLER",
+    "SPATIAL_INDEX",
+    "SELECTION_CONTROLLER",
+    "CONTEXT_ACTION_RESOLVER",
+    "INSPECTOR_PROJECTION",
+    "PLAYER_LOCATOR_ADAPTER",
+    "INTENT_GATEWAY_ADAPTER",
+    "VIEWER_ERROR_BOUNDARY"
+  ],
+  "runtime_states": [
+    "OFFLINE",
+    "BOOTSTRAPPING",
+    "LOADING_MANIFEST",
+    "LOADING_WORLD",
+    "READY",
+    "NAVIGATING",
+    "SELECTING",
+    "CONTEXT_OPEN",
+    "LOCATING_PLAYER",
+    "PREVIEWING_INTENT",
+    "DEGRADED_READ_ONLY",
+    "SOURCE_CONFLICT",
+    "PRIVACY_BLOCKED",
+    "ERROR"
+  ],
+  "runtime_events": [
+    "VIEWER_BOOT_STARTED",
+    "VIEWER_READY",
+    "SOURCE_CONFLICT_DETECTED",
+    "CAMERA_CHANGED",
+    "SEMANTIC_LEVEL_CHANGED",
+    "LAYER_LOAD_STARTED",
+    "LAYER_LOAD_COMPLETED",
+    "LAYER_LOAD_FAILED",
+    "SELECTION_CHANGED",
+    "CONTEXT_MENU_OPENED",
+    "CONTEXT_MENU_CLOSED",
+    "PLAYER_LOCATE_REQUESTED",
+    "PLAYER_LOCATE_COMPLETED",
+    "PLAYER_LOCATE_DENIED",
+    "LAND_USE_INTENT_PREVIEWED",
+    "LAND_USE_INTENT_SUBMISSION_BLOCKED"
+  ],
+  "camera": {
+    "dimension": "TWO_DIMENSIONAL",
+    "pitch_deg": 0,
+    "default_bearing_deg": 0,
+    "semantic_levels": [
+      "EARTH",
+      "REGION",
+      "CITY",
+      "LAND_PARCEL",
+      "BUILDING",
+      "ROOM"
+    ],
+    "thresholds": "CONFIGURABLE_WITH_HYSTERESIS",
+    "operations": [
+      "PAN_BY_SCREEN_DELTA",
+      "ZOOM_AT_SCREEN_POINT",
+      "FIT_GEODETIC_BOUNDS",
+      "FIT_LOCAL_BOUNDS",
+      "FOCUS_OBJECT",
+      "ENTER_CHILD_LEVEL",
+      "EXIT_TO_PARENT_LEVEL",
+      "RESTORE_SAFE_CHECKPOINT",
+      "RESET_TO_EARTH"
+    ],
+    "required_fields": [
+      "camera_x",
+      "camera_y",
+      "zoom_level",
+      "min_zoom",
+      "max_zoom",
+      "viewport_width",
+      "viewport_height",
+      "world_bounds",
+      "focus_target",
+      "animation_state",
+      "input_mode",
+      "coordinate_frame",
+      "semantic_level",
+      "source_snapshot_id"
+    ],
+    "drag_threshold_configurable": true,
+    "zoom_center": "POINTER_OR_GESTURE_CENTER",
+    "bounds_clamp_required": true,
+    "inertia_default": "OFF_FOR_REDUCED_MOTION_OR_LOW_END_MODE",
+    "resize_behavior": "PRESERVE_FOCUS_THEN_CLAMP_OR_REFIT",
+    "orientation_change_behavior": "CANCEL_GESTURE_PRESERVE_FOCUS_RECOMPUTE_VIEWPORT",
+    "mutates_entities": false
+  },
+  "input": {
+    "mouse_drag": "PAN_CAMERA",
+    "mouse_wheel": "ZOOM_AT_POINTER",
+    "trackpad_pinch": "ZOOM_AT_GESTURE_CENTER",
+    "left_click": "SELECT_OBJECT",
+    "right_click": "OPEN_PARCEL_CONTEXT_MENU",
+    "double_click": "ENTER_SELECTED_CHILD_LEVEL",
+    "touch_drag": "PAN_CAMERA",
+    "touch_pinch": "ZOOM_CAMERA",
+    "touch_long_press": "OPEN_PARCEL_CONTEXT_MENU",
+    "keyboard_enter": "SELECT_OR_ENTER_CHILD",
+    "keyboard_escape": "CLOSE_TRANSIENT_OR_EXIT_PARENT"
+  },
+  "selection": {
+    "object_types": [
+      "EARTH",
+      "REGION",
+      "CITY",
+      "LAND_PARCEL",
+      "BUILDING",
+      "ROOM"
+    ],
+    "candidate_priority": [
+      "CURRENT_SEMANTIC_LEVEL",
+      "SMALLEST_CONTAINING_ELIGIBLE_GEOMETRY",
+      "EXPLICIT_VISUAL_STACKING_ORDER",
+      "STABLE_OBJECT_ID"
+    ],
+    "ambiguous_selection": "REQUIRE_DISAMBIGUATION",
+    "screen_pixels_are_ownership_geometry": false,
+    "states": [
+      "NONE",
+      "HOVERED",
+      "SELECTED",
+      "FOCUSED",
+      "LOCKED",
+      "DISABLED",
+      "PENDING_PROPOSAL"
+    ],
+    "future_states": ["MULTI_SELECTED"],
+    "mutates_registry": false
+  },
+  "context_actions": [
+    {
+      "label": "Residential",
+      "requested_use": "RESIDENTIAL",
+      "intent_type": "LAND_USE_PROPOSAL"
+    },
+    {
+      "label": "Farm",
+      "requested_use": "FARM",
+      "intent_type": "LAND_USE_PROPOSAL"
+    },
+    {
+      "label": "Forest",
+      "requested_use": "FOREST",
+      "intent_type": "LAND_USE_PROPOSAL"
+    },
+    {
+      "label": "Factory",
+      "requested_use": "FACTORY",
+      "intent_type": "LAND_USE_PROPOSAL"
+    },
+    {
+      "label": "Marketplace",
+      "requested_use": "MARKETPLACE",
+      "intent_type": "LAND_USE_PROPOSAL"
+    },
+    {
+      "label": "Temple",
+      "requested_use": "TEMPLE",
+      "intent_type": "LAND_USE_PROPOSAL"
+    },
+    {
+      "label": "Mine",
+      "requested_use": "MINE",
+      "intent_type": "LAND_USE_PROPOSAL"
+    },
+    {
+      "label": "Road",
+      "requested_use": "ROAD",
+      "intent_type": "LAND_USE_PROPOSAL"
+    }
+  ],
+  "intent_boundary": {
+    "intent_type": "LAND_USE_PROPOSAL",
+    "local_statuses": [
+      "DRAFT_LOCAL",
+      "PREVIEW_VALIDATED",
+      "SUBMISSION_UNAVAILABLE"
+    ],
+    "direct_land_use_mutation": false,
+    "direct_ownership_mutation": false,
+    "direct_rights_mutation": false,
+    "approved_command_gateway_exists": false
+  },
+  "coordinate_mapping": {
+    "planet_id": "EARTH",
+    "surface_k": 280,
+    "surface_layer": "GROUND",
+    "k280_is_cartesian_z_280": false,
+    "global_source_frame": "GEODETIC_LATITUDE_LONGITUDE_ALTITUDE",
+    "ownership_geometry": "LAND_RUNTIME_REFERENCED_GEODETIC_POLYGON",
+    "display_projection": "MAP_ENGINE_ADAPTER_REVIEW_REQUIRED",
+    "display_projection_authoritative_for_ownership": false,
+    "derived_xyz_authoritative_for_ownership": false,
+    "building_frame": "PARCEL_LOCAL_ENU",
+    "room_frame": "BUILDING_OR_FLOOR_LOCAL_2D",
+    "city_projection_semantics": {
+      "viewer_semantic_level_only": true,
+      "accepted_source_admin_types": [
+        "CITY",
+        "COUNTY",
+        "TOWN",
+        "DISTRICT",
+        "APPROVED_EQUIVALENT"
+      ],
+      "source_admin_lineage_required": true,
+      "parcel_id_rewrite_allowed": false
+    },
+    "antimeridian_handling_required": true,
+    "polar_handling_required": true,
+    "coordinate_epoch_required": true
+  },
+  "projection_contracts": [
+    "WORLD_VIEWER_MANIFEST",
+    "REGION_PROJECTION",
+    "CITY_PROJECTION",
+    "PARCEL_PROJECTION",
+    "BUILDING_PROJECTION",
+    "ROOM_PROJECTION",
+    "PLAYER_LAND_PROJECTION"
+  ],
+  "inspector": {
+    "data_groups": ["CANONICAL_DATA", "VIEWER_DATA", "PROPOSAL_DATA", "UNKNOWN_DATA"],
+    "required_fields": [
+      "OWNER",
+      "GOVERNOR",
+      "PARCEL_ID",
+      "GLOBAL_UID",
+      "COORDINATE",
+      "SURFACE_K",
+      "AREA",
+      "CURRENT_LAND_USE",
+      "PROPOSED_LAND_USE",
+      "BUILDINGS",
+      "POPULATION",
+      "AI_WORKERS",
+      "PROTECTION_ZONE",
+      "TAX_AUTHORITY",
+      "DEFENSE_AUTHORITY",
+      "AIRSPACE_AUTHORITY",
+      "DATA_FRESHNESS",
+      "SOURCE"
+    ],
+    "missing_value": "UNKNOWN",
+    "restricted_value": "RESTRICTED",
+    "stale_value": "STALE",
+    "fabricated_zero_allowed": false
+  },
+  "layout": {
+    "first_screen": "WORKING_MAP",
+    "marketing_hero": false,
+    "desktop": {
+      "primary_track": "MAP_MINMAX_0_1FR",
+      "secondary_track": "RIGHT_INSPECTOR_300_TO_360_CSS_PX",
+      "inspector_resizes_on_selection": false
+    },
+    "mobile": {
+      "map": "FULL_VIEWPORT",
+      "inspector": "BOTTOM_SHEET",
+      "context_menu": "BOUNDED_ACTION_SHEET_WHEN_REQUIRED"
+    },
+    "large_button_dashboard": false,
+    "three_dimensional_scene": false,
+    "large_animation": false
+  },
+  "player_locator": {
+    "preferred_order": [
+      "AUTHENTICATED_STARTER_PARCEL_ID",
+      "AUTHENTICATED_HOME_PARCEL",
+      "SELECTED_OWNED_OR_LEASED_PARCEL",
+      "CONSENTED_COARSE_REGION_OR_CITY",
+      "PUBLIC_EARTH_VIEW"
+    ],
+    "gps_required": false,
+    "gps_is_ownership_evidence": false,
+    "continuous_tracking": false,
+    "precise_location_in_url": false,
+    "precise_location_in_public_log": false,
+    "real_gps_implemented": false,
+    "starter_parcel_issued_by_viewer": false
+  },
+  "map_engine": {
+    "contract": "REPLACEABLE_TWO_DIMENSIONAL_RENDERER_ADAPTER",
+    "synthetic_v1_candidate": "NATIVE_SVG_BOUNDED_TO_12_PARCELS",
+    "synthetic_candidate_approved": true,
+    "global_candidate": "PROVEN_MAP_LIBRARY_REQUIRES_SEPARATE_REVIEW",
+    "global_version_selected": false,
+    "global_license_reviewed": false,
+    "global_vendoring_decided": false,
+    "tile_provider_selected": false,
+    "external_map_is_ownership_source": false
+  },
+  "scale": {
+    "semantic_lod": true,
+    "viewport_tiling": true,
+    "spatial_index": true,
+    "lazy_building_loading": true,
+    "lazy_room_loading": true,
+    "request_cancellation": true,
+    "versioned_client_cache": true,
+    "fixed_feature_limit_selected": true,
+    "visible_parcel_budget": {"desktop": 2000, "mobile": 750},
+    "memory_mib_budget": {"desktop": 256, "mobile": 160},
+    "critical_javascript_gzip_kb_max": 500,
+    "low_end_mobile_fallback_required": true,
+    "offscreen_unload_required": true
+  },
+  "privacy_and_security": {
+    "public_projection_only_without_session": true,
+    "raw_kyc_allowed": false,
+    "secrets_allowed": false,
+    "private_keys_allowed": false,
+    "auth_tokens_in_repository": false,
+    "precise_private_gps_public": false,
+    "browser_writes_github": false,
+    "wallet_signing": false,
+    "client_is_source_of_truth": false,
+    "proposal_replay_protection_required_for_future_gateway": true,
+    "proposal_idempotency_required_for_future_gateway": true,
+    "stale_source_revision_revalidation_required": true
+  },
+  "known_gaps": [
+    "APPROVED_BROWSER_READY_PARCEL_SNAPSHOT",
+    "REGION_SPATIAL_INDEX_CONTRACT",
+    "CITY_SPATIAL_INDEX_CONTRACT",
+    "BUILDING_FOOTPRINT_AND_FLOOR_GEOMETRY",
+    "ROOM_IDENTITY_AND_LOCAL_GEOMETRY",
+    "PLAYER_SESSION_TO_STARTER_PARCEL_BINDING",
+    "LOCATION_CONSENT_AND_RETENTION_POLICY",
+    "SECURE_COMMAND_GATEWAY",
+    "MAP_ENGINE_DEPENDENCY_REVIEW",
+    "TILE_PROVIDER_LICENSE_AND_PRIVACY_REVIEW"
+  ],
+  "proposal_files": [
+    "KGEN-KAIOS/world-viewer/README.md",
+    "KGEN-KAIOS/world-viewer/WORLD_VIEWER_ARCHITECTURE.md",
+    "KGEN-KAIOS/world-viewer/WORLD_VIEWER_RUNTIME.md",
+    "KGEN-KAIOS/world-viewer/CAMERA_STANDARD.md",
+    "KGEN-KAIOS/world-viewer/SELECTION_STANDARD.md",
+    "KGEN-KAIOS/world-viewer/COORDINATE_MAPPING_STANDARD.md",
+    "KGEN-KAIOS/world-viewer/UI_LAYOUT_STANDARD.md",
+    "KGEN-KAIOS/world-viewer/world_viewer_architecture.json",
+    "KGEN-KAIOS/world-viewer/WORLD_VIEWER_V1_ARCHITECTURE_REVIEW.md",
+    "KGEN-KAIOS/world-viewer/world_viewer_v1_architecture_review.json",
+    "KGEN-KAIOS/world-viewer/WORLD_VIEWER_INPUT_COMPATIBILITY_MATRIX.md",
+    "KGEN-KAIOS/world-viewer/WORLD_VIEWER_LOD_AND_PERFORMANCE_REVIEW.md",
+    "KGEN-KAIOS/world-viewer/WORLD_VIEWER_SECURITY_AND_PRIVACY_REVIEW.md",
+    "KGEN-KAIOS/world-viewer/WORLD_VIEWER_V1_ARCHITECTURE_RESOLUTION.md",
+    "KGEN-KAIOS/world-viewer/world_viewer_v1_architecture_resolution.json",
+    "KGEN-KAIOS/world-viewer/ADR/ADR-WV-001-WEB-FIRST-SYNTHETIC-VIEWER.md",
+    "KGEN-KAIOS/world-viewer/WORLD_VIEWER_V1_ARCHITECTURE_BASELINE.md",
+    "KGEN-KAIOS/world-viewer/WORLD_VIEWER_V1_SANDBOX_IMPLEMENTATION_PLAN.md",
+    "KGEN-KAIOS/world-viewer/tasks/KAIOS-WV-SBX-001.task-envelope.json"
+  ],
+  "review_gate": {
+    "human_review_required": false,
+    "independent_ui_architecture_review_complete": true,
+    "external_ui_review_recommended": true,
+    "allowed_next_decisions": [
+      "CLAIM_KAIOS_WV_SBX_001_AFTER_CURRENT_CURSOR_CLOSEOUT",
+      "REQUEST_EXTERNAL_UI_REVIEW",
+      "HOLD_WORLD_VIEWER_SANDBOX",
+      "HUMAN_OVERRIDE_WORLD_VIEWER_BASELINE"
+    ],
+    "implementation_started": false,
+    "sandbox_task_envelope_prepared": true,
+    "implementation_workqueue_created": false,
+    "deployment_started": false,
+    "pages_updated": false,
+    "delegated_baseline_authority": "HUMAN-PRIMEFORGE-FULL-AUTOPILOT-001_LEVEL_B",
+    "commit_authorized": true,
+    "push_authorized": true
+  }
+}

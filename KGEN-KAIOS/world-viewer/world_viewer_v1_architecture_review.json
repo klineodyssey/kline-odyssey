@@ -1,0 +1,556 @@
+{
+  "metadata": {
+    "title": "KAIOS World Viewer V1 Internal Independent UI Architecture Review",
+    "version": "0.1.0",
+    "revision": "2026-07-16.1",
+    "status": "INTERNAL_INDEPENDENT_UI_REVIEW_COMPLETE",
+    "architecture": "UNDER_INDEPENDENT_REVIEW",
+    "external_review": "STILL_REQUIRED",
+    "implementation": "NOT_STARTED",
+    "workqueue": "NOT_CREATED",
+    "deployment": "NOT_AUTHORIZED",
+    "last_updated": "2026-07-16",
+    "updated_by": "Codex / codex-gm-01",
+    "reviewed_by": "Codex internal independent review; Human review required",
+    "source_commit": "ORIGIN_MAIN_7a692c34df50861ab10f8bd80959d95251b1071c",
+    "task_id": "HUMAN-WORLD-VIEWER-INDEPENDENT-REVIEW-001",
+    "human_decision_id": "HUMAN-WORLD-VIEWER-INDEPENDENT-REVIEW-001",
+    "change_reason": "Review World Viewer V1 architecture without creating implementation files or modifying authoritative runtime sources.",
+    "ancestor": "KGEN-KAIOS/world-viewer/world_viewer_architecture.json",
+    "source_of_truth": false,
+    "canonical_file": "KGEN-KAIOS/world-viewer/WORLD_VIEWER_V1_ARCHITECTURE_REVIEW.md"
+  },
+  "review_identity": {
+    "review_type": "INTERNAL_INDEPENDENT_UI_REVIEW",
+    "reviewer": "codex-gm-01",
+    "original_architect": "codex-gm-01",
+    "organizational_independence": false,
+    "external_ui_review_still_required": true,
+    "human_final_review_required": true,
+    "false_external_review_claim": false
+  },
+  "source_state": {
+    "proposal_status_before_review": "ARCHITECTURE_PROPOSAL_UNDER_HUMAN_REVIEW",
+    "proposal_files_reviewed": 8,
+    "proposal_files_modified": 0,
+    "runtime_current_modified": false,
+    "universe_map_modified": false,
+    "frozen_baseline_modified": false,
+    "implementation_files_created": 0,
+    "index_html_created": false,
+    "workqueue_created": false,
+    "deployment_started": false
+  },
+  "verdict": {
+    "decision": "APPROVE_WITH_AMENDMENTS",
+    "overall_score": 88,
+    "baseline_freeze_authorized": false,
+    "implementation_planning_authorized": false,
+    "implementation_authorized": false,
+    "reason": "The authority boundary, 2D Web-first model, K280 coordinate integrity and proposal-only land actions are correct. Explicit camera, input, selection, inspector, LOD, performance and future command contracts are still required before baseline freeze."
+  },
+  "scores": {
+    "architecture_boundary": 94,
+    "desktop_interaction": 91,
+    "mobile_interaction": 86,
+    "coordinate_integrity": 96,
+    "lod_scalability": 82,
+    "ui_usability": 84,
+    "accessibility": 83,
+    "security": 93,
+    "privacy": 94,
+    "github_pages_compatibility": 89,
+    "implementation_readiness": 77
+  },
+  "preserved_architecture": {
+    "hierarchy": [
+      "EARTH_K280",
+      "REGION",
+      "CITY_VIEWER_OVERLAY",
+      "LAND_PARCEL",
+      "BUILDING",
+      "ROOM"
+    ],
+    "city_overlay_may_rewrite_parent_chain": false,
+    "city_overlay_preserves": [
+      "REGION",
+      "COUNTY",
+      "TOWN",
+      "PARCEL_ID",
+      "LAND_REGISTRY",
+      "OWNERSHIP_PARENT_CHAIN"
+    ],
+    "land_action": "LAND_USE_PROPOSAL",
+    "direct_land_use_mutation": false,
+    "direct_ownership_mutation": false,
+    "two_dimensional_v1": true
+  },
+  "web_first_review": {
+    "result": "APPROVED",
+    "github_pages_static_read_viewer_supported": true,
+    "github_pages_authoritative_write_supported": false,
+    "base_technologies": [
+      "HTML",
+      "CSS",
+      "JAVASCRIPT_ES_MODULES"
+    ],
+    "future_compatible_technologies": [
+      "SVG",
+      "CANVAS_2D",
+      "WEBGL",
+      "THREE_JS",
+      "PWA"
+    ],
+    "v1_renderer_candidates": [
+      "SVG_LOW_COUNT_OVERLAY",
+      "CANVAS_2D_DENSE_LAYER"
+    ],
+    "webgl_status": "DEFERRED",
+    "three_js_status": "DEFERRED",
+    "pwa_status": "DEFERRED",
+    "index_html_role": "SINGLE_APPLICATION_ENTRY_AND_SEMANTIC_SHELL",
+    "monolithic_index_html": false,
+    "pages_base_path": "/kline-odyssey/",
+    "root_deployment_assumption_allowed": false
+  },
+  "future_module_boundaries": [
+    "index.html",
+    "assets/styles.css",
+    "assets/app.js",
+    "assets/camera.js",
+    "assets/selection.js",
+    "assets/coordinate.js",
+    "assets/inspector.js",
+    "assets/context-menu.js",
+    "assets/data-loader.js",
+    "assets/accessibility.js"
+  ],
+  "input_compatibility": {
+    "desktop": {
+      "left_click": "SELECT_OBJECT",
+      "double_click": "ENTER_CHILD_LEVEL",
+      "right_click": "OPEN_PARCEL_CONTEXT_MENU",
+      "drag": "PAN_CAMERA",
+      "wheel": "ZOOM_AT_POINTER",
+      "escape": "CLOSE_TRANSIENT_OR_EXIT_PARENT"
+    },
+    "mobile": {
+      "single_tap": "SELECT_OBJECT",
+      "double_tap": "ENTER_CHILD_LEVEL",
+      "long_press": "OPEN_PARCEL_CONTEXT_MENU",
+      "one_finger_drag": "PAN_CAMERA",
+      "pinch": "ZOOM_AT_GESTURE_CENTER",
+      "back_control": "EXIT_TO_PARENT_LEVEL"
+    },
+    "assistive": {
+      "enter": "SELECT_OR_ENTER_CHILD",
+      "shift_f10": "OPEN_PARCEL_CONTEXT_MENU",
+      "arrow_keys": "PAN_CAMERA",
+      "plus_minus": "ZOOM_CAMERA",
+      "escape": "CLOSE_TRANSIENT_OR_EXIT_PARENT"
+    },
+    "drag_suppresses_click": true,
+    "long_press_cancelled_by_pan": true,
+    "multiple_task_or_state_mutation_from_input": false
+  },
+  "camera_contract": {
+    "required_fields": [
+      "camera_x",
+      "camera_y",
+      "zoom_level",
+      "min_zoom",
+      "max_zoom",
+      "viewport_width",
+      "viewport_height",
+      "world_bounds",
+      "focus_target",
+      "animation_state",
+      "input_mode",
+      "coordinate_frame",
+      "semantic_level",
+      "source_snapshot_id"
+    ],
+    "drag_threshold_configurable": true,
+    "zoom_center": "POINTER_OR_GESTURE_CENTER",
+    "zoom_speed_configurable": true,
+    "bounds_clamp_required": true,
+    "inertia": "CONFIGURABLE_DEFAULT_OFF_FOR_REDUCED_MOTION_OR_LOW_END_MODE",
+    "resize_behavior": "PRESERVE_FOCUS_THEN_CLAMP_OR_REFIT",
+    "orientation_change_behavior": "CANCEL_GESTURE_PRESERVE_FOCUS_RECOMPUTE_VIEWPORT",
+    "focus_player_parcel": true,
+    "return_home_parcel": true,
+    "layer_transition_parent_checkpoint": true,
+    "unrecoverable_out_of_bounds_allowed": false
+  },
+  "lod_contract": [
+    {
+      "lod": 0,
+      "semantic_level": "EARTH",
+      "loads": ["EARTH_SHELL", "REGION_EXTENTS", "AGGREGATE_STATUS"]
+    },
+    {
+      "lod": 1,
+      "semantic_level": "REGION",
+      "loads": ["VISIBLE_REGIONS", "CITY_CLUSTERS", "AGGREGATE_DENSITY"]
+    },
+    {
+      "lod": 2,
+      "semantic_level": "CITY_VIEWER_OVERLAY",
+      "loads": ["ADMIN_LINEAGE", "PARCEL_CLUSTERS_OR_SIMPLIFIED_BOUNDARIES"]
+    },
+    {
+      "lod": 3,
+      "semantic_level": "LAND_PARCEL",
+      "loads": ["VISIBLE_PARCEL_POLYGONS", "LAND_USE_PROJECTION", "PROTECTION_PROJECTION"]
+    },
+    {
+      "lod": 4,
+      "semantic_level": "BUILDING",
+      "loads": ["SELECTED_PARCEL", "VISIBLE_BUILDING_FOOTPRINTS"]
+    },
+    {
+      "lod": 5,
+      "semantic_level": "ROOM",
+      "loads": ["SELECTED_BUILDING", "FLOOR_INDEX", "AUTHORIZED_ROOM_PROJECTION"]
+    }
+  ],
+  "scale_controls": {
+    "viewport_scoped_loading": true,
+    "tile_or_chunk_loading": true,
+    "spatial_index": true,
+    "bounded_cache": true,
+    "unload_offscreen": true,
+    "adjacent_prefetch_only": true,
+    "request_cancellation": true,
+    "maximum_visible_entities_required": true,
+    "low_end_mobile_fallback_required": true,
+    "load_all_earth_parcels": false,
+    "load_all_buildings": false,
+    "load_all_rooms": false,
+    "load_all_players": false,
+    "load_all_ai_workers": false
+  },
+  "coordinate_mapping": {
+    "surface_k": 280,
+    "k280_meaning": "EARTH_SURFACE_K_SPHERE",
+    "k280_is_cartesian_z_280": false,
+    "canonical_coordinate": "LATITUDE_LONGITUDE_ALTITUDE_WITH_EPOCH",
+    "ecef_xyz": "DERIVED_3D_PHYSICS_OR_RENDERING",
+    "local_enu": "BUILDING_AND_CONSTRUCTION_FRAME",
+    "parcel_polygon": "SPHERICAL_OR_GEODETIC_OWNERSHIP_GEOMETRY",
+    "projected_screen_coordinate": "NON_AUTHORITATIVE_DISPLAY_DERIVATIVE",
+    "camera_coordinate": "ACTIVE_FRAME_VIEW_STATE",
+    "pointer_coordinate": "INPUT_SAMPLE_REQUIRING_ADAPTER",
+    "selection_hit_area": "DERIVED_INTERACTION_GEOMETRY",
+    "screen_xy_is_ownership_coordinate": false
+  },
+  "projection_review": [
+    {
+      "option": "SYNTHETIC_LOCAL_GRID",
+      "v1_use": "SYNTHETIC_ACCEPTANCE_FIXTURE",
+      "status": "RECOMMENDED"
+    },
+    {
+      "option": "LOCAL_ENU_PARCEL_VIEW",
+      "v1_use": "PARCEL_BUILDING_ROOM",
+      "status": "RECOMMENDED"
+    },
+    {
+      "option": "SIMPLE_EQUIRECTANGULAR_EARTH_VIEW",
+      "v1_use": "NEUTRAL_EARTH_REGION_OVERVIEW",
+      "status": "ACCEPTABLE"
+    },
+    {
+      "option": "WEB_MERCATOR_DISPLAY_ADAPTER",
+      "v1_use": "CANDIDATE_AFTER_LICENSE_PRIVACY_REVIEW",
+      "status": "CONDITIONAL"
+    },
+    {
+      "option": "CUSTOM_K_SPHERE_PROJECTION",
+      "v1_use": "FUTURE",
+      "status": "DEFERRED"
+    }
+  ],
+  "selection": {
+    "states": [
+      "NONE",
+      "HOVERED",
+      "SELECTED",
+      "FOCUSED",
+      "LOCKED",
+      "DISABLED",
+      "PENDING_PROPOSAL"
+    ],
+    "future_states": ["MULTI_SELECTED"],
+    "click_changes_ownership": false,
+    "right_click_starts_construction": false,
+    "unreviewed_land_use_change": false,
+    "required_projection_fields": [
+      "parcel_id",
+      "owner_id",
+      "viewer_governor",
+      "land_use",
+      "area",
+      "coordinate",
+      "buildings",
+      "population",
+      "ai_workers",
+      "proposal_status"
+    ]
+  },
+  "context_menu": {
+    "actions": [
+      "RESIDENTIAL",
+      "FARM",
+      "FOREST",
+      "FACTORY",
+      "MARKETPLACE",
+      "TEMPLE",
+      "MINE",
+      "ROAD"
+    ],
+    "result_type": "LAND_USE_PROPOSAL",
+    "owner_or_governor_capability_required": true,
+    "unauthorized_action": "DISABLED_OR_READ_ONLY",
+    "proposal_fields": [
+      "proposal_id",
+      "parcel_id",
+      "requester_id",
+      "requested_land_use",
+      "current_land_use",
+      "reason",
+      "estimated_cost",
+      "environment_impact",
+      "neighbor_impact",
+      "required_permissions",
+      "evidence",
+      "source_snapshot_id",
+      "source_geometry_revision",
+      "review_status"
+    ]
+  },
+  "inspector": {
+    "data_groups": [
+      "CANONICAL_DATA",
+      "VIEWER_DATA",
+      "PROPOSAL_DATA",
+      "UNKNOWN_DATA"
+    ],
+    "fields": [
+      "OWNER",
+      "GOVERNOR",
+      "PARCEL_ID",
+      "GLOBAL_UID",
+      "COORDINATE",
+      "SURFACE_K",
+      "AREA",
+      "CURRENT_LAND_USE",
+      "PROPOSED_LAND_USE",
+      "BUILDINGS",
+      "POPULATION",
+      "AI_WORKERS",
+      "PROTECTION_ZONE",
+      "TAX_AUTHORITY",
+      "DEFENSE_AUTHORITY",
+      "AIRSPACE_AUTHORITY",
+      "DATA_FRESHNESS",
+      "SOURCE"
+    ],
+    "missing_value": "UNKNOWN",
+    "restricted_value": "RESTRICTED",
+    "stale_value": "STALE",
+    "fabricated_zero_allowed": false
+  },
+  "player_location": {
+    "first_version_mode": [
+      "MOCK_LOGIN",
+      "MOCK_GPS",
+      "SYNTHETIC_STARTER_PARCEL"
+    ],
+    "flow": [
+      "LOGIN",
+      "LOCATION_CONSENT",
+      "COARSE_LOCATION",
+      "REGION_FOCUS",
+      "STARTER_PARCEL_APPLICATION",
+      "REVIEW",
+      "VIRTUAL_PARCEL_GRANT"
+    ],
+    "post_login_default": [
+      "LOAD_PLAYER",
+      "FIND_HOME_ANCHOR",
+      "FOCUS_STARTER_PARCEL",
+      "OPEN_INSPECTOR",
+      "DISPLAY_AVAILABLE_ACTIONS"
+    ],
+    "required_player_controls": [
+      "MY_LAND",
+      "RETURN_HOME",
+      "WORLD_VIEW",
+      "ZOOM_IN",
+      "ZOOM_OUT",
+      "BACK_LAYER",
+      "OPEN_INSPECTOR",
+      "CLOSE_CONTEXT_MENU"
+    ],
+    "blank_map_after_login_allowed": false,
+    "real_kyc": false,
+    "real_gps_provider": false,
+    "continuous_tracking": false,
+    "gps_is_ownership_proof": false
+  },
+  "layout": {
+    "desktop": [
+      "TOP_STATUS_BAR",
+      "COLLAPSIBLE_LEFT_NAVIGATION",
+      "CENTER_WORLD_VIEWER",
+      "FIXED_RIGHT_PARCEL_INSPECTOR",
+      "CONTEXTUAL_BOTTOM_PROPOSAL_TOOLBAR"
+    ],
+    "desktop_top_bar_fields": [
+      "PLAYER",
+      "WORLD",
+      "K_POINT",
+      "RESOURCE_SUMMARY"
+    ],
+    "desktop_left_navigation": [
+      "WORLD",
+      "LAND",
+      "LIFE",
+      "AI",
+      "MISSION",
+      "MARKET",
+      "BANK",
+      "SETTINGS"
+    ],
+    "mobile": [
+      "TOP_COMPACT_BAR",
+      "FULL_SCREEN_VIEWER",
+      "BOTTOM_SHEET_INSPECTOR",
+      "FLOATING_HOME_AND_BACK_CONTROLS",
+      "LONG_PRESS_ACTION_SHEET",
+      "COLLAPSIBLE_NAVIGATION"
+    ],
+    "desktop_three_columns_scaled_into_mobile": false,
+    "map_remains_primary_surface": true
+  },
+  "accessibility": {
+    "keyboard_navigation": true,
+    "focus_indicator": true,
+    "screen_reader_labels": true,
+    "color_independent_selection": true,
+    "high_contrast": true,
+    "touch_target_policy_required": true,
+    "reduced_motion": true,
+    "text_scaling": true,
+    "error_feedback": true,
+    "loading_state": true,
+    "empty_state": true,
+    "offline_state": true,
+    "land_use_signals": ["ICON", "LABEL", "PATTERN", "TOOLTIP"]
+  },
+  "security_and_privacy": {
+    "client_is_source_of_truth": false,
+    "future_command_checks": [
+      "AUTHENTICATION",
+      "AUTHORIZATION",
+      "OWNERSHIP_OR_GOVERNOR_VALIDATION",
+      "PARCEL_ID_VALIDATION",
+      "SOURCE_REVISION_VALIDATION",
+      "PROPOSAL",
+      "EVIDENCE",
+      "REVIEW",
+      "SETTLEMENT_OR_APPROVAL",
+      "REGISTRY_UPDATE",
+      "AUDIT"
+    ],
+    "replay_protection_required": true,
+    "idempotency_required": true,
+    "cross_player_private_coordinates_allowed": false,
+    "exact_gps_in_url_or_log": false,
+    "raw_kyc_in_pages": false,
+    "secrets_in_repository": false
+  },
+  "performance_budget": {
+    "status": "PROPOSED_FOR_IMPLEMENTATION_REVIEW",
+    "critical_compressed_payload_mb_max": 1.5,
+    "critical_javascript_gzip_kb_max": 500,
+    "time_to_interactive_seconds": {
+      "desktop": 3,
+      "representative_mobile": 5
+    },
+    "visible_parcels": {
+      "desktop": 2000,
+      "mobile": 750
+    },
+    "pan_zoom_fps": {
+      "desktop_target": 60,
+      "mobile_target": 45,
+      "low_end_floor": 30
+    },
+    "memory_mib": {
+      "desktop_max": 256,
+      "mobile_max": 160
+    },
+    "parcel_hit_test_p95_ms": {
+      "desktop": 16,
+      "mobile": 24
+    },
+    "inspector_open_p95_ms": {
+      "desktop": 100,
+      "mobile": 150
+    }
+  },
+  "synthetic_demo": {
+    "real_land_data": false,
+    "earth_k280_viewers": 1,
+    "regions": 1,
+    "city_overlays": 1,
+    "land_parcels": 12,
+    "player_starter_parcels": 1,
+    "existing_land_use_types": 3,
+    "existing_land_uses": ["RESIDENTIAL", "FARM", "FOREST"],
+    "proposal_options": 8,
+    "buildings": 2,
+    "rooms": 3,
+    "ai_workers": 1,
+    "npcs": 1,
+    "unknown_data_parcels": 1
+  },
+  "required_amendments": [
+    {"id": "WV-AMEND-001", "priority": "P0", "topic": "EXPLICIT_CAMERA_CONTRACT"},
+    {"id": "WV-AMEND-002", "priority": "P0", "topic": "DESKTOP_MOBILE_GESTURE_ARBITRATION"},
+    {"id": "WV-AMEND-003", "priority": "P0", "topic": "SELECTION_VISUAL_STATES"},
+    {"id": "WV-AMEND-004", "priority": "P0", "topic": "LAND_USE_PROPOSAL_FIELDS_AND_CAPABILITY"},
+    {"id": "WV-AMEND-005", "priority": "P0", "topic": "INSPECTOR_DATA_GROUPS_AND_UNKNOWN_STATE"},
+    {"id": "WV-AMEND-006", "priority": "P0", "topic": "LOD_AND_PERFORMANCE_BUDGETS"},
+    {"id": "WV-AMEND-007", "priority": "P0", "topic": "GITHUB_PAGES_PATH_CACHE_AND_INTEGRITY"},
+    {"id": "WV-AMEND-008", "priority": "P0", "topic": "FUTURE_COMMAND_REPLAY_AND_REVALIDATION"},
+    {"id": "WV-AMEND-009", "priority": "P1", "topic": "MAP_ENGINE_LICENSE_DECISION"},
+    {"id": "WV-AMEND-010", "priority": "P1", "topic": "BROWSER_READY_PROJECTION_SCHEMA_DRAFTS"},
+    {"id": "WV-AMEND-011", "priority": "P1", "topic": "PLAYER_HOME_BOOT_STATE"},
+    {"id": "WV-AMEND-012", "priority": "P1", "topic": "ACCESSIBILITY_ACCEPTANCE_TESTS"}
+  ],
+  "review_outputs": [
+    "KGEN-KAIOS/world-viewer/WORLD_VIEWER_V1_ARCHITECTURE_REVIEW.md",
+    "KGEN-KAIOS/world-viewer/world_viewer_v1_architecture_review.json",
+    "KGEN-KAIOS/world-viewer/WORLD_VIEWER_INPUT_COMPATIBILITY_MATRIX.md",
+    "KGEN-KAIOS/world-viewer/WORLD_VIEWER_LOD_AND_PERFORMANCE_REVIEW.md",
+    "KGEN-KAIOS/world-viewer/WORLD_VIEWER_SECURITY_AND_PRIVACY_REVIEW.md"
+  ],
+  "next_gate": {
+    "recommended_human_decision": "ACCEPT_WORLD_VIEWER_REVIEW_AND_REQUEST_ARCHITECTURE_AMENDMENTS",
+    "alternatives": [
+      "REQUEST_EXTERNAL_UI_REVIEW",
+      "REQUEST_WORLD_VIEWER_REVIEW_REVISION",
+      "HOLD_WORLD_VIEWER",
+      "REJECT_WORLD_VIEWER_ARCHITECTURE"
+    ],
+    "external_ui_review_still_required": true,
+    "implementation_started": false,
+    "workqueue_created": false,
+    "commit_created": false,
+    "push_performed": false,
+    "deployment_started": false
+  }
+}
