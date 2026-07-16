@@ -13,7 +13,7 @@
   "branch": "cursor-handoff/ORG-P2-020-20260716",
   "worktree": "cursor/monkey-boot\u2192cursor-handoff/ORG-P2-020-20260716",
   "base_sha": "89f3c351c488a0705f514adba974dd6c3dd3cb3a",
-  "head_sha": "d79b132a2e8bff845f153e3a6784c80f3ea7b4d4",
+  "head_sha": "4c8be770eab31da896e939a4d7362616ec55e546",
   "observed_origin_main": "89f3c351c488a0705f514adba974dd6c3dd3cb3a",
   "claimed_at": "2026-07-16T04:11:02Z",
   "lease_expires_at": "2026-07-16T08:11:02Z",
