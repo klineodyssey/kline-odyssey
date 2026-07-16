@@ -1,0 +1,419 @@
+{
+  "metadata": {
+    "title": "KAIOS Boot and Life Integrity Runtime Architecture",
+    "version": "0.2.0",
+    "revision": "2026-07-16.2",
+    "status": "INTERNAL_REVIEW_COMPLETE_BASELINE_HOLD",
+    "architecture": "ONLY",
+    "implementation": "NOT_STARTED",
+    "implementation_planning": "NOT_AUTHORIZED",
+    "workqueue": "NOT_CREATED",
+    "deployment": "NOT_STARTED",
+    "last_updated": "2026-07-16",
+    "updated_by": "Codex / codex-gm-01",
+    "reviewed_by": "Codex delegated GM internal review; external or Human baseline review required",
+    "source_commit": "ORIGIN_MAIN_7a692c34df50861ab10f8bd80959d95251b1071c",
+    "task_id": "HUMAN-KAIOS-BOOT-RUNTIME-001",
+    "human_decision_id": "HUMAN-KAIOS-BOOT-RUNTIME-001; HUMAN-PRIMEFORGE-FULL-AUTOPILOT-001",
+    "change_reason": "Define and internally review a fail-closed player world-entry Boot, Species OS and life-integrity verification without implementation.",
+    "ancestor": [
+      "KGEN-KAIOS/kernel/kernel_boot_sequence.md",
+      "KGEN-KAIOS/V8.1/runtime/PLAYER_RUNTIME.md"
+    ],
+    "source_of_truth": false,
+    "canonical_file": "KGEN-KAIOS/boot-runtime/KAIOS_BOOT_RUNTIME.md"
+  },
+  "architecture_boundary": {
+    "runtime_role": "PLAYER_AND_CHARACTER_WORLD_ENTRY_VERIFICATION",
+    "company_os_boot": "SEPARATE_COMPANY_CONTROL_PLANE",
+    "kernel_boot": "SEPARATE_SINGLE_AGENT_EXECUTION_BOOT",
+    "generic_loading_screen": false,
+    "auto_repair_service": false,
+    "client_is_authority": false,
+    "fail_closed": true
+  },
+  "source_audit": {
+    "cached_origin_main": "7a692c34df50861ab10f8bd80959d95251b1071c",
+    "github_dns": "HEALTHY",
+    "github_tcp_443": "FAIL",
+    "github_https": "FAIL",
+    "pages": "HEALTHY",
+    "source_freshness_revalidation_required_before_publication": true,
+    "current_physics_runtime": "docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md",
+    "current_map_selector": "docs/maps/README.md",
+    "map_is_physics_database": false,
+    "frozen_land_baseline": "KGEN-KAIOS/land/LAND_RUNTIME_ARCHITECTURE_BASELINE.md",
+    "frozen_civilization_baseline": "KGEN-KAIOS/civilization/CIVILIZATION_ECONOMY_ARCHITECTURE_BASELINE.md",
+    "common_life_os_candidate_status": "UNAPPROVED_SUPERSEDED_DIRECTION",
+    "company_os_candidate_status": "UNAPPROVED_SEPARATE_CONCERN"
+  },
+  "boot_runtime": {
+    "states": [
+      "POWERED_OFF",
+      "POWERING_ON",
+      "BOOT_SESSION_CREATED",
+      "VERIFYING",
+      "READY_TO_ENTER",
+      "ENTERING_WORLD",
+      "IN_WORLD",
+      "FAILED_CLOSED",
+      "EVIDENCE_SEALED",
+      "WAITING_FOR_RECOVERY_OR_REVIEW"
+    ],
+    "gate_results": [
+      "PENDING",
+      "VERIFYING",
+      "PASS",
+      "PASS_NOT_APPLICABLE",
+      "FAIL",
+      "BLOCKED_BY_DEPENDENCY"
+    ],
+    "gates": [
+      {
+        "gate_id": "BR-01",
+        "name": "CLIENT_VERIFY",
+        "pass_requires": ["APPROVED_BUILD_ID", "VERSION", "MANIFEST_HASH", "PLATFORM_COMPATIBILITY"],
+        "failure_code": "CLIENT_VERIFY_FAILED"
+      },
+      {
+        "gate_id": "BR-02",
+        "name": "ASSET_VERIFY",
+        "pass_requires": ["COMPLETE_MANIFEST", "ALLOWED_SOURCE", "CHECKSUM", "DEPENDENCY_CLOSURE"],
+        "failure_code": "ASSET_VERIFY_FAILED"
+      },
+      {
+        "gate_id": "BR-03",
+        "name": "UNIVERSE_PHYSICS_VERIFY",
+        "pass_requires": ["CURRENT_SELECTOR", "EXPECTED_VERSION", "CONTENT_HASH", "COMPATIBILITY"],
+        "failure_code": "PHYSICS_VERIFY_FAILED"
+      },
+      {
+        "gate_id": "BR-04",
+        "name": "UNIVERSE_PHYSICS_DATABASE_VERIFY",
+        "pass_requires": ["APPROVED_SELECTOR", "SCHEMA_VERSION", "DATASET_VERSION", "K_INDEX_COVERAGE", "CONTENT_HASH"],
+        "current_source_status": "MISSING_FORMAL_SOURCE",
+        "failure_code": "PHYSICS_DATABASE_VERIFY_FAILED"
+      },
+      {
+        "gate_id": "BR-05",
+        "name": "SPECIES_OS_VERIFY",
+        "pass_requires": ["REGISTERED_PROFILE", "APPROVED_STATUS", "VERSION", "CONTENT_HASH", "BODY_COMPATIBILITY"],
+        "failure_code": "SPECIES_OS_VERIFY_FAILED"
+      },
+      {
+        "gate_id": "BR-06",
+        "name": "INDIVIDUAL_LIFE_OS_VERIFY",
+        "pass_requires": ["LIFE_ID", "SPECIES_BINDING", "STATE_VERSION", "INTEGRITY_MANIFEST"],
+        "failure_code": "LIFE_OS_VERIFY_FAILED"
+      },
+      {
+        "gate_id": "BR-07",
+        "name": "MIND_RUNTIME_VERIFY",
+        "pass_requires": ["ALLOWED_PROFILE", "VERSION", "PERMISSION", "LIFE_BINDING"],
+        "failure_code": "MIND_RUNTIME_VERIFY_FAILED"
+      },
+      {
+        "gate_id": "BR-08",
+        "name": "CIVILIZATION_RUNTIME_VERIFY",
+        "pass_requires": ["APPROVED_COMPATIBILITY", "MEMBERSHIP_PROJECTION", "SOURCE_VERSION"],
+        "failure_code": "CIVILIZATION_VERIFY_FAILED"
+      },
+      {
+        "gate_id": "BR-09",
+        "name": "PLAYER_RUNTIME_VERIFY",
+        "pass_requires": ["PLAYER_ID", "SESSION_BINDING", "PERMISSIONS", "CHARACTER_RELATION"],
+        "failure_code": "PLAYER_VERIFY_FAILED"
+      },
+      {
+        "gate_id": "BR-10",
+        "name": "AI_WORKER_RUNTIME_VERIFY",
+        "pass_requires": ["REGISTERED_COMPATIBLE_WORKERS_OR_APPROVED_NOT_APPLICABLE"],
+        "failure_code": "AI_WORKER_VERIFY_FAILED"
+      },
+      {
+        "gate_id": "BR-11",
+        "name": "LAND_REGISTRY_VERIFY",
+        "pass_requires": ["REGISTRY_SELECTOR", "SNAPSHOT_VERSION", "PARCEL_IDENTITY", "RIGHTS_PROJECTION"],
+        "failure_code": "LAND_REGISTRY_VERIFY_FAILED"
+      },
+      {
+        "gate_id": "BR-12",
+        "name": "MARKETPLACE_VERIFY",
+        "pass_requires": ["APPROVED_SELECTOR", "HEALTH", "SCHEMA", "PLAYER_ACCESS_PROJECTION"],
+        "failure_code": "MARKETPLACE_VERIFY_FAILED"
+      },
+      {
+        "gate_id": "BR-13",
+        "name": "SAVE_DATA_VERIFY",
+        "pass_requires": ["VERSION", "HASH", "CHECKPOINT_LINEAGE", "PLAYER_BINDING", "MIGRATION_STATUS"],
+        "failure_code": "SAVE_DATA_VERIFY_FAILED"
+      },
+      {
+        "gate_id": "BR-14",
+        "name": "CHARACTER_VERIFY",
+        "pass_requires": ["CHARACTER_MANIFEST", "LIFE_INTEGRITY_PASS"],
+        "failure_code": "CHARACTER_VERIFY_FAILED"
+      },
+      {
+        "gate_id": "BR-15",
+        "name": "ENTER_WORLD_ELIGIBILITY",
+        "pass_requires": ["ALL_REQUIRED_GATES_PASS", "NO_STALE_RESULT", "SAME_SESSION", "SAME_SOURCE_SET"],
+        "failure_code": "ENTER_WORLD_DENIED"
+      }
+    ],
+    "boot_session_fields": [
+      "boot_session_id",
+      "player_id",
+      "character_id",
+      "client_build_id",
+      "requested_world_id",
+      "started_at",
+      "source_set_id",
+      "gate_results",
+      "failure_incident_id",
+      "ready_at",
+      "entered_at",
+      "final_status"
+    ],
+    "fail_closed_rules": {
+      "first_fail_blocks_remaining": true,
+      "timeout_is_pass": false,
+      "partial_character_activation": false,
+      "silent_auto_repair": false,
+      "silent_version_downgrade": false,
+      "evidence_preserved": true,
+      "recovery_requires_new_boot_session": true
+    }
+  },
+  "universe_physics_database_manifest_draft": {
+    "fields": [
+      "physics_database_id",
+      "universe_id",
+      "selector_id",
+      "schema_version",
+      "dataset_version",
+      "physics_law_profile_ref",
+      "k_coordinate_index_version",
+      "environment_profile_version",
+      "resource_profile_version",
+      "civilization_profile_version",
+      "travel_rule_version",
+      "ownership_rule_version",
+      "building_rule_version",
+      "creature_rule_version",
+      "energy_rule_version",
+      "content_hash",
+      "generated_at",
+      "status"
+    ],
+    "created_in_this_proposal": false,
+    "current_universe_map_reclassified": false
+  },
+  "species_os": {
+    "architecture": ["KAIOS", "SPECIES_OS", "INDIVIDUAL_LIFE_OS"],
+    "one_undifferentiated_life_os": false,
+    "shared_governed_interface": true,
+    "profile_rule_groups": [
+      "LIFE_CAPABILITIES",
+      "MIND_CAPABILITIES",
+      "GROWTH_RULES",
+      "DEATH_RULES",
+      "REPAIR_RULES",
+      "REPRODUCTION_RULES",
+      "NUTRITION_RULES"
+    ],
+    "manifest_fields": [
+      "species_os_id",
+      "species_code",
+      "species_name",
+      "species_os_version",
+      "schema_version",
+      "body_profile_ref",
+      "life_capabilities",
+      "mind_capabilities",
+      "growth_rules",
+      "death_rules",
+      "repair_rules",
+      "reproduction_rules",
+      "nutrition_rules",
+      "environment_tolerance_rules",
+      "resource_unit_profile",
+      "required_organs_or_modules",
+      "optional_organs_or_modules",
+      "prohibited_modules",
+      "compatible_mind_profiles",
+      "compatible_citizen_profiles",
+      "compatibility_range",
+      "migration_policy",
+      "integrity_policy",
+      "content_hash",
+      "status",
+      "reviewed_by",
+      "approval_ref"
+    ],
+    "profiles": [
+      {"profile": "HUMAN_OS", "body": "HUMAN_BIOLOGICAL_BODY", "mind": "HUMAN_MIND_PROFILE", "reproduction": "BIOLOGICAL_GOVERNED"},
+      {"profile": "PLANT_OS", "body": "PLANT_STRUCTURE", "mind": "PLANT_BEHAVIOR", "reproduction": "SEED_OR_PROPAGATION"},
+      {"profile": "ANIMAL_OS", "body": "SPECIES_ANIMAL_BODY", "mind": "SPECIES_BEHAVIOR_OR_MIND", "reproduction": "SPECIES_BIOLOGICAL"},
+      {"profile": "ROBOT_OS", "body": "HARDWARE_BODY", "mind": "OPTIONAL_AI_MIND", "reproduction": "MANUFACTURING_OR_MODULE_COMPOSITION"},
+      {"profile": "PLAYER_OWNED_AI_OS", "body": "DIGITAL_OR_ROBOTIC_BODY_REQUIRED", "mind": "PROVIDER_NEUTRAL_AI_MIND", "reproduction": "CAPABILITY_RECOMBINATION_OR_MANUFACTURING"},
+      {"profile": "NPC_OS", "body": "UNDERLYING_SPECIES_BODY", "mind": "NPC_BEHAVIOR_LIMITS", "reproduction": "UNDERLYING_PROFILE_OR_NOT_APPLICABLE"}
+    ],
+    "npc_erases_underlying_species": false,
+    "provider_is_species_identity": false,
+    "species_capability_grants_player_permission": false
+  },
+  "individual_life_os": {
+    "fields": [
+      "life_id",
+      "individual_id",
+      "species_os_id",
+      "species_os_version",
+      "body_id",
+      "body_revision",
+      "mind_runtime_ref",
+      "memory_snapshot_ref",
+      "current_life_state",
+      "life_state_version",
+      "resource_state_ref",
+      "health_state_ref",
+      "permission_profile_ref",
+      "module_manifest_ref",
+      "integrity_manifest_ref",
+      "created_at",
+      "last_checkpoint_at",
+      "status"
+    ],
+    "silent_species_profile_mutation": false,
+    "migration_review_required": true
+  },
+  "life_integrity": {
+    "gates": [
+      "DNA_VERIFY",
+      "ORGAN_VERIFY",
+      "BODY_VERIFY",
+      "SPECIES_OS_VERIFY",
+      "INDIVIDUAL_LIFE_OS_VERIFY",
+      "MIND_RUNTIME_VERIFY",
+      "MEMORY_VERIFY",
+      "PERMISSION_VERIFY",
+      "CHECKSUM_VERIFY",
+      "VERSION_VERIFY",
+      "ACTIVATION_ELIGIBILITY"
+    ],
+    "result_values": ["PASS", "FAIL", "BLOCKED_BY_DEPENDENCY", "HUMAN_REVIEW_REQUIRED"],
+    "checksum_proves_authority": false,
+    "checksum_proves_ownership": false,
+    "atomic_activation": true,
+    "partial_activation": false,
+    "private_memory_content_required_for_hash_check": false,
+    "silent_downgrade": false,
+    "failure_blocks_boot": true,
+    "failure_preserves_evidence": true
+  },
+  "life_corruption": {
+    "definition": "SIMULATION_AND_ARCHITECTURE_INTEGRITY_MISMATCH",
+    "real_malware_model": false,
+    "types": [
+      "LC-UNKNOWN-MODULE",
+      "LC-UNAUTHORIZED-MUTATION",
+      "LC-ORGAN-MISSING",
+      "LC-DNA-MISMATCH",
+      "LC-SPECIES-OS-VERSION",
+      "LC-INDIVIDUAL-OS-VERSION",
+      "LC-MEMORY-ANOMALY",
+      "LC-CAPABILITY-MISMATCH",
+      "LC-BODY-INTEGRITY",
+      "LC-CHECKSUM-MISMATCH",
+      "LC-PERMISSION-MISMATCH",
+      "LC-VERSION-ROLLBACK"
+    ],
+    "severity": ["L0_CLEAN", "L1_RECOVERABLE", "L2_QUARANTINE", "L3_CRITICAL", "L4_GOVERNANCE_HOLD"],
+    "states": ["CLEAN", "SUSPECTED", "CONFIRMED", "QUARANTINED", "RECOVERY_REVIEW", "BLOCKED", "ARCHIVED_EVIDENCE"],
+    "automatic_delete": false,
+    "automatic_dna_rewrite": false,
+    "automatic_permission_grant": false,
+    "automatic_version_downgrade": false,
+    "source_conflict_is_corruption": false,
+    "source_conflict_result": "L4_GOVERNANCE_HOLD"
+  },
+  "boot_ui": {
+    "role": "VERIFICATION_EVIDENCE_PROJECTION",
+    "generic_loading_screen": false,
+    "groups": [
+      "UNIVERSE_PHYSICS",
+      "LIFE",
+      "MIND",
+      "CIVILIZATION",
+      "PLAYER",
+      "LAND",
+      "MARKETPLACE"
+    ],
+    "states": ["WAITING", "VERIFYING", "PASS", "PASS_NOT_APPLICABLE", "FAIL", "BLOCKED"],
+    "fake_time_based_percentage": false,
+    "continue_anyway_action": false,
+    "enter_world_enabled_only_after_pass": true,
+    "enter_world_revalidation_required": true,
+    "desktop": "ORDERED_TIMELINE_WITH_SAFE_DETAIL_AND_ACTION_REGION",
+    "mobile": "VERTICAL_TIMELINE_WITH_EXPANDABLE_DETAIL_AND_STICKY_SAFE_ACTIONS",
+    "accessibility": [
+      "SEMANTIC_ORDERED_LIST",
+      "LIVE_REGION",
+      "KEYBOARD_NAVIGATION",
+      "VISIBLE_FOCUS",
+      "NON_COLOR_STATUS",
+      "HIGH_CONTRAST",
+      "REDUCED_MOTION",
+      "TEXT_SCALING"
+    ]
+  },
+  "missing_formal_sources": [
+    "UNIVERSE_PHYSICS_DATABASE_SELECTOR_AND_MANIFEST",
+    "CLIENT_BUILD_MANIFEST",
+    "ASSET_MANIFEST",
+    "SPECIES_OS_REGISTRY",
+    "MIND_RUNTIME_SELECTOR",
+    "AI_WORKER_RUNTIME_SELECTOR",
+    "BROWSER_READY_LAND_REGISTRY_HEALTH_PROJECTION",
+    "MARKETPLACE_HEALTH_MANIFEST",
+    "SAVE_DATA_SCHEMA_AND_CHECKPOINT_POLICY",
+    "CHARACTER_MANIFEST_AND_LIFE_BINDING"
+  ],
+  "protected_boundary": {
+    "runtime_current_modified": false,
+    "universe_map_modified": false,
+    "frozen_baseline_modified": false,
+    "contracts_modified": false,
+    "wallet_modified": false,
+    "bridge_modified": false,
+    "temple_12345_runtime_modified": false,
+    "final_whitepaper_modified": false,
+    "token_contract_modified": false
+  },
+  "proposal_files": [
+    "KGEN-KAIOS/boot-runtime/README.md",
+    "KGEN-KAIOS/boot-runtime/KAIOS_BOOT_RUNTIME.md",
+    "KGEN-KAIOS/boot-runtime/SPECIES_OS_STANDARD.md",
+    "KGEN-KAIOS/boot-runtime/LIFE_INTEGRITY_RUNTIME.md",
+    "KGEN-KAIOS/boot-runtime/LIFE_CORRUPTION_MODEL.md",
+    "KGEN-KAIOS/boot-runtime/KAIOS_BOOT_UI_FLOW.md",
+    "KGEN-KAIOS/boot-runtime/kaios_boot_runtime.json"
+  ],
+  "review_gate": {
+    "human_review_required": true,
+    "delegated_publication_authority": "LEVEL_A",
+    "baseline_freeze_authorized": false,
+    "recommended_next_decision": "APPROVE_BOOT_LIFE_INTEGRITY_FOR_INDEPENDENT_ARCHITECTURE_REVIEW",
+    "allowed_next_decisions": [
+      "APPROVE_BOOT_LIFE_INTEGRITY_FOR_INDEPENDENT_ARCHITECTURE_REVIEW",
+      "REQUEST_BOOT_LIFE_INTEGRITY_ARCHITECTURE_REVISION",
+      "HOLD_BOOT_LIFE_INTEGRITY_ARCHITECTURE",
+      "REJECT_BOOT_LIFE_INTEGRITY_ARCHITECTURE"
+    ],
+    "implementation_started": false,
+    "implementation_workqueue_created": false,
+    "commit_created": false,
+    "push_performed": false,
+    "deployment_started": false
+  }
+}

@@ -1,0 +1,71 @@
+{
+  "metadata": {
+    "title": "KAIOS Boot and Life Integrity Architecture Internal Review",
+    "version": "0.1.0",
+    "revision": "2026-07-16.1",
+    "status": "INTERNAL_REVIEW_COMPLETE_BASELINE_HOLD",
+    "last_updated": "2026-07-16",
+    "updated_by": "Codex / codex-gm-01",
+    "reviewed_by": "Codex delegated GM internal review",
+    "source_commit": "ORIGIN_MAIN_7a692c34df50861ab10f8bd80959d95251b1071c",
+    "task_id": "HUMAN-KAIOS-BOOT-RUNTIME-001",
+    "human_decision_id": "HUMAN-PRIMEFORGE-FULL-AUTOPILOT-001",
+    "source_of_truth": false
+  },
+  "classification": {
+    "risk_level": "R2_MEDIUM",
+    "delegated_authority": "LEVEL_A_PROPOSAL_PUBLICATION",
+    "baseline_authority": "NOT_GRANTED",
+    "human_override_available": true
+  },
+  "scores": {
+    "architecture_boundary": 96,
+    "fail_closed_state_model": 94,
+    "species_individual_separation": 92,
+    "integrity_coverage": 93,
+    "ui_evidence_fidelity": 91,
+    "security_and_privacy": 89,
+    "compatibility": 90,
+    "source_completeness": 76,
+    "implementation_readiness": 74,
+    "overall_architecture_readiness": 91
+  },
+  "review_gates": {
+    "internal_review": "PASS",
+    "external_review": "REQUIRED_FOR_BASELINE",
+    "protected_path_violations": 0,
+    "runtime_current_modified": false,
+    "universe_map_modified": false,
+    "frozen_baseline_modified": false,
+    "token_contract_modified": false,
+    "implementation_started": false,
+    "workqueue_created": false,
+    "deployment_started": false,
+    "rollback_available": true
+  },
+  "accepted": [
+    "ordered_fail_closed_world_entry_gates",
+    "single_source_set_boot_session",
+    "species_os_and_individual_life_os_separation",
+    "atomic_life_activation",
+    "quarantine_with_evidence_preservation",
+    "verification_state_driven_boot_ui"
+  ],
+  "baseline_blockers": [
+    "authoritative_selectors_and_integrity_manifests_missing",
+    "trust_anchor_rotation_and_revocation_policy_missing",
+    "timeout_retry_staleness_and_cycle_policy_missing",
+    "privacy_preserving_memory_verification_not_reviewed",
+    "migration_offline_and_degraded_mode_review_missing",
+    "external_or_human_baseline_review_missing"
+  ],
+  "operational_boundary": {
+    "architecture_only": true,
+    "executable_verifier_present": false,
+    "client_or_login_present": false,
+    "real_gps_or_kyc_present": false
+  },
+  "rollback_plan": "Revert the scoped documentation commit; no CURRENT Runtime, selector, player data or production behavior is changed.",
+  "disposition": "APPROVE_FOR_PROPOSAL_PUBLICATION_BASELINE_HOLD",
+  "next_gate": "EXTERNAL_OR_HUMAN_BASELINE_REVIEW"
+}
