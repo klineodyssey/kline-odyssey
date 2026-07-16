@@ -757,7 +757,11 @@ def capture_screenshot(
             if "diff_image" in diff:
                 diff["diff_image"] = Path(diff["diff_image"]).relative_to(output_dir).as_posix()
             result["baseline"] = {
-                "path": baseline.as_posix(),
+                "path": (
+                    baseline.relative_to(VIEWER_ROOT).as_posix()
+                    if baseline.is_relative_to(VIEWER_ROOT)
+                    else baseline.name
+                ),
                 "sha256": sha256_file(baseline),
             }
             result["diff"] = diff
@@ -1592,6 +1596,221 @@ def run_life_stack(browser: Browser, args: argparse.Namespace, gate: Gate) -> No
         context.close()
 
 
+def run_digital_earth_alpha(browser: Browser, args: argparse.Namespace, gate: Gate) -> None:
+    case = ViewportCase("digital-earth-desktop", "desktop", "landscape", 1440, 900, "dark", False, 1)
+    context = new_context(browser, case)
+    page = context.new_page()
+    monitor = BrowserMonitor(page, args.base_url)
+    world = fixture()
+    starter = entity_by_id(world, world["player"]["starter_parcel_id"])
+    home = entity_by_id(world, world["player"]["home_building_id"])
+    living_room = entity_by_id(world, world["player"]["home_room_id"])
+    player_life = entity_by_id(world, world["player"]["life_id"])
+    workshop = entity_by_id(world, "room-workshop-001")
+    ai_worker = entity_by_id(world, "life-wukong-001")
+    try:
+        load_page(page, args.base_url, "dark")
+        start_mock_session(page, with_location=False)
+        page.wait_for_function(
+            "() => document.documentElement.dataset.worldViewerPlayerMarker === 'true'"
+        )
+        player_hud = clean_text(page.locator("#player-command-center").inner_text())
+        gate.expect(
+            "digital-earth.player-session",
+            "digital-earth",
+            "Starter Residence" in player_hud
+            and not page.locator("#player-step-right-button").is_disabled(),
+            details={"hud": player_hud},
+        )
+
+        inspector_text = clean_text(page.locator("#inspector-content").inner_text())
+        gate.expect(
+            "digital-earth.land-history",
+            "land-integrity",
+            all(label in inspector_text for label in (
+                "Parcel Version", "Revision History", "Ownership Timeline"
+            )),
+            details={"required": ["Parcel Version", "Revision History", "Ownership Timeline"]},
+        )
+
+        navigate_to_city(page, world)
+        open_parcel_menu_with_mouse(page, starter)
+        page.locator(".context-action[aria-label^='FARM,']").click()
+        page.locator("#proposal-bar").wait_for(state="visible")
+        page.locator("#land-save-button").click()
+        page.wait_for_function(
+            "() => document.getElementById('land-save-button')?.disabled === true"
+        )
+        storage_keys = page.evaluate("Object.keys(localStorage).sort()")
+        gate.expect(
+            "digital-earth.land-draft-save",
+            "land-integrity",
+            any("land-runtime" in key for key in storage_keys),
+            details={"storage_keys": storage_keys},
+        )
+        page.locator("#land-undo-button").click()
+        page.wait_for_function(
+            "() => document.getElementById('land-redo-button')?.disabled === false"
+        )
+        page.locator("#land-redo-button").click()
+        gate.expect(
+            "digital-earth.land-undo-redo",
+            "land-integrity",
+            page.locator("#proposal-bar").is_visible(),
+        )
+
+        page.locator("#home-button").click()
+        page.wait_for_function(
+            "() => document.documentElement.dataset.worldViewerLevel === 'LAND_PARCEL'"
+        )
+        activate_accessible_entity(page, home, "BUILDING")
+        building_text = clean_text(page.locator("#inspector-content").inner_text())
+        gate.expect(
+            "digital-earth.building-runtime",
+            "building-integrity",
+            all(label in building_text for label in ("Template / Type", "Health", "Capacity", "Lifecycle")),
+            details={"building": home["id"]},
+        )
+
+        activate_accessible_entity(page, living_room, "ROOM")
+        page.wait_for_function(
+            "() => Number(document.documentElement.dataset.worldViewerLifeEntities) >= 3"
+        )
+        room_text = clean_text(page.locator("#inspector-content").inner_text())
+        gate.expect(
+            "digital-earth.room-runtime",
+            "room-integrity",
+            all(label in room_text for label in ("Furniture", "Equipment", "Organisms", "Life", "Content Chain"))
+            and int(page.evaluate("document.documentElement.dataset.worldViewerLifeEntities")) >= 3,
+            details={"room": living_room["id"]},
+        )
+
+        activate_accessible_entity(page, player_life, "ROOM")
+        life_root = page.locator(".life-os-viewer")
+        life_root.wait_for(state="visible")
+        life_before = clean_text(life_root.inner_text())
+        life_root.get_by_role("button", name="EAT").click()
+        page.wait_for_timeout(100)
+        life_after = clean_text(life_root.inner_text())
+        gate.expect(
+            "digital-earth.life-runtime",
+            "life-integrity",
+            all(label in life_after for label in ("Health", "Food", "Water", "Energy", "Age (days)", "Occupation", "Inventory"))
+            and life_before != life_after,
+            details={"life": player_life["id"]},
+        )
+        life_root.get_by_role("button", name="SLEEP").click()
+        page.locator("#simulation-advance-button").click()
+        page.wait_for_timeout(100)
+        life_root.get_by_role("button", name="WAKE").click()
+
+        page.locator("#player-step-right-button").click()
+        page.wait_for_function(
+            "() => document.getElementById('player-hud-movement')?.textContent === 'WALKING'"
+        )
+        gate.expect(
+            "digital-earth.player-walking",
+            "digital-earth",
+            page.locator("#player-hud-movement").inner_text() == "WALKING"
+            and page.evaluate("document.documentElement.dataset.worldViewerPlayerMarker") == "true",
+        )
+
+        screenshot = capture_screenshot(
+            page, case, args.output_dir, None, args.pixel_threshold
+        )
+        gate.screenshots.append(screenshot)
+        gate.expect(
+            "digital-earth.visual-nonblank",
+            "visual-regression",
+            screenshot["pixel_variance"] >= 15 and screenshot["visual_range"] >= 32,
+            details=screenshot,
+        )
+
+        page.locator("[data-mode='WORLD']").click()
+        page.locator("#back-button").click()
+        page.wait_for_function(
+            "() => document.documentElement.dataset.worldViewerLevel === 'BUILDING'"
+        )
+        activate_accessible_entity(page, workshop, "ROOM")
+        activate_accessible_entity(page, ai_worker, "ROOM")
+        ai_text = clean_text(page.locator(".life-os-viewer").inner_text())
+        gate.expect(
+            "digital-earth.ai-worker-visible",
+            "life-integrity",
+            "Wukong 001" in ai_text and "AI_WORKER" in ai_text,
+            details={"worker": ai_worker["id"], "room": workshop["id"]},
+        )
+
+        page.reload(wait_until="domcontentloaded")
+        page.wait_for_function(
+            "() => document.documentElement.dataset.worldViewerRendered === 'true'"
+        )
+        start_mock_session(page, with_location=False)
+        page.locator("#proposal-bar").wait_for(state="visible")
+        canonical_use = page.evaluate(
+            """async ({url, id}) => {
+              const data = await fetch(url, {cache: "no-store"}).then(response => response.json());
+              return data.parcels.find(parcel => parcel.id === id)?.land_use ?? "UNKNOWN";
+            }""",
+            {"url": "./data/synthetic-world.json", "id": starter["id"]},
+        )
+        gate.expect(
+            "digital-earth.reload-recovery",
+            "regression",
+            canonical_use == "RESIDENTIAL"
+            and "FARM" in page.locator("#proposal-summary").inner_text(),
+            details={"canonical_land_use": canonical_use, "draft_recovered": True},
+        )
+        browser_clean(monitor, "digital-earth-alpha", gate)
+    except Exception as error:
+        gate.add(
+            "digital-earth.execution",
+            "digital-earth",
+            "FAIL",
+            details={"error": clean_text(error)},
+        )
+        browser_clean(monitor, "digital-earth-alpha", gate)
+    finally:
+        context.close()
+
+
+def run_digital_earth_mobile(browser: Browser, args: argparse.Namespace, gate: Gate) -> None:
+    base = next(case for case in MATRIX if case.slug == "iphone-portrait-light")
+    case = ViewportCase("digital-earth-mobile", base.family, base.orientation, base.width, base.height, base.theme, base.touch, base.device_scale_factor, base.user_agent)
+    context = new_context(browser, case)
+    page = context.new_page()
+    monitor = BrowserMonitor(page, args.base_url)
+    try:
+        load_page(page, args.base_url, "light")
+        start_mock_session(page, with_location=True)
+        page.locator("#inspector-close").click()
+        page.locator("#player-step-down-button").click()
+        layout = measure_overflow(page)
+        screenshot = capture_screenshot(page, case, args.output_dir, None, args.pixel_threshold)
+        gate.screenshots.append(screenshot)
+        gate.expect(
+            "digital-earth.mobile-living-world",
+            "mobile-interaction",
+            layout["document_width"] <= layout["viewport_width"]
+            and layout["document_height"] <= layout["viewport_height"]
+            and not layout["offenders"]
+            and page.locator("#player-hud-movement").inner_text() == "WALKING"
+            and screenshot["pixel_variance"] >= 15,
+            details={"layout": layout, "screenshot": screenshot},
+        )
+        browser_clean(monitor, "digital-earth-mobile", gate)
+    except Exception as error:
+        gate.add(
+            "digital-earth.mobile-execution",
+            "mobile-interaction",
+            "FAIL",
+            details={"error": clean_text(error)},
+        )
+        browser_clean(monitor, "digital-earth-mobile", gate)
+    finally:
+        context.close()
+
+
 def reports(args: argparse.Namespace, gate: Gate) -> tuple[dict[str, Any], dict[str, Any]]:
     matrix = [asdict(case) for case in MATRIX]
     qa_report = {
@@ -1702,6 +1921,8 @@ def main(argv: list[str] | None = None) -> int:
                 run_login_and_consent(browser, args, gate)
                 run_proposal_permissions(browser, args, gate)
                 run_life_stack(browser, args, gate)
+                run_digital_earth_alpha(browser, args, gate)
+                run_digital_earth_mobile(browser, args, gate)
             finally:
                 browser.close()
     except Exception as error:

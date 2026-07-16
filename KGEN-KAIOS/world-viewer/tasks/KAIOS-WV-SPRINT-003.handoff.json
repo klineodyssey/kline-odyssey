@@ -1,0 +1,51 @@
+{
+  "handoff_id": "HANDOFF-KAIOS-WV-SPRINT-003-CODEX-GM-01",
+  "task_id": "KAIOS-WV-SPRINT-003",
+  "human_decision_id": "HUMAN-SPRINT-003-001",
+  "claim_id": "CLAIM-KAIOS-WV-SPRINT-003-20260717-CODEX-GM-01",
+  "branch": "codex/world-viewer-sprint-003-digital-earth",
+  "worktree": "C:\\Desktop\\kline-odyssey-world-viewer-sprint-003",
+  "base_sha": "62063a8bb873f4c930e47b32bed7e88f17cc448d",
+  "head_sha": "bc98b9a6602f27cc4b21ed2d5c8a6aca5883fae4",
+  "implementation_commit_sha": "bc98b9a6602f27cc4b21ed2d5c8a6aca5883fae4",
+  "tests_run": [
+    "STATIC_DIGITAL_EARTH_ACCEPTANCE",
+    "RUNTIME_INTEGRITY",
+    "BROWSER_PRODUCT_QA",
+    "RESPONSIVE_SCREENSHOT_DIFF",
+    "ACCESSIBILITY",
+    "PERFORMANCE",
+    "SECRET_SCAN",
+    "PROTECTED_PATH_DIFF"
+  ],
+  "test_results": {
+    "static_acceptance": "PASS",
+    "runtime_integrity": "PASS",
+    "browser_product_qa": {
+      "passed": 115,
+      "failed": 0,
+      "skipped": 0
+    },
+    "protected_path_violations": 0
+  },
+  "evidence": [
+    "KGEN-KAIOS/world-viewer/SPRINT_003_DIGITAL_EARTH_REPORT.md",
+    "KGEN-KAIOS/world-viewer/tests/evidence/sprint-003/qa-report.json",
+    "KGEN-KAIOS/world-viewer/tests/evidence/sprint-003/performance-report.json",
+    "KGEN-KAIOS/world-viewer/tests/evidence/sprint-003/runtime-integrity-report.json"
+  ],
+  "known_issues": [],
+  "risks": [
+    "Browser persistence remains local and non-authoritative.",
+    "Synthetic fixtures are not real land, identity, health or financial data."
+  ],
+  "protected_path_violations": 0,
+  "runtime_current_modified": false,
+  "universe_map_modified": false,
+  "frozen_baseline_modified": false,
+  "implementation_scope": "SYNTHETIC_DIGITAL_EARTH_ALPHA",
+  "recommended_next_action": "PUSH_REVIEWED_BRANCH_AND_MERGE_PR",
+  "review_status": "APPROVED",
+  "claim_state": "CLOSED",
+  "lease_state": "RELEASED"
+}
