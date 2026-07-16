@@ -1,0 +1,219 @@
+{
+  "metadata": {
+    "runtime_id": "KAIOS-CODEX-SWARM-V1",
+    "version": "0.1.0",
+    "revision": "2026-07-16.1",
+    "status": "ARCHITECTURE_PROPOSAL_UNDER_REVIEW",
+    "last_updated": "2026-07-16",
+    "updated_by": "Codex / codex-gm-01",
+    "reviewed_by": "HUMAN_ARCHITECTURE_REVIEW_REQUIRED",
+    "source_commit": "89f3c351c488a0705f514adba974dd6c3dd3cb3a",
+    "task_id": "HUMAN-CODEX-SWARM-001",
+    "human_decision_id": "HUMAN-CODEX-SWARM-001",
+    "change_reason": "Define bounded internal Codex parallelism without creating new company governance.",
+    "ancestor": [
+      "KGEN-AI-Company/CODEX_MANAGER_PROTOCOL.md",
+      "KGEN-KAIOS/governance/autopilot/worker-swarm/WORKER_SWARM_RUNTIME.md",
+      "KGEN-KAIOS/governance/autopilot/worker-swarm/MASTER_REGISTRY_STANDARD.md"
+    ],
+    "source_of_truth": false
+  },
+  "boundary": {
+    "architecture": "UNDER_REVIEW",
+    "implementation_started": false,
+    "workqueue_created": false,
+    "second_workqueue_created": false,
+    "second_governance_created": false,
+    "second_dispatcher_created": false,
+    "auto_allocation_enabled": false,
+    "internal_clones_activated": 0,
+    "runtime_current_modified": false,
+    "universe_map_modified": false,
+    "protected_paths_modified": false,
+    "deployment_started": false
+  },
+  "organization": {
+    "organization_id": "CODEX-ENGINEERING-ORG-001",
+    "organization_type": "CHIEF_ENGINEERING_ORGANIZATION",
+    "parent_worker_id": "codex-gm-01",
+    "human_authority_id": "human-primeforge",
+    "parent_controller_edits_files": false,
+    "command_source": "CURRENT_COMPANY_AUTHORITY_UNTIL_DECISION_CENTER_CUTOVER",
+    "workqueue": "KGEN-Organization/WorkOrders/WORK_QUEUE.md",
+    "company_dispatcher": "EXISTING_COMPANY_DISPATCHER_ONLY",
+    "claim_authority": "CANONICAL_ATOMIC_CLAIM_AUTHORITY_REQUIRED_FOR_PARALLEL_EXECUTION"
+  },
+  "compatibility": {
+    "worker_swarm_v1_rule": "ONE_ACTIVE_CLONE_PER_WORKER",
+    "scoped_revision": "UNIQUE_DERIVED_CODEX_INTERNAL_ACTORS_UNDER_ONE_PARENT_ORGANIZATION",
+    "shared_parent_worker_id_as_execution_principal_allowed": false,
+    "derived_actor_registration_required": true,
+    "derived_actor_is_automatic_employee": false,
+    "candidate_decision_center_branch": "codex/company-decision-center-architecture",
+    "candidate_company_autonomy_branch": "codex/company-autonomous-runtime-architecture"
+  },
+  "identity_contract": {
+    "required_fields": [
+      "codex_organization_id",
+      "parent_worker_id",
+      "internal_actor_id",
+      "internal_actor_attestation",
+      "clone_id",
+      "clone_role",
+      "session_id",
+      "claim_id",
+      "task_id",
+      "worktree_id",
+      "branch",
+      "base_sha",
+      "head_sha",
+      "review_owner_id",
+      "fencing_token",
+      "record_version",
+      "permission_snapshot",
+      "protected_path_snapshot",
+      "write_set",
+      "read_set",
+      "checkpoint_id",
+      "status",
+      "created_at",
+      "updated_at",
+      "expires_at"
+    ],
+    "clone_id_format": "CODEX-CLONE-<ROLE>-NNNNNN",
+    "session_id_format": "CODEX-SESSION-YYYYMMDD-NNN",
+    "worktree_id_format": "CODEX-WT-<ROLE>-<TASK-ID>-<INSTANCE>",
+    "branch_format": "codex/<role>/<task-id>-<instance>",
+    "ids_reused": false
+  },
+  "roles": [
+    {
+      "role_id": "ARCHITECTURE_CLONE",
+      "max_active": 2,
+      "allowed": ["SOURCE_AUDIT", "ARCHITECTURE_PROPOSAL", "MODEL", "ADR_CANDIDATE", "GAP_ANALYSIS"],
+      "forbidden": ["IMPLEMENTATION", "SELF_REVIEW", "MERGE", "RELEASE"]
+    },
+    {
+      "role_id": "REVIEW_CLONE",
+      "max_active": 2,
+      "allowed": ["REVIEW", "VALIDATION", "NON_MUTATING_TEST", "REVIEW_ARTIFACT"],
+      "forbidden": ["IMPLEMENTATION", "REPAIR_EDIT", "DISPATCH", "MERGE", "SELF_REVIEW"]
+    },
+    {
+      "role_id": "DISPATCHER_CLONE",
+      "max_active": 1,
+      "allowed": ["CURSOR_ELIGIBILITY", "TASK_ENVELOPE_ROUTING", "CLAIM_REQUEST", "REVIEW_REPAIR_ROUTING", "CLOSE_RELEASE_REQUEST"],
+      "forbidden": ["PROGRAM_EDIT", "ARCHITECTURE_EDIT", "REVIEW", "MERGE", "SELF_CLAIM"]
+    },
+    {
+      "role_id": "KERNEL_CLONE",
+      "max_active": 1,
+      "allowed": ["KERNEL_RESEARCH", "KERNEL_ARCHITECTURE", "AUTHORIZED_KERNEL_SANDBOX"],
+      "forbidden": ["RUNTIME_CURRENT", "UNRELATED_MODULE", "SELF_APPROVAL"]
+    },
+    {
+      "role_id": "LIFE_CLONE",
+      "max_active": 1,
+      "allowed": ["LIFE_RESEARCH", "LIFE_ARCHITECTURE", "AUTHORIZED_LIFE_SANDBOX"],
+      "forbidden": ["COMPANY_OS_LEAKAGE", "LIFE_OS_CURRENT", "SELF_APPROVAL"]
+    },
+    {
+      "role_id": "UI_CLONE",
+      "max_active": 1,
+      "allowed": ["UI_ARCHITECTURE", "AUTHORIZED_UI_SANDBOX", "ACCESSIBILITY_EVIDENCE", "VISUAL_EVIDENCE"],
+      "forbidden": ["OWNERSHIP_MUTATION", "PRODUCTION_DEPLOYMENT", "SELF_APPROVAL"]
+    },
+    {
+      "role_id": "GIT_CLONE",
+      "max_active": 1,
+      "allowed": ["FETCH", "COMPARE", "BRANCH", "APPROVED_INTEGRATION", "AUTHORIZED_PUSH", "REPOSITORY_HEALTH", "RELEASE_EVIDENCE"],
+      "forbidden": ["AUTHORING", "SUBSTANTIVE_REPAIR", "APPROVAL_INVENTION", "FORCE_PUSH"]
+    },
+    {
+      "role_id": "DOCUMENTATION_CLONE",
+      "max_active": 1,
+      "allowed": ["DOCUMENTATION", "INDEX", "LINK", "MACHINE_READABLE_DOCUMENTATION"],
+      "forbidden": ["RUNTIME_IMPLEMENTATION", "ARCHITECTURE_APPROVAL", "MERGE"]
+    },
+    {
+      "role_id": "TESTING_CLONE",
+      "max_active": 2,
+      "allowed": ["TEST_DESIGN", "TEST_EXECUTION", "VALIDATION", "PERFORMANCE_EVIDENCE", "REPRODUCIBILITY_EVIDENCE"],
+      "forbidden": ["PRODUCT_IMPLEMENTATION", "APPROVAL", "UNAUTHORIZED_SOURCE_EDIT"]
+    },
+    {
+      "role_id": "COMPANY_CLONE",
+      "max_active": 1,
+      "allowed": ["DAILY_OPERATION", "HEALTH", "BACKLOG_RECONCILIATION", "REPORT", "DRIFT_OBSERVATION"],
+      "forbidden": ["IMPLEMENTATION", "CURSOR_DISPATCH", "MERGE", "HUMAN_APPROVAL"]
+    }
+  ],
+  "cardinality": {
+    "max_active_codex_clones": 10,
+    "max_active_claims_per_clone": 1,
+    "max_active_sessions_per_clone": 1,
+    "max_active_claims_per_task": 1,
+    "max_active_git_integrations": 1,
+    "max_active_dispatch_mutations": 1,
+    "write_write_overlap_allowed": false,
+    "human_main_allowed": false
+  },
+  "separation_of_duties": [
+    "AUTHOR_CLONE_NOT_REVIEWER_CLONE",
+    "AUTHOR_CLONE_NOT_GIT_CLONE",
+    "REVIEWER_CLONE_NOT_GIT_CLONE",
+    "DISPATCHER_CLONE_NOT_CURSOR_WORKER",
+    "TESTING_CLONE_EVIDENCE_NOT_APPROVAL",
+    "INTERNAL_REVIEW_NOT_EXTERNAL_REVIEW"
+  ],
+  "states": [
+    "REGISTERED",
+    "BOOTING",
+    "READY",
+    "CLAIM_ACTIVE",
+    "EXECUTING",
+    "HANDOFF_SUBMITTED",
+    "WAITING_REVIEW",
+    "REPAIR",
+    "BLOCKED",
+    "CHECKPOINTING",
+    "RECOVERY_PENDING",
+    "RECOVERING",
+    "CLOSED",
+    "OFFLINE",
+    "SUSPENDED",
+    "ARCHIVED"
+  ],
+  "capacity": {
+    "internal_parallelism_target": 10,
+    "review_capacity_target": 2,
+    "dispatcher_capacity_target": 1,
+    "architecture_capacity_target": 4,
+    "git_capacity_target": 1,
+    "testing_capacity_target": 2,
+    "current_operational_parallelism": 1,
+    "monkey_utilization": "NOT_MEASURED",
+    "average_idle_time": "NOT_MEASURED"
+  },
+  "enablement_gates": [
+    "INDEPENDENT_ARCHITECTURE_REVIEW",
+    "DERIVED_ACTOR_REGISTRY_AND_ATTESTATION",
+    "CANONICAL_ATOMIC_CLAIM_AUTHORITY",
+    "SESSION_AND_CHECKPOINT_PERSISTENCE",
+    "WORKTREE_AND_WRITE_SET_RESERVATION",
+    "REVIEW_INDEPENDENCE_ENFORCEMENT",
+    "GIT_EXACT_TREE_INTEGRATION",
+    "HUMAN_ANCHOR_AND_AUTONOMY_ENFORCEMENT",
+    "S0_FAILURE_AND_RECOVERY_TESTS",
+    "OBSERVABILITY_AND_CAPACITY_METRICS"
+  ],
+  "assessment": {
+    "architecture_readiness": 90,
+    "operational_readiness": 0,
+    "addresses_single_session_bottleneck_in_architecture": true,
+    "bottleneck_removed_operationally": false
+  },
+  "live_clones": [],
+  "live_sessions": [],
+  "live_claims": []
+}
