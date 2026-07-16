@@ -1,11 +1,12 @@
 {
   "metadata": {
-    "version": "1.0.0",
-    "revision": "2026-07-16.4",
+    "version": "1.0.2",
+    "revision": "2026-07-16.5",
     "status": "ACTIVE_MANAGED_REGISTRY",
     "human_decision_id": "HUMAN-PRIMEFORGE-FULL-AUTOPILOT-001",
     "manager": "codex-gm-01",
-    "source_commit": "299d2759328f6eddeb6db3f4e767e945e2722ccb",
+    "source_commit": "d5d9b2cc5bafd67ec600fccb2701f638020d9741",
+    "last_decision_id": "HUMAN-MERGE-CONFLICT-001",
     "source_of_truth": true,
     "private_local_paths_published": false
   },
@@ -42,6 +43,40 @@
       "push_status": "PENDING_SESSION_RELEASE",
       "baseline_status": "DOCUMENTATION_BASELINE",
       "next_action": "VALIDATE_AND_PUSH_INTEGRATION_BRANCH"
+    },
+    {
+      "proposal_id": "COMPANY-DECISION-CENTER-001",
+      "decision_ids": ["HUMAN-COMPANY-DECISION-CENTER-001"],
+      "worktree": "WORKTREE-CODEX-COMPANY-DECISION-CENTER",
+      "base_sha": "89f3c351c488a0705f514adba974dd6c3dd3cb3a",
+      "files": ["company/"],
+      "dependencies": [
+        "KAIOS_CONSTITUTION",
+        "DECISION_ENGINE",
+        "COMPANY_INBOX",
+        "PRIORITY_SCHEDULER",
+        "WORKER-SWARM-001",
+        "CANONICAL-CLAIM-AUTHORITY-001"
+      ],
+      "internal_review": "SOURCE_AUDIT_AND_PROPOSAL_COMPLETE",
+      "external_review": "REQUIRED_BEFORE_BASELINE",
+      "review_score": 91,
+      "amendments": [
+        "SCOPE_SSOT_TO_COMMANDS_ONLY",
+        "PRESERVE_CURRENT_AUTHORITIES_UNTIL_CUTOVER",
+        "APPEND_ONLY_DECISION_LINEAGE",
+        "REVIEW_FIRST_WITH_INVALID_SUBMISSION_TRIAGE",
+        "CANONICAL_CLAIM_AUTHORITY_REQUIRED"
+      ],
+      "risk_level": "LEVEL_B_R2_ARCHITECTURE",
+      "protected_path_status": "PASS_ZERO",
+      "implementation_status": "NOT_STARTED",
+      "commit_status": "PROPOSAL_COMMITTED",
+      "commit_sha": "080ae7f96d76195aab27b1af46e30cfeeee06dbe",
+      "push_status": "PENDING_PROPOSAL_PUBLICATION",
+      "baseline_status": "NOT_FROZEN",
+      "cutover_status": "NOT_AUTHORIZED",
+      "next_action": "INDEPENDENT_ARCHITECTURE_REVIEW_THEN_RESOLUTION_AND_ADR"
     },
     {
       "proposal_id": "WORKER-SWARM-001",

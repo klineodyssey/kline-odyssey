@@ -655,3 +655,19 @@ These files are frontend/game runtime modules. They do not replace the formal Un
 | Universe Physics Runtime CURRENT | `C:\Desktop\kline-odyssey\docs\physics\KGEN_Universe_Physics_Runtime_CURRENT.md` | Do not modify. V0.2 runtime modules are subordinate frontend/game modules only. |
 | Temple 12345 | `C:\Desktop\kline-odyssey\K線西遊記\temples\12345` | Do not modify wallet, bridge, Heart runtime, or formal 12345 runtime files. |
 | Contracts | `C:\Desktop\kline-odyssey\KGEN\contracts` | Do not modify contracts during V0.2 documentation registration. |
+
+## Incremental Architecture Registrations
+
+The following proposal files were added after the 2026-07-05 generated inventory. Paths are repository-relative to avoid publishing a private workspace location.
+
+| Full path | Category | Purpose | Rule |
+|---|---|---|---|
+| `company/README.md` | Markdown | Decision Center source audit, package map, and no-cutover boundary | ARCHITECTURE_ONLY |
+| `company/DECISION_CENTER.md` | Markdown | Future Human-anchored append-only company command authority | ARCHITECTURE_ONLY |
+| `company/decision_center.json` | JSON | Zero-state Decision Center and cutover gates | ARCHITECTURE_ONLY |
+| `company/COMPANY_INBOX.md` | Markdown | Typed company intake lanes and review barrier | ARCHITECTURE_ONLY |
+| `company/company_inbox.json` | JSON | Zero-state Inbox lifecycle | ARCHITECTURE_ONLY |
+| `company/COMPANY_DISPATCHER.md` | Markdown | Sole-dispatcher and canonical atomic Claim dependency | ARCHITECTURE_ONLY |
+| `company/dispatcher_runtime.json` | JSON | Disabled Dispatcher model | ARCHITECTURE_ONLY |
+| `company/COMPANY_GOVERNANCE_FLOW.md` | Markdown | Boot-to-review governance and migration flow | ARCHITECTURE_ONLY |
+| `company/COMPANY_MESSAGE_STANDARD.md` | Markdown | Provider-neutral eight-family message contract | ARCHITECTURE_ONLY |

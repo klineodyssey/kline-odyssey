@@ -1,0 +1,116 @@
+{
+  "metadata": {
+    "runtime_id": "KAIOS-COMPANY-DISPATCHER-V1",
+    "version": "0.1.0",
+    "revision": "2026-07-16.1",
+    "status": "ARCHITECTURE_PROPOSAL_UNDER_REVIEW",
+    "last_updated": "2026-07-16",
+    "updated_by": "Codex / codex-gm-01",
+    "reviewed_by": "HUMAN_ARCHITECTURE_REVIEW_REQUIRED",
+    "source_commit": "89f3c351c488a0705f514adba974dd6c3dd3cb3a",
+    "task_id": "HUMAN-COMPANY-DECISION-CENTER-001",
+    "human_decision_id": "HUMAN-COMPANY-DECISION-CENTER-001",
+    "change_reason": "Define sole-dispatcher Architecture while leaving dispatch disabled.",
+    "ancestor": [
+      "KGEN-KAIOS/governance/autopilot/worker-swarm/COMPANY_DISPATCHER.md",
+      "KGEN-AI-Company/CODEX_DISPATCHER_PROTOCOL.md",
+      "KGEN-KAIOS/governance/autopilot/CANONICAL_ATOMIC_CLAIM_AUTHORITY_PROPOSAL.md"
+    ],
+    "source_of_truth": false
+  },
+  "runtime_state": {
+    "architecture": "UNDER_REVIEW",
+    "implemented": false,
+    "enabled": false,
+    "auto_dispatch_enabled": false,
+    "manual_dispatch_mode": "CURRENT_POLICY_OUTSIDE_THIS_PROPOSAL",
+    "workqueue_created": false,
+    "claims_created": 0,
+    "dispatches_created": 0,
+    "deployment_started": false
+  },
+  "sole_dispatcher_after_cutover": "COMPANY_DISPATCHER",
+  "command_source_after_cutover": "COMPANY_DECISION_CENTER",
+  "claim_authority": {
+    "target": "CANONICAL_ATOMIC_CLAIM_AUTHORITY",
+    "implemented": false,
+    "required_features": [
+      "ATOMIC_COMPARE_AND_SWAP",
+      "UNIQUE_CLAIM_ID",
+      "RECORD_VERSION",
+      "FENCING_TOKEN",
+      "LEASE_EXPIRY",
+      "REVIEW_CUSTODY",
+      "CLOSE_AND_RELEASE"
+    ],
+    "branch_local_claim_is_authority": false,
+    "worker_generated_claim_is_authority": false
+  },
+  "normal_priority": [
+    "REVIEW",
+    "REPAIR",
+    "HUMAN_DECISION",
+    "ARCHITECTURE",
+    "IMPLEMENTATION"
+  ],
+  "review_first": {
+    "metric": "actionable_review_count",
+    "block_when_greater_than": 0,
+    "blocks": "NEW_IMPLEMENTATION_DISPATCH",
+    "does_not_block": [
+      "REVIEW_ROUTING",
+      "REPAIR_ROUTING",
+      "URGENT_STOP",
+      "SECURITY_CONTAINMENT",
+      "HUMAN_DECISION_INTAKE"
+    ],
+    "evidence_only_branch_is_actionable_review": false
+  },
+  "preconditions": [
+    "COMPANY_BOOT_PASS",
+    "ACTIVE_DECISION_IN_SCOPE",
+    "INBOX_MESSAGE_VALID",
+    "REVIEW_QUEUE_CLEAR",
+    "ONE_TASK_ENVELOPE",
+    "IMPLEMENTATION_AUTHORIZED_IF_APPLICABLE",
+    "WORKER_AND_SESSION_ELIGIBLE",
+    "CANONICAL_CLAIM_ACQUIRED",
+    "NO_CONCURRENT_CLAIM",
+    "PROTECTED_PATH_CHECK_PASS",
+    "DEPENDENCIES_AND_BASE_PASS",
+    "HUMAN_MAIN_UNTOUCHED"
+  ],
+  "decisions": [
+    "ALLOCATE",
+    "REVIEW_FIRST",
+    "REPAIR_SAME_CLAIM",
+    "RECOVER_SAME_CLAIM",
+    "HOLD_IN_INBOX",
+    "REJECT_DUPLICATE",
+    "REJECT_UNAUTHORIZED",
+    "BLOCK_CLAIM_AUTHORITY",
+    "BLOCK_SOURCE_CONFLICT",
+    "BLOCK_PROTECTED_PATH",
+    "HUMAN_REVIEW_REQUIRED"
+  ],
+  "provider_adapters": [
+    "CODEX",
+    "CURSOR",
+    "CHATGPT",
+    "GEMINI",
+    "GROK",
+    "CLAUDE",
+    "OPENHANDS",
+    "COPILOT",
+    "FUTURE_PROVIDER"
+  ],
+  "worker_constraints": {
+    "one_active_claim_per_session": true,
+    "worker_self_dispatch_allowed": false,
+    "worker_self_review_allowed": false,
+    "worker_merge_allowed": false,
+    "worker_push_main_allowed": false,
+    "worker_release_claim_allowed": false
+  },
+  "live_dispatch_records": []
+}

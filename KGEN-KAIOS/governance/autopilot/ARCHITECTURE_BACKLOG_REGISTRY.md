@@ -1,14 +1,14 @@
 ---
 TITLE: "PrimeForge Architecture Backlog Registry"
-VERSION: "1.0.0"
-REVISION: "2026-07-16.4"
+VERSION: "1.0.2"
+REVISION: "2026-07-16.5"
 STATUS: "ACTIVE_MANAGED_REGISTRY"
 LAST_UPDATED: "2026-07-16"
 UPDATED_BY: "Codex / codex-gm-01"
 REVIEWED_BY: "CODEX_DELEGATED_GM"
-SOURCE_COMMIT: "299d2759328f6eddeb6db3f4e767e945e2722ccb"
-TASK_ID: "HUMAN-PRIMEFORGE-FULL-AUTOPILOT-001"
-CHANGE_REASON: "Register the UI Governor and UI Style Canon architecture proposal without enabling inspection or dispatch automation."
+SOURCE_COMMIT: "d5d9b2cc5bafd67ec600fccb2701f638020d9741"
+TASK_ID: "HUMAN-MERGE-CONFLICT-001"
+CHANGE_REASON: "Reconcile Company Decision Center and UI Governor additions while preserving both proposal histories and all existing baselines."
 ANCESTOR: "Company Inbox; Priority Scheduler; Architecture Governance Board"
 SOURCE_OF_TRUTH: true
 ---
@@ -26,6 +26,7 @@ Priority order is reviewed proposals, amendments, dependency blockers, Company O
 | Proposal | Review | Score | Risk | Baseline / implementation | Next action |
 |---|---|---:|---|---|---|
 | Company Autopilot / Company OS | APPROVED_BY_DELEGATION | 93 | Level B | Documentation baseline; local commit `6936d6f` | Validate and publish integration branch |
+| Company Decision Center V1 | PROPOSAL_COMPLETE | 91 | Level B R2 Architecture | Proposal commit `080ae7f`; command cutover disabled | Independent review, Resolution and ADR before baseline |
 | Worker Swarm | INTERNAL_REVIEW_READY | 90 | Level B | Proposal; local commit `8ed6fc6` | External review before baseline |
 | Boot / Life Integrity | INTERNAL_REVIEW_READY | 91 | Level B | Proposal; local commit `190d8d5` | Independent review before baseline |
 | World Viewer | APPROVE_WITH_AMENDMENTS_RESOLVED | 88 | Level B | `WORLD-VIEWER-V1.0` frozen; local commit `780ffee` | Offer Synthetic Demo after current queue priority |
@@ -50,6 +51,7 @@ Priority order is reviewed proposals, amendments, dependency blockers, Company O
 - Life OS is reconciled with Species OS at Architecture level; external review remains required before implementation.
 - Cursor Control is published only as a proposal and does not replace CURRENT Worker rules.
 - Distributed automatic Cursor dispatch remains disabled until the canonical Claim authority exists.
+- Company Decision Center is a target command control plane only; existing Decision, Inbox, WorkQueue and Review sources remain current until an explicit Human cutover.
 - Genesis DNA normalizes legacy GA levels without changing Physics CURRENT or GEN-007; private engine artifacts remain outside Git.
 - UI Governor defines 80 daily surface/profile cells and fourteen check families, but executable coverage remains zero until independent review and implementation authorization.
 

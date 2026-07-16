@@ -56,6 +56,7 @@ This file is the **unique library-level Master Index** (ORG-P2-003 D7). Other `*
 | KGEN AI Operating System V7.2 | `KGEN-KAIOS/` | Architecture-first AI operating system with worker registry, claim lease, dry run, and read-only operations dashboard |
 | KAIOS Architecture Governance Board | `KGEN-KAIOS/governance/` | Human-approved Architecture proposal, independent review, resolution, ADR and implementation approval gate |
 | PrimeForge Company Autopilot | `KGEN-KAIOS/governance/autopilot/` | Human-delegated Company OS Boot, Session, Inbox, scheduler, repository maintenance, architecture backlog and claim authority proposal |
+| Company Decision Center V1 Proposal | `company/` | Future single company command control plane, typed Inbox, sole Dispatcher and Message Contract; architecture only, no cutover |
 | KAIOS Cursor Control Proposal | `KGEN-KAIOS/governance/cursor/` | Controlled Cursor preflight, Task Envelope, protected path, handoff, stop and legacy suppression proposal |
 | KAIOS Worker Swarm Proposal | `KGEN-KAIOS/governance/autopilot/worker-swarm/` | Architecture-only clone, session, dispatcher, registry and recovery coordination |
 | KAIOS Boot / Life Integrity Proposal | `KGEN-KAIOS/boot-runtime/` | Fail-closed player Boot, Species OS and Life Integrity Architecture; implementation not started |
@@ -105,6 +106,15 @@ This file is the **unique library-level Master Index** (ORG-P2-003 D7). Other `*
 | General Manager Decision Center | `KGEN-KAIOS/decision/index.html` | Read-only Daily Operation, decisions, health, attendance, WorkQueue and readiness center |
 | Decision Engine Standard | `KGEN-KAIOS/decision/DECISION_ENGINE_STANDARD.md` | Codex General Manager daily gate, decision evidence, risk and rollback rules |
 | Decision Log | `KGEN-KAIOS/decision/decision_log.jsonl` | Append-only manager decisions for approve, reject, merge, rollback, workforce and payroll actions |
+| Company Decision Center V1 | `company/README.md` | Source audit, migration boundary and Architecture index for the future canonical command control plane |
+| Company Decision Center Contract | `company/DECISION_CENTER.md` | Human-anchored append-only command authority, projection and fail-closed rules |
+| Company Inbox V1 | `company/COMPANY_INBOX.md` | Human, Codex, Cursor, Review, Architecture, Implementation, Evidence, Done and Archive intake lanes |
+| Company Dispatcher V1 | `company/COMPANY_DISPATCHER.md` | Sole-dispatcher contract with Review First and canonical atomic Claim dependency |
+| Company Message Standard V1 | `company/COMPANY_MESSAGE_STANDARD.md` | Provider-neutral Decision, Task, Review, Repair, Architecture, Implementation, Evidence and Release messages |
+| Company Governance Flow V1 | `company/COMPANY_GOVERNANCE_FLOW.md` | Boot, Decision Center, Inbox, Review First, dispatch, evidence, close and cutover flow |
+| Company Decision Center JSON | `company/decision_center.json` | Machine-readable zero-state command authority, integrity and cutover gates |
+| Company Inbox JSON | `company/company_inbox.json` | Machine-readable nine-lane Inbox and message lifecycle |
+| Company Dispatcher JSON | `company/dispatcher_runtime.json` | Disabled zero-state sole-dispatcher and atomic Claim dependency model |
 | Worker Registry | `KGEN-KAIOS/WORKER_REGISTRY.md` | Worker identity, permission, branch, status, and reviewer model |
 | Generic Worker Protocol | `KGEN-KAIOS/GENERIC_WORKER_PROTOCOL.md` | Shared protocol for AI and Human workers |
 | Worker Boot SOP | `KGEN-KAIOS/workforce/WORKER_BOOT_SOP.md` | Visible BOOT, MUST READ, protected path, task plan, execution, and final report process for every worker task |

@@ -22,13 +22,13 @@ permalink: /PRIMEFORGE_GENESIS_BOOT_SEQUENCE/
 
 STATUS: ACTIVE  
 VERSION: CURRENT  
-REVISION: 2026-07-11.WORKFORCE_GOVERNANCE
-LAST_UPDATED: 2026-07-11
+REVISION: 2026-07-16.COMPANY_DECISION_CENTER_INDEX
+LAST_UPDATED: 2026-07-16
 UPDATED_BY: Codex
 REVIEWED_BY: Codex
-SOURCE_COMMIT: 1ce29b4cb53fcba77213d7792e2ad66e4498eb80
-TASK_ID: KGEN-WORKFORCE-2026-0001
-CHANGE_REASON: Add formal workforce registration, trust levels, violation handling, and unauthorized contribution audit gates.
+SOURCE_COMMIT: d5d9b2cc5bafd67ec600fccb2701f638020d9741
+TASK_ID: HUMAN-MERGE-CONFLICT-001
+CHANGE_REASON: Add the complete Company Decision Center architecture package to the Boot governance index without activating cutover or dispatch.
 SOURCE_OF_TRUTH: TRUE  
 FORMAL_ENTRY: PRIMEFORGE_GENESIS_BOOT_SEQUENCE.md  
 ANCESTOR: PRIMEFORGE_GENESIS_BOOT_SEQUENCE_V1_4.md  
@@ -148,6 +148,22 @@ KGEN work is now governed by provenance and biological evolution gates. These ga
 | Worker trust schema | `KGEN-KAIOS/workforce/WORKER_TRUST_SCHEMA.json` |
 | Worker audit log | `KGEN-KAIOS/workforce/WORKER_AUDIT_LOG.json` |
 | Unauthorized contribution audit | `KGEN_UNAUTHORIZED_CONTRIBUTION_AUDIT.md` |
+
+### Company Decision Center Architecture Index
+
+These files are proposal-only. Reading them does not activate a new command source, Dispatcher, WorkQueue, Claim, implementation, or deployment.
+
+| File | Purpose |
+|---|---|
+| `company/README.md` | Source audit, package map, migration boundary, and no-cutover status |
+| `company/DECISION_CENTER.md` | Future Human-anchored append-only company command authority contract |
+| `company/decision_center.json` | Machine-readable zero-state Decision Center and cutover gates |
+| `company/COMPANY_INBOX.md` | Typed Human, Codex, Cursor, Review, Architecture, Implementation, Evidence, Done, and Archive lanes |
+| `company/company_inbox.json` | Machine-readable Inbox lifecycle with no live dispatch records |
+| `company/COMPANY_DISPATCHER.md` | Future sole-dispatcher and canonical atomic Claim dependency contract |
+| `company/dispatcher_runtime.json` | Disabled zero-state Dispatcher model |
+| `company/COMPANY_GOVERNANCE_FLOW.md` | End-to-end Boot, review-first, repair, release, and migration flow |
+| `company/COMPANY_MESSAGE_STANDARD.md` | Provider-neutral Decision, Task, Review, Repair, Architecture, Implementation, Evidence, and Release messages |
 
 ### WorkOrder Source Rule
 

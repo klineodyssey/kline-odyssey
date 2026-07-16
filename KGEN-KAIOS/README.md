@@ -87,12 +87,29 @@ Human Decision `HUMAN-PRIMEFORGE-FULL-AUTOPILOT-001` delegates bounded Level A a
 | `governance/autopilot/` | Delegated documentation baseline | Company OS Boot, Session, Inbox, scheduler, repository maintenance, backlog and atomic Claim Authority proposal |
 | `governance/autopilot/worker-swarm/` | Architecture proposal | Session, clone, dispatcher, registry and recovery coordination; implementation not started |
 | `governance/cursor/` | Architecture proposal under review | Cursor preflight, Task Envelope, protected paths, handoff, stop conditions and legacy-rule suppression |
+| `../company/` | Architecture proposal under review | Future single company command control plane, typed Inbox, sole Dispatcher and provider-neutral Message Contract; cutover not authorized |
 | `boot-runtime/` | Architecture proposal under review | Fail-closed player Boot, Species OS and Life Integrity contracts |
 | `life/` | `LIFE-OS-V1.0` frozen Architecture | Species-scoped Life OS, state machine, API, events, review and baseline manifest |
 | `world-viewer/` | `WORLD-VIEWER-V1.0` frozen Architecture | Reviewed 2D Web-first World Viewer and synthetic sandbox plan; no runtime implementation yet |
 | `ui-governor/` | Architecture proposal under review | Permanent UI inspection, Style Canon, visual regression and bounded remediation contracts; automation not enabled |
 
 The Canonical Atomic Claim Authority remains a proposal. Until its transactional service is reviewed and implemented, Codex dispatch is explicit and recorded but is not represented as fully atomic distributed scheduling. No entry in this section changes Runtime CURRENT, Universe Map CURRENT, protected paths, Token behavior, real identity, real location, or real financial state.
+
+### Company Decision Center V1
+
+Human Decision `HUMAN-COMPANY-DECISION-CENTER-001` authorizes an Architecture-only integration layer at `../company/`. It scopes Single Source of Truth to company commands and authorization lineage, while Constitution, Canon, CURRENT Runtime, frozen baselines and domain registries keep their own authority. The package does not replace the active Decision Engine, Company Inbox, WorkQueue or Review Log before a reviewed Human cutover. Implementation, WorkQueue creation, automatic dispatch and deployment remain disabled.
+
+| File | Purpose |
+|---|---|
+| `../company/README.md` | Source audit, package map, migration boundary, and no-cutover status |
+| `../company/DECISION_CENTER.md` | Future append-only company command authority contract |
+| `../company/decision_center.json` | Machine-readable zero-state Decision Center and cutover gates |
+| `../company/COMPANY_INBOX.md` | Typed company intake lanes and review barrier |
+| `../company/company_inbox.json` | Machine-readable Inbox lifecycle with no live dispatch records |
+| `../company/COMPANY_DISPATCHER.md` | Future sole Dispatcher and atomic Claim boundary |
+| `../company/dispatcher_runtime.json` | Disabled zero-state Dispatcher model |
+| `../company/COMPANY_GOVERNANCE_FLOW.md` | Boot-to-review governance and migration flow |
+| `../company/COMPANY_MESSAGE_STANDARD.md` | Provider-neutral eight-family message contract |
 
 ## UI Governor Architecture
 
