@@ -1,0 +1,76 @@
+{
+  "metadata": {
+    "manifest_id": "PRIMEFORGE-COMPANY-BOOT-MANIFEST-001",
+    "version": "0.3.0",
+    "revision": "2026-07-15.3",
+    "status": "ARCHITECTURE_APPROVED_IN_PRINCIPLE_P0_AMENDMENT_UNDER_REVIEW",
+    "human_decision_ids": [
+      "HUMAN-PRIMEFORGE-COMPANY-AUTOPILOT-001",
+      "HUMAN-COMPANY-AUTOMATIC-MAINTENANCE-001",
+      "HUMAN-COMPANY-OS-BOOT-001"
+    ],
+    "source_commit": "ORIGIN_MAIN_7a692c34df50861ab10f8bd80959d95251b1071c",
+    "source_freshness": "REMOTE_VERIFIED_2026-07-15T17:29:48+08:00",
+    "source_of_truth": false
+  },
+  "priority_rule": [
+    "HUMAN_DECISION",
+    "CURRENT_CONSTITUTION",
+    "CURRENT_RUNTIME_SELECTOR",
+    "FROZEN_ARCHITECTURE_BASELINE",
+    "APPROVED_ADR",
+    "CURRENT_WORKQUEUE",
+    "ACTIVE_CLAIM_REGISTRY",
+    "LATEST_HANDOFF",
+    "PROTECTED_PATH_POLICY",
+    "OPERATING_SOP",
+    "CURRENT_MAP_SELECTOR",
+    "CURRENT_PHYSICS_RUNTIME",
+    "CURRENT_BIOLOGY_RUNTIME",
+    "CURRENT_CIVILIZATION_ARCHITECTURE",
+    "CURRENT_KERNEL_ARCHITECTURE",
+    "CURSOR_CONTROL_RUNTIME",
+    "HISTORICAL_WHEN_REQUIRED"
+  ],
+  "sources": [
+    {"order":1,"source_id":"HUMAN_DECISION","type":"DYNAMIC","locator":"current request and KGEN-KAIOS/decision/decision_log.jsonl","required":true,"status":"CURRENT_REQUEST_PRESENT"},
+    {"order":2,"source_id":"CURRENT_CONSTITUTION","type":"FILE","locator":"KGEN-KAIOS/constitution/KAIOS_CONSTITUTION.md","required":true,"status":"PRESENT"},
+    {"order":3,"source_id":"BOOT_CURRENT","type":"FILE","locator":"PRIMEFORGE_GENESIS_BOOT_SEQUENCE.md","required":true,"status":"PRESENT"},
+    {"order":4,"source_id":"MACHINE_CANON","type":"FILE","locator":"KGEN-Canon/KGEN_CANON_MASTER.json","required":true,"status":"PRESENT"},
+    {"order":5,"source_id":"WORKSPACE_POLICY","type":"FILE","locator":"KGEN-AI-Company/WORKSPACE_POLICY.md","required":true,"status":"PRESENT"},
+    {"order":6,"source_id":"V11_FROZEN_BASELINE","type":"FILE","locator":"KGEN-KAIOS/V11/ARCHITECTURE_BASELINE.md","required":true,"status":"PRESENT"},
+    {"order":7,"source_id":"APPROVED_ADR_INDEX","type":"FILE","locator":"KGEN-KAIOS/V11/ADR/README.md","required":false,"status":"LOCATOR_REQUIRES_APPROVAL_AUDIT"},
+    {"order":8,"source_id":"CURRENT_WORKQUEUE","type":"FILE","locator":"KGEN-Organization/WorkOrders/WORK_QUEUE.md","required":true,"status":"PRESENT"},
+    {"order":9,"source_id":"WORKER_REGISTRY","type":"FILE","locator":"KGEN-KAIOS/worker_registry.json","required":true,"status":"PRESENT"},
+    {"order":10,"source_id":"ACTIVE_CLAIMS","type":"DYNAMIC_PATTERN","locator":"KGEN-AI-Company/reports/claims/<Task-ID>_claim.json and active handoff refs","required":true,"status":"NO_UNEXPIRED_BRANCH_LEASE_REVIEW_REPAIR_CUSTODY_VISIBLE"},
+    {"order":11,"source_id":"LATEST_HANDOFF","type":"DYNAMIC_GIT_REF","locator":"origin/cursor-handoff/<Task-ID>","required":true,"status":"REMOTE_TIPS_FETCHED_AND_VERIFIED"},
+    {"order":12,"source_id":"PROTECTED_PATH_POLICY","type":"FILE_SET","locator":"KGEN-KAIOS/CODEX_PRE_MERGE_CHECKLIST.md; KGEN-AI-Company/WORKSPACE_POLICY.md; KGEN-Agent-Office/DO_NOT_TOUCH.md","required":true,"status":"PRESENT"},
+    {"order":13,"source_id":"MANAGER_PROTOCOL","type":"FILE","locator":"KGEN-AI-Company/CODEX_MANAGER_PROTOCOL.md","required":true,"status":"PRESENT"},
+    {"order":14,"source_id":"DECISION_ENGINE","type":"FILE","locator":"KGEN-KAIOS/decision/DECISION_ENGINE_STANDARD.md","required":true,"status":"PRESENT"},
+    {"order":15,"source_id":"REVIEW_LOG","type":"FILE","locator":"KGEN-AI-Company/reports/CODEX_REVIEW_LOG.md","required":true,"status":"PRESENT"},
+    {"order":16,"source_id":"CURRENT_MAP_SELECTOR","type":"FILE","locator":"docs/maps/README.md","required":true,"status":"PRESENT"},
+    {"order":17,"source_id":"CURRENT_PHYSICS_RUNTIME","type":"FILE","locator":"docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md","required":true,"status":"PRESENT_PROTECTED"},
+    {"order":18,"source_id":"CURRENT_BIOLOGY_RUNTIME","type":"FILE","locator":"docs/biology/KGEN_Civilization_Biology_Runtime_V1_0.md","required":true,"status":"PRESENT_REFERENCE"},
+    {"order":19,"source_id":"CIVILIZATION_BASELINE","type":"FILE","locator":"KGEN-KAIOS/civilization/CIVILIZATION_ECONOMY_ARCHITECTURE_BASELINE.md","required":true,"status":"PRESENT_FROZEN"},
+    {"order":20,"source_id":"KERNEL_ARCHITECTURE","type":"FILE","locator":"KGEN-KAIOS/kernel/KERNEL_V1.md","required":true,"status":"PRESENT_RESEARCH_NOT_FROZEN"},
+    {"order":21,"source_id":"CURSOR_CONTROL_RUNTIME","type":"PROPOSED_FILE_SET","locator":"KGEN-KAIOS/governance/cursor/","required":false,"required_after_approval":true,"status":"MISSING_IN_MAIN_UNAPPROVED_EXTERNAL_WORKTREE_NOT_AUTHORITY"},
+    {"order":22,"source_id":"MAINTENANCE_MODE","type":"FILE","locator":"KGEN-KAIOS/operations/MAINTENANCE_MODE_STANDARD.md","required":true,"status":"PRESENT"},
+    {"order":23,"source_id":"GITHUB_CONNECTIVITY_RUNBOOK","type":"FILE","locator":"KGEN-KAIOS/operations/GITHUB_CONNECTIVITY_RUNBOOK.md","required":true,"status":"PRESENT"},
+    {"order":24,"source_id":"COMPANY_INBOX","type":"PROPOSED_FILE_SET","locator":"KGEN-KAIOS/governance/autopilot/COMPANY_INBOX.md; KGEN-KAIOS/governance/autopilot/company_inbox.json","required":false,"required_after_approval":true,"status":"PROPOSED_NOT_ACTIVE"},
+    {"order":25,"source_id":"PRIORITY_SCHEDULER","type":"PROPOSED_FILE_SET","locator":"KGEN-KAIOS/governance/autopilot/PRIORITY_SCHEDULER.md; KGEN-KAIOS/governance/autopilot/priority_scheduler.json","required":false,"required_after_approval":true,"status":"PROPOSED_NOT_ACTIVE"},
+    {"order":26,"source_id":"REPOSITORY_MAINTENANCE_RUNTIME","type":"PROPOSED_FILE_SET","locator":"KGEN-KAIOS/governance/autopilot/REPOSITORY_MAINTENANCE_RUNTIME.md; KGEN-KAIOS/governance/autopilot/repository_maintenance_runtime.json","required":false,"required_after_approval":true,"status":"PROPOSED_NOT_ACTIVE"},
+    {"order":27,"source_id":"COMPANY_OS_BOOT","type":"PROPOSED_FILE_SET","locator":"KGEN-KAIOS/governance/autopilot/COMPANY_OS_BOOT.md; KGEN-KAIOS/governance/autopilot/company_os_boot.json","required":false,"required_after_approval":true,"status":"P0_AMENDMENT_UNDER_REVIEW"},
+    {"order":28,"source_id":"COMPANY_SESSION","type":"PROPOSED_FILE_SET","locator":"KGEN-KAIOS/governance/autopilot/COMPANY_SESSION.md; KGEN-KAIOS/governance/autopilot/company_session.json","required":false,"required_after_approval":true,"status":"P0_AMENDMENT_UNDER_REVIEW"}
+  ],
+  "source_conflict_result": "BLOCKED_SOURCE_CONFLICT",
+  "legacy_suppression": {
+    "enabled_in_architecture": true,
+    "delete_legacy_files": false,
+    "record_fields": ["loaded_legacy_rules","suppressed_legacy_rules","reason","effective_source_of_truth"]
+  },
+  "boot_output_fields": [
+    "session_id","previous_session_id","human_decision_id","inbox_id","boot_source","constitution","current_main","remote_freshness","review_workspace",
+    "human_main","workqueue","active_claims","pending_reviews","pending_push","github","pages",
+    "protected_alerts","maintenance_mode","next_network_retry","current_layer","checkpoint_id","implementation_authorized","status"
+  ]
+}

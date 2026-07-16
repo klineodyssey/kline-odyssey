@@ -1,0 +1,101 @@
+{
+  "metadata": {
+    "contract_id": "PRIMEFORGE-COMPANY-SESSION-ARCH-001",
+    "version": "0.1.0",
+    "revision": "2026-07-15.1",
+    "status": "ARCHITECTURE_P0_AMENDMENT_UNDER_REVIEW",
+    "human_decision_id": "HUMAN-COMPANY-OS-BOOT-001",
+    "source_commit": "ORIGIN_MAIN_7a692c34df50861ab10f8bd80959d95251b1071c",
+    "source_of_truth": false
+  },
+  "lifecycle": [
+    "CREATED",
+    "BOOTING",
+    "ACTIVE",
+    "HOLD",
+    "FAILED_CLOSED",
+    "CHECKPOINTING",
+    "CLOSED",
+    "RECOVERABLE",
+    "ARCHIVED"
+  ],
+  "required_fields": [
+    "session_id",
+    "previous_session_id",
+    "actor_id",
+    "provider_id",
+    "worker_id",
+    "role",
+    "trust_level",
+    "started_at",
+    "ended_at",
+    "workspace_id",
+    "branch",
+    "base_sha",
+    "observed_origin_main",
+    "human_decision_ids",
+    "task_id",
+    "claim_id",
+    "current_layer",
+    "layer_results",
+    "repository_health",
+    "protected_path_result",
+    "implementation_authorized",
+    "session_status",
+    "next_legal_action"
+  ],
+  "checkpoint": {
+    "required": true,
+    "categories": [
+      "CHECKPOINT",
+      "EVIDENCE",
+      "DECISION",
+      "STATE",
+      "CLAIM",
+      "REVIEW"
+    ],
+    "required_fields": [
+      "checkpoint_id",
+      "session_id",
+      "created_at",
+      "source_hashes",
+      "observed_refs",
+      "layer_results",
+      "evidence_refs",
+      "decision_ids",
+      "state_snapshot",
+      "claim_snapshot",
+      "review_snapshot",
+      "protected_path_result",
+      "next_legal_action",
+      "session_chain_hash"
+    ],
+    "failure_result": "FAILED_CLOSED_CHECKPOINT"
+  },
+  "recovery": {
+    "reopen_old_session_in_place": false,
+    "new_session_required": true,
+    "previous_session_id_required": true,
+    "revalidate_current_sources": true,
+    "full_boot_when_source_or_ref_changed": true,
+    "checkpoint_is_execution_authority": false
+  },
+  "forbidden_persistence": [
+    "TOKEN",
+    "API_KEY",
+    "PRIVATE_KEY",
+    "SEED_PHRASE",
+    "PASSWORD",
+    "PRIVATE_KYC_DATA",
+    "EXACT_PRIVATE_GPS",
+    "PRIVATE_PROVIDER_PROMPT",
+    "PRIVATE_LOCAL_PATH"
+  ],
+  "runtime_store_implemented": false,
+  "checkpoint_writer_implemented": false,
+  "resume_engine_implemented": false,
+  "implementation_started": false,
+  "commit_allowed_this_round": false,
+  "push_allowed_this_round": false,
+  "deployment_started": false
+}

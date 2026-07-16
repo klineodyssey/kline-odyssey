@@ -1,0 +1,40 @@
+{
+  "metadata": {
+    "version": "1.0.0",
+    "revision": "2026-07-16.1",
+    "status": "APPROVE_FOR_DELEGATED_DOCUMENTATION_BASELINE",
+    "human_decision_id": "HUMAN-PRIMEFORGE-FULL-AUTOPILOT-001",
+    "approver": "CODEX_DELEGATED_GM",
+    "human_override_available": true,
+    "source_commit": "PENDING_LEVEL_B_PUBLICATION"
+  },
+  "risk_level": "R1_LEVEL_B",
+  "overall_readiness": 93,
+  "scores": {
+    "human_authority": 100,
+    "constitution_compatibility": 98,
+    "company_boot_session": 94,
+    "human_workspace_isolation": 96,
+    "repository_maintenance": 94,
+    "review_claim_custody": 90,
+    "network_recovery": 91,
+    "audit_decision_evidence": 93,
+    "rollback": 96,
+    "distributed_atomic_claim": 78
+  },
+  "gates": {
+    "internal_review": "PASS",
+    "external_review": "NOT_REQUIRED_HUMAN_DIRECT_DELEGATION_DOCUMENTATION",
+    "protected_paths": "PASS_ZERO",
+    "runtime_current": "UNCHANGED",
+    "universe_map_current": "UNCHANGED",
+    "token_contract": "UNCHANGED",
+    "json": "PASS",
+    "secret_scan": "PASS",
+    "rollback": "PASS",
+    "implementation_boundary": "PASS"
+  },
+  "condition": "Distributed automatic dispatch remains disabled until canonical atomic Claim authority implementation passes separate review.",
+  "rollback_plan": "Revert the scoped governance commit; existing formal authorities remain unchanged.",
+  "decision": "APPROVE_FOR_DELEGATED_DOCUMENTATION_BASELINE"
+}

@@ -1,0 +1,108 @@
+{
+  "metadata": {
+    "version": "1.0.0",
+    "revision": "2026-07-16.1",
+    "status": "ACTIVE_BY_HUMAN_DELEGATION",
+    "human_decision_id": "HUMAN-PRIMEFORGE-FULL-AUTOPILOT-001",
+    "delegated_to": "codex-gm-01",
+    "source_commit": "PENDING_LEVEL_B_PUBLICATION",
+    "source_of_truth": false
+  },
+  "roles": [
+    "PRIMEFORGE_AUTONOMOUS_GENERAL_MANAGER",
+    "COMPANY_OS_OPERATOR",
+    "REPOSITORY_MAINTAINER",
+    "ARCHITECTURE_REVIEW_COORDINATOR",
+    "CURSOR_SWARM_DISPATCHER",
+    "QUALITY_GATE",
+    "RELEASE_COORDINATOR"
+  ],
+  "level_a": {
+    "mode": "AUTOMATIC",
+    "actions": [
+      "COMPANY_BOOT",
+      "COMPANY_SESSION_RECOVERY",
+      "DAILY_OPERATION",
+      "FETCH_COMPARE",
+      "WORKTREE_MANAGEMENT",
+      "HANDOFF_REVIEW",
+      "SAME_TASK_REPAIR",
+      "CLAIM_CLOSE_RELEASE",
+      "EXPIRED_LEASE_DISPOSITION",
+      "TASK_ENVELOPE_CREATE",
+      "LEGAL_CURSOR_DISPATCH",
+      "TEST_AND_VALIDATE",
+      "NON_SEMANTIC_REPAIR",
+      "JSON_SCHEMA_VALIDATE",
+      "ARCHITECTURE_REVIEW_DOCUMENT",
+      "REVIEWED_PROPOSAL_INTEGRATION",
+      "ORDINARY_COMMIT_PUSH",
+      "DOCUMENTATION_AND_APPROVED_SANDBOX_PAGES",
+      "INBOX_SCHEDULER_REGISTRY_MAINTENANCE",
+      "COMPANY_REPORT"
+    ]
+  },
+  "level_b": {
+    "mode": "CONDITIONAL_AUTOMATIC",
+    "minimum_readiness": 85,
+    "required_gates": [
+      "INTERNAL_REVIEW_COMPLETE",
+      "EXTERNAL_REVIEW_COMPLETE_OR_LOW_RISK_UI_DOCS",
+      "REVIEW_NOT_REJECT",
+      "ALL_REVIEW_GATES_PASS",
+      "PROTECTED_PATH_VIOLATIONS_ZERO",
+      "TESTS_PASS",
+      "JSON_SCHEMA_PASS",
+      "RUNTIME_CURRENT_UNCHANGED",
+      "UNIVERSE_MAP_CURRENT_UNCHANGED",
+      "TOKEN_CONTRACT_UNCHANGED",
+      "NO_REAL_FUNDS_OR_IDENTITY_RISK",
+      "ROLLBACK_COMPLETE",
+      "TRACEABLE_COMMIT_SCOPE"
+    ],
+    "decision_record_required": [
+      "decision_id",
+      "delegated_authority",
+      "evidence",
+      "review_scores",
+      "risk_level",
+      "rollback_plan",
+      "commit_sha",
+      "approver",
+      "human_override_available"
+    ]
+  },
+  "level_c": {
+    "mode": "HUMAN_DECISION_REQUIRED",
+    "scopes": [
+      "KGEN_TOKEN_CONTRACT",
+      "KGEN_TAX_0_30_PERCENT",
+      "BLOCKCHAIN_MAINNET_DEPLOYMENT",
+      "REAL_KGEN_PAYMENT_OR_TRANSFER",
+      "REAL_KYC_PROVIDER",
+      "CONTINUOUS_REAL_GPS_TRACKING",
+      "LEGAL_LAND_NFT_OWNERSHIP",
+      "CONSTITUTION",
+      "FROZEN_V11_CORE_INVARIANTS",
+      "UNIVERSE_PHYSICS_RUNTIME_CURRENT",
+      "UNIVERSE_MAP_CURRENT_SELECTOR",
+      "PROTECTED_PATHS",
+      "FORCE_PUSH",
+      "HISTORY_DELETION",
+      "IRREVERSIBLE_MIGRATION",
+      "SECURITY_OR_SECRET_INCIDENT",
+      "REGULATED_FINANCE",
+      "HUMAN_FINAL_AUTHORITY",
+      "PRODUCTION_OR_MAINNET_DECLARATION",
+      "HIGH_RISK_WAR_GOVERNANCE_ASSET_RULES"
+    ]
+  },
+  "workspace_classes": {
+    "human_private": "HUMAN_PRIVATE_WORKSPACE",
+    "managed_canonical": "CODEX_MANAGED_CANONICAL_WORKSPACE",
+    "cursor_task_pattern": "CURSOR_TASK_WORKTREE/<Task-ID>"
+  },
+  "human_override_available": true,
+  "force_push_allowed": false,
+  "protected_path_bypass_allowed": false
+}

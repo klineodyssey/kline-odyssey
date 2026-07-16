@@ -1,0 +1,170 @@
+{
+  "metadata": {
+    "boot_id": "PRIMEFORGE-COMPANY-OS-BOOT-ARCH-001",
+    "version": "0.1.0",
+    "revision": "2026-07-15.1",
+    "status": "ARCHITECTURE_P0_AMENDMENT_UNDER_REVIEW",
+    "human_decision_id": "HUMAN-COMPANY-OS-BOOT-001",
+    "source_commit": "ORIGIN_MAIN_7a692c34df50861ab10f8bd80959d95251b1071c",
+    "source_of_truth": false
+  },
+  "shared_by": [
+    "CODEX",
+    "CURSOR",
+    "CHATGPT",
+    "FUTURE_AI"
+  ],
+  "provider_specific_layer_order_allowed": false,
+  "human_repeats_boot_instructions_required": false,
+  "session_required_before_layer_zero": true,
+  "company_kernel": {
+    "kernel_id": "PRIMEFORGE_COMPANY_KERNEL",
+    "type": "GOVERNANCE_ORCHESTRATOR",
+    "is_universe_physics_kernel": false,
+    "is_seventh_civilization_kernel": false,
+    "standalone_business_authority": false,
+    "launched_modules": [
+      "COMPANY_INBOX",
+      "PRIORITY_SCHEDULER",
+      "REPOSITORY_MAINTENANCE_RUNTIME"
+    ],
+    "module_standalone_start_allowed": false
+  },
+  "session_preamble": {
+    "event": "SESSION_OPEN",
+    "interpret_human_input": false,
+    "repository_write": false,
+    "required_fields": [
+      "session_id",
+      "actor_id",
+      "provider_id",
+      "worker_id",
+      "started_at",
+      "workspace_id",
+      "observed_branch",
+      "previous_session_id"
+    ]
+  },
+  "layers": [
+    {
+      "number": 0,
+      "layer_id": "COMPANY_CONSTITUTION",
+      "sources": ["KGEN-KAIOS/constitution/KAIOS_CONSTITUTION.md", "KGEN-KAIOS/constitution/constitution.json"],
+      "failure_result": "FAIL_CLOSED_CONSTITUTION"
+    },
+    {
+      "number": 1,
+      "layer_id": "COMPANY_KERNEL",
+      "sources": ["KGEN-KAIOS/governance/autopilot/COMPANY_OS_BOOT.md", "KGEN-KAIOS/governance/autopilot/company_os_boot.json", "KGEN-KAIOS/governance/autopilot/company_boot_manifest.json"],
+      "failure_result": "FAIL_CLOSED_KERNEL"
+    },
+    {
+      "number": 2,
+      "layer_id": "COMPANY_REGISTRY",
+      "sources": ["KGEN-KAIOS/worker_registry.json", "KGEN-KAIOS/workforce/employee_roster.json", "KGEN-KAIOS/provenance/AUTHOR_REGISTRY.json"],
+      "failure_result": "FAIL_CLOSED_REGISTRY"
+    },
+    {
+      "number": 3,
+      "layer_id": "UNIVERSE_PHYSICS",
+      "sources": ["docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md", "docs/maps/README.md"],
+      "access": "READ_ONLY_PROTECTED",
+      "failure_result": "FAIL_CLOSED_PHYSICS"
+    },
+    {
+      "number": 4,
+      "layer_id": "CURRENT_RUNTIME",
+      "sources": ["CURRENT_SELECTORS", "FROZEN_BASELINES", "APPROVED_ADR"],
+      "failure_result": "FAIL_CLOSED_RUNTIME"
+    },
+    {
+      "number": 5,
+      "layer_id": "DAILY_OPERATION",
+      "sources": ["KGEN-KAIOS/decision/DECISION_ENGINE_STANDARD.md", "KGEN-KAIOS/governance/autopilot/COMPANY_DAILY_OPERATION.md"],
+      "failure_result": "FAIL_CLOSED_DAILY_OPERATION"
+    },
+    {
+      "number": 6,
+      "layer_id": "REPOSITORY_MAINTENANCE",
+      "sources": ["KGEN-KAIOS/governance/autopilot/REPOSITORY_MAINTENANCE_RUNTIME.md", "KGEN-KAIOS/operations/MAINTENANCE_MODE_STANDARD.md", "KGEN-KAIOS/operations/GITHUB_CONNECTIVITY_RUNBOOK.md"],
+      "failure_result": "FAIL_CLOSED_MAINTENANCE_ACTION"
+    },
+    {
+      "number": 7,
+      "layer_id": "INBOX_ROUTER",
+      "sources": ["KGEN-KAIOS/governance/autopilot/COMPANY_INBOX.md", "KGEN-KAIOS/governance/autopilot/HUMAN_INBOX_ROUTER.md"],
+      "failure_result": "FAIL_CLOSED_INBOX"
+    },
+    {
+      "number": 8,
+      "layer_id": "REVIEW_QUEUE",
+      "sources": ["KGEN-AI-Company/reports/CODEX_REVIEW_LOG.md", "REMOTE_HANDOFF_REFS", "OPEN_PULL_REQUESTS"],
+      "failure_result": "FAIL_CLOSED_REVIEW_QUEUE"
+    },
+    {
+      "number": 9,
+      "layer_id": "CLAIM_LEASE",
+      "sources": ["KGEN-KAIOS/TASK_CLAIM_LEASE_PROTOCOL.md", "KGEN-KAIOS/task_claim_schema.json", "CANONICAL_CLAIM_AUTHORITY"],
+      "failure_result": "FAIL_CLOSED_CLAIM"
+    },
+    {
+      "number": 10,
+      "layer_id": "IMPLEMENTATION",
+      "mode": "AUTHORIZATION_AND_SCOPE_GATE_ONLY",
+      "executes_implementation": false,
+      "sources": ["HUMAN_IMPLEMENTATION_AUTHORIZATION", "TASK_ENVELOPE", "KGEN-Organization/WorkOrders/WORK_QUEUE.md"],
+      "not_requested_result": "PASS_NOT_APPLICABLE",
+      "failure_result": "FAIL_CLOSED_IMPLEMENTATION_AUTHORITY"
+    },
+    {
+      "number": 11,
+      "layer_id": "EVIDENCE",
+      "sources": ["WORKER_REPORT", "PROVENANCE", "TEST_RESULTS", "DIFF", "PROTECTED_PATH_REPORT"],
+      "failure_result": "FAIL_CLOSED_EVIDENCE"
+    },
+    {
+      "number": 12,
+      "layer_id": "REVIEW",
+      "sources": ["KGEN-KAIOS/CODEX_PRE_MERGE_CHECKLIST.md", "APPLICABLE_HUMAN_SECURITY_LEGAL_RISK_REVIEWS"],
+      "failure_result": "FAIL_CLOSED_REVIEW"
+    },
+    {
+      "number": 13,
+      "layer_id": "HUMAN_DECISION",
+      "sources": ["CURRENT_HUMAN_DECISION", "KGEN-KAIOS/decision/decision_log.jsonl"],
+      "failure_result": "HUMAN_DECISION_REQUIRED"
+    }
+  ],
+  "layer_result_fields": [
+    "session_id",
+    "layer_number",
+    "layer_id",
+    "started_at",
+    "completed_at",
+    "status",
+    "sources_loaded",
+    "source_hashes",
+    "checks",
+    "evidence_refs",
+    "warnings",
+    "failure_code",
+    "next_layer"
+  ],
+  "failure_policy": {
+    "fail_closed": true,
+    "continue_state_mutation_after_fail": false,
+    "checkpoint_required": true,
+    "human_inbox_allowed_during_network_failure": true
+  },
+  "action_boundary": {
+    "action_before_layer_13_pass": false,
+    "implementation_layer_executes_work": false,
+    "architecture_approval_implies_implementation": false,
+    "merge_or_push_implied": false
+  },
+  "implementation_started": false,
+  "workqueue_created": false,
+  "commit_allowed_this_round": false,
+  "push_allowed_this_round": false,
+  "deployment_started": false
+}

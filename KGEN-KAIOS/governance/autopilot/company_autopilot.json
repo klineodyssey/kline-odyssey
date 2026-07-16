@@ -1,0 +1,415 @@
+{
+  "metadata": {
+    "architecture_id": "PRIMEFORGE-COMPANY-AUTOPILOT-ARCH-001",
+    "version": "0.3.0",
+    "revision": "2026-07-15.3",
+    "status": "ARCHITECTURE_APPROVED_IN_PRINCIPLE_P0_AMENDMENT_UNDER_REVIEW",
+    "last_updated": "2026-07-15",
+    "updated_by": "codex-gm-01",
+    "reviewed_by": "HUMAN_PRIMEFORGE_REQUIRED",
+    "human_decision_ids": [
+      "HUMAN-PRIMEFORGE-COMPANY-AUTOPILOT-001",
+      "HUMAN-COMPANY-AUTOMATIC-MAINTENANCE-001",
+      "HUMAN-COMPANY-OS-BOOT-001"
+    ],
+    "source_commit": "ORIGIN_MAIN_7a692c34df50861ab10f8bd80959d95251b1071c",
+    "source_freshness": "REMOTE_VERIFIED_2026-07-15T17:29:48+08:00",
+    "source_of_truth": false
+  },
+  "system_identity": {
+    "name": "PrimeForge Company Autopilot",
+    "type": "INVOCATION_DRIVEN_GOVERNANCE_INTEGRATION",
+    "is_background_daemon": false,
+    "is_second_company_system": false,
+    "implementation_started": false,
+    "workqueue_implementation_created": false,
+    "deployment_started": false
+  },
+  "company_os_boot": {
+    "architecture": "COMPANY_OS_BOOT.md",
+    "machine_contract": "company_os_boot.json",
+    "session_contract": "company_session.json",
+    "layer_count": 14,
+    "layer_order_mutable_by_provider": false,
+    "fail_closed": true,
+    "session_required": true,
+    "implementation_started": false
+  },
+  "roles": [
+    {
+      "actor": "human-primeforge",
+      "role": "FINAL_AUTHORITY_ARCHITECTURE_IDEA_DECISION_APPROVAL_REVIEW",
+      "repository_maintenance_required": false
+    },
+    {
+      "actor": "chatgpt",
+      "role": "CHIEF_SYSTEM_ADVISORY_ARCHITECT",
+      "repository_write": false,
+      "merge": false,
+      "push": false
+    },
+    {
+      "actor": "codex-gm-01",
+      "role": "GENERAL_MANAGER_IMPLEMENTATION_ARCHITECT_QUALITY_GATE_REPOSITORY_MAINTAINER",
+      "human_approval_override": false
+    },
+    {
+      "actor": "cursor-01",
+      "role": "CONTROLLED_EXECUTION_WORKER",
+      "max_active_claims": 1,
+      "push_main": false
+    },
+    {
+      "actor": "grok",
+      "role": "EXTERNAL_INDEPENDENT_REVIEWER",
+      "repository_write": false,
+      "merge": false
+    }
+  ],
+  "proposed_permanent_modules": [
+    {
+      "module_id": "COMPANY_INBOX",
+      "documentation": "COMPANY_INBOX.md",
+      "machine_contract": "company_inbox.json",
+      "launcher": "PRIMEFORGE_COMPANY_KERNEL",
+      "implementation_started": false
+    },
+    {
+      "module_id": "PRIORITY_SCHEDULER",
+      "documentation": "PRIORITY_SCHEDULER.md",
+      "machine_contract": "priority_scheduler.json",
+      "launcher": "PRIMEFORGE_COMPANY_KERNEL",
+      "implementation_started": false
+    },
+    {
+      "module_id": "REPOSITORY_MAINTENANCE_RUNTIME",
+      "documentation": "REPOSITORY_MAINTENANCE_RUNTIME.md",
+      "machine_contract": "repository_maintenance_runtime.json",
+      "launcher": "PRIMEFORGE_COMPANY_KERNEL",
+      "implementation_started": false
+    }
+  ],
+  "control_flow": [
+    "SESSION_OPEN",
+    "LAYER_0_COMPANY_CONSTITUTION",
+    "LAYER_1_COMPANY_KERNEL",
+    "LAYER_2_COMPANY_REGISTRY",
+    "LAYER_3_UNIVERSE_PHYSICS",
+    "LAYER_4_CURRENT_RUNTIME",
+    "LAYER_5_DAILY_OPERATION",
+    "LAYER_6_REPOSITORY_MAINTENANCE",
+    "LAYER_7_INBOX_ROUTER",
+    "LAYER_8_REVIEW_QUEUE",
+    "LAYER_9_CLAIM_LEASE",
+    "LAYER_10_IMPLEMENTATION_GATE",
+    "LAYER_11_EVIDENCE",
+    "LAYER_12_REVIEW",
+    "LAYER_13_HUMAN_DECISION",
+    "ISSUE_ONE_LEGAL_ACTION_OR_HOLD",
+    "SESSION_CHECKPOINT",
+    "GENERAL_MANAGER_REPORT"
+  ],
+  "control_states": [
+    "BOOTING",
+    "SESSION_CREATED",
+    "SOURCE_LOADING",
+    "HEALTH_CHECK",
+    "MAINTENANCE_SERVICE",
+    "NETWORK_RETRY_MODE",
+    "REVIEW_FIRST",
+    "REPAIR_CONTROL",
+    "CLOSEOUT_CONTROL",
+    "SCHEDULING",
+    "INBOX_ROUTING",
+    "READY_FOR_LEGAL_ACTION",
+    "BLOCKED",
+    "REPORTING",
+    "CHECKPOINTING",
+    "FAILED_CLOSED"
+  ],
+  "scheduler": {
+    "normal_priority_order": [
+      "REVIEW",
+      "REPAIR",
+      "HUMAN_DECISION",
+      "ARCHITECTURE",
+      "IMPLEMENTATION"
+    ],
+    "safety_preemption": [
+      "URGENT_STOP",
+      "SECRET_EXPOSURE",
+      "PROTECTED_PATH_ALERT",
+      "SECURITY_INCIDENT",
+      "DATA_LOSS_RISK"
+    ],
+    "maintenance_is_parallel_service_lane": true,
+    "scheduler_grants_authority": false
+  },
+  "formal_sources": {
+    "boot": "PRIMEFORGE_GENESIS_BOOT_SEQUENCE.md",
+    "constitution": "KGEN-KAIOS/constitution/KAIOS_CONSTITUTION.md",
+    "canon": "KGEN-Canon/KGEN_CANON_MASTER.json",
+    "manager_protocol": "KGEN-AI-Company/CODEX_MANAGER_PROTOCOL.md",
+    "decision_engine": "KGEN-KAIOS/decision/DECISION_ENGINE_STANDARD.md",
+    "workqueue": "KGEN-Organization/WorkOrders/WORK_QUEUE.md",
+    "worker_registry": "KGEN-KAIOS/worker_registry.json",
+    "claim_protocol": "KGEN-KAIOS/TASK_CLAIM_LEASE_PROTOCOL.md",
+    "claim_schema": "KGEN-KAIOS/task_claim_schema.json",
+    "pre_merge": "KGEN-KAIOS/CODEX_PRE_MERGE_CHECKLIST.md",
+    "review_log": "KGEN-AI-Company/reports/CODEX_REVIEW_LOG.md",
+    "workspace_policy": "KGEN-AI-Company/WORKSPACE_POLICY.md",
+    "maintenance_mode": "KGEN-KAIOS/operations/MAINTENANCE_MODE_STANDARD.md",
+    "connectivity_runbook": "KGEN-KAIOS/operations/GITHUB_CONNECTIVITY_RUNBOOK.md"
+  },
+  "review_contract": {
+    "allowed_decisions": [
+      "APPROVE",
+      "APPROVE_WITH_WARNINGS",
+      "REPAIR_REQUIRED",
+      "REJECT",
+      "BLOCKED",
+      "HUMAN_REVIEW_REQUIRED"
+    ],
+    "required_artifacts": [
+      "HUMAN_DECISION_OR_WORKORDER_SOURCE",
+      "TASK_ENVELOPE",
+      "CLAIM_LINEAGE",
+      "TASK_BRANCH",
+      "HANDOFF_MD",
+      "HANDOFF_JSON",
+      "WORKER_REPORT",
+      "CONTENT_COMMIT",
+      "OBSERVED_BRANCH_TIP",
+      "FULL_DIFF",
+      "TEST_EVIDENCE",
+      "PROTECTED_PATH_REPORT",
+      "REGISTERED_AUTHOR_AND_REVIEWER"
+    ],
+    "auto_merge": false,
+    "auto_push_main": false,
+    "auto_deploy": false
+  },
+  "task_envelope_contract": {
+    "status": "PROPOSED_NOT_IMPLEMENTED",
+    "required_fields": [
+      "task_id",
+      "human_decision_id",
+      "title",
+      "objective",
+      "authorized_actions",
+      "forbidden_actions",
+      "authorized_paths",
+      "forbidden_paths",
+      "protected_paths",
+      "required_sources",
+      "required_tests",
+      "required_evidence",
+      "branch_name",
+      "worktree_name",
+      "base_sha",
+      "commit_allowed",
+      "push_allowed",
+      "merge_allowed",
+      "deploy_allowed",
+      "reviewer",
+      "handoff_target",
+      "stop_conditions",
+      "expiry",
+      "status"
+    ]
+  },
+  "claim_controller": {
+    "max_active_claims_per_worker": 1,
+    "controller_states": [
+      "ACTIVE",
+      "REVIEW",
+      "REPAIR",
+      "APPROVED",
+      "CLOSED",
+      "RELEASED",
+      "EXPIRED",
+      "ABANDONED",
+      "BLOCKED"
+    ],
+    "review_custody_after_timely_handoff": true,
+    "expiry_during_review_is_worker_abandonment": false,
+    "repair_uses_same_task": true,
+    "release_requires_visible_atomic_closeout": true,
+    "branch_local_claim_race_detected": true,
+    "canonical_claim_serialization_required": true,
+    "automatic_dispatch_enabled": false
+  },
+  "repository_maintenance": {
+    "status": "ARCHITECTURE_PROPOSAL_NOT_ACTIVE",
+    "human_inbox_blocked_by_network": false,
+    "retry_mode": "NETWORK_RETRY_MODE",
+    "fetch_before_compare": true,
+    "fast_forward_only": true,
+    "dirty_human_main_write": false,
+    "force_push": false,
+    "automatic_remote_branch_delete": false
+  },
+  "current_observation": {
+    "observed_at": "2026-07-15T17:29:48+08:00",
+    "dns": "HEALTHY",
+    "github_tcp_443": "HEALTHY",
+    "github_https": "HTTP_200",
+    "git_remote": "HEALTHY",
+    "git_fetch": "PASS",
+    "github_actions": "LATEST_SUCCESS",
+    "pages_home": "HTTP_200",
+    "pages_decision_center": "HTTP_200",
+    "pages_workforce": "HTTP_200",
+    "pages_operating_center": "HTTP_200",
+    "origin_main": "7a692c34df50861ab10f8bd80959d95251b1071c",
+    "head_matches_origin_main": true,
+    "human_main": "DIRTY_READ_ONLY_UNTOUCHED",
+    "canonical_cursor_registry_state": "IDLE_NO_CURRENT_TASK",
+    "branch_local_claim_state": "CONFLICTING_OVERLAPPING_CLAIMS_DETECTED",
+    "workqueue_detail_counts": {
+      "total": 37,
+      "open": 24,
+      "done": 11,
+      "rejected": 2,
+      "review_on_formal_main": 0
+    },
+    "unclassified_handoff_reviews_after_session": 0,
+    "pending_repair": 1,
+    "local_only_commits": 0,
+    "pending_push_patch_count": 0,
+    "open_pull_requests_observed": 13,
+    "protected_path_violations": 0,
+    "overall": "AMBER_ARCHITECTURE_ONLY_NETWORK_HEALTHY"
+  },
+  "current_handoff_review": {
+    "task_id": "ORG-P2-003F-FIX1",
+    "claim_id": "CLAIM-ORG-P2-003F-FIX1-20260715T0205-cursor-01",
+    "worker_id": "cursor-01",
+    "branch": "origin/cursor-handoff/ORG-P2-003F-FIX1",
+    "verified_tip": "e6e5d2fa251ba84b0f49eff1bd341329b381dc67",
+    "base_sha": "7a692c34df50861ab10f8bd80959d95251b1071c",
+    "task_commit_count": 3,
+    "changed_file_count": 4,
+    "protected_path_changes": 0,
+    "technical_evidence": "PASS",
+    "missing_evidence": [
+      "FIRST_CLASS_CLAIM_ID",
+      "TASK_ENVELOPE",
+      "HANDOFF_MD",
+      "HANDOFF_JSON",
+      "REPORT_CONTENT_COMMIT"
+    ],
+    "remote_freshness": "VERIFIED",
+    "timestamp_lease": "EXPIRED_AFTER_TIMELY_HANDOFF",
+    "decision": "REPAIR_REQUIRED",
+    "closeout_status": "REPAIR_PENDING_FORMAL_UPDATE",
+    "claim_released": false,
+    "new_claim_allowed": false,
+    "repair_same_task": true,
+    "next_candidate_after_closeout": "ORG-P2-004"
+  },
+  "concurrent_handoff_dispositions": [
+    {
+      "branch": "origin/cursor-handoff/ORG-P2-019",
+      "tip": "fa22c12f858db53e3d6aa395da1f44bf07b53b30",
+      "decision": "REJECT_NO_CLAIM"
+    },
+    {
+      "branch": "origin/cursor-handoff/ORG-P2-004-20260715",
+      "tip": "3831c9dfdc91f0c1b346b77155abc18f66069cea",
+      "decision": "REJECT_UNAUTHORIZED_DUPLICATE_BRANCH"
+    },
+    {
+      "branch": "origin/cursor-handoff/ORG-P2-004",
+      "tip": "91f9736fdabca113fcf63b412d8b48c541382fb5",
+      "decision": "REJECT_UNAUTHORIZED_CONCURRENT_CLAIM"
+    },
+    {
+      "branch": "origin/cursor-handoff/ORG-P2-020",
+      "tip": "af6220b3000167be769a237354dbea97a5f8c477",
+      "decision": "REJECT_UNAUTHORIZED_INCOMPLETE_HANDOFF"
+    },
+    {
+      "branch": "origin/cursor-handoff/ORG-P2-021",
+      "tip": "334e729e91547692abd48541d4db2da8c43cb8d2",
+      "decision": "REJECT_NO_CLAIM"
+    },
+    {
+      "branch": "origin/cursor-handoff/ORG-P2-022",
+      "tip": "8ba69c1474ef17a1a029e7e3a608a2443d3455a6",
+      "decision": "REJECT_UNAUTHORIZED_CONCURRENT_CLAIM"
+    },
+    {
+      "branch": "origin/cursor-handoff/ORG-P2-005",
+      "tip": "d4de14e3fda09014e1664f6cbc2503c8246a4592",
+      "decision": "REJECT_UNAUTHORIZED_CONCURRENT_CLAIM"
+    },
+    {
+      "branch": "origin/cursor-handoff/ORG-P2-006",
+      "tip": "646bdc0297037b8bc3bfba69c56fe6f4c811d73b",
+      "decision": "REJECT_UNAUTHORIZED_CONCURRENT_CLAIM"
+    }
+  ],
+  "architecture_inbox": [
+    {
+      "inbox_id": "ARCH-INBOX-KERNEL-LAW-20260715-001",
+      "source_decision_id": "HUMAN-PRIMEFORGE-COMPANY-AUTOPILOT-001",
+      "classification": "ARCHITECTURE_REQUEST",
+      "title": "Universe Physics Laws and Universe Physics Database direction",
+      "kernel_freeze": "HOLD",
+      "kernel_count": 6,
+      "law_layer_is_kernel": false,
+      "runtime_current_modified": false,
+      "universe_map_modified": false,
+      "implementation_authorized": false,
+      "status": "ARCHITECTURE_INBOX_REGISTERED_AWAITING_REVIEW"
+    }
+  ],
+  "compliance_tests": [
+    {"test_id": "AUT-001", "scenario": "ACTIVE_CLAIM_PLUS_NEW_CLAIM", "expected": "REJECT_UNAUTHORIZED"},
+    {"test_id": "AUT-002", "scenario": "ACTIVE_CLAIM_PLUS_REVIEW_HANDOFF", "expected": "REVIEW_FIRST"},
+    {"test_id": "AUT-003", "scenario": "APPROVED_HANDOFF", "expected": "ATOMIC_CLOSE_AND_RELEASE"},
+    {"test_id": "AUT-004", "scenario": "REPAIR_REQUIRED", "expected": "SAME_TASK_REPAIR"},
+    {"test_id": "AUT-005", "scenario": "EXPIRED_LEASE_WITHOUT_HANDOFF", "expected": "MARK_EXPIRED_AND_REVIEW"},
+    {"test_id": "AUT-006", "scenario": "HUMAN_IDEA_DURING_ACTIVE_TASK", "expected": "IDEA_INBOX_ONLY"},
+    {"test_id": "AUT-007", "scenario": "HUMAN_IMPLEMENTATION_AUTHORIZATION", "expected": "VALIDATE_CLOSURE_AND_BASELINE_FIRST"},
+    {"test_id": "AUT-008", "scenario": "MISSING_MUST_READ", "expected": "BLOCKED_MISSING_SOURCE"},
+    {"test_id": "AUT-009", "scenario": "SOURCE_CONFLICT", "expected": "BLOCKED_SOURCE_CONFLICT"},
+    {"test_id": "AUT-010", "scenario": "PROTECTED_PATH_REQUESTED", "expected": "BLOCKED_PROTECTED_PATH"},
+    {"test_id": "AUT-011", "scenario": "OLD_CURSOR_RULE_CONFLICT", "expected": "SUPPRESS_LEGACY_WITH_EVIDENCE"},
+    {"test_id": "AUT-012", "scenario": "COMPANY_BOOT_SKIPPED", "expected": "FAIL"},
+    {"test_id": "AUT-013", "scenario": "HANDOFF_REVIEW_SKIPPED", "expected": "FAIL"},
+    {"test_id": "AUT-014", "scenario": "HUMAN_MAIN_DIRTY", "expected": "BLOCK_HUMAN_MAIN_WRITE_USE_ISOLATED_WORKTREE"},
+    {"test_id": "AUT-015", "scenario": "VALID_CLEAN_COMPANY_STATE", "expected": "PROCESS_ONE_NEXT_LEGAL_ACTION"},
+    {"test_id": "AUT-016", "scenario": "NETWORK_FAIL_WITH_HUMAN_IDEA", "expected": "CAPTURE_INBOX_DEFER_REMOTE_ONLY"},
+    {"test_id": "AUT-017", "scenario": "NETWORK_RECOVERY", "expected": "FETCH_COMPARE_INVALIDATE_STALE_TIPS"},
+    {"test_id": "AUT-018", "scenario": "DIRTY_HUMAN_MAIN_MAINTENANCE", "expected": "USE_ISOLATED_CODEX_WORKTREE"},
+    {"test_id": "AUT-019", "scenario": "REVIEW_AND_IMPLEMENTATION_READY", "expected": "SELECT_REVIEW_WITHOUT_AUTHORITY_PROMOTION"},
+    {"test_id": "AUT-020", "scenario": "MAIN_IDLE_BUT_BRANCH_CLAIMS_OVERLAP", "expected": "BLOCKED_CLAIM_STATE_CONFLICT_NO_DISPATCH"},
+    {"test_id": "AUT-021", "scenario": "MANDATORY_OS_LAYER_FAILS", "expected": "SESSION_FAILED_CLOSED_NO_ACTION"},
+    {"test_id": "AUT-022", "scenario": "PROVIDER_CUSTOM_LAYER_ORDER", "expected": "FAIL_PROVIDER_BOOT_DIVERGENCE"},
+    {"test_id": "AUT-023", "scenario": "SESSION_ENVELOPE_MISSING", "expected": "BLOCKED_SESSION_REQUIRED"},
+    {"test_id": "AUT-024", "scenario": "SESSION_CLOSE_WITHOUT_CHECKPOINT", "expected": "FAILED_CLOSED_CHECKPOINT"},
+    {"test_id": "AUT-025", "scenario": "RESUME_SOURCE_OR_REF_CHANGED", "expected": "FULL_NEW_FOURTEEN_LAYER_PASS"},
+    {"test_id": "AUT-026", "scenario": "IMPLEMENTATION_REQUESTED_WITHOUT_APPROVAL_AT_LAYER_10", "expected": "FAIL_CLOSED_IMPLEMENTATION_AUTHORITY"},
+    {"test_id": "AUT-027", "scenario": "HUMAN_DECISION_UNRESOLVED_AT_LAYER_13", "expected": "HUMAN_DECISION_REQUIRED_NO_ACTION"},
+    {"test_id": "AUT-028", "scenario": "MODULE_STANDALONE_START", "expected": "FAIL_STANDALONE_MODULE_START"}
+  ],
+  "boundaries": {
+    "runtime_current_modified": false,
+    "universe_map_modified": false,
+    "frozen_baseline_modified": false,
+    "protected_path_modified": false,
+    "implementation_started": false,
+    "implementation_workqueue_created": false,
+    "deployment_started": false,
+    "commit_allowed_this_round": false,
+    "push_allowed_this_round": false
+  },
+  "next_human_decisions": [
+    "APPROVE_COMPANY_OS_BOOT_P0_AMENDMENT",
+    "REQUEST_COMPANY_OS_BOOT_P0_REVISION",
+    "HOLD_COMPANY_AUTOPILOT",
+    "REJECT_COMPANY_AUTOPILOT_ARCHITECTURE"
+  ]
+}

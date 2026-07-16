@@ -1,0 +1,62 @@
+{
+  "metadata": {
+    "command_id": "CODEX-COMPANY-START-COMMAND-001",
+    "version": "0.3.0",
+    "status": "ARCHITECTURE_APPROVED_IN_PRINCIPLE_P0_AMENDMENT_UNDER_REVIEW",
+    "human_decision_ids": [
+      "HUMAN-PRIMEFORGE-COMPANY-AUTOPILOT-001",
+      "HUMAN-COMPANY-AUTOMATIC-MAINTENANCE-001",
+      "HUMAN-COMPANY-OS-BOOT-001"
+    ],
+    "source_commit": "ORIGIN_MAIN_7a692c34df50861ab10f8bd80959d95251b1071c",
+    "source_of_truth": false
+  },
+  "primary_phrase": "KAIOS COMPANY BOOT",
+  "automatic_on_every_human_message": true,
+  "human_repetition_required": false,
+  "accepted_aliases_after_approval": ["KAIOS BOOT","KAIOS DAILY OPERATION"],
+  "required_steps": [
+    "OPEN_COMPANY_SESSION",
+    "RUN_COMPANY_OS_LAYER_0_CONSTITUTION",
+    "RUN_COMPANY_OS_LAYER_1_KERNEL",
+    "RUN_COMPANY_OS_LAYERS_2_TO_9",
+    "RUN_LAYER_10_IMPLEMENTATION_AUTHORIZATION_GATE_ONLY",
+    "RUN_LAYER_11_EVIDENCE",
+    "RUN_LAYER_12_REVIEW",
+    "RUN_LAYER_13_HUMAN_DECISION",
+    "DISPATCH_AT_MOST_ONE_LEGAL_ACTION",
+    "WRITE_SESSION_CHECKPOINT",
+    "EMIT_GENERAL_MANAGER_REPORT"
+  ],
+  "forbidden": [
+    "USE_HIDDEN_MEMORY_AS_ONLY_SOURCE",
+    "SKIP_COMPANY_BOOT",
+    "SKIP_COMPANY_SESSION",
+    "REORDER_COMPANY_OS_LAYERS",
+    "START_MODULE_OUTSIDE_COMPANY_KERNEL",
+    "OPEN_SECOND_ACTIVE_CLAIM",
+    "WRITE_HUMAN_MAIN",
+    "MODIFY_PROTECTED_PATH_WITHOUT_AUTHORITY",
+    "AUTO_APPROVE_ARCHITECTURE",
+    "START_UNAUTHORIZED_IMPLEMENTATION",
+    "UNAUTHORIZED_AUTO_PUSH_MAIN",
+    "FORCE_PUSH",
+    "AUTO_DEPLOY",
+    "REAL_PAYMENT_KYC_OR_GPS"
+  ],
+  "fail_closed_statuses": [
+    "BLOCKED_MISSING_SOURCE",
+    "BLOCKED_SOURCE_CONFLICT",
+    "NETWORK_RETRY_MODE",
+    "BLOCKED_PROTECTED_PATH",
+    "BLOCKED_BY_ACTIVE_TASK",
+    "HUMAN_REVIEW_REQUIRED"
+  ],
+  "final_report_fields": [
+    "session_id","current_layer","github","main","workqueue","active_claims","cursor_handoffs","pending_review","pending_repair",
+    "pending_commit","pending_push","pages","maintenance_mode","next_network_retry","protected_violations","human_decisions_pending","checkpoint_id","overall_status","next_legal_action"
+  ],
+  "implementation_started": false,
+  "workqueue_created": false,
+  "deployment_started": false
+}

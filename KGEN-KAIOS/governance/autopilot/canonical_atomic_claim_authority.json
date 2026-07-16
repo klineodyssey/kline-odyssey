@@ -1,0 +1,50 @@
+{
+  "metadata": {
+    "version": "0.1.0",
+    "revision": "2026-07-16.1",
+    "status": "IMPLEMENTATION_PROPOSAL_UNDER_REVIEW",
+    "human_decision_id": "HUMAN-PRIMEFORGE-FULL-AUTOPILOT-001",
+    "source_commit": "PENDING_LEVEL_B_PUBLICATION",
+    "source_of_truth": false
+  },
+  "selected_option": {
+    "id": "B",
+    "name": "DEDICATED_TRANSACTIONAL_CLAIM_REGISTRY_SERVICE",
+    "storage_class": "TRANSACTIONAL_SQL",
+    "implementation_started": false
+  },
+  "non_authoritative_adapters": [
+    "GITHUB_BRANCH",
+    "WORKQUEUE_MARKDOWN",
+    "HANDOFF_JSON",
+    "GITHUB_ACTIONS",
+    "DASHBOARD_SNAPSHOT"
+  ],
+  "required_properties": [
+    "ATOMIC_CLAIM",
+    "UNIQUE_CLAIM_ID",
+    "FENCING_TOKEN",
+    "LEASE_EXPIRY",
+    "HEARTBEAT",
+    "REVIEW_CUSTODY",
+    "REPAIR_OWNERSHIP",
+    "ATOMIC_CLOSE_RELEASE",
+    "STALE_SESSION_REJECTION",
+    "APPEND_ONLY_AUDIT"
+  ],
+  "unique_active_constraints": ["task_id", "clone_id", "session_id"],
+  "compare_and_swap_fields": ["record_version", "fencing_token"],
+  "claim_states": ["ACTIVE", "EXECUTING", "REVIEW", "REPAIR", "RECOVERY_PENDING", "APPROVED", "REJECTED", "BLOCKED", "CLOSED", "RELEASED", "EXPIRED", "ABANDONED"],
+  "mutation_endpoints": ["ACQUIRE", "HEARTBEAT", "SUBMIT_REVIEW", "REPAIR", "RECOVER", "CLOSE", "RELEASE"],
+  "security": {
+    "repo_secrets_allowed": false,
+    "least_privilege": true,
+    "encrypted_transport": true,
+    "audit_required": true,
+    "independent_security_review_required": true
+  },
+  "migration_phases": ["LEGACY_INVENTORY", "LOCAL_SQLITE_SIMULATOR", "SECURITY_CONCURRENCY_REVIEW", "NON_PRODUCTION_SERVICE", "SHADOW_READ", "AUTHORIZED_CUTOVER"],
+  "pre_cutover_dispatch_mode": "MANUAL_DISPATCH_NON_ATOMIC",
+  "workqueue_created": false,
+  "deployment_started": false
+}

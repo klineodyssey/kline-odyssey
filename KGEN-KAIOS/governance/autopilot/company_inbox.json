@@ -1,0 +1,99 @@
+{
+  "metadata": {
+    "registry_id": "PRIMEFORGE-COMPANY-INBOX-ARCH-001",
+    "version": "0.1.0",
+    "revision": "2026-07-15.1",
+    "status": "ARCHITECTURE_PROPOSAL_NOT_ACTIVE",
+    "human_decision_id": "HUMAN-COMPANY-AUTOMATIC-MAINTENANCE-001",
+    "source_commit": "ORIGIN_MAIN_7a692c34df50861ab10f8bd80959d95251b1071c",
+    "source_of_truth": false
+  },
+  "module": {
+    "module_id": "COMPANY_INBOX",
+    "launcher": "PRIMEFORGE_COMPANY_KERNEL",
+    "standalone_start_allowed": false,
+    "durable_runtime_implemented": false,
+    "accepts_human_input_during_network_failure": true,
+    "creates_workorder_automatically": false,
+    "grants_implementation_authority": false
+  },
+  "record_fields": [
+    "inbox_id",
+    "source_message_id",
+    "human_decision_id",
+    "received_at",
+    "classification",
+    "priority_class",
+    "summary",
+    "dependencies",
+    "related_workorders",
+    "related_workers",
+    "remote_dependency",
+    "active_task_conflict",
+    "authorization_state",
+    "routed_target",
+    "status",
+    "decision_record",
+    "closed_at"
+  ],
+  "states": [
+    "RECEIVED",
+    "CLASSIFIED",
+    "DEFERRED_ACTIVE_TASK",
+    "DEFERRED_NETWORK_ACTION",
+    "READY",
+    "IN_REVIEW",
+    "ROUTED",
+    "HUMAN_DECISION_REQUIRED",
+    "CLOSED"
+  ],
+  "sensitive_data_forbidden": [
+    "TOKEN",
+    "API_KEY",
+    "PRIVATE_KEY",
+    "SEED_PHRASE",
+    "PASSWORD",
+    "PRIVATE_KYC_DATA",
+    "EXACT_PRIVATE_GPS"
+  ],
+  "records": [
+    {
+      "inbox_id": "INBOX-HUMAN-COMPANY-MAINTENANCE-20260715-001",
+      "source_message_id": "HUMAN-COMPANY-AUTOMATIC-MAINTENANCE-001",
+      "human_decision_id": "HUMAN-COMPANY-AUTOMATIC-MAINTENANCE-001",
+      "received_at": "2026-07-15T16:54:24+08:00",
+      "classification": "ARCHITECTURE_DECISION",
+      "priority_class": "HUMAN_DECISION",
+      "summary": "Design Company Inbox, Priority Scheduler, and Repository Maintenance Runtime while keeping implementation disabled.",
+      "dependencies": ["PRIMEFORGE_COMPANY_AUTOPILOT_ARCHITECTURE"],
+      "related_workorders": [],
+      "related_workers": ["codex-gm-01"],
+      "remote_dependency": false,
+      "active_task_conflict": false,
+      "authorization_state": "ARCHITECTURE_ONLY",
+      "routed_target": "KGEN-KAIOS/governance/autopilot/",
+      "status": "IN_REVIEW",
+      "decision_record": "HUMAN-COMPANY-AUTOMATIC-MAINTENANCE-001",
+      "closed_at": null
+    },
+    {
+      "inbox_id": "INBOX-HUMAN-COMPANY-OS-BOOT-20260715-001",
+      "source_message_id": "HUMAN-COMPANY-OS-BOOT-001",
+      "human_decision_id": "HUMAN-COMPANY-OS-BOOT-001",
+      "received_at": "2026-07-15T17:29:48+08:00",
+      "classification": "ARCHITECTURE_DECISION",
+      "priority_class": "HUMAN_DECISION",
+      "summary": "Define one Company OS Boot, Company Kernel launch contract, and checkpointed Company Session for all AI providers.",
+      "dependencies": ["PRIMEFORGE_COMPANY_AUTOPILOT_ARCHITECTURE"],
+      "related_workorders": [],
+      "related_workers": ["codex-gm-01"],
+      "remote_dependency": false,
+      "active_task_conflict": false,
+      "authorization_state": "ARCHITECTURE_ONLY",
+      "routed_target": "KGEN-KAIOS/governance/autopilot/COMPANY_OS_BOOT.md",
+      "status": "IN_REVIEW",
+      "decision_record": "HUMAN-COMPANY-OS-BOOT-001",
+      "closed_at": null
+    }
+  ]
+}

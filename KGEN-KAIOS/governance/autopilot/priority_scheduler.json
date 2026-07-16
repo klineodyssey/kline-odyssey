@@ -1,0 +1,54 @@
+{
+  "metadata": {
+    "scheduler_id": "PRIMEFORGE-PRIORITY-SCHEDULER-ARCH-001",
+    "version": "0.1.0",
+    "revision": "2026-07-15.1",
+    "status": "ARCHITECTURE_PROPOSAL_NOT_ACTIVE",
+    "human_decision_id": "HUMAN-COMPANY-AUTOMATIC-MAINTENANCE-001",
+    "source_commit": "ORIGIN_MAIN_7a692c34df50861ab10f8bd80959d95251b1071c",
+    "source_of_truth": false
+  },
+  "normal_priority_order": [
+    "REVIEW",
+    "REPAIR",
+    "HUMAN_DECISION",
+    "ARCHITECTURE",
+    "IMPLEMENTATION"
+  ],
+  "safety_preemption": [
+    "URGENT_STOP",
+    "SECRET_EXPOSURE",
+    "PROTECTED_PATH_ALERT",
+    "SECURITY_INCIDENT",
+    "DATA_LOSS_RISK"
+  ],
+  "same_class_order": [
+    "DEPENDENCIES_COMPLETE",
+    "HUMAN_URGENCY",
+    "RISK_LOWER_FIRST_UNLESS_CONTAINMENT",
+    "OLDEST_ACCEPTED_SOURCE_FIRST",
+    "ASSET_CONFLICT_FREE",
+    "ELIGIBLE_WORKER_AVAILABLE",
+    "LEASE_AND_DEADLINE_VALID"
+  ],
+  "maintenance_service_lane": {
+    "parallel_to_work_queue": true,
+    "consumes_cursor_claim_slot": false,
+    "blocks_human_inbox": false,
+    "remote_actions_pause_when_network_unhealthy": true
+  },
+  "launcher": "PRIMEFORGE_COMPANY_KERNEL",
+  "standalone_start_allowed": false,
+  "dispatch_before_company_os_layer_13": false,
+  "constraints": {
+    "max_primary_active_tasks_per_worker": 1,
+    "review_retains_task_custody": true,
+    "repair_reuses_task_id": true,
+    "scheduler_grants_authority": false,
+    "claim_state_conflict_result": "BLOCKED_CLAIM_STATE_CONFLICT",
+    "auto_merge": false,
+    "auto_push": false,
+    "auto_deploy": false
+  },
+  "implementation_started": false
+}
