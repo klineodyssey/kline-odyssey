@@ -5,17 +5,17 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="color-scheme" content="dark light">
   <meta name="theme-color" content="#111512">
-  <meta name="description" content="KAIOS World Viewer Alpha synthetic K280 land interface">
+  <meta name="description" content="KAIOS Digital Earth Alpha synthetic living-world interface">
   <link rel="icon" href="data:,">
-  <title>KAIOS World Viewer Alpha</title>
+  <title>KAIOS Digital Earth Alpha</title>
   <link rel="stylesheet" href="./ui/styles.css">
 </head>
 <body>
   <div class="app-shell" id="app-shell" data-theme="dark">
     <header class="topbar">
-      <div class="brand-block" aria-label="KAIOS World Viewer">
+      <div class="brand-block" aria-label="KAIOS Digital Earth Alpha">
         <span class="brand-mark" aria-hidden="true">K</span>
-        <span><strong>KAIOS</strong><small>World Viewer Alpha</small></span>
+        <span><strong>KAIOS</strong><small>Digital Earth Alpha</small></span>
       </div>
 
       <nav class="breadcrumbs" id="breadcrumbs" aria-label="World hierarchy"></nav>
@@ -77,7 +77,7 @@
 
         <div class="loading-state" id="loading-state" role="status">
           <span class="loading-mark" aria-hidden="true"></span>
-          <span>Loading K280 snapshot</span>
+          <span>Loading Digital Earth snapshot</span>
         </div>
 
         <div class="map-status" aria-label="Viewer status">
@@ -91,6 +91,63 @@
           <strong id="starter-parcel-state">NOT LOADED</strong>
           <span id="starter-parcel-detail">Mock login required / no GPS or KYC</span>
         </div>
+
+        <section
+          class="player-command-center"
+          id="player-command-center"
+          data-session="inactive"
+          data-dirty="false"
+          aria-label="Player and world controls"
+        >
+          <div class="player-hud" aria-label="Player status">
+            <div class="player-hud__identity">
+              <span>PLAYER</span>
+              <strong id="player-hud-location">OFFLINE</strong>
+            </div>
+            <dl class="player-hud__readout">
+              <div><dt>MOVE</dt><dd id="player-hud-movement">IDLE</dd></div>
+              <div><dt>REV</dt><dd id="world-revision-value">R0</dd></div>
+            </dl>
+          </div>
+
+          <div class="player-action-toolbar" role="toolbar" aria-label="Digital Earth actions">
+            <div class="command-group" aria-label="Player actions">
+              <button class="command-button command-button--primary" id="enter-selected-button" type="button" aria-label="Enter selected object" title="Enter selected" disabled>
+                <span aria-hidden="true">&#8617;</span>
+              </button>
+              <button class="command-button" id="simulation-advance-button" type="button" aria-label="Advance life simulation" title="Advance simulation" disabled>
+                <span aria-hidden="true">&#9655;</span>
+              </button>
+            </div>
+
+            <div class="command-group walk-command-group" aria-label="Player movement">
+              <button class="command-button" id="player-step-up-button" type="button" aria-label="Walk up" title="Walk up" disabled>
+                <span aria-hidden="true">&#8593;</span>
+              </button>
+              <button class="command-button" id="player-step-left-button" type="button" aria-label="Walk left" title="Walk left" disabled>
+                <span aria-hidden="true">&#8592;</span>
+              </button>
+              <button class="command-button" id="player-step-right-button" type="button" aria-label="Walk right" title="Walk right" disabled>
+                <span aria-hidden="true">&#8594;</span>
+              </button>
+              <button class="command-button" id="player-step-down-button" type="button" aria-label="Walk down" title="Walk down" disabled>
+                <span aria-hidden="true">&#8595;</span>
+              </button>
+            </div>
+
+            <div class="command-group land-command-group" aria-label="Land history actions">
+              <button class="command-button" id="land-undo-button" type="button" aria-label="Undo land change" title="Undo land change" disabled>
+                <span aria-hidden="true">&#8630;</span>
+              </button>
+              <button class="command-button" id="land-redo-button" type="button" aria-label="Redo land change" title="Redo land change" disabled>
+                <span aria-hidden="true">&#8631;</span>
+              </button>
+              <button class="command-button" id="land-save-button" type="button" aria-label="Save land draft" title="Save land draft" disabled>
+                <span aria-hidden="true">&#10003;</span>
+              </button>
+            </div>
+          </div>
+        </section>
 
         <div class="entity-access-list visually-hidden" id="entity-access-list" role="listbox" aria-label="Visible map objects"></div>
         <div id="context-menu-host"></div>

@@ -2,14 +2,17 @@
   "meta": {
     "synthetic": true,
     "non_authoritative": true,
-    "fixture_id": "KAIOS-WV-SPRINT-002",
-    "schema_version": "2.0.0",
-    "snapshot_id": "WV-SYNTHETIC-20260716-002",
-    "source_revision": "HUMAN-SPRINT-002-001",
-    "generated_at": "2026-07-16T00:00:00Z",
+    "fixture_id": "KAIOS-WV-SPRINT-003",
+    "schema_version": "3.0.0",
+    "snapshot_id": "WV-SYNTHETIC-20260717-003",
+    "source_revision": "HUMAN-SPRINT-003-001",
+    "generated_at": "2026-07-17T00:00:00Z",
     "stale_after": "2099-12-31T23:59:59Z",
     "privacy_class": "PUBLIC_SYNTHETIC",
-    "coordinate_model": "K280_GEODETIC_WITH_LOCAL_VIEW_PROJECTIONS"
+    "coordinate_model": "K280_GEODETIC_WITH_LOCAL_VIEW_PROJECTIONS",
+    "product_stage": "DIGITAL_EARTH_ALPHA",
+    "simulation_scope": "LOCAL_SYNTHETIC_ONLY",
+    "storage_namespace": "kaios.world-viewer.sprint-003"
   },
   "scene_bounds": [0, 0, 1200, 760],
   "player": {
@@ -17,6 +20,9 @@
     "display_name": "PrimeForge Explorer",
     "home_parcel_id": "parcel-001",
     "starter_parcel_id": "parcel-001",
+    "life_id": "life-player-001",
+    "home_building_id": "building-home-001",
+    "home_room_id": "room-living-001",
     "location_mode": "MOCK_COARSE_REGION",
     "location_consent": false
   },
@@ -72,6 +78,8 @@
       "object_type": "LAND_PARCEL",
       "parent_id": "city-hsinchu-overlay",
       "view": { "shape": "rect", "bounds": [55, 65, 250, 180] },
+      "scene_bounds": [0, 0, 1200, 760],
+      "spawn_point": { "x": 600, "y": 380 },
       "coordinate": { "latitude_deg": 24.8701, "longitude_deg": 121.0242, "altitude_m": 32 },
       "surface_k": 280,
       "area_m2": 1200,
@@ -87,6 +95,38 @@
       "population": 3,
       "ai_worker_ids": ["life-wukong-001"],
       "building_ids": ["building-home-001"],
+      "parcel_version": 2,
+      "revision_history": [
+        {
+          "revision_id": "parcel-001-r1",
+          "local_version": 1,
+          "version": "1.0.0",
+          "time": "2026-07-15T00:00:00Z",
+          "event": "STARTER_PARCEL_GRANTED",
+          "summary": "Synthetic Starter Parcel fixture created",
+          "source": "SYNTHETIC_WORLD_FIXTURE"
+        },
+        {
+          "revision_id": "parcel-001-r2",
+          "local_version": 2,
+          "version": "1.2.0",
+          "time": "2026-07-17T00:00:00Z",
+          "event": "DIGITAL_EARTH_ALPHA_LINKED",
+          "summary": "Building, Room and Life projections linked",
+          "source": "SYNTHETIC_WORLD_FIXTURE"
+        }
+      ],
+      "ownership_timeline": [
+        {
+          "event_id": "ownership-parcel-001-001",
+          "time": "2026-07-15T00:00:00Z",
+          "owner_id": "mock-player-001",
+          "event": "VIRTUAL_STARTER_GRANT",
+          "legal_title": false,
+          "source": "SYNTHETIC_WORLD_FIXTURE"
+        }
+      ],
+      "proposal_history": [],
       "data_freshness": "CURRENT_SYNTHETIC",
       "source": "SYNTHETIC_WORLD_FIXTURE"
     },
@@ -366,6 +406,16 @@
       "source": "SYNTHETIC_WORLD_FIXTURE"
     }
   ],
+  "buildingTemplates": [
+    { "id": "template-residential", "building_type": "RESIDENTIAL", "label": "Residential", "base_capacity": 6, "allowed_room_types": ["LIVING", "BEDROOM", "KITCHEN", "WORKSHOP"] },
+    { "id": "template-farm-house", "building_type": "FARM_HOUSE", "label": "Farm House", "base_capacity": 8, "allowed_room_types": ["LIVING", "STORAGE", "FARM_CONTROL"] },
+    { "id": "template-shop", "building_type": "SHOP", "label": "Shop", "base_capacity": 24, "allowed_room_types": ["COMMERCIAL", "STORAGE", "OFFICE"] },
+    { "id": "template-factory", "building_type": "FACTORY", "label": "Factory", "base_capacity": 40, "allowed_room_types": ["PRODUCTION", "STORAGE", "CONTROL"] },
+    { "id": "template-temple", "building_type": "TEMPLE", "label": "Temple", "base_capacity": 30, "allowed_room_types": ["HALL", "MEDITATION", "ARCHIVE"] },
+    { "id": "template-warehouse", "building_type": "WAREHOUSE", "label": "Warehouse", "base_capacity": 18, "allowed_room_types": ["STORAGE", "LOADING", "CONTROL"] },
+    { "id": "template-office", "building_type": "OFFICE", "label": "Office", "base_capacity": 20, "allowed_room_types": ["OFFICE", "MEETING", "WORKSHOP"] },
+    { "id": "template-public-facility", "building_type": "PUBLIC_FACILITY", "label": "Public Facility", "base_capacity": 50, "allowed_room_types": ["SERVICE", "HALL", "OFFICE"] }
+  ],
   "buildings": [
     {
       "id": "building-home-001",
@@ -373,7 +423,18 @@
       "object_type": "BUILDING",
       "parent_id": "parcel-001",
       "parcel_id": "parcel-001",
-      "building_type": "HOUSE",
+      "building_type": "RESIDENTIAL",
+      "template_id": "template-residential",
+      "scene_bounds": [0, 0, 1200, 760],
+      "spawn_point": { "x": 600, "y": 380 },
+      "building_level": 1,
+      "building_health": 94,
+      "building_capacity": 6,
+      "lifecycle_state": "OCCUPIED",
+      "lifecycle_history": [
+        { "event_id": "building-home-001-life-001", "time": "2026-07-15T00:00:00Z", "state": "BUILT" },
+        { "event_id": "building-home-001-life-002", "time": "2026-07-17T00:00:00Z", "state": "OCCUPIED" }
+      ],
       "view": { "shape": "rect", "bounds": [300, 165, 600, 430] },
       "room_ids": ["room-living-001", "room-workshop-001"],
       "population": 3,
@@ -388,7 +449,18 @@
       "object_type": "BUILDING",
       "parent_id": "parcel-007",
       "parcel_id": "parcel-007",
-      "building_type": "MARKETPLACE",
+      "building_type": "SHOP",
+      "template_id": "template-shop",
+      "scene_bounds": [0, 0, 1200, 760],
+      "spawn_point": { "x": 600, "y": 380 },
+      "building_level": 2,
+      "building_health": 87,
+      "building_capacity": 24,
+      "lifecycle_state": "OPERATING",
+      "lifecycle_history": [
+        { "event_id": "building-market-001-life-001", "time": "2026-07-14T00:00:00Z", "state": "BUILT" },
+        { "event_id": "building-market-001-life-002", "time": "2026-07-16T00:00:00Z", "state": "OPERATING" }
+      ],
       "view": { "shape": "rect", "bounds": [245, 130, 710, 500] },
       "room_ids": ["room-market-001"],
       "population": 18,
@@ -407,8 +479,14 @@
       "building_id": "building-home-001",
       "room_type": "LIVING",
       "floor": 1,
+      "capacity": 4,
       "view": { "shape": "rect", "bounds": [85, 135, 480, 490] },
-      "occupant_ids": [],
+      "scene_bounds": [0, 0, 1200, 760],
+      "spawn_point": { "x": 420, "y": 380 },
+      "occupant_ids": ["life-player-001", "life-pet-001", "life-plant-home-001"],
+      "furniture_ids": ["furniture-sofa-001"],
+      "equipment_ids": ["equipment-kitchen-001"],
+      "organism_ids": ["organism-player-001", "organism-pet-001", "organism-plant-home-001"],
       "status": "ACTIVE",
       "source": "SYNTHETIC_WORLD_FIXTURE"
     },
@@ -420,8 +498,14 @@
       "building_id": "building-home-001",
       "room_type": "WORKSHOP",
       "floor": 1,
+      "capacity": 3,
       "view": { "shape": "rect", "bounds": [635, 135, 480, 490] },
+      "scene_bounds": [0, 0, 1200, 760],
+      "spawn_point": { "x": 780, "y": 380 },
       "occupant_ids": ["life-wukong-001"],
+      "furniture_ids": ["furniture-desk-001"],
+      "equipment_ids": ["equipment-terminal-001"],
+      "organism_ids": ["organism-wukong-001"],
       "status": "ACTIVE",
       "source": "SYNTHETIC_WORLD_FIXTURE"
     },
@@ -433,17 +517,41 @@
       "building_id": "building-market-001",
       "room_type": "COMMERCIAL",
       "floor": 1,
+      "capacity": 24,
       "view": { "shape": "rect", "bounds": [145, 115, 910, 530] },
+      "scene_bounds": [0, 0, 1200, 760],
+      "spawn_point": { "x": 600, "y": 380 },
       "occupant_ids": ["life-npc-guide-001"],
+      "furniture_ids": ["furniture-counter-001"],
+      "equipment_ids": ["equipment-market-kiosk-001"],
+      "organism_ids": ["organism-market-guide-001"],
       "status": "ACTIVE",
       "source": "SYNTHETIC_WORLD_FIXTURE"
     }
+  ],
+  "furniture": [
+    { "id": "furniture-sofa-001", "label": "Living Sofa", "room_id": "room-living-001", "furniture_type": "SEATING", "status": "ACTIVE" },
+    { "id": "furniture-desk-001", "label": "AI Work Desk", "room_id": "room-workshop-001", "furniture_type": "WORKSTATION", "status": "ACTIVE" },
+    { "id": "furniture-counter-001", "label": "Market Counter", "room_id": "room-market-001", "furniture_type": "SERVICE_COUNTER", "status": "ACTIVE" }
+  ],
+  "equipment": [
+    { "id": "equipment-kitchen-001", "label": "Kitchen Unit", "room_id": "room-living-001", "equipment_type": "NUTRITION", "status": "ACTIVE" },
+    { "id": "equipment-terminal-001", "label": "KAIOS Terminal", "room_id": "room-workshop-001", "equipment_type": "AI_WORKSTATION", "status": "ACTIVE" },
+    { "id": "equipment-market-kiosk-001", "label": "Market Kiosk", "room_id": "room-market-001", "equipment_type": "MARKET_INTERFACE", "status": "ACTIVE" }
+  ],
+  "organisms": [
+    { "id": "organism-player-001", "label": "Player Organism", "room_id": "room-living-001", "organism_type": "PLAYER", "life_ids": ["life-player-001"], "status": "ACTIVE" },
+    { "id": "organism-wukong-001", "label": "AI Worker Organism", "room_id": "room-workshop-001", "organism_type": "AI_WORKER", "life_ids": ["life-wukong-001"], "status": "ACTIVE" },
+    { "id": "organism-market-guide-001", "label": "NPC Organism", "room_id": "room-market-001", "organism_type": "NPC", "life_ids": ["life-npc-guide-001"], "status": "ACTIVE" },
+    { "id": "organism-pet-001", "label": "Pet Organism", "room_id": "room-living-001", "organism_type": "PET", "life_ids": ["life-pet-001"], "status": "ACTIVE" },
+    { "id": "organism-plant-home-001", "label": "Plant Organism", "room_id": "room-living-001", "organism_type": "PLANT", "life_ids": ["life-plant-home-001"], "status": "ACTIVE" }
   ],
   "lifeProfiles": [
     {
       "id": "life-wukong-001",
       "label": "Wukong 001",
       "life_type": "AI_WORKER",
+      "z_index": 10,
       "synthetic": true,
       "privacy_class": "PUBLIC_SYNTHETIC",
       "identity_class": "SYNTHETIC_ALIAS_ONLY",
@@ -495,6 +603,8 @@
         "occupation": "World Cartographer"
       },
       "vitals": { "health": 96, "energy": 82, "food": 74, "water": 88 },
+      "age_days": 128,
+      "inventory": { "food_portions": 2, "water_units": 3, "items": ["map-kit", "repair-tool"] },
       "ga_count": 72,
       "ga_profile": "GA_COUNT_72",
       "heartbeat": {
@@ -508,6 +618,7 @@
       "id": "life-npc-guide-001",
       "label": "Market Guide",
       "life_type": "NPC",
+      "z_index": 10,
       "synthetic": true,
       "privacy_class": "PUBLIC_SYNTHETIC",
       "identity_class": "SYNTHETIC_ALIAS_ONLY",
@@ -559,6 +670,8 @@
         "occupation": "Market Guide"
       },
       "vitals": { "health": 88, "energy": 68, "food": 79, "water": 83 },
+      "age_days": 365,
+      "inventory": { "food_portions": 1, "water_units": 2, "items": ["market-guide"] },
       "ga_count": 12,
       "ga_profile": "GUIDE_SERVICE_GA_12",
       "heartbeat": {
@@ -572,6 +685,7 @@
       "id": "life-forest-001",
       "label": "Reserve Tree Cluster",
       "life_type": "PLANT",
+      "z_index": 10,
       "synthetic": true,
       "privacy_class": "PUBLIC_SYNTHETIC",
       "identity_class": "SYNTHETIC_ALIAS_ONLY",
@@ -625,6 +739,8 @@
         "reason": "Plant profile has no Citizen Runtime"
       },
       "vitals": { "health": 91, "energy": 76, "food": 86, "water": 92 },
+      "age_days": 1825,
+      "inventory": { "food_portions": 0, "water_units": 1, "items": [] },
       "ga_count": 4,
       "ga_profile": "PLANT_ADAPTATION_GA_4",
       "heartbeat": {
@@ -632,6 +748,117 @@
         "last_at": "2026-07-16T00:00:00Z",
         "sequence": 27
       },
+      "source": "SYNTHETIC_LIFE_FIXTURE"
+    },
+    {
+      "id": "life-player-001",
+      "label": "PrimeForge Explorer",
+      "life_type": "PLAYER",
+      "z_index": 10,
+      "synthetic": true,
+      "privacy_class": "PUBLIC_SYNTHETIC",
+      "identity_class": "SYNTHETIC_ALIAS_ONLY",
+      "parcel_id": "parcel-001",
+      "building_id": "building-home-001",
+      "room_id": "room-living-001",
+      "view": { "shape": "circle", "bounds": [180, 250, 100, 100] },
+      "body": {
+        "id": "body-player-001",
+        "status": "ACTIVE",
+        "version": "1.0.0",
+        "profile": "SYNTHETIC_PLAYER_BODY",
+        "dna_summary": {
+          "summary_id": "dna-summary-player-001",
+          "classification": "SIMULATED_HUMAN_BLUEPRINT",
+          "trait_count": 3,
+          "traits": ["MOBILITY", "ADAPTATION", "SELF_REPAIR"],
+          "disclosure": "PUBLIC_SAFE_SUMMARY"
+        },
+        "organ_systems": ["MOVEMENT_SYSTEM", "SENSOR_SYSTEM", "REPAIR_SYSTEM"]
+      },
+      "species_os": { "id": "species-os-human-player", "status": "ACTIVE", "version": "1.0.0", "species_code": "HUMAN_PLAYER" },
+      "individual_life_os": {
+        "id": "individual-life-os-player-001",
+        "status": "ACTIVE",
+        "version": "1.0.0",
+        "state_version": 1,
+        "life_state": "ALIVE",
+        "activity_state": "AWAKE",
+        "health_state": "HEALTHY",
+        "life_stage": "MATURE"
+      },
+      "mind_runtime": { "id": "mind-runtime-player-001", "status": "ACTIVE", "version": "1.0.0", "profile": "PLAYER_MIND_PUBLIC_V1" },
+      "citizen_runtime": { "id": "citizen-runtime-player-001", "status": "ACTIVE", "version": "1.0.0", "profile": "PLAYER_CITIZEN_PUBLIC_V1", "occupation": "Explorer" },
+      "vitals": { "health": 98, "energy": 86, "food": 82, "water": 90 },
+      "age_days": 10950,
+      "inventory": { "food_portions": 3, "water_units": 4, "items": ["home-key", "field-notebook"] },
+      "ga_count": 18,
+      "ga_profile": "EXPLORER_GA_18",
+      "heartbeat": { "status": "CURRENT_SYNTHETIC", "last_at": "2026-07-17T00:00:00Z", "sequence": 1 },
+      "source": "SYNTHETIC_LIFE_FIXTURE"
+    },
+    {
+      "id": "life-pet-001",
+      "label": "Cloud Pet",
+      "life_type": "PET",
+      "z_index": 10,
+      "synthetic": true,
+      "privacy_class": "PUBLIC_SYNTHETIC",
+      "identity_class": "SYNTHETIC_ALIAS_ONLY",
+      "parcel_id": "parcel-001",
+      "building_id": "building-home-001",
+      "room_id": "room-living-001",
+      "view": { "shape": "circle", "bounds": [360, 350, 70, 70] },
+      "body": {
+        "id": "body-pet-001",
+        "status": "ACTIVE",
+        "version": "1.0.0",
+        "profile": "SYNTHETIC_PET_BODY",
+        "dna_summary": { "summary_id": "dna-summary-pet-001", "classification": "SIMULATED_PET_BLUEPRINT", "trait_count": 2, "traits": ["MOBILITY", "SOCIAL_BOND"], "disclosure": "PUBLIC_SAFE_SUMMARY" },
+        "organ_systems": ["MOVEMENT_SYSTEM", "SENSOR_SYSTEM"]
+      },
+      "species_os": { "id": "species-os-cloud-pet", "status": "ACTIVE", "version": "1.0.0", "species_code": "CLOUD_PET" },
+      "individual_life_os": { "id": "individual-life-os-pet-001", "status": "ACTIVE", "version": "1.0.0", "state_version": 7, "life_state": "ALIVE", "activity_state": "RESTING", "health_state": "HEALTHY", "life_stage": "JUVENILE" },
+      "mind_runtime": { "id": "mind-runtime-pet-001", "status": "ACTIVE", "version": "1.0.0", "profile": "PET_BEHAVIOR_PUBLIC_V1" },
+      "citizen_runtime": { "id": "citizen-runtime-na-pet-001", "status": "NOT_APPLICABLE", "version": "1.0.0", "profile": "NOT_APPLICABLE", "occupation": "NOT_APPLICABLE", "reason": "Pet profile has no Citizen Runtime" },
+      "vitals": { "health": 93, "energy": 64, "food": 72, "water": 80 },
+      "age_days": 240,
+      "inventory": { "food_portions": 1, "water_units": 1, "items": ["toy"] },
+      "ga_count": 5,
+      "ga_profile": "PET_ADAPTATION_GA_5",
+      "heartbeat": { "status": "CURRENT_SYNTHETIC", "last_at": "2026-07-17T00:00:00Z", "sequence": 7 },
+      "source": "SYNTHETIC_LIFE_FIXTURE"
+    },
+    {
+      "id": "life-plant-home-001",
+      "label": "Window Herb",
+      "life_type": "PLANT",
+      "z_index": 10,
+      "synthetic": true,
+      "privacy_class": "PUBLIC_SYNTHETIC",
+      "identity_class": "SYNTHETIC_ALIAS_ONLY",
+      "parcel_id": "parcel-001",
+      "building_id": "building-home-001",
+      "room_id": "room-living-001",
+      "view": { "shape": "circle", "bounds": [470, 260, 64, 64] },
+      "body": {
+        "id": "body-plant-home-001",
+        "status": "ACTIVE",
+        "version": "1.0.0",
+        "profile": "SYNTHETIC_HERB_BODY",
+        "dna_summary": { "summary_id": "dna-summary-plant-home-001", "classification": "SIMULATED_PLANT_BLUEPRINT", "trait_count": 3, "traits": ["GROWTH", "WATER_BALANCE", "SELF_REPAIR"], "disclosure": "PUBLIC_SAFE_SUMMARY" },
+        "organ_systems": ["ROOT_SYSTEM", "GROWTH_SYSTEM", "WATER_BALANCE"]
+      },
+      "species_os": { "id": "species-os-window-herb", "status": "ACTIVE", "version": "1.0.0", "species_code": "WINDOW_HERB" },
+      "individual_life_os": { "id": "individual-life-os-plant-home-001", "status": "ACTIVE", "version": "1.0.0", "state_version": 9, "life_state": "ALIVE", "activity_state": "RESTING", "health_state": "HEALTHY", "life_stage": "MATURE" },
+      "mind_runtime": { "id": "mind-runtime-na-plant-home-001", "status": "NOT_APPLICABLE", "version": "1.0.0", "profile": "NOT_APPLICABLE", "reason": "Plant profile has no Mind Runtime" },
+      "citizen_runtime": { "id": "citizen-runtime-na-plant-home-001", "status": "NOT_APPLICABLE", "version": "1.0.0", "profile": "NOT_APPLICABLE", "occupation": "NOT_APPLICABLE", "reason": "Plant profile has no Citizen Runtime" },
+      "vitals": { "health": 89, "energy": 78, "food": 84, "water": 76 },
+      "age_days": 120,
+      "inventory": { "food_portions": 0, "water_units": 1, "items": [] },
+      "ga_count": 3,
+      "ga_profile": "PLANT_ADAPTATION_GA_3",
+      "heartbeat": { "status": "CURRENT_SYNTHETIC", "last_at": "2026-07-17T00:00:00Z", "sequence": 9 },
       "source": "SYNTHETIC_LIFE_FIXTURE"
     }
   ],

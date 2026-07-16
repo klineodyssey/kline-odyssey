@@ -60,12 +60,20 @@ export function createMapRenderer(canvas, options = {}) {
 
     let labelCount = 0;
     let lifeMarkerCount = 0;
+    let lifeEntityCount = 0;
     for (const item of limited) {
       const screenGeometry = projectGeometry(item.view, camera);
       drawItem(context, item, screenGeometry, theme, interactionState, camera.zoom);
       if (drawItemLabel(context, item, screenGeometry, interactionState)) labelCount += 1;
       if (drawLifeMarker(context, item, screenGeometry)) lifeMarkerCount += 1;
+      if (String(item.type ?? item.object_type) === "LIFE_PROFILE") lifeEntityCount += 1;
     }
+    const playerMarkerDrawn = drawPlayerMarker(
+      context,
+      interactionState.player,
+      camera,
+      scene?.current
+    );
 
     const finishedAt = now();
     const frameDelta = lastFrameStartedAt == null ? 0 : startedAt - lastFrameStartedAt;
@@ -81,6 +89,8 @@ export function createMapRenderer(canvas, options = {}) {
       overflow_items: Math.max(0, visible.length - limited.length),
       labels_drawn: labelCount,
       life_markers_drawn: lifeMarkerCount,
+      life_entities_drawn: lifeEntityCount,
+      player_marker_drawn: playerMarkerDrawn,
       last_hit_test_ms: metrics.last_hit_test_ms,
       rendered_at: new Date().toISOString()
     });
@@ -277,6 +287,52 @@ function drawLifeMarker(ctx, item, geometry) {
     ctx.font = "700 9px system-ui, sans-serif";
     ctx.fillText(String(count), x - 3, y + 18);
   }
+  ctx.restore();
+  return true;
+}
+
+function drawPlayerMarker(ctx, player, camera, sceneCurrent) {
+  if (!player?.sessionActive || !player.position) return false;
+  const playerEntityId = String(player.currentEntity?.id ?? "");
+  const sceneEntityId = String(sceneCurrent?.id ?? "");
+  if (!playerEntityId || playerEntityId !== sceneEntityId) return false;
+  const point = worldToScreen(player.position, camera);
+  if (point.x < -30 || point.y < -30 || point.x > camera.width + 30 || point.y > camera.height + 30) return false;
+
+  const trail = Array.isArray(player.trail)
+    ? player.trail.filter(({ entityId }) => String(entityId) === sceneEntityId).slice(-16)
+    : [];
+  if (trail.length > 1) {
+    ctx.save();
+    ctx.beginPath();
+    trail.forEach((entry, index) => {
+      const projected = worldToScreen(entry, camera);
+      if (index === 0) ctx.moveTo(projected.x, projected.y);
+      else ctx.lineTo(projected.x, projected.y);
+    });
+    ctx.strokeStyle = "rgba(17, 24, 39, 0.45)";
+    ctx.lineWidth = 3;
+    ctx.setLineDash([5, 5]);
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  ctx.save();
+  ctx.shadowColor = "rgba(0, 0, 0, 0.38)";
+  ctx.shadowBlur = 8;
+  ctx.fillStyle = "#f4c542";
+  ctx.strokeStyle = "#111827";
+  ctx.lineWidth = 3;
+  ctx.beginPath();
+  ctx.arc(point.x, point.y, 11, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.stroke();
+  ctx.shadowBlur = 0;
+  ctx.fillStyle = "#111827";
+  ctx.font = "800 10px system-ui, sans-serif";
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.fillText("P", point.x, point.y + 0.5);
   ctx.restore();
   return true;
 }
@@ -479,7 +535,8 @@ function normalizeInteraction(interaction) {
   return {
     selected: new Set(Array.from(selectedValues, String)),
     hovered: interaction.hoveredId == null ? null : String(interaction.hoveredId),
-    focused: interaction.focusedId == null ? null : String(interaction.focusedId)
+    focused: interaction.focusedId == null ? null : String(interaction.focusedId),
+    player: interaction.player ?? null
   };
 }
 
@@ -634,6 +691,8 @@ function createEmptyMetrics() {
     overflow_items: 0,
     labels_drawn: 0,
     life_markers_drawn: 0,
+    life_entities_drawn: 0,
+    player_marker_drawn: false,
     last_hit_test_ms: null,
     rendered_at: null
   });

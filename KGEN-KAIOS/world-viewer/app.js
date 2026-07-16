@@ -1,10 +1,15 @@
 import { createCameraController } from "./camera/camera-controller.js";
+import { createBuildingRuntime } from "./building/building-runtime.js";
 import { loadSyntheticWorld } from "./data/world-store.js";
 import { createInputController } from "./input/input-controller.js";
 import { createInspectorView } from "./inspector/inspector-view.js";
-import { createLifeOsViewer } from "./life/life-os-viewer.js";
+import { createLandRuntime } from "./land/land-runtime.js";
+import { createLifeRuntime } from "./life/life-runtime.js";
+import { createLifeOsViewer, resolveLifeProfiles } from "./life/life-os-viewer.js";
 import { createLodController } from "./lod/lod-controller.js";
+import { createPlayerController } from "./player/player-controller.js";
 import { createMapRenderer, getItemBounds } from "./renderer/map-renderer.js";
+import { createRoomRuntime } from "./room/room-runtime.js";
 import { createSelectionController } from "./selection/selection-controller.js";
 import { createContextMenu } from "./ui/context-menu.js";
 import { createShell } from "./ui/shell.js";
@@ -26,6 +31,12 @@ let activeLifeProfile = null;
 let mode = "WORLD";
 let frameRequested = false;
 let lastMetrics = null;
+let landRuntime = null;
+let buildingRuntime = null;
+let roomRuntime = null;
+let lifeRuntime = null;
+let playerController = null;
+const selectedLandRevisions = new Map();
 
 const camera = createCameraController({
   worldBounds: [0, 0, 1200, 760],
@@ -51,6 +62,12 @@ const shell = createShell({
   onMode: (nextMode) => setMode(nextMode),
   onBreadcrumb: (index) => navigateBreadcrumb(index),
   onDiscardProposal: () => discardProposal(),
+  onEnterSelected: () => activateEntity(currentEntity()),
+  onPlayerStep: (direction) => movePlayer(direction),
+  onSimulationAdvance: () => advanceSimulation(),
+  onLandUndo: () => changeLandHistory("UNDO"),
+  onLandRedo: () => changeLandHistory("REDO"),
+  onLandSave: () => saveLandDraft(),
   onTheme: () => scheduleRender()
 });
 
@@ -65,12 +82,104 @@ function currentEntity() {
   return activeId ? worldIndex?.get(String(activeId)) ?? lod?.getEntity(activeId) : null;
 }
 
+function entityType(entity) {
+  return String(entity?.type ?? entity?.object_type ?? "");
+}
+
+function resolveEntityContext(entity = currentEntity()) {
+  const type = entityType(entity);
+  const roomId = type === "ROOM" ? entity?.id : entity?.room_id ?? null;
+  const room = roomId ? worldIndex?.get(String(roomId)) : null;
+  const buildingId = type === "BUILDING"
+    ? entity?.id
+    : entity?.building_id ?? room?.parent_id ?? null;
+  const building = buildingId ? worldIndex?.get(String(buildingId)) : null;
+  const parcelId = type === "LAND_PARCEL"
+    ? entity?.id
+    : entity?.parcel_id ?? building?.parent_id ?? null;
+  return {
+    type,
+    parcelId: parcelId ? String(parcelId) : null,
+    buildingId: buildingId ? String(buildingId) : null,
+    roomId: roomId ? String(roomId) : null
+  };
+}
+
+function landSnapshot(parcelId) {
+  if (!landRuntime || !parcelId) return null;
+  const requestedRevision = selectedLandRevisions.get(parcelId) ?? null;
+  try {
+    return landRuntime.getParcelSnapshot(parcelId, requestedRevision);
+  } catch {
+    selectedLandRevisions.delete(parcelId);
+    return landRuntime.getParcelSnapshot(parcelId);
+  }
+}
+
+function runtimeProjection(entity = currentEntity()) {
+  const context = resolveEntityContext(entity);
+  const buildingSnapshots = context.buildingId
+    ? [buildingRuntime?.getBuildingSnapshot(context.buildingId)].filter(Boolean)
+    : context.parcelId
+      ? buildingRuntime?.listByParcel(context.parcelId) ?? []
+      : [];
+  const roomSnapshots = context.roomId
+    ? [roomRuntime?.getRoomSnapshot(context.roomId)].filter(Boolean)
+    : context.buildingId
+      ? roomRuntime?.listByBuilding(context.buildingId) ?? []
+      : buildingSnapshots.flatMap(({ buildingId }) => roomRuntime?.listByBuilding(buildingId) ?? []);
+  const lifeSnapshots = lifeRuntime?.listSnapshots().filter((snapshot) => {
+    if (context.type === "LIFE_PROFILE") return snapshot.life_id === String(entity.id);
+    if (context.roomId) return snapshot.room_id === context.roomId;
+    if (context.buildingId) return snapshot.building_id === context.buildingId;
+    if (context.parcelId) return snapshot.parcel_id === context.parcelId;
+    return false;
+  }) ?? [];
+  return {
+    land: context.parcelId ? [landSnapshot(context.parcelId)].filter(Boolean) : [],
+    building: buildingSnapshots,
+    room: roomSnapshots,
+    player: playerController ? [playerController.getSnapshot()] : [],
+    life: lifeSnapshots
+  };
+}
+
+function profileWithRuntime(profile) {
+  if (!profile || !lifeRuntime) return profile;
+  let snapshot;
+  try {
+    snapshot = lifeRuntime.getSnapshot(profile.id ?? profile.life_id ?? profile.profile_id);
+  } catch {
+    return profile;
+  }
+  return {
+    ...profile,
+    age_days: snapshot.age_days,
+    inventory: snapshot.inventory,
+    vitals: {
+      ...profile.vitals,
+      health: snapshot.health,
+      food: snapshot.food,
+      water: snapshot.water,
+      energy: snapshot.energy
+    },
+    individual_life_os: {
+      ...profile.individual_life_os,
+      life_state: snapshot.life_state,
+      activity_state: snapshot.activity_state,
+      health_state: snapshot.health_state,
+      state_version: snapshot.revision
+    }
+  };
+}
+
 function interactionState() {
   const snapshot = selection.snapshot();
   return {
     selectedId: snapshot.selectedId,
     hoveredId: snapshot.hoveredId,
-    focusedId: snapshot.focusedId
+    focusedId: snapshot.focusedId,
+    player: playerController?.getSnapshot() ?? null
   };
 }
 
@@ -87,6 +196,13 @@ function scheduleRender() {
     document.documentElement.dataset.worldViewerCamera = `${cameraState.camera_x.toFixed(2)},${cameraState.camera_y.toFixed(2)}`;
     document.documentElement.dataset.worldViewerRenderMs = String(lastMetrics.render_ms ?? "UNKNOWN");
     document.documentElement.dataset.worldViewerFps = String(lastMetrics.estimated_fps ?? "UNKNOWN");
+    document.documentElement.dataset.worldViewerPlayerMarker = String(lastMetrics.player_marker_drawn === true);
+    document.documentElement.dataset.worldViewerLifeMarkers = String(lastMetrics.life_markers_drawn ?? 0);
+    document.documentElement.dataset.worldViewerLifeEntities = String(lastMetrics.life_entities_drawn ?? 0);
+    document.documentElement.dataset.worldViewerPlayerEntity = String(
+      playerController?.getSnapshot().currentEntity?.id ?? "NONE"
+    );
+    document.documentElement.dataset.worldViewerSceneEntity = String(lod.getScene().current?.id ?? "NONE");
   });
 }
 
@@ -165,17 +281,20 @@ function renderInspector() {
 
   if (mode === "LIFE") {
     if (activeLifeProfile) {
+      const runtimeProfile = profileWithRuntime(activeLifeProfile);
       inspectorKind.textContent = "LIFE";
-      inspectorTitle.textContent = activeLifeProfile.display_name
-        ?? activeLifeProfile.label
-        ?? activeLifeProfile.name
-        ?? activeLifeProfile.id
+      inspectorTitle.textContent = runtimeProfile.display_name
+        ?? runtimeProfile.label
+        ?? runtimeProfile.name
+        ?? runtimeProfile.id
         ?? "Life OS";
-      lifeViewer.render({ profile: activeLifeProfile });
+      lifeViewer.render({ profile: runtimeProfile });
     } else {
       inspectorKind.textContent = entity.type ?? entity.object_type ?? "LIFE";
       inspectorTitle.textContent = entity.label ?? entity.id ?? "Life OS";
-      lifeViewer.render({ world: inspectorWorld, selection: entity.id });
+      const profiles = resolveLifeProfiles({ world: inspectorWorld, selection: entity.id })
+        .map(profileWithRuntime);
+      lifeViewer.render({ resolvedProfiles: profiles });
     }
   } else {
     inspectorKind.textContent = entity.type ?? entity.object_type ?? "WORLD";
@@ -188,9 +307,11 @@ function renderInspector() {
         lod: lod.getState().level,
         visibility: entity.status ?? "VISIBLE",
         frame_metrics: lastMetrics
-      }
+      },
+      runtime: runtimeProjection(entity)
     });
   }
+  syncCommandState();
 }
 
 function updateLodUi(state) {
@@ -217,6 +338,9 @@ function selectEntity(entity) {
     return;
   }
   selection.select(entity.id, { reason: "viewer-select" });
+  inspectorContent.scrollTop = 0;
+  const parcelId = resolveEntityContext(entity).parcelId;
+  if ((proposal?.parcel_id ?? null) !== parcelId) syncProposalForParcel(parcelId);
   const coordinate = entity.coordinate;
   shell.setCoordinates(coordinate
     ? `K280 / ${coordinate.latitude_deg.toFixed(4)}, ${coordinate.longitude_deg.toFixed(4)}`
@@ -239,12 +363,19 @@ function selectFromInput(context) {
 
 function activateEntity(entity) {
   if (!entity) return;
+  if (entityType(entity) === "LIFE_PROFILE") {
+    openLifeProfile(entity, entity);
+    return;
+  }
   selectEntity(entity);
   const result = lod.enter(entity.id);
   if (!result.ok) {
     shell.showToast(result.reason === "DEEPEST_LEVEL" ? "Deepest viewer layer reached" : "This object cannot be entered", "neutral");
-  } else if (matchMedia("(max-width: 900px)").matches) {
-    shell.setInspectorOpen(false);
+  } else {
+    if (playerController?.getSnapshot().sessionActive) {
+      playerController.enter(result.state.scene.current ?? entity);
+    }
+    if (matchMedia("(max-width: 900px)").matches) shell.setInspectorOpen(false);
   }
 }
 
@@ -254,6 +385,7 @@ function navigateBack() {
   if (!result.ok) {
     shell.showToast("Already at Earth K280", "neutral");
   } else {
+    if (playerController?.getSnapshot().sessionActive) playerController.enter(result.state.scene.current);
     selectEntity(result.state.scene.current);
   }
 }
@@ -261,6 +393,7 @@ function navigateBack() {
 function navigateWorld() {
   contextMenu?.close("NAVIGATION");
   lod.world();
+  if (playerController?.getSnapshot().sessionActive) playerController.enter(world.earth);
   selectEntity(world.earth);
 }
 
@@ -268,6 +401,7 @@ function navigateBreadcrumb(targetIndex) {
   const state = lod.getState();
   const steps = Math.max(0, state.path.length - 1 - targetIndex);
   for (let index = 0; index < steps; index += 1) lod.back();
+  if (playerController?.getSnapshot().sessionActive) playerController.enter(lod.getScene().current);
   selectEntity(lod.getScene().current);
 }
 
@@ -279,6 +413,45 @@ function updateStarterParcelStatus(statusOverride = null) {
     parcelId,
     status: statusOverride ?? parcel?.status ?? (player ? "UNAVAILABLE" : null),
     locationConsent: mockLocationConsent
+  });
+}
+
+function syncProposalForParcel(parcelId) {
+  if (proposal) selection.markProposal(proposal.parcel_id, false, { reason: "proposal-sync" });
+  proposal = parcelId ? landRuntime?.getActiveDraft(parcelId) ?? null : null;
+  if (proposal) selection.markProposal(proposal.parcel_id, true, { reason: "proposal-sync" });
+  shell.setProposal(proposal);
+}
+
+function canEnterEntity(entity) {
+  if (!entity || !lod) return false;
+  if (entityType(entity) === "LIFE_PROFILE") return true;
+  return lod.getScene().items.some(({ id }) => String(id) === String(entity.id));
+}
+
+function syncCommandState() {
+  if (!world || !lod) return;
+  const entity = currentEntity();
+  const playerState = playerController?.getSnapshot() ?? null;
+  const context = resolveEntityContext(entity);
+  const snapshot = landSnapshot(context.parcelId);
+  const activeDraft = snapshot?.active_draft ?? null;
+  shell.setPlayerHud({
+    sessionActive: Boolean(playerState?.sessionActive),
+    location: playerState?.currentEntity?.label ?? playerState?.currentEntity?.id ?? null,
+    movement: playerState?.movementState ?? null,
+    worldRevision: snapshot?.local_parcel_version ?? playerState?.revision ?? 0
+  });
+  shell.setPlayerControls({
+    canEnter: Boolean(playerState?.sessionActive && canEnterEntity(entity)),
+    canMove: Boolean(playerState?.sessionActive),
+    canAdvance: Boolean(playerState?.sessionActive && lifeRuntime)
+  });
+  shell.setLandControls({
+    canUndo: snapshot?.can_undo === true,
+    canRedo: snapshot?.can_redo === true,
+    canSave: Boolean(activeDraft && activeDraft.local_saved !== true),
+    dirty: Boolean(activeDraft && activeDraft.local_saved !== true)
   });
 }
 
@@ -296,7 +469,10 @@ function focusHome() {
   updateStarterParcelStatus();
   shell.setMode("LAND");
   mode = "LAND";
-  selectEntity(worldIndex.get(player.starter_parcel_id));
+  const parcel = worldIndex.get(player.starter_parcel_id);
+  if (playerController?.getSnapshot().sessionActive) playerController.enter(parcel);
+  syncProposalForParcel(player.starter_parcel_id);
+  selectEntity(parcel);
   shell.setInspectorOpen(true);
 }
 
@@ -310,6 +486,7 @@ function startMockSession({ locationConsent = false } = {}) {
   });
   shell.setLoggedIn(player);
   lod.setHomeParcel(player.starter_parcel_id);
+  playerController.startSession(player, worldIndex.get(player.starter_parcel_id));
   updateStarterParcelStatus();
   focusHome();
   shell.showToast(
@@ -321,11 +498,13 @@ function startMockSession({ locationConsent = false } = {}) {
 }
 
 function endMockSession() {
+  playerController?.endSession();
   player = null;
   mockLocationConsent = false;
   activeLifeProfile = null;
   shell.setLoggedIn(null);
   updateStarterParcelStatus();
+  syncProposalForParcel(null);
   navigateWorld();
   shell.showToast(
     proposal ? "Mock session ended. Local proposal draft retained." : "Mock session ended.",
@@ -339,6 +518,76 @@ function handleMockLogin() {
   } else {
     shell.openMockConsent();
   }
+}
+
+function movePlayer(direction) {
+  const deltas = {
+    UP: [0, -28],
+    DOWN: [0, 28],
+    LEFT: [-28, 0],
+    RIGHT: [28, 0]
+  };
+  const delta = deltas[direction];
+  if (!delta || !playerController?.getSnapshot().sessionActive) return;
+  playerController.walkBy(delta[0], delta[1]);
+  shell.announce(`Player moved ${direction.toLowerCase()}`);
+}
+
+function advanceSimulation() {
+  if (!lifeRuntime || !playerController?.getSnapshot().sessionActive) return;
+  lifeRuntime.advance({ elapsedMs: 3_600_000 });
+  shell.showToast("Digital Earth advanced by one synthetic hour.", "success");
+}
+
+function performLifeAction(action, snapshot) {
+  const lifeId = snapshot?.life_id ?? snapshot?.lifeId ?? snapshot?.id;
+  if (!lifeId) return;
+  try {
+    lifeRuntime.act(lifeId, action);
+    shell.showToast(`${action} recorded for ${snapshot.display_name ?? lifeId}.`, "success");
+  } catch (error) {
+    shell.showToast(error.message, "warning");
+  }
+}
+
+function selectedParcelId() {
+  return resolveEntityContext().parcelId ?? proposal?.parcel_id ?? null;
+}
+
+function changeLandHistory(direction) {
+  const parcelId = selectedParcelId();
+  if (!parcelId || !landRuntime) return;
+  const result = direction === "UNDO"
+    ? landRuntime.undo(parcelId)
+    : landRuntime.redo(parcelId);
+  proposal = result;
+  selectedLandRevisions.delete(parcelId);
+  syncProposalForParcel(parcelId);
+  renderInspector();
+  shell.showToast(result ? `${direction} restored a local land draft.` : `Nothing to ${direction.toLowerCase()}.`, "neutral");
+}
+
+function saveLandDraft() {
+  const parcelId = selectedParcelId();
+  if (!parcelId || !landRuntime) return;
+  try {
+    const saved = landRuntime.saveDraft(parcelId);
+    proposal = saved;
+    syncProposalForParcel(parcelId);
+    renderInspector();
+    shell.showToast(saved ? "Draft saved locally. Registry ownership remains unchanged." : "No active draft to save.", saved ? "success" : "neutral");
+  } catch (error) {
+    shell.showToast(error.message, "warning");
+  }
+}
+
+function selectLandRevision(revision) {
+  const parcelId = selectedParcelId();
+  const revisionId = revision?.revision_id ?? revision?.id ?? null;
+  if (!parcelId || !revisionId) return;
+  selectedLandRevisions.set(parcelId, revisionId);
+  renderInspector();
+  shell.showToast(`Revision ${revisionId} opened read-only.`, "neutral");
 }
 
 function openContext(context) {
@@ -362,7 +611,8 @@ function acceptDraft(draft) {
   if (proposal) {
     selection.markProposal(proposal.parcel_id, false, { reason: "proposal-replaced" });
   }
-  proposal = Object.freeze(draft);
+  proposal = landRuntime.setDraft(draft);
+  selectedLandRevisions.delete(draft.parcel_id);
   selection.markProposal(draft.parcel_id, true, { reason: "local-proposal" });
   shell.setProposal(proposal);
   renderInspector();
@@ -371,9 +621,11 @@ function acceptDraft(draft) {
 
 function discardProposal() {
   if (!proposal) return;
-  selection.markProposal(proposal.parcel_id, false, { reason: "proposal-discarded" });
-  proposal = null;
-  shell.setProposal(null);
+  const parcelId = proposal.parcel_id;
+  selection.markProposal(parcelId, false, { reason: "proposal-discarded" });
+  landRuntime.discardDraft(parcelId);
+  proposal = landRuntime.getActiveDraft(parcelId);
+  shell.setProposal(proposal);
   renderInspector();
 }
 
@@ -412,19 +664,56 @@ function openLifeProfile(profile, sourceProfile) {
   }
   shell.setMode("LIFE");
   setMode("LIFE");
+  inspectorContent.scrollTop = 0;
   shell.announce(`${profile.displayName ?? activeLifeProfile.label ?? "Life profile"} opened`);
+}
+
+function safeLocalStorage() {
+  try {
+    return globalThis.localStorage ?? null;
+  } catch {
+    return null;
+  }
 }
 
 async function start() {
   const loaded = await loadSyntheticWorld();
   ({ world, inspectorWorld, index: worldIndex } = loaded);
+  const storage = safeLocalStorage();
+  landRuntime = createLandRuntime({
+    world,
+    storage,
+    storageKey: `${world.meta.storage_namespace}.land`
+  });
+  buildingRuntime = createBuildingRuntime({ world });
+  roomRuntime = createRoomRuntime({ world, buildingRuntime });
+  lifeRuntime = createLifeRuntime({
+    world,
+    storage,
+    storageKey: `${world.meta.storage_namespace}.life`
+  });
+  playerController = createPlayerController({ world });
   lod = createLodController({ ...world, homeParcelId: world.player.starter_parcel_id });
   renderer = createMapRenderer(canvas, { maxVisibleItems: 250 });
-  lifeViewer = createLifeOsViewer(inspectorContent);
+  lifeViewer = createLifeOsViewer(inspectorContent, {
+    onAction: (action, projection) => {
+      const snapshot = lifeRuntime.getSnapshot(projection.lifeId);
+      performLifeAction(action, snapshot);
+    }
+  });
   inspector = createInspectorView({
     container: inspectorContent,
     onClose: () => shell.setInspectorOpen(false),
-    onOpenLife: (profile, _projection, sourceProfile) => openLifeProfile(profile, sourceProfile)
+    onOpenLife: (profile, _projection, sourceProfile) => openLifeProfile(profile, sourceProfile),
+    onUndoLand: () => changeLandHistory("UNDO"),
+    onRedoLand: () => changeLandHistory("REDO"),
+    onSaveDraft: () => saveLandDraft(),
+    onSelectRevision: (revision) => selectLandRevision(revision),
+    onEnterEntity: (snapshot) => {
+      const id = snapshot?.buildingId ?? snapshot?.roomId ?? snapshot?.id;
+      activateEntity(id ? worldIndex.get(String(id)) : null);
+    },
+    onLifeAction: (action, snapshot) => performLifeAction(action, snapshot)
   });
   contextMenu = createContextMenu({
     host: contextHost,
@@ -450,6 +739,21 @@ async function start() {
 
   new ResizeObserver(resizeViewer).observe(canvas.parentElement);
   camera.subscribe(scheduleRender);
+  landRuntime.subscribe(({ parcel_id: parcelId }) => {
+    selectedLandRevisions.delete(String(parcelId));
+    if (resolveEntityContext().parcelId === parcelId) syncProposalForParcel(parcelId);
+    renderInspector();
+    scheduleRender();
+  });
+  lifeRuntime.subscribe(() => {
+    renderInspector();
+    scheduleRender();
+  });
+  playerController.subscribe(() => {
+    syncCommandState();
+    renderInspector();
+    scheduleRender();
+  }, { emitCurrent: false });
   selection.subscribe((snapshot) => {
     syncAccessibleScene(snapshot);
     renderInspector();
@@ -463,7 +767,7 @@ async function start() {
   shell.setLoggedIn(null);
   updateStarterParcelStatus();
   shell.setCoordinates("K280 / Earth surface shell");
-  shell.showToast("World Viewer Sprint 002 ready", "success");
+  shell.showToast("Digital Earth Alpha ready", "success");
 }
 
 start().catch((error) => {
@@ -475,5 +779,8 @@ window.addEventListener("beforeunload", () => {
   input?.destroy();
   selection.destroy();
   renderer?.destroy();
+  landRuntime?.destroy();
+  lifeRuntime?.destroy();
+  playerController?.destroy();
   shell.destroy();
 }, { once: true });

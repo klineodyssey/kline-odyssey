@@ -81,7 +81,8 @@ const LIFE_STAGES = new Set([
 ]);
 
 const VITAL_KEYS = Object.freeze(["health", "energy", "food", "water"]);
-const LIFE_TYPES = new Set(["AI_WORKER", "NPC", "PLANT"]);
+const LIFE_TYPES = new Set(["AI_WORKER", "NPC", "PLANT", "PLAYER", "PET"]);
+const REQUIRED_LIFE_TYPES = Object.freeze(["AI_WORKER", "NPC", "PLANT", "PLAYER", "PET"]);
 const SEMANTIC_VERSION = /^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$/;
 const SAFE_DNA_SUMMARY_FIELDS = new Set([
   "summary_id",
@@ -324,7 +325,7 @@ function validateLifeProfile(profile, layerIds) {
 
 export function validateWorldFixture(world) {
   invariant(isRecord(world), "root must be an object");
-  invariant(world.meta?.synthetic === true, "Sprint 002 accepts synthetic data only");
+  invariant(world.meta?.synthetic === true, "World Viewer accepts synthetic data only");
   invariant(
     world.meta?.non_authoritative === true && world.meta?.authoritative !== true,
     "fixture must be explicitly non-authoritative"
@@ -350,8 +351,11 @@ export function validateWorldFixture(world) {
   invariant(world.regions.length === 1, "demo must contain exactly one region");
   invariant(world.cities.length === 1, "demo must contain exactly one city overlay");
   invariant(world.parcels.length === 12, "demo must contain exactly 12 parcels");
-  invariant(world.lifeProfiles.length >= 3, "demo must contain AI Worker, NPC, and Plant life profiles");
+  invariant(world.lifeProfiles.length >= 5, "demo must contain Player, AI Worker, NPC, Pet, and Plant life profiles");
   invariant(world.player?.starter_parcel_id && ids.has(world.player.starter_parcel_id), "starter parcel is invalid");
+  invariant(world.player?.life_id && ids.has(world.player.life_id), "player Life profile is invalid");
+  invariant(world.player?.home_building_id && ids.has(world.player.home_building_id), "player home building is invalid");
+  invariant(world.player?.home_room_id && ids.has(world.player.home_room_id), "player home room is invalid");
 
   const actionIds = (world.proposalActions ?? []).map((action) => (
     typeof action === "string" ? action : action?.id
@@ -359,7 +363,7 @@ export function validateWorldFixture(world) {
   const uniqueActionIds = new Set(actionIds);
   invariant(actionIds.length === EXPECTED_LAND_USES.length, "land-use action count must be eight");
   invariant(uniqueActionIds.size === EXPECTED_LAND_USES.length, "land-use actions must be unique");
-  invariant(EXPECTED_LAND_USES.every((action) => uniqueActionIds.has(action)), "land-use actions do not match the Sprint 002 set");
+  invariant(EXPECTED_LAND_USES.every((action) => uniqueActionIds.has(action)), "land-use actions do not match the approved set");
   invariant(world.parcels.some((parcel) => parcel.status === "UNKNOWN"), "UNKNOWN-data parcel is required");
 
   const parentRules = [
@@ -377,9 +381,41 @@ export function validateWorldFixture(world) {
 
   const layerIds = new Set();
   world.lifeProfiles.forEach((profile) => validateLifeProfile(profile, layerIds));
-  for (const lifeType of LIFE_TYPES) {
+  for (const lifeType of REQUIRED_LIFE_TYPES) {
     invariant(world.lifeProfiles.some((profile) => profile.life_type === lifeType), `${lifeType} life profile is required`);
   }
+
+  invariant(Array.isArray(world.buildingTemplates) && world.buildingTemplates.length >= 7, "building templates are required");
+  invariant(Array.isArray(world.furniture), "furniture must be an array");
+  invariant(Array.isArray(world.equipment), "equipment must be an array");
+  invariant(Array.isArray(world.organisms), "organisms must be an array");
+  const contentIds = new Set();
+  for (const [collectionName, collection] of [
+    ["buildingTemplates", world.buildingTemplates],
+    ["furniture", world.furniture],
+    ["equipment", world.equipment],
+    ["organisms", world.organisms]
+  ]) {
+    for (const item of collection) {
+      const id = entityId(item, collectionName);
+      invariant(!contentIds.has(id), `${collectionName} reuses id ${id}`);
+      contentIds.add(id);
+    }
+  }
+  const organismTypes = new Set(world.organisms.map(({ organism_type: type }) => type));
+  for (const type of REQUIRED_LIFE_TYPES) {
+    invariant(organismTypes.has(type), `${type} room organism is required`);
+  }
+
+  const starterParcel = world.parcels.find(({ id }) => id === world.player.starter_parcel_id);
+  invariant(
+    (typeof starterParcel.parcel_version === "string" && starterParcel.parcel_version.length > 0)
+      || (Number.isInteger(starterParcel.parcel_version) && starterParcel.parcel_version >= 0),
+    "starter parcel version is required"
+  );
+  invariant(Array.isArray(starterParcel.revision_history) && starterParcel.revision_history.length > 0, "starter parcel revision history is required");
+  invariant(Array.isArray(starterParcel.ownership_timeline) && starterParcel.ownership_timeline.length > 0, "starter parcel ownership timeline is required");
+  invariant(Array.isArray(starterParcel.proposal_history), "starter parcel proposal history is required");
 
   return world;
 }
