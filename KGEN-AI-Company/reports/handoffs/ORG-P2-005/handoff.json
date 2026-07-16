@@ -1,0 +1,92 @@
+{
+  "task_id": "ORG-P2-005",
+  "human_decision_id": null,
+  "task_envelope_id": null,
+  "worker_id": "cursor-01",
+  "worker_agent_id": "cursor-agent-0002",
+  "session_id": "SESSION-20260716-01-EPHEMERAL",
+  "claim_id": "CLAIM-ORG-P2-005-20260716T0408-cursor-01",
+  "reviewer": "codex-gm-01",
+  "branch": "cursor-handoff/ORG-P2-005-20260716",
+  "worktree": "cursor/monkey-boot-read-only→cursor-handoff/ORG-P2-005-20260716",
+  "base_sha": "89f3c351c488a0705f514adba974dd6c3dd3cb3a",
+  "head_sha": "f46d3d503fb41557b66dba5db0b5a3e0c1224883",
+  "observed_origin_main": "89f3c351c488a0705f514adba974dd6c3dd3cb3a",
+  "claimed_at": "2026-07-16T04:08:46Z",
+  "lease_expires_at": "2026-07-16T08:08:46Z",
+  "heartbeat_at": "2026-07-16T04:09:12Z",
+  "status": "REVIEW",
+  "review_status": "PENDING_CODEX_REVIEW",
+  "preflight_result": "PASS",
+  "concurrent_sessions_acknowledged": true,
+  "atomic_claim_service": "NOT_IMPLEMENTED",
+  "legacy_rules_suppressed": [
+    "CURSOR_EMPLOYEE_BOOT_WORKQUEUE_SELF_STATUS_UPDATE"
+  ],
+  "workqueue_modified": false,
+  "workqueue_closeout_owner": "codex-gm-01",
+  "report_path": "KGEN-AI-Company/reports/ORG-P2-005_UNIVERSE_REFERENCE_CHECK.md",
+  "files_changed": [
+    "KGEN-AI-Company/reports/ORG-P2-005_UNIVERSE_REFERENCE_CHECK.md",
+    "KGEN-AI-Company/reports/handoffs/ORG-P2-005/HANDOFF.md",
+    "KGEN-AI-Company/reports/handoffs/ORG-P2-005/handoff.json"
+  ],
+  "files_added": [
+    "KGEN-AI-Company/reports/ORG-P2-005_UNIVERSE_REFERENCE_CHECK.md",
+    "KGEN-AI-Company/reports/handoffs/ORG-P2-005/HANDOFF.md",
+    "KGEN-AI-Company/reports/handoffs/ORG-P2-005/handoff.json"
+  ],
+  "files_deleted": [],
+  "tests_run": [
+    "CURSOR_PREFLIGHT",
+    "SOURCE_EXISTENCE",
+    "CANON_JSON_PARSE",
+    "ORG_UNIVERSE_MAP_REFERENCE_SCAN",
+    "DUPLICATE_RUNTIME_CHECK",
+    "SINGLE_TASK_PURITY",
+    "PROTECTED_PATH_DIFF",
+    "SECRET_SCAN"
+  ],
+  "test_results": {
+    "CURSOR_PREFLIGHT": "PASS",
+    "SOURCE_EXISTENCE": "PASS",
+    "CANON_JSON_PARSE": "PASS",
+    "ORG_UNIVERSE_MAP_REFERENCE_SCAN": "PASS",
+    "DUPLICATE_RUNTIME_CHECK": "PASS",
+    "SINGLE_TASK_PURITY": "PASS",
+    "PROTECTED_PATH_DIFF": "PASS",
+    "SECRET_SCAN": "PASS"
+  },
+  "evidence": [
+    "CURSOR_PREFLIGHT",
+    "CLAIM_RECORD",
+    "REPORT",
+    "HANDOFF_MD",
+    "HANDOFF_JSON"
+  ],
+  "known_issues": [
+    "atomic_claim_service NOT_IMPLEMENTED",
+    "WORK_QUEUE left OPEN for Codex closeout"
+  ],
+  "risks": [
+    "PF2 multi-window shared cursor-01",
+    "W1 Org docs omit full Map filename"
+  ],
+  "protected_path_violations": [],
+  "runtime_current_modified": false,
+  "universe_map_modified": false,
+  "implementation_scope": "documentation_reference_qa_only",
+  "out_of_scope_observations": [
+    "ROLE boilerplate still cites Boot V1.4"
+  ],
+  "recommended_next_action": "CODEX_REVIEW_THEN_WORKQUEUE_CLOSEOUT",
+  "supersedes_archive_tips": [
+    {
+      "branch": "cursor-handoff/ORG-P2-005",
+      "sha": "d4de14e3fda09014e1664f6cbc2503c8246a4592",
+      "note": "prior archive evidence tip; not force-updated"
+    }
+  ],
+  "push_allowed": true,
+  "merge_allowed": false
+}
