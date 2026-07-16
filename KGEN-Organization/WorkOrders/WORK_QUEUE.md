@@ -123,6 +123,7 @@ These rows classify remote submissions, not the underlying OPEN WorkOrders. Visi
 | ORG-P2-003F | `e9429d66` | ARCHIVE_EVIDENCE_ONLY | REJECTED |
 | ORG-P2-003F-FIX1 | `e6e5d2fa` | APPROVED_SOURCE_EVIDENCE; 7 duplicate branches SUPERSEDED | DONE |
 | ORG-P2-004 | `7fdb716f` | ARCHIVE_EVIDENCE_ONLY | OPEN |
+| ORG-P2-004 (authorized reissue) | `006c00d0` | APPROVED_WITH_WARNINGS; handoff metadata reconstructed by Codex | DONE |
 | ORG-P2-005 | `b7c7e864` | ARCHIVE_EVIDENCE_ONLY | OPEN |
 | ORG-P2-006 | `1b6ed85e` | ARCHIVE_EVIDENCE_ONLY | OPEN |
 | ORG-P2-007 | `c8ca9ea1` | ARCHIVE_EVIDENCE_ONLY | OPEN |
@@ -203,7 +204,7 @@ Full branch, claim, base, report, purity, protected-path, and age evidence is re
 | ORG-P2-003E-FIX1 | DONE | Cursor | Codex | P2 | Documentation | KGEN-AI-Company/reports/ORG-P2-003E_FIX1_MASTER_INDEX_ALIAS_PLAN.md |
 | ORG-P2-003F | REJECTED | Cursor | Codex | P2 | Runtime | KGEN-AI-Company/reports/ORG-P2-003F_12345_MODULE_NAMING_MIGRATION_PLAN.md |
 | ORG-P2-003F-FIX1 | DONE | Cursor | Codex | P2 | Runtime | KGEN-AI-Company/reports/ORG-P2-003F_FIX1_12345_MODULE_NAMING_MIGRATION_PLAN.md |
-| ORG-P2-004 | OPEN | Cursor | Codex | P0 | Canon | KGEN-AI-Company/reports/ORG-P2-004_CANON_ALIGNMENT.md |
+| ORG-P2-004 | DONE | Cursor | Codex | P0 | Canon | KGEN-AI-Company/reports/ORG-P2-004_CANON_ALIGNMENT.md |
 | ORG-P2-005 | OPEN | Cursor | Codex | P2 | Universe | KGEN-AI-Company/reports/ORG-P2-005_UNIVERSE_REFERENCE_CHECK.md |
 | ORG-P2-006 | OPEN | Cursor | Codex | P1 | Civilization | KGEN-AI-Company/reports/ORG-P2-006_CIVILIZATION_STAGE_MAP.md |
 | ORG-P2-007 | OPEN | Cursor | Codex | P1 | Economy | KGEN-AI-Company/reports/ORG-P2-007_ECONOMY_LOOP_QA.md |
@@ -589,16 +590,18 @@ Full branch, claim, base, report, purity, protected-path, and age evidence is re
 
 ### ORG-P2-004 - Verify Civilization Core Canon against Genesis Library and Canon JSON
 
-- Status: OPEN
+- Status: DONE
 - Owner: Cursor
 - Reviewer: Codex
 - Priority: P0
 - Department: Canon
-- Dispatch: OFFERED_AWAITING_CURSOR_PREFLIGHT_AND_CLAIM
+- Dispatch: CLOSED_AFTER_CODEX_METADATA_RECONSTRUCTION
 - Task Envelope: KGEN-AI-Company/reports/task-envelopes/ORG-P2-004_task_envelope.json
 - Authorized base: `e34a7a8323377e62ab3fbc28f07b5a1092a5e151`
 - Reserved branch: `cursor-handoff/ORG-P2-004`
-- Claim status: NOT_CREATED; Cursor remains IDLE until a valid Boot and Preflight accept this envelope.
+- Evidence branch: `cursor-handoff/ORG-P2-004-20260716` at `006c00d01bbbdc505a0d0a0dd02fba61558e8948`
+- Claim status: CLOSED; review custody RELEASED after `APPROVE_WITH_WARNINGS`.
+- Review: KGEN-AI-Company/reports/ORG-P2-004_CODEX_REVIEW.md
 - Input files:
   - KGEN-AI-Company/CURSOR_EMPLOYEE_BOOT.md
   - KGEN-AI-Company/CURSOR_AUTO_WORK_PROTOCOL.md
