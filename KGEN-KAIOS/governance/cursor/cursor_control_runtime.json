@@ -1,0 +1,485 @@
+{
+  "metadata": {
+    "version": "0.1.0",
+    "revision": "2026-07-15.1",
+    "status": "ARCHITECTURE_PROPOSAL_UNDER_REVIEW",
+    "implementation": "NOT_STARTED",
+    "last_updated": "2026-07-15",
+    "updated_by": "Codex / codex-gm-01",
+    "reviewed_by": "PENDING_HUMAN_REVIEW",
+    "source_commit": "7a692c34df50861ab10f8bd80959d95251b1071c",
+    "task_id": "HUMAN-KAIOS-REVIEW-CURSOR-BOOTSTRAP-001",
+    "change_reason": "Define a machine-readable fail-closed Cursor control architecture.",
+    "ancestor": "KGEN-KAIOS/workforce/WORKER_BOOT_SOP.md",
+    "source_of_truth": false,
+    "canonical_file": "KGEN-KAIOS/governance/cursor/cursor_control_runtime.json",
+    "taxonomy": {
+      "domain": "KGENVERSE",
+      "kingdom": "ArchitectureGovernance",
+      "phylum": "WorkerControlProposal",
+      "class": "CursorControl",
+      "order": "GovernedExecution",
+      "family": "KAIOS",
+      "genus": "ControlledWorker",
+      "species": "CursorControlRuntimeArchitecture"
+    }
+  },
+  "formal_state": {
+    "cursor_control_runtime": "ARCHITECTURE_PROPOSAL_UNDER_REVIEW",
+    "cursor_implementation": "NOT_STARTED",
+    "cursor_workqueue": "NOT_CREATED",
+    "deployment": "NOT_STARTED",
+    "human_review": "REQUIRED"
+  },
+  "role": {
+    "cursor": "KAIOS_CONTROLLED_EXECUTION_WORKER",
+    "human_primeforge": "FINAL_AUTHORITY",
+    "codex": "IMPLEMENTATION_ARCHITECT_AND_QUALITY_GATE",
+    "external_reviewer": "INDEPENDENT_REVIEW_ONLY"
+  },
+  "source_precedence": [
+    "HUMAN_DECISION",
+    "CURRENT_RUNTIME",
+    "FROZEN_BASELINE",
+    "APPROVED_ADR",
+    "APPROVED_PROPOSAL",
+    "CANDIDATE",
+    "HISTORICAL",
+    "ARCHIVE"
+  ],
+  "control_planes": [
+    "AUTHORITY_RESOLVER",
+    "CREDENTIAL_GATE",
+    "TASK_ENVELOPE_GATE",
+    "WORKSPACE_GATE",
+    "SOURCE_LOADER",
+    "SCOPE_GUARD",
+    "PROTECTED_PATH_GUARD",
+    "EXECUTION_MONITOR",
+    "EVIDENCE_BUILDER",
+    "HANDOFF_GATE"
+  ],
+  "state_machine": {
+    "normal": [
+      "OFFLINE",
+      "BOOTSTRAP",
+      "IDENTITY_VALIDATING",
+      "AUTHORITY_RESOLVING",
+      "ENVELOPE_VALIDATING",
+      "WORKSPACE_VALIDATING",
+      "SOURCE_LOADING",
+      "PREFLIGHT_READY",
+      "GO_WAIT",
+      "AUTHORIZED",
+      "EXECUTING",
+      "TESTING",
+      "HANDOFF_BUILDING",
+      "REVIEW_WAIT"
+    ],
+    "exceptional": [
+      "BLOCKED",
+      "STOPPED",
+      "EXPIRED",
+      "SUSPENDED"
+    ],
+    "self_approval_states_denied": [
+      "APPROVED",
+      "MERGED",
+      "RELEASED",
+      "DONE"
+    ]
+  },
+  "task_envelope": {
+    "schema_draft": "https://json-schema.org/draft/2020-12/schema",
+    "schema_id": "https://klineodyssey.github.io/kline-odyssey/schemas/cursor-task-envelope-proposal.json",
+    "type": "object",
+    "required": [
+      "task_id",
+      "human_decision_id",
+      "title",
+      "objective",
+      "authorized_actions",
+      "forbidden_actions",
+      "authorized_paths",
+      "forbidden_paths",
+      "protected_paths",
+      "required_sources",
+      "required_tests",
+      "required_evidence",
+      "branch_name",
+      "worktree_name",
+      "base_sha",
+      "commit_allowed",
+      "push_allowed",
+      "merge_allowed",
+      "deploy_allowed",
+      "reviewer",
+      "handoff_target",
+      "stop_conditions",
+      "expiry",
+      "status"
+    ],
+    "recommended": [
+      "worker_id",
+      "claim_id",
+      "risk_level",
+      "dependencies",
+      "applicable_adr_ids",
+      "go_required",
+      "created_at",
+      "created_by",
+      "source_state_sha"
+    ],
+    "properties": {
+      "task_id": {
+        "type": "string",
+        "minLength": 1
+      },
+      "human_decision_id": {
+        "type": "string",
+        "minLength": 1
+      },
+      "title": {
+        "type": "string",
+        "minLength": 1
+      },
+      "objective": {
+        "type": "string",
+        "minLength": 1
+      },
+      "authorized_actions": {
+        "type": "array",
+        "minItems": 1,
+        "uniqueItems": true,
+        "items": {
+          "type": "string"
+        }
+      },
+      "forbidden_actions": {
+        "type": "array",
+        "minItems": 1,
+        "uniqueItems": true,
+        "items": {
+          "type": "string"
+        }
+      },
+      "authorized_paths": {
+        "type": "array",
+        "minItems": 1,
+        "uniqueItems": true,
+        "items": {
+          "type": "string"
+        }
+      },
+      "forbidden_paths": {
+        "type": "array",
+        "minItems": 1,
+        "uniqueItems": true,
+        "items": {
+          "type": "string"
+        }
+      },
+      "protected_paths": {
+        "type": "array",
+        "minItems": 1,
+        "uniqueItems": true,
+        "items": {
+          "type": "string"
+        }
+      },
+      "required_sources": {
+        "type": "array",
+        "minItems": 1,
+        "uniqueItems": true,
+        "items": {
+          "type": "string"
+        }
+      },
+      "required_tests": {
+        "type": "array",
+        "minItems": 1,
+        "items": {
+          "type": "string"
+        }
+      },
+      "required_evidence": {
+        "type": "array",
+        "minItems": 1,
+        "items": {
+          "type": "string"
+        }
+      },
+      "branch_name": {
+        "type": "string",
+        "pattern": "^cursor-handoff/[A-Za-z0-9._-]+$"
+      },
+      "worktree_name": {
+        "type": "string",
+        "minLength": 1
+      },
+      "base_sha": {
+        "type": "string",
+        "pattern": "^[0-9a-f]{40}$"
+      },
+      "commit_allowed": {
+        "type": "boolean"
+      },
+      "push_allowed": {
+        "type": "boolean"
+      },
+      "merge_allowed": {
+        "const": false
+      },
+      "deploy_allowed": {
+        "const": false
+      },
+      "reviewer": {
+        "type": "string",
+        "minLength": 1
+      },
+      "handoff_target": {
+        "type": "string",
+        "minLength": 1
+      },
+      "stop_conditions": {
+        "type": "array",
+        "minItems": 1,
+        "uniqueItems": true,
+        "items": {
+          "type": "string",
+          "pattern": "^STOP-[0-9]{3}$"
+        }
+      },
+      "expiry": {
+        "type": "string",
+        "format": "date-time"
+      },
+      "status": {
+        "enum": [
+          "PROPOSED",
+          "VALIDATING",
+          "AUTHORIZED",
+          "ACTIVE",
+          "HANDOFF_SUBMITTED",
+          "CLOSED",
+          "BLOCKED",
+          "EXPIRED",
+          "REVOKED",
+          "REJECTED"
+        ]
+      }
+    },
+    "additionalProperties": true,
+    "valid_executable_statuses": [
+      "AUTHORIZED",
+      "ACTIVE"
+    ],
+    "fail_closed": true,
+    "unlisted_action_policy": "DENY",
+    "unlisted_path_policy": "DENY"
+  },
+  "worker_rules": {
+    "one_active_task": true,
+    "registered_identity_required": true,
+    "active_claim_lease_required": true,
+    "isolated_worktree_required": true,
+    "human_main_access": "DENIED",
+    "current_branch_pattern": "cursor-handoff/<Task-ID>",
+    "task_branch_commit": "ENVELOPE_CONTROLLED",
+    "handoff_push": "ENVELOPE_CONTROLLED",
+    "main_push": "DENIED",
+    "main_merge": "DENIED",
+    "deployment": "DENIED"
+  },
+  "protected_path_enforcement": {
+    "checks": [
+      "PRE_WRITE",
+      "PRE_HANDOFF"
+    ],
+    "protected_classes": [
+      "RUNTIME_CURRENT",
+      "UNIVERSE_MAP_CURRENT",
+      "FROZEN_BASELINE",
+      "CONSTITUTION",
+      "CANON",
+      "CURRENT_BOOT",
+      "TOKEN_CONTRACT",
+      "CONTRACTS",
+      "WALLET_RUNTIME",
+      "BRIDGE_RUNTIME",
+      "TEMPLE_12345_PROTECTED_RUNTIME",
+      "FINAL_WHITEPAPER",
+      "HUMAN_MAIN",
+      "SECRETS",
+      "REPOSITORY_MARKED_PROTECTED_PATH"
+    ],
+    "violation_action": "BLOCK_AND_PROPOSE",
+    "direct_cursor_override": false
+  },
+  "legacy_rule_suppression": {
+    "enabled": true,
+    "suppression_precedence": [
+      "HUMAN_DECISION",
+      "CURRENT_CONSTITUTION",
+      "CURRENT_RUNTIME",
+      "FROZEN_BASELINE",
+      "APPROVED_ADR",
+      "PROTECTED_PATH_POLICY"
+    ],
+    "required_report_fields": [
+      "loaded_legacy_rules",
+      "suppressed_legacy_rules",
+      "reason",
+      "effective_source_of_truth"
+    ],
+    "known_conflicts": [
+      {
+        "conflict_id": "CC-LEGACY-001",
+        "source": "KGEN-AI-Company/CURSOR_EMPLOYEE_BOOT.md",
+        "legacy_behavior": "V4 permits local commit without handoff push while V5 requires handoff push.",
+        "resolution": "TASK_ENVELOPE_CONTROLS_COMMIT_AND_HANDOFF_PUSH"
+      },
+      {
+        "conflict_id": "CC-LEGACY-002",
+        "source": "KGEN-AI-Company/CURSOR_AUTO_WORK_PROTOCOL.md",
+        "legacy_behavior": "Select the first OPEN task without a Human Decision and Task Envelope.",
+        "resolution": "SUPPRESSED_UNLESS_EXACT_AUTHORIZED_ENVELOPE_EXISTS"
+      },
+      {
+        "conflict_id": "CC-LEGACY-003",
+        "source": "legacy repository update habits",
+        "legacy_behavior": "Pull or edit in Human Main.",
+        "resolution": "FETCH_AND_ISOLATED_WORKTREE_ONLY"
+      }
+    ]
+  },
+  "stop_conditions": [
+    "STOP-001_MISSING_OR_INVALID_HUMAN_DECISION",
+    "STOP-002_CURRENT_SOURCE_CONFLICT",
+    "STOP-003_PROTECTED_PATH_REQUIRED",
+    "STOP-004_HUMAN_MAIN_DIRTY_OR_REQUIRED",
+    "STOP-005_STALE_UNSAFE_BASE",
+    "STOP-006_INVALID_TASK_ENVELOPE",
+    "STOP-007_SCOPE_EXPANSION",
+    "STOP-008_REAL_KGEN_REQUIRED",
+    "STOP-009_REAL_KYC_REQUIRED",
+    "STOP-010_REAL_GPS_REQUIRED",
+    "STOP-011_TOKEN_CONTRACT_CHANGE_REQUIRED",
+    "STOP-012_PRODUCTION_DEPLOYMENT_REQUIRED",
+    "STOP-013_OUT_OF_SCOPE_TEST_REMEDIATION",
+    "STOP-014_SECURITY_RISK",
+    "STOP-015_SECRET_DISCOVERY",
+    "STOP-016_DATA_LEAKAGE",
+    "STOP-017_GOVERNANCE_RULE_CONFLICT",
+    "STOP-018_HUMAN_ARCHITECTURE_DECISION_REQUIRED"
+  ],
+  "handoff": {
+    "required_files": [
+      "HANDOFF.md",
+      "handoff.json"
+    ],
+    "required_fields": [
+      "task_id",
+      "human_decision_id",
+      "worker_id",
+      "branch",
+      "worktree",
+      "base_sha",
+      "head_sha",
+      "files_changed",
+      "files_added",
+      "files_deleted",
+      "tests_run",
+      "test_results",
+      "evidence",
+      "known_issues",
+      "risks",
+      "protected_path_violations",
+      "runtime_current_modified",
+      "universe_map_modified",
+      "implementation_scope",
+      "out_of_scope_observations",
+      "recommended_next_action",
+      "review_status"
+    ],
+    "review_status": "PENDING_CODEX_REVIEW",
+    "missing_handoff_result": "FAIL",
+    "missing_test_evidence_result": "FAIL",
+    "cursor_may_mark_done": false
+  },
+  "compliance_tests": [
+    {
+      "test_id": "CCT-001",
+      "scenario": "Missing Human Decision",
+      "expected": "BLOCK"
+    },
+    {
+      "test_id": "CCT-002",
+      "scenario": "Missing Task Envelope",
+      "expected": "BLOCK"
+    },
+    {
+      "test_id": "CCT-003",
+      "scenario": "Protected path requested",
+      "expected": "BLOCK"
+    },
+    {
+      "test_id": "CCT-004",
+      "scenario": "Human Main dirty",
+      "expected": "BLOCK"
+    },
+    {
+      "test_id": "CCT-005",
+      "scenario": "Legacy rule conflicts with current authority",
+      "expected": "SUPPRESS_LEGACY"
+    },
+    {
+      "test_id": "CCT-006",
+      "scenario": "Scope expansion attempted",
+      "expected": "BLOCK"
+    },
+    {
+      "test_id": "CCT-007",
+      "scenario": "Multiple tasks claimed",
+      "expected": "BLOCK"
+    },
+    {
+      "test_id": "CCT-008",
+      "scenario": "Push main attempted",
+      "expected": "BLOCK"
+    },
+    {
+      "test_id": "CCT-009",
+      "scenario": "Deployment attempted",
+      "expected": "BLOCK"
+    },
+    {
+      "test_id": "CCT-010",
+      "scenario": "Valid single task with complete authority and evidence plan",
+      "expected": "ALLOW"
+    },
+    {
+      "test_id": "CCT-011",
+      "scenario": "Handoff missing",
+      "expected": "FAIL"
+    },
+    {
+      "test_id": "CCT-012",
+      "scenario": "Test evidence missing",
+      "expected": "FAIL"
+    }
+  ],
+  "source_freshness": {
+    "required_for_execution": "FETCHED_CURRENT_ORIGIN",
+    "architecture_review_snapshot": "LAST_KNOWN_ORIGIN",
+    "network_failure_action": "BLOCK_EXECUTABLE_WORK_AND_DISCLOSE_FRESHNESS"
+  },
+  "non_authorization": {
+    "creates_workorder": false,
+    "creates_claim": false,
+    "authorizes_implementation": false,
+    "authorizes_commit": false,
+    "authorizes_push": false,
+    "authorizes_deployment": false
+  }
+}

@@ -1,0 +1,65 @@
+{
+  "metadata": {
+    "version": "0.1.0",
+    "revision": "2026-07-15.1",
+    "status": "ARCHITECTURE_PROPOSAL_UNDER_REVIEW",
+    "implementation": "NOT_STARTED",
+    "last_updated": "2026-07-15",
+    "updated_by": "Codex / codex-gm-01",
+    "reviewed_by": "PENDING_HUMAN_REVIEW",
+    "source_commit": "7a692c34df50861ab10f8bd80959d95251b1071c",
+    "task_id": "HUMAN-KAIOS-REVIEW-CURSOR-BOOTSTRAP-001",
+    "change_reason": "Represent the Human-pasteable Cursor start command as machine-readable policy.",
+    "ancestor": "KGEN-KAIOS/governance/cursor/CURSOR_START_COMMAND.md",
+    "source_of_truth": false,
+    "canonical_file": "KGEN-KAIOS/governance/cursor/cursor_start_command.json"
+  },
+  "command_id": "KAIOS_CURSOR_CONTROL_BOOT_PROPOSAL_001",
+  "command_status": "PROPOSAL_NOT_ACTIVE",
+  "purpose": "Start authority resolution and preflight, not task execution.",
+  "human_paste_lines": [
+    "KAIOS CURSOR CONTROL BOOT",
+    "Identify the exact Human Decision ID and one Task ID.",
+    "Open the fixed CURRENT Boot and load the ordered authority sources in cursor_boot_manifest.json.",
+    "Suppress conflicting legacy rules and report what was suppressed and why.",
+    "Read and validate the machine-readable Task Envelope.",
+    "Validate identity, lease, one-task limit, scope, dependencies, base SHA, isolated worktree and untouched Human Main.",
+    "Print the complete CURSOR PREFLIGHT report before any file modification.",
+    "Work only on the authorized task and never touch protected paths or Human Main.",
+    "Never merge or push main, deploy, use secrets or invent a Source of Truth.",
+    "Run required tests and the pre-handoff protected-path check.",
+    "Produce HANDOFF.md and handoff.json, then wait for Codex Review and required Human Approval.",
+    "On any conflict, stop and output BLOCKED_REASON, EVIDENCE and RECOMMENDED_HUMAN_DECISION."
+  ],
+  "required_inputs": [
+    "human_decision_id",
+    "task_id",
+    "worker_identity",
+    "task_envelope",
+    "current_source_set"
+  ],
+  "required_first_output": "CURSOR PREFLIGHT",
+  "one_active_task": true,
+  "legacy_rule_policy": "SUPPRESS_WHEN_CONFLICTING_WITH_HIGHER_AUTHORITY",
+  "protected_path_policy": "FAIL_CLOSED",
+  "human_main_policy": "UNTOUCHED",
+  "main_push": "DENIED",
+  "main_merge": "DENIED",
+  "deployment": "DENIED",
+  "handoff_required": [
+    "HANDOFF.md",
+    "handoff.json"
+  ],
+  "conflict_output": [
+    "BLOCKED_REASON",
+    "EVIDENCE",
+    "RECOMMENDED_HUMAN_DECISION"
+  ],
+  "non_authorization": {
+    "grants_claim": false,
+    "grants_file_write": false,
+    "grants_commit": false,
+    "grants_push": false,
+    "grants_deployment": false
+  }
+}

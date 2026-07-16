@@ -1,0 +1,172 @@
+{
+  "metadata": {
+    "version": "0.1.0",
+    "revision": "2026-07-15.1",
+    "status": "ARCHITECTURE_PROPOSAL_UNDER_REVIEW",
+    "implementation": "NOT_STARTED",
+    "last_updated": "2026-07-15",
+    "updated_by": "Codex / codex-gm-01",
+    "reviewed_by": "PENDING_HUMAN_REVIEW",
+    "source_commit": "7a692c34df50861ab10f8bd80959d95251b1071c",
+    "task_id": "HUMAN-KAIOS-REVIEW-CURSOR-BOOTSTRAP-001",
+    "change_reason": "Define the proposed ordered Cursor boot source manifest.",
+    "ancestor": "PRIMEFORGE_GENESIS_BOOT_SEQUENCE.md",
+    "source_of_truth": false,
+    "canonical_file": "KGEN-KAIOS/governance/cursor/cursor_boot_manifest.json"
+  },
+  "bootstrap_anchor": {
+    "path": "PRIMEFORGE_GENESIS_BOOT_SEQUENCE.md",
+    "purpose": "FIXED_CURRENT_BOOT_LOADER",
+    "may_authorize_task_alone": false
+  },
+  "ordered_sources": [
+    {
+      "order": 1,
+      "source_type": "HUMAN_DECISION",
+      "resolver": "exact human_decision_id in Task Envelope and decision evidence",
+      "required": true
+    },
+    {
+      "order": 2,
+      "source_type": "CURRENT_CONSTITUTION",
+      "path": "KGEN-KAIOS/constitution/KAIOS_CONSTITUTION.md",
+      "required": true
+    },
+    {
+      "order": 3,
+      "source_type": "V11_ARCHITECTURE_BASELINE",
+      "path": "KGEN-KAIOS/V11/ARCHITECTURE_BASELINE.md",
+      "required": true
+    },
+    {
+      "order": 4,
+      "source_type": "ACTIVE_RUNTIME_SELECTOR",
+      "resolver": "module-specific CURRENT selector and Runtime CURRENT entry",
+      "required": true
+    },
+    {
+      "order": 5,
+      "source_type": "PROTECTED_PATH_POLICY",
+      "current_sources": [
+        "KGEN-Agent-Office/DO_NOT_TOUCH.md",
+        "KGEN-AI-Company/WORKSPACE_POLICY.md",
+        "KGEN-KAIOS/CODEX_PRE_MERGE_CHECKLIST.md"
+      ],
+      "proposed_consolidated_source": "KGEN-KAIOS/governance/cursor/CURSOR_PROTECTED_PATH_POLICY.md",
+      "required": true
+    },
+    {
+      "order": 6,
+      "source_type": "TASK_ENVELOPE",
+      "resolver": "exact machine-readable envelope for Task ID",
+      "required": true
+    },
+    {
+      "order": 7,
+      "source_type": "RELEVANT_MODULE_BASELINE",
+      "resolver": "exact Human-approved baseline named by Task Envelope",
+      "required": true
+    },
+    {
+      "order": 8,
+      "source_type": "CURRENT_WORKQUEUE_ENTRY",
+      "path": "KGEN-Organization/WorkOrders/WORK_QUEUE.md",
+      "required": true
+    },
+    {
+      "order": 9,
+      "source_type": "APPLICABLE_APPROVED_ADR",
+      "resolver": "exact ADR IDs named by Task Envelope or baseline manifest",
+      "required": true
+    },
+    {
+      "order": 10,
+      "source_type": "LATEST_SAME_TASK_HANDOFF",
+      "resolver": "latest visible handoff for the same Task ID only",
+      "required": false
+    },
+    {
+      "order": 11,
+      "source_type": "BRANCH_AND_WORKTREE_STATE",
+      "resolver": "local and remote Git evidence for isolated worker worktree",
+      "required": true
+    },
+    {
+      "order": 12,
+      "source_type": "REPOSITORY_HEALTH",
+      "resolver": "origin freshness, dependencies, working trees, network and required services",
+      "required": true
+    }
+  ],
+  "precedence": [
+    "HUMAN_DECISION",
+    "CURRENT_RUNTIME",
+    "FROZEN_BASELINE",
+    "APPROVED_ADR",
+    "APPROVED_PROPOSAL",
+    "CANDIDATE",
+    "HISTORICAL",
+    "ARCHIVE"
+  ],
+  "required_worker_sources": [
+    "KGEN-KAIOS/worker_registry.json",
+    "KGEN-KAIOS/WORKER_REGISTRY.md",
+    "KGEN-KAIOS/workforce/WORKER_BOOT_SOP.md",
+    "KGEN-KAIOS/GENERIC_WORKER_PROTOCOL.md",
+    "KGEN-KAIOS/TASK_CLAIM_LEASE_PROTOCOL.md"
+  ],
+  "preflight_fields": [
+    "human_decision_id",
+    "task_id",
+    "worker_id",
+    "worker_status",
+    "trust_level",
+    "branch",
+    "worktree",
+    "base_sha",
+    "current_main_sha",
+    "authorized_paths",
+    "forbidden_paths",
+    "protected_paths_loaded",
+    "current_runtime_loaded",
+    "baseline_loaded",
+    "adr_loaded",
+    "workqueue_loaded",
+    "dependencies",
+    "known_conflicts",
+    "implementation_authorized",
+    "commit_authorized",
+    "push_authorized",
+    "deploy_authorized",
+    "source_freshness",
+    "status"
+  ],
+  "legacy_rule_suppression": {
+    "report_required": true,
+    "fields": [
+      "loaded_legacy_rules",
+      "suppressed_legacy_rules",
+      "reason",
+      "effective_source_of_truth"
+    ],
+    "automatic_task_selection": "SUPPRESSED_WITHOUT_EXACT_TASK_ENVELOPE",
+    "human_main_pull_or_edit": "SUPPRESSED",
+    "newest_adr_by_timestamp": "SUPPRESSED_USE_EXACT_APPLICABLE_ADR"
+  },
+  "preflight_result": {
+    "pass": "MAY_WAIT_FOR_GO_OR_BEGIN_ENVELOPE_AUTHORIZED_WORK",
+    "blocked": "NO_FILE_MODIFICATION",
+    "unknown": "BLOCKED"
+  },
+  "source_freshness": {
+    "review_snapshot": "LAST_KNOWN_ORIGIN",
+    "execution_requirement": "FETCHED_CURRENT_ORIGIN"
+  },
+  "non_authorization": {
+    "active_task_envelope_included": false,
+    "implementation_authorized": false,
+    "commit_authorized": false,
+    "push_authorized": false,
+    "deployment_authorized": false
+  }
+}
