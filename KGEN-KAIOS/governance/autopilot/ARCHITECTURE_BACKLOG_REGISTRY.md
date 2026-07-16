@@ -1,14 +1,14 @@
 ---
 TITLE: "PrimeForge Architecture Backlog Registry"
 VERSION: "1.0.0"
-REVISION: "2026-07-16.4"
+REVISION: "2026-07-16.5"
 STATUS: "ACTIVE_MANAGED_REGISTRY"
 LAST_UPDATED: "2026-07-16"
 UPDATED_BY: "Codex / codex-gm-01"
 REVIEWED_BY: "CODEX_DELEGATED_GM"
 SOURCE_COMMIT: "299d2759328f6eddeb6db3f4e767e945e2722ccb"
 TASK_ID: "HUMAN-PRIMEFORGE-FULL-AUTOPILOT-001"
-CHANGE_REASON: "Register the UI Governor and UI Style Canon architecture proposal without enabling inspection or dispatch automation."
+CHANGE_REASON: "Register the UI Governor and Architecture Auto Approval proposals without enabling inspection, approval, or dispatch automation."
 ANCESTOR: "Company Inbox; Priority Scheduler; Architecture Governance Board"
 SOURCE_OF_TRUTH: true
 ---
@@ -40,6 +40,7 @@ Priority order is reviewed proposals, amendments, dependency blockers, Company O
 | Canonical Atomic Claim Authority | PROPOSAL | 87 | Level B planning | Local commit `6936d6f`; implementation not started | Independent security/consistency review |
 | Genesis DNA Evolution | SOURCE_AUDIT_COMPLETE | null | Level B R2 architecture | Published review candidate `e6d7a96`; implementation not started | Independent architecture review before resolution or baseline |
 | UI Governor / Style Canon V1 | CODEX_DRAFT_COMPLETE | 86 | Level B R2 architecture | Proposal branch; automation and implementation not started | Independent UI architecture review |
+| Architecture Auto Approval | PROPOSAL_UNDER_REVIEW | 87 | Level C bootstrap / R1 steady-state target | Auto Approval disabled; no baseline | Independent review, then Human bootstrap activation decision |
 
 ## Current Decisions
 
@@ -52,6 +53,8 @@ Priority order is reviewed proposals, amendments, dependency blockers, Company O
 - Distributed automatic Cursor dispatch remains disabled until the canonical Claim authority exists.
 - Genesis DNA normalizes legacy GA levels without changing Physics CURRENT or GEN-007; private engine artifacts remain outside Git.
 - UI Governor defines 80 daily surface/profile cells and fourteen check families, but executable coverage remains zero until independent review and implementation authorization.
+- Architecture Auto Approval cannot approve itself or modify AGB, Human Authority, CURRENT selectors, frozen core invariants, release, Pages, or implementation state.
+- Continuous Dispatch remains disabled until the Canonical Atomic Claim Authority is implemented, reviewed, and enabled.
 
 ## Commit Isolation
 

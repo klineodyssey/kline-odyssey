@@ -56,6 +56,7 @@ This file is the **unique library-level Master Index** (ORG-P2-003 D7). Other `*
 | KGEN AI Operating System V7.2 | `KGEN-KAIOS/` | Architecture-first AI operating system with worker registry, claim lease, dry run, and read-only operations dashboard |
 | KAIOS Architecture Governance Board | `KGEN-KAIOS/governance/` | Human-approved Architecture proposal, independent review, resolution, ADR and implementation approval gate |
 | PrimeForge Company Autopilot | `KGEN-KAIOS/governance/autopilot/` | Human-delegated Company OS Boot, Session, Inbox, scheduler, repository maintenance, architecture backlog and claim authority proposal |
+| Architecture Auto Approval Proposal | `KGEN-KAIOS/governance/autopilot/architecture-auto-approval/` | Fail-closed low-risk Architecture approval and future Continuous Dispatch architecture; both disabled |
 | KAIOS Cursor Control Proposal | `KGEN-KAIOS/governance/cursor/` | Controlled Cursor preflight, Task Envelope, protected path, handoff, stop and legacy suppression proposal |
 | KAIOS Worker Swarm Proposal | `KGEN-KAIOS/governance/autopilot/worker-swarm/` | Architecture-only clone, session, dispatcher, registry and recovery coordination |
 | KAIOS Boot / Life Integrity Proposal | `KGEN-KAIOS/boot-runtime/` | Fail-closed player Boot, Species OS and Life Integrity Architecture; implementation not started |
@@ -132,6 +133,7 @@ This file is the **unique library-level Master Index** (ORG-P2-003 D7). Other `*
 | Company Autopilot | `KGEN-KAIOS/governance/autopilot/README.md` | Delegated General Manager boundaries, Company OS Boot and operating package index |
 | Architecture Backlog Registry | `KGEN-KAIOS/governance/autopilot/ARCHITECTURE_BACKLOG_REGISTRY.md` | Proposal dependencies, review scores, risk, commit state and next action |
 | Canonical Claim Authority Proposal | `KGEN-KAIOS/governance/autopilot/CANONICAL_ATOMIC_CLAIM_AUTHORITY_PROPOSAL.md` | Transactional claim, fencing token and lease authority architecture; implementation not started |
+| Architecture Auto Approval Runtime Proposal | `KGEN-KAIOS/governance/autopilot/architecture-auto-approval/README.md` | Source audit, approval gate, queue health, and Continuous Dispatch dependency boundary |
 | Worker Swarm Architecture | `KGEN-KAIOS/governance/autopilot/worker-swarm/README.md` | Multi-session Worker coordination proposal with explicit non-atomic pre-cutover boundary |
 | Cursor Control Architecture | `KGEN-KAIOS/governance/cursor/README.md` | Audit and migration proposal for controlled Cursor execution without replacing CURRENT rules |
 | Boot / Life Integrity Architecture | `KGEN-KAIOS/boot-runtime/README.md` | Fail-closed Boot, Species OS, integrity verification and corruption handling proposal |

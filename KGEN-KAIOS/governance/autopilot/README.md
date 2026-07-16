@@ -66,6 +66,7 @@ Codex reran Company Boot and `git fetch origin --prune` at `2026-07-15T17:29:48+
 | `ARCHITECTURE_BACKLOG_REGISTRY.md` | Proposal inventory, review state, dependencies and next action |
 | `CANONICAL_ATOMIC_CLAIM_AUTHORITY_PROPOSAL.md` | Transactional Claim authority selection and migration proposal |
 | `COMPANY_AUTOPILOT_ARCHITECTURE_REVIEW.md` | Delegated publication review and score evidence |
+| `architecture-auto-approval/README.md` | Proposed low-risk Architecture approval gate and disabled Continuous Dispatch contract |
 | `COMPANY_INBOX.md` | Durable Human intake boundary that remains available during network failure |
 | `PRIORITY_SCHEDULER.md` | Review-first ordering and one-task scheduling contract |
 | `REPOSITORY_MAINTENANCE_RUNTIME.md` | Fetch, compare, retry, recovery and health architecture |

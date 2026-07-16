@@ -36,6 +36,7 @@ Last optimized: 2026-06-11
 | KAIOS Constitution | [KGEN-KAIOS/constitution/KAIOS_CONSTITUTION.md](KGEN-KAIOS/constitution/KAIOS_CONSTITUTION.md) |
 | KAIOS Kernel V1 Design | [KGEN-KAIOS/kernel/KERNEL_V1.md](KGEN-KAIOS/kernel/KERNEL_V1.md) |
 | Architecture Governance Board | [KGEN-KAIOS/governance/ARCHITECTURE_GOVERNANCE_BOARD.md](KGEN-KAIOS/governance/ARCHITECTURE_GOVERNANCE_BOARD.md) |
+| Architecture Auto Approval Proposal | [KGEN-KAIOS/governance/autopilot/architecture-auto-approval/README.md](KGEN-KAIOS/governance/autopilot/architecture-auto-approval/README.md) |
 | KAIOS V11.0 Architecture Baseline | [KGEN-KAIOS/V11/ARCHITECTURE_BASELINE.md](KGEN-KAIOS/V11/ARCHITECTURE_BASELINE.md) |
 | LAND RUNTIME V1 Architecture Baseline | [KGEN-KAIOS/land/LAND_RUNTIME_ARCHITECTURE_BASELINE.md](KGEN-KAIOS/land/LAND_RUNTIME_ARCHITECTURE_BASELINE.md) |
 | Civilization Economy Runtime V1 Baseline | [KGEN-KAIOS/civilization/CIVILIZATION_ECONOMY_ARCHITECTURE_BASELINE.md](KGEN-KAIOS/civilization/CIVILIZATION_ECONOMY_ARCHITECTURE_BASELINE.md) |

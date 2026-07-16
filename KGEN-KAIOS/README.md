@@ -85,6 +85,7 @@ Human Decision `HUMAN-PRIMEFORGE-FULL-AUTOPILOT-001` delegates bounded Level A a
 | Path | Status | Purpose |
 |---|---|---|
 | `governance/autopilot/` | Delegated documentation baseline | Company OS Boot, Session, Inbox, scheduler, repository maintenance, backlog and atomic Claim Authority proposal |
+| `governance/autopilot/architecture-auto-approval/` | Architecture proposal under review | Fail-closed low-risk Architecture gate, queue health, and disabled Continuous Dispatch contract |
 | `governance/autopilot/worker-swarm/` | Architecture proposal | Session, clone, dispatcher, registry and recovery coordination; implementation not started |
 | `governance/cursor/` | Architecture proposal under review | Cursor preflight, Task Envelope, protected paths, handoff, stop conditions and legacy-rule suppression |
 | `boot-runtime/` | Architecture proposal under review | Fail-closed player Boot, Species OS and Life Integrity contracts |
@@ -93,6 +94,8 @@ Human Decision `HUMAN-PRIMEFORGE-FULL-AUTOPILOT-001` delegates bounded Level A a
 | `ui-governor/` | Architecture proposal under review | Permanent UI inspection, Style Canon, visual regression and bounded remediation contracts; automation not enabled |
 
 The Canonical Atomic Claim Authority remains a proposal. Until its transactional service is reviewed and implemented, Codex dispatch is explicit and recorded but is not represented as fully atomic distributed scheduling. No entry in this section changes Runtime CURRENT, Universe Map CURRENT, protected paths, Token behavior, real identity, real location, or real financial state.
+
+The Architecture Auto Approval package is also proposal-only. It cannot approve or activate itself, cannot modify any CURRENT or frozen core invariant, and cannot turn an Architecture baseline event into implementation authority. Monkey Continuous Dispatch remains disabled until the Canonical Atomic Claim Authority is implemented and reviewed.
 
 ## UI Governor Architecture
 

@@ -1,7 +1,7 @@
 {
   "metadata": {
     "version": "1.0.0",
-    "revision": "2026-07-16.4",
+    "revision": "2026-07-16.5",
     "status": "ACTIVE_MANAGED_REGISTRY",
     "human_decision_id": "HUMAN-PRIMEFORGE-FULL-AUTOPILOT-001",
     "manager": "codex-gm-01",
@@ -316,6 +316,25 @@
       "push_status": "PENDING_REVIEW_PUBLICATION",
       "baseline_status": "NOT_FROZEN",
       "next_action": "INDEPENDENT_UI_GOVERNOR_ARCHITECTURE_REVIEW"
+    },
+    {
+      "proposal_id": "ARCHITECTURE-AUTO-APPROVAL-001",
+      "decision_ids": ["HUMAN-ARCHITECTURE-AUTO-APPROVAL-001"],
+      "worktree": "WORKTREE-CODEX-ARCHITECTURE-AUTO-APPROVAL",
+      "base_sha": "d5d9b2cc5bafd67ec600fccb2701f638020d9741",
+      "files": ["KGEN-KAIOS/governance/autopilot/architecture-auto-approval/"],
+      "dependencies": ["ARCHITECTURE_GOVERNANCE_BOARD", "DELEGATED_AUTONOMY_STANDARD", "CANONICAL-CLAIM-AUTHORITY-001", "DECISION-CENTER-001", "CODEX-SWARM-001"],
+      "internal_review": "SOURCE_AUDIT_COMPLETE",
+      "external_review": "REQUIRED_BEFORE_BOOTSTRAP_ACTIVATION",
+      "review_score": 87,
+      "amendments": ["NO_SELF_APPROVAL", "NON_CURRENT_BASELINE_ONLY", "DISPATCH_NOTIFICATION_NOT_IMPLEMENTATION_AUTHORITY", "EMPTY_HEALTHY_QUEUE_STATE"],
+      "risk_level": "LEVEL_C_BOOTSTRAP_THEN_R1_STEADY_STATE_TARGET",
+      "protected_path_status": "PASS_ZERO",
+      "implementation_status": "NOT_STARTED",
+      "commit_status": "PROPOSAL_BRANCH",
+      "push_status": "PENDING_VALIDATION",
+      "baseline_status": "NOT_FROZEN",
+      "next_action": "INDEPENDENT_REVIEW_THEN_HUMAN_BOOTSTRAP_ACTIVATION_DECISION"
     }
   ]
 }
