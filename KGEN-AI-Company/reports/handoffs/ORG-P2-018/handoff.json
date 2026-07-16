@@ -1,0 +1,84 @@
+{
+  "schema_version": "1.1",
+  "task_id": "ORG-P2-018",
+  "worker_id": "cursor-01",
+  "worker_agent_id": "cursor-agent-0006",
+  "session_id": "SESSION-20260716-06-EPHEMERAL",
+  "spawned_by": "本尊 (Sun Wukong / parent Cursor session)",
+  "clone_id": null,
+  "claim_id": "CLAIM-ORG-P2-018-20260716T0508-cursor-01",
+  "reserved_branch": "cursor-handoff/ORG-P2-018-20260716",
+  "evidence_branch": "cursor-handoff/ORG-P2-018-20260716",
+  "base_sha": "89f3c351c488a0705f514adba974dd6c3dd3cb3a",
+  "observed_origin_main": "89f3c351c488a0705f514adba974dd6c3dd3cb3a",
+  "claimed_at": "2026-07-16T05:08:58Z",
+  "handoff_submitted_at": "2026-07-16T05:08:58Z",
+  "execution_lease_expires_at": "2026-07-16T09:08:58Z",
+  "supersedes_archive_tips": [
+    "124b1081"
+  ],
+  "files_changed": [
+    "KGEN-AI-Company/reports/ORG-P2-018_QA_VALIDATION.md",
+    "KGEN-AI-Company/reports/handoffs/ORG-P2-018/HANDOFF.md",
+    "KGEN-AI-Company/reports/handoffs/ORG-P2-018/handoff.json"
+  ],
+  "files_added": [
+    "KGEN-AI-Company/reports/ORG-P2-018_QA_VALIDATION.md",
+    "KGEN-AI-Company/reports/handoffs/ORG-P2-018/HANDOFF.md",
+    "KGEN-AI-Company/reports/handoffs/ORG-P2-018/handoff.json"
+  ],
+  "files_deleted": [],
+  "tests_run": [
+    "CURSOR_PREFLIGHT_PASS",
+    "PROTECTED_PATH_EXISTENCE",
+    "PROTECTED_PATH_DIFF",
+    "PORTAL_MANIFEST",
+    "LOCAL_LINK_SCAN",
+    "CANON_JSON_PARSE",
+    "OFFICIAL_LINKS_JSON",
+    "WORKFORCE_JSON",
+    "SDK_KAIOS_SCHEMAS",
+    "KAIOS_GOVERNANCE_JSON",
+    "ORG_JSON_SCAN",
+    "SINGLE_TASK_PURITY",
+    "SECRET_SCAN"
+  ],
+  "test_results": "ALL_PASS",
+  "task_result": "PASS_QA_VALIDATION",
+  "local_links_checked": 123,
+  "broken_links_count": 0,
+  "json_files_validated": 331,
+  "json_errors_count": 0,
+  "protected_path_violations": 0,
+  "protected_path_doc_notes": 2,
+  "runtime_current_modified": false,
+  "universe_map_modified": false,
+  "canon_modified": false,
+  "work_queue_modified": false,
+  "worker_registry_modified": false,
+  "codex_review_log_modified": false,
+  "implementation_scope": "report_only_qa_validation",
+  "known_issues": [
+    "ATOMIC_CLAIM_REGISTRY_NOT_IMPLEMENTED",
+    "SESSION_ID_EPHEMERAL_MONKEY_CLONE",
+    "WORK_QUEUE_NOT_UPDATED_HANDOFF_ONLY_GOVERNANCE",
+    "PRIOR_124b1081_REJECT_NO_CLAIM_SUPERSEDED"
+  ],
+  "risks": [
+    "R1_agent_edits_protected_12345",
+    "R2_broken_portal_links_post_merge",
+    "R3_invalid_json_breaks_pages",
+    "R4_do_not_touch_path_drift",
+    "R5_non_atomic_parallel_claims"
+  ],
+  "review": {
+    "reviewer": "codex-gm-01",
+    "decision": null,
+    "review_path": null,
+    "claim_status": "REVIEW",
+    "review_custody": "PENDING_CODEX_REVIEW"
+  },
+  "recommended_next_action": "Codex review and WORK_QUEUE closeout; consider ORG-P2-019 for DO_NOT_TOUCH path consistency.",
+  "review_status": "REVIEW",
+  "closeout_status": "PENDING_CODEX_REVIEW"
+}
