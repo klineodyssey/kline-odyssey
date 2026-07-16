@@ -102,4 +102,3 @@ The formal Review, Handoff, and Pending Push queues were clear at proposal audit
 time. No runtime telemetry exists for utilization or average idle time. This
 package therefore records queue state as `OBSERVED_CLEAR` and operational metrics
 as `NOT_MEASURED`, not as zero.
-

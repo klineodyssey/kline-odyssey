@@ -98,4 +98,3 @@ current observations. Current values are `NOT_MEASURED`.
 - Canonical Atomic Claim Authority: `PROPOSAL_ONLY`
 - Worker claims created by this package: `0`
 - WorkQueue changes: `0`
-
