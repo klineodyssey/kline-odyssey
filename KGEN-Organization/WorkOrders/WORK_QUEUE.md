@@ -594,6 +594,11 @@ Full branch, claim, base, report, purity, protected-path, and age evidence is re
 - Reviewer: Codex
 - Priority: P0
 - Department: Canon
+- Dispatch: OFFERED_AWAITING_CURSOR_PREFLIGHT_AND_CLAIM
+- Task Envelope: KGEN-AI-Company/reports/task-envelopes/ORG-P2-004_task_envelope.json
+- Authorized base: `e34a7a8323377e62ab3fbc28f07b5a1092a5e151`
+- Reserved branch: `cursor-handoff/ORG-P2-004`
+- Claim status: NOT_CREATED; Cursor remains IDLE until a valid Boot and Preflight accept this envelope.
 - Input files:
   - KGEN-AI-Company/CURSOR_EMPLOYEE_BOOT.md
   - KGEN-AI-Company/CURSOR_AUTO_WORK_PROTOCOL.md

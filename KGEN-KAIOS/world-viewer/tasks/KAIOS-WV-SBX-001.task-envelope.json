@@ -44,5 +44,6 @@
   "expiry": "ASSIGN_AT_CLAIM",
   "claim_id": null,
   "fencing_token": null,
-  "status": "READY_AFTER_ORG-P2-003F-FIX1_CLOSEOUT"
+  "scheduler_note": "ORG-P2-003F-FIX1 is closed. Existing P0 ORG-P2-004 remains ahead of this R1 sandbox task for cursor-01.",
+  "status": "NEXT_TASK_CANDIDATE_AFTER_ORG-P2-004_CLOSEOUT"
 }
