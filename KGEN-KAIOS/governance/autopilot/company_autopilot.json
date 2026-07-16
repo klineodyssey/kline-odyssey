@@ -2,19 +2,20 @@
   "metadata": {
     "architecture_id": "PRIMEFORGE-COMPANY-AUTOPILOT-ARCH-001",
     "version": "0.3.0",
-    "revision": "2026-07-15.3",
-    "status": "ARCHITECTURE_APPROVED_IN_PRINCIPLE_P0_AMENDMENT_UNDER_REVIEW",
-    "last_updated": "2026-07-15",
+    "revision": "2026-07-16.1",
+    "status": "ACTIVE_OPERATOR_PROTOCOL_NO_BACKGROUND_SERVICE",
+    "last_updated": "2026-07-16",
     "updated_by": "codex-gm-01",
-    "reviewed_by": "HUMAN_PRIMEFORGE_REQUIRED",
+    "reviewed_by": "HUMAN_PRIMEFORGE_FULL_AUTOPILOT_001",
     "human_decision_ids": [
       "HUMAN-PRIMEFORGE-COMPANY-AUTOPILOT-001",
       "HUMAN-COMPANY-AUTOMATIC-MAINTENANCE-001",
-      "HUMAN-COMPANY-OS-BOOT-001"
+      "HUMAN-COMPANY-OS-BOOT-001",
+      "HUMAN-PRIMEFORGE-FULL-AUTOPILOT-001"
     ],
     "source_commit": "ORIGIN_MAIN_7a692c34df50861ab10f8bd80959d95251b1071c",
     "source_freshness": "REMOTE_VERIFIED_2026-07-15T17:29:48+08:00",
-    "source_of_truth": false
+    "source_of_truth": true
   },
   "system_identity": {
     "name": "PrimeForge Company Autopilot",
@@ -403,13 +404,9 @@
     "implementation_started": false,
     "implementation_workqueue_created": false,
     "deployment_started": false,
-    "commit_allowed_this_round": false,
-    "push_allowed_this_round": false
+    "commit_allowed_this_round": true,
+    "push_allowed_this_round": true,
+    "commit_push_scope": "LEVEL_A_AND_LEVEL_B_ONLY"
   },
-  "next_human_decisions": [
-    "APPROVE_COMPANY_OS_BOOT_P0_AMENDMENT",
-    "REQUEST_COMPANY_OS_BOOT_P0_REVISION",
-    "HOLD_COMPANY_AUTOPILOT",
-    "REJECT_COMPANY_AUTOPILOT_ARCHITECTURE"
-  ]
+  "next_human_decisions": ["HUMAN_DECISION_REQUIRED_FOR_LEVEL_C_ONLY"]
 }

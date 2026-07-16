@@ -5,12 +5,12 @@ REVISION: "2026-07-16.1"
 STATUS: "OPERATIONALLY_DELEGATED_GOVERNANCE_ARCHITECTURE"
 LAST_UPDATED: "2026-07-16"
 UPDATED_BY: "Codex / codex-gm-01"
-REVIEWED_BY: "Human PrimeForge required"
+REVIEWED_BY: "Human PrimeForge / HUMAN-PRIMEFORGE-FULL-AUTOPILOT-001"
 SOURCE_COMMIT: "ORIGIN_MAIN_7a692c34df50861ab10f8bd80959d95251b1071c"
 TASK_ID: "HUMAN-PRIMEFORGE-FULL-AUTOPILOT-001"
 CHANGE_REASON: "Record bounded Level A/B operational delegation, protected Human workspace handling, proposal backlog governance, and the canonical atomic Claim authority direction."
 ANCESTOR: "KGEN-AI-Company/CODEX_MANAGER_PROTOCOL.md; KGEN-KAIOS/decision/DECISION_ENGINE_STANDARD.md"
-SOURCE_OF_TRUTH: "FALSE"
+SOURCE_OF_TRUTH: true
 ---
 
 # PrimeForge Company Autopilot
@@ -36,7 +36,7 @@ This directory is an **architecture proposal and integration profile**, not a se
 |---|---|
 | Human Decisions | `HUMAN-PRIMEFORGE-COMPANY-AUTOPILOT-001`; `HUMAN-COMPANY-AUTOMATIC-MAINTENANCE-001`; `HUMAN-COMPANY-OS-BOOT-001`; `HUMAN-PRIMEFORGE-FULL-AUTOPILOT-001` |
 | Design | `AUTHORIZED` |
-| Architecture | `OPERATIONALLY_DELEGATED / DOCUMENTATION BASELINE CANDIDATE` |
+| Architecture | `OPERATIONALLY_DELEGATED / ACTIVE OPERATOR PROTOCOL` |
 | Runtime implementation | `NOT_STARTED` |
 | Background automation | `NOT_RUNNING` |
 | WorkQueue implementation task | `NOT_CREATED` |

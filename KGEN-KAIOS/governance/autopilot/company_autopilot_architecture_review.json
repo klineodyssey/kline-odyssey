@@ -6,7 +6,7 @@
     "human_decision_id": "HUMAN-PRIMEFORGE-FULL-AUTOPILOT-001",
     "approver": "CODEX_DELEGATED_GM",
     "human_override_available": true,
-    "source_commit": "PENDING_LEVEL_B_PUBLICATION"
+    "source_commit": "6936d6fe69ee9f2167aea6de109987fb66311e94"
   },
   "risk_level": "R1_LEVEL_B",
   "overall_readiness": 93,

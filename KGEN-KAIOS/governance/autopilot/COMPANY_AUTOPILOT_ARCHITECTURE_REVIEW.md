@@ -6,11 +6,11 @@ STATUS: "APPROVE_FOR_DELEGATED_DOCUMENTATION_BASELINE"
 LAST_UPDATED: "2026-07-16"
 UPDATED_BY: "Codex / codex-gm-01"
 REVIEWED_BY: "CODEX_DELEGATED_GM under HUMAN-PRIMEFORGE-FULL-AUTOPILOT-001"
-SOURCE_COMMIT: "PENDING_LEVEL_B_PUBLICATION"
+SOURCE_COMMIT: "6936d6fe69ee9f2167aea6de109987fb66311e94"
 TASK_ID: "HUMAN-PRIMEFORGE-FULL-AUTOPILOT-001"
 CHANGE_REASON: "Record internal review gates and rollback evidence for bounded Company Autopilot publication."
 ANCESTOR: "PrimeForge Company Autopilot architecture package"
-SOURCE_OF_TRUTH: "FALSE_UNTIL_PUBLISHED"
+SOURCE_OF_TRUTH: true
 ---
 
 # Company Autopilot Architecture Review

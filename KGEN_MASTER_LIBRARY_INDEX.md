@@ -55,6 +55,12 @@ This file is the **unique library-level Master Index** (ORG-P2-003 D7). Other `*
 | KGEN AI Company Automation V5.0 | `KGEN-AI-Company/` | Cursor Handoff Branch Workflow, workspace policy, Codex review/merge, reports, and WorkQueue automation |
 | KGEN AI Operating System V7.2 | `KGEN-KAIOS/` | Architecture-first AI operating system with worker registry, claim lease, dry run, and read-only operations dashboard |
 | KAIOS Architecture Governance Board | `KGEN-KAIOS/governance/` | Human-approved Architecture proposal, independent review, resolution, ADR and implementation approval gate |
+| PrimeForge Company Autopilot | `KGEN-KAIOS/governance/autopilot/` | Human-delegated Company OS Boot, Session, Inbox, scheduler, repository maintenance, architecture backlog and claim authority proposal |
+| KAIOS Cursor Control Proposal | `KGEN-KAIOS/governance/cursor/` | Controlled Cursor preflight, Task Envelope, protected path, handoff, stop and legacy suppression proposal |
+| KAIOS Worker Swarm Proposal | `KGEN-KAIOS/governance/autopilot/worker-swarm/` | Architecture-only clone, session, dispatcher, registry and recovery coordination |
+| KAIOS Boot / Life Integrity Proposal | `KGEN-KAIOS/boot-runtime/` | Fail-closed player Boot, Species OS and Life Integrity Architecture; implementation not started |
+| KAIOS Life OS V1.0 Baseline | `KGEN-KAIOS/life/` | Frozen Species-scoped Life OS Architecture and SHA-256 manifest; implementation not started |
+| KAIOS World Viewer V1.0 Baseline | `KGEN-KAIOS/world-viewer/` | Frozen Web-first 2D Viewer Architecture and synthetic sandbox plan; runtime not implemented |
 | KAIOS V11.0 Architecture Baseline | `KGEN-KAIOS/V11/` | Frozen Multi-Agent Civilization Architecture, 11 design documents, ADR set, Resolution, review evidence and evolution log |
 | LAND RUNTIME V1 Architecture Baseline | `KGEN-KAIOS/land/` | Frozen K280 / Land Runtime V1 architecture: parcel geometry, rights separation, territory zones, residence protection, lunar registry (docs only) |
 | Civilization Economy Runtime V1 Baseline | `KGEN-KAIOS/civilization/` | Frozen CIV-ECONOMY-V1.0 architecture: biology mapping, payroll, zones, economic conflict, border margin, title/seat/realm (docs only) |
@@ -123,6 +129,14 @@ This file is the **unique library-level Master Index** (ORG-P2-003 D7). Other `*
 | Architecture Governance Board JSON | `KGEN-KAIOS/governance/architecture_governance_board.json` | Machine-readable Board roles, authority and Human approval scope |
 | Architecture Review Registry | `KGEN-KAIOS/governance/architecture_review_registry.json` | Reviewer activation, restrictions and registered architecture reviews |
 | Architecture Review History | `KGEN-KAIOS/governance/architecture_review_history.jsonl` | Append-only review, resolution and Human approval events |
+| Company Autopilot | `KGEN-KAIOS/governance/autopilot/README.md` | Delegated General Manager boundaries, Company OS Boot and operating package index |
+| Architecture Backlog Registry | `KGEN-KAIOS/governance/autopilot/ARCHITECTURE_BACKLOG_REGISTRY.md` | Proposal dependencies, review scores, risk, commit state and next action |
+| Canonical Claim Authority Proposal | `KGEN-KAIOS/governance/autopilot/CANONICAL_ATOMIC_CLAIM_AUTHORITY_PROPOSAL.md` | Transactional claim, fencing token and lease authority architecture; implementation not started |
+| Worker Swarm Architecture | `KGEN-KAIOS/governance/autopilot/worker-swarm/README.md` | Multi-session Worker coordination proposal with explicit non-atomic pre-cutover boundary |
+| Cursor Control Architecture | `KGEN-KAIOS/governance/cursor/README.md` | Audit and migration proposal for controlled Cursor execution without replacing CURRENT rules |
+| Boot / Life Integrity Architecture | `KGEN-KAIOS/boot-runtime/README.md` | Fail-closed Boot, Species OS, integrity verification and corruption handling proposal |
+| Life OS Architecture Baseline | `KGEN-KAIOS/life/LIFE_OS_ARCHITECTURE_BASELINE.md` | Frozen `LIFE-OS-V1.0` Architecture and implementation hold boundary |
+| World Viewer Architecture Baseline | `KGEN-KAIOS/world-viewer/WORLD_VIEWER_V1_ARCHITECTURE_BASELINE.md` | Frozen `WORLD-VIEWER-V1.0` Architecture and synthetic-only sandbox boundary |
 | V11 Architecture Baseline | `KGEN-KAIOS/V11/ARCHITECTURE_BASELINE.md` | Human-frozen V11.0 Architecture scope and Phase 1 HOLD boundary |
 | V11 Architecture Baseline JSON | `KGEN-KAIOS/V11/architecture_baseline.json` | SHA-256 manifest for the 11 Architecture documents, ADRs and review evidence |
 | V11 Architecture Evolution Log | `KGEN-KAIOS/V11/architecture_evolution_log.jsonl` | Append-only Architecture version, proposal, reason, ADR and approval lineage |

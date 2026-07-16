@@ -5,8 +5,8 @@
     "status": "ACTIVE_BY_HUMAN_DELEGATION",
     "human_decision_id": "HUMAN-PRIMEFORGE-FULL-AUTOPILOT-001",
     "delegated_to": "codex-gm-01",
-    "source_commit": "PENDING_LEVEL_B_PUBLICATION",
-    "source_of_truth": false
+    "source_commit": "6936d6fe69ee9f2167aea6de109987fb66311e94",
+    "source_of_truth": true
   },
   "roles": [
     "PRIMEFORGE_AUTONOMOUS_GENERAL_MANAGER",

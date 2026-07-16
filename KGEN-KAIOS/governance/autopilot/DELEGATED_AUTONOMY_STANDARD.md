@@ -6,11 +6,11 @@ STATUS: "ACTIVE_BY_HUMAN_DELEGATION"
 LAST_UPDATED: "2026-07-16"
 UPDATED_BY: "Codex / codex-gm-01"
 REVIEWED_BY: "Human PrimeForge / HUMAN-PRIMEFORGE-FULL-AUTOPILOT-001"
-SOURCE_COMMIT: "PENDING_LEVEL_B_PUBLICATION"
+SOURCE_COMMIT: "6936d6fe69ee9f2167aea6de109987fb66311e94"
 TASK_ID: "HUMAN-PRIMEFORGE-FULL-AUTOPILOT-001"
 CHANGE_REASON: "Define bounded autonomous company operations while preserving Human Final Authority and permanent protected boundaries."
 ANCESTOR: "KAIOS Constitution; Company OS Boot; PrimeForge Company Autopilot"
-SOURCE_OF_TRUTH: "FALSE_UNTIL_PUBLISHED"
+SOURCE_OF_TRUTH: true
 ---
 
 # Delegated Autonomy Standard

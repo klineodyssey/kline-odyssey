@@ -2,11 +2,11 @@
   "metadata": {
     "boot_id": "PRIMEFORGE-COMPANY-OS-BOOT-ARCH-001",
     "version": "0.1.0",
-    "revision": "2026-07-15.1",
-    "status": "ARCHITECTURE_P0_AMENDMENT_UNDER_REVIEW",
-    "human_decision_id": "HUMAN-COMPANY-OS-BOOT-001",
+    "revision": "2026-07-16.1",
+    "status": "ACTIVE_OPERATOR_PROTOCOL_NO_BACKGROUND_SERVICE",
+    "human_decision_id": "HUMAN-PRIMEFORGE-FULL-AUTOPILOT-001",
     "source_commit": "ORIGIN_MAIN_7a692c34df50861ab10f8bd80959d95251b1071c",
-    "source_of_truth": false
+    "source_of_truth": true
   },
   "shared_by": [
     "CODEX",
@@ -164,7 +164,8 @@
   },
   "implementation_started": false,
   "workqueue_created": false,
-  "commit_allowed_this_round": false,
-  "push_allowed_this_round": false,
+  "commit_allowed_this_round": true,
+  "push_allowed_this_round": true,
+  "commit_push_scope": "LEVEL_A_AND_LEVEL_B_ONLY",
   "deployment_started": false
 }

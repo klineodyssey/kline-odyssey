@@ -1,12 +1,12 @@
 {
   "metadata": {
     "version": "1.0.0",
-    "revision": "2026-07-16.1",
+    "revision": "2026-07-16.2",
     "status": "ACTIVE_MANAGED_REGISTRY",
     "human_decision_id": "HUMAN-PRIMEFORGE-FULL-AUTOPILOT-001",
     "manager": "codex-gm-01",
-    "source_commit": "PENDING_LEVEL_B_PUBLICATION",
-    "source_of_truth": false,
+    "source_commit": "299d2759328f6eddeb6db3f4e767e945e2722ccb",
+    "source_of_truth": true,
     "private_local_paths_published": false
   },
   "priority_order": [
@@ -37,10 +37,11 @@
       "risk_level": "LEVEL_B_R1",
       "protected_path_status": "PASS_ZERO",
       "implementation_status": "BOUNDED_OPERATIONS_DELEGATED_NO_BACKGROUND_SERVICE",
-      "commit_status": "READY",
-      "push_status": "WAITING_NETWORK",
-      "baseline_status": "DOCUMENTATION_BASELINE_CANDIDATE",
-      "next_action": "COMMIT_SCOPED_GOVERNANCE_PACKAGE"
+      "commit_status": "INTEGRATED_LOCAL",
+      "commit_sha": "6936d6f",
+      "push_status": "PENDING_SESSION_RELEASE",
+      "baseline_status": "DOCUMENTATION_BASELINE",
+      "next_action": "VALIDATE_AND_PUSH_INTEGRATION_BRANCH"
     },
     {
       "proposal_id": "WORKER-SWARM-001",
@@ -56,10 +57,11 @@
       "risk_level": "LEVEL_B_R1",
       "protected_path_status": "PASS_ZERO",
       "implementation_status": "NOT_STARTED",
-      "commit_status": "READY_AFTER_REVIEW_RECORD",
-      "push_status": "WAITING_NETWORK",
+      "commit_status": "INTEGRATED_LOCAL",
+      "commit_sha": "8ed6fc6",
+      "push_status": "PENDING_SESSION_RELEASE",
       "baseline_status": "PROPOSAL",
-      "next_action": "ADD_REVIEW_AND_COMMIT_SEPARATELY"
+      "next_action": "EXTERNAL_REVIEW_BEFORE_BASELINE"
     },
     {
       "proposal_id": "BOOT-LIFE-INTEGRITY-001",
@@ -75,10 +77,11 @@
       "risk_level": "LEVEL_B_R1",
       "protected_path_status": "PASS_ZERO",
       "implementation_status": "NOT_STARTED",
-      "commit_status": "READY_AS_PROPOSAL",
-      "push_status": "WAITING_NETWORK",
+      "commit_status": "INTEGRATED_LOCAL",
+      "commit_sha": "190d8d5",
+      "push_status": "PENDING_SESSION_RELEASE",
       "baseline_status": "NOT_FROZEN",
-      "next_action": "PUBLISH_PROPOSAL_FOR_INDEPENDENT_REVIEW"
+      "next_action": "INDEPENDENT_REVIEW_BEFORE_BASELINE"
     },
     {
       "proposal_id": "WORLD-VIEWER-001",
@@ -94,10 +97,11 @@
       "risk_level": "LEVEL_B_R1",
       "protected_path_status": "PASS_ZERO",
       "implementation_status": "SANDBOX_PLAN_AUTHORIZED",
-      "commit_status": "RESOLUTION_ADR_BASELINE_REQUIRED",
-      "push_status": "WAITING_NETWORK",
-      "baseline_status": "CANDIDATE",
-      "next_action": "RESOLVE_FREEZE_AND_DISPATCH_SYNTHETIC_DEMO"
+      "commit_status": "INTEGRATED_LOCAL",
+      "commit_sha": "780ffee",
+      "push_status": "PENDING_SESSION_RELEASE",
+      "baseline_status": "FROZEN_WORLD_VIEWER_V1_0",
+      "next_action": "OFFER_SYNTHETIC_DEMO_AFTER_CURRENT_QUEUE_PRIORITY"
     },
     {
       "proposal_id": "LIFE-OS-001",
@@ -106,17 +110,18 @@
       "base_sha": "7a692c34df50861ab10f8bd80959d95251b1071c",
       "files": ["KGEN-KAIOS/life/"],
       "dependencies": ["SPECIES_OS_AMENDMENT"],
-      "internal_review": "PENDING",
-      "external_review": "PENDING",
-      "review_score": null,
+      "internal_review": "COMPLETE",
+      "external_review": "REQUIRED_BEFORE_IMPLEMENTATION",
+      "review_score": 89,
       "amendments": ["RECONCILE_COMMON_LIFE_OS_WITH_SPECIES_OS"],
       "risk_level": "LEVEL_B_CANDIDATE",
       "protected_path_status": "PASS_ZERO",
       "implementation_status": "NOT_STARTED",
-      "commit_status": "HOLD_REVIEW",
-      "push_status": "NOT_READY",
-      "baseline_status": "NOT_FROZEN",
-      "next_action": "INDEPENDENT_REVIEW"
+      "commit_status": "INTEGRATED_LOCAL",
+      "commit_sha": "5baeb80",
+      "push_status": "PENDING_SESSION_RELEASE",
+      "baseline_status": "FROZEN_LIFE_OS_V1_0",
+      "next_action": "EXTERNAL_REVIEW_BEFORE_SANDBOX_IMPLEMENTATION"
     },
     {
       "proposal_id": "LIFE-MANUFACTURING-001",
@@ -144,17 +149,18 @@
       "base_sha": "7a692c34df50861ab10f8bd80959d95251b1071c",
       "files": ["KGEN-KAIOS/governance/cursor/"],
       "dependencies": ["COMPANY-AUTOPILOT-001", "WORKER-SWARM-001"],
-      "internal_review": "PENDING",
+      "internal_review": "PREPUBLICATION_STRUCTURE_AUDIT_COMPLETE",
       "external_review": "NOT_REQUIRED_LOW_RISK_GOVERNANCE_DOCS",
       "review_score": null,
       "amendments": ["ALIGN_WITH_DELEGATED_LEVELS", "ALIGN_WITH_CANONICAL_CLAIM_AUTHORITY"],
       "risk_level": "LEVEL_B_CANDIDATE",
       "protected_path_status": "PASS_ZERO",
       "implementation_status": "NOT_STARTED",
-      "commit_status": "HOLD_REVIEW",
-      "push_status": "NOT_READY",
+      "commit_status": "INTEGRATED_LOCAL",
+      "commit_sha": "299d275",
+      "push_status": "PENDING_SESSION_RELEASE",
       "baseline_status": "PROPOSAL",
-      "next_action": "REVIEW_AFTER_COMPANY_OS"
+      "next_action": "ARCHITECTURE_REVIEW_BEFORE_EFFECTIVE_CUTOVER"
     },
     {
       "proposal_id": "KERNEL-LAW-001",
@@ -265,8 +271,9 @@
       "risk_level": "LEVEL_B_R2_PLANNING",
       "protected_path_status": "PASS_ZERO",
       "implementation_status": "NOT_STARTED",
-      "commit_status": "READY_AS_PROPOSAL",
-      "push_status": "WAITING_NETWORK",
+      "commit_status": "INTEGRATED_LOCAL",
+      "commit_sha": "6936d6f",
+      "push_status": "PENDING_SESSION_RELEASE",
       "baseline_status": "PROPOSAL",
       "next_action": "INDEPENDENT_SECURITY_AND_CONCURRENCY_REVIEW"
     }

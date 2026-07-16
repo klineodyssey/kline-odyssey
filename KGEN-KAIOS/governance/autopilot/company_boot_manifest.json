@@ -2,16 +2,17 @@
   "metadata": {
     "manifest_id": "PRIMEFORGE-COMPANY-BOOT-MANIFEST-001",
     "version": "0.3.0",
-    "revision": "2026-07-15.3",
-    "status": "ARCHITECTURE_APPROVED_IN_PRINCIPLE_P0_AMENDMENT_UNDER_REVIEW",
+    "revision": "2026-07-16.1",
+    "status": "ACTIVE_OPERATOR_PROTOCOL_NO_BACKGROUND_SERVICE",
     "human_decision_ids": [
       "HUMAN-PRIMEFORGE-COMPANY-AUTOPILOT-001",
       "HUMAN-COMPANY-AUTOMATIC-MAINTENANCE-001",
-      "HUMAN-COMPANY-OS-BOOT-001"
+      "HUMAN-COMPANY-OS-BOOT-001",
+      "HUMAN-PRIMEFORGE-FULL-AUTOPILOT-001"
     ],
     "source_commit": "ORIGIN_MAIN_7a692c34df50861ab10f8bd80959d95251b1071c",
     "source_freshness": "REMOTE_VERIFIED_2026-07-15T17:29:48+08:00",
-    "source_of_truth": false
+    "source_of_truth": true
   },
   "priority_rule": [
     "HUMAN_DECISION",
@@ -53,14 +54,14 @@
     {"order":18,"source_id":"CURRENT_BIOLOGY_RUNTIME","type":"FILE","locator":"docs/biology/KGEN_Civilization_Biology_Runtime_V1_0.md","required":true,"status":"PRESENT_REFERENCE"},
     {"order":19,"source_id":"CIVILIZATION_BASELINE","type":"FILE","locator":"KGEN-KAIOS/civilization/CIVILIZATION_ECONOMY_ARCHITECTURE_BASELINE.md","required":true,"status":"PRESENT_FROZEN"},
     {"order":20,"source_id":"KERNEL_ARCHITECTURE","type":"FILE","locator":"KGEN-KAIOS/kernel/KERNEL_V1.md","required":true,"status":"PRESENT_RESEARCH_NOT_FROZEN"},
-    {"order":21,"source_id":"CURSOR_CONTROL_RUNTIME","type":"PROPOSED_FILE_SET","locator":"KGEN-KAIOS/governance/cursor/","required":false,"required_after_approval":true,"status":"MISSING_IN_MAIN_UNAPPROVED_EXTERNAL_WORKTREE_NOT_AUTHORITY"},
+    {"order":21,"source_id":"CURSOR_CONTROL_RUNTIME","type":"PROPOSED_FILE_SET","locator":"KGEN-KAIOS/governance/cursor/","required":false,"required_after_approval":true,"status":"PRESENT_PROPOSAL_UNDER_REVIEW_NOT_AUTHORITY"},
     {"order":22,"source_id":"MAINTENANCE_MODE","type":"FILE","locator":"KGEN-KAIOS/operations/MAINTENANCE_MODE_STANDARD.md","required":true,"status":"PRESENT"},
     {"order":23,"source_id":"GITHUB_CONNECTIVITY_RUNBOOK","type":"FILE","locator":"KGEN-KAIOS/operations/GITHUB_CONNECTIVITY_RUNBOOK.md","required":true,"status":"PRESENT"},
-    {"order":24,"source_id":"COMPANY_INBOX","type":"PROPOSED_FILE_SET","locator":"KGEN-KAIOS/governance/autopilot/COMPANY_INBOX.md; KGEN-KAIOS/governance/autopilot/company_inbox.json","required":false,"required_after_approval":true,"status":"PROPOSED_NOT_ACTIVE"},
-    {"order":25,"source_id":"PRIORITY_SCHEDULER","type":"PROPOSED_FILE_SET","locator":"KGEN-KAIOS/governance/autopilot/PRIORITY_SCHEDULER.md; KGEN-KAIOS/governance/autopilot/priority_scheduler.json","required":false,"required_after_approval":true,"status":"PROPOSED_NOT_ACTIVE"},
-    {"order":26,"source_id":"REPOSITORY_MAINTENANCE_RUNTIME","type":"PROPOSED_FILE_SET","locator":"KGEN-KAIOS/governance/autopilot/REPOSITORY_MAINTENANCE_RUNTIME.md; KGEN-KAIOS/governance/autopilot/repository_maintenance_runtime.json","required":false,"required_after_approval":true,"status":"PROPOSED_NOT_ACTIVE"},
-    {"order":27,"source_id":"COMPANY_OS_BOOT","type":"PROPOSED_FILE_SET","locator":"KGEN-KAIOS/governance/autopilot/COMPANY_OS_BOOT.md; KGEN-KAIOS/governance/autopilot/company_os_boot.json","required":false,"required_after_approval":true,"status":"P0_AMENDMENT_UNDER_REVIEW"},
-    {"order":28,"source_id":"COMPANY_SESSION","type":"PROPOSED_FILE_SET","locator":"KGEN-KAIOS/governance/autopilot/COMPANY_SESSION.md; KGEN-KAIOS/governance/autopilot/company_session.json","required":false,"required_after_approval":true,"status":"P0_AMENDMENT_UNDER_REVIEW"}
+    {"order":24,"source_id":"COMPANY_INBOX","type":"ACTIVE_OPERATOR_FILE_SET","locator":"KGEN-KAIOS/governance/autopilot/COMPANY_INBOX.md; KGEN-KAIOS/governance/autopilot/company_inbox.json","required":true,"status":"ACTIVE_NO_BACKGROUND_SERVICE"},
+    {"order":25,"source_id":"PRIORITY_SCHEDULER","type":"ACTIVE_OPERATOR_FILE_SET","locator":"KGEN-KAIOS/governance/autopilot/PRIORITY_SCHEDULER.md; KGEN-KAIOS/governance/autopilot/priority_scheduler.json","required":true,"status":"ACTIVE_NO_BACKGROUND_SERVICE"},
+    {"order":26,"source_id":"REPOSITORY_MAINTENANCE_RUNTIME","type":"ACTIVE_OPERATOR_FILE_SET","locator":"KGEN-KAIOS/governance/autopilot/REPOSITORY_MAINTENANCE_RUNTIME.md; KGEN-KAIOS/governance/autopilot/repository_maintenance_runtime.json","required":true,"status":"ACTIVE_NO_BACKGROUND_SERVICE"},
+    {"order":27,"source_id":"COMPANY_OS_BOOT","type":"ACTIVE_OPERATOR_FILE_SET","locator":"KGEN-KAIOS/governance/autopilot/COMPANY_OS_BOOT.md; KGEN-KAIOS/governance/autopilot/company_os_boot.json","required":true,"status":"ACTIVE_NO_BACKGROUND_SERVICE"},
+    {"order":28,"source_id":"COMPANY_SESSION","type":"ACTIVE_OPERATOR_FILE_SET","locator":"KGEN-KAIOS/governance/autopilot/COMPANY_SESSION.md; KGEN-KAIOS/governance/autopilot/company_session.json","required":true,"status":"ACTIVE_NO_BACKGROUND_SERVICE"}
   ],
   "source_conflict_result": "BLOCKED_SOURCE_CONFLICT",
   "legacy_suppression": {

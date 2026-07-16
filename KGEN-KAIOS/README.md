@@ -78,6 +78,21 @@ Human Approval `HUMAN-AGB-APPROVAL-001` establishes the KAIOS Architecture Gover
 
 AGB is approved, while V11 Phase 1 and Implementation remain `NOT STARTED`. ChatGPT is an advisory architect without repository write authority; Grok is an external reviewer without merge authority; Codex remains the Implementation Architect; PrimeForge remains the final Human authority.
 
+## Delegated Company Operations And Reviewed Architecture
+
+Human Decision `HUMAN-PRIMEFORGE-FULL-AUTOPILOT-001` delegates bounded Level A and Level B company operations to Codex while preserving all Level C decisions for Human PrimeForge. The managed workspace, Human workspace protection, architecture backlog, repository maintenance, review, claim/lease closeout, and release evidence are defined under `governance/autopilot/`.
+
+| Path | Status | Purpose |
+|---|---|---|
+| `governance/autopilot/` | Delegated documentation baseline | Company OS Boot, Session, Inbox, scheduler, repository maintenance, backlog and atomic Claim Authority proposal |
+| `governance/autopilot/worker-swarm/` | Architecture proposal | Session, clone, dispatcher, registry and recovery coordination; implementation not started |
+| `governance/cursor/` | Architecture proposal under review | Cursor preflight, Task Envelope, protected paths, handoff, stop conditions and legacy-rule suppression |
+| `boot-runtime/` | Architecture proposal under review | Fail-closed player Boot, Species OS and Life Integrity contracts |
+| `life/` | `LIFE-OS-V1.0` frozen Architecture | Species-scoped Life OS, state machine, API, events, review and baseline manifest |
+| `world-viewer/` | `WORLD-VIEWER-V1.0` frozen Architecture | Reviewed 2D Web-first World Viewer and synthetic sandbox plan; no runtime implementation yet |
+
+The Canonical Atomic Claim Authority remains a proposal. Until its transactional service is reviewed and implemented, Codex dispatch is explicit and recorded but is not represented as fully atomic distributed scheduling. No entry in this section changes Runtime CURRENT, Universe Map CURRENT, protected paths, Token behavior, real identity, real location, or real financial state.
+
 ## V11.0 Architecture Baseline
 
 Human Decision `HUMAN-V11-BASELINE-001` freezes the reviewed V11 Genesis Design as the V11.0 Architecture Baseline. The baseline includes 11 Architecture documents, ADR-001 through ADR-010, the independent review, Architecture Resolution and AGB Review Registry.

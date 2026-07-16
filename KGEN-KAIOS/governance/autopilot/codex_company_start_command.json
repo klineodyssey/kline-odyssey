@@ -2,14 +2,15 @@
   "metadata": {
     "command_id": "CODEX-COMPANY-START-COMMAND-001",
     "version": "0.3.0",
-    "status": "ARCHITECTURE_APPROVED_IN_PRINCIPLE_P0_AMENDMENT_UNDER_REVIEW",
+    "status": "ACTIVE_OPERATOR_PROTOCOL_NO_BACKGROUND_SERVICE",
     "human_decision_ids": [
       "HUMAN-PRIMEFORGE-COMPANY-AUTOPILOT-001",
       "HUMAN-COMPANY-AUTOMATIC-MAINTENANCE-001",
-      "HUMAN-COMPANY-OS-BOOT-001"
+      "HUMAN-COMPANY-OS-BOOT-001",
+      "HUMAN-PRIMEFORGE-FULL-AUTOPILOT-001"
     ],
     "source_commit": "ORIGIN_MAIN_7a692c34df50861ab10f8bd80959d95251b1071c",
-    "source_of_truth": false
+    "source_of_truth": true
   },
   "primary_phrase": "KAIOS COMPANY BOOT",
   "automatic_on_every_human_message": true,
