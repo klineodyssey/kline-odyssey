@@ -1,0 +1,453 @@
+{
+  "metadata": {
+    "title": "KAIOS Worker Swarm Runtime Architecture",
+    "version": "0.2.0",
+    "revision": "2026-07-16.2",
+    "status": "INTERNAL_REVIEW_COMPLETE_BASELINE_HOLD",
+    "last_updated": "2026-07-16",
+    "updated_by": "Codex / codex-gm-01",
+    "reviewed_by": "Codex delegated GM internal review; external or Human baseline review required",
+    "source_commit": "ORIGIN_MAIN_7a692c34df50861ab10f8bd80959d95251b1071c",
+    "task_id": "HUMAN-WORKER-SWARM-RUNTIME-001",
+    "human_decision_id": "HUMAN-WORKER-SWARM-RUNTIME-001; HUMAN-PRIMEFORGE-FULL-AUTOPILOT-001",
+    "change_reason": "Define and internally review a Company Runtime worker coordination layer without representing an architecture as an implemented atomic dispatcher.",
+    "ancestor": [
+      "KGEN-KAIOS/TASK_CLAIM_LEASE_PROTOCOL.md",
+      "KGEN-KAIOS/TASK_DISPATCHER.md",
+      "KGEN-KAIOS/workforce/AGENT_WORKFORCE_V2_STANDARD.md",
+      "KGEN-AI-Company/CODEX_DISPATCHER_PROTOCOL.md"
+    ],
+    "source_of_truth": false
+  },
+  "classification": {
+    "domain": "KGENVERSE",
+    "kingdom": "CivilizationLifeform",
+    "phylum": "RuntimeArchitecture",
+    "class": "CompanyCoordinationRuntime",
+    "order": "WorkerSwarm",
+    "family": "KAIOS",
+    "genus": "ControlledWorkerSwarm",
+    "species": "KAIOSWorkerSwarmRuntimeProposal",
+    "canonical_file": "KGEN-KAIOS/governance/autopilot/worker-swarm/worker_swarm_runtime.json"
+  },
+  "architecture_boundary": {
+    "layer_type": "COMPANY_RUNTIME_WORKER_COORDINATION_LAYER",
+    "new_kernel": false,
+    "implementation_started": false,
+    "implementation_planning_authorized": false,
+    "workqueue_created": false,
+    "commit_authorized": true,
+    "push_authorized": true,
+    "deployment_authorized": false,
+    "runtime_current_modified": false,
+    "universe_map_modified": false,
+    "protected_paths_modified": false,
+    "human_review_required": true,
+    "delegated_publication_authority": "LEVEL_A",
+    "baseline_freeze_authorized": false
+  },
+  "source_dependencies": {
+    "current": [
+      "PRIMEFORGE_GENESIS_BOOT_SEQUENCE.md",
+      "KGEN-KAIOS/constitution/KAIOS_CONSTITUTION.md",
+      "KGEN-KAIOS/worker_registry.json",
+      "KGEN-KAIOS/workforce/agent_registry.json",
+      "KGEN-Organization/WorkOrders/WORK_QUEUE.md",
+      "KGEN-KAIOS/TASK_CLAIM_LEASE_PROTOCOL.md",
+      "KGEN-KAIOS/task_claim_schema.json",
+      "KGEN-KAIOS/TASK_DISPATCHER.md",
+      "KGEN-AI-Company/CODEX_DISPATCHER_PROTOCOL.md",
+      "KGEN-KAIOS/decision/decision_log.jsonl",
+      "KGEN-AI-Company/reports/CODEX_REVIEW_LOG.md"
+    ],
+    "candidate_not_on_main": [
+      "KGEN-KAIOS/governance/autopilot/COMPANY_OS_BOOT.md",
+      "KGEN-KAIOS/governance/autopilot/COMPANY_SESSION.md",
+      "KGEN-KAIOS/governance/autopilot/PRIORITY_SCHEDULER.md",
+      "KGEN-KAIOS/governance/autopilot/CLAIM_AND_LEASE_CONTROLLER.md"
+    ],
+    "candidate_dependency_rule": "A rejected or changed Company OS candidate requires Worker Swarm re-review before implementation planning."
+  },
+  "identity_chain": [
+    "employee_uuid",
+    "agent_id",
+    "worker_id",
+    "clone_id",
+    "session_id",
+    "claim_id",
+    "task_id",
+    "evidence_id",
+    "review_id"
+  ],
+  "id_formats": {
+    "clone_id": "CLONE-CURSOR-000001",
+    "session_id": "SESSION-YYYYMMDD-NNN",
+    "claim_id": "CLAIM-<TASK-ID>-<UTCSTAMP>-<WORKER-ID>",
+    "checkpoint_id": "CHECKPOINT-<SESSION-ID>-NNN",
+    "recovery_id": "RECOVERY-<SESSION-ID>-NNN",
+    "durable_identity": "Collision-resistant UID is stored beside every display ID."
+  },
+  "cardinality": {
+    "active_clone_per_worker_v1": 1,
+    "active_session_per_clone": 1,
+    "active_claim_per_session": 1,
+    "active_claim_per_task": 1,
+    "primary_worker_per_claim": 1,
+    "review_owner_per_claim": 1,
+    "recovery_rule": "A new Session may continue the same Claim only after the prior Session is fenced."
+  },
+  "clone_model": {
+    "formal_name": "Monkey Clone",
+    "definition": "One controlled Cursor execution identity linked to an authorized Worker and Agent.",
+    "required_fields": [
+      "clone_id",
+      "session_id",
+      "worker_id",
+      "claim_id",
+      "review_owner_id",
+      "current_status",
+      "heartbeat_at",
+      "boot_time"
+    ],
+    "extended_fields": [
+      "clone_uid",
+      "employee_uuid",
+      "agent_id",
+      "provider_type",
+      "worker_registry_version",
+      "trust_level_snapshot",
+      "permission_snapshot",
+      "workspace_id",
+      "branch_namespace",
+      "boot_manifest_version",
+      "current_task_id",
+      "current_branch",
+      "fencing_token",
+      "last_checkpoint_id",
+      "evidence_refs",
+      "record_version"
+    ],
+    "states": [
+      "REGISTERED",
+      "BOOTING",
+      "READY",
+      "CLAIM_ACTIVE",
+      "EXECUTING",
+      "WAITING_REVIEW",
+      "REPAIR",
+      "BLOCKED",
+      "RECOVERY_PENDING",
+      "RECOVERING",
+      "CLOSED",
+      "OFFLINE",
+      "SUSPENDED",
+      "ARCHIVED"
+    ],
+    "self_registration_allowed": false,
+    "self_dispatch_allowed": false,
+    "self_review_allowed": false,
+    "push_main_allowed": false
+  },
+  "session_runtime": {
+    "definition": "Every chat window or provider invocation is one immutable Session Runtime.",
+    "required_fields": [
+      "session_id",
+      "session_uid",
+      "previous_session_id",
+      "recovery_of_session_id",
+      "clone_id",
+      "worker_id",
+      "provider_id",
+      "workspace_id",
+      "branch",
+      "base_sha",
+      "observed_origin_main",
+      "human_decision_ids",
+      "task_id",
+      "claim_id",
+      "review_owner_id",
+      "fencing_token",
+      "boot_version",
+      "boot_time",
+      "session_status",
+      "last_heartbeat_at",
+      "last_checkpoint_id",
+      "evidence_refs",
+      "review_id",
+      "started_at",
+      "ended_at",
+      "next_legal_action"
+    ],
+    "states": [
+      "CREATED",
+      "BOOTING",
+      "READY",
+      "CLAIM_ACTIVE",
+      "EXECUTING",
+      "HANDOFF_SUBMITTED",
+      "WAITING_REVIEW",
+      "REPAIR",
+      "BLOCKED",
+      "RECOVERY_PENDING",
+      "FENCED",
+      "CHECKPOINTING",
+      "CLOSED",
+      "FAILED_CLOSED"
+    ],
+    "one_active_claim": true,
+    "old_session_reopen_allowed": false,
+    "checkpoint_required_to_close": true,
+    "hidden_chat_memory_is_authority": false
+  },
+  "company_dispatcher": {
+    "controller": "Codex General Manager through Company Kernel",
+    "managed_lanes": [
+      "HUMAN_INBOX",
+      "REVIEW_QUEUE",
+      "REPAIR_QUEUE",
+      "RECOVERY_QUEUE",
+      "DISPATCH_CANDIDATES",
+      "CLOSE_RELEASE",
+      "HEALTH_RETRY"
+    ],
+    "normal_priority": [
+      "REVIEW",
+      "REPAIR",
+      "HUMAN_DECISION",
+      "ARCHITECTURE",
+      "IMPLEMENTATION"
+    ],
+    "decisions": [
+      "ALLOCATE",
+      "REVIEW_FIRST",
+      "REPAIR_SAME_CLAIM",
+      "RECOVER_SAME_CLAIM",
+      "HOLD_IN_INBOX",
+      "REJECT_DUPLICATE_CLAIM",
+      "BLOCK_IDENTITY",
+      "BLOCK_SOURCE_CONFLICT",
+      "BLOCK_PROTECTED_PATH",
+      "HUMAN_REVIEW_REQUIRED"
+    ],
+    "atomic_allocation_required": true,
+    "cursor_may_choose_task": false,
+    "cursor_may_release_claim": false,
+    "cursor_may_dispatch": false
+  },
+  "registries": [
+    {
+      "registry_id": "CLONE_REGISTRY",
+      "purpose": "Runtime execution identity and current custody pointers.",
+      "current_source": "PROPOSED",
+      "history": "APPEND_ONLY"
+    },
+    {
+      "registry_id": "SESSION_REGISTRY",
+      "purpose": "Immutable invocation, checkpoint and recovery chain.",
+      "current_source": "PROPOSED",
+      "history": "APPEND_ONLY"
+    },
+    {
+      "registry_id": "CLAIM_REGISTRY",
+      "purpose": "Canonical task lock, lease, review custody and fencing token.",
+      "current_source": "TASK_CLAIM_LEASE_PROTOCOL_AND_WORKQUEUE",
+      "history": "APPEND_ONLY_WITH_SNAPSHOT"
+    },
+    {
+      "registry_id": "EVIDENCE_REGISTRY",
+      "purpose": "Immutable report, diff, test and provenance references.",
+      "current_source": "REPORTS_AND_PROVENANCE_GOVERNANCE",
+      "history": "APPEND_ONLY"
+    },
+    {
+      "registry_id": "DECISION_REGISTRY",
+      "purpose": "Human and manager decisions.",
+      "current_source": "KGEN-KAIOS/decision/decision_log.jsonl",
+      "history": "APPEND_ONLY"
+    },
+    {
+      "registry_id": "REVIEW_REGISTRY",
+      "purpose": "Review identity, reviewer, evidence and disposition.",
+      "current_source": "KGEN-AI-Company/reports/CODEX_REVIEW_LOG.md",
+      "history": "APPEND_ONLY"
+    }
+  ],
+  "master_registry": {
+    "type": "LOGICAL_CONSISTENCY_FACADE",
+    "single_giant_json": false,
+    "new_source_of_truth": false,
+    "strong_consistency_operations": [
+      "CLAIM_ACQUIRE",
+      "SESSION_FENCE",
+      "REVIEW_CUSTODY_TRANSFER",
+      "CLOSE_RELEASE"
+    ],
+    "eventual_consistency_allowed_for": [
+      "READ_ONLY_DASHBOARD",
+      "ANALYTICS_SNAPSHOT"
+    ],
+    "last_write_wins_allowed": false,
+    "transaction_fields": [
+      "transaction_id",
+      "expected_registry_versions",
+      "operations",
+      "invariants_checked",
+      "fencing_token",
+      "actor_id",
+      "authority_decision_id",
+      "started_at",
+      "committed_at",
+      "result",
+      "rollback_reference"
+    ]
+  },
+  "recovery_runtime": {
+    "preserves": [
+      "CLAIM",
+      "EVIDENCE",
+      "REVIEW",
+      "SESSION",
+      "CHECKPOINT"
+    ],
+    "states": [
+      "ACTIVE",
+      "SUSPECTED_LOST",
+      "RECOVERY_PENDING",
+      "FENCED",
+      "RECOVERY_VALIDATING",
+      "RECOVERING",
+      "BLOCKED_RECOVERY",
+      "HUMAN_REVIEW_REQUIRED"
+    ],
+    "new_claim_created": false,
+    "fencing_token_increment_required": true,
+    "stale_session_write_result": "STALE_SESSION_FENCED",
+    "checkpoint_is_authority": false,
+    "revalidate_current_sources": true,
+    "automatic_unrelated_worker_reassignment": false
+  },
+  "security": {
+    "fail_closed": true,
+    "protected_paths": [
+      "contracts",
+      "wallet",
+      "bridge",
+      "KGEN Token contract",
+      "KLINE_ODYSSEY_TEMPLE_12345",
+      "docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md",
+      "docs/physics/final-whitepaper",
+      "Human Main uncommitted files"
+    ],
+    "never_store": [
+      "tokens",
+      "api_keys",
+      "private_keys",
+      "seed_phrases",
+      "passwords",
+      "private_kyc",
+      "exact_private_gps",
+      "hidden_provider_memory"
+    ],
+    "main_push_by_clone": false,
+    "force_push": false,
+    "production_deploy": false
+  },
+  "compliance_tests": [
+    {
+      "test_id": "SWRM-001",
+      "scenario": "Duplicate clone_id",
+      "expected": "BLOCK_REGISTRY_CONFLICT"
+    },
+    {
+      "test_id": "SWRM-002",
+      "scenario": "Session requests second active Claim",
+      "expected": "REJECT_UNAUTHORIZED_ALREADY_HOLDING_ACTIVE_TASK"
+    },
+    {
+      "test_id": "SWRM-003",
+      "scenario": "Task already has active Claim",
+      "expected": "REJECT_DUPLICATE_CLAIM"
+    },
+    {
+      "test_id": "SWRM-004",
+      "scenario": "Cursor self-dispatches",
+      "expected": "BLOCK_DISPATCH_AUTHORITY"
+    },
+    {
+      "test_id": "SWRM-005",
+      "scenario": "Handoff enters Review",
+      "expected": "CLAIM_RETAINED_REVIEW_CUSTODY"
+    },
+    {
+      "test_id": "SWRM-006",
+      "scenario": "Repair creates unrelated Claim",
+      "expected": "BLOCK_REPAIR_LINEAGE"
+    },
+    {
+      "test_id": "SWRM-007",
+      "scenario": "Heartbeat missing before timeout",
+      "expected": "SUSPECTED_LOST_NOT_AUTO_RELEASED"
+    },
+    {
+      "test_id": "SWRM-008",
+      "scenario": "Recovery Session starts before fencing",
+      "expected": "BLOCK_RECOVERY_FENCE_REQUIRED"
+    },
+    {
+      "test_id": "SWRM-009",
+      "scenario": "Old Session writes after recovery",
+      "expected": "STALE_SESSION_FENCED"
+    },
+    {
+      "test_id": "SWRM-010",
+      "scenario": "Checkpoint hash mismatch",
+      "expected": "BLOCKED_RECOVERY"
+    },
+    {
+      "test_id": "SWRM-011",
+      "scenario": "Protected path requested",
+      "expected": "BLOCK_PROTECTED_PATH"
+    },
+    {
+      "test_id": "SWRM-012",
+      "scenario": "Registry pointer partial update",
+      "expected": "ABORT_TRANSACTION"
+    },
+    {
+      "test_id": "SWRM-013",
+      "scenario": "Release before Review disposition",
+      "expected": "BLOCK_PREMATURE_RELEASE"
+    },
+    {
+      "test_id": "SWRM-014",
+      "scenario": "Valid registered Clone with clean Session and eligible Task",
+      "expected": "ALLOCATE_ONE_CLAIM"
+    },
+    {
+      "test_id": "SWRM-015",
+      "scenario": "Architecture-only Human Decision",
+      "expected": "NO_IMPLEMENTATION_NO_WORKQUEUE_NO_DEPLOYMENT"
+    }
+  ],
+  "open_gaps_before_implementation_planning": [
+    "Approve or revise the candidate Company OS Boot and Company Session architecture.",
+    "Choose one canonical transactional Claim authority.",
+    "Define registry schemas and event versioning through independent review.",
+    "Define durable ID allocation and fencing-token storage.",
+    "Define provider-neutral heartbeat and checkpoint adapters.",
+    "Define migration from branch-local claims without losing evidence.",
+    "Complete security, privacy, failure-injection and scale review.",
+    "Obtain separate Human approval for implementation planning."
+  ],
+  "status_summary": {
+    "worker_swarm_runtime": "INTERNAL_REVIEW_COMPLETE_BASELINE_HOLD",
+    "monkey_clone_model": "DESIGNED",
+    "session_runtime": "DESIGNED",
+    "company_dispatcher": "DESIGNED",
+    "clone_registry": "SCHEMA_LEVEL_PROPOSAL_ONLY",
+    "master_registry": "LOGICAL_ARCHITECTURE_ONLY",
+    "recovery_runtime": "DESIGNED",
+    "implementation": "NOT_STARTED",
+    "next_gate": "EXTERNAL_OR_HUMAN_BASELINE_REVIEW"
+  }
+}

@@ -1,0 +1,68 @@
+{
+  "metadata": {
+    "title": "KAIOS Worker Swarm Architecture Internal Review",
+    "version": "0.1.0",
+    "revision": "2026-07-16.1",
+    "status": "INTERNAL_REVIEW_COMPLETE_BASELINE_HOLD",
+    "last_updated": "2026-07-16",
+    "updated_by": "Codex / codex-gm-01",
+    "reviewed_by": "Codex delegated GM internal review",
+    "source_commit": "ORIGIN_MAIN_7a692c34df50861ab10f8bd80959d95251b1071c",
+    "task_id": "HUMAN-WORKER-SWARM-RUNTIME-001",
+    "human_decision_id": "HUMAN-PRIMEFORGE-FULL-AUTOPILOT-001",
+    "source_of_truth": false
+  },
+  "classification": {
+    "risk_level": "R2_MEDIUM",
+    "delegated_authority": "LEVEL_A_PROPOSAL_PUBLICATION",
+    "baseline_authority": "NOT_GRANTED",
+    "human_override_available": true
+  },
+  "scores": {
+    "architecture_boundary": 94,
+    "identity_integrity": 92,
+    "session_and_recovery": 91,
+    "dispatcher_separation": 94,
+    "registry_consistency": 88,
+    "concurrency_safety_as_designed": 90,
+    "implementation_readiness": 78,
+    "security_and_protected_paths": 96,
+    "overall_architecture_readiness": 90
+  },
+  "review_gates": {
+    "internal_review": "PASS",
+    "external_review": "REQUIRED_FOR_BASELINE",
+    "protected_path_violations": 0,
+    "runtime_current_modified": false,
+    "universe_map_modified": false,
+    "token_contract_modified": false,
+    "implementation_started": false,
+    "workqueue_created": false,
+    "deployment_started": false,
+    "rollback_available": true
+  },
+  "accepted": [
+    "distinct_worker_clone_session_claim_review_identity",
+    "one_active_or_review_claim_per_session",
+    "dispatcher_owned_queue_and_release",
+    "fence_before_recovery_takeover",
+    "logical_master_registry_facade",
+    "append_only_evidence_and_history"
+  ],
+  "baseline_blockers": [
+    "canonical_transactional_claim_authority_not_implemented",
+    "compare_and_swap_and_idempotency_contract_not_independently_reviewed",
+    "branch_local_claim_migration_not_defined",
+    "failure_injection_review_not_complete",
+    "provider_neutral_heartbeat_scale_review_not_complete"
+  ],
+  "operational_boundary": {
+    "pre_cutover_dispatch_mode": "MANUAL_CODEX_ASSIGNMENT_NON_ATOMIC",
+    "automatic_atomic_dispatch_claimed": false,
+    "cursor_self_dispatch_allowed": false,
+    "cursor_push_main_allowed": false
+  },
+  "rollback_plan": "Revert the scoped documentation commit; no live registry or Runtime state is changed.",
+  "disposition": "APPROVE_FOR_PROPOSAL_PUBLICATION_BASELINE_HOLD",
+  "next_gate": "EXTERNAL_OR_HUMAN_BASELINE_REVIEW"
+}
