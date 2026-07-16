@@ -1,0 +1,71 @@
+{
+  "schema_version": "1.1",
+  "task_id": "ORG-P2-014",
+  "worker_id": "cursor-01",
+  "worker_agent_id": "cursor-agent-0005",
+  "session_id": "SESSION-20260716-05-EPHEMERAL",
+  "spawned_by": "本尊 (Sun Wukong / parent Cursor session)",
+  "clone_id": null,
+  "claim_id": "CLAIM-ORG-P2-014-20260716T0509-cursor-01",
+  "reserved_branch": "cursor-handoff/ORG-P2-014-20260716",
+  "evidence_branch": "cursor-handoff/ORG-P2-014-20260716",
+  "base_sha": "89f3c351c488a0705f514adba974dd6c3dd3cb3a",
+  "claimed_at": "2026-07-16T05:09:45Z",
+  "handoff_submitted_at": "2026-07-16T05:09:45Z",
+  "execution_lease_expires_at": "2026-07-16T09:09:45Z",
+  "supersedes_archive_tips": [
+    "10646e15"
+  ],
+  "files_changed": [
+    "KGEN-AI-Company/reports/ORG-P2-014_RUNTIME_GOVERNANCE.md",
+    "KGEN-AI-Company/reports/handoffs/ORG-P2-014/HANDOFF.md",
+    "KGEN-AI-Company/reports/handoffs/ORG-P2-014/handoff.json"
+  ],
+  "files_added": [
+    "KGEN-AI-Company/reports/ORG-P2-014_RUNTIME_GOVERNANCE.md",
+    "KGEN-AI-Company/reports/handoffs/ORG-P2-014/HANDOFF.md",
+    "KGEN-AI-Company/reports/handoffs/ORG-P2-014/handoff.json"
+  ],
+  "files_deleted": [],
+  "tests_run": [
+    "CURSOR_PREFLIGHT_PASS",
+    "CANON_JSON_PARSE",
+    "RUNTIME_CURRENT_UNIQUENESS",
+    "V3_7_HASH_MATCH",
+    "ORG_RUNTIME_FILE_COUNT",
+    "ORG_BOOTSTRAP_SEARCH",
+    "ORG_RUNTIME_SUBDIRS",
+    "NO_CURRENT_V2",
+    "NO_BOOT_V2",
+    "KAIOS_DEFERRAL",
+    "PROTECTED_PATH_DIFF",
+    "SINGLE_TASK_PURITY",
+    "WORK_QUEUE_UNTOUCHED",
+    "SECRET_SCAN"
+  ],
+  "test_results": "ALL_PASS",
+  "task_result": "PASS_NO_DUPLICATE_RUNTIME_CURRENT_OR_BOOTSTRAP",
+  "wording_risks_count": 4,
+  "hard_conflicts_count": 0,
+  "protected_path_violations": 0,
+  "runtime_current_modified": false,
+  "universe_map_modified": false,
+  "work_queue_modified": false,
+  "worker_registry_modified": false,
+  "implementation_scope": "report_only_runtime_governance_audit",
+  "status": "REVIEW",
+  "known_issues": [
+    "ATOMIC_CLAIM_REGISTRY_NOT_IMPLEMENTED",
+    "WORK_QUEUE_NOT_UPDATED_HANDOFF_ONLY",
+    "PRIOR_ARCHIVE_TIP_10646e15_REJECTED_MISSING_CLAIM_LEASE"
+  ],
+  "risks": [
+    "R1_RUNTIME_INIT_BOOT_NAME_COLLISION",
+    "R2_V3_7_ALIAS_NO_BANNER",
+    "R3_KAIOS_RUNTIME_FOLDER_AMBIGUITY",
+    "R4_TEMPLE_MODULE_BOOTSTRAP_NAMING",
+    "R5_NON_ATOMIC_PARALLEL_CLAIMS"
+  ],
+  "recommended_next_action": "Codex approve; merge handoff; close ORG-P2-014 on main; supersede archive tip 10646e15.",
+  "review_status": "PENDING_CODEX_REVIEW"
+}
