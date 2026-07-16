@@ -40,6 +40,7 @@ Last optimized: 2026-06-11
 | LAND RUNTIME V1 Architecture Baseline | [KGEN-KAIOS/land/LAND_RUNTIME_ARCHITECTURE_BASELINE.md](KGEN-KAIOS/land/LAND_RUNTIME_ARCHITECTURE_BASELINE.md) |
 | Civilization Economy Runtime V1 Baseline | [KGEN-KAIOS/civilization/CIVILIZATION_ECONOMY_ARCHITECTURE_BASELINE.md](KGEN-KAIOS/civilization/CIVILIZATION_ECONOMY_ARCHITECTURE_BASELINE.md) |
 | UI Governor Architecture | [KGEN-KAIOS/ui-governor/README.md](KGEN-KAIOS/ui-governor/README.md) |
+| KAIOS World Viewer Sprint 001 | [KGEN-KAIOS/world-viewer/index.html](KGEN-KAIOS/world-viewer/index.html) |
 | PrimeForge Boot CURRENT | https://klineodyssey.github.io/kline-odyssey/boot/ |
 | Official Contact Email | klineodyssey.io@gmail.com |
 | BNB Smart Chain Token Contract | `0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be` |
@@ -120,6 +121,7 @@ KGEN official documentation is organized into Canon-first libraries for public r
 | LAND RUNTIME V1 | [KGEN-KAIOS/land/](KGEN-KAIOS/land/) | https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/land/LAND_RUNTIME_ARCHITECTURE_BASELINE.md |
 | Civilization Economy Runtime V1 | [KGEN-KAIOS/civilization/](KGEN-KAIOS/civilization/) | https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/civilization/CIVILIZATION_ECONOMY_ARCHITECTURE_BASELINE.md |
 | UI Governor | [KGEN-KAIOS/ui-governor/](KGEN-KAIOS/ui-governor/) | Architecture proposal only; no public runtime route or automation yet |
+| KAIOS World Viewer | [KGEN-KAIOS/world-viewer/](KGEN-KAIOS/world-viewer/) | https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/world-viewer/ |
 | KAIOS V8.0 One Picture One Temple | [KGEN-KAIOS/V8/](KGEN-KAIOS/V8/) | https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V8/ |
 | KAIOS V8.1 Universe Data Layer | [KGEN-KAIOS/V8.1/](KGEN-KAIOS/V8.1/) | https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V8.1/ |
 | KAIOS V8.2 Civilization Economy Engine | [KGEN-KAIOS/V8.2/](KGEN-KAIOS/V8.2/) | https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V8.2/ |

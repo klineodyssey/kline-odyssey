@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="color-scheme" content="dark light">
+  <meta name="theme-color" content="#111512">
+  <meta name="description" content="KAIOS World Viewer V1 synthetic K280 land interface">
+  <link rel="icon" href="data:,">
+  <title>KAIOS World Viewer</title>
+  <link rel="stylesheet" href="./ui/styles.css">
+</head>
+<body>
+  <div class="app-shell" id="app-shell" data-theme="dark">
+    <header class="topbar">
+      <div class="brand-block" aria-label="KAIOS World Viewer">
+        <span class="brand-mark" aria-hidden="true">K</span>
+        <span><strong>KAIOS</strong><small>World Viewer</small></span>
+      </div>
+
+      <nav class="breadcrumbs" id="breadcrumbs" aria-label="World hierarchy"></nav>
+
+      <div class="toolbar" aria-label="Map controls">
+        <button class="icon-button" id="back-button" type="button" aria-label="Back one layer" title="Back">
+          <span aria-hidden="true">&larr;</span>
+        </button>
+        <button class="icon-button" id="world-button" type="button" aria-label="World view" title="World view">
+          <span aria-hidden="true">&#9673;</span>
+        </button>
+        <button class="icon-button" id="home-button" type="button" aria-label="Return to home parcel" title="My land">
+          <span aria-hidden="true">&#8962;</span>
+        </button>
+        <span class="toolbar-separator" aria-hidden="true"></span>
+        <button class="icon-button" id="zoom-out-button" type="button" aria-label="Zoom out" title="Zoom out">
+          <span aria-hidden="true">&minus;</span>
+        </button>
+        <button class="icon-button" id="zoom-in-button" type="button" aria-label="Zoom in" title="Zoom in">
+          <span aria-hidden="true">+</span>
+        </button>
+        <button class="icon-button" id="theme-button" type="button" aria-label="Toggle color theme" title="Theme">
+          <span aria-hidden="true">&#9680;</span>
+        </button>
+        <button class="login-button" id="login-button" type="button">Mock login</button>
+      </div>
+    </header>
+
+    <main class="workspace" id="viewer-layout">
+      <nav class="mode-rail" aria-label="Viewer modes">
+        <button class="mode-button is-active" type="button" data-mode="WORLD" aria-pressed="true">
+          <span aria-hidden="true">&#9673;</span><span>World</span>
+        </button>
+        <button class="mode-button" type="button" data-mode="LAND" aria-pressed="false">
+          <span aria-hidden="true">&#9638;</span><span>Land</span>
+        </button>
+        <button class="mode-button" type="button" data-mode="LIFE" aria-pressed="false">
+          <span aria-hidden="true">&#9670;</span><span>Life</span>
+        </button>
+      </nav>
+
+      <section class="viewer-stage" id="viewer-stage" aria-label="K280 world map">
+        <canvas
+          id="world-canvas"
+          tabindex="0"
+          role="application"
+          aria-label="Interactive synthetic K280 world map"
+          aria-describedby="map-description"
+        ></canvas>
+        <p class="visually-hidden" id="map-description">Select a visible world object to inspect it.</p>
+
+        <div class="loading-state" id="loading-state" role="status">
+          <span class="loading-mark" aria-hidden="true"></span>
+          <span>Loading K280 snapshot</span>
+        </div>
+
+        <div class="map-status" aria-label="Viewer status">
+          <span class="level-badge" id="level-badge">EARTH</span>
+          <span id="coordinate-readout">K280 / --</span>
+          <span class="synthetic-badge">SYNTHETIC</span>
+        </div>
+
+        <div class="entity-access-list visually-hidden" id="entity-access-list" role="listbox" aria-label="Visible map objects"></div>
+        <div id="context-menu-host"></div>
+      </section>
+
+      <aside class="inspector-panel" id="inspector-panel" aria-label="Selection inspector" aria-expanded="true">
+        <header class="inspector-header">
+          <button class="sheet-handle" id="inspector-toggle" type="button" aria-label="Expand inspector"></button>
+          <div>
+            <span class="eyebrow" id="inspector-kind">WORLD</span>
+            <h1 id="inspector-title">Earth K280</h1>
+          </div>
+          <button class="icon-button inspector-close" id="inspector-close" type="button" aria-label="Close inspector">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </header>
+        <div class="inspector-content" id="inspector-content"></div>
+        <footer class="proposal-bar" id="proposal-bar" hidden>
+          <div><strong>Local proposal</strong><span id="proposal-summary"></span></div>
+          <button type="button" id="proposal-discard">Discard</button>
+        </footer>
+      </aside>
+    </main>
+
+    <div class="toast-region" id="toast-region" role="status" aria-live="polite"></div>
+    <div class="visually-hidden" id="a11y-live" aria-live="polite" aria-atomic="true"></div>
+    <div class="fatal-error" id="fatal-error" role="alert" hidden></div>
+  </div>
+
+  <script type="module" src="./app.js"></script>
+</body>
+</html>

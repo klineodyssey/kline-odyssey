@@ -50,6 +50,7 @@ The worker must then stop without changing WorkQueue, creating a branch, editing
 |---|---|---|---|---|---|---|---|
 | KAIOS-GM-V4-2026-0001 | DONE | Codex | Human PrimeForge | P1 | CEO_Codex | `codex/workforce-roster` | `KGEN-KAIOS/decision/decision_snapshot.json` |
 | KAIOS-V11-READINESS-RECOVERY-20260713 | DONE | Codex | Human PrimeForge | P0 | Operations | `codex/v11-readiness` | `KGEN-KAIOS/reports/V11_READINESS_REPORT.md` |
+| KAIOS-WV-SPRINT-001 | DONE | Codex + isolated Worker Clones | Codex | P0 | Frontend | `codex/world-viewer-sprint-001` | `KGEN-AI-Company/reports/handoffs/KAIOS-WV-SPRINT-001/HANDOFF.md` |
 
 ### KAIOS-GM-V4-2026-0001 - General Manager Decision Engine
 
@@ -108,6 +109,26 @@ The worker must then stop without changing WorkQueue, creating a branch, editing
   - Closeout commit `90d7283c8b6880255e1176b4ebba1f54da35da21` reached main.
   - Deploy Pages Static run `29224741774` succeeded.
   - Final readiness result is `V11 READY`; explicit Human approval remains required.
+
+### KAIOS-WV-SPRINT-001 - Implement KAIOS World Viewer Sprint 001
+
+- Status: DONE
+- Owner: Codex / `codex-gm-01` with three isolated Worker Clones
+- Reviewer: Codex / `codex-gm-01`
+- Priority: P0
+- Risk Level: R1 synthetic static UI
+- Department: Frontend
+- Branch: `codex/world-viewer-sprint-001`
+- Base Commit: `16f15981673e8dd2678db985b7a35486f130cafd`
+- Product Commit: `6fbf7ce77cc1475655fb4367cbd794f12ccc1465`
+- Task Source Type: HUMAN_IMPLEMENTATION_AUTHORIZATION
+- Task Source ID: `HUMAN-PHASE-SHIFT-001`
+- Output report: `KGEN-AI-Company/reports/handoffs/KAIOS-WV-SPRINT-001/HANDOFF.md`
+- Acceptance: Six-level Viewer, desktop/mobile input, Inspector, local proposal, Life OS, synthetic fixture, JSON/modules/browser/visual/safety gates all PASS.
+- Protected paths: 0 changes.
+- Claim: CLOSED.
+- Lease: RELEASED.
+- Real ownership, GPS, KYC, wallet, payment and backend writes: NOT IMPLEMENTED.
 
 ## V11 Readiness Handoff Dispositions
 

@@ -1,0 +1,130 @@
+{
+  "task_id": "KAIOS-WV-SPRINT-001",
+  "human_decision_id": "HUMAN-PHASE-SHIFT-001",
+  "title": "KAIOS World Viewer implementation sprint 001",
+  "objective": "Deliver a playable static synthetic World Viewer from Earth K280 through Room with desktop, mobile, Inspector, local land-use proposal, and Life OS viewing flows.",
+  "task_source_type": "HUMAN_IMPLEMENTATION_AUTHORIZATION",
+  "task_source_actor": "Human PrimeForge",
+  "assigned_manager": "codex-gm-01",
+  "reviewer": "codex-gm-01",
+  "risk_level": "R1_SANDBOX_UI",
+  "claim_authority": "MANUAL_CODEX_DISPATCH_PRE_ATOMIC_AUTHORITY",
+  "claim_id": "CLAIM-KAIOS-WV-SPRINT-001-20260716-CODEX-GM-01",
+  "fencing_token": "CODEX-MANUAL-WV-SPRINT-001-001",
+  "worker_clones": [
+    {
+      "clone_id": "CLONE-WV-CAMERA-01",
+      "session_id": "SESSION-WV-CAMERA-20260716-001",
+      "scope": ["camera/**", "renderer/**", "lod/**"],
+      "status": "HANDOFF_COMPLETE"
+    },
+    {
+      "clone_id": "CLONE-WV-INPUT-02",
+      "session_id": "SESSION-WV-INPUT-20260716-002",
+      "scope": ["input/**", "selection/**"],
+      "status": "HANDOFF_COMPLETE"
+    },
+    {
+      "clone_id": "CLONE-WV-LIFE-03",
+      "session_id": "SESSION-WV-LIFE-20260716-003",
+      "scope": ["inspector/**", "life/**"],
+      "status": "HANDOFF_COMPLETE"
+    }
+  ],
+  "authorized_actions": [
+    "IMPLEMENT_STATIC_VIEWER",
+    "EDIT_AUTHORIZED_PATHS",
+    "RUN_TESTS",
+    "CREATE_SYNTHETIC_FIXTURE",
+    "PRODUCE_EVIDENCE",
+    "COMMIT_REVIEWED_WORK",
+    "PUSH_REVIEWED_NON_PROTECTED_WORK"
+  ],
+  "forbidden_actions": [
+    "REAL_KYC",
+    "REAL_GPS",
+    "REAL_LAND_DATA",
+    "OWNERSHIP_MUTATION",
+    "WALLET_OR_PAYMENT",
+    "BACKEND_WRITE_SERVICE",
+    "RUNTIME_CURRENT_MODIFICATION",
+    "UNIVERSE_MAP_CURRENT_MODIFICATION",
+    "TOKEN_CONTRACT_MODIFICATION",
+    "FORCE_PUSH"
+  ],
+  "authorized_paths": [
+    "KGEN-KAIOS/world-viewer/**",
+    "KGEN-AI-Company/reports/handoffs/KAIOS-WV-SPRINT-001/**",
+    "KGEN-Organization/WorkOrders/WORK_QUEUE.md",
+    "KGEN-KAIOS/README.md",
+    "KGEN_MASTER_LIBRARY_INDEX.md",
+    "README.md"
+  ],
+  "protected_paths": [
+    "contracts/**",
+    "wallet/**",
+    "bridge/**",
+    "K線西遊記/temples/12345/**",
+    "docs/physics/*CURRENT*",
+    "docs/maps/*CURRENT*",
+    "final-whitepaper/**",
+    "KGEN/contracts/**",
+    "Human Main worktree"
+  ],
+  "required_sources": [
+    "PRIMEFORGE_GENESIS_BOOT_SEQUENCE_V1_4.md",
+    "docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md",
+    "docs/maps/UniverseMap_V10_2_DISTANCE_COMPLETE_ALL_POINTS.json",
+    "KGEN-KAIOS/constitution/KAIOS_CONSTITUTION.md",
+    "KGEN-KAIOS/world-viewer/WORLD_VIEWER_V1_ARCHITECTURE_BASELINE.md",
+    "KGEN-KAIOS/world-viewer/WORLD_VIEWER_V1_SANDBOX_IMPLEMENTATION_PLAN.md",
+    "KGEN-KAIOS/land/LAND_RUNTIME_ARCHITECTURE_BASELINE.md"
+  ],
+  "required_tests": [
+    "STRICT_JSON_PARSE",
+    "ES_MODULE_SYNTAX",
+    "STATIC_PACKAGE_ACCEPTANCE",
+    "SIX_LEVEL_NAVIGATION",
+    "DESKTOP_POINTER_INPUT",
+    "MOBILE_TOUCH_INPUT",
+    "RESPONSIVE_SCREENSHOTS",
+    "CANVAS_PIXEL_CHECK",
+    "CONSOLE_ERROR_CHECK",
+    "PROTECTED_PATH_DIFF",
+    "SECRET_SCAN"
+  ],
+  "required_evidence": [
+    "FILES_CHANGED",
+    "TEST_RESULTS",
+    "DESKTOP_SCREENSHOT",
+    "MOBILE_SCREENSHOT",
+    "PROTECTED_PATH_REPORT",
+    "HANDOFF_MD",
+    "HANDOFF_JSON",
+    "PRODUCT_COMMIT_SHA"
+  ],
+  "branch_name": "codex/world-viewer-sprint-001",
+  "worktree_name": "kline-odyssey-world-viewer-sprint-001",
+  "base_sha": "16f15981673e8dd2678db985b7a35486f130cafd",
+  "commit_allowed": true,
+  "push_allowed": true,
+  "merge_allowed": true,
+  "deploy_allowed": true,
+  "deploy_scope": "GITHUB_PAGES_STATIC_SANDBOX_ONLY",
+  "handoff_target": "codex-gm-01",
+  "stop_conditions": [
+    "PROTECTED_PATH_REQUIRED",
+    "REAL_IDENTITY_OR_GPS_REQUIRED",
+    "REAL_PAYMENT_REQUIRED",
+    "SECRET_DETECTED",
+    "UNRESOLVED_TEST_FAILURE",
+    "LEVEL_C_CHANGE_REQUIRED"
+  ],
+  "created_at": "2026-07-16T17:20:00+08:00",
+  "updated_at": "2026-07-16T18:14:22+08:00",
+  "product_commit_sha": "6fbf7ce77cc1475655fb4367cbd794f12ccc1465",
+  "review_result": "APPROVED",
+  "claim_state": "CLOSED",
+  "lease_state": "RELEASED",
+  "status": "DONE"
+}
