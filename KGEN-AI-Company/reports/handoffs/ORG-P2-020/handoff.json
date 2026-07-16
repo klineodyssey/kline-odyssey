@@ -1,0 +1,84 @@
+{
+  "schema_version": "1.1",
+  "task_id": "ORG-P2-020",
+  "human_decision_id": null,
+  "task_envelope_id": null,
+  "task_envelope_path": null,
+  "worker_id": "cursor-01",
+  "worker_agent_id": "cursor-agent-0003",
+  "session_id": "SESSION-20260716-02-EPHEMERAL",
+  "clone_id": "monkey-boot-session-02",
+  "claim_id": "CLAIM-ORG-P2-020-20260716T041102Z-cursor-01",
+  "reviewer": "codex-gm-01",
+  "branch": "cursor-handoff/ORG-P2-020-20260716",
+  "worktree": "cursor/monkey-boot\u2192cursor-handoff/ORG-P2-020-20260716",
+  "base_sha": "89f3c351c488a0705f514adba974dd6c3dd3cb3a",
+  "head_sha": "7d11cfd03b0d15d4c4dec85913a23eac50c990bd",
+  "observed_origin_main": "89f3c351c488a0705f514adba974dd6c3dd3cb3a",
+  "claimed_at": "2026-07-16T04:11:02Z",
+  "lease_expires_at": "2026-07-16T08:11:02Z",
+  "heartbeat_at": "2026-07-16T04:11:02Z",
+  "handoff_submitted_at": "2026-07-16T04:11:02Z",
+  "status": "REVIEW",
+  "review_status": "PENDING_CODEX_REVIEW",
+  "preflight_result": "PASS",
+  "concurrent_sessions_acknowledged": true,
+  "atomic_claim_service": "NOT_IMPLEMENTED",
+  "legacy_rules_suppressed": [
+    "CURSOR_EMPLOYEE_BOOT_WORKQUEUE_SELF_STATUS_UPDATE"
+  ],
+  "workqueue_modified": false,
+  "workqueue_closeout_owner": "codex-gm-01",
+  "supersedes_archive_tips": [
+    "af6220b"
+  ],
+  "report_path": "KGEN-AI-Company/reports/ORG-P2-020_DEVOPS_PAGES_QA.md",
+  "files_changed": [
+    "KGEN-AI-Company/reports/ORG-P2-020_DEVOPS_PAGES_QA.md",
+    "KGEN-AI-Company/reports/handoffs/ORG-P2-020/HANDOFF.md",
+    "KGEN-AI-Company/reports/handoffs/ORG-P2-020/handoff.json"
+  ],
+  "files_added": [
+    "KGEN-AI-Company/reports/ORG-P2-020_DEVOPS_PAGES_QA.md",
+    "KGEN-AI-Company/reports/handoffs/ORG-P2-020/HANDOFF.md",
+    "KGEN-AI-Company/reports/handoffs/ORG-P2-020/handoff.json"
+  ],
+  "files_deleted": [],
+  "tests_run": [
+    "CURSOR_PREFLIGHT_PASS",
+    "WORKFLOW_NO_JEKYLL",
+    "ORG_DIR_IN_COPY_LIST",
+    "WORKQUEUE_PORTAL_LINK",
+    "SOURCE_EXISTENCE",
+    "CANON_JSON_PARSE",
+    "PROTECTED_PATH_DIFF",
+    "SINGLE_TASK_PURITY",
+    "SECRET_SCAN"
+  ],
+  "test_results": "ALL_PASS",
+  "task_result": "PASS_STATIC_ORG_PUBLISH_CONFIRMED",
+  "protected_path_violations": 0,
+  "runtime_current_modified": false,
+  "universe_map_modified": false,
+  "implementation_scope": "report_only_devops_qa",
+  "known_issues": [
+    "ATOMIC_CLAIM_REGISTRY_NOT_IMPLEMENTED"
+  ],
+  "risks": [
+    "PF2_multi_window_duplicate_claim",
+    "R1_raw_md_not_html_portal"
+  ],
+  "recommended_next_action": "Codex closeout ORG-P2-020; scheduler may dispatch ORG-P2-023 Publishing URL QA next.",
+  "codex_coordination": {
+    "dispatch_envelope": null,
+    "workqueue_owner": "codex-gm-01",
+    "sibling_skip": [
+      "ORG-P2-004",
+      "ORG-P2-005"
+    ]
+  },
+  "multi_window_problems": {
+    "PF2": "shared cursor-01 \u2014 unique claim_id per session",
+    "PF1": "no WORK_QUEUE edit by Cursor"
+  }
+}
