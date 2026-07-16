@@ -1,0 +1,90 @@
+{
+  "metadata": {
+    "title": "KAIOS UI Health Report - Pre-Automation Baseline",
+    "version": "0.1.0",
+    "revision": "2026-07-16.1",
+    "status": "ARCHITECTURE_BASELINE_OBSERVATION_NOT_RUNTIME_RESULT",
+    "generated_at": "2026-07-16T15:26:07+08:00",
+    "source_commit": "89f3c351c488a0705f514adba974dd6c3dd3cb3a",
+    "task_id": "KAIOS-UI-GOVERNOR-ARCH-001",
+    "human_decision_id": "HUMAN-UI-GOVERNOR-001_REPOSITORY_ASSIGNED",
+    "source_of_truth": false,
+    "deterministic_browser_run": false
+  },
+  "scores": {
+    "ui_governor_architecture_readiness": 86,
+    "current_ui_health": 31,
+    "current_ui_health_confidence": "LOW_TO_MEDIUM",
+    "visual_regression_runtime_coverage_percent": 0,
+    "automation_runtime_coverage_percent": 0,
+    "rule_family_architecture_coverage_percent": 100
+  },
+  "score_breakdown": [
+    {"category": "CANONICAL_SURFACE_AVAILABILITY", "weight": 20, "score": 6},
+    {"category": "RESPONSIVE_SAFE_AREA", "weight": 15, "score": 8},
+    {"category": "INTERACTION_GEOMETRY", "weight": 10, "score": 5},
+    {"category": "ACCESSIBILITY", "weight": 15, "score": 4},
+    {"category": "VISUAL_STABILITY", "weight": 15, "score": 0},
+    {"category": "RUNTIME_RELIABILITY", "weight": 10, "score": 4},
+    {"category": "PERFORMANCE", "weight": 10, "score": 2},
+    {"category": "GOVERNANCE_EVIDENCE", "weight": 5, "score": 2}
+  ],
+  "surface_health": [
+    {"surface_id": "HOMEPAGE", "route": "/", "http_status": 200, "state": "AVAILABLE"},
+    {"surface_id": "TEMPLE", "route": "/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/12345/", "http_status": 200, "state": "AVAILABLE_PROTECTED"},
+    {"surface_id": "WORLD_VIEWER", "route": "/KGEN-KAIOS/world-viewer/", "http_status": 404, "state": "ARCHITECTURE_ONLY"},
+    {"surface_id": "LAND", "route": "/land/", "http_status": 404, "state": "NO_CANONICAL_UI_ROUTE"},
+    {"surface_id": "LIFE", "route": "/life/", "http_status": 404, "state": "NO_CANONICAL_UI_ROUTE"},
+    {"surface_id": "MISSION", "route": "/mission/", "http_status": 404, "state": "NO_CANONICAL_UI_ROUTE"},
+    {"surface_id": "MARKETPLACE", "route": "/marketplace/", "http_status": 404, "state": "NO_CANONICAL_UI_ROUTE"},
+    {"surface_id": "COMPANY", "route": "/ai-company/", "http_status": 200, "state": "AVAILABLE"},
+    {"surface_id": "DNA", "route": "/dna/", "http_status": 404, "state": "NO_CANONICAL_UI_ROUTE"},
+    {"surface_id": "PLAYER", "route": "/player/", "http_status": 404, "state": "NO_CANONICAL_UI_ROUTE"}
+  ],
+  "related_aliases_not_counted": [
+    {"route": "/exchange/", "http_status": 200},
+    {"route": "/membership/", "http_status": 200},
+    {"route": "/civilization/", "http_status": 200}
+  ],
+  "coverage": {
+    "surfaces_required": 10,
+    "surfaces_available": 3,
+    "profiles_required": 8,
+    "default_cells_required": 80,
+    "approved_screenshot_baselines": 0,
+    "automated_comparisons": 0,
+    "rule_families_required": 14,
+    "rule_families_specified": 14,
+    "rule_families_executed": 0
+  },
+  "mandatory_style_amendments": [
+    "MOBILE_DRAWER_FULLSCREEN",
+    "SAFE_AREA_ALL_INSETS",
+    "TOP_RIGHT_CONTROL_SIZE",
+    "DRAWER_OVERLAY_NO_REFLOW",
+    "BACKGROUND_LOCK",
+    "BOTTOM_ACTIONS_FIXED_SAFE"
+  ],
+  "automation": {
+    "daily_scheduler": "NOT_RUNNING",
+    "screenshot_capture": "NOT_IMPLEMENTED",
+    "screenshot_diff": "NOT_IMPLEMENTED",
+    "visual_regression": "NOT_IMPLEMENTED",
+    "responsive_probe": "NOT_IMPLEMENTED",
+    "accessibility_probe": "NOT_IMPLEMENTED",
+    "performance_probe": "NOT_IMPLEMENTED",
+    "issue_generator": "DISABLED",
+    "workqueue_generator": "DISABLED",
+    "cursor_dispatch": "DISABLED"
+  },
+  "boundaries": {
+    "implementation_started": false,
+    "workqueue_created": false,
+    "deployment_started": false,
+    "runtime_current_modified": false,
+    "universe_map_modified": false,
+    "protected_ui_modified": false,
+    "frozen_baseline_modified": false
+  },
+  "next_gate": "REQUEST_INDEPENDENT_UI_GOVERNOR_ARCHITECTURE_REVIEW"
+}

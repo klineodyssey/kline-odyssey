@@ -1,7 +1,7 @@
 {
   "metadata": {
     "version": "1.0.0",
-    "revision": "2026-07-16.3",
+    "revision": "2026-07-16.4",
     "status": "ACTIVE_MANAGED_REGISTRY",
     "human_decision_id": "HUMAN-PRIMEFORGE-FULL-AUTOPILOT-001",
     "manager": "codex-gm-01",
@@ -297,6 +297,25 @@
       "push_status": "PENDING_SESSION_RELEASE",
       "baseline_status": "PROPOSAL",
       "next_action": "INDEPENDENT_SECURITY_AND_CONCURRENCY_REVIEW"
+    },
+    {
+      "proposal_id": "UI-GOVERNOR-001",
+      "decision_ids": ["HUMAN-UI-GOVERNOR-001_REPOSITORY_ASSIGNED"],
+      "worktree": "WORKTREE-CODEX-UI-GOVERNOR",
+      "base_sha": "89f3c351c488a0705f514adba974dd6c3dd3cb3a",
+      "files": ["KGEN-KAIOS/ui-governor/"],
+      "dependencies": ["GEN-010-DESIGN-SYSTEM", "WORLD-VIEWER-001", "COMPANY-AUTOPILOT-001", "CANONICAL-CLAIM-AUTHORITY-001"],
+      "internal_review": "CODEX_ARCHITECTURE_DRAFT_COMPLETE",
+      "external_review": "REQUIRED_BEFORE_BASELINE_OR_IMPLEMENTATION",
+      "review_score": 86,
+      "amendments": ["MOBILE_DRAWER_FULLSCREEN", "SAFE_AREA_ALL_INSETS", "TOP_RIGHT_CONTROL_SIZE", "DRAWER_OVERLAY_NO_REFLOW", "BACKGROUND_LOCK", "BOTTOM_ACTIONS_FIXED_SAFE"],
+      "risk_level": "LEVEL_B_R2_ARCHITECTURE",
+      "protected_path_status": "PASS_ZERO",
+      "implementation_status": "NOT_STARTED",
+      "commit_status": "PROPOSAL_BRANCH_CANDIDATE",
+      "push_status": "PENDING_REVIEW_PUBLICATION",
+      "baseline_status": "NOT_FROZEN",
+      "next_action": "INDEPENDENT_UI_GOVERNOR_ARCHITECTURE_REVIEW"
     }
   ]
 }
