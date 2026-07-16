@@ -39,6 +39,7 @@ Last optimized: 2026-06-11
 | KAIOS V11.0 Architecture Baseline | [KGEN-KAIOS/V11/ARCHITECTURE_BASELINE.md](KGEN-KAIOS/V11/ARCHITECTURE_BASELINE.md) |
 | LAND RUNTIME V1 Architecture Baseline | [KGEN-KAIOS/land/LAND_RUNTIME_ARCHITECTURE_BASELINE.md](KGEN-KAIOS/land/LAND_RUNTIME_ARCHITECTURE_BASELINE.md) |
 | Civilization Economy Runtime V1 Baseline | [KGEN-KAIOS/civilization/CIVILIZATION_ECONOMY_ARCHITECTURE_BASELINE.md](KGEN-KAIOS/civilization/CIVILIZATION_ECONOMY_ARCHITECTURE_BASELINE.md) |
+| UI Governor Architecture | [KGEN-KAIOS/ui-governor/README.md](KGEN-KAIOS/ui-governor/README.md) |
 | PrimeForge Boot CURRENT | https://klineodyssey.github.io/kline-odyssey/boot/ |
 | Official Contact Email | klineodyssey.io@gmail.com |
 | BNB Smart Chain Token Contract | `0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be` |
@@ -118,6 +119,7 @@ KGEN official documentation is organized into Canon-first libraries for public r
 | KAIOS V11.0 Architecture Baseline | [KGEN-KAIOS/V11/](KGEN-KAIOS/V11/) | https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V11/ARCHITECTURE_BASELINE.md |
 | LAND RUNTIME V1 | [KGEN-KAIOS/land/](KGEN-KAIOS/land/) | https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/land/LAND_RUNTIME_ARCHITECTURE_BASELINE.md |
 | Civilization Economy Runtime V1 | [KGEN-KAIOS/civilization/](KGEN-KAIOS/civilization/) | https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/civilization/CIVILIZATION_ECONOMY_ARCHITECTURE_BASELINE.md |
+| UI Governor | [KGEN-KAIOS/ui-governor/](KGEN-KAIOS/ui-governor/) | Architecture proposal only; no public runtime route or automation yet |
 | KAIOS V8.0 One Picture One Temple | [KGEN-KAIOS/V8/](KGEN-KAIOS/V8/) | https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V8/ |
 | KAIOS V8.1 Universe Data Layer | [KGEN-KAIOS/V8.1/](KGEN-KAIOS/V8.1/) | https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V8.1/ |
 | KAIOS V8.2 Civilization Economy Engine | [KGEN-KAIOS/V8.2/](KGEN-KAIOS/V8.2/) | https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/V8.2/ |
@@ -186,6 +188,18 @@ KAIOS V7.2 adds a read-only operations dashboard on top of the V7.1 worker layer
 The Architecture Governance Board is approved under `HUMAN-AGB-APPROVAL-001` for governance publication only.
 
 Human Decision `HUMAN-COMPANY-DECISION-CENTER-001` authorizes the Architecture Proposal for a future single company command control plane. The existing General Manager Decision Center remains the active Daily Operation dashboard and decision evidence source; `company/` is not active, dispatch is disabled, and cutover requires a later Human Architecture decision.
+
+| Company Decision Center file | Purpose |
+|---|---|
+| [company/README.md](company/README.md) | Source audit, package map, migration boundary, and no-cutover status |
+| [company/DECISION_CENTER.md](company/DECISION_CENTER.md) | Future append-only company command authority contract |
+| [company/decision_center.json](company/decision_center.json) | Machine-readable zero-state Decision Center and cutover gates |
+| [company/COMPANY_INBOX.md](company/COMPANY_INBOX.md) | Typed company intake lanes and review barrier |
+| [company/company_inbox.json](company/company_inbox.json) | Machine-readable Inbox lifecycle with no live dispatch records |
+| [company/COMPANY_DISPATCHER.md](company/COMPANY_DISPATCHER.md) | Future sole Dispatcher and atomic Claim boundary |
+| [company/dispatcher_runtime.json](company/dispatcher_runtime.json) | Disabled zero-state Dispatcher model |
+| [company/COMPANY_GOVERNANCE_FLOW.md](company/COMPANY_GOVERNANCE_FLOW.md) | Boot-to-review governance and migration flow |
+| [company/COMPANY_MESSAGE_STANDARD.md](company/COMPANY_MESSAGE_STANDARD.md) | Provider-neutral eight-family message contract |
 
 Human Decision `HUMAN-KAIOS-CONSTITUTION-001` establishes KAIOS Constitution V1.0 as `ACTIVE / READY` below Human Final Authority and above WorkQueue, Implementation, ADR and Architecture Proposal.
 

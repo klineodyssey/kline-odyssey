@@ -1,0 +1,95 @@
+{
+  "metadata": {
+    "title": "KAIOS UI Style Canon V1 Architecture Candidate",
+    "version": "1.0.0-CANDIDATE",
+    "revision": "2026-07-16.1",
+    "status": "ARCHITECTURE_CANON_CANDIDATE_UNDER_REVIEW",
+    "architecture_only": true,
+    "implementation_started": false,
+    "source_commit": "89f3c351c488a0705f514adba974dd6c3dd3cb3a",
+    "task_id": "KAIOS-UI-GOVERNOR-ARCH-001",
+    "human_decision_id": "HUMAN-UI-GOVERNOR-001_REPOSITORY_ASSIGNED",
+    "source_of_truth": false
+  },
+  "tokens": {
+    "spacing_px": [0, 4, 8, 12, 16, 24, 32, 48],
+    "radius_px": {
+      "control": 6,
+      "panel": 8,
+      "dialog": 8,
+      "round_restricted_to": ["CIRCULAR_CONTROL", "PILL", "STATUS_INDICATOR"]
+    },
+    "control_px": {
+      "icon_box_min": 44,
+      "touch_target_min": 48,
+      "text_button_height_min": 44,
+      "icon_min": 20,
+      "icon_max": 24
+    },
+    "motion_ms": {
+      "instant": 0,
+      "fast": 120,
+      "standard": 180,
+      "deliberate": 240,
+      "reduced_motion_nonessential": 0
+    },
+    "typography": {
+      "letter_spacing": 0,
+      "viewport_width_font_scaling": false,
+      "sizes_px": {
+        "xs": 12,
+        "sm": 14,
+        "md": 16,
+        "lg": 20,
+        "xl": 24,
+        "display": 32
+      }
+    },
+    "inspector_width_px": {
+      "min": 320,
+      "max": 360
+    },
+    "dialog_default_max_width_px": 640
+  },
+  "components": [
+    "BUTTON",
+    "PANEL",
+    "DIALOG",
+    "DRAWER",
+    "INSPECTOR",
+    "CONTEXT_MENU",
+    "TOOLBAR",
+    "BOTTOM_ACTION_BAR"
+  ],
+  "mobile_drawer": {
+    "position": "FIXED",
+    "inset": 0,
+    "width": "100dvw",
+    "height": "100dvh",
+    "max_width": "NONE",
+    "max_height": "NONE",
+    "border_radius": 0,
+    "safe_area_all_sides": true,
+    "overlay_does_not_reflow_layout": true,
+    "background_scroll_lock": true,
+    "background_inert": true,
+    "focus_containment": true,
+    "focus_restore": true,
+    "scroll_restore": true
+  },
+  "mandatory_first_implementation_amendments": [
+    "UI-CANON-P0-001_MOBILE_DRAWER_FULLSCREEN",
+    "UI-CANON-P0-002_SAFE_AREA_ALL_INSETS",
+    "UI-CANON-P0-003_TOP_RIGHT_CONTROL_SIZE",
+    "UI-CANON-P0-004_DRAWER_OVERLAY_NO_REFLOW",
+    "UI-CANON-P0-005_BACKGROUND_LOCK",
+    "UI-CANON-P0-006_BOTTOM_ACTIONS_FIXED_SAFE"
+  ],
+  "boundaries": {
+    "protected_ui_modified": false,
+    "frozen_baseline_modified": false,
+    "runtime_current_modified": false,
+    "implementation_started": false,
+    "adoption_requires_review": true
+  }
+}

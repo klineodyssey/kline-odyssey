@@ -1,14 +1,14 @@
 ---
 TITLE: "PrimeForge Architecture Backlog Registry"
-VERSION: "1.0.1"
-REVISION: "2026-07-16.4"
+VERSION: "1.0.2"
+REVISION: "2026-07-16.5"
 STATUS: "ACTIVE_MANAGED_REGISTRY"
 LAST_UPDATED: "2026-07-16"
 UPDATED_BY: "Codex / codex-gm-01"
 REVIEWED_BY: "CODEX_DELEGATED_GM"
-SOURCE_COMMIT: "89f3c351c488a0705f514adba974dd6c3dd3cb3a"
-TASK_ID: "HUMAN-COMPANY-DECISION-CENTER-001"
-CHANGE_REASON: "Register the Company Decision Center V1 Architecture Proposal and its no-cutover boundary."
+SOURCE_COMMIT: "d5d9b2cc5bafd67ec600fccb2701f638020d9741"
+TASK_ID: "HUMAN-MERGE-CONFLICT-001"
+CHANGE_REASON: "Reconcile Company Decision Center and UI Governor additions while preserving both proposal histories and all existing baselines."
 ANCESTOR: "Company Inbox; Priority Scheduler; Architecture Governance Board"
 SOURCE_OF_TRUTH: true
 ---
@@ -40,6 +40,7 @@ Priority order is reviewed proposals, amendments, dependency blockers, Company O
 | V11 Baseline | FROZEN | 100 | Level C core | Implementation hold | Human decision required for core change |
 | Canonical Atomic Claim Authority | PROPOSAL | 87 | Level B planning | Local commit `6936d6f`; implementation not started | Independent security/consistency review |
 | Genesis DNA Evolution | SOURCE_AUDIT_COMPLETE | null | Level B R2 architecture | Published review candidate `e6d7a96`; implementation not started | Independent architecture review before resolution or baseline |
+| UI Governor / Style Canon V1 | CODEX_DRAFT_COMPLETE | 86 | Level B R2 architecture | Proposal branch; automation and implementation not started | Independent UI architecture review |
 
 ## Current Decisions
 
@@ -52,6 +53,7 @@ Priority order is reviewed proposals, amendments, dependency blockers, Company O
 - Distributed automatic Cursor dispatch remains disabled until the canonical Claim authority exists.
 - Company Decision Center is a target command control plane only; existing Decision, Inbox, WorkQueue and Review sources remain current until an explicit Human cutover.
 - Genesis DNA normalizes legacy GA levels without changing Physics CURRENT or GEN-007; private engine artifacts remain outside Git.
+- UI Governor defines 80 daily surface/profile cells and fourteen check families, but executable coverage remains zero until independent review and implementation authorization.
 
 ## Commit Isolation
 
