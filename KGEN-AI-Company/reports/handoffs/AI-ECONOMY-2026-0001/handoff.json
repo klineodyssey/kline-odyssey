@@ -1,0 +1,73 @@
+{
+  "schema_version": "1.1",
+  "task_id": "AI-ECONOMY-2026-0001",
+  "source_draft_id": "V9-DRYRUN-001A",
+  "source_decision_id": "KGEN-AIDEC-V9-DRYRUN-001",
+  "promotion_review_id": "KAIOS-V9.1-PROMOTE-001A",
+  "release_review_id": "KAIOS-V9.3-RELEASE-REVIEW-0001",
+  "sync_request_id": "KAIOS-V9.2-SYNC-REQ-0001",
+  "allocation_id": "KAIOS-V9.2-ALLOC-0001",
+  "worker_id": "cursor-01",
+  "worker_agent_id": "cursor-agent-0017",
+  "session_id": "SESSION-20260716-18-EPHEMERAL",
+  "spawned_by": "本尊",
+  "clone_id": null,
+  "claim_id": "CLAIM-AI-ECONOMY-2026-0001-20260716T0920-cursor-01",
+  "reserved_branch": "cursor-handoff/AI-ECONOMY-2026-0001",
+  "evidence_branch": "cursor-handoff/AI-ECONOMY-2026-0001-20260716",
+  "base_sha": "d5d9b2cc5bafd67ec600fccb2701f638020d9741",
+  "sync_commit_sha": "5e65b8542bb5d476bcde4e66829bcba26e8d0fd7",
+  "release_commit_sha": "142aeb6f218a7180460fd483d5bad4c5d57ec3f8",
+  "observed_origin_main": "d5d9b2cc5bafd67ec600fccb2701f638020d9741",
+  "claimed_at": "2026-07-16T09:20:00Z",
+  "handoff_submitted_at": "2026-07-16T09:20:00Z",
+  "closed_at": null,
+  "files_changed": [
+    "KGEN-AI-Company/reports/AI-ECONOMY-2026-0001_RESOURCE_RESERVE_REVIEW.md",
+    "KGEN-AI-Company/reports/handoffs/AI-ECONOMY-2026-0001/HANDOFF.md",
+    "KGEN-AI-Company/reports/handoffs/AI-ECONOMY-2026-0001/handoff.json"
+  ],
+  "files_added": [
+    "KGEN-AI-Company/reports/AI-ECONOMY-2026-0001_RESOURCE_RESERVE_REVIEW.md",
+    "KGEN-AI-Company/reports/handoffs/AI-ECONOMY-2026-0001/HANDOFF.md",
+    "KGEN-AI-Company/reports/handoffs/AI-ECONOMY-2026-0001/handoff.json"
+  ],
+  "files_deleted": [],
+  "tests_run": [
+    "SOURCE_EXISTENCE",
+    "PROTECTED_PATH_DIFF",
+    "REPORT_SECTION_COMPLETENESS",
+    "SIMULATION_BOUNDARY",
+    "SINGLE_TASK_PURITY",
+    "WORKQUEUE_MODIFY_FORBIDDEN"
+  ],
+  "test_results": "ALL_GATES_PASS",
+  "task_result": "PASS_SIMULATION_RESOURCE_RESERVE_REVIEW",
+  "stabilization_alternatives_count": 3,
+  "recommended_alternative": "A_RESERVE_FLOOR_POLICY",
+  "protected_path_violations": 0,
+  "runtime_current_modified": false,
+  "universe_map_modified": false,
+  "implementation_scope": "report_only_simulation_advisory",
+  "dispatch_hold_at_claim": false,
+  "dispatch_status_at_claim": "RELEASED",
+  "known_issues": [
+    "ATOMIC_CLAIM_REGISTRY_NOT_IMPLEMENTED",
+    "WORKQUEUE_OPEN_UNTIL_CODEX_CLOSEOUT",
+    "KGEN_PRODUCTION_STATUS_VS_RECESSION_SCENARIO_MISMATCH"
+  ],
+  "risks": [
+    "R2_simulation_advisory_only",
+    "R1_threshold_calibration_requires_follow_on_dryrun"
+  ],
+  "review": {
+    "reviewer": "Codex",
+    "decision": null,
+    "review_path": null,
+    "claim_status": "SUBMITTED",
+    "review_custody": "CODEX_PENDING"
+  },
+  "recommended_next_action": "Codex review handoff; if approved, dry-run Reserve Floor thresholds under recession stress injection.",
+  "review_status": "PENDING_CODEX_REVIEW",
+  "closeout_status": "OPEN"
+}
