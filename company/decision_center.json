@@ -1,0 +1,223 @@
+{
+  "metadata": {
+    "runtime_id": "KAIOS-COMPANY-DECISION-CENTER-V1",
+    "version": "0.1.0",
+    "revision": "2026-07-16.1",
+    "status": "ARCHITECTURE_PROPOSAL_UNDER_REVIEW",
+    "last_updated": "2026-07-16",
+    "updated_by": "Codex / codex-gm-01",
+    "reviewed_by": "HUMAN_ARCHITECTURE_REVIEW_REQUIRED",
+    "source_commit": "89f3c351c488a0705f514adba974dd6c3dd3cb3a",
+    "task_id": "HUMAN-COMPANY-DECISION-CENTER-001",
+    "human_decision_id": "HUMAN-COMPANY-DECISION-CENTER-001",
+    "change_reason": "Define a future canonical command ledger without activating it.",
+    "ancestor": [
+      "KGEN-KAIOS/decision/DECISION_ENGINE_STANDARD.md",
+      "KGEN-KAIOS/decision/decision_log.jsonl",
+      "KGEN-KAIOS/governance/autopilot/COMPANY_INBOX.md"
+    ],
+    "source_of_truth": false,
+    "target_source_of_truth_after_human_cutover": "COMPANY_COMMANDS_ONLY"
+  },
+  "boundary": {
+    "architecture": "UNDER_REVIEW",
+    "implementation_started": false,
+    "workqueue_created": false,
+    "dispatcher_enabled": false,
+    "auto_dispatch_enabled": false,
+    "deployment_started": false,
+    "pages_modified": false,
+    "protected_runtime_modified": false,
+    "universe_map_modified": false,
+    "kernel_baseline_modified": false,
+    "land_baseline_modified": false,
+    "civilization_baseline_modified": false,
+    "cutover_authorized": false
+  },
+  "scope": {
+    "owns_after_cutover": [
+      "COMMAND_IDENTITY",
+      "COMMAND_AUTHORITY",
+      "COMMAND_SCOPE",
+      "COMMAND_VERSION",
+      "COMMAND_STATUS",
+      "COMMAND_EFFECTIVE_TIME",
+      "COMMAND_SUPERSESSION",
+      "COMMAND_REVOCATION",
+      "COMMAND_AUDIT_LINEAGE"
+    ],
+    "references_only": [
+      "CONSTITUTION",
+      "CANON",
+      "RUNTIME_CURRENT",
+      "FROZEN_BASELINES",
+      "WORKQUEUE",
+      "CLAIMS",
+      "EVIDENCE",
+      "REVIEWS",
+      "COMMITS",
+      "RELEASES"
+    ],
+    "never_owns": [
+      "DOMAIN_RUNTIME_STATE",
+      "LAND_OWNERSHIP",
+      "MONEY_LEDGER",
+      "TOKEN_CONTRACT",
+      "PRIVATE_IDENTITY",
+      "SECRETS",
+      "PROTECTED_RUNTIME_CONTENT"
+    ]
+  },
+  "current_authority_sources": [
+    "HUMAN_DECISIONS",
+    "KGEN-KAIOS/constitution/KAIOS_CONSTITUTION.md",
+    "KGEN-KAIOS/decision/decision_log.jsonl",
+    "KGEN-Organization/WorkOrders/WORK_QUEUE.md",
+    "KGEN-KAIOS/governance/autopilot/company_inbox.json"
+  ],
+  "target_authority": {
+    "logical_id": "COMPANY_DECISION_CENTER",
+    "authority_scope": "COMPANY_COMMAND_CONTROL_PLANE",
+    "physically_single_node_required": false,
+    "one_ordered_canonical_ledger_required": true,
+    "current_projection_rebuildable": true,
+    "human_final_authority_preserved": true
+  },
+  "decision_contract": {
+    "required_fields": [
+      "decision_id",
+      "decision_version",
+      "decision_type",
+      "title",
+      "reason",
+      "options",
+      "chosen_option",
+      "scope",
+      "risk_level",
+      "rollback_plan",
+      "human_authority_id",
+      "delegated_authority_id",
+      "authority_scope",
+      "authority_evidence_ref",
+      "status",
+      "effective_at",
+      "expires_at",
+      "supersedes_decision_version",
+      "revokes_decision_id",
+      "affected_workorders",
+      "affected_workers",
+      "affected_files",
+      "expected_result",
+      "review_required",
+      "evidence_refs",
+      "created_at",
+      "recorded_by",
+      "record_hash",
+      "previous_record_hash",
+      "classification",
+      "retention_class"
+    ],
+    "statuses": [
+      "RECEIVED",
+      "AUTHORITY_VALIDATING",
+      "ACTIVE",
+      "HOLD",
+      "SUPERSEDED",
+      "REVOKED",
+      "EXPIRED",
+      "REJECTED",
+      "ARCHIVED"
+    ],
+    "only_action_authorizing_status": "ACTIVE",
+    "silent_edit_allowed": false,
+    "correction_method": "APPEND_SUPERSEDING_VERSION",
+    "deletion_allowed": false
+  },
+  "integrity": {
+    "append_only": true,
+    "ordered_sequence_required": true,
+    "hash_chain_required": true,
+    "idempotency_required": true,
+    "causation_required": true,
+    "snapshot_and_replay_required": true,
+    "tamper_detection_required": true,
+    "human_anchor_required": true,
+    "secrets_in_records_allowed": false
+  },
+  "validation_pipeline": [
+    "SCHEMA_VALIDATION",
+    "UNIQUE_ID_AND_VERSION_CHECK",
+    "HUMAN_ANCHOR_CHECK",
+    "AUTHORITY_SCOPE_CHECK",
+    "CONSTITUTION_AND_PROTECTED_CONSTRAINT_CHECK",
+    "EFFECTIVE_TIME_AND_EXPIRY_CHECK",
+    "SUPERSESSION_AND_REVOCATION_CHECK",
+    "RISK_AND_REVIEW_GATE",
+    "APPEND_IMMUTABLE_RECORD",
+    "PUBLISH_CURRENT_PROJECTION"
+  ],
+  "adapters": [
+    {
+      "source": "KGEN-KAIOS/decision/decision_log.jsonl",
+      "mode_before_cutover": "CURRENT_AUTHORITY_EVIDENCE",
+      "mode_after_cutover": "READ_ONLY_PROJECTION_AND_MIGRATION_REFERENCE"
+    },
+    {
+      "source": "KGEN-KAIOS/governance/autopilot/company_inbox.json",
+      "mode_before_cutover": "CURRENT_INTAKE_PROTOCOL",
+      "mode_after_cutover": "COMPATIBILITY_ADAPTER"
+    },
+    {
+      "source": "KGEN-Organization/WorkOrders/WORK_QUEUE.md",
+      "mode_before_cutover": "OFFICIAL_TASK_INVENTORY",
+      "mode_after_cutover": "TASK_LIFECYCLE_PROJECTION"
+    },
+    {
+      "source": "KGEN-AI-Company/reports/CODEX_REVIEW_LOG.md",
+      "mode_before_cutover": "CURRENT_REVIEW_EVIDENCE",
+      "mode_after_cutover": "REVIEW_PROJECTION"
+    }
+  ],
+  "cutover_stages": [
+    "DC0_PROPOSAL",
+    "DC1_BASELINE",
+    "DC2_SANDBOX",
+    "DC3_SHADOW_READ",
+    "DC4_HUMAN_CUTOVER",
+    "DC5_COMPATIBILITY"
+  ],
+  "cutover_gates": [
+    "INDEPENDENT_REVIEW_PASS",
+    "ARCHITECTURE_RESOLUTION_AND_ADR",
+    "HUMAN_BASELINE_APPROVAL",
+    "APPEND_ONLY_LEDGER_IMPLEMENTED",
+    "HUMAN_ANCHOR_IMPLEMENTED",
+    "CANONICAL_ATOMIC_CLAIM_AUTHORITY_IMPLEMENTED",
+    "MIGRATION_REPLAY_PASS",
+    "ZERO_UNRESOLVED_DIVERGENCE",
+    "ROLLBACK_TEST_PASS",
+    "PROVIDER_ADAPTER_TEST_PASS",
+    "EXPLICIT_HUMAN_CUTOVER_DECISION"
+  ],
+  "architecture_source_decisions": [
+    {
+      "decision_id": "HUMAN-COMPANY-DECISION-CENTER-001",
+      "decision_version": 1,
+      "decision_type": "ARCHITECTURE_PROPOSAL_AUTHORIZATION",
+      "status": "ACTIVE_FOR_ARCHITECTURE_ONLY",
+      "effective_at": "2026-07-16",
+      "human_authority_id": "PRIMEFORGE",
+      "scope": "CREATE_DECISION_CENTER_V1_ARCHITECTURE_PROPOSAL",
+      "implementation_authorized": false,
+      "dispatch_authorized": false,
+      "cutover_authorized": false
+    }
+  ],
+  "runtime_records": [],
+  "assessment": {
+    "architecture_readiness_score": 91,
+    "operational_readiness_score": 0,
+    "sufficient_for_architecture_baseline_review": true,
+    "sufficient_as_active_single_governance_center": false
+  }
+}

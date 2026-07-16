@@ -1,0 +1,161 @@
+{
+  "metadata": {
+    "registry_id": "KAIOS-COMPANY-INBOX-V1",
+    "version": "0.1.0",
+    "revision": "2026-07-16.1",
+    "status": "ARCHITECTURE_PROPOSAL_UNDER_REVIEW",
+    "last_updated": "2026-07-16",
+    "updated_by": "Codex / codex-gm-01",
+    "reviewed_by": "HUMAN_ARCHITECTURE_REVIEW_REQUIRED",
+    "source_commit": "89f3c351c488a0705f514adba974dd6c3dd3cb3a",
+    "task_id": "HUMAN-COMPANY-DECISION-CENTER-001",
+    "human_decision_id": "HUMAN-COMPANY-DECISION-CENTER-001",
+    "change_reason": "Define typed intake lanes without activating routing or dispatch.",
+    "ancestor": [
+      "KGEN-KAIOS/governance/autopilot/COMPANY_INBOX.md",
+      "KGEN-KAIOS/governance/autopilot/company_inbox.json",
+      "KGEN-KAIOS/governance/autopilot/HUMAN_INBOX_ROUTER.md"
+    ],
+    "source_of_truth": false
+  },
+  "boundary": {
+    "implemented": false,
+    "live_routing_enabled": false,
+    "creates_workorders": false,
+    "creates_claims": false,
+    "dispatches_workers": false,
+    "grants_implementation_authority": false,
+    "current_inbox_replaced": false
+  },
+  "lanes": [
+    "HUMAN_INBOX",
+    "CODEX_INBOX",
+    "CURSOR_INBOX",
+    "REVIEW_INBOX",
+    "ARCHITECTURE_INBOX",
+    "IMPLEMENTATION_INBOX",
+    "EVIDENCE_INBOX",
+    "DONE",
+    "ARCHIVE"
+  ],
+  "record_fields": [
+    "inbox_id",
+    "message_id",
+    "message_type",
+    "schema_version",
+    "source_actor_id",
+    "source_provider",
+    "received_at",
+    "classification",
+    "lane",
+    "priority_class",
+    "human_decision_id",
+    "decision_version",
+    "authority_state",
+    "summary",
+    "payload_ref",
+    "payload_hash",
+    "correlation_id",
+    "causation_id",
+    "idempotency_key",
+    "dependencies",
+    "related_workorders",
+    "related_claims",
+    "related_workers",
+    "review_required",
+    "review_state",
+    "sensitive_classification",
+    "retention_class",
+    "status",
+    "routed_target",
+    "created_at",
+    "updated_at",
+    "closed_at"
+  ],
+  "states": [
+    "RECEIVED",
+    "SCHEMA_VALIDATED",
+    "CLASSIFIED",
+    "DEDUPLICATED",
+    "AUTHORITY_CHECKED",
+    "QUEUED",
+    "ROUTED",
+    "CLOSED",
+    "HOLD_REVIEW_FIRST",
+    "HOLD_ACTIVE_CLAIM",
+    "HOLD_NETWORK_DEPENDENCY",
+    "HUMAN_DECISION_REQUIRED",
+    "BLOCKED_SOURCE_CONFLICT",
+    "BLOCKED_PROTECTED_PATH",
+    "REJECTED_SCHEMA",
+    "REJECTED_REPLAY"
+  ],
+  "normal_priority": [
+    "REVIEW",
+    "REPAIR",
+    "HUMAN_DECISION",
+    "ARCHITECTURE",
+    "IMPLEMENTATION"
+  ],
+  "safety_preemption": [
+    "URGENT_STOP",
+    "SECRET_EXPOSURE",
+    "PROTECTED_PATH_ALERT",
+    "SECURITY_INCIDENT",
+    "DATA_LOSS_RISK"
+  ],
+  "review_first": {
+    "blocks_new_implementation_dispatch": true,
+    "block_metric": "actionable_review_count",
+    "invalid_submission_triage": "EVIDENCE_INBOX_THEN_ARCHIVE",
+    "invalid_submission_blocks_forever": false,
+    "review_messages_may_route_while_blocked": true,
+    "repair_messages_may_route_while_blocked": true,
+    "deadlock_result": "SAFE_HOLD_AND_HUMAN_ESCALATION"
+  },
+  "deduplication": {
+    "idempotency_key_required": true,
+    "payload_hash_required": true,
+    "identical_replay_result": "RETURN_EXISTING_RECORD",
+    "different_payload_same_key_result": "REJECTED_REPLAY"
+  },
+  "privacy": {
+    "forbidden_public_content": [
+      "TOKEN",
+      "PRIVATE_KEY",
+      "SEED_PHRASE",
+      "PASSWORD",
+      "CREDENTIAL",
+      "PRIVATE_KYC",
+      "EXACT_PRIVATE_GPS",
+      "PRIVATE_PROMPT",
+      "HEAVEN_SECRET_PAYLOAD"
+    ],
+    "public_record_mode": "REDACTED_METADATA_HASH_AND_ACCESS_POLICY_REF"
+  },
+  "retention_classes": [
+    "HOT_ACTIVE",
+    "WARM_HISTORY",
+    "COLD_ARCHIVE",
+    "IMMUTABLE_GOVERNANCE",
+    "DISPOSABLE_TELEMETRY"
+  ],
+  "compatibility": {
+    "current_source": "KGEN-KAIOS/governance/autopilot/company_inbox.json",
+    "current_source_remains_authoritative": true,
+    "target_mode": "COMPATIBILITY_ADAPTER_AFTER_HUMAN_CUTOVER"
+  },
+  "architecture_examples": [
+    {
+      "inbox_id": "EXAMPLE-INBOX-HUMAN-COMPANY-DECISION-CENTER-001",
+      "message_type": "ARCHITECTURE",
+      "lane": "ARCHITECTURE_INBOX",
+      "human_decision_id": "HUMAN-COMPANY-DECISION-CENTER-001",
+      "authority_state": "ARCHITECTURE_ONLY",
+      "status": "QUEUED_FOR_HUMAN_ARCHITECTURE_REVIEW",
+      "dispatch_allowed": false,
+      "non_operational_example": true
+    }
+  ],
+  "live_records": []
+}
