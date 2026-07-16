@@ -12,7 +12,7 @@
   "evidence_branch": "cursor-handoff/ORG-P2-015-20260716",
   "worktree": "cursor/monkey-boot-gap-fill-015",
   "base_sha": "89f3c351c488a0705f514adba974dd6c3dd3cb3a",
-  "head_sha": "PENDING_COMMIT",
+  "head_sha": "a499c78a8c7c4c9d993098dda507564f0ef30e5c",
   "observed_origin_main": "89f3c351c488a0705f514adba974dd6c3dd3cb3a",
   "claimed_at": "2026-07-16T06:36:57Z",
   "lease_expires_at": "2026-07-16T10:36:57Z",
