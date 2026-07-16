@@ -1,0 +1,127 @@
+{
+  "metadata": {
+    "runtime_id": "KAIOS-ARCHITECTURE-AUTO-APPROVAL-V1",
+    "version": "0.1.0",
+    "status": "ARCHITECTURE_PROPOSAL_UNDER_REVIEW",
+    "human_decision_id": "HUMAN-ARCHITECTURE-AUTO-APPROVAL-001",
+    "owner": "HUMAN_PRIMEFORGE",
+    "architect": "codex-gm-01",
+    "auto_approval_enabled": false,
+    "implementation_started": false,
+    "deployment_started": false,
+    "workqueue_modified": false
+  },
+  "authority": {
+    "parent_authorities": [
+      "KAIOS_CONSTITUTION",
+      "ARCHITECTURE_GOVERNANCE_BOARD",
+      "HUMAN_FINAL_AUTHORITY",
+      "ACTIVE_STANDING_DELEGATION"
+    ],
+    "approver_identity_when_delegated": "CODEX_DELEGATED_GM",
+    "human_override_available": true,
+    "self_approval_allowed": false,
+    "bootstrap_human_activation_required": true
+  },
+  "eligible_artifact_types": [
+    "ARCHITECTURE",
+    "REVIEW",
+    "PROPOSAL",
+    "README",
+    "ADR",
+    "DECISION_LOG",
+    "SCHEMA",
+    "DOCUMENTATION",
+    "MACHINE_READABLE_JSON"
+  ],
+  "mandatory_gates": {
+    "protected_path_changes": 0,
+    "json_validation": "PASS",
+    "jsonl_validation": "PASS",
+    "link_validation": "PASS",
+    "runtime_current": "UNCHANGED",
+    "universe_map_current": "UNCHANGED",
+    "kernel_current": "UNCHANGED",
+    "land_current": "UNCHANGED",
+    "implementation": false,
+    "deployment": false,
+    "workqueue": "UNCHANGED",
+    "minimum_review_readiness": 85,
+    "unresolved_p0": 0,
+    "unresolved_p1": 0,
+    "rollback": "DEFINED_AND_TESTABLE",
+    "source_audit": "PASS",
+    "manifest": "SHA256_VERIFIED",
+    "author_reviewer_separation": "PASS",
+    "standing_delegation": "ACTIVE_AND_IN_SCOPE"
+  },
+  "eligible_risk_classes": ["R0", "R1"],
+  "permanent_exclusions": [
+    "TOKEN",
+    "CONTRACTS",
+    "TAX",
+    "WALLET",
+    "DEPLOYMENT",
+    "PAGES",
+    "RELEASE",
+    "UNIVERSE_PHYSICS_CURRENT",
+    "UNIVERSE_MAP_CURRENT",
+    "KERNEL_CURRENT",
+    "LIFE_OS_CURRENT",
+    "LAND_CURRENT",
+    "CIVILIZATION_CURRENT",
+    "ANY_RUNTIME_CURRENT",
+    "CONSTITUTION",
+    "HUMAN_FINAL_AUTHORITY",
+    "ARCHITECTURE_GOVERNANCE_BOARD",
+    "HUMAN_ANCHOR",
+    "AUTONOMY_LEVEL",
+    "DECISION_CENTER_AUTHORITY",
+    "CANONICAL_CLAIM_AUTHORITY",
+    "AUTO_APPROVAL_RUNTIME_SELF_CHANGE",
+    "FROZEN_CORE_INVARIANT",
+    "REAL_KYC",
+    "PRECISE_GPS",
+    "LEGAL_LAND",
+    "HEAVEN_SECRET",
+    "DIVINE_VAULT",
+    "IRREVERSIBLE_MIGRATION"
+  ],
+  "workflow": [
+    "SOURCE_AUDIT",
+    "INDEPENDENT_REVIEW",
+    "AMENDMENT_RESOLUTION",
+    "VALIDATION",
+    "RISK_CLASSIFICATION",
+    "AUTO_GATE",
+    "STANDING_DELEGATION_CHECK",
+    "NON_CURRENT_BASELINE_RECORD",
+    "APPEND_DECISION",
+    "DECISION_CENTER_PROJECTION",
+    "DISPATCHER_INFORMATIONAL_NOTIFICATION"
+  ],
+  "outputs": [
+    "AUTO_APPROVE",
+    "HUMAN_REVIEW_REQUIRED",
+    "REJECT"
+  ],
+  "baseline": {
+    "target_kind": "NON_DEPLOYED_ARCHITECTURE_REF_OR_REGISTRY",
+    "recommended_ref_pattern": "architecture-baseline/<proposal-id>",
+    "existing_frozen_baseline_rewrite_allowed": false,
+    "main_update_implied": false,
+    "pages_update_implied": false,
+    "implementation_authority_implied": false
+  },
+  "dispatcher_event": {
+    "event_type": "ARCHITECTURE_BASELINE_AVAILABLE",
+    "informational_only": true,
+    "creates_task": false,
+    "creates_claim": false
+  },
+  "readiness": {
+    "architecture_score": 87,
+    "operational_score": 0,
+    "current_state": "DISABLED_PENDING_REVIEW_AND_BOOTSTRAP_APPROVAL"
+  }
+}

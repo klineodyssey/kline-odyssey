@@ -1,0 +1,101 @@
+{
+  "metadata": {
+    "runtime_id": "KAIOS-MONKEY-CONTINUOUS-DISPATCH-V1",
+    "version": "0.1.0",
+    "status": "ARCHITECTURE_PROPOSAL_DISABLED",
+    "human_decision_id": "HUMAN-ARCHITECTURE-AUTO-APPROVAL-001",
+    "implementation_started": false,
+    "auto_dispatch_enabled": false,
+    "claims_created": 0,
+    "workqueue_modified": false
+  },
+  "required_dependency": {
+    "id": "CANONICAL_ATOMIC_CLAIM_AUTHORITY",
+    "required_state": "IMPLEMENTED_REVIEWED_AND_ENABLED",
+    "current_state": "PROPOSAL_ONLY",
+    "blocking": true
+  },
+  "review_first_order": [
+    "URGENT_STOP",
+    "REVIEW",
+    "REPAIR",
+    "EXPIRED_OR_ORPHANED_CLAIM_RECOVERY",
+    "HUMAN_DECISION",
+    "APPROVED_IMPLEMENTATION",
+    "ARCHITECTURE",
+    "PROPOSAL_CANDIDATE"
+  ],
+  "dispatch_flow": [
+    "HANDOFF_REVIEWED",
+    "CLAIM_CLOSED",
+    "LEASE_RELEASED",
+    "REVIEW_AND_REPAIR_SCAN",
+    "APPROVED_IMPLEMENTATION_INBOX_SCAN",
+    "CAPABILITY_AND_PATH_MATCH",
+    "ATOMIC_COMPARE_AND_SWAP",
+    "TASK_ENVELOPE_BOUND",
+    "CLAIM_ACTIVE"
+  ],
+  "hard_gates": {
+    "implementation_authorized": true,
+    "architecture_only": false,
+    "task_envelope_complete": true,
+    "worker_has_active_claim": false,
+    "authorized_paths_overlap": false,
+    "protected_paths_requested": false,
+    "human_main_used": false,
+    "repository_health": "PASS",
+    "security_health": "PASS",
+    "canonical_compare_and_swap": "PASS",
+    "fencing_token_issued": true,
+    "quota": "PASS",
+    "cooldown": "PASS"
+  },
+  "worker_constraints": {
+    "maximum_active_claims_per_session": 1,
+    "self_dispatch_allowed": false,
+    "self_review_allowed": false,
+    "merge_allowed": false,
+    "push_main_allowed": false,
+    "release_allowed": false
+  },
+  "queue_states": [
+    "ACTIVE",
+    "EMPTY_HEALTHY",
+    "BLOCKED",
+    "STALE",
+    "ERROR"
+  ],
+  "bounded_scouts": {
+    "domains": [
+      "UI",
+      "PAGES",
+      "PERFORMANCE",
+      "SECURITY",
+      "ACCESSIBILITY",
+      "DOCUMENTATION",
+      "ARCHITECTURE_DRIFT",
+      "BROKEN_LINKS",
+      "LEGACY_RULES"
+    ],
+    "outputs": ["OBSERVATION", "PROPOSAL_CANDIDATE"],
+    "implementation_workorder_allowed": false,
+    "requires_deduplication": true,
+    "requires_cooldown": true,
+    "requires_daily_cap": true,
+    "requires_evidence": true
+  },
+  "metrics": {
+    "monkey_utilization_current": "NOT_MEASURED",
+    "average_idle_time_current": "NOT_MEASURED",
+    "target_utilization_percent_range": [60, 85],
+    "target_eligible_idle_time_minutes_max_when_work_exists": 5,
+    "queue_health_current": "OBSERVED_CLEAR_NO_RUNTIME_TELEMETRY",
+    "queue_health_architecture_score": 92
+  },
+  "readiness": {
+    "architecture_score": 78,
+    "operational_score": 0,
+    "current_state": "DISABLED_PENDING_CANONICAL_ATOMIC_CLAIM_AUTHORITY"
+  }
+}
