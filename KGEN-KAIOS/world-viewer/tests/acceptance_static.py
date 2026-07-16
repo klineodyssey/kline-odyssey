@@ -27,9 +27,15 @@ REQUIRED_FILES = (
     "inspector/inspector-view.js",
     "lod/lod-controller.js",
     "input/input-controller.js",
+    "land/land-runtime.js",
+    "building/building-runtime.js",
+    "room/room-runtime.js",
     "life/life-os-viewer.js",
+    "life/life-runtime.js",
+    "player/player-controller.js",
     "data/world-store.js",
     "data/synthetic-world.json",
+    "tests/runtime_integrity.mjs",
 )
 
 PROTECTED_PREFIXES = (
@@ -210,8 +216,10 @@ def check_life_contract(errors: list[str], data: dict, life_source: str) -> None
     for label in LIFE_LAYERS:
         if label.lower() not in life_source.lower():
             fail(errors, f"Life viewer does not render the {label} layer")
-    if "privacy" not in life_source.lower() or "read-only" not in life_source.lower():
-        fail(errors, "Life viewer lacks an explicit privacy-safe read-only contract")
+    if "privacy" not in life_source.lower() or not any(
+        marker in life_source.lower() for marker in ("read-only", "local-only")
+    ):
+        fail(errors, "Life viewer lacks an explicit privacy-safe local simulation contract")
 
 
 def check_alpha_contract(errors: list[str], data: dict, source_text: str, html: str) -> None:
@@ -226,7 +234,7 @@ def check_alpha_contract(errors: list[str], data: dict, source_text: str, html: 
         "ALPHA" in str(value).upper() or "SPRINT-002" in str(value).upper()
         for value in alpha_values
     ):
-        fail(errors, "fixture does not declare the Sprint 002 Alpha contract")
+        fail(errors, "fixture does not declare the World Viewer Alpha contract")
     if "alpha" not in (html + source_text).lower():
         fail(errors, "product UI does not identify the Alpha state")
 
@@ -281,9 +289,13 @@ def main() -> int:
         "one region": len(data.get("regions", [])) == 1,
         "one city overlay": len(data.get("cities", [])) == 1,
         "twelve parcels": len(data.get("parcels", [])) == 12,
+        "building templates": len(data.get("buildingTemplates", [])) == 8,
         "two buildings": len(data.get("buildings", [])) == 2,
         "three rooms": len(data.get("rooms", [])) == 3,
-        "life profiles": len(data.get("lifeProfiles", [])) >= 2,
+        "furniture": len(data.get("furniture", [])) == 3,
+        "equipment": len(data.get("equipment", [])) == 3,
+        "room organisms": len(data.get("organisms", [])) == 5,
+        "life profiles": len(data.get("lifeProfiles", [])) >= 5,
         "unknown parcel": any(
             parcel.get("status") == "UNKNOWN" for parcel in data.get("parcels", [])
         ),
@@ -329,6 +341,21 @@ def main() -> int:
         or starter.get("status") != "ACTIVE"
     ):
         fail(errors, "Starter Parcel does not satisfy the proposal permission contract")
+    if not starter.get("revision_history") or not starter.get("ownership_timeline"):
+        fail(errors, "Starter Parcel lacks revision or ownership history")
+    player = data.get("player", {})
+    for field, collection in (
+        ("life_id", "lifeProfiles"),
+        ("home_building_id", "buildings"),
+        ("home_room_id", "rooms"),
+    ):
+        target_ids = {item.get("id") for item in data.get(collection, [])}
+        if player.get(field) not in target_ids:
+            fail(errors, f"player {field} does not resolve into {collection}")
+    organism_types = {item.get("organism_type") for item in data.get("organisms", [])}
+    expected_organism_types = {"PLAYER", "AI_WORKER", "NPC", "PET", "PLANT"}
+    if not expected_organism_types.issubset(organism_types):
+        fail(errors, f"room organism types incomplete: {sorted(str(item) for item in organism_types)}")
 
     html = (ROOT / "index.html").read_text(encoding="utf-8")
     if 'src="./app.js"' not in html or 'href="./ui/styles.css"' not in html:
@@ -417,7 +444,7 @@ def main() -> int:
         f"{len(REQUIRED_FILES)} files;",
         f"{parsed_json_records} JSON records;",
         f"{checked_references} local references;",
-        "Alpha + 8 proposal actions + 5 Life layers; protected-path input clean",
+        "Digital Earth Alpha + Land/Building/Room/Life/Player runtimes + 8 proposals; protected-path input clean",
     )
     return 0
 

@@ -40,6 +40,16 @@ const REQUIRED_FIELD_LABELS = Object.freeze([
   "Source"
 ]);
 
+const LIFE_RUNTIME_ACTIONS = Object.freeze([
+  "EAT",
+  "DRINK",
+  "SLEEP",
+  "WAKE",
+  "WORK"
+]);
+
+const RUNTIME_COLLECTION_LIMIT = 32;
+
 function isRecord(value) {
   return value !== null && typeof value === "object" && !Array.isArray(value);
 }
@@ -361,12 +371,307 @@ function rowsToObject(rows) {
   return Object.fromEntries(rows.map(([label, value]) => [label, value]));
 }
 
+function runtimeItems(value) {
+  if (!isKnown(value) || value === UNKNOWN_VALUE) return [];
+  if (Array.isArray(value)) return value.filter(isRecord).slice(0, RUNTIME_COLLECTION_LIMIT);
+  if (!isRecord(value)) return [];
+
+  if (isRecord(value.snapshot)) return [value.snapshot];
+
+  for (const key of ["snapshots", "items", "values", "records"]) {
+    if (Array.isArray(value[key])) {
+      return value[key].filter(isRecord).slice(0, RUNTIME_COLLECTION_LIMIT);
+    }
+  }
+  return [value];
+}
+
+function runtimeSource(runtime, name) {
+  if (!isRecord(runtime)) return null;
+  return firstKnown(
+    runtime[name],
+    runtime[`${name}Snapshot`],
+    runtime[`${name}_snapshot`],
+    runtime[`${name}Snapshots`],
+    runtime[`${name}_snapshots`],
+    runtime[`${name}s`]
+  );
+}
+
+function runtimeIdentifier(value, keys) {
+  if (!isRecord(value)) return null;
+  return normalizeId(firstKnown(...keys.map((key) => value[key])));
+}
+
+function selectRuntimeItem(items, preferredIds, keys, relation = null) {
+  const ids = preferredIds.filter(isKnown).map(String);
+  const exact = items.find((item) => ids.includes(runtimeIdentifier(item, keys)));
+  if (exact) return exact;
+  if (typeof relation === "function") {
+    const related = items.find(relation);
+    if (related) return related;
+  }
+  return items[0] ?? null;
+}
+
+function historyEntryLabel(entry) {
+  if (!isRecord(entry)) return formatScalar(entry);
+  const identity = firstKnown(
+    entry.revision_id,
+    entry.proposal_id,
+    entry.event_id,
+    entry.transfer_id,
+    entry.id,
+    entry.local_version,
+    entry.parcel_version,
+    entry.version
+  );
+  const state = firstKnown(
+    entry.event_type,
+    entry.review_status,
+    entry.status,
+    entry.owner_id,
+    entry.to_owner_id,
+    entry.requested_land_use
+  );
+  if (!isKnown(identity) && !isKnown(state)) return UNKNOWN_VALUE;
+  return [identity, state].filter(isKnown).map(formatScalar).join(" / ");
+}
+
+function formatHistory(value) {
+  if (!isKnown(value) || value === UNKNOWN_VALUE || !Array.isArray(value)) return UNKNOWN_VALUE;
+  if (value.length === 0) return "0";
+  const recent = value.slice(-3).map(historyEntryLabel).filter((label) => label !== UNKNOWN_VALUE);
+  return recent.length ? `${value.length} / ${recent.join(", ")}` : String(value.length);
+}
+
+function formatRuntimeCollection(value) {
+  if (!isKnown(value) || value === UNKNOWN_VALUE) return UNKNOWN_VALUE;
+  if (!Array.isArray(value)) return formatCollection(value);
+  if (value.length === 0) return "0";
+  const labels = value.map((entry) => {
+    if (!isRecord(entry)) return formatScalar(entry);
+    return formatScalar(firstKnown(
+      entry.label,
+      entry.displayName,
+      entry.display_name,
+      entry.name,
+      entry.life_id,
+      entry.buildingId,
+      entry.building_id,
+      entry.roomId,
+      entry.room_id,
+      entry.id
+    ));
+  });
+  return `${value.length} / ${labels.join(", ")}`;
+}
+
+function formatCapacity(value) {
+  if (!isKnown(value) || value === UNKNOWN_VALUE) return UNKNOWN_VALUE;
+  if (!isRecord(value)) return formatScalar(value);
+  const total = firstKnown(value.total, value.people, value.occupants, value.capacity);
+  const used = firstKnown(
+    value.used,
+    value.occupied,
+    value.occupantCount,
+    value.occupant_count,
+    value.resolvedLifeCount,
+    value.roomOccupantCount,
+    value.declaredPopulation
+  );
+  if (isKnown(total) && isKnown(used)) return `${formatScalar(used)} / ${formatScalar(total)}`;
+  return formatScalar(firstKnown(total, used));
+}
+
+function formatInventory(value) {
+  if (!isKnown(value) || value === UNKNOWN_VALUE) return UNKNOWN_VALUE;
+  if (Array.isArray(value)) return formatRuntimeCollection(value);
+  if (!isRecord(value)) return formatScalar(value);
+  const entries = Object.entries(value);
+  if (entries.length === 0) return "0";
+  return entries.map(([name, quantity]) => `${name} ${formatScalar(quantity)}`).join(", ");
+}
+
+function selectedRevisionId(land) {
+  const selected = land?.revision_viewer?.selected_revision;
+  return normalizeId(firstKnown(
+    selected?.revision_id,
+    selected?.id,
+    selected?.local_version,
+    selected?.parcel_version,
+    land?.selected_revision_id
+  ));
+}
+
+function resolveRuntimeLife(items, resolved) {
+  if (items.length <= 1) return items;
+  const relationKey = resolved.type === "PARCEL"
+    ? ["parcel_id", "parcelId"]
+    : resolved.type === "BUILDING"
+      ? ["building_id", "buildingId"]
+      : resolved.type === "ROOM"
+        ? ["room_id", "roomId"]
+        : [];
+  if (relationKey.length === 0) return items;
+  const related = items.filter((item) => (
+    relationKey.some((key) => normalizeId(item[key]) === resolved.id)
+  ));
+  return related.length ? related : items;
+}
+
+/** Project optional Sprint 003 runtime snapshots without mutating their source. */
+export function createInspectorRuntimeProjection({ runtime = {}, resolved, parcelId } = {}) {
+  const safeResolved = isRecord(resolved) ? resolved : { type: null, id: null, entity: {} };
+  const entity = isRecord(safeResolved.entity) ? safeResolved.entity : {};
+  const resolvedParcelId = normalizeId(firstKnown(
+    parcelId,
+    entity.parcel_id,
+    safeResolved.type === "PARCEL" ? safeResolved.id : null
+  ));
+  const resolvedBuildingId = normalizeId(firstKnown(
+    entity.building_id,
+    safeResolved.type === "BUILDING" ? safeResolved.id : null
+  ));
+  const resolvedRoomId = normalizeId(
+    safeResolved.type === "ROOM" ? safeResolved.id : entity.room_id
+  );
+
+  const landItems = runtimeItems(runtimeSource(runtime, "land"));
+  const buildingItems = runtimeItems(runtimeSource(runtime, "building"));
+  const roomItems = runtimeItems(runtimeSource(runtime, "room"));
+  const playerItems = runtimeItems(runtimeSource(runtime, "player"));
+  const lifeItems = resolveRuntimeLife(runtimeItems(runtimeSource(runtime, "life")), safeResolved);
+
+  const land = selectRuntimeItem(
+    landItems,
+    [resolvedParcelId],
+    ["parcel_id", "parcelId", "id"]
+  );
+  const building = selectRuntimeItem(
+    buildingItems,
+    [resolvedBuildingId],
+    ["buildingId", "building_id", "id"],
+    (item) => normalizeId(firstKnown(item.parcelId, item.parcel_id)) === resolvedParcelId
+  );
+  const room = selectRuntimeItem(
+    roomItems,
+    [resolvedRoomId],
+    ["roomId", "room_id", "id"],
+    (item) => normalizeId(firstKnown(item.buildingId, item.building_id))
+      === normalizeId(firstKnown(resolvedBuildingId, building?.buildingId, building?.building_id))
+  );
+  const player = playerItems[0] ?? null;
+  const revisions = asArray(land?.revision_history).filter(isRecord).slice(-RUNTIME_COLLECTION_LIMIT);
+  const buildingLifecycle = firstKnown(
+    building?.lifecycleState,
+    building?.lifecycle_state,
+    building?.lifecycle?.state,
+    building?.life_cycle,
+    building?.lifecycle
+  );
+  const roomContents = isRecord(room?.contents) ? room.contents : {};
+  const roomOccupancy = isRecord(room?.occupancy) ? room.occupancy : {};
+  const playerPosition = firstKnown(player?.position, player?.coordinate);
+
+  const life = lifeItems.map((snapshot) => Object.freeze({
+    source: snapshot,
+    data: Object.freeze(rowsToObject([
+      ["Life ID", formatScalar(firstKnown(snapshot.life_id, snapshot.lifeId, snapshot.id))],
+      ["Health", formatScalar(snapshot.health)],
+      ["Food", formatScalar(snapshot.food)],
+      ["Water", formatScalar(snapshot.water)],
+      ["Energy", formatScalar(snapshot.energy)],
+      ["Age (days)", formatScalar(firstKnown(snapshot.age_days, snapshot.ageDays, snapshot.age))],
+      ["Occupation", formatScalar(snapshot.occupation)],
+      ["Activity", formatScalar(firstKnown(snapshot.activity_state, snapshot.activityState))],
+      ["Life State", formatScalar(firstKnown(snapshot.life_state, snapshot.lifeState))],
+      ["Inventory", formatInventory(snapshot.inventory)],
+      ["Revision", formatScalar(snapshot.revision)]
+    ]))
+  }));
+
+  return Object.freeze({
+    land: Object.freeze({
+      source: land,
+      revisions: Object.freeze(revisions),
+      data: Object.freeze(rowsToObject([
+        ["Parcel Version", formatScalar(firstKnown(land?.local_parcel_version, land?.parcel_version, land?.version))],
+        ["Canonical Version", formatScalar(firstKnown(land?.canonical_parcel_version, land?.canonical_version))],
+        ["Selected Revision", formatScalar(selectedRevisionId(land))],
+        ["Revision History", formatHistory(land?.revision_history)],
+        ["Proposal History", formatHistory(land?.proposal_history)],
+        ["Ownership Timeline", formatHistory(land?.ownership_timeline)],
+        ["Active Draft", formatScalar(firstKnown(land?.active_draft?.proposal_id, land?.draft?.proposal_id))],
+        ["Draft Storage", formatScalar(firstKnown(land?.storage_status, land?.active_draft?.local_saved))]
+      ]))
+    }),
+    building: Object.freeze({
+      source: building,
+      data: Object.freeze(rowsToObject([
+        ["Building ID", formatScalar(firstKnown(building?.buildingId, building?.building_id, building?.id))],
+        ["Template / Type", formatScalar(firstKnown(
+          building?.templateType,
+          building?.template_type,
+          building?.building_type,
+          building?.template?.label,
+          building?.template?.name,
+          building?.template?.id
+        ))],
+        ["Level", formatScalar(firstKnown(building?.level, building?.building_level))],
+        ["Health", formatScalar(firstKnown(building?.health, building?.building_health))],
+        ["Capacity", formatCapacity(firstKnown(building?.capacity, building?.building_capacity))],
+        ["Occupancy", formatCapacity(building?.occupancy)],
+        ["Lifecycle", formatScalar(buildingLifecycle)],
+        ["Rooms", formatRuntimeCollection(firstKnown(building?.rooms, building?.roomIds, building?.room_ids))]
+      ]))
+    }),
+    room: Object.freeze({
+      source: room,
+      data: Object.freeze(rowsToObject([
+        ["Room ID", formatScalar(firstKnown(room?.roomId, room?.room_id, room?.id))],
+        ["Room Type", formatScalar(firstKnown(room?.roomType, room?.room_type))],
+        ["Capacity", formatCapacity(room?.capacity)],
+        ["Occupants", formatRuntimeCollection(firstKnown(
+          roomOccupancy.resolvedOccupants,
+          roomOccupancy.occupants,
+          roomOccupancy.occupantIds,
+          room?.occupants
+        ))],
+        ["Furniture", formatRuntimeCollection(firstKnown(roomContents.furniture, room?.furniture))],
+        ["Equipment", formatRuntimeCollection(firstKnown(roomContents.equipment, room?.equipment))],
+        ["Organisms", formatRuntimeCollection(firstKnown(roomContents.organisms, room?.organisms))],
+        ["Life", formatRuntimeCollection(firstKnown(roomContents.life, room?.life))],
+        ["Content Chain", formatScalar(firstKnown(roomContents.chainStatus, room?.chain_status))]
+      ]))
+    }),
+    player: Object.freeze({
+      source: player,
+      data: Object.freeze(rowsToObject([
+        ["Session", formatScalar(firstKnown(player?.sessionId, player?.session_id))],
+        ["Player", formatScalar(firstKnown(player?.player?.display_name, player?.player?.player_id, player?.player_id))],
+        ["Current Entity", formatScalar(firstKnown(
+          player?.currentEntity?.label,
+          player?.currentEntity?.id,
+          player?.current_entity?.id
+        ))],
+        ["Position", formatCoordinate(playerPosition)],
+        ["Movement", formatScalar(firstKnown(player?.movementState, player?.movement_state))],
+        ["Facing", formatScalar(player?.facing)],
+        ["Steps", formatScalar(firstKnown(player?.stepCount, player?.step_count))]
+      ]))
+    }),
+    life: Object.freeze(life)
+  });
+}
+
 /** Build the four-group read-only Inspector projection. */
 export function createInspectorProjection({
   world = {},
   selection = null,
   proposal = null,
-  viewerState = {}
+  viewerState = {},
+  runtime = {}
 } = {}) {
   const resolved = resolveInspectorEntity(world, selection);
   if (!resolved) return null;
@@ -443,6 +748,16 @@ export function createInspectorProjection({
   if (unknownRows.length === 0) unknownRows.push(["Missing Fields", "NONE"]);
 
   const lifeProfiles = resolveLifeProfiles({ world, entity });
+  const runtimeProjection = createInspectorRuntimeProjection({
+    runtime,
+    resolved,
+    parcelId: firstKnown(
+      canonical.parcel_id,
+      parcelCanonical.parcel_id,
+      parcel?.id,
+      resolved.type === "PARCEL" ? entity.id : undefined
+    )
+  });
   return Object.freeze({
     type: resolved.type,
     id: resolved.id,
@@ -452,7 +767,8 @@ export function createInspectorProjection({
     proposalData: Object.freeze(rowsToObject(proposalRows)),
     unknownData: Object.freeze(rowsToObject(unknownRows)),
     lifeProfiles: Object.freeze(lifeProfiles.map(projectLifeProfile)),
-    lifeProfileSources: Object.freeze([...lifeProfiles])
+    lifeProfileSources: Object.freeze([...lifeProfiles]),
+    runtime: runtimeProjection
   });
 }
 
@@ -529,12 +845,194 @@ function actionButton(documentRef, label, className, handler, options = {}) {
   button.type = "button";
   button.title = options.title ?? label;
   button.setAttribute("aria-label", options.ariaLabel ?? label);
+  button.style.minHeight = "44px";
   if (options.expanded !== undefined) {
     button.setAttribute("aria-expanded", String(options.expanded));
+  }
+  if (options.pressed !== undefined) {
+    button.setAttribute("aria-pressed", String(options.pressed));
   }
   if (options.disabled) button.disabled = true;
   if (typeof handler === "function") button.addEventListener("click", handler);
   return button;
+}
+
+function runtimeCommandBar(documentRef, label) {
+  const commands = createElement(documentRef, "div", "inspector-view__runtime-commands");
+  commands.setAttribute("role", "group");
+  commands.setAttribute("aria-label", label);
+  commands.style.display = "grid";
+  commands.style.gridTemplateColumns = "repeat(auto-fit, minmax(112px, 1fr))";
+  commands.style.gap = "7px";
+  commands.style.marginTop = "10px";
+  return commands;
+}
+
+function runtimeCommandButton(documentRef, label, handler, options = {}) {
+  return actionButton(
+    documentRef,
+    label,
+    "inspector-view__life-action inspector-view__runtime-action",
+    handler,
+    options
+  );
+}
+
+function renderLandRuntime(documentRef, projection, callbacks) {
+  const runtime = projection.runtime.land;
+  const source = runtime.source;
+  const section = renderDataGroup(documentRef, "Land History", runtime.data, "land-runtime");
+  const commands = runtimeCommandBar(documentRef, "Land history commands");
+  commands.append(
+    runtimeCommandButton(
+      documentRef,
+      "Undo",
+      () => callbacks.onUndoLand?.(source, projection),
+      {
+        disabled: source?.can_undo !== true || typeof callbacks.onUndoLand !== "function",
+        ariaLabel: "Undo latest local land draft command"
+      }
+    ),
+    runtimeCommandButton(
+      documentRef,
+      "Redo",
+      () => callbacks.onRedoLand?.(source, projection),
+      {
+        disabled: source?.can_redo !== true || typeof callbacks.onRedoLand !== "function",
+        ariaLabel: "Redo latest local land draft command"
+      }
+    ),
+    runtimeCommandButton(
+      documentRef,
+      "Save Draft",
+      () => callbacks.onSaveDraft?.(source?.active_draft ?? source?.draft ?? null, source, projection),
+      {
+        disabled: !isRecord(source?.active_draft ?? source?.draft)
+          || typeof callbacks.onSaveDraft !== "function",
+        ariaLabel: "Save current land proposal draft locally"
+      }
+    )
+  );
+  section.appendChild(commands);
+
+  if (runtime.revisions.length > 0) {
+    const revisionCommands = runtimeCommandBar(documentRef, "Parcel revision selection");
+    const currentRevisionId = selectedRevisionId(source);
+    runtime.revisions.forEach((revision, index) => {
+      const revisionId = normalizeId(firstKnown(
+        revision.revision_id,
+        revision.id,
+        revision.local_version,
+        revision.parcel_version,
+        revision.version,
+        index + 1
+      ));
+      revisionCommands.appendChild(runtimeCommandButton(
+        documentRef,
+        `Revision ${revisionId ?? index + 1}`,
+        () => callbacks.onSelectRevision?.(revision, source, projection),
+        {
+          disabled: typeof callbacks.onSelectRevision !== "function",
+          pressed: revisionId === currentRevisionId,
+          ariaLabel: `Select parcel revision ${revisionId ?? index + 1}`
+        }
+      ));
+    });
+    section.appendChild(revisionCommands);
+  }
+
+  return section;
+}
+
+function runtimeEntityId(source, type) {
+  if (type === "BUILDING") {
+    return normalizeId(firstKnown(source?.buildingId, source?.building_id, source?.id));
+  }
+  return normalizeId(firstKnown(source?.roomId, source?.room_id, source?.id));
+}
+
+function renderEntityRuntime(documentRef, title, modifier, runtime, type, projection, callbacks) {
+  const section = renderDataGroup(documentRef, title, runtime.data, modifier);
+  const entityId = runtimeEntityId(runtime.source, type);
+  const commands = runtimeCommandBar(documentRef, `${type.toLowerCase()} commands`);
+  commands.appendChild(runtimeCommandButton(
+    documentRef,
+    `Enter ${type === "BUILDING" ? "Building" : "Room"}`,
+    () => callbacks.onEnterEntity?.(runtime.source, projection),
+    {
+      disabled: !entityId || typeof callbacks.onEnterEntity !== "function",
+      ariaLabel: entityId
+        ? `Enter ${type.toLowerCase()} ${entityId}`
+        : `Enter ${type.toLowerCase()}, unavailable`
+    }
+  ));
+  section.appendChild(commands);
+  return section;
+}
+
+function lifeActionDisabled(action, source, callback) {
+  if (typeof callback !== "function" || !isRecord(source)) return true;
+  const lifeState = String(firstKnown(source.life_state, source.lifeState, "")).toUpperCase();
+  const activity = String(firstKnown(source.activity_state, source.activityState, "")).toUpperCase();
+  if (lifeState === "DEAD") return true;
+  if (action === "SLEEP") return activity === "SLEEPING";
+  if (action === "WAKE") return activity !== "SLEEPING";
+  if (action === "WORK") return source.occupation === "NOT_APPLICABLE";
+  return false;
+}
+
+function unknownLifeRuntimeData() {
+  return rowsToObject([
+    ["Life ID", UNKNOWN_VALUE],
+    ["Health", UNKNOWN_VALUE],
+    ["Food", UNKNOWN_VALUE],
+    ["Water", UNKNOWN_VALUE],
+    ["Energy", UNKNOWN_VALUE],
+    ["Age (days)", UNKNOWN_VALUE],
+    ["Occupation", UNKNOWN_VALUE],
+    ["Activity", UNKNOWN_VALUE],
+    ["Life State", UNKNOWN_VALUE],
+    ["Inventory", UNKNOWN_VALUE],
+    ["Revision", UNKNOWN_VALUE]
+  ]);
+}
+
+function renderLifeRuntime(documentRef, projection, callbacks) {
+  const runtimes = projection.runtime.life.length
+    ? projection.runtime.life
+    : [{ source: null, data: unknownLifeRuntimeData() }];
+  const fragment = createElement(documentRef, "div", "inspector-view__runtime-life");
+  fragment.style.display = "contents";
+
+  runtimes.forEach((runtime, index) => {
+    const lifeId = formatScalar(firstKnown(
+      runtime.source?.life_id,
+      runtime.source?.lifeId,
+      runtime.source?.id
+    ));
+    const title = runtimes.length === 1 || lifeId === UNKNOWN_VALUE
+      ? "Life Simulation"
+      : `Life Simulation: ${lifeId}`;
+    const section = renderDataGroup(documentRef, title, runtime.data, `life-runtime-${index}`);
+    const commands = runtimeCommandBar(documentRef, `${title} commands`);
+    LIFE_RUNTIME_ACTIONS.forEach((action) => {
+      commands.appendChild(runtimeCommandButton(
+        documentRef,
+        action[0] + action.slice(1).toLowerCase(),
+        () => callbacks.onLifeAction?.(action, runtime.source, projection),
+        {
+          disabled: lifeActionDisabled(action, runtime.source, callbacks.onLifeAction),
+          ariaLabel: lifeId === UNKNOWN_VALUE
+            ? `${action.toLowerCase()} life, unavailable`
+            : `${action.toLowerCase()} ${lifeId}`
+        }
+      ));
+    });
+    section.appendChild(commands);
+    fragment.appendChild(section);
+  });
+
+  return fragment;
 }
 
 /** Render the responsive right-panel / mobile-bottom-sheet Inspector shell. */
@@ -596,6 +1094,27 @@ export function renderInspectorView(container, input = {}, callbacks = {}) {
     renderDataGroup(documentRef, "Land Record (Read Only)", projection.canonicalData, "canonical"),
     renderDataGroup(documentRef, "Viewer Context", projection.viewerData, "viewer"),
     renderDataGroup(documentRef, "Local Proposal (Proposal Only)", projection.proposalData, "proposal"),
+    renderLandRuntime(documentRef, projection, callbacks),
+    renderEntityRuntime(
+      documentRef,
+      "Building Runtime",
+      "building-runtime",
+      projection.runtime.building,
+      "BUILDING",
+      projection,
+      callbacks
+    ),
+    renderEntityRuntime(
+      documentRef,
+      "Room Runtime",
+      "room-runtime",
+      projection.runtime.room,
+      "ROOM",
+      projection,
+      callbacks
+    ),
+    renderDataGroup(documentRef, "Player Movement", projection.runtime.player.data, "player-runtime"),
+    renderLifeRuntime(documentRef, projection, callbacks),
     renderDataGroup(documentRef, "Unavailable Fields", projection.unknownData, "unknown")
   );
 
@@ -633,7 +1152,13 @@ export function createInspectorView({
   container,
   onClose,
   onExpandedChange,
-  onOpenLife
+  onOpenLife,
+  onUndoLand,
+  onRedoLand,
+  onSaveDraft,
+  onSelectRevision,
+  onEnterEntity,
+  onLifeAction
 }) {
   let expanded = false;
   let visible = true;
@@ -658,7 +1183,13 @@ export function createInspectorView({
           render(lastInput);
           onExpandedChange?.(expanded, projection);
         },
-        onOpenLife
+        onOpenLife,
+        onUndoLand,
+        onRedoLand,
+        onSaveDraft,
+        onSelectRevision,
+        onEnterEntity,
+        onLifeAction
       }
     );
     return lastProjection;

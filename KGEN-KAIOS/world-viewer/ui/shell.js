@@ -21,6 +21,19 @@ export function createShell(callbacks = {}) {
     starterStatus: byId("starter-parcel-status"),
     starterState: byId("starter-parcel-state"),
     starterDetail: byId("starter-parcel-detail"),
+    commandCenter: byId("player-command-center"),
+    playerLocation: byId("player-hud-location"),
+    playerMovement: byId("player-hud-movement"),
+    worldRevision: byId("world-revision-value"),
+    enterSelected: byId("enter-selected-button"),
+    stepUp: byId("player-step-up-button"),
+    stepLeft: byId("player-step-left-button"),
+    stepRight: byId("player-step-right-button"),
+    stepDown: byId("player-step-down-button"),
+    simulationAdvance: byId("simulation-advance-button"),
+    landUndo: byId("land-undo-button"),
+    landRedo: byId("land-redo-button"),
+    landSave: byId("land-save-button"),
     inspector: byId("inspector-panel"),
     inspectorToggle: byId("inspector-toggle"),
     proposalBar: byId("proposal-bar"),
@@ -60,6 +73,15 @@ export function createShell(callbacks = {}) {
   listen("inspector-close", "click", () => setInspectorOpen(false));
   listen("inspector-toggle", "click", () => setInspectorOpen(!elements.inspector.classList.contains("is-open")));
   listen("proposal-discard", "click", () => callbacks.onDiscardProposal?.());
+  listen("enter-selected-button", "click", () => callbacks.onEnterSelected?.());
+  listen("player-step-up-button", "click", () => callbacks.onPlayerStep?.("UP"));
+  listen("player-step-left-button", "click", () => callbacks.onPlayerStep?.("LEFT"));
+  listen("player-step-right-button", "click", () => callbacks.onPlayerStep?.("RIGHT"));
+  listen("player-step-down-button", "click", () => callbacks.onPlayerStep?.("DOWN"));
+  listen("simulation-advance-button", "click", () => callbacks.onSimulationAdvance?.());
+  listen("land-undo-button", "click", () => callbacks.onLandUndo?.());
+  listen("land-redo-button", "click", () => callbacks.onLandRedo?.());
+  listen("land-save-button", "click", () => callbacks.onLandSave?.());
   listen("theme-button", "click", () => {
     theme = theme === "dark" ? "light" : "dark";
     elements.shell.dataset.theme = theme;
@@ -154,6 +176,33 @@ export function createShell(callbacks = {}) {
       : "Mock login required / no GPS or KYC";
   }
 
+  function setPlayerHud({ sessionActive = false, location = null, movement = null, worldRevision = null } = {}) {
+    elements.commandCenter.dataset.session = sessionActive ? "active" : "inactive";
+    elements.playerLocation.textContent = displayValue(location, sessionActive ? "UNKNOWN" : "OFFLINE");
+    elements.playerMovement.textContent = displayMovement(movement);
+    setWorldRevision(worldRevision);
+  }
+
+  function setWorldRevision(revision) {
+    const value = displayValue(revision, "R0");
+    elements.worldRevision.textContent = /^R/i.test(value) ? value : `R${value}`;
+  }
+
+  function setPlayerControls({ canEnter = false, canMove = false, canAdvance = false } = {}) {
+    elements.enterSelected.disabled = !canEnter;
+    elements.simulationAdvance.disabled = !canAdvance;
+    for (const button of [elements.stepUp, elements.stepLeft, elements.stepRight, elements.stepDown]) {
+      button.disabled = !canMove;
+    }
+  }
+
+  function setLandControls({ canUndo = false, canRedo = false, canSave = false, dirty = false } = {}) {
+    elements.landUndo.disabled = !canUndo;
+    elements.landRedo.disabled = !canRedo;
+    elements.landSave.disabled = !canSave;
+    elements.commandCenter.dataset.dirty = String(Boolean(dirty));
+  }
+
   function openMockConsent() {
     if (elements.consentDialog.open) return false;
     elements.consentDialog.returnValue = "cancel";
@@ -193,6 +242,10 @@ export function createShell(callbacks = {}) {
     setProposal,
     setLoggedIn,
     setStarterParcel,
+    setPlayerHud,
+    setWorldRevision,
+    setPlayerControls,
+    setLandControls,
     openMockConsent,
     closeMockConsent,
     setReady,
@@ -210,4 +263,33 @@ export function createShell(callbacks = {}) {
       clearTimeout(toastTimer);
     }
   };
+}
+
+function displayValue(value, fallback) {
+  if (value === null || value === undefined || value === "") return fallback;
+  if (typeof value === "string" || typeof value === "number") return String(value);
+  if (typeof value !== "object") return fallback;
+
+  const direct = value.label
+    ?? value.location
+    ?? value.entity_id
+    ?? value.entityId
+    ?? value.facing
+    ?? value.state
+    ?? value.revision;
+  if (direct !== null && direct !== undefined && direct !== "") return String(direct);
+
+  if (Number.isFinite(value.x) && Number.isFinite(value.y)) {
+    return `${Number(value.x).toFixed(1)}, ${Number(value.y).toFixed(1)}`;
+  }
+  return fallback;
+}
+
+function displayMovement(value) {
+  if (value && typeof value === "object") {
+    const facing = value.facing ?? value.direction ?? value.state ?? null;
+    const steps = value.step_count ?? value.stepCount ?? value.steps ?? null;
+    if (facing && Number.isFinite(Number(steps))) return `${facing} / ${steps}`;
+  }
+  return displayValue(value, "IDLE");
 }

@@ -1,0 +1,140 @@
+{
+  "task_id": "KAIOS-WV-SPRINT-003",
+  "human_decision_id": "HUMAN-SPRINT-003-001",
+  "title": "KAIOS Digital Earth Alpha implementation sprint 003",
+  "objective": "Evolve the frozen World Viewer architecture into a synthetic Living World product Alpha with local land revision history, building and room integrity, bounded Life simulation, player movement, and automated product QA.",
+  "task_source_type": "HUMAN_IMPLEMENTATION_AUTHORIZATION",
+  "task_source_actor": "Human PrimeForge",
+  "assigned_manager": "codex-gm-01",
+  "reviewer": "codex-gm-01",
+  "risk_level": "R1_SYNTHETIC_DIGITAL_EARTH_ALPHA",
+  "claim_authority": "MANUAL_CODEX_DISPATCH_PRE_ATOMIC_AUTHORITY",
+  "claim_id": "CLAIM-KAIOS-WV-SPRINT-003-20260717-CODEX-GM-01",
+  "fencing_token": "CODEX-MANUAL-WV-SPRINT-003-001",
+  "worker_clones": [
+    {
+      "clone_id": "CLONE-WV-LAND-07",
+      "scope": ["land/land-runtime.js"],
+      "status": "DONE"
+    },
+    {
+      "clone_id": "CLONE-WV-BUILDING-ROOM-08",
+      "scope": ["building/building-runtime.js", "room/room-runtime.js"],
+      "status": "DONE"
+    },
+    {
+      "clone_id": "CLONE-WV-LIFE-09",
+      "scope": ["life/life-runtime.js"],
+      "status": "DONE"
+    },
+    {
+      "clone_id": "CLONE-WV-PLAYER-10",
+      "scope": ["player/player-controller.js"],
+      "status": "DONE"
+    },
+    {
+      "clone_id": "CLONE-WV-INSPECTOR-11",
+      "scope": ["inspector/inspector-view.js"],
+      "status": "DONE"
+    },
+    {
+      "clone_id": "CLONE-WV-SHELL-12",
+      "scope": ["index.html", "ui/shell.js", "ui/styles.css"],
+      "status": "DONE"
+    }
+  ],
+  "authorized_actions": [
+    "IMPLEMENT_DIGITAL_EARTH_ALPHA",
+    "IMPLEMENT_LOCAL_LAND_HISTORY_AND_DRAFT_PERSISTENCE",
+    "IMPLEMENT_BUILDING_AND_ROOM_PROJECTIONS",
+    "IMPLEMENT_SYNTHETIC_LIFE_SIMULATION",
+    "IMPLEMENT_PLAYER_MOVEMENT",
+    "IMPLEMENT_AUTONOMOUS_PRODUCT_QA",
+    "RUN_TESTS",
+    "PRODUCE_EVIDENCE",
+    "COMMIT_REVIEWED_WORK",
+    "PUSH_REVIEWED_NON_PROTECTED_WORK",
+    "DEPLOY_STATIC_PAGES_ALPHA"
+  ],
+  "forbidden_actions": [
+    "REAL_KYC",
+    "REAL_GPS",
+    "REAL_LAND_DATA",
+    "AUTHORITATIVE_OWNERSHIP_MUTATION",
+    "REAL_HEALTH_DATA",
+    "WALLET_OR_PAYMENT",
+    "BACKEND_WRITE_SERVICE",
+    "RUNTIME_CURRENT_MODIFICATION",
+    "UNIVERSE_MAP_CURRENT_MODIFICATION",
+    "FROZEN_BASELINE_MODIFICATION",
+    "TOKEN_CONTRACT_MODIFICATION",
+    "FORCE_PUSH"
+  ],
+  "authorized_paths": [
+    "KGEN-KAIOS/world-viewer/**",
+    ".github/workflows/world-viewer-product-qa.yml",
+    "KGEN-AI-Company/reports/handoffs/KAIOS-WV-SPRINT-003/**",
+    "KGEN-Organization/WorkOrders/WORK_QUEUE.md",
+    "KGEN-KAIOS/decision/decision_log.jsonl",
+    "KGEN-AI-Company/reports/CODEX_REVIEW_LOG.md",
+    "KGEN-KAIOS/README.md",
+    "KGEN_MASTER_LIBRARY_INDEX.md",
+    "README.md"
+  ],
+  "protected_paths": [
+    "contracts/**",
+    "wallet/**",
+    "bridge/**",
+    "K線西遊記/temples/12345/**",
+    "docs/physics/*CURRENT*",
+    "docs/maps/*CURRENT*",
+    "KGEN-KAIOS/**/**BASELINE*",
+    "final-whitepaper/**",
+    "KGEN/contracts/**",
+    "Human Main worktree"
+  ],
+  "required_tests": [
+    "STATIC_DIGITAL_EARTH_ACCEPTANCE",
+    "LAND_HISTORY_INTEGRITY",
+    "DRAFT_SAVE_UNDO_REDO",
+    "PARCEL_VERSION_AND_OWNERSHIP_TIMELINE",
+    "BUILDING_TEMPLATE_AND_LIFECYCLE_INTEGRITY",
+    "ROOM_CONTENT_AND_OCCUPANT_INTEGRITY",
+    "LIFE_SIMULATION_INTEGRITY",
+    "PLAYER_WALK_AND_ENTER_FLOW",
+    "SIX_LEVEL_NAVIGATION",
+    "DESKTOP_AND_MOBILE_INPUT",
+    "RESPONSIVE_SCREENSHOT_DIFF",
+    "ACCESSIBILITY",
+    "PERFORMANCE",
+    "BROKEN_LINK_AND_CONSOLE_CHECK",
+    "JSON_AND_MODULE_SYNTAX",
+    "PROTECTED_PATH_DIFF",
+    "SECRET_SCAN"
+  ],
+  "branch_name": "codex/world-viewer-sprint-003-digital-earth",
+  "worktree_name": "kline-odyssey-world-viewer-sprint-003",
+  "base_sha": "62063a8bb873f4c930e47b32bed7e88f17cc448d",
+  "commit_allowed": true,
+  "push_allowed": true,
+  "merge_allowed": true,
+  "deploy_allowed": true,
+  "deploy_scope": "GITHUB_PAGES_STATIC_DIGITAL_EARTH_ALPHA_ONLY",
+  "handoff_target": "codex-gm-01",
+  "implementation_commit_sha": "bc98b9a6602f27cc4b21ed2d5c8a6aca5883fae4",
+  "review_result": "APPROVED",
+  "review_evidence": {
+    "static_acceptance": "PASS",
+    "runtime_integrity": "PASS",
+    "product_qa": "115_PASS_0_FAIL_0_SKIP",
+    "protected_path_violations": 0,
+    "runtime_current_modified": false,
+    "universe_map_current_modified": false,
+    "frozen_baseline_modified": false
+  },
+  "created_at": "2026-07-17T00:50:01+08:00",
+  "updated_at": "2026-07-17T04:35:00+08:00",
+  "claim_state": "CLOSED",
+  "lease_state": "RELEASED",
+  "status": "DONE"
+}

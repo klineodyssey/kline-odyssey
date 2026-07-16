@@ -1,19 +1,19 @@
 ---
 TITLE: "KAIOS World Viewer Architecture Package"
-VERSION: "1.2.0"
-REVISION: "2026-07-16.3"
-STATUS: "SPRINT_002_ALPHA_COMPLETE"
+VERSION: "1.3.0"
+REVISION: "2026-07-17.1"
+STATUS: "SPRINT_003_DIGITAL_EARTH_ALPHA_COMPLETE"
 ARCHITECTURE: "BASELINE_FROZEN_V1.0"
-IMPLEMENTATION: "WORLD_VIEWER_ALPHA"
-WORKQUEUE: "KAIOS-WV-SPRINT-002_DONE"
+IMPLEMENTATION: "DIGITAL_EARTH_ALPHA"
+WORKQUEUE: "KAIOS-WV-SPRINT-003_READY_FOR_REVIEW"
 DEPLOYMENT: "STATIC_PAGES_COMPATIBLE"
-LAST_UPDATED: "2026-07-16"
+LAST_UPDATED: "2026-07-17"
 UPDATED_BY: "Codex / codex-gm-01"
 REVIEWED_BY: "Codex internal independent UI review; Human delegated approval"
-SOURCE_COMMIT: "151b14433d94e264661941ab977e3735fe8e03eb"
-TASK_ID: "KAIOS-WV-SPRINT-002"
-HUMAN_DECISION_ID: "HUMAN-SPRINT-002-001"
-CHANGE_REASON: "Deliver the first World Viewer Alpha with complete Life projection, explicit mock location consent, approved land proposals and repeatable Product QA."
+SOURCE_COMMIT: "RECORDED_BY_SPRINT_003_GIT_HANDOFF"
+TASK_ID: "KAIOS-WV-SPRINT-003"
+HUMAN_DECISION_ID: "HUMAN-SPRINT-003-001"
+CHANGE_REASON: "Evolve the Viewer into a local synthetic Living World with land history, buildings, rooms, life simulation, player movement and autonomous regression QA."
 ANCESTOR: "KGEN-KAIOS/V8.1/index.html; KGEN-KAIOS/land/LAND_RUNTIME_ARCHITECTURE_BASELINE.md"
 SOURCE_OF_TRUTH: false
 DOMAIN: KGENVERSE
@@ -33,15 +33,15 @@ CANONICAL_FILE: "KGEN-KAIOS/world-viewer/README.md"
 
 | Field | Value |
 |---|---|
-| Human Decision | `HUMAN-SPRINT-002-001` |
+| Human Decision | `HUMAN-SPRINT-003-001` |
 | Architecture | `BASELINE_FROZEN_V1.0` |
-| Implementation | `SPRINT_002_WORLD_VIEWER_ALPHA_COMPLETE` |
+| Implementation | `SPRINT_003_DIGITAL_EARTH_ALPHA_COMPLETE` |
 | Sprint Task Envelope | `DONE` |
 | Deployment | `STATIC_GITHUB_PAGES_COMPATIBLE` |
 | Executable `index.html` | `CREATED` |
 | Art / 3D / animation | `OUT_OF_SCOPE` |
 
-This package now includes the first working KAIOS map control surface for land. It uses synthetic public fixtures and local-only proposal drafts; it does not modify a registry, grant land, perform real authentication, request real GPS, or create authoritative ownership state.
+This package now includes the first working KAIOS Digital Earth control surface. It uses synthetic public fixtures, local-only proposal drafts and bounded browser simulation; it does not modify a registry, grant land, perform real authentication, request real GPS, or create authoritative ownership state.
 
 ## 2. Architecture Verdict
 
@@ -125,15 +125,20 @@ World Viewer V1 therefore defines adapter boundaries and draft projections. It d
 | `tasks/KAIOS-WV-SPRINT-001.task-envelope.json` | Sprint 001 execution and closeout envelope |
 | `tasks/KAIOS-WV-SPRINT-002.task-envelope.json` | Sprint 002 Alpha execution and closeout envelope |
 | `SPRINT_002_ALPHA_REPORT.md` | Alpha, architecture diff, implementation diff, QA, performance and Sprint 003 recommendation |
+| `tasks/KAIOS-WV-SPRINT-003.task-envelope.json` | Sprint 003 Digital Earth execution envelope |
+| `SPRINT_003_DIGITAL_EARTH_REPORT.md` | Digital Earth demo, diffs, QA, performance and next-sprint recommendation |
 | `index.html` | Unique executable World Viewer entry |
 | `app.js` | Application orchestration and read-only proposal flow |
 | `camera/`, `renderer/`, `lod/` | Bounded camera, Canvas renderer and six-level semantic navigation |
 | `input/`, `selection/` | Mouse, touch, keyboard and selection state controllers |
 | `inspector/`, `life/` | Canonical-data inspector and Life OS status projection |
+| `land/`, `building/`, `room/`, `player/` | Local Land history, read-only structure integrity and player movement runtimes |
 | `ui/` | Responsive shell, context menu and visual system |
 | `data/` | Validated synthetic world fixture and loader |
 | `tests/acceptance_static.py` | Offline package, fixture and safety validation |
 | `tests/product_qa.py` | Browser, responsive, accessibility, interaction and performance gate |
+| `tests/runtime_integrity.mjs` | Land, Building, Room, Life and Player invariant gate |
+| `tests/baselines/sprint-003/` | Required desktop, tablet, Android and iPhone visual baselines |
 | `tests/evidence/sprint-002/` | Alpha screenshots plus machine-readable QA and performance reports |
 | `.github/workflows/world-viewer-product-qa.yml` | Pull-request and push Product QA workflow |
 
@@ -150,3 +155,16 @@ Sprint 002 preserves Earth K280 through Room navigation and adds an explicit moc
 See `SPRINT_002_ALPHA_REPORT.md` for the Alpha demo, architecture diff, implementation diff, QA report, performance report and Sprint 003 recommendation. Real ownership, KYC, GPS, backend writes and settlement remain outside this implementation.
 
 No decision in this package authorizes real land, KYC, GPS, ownership mutation, backend write service, financial settlement or production authority.
+
+## 9. Sprint 003 Digital Earth Result
+
+Sprint 003 preserves the frozen World Viewer architecture and adds a bounded product layer:
+
+- Local Land Runtime V2 history, parcel revisions, ownership timeline, draft save and undo/redo.
+- Eight Building templates with health, level, capacity and lifecycle projections.
+- Room-to-Furniture-to-Equipment-to-Organism-to-Life integrity links.
+- Synthetic Life simulation for Player, AI Worker, NPC, Pet and Plant profiles.
+- Player walking, room entry, visible map marker and a persistent local-only land draft.
+- Required visual baselines and automatic runtime, accessibility, responsive, performance and regression checks.
+
+See `SPRINT_003_DIGITAL_EARTH_REPORT.md` and `tests/evidence/sprint-003/` for the reviewed implementation and QA evidence. Architecture baselines, Runtime CURRENT, Universe Map CURRENT and all protected paths remain unchanged.

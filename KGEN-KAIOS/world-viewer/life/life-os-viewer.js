@@ -371,7 +371,21 @@ function dnaSummaryText(summary) {
   return `${summary.classification} / ${count}`;
 }
 
-/** Create an allowlisted, privacy-minimized, read-only Life stack projection. */
+function inventoryText(value) {
+  if (Array.isArray(value)) {
+    const labels = value.map((item) => isRecord(item)
+      ? `${firstKnown(item.item_id, item.id, item.name, UNKNOWN_VALUE)} x${firstKnown(item.quantity, item.count, UNKNOWN_VALUE)}`
+      : String(item));
+    return labels.join(", ") || "EMPTY";
+  }
+  if (!isRecord(value)) return UNKNOWN_VALUE;
+  const labels = Object.entries(value)
+    .filter(([, quantity]) => typeof quantity === "number" || typeof quantity === "string")
+    .map(([item, quantity]) => `${item} x${quantity}`);
+  return labels.join(", ") || "EMPTY";
+}
+
+/** Create an allowlisted, privacy-minimized Life stack projection. */
 export function projectLifeProfile(profile = {}) {
   const safeProfile = isRecord(profile) ? profile : {};
   const layerEntries = LIFE_LAYER_DEFINITIONS.map((definition) => [
@@ -403,6 +417,8 @@ export function projectLifeProfile(profile = {}) {
   const gaCountValue = firstKnown(safeProfile.ga_count, safeProfile.gaCount, gaSource.count);
   const gaCount = Number.isInteger(gaCountValue) ? gaCountValue : UNKNOWN_VALUE;
 
+  const rawAgeDays = firstKnown(safeProfile.age_days, individual.age_days);
+  const numericAgeDays = Number(rawAgeDays);
   return Object.freeze({
     profileId: String(resolvedProfileId),
     lifeId: String(firstKnown(safeProfile.life_id, safeProfile.lifeId, resolvedProfileId)),
@@ -432,6 +448,10 @@ export function projectLifeProfile(profile = {}) {
     rest: metricValue(firstKnown(vitalsSource.rest, safeProfile.rest)),
     integrity: metricValue(firstKnown(vitalsSource.integrity, safeProfile.integrity)),
     occupation: String(firstKnown(citizen.occupation, UNKNOWN_VALUE)),
+    ageDays: Number.isFinite(numericAgeDays)
+      ? String(Math.round(numericAgeDays * 100) / 100)
+      : UNKNOWN_VALUE,
+    inventory: inventoryText(safeProfile.inventory),
     gaCount,
     gaProfile: String(firstKnown(safeProfile.ga_profile, safeProfile.gaProfile, gaSource.profile, UNKNOWN_VALUE)),
     dnaSummary,
@@ -589,7 +609,31 @@ function renderPublicCapabilities(documentRef, projection) {
   return section;
 }
 
-function renderProjectedProfile(documentRef, projection) {
+function renderDailyLife(documentRef, projection, callbacks) {
+  const section = createElement(documentRef, "section", "life-os-viewer__daily inspector-section");
+  section.appendChild(createElement(documentRef, "h5", "life-os-viewer__section-title", "Daily life simulation"));
+  appendRows(documentRef, section, [
+    ["Age (days)", projection.ageDays],
+    ["Occupation", projection.occupation],
+    ["Activity", projection.activityState],
+    ["Inventory", projection.inventory]
+  ]);
+  if (typeof callbacks.onAction === "function") {
+    const actions = createElement(documentRef, "div", "life-os-viewer__actions");
+    actions.setAttribute("role", "toolbar");
+    actions.setAttribute("aria-label", `Actions for ${projection.displayName}`);
+    ["EAT", "DRINK", "SLEEP", "WAKE", "WORK"].forEach((action) => {
+      const button = createElement(documentRef, "button", "inspector-view__life-action", action);
+      button.type = "button";
+      button.addEventListener("click", () => callbacks.onAction(action, projection));
+      actions.appendChild(button);
+    });
+    section.appendChild(actions);
+  }
+  return section;
+}
+
+function renderProjectedProfile(documentRef, projection, callbacks) {
   const article = createElement(documentRef, "article", "life-os-viewer__profile");
   article.setAttribute("data-life-profile", projection.profileId);
   const heading = createElement(
@@ -606,15 +650,16 @@ function renderProjectedProfile(documentRef, projection) {
   ]);
   article.appendChild(renderLifeStack(documentRef, projection));
   article.appendChild(renderVitals(documentRef, projection));
+  article.appendChild(renderDailyLife(documentRef, projection, callbacks));
   article.appendChild(renderPublicCapabilities(documentRef, projection));
   return article;
 }
 
 /**
- * Render the Life OS projection without HTML parsing or write capabilities.
+ * Render the Life OS projection without HTML parsing or authoritative writes.
  * Returns the projections used by the view for integration and tests.
  */
-export function renderLifeOsViewer(container, input = {}) {
+export function renderLifeOsViewer(container, input = {}, callbacks = {}) {
   if (!container || typeof container.replaceChildren !== "function") {
     throw new TypeError("Life OS viewer container must be a DOM element");
   }
@@ -632,13 +677,13 @@ export function renderLifeOsViewer(container, input = {}) {
   const projections = rawProfiles.filter(isRecord).map(projectLifeProfile);
 
   const root = createElement(documentRef, "section", "life-os-viewer");
-  root.setAttribute("aria-label", "Life OS Alpha read-only public synthetic status");
+  root.setAttribute("aria-label", "Life OS Alpha local public synthetic status");
   root.appendChild(createElement(documentRef, "h3", "life-os-viewer__title", "Life OS Alpha"));
   root.appendChild(createElement(
     documentRef,
     "p",
     "life-os-viewer__privacy",
-    "Read-only PUBLIC_SYNTHETIC projection. No private DNA, health, identity, GPS, or write authority."
+    "Local-only PUBLIC_SYNTHETIC projection. Actions update browser simulation only; no private DNA, identity, GPS, or registry authority."
   ));
 
   if (projections.length === 0) {
@@ -647,7 +692,7 @@ export function renderLifeOsViewer(container, input = {}) {
     );
   } else {
     projections.forEach((projection) => {
-      root.appendChild(renderProjectedProfile(documentRef, projection));
+      root.appendChild(renderProjectedProfile(documentRef, projection, callbacks));
     });
   }
 
@@ -655,12 +700,12 @@ export function renderLifeOsViewer(container, input = {}) {
   return Object.freeze(projections);
 }
 
-export function createLifeOsViewer(container) {
+export function createLifeOsViewer(container, callbacks = {}) {
   let lastInput = {};
   return Object.freeze({
     render(input = lastInput) {
       lastInput = input;
-      return renderLifeOsViewer(container, input);
+      return renderLifeOsViewer(container, input, callbacks);
     },
     clear() {
       lastInput = {};
