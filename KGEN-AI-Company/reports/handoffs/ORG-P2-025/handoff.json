@@ -1,0 +1,89 @@
+{
+  "schema_version": "1.1",
+  "task_id": "ORG-P2-025",
+  "human_decision_id": null,
+  "task_envelope_id": null,
+  "worker_id": "cursor-01",
+  "worker_agent_id": "cursor-agent-e1a1",
+  "session_id": "SESSION-20260716-03-EPHEMERAL",
+  "claim_id": "CLAIM-ORG-P2-025-20260716T0637-cursor-01",
+  "reviewer": "codex-gm-01",
+  "branch": "cursor-handoff/ORG-P2-025-20260716",
+  "worktree": "cursor/monkey-boot-gap-fill-025",
+  "base_sha": "89f3c351c488a0705f514adba974dd6c3dd3cb3a",
+  "head_sha": "3b9b4077ce6494cc012106f3e97b2e9698ac6195",
+  "observed_origin_main": "89f3c351c488a0705f514adba974dd6c3dd3cb3a",
+  "claimed_at": "2026-07-16T06:37:05Z",
+  "lease_expires_at": "2026-07-16T10:37:05Z",
+  "heartbeat_at": "2026-07-16T06:37:05Z",
+  "status": "REVIEW",
+  "review_status": "PENDING_CODEX_REVIEW",
+  "preflight_result": "PASS",
+  "concurrent_sessions_acknowledged": true,
+  "atomic_claim_service": "NOT_IMPLEMENTED",
+  "legacy_rules_suppressed": [
+    "CURSOR_EMPLOYEE_BOOT_WORKQUEUE_SELF_STATUS_UPDATE"
+  ],
+  "workqueue_modified": false,
+  "workqueue_closeout_owner": "codex-gm-01",
+  "report_path": "KGEN-AI-Company/reports/ORG-P2-025_REPORTS_CHECKLIST.md",
+  "files_changed": [
+    "KGEN-AI-Company/reports/ORG-P2-025_REPORTS_CHECKLIST.md",
+    "KGEN-AI-Company/reports/handoffs/ORG-P2-025/HANDOFF.md",
+    "KGEN-AI-Company/reports/handoffs/ORG-P2-025/handoff.json"
+  ],
+  "files_added": [
+    "KGEN-AI-Company/reports/ORG-P2-025_REPORTS_CHECKLIST.md",
+    "KGEN-AI-Company/reports/handoffs/ORG-P2-025/HANDOFF.md",
+    "KGEN-AI-Company/reports/handoffs/ORG-P2-025/handoff.json"
+  ],
+  "files_deleted": [],
+  "tests_run": [
+    "CURSOR_PREFLIGHT",
+    "SOURCE_EXISTENCE",
+    "CANON_JSON_PARSE",
+    "REPORT_INVENTORY",
+    "REMOTE_HANDOFF_SCAN",
+    "SINGLE_TASK_PURITY",
+    "PROTECTED_PATH_DIFF",
+    "SECRET_SCAN"
+  ],
+  "test_results": {
+    "CURSOR_PREFLIGHT": "PASS",
+    "SOURCE_EXISTENCE": "PASS",
+    "CANON_JSON_PARSE": "PASS",
+    "REPORT_INVENTORY": "PASS",
+    "REMOTE_HANDOFF_SCAN": "PASS",
+    "SINGLE_TASK_PURITY": "PASS",
+    "PROTECTED_PATH_DIFF": "PASS",
+    "SECRET_SCAN": "PASS"
+  },
+  "evidence": [
+    "CURSOR_PREFLIGHT",
+    "CLAIM_RECORD",
+    "REPORT",
+    "HANDOFF_MD",
+    "HANDOFF_JSON"
+  ],
+  "known_issues": [
+    "atomic_claim_service NOT_IMPLEMENTED",
+    "WORK_QUEUE left OPEN for Codex closeout",
+    "Codex review backlog for 005-024 swarm"
+  ],
+  "risks": [
+    "PF2 multi-window shared cursor-01",
+    "W1 review backlog blocks Phase-2 closure gate"
+  ],
+  "protected_path_violations": [],
+  "runtime_current_modified": false,
+  "universe_map_modified": false,
+  "implementation_scope": "documentation_checklist_only",
+  "out_of_scope_observations": [
+    "ORG-P2-011 tip missing handoff.json",
+    "005-024 swarm awaiting Codex"
+  ],
+  "recommended_next_action": "CODEX_REVIEW_THEN_WORKQUEUE_CLOSEOUT",
+  "supersedes_archive_tips": [],
+  "push_allowed": true,
+  "merge_allowed": false
+}
