@@ -2,19 +2,36 @@
   "meta": {
     "synthetic": true,
     "non_authoritative": true,
-    "fixture_id": "KAIOS-WV-SPRINT-003",
-    "schema_version": "3.0.0",
-    "snapshot_id": "WV-SYNTHETIC-20260717-003",
-    "source_revision": "HUMAN-SPRINT-003-001",
+    "fixture_id": "KAIOS-WV-SPRINT-004",
+    "schema_version": "4.0.0",
+    "snapshot_id": "WV-SYNTHETIC-20260717-004",
+    "source_revision": "HUMAN-SPRINT-004-001",
     "generated_at": "2026-07-17T00:00:00Z",
     "stale_after": "2099-12-31T23:59:59Z",
     "privacy_class": "PUBLIC_SYNTHETIC",
     "coordinate_model": "K280_GEODETIC_WITH_LOCAL_VIEW_PROJECTIONS",
-    "product_stage": "DIGITAL_EARTH_ALPHA",
+    "product_stage": "CIVILIZATION_ALPHA",
     "simulation_scope": "LOCAL_SYNTHETIC_ONLY",
-    "storage_namespace": "kaios.world-viewer.sprint-003"
+    "storage_namespace": "kaios.world-viewer.sprint-004"
   },
   "scene_bounds": [0, 0, 1200, 760],
+  "civilization_alpha": {
+    "simulation_id": "civilization-alpha-hsinchu-001",
+    "clock_start": "2036-03-20T06:00:00Z",
+    "city_id": "city-hsinchu-overlay",
+    "player_id": "mock-player-001",
+    "player_life_id": "life-player-001",
+    "ai_worker_id": "life-wukong-001",
+    "prototype_balance": 500,
+    "starter_plot_ids": [
+      "starter-garden-001",
+      "starter-field-001",
+      "starter-orchard-001"
+    ],
+    "simulation_only": true,
+    "real_payment": false,
+    "authoritative_registry": false
+  },
   "player": {
     "player_id": "mock-player-001",
     "display_name": "PrimeForge Explorer",

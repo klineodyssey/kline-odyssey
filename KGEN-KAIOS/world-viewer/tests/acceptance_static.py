@@ -33,9 +33,19 @@ REQUIRED_FILES = (
     "life/life-os-viewer.js",
     "life/life-runtime.js",
     "player/player-controller.js",
+    "simulation/simulation-clock.js",
+    "citizen/citizen-daily-runtime.js",
+    "ai/ai-worker-runtime.js",
+    "economy/economy-runtime.js",
+    "agriculture/agriculture-runtime.js",
+    "city/city-runtime.js",
+    "civilization/runtime-utils.js",
+    "civilization/civilization-runtime.js",
+    "civilization/civilization-view.js",
     "data/world-store.js",
     "data/synthetic-world.json",
     "tests/runtime_integrity.mjs",
+    "tests/civilization_integrity.mjs",
 )
 
 PROTECTED_PREFIXES = (
@@ -261,6 +271,20 @@ def check_alpha_contract(errors: list[str], data: dict, source_text: str, html: 
     if "navigator.geolocation" in lowered or "getcurrentposition" in lowered:
         fail(errors, "real browser geolocation is forbidden in the Alpha")
 
+    civilization = data.get("civilization_alpha", {})
+    if civilization.get("simulation_only") is not True:
+        fail(errors, "Civilization Alpha must declare simulation_only")
+    if civilization.get("real_payment") is not False:
+        fail(errors, "Civilization Alpha must prohibit real payment")
+    if civilization.get("authoritative_registry") is not False:
+        fail(errors, "Civilization Alpha cannot become the authoritative registry")
+    for label in ("Sleep", "Breakfast", "Work", "Study", "Shopping", "Exercise", "Entertainment"):
+        if label.upper() not in source_text.upper():
+            fail(errors, f"Citizen schedule is missing {label}")
+    for resource in ("RICE", "VEGETABLE", "FRUIT", "FISH", "PIG", "CHICKEN", "EGG", "MILK", "WATER", "WOOD", "STONE", "IRON", "ELECTRICITY"):
+        if resource not in source_text:
+            fail(errors, f"resource catalog is missing {resource}")
+
 
 def main() -> int:
     errors: list[str] = []
@@ -444,7 +468,7 @@ def main() -> int:
         f"{len(REQUIRED_FILES)} files;",
         f"{parsed_json_records} JSON records;",
         f"{checked_references} local references;",
-        "Digital Earth Alpha + Land/Building/Room/Life/Player runtimes + 8 proposals; protected-path input clean",
+        "Civilization Alpha + Land/Building/Room/Life/Player/Citizen/AI/Economy/Agriculture/City runtimes + 8 proposals; protected-path input clean",
     )
     return 0
 

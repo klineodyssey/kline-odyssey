@@ -1,19 +1,19 @@
 ---
 TITLE: "KAIOS World Viewer Architecture Package"
-VERSION: "1.3.0"
-REVISION: "2026-07-17.1"
-STATUS: "SPRINT_003_DIGITAL_EARTH_ALPHA_COMPLETE"
+VERSION: "1.4.0"
+REVISION: "2026-07-17.2"
+STATUS: "SPRINT_004_CIVILIZATION_ALPHA_COMPLETE"
 ARCHITECTURE: "BASELINE_FROZEN_V1.0"
-IMPLEMENTATION: "DIGITAL_EARTH_ALPHA"
-WORKQUEUE: "KAIOS-WV-SPRINT-003_READY_FOR_REVIEW"
+IMPLEMENTATION: "CIVILIZATION_ALPHA"
+WORKQUEUE: "KAIOS-WV-SPRINT-004_READY_FOR_REVIEW"
 DEPLOYMENT: "STATIC_PAGES_COMPATIBLE"
 LAST_UPDATED: "2026-07-17"
 UPDATED_BY: "Codex / codex-gm-01"
 REVIEWED_BY: "Codex internal independent UI review; Human delegated approval"
 SOURCE_COMMIT: "RECORDED_BY_SPRINT_003_GIT_HANDOFF"
-TASK_ID: "KAIOS-WV-SPRINT-003"
-HUMAN_DECISION_ID: "HUMAN-SPRINT-003-001"
-CHANGE_REASON: "Evolve the Viewer into a local synthetic Living World with land history, buildings, rooms, life simulation, player movement and autonomous regression QA."
+TASK_ID: "KAIOS-WV-SPRINT-004"
+HUMAN_DECISION_ID: "HUMAN-SPRINT-004-001"
+CHANGE_REASON: "Run a bounded synthetic civilization with daily life, autonomous AI work, agriculture, food economy, market interaction, city metrics and shared time."
 ANCESTOR: "KGEN-KAIOS/V8.1/index.html; KGEN-KAIOS/land/LAND_RUNTIME_ARCHITECTURE_BASELINE.md"
 SOURCE_OF_TRUTH: false
 DOMAIN: KGENVERSE
@@ -33,9 +33,9 @@ CANONICAL_FILE: "KGEN-KAIOS/world-viewer/README.md"
 
 | Field | Value |
 |---|---|
-| Human Decision | `HUMAN-SPRINT-003-001` |
+| Human Decision | `HUMAN-SPRINT-004-001` |
 | Architecture | `BASELINE_FROZEN_V1.0` |
-| Implementation | `SPRINT_003_DIGITAL_EARTH_ALPHA_COMPLETE` |
+| Implementation | `SPRINT_004_CIVILIZATION_ALPHA_COMPLETE` |
 | Sprint Task Envelope | `DONE` |
 | Deployment | `STATIC_GITHUB_PAGES_COMPATIBLE` |
 | Executable `index.html` | `CREATED` |
@@ -140,6 +140,13 @@ World Viewer V1 therefore defines adapter boundaries and draft projections. It d
 | `tests/runtime_integrity.mjs` | Land, Building, Room, Life and Player invariant gate |
 | `tests/baselines/sprint-003/` | Required desktop, tablet, Android and iPhone visual baselines |
 | `tests/evidence/sprint-002/` | Alpha screenshots plus machine-readable QA and performance reports |
+| `tasks/KAIOS-WV-SPRINT-004.task-envelope.json` | Sprint 004 Civilization Alpha execution envelope |
+| `SPRINT_004_CIVILIZATION_ALPHA_REPORT.md` | Product, implementation, QA, performance and Sprint 005 candidate |
+| `simulation/`, `citizen/`, `ai/` | Shared world time, Citizen daily schedule and autonomous AI Worker shift |
+| `economy/`, `agriculture/`, `city/`, `civilization/` | Prototype market, farming, derived city metrics and product orchestration |
+| `tests/civilization_integrity.mjs` | Economy, food, life, AI, city and memory-bound invariant gate |
+| `tests/baselines/sprint-004/` | Civilization Alpha device, orientation and theme visual baselines |
+| `tests/evidence/sprint-004/` | Civilization QA, performance, integrity, screenshots and visual diffs |
 | `.github/workflows/world-viewer-product-qa.yml` | Pull-request and push Product QA workflow |
 
 ## 7. Implementation Boundary
@@ -168,3 +175,9 @@ Sprint 003 preserves the frozen World Viewer architecture and adds a bounded pro
 - Required visual baselines and automatic runtime, accessibility, responsive, performance and regression checks.
 
 See `SPRINT_003_DIGITAL_EARTH_REPORT.md` and `tests/evidence/sprint-003/` for the reviewed implementation and QA evidence. Architecture baselines, Runtime CURRENT, Universe Map CURRENT and all protected paths remain unchanged.
+
+## 10. Sprint 004 Civilization Result
+
+Sprint 004 adds a shared synthetic calendar, complete Citizen daily schedule, autonomous Wukong 001 shift, thirteen-resource food economy, Starter Parcel farming, local market transactions and derived city health. The Civilization Inspector provides Today, Farm, Market and City tabs on desktop and mobile.
+
+The reviewed browser gate reports `128 PASS / 0 FAIL / 0 SKIP` across desktop, tablet, Android and iPhone viewports. See `SPRINT_004_CIVILIZATION_ALPHA_REPORT.md` and `tests/evidence/sprint-004/` for the full product flow, integrity evidence, visual baselines and performance results.

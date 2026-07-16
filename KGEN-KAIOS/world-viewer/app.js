@@ -1,5 +1,7 @@
 import { createCameraController } from "./camera/camera-controller.js";
 import { createBuildingRuntime } from "./building/building-runtime.js";
+import { createCivilizationRuntime } from "./civilization/civilization-runtime.js";
+import { createCivilizationView } from "./civilization/civilization-view.js";
 import { loadSyntheticWorld } from "./data/world-store.js";
 import { createInputController } from "./input/input-controller.js";
 import { createInspectorView } from "./inspector/inspector-view.js";
@@ -35,6 +37,7 @@ let landRuntime = null;
 let buildingRuntime = null;
 let roomRuntime = null;
 let lifeRuntime = null;
+let civilizationRuntime = null;
 let playerController = null;
 const selectedLandRevisions = new Map();
 
@@ -49,6 +52,7 @@ let renderer = null;
 let input = null;
 let inspector = null;
 let lifeViewer = null;
+let civilizationView = null;
 let contextMenu = null;
 
 const shell = createShell({
@@ -65,6 +69,7 @@ const shell = createShell({
   onEnterSelected: () => activateEntity(currentEntity()),
   onPlayerStep: (direction) => movePlayer(direction),
   onSimulationAdvance: () => advanceSimulation(),
+  onSimulationAuto: () => toggleSimulation(),
   onLandUndo: () => changeLandHistory("UNDO"),
   onLandRedo: () => changeLandHistory("REDO"),
   onLandSave: () => saveLandDraft(),
@@ -279,7 +284,11 @@ function renderInspector() {
   if (!world) return;
   const entity = currentEntity() ?? lod.getScene().current ?? world.earth;
 
-  if (mode === "LIFE") {
+  if (mode === "CIVILIZATION") {
+    inspectorKind.textContent = "CIVILIZATION";
+    inspectorTitle.textContent = "Hsinchu Living District";
+    civilizationView.render(civilizationRuntime.getSnapshot());
+  } else if (mode === "LIFE") {
     if (activeLifeProfile) {
       const runtimeProfile = profileWithRuntime(activeLifeProfile);
       inspectorKind.textContent = "LIFE";
@@ -445,7 +454,7 @@ function syncCommandState() {
   shell.setPlayerControls({
     canEnter: Boolean(playerState?.sessionActive && canEnterEntity(entity)),
     canMove: Boolean(playerState?.sessionActive),
-    canAdvance: Boolean(playerState?.sessionActive && lifeRuntime)
+    canAdvance: Boolean(playerState?.sessionActive && civilizationRuntime)
   });
   shell.setLandControls({
     canUndo: snapshot?.can_undo === true,
@@ -498,6 +507,8 @@ function startMockSession({ locationConsent = false } = {}) {
 }
 
 function endMockSession() {
+  civilizationRuntime?.stop();
+  shell.setSimulationRunning(false);
   playerController?.endSession();
   player = null;
   mockLocationConsent = false;
@@ -534,9 +545,42 @@ function movePlayer(direction) {
 }
 
 function advanceSimulation() {
-  if (!lifeRuntime || !playerController?.getSnapshot().sessionActive) return;
-  lifeRuntime.advance({ elapsedMs: 3_600_000 });
-  shell.showToast("Digital Earth advanced by one synthetic hour.", "success");
+  advanceCivilization(60);
+}
+
+function activeSessionRequired() {
+  if (playerController?.getSnapshot().sessionActive) return true;
+  shell.showToast("Start the mock player session before changing Civilization Alpha.", "warning");
+  return false;
+}
+
+function advanceCivilization(minutes) {
+  if (!civilizationRuntime || !activeSessionRequired()) return;
+  try {
+    civilizationRuntime.advance(minutes);
+    shell.showToast(`Civilization advanced by ${minutes >= 1440 ? `${minutes / 1440} day` : `${minutes / 60} hour`}.`, "success");
+  } catch (error) {
+    shell.showToast(error.message, "warning");
+  }
+}
+
+function toggleSimulation() {
+  if (!civilizationRuntime || !activeSessionRequired()) return;
+  const current = civilizationRuntime.getSnapshot().running;
+  if (current) civilizationRuntime.stop();
+  else civilizationRuntime.start({ intervalMs: 1000, minutesPerTick: 60 });
+  shell.setSimulationRunning(!current);
+  shell.showToast(current ? "Civilization time paused." : "Civilization time is running.", "success");
+}
+
+function civilizationAction(action, successMessage) {
+  if (!civilizationRuntime || !activeSessionRequired()) return;
+  try {
+    action();
+    shell.showToast(successMessage, "success");
+  } catch (error) {
+    shell.showToast(error.message, "warning");
+  }
 }
 
 function performLifeAction(action, snapshot) {
@@ -638,7 +682,7 @@ function handleTransientBack() {
 }
 
 function resizeViewer() {
-  const rect = canvas.getBoundingClientRect();
+  const rect = canvas.parentElement.getBoundingClientRect();
   camera.resizeViewport(rect.width, rect.height, Math.min(devicePixelRatio || 1, 3));
 }
 
@@ -693,6 +737,13 @@ async function start() {
     storageKey: `${world.meta.storage_namespace}.life`
   });
   playerController = createPlayerController({ world });
+  civilizationRuntime = createCivilizationRuntime({
+    world,
+    lifeRuntime,
+    buildingRuntime,
+    storage,
+    storagePrefix: `${world.meta.storage_namespace}.civilization`
+  });
   lod = createLodController({ ...world, homeParcelId: world.player.starter_parcel_id });
   renderer = createMapRenderer(canvas, { maxVisibleItems: 250 });
   lifeViewer = createLifeOsViewer(inspectorContent, {
@@ -700,6 +751,25 @@ async function start() {
       const snapshot = lifeRuntime.getSnapshot(projection.lifeId);
       performLifeAction(action, snapshot);
     }
+  });
+  civilizationView = createCivilizationView(inspectorContent, {
+    onAdvance: (minutes) => advanceCivilization(minutes),
+    onBuy: (listingId, quantity) => civilizationAction(
+      () => civilizationRuntime.buy(listingId, quantity),
+      "Prototype purchase completed in the local synthetic ledger."
+    ),
+    onPlant: (plotId, cropId) => civilizationAction(
+      () => civilizationRuntime.plant(plotId, cropId),
+      `${cropId} planted on the Starter Parcel.`
+    ),
+    onHarvest: (plotId) => civilizationAction(
+      () => civilizationRuntime.harvest(plotId),
+      "Harvest moved into the local farm warehouse."
+    ),
+    onSellHarvest: (resourceId, quantity) => civilizationAction(
+      () => civilizationRuntime.sellHarvest(resourceId, quantity),
+      `${resourceId} sold through the prototype market.`
+    )
   });
   inspector = createInspectorView({
     container: inspectorContent,
@@ -749,6 +819,18 @@ async function start() {
     renderInspector();
     scheduleRender();
   });
+  civilizationRuntime.subscribe(({ snapshot }) => {
+    shell.setSimulationClock(snapshot.clock);
+    shell.setSimulationRunning(snapshot.running);
+    document.documentElement.dataset.civilizationReady = "true";
+    document.documentElement.dataset.civilizationTime = snapshot.clock.timestamp;
+    document.documentElement.dataset.civilizationActivity = snapshot.citizen.current_activity;
+    document.documentElement.dataset.civilizationAiAction = snapshot.aiWorker.current_action;
+    document.documentElement.dataset.civilizationCity = snapshot.city.status;
+    document.documentElement.dataset.civilizationBalance = String(snapshot.economy.player_balance);
+    if (mode === "CIVILIZATION") renderInspector();
+    scheduleRender();
+  }, { emitCurrent: true });
   playerController.subscribe(() => {
     syncCommandState();
     renderInspector();
@@ -767,7 +849,8 @@ async function start() {
   shell.setLoggedIn(null);
   updateStarterParcelStatus();
   shell.setCoordinates("K280 / Earth surface shell");
-  shell.showToast("Digital Earth Alpha ready", "success");
+  shell.setSimulationClock(civilizationRuntime.getSnapshot().clock);
+  shell.showToast("Civilization Alpha ready", "success");
 }
 
 start().catch((error) => {
@@ -780,6 +863,7 @@ window.addEventListener("beforeunload", () => {
   selection.destroy();
   renderer?.destroy();
   landRuntime?.destroy();
+  civilizationRuntime?.destroy();
   lifeRuntime?.destroy();
   playerController?.destroy();
   shell.destroy();

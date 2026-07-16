@@ -1811,6 +1811,158 @@ def run_digital_earth_mobile(browser: Browser, args: argparse.Namespace, gate: G
         context.close()
 
 
+def run_civilization_alpha(browser: Browser, args: argparse.Namespace, gate: Gate) -> None:
+    case = ViewportCase("civilization-alpha", "desktop", "landscape", 1440, 900, "dark", False, 1)
+    context = new_context(browser, case)
+    page = context.new_page()
+    monitor = BrowserMonitor(page, args.base_url)
+    try:
+        load_page(page, args.base_url, "dark")
+        start_mock_session(page, with_location=False)
+        page.locator("[data-mode='CIVILIZATION']").click()
+        page.wait_for_function("() => document.documentElement.dataset.civilizationReady === 'true'")
+
+        today_text = clean_text(page.locator(".civilization-view").inner_text())
+        gate.expect(
+            "civilization.daily-schedule",
+            "civilization-life",
+            all(label in today_text for label in (
+                "Sleep", "Wake", "Breakfast", "Work", "Lunch", "Study",
+                "Shopping", "Dinner", "Exercise", "Entertainment",
+            )),
+            details={"required_count": 11},
+        )
+        gate.expect(
+            "civilization.citizen-needs",
+            "civilization-life",
+            all(label in today_text for label in (
+                "Hunger", "Thirst", "Fatigue", "Mood", "Health", "Knowledge",
+                "Money", "Housing", "Relationship", "Safety",
+            )),
+        )
+
+        page.locator("[data-civilization-action='ADVANCE_HOUR']").click()
+        page.wait_for_function("() => document.documentElement.dataset.civilizationActivity === 'BREAKFAST'")
+        page.locator("[data-civilization-action='ADVANCE_HOUR']").click()
+        page.wait_for_function("() => document.documentElement.dataset.civilizationActivity === 'WORK'")
+        gate.expect(
+            "civilization.ai-schedule",
+            "ai-schedule",
+            page.evaluate("document.documentElement.dataset.civilizationAiAction") == "FARM"
+            and page.evaluate("Number(document.documentElement.dataset.civilizationBalance)") == 515,
+            details={
+                "activity": page.evaluate("document.documentElement.dataset.civilizationActivity"),
+                "ai_action": page.evaluate("document.documentElement.dataset.civilizationAiAction"),
+                "balance": page.evaluate("document.documentElement.dataset.civilizationBalance"),
+            },
+        )
+
+        page.locator("[data-civilization-action='TAB_FARM']").click()
+        garden = page.locator(".farm-plot").filter(has_text="Kitchen Garden")
+        garden.get_by_role("button", name="Veg").click()
+        gate.expect(
+            "civilization.crop-planted",
+            "agriculture",
+            "GROWING / VEGETABLE" in clean_text(garden.inner_text()),
+        )
+        page.locator("[data-civilization-action='TAB_TODAY']").click()
+        page.locator("[data-civilization-action='ADVANCE_DAY']").click()
+        page.locator("[data-civilization-action='TAB_FARM']").click()
+        garden = page.locator(".farm-plot").filter(has_text="Kitchen Garden")
+        gate.expect(
+            "civilization.crop-ready",
+            "agriculture",
+            "READY / VEGETABLE" in clean_text(garden.inner_text()),
+        )
+        garden.get_by_role("button", name="Harvest").click()
+        warehouse = page.locator(".civilization-section").filter(has_text="Farm Warehouse")
+        gate.expect(
+            "civilization.harvest-storage",
+            "food-balance",
+            "VEGETABLE" in clean_text(warehouse.inner_text())
+            and "Sell VEGETABLE" in clean_text(warehouse.inner_text()),
+        )
+        balance_before_sale = int(page.evaluate("document.documentElement.dataset.civilizationBalance"))
+        warehouse.get_by_role("button", name="Sell VEGETABLE").click()
+        balance_after_sale = int(page.evaluate("document.documentElement.dataset.civilizationBalance"))
+        gate.expect(
+            "civilization.harvest-sale",
+            "economy-integrity",
+            balance_after_sale == balance_before_sale + 4,
+            details={"before": balance_before_sale, "after": balance_after_sale},
+        )
+
+        page.locator("[data-civilization-action='TAB_MARKET']").click()
+        rice = page.locator(".market-listing").filter(has_text="FOOD / 6 CR")
+        balance_before_buy = int(page.evaluate("document.documentElement.dataset.civilizationBalance"))
+        rice.get_by_role("button", name="Buy").click()
+        balance_after_buy = int(page.evaluate("document.documentElement.dataset.civilizationBalance"))
+        gate.expect(
+            "civilization.market-purchase",
+            "economy-integrity",
+            balance_after_buy == balance_before_buy - 6
+            and "stock 119" in clean_text(rice.inner_text()),
+            details={"before": balance_before_buy, "after": balance_after_buy},
+        )
+
+        page.locator("[data-civilization-action='TAB_CITY']").click()
+        city_text = clean_text(page.locator(".civilization-view").inner_text())
+        gate.expect(
+            "civilization.city-runtime",
+            "city-integrity",
+            all(label in city_text for label in (
+                "Population", "Employment", "Unemployment", "Food", "Energy",
+                "Housing", "Roads", "Pollution", "Happiness",
+            ))
+            and page.evaluate("document.documentElement.dataset.civilizationCity") in {"STABLE", "THRIVING", "STRAINED", "AT_RISK"},
+        )
+
+        storage_before = page.evaluate("Object.values(localStorage).reduce((sum, value) => sum + value.length, 0)")
+        page.locator("[data-civilization-action='TAB_TODAY']").click()
+        for _ in range(10):
+            page.locator("[data-civilization-action='ADVANCE_DAY']").click()
+        storage_after = page.evaluate("Object.values(localStorage).reduce((sum, value) => sum + value.length, 0)")
+        gate.expect(
+            "civilization.memory-bound",
+            "memory-leak",
+            storage_after < 500_000 and storage_after - storage_before < 250_000,
+            details={"before_bytes": storage_before, "after_bytes": storage_after},
+        )
+
+        layout = measure_overflow(page)
+        canvas_widths = page.locator("#world-canvas").evaluate(
+            "element => ({canvas: element.getBoundingClientRect().width, parent: element.parentElement.getBoundingClientRect().width})"
+        )
+        gate.expect(
+            "civilization.responsive-canvas",
+            "responsive",
+            abs(canvas_widths["canvas"] - canvas_widths["parent"]) <= 1
+            and layout["document_width"] <= layout["viewport_width"]
+            and not layout["offenders"],
+            details={"canvas": canvas_widths, "layout": layout},
+        )
+
+        screenshot = capture_screenshot(page, case, args.output_dir, None, args.pixel_threshold)
+        gate.screenshots.append(screenshot)
+        gate.expect(
+            "civilization.visual-nonblank",
+            "visual-regression",
+            screenshot["pixel_variance"] >= 15 and screenshot["visual_range"] >= 32,
+            details=screenshot,
+        )
+        browser_clean(monitor, "civilization-alpha", gate)
+    except Exception as error:
+        gate.add(
+            "civilization.execution",
+            "civilization",
+            "FAIL",
+            details={"error": clean_text(error)},
+        )
+        browser_clean(monitor, "civilization-alpha", gate)
+    finally:
+        context.close()
+
+
 def reports(args: argparse.Namespace, gate: Gate) -> tuple[dict[str, Any], dict[str, Any]]:
     matrix = [asdict(case) for case in MATRIX]
     qa_report = {
@@ -1923,6 +2075,7 @@ def main(argv: list[str] | None = None) -> int:
                 run_life_stack(browser, args, gate)
                 run_digital_earth_alpha(browser, args, gate)
                 run_digital_earth_mobile(browser, args, gate)
+                run_civilization_alpha(browser, args, gate)
             finally:
                 browser.close()
     except Exception as error:

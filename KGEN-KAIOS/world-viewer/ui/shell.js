@@ -25,12 +25,14 @@ export function createShell(callbacks = {}) {
     playerLocation: byId("player-hud-location"),
     playerMovement: byId("player-hud-movement"),
     worldRevision: byId("world-revision-value"),
+    simulationClock: byId("simulation-clock-value"),
     enterSelected: byId("enter-selected-button"),
     stepUp: byId("player-step-up-button"),
     stepLeft: byId("player-step-left-button"),
     stepRight: byId("player-step-right-button"),
     stepDown: byId("player-step-down-button"),
     simulationAdvance: byId("simulation-advance-button"),
+    simulationAuto: byId("simulation-auto-button"),
     landUndo: byId("land-undo-button"),
     landRedo: byId("land-redo-button"),
     landSave: byId("land-save-button"),
@@ -79,6 +81,7 @@ export function createShell(callbacks = {}) {
   listen("player-step-right-button", "click", () => callbacks.onPlayerStep?.("RIGHT"));
   listen("player-step-down-button", "click", () => callbacks.onPlayerStep?.("DOWN"));
   listen("simulation-advance-button", "click", () => callbacks.onSimulationAdvance?.());
+  listen("simulation-auto-button", "click", () => callbacks.onSimulationAuto?.());
   listen("land-undo-button", "click", () => callbacks.onLandUndo?.());
   listen("land-redo-button", "click", () => callbacks.onLandRedo?.());
   listen("land-save-button", "click", () => callbacks.onLandSave?.());
@@ -188,9 +191,32 @@ export function createShell(callbacks = {}) {
     elements.worldRevision.textContent = /^R/i.test(value) ? value : `R${value}`;
   }
 
+  function setSimulationClock(snapshot = null) {
+    if (!snapshot) {
+      elements.simulationClock.textContent = "--:--";
+      return;
+    }
+    const hour = Number(snapshot.hour ?? snapshot.hour_of_day ?? 0);
+    const minute = Number(snapshot.minute ?? snapshot.minute_of_hour ?? 0);
+    const day = Number(snapshot.day ?? snapshot.day_of_year ?? 1);
+    const time = `${String(hour).padStart(2, "0")}:${String(minute).padStart(2, "0")}`;
+    elements.simulationClock.textContent = `D${day} ${time}`;
+    elements.simulationClock.title = `${snapshot.season ?? "SEASON"} / week ${snapshot.week ?? 1} / year ${snapshot.year ?? 1}`;
+  }
+
+  function setSimulationRunning(running) {
+    elements.simulationAuto.setAttribute("aria-pressed", String(Boolean(running)));
+    elements.simulationAuto.classList.toggle("is-active", Boolean(running));
+    elements.simulationAuto.title = running ? "Pause time" : "Run time";
+    elements.simulationAuto.setAttribute("aria-label", running
+      ? "Pause automatic civilization time"
+      : "Start automatic civilization time");
+  }
+
   function setPlayerControls({ canEnter = false, canMove = false, canAdvance = false } = {}) {
     elements.enterSelected.disabled = !canEnter;
     elements.simulationAdvance.disabled = !canAdvance;
+    elements.simulationAuto.disabled = !canAdvance;
     for (const button of [elements.stepUp, elements.stepLeft, elements.stepRight, elements.stepDown]) {
       button.disabled = !canMove;
     }
@@ -244,6 +270,8 @@ export function createShell(callbacks = {}) {
     setStarterParcel,
     setPlayerHud,
     setWorldRevision,
+    setSimulationClock,
+    setSimulationRunning,
     setPlayerControls,
     setLandControls,
     openMockConsent,
