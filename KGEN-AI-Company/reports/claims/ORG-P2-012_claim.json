@@ -1,0 +1,19 @@
+{
+  "claim_id": "CLAIM-ORG-P2-012-20260716T0624-cursor-01",
+  "task_id": "ORG-P2-012",
+  "worker_id": "cursor-01",
+  "worker_agent_id": "cursor-agent-0009",
+  "session_id": "SESSION-20260716-10-EPHEMERAL",
+  "branch": "cursor-handoff/ORG-P2-012-20260716",
+  "base_sha": "89f3c351c488a0705f514adba974dd6c3dd3cb3a",
+  "claimed_at": "2026-07-16T06:24:00Z",
+  "lease_expires_at": "2026-07-17T06:24:00Z",
+  "status": "ACTIVE",
+  "output_report": "KGEN-AI-Company/reports/ORG-P2-012_APP_LIFE_QA.md",
+  "supersedes_archive_tips": [
+    "152bd1e1"
+  ],
+  "scope": "report_only",
+  "protected_paths_checked": true,
+  "workqueue_modified": false
+}

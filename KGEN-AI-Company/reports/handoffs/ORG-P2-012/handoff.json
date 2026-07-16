@@ -1,0 +1,69 @@
+{
+  "schema_version": "1.1",
+  "task_id": "ORG-P2-012",
+  "spawned_by": "本尊 Sun Wukong",
+  "worker_id": "cursor-01",
+  "worker_agent_id": "cursor-agent-0009",
+  "session_id": "SESSION-20260716-10-EPHEMERAL",
+  "clone_id": null,
+  "claim_id": "CLAIM-ORG-P2-012-20260716T0624-cursor-01",
+  "reserved_branch": "cursor-handoff/ORG-P2-012",
+  "evidence_branch": "cursor-handoff/ORG-P2-012-20260716",
+  "worktree": "cursor-task-ORG-P2-012",
+  "base_sha": "89f3c351c488a0705f514adba974dd6c3dd3cb3a",
+  "observed_origin_main": "89f3c351c488a0705f514adba974dd6c3dd3cb3a",
+  "claimed_at": "2026-07-16T06:24:00Z",
+  "handoff_submitted_at": "2026-07-16T06:24:00Z",
+  "supersedes_archive_tips": [
+    "152bd1e1"
+  ],
+  "files_changed": [
+    "KGEN-AI-Company/reports/ORG-P2-012_APP_LIFE_QA.md",
+    "KGEN-AI-Company/reports/handoffs/ORG-P2-012/HANDOFF.md",
+    "KGEN-AI-Company/reports/handoffs/ORG-P2-012/handoff.json",
+    "KGEN-AI-Company/reports/claims/ORG-P2-012_claim.json"
+  ],
+  "files_added": [
+    "KGEN-AI-Company/reports/ORG-P2-012_APP_LIFE_QA.md",
+    "KGEN-AI-Company/reports/handoffs/ORG-P2-012/HANDOFF.md",
+    "KGEN-AI-Company/reports/handoffs/ORG-P2-012/handoff.json",
+    "KGEN-AI-Company/reports/claims/ORG-P2-012_claim.json"
+  ],
+  "files_deleted": [],
+  "tests_run": [
+    "CANON_JSON_PARSE",
+    "LIFE_DIMENSION_COVERAGE_MATRIX",
+    "TERMINOLOGY_CROSSWALK",
+    "PROTECTED_PATH_DIFF",
+    "SINGLE_TASK_PURITY",
+    "REPORT_SECTION_COMPLETENESS"
+  ],
+  "test_results": "ALL_CONTENT_GATES_PASS",
+  "task_result": "PASS_WITH_MINOR_GAPS",
+  "gaps_count": 4,
+  "hard_conflicts_count": 0,
+  "protected_path_violations": 0,
+  "runtime_current_modified": false,
+  "universe_map_modified": false,
+  "canon_modified": false,
+  "workqueue_modified": false,
+  "implementation_scope": "report_only_app_life_qa",
+  "known_issues": [
+    "WORKQUEUE_NOT_MODIFIED_PER_ENVELOPE",
+    "ARCHIVE_TIP_152bd1e1_SUPERSEDED",
+    "SESSION_ID_EPHEMERAL"
+  ],
+  "risks": [
+    "R1_unbounded_reproduction",
+    "R2_fusion_without_manifest_rules",
+    "R3_rebirth_audit_erasure"
+  ],
+  "review": {
+    "reviewer": "codex-gm-01",
+    "decision": "PENDING",
+    "claim_status": "OPEN",
+    "review_custody": "AWAITING_CODEX"
+  },
+  "recommended_next_action": "Codex review; optional PROPOSED follow-ups ORG-P2-012-PAIRING-XREF and ORG-P2-012-GLOSSARY.",
+  "review_status": "PENDING_CODEX_REVIEW"
+}
