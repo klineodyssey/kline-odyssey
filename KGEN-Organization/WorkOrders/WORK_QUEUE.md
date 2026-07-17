@@ -173,6 +173,96 @@ The worker must then stop without changing WorkQueue, creating a branch, editing
 - Claim: Codex managed.
 - Lease: Not required.
 
+## Product Sprint 001 Dispatch Summary
+
+| Task ID | Status | Owner | Reviewer | Priority | Department | Branch | Output Report |
+|---|---|---|---|---|---|---|---|
+| KAIOS-PRODUCT-SPRINT-001A | OPEN | cursor-01 | Codex | P0 | Frontend | `cursor-handoff/KAIOS-PRODUCT-SPRINT-001A` | `KGEN-AI-Company/reports/KAIOS_PRODUCT_SPRINT_001A_REPORT.md` |
+| KAIOS-PRODUCT-SPRINT-001B | DRAFT | cursor-01 | Codex | P1 | Frontend | `cursor-handoff/KAIOS-PRODUCT-SPRINT-001B` | `KGEN-AI-Company/reports/KAIOS_PRODUCT_SPRINT_001B_REPORT.md` |
+| KAIOS-PRODUCT-SPRINT-001C | DRAFT | cursor-01 | Codex | P1 | QA | `cursor-handoff/KAIOS-PRODUCT-SPRINT-001C` | `KGEN-AI-Company/reports/KAIOS_PRODUCT_SPRINT_001C_REPORT.md` |
+
+## Product Sprint 001 Dispatch
+
+### KAIOS-PRODUCT-SPRINT-001A - Official Website refresh and World Viewer integration
+
+- Status: OPEN
+- Dispatch Status: OPEN_ASSIGNED
+- Cursor Claim Status: NOT_CLAIMED / WAITING_FOR_CURSOR_ACCEPTANCE
+- Owner: cursor-01
+- Reviewer: Codex / `codex-gm-01`
+- Priority: P0
+- Risk Level: R2 product UI frontend
+- Department: Frontend
+- Branch: `cursor-handoff/KAIOS-PRODUCT-SPRINT-001A`
+- Current Main SHA: `ab8f5ff782a3e507783f4968a87057ad293b18fc`
+- Allowed Paths:
+  - `index.html`
+  - `assets/**`
+  - `KGEN-KAIOS/world-viewer/index.html`
+  - `KGEN-KAIOS/world-viewer/app.js`
+  - `KGEN-KAIOS/world-viewer/ui/**`
+  - `KGEN-KAIOS/world-viewer/input/**`
+  - `KGEN-KAIOS/world-viewer/renderer/**`
+  - `KGEN-KAIOS/world-viewer/inspector/**`
+  - `KGEN-KAIOS/world-viewer/tests/**`
+  - `KGEN-AI-Company/reports/KAIOS_PRODUCT_SPRINT_001A_REPORT.md`
+  - `KGEN-AI-Company/reports/handoffs/KAIOS-PRODUCT-SPRINT-001A/HANDOFF.md`
+  - `KGEN-AI-Company/reports/handoffs/KAIOS-PRODUCT-SPRINT-001A/handoff.json`
+- Forbidden Paths:
+  - Universe Law files
+  - Genesis files
+  - PrimeForge Boot files
+  - Runtime CURRENT
+  - Universe Map CURRENT
+  - Token Contract
+  - contracts, wallet, bridge, Temple 12345 runtime, final-whitepaper
+- Deliverables:
+  - Official Website refresh with professional landing-page product entry
+  - direct navigation to World Viewer, Web App and Demo
+  - fixed navigation for Home, World, Life, Market, Temple, Company, Settings, Back, Previous and Next
+  - safe-area aware mobile layout that does not cover time, signal, WiFi or battery areas
+  - full-page expansion behavior for primary features with return navigation
+  - desktop, tablet and phone responsive behavior
+  - accessibility and performance evidence
+  - report and handoff pair
+- Acceptance Tests:
+  - static server smoke test
+  - desktop viewport check
+  - tablet viewport check
+  - phone viewport check
+  - safe-area check
+  - navigation visibility check
+  - World Viewer link check
+  - basic accessibility check
+  - console error check
+  - protected path diff
+  - secret scan
+- Protected Path Rules:
+  - no Universe Law changes
+  - no Genesis changes
+  - no PrimeForge changes
+  - no Runtime CURRENT changes
+  - no Universe Map CURRENT changes
+  - no Token Contract changes
+- PR / Handoff Requirements:
+  - push only `cursor-handoff/KAIOS-PRODUCT-SPRINT-001A`
+  - open PR for Codex review
+  - do not push main
+  - do not modify WorkQueue, Review Log or Engineering Handover Log
+  - stop after handoff and wait for Codex review
+
+### KAIOS-PRODUCT-SPRINT-001B - Expanded feature pages and routing
+
+- Status: DRAFT
+- Activation Rule: Codex may open after `KAIOS-PRODUCT-SPRINT-001A` review passes.
+- Scope: full-page feature routes for World, Life, Market, Temple, Company and Settings.
+
+### KAIOS-PRODUCT-SPRINT-001C - Product QA and release hardening
+
+- Status: DRAFT
+- Activation Rule: Codex may open after `KAIOS-PRODUCT-SPRINT-001A` and `KAIOS-PRODUCT-SPRINT-001B` review pass or when Codex explicitly splits QA.
+- Scope: performance, accessibility, visual regression, responsive matrix and release evidence.
+
 ## Current Cursor Dispatch Summary
 
 | Task ID | Status | Owner | Reviewer | Priority | Department | Branch | Output Report |
