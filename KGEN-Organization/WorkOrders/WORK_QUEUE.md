@@ -52,6 +52,7 @@ The worker must then stop without changing WorkQueue, creating a branch, editing
 | KAIOS-V11-READINESS-RECOVERY-20260713 | DONE | Codex | Human PrimeForge | P0 | Operations | `codex/v11-readiness` | `KGEN-KAIOS/reports/V11_READINESS_REPORT.md` |
 | KAIOS-WV-SPRINT-001 | DONE | Codex + isolated Worker Clones | Codex | P0 | Frontend | `codex/world-viewer-sprint-001` | `KGEN-AI-Company/reports/handoffs/KAIOS-WV-SPRINT-001/HANDOFF.md` |
 | KAIOS-WV-SPRINT-002 | DONE | Codex + isolated Worker Clones | Codex | P0 | Frontend | `codex/world-viewer-sprint-002-alpha` | `KGEN-AI-Company/reports/handoffs/KAIOS-WV-SPRINT-002/HANDOFF.md` |
+| KAIOS-WALS-V1-2026-0001 | DONE | Codex | Codex | P1 | Architecture | `codex/world-asset-life-spec-v1` | `KGEN-AI-Company/reports/KAIOS_WORLD_ASSET_LIFE_SPEC_V1_REVIEW.md` |
 
 ### KAIOS-GM-V4-2026-0001 - General Manager Decision Engine
 
@@ -151,6 +152,85 @@ The worker must then stop without changing WorkQueue, creating a branch, editing
 - Claim: CLOSED.
 - Lease: RELEASED.
 - Real ownership, GPS, KYC, wallet, payment and backend writes: NOT IMPLEMENTED.
+
+### KAIOS-WALS-V1-2026-0001 - Publish World Asset & Life Specification V1.0
+
+- Status: DONE
+- Owner: Codex / `codex-gm-01`
+- Reviewer: Codex / `codex-gm-01`
+- Priority: P1
+- Risk Level: R1 architecture documentation
+- Department: Architecture
+- Branch: `codex/world-asset-life-spec-v1`
+- Base Commit: `cbf4ecbfb95bb369be96aa3bd7983ab0d6d3ea1f`
+- Product Commit: `ff0524aae1ac9e80a5b1fb04394b9d22236cac85`
+- Merge Commit: `e9fb9b462eb105ac1d455471a71753bc79c5d8c2`
+- Task Source Type: HUMAN_REQUEST
+- Task Source ID: `KAIOS WORLD ASSET & LIFE SPECIFICATION V1.0`
+- Output report: `KGEN-AI-Company/reports/KAIOS_WORLD_ASSET_LIFE_SPEC_V1_REVIEW.md`
+- Acceptance: Specification files created, README references added, JSON parsed, protected paths unchanged, architecture-only scope preserved.
+- Protected paths: 0 changes.
+- Claim: Codex managed.
+- Lease: Not required.
+
+## Current Cursor Dispatch Summary
+
+| Task ID | Status | Owner | Reviewer | Priority | Department | Branch | Output Report |
+|---|---|---|---|---|---|---|---|
+| KAIOS-WALS-DOCS-001 | OPEN | cursor-01 | Codex | P1 | Documentation | `cursor-handoff/KAIOS-WALS-DOCS-001` | `KGEN-AI-Company/reports/KAIOS_WALS_DOCS_INDEX_INTEGRATION.md` |
+
+## Current Cursor Dispatch
+
+### KAIOS-WALS-DOCS-001 - Integrate World Asset & Life Specification into repository indexes
+
+- Status: OPEN
+- Dispatch Status: OPEN_ASSIGNED
+- Cursor Claim Status: NOT_CLAIMED / WAITING_FOR_CURSOR_ACCEPTANCE
+- Owner: cursor-01
+- Reviewer: Codex / `codex-gm-01`
+- Priority: P1
+- Risk Level: R1 documentation index only
+- Department: Documentation
+- Branch: `cursor-handoff/KAIOS-WALS-DOCS-001`
+- Base Commit: `e9fb9b462eb105ac1d455471a71753bc79c5d8c2`
+- Allowed Paths:
+  - `KGEN_MASTER_LIBRARY_INDEX.md`
+  - `docs/KGEN_MASTER_INDEX.md`
+  - `KGEN-AI-Company/reports/KAIOS_WALS_DOCS_INDEX_INTEGRATION.md`
+  - `KGEN-AI-Company/reports/handoffs/KAIOS-WALS-DOCS-001/HANDOFF.md`
+  - `KGEN-AI-Company/reports/handoffs/KAIOS-WALS-DOCS-001/handoff.json`
+- Forbidden Paths:
+  - all unlisted paths
+  - `contracts/**`
+  - `KGEN/contracts/**`
+  - `wallet/**`
+  - `bridge/**`
+  - `K線西遊記/temples/12345/**`
+  - `PRIMEFORGE_GENESIS_BOOT_SEQUENCE*.md`
+  - `docs/physics/**CURRENT*`
+  - `docs/maps/**CURRENT*`
+  - `docs/physics/final-whitepaper/**`
+- Deliverables:
+  - update authorized index references for the merged specification package
+  - produce one report at `KGEN-AI-Company/reports/KAIOS_WALS_DOCS_INDEX_INTEGRATION.md`
+  - produce one handoff pair under `KGEN-AI-Company/reports/handoffs/KAIOS-WALS-DOCS-001/`
+- Acceptance Tests:
+  - index paths exist
+  - links resolve to the new specification files
+  - JSON source still parses
+  - protected path diff is zero
+  - single-task purity is preserved
+- Protected Path Rules:
+  - no edit to Runtime CURRENT
+  - no edit to Universe Map CURRENT
+  - no edit to Token Contract
+  - no edit to frozen baseline
+  - no edit to Boot V1.4 without separate Human approval
+- PR / Handoff Requirements:
+  - push only `cursor-handoff/KAIOS-WALS-DOCS-001`
+  - do not push main
+  - do not modify WorkQueue or Review Log
+  - stop after handoff and wait for Codex review
 
 ## V11 Readiness Handoff Dispositions
 
