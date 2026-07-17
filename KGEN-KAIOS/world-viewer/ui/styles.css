@@ -275,6 +275,7 @@ button:focus-visible, canvas:focus-visible, [tabindex]:focus-visible {
 .civilization-section--time { border-top: 2px solid var(--accent); }
 .civilization-section--city { border-top: 2px solid var(--cyan); }
 .civilization-section--ecosystem { border-top: 2px solid var(--accent); }
+.civilization-section--biology { border-top: 2px solid var(--cyan); }
 .civilization-section--production { border-top: 2px solid var(--amber); }
 .civilization-section--company { border-top: 2px solid var(--cyan); }
 .civilization-section--settlement { border-top: 2px solid var(--amber); }
@@ -340,6 +341,14 @@ button:focus-visible, canvas:focus-visible, [tabindex]:focus-visible {
 .evolution-lineage__item.is-active { border-color: var(--accent); color: var(--text); background: var(--surface-2); }
 .evolution-lineage__index { color: var(--accent-strong); font-variant-numeric: tabular-nums; }
 .species-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 7px; }
+.biology-category-grid, .atom-domain-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 7px; margin-top: 10px; }
+.biology-category, .atom-domain { min-width: 0; padding: 8px; border: 1px solid var(--line); border-radius: var(--radius-sm); background: var(--surface-2); }
+.biology-category strong, .biology-category span, .atom-domain span, .atom-domain strong, .atom-domain small { display: block; overflow-wrap: anywhere; }
+.biology-category span, .atom-domain span, .atom-domain small { margin-top: 3px; color: var(--muted); font-size: 10px; }
+.taxonomy-path { display: grid; gap: 5px; margin: 10px 0 0; padding: 0; list-style: none; }
+.taxonomy-path__item { display: grid; grid-template-columns: minmax(76px, 0.42fr) minmax(0, 1fr); gap: 8px; padding: 6px 8px; border-left: 2px solid var(--cyan); background: var(--surface-2); }
+.taxonomy-path__item span { color: var(--muted); font-size: 10px; }
+.taxonomy-path__item strong { min-width: 0; overflow-wrap: anywhere; font-size: 11px; }
 .species-card {
   min-width: 0; display: grid; gap: 4px; padding: 8px; border: 1px solid var(--line); border-radius: 6px;
   background: var(--surface-2); font-size: 9px;

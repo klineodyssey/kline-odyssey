@@ -1,0 +1,61 @@
+{
+  "status": "PASS",
+  "decision_id": "HUMAN-SPRINT-004-CIVILIZATION-GENESIS",
+  "birth_flow": [
+    {
+      "step": "UNIVERSE_BOOT",
+      "status": "PASS",
+      "evidence": "EARTH-K280"
+    },
+    {
+      "step": "PLANET_CHECK",
+      "status": "PASS",
+      "evidence": "EARTH:COMPATIBLE"
+    },
+    {
+      "step": "SPECIES_CHECK",
+      "status": "PASS",
+      "evidence": "HUMAN:life-player-001"
+    },
+    {
+      "step": "LIFE_OS_BOOT",
+      "status": "PASS",
+      "evidence": "life-player-001:ALIVE"
+    },
+    {
+      "step": "STARTER_RESOURCES",
+      "status": "PASS",
+      "evidence": "GENESIS-FORTUNE-mock-player-001:GENESIS-SURVIVAL-PACK-mock-player-001"
+    },
+    {
+      "step": "STARTER_PARCEL",
+      "status": "PASS",
+      "evidence": "parcel-001:building-home-001"
+    },
+    {
+      "step": "ENTER_WORLD",
+      "status": "PASS",
+      "evidence": "EARTH-K280"
+    }
+  ],
+  "fortune": {
+    "amount": 888,
+    "one_time_enforced": true,
+    "currency": "KAIOS_CREDIT",
+    "real_kgen": false,
+    "airdrop": false
+  },
+  "survival_pack_items": 7,
+  "planet_profiles": [
+    "EARTH",
+    "MOON",
+    "MARS",
+    "JUPITER",
+    "FUTURE_PLANET"
+  ],
+  "persistence_recovered": true,
+  "oxygen_environment_effect": true,
+  "immortal_mode_requires_planet_rule": true,
+  "protected_runtime_mutated": false,
+  "universe_physics_database_current_mutated": false
+}

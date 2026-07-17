@@ -853,6 +853,14 @@ async function start() {
       () => civilizationRuntime.recoverEcology(waterUnits, effort),
       "Water-backed ecology recovery completed."
     ),
+    onAdvanceEvolution: (speciesId, pathway) => civilizationAction(
+      () => civilizationRuntime.advanceSpeciesEvolution(speciesId, pathway),
+      `${speciesId} gained reviewed ${pathway.toLowerCase()} evidence. GA unlocks remain compatibility gated.`
+    ),
+    onSpeciesReproduction: (speciesId, mode) => civilizationAction(
+      () => civilizationRuntime.requestSpeciesReproduction(speciesId, mode),
+      mode === "CLONE" ? "Clone proposal recorded for review. No population was created." : "Synthetic lineage event recorded without direct population mutation."
+    ),
     onRequestKgen: (amount) => civilizationAction(
       () => civilizationRuntime.requestKgenSettlement(amount),
       "KGEN settlement request created. No blockchain transfer occurred."
@@ -958,6 +966,12 @@ async function start() {
     document.documentElement.dataset.mortgageProposals = String(snapshot.settlement.mortgage_proposals.length);
     document.documentElement.dataset.insuranceProposals = String(snapshot.settlement.insurance_proposals.length);
     document.documentElement.dataset.governmentCycles = String(snapshot.government.cycle_count);
+    document.documentElement.dataset.biologyReady = String(snapshot.biology?.registry_count > 0);
+    document.documentElement.dataset.biologySpecies = String(snapshot.biology?.registry_count ?? 0);
+    document.documentElement.dataset.biologyAtoms = String(snapshot.biology?.evolution?.catalog?.atoms?.length ?? 0);
+    document.documentElement.dataset.biologyHumanAtoms = String(snapshot.biology?.registry?.find(({ species_id: id }) => id === "HUMAN_ALPHA")?.evolution?.active_atom_ids?.length ?? 0);
+    document.documentElement.dataset.biologyReproduction = String(snapshot.biology?.reproduction?.history?.length ?? 0);
+    document.documentElement.dataset.foodChainV2 = String(Object.keys(snapshot.ecosystem?.population_balance?.role_counts ?? {}).length === 7);
     document.documentElement.dataset.citizenRights = String(snapshot.government.citizen_rights.length);
     document.documentElement.dataset.justiceCases = String(snapshot.government.justice.cases.length);
     document.documentElement.dataset.publicServices = String(snapshot.public_services.services.length);

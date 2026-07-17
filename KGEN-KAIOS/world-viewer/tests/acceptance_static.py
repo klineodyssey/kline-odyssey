@@ -42,6 +42,10 @@ REQUIRED_FILES = (
     "genesis/genesis-view.js",
     "agriculture/agriculture-runtime.js",
     "ecosystem/ecosystem-runtime.js",
+    "biology/taxonomy-standard.js",
+    "biology/genome-runtime.js",
+    "biology/evolution-runtime.js",
+    "biology/biology-runtime.js",
     "production/production-runtime.js",
     "enterprise/ai-company-organism-runtime.js",
     "exchange/life-exchange-runtime.js",
@@ -63,6 +67,7 @@ REQUIRED_FILES = (
     "tests/production_integrity.mjs",
     "tests/settlement_economy_integrity.mjs",
     "tests/governance_integrity.mjs",
+    "tests/biology_integrity.mjs",
 )
 
 PROTECTED_PREFIXES = (
@@ -350,6 +355,32 @@ def check_alpha_contract(errors: list[str], data: dict, source_text: str, html: 
     ):
         fail(errors, "K11520 candidate-only exchange boundary is invalid")
 
+    biology = data.get("biology_alpha", {})
+    if biology.get("decision_id") != "HUMAN-SPRINT-008-CAMBRIAN-EXPLOSION":
+        fail(errors, "Biology Alpha decision ID is invalid")
+    if biology.get("simulation_only") is not True or biology.get("authoritative_registry") is not False:
+        fail(errors, "Biology Alpha must remain synthetic and non-authoritative")
+    if any(biology.get(key) is not False for key in ("real_genetic_engineering", "real_breeding", "clone_execution")):
+        fail(errors, "Biology Alpha crosses a real biology or Clone boundary")
+    expected_ranks = ["DOMAIN", "KINGDOM", "PHYLUM", "CLASS", "ORDER", "FAMILY", "GENUS", "SPECIES", "SUBSPECIES"]
+    expected_pathways = ["MUTATION", "SELECTION", "ADAPTATION", "LEARNING", "CIVILIZATION", "TECHNOLOGY", "AI"]
+    expected_roles = {"PRODUCER", "HERBIVORE", "CARNIVORE", "OMNIVORE", "PREDATOR", "SCAVENGER", "DECOMPOSER"}
+    expected_categories = {"AI_ORGANISM", "APP_ORGANISM", "COMPANY_ORGANISM", "ROBOT", "FUTURE_SPECIES"}
+    if biology.get("taxonomy_ranks") != expected_ranks:
+        fail(errors, "Biology Alpha taxonomy ranks are invalid")
+    if biology.get("evolution_pathways") != expected_pathways:
+        fail(errors, "Biology Alpha evolution pathways are invalid")
+    if set(biology.get("food_chain_roles", [])) != expected_roles:
+        fail(errors, "Food Chain V2 roles are incomplete")
+    if biology.get("atom_capacity") != 108:
+        fail(errors, "Biology Alpha Genesis Atom capacity is invalid")
+    categories = {species.get("category") for species in biology.get("additional_species", [])}
+    if not expected_categories.issubset(categories):
+        fail(errors, f"Biology Species Registry categories are incomplete: {sorted(expected_categories - categories)}")
+    for token in ("CAMBRIAN_BIOLOGY_FOUNDATION_ALPHA", "GENOME_DNA_ALPHA", "GENESIS_CAPABILITY_EVOLUTION_ALPHA", "PROPOSAL_ONLY_REVIEW_REQUIRED"):
+        if token not in source_text:
+            fail(errors, f"Biology Runtime is missing {token}")
+
     settlement = data.get("settlement_alpha", {})
     if settlement.get("decision_id") != "HUMAN-SPRINT-006-SETTLEMENT-ECONOMY":
         fail(errors, "Settlement Alpha decision ID is invalid")
@@ -602,7 +633,7 @@ def main() -> int:
         f"{len(REQUIRED_FILES)} files;",
         f"{parsed_json_records} JSON records;",
         f"{checked_references} local references;",
-        "Civilization Governance Alpha + Public Services/Justice/Resilience + Settlement Economy/Production runtimes + 8 land proposals; protected-path input clean",
+        "Cambrian Biology Foundation + 9-rank taxonomy + 108 GA + Food Chain V2 + Civilization Governance/Settlement/Production + 8 land proposals; protected-path input clean",
     )
     return 0
 

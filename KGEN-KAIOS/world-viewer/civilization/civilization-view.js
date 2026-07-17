@@ -1,6 +1,7 @@
 const TABS = Object.freeze([
   ["GENESIS", "Genesis"],
   ["TODAY", "Today"],
+  ["BIOLOGY", "Biology"],
   ["ECOSYSTEM", "Ecology"],
   ["FARM", "Farm"],
   ["PRODUCTION", "Production"],
@@ -323,12 +324,14 @@ function renderEcosystem(documentRef, model) {
   const summary = section(documentRef, "Living Earth", "civilization-section--ecosystem");
   summary.append(definitionList(documentRef, [
     ["Evolution Stage", ecosystem.current_evolution_stage],
-    ["Food Chain", ecosystem.food_chain_status],
+    ["Food Chain V2", ecosystem.food_chain_status],
     ["Biodiversity", ecosystem.biodiversity],
     ["Population", ecosystem.total_population],
     ["Average Health", `${number(ecosystem.average_health).toFixed(1)}%`],
     ["Simulation", "ACCELERATED SYNTHETIC ALPHA"]
   ]));
+  const roleCounts = ecosystem.population_balance?.role_counts ?? {};
+  summary.append(definitionList(documentRef, Object.entries(roleCounts).map(([role, count]) => [humanize(role), count]), "civilization-data civilization-data--compact"));
   fragment.append(summary);
 
   const lineageSection = section(documentRef, "Cambrian Lineage");
@@ -345,7 +348,7 @@ function renderEcosystem(documentRef, model) {
   lineageSection.append(lineage);
   fragment.append(lineageSection);
 
-  const energy = section(documentRef, "Food Chain Energy");
+  const energy = section(documentRef, "Food Chain V2 Energy");
   energy.append(definitionList(documentRef, [
     ["Producer Input", number(ecosystem.energy_flow?.producer_input).toFixed(2)],
     ["Agriculture Input", number(ecosystem.energy_flow?.agriculture_input).toFixed(2)],
@@ -354,6 +357,11 @@ function renderEcosystem(documentRef, model) {
     ["Decomposer Recovery", number(ecosystem.energy_flow?.decomposer_recovery).toFixed(2)],
     ["Balance", number(ecosystem.energy_flow?.balance).toFixed(2)]
   ]));
+  energy.append(definitionList(documentRef, [
+    ["Producer Population", ecosystem.population_balance?.producer_population],
+    ["Consumer Population", ecosystem.population_balance?.consumer_population],
+    ["Producer / Consumer", number(ecosystem.population_balance?.producer_consumer_ratio).toFixed(3)]
+  ], "civilization-data civilization-data--compact"));
   fragment.append(energy);
 
   const species = section(documentRef, "Species Population");
@@ -371,6 +379,135 @@ function renderEcosystem(documentRef, model) {
   }
   species.append(grid);
   fragment.append(species);
+  return fragment;
+}
+
+function renderBiology(documentRef, model, callbacks) {
+  const fragment = documentRef.createDocumentFragment();
+  const biology = model.biology ?? {};
+  const registry = collection(biology.registry);
+  const featured = registry.find(({ species_id: id }) => id === "HUMAN_ALPHA") ?? registry[0] ?? {};
+  const genome = collection(biology.genomes?.genomes).find(({ species_id: id }) => id === featured.species_id) ?? {};
+  const evolution = featured.evolution ?? {};
+
+  const summary = section(documentRef, "Universal Biology Foundation", "civilization-section--biology");
+  summary.append(definitionList(documentRef, [
+    ["Registry", `${biology.registry_count ?? 0} synthetic Species`],
+    ["Taxonomy", `${collection(biology.taxonomy_ranks).length} ranks`],
+    ["Genome", `${biology.genomes?.genomes?.length ?? 0} versioned records`],
+    ["Genesis Atoms", `${biology.evolution?.catalog?.atoms?.length ?? 0} / 108 cataloged`],
+    ["Real Biology", biology.real_genetic_engineering ? "ENABLED" : "FORBIDDEN"],
+    ["Authority", biology.source_of_truth ? "AUTHORITATIVE" : "PUBLIC SYNTHETIC"]
+  ]));
+  const categoryGrid = element(documentRef, "div", "biology-category-grid");
+  for (const [category, count] of Object.entries(biology.category_coverage ?? {})) {
+    const card = element(documentRef, "article", "biology-category");
+    card.append(element(documentRef, "strong", "", humanize(category)), element(documentRef, "span", "", `${count} Species`));
+    categoryGrid.append(card);
+  }
+  summary.append(categoryGrid);
+  fragment.append(summary);
+
+  const classification = section(documentRef, featured.label ?? "Featured Species");
+  classification.append(definitionList(documentRef, [
+    ["Species ID", featured.species_id],
+    ["Category", featured.category],
+    ["Status", featured.status],
+    ["Species OS", featured.species_os_id],
+    ["Life OS", featured.life_os_profile_id]
+  ]));
+  const taxonomy = element(documentRef, "ol", "taxonomy-path");
+  for (const rank of collection(biology.taxonomy_ranks)) {
+    const key = String(rank).toLowerCase();
+    const item = element(documentRef, "li", "taxonomy-path__item");
+    item.append(element(documentRef, "span", "", humanize(rank)), element(documentRef, "strong", "", display(featured.taxonomy?.[key])));
+    taxonomy.append(item);
+  }
+  classification.append(taxonomy);
+  fragment.append(classification);
+
+  const genomeSection = section(documentRef, "Genome and DNA");
+  genomeSection.append(definitionList(documentRef, [
+    ["Genome", genome.genome_id],
+    ["Generation", genome.generation],
+    ["DNA", genome.dna?.dna_id],
+    ["Chromosomes", collection(genome.chromosomes).length],
+    ["Genes", collection(genome.genes).length],
+    ["Mutations", collection(genome.mutations).length],
+    ["Inheritance", genome.inheritance?.mode],
+    ["Life Cycle", collection(genome.life_cycle?.stages).join(" -> ")]
+  ]));
+  fragment.append(genomeSection);
+
+  const capability = section(documentRef, "Verified Capability Evolution");
+  capability.append(definitionList(documentRef, [
+    ["Evolution XP", evolution.evolution_xp],
+    ["Training Level", `LV${evolution.training_level ?? 1}`],
+    ["Active GA", `${collection(evolution.active_atom_ids).length} / ${evolution.atom_capacity ?? 108}`],
+    ["Genome Generation", evolution.genome_generation],
+    ["Role Fixed", "NO"],
+    ["Last Evidence", evolution.last_evidence_id]
+  ]));
+  capability.append(meter(documentRef, "GA Completion", collection(evolution.active_atom_ids).length / 108 * 100));
+  const domainGrid = element(documentRef, "div", "atom-domain-grid");
+  for (const domain of collection(biology.evolution?.catalog?.domains)) {
+    const unlocked = collection(evolution.active_atom_ids).filter((id) => {
+      const atom = collection(biology.evolution?.catalog?.atoms).find(({ ga_id: atomId }) => atomId === id);
+      return atom?.domain_id === domain.domain_id;
+    }).length;
+    const card = element(documentRef, "article", "atom-domain");
+    card.append(element(documentRef, "span", "", domain.code ?? domain.domain_id), element(documentRef, "strong", "", domain.name), element(documentRef, "small", "", `${unlocked} / 9 active`));
+    domainGrid.append(card);
+  }
+  capability.append(domainGrid);
+  const evolutionActions = element(documentRef, "div", "civilization-actions civilization-actions--wrap");
+  evolutionActions.append(
+    actionButton(documentRef, "Train Learning", "ADVANCE_LEARNING", () => callbacks.onAdvanceEvolution?.(featured.species_id, "LEARNING"), { tone: "civilization-action--primary" }),
+    actionButton(documentRef, "Train Adaptation", "ADVANCE_ADAPTATION", () => callbacks.onAdvanceEvolution?.(featured.species_id, "ADAPTATION"))
+  );
+  capability.append(evolutionActions);
+  fragment.append(capability);
+
+  const reproduction = section(documentRef, "Reproduction and Lineage");
+  reproduction.append(definitionList(documentRef, [
+    ["Natural", collection(biology.reproduction?.natural_modes).join(" / ")],
+    ["Clone", "PROPOSAL ONLY"],
+    ["Artificial Breeding", "PROPOSAL ONLY"],
+    ["Population Mutation", "DISABLED FROM VIEWER"]
+  ]));
+  const reproductionActions = element(documentRef, "div", "civilization-actions civilization-actions--wrap");
+  reproductionActions.append(
+    actionButton(documentRef, "Record Birth", "RECORD_BIRTH", () => callbacks.onSpeciesReproduction?.(featured.species_id, "BIRTH"), { tone: "civilization-action--primary" }),
+    actionButton(documentRef, "Clone Proposal", "PROPOSE_CLONE", () => callbacks.onSpeciesReproduction?.(featured.species_id, "CLONE"))
+  );
+  reproduction.append(reproductionActions);
+  const latestBirth = collection(biology.reproduction?.history).at(-1);
+  if (latestBirth) reproduction.append(definitionList(documentRef, [["Latest", latestBirth.mode], ["Status", latestBirth.status], ["Evidence", latestBirth.evidence_id]]));
+  fragment.append(reproduction);
+
+  const ecology = section(documentRef, "Planet Ecology");
+  for (const profile of collection(biology.planet_ecology).filter(({ species_id: id }) => id === featured.species_id)) {
+    const row = element(documentRef, "div", "production-row");
+    const copy = element(documentRef, "div", "production-row__copy");
+    copy.append(
+      element(documentRef, "strong", "", humanize(profile.planet_id)),
+      element(documentRef, "span", "", humanize(profile.status)),
+      element(documentRef, "small", "", collection(profile.requirements).length ? collection(profile.requirements).map(humanize).join(" / ") : "Native environment compatible")
+    );
+    row.append(copy);
+    ecology.append(row);
+  }
+  fragment.append(ecology);
+
+  const archive = section(documentRef, "Evolution Archive");
+  archive.append(definitionList(documentRef, [
+    ["Cambrian Timeline", `${collection(biology.cambrian_timeline).length} stages`],
+    ["Evolution Tree", `${collection(biology.evolution_tree).length} reviewed links`],
+    ["Species History", collection(biology.species_history).length],
+    ["Fossils", collection(biology.fossils).length],
+    ["Archive", "APPEND ONLY / BOUNDED"]
+  ]));
+  fragment.append(archive);
   return fragment;
 }
 
@@ -928,6 +1065,7 @@ export function createCivilizationView(container, callbacks = {}) {
     root.append(header, tabs);
 
     if (activeTab === "GENESIS") root.append(renderGenesis(documentRef, model));
+    else if (activeTab === "BIOLOGY") root.append(renderBiology(documentRef, model, callbacks));
     else if (activeTab === "ECOSYSTEM") root.append(renderEcosystem(documentRef, model));
     else if (activeTab === "FARM") root.append(renderFarm(documentRef, model, callbacks));
     else if (activeTab === "PRODUCTION") root.append(renderProduction(documentRef, model, callbacks));

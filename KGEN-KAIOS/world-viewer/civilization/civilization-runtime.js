@@ -1,5 +1,6 @@
 import { createAgricultureRuntime } from "../agriculture/agriculture-runtime.js";
 import { createAiWorkerRuntime } from "../ai/ai-worker-runtime.js";
+import { createBiologyRuntime } from "../biology/biology-runtime.js";
 import { createCitizenDailyRuntime, CITIZEN_DAILY_SCHEDULE } from "../citizen/citizen-daily-runtime.js";
 import { createCityRuntime } from "../city/city-runtime.js";
 import { createEconomyRuntime } from "../economy/economy-runtime.js";
@@ -97,6 +98,15 @@ export function createCivilizationRuntime({
     storageKey: `${storagePrefix}.agriculture`
   });
   const ecosystem = createEcosystemRuntime({ config: productionConfig, storage, storageKey: `${storagePrefix}.ecosystem` });
+  const biology = createBiologyRuntime({
+    config: world.biology_alpha,
+    speciesCatalog: productionConfig.species_catalog,
+    atomCatalog: world.reference_data?.genesis_atom_catalog,
+    planetProfiles: world.planet_profiles,
+    storage,
+    storageKey: `${storagePrefix}.biology`
+  });
+  biology.synchronizeEcosystem(ecosystem.getSnapshot());
   const resilience = createResilienceRuntime({
     logisticsRuntime: logistics,
     ecosystemRuntime: ecosystem,
@@ -146,6 +156,7 @@ export function createCivilizationRuntime({
     resilience: resilience.getSnapshot(),
     agriculture: configuredAgriculture.getSnapshot(),
     ecosystem: ecosystem.getSnapshot(),
+    biology: biology.getSnapshot(),
     production: production.getSnapshot(),
     ai_company: aiCompany.getSnapshot(),
     exchange: exchange.getSnapshot(),
@@ -294,6 +305,7 @@ export function createCivilizationRuntime({
         },
         agricultureWarehouse: configuredAgriculture.getSnapshot().warehouse
       });
+      biology.synchronizeEcosystem(ecosystem.getSnapshot());
       const companyStatus = aiCompany.getSnapshot().company.status;
       const productionResult = production.advance({ elapsedHours: chunk / 60, companyStatus, autoProduce: true });
       for (const product of productionResult.produced) {
@@ -488,6 +500,41 @@ export function createCivilizationRuntime({
     return getSnapshot();
   }
 
+  function advanceSpeciesEvolution(speciesId = "HUMAN_ALPHA", pathway = "LEARNING") {
+    usable();
+    born();
+    biology.advanceEvolution({
+      speciesId,
+      pathway,
+      evidence: {
+        evidence_id: stableId("biology-evidence", revision + 1),
+        reviewed: true,
+        score: 100,
+        source: "SYNTHETIC_PLAYER_TRAINING"
+      }
+    });
+    record("SPECIES_EVOLUTION_ADVANCED", { species_id: speciesId, pathway, simulation_only: true });
+    notifier.emit("SPECIES_EVOLUTION_ADVANCED", { species_id: speciesId, pathway });
+    return getSnapshot();
+  }
+
+  function requestSpeciesReproduction(speciesId = "HUMAN_ALPHA", mode = "BIRTH") {
+    usable();
+    born();
+    biology.requestReproduction({
+      speciesId,
+      mode,
+      evidence: {
+        evidence_id: stableId("reproduction-evidence", revision + 1),
+        reviewed: true,
+        source: "SYNTHETIC_BIOLOGY_REVIEW"
+      }
+    });
+    record("SPECIES_REPRODUCTION_RECORDED", { species_id: speciesId, mode, population_mutated: false });
+    notifier.emit("SPECIES_REPRODUCTION_RECORDED", { species_id: speciesId, mode });
+    return getSnapshot();
+  }
+
   function requestKgenSettlement(amount = 1) {
     usable();
     born();
@@ -624,6 +671,7 @@ export function createCivilizationRuntime({
       resilience: resilience.integrityReport(),
       agriculture: configuredAgriculture.integrityReport(),
       ecosystem: ecosystem.integrityReport(),
+      biology: biology.integrityReport(),
       production: production.integrityReport(),
       ai_company: aiCompany.integrityReport(),
       exchange: exchange.integrityReport(),
@@ -675,6 +723,8 @@ export function createCivilizationRuntime({
     registerBirth,
     dispatchLogistics,
     recoverEcology,
+    advanceSpeciesEvolution,
+    requestSpeciesReproduction,
     requestKgenSettlement,
     requestExternalSettlement,
     requestMortgage,
@@ -705,6 +755,7 @@ export function createCivilizationRuntime({
       resilience.destroy();
       configuredAgriculture.destroy();
       ecosystem.destroy();
+      biology.destroy();
       production.destroy();
       aiCompany.destroy();
       exchange.destroy();

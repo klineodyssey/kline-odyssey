@@ -39,7 +39,8 @@ assert.ok(initialEcosystem.species.every((species) => (
   species.body_profile_id && species.species_os_id && species.life_os_profile_id && species.dna_summary_id
 )));
 const trophicRoles = new Set(initialEcosystem.species.map(({ trophic_role: role }) => role));
-assert.ok(["PRODUCER", "CONSUMER", "PREDATOR", "DECOMPOSER"].every((role) => trophicRoles.has(role)));
+assert.ok(["PRODUCER", "HERBIVORE", "CARNIVORE", "OMNIVORE", "PREDATOR", "SCAVENGER", "DECOMPOSER"].every((role) => trophicRoles.has(role)));
+assert.equal(Object.keys(initialEcosystem.population_balance.role_counts).length, 7);
 
 const healthy = ecosystem.advance({
   elapsedHours: 24,

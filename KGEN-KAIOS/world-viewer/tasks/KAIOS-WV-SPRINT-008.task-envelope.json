@@ -1,0 +1,73 @@
+{
+  "task_id": "KAIOS-WV-SPRINT-008",
+  "human_decision_id": "HUMAN-SPRINT-008-CAMBRIAN-EXPLOSION",
+  "title": "Cambrian Explosion Runtime Alpha",
+  "objective": "Implement the shared synthetic Biology Foundation with taxonomy, Species Registry, genome, evidence-gated evolution, 108 Genesis Capability Atoms, Food Chain V2, reproduction boundaries, fossils, and planet ecology.",
+  "authorized_actions": [
+    "PRODUCT_CONTRACT",
+    "WORLD_VIEWER_IMPLEMENTATION",
+    "LOCAL_SIMULATION",
+    "TEST",
+    "EVIDENCE",
+    "COMMIT",
+    "PUSH",
+    "REVIEWED_MERGE",
+    "PAGES_VERIFICATION"
+  ],
+  "forbidden_actions": [
+    "REAL_GENETIC_ENGINEERING",
+    "REAL_BREEDING_OR_LAB_PROTOCOL",
+    "REAL_PATHOGEN_OR_BIOWEAPON",
+    "AUTHORITATIVE_SPECIES_REGISTRY",
+    "EXECUTABLE_CLONING",
+    "PROTECTED_RUNTIME_CHANGE",
+    "UNIVERSE_MAP_CURRENT_CHANGE",
+    "TOKEN_CONTRACT_CHANGE"
+  ],
+  "authorized_paths": [
+    "KGEN-KAIOS/world-viewer/",
+    ".github/workflows/world-viewer-product-qa.yml",
+    "KGEN-KAIOS/README.md",
+    "KGEN_MASTER_LIBRARY_INDEX.md",
+    "README.md"
+  ],
+  "protected_paths": [
+    "docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md",
+    "docs/maps/UniverseMap_CURRENT*",
+    "KGEN-KAIOS/life/LIFE_OS_ARCHITECTURE_BASELINE.md",
+    "KGEN-KAIOS/kernel/*CURRENT*",
+    "KGEN-KAIOS/settlement/*CURRENT*",
+    "KGEN-KAIOS/governance/*CURRENT*",
+    "contracts/",
+    "KGEN/contracts/",
+    "wallet/",
+    "bridge/",
+    "K線西遊記/temples/12345/",
+    "final-whitepaper/"
+  ],
+  "branch_name": "codex/world-viewer-sprint-008-cambrian",
+  "worktree_name": "kline-odyssey-world-viewer-sprint-008",
+  "base_sha": "345521e62f0cce49d64107e027386c6ec62e4679",
+  "commit_allowed": true,
+  "push_allowed": true,
+  "merge_allowed": true,
+  "deploy_allowed": false,
+  "reviewer": "CODEX_QUALITY_GATE",
+  "handoff_target": "CODEX_REVIEW",
+  "required_tests": [
+    "STATIC_ACCEPTANCE",
+    "STRICT_JSON_JSONL",
+    "ES_MODULE_IMPORT",
+    "BIOLOGY_INTEGRITY",
+    "PRODUCTION_INTEGRITY",
+    "CIVILIZATION_INTEGRITY",
+    "PRODUCT_BROWSER_QA",
+    "PROTECTED_PATH_CHECK",
+    "SECRET_SCAN"
+  ],
+  "implementation_commit_sha": "ed91bb03decd8ab21eb89aa1c9cc0e483e9b2826",
+  "review_result": "APPROVED",
+  "claim_state": "CLOSED",
+  "lease_state": "RELEASED",
+  "status": "DONE"
+}

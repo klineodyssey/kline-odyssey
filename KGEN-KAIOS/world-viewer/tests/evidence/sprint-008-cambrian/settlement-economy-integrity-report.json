@@ -1,0 +1,66 @@
+{
+  "status": "PASS",
+  "decision_id": "HUMAN-SPRINT-006-SETTLEMENT-ECONOMY",
+  "population": {
+    "ok": true,
+    "runtime": "SETTLEMENT_POPULATION_ALPHA",
+    "metrics": {
+      "population": 4,
+      "total_registered": 5,
+      "births": 1,
+      "families": 1,
+      "employment_rate": 100,
+      "education_index": 39.5
+    },
+    "issues": []
+  },
+  "logistics": {
+    "ok": true,
+    "runtime": "SETTLEMENT_LOGISTICS_ALPHA",
+    "pollution": 12.910000000000087,
+    "jobs": 120,
+    "issues": []
+  },
+  "settlement": {
+    "ok": true,
+    "runtime": "SETTLEMENT_ECONOMY_ALPHA",
+    "obligations": 4,
+    "pending_official_requests": 140,
+    "issues": []
+  },
+  "economy": {
+    "ok": true,
+    "runtime": "CIVILIZATION_ECONOMY_ALPHA",
+    "currency": "KAIOS_CREDIT",
+    "credit_supply": 20000,
+    "ledger_entries": 167,
+    "issues": []
+  },
+  "verified_flows": {
+    "family_to_civilization_hierarchy": true,
+    "marriage_with_consent": true,
+    "birth_with_carrying_capacity": true,
+    "education_and_employment": true,
+    "inheritance_once": true,
+    "domestic_logistics": true,
+    "export_gate": true,
+    "ecology_recovery": true,
+    "salary_tax_rent": true,
+    "kaios_credit_balanced": true,
+    "kgen_request_only": true,
+    "external_settlement_request_only": true,
+    "mortgage_architecture_only": true,
+    "insurance_architecture_only": true,
+    "bootstrap_reference_not_peg": true,
+    "kgen_tax_unchanged": true
+  },
+  "bounded_history": {
+    "logistics_jobs": 120,
+    "logistics_events": 40,
+    "settlement_requests": 140,
+    "settlement_events": 140,
+    "economy_ledger": 167
+  },
+  "protected_runtime_mutated": false,
+  "token_contract_mutated": false
+}

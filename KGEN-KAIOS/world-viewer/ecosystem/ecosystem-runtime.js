@@ -11,9 +11,9 @@ import {
 } from "../civilization/runtime-utils.js";
 
 const RUNTIME = "EcosystemRuntime";
-const SCHEMA_VERSION = "1.0.0";
+const SCHEMA_VERSION = "2.0.0";
 const MAX_EVENTS = 180;
-const TROPHIC_ROLES = new Set(["PRODUCER", "CONSUMER", "PREDATOR", "OMNIVORE", "DECOMPOSER"]);
+const TROPHIC_ROLES = new Set(["PRODUCER", "HERBIVORE", "CARNIVORE", "OMNIVORE", "PREDATOR", "SCAVENGER", "DECOMPOSER"]);
 
 function initialState(config) {
   return {
@@ -81,6 +81,9 @@ export function createEcosystemRuntime({
     const averageHealth = active.length
       ? active.reduce((sum, species) => sum + species.health, 0) / active.length
       : 0;
+    const roleCounts = Object.fromEntries([...TROPHIC_ROLES].map((role) => [role, active.filter((species) => species.trophic_role === role).length]));
+    const producerPopulation = active.filter(({ trophic_role: role }) => role === "PRODUCER").reduce((sum, species) => sum + species.population, 0);
+    const consumerPopulation = active.filter(({ trophic_role: role }) => !["PRODUCER", "DECOMPOSER"].includes(role)).reduce((sum, species) => sum + species.population, 0);
     return snapshot({
       runtime: "CAMBRIAN_ECOSYSTEM_ALPHA",
       schema_version: SCHEMA_VERSION,
@@ -93,6 +96,13 @@ export function createEcosystemRuntime({
       biodiversity: active.length,
       total_population: totalPopulation,
       average_health: averageHealth,
+      population_balance: {
+        role_counts: roleCounts,
+        producer_population: producerPopulation,
+        consumer_population: consumerPopulation,
+        producer_consumer_ratio: consumerPopulation > 0 ? producerPopulation / consumerPopulation : producerPopulation,
+        status: state.food_chain_status
+      },
       elapsed_hours: state.elapsed_hours,
       revision: state.revision,
       events: state.events
@@ -152,9 +162,11 @@ export function createEcosystemRuntime({
       species.health = clamp(species.health + recovery - stress);
       const baseGrowth = {
         PRODUCER: 0.006,
-        CONSUMER: 0.0025,
+        HERBIVORE: 0.0025,
+        CARNIVORE: 0.0015,
         PREDATOR: 0.001,
         OMNIVORE: 0.002,
+        SCAVENGER: 0.0025,
         DECOMPOSER: 0.004
       }[species.trophic_role] ?? 0;
       const healthFactor = species.health / 100;
@@ -163,7 +175,8 @@ export function createEcosystemRuntime({
         : species.health < 25
           ? -0.08 * days
           : baseGrowth * healthFactor * days;
-      species.population = Math.max(0, Math.round(species.population * (1 + changeRate)));
+      const projectedPopulation = species.population * (1 + changeRate);
+      species.population = Math.max(0, species.health <= 0 ? Math.floor(projectedPopulation) : Math.round(projectedPopulation));
       species.status = species.population > 0 ? "ACTIVE" : "EXTINCT";
       species.population_revision += 1;
     }

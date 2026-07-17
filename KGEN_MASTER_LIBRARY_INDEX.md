@@ -61,7 +61,7 @@ This file is the **unique library-level Master Index** (ORG-P2-003 D7). Other `*
 | KAIOS Worker Swarm Proposal | `KGEN-KAIOS/governance/autopilot/worker-swarm/` | Architecture-only clone, session, dispatcher, registry and recovery coordination |
 | KAIOS Boot / Life Integrity Proposal | `KGEN-KAIOS/boot-runtime/` | Fail-closed player Boot, Species OS and Life Integrity Architecture; implementation not started |
 | KAIOS Life OS V1.0 Baseline | `KGEN-KAIOS/life/` | Frozen Species-scoped Life OS Architecture and SHA-256 manifest; implementation not started |
-| KAIOS World Viewer V1.0 + Sprint 007 Civilization Governance Alpha | `KGEN-KAIOS/world-viewer/` | Frozen Web-first Architecture plus executable K280 living world, government, citizen rights, public services, resilience, conserved KAIOS Credit and gated settlement requests |
+| KAIOS World Viewer V1.0 + Sprint 008 Cambrian Explosion Alpha | `KGEN-KAIOS/world-viewer/` | Frozen Web-first Architecture plus executable K280 living world, 9-rank Biology Registry, Genome/DNA, 108 GA, Food Chain V2, planet ecology, civilization governance and conserved KAIOS Credit |
 | KAIOS V11.0 Architecture Baseline | `KGEN-KAIOS/V11/` | Frozen Multi-Agent Civilization Architecture, 11 design documents, ADR set, Resolution, review evidence and evolution log |
 | LAND RUNTIME V1 Architecture Baseline | `KGEN-KAIOS/land/` | Frozen K280 / Land Runtime V1 architecture: parcel geometry, rights separation, territory zones, residence protection, lunar registry (docs only) |
 | Civilization Economy Runtime V1 Baseline | `KGEN-KAIOS/civilization/` | Frozen CIV-ECONOMY-V1.0 architecture: biology mapping, payroll, zones, economic conflict, border margin, title/seat/realm (docs only) |
@@ -104,7 +104,7 @@ This file is the **unique library-level Master Index** (ORG-P2-003 D7). Other `*
 | KAIOS Index | `KGEN-KAIOS/README.md` | KAIOS V7 architecture, V7.1 worker layer, and V7.2 dashboard entry |
 | KAIOS Dashboard | `KGEN-KAIOS/dashboard/index.html` | Read-only operations dashboard for workers, WorkQueue, review pipeline, reports, and alerts |
 | General Manager Decision Center | `KGEN-KAIOS/decision/index.html` | Read-only Daily Operation, decisions, health, attendance, WorkQueue and readiness center |
-| KAIOS World Viewer Sprint 007 Civilization Governance Alpha | `KGEN-KAIOS/world-viewer/index.html` | Unique static entry for the synthetic K280 map, responsive Inspector, Life OS, government, public services, resilience and reviewed AI Government |
+| KAIOS World Viewer Sprint 008 Cambrian Explosion Alpha | `KGEN-KAIOS/world-viewer/index.html` | Unique static entry for the synthetic K280 map, responsive Biology Inspector, Species Registry, Genome/DNA, 108 GA, Food Chain V2, Life OS and civilization |
 | Decision Engine Standard | `KGEN-KAIOS/decision/DECISION_ENGINE_STANDARD.md` | Codex General Manager daily gate, decision evidence, risk and rollback rules |
 | Decision Log | `KGEN-KAIOS/decision/decision_log.jsonl` | Append-only manager decisions for approve, reject, merge, rollback, workforce and payroll actions |
 | Company Decision Center V1 | `company/README.md` | Source audit, migration boundary and Architecture index for the future canonical command control plane |

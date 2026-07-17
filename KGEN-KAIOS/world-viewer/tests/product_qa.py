@@ -1928,6 +1928,56 @@ def run_civilization_alpha(browser: Browser, args: argparse.Namespace, gate: Gat
             )),
         )
 
+        page.locator("[data-civilization-action='TAB_BIOLOGY']").click()
+        biology_text = clean_text(page.locator(".civilization-view").inner_text())
+        gate.expect(
+            "biology.registry-and-taxonomy",
+            "biology-registry",
+            all(label in biology_text for label in (
+                "Universal Biology Foundation", "26 synthetic Species", "9 ranks",
+                "Animal", "Plant", "Fungus", "Microorganism", "Human",
+                "AI Organism", "App Organism", "Company Organism", "Robot",
+                "Future Species", "Domain", "Kingdom", "Phylum", "Class",
+                "Order", "Family", "Genus", "Species", "Subspecies",
+            ))
+            and page.evaluate("document.documentElement.dataset.biologyReady") == "true"
+            and page.evaluate("document.documentElement.dataset.biologySpecies") == "26",
+        )
+        gate.expect(
+            "biology.genome-and-atoms",
+            "genome-evolution",
+            all(label in biology_text for label in (
+                "Genome and DNA", "Chromosomes", "Genes", "Mutations", "Inheritance",
+                "Verified Capability Evolution", "108 / 108 cataloged", "Active GA",
+                "Life Support", "Learning and Memory", "Genesis Integration", "Role Fixed NO",
+            ))
+            and page.evaluate("document.documentElement.dataset.biologyAtoms") == "108",
+        )
+        page.locator("[data-civilization-action='ADVANCE_LEARNING']").click()
+        page.wait_for_function("() => document.documentElement.dataset.biologyHumanAtoms === '1'")
+        gate.expect(
+            "biology.evidence-gated-evolution",
+            "genome-evolution",
+            "1 / 108" in clean_text(page.locator(".civilization-view").inner_text())
+            and "LV2" in clean_text(page.locator(".civilization-view").inner_text()),
+        )
+        page.locator("[data-civilization-action='PROPOSE_CLONE']").click()
+        page.wait_for_function("() => document.documentElement.dataset.biologyReproduction === '1'")
+        gate.expect(
+            "biology.clone-proposal-boundary",
+            "reproduction-integrity",
+            "PROPOSAL ONLY REVIEW REQUIRED" in clean_text(page.locator(".civilization-view").inner_text())
+            and "Population Mutation DISABLED FROM VIEWER" in clean_text(page.locator(".civilization-view").inner_text()),
+        )
+        gate.expect(
+            "biology.planet-ecology",
+            "planet-ecology",
+            all(label in clean_text(page.locator(".civilization-view").inner_text()) for label in (
+                "Earth", "Compatible", "Moon", "Base Required", "Mars", "Jupiter",
+                "Not Survivable", "Future Planet", "Unknown Review Required",
+            )),
+        )
+
         page.locator("[data-civilization-action='TAB_ECOSYSTEM']").click()
         ecosystem_text = clean_text(page.locator(".civilization-view").inner_text())
         gate.expect(
@@ -1943,10 +1993,12 @@ def run_civilization_alpha(browser: Browser, args: argparse.Namespace, gate: Gat
             "production.food-chain",
             "ecosystem",
             all(label in ecosystem_text for label in (
-                "Food Chain Energy", "Producer Input", "Consumer Demand",
-                "Decomposer Recovery", "Species Population", "Bacteria", "Tiger",
-                "Lion", "Elephant", "Bee", "Rice", "Mushroom",
+                "Food Chain V2 Energy", "Producer Input", "Consumer Demand",
+                "Decomposer Recovery", "Species Population", "Producer", "Herbivore",
+                "Carnivore", "Omnivore", "Predator", "Scavenger", "Decomposer",
+                "Bacteria", "Tiger", "Lion", "Elephant", "Bee", "Rice", "Mushroom",
             ))
+            and page.evaluate("document.documentElement.dataset.foodChainV2") == "true"
             and page.evaluate("document.documentElement.dataset.ecosystemStatus")
             in {"BALANCED", "CONSTRAINED", "COLLAPSE_RISK"},
         )
