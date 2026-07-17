@@ -45,7 +45,7 @@
     "KGEN/contracts/",
     "wallet/",
     "bridge/",
-    "K線西遊記/temples/12345/",
+    "K\u7dda\u897f\u904a\u8a18/temples/12345/",
     "final-whitepaper/"
   ],
   "branch_name": "codex/world-viewer-sprint-009-nation",
@@ -70,7 +70,12 @@
     "PROTECTED_PATH_CHECK",
     "SECRET_SCAN"
   ],
-  "claim_state": "ACTIVE",
-  "lease_state": "ACTIVE",
-  "status": "IN_PROGRESS"
+  "claim_id": "CLAIM-KAIOS-WV-SPRINT-009-20260717-CODEX-GM-01",
+  "fencing_token": "CODEX-MANUAL-WV-SPRINT-009-001",
+  "architecture_commit_sha": "9cb8714198c34c8c1aab0d8f2b44685e9d9e51ac",
+  "implementation_commit_sha": "9a5d0ae8f8a10e4a2f43a039305a60c1bf0fd771",
+  "review_status": "APPROVED",
+  "claim_state": "CLOSED",
+  "lease_state": "RELEASED",
+  "status": "DONE"
 }

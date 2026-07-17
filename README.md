@@ -40,7 +40,7 @@ Last optimized: 2026-06-11
 | LAND RUNTIME V1 Architecture Baseline | [KGEN-KAIOS/land/LAND_RUNTIME_ARCHITECTURE_BASELINE.md](KGEN-KAIOS/land/LAND_RUNTIME_ARCHITECTURE_BASELINE.md) |
 | Civilization Economy Runtime V1 Baseline | [KGEN-KAIOS/civilization/CIVILIZATION_ECONOMY_ARCHITECTURE_BASELINE.md](KGEN-KAIOS/civilization/CIVILIZATION_ECONOMY_ARCHITECTURE_BASELINE.md) |
 | UI Governor Architecture | [KGEN-KAIOS/ui-governor/README.md](KGEN-KAIOS/ui-governor/README.md) |
-| KAIOS World Viewer Sprint 008 Cambrian Explosion Alpha | [KGEN-KAIOS/world-viewer/index.html](KGEN-KAIOS/world-viewer/index.html) |
+| KAIOS World Viewer Sprint 009 Nation and Timeline Alpha | [KGEN-KAIOS/world-viewer/index.html](KGEN-KAIOS/world-viewer/index.html) |
 | PrimeForge Boot CURRENT | https://klineodyssey.github.io/kline-odyssey/boot/ |
 | Official Contact Email | klineodyssey.io@gmail.com |
 | BNB Smart Chain Token Contract | `0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be` |

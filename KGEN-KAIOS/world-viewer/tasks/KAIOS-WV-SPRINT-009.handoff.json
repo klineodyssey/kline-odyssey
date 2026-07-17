@@ -1,0 +1,72 @@
+{
+  "handoff_id": "HANDOFF-KAIOS-WV-SPRINT-009-CODEX-GM-01",
+  "task_id": "KAIOS-WV-SPRINT-009",
+  "human_decision_id": "HUMAN-SPRINT-009-NATION-TIMELINE",
+  "claim_id": "CLAIM-KAIOS-WV-SPRINT-009-20260717-CODEX-GM-01",
+  "branch": "codex/world-viewer-sprint-009-nation",
+  "worktree": "C:\\Desktop\\kline-odyssey-world-viewer-sprint-009",
+  "base_sha": "a4ac488b8e269c7c8cb4da48b41c81d3df83d0ef",
+  "head_sha_at_review": "9a5d0ae8f8a10e4a2f43a039305a60c1bf0fd771",
+  "architecture_commit_sha": "9cb8714198c34c8c1aab0d8f2b44685e9d9e51ac",
+  "implementation_commit_sha": "9a5d0ae8f8a10e4a2f43a039305a60c1bf0fd771",
+  "tests_run": [
+    "STATIC_ACCEPTANCE",
+    "STRICT_JSON_JSONL",
+    "ES_MODULE_IMPORT",
+    "NATION_TIMELINE_INTEGRITY",
+    "BIOLOGY_INTEGRITY",
+    "RUNTIME_INTEGRITY",
+    "GENESIS_INTEGRITY",
+    "PRODUCTION_INTEGRITY",
+    "SETTLEMENT_ECONOMY_INTEGRITY",
+    "GOVERNANCE_INTEGRITY",
+    "CIVILIZATION_INTEGRITY",
+    "BROWSER_PRODUCT_QA",
+    "RESPONSIVE_SCREENSHOT_DIFF",
+    "ACCESSIBILITY",
+    "PERFORMANCE",
+    "SECRET_SCAN",
+    "PROTECTED_PATH_DIFF"
+  ],
+  "test_results": {
+    "static_acceptance": "PASS",
+    "nation_timeline_integrity": "PASS",
+    "runtime_regressions": "PASS",
+    "browser_product_qa": {
+      "passed": 180,
+      "failed": 0,
+      "skipped": 0
+    },
+    "required_screenshots": 17,
+    "visual_regression": "PASS",
+    "performance": "PASS",
+    "protected_path_violations": 0
+  },
+  "evidence": [
+    "KGEN-KAIOS/world-viewer/SPRINT_009_NATION_TIMELINE_REPORT.md",
+    "KGEN-KAIOS/world-viewer/tests/evidence/sprint-009-nation-timeline/qa-report.json",
+    "KGEN-KAIOS/world-viewer/tests/evidence/sprint-009-nation-timeline/performance-report.json",
+    "KGEN-KAIOS/world-viewer/tests/evidence/sprint-009-nation-timeline/nation-timeline-integrity-report.json",
+    "KGEN-KAIOS/world-viewer/tests/evidence/sprint-009-nation-timeline/civilization-integrity-report.json"
+  ],
+  "known_issues": [],
+  "risks": [
+    "All Nation, tax, currency, resource, diplomacy, Timeline, vehicle, population, and economy data is synthetic and local.",
+    "The client is not an authoritative government, legal tender, tax, ownership, identity, diplomatic, historical, or financial registry."
+  ],
+  "protected_path_violations": 0,
+  "runtime_current_modified": false,
+  "universe_map_modified": false,
+  "kernel_current_modified": false,
+  "life_os_current_modified": false,
+  "cambrian_current_modified": false,
+  "settlement_current_modified": false,
+  "governance_current_modified": false,
+  "token_contract_modified": false,
+  "frozen_baseline_modified": false,
+  "implementation_scope": "SYNTHETIC_NATION_TIMELINE_ALPHA",
+  "recommended_next_action": "PUSH_REVIEWED_BRANCH_AND_MERGE_PR",
+  "review_status": "APPROVED",
+  "claim_state": "CLOSED",
+  "lease_state": "RELEASED"
+}

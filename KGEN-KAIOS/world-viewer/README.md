@@ -1,19 +1,19 @@
 ---
 TITLE: "KAIOS World Viewer Architecture Package"
-VERSION: "1.9.0"
-REVISION: "2026-07-17.7"
-STATUS: "SPRINT_008_CAMBRIAN_EXPLOSION_ALPHA_COMPLETE"
+VERSION: "1.10.0"
+REVISION: "2026-07-17.8"
+STATUS: "SPRINT_009_NATION_TIMELINE_ALPHA_COMPLETE"
 ARCHITECTURE: "BASELINE_FROZEN_V1.0"
-IMPLEMENTATION: "CAMBRIAN_BIOLOGY_FOUNDATION_ALPHA"
-WORKQUEUE: "KAIOS-WV-SPRINT-008_CLOSED"
+IMPLEMENTATION: "NATION_TIMELINE_ALPHA"
+WORKQUEUE: "KAIOS-WV-SPRINT-009_CLOSED"
 DEPLOYMENT: "STATIC_PAGES_COMPATIBLE"
 LAST_UPDATED: "2026-07-17"
 UPDATED_BY: "Codex / codex-gm-01"
 REVIEWED_BY: "Codex internal independent UI review; Human delegated approval"
-SOURCE_COMMIT: "ed91bb03decd8ab21eb89aa1c9cc0e483e9b2826"
-TASK_ID: "KAIOS-WV-SPRINT-008"
-HUMAN_DECISION_ID: "HUMAN-SPRINT-008-CAMBRIAN-EXPLOSION"
-CHANGE_REASON: "Add the shared synthetic Biology Foundation, nine-rank taxonomy, Species Registry, Genome/DNA, evidence-gated 108-GA evolution, Food Chain V2, reproduction boundaries, fossils and planet ecology."
+SOURCE_COMMIT: "9a5d0ae8f8a10e4a2f43a039305a60c1bf0fd771"
+TASK_ID: "KAIOS-WV-SPRINT-009"
+HUMAN_DECISION_ID: "HUMAN-SPRINT-009-NATION-TIMELINE"
+CHANGE_REASON: "Add a six-gate synthetic Nation, configurable tax policy, balanced Treasury, Official Currency isolation, finite Planet resources, reviewed diplomacy and Pocket Time Cloaked UFO-gated Timeline travel."
 ANCESTOR: "KGEN-KAIOS/V8.1/index.html; KGEN-KAIOS/land/LAND_RUNTIME_ARCHITECTURE_BASELINE.md"
 SOURCE_OF_TRUTH: false
 DOMAIN: KGENVERSE
@@ -33,9 +33,9 @@ CANONICAL_FILE: "KGEN-KAIOS/world-viewer/README.md"
 
 | Field | Value |
 |---|---|
-| Human Decision | `HUMAN-SPRINT-008-CAMBRIAN-EXPLOSION` |
+| Human Decision | `HUMAN-SPRINT-009-NATION-TIMELINE` |
 | Architecture | `BASELINE_FROZEN_V1.0` |
-| Implementation | `SPRINT_008_CAMBRIAN_EXPLOSION_ALPHA_COMPLETE` |
+| Implementation | `SPRINT_009_NATION_TIMELINE_ALPHA_COMPLETE` |
 | Sprint Task Envelope | `DONE` |
 | Deployment | `STATIC_GITHUB_PAGES_COMPATIBLE` |
 | Executable `index.html` | `CREATED` |
@@ -177,6 +177,14 @@ World Viewer V1 therefore defines adapter boundaries and draft projections. It d
 | `tests/baselines/sprint-008/` | Required Sprint 008 device, orientation, theme and product visual baselines |
 | `tests/evidence/sprint-008-cambrian/` | Product QA, integrity, performance, screenshots and visual diffs |
 | `SPRINT_008_CAMBRIAN_EXPLOSION_REPORT.md` | Alpha demo, architecture diff, implementation diff, QA, performance and Sprint 009 recommendation |
+| `SPRINT_009_NATION_TIMELINE_ARCHITECTURE.md` | Nation, public finance, resource, diplomacy, Timeline and transport ownership contracts |
+| `nation/`, `timeline/` | Synthetic Nation aggregate and vehicle-gated Timeline simulation runtimes |
+| `tests/nation_timeline_integrity.mjs` | Nation gates, balanced Treasury, resource conservation, diplomacy and Timeline integrity gate |
+| `tasks/KAIOS-WV-SPRINT-009.task-envelope.json` | Sprint 009 execution and closeout envelope |
+| `tasks/KAIOS-WV-SPRINT-009.HANDOFF.md` | Reviewed Sprint 009 claim, evidence and release handoff |
+| `tests/baselines/sprint-009/` | Required Sprint 009 device, orientation, theme and product visual baselines |
+| `tests/evidence/sprint-009-nation-timeline/` | Product QA, integrity, performance, screenshots and visual diffs |
+| `SPRINT_009_NATION_TIMELINE_REPORT.md` | Alpha demo, architecture diff, implementation diff, QA, performance and Sprint 010 recommendation |
 | `.github/workflows/world-viewer-product-qa.yml` | Pull-request and push Product QA workflow |
 
 ## 7. Implementation Boundary
@@ -241,3 +249,9 @@ Justice, penalty, prison, medical, police and emergency behavior remains non-exe
 Sprint 008 adds one shared synthetic Biology Foundation without replacing the existing Ecosystem, Planet, Species OS, Life OS or Civilization runtimes. Twenty-six registered Species cover ten biological and digital categories. Every Species exposes Domain-to-Subspecies classification plus versioned Genome, DNA, Gene, Chromosome, Mutation, Inheritance, Trait and Life Cycle projections.
 
 Evolution uses seven reviewed pathways and the public twelve-domain, 108-item Genesis Capability Atom catalog. GA count never defines identity, fixed role, morality or absolute power. Natural lineage events never directly mutate the Ecosystem population; Clone and Artificial Breeding remain proposal-only. Food Chain V2 adds Herbivore, Carnivore and Scavenger roles, while extinction observations create append-only synthetic Fossils. The reviewed browser gate reports `171 PASS / 0 FAIL / 0 SKIP`; see `SPRINT_008_CAMBRIAN_EXPLOSION_REPORT.md` and `tests/evidence/sprint-008-cambrian/`.
+
+## 16. Sprint 009 Nation and Timeline Result
+
+Sprint 009 adds a synthetic Nation that becomes established only after Population, Territory, Government, Sovereignty, Treasury and Official Currency gates pass. Twelve tax types remain governance-adjustable, KAIOS Credit Treasury entries stay balanced, KGEN remains isolated, eleven Planet resources obey finite-capacity checks, and six diplomacy actions require proposal review.
+
+Timeline travel spans nine Civilization eras and requires era research, civilization capacity, a checksummed Pocket Time Cloaked UFO and sufficient synthetic energy. Travel creates isolated records and never rewrites canonical history. The reviewed browser gate reports `180 PASS / 0 FAIL / 0 SKIP`; see `SPRINT_009_NATION_TIMELINE_REPORT.md` and `tests/evidence/sprint-009-nation-timeline/`.
