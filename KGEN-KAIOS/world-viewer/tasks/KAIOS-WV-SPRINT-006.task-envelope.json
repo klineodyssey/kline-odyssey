@@ -60,5 +60,9 @@
     "PROTECTED_PATH_CHECK",
     "SECRET_SCAN"
   ],
-  "status": "ACTIVE"
+  "implementation_commit_sha": "635dbe84ebfcbe16e95095b9c5c2572cff9b20c3",
+  "review_result": "APPROVED",
+  "claim_state": "CLOSED",
+  "lease_state": "RELEASED",
+  "status": "DONE"
 }
