@@ -1,0 +1,248 @@
+{
+  "budgets": {
+    "critical_payload_bytes": 1572864,
+    "desktop_first_usable_ms": 2500.0,
+    "desktop_heap_bytes": 268435456,
+    "maximum_render_ms": 50.0,
+    "minimum_fps": 30.0,
+    "touch_first_usable_ms": 2500.0,
+    "touch_heap_bytes": 167772160
+  },
+  "cases": [
+    {
+      "budgets": {
+        "first_usable_ms": 2500.0,
+        "heap_bytes": 167772160,
+        "maximum_render_ms": 50.0,
+        "minimum_fps": 30.0,
+        "transfer_bytes": 1572864
+      },
+      "case": "android-landscape-light",
+      "metrics": {
+        "dom_content_loaded_ms": 222.1,
+        "first_contentful_paint_ms": 188,
+        "first_usable_ms": 637,
+        "heap_bytes": 4611546,
+        "load_event_ms": 230.7,
+        "renderer_fps": 60.2,
+        "renderer_ms": 0.5,
+        "resource_count": 27,
+        "transfer_bytes": 501614
+      },
+      "results": {
+        "critical_payload": true,
+        "first_usable": true,
+        "heap": true,
+        "renderer_fps": true,
+        "renderer_time": true
+      },
+      "status": "PASS"
+    },
+    {
+      "budgets": {
+        "first_usable_ms": 2500.0,
+        "heap_bytes": 167772160,
+        "maximum_render_ms": 50.0,
+        "minimum_fps": 30.0,
+        "transfer_bytes": 1572864
+      },
+      "case": "android-portrait-dark",
+      "metrics": {
+        "dom_content_loaded_ms": 262.6,
+        "first_contentful_paint_ms": 236,
+        "first_usable_ms": 715.2,
+        "heap_bytes": 4574903,
+        "load_event_ms": 263,
+        "renderer_fps": 59.9,
+        "renderer_ms": 0.9,
+        "resource_count": 27,
+        "transfer_bytes": 501614
+      },
+      "results": {
+        "critical_payload": true,
+        "first_usable": true,
+        "heap": true,
+        "renderer_fps": true,
+        "renderer_time": true
+      },
+      "status": "PASS"
+    },
+    {
+      "budgets": {
+        "first_usable_ms": 2500.0,
+        "heap_bytes": 268435456,
+        "maximum_render_ms": 50.0,
+        "minimum_fps": 30.0,
+        "transfer_bytes": 1572864
+      },
+      "case": "desktop-dark",
+      "metrics": {
+        "dom_content_loaded_ms": 249.4,
+        "first_contentful_paint_ms": 192,
+        "first_usable_ms": 682.8,
+        "heap_bytes": 4498584,
+        "load_event_ms": 249.8,
+        "renderer_fps": 58.5,
+        "renderer_ms": 0.4,
+        "resource_count": 27,
+        "transfer_bytes": 501614
+      },
+      "results": {
+        "critical_payload": true,
+        "first_usable": true,
+        "heap": true,
+        "renderer_fps": true,
+        "renderer_time": true
+      },
+      "status": "PASS"
+    },
+    {
+      "budgets": {
+        "first_usable_ms": 2500.0,
+        "heap_bytes": 268435456,
+        "maximum_render_ms": 50.0,
+        "minimum_fps": 30.0,
+        "transfer_bytes": 1572864
+      },
+      "case": "desktop-light",
+      "metrics": {
+        "dom_content_loaded_ms": 205.7,
+        "first_contentful_paint_ms": 168,
+        "first_usable_ms": 621.2,
+        "heap_bytes": 4563799,
+        "load_event_ms": 214.4,
+        "renderer_fps": 60.2,
+        "renderer_ms": 0.6,
+        "resource_count": 27,
+        "transfer_bytes": 501614
+      },
+      "results": {
+        "critical_payload": true,
+        "first_usable": true,
+        "heap": true,
+        "renderer_fps": true,
+        "renderer_time": true
+      },
+      "status": "PASS"
+    },
+    {
+      "budgets": {
+        "first_usable_ms": 2500.0,
+        "heap_bytes": 167772160,
+        "maximum_render_ms": 50.0,
+        "minimum_fps": 30.0,
+        "transfer_bytes": 1572864
+      },
+      "case": "iphone-landscape-dark",
+      "metrics": {
+        "dom_content_loaded_ms": 241.6,
+        "first_contentful_paint_ms": 236,
+        "first_usable_ms": 692.3,
+        "heap_bytes": 4570696,
+        "load_event_ms": 242,
+        "renderer_fps": 59.5,
+        "renderer_ms": 0.6,
+        "resource_count": 27,
+        "transfer_bytes": 501614
+      },
+      "results": {
+        "critical_payload": true,
+        "first_usable": true,
+        "heap": true,
+        "renderer_fps": true,
+        "renderer_time": true
+      },
+      "status": "PASS"
+    },
+    {
+      "budgets": {
+        "first_usable_ms": 2500.0,
+        "heap_bytes": 167772160,
+        "maximum_render_ms": 50.0,
+        "minimum_fps": 30.0,
+        "transfer_bytes": 1572864
+      },
+      "case": "iphone-portrait-light",
+      "metrics": {
+        "dom_content_loaded_ms": 313.1,
+        "first_contentful_paint_ms": 328,
+        "first_usable_ms": 793.2,
+        "heap_bytes": 4578965,
+        "load_event_ms": 325,
+        "renderer_fps": 60.2,
+        "renderer_ms": 0.8,
+        "resource_count": 27,
+        "transfer_bytes": 501614
+      },
+      "results": {
+        "critical_payload": true,
+        "first_usable": true,
+        "heap": true,
+        "renderer_fps": true,
+        "renderer_time": true
+      },
+      "status": "PASS"
+    },
+    {
+      "budgets": {
+        "first_usable_ms": 2500.0,
+        "heap_bytes": 167772160,
+        "maximum_render_ms": 50.0,
+        "minimum_fps": 30.0,
+        "transfer_bytes": 1572864
+      },
+      "case": "tablet-landscape-dark",
+      "metrics": {
+        "dom_content_loaded_ms": 197,
+        "first_contentful_paint_ms": 200,
+        "first_usable_ms": 582,
+        "heap_bytes": 4631328,
+        "load_event_ms": 197.4,
+        "renderer_fps": 57.8,
+        "renderer_ms": 0.8,
+        "resource_count": 27,
+        "transfer_bytes": 501614
+      },
+      "results": {
+        "critical_payload": true,
+        "first_usable": true,
+        "heap": true,
+        "renderer_fps": true,
+        "renderer_time": true
+      },
+      "status": "PASS"
+    },
+    {
+      "budgets": {
+        "first_usable_ms": 2500.0,
+        "heap_bytes": 167772160,
+        "maximum_render_ms": 50.0,
+        "minimum_fps": 30.0,
+        "transfer_bytes": 1572864
+      },
+      "case": "tablet-portrait-light",
+      "metrics": {
+        "dom_content_loaded_ms": 267.4,
+        "first_contentful_paint_ms": 476,
+        "first_usable_ms": 745.6,
+        "heap_bytes": 3712541,
+        "load_event_ms": 279.5,
+        "renderer_fps": 59.5,
+        "renderer_ms": 0.5,
+        "resource_count": 27,
+        "transfer_bytes": 501614
+      },
+      "results": {
+        "critical_payload": true,
+        "first_usable": true,
+        "heap": true,
+        "renderer_fps": true,
+        "renderer_time": true
+      },
+      "status": "PASS"
+    }
+  ],
+  "gate": "KAIOS_WORLD_VIEWER_PERFORMANCE_QA",
+  "schema": "KAIOS_WORLD_VIEWER_PRODUCT_QA_V1",
+  "status": "PASS"
+}

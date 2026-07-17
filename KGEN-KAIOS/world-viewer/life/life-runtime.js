@@ -194,6 +194,7 @@ function initialState(profile, timestamp) {
     health,
     food: boundedMetric(vitals.food ?? profile.food, 75),
     water: boundedMetric(vitals.water ?? profile.water, 75),
+    oxygen: boundedMetric(vitals.oxygen ?? profile.oxygen, 100),
     energy: boundedMetric(vitals.energy ?? profile.energy, 75),
     age_days: nonNegativeNumber(profile.age_days ?? individual.age_days, 0),
     occupation: String(citizen.occupation ?? profile.occupation ?? "NOT_APPLICABLE"),
@@ -204,9 +205,32 @@ function initialState(profile, timestamp) {
     building_id: stringOrNull(profile.building_id),
     parcel_id: stringOrNull(profile.parcel_id),
     inventory: normalizeInventory(profile.inventory, true),
+    genesis: null,
     revision: Math.max(0, Math.floor(finiteNumber(individual.state_version ?? profile.revision, 0))),
     last_simulated_at: toIso(timestamp),
     events: []
+  };
+}
+
+function normalizeGenesisRecord(candidate, lifeId) {
+  if (!isRecord(candidate)
+    || candidate.life_id !== lifeId
+    || candidate.synthetic !== true
+    || typeof candidate.birth_id !== "string"
+    || typeof candidate.fortune_claim_id !== "string") return null;
+  return {
+    birth_id: candidate.birth_id,
+    life_id: lifeId,
+    planet_id: String(candidate.planet_id ?? "UNKNOWN"),
+    species_id: String(candidate.species_id ?? "UNKNOWN"),
+    fortune_claim_id: candidate.fortune_claim_id,
+    starter_pack_id: String(candidate.starter_pack_id ?? "UNKNOWN"),
+    starter_parcel_id: String(candidate.starter_parcel_id ?? "UNKNOWN"),
+    starter_shelter_id: String(candidate.starter_shelter_id ?? "UNKNOWN"),
+    recorded_at: Number.isFinite(Date.parse(candidate.recorded_at))
+      ? new Date(candidate.recorded_at).toISOString()
+      : null,
+    synthetic: true
   };
 }
 
@@ -222,12 +246,14 @@ function persistedState(candidate, fallback) {
     health,
     food: boundedMetric(candidate.food, fallback.food),
     water: boundedMetric(candidate.water, fallback.water),
+    oxygen: boundedMetric(candidate.oxygen, fallback.oxygen),
     energy: boundedMetric(candidate.energy, fallback.energy),
     age_days: nonNegativeNumber(candidate.age_days, fallback.age_days),
     activity_state: normalizeActivity(candidate.activity_state, lifeState),
     life_state: lifeState,
     health_state: deriveHealthState(health),
     inventory: normalizeInventory(candidate.inventory, false),
+    genesis: normalizeGenesisRecord(candidate.genesis, fallback.life_id),
     revision: Math.max(fallback.revision, Math.floor(nonNegativeNumber(candidate.revision, fallback.revision))),
     last_simulated_at: Number.isFinite(Date.parse(candidate.last_simulated_at))
       ? new Date(candidate.last_simulated_at).toISOString()
@@ -296,7 +322,7 @@ function inventoryKey(inventory, candidates) {
   return null;
 }
 
-function applyMetabolism(state, elapsedMs) {
+function applyMetabolism(state, elapsedMs, environment = {}) {
   if (state.life_state === "DEAD" || elapsedMs <= 0) return;
 
   const hours = elapsedMs / HOUR_MS;
@@ -308,12 +334,15 @@ function applyMetabolism(state, elapsedMs) {
 
   state.food = boundedMetric(state.food - foodRate * hours);
   state.water = boundedMetric(state.water - waterRate * hours);
+  const oxygenAvailable = environment.oxygen_available !== false;
+  state.oxygen = boundedMetric(state.oxygen + (oxygenAvailable ? 12 : -24) * hours);
   state.energy = boundedMetric(state.energy - energyRate * hours);
   state.age_days = nonNegativeNumber(state.age_days + elapsedMs / DAY_MS);
 
   let healthDelta = 0;
   if (state.water <= 0) healthDelta -= 4 * hours;
   if (state.food <= 0) healthDelta -= 2 * hours;
+  if (state.oxygen <= 30) healthDelta -= (state.oxygen <= 0 ? 12 : 4) * hours;
   if (state.energy <= 0) healthDelta -= 1.5 * hours;
   if (state.food >= 60 && state.water >= 60 && state.energy >= 60) healthDelta += 0.15 * hours;
   state.health = boundedMetric(state.health + healthDelta);
@@ -559,13 +588,58 @@ export function createLifeRuntime({
     return snapshotFor(state);
   }
 
+  function registerGenesis(lifeId, record = {}) {
+    assertUsable();
+    const state = requireState(lifeId);
+    const birthId = stringOrNull(record.birth_id);
+    const claimId = stringOrNull(record.fortune_claim_id);
+    if (!birthId || !claimId) {
+      throw runtimeError("INVALID_GENESIS_RECORD", "Life Genesis record requires birth and fortune claim IDs");
+    }
+    if (state.genesis) {
+      if (state.genesis.birth_id === birthId && state.genesis.fortune_claim_id === claimId) {
+        return snapshotFor(state);
+      }
+      throw runtimeError("GENESIS_ALREADY_RECORDED", `${state.life_id} already has a Genesis birth record`);
+    }
+    const inventory = normalizeInventory(record.inventory, false);
+    for (const [itemId, quantity] of Object.entries(inventory)) {
+      state.inventory[itemId] = clamp((state.inventory[itemId] ?? 0) + quantity, 0, MAX_INVENTORY_QUANTITY);
+    }
+    const recordedAt = toIso(Math.max(clock(), Date.parse(state.last_simulated_at)));
+    state.genesis = normalizeGenesisRecord({
+      ...record,
+      birth_id: birthId,
+      fortune_claim_id: claimId,
+      life_id: state.life_id,
+      recorded_at: recordedAt,
+      synthetic: true
+    }, state.life_id);
+    state.revision += 1;
+    state.last_simulated_at = recordedAt;
+    const event = appendEvent(state, "GENESIS_BIRTH", Date.parse(recordedAt), {
+      details: {
+        birth_id: birthId,
+        planet_id: state.genesis.planet_id,
+        fortune_claim_id: claimId,
+        starter_pack_id: state.genesis.starter_pack_id,
+        starter_parcel_id: state.genesis.starter_parcel_id
+      }
+    });
+    persist();
+    notify("GENESIS_BIRTH", state, event);
+    return snapshotFor(state);
+  }
+
   function advance(request = undefined, selectedLifeId = null) {
     assertUsable();
     let elapsedMs = request;
     let lifeId = selectedLifeId;
+    let environment = {};
     if (isRecord(request)) {
       elapsedMs = request.elapsedMs ?? request.elapsed_ms;
       lifeId = request.lifeId ?? request.life_id ?? selectedLifeId;
+      environment = isRecord(request.environment) ? request.environment : {};
     }
 
     const currentTime = clock();
@@ -579,7 +653,7 @@ export function createLifeRuntime({
       const boundedElapsed = Math.min(requestedElapsed, MAX_ADVANCE_MS);
       if (boundedElapsed <= 0) continue;
 
-      applyMetabolism(state, boundedElapsed);
+      applyMetabolism(state, boundedElapsed, environment);
       const simulationTime = elapsedMs === undefined
         ? currentTime
         : previousTime + boundedElapsed;
@@ -658,7 +732,7 @@ export function createLifeRuntime({
       if (!defaults.has(id) || state.synthetic !== true || state.privacy_class !== "PUBLIC_SYNTHETIC") {
         issues.push(`${id}: non-synthetic or unknown identity`);
       }
-      for (const metric of ["health", "food", "water", "energy"]) {
+      for (const metric of ["health", "food", "water", "oxygen", "energy"]) {
         if (!Number.isFinite(state[metric]) || state[metric] < 0 || state[metric] > 100) {
           issues.push(`${id}: invalid ${metric}`);
         }
@@ -701,6 +775,7 @@ export function createLifeRuntime({
     getSnapshot,
     listSnapshots,
     act,
+    registerGenesis,
     advance,
     subscribe,
     start,

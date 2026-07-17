@@ -1189,6 +1189,15 @@ def run_touch_interaction(browser: Browser, args: argparse.Namespace, gate: Gate
         context.close()
 
 
+def complete_genesis(page: Page, amount: int = 88) -> None:
+    dialog = page.locator("#genesis-dialog[open]")
+    if not dialog.count() or not dialog.is_visible():
+        return
+    dialog.locator(f"[data-amount='{amount}']").click()
+    page.wait_for_function("() => document.documentElement.dataset.genesisComplete === 'true'")
+    dialog.get_by_role("button", name="Enter world").click()
+
+
 def start_mock_session(page: Page, *, with_location: bool) -> None:
     page.locator("#login-button").click()
     dialog = visible_consent_dialog(page)
@@ -1200,9 +1209,65 @@ def start_mock_session(page: Page, *, with_location: bool) -> None:
     page.wait_for_function(
         "() => document.getElementById('login-button')?.textContent.trim() === 'End mock session'"
     )
+    complete_genesis(page)
     page.wait_for_function(
         "() => document.documentElement.dataset.worldViewerLevel === 'LAND_PARCEL'"
     )
+
+
+def run_genesis_mobile(browser: Browser, args: argparse.Namespace, gate: Gate) -> None:
+    source = MATRIX[4]
+    case = ViewportCase(
+        "genesis-mobile", source.family, source.orientation, source.width,
+        source.height, source.theme, source.touch, source.device_scale_factor,
+        source.user_agent,
+    )
+    context = new_context(browser, case)
+    page = context.new_page()
+    monitor = BrowserMonitor(page, args.base_url)
+    try:
+        load_page(page, args.base_url, "dark")
+        page.locator("#login-button").click()
+        visible_consent_dialog(page).get_by_role("button", name="Continue without location").click()
+        dialog = page.locator("#genesis-dialog[open]")
+        dialog.wait_for(state="visible")
+        dialog_text = clean_text(dialog.inner_text())
+        bounds = dialog.bounding_box() or {}
+        choices = dialog.locator("[data-amount]")
+        gate.expect(
+            "genesis.mobile-gate",
+            "civilization-genesis",
+            choices.count() == 6
+            and all(token in dialog_text.upper() for token in ("UNIVERSE BOOT", "PLANET CHECK", "LIFE OS BOOT", "K12345"))
+            and bounds.get("width", 0) >= source.width - 2,
+            case=case.slug,
+            details={"choices": choices.count(), "bounds": bounds},
+        )
+        screenshot = capture_screenshot(page, case, args.output_dir, None, args.pixel_threshold)
+        gate.screenshots.append(screenshot)
+        choices.filter(has_text="888 KGEN").click()
+        page.wait_for_function("() => document.documentElement.dataset.genesisComplete === 'true'")
+        dialog.get_by_role("button", name="Enter world").click()
+        page.wait_for_function("() => document.documentElement.dataset.worldViewerLevel === 'LAND_PARCEL'")
+        gate.expect(
+            "genesis.mobile-enter-world",
+            "civilization-genesis",
+            page.evaluate("document.documentElement.dataset.genesisStage") == "ENTER_WORLD"
+            and page.locator("#player-command-center").get_attribute("data-session") == "active",
+            case=case.slug,
+        )
+        browser_clean(monitor, "genesis-mobile", gate)
+    except Exception as error:
+        gate.add(
+            "genesis-mobile.execution",
+            "civilization-genesis",
+            "FAIL",
+            case=case.slug,
+            details={"error": clean_text(error)},
+        )
+        browser_clean(monitor, "genesis-mobile", gate)
+    finally:
+        context.close()
 
 
 def run_proposal_permissions(browser: Browser, args: argparse.Namespace, gate: Gate) -> None:
@@ -1433,6 +1498,7 @@ def run_login_and_consent(browser: Browser, args: argparse.Namespace, gate: Gate
         page.wait_for_function(
             "() => document.getElementById('login-button')?.textContent.trim() === 'End mock session'"
         )
+        complete_genesis(page)
         declined = clean_text(page.locator("#starter-parcel-status").inner_text())
         gate.expect(
             "location.decline",
@@ -1695,7 +1761,7 @@ def run_digital_earth_alpha(browser: Browser, args: argparse.Namespace, gate: Ga
         gate.expect(
             "digital-earth.life-runtime",
             "life-integrity",
-            all(label in life_after for label in ("Health", "Food", "Water", "Energy", "Age (days)", "Occupation", "Inventory"))
+            all(label in life_after for label in ("Health", "Food", "Water", "Oxygen", "Energy", "Age (days)", "Occupation", "Inventory"))
             and life_before != life_after,
             details={"life": player_life["id"]},
         )
@@ -1811,6 +1877,179 @@ def run_digital_earth_mobile(browser: Browser, args: argparse.Namespace, gate: G
         context.close()
 
 
+def run_civilization_alpha(browser: Browser, args: argparse.Namespace, gate: Gate) -> None:
+    case = ViewportCase("civilization-alpha", "desktop", "landscape", 1440, 900, "dark", False, 1)
+    context = new_context(browser, case)
+    page = context.new_page()
+    monitor = BrowserMonitor(page, args.base_url)
+    try:
+        load_page(page, args.base_url, "dark")
+        start_mock_session(page, with_location=False)
+        page.locator("[data-mode='CIVILIZATION']").click()
+        page.wait_for_function("() => document.documentElement.dataset.civilizationReady === 'true'")
+
+        page.locator("[data-civilization-action='TAB_GENESIS']").click()
+        genesis_text = clean_text(page.locator(".civilization-view").inner_text())
+        gate.expect(
+            "genesis.boot-and-fortune",
+            "civilization-genesis",
+            all(label in genesis_text for label in (
+                "Civilization Birth", "ENTER WORLD", "88 PROTOTYPE KGEN",
+                "Planet Environment", "Starter Survival Pack", "K12345",
+            )),
+            details={"genesis_complete": page.evaluate("document.documentElement.dataset.genesisComplete")},
+        )
+        gate.expect(
+            "genesis.planet-profile",
+            "planet-environment",
+            all(label in genesis_text for label in (
+                "Atmosphere", "Oxygen", "Gravity", "Temperature", "Pressure",
+                "Water", "Radiation", "Magnetic Field", "Day", "Year", "Human",
+            )),
+        )
+        page.locator("[data-civilization-action='TAB_TODAY']").click()
+
+        today_text = clean_text(page.locator(".civilization-view").inner_text())
+        gate.expect(
+            "civilization.daily-schedule",
+            "civilization-life",
+            all(label in today_text for label in (
+                "Sleep", "Wake", "Breakfast", "Work", "Lunch", "Study",
+                "Shopping", "Dinner", "Exercise", "Entertainment",
+            )),
+            details={"required_count": 11},
+        )
+        gate.expect(
+            "civilization.citizen-needs",
+            "civilization-life",
+            all(label in today_text for label in (
+                "Hunger", "Thirst", "Fatigue", "Mood", "Health", "Knowledge",
+                "Money", "Housing", "Relationship", "Safety",
+            )),
+        )
+
+        page.locator("[data-civilization-action='ADVANCE_HOUR']").click()
+        page.wait_for_function("() => document.documentElement.dataset.civilizationActivity === 'BREAKFAST'")
+        page.locator("[data-civilization-action='ADVANCE_HOUR']").click()
+        page.wait_for_function("() => document.documentElement.dataset.civilizationActivity === 'WORK'")
+        gate.expect(
+            "civilization.ai-schedule",
+            "ai-schedule",
+            page.evaluate("document.documentElement.dataset.civilizationAiAction") == "FARM"
+            and page.evaluate("Number(document.documentElement.dataset.civilizationBalance)") == 103,
+            details={
+                "activity": page.evaluate("document.documentElement.dataset.civilizationActivity"),
+                "ai_action": page.evaluate("document.documentElement.dataset.civilizationAiAction"),
+                "balance": page.evaluate("document.documentElement.dataset.civilizationBalance"),
+            },
+        )
+
+        page.locator("[data-civilization-action='TAB_FARM']").click()
+        garden = page.locator(".farm-plot").filter(has_text="Kitchen Garden")
+        garden.get_by_role("button", name="Veg").click()
+        gate.expect(
+            "civilization.crop-planted",
+            "agriculture",
+            "GROWING / VEGETABLE" in clean_text(garden.inner_text()),
+        )
+        page.locator("[data-civilization-action='TAB_TODAY']").click()
+        page.locator("[data-civilization-action='ADVANCE_DAY']").click()
+        page.locator("[data-civilization-action='TAB_FARM']").click()
+        garden = page.locator(".farm-plot").filter(has_text="Kitchen Garden")
+        gate.expect(
+            "civilization.crop-ready",
+            "agriculture",
+            "READY / VEGETABLE" in clean_text(garden.inner_text()),
+        )
+        garden.get_by_role("button", name="Harvest").click()
+        warehouse = page.locator(".civilization-section").filter(has_text="Farm Warehouse")
+        gate.expect(
+            "civilization.harvest-storage",
+            "food-balance",
+            "VEGETABLE" in clean_text(warehouse.inner_text())
+            and "Sell VEGETABLE" in clean_text(warehouse.inner_text()),
+        )
+        balance_before_sale = int(page.evaluate("document.documentElement.dataset.civilizationBalance"))
+        warehouse.get_by_role("button", name="Sell VEGETABLE").click()
+        balance_after_sale = int(page.evaluate("document.documentElement.dataset.civilizationBalance"))
+        gate.expect(
+            "civilization.harvest-sale",
+            "economy-integrity",
+            balance_after_sale == balance_before_sale + 4,
+            details={"before": balance_before_sale, "after": balance_after_sale},
+        )
+
+        page.locator("[data-civilization-action='TAB_MARKET']").click()
+        rice = page.locator(".market-listing").filter(has_text="FOOD / 6 CR")
+        balance_before_buy = int(page.evaluate("document.documentElement.dataset.civilizationBalance"))
+        rice.get_by_role("button", name="Buy").click()
+        balance_after_buy = int(page.evaluate("document.documentElement.dataset.civilizationBalance"))
+        gate.expect(
+            "civilization.market-purchase",
+            "economy-integrity",
+            balance_after_buy == balance_before_buy - 6
+            and "stock 119" in clean_text(rice.inner_text()),
+            details={"before": balance_before_buy, "after": balance_after_buy},
+        )
+
+        page.locator("[data-civilization-action='TAB_CITY']").click()
+        city_text = clean_text(page.locator(".civilization-view").inner_text())
+        gate.expect(
+            "civilization.city-runtime",
+            "city-integrity",
+            all(label in city_text for label in (
+                "Population", "Employment", "Unemployment", "Food", "Energy",
+                "Housing", "Roads", "Pollution", "Happiness",
+            ))
+            and page.evaluate("document.documentElement.dataset.civilizationCity") in {"STABLE", "THRIVING", "STRAINED", "AT_RISK"},
+        )
+
+        storage_before = page.evaluate("Object.values(localStorage).reduce((sum, value) => sum + value.length, 0)")
+        page.locator("[data-civilization-action='TAB_TODAY']").click()
+        for _ in range(10):
+            page.locator("[data-civilization-action='ADVANCE_DAY']").click()
+        storage_after = page.evaluate("Object.values(localStorage).reduce((sum, value) => sum + value.length, 0)")
+        gate.expect(
+            "civilization.memory-bound",
+            "memory-leak",
+            storage_after < 500_000 and storage_after - storage_before < 250_000,
+            details={"before_bytes": storage_before, "after_bytes": storage_after},
+        )
+
+        layout = measure_overflow(page)
+        canvas_widths = page.locator("#world-canvas").evaluate(
+            "element => ({canvas: element.getBoundingClientRect().width, parent: element.parentElement.getBoundingClientRect().width})"
+        )
+        gate.expect(
+            "civilization.responsive-canvas",
+            "responsive",
+            abs(canvas_widths["canvas"] - canvas_widths["parent"]) <= 1
+            and layout["document_width"] <= layout["viewport_width"]
+            and not layout["offenders"],
+            details={"canvas": canvas_widths, "layout": layout},
+        )
+
+        screenshot = capture_screenshot(page, case, args.output_dir, None, args.pixel_threshold)
+        gate.screenshots.append(screenshot)
+        gate.expect(
+            "civilization.visual-nonblank",
+            "visual-regression",
+            screenshot["pixel_variance"] >= 15 and screenshot["visual_range"] >= 32,
+            details=screenshot,
+        )
+        browser_clean(monitor, "civilization-alpha", gate)
+    except Exception as error:
+        gate.add(
+            "civilization.execution",
+            "civilization",
+            "FAIL",
+            details={"error": clean_text(error)},
+        )
+        browser_clean(monitor, "civilization-alpha", gate)
+    finally:
+        context.close()
+
+
 def reports(args: argparse.Namespace, gate: Gate) -> tuple[dict[str, Any], dict[str, Any]]:
     matrix = [asdict(case) for case in MATRIX]
     qa_report = {
@@ -1919,10 +2158,12 @@ def main(argv: list[str] | None = None) -> int:
                 run_mouse_and_navigation(browser, args, gate)
                 run_touch_interaction(browser, args, gate)
                 run_login_and_consent(browser, args, gate)
+                run_genesis_mobile(browser, args, gate)
                 run_proposal_permissions(browser, args, gate)
                 run_life_stack(browser, args, gate)
                 run_digital_earth_alpha(browser, args, gate)
                 run_digital_earth_mobile(browser, args, gate)
+                run_civilization_alpha(browser, args, gate)
             finally:
                 browser.close()
     except Exception as error:

@@ -1,0 +1,140 @@
+{
+  "task_id": "KAIOS-WV-SPRINT-004",
+  "human_decision_id": "HUMAN-SPRINT-004-001",
+  "title": "KAIOS Civilization Alpha implementation sprint 004",
+  "objective": "Turn the synthetic Digital Earth Alpha into a bounded living civilization simulation with daily schedules, autonomous AI workers, food and resource economy, agriculture, marketplace, city metrics, and multi-scale time.",
+  "task_source_type": "HUMAN_IMPLEMENTATION_AUTHORIZATION",
+  "task_source_actor": "Human PrimeForge",
+  "assigned_manager": "codex-gm-01",
+  "reviewer": "codex-gm-01",
+  "risk_level": "R1_SYNTHETIC_CIVILIZATION_ALPHA",
+  "claim_authority": "MANUAL_CODEX_DISPATCH_PRE_ATOMIC_AUTHORITY",
+  "claim_id": "CLAIM-KAIOS-WV-SPRINT-004-20260717-CODEX-GM-01",
+  "fencing_token": "CODEX-MANUAL-WV-SPRINT-004-001",
+  "worker_clones": [
+    {
+      "clone_id": "CLONE-WV-TIME-CITIZEN-13",
+      "scope": ["simulation/simulation-clock.js", "citizen/citizen-daily-runtime.js"],
+      "status": "DONE"
+    },
+    {
+      "clone_id": "CLONE-WV-AI-WORKER-14",
+      "scope": ["ai/ai-worker-runtime.js"],
+      "status": "DONE"
+    },
+    {
+      "clone_id": "CLONE-WV-ECONOMY-15",
+      "scope": ["economy/economy-runtime.js"],
+      "status": "DONE"
+    },
+    {
+      "clone_id": "CLONE-WV-AGRICULTURE-16",
+      "scope": ["agriculture/agriculture-runtime.js"],
+      "status": "DONE"
+    },
+    {
+      "clone_id": "CLONE-WV-CITY-17",
+      "scope": ["city/city-runtime.js"],
+      "status": "DONE"
+    },
+    {
+      "clone_id": "CODEX-GM-INTEGRATION-01",
+      "scope": ["civilization/**", "app.js", "index.html", "ui/**", "inspector/**", "tests/**", "reports and handoff"],
+      "status": "DONE"
+    }
+  ],
+  "authorized_actions": [
+    "IMPLEMENT_CIVILIZATION_ALPHA",
+    "IMPLEMENT_SYNTHETIC_TIME_AND_DAILY_SCHEDULES",
+    "IMPLEMENT_AUTONOMOUS_AI_WORKER_SCHEDULE",
+    "IMPLEMENT_SYNTHETIC_RESOURCE_AND_FOOD_ECONOMY",
+    "IMPLEMENT_SYNTHETIC_AGRICULTURE_AND_MARKETPLACE",
+    "IMPLEMENT_DERIVED_CITY_METRICS",
+    "IMPLEMENT_AUTONOMOUS_PRODUCT_QA",
+    "RUN_TESTS",
+    "PRODUCE_EVIDENCE",
+    "COMMIT_REVIEWED_WORK",
+    "PUSH_REVIEWED_NON_PROTECTED_WORK",
+    "DEPLOY_STATIC_PAGES_ALPHA"
+  ],
+  "forbidden_actions": [
+    "REAL_KYC",
+    "REAL_GPS",
+    "REAL_LAND_DATA",
+    "AUTHORITATIVE_OWNERSHIP_MUTATION",
+    "REAL_PAYMENT_OR_WALLET",
+    "REAL_MARKETPLACE_SETTLEMENT",
+    "BACKEND_WRITE_SERVICE",
+    "RUNTIME_CURRENT_MODIFICATION",
+    "UNIVERSE_MAP_CURRENT_MODIFICATION",
+    "FROZEN_BASELINE_MODIFICATION",
+    "TOKEN_CONTRACT_MODIFICATION",
+    "COMPANY_OR_GOVERNANCE_RUNTIME_CREATION",
+    "FORCE_PUSH"
+  ],
+  "authorized_paths": [
+    "KGEN-KAIOS/world-viewer/**",
+    ".github/workflows/world-viewer-product-qa.yml",
+    "KGEN-AI-Company/reports/handoffs/KAIOS-WV-SPRINT-004/**"
+  ],
+  "protected_paths": [
+    "contracts/**",
+    "wallet/**",
+    "bridge/**",
+    "K線西遊記/temples/12345/**",
+    "docs/physics/*CURRENT*",
+    "docs/maps/*CURRENT*",
+    "KGEN-KAIOS/**/**BASELINE*",
+    "final-whitepaper/**",
+    "KGEN/contracts/**",
+    "Human Main worktree"
+  ],
+  "required_tests": [
+    "CITIZEN_DAILY_SCHEDULE",
+    "LIFE_NEEDS_BALANCE",
+    "AI_WORKER_AUTONOMOUS_SCHEDULE",
+    "ECONOMY_LEDGER_INTEGRITY",
+    "FOOD_CONSUMPTION_AND_STORAGE_BALANCE",
+    "AGRICULTURE_PLANT_HARVEST_SELL_FLOW",
+    "MARKETPLACE_BUY_FLOW",
+    "CITY_METRIC_INTEGRITY",
+    "TIME_MINUTE_TO_YEAR_PROGRESSION",
+    "MEMORY_GROWTH_BOUND",
+    "DESKTOP_AND_MOBILE_PRODUCT_FLOW",
+    "RESPONSIVE_SCREENSHOT_DIFF",
+    "ACCESSIBILITY",
+    "PERFORMANCE",
+    "BROKEN_LINK_AND_CONSOLE_CHECK",
+    "JSON_JSONL_AND_MODULE_SYNTAX",
+    "PROTECTED_PATH_DIFF",
+    "SECRET_SCAN"
+  ],
+  "branch_name": "codex/world-viewer-sprint-004-civilization",
+  "worktree_name": "kline-odyssey-world-viewer-sprint-004",
+  "base_sha": "a388d79420941a772397869218d2a737915c1960",
+  "commit_allowed": true,
+  "push_allowed": true,
+  "merge_allowed": true,
+  "deploy_allowed": true,
+  "deploy_scope": "GITHUB_PAGES_STATIC_CIVILIZATION_ALPHA_ONLY",
+  "handoff_target": "codex-gm-01",
+  "implementation_commit_sha": "50962bf7005126589a3edc3a781aa75c21b36bd6",
+  "review_result": "APPROVED",
+  "review_evidence": {
+    "static_acceptance": "PASS",
+    "digital_earth_integrity": "PASS",
+    "civilization_integrity": "PASS",
+    "browser_product_qa": "128_PASS_0_FAIL_0_SKIP",
+    "visual_regression_profiles": 8,
+    "performance": "PASS",
+    "protected_path_violations": 0,
+    "runtime_current_modified": false,
+    "universe_map_current_modified": false,
+    "frozen_baseline_modified": false
+  },
+  "created_at": "2026-07-17T00:00:00+08:00",
+  "updated_at": "2026-07-17T06:56:23+08:00",
+  "claim_state": "CLOSED",
+  "lease_state": "RELEASED",
+  "status": "DONE"
+}

@@ -1,0 +1,61 @@
+{
+  "status": "PASS",
+  "clock": {
+    "ok": true,
+    "runtime": "CIVILIZATION_SIMULATION_CLOCK",
+    "event_count": 120,
+    "issues": []
+  },
+  "citizen": {
+    "ok": true,
+    "runtime": "CITIZEN_DAILY_RUNTIME",
+    "citizen_count": 3,
+    "issues": []
+  },
+  "ai_worker": {
+    "ok": true,
+    "runtime": "AI_WORKER_DAILY_RUNTIME",
+    "worker_count": 1,
+    "issues": []
+  },
+  "economy": {
+    "ok": true,
+    "runtime": "CIVILIZATION_ECONOMY_ALPHA",
+    "credit_supply": 10500,
+    "ledger_entries": 26,
+    "issues": []
+  },
+  "agriculture": {
+    "ok": true,
+    "runtime": "AGRICULTURE_ALPHA",
+    "plot_count": 3,
+    "warehouse_units": 5,
+    "issues": []
+  },
+  "city": {
+    "ok": true,
+    "runtime": "CITY_RUNTIME_ALPHA",
+    "derived_only": true,
+    "issues": []
+  },
+  "product_flow": {
+    "login_fixture": true,
+    "breakfast_consumed": true,
+    "work_rewarded": true,
+    "ai_farmed": true,
+    "crop_planted": true,
+    "crop_harvested": true,
+    "harvest_sold": true,
+    "market_purchase": true
+  },
+  "memory_bounds": {
+    "civilization": 180,
+    "clock": 120,
+    "citizen": 160,
+    "ai_worker": 160,
+    "economy": 26,
+    "agriculture": 180,
+    "city": 120
+  },
+  "protected_runtime_mutated": false
+}
