@@ -1,0 +1,127 @@
+{
+  "task_id": "KAIOS-PRODUCT-SPRINT-001A",
+  "claim_id": "CLAIM-KAIOS-PRODUCT-SPRINT-001A-20260717T2237-cursor-01",
+  "results": [
+    {
+      "test": "HTTP/index.html",
+      "pass": true,
+      "detail": "200"
+    },
+    {
+      "test": "HTTP/KGEN-KAIOS/world-viewer/index.html",
+      "pass": true,
+      "detail": "200"
+    },
+    {
+      "test": "NAV_LABELS_ZH",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "test": "WORLD_VIEWER_HERO_CTA",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "test": "SAFE_AREA_VIEWPORT",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "test": "PRODUCT_DOCK_FIXED",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "test": "HISTORY_FORWARD_BTN",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "test": "STAGE_ERROR_PANEL",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "test": "QUICK_START_PANEL",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "test": "SCREENSHOT_desktop-1440-hero.png",
+      "pass": true,
+      "detail": "/workspace/assets/product-sprint-001a-evidence/desktop-1440-hero.png"
+    },
+    {
+      "test": "SCREENSHOT_desktop-1440-world-nav.png",
+      "pass": true,
+      "detail": "/workspace/assets/product-sprint-001a-evidence/desktop-1440-world-nav.png"
+    },
+    {
+      "test": "SCREENSHOT_mobile-390-portrait-hero.png",
+      "pass": true,
+      "detail": "/workspace/assets/product-sprint-001a-evidence/mobile-390-portrait-hero.png"
+    },
+    {
+      "test": "SCREENSHOT_mobile-390-portrait-nav.png",
+      "pass": true,
+      "detail": "/workspace/assets/product-sprint-001a-evidence/mobile-390-portrait-nav.png"
+    },
+    {
+      "test": "SCREENSHOT_tablet-834-portrait.png",
+      "pass": true,
+      "detail": "/workspace/assets/product-sprint-001a-evidence/tablet-834-portrait.png"
+    },
+    {
+      "test": "SCREENSHOT_mobile-844-landscape.png",
+      "pass": true,
+      "detail": "/workspace/assets/product-sprint-001a-evidence/mobile-844-landscape.png"
+    },
+    {
+      "test": "SCREENSHOT_mobile-safe-area-simulated.png",
+      "pass": true,
+      "detail": "/workspace/assets/product-sprint-001a-evidence/mobile-safe-area-simulated.png"
+    },
+    {
+      "test": "PROTECTED_PATH_DIFF",
+      "pass": true,
+      "detail": {
+        "changed": [
+          "KGEN-AI-Company/reports/KAIOS_PRODUCT_SPRINT_001A_REPORT.md",
+          "KGEN-AI-Company/reports/handoffs/KAIOS-PRODUCT-SPRINT-001A/HANDOFF.md",
+          "KGEN-AI-Company/reports/handoffs/KAIOS-PRODUCT-SPRINT-001A/handoff.json",
+          "assets/product-shell.css",
+          "assets/product-shell.js",
+          "index.html",
+          "KGEN-KAIOS/world-viewer/tests/product_sprint_001a_qa.py",
+          "KGEN-KAIOS/world-viewer/tests/product_sprint_001a_screenshots.mjs",
+          "assets/product-sprint-001a-evidence/desktop-1440-hero.png",
+          "assets/product-sprint-001a-evidence/desktop-1440-world-nav.png",
+          "assets/product-sprint-001a-evidence/mobile-390-portrait-hero.png",
+          "assets/product-sprint-001a-evidence/mobile-390-portrait-nav.png",
+          "assets/product-sprint-001a-evidence/mobile-844-landscape.png",
+          "assets/product-sprint-001a-evidence/mobile-safe-area-simulated.png",
+          "assets/product-sprint-001a-evidence/qa-automation.json",
+          "assets/product-sprint-001a-evidence/screenshot-manifest.json",
+          "assets/product-sprint-001a-evidence/tablet-834-portrait.png"
+        ],
+        "unauthorized": []
+      }
+    },
+    {
+      "test": "UNCHANGED_KGEN_Universe_Physics_Runtime_CURRENT.md",
+      "pass": true,
+      "detail": "no diff"
+    },
+    {
+      "test": "UNCHANGED_UniverseMap_V10_2_DISTANCE_COMPLETE_ALL_POINTS.json",
+      "pass": true,
+      "detail": "no diff"
+    }
+  ],
+  "summary": {
+    "total": 19,
+    "pass": 19,
+    "fail": 0
+  }
+}

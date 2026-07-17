@@ -705,18 +705,31 @@
           <a class="button dark" href="#kaios-world">產品導覽</a>
         </div>
         <div class="hero-stats" aria-label="Universe overview">
-          <div class="stat"><b>123</b><span>Universe Map coordinates</span></div>
-          <div class="stat"><b>13+</b><span>神殿與文明節點</span></div>
-          <div class="stat"><b>V3.0</b><span>Official portal generation</span></div>
+          <div class="stat"><b>K280</b><span>World Viewer 數位地球</span></div>
+          <div class="stat"><b>2 點</b><span>即可開始探索</span></div>
+          <div class="stat"><b>Alpha</b><span>Synthetic Demo · 無真實 GPS/KYC</span></div>
+        </div>
+        <div class="product-start-panel" aria-label="Quick start">
+          <h2>兩步開始 · Quick Start</h2>
+          <p style="margin:0;color:var(--muted)">首次進入：先選「世界」，再一鍵進入 World Viewer。官網基本功能在 Viewer 失敗時仍可使用。</p>
+          <div class="product-start-steps">
+            <div class="product-start-step"><b>Step 1</b><span>點下方「世界」或 Hero 主按鈕</span></div>
+            <div class="product-start-step"><b>Step 2</b><span>進入 KAIOS World Viewer Demo</span></div>
+            <div class="product-start-step"><b>Web App</b><span>《K線西遊記》Galaxy Portal</span></div>
+          </div>
         </div>
       </div>
     </section>
 
     <section class="band-dark product-kaios" id="kaios-world">
       <div class="section-inner">
+        <button class="button dark product-fullpage-close" type="button" data-fullpage-close="kaios-world" aria-label="Close full page">返回</button>
         <div class="section-heading">
-          <h2>KAIOS World · Product Entry</h2>
-          <p>Product Sprint 001 將 Official Website、World Viewer Alpha 與 Web App 接到同一組固定導航。所有互動仍為 synthetic / proposal-only，不含真實 GPS、KYC、支付或鏈上寫入。</p>
+          <h2>KAIOS World · 世界入口</h2>
+          <p>Product Sprint 001：官網、World Viewer Alpha、Web App 同一產品線。主操作 ≤2 次點擊即可進入 Demo。</p>
+        </div>
+        <div class="hero-actions" style="margin-bottom:18px">
+          <button class="button primary" type="button" data-product-fullpage="kaios-world">全屏展開此區</button>
         </div>
         <div class="product-kaios-grid">
           <article class="product-kaios-card">
@@ -1122,26 +1135,31 @@
 
   <nav class="product-dock" aria-label="KAIOS product navigation">
     <div class="product-dock__controls">
-      <button type="button" id="product-nav-back" aria-label="Back">Back</button>
-      <button type="button" id="product-nav-prev" aria-label="Previous section">Prev</button>
-      <button type="button" id="product-nav-next" aria-label="Next section">Next</button>
+      <button type="button" id="product-nav-back" aria-label="返回">返回</button>
+      <button type="button" id="product-nav-prev" aria-label="上一頁">上一頁</button>
+      <button type="button" id="product-nav-next" aria-label="下一頁">下一頁</button>
+      <button type="button" id="product-nav-forward" aria-label="前進">前進</button>
     </div>
     <div class="product-dock__sections" role="navigation" aria-label="Primary sections">
-      <a class="product-dock__link is-active" href="#top" data-product-section="top" aria-current="page">Home</a>
-      <a class="product-dock__link" href="#kaios-world" data-product-section="kaios-world">World</a>
-      <a class="product-dock__link" href="#kaios-life" data-product-section="kaios-life">Life</a>
-      <a class="product-dock__link" href="#token" data-product-section="token">Market</a>
-      <a class="product-dock__link" href="#temples" data-product-section="temples">Temple</a>
-      <a class="product-dock__link" href="#operating" data-product-section="operating">Company</a>
-      <a class="product-dock__link" href="#product-settings" data-product-section="product-settings">Settings</a>
+      <a class="product-dock__link is-active" href="#top" data-product-section="top" aria-current="page">首頁</a>
+      <a class="product-dock__link" href="#kaios-world" data-product-section="kaios-world">世界</a>
+      <a class="product-dock__link" href="#kaios-life" data-product-section="kaios-life">生命</a>
+      <a class="product-dock__link" href="#token" data-product-section="token">市場</a>
+      <a class="product-dock__link" href="#temples" data-product-section="temples">神殿</a>
+      <a class="product-dock__link" href="#operating" data-product-section="operating">公司</a>
+      <a class="product-dock__link" href="#product-settings" data-product-section="product-settings">設定</a>
     </div>
   </nav>
 
   <div class="product-feature-stage" id="product-feature-stage" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="product-feature-stage-title">
     <header class="product-feature-stage__bar">
       <h2 class="product-feature-stage__title" id="product-feature-stage-title">KAIOS Feature</h2>
-      <button class="button dark" type="button" id="product-feature-back">Back</button>
+      <div class="hero-actions">
+        <button class="button dark" type="button" id="product-feature-stage-retry">重試</button>
+        <button class="button dark" type="button" id="product-feature-back">返回</button>
+      </div>
     </header>
+    <p class="product-feature-stage__error" id="product-feature-stage-error" hidden role="alert"></p>
     <iframe class="product-feature-stage__frame" id="product-feature-stage-frame" title="KAIOS product feature" loading="lazy"></iframe>
   </div>
 
