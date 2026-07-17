@@ -89,8 +89,9 @@ button:focus-visible, canvas:focus-visible, [tabindex]:focus-visible {
   min-width: var(--touch); height: var(--touch); border: 1px solid var(--line); border-radius: 6px;
   background: var(--surface-2); cursor: pointer; display: inline-grid; place-items: center;
 }
-.icon-button:hover, .login-button:hover, .proposal-bar button:hover { border-color: var(--accent); background: var(--surface-3); }
+.icon-button:hover, .login-button:hover, .proposal-bar button:hover, .portal-home-link:hover { border-color: var(--accent); background: var(--surface-3); }
 .icon-button span { font-size: 20px; line-height: 1; }
+.portal-home-link { text-decoration: none; color: inherit; }
 .login-button { padding: 0 13px; width: auto; max-width: 152px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12px; font-weight: 650; }
 .login-button.is-authenticated { border-color: var(--accent); color: var(--accent-strong); }
 .login-button:disabled { opacity: 0.55; }

@@ -1,0 +1,50 @@
+{
+  "schema_version": "1.1",
+  "task_id": "KAIOS-PRODUCT-SPRINT-001A",
+  "human_decision_id": "KAIOS PRODUCT SPRINT 001",
+  "task_envelope_path": "KGEN-AI-Company/reports/task-envelopes/KAIOS-PRODUCT-SPRINT-001A_task_envelope.json",
+  "worker_id": "cursor-01",
+  "worker_agent_id": "cursor-agent-0001",
+  "claim_id": "CLAIM-KAIOS-PRODUCT-SPRINT-001A-20260717T1721-cursor-01",
+  "reserved_branch": "cursor-handoff/KAIOS-PRODUCT-SPRINT-001A",
+  "base_sha": "97165d9520f0608e04567c20dade5cdb647fd9eb",
+  "claimed_at": "2026-07-17T17:21:59Z",
+  "handoff_submitted_at": "2026-07-17T17:25:00Z",
+  "files_changed": [
+    "index.html",
+    "assets/product-shell.css",
+    "assets/product-shell.js",
+    "KGEN-KAIOS/world-viewer/index.html",
+    "KGEN-KAIOS/world-viewer/ui/styles.css",
+    "KGEN-AI-Company/reports/KAIOS_PRODUCT_SPRINT_001A_REPORT.md",
+    "KGEN-AI-Company/reports/handoffs/KAIOS-PRODUCT-SPRINT-001A/HANDOFF.md",
+    "KGEN-AI-Company/reports/handoffs/KAIOS-PRODUCT-SPRINT-001A/handoff.json"
+  ],
+  "tests_run": [
+    "CURSOR_PREFLIGHT_PASS",
+    "STATIC_SERVER_SMOKE_TEST",
+    "DESKTOP_VIEWPORT_CHECK",
+    "TABLET_VIEWPORT_CHECK",
+    "PHONE_VIEWPORT_CHECK",
+    "SAFE_AREA_CHECK",
+    "NAVIGATION_VISIBILITY_CHECK",
+    "WORLD_VIEWER_LINK_CHECK",
+    "ACCESSIBILITY_BASIC_CHECK",
+    "CONSOLE_ERROR_CHECK",
+    "PROTECTED_PATH_DIFF",
+    "SECRET_SCAN"
+  ],
+  "test_results": "ALL_REQUIRED_GATES_PASS",
+  "task_result": "PASS",
+  "protected_path_violations": 0,
+  "runtime_current_modified": false,
+  "universe_map_modified": false,
+  "implementation_scope": "product_ui_frontend_integration",
+  "known_issues": [
+    "WALS-DOCS-001_DEFERRED",
+    "PHASE2_REPAIR_QUEUE_UNCHANGED",
+    "IFRAME_NESTED_CORS_WARNINGS_POSSIBLE"
+  ],
+  "review_status": "REVIEW",
+  "recommended_next_action": "Codex review and merge; then dispatch or allow claim of KAIOS-WALS-DOCS-001."
+}
