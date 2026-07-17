@@ -1,0 +1,99 @@
+{
+  "title": "Codex Mainline Controller",
+  "version": "1.0.0",
+  "revision": "2026-07-18.1",
+  "status": "APPROVED_ACTIVE_COMPANY_PROTOCOL",
+  "human_decision_id": "KAIOS COMPANY AUTOPILOT V1.0",
+  "codex_role": "KAIOS_GITHUB_MAINLINE_CONTROLLER",
+  "human_role": "PRODUCT_EXPERIENCE_WORLDVIEW_MAJOR_DECISION",
+  "cursor_role": "CLAIM_IMPLEMENT_PR_REPAIR_REPORT_HANDOFF",
+  "codex_responsibilities": [
+    "GITHUB_MAIN_BRANCH_STEWARDSHIP",
+    "DAILY_COMPANY_BOOT",
+    "ORIGIN_MAIN_SYNC",
+    "REVIEW_QUEUE_SYNC",
+    "WORKQUEUE_SYNC",
+    "ENGINEERING_HANDOVER_LOG_SYNC",
+    "REVIEW_LOG_SYNC",
+    "TASK_ENVELOPE_SYNC",
+    "MASTER_INDEX_SYNC",
+    "REPOSITORY_INDEX_SYNC",
+    "DOCUMENTATION_INDEX_SYNC",
+    "CURSOR_DISPATCH",
+    "REVIEW",
+    "MERGE",
+    "CLOSEOUT",
+    "RELEASE"
+  ],
+  "routine_human_review_not_required_for": [
+    "GENERAL_DOCUMENTATION",
+    "GENERAL_BUG",
+    "GENERAL_REVIEW",
+    "GENERAL_REPAIR",
+    "GENERAL_MERGE",
+    "GENERAL_CLOSEOUT",
+    "GENERAL_DISPATCH"
+  ],
+  "human_escalation_required_for": [
+    "NEW_UNIVERSE_LAW",
+    "WORLDVIEW_CHANGE",
+    "TOKEN_ECONOMY_CHANGE",
+    "GENESIS_CHANGE",
+    "PRIMEFORGE_CONSTITUTION_CHANGE",
+    "UNIVERSE_MAP_MAIN_STRUCTURE_CHANGE",
+    "MAJOR_PRODUCT_DIRECTION",
+    "MAJOR_SECURITY_INCIDENT",
+    "IRREVERSIBLE_DATA_DELETION",
+    "EXPLICIT_HUMAN_STOP"
+  ],
+  "mainline_boot_sequence": [
+    "FETCH",
+    "SYNC",
+    "REVIEW",
+    "DISPATCH",
+    "REVIEW_PR",
+    "MERGE",
+    "CLOSEOUT",
+    "UPDATE_LOGS",
+    "UPDATE_INDEX",
+    "VERIFY_PROTECTED_PATHS",
+    "VERIFY_REPOSITORY_HEALTH",
+    "VERIFY_MAIN_STATUS"
+  ],
+  "recovery_point_required_before": [
+    "MERGE",
+    "BATCH_UPDATE",
+    "AUTO_CLOSEOUT",
+    "AUTO_DISPATCH"
+  ],
+  "recovery_point_fields": [
+    "current_main_sha",
+    "current_tag",
+    "current_work_queue_hash",
+    "current_review_log_hash",
+    "current_handover_hash",
+    "current_protected_path_hash_manifest"
+  ],
+  "must_record_failures": [
+    "BLOCKED",
+    "REPAIR",
+    "REJECTED",
+    "CONFLICT",
+    "MERGE_FAILURE",
+    "REVIEW_FAILURE",
+    "PROTECTED_PATH_VIOLATION"
+  ],
+  "protected_boundaries": [
+    "TOKEN_CONTRACT",
+    "RUNTIME_CURRENT",
+    "UNIVERSE_MAP_CURRENT",
+    "TEMPLE_12345_RUNTIME",
+    "WALLET",
+    "BRIDGE",
+    "IRREVERSIBLE_DELETION",
+    "PRODUCTION_FINANCIAL_ACTION",
+    "REAL_KYC",
+    "REAL_GPS"
+  ]
+}
+

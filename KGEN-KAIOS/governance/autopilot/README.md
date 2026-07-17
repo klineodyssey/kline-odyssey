@@ -66,6 +66,10 @@ Codex reran Company Boot and `git fetch origin --prune` at `2026-07-15T17:29:48+
 | `ARCHITECTURE_BACKLOG_REGISTRY.md` | Proposal inventory, review state, dependencies and next action |
 | `CANONICAL_ATOMIC_CLAIM_AUTHORITY_PROPOSAL.md` | Transactional Claim authority selection and migration proposal |
 | `COMPANY_AUTOPILOT_ARCHITECTURE_REVIEW.md` | Delegated publication review and score evidence |
+| `CODEX_MAINLINE_CONTROLLER.md` | KAIOS Company Autopilot V1.0 GitHub mainline controller protocol |
+| `codex_mainline_controller.json` | Machine-readable Codex mainline controller authority, escalation and recovery contract |
+| `recovery_points/` | Per-operation recovery points created before merge, batch update, closeout or dispatch |
+| `company_status/` | Daily Company Boot status reports |
 | `COMPANY_INBOX.md` | Durable Human intake boundary that remains available during network failure |
 | `PRIORITY_SCHEDULER.md` | Review-first ordering and one-task scheduling contract |
 | `REPOSITORY_MAINTENANCE_RUNTIME.md` | Fetch, compare, retry, recovery and health architecture |
@@ -104,6 +108,12 @@ If this proposal is approved, the merge plan updates those active authorities cu
 ## Human and Company Responsibility
 
 Human PrimeForge retains Final Authority and all Level C decisions. Under `HUMAN-PRIMEFORGE-FULL-AUTOPILOT-001`, Codex owns bounded Level A and qualifying Level B operations, including routine repository maintenance, reviewed documentation publication, Claim closeout and isolated sandbox coordination. Cursor owns one authorized execution task at a time and never receives main, architecture or protected-path authority.
+
+## Codex Mainline Controller V1.0
+
+Human Decision `KAIOS COMPANY AUTOPILOT V1.0` makes Codex the GitHub mainline controller for routine engineering operations. Human no longer handles daily fetch, sync, review, merge, closeout, release, index maintenance or Cursor dispatch. Codex performs those actions through managed workspaces, recovery points, WorkQueue, Review Log and Engineering Handover Log.
+
+Escalation remains required for new universe law, worldbuilding changes, Token economy changes, Genesis changes, PrimeForge Constitution changes, Universe Map main-structure changes, major product direction, major security incident, irreversible deletion and explicit Human stop.
 
 ## Shared Company Boot
 
