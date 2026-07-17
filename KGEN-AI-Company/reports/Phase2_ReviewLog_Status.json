@@ -1,0 +1,41 @@
+{
+  "schema_version": "1.0",
+  "decision_id": "HUMAN-PHASE2-HANDOFF-RECONCILIATION-001",
+  "generated_at": "2026-07-17T22:44:23+08:00",
+  "current_main_sha": "8d95316ac01e7c6cdad05c6917abc38f2456f61b",
+  "review_log": "KGEN-AI-Company/reports/CODEX_REVIEW_LOG.md",
+  "scan_result": {
+    "target_workorders": 22,
+    "approved_target_payloads_on_main": 0,
+    "merged_target_payloads_without_closeout": 0,
+    "existing_target_rejections": [
+      {
+        "task_id": "ORG-P2-006",
+        "commit_sha": "a7a3d21",
+        "meaning": "historical handoff rejection, not an approved payload merge"
+      }
+    ],
+    "reconciliation_entry_appended": true,
+    "review_log_status": "CURRENT"
+  },
+  "main_coverage": {
+    "pull_requests_27_through_35_present": true,
+    "world_life_law_v2_1_present": true,
+    "duplicate_merge_required": false
+  },
+  "archive_status": {
+    "latest_stale_handoffs": "REPAIR_EVIDENCE_ONLY",
+    "older_same_task_handoffs": "SUPERSEDED_EVIDENCE_ONLY_WHERE_PRESENT",
+    "remote_branches_deleted": 0,
+    "payloads_merged": 0
+  },
+  "protection": {
+    "protected_path_violations": 0,
+    "runtime_current_modified": false,
+    "universe_map_modified": false,
+    "frozen_baseline_modified": false,
+    "token_contract_modified": false,
+    "human_main_modified": false,
+    "implementation_files": 0
+  }
+}

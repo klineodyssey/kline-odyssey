@@ -154,7 +154,7 @@ The worker must then stop without changing WorkQueue, creating a branch, editing
 
 ## V11 Readiness Handoff Dispositions
 
-These rows classify remote submissions, not the underlying OPEN WorkOrders. Visible evidence branches are retained and are not pending after a Codex decision is recorded.
+These rows classify remote submissions, not the current WorkOrder state. The `Official Task Status` column is the historical status captured by the 2026-07-13 V11 reconciliation. Visible evidence branches are retained and are not pending after a Codex decision is recorded. Current task status is governed by the summary and detail records below.
 
 | Task ID | Branch Tip | Submission Decision | Official Task Status |
 |---|---|---|---|
@@ -248,27 +248,31 @@ Full branch, claim, base, report, purity, protected-path, and age evidence is re
 | ORG-P2-003F | REJECTED | Cursor | Codex | P2 | Runtime | KGEN-AI-Company/reports/ORG-P2-003F_12345_MODULE_NAMING_MIGRATION_PLAN.md |
 | ORG-P2-003F-FIX1 | DONE | Cursor | Codex | P2 | Runtime | KGEN-AI-Company/reports/ORG-P2-003F_FIX1_12345_MODULE_NAMING_MIGRATION_PLAN.md |
 | ORG-P2-004 | DONE | Cursor | Codex | P0 | Canon | KGEN-AI-Company/reports/ORG-P2-004_CANON_ALIGNMENT.md |
-| ORG-P2-005 | OPEN | Cursor | Codex | P2 | Universe | KGEN-AI-Company/reports/ORG-P2-005_UNIVERSE_REFERENCE_CHECK.md |
-| ORG-P2-006 | OPEN | Cursor | Codex | P1 | Civilization | KGEN-AI-Company/reports/ORG-P2-006_CIVILIZATION_STAGE_MAP.md |
-| ORG-P2-007 | OPEN | Cursor | Codex | P1 | Economy | KGEN-AI-Company/reports/ORG-P2-007_ECONOMY_LOOP_QA.md |
-| ORG-P2-008 | OPEN | Cursor | Codex | P1 | Temple | KGEN-AI-Company/reports/ORG-P2-008_TEMPLE_STANDARD_QA.md |
-| ORG-P2-009 | OPEN | Cursor | Codex | P1 | Land | KGEN-AI-Company/reports/ORG-P2-009_LAND_STANDARD_QA.md |
-| ORG-P2-010 | OPEN | Cursor | Codex | P2 | Building | KGEN-AI-Company/reports/ORG-P2-010_BUILDING_EVOLUTION_MAP.md |
-| ORG-P2-011 | OPEN | Cursor | Codex | P2 | NPC | KGEN-AI-Company/reports/ORG-P2-011_NPC_EVOLUTION_REVIEW.md |
-| ORG-P2-012 | OPEN | Cursor | Codex | P1 | App | KGEN-AI-Company/reports/ORG-P2-012_APP_LIFE_QA.md |
-| ORG-P2-013 | OPEN | Cursor | Codex | P1 | Game | KGEN-AI-Company/reports/ORG-P2-013_GAME_LOOP_MAP.md |
-| ORG-P2-014 | OPEN | Cursor | Codex | P0 | Runtime | KGEN-AI-Company/reports/ORG-P2-014_RUNTIME_GOVERNANCE.md |
-| ORG-P2-015 | OPEN | Cursor | Codex | P2 | SDK | KGEN-AI-Company/reports/ORG-P2-015_SDK_SCHEMA_GAP.md |
-| ORG-P2-016 | OPEN | Cursor | Codex | P1 | Frontend | KGEN-AI-Company/reports/ORG-P2-016_FRONTEND_PAGES_LINKS.md |
-| ORG-P2-017 | OPEN | Cursor | Codex | P2 | Backend | KGEN-AI-Company/reports/ORG-P2-017_BACKEND_BOUNDARY.md |
-| ORG-P2-018 | OPEN | Cursor | Codex | P0 | QA | KGEN-AI-Company/reports/ORG-P2-018_QA_VALIDATION.md |
-| ORG-P2-019 | OPEN | Cursor | Codex | P0 | Security | KGEN-AI-Company/reports/ORG-P2-019_SECURITY_PROTECTED_PATHS.md |
-| ORG-P2-020 | OPEN | Cursor | Codex | P1 | DevOps | KGEN-AI-Company/reports/ORG-P2-020_DEVOPS_PAGES_QA.md |
-| ORG-P2-021 | OPEN | Cursor | Codex | P3 | Research | KGEN-AI-Company/reports/ORG-P2-021_RESEARCH_INPUTS.md |
-| ORG-P2-022 | OPEN | Cursor | Codex | P1 | Documentation | KGEN-AI-Company/reports/ORG-P2-022_DOCUMENTATION_INDEX_QA.md |
-| ORG-P2-023 | OPEN | Cursor | Codex | P1 | Publishing | KGEN-AI-Company/reports/ORG-P2-023_PUBLISHING_URL_QA.md |
-| ORG-P2-024 | OPEN | Cursor | Codex | P1 | WorkOrders | KGEN-AI-Company/reports/ORG-P2-024_WORKORDER_QA.md |
-| ORG-P2-025 | OPEN | Cursor | Codex | P2 | Reports | KGEN-AI-Company/reports/ORG-P2-025_REPORTS_CHECKLIST.md |
+| ORG-P2-005 | REPAIR_REQUIRED | Cursor | Codex | P2 | Universe | KGEN-AI-Company/reports/ORG-P2-005_UNIVERSE_REFERENCE_CHECK.md |
+| ORG-P2-006 | REPAIR_REQUIRED | Cursor | Codex | P1 | Civilization | KGEN-AI-Company/reports/ORG-P2-006_CIVILIZATION_STAGE_MAP.md |
+| ORG-P2-007 | REPAIR_REQUIRED | Cursor | Codex | P1 | Economy | KGEN-AI-Company/reports/ORG-P2-007_ECONOMY_LOOP_QA.md |
+| ORG-P2-008 | REPAIR_REQUIRED | Cursor | Codex | P1 | Temple | KGEN-AI-Company/reports/ORG-P2-008_TEMPLE_STANDARD_QA.md |
+| ORG-P2-009 | REPAIR_REQUIRED | Cursor | Codex | P1 | Land | KGEN-AI-Company/reports/ORG-P2-009_LAND_STANDARD_QA.md |
+| ORG-P2-010 | REPAIR_REQUIRED | Cursor | Codex | P2 | Building | KGEN-AI-Company/reports/ORG-P2-010_BUILDING_EVOLUTION_MAP.md |
+| ORG-P2-011 | REPAIR_REQUIRED | Cursor | Codex | P2 | NPC | KGEN-AI-Company/reports/ORG-P2-011_NPC_EVOLUTION_REVIEW.md |
+| ORG-P2-012 | REPAIR_REQUIRED | Cursor | Codex | P1 | App | KGEN-AI-Company/reports/ORG-P2-012_APP_LIFE_QA.md |
+| ORG-P2-013 | REPAIR_REQUIRED | Cursor | Codex | P1 | Game | KGEN-AI-Company/reports/ORG-P2-013_GAME_LOOP_MAP.md |
+| ORG-P2-014 | REPAIR_REQUIRED | Cursor | Codex | P0 | Runtime | KGEN-AI-Company/reports/ORG-P2-014_RUNTIME_GOVERNANCE.md |
+| ORG-P2-015 | REPAIR_REQUIRED | Cursor | Codex | P2 | SDK | KGEN-AI-Company/reports/ORG-P2-015_SDK_SCHEMA_GAP.md |
+| ORG-P2-016 | REPAIR_REQUIRED | Cursor | Codex | P1 | Frontend | KGEN-AI-Company/reports/ORG-P2-016_FRONTEND_PAGES_LINKS.md |
+| ORG-P2-017 | REPAIR_REQUIRED | Cursor | Codex | P2 | Backend | KGEN-AI-Company/reports/ORG-P2-017_BACKEND_BOUNDARY.md |
+| ORG-P2-018 | REPAIR_REQUIRED | Cursor | Codex | P0 | QA | KGEN-AI-Company/reports/ORG-P2-018_QA_VALIDATION.md |
+| ORG-P2-019 | REPAIR_REQUIRED | Cursor | Codex | P0 | Security | KGEN-AI-Company/reports/ORG-P2-019_SECURITY_PROTECTED_PATHS.md |
+| ORG-P2-020 | REPAIR_REQUIRED | Cursor | Codex | P1 | DevOps | KGEN-AI-Company/reports/ORG-P2-020_DEVOPS_PAGES_QA.md |
+| ORG-P2-021 | REPAIR_REQUIRED | Cursor | Codex | P3 | Research | KGEN-AI-Company/reports/ORG-P2-021_RESEARCH_INPUTS.md |
+| ORG-P2-022 | REPAIR_REQUIRED | Cursor | Codex | P1 | Documentation | KGEN-AI-Company/reports/ORG-P2-022_DOCUMENTATION_INDEX_QA.md |
+| ORG-P2-023 | REPAIR_REQUIRED | Cursor | Codex | P1 | Publishing | KGEN-AI-Company/reports/ORG-P2-023_PUBLISHING_URL_QA.md |
+| ORG-P2-024 | REPAIR_REQUIRED | Cursor | Codex | P1 | WorkOrders | KGEN-AI-Company/reports/ORG-P2-024_WORKORDER_QA.md |
+| ORG-P2-025 | REPAIR_REQUIRED | Cursor | Codex | P2 | Reports | KGEN-AI-Company/reports/ORG-P2-025_REPORTS_CHECKLIST.md |
+
+### Phase 2 Handoff Reconciliation Hold
+
+Decision `HUMAN-PHASE2-HANDOFF-RECONCILIATION-001` moved ORG-P2-005 through ORG-P2-025 to `REPAIR_REQUIRED`. Their latest handoffs are based on `89f3c351` or `d5d9b2cc`, while current `origin/main` is `8d95316a`. The stale branches are retained as evidence only and must not be force-merged, cherry-picked, or treated as completed reports. See `KGEN-AI-Company/reports/Phase2_Reconciliation_Report.md`.
 
 ## Phase 2 Cursor Execution WorkOrders
 
@@ -674,7 +678,7 @@ Full branch, claim, base, report, purity, protected-path, and age evidence is re
 
 ### ORG-P2-005 - Check Universe Map references in Organization standards
 
-- Status: OPEN
+- Status: REPAIR_REQUIRED
 - Owner: Cursor
 - Reviewer: Codex
 - Priority: P2
@@ -708,7 +712,7 @@ Full branch, claim, base, report, purity, protected-path, and age evidence is re
 
 ### ORG-P2-006 - Map civilization upgrade stages to economy and game loops
 
-- Status: OPEN
+- Status: REPAIR_REQUIRED
 - Owner: Cursor
 - Reviewer: Codex
 - Priority: P1
@@ -742,7 +746,7 @@ Full branch, claim, base, report, purity, protected-path, and age evidence is re
 
 ### ORG-P2-007 - Validate Wild Land to cross-universe economy loop
 
-- Status: OPEN
+- Status: REPAIR_REQUIRED
 - Owner: Cursor
 - Reviewer: Codex
 - Priority: P1
@@ -776,7 +780,7 @@ Full branch, claim, base, report, purity, protected-path, and age evidence is re
 
 ### ORG-P2-008 - Check temple organ naming rules and one image one temple references
 
-- Status: OPEN
+- Status: REPAIR_REQUIRED
 - Owner: Cursor
 - Reviewer: Codex
 - Priority: P1
@@ -810,7 +814,7 @@ Full branch, claim, base, report, purity, protected-path, and age evidence is re
 
 ### ORG-P2-009 - Validate land acquisition, rental, conquest, and NFT future language
 
-- Status: OPEN
+- Status: REPAIR_REQUIRED
 - Owner: Cursor
 - Reviewer: Codex
 - Priority: P1
@@ -844,7 +848,7 @@ Full branch, claim, base, report, purity, protected-path, and age evidence is re
 
 ### ORG-P2-010 - Map house to shop, bank, warehouse, exchange, temple service node evolution
 
-- Status: OPEN
+- Status: REPAIR_REQUIRED
 - Owner: Cursor
 - Reviewer: Codex
 - Priority: P2
@@ -878,7 +882,7 @@ Full branch, claim, base, report, purity, protected-path, and age evidence is re
 
 ### ORG-P2-011 - Define NPC evolution constraints without changing runtime code
 
-- Status: OPEN
+- Status: REPAIR_REQUIRED
 - Owner: Cursor
 - Reviewer: Codex
 - Priority: P2
@@ -912,7 +916,7 @@ Full branch, claim, base, report, purity, protected-path, and age evidence is re
 
 ### ORG-P2-012 - Validate App life rules: DNA, pairing, reproduction, assembly, fusion, disassembly, death, rebirth
 
-- Status: OPEN
+- Status: REPAIR_REQUIRED
 - Owner: Cursor
 - Reviewer: Codex
 - Priority: P1
@@ -946,7 +950,7 @@ Full branch, claim, base, report, purity, protected-path, and age evidence is re
 
 ### ORG-P2-013 - Map exploration, quests, combat, upgrades, civilization war, and Portal loop
 
-- Status: OPEN
+- Status: REPAIR_REQUIRED
 - Owner: Cursor
 - Reviewer: Codex
 - Priority: P1
@@ -980,7 +984,7 @@ Full branch, claim, base, report, purity, protected-path, and age evidence is re
 
 ### ORG-P2-014 - Check Organization V2.0 does not create duplicate Runtime CURRENT or bootstrap
 
-- Status: OPEN
+- Status: REPAIR_REQUIRED
 - Owner: Cursor
 - Reviewer: Codex
 - Priority: P0
@@ -1014,7 +1018,7 @@ Full branch, claim, base, report, purity, protected-path, and age evidence is re
 
 ### ORG-P2-015 - Check future SDK schemas needed for Organization standards
 
-- Status: OPEN
+- Status: REPAIR_REQUIRED
 - Owner: Cursor
 - Reviewer: Codex
 - Priority: P2
@@ -1048,7 +1052,7 @@ Full branch, claim, base, report, purity, protected-path, and age evidence is re
 
 ### ORG-P2-016 - Verify Organization README and Pages entry links from root README
 
-- Status: OPEN
+- Status: REPAIR_REQUIRED
 - Owner: Cursor
 - Reviewer: Codex
 - Priority: P1
@@ -1082,7 +1086,7 @@ Full branch, claim, base, report, purity, protected-path, and age evidence is re
 
 ### ORG-P2-017 - Define backend boundary assumptions without adding services
 
-- Status: OPEN
+- Status: REPAIR_REQUIRED
 - Owner: Cursor
 - Reviewer: Codex
 - Priority: P2
@@ -1116,7 +1120,7 @@ Full branch, claim, base, report, purity, protected-path, and age evidence is re
 
 ### ORG-P2-018 - Run protected path, local link, and JSON validity check after Organization changes
 
-- Status: OPEN
+- Status: REPAIR_REQUIRED
 - Owner: Cursor
 - Reviewer: Codex
 - Priority: P0
@@ -1150,7 +1154,7 @@ Full branch, claim, base, report, purity, protected-path, and age evidence is re
 
 ### ORG-P2-019 - Audit DO_NOT_TOUCH and protected path consistency
 
-- Status: OPEN
+- Status: REPAIR_REQUIRED
 - Owner: Cursor
 - Reviewer: Codex
 - Priority: P0
@@ -1184,7 +1188,7 @@ Full branch, claim, base, report, purity, protected-path, and age evidence is re
 
 ### ORG-P2-020 - Verify Pages workflow publishes KGEN-Organization without Jekyll
 
-- Status: OPEN
+- Status: REPAIR_REQUIRED
 - Owner: Cursor
 - Reviewer: Codex
 - Priority: P1
@@ -1218,7 +1222,7 @@ Full branch, claim, base, report, purity, protected-path, and age evidence is re
 
 ### ORG-P2-021 - List research inputs needed for Organization V2.1 without changing Canon
 
-- Status: OPEN
+- Status: REPAIR_REQUIRED
 - Owner: Cursor
 - Reviewer: Codex
 - Priority: P3
@@ -1252,7 +1256,7 @@ Full branch, claim, base, report, purity, protected-path, and age evidence is re
 
 ### ORG-P2-022 - Check README and Master Index coverage for Organization V2.0
 
-- Status: OPEN
+- Status: REPAIR_REQUIRED
 - Owner: Cursor
 - Reviewer: Codex
 - Priority: P1
@@ -1286,7 +1290,7 @@ Full branch, claim, base, report, purity, protected-path, and age evidence is re
 
 ### ORG-P2-023 - Check GitHub Pages URLs for Organization standards
 
-- Status: OPEN
+- Status: REPAIR_REQUIRED
 - Owner: Cursor
 - Reviewer: Codex
 - Priority: P1
@@ -1320,7 +1324,7 @@ Full branch, claim, base, report, purity, protected-path, and age evidence is re
 
 ### ORG-P2-024 - Review WorkOrder status and report path consistency
 
-- Status: OPEN
+- Status: REPAIR_REQUIRED
 - Owner: Cursor
 - Reviewer: Codex
 - Priority: P1
@@ -1354,7 +1358,7 @@ Full branch, claim, base, report, purity, protected-path, and age evidence is re
 
 ### ORG-P2-025 - Create final Organization V2.0 report checklist
 
-- Status: OPEN
+- Status: REPAIR_REQUIRED
 - Owner: Cursor
 - Reviewer: Codex
 - Priority: P2
@@ -1390,13 +1394,13 @@ Full branch, claim, base, report, purity, protected-path, and age evidence is re
 
 | Task ID | Status | Owner | Reviewer | Priority | Department | Dispatch Hold | Output Report |
 |---|---|---|---|---|---|---|---|
-| AI-ECONOMY-2026-0001 | OPEN | Cursor | Codex | P1 | Economy | false | KGEN-AI-Company/reports/AI-ECONOMY-2026-0001_RESOURCE_RESERVE_REVIEW.md |
+| AI-ECONOMY-2026-0001 | REPAIR_REQUIRED | Cursor | Codex | P1 | Economy | true | KGEN-AI-Company/reports/AI-ECONOMY-2026-0001_RESOURCE_RESERVE_REVIEW.md |
 
 ## KAIOS V9.2 AI-Synced WorkOrders
 
 ### AI-ECONOMY-2026-0001 - Resource Reserve Review from V9 approved draft
 
-- Status: OPEN
+- Status: REPAIR_REQUIRED
 - Owner: Cursor
 - Reviewer: Codex
 - Priority: P1
@@ -1411,9 +1415,11 @@ Full branch, claim, base, report, purity, protected-path, and age evidence is re
 - Sync commit SHA: `5e65b8542bb5d476bcde4e66829bcba26e8d0fd7`
 - Branch: `cursor-handoff/AI-ECONOMY-2026-0001`
 - Source draft branch pattern: `cursor-handoff/V9-DRYRUN-001A`
-- Dispatch Hold: false
-- Dispatch Status: RELEASED
-- Claimable: true
+- Dispatch Hold: true
+- Dispatch Status: REPAIR_REQUIRED
+- Claimable: false
+- Repair decision ID: `HUMAN-PHASE2-HANDOFF-RECONCILIATION-001`
+- Repair reason: latest handoff base `d5d9b2cc` is stale relative to current `origin/main`; rebuild from the current base before review
 - Released by: Codex
 - Released at: `2026-07-11T00:00:00Z`
 - Release review ID: `KAIOS-V9.3-RELEASE-REVIEW-0001`
