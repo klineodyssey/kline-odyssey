@@ -91,10 +91,17 @@ Human Decision `HUMAN-PRIMEFORGE-FULL-AUTOPILOT-001` delegates bounded Level A a
 | `../company/` | Architecture proposal under review | Future single company command control plane, typed Inbox, sole Dispatcher and provider-neutral Message Contract; cutover not authorized |
 | `boot-runtime/` | Architecture proposal under review | Fail-closed player Boot, Species OS and Life Integrity contracts |
 | `life/` | `LIFE-OS-V1.0` frozen Architecture | Species-scoped Life OS, state machine, API, events, review and baseline manifest |
+| `life/KAIOS_WORLD_LIFE_LAW.md` | Human-approved Architecture, not frozen | Cumulative V2.1 Everything Has Life law, Family consent amendment and cross-runtime boundaries |
+| `life/kaios_world_life_law.json` | Machine-readable Architecture | Twenty-three laws, common Life Identity, Soul Core, family, spawn, death and adapter contracts |
+| `life/WORLD_LIFE_LAW_SOURCE_AUDIT.md` | Architecture source audit | CURRENT/frozen/source classification, conflict resolutions and no-migration boundary |
 | `world-viewer/` | `WORLD-VIEWER-V1.0` + Sprint 009 Nation and Timeline Alpha | Frozen Architecture plus executable synthetic 2D living world, universal Biology Foundation, Nation, public finance, diplomacy and isolated era travel; no real sovereignty, taxation, legal tender, history mutation or external settlement |
 | `ui-governor/` | Architecture proposal under review | Permanent UI inspection, Style Canon, visual regression and bounded remediation contracts; automation not enabled |
 
 The Canonical Atomic Claim Authority remains a proposal. Until its transactional service is reviewed and implemented, Codex dispatch is explicit and recorded but is not represented as fully atomic distributed scheduling. No entry in this section changes Runtime CURRENT, Universe Map CURRENT, protected paths, Token behavior, real identity, real location, or real financial state.
+
+### KAIOS World Life Law V2.1
+
+Human Decision `HUMAN-LIFEOS-WORLDLAW-V2` approves the cumulative World Life Law Architecture. `Universe Is Alive` and `Everything Has Life` are KAIOS simulation ontology rules implemented through class profiles and domain adapters; they do not fabricate biological DNA for non-biological entities or transfer Land, Temple, Company, Family, Timeline, ownership or governance authority into the frozen Life OS core. Real-player family relationships require explicit participant consent, location evidence is optional and coarse, and death remains terminal for the same Life ID. The Architecture is approved but not frozen or implemented; no WorkQueue or deployment exists.
 
 ### Company Decision Center V1
 
