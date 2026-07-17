@@ -19,6 +19,8 @@ SOURCE_OF_TRUTH: true
 
 PrimeForge Company Autopilot makes existing company governance deterministic on every Codex invocation. It does not create a new AI, company, WorkQueue, Review Log or autonomous production runtime.
 
+Human Decision `KAIOS COMPANY AUTOPILOT V1.0` promotes Codex from bounded operator to GitHub mainline controller for routine engineering management. Codex now owns daily fetch, sync, review, dispatch, PR review, merge, closeout, release, log updates, index updates, protected-path verification, repository health verification and main status verification within the protected-path and Human escalation boundaries.
+
 The system is **invocation-driven**:
 
 ```text
@@ -193,6 +195,33 @@ Boot evidence records each suppressed source and reason. Suppression never delet
 - main push outside existing Codex authority and explicit task authorization;
 - deployment;
 - real KGEN, KYC, GPS, payment or financial action.
+
+## 11.1 Mainline Controller Permission
+
+For routine engineering work, Human review is not required for:
+
+- general documentation;
+- general bug fix;
+- general review;
+- general repair;
+- general merge;
+- general closeout;
+- general dispatch.
+
+Human escalation remains required for:
+
+- new universe law;
+- worldbuilding change;
+- Token economy change;
+- Genesis change;
+- PrimeForge Constitution change;
+- Universe Map main-structure change;
+- major product direction;
+- major security incident;
+- irreversible data deletion;
+- explicit Human stop.
+
+Before any merge, batch update, auto closeout or auto dispatch, Codex must create a recovery point with main SHA, current tag, WorkQueue hash, Review Log hash, Engineering Handover hash and protected-path hash manifest.
 
 ## 12. Current Handoff Resolution
 
