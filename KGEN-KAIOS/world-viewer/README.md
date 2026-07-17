@@ -1,19 +1,19 @@
 ---
 TITLE: "KAIOS World Viewer Architecture Package"
-VERSION: "1.4.0"
-REVISION: "2026-07-17.2"
-STATUS: "SPRINT_004_CIVILIZATION_ALPHA_COMPLETE"
+VERSION: "1.5.0"
+REVISION: "2026-07-17.3"
+STATUS: "SPRINT_004_CIVILIZATION_GENESIS_ALPHA_COMPLETE"
 ARCHITECTURE: "BASELINE_FROZEN_V1.0"
-IMPLEMENTATION: "CIVILIZATION_ALPHA"
-WORKQUEUE: "KAIOS-WV-SPRINT-004_READY_FOR_REVIEW"
+IMPLEMENTATION: "CIVILIZATION_GENESIS_ALPHA"
+WORKQUEUE: "KAIOS-WV-SPRINT-004-GENESIS_READY_FOR_REVIEW"
 DEPLOYMENT: "STATIC_PAGES_COMPATIBLE"
 LAST_UPDATED: "2026-07-17"
 UPDATED_BY: "Codex / codex-gm-01"
 REVIEWED_BY: "Codex internal independent UI review; Human delegated approval"
-SOURCE_COMMIT: "50962bf7005126589a3edc3a781aa75c21b36bd6"
-TASK_ID: "KAIOS-WV-SPRINT-004"
-HUMAN_DECISION_ID: "HUMAN-SPRINT-004-001"
-CHANGE_REASON: "Run a bounded synthetic civilization with daily life, autonomous AI work, agriculture, food economy, market interaction, city metrics and shared time."
+SOURCE_COMMIT: "PENDING_REVIEWED_GENESIS_COMMIT"
+TASK_ID: "KAIOS-WV-SPRINT-004-GENESIS"
+HUMAN_DECISION_ID: "HUMAN-SPRINT-004-CIVILIZATION-GENESIS"
+CHANGE_REASON: "Require a verified synthetic birth, one-time K12345 starter fund, survival pack and Planet compatibility before the player enters Earth K280."
 ANCESTOR: "KGEN-KAIOS/V8.1/index.html; KGEN-KAIOS/land/LAND_RUNTIME_ARCHITECTURE_BASELINE.md"
 SOURCE_OF_TRUTH: false
 DOMAIN: KGENVERSE
@@ -33,9 +33,9 @@ CANONICAL_FILE: "KGEN-KAIOS/world-viewer/README.md"
 
 | Field | Value |
 |---|---|
-| Human Decision | `HUMAN-SPRINT-004-001` |
+| Human Decision | `HUMAN-SPRINT-004-CIVILIZATION-GENESIS` |
 | Architecture | `BASELINE_FROZEN_V1.0` |
-| Implementation | `SPRINT_004_CIVILIZATION_ALPHA_COMPLETE` |
+| Implementation | `SPRINT_004_CIVILIZATION_GENESIS_ALPHA_COMPLETE` |
 | Sprint Task Envelope | `DONE` |
 | Deployment | `STATIC_GITHUB_PAGES_COMPATIBLE` |
 | Executable `index.html` | `CREATED` |
@@ -147,6 +147,10 @@ World Viewer V1 therefore defines adapter boundaries and draft projections. It d
 | `tests/civilization_integrity.mjs` | Economy, food, life, AI, city and memory-bound invariant gate |
 | `tests/baselines/sprint-004/` | Civilization Alpha device, orientation and theme visual baselines |
 | `tests/evidence/sprint-004/` | Civilization QA, performance, integrity, screenshots and visual diffs |
+| `genesis/`, `planet/` | One-time birth state machine, Genesis Boot UI and synthetic Planet Environment profiles |
+| `tests/genesis_integrity.mjs` | Birth, one-time claim, persistence, Planet compatibility and Oxygen gate |
+| `tests/evidence/sprint-004-genesis/` | Genesis QA, performance, integrity and responsive visual evidence |
+| `SPRINT_004_CIVILIZATION_GENESIS_REPORT.md` | Birth flow, implementation diff, QA, performance and safety report |
 | `.github/workflows/world-viewer-product-qa.yml` | Pull-request and push Product QA workflow |
 
 ## 7. Implementation Boundary
@@ -181,3 +185,9 @@ See `SPRINT_003_DIGITAL_EARTH_REPORT.md` and `tests/evidence/sprint-003/` for th
 Sprint 004 adds a shared synthetic calendar, complete Citizen daily schedule, autonomous Wukong 001 shift, thirteen-resource food economy, Starter Parcel farming, local market transactions and derived city health. The Civilization Inspector provides Today, Farm, Market and City tabs on desktop and mobile.
 
 The reviewed browser gate reports `128 PASS / 0 FAIL / 0 SKIP` across desktop, tablet, Android and iPhone viewports. See `SPRINT_004_CIVILIZATION_ALPHA_REPORT.md` and `tests/evidence/sprint-004/` for the full product flow, integrity evidence, visual baselines and performance results.
+
+## 11. Sprint 004 Civilization Genesis Result
+
+Civilization Genesis adds a required first-login birth gate before the existing living-world simulation. Universe, Planet, Species and Life OS checks must pass; the player then chooses one K12345 Genesis Fortune, receives the Starter Survival Pack, verifies the Starter Parcel and enters Earth K280. The claim is persistent and can occur only once.
+
+The Planet Environment adapter covers Earth, Moon, Mars, Jupiter and an unknown Future Planet without changing Universe Physics Database CURRENT. Life OS now includes Oxygen environment effects. The reviewed browser gate reports `133 PASS / 0 FAIL / 0 SKIP`; see `SPRINT_004_CIVILIZATION_GENESIS_REPORT.md` and `tests/evidence/sprint-004-genesis/`.

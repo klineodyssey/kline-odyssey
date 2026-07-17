@@ -3,6 +3,7 @@ import { createBuildingRuntime } from "./building/building-runtime.js";
 import { createCivilizationRuntime } from "./civilization/civilization-runtime.js";
 import { createCivilizationView } from "./civilization/civilization-view.js";
 import { loadSyntheticWorld } from "./data/world-store.js";
+import { createGenesisView } from "./genesis/genesis-view.js";
 import { createInputController } from "./input/input-controller.js";
 import { createInspectorView } from "./inspector/inspector-view.js";
 import { createLandRuntime } from "./land/land-runtime.js";
@@ -22,6 +23,7 @@ const contextHost = document.getElementById("context-menu-host");
 const inspectorKind = document.getElementById("inspector-kind");
 const inspectorTitle = document.getElementById("inspector-title");
 const accessList = document.getElementById("entity-access-list");
+const genesisDialog = document.getElementById("genesis-dialog");
 
 let world;
 let inspectorWorld;
@@ -53,6 +55,7 @@ let input = null;
 let inspector = null;
 let lifeViewer = null;
 let civilizationView = null;
+let genesisView = null;
 let contextMenu = null;
 
 const shell = createShell({
@@ -494,6 +497,26 @@ function startMockSession({ locationConsent = false } = {}) {
     location_mode: mockLocationConsent ? world.player.location_mode : "NOT_USED"
   });
   shell.setLoggedIn(player);
+  let genesisSnapshot;
+  try {
+    genesisSnapshot = civilizationRuntime.beginGenesis().genesis;
+  } catch (error) {
+    updateStarterParcelStatus("BIRTH_BLOCKED");
+    shell.showToast(`Genesis verification failed: ${error.message}`, "error");
+    return;
+  }
+  if (!genesisSnapshot.completed) {
+    updateStarterParcelStatus("BIRTH_PENDING");
+    genesisView.open(genesisSnapshot);
+    shell.showToast("Complete Civilization Genesis before entering Earth K280.", "neutral");
+    return;
+  }
+  activatePlayerSession();
+}
+
+function activatePlayerSession() {
+  if (!player || playerController.getSnapshot().sessionActive) return;
+  genesisView.close();
   lod.setHomeParcel(player.starter_parcel_id);
   playerController.startSession(player, worldIndex.get(player.starter_parcel_id));
   updateStarterParcelStatus();
@@ -506,7 +529,22 @@ function startMockSession({ locationConsent = false } = {}) {
   );
 }
 
+function claimGenesisFortune(amount) {
+  if (!player || !civilizationRuntime) return;
+  genesisView.setBusy(true);
+  try {
+    const snapshot = civilizationRuntime.claimGenesisFortune(amount);
+    genesisView.update(snapshot.genesis);
+    shell.showToast(`${amount} prototype KGEN and the Starter Survival Pack were recorded.`, "success");
+  } catch (error) {
+    shell.showToast(error.message, "warning");
+  } finally {
+    genesisView.setBusy(false);
+  }
+}
+
 function endMockSession() {
+  genesisView?.close();
   civilizationRuntime?.stop();
   shell.setSimulationRunning(false);
   playerController?.endSession();
@@ -744,6 +782,11 @@ async function start() {
     storage,
     storagePrefix: `${world.meta.storage_namespace}.civilization`
   });
+  genesisView = createGenesisView(genesisDialog, {
+    onClaim: (amount) => claimGenesisFortune(amount),
+    onEnterWorld: () => activatePlayerSession(),
+    onCancel: () => endMockSession()
+  });
   lod = createLodController({ ...world, homeParcelId: world.player.starter_parcel_id });
   renderer = createMapRenderer(canvas, { maxVisibleItems: 250 });
   lifeViewer = createLifeOsViewer(inspectorContent, {
@@ -828,6 +871,8 @@ async function start() {
     document.documentElement.dataset.civilizationAiAction = snapshot.aiWorker.current_action;
     document.documentElement.dataset.civilizationCity = snapshot.city.status;
     document.documentElement.dataset.civilizationBalance = String(snapshot.economy.player_balance);
+    document.documentElement.dataset.genesisStage = snapshot.genesis.stage;
+    document.documentElement.dataset.genesisComplete = String(snapshot.genesis.completed);
     if (mode === "CIVILIZATION") renderInspector();
     scheduleRender();
   }, { emitCurrent: true });

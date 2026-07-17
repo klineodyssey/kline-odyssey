@@ -37,6 +37,9 @@ REQUIRED_FILES = (
     "citizen/citizen-daily-runtime.js",
     "ai/ai-worker-runtime.js",
     "economy/economy-runtime.js",
+    "planet/planet-environment-runtime.js",
+    "genesis/genesis-runtime.js",
+    "genesis/genesis-view.js",
     "agriculture/agriculture-runtime.js",
     "city/city-runtime.js",
     "civilization/runtime-utils.js",
@@ -46,6 +49,7 @@ REQUIRED_FILES = (
     "data/synthetic-world.json",
     "tests/runtime_integrity.mjs",
     "tests/civilization_integrity.mjs",
+    "tests/genesis_integrity.mjs",
 )
 
 PROTECTED_PREFIXES = (
@@ -320,6 +324,9 @@ def main() -> int:
         "equipment": len(data.get("equipment", [])) == 3,
         "room organisms": len(data.get("organisms", [])) == 5,
         "life profiles": len(data.get("lifeProfiles", [])) >= 5,
+        "Genesis one-time claim": data.get("genesis", {}).get("one_time_claim") is True,
+        "Genesis is not real KGEN": data.get("genesis", {}).get("real_kgen") is False,
+        "five Planet profiles": len(data.get("planet_profiles", [])) == 5,
         "unknown parcel": any(
             parcel.get("status") == "UNKNOWN" for parcel in data.get("parcels", [])
         ),
@@ -380,6 +387,22 @@ def main() -> int:
     expected_organism_types = {"PLAYER", "AI_WORKER", "NPC", "PET", "PLANT"}
     if not expected_organism_types.issubset(organism_types):
         fail(errors, f"room organism types incomplete: {sorted(str(item) for item in organism_types)}")
+
+    genesis = data.get("genesis", {})
+    if genesis.get("starter_fortune_options") != [1, 8, 88, 188, 388, 888]:
+        fail(errors, "Genesis Fortune options do not match the approved one-time set")
+    planet_ids = {profile.get("planet_id") for profile in data.get("planet_profiles", [])}
+    if planet_ids != {"EARTH", "MOON", "MARS", "JUPITER", "FUTURE_PLANET"}:
+        fail(errors, f"Planet profile IDs mismatch: {sorted(str(item) for item in planet_ids)}")
+    for profile in data.get("planet_profiles", []):
+        missing = {
+            "atmosphere", "gravity_g", "temperature", "pressure", "water",
+            "radiation", "magnetic_field", "day_length_hours", "year_length_days",
+            "native_species", "food_availability", "energy", "life_compatibility",
+            "resource_rules", "civilization_rules", "travel_rules",
+        } - set(profile)
+        if missing:
+            fail(errors, f"Planet profile {profile.get('planet_id')} missing: {sorted(missing)}")
 
     html = (ROOT / "index.html").read_text(encoding="utf-8")
     if 'src="./app.js"' not in html or 'href="./ui/styles.css"' not in html:
@@ -468,7 +491,7 @@ def main() -> int:
         f"{len(REQUIRED_FILES)} files;",
         f"{parsed_json_records} JSON records;",
         f"{checked_references} local references;",
-        "Civilization Alpha + Land/Building/Room/Life/Player/Citizen/AI/Economy/Agriculture/City runtimes + 8 proposals; protected-path input clean",
+        "Civilization Genesis Alpha + Planet/Land/Building/Room/Life/Player/Citizen/AI/Economy/Agriculture/City runtimes + 8 proposals; protected-path input clean",
     )
     return 0
 

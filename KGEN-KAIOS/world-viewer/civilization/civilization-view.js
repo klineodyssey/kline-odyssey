@@ -1,4 +1,5 @@
 const TABS = Object.freeze([
+  ["GENESIS", "Genesis"],
   ["TODAY", "Today"],
   ["FARM", "Farm"],
   ["MARKET", "Market"],
@@ -96,6 +97,66 @@ function clockLabel(clock) {
   const hour = String(number(clock.hour ?? clock.hour_of_day)).padStart(2, "0");
   const minute = String(number(clock.minute ?? clock.minute_of_hour)).padStart(2, "0");
   return `DAY ${clock.day ?? 1} / ${hour}:${minute}`;
+}
+
+function renderGenesis(documentRef, model) {
+  const fragment = documentRef.createDocumentFragment();
+  const genesis = model.genesis ?? {};
+  const planet = model.planet_environment?.active_profile ?? genesis.planet ?? {};
+
+  const birth = section(documentRef, "Civilization Birth", "civilization-section--time");
+  birth.append(definitionList(documentRef, [
+    ["Status", genesis.completed ? "BORN" : genesis.stage],
+    ["Birth ID", genesis.birth_id],
+    ["Species", genesis.species_id],
+    ["Planet", planet.label ?? genesis.planet_id],
+    ["Starter Parcel", genesis.starter_parcel_id],
+    ["Starter Shelter", genesis.starter_shelter_id],
+    ["Genesis Fortune", genesis.fortune_claim ? `${genesis.fortune_claim.amount} PROTOTYPE KGEN` : "NOT CLAIMED"],
+    ["Temple", genesis.temple_id]
+  ]));
+  fragment.append(birth);
+
+  const boot = section(documentRef, "Boot Integrity");
+  const timeline = element(documentRef, "ol", "daily-timeline");
+  const complete = new Map(collection(genesis.completed_steps).map((entry) => [entry.step, entry]));
+  for (const stepId of collection(genesis.boot_steps)) {
+    const entry = complete.get(stepId);
+    const item = element(documentRef, "li", "daily-timeline__item");
+    item.classList.toggle("is-active", stepId === genesis.stage);
+    item.append(
+      element(documentRef, "time", "", entry ? "PASS" : "WAIT"),
+      element(documentRef, "span", "", display(stepId))
+    );
+    timeline.append(item);
+  }
+  boot.append(timeline);
+  fragment.append(boot);
+
+  const environment = section(documentRef, "Planet Environment");
+  environment.append(definitionList(documentRef, [
+    ["Atmosphere", planet.atmosphere?.status],
+    ["Oxygen", planet.atmosphere?.oxygen_available ? "AVAILABLE" : "UNAVAILABLE"],
+    ["Gravity", planet.gravity_g == null ? "UNKNOWN" : `${planet.gravity_g} G`],
+    ["Temperature", planet.temperature?.class],
+    ["Pressure", planet.pressure?.class],
+    ["Water", planet.water],
+    ["Radiation", planet.radiation],
+    ["Magnetic Field", planet.magnetic_field],
+    ["Day", planet.day_length_hours == null ? "UNKNOWN" : `${planet.day_length_hours} h`],
+    ["Year", planet.year_length_days == null ? "UNKNOWN" : `${planet.year_length_days} d`],
+    ["Food", planet.food_availability],
+    ["Human", planet.life_compatibility?.HUMAN]
+  ]));
+  fragment.append(environment);
+
+  const pack = section(documentRef, "Starter Survival Pack");
+  const items = collection(genesis.survival_pack?.items);
+  pack.append(definitionList(documentRef, items.length
+    ? items.map((item) => [display(item.item_id), item.quantity])
+    : [["Status", "PENDING BIRTH"]]));
+  fragment.append(pack);
+  return fragment;
 }
 
 function currentSchedule(citizen) {
@@ -333,7 +394,8 @@ export function createCivilizationView(container, callbacks = {}) {
     }
     root.append(header, tabs);
 
-    if (activeTab === "FARM") root.append(renderFarm(documentRef, model, callbacks));
+    if (activeTab === "GENESIS") root.append(renderGenesis(documentRef, model));
+    else if (activeTab === "FARM") root.append(renderFarm(documentRef, model, callbacks));
     else if (activeTab === "MARKET") root.append(renderMarket(documentRef, model, callbacks));
     else if (activeTab === "CITY") root.append(renderCity(documentRef, model));
     else root.append(renderToday(documentRef, model, callbacks));

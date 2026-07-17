@@ -14,6 +14,7 @@ import {
 const RUNTIME = "EconomyRuntime";
 const SCHEMA_VERSION = "1.0.0";
 const MARKET_ID = "civilization-market-alpha";
+const GENESIS_TREASURY_ID = "civilization-genesis-treasury-alpha";
 const MAX_LEDGER = 300;
 const MAX_RESOURCE_QUANTITY = 10_000;
 const WAREHOUSE_CAPACITY = 5_000;
@@ -45,13 +46,18 @@ const DEFAULT_LISTINGS = Object.freeze([
   listing_id, resource_id, label, category, price, stock
 })));
 
-function initialState(playerId, playerBalance) {
+function initialState(playerId, playerBalance, playerInventory, genesisTreasury) {
   return {
     revision: 0,
-    accounts: { [playerId]: playerBalance, [MARKET_ID]: 10_000 },
-    inventories: { [playerId]: { RICE: 3, VEGETABLE: 2, FRUIT: 1, WATER: 6, ELECTRICITY: 4 } },
+    accounts: {
+      [playerId]: playerBalance,
+      [MARKET_ID]: 10_000,
+      [GENESIS_TREASURY_ID]: genesisTreasury
+    },
+    inventories: { [playerId]: { ...playerInventory } },
     listings: DEFAULT_LISTINGS.map((listing) => ({ ...listing })),
     transport_jobs: [],
+    genesis_grants: {},
     ledger: []
   };
 }
@@ -63,6 +69,9 @@ function cleanState(candidate, fallback) {
   state.inventories = Object.fromEntries(Object.entries(candidate.inventories ?? fallback.inventories).map(([id, inventory]) => [id, { ...inventory }]));
   state.listings = Array.isArray(candidate.listings) ? candidate.listings.map((listing) => ({ ...listing })) : fallback.listings;
   state.transport_jobs = Array.isArray(candidate.transport_jobs) ? candidate.transport_jobs.slice(-80) : [];
+  state.genesis_grants = candidate.genesis_grants && typeof candidate.genesis_grants === "object"
+    ? Object.fromEntries(Object.entries(candidate.genesis_grants).map(([id, grant]) => [id, { ...grant }]))
+    : {};
   state.ledger = Array.isArray(candidate.ledger) ? candidate.ledger.slice(-MAX_LEDGER) : [];
   return state;
 }
@@ -74,11 +83,13 @@ function inventoryQuantity(inventory) {
 export function createEconomyRuntime({
   playerId = "mock-player-001",
   playerBalance = 500,
+  playerInventory = { RICE: 3, VEGETABLE: 2, FRUIT: 1, WATER: 6, ELECTRICITY: 4 },
+  genesisTreasury = 10_000,
   storage,
   storageKey = "kaios.world-viewer.economy.v1"
 } = {}) {
   const storageRef = resolveStorage(storage);
-  const defaults = initialState(playerId, playerBalance);
+  const defaults = initialState(playerId, playerBalance, playerInventory, genesisTreasury);
   let state = defaults;
   let destroyed = false;
   const restored = loadEnvelope(storageRef, storageKey, (value) => value?.schema_version === SCHEMA_VERSION && value?.state?.accounts);
@@ -97,6 +108,7 @@ export function createEconomyRuntime({
     inventories: state.inventories,
     listings: state.listings,
     transport_jobs: state.transport_jobs,
+    genesis_grants: state.genesis_grants,
     ledger: state.ledger,
     warehouse_capacity: WAREHOUSE_CAPACITY,
     revision: state.revision
@@ -202,6 +214,63 @@ export function createEconomyRuntime({
     return getSnapshot();
   }
 
+  function grantGenesisBundle({ claimId, ownerId = playerId, amount, resources = [] } = {}) {
+    usable();
+    const id = String(claimId ?? "");
+    const value = Number(amount);
+    if (!/^[A-Z0-9_-]{8,128}$/i.test(id)) {
+      throw runtimeError(RUNTIME, "INVALID_GENESIS_CLAIM", "Genesis claim ID is invalid");
+    }
+    if (![1, 8, 88, 188, 388, 888].includes(value)) {
+      throw runtimeError(RUNTIME, "INVALID_GENESIS_AMOUNT", "Genesis Fortune amount is not approved");
+    }
+    const existing = state.genesis_grants[id];
+    if (existing) {
+      if (existing.owner_id !== ownerId || existing.amount !== value) {
+        throw runtimeError(RUNTIME, "GENESIS_CLAIM_CONFLICT", "Genesis claim identity conflicts with the recorded grant");
+      }
+      return getSnapshot();
+    }
+    if (!Array.isArray(resources) || resources.length < 1 || resources.length > 16) {
+      throw runtimeError(RUNTIME, "INVALID_GENESIS_BUNDLE", "Genesis survival bundle is invalid");
+    }
+    const normalized = resources.map((item) => {
+      const resourceId = String(item?.resource_id ?? "").toUpperCase();
+      const units = integer(item?.quantity);
+      if (!/^[A-Z0-9_-]{1,64}$/.test(resourceId) || units <= 0 || units > 100) {
+        throw runtimeError(RUNTIME, "INVALID_GENESIS_BUNDLE", "Genesis bundle contains an invalid resource");
+      }
+      return { resource_id: resourceId, quantity: units };
+    });
+    if (account(GENESIS_TREASURY_ID) < value) {
+      throw runtimeError(RUNTIME, "GENESIS_TREASURY_EMPTY", "Prototype Genesis treasury has insufficient balance");
+    }
+    const target = inventory(ownerId);
+    const bundleQuantity = normalized.reduce((sum, item) => sum + item.quantity, 0);
+    if (inventoryQuantity(target) + bundleQuantity > WAREHOUSE_CAPACITY) {
+      throw runtimeError(RUNTIME, "STORAGE_FULL", `${ownerId} storage cannot receive the Genesis bundle`);
+    }
+
+    transferCredits(GENESIS_TREASURY_ID, ownerId, value, `GENESIS_FORTUNE:${id}`);
+    for (const item of normalized) {
+      target[item.resource_id] = clamp((target[item.resource_id] ?? 0) + item.quantity, 0, MAX_RESOURCE_QUANTITY);
+      record("GENESIS_RESOURCE_SOURCE", { claim_id: id, owner_id: ownerId, ...item });
+    }
+    state.genesis_grants[id] = {
+      claim_id: id,
+      owner_id: ownerId,
+      amount: value,
+      currency: "PROTOTYPE_KGEN",
+      resources: normalized,
+      one_time: true,
+      synthetic: true
+    };
+    record("GENESIS_BUNDLE_GRANTED", { claim_id: id, owner_id: ownerId, amount: value });
+    persist();
+    notifier.emit("GENESIS_BUNDLE_GRANTED", { claim_id: id, owner_id: ownerId, amount: value });
+    return getSnapshot();
+  }
+
   function createTransportJob({ resourceId, quantity, from, to } = {}) {
     usable();
     const units = integer(quantity);
@@ -233,6 +302,10 @@ export function createEconomyRuntime({
     }
     if (state.ledger.length > MAX_LEDGER) issues.push("ledger history exceeded limit");
     if (!state.listings.every((listing) => MARKETPLACE_CATEGORIES.includes(listing.category))) issues.push("unknown marketplace category");
+    for (const [claimId, grant] of Object.entries(state.genesis_grants)) {
+      if (grant.claim_id !== claimId || grant.one_time !== true) issues.push(`${claimId}: invalid Genesis grant`);
+      if (![1, 8, 88, 188, 388, 888].includes(grant.amount)) issues.push(`${claimId}: invalid Genesis amount`);
+    }
     return snapshot({ ok: issues.length === 0, runtime: "CIVILIZATION_ECONOMY_ALPHA", credit_supply: creditSupply, ledger_entries: state.ledger.length, issues });
   }
 
@@ -243,6 +316,7 @@ export function createEconomyRuntime({
     consume,
     sell,
     payReward,
+    grantGenesisBundle,
     createTransportJob,
     subscribe: notifier.subscribe,
     integrityReport,

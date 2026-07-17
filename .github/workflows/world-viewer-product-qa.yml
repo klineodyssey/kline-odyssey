@@ -96,6 +96,12 @@ jobs:
         shell: bash
         run: node KGEN-KAIOS/world-viewer/tests/civilization_integrity.mjs
 
+      - name: Run Civilization Genesis integrity
+        id: genesis
+        continue-on-error: true
+        shell: bash
+        run: node KGEN-KAIOS/world-viewer/tests/genesis_integrity.mjs
+
       - name: Start static server
         shell: bash
         run: |
@@ -158,15 +164,17 @@ jobs:
         shell: bash
         env:
           PRODUCT_OUTCOME: ${{ steps.product.outcome }}
+          GENESIS_OUTCOME: ${{ steps.genesis.outcome }}
           CIVILIZATION_OUTCOME: ${{ steps.civilization.outcome }}
           RUNTIME_OUTCOME: ${{ steps.runtime.outcome }}
           STATIC_OUTCOME: ${{ steps.static.outcome }}
           SYNTAX_OUTCOME: ${{ steps.syntax.outcome }}
         run: |
-          printf 'syntax=%s\nstatic=%s\nruntime=%s\ncivilization=%s\nproduct=%s\n' \
-            "$SYNTAX_OUTCOME" "$STATIC_OUTCOME" "$RUNTIME_OUTCOME" "$CIVILIZATION_OUTCOME" "$PRODUCT_OUTCOME"
+          printf 'syntax=%s\nstatic=%s\nruntime=%s\ncivilization=%s\ngenesis=%s\nproduct=%s\n' \
+            "$SYNTAX_OUTCOME" "$STATIC_OUTCOME" "$RUNTIME_OUTCOME" "$CIVILIZATION_OUTCOME" "$GENESIS_OUTCOME" "$PRODUCT_OUTCOME"
           [[ "$SYNTAX_OUTCOME" == "success" ]]
           [[ "$STATIC_OUTCOME" == "success" ]]
           [[ "$RUNTIME_OUTCOME" == "success" ]]
           [[ "$CIVILIZATION_OUTCOME" == "success" ]]
+          [[ "$GENESIS_OUTCOME" == "success" ]]
           [[ "$PRODUCT_OUTCOME" == "success" ]]

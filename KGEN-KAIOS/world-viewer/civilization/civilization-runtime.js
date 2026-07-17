@@ -3,6 +3,8 @@ import { createAiWorkerRuntime } from "../ai/ai-worker-runtime.js";
 import { createCitizenDailyRuntime, CITIZEN_DAILY_SCHEDULE } from "../citizen/citizen-daily-runtime.js";
 import { createCityRuntime } from "../city/city-runtime.js";
 import { createEconomyRuntime } from "../economy/economy-runtime.js";
+import { createCivilizationGenesisRuntime } from "../genesis/genesis-runtime.js";
+import { createPlanetEnvironmentRuntime } from "../planet/planet-environment-runtime.js";
 import { createSimulationClock } from "../simulation/simulation-clock.js";
 import { boundedPush, createNotifier, runtimeError, snapshot, stableId } from "./runtime-utils.js";
 
@@ -26,12 +28,28 @@ export function createCivilizationRuntime({
   const config = world.civilization_alpha ?? {};
   const playerId = world.player?.player_id ?? "mock-player-001";
   const playerLifeId = world.player?.life_id ?? "life-player-001";
+  const planet = createPlanetEnvironmentRuntime({ world });
   const clock = createSimulationClock({ start: config.clock_start, storage, storageKey: `${storagePrefix}.clock` });
-  const citizen = createCitizenDailyRuntime({ world, storage, storageKey: `${storagePrefix}.citizen`, startingMoney: config.prototype_balance ?? 500 });
+  const citizen = createCitizenDailyRuntime({ world, storage, storageKey: `${storagePrefix}.citizen`, startingMoney: config.prototype_balance ?? 0 });
   const aiWorker = createAiWorkerRuntime({ world, storage, storageKey: `${storagePrefix}.ai-worker` });
-  const economy = createEconomyRuntime({ playerId, playerBalance: config.prototype_balance ?? 500, storage, storageKey: `${storagePrefix}.economy` });
+  const economy = createEconomyRuntime({
+    playerId,
+    playerBalance: config.prototype_balance ?? 0,
+    playerInventory: {},
+    genesisTreasury: config.genesis_treasury ?? 10_000,
+    storage,
+    storageKey: `${storagePrefix}.economy`
+  });
   const agriculture = createAgricultureRuntime({ parcelId: world.player?.starter_parcel_id, storage, storageKey: `${storagePrefix}.agriculture` });
   const city = createCityRuntime({ cityId: config.city_id, label: world.cities?.find(({ id }) => id === config.city_id)?.label, storage, storageKey: `${storagePrefix}.city` });
+  const genesis = createCivilizationGenesisRuntime({
+    world,
+    planetRuntime: planet,
+    lifeRuntime,
+    economyRuntime: economy,
+    storage,
+    storageKey: `${storagePrefix}.genesis`
+  });
   let running = false;
   let timer = null;
   let destroyed = false;
@@ -51,6 +69,8 @@ export function createCivilizationRuntime({
     citizens: citizen.listSnapshots(),
     aiWorker: aiWorker.getSnapshot(config.ai_worker_id),
     aiWorkers: aiWorker.listSnapshots(),
+    genesis: genesis.getSnapshot(),
+    planet_environment: planet.getSnapshot(),
     economy: economy.getSnapshot(),
     agriculture: agriculture.getSnapshot(),
     city: city.getSnapshot(),
@@ -59,6 +79,11 @@ export function createCivilizationRuntime({
   const notifier = createNotifier(getSnapshot);
   const usable = () => {
     if (destroyed) throw runtimeError(RUNTIME, "RUNTIME_DESTROYED", "Civilization Runtime has been destroyed");
+  };
+  const born = () => {
+    if (!genesis.getSnapshot().completed) {
+      throw runtimeError(RUNTIME, "GENESIS_REQUIRED", "Complete Civilization Genesis before entering the living world");
+    }
   };
 
   function record(type, details = {}) {
@@ -109,6 +134,7 @@ export function createCivilizationRuntime({
 
   function advance(minutes = 60) {
     usable();
+    born();
     const total = Number(minutes);
     if (!Number.isFinite(total) || total <= 0 || total > 30 * 1440) throw runtimeError(RUNTIME, "INVALID_ADVANCE", "Civilization advance must be 1-43200 minutes");
     let remaining = Math.floor(total);
@@ -118,7 +144,11 @@ export function createCivilizationRuntime({
       const clockSnapshot = clock.advance(chunk);
       const nextActivity = scheduleAt(clockSnapshot.hour);
       handleCitizenTransition(previousActivity, nextActivity);
-      lifeRuntime.advance({ elapsedMs: chunk * 60_000 });
+      const compatibility = planet.evaluateLifeCompatibility({ planetId: "EARTH", speciesId: "HUMAN" });
+      lifeRuntime.advance({
+        elapsedMs: chunk * 60_000,
+        environment: { oxygen_available: compatibility.oxygen_available }
+      });
       aiWorker.advance({ elapsedMinutes: chunk, clockSnapshot });
       const workerSnapshots = aiWorker.listSnapshots();
       const assistance = workerSnapshots.some((worker) => worker.current_action === "FARM") ? 0.25 : 0;
@@ -135,6 +165,7 @@ export function createCivilizationRuntime({
 
   function buy(listingId, quantity = 1) {
     usable();
+    born();
     economy.buy({ listingId, buyerId: playerId, quantity });
     citizen.setMoney(playerLifeId, economy.getSnapshot().player_balance);
     refreshCity();
@@ -145,6 +176,7 @@ export function createCivilizationRuntime({
 
   function plant(plotId, cropId) {
     usable();
+    born();
     agriculture.plant({ plotId, cropId });
     record("CROP_PLANTED", { plot_id: plotId, crop_id: cropId });
     notifier.emit("CROP_PLANTED", { plot_id: plotId, crop_id: cropId });
@@ -153,6 +185,7 @@ export function createCivilizationRuntime({
 
   function harvest(plotId) {
     usable();
+    born();
     const result = agriculture.harvest(plotId).result;
     refreshCity();
     record("CROP_HARVESTED", result);
@@ -162,6 +195,7 @@ export function createCivilizationRuntime({
 
   function sellHarvest(resourceId, quantity = 1) {
     usable();
+    born();
     agriculture.takeFromWarehouse(resourceId, quantity);
     economy.deposit({ ownerId: playerId, resourceId, quantity, source: "FARM_WAREHOUSE" });
     economy.sell({ sellerId: playerId, resourceId, quantity, unitPrice: 4 });
@@ -174,6 +208,7 @@ export function createCivilizationRuntime({
 
   function start({ intervalMs = 1000, minutesPerTick = 60 } = {}) {
     usable();
+    born();
     if (timer !== null) return false;
     if (!Number.isFinite(intervalMs) || intervalMs < 250) throw runtimeError(RUNTIME, "INVALID_INTERVAL", "Auto interval must be at least 250ms");
     running = true;
@@ -195,6 +230,8 @@ export function createCivilizationRuntime({
 
   function integrityReport() {
     const reports = {
+      genesis: genesis.integrityReport(),
+      planet: planet.integrityReport(),
       clock: clock.integrityReport(),
       citizen: citizen.integrityReport(),
       ai_worker: aiWorker.integrityReport(),
@@ -209,8 +246,31 @@ export function createCivilizationRuntime({
 
   refreshCity();
 
+  function beginGenesis() {
+    usable();
+    const result = genesis.beginBirth();
+    record("GENESIS_STARTED", { stage: result.stage });
+    notifier.emit("GENESIS_STARTED", { stage: result.stage });
+    return getSnapshot();
+  }
+
+  function claimGenesisFortune(amount) {
+    usable();
+    const result = genesis.claimFortune(amount);
+    citizen.setMoney(playerLifeId, economy.getSnapshot().player_balance);
+    refreshCity();
+    record("GENESIS_COMPLETED", {
+      birth_id: result.birth_id,
+      fortune_amount: result.fortune_claim?.amount ?? 0
+    });
+    notifier.emit("GENESIS_COMPLETED", { birth_id: result.birth_id });
+    return getSnapshot();
+  }
+
   return Object.freeze({
     getSnapshot,
+    beginGenesis,
+    claimGenesisFortune,
     advance,
     buy,
     plant,
@@ -230,6 +290,8 @@ export function createCivilizationRuntime({
       economy.destroy();
       agriculture.destroy();
       city.destroy();
+      genesis.destroy();
+      planet.destroy();
       destroyed = true;
       return true;
     }

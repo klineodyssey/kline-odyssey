@@ -263,7 +263,7 @@ button:focus-visible, canvas:focus-visible, [tabindex]:focus-visible {
 .civilization-view__header strong { font-size: 14px; }
 .civilization-tabs {
   position: sticky; top: -10px; z-index: 4;
-  display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 4px;
+  display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 4px;
   padding: 8px 0; background: var(--surface);
 }
 .civilization-tabs .civilization-action { min-height: 36px; padding: 5px 4px; }
@@ -309,6 +309,51 @@ button:focus-visible, canvas:focus-visible, [tabindex]:focus-visible {
 .farm-plot__copy > span, .market-listing > div:first-child > span { color: var(--muted); overflow-wrap: anywhere; }
 .farm-plot .need-meter { margin-top: 3px; }
 .civilization-empty { margin: 0; color: var(--muted); font-size: 10px; }
+
+.genesis-dialog {
+  width: min(760px, calc(100vw - 24px - var(--safe-left) - var(--safe-right)));
+  max-width: none; max-height: calc(100dvh - 24px - var(--safe-top) - var(--safe-bottom));
+  margin: auto; padding: 0; overflow: hidden;
+  border: 1px solid var(--accent); border-radius: 8px;
+  background: var(--surface); color: var(--text); box-shadow: var(--shadow);
+}
+.genesis-dialog:not([open]) { display: none; }
+.genesis-dialog::backdrop { background: rgba(3, 6, 4, 0.86); }
+.genesis-dialog__surface { max-height: inherit; display: grid; grid-template-rows: auto minmax(0, 1fr) auto; }
+.genesis-dialog__header {
+  display: grid; grid-template-columns: minmax(0, 1fr) var(--touch); align-items: center; gap: 12px;
+  padding: 18px; border-bottom: 1px solid var(--line);
+}
+.genesis-dialog__header h2 { margin: 4px 0 0; font-size: 22px; line-height: 1.2; }
+.genesis-dialog__header .icon-button { width: var(--touch); height: var(--touch); }
+.genesis-dialog__body { min-height: 0; overflow: auto; display: grid; gap: 14px; padding: 16px 18px; overscroll-behavior: contain; }
+.genesis-planet, .genesis-receipt {
+  display: grid; gap: 5px; padding: 12px; border: 1px solid var(--cyan); border-radius: 6px; background: var(--surface-2);
+}
+.genesis-planet span, .genesis-receipt p { margin: 0; color: var(--muted); font-size: 11px; }
+.genesis-steps { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 5px; margin: 0; padding: 0; list-style: none; }
+.genesis-step { min-width: 0; display: grid; gap: 5px; padding: 8px; border: 1px solid var(--line); background: var(--surface-2); }
+.genesis-step[data-status="PASS"] { border-color: var(--accent); }
+.genesis-step[data-status="ACTIVE"] { border-color: var(--amber); }
+.genesis-step__status { color: var(--muted); font-size: 8px; font-weight: 800; }
+.genesis-step strong { font-size: 9px; line-height: 1.25; overflow-wrap: anywhere; }
+.genesis-fortune { display: grid; gap: 10px; }
+.genesis-fortune h3 { margin: 0; font-size: 16px; }
+.genesis-fortune p { margin: 0; color: var(--muted); font-size: 11px; line-height: 1.5; }
+.genesis-fortune__choices { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 6px; }
+.genesis-fortune__choice {
+  min-width: 0; min-height: var(--touch); padding: 8px 5px; border: 1px solid var(--line); border-radius: 6px;
+  background: var(--surface-2); color: var(--text); font: inherit; font-size: 11px; font-weight: 800; cursor: pointer;
+}
+.genesis-fortune__choice:not(:disabled):hover, .genesis-fortune__choice:not(:disabled):focus-visible { border-color: var(--accent); color: var(--accent-strong); }
+.genesis-fortune__choice:disabled { opacity: 0.45; }
+.genesis-dialog__footer {
+  display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 12px;
+  padding: 12px 18px calc(12px + var(--safe-bottom)); border-top: 1px solid var(--line); background: var(--surface-2);
+}
+.genesis-dialog__footer span { color: var(--muted); font-size: 10px; }
+.genesis-dialog__footer .primary-button { min-height: var(--touch); padding: 8px 14px; border: 1px solid var(--accent); border-radius: 6px; background: var(--accent); color: #07150c; font-weight: 800; }
+.genesis-dialog__footer .primary-button:disabled { opacity: 0.45; }
 
 .proposal-bar { padding: 12px 16px calc(12px + var(--safe-bottom)); border-top: 1px solid var(--amber); background: var(--surface-2); display: grid; grid-template-columns: 1fr auto; gap: 10px; align-items: center; }
 .proposal-bar[hidden] { display: none; }
@@ -416,6 +461,11 @@ button:focus-visible, canvas:focus-visible, [tabindex]:focus-visible {
   .inspector-close { display: grid; }
   .inspector-content { padding-bottom: calc(20px + var(--safe-bottom)); }
   .civilization-action, .civilization-tabs .civilization-action { min-height: var(--touch); }
+  .civilization-tabs { grid-template-columns: repeat(5, minmax(64px, 1fr)); overflow-x: auto; }
+  .genesis-dialog { width: calc(100vw - var(--safe-left) - var(--safe-right)); height: calc(100dvh - var(--safe-top) - var(--safe-bottom)); max-height: none; border-radius: 0; }
+  .genesis-dialog__surface { height: 100%; }
+  .genesis-steps { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .genesis-fortune__choices { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .inspector-view__summary-data { grid-template-columns: minmax(96px, 36%) minmax(0, 1fr); }
   .inspector-view__data, .life-os-viewer__data { grid-template-columns: minmax(112px, 38%) minmax(0, 1fr); }
   .starter-status { top: 68px; right: calc(8px + var(--safe-right)); width: min(230px, calc(100% - 16px - var(--safe-left) - var(--safe-right))); }
@@ -446,6 +496,9 @@ button:focus-visible, canvas:focus-visible, [tabindex]:focus-visible {
   .consent-dialog__facts div { grid-template-columns: 1fr; gap: 2px; }
   .consent-dialog__footer { display: grid; grid-template-columns: 1fr; padding-left: 12px; padding-right: 12px; }
   .consent-dialog__footer button { width: 100%; }
+  .genesis-dialog__header, .genesis-dialog__body, .genesis-dialog__footer { padding-left: 12px; padding-right: 12px; }
+  .genesis-dialog__footer { grid-template-columns: 1fr; }
+  .genesis-dialog__footer .primary-button { width: 100%; }
 }
 
 @media (max-height: 520px) and (max-width: 900px) {

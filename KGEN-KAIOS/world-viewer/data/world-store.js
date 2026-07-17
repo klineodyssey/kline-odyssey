@@ -356,6 +356,15 @@ export function validateWorldFixture(world) {
   invariant(world.player?.life_id && ids.has(world.player.life_id), "player Life profile is invalid");
   invariant(world.player?.home_building_id && ids.has(world.player.home_building_id), "player home building is invalid");
   invariant(world.player?.home_room_id && ids.has(world.player.home_room_id), "player home room is invalid");
+  invariant(world.genesis?.decision_id === "HUMAN-SPRINT-004-CIVILIZATION-GENESIS", "Genesis decision ID is invalid");
+  invariant(world.genesis?.one_time_claim === true && world.genesis?.real_kgen === false, "Genesis must be one-time and synthetic");
+  invariant(
+    JSON.stringify(world.genesis?.starter_fortune_options) === JSON.stringify([1, 8, 88, 188, 388, 888]),
+    "Genesis Fortune options are invalid"
+  );
+  invariant(Array.isArray(world.planet_profiles) && world.planet_profiles.length >= 5, "Planet profiles are required");
+  const planetIds = new Set(world.planet_profiles.map(({ planet_id: id }) => id));
+  invariant(["EARTH", "MOON", "MARS", "JUPITER", "FUTURE_PLANET"].every((id) => planetIds.has(id)), "required Planet profiles are missing");
 
   const actionIds = (world.proposalActions ?? []).map((action) => (
     typeof action === "string" ? action : action?.id

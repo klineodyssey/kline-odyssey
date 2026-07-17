@@ -408,7 +408,8 @@ export function projectLifeProfile(profile = {}) {
     health: metricNumber(firstKnown(vitalsSource.health, safeProfile.health)),
     energy: metricNumber(firstKnown(vitalsSource.energy, safeProfile.energy)),
     food: metricNumber(firstKnown(vitalsSource.food, safeProfile.food)),
-    water: metricNumber(firstKnown(vitalsSource.water, safeProfile.water))
+    water: metricNumber(firstKnown(vitalsSource.water, safeProfile.water)),
+    oxygen: metricNumber(firstKnown(vitalsSource.oxygen, safeProfile.oxygen))
   });
   const dnaSummary = normalizeDnaSummary(safeProfile, body);
   const heartbeat = isRecord(safeProfile.heartbeat) ? safeProfile.heartbeat : {};
@@ -590,7 +591,8 @@ function renderVitals(documentRef, projection) {
     ["health", "Health"],
     ["energy", "Energy"],
     ["food", "Food"],
-    ["water", "Water"]
+    ["water", "Water"],
+    ["oxygen", "Oxygen"]
   ]) {
     section.appendChild(renderVitalRow(documentRef, label, projection.vitals[key]));
   }

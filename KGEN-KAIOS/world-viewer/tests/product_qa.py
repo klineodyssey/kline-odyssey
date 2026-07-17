@@ -1189,6 +1189,15 @@ def run_touch_interaction(browser: Browser, args: argparse.Namespace, gate: Gate
         context.close()
 
 
+def complete_genesis(page: Page, amount: int = 88) -> None:
+    dialog = page.locator("#genesis-dialog[open]")
+    if not dialog.count() or not dialog.is_visible():
+        return
+    dialog.locator(f"[data-amount='{amount}']").click()
+    page.wait_for_function("() => document.documentElement.dataset.genesisComplete === 'true'")
+    dialog.get_by_role("button", name="Enter world").click()
+
+
 def start_mock_session(page: Page, *, with_location: bool) -> None:
     page.locator("#login-button").click()
     dialog = visible_consent_dialog(page)
@@ -1200,9 +1209,65 @@ def start_mock_session(page: Page, *, with_location: bool) -> None:
     page.wait_for_function(
         "() => document.getElementById('login-button')?.textContent.trim() === 'End mock session'"
     )
+    complete_genesis(page)
     page.wait_for_function(
         "() => document.documentElement.dataset.worldViewerLevel === 'LAND_PARCEL'"
     )
+
+
+def run_genesis_mobile(browser: Browser, args: argparse.Namespace, gate: Gate) -> None:
+    source = MATRIX[4]
+    case = ViewportCase(
+        "genesis-mobile", source.family, source.orientation, source.width,
+        source.height, source.theme, source.touch, source.device_scale_factor,
+        source.user_agent,
+    )
+    context = new_context(browser, case)
+    page = context.new_page()
+    monitor = BrowserMonitor(page, args.base_url)
+    try:
+        load_page(page, args.base_url, "dark")
+        page.locator("#login-button").click()
+        visible_consent_dialog(page).get_by_role("button", name="Continue without location").click()
+        dialog = page.locator("#genesis-dialog[open]")
+        dialog.wait_for(state="visible")
+        dialog_text = clean_text(dialog.inner_text())
+        bounds = dialog.bounding_box() or {}
+        choices = dialog.locator("[data-amount]")
+        gate.expect(
+            "genesis.mobile-gate",
+            "civilization-genesis",
+            choices.count() == 6
+            and all(token in dialog_text.upper() for token in ("UNIVERSE BOOT", "PLANET CHECK", "LIFE OS BOOT", "K12345"))
+            and bounds.get("width", 0) >= source.width - 2,
+            case=case.slug,
+            details={"choices": choices.count(), "bounds": bounds},
+        )
+        screenshot = capture_screenshot(page, case, args.output_dir, None, args.pixel_threshold)
+        gate.screenshots.append(screenshot)
+        choices.filter(has_text="888 KGEN").click()
+        page.wait_for_function("() => document.documentElement.dataset.genesisComplete === 'true'")
+        dialog.get_by_role("button", name="Enter world").click()
+        page.wait_for_function("() => document.documentElement.dataset.worldViewerLevel === 'LAND_PARCEL'")
+        gate.expect(
+            "genesis.mobile-enter-world",
+            "civilization-genesis",
+            page.evaluate("document.documentElement.dataset.genesisStage") == "ENTER_WORLD"
+            and page.locator("#player-command-center").get_attribute("data-session") == "active",
+            case=case.slug,
+        )
+        browser_clean(monitor, "genesis-mobile", gate)
+    except Exception as error:
+        gate.add(
+            "genesis-mobile.execution",
+            "civilization-genesis",
+            "FAIL",
+            case=case.slug,
+            details={"error": clean_text(error)},
+        )
+        browser_clean(monitor, "genesis-mobile", gate)
+    finally:
+        context.close()
 
 
 def run_proposal_permissions(browser: Browser, args: argparse.Namespace, gate: Gate) -> None:
@@ -1433,6 +1498,7 @@ def run_login_and_consent(browser: Browser, args: argparse.Namespace, gate: Gate
         page.wait_for_function(
             "() => document.getElementById('login-button')?.textContent.trim() === 'End mock session'"
         )
+        complete_genesis(page)
         declined = clean_text(page.locator("#starter-parcel-status").inner_text())
         gate.expect(
             "location.decline",
@@ -1695,7 +1761,7 @@ def run_digital_earth_alpha(browser: Browser, args: argparse.Namespace, gate: Ga
         gate.expect(
             "digital-earth.life-runtime",
             "life-integrity",
-            all(label in life_after for label in ("Health", "Food", "Water", "Energy", "Age (days)", "Occupation", "Inventory"))
+            all(label in life_after for label in ("Health", "Food", "Water", "Oxygen", "Energy", "Age (days)", "Occupation", "Inventory"))
             and life_before != life_after,
             details={"life": player_life["id"]},
         )
@@ -1822,6 +1888,27 @@ def run_civilization_alpha(browser: Browser, args: argparse.Namespace, gate: Gat
         page.locator("[data-mode='CIVILIZATION']").click()
         page.wait_for_function("() => document.documentElement.dataset.civilizationReady === 'true'")
 
+        page.locator("[data-civilization-action='TAB_GENESIS']").click()
+        genesis_text = clean_text(page.locator(".civilization-view").inner_text())
+        gate.expect(
+            "genesis.boot-and-fortune",
+            "civilization-genesis",
+            all(label in genesis_text for label in (
+                "Civilization Birth", "ENTER WORLD", "88 PROTOTYPE KGEN",
+                "Planet Environment", "Starter Survival Pack", "K12345",
+            )),
+            details={"genesis_complete": page.evaluate("document.documentElement.dataset.genesisComplete")},
+        )
+        gate.expect(
+            "genesis.planet-profile",
+            "planet-environment",
+            all(label in genesis_text for label in (
+                "Atmosphere", "Oxygen", "Gravity", "Temperature", "Pressure",
+                "Water", "Radiation", "Magnetic Field", "Day", "Year", "Human",
+            )),
+        )
+        page.locator("[data-civilization-action='TAB_TODAY']").click()
+
         today_text = clean_text(page.locator(".civilization-view").inner_text())
         gate.expect(
             "civilization.daily-schedule",
@@ -1849,7 +1936,7 @@ def run_civilization_alpha(browser: Browser, args: argparse.Namespace, gate: Gat
             "civilization.ai-schedule",
             "ai-schedule",
             page.evaluate("document.documentElement.dataset.civilizationAiAction") == "FARM"
-            and page.evaluate("Number(document.documentElement.dataset.civilizationBalance)") == 515,
+            and page.evaluate("Number(document.documentElement.dataset.civilizationBalance)") == 103,
             details={
                 "activity": page.evaluate("document.documentElement.dataset.civilizationActivity"),
                 "ai_action": page.evaluate("document.documentElement.dataset.civilizationAiAction"),
@@ -2071,6 +2158,7 @@ def main(argv: list[str] | None = None) -> int:
                 run_mouse_and_navigation(browser, args, gate)
                 run_touch_interaction(browser, args, gate)
                 run_login_and_consent(browser, args, gate)
+                run_genesis_mobile(browser, args, gate)
                 run_proposal_permissions(browser, args, gate)
                 run_life_stack(browser, args, gate)
                 run_digital_earth_alpha(browser, args, gate)

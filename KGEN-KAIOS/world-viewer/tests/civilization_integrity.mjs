@@ -28,24 +28,38 @@ const civilization = createCivilizationRuntime({
 const initial = civilization.getSnapshot();
 assert.equal(initial.clock.hour, 6);
 assert.equal(initial.citizen.current_activity, "WAKE");
-assert.equal(initial.economy.player_balance, 500);
+assert.equal(initial.economy.player_balance, 0);
+assert.equal(initial.genesis.completed, false);
+assert.equal(initial.planet_environment.active_profile.planet_id, "EARTH");
 assert.equal(initial.agriculture.plots.length, 3);
 assert.equal(RESOURCE_CATALOG.length, 13);
 assert.deepEqual(MARKETPLACE_CATEGORIES, [
   "FOOD", "FURNITURE", "TOOLS", "SEEDS", "BUILDING_MATERIALS", "MEDICAL", "ENERGY", "WATER"
 ]);
 
+assert.throws(() => civilization.advance(60), (error) => error.code === "GENESIS_REQUIRED");
+const booted = civilization.beginGenesis();
+assert.equal(booted.genesis.stage, "AWAITING_FORTUNE");
+assert.equal(booted.genesis.completed_steps.length, 4);
+const born = civilization.claimGenesisFortune(88);
+assert.equal(born.genesis.completed, true);
+assert.equal(born.genesis.fortune_claim.amount, 88);
+assert.equal(born.economy.player_balance, 88);
+assert.equal(born.economy.player_inventory.BASIC_CLOTHES, 1);
+assert.equal(life.getSnapshot("life-player-001").genesis.birth_id, born.genesis.birth_id);
+assert.throws(() => civilization.claimGenesisFortune(888), (error) => error.code === "GENESIS_ALREADY_CLAIMED");
+
 const breakfast = civilization.advance(60);
 assert.equal(breakfast.clock.hour, 7);
 assert.equal(breakfast.citizen.current_activity, "BREAKFAST");
-assert.ok(breakfast.economy.player_inventory.RICE < initial.economy.player_inventory.RICE);
-assert.ok(breakfast.economy.player_inventory.WATER < initial.economy.player_inventory.WATER);
+assert.ok(breakfast.economy.player_inventory.RICE < born.economy.player_inventory.RICE);
+assert.ok(breakfast.economy.player_inventory.WATER < born.economy.player_inventory.WATER);
 
 const work = civilization.advance(60);
 assert.equal(work.clock.hour, 8);
 assert.equal(work.citizen.current_activity, "WORK");
 assert.equal(work.aiWorker.current_action, "FARM");
-assert.equal(work.economy.player_balance, 515);
+assert.equal(work.economy.player_balance, 103);
 
 civilization.plant("starter-garden-001", "VEGETABLE");
 const grown = civilization.advance(12 * 60);
@@ -88,6 +102,12 @@ const output = {
   agriculture: report.reports.agriculture,
   city: report.reports.city,
   product_flow: {
+    universe_booted: true,
+    planet_verified: true,
+    life_os_booted: true,
+    genesis_fortune_claimed_once: true,
+    survival_pack_granted: true,
+    starter_parcel_verified: true,
     login_fixture: true,
     breakfast_consumed: true,
     work_rewarded: true,
