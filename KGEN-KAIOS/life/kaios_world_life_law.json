@@ -1,0 +1,530 @@
+{
+  "schema_version": "1.0.0",
+  "law_version": "2.1.0",
+  "law_id": "KAIOS-WORLD-LIFE-LAW-V2.1",
+  "title": "KAIOS World Life Law",
+  "human_decision_id": "HUMAN-LIFEOS-WORLDLAW-V2",
+  "status": "HUMAN_APPROVED_ARCHITECTURE",
+  "architecture": "APPROVED",
+  "baseline": "NOT_FROZEN",
+  "implementation": "NOT_STARTED",
+  "implementation_planning": "NOT_AUTHORIZED",
+  "workqueue": "NOT_CREATED",
+  "deployment": "NOT_STARTED",
+  "runtime_authority": false,
+  "source_of_truth": true,
+  "simulation_only": true,
+  "authority_order": [
+    "HUMAN_FINAL_AUTHORITY",
+    "KAIOS_CONSTITUTION",
+    "APPROVED_CANON_AND_FROZEN_BASELINES",
+    "KAIOS_WORLD_LIFE_LAW",
+    "APPROVED_DOMAIN_ARCHITECTURE",
+    "SEPARATELY_AUTHORIZED_IMPLEMENTATION"
+  ],
+  "ancestor": {
+    "baseline_id": "LIFE-OS-V1.0",
+    "status": "FROZEN_UNCHANGED",
+    "manifest": "KGEN-KAIOS/life/life_os_architecture_baseline.json"
+  },
+  "runtime_placement": [
+    "UNIVERSE_PHYSICS",
+    "LIFE_BODY_OR_GOVERNED_STRUCTURE",
+    "SPECIES_OS_OR_CLASS_PROFILE",
+    "INDIVIDUAL_LIFE_OS_OR_VIABILITY_ADAPTER",
+    "MIND_RUNTIME_IF_APPLICABLE",
+    "CITIZEN_RUNTIME_IF_APPLICABLE",
+    "CIVILIZATION_RUNTIME"
+  ],
+  "life_classes": [
+    "BIOLOGICAL",
+    "DIGITAL",
+    "ROBOTIC",
+    "INFRASTRUCTURE",
+    "LAND",
+    "GEOLOGIC",
+    "HYDROLOGIC",
+    "CELESTIAL",
+    "ORGANIZATIONAL",
+    "COSMIC"
+  ],
+  "common_life_identity": {
+    "object_type": "LifeIdentity",
+    "required_fields": [
+      "life_id",
+      "life_class",
+      "species_code",
+      "species_profile_ref",
+      "soul_core_id",
+      "memory_ref",
+      "knowledge_ref",
+      "energy_profile_ref",
+      "age",
+      "age_unit",
+      "life_stage",
+      "civilization_context",
+      "timeline_id",
+      "life_level",
+      "intelligence_tier",
+      "seal_level",
+      "state_version",
+      "status",
+      "provenance",
+      "privacy_class"
+    ],
+    "nullable_fields": [
+      "dna_ref",
+      "blueprint_ref",
+      "composition_ref",
+      "configuration_genome_ref",
+      "civilization_id"
+    ],
+    "civilization_context_values": [
+      "AFFILIATED",
+      "UNAFFILIATED",
+      "UNKNOWN"
+    ],
+    "applicability_values": [
+      "APPLICABLE",
+      "NOT_APPLICABLE",
+      "UNKNOWN"
+    ],
+    "invariants": [
+      "LIFE_ID_GLOBALLY_UNIQUE",
+      "BIOLOGICAL_FIELDS_NOT_FABRICATED",
+      "MISSING_APPLICABLE_DATA_IS_UNKNOWN",
+      "INAPPLICABLE_DATA_IS_NOT_APPLICABLE",
+      "STATE_VERSION_MONOTONIC"
+    ]
+  },
+  "soul_core": {
+    "object_type": "SoulCore",
+    "definition": "Technical continuity and provenance envelope for a KAIOS life identity.",
+    "required_fields": [
+      "soul_core_id",
+      "origin_life_id",
+      "current_life_id",
+      "predecessor_life_ids",
+      "lineage_ref",
+      "identity_hash",
+      "canonical_event_head",
+      "archive_status",
+      "memory_transfer_policy",
+      "knowledge_transfer_policy",
+      "privacy_class",
+      "created_at",
+      "state_version"
+    ],
+    "not_valid_as": [
+      "WALLET",
+      "PRIVATE_KEY",
+      "LEGAL_IDENTITY",
+      "MEDICAL_RECORD",
+      "REAL_WORLD_SOUL_PROOF"
+    ],
+    "history_mode": "APPEND_ONLY"
+  },
+  "scales": {
+    "life_level": {
+      "meaning": "Lifecycle maturity or system complexity",
+      "grants_authority": false
+    },
+    "intelligence_tier": {
+      "meaning": "Permitted cognitive capability classification",
+      "range": [0, 8],
+      "grants_authority": false
+    },
+    "seal_level": {
+      "meaning": "Governed capability restriction or release",
+      "grants_authority": false
+    }
+  },
+  "intelligence_tiers": [
+    { "tier": 0, "examples": ["STONE", "LAND", "MOUNTAIN"], "meaning": "Condition intelligence" },
+    { "tier": 1, "examples": ["PLANT"], "meaning": "Plant behavior" },
+    { "tier": 2, "examples": ["ANIMAL"], "meaning": "Animal cognition" },
+    { "tier": 3, "examples": ["HUMAN"], "meaning": "Human cognition" },
+    { "tier": 4, "examples": ["AI_AGENT"], "meaning": "Agent cognition" },
+    { "tier": 5, "examples": ["HIGH_CIVILIZATION_AI"], "meaning": "High-civilization AI" },
+    { "tier": 6, "examples": ["PLANET_INTELLIGENCE"], "meaning": "Planet-scale intelligence" },
+    { "tier": 7, "examples": ["GALAXY_INTELLIGENCE"], "meaning": "Galaxy-scale intelligence" },
+    { "tier": 8, "examples": ["UNIVERSE_INTELLIGENCE"], "meaning": "Universe-scale intelligence" }
+  ],
+  "energy_profiles": [
+    { "profile": "HUMAN", "inputs": ["WATER", "PROTEIN", "FAT", "CARBOHYDRATE", "VITAMIN", "MINERAL", "OXYGEN", "SLEEP"] },
+    { "profile": "ANIMAL", "inputs": ["SPECIES_FOOD_WEB", "WATER", "RESPIRATION_MEDIUM"] },
+    { "profile": "PLANT", "inputs": ["LIGHT", "WATER", "MINERAL", "GAS_EXCHANGE", "SUITABLE_ENVIRONMENT"] },
+    { "profile": "AI", "inputs": ["ELECTRICITY", "COMPUTE", "STORAGE", "MAINTENANCE"] },
+    { "profile": "ROBOT", "inputs": ["ELECTRICITY_OR_ENERGY_CELL", "PARTS", "COOLANT", "MAINTENANCE"] },
+    { "profile": "ORGANIZATION_OR_INFRASTRUCTURE", "inputs": ["POWER", "MATERIALS", "MAINTENANCE", "AUTHORIZED_SERVICES"] },
+    { "profile": "ADVANCED_CIVILIZATION", "inputs": ["REVIEWED_FUSION", "DARK_ENERGY_SIMULATION", "ANTI_GRAVITY_ENERGY_PROFILE"] },
+    { "profile": "IMMORTAL_CIVILIZATION", "inputs": ["HIGH_DENSITY_SIMULATED_ENERGY"] }
+  ],
+  "food_contract": {
+    "model": "FOOD_WEB",
+    "required_fields": [
+      "food_id",
+      "nutrition",
+      "calories_or_energy_equivalent",
+      "protein",
+      "fat",
+      "carbohydrate",
+      "vitamins",
+      "minerals",
+      "water",
+      "species_compatibility",
+      "provenance",
+      "contamination_status",
+      "storage_rules",
+      "expiry"
+    ],
+    "human_to_advanced_civilization_semantics": "DEPENDENCY_AND_PROGRESSION_NOT_PREDATION"
+  },
+  "civilization_bootstrap": {
+    "required_context": [
+      "HOUSE_OR_SHELTER",
+      "FAMILY_GUARDIAN_OR_INSTITUTION",
+      "VILLAGE_TOWN_OR_CITY",
+      "FOOD_AND_WATER_PRODUCTION",
+      "HOSPITAL_OR_CARE",
+      "SCHOOL_OR_EDUCATION",
+      "MARKET",
+      "PRODUCTION",
+      "POWER",
+      "TRANSPORTATION",
+      "GOVERNMENT",
+      "COMPANY_OR_SERVICE_ORGANIZATION"
+    ],
+    "required_checks": [
+      "WORLD_SNAPSHOT",
+      "ENVIRONMENT_COMPATIBILITY",
+      "RESOURCE_BUDGET",
+      "POPULATION_CAPACITY",
+      "SERVICE_HEALTH",
+      "RECOVERY_PATH"
+    ],
+    "existing_facilities_grant_player_ownership": false
+  },
+  "spawn_contract": {
+    "object_type": "SpawnContext",
+    "modes": [
+      "NATURAL_BIRTH",
+      "HOSPITAL_BIRTH",
+      "INCUBATOR",
+      "ADVANCED_CIVILIZATION",
+      "TIMELINE_ARRIVAL"
+    ],
+    "required_fields": [
+      "spawn_id",
+      "life_id",
+      "mode",
+      "origin_ref",
+      "guardian_or_institution_ref",
+      "planet_id",
+      "timeline_id",
+      "environment_compatibility",
+      "capacity_check",
+      "consent_status",
+      "provenance",
+      "review_status"
+    ],
+    "timeline_arrival_is_birth": false,
+    "unrecorded_spawn_allowed": false
+  },
+  "family_contract": {
+    "object_type": "FamilyRelationshipProposal",
+    "modes": [
+      "REAL_FAMILY",
+      "INVITE_FAMILY",
+      "AI_FAMILY",
+      "LOCATION_FAMILY"
+    ],
+    "required_fields": [
+      "proposal_id",
+      "mode",
+      "relationship_type",
+      "participant_life_ids",
+      "subject_life_id",
+      "target_life_id",
+      "consent_records",
+      "evidence_class",
+      "created_at",
+      "expires_at",
+      "status",
+      "revocation_rule",
+      "audit_head",
+      "privacy_class"
+    ],
+    "nullable_fields": [
+      "family_id",
+      "coarse_location_evidence_ref",
+      "guardian_or_institution_ref"
+    ],
+    "states": [
+      "DRAFT",
+      "AWAITING_CONSENT",
+      "CONFIRMED",
+      "REJECTED",
+      "WITHDRAWN",
+      "EXPIRED",
+      "REVOKED",
+      "ARCHIVED"
+    ],
+    "confirmation_rule": "ALL_REQUIRED_PARTICIPANTS_CONFIRMED",
+    "ai_family_real_kinship_claim_allowed": false,
+    "location_evidence": {
+      "optional": true,
+      "coarse_only": true,
+      "continuous_tracking": false,
+      "movement_history": false,
+      "proves_kinship": false,
+      "proves_ownership": false,
+      "all_participants_must_consent": true
+    }
+  },
+  "bloodline_contract": {
+    "object_type": "BloodlineRecord",
+    "schema_exposed_by_every_life": true,
+    "non_applicable_value": "NOT_APPLICABLE",
+    "non_biological_lineage_field": "lineage_ref",
+    "applicable_fields": [
+      "family_id",
+      "bloodline_id",
+      "generation",
+      "surname",
+      "dna_id",
+      "gene_refs",
+      "chromosome_refs",
+      "ancestor_refs",
+      "descendant_refs"
+    ],
+    "survives_individual_death": true,
+    "automatic_grants": []
+  },
+  "organism_adapters": {
+    "HouseOrganism": {
+      "life_projection": ["ENERGY", "STORAGE_HEALTH", "AGE", "CONDITION", "MAINTENANCE", "MEMORY", "LIFECYCLE"],
+      "authoritative_domains": ["BUILDING_RUNTIME", "LAND_RUNTIME", "PROPERTY_RUNTIME", "FAMILY_RUNTIME"],
+      "self_transfer_allowed": false,
+      "self_eviction_allowed": false
+    },
+    "TempleOrganism": {
+      "life_projection": ["ENERGY", "AGE", "CONDITION", "MEMORY", "GUARDIAN_STATUS", "LIFECYCLE"],
+      "authoritative_domains": ["TEMPLE_RUNTIME", "LAND_RUNTIME", "CIVILIZATION_RUNTIME"],
+      "protected_runtime_access_granted": false,
+      "religious_authority_granted": false
+    },
+    "CompanyOrganism": {
+      "life_projection": ["ENERGY", "RESOURCE_HEALTH", "AGE", "CONDITION", "MEMORY", "REPUTATION_SUMMARY", "LIFECYCLE"],
+      "authoritative_domains": ["COMPANY_RUNTIME", "ECONOMY_RUNTIME", "CITIZEN_RUNTIME"],
+      "life_os_owns_payroll": false,
+      "life_os_owns_workqueue": false,
+      "life_os_owns_finance": false
+    },
+    "LandOrganism": {
+      "life_projection": ["ECOLOGICAL_HEALTH", "ENERGY_FLOW", "AGE", "CONDITION", "MEMORY", "LIFECYCLE"],
+      "authoritative_domains": ["LAND_RUNTIME", "UNIVERSE_PHYSICS"],
+      "life_os_owns_geometry": false,
+      "life_os_owns_rights": false
+    }
+  },
+  "playable_map_temple_rule": {
+    "minimum_registered_temple_or_approved_plan": 1,
+    "image_alone_activates_temple": false,
+    "required_activation_gates": [
+      "APPROVED_SPECIFICATION",
+      "LAND_RIGHT",
+      "MANUFACTURING_EVIDENCE",
+      "INTEGRITY_REVIEW",
+      "REGISTRY_ACTIVATION"
+    ]
+  },
+  "residential_parcel_house_rule": {
+    "maximum_primary_house_organisms": 1,
+    "apartments_and_accessory_structures_use_domain_proposals": true,
+    "rewrites_land_geometry": false,
+    "creates_legal_real_estate_title": false
+  },
+  "company_organism_rule": {
+    "all_kaios_companies_register_as_organizational_life": true,
+    "ai_organization_profile_required": true,
+    "human_or_citizen_ownership_allowed": true,
+    "ownership_distinct_from_operating_agents": true
+  },
+  "npc_contract": {
+    "object_type": "NPCProfile",
+    "required_applicable_fields": [
+      "life_id",
+      "age",
+      "species_code",
+      "family_ref",
+      "profession_ref",
+      "emotion_profile_ref",
+      "memory_ref",
+      "home_ref",
+      "job_ref",
+      "food_state",
+      "energy_state",
+      "health_state",
+      "goal_refs",
+      "permission_profile_ref",
+      "life_stage"
+    ],
+    "impersonate_real_person": false,
+    "fabricate_real_kinship": false
+  },
+  "death_and_reincarnation": {
+    "death_flow": [
+      "DEATH_CONFIRMED",
+      "FINAL_STATE_SEALED",
+      "SOUL_CORE_ARCHIVED",
+      "LIFE_INFORMATION_CENTER_REVIEW",
+      "DISPOSITION_DECISION"
+    ],
+    "dispositions": [
+      "ARCHIVE",
+      "WAITING",
+      "RESPAWN_REQUEST",
+      "TIMELINE_TRANSFER_REQUEST",
+      "REINCARNATION_REQUEST"
+    ],
+    "dead_terminal_for_same_individual": true,
+    "reincarnation_creates_new_life_id": true,
+    "reincarnation_gates": [
+      "TECHNOLOGY_UNLOCK",
+      "SOUL_CORE_AUTHORIZATION",
+      "SPECIES_COMPATIBILITY",
+      "PLANET_PERMISSION",
+      "TIMELINE_PERMISSION",
+      "RESOURCE_BUDGET",
+      "MEMORY_TRANSFER_POLICY",
+      "KNOWLEDGE_TRANSFER_POLICY",
+      "INTEGRITY_VALIDATION",
+      "REVIEW",
+      "AUDIT"
+    ]
+  },
+  "profession_contract": {
+    "object_type": "ProfessionProfile",
+    "belongs_to": "CITIZEN_RUNTIME",
+    "gates": [
+      "SPECIES_CAPABILITY",
+      "AGE",
+      "EDUCATION",
+      "LICENSE_IF_APPLICABLE",
+      "WORKPLACE_CAPACITY",
+      "EVIDENCE",
+      "CONSENT"
+    ],
+    "may_directly_mutate_life_os": false,
+    "may_directly_mutate_family": false
+  },
+  "timeline_contract": {
+    "initial_timeline": "CURRENT_TIMELINE",
+    "unrestricted_initial_travel": false,
+    "travel_gates": [
+      "TECHNOLOGY_UNLOCK",
+      "APPROVED_TIMELINE_VEHICLE",
+      "TIMELINE_PERMISSION",
+      "DESTINATION_COMPATIBILITY",
+      "EVIDENCE",
+      "REVIEW"
+    ]
+  },
+  "laws": [
+    { "law_id": "WL-01", "name": "UNIVERSAL_LIFE_REGISTRATION", "rule": "All approved KAIOS entity classes may receive a governed LifeIdentity." },
+    { "law_id": "WL-02", "name": "LIFE_IDENTITY_AND_CONTINUITY", "rule": "Every life has unique identity, continuity, energy, lifecycle, class and timeline data; DNA is conditional." },
+    { "law_id": "WL-03", "name": "ENERGY_DEPENDENCY", "rule": "Every active life consumes conserved profile-specific energy or resources." },
+    { "law_id": "WL-04", "name": "FOOD_AND_NUTRITION", "rule": "Food is modeled as a provenance-bearing Species-compatible food web." },
+    { "law_id": "WL-05", "name": "CIVILIZATION_BOOTSTRAP", "rule": "Spawn requires a viable pre-existing civilization context and capacity." },
+    { "law_id": "WL-06", "name": "PLAYER_SPAWN", "rule": "Every spawn has an approved origin and no player appears without provenance." },
+    { "law_id": "WL-07", "name": "DEATH_NOT_DELETION", "rule": "Death seals identity state and preserves history; it does not delete records." },
+    { "law_id": "WL-08", "name": "REINCARNATION_GOVERNED_TECHNOLOGY", "rule": "Reincarnation is reviewed simulation technology that creates a new Life ID." },
+    { "law_id": "WL-09", "name": "CURRENT_TIMELINE_FIRST", "rule": "Initial existence is in Current Timeline and travel is technology and permission gated." },
+    { "law_id": "WL-10", "name": "INTELLIGENCE_TIERS", "rule": "Tier 0 through Tier 8 classify capability but grant no authority or rights." },
+    { "law_id": "WL-11", "name": "TEMPLE_HOUSE_LAND_BUILDING_ORGANISMS", "rule": "Physical domain entities use Life adapters without losing domain authority boundaries." },
+    { "law_id": "WL-12", "name": "COMPANY_ORGANISMS", "rule": "Organizations may have governed life identity and lifecycle without Life OS owning company operations." },
+    { "law_id": "WL-13", "name": "CONSENT_GOVERNED_FAMILY", "rule": "Real-player family relationships require all required participant confirmations." },
+    { "law_id": "WL-14", "name": "BLOODLINE_AND_FAMILY_PERSISTENCE", "rule": "Lineage survives individual death but grants no automatic privilege." },
+    { "law_id": "WL-15", "name": "HOUSE_ORGANISM", "rule": "House identity is distinct from parcel, owner, tenant and family identities." },
+    { "law_id": "WL-16", "name": "TEMPLE_ORGANISM", "rule": "Temple creation needs specification, land right, manufacturing, integrity and registry approval." },
+    { "law_id": "WL-17", "name": "COMPANY_LIFECYCLE", "rule": "Company viability is projected to Life OS while operations remain in Company Runtime." },
+    { "law_id": "WL-18", "name": "NPC_INTEGRITY", "rule": "NPCs have governed identity, needs, permissions and lifecycle and cannot impersonate real people." },
+    { "law_id": "WL-19", "name": "LIFE_CYCLE", "rule": "Every Species or class defines versioned evidence-bearing lifecycle transitions." },
+    { "law_id": "WL-20", "name": "SPECIES_SPECIFIC_ENERGY", "rule": "Energy conversion, loss, waste and failure thresholds are profile specific." },
+    { "law_id": "WL-21", "name": "LIVING_CIVILIZATION_AT_LOGIN", "rule": "Pre-existing world services require real snapshot, capacity and resource-flow state." },
+    { "law_id": "WL-22", "name": "PROFESSION", "rule": "Profession belongs to Citizen Runtime and is capability, age, education, evidence and consent gated." },
+    { "law_id": "WL-23", "name": "EVERYTHING_HAS_LIFE", "rule": "Universal life identity preserves capability and domain distinctions and does not make every entity a Citizen." }
+  ],
+  "domain_authority": [
+    { "concern": "PHYSICS_TIME_CONSERVATION", "authority": "UNIVERSE_PHYSICS", "life_law_access": "CONSTRAINTS_ONLY" },
+    { "concern": "SPECIES_CAPABILITY", "authority": "SPECIES_OS_AND_BIOLOGY", "life_law_access": "PROFILE_REFERENCE" },
+    { "concern": "INDIVIDUAL_VIABILITY", "authority": "INDIVIDUAL_LIFE_OS", "life_law_access": "HEALTH_AND_LIFECYCLE_CONTRACT" },
+    { "concern": "THOUGHT_AND_BEHAVIOR", "authority": "MIND_RUNTIME", "life_law_access": "CAPABILITY_REFERENCE" },
+    { "concern": "FAMILY_AND_PROFESSION", "authority": "CITIZEN_AND_FAMILY_RUNTIME", "life_law_access": "CONSENT_AND_LIFECYCLE_INVARIANTS" },
+    { "concern": "PARCEL_AND_OWNERSHIP", "authority": "LAND_AND_PROPERTY_REGISTRY", "life_law_access": "LAND_CONDITION_PROJECTION" },
+    { "concern": "BUILDING_AND_ROOMS", "authority": "BUILDING_RUNTIME", "life_law_access": "BUILDING_CONDITION_PROJECTION" },
+    { "concern": "TEMPLE_SERVICES", "authority": "TEMPLE_RUNTIME", "life_law_access": "TEMPLE_CONDITION_PROJECTION" },
+    { "concern": "COMPANY_WORK_AND_FINANCE", "authority": "COMPANY_AND_ECONOMY_RUNTIME", "life_law_access": "COMPANY_VIABILITY_PROJECTION" },
+    { "concern": "TIMELINE_TRAVEL", "authority": "TIMELINE_AND_TECHNOLOGY_RUNTIME", "life_law_access": "ELIGIBILITY_AND_LINEAGE_LINK" },
+    { "concern": "HUMAN_AUTHORITY", "authority": "HUMAN_AND_CONSTITUTION", "life_law_access": "NEVER_DELEGATED_BY_LIFE_STATUS" }
+  ],
+  "compliance_invariants": [
+    "LIFE_ID_UNIQUE",
+    "CLASS_PROFILE_VERSIONED",
+    "NO_FABRICATED_BIOLOGICAL_FIELDS",
+    "ENERGY_AND_RESOURCES_CONSERVED",
+    "DEAD_TERMINAL_FOR_SAME_INDIVIDUAL",
+    "REINCARNATION_CREATES_NEW_LIFE_ID",
+    "FAMILY_REQUIRES_EXPLICIT_CONSENT",
+    "PRIVATE_LOCATION_AND_MEMORY_NOT_PUBLIC_EVIDENCE",
+    "LIFE_INTELLIGENCE_SEAL_LEVELS_GRANT_NO_AUTHORITY",
+    "CURRENT_AND_FROZEN_SOURCES_UNCHANGED",
+    "DOMAIN_ADAPTERS_CANNOT_OVERWRITE_AUTHORITATIVE_REGISTRIES",
+    "STATE_TRANSITIONS_ORDERED_VERSIONED_EVIDENCED_AUDITED",
+    "HUMAN_AND_CONSTITUTION_REMAIN_SUPREME"
+  ],
+  "protected_boundaries": {
+    "must_remain_unchanged": [
+      "UNIVERSE_PHYSICS_CURRENT",
+      "KERNEL_CURRENT",
+      "LIFE_OS_CURRENT",
+      "SETTLEMENT_CURRENT",
+      "GOVERNANCE_CURRENT",
+      "NATION_RUNTIME_CURRENT",
+      "TIMELINE_RUNTIME_CURRENT",
+      "UNIVERSE_MAP_CURRENT",
+      "TOKEN_CONTRACT",
+      "FROZEN_BASELINES",
+      "HUMAN_MAIN"
+    ],
+    "real_world_not_authorized": [
+      "GENETIC_ENGINEERING",
+      "MEDICAL_TREATMENT",
+      "REINCARNATION_CLAIM",
+      "LEGAL_IDENTITY",
+      "FAMILY_VERIFICATION",
+      "CONTINUOUS_GPS_OR_WIFI_TRACKING",
+      "PROPERTY_TRANSFER",
+      "FINANCIAL_SETTLEMENT",
+      "TOKEN_CHANGE"
+    ]
+  },
+  "future_review_gates": [
+    "REGISTRY_SHARDING_AND_IDENTIFIER_ALLOCATION",
+    "PRIVACY_RETENTION_GUARDIANSHIP_MINOR_SAFETY_AND_CONSENT_REVOCATION",
+    "NON_BIOLOGICAL_CLASS_PROFILE_SCHEMAS",
+    "SOUL_CORE_INTEGRITY_WITHOUT_SECRET_STORAGE",
+    "FOOD_ENERGY_POPULATION_AND_ENVIRONMENT_BALANCE_TESTS",
+    "DEATH_INHERITANCE_ARCHIVE_TIMELINE_AND_REINCARNATION_RECOVERY_TESTS",
+    "DOMAIN_ADAPTER_APIS_AND_CROSS_RUNTIME_MUTATION_PROHIBITION_TESTS",
+    "EXISTING_SYNTHETIC_LIFE_MIGRATION_MAPPING"
+  ],
+  "validation_expectations": {
+    "json": "PASS_REQUIRED",
+    "links": "PASS_REQUIRED",
+    "frozen_manifest": "UNCHANGED_REQUIRED",
+    "protected_path_violations": 0,
+    "implementation_files": 0
+  }
+}

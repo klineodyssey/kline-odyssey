@@ -61,6 +61,7 @@ This file is the **unique library-level Master Index** (ORG-P2-003 D7). Other `*
 | KAIOS Worker Swarm Proposal | `KGEN-KAIOS/governance/autopilot/worker-swarm/` | Architecture-only clone, session, dispatcher, registry and recovery coordination |
 | KAIOS Boot / Life Integrity Proposal | `KGEN-KAIOS/boot-runtime/` | Fail-closed player Boot, Species OS and Life Integrity Architecture; implementation not started |
 | KAIOS Life OS V1.0 Baseline | `KGEN-KAIOS/life/` | Frozen Species-scoped Life OS Architecture and SHA-256 manifest; implementation not started |
+| KAIOS World Life Law V2.1 | `KGEN-KAIOS/life/KAIOS_WORLD_LIFE_LAW.md` | Human-approved Everything Has Life domain Architecture and consent-governed Family amendment; baseline not frozen, implementation not started |
 | KAIOS World Viewer V1.0 + Sprint 009 Nation and Timeline Alpha | `KGEN-KAIOS/world-viewer/` | Frozen Web-first Architecture plus executable K280 living world, Nation gates, configurable taxation, balanced Treasury, finite resources, reviewed diplomacy and isolated era travel |
 | KAIOS V11.0 Architecture Baseline | `KGEN-KAIOS/V11/` | Frozen Multi-Agent Civilization Architecture, 11 design documents, ADR set, Resolution, review evidence and evolution log |
 | LAND RUNTIME V1 Architecture Baseline | `KGEN-KAIOS/land/` | Frozen K280 / Land Runtime V1 architecture: parcel geometry, rights separation, territory zones, residence protection, lunar registry (docs only) |
@@ -147,6 +148,9 @@ This file is the **unique library-level Master Index** (ORG-P2-003 D7). Other `*
 | Cursor Control Architecture | `KGEN-KAIOS/governance/cursor/README.md` | Audit and migration proposal for controlled Cursor execution without replacing CURRENT rules |
 | Boot / Life Integrity Architecture | `KGEN-KAIOS/boot-runtime/README.md` | Fail-closed Boot, Species OS, integrity verification and corruption handling proposal |
 | Life OS Architecture Baseline | `KGEN-KAIOS/life/LIFE_OS_ARCHITECTURE_BASELINE.md` | Frozen `LIFE-OS-V1.0` Architecture and implementation hold boundary |
+| KAIOS World Life Law V2.1 | `KGEN-KAIOS/life/KAIOS_WORLD_LIFE_LAW.md` | Cumulative 23-law Architecture for universal Life Identity, energy, spawn, death, Family, House, Temple, Company, NPC and profession boundaries |
+| KAIOS World Life Law JSON | `KGEN-KAIOS/life/kaios_world_life_law.json` | Machine-readable laws, Life Identity, Soul Core, consent, adapter, authority and compliance contracts |
+| World Life Law Source Audit | `KGEN-KAIOS/life/WORLD_LIFE_LAW_SOURCE_AUDIT.md` | Existing-source classification, frozen-boundary proof, conflict resolution and future migration gates |
 | World Viewer Architecture Baseline | `KGEN-KAIOS/world-viewer/WORLD_VIEWER_V1_ARCHITECTURE_BASELINE.md` | Frozen `WORLD-VIEWER-V1.0` Architecture and synthetic-only sandbox boundary |
 | UI Governor Package | `KGEN-KAIOS/ui-governor/README.md` | Source audit, 80-cell daily matrix and architecture enablement boundary |
 | UI Governor Runtime | `KGEN-KAIOS/ui-governor/UI_GOVERNOR_RUNTIME.md` | Permanent inspection control-plane, evidence and release-gate proposal |
