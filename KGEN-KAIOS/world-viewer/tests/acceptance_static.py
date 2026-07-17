@@ -63,6 +63,17 @@ REQUIRED_FILES = (
     "timeline/pocket-time-ufo-runtime.js",
     "timeline/timeline-runtime.js",
     "timeline/timeline-view.js",
+    "technology/runtime-ledger.js",
+    "technology/research-runtime.js",
+    "technology/technology-tree-runtime.js",
+    "technology/cosmic-material-runtime.js",
+    "technology/energy-runtime.js",
+    "technology/vehicle-runtime.js",
+    "technology/special-ability-runtime.js",
+    "technology/cosmic-coordinate-runtime.js",
+    "technology/space-exploration-runtime.js",
+    "technology/cosmic-technology-runtime.js",
+    "technology/cosmic-technology-view.js",
     "city/city-runtime.js",
     "civilization/runtime-utils.js",
     "civilization/civilization-runtime.js",
@@ -77,6 +88,7 @@ REQUIRED_FILES = (
     "tests/governance_integrity.mjs",
     "tests/biology_integrity.mjs",
     "tests/nation_timeline_integrity.mjs",
+    "tests/cosmic_technology_integrity.mjs",
 )
 
 PROTECTED_PREFIXES = (
@@ -481,9 +493,45 @@ def check_alpha_contract(errors: list[str], data: dict, source_text: str, html: 
     vehicle = timeline.get("vehicle", {})
     if vehicle.get("vehicle_type") != "POCKET_TIME_CLOAKED_UFO" or not re.fullmatch(r"sha256:[0-9a-f]{64}", str(vehicle.get("blueprint_checksum", ""))):
         fail(errors, "Timeline transport or blueprint checksum contract is invalid")
-    for token in ("NATION_TIMELINE_NATION_ALPHA", "NATION_PUBLIC_FINANCE_ALPHA", "PLANET_RESOURCE_ECONOMY_ALPHA", "NATION_DIPLOMACY_ALPHA", "CIVILIZATION_TIMELINE_ALPHA", "POCKET_TIME_CLOAKED_UFO_ALPHA"):
+    for token in ("NATION_TIMELINE_NATION_ALPHA", "NATION_PUBLIC_FINANCE_ALPHA", "PLANET_RESOURCE_ECONOMY_ALPHA", "NATION_DIPLOMACY_ALPHA", "CIVILIZATION_TIMELINE_ALPHA", "POCKET_TIME_CLOAKED_UFO_V2_ALPHA"):
         if token not in source_text:
             fail(errors, f"Nation and Timeline Runtime is missing {token}")
+
+    cosmic = data.get("cosmic_technology_alpha", {})
+    if cosmic.get("decision_id") != "HUMAN-SPRINT-010-COSMIC-TECHNOLOGY":
+        fail(errors, "Cosmic Technology Alpha decision ID is invalid")
+    if cosmic.get("simulation_only") is not True or cosmic.get("authoritative_registry") is not False:
+        fail(errors, "Cosmic Technology Alpha must remain synthetic and non-authoritative")
+    if any(cosmic.get(key) is not False for key in ("real_nuclear_operation", "real_antimatter_operation", "real_navigation", "real_time_travel")):
+        fail(errors, "Cosmic Technology Alpha crossed its real-world safety boundary")
+    expected_technology_ages = [
+        "STONE_AGE", "BRONZE_AGE", "IRON_AGE", "INDUSTRIAL_AGE", "ELECTRICAL_AGE",
+        "COMPUTER_AGE", "AI_AGE", "QUANTUM_AGE", "ANTI_GRAVITY_AGE", "WARP_AGE",
+        "TIMELINE_AGE", "INTERSTELLAR_AGE", "DIMENSIONAL_AGE", "MULTIVERSE_AGE",
+    ]
+    if [item.get("age_id") for item in cosmic.get("technology_ages", [])] != expected_technology_ages:
+        fail(errors, "Cosmic Technology age catalog is incomplete or out of order")
+    if len(cosmic.get("materials", [])) != 12 or len(cosmic.get("energy", [])) != 8:
+        fail(errors, "Cosmic material or energy catalog is incomplete")
+    if len(cosmic.get("vehicles", [])) != 9 or len(cosmic.get("abilities", [])) != 9:
+        fail(errors, "Cosmic vehicle or special ability catalog is incomplete")
+    if len([vehicle for vehicle in cosmic.get("vehicles", []) if vehicle.get("timeline_authority") is True]) != 1:
+        fail(errors, "Pocket Time Cloaked UFO must remain the sole Timeline transport")
+    if next((item for item in cosmic.get("abilities", []) if item.get("ability_id") == "CLONE"), {}).get("sandbox_proposal_only") is not True:
+        fail(errors, "Clone capability must remain a sandbox proposal")
+    coordinate_types = {item.get("coordinate_type") for item in cosmic.get("coordinates", [])}
+    if coordinate_types != {"PLANET", "CIVILIZATION", "TEMPLE", "PORTAL", "TIMELINE_GATE", "GRAVITY_WELL", "SPECIAL_COORDINATE"}:
+        fail(errors, "Cosmic coordinate types are incomplete")
+    if [item.get("activity_id") for item in cosmic.get("exploration_activities", [])] != ["PLANET_DISCOVERY", "SPACE_ROUTE", "RESOURCE_SURVEY", "COLONY_PLANNING", "DEEP_SPACE_MISSION"]:
+        fail(errors, "Space exploration activity catalog is incomplete or out of order")
+    if next((item for item in cosmic.get("exploration_activities", []) if item.get("activity_id") == "COLONY_PLANNING"), {}).get("proposal_only") is not True:
+        fail(errors, "Colony planning must remain proposal only")
+    ufo_v2 = cosmic.get("ufo_v2", {})
+    if ufo_v2.get("required_technologies") != ["ANTI_GRAVITY_TECHNOLOGY", "WARP_TECHNOLOGY", "TIMELINE_TECHNOLOGY"] or ufo_v2.get("required_capabilities") != ["AI_NAVIGATION", "SHAPE_SHIFT_CAPABILITY"]:
+        fail(errors, "Pocket Time Cloaked UFO V2 six-gate contract is invalid")
+    for token in ("COSMIC_TECHNOLOGY_ALPHA", "COSMIC_TECHNOLOGY_TREE_ALPHA", "COSMIC_RESEARCH_ALPHA", "COSMIC_MATERIAL_ALPHA", "COSMIC_ENERGY_ALPHA", "COSMIC_VEHICLE_ALPHA", "SPECIAL_ABILITY_ALPHA", "COSMIC_COORDINATE_ALPHA", "SPACE_EXPLORATION_ALPHA"):
+        if token not in source_text:
+            fail(errors, f"Cosmic Technology Runtime is missing {token}")
 
 
 def main() -> int:
@@ -687,7 +735,7 @@ def main() -> int:
         f"{len(REQUIRED_FILES)} files;",
         f"{parsed_json_records} JSON records;",
         f"{checked_references} local references;",
-        "Nation + Treasury + 12 governable taxes + 11 resources + Diplomacy + 9-era Timeline + sole transport gate + Cambrian Biology + 8 land proposals; protected-path input clean",
+        "Cosmic Technology 14 ages + Research + 12 materials + 8 energies + 9 vehicles + 9 abilities + data-driven coordinates + exploration + Nation/Timeline + Cambrian Biology + 8 land proposals; protected-path input clean",
     )
     return 0
 

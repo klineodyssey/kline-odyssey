@@ -132,6 +132,12 @@ jobs:
         shell: bash
         run: node KGEN-KAIOS/world-viewer/tests/nation_timeline_integrity.mjs
 
+      - name: Run Cosmic Technology integrity
+        id: cosmic-technology
+        continue-on-error: true
+        shell: bash
+        run: node KGEN-KAIOS/world-viewer/tests/cosmic_technology_integrity.mjs
+
       - name: Start static server
         shell: bash
         run: |
@@ -157,7 +163,7 @@ jobs:
           python KGEN-KAIOS/world-viewer/tests/product_qa.py \
             --base-url http://127.0.0.1:8080/KGEN-KAIOS/world-viewer/index.html \
             --output-dir "$RUNNER_TEMP/world-viewer-product-qa" \
-            --baseline-dir KGEN-KAIOS/world-viewer/tests/baselines/sprint-009 \
+            --baseline-dir KGEN-KAIOS/world-viewer/tests/baselines/sprint-010 \
             --require-baselines \
             --max-diff-ratio 0.12 \
             --pixel-threshold 32
@@ -194,6 +200,7 @@ jobs:
         shell: bash
         env:
           PRODUCT_OUTCOME: ${{ steps.product.outcome }}
+          COSMIC_TECHNOLOGY_OUTCOME: ${{ steps.cosmic-technology.outcome }}
           NATION_TIMELINE_OUTCOME: ${{ steps.nation-timeline.outcome }}
           BIOLOGY_OUTCOME: ${{ steps.biology.outcome }}
           GOVERNANCE_OUTCOME: ${{ steps.governance.outcome }}
@@ -205,8 +212,8 @@ jobs:
           STATIC_OUTCOME: ${{ steps.static.outcome }}
           SYNTAX_OUTCOME: ${{ steps.syntax.outcome }}
         run: |
-          printf 'syntax=%s\nstatic=%s\nruntime=%s\ncivilization=%s\ngenesis=%s\nproduction=%s\nsettlement=%s\ngovernance=%s\nbiology=%s\nnation_timeline=%s\nproduct=%s\n' \
-            "$SYNTAX_OUTCOME" "$STATIC_OUTCOME" "$RUNTIME_OUTCOME" "$CIVILIZATION_OUTCOME" "$GENESIS_OUTCOME" "$PRODUCTION_OUTCOME" "$SETTLEMENT_OUTCOME" "$GOVERNANCE_OUTCOME" "$BIOLOGY_OUTCOME" "$NATION_TIMELINE_OUTCOME" "$PRODUCT_OUTCOME"
+          printf 'syntax=%s\nstatic=%s\nruntime=%s\ncivilization=%s\ngenesis=%s\nproduction=%s\nsettlement=%s\ngovernance=%s\nbiology=%s\nnation_timeline=%s\ncosmic_technology=%s\nproduct=%s\n' \
+            "$SYNTAX_OUTCOME" "$STATIC_OUTCOME" "$RUNTIME_OUTCOME" "$CIVILIZATION_OUTCOME" "$GENESIS_OUTCOME" "$PRODUCTION_OUTCOME" "$SETTLEMENT_OUTCOME" "$GOVERNANCE_OUTCOME" "$BIOLOGY_OUTCOME" "$NATION_TIMELINE_OUTCOME" "$COSMIC_TECHNOLOGY_OUTCOME" "$PRODUCT_OUTCOME"
           [[ "$SYNTAX_OUTCOME" == "success" ]]
           [[ "$STATIC_OUTCOME" == "success" ]]
           [[ "$RUNTIME_OUTCOME" == "success" ]]
@@ -217,4 +224,5 @@ jobs:
           [[ "$GOVERNANCE_OUTCOME" == "success" ]]
           [[ "$BIOLOGY_OUTCOME" == "success" ]]
           [[ "$NATION_TIMELINE_OUTCOME" == "success" ]]
+          [[ "$COSMIC_TECHNOLOGY_OUTCOME" == "success" ]]
           [[ "$PRODUCT_OUTCOME" == "success" ]]

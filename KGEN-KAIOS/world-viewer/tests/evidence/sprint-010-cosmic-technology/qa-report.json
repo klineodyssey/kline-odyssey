@@ -1,0 +1,3659 @@
+{
+  "base_url": "http://127.0.0.1:8100/KGEN-KAIOS/world-viewer/index.html",
+  "browser_engine": "chromium",
+  "checks": [
+    {
+      "case": "android-landscape-light",
+      "category": "accessibility",
+      "details": {
+        "canvas_labelled": true,
+        "duplicate_ids": [],
+        "html_lang": "zh-Hant",
+        "images_without_alt": [],
+        "keyboard_focus": {
+          "name": "Back one layer",
+          "outline_style": "solid",
+          "outline_width": "3px",
+          "tag": "BUTTON"
+        },
+        "live_region": true,
+        "main_landmark": true,
+        "missing_control_names": [],
+        "named_navigation": true,
+        "title": "KAIOS Cosmic Technology Alpha"
+      },
+      "id": "android-landscape-light.accessibility",
+      "status": "PASS"
+    },
+    {
+      "case": "android-landscape-light",
+      "category": "browser-errors",
+      "details": {
+        "bad_responses": [],
+        "case": "android-landscape-light",
+        "console_errors": [],
+        "external_requests": [],
+        "mutating_requests": [],
+        "page_errors": [],
+        "request_failures": []
+      },
+      "id": "android-landscape-light.browser-clean",
+      "status": "PASS"
+    },
+    {
+      "case": "android-landscape-light",
+      "category": "browser-errors",
+      "id": "android-landscape-light.fatal-error",
+      "status": "PASS"
+    },
+    {
+      "case": "android-landscape-light",
+      "category": "responsive-matrix",
+      "details": {
+        "document_height": 412,
+        "document_width": 915,
+        "offenders": [],
+        "viewport_height": 412,
+        "viewport_width": 915
+      },
+      "id": "android-landscape-light.overflow",
+      "status": "PASS"
+    },
+    {
+      "case": "android-landscape-light",
+      "category": "performance",
+      "details": {
+        "budgets": {
+          "first_usable_ms": 2500.0,
+          "heap_bytes": 167772160,
+          "maximum_render_ms": 50.0,
+          "minimum_fps": 30.0,
+          "transfer_bytes": 1572864
+        },
+        "case": "android-landscape-light",
+        "metrics": {
+          "dom_content_loaded_ms": 304.7,
+          "first_contentful_paint_ms": 136,
+          "first_usable_ms": 749.6,
+          "heap_bytes": 10000000,
+          "load_event_ms": 313.8,
+          "renderer_fps": 83.3,
+          "renderer_ms": 0.8,
+          "resource_count": 64,
+          "transfer_bytes": 1293418
+        },
+        "results": {
+          "critical_payload": true,
+          "first_usable": true,
+          "heap": true,
+          "renderer_fps": true,
+          "renderer_time": true
+        },
+        "status": "PASS"
+      },
+      "id": "android-landscape-light.performance-budget",
+      "status": "PASS"
+    },
+    {
+      "case": "android-landscape-light",
+      "category": "responsive-matrix",
+      "details": {
+        "brand": {
+          "bottom": 65.5,
+          "left": 27,
+          "right": 61,
+          "top": 31.5
+        },
+        "inspector": {
+          "bottom": 412,
+          "left": 555,
+          "right": 915,
+          "top": 81
+        },
+        "mobile": false,
+        "rail": {
+          "bottom": 412,
+          "left": 0,
+          "right": 72,
+          "top": 81
+        },
+        "toolbar": {
+          "bottom": 70.5,
+          "left": 489.546875,
+          "right": 892,
+          "top": 26.5
+        },
+        "viewport_height": 412,
+        "viewport_width": 915
+      },
+      "id": "android-landscape-light.safe-area",
+      "status": "PASS"
+    },
+    {
+      "case": "android-landscape-light",
+      "category": "screenshots",
+      "details": {
+        "actual_size": [
+          1830,
+          824
+        ],
+        "baseline": {
+          "path": "tests/baselines/sprint-010/android-landscape-light.png",
+          "sha256": "9f7a1a9ba2455424df5b4e12d650fdbb1e167f1917e3d9da8b496cbf2c37cec4"
+        },
+        "case": "android-landscape-light",
+        "diff": {
+          "diff_image": "diffs/android-landscape-light.png",
+          "mean_absolute_difference": 0.0,
+          "mismatch_pixels": 0,
+          "mismatch_ratio": 0.0,
+          "pixel_threshold": 32,
+          "reason": "COMPARED"
+        },
+        "expected_size": [
+          1830,
+          824
+        ],
+        "path": "screenshots/android-landscape-light.png",
+        "pixel_variance": 1165.444,
+        "sha256": "9f7a1a9ba2455424df5b4e12d650fdbb1e167f1917e3d9da8b496cbf2c37cec4",
+        "visual_range": 248
+      },
+      "id": "android-landscape-light.screenshot",
+      "status": "PASS"
+    },
+    {
+      "case": "android-landscape-light",
+      "category": "screenshots",
+      "details": {
+        "allowed_mismatch_ratio": 0.12,
+        "diff_image": "diffs/android-landscape-light.png",
+        "mean_absolute_difference": 0.0,
+        "mismatch_pixels": 0,
+        "mismatch_ratio": 0.0,
+        "pixel_threshold": 32,
+        "reason": "COMPARED"
+      },
+      "id": "android-landscape-light.screenshot-diff",
+      "status": "PASS"
+    },
+    {
+      "case": "android-landscape-light",
+      "category": "responsive-matrix",
+      "details": {
+        "theme": "light"
+      },
+      "id": "android-landscape-light.theme",
+      "status": "PASS"
+    },
+    {
+      "case": "android-landscape-light",
+      "category": "touch-controls",
+      "details": {
+        "checked": 22,
+        "violations": []
+      },
+      "id": "android-landscape-light.touch-targets",
+      "status": "PASS"
+    },
+    {
+      "case": "android-portrait-dark",
+      "category": "accessibility",
+      "details": {
+        "canvas_labelled": true,
+        "duplicate_ids": [],
+        "html_lang": "zh-Hant",
+        "images_without_alt": [],
+        "keyboard_focus": {
+          "name": "Back one layer",
+          "outline_style": "solid",
+          "outline_width": "3px",
+          "tag": "BUTTON"
+        },
+        "live_region": true,
+        "main_landmark": true,
+        "missing_control_names": [],
+        "named_navigation": true,
+        "title": "KAIOS Cosmic Technology Alpha"
+      },
+      "id": "android-portrait-dark.accessibility",
+      "status": "PASS"
+    },
+    {
+      "case": "android-portrait-dark",
+      "category": "browser-errors",
+      "details": {
+        "bad_responses": [],
+        "case": "android-portrait-dark",
+        "console_errors": [],
+        "external_requests": [],
+        "mutating_requests": [],
+        "page_errors": [],
+        "request_failures": []
+      },
+      "id": "android-portrait-dark.browser-clean",
+      "status": "PASS"
+    },
+    {
+      "case": "android-portrait-dark",
+      "category": "browser-errors",
+      "id": "android-portrait-dark.fatal-error",
+      "status": "PASS"
+    },
+    {
+      "case": "android-portrait-dark",
+      "category": "responsive-matrix",
+      "details": {
+        "document_height": 915,
+        "document_width": 412,
+        "offenders": [],
+        "viewport_height": 915,
+        "viewport_width": 412
+      },
+      "id": "android-portrait-dark.overflow",
+      "status": "PASS"
+    },
+    {
+      "case": "android-portrait-dark",
+      "category": "performance",
+      "details": {
+        "budgets": {
+          "first_usable_ms": 2500.0,
+          "heap_bytes": 167772160,
+          "maximum_render_ms": 50.0,
+          "minimum_fps": 30.0,
+          "transfer_bytes": 1572864
+        },
+        "case": "android-portrait-dark",
+        "metrics": {
+          "dom_content_loaded_ms": 253.1,
+          "first_contentful_paint_ms": 152,
+          "first_usable_ms": 690.5,
+          "heap_bytes": 10000000,
+          "load_event_ms": 253.1,
+          "renderer_fps": 59.9,
+          "renderer_ms": 0.5,
+          "resource_count": 64,
+          "transfer_bytes": 1293418
+        },
+        "results": {
+          "critical_payload": true,
+          "first_usable": true,
+          "heap": true,
+          "renderer_fps": true,
+          "renderer_time": true
+        },
+        "status": "PASS"
+      },
+      "id": "android-portrait-dark.performance-budget",
+      "status": "PASS"
+    },
+    {
+      "case": "android-portrait-dark",
+      "category": "responsive-matrix",
+      "details": {
+        "brand": {
+          "bottom": 61.5,
+          "left": 21,
+          "right": 55,
+          "top": 27.5
+        },
+        "inspector": {
+          "bottom": 1444,
+          "left": 13,
+          "right": 401,
+          "top": 824
+        },
+        "mobile": true,
+        "rail": {
+          "bottom": 135,
+          "left": 21,
+          "right": 231,
+          "top": 81
+        },
+        "toolbar": {
+          "bottom": 66.5,
+          "left": 255,
+          "right": 393,
+          "top": 22.5
+        },
+        "viewport_height": 915,
+        "viewport_width": 412
+      },
+      "id": "android-portrait-dark.safe-area",
+      "status": "PASS"
+    },
+    {
+      "case": "android-portrait-dark",
+      "category": "screenshots",
+      "details": {
+        "actual_size": [
+          824,
+          1830
+        ],
+        "baseline": {
+          "path": "tests/baselines/sprint-010/android-portrait-dark.png",
+          "sha256": "825802b1248407c3bdd8db37fafce753461704bf67b0279f7a970a502e8918b3"
+        },
+        "case": "android-portrait-dark",
+        "diff": {
+          "diff_image": "diffs/android-portrait-dark.png",
+          "mean_absolute_difference": 0.0,
+          "mismatch_pixels": 0,
+          "mismatch_ratio": 0.0,
+          "pixel_threshold": 32,
+          "reason": "COMPARED"
+        },
+        "expected_size": [
+          824,
+          1830
+        ],
+        "path": "screenshots/android-portrait-dark.png",
+        "pixel_variance": 9192.292,
+        "sha256": "825802b1248407c3bdd8db37fafce753461704bf67b0279f7a970a502e8918b3",
+        "visual_range": 236
+      },
+      "id": "android-portrait-dark.screenshot",
+      "status": "PASS"
+    },
+    {
+      "case": "android-portrait-dark",
+      "category": "screenshots",
+      "details": {
+        "allowed_mismatch_ratio": 0.12,
+        "diff_image": "diffs/android-portrait-dark.png",
+        "mean_absolute_difference": 0.0,
+        "mismatch_pixels": 0,
+        "mismatch_ratio": 0.0,
+        "pixel_threshold": 32,
+        "reason": "COMPARED"
+      },
+      "id": "android-portrait-dark.screenshot-diff",
+      "status": "PASS"
+    },
+    {
+      "case": "android-portrait-dark",
+      "category": "responsive-matrix",
+      "details": {
+        "theme": "dark"
+      },
+      "id": "android-portrait-dark.theme",
+      "status": "PASS"
+    },
+    {
+      "case": "android-portrait-dark",
+      "category": "touch-controls",
+      "details": {
+        "checked": 20,
+        "violations": []
+      },
+      "id": "android-portrait-dark.touch-targets",
+      "status": "PASS"
+    },
+    {
+      "category": "reproduction-integrity",
+      "id": "biology.clone-proposal-boundary",
+      "status": "PASS"
+    },
+    {
+      "category": "genome-evolution",
+      "id": "biology.evidence-gated-evolution",
+      "status": "PASS"
+    },
+    {
+      "category": "genome-evolution",
+      "id": "biology.genome-and-atoms",
+      "status": "PASS"
+    },
+    {
+      "category": "planet-ecology",
+      "id": "biology.planet-ecology",
+      "status": "PASS"
+    },
+    {
+      "category": "biology-registry",
+      "id": "biology.registry-and-taxonomy",
+      "status": "PASS"
+    },
+    {
+      "case": "civilization-alpha",
+      "category": "browser-errors",
+      "details": {
+        "bad_responses": [],
+        "case": "civilization-alpha",
+        "console_errors": [],
+        "external_requests": [],
+        "mutating_requests": [],
+        "page_errors": [],
+        "request_failures": []
+      },
+      "id": "civilization-alpha.browser-clean",
+      "status": "PASS"
+    },
+    {
+      "category": "ai-schedule",
+      "details": {
+        "activity": "WORK",
+        "ai_action": "FARM",
+        "balance": "106"
+      },
+      "id": "civilization.ai-schedule",
+      "status": "PASS"
+    },
+    {
+      "category": "civilization-life",
+      "id": "civilization.citizen-needs",
+      "status": "PASS"
+    },
+    {
+      "category": "city-integrity",
+      "id": "civilization.city-runtime",
+      "status": "PASS"
+    },
+    {
+      "category": "agriculture",
+      "id": "civilization.crop-planted",
+      "status": "PASS"
+    },
+    {
+      "category": "agriculture",
+      "id": "civilization.crop-ready",
+      "status": "PASS"
+    },
+    {
+      "category": "civilization-life",
+      "details": {
+        "required_count": 11
+      },
+      "id": "civilization.daily-schedule",
+      "status": "PASS"
+    },
+    {
+      "category": "economy-integrity",
+      "details": {
+        "after": 128,
+        "before": 124
+      },
+      "id": "civilization.harvest-sale",
+      "status": "PASS"
+    },
+    {
+      "category": "food-balance",
+      "id": "civilization.harvest-storage",
+      "status": "PASS"
+    },
+    {
+      "category": "economy-integrity",
+      "details": {
+        "after": 122,
+        "before": 128
+      },
+      "id": "civilization.market-purchase",
+      "status": "PASS"
+    },
+    {
+      "category": "memory-leak",
+      "details": {
+        "after_bytes": 424931,
+        "before_bytes": 175680
+      },
+      "id": "civilization.memory-bound",
+      "status": "PASS"
+    },
+    {
+      "category": "responsive",
+      "details": {
+        "canvas": {
+          "canvas": 1008,
+          "parent": 1008
+        },
+        "layout": {
+          "document_height": 900,
+          "document_width": 1440,
+          "offenders": [],
+          "viewport_height": 900,
+          "viewport_width": 1440
+        }
+      },
+      "id": "civilization.responsive-canvas",
+      "status": "PASS"
+    },
+    {
+      "category": "visual-regression",
+      "details": {
+        "actual_size": [
+          1440,
+          900
+        ],
+        "case": "civilization-alpha",
+        "diff": {
+          "reason": "BASELINE_NOT_CONFIGURED"
+        },
+        "expected_size": [
+          1440,
+          900
+        ],
+        "path": "screenshots/civilization-alpha.png",
+        "pixel_variance": 7970.66,
+        "sha256": "f02d33f75ffa7257d0cd796806838fc7eb8c2d75075ff908340cbb20d88279f8",
+        "visual_range": 234
+      },
+      "id": "civilization.visual-nonblank",
+      "status": "PASS"
+    },
+    {
+      "case": "consent-login",
+      "category": "browser-errors",
+      "details": {
+        "bad_responses": [],
+        "case": "consent-login",
+        "console_errors": [],
+        "external_requests": [],
+        "mutating_requests": [],
+        "page_errors": [],
+        "request_failures": []
+      },
+      "id": "consent-login.browser-clean",
+      "status": "PASS"
+    },
+    {
+      "case": "cosmic-technology-alpha",
+      "category": "browser-errors",
+      "details": {
+        "bad_responses": [],
+        "case": "cosmic-technology-alpha",
+        "console_errors": [],
+        "external_requests": [],
+        "mutating_requests": [],
+        "page_errors": [],
+        "request_failures": []
+      },
+      "id": "cosmic-technology-alpha.browser-clean",
+      "status": "PASS"
+    },
+    {
+      "case": "cosmic-technology-mobile",
+      "category": "browser-errors",
+      "details": {
+        "bad_responses": [],
+        "case": "cosmic-technology-mobile",
+        "console_errors": [],
+        "external_requests": [],
+        "mutating_requests": [],
+        "page_errors": [],
+        "request_failures": []
+      },
+      "id": "cosmic-technology-mobile.browser-clean",
+      "status": "PASS"
+    },
+    {
+      "category": "cosmic-ability",
+      "id": "cosmic-technology.clone-proposal-only",
+      "status": "PASS"
+    },
+    {
+      "category": "cosmic-coordinate",
+      "id": "cosmic-technology.data-driven-coordinate",
+      "status": "PASS"
+    },
+    {
+      "category": "space-exploration",
+      "details": {
+        "layout": {
+          "document_height": 900,
+          "document_width": 1440,
+          "offenders": [],
+          "viewport_height": 900,
+          "viewport_width": 1440
+        },
+        "screenshot": {
+          "actual_size": [
+            1440,
+            900
+          ],
+          "case": "cosmic-technology-alpha",
+          "diff": {
+            "reason": "BASELINE_NOT_CONFIGURED"
+          },
+          "expected_size": [
+            1440,
+            900
+          ],
+          "path": "screenshots/cosmic-technology-alpha.png",
+          "pixel_variance": 7850.075,
+          "sha256": "26ecbafc36e5d1932ca13f4ab840e370cef543ad41a50737506c2484b306a3b5",
+          "visual_range": 234
+        }
+      },
+      "id": "cosmic-technology.exploration-boundary",
+      "status": "PASS"
+    },
+    {
+      "category": "cosmic-technology",
+      "id": "cosmic-technology.fourteen-age-tree",
+      "status": "PASS"
+    },
+    {
+      "category": "mobile-interaction",
+      "details": {
+        "active_tab_visible": true,
+        "layout": {
+          "document_height": 844,
+          "document_width": 390,
+          "offenders": [],
+          "viewport_height": 844,
+          "viewport_width": 390
+        },
+        "screenshot": {
+          "actual_size": [
+            780,
+            1688
+          ],
+          "case": "cosmic-technology-mobile",
+          "diff": {
+            "reason": "BASELINE_NOT_CONFIGURED"
+          },
+          "expected_size": [
+            780,
+            1688
+          ],
+          "path": "screenshots/cosmic-technology-mobile.png",
+          "pixel_variance": 1151.837,
+          "sha256": "ca926b73f5f431d062d58d19fe08efacf4e82865ab512bd91b468ac1d413ed5e",
+          "visual_range": 247
+        },
+        "targets": {
+          "checked": 30,
+          "violations": []
+        }
+      },
+      "id": "cosmic-technology.mobile-responsive",
+      "status": "PASS"
+    },
+    {
+      "category": "cosmic-vehicle",
+      "id": "cosmic-technology.nine-vehicle-catalog",
+      "status": "PASS"
+    },
+    {
+      "category": "cosmic-technology",
+      "id": "cosmic-technology.shared-ufo-v2-gates",
+      "status": "PASS"
+    },
+    {
+      "case": "desktop-dark",
+      "category": "accessibility",
+      "details": {
+        "canvas_labelled": true,
+        "duplicate_ids": [],
+        "html_lang": "zh-Hant",
+        "images_without_alt": [],
+        "keyboard_focus": {
+          "name": "Back one layer",
+          "outline_style": "solid",
+          "outline_width": "3px",
+          "tag": "BUTTON"
+        },
+        "live_region": true,
+        "main_landmark": true,
+        "missing_control_names": [],
+        "named_navigation": true,
+        "title": "KAIOS Cosmic Technology Alpha"
+      },
+      "id": "desktop-dark.accessibility",
+      "status": "PASS"
+    },
+    {
+      "case": "desktop-dark",
+      "category": "browser-errors",
+      "details": {
+        "bad_responses": [],
+        "case": "desktop-dark",
+        "console_errors": [],
+        "external_requests": [],
+        "mutating_requests": [],
+        "page_errors": [],
+        "request_failures": []
+      },
+      "id": "desktop-dark.browser-clean",
+      "status": "PASS"
+    },
+    {
+      "case": "desktop-dark",
+      "category": "browser-errors",
+      "id": "desktop-dark.fatal-error",
+      "status": "PASS"
+    },
+    {
+      "case": "desktop-dark",
+      "category": "responsive-matrix",
+      "details": {
+        "document_height": 900,
+        "document_width": 1440,
+        "offenders": [],
+        "viewport_height": 900,
+        "viewport_width": 1440
+      },
+      "id": "desktop-dark.overflow",
+      "status": "PASS"
+    },
+    {
+      "case": "desktop-dark",
+      "category": "performance",
+      "details": {
+        "budgets": {
+          "first_usable_ms": 2500.0,
+          "heap_bytes": 268435456,
+          "maximum_render_ms": 50.0,
+          "minimum_fps": 30.0,
+          "transfer_bytes": 1572864
+        },
+        "case": "desktop-dark",
+        "metrics": {
+          "dom_content_loaded_ms": 247.5,
+          "first_contentful_paint_ms": 164,
+          "first_usable_ms": 692.6,
+          "heap_bytes": 10000000,
+          "load_event_ms": 247.6,
+          "renderer_fps": 62.1,
+          "renderer_ms": 0.4,
+          "resource_count": 64,
+          "transfer_bytes": 1293418
+        },
+        "results": {
+          "critical_payload": true,
+          "first_usable": true,
+          "heap": true,
+          "renderer_fps": true,
+          "renderer_time": true
+        },
+        "status": "PASS"
+      },
+      "id": "desktop-dark.performance-budget",
+      "status": "PASS"
+    },
+    {
+      "case": "desktop-dark",
+      "category": "responsive-matrix",
+      "details": {
+        "brand": {
+          "bottom": 65.5,
+          "left": 27,
+          "right": 61,
+          "top": 31.5
+        },
+        "inspector": {
+          "bottom": 900,
+          "left": 1080,
+          "right": 1440,
+          "top": 81
+        },
+        "mobile": false,
+        "rail": {
+          "bottom": 900,
+          "left": 0,
+          "right": 72,
+          "top": 81
+        },
+        "toolbar": {
+          "bottom": 70.5,
+          "left": 1014.546875,
+          "right": 1417,
+          "top": 26.5
+        },
+        "viewport_height": 900,
+        "viewport_width": 1440
+      },
+      "id": "desktop-dark.safe-area",
+      "status": "PASS"
+    },
+    {
+      "case": "desktop-dark",
+      "category": "screenshots",
+      "details": {
+        "actual_size": [
+          1440,
+          900
+        ],
+        "baseline": {
+          "path": "tests/baselines/sprint-010/desktop-dark.png",
+          "sha256": "b593ba4526237c79d30a1427b3bd73fe42ccd72daeb1024dad9f6b71795bcc2e"
+        },
+        "case": "desktop-dark",
+        "diff": {
+          "diff_image": "diffs/desktop-dark.png",
+          "mean_absolute_difference": 0.0,
+          "mismatch_pixels": 0,
+          "mismatch_ratio": 0.0,
+          "pixel_threshold": 32,
+          "reason": "COMPARED"
+        },
+        "expected_size": [
+          1440,
+          900
+        ],
+        "path": "screenshots/desktop-dark.png",
+        "pixel_variance": 9723.47,
+        "sha256": "b593ba4526237c79d30a1427b3bd73fe42ccd72daeb1024dad9f6b71795bcc2e",
+        "visual_range": 231
+      },
+      "id": "desktop-dark.screenshot",
+      "status": "PASS"
+    },
+    {
+      "case": "desktop-dark",
+      "category": "screenshots",
+      "details": {
+        "allowed_mismatch_ratio": 0.12,
+        "diff_image": "diffs/desktop-dark.png",
+        "mean_absolute_difference": 0.0,
+        "mismatch_pixels": 0,
+        "mismatch_ratio": 0.0,
+        "pixel_threshold": 32,
+        "reason": "COMPARED"
+      },
+      "id": "desktop-dark.screenshot-diff",
+      "status": "PASS"
+    },
+    {
+      "case": "desktop-dark",
+      "category": "responsive-matrix",
+      "details": {
+        "theme": "dark"
+      },
+      "id": "desktop-dark.theme",
+      "status": "PASS"
+    },
+    {
+      "case": "desktop-light",
+      "category": "accessibility",
+      "details": {
+        "canvas_labelled": true,
+        "duplicate_ids": [],
+        "html_lang": "zh-Hant",
+        "images_without_alt": [],
+        "keyboard_focus": {
+          "name": "Back one layer",
+          "outline_style": "solid",
+          "outline_width": "3px",
+          "tag": "BUTTON"
+        },
+        "live_region": true,
+        "main_landmark": true,
+        "missing_control_names": [],
+        "named_navigation": true,
+        "title": "KAIOS Cosmic Technology Alpha"
+      },
+      "id": "desktop-light.accessibility",
+      "status": "PASS"
+    },
+    {
+      "case": "desktop-light",
+      "category": "browser-errors",
+      "details": {
+        "bad_responses": [],
+        "case": "desktop-light",
+        "console_errors": [],
+        "external_requests": [],
+        "mutating_requests": [],
+        "page_errors": [],
+        "request_failures": []
+      },
+      "id": "desktop-light.browser-clean",
+      "status": "PASS"
+    },
+    {
+      "case": "desktop-light",
+      "category": "browser-errors",
+      "id": "desktop-light.fatal-error",
+      "status": "PASS"
+    },
+    {
+      "case": "desktop-light",
+      "category": "responsive-matrix",
+      "details": {
+        "document_height": 800,
+        "document_width": 1280,
+        "offenders": [],
+        "viewport_height": 800,
+        "viewport_width": 1280
+      },
+      "id": "desktop-light.overflow",
+      "status": "PASS"
+    },
+    {
+      "case": "desktop-light",
+      "category": "performance",
+      "details": {
+        "budgets": {
+          "first_usable_ms": 2500.0,
+          "heap_bytes": 268435456,
+          "maximum_render_ms": 50.0,
+          "minimum_fps": 30.0,
+          "transfer_bytes": 1572864
+        },
+        "case": "desktop-light",
+        "metrics": {
+          "dom_content_loaded_ms": 282.5,
+          "first_contentful_paint_ms": 144,
+          "first_usable_ms": 758.7,
+          "heap_bytes": 10000000,
+          "load_event_ms": 291.9,
+          "renderer_fps": 58.5,
+          "renderer_ms": 0.4,
+          "resource_count": 64,
+          "transfer_bytes": 1293418
+        },
+        "results": {
+          "critical_payload": true,
+          "first_usable": true,
+          "heap": true,
+          "renderer_fps": true,
+          "renderer_time": true
+        },
+        "status": "PASS"
+      },
+      "id": "desktop-light.performance-budget",
+      "status": "PASS"
+    },
+    {
+      "case": "desktop-light",
+      "category": "responsive-matrix",
+      "details": {
+        "brand": {
+          "bottom": 65.5,
+          "left": 27,
+          "right": 61,
+          "top": 31.5
+        },
+        "inspector": {
+          "bottom": 800,
+          "left": 920,
+          "right": 1280,
+          "top": 81
+        },
+        "mobile": false,
+        "rail": {
+          "bottom": 800,
+          "left": 0,
+          "right": 72,
+          "top": 81
+        },
+        "toolbar": {
+          "bottom": 70.5,
+          "left": 854.546875,
+          "right": 1257,
+          "top": 26.5
+        },
+        "viewport_height": 800,
+        "viewport_width": 1280
+      },
+      "id": "desktop-light.safe-area",
+      "status": "PASS"
+    },
+    {
+      "case": "desktop-light",
+      "category": "screenshots",
+      "details": {
+        "actual_size": [
+          1280,
+          800
+        ],
+        "baseline": {
+          "path": "tests/baselines/sprint-010/desktop-light.png",
+          "sha256": "ebb9b42a6205ec285da5ce23a37141ab4b05d8601eec3c0a5a1e3fc137cf67bb"
+        },
+        "case": "desktop-light",
+        "diff": {
+          "diff_image": "diffs/desktop-light.png",
+          "mean_absolute_difference": 0.0,
+          "mismatch_pixels": 0,
+          "mismatch_ratio": 0.0,
+          "pixel_threshold": 32,
+          "reason": "COMPARED"
+        },
+        "expected_size": [
+          1280,
+          800
+        ],
+        "path": "screenshots/desktop-light.png",
+        "pixel_variance": 864.697,
+        "sha256": "ebb9b42a6205ec285da5ce23a37141ab4b05d8601eec3c0a5a1e3fc137cf67bb",
+        "visual_range": 248
+      },
+      "id": "desktop-light.screenshot",
+      "status": "PASS"
+    },
+    {
+      "case": "desktop-light",
+      "category": "screenshots",
+      "details": {
+        "allowed_mismatch_ratio": 0.12,
+        "diff_image": "diffs/desktop-light.png",
+        "mean_absolute_difference": 0.0,
+        "mismatch_pixels": 0,
+        "mismatch_ratio": 0.0,
+        "pixel_threshold": 32,
+        "reason": "COMPARED"
+      },
+      "id": "desktop-light.screenshot-diff",
+      "status": "PASS"
+    },
+    {
+      "case": "desktop-light",
+      "category": "responsive-matrix",
+      "details": {
+        "theme": "light"
+      },
+      "id": "desktop-light.theme",
+      "status": "PASS"
+    },
+    {
+      "case": "digital-earth-alpha",
+      "category": "browser-errors",
+      "details": {
+        "bad_responses": [],
+        "case": "digital-earth-alpha",
+        "console_errors": [],
+        "external_requests": [],
+        "mutating_requests": [],
+        "page_errors": [],
+        "request_failures": []
+      },
+      "id": "digital-earth-alpha.browser-clean",
+      "status": "PASS"
+    },
+    {
+      "case": "digital-earth-mobile",
+      "category": "browser-errors",
+      "details": {
+        "bad_responses": [],
+        "case": "digital-earth-mobile",
+        "console_errors": [],
+        "external_requests": [],
+        "mutating_requests": [],
+        "page_errors": [],
+        "request_failures": []
+      },
+      "id": "digital-earth-mobile.browser-clean",
+      "status": "PASS"
+    },
+    {
+      "category": "life-integrity",
+      "details": {
+        "room": "room-workshop-001",
+        "worker": "life-wukong-001"
+      },
+      "id": "digital-earth.ai-worker-visible",
+      "status": "PASS"
+    },
+    {
+      "category": "building-integrity",
+      "details": {
+        "building": "building-home-001"
+      },
+      "id": "digital-earth.building-runtime",
+      "status": "PASS"
+    },
+    {
+      "category": "land-integrity",
+      "details": {
+        "storage_keys": [
+          "kaios.world-viewer.land-runtime.v2:kaios.world-viewer.sprint-009.nation-timeline.land",
+          "kaios.world-viewer.sprint-009.nation-timeline.civilization.citizen",
+          "kaios.world-viewer.sprint-009.nation-timeline.civilization.city",
+          "kaios.world-viewer.sprint-009.nation-timeline.civilization.economy",
+          "kaios.world-viewer.sprint-009.nation-timeline.civilization.genesis",
+          "kaios.world-viewer.sprint-009.nation-timeline.civilization.nation.finance",
+          "kaios.world-viewer.sprint-009.nation-timeline.life"
+        ]
+      },
+      "id": "digital-earth.land-draft-save",
+      "status": "PASS"
+    },
+    {
+      "category": "land-integrity",
+      "details": {
+        "required": [
+          "Parcel Version",
+          "Revision History",
+          "Ownership Timeline"
+        ]
+      },
+      "id": "digital-earth.land-history",
+      "status": "PASS"
+    },
+    {
+      "category": "land-integrity",
+      "id": "digital-earth.land-undo-redo",
+      "status": "PASS"
+    },
+    {
+      "category": "life-integrity",
+      "details": {
+        "life": "life-player-001"
+      },
+      "id": "digital-earth.life-runtime",
+      "status": "PASS"
+    },
+    {
+      "category": "mobile-interaction",
+      "details": {
+        "layout": {
+          "document_height": 844,
+          "document_width": 390,
+          "offenders": [],
+          "viewport_height": 844,
+          "viewport_width": 390
+        },
+        "screenshot": {
+          "actual_size": [
+            780,
+            1688
+          ],
+          "case": "digital-earth-mobile",
+          "diff": {
+            "reason": "BASELINE_NOT_CONFIGURED"
+          },
+          "expected_size": [
+            780,
+            1688
+          ],
+          "path": "screenshots/digital-earth-mobile.png",
+          "pixel_variance": 1195.146,
+          "sha256": "94b8bb9722d59eba2b8314335bb139913f5e01b63393a65dba1f025ba7768a7d",
+          "visual_range": 248
+        }
+      },
+      "id": "digital-earth.mobile-living-world",
+      "status": "PASS"
+    },
+    {
+      "category": "digital-earth",
+      "details": {
+        "hud": "PLAYER Starter Residence MOVE IDLE REV R2 TIME D1 06:00 \u21a9 \u25b7 \u25b6 \u2191 \u2190 \u2192 \u2193 \u21b6 \u21b7 \u2713"
+      },
+      "id": "digital-earth.player-session",
+      "status": "PASS"
+    },
+    {
+      "category": "digital-earth",
+      "id": "digital-earth.player-walking",
+      "status": "PASS"
+    },
+    {
+      "category": "regression",
+      "details": {
+        "canonical_land_use": "RESIDENTIAL",
+        "draft_recovered": true
+      },
+      "id": "digital-earth.reload-recovery",
+      "status": "PASS"
+    },
+    {
+      "category": "room-integrity",
+      "details": {
+        "room": "room-living-001"
+      },
+      "id": "digital-earth.room-runtime",
+      "status": "PASS"
+    },
+    {
+      "category": "visual-regression",
+      "details": {
+        "actual_size": [
+          1440,
+          900
+        ],
+        "case": "digital-earth-desktop",
+        "diff": {
+          "reason": "BASELINE_NOT_CONFIGURED"
+        },
+        "expected_size": [
+          1440,
+          900
+        ],
+        "path": "screenshots/digital-earth-desktop.png",
+        "pixel_variance": 8992.951,
+        "sha256": "7839c2895608df148e1af5a65064bec04300bb33efd6cea0ba64bc5511820f7b",
+        "visual_range": 237
+      },
+      "id": "digital-earth.visual-nonblank",
+      "status": "PASS"
+    },
+    {
+      "case": "genesis-mobile",
+      "category": "browser-errors",
+      "details": {
+        "bad_responses": [],
+        "case": "genesis-mobile",
+        "console_errors": [],
+        "external_requests": [],
+        "mutating_requests": [],
+        "page_errors": [],
+        "request_failures": []
+      },
+      "id": "genesis-mobile.browser-clean",
+      "status": "PASS"
+    },
+    {
+      "category": "civilization-genesis",
+      "details": {
+        "genesis_complete": "true"
+      },
+      "id": "genesis.boot-and-fortune",
+      "status": "PASS"
+    },
+    {
+      "case": "genesis-mobile",
+      "category": "civilization-genesis",
+      "id": "genesis.mobile-enter-world",
+      "status": "PASS"
+    },
+    {
+      "case": "genesis-mobile",
+      "category": "civilization-genesis",
+      "details": {
+        "bounds": {
+          "height": 915,
+          "width": 412,
+          "x": 0,
+          "y": 0
+        },
+        "choices": 6
+      },
+      "id": "genesis.mobile-gate",
+      "status": "PASS"
+    },
+    {
+      "category": "planet-environment",
+      "id": "genesis.planet-profile",
+      "status": "PASS"
+    },
+    {
+      "case": "governance-mobile",
+      "category": "browser-errors",
+      "details": {
+        "bad_responses": [],
+        "case": "governance-mobile",
+        "console_errors": [],
+        "external_requests": [],
+        "mutating_requests": [],
+        "page_errors": [],
+        "request_failures": []
+      },
+      "id": "governance-mobile.browser-clean",
+      "status": "PASS"
+    },
+    {
+      "category": "resilience",
+      "id": "governance.drill-and-recovery",
+      "status": "PASS"
+    },
+    {
+      "category": "resilience",
+      "id": "governance.environment-and-resilience",
+      "status": "PASS"
+    },
+    {
+      "category": "civilization-governance",
+      "id": "governance.hierarchy-and-rights",
+      "status": "PASS"
+    },
+    {
+      "category": "mobile-interaction",
+      "details": {
+        "layout": {
+          "document_height": 915,
+          "document_width": 412,
+          "offenders": [],
+          "viewport_height": 915,
+          "viewport_width": 412
+        },
+        "mobile": {
+          "inspector": {
+            "height": 620,
+            "left": 0,
+            "top": 295,
+            "width": 412
+          },
+          "services": "10",
+          "tabs_client": 378,
+          "tabs_scroll": 1390,
+          "viewport": {
+            "height": 915,
+            "width": 412
+          }
+        },
+        "screenshot": {
+          "actual_size": [
+            824,
+            1830
+          ],
+          "case": "governance-mobile",
+          "diff": {
+            "reason": "BASELINE_NOT_CONFIGURED"
+          },
+          "expected_size": [
+            824,
+            1830
+          ],
+          "path": "screenshots/governance-mobile.png",
+          "pixel_variance": 6707.97,
+          "sha256": "9ed1e335f99443c4de9c4cb442741175be8da841911d838c66798e9b9ef22502",
+          "visual_range": 229
+        },
+        "targets": {
+          "checked": 28,
+          "violations": []
+        }
+      },
+      "id": "governance.mobile-services-and-resilience",
+      "status": "PASS"
+    },
+    {
+      "category": "public-finance",
+      "id": "governance.public-finance-ledger",
+      "status": "PASS"
+    },
+    {
+      "category": "public-services",
+      "id": "governance.public-services-network",
+      "status": "PASS"
+    },
+    {
+      "category": "justice-integrity",
+      "id": "governance.review-and-justice-boundary",
+      "status": "PASS"
+    },
+    {
+      "case": "iphone-landscape-dark",
+      "category": "accessibility",
+      "details": {
+        "canvas_labelled": true,
+        "duplicate_ids": [],
+        "html_lang": "zh-Hant",
+        "images_without_alt": [],
+        "keyboard_focus": {
+          "name": "Back one layer",
+          "outline_style": "solid",
+          "outline_width": "3px",
+          "tag": "BUTTON"
+        },
+        "live_region": true,
+        "main_landmark": true,
+        "missing_control_names": [],
+        "named_navigation": true,
+        "title": "KAIOS Cosmic Technology Alpha"
+      },
+      "id": "iphone-landscape-dark.accessibility",
+      "status": "PASS"
+    },
+    {
+      "case": "iphone-landscape-dark",
+      "category": "browser-errors",
+      "details": {
+        "bad_responses": [],
+        "case": "iphone-landscape-dark",
+        "console_errors": [],
+        "external_requests": [],
+        "mutating_requests": [],
+        "page_errors": [],
+        "request_failures": []
+      },
+      "id": "iphone-landscape-dark.browser-clean",
+      "status": "PASS"
+    },
+    {
+      "case": "iphone-landscape-dark",
+      "category": "browser-errors",
+      "id": "iphone-landscape-dark.fatal-error",
+      "status": "PASS"
+    },
+    {
+      "case": "iphone-landscape-dark",
+      "category": "responsive-matrix",
+      "details": {
+        "document_height": 390,
+        "document_width": 844,
+        "offenders": [],
+        "viewport_height": 390,
+        "viewport_width": 844
+      },
+      "id": "iphone-landscape-dark.overflow",
+      "status": "PASS"
+    },
+    {
+      "case": "iphone-landscape-dark",
+      "category": "performance",
+      "details": {
+        "budgets": {
+          "first_usable_ms": 2500.0,
+          "heap_bytes": 167772160,
+          "maximum_render_ms": 50.0,
+          "minimum_fps": 30.0,
+          "transfer_bytes": 1572864
+        },
+        "case": "iphone-landscape-dark",
+        "metrics": {
+          "dom_content_loaded_ms": 274.3,
+          "first_contentful_paint_ms": 144,
+          "first_usable_ms": 715.4,
+          "heap_bytes": 10000000,
+          "load_event_ms": 274.3,
+          "renderer_fps": 62.5,
+          "renderer_ms": 0.5,
+          "resource_count": 64,
+          "transfer_bytes": 1293418
+        },
+        "results": {
+          "critical_payload": true,
+          "first_usable": true,
+          "heap": true,
+          "renderer_fps": true,
+          "renderer_time": true
+        },
+        "status": "PASS"
+      },
+      "id": "iphone-landscape-dark.performance-budget",
+      "status": "PASS"
+    },
+    {
+      "case": "iphone-landscape-dark",
+      "category": "responsive-matrix",
+      "details": {
+        "brand": {
+          "bottom": 61.5,
+          "left": 21,
+          "right": 55,
+          "top": 27.5
+        },
+        "inspector": {
+          "bottom": 579.796875,
+          "left": 13,
+          "right": 833,
+          "top": 299
+        },
+        "mobile": true,
+        "rail": {
+          "bottom": 135,
+          "left": 21,
+          "right": 231,
+          "top": 81
+        },
+        "toolbar": {
+          "bottom": 66.5,
+          "left": 687,
+          "right": 825,
+          "top": 22.5
+        },
+        "viewport_height": 390,
+        "viewport_width": 844
+      },
+      "id": "iphone-landscape-dark.safe-area",
+      "status": "PASS"
+    },
+    {
+      "case": "iphone-landscape-dark",
+      "category": "screenshots",
+      "details": {
+        "actual_size": [
+          1688,
+          780
+        ],
+        "baseline": {
+          "path": "tests/baselines/sprint-010/iphone-landscape-dark.png",
+          "sha256": "3a4980c8d644ad9f87444a2ae0ffb79dcc669032309cac651695f3d477430858"
+        },
+        "case": "iphone-landscape-dark",
+        "diff": {
+          "diff_image": "diffs/iphone-landscape-dark.png",
+          "mean_absolute_difference": 0.0,
+          "mismatch_pixels": 0,
+          "mismatch_ratio": 0.0,
+          "pixel_threshold": 32,
+          "reason": "COMPARED"
+        },
+        "expected_size": [
+          1688,
+          780
+        ],
+        "path": "screenshots/iphone-landscape-dark.png",
+        "pixel_variance": 9406.767,
+        "sha256": "3a4980c8d644ad9f87444a2ae0ffb79dcc669032309cac651695f3d477430858",
+        "visual_range": 232
+      },
+      "id": "iphone-landscape-dark.screenshot",
+      "status": "PASS"
+    },
+    {
+      "case": "iphone-landscape-dark",
+      "category": "screenshots",
+      "details": {
+        "allowed_mismatch_ratio": 0.12,
+        "diff_image": "diffs/iphone-landscape-dark.png",
+        "mean_absolute_difference": 0.0,
+        "mismatch_pixels": 0,
+        "mismatch_ratio": 0.0,
+        "pixel_threshold": 32,
+        "reason": "COMPARED"
+      },
+      "id": "iphone-landscape-dark.screenshot-diff",
+      "status": "PASS"
+    },
+    {
+      "case": "iphone-landscape-dark",
+      "category": "responsive-matrix",
+      "details": {
+        "theme": "dark"
+      },
+      "id": "iphone-landscape-dark.theme",
+      "status": "PASS"
+    },
+    {
+      "case": "iphone-landscape-dark",
+      "category": "touch-controls",
+      "details": {
+        "checked": 20,
+        "violations": []
+      },
+      "id": "iphone-landscape-dark.touch-targets",
+      "status": "PASS"
+    },
+    {
+      "case": "iphone-portrait-light",
+      "category": "accessibility",
+      "details": {
+        "canvas_labelled": true,
+        "duplicate_ids": [],
+        "html_lang": "zh-Hant",
+        "images_without_alt": [],
+        "keyboard_focus": {
+          "name": "Back one layer",
+          "outline_style": "solid",
+          "outline_width": "3px",
+          "tag": "BUTTON"
+        },
+        "live_region": true,
+        "main_landmark": true,
+        "missing_control_names": [],
+        "named_navigation": true,
+        "title": "KAIOS Cosmic Technology Alpha"
+      },
+      "id": "iphone-portrait-light.accessibility",
+      "status": "PASS"
+    },
+    {
+      "case": "iphone-portrait-light",
+      "category": "browser-errors",
+      "details": {
+        "bad_responses": [],
+        "case": "iphone-portrait-light",
+        "console_errors": [],
+        "external_requests": [],
+        "mutating_requests": [],
+        "page_errors": [],
+        "request_failures": []
+      },
+      "id": "iphone-portrait-light.browser-clean",
+      "status": "PASS"
+    },
+    {
+      "case": "iphone-portrait-light",
+      "category": "browser-errors",
+      "id": "iphone-portrait-light.fatal-error",
+      "status": "PASS"
+    },
+    {
+      "case": "iphone-portrait-light",
+      "category": "responsive-matrix",
+      "details": {
+        "document_height": 844,
+        "document_width": 390,
+        "offenders": [],
+        "viewport_height": 844,
+        "viewport_width": 390
+      },
+      "id": "iphone-portrait-light.overflow",
+      "status": "PASS"
+    },
+    {
+      "case": "iphone-portrait-light",
+      "category": "performance",
+      "details": {
+        "budgets": {
+          "first_usable_ms": 2500.0,
+          "heap_bytes": 167772160,
+          "maximum_render_ms": 50.0,
+          "minimum_fps": 30.0,
+          "transfer_bytes": 1572864
+        },
+        "case": "iphone-portrait-light",
+        "metrics": {
+          "dom_content_loaded_ms": 259,
+          "first_contentful_paint_ms": 120,
+          "first_usable_ms": 705.9,
+          "heap_bytes": 10000000,
+          "load_event_ms": 269.4,
+          "renderer_fps": 58.8,
+          "renderer_ms": 0.6,
+          "resource_count": 64,
+          "transfer_bytes": 1293418
+        },
+        "results": {
+          "critical_payload": true,
+          "first_usable": true,
+          "heap": true,
+          "renderer_fps": true,
+          "renderer_time": true
+        },
+        "status": "PASS"
+      },
+      "id": "iphone-portrait-light.performance-budget",
+      "status": "PASS"
+    },
+    {
+      "case": "iphone-portrait-light",
+      "category": "responsive-matrix",
+      "details": {
+        "brand": {
+          "bottom": 61.5,
+          "left": 21,
+          "right": 55,
+          "top": 27.5
+        },
+        "inspector": {
+          "bottom": 1360.671875,
+          "left": 13,
+          "right": 379,
+          "top": 753
+        },
+        "mobile": true,
+        "rail": {
+          "bottom": 135,
+          "left": 21,
+          "right": 231,
+          "top": 81
+        },
+        "toolbar": {
+          "bottom": 66.5,
+          "left": 233,
+          "right": 371,
+          "top": 22.5
+        },
+        "viewport_height": 844,
+        "viewport_width": 390
+      },
+      "id": "iphone-portrait-light.safe-area",
+      "status": "PASS"
+    },
+    {
+      "case": "iphone-portrait-light",
+      "category": "screenshots",
+      "details": {
+        "actual_size": [
+          780,
+          1688
+        ],
+        "baseline": {
+          "path": "tests/baselines/sprint-010/iphone-portrait-light.png",
+          "sha256": "b2fa5ceb4f8ef4fe46537f8b43dfbce69150246fe5055376ad37515428dee044"
+        },
+        "case": "iphone-portrait-light",
+        "diff": {
+          "diff_image": "diffs/iphone-portrait-light.png",
+          "mean_absolute_difference": 0.0,
+          "mismatch_pixels": 0,
+          "mismatch_ratio": 0.0,
+          "pixel_threshold": 32,
+          "reason": "COMPARED"
+        },
+        "expected_size": [
+          780,
+          1688
+        ],
+        "path": "screenshots/iphone-portrait-light.png",
+        "pixel_variance": 696.83,
+        "sha256": "b2fa5ceb4f8ef4fe46537f8b43dfbce69150246fe5055376ad37515428dee044",
+        "visual_range": 249
+      },
+      "id": "iphone-portrait-light.screenshot",
+      "status": "PASS"
+    },
+    {
+      "case": "iphone-portrait-light",
+      "category": "screenshots",
+      "details": {
+        "allowed_mismatch_ratio": 0.12,
+        "diff_image": "diffs/iphone-portrait-light.png",
+        "mean_absolute_difference": 0.0,
+        "mismatch_pixels": 0,
+        "mismatch_ratio": 0.0,
+        "pixel_threshold": 32,
+        "reason": "COMPARED"
+      },
+      "id": "iphone-portrait-light.screenshot-diff",
+      "status": "PASS"
+    },
+    {
+      "case": "iphone-portrait-light",
+      "category": "responsive-matrix",
+      "details": {
+        "theme": "light"
+      },
+      "id": "iphone-portrait-light.theme",
+      "status": "PASS"
+    },
+    {
+      "case": "iphone-portrait-light",
+      "category": "touch-controls",
+      "details": {
+        "checked": 20,
+        "violations": []
+      },
+      "id": "iphone-portrait-light.touch-targets",
+      "status": "PASS"
+    },
+    {
+      "case": "life-stack",
+      "category": "browser-errors",
+      "details": {
+        "bad_responses": [],
+        "case": "life-stack",
+        "console_errors": [],
+        "external_requests": [],
+        "mutating_requests": [],
+        "page_errors": [],
+        "request_failures": []
+      },
+      "id": "life-stack.browser-clean",
+      "status": "PASS"
+    },
+    {
+      "category": "life-privacy",
+      "details": {
+        "expected_profile": "Wukong 001",
+        "selection": {
+          "mechanism": "context-selection",
+          "options": 4
+        }
+      },
+      "id": "life.chosen-profile",
+      "status": "PASS"
+    },
+    {
+      "category": "life-privacy",
+      "details": {
+        "layers": {
+          "Body": true,
+          "Citizen": true,
+          "Individual Life OS": true,
+          "Mind": true,
+          "Species OS": true
+        }
+      },
+      "id": "life.five-layer-view",
+      "status": "PASS"
+    },
+    {
+      "category": "life-privacy",
+      "details": {
+        "field_labels": [
+          "Life ID",
+          "Life type",
+          "ID",
+          "Status",
+          "Version",
+          "Body profile",
+          "DNA summary",
+          "Body systems",
+          "ID",
+          "Status",
+          "Version",
+          "Species",
+          "ID",
+          "Status",
+          "Version",
+          "Life State",
+          "Activity",
+          "Health State",
+          "Life stage",
+          "State version",
+          "Heartbeat",
+          "ID",
+          "Status",
+          "Version",
+          "Mind profile",
+          "ID",
+          "Status",
+          "Version",
+          "Citizen profile",
+          "Occupation",
+          "Age (days)",
+          "Occupation",
+          "Activity",
+          "Inventory",
+          "DNA class",
+          "DNA traits",
+          "GA count",
+          "GA profile",
+          "Life ID",
+          "Life type",
+          "ID",
+          "Status",
+          "Version",
+          "Body profile",
+          "DNA summary",
+          "Body systems",
+          "ID",
+          "Status",
+          "Version",
+          "Species",
+          "ID",
+          "Status",
+          "Version",
+          "Life State",
+          "Activity",
+          "Health State",
+          "Life stage",
+          "State version",
+          "Heartbeat",
+          "ID",
+          "Status",
+          "Version",
+          "Mind profile",
+          "ID",
+          "Status",
+          "Version",
+          "Citizen profile",
+          "Occupation",
+          "Age (days)",
+          "Occupation",
+          "Activity",
+          "Inventory",
+          "DNA class",
+          "DNA traits",
+          "GA count",
+          "GA profile",
+          "Life ID",
+          "Life type",
+          "ID",
+          "Status",
+          "Version",
+          "Body profile",
+          "DNA summary",
+          "Body systems",
+          "ID",
+          "Status",
+          "Version",
+          "Species",
+          "ID",
+          "Status",
+          "Version",
+          "Life State",
+          "Activity",
+          "Health State",
+          "Life stage",
+          "State version",
+          "Heartbeat",
+          "ID",
+          "Status",
+          "Version",
+          "Mind profile",
+          "ID",
+          "Status",
+          "Version",
+          "Citizen profile",
+          "Occupation",
+          "Reason",
+          "Age (days)",
+          "Occupation",
+          "Activity",
+          "Inventory",
+          "DNA class",
+          "DNA traits",
+          "GA count",
+          "GA profile",
+          "Life ID",
+          "Life type",
+          "ID",
+          "Status",
+          "Version",
+          "Body profile",
+          "DNA summary",
+          "Body systems",
+          "ID",
+          "Status",
+          "Version",
+          "Species",
+          "ID",
+          "Status",
+          "Version",
+          "Life State",
+          "Activity",
+          "Health State",
+          "Life stage",
+          "State version",
+          "Heartbeat",
+          "ID",
+          "Status",
+          "Version",
+          "Mind profile",
+          "Reason",
+          "ID",
+          "Status",
+          "Version",
+          "Citizen profile",
+          "Occupation",
+          "Reason",
+          "Age (days)",
+          "Occupation",
+          "Activity",
+          "Inventory",
+          "DNA class",
+          "DNA traits",
+          "GA count",
+          "GA profile"
+        ],
+        "privacy_marked": true,
+        "privacy_safe": true,
+        "write_controls": []
+      },
+      "id": "life.privacy-read-only",
+      "status": "PASS"
+    },
+    {
+      "category": "links",
+      "details": {
+        "checked": [
+          {
+            "status": 200,
+            "tag": "script",
+            "url": "/KGEN-KAIOS/world-viewer/app.js"
+          },
+          {
+            "status": 200,
+            "tag": "link",
+            "url": "/KGEN-KAIOS/world-viewer/ui/styles.css"
+          }
+        ],
+        "external": []
+      },
+      "id": "local-links",
+      "status": "PASS"
+    },
+    {
+      "category": "consent-login",
+      "details": {
+        "starter_status": "STARTER PARCEL ACTIVE / parcel-001 Synthetic fixture / mock location consented / no GPS or KYC"
+      },
+      "id": "location.allow-mock-coarse",
+      "status": "PASS"
+    },
+    {
+      "category": "consent-login",
+      "details": {
+        "starter_status": "STARTER PARCEL ACTIVE / parcel-001 Synthetic fixture / mock location not used / no GPS or KYC"
+      },
+      "id": "location.decline",
+      "status": "PASS"
+    },
+    {
+      "category": "consent-login",
+      "details": {
+        "dialog_text": "VOLUNTARY MOCK LOCATION Start a synthetic player session \u00d7 A coarse synthetic location can focus this demo session. It is optional and used only in memory. Device GPS Not requested KYC or identity check Not performed Land ownership Not granted or changed Storage Session only I voluntarily consent Use one coarse synthetic mock location for this session. Declining location still starts the mock session and opens the Starter Parcel fixture. Continue without location Use mock location"
+      },
+      "id": "location.explicit-prompt",
+      "status": "PASS"
+    },
+    {
+      "category": "consent-login",
+      "id": "login.initial",
+      "status": "PASS"
+    },
+    {
+      "category": "consent-login",
+      "id": "login.logout",
+      "status": "PASS"
+    },
+    {
+      "case": "mouse-navigation",
+      "category": "browser-errors",
+      "details": {
+        "bad_responses": [],
+        "case": "mouse-navigation",
+        "console_errors": [],
+        "external_requests": [],
+        "mutating_requests": [],
+        "page_errors": [],
+        "request_failures": []
+      },
+      "id": "mouse-navigation.browser-clean",
+      "status": "PASS"
+    },
+    {
+      "case": "desktop-dark",
+      "category": "mouse-interaction",
+      "details": {
+        "camera_changed": true,
+        "zoom_after": 1.52,
+        "zoom_before": 0.76
+      },
+      "id": "mouse.pan-and-zoom",
+      "status": "PASS"
+    },
+    {
+      "case": "nation-timeline-alpha",
+      "category": "browser-errors",
+      "details": {
+        "bad_responses": [],
+        "case": "nation-timeline-alpha",
+        "console_errors": [],
+        "external_requests": [],
+        "mutating_requests": [],
+        "page_errors": [],
+        "request_failures": []
+      },
+      "id": "nation-timeline-alpha.browser-clean",
+      "status": "PASS"
+    },
+    {
+      "case": "nation-timeline-mobile",
+      "category": "browser-errors",
+      "details": {
+        "bad_responses": [],
+        "case": "nation-timeline-mobile",
+        "console_errors": [],
+        "external_requests": [],
+        "mutating_requests": [],
+        "page_errors": [],
+        "request_failures": []
+      },
+      "id": "nation-timeline-mobile.browser-clean",
+      "status": "PASS"
+    },
+    {
+      "category": "mobile-interaction",
+      "details": {
+        "active_tab_visible": true,
+        "nation": {
+          "document_height": 844,
+          "document_width": 390,
+          "offenders": [],
+          "viewport_height": 844,
+          "viewport_width": 390
+        },
+        "screenshot": {
+          "actual_size": [
+            780,
+            1688
+          ],
+          "case": "nation-timeline-mobile",
+          "diff": {
+            "reason": "BASELINE_NOT_CONFIGURED"
+          },
+          "expected_size": [
+            780,
+            1688
+          ],
+          "path": "screenshots/nation-timeline-mobile.png",
+          "pixel_variance": 1133.108,
+          "sha256": "830c3f406d02dbf2d49e413be0e5b93c443da54b807dec3c8568d398b55cc93b",
+          "visual_range": 248
+        },
+        "timeline": {
+          "document_height": 844,
+          "document_width": 390,
+          "offenders": [],
+          "viewport_height": 844,
+          "viewport_width": 390
+        }
+      },
+      "id": "nation-timeline.mobile-responsive",
+      "status": "PASS"
+    },
+    {
+      "category": "nation-economy",
+      "id": "nation.finance-and-resource-economy",
+      "status": "PASS"
+    },
+    {
+      "category": "nation-diplomacy",
+      "id": "nation.reviewed-diplomacy",
+      "status": "PASS"
+    },
+    {
+      "category": "nation-runtime",
+      "id": "nation.six-founding-requirements",
+      "status": "PASS"
+    },
+    {
+      "category": "nation-runtime",
+      "id": "nation.synthetic-founding",
+      "status": "PASS"
+    },
+    {
+      "case": "desktop-dark",
+      "category": "navigation",
+      "id": "navigation.back",
+      "status": "PASS"
+    },
+    {
+      "case": "desktop-dark",
+      "category": "navigation",
+      "details": {
+        "levels": [
+          "EARTH",
+          "REGION",
+          "CITY",
+          "LAND_PARCEL",
+          "BUILDING",
+          "ROOM"
+        ]
+      },
+      "id": "navigation.six-level",
+      "status": "PASS"
+    },
+    {
+      "case": "production-mobile",
+      "category": "browser-errors",
+      "details": {
+        "bad_responses": [],
+        "case": "production-mobile",
+        "console_errors": [],
+        "external_requests": [],
+        "mutating_requests": [],
+        "page_errors": [],
+        "request_failures": []
+      },
+      "id": "production-mobile.browser-clean",
+      "status": "PASS"
+    },
+    {
+      "category": "agriculture",
+      "id": "production.agriculture-collection",
+      "status": "PASS"
+    },
+    {
+      "category": "agriculture",
+      "id": "production.agriculture-organism",
+      "status": "PASS"
+    },
+    {
+      "category": "company",
+      "id": "production.ai-company-organism",
+      "status": "PASS"
+    },
+    {
+      "category": "ecosystem",
+      "id": "production.cambrian-lineage",
+      "status": "PASS"
+    },
+    {
+      "category": "company",
+      "id": "production.company-product-inventory",
+      "status": "PASS"
+    },
+    {
+      "category": "production",
+      "id": "production.factory-cycle",
+      "status": "PASS"
+    },
+    {
+      "category": "production",
+      "id": "production.factory-supply-chain",
+      "status": "PASS"
+    },
+    {
+      "category": "ecosystem",
+      "id": "production.food-chain",
+      "status": "PASS"
+    },
+    {
+      "category": "exchange",
+      "id": "production.k11520-candidate-only",
+      "status": "PASS"
+    },
+    {
+      "category": "exchange",
+      "id": "production.k11520-review-request",
+      "status": "PASS"
+    },
+    {
+      "category": "mobile-interaction",
+      "details": {
+        "layout": {
+          "document_height": 915,
+          "document_width": 412,
+          "offenders": [],
+          "viewport_height": 915,
+          "viewport_width": 412
+        },
+        "mobile": {
+          "factory": "READY",
+          "inspector": {
+            "height": 620,
+            "left": 0,
+            "top": 295,
+            "width": 412
+          },
+          "tabs_client": 378,
+          "tabs_scroll": 1390,
+          "viewport": {
+            "height": 915,
+            "width": 412
+          }
+        },
+        "screenshot": {
+          "actual_size": [
+            824,
+            1830
+          ],
+          "case": "production-mobile",
+          "diff": {
+            "reason": "BASELINE_NOT_CONFIGURED"
+          },
+          "expected_size": [
+            824,
+            1830
+          ],
+          "path": "screenshots/production-mobile.png",
+          "pixel_variance": 6660.094,
+          "sha256": "982d3b054d30eb8a1b3b69365689a2773a13c8ddda01c1a0cb7e6cec68e5c911",
+          "visual_range": 229
+        },
+        "targets": {
+          "checked": 26,
+          "violations": []
+        }
+      },
+      "id": "production.mobile-runtime",
+      "status": "PASS"
+    },
+    {
+      "case": "proposal-permissions",
+      "category": "browser-errors",
+      "details": {
+        "bad_responses": [],
+        "case": "proposal-permissions",
+        "console_errors": [],
+        "external_requests": [],
+        "mutating_requests": [],
+        "page_errors": [],
+        "request_failures": []
+      },
+      "id": "proposal-permissions.browser-clean",
+      "status": "PASS"
+    },
+    {
+      "category": "proposal-permissions",
+      "details": {
+        "created": [
+          "RESIDENTIAL",
+          "FARM",
+          "FOREST",
+          "FACTORY",
+          "MARKETPLACE",
+          "TEMPLE",
+          "RESEARCH",
+          "PUBLIC_FACILITY"
+        ],
+        "fixture_land_use_unchanged": true,
+        "mutating_requests": []
+      },
+      "id": "proposal.all-eight-local-only",
+      "status": "PASS"
+    },
+    {
+      "category": "proposal-permissions",
+      "details": {
+        "actions": 8,
+        "disabled": 8
+      },
+      "id": "proposal.logged-out",
+      "status": "PASS"
+    },
+    {
+      "category": "proposal-permissions",
+      "details": {
+        "actions": 8,
+        "disabled": 8
+      },
+      "id": "proposal.non-owner-denied",
+      "status": "PASS"
+    },
+    {
+      "category": "proposal-permissions",
+      "details": {
+        "actions": 8,
+        "enabled": 8
+      },
+      "id": "proposal.owner-enabled",
+      "status": "PASS"
+    },
+    {
+      "case": "settlement-mobile",
+      "category": "browser-errors",
+      "details": {
+        "bad_responses": [],
+        "case": "settlement-mobile",
+        "console_errors": [],
+        "external_requests": [],
+        "mutating_requests": [],
+        "page_errors": [],
+        "request_failures": []
+      },
+      "id": "settlement-mobile.browser-clean",
+      "status": "PASS"
+    },
+    {
+      "category": "financial-boundary",
+      "id": "settlement.architecture-only-services",
+      "status": "PASS"
+    },
+    {
+      "category": "settlement-population",
+      "id": "settlement.birth-capacity",
+      "status": "PASS"
+    },
+    {
+      "category": "settlement-economy",
+      "id": "settlement.currency-layers",
+      "status": "PASS"
+    },
+    {
+      "category": "ecology",
+      "details": {
+        "after": 10.77,
+        "before": 18.17
+      },
+      "id": "settlement.ecology-recovery",
+      "status": "PASS"
+    },
+    {
+      "category": "settlement-economy",
+      "details": {
+        "after": 142,
+        "before": 122
+      },
+      "id": "settlement.inheritance-once",
+      "status": "PASS"
+    },
+    {
+      "category": "logistics",
+      "id": "settlement.logistics-gate",
+      "status": "PASS"
+    },
+    {
+      "category": "settlement-population",
+      "id": "settlement.marriage-consent",
+      "status": "PASS"
+    },
+    {
+      "category": "mobile-interaction",
+      "details": {
+        "layout": {
+          "document_height": 844,
+          "document_width": 390,
+          "offenders": [],
+          "viewport_height": 844,
+          "viewport_width": 390
+        },
+        "mobile": {
+          "inspector": {
+            "height": 607.671875,
+            "left": 0,
+            "top": 236.328125,
+            "width": 390
+          },
+          "layer_columns": 1,
+          "tabs_client": 356,
+          "tabs_scroll": 1390,
+          "viewport": {
+            "height": 844,
+            "width": 390
+          }
+        },
+        "screenshot": {
+          "actual_size": [
+            780,
+            1688
+          ],
+          "case": "settlement-mobile",
+          "diff": {
+            "reason": "BASELINE_NOT_CONFIGURED"
+          },
+          "expected_size": [
+            780,
+            1688
+          ],
+          "path": "screenshots/settlement-mobile.png",
+          "pixel_variance": 1346.907,
+          "sha256": "9492bc3b074ae2f4da0f82a3f78b887e092b54d30386d00481b95200090c38d3",
+          "visual_range": 247
+        },
+        "targets": {
+          "checked": 30,
+          "violations": []
+        }
+      },
+      "id": "settlement.mobile-economy",
+      "status": "PASS"
+    },
+    {
+      "category": "mobile-interaction",
+      "id": "settlement.mobile-population",
+      "status": "PASS"
+    },
+    {
+      "category": "financial-boundary",
+      "id": "settlement.official-gates",
+      "status": "PASS"
+    },
+    {
+      "category": "settlement-population",
+      "id": "settlement.population-hierarchy",
+      "status": "PASS"
+    },
+    {
+      "category": "settlement-economy",
+      "details": {
+        "after": 160,
+        "before": 142
+      },
+      "id": "settlement.salary-tax-rent",
+      "status": "PASS"
+    },
+    {
+      "case": "tablet-landscape-dark",
+      "category": "accessibility",
+      "details": {
+        "canvas_labelled": true,
+        "duplicate_ids": [],
+        "html_lang": "zh-Hant",
+        "images_without_alt": [],
+        "keyboard_focus": {
+          "name": "Back one layer",
+          "outline_style": "solid",
+          "outline_width": "3px",
+          "tag": "BUTTON"
+        },
+        "live_region": true,
+        "main_landmark": true,
+        "missing_control_names": [],
+        "named_navigation": true,
+        "title": "KAIOS Cosmic Technology Alpha"
+      },
+      "id": "tablet-landscape-dark.accessibility",
+      "status": "PASS"
+    },
+    {
+      "case": "tablet-landscape-dark",
+      "category": "browser-errors",
+      "details": {
+        "bad_responses": [],
+        "case": "tablet-landscape-dark",
+        "console_errors": [],
+        "external_requests": [],
+        "mutating_requests": [],
+        "page_errors": [],
+        "request_failures": []
+      },
+      "id": "tablet-landscape-dark.browser-clean",
+      "status": "PASS"
+    },
+    {
+      "case": "tablet-landscape-dark",
+      "category": "browser-errors",
+      "id": "tablet-landscape-dark.fatal-error",
+      "status": "PASS"
+    },
+    {
+      "case": "tablet-landscape-dark",
+      "category": "responsive-matrix",
+      "details": {
+        "document_height": 820,
+        "document_width": 1180,
+        "offenders": [],
+        "viewport_height": 820,
+        "viewport_width": 1180
+      },
+      "id": "tablet-landscape-dark.overflow",
+      "status": "PASS"
+    },
+    {
+      "case": "tablet-landscape-dark",
+      "category": "performance",
+      "details": {
+        "budgets": {
+          "first_usable_ms": 2500.0,
+          "heap_bytes": 167772160,
+          "maximum_render_ms": 50.0,
+          "minimum_fps": 30.0,
+          "transfer_bytes": 1572864
+        },
+        "case": "tablet-landscape-dark",
+        "metrics": {
+          "dom_content_loaded_ms": 262.1,
+          "first_contentful_paint_ms": 168,
+          "first_usable_ms": 694.6,
+          "heap_bytes": 10000000,
+          "load_event_ms": 262.1,
+          "renderer_fps": 66.2,
+          "renderer_ms": 0.4,
+          "resource_count": 64,
+          "transfer_bytes": 1293418
+        },
+        "results": {
+          "critical_payload": true,
+          "first_usable": true,
+          "heap": true,
+          "renderer_fps": true,
+          "renderer_time": true
+        },
+        "status": "PASS"
+      },
+      "id": "tablet-landscape-dark.performance-budget",
+      "status": "PASS"
+    },
+    {
+      "case": "tablet-landscape-dark",
+      "category": "responsive-matrix",
+      "details": {
+        "brand": {
+          "bottom": 65.5,
+          "left": 27,
+          "right": 61,
+          "top": 31.5
+        },
+        "inspector": {
+          "bottom": 820,
+          "left": 820,
+          "right": 1180,
+          "top": 81
+        },
+        "mobile": false,
+        "rail": {
+          "bottom": 820,
+          "left": 0,
+          "right": 72,
+          "top": 81
+        },
+        "toolbar": {
+          "bottom": 70.5,
+          "left": 754.546875,
+          "right": 1157,
+          "top": 26.5
+        },
+        "viewport_height": 820,
+        "viewport_width": 1180
+      },
+      "id": "tablet-landscape-dark.safe-area",
+      "status": "PASS"
+    },
+    {
+      "case": "tablet-landscape-dark",
+      "category": "screenshots",
+      "details": {
+        "actual_size": [
+          1180,
+          820
+        ],
+        "baseline": {
+          "path": "tests/baselines/sprint-010/tablet-landscape-dark.png",
+          "sha256": "ed43ae44cbe9cd327316b4da5083020887143e19ccb81cb137a6ade99dba53dc"
+        },
+        "case": "tablet-landscape-dark",
+        "diff": {
+          "diff_image": "diffs/tablet-landscape-dark.png",
+          "mean_absolute_difference": 0.0,
+          "mismatch_pixels": 0,
+          "mismatch_ratio": 0.0,
+          "pixel_threshold": 32,
+          "reason": "COMPARED"
+        },
+        "expected_size": [
+          1180,
+          820
+        ],
+        "path": "screenshots/tablet-landscape-dark.png",
+        "pixel_variance": 10079.785,
+        "sha256": "ed43ae44cbe9cd327316b4da5083020887143e19ccb81cb137a6ade99dba53dc",
+        "visual_range": 231
+      },
+      "id": "tablet-landscape-dark.screenshot",
+      "status": "PASS"
+    },
+    {
+      "case": "tablet-landscape-dark",
+      "category": "screenshots",
+      "details": {
+        "allowed_mismatch_ratio": 0.12,
+        "diff_image": "diffs/tablet-landscape-dark.png",
+        "mean_absolute_difference": 0.0,
+        "mismatch_pixels": 0,
+        "mismatch_ratio": 0.0,
+        "pixel_threshold": 32,
+        "reason": "COMPARED"
+      },
+      "id": "tablet-landscape-dark.screenshot-diff",
+      "status": "PASS"
+    },
+    {
+      "case": "tablet-landscape-dark",
+      "category": "responsive-matrix",
+      "details": {
+        "theme": "dark"
+      },
+      "id": "tablet-landscape-dark.theme",
+      "status": "PASS"
+    },
+    {
+      "case": "tablet-landscape-dark",
+      "category": "touch-controls",
+      "details": {
+        "checked": 22,
+        "violations": []
+      },
+      "id": "tablet-landscape-dark.touch-targets",
+      "status": "PASS"
+    },
+    {
+      "case": "tablet-portrait-light",
+      "category": "accessibility",
+      "details": {
+        "canvas_labelled": true,
+        "duplicate_ids": [],
+        "html_lang": "zh-Hant",
+        "images_without_alt": [],
+        "keyboard_focus": {
+          "name": "Back one layer",
+          "outline_style": "solid",
+          "outline_width": "3px",
+          "tag": "BUTTON"
+        },
+        "live_region": true,
+        "main_landmark": true,
+        "missing_control_names": [],
+        "named_navigation": true,
+        "title": "KAIOS Cosmic Technology Alpha"
+      },
+      "id": "tablet-portrait-light.accessibility",
+      "status": "PASS"
+    },
+    {
+      "case": "tablet-portrait-light",
+      "category": "browser-errors",
+      "details": {
+        "bad_responses": [],
+        "case": "tablet-portrait-light",
+        "console_errors": [],
+        "external_requests": [],
+        "mutating_requests": [],
+        "page_errors": [],
+        "request_failures": []
+      },
+      "id": "tablet-portrait-light.browser-clean",
+      "status": "PASS"
+    },
+    {
+      "case": "tablet-portrait-light",
+      "category": "browser-errors",
+      "id": "tablet-portrait-light.fatal-error",
+      "status": "PASS"
+    },
+    {
+      "case": "tablet-portrait-light",
+      "category": "responsive-matrix",
+      "details": {
+        "document_height": 1180,
+        "document_width": 820,
+        "offenders": [],
+        "viewport_height": 1180,
+        "viewport_width": 820
+      },
+      "id": "tablet-portrait-light.overflow",
+      "status": "PASS"
+    },
+    {
+      "case": "tablet-portrait-light",
+      "category": "performance",
+      "details": {
+        "budgets": {
+          "first_usable_ms": 2500.0,
+          "heap_bytes": 167772160,
+          "maximum_render_ms": 50.0,
+          "minimum_fps": 30.0,
+          "transfer_bytes": 1572864
+        },
+        "case": "tablet-portrait-light",
+        "metrics": {
+          "dom_content_loaded_ms": 263.3,
+          "first_contentful_paint_ms": 140,
+          "first_usable_ms": 705,
+          "heap_bytes": 10000000,
+          "load_event_ms": 272.3,
+          "renderer_fps": 58.5,
+          "renderer_ms": 0.4,
+          "resource_count": 64,
+          "transfer_bytes": 1293418
+        },
+        "results": {
+          "critical_payload": true,
+          "first_usable": true,
+          "heap": true,
+          "renderer_fps": true,
+          "renderer_time": true
+        },
+        "status": "PASS"
+      },
+      "id": "tablet-portrait-light.performance-budget",
+      "status": "PASS"
+    },
+    {
+      "case": "tablet-portrait-light",
+      "category": "responsive-matrix",
+      "details": {
+        "brand": {
+          "bottom": 61.5,
+          "left": 21,
+          "right": 55,
+          "top": 27.5
+        },
+        "inspector": {
+          "bottom": 1709,
+          "left": 13,
+          "right": 809,
+          "top": 1089
+        },
+        "mobile": true,
+        "rail": {
+          "bottom": 135,
+          "left": 21,
+          "right": 231,
+          "top": 81
+        },
+        "toolbar": {
+          "bottom": 66.5,
+          "left": 663,
+          "right": 801,
+          "top": 22.5
+        },
+        "viewport_height": 1180,
+        "viewport_width": 820
+      },
+      "id": "tablet-portrait-light.safe-area",
+      "status": "PASS"
+    },
+    {
+      "case": "tablet-portrait-light",
+      "category": "screenshots",
+      "details": {
+        "actual_size": [
+          820,
+          1180
+        ],
+        "baseline": {
+          "path": "tests/baselines/sprint-010/tablet-portrait-light.png",
+          "sha256": "1be774d2bf5f7f0a2f765f8212ad2af419bc2d1d6d1be4d78e3fdb5d8a0669aa"
+        },
+        "case": "tablet-portrait-light",
+        "diff": {
+          "diff_image": "diffs/tablet-portrait-light.png",
+          "mean_absolute_difference": 0.0,
+          "mismatch_pixels": 0,
+          "mismatch_ratio": 0.0,
+          "pixel_threshold": 32,
+          "reason": "COMPARED"
+        },
+        "expected_size": [
+          820,
+          1180
+        ],
+        "path": "screenshots/tablet-portrait-light.png",
+        "pixel_variance": 531.88,
+        "sha256": "1be774d2bf5f7f0a2f765f8212ad2af419bc2d1d6d1be4d78e3fdb5d8a0669aa",
+        "visual_range": 248
+      },
+      "id": "tablet-portrait-light.screenshot",
+      "status": "PASS"
+    },
+    {
+      "case": "tablet-portrait-light",
+      "category": "screenshots",
+      "details": {
+        "allowed_mismatch_ratio": 0.12,
+        "diff_image": "diffs/tablet-portrait-light.png",
+        "mean_absolute_difference": 0.0,
+        "mismatch_pixels": 0,
+        "mismatch_ratio": 0.0,
+        "pixel_threshold": 32,
+        "reason": "COMPARED"
+      },
+      "id": "tablet-portrait-light.screenshot-diff",
+      "status": "PASS"
+    },
+    {
+      "case": "tablet-portrait-light",
+      "category": "responsive-matrix",
+      "details": {
+        "theme": "light"
+      },
+      "id": "tablet-portrait-light.theme",
+      "status": "PASS"
+    },
+    {
+      "case": "tablet-portrait-light",
+      "category": "touch-controls",
+      "details": {
+        "checked": 20,
+        "violations": []
+      },
+      "id": "tablet-portrait-light.touch-targets",
+      "status": "PASS"
+    },
+    {
+      "category": "timeline-runtime",
+      "id": "timeline.research-material-civilization-checksum-gates",
+      "status": "PASS"
+    },
+    {
+      "category": "timeline-runtime",
+      "details": {
+        "layout": {
+          "document_height": 900,
+          "document_width": 1440,
+          "offenders": [],
+          "viewport_height": 900,
+          "viewport_width": 1440
+        },
+        "screenshot": {
+          "actual_size": [
+            1440,
+            900
+          ],
+          "case": "nation-timeline-alpha",
+          "diff": {
+            "reason": "BASELINE_NOT_CONFIGURED"
+          },
+          "expected_size": [
+            1440,
+            900
+          ],
+          "path": "screenshots/nation-timeline-alpha.png",
+          "pixel_variance": 7890.424,
+          "sha256": "66c38a5d41cc4ac8a06587153b374d7d1200a1378b10709bc63424198e5a3059",
+          "visual_range": 234
+        }
+      },
+      "id": "timeline.synthetic-round-trip",
+      "status": "PASS"
+    },
+    {
+      "case": "touch-interaction",
+      "category": "browser-errors",
+      "details": {
+        "bad_responses": [],
+        "case": "touch-interaction",
+        "console_errors": [],
+        "external_requests": [],
+        "mutating_requests": [],
+        "page_errors": [],
+        "request_failures": []
+      },
+      "id": "touch-interaction.browser-clean",
+      "status": "PASS"
+    },
+    {
+      "case": "android-portrait-dark",
+      "category": "touch-interaction",
+      "details": {
+        "actions": 8
+      },
+      "id": "touch.long-press",
+      "status": "PASS"
+    },
+    {
+      "case": "android-portrait-dark",
+      "category": "touch-interaction",
+      "details": {
+        "camera_changed": true
+      },
+      "id": "touch.pan",
+      "status": "PASS"
+    }
+  ],
+  "errors": [
+    {
+      "bad_responses": [],
+      "case": "android-landscape-light",
+      "console_errors": [],
+      "external_requests": [],
+      "mutating_requests": [],
+      "page_errors": [],
+      "request_failures": []
+    },
+    {
+      "bad_responses": [],
+      "case": "android-portrait-dark",
+      "console_errors": [],
+      "external_requests": [],
+      "mutating_requests": [],
+      "page_errors": [],
+      "request_failures": []
+    },
+    {
+      "bad_responses": [],
+      "case": "civilization-alpha",
+      "console_errors": [],
+      "external_requests": [],
+      "mutating_requests": [],
+      "page_errors": [],
+      "request_failures": []
+    },
+    {
+      "bad_responses": [],
+      "case": "consent-login",
+      "console_errors": [],
+      "external_requests": [],
+      "mutating_requests": [],
+      "page_errors": [],
+      "request_failures": []
+    },
+    {
+      "bad_responses": [],
+      "case": "cosmic-technology-alpha",
+      "console_errors": [],
+      "external_requests": [],
+      "mutating_requests": [],
+      "page_errors": [],
+      "request_failures": []
+    },
+    {
+      "bad_responses": [],
+      "case": "cosmic-technology-mobile",
+      "console_errors": [],
+      "external_requests": [],
+      "mutating_requests": [],
+      "page_errors": [],
+      "request_failures": []
+    },
+    {
+      "bad_responses": [],
+      "case": "desktop-dark",
+      "console_errors": [],
+      "external_requests": [],
+      "mutating_requests": [],
+      "page_errors": [],
+      "request_failures": []
+    },
+    {
+      "bad_responses": [],
+      "case": "desktop-light",
+      "console_errors": [],
+      "external_requests": [],
+      "mutating_requests": [],
+      "page_errors": [],
+      "request_failures": []
+    },
+    {
+      "bad_responses": [],
+      "case": "digital-earth-alpha",
+      "console_errors": [],
+      "external_requests": [],
+      "mutating_requests": [],
+      "page_errors": [],
+      "request_failures": []
+    },
+    {
+      "bad_responses": [],
+      "case": "digital-earth-mobile",
+      "console_errors": [],
+      "external_requests": [],
+      "mutating_requests": [],
+      "page_errors": [],
+      "request_failures": []
+    },
+    {
+      "bad_responses": [],
+      "case": "genesis-mobile",
+      "console_errors": [],
+      "external_requests": [],
+      "mutating_requests": [],
+      "page_errors": [],
+      "request_failures": []
+    },
+    {
+      "bad_responses": [],
+      "case": "governance-mobile",
+      "console_errors": [],
+      "external_requests": [],
+      "mutating_requests": [],
+      "page_errors": [],
+      "request_failures": []
+    },
+    {
+      "bad_responses": [],
+      "case": "iphone-landscape-dark",
+      "console_errors": [],
+      "external_requests": [],
+      "mutating_requests": [],
+      "page_errors": [],
+      "request_failures": []
+    },
+    {
+      "bad_responses": [],
+      "case": "iphone-portrait-light",
+      "console_errors": [],
+      "external_requests": [],
+      "mutating_requests": [],
+      "page_errors": [],
+      "request_failures": []
+    },
+    {
+      "bad_responses": [],
+      "case": "life-stack",
+      "console_errors": [],
+      "external_requests": [],
+      "mutating_requests": [],
+      "page_errors": [],
+      "request_failures": []
+    },
+    {
+      "bad_responses": [],
+      "case": "mouse-navigation",
+      "console_errors": [],
+      "external_requests": [],
+      "mutating_requests": [],
+      "page_errors": [],
+      "request_failures": []
+    },
+    {
+      "bad_responses": [],
+      "case": "nation-timeline-alpha",
+      "console_errors": [],
+      "external_requests": [],
+      "mutating_requests": [],
+      "page_errors": [],
+      "request_failures": []
+    },
+    {
+      "bad_responses": [],
+      "case": "nation-timeline-mobile",
+      "console_errors": [],
+      "external_requests": [],
+      "mutating_requests": [],
+      "page_errors": [],
+      "request_failures": []
+    },
+    {
+      "bad_responses": [],
+      "case": "production-mobile",
+      "console_errors": [],
+      "external_requests": [],
+      "mutating_requests": [],
+      "page_errors": [],
+      "request_failures": []
+    },
+    {
+      "bad_responses": [],
+      "case": "proposal-permissions",
+      "console_errors": [],
+      "external_requests": [],
+      "mutating_requests": [],
+      "page_errors": [],
+      "request_failures": []
+    },
+    {
+      "bad_responses": [],
+      "case": "settlement-mobile",
+      "console_errors": [],
+      "external_requests": [],
+      "mutating_requests": [],
+      "page_errors": [],
+      "request_failures": []
+    },
+    {
+      "bad_responses": [],
+      "case": "tablet-landscape-dark",
+      "console_errors": [],
+      "external_requests": [],
+      "mutating_requests": [],
+      "page_errors": [],
+      "request_failures": []
+    },
+    {
+      "bad_responses": [],
+      "case": "tablet-portrait-light",
+      "console_errors": [],
+      "external_requests": [],
+      "mutating_requests": [],
+      "page_errors": [],
+      "request_failures": []
+    },
+    {
+      "bad_responses": [],
+      "case": "touch-interaction",
+      "console_errors": [],
+      "external_requests": [],
+      "mutating_requests": [],
+      "page_errors": [],
+      "request_failures": []
+    }
+  ],
+  "gate": "KAIOS_WORLD_VIEWER_PRODUCT_QA",
+  "matrix": [
+    {
+      "device_scale_factor": 1,
+      "family": "desktop",
+      "height": 900,
+      "orientation": "landscape",
+      "slug": "desktop-dark",
+      "theme": "dark",
+      "touch": false,
+      "user_agent": null,
+      "width": 1440
+    },
+    {
+      "device_scale_factor": 1,
+      "family": "desktop",
+      "height": 800,
+      "orientation": "landscape",
+      "slug": "desktop-light",
+      "theme": "light",
+      "touch": false,
+      "user_agent": null,
+      "width": 1280
+    },
+    {
+      "device_scale_factor": 1,
+      "family": "tablet",
+      "height": 1180,
+      "orientation": "portrait",
+      "slug": "tablet-portrait-light",
+      "theme": "light",
+      "touch": true,
+      "user_agent": null,
+      "width": 820
+    },
+    {
+      "device_scale_factor": 1,
+      "family": "tablet",
+      "height": 820,
+      "orientation": "landscape",
+      "slug": "tablet-landscape-dark",
+      "theme": "dark",
+      "touch": true,
+      "user_agent": null,
+      "width": 1180
+    },
+    {
+      "device_scale_factor": 2,
+      "family": "android",
+      "height": 915,
+      "orientation": "portrait",
+      "slug": "android-portrait-dark",
+      "theme": "dark",
+      "touch": true,
+      "user_agent": "Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 Chrome/126 Mobile Safari/537.36",
+      "width": 412
+    },
+    {
+      "device_scale_factor": 2,
+      "family": "android",
+      "height": 412,
+      "orientation": "landscape",
+      "slug": "android-landscape-light",
+      "theme": "light",
+      "touch": true,
+      "user_agent": "Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 Chrome/126 Mobile Safari/537.36",
+      "width": 915
+    },
+    {
+      "device_scale_factor": 2,
+      "family": "iphone",
+      "height": 844,
+      "orientation": "portrait",
+      "slug": "iphone-portrait-light",
+      "theme": "light",
+      "touch": true,
+      "user_agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_5 like Mac OS X) AppleWebKit/605.1.15 Mobile/15E148",
+      "width": 390
+    },
+    {
+      "device_scale_factor": 2,
+      "family": "iphone",
+      "height": 390,
+      "orientation": "landscape",
+      "slug": "iphone-landscape-dark",
+      "theme": "dark",
+      "touch": true,
+      "user_agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_5 like Mac OS X) AppleWebKit/605.1.15 Mobile/15E148",
+      "width": 844
+    }
+  ],
+  "schema": "KAIOS_WORLD_VIEWER_PRODUCT_QA_V1",
+  "screenshots": [
+    {
+      "actual_size": [
+        1830,
+        824
+      ],
+      "baseline": {
+        "path": "tests/baselines/sprint-010/android-landscape-light.png",
+        "sha256": "9f7a1a9ba2455424df5b4e12d650fdbb1e167f1917e3d9da8b496cbf2c37cec4"
+      },
+      "case": "android-landscape-light",
+      "diff": {
+        "diff_image": "diffs/android-landscape-light.png",
+        "mean_absolute_difference": 0.0,
+        "mismatch_pixels": 0,
+        "mismatch_ratio": 0.0,
+        "pixel_threshold": 32,
+        "reason": "COMPARED"
+      },
+      "expected_size": [
+        1830,
+        824
+      ],
+      "path": "screenshots/android-landscape-light.png",
+      "pixel_variance": 1165.444,
+      "sha256": "9f7a1a9ba2455424df5b4e12d650fdbb1e167f1917e3d9da8b496cbf2c37cec4",
+      "visual_range": 248
+    },
+    {
+      "actual_size": [
+        824,
+        1830
+      ],
+      "baseline": {
+        "path": "tests/baselines/sprint-010/android-portrait-dark.png",
+        "sha256": "825802b1248407c3bdd8db37fafce753461704bf67b0279f7a970a502e8918b3"
+      },
+      "case": "android-portrait-dark",
+      "diff": {
+        "diff_image": "diffs/android-portrait-dark.png",
+        "mean_absolute_difference": 0.0,
+        "mismatch_pixels": 0,
+        "mismatch_ratio": 0.0,
+        "pixel_threshold": 32,
+        "reason": "COMPARED"
+      },
+      "expected_size": [
+        824,
+        1830
+      ],
+      "path": "screenshots/android-portrait-dark.png",
+      "pixel_variance": 9192.292,
+      "sha256": "825802b1248407c3bdd8db37fafce753461704bf67b0279f7a970a502e8918b3",
+      "visual_range": 236
+    },
+    {
+      "actual_size": [
+        1440,
+        900
+      ],
+      "case": "civilization-alpha",
+      "diff": {
+        "reason": "BASELINE_NOT_CONFIGURED"
+      },
+      "expected_size": [
+        1440,
+        900
+      ],
+      "path": "screenshots/civilization-alpha.png",
+      "pixel_variance": 7970.66,
+      "sha256": "f02d33f75ffa7257d0cd796806838fc7eb8c2d75075ff908340cbb20d88279f8",
+      "visual_range": 234
+    },
+    {
+      "actual_size": [
+        1440,
+        900
+      ],
+      "case": "cosmic-technology-alpha",
+      "diff": {
+        "reason": "BASELINE_NOT_CONFIGURED"
+      },
+      "expected_size": [
+        1440,
+        900
+      ],
+      "path": "screenshots/cosmic-technology-alpha.png",
+      "pixel_variance": 7850.075,
+      "sha256": "26ecbafc36e5d1932ca13f4ab840e370cef543ad41a50737506c2484b306a3b5",
+      "visual_range": 234
+    },
+    {
+      "actual_size": [
+        780,
+        1688
+      ],
+      "case": "cosmic-technology-mobile",
+      "diff": {
+        "reason": "BASELINE_NOT_CONFIGURED"
+      },
+      "expected_size": [
+        780,
+        1688
+      ],
+      "path": "screenshots/cosmic-technology-mobile.png",
+      "pixel_variance": 1151.837,
+      "sha256": "ca926b73f5f431d062d58d19fe08efacf4e82865ab512bd91b468ac1d413ed5e",
+      "visual_range": 247
+    },
+    {
+      "actual_size": [
+        1440,
+        900
+      ],
+      "baseline": {
+        "path": "tests/baselines/sprint-010/desktop-dark.png",
+        "sha256": "b593ba4526237c79d30a1427b3bd73fe42ccd72daeb1024dad9f6b71795bcc2e"
+      },
+      "case": "desktop-dark",
+      "diff": {
+        "diff_image": "diffs/desktop-dark.png",
+        "mean_absolute_difference": 0.0,
+        "mismatch_pixels": 0,
+        "mismatch_ratio": 0.0,
+        "pixel_threshold": 32,
+        "reason": "COMPARED"
+      },
+      "expected_size": [
+        1440,
+        900
+      ],
+      "path": "screenshots/desktop-dark.png",
+      "pixel_variance": 9723.47,
+      "sha256": "b593ba4526237c79d30a1427b3bd73fe42ccd72daeb1024dad9f6b71795bcc2e",
+      "visual_range": 231
+    },
+    {
+      "actual_size": [
+        1280,
+        800
+      ],
+      "baseline": {
+        "path": "tests/baselines/sprint-010/desktop-light.png",
+        "sha256": "ebb9b42a6205ec285da5ce23a37141ab4b05d8601eec3c0a5a1e3fc137cf67bb"
+      },
+      "case": "desktop-light",
+      "diff": {
+        "diff_image": "diffs/desktop-light.png",
+        "mean_absolute_difference": 0.0,
+        "mismatch_pixels": 0,
+        "mismatch_ratio": 0.0,
+        "pixel_threshold": 32,
+        "reason": "COMPARED"
+      },
+      "expected_size": [
+        1280,
+        800
+      ],
+      "path": "screenshots/desktop-light.png",
+      "pixel_variance": 864.697,
+      "sha256": "ebb9b42a6205ec285da5ce23a37141ab4b05d8601eec3c0a5a1e3fc137cf67bb",
+      "visual_range": 248
+    },
+    {
+      "actual_size": [
+        1440,
+        900
+      ],
+      "case": "digital-earth-desktop",
+      "diff": {
+        "reason": "BASELINE_NOT_CONFIGURED"
+      },
+      "expected_size": [
+        1440,
+        900
+      ],
+      "path": "screenshots/digital-earth-desktop.png",
+      "pixel_variance": 8992.951,
+      "sha256": "7839c2895608df148e1af5a65064bec04300bb33efd6cea0ba64bc5511820f7b",
+      "visual_range": 237
+    },
+    {
+      "actual_size": [
+        780,
+        1688
+      ],
+      "case": "digital-earth-mobile",
+      "diff": {
+        "reason": "BASELINE_NOT_CONFIGURED"
+      },
+      "expected_size": [
+        780,
+        1688
+      ],
+      "path": "screenshots/digital-earth-mobile.png",
+      "pixel_variance": 1195.146,
+      "sha256": "94b8bb9722d59eba2b8314335bb139913f5e01b63393a65dba1f025ba7768a7d",
+      "visual_range": 248
+    },
+    {
+      "actual_size": [
+        824,
+        1830
+      ],
+      "case": "genesis-mobile",
+      "diff": {
+        "reason": "BASELINE_NOT_CONFIGURED"
+      },
+      "expected_size": [
+        824,
+        1830
+      ],
+      "path": "screenshots/genesis-mobile.png",
+      "pixel_variance": 1291.88,
+      "sha256": "fac66cdb51d93b65daa9db4ab9a4c612d6bb2f45c3561896f9290dd939e14397",
+      "visual_range": 223
+    },
+    {
+      "actual_size": [
+        824,
+        1830
+      ],
+      "case": "governance-mobile",
+      "diff": {
+        "reason": "BASELINE_NOT_CONFIGURED"
+      },
+      "expected_size": [
+        824,
+        1830
+      ],
+      "path": "screenshots/governance-mobile.png",
+      "pixel_variance": 6707.97,
+      "sha256": "9ed1e335f99443c4de9c4cb442741175be8da841911d838c66798e9b9ef22502",
+      "visual_range": 229
+    },
+    {
+      "actual_size": [
+        1688,
+        780
+      ],
+      "baseline": {
+        "path": "tests/baselines/sprint-010/iphone-landscape-dark.png",
+        "sha256": "3a4980c8d644ad9f87444a2ae0ffb79dcc669032309cac651695f3d477430858"
+      },
+      "case": "iphone-landscape-dark",
+      "diff": {
+        "diff_image": "diffs/iphone-landscape-dark.png",
+        "mean_absolute_difference": 0.0,
+        "mismatch_pixels": 0,
+        "mismatch_ratio": 0.0,
+        "pixel_threshold": 32,
+        "reason": "COMPARED"
+      },
+      "expected_size": [
+        1688,
+        780
+      ],
+      "path": "screenshots/iphone-landscape-dark.png",
+      "pixel_variance": 9406.767,
+      "sha256": "3a4980c8d644ad9f87444a2ae0ffb79dcc669032309cac651695f3d477430858",
+      "visual_range": 232
+    },
+    {
+      "actual_size": [
+        780,
+        1688
+      ],
+      "baseline": {
+        "path": "tests/baselines/sprint-010/iphone-portrait-light.png",
+        "sha256": "b2fa5ceb4f8ef4fe46537f8b43dfbce69150246fe5055376ad37515428dee044"
+      },
+      "case": "iphone-portrait-light",
+      "diff": {
+        "diff_image": "diffs/iphone-portrait-light.png",
+        "mean_absolute_difference": 0.0,
+        "mismatch_pixels": 0,
+        "mismatch_ratio": 0.0,
+        "pixel_threshold": 32,
+        "reason": "COMPARED"
+      },
+      "expected_size": [
+        780,
+        1688
+      ],
+      "path": "screenshots/iphone-portrait-light.png",
+      "pixel_variance": 696.83,
+      "sha256": "b2fa5ceb4f8ef4fe46537f8b43dfbce69150246fe5055376ad37515428dee044",
+      "visual_range": 249
+    },
+    {
+      "actual_size": [
+        1440,
+        900
+      ],
+      "case": "nation-timeline-alpha",
+      "diff": {
+        "reason": "BASELINE_NOT_CONFIGURED"
+      },
+      "expected_size": [
+        1440,
+        900
+      ],
+      "path": "screenshots/nation-timeline-alpha.png",
+      "pixel_variance": 7890.424,
+      "sha256": "66c38a5d41cc4ac8a06587153b374d7d1200a1378b10709bc63424198e5a3059",
+      "visual_range": 234
+    },
+    {
+      "actual_size": [
+        780,
+        1688
+      ],
+      "case": "nation-timeline-mobile",
+      "diff": {
+        "reason": "BASELINE_NOT_CONFIGURED"
+      },
+      "expected_size": [
+        780,
+        1688
+      ],
+      "path": "screenshots/nation-timeline-mobile.png",
+      "pixel_variance": 1133.108,
+      "sha256": "830c3f406d02dbf2d49e413be0e5b93c443da54b807dec3c8568d398b55cc93b",
+      "visual_range": 248
+    },
+    {
+      "actual_size": [
+        824,
+        1830
+      ],
+      "case": "production-mobile",
+      "diff": {
+        "reason": "BASELINE_NOT_CONFIGURED"
+      },
+      "expected_size": [
+        824,
+        1830
+      ],
+      "path": "screenshots/production-mobile.png",
+      "pixel_variance": 6660.094,
+      "sha256": "982d3b054d30eb8a1b3b69365689a2773a13c8ddda01c1a0cb7e6cec68e5c911",
+      "visual_range": 229
+    },
+    {
+      "actual_size": [
+        780,
+        1688
+      ],
+      "case": "settlement-mobile",
+      "diff": {
+        "reason": "BASELINE_NOT_CONFIGURED"
+      },
+      "expected_size": [
+        780,
+        1688
+      ],
+      "path": "screenshots/settlement-mobile.png",
+      "pixel_variance": 1346.907,
+      "sha256": "9492bc3b074ae2f4da0f82a3f78b887e092b54d30386d00481b95200090c38d3",
+      "visual_range": 247
+    },
+    {
+      "actual_size": [
+        1180,
+        820
+      ],
+      "baseline": {
+        "path": "tests/baselines/sprint-010/tablet-landscape-dark.png",
+        "sha256": "ed43ae44cbe9cd327316b4da5083020887143e19ccb81cb137a6ade99dba53dc"
+      },
+      "case": "tablet-landscape-dark",
+      "diff": {
+        "diff_image": "diffs/tablet-landscape-dark.png",
+        "mean_absolute_difference": 0.0,
+        "mismatch_pixels": 0,
+        "mismatch_ratio": 0.0,
+        "pixel_threshold": 32,
+        "reason": "COMPARED"
+      },
+      "expected_size": [
+        1180,
+        820
+      ],
+      "path": "screenshots/tablet-landscape-dark.png",
+      "pixel_variance": 10079.785,
+      "sha256": "ed43ae44cbe9cd327316b4da5083020887143e19ccb81cb137a6ade99dba53dc",
+      "visual_range": 231
+    },
+    {
+      "actual_size": [
+        820,
+        1180
+      ],
+      "baseline": {
+        "path": "tests/baselines/sprint-010/tablet-portrait-light.png",
+        "sha256": "1be774d2bf5f7f0a2f765f8212ad2af419bc2d1d6d1be4d78e3fdb5d8a0669aa"
+      },
+      "case": "tablet-portrait-light",
+      "diff": {
+        "diff_image": "diffs/tablet-portrait-light.png",
+        "mean_absolute_difference": 0.0,
+        "mismatch_pixels": 0,
+        "mismatch_ratio": 0.0,
+        "pixel_threshold": 32,
+        "reason": "COMPARED"
+      },
+      "expected_size": [
+        820,
+        1180
+      ],
+      "path": "screenshots/tablet-portrait-light.png",
+      "pixel_variance": 531.88,
+      "sha256": "1be774d2bf5f7f0a2f765f8212ad2af419bc2d1d6d1be4d78e3fdb5d8a0669aa",
+      "visual_range": 248
+    }
+  ],
+  "status": "PASS",
+  "summary": {
+    "failed": 0,
+    "passed": 189,
+    "skipped": 0,
+    "total": 189
+  }
+}

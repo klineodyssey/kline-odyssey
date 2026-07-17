@@ -39,19 +39,21 @@ export function createTimelineRuntime({
   config,
   civilizationProvider,
   nationProvider,
+  technologyRuntime,
   storage,
   storageKey = "kaios.world-viewer.timeline.v1"
 } = {}) {
   validateConfig(config);
-  if (typeof civilizationProvider !== "function" || typeof nationProvider !== "function") {
-    throw new TypeError("Timeline Runtime requires Civilization and Nation state providers");
+  if (typeof civilizationProvider !== "function" || typeof nationProvider !== "function" || !technologyRuntime) {
+    throw new TypeError("Timeline Runtime requires Civilization, Nation, and Cosmic Technology providers");
   }
   const storageRef = resolveStorage(storage);
   const vehicle = createPocketTimeCloakedUfoRuntime({
     config: config.vehicle,
     civilizationProvider,
+    sharedGateProvider: () => technologyRuntime.getUfoGateSnapshot(),
     storage,
-    storageKey: `${storageKey}.vehicle`
+    storageKey: `${storageKey}.vehicle.v2`
   });
   let destroyed = false;
   let state = {
@@ -164,7 +166,7 @@ export function createTimelineRuntime({
 
   function researchVehicleProgram(points = config.vehicle.research_increment) {
     usable();
-    for (const requirement of config.vehicle.technology_requirements) vehicle.research(requirement.technology_id, points);
+    technologyRuntime.advanceUfoProgram();
     state.revision += 1;
     record("TIMELINE_VEHICLE_RESEARCH_PROGRAM", { points_per_technology: points });
     persist();
@@ -174,6 +176,7 @@ export function createTimelineRuntime({
 
   function supplyVehiclePackage() {
     usable();
+    technologyRuntime.approveUfoMaterialPackage();
     for (const requirement of config.vehicle.material_requirements) {
       const stockpiled = vehicle.getSnapshot().material_requirements.find(({ material_id: id }) => id === requirement.material_id)?.stockpiled ?? 0;
       const missing = Math.max(0, requirement.quantity - stockpiled);
@@ -279,6 +282,7 @@ export function createTimelineRuntime({
     if (!TIMELINE_ERA_IDS.includes(state.current_era_id)) issues.push("current Timeline era is unknown");
     if (state.journeys.some((journey) => journey.vehicle_type !== "POCKET_TIME_CLOAKED_UFO" || journey.canonical_history_mutated !== false || journey.real_time_travel !== false)) issues.push("journey crossed Timeline safety boundary");
     if (!vehicle.integrityReport().ok) issues.push("Timeline vehicle integrity failed");
+    if (!technologyRuntime.integrityReport().ok) issues.push("shared Cosmic Technology integrity failed");
     if (state.journeys.length > MAX_JOURNEYS || state.audit_log.length > MAX_AUDIT) issues.push("Timeline history limit exceeded");
     return snapshot({ ok: issues.length === 0, runtime: "CIVILIZATION_TIMELINE_ALPHA", issues, vehicle: vehicle.integrityReport(), journey_count: state.journeys.length });
   }

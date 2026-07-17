@@ -1,19 +1,19 @@
 ---
 TITLE: "KAIOS World Viewer Architecture Package"
-VERSION: "1.10.0"
-REVISION: "2026-07-17.8"
-STATUS: "SPRINT_009_NATION_TIMELINE_ALPHA_COMPLETE"
+VERSION: "1.11.0"
+REVISION: "2026-07-17.9"
+STATUS: "SPRINT_010_COSMIC_TECHNOLOGY_ALPHA_COMPLETE"
 ARCHITECTURE: "BASELINE_FROZEN_V1.0"
-IMPLEMENTATION: "NATION_TIMELINE_ALPHA"
-WORKQUEUE: "KAIOS-WV-SPRINT-009_CLOSED"
+IMPLEMENTATION: "COSMIC_TECHNOLOGY_ALPHA"
+WORKQUEUE: "KAIOS-WV-SPRINT-010_CLOSED"
 DEPLOYMENT: "STATIC_PAGES_COMPATIBLE"
 LAST_UPDATED: "2026-07-17"
 UPDATED_BY: "Codex / codex-gm-01"
 REVIEWED_BY: "Codex internal independent UI review; Human delegated approval"
-SOURCE_COMMIT: "9a5d0ae8f8a10e4a2f43a039305a60c1bf0fd771"
-TASK_ID: "KAIOS-WV-SPRINT-009"
-HUMAN_DECISION_ID: "HUMAN-SPRINT-009-NATION-TIMELINE"
-CHANGE_REASON: "Add a six-gate synthetic Nation, configurable tax policy, balanced Treasury, Official Currency isolation, finite Planet resources, reviewed diplomacy and Pocket Time Cloaked UFO-gated Timeline travel."
+SOURCE_COMMIT: "321737a4bea92209d4bb7dccdd215b4efef4cf8d"
+TASK_ID: "KAIOS-WV-SPRINT-010"
+HUMAN_DECISION_ID: "HUMAN-SPRINT-010-COSMIC-TECHNOLOGY"
+CHANGE_REASON: "Add a research-gated fourteen-age Technology Tree, bounded Cosmic Material and Energy ledgers, reviewed vehicles and abilities, shared Pocket Time Cloaked UFO V2 gates, data-driven coordinates and synthetic Space Exploration."
 ANCESTOR: "KGEN-KAIOS/V8.1/index.html; KGEN-KAIOS/land/LAND_RUNTIME_ARCHITECTURE_BASELINE.md"
 SOURCE_OF_TRUTH: false
 DOMAIN: KGENVERSE
@@ -33,9 +33,9 @@ CANONICAL_FILE: "KGEN-KAIOS/world-viewer/README.md"
 
 | Field | Value |
 |---|---|
-| Human Decision | `HUMAN-SPRINT-009-NATION-TIMELINE` |
+| Human Decision | `HUMAN-SPRINT-010-COSMIC-TECHNOLOGY` |
 | Architecture | `BASELINE_FROZEN_V1.0` |
-| Implementation | `SPRINT_009_NATION_TIMELINE_ALPHA_COMPLETE` |
+| Implementation | `SPRINT_010_COSMIC_TECHNOLOGY_ALPHA_COMPLETE` |
 | Sprint Task Envelope | `DONE` |
 | Deployment | `STATIC_GITHUB_PAGES_COMPATIBLE` |
 | Executable `index.html` | `CREATED` |
@@ -185,6 +185,14 @@ World Viewer V1 therefore defines adapter boundaries and draft projections. It d
 | `tests/baselines/sprint-009/` | Required Sprint 009 device, orientation, theme and product visual baselines |
 | `tests/evidence/sprint-009-nation-timeline/` | Product QA, integrity, performance, screenshots and visual diffs |
 | `SPRINT_009_NATION_TIMELINE_REPORT.md` | Alpha demo, architecture diff, implementation diff, QA, performance and Sprint 010 recommendation |
+| `SPRINT_010_COSMIC_TECHNOLOGY_ARCHITECTURE.md` | Technology ownership, unlock, resource, vehicle, ability, UFO V2, coordinate and exploration contracts |
+| `technology/` | Research, Technology Tree, bounded Cosmic Material/Energy, Vehicle, Ability, Coordinate and Exploration runtimes and view |
+| `tests/cosmic_technology_integrity.mjs` | Fourteen-age gates, resource conservation, special abilities, UFO V2, coordinates and exploration integrity gate |
+| `tasks/KAIOS-WV-SPRINT-010.task-envelope.json` | Sprint 010 execution and closeout envelope |
+| `tasks/KAIOS-WV-SPRINT-010.HANDOFF.md` | Reviewed Sprint 010 claim, evidence and release handoff |
+| `tests/baselines/sprint-010/` | Required Sprint 010 device, orientation and theme visual baselines |
+| `tests/evidence/sprint-010-cosmic-technology/` | Product QA, integrity, performance, screenshots and visual diffs |
+| `SPRINT_010_COSMIC_TECHNOLOGY_REPORT.md` | Alpha demo, architecture diff, implementation diff, QA, performance and Sprint 011 recommendation |
 | `.github/workflows/world-viewer-product-qa.yml` | Pull-request and push Product QA workflow |
 
 ## 7. Implementation Boundary
@@ -255,3 +263,9 @@ Evolution uses seven reviewed pathways and the public twelve-domain, 108-item Ge
 Sprint 009 adds a synthetic Nation that becomes established only after Population, Territory, Government, Sovereignty, Treasury and Official Currency gates pass. Twelve tax types remain governance-adjustable, KAIOS Credit Treasury entries stay balanced, KGEN remains isolated, eleven Planet resources obey finite-capacity checks, and six diplomacy actions require proposal review.
 
 Timeline travel spans nine Civilization eras and requires era research, civilization capacity, a checksummed Pocket Time Cloaked UFO and sufficient synthetic energy. Travel creates isolated records and never rewrites canonical history. The reviewed browser gate reports `180 PASS / 0 FAIL / 0 SKIP`; see `SPRINT_009_NATION_TIMELINE_REPORT.md` and `tests/evidence/sprint-009-nation-timeline/`.
+
+## 17. Sprint 010 Cosmic Technology Result
+
+Sprint 010 adds one shared Technology Runtime beneath the existing Civilization UI. Fourteen dependency-ordered ages span Stone through Multiverse; every unlock requires reviewed Research, Knowledge, Civilization capacity, Materials, Energy and predecessor technologies. Twelve Cosmic Materials and eight Energy types use bounded conserved ledgers.
+
+Nine vehicle blueprints, nine special ability profiles, fixture-driven Cosmic coordinates and five Space Exploration activities now form a playable synthetic progression. Pocket Time Cloaked UFO V2 reads the shared Technology state and remains the only Timeline transport. Clone and Colony Planning remain proposal-only, and coordinate discovery grants no ownership or sovereignty. The reviewed browser gate reports `189 PASS / 0 FAIL / 0 SKIP`; see `SPRINT_010_COSMIC_TECHNOLOGY_REPORT.md` and `tests/evidence/sprint-010-cosmic-technology/`.

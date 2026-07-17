@@ -1,0 +1,97 @@
+{
+  "status": "PASS",
+  "decision_id": "HUMAN-SPRINT-009-NATION-TIMELINE",
+  "nation": {
+    "ok": true,
+    "runtime": "NATION_TIMELINE_NATION_ALPHA",
+    "issues": [],
+    "reports": {
+      "public_finance": {
+        "ok": true,
+        "runtime": "NATION_PUBLIC_FINANCE_ALPHA",
+        "issues": [],
+        "ledger_entries": 7
+      },
+      "resources": {
+        "ok": true,
+        "runtime": "PLANET_RESOURCE_ECONOMY_ALPHA",
+        "issues": [],
+        "trade_count": 2
+      },
+      "diplomacy": {
+        "ok": true,
+        "runtime": "NATION_DIPLOMACY_ALPHA",
+        "issues": [],
+        "agreement_count": 1
+      }
+    }
+  },
+  "timeline": {
+    "ok": true,
+    "runtime": "CIVILIZATION_TIMELINE_ALPHA",
+    "issues": [],
+    "vehicle": {
+      "ok": true,
+      "runtime": "POCKET_TIME_CLOAKED_UFO_V2_ALPHA",
+      "issues": [],
+      "status": "BUILT_ENERGY_REQUIRED",
+      "shared_gates": {
+        "schema_version": "2.0.0",
+        "technology_requirements": [
+          {
+            "technology_id": "ANTI_GRAVITY_TECHNOLOGY",
+            "ready": true
+          },
+          {
+            "technology_id": "WARP_TECHNOLOGY",
+            "ready": true
+          },
+          {
+            "technology_id": "TIMELINE_TECHNOLOGY",
+            "ready": true
+          }
+        ],
+        "capability_requirements": [
+          {
+            "capability_id": "AI_NAVIGATION",
+            "ready": true
+          },
+          {
+            "capability_id": "SHAPE_SHIFT_CAPABILITY",
+            "ready": true
+          }
+        ],
+        "special_material_costs": {
+          "METEORITE": 2,
+          "RARE_EARTH": 2,
+          "TIMELINE_CRYSTAL": 2,
+          "WARP_CRYSTAL": 2
+        },
+        "special_material_ready": true,
+        "ready": true
+      }
+    },
+    "journey_count": 2
+  },
+  "verified_flows": {
+    "six_requirement_nation_founding": true,
+    "government_v2_nine_policy_cycle": true,
+    "twelve_governable_tax_types": true,
+    "balanced_treasury_ledger": true,
+    "official_currency_kgen_isolated": true,
+    "eleven_resource_conservation": true,
+    "reviewed_diplomacy": true,
+    "nine_era_timeline": true,
+    "sole_transport_gate": true,
+    "vehicle_checksum_gate": true,
+    "canonical_history_immutable": true
+  },
+  "protected_runtime_mutated": false,
+  "universe_map_current_mutated": false,
+  "kernel_current_mutated": false,
+  "life_os_current_mutated": false,
+  "cambrian_current_mutated": false,
+  "settlement_current_mutated": false,
+  "governance_current_mutated": false,
+  "token_contract_mutated": false
+}

@@ -19,6 +19,7 @@ import { createPopulationRuntime } from "../settlement/population-runtime.js";
 import { createSettlementRuntime } from "../settlement/settlement-runtime.js";
 import { createSimulationClock } from "../simulation/simulation-clock.js";
 import { createTimelineRuntime } from "../timeline/timeline-runtime.js";
+import { createCosmicTechnologyRuntime } from "../technology/cosmic-technology-runtime.js";
 import { boundedPush, createNotifier, runtimeError, snapshot, stableId } from "./runtime-utils.js";
 
 const RUNTIME = "CivilizationRuntime";
@@ -135,10 +136,17 @@ export function createCivilizationRuntime({
     storage,
     storageKey: `${storagePrefix}.nation`
   });
+  const cosmicTechnology = createCosmicTechnologyRuntime({
+    config: world.cosmic_technology_alpha,
+    civilizationProvider: () => civilizationProgress(),
+    storage,
+    storageKey: `${storagePrefix}.cosmic-technology`
+  });
   const timeline = createTimelineRuntime({
     config: world.nation_timeline_alpha?.timeline,
     civilizationProvider: () => civilizationProgress(),
     nationProvider: () => nation.getSnapshot(),
+    technologyRuntime: cosmicTechnology,
     storage,
     storageKey: `${storagePrefix}.timeline`
   });
@@ -180,6 +188,7 @@ export function createCivilizationRuntime({
       ai_company: aiCompany.getSnapshot(),
       exchange: exchange.getSnapshot(),
       nation: nationSnapshot,
+      cosmic_technology: cosmicTechnology.getSnapshot(),
       timeline: timeline.getSnapshot({ civilization: progress, nation: nationSnapshot }),
       civilization_progress: progress,
       city: city.getSnapshot(),
@@ -745,6 +754,78 @@ export function createCivilizationRuntime({
     return getSnapshot();
   }
 
+  function runCosmicResearchCycle(technologyId) {
+    usable();
+    born();
+    cosmicTechnology.runResearchCycle(technologyId);
+    record("COSMIC_RESEARCH_CYCLE_COMPLETED", { technology_id: technologyId });
+    notifier.emit("COSMIC_RESEARCH_CYCLE_COMPLETED", { technology_id: technologyId });
+    return getSnapshot();
+  }
+
+  function unlockCosmicTechnology(technologyId) {
+    usable();
+    born();
+    cosmicTechnology.unlockTechnology(technologyId);
+    record("COSMIC_TECHNOLOGY_UNLOCKED", { technology_id: technologyId });
+    notifier.emit("COSMIC_TECHNOLOGY_UNLOCKED", { technology_id: technologyId });
+    return getSnapshot();
+  }
+
+  function surveyCosmicMaterial(materialId, quantity = 2) {
+    usable();
+    born();
+    cosmicTechnology.surveyMaterial(materialId, quantity);
+    record("COSMIC_MATERIAL_SURVEYED", { material_id: materialId, quantity });
+    notifier.emit("COSMIC_MATERIAL_SURVEYED", { material_id: materialId });
+    return getSnapshot();
+  }
+
+  function generateCosmicEnergy(energyId, quantity = 4) {
+    usable();
+    born();
+    cosmicTechnology.generateEnergy(energyId, quantity);
+    record("COSMIC_ENERGY_GENERATED", { energy_id: energyId, quantity });
+    notifier.emit("COSMIC_ENERGY_GENERATED", { energy_id: energyId });
+    return getSnapshot();
+  }
+
+  function trainCosmicAbility(abilityId) {
+    usable();
+    born();
+    cosmicTechnology.trainAbility(abilityId);
+    record("COSMIC_ABILITY_TRAINED", { ability_id: abilityId });
+    notifier.emit("COSMIC_ABILITY_TRAINED", { ability_id: abilityId });
+    return getSnapshot();
+  }
+
+  function buildCosmicVehicle(vehicleId) {
+    usable();
+    born();
+    cosmicTechnology.buildVehicle(vehicleId);
+    record("COSMIC_VEHICLE_BUILT", { vehicle_id: vehicleId });
+    notifier.emit("COSMIC_VEHICLE_BUILT", { vehicle_id: vehicleId });
+    return getSnapshot();
+  }
+
+  function discoverCosmicCoordinate(coordinateId) {
+    usable();
+    born();
+    cosmicTechnology.discoverCoordinate(coordinateId);
+    record("COSMIC_COORDINATE_DISCOVERED", { coordinate_id: coordinateId });
+    notifier.emit("COSMIC_COORDINATE_DISCOVERED", { coordinate_id: coordinateId });
+    return getSnapshot();
+  }
+
+  function launchSpaceExploration(activityId, coordinateId) {
+    usable();
+    born();
+    cosmicTechnology.launchExploration(activityId, coordinateId);
+    record("SPACE_EXPLORATION_RECORDED", { activity_id: activityId, coordinate_id: coordinateId });
+    notifier.emit("SPACE_EXPLORATION_RECORDED", { activity_id: activityId });
+    return getSnapshot();
+  }
+
   function researchTimelineEra(eraId) {
     usable();
     born();
@@ -851,6 +932,7 @@ export function createCivilizationRuntime({
       ai_company: aiCompany.integrityReport(),
       exchange: exchange.integrityReport(),
       nation: nation.integrityReport(),
+      cosmic_technology: cosmicTechnology.integrityReport(),
       timeline: timeline.integrityReport(),
       city: city.integrityReport()
     };
@@ -922,6 +1004,14 @@ export function createCivilizationRuntime({
     proposeNationDiplomacy,
     reviewNationDiplomacy,
     setNationCurrencyPolicy,
+    runCosmicResearchCycle,
+    unlockCosmicTechnology,
+    surveyCosmicMaterial,
+    generateCosmicEnergy,
+    trainCosmicAbility,
+    buildCosmicVehicle,
+    discoverCosmicCoordinate,
+    launchSpaceExploration,
     researchTimelineEra,
     researchTimelineVehicle,
     supplyTimelineVehicle,
@@ -955,6 +1045,7 @@ export function createCivilizationRuntime({
       exchange.destroy();
       nation.destroy();
       timeline.destroy();
+      cosmicTechnology.destroy();
       city.destroy();
       genesis.destroy();
       planet.destroy();
