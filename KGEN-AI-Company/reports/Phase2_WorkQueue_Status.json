@@ -1,0 +1,56 @@
+{
+  "schema_version": "1.0",
+  "decision_id": "HUMAN-PHASE2-HANDOFF-RECONCILIATION-001",
+  "generated_at": "2026-07-17T22:44:23+08:00",
+  "current_main_sha": "8d95316ac01e7c6cdad05c6917abc38f2456f61b",
+  "canonical_workqueue": "KGEN-Organization/WorkOrders/WORK_QUEUE.md",
+  "writeback_applied": true,
+  "summary": {
+    "total_reviewed": 22,
+    "previous_open": 22,
+    "merged": 0,
+    "superseded": 0,
+    "repair_required": 22,
+    "rejected": 0,
+    "still_open": 0,
+    "merged_without_closeout": 0
+  },
+  "transitions": [
+    {"task_id": "ORG-P2-005", "previous_status": "OPEN", "status": "REPAIR_REQUIRED", "dispatchable": false},
+    {"task_id": "ORG-P2-006", "previous_status": "OPEN", "status": "REPAIR_REQUIRED", "dispatchable": false},
+    {"task_id": "ORG-P2-007", "previous_status": "OPEN", "status": "REPAIR_REQUIRED", "dispatchable": false},
+    {"task_id": "ORG-P2-008", "previous_status": "OPEN", "status": "REPAIR_REQUIRED", "dispatchable": false},
+    {"task_id": "ORG-P2-009", "previous_status": "OPEN", "status": "REPAIR_REQUIRED", "dispatchable": false},
+    {"task_id": "ORG-P2-010", "previous_status": "OPEN", "status": "REPAIR_REQUIRED", "dispatchable": false},
+    {"task_id": "ORG-P2-011", "previous_status": "OPEN", "status": "REPAIR_REQUIRED", "dispatchable": false},
+    {"task_id": "ORG-P2-012", "previous_status": "OPEN", "status": "REPAIR_REQUIRED", "dispatchable": false},
+    {"task_id": "ORG-P2-013", "previous_status": "OPEN", "status": "REPAIR_REQUIRED", "dispatchable": false},
+    {"task_id": "ORG-P2-014", "previous_status": "OPEN", "status": "REPAIR_REQUIRED", "dispatchable": false},
+    {"task_id": "ORG-P2-015", "previous_status": "OPEN", "status": "REPAIR_REQUIRED", "dispatchable": false},
+    {"task_id": "ORG-P2-016", "previous_status": "OPEN", "status": "REPAIR_REQUIRED", "dispatchable": false},
+    {"task_id": "ORG-P2-017", "previous_status": "OPEN", "status": "REPAIR_REQUIRED", "dispatchable": false},
+    {"task_id": "ORG-P2-018", "previous_status": "OPEN", "status": "REPAIR_REQUIRED", "dispatchable": false},
+    {"task_id": "ORG-P2-019", "previous_status": "OPEN", "status": "REPAIR_REQUIRED", "dispatchable": false},
+    {"task_id": "ORG-P2-020", "previous_status": "OPEN", "status": "REPAIR_REQUIRED", "dispatchable": false},
+    {"task_id": "ORG-P2-021", "previous_status": "OPEN", "status": "REPAIR_REQUIRED", "dispatchable": false},
+    {"task_id": "ORG-P2-022", "previous_status": "OPEN", "status": "REPAIR_REQUIRED", "dispatchable": false},
+    {"task_id": "ORG-P2-023", "previous_status": "OPEN", "status": "REPAIR_REQUIRED", "dispatchable": false},
+    {"task_id": "ORG-P2-024", "previous_status": "OPEN", "status": "REPAIR_REQUIRED", "dispatchable": false},
+    {"task_id": "ORG-P2-025", "previous_status": "OPEN", "status": "REPAIR_REQUIRED", "dispatchable": false},
+    {
+      "task_id": "AI-ECONOMY-2026-0001",
+      "previous_status": "OPEN",
+      "status": "REPAIR_REQUIRED",
+      "dispatch_hold": true,
+      "claimable": false,
+      "dispatchable": false
+    }
+  ],
+  "repair_gate": {
+    "required_base": "CURRENT_ORIGIN_MAIN_AT_REISSUE",
+    "single_task_claim_required": true,
+    "complete_task_envelope_required": true,
+    "complete_handoff_required": true,
+    "stale_payload_merge_allowed": false
+  }
+}
