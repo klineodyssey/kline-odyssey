@@ -283,6 +283,10 @@ button:focus-visible, canvas:focus-visible, [tabindex]:focus-visible {
 .civilization-section--government { border-top: 2px solid var(--cyan); }
 .civilization-section--services { border-top: 2px solid var(--accent); }
 .civilization-section--resilience { border-top: 2px solid var(--amber); }
+.civilization-section--nation { border-top: 2px solid var(--cyan); }
+.civilization-section--finance { border-top: 2px solid var(--accent); }
+.civilization-section--timeline { border-top: 2px solid var(--amber); }
+.civilization-section--vehicle { border-top: 2px solid var(--cyan); }
 .civilization-time { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 10px; margin-bottom: 12px; }
 .civilization-time > div:first-child { min-width: 0; display: grid; gap: 3px; }
 .civilization-time__clock { font-size: 18px; }
@@ -377,6 +381,44 @@ button:focus-visible, canvas:focus-visible, [tabindex]:focus-visible {
 .currency-layer-card > span:not(.currency-layer-card__id), .currency-layer-card small { color: var(--muted); overflow-wrap: anywhere; }
 .currency-layer-card__id { color: var(--accent-strong); font-size: 8px; font-weight: 800; }
 .settlement-record { margin-top: 6px; padding: 7px; border: 1px solid var(--line); border-radius: 6px; background: var(--surface-2); }
+.nation-status-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; margin: 10px 0; }
+.nation-status-card {
+  min-width: 0; min-height: 58px; display: grid; align-content: start; gap: 5px; padding: 8px;
+  border: 1px solid var(--line); border-left: 3px solid var(--amber); border-radius: 4px; background: var(--surface-2);
+}
+.nation-status-card[data-status="PASS"], .nation-status-card[data-status="ACTIVE_SYNTHETIC"] { border-left-color: var(--accent); }
+.nation-status-card strong { font-size: 10px; overflow-wrap: anywhere; }
+.nation-status-card span { color: var(--muted); font-size: 9px; line-height: 1.4; overflow-wrap: anywhere; }
+.nation-controls {
+  display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: end; gap: 7px;
+  margin-top: 10px; padding: 9px; border: 1px solid var(--line); border-radius: 6px; background: var(--surface-2);
+}
+.nation-control { min-width: 0; display: grid; gap: 5px; color: var(--muted); font-size: 9px; font-weight: 700; }
+.nation-control select, .nation-control input {
+  width: 100%; min-width: 0; min-height: 36px; padding: 6px 8px; border: 1px solid var(--line); border-radius: 4px;
+  background: var(--surface); color: var(--text); font: inherit; font-size: 10px;
+}
+.nation-control select:focus-visible, .nation-control input:focus-visible { outline: 2px solid var(--cyan); outline-offset: 1px; }
+.nation-review-row { margin-top: 8px; padding: 0 8px 8px; border: 1px solid var(--line); border-radius: 6px; background: var(--surface-2); }
+.nation-review-row .civilization-action { margin-top: 8px; }
+.timeline-era-track {
+  display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; margin: 10px 0 0; padding: 0; list-style: none;
+}
+.timeline-era-card {
+  min-width: 0; min-height: 76px; display: grid; align-content: start; gap: 4px; padding: 8px;
+  border: 1px solid var(--line); border-radius: 4px; background: var(--surface-2);
+}
+.timeline-era-card[data-current="true"] { border-color: var(--cyan); }
+.timeline-era-card[data-ready="true"] { box-shadow: inset 3px 0 0 var(--accent); }
+.timeline-era-card__index { color: var(--cyan); font-size: 8px; font-weight: 800; }
+.timeline-era-card strong { font-size: 10px; line-height: 1.3; overflow-wrap: anywhere; }
+.timeline-era-card small { color: var(--muted); font-size: 8px; overflow-wrap: anywhere; }
+.timeline-progress { display: grid; gap: 4px; margin-top: 8px; }
+.timeline-progress__copy { display: flex; justify-content: space-between; gap: 8px; color: var(--muted); font-size: 9px; }
+.timeline-progress__copy strong { color: var(--text); }
+.timeline-progress__track { height: 7px; overflow: hidden; border: 1px solid var(--line); background: var(--surface-3); }
+.timeline-progress__fill { display: block; height: 100%; background: var(--cyan); }
+.timeline-journey { padding: 8px; border: 1px solid var(--line); border-left: 3px solid var(--cyan); border-radius: 4px; background: var(--surface-2); }
 
 .genesis-dialog {
   width: min(760px, calc(100vw - 24px - var(--safe-left) - var(--safe-right)));
@@ -532,6 +574,9 @@ button:focus-visible, canvas:focus-visible, [tabindex]:focus-visible {
   .civilization-tabs { grid-auto-columns: minmax(78px, 1fr); }
   .currency-layer-grid { grid-template-columns: 1fr; }
   .currency-layer-card { min-height: 0; }
+  .nation-controls { grid-template-columns: 1fr; }
+  .nation-control select, .nation-control input { min-height: var(--touch); }
+  .timeline-era-track { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .genesis-dialog { width: calc(100vw - var(--safe-left) - var(--safe-right)); height: calc(100dvh - var(--safe-top) - var(--safe-bottom)); max-height: none; border-radius: 0; }
   .genesis-dialog__surface { height: 100%; }
   .genesis-steps { grid-template-columns: repeat(2, minmax(0, 1fr)); }

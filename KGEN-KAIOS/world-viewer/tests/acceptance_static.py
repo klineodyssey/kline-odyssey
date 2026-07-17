@@ -55,6 +55,14 @@ REQUIRED_FILES = (
     "governance/government-runtime.js",
     "governance/public-services-runtime.js",
     "governance/resilience-runtime.js",
+    "nation/public-finance-runtime.js",
+    "nation/resource-economy-runtime.js",
+    "nation/diplomacy-runtime.js",
+    "nation/nation-runtime.js",
+    "nation/nation-view.js",
+    "timeline/pocket-time-ufo-runtime.js",
+    "timeline/timeline-runtime.js",
+    "timeline/timeline-view.js",
     "city/city-runtime.js",
     "civilization/runtime-utils.js",
     "civilization/civilization-runtime.js",
@@ -68,6 +76,7 @@ REQUIRED_FILES = (
     "tests/settlement_economy_integrity.mjs",
     "tests/governance_integrity.mjs",
     "tests/biology_integrity.mjs",
+    "tests/nation_timeline_integrity.mjs",
 )
 
 PROTECTED_PREFIXES = (
@@ -431,6 +440,51 @@ def check_alpha_contract(errors: list[str], data: dict, source_text: str, html: 
         if token not in source_text:
             fail(errors, f"Governance Runtime is missing {token}")
 
+    nation_timeline = data.get("nation_timeline_alpha", {})
+    if nation_timeline.get("decision_id") != "HUMAN-SPRINT-009-NATION-TIMELINE":
+        fail(errors, "Nation and Timeline Alpha decision ID is invalid")
+    if nation_timeline.get("simulation_only") is not True or nation_timeline.get("authoritative_registry") is not False:
+        fail(errors, "Nation and Timeline Alpha must remain synthetic and non-authoritative")
+    real_boundaries = (
+        "real_sovereignty", "real_government", "real_tax", "real_currency",
+        "real_diplomacy", "real_military", "real_time_travel",
+        "canonical_history_mutation",
+    )
+    if any(nation_timeline.get(key) is not False for key in real_boundaries):
+        fail(errors, "Nation and Timeline Alpha crosses a real-world or canonical boundary")
+    nation = nation_timeline.get("nation", {})
+    if len(nation.get("government_policies", [])) != 9:
+        fail(errors, "Government V2 must define nine policy families")
+    if nation.get("official_currency") == "KGEN":
+        fail(errors, "Nation Official Currency cannot redefine KGEN")
+    required_taxes = [
+        "INCOME_TAX", "SALES_TAX", "BUSINESS_TAX", "PROPERTY_TAX", "LAND_TAX",
+        "VEHICLE_LICENSE_TAX", "FUEL_TAX", "IMPORT_TARIFF", "EXPORT_TARIFF",
+        "RESOURCE_ROYALTY", "WATER_USAGE_FEE", "CARBON_FEE",
+    ]
+    taxes = nation_timeline.get("public_finance", {}).get("tax_policy", [])
+    if [tax.get("tax_id") for tax in taxes] != required_taxes:
+        fail(errors, "Nation tax catalog is incomplete or out of order")
+    if any(not all(isinstance(tax.get(key), int) for key in ("rate_bps", "minimum_rate_bps", "maximum_rate_bps", "step_bps")) for tax in taxes):
+        fail(errors, "Nation tax policy lacks governable integer rate bounds")
+    required_resources = ["WATER", "FOREST", "STONE", "IRON", "COPPER", "GOLD", "OIL", "GAS", "RARE_EARTH", "FOOD", "ENERGY"]
+    resources = nation_timeline.get("resources", {}).get("catalog", [])
+    if [resource.get("resource_id") for resource in resources] != required_resources:
+        fail(errors, "Planet Resource catalog is incomplete or out of order")
+    required_eras = [
+        "CAMBRIAN", "ANCIENT_CIVILIZATION", "STONE_AGE", "BRONZE_AGE", "IRON_AGE",
+        "INDUSTRIAL_AGE", "INFORMATION_AGE", "AI_CIVILIZATION", "INTERSTELLAR_CIVILIZATION",
+    ]
+    timeline = nation_timeline.get("timeline", {})
+    if [era.get("era_id") for era in timeline.get("eras", [])] != required_eras:
+        fail(errors, "Timeline era catalog is incomplete or out of order")
+    vehicle = timeline.get("vehicle", {})
+    if vehicle.get("vehicle_type") != "POCKET_TIME_CLOAKED_UFO" or not re.fullmatch(r"sha256:[0-9a-f]{64}", str(vehicle.get("blueprint_checksum", ""))):
+        fail(errors, "Timeline transport or blueprint checksum contract is invalid")
+    for token in ("NATION_TIMELINE_NATION_ALPHA", "NATION_PUBLIC_FINANCE_ALPHA", "PLANET_RESOURCE_ECONOMY_ALPHA", "NATION_DIPLOMACY_ALPHA", "CIVILIZATION_TIMELINE_ALPHA", "POCKET_TIME_CLOAKED_UFO_ALPHA"):
+        if token not in source_text:
+            fail(errors, f"Nation and Timeline Runtime is missing {token}")
+
 
 def main() -> int:
     errors: list[str] = []
@@ -633,7 +687,7 @@ def main() -> int:
         f"{len(REQUIRED_FILES)} files;",
         f"{parsed_json_records} JSON records;",
         f"{checked_references} local references;",
-        "Cambrian Biology Foundation + 9-rank taxonomy + 108 GA + Food Chain V2 + Civilization Governance/Settlement/Production + 8 land proposals; protected-path input clean",
+        "Nation + Treasury + 12 governable taxes + 11 resources + Diplomacy + 9-era Timeline + sole transport gate + Cambrian Biology + 8 land proposals; protected-path input clean",
     )
     return 0
 

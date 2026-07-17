@@ -2029,7 +2029,7 @@ def run_civilization_alpha(browser: Browser, args: argparse.Namespace, gate: Gat
             "GROWING / VEGETABLE" in clean_text(garden.inner_text()),
         )
         page.locator("[data-civilization-action='TAB_TODAY']").click()
-        page.locator("[data-civilization-action='ADVANCE_DAY']").click()
+        page.locator("[data-civilization-action='ADVANCE_DAY']").click(timeout=20000)
         page.locator("[data-civilization-action='TAB_FARM']").click()
         garden = page.locator(".farm-plot").filter(has_text="Kitchen Garden")
         gate.expect(
@@ -2328,7 +2328,7 @@ def run_civilization_alpha(browser: Browser, args: argparse.Namespace, gate: Gat
         storage_before = page.evaluate("Object.values(localStorage).reduce((sum, value) => sum + value.length, 0)")
         page.locator("[data-civilization-action='TAB_TODAY']").click()
         for _ in range(10):
-            page.locator("[data-civilization-action='ADVANCE_DAY']").click()
+            page.locator("[data-civilization-action='ADVANCE_DAY']").click(timeout=20000)
         storage_after = page.evaluate("Object.values(localStorage).reduce((sum, value) => sum + value.length, 0)")
         gate.expect(
             "civilization.memory-bound",
@@ -2561,6 +2561,162 @@ def run_governance_mobile(browser: Browser, args: argparse.Namespace, gate: Gate
         context.close()
 
 
+def run_nation_timeline_alpha(browser: Browser, args: argparse.Namespace, gate: Gate) -> None:
+    case = ViewportCase("nation-timeline-alpha", "desktop", "landscape", 1440, 900, "dark", False, 1)
+    context = new_context(browser, case)
+    page = context.new_page()
+    monitor = BrowserMonitor(page, args.base_url)
+    try:
+        load_page(page, args.base_url, "dark")
+        start_mock_session(page, with_location=False)
+        page.locator("[data-mode='CIVILIZATION']").click()
+        page.wait_for_function("() => document.documentElement.dataset.nationFoundingReady === 'true'")
+
+        page.locator("[data-civilization-action='TAB_NATION']").click()
+        nation_text = clean_text(page.locator(".civilization-view").inner_text())
+        gate.expect(
+            "nation.six-founding-requirements",
+            "nation-runtime",
+            all(label in nation_text for label in (
+                "POPULATION", "TERRITORY", "GOVERNMENT", "SOVEREIGNTY", "TREASURY", "OFFICIAL CURRENCY",
+            ))
+            and page.evaluate("document.documentElement.dataset.nationStatus") == "NATION_CANDIDATE",
+        )
+        page.locator("[data-civilization-action='ESTABLISH_NATION']").click()
+        page.wait_for_function("() => document.documentElement.dataset.nationStatus === 'ESTABLISHED_SYNTHETIC'")
+        gate.expect(
+            "nation.synthetic-founding",
+            "nation-runtime",
+            "SYNTHETIC ONLY" in clean_text(page.locator(".civilization-view").inner_text()),
+        )
+
+        policy_before = int(page.evaluate("document.documentElement.dataset.nationTaxPolicy"))
+        page.locator("[data-civilization-action='SET_NATION_TAX']").click()
+        page.locator("[data-civilization-action='SETTLE_NATION_TAX']").click()
+        page.wait_for_function(
+            "before => Number(document.documentElement.dataset.nationTaxPolicy) === before + 1",
+            arg=policy_before,
+        )
+        page.locator("[data-civilization-action='TRADE_NATION_RESOURCE']").click()
+        page.wait_for_function("() => Number(document.documentElement.dataset.nationResourceTrades) === 1")
+        gate.expect(
+            "nation.finance-and-resource-economy",
+            "nation-economy",
+            float(page.evaluate("document.documentElement.dataset.nationTreasury")) > 0
+            and page.evaluate("document.documentElement.dataset.nationResourceTrades") == "1"
+            and all(label in clean_text(page.locator(".civilization-view").inner_text()) for label in (
+                "Tax Policy and Treasury", "Planet Resources", "KAIOS CREDIT",
+            )),
+        )
+
+        page.locator("[data-civilization-action='PROPOSE_NATION_DIPLOMACY']").click()
+        page.wait_for_function("() => document.documentElement.dataset.nationDiplomacyPending === '1'")
+        page.locator("[data-civilization-action='REVIEW_NATION_DIPLOMACY']").click()
+        page.wait_for_function("() => document.documentElement.dataset.nationDiplomacyPending === '0'")
+        gate.expect(
+            "nation.reviewed-diplomacy",
+            "nation-diplomacy",
+            "NO AGREEMENTS PENDING REVIEW" in clean_text(page.locator(".civilization-view").inner_text()),
+        )
+
+        page.locator("[data-civilization-action='TAB_TIMELINE']").click()
+        for _ in range(2):
+            page.locator("[data-civilization-action='RESEARCH_TIMELINE_ERA']").click()
+        for _ in range(4):
+            page.locator("[data-civilization-action='RESEARCH_TIMELINE_VEHICLE']").click()
+        page.locator("[data-civilization-action='SUPPLY_TIMELINE_VEHICLE']").click()
+        page.locator("[data-civilization-action='BUILD_TIMELINE_VEHICLE']").click()
+        page.wait_for_function("() => document.documentElement.dataset.timelineVehicle === 'OPERATIONAL'")
+        timeline_text = clean_text(page.locator(".civilization-view").inner_text())
+        gate.expect(
+            "timeline.research-material-civilization-checksum-gates",
+            "timeline-runtime",
+            all(label in timeline_text for label in (
+                "Pocket Time Cloaked UFO", "VERIFIED", "Civilization Gate PASS", "Cambrian RESEARCH READY",
+            )),
+        )
+
+        page.locator("[data-civilization-action='TRAVEL_TIMELINE']").click()
+        page.wait_for_function("() => document.documentElement.dataset.timelineEra === 'CAMBRIAN'")
+        page.locator("[data-civilization-action='RETURN_TIMELINE_ORIGIN']").click()
+        page.wait_for_function("() => document.documentElement.dataset.timelineEra === 'AI_CIVILIZATION'")
+        layout = measure_overflow(page)
+        screenshot = capture_screenshot(page, case, args.output_dir, None, args.pixel_threshold)
+        gate.screenshots.append(screenshot)
+        gate.expect(
+            "timeline.synthetic-round-trip",
+            "timeline-runtime",
+            page.evaluate("document.documentElement.dataset.timelineJourneys") == "2"
+            and "Canonical Mutation false" in clean_text(page.locator(".civilization-view").inner_text())
+            and not layout["offenders"],
+            details={"layout": layout, "screenshot": screenshot},
+        )
+        browser_clean(monitor, "nation-timeline-alpha", gate)
+    except Exception as error:
+        gate.add(
+            "nation-timeline.execution",
+            "nation-timeline",
+            "FAIL",
+            details={"error": clean_text(error)},
+        )
+        browser_clean(monitor, "nation-timeline-alpha", gate)
+    finally:
+        context.close()
+
+
+def run_nation_timeline_mobile(browser: Browser, args: argparse.Namespace, gate: Gate) -> None:
+    source = next(case for case in MATRIX if case.slug == "iphone-portrait-light")
+    case = ViewportCase(
+        "nation-timeline-mobile", source.family, source.orientation, source.width,
+        source.height, source.theme, source.touch, source.device_scale_factor, source.user_agent,
+    )
+    context = new_context(browser, case)
+    page = context.new_page()
+    monitor = BrowserMonitor(page, args.base_url)
+    try:
+        load_page(page, args.base_url, "light")
+        start_mock_session(page, with_location=False)
+        page.locator("[data-mode='CIVILIZATION']").click()
+        page.locator("[data-civilization-action='TAB_NATION']").click()
+        nation_layout = measure_overflow(page)
+        page.locator("[data-civilization-action='TAB_TIMELINE']").click()
+        timeline_layout = measure_overflow(page)
+        active_tab_visible = page.evaluate("""
+          () => {
+            const tabs = document.querySelector('.civilization-tabs');
+            const active = tabs?.querySelector('[aria-selected="true"]');
+            if (!tabs || !active) return false;
+            const container = tabs.getBoundingClientRect();
+            const target = active.getBoundingClientRect();
+            return target.left >= container.left && target.right <= container.right;
+          }
+        """)
+        screenshot = capture_screenshot(page, case, args.output_dir, None, args.pixel_threshold)
+        gate.screenshots.append(screenshot)
+        gate.expect(
+            "nation-timeline.mobile-responsive",
+            "mobile-interaction",
+            not nation_layout["offenders"]
+            and not timeline_layout["offenders"]
+            and page.locator(".inspector-panel").evaluate("element => element.classList.contains('is-open')")
+            and page.locator("[data-civilization-action='TAB_TIMELINE']").get_attribute("aria-selected") == "true"
+            and active_tab_visible
+            and screenshot["pixel_variance"] >= 15,
+            details={"nation": nation_layout, "timeline": timeline_layout, "active_tab_visible": active_tab_visible, "screenshot": screenshot},
+        )
+        browser_clean(monitor, "nation-timeline-mobile", gate)
+    except Exception as error:
+        gate.add(
+            "nation-timeline.mobile-execution",
+            "mobile-interaction",
+            "FAIL",
+            details={"error": clean_text(error)},
+        )
+        browser_clean(monitor, "nation-timeline-mobile", gate)
+    finally:
+        context.close()
+
+
 def reports(args: argparse.Namespace, gate: Gate) -> tuple[dict[str, Any], dict[str, Any]]:
     matrix = [asdict(case) for case in MATRIX]
     qa_report = {
@@ -2678,6 +2834,8 @@ def main(argv: list[str] | None = None) -> int:
                 run_production_mobile(browser, args, gate)
                 run_settlement_mobile(browser, args, gate)
                 run_governance_mobile(browser, args, gate)
+                run_nation_timeline_alpha(browser, args, gate)
+                run_nation_timeline_mobile(browser, args, gate)
             finally:
                 browser.close()
     except Exception as error:

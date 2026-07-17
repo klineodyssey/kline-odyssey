@@ -68,10 +68,12 @@ export function createNotifier(getSnapshot) {
   const listeners = new Set();
   return Object.freeze({
     emit(type, details = {}) {
+      if (listeners.size === 0) return false;
       const message = snapshot({ type, details, snapshot: getSnapshot() });
       for (const listener of [...listeners]) {
         try { listener(message); } catch { /* Observers cannot break a runtime. */ }
       }
+      return true;
     },
     subscribe(listener, { emitCurrent = false } = {}) {
       if (typeof listener !== "function") throw new TypeError("listener must be a function");

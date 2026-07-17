@@ -87,6 +87,12 @@ const BIOLOGY_TAXONOMY_RANKS = Object.freeze(["DOMAIN", "KINGDOM", "PHYLUM", "CL
 const BIOLOGY_CATEGORIES = Object.freeze(["ANIMAL", "PLANT", "FUNGUS", "MICROORGANISM", "HUMAN", "AI_ORGANISM", "APP_ORGANISM", "COMPANY_ORGANISM", "ROBOT", "FUTURE_SPECIES"]);
 const FOOD_CHAIN_ROLES_V2 = new Set(["PRODUCER", "HERBIVORE", "CARNIVORE", "OMNIVORE", "PREDATOR", "SCAVENGER", "DECOMPOSER"]);
 const EVOLUTION_PATHWAYS = Object.freeze(["MUTATION", "SELECTION", "ADAPTATION", "LEARNING", "CIVILIZATION", "TECHNOLOGY", "AI"]);
+const NATION_FOUNDING_REQUIREMENTS = Object.freeze(["POPULATION", "TERRITORY", "GOVERNMENT", "SOVEREIGNTY", "TREASURY", "OFFICIAL_CURRENCY"]);
+const GOVERNMENT_V2_POLICIES = Object.freeze(["TAX_POLICY", "BUDGET", "PUBLIC_SPENDING", "MILITARY", "DIPLOMACY", "IMMIGRATION", "TRADE_POLICY", "INFRASTRUCTURE", "EMERGENCY"]);
+const NATION_TAX_IDS = Object.freeze(["INCOME_TAX", "SALES_TAX", "BUSINESS_TAX", "PROPERTY_TAX", "LAND_TAX", "VEHICLE_LICENSE_TAX", "FUEL_TAX", "IMPORT_TARIFF", "EXPORT_TARIFF", "RESOURCE_ROYALTY", "WATER_USAGE_FEE", "CARBON_FEE"]);
+const PLANET_RESOURCE_IDS = Object.freeze(["WATER", "FOREST", "STONE", "IRON", "COPPER", "GOLD", "OIL", "GAS", "RARE_EARTH", "FOOD", "ENERGY"]);
+const DIPLOMACY_TYPES = Object.freeze(["ALLIANCE", "TRADE_AGREEMENT", "EMBASSY", "VISA", "PEACE_TREATY", "SANCTION"]);
+const TIMELINE_ERA_IDS = Object.freeze(["CAMBRIAN", "ANCIENT_CIVILIZATION", "STONE_AGE", "BRONZE_AGE", "IRON_AGE", "INDUSTRIAL_AGE", "INFORMATION_AGE", "AI_CIVILIZATION", "INTERSTELLAR_CIVILIZATION"]);
 const SEMANTIC_VERSION = /^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$/;
 const SAFE_DNA_SUMMARY_FIELDS = new Set([
   "summary_id",
@@ -501,6 +507,76 @@ function validateGovernanceAlpha(governance) {
   invariant(JSON.stringify(governance.resilience_hazards) === JSON.stringify(hazards), `${path}.resilience_hazards is invalid`);
 }
 
+function validateNationTimelineAlpha(runtime, world) {
+  const path = "nation_timeline_alpha";
+  invariant(isRecord(runtime), `${path} must be an object`);
+  invariant(runtime.decision_id === "HUMAN-SPRINT-009-NATION-TIMELINE", `${path} has invalid decision ID`);
+  invariant(runtime.simulation_only === true && runtime.authoritative_registry === false, `${path} must remain synthetic and non-authoritative`);
+  invariant(
+    runtime.real_sovereignty === false
+      && runtime.real_government === false
+      && runtime.real_tax === false
+      && runtime.real_currency === false
+      && runtime.real_diplomacy === false
+      && runtime.real_military === false
+      && runtime.real_time_travel === false
+      && runtime.canonical_history_mutation === false,
+    `${path} crossed a real-world or canonical-history boundary`
+  );
+  validateNoPrivateFields(runtime, path);
+
+  const nation = runtime.nation;
+  invariant(nation?.nation_id && nation?.government_runtime_id && nation?.label, `${path}.nation identity is incomplete`);
+  invariant(nation.territory?.planet_id === "EARTH" && nation.territory?.surface_k === 280, `${path}.nation territory must remain on Earth K280`);
+  invariant(nation.territory?.ownership_changed === false && nation.territory?.legal_land_title === false, `${path}.nation territory cannot change legal ownership`);
+  const parcelIds = new Set(world.parcels.map(({ id }) => id));
+  invariant(Array.isArray(nation.territory?.parcel_ids) && nation.territory.parcel_ids.length >= nation.founding.minimum_parcels, `${path}.nation territory is incomplete`);
+  invariant(nation.territory.parcel_ids.every((id) => parcelIds.has(id)), `${path}.nation references an unknown Parcel`);
+  invariant(nation.sovereignty?.evidence_status === "RECORDED" && nation.sovereignty?.review_status === "REVIEWED_SYNTHETIC" && nation.sovereignty?.real_world_authority === false, `${path}.sovereignty boundary is invalid`);
+  invariant(JSON.stringify(nation.government_policies?.map(({ policy_id: id }) => id)) === JSON.stringify(GOVERNMENT_V2_POLICIES), `${path}.government_policies is invalid`);
+  invariant(nation.government_policies.find(({ policy_id: id }) => id === "MILITARY")?.real_world_operation === false, `${path}.military policy must remain simulation only`);
+
+  const finance = runtime.public_finance;
+  invariant(JSON.stringify(finance?.tax_policy?.map(({ tax_id: id }) => id)) === JSON.stringify(NATION_TAX_IDS), `${path}.tax_policy is invalid`);
+  invariant(finance.tax_policy.every((tax) => (
+    [tax.rate_bps, tax.minimum_rate_bps, tax.maximum_rate_bps, tax.step_bps].every(Number.isInteger)
+      && tax.rate_bps >= tax.minimum_rate_bps
+      && tax.rate_bps <= tax.maximum_rate_bps
+      && tax.step_bps > 0
+  )), `${path}.tax_policy contains an invalid governance range`);
+  invariant(finance.official_currency?.currency_code === "KAIOS_CREDIT", `${path}.official_currency must remain KAIOS Credit in Alpha`);
+  invariant(finance.official_currency?.legal_tender === false && finance.official_currency?.token_contract === false, `${path}.official_currency cannot be legal tender or a Token Contract`);
+  invariant(Array.isArray(finance.exchange_policies) && finance.exchange_policies.includes(finance.official_currency.exchange_policy), `${path}.official_currency exchange policy is invalid`);
+  invariant([finance.treasury?.initial_operating_balance, finance.treasury?.initial_reserve_balance, finance.treasury?.initial_emergency_balance].every((value) => Number.isFinite(value) && value >= 0), `${path}.treasury balances are invalid`);
+
+  const resources = runtime.resources;
+  invariant(resources?.planet_id === "EARTH", `${path}.resources must use Earth in Alpha`);
+  invariant(JSON.stringify(resources.catalog?.map(({ resource_id: id }) => id)) === JSON.stringify(PLANET_RESOURCE_IDS), `${path}.resources catalog is invalid`);
+  invariant(resources.catalog.every((resource) => (
+    [resource.initial_quantity, resource.capacity, resource.minimum_reserve, resource.reference_value_credit].every(Number.isFinite)
+      && resource.initial_quantity >= 0
+      && resource.initial_quantity <= resource.capacity
+      && resource.minimum_reserve >= 0
+      && resource.minimum_reserve <= resource.initial_quantity
+  )), `${path}.resources contains invalid inventory bounds`);
+
+  invariant(JSON.stringify(runtime.diplomacy?.agreement_types) === JSON.stringify(DIPLOMACY_TYPES), `${path}.diplomacy agreement types are invalid`);
+  invariant(DIPLOMACY_TYPES.every((type) => isRecord(runtime.diplomacy.templates?.[type])), `${path}.diplomacy templates are incomplete`);
+
+  const timeline = runtime.timeline;
+  invariant(timeline?.decision_id === runtime.decision_id, `${path}.timeline decision ID is invalid`);
+  invariant(JSON.stringify(timeline.eras?.map(({ era_id: id }) => id)) === JSON.stringify(TIMELINE_ERA_IDS), `${path}.timeline era catalog is invalid`);
+  invariant(timeline.origin_era_id === "AI_CIVILIZATION" && TIMELINE_ERA_IDS.includes(timeline.default_target_era_id), `${path}.timeline origin or target is invalid`);
+  invariant(timeline.eras.every(({ required_research_points: points }) => Number.isInteger(points) && points >= 0), `${path}.timeline research requirements are invalid`);
+  invariant(timeline.vehicle?.vehicle_type === "POCKET_TIME_CLOAKED_UFO", `${path}.timeline vehicle is invalid`);
+  invariant(/^sha256:[0-9a-f]{64}$/.test(timeline.vehicle.blueprint_checksum), `${path}.timeline vehicle checksum is invalid`);
+  invariant(timeline.vehicle.energy_capacity >= timeline.vehicle.initial_energy_after_build && timeline.vehicle.initial_energy_after_build >= timeline.vehicle.travel_energy_cost, `${path}.timeline vehicle energy rules are invalid`);
+  invariant(Array.isArray(timeline.vehicle.technology_requirements) && timeline.vehicle.technology_requirements.length >= 3, `${path}.timeline technology requirements are incomplete`);
+  invariant(Array.isArray(timeline.vehicle.material_requirements) && timeline.vehicle.material_requirements.length >= 5, `${path}.timeline material requirements are incomplete`);
+
+  invariant(NATION_FOUNDING_REQUIREMENTS.length === 6, `${path}.founding requirement contract is invalid`);
+}
+
 export function validateWorldFixture(world) {
   invariant(isRecord(world), "root must be an object");
   invariant(world.meta?.synthetic === true, "World Viewer accepts synthetic data only");
@@ -547,6 +623,7 @@ export function validateWorldFixture(world) {
   validateProductionAlpha(world.production_alpha);
   validateSettlementAlpha(world.settlement_alpha);
   validateGovernanceAlpha(world.governance_alpha);
+  validateNationTimelineAlpha(world.nation_timeline_alpha, world);
 
   const actionIds = (world.proposalActions ?? []).map((action) => (
     typeof action === "string" ? action : action?.id

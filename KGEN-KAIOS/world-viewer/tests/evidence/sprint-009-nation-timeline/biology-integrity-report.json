@@ -1,0 +1,45 @@
+{
+  "status": "PASS",
+  "decision_id": "HUMAN-SPRINT-008-CAMBRIAN-EXPLOSION",
+  "report": {
+    "ok": true,
+    "runtime": "CAMBRIAN_BIOLOGY_FOUNDATION_ALPHA",
+    "registry_count": 26,
+    "taxonomy_rank_count": 9,
+    "atom_count": 108,
+    "fossil_count": 21,
+    "reports": {
+      "genome": {
+        "ok": true,
+        "runtime": "GENOME_DNA_ALPHA",
+        "genome_count": 26,
+        "issues": []
+      },
+      "evolution": {
+        "ok": true,
+        "runtime": "GENESIS_CAPABILITY_EVOLUTION_ALPHA",
+        "species_count": 26,
+        "issues": []
+      }
+    },
+    "issues": []
+  },
+  "coverage": {
+    "taxonomy_ranks": 9,
+    "registry_categories": 10,
+    "species": 26,
+    "genomes": 26,
+    "atom_domains": 12,
+    "atoms": 108,
+    "food_chain_roles": 7,
+    "planets": 5,
+    "fossils_observed": 21
+  },
+  "boundaries": {
+    "real_genetic_engineering": false,
+    "clone_execution": false,
+    "authoritative_registry": false,
+    "fixed_role_atoms": false,
+    "protected_runtime_mutated": false
+  }
+}
