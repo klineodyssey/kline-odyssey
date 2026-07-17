@@ -151,10 +151,11 @@ This file is the **unique library-level Master Index** (ORG-P2-003 D7). Other `*
 | KAIOS World Life Law V2.1 | `KGEN-KAIOS/life/KAIOS_WORLD_LIFE_LAW.md` | Cumulative 23-law Architecture for universal Life Identity, energy, spawn, death, Family, House, Temple, Company, NPC and profession boundaries |
 | KAIOS World Life Law JSON | `KGEN-KAIOS/life/kaios_world_life_law.json` | Machine-readable laws, Life Identity, Soul Core, consent, adapter, authority and compliance contracts |
 | World Life Law Source Audit | `KGEN-KAIOS/life/WORLD_LIFE_LAW_SOURCE_AUDIT.md` | Existing-source classification, frozen-boundary proof, conflict resolution and future migration gates |
-| World Life Law V2.1 Baseline Review | `KGEN-KAIOS/life/World_Life_Law_V2_1_Baseline_Review.md` | Completed 23-law consistency and 18-gate freeze review; result `NOT_READY_TO_FREEZE` |
+| World Life Law V2.1 Amendment 001 | `KGEN-KAIOS/life/World_Life_Law_V2_1_Amendment_001.md` | Human-approved P0 contracts for food lifecycle, guardian separation, NPC compute and offline protection; Architecture only |
+| World Life Law V2.1 Baseline Review | `KGEN-KAIOS/life/World_Life_Law_V2_1_Baseline_Review.md` | Completed Amendment 001 repeat review; `13/18` gates pass, P0 remaining `0`, result `NOT_READY_TO_FREEZE` |
 | World Life Law V2.1 Conflict Matrix | `KGEN-KAIOS/life/World_Life_Law_V2_1_Conflict_Matrix.json` | Machine-readable law-pair results, gate findings and zero-conflict evidence |
 | World Life Law V2.1 Term Glossary | `KGEN-KAIOS/life/World_Life_Law_V2_1_Term_Glossary.json` | Machine-readable terminology and science/setting/mythic/future classification |
-| World Life Law V2.1 Freeze Readiness | `KGEN-KAIOS/life/World_Life_Law_V2_1_Freeze_Readiness.json` | Four P0 blockers, five P1 clarifications and required Human amendment path |
+| World Life Law V2.1 Freeze Readiness | `KGEN-KAIOS/life/World_Life_Law_V2_1_Freeze_Readiness.json` | Four P0 findings resolved, five P1 clarifications open and required Human amendment path |
 | World Life Law V2.1 Source Classification | `KGEN-KAIOS/life/World_Life_Law_V2_1_Source_Classification.md` | Public-source boundary separating science, KAIOS ontology, mythic interface and future technology |
 | World Viewer Architecture Baseline | `KGEN-KAIOS/world-viewer/WORLD_VIEWER_V1_ARCHITECTURE_BASELINE.md` | Frozen `WORLD-VIEWER-V1.0` Architecture and synthetic-only sandbox boundary |
 | UI Governor Package | `KGEN-KAIOS/ui-governor/README.md` | Source audit, 80-cell daily matrix and architecture enablement boundary |

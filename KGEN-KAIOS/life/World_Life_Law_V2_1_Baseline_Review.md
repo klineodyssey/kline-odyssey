@@ -1,14 +1,15 @@
 ---
 TITLE: "KAIOS World Life Law V2.1 Baseline Review"
-VERSION: "1.0.0"
-STATUS: "BASELINE_REVIEW_COMPLETED"
+VERSION: "1.1.0"
+STATUS: "AMENDMENT_001_REVIEW_COMPLETED"
 REVIEW_RESULT: "CLARIFICATION_REQUIRED"
 FREEZE_READINESS: "NOT_READY_TO_FREEZE"
 ARCHITECTURE: "APPROVED_NOT_FROZEN"
 IMPLEMENTATION: "NOT_STARTED"
 WORKQUEUE: "NOT_CREATED"
 DEPLOYMENT: "NOT_STARTED"
-HUMAN_DECISION_ID: "HUMAN-WORLD-LIFE-LAW-V2_1-BASELINE-REVIEW"
+HUMAN_DECISION_ID: "HUMAN-WORLD-LIFE-LAW-V2_1-FREEZE-AMENDMENT-001"
+BASELINE_REVIEW_DECISION_ID: "HUMAN-WORLD-LIFE-LAW-V2_1-BASELINE-REVIEW"
 REVIEWED_MAIN_SHA: "8d95316ac01e7c6cdad05c6917abc38f2456f61b"
 REVIEW_DATE: "2026-07-17"
 RUNTIME_AUTHORITY: false
@@ -24,13 +25,14 @@ This is an Architecture Baseline Review. It does not amend, freeze, implement, m
 |---|---|
 | Twenty-three-law internal consistency | `PASS` (`23/23`) |
 | Direct law-to-law conflicts | `0` |
-| Human review gates passed | `9/18` |
+| Human review gates passed | `13/18` |
 | Clarifications required | `5/18` |
-| Missing definitions | `4/18` |
+| Missing definitions | `0/18` |
+| P0 findings remaining | `0` |
 | Human decision required | `true` |
 | Freeze readiness | `NOT_READY_TO_FREEZE` |
 
-The approved V2.1 Architecture is coherent. It is not yet complete enough to freeze because four requested contracts are absent and five definitions remain underspecified. A missing contract is not recorded as a contradiction; it is a freeze blocker.
+The approved V2.1 Architecture and Human-approved Amendment 001 are coherent. Amendment 001 resolves all four P0 Architecture gaps. Freeze remains unavailable because the five P1 definitions explicitly excluded from the amendment remain underspecified. An open clarification is not recorded as a contradiction, but it remains a pre-freeze gate.
 
 ## 2. Reviewed Sources
 
@@ -39,6 +41,7 @@ The approved V2.1 Architecture is coherent. It is not yet complete enough to fre
 | `KAIOS_WORLD_LIFE_LAW.md` | Human-approved Architecture, not frozen | `34cfeed7c3944e28301d2648ce52e59eda3467c714555071fa367924808d6e35` |
 | `kaios_world_life_law.json` | Machine-readable Architecture | `542569f50e534da477c2c19332cae8b5b2f7d995fa1a74e4a0dd5f9dc909b845` |
 | `WORLD_LIFE_LAW_SOURCE_AUDIT.md` | Source audit | `4fa5edaf2dc55e1626d4220da14576c7f17d53bcc2b6bfb6c8d11a442652f359` |
+| `World_Life_Law_V2_1_Amendment_001.md` | Human-approved P0 Architecture amendment | `6abeab8099e0af6252aa1b55f0907a2670788c304713848accdfc31fa2339892` (UTF-8, LF-normalized) |
 | `LIFE_OS_ARCHITECTURE_BASELINE.md` and `life_os_architecture_baseline.json` | Frozen `LIFE-OS-V1.0` reference and embedded manifest | Unchanged; `13/13` members verified with LF-normalized SHA-256 |
 | Git source | `origin/main` | `8d95316ac01e7c6cdad05c6917abc38f2456f61b` |
 
@@ -48,7 +51,7 @@ The review also consulted the Constitution, Universe Physics CURRENT, Universe M
 
 1. Confirm the source and machine-readable law contain exactly 23 unique laws.
 2. Review every law against every other law for identity, state, authority, consent, resource, death, timeline, and domain-boundary contradictions.
-3. Evaluate the 18 Human-specified baseline gates against explicit normative text. An implied future module does not count as a completed contract.
+3. Evaluate the 18 Human-specified baseline gates against the approved law and Human-approved Amendment 001. An implied future module does not count as a completed contract.
 4. Separate `REAL_SCIENCE`, `KAIOS_WORLD_SETTING`, `MYTHIC_INTERFACE`, and `FUTURE_TECHNOLOGY` claims.
 5. Fail closed on missing freeze definitions without editing the approved source.
 
@@ -89,39 +92,32 @@ All 253 unique law pairs were evaluated under a default `NO_CONFLICT` rule with 
 | 1. Twenty-three-law consistency | `PASS` | `23/23` laws are individually and pairwise coherent. |
 | 2. Life Identity | `PASS` | Required classes are registrable; DNA is explicitly conditional. |
 | 3. Energy Runtime | `PASS` | Human, animal, plant, AI, robot, building/company, advanced, and immortal profiles have governed energy sources. |
-| 4. Food Runtime | `MISSING` | Food web and nutrition exist, but feed, agriculture, livestock, fishing, production, transport, processing, waste, and recycling are not a complete normative lifecycle contract. |
+| 4. Food Runtime | `PASS` | Amendment 001 defines the full lifecycle from energy and raw material through production, storage, transport, consumption, waste, recycling, and environment, with the required Food and Species Energy fields. |
 | 5. Death Runtime | `CLARIFICATION_REQUIRED` | History, evidence, lineage, succession, and audit survive. Body record and asset disposition/retention are not explicit. |
 | 6. Reincarnation Runtime | `CLARIFICATION_REQUIRED` | A new Life ID and predecessor link are explicit. A new birth event and new body identity are not explicit gates. |
 | 7. Timeline | `PASS` | Current Timeline is the default; travel requires technology, permission, vehicle, evidence, and review. |
 | 8. Family Runtime | `PASS` | Consent is mandatory. Location evidence is optional, coarse, private, revocable, and never proof of kinship. |
-| 9. Bloodline Runtime | `MISSING` | Family, bloodline, DNA, and generation references exist. Guardian, legal parent, and biological parent are not distinct typed identities. |
+| 9. Bloodline Runtime | `PASS` | Amendment 001 separately types Guardian, Legal Parent, Biological Parent, Adoptive Parent, Household Manager, and Emergency Guardian, with consent and location boundaries. |
 | 10. House Runtime | `PASS` | House life, ownership separation, family, energy, storage, memory, repair, inheritance, and timeline are represented. |
 | 11. Temple Runtime | `PASS` | One-image/one-temple is an approval rule; Life ID, memory, guardian, energy, and timeline are supported. |
 | 12. Company Runtime | `CLARIFICATION_REQUIRED` | AI Organization and Company life exist, but Economic Entity, Employer, Producer, Consumer, and Asset Owner facets are not normalized. Trademark safety is explicit. |
-| 13. NPC Runtime | `MISSING` | NPC integrity exists, but `LOW_COMPUTE`, `MEDIUM_COMPUTE`, and `HIGH_COMPUTE` profiles and budgets do not. |
+| 13. NPC Runtime | `PASS` | Amendment 001 defines bounded Compute Levels 0 through 6, profile budgets, scheduling, degradation, energy, permission, and the separation from Intelligence and rights. |
 | 14. Profession Runtime | `CLARIFICATION_REQUIRED` | The profession model is extensible; Temple Keeper, Government, Factory, and Feed Producer roles are not normalized in the approved vocabulary. |
 | 15. Civilization Bootstrap | `PASS` | The required viable world and core services are present; the player joins rather than owns them. |
-| 16. Offline Runtime | `MISSING` | No explicit offline protection state covers sleep, dormancy, house care, guardian care, and civilization protection against ordinary absence. |
+| 16. Offline Runtime | `PASS` | Amendment 001 defines sleep, dormancy, house/guardian/hospital/civilization care, bounded progress and costs, prohibited ordinary-absence outcomes, and return reconciliation. |
 | 17. Life is not Rights | `PASS` | Life, intelligence, citizenship, authority, ownership, and legal personhood are separated. |
 | 18. Public Source Audit | `CLARIFICATION_REQUIRED` | The source classes can be defined without conflict, but the approved law does not yet normatively reference the classification artifact. |
 
-## 6. P0 Freeze Blockers
+## 6. P0 Amendment Resolution
 
-### `FZ-P0-001` Food lifecycle contract missing
+| Finding | Review after Amendment 001 | Resolution evidence |
+|---|---|---|
+| `FZ-P0-001` | `RESOLVED` | Food Lifecycle Contract, Food record, domain ownership, and Species Energy Contract are normative in Amendment 001. |
+| `FZ-P0-002` | `RESOLVED` | Six independent care/parent/household relationship types, typed records, consent, and location limits are normative in Amendment 001. |
+| `FZ-P0-003` | `RESOLVED` | Compute Levels 0 through 6, bounded budgets, safe degradation, and compute/intelligence/rights separation are normative in Amendment 001. |
+| `FZ-P0-004` | `RESOLVED` | Offline care states, bounded progression, prohibited outcomes, and return reconciliation are normative in Amendment 001. |
 
-Law 04 defines a food web, food record, nutrition, provenance, storage rules, and Life OS degradation. It does not define the complete requested chain from feed and agriculture through production, storage, transportation, processing, waste, and recycling. Sprint 005 demonstrates downstream compatibility, but a downstream sandbox document cannot silently complete a higher-level law.
-
-### `FZ-P0-002` Family role identity separation missing
-
-The law distinguishes family and bloodline records and mentions guardianship. It does not provide distinct typed references for biological parent, legal parent, guardian, and narrative or synthetic parent. Freeze would make future consent and lineage migration ambiguous.
-
-### `FZ-P0-003` NPC compute profiles missing
-
-Law 18 specifies NPC identity and lifecycle but not compute LOD. The baseline needs bounded `LOW_COMPUTE`, `MEDIUM_COMPUTE`, and `HIGH_COMPUTE` profiles, capability limits, scheduling policy, and downgrade behavior so ordinary animals do not require a large reasoning model.
-
-### `FZ-P0-004` Offline protection missing
-
-The law has sleep and lifecycle concepts but no player-offline contract. Freeze requires a fail-safe state that prevents ordinary absence from causing irreversible starvation or death and defines dormancy, care delegation, resource caps, and return reconciliation.
+P0 remaining: `0`. The Amendment also adds `EVERY_LIFE_REQUIRES_SUSTAINABLE_EXISTENCE_CONTRACT`, requiring Energy, Maintenance, Lifecycle, Protection, and History while keeping Compute, Intelligence, Rights, and maintenance methods independent.
 
 ## 7. P1 Clarifications Before Freeze
 
@@ -144,13 +140,13 @@ The law has sleep and lifecycle concepts but no player-offline contract. Freeze 
 
 ## 9. Freeze Gate
 
-Freeze remains prohibited until all four P0 blockers and five P1 clarifications are resolved in the approved source and machine-readable contract, followed by a repeat baseline review. Review evidence itself cannot amend the source.
+Freeze remains prohibited until the five P1 clarifications are resolved by a Human-approved amendment and a final repeat baseline review passes. Amendment 001 has normative authority only for the four approved P0 gaps; review evidence cannot broaden its scope.
 
 Required next flow:
 
 ```text
-Human Targeted Amendment Decision
--> Source and JSON Amendment
+Human P1 Amendment Decision
+-> P1 Architecture Amendment
 -> JSON / Link / Boundary Validation
 -> Repeat Baseline Review
 -> Human Freeze Decision
@@ -159,9 +155,9 @@ Human Targeted Amendment Decision
 Recommended next Human Decision:
 
 ```text
-Decision ID: HUMAN-WORLD-LIFE-LAW-V2_1-FREEZE-AMENDMENT-001
-Decision: APPROVE_TARGETED_FREEZE_AMENDMENTS
-Scope: FZ-P0-001..004 and FZ-P1-001..005 only
+Decision ID: HUMAN-WORLD-LIFE-LAW-V2_1-FREEZE-AMENDMENT-002
+Decision: APPROVE_P1_FREEZE_CLARIFICATIONS
+Scope: FZ-P1-001..005 only
 ```
 
 ## 10. Boundary Result
@@ -187,7 +183,8 @@ Scope: FZ-P0-001..004 and FZ-P1-001..005 only
 Review: COMPLETED
 Review Result: CLARIFICATION_REQUIRED
 Conflict: 0
-Missing: 4
+Missing: 0
+P0 Remaining: 0
 Human Decision Required: true
 Freeze Readiness: NOT_READY_TO_FREEZE
 Implementation: NOT_STARTED

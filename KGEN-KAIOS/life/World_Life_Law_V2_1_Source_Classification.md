@@ -1,8 +1,9 @@
 ---
 TITLE: "KAIOS World Life Law V2.1 Source Classification"
-VERSION: "1.0.0"
-STATUS: "BASELINE_REVIEW_EVIDENCE"
-HUMAN_DECISION_ID: "HUMAN-WORLD-LIFE-LAW-V2_1-BASELINE-REVIEW"
+VERSION: "1.1.0"
+STATUS: "AMENDMENT_001_REVIEW_EVIDENCE"
+HUMAN_DECISION_ID: "HUMAN-WORLD-LIFE-LAW-V2_1-FREEZE-AMENDMENT-001"
+BASELINE_REVIEW_DECISION_ID: "HUMAN-WORLD-LIFE-LAW-V2_1-BASELINE-REVIEW"
 REVIEWED_MAIN_SHA: "8d95316ac01e7c6cdad05c6917abc38f2456f61b"
 REVIEW_DATE: "2026-07-17"
 RUNTIME_AUTHORITY: false
@@ -14,7 +15,7 @@ RUNTIME_AUTHORITY: false
 
 This review artifact separates public scientific knowledge from KAIOS simulation ontology, mythic interface language, and speculative future technology. It prevents narrative terms from being presented as verified science and prevents scientific terminology from being silently redefined by world setting.
 
-This file is evidence for baseline review. It does not amend the World Life Law and is not Runtime authority. Before freeze, the approved law must normatively reference an approved source-classification contract.
+This file is evidence for baseline and amendment review. It does not amend the World Life Law and is not Runtime authority. Before freeze, the approved cumulative Architecture must normatively reference an approved source-classification contract.
 
 ## 2. Primary Source Classes
 
@@ -89,7 +90,17 @@ Some terms legitimately cross classes. They must carry an explicit layer label r
 
 ## 7. Freeze Finding
 
-Source classes are separable and no scientific-source conflict requires rejection of the World Life Law. The freeze gate remains `CLARIFICATION_REQUIRED` because this classification is review evidence only. A targeted amendment must make the classification contract normative before freeze.
+### Amendment 001 classifications
+
+| Amendment concept | Classification | Required boundary |
+|---|---|---|
+| Food Lifecycle and Species Energy Contracts | `REAL_SCIENCE`-informed `KAIOS_WORLD_SETTING` simulation | They are not medical, nutrition, food-safety, agriculture, aquaculture, or livestock advice. Real parameters require qualified sources, units, uncertainty, and applicable professional review. |
+| Guardian Separation Contract | `KAIOS_WORLD_SETTING` plus `GOVERNANCE_CONTRACT` | KAIOS Legal Parent, Adoptive Parent, Guardian, and Emergency Guardian records do not determine real-world parenthood, adoption, custody, or guardianship. |
+| NPC Compute Contract | `KAIOS_WORLD_SETTING` infrastructure profile | Compute Level is not Intelligence Tier, Life Level, consciousness, moral worth, legal status, rights, or authority. |
+| Offline Protection Contract | `KAIOS_WORLD_SETTING` simulation policy | It is not a medical, insurance, employment, custodial-care, or legal guarantee outside the game. |
+| Sustainable Existence Contract | `KAIOS_WORLD_SETTING` invariant | It governs simulation viability and does not claim that every registered entity is biologically alive. |
+
+Source classes remain separable, and Amendment 001 introduces no scientific-source conflict. Its P0 definitions are acceptable under these boundaries. The freeze gate remains `CLARIFICATION_REQUIRED` because the original cumulative law and Amendment 001 do not yet make this classification artifact normative; that existing P1 finding was outside Amendment 001's authorized scope.
 
 ```text
 Source Classification Review: PASS_WITH_CLARIFICATION
@@ -97,4 +108,5 @@ Scientific / Setting Separation: PASS
 Mythic / Future Technology Labeling: PASS
 Normative Reference in Approved Law: MISSING
 Freeze Effect: BLOCKING_P1
+Amendment 001 Classification: PASS
 ```

@@ -1,8 +1,9 @@
 {
-  "schema_version": "1.0.0",
+  "schema_version": "1.1.0",
   "artifact_id": "WORLD-LIFE-LAW-V2.1-FREEZE-READINESS-001",
   "artifact_type": "ARCHITECTURE_BASELINE_REVIEW_EVIDENCE",
-  "decision_id": "HUMAN-WORLD-LIFE-LAW-V2_1-BASELINE-REVIEW",
+  "decision_id": "HUMAN-WORLD-LIFE-LAW-V2_1-FREEZE-AMENDMENT-001",
+  "baseline_review_decision_id": "HUMAN-WORLD-LIFE-LAW-V2_1-BASELINE-REVIEW",
   "review_date": "2026-07-17",
   "reviewed_main_sha": "8d95316ac01e7c6cdad05c6917abc38f2456f61b",
   "review_result": "CLARIFICATION_REQUIRED",
@@ -18,37 +19,40 @@
     },
     "human_review_gates": {
       "total": 18,
-      "pass": 9,
+      "pass": 13,
       "clarification_required": 5,
-      "missing": 4,
+      "missing": 0,
       "conflict": 0
     },
-    "freeze_blocker_policy": "ANY_OPEN_P0_OR_UNRESOLVED_REQUIRED_DEFINITION_PREVENTS_FREEZE"
+    "p0_findings_remaining": 0,
+    "p1_clarifications_remaining": 5,
+    "freeze_blocker_policy": "ANY_OPEN_P0_OR_UNRESOLVED_PRE_FREEZE_CLARIFICATION_PREVENTS_FREEZE"
   },
-  "p0_freeze_blockers": [
+  "p0_freeze_blockers": [],
+  "resolved_p0_findings": [
     {
       "finding_id": "FZ-P0-001",
       "title": "FOOD_LIFECYCLE_CONTRACT_MISSING",
-      "status": "OPEN",
-      "required_resolution": "Define feed, agriculture, livestock, fishing, production, storage, transportation, processing, waste, recycling, provenance, safety, and domain ownership as one bounded contract."
+      "status": "RESOLVED_BY_AMENDMENT_001",
+      "resolution": "Food Lifecycle Contract, Food record, domain ownership, and Species Energy Contract are normative."
     },
     {
       "finding_id": "FZ-P0-002",
       "title": "FAMILY_ROLE_IDENTITY_SEPARATION_MISSING",
-      "status": "OPEN",
-      "required_resolution": "Define guardian, legal parent, biological parent, narrative parent, and synthetic caregiver as distinct typed and consent-governed relationships."
+      "status": "RESOLVED_BY_AMENDMENT_001",
+      "resolution": "Guardian, Legal Parent, Biological Parent, Adoptive Parent, Household Manager, and Emergency Guardian are separate governed records."
     },
     {
       "finding_id": "FZ-P0-003",
       "title": "NPC_COMPUTE_PROFILE_MISSING",
-      "status": "OPEN",
-      "required_resolution": "Define LOW_COMPUTE, MEDIUM_COMPUTE, and HIGH_COMPUTE profiles with capability, budget, scheduling, downgrade, and observability rules."
+      "status": "RESOLVED_BY_AMENDMENT_001",
+      "resolution": "Compute Levels 0 through 6 define bounded behavior, budgets, scheduling, degradation, energy, permission, and observability."
     },
     {
       "finding_id": "FZ-P0-004",
       "title": "OFFLINE_PROTECTION_MISSING",
-      "status": "OPEN",
-      "required_resolution": "Define offline, dormant, house care, guardian care, civilization protection, resource caps, and return reconciliation without irreversible ordinary-absence death."
+      "status": "RESOLVED_BY_AMENDMENT_001",
+      "resolution": "Offline care states, bounded progress and costs, prohibited ordinary-absence outcomes, and return reconciliation are normative."
     }
   ],
   "p1_pre_freeze_clarifications": [
@@ -91,6 +95,12 @@
       "expected": "4fa5edaf2dc55e1626d4220da14576c7f17d53bcc2b6bfb6c8d11a442652f359",
       "status": "PASS"
     },
+    "amendment_001_sha256": {
+      "path": "KGEN-KAIOS/life/World_Life_Law_V2_1_Amendment_001.md",
+      "expected": "6abeab8099e0af6252aa1b55f0907a2670788c304713848accdfc31fa2339892",
+      "normalization": "UTF8_WITH_LF_LINE_ENDINGS",
+      "status": "PASS"
+    },
     "frozen_life_os_manifest": {
       "manifest_path": "KGEN-KAIOS/life/life_os_architecture_baseline.json#frozen_files",
       "normalization": "UTF8_WITH_LF_LINE_ENDINGS",
@@ -123,21 +133,16 @@
     "deployment_started": false
   },
   "required_before_freeze": [
-    "HUMAN_TARGETED_AMENDMENT_DECISION",
-    "P0_BLOCKERS_RESOLVED_IN_APPROVED_SOURCE_AND_JSON",
-    "P1_CLARIFICATIONS_RESOLVED_IN_APPROVED_SOURCE_AND_JSON",
+    "HUMAN_P1_AMENDMENT_DECISION",
+    "P1_CLARIFICATIONS_RESOLVED_IN_APPROVED_ARCHITECTURE",
     "REPEAT_BASELINE_REVIEW",
     "ALL_JSON_LINK_HASH_AND_BOUNDARY_CHECKS_PASS",
     "HUMAN_FREEZE_DECISION"
   ],
   "recommended_next_human_decision": {
-    "decision_id": "HUMAN-WORLD-LIFE-LAW-V2_1-FREEZE-AMENDMENT-001",
-    "decision": "APPROVE_TARGETED_FREEZE_AMENDMENTS",
+    "decision_id": "HUMAN-WORLD-LIFE-LAW-V2_1-FREEZE-AMENDMENT-002",
+    "decision": "APPROVE_P1_FREEZE_CLARIFICATIONS",
     "scope": [
-      "FZ-P0-001",
-      "FZ-P0-002",
-      "FZ-P0-003",
-      "FZ-P0-004",
       "FZ-P1-001",
       "FZ-P1-002",
       "FZ-P1-003",

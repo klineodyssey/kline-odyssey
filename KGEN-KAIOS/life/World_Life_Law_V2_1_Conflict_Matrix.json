@@ -1,8 +1,9 @@
 {
-  "schema_version": "1.0.0",
+  "schema_version": "1.1.0",
   "artifact_id": "WORLD-LIFE-LAW-V2.1-CONFLICT-MATRIX-001",
   "artifact_type": "ARCHITECTURE_BASELINE_REVIEW_EVIDENCE",
-  "decision_id": "HUMAN-WORLD-LIFE-LAW-V2_1-BASELINE-REVIEW",
+  "decision_id": "HUMAN-WORLD-LIFE-LAW-V2_1-FREEZE-AMENDMENT-001",
+  "baseline_review_decision_id": "HUMAN-WORLD-LIFE-LAW-V2_1-BASELINE-REVIEW",
   "review_date": "2026-07-17",
   "reviewed_main_sha": "8d95316ac01e7c6cdad05c6917abc38f2456f61b",
   "reviewed_sources": [
@@ -17,6 +18,11 @@
     {
       "path": "KGEN-KAIOS/life/WORLD_LIFE_LAW_SOURCE_AUDIT.md",
       "sha256": "4fa5edaf2dc55e1626d4220da14576c7f17d53bcc2b6bfb6c8d11a442652f359"
+    },
+    {
+      "path": "KGEN-KAIOS/life/World_Life_Law_V2_1_Amendment_001.md",
+      "sha256": "6abeab8099e0af6252aa1b55f0907a2670788c304713848accdfc31fa2339892",
+      "normalization": "UTF8_WITH_LF_LINE_ENDINGS"
     }
   ],
   "summary": {
@@ -26,9 +32,10 @@
     "unique_law_pairs_evaluated": 253,
     "direct_conflicts": 0,
     "review_gate_count": 18,
-    "review_gates_pass": 9,
+    "review_gates_pass": 13,
     "review_gates_clarification_required": 5,
-    "review_gates_missing": 4,
+    "review_gates_missing": 0,
+    "p0_findings_remaining": 0,
     "human_decision_required": true,
     "freeze_readiness": "NOT_READY_TO_FREEZE"
   },
@@ -289,9 +296,9 @@
     {
       "gate_id": "RG-04",
       "title": "FOOD_RUNTIME",
-      "status": "MISSING",
-      "evidence": ["WL-04 food web", "nutrition record", "storage rules"],
-      "missing": ["feed", "agriculture", "livestock", "fishing", "food_production", "food_transportation", "food_processing", "food_waste", "food_recycling"]
+      "status": "PASS",
+      "evidence": ["WL-04 food web", "Amendment 001 Food Lifecycle Contract", "Amendment 001 Species Energy Contract"],
+      "missing": []
     },
     {
       "gate_id": "RG-05",
@@ -324,9 +331,9 @@
     {
       "gate_id": "RG-09",
       "title": "BLOODLINE_RUNTIME",
-      "status": "MISSING",
-      "evidence": ["family_id", "bloodline_id", "dna_id", "generation"],
-      "missing": ["guardian_id", "legal_parent_id", "biological_parent_id", "typed_parent_relationship"]
+      "status": "PASS",
+      "evidence": ["family_id", "bloodline_id", "dna_id", "generation", "Amendment 001 Guardian Separation Contract"],
+      "missing": []
     },
     {
       "gate_id": "RG-10",
@@ -352,9 +359,9 @@
     {
       "gate_id": "RG-13",
       "title": "NPC_RUNTIME",
-      "status": "MISSING",
-      "evidence": ["NPC identity", "lifecycle", "Species rules", "permission profile"],
-      "missing": ["LOW_COMPUTE", "MEDIUM_COMPUTE", "HIGH_COMPUTE", "compute_budget", "degrade_policy"]
+      "status": "PASS",
+      "evidence": ["NPC identity", "lifecycle", "Species rules", "Amendment 001 Compute Levels 0 through 6", "bounded budgets and degrade policy"],
+      "missing": []
     },
     {
       "gate_id": "RG-14",
@@ -373,9 +380,9 @@
     {
       "gate_id": "RG-16",
       "title": "OFFLINE_RUNTIME",
-      "status": "MISSING",
-      "evidence": ["sleep concept only"],
-      "missing": ["OFFLINE", "DORMANT", "HOUSE_CARE", "GUARDIAN_CARE", "CIVILIZATION_PROTECTION", "return_reconciliation"]
+      "status": "PASS",
+      "evidence": ["Amendment 001 Offline Protection Contract", "care state escalation", "prohibited ordinary-absence outcomes", "return reconciliation"],
+      "missing": []
     },
     {
       "gate_id": "RG-17",
@@ -392,26 +399,31 @@
       "missing": ["normative_reference_from_approved_law"]
     }
   ],
-  "missing_definitions": [
+  "missing_definitions": [],
+  "resolved_p0_findings": [
     {
       "finding_id": "FZ-P0-001",
       "title": "FOOD_LIFECYCLE_CONTRACT_MISSING",
-      "severity": "P0_FREEZE_BLOCKER"
+      "status": "RESOLVED_BY_AMENDMENT_001",
+      "evidence": "Food Lifecycle Contract and Species Energy Contract"
     },
     {
       "finding_id": "FZ-P0-002",
       "title": "FAMILY_ROLE_IDENTITY_SEPARATION_MISSING",
-      "severity": "P0_FREEZE_BLOCKER"
+      "status": "RESOLVED_BY_AMENDMENT_001",
+      "evidence": "Guardian Separation Contract"
     },
     {
       "finding_id": "FZ-P0-003",
       "title": "NPC_COMPUTE_PROFILE_MISSING",
-      "severity": "P0_FREEZE_BLOCKER"
+      "status": "RESOLVED_BY_AMENDMENT_001",
+      "evidence": "NPC Compute Contract Levels 0 through 6"
     },
     {
       "finding_id": "FZ-P0-004",
       "title": "OFFLINE_PROTECTION_MISSING",
-      "severity": "P0_FREEZE_BLOCKER"
+      "status": "RESOLVED_BY_AMENDMENT_001",
+      "evidence": "Offline Protection Contract"
     }
   ],
   "clarifications": [
@@ -452,8 +464,9 @@
     "freeze_performed": false
   },
   "recommended_next_decision": {
-    "decision_id": "HUMAN-WORLD-LIFE-LAW-V2_1-FREEZE-AMENDMENT-001",
-    "decision": "APPROVE_TARGETED_FREEZE_AMENDMENTS",
+    "decision_id": "HUMAN-WORLD-LIFE-LAW-V2_1-FREEZE-AMENDMENT-002",
+    "decision": "APPROVE_P1_FREEZE_CLARIFICATIONS",
+    "scope": ["FZ-P1-001", "FZ-P1-002", "FZ-P1-003", "FZ-P1-004", "FZ-P1-005"],
     "human_approval_required": true
   }
 }

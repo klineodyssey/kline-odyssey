@@ -1,8 +1,14 @@
 {
-  "schema_version": "1.0.0",
+  "schema_version": "1.1.0",
   "artifact_id": "WORLD-LIFE-LAW-V2.1-TERM-GLOSSARY-001",
   "artifact_type": "ARCHITECTURE_BASELINE_REVIEW_EVIDENCE",
-  "decision_id": "HUMAN-WORLD-LIFE-LAW-V2_1-BASELINE-REVIEW",
+  "decision_id": "HUMAN-WORLD-LIFE-LAW-V2_1-FREEZE-AMENDMENT-001",
+  "baseline_review_decision_id": "HUMAN-WORLD-LIFE-LAW-V2_1-BASELINE-REVIEW",
+  "amendment_source": {
+    "path": "KGEN-KAIOS/life/World_Life_Law_V2_1_Amendment_001.md",
+    "sha256": "6abeab8099e0af6252aa1b55f0907a2670788c304713848accdfc31fa2339892",
+    "normalization": "UTF8_WITH_LF_LINE_ENDINGS"
+  },
   "review_date": "2026-07-17",
   "reviewed_main_sha": "8d95316ac01e7c6cdad05c6917abc38f2456f61b",
   "runtime_authority": false,
@@ -168,8 +174,8 @@
       "source_classes": ["REAL_SCIENCE", "KAIOS_WORLD_SETTING"],
       "contract_kind": "GOVERNANCE_CONTRACT",
       "real_world_claim": "SIMULATION_ONLY",
-      "normative_reference": "FZ-P0-001",
-      "freeze_definition_status": "MISSING_IN_APPROVED_SOURCE"
+      "normative_reference": "AMENDMENT_001_SECTION_3",
+      "freeze_definition_status": "RESOLVED_BY_AMENDMENT_001"
     },
     {
       "term_id": "TERM-016",
@@ -268,8 +274,8 @@
       "source_classes": ["KAIOS_WORLD_SETTING"],
       "contract_kind": "GOVERNANCE_CONTRACT",
       "real_world_claim": "NO_REAL_LEGAL_STATUS",
-      "normative_reference": "FZ-P0-002",
-      "freeze_definition_status": "TYPE_SEPARATION_MISSING_IN_APPROVED_SOURCE"
+      "normative_reference": "AMENDMENT_001_SECTION_4",
+      "freeze_definition_status": "RESOLVED_BY_AMENDMENT_001"
     },
     {
       "term_id": "TERM-027",
@@ -278,8 +284,8 @@
       "source_classes": ["KAIOS_WORLD_SETTING"],
       "contract_kind": "GOVERNANCE_CONTRACT",
       "real_world_claim": "NO_REAL_LEGAL_STATUS",
-      "normative_reference": "FZ-P0-002",
-      "freeze_definition_status": "MISSING_IN_APPROVED_SOURCE"
+      "normative_reference": "AMENDMENT_001_SECTION_4",
+      "freeze_definition_status": "RESOLVED_BY_AMENDMENT_001"
     },
     {
       "term_id": "TERM-028",
@@ -288,28 +294,28 @@
       "source_classes": ["REAL_SCIENCE", "KAIOS_WORLD_SETTING"],
       "contract_kind": "GOVERNANCE_CONTRACT",
       "real_world_claim": "NO_REAL_PARENTAGE_DETERMINATION",
-      "normative_reference": "FZ-P0-002",
-      "freeze_definition_status": "MISSING_IN_APPROVED_SOURCE"
+      "normative_reference": "AMENDMENT_001_SECTION_4",
+      "freeze_definition_status": "RESOLVED_BY_AMENDMENT_001"
     },
     {
       "term_id": "TERM-029",
       "term": "NPC Compute Profile",
-      "definition": "A bounded LOW, MEDIUM, or HIGH compute simulation profile with capability, budget, scheduling, and downgrade rules.",
+      "definition": "A bounded Level 0 through Level 6 simulation profile with capability, budget, scheduling, safe degradation, energy, permission, and observability rules; it is independent of Intelligence Tier and rights.",
       "source_classes": ["KAIOS_WORLD_SETTING"],
       "contract_kind": "GOVERNANCE_CONTRACT",
       "real_world_claim": false,
-      "normative_reference": "FZ-P0-003",
-      "freeze_definition_status": "MISSING_IN_APPROVED_SOURCE"
+      "normative_reference": "AMENDMENT_001_SECTION_5",
+      "freeze_definition_status": "RESOLVED_BY_AMENDMENT_001"
     },
     {
       "term_id": "TERM-030",
       "term": "Offline Protection State",
-      "definition": "A fail-safe simulation state for ordinary player absence using dormancy or bounded delegated care without irreversible starvation by elapsed wall-clock time alone.",
+      "definition": "A fail-safe simulation contract for ordinary player absence using sleep, dormancy, bounded delegated care, protected outcomes, and ordered return reconciliation.",
       "source_classes": ["KAIOS_WORLD_SETTING"],
       "contract_kind": "GOVERNANCE_CONTRACT",
       "real_world_claim": false,
-      "normative_reference": "FZ-P0-004",
-      "freeze_definition_status": "MISSING_IN_APPROVED_SOURCE"
+      "normative_reference": "AMENDMENT_001_SECTION_6",
+      "freeze_definition_status": "RESOLVED_BY_AMENDMENT_001"
     },
     {
       "term_id": "TERM-031",
@@ -329,6 +335,56 @@
       "external_domain": "LAW",
       "real_world_claim": false,
       "normative_reference": "LIFE_NOT_RIGHTS"
+    },
+    {
+      "term_id": "TERM-033",
+      "term": "Sustainable Existence Contract",
+      "definition": "The class-specific Architecture contract requiring governed Energy, Maintenance, Lifecycle, Protection, and append-only History for every Life Identity.",
+      "source_classes": ["KAIOS_WORLD_SETTING"],
+      "contract_kind": "GOVERNANCE_CONTRACT",
+      "real_world_claim": false,
+      "normative_reference": "AMENDMENT_001_SECTION_2",
+      "freeze_definition_status": "RESOLVED_BY_AMENDMENT_001"
+    },
+    {
+      "term_id": "TERM-034",
+      "term": "Species Energy Contract",
+      "definition": "A class-specific declaration of energy sources, consumption, maintenance, reserves, depletion, waste, environmental constraints, and recovery conditions.",
+      "source_classes": ["REAL_SCIENCE", "KAIOS_WORLD_SETTING"],
+      "contract_kind": "DOMAIN_MODEL",
+      "real_world_claim": "SIMULATION_MODEL_INFORMED_BY_SCIENCE",
+      "normative_reference": "AMENDMENT_001_SECTION_3_4",
+      "freeze_definition_status": "RESOLVED_BY_AMENDMENT_001"
+    },
+    {
+      "term_id": "TERM-035",
+      "term": "Adoptive Parent",
+      "definition": "A separately typed, consent- and governance-approved adoptive relationship inside KAIOS that makes no real-world legal determination.",
+      "source_classes": ["KAIOS_WORLD_SETTING"],
+      "contract_kind": "GOVERNANCE_CONTRACT",
+      "real_world_claim": "NO_REAL_LEGAL_STATUS",
+      "normative_reference": "AMENDMENT_001_SECTION_4",
+      "freeze_definition_status": "RESOLVED_BY_AMENDMENT_001"
+    },
+    {
+      "term_id": "TERM-036",
+      "term": "Household Manager",
+      "definition": "A co-residence and household-resource administration role that grants no parental authority by itself.",
+      "source_classes": ["KAIOS_WORLD_SETTING"],
+      "contract_kind": "GOVERNANCE_CONTRACT",
+      "real_world_claim": false,
+      "normative_reference": "AMENDMENT_001_SECTION_4",
+      "freeze_definition_status": "RESOLVED_BY_AMENDMENT_001"
+    },
+    {
+      "term_id": "TERM-037",
+      "term": "Emergency Guardian",
+      "definition": "A temporary, scoped, expiring KAIOS care role established for a defined emergency without creating parenthood.",
+      "source_classes": ["KAIOS_WORLD_SETTING"],
+      "contract_kind": "GOVERNANCE_CONTRACT",
+      "real_world_claim": "NO_REAL_LEGAL_STATUS",
+      "normative_reference": "AMENDMENT_001_SECTION_4",
+      "freeze_definition_status": "RESOLVED_BY_AMENDMENT_001"
     }
   ],
   "public_references": [
