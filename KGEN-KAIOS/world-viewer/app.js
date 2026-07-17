@@ -828,6 +828,46 @@ async function start() {
     onExchangeReview: (candidateId) => civilizationAction(
       () => civilizationRuntime.requestExchangeReview(candidateId),
       "K11520 review requested. No listing or trade was executed."
+    ),
+    onRunSettlement: () => civilizationAction(
+      () => civilizationRuntime.runSettlementCycle(),
+      "Salary, tax, and rent settled in the balanced KAIOS Credit ledger."
+    ),
+    onRegisterMarriage: () => civilizationAction(
+      () => civilizationRuntime.registerMarriage(),
+      "Marriage registered with mutual synthetic consent."
+    ),
+    onRegisterBirth: () => civilizationAction(
+      () => civilizationRuntime.registerBirth(),
+      "Birth registered after food, water, housing, and ecology checks."
+    ),
+    onSettleInheritance: () => civilizationAction(
+      () => civilizationRuntime.settleInheritance(),
+      "Inheritance settled once through the KAIOS Credit ledger."
+    ),
+    onDispatchLogistics: (routeId, resourceId, quantity, direction) => civilizationAction(
+      () => civilizationRuntime.dispatchLogistics(routeId, resourceId, quantity, direction),
+      direction === "DOMESTIC" ? "Domestic shipment delivered." : "Export request stopped at the official settlement gate."
+    ),
+    onRecoverEcology: (waterUnits, effort) => civilizationAction(
+      () => civilizationRuntime.recoverEcology(waterUnits, effort),
+      "Water-backed ecology recovery completed."
+    ),
+    onRequestKgen: (amount) => civilizationAction(
+      () => civilizationRuntime.requestKgenSettlement(amount),
+      "KGEN settlement request created. No blockchain transfer occurred."
+    ),
+    onRequestExternal: (asset, amount) => civilizationAction(
+      () => civilizationRuntime.requestExternalSettlement(asset, amount),
+      `${asset} settlement request created. No fiat transfer occurred.`
+    ),
+    onRequestMortgage: () => civilizationAction(
+      () => civilizationRuntime.requestMortgage(),
+      "Mortgage architecture proposal created. No debt was issued."
+    ),
+    onRequestInsurance: () => civilizationAction(
+      () => civilizationRuntime.requestInsurance(),
+      "Insurance architecture proposal created. No policy was issued."
     )
   });
   inspector = createInspectorView({
@@ -888,6 +928,15 @@ async function start() {
     document.documentElement.dataset.civilizationCity = snapshot.city.status;
     document.documentElement.dataset.civilizationStage = snapshot.civilization_progress.stage_id;
     document.documentElement.dataset.civilizationBalance = String(snapshot.economy.player_balance);
+    document.documentElement.dataset.populationTotal = String(snapshot.population.metrics.population);
+    document.documentElement.dataset.populationFamilies = String(snapshot.population.metrics.families);
+    document.documentElement.dataset.settlementCurrency = snapshot.settlement.executable_currency;
+    document.documentElement.dataset.settlementRequests = String(snapshot.settlement.asset_requests.length);
+    document.documentElement.dataset.logisticsStatus = snapshot.logistics.status;
+    document.documentElement.dataset.logisticsPollution = String(snapshot.logistics.pollution);
+    document.documentElement.dataset.logisticsJobs = String(snapshot.logistics.jobs.length);
+    document.documentElement.dataset.mortgageProposals = String(snapshot.settlement.mortgage_proposals.length);
+    document.documentElement.dataset.insuranceProposals = String(snapshot.settlement.insurance_proposals.length);
     document.documentElement.dataset.ecosystemStatus = snapshot.ecosystem.food_chain_status;
     document.documentElement.dataset.factoryStatus = snapshot.production.factory.status;
     document.documentElement.dataset.productionTotal = String(snapshot.production.factory.total_produced);

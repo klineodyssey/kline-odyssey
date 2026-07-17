@@ -395,6 +395,46 @@ function validateProductionAlpha(production) {
   invariant(production.exchange.candidates.every(({ review_status: status }) => status === "CANDIDATE_REVIEW_REQUIRED"), `${path}.exchange cannot auto-list candidates`);
 }
 
+function validateSettlementAlpha(settlement) {
+  const path = "settlement_alpha";
+  invariant(isRecord(settlement), `${path} must be an object`);
+  invariant(settlement.decision_id === "HUMAN-SPRINT-006-SETTLEMENT-ECONOMY", `${path} has invalid decision ID`);
+  invariant(settlement.simulation_only === true && settlement.authoritative_registry === false, `${path} must remain synthetic and non-authoritative`);
+  invariant(settlement.real_finance === false && settlement.real_kgen_transfer === false && settlement.real_external_settlement === false, `${path} cannot enable real settlement`);
+  invariant(Number.isInteger(settlement.carrying_capacity) && settlement.carrying_capacity >= 4, `${path} has invalid carrying capacity`);
+  validateNoPrivateFields(settlement, path);
+
+  invariant(Array.isArray(settlement.currency_layers) && settlement.currency_layers.length === 3, `${path} must define three currency layers`);
+  invariant(settlement.currency_layers[0]?.asset_id === "KAIOS_CREDIT", `${path} Layer 1 must be KAIOS Credit`);
+  invariant(settlement.currency_layers[0]?.status === "ACTIVE_SYNTHETIC_LEDGER", `${path} Layer 1 must remain synthetic`);
+  invariant(settlement.currency_layers[1]?.asset_id === "KGEN" && settlement.currency_layers[1]?.token_tax === "0.30% UNCHANGED", `${path} must preserve the KGEN boundary and tax`);
+  invariant(settlement.currency_layers[2]?.asset_id === "EXTERNAL_SETTLEMENT", `${path} Layer 3 must use the official external settlement boundary`);
+  invariant(settlement.currency_layers.slice(1).every(({ status }) => status === "OFFICIAL_SETTLEMENT_REQUEST_ONLY"), `${path} external layers must be request only`);
+  invariant(settlement.bootstrap_reference?.rate === 1, `${path} Bootstrap Reference must start at 1:1`);
+  invariant(settlement.bootstrap_reference?.permanent_peg === false && settlement.bootstrap_reference?.guaranteed_return === false, `${path} Bootstrap Reference cannot be a peg or guarantee`);
+  invariant(settlement.bootstrap_reference?.future_governance_adjustable === true, `${path} Bootstrap Reference must remain governance adjustable`);
+
+  const expectedHierarchy = ["FAMILY", "VILLAGE", "TOWN", "CITY", "NATION", "CIVILIZATION"];
+  invariant(Array.isArray(settlement.hierarchy) && settlement.hierarchy.length === expectedHierarchy.length, `${path}.hierarchy is incomplete`);
+  invariant(JSON.stringify(settlement.hierarchy.map(({ level }) => level)) === JSON.stringify(expectedHierarchy), `${path}.hierarchy has invalid levels`);
+  const hierarchyIds = new Set(settlement.hierarchy.map(({ entity_id: id }) => id));
+  for (const node of settlement.hierarchy) {
+    invariant(node.entity_id && node.label, `${path}.hierarchy contains an incomplete node`);
+    invariant(node.parent_id === null || hierarchyIds.has(node.parent_id), `${node.entity_id} has an invalid settlement parent`);
+  }
+
+  invariant(Array.isArray(settlement.logistics_routes) && settlement.logistics_routes.length >= 4, `${path}.logistics_routes is incomplete`);
+  const routeIds = new Set();
+  for (const route of settlement.logistics_routes) {
+    invariant(!routeIds.has(route.route_id), `${path} duplicates route ${route.route_id}`);
+    routeIds.add(route.route_id);
+    invariant(route.from && route.to && Number.isInteger(route.capacity) && route.capacity > 0, `${route.route_id} is invalid`);
+    invariant(Array.isArray(route.modes) && route.modes.every((mode) => ["DOMESTIC", "EXPORT", "IMPORT"].includes(mode)), `${route.route_id} has an invalid mode`);
+  }
+  invariant(settlement.living_cycle?.currency === "KAIOS_CREDIT", `${path}.living_cycle must use KAIOS Credit`);
+  invariant(settlement.living_cycle.salary > settlement.living_cycle.tax + settlement.living_cycle.rent, `${path}.living_cycle must leave positive income`);
+}
+
 export function validateWorldFixture(world) {
   invariant(isRecord(world), "root must be an object");
   invariant(world.meta?.synthetic === true, "World Viewer accepts synthetic data only");
@@ -438,6 +478,7 @@ export function validateWorldFixture(world) {
   const planetIds = new Set(world.planet_profiles.map(({ planet_id: id }) => id));
   invariant(["EARTH", "MOON", "MARS", "JUPITER", "FUTURE_PLANET"].every((id) => planetIds.has(id)), "required Planet profiles are missing");
   validateProductionAlpha(world.production_alpha);
+  validateSettlementAlpha(world.settlement_alpha);
 
   const actionIds = (world.proposalActions ?? []).map((action) => (
     typeof action === "string" ? action : action?.id

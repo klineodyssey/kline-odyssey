@@ -9,6 +9,9 @@ import { createLifeExchangeRuntime } from "../exchange/life-exchange-runtime.js"
 import { createCivilizationGenesisRuntime } from "../genesis/genesis-runtime.js";
 import { createPlanetEnvironmentRuntime } from "../planet/planet-environment-runtime.js";
 import { createProductionRuntime } from "../production/production-runtime.js";
+import { createLogisticsRuntime } from "../settlement/logistics-runtime.js";
+import { createPopulationRuntime } from "../settlement/population-runtime.js";
+import { createSettlementRuntime } from "../settlement/settlement-runtime.js";
 import { createSimulationClock } from "../simulation/simulation-clock.js";
 import { boundedPush, createNotifier, runtimeError, snapshot, stableId } from "./runtime-utils.js";
 
@@ -43,6 +46,26 @@ export function createCivilizationRuntime({
     genesisTreasury: config.genesis_treasury ?? 10_000,
     storage,
     storageKey: `${storagePrefix}.economy`
+  });
+  const settlementConfig = world.settlement_alpha ?? {};
+  const population = createPopulationRuntime({
+    citizenSnapshots: citizen.listSnapshots(),
+    hierarchy: settlementConfig.hierarchy,
+    storage,
+    storageKey: `${storagePrefix}.population`
+  });
+  const logistics = createLogisticsRuntime({
+    routes: settlementConfig.logistics_routes,
+    storage,
+    storageKey: `${storagePrefix}.logistics`
+  });
+  const settlement = createSettlementRuntime({
+    economyRuntime: economy,
+    populationRuntime: population,
+    playerId,
+    playerLifeId,
+    storage,
+    storageKey: `${storagePrefix}.settlement`
   });
   const productionConfig = world.production_alpha;
   if (!productionConfig) throw new TypeError("Civilization Runtime requires the Sprint 005 production fixture");
@@ -88,6 +111,9 @@ export function createCivilizationRuntime({
     genesis: genesis.getSnapshot(),
     planet_environment: planet.getSnapshot(),
     economy: economy.getSnapshot(),
+    population: population.getSnapshot(),
+    logistics: logistics.getSnapshot(),
+    settlement: settlement.getSnapshot(),
     agriculture: configuredAgriculture.getSnapshot(),
     ecosystem: ecosystem.getSnapshot(),
     production: production.getSnapshot(),
@@ -167,6 +193,9 @@ export function createCivilizationRuntime({
       production: production.getSnapshot(),
       company: aiCompany.getSnapshot(),
       ecosystem: ecosystem.getSnapshot(),
+      population: population.getSnapshot(),
+      logistics: logistics.getSnapshot(),
+      settlement: settlement.getSnapshot(),
       buildings: buildings(),
       world
     });
@@ -186,8 +215,12 @@ export function createCivilizationRuntime({
       record("MEAL", { activity: next, ate, drank });
     } else if (next === "WORK") {
       tryLifeAction("WORK");
-      try { economy.payReward({ ownerId: playerId, amount: 15, reason: "DAILY_WORK" }); } catch { /* Prototype treasury can enter a constrained state. */ }
-      record("WORK_STARTED", { reward: 15 });
+      try {
+        settlement.runLivingCycle(settlementConfig.living_cycle);
+        record("WORK_STARTED", { salary: settlementConfig.living_cycle?.salary ?? 24, currency: "KAIOS_CREDIT" });
+      } catch {
+        record("WORK_STARTED", { salary: 0, settlement_status: "CONSTRAINED" });
+      }
     } else if (next === "SLEEP") {
       tryLifeAction("SLEEP");
       record("SLEEP_STARTED");
@@ -243,7 +276,20 @@ export function createCivilizationRuntime({
         factoryStatus: production.getSnapshot().factory.status,
         supplyChainHealth: supplyChainHealth()
       });
+      logistics.advance({
+        elapsedHours: chunk / 60,
+        productionPollution: production.getSnapshot().factory.status === "READY" ? 22 : 8,
+        ecosystemHealth: ecosystem.getSnapshot().average_health
+      });
       citizen.advance({ elapsedMinutes: chunk, clockSnapshot, lifeSnapshots: lifeRuntime.listSnapshots() });
+      const currentCity = city.getSnapshot();
+      population.advance({
+        elapsedHours: chunk / 60,
+        educationCapacity: currentCity.education ?? 70,
+        employmentDemand: currentCity.employment ?? 70,
+        carryingCapacity: settlementConfig.carrying_capacity ?? 24,
+        citizenSnapshots: citizen.listSnapshots()
+      });
       citizen.setMoney(playerLifeId, economy.getSnapshot().player_balance);
       remaining -= chunk;
     }
@@ -340,6 +386,119 @@ export function createCivilizationRuntime({
     return getSnapshot();
   }
 
+  function runSettlementCycle() {
+    usable();
+    born();
+    settlement.runLivingCycle(settlementConfig.living_cycle);
+    citizen.setMoney(playerLifeId, economy.getSnapshot().player_balance);
+    refreshCity();
+    record("SETTLEMENT_CYCLE_COMPLETED", { currency: "KAIOS_CREDIT" });
+    notifier.emit("SETTLEMENT_CYCLE_COMPLETED");
+    return getSnapshot();
+  }
+
+  function registerMarriage(partnerAId = playerLifeId, partnerBId = "life-npc-guide-001") {
+    usable();
+    born();
+    population.registerMarriage({ partnerAId, partnerBId, consentA: true, consentB: true });
+    refreshCity();
+    record("MARRIAGE_REGISTERED", { partner_ids: [partnerAId, partnerBId] });
+    notifier.emit("MARRIAGE_REGISTERED", { partner_ids: [partnerAId, partnerBId] });
+    return getSnapshot();
+  }
+
+  function registerBirth(familyId = "family-starter-001") {
+    usable();
+    born();
+    const inventory = economy.getSnapshot().player_inventory;
+    const citySnapshot = city.getSnapshot();
+    const resourceReady = (inventory.RICE ?? 0) >= 1
+      && (inventory.WATER ?? 0) >= 1
+      && citySnapshot.housing >= 40
+      && ecosystem.getSnapshot().average_health >= 40;
+    population.registerBirth({
+      familyId,
+      displayName: `Genesis Child ${population.getSnapshot().metrics.births + 1}`,
+      carryingCapacity: settlementConfig.carrying_capacity ?? 24,
+      resourceReady
+    });
+    economy.consume({ ownerId: playerId, resourceId: "RICE", quantity: 1, reason: "BIRTH_SUPPORT" });
+    economy.consume({ ownerId: playerId, resourceId: "WATER", quantity: 1, reason: "BIRTH_SUPPORT" });
+    refreshCity();
+    record("BIRTH_REGISTERED", { family_id: familyId });
+    notifier.emit("BIRTH_REGISTERED", { family_id: familyId });
+    return getSnapshot();
+  }
+
+  function dispatchLogistics(routeId = "route-farm-warehouse", resourceId = "RICE", quantity = 1, mode = "DOMESTIC") {
+    usable();
+    born();
+    const job = logistics.dispatch({ routeId, resourceId, quantity, mode });
+    if (job.status === "DELIVERED") economy.createTransportJob({ resourceId, quantity, from: job.from, to: job.to });
+    refreshCity();
+    record("LOGISTICS_DISPATCHED", { job_id: job.job_id, mode: job.mode });
+    notifier.emit("LOGISTICS_DISPATCHED", { job_id: job.job_id });
+    return getSnapshot();
+  }
+
+  function recoverEcology(waterUnits = 1, effort = 10) {
+    usable();
+    born();
+    economy.consume({ ownerId: playerId, resourceId: "WATER", quantity: waterUnits, reason: "ECOLOGY_RECOVERY" });
+    logistics.recoverEcology({ waterUnits, effort });
+    refreshCity();
+    record("ECOLOGY_RECOVERY_COMPLETED", { water_units: waterUnits, effort });
+    notifier.emit("ECOLOGY_RECOVERY_COMPLETED");
+    return getSnapshot();
+  }
+
+  function requestKgenSettlement(amount = 1) {
+    usable();
+    born();
+    settlement.requestAssetSettlement({ asset: "KGEN", direction: "KGEN_TO_CREDIT", amount, requesterId: playerId });
+    record("KGEN_SETTLEMENT_REQUESTED", { amount, execution: false });
+    notifier.emit("KGEN_SETTLEMENT_REQUESTED", { amount });
+    return getSnapshot();
+  }
+
+  function requestExternalSettlement(asset = "TWD", amount = 100) {
+    usable();
+    born();
+    settlement.requestAssetSettlement({ asset, direction: "EXTERNAL_TO_CREDIT", amount, requesterId: playerId });
+    record("EXTERNAL_SETTLEMENT_REQUESTED", { asset, amount, execution: false });
+    notifier.emit("EXTERNAL_SETTLEMENT_REQUESTED", { asset, amount });
+    return getSnapshot();
+  }
+
+  function requestMortgage() {
+    usable();
+    born();
+    settlement.requestMortgage({ parcelId: world.player?.starter_parcel_id });
+    record("MORTGAGE_ARCHITECTURE_PROPOSED");
+    notifier.emit("MORTGAGE_ARCHITECTURE_PROPOSED");
+    return getSnapshot();
+  }
+
+  function requestInsurance() {
+    usable();
+    born();
+    settlement.requestInsurance({ subjectId: playerLifeId });
+    record("INSURANCE_ARCHITECTURE_PROPOSED");
+    notifier.emit("INSURANCE_ARCHITECTURE_PROPOSED");
+    return getSnapshot();
+  }
+
+  function settleInheritance() {
+    usable();
+    born();
+    settlement.settleInheritance({ beneficiaryId: playerLifeId });
+    citizen.setMoney(playerLifeId, economy.getSnapshot().player_balance);
+    refreshCity();
+    record("INHERITANCE_SETTLED", { beneficiary_id: playerLifeId });
+    notifier.emit("INHERITANCE_SETTLED", { beneficiary_id: playerLifeId });
+    return getSnapshot();
+  }
+
   function start({ intervalMs = 1000, minutesPerTick = 60 } = {}) {
     usable();
     born();
@@ -370,6 +529,9 @@ export function createCivilizationRuntime({
       citizen: citizen.integrityReport(),
       ai_worker: aiWorker.integrityReport(),
       economy: economy.integrityReport(),
+      population: population.integrityReport(),
+      logistics: logistics.integrityReport(),
+      settlement: settlement.integrityReport(),
       agriculture: configuredAgriculture.integrityReport(),
       ecosystem: ecosystem.integrityReport(),
       production: production.integrityReport(),
@@ -418,6 +580,16 @@ export function createCivilizationRuntime({
     runProductionCycle,
     sellCompanyProduct,
     requestExchangeReview,
+    runSettlementCycle,
+    registerMarriage,
+    registerBirth,
+    dispatchLogistics,
+    recoverEcology,
+    requestKgenSettlement,
+    requestExternalSettlement,
+    requestMortgage,
+    requestInsurance,
+    settleInheritance,
     start,
     stop,
     subscribe: notifier.subscribe,
@@ -430,6 +602,9 @@ export function createCivilizationRuntime({
       citizen.destroy();
       aiWorker.destroy();
       economy.destroy();
+      population.destroy();
+      logistics.destroy();
+      settlement.destroy();
       configuredAgriculture.destroy();
       ecosystem.destroy();
       production.destroy();
