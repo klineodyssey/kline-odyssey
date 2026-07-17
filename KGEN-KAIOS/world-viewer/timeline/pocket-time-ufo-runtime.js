@@ -10,7 +10,7 @@ import {
 } from "../civilization/runtime-utils.js";
 
 const RUNTIME = "PocketTimeCloakedUfoRuntime";
-const SCHEMA_VERSION = "1.0.0";
+const SCHEMA_VERSION = "2.0.0";
 const MAX_AUDIT = 160;
 
 function validateConfig(config) {
@@ -28,8 +28,9 @@ function validateConfig(config) {
 export function createPocketTimeCloakedUfoRuntime({
   config,
   civilizationProvider,
+  sharedGateProvider,
   storage,
-  storageKey = "kaios.world-viewer.pocket-time-ufo.v1"
+  storageKey = "kaios.world-viewer.pocket-time-ufo.v2"
 } = {}) {
   validateConfig(config);
   if (typeof civilizationProvider !== "function") throw new TypeError("Timeline vehicle requires a Civilization state provider");
@@ -62,11 +63,21 @@ export function createPocketTimeCloakedUfoRuntime({
   };
 
   function technologyReady() {
+    if (typeof sharedGateProvider === "function") {
+      return sharedGateProvider().technology_requirements.every(({ ready }) => ready === true);
+    }
     return config.technology_requirements.every(({ technology_id: id, required_points: required }) => state.technology_progress[id] >= required);
   }
 
   function materialsReady() {
-    return state.built || config.material_requirements.every(({ material_id: id, quantity }) => state.material_stockpile[id] >= quantity);
+    const localReady = state.built || config.material_requirements.every(({ material_id: id, quantity }) => state.material_stockpile[id] >= quantity);
+    const sharedReady = typeof sharedGateProvider !== "function" || sharedGateProvider().special_material_ready === true;
+    return localReady && sharedReady;
+  }
+
+  function capabilitiesReady() {
+    return typeof sharedGateProvider !== "function"
+      || sharedGateProvider().capability_requirements.every(({ ready }) => ready === true);
   }
 
   function civilizationReady() {
@@ -77,7 +88,8 @@ export function createPocketTimeCloakedUfoRuntime({
 
   function status() {
     if (state.built) return state.energy_reserve >= config.travel_energy_cost ? "OPERATIONAL" : "BUILT_ENERGY_REQUIRED";
-    if (technologyReady() && materialsReady() && civilizationReady()) return "CONSTRUCTION_READY";
+    if (technologyReady() && materialsReady() && capabilitiesReady() && civilizationReady()) return "CONSTRUCTION_READY";
+    if (technologyReady() && materialsReady() && !capabilitiesReady()) return "CAPABILITY_GATE_REQUIRED";
     if (technologyReady() && materialsReady()) return "CIVILIZATION_GATE_REQUIRED";
     if (technologyReady()) return "MATERIAL_READY_REQUIRED";
     return "BLUEPRINT_LOCKED";
@@ -85,8 +97,9 @@ export function createPocketTimeCloakedUfoRuntime({
 
   const getSnapshot = () => {
     const civilization = civilizationProvider() ?? {};
+    const sharedGates = typeof sharedGateProvider === "function" ? sharedGateProvider() : null;
     return snapshot({
-      runtime: "POCKET_TIME_CLOAKED_UFO_ALPHA",
+      runtime: "POCKET_TIME_CLOAKED_UFO_V2_ALPHA",
       schema_version: SCHEMA_VERSION,
       vehicle_id: config.vehicle_id,
       vehicle_type: config.vehicle_type,
@@ -100,11 +113,17 @@ export function createPocketTimeCloakedUfoRuntime({
       energy_reserve: state.energy_reserve,
       energy_capacity: config.energy_capacity,
       travel_energy_cost: config.travel_energy_cost,
-      technology_requirements: config.technology_requirements.map((requirement) => ({
-        ...requirement,
-        progress: state.technology_progress[requirement.technology_id],
-        ready: state.technology_progress[requirement.technology_id] >= requirement.required_points
-      })),
+      shared_technology_source: sharedGates ? "COSMIC_TECHNOLOGY_ALPHA" : "LEGACY_LOCAL_RESEARCH",
+      technology_requirements: sharedGates?.technology_requirements ?? config.technology_requirements.map((requirement) => ({
+          ...requirement,
+          progress: state.technology_progress[requirement.technology_id],
+          ready: state.technology_progress[requirement.technology_id] >= requirement.required_points
+        })),
+      capability_requirements: sharedGates?.capability_requirements ?? [],
+      special_material_package: sharedGates ? {
+        costs: sharedGates.special_material_costs,
+        ready: sharedGates.special_material_ready
+      } : null,
       material_requirements: config.material_requirements.map((requirement) => ({
         ...requirement,
         stockpiled: state.material_stockpile[requirement.material_id],
@@ -136,6 +155,9 @@ export function createPocketTimeCloakedUfoRuntime({
 
   function research(technologyId, points = config.research_increment) {
     usable();
+    if (typeof sharedGateProvider === "function") {
+      throw runtimeError(RUNTIME, "SHARED_TECHNOLOGY_REQUIRED", "UFO V2 research is owned by Cosmic Technology Runtime");
+    }
     if (state.built) return getSnapshot();
     const requirement = config.technology_requirements.find(({ technology_id: id }) => id === technologyId);
     if (!requirement) throw runtimeError(RUNTIME, "UNKNOWN_TECHNOLOGY", `Unknown Timeline technology ${technologyId}`);
@@ -169,6 +191,7 @@ export function createPocketTimeCloakedUfoRuntime({
     const blocked = [];
     if (!technologyReady()) blocked.push("TECHNOLOGY");
     if (!materialsReady()) blocked.push("MATERIALS");
+    if (!capabilitiesReady()) blocked.push("CAPABILITIES");
     if (!civilizationReady()) blocked.push("CIVILIZATION");
     if (blocked.length) throw runtimeError(RUNTIME, "VEHICLE_BUILD_BLOCKED", `Timeline vehicle build blocked by ${blocked.join(", ")}`);
     state.revision += 1;
@@ -221,13 +244,15 @@ export function createPocketTimeCloakedUfoRuntime({
     if (config.vehicle_type !== "POCKET_TIME_CLOAKED_UFO") issues.push("invalid Timeline transport type");
     if (state.built && state.checksum !== config.blueprint_checksum) issues.push("vehicle checksum mismatch");
     if (state.energy_reserve < 0 || state.energy_reserve > config.energy_capacity) issues.push("vehicle energy outside capacity");
-    for (const requirement of config.technology_requirements) {
-      const progress = state.technology_progress[requirement.technology_id];
-      if (progress < 0 || progress > requirement.required_points) issues.push(`${requirement.technology_id} research outside bounds`);
+    if (typeof sharedGateProvider !== "function") {
+      for (const requirement of config.technology_requirements) {
+        const progress = state.technology_progress[requirement.technology_id];
+        if (progress < 0 || progress > requirement.required_points) issues.push(`${requirement.technology_id} research outside bounds`);
+      }
     }
     if (Object.values(state.material_stockpile).some((quantity) => quantity < 0)) issues.push("vehicle material stockpile became negative");
     if (state.audit_log.length > MAX_AUDIT) issues.push("vehicle audit limit exceeded");
-    return snapshot({ ok: issues.length === 0, runtime: "POCKET_TIME_CLOAKED_UFO_ALPHA", issues, status: status() });
+    return snapshot({ ok: issues.length === 0, runtime: "POCKET_TIME_CLOAKED_UFO_V2_ALPHA", issues, status: status(), shared_gates: sharedGateProvider?.() ?? null });
   }
 
   return Object.freeze({

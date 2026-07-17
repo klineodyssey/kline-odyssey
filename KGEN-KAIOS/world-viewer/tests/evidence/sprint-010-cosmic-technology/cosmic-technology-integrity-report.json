@@ -1,0 +1,161 @@
+{
+  "status": "PASS",
+  "decision_id": "HUMAN-SPRINT-010-COSMIC-TECHNOLOGY",
+  "cosmic_technology": {
+    "ok": true,
+    "runtime": "COSMIC_TECHNOLOGY_ALPHA",
+    "issues": [],
+    "reports": {
+      "technology": {
+        "ok": true,
+        "runtime": "COSMIC_TECHNOLOGY_TREE_ALPHA",
+        "issues": []
+      },
+      "research": {
+        "ok": true,
+        "runtime": "COSMIC_RESEARCH_ALPHA",
+        "issues": []
+      },
+      "materials": {
+        "ok": true,
+        "runtime": "COSMIC_MATERIAL_ALPHA",
+        "issues": []
+      },
+      "energy": {
+        "ok": true,
+        "runtime": "COSMIC_ENERGY_ALPHA",
+        "issues": []
+      },
+      "vehicles": {
+        "ok": true,
+        "runtime": "COSMIC_VEHICLE_ALPHA",
+        "issues": []
+      },
+      "abilities": {
+        "ok": true,
+        "runtime": "SPECIAL_ABILITY_ALPHA",
+        "issues": []
+      },
+      "coordinates": {
+        "ok": true,
+        "runtime": "COSMIC_COORDINATE_ALPHA",
+        "issues": []
+      },
+      "exploration": {
+        "ok": true,
+        "runtime": "SPACE_EXPLORATION_ALPHA",
+        "issues": []
+      }
+    },
+    "ufo_v2_gates": {
+      "schema_version": "2.0.0",
+      "technology_requirements": [
+        {
+          "technology_id": "ANTI_GRAVITY_TECHNOLOGY",
+          "ready": true
+        },
+        {
+          "technology_id": "WARP_TECHNOLOGY",
+          "ready": true
+        },
+        {
+          "technology_id": "TIMELINE_TECHNOLOGY",
+          "ready": true
+        }
+      ],
+      "capability_requirements": [
+        {
+          "capability_id": "AI_NAVIGATION",
+          "ready": true
+        },
+        {
+          "capability_id": "SHAPE_SHIFT_CAPABILITY",
+          "ready": true
+        }
+      ],
+      "special_material_costs": {
+        "METEORITE": 2,
+        "RARE_EARTH": 2,
+        "TIMELINE_CRYSTAL": 2,
+        "WARP_CRYSTAL": 2
+      },
+      "special_material_ready": true,
+      "ready": true
+    }
+  },
+  "timeline": {
+    "ok": true,
+    "runtime": "CIVILIZATION_TIMELINE_ALPHA",
+    "issues": [],
+    "vehicle": {
+      "ok": true,
+      "runtime": "POCKET_TIME_CLOAKED_UFO_V2_ALPHA",
+      "issues": [],
+      "status": "OPERATIONAL",
+      "shared_gates": {
+        "schema_version": "2.0.0",
+        "technology_requirements": [
+          {
+            "technology_id": "ANTI_GRAVITY_TECHNOLOGY",
+            "ready": true
+          },
+          {
+            "technology_id": "WARP_TECHNOLOGY",
+            "ready": true
+          },
+          {
+            "technology_id": "TIMELINE_TECHNOLOGY",
+            "ready": true
+          }
+        ],
+        "capability_requirements": [
+          {
+            "capability_id": "AI_NAVIGATION",
+            "ready": true
+          },
+          {
+            "capability_id": "SHAPE_SHIFT_CAPABILITY",
+            "ready": true
+          }
+        ],
+        "special_material_costs": {
+          "METEORITE": 2,
+          "RARE_EARTH": 2,
+          "TIMELINE_CRYSTAL": 2,
+          "WARP_CRYSTAL": 2
+        },
+        "special_material_ready": true,
+        "ready": true
+      }
+    },
+    "journey_count": 1
+  },
+  "verified_flows": {
+    "fourteen_age_dependency_tree": true,
+    "five_factor_unlock_gate": true,
+    "twelve_material_bounded_ledger": true,
+    "eight_energy_bounded_ledger": true,
+    "nine_vehicle_catalog": true,
+    "nine_special_ability_catalog": true,
+    "clone_proposal_only": true,
+    "data_driven_coordinates": true,
+    "five_space_exploration_activities": true,
+    "colony_proposal_only": true,
+    "ufo_v2_shared_technology_truth": true,
+    "ufo_v2_six_gates": true,
+    "sole_timeline_transport": true,
+    "canonical_history_immutable": true
+  },
+  "protected_runtime_mutated": false,
+  "universe_map_current_mutated": false,
+  "kernel_current_mutated": false,
+  "life_os_current_mutated": false,
+  "cambrian_current_mutated": false,
+  "nation_current_mutated": false,
+  "timeline_current_mutated": false,
+  "settlement_current_mutated": false,
+  "governance_current_mutated": false,
+  "frozen_baseline_mutated": false,
+  "token_contract_mutated": false,
+  "human_main_modified": false
+}

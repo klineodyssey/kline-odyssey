@@ -1,5 +1,6 @@
 import { renderNationView } from "../nation/nation-view.js";
 import { renderTimelineView } from "../timeline/timeline-view.js";
+import { renderCosmicTechnologyView } from "../technology/cosmic-technology-view.js";
 
 const TABS = Object.freeze([
   ["GENESIS", "Genesis"],
@@ -16,6 +17,7 @@ const TABS = Object.freeze([
   ["SERVICES", "Services"],
   ["RESILIENCE", "Resilience"],
   ["NATION", "Nation"],
+  ["TECHNOLOGY", "Technology"],
   ["TIMELINE", "Timeline"],
   ["CITY", "City"]
 ]);
@@ -1082,6 +1084,7 @@ export function createCivilizationView(container, callbacks = {}) {
     else if (activeTab === "SERVICES") root.append(renderServices(documentRef, model, callbacks));
     else if (activeTab === "RESILIENCE") root.append(renderResilience(documentRef, model, callbacks));
     else if (activeTab === "NATION") root.append(renderNationView(documentRef, model, callbacks));
+    else if (activeTab === "TECHNOLOGY") root.append(renderCosmicTechnologyView(documentRef, model, callbacks));
     else if (activeTab === "TIMELINE") root.append(renderTimelineView(documentRef, model, callbacks));
     else if (activeTab === "CITY") root.append(renderCity(documentRef, model));
     else root.append(renderToday(documentRef, model, callbacks));

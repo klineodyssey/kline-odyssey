@@ -93,6 +93,13 @@ const NATION_TAX_IDS = Object.freeze(["INCOME_TAX", "SALES_TAX", "BUSINESS_TAX",
 const PLANET_RESOURCE_IDS = Object.freeze(["WATER", "FOREST", "STONE", "IRON", "COPPER", "GOLD", "OIL", "GAS", "RARE_EARTH", "FOOD", "ENERGY"]);
 const DIPLOMACY_TYPES = Object.freeze(["ALLIANCE", "TRADE_AGREEMENT", "EMBASSY", "VISA", "PEACE_TREATY", "SANCTION"]);
 const TIMELINE_ERA_IDS = Object.freeze(["CAMBRIAN", "ANCIENT_CIVILIZATION", "STONE_AGE", "BRONZE_AGE", "IRON_AGE", "INDUSTRIAL_AGE", "INFORMATION_AGE", "AI_CIVILIZATION", "INTERSTELLAR_CIVILIZATION"]);
+const TECHNOLOGY_AGE_IDS = Object.freeze(["STONE_AGE", "BRONZE_AGE", "IRON_AGE", "INDUSTRIAL_AGE", "ELECTRICAL_AGE", "COMPUTER_AGE", "AI_AGE", "QUANTUM_AGE", "ANTI_GRAVITY_AGE", "WARP_AGE", "TIMELINE_AGE", "INTERSTELLAR_AGE", "DIMENSIONAL_AGE", "MULTIVERSE_AGE"]);
+const COSMIC_MATERIAL_IDS = Object.freeze(["IRON", "COPPER", "GOLD", "DIAMOND", "METEORITE", "URANIUM", "RARE_EARTH", "DARK_MATTER", "ANTI_MATTER", "EXOTIC_MATTER", "TIMELINE_CRYSTAL", "WARP_CRYSTAL"]);
+const COSMIC_ENERGY_IDS = Object.freeze(["FIRE", "ELECTRICITY", "NUCLEAR", "FUSION", "ANTI_GRAVITY_ENERGY", "DARK_ENERGY", "ANTI_MATTER_ENERGY", "TIMELINE_ENERGY"]);
+const COSMIC_VEHICLE_IDS = Object.freeze(["HORSE", "SHIP", "AIRCRAFT", "ROCKET", "SPACECRAFT", "GOLDEN_CLOUD", "POCKET_TIME_CLOAKED_UFO", "WARP_SHIP", "TIMELINE_VEHICLE"]);
+const SPECIAL_ABILITY_IDS = Object.freeze(["TRANSFORMATIONS_72", "TRANSFORMATIONS_108", "THIRD_EYE", "CLONE", "INVISIBILITY", "AVATAR", "MIND_COMMUNICATION", "TIMELINE_NAVIGATION", "REALITY_MAPPING"]);
+const COSMIC_COORDINATE_TYPES = Object.freeze(["PLANET", "CIVILIZATION", "TEMPLE", "PORTAL", "TIMELINE_GATE", "GRAVITY_WELL", "SPECIAL_COORDINATE"]);
+const SPACE_EXPLORATION_IDS = Object.freeze(["PLANET_DISCOVERY", "SPACE_ROUTE", "RESOURCE_SURVEY", "COLONY_PLANNING", "DEEP_SPACE_MISSION"]);
 const SEMANTIC_VERSION = /^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$/;
 const SAFE_DNA_SUMMARY_FIELDS = new Set([
   "summary_id",
@@ -577,6 +584,59 @@ function validateNationTimelineAlpha(runtime, world) {
   invariant(NATION_FOUNDING_REQUIREMENTS.length === 6, `${path}.founding requirement contract is invalid`);
 }
 
+function validateCosmicTechnologyAlpha(runtime) {
+  const path = "cosmic_technology_alpha";
+  invariant(isRecord(runtime), `${path} must be an object`);
+  invariant(runtime.decision_id === "HUMAN-SPRINT-010-COSMIC-TECHNOLOGY", `${path} has invalid decision ID`);
+  invariant(runtime.simulation_only === true && runtime.authoritative_registry === false, `${path} must remain synthetic and non-authoritative`);
+  invariant(
+    runtime.real_nuclear_operation === false
+      && runtime.real_antimatter_operation === false
+      && runtime.real_navigation === false
+      && runtime.real_time_travel === false,
+    `${path} crossed the simulation safety boundary`
+  );
+  validateNoPrivateFields(runtime, path);
+
+  const nodes = runtime.technology_ages;
+  invariant(JSON.stringify(nodes?.map(({ age_id: id }) => id)) === JSON.stringify(TECHNOLOGY_AGE_IDS), `${path}.technology_ages is invalid`);
+  invariant(new Set(nodes.map(({ technology_id: id }) => id)).size === nodes.length, `${path}.technology IDs must be unique`);
+  const technologyIds = new Set(nodes.map(({ technology_id: id }) => id));
+  invariant(nodes[0].initially_unlocked === true && nodes.slice(1).every(({ initially_unlocked: unlocked }) => unlocked !== true), `${path} must have one root technology`);
+  invariant(nodes.every((node) => (
+    Number.isInteger(node.index)
+      && Number.isFinite(node.required_research_points)
+      && Number.isFinite(node.required_knowledge)
+      && Number.isFinite(node.minimum_civilization_score)
+      && node.dependencies.every((id) => technologyIds.has(id))
+      && isRecord(node.material_costs)
+      && isRecord(node.energy_costs)
+  )), `${path}.technology node contract is invalid`);
+
+  invariant(JSON.stringify(runtime.materials?.map(({ material_id: id }) => id)) === JSON.stringify(COSMIC_MATERIAL_IDS), `${path}.materials is invalid`);
+  invariant(runtime.materials.every(({ initial_stock: stock, capacity }) => Number.isFinite(stock) && Number.isFinite(capacity) && stock >= 0 && stock <= capacity), `${path}.materials has invalid capacity bounds`);
+  invariant(JSON.stringify(runtime.energy?.map(({ energy_id: id }) => id)) === JSON.stringify(COSMIC_ENERGY_IDS), `${path}.energy is invalid`);
+  invariant(runtime.energy.every(({ initial_reserve: reserve, capacity }) => Number.isFinite(reserve) && Number.isFinite(capacity) && reserve >= 0 && reserve <= capacity), `${path}.energy has invalid capacity bounds`);
+  invariant(JSON.stringify(runtime.vehicles?.map(({ vehicle_id: id }) => id)) === JSON.stringify(COSMIC_VEHICLE_IDS), `${path}.vehicles is invalid`);
+  invariant(runtime.vehicles.find(({ vehicle_id: id }) => id === "POCKET_TIME_CLOAKED_UFO")?.timeline_authority === true, `${path} must retain the sole Timeline transport`);
+  invariant(runtime.vehicles.filter(({ timeline_authority: authority }) => authority === true).length === 1, `${path} grants duplicate Timeline authority`);
+  invariant(runtime.vehicles.find(({ vehicle_id: id }) => id === "TIMELINE_VEHICLE")?.research_archetype_only === true, `${path}.TIMELINE_VEHICLE must remain non-executable`);
+  invariant(JSON.stringify(runtime.abilities?.map(({ ability_id: id }) => id)) === JSON.stringify(SPECIAL_ABILITY_IDS), `${path}.abilities is invalid`);
+  invariant(runtime.abilities.find(({ ability_id: id }) => id === "CLONE")?.sandbox_proposal_only === true, `${path}.CLONE must remain proposal only`);
+
+  invariant(JSON.stringify(runtime.ufo_v2?.required_technologies) === JSON.stringify(["ANTI_GRAVITY_TECHNOLOGY", "WARP_TECHNOLOGY", "TIMELINE_TECHNOLOGY"]), `${path}.ufo_v2 technology gates are invalid`);
+  invariant(JSON.stringify(runtime.ufo_v2?.required_capabilities) === JSON.stringify(["AI_NAVIGATION", "SHAPE_SHIFT_CAPABILITY"]), `${path}.ufo_v2 capability gates are invalid`);
+  invariant(isRecord(runtime.ufo_v2?.special_material_costs), `${path}.ufo_v2 special material package is missing`);
+
+  const coordinates = runtime.coordinates;
+  invariant(Array.isArray(coordinates) && COSMIC_COORDINATE_TYPES.every((type) => coordinates.some(({ coordinate_type: candidate }) => candidate === type)), `${path}.coordinates lacks an approved type`);
+  invariant(new Set(coordinates.map(({ coordinate_id: id }) => id)).size === coordinates.length, `${path}.coordinate IDs must be unique`);
+  invariant(coordinates.every((coordinate) => COSMIC_COORDINATE_TYPES.includes(coordinate.coordinate_type) && SEMANTIC_VERSION.test(coordinate.version) && technologyIds.has(coordinate.required_technology)), `${path}.coordinate contract is invalid`);
+  invariant(coordinates.filter(({ source_class: source }) => source === "CURRENT_REFERENCE").every(({ canonical_reference: reference }) => /^K\d+$/.test(reference)), `${path}.CURRENT references need K-anchor evidence`);
+  invariant(JSON.stringify(runtime.exploration_activities?.map(({ activity_id: id }) => id)) === JSON.stringify(SPACE_EXPLORATION_IDS), `${path}.exploration activities are invalid`);
+  invariant(runtime.exploration_activities.find(({ activity_id: id }) => id === "COLONY_PLANNING")?.proposal_only === true, `${path}.COLONY_PLANNING must remain proposal only`);
+}
+
 export function validateWorldFixture(world) {
   invariant(isRecord(world), "root must be an object");
   invariant(world.meta?.synthetic === true, "World Viewer accepts synthetic data only");
@@ -624,6 +684,7 @@ export function validateWorldFixture(world) {
   validateSettlementAlpha(world.settlement_alpha);
   validateGovernanceAlpha(world.governance_alpha);
   validateNationTimelineAlpha(world.nation_timeline_alpha, world);
+  validateCosmicTechnologyAlpha(world.cosmic_technology_alpha);
 
   const actionIds = (world.proposalActions ?? []).map((action) => (
     typeof action === "string" ? action : action?.id

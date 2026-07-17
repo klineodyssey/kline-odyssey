@@ -2717,6 +2717,157 @@ def run_nation_timeline_mobile(browser: Browser, args: argparse.Namespace, gate:
         context.close()
 
 
+def run_cosmic_technology_alpha(browser: Browser, args: argparse.Namespace, gate: Gate) -> None:
+    case = ViewportCase("cosmic-technology-alpha", "desktop", "landscape", 1440, 900, "dark", False, 1)
+    context = new_context(browser, case)
+    page = context.new_page()
+    monitor = BrowserMonitor(page, args.base_url)
+    try:
+        load_page(page, args.base_url, "dark")
+        start_mock_session(page, with_location=False)
+        page.locator("[data-mode='CIVILIZATION']").click()
+        page.locator("[data-civilization-action='TAB_TECHNOLOGY']").click()
+        page.wait_for_function("() => document.documentElement.dataset.technologyAge === 'STONE_AGE'")
+        gate.expect(
+            "cosmic-technology.fourteen-age-tree",
+            "cosmic-technology",
+            page.locator(".technology-age-card").count() == 14
+            and page.evaluate("document.documentElement.dataset.technologyUnlocked") == "1"
+            and all(label in clean_text(page.locator(".civilization-view").inner_text()) for label in (
+                "Stone Age", "Quantum Age", "Anti-Gravity Age", "Timeline Age", "Multiverse Age",
+            )),
+        )
+
+        page.locator("[data-civilization-action='UNLOCK_ANTI_GRAVITY_TECHNOLOGY']").is_disabled()
+        page.locator("[data-civilization-action='TAB_TIMELINE']").click()
+        for _ in range(4):
+            page.locator("[data-civilization-action='RESEARCH_TIMELINE_VEHICLE']").click()
+        page.locator("[data-civilization-action='SUPPLY_TIMELINE_VEHICLE']").click()
+        page.wait_for_function("() => document.documentElement.dataset.ufoV2Ready === 'true'")
+
+        page.locator("[data-civilization-action='TAB_TECHNOLOGY']").click()
+        gate.expect(
+            "cosmic-technology.shared-ufo-v2-gates",
+            "cosmic-technology",
+            page.evaluate("document.documentElement.dataset.technologyAge") == "MULTIVERSE_AGE"
+            and page.evaluate("document.documentElement.dataset.technologyUnlocked") == "14"
+            and page.evaluate("document.documentElement.dataset.ufoV2Ready") == "true",
+        )
+
+        page.locator("[data-civilization-action='TECH_PANEL_FLEET']").click()
+        page.locator("[data-civilization-action='BUILD_HORSE']").click()
+        page.wait_for_function("() => document.documentElement.dataset.cosmicVehicles === '1'")
+        fleet_text = clean_text(page.locator(".civilization-view").inner_text())
+        gate.expect(
+            "cosmic-technology.nine-vehicle-catalog",
+            "cosmic-vehicle",
+            page.locator(".technology-list-card").count() == 9
+            and "POCKET TIME CLOAKED UFO" in fleet_text
+            and "SOLE TIMELINE TRANSPORT" in fleet_text,
+        )
+
+        page.locator("[data-civilization-action='TECH_PANEL_ABILITIES']").click()
+        for _ in range(4):
+            page.locator("[data-civilization-action='TRAIN_CLONE']").click()
+        page.wait_for_function("() => document.documentElement.dataset.cosmicAbilityProposals === '1'")
+        gate.expect(
+            "cosmic-technology.clone-proposal-only",
+            "cosmic-ability",
+            page.evaluate("document.documentElement.dataset.cosmicAbilityProposals") == "1"
+            and "SANDBOX PROPOSAL ONLY" in clean_text(page.locator(".civilization-view").inner_text()),
+        )
+
+        page.locator("[data-civilization-action='TECH_PANEL_COORDINATES']").click()
+        page.locator("[data-civilization-action='DISCOVER_coord-k16888-moon']").click()
+        page.wait_for_function("() => Number(document.documentElement.dataset.cosmicCoordinates) >= 5")
+        gate.expect(
+            "cosmic-technology.data-driven-coordinate",
+            "cosmic-coordinate",
+            "K16888" in clean_text(page.locator(".civilization-view").inner_text())
+            and "DISCOVERED" in clean_text(page.locator(".civilization-view").inner_text()),
+        )
+
+        page.locator("[data-civilization-action='TECH_PANEL_EXPLORATION']").click()
+        page.locator("[data-civilization-action='EXPLORE_PLANET_DISCOVERY']").click()
+        page.locator("[data-civilization-action='EXPLORE_COLONY_PLANNING']").click()
+        page.wait_for_function("() => document.documentElement.dataset.spaceMissions === '2'")
+        layout = measure_overflow(page)
+        screenshot = capture_screenshot(page, case, args.output_dir, None, args.pixel_threshold)
+        gate.screenshots.append(screenshot)
+        gate.expect(
+            "cosmic-technology.exploration-boundary",
+            "space-exploration",
+            page.evaluate("document.documentElement.dataset.spaceProposals") == "1"
+            and "PROPOSAL ONLY" in clean_text(page.locator(".civilization-view").inner_text())
+            and not layout["offenders"]
+            and screenshot["pixel_variance"] >= 15,
+            details={"layout": layout, "screenshot": screenshot},
+        )
+        browser_clean(monitor, "cosmic-technology-alpha", gate)
+    except Exception as error:
+        gate.add(
+            "cosmic-technology.execution",
+            "cosmic-technology",
+            "FAIL",
+            details={"error": clean_text(error)},
+        )
+        browser_clean(monitor, "cosmic-technology-alpha", gate)
+    finally:
+        context.close()
+
+
+def run_cosmic_technology_mobile(browser: Browser, args: argparse.Namespace, gate: Gate) -> None:
+    source = next(case for case in MATRIX if case.slug == "iphone-portrait-light")
+    case = ViewportCase(
+        "cosmic-technology-mobile", source.family, source.orientation, source.width,
+        source.height, source.theme, source.touch, source.device_scale_factor, source.user_agent,
+    )
+    context = new_context(browser, case)
+    page = context.new_page()
+    monitor = BrowserMonitor(page, args.base_url)
+    try:
+        load_page(page, args.base_url, "light")
+        start_mock_session(page, with_location=False)
+        page.locator("[data-mode='CIVILIZATION']").click()
+        page.locator("[data-civilization-action='TAB_TECHNOLOGY']").click()
+        page.locator("[data-civilization-action='TECH_PANEL_RESOURCES']").click()
+        layout = measure_overflow(page)
+        targets = measure_touch_targets(page)
+        active_tab_visible = page.evaluate("""
+          () => {
+            const tabs = document.querySelector('.civilization-tabs');
+            const active = tabs?.querySelector('[aria-selected="true"]');
+            if (!tabs || !active) return false;
+            const container = tabs.getBoundingClientRect();
+            const target = active.getBoundingClientRect();
+            return target.left >= container.left && target.right <= container.right;
+          }
+        """)
+        screenshot = capture_screenshot(page, case, args.output_dir, None, args.pixel_threshold)
+        gate.screenshots.append(screenshot)
+        gate.expect(
+            "cosmic-technology.mobile-responsive",
+            "mobile-interaction",
+            not layout["offenders"]
+            and not targets["violations"]
+            and active_tab_visible
+            and page.locator(".technology-resource-card").count() == 20
+            and screenshot["pixel_variance"] >= 15,
+            details={"layout": layout, "targets": targets, "active_tab_visible": active_tab_visible, "screenshot": screenshot},
+        )
+        browser_clean(monitor, "cosmic-technology-mobile", gate)
+    except Exception as error:
+        gate.add(
+            "cosmic-technology.mobile-execution",
+            "mobile-interaction",
+            "FAIL",
+            details={"error": clean_text(error)},
+        )
+        browser_clean(monitor, "cosmic-technology-mobile", gate)
+    finally:
+        context.close()
+
+
 def reports(args: argparse.Namespace, gate: Gate) -> tuple[dict[str, Any], dict[str, Any]]:
     matrix = [asdict(case) for case in MATRIX]
     qa_report = {
@@ -2836,6 +2987,8 @@ def main(argv: list[str] | None = None) -> int:
                 run_governance_mobile(browser, args, gate)
                 run_nation_timeline_alpha(browser, args, gate)
                 run_nation_timeline_mobile(browser, args, gate)
+                run_cosmic_technology_alpha(browser, args, gate)
+                run_cosmic_technology_mobile(browser, args, gate)
             finally:
                 browser.close()
     except Exception as error:

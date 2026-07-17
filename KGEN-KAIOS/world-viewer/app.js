@@ -929,6 +929,38 @@ async function start() {
       () => civilizationRuntime.reviewNationDiplomacy(agreementId, decision),
       `${agreementId} review recorded as ${decision}.`
     ),
+    onCosmicResearch: (technologyId) => civilizationAction(
+      () => civilizationRuntime.runCosmicResearchCycle(technologyId),
+      `${technologyId} received bounded research, knowledge, and Civilization XP evidence.`
+    ),
+    onCosmicUnlock: (technologyId) => civilizationAction(
+      () => civilizationRuntime.unlockCosmicTechnology(technologyId),
+      `${technologyId} unlocked after all Research, Knowledge, Civilization, Material, and Energy gates passed.`
+    ),
+    onCosmicMaterial: (materialId) => civilizationAction(
+      () => civilizationRuntime.surveyCosmicMaterial(materialId),
+      `${materialId} synthetic survey recorded inside its bounded inventory.`
+    ),
+    onCosmicEnergy: (energyId) => civilizationAction(
+      () => civilizationRuntime.generateCosmicEnergy(energyId),
+      `${energyId} synthetic reserve increased inside its capacity boundary.`
+    ),
+    onCosmicAbility: (abilityId) => civilizationAction(
+      () => civilizationRuntime.trainCosmicAbility(abilityId),
+      `${abilityId} received reviewed training evidence. It remains gated until compatible Technology is unlocked.`
+    ),
+    onCosmicVehicle: (vehicleId) => civilizationAction(
+      () => civilizationRuntime.buildCosmicVehicle(vehicleId),
+      `${vehicleId} built as a synthetic fleet record after all gates passed.`
+    ),
+    onCosmicCoordinate: (coordinateId) => civilizationAction(
+      () => civilizationRuntime.discoverCosmicCoordinate(coordinateId),
+      `${coordinateId} discovered without granting ownership, sovereignty, or real navigation authority.`
+    ),
+    onSpaceExploration: (activityId, coordinateId) => civilizationAction(
+      () => civilizationRuntime.launchSpaceExploration(activityId, coordinateId),
+      `${activityId} recorded against ${coordinateId} as a synthetic reviewed mission.`
+    ),
     onResearchEra: (eraId) => civilizationAction(
       () => civilizationRuntime.researchTimelineEra(eraId),
       `${eraId} received bounded Timeline research evidence.`
@@ -1048,6 +1080,18 @@ async function start() {
     document.documentElement.dataset.timelineEra = snapshot.timeline.current_era_id;
     document.documentElement.dataset.timelineVehicle = snapshot.timeline.vehicle.status;
     document.documentElement.dataset.timelineJourneys = String(snapshot.timeline.journeys.length);
+    document.documentElement.dataset.technologyAge = snapshot.cosmic_technology.technology.current_age_id;
+    document.documentElement.dataset.technologyUnlocked = String(snapshot.cosmic_technology.technology.unlocked_count);
+    document.documentElement.dataset.technologyKnowledge = String(snapshot.cosmic_technology.research.knowledge);
+    document.documentElement.dataset.cosmicMaterials = String(snapshot.cosmic_technology.materials.records.length);
+    document.documentElement.dataset.cosmicEnergy = String(snapshot.cosmic_technology.energy.records.length);
+    document.documentElement.dataset.cosmicVehicles = String(snapshot.cosmic_technology.vehicles.fleet.length);
+    document.documentElement.dataset.cosmicAbilities = String(snapshot.cosmic_technology.abilities.abilities.filter(({ unlocked }) => unlocked).length);
+    document.documentElement.dataset.cosmicAbilityProposals = String(snapshot.cosmic_technology.abilities.proposals.length);
+    document.documentElement.dataset.cosmicCoordinates = String(snapshot.cosmic_technology.coordinates.coordinates.filter(({ discovery_status: status }) => status === "DISCOVERED").length);
+    document.documentElement.dataset.spaceMissions = String(snapshot.cosmic_technology.exploration.missions.length);
+    document.documentElement.dataset.spaceProposals = String(snapshot.cosmic_technology.exploration.proposals.length);
+    document.documentElement.dataset.ufoV2Ready = String(snapshot.cosmic_technology.ufo_v2_gates.ready);
     document.documentElement.dataset.ecosystemStatus = snapshot.ecosystem.food_chain_status;
     document.documentElement.dataset.factoryStatus = snapshot.production.factory.status;
     document.documentElement.dataset.productionTotal = String(snapshot.production.factory.total_produced);
@@ -1076,7 +1120,7 @@ async function start() {
   updateStarterParcelStatus();
   shell.setCoordinates("K280 / Earth surface shell");
   shell.setSimulationClock(civilizationRuntime.getSnapshot().clock);
-  shell.showToast("Nation and Timeline Alpha ready", "success");
+  shell.showToast("Cosmic Technology Alpha ready", "success");
 }
 
 start().catch((error) => {

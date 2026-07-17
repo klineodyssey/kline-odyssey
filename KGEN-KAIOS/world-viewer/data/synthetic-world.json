@@ -2,17 +2,17 @@
   "meta": {
     "synthetic": true,
     "non_authoritative": true,
-    "fixture_id": "KAIOS-WV-SPRINT-009-NATION-TIMELINE",
-    "schema_version": "9.0.0",
-    "snapshot_id": "WV-SYNTHETIC-20260717-009-NATION-TIMELINE",
-    "source_revision": "HUMAN-SPRINT-009-NATION-TIMELINE",
+    "fixture_id": "KAIOS-WV-SPRINT-010-COSMIC-TECHNOLOGY",
+    "schema_version": "10.0.0",
+    "snapshot_id": "WV-SYNTHETIC-20260717-010-COSMIC-TECHNOLOGY",
+    "source_revision": "HUMAN-SPRINT-010-COSMIC-TECHNOLOGY",
     "generated_at": "2026-07-17T00:00:00Z",
     "stale_after": "2099-12-31T23:59:59Z",
     "privacy_class": "PUBLIC_SYNTHETIC",
     "coordinate_model": "K280_GEODETIC_WITH_LOCAL_VIEW_PROJECTIONS",
-    "product_stage": "NATION_TIMELINE_ALPHA",
+    "product_stage": "COSMIC_TECHNOLOGY_ALPHA",
     "simulation_scope": "LOCAL_SYNTHETIC_ONLY",
-    "storage_namespace": "kaios.world-viewer.sprint-009.nation-timeline"
+    "storage_namespace": "kaios.world-viewer.sprint-010.cosmic-technology"
   },
   "scene_bounds": [0, 0, 1200, 760],
   "civilization_alpha": {
@@ -302,6 +302,7 @@
         { "era_id": "INTERSTELLAR_CIVILIZATION", "index": 8, "label": "Interstellar Civilization", "required_research_points": 120, "initial_research_points": 0 }
       ],
       "vehicle": {
+        "schema_version": "2.0.0",
         "vehicle_id": "pocket-time-cloaked-ufo-alpha-001",
         "vehicle_type": "POCKET_TIME_CLOAKED_UFO",
         "blueprint_checksum": "sha256:327e3248d949f7b12a6931c0e90929c13c05159151ffa2a299aab6c40226a584",
@@ -327,6 +328,111 @@
         "charge_increment": 20
       }
     }
+  },
+  "cosmic_technology_alpha": {
+    "decision_id": "HUMAN-SPRINT-010-COSMIC-TECHNOLOGY",
+    "runtime_id": "cosmic-technology-alpha-001",
+    "simulation_only": true,
+    "authoritative_registry": false,
+    "real_nuclear_operation": false,
+    "real_antimatter_operation": false,
+    "real_navigation": false,
+    "real_time_travel": false,
+    "research_increment": 25,
+    "knowledge_increment": 20,
+    "civilization_experience_increment": 10,
+    "technology_ages": [
+      { "age_id": "STONE_AGE", "index": 0, "label": "Stone Age", "technology_id": "STONE_FOUNDATIONS", "required_research_points": 0, "required_knowledge": 0, "minimum_civilization_score": 0, "dependencies": [], "material_costs": {}, "energy_costs": {}, "initially_unlocked": true },
+      { "age_id": "BRONZE_AGE", "index": 1, "label": "Bronze Age", "technology_id": "BRONZE_METALLURGY", "required_research_points": 50, "required_knowledge": 20, "minimum_civilization_score": 10, "dependencies": ["STONE_FOUNDATIONS"], "material_costs": { "COPPER": 2 }, "energy_costs": { "FIRE": 2 } },
+      { "age_id": "IRON_AGE", "index": 2, "label": "Iron Age", "technology_id": "IRON_ENGINEERING", "required_research_points": 50, "required_knowledge": 40, "minimum_civilization_score": 15, "dependencies": ["BRONZE_METALLURGY"], "material_costs": { "IRON": 3 }, "energy_costs": { "FIRE": 2 } },
+      { "age_id": "INDUSTRIAL_AGE", "index": 3, "label": "Industrial Age", "technology_id": "INDUSTRIAL_POWER", "required_research_points": 75, "required_knowledge": 60, "minimum_civilization_score": 20, "dependencies": ["IRON_ENGINEERING"], "material_costs": { "IRON": 4, "COPPER": 2 }, "energy_costs": { "FIRE": 3 } },
+      { "age_id": "ELECTRICAL_AGE", "index": 4, "label": "Electrical Age", "technology_id": "ELECTRICAL_GRID", "required_research_points": 75, "required_knowledge": 80, "minimum_civilization_score": 25, "dependencies": ["INDUSTRIAL_POWER"], "material_costs": { "COPPER": 4 }, "energy_costs": { "ELECTRICITY": 3 } },
+      { "age_id": "COMPUTER_AGE", "index": 5, "label": "Computer Age", "technology_id": "COMPUTER_SYSTEMS", "required_research_points": 75, "required_knowledge": 100, "minimum_civilization_score": 30, "dependencies": ["ELECTRICAL_GRID"], "material_costs": { "GOLD": 2, "RARE_EARTH": 2 }, "energy_costs": { "ELECTRICITY": 4 } },
+      { "age_id": "AI_AGE", "index": 6, "label": "AI Age", "technology_id": "AI_NAVIGATION", "required_research_points": 100, "required_knowledge": 120, "minimum_civilization_score": 35, "dependencies": ["COMPUTER_SYSTEMS"], "material_costs": { "RARE_EARTH": 3 }, "energy_costs": { "ELECTRICITY": 5 } },
+      { "age_id": "QUANTUM_AGE", "index": 7, "label": "Quantum Age", "technology_id": "QUANTUM_SYSTEMS", "required_research_points": 100, "required_knowledge": 140, "minimum_civilization_score": 40, "dependencies": ["AI_NAVIGATION"], "material_costs": { "GOLD": 2, "DIAMOND": 2 }, "energy_costs": { "NUCLEAR": 3 } },
+      { "age_id": "ANTI_GRAVITY_AGE", "index": 8, "label": "Anti-Gravity Age", "technology_id": "ANTI_GRAVITY_TECHNOLOGY", "required_research_points": 100, "required_knowledge": 160, "minimum_civilization_score": 45, "dependencies": ["QUANTUM_SYSTEMS"], "material_costs": { "METEORITE": 3, "RARE_EARTH": 3 }, "energy_costs": { "ANTI_GRAVITY_ENERGY": 4 } },
+      { "age_id": "WARP_AGE", "index": 9, "label": "Warp Age", "technology_id": "WARP_TECHNOLOGY", "required_research_points": 100, "required_knowledge": 180, "minimum_civilization_score": 50, "dependencies": ["ANTI_GRAVITY_TECHNOLOGY"], "material_costs": { "WARP_CRYSTAL": 3, "EXOTIC_MATTER": 2 }, "energy_costs": { "DARK_ENERGY": 4 } },
+      { "age_id": "TIMELINE_AGE", "index": 10, "label": "Timeline Age", "technology_id": "TIMELINE_TECHNOLOGY", "required_research_points": 100, "required_knowledge": 200, "minimum_civilization_score": 55, "dependencies": ["WARP_TECHNOLOGY"], "material_costs": { "TIMELINE_CRYSTAL": 3 }, "energy_costs": { "TIMELINE_ENERGY": 4 } },
+      { "age_id": "INTERSTELLAR_AGE", "index": 11, "label": "Interstellar Age", "technology_id": "INTERSTELLAR_NETWORK", "required_research_points": 100, "required_knowledge": 220, "minimum_civilization_score": 60, "dependencies": ["TIMELINE_TECHNOLOGY"], "material_costs": { "METEORITE": 3, "ANTI_MATTER": 1 }, "energy_costs": { "ANTI_MATTER_ENERGY": 3 } },
+      { "age_id": "DIMENSIONAL_AGE", "index": 12, "label": "Dimensional Age", "technology_id": "DIMENSIONAL_MAPPING", "required_research_points": 100, "required_knowledge": 240, "minimum_civilization_score": 65, "dependencies": ["INTERSTELLAR_NETWORK"], "material_costs": { "DARK_MATTER": 2, "EXOTIC_MATTER": 2 }, "energy_costs": { "DARK_ENERGY": 4 } },
+      { "age_id": "MULTIVERSE_AGE", "index": 13, "label": "Multiverse Age", "technology_id": "MULTIVERSE_NAVIGATION", "required_research_points": 100, "required_knowledge": 260, "minimum_civilization_score": 70, "dependencies": ["DIMENSIONAL_MAPPING"], "material_costs": { "TIMELINE_CRYSTAL": 2, "WARP_CRYSTAL": 2 }, "energy_costs": { "TIMELINE_ENERGY": 5 }, "terminal_research_state": true }
+    ],
+    "research": {
+      "facilities": ["RESEARCH_CENTER", "LABORATORY", "UNIVERSITY"],
+      "roles": ["SCIENTIST", "ENGINEER"],
+      "repositories": ["KNOWLEDGE_LIBRARY", "TECHNOLOGY_ARCHIVE"],
+      "initial_knowledge": 20,
+      "initial_research_points": 0,
+      "initial_civilization_experience": 0
+    },
+    "materials": [
+      { "material_id": "IRON", "planet_ids": ["EARTH", "MARS"], "initial_stock": 40, "capacity": 200, "hazard_class": "LOW" },
+      { "material_id": "COPPER", "planet_ids": ["EARTH", "MARS"], "initial_stock": 40, "capacity": 200, "hazard_class": "LOW" },
+      { "material_id": "GOLD", "planet_ids": ["EARTH"], "initial_stock": 24, "capacity": 120, "hazard_class": "LOW" },
+      { "material_id": "DIAMOND", "planet_ids": ["EARTH"], "initial_stock": 20, "capacity": 100, "hazard_class": "LOW" },
+      { "material_id": "METEORITE", "planet_ids": ["MOON", "MARS"], "initial_stock": 24, "capacity": 100, "hazard_class": "MEDIUM" },
+      { "material_id": "URANIUM", "planet_ids": ["EARTH"], "initial_stock": 12, "capacity": 40, "hazard_class": "ABSTRACT_RESTRICTED" },
+      { "material_id": "RARE_EARTH", "planet_ids": ["EARTH", "MOON"], "initial_stock": 30, "capacity": 120, "hazard_class": "MEDIUM" },
+      { "material_id": "DARK_MATTER", "planet_ids": ["FUTURE_PLANET"], "initial_stock": 12, "capacity": 40, "hazard_class": "FICTIONAL" },
+      { "material_id": "ANTI_MATTER", "planet_ids": ["FUTURE_PLANET"], "initial_stock": 10, "capacity": 30, "hazard_class": "FICTIONAL_RESTRICTED" },
+      { "material_id": "EXOTIC_MATTER", "planet_ids": ["FUTURE_PLANET"], "initial_stock": 18, "capacity": 60, "hazard_class": "FICTIONAL" },
+      { "material_id": "TIMELINE_CRYSTAL", "planet_ids": ["FUTURE_PLANET"], "initial_stock": 20, "capacity": 60, "hazard_class": "FICTIONAL" },
+      { "material_id": "WARP_CRYSTAL", "planet_ids": ["FUTURE_PLANET"], "initial_stock": 20, "capacity": 60, "hazard_class": "FICTIONAL" }
+    ],
+    "energy": [
+      { "energy_id": "FIRE", "minimum_age": "STONE_AGE", "initial_reserve": 50, "capacity": 200, "hazard_class": "LOW" },
+      { "energy_id": "ELECTRICITY", "minimum_age": "ELECTRICAL_AGE", "initial_reserve": 50, "capacity": 200, "hazard_class": "LOW" },
+      { "energy_id": "NUCLEAR", "minimum_age": "QUANTUM_AGE", "initial_reserve": 20, "capacity": 80, "hazard_class": "ABSTRACT_RESTRICTED" },
+      { "energy_id": "FUSION", "minimum_age": "QUANTUM_AGE", "initial_reserve": 20, "capacity": 80, "hazard_class": "FICTIONAL" },
+      { "energy_id": "ANTI_GRAVITY_ENERGY", "minimum_age": "ANTI_GRAVITY_AGE", "initial_reserve": 20, "capacity": 80, "hazard_class": "FICTIONAL" },
+      { "energy_id": "DARK_ENERGY", "minimum_age": "WARP_AGE", "initial_reserve": 20, "capacity": 80, "hazard_class": "FICTIONAL" },
+      { "energy_id": "ANTI_MATTER_ENERGY", "minimum_age": "INTERSTELLAR_AGE", "initial_reserve": 20, "capacity": 80, "hazard_class": "FICTIONAL_RESTRICTED" },
+      { "energy_id": "TIMELINE_ENERGY", "minimum_age": "TIMELINE_AGE", "initial_reserve": 24, "capacity": 80, "hazard_class": "FICTIONAL" }
+    ],
+    "vehicles": [
+      { "vehicle_id": "HORSE", "required_technology": "STONE_FOUNDATIONS", "material_costs": {}, "energy_costs": { "FIRE": 1 }, "timeline_authority": false },
+      { "vehicle_id": "SHIP", "required_technology": "BRONZE_METALLURGY", "material_costs": { "COPPER": 2 }, "energy_costs": { "FIRE": 2 }, "timeline_authority": false },
+      { "vehicle_id": "AIRCRAFT", "required_technology": "INDUSTRIAL_POWER", "material_costs": { "IRON": 3, "COPPER": 2 }, "energy_costs": { "ELECTRICITY": 3 }, "timeline_authority": false },
+      { "vehicle_id": "ROCKET", "required_technology": "ELECTRICAL_GRID", "material_costs": { "IRON": 4, "RARE_EARTH": 2 }, "energy_costs": { "NUCLEAR": 2 }, "timeline_authority": false },
+      { "vehicle_id": "SPACECRAFT", "required_technology": "AI_NAVIGATION", "material_costs": { "METEORITE": 3, "RARE_EARTH": 2 }, "energy_costs": { "FUSION": 3 }, "timeline_authority": false },
+      { "vehicle_id": "GOLDEN_CLOUD", "required_technology": "ANTI_GRAVITY_TECHNOLOGY", "material_costs": { "EXOTIC_MATTER": 2 }, "energy_costs": { "ANTI_GRAVITY_ENERGY": 3 }, "timeline_authority": false },
+      { "vehicle_id": "POCKET_TIME_CLOAKED_UFO", "required_technology": "TIMELINE_TECHNOLOGY", "material_costs": { "TIMELINE_CRYSTAL": 3, "WARP_CRYSTAL": 3 }, "energy_costs": { "TIMELINE_ENERGY": 4 }, "timeline_authority": true, "external_timeline_runtime": true },
+      { "vehicle_id": "WARP_SHIP", "required_technology": "WARP_TECHNOLOGY", "material_costs": { "WARP_CRYSTAL": 3, "METEORITE": 2 }, "energy_costs": { "DARK_ENERGY": 4 }, "timeline_authority": false },
+      { "vehicle_id": "TIMELINE_VEHICLE", "required_technology": "TIMELINE_TECHNOLOGY", "material_costs": {}, "energy_costs": {}, "timeline_authority": false, "research_archetype_only": true }
+    ],
+    "abilities": [
+      { "ability_id": "TRANSFORMATIONS_72", "required_technology": "ANTI_GRAVITY_TECHNOLOGY", "required_training": 100, "sandbox_proposal_only": false },
+      { "ability_id": "TRANSFORMATIONS_108", "required_technology": "MULTIVERSE_NAVIGATION", "required_training": 100, "sandbox_proposal_only": false },
+      { "ability_id": "THIRD_EYE", "required_technology": "QUANTUM_SYSTEMS", "required_training": 100, "sandbox_proposal_only": false },
+      { "ability_id": "CLONE", "required_technology": "AI_NAVIGATION", "required_training": 100, "sandbox_proposal_only": true },
+      { "ability_id": "INVISIBILITY", "required_technology": "QUANTUM_SYSTEMS", "required_training": 100, "sandbox_proposal_only": false },
+      { "ability_id": "AVATAR", "required_technology": "AI_NAVIGATION", "required_training": 100, "sandbox_proposal_only": false },
+      { "ability_id": "MIND_COMMUNICATION", "required_technology": "AI_NAVIGATION", "required_training": 100, "sandbox_proposal_only": false },
+      { "ability_id": "TIMELINE_NAVIGATION", "required_technology": "TIMELINE_TECHNOLOGY", "required_training": 100, "sandbox_proposal_only": false },
+      { "ability_id": "REALITY_MAPPING", "required_technology": "DIMENSIONAL_MAPPING", "required_training": 100, "sandbox_proposal_only": false }
+    ],
+    "ufo_v2": {
+      "required_technologies": ["ANTI_GRAVITY_TECHNOLOGY", "WARP_TECHNOLOGY", "TIMELINE_TECHNOLOGY"],
+      "required_capabilities": ["AI_NAVIGATION", "SHAPE_SHIFT_CAPABILITY"],
+      "special_material_costs": { "METEORITE": 2, "RARE_EARTH": 2, "TIMELINE_CRYSTAL": 2, "WARP_CRYSTAL": 2 }
+    },
+    "coordinates": [
+      { "coordinate_id": "coord-earth-k280", "coordinate_type": "PLANET", "planet_id": "EARTH", "civilization_id": null, "k_anchor": 280, "latitude_deg": 23.7, "longitude_deg": 121.0, "altitude_m": 0, "timeline_id": "AI_CIVILIZATION", "gravity_profile": "EARTH_1G", "travel_rules": ["EARTH_SURFACE"], "source_class": "CURRENT_REFERENCE", "canonical_reference": "K280", "discovery_status": "DISCOVERED", "visibility": "PUBLIC", "version": "1.0.0", "status": "ACTIVE_SYNTHETIC", "required_technology": "STONE_FOUNDATIONS" },
+      { "coordinate_id": "coord-k411-atmosphere", "coordinate_type": "SPECIAL_COORDINATE", "planet_id": "EARTH", "civilization_id": null, "k_anchor": 411, "latitude_deg": null, "longitude_deg": null, "altitude_m": null, "timeline_id": "AI_CIVILIZATION", "gravity_profile": "EARTH_ATMOSPHERE", "travel_rules": ["AIRCRAFT_OR_HIGHER"], "source_class": "CURRENT_REFERENCE", "canonical_reference": "K411", "discovery_status": "DISCOVERED", "visibility": "PUBLIC", "version": "1.0.0", "status": "ACTIVE_SYNTHETIC", "required_technology": "INDUSTRIAL_POWER" },
+      { "coordinate_id": "coord-k1852-orbit", "coordinate_type": "GRAVITY_WELL", "planet_id": "EARTH", "civilization_id": null, "k_anchor": 1852, "latitude_deg": null, "longitude_deg": null, "altitude_m": null, "timeline_id": "AI_CIVILIZATION", "gravity_profile": "EARTH_ORBIT", "travel_rules": ["SPACECRAFT_REQUIRED"], "source_class": "CURRENT_REFERENCE", "canonical_reference": "K1852", "discovery_status": "UNDISCOVERED", "visibility": "RESEARCH", "version": "1.0.0", "status": "CANDIDATE_SYNTHETIC", "required_technology": "AI_NAVIGATION" },
+      { "coordinate_id": "coord-k11520-exchange", "coordinate_type": "CIVILIZATION", "planet_id": "EARTH", "civilization_id": "FLOWER_FRUIT_MOUNTAIN_EXCHANGE", "k_anchor": 11520, "latitude_deg": null, "longitude_deg": null, "altitude_m": null, "timeline_id": "AI_CIVILIZATION", "gravity_profile": "K_SPHERE_REFERENCE", "travel_rules": ["CIVILIZATION_ROUTE"], "source_class": "CURRENT_REFERENCE", "canonical_reference": "K11520", "discovery_status": "DISCOVERED", "visibility": "PUBLIC", "version": "1.0.0", "status": "ACTIVE_SYNTHETIC", "required_technology": "COMPUTER_SYSTEMS" },
+      { "coordinate_id": "coord-k12345-temple", "coordinate_type": "TEMPLE", "planet_id": "EARTH", "civilization_id": "WUKONG_FORTUNE_TEMPLE", "k_anchor": 12345, "latitude_deg": null, "longitude_deg": null, "altitude_m": null, "timeline_id": "AI_CIVILIZATION", "gravity_profile": "K_SPHERE_REFERENCE", "travel_rules": ["GENESIS_ROUTE"], "source_class": "CURRENT_REFERENCE", "canonical_reference": "K12345", "discovery_status": "DISCOVERED", "visibility": "PUBLIC", "version": "1.0.0", "status": "ACTIVE_SYNTHETIC", "required_technology": "STONE_FOUNDATIONS" },
+      { "coordinate_id": "coord-k16888-moon", "coordinate_type": "PLANET", "planet_id": "MOON", "civilization_id": "MOON_CIVILIZATION_CANDIDATE", "k_anchor": 16888, "latitude_deg": null, "longitude_deg": null, "altitude_m": null, "timeline_id": "AI_CIVILIZATION", "gravity_profile": "MOON_0165G", "travel_rules": ["SPACECRAFT_REQUIRED", "LIFE_SUPPORT_REQUIRED"], "source_class": "CURRENT_REFERENCE", "canonical_reference": "K16888", "discovery_status": "UNDISCOVERED", "visibility": "RESEARCH", "version": "1.0.0", "status": "CANDIDATE_SYNTHETIC", "required_technology": "AI_NAVIGATION" },
+      { "coordinate_id": "coord-timeline-gate-alpha", "coordinate_type": "TIMELINE_GATE", "planet_id": "EARTH", "civilization_id": null, "k_anchor": null, "latitude_deg": null, "longitude_deg": null, "altitude_m": null, "timeline_id": "CAMBRIAN", "gravity_profile": "ISOLATED_SIMULATION", "travel_rules": ["POCKET_TIME_CLOAKED_UFO_ONLY"], "source_class": "SYNTHETIC_PRODUCT_FIXTURE", "canonical_reference": null, "discovery_status": "UNDISCOVERED", "visibility": "RESTRICTED", "version": "1.0.0", "status": "CANDIDATE_SYNTHETIC", "required_technology": "TIMELINE_TECHNOLOGY" },
+      { "coordinate_id": "coord-portal-alpha", "coordinate_type": "PORTAL", "planet_id": "FUTURE_PLANET", "civilization_id": null, "k_anchor": null, "latitude_deg": null, "longitude_deg": null, "altitude_m": null, "timeline_id": "MULTIVERSE_CANDIDATE", "gravity_profile": "UNKNOWN", "travel_rules": ["NON_EXECUTABLE_RESEARCH_ONLY"], "source_class": "SYNTHETIC_PRODUCT_FIXTURE", "canonical_reference": null, "discovery_status": "UNDISCOVERED", "visibility": "RESTRICTED", "version": "1.0.0", "status": "CANDIDATE_SYNTHETIC", "required_technology": "MULTIVERSE_NAVIGATION" }
+    ],
+    "exploration_activities": [
+      { "activity_id": "PLANET_DISCOVERY", "required_technology": "AI_NAVIGATION", "energy_id": "FUSION", "energy_cost": 2 },
+      { "activity_id": "SPACE_ROUTE", "required_technology": "INTERSTELLAR_NETWORK", "energy_id": "ANTI_MATTER_ENERGY", "energy_cost": 2 },
+      { "activity_id": "RESOURCE_SURVEY", "required_technology": "AI_NAVIGATION", "energy_id": "ELECTRICITY", "energy_cost": 2 },
+      { "activity_id": "COLONY_PLANNING", "required_technology": "INTERSTELLAR_NETWORK", "energy_id": "FUSION", "energy_cost": 3, "proposal_only": true },
+      { "activity_id": "DEEP_SPACE_MISSION", "required_technology": "DIMENSIONAL_MAPPING", "energy_id": "DARK_ENERGY", "energy_cost": 4 }
+    ]
   },
   "biology_alpha": {
     "decision_id": "HUMAN-SPRINT-008-CAMBRIAN-EXPLOSION",
