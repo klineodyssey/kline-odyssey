@@ -83,6 +83,10 @@ const LIFE_STAGES = new Set([
 const VITAL_KEYS = Object.freeze(["health", "energy", "food", "water"]);
 const LIFE_TYPES = new Set(["AI_WORKER", "NPC", "PLANT", "PLAYER", "PET"]);
 const REQUIRED_LIFE_TYPES = Object.freeze(["AI_WORKER", "NPC", "PLANT", "PLAYER", "PET"]);
+const BIOLOGY_TAXONOMY_RANKS = Object.freeze(["DOMAIN", "KINGDOM", "PHYLUM", "CLASS", "ORDER", "FAMILY", "GENUS", "SPECIES", "SUBSPECIES"]);
+const BIOLOGY_CATEGORIES = Object.freeze(["ANIMAL", "PLANT", "FUNGUS", "MICROORGANISM", "HUMAN", "AI_ORGANISM", "APP_ORGANISM", "COMPANY_ORGANISM", "ROBOT", "FUTURE_SPECIES"]);
+const FOOD_CHAIN_ROLES_V2 = new Set(["PRODUCER", "HERBIVORE", "CARNIVORE", "OMNIVORE", "PREDATOR", "SCAVENGER", "DECOMPOSER"]);
+const EVOLUTION_PATHWAYS = Object.freeze(["MUTATION", "SELECTION", "ADAPTATION", "LEARNING", "CIVILIZATION", "TECHNOLOGY", "AI"]);
 const SEMANTIC_VERSION = /^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$/;
 const SAFE_DNA_SUMMARY_FIELDS = new Set([
   "summary_id",
@@ -360,7 +364,7 @@ function validateProductionAlpha(production) {
     invariant(!speciesIds.has(species.species_id), `${path} duplicates Species ${species.species_id}`);
     speciesIds.add(species.species_id);
     invariant(PRODUCTION_EVOLUTION_STAGES.includes(species.evolution_stage), `${species.species_id} has invalid evolution stage`);
-    invariant(["PRODUCER", "CONSUMER", "PREDATOR", "OMNIVORE", "DECOMPOSER"].includes(species.trophic_role), `${species.species_id} has invalid trophic role`);
+    invariant(FOOD_CHAIN_ROLES_V2.has(species.trophic_role), `${species.species_id} has invalid Food Chain V2 role`);
     invariant(Number.isInteger(species.population) && species.population >= 0, `${species.species_id} has invalid population`);
     invariant(Number.isFinite(species.health) && species.health >= 0 && species.health <= 100, `${species.species_id} has invalid health`);
     for (const field of ["body_profile_id", "species_os_id", "life_os_profile_id", "dna_summary_id"]) {
@@ -393,6 +397,40 @@ function validateProductionAlpha(production) {
   invariant(production.exchange?.exchange_id === "K11520", `${path}.exchange must be K11520`);
   invariant(Array.isArray(production.exchange.candidates) && production.exchange.candidates.length >= 3, `${path}.exchange candidates are incomplete`);
   invariant(production.exchange.candidates.every(({ review_status: status }) => status === "CANDIDATE_REVIEW_REQUIRED"), `${path}.exchange cannot auto-list candidates`);
+}
+
+function validateBiologyAlpha(biology) {
+  const path = "biology_alpha";
+  invariant(isRecord(biology), `${path} must be an object`);
+  invariant(biology.decision_id === "HUMAN-SPRINT-008-CAMBRIAN-EXPLOSION", `${path} has invalid decision ID`);
+  invariant(biology.simulation_only === true && biology.authoritative_registry === false, `${path} must remain synthetic and non-authoritative`);
+  invariant(biology.real_genetic_engineering === false && biology.real_breeding === false && biology.clone_execution === false, `${path} violates the biology safety boundary`);
+  invariant(biology.atom_capacity === 108, `${path}.atom_capacity must be 108`);
+  invariant(JSON.stringify(biology.taxonomy_ranks) === JSON.stringify(BIOLOGY_TAXONOMY_RANKS), `${path}.taxonomy_ranks is invalid`);
+  invariant(JSON.stringify(biology.evolution_pathways) === JSON.stringify(EVOLUTION_PATHWAYS), `${path}.evolution_pathways is invalid`);
+  invariant(Array.isArray(biology.food_chain_roles) && biology.food_chain_roles.length === FOOD_CHAIN_ROLES_V2.size, `${path}.food_chain_roles is incomplete`);
+  invariant([...FOOD_CHAIN_ROLES_V2].every((role) => biology.food_chain_roles.includes(role)), `${path}.food_chain_roles is invalid`);
+  invariant(Array.isArray(biology.cambrian_timeline) && biology.cambrian_timeline.length === 11, `${path}.cambrian_timeline is incomplete`);
+  invariant(biology.cambrian_timeline[0]?.stage_id === "UNICELLULAR" && biology.cambrian_timeline.at(-1)?.stage_id === "AI_CIVILIZATION", `${path}.cambrian_timeline has invalid boundaries`);
+  invariant(Array.isArray(biology.additional_species) && biology.additional_species.length >= 5, `${path}.additional_species is incomplete`);
+  const categories = new Set(biology.additional_species.map(({ category }) => category));
+  for (const category of ["AI_ORGANISM", "APP_ORGANISM", "COMPANY_ORGANISM", "ROBOT", "FUTURE_SPECIES"]) {
+    invariant(categories.has(category), `${path} is missing ${category}`);
+  }
+  const ids = new Set();
+  for (const species of biology.additional_species) {
+    invariant(!ids.has(species.species_id), `${path} duplicates ${species.species_id}`);
+    ids.add(species.species_id);
+    invariant(BIOLOGY_CATEGORIES.includes(species.category), `${species.species_id} has invalid category`);
+    invariant(isRecord(species.taxonomy), `${species.species_id} taxonomy is required`);
+    for (const rank of BIOLOGY_TAXONOMY_RANKS) {
+      invariant(typeof species.taxonomy[rank.toLowerCase()] === "string" && species.taxonomy[rank.toLowerCase()].length > 0, `${species.species_id} is missing ${rank}`);
+    }
+    for (const field of ["body_profile_id", "species_os_id", "life_os_profile_id", "dna_summary_id"]) {
+      invariant(typeof species[field] === "string" && species[field].length > 0, `${species.species_id} is missing ${field}`);
+    }
+  }
+  validateNoPrivateFields(biology, path);
 }
 
 function validateSettlementAlpha(settlement) {
@@ -505,6 +543,7 @@ export function validateWorldFixture(world) {
   invariant(Array.isArray(world.planet_profiles) && world.planet_profiles.length >= 5, "Planet profiles are required");
   const planetIds = new Set(world.planet_profiles.map(({ planet_id: id }) => id));
   invariant(["EARTH", "MOON", "MARS", "JUPITER", "FUTURE_PLANET"].every((id) => planetIds.has(id)), "required Planet profiles are missing");
+  validateBiologyAlpha(world.biology_alpha);
   validateProductionAlpha(world.production_alpha);
   validateSettlementAlpha(world.settlement_alpha);
   validateGovernanceAlpha(world.governance_alpha);
@@ -589,9 +628,22 @@ export function createWorldIndex(world) {
 }
 
 export async function loadSyntheticWorld(url = new URL("./synthetic-world.json", import.meta.url)) {
-  const response = await fetch(url, { cache: "no-store" });
-  if (!response.ok) throw new Error(`Unable to load synthetic world (${response.status})`);
-  const world = validateWorldFixture(await response.json());
+  const atomCatalogUrl = new URL("../../genesis-dna/genesis_atom_catalog.json", import.meta.url);
+  const [worldResponse, atomResponse] = await Promise.all([
+    fetch(url, { cache: "no-store" }),
+    fetch(atomCatalogUrl, { cache: "no-store" })
+  ]);
+  if (!worldResponse.ok) throw new Error(`Unable to load synthetic world (${worldResponse.status})`);
+  if (!atomResponse.ok) throw new Error(`Unable to load public Genesis Atom catalog (${atomResponse.status})`);
+  const validatedWorld = validateWorldFixture(await worldResponse.json());
+  const atomCatalog = await atomResponse.json();
+  invariant(atomCatalog?.metadata?.atom_count === 108, "Genesis Atom catalog must contain 108 public capability atoms");
+  invariant(Array.isArray(atomCatalog?.domains) && atomCatalog.domains.length === 12, "Genesis Atom catalog must contain 12 domains");
+  invariant(Array.isArray(atomCatalog?.atoms) && atomCatalog.atoms.length === 108, "Genesis Atom catalog is incomplete");
+  const world = Object.freeze({
+    ...validatedWorld,
+    reference_data: Object.freeze({ genesis_atom_catalog: Object.freeze(atomCatalog) })
+  });
   return Object.freeze({
     world,
     index: createWorldIndex(world),

@@ -36,6 +36,9 @@ assert.equal(RESOURCE_CATALOG.length, 25);
 assert.ok(["FOOD", "ANIMALS", "PLANTS", "DNA", "FACTORIES", "AI_COMPANY", "SOFTWARE", "LICENSE", "GENOME"].every((category) => MARKETPLACE_CATEGORIES.includes(category)));
 assert.equal(initial.agriculture.facilities.length, 9);
 assert.ok(initial.ecosystem.species.length >= 20);
+assert.equal(initial.biology.registry_count, 26);
+assert.equal(initial.biology.taxonomy_ranks.length, 9);
+assert.equal(initial.biology.evolution.catalog.atoms.length, 108);
 assert.equal(initial.ecosystem.current_evolution_stage, "AI_CIVILIZATION");
 assert.equal(initial.production.factory.status, "READY");
 assert.equal(initial.ai_company.company.status, "ACTIVE");
@@ -63,6 +66,11 @@ assert.equal(manufactured.ai_company.company.product_inventory.REFRIGERATOR_ALPH
 civilization.requestExchangeReview("candidate-refrigerator-alpha");
 assert.equal(civilization.getSnapshot().exchange.candidates.find(({ candidate_id: id }) => id === "candidate-refrigerator-alpha").review_status, "REVIEW_REQUESTED");
 assert.equal(civilization.getSnapshot().exchange.listed_count, 0);
+
+civilization.advanceSpeciesEvolution("HUMAN_ALPHA", "LEARNING");
+assert.deepEqual(civilization.getSnapshot().biology.registry.find(({ species_id: id }) => id === "HUMAN_ALPHA").evolution.active_atom_ids, ["GA001"]);
+civilization.requestSpeciesReproduction("HUMAN_ALPHA", "CLONE");
+assert.equal(civilization.getSnapshot().biology.reproduction.history.at(-1).status, "PROPOSAL_ONLY_REVIEW_REQUIRED");
 
 const breakfast = civilization.advance(60);
 assert.equal(breakfast.clock.hour, 7);
@@ -106,6 +114,7 @@ assert.ok(final.aiWorker.events.length <= 160);
 assert.ok(final.economy.ledger.length <= 300);
 assert.ok(final.agriculture.events.length <= 180);
 assert.ok(final.ecosystem.events.length <= 180);
+assert.ok(final.biology.events.length <= 180);
 assert.ok(final.production.events.length <= 180);
 assert.ok(final.ai_company.events.length <= 160);
 assert.ok(final.ai_company.ledger.length <= 200);
@@ -131,6 +140,7 @@ const output = {
   economy: report.reports.economy,
   agriculture: report.reports.agriculture,
   ecosystem: report.reports.ecosystem,
+  biology: report.reports.biology,
   production: report.reports.production,
   ai_company: report.reports.ai_company,
   exchange: report.reports.exchange,
@@ -158,6 +168,10 @@ const output = {
     market_purchase: true,
     cambrian_lineage: true,
     food_chain_running: true,
+    biology_registry_running: true,
+    genome_and_dna_running: true,
+    genesis_atom_evolution_running: true,
+    clone_proposal_only: true,
     factory_produced: true,
     ai_company_running: true,
     k11520_review_only: true
@@ -170,6 +184,7 @@ const output = {
     economy: final.economy.ledger.length,
     agriculture: final.agriculture.events.length,
     ecosystem: final.ecosystem.events.length,
+    biology: final.biology.events.length,
     production: final.production.events.length,
     ai_company: final.ai_company.events.length,
     exchange: final.exchange.events.length,

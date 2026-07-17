@@ -2,17 +2,17 @@
   "meta": {
     "synthetic": true,
     "non_authoritative": true,
-    "fixture_id": "KAIOS-WV-SPRINT-007-GOVERNANCE",
-    "schema_version": "7.0.0",
-    "snapshot_id": "WV-SYNTHETIC-20260717-007-GOVERNANCE",
-    "source_revision": "HUMAN-SPRINT-007-CIVILIZATION-GOVERNANCE",
+    "fixture_id": "KAIOS-WV-SPRINT-008-CAMBRIAN",
+    "schema_version": "8.0.0",
+    "snapshot_id": "WV-SYNTHETIC-20260717-008-CAMBRIAN",
+    "source_revision": "HUMAN-SPRINT-008-CAMBRIAN-EXPLOSION",
     "generated_at": "2026-07-17T00:00:00Z",
     "stale_after": "2099-12-31T23:59:59Z",
     "privacy_class": "PUBLIC_SYNTHETIC",
     "coordinate_model": "K280_GEODETIC_WITH_LOCAL_VIEW_PROJECTIONS",
-    "product_stage": "CIVILIZATION_GOVERNANCE_ALPHA",
+    "product_stage": "CAMBRIAN_EXPLOSION_ALPHA",
     "simulation_scope": "LOCAL_SYNTHETIC_ONLY",
-    "storage_namespace": "kaios.world-viewer.sprint-007.governance"
+    "storage_namespace": "kaios.world-viewer.sprint-008.cambrian"
   },
   "scene_bounds": [0, 0, 1200, 760],
   "civilization_alpha": {
@@ -154,6 +154,95 @@
       "POWER_FAILURE"
     ]
   },
+  "biology_alpha": {
+    "decision_id": "HUMAN-SPRINT-008-CAMBRIAN-EXPLOSION",
+    "runtime_id": "cambrian-biology-foundation-alpha-001",
+    "simulation_only": true,
+    "authoritative_registry": false,
+    "real_genetic_engineering": false,
+    "real_breeding": false,
+    "clone_execution": false,
+    "atom_capacity": 108,
+    "atom_catalog_path": "../genesis-dna/genesis_atom_catalog.json",
+    "taxonomy_ranks": ["DOMAIN", "KINGDOM", "PHYLUM", "CLASS", "ORDER", "FAMILY", "GENUS", "SPECIES", "SUBSPECIES"],
+    "evolution_pathways": ["MUTATION", "SELECTION", "ADAPTATION", "LEARNING", "CIVILIZATION", "TECHNOLOGY", "AI"],
+    "food_chain_roles": ["PRODUCER", "HERBIVORE", "CARNIVORE", "OMNIVORE", "PREDATOR", "SCAVENGER", "DECOMPOSER"],
+    "cambrian_timeline": [
+      { "stage_id": "UNICELLULAR", "index": 0, "label": "Unicellular Life" },
+      { "stage_id": "CAMBRIAN_OCEAN", "index": 1, "label": "Cambrian Ocean" },
+      { "stage_id": "FISH", "index": 2, "label": "Fish" },
+      { "stage_id": "AMPHIBIAN", "index": 3, "label": "Amphibian" },
+      { "stage_id": "REPTILE", "index": 4, "label": "Reptile" },
+      { "stage_id": "BIRD", "index": 5, "label": "Bird" },
+      { "stage_id": "MAMMAL", "index": 6, "label": "Mammal" },
+      { "stage_id": "PRIMITIVE_HUMAN", "index": 7, "label": "Primitive Human" },
+      { "stage_id": "CIVILIZATION", "index": 8, "label": "Civilization" },
+      { "stage_id": "INDUSTRIAL", "index": 9, "label": "Industrial" },
+      { "stage_id": "AI_CIVILIZATION", "index": 10, "label": "AI Civilization" }
+    ],
+    "additional_species": [
+      {
+        "species_id": "AI_ORGANISM_ALPHA",
+        "label": "AI Organism Alpha",
+        "category": "AI_ORGANISM",
+        "evolution_stage": "AI_CIVILIZATION",
+        "body_profile_id": "body-ai-organism-alpha",
+        "species_os_id": "species-os-ai-organism-alpha",
+        "life_os_profile_id": "life-os-ai-organism-alpha",
+        "dna_summary_id": "dna-summary-ai-organism-alpha",
+        "habitat": "SANDBOX_COMPUTE",
+        "taxonomy": { "domain": "DIGITAL_LIFE", "kingdom": "AI_ORGANISM", "phylum": "AGENT_RUNTIME", "class": "LEARNING_AGENT", "order": "MISSION_EXECUTOR", "family": "KAIOS_AI_FAMILY", "genus": "KAIOS_AI", "species": "KAIOS_AI_ALPHA", "subspecies": "SYNTHETIC_ALPHA", "category": "AI_ORGANISM" }
+      },
+      {
+        "species_id": "APP_ORGANISM_ALPHA",
+        "label": "App Organism Alpha",
+        "category": "APP_ORGANISM",
+        "evolution_stage": "AI_CIVILIZATION",
+        "body_profile_id": "body-app-organism-alpha",
+        "species_os_id": "species-os-app-organism-alpha",
+        "life_os_profile_id": "life-os-app-organism-alpha",
+        "dna_summary_id": "dna-summary-app-organism-alpha",
+        "habitat": "APPLICATION_SANDBOX",
+        "taxonomy": { "domain": "DIGITAL_LIFE", "kingdom": "APP_ORGANISM", "phylum": "SOFTWARE_RUNTIME", "class": "INTERACTIVE_APPLICATION", "order": "USER_SERVICE", "family": "KAIOS_APP_FAMILY", "genus": "KAIOS_APP", "species": "KAIOS_APP_ALPHA", "subspecies": "SYNTHETIC_ALPHA", "category": "APP_ORGANISM" }
+      },
+      {
+        "species_id": "COMPANY_ORGANISM_ALPHA",
+        "label": "Company Organism Alpha",
+        "category": "COMPANY_ORGANISM",
+        "evolution_stage": "AI_CIVILIZATION",
+        "body_profile_id": "body-company-organism-alpha",
+        "species_os_id": "species-os-company-organism-alpha",
+        "life_os_profile_id": "life-os-company-organism-alpha",
+        "dna_summary_id": "dna-summary-company-organism-alpha",
+        "habitat": "CIVILIZATION_ECONOMY",
+        "taxonomy": { "domain": "DIGITAL_LIFE", "kingdom": "COMPANY_ORGANISM", "phylum": "ENTERPRISE_RUNTIME", "class": "PRODUCTION_ORGANISM", "order": "CIVILIZATION_SERVICE", "family": "KAIOS_COMPANY_FAMILY", "genus": "KAIOS_COMPANY", "species": "KAIOS_COMPANY_ALPHA", "subspecies": "SYNTHETIC_ALPHA", "category": "COMPANY_ORGANISM" }
+      },
+      {
+        "species_id": "ROBOT_ALPHA",
+        "label": "Robot Alpha",
+        "category": "ROBOT",
+        "evolution_stage": "AI_CIVILIZATION",
+        "body_profile_id": "body-robot-alpha",
+        "species_os_id": "species-os-robot-alpha",
+        "life_os_profile_id": "life-os-robot-alpha",
+        "dna_summary_id": "dna-summary-robot-alpha",
+        "habitat": "PHYSICAL_SANDBOX",
+        "taxonomy": { "domain": "DIGITAL_LIFE", "kingdom": "ROBOT_ORGANISM", "phylum": "CYBER_PHYSICAL_RUNTIME", "class": "MOBILE_MACHINE", "order": "BOUNDED_ACTUATOR", "family": "KAIOS_ROBOT_FAMILY", "genus": "KAIOS_ROBOT", "species": "KAIOS_ROBOT_ALPHA", "subspecies": "SYNTHETIC_ALPHA", "category": "ROBOT" }
+      },
+      {
+        "species_id": "FUTURE_SPECIES_ALPHA",
+        "label": "Unknown Future Species",
+        "category": "FUTURE_SPECIES",
+        "evolution_stage": "FUTURE",
+        "body_profile_id": "body-future-species-alpha",
+        "species_os_id": "species-os-future-species-alpha",
+        "life_os_profile_id": "life-os-future-species-alpha",
+        "dna_summary_id": "dna-summary-future-species-alpha",
+        "habitat": "UNKNOWN_REVIEW_REQUIRED",
+        "taxonomy": { "domain": "UNKNOWN_DOMAIN", "kingdom": "UNKNOWN_KINGDOM", "phylum": "UNKNOWN_PHYLUM", "class": "UNKNOWN_CLASS", "order": "UNKNOWN_ORDER", "family": "UNKNOWN_FAMILY", "genus": "UNKNOWN_GENUS", "species": "FUTURE_SPECIES_ALPHA", "subspecies": "UNCLASSIFIED", "category": "FUTURE_SPECIES" }
+      }
+    ]
+  },
   "production_alpha": {
     "decision_id": "HUMAN-SPRINT-005-CIVILIZATION-PRODUCTION",
     "runtime_id": "civilization-production-alpha-hsinchu-001",
@@ -184,7 +273,7 @@
         "oxygen_required": false, "water_required": true, "disease_risks": ["PH_IMBALANCE"], "evolution_target": "MARINE_INVERTEBRATE_ALPHA"
       },
       {
-        "species_id": "MARINE_INVERTEBRATE_ALPHA", "label": "Cambrian Marine Life", "evolution_stage": "CAMBRIAN_OCEAN", "life_form": "MARINE", "trophic_role": "CONSUMER",
+        "species_id": "MARINE_INVERTEBRATE_ALPHA", "label": "Cambrian Marine Life", "evolution_stage": "CAMBRIAN_OCEAN", "life_form": "MARINE", "trophic_role": "SCAVENGER",
         "body_profile_id": "body-marine-alpha", "species_os_id": "species-os-marine-alpha", "life_os_profile_id": "life-os-marine-alpha", "dna_summary_id": "dna-summary-marine-alpha",
         "habitat": "OCEAN", "food_sources": ["ALGAE_ALPHA", "BACTERIA_ALPHA"], "predators": ["FISH_ALPHA"], "prey": ["BACTERIA_ALPHA"], "energy_cost": 0.25, "lifecycle_days": 120, "population": 900, "health": 89,
         "oxygen_required": true, "water_required": true, "disease_risks": ["OCEAN_STRESS"], "evolution_target": "FISH_ALPHA"
@@ -196,13 +285,13 @@
         "oxygen_required": false, "water_required": true, "disease_risks": ["NUTRIENT_IMBALANCE"], "evolution_target": "TREE_ALPHA"
       },
       {
-        "species_id": "FISH_ALPHA", "label": "Fish", "evolution_stage": "FISH", "life_form": "FISH", "trophic_role": "CONSUMER",
+        "species_id": "FISH_ALPHA", "label": "Fish", "evolution_stage": "FISH", "life_form": "FISH", "trophic_role": "CARNIVORE",
         "body_profile_id": "body-fish-alpha", "species_os_id": "species-os-fish-alpha", "life_os_profile_id": "life-os-fish-alpha", "dna_summary_id": "dna-summary-fish-alpha",
         "habitat": "FRESHWATER", "food_sources": ["ALGAE_ALPHA", "MARINE_INVERTEBRATE_ALPHA"], "predators": ["HUMAN_ALPHA"], "prey": ["MARINE_INVERTEBRATE_ALPHA"], "energy_cost": 0.8, "lifecycle_days": 1800, "population": 520, "health": 90,
         "oxygen_required": true, "water_required": true, "disease_risks": ["WATERBORNE_DISEASE"], "evolution_target": "FROG_ALPHA"
       },
       {
-        "species_id": "FROG_ALPHA", "label": "Frog", "evolution_stage": "AMPHIBIAN", "life_form": "AMPHIBIAN", "trophic_role": "CONSUMER",
+        "species_id": "FROG_ALPHA", "label": "Frog", "evolution_stage": "AMPHIBIAN", "life_form": "AMPHIBIAN", "trophic_role": "CARNIVORE",
         "body_profile_id": "body-frog-alpha", "species_os_id": "species-os-frog-alpha", "life_os_profile_id": "life-os-frog-alpha", "dna_summary_id": "dna-summary-frog-alpha",
         "habitat": "WETLAND", "food_sources": ["BEE_ALPHA"], "predators": ["LIZARD_ALPHA"], "prey": ["BEE_ALPHA"], "energy_cost": 0.45, "lifecycle_days": 2200, "population": 180, "health": 86,
         "oxygen_required": true, "water_required": true, "disease_risks": ["HABITAT_DRYING"], "evolution_target": "LIZARD_ALPHA"
@@ -232,13 +321,13 @@
         "oxygen_required": true, "water_required": true, "disease_risks": ["PREY_SHORTAGE"], "evolution_target": null
       },
       {
-        "species_id": "ELEPHANT_ALPHA", "label": "Elephant", "evolution_stage": "MAMMAL", "life_form": "ANIMAL", "trophic_role": "CONSUMER",
+        "species_id": "ELEPHANT_ALPHA", "label": "Elephant", "evolution_stage": "MAMMAL", "life_form": "ANIMAL", "trophic_role": "HERBIVORE",
         "body_profile_id": "body-elephant-alpha", "species_os_id": "species-os-elephant-alpha", "life_os_profile_id": "life-os-elephant-alpha", "dna_summary_id": "dna-summary-elephant-alpha",
         "habitat": "GRASSLAND", "food_sources": ["TREE_ALPHA", "CABBAGE_ALPHA"], "predators": [], "prey": [], "energy_cost": 12, "lifecycle_days": 25000, "population": 18, "health": 89,
         "oxygen_required": true, "water_required": true, "disease_risks": ["WATER_SHORTAGE"], "evolution_target": null
       },
       {
-        "species_id": "COW_ALPHA", "label": "Cow", "evolution_stage": "MAMMAL", "life_form": "ANIMAL", "trophic_role": "CONSUMER",
+        "species_id": "COW_ALPHA", "label": "Cow", "evolution_stage": "MAMMAL", "life_form": "ANIMAL", "trophic_role": "HERBIVORE",
         "body_profile_id": "body-cow-alpha", "species_os_id": "species-os-cow-alpha", "life_os_profile_id": "life-os-cow-alpha", "dna_summary_id": "dna-summary-cow-alpha",
         "habitat": "FARM", "food_sources": ["CORN_ALPHA", "CABBAGE_ALPHA"], "predators": ["LION_ALPHA"], "prey": [], "energy_cost": 5, "lifecycle_days": 7300, "population": 42, "health": 92,
         "oxygen_required": true, "water_required": true, "disease_risks": ["HERD_DISEASE"], "evolution_target": null
@@ -250,7 +339,7 @@
         "oxygen_required": true, "water_required": true, "disease_risks": ["HERD_DISEASE"], "evolution_target": null
       },
       {
-        "species_id": "BEE_ALPHA", "label": "Bee", "evolution_stage": "BIRD", "life_form": "INSECT", "trophic_role": "CONSUMER",
+        "species_id": "BEE_ALPHA", "label": "Bee", "evolution_stage": "BIRD", "life_form": "INSECT", "trophic_role": "HERBIVORE",
         "body_profile_id": "body-bee-alpha", "species_os_id": "species-os-bee-alpha", "life_os_profile_id": "life-os-bee-alpha", "dna_summary_id": "dna-summary-bee-alpha",
         "habitat": "FOREST_AND_FARM", "food_sources": ["FLOWER_ALPHA", "FRUIT_ALPHA"], "predators": ["FROG_ALPHA", "CHICKEN_ALPHA"], "prey": [], "energy_cost": 0.03, "lifecycle_days": 180, "population": 2600, "health": 93,
         "oxygen_required": true, "water_required": true, "disease_risks": ["COLONY_COLLAPSE"], "evolution_target": null
