@@ -27,7 +27,7 @@ Three bounded modules fill the executable product gap:
 
 - `governance/government-runtime.js` owns the Village-to-Planet government hierarchy, officials, civil service, Citizen Rights projections, eight-law catalog and Architecture-only Justice case proposals.
 - `governance/public-services-runtime.js` owns ten service capacities, Education and Medical facilities, AI Government workers, public appropriations and reviewed public projects.
-- `governance/resilience-runtime.js` owns environmental projections, ten synthetic hazard types, drills, incident recovery and environment-recovery records. It imports Pollution and Ecology from the existing Logistics Runtime rather than redefining them.
+- `governance/resilience-runtime.js` owns environmental projections, the approved synthetic hazard types, drills, incident recovery and environment-recovery records. It imports Pollution and Ecology from the existing Logistics Runtime rather than redefining them.
 
 ## Government Model
 

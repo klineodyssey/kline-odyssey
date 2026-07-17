@@ -1,0 +1,156 @@
+{
+  "status": "PASS",
+  "clock": {
+    "ok": true,
+    "runtime": "CIVILIZATION_SIMULATION_CLOCK",
+    "event_count": 120,
+    "issues": []
+  },
+  "citizen": {
+    "ok": true,
+    "runtime": "CITIZEN_DAILY_RUNTIME",
+    "citizen_count": 3,
+    "issues": []
+  },
+  "ai_worker": {
+    "ok": true,
+    "runtime": "AI_WORKER_DAILY_RUNTIME",
+    "worker_count": 1,
+    "issues": []
+  },
+  "economy": {
+    "ok": true,
+    "runtime": "CIVILIZATION_ECONOMY_ALPHA",
+    "currency": "KAIOS_CREDIT",
+    "credit_supply": 20000,
+    "ledger_entries": 57,
+    "issues": []
+  },
+  "agriculture": {
+    "ok": true,
+    "runtime": "AGRICULTURE_ALPHA",
+    "plot_count": 3,
+    "facility_count": 9,
+    "warehouse_units": 5,
+    "issues": []
+  },
+  "ecosystem": {
+    "ok": true,
+    "runtime": "CAMBRIAN_ECOSYSTEM_ALPHA",
+    "species_count": 21,
+    "total_population": 31421,
+    "issues": []
+  },
+  "production": {
+    "ok": true,
+    "runtime": "CIVILIZATION_PRODUCTION_ALPHA",
+    "factory_status": "READY",
+    "total_produced": 11,
+    "issues": []
+  },
+  "ai_company": {
+    "ok": true,
+    "runtime": "CIVILIZATION_AI_COMPANY_ALPHA",
+    "status": "ACTIVE",
+    "balance": 2280,
+    "issues": []
+  },
+  "exchange": {
+    "ok": true,
+    "runtime": "K11520_LIFE_EXCHANGE_ALPHA",
+    "candidate_count": 3,
+    "listed_count": 0,
+    "issues": []
+  },
+  "population": {
+    "ok": true,
+    "runtime": "SETTLEMENT_POPULATION_ALPHA",
+    "metrics": {
+      "population": 0,
+      "total_registered": 4,
+      "births": 0,
+      "families": 1,
+      "employment_rate": 100,
+      "education_index": 0
+    },
+    "issues": []
+  },
+  "logistics": {
+    "ok": true,
+    "runtime": "SETTLEMENT_LOGISTICS_ALPHA",
+    "pollution": 19.352740066963964,
+    "jobs": 0,
+    "issues": []
+  },
+  "settlement": {
+    "ok": true,
+    "runtime": "SETTLEMENT_ECONOMY_ALPHA",
+    "obligations": 33,
+    "pending_official_requests": 0,
+    "issues": []
+  },
+  "government": {
+    "ok": true,
+    "runtime": "CIVILIZATION_GOVERNMENT_ALPHA",
+    "issues": []
+  },
+  "public_services": {
+    "ok": true,
+    "runtime": "PUBLIC_SERVICES_ALPHA",
+    "average_quality": 68.2,
+    "issues": []
+  },
+  "resilience": {
+    "ok": true,
+    "runtime": "CIVILIZATION_RESILIENCE_ALPHA",
+    "readiness_score": 68.4,
+    "issues": []
+  },
+  "city": {
+    "ok": true,
+    "runtime": "CITY_RUNTIME_ALPHA",
+    "derived_only": true,
+    "issues": []
+  },
+  "product_flow": {
+    "universe_booted": true,
+    "planet_verified": true,
+    "life_os_booted": true,
+    "genesis_fortune_claimed_once": true,
+    "survival_pack_granted": true,
+    "starter_parcel_verified": true,
+    "login_fixture": true,
+    "breakfast_consumed": true,
+    "work_settlement_completed": true,
+    "ai_farmed": true,
+    "crop_planted": true,
+    "crop_harvested": true,
+    "harvest_sold": true,
+    "market_purchase": true,
+    "cambrian_lineage": true,
+    "food_chain_running": true,
+    "factory_produced": true,
+    "ai_company_running": true,
+    "k11520_review_only": true
+  },
+  "memory_bounds": {
+    "civilization": 180,
+    "clock": 120,
+    "citizen": 160,
+    "ai_worker": 160,
+    "economy": 57,
+    "agriculture": 180,
+    "ecosystem": 180,
+    "production": 180,
+    "ai_company": 160,
+    "exchange": 1,
+    "population": 40,
+    "logistics": 40,
+    "settlement": 11,
+    "government": 1,
+    "public_services": 0,
+    "resilience": 0,
+    "city": 120
+  },
+  "protected_runtime_mutated": false
+}

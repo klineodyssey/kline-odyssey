@@ -114,6 +114,12 @@ jobs:
         shell: bash
         run: node KGEN-KAIOS/world-viewer/tests/settlement_economy_integrity.mjs
 
+      - name: Run Civilization Governance integrity
+        id: governance
+        continue-on-error: true
+        shell: bash
+        run: node KGEN-KAIOS/world-viewer/tests/governance_integrity.mjs
+
       - name: Start static server
         shell: bash
         run: |
@@ -139,7 +145,7 @@ jobs:
           python KGEN-KAIOS/world-viewer/tests/product_qa.py \
             --base-url http://127.0.0.1:8080/KGEN-KAIOS/world-viewer/index.html \
             --output-dir "$RUNNER_TEMP/world-viewer-product-qa" \
-            --baseline-dir KGEN-KAIOS/world-viewer/tests/baselines/sprint-006 \
+            --baseline-dir KGEN-KAIOS/world-viewer/tests/baselines/sprint-007 \
             --require-baselines \
             --max-diff-ratio 0.12 \
             --pixel-threshold 32
@@ -176,6 +182,7 @@ jobs:
         shell: bash
         env:
           PRODUCT_OUTCOME: ${{ steps.product.outcome }}
+          GOVERNANCE_OUTCOME: ${{ steps.governance.outcome }}
           SETTLEMENT_OUTCOME: ${{ steps.settlement.outcome }}
           PRODUCTION_OUTCOME: ${{ steps.production.outcome }}
           GENESIS_OUTCOME: ${{ steps.genesis.outcome }}
@@ -184,8 +191,8 @@ jobs:
           STATIC_OUTCOME: ${{ steps.static.outcome }}
           SYNTAX_OUTCOME: ${{ steps.syntax.outcome }}
         run: |
-          printf 'syntax=%s\nstatic=%s\nruntime=%s\ncivilization=%s\ngenesis=%s\nproduction=%s\nsettlement=%s\nproduct=%s\n' \
-            "$SYNTAX_OUTCOME" "$STATIC_OUTCOME" "$RUNTIME_OUTCOME" "$CIVILIZATION_OUTCOME" "$GENESIS_OUTCOME" "$PRODUCTION_OUTCOME" "$SETTLEMENT_OUTCOME" "$PRODUCT_OUTCOME"
+          printf 'syntax=%s\nstatic=%s\nruntime=%s\ncivilization=%s\ngenesis=%s\nproduction=%s\nsettlement=%s\ngovernance=%s\nproduct=%s\n' \
+            "$SYNTAX_OUTCOME" "$STATIC_OUTCOME" "$RUNTIME_OUTCOME" "$CIVILIZATION_OUTCOME" "$GENESIS_OUTCOME" "$PRODUCTION_OUTCOME" "$SETTLEMENT_OUTCOME" "$GOVERNANCE_OUTCOME" "$PRODUCT_OUTCOME"
           [[ "$SYNTAX_OUTCOME" == "success" ]]
           [[ "$STATIC_OUTCOME" == "success" ]]
           [[ "$RUNTIME_OUTCOME" == "success" ]]
@@ -193,4 +200,5 @@ jobs:
           [[ "$GENESIS_OUTCOME" == "success" ]]
           [[ "$PRODUCTION_OUTCOME" == "success" ]]
           [[ "$SETTLEMENT_OUTCOME" == "success" ]]
+          [[ "$GOVERNANCE_OUTCOME" == "success" ]]
           [[ "$PRODUCT_OUTCOME" == "success" ]]

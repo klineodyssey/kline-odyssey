@@ -1,0 +1,64 @@
+{
+  "status": "PASS",
+  "land": {
+    "canonical_version": 2,
+    "history_events": 4,
+    "ownership_mutated": false,
+    "draft_recovered": true
+  },
+  "building": {
+    "ok": true,
+    "runtime": "BUILDING_RUNTIME_ALPHA",
+    "mode": "READ_ONLY_SYNTHETIC_PROJECTION",
+    "templateCount": 8,
+    "buildingCount": 2,
+    "roomCount": 3,
+    "parcelCount": 12,
+    "lifeProfileCount": 6,
+    "unknownProjectionCount": 0,
+    "violations": []
+  },
+  "room": {
+    "ok": true,
+    "runtime": "ROOM_RUNTIME_ALPHA",
+    "mode": "READ_ONLY_SYNTHETIC_PROJECTION",
+    "roomCount": 3,
+    "furnitureCount": 3,
+    "equipmentCount": 3,
+    "organismCount": 5,
+    "lifeReferenceCount": 7,
+    "unknownContentChains": 0,
+    "linkModels": [
+      "ROOM_ANCHORED_CONTENT_LAYERS"
+    ],
+    "occupantTypes": [
+      "PLAYER",
+      "AI_WORKER",
+      "NPC",
+      "PET",
+      "PLANT"
+    ],
+    "violations": []
+  },
+  "life": {
+    "ok": true,
+    "schema_version": "1.0.0",
+    "synthetic_only": true,
+    "life_count": 6,
+    "event_count": 6,
+    "running": false,
+    "persistence": {
+      "available": true,
+      "storage_key": "sprint-003-life-test",
+      "recovery_status": "NOT_REQUIRED",
+      "last_error": null
+    },
+    "issues": [],
+    "checked_at": "2026-07-17T01:00:19.000Z"
+  },
+  "player": {
+    "walking": true,
+    "entered_room": true
+  },
+  "protected_runtime_mutated": false
+}

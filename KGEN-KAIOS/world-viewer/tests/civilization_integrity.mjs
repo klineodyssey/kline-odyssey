@@ -40,6 +40,9 @@ assert.equal(initial.ecosystem.current_evolution_stage, "AI_CIVILIZATION");
 assert.equal(initial.production.factory.status, "READY");
 assert.equal(initial.ai_company.company.status, "ACTIVE");
 assert.equal(initial.exchange.listed_count, 0);
+assert.equal(initial.government.hierarchy.length, 6);
+assert.equal(initial.public_services.services.length, 10);
+assert.equal(initial.resilience.hazards.length, 9);
 
 assert.throws(() => civilization.advance(60), (error) => error.code === "GENESIS_REQUIRED");
 const booted = civilization.beginGenesis();
@@ -110,6 +113,9 @@ assert.ok(final.exchange.events.length <= 120);
 assert.ok(final.population.events.length <= 180);
 assert.ok(final.logistics.events.length <= 160);
 assert.ok(final.settlement.events.length <= 140);
+assert.ok(final.government.audit_log.length <= 120);
+assert.ok(final.public_services.history.length <= 120);
+assert.ok(final.resilience.history.length <= 120);
 assert.ok(final.city.history.length <= 120);
 assert.equal(final.city.employed + final.city.unemployed, final.city.population);
 for (const deadCitizen of final.citizens.filter(({ life_state: state }) => state === "DEAD")) {
@@ -131,6 +137,9 @@ const output = {
   population: report.reports.population,
   logistics: report.reports.logistics,
   settlement: report.reports.settlement,
+  government: report.reports.government,
+  public_services: report.reports.public_services,
+  resilience: report.reports.resilience,
   city: report.reports.city,
   product_flow: {
     universe_booted: true,
@@ -167,6 +176,9 @@ const output = {
     population: final.population.events.length,
     logistics: final.logistics.events.length,
     settlement: final.settlement.events.length,
+    government: final.government.audit_log.length,
+    public_services: final.public_services.history.length,
+    resilience: final.resilience.history.length,
     city: final.city.history.length
   },
   protected_runtime_mutated: false

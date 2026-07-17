@@ -279,6 +279,9 @@ button:focus-visible, canvas:focus-visible, [tabindex]:focus-visible {
 .civilization-section--company { border-top: 2px solid var(--cyan); }
 .civilization-section--settlement { border-top: 2px solid var(--amber); }
 .civilization-section--economy { border-top: 2px solid var(--accent); }
+.civilization-section--government { border-top: 2px solid var(--cyan); }
+.civilization-section--services { border-top: 2px solid var(--accent); }
+.civilization-section--resilience { border-top: 2px solid var(--amber); }
 .civilization-time { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 10px; margin-bottom: 12px; }
 .civilization-time > div:first-child { min-width: 0; display: grid; gap: 3px; }
 .civilization-time__clock { font-size: 18px; }

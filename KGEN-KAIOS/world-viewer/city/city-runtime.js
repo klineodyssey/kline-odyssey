@@ -32,7 +32,7 @@ function resourceTotal(economy, filter) {
 
 function statusFor(snapshotValue) {
   if (snapshotValue.food < 25 || snapshotValue.water < 25 || snapshotValue.energy < 25 || snapshotValue.housing < 25) return "STRAINED";
-  if (snapshotValue.pollution > 70 || snapshotValue.unemployment_rate > 45) return "AT_RISK";
+  if (snapshotValue.pollution > 70 || snapshotValue.unemployment_rate > 45 || snapshotValue.resilience < 35 || snapshotValue.public_services < 35) return "AT_RISK";
   if (snapshotValue.happiness >= 70) return "THRIVING";
   return "STABLE";
 }
@@ -70,6 +70,10 @@ export function createCityRuntime({
     logistics: 0,
     settlement_health: 0,
     company_health: 0,
+    public_services: 0,
+    government_trust: 0,
+    justice_integrity: 0,
+    resilience: 0,
     status: "INITIALIZING",
     revision: 0,
     formulas: {
@@ -89,7 +93,7 @@ export function createCityRuntime({
   const notifier = createNotifier(getSnapshot);
   const persist = () => saveEnvelope(storageRef, storageKey, { schema_version: SCHEMA_VERSION, state });
 
-  function refresh({ citizens = [], aiWorkers = [], economy = {}, agriculture = {}, production = {}, company = {}, ecosystem = {}, population = {}, logistics = {}, settlement = {}, buildings = [], world = {} } = {}) {
+  function refresh({ citizens = [], aiWorkers = [], economy = {}, agriculture = {}, production = {}, company = {}, ecosystem = {}, population = {}, logistics = {}, settlement = {}, government = {}, publicServices = {}, resilience = {}, buildings = [], world = {} } = {}) {
     if (destroyed) throw runtimeError(RUNTIME, "RUNTIME_DESTROYED", "City Runtime has been destroyed");
     const citizenList = values(citizens).filter((citizen) => citizen.life_state !== "DEAD");
     const workerList = values(aiWorkers);
@@ -126,6 +130,12 @@ export function createCityRuntime({
     const education = clamp(population?.metrics?.education_index ?? average("knowledge", 50));
     const logisticsScore = clamp(100 - Number(logistics?.pollution ?? 0) * 0.55 - (logistics?.status === "ECOLOGY_CRITICAL" ? 25 : 0));
     const settlementHealth = (settlement?.asset_requests ?? []).every(({ executable, status }) => executable === false && status === "PENDING_OFFICIAL_SETTLEMENT") ? 100 : 35;
+    const serviceList = values(publicServices?.services);
+    const publicServiceScore = serviceList.length ? serviceList.reduce((sum, service) => sum + Number(service.quality ?? 0), 0) / serviceList.length : 0;
+    const justiceCases = values(government?.justice?.cases);
+    const justiceIntegrity = justiceCases.every(({ executable, citizen_state_mutation: mutation }) => executable === false && mutation === false) ? 100 : 0;
+    const governmentTrust = clamp(65 + Math.min(15, Number(government?.cycle_count ?? 0)) + (government?.citizen_rights?.length ? 10 : 0));
+    const resilienceScore = clamp(resilience?.readiness_score ?? 0);
     const happiness = clamp(
       average("health", 75) * 0.2
       + average("mood", 65) * 0.25
@@ -136,6 +146,7 @@ export function createCityRuntime({
       + housing * 0.1
       + education * 0.05
       + (100 - pollution) * 0.05
+      + publicServiceScore * 0.05
     );
 
     Object.assign(state, {
@@ -159,6 +170,10 @@ export function createCityRuntime({
       logistics: Number(logisticsScore.toFixed(1)),
       settlement_health: Number(settlementHealth.toFixed(1)),
       company_health: Number(clamp(company?.company?.health ?? 0).toFixed(1)),
+      public_services: Number(clamp(publicServiceScore).toFixed(1)),
+      government_trust: Number(governmentTrust.toFixed(1)),
+      justice_integrity: Number(justiceIntegrity.toFixed(1)),
+      resilience: Number(resilienceScore.toFixed(1)),
       revision: state.revision + 1
     });
     state.status = statusFor(state);
@@ -178,7 +193,7 @@ export function createCityRuntime({
 
   function integrityReport() {
     const issues = [];
-    for (const key of ["employment_rate", "unemployment_rate", "food", "water", "energy", "housing", "roads", "pollution", "happiness", "industry", "supply_chain", "ecology", "ecology_recovery", "education", "logistics", "settlement_health", "company_health"]) {
+    for (const key of ["employment_rate", "unemployment_rate", "food", "water", "energy", "housing", "roads", "pollution", "happiness", "industry", "supply_chain", "ecology", "ecology_recovery", "education", "logistics", "settlement_health", "company_health", "public_services", "government_trust", "justice_integrity", "resilience"]) {
       if (!Number.isFinite(state[key]) || state[key] < 0 || state[key] > 100) issues.push(`invalid ${key}`);
     }
     if (state.employed + state.unemployed !== state.population) issues.push("employment population mismatch");
