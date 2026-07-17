@@ -48,7 +48,23 @@ Repository deploys GitHub Pages **only from `main`** via `deploy-pages-static.ym
 - [ ] Production URL unchanged until explicit merge after Human sign-off
 - [ ] Future PRs auto-receive preview URL comment
 
-## Governance
+## Root Cause (2026-07-18 run #29620340241)
+
+`deploy-preview` failed in **2s with zero steps** because the `github-pages` environment has a **deployment branch policy allowing only `main`**. PR head branches (e.g. `cursor-handoff/KAIOS-PRODUCT-SPRINT-001A`) are rejected before a runner starts.
+
+Cursor cannot change this via API (403). **Human or Codex repo admin action is required.**
+
+## Immediate Human Actions (unblock PR #42 preview)
+
+1. Open **Settings → Environments → github-pages → Deployment branches**
+2. Add branch name: `cursor-handoff/KAIOS-PRODUCT-SPRINT-001A`  
+   **or** temporarily allow all branches during acceptance
+3. Re-run workflow **PR Preview Pages** on PR #42 (or push empty commit)
+4. Use the **View deployment** link / PR comment preview URL on real phone + desktop
+
+## Merge Gate
+
+**PR #42 must NOT merge** until Human confirms preview acceptance.
 
 - **Merge gate for PR #42:** `HUMAN_PREVIEW_ACCEPTANCE_REQUIRED`
 - Cursor must **not** merge PR #42
