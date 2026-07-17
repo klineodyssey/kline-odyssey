@@ -1,3 +1,6 @@
+import { renderNationView } from "../nation/nation-view.js";
+import { renderTimelineView } from "../timeline/timeline-view.js";
+
 const TABS = Object.freeze([
   ["GENESIS", "Genesis"],
   ["TODAY", "Today"],
@@ -12,6 +15,8 @@ const TABS = Object.freeze([
   ["GOVERNMENT", "Government"],
   ["SERVICES", "Services"],
   ["RESILIENCE", "Resilience"],
+  ["NATION", "Nation"],
+  ["TIMELINE", "Timeline"],
   ["CITY", "City"]
 ]);
 
@@ -1076,10 +1081,16 @@ export function createCivilizationView(container, callbacks = {}) {
     else if (activeTab === "GOVERNMENT") root.append(renderGovernment(documentRef, model, callbacks));
     else if (activeTab === "SERVICES") root.append(renderServices(documentRef, model, callbacks));
     else if (activeTab === "RESILIENCE") root.append(renderResilience(documentRef, model, callbacks));
+    else if (activeTab === "NATION") root.append(renderNationView(documentRef, model, callbacks));
+    else if (activeTab === "TIMELINE") root.append(renderTimelineView(documentRef, model, callbacks));
     else if (activeTab === "CITY") root.append(renderCity(documentRef, model));
     else root.append(renderToday(documentRef, model, callbacks));
 
     container.replaceChildren(root);
+    const activeButton = tabs.querySelector('[aria-selected="true"]');
+    if (activeButton) {
+      tabs.scrollLeft = Math.max(0, activeButton.offsetLeft - (tabs.clientWidth - activeButton.offsetWidth) / 2);
+    }
   }
 
   return Object.freeze({

@@ -2,17 +2,17 @@
   "meta": {
     "synthetic": true,
     "non_authoritative": true,
-    "fixture_id": "KAIOS-WV-SPRINT-008-CAMBRIAN",
-    "schema_version": "8.0.0",
-    "snapshot_id": "WV-SYNTHETIC-20260717-008-CAMBRIAN",
-    "source_revision": "HUMAN-SPRINT-008-CAMBRIAN-EXPLOSION",
+    "fixture_id": "KAIOS-WV-SPRINT-009-NATION-TIMELINE",
+    "schema_version": "9.0.0",
+    "snapshot_id": "WV-SYNTHETIC-20260717-009-NATION-TIMELINE",
+    "source_revision": "HUMAN-SPRINT-009-NATION-TIMELINE",
     "generated_at": "2026-07-17T00:00:00Z",
     "stale_after": "2099-12-31T23:59:59Z",
     "privacy_class": "PUBLIC_SYNTHETIC",
     "coordinate_model": "K280_GEODETIC_WITH_LOCAL_VIEW_PROJECTIONS",
-    "product_stage": "CAMBRIAN_EXPLOSION_ALPHA",
+    "product_stage": "NATION_TIMELINE_ALPHA",
     "simulation_scope": "LOCAL_SYNTHETIC_ONLY",
-    "storage_namespace": "kaios.world-viewer.sprint-008.cambrian"
+    "storage_namespace": "kaios.world-viewer.sprint-009.nation-timeline"
   },
   "scene_bounds": [0, 0, 1200, 760],
   "civilization_alpha": {
@@ -153,6 +153,180 @@
       "FOOD_CRISIS",
       "POWER_FAILURE"
     ]
+  },
+  "nation_timeline_alpha": {
+    "decision_id": "HUMAN-SPRINT-009-NATION-TIMELINE",
+    "runtime_id": "nation-timeline-alpha-taiwan-001",
+    "simulation_only": true,
+    "authoritative_registry": false,
+    "real_sovereignty": false,
+    "real_government": false,
+    "real_tax": false,
+    "real_currency": false,
+    "real_diplomacy": false,
+    "real_military": false,
+    "real_time_travel": false,
+    "canonical_history_mutation": false,
+    "nation": {
+      "nation_id": "nation-taiwan-alpha",
+      "label": "Taiwan Nation Alpha",
+      "government_runtime_id": "government-taiwan-alpha",
+      "founding": {
+        "minimum_population": 1,
+        "minimum_parcels": 1,
+        "minimum_treasury_assets": 1000
+      },
+      "territory": {
+        "planet_id": "EARTH",
+        "surface_k": 280,
+        "parcel_ids": [
+          "parcel-001",
+          "parcel-002",
+          "parcel-003"
+        ],
+        "ownership_changed": false,
+        "legal_land_title": false
+      },
+      "sovereignty": {
+        "declaration_id": "sovereignty-declaration-taiwan-alpha-001",
+        "scope": "SYNTHETIC_CIVILIZATION_ONLY",
+        "evidence_status": "RECORDED",
+        "review_status": "REVIEWED_SYNTHETIC",
+        "real_world_authority": false
+      },
+      "government_policies": [
+        { "policy_id": "TAX_POLICY", "version": 1, "status": "CONFIGURABLE_SYNTHETIC", "review_status": "REVIEWED_SYNTHETIC" },
+        { "policy_id": "BUDGET", "version": 1, "status": "BALANCED_LEDGER_REQUIRED", "review_status": "REVIEWED_SYNTHETIC" },
+        { "policy_id": "PUBLIC_SPENDING", "version": 1, "status": "EVIDENCE_REQUIRED", "review_status": "REVIEWED_SYNTHETIC" },
+        { "policy_id": "MILITARY", "version": 1, "status": "DEFENSE_READINESS_SIMULATION_ONLY", "review_status": "REVIEWED_SYNTHETIC", "real_world_operation": false },
+        { "policy_id": "DIPLOMACY", "version": 1, "status": "PROPOSAL_AND_REVIEW", "review_status": "REVIEWED_SYNTHETIC" },
+        { "policy_id": "IMMIGRATION", "version": 1, "status": "SYNTHETIC_CITIZEN_POLICY", "review_status": "REVIEWED_SYNTHETIC" },
+        { "policy_id": "TRADE_POLICY", "version": 1, "status": "RESOURCE_RESERVE_PROTECTED", "review_status": "REVIEWED_SYNTHETIC" },
+        { "policy_id": "INFRASTRUCTURE", "version": 1, "status": "CAPACITY_AND_BUDGET_GATED", "review_status": "REVIEWED_SYNTHETIC" },
+        { "policy_id": "EMERGENCY", "version": 1, "status": "EMERGENCY_RESERVE_GATED", "review_status": "REVIEWED_SYNTHETIC" }
+      ]
+    },
+    "public_finance": {
+      "decision_id": "HUMAN-SPRINT-009-NATION-TIMELINE",
+      "tax_policy": [
+        { "tax_id": "INCOME_TAX", "label": "Income Tax", "calculation_basis": "INCOME", "rate_bps": 800, "minimum_rate_bps": 0, "maximum_rate_bps": 3000, "step_bps": 25 },
+        { "tax_id": "SALES_TAX", "label": "Sales Tax", "calculation_basis": "SALE_VALUE", "rate_bps": 500, "minimum_rate_bps": 0, "maximum_rate_bps": 1500, "step_bps": 25 },
+        { "tax_id": "BUSINESS_TAX", "label": "Business Tax", "calculation_basis": "BUSINESS_REVENUE", "rate_bps": 700, "minimum_rate_bps": 0, "maximum_rate_bps": 2500, "step_bps": 25 },
+        { "tax_id": "PROPERTY_TAX", "label": "Property Tax", "calculation_basis": "PROPERTY_VALUE", "rate_bps": 300, "minimum_rate_bps": 0, "maximum_rate_bps": 1200, "step_bps": 25 },
+        { "tax_id": "LAND_TAX", "label": "Land Tax", "calculation_basis": "LAND_VALUE", "rate_bps": 250, "minimum_rate_bps": 0, "maximum_rate_bps": 1200, "step_bps": 25 },
+        { "tax_id": "VEHICLE_LICENSE_TAX", "label": "Vehicle License Tax", "calculation_basis": "LICENSE_VALUE", "rate_bps": 150, "minimum_rate_bps": 0, "maximum_rate_bps": 1000, "step_bps": 25 },
+        { "tax_id": "FUEL_TAX", "label": "Fuel Tax", "calculation_basis": "FUEL_VALUE", "rate_bps": 200, "minimum_rate_bps": 0, "maximum_rate_bps": 1200, "step_bps": 25 },
+        { "tax_id": "IMPORT_TARIFF", "label": "Import Tariff", "calculation_basis": "IMPORT_VALUE", "rate_bps": 400, "minimum_rate_bps": 0, "maximum_rate_bps": 3000, "step_bps": 25 },
+        { "tax_id": "EXPORT_TARIFF", "label": "Export Tariff", "calculation_basis": "EXPORT_VALUE", "rate_bps": 100, "minimum_rate_bps": 0, "maximum_rate_bps": 2000, "step_bps": 25 },
+        { "tax_id": "RESOURCE_ROYALTY", "label": "Resource Royalty", "calculation_basis": "RESOURCE_VALUE", "rate_bps": 600, "minimum_rate_bps": 0, "maximum_rate_bps": 3000, "step_bps": 25 },
+        { "tax_id": "WATER_USAGE_FEE", "label": "Water Usage Fee", "calculation_basis": "WATER_VALUE", "rate_bps": 100, "minimum_rate_bps": 0, "maximum_rate_bps": 1000, "step_bps": 25 },
+        { "tax_id": "CARBON_FEE", "label": "Carbon Fee", "calculation_basis": "CARBON_VALUE", "rate_bps": 250, "minimum_rate_bps": 0, "maximum_rate_bps": 2000, "step_bps": 25 }
+      ],
+      "treasury": {
+        "treasury_id": "national-treasury-taiwan-alpha",
+        "fiscal_year": "ALPHA-YEAR-001",
+        "operating_account": "TREASURY_OPERATING",
+        "reserve_account": "TREASURY_RESERVE",
+        "emergency_account": "TREASURY_EMERGENCY_RESERVE",
+        "genesis_equity_account": "NATION_GENESIS_EQUITY",
+        "initial_operating_balance": 5000,
+        "initial_reserve_balance": 1500,
+        "initial_emergency_balance": 1000
+      },
+      "annual_budget_categories": [
+        { "category_id": "EDUCATION", "public_investment": true },
+        { "category_id": "MEDICAL", "public_investment": true },
+        { "category_id": "INFRASTRUCTURE", "public_investment": true },
+        { "category_id": "ECOLOGY_RECOVERY", "public_investment": true },
+        { "category_id": "EMERGENCY_RESPONSE", "public_investment": false }
+      ],
+      "official_currency": {
+        "currency_code": "KAIOS_CREDIT",
+        "currency_name": "Taiwan Alpha KAIOS Credit",
+        "issuer": "national-treasury-taiwan-alpha",
+        "supply_policy": "BALANCED_PROTOTYPE_LEDGER",
+        "exchange_policy": "GOVERNANCE_REVIEW_REQUIRED",
+        "policy_version": 1,
+        "kgen_reference_only": true,
+        "legal_tender": false,
+        "token_contract": false
+      },
+      "exchange_policies": [
+        "GOVERNANCE_REVIEW_REQUIRED",
+        "MANAGED_REFERENCE_BAND",
+        "SETTLEMENT_GATE_ONLY"
+      ]
+    },
+    "resources": {
+      "planet_id": "EARTH",
+      "catalog": [
+        { "resource_id": "WATER", "unit": "UNIT", "initial_quantity": 800, "capacity": 1200, "minimum_reserve": 300, "reference_value_credit": 1, "renewable": true, "import_enabled": true, "export_enabled": true },
+        { "resource_id": "FOREST", "unit": "UNIT", "initial_quantity": 420, "capacity": 700, "minimum_reserve": 220, "reference_value_credit": 2, "renewable": true, "import_enabled": true, "export_enabled": true },
+        { "resource_id": "STONE", "unit": "UNIT", "initial_quantity": 520, "capacity": 900, "minimum_reserve": 160, "reference_value_credit": 2, "renewable": false, "import_enabled": true, "export_enabled": true },
+        { "resource_id": "IRON", "unit": "UNIT", "initial_quantity": 260, "capacity": 600, "minimum_reserve": 100, "reference_value_credit": 4, "renewable": false, "import_enabled": true, "export_enabled": true },
+        { "resource_id": "COPPER", "unit": "UNIT", "initial_quantity": 180, "capacity": 480, "minimum_reserve": 80, "reference_value_credit": 5, "renewable": false, "import_enabled": true, "export_enabled": true },
+        { "resource_id": "GOLD", "unit": "UNIT", "initial_quantity": 80, "capacity": 200, "minimum_reserve": 50, "reference_value_credit": 12, "renewable": false, "import_enabled": true, "export_enabled": true },
+        { "resource_id": "OIL", "unit": "UNIT", "initial_quantity": 240, "capacity": 500, "minimum_reserve": 120, "reference_value_credit": 6, "renewable": false, "import_enabled": true, "export_enabled": true },
+        { "resource_id": "GAS", "unit": "UNIT", "initial_quantity": 260, "capacity": 520, "minimum_reserve": 130, "reference_value_credit": 5, "renewable": false, "import_enabled": true, "export_enabled": true },
+        { "resource_id": "RARE_EARTH", "unit": "UNIT", "initial_quantity": 110, "capacity": 260, "minimum_reserve": 70, "reference_value_credit": 10, "renewable": false, "import_enabled": true, "export_enabled": true },
+        { "resource_id": "FOOD", "unit": "UNIT", "initial_quantity": 640, "capacity": 1000, "minimum_reserve": 320, "reference_value_credit": 2, "renewable": true, "import_enabled": true, "export_enabled": true },
+        { "resource_id": "ENERGY", "unit": "UNIT", "initial_quantity": 900, "capacity": 1400, "minimum_reserve": 400, "reference_value_credit": 3, "renewable": true, "import_enabled": true, "export_enabled": true }
+      ]
+    },
+    "diplomacy": {
+      "agreement_types": ["ALLIANCE", "TRADE_AGREEMENT", "EMBASSY", "VISA", "PEACE_TREATY", "SANCTION"],
+      "default_expiry": "ALPHA-YEAR-002-REVIEW",
+      "templates": {
+        "ALLIANCE": { "rights": ["COOPERATION"], "obligations": ["MUTUAL_REVIEW"] },
+        "TRADE_AGREEMENT": { "rights": ["RESOURCE_EXCHANGE"], "obligations": ["RESERVE_PROTECTION"] },
+        "EMBASSY": { "rights": ["DIPLOMATIC_CHANNEL"], "obligations": ["NON_INTERFERENCE"] },
+        "VISA": { "rights": ["SYNTHETIC_TRANSIT"], "obligations": ["IDENTITY_REVIEW"] },
+        "PEACE_TREATY": { "rights": ["SAFE_HOLD"], "obligations": ["NO_SYNTHETIC_HOSTILITY"] },
+        "SANCTION": { "rights": ["MARKET_ACCESS_RESTRICTION_SIM"], "obligations": ["HUMAN_APPEAL_AVAILABLE"] }
+      }
+    },
+    "timeline": {
+      "decision_id": "HUMAN-SPRINT-009-NATION-TIMELINE",
+      "origin_era_id": "AI_CIVILIZATION",
+      "default_target_era_id": "CAMBRIAN",
+      "era_research_increment": 20,
+      "eras": [
+        { "era_id": "CAMBRIAN", "index": 0, "label": "Cambrian", "required_research_points": 40, "initial_research_points": 0 },
+        { "era_id": "ANCIENT_CIVILIZATION", "index": 1, "label": "Ancient Civilization", "required_research_points": 40, "initial_research_points": 0 },
+        { "era_id": "STONE_AGE", "index": 2, "label": "Stone Age", "required_research_points": 40, "initial_research_points": 0 },
+        { "era_id": "BRONZE_AGE", "index": 3, "label": "Bronze Age", "required_research_points": 50, "initial_research_points": 0 },
+        { "era_id": "IRON_AGE", "index": 4, "label": "Iron Age", "required_research_points": 60, "initial_research_points": 0 },
+        { "era_id": "INDUSTRIAL_AGE", "index": 5, "label": "Industrial Age", "required_research_points": 70, "initial_research_points": 0 },
+        { "era_id": "INFORMATION_AGE", "index": 6, "label": "Information Age", "required_research_points": 80, "initial_research_points": 0 },
+        { "era_id": "AI_CIVILIZATION", "index": 7, "label": "AI Civilization", "required_research_points": 0, "initial_research_points": 0 },
+        { "era_id": "INTERSTELLAR_CIVILIZATION", "index": 8, "label": "Interstellar Civilization", "required_research_points": 120, "initial_research_points": 0 }
+      ],
+      "vehicle": {
+        "vehicle_id": "pocket-time-cloaked-ufo-alpha-001",
+        "vehicle_type": "POCKET_TIME_CLOAKED_UFO",
+        "blueprint_checksum": "sha256:327e3248d949f7b12a6931c0e90929c13c05159151ffa2a299aab6c40226a584",
+        "minimum_civilization_score": 90,
+        "allowed_civilization_stages": ["CIVILIZATION", "PLANET_CIVILIZATION"],
+        "research_increment": 25,
+        "technology_requirements": [
+          { "technology_id": "TEMPORAL_FIELD_THEORY", "required_points": 100 },
+          { "technology_id": "POCKET_DIMENSION_STABILIZATION", "required_points": 100 },
+          { "technology_id": "CLOAKED_NAVIGATION", "required_points": 100 }
+        ],
+        "material_requirements": [
+          { "material_id": "IRON", "quantity": 20 },
+          { "material_id": "COPPER", "quantity": 10 },
+          { "material_id": "GOLD", "quantity": 6 },
+          { "material_id": "RARE_EARTH", "quantity": 8 },
+          { "material_id": "ENERGY", "quantity": 60 }
+        ],
+        "energy_material_id": "ENERGY",
+        "energy_capacity": 100,
+        "initial_energy_after_build": 50,
+        "travel_energy_cost": 20,
+        "charge_increment": 20
+      }
+    }
   },
   "biology_alpha": {
     "decision_id": "HUMAN-SPRINT-008-CAMBRIAN-EXPLOSION",

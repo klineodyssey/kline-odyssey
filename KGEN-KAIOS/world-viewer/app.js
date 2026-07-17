@@ -896,6 +896,66 @@ async function start() {
     onRunResilienceRecovery: (effort) => civilizationAction(
       () => civilizationRuntime.runResilienceRecovery(effort),
       "Synthetic resilience recovery completed."
+    ),
+    onEstablishNation: () => civilizationAction(
+      () => civilizationRuntime.establishNation(),
+      "The synthetic Nation passed all six founding requirements."
+    ),
+    onRunNationGovernment: () => civilizationAction(
+      () => civilizationRuntime.runNationGovernmentCycle(),
+      "Government V2 completed a reviewed synthetic policy cycle."
+    ),
+    onSetTax: (taxId, rateBps) => civilizationAction(
+      () => civilizationRuntime.setNationTaxRate(taxId, rateBps),
+      `${taxId} updated to ${rateBps} basis points in the prototype policy ledger.`
+    ),
+    onSettleTax: (taxId, taxableAmount) => civilizationAction(
+      () => civilizationRuntime.settleNationTaxInvoice(taxId, taxableAmount),
+      `${taxId} synthetic invoice settled through balanced entries.`
+    ),
+    onAllocateBudget: (category, amount) => civilizationAction(
+      () => civilizationRuntime.allocateNationBudget(category, amount),
+      `${amount} KAIOS Credit allocated to ${category}.`
+    ),
+    onTradeResource: (resourceId, direction, quantity) => civilizationAction(
+      () => civilizationRuntime.tradeNationResource(resourceId, direction, quantity),
+      `${direction} of ${quantity} ${resourceId} completed inside the bounded synthetic resource economy.`
+    ),
+    onProposeDiplomacy: (type) => civilizationAction(
+      () => civilizationRuntime.proposeNationDiplomacy(type),
+      `${type} proposal entered independent synthetic review.`
+    ),
+    onReviewDiplomacy: (agreementId, decision) => civilizationAction(
+      () => civilizationRuntime.reviewNationDiplomacy(agreementId, decision),
+      `${agreementId} review recorded as ${decision}.`
+    ),
+    onResearchEra: (eraId) => civilizationAction(
+      () => civilizationRuntime.researchTimelineEra(eraId),
+      `${eraId} received bounded Timeline research evidence.`
+    ),
+    onResearchVehicle: () => civilizationAction(
+      () => civilizationRuntime.researchTimelineVehicle(),
+      "Pocket Time Cloaked UFO research advanced across all required technologies."
+    ),
+    onSupplyVehicle: () => civilizationAction(
+      () => civilizationRuntime.supplyTimelineVehicle(),
+      "The synthetic Timeline vehicle material package was supplied."
+    ),
+    onBuildVehicle: () => civilizationAction(
+      () => civilizationRuntime.buildTimelineVehicle(),
+      "Pocket Time Cloaked UFO built after technology, material, Nation, and checksum gates."
+    ),
+    onChargeVehicle: () => civilizationAction(
+      () => civilizationRuntime.chargeTimelineVehicle(),
+      "Timeline vehicle energy reserve charged."
+    ),
+    onTravel: (eraId) => civilizationAction(
+      () => civilizationRuntime.travelTimeline(eraId),
+      `Synthetic Timeline journey to ${eraId} completed without changing canonical history.`
+    ),
+    onReturnOrigin: () => civilizationAction(
+      () => civilizationRuntime.returnTimelineOrigin(),
+      "Timeline vehicle returned to the origin era."
     )
   });
   inspector = createInspectorView({
@@ -979,6 +1039,15 @@ async function start() {
     document.documentElement.dataset.publicTreasury = String(snapshot.public_services.public_finance.public_service_balance);
     document.documentElement.dataset.resilienceReadiness = String(snapshot.resilience.readiness_score);
     document.documentElement.dataset.resilienceDrills = String(snapshot.resilience.drills.length);
+    document.documentElement.dataset.nationStatus = snapshot.nation.nation.status;
+    document.documentElement.dataset.nationFoundingReady = String(snapshot.nation.founding_ready);
+    document.documentElement.dataset.nationTreasury = String(snapshot.nation.public_finance.treasury.total_assets);
+    document.documentElement.dataset.nationTaxPolicy = String(snapshot.nation.public_finance.policy_version);
+    document.documentElement.dataset.nationResourceTrades = String(snapshot.nation.resources.trades.length);
+    document.documentElement.dataset.nationDiplomacyPending = String(snapshot.nation.diplomacy.pending_review.length);
+    document.documentElement.dataset.timelineEra = snapshot.timeline.current_era_id;
+    document.documentElement.dataset.timelineVehicle = snapshot.timeline.vehicle.status;
+    document.documentElement.dataset.timelineJourneys = String(snapshot.timeline.journeys.length);
     document.documentElement.dataset.ecosystemStatus = snapshot.ecosystem.food_chain_status;
     document.documentElement.dataset.factoryStatus = snapshot.production.factory.status;
     document.documentElement.dataset.productionTotal = String(snapshot.production.factory.total_produced);
@@ -1007,7 +1076,7 @@ async function start() {
   updateStarterParcelStatus();
   shell.setCoordinates("K280 / Earth surface shell");
   shell.setSimulationClock(civilizationRuntime.getSnapshot().clock);
-  shell.showToast("Civilization Alpha ready", "success");
+  shell.showToast("Nation and Timeline Alpha ready", "success");
 }
 
 start().catch((error) => {

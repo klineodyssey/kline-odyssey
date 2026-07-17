@@ -11,12 +11,14 @@ import { createCivilizationGenesisRuntime } from "../genesis/genesis-runtime.js"
 import { createGovernmentRuntime } from "../governance/government-runtime.js";
 import { createPublicServicesRuntime } from "../governance/public-services-runtime.js";
 import { createResilienceRuntime } from "../governance/resilience-runtime.js";
+import { createNationRuntime } from "../nation/nation-runtime.js";
 import { createPlanetEnvironmentRuntime } from "../planet/planet-environment-runtime.js";
 import { createProductionRuntime } from "../production/production-runtime.js";
 import { createLogisticsRuntime } from "../settlement/logistics-runtime.js";
 import { createPopulationRuntime } from "../settlement/population-runtime.js";
 import { createSettlementRuntime } from "../settlement/settlement-runtime.js";
 import { createSimulationClock } from "../simulation/simulation-clock.js";
+import { createTimelineRuntime } from "../timeline/timeline-runtime.js";
 import { boundedPush, createNotifier, runtimeError, snapshot, stableId } from "./runtime-utils.js";
 
 const RUNTIME = "CivilizationRuntime";
@@ -126,44 +128,64 @@ export function createCivilizationRuntime({
     storage,
     storageKey: `${storagePrefix}.genesis`
   });
+  const nation = createNationRuntime({
+    world,
+    populationRuntime: population,
+    governmentRuntime: government,
+    storage,
+    storageKey: `${storagePrefix}.nation`
+  });
+  const timeline = createTimelineRuntime({
+    config: world.nation_timeline_alpha?.timeline,
+    civilizationProvider: () => civilizationProgress(),
+    nationProvider: () => nation.getSnapshot(),
+    storage,
+    storageKey: `${storagePrefix}.timeline`
+  });
   let running = false;
   let timer = null;
   let destroyed = false;
   let revision = 0;
   const events = [];
 
-  const getSnapshot = () => snapshot({
-    runtime: "CIVILIZATION_ALPHA",
-    synthetic: true,
-    source_of_truth: false,
-    playerId,
-    playerLifeId,
-    running,
-    revision,
-    clock: clock.getSnapshot(),
-    citizen: citizen.getSnapshot(playerLifeId),
-    citizens: citizen.listSnapshots(),
-    aiWorker: aiWorker.getSnapshot(config.ai_worker_id),
-    aiWorkers: aiWorker.listSnapshots(),
-    genesis: genesis.getSnapshot(),
-    planet_environment: planet.getSnapshot(),
-    economy: economy.getSnapshot(),
-    population: population.getSnapshot(),
-    logistics: logistics.getSnapshot(),
-    settlement: settlement.getSnapshot(),
-    government: government.getSnapshot(),
-    public_services: publicServices.getSnapshot(),
-    resilience: resilience.getSnapshot(),
-    agriculture: configuredAgriculture.getSnapshot(),
-    ecosystem: ecosystem.getSnapshot(),
-    biology: biology.getSnapshot(),
-    production: production.getSnapshot(),
-    ai_company: aiCompany.getSnapshot(),
-    exchange: exchange.getSnapshot(),
-    civilization_progress: civilizationProgress(),
-    city: city.getSnapshot(),
-    events
-  });
+  const getSnapshot = () => {
+    const progress = civilizationProgress();
+    const nationSnapshot = nation.getSnapshot();
+    return snapshot({
+      runtime: "CIVILIZATION_ALPHA",
+      synthetic: true,
+      source_of_truth: false,
+      playerId,
+      playerLifeId,
+      running,
+      revision,
+      clock: clock.getSnapshot(),
+      citizen: citizen.getSnapshot(playerLifeId),
+      citizens: citizen.listSnapshots(),
+      aiWorker: aiWorker.getSnapshot(config.ai_worker_id),
+      aiWorkers: aiWorker.listSnapshots(),
+      genesis: genesis.getSnapshot(),
+      planet_environment: planet.getSnapshot(),
+      economy: economy.getSnapshot(),
+      population: population.getSnapshot(),
+      logistics: logistics.getSnapshot(),
+      settlement: settlement.getSnapshot(),
+      government: government.getSnapshot(),
+      public_services: publicServices.getSnapshot(),
+      resilience: resilience.getSnapshot(),
+      agriculture: configuredAgriculture.getSnapshot(),
+      ecosystem: ecosystem.getSnapshot(),
+      biology: biology.getSnapshot(),
+      production: production.getSnapshot(),
+      ai_company: aiCompany.getSnapshot(),
+      exchange: exchange.getSnapshot(),
+      nation: nationSnapshot,
+      timeline: timeline.getSnapshot({ civilization: progress, nation: nationSnapshot }),
+      civilization_progress: progress,
+      city: city.getSnapshot(),
+      events
+    });
+  };
   const notifier = createNotifier(getSnapshot);
   const usable = () => {
     if (destroyed) throw runtimeError(RUNTIME, "RUNTIME_DESTROYED", "Civilization Runtime has been destroyed");
@@ -633,6 +655,159 @@ export function createCivilizationRuntime({
     return getSnapshot();
   }
 
+  function establishNation() {
+    usable();
+    born();
+    nation.establishNation();
+    record("NATION_ESTABLISHED", { nation_id: nation.getSnapshot().nation.nation_id });
+    notifier.emit("NATION_ESTABLISHED", { nation_id: nation.getSnapshot().nation.nation_id });
+    return getSnapshot();
+  }
+
+  function runNationGovernmentCycle() {
+    usable();
+    born();
+    nation.runGovernmentV2Cycle();
+    record("NATION_GOVERNMENT_V2_CYCLE_COMPLETED");
+    notifier.emit("NATION_GOVERNMENT_V2_CYCLE_COMPLETED");
+    return getSnapshot();
+  }
+
+  function setNationTaxRate(taxId, rateBps) {
+    usable();
+    born();
+    nation.setTaxRate(taxId, rateBps);
+    record("NATION_TAX_RATE_UPDATED", { tax_id: taxId, rate_bps: Number(rateBps) });
+    notifier.emit("NATION_TAX_RATE_UPDATED", { tax_id: taxId });
+    return getSnapshot();
+  }
+
+  function settleNationTaxInvoice(taxId, taxableAmount) {
+    usable();
+    born();
+    nation.settleTaxInvoice(taxId, taxableAmount, playerId);
+    record("NATION_TAX_INVOICE_SETTLED", { tax_id: taxId, taxable_amount: Number(taxableAmount) });
+    notifier.emit("NATION_TAX_INVOICE_SETTLED", { tax_id: taxId });
+    return getSnapshot();
+  }
+
+  function allocateNationBudget(category, amount) {
+    usable();
+    born();
+    nation.allocateBudget(category, amount);
+    record("NATION_BUDGET_ALLOCATED", { category, amount: Number(amount) });
+    notifier.emit("NATION_BUDGET_ALLOCATED", { category });
+    return getSnapshot();
+  }
+
+  function tradeNationResource(resourceId, direction, quantity, counterpartyId = "nation-partner-alpha") {
+    usable();
+    born();
+    nation.tradeResource(resourceId, direction, quantity, counterpartyId);
+    record("NATION_RESOURCE_TRADE_COMPLETED", { resource_id: resourceId, direction, quantity: Number(quantity) });
+    notifier.emit("NATION_RESOURCE_TRADE_COMPLETED", { resource_id: resourceId, direction });
+    return getSnapshot();
+  }
+
+  function exchangeNationResources(details) {
+    usable();
+    born();
+    nation.exchangeResources(details);
+    record("NATION_RESOURCE_EXCHANGE_COMPLETED", { from_resource_id: details?.fromResourceId, to_resource_id: details?.toResourceId });
+    notifier.emit("NATION_RESOURCE_EXCHANGE_COMPLETED");
+    return getSnapshot();
+  }
+
+  function proposeNationDiplomacy(type, counterpartyId = "nation-partner-alpha") {
+    usable();
+    born();
+    nation.proposeDiplomacy(type, counterpartyId);
+    record("NATION_DIPLOMACY_PROPOSED", { agreement_type: type, counterparty_id: counterpartyId });
+    notifier.emit("NATION_DIPLOMACY_PROPOSED", { agreement_type: type });
+    return getSnapshot();
+  }
+
+  function reviewNationDiplomacy(agreementId, decision = "APPROVE") {
+    usable();
+    born();
+    nation.reviewDiplomacy(agreementId, decision);
+    record("NATION_DIPLOMACY_REVIEWED", { agreement_id: agreementId, decision });
+    notifier.emit("NATION_DIPLOMACY_REVIEWED", { agreement_id: agreementId, decision });
+    return getSnapshot();
+  }
+
+  function setNationCurrencyPolicy(policyId) {
+    usable();
+    born();
+    nation.setCurrencyPolicy(policyId);
+    record("NATION_CURRENCY_POLICY_UPDATED", { policy_id: policyId });
+    notifier.emit("NATION_CURRENCY_POLICY_UPDATED", { policy_id: policyId });
+    return getSnapshot();
+  }
+
+  function researchTimelineEra(eraId) {
+    usable();
+    born();
+    timeline.researchEra(eraId);
+    record("TIMELINE_ERA_RESEARCHED", { era_id: eraId });
+    notifier.emit("TIMELINE_ERA_RESEARCHED", { era_id: eraId });
+    return getSnapshot();
+  }
+
+  function researchTimelineVehicle() {
+    usable();
+    born();
+    timeline.researchVehicleProgram();
+    record("TIMELINE_VEHICLE_RESEARCHED");
+    notifier.emit("TIMELINE_VEHICLE_RESEARCHED");
+    return getSnapshot();
+  }
+
+  function supplyTimelineVehicle() {
+    usable();
+    born();
+    timeline.supplyVehiclePackage();
+    record("TIMELINE_VEHICLE_MATERIALS_SUPPLIED");
+    notifier.emit("TIMELINE_VEHICLE_MATERIALS_SUPPLIED");
+    return getSnapshot();
+  }
+
+  function buildTimelineVehicle() {
+    usable();
+    born();
+    timeline.buildVehicle();
+    record("TIMELINE_VEHICLE_BUILT");
+    notifier.emit("TIMELINE_VEHICLE_BUILT");
+    return getSnapshot();
+  }
+
+  function chargeTimelineVehicle() {
+    usable();
+    born();
+    timeline.chargeVehicle();
+    record("TIMELINE_VEHICLE_CHARGED");
+    notifier.emit("TIMELINE_VEHICLE_CHARGED");
+    return getSnapshot();
+  }
+
+  function travelTimeline(eraId) {
+    usable();
+    born();
+    timeline.travel(eraId);
+    record("TIMELINE_TRAVEL_COMPLETED", { era_id: eraId, canonical_history_mutated: false });
+    notifier.emit("TIMELINE_TRAVEL_COMPLETED", { era_id: eraId });
+    return getSnapshot();
+  }
+
+  function returnTimelineOrigin() {
+    usable();
+    born();
+    timeline.returnToOrigin();
+    record("TIMELINE_RETURNED_TO_ORIGIN", { origin_era_id: timeline.getSnapshot().origin_era_id });
+    notifier.emit("TIMELINE_RETURNED_TO_ORIGIN");
+    return getSnapshot();
+  }
+
   function start({ intervalMs = 1000, minutesPerTick = 60 } = {}) {
     usable();
     born();
@@ -675,6 +850,8 @@ export function createCivilizationRuntime({
       production: production.integrityReport(),
       ai_company: aiCompany.integrityReport(),
       exchange: exchange.integrityReport(),
+      nation: nation.integrityReport(),
+      timeline: timeline.integrityReport(),
       city: city.integrityReport()
     };
     const issues = Object.entries(reports).filter(([, report]) => !report.ok).map(([name]) => `${name} integrity failed`);
@@ -735,6 +912,23 @@ export function createCivilizationRuntime({
     runResilienceDrill,
     runResilienceRecovery,
     settleInheritance,
+    establishNation,
+    runNationGovernmentCycle,
+    setNationTaxRate,
+    settleNationTaxInvoice,
+    allocateNationBudget,
+    tradeNationResource,
+    exchangeNationResources,
+    proposeNationDiplomacy,
+    reviewNationDiplomacy,
+    setNationCurrencyPolicy,
+    researchTimelineEra,
+    researchTimelineVehicle,
+    supplyTimelineVehicle,
+    buildTimelineVehicle,
+    chargeTimelineVehicle,
+    travelTimeline,
+    returnTimelineOrigin,
     start,
     stop,
     subscribe: notifier.subscribe,
@@ -759,6 +953,8 @@ export function createCivilizationRuntime({
       production.destroy();
       aiCompany.destroy();
       exchange.destroy();
+      nation.destroy();
+      timeline.destroy();
       city.destroy();
       genesis.destroy();
       planet.destroy();
