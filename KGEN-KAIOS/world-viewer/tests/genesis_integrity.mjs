@@ -64,6 +64,8 @@ assert.equal(born.genesis.airdrop, false);
 assert.equal(born.genesis.real_kgen, false);
 assert.equal(born.economy.player_balance, 888);
 assert.equal(Object.keys(born.economy.genesis_grants).length, 1);
+assert.equal(Object.values(born.economy.genesis_grants)[0].currency, "KAIOS_CREDIT");
+assert.equal(Object.values(born.economy.genesis_grants)[0].reference_asset, "KGEN");
 assert.equal(born.economy.player_inventory.WATER, 6);
 assert.equal(born.economy.player_inventory.RICE, 3);
 assert.equal(born.economy.player_inventory.STARTER_BACKPACK, 1);

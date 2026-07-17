@@ -2,17 +2,17 @@
   "meta": {
     "synthetic": true,
     "non_authoritative": true,
-    "fixture_id": "KAIOS-WV-SPRINT-005-PRODUCTION",
-    "schema_version": "5.0.0",
-    "snapshot_id": "WV-SYNTHETIC-20260717-005-PRODUCTION",
-    "source_revision": "HUMAN-SPRINT-005-CIVILIZATION-PRODUCTION",
+    "fixture_id": "KAIOS-WV-SPRINT-006-SETTLEMENT",
+    "schema_version": "6.0.0",
+    "snapshot_id": "WV-SYNTHETIC-20260717-006-SETTLEMENT",
+    "source_revision": "HUMAN-SPRINT-006-SETTLEMENT-ECONOMY",
     "generated_at": "2026-07-17T00:00:00Z",
     "stale_after": "2099-12-31T23:59:59Z",
     "privacy_class": "PUBLIC_SYNTHETIC",
     "coordinate_model": "K280_GEODETIC_WITH_LOCAL_VIEW_PROJECTIONS",
-    "product_stage": "CIVILIZATION_PRODUCTION_ALPHA",
+    "product_stage": "SETTLEMENT_ECONOMY_ALPHA",
     "simulation_scope": "LOCAL_SYNTHETIC_ONLY",
-    "storage_namespace": "kaios.world-viewer.sprint-005.production"
+    "storage_namespace": "kaios.world-viewer.sprint-006.settlement"
   },
   "scene_bounds": [0, 0, 1200, 760],
   "civilization_alpha": {
@@ -32,6 +32,65 @@
     "simulation_only": true,
     "real_payment": false,
     "authoritative_registry": false
+  },
+  "settlement_alpha": {
+    "decision_id": "HUMAN-SPRINT-006-SETTLEMENT-ECONOMY",
+    "runtime_id": "settlement-economy-alpha-hsinchu-001",
+    "simulation_only": true,
+    "real_finance": false,
+    "real_kgen_transfer": false,
+    "real_external_settlement": false,
+    "authoritative_registry": false,
+    "carrying_capacity": 24,
+    "living_cycle": {
+      "salary": 24,
+      "tax": 2,
+      "rent": 4,
+      "currency": "KAIOS_CREDIT"
+    },
+    "currency_layers": [
+      {
+        "layer": 1,
+        "asset_id": "KAIOS_CREDIT",
+        "role": "CIVILIZATION_LIVING_CURRENCY",
+        "status": "ACTIVE_SYNTHETIC_LEDGER"
+      },
+      {
+        "layer": 2,
+        "asset_id": "KGEN",
+        "role": "OFFICIAL_BLOCKCHAIN_ASSET",
+        "status": "OFFICIAL_SETTLEMENT_REQUEST_ONLY",
+        "token_tax": "0.30% UNCHANGED"
+      },
+      {
+        "layer": 3,
+        "asset_id": "EXTERNAL_SETTLEMENT",
+        "supported_references": ["USDT", "TWD", "OTHER_FIAT"],
+        "status": "OFFICIAL_SETTLEMENT_REQUEST_ONLY"
+      }
+    ],
+    "bootstrap_reference": {
+      "base_asset": "KGEN",
+      "quote_asset": "KAIOS_CREDIT",
+      "rate": 1,
+      "permanent_peg": false,
+      "guaranteed_return": false,
+      "future_governance_adjustable": true
+    },
+    "hierarchy": [
+      { "level": "FAMILY", "entity_id": "family-starter-001", "parent_id": "village-genesis-001", "label": "Starter Household" },
+      { "level": "VILLAGE", "entity_id": "village-genesis-001", "parent_id": "town-hukou-alpha", "label": "Genesis Village" },
+      { "level": "TOWN", "entity_id": "town-hukou-alpha", "parent_id": "city-hsinchu-alpha", "label": "Hukou Alpha" },
+      { "level": "CITY", "entity_id": "city-hsinchu-alpha", "parent_id": "nation-taiwan-alpha", "label": "Hsinchu Alpha" },
+      { "level": "NATION", "entity_id": "nation-taiwan-alpha", "parent_id": "civilization-kaios-alpha", "label": "Taiwan Alpha" },
+      { "level": "CIVILIZATION", "entity_id": "civilization-kaios-alpha", "parent_id": null, "label": "KAIOS Civilization Alpha" }
+    ],
+    "logistics_routes": [
+      { "route_id": "route-farm-warehouse", "from": "FARM", "to": "WAREHOUSE", "modes": ["DOMESTIC"], "capacity": 120 },
+      { "route_id": "route-warehouse-market", "from": "WAREHOUSE", "to": "MARKETPLACE", "modes": ["DOMESTIC", "EXPORT"], "capacity": 100 },
+      { "route_id": "route-factory-market", "from": "FACTORY", "to": "MARKETPLACE", "modes": ["DOMESTIC", "EXPORT"], "capacity": 80 },
+      { "route_id": "route-city-settlement-gate", "from": "CITY", "to": "OFFICIAL_SETTLEMENT_GATE", "modes": ["EXPORT", "IMPORT"], "capacity": 40 }
+    ]
   },
   "production_alpha": {
     "decision_id": "HUMAN-SPRINT-005-CIVILIZATION-PRODUCTION",

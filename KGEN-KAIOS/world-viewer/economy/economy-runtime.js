@@ -12,12 +12,66 @@ import {
 } from "../civilization/runtime-utils.js";
 
 const RUNTIME = "EconomyRuntime";
-const SCHEMA_VERSION = "1.0.0";
+const SCHEMA_VERSION = "2.0.0";
 const MARKET_ID = "civilization-market-alpha";
 const GENESIS_TREASURY_ID = "civilization-genesis-treasury-alpha";
+const EMPLOYER_ID = "civilization-employer-alpha";
+const GOVERNMENT_ID = "civilization-government-alpha";
+const LANDLORD_ID = "civilization-landlord-alpha";
+const ESTATE_ID = "civilization-estate-alpha";
+const INSURANCE_POOL_ID = "civilization-insurance-pool-alpha";
 const MAX_LEDGER = 300;
 const MAX_RESOURCE_QUANTITY = 10_000;
 const WAREHOUSE_CAPACITY = 5_000;
+
+export const ECONOMY_ACCOUNT_IDS = Object.freeze({
+  MARKET: MARKET_ID,
+  GENESIS_TREASURY: GENESIS_TREASURY_ID,
+  EMPLOYER: EMPLOYER_ID,
+  GOVERNMENT: GOVERNMENT_ID,
+  LANDLORD: LANDLORD_ID,
+  ESTATE: ESTATE_ID,
+  INSURANCE_POOL: INSURANCE_POOL_ID
+});
+
+const ACCOUNT_LABELS = Object.freeze({
+  [MARKET_ID]: "Civilization Market",
+  [GENESIS_TREASURY_ID]: "Genesis Treasury",
+  [EMPLOYER_ID]: "Settlement Employer",
+  [GOVERNMENT_ID]: "Settlement Government",
+  [LANDLORD_ID]: "Settlement Landlord",
+  [ESTATE_ID]: "Inheritance Estate",
+  [INSURANCE_POOL_ID]: "Insurance Architecture Pool"
+});
+
+const CURRENCY_MODEL = Object.freeze({
+  layer_1: {
+    asset_id: "KAIOS_CREDIT",
+    role: "CIVILIZATION_LIVING_CURRENCY",
+    execution_status: "ACTIVE_SYNTHETIC_LEDGER",
+    uses: ["FOOD", "SALARY", "RENT", "BUILDING", "AI_COMPANY", "MARKETPLACE"]
+  },
+  layer_2: {
+    asset_id: "KGEN",
+    role: "OFFICIAL_BLOCKCHAIN_ASSET",
+    execution_status: "GATED_OFFICIAL_SETTLEMENT_ONLY",
+    token_tax: "0.30% UNCHANGED"
+  },
+  layer_3: {
+    asset_ids: ["USDT", "TWD", "OTHER_FIAT"],
+    role: "EXTERNAL_SETTLEMENT",
+    execution_status: "GATED_OFFICIAL_SETTLEMENT_ONLY"
+  },
+  bootstrap_reference: {
+    base_asset: "KGEN",
+    quote_asset: "KAIOS_CREDIT",
+    rate: 1,
+    status: "BOOTSTRAP_REFERENCE_ONLY",
+    permanent_peg: false,
+    guaranteed_return: false,
+    future_governance_adjustable: true
+  }
+});
 
 export const RESOURCE_CATALOG = Object.freeze([
   ["RICE", "FOOD"], ["VEGETABLE", "FOOD"], ["FRUIT", "FOOD"],
@@ -61,8 +115,13 @@ function initialState(playerId, playerBalance, playerInventory, genesisTreasury)
     revision: 0,
     accounts: {
       [playerId]: playerBalance,
-      [MARKET_ID]: 10_000,
-      [GENESIS_TREASURY_ID]: genesisTreasury
+      [MARKET_ID]: 6_000,
+      [GENESIS_TREASURY_ID]: genesisTreasury,
+      [EMPLOYER_ID]: 1_500,
+      [GOVERNMENT_ID]: 500,
+      [LANDLORD_ID]: 500,
+      [ESTATE_ID]: 1_000,
+      [INSURANCE_POOL_ID]: 500
     },
     inventories: { [playerId]: { ...playerInventory } },
     listings: DEFAULT_LISTINGS.map((listing) => ({ ...listing })),
@@ -111,10 +170,12 @@ export function createEconomyRuntime({
     schema_version: SCHEMA_VERSION,
     synthetic: true,
     prototype_ledger_only: true,
+    currency_model: CURRENCY_MODEL,
     player_id: playerId,
     player_balance: state.accounts[playerId] ?? 0,
     player_inventory: state.inventories[playerId] ?? {},
     balances: state.accounts,
+    account_labels: ACCOUNT_LABELS,
     inventories: state.inventories,
     listings: state.listings,
     marketplace_categories: MARKETPLACE_CATEGORIES,
@@ -149,14 +210,30 @@ export function createEconomyRuntime({
     }, MAX_LEDGER);
   }
 
-  function transferCredits(from, to, amount, reason) {
+  function transferCredits(from, to, amount, reason, category = "GENERAL") {
     const value = Number(amount);
     if (!Number.isFinite(value) || value <= 0) throw runtimeError(RUNTIME, "INVALID_AMOUNT", "Credit amount must be positive");
-    if (account(from) < value) throw runtimeError(RUNTIME, "INSUFFICIENT_FUNDS", `${from} has insufficient prototype credits`);
+    if (account(from) < value) throw runtimeError(RUNTIME, "INSUFFICIENT_FUNDS", `${from} has insufficient KAIOS Credit`);
     state.accounts[from] -= value;
     account(to);
     state.accounts[to] += value;
-    record("BALANCED_CREDIT_TRANSFER", { from, to, amount: value, reason });
+    return record("BALANCED_CREDIT_TRANSFER", {
+      currency: "KAIOS_CREDIT",
+      category,
+      from,
+      to,
+      amount: value,
+      reason
+    });
+  }
+
+  function transfer({ from, to, amount, reason = "SETTLEMENT", category = "GENERAL" } = {}) {
+    usable();
+    if (!from || !to || from === to) throw runtimeError(RUNTIME, "INVALID_TRANSFER", "Transfer requires two different accounts");
+    const entry = transferCredits(String(from), String(to), amount, String(reason), String(category));
+    persist();
+    notifier.emit("CREDIT_TRANSFER", { entry_id: entry.entry_id, from, to, amount: Number(amount), category });
+    return snapshot({ entry, economy: getSnapshot() });
   }
 
   function buy({ listingId, buyerId = playerId, quantity = 1 } = {}) {
@@ -271,7 +348,9 @@ export function createEconomyRuntime({
       claim_id: id,
       owner_id: ownerId,
       amount: value,
-      currency: "PROTOTYPE_KGEN",
+      currency: "KAIOS_CREDIT",
+      reference_asset: "KGEN",
+      bootstrap_reference_rate: 1,
       resources: normalized,
       one_time: true,
       synthetic: true
@@ -305,19 +384,21 @@ export function createEconomyRuntime({
   function integrityReport() {
     const issues = [];
     const creditSupply = Object.values(state.accounts).reduce((sum, value) => sum + Number(value), 0);
-    if (Math.abs(creditSupply - initialCreditSupply) > 0.0001) issues.push("prototype credit ledger is unbalanced");
+    if (Math.abs(creditSupply - initialCreditSupply) > 0.0001) issues.push("KAIOS Credit ledger is unbalanced");
     for (const [owner, balance] of Object.entries(state.accounts)) if (!Number.isFinite(balance) || balance < 0) issues.push(`${owner}: invalid balance`);
     for (const [owner, values] of Object.entries(state.inventories)) {
       if (inventoryQuantity(values) > WAREHOUSE_CAPACITY) issues.push(`${owner}: warehouse capacity exceeded`);
       for (const [resource, quantity] of Object.entries(values)) if (!Number.isFinite(quantity) || quantity < 0 || quantity > MAX_RESOURCE_QUANTITY) issues.push(`${owner}/${resource}: invalid stock`);
     }
     if (state.ledger.length > MAX_LEDGER) issues.push("ledger history exceeded limit");
+    if (CURRENCY_MODEL.bootstrap_reference.permanent_peg !== false) issues.push("bootstrap reference must not become a permanent peg");
+    if (CURRENCY_MODEL.layer_2.token_tax !== "0.30% UNCHANGED") issues.push("KGEN tax boundary changed");
     if (!state.listings.every((listing) => MARKETPLACE_CATEGORIES.includes(listing.category))) issues.push("unknown marketplace category");
     for (const [claimId, grant] of Object.entries(state.genesis_grants)) {
       if (grant.claim_id !== claimId || grant.one_time !== true) issues.push(`${claimId}: invalid Genesis grant`);
       if (![1, 8, 88, 188, 388, 888].includes(grant.amount)) issues.push(`${claimId}: invalid Genesis amount`);
     }
-    return snapshot({ ok: issues.length === 0, runtime: "CIVILIZATION_ECONOMY_ALPHA", credit_supply: creditSupply, ledger_entries: state.ledger.length, issues });
+    return snapshot({ ok: issues.length === 0, runtime: "CIVILIZATION_ECONOMY_ALPHA", currency: "KAIOS_CREDIT", credit_supply: creditSupply, ledger_entries: state.ledger.length, issues });
   }
 
   return Object.freeze({
@@ -326,6 +407,7 @@ export function createEconomyRuntime({
     deposit,
     consume,
     sell,
+    transfer,
     payReward,
     grantGenesisBundle,
     createTransportJob,

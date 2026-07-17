@@ -1894,7 +1894,7 @@ def run_civilization_alpha(browser: Browser, args: argparse.Namespace, gate: Gat
             "genesis.boot-and-fortune",
             "civilization-genesis",
             all(label in genesis_text for label in (
-                "Civilization Birth", "ENTER WORLD", "88 PROTOTYPE KGEN",
+                "Civilization Birth", "ENTER WORLD", "88 KAIOS CREDIT (KGEN REFERENCE)",
                 "Planet Environment", "Starter Survival Pack", "K12345",
             )),
             details={"genesis_complete": page.evaluate("document.documentElement.dataset.genesisComplete")},
@@ -1960,7 +1960,7 @@ def run_civilization_alpha(browser: Browser, args: argparse.Namespace, gate: Gat
             "civilization.ai-schedule",
             "ai-schedule",
             page.evaluate("document.documentElement.dataset.civilizationAiAction") == "FARM"
-            and page.evaluate("Number(document.documentElement.dataset.civilizationBalance)") == 103,
+            and page.evaluate("Number(document.documentElement.dataset.civilizationBalance)") == 106,
             details={
                 "activity": page.evaluate("document.documentElement.dataset.civilizationActivity"),
                 "ai_action": page.evaluate("document.documentElement.dataset.civilizationAiAction"),
@@ -2091,15 +2091,113 @@ def run_civilization_alpha(browser: Browser, args: argparse.Namespace, gate: Gat
             and "Listed 0" in clean_text(page.locator(".civilization-view").inner_text()),
         )
 
+        page.locator("[data-civilization-action='TAB_POPULATION']").click()
+        settlement_text = clean_text(page.locator(".civilization-view").inner_text())
+        gate.expect(
+            "settlement.population-hierarchy",
+            "settlement-population",
+            all(label in settlement_text for label in (
+                "Settlement Population", "Family to Civilization", "Starter Household",
+                "Genesis Village", "Hukou Alpha", "Hsinchu Alpha", "Taiwan Alpha",
+                "KAIOS Civilization Alpha", "Citizens and Families",
+            )),
+        )
+        page.locator("[data-civilization-action='REGISTER_MARRIAGE']").click()
+        gate.expect(
+            "settlement.marriage-consent",
+            "settlement-population",
+            page.locator("[data-civilization-action='REGISTER_MARRIAGE']").is_disabled()
+            and page.locator("[data-civilization-action='REGISTER_BIRTH']").is_enabled(),
+        )
+        page.locator("[data-civilization-action='REGISTER_BIRTH']").click()
+        page.wait_for_function("() => document.documentElement.dataset.populationTotal === '4'")
+        gate.expect(
+            "settlement.birth-capacity",
+            "settlement-population",
+            "Genesis Child 1" in clean_text(page.locator(".civilization-view").inner_text())
+            and page.evaluate("document.documentElement.dataset.populationFamilies") == "1",
+        )
+        inheritance_before = int(page.evaluate("document.documentElement.dataset.civilizationBalance"))
+        page.locator("[data-civilization-action='SETTLE_INHERITANCE']").click()
+        inheritance_after = int(page.evaluate("document.documentElement.dataset.civilizationBalance"))
+        gate.expect(
+            "settlement.inheritance-once",
+            "settlement-economy",
+            inheritance_after == inheritance_before + 20
+            and page.locator("[data-civilization-action='SETTLE_INHERITANCE']").is_disabled(),
+            details={"before": inheritance_before, "after": inheritance_after},
+        )
+        jobs_before = int(page.evaluate("document.documentElement.dataset.logisticsJobs"))
+        page.locator("[data-civilization-action='DISPATCH_DOMESTIC']").click()
+        page.locator("[data-civilization-action='DISPATCH_EXPORT']").click()
+        gate.expect(
+            "settlement.logistics-gate",
+            "logistics",
+            int(page.evaluate("document.documentElement.dataset.logisticsJobs")) == jobs_before + 2
+            and "READY" in clean_text(page.locator(".civilization-view").inner_text()),
+        )
+        pollution_before = float(page.evaluate("document.documentElement.dataset.logisticsPollution"))
+        page.locator("[data-civilization-action='RECOVER_ECOLOGY']").click()
+        pollution_after = float(page.evaluate("document.documentElement.dataset.logisticsPollution"))
+        gate.expect(
+            "settlement.ecology-recovery",
+            "ecology",
+            pollution_after < pollution_before,
+            details={"before": pollution_before, "after": pollution_after},
+        )
+
+        page.locator("[data-civilization-action='TAB_ECONOMY']").click()
+        economy_text = clean_text(page.locator(".civilization-view").inner_text())
+        gate.expect(
+            "settlement.currency-layers",
+            "settlement-economy",
+            all(label in economy_text for label in (
+                "KAIOS CREDIT", "KGEN", "USDT / TWD / OTHER FIAT",
+                "REFERENCE ONLY", "Permanent Peg false", "Guaranteed Return false",
+                "0.30% UNCHANGED",
+            )),
+        )
+        cycle_before = int(page.evaluate("document.documentElement.dataset.civilizationBalance"))
+        page.locator("[data-civilization-action='RUN_SETTLEMENT']").click()
+        cycle_after = int(page.evaluate("document.documentElement.dataset.civilizationBalance"))
+        gate.expect(
+            "settlement.salary-tax-rent",
+            "settlement-economy",
+            cycle_after == cycle_before + 18
+            and all(label in clean_text(page.locator(".civilization-view").inner_text()) for label in ("SALARY", "TAX", "RENT")),
+            details={"before": cycle_before, "after": cycle_after},
+        )
+        gate_balance = cycle_after
+        page.locator("[data-civilization-action='REQUEST_KGEN']").click()
+        page.locator("[data-civilization-action='REQUEST_TWD']").click()
+        page.wait_for_function("() => document.documentElement.dataset.settlementRequests === '2'")
+        gate.expect(
+            "settlement.official-gates",
+            "financial-boundary",
+            int(page.evaluate("document.documentElement.dataset.civilizationBalance")) == gate_balance
+            and clean_text(page.locator(".civilization-view").inner_text()).count("PENDING OFFICIAL SETTLEMENT") >= 2
+            and page.evaluate("document.documentElement.dataset.settlementCurrency") == "KAIOS_CREDIT",
+        )
+        page.locator("[data-civilization-action='REQUEST_MORTGAGE']").click()
+        page.locator("[data-civilization-action='REQUEST_INSURANCE']").click()
+        gate.expect(
+            "settlement.architecture-only-services",
+            "financial-boundary",
+            page.evaluate("document.documentElement.dataset.mortgageProposals") == "1"
+            and page.evaluate("document.documentElement.dataset.insuranceProposals") == "1"
+            and int(page.evaluate("document.documentElement.dataset.civilizationBalance")) == gate_balance,
+        )
+
         page.locator("[data-civilization-action='TAB_CITY']").click()
         city_text = clean_text(page.locator(".civilization-view").inner_text())
         gate.expect(
             "civilization.city-runtime",
             "city-integrity",
             all(label in city_text for label in (
-                "Population", "Employment", "Unemployment", "Food", "Energy",
+                "Population", "Employment", "Unemployment", "Food", "Water", "Energy",
                 "Housing", "Roads", "Pollution", "Happiness", "Industry",
-                "Supply Chain", "Ecology", "Company Health", "Civilization Stage",
+                "Supply Chain", "Ecology", "Ecology Recovery", "Education", "Logistics",
+                "Settlement Integrity", "Company Health", "Civilization Stage",
             ))
             and page.evaluate("document.documentElement.dataset.civilizationCity") in {"STABLE", "THRIVING", "STRAINED", "AT_RISK"},
         )
@@ -2203,6 +2301,75 @@ def run_production_mobile(browser: Browser, args: argparse.Namespace, gate: Gate
             details={"error": clean_text(error)},
         )
         browser_clean(monitor, "production-mobile", gate)
+    finally:
+        context.close()
+
+
+def run_settlement_mobile(browser: Browser, args: argparse.Namespace, gate: Gate) -> None:
+    base = next(case for case in MATRIX if case.slug == "iphone-portrait-light")
+    case = ViewportCase(
+        "settlement-mobile", base.family, base.orientation, base.width, base.height,
+        base.theme, base.touch, base.device_scale_factor, base.user_agent,
+    )
+    context = new_context(browser, case)
+    page = context.new_page()
+    monitor = BrowserMonitor(page, args.base_url)
+    try:
+        load_page(page, args.base_url, "light")
+        start_mock_session(page, with_location=False)
+        page.locator("[data-mode='CIVILIZATION']").click()
+        page.locator("[data-civilization-action='TAB_ECONOMY']").click()
+        page.locator("[data-civilization-action='RUN_SETTLEMENT']").click()
+        page.locator("[data-civilization-action='REQUEST_KGEN']").click()
+        economy_text = clean_text(page.locator(".civilization-view").inner_text())
+        layout = measure_overflow(page)
+        targets = measure_touch_targets(page)
+        mobile = page.evaluate("""
+          () => {
+            const inspector = document.getElementById("inspector-panel")?.getBoundingClientRect();
+            const tabs = document.querySelector(".civilization-tabs");
+            const layerGrid = document.querySelector(".currency-layer-grid");
+            return {
+              inspector: inspector ? {width: inspector.width, height: inspector.height, left: inspector.left, top: inspector.top} : null,
+              tabs_client: tabs?.clientWidth ?? 0,
+              tabs_scroll: tabs?.scrollWidth ?? 0,
+              layer_columns: layerGrid ? getComputedStyle(layerGrid).gridTemplateColumns.split(" ").length : 0,
+              viewport: {width: innerWidth, height: innerHeight}
+            };
+          }
+        """)
+        screenshot = capture_screenshot(page, case, args.output_dir, None, args.pixel_threshold)
+        gate.screenshots.append(screenshot)
+        gate.expect(
+            "settlement.mobile-economy",
+            "mobile-interaction",
+            all(label in economy_text for label in ("KAIOS CREDIT", "KGEN", "PENDING OFFICIAL SETTLEMENT"))
+            and mobile["inspector"] is not None
+            and mobile["inspector"]["width"] >= mobile["viewport"]["width"] - 1
+            and mobile["tabs_scroll"] > mobile["tabs_client"]
+            and mobile["layer_columns"] == 1
+            and layout["document_width"] <= layout["viewport_width"]
+            and not layout["offenders"]
+            and not targets["violations"]
+            and screenshot["pixel_variance"] >= 15,
+            details={"layout": layout, "mobile": mobile, "targets": targets, "screenshot": screenshot},
+        )
+        page.locator("[data-civilization-action='TAB_POPULATION']").click()
+        population_text = clean_text(page.locator(".civilization-view").inner_text())
+        gate.expect(
+            "settlement.mobile-population",
+            "mobile-interaction",
+            all(label in population_text for label in ("Settlement Population", "Family to Civilization", "Logistics and Ecology")),
+        )
+        browser_clean(monitor, "settlement-mobile", gate)
+    except Exception as error:
+        gate.add(
+            "settlement.mobile-execution",
+            "mobile-interaction",
+            "FAIL",
+            details={"error": clean_text(error)},
+        )
+        browser_clean(monitor, "settlement-mobile", gate)
     finally:
         context.close()
 
@@ -2322,6 +2489,7 @@ def main(argv: list[str] | None = None) -> int:
                 run_digital_earth_mobile(browser, args, gate)
                 run_civilization_alpha(browser, args, gate)
                 run_production_mobile(browser, args, gate)
+                run_settlement_mobile(browser, args, gate)
             finally:
                 browser.close()
     except Exception as error:

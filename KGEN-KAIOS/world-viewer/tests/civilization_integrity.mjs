@@ -71,7 +71,8 @@ const work = civilization.advance(60);
 assert.equal(work.clock.hour, 8);
 assert.equal(work.citizen.current_activity, "WORK");
 assert.equal(work.aiWorker.current_action, "FARM");
-assert.equal(work.economy.player_balance, 103);
+assert.equal(work.economy.player_balance, 106);
+assert.deepEqual(work.settlement.obligations.map(({ type }) => type), ["SALARY", "TAX", "RENT"]);
 
 civilization.plant("starter-garden-001", "VEGETABLE");
 const grown = civilization.advance(12 * 60);
@@ -106,8 +107,14 @@ assert.ok(final.production.events.length <= 180);
 assert.ok(final.ai_company.events.length <= 160);
 assert.ok(final.ai_company.ledger.length <= 200);
 assert.ok(final.exchange.events.length <= 120);
+assert.ok(final.population.events.length <= 180);
+assert.ok(final.logistics.events.length <= 160);
+assert.ok(final.settlement.events.length <= 140);
 assert.ok(final.city.history.length <= 120);
 assert.equal(final.city.employed + final.city.unemployed, final.city.population);
+for (const deadCitizen of final.citizens.filter(({ life_state: state }) => state === "DEAD")) {
+  assert.equal(final.population.citizens.find(({ life_id: id }) => id === deadCitizen.life_id)?.lifecycle_state, "DECEASED");
+}
 assert.equal(JSON.stringify(world), canonicalBefore, "Civilization Runtime must not mutate the canonical fixture");
 
 const output = {
@@ -121,6 +128,9 @@ const output = {
   production: report.reports.production,
   ai_company: report.reports.ai_company,
   exchange: report.reports.exchange,
+  population: report.reports.population,
+  logistics: report.reports.logistics,
+  settlement: report.reports.settlement,
   city: report.reports.city,
   product_flow: {
     universe_booted: true,
@@ -131,7 +141,7 @@ const output = {
     starter_parcel_verified: true,
     login_fixture: true,
     breakfast_consumed: true,
-    work_rewarded: true,
+    work_settlement_completed: true,
     ai_farmed: true,
     crop_planted: true,
     crop_harvested: true,
@@ -154,6 +164,9 @@ const output = {
     production: final.production.events.length,
     ai_company: final.ai_company.events.length,
     exchange: final.exchange.events.length,
+    population: final.population.events.length,
+    logistics: final.logistics.events.length,
+    settlement: final.settlement.events.length,
     city: final.city.history.length
   },
   protected_runtime_mutated: false

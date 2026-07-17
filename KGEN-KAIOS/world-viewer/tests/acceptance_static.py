@@ -45,6 +45,9 @@ REQUIRED_FILES = (
     "production/production-runtime.js",
     "enterprise/ai-company-organism-runtime.js",
     "exchange/life-exchange-runtime.js",
+    "settlement/population-runtime.js",
+    "settlement/logistics-runtime.js",
+    "settlement/settlement-runtime.js",
     "city/city-runtime.js",
     "civilization/runtime-utils.js",
     "civilization/civilization-runtime.js",
@@ -55,6 +58,7 @@ REQUIRED_FILES = (
     "tests/civilization_integrity.mjs",
     "tests/genesis_integrity.mjs",
     "tests/production_integrity.mjs",
+    "tests/settlement_economy_integrity.mjs",
 )
 
 PROTECTED_PREFIXES = (
@@ -342,6 +346,29 @@ def check_alpha_contract(errors: list[str], data: dict, source_text: str, html: 
     ):
         fail(errors, "K11520 candidate-only exchange boundary is invalid")
 
+    settlement = data.get("settlement_alpha", {})
+    if settlement.get("decision_id") != "HUMAN-SPRINT-006-SETTLEMENT-ECONOMY":
+        fail(errors, "Settlement Alpha decision ID is invalid")
+    if settlement.get("simulation_only") is not True or settlement.get("authoritative_registry") is not False:
+        fail(errors, "Settlement Alpha must remain synthetic and non-authoritative")
+    if any(settlement.get(key) is not False for key in ("real_finance", "real_kgen_transfer", "real_external_settlement")):
+        fail(errors, "Settlement Alpha crosses an official financial boundary")
+    layers = settlement.get("currency_layers", [])
+    if [layer.get("asset_id") for layer in layers] != ["KAIOS_CREDIT", "KGEN", "EXTERNAL_SETTLEMENT"]:
+        fail(errors, "Settlement Alpha currency layers are invalid")
+    if len(layers) < 2 or layers[1].get("token_tax") != "0.30% UNCHANGED":
+        fail(errors, "Settlement Alpha changed the KGEN tax boundary")
+    reference = settlement.get("bootstrap_reference", {})
+    if reference.get("rate") != 1 or reference.get("permanent_peg") is not False or reference.get("guaranteed_return") is not False:
+        fail(errors, "Settlement Bootstrap Reference is invalid")
+    if [node.get("level") for node in settlement.get("hierarchy", [])] != ["FAMILY", "VILLAGE", "TOWN", "CITY", "NATION", "CIVILIZATION"]:
+        fail(errors, "Settlement hierarchy is incomplete")
+    if len(settlement.get("logistics_routes", [])) < 4:
+        fail(errors, "Settlement logistics routes are incomplete")
+    for token in ("KAIOS_CREDIT", "PENDING_OFFICIAL_SETTLEMENT", "ARCHITECTURE_ONLY_REVIEW_REQUIRED", "ECOLOGY_RECOVERY"):
+        if token not in source_text:
+            fail(errors, f"Settlement Runtime is missing {token}")
+
 
 def main() -> int:
     errors: list[str] = []
@@ -544,7 +571,7 @@ def main() -> int:
         f"{len(REQUIRED_FILES)} files;",
         f"{parsed_json_records} JSON records;",
         f"{checked_references} local references;",
-        "Civilization Production Alpha + Planet/Land/Building/Room/Life/Ecosystem/Agriculture/SupplyChain/Factory/AICompany/K11520 runtimes + 8 proposals; protected-path input clean",
+        "Settlement Economy Alpha + Population/Logistics/KAIOS Credit/official settlement gates + Civilization Production runtimes + 8 proposals; protected-path input clean",
     )
     return 0
 

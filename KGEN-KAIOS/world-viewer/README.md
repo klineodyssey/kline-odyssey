@@ -1,19 +1,19 @@
 ---
 TITLE: "KAIOS World Viewer Architecture Package"
-VERSION: "1.6.0"
-REVISION: "2026-07-17.4"
-STATUS: "SPRINT_005_CIVILIZATION_PRODUCTION_ALPHA_COMPLETE"
+VERSION: "1.7.0"
+REVISION: "2026-07-17.5"
+STATUS: "SPRINT_006_SETTLEMENT_ECONOMY_ALPHA_COMPLETE"
 ARCHITECTURE: "BASELINE_FROZEN_V1.0"
-IMPLEMENTATION: "CIVILIZATION_PRODUCTION_ALPHA"
-WORKQUEUE: "KAIOS-WV-SPRINT-005_CLOSED"
+IMPLEMENTATION: "SETTLEMENT_ECONOMY_ALPHA"
+WORKQUEUE: "KAIOS-WV-SPRINT-006_CLOSED"
 DEPLOYMENT: "STATIC_PAGES_COMPATIBLE"
 LAST_UPDATED: "2026-07-17"
 UPDATED_BY: "Codex / codex-gm-01"
 REVIEWED_BY: "Codex internal independent UI review; Human delegated approval"
-SOURCE_COMMIT: "5db829b1dad024275b6acd0949c92d53c59452e3"
-TASK_ID: "KAIOS-WV-SPRINT-005"
-HUMAN_DECISION_ID: "HUMAN-SPRINT-005-CIVILIZATION-PRODUCTION"
-CHANGE_REASON: "Run a bounded synthetic living world from Cambrian lineage through food chains, agriculture, production, AI company and reviewed K11520 listing candidates."
+SOURCE_COMMIT: "635dbe84ebfcbe16e95095b9c5c2572cff9b20c3"
+TASK_ID: "KAIOS-WV-SPRINT-006"
+HUMAN_DECISION_ID: "HUMAN-SPRINT-006-SETTLEMENT-ECONOMY"
+CHANGE_REASON: "Add bounded settlement, population, logistics, ecology recovery and a three-layer economy with KAIOS Credit as the only executable Alpha currency."
 ANCESTOR: "KGEN-KAIOS/V8.1/index.html; KGEN-KAIOS/land/LAND_RUNTIME_ARCHITECTURE_BASELINE.md"
 SOURCE_OF_TRUTH: false
 DOMAIN: KGENVERSE
@@ -33,9 +33,9 @@ CANONICAL_FILE: "KGEN-KAIOS/world-viewer/README.md"
 
 | Field | Value |
 |---|---|
-| Human Decision | `HUMAN-SPRINT-005-CIVILIZATION-PRODUCTION` |
+| Human Decision | `HUMAN-SPRINT-006-SETTLEMENT-ECONOMY` |
 | Architecture | `BASELINE_FROZEN_V1.0` |
-| Implementation | `SPRINT_005_CIVILIZATION_PRODUCTION_ALPHA_COMPLETE` |
+| Implementation | `SPRINT_006_SETTLEMENT_ECONOMY_ALPHA_COMPLETE` |
 | Sprint Task Envelope | `DONE` |
 | Deployment | `STATIC_GITHUB_PAGES_COMPATIBLE` |
 | Executable `index.html` | `CREATED` |
@@ -157,6 +157,12 @@ World Viewer V1 therefore defines adapter boundaries and draft projections. It d
 | `tests/baselines/sprint-005/` | Required Sprint 005 device, orientation and theme visual baselines |
 | `tests/evidence/sprint-005-production/` | Product QA, integrity, performance, screenshots and visual diffs |
 | `SPRINT_005_CIVILIZATION_PRODUCTION_REPORT.md` | Product, architecture diff, implementation diff, QA and Sprint 006 recommendation |
+| `tasks/KAIOS-WV-SPRINT-006.task-envelope.json` | Sprint 006 Settlement Economy execution and closeout envelope |
+| `settlement/` | Population, logistics and gated settlement runtimes |
+| `tests/settlement_economy_integrity.mjs` | Family, economy, logistics, inheritance and settlement-boundary invariant gate |
+| `tests/baselines/sprint-006/` | Required Sprint 006 device, orientation and theme visual baselines |
+| `tests/evidence/sprint-006-settlement/` | Product QA, integrity, performance, screenshots and visual diffs |
+| `SPRINT_006_SETTLEMENT_ECONOMY_REPORT.md` | Alpha demo, architecture diff, implementation diff, QA and Sprint 007 recommendation |
 | `.github/workflows/world-viewer-product-qa.yml` | Pull-request and push Product QA workflow |
 
 ## 7. Implementation Boundary
@@ -203,3 +209,9 @@ The Planet Environment adapter covers Earth, Moon, Mars, Jupiter and an unknown 
 Sprint 005 makes the synthetic world self-running. A twenty-one-species ecosystem follows the full Cambrian-to-AI-Civilization lineage, moves energy through Producer, Consumer, Predator and Decomposer roles, and reacts to food, water, oxygen and Planet stress. Nine agriculture organisms feed a twelve-node supply chain; a Factory organism can produce a traceable refrigerator only when power, water, workers, equipment, materials, logistics, warehouse, finance and AI support are available.
 
 The AI Company organism tracks Life OS, DNA, employees, AI workers, assets, finance, reputation, products and bankruptcy constraints. K11520 accepts reviewable Life, Factory and DNA candidates but cannot auto-list or execute a trade. The reviewed browser gate reports `145 PASS / 0 FAIL / 0 SKIP`; see `SPRINT_005_CIVILIZATION_PRODUCTION_REPORT.md` and `tests/evidence/sprint-005-production/`.
+
+## 13. Sprint 006 Settlement Economy Result
+
+Sprint 006 connects Family, Citizen, Village, Town, City, Nation and Civilization into a bounded synthetic population model. Marriage requires consent, Birth requires carrying capacity, and Inheritance settles once through the balanced local ledger. Logistics, warehouse capacity, pollution and ecology recovery connect production to the city without authorizing real import or export.
+
+KAIOS Credit is the Alpha's only executable currency. Salary, Tax and Rent run on its conserved local ledger. KGEN, USDT, TWD, Mortgage and Insurance remain request-only or Architecture-only boundaries; the `1 KGEN = 1 KAIOS Credit` value is a mutable bootstrap reference, not a peg or guaranteed return. The reviewed browser gate reports `158 PASS / 0 FAIL / 0 SKIP`; see `SPRINT_006_SETTLEMENT_ECONOMY_REPORT.md` and `tests/evidence/sprint-006-settlement/`.

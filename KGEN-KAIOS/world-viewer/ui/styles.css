@@ -277,6 +277,8 @@ button:focus-visible, canvas:focus-visible, [tabindex]:focus-visible {
 .civilization-section--ecosystem { border-top: 2px solid var(--accent); }
 .civilization-section--production { border-top: 2px solid var(--amber); }
 .civilization-section--company { border-top: 2px solid var(--cyan); }
+.civilization-section--settlement { border-top: 2px solid var(--amber); }
+.civilization-section--economy { border-top: 2px solid var(--accent); }
 .civilization-time { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 10px; margin-bottom: 12px; }
 .civilization-time > div:first-child { min-width: 0; display: grid; gap: 3px; }
 .civilization-time__clock { font-size: 18px; }
@@ -352,6 +354,17 @@ button:focus-visible, canvas:focus-visible, [tabindex]:focus-visible {
 .supply-node:not([data-status="AVAILABLE"]) .supply-node__status { color: var(--coral); }
 .supply-node small { color: var(--muted); overflow-wrap: anywhere; }
 .exchange-candidate small { color: var(--muted); overflow-wrap: anywhere; }
+.settlement-hierarchy .evolution-lineage__item { grid-template-columns: 34px minmax(0, 1fr); }
+.settlement-hierarchy small { grid-column: 2; color: var(--muted); overflow-wrap: anywhere; }
+.settlement-citizen small { color: var(--muted); overflow-wrap: anywhere; }
+.currency-layer-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 7px; }
+.currency-layer-card {
+  min-width: 0; min-height: 104px; display: grid; align-content: start; gap: 5px; padding: 9px;
+  border: 1px solid var(--line); border-radius: 6px; background: var(--surface-2); font-size: 9px;
+}
+.currency-layer-card > span:not(.currency-layer-card__id), .currency-layer-card small { color: var(--muted); overflow-wrap: anywhere; }
+.currency-layer-card__id { color: var(--accent-strong); font-size: 8px; font-weight: 800; }
+.settlement-record { margin-top: 6px; padding: 7px; border: 1px solid var(--line); border-radius: 6px; background: var(--surface-2); }
 
 .genesis-dialog {
   width: min(760px, calc(100vw - 24px - var(--safe-left) - var(--safe-right)));
@@ -505,6 +518,8 @@ button:focus-visible, canvas:focus-visible, [tabindex]:focus-visible {
   .inspector-content { padding-bottom: calc(20px + var(--safe-bottom)); }
   .civilization-action, .civilization-tabs .civilization-action { min-height: var(--touch); }
   .civilization-tabs { grid-auto-columns: minmax(78px, 1fr); }
+  .currency-layer-grid { grid-template-columns: 1fr; }
+  .currency-layer-card { min-height: 0; }
   .genesis-dialog { width: calc(100vw - var(--safe-left) - var(--safe-right)); height: calc(100dvh - var(--safe-top) - var(--safe-bottom)); max-height: none; border-radius: 0; }
   .genesis-dialog__surface { height: 100%; }
   .genesis-steps { grid-template-columns: repeat(2, minmax(0, 1fr)); }

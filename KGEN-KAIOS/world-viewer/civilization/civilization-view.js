@@ -6,6 +6,8 @@ const TABS = Object.freeze([
   ["PRODUCTION", "Production"],
   ["COMPANY", "Company"],
   ["MARKET", "Market"],
+  ["POPULATION", "Settlement"],
+  ["ECONOMY", "Economy"],
   ["CITY", "City"]
 ]);
 
@@ -115,7 +117,7 @@ function renderGenesis(documentRef, model) {
     ["Planet", planet.label ?? genesis.planet_id],
     ["Starter Parcel", genesis.starter_parcel_id],
     ["Starter Shelter", genesis.starter_shelter_id],
-    ["Genesis Fortune", genesis.fortune_claim ? `${genesis.fortune_claim.amount} PROTOTYPE KGEN` : "NOT CLAIMED"],
+    ["Genesis Fortune", genesis.fortune_claim ? `${genesis.fortune_claim.amount} KAIOS CREDIT (KGEN REFERENCE)` : "NOT CLAIMED"],
     ["Temple", genesis.temple_id]
   ]));
   fragment.append(birth);
@@ -547,6 +549,7 @@ function renderCity(documentRef, model) {
     ["Employment", city.employment_rate ?? city.work_rate],
     ["Unemployment", city.unemployment_rate],
     ["Food", city.food ?? city.food_stock],
+    ["Water", city.water],
     ["Energy", city.energy],
     ["Housing", city.housing ?? city.housing_capacity],
     ["Roads", city.roads ?? city.road_score],
@@ -555,6 +558,10 @@ function renderCity(documentRef, model) {
     ["Industry", city.industry],
     ["Supply Chain", city.supply_chain],
     ["Ecology", city.ecology],
+    ["Ecology Recovery", city.ecology_recovery],
+    ["Education", city.education],
+    ["Logistics", city.logistics],
+    ["Settlement Integrity", city.settlement_health],
     ["Company Health", city.company_health],
     ["Status", city.status],
     ["Civilization Stage", progress.stage_id],
@@ -567,6 +574,7 @@ function renderCity(documentRef, model) {
   for (const [key, label, inverse] of [
     ["employment_rate", "Employment", false],
     ["food", "Food", false],
+    ["water", "Water", false],
     ["energy", "Energy", false],
     ["housing", "Housing", false],
     ["roads", "Roads", false],
@@ -574,10 +582,161 @@ function renderCity(documentRef, model) {
     ["happiness", "Happiness", false],
     ["industry", "Industry", false],
     ["supply_chain", "Supply Chain", false],
-    ["ecology", "Ecology", false]
+    ["ecology", "Ecology", false],
+    ["education", "Education", false],
+    ["logistics", "Logistics", false]
   ]) grid.append(meter(documentRef, label, city[key], { inverse }));
   balances.append(grid);
   fragment.append(balances);
+  return fragment;
+}
+
+function renderPopulation(documentRef, model, callbacks) {
+  const fragment = documentRef.createDocumentFragment();
+  const population = model.population ?? {};
+  const logistics = model.logistics ?? {};
+  const metrics = population.metrics ?? {};
+
+  const overview = section(documentRef, "Settlement Population", "civilization-section--settlement");
+  overview.append(definitionList(documentRef, [
+    ["Living Population", metrics.population],
+    ["Registered Citizens", metrics.total_registered],
+    ["Families", metrics.families],
+    ["Births", metrics.births],
+    ["Employment", `${number(metrics.employment_rate).toFixed(1)}%`],
+    ["Education", `${number(metrics.education_index).toFixed(1)}%`],
+    ["Carrying Model", "FOOD + WATER + HOUSING + ECOLOGY"]
+  ]));
+  const familyActions = element(documentRef, "div", "civilization-actions civilization-actions--wrap");
+  const married = collection(population.families).some(({ marriage_status: status }) => status === "MARRIED");
+  const inherited = collection(population.inheritance_records).some(({ status }) => status === "SETTLED");
+  familyActions.append(
+    actionButton(documentRef, "Register Marriage", "REGISTER_MARRIAGE", () => callbacks.onRegisterMarriage?.(), { disabled: married }),
+    actionButton(documentRef, "Register Birth", "REGISTER_BIRTH", () => callbacks.onRegisterBirth?.(), { disabled: !married, tone: "civilization-action--primary" }),
+    actionButton(documentRef, "Settle Inheritance", "SETTLE_INHERITANCE", () => callbacks.onSettleInheritance?.(), { disabled: inherited })
+  );
+  overview.append(familyActions);
+  fragment.append(overview);
+
+  const hierarchy = section(documentRef, "Family to Civilization");
+  const lineage = element(documentRef, "ol", "evolution-lineage settlement-hierarchy");
+  for (const node of collection(population.hierarchy)) {
+    const item = element(documentRef, "li", "evolution-lineage__item");
+    item.append(
+      element(documentRef, "span", "evolution-lineage__index", display(node.level).slice(0, 3)),
+      element(documentRef, "strong", "", node.label),
+      element(documentRef, "small", "", node.entity_id)
+    );
+    lineage.append(item);
+  }
+  hierarchy.append(lineage);
+  fragment.append(hierarchy);
+
+  const citizens = section(documentRef, "Citizens and Families");
+  for (const person of collection(population.citizens)) {
+    const row = element(documentRef, "div", "market-listing settlement-citizen");
+    const copy = element(documentRef, "div");
+    copy.append(
+      element(documentRef, "strong", "", person.display_name),
+      element(documentRef, "span", "", `${display(person.lifecycle_state)} / ${display(person.occupation)} / age ${number(person.age_years).toFixed(1)}`),
+      element(documentRef, "small", "", `${display(person.employment_status)} / ${person.family_id ?? "NO FAMILY"}`)
+    );
+    row.append(copy);
+    citizens.append(row);
+  }
+  fragment.append(citizens);
+
+  const logisticsSection = section(documentRef, "Logistics and Ecology");
+  logisticsSection.append(definitionList(documentRef, [
+    ["Status", logistics.status],
+    ["Routes", collection(logistics.routes).length],
+    ["Shipments", collection(logistics.jobs).length],
+    ["Pollution", `${number(logistics.pollution).toFixed(1)}%`],
+    ["Ecology Recovery", `${number(logistics.ecology_recovery).toFixed(1)}%`]
+  ]));
+  const logisticsActions = element(documentRef, "div", "civilization-actions civilization-actions--wrap");
+  logisticsActions.append(
+    actionButton(documentRef, "Farm Delivery", "DISPATCH_DOMESTIC", () => callbacks.onDispatchLogistics?.("route-farm-warehouse", "RICE", 1, "DOMESTIC")),
+    actionButton(documentRef, "Export Request", "DISPATCH_EXPORT", () => callbacks.onDispatchLogistics?.("route-warehouse-market", "RICE", 1, "EXPORT")),
+    actionButton(documentRef, "Ecology Recovery", "RECOVER_ECOLOGY", () => callbacks.onRecoverEcology?.(1, 10), { tone: "civilization-action--primary" })
+  );
+  logisticsSection.append(logisticsActions);
+  fragment.append(logisticsSection);
+  return fragment;
+}
+
+function renderEconomy(documentRef, model, callbacks) {
+  const fragment = documentRef.createDocumentFragment();
+  const economy = model.economy ?? {};
+  const settlement = model.settlement ?? {};
+  const currency = economy.currency_model ?? {};
+
+  const wallet = section(documentRef, "Civilization Economy", "civilization-section--economy");
+  wallet.append(definitionList(documentRef, [
+    ["Player Balance", `${number(economy.player_balance).toFixed(0)} KAIOS CREDIT`],
+    ["Executable Currency", settlement.executable_currency],
+    ["KGEN Boundary", settlement.official_boundaries?.KGEN],
+    ["External Boundary", settlement.official_boundaries?.external_assets],
+    ["KGEN Tax", settlement.official_boundaries?.kgen_tax],
+    ["Mortgage Proposals", collection(settlement.mortgage_proposals).length],
+    ["Insurance Proposals", collection(settlement.insurance_proposals).length]
+  ]));
+  const actions = element(documentRef, "div", "civilization-actions civilization-actions--wrap");
+  actions.append(
+    actionButton(documentRef, "Run Living Cycle", "RUN_SETTLEMENT", () => callbacks.onRunSettlement?.(), { tone: "civilization-action--primary" }),
+    actionButton(documentRef, "Request 1 KGEN", "REQUEST_KGEN", () => callbacks.onRequestKgen?.(1)),
+    actionButton(documentRef, "Request TWD", "REQUEST_TWD", () => callbacks.onRequestExternal?.("TWD", 100)),
+    actionButton(documentRef, "Mortgage Proposal", "REQUEST_MORTGAGE", () => callbacks.onRequestMortgage?.()),
+    actionButton(documentRef, "Insurance Proposal", "REQUEST_INSURANCE", () => callbacks.onRequestInsurance?.())
+  );
+  wallet.append(actions);
+  fragment.append(wallet);
+
+  const layers = section(documentRef, "Three Currency Layers");
+  const grid = element(documentRef, "div", "currency-layer-grid");
+  for (const [key, layer] of Object.entries(currency).filter(([key]) => key.startsWith("layer_"))) {
+    const card = element(documentRef, "article", "currency-layer-card");
+    card.append(
+      element(documentRef, "span", "currency-layer-card__id", key.replace("layer_", "LAYER ")),
+      element(documentRef, "strong", "", display(layer.asset_id ?? collection(layer.asset_ids).join(" / "))),
+      element(documentRef, "span", "", display(layer.role)),
+      element(documentRef, "small", "", display(layer.execution_status))
+    );
+    grid.append(card);
+  }
+  layers.append(grid, definitionList(documentRef, [
+    ["Bootstrap Reference", `${settlement.bootstrap_reference?.rate ?? 1} KAIOS CREDIT per KGEN`],
+    ["Reference Status", settlement.bootstrap_reference?.status],
+    ["Permanent Peg", settlement.bootstrap_reference?.permanent_peg],
+    ["Guaranteed Return", settlement.bootstrap_reference?.guaranteed_return],
+    ["Governance Adjustable", settlement.bootstrap_reference?.governance_adjustable]
+  ], "civilization-data civilization-data--compact"));
+  fragment.append(layers);
+
+  const obligations = section(documentRef, "Salary, Tax, Rent and Inheritance");
+  const obligationRows = collection(settlement.obligations).slice(-8).reverse();
+  if (!obligationRows.length) obligations.append(element(documentRef, "p", "civilization-empty", "NO SETTLEMENT CYCLE YET"));
+  for (const item of obligationRows) {
+    obligations.append(definitionList(documentRef, [
+      [display(item.type), `${item.amount} ${display(item.currency)}`],
+      ["Status", item.status],
+      ["Ledger", item.ledger_entry_id]
+    ], "civilization-data civilization-data--compact settlement-record"));
+  }
+  fragment.append(obligations);
+
+  const requests = section(documentRef, "Official Settlement Gate");
+  const requestRows = collection(settlement.asset_requests).slice(-6).reverse();
+  if (!requestRows.length) requests.append(element(documentRef, "p", "civilization-empty", "NO OFFICIAL SETTLEMENT REQUESTS"));
+  for (const request of requestRows) {
+    requests.append(definitionList(documentRef, [
+      [request.asset, request.amount],
+      ["Status", request.status],
+      ["Executable", request.executable],
+      ["Balance Mutation", request.balance_mutation]
+    ], "civilization-data civilization-data--compact settlement-record"));
+  }
+  fragment.append(requests);
   return fragment;
 }
 
@@ -619,6 +778,8 @@ export function createCivilizationView(container, callbacks = {}) {
     else if (activeTab === "PRODUCTION") root.append(renderProduction(documentRef, model, callbacks));
     else if (activeTab === "COMPANY") root.append(renderCompany(documentRef, model, callbacks));
     else if (activeTab === "MARKET") root.append(renderMarket(documentRef, model, callbacks));
+    else if (activeTab === "POPULATION") root.append(renderPopulation(documentRef, model, callbacks));
+    else if (activeTab === "ECONOMY") root.append(renderEconomy(documentRef, model, callbacks));
     else if (activeTab === "CITY") root.append(renderCity(documentRef, model));
     else root.append(renderToday(documentRef, model, callbacks));
 
