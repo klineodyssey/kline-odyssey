@@ -2,17 +2,17 @@
   "meta": {
     "synthetic": true,
     "non_authoritative": true,
-    "fixture_id": "KAIOS-WV-SPRINT-004-GENESIS",
-    "schema_version": "4.1.0",
-    "snapshot_id": "WV-SYNTHETIC-20260717-004-GENESIS",
-    "source_revision": "HUMAN-SPRINT-004-CIVILIZATION-GENESIS",
+    "fixture_id": "KAIOS-WV-SPRINT-005-PRODUCTION",
+    "schema_version": "5.0.0",
+    "snapshot_id": "WV-SYNTHETIC-20260717-005-PRODUCTION",
+    "source_revision": "HUMAN-SPRINT-005-CIVILIZATION-PRODUCTION",
     "generated_at": "2026-07-17T00:00:00Z",
     "stale_after": "2099-12-31T23:59:59Z",
     "privacy_class": "PUBLIC_SYNTHETIC",
     "coordinate_model": "K280_GEODETIC_WITH_LOCAL_VIEW_PROJECTIONS",
-    "product_stage": "CIVILIZATION_GENESIS_ALPHA",
+    "product_stage": "CIVILIZATION_PRODUCTION_ALPHA",
     "simulation_scope": "LOCAL_SYNTHETIC_ONLY",
-    "storage_namespace": "kaios.world-viewer.sprint-004.genesis"
+    "storage_namespace": "kaios.world-viewer.sprint-005.production"
   },
   "scene_bounds": [0, 0, 1200, 760],
   "civilization_alpha": {
@@ -32,6 +32,253 @@
     "simulation_only": true,
     "real_payment": false,
     "authoritative_registry": false
+  },
+  "production_alpha": {
+    "decision_id": "HUMAN-SPRINT-005-CIVILIZATION-PRODUCTION",
+    "runtime_id": "civilization-production-alpha-hsinchu-001",
+    "current_evolution_stage": "AI_CIVILIZATION",
+    "simulation_only": true,
+    "real_biology": false,
+    "real_trade": false,
+    "legal_securities": false,
+    "authoritative_registry": false,
+    "evolution_stages": [
+      { "stage_id": "UNICELLULAR", "index": 0, "label": "Unicellular Life", "status": "COMPLETED_LINEAGE" },
+      { "stage_id": "CAMBRIAN_OCEAN", "index": 1, "label": "Cambrian Ocean", "status": "COMPLETED_LINEAGE" },
+      { "stage_id": "FISH", "index": 2, "label": "Fish", "status": "COMPLETED_LINEAGE" },
+      { "stage_id": "AMPHIBIAN", "index": 3, "label": "Amphibian", "status": "COMPLETED_LINEAGE" },
+      { "stage_id": "REPTILE", "index": 4, "label": "Reptile", "status": "COMPLETED_LINEAGE" },
+      { "stage_id": "BIRD", "index": 5, "label": "Bird", "status": "COMPLETED_LINEAGE" },
+      { "stage_id": "MAMMAL", "index": 6, "label": "Mammal", "status": "COMPLETED_LINEAGE" },
+      { "stage_id": "PRIMITIVE_HUMAN", "index": 7, "label": "Primitive Human", "status": "COMPLETED_LINEAGE" },
+      { "stage_id": "CIVILIZATION", "index": 8, "label": "Civilization", "status": "COMPLETED_LINEAGE" },
+      { "stage_id": "INDUSTRIAL", "index": 9, "label": "Industrial", "status": "COMPLETED_LINEAGE" },
+      { "stage_id": "AI_CIVILIZATION", "index": 10, "label": "AI Civilization", "status": "ACTIVE" }
+    ],
+    "species_catalog": [
+      {
+        "species_id": "BACTERIA_ALPHA", "label": "Bacteria", "evolution_stage": "UNICELLULAR", "life_form": "MICROBE", "trophic_role": "DECOMPOSER",
+        "body_profile_id": "body-bacteria-alpha", "species_os_id": "species-os-bacteria-alpha", "life_os_profile_id": "life-os-bacteria-alpha", "dna_summary_id": "dna-summary-bacteria-alpha",
+        "habitat": "SOIL_AND_WATER", "food_sources": ["ORGANIC_WASTE"], "predators": [], "prey": [], "energy_cost": 0.02, "lifecycle_days": 1, "population": 8000, "health": 94,
+        "oxygen_required": false, "water_required": true, "disease_risks": ["PH_IMBALANCE"], "evolution_target": "MARINE_INVERTEBRATE_ALPHA"
+      },
+      {
+        "species_id": "MARINE_INVERTEBRATE_ALPHA", "label": "Cambrian Marine Life", "evolution_stage": "CAMBRIAN_OCEAN", "life_form": "MARINE", "trophic_role": "CONSUMER",
+        "body_profile_id": "body-marine-alpha", "species_os_id": "species-os-marine-alpha", "life_os_profile_id": "life-os-marine-alpha", "dna_summary_id": "dna-summary-marine-alpha",
+        "habitat": "OCEAN", "food_sources": ["ALGAE_ALPHA", "BACTERIA_ALPHA"], "predators": ["FISH_ALPHA"], "prey": ["BACTERIA_ALPHA"], "energy_cost": 0.25, "lifecycle_days": 120, "population": 900, "health": 89,
+        "oxygen_required": true, "water_required": true, "disease_risks": ["OCEAN_STRESS"], "evolution_target": "FISH_ALPHA"
+      },
+      {
+        "species_id": "ALGAE_ALPHA", "label": "Algae", "evolution_stage": "CAMBRIAN_OCEAN", "life_form": "PLANT", "trophic_role": "PRODUCER",
+        "body_profile_id": "body-algae-alpha", "species_os_id": "species-os-algae-alpha", "life_os_profile_id": "life-os-algae-alpha", "dna_summary_id": "dna-summary-algae-alpha",
+        "habitat": "FRESHWATER_AND_OCEAN", "food_sources": ["SOLAR_ENERGY"], "predators": ["FISH_ALPHA"], "prey": [], "energy_cost": 0.05, "lifecycle_days": 45, "population": 3200, "health": 92,
+        "oxygen_required": false, "water_required": true, "disease_risks": ["NUTRIENT_IMBALANCE"], "evolution_target": "TREE_ALPHA"
+      },
+      {
+        "species_id": "FISH_ALPHA", "label": "Fish", "evolution_stage": "FISH", "life_form": "FISH", "trophic_role": "CONSUMER",
+        "body_profile_id": "body-fish-alpha", "species_os_id": "species-os-fish-alpha", "life_os_profile_id": "life-os-fish-alpha", "dna_summary_id": "dna-summary-fish-alpha",
+        "habitat": "FRESHWATER", "food_sources": ["ALGAE_ALPHA", "MARINE_INVERTEBRATE_ALPHA"], "predators": ["HUMAN_ALPHA"], "prey": ["MARINE_INVERTEBRATE_ALPHA"], "energy_cost": 0.8, "lifecycle_days": 1800, "population": 520, "health": 90,
+        "oxygen_required": true, "water_required": true, "disease_risks": ["WATERBORNE_DISEASE"], "evolution_target": "FROG_ALPHA"
+      },
+      {
+        "species_id": "FROG_ALPHA", "label": "Frog", "evolution_stage": "AMPHIBIAN", "life_form": "AMPHIBIAN", "trophic_role": "CONSUMER",
+        "body_profile_id": "body-frog-alpha", "species_os_id": "species-os-frog-alpha", "life_os_profile_id": "life-os-frog-alpha", "dna_summary_id": "dna-summary-frog-alpha",
+        "habitat": "WETLAND", "food_sources": ["BEE_ALPHA"], "predators": ["LIZARD_ALPHA"], "prey": ["BEE_ALPHA"], "energy_cost": 0.45, "lifecycle_days": 2200, "population": 180, "health": 86,
+        "oxygen_required": true, "water_required": true, "disease_risks": ["HABITAT_DRYING"], "evolution_target": "LIZARD_ALPHA"
+      },
+      {
+        "species_id": "LIZARD_ALPHA", "label": "Lizard", "evolution_stage": "REPTILE", "life_form": "REPTILE", "trophic_role": "PREDATOR",
+        "body_profile_id": "body-lizard-alpha", "species_os_id": "species-os-lizard-alpha", "life_os_profile_id": "life-os-lizard-alpha", "dna_summary_id": "dna-summary-lizard-alpha",
+        "habitat": "GRASSLAND", "food_sources": ["FROG_ALPHA", "BEE_ALPHA"], "predators": ["LION_ALPHA"], "prey": ["FROG_ALPHA"], "energy_cost": 0.55, "lifecycle_days": 3650, "population": 95, "health": 88,
+        "oxygen_required": true, "water_required": true, "disease_risks": ["THERMAL_STRESS"], "evolution_target": "CHICKEN_ALPHA"
+      },
+      {
+        "species_id": "CHICKEN_ALPHA", "label": "Chicken", "evolution_stage": "BIRD", "life_form": "BIRD", "trophic_role": "OMNIVORE",
+        "body_profile_id": "body-chicken-alpha", "species_os_id": "species-os-chicken-alpha", "life_os_profile_id": "life-os-chicken-alpha", "dna_summary_id": "dna-summary-chicken-alpha",
+        "habitat": "FARM", "food_sources": ["CORN_ALPHA", "BEE_ALPHA"], "predators": ["HUMAN_ALPHA"], "prey": ["BEE_ALPHA"], "energy_cost": 0.9, "lifecycle_days": 2500, "population": 240, "health": 91,
+        "oxygen_required": true, "water_required": true, "disease_risks": ["FLOCK_DISEASE"], "evolution_target": null
+      },
+      {
+        "species_id": "TIGER_ALPHA", "label": "Tiger", "evolution_stage": "MAMMAL", "life_form": "ANIMAL", "trophic_role": "PREDATOR",
+        "body_profile_id": "body-tiger-alpha", "species_os_id": "species-os-tiger-alpha", "life_os_profile_id": "life-os-tiger-alpha", "dna_summary_id": "dna-summary-tiger-alpha",
+        "habitat": "FOREST", "food_sources": ["PIG_ALPHA"], "predators": [], "prey": ["PIG_ALPHA"], "energy_cost": 8.5, "lifecycle_days": 7300, "population": 12, "health": 87,
+        "oxygen_required": true, "water_required": true, "disease_risks": ["HABITAT_FRAGMENTATION"], "evolution_target": null
+      },
+      {
+        "species_id": "LION_ALPHA", "label": "Lion", "evolution_stage": "MAMMAL", "life_form": "ANIMAL", "trophic_role": "PREDATOR",
+        "body_profile_id": "body-lion-alpha", "species_os_id": "species-os-lion-alpha", "life_os_profile_id": "life-os-lion-alpha", "dna_summary_id": "dna-summary-lion-alpha",
+        "habitat": "GRASSLAND", "food_sources": ["COW_ALPHA", "PIG_ALPHA"], "predators": [], "prey": ["COW_ALPHA", "PIG_ALPHA"], "energy_cost": 8, "lifecycle_days": 7000, "population": 14, "health": 86,
+        "oxygen_required": true, "water_required": true, "disease_risks": ["PREY_SHORTAGE"], "evolution_target": null
+      },
+      {
+        "species_id": "ELEPHANT_ALPHA", "label": "Elephant", "evolution_stage": "MAMMAL", "life_form": "ANIMAL", "trophic_role": "CONSUMER",
+        "body_profile_id": "body-elephant-alpha", "species_os_id": "species-os-elephant-alpha", "life_os_profile_id": "life-os-elephant-alpha", "dna_summary_id": "dna-summary-elephant-alpha",
+        "habitat": "GRASSLAND", "food_sources": ["TREE_ALPHA", "CABBAGE_ALPHA"], "predators": [], "prey": [], "energy_cost": 12, "lifecycle_days": 25000, "population": 18, "health": 89,
+        "oxygen_required": true, "water_required": true, "disease_risks": ["WATER_SHORTAGE"], "evolution_target": null
+      },
+      {
+        "species_id": "COW_ALPHA", "label": "Cow", "evolution_stage": "MAMMAL", "life_form": "ANIMAL", "trophic_role": "CONSUMER",
+        "body_profile_id": "body-cow-alpha", "species_os_id": "species-os-cow-alpha", "life_os_profile_id": "life-os-cow-alpha", "dna_summary_id": "dna-summary-cow-alpha",
+        "habitat": "FARM", "food_sources": ["CORN_ALPHA", "CABBAGE_ALPHA"], "predators": ["LION_ALPHA"], "prey": [], "energy_cost": 5, "lifecycle_days": 7300, "population": 42, "health": 92,
+        "oxygen_required": true, "water_required": true, "disease_risks": ["HERD_DISEASE"], "evolution_target": null
+      },
+      {
+        "species_id": "PIG_ALPHA", "label": "Pig", "evolution_stage": "MAMMAL", "life_form": "ANIMAL", "trophic_role": "OMNIVORE",
+        "body_profile_id": "body-pig-alpha", "species_os_id": "species-os-pig-alpha", "life_os_profile_id": "life-os-pig-alpha", "dna_summary_id": "dna-summary-pig-alpha",
+        "habitat": "FARM", "food_sources": ["CORN_ALPHA", "VEGETABLE_ALPHA"], "predators": ["TIGER_ALPHA", "LION_ALPHA", "HUMAN_ALPHA"], "prey": [], "energy_cost": 3, "lifecycle_days": 5000, "population": 64, "health": 91,
+        "oxygen_required": true, "water_required": true, "disease_risks": ["HERD_DISEASE"], "evolution_target": null
+      },
+      {
+        "species_id": "BEE_ALPHA", "label": "Bee", "evolution_stage": "BIRD", "life_form": "INSECT", "trophic_role": "CONSUMER",
+        "body_profile_id": "body-bee-alpha", "species_os_id": "species-os-bee-alpha", "life_os_profile_id": "life-os-bee-alpha", "dna_summary_id": "dna-summary-bee-alpha",
+        "habitat": "FOREST_AND_FARM", "food_sources": ["FLOWER_ALPHA", "FRUIT_ALPHA"], "predators": ["FROG_ALPHA", "CHICKEN_ALPHA"], "prey": [], "energy_cost": 0.03, "lifecycle_days": 180, "population": 2600, "health": 93,
+        "oxygen_required": true, "water_required": true, "disease_risks": ["COLONY_COLLAPSE"], "evolution_target": null
+      },
+      {
+        "species_id": "TREE_ALPHA", "label": "Tree", "evolution_stage": "CIVILIZATION", "life_form": "PLANT", "trophic_role": "PRODUCER",
+        "body_profile_id": "body-tree-alpha", "species_os_id": "species-os-tree-alpha", "life_os_profile_id": "life-os-tree-alpha", "dna_summary_id": "dna-summary-tree-alpha",
+        "habitat": "FOREST", "food_sources": ["SOLAR_ENERGY"], "predators": ["ELEPHANT_ALPHA"], "prey": [], "energy_cost": 0.2, "lifecycle_days": 36500, "population": 1100, "health": 94,
+        "oxygen_required": false, "water_required": true, "disease_risks": ["FUNGAL_DISEASE"], "evolution_target": null
+      },
+      {
+        "species_id": "RICE_ALPHA", "label": "Rice", "evolution_stage": "CIVILIZATION", "life_form": "PLANT", "trophic_role": "PRODUCER",
+        "body_profile_id": "body-rice-alpha", "species_os_id": "species-os-rice-alpha", "life_os_profile_id": "life-os-rice-alpha", "dna_summary_id": "dna-summary-rice-alpha",
+        "habitat": "FARM", "food_sources": ["SOLAR_ENERGY"], "predators": ["HUMAN_ALPHA"], "prey": [], "energy_cost": 0.08, "lifecycle_days": 140, "population": 4200, "health": 92,
+        "oxygen_required": false, "water_required": true, "disease_risks": ["CROP_DISEASE"], "evolution_target": null
+      },
+      {
+        "species_id": "CORN_ALPHA", "label": "Corn", "evolution_stage": "CIVILIZATION", "life_form": "PLANT", "trophic_role": "PRODUCER",
+        "body_profile_id": "body-corn-alpha", "species_os_id": "species-os-corn-alpha", "life_os_profile_id": "life-os-corn-alpha", "dna_summary_id": "dna-summary-corn-alpha",
+        "habitat": "FARM", "food_sources": ["SOLAR_ENERGY"], "predators": ["COW_ALPHA", "PIG_ALPHA", "CHICKEN_ALPHA"], "prey": [], "energy_cost": 0.07, "lifecycle_days": 110, "population": 2600, "health": 91,
+        "oxygen_required": false, "water_required": true, "disease_risks": ["CROP_DISEASE"], "evolution_target": null
+      },
+      {
+        "species_id": "CABBAGE_ALPHA", "label": "Cabbage", "evolution_stage": "CIVILIZATION", "life_form": "PLANT", "trophic_role": "PRODUCER",
+        "body_profile_id": "body-cabbage-alpha", "species_os_id": "species-os-cabbage-alpha", "life_os_profile_id": "life-os-cabbage-alpha", "dna_summary_id": "dna-summary-cabbage-alpha",
+        "habitat": "FARM", "food_sources": ["SOLAR_ENERGY"], "predators": ["COW_ALPHA", "ELEPHANT_ALPHA"], "prey": [], "energy_cost": 0.06, "lifecycle_days": 95, "population": 1800, "health": 90,
+        "oxygen_required": false, "water_required": true, "disease_risks": ["CROP_DISEASE"], "evolution_target": null
+      },
+      {
+        "species_id": "FRUIT_ALPHA", "label": "Fruit Tree", "evolution_stage": "CIVILIZATION", "life_form": "PLANT", "trophic_role": "PRODUCER",
+        "body_profile_id": "body-fruit-alpha", "species_os_id": "species-os-fruit-alpha", "life_os_profile_id": "life-os-fruit-alpha", "dna_summary_id": "dna-summary-fruit-alpha",
+        "habitat": "ORCHARD", "food_sources": ["SOLAR_ENERGY"], "predators": ["HUMAN_ALPHA", "BEE_ALPHA"], "prey": [], "energy_cost": 0.12, "lifecycle_days": 12000, "population": 360, "health": 93,
+        "oxygen_required": false, "water_required": true, "disease_risks": ["ORCHARD_DISEASE"], "evolution_target": null
+      },
+      {
+        "species_id": "FLOWER_ALPHA", "label": "Flower", "evolution_stage": "CIVILIZATION", "life_form": "PLANT", "trophic_role": "PRODUCER",
+        "body_profile_id": "body-flower-alpha", "species_os_id": "species-os-flower-alpha", "life_os_profile_id": "life-os-flower-alpha", "dna_summary_id": "dna-summary-flower-alpha",
+        "habitat": "FOREST_AND_FARM", "food_sources": ["SOLAR_ENERGY"], "predators": ["BEE_ALPHA"], "prey": [], "energy_cost": 0.02, "lifecycle_days": 180, "population": 3400, "health": 94,
+        "oxygen_required": false, "water_required": true, "disease_risks": ["POLLINATOR_LOSS"], "evolution_target": null
+      },
+      {
+        "species_id": "MUSHROOM_ALPHA", "label": "Mushroom", "evolution_stage": "CIVILIZATION", "life_form": "FUNGI", "trophic_role": "DECOMPOSER",
+        "body_profile_id": "body-mushroom-alpha", "species_os_id": "species-os-mushroom-alpha", "life_os_profile_id": "life-os-mushroom-alpha", "dna_summary_id": "dna-summary-mushroom-alpha",
+        "habitat": "FOREST", "food_sources": ["ORGANIC_WASTE"], "predators": ["HUMAN_ALPHA"], "prey": [], "energy_cost": 0.04, "lifecycle_days": 60, "population": 750, "health": 90,
+        "oxygen_required": true, "water_required": true, "disease_risks": ["DRY_HABITAT"], "evolution_target": null
+      },
+      {
+        "species_id": "HUMAN_ALPHA", "label": "Primitive Human Lineage", "evolution_stage": "PRIMITIVE_HUMAN", "life_form": "HUMAN", "trophic_role": "OMNIVORE",
+        "body_profile_id": "body-human-alpha", "species_os_id": "species-os-human-alpha", "life_os_profile_id": "life-os-human-alpha", "dna_summary_id": "dna-summary-human-alpha",
+        "habitat": "SETTLEMENT", "food_sources": ["RICE_ALPHA", "CABBAGE_ALPHA", "FRUIT_ALPHA", "FISH_ALPHA", "PIG_ALPHA", "CHICKEN_ALPHA"], "predators": [], "prey": ["FISH_ALPHA", "PIG_ALPHA", "CHICKEN_ALPHA"], "energy_cost": 2.4, "lifecycle_days": 29200, "population": 36, "health": 92,
+        "oxygen_required": true, "water_required": true, "disease_risks": ["COMMUNICABLE_DISEASE"], "evolution_target": "AI_CIVILIZATION"
+      }
+    ],
+    "agriculture_resources": {
+      "WATER": 420,
+      "FERTILIZER": 80,
+      "FEED": 180,
+      "ELECTRICITY": 160,
+      "MAINTENANCE": 60
+    },
+    "agriculture_facilities": [
+      { "facility_id": "mixed-farm-001", "label": "Mixed Farm", "facility_type": "MIXED_FARM", "species_os_id": "species-os-mixed-farm", "life_os_profile_id": "life-os-mixed-farm", "cycle_hours": 24, "capacity": 12, "output": { "resource_id": "RICE", "quantity": 6 }, "required_inputs": [{ "resource_id": "WATER", "per_hour": 0.35 }, { "resource_id": "FERTILIZER", "per_hour": 0.05 }] },
+      { "facility_id": "fish-farm-001", "label": "Fish Farm", "facility_type": "FISH_FARM", "species_os_id": "species-os-fish-farm", "life_os_profile_id": "life-os-fish-farm", "cycle_hours": 36, "capacity": 10, "output": { "resource_id": "FISH", "quantity": 5 }, "required_inputs": [{ "resource_id": "WATER", "per_hour": 0.5 }, { "resource_id": "FEED", "per_hour": 0.08 }, { "resource_id": "ELECTRICITY", "per_hour": 0.04 }] },
+      { "facility_id": "pig-farm-001", "label": "Pig Farm", "facility_type": "PIG_FARM", "species_os_id": "species-os-pig-farm", "life_os_profile_id": "life-os-pig-farm", "cycle_hours": 48, "capacity": 8, "output": { "resource_id": "PIG", "quantity": 3 }, "required_inputs": [{ "resource_id": "WATER", "per_hour": 0.28 }, { "resource_id": "FEED", "per_hour": 0.12 }] },
+      { "facility_id": "chicken-farm-001", "label": "Chicken Farm", "facility_type": "CHICKEN_FARM", "species_os_id": "species-os-chicken-farm", "life_os_profile_id": "life-os-chicken-farm", "cycle_hours": 18, "capacity": 18, "output": { "resource_id": "EGG", "quantity": 8 }, "required_inputs": [{ "resource_id": "WATER", "per_hour": 0.15 }, { "resource_id": "FEED", "per_hour": 0.1 }] },
+      { "facility_id": "fruit-farm-001", "label": "Fruit Farm", "facility_type": "FRUIT_FARM", "species_os_id": "species-os-fruit-farm", "life_os_profile_id": "life-os-fruit-farm", "cycle_hours": 30, "capacity": 12, "output": { "resource_id": "FRUIT", "quantity": 7 }, "required_inputs": [{ "resource_id": "WATER", "per_hour": 0.3 }, { "resource_id": "FERTILIZER", "per_hour": 0.04 }] },
+      { "facility_id": "forest-001", "label": "Managed Forest", "facility_type": "FOREST", "species_os_id": "species-os-forest", "life_os_profile_id": "life-os-forest", "cycle_hours": 72, "capacity": 20, "output": { "resource_id": "WOOD", "quantity": 6 }, "required_inputs": [{ "resource_id": "WATER", "per_hour": 0.2 }, { "resource_id": "MAINTENANCE", "per_hour": 0.02 }] },
+      { "facility_id": "vegetable-farm-001", "label": "Vegetable Farm", "facility_type": "VEGETABLE_FARM", "species_os_id": "species-os-vegetable-farm", "life_os_profile_id": "life-os-vegetable-farm", "cycle_hours": 16, "capacity": 16, "output": { "resource_id": "VEGETABLE", "quantity": 8 }, "required_inputs": [{ "resource_id": "WATER", "per_hour": 0.24 }, { "resource_id": "FERTILIZER", "per_hour": 0.04 }] },
+      { "facility_id": "bee-farm-001", "label": "Bee Farm", "facility_type": "BEE_FARM", "species_os_id": "species-os-bee-farm", "life_os_profile_id": "life-os-bee-farm", "cycle_hours": 24, "capacity": 10, "output": { "resource_id": "HONEY", "quantity": 5 }, "required_inputs": [{ "resource_id": "WATER", "per_hour": 0.08 }, { "resource_id": "MAINTENANCE", "per_hour": 0.01 }] },
+      { "facility_id": "water-system-001", "label": "Farm Water System", "facility_type": "WATER_SYSTEM", "species_os_id": "species-os-water-system", "life_os_profile_id": "life-os-water-system", "cycle_hours": 12, "capacity": 40, "output": { "resource_id": "WATER", "quantity": 20 }, "required_inputs": [{ "resource_id": "ELECTRICITY", "per_hour": 0.12 }, { "resource_id": "MAINTENANCE", "per_hour": 0.02 }] }
+    ],
+    "supply_nodes": [
+      { "node_id": "supply-electricity", "label": "Electricity Grid", "category": "ELECTRICITY", "status": "AVAILABLE", "capacity": 120, "unit": "ENERGY_UNIT" },
+      { "node_id": "supply-water", "label": "Industrial Water", "category": "WATER", "status": "AVAILABLE", "capacity": 120, "unit": "WATER_UNIT" },
+      { "node_id": "supply-engineers", "label": "Engineers", "category": "ENGINEERS", "status": "AVAILABLE", "capacity": 8, "unit": "WORKER" },
+      { "node_id": "supply-workers", "label": "Workers", "category": "WORKERS", "status": "AVAILABLE", "capacity": 18, "unit": "WORKER" },
+      { "node_id": "supply-equipment", "label": "Production Equipment", "category": "EQUIPMENT", "status": "AVAILABLE", "capacity": 8, "unit": "MACHINE" },
+      { "node_id": "supply-silicon", "label": "Silicon Supply", "category": "SILICON", "status": "AVAILABLE", "capacity": 40, "unit": "MATERIAL_UNIT" },
+      { "node_id": "supply-chemicals", "label": "Chemical Supply", "category": "CHEMICALS", "status": "AVAILABLE", "capacity": 40, "unit": "MATERIAL_UNIT" },
+      { "node_id": "supply-gas", "label": "Industrial Gas", "category": "INDUSTRIAL_GAS", "status": "AVAILABLE", "capacity": 40, "unit": "GAS_UNIT" },
+      { "node_id": "supply-transport", "label": "Transportation", "category": "TRANSPORTATION", "status": "AVAILABLE", "capacity": 20, "unit": "DELIVERY" },
+      { "node_id": "supply-warehouse", "label": "Warehouse", "category": "WAREHOUSE", "status": "AVAILABLE", "capacity": 80, "unit": "STORAGE_SLOT" },
+      { "node_id": "supply-finance", "label": "Prototype Finance", "category": "FINANCE", "status": "AVAILABLE", "capacity": 2500, "unit": "PROTOTYPE_CREDIT" },
+      { "node_id": "supply-ai-company", "label": "AI Company", "category": "AI_COMPANY", "status": "AVAILABLE", "capacity": 1, "unit": "COMPANY" }
+    ],
+    "factory": {
+      "factory_id": "factory-refrigerator-alpha-001",
+      "label": "Hsinchu Living Appliance Factory",
+      "organism_type": "FACTORY_ORGANISM",
+      "body_profile_id": "body-factory-refrigerator-alpha",
+      "species_os_id": "species-os-factory-alpha",
+      "life_os_profile_id": "life-os-factory-alpha",
+      "company_id": "ai-company-civilization-alpha-001",
+      "level": 1,
+      "health": 94,
+      "energy": 92,
+      "capacity_per_cycle": 1,
+      "cycle_hours": 24,
+      "maintenance": 88,
+      "required_nodes": ["ELECTRICITY", "WATER", "ENGINEERS", "WORKERS", "EQUIPMENT", "SILICON", "CHEMICALS", "INDUSTRIAL_GAS", "TRANSPORTATION", "WAREHOUSE", "FINANCE", "AI_COMPANY"],
+      "material_inventory": { "STEEL": 24, "PLASTIC": 24, "CHIP": 12, "MAINTENANCE_KIT": 8 },
+      "product_recipe": {
+        "product_id": "REFRIGERATOR_ALPHA",
+        "label": "Refrigerator Alpha",
+        "materials": { "STEEL": 2, "PLASTIC": 2, "CHIP": 1, "MAINTENANCE_KIT": 0.25 },
+        "node_costs": { "ELECTRICITY": 2, "WATER": 1, "TRANSPORTATION": 1, "WAREHOUSE": 1, "FINANCE": 20 },
+        "sale_value": 84,
+        "repairable": true,
+        "recyclable": true
+      }
+    },
+    "ai_company": {
+      "company_id": "ai-company-civilization-alpha-001",
+      "label": "PrimeForge Living Systems Alpha",
+      "organism_type": "AI_COMPANY_ORGANISM",
+      "owner_id": "mock-player-001",
+      "company_dna_id": "company-dna-living-systems-v1",
+      "life_os_profile_id": "company-life-os-alpha-v1",
+      "employees": 6,
+      "ai_workers": 2,
+      "assets": ["factory-refrigerator-alpha-001", "warehouse-alpha-001", "software-production-planner-alpha"],
+      "products": ["REFRIGERATOR_ALPHA"],
+      "prototype_balance": 2500,
+      "reputation": 72,
+      "health": 91,
+      "energy": 88,
+      "bankruptcy_threshold": 0,
+      "expansion_balance": 3000,
+      "expansion_reputation": 80
+    },
+    "civilization_stages": [
+      { "stage_id": "PRIMITIVE_VILLAGE", "minimum_score": 0 },
+      { "stage_id": "TOWN", "minimum_score": 30 },
+      { "stage_id": "CITY", "minimum_score": 50 },
+      { "stage_id": "NATION", "minimum_score": 68 },
+      { "stage_id": "CIVILIZATION", "minimum_score": 82 },
+      { "stage_id": "PLANET_CIVILIZATION", "minimum_score": 96 }
+    ],
+    "exchange": {
+      "exchange_id": "K11520",
+      "label": "Flower Fruit Mountain Civilization Exchange",
+      "candidate_types": ["LIFE_ORGANISM", "AI_COMPANY", "FACTORY", "BUILDING", "DNA_BLUEPRINT", "GENOME_LICENSE", "SPECIES_VARIANT", "TECHNOLOGY", "SERVICE", "DIGITAL_ORGANISM"],
+      "rights_types": ["USE_RIGHT", "LICENSE_RIGHT", "REVENUE_SHARE_RIGHT", "MAINTENANCE_RIGHT", "GOVERNANCE_RIGHT", "ORGAN_SUBSCRIPTION_RIGHT", "FULL_OWNERSHIP_RIGHT"],
+      "candidates": [
+        { "candidate_id": "candidate-refrigerator-alpha", "asset_type": "TECHNOLOGY", "asset_id": "REFRIGERATOR_ALPHA", "owner_id": "ai-company-civilization-alpha-001", "rights_offered": ["USE_RIGHT", "LICENSE_RIGHT", "MAINTENANCE_RIGHT"], "review_status": "CANDIDATE_REVIEW_REQUIRED", "risk_disclosure": "SYNTHETIC PRODUCT LICENSE ONLY" },
+        { "candidate_id": "candidate-factory-alpha", "asset_type": "FACTORY", "asset_id": "factory-refrigerator-alpha-001", "owner_id": "mock-player-001", "rights_offered": ["USE_RIGHT", "MAINTENANCE_RIGHT"], "review_status": "CANDIDATE_REVIEW_REQUIRED", "risk_disclosure": "NO REAL PROPERTY OR SECURITIES STATUS" },
+        { "candidate_id": "candidate-company-alpha", "asset_type": "AI_COMPANY", "asset_id": "ai-company-civilization-alpha-001", "owner_id": "mock-player-001", "rights_offered": ["LICENSE_RIGHT", "REVENUE_SHARE_RIGHT"], "review_status": "CANDIDATE_REVIEW_REQUIRED", "risk_disclosure": "LOCAL SIMULATION; NO REAL EQUITY" }
+      ]
+    }
   },
   "genesis": {
     "decision_id": "HUMAN-SPRINT-004-CIVILIZATION-GENESIS",

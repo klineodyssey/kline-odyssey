@@ -41,6 +41,10 @@ REQUIRED_FILES = (
     "genesis/genesis-runtime.js",
     "genesis/genesis-view.js",
     "agriculture/agriculture-runtime.js",
+    "ecosystem/ecosystem-runtime.js",
+    "production/production-runtime.js",
+    "enterprise/ai-company-organism-runtime.js",
+    "exchange/life-exchange-runtime.js",
     "city/city-runtime.js",
     "civilization/runtime-utils.js",
     "civilization/civilization-runtime.js",
@@ -50,6 +54,7 @@ REQUIRED_FILES = (
     "tests/runtime_integrity.mjs",
     "tests/civilization_integrity.mjs",
     "tests/genesis_integrity.mjs",
+    "tests/production_integrity.mjs",
 )
 
 PROTECTED_PREFIXES = (
@@ -289,6 +294,54 @@ def check_alpha_contract(errors: list[str], data: dict, source_text: str, html: 
         if resource not in source_text:
             fail(errors, f"resource catalog is missing {resource}")
 
+    production = data.get("production_alpha", {})
+    if production.get("decision_id") != "HUMAN-SPRINT-005-CIVILIZATION-PRODUCTION":
+        fail(errors, "Production Alpha decision ID is invalid")
+    if production.get("simulation_only") is not True:
+        fail(errors, "Production Alpha must be simulation only")
+    if any(production.get(key) is not False for key in ("real_biology", "real_trade", "legal_securities", "authoritative_registry")):
+        fail(errors, "Production Alpha crosses a real-world or authoritative boundary")
+    expected_lineage = [
+        "UNICELLULAR", "CAMBRIAN_OCEAN", "FISH", "AMPHIBIAN", "REPTILE",
+        "BIRD", "MAMMAL", "PRIMITIVE_HUMAN", "CIVILIZATION", "INDUSTRIAL",
+        "AI_CIVILIZATION",
+    ]
+    if [stage.get("stage_id") for stage in production.get("evolution_stages", [])] != expected_lineage:
+        fail(errors, "Cambrian-to-AI evolution lineage is incomplete")
+    species_labels = {species.get("label") for species in production.get("species_catalog", [])}
+    expected_species = {
+        "Tiger", "Lion", "Elephant", "Cow", "Pig", "Chicken", "Fish", "Bee",
+        "Tree", "Rice", "Corn", "Cabbage", "Fruit Tree", "Flower", "Mushroom",
+        "Bacteria",
+    }
+    if not expected_species.issubset(species_labels):
+        fail(errors, f"Production species catalog incomplete: {sorted(expected_species - species_labels)}")
+    facility_types = {facility.get("facility_type") for facility in production.get("agriculture_facilities", [])}
+    expected_facilities = {
+        "MIXED_FARM", "FISH_FARM", "PIG_FARM", "CHICKEN_FARM", "FRUIT_FARM",
+        "FOREST", "VEGETABLE_FARM", "BEE_FARM", "WATER_SYSTEM",
+    }
+    if facility_types != expected_facilities:
+        fail(errors, f"Agriculture facility organisms incomplete: {sorted(str(value) for value in facility_types)}")
+    supply_categories = {node.get("category") for node in production.get("supply_nodes", [])}
+    expected_supply = {
+        "ELECTRICITY", "WATER", "ENGINEERS", "WORKERS", "EQUIPMENT", "SILICON",
+        "CHEMICALS", "INDUSTRIAL_GAS", "TRANSPORTATION", "WAREHOUSE", "FINANCE",
+        "AI_COMPANY",
+    }
+    if supply_categories != expected_supply:
+        fail(errors, f"Factory supply chain incomplete: {sorted(str(value) for value in supply_categories)}")
+    if production.get("factory", {}).get("product_recipe", {}).get("product_id") != "REFRIGERATOR_ALPHA":
+        fail(errors, "Refrigerator product chain is missing")
+    if production.get("ai_company", {}).get("organism_type") != "AI_COMPANY_ORGANISM":
+        fail(errors, "AI Company organism is missing")
+    exchange = production.get("exchange", {})
+    if exchange.get("exchange_id") != "K11520" or any(
+        item.get("review_status") != "CANDIDATE_REVIEW_REQUIRED"
+        for item in exchange.get("candidates", [])
+    ):
+        fail(errors, "K11520 candidate-only exchange boundary is invalid")
+
 
 def main() -> int:
     errors: list[str] = []
@@ -491,7 +544,7 @@ def main() -> int:
         f"{len(REQUIRED_FILES)} files;",
         f"{parsed_json_records} JSON records;",
         f"{checked_references} local references;",
-        "Civilization Genesis Alpha + Planet/Land/Building/Room/Life/Player/Citizen/AI/Economy/Agriculture/City runtimes + 8 proposals; protected-path input clean",
+        "Civilization Production Alpha + Planet/Land/Building/Room/Life/Ecosystem/Agriculture/SupplyChain/Factory/AICompany/K11520 runtimes + 8 proposals; protected-path input clean",
     )
     return 0
 

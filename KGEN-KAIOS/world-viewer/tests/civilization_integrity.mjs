@@ -32,10 +32,14 @@ assert.equal(initial.economy.player_balance, 0);
 assert.equal(initial.genesis.completed, false);
 assert.equal(initial.planet_environment.active_profile.planet_id, "EARTH");
 assert.equal(initial.agriculture.plots.length, 3);
-assert.equal(RESOURCE_CATALOG.length, 13);
-assert.deepEqual(MARKETPLACE_CATEGORIES, [
-  "FOOD", "FURNITURE", "TOOLS", "SEEDS", "BUILDING_MATERIALS", "MEDICAL", "ENERGY", "WATER"
-]);
+assert.equal(RESOURCE_CATALOG.length, 25);
+assert.ok(["FOOD", "ANIMALS", "PLANTS", "DNA", "FACTORIES", "AI_COMPANY", "SOFTWARE", "LICENSE", "GENOME"].every((category) => MARKETPLACE_CATEGORIES.includes(category)));
+assert.equal(initial.agriculture.facilities.length, 9);
+assert.ok(initial.ecosystem.species.length >= 20);
+assert.equal(initial.ecosystem.current_evolution_stage, "AI_CIVILIZATION");
+assert.equal(initial.production.factory.status, "READY");
+assert.equal(initial.ai_company.company.status, "ACTIVE");
+assert.equal(initial.exchange.listed_count, 0);
 
 assert.throws(() => civilization.advance(60), (error) => error.code === "GENESIS_REQUIRED");
 const booted = civilization.beginGenesis();
@@ -48,6 +52,14 @@ assert.equal(born.economy.player_balance, 88);
 assert.equal(born.economy.player_inventory.BASIC_CLOTHES, 1);
 assert.equal(life.getSnapshot("life-player-001").genesis.birth_id, born.genesis.birth_id);
 assert.throws(() => civilization.claimGenesisFortune(888), (error) => error.code === "GENESIS_ALREADY_CLAIMED");
+
+const factoryBefore = born.production.factory.total_produced;
+const manufactured = civilization.runProductionCycle();
+assert.equal(manufactured.production.factory.total_produced, factoryBefore + 1);
+assert.equal(manufactured.ai_company.company.product_inventory.REFRIGERATOR_ALPHA, 1);
+civilization.requestExchangeReview("candidate-refrigerator-alpha");
+assert.equal(civilization.getSnapshot().exchange.candidates.find(({ candidate_id: id }) => id === "candidate-refrigerator-alpha").review_status, "REVIEW_REQUESTED");
+assert.equal(civilization.getSnapshot().exchange.listed_count, 0);
 
 const breakfast = civilization.advance(60);
 assert.equal(breakfast.clock.hour, 7);
@@ -89,6 +101,11 @@ assert.ok(final.citizen.events.length <= 160);
 assert.ok(final.aiWorker.events.length <= 160);
 assert.ok(final.economy.ledger.length <= 300);
 assert.ok(final.agriculture.events.length <= 180);
+assert.ok(final.ecosystem.events.length <= 180);
+assert.ok(final.production.events.length <= 180);
+assert.ok(final.ai_company.events.length <= 160);
+assert.ok(final.ai_company.ledger.length <= 200);
+assert.ok(final.exchange.events.length <= 120);
 assert.ok(final.city.history.length <= 120);
 assert.equal(final.city.employed + final.city.unemployed, final.city.population);
 assert.equal(JSON.stringify(world), canonicalBefore, "Civilization Runtime must not mutate the canonical fixture");
@@ -100,6 +117,10 @@ const output = {
   ai_worker: report.reports.ai_worker,
   economy: report.reports.economy,
   agriculture: report.reports.agriculture,
+  ecosystem: report.reports.ecosystem,
+  production: report.reports.production,
+  ai_company: report.reports.ai_company,
+  exchange: report.reports.exchange,
   city: report.reports.city,
   product_flow: {
     universe_booted: true,
@@ -115,7 +136,12 @@ const output = {
     crop_planted: true,
     crop_harvested: true,
     harvest_sold: true,
-    market_purchase: true
+    market_purchase: true,
+    cambrian_lineage: true,
+    food_chain_running: true,
+    factory_produced: true,
+    ai_company_running: true,
+    k11520_review_only: true
   },
   memory_bounds: {
     civilization: final.events.length,
@@ -124,6 +150,10 @@ const output = {
     ai_worker: final.aiWorker.events.length,
     economy: final.economy.ledger.length,
     agriculture: final.agriculture.events.length,
+    ecosystem: final.ecosystem.events.length,
+    production: final.production.events.length,
+    ai_company: final.ai_company.events.length,
+    exchange: final.exchange.events.length,
     city: final.city.history.length
   },
   protected_runtime_mutated: false

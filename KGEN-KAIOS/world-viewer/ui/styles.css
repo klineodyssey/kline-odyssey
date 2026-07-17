@@ -263,7 +263,8 @@ button:focus-visible, canvas:focus-visible, [tabindex]:focus-visible {
 .civilization-view__header strong { font-size: 14px; }
 .civilization-tabs {
   position: sticky; top: -10px; z-index: 4;
-  display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 4px;
+  display: grid; grid-auto-flow: column; grid-auto-columns: minmax(76px, 1fr); gap: 4px;
+  overflow-x: auto; scrollbar-width: thin;
   padding: 8px 0; background: var(--surface);
 }
 .civilization-tabs .civilization-action { min-height: 36px; padding: 5px 4px; }
@@ -273,6 +274,9 @@ button:focus-visible, canvas:focus-visible, [tabindex]:focus-visible {
 .civilization-section__title { margin: 0 0 10px; color: var(--accent-strong); font-size: 12px; }
 .civilization-section--time { border-top: 2px solid var(--accent); }
 .civilization-section--city { border-top: 2px solid var(--cyan); }
+.civilization-section--ecosystem { border-top: 2px solid var(--accent); }
+.civilization-section--production { border-top: 2px solid var(--amber); }
+.civilization-section--company { border-top: 2px solid var(--cyan); }
 .civilization-time { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 10px; margin-bottom: 12px; }
 .civilization-time > div:first-child { min-width: 0; display: grid; gap: 3px; }
 .civilization-time__clock { font-size: 18px; }
@@ -309,6 +313,45 @@ button:focus-visible, canvas:focus-visible, [tabindex]:focus-visible {
 .farm-plot__copy > span, .market-listing > div:first-child > span { color: var(--muted); overflow-wrap: anywhere; }
 .farm-plot .need-meter { margin-top: 3px; }
 .civilization-empty { margin: 0; color: var(--muted); font-size: 10px; }
+.civilization-data--compact { margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--line); }
+.production-row {
+  display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 9px;
+  padding: 10px 0; border-bottom: 1px solid var(--line);
+}
+.production-row:last-of-type { border-bottom: 0; }
+.production-row__copy { min-width: 0; display: grid; gap: 5px; font-size: 10px; }
+.production-row__copy > span { color: var(--muted); overflow-wrap: anywhere; }
+.production-headline { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 10px; margin-bottom: 12px; }
+.production-headline > div { min-width: 0; display: grid; gap: 4px; }
+.production-headline span { color: var(--muted); font-size: 10px; }
+.evolution-lineage {
+  display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px;
+  margin: 0; padding: 0; list-style: none;
+}
+.evolution-lineage__item {
+  min-width: 0; display: grid; grid-template-columns: 24px minmax(0, 1fr); align-items: center; gap: 7px;
+  padding: 7px; border: 1px solid var(--line); border-radius: 4px; color: var(--muted); font-size: 9px;
+}
+.evolution-lineage__item.is-active { border-color: var(--accent); color: var(--text); background: var(--surface-2); }
+.evolution-lineage__index { color: var(--accent-strong); font-variant-numeric: tabular-nums; }
+.species-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 7px; }
+.species-card {
+  min-width: 0; display: grid; gap: 4px; padding: 8px; border: 1px solid var(--line); border-radius: 6px;
+  background: var(--surface-2); font-size: 9px;
+}
+.species-card > span:not(.species-card__role), .species-card small { color: var(--muted); overflow-wrap: anywhere; }
+.species-card__role { width: fit-content; padding: 2px 4px; border: 1px solid var(--line); color: var(--accent-strong); font-size: 8px; font-weight: 700; }
+.supply-grid { display: grid; gap: 5px; }
+.supply-node {
+  display: grid; grid-template-columns: 36px minmax(0, 1fr); gap: 3px 8px; align-items: center;
+  padding: 7px 8px; border-left: 2px solid var(--accent); background: var(--surface-2); font-size: 9px;
+}
+.supply-node[data-status="DEGRADED"] { border-left-color: var(--amber); }
+.supply-node[data-status="OFFLINE"] { border-left-color: var(--coral); }
+.supply-node__status { grid-row: 1 / span 2; color: var(--accent); font-size: 8px; font-weight: 800; }
+.supply-node:not([data-status="AVAILABLE"]) .supply-node__status { color: var(--coral); }
+.supply-node small { color: var(--muted); overflow-wrap: anywhere; }
+.exchange-candidate small { color: var(--muted); overflow-wrap: anywhere; }
 
 .genesis-dialog {
   width: min(760px, calc(100vw - 24px - var(--safe-left) - var(--safe-right)));
@@ -461,7 +504,7 @@ button:focus-visible, canvas:focus-visible, [tabindex]:focus-visible {
   .inspector-close { display: grid; }
   .inspector-content { padding-bottom: calc(20px + var(--safe-bottom)); }
   .civilization-action, .civilization-tabs .civilization-action { min-height: var(--touch); }
-  .civilization-tabs { grid-template-columns: repeat(5, minmax(64px, 1fr)); overflow-x: auto; }
+  .civilization-tabs { grid-auto-columns: minmax(78px, 1fr); }
   .genesis-dialog { width: calc(100vw - var(--safe-left) - var(--safe-right)); height: calc(100dvh - var(--safe-top) - var(--safe-bottom)); max-height: none; border-radius: 0; }
   .genesis-dialog__surface { height: 100%; }
   .genesis-steps { grid-template-columns: repeat(2, minmax(0, 1fr)); }

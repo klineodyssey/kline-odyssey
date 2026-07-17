@@ -133,6 +133,21 @@ const FORBIDDEN_PUBLIC_FIELD_NAMES = new Set([
   "biometric"
 ]);
 
+const PRODUCTION_EVOLUTION_STAGES = Object.freeze([
+  "UNICELLULAR", "CAMBRIAN_OCEAN", "FISH", "AMPHIBIAN", "REPTILE", "BIRD",
+  "MAMMAL", "PRIMITIVE_HUMAN", "CIVILIZATION", "INDUSTRIAL", "AI_CIVILIZATION"
+]);
+
+const AGRICULTURE_FACILITY_TYPES = new Set([
+  "MIXED_FARM", "FISH_FARM", "PIG_FARM", "CHICKEN_FARM", "FRUIT_FARM",
+  "FOREST", "VEGETABLE_FARM", "BEE_FARM", "WATER_SYSTEM"
+]);
+
+const FACTORY_SUPPLY_CATEGORIES = new Set([
+  "ELECTRICITY", "WATER", "ENGINEERS", "WORKERS", "EQUIPMENT", "SILICON",
+  "CHEMICALS", "INDUSTRIAL_GAS", "TRANSPORTATION", "WAREHOUSE", "FINANCE", "AI_COMPANY"
+]);
+
 function invariant(condition, message) {
   if (!condition) throw new Error(`World data validation failed: ${message}`);
 }
@@ -323,6 +338,63 @@ function validateLifeProfile(profile, layerIds) {
   invariant(typeof profile.ga_profile === "string" && profile.ga_profile.length > 0, `${path}.ga_profile is required`);
 }
 
+function validateProductionAlpha(production) {
+  const path = "production_alpha";
+  invariant(isRecord(production), `${path} must be an object`);
+  invariant(production.decision_id === "HUMAN-SPRINT-005-CIVILIZATION-PRODUCTION", `${path} has invalid decision ID`);
+  invariant(production.simulation_only === true, `${path} must be simulation only`);
+  invariant(production.real_biology === false && production.real_trade === false, `${path} cannot enable real biology or trade`);
+  invariant(production.legal_securities === false && production.authoritative_registry === false, `${path} cannot be authoritative`);
+  validateNoPrivateFields(production, path);
+
+  invariant(Array.isArray(production.evolution_stages), `${path}.evolution_stages must be an array`);
+  invariant(
+    JSON.stringify(production.evolution_stages.map(({ stage_id: id }) => id)) === JSON.stringify(PRODUCTION_EVOLUTION_STAGES),
+    `${path}.evolution_stages must preserve the approved lineage`
+  );
+  invariant(production.current_evolution_stage === "AI_CIVILIZATION", `${path} must open at AI_CIVILIZATION`);
+
+  invariant(Array.isArray(production.species_catalog) && production.species_catalog.length >= 20, `${path}.species_catalog is incomplete`);
+  const speciesIds = new Set();
+  for (const species of production.species_catalog) {
+    invariant(!speciesIds.has(species.species_id), `${path} duplicates Species ${species.species_id}`);
+    speciesIds.add(species.species_id);
+    invariant(PRODUCTION_EVOLUTION_STAGES.includes(species.evolution_stage), `${species.species_id} has invalid evolution stage`);
+    invariant(["PRODUCER", "CONSUMER", "PREDATOR", "OMNIVORE", "DECOMPOSER"].includes(species.trophic_role), `${species.species_id} has invalid trophic role`);
+    invariant(Number.isInteger(species.population) && species.population >= 0, `${species.species_id} has invalid population`);
+    invariant(Number.isFinite(species.health) && species.health >= 0 && species.health <= 100, `${species.species_id} has invalid health`);
+    for (const field of ["body_profile_id", "species_os_id", "life_os_profile_id", "dna_summary_id"]) {
+      invariant(typeof species[field] === "string" && species[field].length > 0, `${species.species_id} is missing ${field}`);
+    }
+  }
+  for (const label of ["Tiger", "Lion", "Elephant", "Cow", "Pig", "Chicken", "Fish", "Bee", "Tree", "Rice", "Corn", "Cabbage", "Fruit Tree", "Flower", "Mushroom", "Bacteria"]) {
+    invariant(production.species_catalog.some((species) => species.label === label), `${path} is missing ${label}`);
+  }
+
+  invariant(Array.isArray(production.agriculture_facilities) && production.agriculture_facilities.length === AGRICULTURE_FACILITY_TYPES.size, `${path}.agriculture_facilities is incomplete`);
+  const facilityTypes = new Set(production.agriculture_facilities.map(({ facility_type: type }) => type));
+  invariant([...AGRICULTURE_FACILITY_TYPES].every((type) => facilityTypes.has(type)), `${path}.agriculture_facilities has invalid types`);
+  for (const facility of production.agriculture_facilities) {
+    invariant(facility.species_os_id && facility.life_os_profile_id, `${facility.facility_id} lacks organism layers`);
+    invariant(Array.isArray(facility.required_inputs) && facility.required_inputs.length > 0, `${facility.facility_id} lacks inputs`);
+    invariant(facility.output?.resource_id && Number(facility.output?.quantity) > 0, `${facility.facility_id} lacks output`);
+  }
+
+  invariant(Array.isArray(production.supply_nodes), `${path}.supply_nodes must be an array`);
+  const supplyCategories = new Set(production.supply_nodes.map(({ category }) => category));
+  invariant([...FACTORY_SUPPLY_CATEGORIES].every((category) => supplyCategories.has(category)), `${path}.supply_nodes are incomplete`);
+  invariant(production.factory?.organism_type === "FACTORY_ORGANISM", `${path}.factory must be a Factory Organism`);
+  invariant(production.factory.required_nodes.every((category) => FACTORY_SUPPLY_CATEGORIES.has(category)), `${path}.factory has unknown requirements`);
+  invariant(production.factory.product_recipe?.product_id === "REFRIGERATOR_ALPHA", `${path}.factory must include the refrigerator Alpha recipe`);
+  invariant(production.ai_company?.organism_type === "AI_COMPANY_ORGANISM", `${path}.ai_company must be an AI Company Organism`);
+  invariant(production.ai_company.company_dna_id && production.ai_company.life_os_profile_id, `${path}.ai_company lacks life layers`);
+
+  invariant(Array.isArray(production.civilization_stages) && production.civilization_stages.length === 6, `${path}.civilization_stages is incomplete`);
+  invariant(production.exchange?.exchange_id === "K11520", `${path}.exchange must be K11520`);
+  invariant(Array.isArray(production.exchange.candidates) && production.exchange.candidates.length >= 3, `${path}.exchange candidates are incomplete`);
+  invariant(production.exchange.candidates.every(({ review_status: status }) => status === "CANDIDATE_REVIEW_REQUIRED"), `${path}.exchange cannot auto-list candidates`);
+}
+
 export function validateWorldFixture(world) {
   invariant(isRecord(world), "root must be an object");
   invariant(world.meta?.synthetic === true, "World Viewer accepts synthetic data only");
@@ -365,6 +437,7 @@ export function validateWorldFixture(world) {
   invariant(Array.isArray(world.planet_profiles) && world.planet_profiles.length >= 5, "Planet profiles are required");
   const planetIds = new Set(world.planet_profiles.map(({ planet_id: id }) => id));
   invariant(["EARTH", "MOON", "MARS", "JUPITER", "FUTURE_PLANET"].every((id) => planetIds.has(id)), "required Planet profiles are missing");
+  validateProductionAlpha(world.production_alpha);
 
   const actionIds = (world.proposalActions ?? []).map((action) => (
     typeof action === "string" ? action : action?.id

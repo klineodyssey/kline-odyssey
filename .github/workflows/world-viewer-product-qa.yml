@@ -102,6 +102,12 @@ jobs:
         shell: bash
         run: node KGEN-KAIOS/world-viewer/tests/genesis_integrity.mjs
 
+      - name: Run Civilization Production integrity
+        id: production
+        continue-on-error: true
+        shell: bash
+        run: node KGEN-KAIOS/world-viewer/tests/production_integrity.mjs
+
       - name: Start static server
         shell: bash
         run: |
@@ -127,7 +133,7 @@ jobs:
           python KGEN-KAIOS/world-viewer/tests/product_qa.py \
             --base-url http://127.0.0.1:8080/KGEN-KAIOS/world-viewer/index.html \
             --output-dir "$RUNNER_TEMP/world-viewer-product-qa" \
-            --baseline-dir KGEN-KAIOS/world-viewer/tests/baselines/sprint-004 \
+            --baseline-dir KGEN-KAIOS/world-viewer/tests/baselines/sprint-005 \
             --require-baselines \
             --max-diff-ratio 0.12 \
             --pixel-threshold 32
@@ -164,17 +170,19 @@ jobs:
         shell: bash
         env:
           PRODUCT_OUTCOME: ${{ steps.product.outcome }}
+          PRODUCTION_OUTCOME: ${{ steps.production.outcome }}
           GENESIS_OUTCOME: ${{ steps.genesis.outcome }}
           CIVILIZATION_OUTCOME: ${{ steps.civilization.outcome }}
           RUNTIME_OUTCOME: ${{ steps.runtime.outcome }}
           STATIC_OUTCOME: ${{ steps.static.outcome }}
           SYNTAX_OUTCOME: ${{ steps.syntax.outcome }}
         run: |
-          printf 'syntax=%s\nstatic=%s\nruntime=%s\ncivilization=%s\ngenesis=%s\nproduct=%s\n' \
-            "$SYNTAX_OUTCOME" "$STATIC_OUTCOME" "$RUNTIME_OUTCOME" "$CIVILIZATION_OUTCOME" "$GENESIS_OUTCOME" "$PRODUCT_OUTCOME"
+          printf 'syntax=%s\nstatic=%s\nruntime=%s\ncivilization=%s\ngenesis=%s\nproduction=%s\nproduct=%s\n' \
+            "$SYNTAX_OUTCOME" "$STATIC_OUTCOME" "$RUNTIME_OUTCOME" "$CIVILIZATION_OUTCOME" "$GENESIS_OUTCOME" "$PRODUCTION_OUTCOME" "$PRODUCT_OUTCOME"
           [[ "$SYNTAX_OUTCOME" == "success" ]]
           [[ "$STATIC_OUTCOME" == "success" ]]
           [[ "$RUNTIME_OUTCOME" == "success" ]]
           [[ "$CIVILIZATION_OUTCOME" == "success" ]]
           [[ "$GENESIS_OUTCOME" == "success" ]]
+          [[ "$PRODUCTION_OUTCOME" == "success" ]]
           [[ "$PRODUCT_OUTCOME" == "success" ]]

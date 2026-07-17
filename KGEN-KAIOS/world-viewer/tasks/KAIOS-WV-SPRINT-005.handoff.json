@@ -1,0 +1,61 @@
+{
+  "handoff_id": "HANDOFF-KAIOS-WV-SPRINT-005-CODEX-GM-01",
+  "task_id": "KAIOS-WV-SPRINT-005",
+  "human_decision_id": "HUMAN-SPRINT-005-CIVILIZATION-PRODUCTION",
+  "claim_id": "CLAIM-KAIOS-WV-SPRINT-005-20260717-CODEX-GM-01",
+  "branch": "codex/world-viewer-sprint-005-production",
+  "worktree": "C:\\Desktop\\kline-odyssey-world-viewer-sprint-005",
+  "base_sha": "3dc6780980c240222ec7c8fbe6d009fd66d83896",
+  "head_sha_at_review": "5db829b1dad024275b6acd0949c92d53c59452e3",
+  "implementation_commit_sha": "5db829b1dad024275b6acd0949c92d53c59452e3",
+  "tests_run": [
+    "STATIC_ACCEPTANCE",
+    "RUNTIME_INTEGRITY",
+    "GENESIS_INTEGRITY",
+    "PRODUCTION_INTEGRITY",
+    "CIVILIZATION_INTEGRITY",
+    "BROWSER_PRODUCT_QA",
+    "RESPONSIVE_SCREENSHOT_DIFF",
+    "ACCESSIBILITY",
+    "PERFORMANCE",
+    "SECRET_SCAN",
+    "PROTECTED_PATH_DIFF"
+  ],
+  "test_results": {
+    "static_acceptance": "PASS",
+    "runtime_integrity": "PASS",
+    "genesis_integrity": "PASS",
+    "production_integrity": "PASS",
+    "civilization_integrity": "PASS",
+    "browser_product_qa": {
+      "passed": 145,
+      "failed": 0,
+      "skipped": 0
+    },
+    "visual_profiles": 8,
+    "performance": "PASS",
+    "protected_path_violations": 0
+  },
+  "evidence": [
+    "KGEN-KAIOS/world-viewer/SPRINT_005_CIVILIZATION_PRODUCTION_REPORT.md",
+    "KGEN-KAIOS/world-viewer/tests/evidence/sprint-005-production/qa-report.json",
+    "KGEN-KAIOS/world-viewer/tests/evidence/sprint-005-production/performance-report.json",
+    "KGEN-KAIOS/world-viewer/tests/evidence/sprint-005-production/production-integrity-report.json",
+    "KGEN-KAIOS/world-viewer/tests/evidence/sprint-005-production/civilization-integrity-report.json"
+  ],
+  "known_issues": [],
+  "risks": [
+    "All biology, production, finance and exchange behavior is synthetic and local.",
+    "The client is not an authoritative life, land, company or settlement registry."
+  ],
+  "protected_path_violations": 0,
+  "runtime_current_modified": false,
+  "universe_map_modified": false,
+  "token_contract_modified": false,
+  "frozen_baseline_modified": false,
+  "implementation_scope": "SYNTHETIC_CIVILIZATION_PRODUCTION_ALPHA",
+  "recommended_next_action": "PUSH_REVIEWED_BRANCH_AND_MERGE_PR",
+  "review_status": "APPROVED",
+  "claim_state": "CLOSED",
+  "lease_state": "RELEASED"
+}

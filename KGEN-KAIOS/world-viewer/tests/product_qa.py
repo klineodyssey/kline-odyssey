@@ -1928,6 +1928,30 @@ def run_civilization_alpha(browser: Browser, args: argparse.Namespace, gate: Gat
             )),
         )
 
+        page.locator("[data-civilization-action='TAB_ECOSYSTEM']").click()
+        ecosystem_text = clean_text(page.locator(".civilization-view").inner_text())
+        gate.expect(
+            "production.cambrian-lineage",
+            "ecosystem",
+            all(label in ecosystem_text for label in (
+                "Unicellular Life", "Cambrian Ocean", "Fish", "Amphibian",
+                "Reptile", "Bird", "Mammal", "Primitive Human", "Industrial",
+                "AI Civilization",
+            )),
+        )
+        gate.expect(
+            "production.food-chain",
+            "ecosystem",
+            all(label in ecosystem_text for label in (
+                "Food Chain Energy", "Producer Input", "Consumer Demand",
+                "Decomposer Recovery", "Species Population", "Bacteria", "Tiger",
+                "Lion", "Elephant", "Bee", "Rice", "Mushroom",
+            ))
+            and page.evaluate("document.documentElement.dataset.ecosystemStatus")
+            in {"BALANCED", "CONSTRAINED", "COLLAPSE_RISK"},
+        )
+        page.locator("[data-civilization-action='TAB_TODAY']").click()
+
         page.locator("[data-civilization-action='ADVANCE_HOUR']").click()
         page.wait_for_function("() => document.documentElement.dataset.civilizationActivity === 'BREAKFAST'")
         page.locator("[data-civilization-action='ADVANCE_HOUR']").click()
@@ -1969,6 +1993,20 @@ def run_civilization_alpha(browser: Browser, args: argparse.Namespace, gate: Gat
             "VEGETABLE" in clean_text(warehouse.inner_text())
             and "Sell VEGETABLE" in clean_text(warehouse.inner_text()),
         )
+        facility = page.locator(".production-row").filter(has_text="Vegetable Farm")
+        facility_text = clean_text(facility.inner_text())
+        gate.expect(
+            "production.agriculture-organism",
+            "agriculture",
+            "VEGETABLE FARM / READY" in facility_text
+            and "Collect" in facility_text,
+        )
+        facility.get_by_role("button", name="Collect").click()
+        gate.expect(
+            "production.agriculture-collection",
+            "agriculture",
+            "VEGETABLE FARM / ACTIVE" in clean_text(facility.inner_text()),
+        )
         balance_before_sale = int(page.evaluate("document.documentElement.dataset.civilizationBalance"))
         warehouse.get_by_role("button", name="Sell VEGETABLE").click()
         balance_after_sale = int(page.evaluate("document.documentElement.dataset.civilizationBalance"))
@@ -1978,6 +2016,53 @@ def run_civilization_alpha(browser: Browser, args: argparse.Namespace, gate: Gat
             balance_after_sale == balance_before_sale + 4,
             details={"before": balance_before_sale, "after": balance_after_sale},
         )
+
+        page.locator("[data-civilization-action='TAB_PRODUCTION']").click()
+        production_text = clean_text(page.locator(".civilization-view").inner_text())
+        gate.expect(
+            "production.factory-supply-chain",
+            "production",
+            all(label in production_text for label in (
+                "Factory Organism", "Hsinchu Living Appliance Factory", "Supply Chain",
+                "Electricity Grid", "Industrial Water", "Engineers", "Workers",
+                "Production Equipment", "Silicon Supply", "Chemical Supply",
+                "Industrial Gas", "Transportation", "Warehouse", "Prototype Finance",
+                "AI Company", "Product Lifecycle", "Refrigerator Alpha", "REPAIR", "RECYCLE",
+            )),
+        )
+        produced_before = int(page.evaluate("document.documentElement.dataset.productionTotal"))
+        page.locator("[data-civilization-action='RUN_FACTORY']").click()
+        page.wait_for_function(
+            "previous => Number(document.documentElement.dataset.productionTotal) === previous + 1",
+            arg=produced_before,
+        )
+        gate.expect(
+            "production.factory-cycle",
+            "production",
+            page.evaluate("document.documentElement.dataset.factoryStatus") in {"READY", "BLOCKED"}
+            and int(page.evaluate("document.documentElement.dataset.productionTotal")) == produced_before + 1,
+        )
+
+        page.locator("[data-civilization-action='TAB_COMPANY']").click()
+        company_text = clean_text(page.locator(".civilization-view").inner_text())
+        gate.expect(
+            "production.ai-company-organism",
+            "company",
+            all(label in company_text for label in (
+                "AI Company Organism", "Company Life", "Company DNA", "Employees",
+                "AI Workers", "Reputation", "Prototype Company Finance", "Operating Cost",
+                "Company Assets", "LOCAL SYNTHETIC LEDGER",
+            ))
+            and page.evaluate("document.documentElement.dataset.companyStatus")
+            in {"ACTIVE", "CONSTRAINED", "DISTRESSED", "EXPANSION_READY"},
+        )
+        company_sale = page.locator("[data-civilization-action='SELL_COMPANY_PRODUCT']")
+        gate.expect(
+            "production.company-product-inventory",
+            "company",
+            company_sale.count() == 1 and company_sale.is_enabled(),
+        )
+        company_sale.click()
 
         page.locator("[data-civilization-action='TAB_MARKET']").click()
         rice = page.locator(".market-listing").filter(has_text="FOOD / 6 CR")
@@ -1991,6 +2076,20 @@ def run_civilization_alpha(browser: Browser, args: argparse.Namespace, gate: Gat
             and "stock 119" in clean_text(rice.inner_text()),
             details={"before": balance_before_buy, "after": balance_after_buy},
         )
+        exchange_candidate = page.locator(".exchange-candidate").filter(has_text="REFRIGERATOR ALPHA")
+        gate.expect(
+            "production.k11520-candidate-only",
+            "exchange",
+            "CANDIDATE REVIEW REQUIRED" in clean_text(exchange_candidate.inner_text())
+            and "NO REAL" not in clean_text(exchange_candidate.inner_text()),
+        )
+        exchange_candidate.get_by_role("button", name="Request review").click()
+        gate.expect(
+            "production.k11520-review-request",
+            "exchange",
+            "REVIEW REQUESTED" in clean_text(exchange_candidate.inner_text())
+            and "Listed 0" in clean_text(page.locator(".civilization-view").inner_text()),
+        )
 
         page.locator("[data-civilization-action='TAB_CITY']").click()
         city_text = clean_text(page.locator(".civilization-view").inner_text())
@@ -1999,7 +2098,8 @@ def run_civilization_alpha(browser: Browser, args: argparse.Namespace, gate: Gat
             "city-integrity",
             all(label in city_text for label in (
                 "Population", "Employment", "Unemployment", "Food", "Energy",
-                "Housing", "Roads", "Pollution", "Happiness",
+                "Housing", "Roads", "Pollution", "Happiness", "Industry",
+                "Supply Chain", "Ecology", "Company Health", "Civilization Stage",
             ))
             and page.evaluate("document.documentElement.dataset.civilizationCity") in {"STABLE", "THRIVING", "STRAINED", "AT_RISK"},
         )
@@ -2046,6 +2146,63 @@ def run_civilization_alpha(browser: Browser, args: argparse.Namespace, gate: Gat
             details={"error": clean_text(error)},
         )
         browser_clean(monitor, "civilization-alpha", gate)
+    finally:
+        context.close()
+
+
+def run_production_mobile(browser: Browser, args: argparse.Namespace, gate: Gate) -> None:
+    base = next(case for case in MATRIX if case.slug == "android-portrait-dark")
+    case = ViewportCase(
+        "production-mobile", base.family, base.orientation, base.width, base.height,
+        base.theme, base.touch, base.device_scale_factor, base.user_agent,
+    )
+    context = new_context(browser, case)
+    page = context.new_page()
+    monitor = BrowserMonitor(page, args.base_url)
+    try:
+        load_page(page, args.base_url, "dark")
+        start_mock_session(page, with_location=False)
+        page.locator("[data-mode='CIVILIZATION']").click()
+        page.locator("[data-civilization-action='TAB_PRODUCTION']").click()
+        layout = measure_overflow(page)
+        mobile = page.evaluate("""
+          () => {
+            const inspector = document.getElementById("inspector-panel")?.getBoundingClientRect();
+            const tabs = document.querySelector(".civilization-tabs");
+            return {
+              factory: document.documentElement.dataset.factoryStatus,
+              inspector: inspector ? {width: inspector.width, height: inspector.height, left: inspector.left, top: inspector.top} : null,
+              tabs_client: tabs?.clientWidth ?? 0,
+              tabs_scroll: tabs?.scrollWidth ?? 0,
+              viewport: {width: innerWidth, height: innerHeight}
+            };
+          }
+        """)
+        targets = measure_touch_targets(page)
+        screenshot = capture_screenshot(page, case, args.output_dir, None, args.pixel_threshold)
+        gate.screenshots.append(screenshot)
+        gate.expect(
+            "production.mobile-runtime",
+            "mobile-interaction",
+            mobile["factory"] in {"READY", "BLOCKED"}
+            and mobile["inspector"] is not None
+            and mobile["inspector"]["width"] >= mobile["viewport"]["width"] - 1
+            and layout["document_width"] <= layout["viewport_width"]
+            and layout["document_height"] <= layout["viewport_height"]
+            and not layout["offenders"]
+            and not targets["violations"]
+            and screenshot["pixel_variance"] >= 15,
+            details={"layout": layout, "mobile": mobile, "targets": targets, "screenshot": screenshot},
+        )
+        browser_clean(monitor, "production-mobile", gate)
+    except Exception as error:
+        gate.add(
+            "production.mobile-execution",
+            "mobile-interaction",
+            "FAIL",
+            details={"error": clean_text(error)},
+        )
+        browser_clean(monitor, "production-mobile", gate)
     finally:
         context.close()
 
@@ -2164,6 +2321,7 @@ def main(argv: list[str] | None = None) -> int:
                 run_digital_earth_alpha(browser, args, gate)
                 run_digital_earth_mobile(browser, args, gate)
                 run_civilization_alpha(browser, args, gate)
+                run_production_mobile(browser, args, gate)
             finally:
                 browser.close()
     except Exception as error:
