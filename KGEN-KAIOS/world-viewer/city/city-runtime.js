@@ -13,7 +13,7 @@ import {
 const RUNTIME = "CityRuntime";
 const SCHEMA_VERSION = "1.0.0";
 const MAX_HISTORY = 120;
-const FOOD_RESOURCES = new Set(["RICE", "VEGETABLE", "FRUIT", "FISH", "PIG", "CHICKEN", "EGG", "MILK"]);
+const FOOD_RESOURCES = new Set(["RICE", "VEGETABLE", "FRUIT", "FISH", "PIG", "CHICKEN", "EGG", "MILK", "CORN", "CABBAGE", "HONEY", "MUSHROOM"]);
 
 function values(value) {
   if (Array.isArray(value)) return value;
@@ -61,6 +61,10 @@ export function createCityRuntime({
     roads: 62,
     pollution: 8,
     happiness: 50,
+    industry: 0,
+    supply_chain: 0,
+    ecology: 0,
+    company_health: 0,
     status: "INITIALIZING",
     revision: 0,
     formulas: {
@@ -77,7 +81,7 @@ export function createCityRuntime({
   const notifier = createNotifier(getSnapshot);
   const persist = () => saveEnvelope(storageRef, storageKey, { schema_version: SCHEMA_VERSION, state });
 
-  function refresh({ citizens = [], aiWorkers = [], economy = {}, agriculture = {}, buildings = [], world = {} } = {}) {
+  function refresh({ citizens = [], aiWorkers = [], economy = {}, agriculture = {}, production = {}, company = {}, ecosystem = {}, buildings = [], world = {} } = {}) {
     if (destroyed) throw runtimeError(RUNTIME, "RUNTIME_DESTROYED", "City Runtime has been destroyed");
     const citizenList = values(citizens).filter((citizen) => citizen.life_state !== "DEAD");
     const workerList = values(aiWorkers);
@@ -93,7 +97,12 @@ export function createCityRuntime({
     const housingCapacity = buildingList.reduce((sum, building) => sum + Number(building.capacity?.population ?? building.capacity?.occupants ?? building.capacity ?? 2), 0);
     const factoryCount = (world?.parcels ?? []).filter((parcel) => parcel.land_use === "FACTORY").length;
     const roads = clamp(58 + Math.min(22, (world?.parcels ?? []).length * 1.5));
-    const pollution = clamp(7 + factoryCount * 12 + workerList.reduce((sum, worker) => sum + Number(worker.build_hours ?? 0) * 0.05, 0));
+    const industry = production?.factory?.status === "READY" ? clamp(production.factory.health) : clamp((production?.factory?.health ?? 0) * 0.5);
+    const supplyNodes = values(production?.supply_nodes);
+    const supplyChain = supplyNodes.length ? supplyNodes.filter(({ status }) => status === "AVAILABLE").length / supplyNodes.length * 100 : 0;
+    const ecology = clamp(ecosystem?.average_health ?? 0);
+    const productionPollution = Math.min(18, Number(production?.factory?.total_produced ?? 0) * 0.2);
+    const pollution = clamp(7 + factoryCount * 12 + productionPollution + workerList.reduce((sum, worker) => sum + Number(worker.build_hours ?? 0) * 0.05, 0));
     const average = (key, fallback) => citizenList.length
       ? citizenList.reduce((sum, citizen) => sum + Number(citizen.needs?.[key] ?? fallback), 0) / citizenList.length
       : fallback;
@@ -122,6 +131,10 @@ export function createCityRuntime({
       roads: Number(roads.toFixed(1)),
       pollution: Number(pollution.toFixed(1)),
       happiness: Number(happiness.toFixed(1)),
+      industry: Number(industry.toFixed(1)),
+      supply_chain: Number(supplyChain.toFixed(1)),
+      ecology: Number(ecology.toFixed(1)),
+      company_health: Number(clamp(company?.company?.health ?? 0).toFixed(1)),
       revision: state.revision + 1
     });
     state.status = statusFor(state);
@@ -141,7 +154,7 @@ export function createCityRuntime({
 
   function integrityReport() {
     const issues = [];
-    for (const key of ["employment_rate", "unemployment_rate", "food", "energy", "housing", "roads", "pollution", "happiness"]) {
+    for (const key of ["employment_rate", "unemployment_rate", "food", "energy", "housing", "roads", "pollution", "happiness", "industry", "supply_chain", "ecology", "company_health"]) {
       if (!Number.isFinite(state[key]) || state[key] < 0 || state[key] > 100) issues.push(`invalid ${key}`);
     }
     if (state.employed + state.unemployed !== state.population) issues.push("employment population mismatch");

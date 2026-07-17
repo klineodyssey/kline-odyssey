@@ -3,8 +3,12 @@ import { createAiWorkerRuntime } from "../ai/ai-worker-runtime.js";
 import { createCitizenDailyRuntime, CITIZEN_DAILY_SCHEDULE } from "../citizen/citizen-daily-runtime.js";
 import { createCityRuntime } from "../city/city-runtime.js";
 import { createEconomyRuntime } from "../economy/economy-runtime.js";
+import { createEcosystemRuntime } from "../ecosystem/ecosystem-runtime.js";
+import { createAiCompanyOrganismRuntime } from "../enterprise/ai-company-organism-runtime.js";
+import { createLifeExchangeRuntime } from "../exchange/life-exchange-runtime.js";
 import { createCivilizationGenesisRuntime } from "../genesis/genesis-runtime.js";
 import { createPlanetEnvironmentRuntime } from "../planet/planet-environment-runtime.js";
+import { createProductionRuntime } from "../production/production-runtime.js";
 import { createSimulationClock } from "../simulation/simulation-clock.js";
 import { boundedPush, createNotifier, runtimeError, snapshot, stableId } from "./runtime-utils.js";
 
@@ -40,7 +44,19 @@ export function createCivilizationRuntime({
     storage,
     storageKey: `${storagePrefix}.economy`
   });
-  const agriculture = createAgricultureRuntime({ parcelId: world.player?.starter_parcel_id, storage, storageKey: `${storagePrefix}.agriculture` });
+  const productionConfig = world.production_alpha;
+  if (!productionConfig) throw new TypeError("Civilization Runtime requires the Sprint 005 production fixture");
+  const configuredAgriculture = createAgricultureRuntime({
+    parcelId: world.player?.starter_parcel_id,
+    facilities: productionConfig.agriculture_facilities,
+    resources: productionConfig.agriculture_resources,
+    storage,
+    storageKey: `${storagePrefix}.agriculture`
+  });
+  const ecosystem = createEcosystemRuntime({ config: productionConfig, storage, storageKey: `${storagePrefix}.ecosystem` });
+  const production = createProductionRuntime({ config: productionConfig, storage, storageKey: `${storagePrefix}.production` });
+  const aiCompany = createAiCompanyOrganismRuntime({ config: productionConfig.ai_company, storage, storageKey: `${storagePrefix}.ai-company-organism` });
+  const exchange = createLifeExchangeRuntime({ config: productionConfig.exchange, storage, storageKey: `${storagePrefix}.life-exchange` });
   const city = createCityRuntime({ cityId: config.city_id, label: world.cities?.find(({ id }) => id === config.city_id)?.label, storage, storageKey: `${storagePrefix}.city` });
   const genesis = createCivilizationGenesisRuntime({
     world,
@@ -72,7 +88,12 @@ export function createCivilizationRuntime({
     genesis: genesis.getSnapshot(),
     planet_environment: planet.getSnapshot(),
     economy: economy.getSnapshot(),
-    agriculture: agriculture.getSnapshot(),
+    agriculture: configuredAgriculture.getSnapshot(),
+    ecosystem: ecosystem.getSnapshot(),
+    production: production.getSnapshot(),
+    ai_company: aiCompany.getSnapshot(),
+    exchange: exchange.getSnapshot(),
+    civilization_progress: civilizationProgress(),
     city: city.getSnapshot(),
     events
   });
@@ -96,12 +117,56 @@ export function createCivilizationRuntime({
     return (world.parcels ?? []).flatMap((parcel) => buildingRuntime.listByParcel(parcel.id));
   }
 
+  function supplyChainHealth() {
+    const nodes = production.getSnapshot().supply_nodes;
+    return nodes.length
+      ? nodes.filter(({ status }) => status === "AVAILABLE").length / nodes.length * 100
+      : 0;
+  }
+
+  function civilizationProgress() {
+    const citySnapshot = city.getSnapshot();
+    const ecosystemSnapshot = ecosystem.getSnapshot();
+    const productionSnapshot = production.getSnapshot();
+    const companySnapshot = aiCompany.getSnapshot();
+    const score = Math.max(0, Math.min(100,
+      citySnapshot.food * 0.14
+      + citySnapshot.energy * 0.13
+      + citySnapshot.housing * 0.13
+      + citySnapshot.roads * 0.1
+      + citySnapshot.happiness * 0.1
+      + ecosystemSnapshot.average_health * 0.15
+      + (productionSnapshot.factory.status === "READY" ? 100 : 35) * 0.12
+      + companySnapshot.company.health * 0.13
+    ));
+    let stage = productionConfig.civilization_stages[0];
+    for (const candidate of productionConfig.civilization_stages) {
+      if (score >= candidate.minimum_score) stage = candidate;
+    }
+    return snapshot({
+      stage_id: stage.stage_id,
+      score: Number(score.toFixed(1)),
+      stages: productionConfig.civilization_stages,
+      constraints: {
+        food: citySnapshot.food,
+        energy: citySnapshot.energy,
+        housing: citySnapshot.housing,
+        ecosystem_health: Number(ecosystemSnapshot.average_health.toFixed(1)),
+        factory_status: productionSnapshot.factory.status,
+        company_status: companySnapshot.company.status
+      }
+    });
+  }
+
   function refreshCity() {
     return city.refresh({
       citizens: citizen.listSnapshots(),
       aiWorkers: aiWorker.listSnapshots(),
       economy: economy.getSnapshot(),
-      agriculture: agriculture.getSnapshot(),
+      agriculture: configuredAgriculture.getSnapshot(),
+      production: production.getSnapshot(),
+      company: aiCompany.getSnapshot(),
+      ecosystem: ecosystem.getSnapshot(),
       buildings: buildings(),
       world
     });
@@ -152,7 +217,32 @@ export function createCivilizationRuntime({
       aiWorker.advance({ elapsedMinutes: chunk, clockSnapshot });
       const workerSnapshots = aiWorker.listSnapshots();
       const assistance = workerSnapshots.some((worker) => worker.current_action === "FARM") ? 0.25 : 0;
-      agriculture.advance({ elapsedHours: chunk / 60, aiAssistance: assistance });
+      configuredAgriculture.advance({ elapsedHours: chunk / 60, aiAssistance: assistance });
+      const planetProfile = planet.getSnapshot().active_profile;
+      ecosystem.advance({
+        elapsedHours: chunk / 60,
+        environment: {
+          oxygen_available: compatibility.oxygen_available,
+          water_available: String(planetProfile.water).includes("AVAILABLE"),
+          temperature_compatible: planetProfile.life_compatibility?.HUMAN === "COMPATIBLE"
+        },
+        agricultureWarehouse: configuredAgriculture.getSnapshot().warehouse
+      });
+      const companyStatus = aiCompany.getSnapshot().company.status;
+      const productionResult = production.advance({ elapsedHours: chunk / 60, companyStatus, autoProduce: true });
+      for (const product of productionResult.produced) {
+        aiCompany.recordProduction({
+          productId: product.product_id,
+          quantity: product.quantity,
+          unitValue: productionConfig.factory.product_recipe.sale_value,
+          operatingCost: productionConfig.factory.product_recipe.node_costs.FINANCE
+        });
+      }
+      aiCompany.advance({
+        elapsedHours: chunk / 60,
+        factoryStatus: production.getSnapshot().factory.status,
+        supplyChainHealth: supplyChainHealth()
+      });
       citizen.advance({ elapsedMinutes: chunk, clockSnapshot, lifeSnapshots: lifeRuntime.listSnapshots() });
       citizen.setMoney(playerLifeId, economy.getSnapshot().player_balance);
       remaining -= chunk;
@@ -177,7 +267,7 @@ export function createCivilizationRuntime({
   function plant(plotId, cropId) {
     usable();
     born();
-    agriculture.plant({ plotId, cropId });
+    configuredAgriculture.plant({ plotId, cropId });
     record("CROP_PLANTED", { plot_id: plotId, crop_id: cropId });
     notifier.emit("CROP_PLANTED", { plot_id: plotId, crop_id: cropId });
     return getSnapshot();
@@ -186,7 +276,7 @@ export function createCivilizationRuntime({
   function harvest(plotId) {
     usable();
     born();
-    const result = agriculture.harvest(plotId).result;
+    const result = configuredAgriculture.harvest(plotId).result;
     refreshCity();
     record("CROP_HARVESTED", result);
     notifier.emit("CROP_HARVESTED", result);
@@ -196,13 +286,57 @@ export function createCivilizationRuntime({
   function sellHarvest(resourceId, quantity = 1) {
     usable();
     born();
-    agriculture.takeFromWarehouse(resourceId, quantity);
+    configuredAgriculture.takeFromWarehouse(resourceId, quantity);
     economy.deposit({ ownerId: playerId, resourceId, quantity, source: "FARM_WAREHOUSE" });
     economy.sell({ sellerId: playerId, resourceId, quantity, unitPrice: 4 });
     citizen.setMoney(playerLifeId, economy.getSnapshot().player_balance);
     refreshCity();
     record("HARVEST_SOLD", { resource_id: resourceId, quantity });
     notifier.emit("HARVEST_SOLD", { resource_id: resourceId, quantity });
+    return getSnapshot();
+  }
+
+  function collectFacility(facilityId) {
+    usable();
+    born();
+    const result = configuredAgriculture.collectFacility(facilityId).result;
+    refreshCity();
+    record("AGRICULTURE_FACILITY_COLLECTED", result);
+    notifier.emit("AGRICULTURE_FACILITY_COLLECTED", result);
+    return getSnapshot();
+  }
+
+  function runProductionCycle() {
+    usable();
+    born();
+    const companyStatus = aiCompany.getSnapshot().company.status;
+    const result = production.runCycle({ companyStatus }).result;
+    aiCompany.recordProduction({
+      productId: result.product_id,
+      quantity: result.quantity,
+      unitValue: productionConfig.factory.product_recipe.sale_value,
+      operatingCost: productionConfig.factory.product_recipe.node_costs.FINANCE
+    });
+    record("FACTORY_CYCLE_COMPLETED", result);
+    notifier.emit("FACTORY_CYCLE_COMPLETED", result);
+    return getSnapshot();
+  }
+
+  function sellCompanyProduct(productId, quantity = 1) {
+    usable();
+    born();
+    aiCompany.sellProduct({ productId, quantity, unitValue: productionConfig.factory.product_recipe.sale_value });
+    record("COMPANY_PRODUCT_SOLD", { product_id: productId, quantity });
+    notifier.emit("COMPANY_PRODUCT_SOLD", { product_id: productId, quantity });
+    return getSnapshot();
+  }
+
+  function requestExchangeReview(candidateId) {
+    usable();
+    born();
+    exchange.requestReview(candidateId);
+    record("EXCHANGE_REVIEW_REQUESTED", { candidate_id: candidateId });
+    notifier.emit("EXCHANGE_REVIEW_REQUESTED", { candidate_id: candidateId });
     return getSnapshot();
   }
 
@@ -236,7 +370,11 @@ export function createCivilizationRuntime({
       citizen: citizen.integrityReport(),
       ai_worker: aiWorker.integrityReport(),
       economy: economy.integrityReport(),
-      agriculture: agriculture.integrityReport(),
+      agriculture: configuredAgriculture.integrityReport(),
+      ecosystem: ecosystem.integrityReport(),
+      production: production.integrityReport(),
+      ai_company: aiCompany.integrityReport(),
+      exchange: exchange.integrityReport(),
       city: city.integrityReport()
     };
     const issues = Object.entries(reports).filter(([, report]) => !report.ok).map(([name]) => `${name} integrity failed`);
@@ -276,6 +414,10 @@ export function createCivilizationRuntime({
     plant,
     harvest,
     sellHarvest,
+    collectFacility,
+    runProductionCycle,
+    sellCompanyProduct,
+    requestExchangeReview,
     start,
     stop,
     subscribe: notifier.subscribe,
@@ -288,7 +430,11 @@ export function createCivilizationRuntime({
       citizen.destroy();
       aiWorker.destroy();
       economy.destroy();
-      agriculture.destroy();
+      configuredAgriculture.destroy();
+      ecosystem.destroy();
+      production.destroy();
+      aiCompany.destroy();
+      exchange.destroy();
       city.destroy();
       genesis.destroy();
       planet.destroy();

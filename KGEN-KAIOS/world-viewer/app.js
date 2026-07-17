@@ -812,6 +812,22 @@ async function start() {
     onSellHarvest: (resourceId, quantity) => civilizationAction(
       () => civilizationRuntime.sellHarvest(resourceId, quantity),
       `${resourceId} sold through the prototype market.`
+    ),
+    onCollectFacility: (facilityId) => civilizationAction(
+      () => civilizationRuntime.collectFacility(facilityId),
+      "Agriculture Organism output moved into bounded local storage."
+    ),
+    onRunProduction: () => civilizationAction(
+      () => civilizationRuntime.runProductionCycle(),
+      "Factory cycle completed through the synthetic supply chain."
+    ),
+    onSellCompanyProduct: (productId, quantity) => civilizationAction(
+      () => civilizationRuntime.sellCompanyProduct(productId, quantity),
+      "Synthetic product sale recorded in the prototype company ledger."
+    ),
+    onExchangeReview: (candidateId) => civilizationAction(
+      () => civilizationRuntime.requestExchangeReview(candidateId),
+      "K11520 review requested. No listing or trade was executed."
     )
   });
   inspector = createInspectorView({
@@ -870,7 +886,12 @@ async function start() {
     document.documentElement.dataset.civilizationActivity = snapshot.citizen.current_activity;
     document.documentElement.dataset.civilizationAiAction = snapshot.aiWorker.current_action;
     document.documentElement.dataset.civilizationCity = snapshot.city.status;
+    document.documentElement.dataset.civilizationStage = snapshot.civilization_progress.stage_id;
     document.documentElement.dataset.civilizationBalance = String(snapshot.economy.player_balance);
+    document.documentElement.dataset.ecosystemStatus = snapshot.ecosystem.food_chain_status;
+    document.documentElement.dataset.factoryStatus = snapshot.production.factory.status;
+    document.documentElement.dataset.productionTotal = String(snapshot.production.factory.total_produced);
+    document.documentElement.dataset.companyStatus = snapshot.ai_company.company.status;
     document.documentElement.dataset.genesisStage = snapshot.genesis.stage;
     document.documentElement.dataset.genesisComplete = String(snapshot.genesis.completed);
     if (mode === "CIVILIZATION") renderInspector();

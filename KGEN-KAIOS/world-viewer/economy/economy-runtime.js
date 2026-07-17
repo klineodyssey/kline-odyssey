@@ -23,12 +23,18 @@ export const RESOURCE_CATALOG = Object.freeze([
   ["RICE", "FOOD"], ["VEGETABLE", "FOOD"], ["FRUIT", "FOOD"],
   ["FISH", "FOOD"], ["PIG", "FOOD"], ["CHICKEN", "FOOD"],
   ["EGG", "FOOD"], ["MILK", "FOOD"], ["WATER", "WATER"],
+  ["CORN", "FOOD"], ["CABBAGE", "FOOD"], ["HONEY", "FOOD"], ["MUSHROOM", "FOOD"],
   ["WOOD", "BUILDING_MATERIALS"], ["STONE", "BUILDING_MATERIALS"],
-  ["IRON", "BUILDING_MATERIALS"], ["ELECTRICITY", "ENERGY"]
+  ["IRON", "BUILDING_MATERIALS"], ["STEEL", "BUILDING_MATERIALS"], ["PLASTIC", "BUILDING_MATERIALS"],
+  ["CHIP", "EQUIPMENT"], ["MACHINE", "EQUIPMENT"], ["ELECTRICITY", "ENERGY"],
+  ["FEED", "AGRICULTURE_INPUT"], ["FERTILIZER", "AGRICULTURE_INPUT"],
+  ["CHEMICALS", "INDUSTRIAL_INPUT"], ["INDUSTRIAL_GAS", "INDUSTRIAL_INPUT"]
 ].map(([resource_id, category]) => Object.freeze({ resource_id, category })));
 
 export const MARKETPLACE_CATEGORIES = Object.freeze([
-  "FOOD", "FURNITURE", "TOOLS", "SEEDS", "BUILDING_MATERIALS", "MEDICAL", "ENERGY", "WATER"
+  "FOOD", "FURNITURE", "TOOLS", "SEEDS", "BUILDING_MATERIALS", "MEDICAL", "ENERGY", "WATER",
+  "ANIMALS", "PLANTS", "DNA", "BUILDINGS", "FACTORIES", "MACHINES", "AI_COMPANY", "SOFTWARE",
+  "APP_ORGANISM", "SERVICE", "LICENSE", "BLUEPRINT", "ORGAN", "GENOME", "AGRICULTURE_INPUT", "INDUSTRIAL_INPUT"
 ]);
 
 const DEFAULT_LISTINGS = Object.freeze([
@@ -41,6 +47,10 @@ const DEFAULT_LISTINGS = Object.freeze([
   ["listing-tool", "FARM_TOOL", "Farm tool", "TOOLS", 18, 12],
   ["listing-furniture", "CHAIR", "Furniture", "FURNITURE", 24, 8],
   ["listing-wood", "WOOD", "Wood", "BUILDING_MATERIALS", 9, 85],
+  ["listing-corn", "CORN", "Corn", "FOOD", 5, 110],
+  ["listing-honey", "HONEY", "Honey", "FOOD", 11, 30],
+  ["listing-steel", "STEEL", "Steel", "BUILDING_MATERIALS", 16, 45],
+  ["listing-chip", "CHIP", "Chip", "MACHINES", 38, 18],
   ["listing-medical", "MEDICAL_KIT", "Medical kit", "MEDICAL", 28, 10]
 ].map(([listing_id, resource_id, label, category, price, stock]) => Object.freeze({
   listing_id, resource_id, label, category, price, stock
@@ -107,6 +117,7 @@ export function createEconomyRuntime({
     balances: state.accounts,
     inventories: state.inventories,
     listings: state.listings,
+    marketplace_categories: MARKETPLACE_CATEGORIES,
     transport_jobs: state.transport_jobs,
     genesis_grants: state.genesis_grants,
     ledger: state.ledger,

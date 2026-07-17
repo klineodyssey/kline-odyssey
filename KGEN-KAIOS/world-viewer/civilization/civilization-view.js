@@ -1,7 +1,10 @@
 const TABS = Object.freeze([
   ["GENESIS", "Genesis"],
   ["TODAY", "Today"],
+  ["ECOSYSTEM", "Ecology"],
   ["FARM", "Farm"],
+  ["PRODUCTION", "Production"],
+  ["COMPANY", "Company"],
   ["MARKET", "Market"],
   ["CITY", "City"]
 ]);
@@ -278,6 +281,188 @@ function renderFarm(documentRef, model, callbacks) {
     warehouse.append(actions);
   }
   fragment.append(warehouse);
+
+  const facilities = section(documentRef, "Agriculture Organisms");
+  for (const facility of collection(farm.facilities)) {
+    const row = element(documentRef, "div", "production-row");
+    const copy = element(documentRef, "div", "production-row__copy");
+    copy.append(
+      element(documentRef, "strong", "", facility.label ?? facility.facility_id),
+      element(documentRef, "span", "", `${display(facility.facility_type)} / ${display(facility.state)}`),
+      meter(documentRef, "Cycle", number(facility.progress_hours) / Math.max(1, number(facility.cycle_hours, 1)) * 100)
+    );
+    const actions = element(documentRef, "div", "civilization-actions");
+    if (facility.state === "READY") {
+      actions.append(actionButton(documentRef, "Collect", "COLLECT_FACILITY", () => callbacks.onCollectFacility?.(facility.facility_id), { tone: "civilization-action--primary" }));
+    }
+    row.append(copy, actions);
+    facilities.append(row);
+  }
+  const resourceRows = Object.entries(farm.resources ?? {}).map(([resource, quantity]) => [display(resource), Number(quantity).toFixed(1)]);
+  if (resourceRows.length) facilities.append(definitionList(documentRef, resourceRows, "civilization-data civilization-data--compact"));
+  fragment.append(facilities);
+  return fragment;
+}
+
+function renderEcosystem(documentRef, model) {
+  const fragment = documentRef.createDocumentFragment();
+  const ecosystem = model.ecosystem ?? {};
+  const summary = section(documentRef, "Living Earth", "civilization-section--ecosystem");
+  summary.append(definitionList(documentRef, [
+    ["Evolution Stage", ecosystem.current_evolution_stage],
+    ["Food Chain", ecosystem.food_chain_status],
+    ["Biodiversity", ecosystem.biodiversity],
+    ["Population", ecosystem.total_population],
+    ["Average Health", `${number(ecosystem.average_health).toFixed(1)}%`],
+    ["Simulation", "ACCELERATED SYNTHETIC ALPHA"]
+  ]));
+  fragment.append(summary);
+
+  const lineageSection = section(documentRef, "Cambrian Lineage");
+  const lineage = element(documentRef, "ol", "evolution-lineage");
+  for (const stage of collection(ecosystem.lineage)) {
+    const item = element(documentRef, "li", "evolution-lineage__item");
+    item.classList.toggle("is-active", stage.stage_id === ecosystem.current_evolution_stage);
+    item.append(
+      element(documentRef, "span", "evolution-lineage__index", String(number(stage.index) + 1).padStart(2, "0")),
+      element(documentRef, "strong", "", stage.label ?? display(stage.stage_id))
+    );
+    lineage.append(item);
+  }
+  lineageSection.append(lineage);
+  fragment.append(lineageSection);
+
+  const energy = section(documentRef, "Food Chain Energy");
+  energy.append(definitionList(documentRef, [
+    ["Producer Input", number(ecosystem.energy_flow?.producer_input).toFixed(2)],
+    ["Agriculture Input", number(ecosystem.energy_flow?.agriculture_input).toFixed(2)],
+    ["Consumer Demand", number(ecosystem.energy_flow?.consumer_demand).toFixed(2)],
+    ["Transferred", number(ecosystem.energy_flow?.transferred).toFixed(2)],
+    ["Decomposer Recovery", number(ecosystem.energy_flow?.decomposer_recovery).toFixed(2)],
+    ["Balance", number(ecosystem.energy_flow?.balance).toFixed(2)]
+  ]));
+  fragment.append(energy);
+
+  const species = section(documentRef, "Species Population");
+  const grid = element(documentRef, "div", "species-grid");
+  for (const profile of collection(ecosystem.species)) {
+    const card = element(documentRef, "article", "species-card");
+    card.dataset.trophicRole = profile.trophic_role;
+    card.append(
+      element(documentRef, "span", "species-card__role", display(profile.trophic_role)),
+      element(documentRef, "strong", "", profile.label),
+      element(documentRef, "span", "", `${number(profile.population).toLocaleString()} life / ${Math.round(number(profile.health))}% health`),
+      element(documentRef, "small", "", `${display(profile.habitat)} / ${display(profile.evolution_stage)}`)
+    );
+    grid.append(card);
+  }
+  species.append(grid);
+  fragment.append(species);
+  return fragment;
+}
+
+function renderProduction(documentRef, model, callbacks) {
+  const fragment = documentRef.createDocumentFragment();
+  const production = model.production ?? {};
+  const factory = production.factory ?? {};
+  const factorySection = section(documentRef, "Factory Organism", "civilization-section--production");
+  const header = element(documentRef, "div", "production-headline");
+  const copy = element(documentRef, "div");
+  copy.append(
+    element(documentRef, "strong", "", factory.label ?? factory.factory_id),
+    element(documentRef, "span", "", `${display(factory.status)} / LEVEL ${factory.level ?? 1}`)
+  );
+  header.append(copy, actionButton(documentRef, "Run Cycle", "RUN_FACTORY", () => callbacks.onRunProduction?.(), {
+    disabled: factory.status === "BLOCKED",
+    tone: "civilization-action--primary"
+  }));
+  factorySection.append(header, definitionList(documentRef, [
+    ["Life OS", factory.life_os_profile_id],
+    ["Health", `${number(factory.health).toFixed(1)}%`],
+    ["Energy", `${number(factory.energy).toFixed(1)}%`],
+    ["Maintenance", `${number(factory.maintenance).toFixed(1)}%`],
+    ["Cycle", `${number(factory.cycle_progress_hours).toFixed(1)} / ${factory.cycle_hours ?? 0} h`],
+    ["Produced", factory.total_produced],
+    ["Missing", collection(factory.missing_dependencies).length ? collection(factory.missing_dependencies).join(", ") : "NONE"]
+  ]));
+  fragment.append(factorySection);
+
+  const chain = section(documentRef, "Supply Chain");
+  const nodes = element(documentRef, "div", "supply-grid");
+  for (const node of collection(production.supply_nodes)) {
+    const item = element(documentRef, "div", "supply-node");
+    item.dataset.status = node.status;
+    item.append(
+      element(documentRef, "span", "supply-node__status", node.status === "AVAILABLE" ? "PASS" : "STOP"),
+      element(documentRef, "strong", "", node.label),
+      element(documentRef, "small", "", `${display(node.category)} / ${number(node.capacity).toFixed(1)} ${display(node.unit)}`)
+    );
+    nodes.append(item);
+  }
+  chain.append(nodes);
+  fragment.append(chain);
+
+  const product = section(documentRef, "Product Lifecycle");
+  product.append(definitionList(documentRef, [
+    ["Product", factory.product_recipe?.label],
+    ["Inventory", factory.product_inventory?.[factory.product_recipe?.product_id] ?? 0],
+    ["Materials", Object.entries(factory.material_inventory ?? {}).map(([id, quantity]) => `${id} ${number(quantity).toFixed(1)}`).join(" / ")],
+    ["Lifecycle", collection(production.product_lifecycle).join(" -> ")],
+    ["Repairable", factory.product_recipe?.repairable],
+    ["Recyclable", factory.product_recipe?.recyclable]
+  ]));
+  fragment.append(product);
+  return fragment;
+}
+
+function renderCompany(documentRef, model, callbacks) {
+  const fragment = documentRef.createDocumentFragment();
+  const runtime = model.ai_company ?? {};
+  const company = runtime.company ?? {};
+  const finance = runtime.finance ?? {};
+  const identity = section(documentRef, "AI Company Organism", "civilization-section--company");
+  identity.append(definitionList(documentRef, [
+    ["Company", company.label ?? company.company_id],
+    ["Status", company.status],
+    ["Company Life", company.company_life_state],
+    ["Company DNA", company.company_dna_id],
+    ["DNA Revision", company.company_dna_revision],
+    ["Employees", company.employees],
+    ["AI Workers", company.ai_workers],
+    ["Reputation", `${number(company.reputation).toFixed(1)}%`],
+    ["Expansion", company.expansion_state]
+  ]));
+  const metrics = element(documentRef, "div", "needs-grid");
+  metrics.append(
+    meter(documentRef, "Health", company.health),
+    meter(documentRef, "Energy", company.energy),
+    meter(documentRef, "Supply", company.supply_chain_health),
+    meter(documentRef, "Reputation", company.reputation)
+  );
+  identity.append(metrics);
+  fragment.append(identity);
+
+  const financeSection = section(documentRef, "Prototype Company Finance");
+  financeSection.append(definitionList(documentRef, [
+    ["Balance", `${number(finance.balance).toFixed(0)} CR`],
+    ["Revenue", `${number(finance.revenue).toFixed(0)} CR`],
+    ["Operating Cost", `${number(finance.operating_cost).toFixed(0)} CR`],
+    ["Inventory Value", `${number(finance.inventory_value).toFixed(0)} CR`],
+    ["Settlement", "LOCAL SYNTHETIC LEDGER"]
+  ]));
+  const inventory = Object.entries(company.product_inventory ?? {}).filter(([, quantity]) => number(quantity) > 0);
+  if (inventory.length) {
+    const actions = element(documentRef, "div", "civilization-actions civilization-actions--wrap");
+    for (const [productId, quantity] of inventory) {
+      actions.append(actionButton(documentRef, `Sell ${display(productId)} (${quantity})`, "SELL_COMPANY_PRODUCT", () => callbacks.onSellCompanyProduct?.(productId, 1)));
+    }
+    financeSection.append(actions);
+  }
+  fragment.append(financeSection);
+
+  const assets = section(documentRef, "Company Assets");
+  assets.append(definitionList(documentRef, collection(company.assets).map((asset, index) => [`Asset ${index + 1}`, asset])));
+  fragment.append(assets);
   return fragment;
 }
 
@@ -325,12 +510,37 @@ function renderMarket(documentRef, model, callbacks) {
     .map(([id, quantity]) => [display(id), typeof quantity === "object" ? quantity.quantity : quantity]);
   inventorySection.append(definitionList(documentRef, rows.length ? rows : [["Stock", "EMPTY"]]));
   fragment.append(inventorySection);
+
+  const exchange = model.exchange ?? {};
+  const exchangeSection = section(documentRef, "K11520 Civilization Exchange");
+  exchangeSection.append(definitionList(documentRef, [
+    ["Exchange", exchange.label ?? exchange.exchange_id],
+    ["Candidates", collection(exchange.candidates).length],
+    ["Listed", exchange.listed_count],
+    ["Automatic Listing", exchange.automatic_listing],
+    ["Legal Securities", exchange.legal_securities]
+  ]));
+  for (const candidate of collection(exchange.candidates)) {
+    const row = element(documentRef, "div", "market-listing exchange-candidate");
+    const copy = element(documentRef, "div");
+    copy.append(
+      element(documentRef, "strong", "", display(candidate.asset_id)),
+      element(documentRef, "span", "", `${display(candidate.asset_type)} / ${display(candidate.review_status)}`),
+      element(documentRef, "small", "", collection(candidate.rights_offered).map((right) => display(right)).join(" / "))
+    );
+    row.append(copy, actionButton(documentRef, candidate.review_status === "REVIEW_REQUESTED" ? "Review queued" : "Request review", "EXCHANGE_REVIEW", () => callbacks.onExchangeReview?.(candidate.candidate_id), {
+      disabled: candidate.review_status !== "CANDIDATE_REVIEW_REQUIRED"
+    }));
+    exchangeSection.append(row);
+  }
+  fragment.append(exchangeSection);
   return fragment;
 }
 
 function renderCity(documentRef, model) {
   const fragment = documentRef.createDocumentFragment();
   const city = model.city ?? {};
+  const progress = model.civilization_progress ?? {};
   const headline = section(documentRef, display(city.label ?? city.city_id ?? "City Runtime"), "civilization-section--city");
   headline.append(definitionList(documentRef, [
     ["Population", city.population],
@@ -342,7 +552,13 @@ function renderCity(documentRef, model) {
     ["Roads", city.roads ?? city.road_score],
     ["Pollution", city.pollution],
     ["Happiness", city.happiness],
-    ["Status", city.status]
+    ["Industry", city.industry],
+    ["Supply Chain", city.supply_chain],
+    ["Ecology", city.ecology],
+    ["Company Health", city.company_health],
+    ["Status", city.status],
+    ["Civilization Stage", progress.stage_id],
+    ["Civilization Score", progress.score]
   ]));
   fragment.append(headline);
 
@@ -355,7 +571,10 @@ function renderCity(documentRef, model) {
     ["housing", "Housing", false],
     ["roads", "Roads", false],
     ["pollution", "Pollution", true],
-    ["happiness", "Happiness", false]
+    ["happiness", "Happiness", false],
+    ["industry", "Industry", false],
+    ["supply_chain", "Supply Chain", false],
+    ["ecology", "Ecology", false]
   ]) grid.append(meter(documentRef, label, city[key], { inverse }));
   balances.append(grid);
   fragment.append(balances);
@@ -395,7 +614,10 @@ export function createCivilizationView(container, callbacks = {}) {
     root.append(header, tabs);
 
     if (activeTab === "GENESIS") root.append(renderGenesis(documentRef, model));
+    else if (activeTab === "ECOSYSTEM") root.append(renderEcosystem(documentRef, model));
     else if (activeTab === "FARM") root.append(renderFarm(documentRef, model, callbacks));
+    else if (activeTab === "PRODUCTION") root.append(renderProduction(documentRef, model, callbacks));
+    else if (activeTab === "COMPANY") root.append(renderCompany(documentRef, model, callbacks));
     else if (activeTab === "MARKET") root.append(renderMarket(documentRef, model, callbacks));
     else if (activeTab === "CITY") root.append(renderCity(documentRef, model));
     else root.append(renderToday(documentRef, model, callbacks));
