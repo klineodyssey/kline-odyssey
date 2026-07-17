@@ -83,8 +83,11 @@
   ],
   "claim_id": "CLAIM-KAIOS-WV-SPRINT-010-20260717-CODEX-GM-01",
   "fencing_token": "CODEX-MANUAL-WV-SPRINT-010-001",
-  "review_status": "PENDING",
-  "claim_state": "ACTIVE",
-  "lease_state": "ACTIVE",
-  "status": "IN_PROGRESS"
+  "architecture_commit_sha": "2eed3da6c30a7c775c8c8bf83c88bf7c9a48ad9a",
+  "implementation_commit_sha": "321737a4bea92209d4bb7dccdd215b4efef4cf8d",
+  "handoff_id": "HANDOFF-KAIOS-WV-SPRINT-010-CODEX-GM-01",
+  "review_status": "APPROVED",
+  "claim_state": "CLOSED",
+  "lease_state": "RELEASED",
+  "status": "COMPLETED"
 }
