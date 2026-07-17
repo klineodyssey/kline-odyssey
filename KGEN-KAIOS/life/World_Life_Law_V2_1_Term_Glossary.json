@@ -1,0 +1,381 @@
+{
+  "schema_version": "1.0.0",
+  "artifact_id": "WORLD-LIFE-LAW-V2.1-TERM-GLOSSARY-001",
+  "artifact_type": "ARCHITECTURE_BASELINE_REVIEW_EVIDENCE",
+  "decision_id": "HUMAN-WORLD-LIFE-LAW-V2_1-BASELINE-REVIEW",
+  "review_date": "2026-07-17",
+  "reviewed_main_sha": "8d95316ac01e7c6cdad05c6917abc38f2456f61b",
+  "runtime_authority": false,
+  "source_classes": [
+    {
+      "class_id": "REAL_SCIENCE",
+      "definition": "Publicly supportable scientific concepts or observations with attributable sources and preserved uncertainty."
+    },
+    {
+      "class_id": "KAIOS_WORLD_SETTING",
+      "definition": "Project-specific simulation ontology and game rules that make no real-world scientific, legal, religious, property, or financial claim."
+    },
+    {
+      "class_id": "MYTHIC_INTERFACE",
+      "definition": "Symbolic or narrative vocabulary used as an interface without asserting supernatural fact or religious authority."
+    },
+    {
+      "class_id": "FUTURE_TECHNOLOGY",
+      "definition": "Speculative simulated technology that is not represented as currently feasible, safe, or production ready."
+    }
+  ],
+  "auxiliary_contract_kind": {
+    "id": "GOVERNANCE_CONTRACT",
+    "definition": "A software Architecture rule for identity, consent, state, evidence, permissions, provenance, or domain ownership; it is not a source class."
+  },
+  "auxiliary_boundaries": [
+    {
+      "id": "EXTERNAL_REAL_WORLD_DOMAIN",
+      "definition": "An exclusion marker for legal, medical, financial, property, identity, privacy, or other regulated real-world domains that this Architecture does not determine."
+    }
+  ],
+  "terms": [
+    {
+      "term_id": "TERM-001",
+      "term": "Biological Organism",
+      "definition": "An organism represented with applicable biological evidence, taxonomy, physiology, and lifecycle fields.",
+      "source_classes": ["REAL_SCIENCE"],
+      "contract_kind": "DOMAIN_MODEL",
+      "real_world_claim": true,
+      "normative_reference": "NCBI_TAXONOMY"
+    },
+    {
+      "term_id": "TERM-002",
+      "term": "Everything Has Life",
+      "definition": "A KAIOS rule allowing every approved entity class to receive a governed Life Identity with class-specific capabilities.",
+      "source_classes": ["KAIOS_WORLD_SETTING"],
+      "contract_kind": "GOVERNANCE_CONTRACT",
+      "real_world_claim": false,
+      "normative_reference": "WL-01_AND_WL-23"
+    },
+    {
+      "term_id": "TERM-003",
+      "term": "Life Identity",
+      "definition": "A unique, versioned KAIOS registry identity that grants no automatic citizenship, personhood, ownership, or authority.",
+      "source_classes": ["KAIOS_WORLD_SETTING"],
+      "contract_kind": "GOVERNANCE_CONTRACT",
+      "real_world_claim": false,
+      "normative_reference": "WL-02"
+    },
+    {
+      "term_id": "TERM-004",
+      "term": "Life ID",
+      "definition": "The unique identifier of one KAIOS life record and lifecycle continuity scope.",
+      "source_classes": ["KAIOS_WORLD_SETTING"],
+      "contract_kind": "GOVERNANCE_CONTRACT",
+      "real_world_claim": false,
+      "normative_reference": "LIFE_IDENTITY"
+    },
+    {
+      "term_id": "TERM-005",
+      "term": "DNA",
+      "definition": "Biological hereditary material when used for biological life; non-biological configuration must use a clearly labeled blueprint or configuration genome instead.",
+      "source_classes": ["REAL_SCIENCE"],
+      "contract_kind": "DOMAIN_MODEL",
+      "real_world_claim": true,
+      "normative_reference": "WL-02"
+    },
+    {
+      "term_id": "TERM-006",
+      "term": "Genome",
+      "definition": "A biological genome for applicable organisms, or an explicitly non-biological configuration genome when used by analogy.",
+      "source_classes": ["REAL_SCIENCE", "KAIOS_WORLD_SETTING"],
+      "contract_kind": "DOMAIN_MODEL",
+      "real_world_claim": "CONDITIONAL_BY_PROFILE",
+      "normative_reference": "LIFE_CLASS_PROFILE"
+    },
+    {
+      "term_id": "TERM-007",
+      "term": "Species or Class Profile",
+      "definition": "A versioned capability, lifecycle, energy, and compatibility profile; biological taxonomy and non-biological classes remain distinct.",
+      "source_classes": ["REAL_SCIENCE", "KAIOS_WORLD_SETTING"],
+      "contract_kind": "GOVERNANCE_CONTRACT",
+      "real_world_claim": "CONDITIONAL_BY_PROFILE",
+      "normative_reference": "WL-01_TO_WL-03"
+    },
+    {
+      "term_id": "TERM-008",
+      "term": "Soul Core",
+      "definition": "A technical continuity and provenance envelope for a KAIOS life, not a wallet, private key, legal identity, or proof of a real soul.",
+      "source_classes": ["MYTHIC_INTERFACE", "KAIOS_WORLD_SETTING"],
+      "contract_kind": "GOVERNANCE_CONTRACT",
+      "real_world_claim": false,
+      "normative_reference": "SOUL_CORE_CONTRACT"
+    },
+    {
+      "term_id": "TERM-009",
+      "term": "Life Level",
+      "definition": "Lifecycle maturity or system complexity, not moral worth or legal rank.",
+      "source_classes": ["KAIOS_WORLD_SETTING"],
+      "contract_kind": "GOVERNANCE_CONTRACT",
+      "real_world_claim": false,
+      "normative_reference": "THREE_INDEPENDENT_SCALES"
+    },
+    {
+      "term_id": "TERM-010",
+      "term": "Intelligence Tier",
+      "definition": "A governed capability classification from Tier 0 through Tier 8 that does not prove consciousness or grant rights.",
+      "source_classes": ["KAIOS_WORLD_SETTING"],
+      "contract_kind": "GOVERNANCE_CONTRACT",
+      "real_world_claim": false,
+      "normative_reference": "WL-10"
+    },
+    {
+      "term_id": "TERM-011",
+      "term": "Seal Level",
+      "definition": "A narrative capability restriction or release level that grants no authority, ownership, citizenship, or superiority.",
+      "source_classes": ["MYTHIC_INTERFACE", "KAIOS_WORLD_SETTING"],
+      "contract_kind": "GOVERNANCE_CONTRACT",
+      "real_world_claim": false,
+      "normative_reference": "THREE_INDEPENDENT_SCALES"
+    },
+    {
+      "term_id": "TERM-012",
+      "term": "Energy Profile",
+      "definition": "A class-specific record of energy or resource inputs, stores, conversion losses, waste, limits, maintenance, and recovery.",
+      "source_classes": ["REAL_SCIENCE", "KAIOS_WORLD_SETTING"],
+      "contract_kind": "DOMAIN_MODEL",
+      "real_world_claim": "SIMULATION_MODEL_INFORMED_BY_SCIENCE",
+      "normative_reference": "WL-03_AND_WL-20"
+    },
+    {
+      "term_id": "TERM-013",
+      "term": "Food Web",
+      "definition": "A network of producers, consumers, predators, scavengers, decomposers, and energy flows rather than a single linear ladder.",
+      "source_classes": ["REAL_SCIENCE"],
+      "contract_kind": "DOMAIN_MODEL",
+      "real_world_claim": true,
+      "normative_reference": "WL-04"
+    },
+    {
+      "term_id": "TERM-014",
+      "term": "Nutrition Profile",
+      "definition": "A Species-compatible simulation record for energy, macronutrients, micronutrients, water, provenance, contamination, storage, and expiry.",
+      "source_classes": ["REAL_SCIENCE", "KAIOS_WORLD_SETTING"],
+      "contract_kind": "DOMAIN_MODEL",
+      "real_world_claim": "NOT_MEDICAL_ADVICE",
+      "normative_reference": "WL-04"
+    },
+    {
+      "term_id": "TERM-015",
+      "term": "Food Lifecycle Contract",
+      "definition": "The governed chain for feed, agriculture, livestock, fishing, production, storage, transportation, processing, waste, and recycling.",
+      "source_classes": ["REAL_SCIENCE", "KAIOS_WORLD_SETTING"],
+      "contract_kind": "GOVERNANCE_CONTRACT",
+      "real_world_claim": "SIMULATION_ONLY",
+      "normative_reference": "FZ-P0-001",
+      "freeze_definition_status": "MISSING_IN_APPROVED_SOURCE"
+    },
+    {
+      "term_id": "TERM-016",
+      "term": "Death",
+      "definition": "A class-specific terminal or retirement transition that seals the current life state and preserves governed history.",
+      "source_classes": ["REAL_SCIENCE", "KAIOS_WORLD_SETTING"],
+      "contract_kind": "GOVERNANCE_CONTRACT",
+      "real_world_claim": "NOT_A_MEDICAL_DETERMINATION",
+      "normative_reference": "WL-07"
+    },
+    {
+      "term_id": "TERM-017",
+      "term": "Reincarnation",
+      "definition": "A mythic interface over a speculative, reviewed simulation transfer that creates a new Life ID linked to a sealed predecessor.",
+      "source_classes": ["MYTHIC_INTERFACE", "FUTURE_TECHNOLOGY"],
+      "contract_kind": "GOVERNANCE_CONTRACT",
+      "real_world_claim": false,
+      "normative_reference": "WL-08"
+    },
+    {
+      "term_id": "TERM-018",
+      "term": "Current Timeline",
+      "definition": "The default timeline context for a new player unless an approved arrival record establishes otherwise.",
+      "source_classes": ["KAIOS_WORLD_SETTING"],
+      "contract_kind": "GOVERNANCE_CONTRACT",
+      "real_world_claim": false,
+      "normative_reference": "WL-09"
+    },
+    {
+      "term_id": "TERM-019",
+      "term": "Timeline Travel",
+      "definition": "A speculative travel capability gated by technology, vehicle approval, permission, compatibility, evidence, and review.",
+      "source_classes": ["FUTURE_TECHNOLOGY"],
+      "contract_kind": "GOVERNANCE_CONTRACT",
+      "real_world_claim": false,
+      "normative_reference": "WL-09"
+    },
+    {
+      "term_id": "TERM-020",
+      "term": "Pocket Time Cloaked UFO",
+      "definition": "A fictional future vehicle interface used by the timeline Architecture; no current engineering feasibility is asserted.",
+      "source_classes": ["FUTURE_TECHNOLOGY"],
+      "contract_kind": "VEHICLE_PROFILE",
+      "real_world_claim": false,
+      "normative_reference": "TIMELINE_TRAVEL_GATE"
+    },
+    {
+      "term_id": "TERM-021",
+      "term": "Ultra High Density Energy Capsule",
+      "definition": "A speculative simulated energy item that may extend a compatible lifecycle but provides neither infinite life nor medical treatment.",
+      "source_classes": ["FUTURE_TECHNOLOGY", "MYTHIC_INTERFACE"],
+      "contract_kind": "ITEM_PROFILE",
+      "real_world_claim": false,
+      "normative_reference": "WL-03"
+    },
+    {
+      "term_id": "TERM-022",
+      "term": "House Organism",
+      "definition": "A KAIOS infrastructure life adapter whose identity is distinct from parcel, owner, tenant, family, and Building Registry state.",
+      "source_classes": ["KAIOS_WORLD_SETTING"],
+      "contract_kind": "DOMAIN_ADAPTER",
+      "real_world_claim": false,
+      "normative_reference": "WL-15"
+    },
+    {
+      "term_id": "TERM-023",
+      "term": "Temple Organism",
+      "definition": "A KAIOS life adapter for a reviewed Temple entity; it grants no protected-runtime access or real religious authority.",
+      "source_classes": ["KAIOS_WORLD_SETTING", "MYTHIC_INTERFACE"],
+      "contract_kind": "DOMAIN_ADAPTER",
+      "real_world_claim": false,
+      "normative_reference": "WL-16"
+    },
+    {
+      "term_id": "TERM-024",
+      "term": "Company Organism",
+      "definition": "An organizational KAIOS life whose operations remain authoritative in Company and Economy Runtime contracts.",
+      "source_classes": ["KAIOS_WORLD_SETTING"],
+      "contract_kind": "DOMAIN_ADAPTER",
+      "real_world_claim": false,
+      "normative_reference": "WL-12_AND_WL-17"
+    },
+    {
+      "term_id": "TERM-025",
+      "term": "Family Relationship Consent",
+      "definition": "Explicit confirmation by every affected real-player participant, with rejection, expiry, withdrawal, and revocation preserved.",
+      "source_classes": ["KAIOS_WORLD_SETTING"],
+      "contract_kind": "GOVERNANCE_CONTRACT",
+      "real_world_claim": false,
+      "normative_reference": "WL-13"
+    },
+    {
+      "term_id": "TERM-026",
+      "term": "Guardian",
+      "definition": "A role responsible for governed care or origin context; it is distinct from biological and legal parent identity.",
+      "source_classes": ["KAIOS_WORLD_SETTING"],
+      "contract_kind": "GOVERNANCE_CONTRACT",
+      "real_world_claim": "NO_REAL_LEGAL_STATUS",
+      "normative_reference": "FZ-P0-002",
+      "freeze_definition_status": "TYPE_SEPARATION_MISSING_IN_APPROVED_SOURCE"
+    },
+    {
+      "term_id": "TERM-027",
+      "term": "Legal Parent",
+      "definition": "A separately typed game-governance relationship that must never be inferred from DNA, location, or AI assignment.",
+      "source_classes": ["KAIOS_WORLD_SETTING"],
+      "contract_kind": "GOVERNANCE_CONTRACT",
+      "real_world_claim": "NO_REAL_LEGAL_STATUS",
+      "normative_reference": "FZ-P0-002",
+      "freeze_definition_status": "MISSING_IN_APPROVED_SOURCE"
+    },
+    {
+      "term_id": "TERM-028",
+      "term": "Biological Parent",
+      "definition": "A separately typed biological-lineage relationship that cannot by itself establish consent, guardianship, or legal parent status.",
+      "source_classes": ["REAL_SCIENCE", "KAIOS_WORLD_SETTING"],
+      "contract_kind": "GOVERNANCE_CONTRACT",
+      "real_world_claim": "NO_REAL_PARENTAGE_DETERMINATION",
+      "normative_reference": "FZ-P0-002",
+      "freeze_definition_status": "MISSING_IN_APPROVED_SOURCE"
+    },
+    {
+      "term_id": "TERM-029",
+      "term": "NPC Compute Profile",
+      "definition": "A bounded LOW, MEDIUM, or HIGH compute simulation profile with capability, budget, scheduling, and downgrade rules.",
+      "source_classes": ["KAIOS_WORLD_SETTING"],
+      "contract_kind": "GOVERNANCE_CONTRACT",
+      "real_world_claim": false,
+      "normative_reference": "FZ-P0-003",
+      "freeze_definition_status": "MISSING_IN_APPROVED_SOURCE"
+    },
+    {
+      "term_id": "TERM-030",
+      "term": "Offline Protection State",
+      "definition": "A fail-safe simulation state for ordinary player absence using dormancy or bounded delegated care without irreversible starvation by elapsed wall-clock time alone.",
+      "source_classes": ["KAIOS_WORLD_SETTING"],
+      "contract_kind": "GOVERNANCE_CONTRACT",
+      "real_world_claim": false,
+      "normative_reference": "FZ-P0-004",
+      "freeze_definition_status": "MISSING_IN_APPROVED_SOURCE"
+    },
+    {
+      "term_id": "TERM-031",
+      "term": "Planet Intelligence",
+      "definition": "A speculative KAIOS planet-scale capability profile, not evidence that a real planet is sentient.",
+      "source_classes": ["FUTURE_TECHNOLOGY", "KAIOS_WORLD_SETTING"],
+      "contract_kind": "CAPABILITY_PROFILE",
+      "real_world_claim": false,
+      "normative_reference": "WL-10"
+    },
+    {
+      "term_id": "TERM-032",
+      "term": "Legal Personhood",
+      "definition": "A real-world legal status outside this Architecture; KAIOS Life Identity never grants it.",
+      "source_classes": [],
+      "contract_kind": "EXTERNAL_LEGAL_BOUNDARY",
+      "external_domain": "LAW",
+      "real_world_claim": false,
+      "normative_reference": "LIFE_NOT_RIGHTS"
+    }
+  ],
+  "public_references": [
+    {
+      "reference_id": "NASA_ASTROBIOLOGY",
+      "title": "NASA Astrobiology",
+      "url": "https://astrobiology.nasa.gov/about/",
+      "accessed": "2026-07-17"
+    },
+    {
+      "reference_id": "NCBI_TAXONOMY",
+      "title": "NCBI Taxonomy",
+      "url": "https://www.ncbi.nlm.nih.gov/taxonomy?db=Taxonomy",
+      "accessed": "2026-07-17"
+    },
+    {
+      "reference_id": "WHO_HEALTHY_DIET",
+      "title": "WHO Healthy Diet",
+      "url": "https://www.who.int/news-room/fact-sheets/detail/healthy-diet",
+      "accessed": "2026-07-17"
+    },
+    {
+      "reference_id": "FAO_FOOD_LOSS_WASTE",
+      "title": "FAO Food Loss and Waste",
+      "url": "https://www.fao.org/platform-food-loss-waste/food-loss/introduction/en/",
+      "accessed": "2026-07-17"
+    },
+    {
+      "reference_id": "FAO_SDG_12_3_1",
+      "title": "FAO SDG Indicator 12.3.1",
+      "url": "https://www.fao.org/sustainable-development-goals-data-portal/data/indicators/1231-global-food-losses/",
+      "accessed": "2026-07-17"
+    }
+  ],
+  "publication_rules": [
+    "REAL_SCIENCE_REQUIRES_ATTRIBUTION_AND_UNCERTAINTY",
+    "KAIOS_WORLD_SETTING_MUST_BE_LABELED_SIMULATION_ONTOLOGY",
+    "MYTHIC_INTERFACE_MUST_NOT_ASSERT_SUPERNATURAL_FACT",
+    "FUTURE_TECHNOLOGY_MUST_NOT_ASSERT_CURRENT_FEASIBILITY",
+    "MIXED_TERMS_MUST_DECLARE_EACH_LAYER",
+    "LIFE_IDENTITY_DOES_NOT_GRANT_LEGAL_PERSONHOOD",
+    "NO_REAL_MEDICAL_GENETIC_LEGAL_PROPERTY_OR_FINANCIAL_ACTION"
+  ],
+  "review_result": {
+    "classification_separation": "PASS",
+    "normative_reference_in_approved_law": "MISSING",
+    "freeze_effect": "CLARIFICATION_REQUIRED",
+    "runtime_effect": "NONE"
+  }
+}
