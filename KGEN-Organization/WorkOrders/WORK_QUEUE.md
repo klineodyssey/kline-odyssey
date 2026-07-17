@@ -262,7 +262,7 @@ Full branch, claim, base, report, purity, protected-path, and age evidence is re
 | ORG-P2-016 | OPEN | Cursor | Codex | P1 | Frontend | KGEN-AI-Company/reports/ORG-P2-016_FRONTEND_PAGES_LINKS.md |
 | ORG-P2-017 | OPEN | Cursor | Codex | P2 | Backend | KGEN-AI-Company/reports/ORG-P2-017_BACKEND_BOUNDARY.md |
 | ORG-P2-018 | OPEN | Cursor | Codex | P0 | QA | KGEN-AI-Company/reports/ORG-P2-018_QA_VALIDATION.md |
-| ORG-P2-019 | OPEN | Cursor | Codex | P0 | Security | KGEN-AI-Company/reports/ORG-P2-019_SECURITY_PROTECTED_PATHS.md |
+| ORG-P2-019 | REVIEW | Cursor | Codex | P0 | Security | KGEN-AI-Company/reports/ORG-P2-019_SECURITY_PROTECTED_PATHS.md |
 | ORG-P2-020 | OPEN | Cursor | Codex | P1 | DevOps | KGEN-AI-Company/reports/ORG-P2-020_DEVOPS_PAGES_QA.md |
 | ORG-P2-021 | OPEN | Cursor | Codex | P3 | Research | KGEN-AI-Company/reports/ORG-P2-021_RESEARCH_INPUTS.md |
 | ORG-P2-022 | OPEN | Cursor | Codex | P1 | Documentation | KGEN-AI-Company/reports/ORG-P2-022_DOCUMENTATION_INDEX_QA.md |
@@ -1150,11 +1150,15 @@ Full branch, claim, base, report, purity, protected-path, and age evidence is re
 
 ### ORG-P2-019 - Audit DO_NOT_TOUCH and protected path consistency
 
-- Status: OPEN
+- Status: REVIEW
 - Owner: Cursor
 - Reviewer: Codex
 - Priority: P0
 - Department: Security
+- Branch: `cursor-handoff/ORG-P2-019`
+- Claimed by: `cursor-01`
+- Claimed at: `2026-07-15T02:09:30Z`
+- Lease expires at: `2026-07-15T06:09:30Z`
 - Input files:
   - KGEN-AI-Company/CURSOR_EMPLOYEE_BOOT.md
   - KGEN-AI-Company/CURSOR_AUTO_WORK_PROTOCOL.md
