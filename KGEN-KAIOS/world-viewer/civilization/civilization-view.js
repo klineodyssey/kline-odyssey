@@ -8,6 +8,9 @@ const TABS = Object.freeze([
   ["MARKET", "Market"],
   ["POPULATION", "Settlement"],
   ["ECONOMY", "Economy"],
+  ["GOVERNMENT", "Government"],
+  ["SERVICES", "Services"],
+  ["RESILIENCE", "Resilience"],
   ["CITY", "City"]
 ]);
 
@@ -43,6 +46,14 @@ function bounded(value) {
 function display(value, fallback = "UNKNOWN") {
   if (value === null || value === undefined || value === "") return fallback;
   return String(value).replaceAll("_", " ");
+}
+
+function humanize(value, fallback = "Unknown") {
+  return display(value, fallback)
+    .toLowerCase()
+    .replace(/\b\w/g, (letter) => letter.toUpperCase())
+    .replace(/\bAi\b/g, "AI")
+    .replace(/\bDna\b/g, "DNA");
 }
 
 function collection(value) {
@@ -563,6 +574,10 @@ function renderCity(documentRef, model) {
     ["Logistics", city.logistics],
     ["Settlement Integrity", city.settlement_health],
     ["Company Health", city.company_health],
+    ["Public Services", city.public_services],
+    ["Government Trust", city.government_trust],
+    ["Justice Integrity", city.justice_integrity],
+    ["Resilience", city.resilience],
     ["Status", city.status],
     ["Civilization Stage", progress.stage_id],
     ["Civilization Score", progress.score]
@@ -584,7 +599,11 @@ function renderCity(documentRef, model) {
     ["supply_chain", "Supply Chain", false],
     ["ecology", "Ecology", false],
     ["education", "Education", false],
-    ["logistics", "Logistics", false]
+    ["logistics", "Logistics", false],
+    ["public_services", "Public Services", false],
+    ["government_trust", "Government Trust", false],
+    ["justice_integrity", "Justice Integrity", false],
+    ["resilience", "Resilience", false]
   ]) grid.append(meter(documentRef, label, city[key], { inverse }));
   balances.append(grid);
   fragment.append(balances);
@@ -740,6 +759,142 @@ function renderEconomy(documentRef, model, callbacks) {
   return fragment;
 }
 
+function renderGovernment(documentRef, model, callbacks) {
+  const fragment = documentRef.createDocumentFragment();
+  const government = model.government ?? {};
+  const city = model.city ?? {};
+  const overview = section(documentRef, "Civilization Government", "civilization-section--government");
+  overview.append(definitionList(documentRef, [
+    ["Status", government.authoritative === false ? "SYNTHETIC GOVERNANCE" : "UNKNOWN"],
+    ["Government Trust", `${number(city.government_trust).toFixed(1)}%`],
+    ["Justice Integrity", `${number(city.justice_integrity).toFixed(1)}%`],
+    ["Government Levels", collection(government.hierarchy).length],
+    ["Civil Service", collection(government.civil_service).length],
+    ["Rights Projections", collection(government.citizen_rights).length],
+    ["Justice Cases", collection(government.justice?.cases).length]
+  ]));
+  overview.append(actionButton(documentRef, "Run Governance Review", "RUN_GOVERNANCE", () => callbacks.onRunGovernance?.(), { tone: "civilization-action--primary" }));
+  fragment.append(overview);
+
+  const hierarchy = section(documentRef, "Village to Planet Government");
+  const levels = element(documentRef, "ol", "evolution-lineage settlement-hierarchy");
+  for (const level of collection(government.hierarchy)) {
+    const item = element(documentRef, "li", "evolution-lineage__item");
+    item.append(
+      element(documentRef, "span", "evolution-lineage__index", display(level.level_id).slice(0, 3)),
+      element(documentRef, "strong", "", level.label),
+      element(documentRef, "small", "", display(level.authority))
+    );
+    levels.append(item);
+  }
+  hierarchy.append(levels);
+  fragment.append(hierarchy);
+
+  const rights = section(documentRef, "Citizen Rights");
+  for (const citizen of collection(government.citizen_rights)) {
+    rights.append(definitionList(documentRef, [
+      ["Identity", citizen.identity],
+      ["Citizenship", citizen.citizenship],
+      ["Residence", citizen.residence],
+      ["Family", citizen.family],
+      ["Education", citizen.education],
+      ["Occupation", citizen.occupation],
+      ["Health", citizen.health],
+      ["Property", citizen.property],
+      ["Tax Record", `${citizen.tax_record?.entries ?? 0} synthetic entries`],
+      ["Reputation", citizen.reputation],
+      ["Contribution", citizen.contribution]
+    ], "civilization-data civilization-data--compact"));
+  }
+  fragment.append(rights);
+
+  const law = section(documentRef, "Law and Justice Proposals");
+  law.append(definitionList(documentRef, collection(government.laws).map((entry) => [humanize(entry.law_id), entry.enforcement])));
+  const lawActions = element(documentRef, "div", "civilization-actions civilization-actions--wrap");
+  lawActions.append(
+    actionButton(documentRef, "Civil Case Proposal", "JUSTICE_CIVIL", () => callbacks.onSubmitJustice?.("CIVIL_LAW")),
+    actionButton(documentRef, "AI Law Proposal", "JUSTICE_AI", () => callbacks.onSubmitJustice?.("AI_LAW"))
+  );
+  law.append(lawActions, element(documentRef, "p", "civilization-note", "Architecture-only: no conviction, prison, penalty, or Citizen mutation can execute."));
+  fragment.append(law);
+  return fragment;
+}
+
+function renderServices(documentRef, model, callbacks) {
+  const fragment = documentRef.createDocumentFragment();
+  const services = model.public_services ?? {};
+  const finance = services.public_finance ?? {};
+  const overview = section(documentRef, "Public Services", "civilization-section--services");
+  overview.append(definitionList(documentRef, [
+    ["Government Budget", `${number(finance.government_budget)} KAIOS CREDIT`],
+    ["Service Treasury", `${number(finance.public_service_balance)} KAIOS CREDIT`],
+    ["Public Spending", `${number(finance.public_spending)} KAIOS CREDIT`],
+    ["Public Projects", finance.public_projects],
+    ["Emergency Fund", `${number(finance.emergency_fund)} KAIOS CREDIT`],
+    ["AI Government", `${collection(services.ai_government).length} reviewed workers`]
+  ]));
+  const actions = element(documentRef, "div", "civilization-actions civilization-actions--wrap");
+  actions.append(
+    actionButton(documentRef, "Fund Education 10", "FUND_EDUCATION", () => callbacks.onFundService?.("EDUCATION", 10), { tone: "civilization-action--primary" }),
+    actionButton(documentRef, "Fund Medical 10", "FUND_MEDICAL", () => callbacks.onFundService?.("MEDICAL", 10)),
+    actionButton(documentRef, "Fund Emergency 10", "FUND_EMERGENCY", () => callbacks.onFundService?.("DISASTER_RESPONSE", 10))
+  );
+  overview.append(actions);
+  fragment.append(overview);
+
+  const capacity = section(documentRef, "Capacity and Quality");
+  const grid = element(documentRef, "div", "needs-grid");
+  for (const service of collection(services.services)) grid.append(meter(documentRef, humanize(service.service_id), service.quality));
+  capacity.append(grid);
+  fragment.append(capacity);
+
+  const facilities = section(documentRef, "Education and Medical Network");
+  facilities.append(definitionList(documentRef, [
+    ["Education Facilities", collection(services.education?.facilities).map(({ facility_type: type }) => humanize(type)).join(" / ")],
+    ["Medical Facilities", collection(services.medical?.facilities).map(({ facility_type: type }) => humanize(type)).join(" / ")],
+    ["Clinical Boundary", services.medical?.clinical_service === false ? "SIMULATION ONLY" : "UNKNOWN"]
+  ]));
+  fragment.append(facilities);
+  return fragment;
+}
+
+function renderResilience(documentRef, model, callbacks) {
+  const fragment = documentRef.createDocumentFragment();
+  const resilience = model.resilience ?? {};
+  const environment = resilience.environment ?? {};
+  const overview = section(documentRef, "Civilization Resilience", "civilization-section--resilience");
+  overview.append(definitionList(documentRef, [
+    ["Readiness", `${number(resilience.readiness_score).toFixed(1)}%`],
+    ["Active Incidents", collection(resilience.active_incidents).length],
+    ["Drills", collection(resilience.drills).length],
+    ["Recovery Records", collection(resilience.recovery_records).length],
+    ["Prediction Boundary", resilience.real_prediction === false ? "NO REAL PREDICTION" : "UNKNOWN"]
+  ]));
+  const actions = element(documentRef, "div", "civilization-actions civilization-actions--wrap");
+  actions.append(
+    actionButton(documentRef, "Earthquake Drill", "DRILL_EARTHQUAKE", () => callbacks.onRunDrill?.("EARTHQUAKE"), { tone: "civilization-action--primary" }),
+    actionButton(documentRef, "Typhoon Drill", "DRILL_TYPHOON", () => callbacks.onRunDrill?.("TYPHOON")),
+    actionButton(documentRef, "Recovery Cycle", "RESILIENCE_RECOVERY", () => callbacks.onRunResilienceRecovery?.(10))
+  );
+  overview.append(actions);
+  fragment.append(overview);
+
+  const environmentSection = section(documentRef, "Environment");
+  const grid = element(documentRef, "div", "needs-grid");
+  for (const [key, label, inverse] of [
+    ["air_quality", "Air Quality", false], ["water_quality", "Water Quality", false], ["forest", "Forest", false],
+    ["river", "River", false], ["ocean", "Ocean", false], ["wildlife", "Wildlife", false],
+    ["pollution", "Pollution", true], ["carbon", "Carbon", true], ["ecology_recovery", "Ecology Recovery", false]
+  ]) grid.append(meter(documentRef, label, environment[key], { inverse }));
+  environmentSection.append(grid);
+  fragment.append(environmentSection);
+
+  const hazards = section(documentRef, "Synthetic Hazard Coverage");
+  hazards.append(element(documentRef, "p", "civilization-note", collection(resilience.hazards).map((hazard) => humanize(hazard)).join(" / ")));
+  fragment.append(hazards);
+  return fragment;
+}
+
 export function createCivilizationView(container, callbacks = {}) {
   if (!container || typeof container.replaceChildren !== "function") {
     throw new TypeError("Civilization View requires a DOM container");
@@ -780,6 +935,9 @@ export function createCivilizationView(container, callbacks = {}) {
     else if (activeTab === "MARKET") root.append(renderMarket(documentRef, model, callbacks));
     else if (activeTab === "POPULATION") root.append(renderPopulation(documentRef, model, callbacks));
     else if (activeTab === "ECONOMY") root.append(renderEconomy(documentRef, model, callbacks));
+    else if (activeTab === "GOVERNMENT") root.append(renderGovernment(documentRef, model, callbacks));
+    else if (activeTab === "SERVICES") root.append(renderServices(documentRef, model, callbacks));
+    else if (activeTab === "RESILIENCE") root.append(renderResilience(documentRef, model, callbacks));
     else if (activeTab === "CITY") root.append(renderCity(documentRef, model));
     else root.append(renderToday(documentRef, model, callbacks));
 

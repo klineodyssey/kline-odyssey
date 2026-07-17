@@ -1,0 +1,44 @@
+{
+  "status": "PASS",
+  "decision_id": "HUMAN-SPRINT-007-CIVILIZATION-GOVERNANCE",
+  "government": {
+    "ok": true,
+    "runtime": "CIVILIZATION_GOVERNMENT_ALPHA",
+    "issues": []
+  },
+  "public_services": {
+    "ok": true,
+    "runtime": "PUBLIC_SERVICES_ALPHA",
+    "average_quality": 68.3,
+    "issues": []
+  },
+  "resilience": {
+    "ok": true,
+    "runtime": "CIVILIZATION_RESILIENCE_ALPHA",
+    "readiness_score": 68.2,
+    "issues": []
+  },
+  "verified_flows": {
+    "village_to_planet_government": true,
+    "citizen_rights_projection": true,
+    "eight_law_catalog": true,
+    "justice_architecture_only": true,
+    "public_service_appropriation_balanced": true,
+    "education_and_medical_network": true,
+    "ai_government_least_privilege": true,
+    "environment_projection": true,
+    "resilience_drill_only": true,
+    "recovery_evidence": true
+  },
+  "bounded_history": {
+    "government_audit": 3,
+    "justice_cases": 1,
+    "service_history": 1,
+    "service_projects": 1,
+    "resilience_history": 2
+  },
+  "protected_runtime_mutated": false,
+  "life_os_current_mutated": false,
+  "settlement_runtime_current_mutated": false,
+  "token_contract_mutated": false
+}

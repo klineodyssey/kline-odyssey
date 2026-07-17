@@ -1,19 +1,19 @@
 ---
 TITLE: "KAIOS World Viewer Architecture Package"
-VERSION: "1.7.0"
-REVISION: "2026-07-17.5"
-STATUS: "SPRINT_006_SETTLEMENT_ECONOMY_ALPHA_COMPLETE"
+VERSION: "1.8.0"
+REVISION: "2026-07-17.6"
+STATUS: "SPRINT_007_CIVILIZATION_GOVERNANCE_ALPHA_COMPLETE"
 ARCHITECTURE: "BASELINE_FROZEN_V1.0"
-IMPLEMENTATION: "SETTLEMENT_ECONOMY_ALPHA"
-WORKQUEUE: "KAIOS-WV-SPRINT-006_CLOSED"
+IMPLEMENTATION: "CIVILIZATION_GOVERNANCE_ALPHA"
+WORKQUEUE: "KAIOS-WV-SPRINT-007_CLOSED"
 DEPLOYMENT: "STATIC_PAGES_COMPATIBLE"
 LAST_UPDATED: "2026-07-17"
 UPDATED_BY: "Codex / codex-gm-01"
 REVIEWED_BY: "Codex internal independent UI review; Human delegated approval"
-SOURCE_COMMIT: "635dbe84ebfcbe16e95095b9c5c2572cff9b20c3"
-TASK_ID: "KAIOS-WV-SPRINT-006"
-HUMAN_DECISION_ID: "HUMAN-SPRINT-006-SETTLEMENT-ECONOMY"
-CHANGE_REASON: "Add bounded settlement, population, logistics, ecology recovery and a three-layer economy with KAIOS Credit as the only executable Alpha currency."
+SOURCE_COMMIT: "19a67a4fe89e8b26e1022a0a81b56a21b978e66b"
+TASK_ID: "KAIOS-WV-SPRINT-007"
+HUMAN_DECISION_ID: "HUMAN-SPRINT-007-CIVILIZATION-GOVERNANCE"
+CHANGE_REASON: "Add bounded government, citizen rights, public services, law, resilience and AI Government simulation without real authority."
 ANCESTOR: "KGEN-KAIOS/V8.1/index.html; KGEN-KAIOS/land/LAND_RUNTIME_ARCHITECTURE_BASELINE.md"
 SOURCE_OF_TRUTH: false
 DOMAIN: KGENVERSE
@@ -33,9 +33,9 @@ CANONICAL_FILE: "KGEN-KAIOS/world-viewer/README.md"
 
 | Field | Value |
 |---|---|
-| Human Decision | `HUMAN-SPRINT-006-SETTLEMENT-ECONOMY` |
+| Human Decision | `HUMAN-SPRINT-007-CIVILIZATION-GOVERNANCE` |
 | Architecture | `BASELINE_FROZEN_V1.0` |
-| Implementation | `SPRINT_006_SETTLEMENT_ECONOMY_ALPHA_COMPLETE` |
+| Implementation | `SPRINT_007_CIVILIZATION_GOVERNANCE_ALPHA_COMPLETE` |
 | Sprint Task Envelope | `DONE` |
 | Deployment | `STATIC_GITHUB_PAGES_COMPATIBLE` |
 | Executable `index.html` | `CREATED` |
@@ -163,6 +163,12 @@ World Viewer V1 therefore defines adapter boundaries and draft projections. It d
 | `tests/baselines/sprint-006/` | Required Sprint 006 device, orientation and theme visual baselines |
 | `tests/evidence/sprint-006-settlement/` | Product QA, integrity, performance, screenshots and visual diffs |
 | `SPRINT_006_SETTLEMENT_ECONOMY_REPORT.md` | Alpha demo, architecture diff, implementation diff, QA and Sprint 007 recommendation |
+| `tasks/KAIOS-WV-SPRINT-007.task-envelope.json` | Sprint 007 Civilization Governance execution and closeout envelope |
+| `governance/` | Government, Public Services and Resilience Alpha runtimes |
+| `tests/governance_integrity.mjs` | Rights, law, services, finance, AI Government and resilience invariant gate |
+| `tests/baselines/sprint-007/` | Required Sprint 007 device, orientation and theme visual baselines |
+| `tests/evidence/sprint-007-governance/` | Product QA, integrity, performance, screenshots and visual diffs |
+| `SPRINT_007_CIVILIZATION_GOVERNANCE_REPORT.md` | Product, architecture diff, implementation diff, QA and next-product recommendation |
 | `.github/workflows/world-viewer-product-qa.yml` | Pull-request and push Product QA workflow |
 
 ## 7. Implementation Boundary
@@ -215,3 +221,9 @@ The AI Company organism tracks Life OS, DNA, employees, AI workers, assets, fina
 Sprint 006 connects Family, Citizen, Village, Town, City, Nation and Civilization into a bounded synthetic population model. Marriage requires consent, Birth requires carrying capacity, and Inheritance settles once through the balanced local ledger. Logistics, warehouse capacity, pollution and ecology recovery connect production to the city without authorizing real import or export.
 
 KAIOS Credit is the Alpha's only executable currency. Salary, Tax and Rent run on its conserved local ledger. KGEN, USDT, TWD, Mortgage and Insurance remain request-only or Architecture-only boundaries; the `1 KGEN = 1 KAIOS Credit` value is a mutable bootstrap reference, not a peg or guaranteed return. The reviewed browser gate reports `158 PASS / 0 FAIL / 0 SKIP`; see `SPRINT_006_SETTLEMENT_ECONOMY_REPORT.md` and `tests/evidence/sprint-006-settlement/`.
+
+## 14. Sprint 007 Civilization Governance Result
+
+Sprint 007 adds a six-level synthetic government hierarchy, eleven-field Citizen Rights projection, eight-law catalog, ten Public Services, balanced public appropriations, environment health and resilience drills. Government, Medical, Education, Justice, Police, Traffic, Agriculture and Environmental AI profiles require Life OS, evidence, scoped permission, audit and review.
+
+Justice, penalty, prison, medical, police and emergency behavior remains non-executable simulation. The reviewed browser gate reports `166 PASS / 0 FAIL / 0 SKIP`; see `SPRINT_007_CIVILIZATION_GOVERNANCE_REPORT.md` and `tests/evidence/sprint-007-governance/`.

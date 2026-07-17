@@ -48,6 +48,9 @@ REQUIRED_FILES = (
     "settlement/population-runtime.js",
     "settlement/logistics-runtime.js",
     "settlement/settlement-runtime.js",
+    "governance/government-runtime.js",
+    "governance/public-services-runtime.js",
+    "governance/resilience-runtime.js",
     "city/city-runtime.js",
     "civilization/runtime-utils.js",
     "civilization/civilization-runtime.js",
@@ -59,6 +62,7 @@ REQUIRED_FILES = (
     "tests/genesis_integrity.mjs",
     "tests/production_integrity.mjs",
     "tests/settlement_economy_integrity.mjs",
+    "tests/governance_integrity.mjs",
 )
 
 PROTECTED_PREFIXES = (
@@ -369,6 +373,33 @@ def check_alpha_contract(errors: list[str], data: dict, source_text: str, html: 
         if token not in source_text:
             fail(errors, f"Settlement Runtime is missing {token}")
 
+    governance = data.get("governance_alpha", {})
+    if governance.get("decision_id") != "HUMAN-SPRINT-007-CIVILIZATION-GOVERNANCE":
+        fail(errors, "Governance Alpha decision ID is invalid")
+    if governance.get("simulation_only") is not True or governance.get("authoritative_registry") is not False:
+        fail(errors, "Governance Alpha must remain synthetic and non-authoritative")
+    real_boundaries = (
+        "real_government", "real_law_enforcement", "real_medical_service",
+        "real_emergency_service", "real_finance",
+    )
+    if any(governance.get(key) is not False for key in real_boundaries):
+        fail(errors, "Governance Alpha crosses a real authority or service boundary")
+    expected_government = ["VILLAGE_COUNCIL", "TOWN_HALL", "CITY_GOVERNMENT", "PROVINCE", "NATION", "PLANET_GOVERNMENT"]
+    expected_laws = ["CIVIL_LAW", "CRIMINAL_LAW", "PROPERTY_LAW", "TRADE_LAW", "ENVIRONMENT_LAW", "CONSTRUCTION_LAW", "AI_LAW", "DNA_CREATION_LAW"]
+    expected_services = ["EDUCATION", "MEDICAL", "JUSTICE", "POLICE", "FIRE_DEPARTMENT", "TRANSPORTATION", "PUBLIC_UTILITIES", "COMMUNICATION", "DISASTER_RESPONSE", "SOCIAL_WELFARE"]
+    expected_hazards = ["EARTHQUAKE", "FLOOD", "TYPHOON", "VOLCANO", "PANDEMIC", "WAR", "ECONOMIC_CRISIS", "FOOD_CRISIS", "POWER_FAILURE"]
+    if governance.get("government_hierarchy") != expected_government:
+        fail(errors, "Governance hierarchy is incomplete")
+    if governance.get("law_catalog") != expected_laws:
+        fail(errors, "Governance law catalog is incomplete")
+    if [service.get("service_id") for service in governance.get("services", [])] != expected_services:
+        fail(errors, "Public Services catalog is incomplete")
+    if governance.get("resilience_hazards") != expected_hazards:
+        fail(errors, "Resilience hazard catalog is incomplete")
+    for token in ("CIVILIZATION_GOVERNMENT_ALPHA", "PUBLIC_SERVICES_ALPHA", "CIVILIZATION_RESILIENCE_ALPHA", "RECOMMENDATION_ONLY", "real_emergency_instruction"):
+        if token not in source_text:
+            fail(errors, f"Governance Runtime is missing {token}")
+
 
 def main() -> int:
     errors: list[str] = []
@@ -571,7 +602,7 @@ def main() -> int:
         f"{len(REQUIRED_FILES)} files;",
         f"{parsed_json_records} JSON records;",
         f"{checked_references} local references;",
-        "Settlement Economy Alpha + Population/Logistics/KAIOS Credit/official settlement gates + Civilization Production runtimes + 8 proposals; protected-path input clean",
+        "Civilization Governance Alpha + Public Services/Justice/Resilience + Settlement Economy/Production runtimes + 8 land proposals; protected-path input clean",
     )
     return 0
 

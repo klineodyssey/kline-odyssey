@@ -7,6 +7,9 @@ import { createEcosystemRuntime } from "../ecosystem/ecosystem-runtime.js";
 import { createAiCompanyOrganismRuntime } from "../enterprise/ai-company-organism-runtime.js";
 import { createLifeExchangeRuntime } from "../exchange/life-exchange-runtime.js";
 import { createCivilizationGenesisRuntime } from "../genesis/genesis-runtime.js";
+import { createGovernmentRuntime } from "../governance/government-runtime.js";
+import { createPublicServicesRuntime } from "../governance/public-services-runtime.js";
+import { createResilienceRuntime } from "../governance/resilience-runtime.js";
 import { createPlanetEnvironmentRuntime } from "../planet/planet-environment-runtime.js";
 import { createProductionRuntime } from "../production/production-runtime.js";
 import { createLogisticsRuntime } from "../settlement/logistics-runtime.js";
@@ -67,6 +70,23 @@ export function createCivilizationRuntime({
     storage,
     storageKey: `${storagePrefix}.settlement`
   });
+  const governanceConfig = world.governance_alpha ?? {};
+  const government = createGovernmentRuntime({
+    world,
+    populationRuntime: population,
+    lifeRuntime,
+    settlementRuntime: settlement,
+    storage,
+    storageKey: `${storagePrefix}.government`
+  });
+  const publicServices = createPublicServicesRuntime({
+    economyRuntime: economy,
+    populationRuntime: population,
+    settlementRuntime: settlement,
+    config: governanceConfig,
+    storage,
+    storageKey: `${storagePrefix}.public-services`
+  });
   const productionConfig = world.production_alpha;
   if (!productionConfig) throw new TypeError("Civilization Runtime requires the Sprint 005 production fixture");
   const configuredAgriculture = createAgricultureRuntime({
@@ -77,6 +97,13 @@ export function createCivilizationRuntime({
     storageKey: `${storagePrefix}.agriculture`
   });
   const ecosystem = createEcosystemRuntime({ config: productionConfig, storage, storageKey: `${storagePrefix}.ecosystem` });
+  const resilience = createResilienceRuntime({
+    logisticsRuntime: logistics,
+    ecosystemRuntime: ecosystem,
+    publicServicesRuntime: publicServices,
+    storage,
+    storageKey: `${storagePrefix}.resilience`
+  });
   const production = createProductionRuntime({ config: productionConfig, storage, storageKey: `${storagePrefix}.production` });
   const aiCompany = createAiCompanyOrganismRuntime({ config: productionConfig.ai_company, storage, storageKey: `${storagePrefix}.ai-company-organism` });
   const exchange = createLifeExchangeRuntime({ config: productionConfig.exchange, storage, storageKey: `${storagePrefix}.life-exchange` });
@@ -114,6 +141,9 @@ export function createCivilizationRuntime({
     population: population.getSnapshot(),
     logistics: logistics.getSnapshot(),
     settlement: settlement.getSnapshot(),
+    government: government.getSnapshot(),
+    public_services: publicServices.getSnapshot(),
+    resilience: resilience.getSnapshot(),
     agriculture: configuredAgriculture.getSnapshot(),
     ecosystem: ecosystem.getSnapshot(),
     production: production.getSnapshot(),
@@ -196,6 +226,9 @@ export function createCivilizationRuntime({
       population: population.getSnapshot(),
       logistics: logistics.getSnapshot(),
       settlement: settlement.getSnapshot(),
+      government: government.getSnapshot(),
+      publicServices: publicServices.getSnapshot(),
+      resilience: resilience.getSnapshot(),
       buildings: buildings(),
       world
     });
@@ -281,6 +314,9 @@ export function createCivilizationRuntime({
         productionPollution: production.getSnapshot().factory.status === "READY" ? 22 : 8,
         ecosystemHealth: ecosystem.getSnapshot().average_health
       });
+      publicServices.runCycle({ city: city.getSnapshot(), resilience: resilience.getSnapshot() });
+      resilience.advance({ elapsedHours: chunk / 60, city: city.getSnapshot() });
+      if (clockSnapshot.hour === 0 && clockSnapshot.day % 7 === 0) government.runCycle();
       citizen.advance({ elapsedMinutes: chunk, clockSnapshot, lifeSnapshots: lifeRuntime.listSnapshots() });
       const currentCity = city.getSnapshot();
       population.advance({
@@ -488,6 +524,57 @@ export function createCivilizationRuntime({
     return getSnapshot();
   }
 
+  function runGovernanceCycle() {
+    usable();
+    born();
+    government.runCycle();
+    refreshCity();
+    record("GOVERNANCE_CYCLE_COMPLETED", { rights_reviewed: government.getSnapshot().citizen_rights.length });
+    notifier.emit("GOVERNANCE_CYCLE_COMPLETED");
+    return getSnapshot();
+  }
+
+  function fundPublicService(serviceId = "EDUCATION", amount = 10) {
+    usable();
+    born();
+    publicServices.fundService({ serviceId, amount });
+    publicServices.runCycle({ city: city.getSnapshot(), resilience: resilience.getSnapshot() });
+    refreshCity();
+    record("PUBLIC_SERVICE_FUNDED", { service_id: serviceId, amount, currency: "KAIOS_CREDIT" });
+    notifier.emit("PUBLIC_SERVICE_FUNDED", { service_id: serviceId, amount });
+    return getSnapshot();
+  }
+
+  function submitJusticeCase(lawId = "CIVIL_LAW") {
+    usable();
+    born();
+    government.submitJusticeCase({ lawId, claimantId: playerLifeId });
+    refreshCity();
+    record("JUSTICE_CASE_PROPOSED", { law_id: lawId, executable: false });
+    notifier.emit("JUSTICE_CASE_PROPOSED", { law_id: lawId });
+    return getSnapshot();
+  }
+
+  function runResilienceDrill(hazardType = "EARTHQUAKE") {
+    usable();
+    born();
+    resilience.runDrill(hazardType);
+    refreshCity();
+    record("RESILIENCE_DRILL_COMPLETED", { hazard_type: hazardType, simulation_only: true });
+    notifier.emit("RESILIENCE_DRILL_COMPLETED", { hazard_type: hazardType });
+    return getSnapshot();
+  }
+
+  function runResilienceRecovery(effort = 10) {
+    usable();
+    born();
+    resilience.recover({ effort });
+    refreshCity();
+    record("RESILIENCE_RECOVERY_COMPLETED", { effort });
+    notifier.emit("RESILIENCE_RECOVERY_COMPLETED", { effort });
+    return getSnapshot();
+  }
+
   function settleInheritance() {
     usable();
     born();
@@ -532,6 +619,9 @@ export function createCivilizationRuntime({
       population: population.integrityReport(),
       logistics: logistics.integrityReport(),
       settlement: settlement.integrityReport(),
+      government: government.integrityReport(),
+      public_services: publicServices.integrityReport(),
+      resilience: resilience.integrityReport(),
       agriculture: configuredAgriculture.integrityReport(),
       ecosystem: ecosystem.integrityReport(),
       production: production.integrityReport(),
@@ -589,6 +679,11 @@ export function createCivilizationRuntime({
     requestExternalSettlement,
     requestMortgage,
     requestInsurance,
+    runGovernanceCycle,
+    fundPublicService,
+    submitJusticeCase,
+    runResilienceDrill,
+    runResilienceRecovery,
     settleInheritance,
     start,
     stop,
@@ -605,6 +700,9 @@ export function createCivilizationRuntime({
       population.destroy();
       logistics.destroy();
       settlement.destroy();
+      government.destroy();
+      publicServices.destroy();
+      resilience.destroy();
       configuredAgriculture.destroy();
       ecosystem.destroy();
       production.destroy();

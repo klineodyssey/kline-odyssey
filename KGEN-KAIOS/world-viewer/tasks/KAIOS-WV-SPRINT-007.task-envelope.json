@@ -1,0 +1,71 @@
+{
+  "task_id": "KAIOS-WV-SPRINT-007",
+  "human_decision_id": "HUMAN-SPRINT-007-CIVILIZATION-GOVERNANCE",
+  "title": "Civilization Governance Runtime Alpha",
+  "objective": "Implement bounded synthetic government, public services, citizen rights, law, environment, resilience and AI Government controls in the existing World Viewer Civilization Runtime.",
+  "authorized_actions": [
+    "PRODUCT_CONTRACT",
+    "WORLD_VIEWER_IMPLEMENTATION",
+    "LOCAL_SIMULATION",
+    "TEST",
+    "EVIDENCE",
+    "COMMIT",
+    "PUSH",
+    "REVIEWED_MERGE",
+    "PAGES_VERIFICATION"
+  ],
+  "forbidden_actions": [
+    "REAL_GOVERNMENT_AUTHORITY",
+    "REAL_IDENTITY_OR_CITIZENSHIP",
+    "REAL_MEDICAL_OR_LEGAL_DECISION",
+    "REAL_POLICE_OR_EMERGENCY_OPERATION",
+    "REAL_KGEN_OR_EXTERNAL_SETTLEMENT",
+    "PROTECTED_RUNTIME_CHANGE",
+    "SETTLEMENT_RUNTIME_CURRENT_CHANGE",
+    "UNIVERSE_MAP_CURRENT_CHANGE",
+    "TOKEN_CONTRACT_CHANGE"
+  ],
+  "authorized_paths": [
+    "KGEN-KAIOS/world-viewer/",
+    ".github/workflows/world-viewer-product-qa.yml",
+    "KGEN-KAIOS/README.md",
+    "KGEN_MASTER_LIBRARY_INDEX.md",
+    "README.md"
+  ],
+  "protected_paths": [
+    "docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md",
+    "docs/maps/UniverseMap_CURRENT*",
+    "KGEN-KAIOS/life/LIFE_OS_ARCHITECTURE_BASELINE.md",
+    "contracts/",
+    "KGEN/contracts/",
+    "wallet/",
+    "bridge/",
+    "K\u7dda\u897f\u904a\u8a18/temples/12345/",
+    "final-whitepaper/"
+  ],
+  "branch_name": "codex/world-viewer-sprint-007-governance",
+  "worktree_name": "kline-odyssey-world-viewer-sprint-007",
+  "base_sha": "7542b1d9d48681e076358304c105d1546f943a6f",
+  "commit_allowed": true,
+  "push_allowed": true,
+  "merge_allowed": true,
+  "deploy_allowed": false,
+  "reviewer": "CODEX_QUALITY_GATE",
+  "handoff_target": "CODEX_REVIEW",
+  "required_tests": [
+    "STATIC_ACCEPTANCE",
+    "STRICT_JSON_JSONL",
+    "ES_MODULE_IMPORT",
+    "GOVERNANCE_INTEGRITY",
+    "SETTLEMENT_ECONOMY_INTEGRITY",
+    "CIVILIZATION_INTEGRITY",
+    "PRODUCT_BROWSER_QA",
+    "PROTECTED_PATH_CHECK",
+    "SECRET_SCAN"
+  ],
+  "implementation_commit_sha": "19a67a4fe89e8b26e1022a0a81b56a21b978e66b",
+  "review_result": "APPROVED",
+  "claim_state": "CLOSED",
+  "lease_state": "RELEASED",
+  "status": "DONE"
+}

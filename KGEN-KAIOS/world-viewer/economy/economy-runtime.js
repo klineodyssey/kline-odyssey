@@ -20,6 +20,7 @@ const GOVERNMENT_ID = "civilization-government-alpha";
 const LANDLORD_ID = "civilization-landlord-alpha";
 const ESTATE_ID = "civilization-estate-alpha";
 const INSURANCE_POOL_ID = "civilization-insurance-pool-alpha";
+const PUBLIC_SERVICES_ID = "civilization-public-services-alpha";
 const MAX_LEDGER = 300;
 const MAX_RESOURCE_QUANTITY = 10_000;
 const WAREHOUSE_CAPACITY = 5_000;
@@ -31,7 +32,8 @@ export const ECONOMY_ACCOUNT_IDS = Object.freeze({
   GOVERNMENT: GOVERNMENT_ID,
   LANDLORD: LANDLORD_ID,
   ESTATE: ESTATE_ID,
-  INSURANCE_POOL: INSURANCE_POOL_ID
+  INSURANCE_POOL: INSURANCE_POOL_ID,
+  PUBLIC_SERVICES: PUBLIC_SERVICES_ID
 });
 
 const ACCOUNT_LABELS = Object.freeze({
@@ -41,7 +43,8 @@ const ACCOUNT_LABELS = Object.freeze({
   [GOVERNMENT_ID]: "Settlement Government",
   [LANDLORD_ID]: "Settlement Landlord",
   [ESTATE_ID]: "Inheritance Estate",
-  [INSURANCE_POOL_ID]: "Insurance Architecture Pool"
+  [INSURANCE_POOL_ID]: "Insurance Architecture Pool",
+  [PUBLIC_SERVICES_ID]: "Public Services Treasury"
 });
 
 const CURRENCY_MODEL = Object.freeze({
@@ -121,7 +124,8 @@ function initialState(playerId, playerBalance, playerInventory, genesisTreasury)
       [GOVERNMENT_ID]: 500,
       [LANDLORD_ID]: 500,
       [ESTATE_ID]: 1_000,
-      [INSURANCE_POOL_ID]: 500
+      [INSURANCE_POOL_ID]: 500,
+      [PUBLIC_SERVICES_ID]: 0
     },
     inventories: { [playerId]: { ...playerInventory } },
     listings: DEFAULT_LISTINGS.map((listing) => ({ ...listing })),

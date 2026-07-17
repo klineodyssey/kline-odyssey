@@ -2188,6 +2188,76 @@ def run_civilization_alpha(browser: Browser, args: argparse.Namespace, gate: Gat
             and int(page.evaluate("document.documentElement.dataset.civilizationBalance")) == gate_balance,
         )
 
+        page.locator("[data-civilization-action='TAB_GOVERNMENT']").click()
+        government_text = clean_text(page.locator(".civilization-view").inner_text())
+        gate.expect(
+            "governance.hierarchy-and-rights",
+            "civilization-governance",
+            all(label in government_text for label in (
+                "Civilization Government", "Village to Planet Government", "Genesis Village Council",
+                "Hukou Town Hall", "Hsinchu City Government", "Taiwan Province Alpha",
+                "Taiwan Nation Alpha", "Earth Planet Government Alpha", "Citizen Rights",
+                "Identity", "Citizenship", "Residence", "Family", "Education", "Occupation",
+                "Health", "Property", "Tax Record", "Reputation", "Contribution",
+            )),
+        )
+        cycles_before = int(page.evaluate("document.documentElement.dataset.governmentCycles"))
+        page.locator("[data-civilization-action='RUN_GOVERNANCE']").click()
+        page.locator("[data-civilization-action='JUSTICE_AI']").click()
+        gate.expect(
+            "governance.review-and-justice-boundary",
+            "justice-integrity",
+            int(page.evaluate("document.documentElement.dataset.governmentCycles")) == cycles_before + 1
+            and page.evaluate("document.documentElement.dataset.justiceCases") == "1"
+            and "no conviction, prison, penalty, or Citizen mutation" in clean_text(page.locator(".civilization-view").inner_text()),
+        )
+
+        page.locator("[data-civilization-action='TAB_SERVICES']").click()
+        services_text = clean_text(page.locator(".civilization-view").inner_text())
+        gate.expect(
+            "governance.public-services-network",
+            "public-services",
+            all(label in services_text for label in (
+                "Public Services", "Government Budget", "Service Treasury", "Public Spending",
+                "Public Projects", "Emergency Fund", "Education", "Medical", "Justice", "Police",
+                "Fire Department", "Transportation", "Public Utilities", "Communication",
+                "Disaster Response", "Social Welfare", "Education and Medical Network",
+                "School", "College", "University", "Research Center", "AI Academy", "DNA Laboratory",
+                "Hospital", "Clinic", "Emergency Center", "SIMULATION ONLY",
+            ))
+            and page.evaluate("document.documentElement.dataset.publicServices") == "10",
+        )
+        treasury_before = int(float(page.evaluate("document.documentElement.dataset.publicTreasury")))
+        page.locator("[data-civilization-action='FUND_EDUCATION']").click()
+        gate.expect(
+            "governance.public-finance-ledger",
+            "public-finance",
+            int(float(page.evaluate("document.documentElement.dataset.publicTreasury"))) == treasury_before + 10
+            and float(page.evaluate("document.documentElement.dataset.publicServiceQuality")) >= 0,
+        )
+
+        page.locator("[data-civilization-action='TAB_RESILIENCE']").click()
+        resilience_text = clean_text(page.locator(".civilization-view").inner_text())
+        gate.expect(
+            "governance.environment-and-resilience",
+            "resilience",
+            all(label in resilience_text for label in (
+                "Civilization Resilience", "Readiness", "Environment", "Air Quality", "Water Quality",
+                "Forest", "River", "Ocean", "Wildlife", "Pollution", "Carbon", "Ecology Recovery",
+                "Earthquake", "Flood", "Typhoon", "Volcano", "Pandemic", "War",
+                "Economic Crisis", "Food Crisis", "Power Failure", "NO REAL PREDICTION",
+            )),
+        )
+        drills_before = int(page.evaluate("document.documentElement.dataset.resilienceDrills"))
+        page.locator("[data-civilization-action='DRILL_EARTHQUAKE']").click()
+        page.locator("[data-civilization-action='RESILIENCE_RECOVERY']").click()
+        gate.expect(
+            "governance.drill-and-recovery",
+            "resilience",
+            int(page.evaluate("document.documentElement.dataset.resilienceDrills")) == drills_before + 1
+            and float(page.evaluate("document.documentElement.dataset.resilienceReadiness")) >= 0,
+        )
+
         page.locator("[data-civilization-action='TAB_CITY']").click()
         city_text = clean_text(page.locator(".civilization-view").inner_text())
         gate.expect(
@@ -2197,7 +2267,8 @@ def run_civilization_alpha(browser: Browser, args: argparse.Namespace, gate: Gat
                 "Population", "Employment", "Unemployment", "Food", "Water", "Energy",
                 "Housing", "Roads", "Pollution", "Happiness", "Industry",
                 "Supply Chain", "Ecology", "Ecology Recovery", "Education", "Logistics",
-                "Settlement Integrity", "Company Health", "Civilization Stage",
+                "Settlement Integrity", "Company Health", "Public Services", "Government Trust",
+                "Justice Integrity", "Resilience", "Civilization Stage",
             ))
             and page.evaluate("document.documentElement.dataset.civilizationCity") in {"STABLE", "THRIVING", "STRAINED", "AT_RISK"},
         )
@@ -2374,6 +2445,70 @@ def run_settlement_mobile(browser: Browser, args: argparse.Namespace, gate: Gate
         context.close()
 
 
+def run_governance_mobile(browser: Browser, args: argparse.Namespace, gate: Gate) -> None:
+    base = next(case for case in MATRIX if case.slug == "android-portrait-dark")
+    case = ViewportCase(
+        "governance-mobile", base.family, base.orientation, base.width, base.height,
+        base.theme, base.touch, base.device_scale_factor, base.user_agent,
+    )
+    context = new_context(browser, case)
+    page = context.new_page()
+    monitor = BrowserMonitor(page, args.base_url)
+    try:
+        load_page(page, args.base_url, "dark")
+        start_mock_session(page, with_location=False)
+        page.locator("[data-mode='CIVILIZATION']").click()
+        page.locator("[data-civilization-action='TAB_SERVICES']").click()
+        page.locator("[data-civilization-action='FUND_MEDICAL']").click()
+        services_text = clean_text(page.locator(".civilization-view").inner_text())
+        layout = measure_overflow(page)
+        targets = measure_touch_targets(page)
+        mobile = page.evaluate("""
+          () => {
+            const inspector = document.getElementById("inspector-panel")?.getBoundingClientRect();
+            const tabs = document.querySelector(".civilization-tabs");
+            return {
+              inspector: inspector ? {width: inspector.width, height: inspector.height, left: inspector.left, top: inspector.top} : null,
+              tabs_client: tabs?.clientWidth ?? 0,
+              tabs_scroll: tabs?.scrollWidth ?? 0,
+              services: document.documentElement.dataset.publicServices,
+              viewport: {width: innerWidth, height: innerHeight}
+            };
+          }
+        """)
+        page.locator("[data-civilization-action='TAB_RESILIENCE']").click()
+        page.locator("[data-civilization-action='DRILL_TYPHOON']").click()
+        resilience_text = clean_text(page.locator(".civilization-view").inner_text())
+        screenshot = capture_screenshot(page, case, args.output_dir, None, args.pixel_threshold)
+        gate.screenshots.append(screenshot)
+        gate.expect(
+            "governance.mobile-services-and-resilience",
+            "mobile-interaction",
+            all(label in services_text for label in ("Public Services", "Education and Medical Network"))
+            and all(label in resilience_text for label in ("Civilization Resilience", "Synthetic Hazard Coverage"))
+            and mobile["services"] == "10"
+            and mobile["inspector"] is not None
+            and mobile["inspector"]["width"] >= mobile["viewport"]["width"] - 1
+            and mobile["tabs_scroll"] > mobile["tabs_client"]
+            and layout["document_width"] <= layout["viewport_width"]
+            and not layout["offenders"]
+            and not targets["violations"]
+            and screenshot["pixel_variance"] >= 15,
+            details={"layout": layout, "mobile": mobile, "targets": targets, "screenshot": screenshot},
+        )
+        browser_clean(monitor, "governance-mobile", gate)
+    except Exception as error:
+        gate.add(
+            "governance.mobile-execution",
+            "mobile-interaction",
+            "FAIL",
+            details={"error": clean_text(error)},
+        )
+        browser_clean(monitor, "governance-mobile", gate)
+    finally:
+        context.close()
+
+
 def reports(args: argparse.Namespace, gate: Gate) -> tuple[dict[str, Any], dict[str, Any]]:
     matrix = [asdict(case) for case in MATRIX]
     qa_report = {
@@ -2490,6 +2625,7 @@ def main(argv: list[str] | None = None) -> int:
                 run_civilization_alpha(browser, args, gate)
                 run_production_mobile(browser, args, gate)
                 run_settlement_mobile(browser, args, gate)
+                run_governance_mobile(browser, args, gate)
             finally:
                 browser.close()
     except Exception as error:

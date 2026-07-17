@@ -435,6 +435,34 @@ function validateSettlementAlpha(settlement) {
   invariant(settlement.living_cycle.salary > settlement.living_cycle.tax + settlement.living_cycle.rent, `${path}.living_cycle must leave positive income`);
 }
 
+function validateGovernanceAlpha(governance) {
+  const path = "governance_alpha";
+  invariant(isRecord(governance), `${path} must be an object`);
+  invariant(governance.decision_id === "HUMAN-SPRINT-007-CIVILIZATION-GOVERNANCE", `${path} has invalid decision ID`);
+  invariant(governance.simulation_only === true && governance.authoritative_registry === false, `${path} must remain synthetic and non-authoritative`);
+  invariant(
+    governance.real_government === false
+      && governance.real_law_enforcement === false
+      && governance.real_medical_service === false
+      && governance.real_emergency_service === false
+      && governance.real_finance === false,
+    `${path} cannot enable real public authority or services`
+  );
+  validateNoPrivateFields(governance, path);
+
+  const hierarchy = ["VILLAGE_COUNCIL", "TOWN_HALL", "CITY_GOVERNMENT", "PROVINCE", "NATION", "PLANET_GOVERNMENT"];
+  const laws = ["CIVIL_LAW", "CRIMINAL_LAW", "PROPERTY_LAW", "TRADE_LAW", "ENVIRONMENT_LAW", "CONSTRUCTION_LAW", "AI_LAW", "DNA_CREATION_LAW"];
+  const services = ["EDUCATION", "MEDICAL", "JUSTICE", "POLICE", "FIRE_DEPARTMENT", "TRANSPORTATION", "PUBLIC_UTILITIES", "COMMUNICATION", "DISASTER_RESPONSE", "SOCIAL_WELFARE"];
+  const aiRoles = ["GOVERNMENT_AI", "MEDICAL_AI", "EDUCATION_AI", "JUSTICE_AI", "POLICE_AI", "TRAFFIC_AI", "AGRICULTURE_AI", "ENVIRONMENTAL_AI"];
+  const hazards = ["EARTHQUAKE", "FLOOD", "TYPHOON", "VOLCANO", "PANDEMIC", "WAR", "ECONOMIC_CRISIS", "FOOD_CRISIS", "POWER_FAILURE"];
+  invariant(JSON.stringify(governance.government_hierarchy) === JSON.stringify(hierarchy), `${path}.government_hierarchy is invalid`);
+  invariant(JSON.stringify(governance.law_catalog) === JSON.stringify(laws), `${path}.law_catalog is invalid`);
+  invariant(Array.isArray(governance.services) && JSON.stringify(governance.services.map(({ service_id: id }) => id)) === JSON.stringify(services), `${path}.services is incomplete`);
+  invariant(governance.services.every(({ capacity, demand, staff }) => [capacity, demand].every((value) => Number.isFinite(value) && value >= 0 && value <= 100) && Number.isInteger(staff) && staff > 0), `${path}.services contains invalid capacity data`);
+  invariant(JSON.stringify(governance.ai_government_roles) === JSON.stringify(aiRoles), `${path}.ai_government_roles is invalid`);
+  invariant(JSON.stringify(governance.resilience_hazards) === JSON.stringify(hazards), `${path}.resilience_hazards is invalid`);
+}
+
 export function validateWorldFixture(world) {
   invariant(isRecord(world), "root must be an object");
   invariant(world.meta?.synthetic === true, "World Viewer accepts synthetic data only");
@@ -479,6 +507,7 @@ export function validateWorldFixture(world) {
   invariant(["EARTH", "MOON", "MARS", "JUPITER", "FUTURE_PLANET"].every((id) => planetIds.has(id)), "required Planet profiles are missing");
   validateProductionAlpha(world.production_alpha);
   validateSettlementAlpha(world.settlement_alpha);
+  validateGovernanceAlpha(world.governance_alpha);
 
   const actionIds = (world.proposalActions ?? []).map((action) => (
     typeof action === "string" ? action : action?.id

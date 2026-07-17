@@ -868,6 +868,26 @@ async function start() {
     onRequestInsurance: () => civilizationAction(
       () => civilizationRuntime.requestInsurance(),
       "Insurance architecture proposal created. No policy was issued."
+    ),
+    onRunGovernance: () => civilizationAction(
+      () => civilizationRuntime.runGovernanceCycle(),
+      "Citizen rights and public authority completed a synthetic governance review."
+    ),
+    onFundService: (serviceId, amount) => civilizationAction(
+      () => civilizationRuntime.fundPublicService(serviceId, amount),
+      `${serviceId} received ${amount} KAIOS Credit through the balanced public ledger.`
+    ),
+    onSubmitJustice: (lawId) => civilizationAction(
+      () => civilizationRuntime.submitJusticeCase(lawId),
+      `${lawId} case proposal recorded. No penalty or Citizen mutation was executed.`
+    ),
+    onRunDrill: (hazardType) => civilizationAction(
+      () => civilizationRuntime.runResilienceDrill(hazardType),
+      `${hazardType} synthetic drill completed with evidence and review.`
+    ),
+    onRunResilienceRecovery: (effort) => civilizationAction(
+      () => civilizationRuntime.runResilienceRecovery(effort),
+      "Synthetic resilience recovery completed."
     )
   });
   inspector = createInspectorView({
@@ -937,6 +957,14 @@ async function start() {
     document.documentElement.dataset.logisticsJobs = String(snapshot.logistics.jobs.length);
     document.documentElement.dataset.mortgageProposals = String(snapshot.settlement.mortgage_proposals.length);
     document.documentElement.dataset.insuranceProposals = String(snapshot.settlement.insurance_proposals.length);
+    document.documentElement.dataset.governmentCycles = String(snapshot.government.cycle_count);
+    document.documentElement.dataset.citizenRights = String(snapshot.government.citizen_rights.length);
+    document.documentElement.dataset.justiceCases = String(snapshot.government.justice.cases.length);
+    document.documentElement.dataset.publicServices = String(snapshot.public_services.services.length);
+    document.documentElement.dataset.publicServiceQuality = String(snapshot.city.public_services);
+    document.documentElement.dataset.publicTreasury = String(snapshot.public_services.public_finance.public_service_balance);
+    document.documentElement.dataset.resilienceReadiness = String(snapshot.resilience.readiness_score);
+    document.documentElement.dataset.resilienceDrills = String(snapshot.resilience.drills.length);
     document.documentElement.dataset.ecosystemStatus = snapshot.ecosystem.food_chain_status;
     document.documentElement.dataset.factoryStatus = snapshot.production.factory.status;
     document.documentElement.dataset.productionTotal = String(snapshot.production.factory.total_produced);
