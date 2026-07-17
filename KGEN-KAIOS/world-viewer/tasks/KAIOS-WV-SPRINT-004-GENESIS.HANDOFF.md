@@ -4,8 +4,9 @@
 - Decision: `HUMAN-SPRINT-004-CIVILIZATION-GENESIS`
 - Branch: `codex/world-viewer-sprint-004-civilization`
 - Base: `2b4b0504578507459382380d44cdb498d838cf29`
+- Implementation commit: `0197f45699c81837573964e24c781cac465f4486`
 - Review owner: `codex-gm-01`
-- Status: `REVIEW`
+- Status: `APPROVED / CLOSED / RELEASED`
 
 ## Delivered
 
@@ -34,4 +35,4 @@ All balances, Planet profiles, land, identity and persistence are synthetic loca
 
 ## Recommended Action
 
-Complete final diff and secret validation, commit the reviewed product scope, then push the task branch for normal PR review.
+Push the reviewed task branch and merge it through the normal pull-request gate.
