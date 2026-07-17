@@ -98,6 +98,16 @@ The following distinctions are missing from current architecture and are supplie
 | `life_os_architecture_baseline.json` | Machine-readable baseline and content hashes |
 | `life_os_architecture_evolution_log.jsonl` | Append-only baseline evolution history |
 
+## World Asset And Life Specification V1.0
+
+`World Asset & Life Specification V1.0` extends the World Life Law into one architecture-only asset taxonomy for living species, terrain life, mineral life, civilization assets, and K11520 exchange capability flags.
+
+| File | Purpose |
+|---|---|
+| `World_Asset_Life_Specification_V1_0.md` | Unified asset-life specification, life classes, lifecycle contract, energy guidance, and ownership boundary |
+| `World_Asset_Taxonomy.json` | Machine-readable taxonomy, required fields, exchange capability flags, and architecture invariants |
+| `11520_Exchange_Contract.md` | Architecture-only K11520 candidate contract for tradable, harvestable, craftable, upgradeable, destroyable, and recyclable assets |
+
 ## Formal Boundaries
 
 Life OS must not know or control:

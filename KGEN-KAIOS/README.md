@@ -595,6 +595,20 @@ V10 defines KAIOS as the operating system for all KGEN modules: Universe, Temple
 
 Status is `ARCHITECTURE_PROPOSAL_UNDER_REVIEW`; implementation, WorkQueue and deployment are not started.
 
+## World Asset And Life Specification V1.0
+
+Human approved `KAIOS World Asset & Life Specification V1.0` as an architecture-only package under `life/`. It standardizes asset identity across living species, terrain, minerals, civilization assets, and K11520 review candidates without creating runtime, UI, database, or settlement behavior.
+
+| File | Purpose |
+|---|---|
+| `life/World_Asset_Life_Specification_V1_0.md` | Shared world asset-life specification, life classes, lifecycle, activity, maintenance, and ownership separation |
+| `life/World_Asset_Taxonomy.json` | Machine-readable taxonomy for living species, terrain life, mineral life, and civilization assets |
+| `life/11520_Exchange_Contract.md` | Architecture-only K11520 candidate and rights contract for tradable world assets |
+| `governance/Engineering_Governance.md` | Engineering recording policy requiring Issue, Review Log, Repair Request, Blocked Reason, or Human Decision trace |
+| `governance/Company_Operation_Governance.md` | Formal Codex versus Cursor role split for architecture, review, merge, release, dispatch, claim, implementation, PR, report, and repair |
+
+Status is `HUMAN_APPROVED_ARCHITECTURE`; runtime implementation remains forbidden and CURRENT sources remain unchanged.
+
 ## Protected Systems
 
 KAIOS V10 does not modify:

@@ -1,0 +1,147 @@
+{
+  "title": "KAIOS World Asset Taxonomy",
+  "version": "1.0.0",
+  "revision": "2026-07-17.1",
+  "status": "HUMAN_APPROVED_ARCHITECTURE",
+  "implementation": "FORBIDDEN",
+  "human_decision": "KAIOS WORLD ASSET & LIFE SPECIFICATION V1.0",
+  "scope": "Architecture only. No runtime, UI, database, API, or deployment.",
+  "life_classes": [
+    "LIVING",
+    "TERRAIN",
+    "MINERAL",
+    "CIVILIZATION",
+    "ENERGY",
+    "ARTIFACT",
+    "MYTHIC"
+  ],
+  "required_asset_fields": [
+    "asset_id",
+    "life_id",
+    "life_class",
+    "energy_source",
+    "owner",
+    "location",
+    "market_tradable",
+    "lifecycle",
+    "activity",
+    "memory",
+    "timeline",
+    "maintenance"
+  ],
+  "exchange_capabilities": [
+    "tradable",
+    "harvestable",
+    "craftable",
+    "upgradeable",
+    "destroyable",
+    "recyclable"
+  ],
+  "categories": {
+    "living_species": {
+      "life_class": "LIVING",
+      "items": [
+        "HUMAN",
+        "ANIMAL",
+        "FISH",
+        "BIRD",
+        "DOG",
+        "CAT",
+        "INSECT",
+        "PLANT",
+        "GRASS",
+        "TREE",
+        "FLOWER",
+        "FUNGUS",
+        "MICROBE"
+      ],
+      "minimum_contracts": [
+        "energy_source",
+        "lifecycle",
+        "activity",
+        "memory",
+        "maintenance"
+      ]
+    },
+    "terrain_life": {
+      "life_class": "TERRAIN",
+      "items": [
+        "MOUNTAIN",
+        "RIVER",
+        "LAKE",
+        "OCEAN",
+        "FOREST",
+        "DESERT",
+        "VOLCANO",
+        "CAVE",
+        "ISLAND",
+        "GOLD_ISLAND"
+      ],
+      "minimum_contracts": [
+        "composition_ref",
+        "energy_source",
+        "activity",
+        "memory",
+        "maintenance"
+      ]
+    },
+    "mineral_life": {
+      "life_class": "MINERAL",
+      "items": [
+        "STONE",
+        "IRON",
+        "COPPER",
+        "GOLD",
+        "SILVER",
+        "DIAMOND",
+        "OIL",
+        "COAL",
+        "GAS",
+        "RARE_EARTH",
+        "CRYSTAL"
+      ],
+      "minimum_contracts": [
+        "composition_ref",
+        "energy_source",
+        "lifecycle",
+        "maintenance",
+        "recycling_policy"
+      ]
+    },
+    "civilization_assets": {
+      "life_class": "CIVILIZATION",
+      "items": [
+        "HOUSE",
+        "TEMPLE",
+        "ROAD",
+        "BRIDGE",
+        "FARM",
+        "FACTORY",
+        "MARKET",
+        "HOSPITAL",
+        "SCHOOL",
+        "GOVERNMENT",
+        "COMPANY",
+        "HARBOR",
+        "AIRPORT",
+        "POWER_PLANT"
+      ],
+      "minimum_contracts": [
+        "blueprint_ref",
+        "energy_source",
+        "owner",
+        "activity",
+        "memory",
+        "maintenance"
+      ]
+    }
+  },
+  "invariants": [
+    "Every covered asset must have asset_id and life_id.",
+    "Life does not automatically imply legal personhood or full ownership rights.",
+    "DNA is optional and applies only when the species or asset type requires it.",
+    "K11520 capability flags do not authorize execution, settlement, or legal transfer.",
+    "This taxonomy must not modify Runtime CURRENT, Universe Map CURRENT, Token Contract, or Frozen Baselines."
+  ]
+}
+
