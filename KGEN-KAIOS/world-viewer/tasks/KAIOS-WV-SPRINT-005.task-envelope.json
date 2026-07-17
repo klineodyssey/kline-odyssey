@@ -1,0 +1,63 @@
+{
+  "task_id": "KAIOS-WV-SPRINT-005",
+  "human_decision_id": "HUMAN-SPRINT-005-CIVILIZATION-PRODUCTION",
+  "title": "Civilization Production Runtime Alpha",
+  "objective": "Implement a bounded synthetic living-world production chain from ecosystem through K11520 listing candidates.",
+  "authorized_actions": [
+    "ARCHITECTURE_CONTRACT",
+    "WORLD_VIEWER_IMPLEMENTATION",
+    "LOCAL_SIMULATION",
+    "TEST",
+    "EVIDENCE",
+    "COMMIT",
+    "PUSH",
+    "REVIEWED_MERGE",
+    "PAGES_VERIFICATION"
+  ],
+  "forbidden_actions": [
+    "REAL_TRADE",
+    "REAL_BIOLOGY",
+    "REAL_FINANCE",
+    "PRODUCTION_DEPLOYMENT",
+    "PROTECTED_RUNTIME_CHANGE",
+    "UNIVERSE_MAP_CURRENT_CHANGE",
+    "TOKEN_CONTRACT_CHANGE"
+  ],
+  "authorized_paths": [
+    "KGEN-KAIOS/world-viewer/",
+    ".github/workflows/world-viewer-product-qa.yml",
+    "KGEN-KAIOS/README.md",
+    "KGEN_MASTER_LIBRARY_INDEX.md",
+    "README.md"
+  ],
+  "protected_paths": [
+    "docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md",
+    "docs/maps/UniverseMap_CURRENT*",
+    "contracts/",
+    "KGEN/contracts/",
+    "wallet/",
+    "bridge/",
+    "K\u7dda\u897f\u904a\u8a18/temples/12345/",
+    "final-whitepaper/"
+  ],
+  "branch_name": "codex/world-viewer-sprint-005-production",
+  "worktree_name": "kline-odyssey-world-viewer-sprint-005",
+  "base_sha": "3dc6780980c240222ec7c8fbe6d009fd66d83896",
+  "commit_allowed": true,
+  "push_allowed": true,
+  "merge_allowed": true,
+  "deploy_allowed": false,
+  "reviewer": "CODEX_QUALITY_GATE",
+  "handoff_target": "CODEX_REVIEW",
+  "required_tests": [
+    "STATIC_ACCEPTANCE",
+    "STRICT_JSON_JSONL",
+    "ES_MODULE_IMPORT",
+    "PRODUCTION_INTEGRITY",
+    "CIVILIZATION_INTEGRITY",
+    "PRODUCT_BROWSER_QA",
+    "PROTECTED_PATH_CHECK",
+    "SECRET_SCAN"
+  ],
+  "status": "ACTIVE"
+}
