@@ -1,0 +1,54 @@
+{
+  "status": "PASS",
+  "decision_id": "HUMAN-SPRINT-005-CIVILIZATION-PRODUCTION",
+  "reports": {
+    "ecosystem": {
+      "ok": true,
+      "runtime": "CAMBRIAN_ECOSYSTEM_ALPHA",
+      "species_count": 21,
+      "total_population": 0,
+      "issues": []
+    },
+    "agriculture": {
+      "ok": true,
+      "runtime": "AGRICULTURE_ALPHA",
+      "plot_count": 3,
+      "facility_count": 9,
+      "warehouse_units": 8,
+      "issues": []
+    },
+    "production": {
+      "ok": true,
+      "runtime": "CIVILIZATION_PRODUCTION_ALPHA",
+      "factory_status": "READY",
+      "total_produced": 1,
+      "issues": []
+    },
+    "company": {
+      "ok": true,
+      "runtime": "CIVILIZATION_AI_COMPANY_ALPHA",
+      "status": "ACTIVE",
+      "balance": 2564,
+      "issues": []
+    },
+    "exchange": {
+      "ok": true,
+      "runtime": "K11520_LIFE_EXCHANGE_ALPHA",
+      "candidate_count": 3,
+      "listed_count": 0,
+      "issues": []
+    }
+  },
+  "product_flow": {
+    "cambrian_lineage": true,
+    "species_life_layers": true,
+    "planet_stress": true,
+    "food_chain_energy": true,
+    "agriculture_organisms": true,
+    "missing_supply_blocks_factory": true,
+    "refrigerator_created": true,
+    "company_ledger_balanced": true,
+    "k11520_review_only": true
+  },
+  "protected_runtime_mutated": false
+}

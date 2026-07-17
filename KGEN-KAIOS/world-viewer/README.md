@@ -1,19 +1,19 @@
 ---
 TITLE: "KAIOS World Viewer Architecture Package"
-VERSION: "1.5.0"
-REVISION: "2026-07-17.3"
-STATUS: "SPRINT_004_CIVILIZATION_GENESIS_ALPHA_COMPLETE"
+VERSION: "1.6.0"
+REVISION: "2026-07-17.4"
+STATUS: "SPRINT_005_CIVILIZATION_PRODUCTION_ALPHA_COMPLETE"
 ARCHITECTURE: "BASELINE_FROZEN_V1.0"
-IMPLEMENTATION: "CIVILIZATION_GENESIS_ALPHA"
-WORKQUEUE: "KAIOS-WV-SPRINT-004-GENESIS_CLOSED"
+IMPLEMENTATION: "CIVILIZATION_PRODUCTION_ALPHA"
+WORKQUEUE: "KAIOS-WV-SPRINT-005_CLOSED"
 DEPLOYMENT: "STATIC_PAGES_COMPATIBLE"
 LAST_UPDATED: "2026-07-17"
 UPDATED_BY: "Codex / codex-gm-01"
 REVIEWED_BY: "Codex internal independent UI review; Human delegated approval"
-SOURCE_COMMIT: "0197f45699c81837573964e24c781cac465f4486"
-TASK_ID: "KAIOS-WV-SPRINT-004-GENESIS"
-HUMAN_DECISION_ID: "HUMAN-SPRINT-004-CIVILIZATION-GENESIS"
-CHANGE_REASON: "Require a verified synthetic birth, one-time K12345 starter fund, survival pack and Planet compatibility before the player enters Earth K280."
+SOURCE_COMMIT: "5db829b1dad024275b6acd0949c92d53c59452e3"
+TASK_ID: "KAIOS-WV-SPRINT-005"
+HUMAN_DECISION_ID: "HUMAN-SPRINT-005-CIVILIZATION-PRODUCTION"
+CHANGE_REASON: "Run a bounded synthetic living world from Cambrian lineage through food chains, agriculture, production, AI company and reviewed K11520 listing candidates."
 ANCESTOR: "KGEN-KAIOS/V8.1/index.html; KGEN-KAIOS/land/LAND_RUNTIME_ARCHITECTURE_BASELINE.md"
 SOURCE_OF_TRUTH: false
 DOMAIN: KGENVERSE
@@ -33,9 +33,9 @@ CANONICAL_FILE: "KGEN-KAIOS/world-viewer/README.md"
 
 | Field | Value |
 |---|---|
-| Human Decision | `HUMAN-SPRINT-004-CIVILIZATION-GENESIS` |
+| Human Decision | `HUMAN-SPRINT-005-CIVILIZATION-PRODUCTION` |
 | Architecture | `BASELINE_FROZEN_V1.0` |
-| Implementation | `SPRINT_004_CIVILIZATION_GENESIS_ALPHA_COMPLETE` |
+| Implementation | `SPRINT_005_CIVILIZATION_PRODUCTION_ALPHA_COMPLETE` |
 | Sprint Task Envelope | `DONE` |
 | Deployment | `STATIC_GITHUB_PAGES_COMPATIBLE` |
 | Executable `index.html` | `CREATED` |
@@ -151,6 +151,12 @@ World Viewer V1 therefore defines adapter boundaries and draft projections. It d
 | `tests/genesis_integrity.mjs` | Birth, one-time claim, persistence, Planet compatibility and Oxygen gate |
 | `tests/evidence/sprint-004-genesis/` | Genesis QA, performance, integrity and responsive visual evidence |
 | `SPRINT_004_CIVILIZATION_GENESIS_REPORT.md` | Birth flow, implementation diff, QA, performance and safety report |
+| `tasks/KAIOS-WV-SPRINT-005.task-envelope.json` | Sprint 005 Civilization Production execution and closeout envelope |
+| `ecosystem/`, `production/`, `enterprise/`, `exchange/` | Food-chain ecology, Factory organism, AI Company organism and K11520 candidate runtimes |
+| `tests/production_integrity.mjs` | Ecosystem, agriculture, production, company and exchange invariant gate |
+| `tests/baselines/sprint-005/` | Required Sprint 005 device, orientation and theme visual baselines |
+| `tests/evidence/sprint-005-production/` | Product QA, integrity, performance, screenshots and visual diffs |
+| `SPRINT_005_CIVILIZATION_PRODUCTION_REPORT.md` | Product, architecture diff, implementation diff, QA and Sprint 006 recommendation |
 | `.github/workflows/world-viewer-product-qa.yml` | Pull-request and push Product QA workflow |
 
 ## 7. Implementation Boundary
@@ -191,3 +197,9 @@ The reviewed browser gate reports `128 PASS / 0 FAIL / 0 SKIP` across desktop, t
 Civilization Genesis adds a required first-login birth gate before the existing living-world simulation. Universe, Planet, Species and Life OS checks must pass; the player then chooses one K12345 Genesis Fortune, receives the Starter Survival Pack, verifies the Starter Parcel and enters Earth K280. The claim is persistent and can occur only once.
 
 The Planet Environment adapter covers Earth, Moon, Mars, Jupiter and an unknown Future Planet without changing Universe Physics Database CURRENT. Life OS now includes Oxygen environment effects. The reviewed browser gate reports `133 PASS / 0 FAIL / 0 SKIP`; see `SPRINT_004_CIVILIZATION_GENESIS_REPORT.md` and `tests/evidence/sprint-004-genesis/`.
+
+## 12. Sprint 005 Civilization Production Result
+
+Sprint 005 makes the synthetic world self-running. A twenty-one-species ecosystem follows the full Cambrian-to-AI-Civilization lineage, moves energy through Producer, Consumer, Predator and Decomposer roles, and reacts to food, water, oxygen and Planet stress. Nine agriculture organisms feed a twelve-node supply chain; a Factory organism can produce a traceable refrigerator only when power, water, workers, equipment, materials, logistics, warehouse, finance and AI support are available.
+
+The AI Company organism tracks Life OS, DNA, employees, AI workers, assets, finance, reputation, products and bankruptcy constraints. K11520 accepts reviewable Life, Factory and DNA candidates but cannot auto-list or execute a trade. The reviewed browser gate reports `145 PASS / 0 FAIL / 0 SKIP`; see `SPRINT_005_CIVILIZATION_PRODUCTION_REPORT.md` and `tests/evidence/sprint-005-production/`.

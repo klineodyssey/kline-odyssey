@@ -55,7 +55,7 @@ Kernel V1 is `UNDER_REVIEW / RESEARCH_ONLY`. The independent Review Resolution i
 | KAIOS Dashboard | https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/dashboard/ | Read-only worker, task, report and health dashboard |
 | General Manager Decision Center | https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/decision/ | Daily Operation gate, manager decisions, network health and readiness |
 | KAIOS Constitution | https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/constitution/KAIOS_CONSTITUTION.md | Permanent KAIOS governance below Human Final Authority |
-| KAIOS World Viewer | https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/world-viewer/ | Sprint 004 Civilization Alpha: K280 living world, daily life, AI work, farming, market, city health and Product QA |
+| KAIOS World Viewer | https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/world-viewer/ | Sprint 005 Civilization Production Alpha: K280 living world, ecology, agriculture, factory, supply chain, AI company and K11520 review candidates |
 | AI Company | https://klineodyssey.github.io/kline-odyssey/ai-company/ | Codex / Cursor company workflow |
 | WorkQueue | https://klineodyssey.github.io/kline-odyssey/workqueue/ | Official task queue entry |
 | PrimeForge Boot CURRENT | https://klineodyssey.github.io/kline-odyssey/boot/ | Stable Boot source of truth |
@@ -91,7 +91,7 @@ Human Decision `HUMAN-PRIMEFORGE-FULL-AUTOPILOT-001` delegates bounded Level A a
 | `../company/` | Architecture proposal under review | Future single company command control plane, typed Inbox, sole Dispatcher and provider-neutral Message Contract; cutover not authorized |
 | `boot-runtime/` | Architecture proposal under review | Fail-closed player Boot, Species OS and Life Integrity contracts |
 | `life/` | `LIFE-OS-V1.0` frozen Architecture | Species-scoped Life OS, state machine, API, events, review and baseline manifest |
-| `world-viewer/` | `WORLD-VIEWER-V1.0` + Sprint 004 Civilization Alpha | Frozen Architecture plus executable synthetic 2D living world, five-layer Life, daily schedules, AI work, agriculture, market and derived city metrics; no real ownership, KYC, GPS or settlement |
+| `world-viewer/` | `WORLD-VIEWER-V1.0` + Sprint 005 Civilization Production Alpha | Frozen Architecture plus executable synthetic 2D living world, five-layer Life, ecology, agriculture, supply chain, Factory and AI Company organisms; no real biology, ownership, KYC, GPS, trade or settlement |
 | `ui-governor/` | Architecture proposal under review | Permanent UI inspection, Style Canon, visual regression and bounded remediation contracts; automation not enabled |
 
 The Canonical Atomic Claim Authority remains a proposal. Until its transactional service is reviewed and implemented, Codex dispatch is explicit and recorded but is not represented as fully atomic distributed scheduling. No entry in this section changes Runtime CURRENT, Universe Map CURRENT, protected paths, Token behavior, real identity, real location, or real financial state.
