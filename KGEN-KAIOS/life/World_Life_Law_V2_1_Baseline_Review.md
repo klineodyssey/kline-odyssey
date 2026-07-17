@@ -1,15 +1,16 @@
 ---
 TITLE: "KAIOS World Life Law V2.1 Baseline Review"
-VERSION: "1.1.0"
-STATUS: "AMENDMENT_001_REVIEW_COMPLETED"
+VERSION: "1.2.0"
+STATUS: "AMENDMENT_002_REVIEW_COMPLETED"
 REVIEW_RESULT: "CLARIFICATION_REQUIRED"
 FREEZE_READINESS: "NOT_READY_TO_FREEZE"
 ARCHITECTURE: "APPROVED_NOT_FROZEN"
 IMPLEMENTATION: "NOT_STARTED"
 WORKQUEUE: "NOT_CREATED"
 DEPLOYMENT: "NOT_STARTED"
-HUMAN_DECISION_ID: "HUMAN-WORLD-LIFE-LAW-V2_1-FREEZE-AMENDMENT-001"
+HUMAN_DECISION_ID: "HUMAN-WORLD-LIFE-LAW-V2_1-FREEZE-AMENDMENT-002"
 BASELINE_REVIEW_DECISION_ID: "HUMAN-WORLD-LIFE-LAW-V2_1-BASELINE-REVIEW"
+AMENDMENT_001_DECISION_ID: "HUMAN-WORLD-LIFE-LAW-V2_1-FREEZE-AMENDMENT-001"
 REVIEWED_MAIN_SHA: "8d95316ac01e7c6cdad05c6917abc38f2456f61b"
 REVIEW_DATE: "2026-07-17"
 RUNTIME_AUTHORITY: false
@@ -29,10 +30,11 @@ This is an Architecture Baseline Review. It does not amend, freeze, implement, m
 | Clarifications required | `5/18` |
 | Missing definitions | `0/18` |
 | P0 findings remaining | `0` |
+| Life Activity review gates | `5/5 PASS` |
 | Human decision required | `true` |
 | Freeze readiness | `NOT_READY_TO_FREEZE` |
 
-The approved V2.1 Architecture and Human-approved Amendment 001 are coherent. Amendment 001 resolves all four P0 Architecture gaps. Freeze remains unavailable because the five P1 definitions explicitly excluded from the amendment remain underspecified. An open clarification is not recorded as a contradiction, but it remains a pre-freeze gate.
+The approved V2.1 Architecture, Amendment 001, and Life Activity Contract in Amendment 002 are coherent. The Activity, Offline, Cultivation, Travel, and Dream contracts all pass. Freeze remains unavailable because Amendment 002 does not authorize the five pre-existing P1 definitions; they remain underspecified. An open clarification is not a contradiction, but it remains a pre-freeze gate.
 
 ## 2. Reviewed Sources
 
@@ -42,6 +44,7 @@ The approved V2.1 Architecture and Human-approved Amendment 001 are coherent. Am
 | `kaios_world_life_law.json` | Machine-readable Architecture | `542569f50e534da477c2c19332cae8b5b2f7d995fa1a74e4a0dd5f9dc909b845` |
 | `WORLD_LIFE_LAW_SOURCE_AUDIT.md` | Source audit | `4fa5edaf2dc55e1626d4220da14576c7f17d53bcc2b6bfb6c8d11a442652f359` |
 | `World_Life_Law_V2_1_Amendment_001.md` | Human-approved P0 Architecture amendment | `6abeab8099e0af6252aa1b55f0907a2670788c304713848accdfc31fa2339892` (UTF-8, LF-normalized) |
+| `World_Life_Law_V2_1_Activity_Contract.md` | Human-approved Life Activity Architecture amendment | `a39fd6255fabac6632e0b1f7ea0b14d7e5604b804145a4c77cb7c1b51c1ff984` (UTF-8, LF-normalized) |
 | `LIFE_OS_ARCHITECTURE_BASELINE.md` and `life_os_architecture_baseline.json` | Frozen `LIFE-OS-V1.0` reference and embedded manifest | Unchanged; `13/13` members verified with LF-normalized SHA-256 |
 | Git source | `origin/main` | `8d95316ac01e7c6cdad05c6917abc38f2456f61b` |
 
@@ -51,9 +54,10 @@ The review also consulted the Constitution, Universe Physics CURRENT, Universe M
 
 1. Confirm the source and machine-readable law contain exactly 23 unique laws.
 2. Review every law against every other law for identity, state, authority, consent, resource, death, timeline, and domain-boundary contradictions.
-3. Evaluate the 18 Human-specified baseline gates against the approved law and Human-approved Amendment 001. An implied future module does not count as a completed contract.
+3. Evaluate the 18 Human-specified baseline gates against the approved law and Human-approved Amendments 001 and 002. An implied future module does not count as a completed contract.
 4. Separate `REAL_SCIENCE`, `KAIOS_WORLD_SETTING`, `MYTHIC_INTERFACE`, and `FUTURE_TECHNOLOGY` claims.
-5. Fail closed on missing freeze definitions without editing the approved source.
+5. Verify the Life Activity projection composes with the frozen Life OS physiological state machine and does not replace domain authority.
+6. Fail closed on missing freeze definitions without editing the approved source.
 
 ## 4. Twenty-Three-Law Consistency
 
@@ -104,7 +108,7 @@ All 253 unique law pairs were evaluated under a default `NO_CONFLICT` rule with 
 | 13. NPC Runtime | `PASS` | Amendment 001 defines bounded Compute Levels 0 through 6, profile budgets, scheduling, degradation, energy, permission, and the separation from Intelligence and rights. |
 | 14. Profession Runtime | `CLARIFICATION_REQUIRED` | The profession model is extensible; Temple Keeper, Government, Factory, and Feed Producer roles are not normalized in the approved vocabulary. |
 | 15. Civilization Bootstrap | `PASS` | The required viable world and core services are present; the player joins rather than owns them. |
-| 16. Offline Runtime | `PASS` | Amendment 001 defines sleep, dormancy, house/guardian/hospital/civilization care, bounded progress and costs, prohibited ordinary-absence outcomes, and return reconciliation. |
+| 16. Offline Runtime | `PASS` | Amendment 001 defines protection and return reconciliation; Amendment 002 adds selected activity, safe fallback, bounded offline progress, and continuous Life Identity. |
 | 17. Life is not Rights | `PASS` | Life, intelligence, citizenship, authority, ownership, and legal personhood are separated. |
 | 18. Public Source Audit | `CLARIFICATION_REQUIRED` | The source classes can be defined without conflict, but the approved law does not yet normatively reference the classification artifact. |
 
@@ -119,7 +123,19 @@ All 253 unique law pairs were evaluated under a default `NO_CONFLICT` rule with 
 
 P0 remaining: `0`. The Amendment also adds `EVERY_LIFE_REQUIRES_SUSTAINABLE_EXISTENCE_CONTRACT`, requiring Energy, Maintenance, Lifecycle, Protection, and History while keeping Compute, Intelligence, Rights, and maintenance methods independent.
 
-## 7. P1 Clarifications Before Freeze
+## 7. Life Activity Contract Review
+
+| Gate | Result | Review finding |
+|---|---|---|
+| Activity Contract | `PASS` | Current Activity, transition, permission, reward, cost, risk, time, energy, maintenance, version, evidence, and authority are defined. |
+| Offline Contract | `PASS` | Life continues offline through a selected permitted activity or safe fallback; ordinary absence cannot directly cause death or deletion. |
+| Cultivation Contract | `PASS` | Cultivation is multi-dimensional, evidence- and resource-bounded, and cannot directly create Money, production, or materials. |
+| Travel Contract | `PASS` | Travel and exploration variants, permissions, costs, candidate outcomes, and no-guaranteed-rarity rules are defined without an engine. |
+| Dream Contract | `PASS` | Dream is a Mind Runtime sub-activity during sleep; Soul Journey is mythic interface and cannot directly rewrite Reality or universal death rules. |
+
+The Activity Contract is a cross-layer projection, not a replacement for frozen `activity_state`. `DEAD` is a read-only terminal projection and cannot transition to an active activity. Domain-owned activities such as Company work, medical care, travel, construction, and research remain authoritative in their proper domains.
+
+## 8. P1 Clarifications Before Freeze
 
 | ID | Clarification |
 |---|---|
@@ -129,7 +145,7 @@ P0 remaining: `0`. The Amendment also adds `EVERY_LIFE_REQUIRES_SUSTAINABLE_EXIS
 | `FZ-P1-004` | Define a versioned profession vocabulary or registry extension rule covering the requested specialist roles. |
 | `FZ-P1-005` | Add a normative reference from the law to the approved source-classification contract before freeze. |
 
-## 8. Confirmed Non-Conflicts
+## 9. Confirmed Non-Conflicts
 
 - `Everything Has Life` is a KAIOS simulation ontology and does not claim that stones or software are biological organisms.
 - Life registration does not create legal personhood, citizenship, ownership, governance, religious authority, or Human authority.
@@ -137,10 +153,14 @@ P0 remaining: `0`. The Amendment also adds `EVERY_LIFE_REQUIRES_SUSTAINABLE_EXIS
 - Timeline arrival cannot be used as an unreviewed initial birth or unrestricted travel path.
 - Real family relationships require consent; AI family members cannot claim real kinship.
 - House, Temple, Company, Land, and other adapters cannot mutate their authoritative registries through Life OS.
+- Physiological `activity_state` remains frozen Life OS authority; the Life Activity Contract exposes a versioned cross-layer projection.
+- Dream remains Mind Runtime behavior under `SLEEPING`, even though it is represented as a governed Life sub-activity.
+- `DEAD` remains terminal for the same Life ID and cannot earn rewards or transition to an active activity.
+- Continuous offline existence permits bounded simulation LOD and does not require continuous high compute.
 
-## 9. Freeze Gate
+## 10. Freeze Gate
 
-Freeze remains prohibited until the five P1 clarifications are resolved by a Human-approved amendment and a final repeat baseline review passes. Amendment 001 has normative authority only for the four approved P0 gaps; review evidence cannot broaden its scope.
+Freeze remains prohibited until the five P1 clarifications are resolved by a Human-approved amendment and a final repeat baseline review passes. Amendment 001 is normative for its four P0 gaps, and Amendment 002 is normative for Life Activity only; neither authorizes review evidence to broaden their scope.
 
 Required next flow:
 
@@ -155,12 +175,12 @@ Human P1 Amendment Decision
 Recommended next Human Decision:
 
 ```text
-Decision ID: HUMAN-WORLD-LIFE-LAW-V2_1-FREEZE-AMENDMENT-002
+Decision ID: HUMAN-WORLD-LIFE-LAW-V2_1-FREEZE-AMENDMENT-003
 Decision: APPROVE_P1_FREEZE_CLARIFICATIONS
 Scope: FZ-P1-001..005 only
 ```
 
-## 10. Boundary Result
+## 11. Boundary Result
 
 | Boundary | Result |
 |---|---|
@@ -170,14 +190,15 @@ Scope: FZ-P1-001..005 only
 | Frozen baseline modified | `false` |
 | Human Main modified | `false` |
 | Runtime created | `false` |
-| API / database / UI / migration created | `false` |
+| API / database / UI / game logic / migration created | `false` |
+| NPC AI / Cultivation System / Timeline Engine created | `false` |
 | Implementation files | `0` |
 | WorkQueue created | `false` |
 | Deployment started | `false` |
 | Protected path violations | `0` |
 | Frozen Life OS hash verification | `13/13 PASS` using the embedded LF-normalized SHA-256 manifest |
 
-## 11. End State
+## 12. End State
 
 ```text
 Review: COMPLETED
@@ -185,6 +206,11 @@ Review Result: CLARIFICATION_REQUIRED
 Conflict: 0
 Missing: 0
 P0 Remaining: 0
+Activity Contract: PASS
+Offline Contract: PASS
+Cultivation Contract: PASS
+Travel Contract: PASS
+Dream Contract: PASS
 Human Decision Required: true
 Freeze Readiness: NOT_READY_TO_FREEZE
 Implementation: NOT_STARTED

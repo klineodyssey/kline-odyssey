@@ -95,10 +95,11 @@ Human Decision `HUMAN-PRIMEFORGE-FULL-AUTOPILOT-001` delegates bounded Level A a
 | `life/kaios_world_life_law.json` | Machine-readable Architecture | Twenty-three laws, common Life Identity, Soul Core, family, spawn, death and adapter contracts |
 | `life/WORLD_LIFE_LAW_SOURCE_AUDIT.md` | Architecture source audit | CURRENT/frozen/source classification, conflict resolutions and no-migration boundary |
 | `life/World_Life_Law_V2_1_Amendment_001.md` | Human-approved P0 Architecture amendment | Food lifecycle, guardian separation, NPC compute and offline protection contracts; no Runtime or implementation |
-| `life/World_Life_Law_V2_1_Baseline_Review.md` | Completed Amendment 001 freeze review | `23/23` consistency pass, `13/18` gates pass, P0 remaining `0`, and `NOT_READY_TO_FREEZE` verdict |
+| `life/World_Life_Law_V2_1_Activity_Contract.md` | Human-approved Amendment 002 | Cross-layer Current Activity, transition, permission, reward/cost/risk, offline, cultivation, travel and dream Architecture |
+| `life/World_Life_Law_V2_1_Baseline_Review.md` | Completed Amendment 002 freeze review | `23/23` consistency, Life Activity gates `5/5 PASS`, P0 remaining `0`, P1 remaining `5`, and `NOT_READY_TO_FREEZE` |
 | `life/World_Life_Law_V2_1_Conflict_Matrix.json` | Machine-readable review evidence | Law-pair consistency, review-gate results, missing definitions and clarification register |
 | `life/World_Life_Law_V2_1_Term_Glossary.json` | Machine-readable terminology evidence | Science, world-setting, mythic-interface and future-technology term boundaries |
-| `life/World_Life_Law_V2_1_Freeze_Readiness.json` | Machine-readable freeze gate | Four P0 findings resolved, five P1 clarifications open, and Human decision requirement |
+| `life/World_Life_Law_V2_1_Freeze_Readiness.json` | Machine-readable freeze gate | P0 and Life Activity gates resolved, five P1 clarifications open, and Human decision requirement |
 | `life/World_Life_Law_V2_1_Source_Classification.md` | Public source classification review | Separates sourced science from simulation ontology, mythic language and speculative technology |
 | `world-viewer/` | `WORLD-VIEWER-V1.0` + Sprint 009 Nation and Timeline Alpha | Frozen Architecture plus executable synthetic 2D living world, universal Biology Foundation, Nation, public finance, diplomacy and isolated era travel; no real sovereignty, taxation, legal tender, history mutation or external settlement |
 | `ui-governor/` | Architecture proposal under review | Permanent UI inspection, Style Canon, visual regression and bounded remediation contracts; automation not enabled |

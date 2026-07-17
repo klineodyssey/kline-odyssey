@@ -1,12 +1,18 @@
 {
-  "schema_version": "1.1.0",
+  "schema_version": "1.2.0",
   "artifact_id": "WORLD-LIFE-LAW-V2.1-TERM-GLOSSARY-001",
   "artifact_type": "ARCHITECTURE_BASELINE_REVIEW_EVIDENCE",
-  "decision_id": "HUMAN-WORLD-LIFE-LAW-V2_1-FREEZE-AMENDMENT-001",
+  "decision_id": "HUMAN-WORLD-LIFE-LAW-V2_1-FREEZE-AMENDMENT-002",
   "baseline_review_decision_id": "HUMAN-WORLD-LIFE-LAW-V2_1-BASELINE-REVIEW",
+  "amendment_001_decision_id": "HUMAN-WORLD-LIFE-LAW-V2_1-FREEZE-AMENDMENT-001",
   "amendment_source": {
     "path": "KGEN-KAIOS/life/World_Life_Law_V2_1_Amendment_001.md",
     "sha256": "6abeab8099e0af6252aa1b55f0907a2670788c304713848accdfc31fa2339892",
+    "normalization": "UTF8_WITH_LF_LINE_ENDINGS"
+  },
+  "activity_contract_source": {
+    "path": "KGEN-KAIOS/life/World_Life_Law_V2_1_Activity_Contract.md",
+    "sha256": "a39fd6255fabac6632e0b1f7ea0b14d7e5604b804145a4c77cb7c1b51c1ff984",
     "normalization": "UTF8_WITH_LF_LINE_ENDINGS"
   },
   "review_date": "2026-07-17",
@@ -385,6 +391,156 @@
       "real_world_claim": "NO_REAL_LEGAL_STATUS",
       "normative_reference": "AMENDMENT_001_SECTION_4",
       "freeze_definition_status": "RESOLVED_BY_AMENDMENT_001"
+    },
+    {
+      "term_id": "TERM-038",
+      "term": "Life Activity Contract",
+      "definition": "A versioned cross-layer projection of one Life's primary activity, transition, permission, reward policy, cost policy, risk policy, evidence, and authoritative domain reference.",
+      "source_classes": ["KAIOS_WORLD_SETTING"],
+      "contract_kind": "GOVERNANCE_CONTRACT",
+      "real_world_claim": false,
+      "normative_reference": "AMENDMENT_002_SECTIONS_1_TO_4",
+      "freeze_definition_status": "RESOLVED_BY_AMENDMENT_002"
+    },
+    {
+      "term_id": "TERM-039",
+      "term": "Current Activity",
+      "definition": "The single primary cross-layer activity projection for a Life at a versioned point in ordered Universe time; it does not replace physiological Life OS activity_state.",
+      "source_classes": ["KAIOS_WORLD_SETTING"],
+      "contract_kind": "STATE_PROJECTION",
+      "real_world_claim": false,
+      "normative_reference": "AMENDMENT_002_SECTION_3",
+      "freeze_definition_status": "RESOLVED_BY_AMENDMENT_002"
+    },
+    {
+      "term_id": "TERM-040",
+      "term": "Activity Transition",
+      "definition": "A guarded, versioned, evidence-bearing change from one primary activity to another that preserves the prior state when validation fails.",
+      "source_classes": ["KAIOS_WORLD_SETTING"],
+      "contract_kind": "GOVERNANCE_CONTRACT",
+      "real_world_claim": false,
+      "normative_reference": "AMENDMENT_002_SECTION_6",
+      "freeze_definition_status": "RESOLVED_BY_AMENDMENT_002"
+    },
+    {
+      "term_id": "TERM-041",
+      "term": "Activity Permission",
+      "definition": "A scoped, expiring, revocable, and versioned authorization result covering capability, viability, role, location, resource, technology, privacy, and risk constraints.",
+      "source_classes": ["KAIOS_WORLD_SETTING"],
+      "contract_kind": "GOVERNANCE_CONTRACT",
+      "real_world_claim": false,
+      "normative_reference": "AMENDMENT_002_SECTION_7",
+      "freeze_definition_status": "RESOLVED_BY_AMENDMENT_002"
+    },
+    {
+      "term_id": "TERM-042",
+      "term": "Activity Reward",
+      "definition": "An evidence- and review-gated candidate outcome of accepted activity progress; it is not a guaranteed payment, item, ownership change, or rare encounter.",
+      "source_classes": ["KAIOS_WORLD_SETTING"],
+      "contract_kind": "GOVERNANCE_CONTRACT",
+      "real_world_claim": false,
+      "normative_reference": "AMENDMENT_002_SECTION_8",
+      "freeze_definition_status": "RESOLVED_BY_AMENDMENT_002"
+    },
+    {
+      "term_id": "TERM-043",
+      "term": "Activity Cost",
+      "definition": "The bounded time, energy, resource, maintenance, and opportunity consumption required by an activity under conservation rules.",
+      "source_classes": ["REAL_SCIENCE", "KAIOS_WORLD_SETTING"],
+      "contract_kind": "DOMAIN_MODEL",
+      "real_world_claim": "SIMULATION_MODEL_INFORMED_BY_SCIENCE",
+      "normative_reference": "AMENDMENT_002_SECTION_8",
+      "freeze_definition_status": "RESOLVED_BY_AMENDMENT_002"
+    },
+    {
+      "term_id": "TERM-044",
+      "term": "Activity Risk",
+      "definition": "The bounded hazards, failure states, containment, and recovery policy evaluated before and during an activity.",
+      "source_classes": ["KAIOS_WORLD_SETTING"],
+      "contract_kind": "GOVERNANCE_CONTRACT",
+      "real_world_claim": false,
+      "normative_reference": "AMENDMENT_002_SECTION_8",
+      "freeze_definition_status": "RESOLVED_BY_AMENDMENT_002"
+    },
+    {
+      "term_id": "TERM-045",
+      "term": "Offline Activity",
+      "definition": "A pre-authorized, checkpointed, resource-bounded activity that may continue at reduced simulation fidelity while the player is absent, with safe fallback and return reconciliation.",
+      "source_classes": ["KAIOS_WORLD_SETTING"],
+      "contract_kind": "GOVERNANCE_CONTRACT",
+      "real_world_claim": false,
+      "normative_reference": "AMENDMENT_002_SECTION_9",
+      "freeze_definition_status": "RESOLVED_BY_AMENDMENT_002"
+    },
+    {
+      "term_id": "TERM-046",
+      "term": "Meditation Activity",
+      "definition": "A bounded Mind or Cultivation activity that may develop mind stability, wisdom, insight, spiritual knowledge, and cultivation progress without directly creating Money, production, or materials.",
+      "source_classes": ["KAIOS_WORLD_SETTING", "MYTHIC_INTERFACE"],
+      "contract_kind": "ACTIVITY_PROFILE",
+      "real_world_claim": false,
+      "normative_reference": "AMENDMENT_002_SECTION_10",
+      "freeze_definition_status": "RESOLVED_BY_AMENDMENT_002"
+    },
+    {
+      "term_id": "TERM-047",
+      "term": "Cultivation Profile",
+      "definition": "A multi-dimensional KAIOS profile for realm, wisdom, insight, spiritual energy, mind stability, heart nature, virtue, karma, contribution, knowledge, experience, and skill.",
+      "source_classes": ["KAIOS_WORLD_SETTING", "MYTHIC_INTERFACE"],
+      "contract_kind": "CAPABILITY_PROFILE",
+      "real_world_claim": false,
+      "normative_reference": "AMENDMENT_002_SECTION_10_3",
+      "freeze_definition_status": "RESOLVED_BY_AMENDMENT_002"
+    },
+    {
+      "term_id": "TERM-048",
+      "term": "Travel Activity",
+      "definition": "An authorized route-based activity with destination, capability, resource, environment, jurisdiction, privacy, technology, and Timeline gates.",
+      "source_classes": ["KAIOS_WORLD_SETTING", "FUTURE_TECHNOLOGY"],
+      "contract_kind": "ACTIVITY_PROFILE",
+      "real_world_claim": false,
+      "normative_reference": "AMENDMENT_002_SECTION_12",
+      "freeze_definition_status": "RESOLVED_BY_AMENDMENT_002"
+    },
+    {
+      "term_id": "TERM-049",
+      "term": "Dream Event",
+      "definition": "An optional Mind Runtime sub-activity during Life OS sleep that may open a governed myth, memory, Soul Journey, or inner-trial event without directly rewriting Reality.",
+      "source_classes": ["KAIOS_WORLD_SETTING", "MYTHIC_INTERFACE"],
+      "contract_kind": "EVENT_PROFILE",
+      "real_world_claim": false,
+      "normative_reference": "AMENDMENT_002_SECTION_13_2",
+      "freeze_definition_status": "RESOLVED_BY_AMENDMENT_002"
+    },
+    {
+      "term_id": "TERM-050",
+      "term": "Soul Journey",
+      "definition": "A mythic-interface Civilization event whose proposed simulated effects require capability, authorization, evidence, compatibility, review, immutable audit, and high-risk Human approval.",
+      "source_classes": ["MYTHIC_INTERFACE", "KAIOS_WORLD_SETTING"],
+      "contract_kind": "EVENT_PROFILE",
+      "real_world_claim": false,
+      "normative_reference": "AMENDMENT_002_SECTION_13_3",
+      "freeze_definition_status": "RESOLVED_BY_AMENDMENT_002"
+    },
+    {
+      "term_id": "TERM-051",
+      "term": "Longevity Profile",
+      "definition": "A separated lifecycle capability profile ranging from Normal Life through restricted mythic or future states; it is never a guarantee of absolute immortality.",
+      "source_classes": ["KAIOS_WORLD_SETTING", "MYTHIC_INTERFACE", "FUTURE_TECHNOLOGY"],
+      "contract_kind": "CAPABILITY_PROFILE",
+      "real_world_claim": false,
+      "normative_reference": "AMENDMENT_002_SECTION_14",
+      "freeze_definition_status": "RESOLVED_BY_AMENDMENT_002"
+    },
+    {
+      "term_id": "TERM-052",
+      "term": "Dead Activity Projection",
+      "definition": "A read-only projection of existence_state DEAD; it is not performable, cannot earn rewards, and cannot transition the same individual back to an active state.",
+      "source_classes": ["KAIOS_WORLD_SETTING"],
+      "contract_kind": "STATE_PROJECTION",
+      "real_world_claim": "NOT_A_MEDICAL_DETERMINATION",
+      "normative_reference": "AMENDMENT_002_SECTION_5",
+      "freeze_definition_status": "RESOLVED_BY_AMENDMENT_002"
     }
   ],
   "public_references": [
@@ -430,6 +586,11 @@
   ],
   "review_result": {
     "classification_separation": "PASS",
+    "activity_contract": "PASS",
+    "offline_contract": "PASS",
+    "cultivation_contract": "PASS",
+    "travel_contract": "PASS",
+    "dream_contract": "PASS",
     "normative_reference_in_approved_law": "MISSING",
     "freeze_effect": "CLARIFICATION_REQUIRED",
     "runtime_effect": "NONE"

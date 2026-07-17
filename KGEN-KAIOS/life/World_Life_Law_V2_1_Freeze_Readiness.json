@@ -1,9 +1,10 @@
 {
-  "schema_version": "1.1.0",
+  "schema_version": "1.2.0",
   "artifact_id": "WORLD-LIFE-LAW-V2.1-FREEZE-READINESS-001",
   "artifact_type": "ARCHITECTURE_BASELINE_REVIEW_EVIDENCE",
-  "decision_id": "HUMAN-WORLD-LIFE-LAW-V2_1-FREEZE-AMENDMENT-001",
+  "decision_id": "HUMAN-WORLD-LIFE-LAW-V2_1-FREEZE-AMENDMENT-002",
   "baseline_review_decision_id": "HUMAN-WORLD-LIFE-LAW-V2_1-BASELINE-REVIEW",
+  "amendment_001_decision_id": "HUMAN-WORLD-LIFE-LAW-V2_1-FREEZE-AMENDMENT-001",
   "review_date": "2026-07-17",
   "reviewed_main_sha": "8d95316ac01e7c6cdad05c6917abc38f2456f61b",
   "review_result": "CLARIFICATION_REQUIRED",
@@ -24,11 +25,22 @@
       "missing": 0,
       "conflict": 0
     },
+    "life_activity_contract_review": {
+      "activity_contract": "PASS",
+      "offline_contract": "PASS",
+      "cultivation_contract": "PASS",
+      "travel_contract": "PASS",
+      "dream_contract": "PASS",
+      "passed": 5,
+      "total": 5,
+      "conflicts": 0
+    },
     "p0_findings_remaining": 0,
     "p1_clarifications_remaining": 5,
     "freeze_blocker_policy": "ANY_OPEN_P0_OR_UNRESOLVED_PRE_FREEZE_CLARIFICATION_PREVENTS_FREEZE"
   },
   "p0_freeze_blockers": [],
+  "activity_contract_blockers": [],
   "resolved_p0_findings": [
     {
       "finding_id": "FZ-P0-001",
@@ -82,6 +94,33 @@
       "status": "OPEN"
     }
   ],
+  "resolved_activity_findings": [
+    {
+      "finding_id": "ACT-001",
+      "title": "LIFE_ACTIVITY_CONTRACT",
+      "status": "PASS_BY_AMENDMENT_002"
+    },
+    {
+      "finding_id": "ACT-002",
+      "title": "OFFLINE_ACTIVITY_CONTRACT",
+      "status": "PASS_BY_AMENDMENT_002"
+    },
+    {
+      "finding_id": "ACT-003",
+      "title": "CULTIVATION_ACTIVITY_CONTRACT",
+      "status": "PASS_BY_AMENDMENT_002"
+    },
+    {
+      "finding_id": "ACT-004",
+      "title": "TRAVEL_ACTIVITY_CONTRACT",
+      "status": "PASS_BY_AMENDMENT_002"
+    },
+    {
+      "finding_id": "ACT-005",
+      "title": "DREAM_ACTIVITY_CONTRACT",
+      "status": "PASS_BY_AMENDMENT_002"
+    }
+  ],
   "integrity_checks": {
     "review_source_markdown_sha256": {
       "expected": "34cfeed7c3944e28301d2648ce52e59eda3467c714555071fa367924808d6e35",
@@ -98,6 +137,12 @@
     "amendment_001_sha256": {
       "path": "KGEN-KAIOS/life/World_Life_Law_V2_1_Amendment_001.md",
       "expected": "6abeab8099e0af6252aa1b55f0907a2670788c304713848accdfc31fa2339892",
+      "normalization": "UTF8_WITH_LF_LINE_ENDINGS",
+      "status": "PASS"
+    },
+    "activity_contract_sha256": {
+      "path": "KGEN-KAIOS/life/World_Life_Law_V2_1_Activity_Contract.md",
+      "expected": "a39fd6255fabac6632e0b1f7ea0b14d7e5604b804145a4c77cb7c1b51c1ff984",
       "normalization": "UTF8_WITH_LF_LINE_ENDINGS",
       "status": "PASS"
     },
@@ -127,6 +172,10 @@
     "api_created": false,
     "database_created": false,
     "ui_created": false,
+    "game_logic_created": false,
+    "npc_ai_created": false,
+    "cultivation_system_created": false,
+    "timeline_engine_created": false,
     "migration_created": false,
     "implementation_files": 0,
     "workqueue_created": false,
@@ -140,7 +189,7 @@
     "HUMAN_FREEZE_DECISION"
   ],
   "recommended_next_human_decision": {
-    "decision_id": "HUMAN-WORLD-LIFE-LAW-V2_1-FREEZE-AMENDMENT-002",
+    "decision_id": "HUMAN-WORLD-LIFE-LAW-V2_1-FREEZE-AMENDMENT-003",
     "decision": "APPROVE_P1_FREEZE_CLARIFICATIONS",
     "scope": [
       "FZ-P1-001",
@@ -152,6 +201,8 @@
   },
   "end_state": {
     "review": "COMPLETED",
+    "activity_contract_review": "PASS",
+    "freeze_readiness": "NOT_READY_TO_FREEZE",
     "implementation": "NOT_STARTED",
     "workqueue": "NOT_CREATED",
     "deployment": "NOT_STARTED",
