@@ -1,12 +1,12 @@
 # KAIOS AI Employment & Enterprise Baseline Readiness
 
-Status: READY_FOR_BASELINE_REVIEW  
-Architecture Candidate: CONDITIONALLY_APPROVED  
-Baseline: NOT_APPROVED  
-Runtime: NOT_APPROVED  
-UI: NOT_APPROVED  
-Cursor Dispatch: NOT_APPROVED  
-Real KGEN: NOT_AUTHORIZED  
+Status: READY_FOR_BASELINE_REVIEW
+Architecture Candidate: CONDITIONALLY_APPROVED
+Baseline: NOT_APPROVED
+Runtime: NOT_APPROVED
+UI: NOT_APPROVED
+Cursor Dispatch: NOT_APPROVED
+Real KGEN: NOT_AUTHORIZED
 Generated At: 2026-07-20T07:56:40.602033+00:00
 
 ## AI Architecture Gates
@@ -26,3 +26,16 @@ Generated At: 2026-07-20T07:56:40.602033+00:00
 **READY_FOR_BASELINE_REVIEW**
 
 The AI Employment & Enterprise package is ready for baseline review. This does not approve Baseline, Runtime, UI, Cursor dispatch, Real KGEN, deployment, merge, or implementation.
+
+## Semantic Integrity Correction 001
+
+Status: READY_FOR_BASELINE_REVIEW
+Decision Scope: PR #43 narrow verified source corruption repair
+Rule: KAIOS_SOURCE_SEMANTIC_INTEGRITY_RULE
+Header Exact Match: PASS
+Final Genesis Signature Exact Match: PASS
+Canonical Literal Question-Mark Corruption: REPAIRED_VERIFIED_EXACT
+Runtime Implementation: NOT_STARTED
+Cursor Dispatch: FORBIDDEN
+Real KGEN: FUTURE_NOT_AUTHORIZED_FOR_IMPLEMENTATION
+Updated At: 2026-07-20T09:21:02.380744+00:00

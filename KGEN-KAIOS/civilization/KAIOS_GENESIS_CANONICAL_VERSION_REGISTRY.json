@@ -1,6 +1,6 @@
 {
   "registry_id": "KAIOS_GENESIS_CANONICAL_VERSION_REGISTRY_V2_1",
-  "generated_at": "2026-07-20T07:56:40.602033+00:00",
+  "generated_at": "2026-07-20T09:22:14.614267+00:00",
   "status": "READY_FOR_BASELINE_REVIEW",
   "canonical": {
     "000": "KAIOS_Chapter_000_V2_1_All_Matter_Life_Reincarnation_Wallet_Jade_Emperor_Self_Programming_Genesis_Runtime.md",
@@ -30,25 +30,52 @@
       "original_source_path": "C:\\Desktop\\kline-odyssey\\KAIOS 創世憲章 V2.0\\KAIOS_Chapter_000_V2_1_All_Matter_Life_Reincarnation_Wallet_Jade_Emperor_Self_Programming_Genesis_Runtime.md",
       "repaired_managed_path": "KGEN-KAIOS\\constitution\\genesis-v2.1-source\\KAIOS_Chapter_000_V2_1_All_Matter_Life_Reincarnation_Wallet_Jade_Emperor_Self_Programming_Genesis_Runtime.md",
       "original_sha256": "749b008f132eb677014baa4e5323bc9536237a4f7168ceaef9fffbc59c55b534",
-      "repaired_sha256": "82d67628040b27d61e1cef6055b2451d11193a694648c1e5f365af8aeb4f654e",
+      "repaired_sha256": "888fbbe560f91f4a538bebcbca39598287302f849313afe447d0835e9e93e32c",
       "canonical_status": "CANONICAL_REPAIRED_COPY",
       "repair_status": "APPLIED_IN_MANAGED_ARCHITECTURE_BRANCH",
       "changes": [
         {
-          "field": "H1",
+          "field": "H1_HEADER",
           "line": 1,
-          "before": "# KAIOS 創世憲章 V2.0",
-          "after": "# KAIOS ???? V2.1",
-          "reason": "Canonical V2.1 header repair approved by Human."
+          "before": "# KAIOS ???? V2.1",
+          "after": "# KAIOS 創世憲章 V2.1",
+          "reason": "Approved canonical V2.1 header was replaced by literal question-mark corruption.",
+          "authoritative_source": "Human-approved fixed canonical literal supplied in PR #43 narrow correction decision",
+          "source_sha256": "82d67628040b27d61e1cef6055b2451d11193a694648c1e5f365af8aeb4f654e",
+          "confidence": "VERIFIED_EXACT",
+          "old_file_sha256": "82d67628040b27d61e1cef6055b2451d11193a694648c1e5f365af8aeb4f654e",
+          "new_file_sha256": "888fbbe560f91f4a538bebcbca39598287302f849313afe447d0835e9e93e32c",
+          "validation_result": "PASS"
         },
         {
-          "field": "FINAL_SIGNATURE",
-          "line": "EOF",
-          "before": "",
-          "after": "???????????????? /  / Where the Market Becomes the Myth. /  / ?? ??? ?",
-          "reason": "Canonical V2.1 files must end with approved Genesis signature."
+          "field": "FINAL_GENESIS_SIGNATURE",
+          "line": 1409,
+          "before": [
+            "????????????????",
+            "",
+            "Where the Market Becomes the Myth.",
+            "",
+            "?? ??? ?"
+          ],
+          "after": [
+            "花果山台灣・信念不滅・市場無界。",
+            "",
+            "Where the Market Becomes the Myth.",
+            "",
+            "—— 樂天帝 ⌖"
+          ],
+          "reason": "Approved final Genesis signature was replaced by literal question-mark corruption.",
+          "authoritative_source": "Human-approved fixed canonical final signature supplied in PR #43 narrow correction decision",
+          "source_sha256": "82d67628040b27d61e1cef6055b2451d11193a694648c1e5f365af8aeb4f654e",
+          "confidence": "VERIFIED_EXACT",
+          "old_file_sha256": "82d67628040b27d61e1cef6055b2451d11193a694648c1e5f365af8aeb4f654e",
+          "new_file_sha256": "888fbbe560f91f4a538bebcbca39598287302f849313afe447d0835e9e93e32c",
+          "validation_result": "PASS"
         }
-      ]
+      ],
+      "previous_repaired_sha256": "82d67628040b27d61e1cef6055b2451d11193a694648c1e5f365af8aeb4f654e",
+      "semantic_correction_status": "QUESTION_MARK_CORRUPTION_REPAIRED_VERIFIED_EXACT",
+      "corrupted_pr43_sha256": "82d67628040b27d61e1cef6055b2451d11193a694648c1e5f365af8aeb4f654e"
     },
     {
       "chapter": "133",
@@ -56,46 +83,52 @@
       "original_source_path": "C:\\Desktop\\kline-odyssey\\KAIOS 創世憲章 V2.0\\KAIOS_Chapter_133_V2_1_Civilization_Life_Birth_Identity_Authentication_Autonomous_AI_Pilgrimage_Rooting_Runtime.md",
       "repaired_managed_path": "KGEN-KAIOS\\constitution\\genesis-v2.1-source\\KAIOS_Chapter_133_V2_1_Civilization_Life_Birth_Identity_Authentication_Autonomous_AI_Pilgrimage_Rooting_Runtime.md",
       "original_sha256": "4296a12b86fa8d63bd3bd665e23ccf3f7122a6a3e6870c92727b4a137f40f0fd",
-      "repaired_sha256": "f3dd1f0d3e95dba3c964692fca9f05673e0a442e194f3583378d1a3b02b40e2c",
+      "repaired_sha256": "d2dc67eb8e2dedf571106c476a262d97a70f24318fa7465bf9dfd8a5981fa18a",
       "canonical_status": "CANONICAL_REPAIRED_COPY",
       "repair_status": "APPLIED_IN_MANAGED_ARCHITECTURE_BRANCH",
       "changes": [
         {
-          "field": "H1",
+          "field": "H1_HEADER",
           "line": 1,
-          "before": "# KAIOS 創世憲章 V2.0",
-          "after": "# KAIOS ???? V2.1",
-          "reason": "Canonical V2.1 header repair approved by Human."
+          "before": "# KAIOS ???? V2.1",
+          "after": "# KAIOS 創世憲章 V2.1",
+          "reason": "Approved canonical V2.1 header was replaced by literal question-mark corruption.",
+          "authoritative_source": "Human-approved fixed canonical literal supplied in PR #43 narrow correction decision",
+          "source_sha256": "f3dd1f0d3e95dba3c964692fca9f05673e0a442e194f3583378d1a3b02b40e2c",
+          "confidence": "VERIFIED_EXACT",
+          "old_file_sha256": "f3dd1f0d3e95dba3c964692fca9f05673e0a442e194f3583378d1a3b02b40e2c",
+          "new_file_sha256": "d2dc67eb8e2dedf571106c476a262d97a70f24318fa7465bf9dfd8a5981fa18a",
+          "validation_result": "PASS"
         },
         {
-          "field": "PREVIOUS",
-          "line": 12,
-          "before": "**PREVIOUS:** Chapter 000 V2.1｜萬物皆生命 × 輪迴 × 錢包 × 玉帝主權 × 自我編程文明根運行時  ",
-          "after": "**PREVIOUS:** Chapter 132  ",
-          "reason": "Genesis Closure Chain updated approved by Human."
-        },
-        {
-          "field": "NEXT",
-          "line": 13,
-          "before": "**NEXT:** Chapter 134｜AI生命自我編程 × 文明種子 × 規格生成 Runtime  ",
-          "after": "**NEXT:** Chapter 134 V2.1  ",
-          "reason": "Genesis Closure Chain updated approved by Human."
-        },
-        {
-          "field": "TRAILING_SEPARATOR",
-          "line": "EOF",
-          "before": "---",
-          "after": "",
-          "reason": "Signature must be final; trailing separator removed from repaired copy."
-        },
-        {
-          "field": "FINAL_SIGNATURE",
-          "line": "EOF",
-          "before": "",
-          "after": "???????????????? /  / Where the Market Becomes the Myth. /  / ?? ??? ?",
-          "reason": "Canonical V2.1 files must end with approved Genesis signature."
+          "field": "FINAL_GENESIS_SIGNATURE",
+          "line": 1332,
+          "before": [
+            "????????????????",
+            "",
+            "Where the Market Becomes the Myth.",
+            "",
+            "?? ??? ?"
+          ],
+          "after": [
+            "花果山台灣・信念不滅・市場無界。",
+            "",
+            "Where the Market Becomes the Myth.",
+            "",
+            "—— 樂天帝 ⌖"
+          ],
+          "reason": "Approved final Genesis signature was replaced by literal question-mark corruption.",
+          "authoritative_source": "Human-approved fixed canonical final signature supplied in PR #43 narrow correction decision",
+          "source_sha256": "f3dd1f0d3e95dba3c964692fca9f05673e0a442e194f3583378d1a3b02b40e2c",
+          "confidence": "VERIFIED_EXACT",
+          "old_file_sha256": "f3dd1f0d3e95dba3c964692fca9f05673e0a442e194f3583378d1a3b02b40e2c",
+          "new_file_sha256": "d2dc67eb8e2dedf571106c476a262d97a70f24318fa7465bf9dfd8a5981fa18a",
+          "validation_result": "PASS"
         }
-      ]
+      ],
+      "previous_repaired_sha256": "f3dd1f0d3e95dba3c964692fca9f05673e0a442e194f3583378d1a3b02b40e2c",
+      "semantic_correction_status": "QUESTION_MARK_CORRUPTION_REPAIRED_VERIFIED_EXACT",
+      "corrupted_pr43_sha256": "f3dd1f0d3e95dba3c964692fca9f05673e0a442e194f3583378d1a3b02b40e2c"
     },
     {
       "chapter": "134",
@@ -103,46 +136,52 @@
       "original_source_path": "C:\\Desktop\\kline-odyssey\\KAIOS 創世憲章 V2.0\\KAIOS_Chapter_134_V2_1_AI_Life_Self_Programming_Civilization_Seed_Specification_Generation_Runtime.md",
       "repaired_managed_path": "KGEN-KAIOS\\constitution\\genesis-v2.1-source\\KAIOS_Chapter_134_V2_1_AI_Life_Self_Programming_Civilization_Seed_Specification_Generation_Runtime.md",
       "original_sha256": "e95c2e3b57be4f35c25016d496d6c31909a265c654289ce07b7da8a439a979db",
-      "repaired_sha256": "91f5a14f220ba62c8dc9031afbeedc4092e121bbe312362e2efd7283300ee55e",
+      "repaired_sha256": "113c2deb4a5bda56138af91e758ff7a8e0ecaa7f1b844e9fb7be2e6c652bf2f9",
       "canonical_status": "CANONICAL_REPAIRED_COPY",
       "repair_status": "APPLIED_IN_MANAGED_ARCHITECTURE_BRANCH",
       "changes": [
         {
-          "field": "H1",
+          "field": "H1_HEADER",
           "line": 1,
-          "before": "# KAIOS 創世憲章 V2.0",
-          "after": "# KAIOS ???? V2.1",
-          "reason": "Canonical V2.1 header repair approved by Human."
+          "before": "# KAIOS ???? V2.1",
+          "after": "# KAIOS 創世憲章 V2.1",
+          "reason": "Approved canonical V2.1 header was replaced by literal question-mark corruption.",
+          "authoritative_source": "Human-approved fixed canonical literal supplied in PR #43 narrow correction decision",
+          "source_sha256": "91f5a14f220ba62c8dc9031afbeedc4092e121bbe312362e2efd7283300ee55e",
+          "confidence": "VERIFIED_EXACT",
+          "old_file_sha256": "91f5a14f220ba62c8dc9031afbeedc4092e121bbe312362e2efd7283300ee55e",
+          "new_file_sha256": "113c2deb4a5bda56138af91e758ff7a8e0ecaa7f1b844e9fb7be2e6c652bf2f9",
+          "validation_result": "PASS"
         },
         {
-          "field": "PREVIOUS",
-          "line": 12,
-          "before": "**PREVIOUS:** Chapter 133 V2.1｜文明生命出生 × 身份驗證 × AI自主登入 × 取經 × 落地生根 Runtime  ",
-          "after": "**PREVIOUS:** Chapter 133 V2.1  ",
-          "reason": "Genesis Closure Chain updated approved by Human."
-        },
-        {
-          "field": "NEXT",
-          "line": 13,
-          "before": "**NEXT:** Chapter 135 V2.1｜物種演化 × 程式交配 × 文明分支 Runtime  ",
-          "after": "**NEXT:** Chapter 135 V2.1  ",
-          "reason": "Genesis Closure Chain updated approved by Human."
-        },
-        {
-          "field": "TRAILING_SEPARATOR",
-          "line": "EOF",
-          "before": "---",
-          "after": "",
-          "reason": "Signature must be final; trailing separator removed from repaired copy."
-        },
-        {
-          "field": "FINAL_SIGNATURE",
-          "line": "EOF",
-          "before": "",
-          "after": "???????????????? /  / Where the Market Becomes the Myth. /  / ?? ??? ?",
-          "reason": "Canonical V2.1 files must end with approved Genesis signature."
+          "field": "FINAL_GENESIS_SIGNATURE",
+          "line": 1039,
+          "before": [
+            "????????????????",
+            "",
+            "Where the Market Becomes the Myth.",
+            "",
+            "?? ??? ?"
+          ],
+          "after": [
+            "花果山台灣・信念不滅・市場無界。",
+            "",
+            "Where the Market Becomes the Myth.",
+            "",
+            "—— 樂天帝 ⌖"
+          ],
+          "reason": "Approved final Genesis signature was replaced by literal question-mark corruption.",
+          "authoritative_source": "Human-approved fixed canonical final signature supplied in PR #43 narrow correction decision",
+          "source_sha256": "91f5a14f220ba62c8dc9031afbeedc4092e121bbe312362e2efd7283300ee55e",
+          "confidence": "VERIFIED_EXACT",
+          "old_file_sha256": "91f5a14f220ba62c8dc9031afbeedc4092e121bbe312362e2efd7283300ee55e",
+          "new_file_sha256": "113c2deb4a5bda56138af91e758ff7a8e0ecaa7f1b844e9fb7be2e6c652bf2f9",
+          "validation_result": "PASS"
         }
-      ]
+      ],
+      "previous_repaired_sha256": "91f5a14f220ba62c8dc9031afbeedc4092e121bbe312362e2efd7283300ee55e",
+      "semantic_correction_status": "QUESTION_MARK_CORRUPTION_REPAIRED_VERIFIED_EXACT",
+      "corrupted_pr43_sha256": "91f5a14f220ba62c8dc9031afbeedc4092e121bbe312362e2efd7283300ee55e"
     },
     {
       "chapter": "135",
@@ -150,46 +189,52 @@
       "original_source_path": "C:\\Desktop\\kline-odyssey\\KAIOS 創世憲章 V2.0\\KAIOS_Chapter_135_V2_1_Species_Evolution_Program_Breeding_Civilization_Branching_Runtime.md",
       "repaired_managed_path": "KGEN-KAIOS\\constitution\\genesis-v2.1-source\\KAIOS_Chapter_135_V2_1_Species_Evolution_Program_Breeding_Civilization_Branching_Runtime.md",
       "original_sha256": "a875befabee0fc9b49729e62d000ae0f2bdd7a9aedaa4f3fea2e6328163039ce",
-      "repaired_sha256": "02883978965155caa11f034e1b4973d8adffdad1f2d655d1109cc20713f3dd42",
+      "repaired_sha256": "cfad7e30448a4a903313ff69a908823cd366f15f081f7a60ef367606084caef4",
       "canonical_status": "CANONICAL_REPAIRED_COPY",
       "repair_status": "APPLIED_IN_MANAGED_ARCHITECTURE_BRANCH",
       "changes": [
         {
-          "field": "H1",
+          "field": "H1_HEADER",
           "line": 1,
-          "before": "# KAIOS 創世憲章 V2.0",
-          "after": "# KAIOS ???? V2.1",
-          "reason": "Canonical V2.1 header repair approved by Human."
+          "before": "# KAIOS ???? V2.1",
+          "after": "# KAIOS 創世憲章 V2.1",
+          "reason": "Approved canonical V2.1 header was replaced by literal question-mark corruption.",
+          "authoritative_source": "Human-approved fixed canonical literal supplied in PR #43 narrow correction decision",
+          "source_sha256": "02883978965155caa11f034e1b4973d8adffdad1f2d655d1109cc20713f3dd42",
+          "confidence": "VERIFIED_EXACT",
+          "old_file_sha256": "02883978965155caa11f034e1b4973d8adffdad1f2d655d1109cc20713f3dd42",
+          "new_file_sha256": "cfad7e30448a4a903313ff69a908823cd366f15f081f7a60ef367606084caef4",
+          "validation_result": "PASS"
         },
         {
-          "field": "PREVIOUS",
-          "line": 12,
-          "before": "**PREVIOUS:** Chapter 134 V2.1｜AI生命自我編程 × 文明種子 × 規格生成 Runtime  ",
-          "after": "**PREVIOUS:** Chapter 134 V2.1  ",
-          "reason": "Genesis Closure Chain updated approved by Human."
-        },
-        {
-          "field": "NEXT",
-          "line": 13,
-          "before": "**NEXT:** Chapter 136 V2.1｜公司 × 工廠 × 供應鏈 × 法院 × 破產 Runtime  ",
-          "after": "**NEXT:** Chapter 136 V2.1  ",
-          "reason": "Genesis Closure Chain updated approved by Human."
-        },
-        {
-          "field": "TRAILING_SEPARATOR",
-          "line": "EOF",
-          "before": "---",
-          "after": "",
-          "reason": "Signature must be final; trailing separator removed from repaired copy."
-        },
-        {
-          "field": "FINAL_SIGNATURE",
-          "line": "EOF",
-          "before": "",
-          "after": "???????????????? /  / Where the Market Becomes the Myth. /  / ?? ??? ?",
-          "reason": "Canonical V2.1 files must end with approved Genesis signature."
+          "field": "FINAL_GENESIS_SIGNATURE",
+          "line": 1097,
+          "before": [
+            "????????????????",
+            "",
+            "Where the Market Becomes the Myth.",
+            "",
+            "?? ??? ?"
+          ],
+          "after": [
+            "花果山台灣・信念不滅・市場無界。",
+            "",
+            "Where the Market Becomes the Myth.",
+            "",
+            "—— 樂天帝 ⌖"
+          ],
+          "reason": "Approved final Genesis signature was replaced by literal question-mark corruption.",
+          "authoritative_source": "Human-approved fixed canonical final signature supplied in PR #43 narrow correction decision",
+          "source_sha256": "02883978965155caa11f034e1b4973d8adffdad1f2d655d1109cc20713f3dd42",
+          "confidence": "VERIFIED_EXACT",
+          "old_file_sha256": "02883978965155caa11f034e1b4973d8adffdad1f2d655d1109cc20713f3dd42",
+          "new_file_sha256": "cfad7e30448a4a903313ff69a908823cd366f15f081f7a60ef367606084caef4",
+          "validation_result": "PASS"
         }
-      ]
+      ],
+      "previous_repaired_sha256": "02883978965155caa11f034e1b4973d8adffdad1f2d655d1109cc20713f3dd42",
+      "semantic_correction_status": "QUESTION_MARK_CORRUPTION_REPAIRED_VERIFIED_EXACT",
+      "corrupted_pr43_sha256": "02883978965155caa11f034e1b4973d8adffdad1f2d655d1109cc20713f3dd42"
     },
     {
       "chapter": "136",
@@ -197,46 +242,52 @@
       "original_source_path": "C:\\Desktop\\kline-odyssey\\KAIOS 創世憲章 V2.0\\KAIOS_Chapter_136_V2_1_Enterprise_Factory_SupplyChain_Court_Bankruptcy_KGEN_Economic_Anchor_Runtime.md",
       "repaired_managed_path": "KGEN-KAIOS\\constitution\\genesis-v2.1-source\\KAIOS_Chapter_136_V2_1_Enterprise_Factory_SupplyChain_Court_Bankruptcy_KGEN_Economic_Anchor_Runtime.md",
       "original_sha256": "770db84bb31c16451633aa805d29f4e6d016a5db578a02106c6ed3f36f42eabf",
-      "repaired_sha256": "d3a34d395226b702b7831e54b9d7f8e9262fa003f57db404e57c5a1e240f5bc6",
+      "repaired_sha256": "2a34283ef16baf37ca10f8a8f0570de0d683017d468b1eeda1977b6ffd606896",
       "canonical_status": "CANONICAL_REPAIRED_COPY",
       "repair_status": "APPLIED_IN_MANAGED_ARCHITECTURE_BRANCH",
       "changes": [
         {
-          "field": "H1",
+          "field": "H1_HEADER",
           "line": 1,
-          "before": "# KAIOS 創世憲章 V2.0",
-          "after": "# KAIOS ???? V2.1",
-          "reason": "Canonical V2.1 header repair approved by Human."
+          "before": "# KAIOS ???? V2.1",
+          "after": "# KAIOS 創世憲章 V2.1",
+          "reason": "Approved canonical V2.1 header was replaced by literal question-mark corruption.",
+          "authoritative_source": "Human-approved fixed canonical literal supplied in PR #43 narrow correction decision",
+          "source_sha256": "d3a34d395226b702b7831e54b9d7f8e9262fa003f57db404e57c5a1e240f5bc6",
+          "confidence": "VERIFIED_EXACT",
+          "old_file_sha256": "d3a34d395226b702b7831e54b9d7f8e9262fa003f57db404e57c5a1e240f5bc6",
+          "new_file_sha256": "2a34283ef16baf37ca10f8a8f0570de0d683017d468b1eeda1977b6ffd606896",
+          "validation_result": "PASS"
         },
         {
-          "field": "PREVIOUS",
-          "line": 12,
-          "before": "**PREVIOUS:** Chapter 135 V2.1｜物種演化 × 程式交配 × 文明分支 Runtime  ",
-          "after": "**PREVIOUS:** Chapter 135 V2.1  ",
-          "reason": "Genesis Closure Chain updated approved by Human."
-        },
-        {
-          "field": "NEXT",
-          "line": 13,
-          "before": "**NEXT:** Chapter 137 V2.1｜星系文明 × 宇宙文明 × 平行宇宙 × 多重宇宙 × 黑洞白洞 × 大爆炸 Runtime  ",
-          "after": "**NEXT:** Chapter 137 V2.1  ",
-          "reason": "Genesis Closure Chain updated approved by Human."
-        },
-        {
-          "field": "TRAILING_SEPARATOR",
-          "line": "EOF",
-          "before": "---",
-          "after": "",
-          "reason": "Signature must be final; trailing separator removed from repaired copy."
-        },
-        {
-          "field": "FINAL_SIGNATURE",
-          "line": "EOF",
-          "before": "",
-          "after": "???????????????? /  / Where the Market Becomes the Myth. /  / ?? ??? ?",
-          "reason": "Canonical V2.1 files must end with approved Genesis signature."
+          "field": "FINAL_GENESIS_SIGNATURE",
+          "line": 998,
+          "before": [
+            "????????????????",
+            "",
+            "Where the Market Becomes the Myth.",
+            "",
+            "?? ??? ?"
+          ],
+          "after": [
+            "花果山台灣・信念不滅・市場無界。",
+            "",
+            "Where the Market Becomes the Myth.",
+            "",
+            "—— 樂天帝 ⌖"
+          ],
+          "reason": "Approved final Genesis signature was replaced by literal question-mark corruption.",
+          "authoritative_source": "Human-approved fixed canonical final signature supplied in PR #43 narrow correction decision",
+          "source_sha256": "d3a34d395226b702b7831e54b9d7f8e9262fa003f57db404e57c5a1e240f5bc6",
+          "confidence": "VERIFIED_EXACT",
+          "old_file_sha256": "d3a34d395226b702b7831e54b9d7f8e9262fa003f57db404e57c5a1e240f5bc6",
+          "new_file_sha256": "2a34283ef16baf37ca10f8a8f0570de0d683017d468b1eeda1977b6ffd606896",
+          "validation_result": "PASS"
         }
-      ]
+      ],
+      "previous_repaired_sha256": "d3a34d395226b702b7831e54b9d7f8e9262fa003f57db404e57c5a1e240f5bc6",
+      "semantic_correction_status": "QUESTION_MARK_CORRUPTION_REPAIRED_VERIFIED_EXACT",
+      "corrupted_pr43_sha256": "d3a34d395226b702b7831e54b9d7f8e9262fa003f57db404e57c5a1e240f5bc6"
     },
     {
       "chapter": "137",
@@ -244,46 +295,52 @@
       "original_source_path": "C:\\Desktop\\kline-odyssey\\KAIOS 創世憲章 V2.0\\KAIOS_Chapter_137_V2_1_Galactic_Universe_Parallel_Multiverse_BlackHole_WhiteHole_BigBang_Runtime.md",
       "repaired_managed_path": "KGEN-KAIOS\\constitution\\genesis-v2.1-source\\KAIOS_Chapter_137_V2_1_Galactic_Universe_Parallel_Multiverse_BlackHole_WhiteHole_BigBang_Runtime.md",
       "original_sha256": "be43bcb2fb9fd8555d8d72304cca5f0b766ac652d7149a32974086f5dc0ef54c",
-      "repaired_sha256": "bd1570a1b10387356799770c5ba217907d3cbed363af4cbcfd4f99a80ddf84ea",
+      "repaired_sha256": "269a40aa602906a38dff7e12d8bf763f2069ecbc119a30d5369b8643521d34c2",
       "canonical_status": "CANONICAL_REPAIRED_COPY",
       "repair_status": "APPLIED_IN_MANAGED_ARCHITECTURE_BRANCH",
       "changes": [
         {
-          "field": "H1",
+          "field": "H1_HEADER",
           "line": 1,
-          "before": "# KAIOS 創世憲章 V2.0",
-          "after": "# KAIOS ???? V2.1",
-          "reason": "Canonical V2.1 header repair approved by Human."
+          "before": "# KAIOS ???? V2.1",
+          "after": "# KAIOS 創世憲章 V2.1",
+          "reason": "Approved canonical V2.1 header was replaced by literal question-mark corruption.",
+          "authoritative_source": "Human-approved fixed canonical literal supplied in PR #43 narrow correction decision",
+          "source_sha256": "bd1570a1b10387356799770c5ba217907d3cbed363af4cbcfd4f99a80ddf84ea",
+          "confidence": "VERIFIED_EXACT",
+          "old_file_sha256": "bd1570a1b10387356799770c5ba217907d3cbed363af4cbcfd4f99a80ddf84ea",
+          "new_file_sha256": "269a40aa602906a38dff7e12d8bf763f2069ecbc119a30d5369b8643521d34c2",
+          "validation_result": "PASS"
         },
         {
-          "field": "PREVIOUS",
-          "line": 12,
-          "before": "**PREVIOUS:** Chapter 136 V2.1｜公司 × 工廠 × 供應鏈 × 法院 × 破產 × KGEN經濟錨 Runtime  ",
-          "after": "**PREVIOUS:** Chapter 136 V2.1  ",
-          "reason": "Genesis Closure Chain updated approved by Human."
-        },
-        {
-          "field": "NEXT",
-          "line": 13,
-          "before": "**NEXT:** Chapter 138 V2.1｜動態憲章編譯器 × 11520認證交易 × 創世封卷 Runtime  ",
-          "after": "**NEXT:** Chapter 138 V2.1  ",
-          "reason": "Genesis Closure Chain updated approved by Human."
-        },
-        {
-          "field": "TRAILING_SEPARATOR",
-          "line": "EOF",
-          "before": "---",
-          "after": "",
-          "reason": "Signature must be final; trailing separator removed from repaired copy."
-        },
-        {
-          "field": "FINAL_SIGNATURE",
-          "line": "EOF",
-          "before": "",
-          "after": "???????????????? /  / Where the Market Becomes the Myth. /  / ?? ??? ?",
-          "reason": "Canonical V2.1 files must end with approved Genesis signature."
+          "field": "FINAL_GENESIS_SIGNATURE",
+          "line": 996,
+          "before": [
+            "????????????????",
+            "",
+            "Where the Market Becomes the Myth.",
+            "",
+            "?? ??? ?"
+          ],
+          "after": [
+            "花果山台灣・信念不滅・市場無界。",
+            "",
+            "Where the Market Becomes the Myth.",
+            "",
+            "—— 樂天帝 ⌖"
+          ],
+          "reason": "Approved final Genesis signature was replaced by literal question-mark corruption.",
+          "authoritative_source": "Human-approved fixed canonical final signature supplied in PR #43 narrow correction decision",
+          "source_sha256": "bd1570a1b10387356799770c5ba217907d3cbed363af4cbcfd4f99a80ddf84ea",
+          "confidence": "VERIFIED_EXACT",
+          "old_file_sha256": "bd1570a1b10387356799770c5ba217907d3cbed363af4cbcfd4f99a80ddf84ea",
+          "new_file_sha256": "269a40aa602906a38dff7e12d8bf763f2069ecbc119a30d5369b8643521d34c2",
+          "validation_result": "PASS"
         }
-      ]
+      ],
+      "previous_repaired_sha256": "bd1570a1b10387356799770c5ba217907d3cbed363af4cbcfd4f99a80ddf84ea",
+      "semantic_correction_status": "QUESTION_MARK_CORRUPTION_REPAIRED_VERIFIED_EXACT",
+      "corrupted_pr43_sha256": "bd1570a1b10387356799770c5ba217907d3cbed363af4cbcfd4f99a80ddf84ea"
     },
     {
       "chapter": "138",
@@ -291,46 +348,62 @@
       "original_source_path": "C:\\Desktop\\kline-odyssey\\KAIOS 創世憲章 V2.0\\KAIOS_Chapter_138_V2_1_Dynamic_Constitution_Compiler_11520_Certification_Genesis_Closure_Autonomous_Civilization_Runtime.md",
       "repaired_managed_path": "KGEN-KAIOS\\constitution\\genesis-v2.1-source\\KAIOS_Chapter_138_V2_1_Dynamic_Constitution_Compiler_11520_Certification_Genesis_Closure_Autonomous_Civilization_Runtime.md",
       "original_sha256": "7eb6d007abfb10eadec0936d87b6baf93cfce27d46455063f5dab2fb073f2dad",
-      "repaired_sha256": "89e721ffe95fe95c871d4407d1b7bc0a1ac0d87d7d9ef5a4ef2770788c7ac205",
+      "repaired_sha256": "f7d1177fa84523f5d05c63a8e92947961f3a31929109519360a932cd0016f4ba",
       "canonical_status": "CANONICAL_REPAIRED_COPY",
       "repair_status": "APPLIED_IN_MANAGED_ARCHITECTURE_BRANCH",
       "changes": [
         {
-          "field": "H1",
+          "field": "H1_HEADER",
           "line": 1,
-          "before": "# KAIOS 創世憲章 V2.0",
-          "after": "# KAIOS ???? V2.1",
-          "reason": "Canonical V2.1 header repair approved by Human."
+          "before": "# KAIOS ???? V2.1",
+          "after": "# KAIOS 創世憲章 V2.1",
+          "reason": "Approved canonical V2.1 header was replaced by literal question-mark corruption.",
+          "authoritative_source": "Human-approved fixed canonical literal supplied in PR #43 narrow correction decision",
+          "source_sha256": "89e721ffe95fe95c871d4407d1b7bc0a1ac0d87d7d9ef5a4ef2770788c7ac205",
+          "confidence": "VERIFIED_EXACT",
+          "old_file_sha256": "89e721ffe95fe95c871d4407d1b7bc0a1ac0d87d7d9ef5a4ef2770788c7ac205",
+          "new_file_sha256": "f7d1177fa84523f5d05c63a8e92947961f3a31929109519360a932cd0016f4ba",
+          "validation_result": "PASS"
         },
         {
-          "field": "PREVIOUS",
-          "line": 12,
-          "before": "**PREVIOUS:** Chapter 137 V2.1｜星系文明 × 宇宙文明 × 平行宇宙 × 多重宇宙 × 黑洞白洞 × 大爆炸 Runtime  ",
-          "after": "**PREVIOUS:** Chapter 137 V2.1  ",
-          "reason": "Genesis Closure Chain updated approved by Human."
-        },
-        {
-          "field": "NEXT",
-          "line": 13,
-          "before": "**NEXT:** Autonomous Civilization Branch Documents / No Fixed Chapter 139  ",
-          "after": "**NEXT:** Autonomous Civilization Branch Documents / No Fixed Chapter 139  ",
-          "reason": "Genesis Closure Chain updated approved by Human."
-        },
-        {
-          "field": "TRAILING_SEPARATOR",
-          "line": "EOF",
-          "before": "---",
-          "after": "",
-          "reason": "Signature must be final; trailing separator removed from repaired copy."
-        },
-        {
-          "field": "FINAL_SIGNATURE",
-          "line": "EOF",
-          "before": "",
-          "after": "???????????????? /  / Where the Market Becomes the Myth. /  / ?? ??? ?",
-          "reason": "Canonical V2.1 files must end with approved Genesis signature."
+          "field": "FINAL_GENESIS_SIGNATURE",
+          "line": 1030,
+          "before": [
+            "????????????????",
+            "",
+            "Where the Market Becomes the Myth.",
+            "",
+            "?? ??? ?"
+          ],
+          "after": [
+            "花果山台灣・信念不滅・市場無界。",
+            "",
+            "Where the Market Becomes the Myth.",
+            "",
+            "—— 樂天帝 ⌖"
+          ],
+          "reason": "Approved final Genesis signature was replaced by literal question-mark corruption.",
+          "authoritative_source": "Human-approved fixed canonical final signature supplied in PR #43 narrow correction decision",
+          "source_sha256": "89e721ffe95fe95c871d4407d1b7bc0a1ac0d87d7d9ef5a4ef2770788c7ac205",
+          "confidence": "VERIFIED_EXACT",
+          "old_file_sha256": "89e721ffe95fe95c871d4407d1b7bc0a1ac0d87d7d9ef5a4ef2770788c7ac205",
+          "new_file_sha256": "f7d1177fa84523f5d05c63a8e92947961f3a31929109519360a932cd0016f4ba",
+          "validation_result": "PASS"
         }
-      ]
+      ],
+      "previous_repaired_sha256": "89e721ffe95fe95c871d4407d1b7bc0a1ac0d87d7d9ef5a4ef2770788c7ac205",
+      "semantic_correction_status": "QUESTION_MARK_CORRUPTION_REPAIRED_VERIFIED_EXACT",
+      "corrupted_pr43_sha256": "89e721ffe95fe95c871d4407d1b7bc0a1ac0d87d7d9ef5a4ef2770788c7ac205"
     }
-  ]
+  ],
+  "semantic_integrity_rule": {
+    "rule_id": "KAIOS_SOURCE_SEMANTIC_INTEGRITY_RULE",
+    "principles": [
+      "UTF-8 PASS is not Semantic PASS.",
+      "JSON PASS is not Canonical PASS.",
+      "AI must not propagate verified source corruption.",
+      "AI must repair verified errors with authoritative sources and preserve evidence.",
+      "AI must not guess ambiguous source text."
+    ]
+  }
 }

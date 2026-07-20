@@ -1,4 +1,4 @@
-# KAIOS ???? V2.1
+# KAIOS 創世憲章 V2.1
 
 ## Chapter 000 V2.1｜萬物皆生命 × 輪迴 × 錢包 × 玉帝主權 × 自我編程文明根運行時
 
@@ -1406,8 +1406,8 @@ Where the Market Becomes the Myth.
 
 —— 樂天帝 ⌖
 
-????????????????
+花果山台灣・信念不滅・市場無界。
 
 Where the Market Becomes the Myth.
 
-?? ??? ?
+—— 樂天帝 ⌖

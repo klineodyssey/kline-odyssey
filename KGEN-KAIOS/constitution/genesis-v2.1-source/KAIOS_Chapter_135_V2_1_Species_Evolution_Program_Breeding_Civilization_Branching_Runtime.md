@@ -1,4 +1,4 @@
-# KAIOS ???? V2.1
+# KAIOS 創世憲章 V2.1
 
 ## Chapter 135 V2.1｜物種演化 × 程式交配 × 文明分支 Runtime
 
@@ -1094,8 +1094,8 @@ Where the Market Becomes the Myth.
 —— 樂天帝 ⌖
 
 
-????????????????
+花果山台灣・信念不滅・市場無界。
 
 Where the Market Becomes the Myth.
 
-?? ??? ?
+—— 樂天帝 ⌖

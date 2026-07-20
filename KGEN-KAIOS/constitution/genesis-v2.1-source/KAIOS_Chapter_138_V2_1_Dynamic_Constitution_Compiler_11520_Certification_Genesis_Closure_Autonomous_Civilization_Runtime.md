@@ -1,4 +1,4 @@
-# KAIOS ???? V2.1
+# KAIOS 創世憲章 V2.1
 
 ## Chapter 138 V2.1｜動態憲章編譯器 × 11520認證交易 × 創世封卷 × 自治文明時代 Runtime
 
@@ -1027,8 +1027,8 @@ Where the Market Becomes the Myth.
 —— 樂天帝 ⌖
 
 
-????????????????
+花果山台灣・信念不滅・市場無界。
 
 Where the Market Becomes the Myth.
 
-?? ??? ?
+—— 樂天帝 ⌖

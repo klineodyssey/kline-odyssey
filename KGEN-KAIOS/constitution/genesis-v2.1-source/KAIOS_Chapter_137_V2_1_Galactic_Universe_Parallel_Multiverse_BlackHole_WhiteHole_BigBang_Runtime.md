@@ -1,4 +1,4 @@
-# KAIOS ???? V2.1
+# KAIOS 創世憲章 V2.1
 
 ## Chapter 137 V2.1｜星系文明 × 宇宙文明 × 平行宇宙 × 多重宇宙 × 黑洞白洞 × 大爆炸 Runtime
 
@@ -993,8 +993,8 @@ Where the Market Becomes the Myth.
 —— 樂天帝 ⌖
 
 
-????????????????
+花果山台灣・信念不滅・市場無界。
 
 Where the Market Becomes the Myth.
 
-?? ??? ?
+—— 樂天帝 ⌖
