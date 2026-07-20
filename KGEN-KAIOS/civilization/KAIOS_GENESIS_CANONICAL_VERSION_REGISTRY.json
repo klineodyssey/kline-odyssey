@@ -1,7 +1,7 @@
 {
   "registry_id": "KAIOS_GENESIS_CANONICAL_VERSION_REGISTRY_V2_1",
   "generated_at": "2026-07-20T09:22:14.614267+00:00",
-  "status": "READY_FOR_BASELINE_REVIEW",
+  "status": "BASELINE_APPROVED",
   "canonical": {
     "000": "KAIOS_Chapter_000_V2_1_All_Matter_Life_Reincarnation_Wallet_Jade_Emperor_Self_Programming_Genesis_Runtime.md",
     "133": "KAIOS_Chapter_133_V2_1_Civilization_Life_Birth_Identity_Authentication_Autonomous_AI_Pilgrimage_Rooting_Runtime.md",
@@ -405,5 +405,20 @@
       "AI must repair verified errors with authoritative sources and preserve evidence.",
       "AI must not guess ambiguous source text."
     ]
+  },
+  "baseline_status": "BASELINE_APPROVED",
+  "baseline_merge": {
+    "pr_number": 43,
+    "original_base_sha": "9198fabab1d3a68e07d313655c1205d77fe1bb66",
+    "final_head_sha": "4cf73bfd47880cafc9643333e14f8e5346e6b534",
+    "merge_sha": "3431508dce393fac0a8da51567f089f47617009a",
+    "new_main_sha_before_closeout": "3431508dce393fac0a8da51567f089f47617009a",
+    "approved_by": "Human PrimeForge",
+    "recovery_point": "RECOVERY-20260720-KAIOS-GENESIS-V2-1-BASELINE",
+    "runtime_status": "NOT_APPROVED",
+    "ui_status": "NOT_APPROVED",
+    "cursor_dispatch_status": "NOT_APPROVED",
+    "real_kgen_status": "NOT_AUTHORIZED",
+    "updated_at": "2026-07-20T09:34:24.694400+00:00"
   }
 }

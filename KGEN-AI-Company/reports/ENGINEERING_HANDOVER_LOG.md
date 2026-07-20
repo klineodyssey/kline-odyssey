@@ -10,3 +10,4 @@
 ## Rule
 
 Any blocked, superseded, merged, or dispatched engineering state must appear here or in another formal engineering record. No unresolved item may be left undocumented.
+| 2026-07-20 | EHL-20260720-001 | BASELINE_MERGE_CLOSEOUT | KAIOS-GENESIS-V2.1-BASELINE | COMPLETE | PR #43 merged and closeout records created. Recovery point `RECOVERY-20260720-KAIOS-GENESIS-V2-1-BASELINE` anchors rollback to `9198fabab1d3a68e07d313655c1205d77fe1bb66` and merge `3431508dce393fac0a8da51567f089f47617009a`. | Stop. Wait for Human decision on old Product Sprint 001A disposition: SUPERSEDE, REVISE AS 001A-R1, or CLOSE. | None |
