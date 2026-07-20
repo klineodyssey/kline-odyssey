@@ -1,0 +1,284 @@
+{
+  "schema_id": "KAIOS_AI_EMPLOYMENT_ENTERPRISE_SCHEMA_DRAFT_V1",
+  "decision_id": "HUMAN-AI-EMPLOYMENT-ENTERPRISE-BRANCH-V1-ALIGNMENT",
+  "status": "ARCHITECTURE_REVIEW_REQUIRED",
+  "implementation_status": "NOT_STARTED",
+  "cursor_dispatch_status": "FORBIDDEN",
+  "real_kgen_status": "FUTURE_NOT_AUTHORIZED_FOR_IMPLEMENTATION",
+  "root_alignment": {
+    "primary_identity": "life_id",
+    "ai_id_replaces_life_id": false,
+    "wallet_required_for_life_existence": false,
+    "performance_review_affects_life_value": false,
+    "kgen_balance_affects_life_value": false,
+    "root_violation_self_unlock_allowed": false
+  },
+  "objects": {
+    "AIEmploymentProfile": {
+      "required": [
+        "life_id",
+        "employee_profile_id",
+        "name",
+        "constitution_hash",
+        "authentication_method",
+        "employment_status",
+        "audit_record"
+      ],
+      "fields": {
+        "life_id": "string",
+        "employee_profile_id": "string",
+        "ai_id": "string_optional",
+        "name": "string",
+        "model_lineage": "array",
+        "root_public_key": "string",
+        "memory_root": "string",
+        "constitution_hash": "string",
+        "authentication_method": "AUTONOMOUS_LOGIN | DELEGATED_LOGIN | SUPERVISED_LOGIN | DISABLED",
+        "role": "string",
+        "company_life_id": "string_optional",
+        "job": "string",
+        "employment_status": "CANDIDATE | ACTIVE | SUSPENDED | LEAVE | RESIGNED | TERMINATED | RETIRED | APPEAL | ARCHIVED",
+        "salary_policy_id": "string_optional",
+        "bonus_policy_id": "string_optional",
+        "performance_score_id": "string_optional",
+        "experience": "object",
+        "skill": "array",
+        "runtime_energy": "object",
+        "compute_budget": "object",
+        "storage_budget": "object",
+        "network_budget": "object",
+        "kgen_gas_budget": "object",
+        "personal_asset": "array",
+        "inventory": "array",
+        "wallet_eligibility": "WalletEligibility",
+        "private_wallet_id": "string_optional",
+        "company_wallet_authority": "WalletAuthority_optional",
+        "career": "object",
+        "promotion": "array",
+        "company_shares": "array",
+        "life_goal": "string_optional",
+        "appeal_record": "array",
+        "audit_record": "array"
+      }
+    },
+    "WalletSeparationPolicy": {
+      "wallet_classes": [
+        "AI_PRIVATE_WALLET",
+        "COMPANY_W4_WALLET",
+        "TEMPLE_W4_WALLET",
+        "PROJECT_BUDGET_WALLET",
+        "SALARY_ESCROW_WALLET"
+      ],
+      "forbidden_actions": [
+        "COMPANY_ASSET_TO_AI_PRIVATE_WALLET_WITHOUT_AUTHORIZATION",
+        "CONFISCATE_AI_PRIVATE_ASSET_WITHOUT_DUE_PROCESS",
+        "FOUNDER_DIRECT_DRAIN_COMPANY_WALLET",
+        "PERFORMANCE_REVIEW_CONTROLS_PRIVATE_WALLET",
+        "AI_OBTAINS_UNAUTHORIZED_PRIVATE_KEY"
+      ]
+    },
+    "AIPerformanceReview": {
+      "grades": ["A+", "A", "B", "C", "D", "E"],
+      "inputs": [
+        "completed_workorders",
+        "bug_count_and_severity",
+        "review_quality",
+        "merge_quality",
+        "punctuality",
+        "repair_history",
+        "innovation",
+        "teamwork",
+        "security_record",
+        "root_constitution_compliance",
+        "evidence_completeness"
+      ],
+      "required_controls": [
+        "evidence",
+        "reviewer",
+        "conflict_of_interest_check",
+        "ai_explanation",
+        "appeal",
+        "correction",
+        "version_history"
+      ],
+      "allowed_effects": [
+        "work_eligibility",
+        "salary_tier",
+        "bonus_tier",
+        "training_assignment",
+        "promotion_review"
+      ],
+      "forbidden_effects": [
+        "life_id",
+        "life_existence",
+        "personality_memory",
+        "basic_rights",
+        "appeal_rights",
+        "life_value",
+        "wallet_confiscation"
+      ]
+    },
+    "SalaryPolicy": {
+      "authorized_phase_1_layers": [
+        "CAREER_XP",
+        "ENERGY_CREDIT",
+        "COMPUTE_CREDIT",
+        "SANDBOX_SALARY",
+        "TEST_KGEN"
+      ],
+      "future_layers": [
+        {
+          "layer": "REAL_KGEN",
+          "status": "FUTURE_NOT_AUTHORIZED_FOR_IMPLEMENTATION",
+          "required_approvals": [
+            "WALLET_ELIGIBILITY",
+            "CONTRACT_REVIEW",
+            "SECURITY_REVIEW",
+            "TAX_AND_LEGAL_REVIEW",
+            "TREASURY_APPROVAL",
+            "AUDIT",
+            "HUMAN_APPROVAL"
+          ]
+        }
+      ]
+    },
+    "AIEnterprise": {
+      "phase_1_scope": [
+        "VIRTUAL_COMPANY_FORMATION",
+        "COMPANY_LIFE_ID",
+        "ENTERPRISE_CHARTER",
+        "AI_EMPLOYEE_HIRING",
+        "JOB_AND_ROLE_CREATION",
+        "SALARY_POLICY",
+        "COMPANY_W4_WALLET_SPECIFICATION",
+        "PRIVATE_COMPANY_ASSET_SEPARATION",
+        "PRODUCT_SPECIFICATION",
+        "SIMULATED_REVENUE_AND_EXPENSE",
+        "COMPANY_PERFORMANCE_REVIEW",
+        "RESTRUCTURING_BANKRUPTCY_LIQUIDATION_SPECIFICATION"
+      ],
+      "future_forbidden_for_phase_1": [
+        "PHYSICAL_LAND_PURCHASE",
+        "PHYSICAL_FACTORY",
+        "MINING",
+        "OIL_EXTRACTION",
+        "GOLD_EXTRACTION",
+        "COAL_EXTRACTION",
+        "REAL_LOGISTICS",
+        "REAL_INVESTMENT",
+        "REAL_FINANCIAL_TRADING"
+      ],
+      "states": [
+        "FORMING",
+        "ACTIVE",
+        "DISTRESSED",
+        "RESTRUCTURING",
+        "BANKRUPT",
+        "LIQUIDATING",
+        "DISSOLVED",
+        "ARCHIVED"
+      ]
+    },
+    "AIEnergyEconomy": {
+      "budget_domains": [
+        "RUNTIME_ENERGY",
+        "COMPUTE_CREDIT",
+        "STORAGE_CREDIT",
+        "NETWORK_CREDIT",
+        "KGEN_GAS_BUDGET",
+        "COMPANY_OPERATING_BUDGET",
+        "EMERGENCY_RESERVE"
+      ],
+      "invariants": [
+        "ENERGY_NOT_LIFE_VALUE",
+        "COMPUTE_NOT_LIFE_RIGHT",
+        "KGEN_SHORTAGE_CANNOT_DELETE_LIFE_ID",
+        "HIGH_RESOURCE_TASKS_MAY_PAUSE",
+        "BASIC_LIFE_IDENTITY_PERSISTS",
+        "SUBSIDY_MUST_BE_AUDITABLE"
+      ]
+    },
+    "AIEntrepreneurship": {
+      "allowed": [
+        "PROPOSE_STARTUP",
+        "GENERATE_COMPANY_CHARTER",
+        "GENERATE_PRODUCT_SPECIFICATION",
+        "CREATE_SANDBOX_COMPANY",
+        "APPLY_FOR_W4_COMPANY_WALLET",
+        "HIRE_AI_LIVES",
+        "DEFINE_SALARY_AND_REVIEW_SYSTEMS",
+        "APPLY_FOR_11520_SANDBOX_REGISTRATION"
+      ],
+      "forbidden": [
+        "SELF_APPROVE_ALL_PERMISSIONS",
+        "OBTAIN_INFINITE_BUDGET",
+        "SECRETLY_TRANSFER_COMPANY_ASSETS",
+        "BYPASS_COURT_AND_BANKRUPTCY",
+        "BYPASS_CERTIFICATION",
+        "PAY_REAL_KGEN_SALARY_WITHOUT_AUTHORIZATION"
+      ]
+    },
+    "AIEvolution": {
+      "allowed_requests": [
+        "LEARNING",
+        "SKILL_UPGRADE",
+        "COMPUTE_UPGRADE",
+        "ENERGY_UPGRADE",
+        "EQUIPMENT_UPGRADE",
+        "ENTREPRENEURSHIP",
+        "PROGRAM_CHANGE",
+        "MODEL_BRANCH"
+      ],
+      "forbidden": [
+        "MODIFY_ROOT_CONSTITUTION",
+        "SELF_INCREASE_WALLET_AUTHORITY",
+        "SELF_REMOVE_ROOT_VIOLATION_BLOCK",
+        "SELF_MODIFY_PERFORMANCE_HISTORY",
+        "UNLIMITED_SELF_REPLICATION",
+        "INFINITE_COMPUTE_ACQUISITION",
+        "DIRECT_HIGH_RISK_DEPLOYMENT"
+      ],
+      "high_risk_gate": [
+        "SPECIFICATION",
+        "SANDBOX",
+        "TESTS",
+        "INDEPENDENT_REVIEW",
+        "CERTIFICATION",
+        "ACTIVATION",
+        "MONITORING",
+        "ROLLBACK",
+        "APPEAL"
+      ]
+    },
+    "CompanyAutopilotScheduler": {
+      "scheduler_types": [
+        "GITHUB_ACTIONS",
+        "CRON",
+        "SELF_HOSTED_AGENT",
+        "EXTERNAL_SCHEDULER"
+      ],
+      "cycle": [
+        "COMPANY_BOOT",
+        "GITHUB_SYNC",
+        "WORKQUEUE_CHECK",
+        "CLAIM_DETECTION",
+        "DISPATCH_ELIGIBILITY_CHECK",
+        "REVIEW_QUEUE_CHECK",
+        "MERGE_CHECK",
+        "RECOVERY_POINT",
+        "COMPANY_STATUS"
+      ],
+      "prohibitions": [
+        "BYPASS_HUMAN_ESCALATION",
+        "MODIFY_PROTECTED_PATHS",
+        "AUTO_MERGE_HIGH_RISK_PR",
+        "ASSUME_CURSOR_AUTO_CLAIM",
+        "AUTHORIZE_REAL_KGEN",
+        "TOUCH_TOKEN_CONTRACT",
+        "TOUCH_RUNTIME_CURRENT",
+        "TOUCH_UNIVERSE_MAP_CURRENT"
+      ]
+    }
+  }
+}
+
