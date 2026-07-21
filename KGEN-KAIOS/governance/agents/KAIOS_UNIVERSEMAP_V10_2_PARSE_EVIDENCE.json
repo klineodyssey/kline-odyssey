@@ -1,0 +1,52 @@
+{
+  "status": "DIAGNOSTIC_COMPLETED",
+  "final_decision": "VALIDATED",
+  "diagnostic_classification": "VALID_JSON_SOURCE_INTEGRITY_VALIDATED",
+  "source_modification": false,
+  "repair_proposal_created": false,
+  "file": "docs/maps/UniverseMap_V10_2_DISTANCE_COMPLETE_ALL_POINTS.json",
+  "read_encoding": "utf-8",
+  "utf8_decode_ok": true,
+  "file_size_bytes": 183610,
+  "sha256": "ad9895f4073a2064226189307f3f1f72d251c0cf7c2dccd9b736471695afda1d",
+  "tools": [
+    {
+      "tool": "Python json",
+      "tool_version": "Python 3.14.0",
+      "read_encoding": "utf-8",
+      "parse_result": "PASS",
+      "error_line": null,
+      "error_column": null,
+      "error_message": null,
+      "context_before": [],
+      "context_after": []
+    },
+    {
+      "tool": "Node.js JSON.parse",
+      "tool_version": "v24.12.0",
+      "read_encoding": "utf8",
+      "parse_result": "PASS",
+      "error_line": null,
+      "error_column": null,
+      "error_message": null,
+      "context_before": [],
+      "context_after": []
+    },
+    {
+      "tool": "PowerShell ConvertFrom-Json",
+      "tool_version": "5.1.19041.6456",
+      "read_encoding": "UTF8",
+      "parse_result": "PASS",
+      "error_line": null,
+      "error_column": null,
+      "error_message": null,
+      "context_before": [],
+      "context_after": []
+    }
+  ],
+  "notes": [
+    "The earlier PowerShell failure was not reproduced in the required three-parser diagnostic and is classified as TRANSIENT_TOOL_OR_INVOCATION_FAILURE, not source corruption.",
+    "No syntax error was confirmed, so no repair proposal was created.",
+    "This evidence does not modify the Universe Map source or CURRENT selector."
+  ]
+}
