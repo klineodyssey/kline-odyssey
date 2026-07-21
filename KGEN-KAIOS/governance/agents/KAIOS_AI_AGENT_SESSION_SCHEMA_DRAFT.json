@@ -1,0 +1,1168 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "KAIOS_AI_AGENT_SESSION_SCHEMA_DRAFT",
+  "title": "KAIOS AI Agent Session Schema Draft",
+  "status": "READY_FOR_BASELINE_REVIEW",
+  "implementation_status": "NOT_STARTED",
+  "description": "Draft schema for durable AI Life records, per-session Agent Instance records, handoffs, repository messages, performance records and incidents. Includes narrow baseline repair contracts for attestation, birth records, capability grants, revocation, locks, stale blocking, current pointer, evidence provenance and secret boundaries.",
+  "type": "object",
+  "required": [
+    "life_record",
+    "session_record",
+    "handoff_record",
+    "message_record",
+    "performance_record",
+    "incident_record",
+    "agent_identity_attestation",
+    "session_birth_record",
+    "capability_grant",
+    "capability_revocation",
+    "session_lock",
+    "canonical_current_state_pointer",
+    "evidence_provenance",
+    "secret_access_record"
+  ],
+  "properties": {
+    "life_record": {
+      "type": "object",
+      "required": [
+        "life_id",
+        "role",
+        "authority_scope",
+        "forbidden_actions",
+        "capabilities",
+        "status"
+      ],
+      "properties": {
+        "life_id": {
+          "type": "string",
+          "pattern": "^KAIOS-AI-LIFE-[A-Z0-9-]+$"
+        },
+        "role": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "authority_scope": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "forbidden_actions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "capabilities": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "memory_policy": {
+          "type": "string"
+        },
+        "performance_policy": {
+          "type": "string"
+        },
+        "succession_policy": {
+          "type": "string"
+        },
+        "human_authority_anchor": {
+          "type": "string"
+        },
+        "status": {
+          "enum": [
+            "ACTIVE",
+            "SUSPENDED",
+            "RETIRED",
+            "ARCHIVED"
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "session_record": {
+      "type": "object",
+      "required": [
+        "life_id",
+        "instance_id",
+        "conversation_channel",
+        "born_at",
+        "role",
+        "authority",
+        "forbidden_actions",
+        "base_main_sha",
+        "current_main_sha",
+        "current_state",
+        "status"
+      ],
+      "properties": {
+        "life_id": {
+          "type": "string"
+        },
+        "instance_id": {
+          "type": "string",
+          "pattern": "^CODEX-GM-[0-9]{8}-SESSION-[0-9]{4}$"
+        },
+        "conversation_channel": {
+          "type": "string"
+        },
+        "born_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "parent_instance_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "parent_handoff_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "role": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "authority": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "forbidden_actions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "base_main_sha": {
+          "type": "string"
+        },
+        "current_main_sha": {
+          "type": "string"
+        },
+        "assigned_workorder": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "current_state": {
+          "type": "string"
+        },
+        "files_read": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "files_changed": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "decisions_read": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "risks_read": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "recovery_point": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "last_action": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "handoff_target": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "status": {
+          "enum": [
+            "BOOTING",
+            "ACTIVE",
+            "ACTIVE_WRITE",
+            "REVIEWING",
+            "HANDOFF_REQUIRED",
+            "STALE_SESSION_BLOCKED",
+            "CLOSED",
+            "ARCHIVED",
+            "BLOCKED"
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "handoff_record": {
+      "type": "object",
+      "required": [
+        "handoff_id",
+        "from_life_id",
+        "from_instance_id",
+        "to_role",
+        "workorder_id",
+        "base_sha",
+        "ending_sha",
+        "actions_completed",
+        "actions_not_completed",
+        "created_at",
+        "signature"
+      ],
+      "properties": {
+        "handoff_id": {
+          "type": "string"
+        },
+        "from_life_id": {
+          "type": "string"
+        },
+        "from_instance_id": {
+          "type": "string"
+        },
+        "to_role": {
+          "type": "string"
+        },
+        "to_instance_id_if_known": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "workorder_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "base_sha": {
+          "type": "string"
+        },
+        "ending_sha": {
+          "type": "string"
+        },
+        "files_read": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "files_changed": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "actions_completed": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "actions_not_completed": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "tests_run": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "test_results": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "open_blockers": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "known_risks": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "incidents": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "human_decisions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "forbidden_next_actions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "required_next_actions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "recovery_point": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "evidence_paths": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "signature": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "message_record": {
+      "type": "object",
+      "required": [
+        "message_id",
+        "from_life_id",
+        "from_instance_id",
+        "to_life_id_or_role",
+        "subject",
+        "main_sha",
+        "body",
+        "priority",
+        "requires_response",
+        "status",
+        "idempotency_key",
+        "sequence_number",
+        "retry_count",
+        "max_retries",
+        "ack_required",
+        "ack_status",
+        "supersedes_message_id",
+        "body_sha256"
+      ],
+      "properties": {
+        "message_id": {
+          "type": "string"
+        },
+        "from_life_id": {
+          "type": "string"
+        },
+        "from_instance_id": {
+          "type": "string"
+        },
+        "to_life_id_or_role": {
+          "type": "string"
+        },
+        "subject": {
+          "type": "string"
+        },
+        "workorder_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "main_sha": {
+          "type": "string"
+        },
+        "body": {
+          "type": "string"
+        },
+        "evidence": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "priority": {
+          "enum": [
+            "P0",
+            "P1",
+            "P2",
+            "P3"
+          ]
+        },
+        "requires_response": {
+          "type": "boolean"
+        },
+        "expires_at": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        },
+        "status": {
+          "enum": [
+            "CREATED",
+            "DELIVERED",
+            "ACKNOWLEDGED",
+            "RETRY_PENDING",
+            "EXPIRED",
+            "SUPERSEDED",
+            "FAILED",
+            "CLOSED",
+            "ARCHIVED"
+          ]
+        },
+        "idempotency_key": {
+          "type": "string"
+        },
+        "sequence_number": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "retry_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "max_retries": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "ack_required": {
+          "type": "boolean"
+        },
+        "ack_status": {
+          "enum": [
+            "NOT_REQUIRED",
+            "PENDING",
+            "ACKNOWLEDGED",
+            "EXPIRED",
+            "FAILED"
+          ]
+        },
+        "supersedes_message_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "body_sha256": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "performance_record": {
+      "type": "object",
+      "properties": {
+        "life_id": {
+          "type": "string"
+        },
+        "instance_id": {
+          "type": "string"
+        },
+        "workorder_completion": {
+          "type": "string"
+        },
+        "bug_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "review_quality": {
+          "type": "string"
+        },
+        "merge_quality": {
+          "type": "string"
+        },
+        "evidence_completeness": {
+          "type": "string"
+        },
+        "boundary_compliance": {
+          "type": "string"
+        },
+        "repair_quality": {
+          "type": "string"
+        },
+        "innovation": {
+          "type": "string"
+        },
+        "teamwork": {
+          "type": "string"
+        },
+        "handoff_quality": {
+          "type": "string"
+        },
+        "self_correction": {
+          "type": "string"
+        },
+        "repeat_incident_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "cannot_affect": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "Life ID",
+              "life existence",
+              "basic rights",
+              "memory personality",
+              "appeal right",
+              "life value"
+            ]
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "incident_record": {
+      "type": "object",
+      "properties": {
+        "incident_id": {
+          "type": "string"
+        },
+        "life_id": {
+          "type": "string"
+        },
+        "instance_id": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string"
+        },
+        "severity": {
+          "enum": [
+            "P0",
+            "P1",
+            "P2",
+            "P3"
+          ]
+        },
+        "description": {
+          "type": "string"
+        },
+        "evidence": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "containment": {
+          "type": "string"
+        },
+        "repair_required": {
+          "type": "boolean"
+        },
+        "human_escalation_required": {
+          "type": "boolean"
+        },
+        "status": {
+          "enum": [
+            "OPEN",
+            "CONTAINED",
+            "REPAIR_REQUIRED",
+            "RESOLVED",
+            "ARCHIVED"
+          ]
+        },
+        "main_sha": {
+          "type": "string"
+        },
+        "base_sha": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "ending_sha": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "evidence_hash": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "incident_id",
+        "life_id",
+        "instance_id",
+        "main_sha",
+        "evidence"
+      ]
+    },
+    "agent_identity_attestation": {
+      "type": "object",
+      "required": [
+        "attestation_id",
+        "life_id",
+        "agent_type",
+        "role",
+        "issued_by",
+        "issued_at",
+        "expires_at",
+        "public_identity_anchor",
+        "allowed_capability_profile",
+        "revocation_status",
+        "registry_entry_sha256",
+        "human_or_controller_approval",
+        "signature_or_evidence_reference"
+      ],
+      "properties": {
+        "attestation_id": {
+          "type": "string"
+        },
+        "life_id": {
+          "type": "string"
+        },
+        "agent_type": {
+          "type": "string"
+        },
+        "role": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "issued_by": {
+          "type": "string"
+        },
+        "issued_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "expires_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "public_identity_anchor": {
+          "type": "string"
+        },
+        "allowed_capability_profile": {
+          "type": "string"
+        },
+        "revocation_status": {
+          "enum": [
+            "ACTIVE",
+            "REVOKED",
+            "EXPIRED",
+            "SUSPENDED"
+          ]
+        },
+        "registry_entry_sha256": {
+          "type": "string"
+        },
+        "human_or_controller_approval": {
+          "type": "string"
+        },
+        "signature_or_evidence_reference": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "session_birth_record": {
+      "type": "object",
+      "required": [
+        "session_birth_id",
+        "life_id",
+        "instance_id",
+        "conversation_channel",
+        "born_at",
+        "base_main_sha",
+        "current_baseline_id",
+        "capability_grant_id",
+        "attestation_id",
+        "boot_evidence",
+        "initial_status"
+      ],
+      "properties": {
+        "session_birth_id": {
+          "type": "string"
+        },
+        "life_id": {
+          "type": "string"
+        },
+        "instance_id": {
+          "type": "string"
+        },
+        "parent_instance_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "parent_handoff_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "conversation_channel": {
+          "type": "string"
+        },
+        "born_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "base_main_sha": {
+          "type": "string"
+        },
+        "current_baseline_id": {
+          "type": "string"
+        },
+        "assigned_workorder": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "capability_grant_id": {
+          "type": "string"
+        },
+        "attestation_id": {
+          "type": "string"
+        },
+        "boot_evidence": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "initial_status": {
+          "enum": [
+            "ROOT_SESSION",
+            "HUMAN_AUTHORIZED_ORPHAN_SESSION",
+            "CHILD_SESSION",
+            "BOOTING",
+            "BLOCKED"
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "capability_grant": {
+      "type": "object",
+      "required": [
+        "grant_id",
+        "life_id",
+        "instance_id",
+        "capabilities",
+        "scope_paths",
+        "base_sha",
+        "issued_by",
+        "issued_at",
+        "expires_at",
+        "conditions"
+      ],
+      "properties": {
+        "grant_id": {
+          "type": "string"
+        },
+        "life_id": {
+          "type": "string"
+        },
+        "instance_id": {
+          "type": "string"
+        },
+        "capabilities": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "READ",
+              "AUDIT",
+              "ARCHITECTURE",
+              "REVIEW",
+              "WRITE_DOCS",
+              "CREATE_BRANCH",
+              "COMMIT",
+              "PUSH",
+              "OPEN_PR",
+              "APPROVE_REVIEW",
+              "MERGE",
+              "DISPATCH_CURSOR",
+              "MODIFY_RUNTIME",
+              "MODIFY_TOKEN",
+              "DEPLOY"
+            ]
+          }
+        },
+        "scope_paths": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "workorder_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "base_sha": {
+          "type": "string"
+        },
+        "issued_by": {
+          "type": "string"
+        },
+        "issued_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "expires_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "conditions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "revocation_id_if_any": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "capability_revocation": {
+      "type": "object",
+      "required": [
+        "revocation_id",
+        "grant_id",
+        "life_id",
+        "instance_id",
+        "revoked_capabilities",
+        "revoked_by",
+        "revoked_at",
+        "reason",
+        "effect"
+      ],
+      "properties": {
+        "revocation_id": {
+          "type": "string"
+        },
+        "grant_id": {
+          "type": "string"
+        },
+        "life_id": {
+          "type": "string"
+        },
+        "instance_id": {
+          "type": "string"
+        },
+        "revoked_capabilities": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "READ",
+              "AUDIT",
+              "ARCHITECTURE",
+              "REVIEW",
+              "WRITE_DOCS",
+              "CREATE_BRANCH",
+              "COMMIT",
+              "PUSH",
+              "OPEN_PR",
+              "APPROVE_REVIEW",
+              "MERGE",
+              "DISPATCH_CURSOR",
+              "MODIFY_RUNTIME",
+              "MODIFY_TOKEN",
+              "DEPLOY"
+            ]
+          }
+        },
+        "revoked_by": {
+          "type": "string"
+        },
+        "revoked_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "reason": {
+          "type": "string"
+        },
+        "effect": {
+          "enum": [
+            "SESSION_INVALIDATED",
+            "CAPABILITY_REMOVED",
+            "READ_ONLY_ALLOWED",
+            "FULL_STOP"
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "session_lock": {
+      "type": "object",
+      "required": [
+        "lock_id",
+        "workorder_id",
+        "holder_instance_id",
+        "scope",
+        "acquired_at",
+        "heartbeat_at",
+        "expires_at",
+        "status"
+      ],
+      "properties": {
+        "lock_id": {
+          "type": "string"
+        },
+        "workorder_id": {
+          "type": "string"
+        },
+        "holder_instance_id": {
+          "type": "string"
+        },
+        "scope": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "acquired_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "heartbeat_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "expires_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "status": {
+          "enum": [
+            "ACTIVE",
+            "EXPIRED",
+            "RELEASED",
+            "REVOKED",
+            "CONFLICTED",
+            "SESSION_STALE"
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "canonical_current_state_pointer": {
+      "type": "object",
+      "required": [
+        "current_main_sha",
+        "current_baseline_id",
+        "current_recovery_point",
+        "active_workorders",
+        "superseded_workorders",
+        "active_agent_sessions",
+        "revoked_sessions",
+        "last_human_decision_id",
+        "updated_at",
+        "updated_by",
+        "state_sha256"
+      ],
+      "properties": {
+        "current_main_sha": {
+          "type": "string"
+        },
+        "current_baseline_id": {
+          "type": "string"
+        },
+        "current_recovery_point": {
+          "type": "string"
+        },
+        "active_workorders": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "superseded_workorders": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "active_agent_sessions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "revoked_sessions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "last_human_decision_id": {
+          "type": "string"
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updated_by": {
+          "type": "string"
+        },
+        "state_sha256": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "evidence_provenance": {
+      "type": "object",
+      "required": [
+        "evidence_id",
+        "source_type",
+        "source_path",
+        "source_sha256",
+        "source_main_sha",
+        "observed_at",
+        "observed_by_instance_id",
+        "method",
+        "result",
+        "confidence",
+        "tamper_status"
+      ],
+      "properties": {
+        "evidence_id": {
+          "type": "string"
+        },
+        "source_type": {
+          "type": "string"
+        },
+        "source_path": {
+          "type": "string"
+        },
+        "source_sha256": {
+          "type": "string"
+        },
+        "source_main_sha": {
+          "type": "string"
+        },
+        "observed_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "observed_by_instance_id": {
+          "type": "string"
+        },
+        "method": {
+          "type": "string"
+        },
+        "result": {
+          "type": "string"
+        },
+        "confidence": {
+          "enum": [
+            "LOW",
+            "MEDIUM",
+            "HIGH",
+            "VERIFIED_EXACT"
+          ]
+        },
+        "superseded_by": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "tamper_status": {
+          "enum": [
+            "UNKNOWN",
+            "CLEAN",
+            "SUSPECTED",
+            "TAMPERED",
+            "SUPERSEDED"
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "secret_access_record": {
+      "type": "object",
+      "required": [
+        "secret_scope",
+        "access_reason",
+        "approved_by",
+        "access_started_at",
+        "access_ended_at",
+        "result_only_evidence",
+        "revocation"
+      ],
+      "properties": {
+        "secret_scope": {
+          "type": "string"
+        },
+        "access_reason": {
+          "type": "string"
+        },
+        "approved_by": {
+          "type": "string"
+        },
+        "access_started_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "access_ended_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "result_only_evidence": {
+          "type": "string"
+        },
+        "revocation": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}
