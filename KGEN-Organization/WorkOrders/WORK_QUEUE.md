@@ -34,6 +34,8 @@ The worker must then stop without changing WorkQueue, creating a branch, editing
 | MERGED | Approved handoff branch was merged into main | Codex |
 | REJECTED | Codex rejected result | Codex |
 | FIX | Rejected task requires a correction pass | Codex then Cursor |
+| HOLD | Preserved but not claimable until an explicit later authorization | Codex |
+| SUPERSEDED | Historical task replaced by a newer approved direction; not claimable | Codex |
 | DONE | Codex closed after commit/push or no-change acceptance | Codex |
 
 ## Cursor Required Read Order
@@ -177,17 +179,19 @@ The worker must then stop without changing WorkQueue, creating a branch, editing
 
 | Task ID | Status | Owner | Reviewer | Priority | Department | Branch | Output Report |
 |---|---|---|---|---|---|---|---|
-| KAIOS-PRODUCT-SPRINT-001A | OPEN | cursor-01 | Codex | P0 | Frontend | `cursor-handoff/KAIOS-PRODUCT-SPRINT-001A` | `KGEN-AI-Company/reports/KAIOS_PRODUCT_SPRINT_001A_REPORT.md` |
-| KAIOS-PRODUCT-SPRINT-001B | DRAFT | cursor-01 | Codex | P1 | Frontend | `cursor-handoff/KAIOS-PRODUCT-SPRINT-001B` | `KGEN-AI-Company/reports/KAIOS_PRODUCT_SPRINT_001B_REPORT.md` |
-| KAIOS-PRODUCT-SPRINT-001C | DRAFT | cursor-01 | Codex | P1 | QA | `cursor-handoff/KAIOS-PRODUCT-SPRINT-001C` | `KGEN-AI-Company/reports/KAIOS_PRODUCT_SPRINT_001C_REPORT.md` |
+| KAIOS-PRODUCT-SPRINT-001A | SUPERSEDED | cursor-01 | Codex | P0 | Frontend | `cursor-handoff/KAIOS-PRODUCT-SPRINT-001A` | `KGEN-AI-Company/reports/KAIOS_PRODUCT_SPRINT_001A_REPORT.md` |
+| KAIOS-PRODUCT-SPRINT-001B | HOLD | cursor-01 | Codex | P1 | Frontend | `cursor-handoff/KAIOS-PRODUCT-SPRINT-001B` | `KGEN-AI-Company/reports/KAIOS_PRODUCT_SPRINT_001B_REPORT.md` |
+| KAIOS-PRODUCT-SPRINT-001C | HOLD | cursor-01 | Codex | P1 | QA | `cursor-handoff/KAIOS-PRODUCT-SPRINT-001C` | `KGEN-AI-Company/reports/KAIOS_PRODUCT_SPRINT_001C_REPORT.md` |
 
 ## Product Sprint 001 Dispatch
 
 ### KAIOS-PRODUCT-SPRINT-001A - Official Website refresh and World Viewer integration
 
-- Status: OPEN
-- Dispatch Status: OPEN_ASSIGNED
-- Cursor Claim Status: NOT_CLAIMED / WAITING_FOR_CURSOR_ACCEPTANCE
+- Status: SUPERSEDED
+- Dispatch Status: CANCELLED_SUPERSEDED
+- Cursor Claim Status: NOT_CLAIMABLE
+- Superseded By: `KAIOS-PRODUCT-SPRINT-001A-R1`
+- Historical PR: `#42` remains a Draft record and is not an execution source.
 - Owner: cursor-01
 - Reviewer: Codex / `codex-gm-01`
 - Priority: P0
@@ -253,29 +257,30 @@ The worker must then stop without changing WorkQueue, creating a branch, editing
 
 ### KAIOS-PRODUCT-SPRINT-001B - Expanded feature pages and routing
 
-- Status: DRAFT
-- Activation Rule: Codex may open after `KAIOS-PRODUCT-SPRINT-001A` review passes.
+- Status: HOLD
+- Activation Rule: Disabled because the original `KAIOS-PRODUCT-SPRINT-001A` was superseded. A revised task requires a separately approved current-baseline WorkOrder.
 - Scope: full-page feature routes for World, Life, Market, Temple, Company and Settings.
 
 ### KAIOS-PRODUCT-SPRINT-001C - Product QA and release hardening
 
-- Status: DRAFT
-- Activation Rule: Codex may open after `KAIOS-PRODUCT-SPRINT-001A` and `KAIOS-PRODUCT-SPRINT-001B` review pass or when Codex explicitly splits QA.
+- Status: HOLD
+- Activation Rule: Disabled because the original Product Sprint 001 chain was superseded. A revised QA task requires a separately approved current-baseline WorkOrder.
 - Scope: performance, accessibility, visual regression, responsive matrix and release evidence.
 
 ## Current Cursor Dispatch Summary
 
 | Task ID | Status | Owner | Reviewer | Priority | Department | Branch | Output Report |
 |---|---|---|---|---|---|---|---|
-| KAIOS-WALS-DOCS-001 | OPEN | cursor-01 | Codex | P1 | Documentation | `cursor-handoff/KAIOS-WALS-DOCS-001` | `KGEN-AI-Company/reports/KAIOS_WALS_DOCS_INDEX_INTEGRATION.md` |
+| KAIOS-WALS-DOCS-001 | HOLD | cursor-01 | Codex | P1 | Documentation | `cursor-handoff/KAIOS-WALS-DOCS-001` | `KGEN-AI-Company/reports/KAIOS_WALS_DOCS_INDEX_INTEGRATION.md` |
 
 ## Current Cursor Dispatch
 
 ### KAIOS-WALS-DOCS-001 - Integrate World Asset & Life Specification into repository indexes
 
-- Status: OPEN
-- Dispatch Status: OPEN_ASSIGNED
-- Cursor Claim Status: NOT_CLAIMED / WAITING_FOR_CURSOR_ACCEPTANCE
+- Status: HOLD
+- Dispatch Status: NOT_APPROVED
+- Cursor Claim Status: NOT_CLAIMABLE
+- Hold Reason: Current Company Boot baseline keeps Cursor Dispatch `NOT_APPROVED`.
 - Owner: cursor-01
 - Reviewer: Codex / `codex-gm-01`
 - Priority: P1
@@ -708,7 +713,7 @@ Decision `HUMAN-PHASE2-HANDOFF-RECONCILIATION-001` moved ORG-P2-005 through ORG-
 - Output report path: KGEN-AI-Company/reports/ORG-P2-003E_FIX1_MASTER_INDEX_ALIAS_PLAN.md
 - Protected paths:
   - contracts
-  - K蝺正??/temples/12345
+  - K線西遊記/temples/12345
   - wallet
   - bridge
   - PRIMEFORGE_GENESIS_BOOT_SEQUENCE.md
@@ -1609,7 +1614,7 @@ Decision `HUMAN-PHASE2-HANDOFF-RECONCILIATION-001` moved ORG-P2-005 through ORG-
 - Output report path: KGEN-AI-Company/reports/AI-ECONOMY-2026-0001_RESOURCE_RESERVE_REVIEW.md
 - Protected paths:
   - contracts
-  - K蝺正??/temples/12345
+  - K線西遊記/temples/12345
   - wallet
   - bridge
   - PRIMEFORGE_GENESIS_BOOT_SEQUENCE.md
