@@ -1,0 +1,250 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "KAIOS_COMPANY_BOOT_RUNTIME_V0_1_SCHEMA",
+  "title": "KAIOS Company Boot Runtime V0.1 Integrity Schema",
+  "status": "LOCAL_CLI_PROTOTYPE_REPAIRED",
+  "type": "object",
+  "required": ["agent_registry", "current_state", "session_birth_records", "handoffs", "boot_results"],
+  "properties": {
+    "agent_registry": {
+      "type": "object",
+      "required": ["agents", "attestations", "capability_grants", "revocations", "workorders"],
+      "properties": {
+        "agents": { "type": "object", "additionalProperties": { "$ref": "#/$defs/agent" } },
+        "attestations": { "type": "object", "additionalProperties": { "$ref": "#/$defs/attestation" } },
+        "capability_grants": { "type": "object", "additionalProperties": { "$ref": "#/$defs/capabilityGrant" } },
+        "revocations": { "type": "object", "additionalProperties": { "$ref": "#/$defs/revocation" } },
+        "workorders": { "type": "object", "additionalProperties": { "$ref": "#/$defs/workorder" } }
+      },
+      "additionalProperties": false
+    },
+    "current_state": { "$ref": "#/$defs/currentState" },
+    "session_birth_records": { "type": "array", "items": { "$ref": "#/$defs/sessionBirth" } },
+    "handoffs": { "type": "array", "items": { "$ref": "#/$defs/handoff" } },
+    "boot_results": { "type": "array", "items": { "$ref": "#/$defs/bootResult" } }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "gitSha": { "type": "string", "pattern": "^[0-9a-f]{40}$" },
+    "allowedAction": {
+      "enum": ["READ", "BOOT", "VERIFY", "AUDIT", "CREATE_SESSION_RECORD", "CREATE_HANDOFF_RECORD", "ARCHIVE_SESSION", "RELEASE_SESSION_LOCK"]
+    },
+    "agent": {
+      "type": "object",
+      "required": ["life_id", "status", "role", "attestation_ids", "allowed_capability_profiles"],
+      "properties": {
+        "life_id": { "type": "string", "pattern": "^KAIOS-AI-LIFE-[A-Z0-9-]+$" },
+        "status": { "enum": ["ACTIVE", "SUSPENDED", "ARCHIVED"] },
+        "role": { "type": "array", "items": { "type": "string" } },
+        "attestation_ids": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+        "allowed_capability_profiles": { "type": "array", "items": { "type": "string" }, "minItems": 1 }
+      },
+      "additionalProperties": false
+    },
+    "attestation": {
+      "type": "object",
+      "required": ["attestation_id", "life_id", "instance_id", "issued_at", "expires_at", "status", "revocation_status", "approved_by", "approval_evidence_id", "issuer", "scope", "registry_entry_sha256", "integrity_sha256"],
+      "properties": {
+        "attestation_id": { "type": "string" },
+        "life_id": { "type": "string" },
+        "instance_id": { "type": "string" },
+        "issued_at": { "type": "string", "format": "date-time" },
+        "expires_at": { "type": "string", "format": "date-time" },
+        "status": { "enum": ["ACTIVE", "MISSING", "EXPIRED", "REVOKED", "SUPERSEDED", "UNKNOWN", "UNAPPROVED"] },
+        "revocation_status": { "enum": ["ACTIVE", "REVOKED"] },
+        "approved_by": { "type": "string", "minLength": 1 },
+        "approval_evidence_id": { "type": "string", "minLength": 1 },
+        "issuer": { "type": "string", "minLength": 1 },
+        "scope": { "const": "KAIOS_COMPANY_BOOT_RUNTIME_V0_1" },
+        "registry_entry_sha256": { "$ref": "#/$defs/sha256" },
+        "integrity_sha256": { "$ref": "#/$defs/sha256" }
+      },
+      "additionalProperties": false
+    },
+    "capabilityGrant": {
+      "type": "object",
+      "required": ["grant_id", "life_id", "instance_id", "workorder_id", "capabilities", "scope_paths", "issued_at", "expires_at", "status", "revocation_id_if_any", "integrity_sha256"],
+      "properties": {
+        "grant_id": { "type": "string" },
+        "life_id": { "type": "string" },
+        "instance_id": { "type": "string" },
+        "workorder_id": { "type": "string" },
+        "capabilities": { "type": "array", "items": { "$ref": "#/$defs/allowedAction" }, "minItems": 1, "uniqueItems": true },
+        "scope_paths": { "type": "array", "items": { "type": "string", "pattern": "^KGEN-KAIOS/governance/agents/runtime-v0\\.1/" }, "minItems": 1, "uniqueItems": true },
+        "issued_at": { "type": "string", "format": "date-time" },
+        "expires_at": { "type": "string", "format": "date-time" },
+        "status": { "enum": ["ACTIVE", "EXPIRED", "REVOKED", "SUPERSEDED", "UNKNOWN"] },
+        "revocation_id_if_any": { "type": ["string", "null"] },
+        "integrity_sha256": { "$ref": "#/$defs/sha256" }
+      },
+      "additionalProperties": false
+    },
+    "revocation": {
+      "type": "object",
+      "required": ["revocation_id", "grant_id", "status", "reason", "revoked_at", "revoked_by", "integrity_sha256"],
+      "properties": {
+        "revocation_id": { "type": "string" },
+        "grant_id": { "type": "string" },
+        "status": { "const": "ACTIVE" },
+        "reason": { "type": "string" },
+        "revoked_at": { "type": "string", "format": "date-time" },
+        "revoked_by": { "type": "string" },
+        "integrity_sha256": { "$ref": "#/$defs/sha256" }
+      },
+      "additionalProperties": false
+    },
+    "workorder": {
+      "type": "object",
+      "required": ["workorder_id", "status", "authorized_paths", "base_sha", "integrity_sha256"],
+      "properties": {
+        "workorder_id": { "type": "string" },
+        "status": { "enum": ["ACTIVE", "SUPERSEDED", "CLOSED", "REVOKED"] },
+        "authorized_paths": { "type": "array", "items": { "type": "string", "pattern": "^KGEN-KAIOS/governance/agents/runtime-v0\\.1/" }, "minItems": 1 },
+        "base_sha": { "$ref": "#/$defs/gitSha" },
+        "integrity_sha256": { "$ref": "#/$defs/sha256" }
+      },
+      "additionalProperties": false
+    },
+    "sessionLock": {
+      "type": "object",
+      "required": ["lock_id", "workorder_id", "holder_instance_id", "scope", "acquired_at", "heartbeat_at", "expires_at", "status"],
+      "properties": {
+        "lock_id": { "type": "string" },
+        "workorder_id": { "type": "string" },
+        "holder_instance_id": { "type": "string" },
+        "scope": { "type": "string" },
+        "acquired_at": { "type": "string", "format": "date-time" },
+        "heartbeat_at": { "type": "string", "format": "date-time" },
+        "expires_at": { "type": "string", "format": "date-time" },
+        "status": { "enum": ["ACTIVE", "EXPIRED", "RELEASED", "REVOKED", "CONFLICTED"] }
+      },
+      "additionalProperties": false
+    },
+    "currentState": {
+      "type": "object",
+      "required": ["current_main_sha", "current_baseline_id", "baseline_status", "current_recovery_point", "active_workorders", "superseded_workorders", "active_sessions", "active_agent_sessions", "revoked_sessions", "last_human_decision_id", "updated_at", "updated_by", "session_locks", "state_sha256"],
+      "properties": {
+        "current_main_sha": { "$ref": "#/$defs/gitSha" },
+        "current_baseline_id": { "type": "string" },
+        "baseline_status": { "enum": ["ARCHITECTURE_BASELINE_APPROVED", "DRAFT", "SUPERSEDED", "REVOKED", "CONFLICTED", "UNKNOWN"] },
+        "current_recovery_point": { "type": "string" },
+        "active_workorders": { "type": "array", "items": { "type": "string" } },
+        "superseded_workorders": { "type": "array", "items": { "type": "string" } },
+        "active_sessions": { "type": "array", "items": { "type": "string" } },
+        "active_agent_sessions": { "type": "array", "items": { "type": "string" } },
+        "revoked_sessions": { "type": "array", "items": { "type": "string" } },
+        "last_human_decision_id": { "type": "string" },
+        "updated_at": { "type": "string", "format": "date-time" },
+        "updated_by": { "type": "string" },
+        "session_locks": { "type": "array", "items": { "$ref": "#/$defs/sessionLock" } },
+        "state_sha256": { "$ref": "#/$defs/sha256" },
+        "source_type": { "enum": ["CANONICAL", "CACHE"] },
+        "conflicting_current_state": { "type": "boolean" }
+      },
+      "additionalProperties": false
+    },
+    "sessionBirth": {
+      "type": "object",
+      "required": ["session_birth_id", "life_id", "instance_id", "conversation_channel", "assigned_workorder", "base_main_sha", "expected_baseline_id", "capability_grant_id", "attestation_id"],
+      "properties": {
+        "session_birth_id": { "type": "string" },
+        "life_id": { "type": "string" },
+        "instance_id": { "type": "string" },
+        "conversation_channel": { "type": "string" },
+        "parent_handoff_id": { "type": ["string", "null"] },
+        "parent_handoff_sha256": { "$ref": "#/$defs/sha256" },
+        "assigned_workorder": { "type": "string" },
+        "base_main_sha": { "$ref": "#/$defs/gitSha" },
+        "expected_baseline_id": { "type": "string" },
+        "capability_grant_id": { "type": "string" },
+        "attestation_id": { "type": "string" },
+        "initial_status": { "enum": ["ROOT_SESSION", "HUMAN_AUTHORIZED_ORPHAN_SESSION"] },
+        "allow_stale": { "type": "boolean" },
+        "authorized_workorders": { "type": "array", "items": { "type": "string" } }
+      },
+      "additionalProperties": false
+    },
+    "handoff": {
+      "type": "object",
+      "required": ["handoff_id", "from_life_id", "from_instance_id", "ending_sha"],
+      "properties": {
+        "handoff_id": { "type": "string" },
+        "from_life_id": { "type": "string" },
+        "from_instance_id": { "type": "string" },
+        "to_role": { "type": "string" },
+        "workorder_id": { "type": ["string", "null"] },
+        "base_sha": { "$ref": "#/$defs/gitSha" },
+        "ending_sha": { "$ref": "#/$defs/gitSha" },
+        "files_read": { "type": "array", "items": { "type": "string" } },
+        "files_changed": { "type": "array", "items": { "type": "string" } },
+        "actions_completed": { "type": "array", "items": { "type": "string" } },
+        "actions_not_completed": { "type": "array", "items": { "type": "string" } },
+        "tests_run": { "type": "array" },
+        "test_results": { "type": "array" },
+        "open_blockers": { "type": "array" },
+        "known_risks": { "type": "array" },
+        "human_decisions": { "type": "array" },
+        "forbidden_next_actions": { "type": "array", "items": { "type": "string" } },
+        "required_next_actions": { "type": "array", "items": { "type": "string" } },
+        "recovery_point": { "type": "string" },
+        "evidence_paths": { "type": "array", "items": { "type": "string" } },
+        "created_at": { "type": "string", "format": "date-time" },
+        "signature": { "type": "string" },
+        "session_status": { "enum": ["ARCHIVED"] },
+        "lock_status": { "enum": ["RELEASED"] },
+        "ending_main_sha": { "$ref": "#/$defs/gitSha" },
+        "state_path": { "type": "array", "items": { "type": "string" } },
+        "evidence_ids": { "type": "array", "items": { "type": "string" } },
+        "content_sha256": { "$ref": "#/$defs/sha256" },
+        "record_sha256": { "$ref": "#/$defs/sha256" },
+        "result_sha256": { "$ref": "#/$defs/sha256" }
+      },
+      "additionalProperties": false
+    },
+    "bootResult": {
+      "type": "object",
+      "required": ["company_boot_status", "life_id", "instance_id", "attestation_status", "capability_status", "revocation_status", "current_main_sha", "expected_main_sha", "main_sha_match", "current_baseline_id", "expected_baseline_id", "baseline_status", "baseline_validation_passed", "parent_handoff_status", "assigned_workorder_status", "session_lock_status", "session_lock_holder_instance_id", "state_path", "authorized_actions", "forbidden_actions", "evidence_ids", "files_read", "identity_binding", "stale", "conflicted", "booted_at", "content_sha256", "record_sha256", "result_sha256"],
+      "properties": {
+        "company_boot_status": { "const": "COMPANY_BOOT_PASS" },
+        "life_id": { "type": "string" },
+        "instance_id": { "type": "string" },
+        "attestation_status": { "const": "VALID" },
+        "capability_status": { "const": "VALID" },
+        "revocation_status": { "const": "ACTIVE" },
+        "current_main_sha": { "$ref": "#/$defs/gitSha" },
+        "expected_main_sha": { "$ref": "#/$defs/gitSha" },
+        "main_sha_match": { "const": true },
+        "current_baseline_id": { "type": "string" },
+        "expected_baseline_id": { "type": "string" },
+        "baseline_status": { "const": "ARCHITECTURE_BASELINE_APPROVED" },
+        "baseline_validation_passed": { "const": true },
+        "parent_handoff_status": { "enum": ["FOUND", "ROOT_SESSION_AUTHORIZED"] },
+        "assigned_workorder_status": { "const": "VALID" },
+        "session_lock_status": { "const": "READ_ONLY_ALLOWED" },
+        "session_lock_holder_instance_id": { "type": "string" },
+        "state_path": { "type": "array", "items": { "type": "string" } },
+        "authorized_actions": { "type": "array", "items": { "$ref": "#/$defs/allowedAction" }, "minItems": 1 },
+        "forbidden_actions": { "type": "array", "items": { "type": "string" } },
+        "evidence_ids": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+        "files_read": { "type": "array", "items": { "type": "string" } },
+        "identity_binding": {
+          "type": "object",
+          "required": ["life_id", "instance_id", "attestation_id", "capability_grant_id", "workorder_id"],
+          "properties": {
+            "life_id": { "type": "string" }, "instance_id": { "type": "string" }, "attestation_id": { "type": "string" },
+            "capability_grant_id": { "type": "string" }, "workorder_id": { "type": "string" }
+          },
+          "additionalProperties": false
+        },
+        "stale": { "const": false },
+        "conflicted": { "const": false },
+        "booted_at": { "type": "string", "format": "date-time" },
+        "content_sha256": { "$ref": "#/$defs/sha256" },
+        "record_sha256": { "$ref": "#/$defs/sha256" },
+        "result_sha256": { "$ref": "#/$defs/sha256" }
+      },
+      "additionalProperties": false
+    }
+  }
+}
