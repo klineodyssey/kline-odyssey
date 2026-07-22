@@ -8,9 +8,9 @@ from .models import BootFailure, FailureCode, Stage
 
 ALLOWED_TRANSITIONS: dict[Stage, set[Stage]] = {
     Stage.NEW: {Stage.BOOTING, Stage.FAILED},
-    Stage.BOOTING: {Stage.IDENTITY_VERIFIED, Stage.FAILED, Stage.CONFLICTED},
-    Stage.IDENTITY_VERIFIED: {Stage.CAPABILITY_VERIFIED, Stage.FAILED, Stage.REVOKED},
-    Stage.CAPABILITY_VERIFIED: {Stage.STATE_VERIFIED, Stage.FAILED, Stage.REVOKED},
+    Stage.BOOTING: {Stage.IDENTITY_VERIFIED, Stage.FAILED, Stage.REVOKED, Stage.CONFLICTED},
+    Stage.IDENTITY_VERIFIED: {Stage.CAPABILITY_VERIFIED, Stage.FAILED, Stage.REVOKED, Stage.CONFLICTED},
+    Stage.CAPABILITY_VERIFIED: {Stage.STATE_VERIFIED, Stage.FAILED, Stage.REVOKED, Stage.STALE, Stage.CONFLICTED},
     Stage.STATE_VERIFIED: {Stage.HANDOFF_LOADED, Stage.STALE, Stage.CONFLICTED, Stage.FAILED},
     Stage.HANDOFF_LOADED: {Stage.READ_ONLY_ACTIVE, Stage.FAILED, Stage.CONFLICTED},
     Stage.READ_ONLY_ACTIVE: {Stage.HANDOFF_WRITTEN, Stage.FAILED},
@@ -29,6 +29,7 @@ def assert_transition(current: Stage, next_state: Stage) -> None:
             FailureCode.INVALID_STATE_TRANSITION,
             current,
             f"invalid transition {current.value} -> {next_state.value}",
+            Stage.FAILED,
         )
 
 
@@ -44,10 +45,10 @@ class StateTracker:
         self.current = next_state
         self.path.append(next_state.value)
 
+    def terminate(self, failure_state: Stage) -> None:
+        if failure_state not in {Stage.FAILED, Stage.REVOKED, Stage.STALE, Stage.CONFLICTED}:
+            failure_state = Stage.FAILED
+        self.transition(failure_state)
+
     def fail(self, failure_state: Stage) -> None:
-        if failure_state == self.current:
-            return
-        try:
-            self.transition(failure_state)
-        except BootFailure:
-            self.transition(Stage.FAILED)
+        self.terminate(failure_state)

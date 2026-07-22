@@ -1,44 +1,18 @@
 # KAIOS Company Boot Runtime V0.1 Security Test Report
 
 Status: PASS
-Implementation Type: LOCAL_CLI_PROTOTYPE_ONLY
 
-## Secret Boundary
+| Security group | Tests | Result |
+|---|---:|---|
+| Original failure gates | 15 | PASS |
+| Forged Boot Result rejection | 8 rejection + 1 valid close | PASS |
+| Attestation rejection classes | 10 | PASS |
+| Capability allowlist and scope | 8 | PASS |
+| Exact terminal state | 4 | PASS |
+| Schema alignment | 9 | PASS |
 
-The CLI and tests reject secret-like input before a successful boot result can be produced.
+The hashless fabricated PASS record returned exit code 2. Handoff output and archive output were both absent.
 
-Forbidden raw values:
+Secret values: 0. Forbidden generated files: 0. Runtime code contains no network, Git, GitHub, wallet, payment, deployment or scheduler execution path.
 
-- Token
-- Password
-- Private Key
-- Mnemonic
-- Wallet Seed
-- Cookie
-- Authorization Header
-- Full environment variable dump
-- Credential Manager content
-
-## Secret Fixture Rule
-
-The secret failure test uses an explicit fake marker assembled at test runtime. It is intentionally not a real credential.
-
-The expected output is `COMPANY_BOOT_FAILED` with `SECRET_IN_OUTPUT`, and the raw fake marker must not appear in the output JSON.
-
-## Test Result
-
-- Secret output rejection: PASS
-- Raw fake marker absent from result: PASS
-- Secret scan over implementation files: PASS
-
-## Boundary Result
-
-- No secret folder created
-- No plaintext token registry created
-- No private key handoff created
-- No mnemonic record created
-- No environment dump created
-
-## Result
-
-SECURITY_TEST_PASS
+Protected path violations: 0. Product, Runtime CURRENT, Universe Map CURRENT and Token modifications: false.

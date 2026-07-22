@@ -1,8 +1,8 @@
 # KAIOS Company Boot Runtime V0.1 Architecture
 
-Status: READY_FOR_HUMAN_RUNTIME_REVIEW
+Status: READY_FOR_HUMAN_PR_REVIEW
 Mode: Runtime architecture and minimum implementation plan
-Implementation: NOT_STARTED
+Implementation: LOCAL_CLI_PROTOTYPE_REPAIRED
 Scheduler: NOT_APPROVED
 Auto Dispatch: NOT_APPROVED
 Cursor Dispatch: NOT_APPROVED
@@ -29,6 +29,7 @@ V0.1 does not prove autonomous company operation. It proves session identity, bo
 - CREATE_SESSION_RECORD
 - CREATE_HANDOFF_RECORD
 - ARCHIVE_SESSION
+- RELEASE_SESSION_LOCK
 
 ## V0.1 Forbidden Capabilities
 
@@ -105,6 +106,8 @@ Company Boot receives:
 12. Session Lock rules pass.
 
 If any step fails, boot result is `COMPANY_BOOT_FAILED` and the session may not continue beyond read-only evidence and handoff.
+
+Before `close-session` writes a handoff or archive, it verifies the exact Boot Result field contract, canonical content and record hashes, identity binding, approved baseline and main state, attestation and capability status, session-lock ownership, V0.1 action allowlist, evidence presence and secret boundary. Failure creates no handoff or archive output.
 
 ## Required Boot Result
 

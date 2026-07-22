@@ -56,6 +56,13 @@ def stamp_hashes(data: dict[str, Any]) -> dict[str, Any]:
     return result
 
 
+def verify_hashes(data: dict[str, Any]) -> bool:
+    if not all(isinstance(data.get(field), str) for field in HASH_FIELDS):
+        return False
+    expected = stamp_hashes(data)
+    return all(data[field] == expected[field] for field in HASH_FIELDS)
+
+
 def stamp_result_sha256(data: dict[str, Any]) -> dict[str, Any]:
     return stamp_hashes(data)
 

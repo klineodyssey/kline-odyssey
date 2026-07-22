@@ -8,9 +8,17 @@ from pathlib import Path
 from typing import Any
 
 from .evidence import evidence_id, sha256_file, stamp_result_sha256
-from .models import AUTHORIZED_ACTIONS, BLOCKED_ACTIONS, FORBIDDEN_ACTIONS, BootFailure, BootStatus, Stage
+from .models import BLOCKED_ACTIONS, FORBIDDEN_ACTIONS, BootFailure, BootStatus, Stage
 from .state_machine import StateTracker
-from .validators import load_json, validate_boot_inputs
+from .validators import (
+    load_json,
+    validate_attestation,
+    validate_boot_result,
+    validate_capability,
+    validate_common_inputs,
+    validate_current_state,
+    validate_parent_handoff,
+)
 
 
 def write_json(path: Path, data: dict[str, Any]) -> None:
@@ -22,7 +30,12 @@ def utc_now_text() -> str:
     return datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
 
 
-def failure_result(exc: BootFailure, session: dict[str, Any] | None = None, tracker: StateTracker | None = None) -> dict[str, Any]:
+def failure_result(
+    exc: BootFailure,
+    session: dict[str, Any] | None = None,
+    tracker: StateTracker | None = None,
+    last_successful_state: Stage | None = None,
+) -> dict[str, Any]:
     session = session or {}
     state_path = tracker.path if tracker else [Stage.NEW.value, Stage.FAILED.value]
     state_evidence = tracker.evidence_ids if tracker else []
@@ -30,6 +43,8 @@ def failure_result(exc: BootFailure, session: dict[str, Any] | None = None, trac
         "company_boot_status": BootStatus.FAILED.value,
         "failure_code": exc.code.value,
         "failure_stage": exc.stage.value,
+        "failure_state": tracker.current.value if tracker else exc.terminal_state.value,
+        "last_successful_state": (last_successful_state or (tracker.current if tracker else Stage.NEW)).value,
         "life_id_if_known": session.get("life_id"),
         "instance_id_if_known": session.get("instance_id"),
         "state_path": state_path,
@@ -51,15 +66,19 @@ def validate_session(args: argparse.Namespace) -> int:
         handoff_path = Path(args.handoff)
         handoff = load_json(handoff_path)
         handoff_sha = sha256_file(handoff_path)
-        validate_boot_inputs(session, current_state, agent_registry, handoff, handoff_sha)
+        agent, life_id, instance_id, attestation_id, grant_id, base_main_sha, assigned_workorder = validate_common_inputs(
+            session, current_state, agent_registry, handoff
+        )
+        attestation = validate_attestation(session, agent_registry, agent, life_id, instance_id, attestation_id)
         tracker.transition(Stage.IDENTITY_VERIFIED)
+        grant = validate_capability(session, agent_registry, life_id, instance_id, grant_id, assigned_workorder)
         tracker.transition(Stage.CAPABILITY_VERIFIED)
+        validate_current_state(session, current_state, base_main_sha, assigned_workorder)
         tracker.transition(Stage.STATE_VERIFIED)
+        validate_parent_handoff(session, handoff, handoff_sha)
         tracker.transition(Stage.HANDOFF_LOADED)
         tracker.transition(Stage.READ_ONLY_ACTIVE)
 
-        life_id = session["life_id"]
-        instance_id = session["instance_id"]
         current_main_sha = current_state["current_main_sha"]
         result = {
             "company_boot_status": BootStatus.PASS.value,
@@ -74,11 +93,13 @@ def validate_session(args: argparse.Namespace) -> int:
             "current_baseline_id": current_state["current_baseline_id"],
             "expected_baseline_id": session["expected_baseline_id"],
             "baseline_status": current_state["baseline_status"],
+            "baseline_validation_passed": True,
             "parent_handoff_status": "FOUND" if session.get("parent_handoff_id") else "ROOT_SESSION_AUTHORIZED",
             "assigned_workorder_status": "VALID",
             "session_lock_status": "READ_ONLY_ALLOWED",
+            "session_lock_holder_instance_id": instance_id,
             "state_path": tracker.path,
-            "authorized_actions": AUTHORIZED_ACTIONS,
+            "authorized_actions": grant["capabilities"],
             "forbidden_actions": FORBIDDEN_ACTIONS,
             "evidence_ids": [
                 evidence_id("BOOT", life_id, instance_id, current_main_sha),
@@ -90,35 +111,41 @@ def validate_session(args: argparse.Namespace) -> int:
                 str(Path(args.agent_registry)),
                 str(Path(args.handoff)),
             ],
+            "identity_binding": {
+                "life_id": life_id,
+                "instance_id": instance_id,
+                "attestation_id": attestation["attestation_id"],
+                "capability_grant_id": grant["grant_id"],
+                "workorder_id": assigned_workorder,
+            },
+            "stale": False,
+            "conflicted": False,
             "booted_at": utc_now_text(),
         }
         write_json(Path(args.output), stamp_result_sha256(result))
         return 0
     except BootFailure as exc:
-        tracker.fail(exc.stage)
-        write_json(Path(args.output), failure_result(exc, session, tracker))
+        last_successful_state = tracker.current
+        tracker.terminate(exc.terminal_state)
+        write_json(Path(args.output), failure_result(exc, session, tracker, last_successful_state))
         return 2
 
 
 def close_session(args: argparse.Namespace) -> int:
-    boot_result = load_json(Path(args.boot_result))
-    archive_dir = Path(args.archive_dir)
-    archive_dir.mkdir(parents=True, exist_ok=True)
-    now = utc_now_text()
-    status = boot_result.get("company_boot_status")
-    if status != BootStatus.PASS.value:
-        exc = BootFailure.__new__(BootFailure)
-        object.__setattr__(exc, "code", "BOOT_NOT_PASS")
-        object.__setattr__(exc, "stage", "HANDOFF_WRITTEN")
-        object.__setattr__(exc, "message", "cannot close successful session from failed boot")
+    try:
+        boot_result = load_json(Path(args.boot_result))
+        validate_boot_result(boot_result)
+    except BootFailure:
         return 2
 
+    archive_dir = Path(args.archive_dir)
+    now = utc_now_text()
     handoff = {
         "handoff_id": f"HANDOFF-{boot_result['instance_id']}",
         "from_life_id": boot_result["life_id"],
         "from_instance_id": boot_result["instance_id"],
         "to_role": "NEXT_COMPANY_BOOT_SESSION",
-        "workorder_id": None,
+        "workorder_id": boot_result["identity_binding"]["workorder_id"],
         "base_sha": boot_result["expected_main_sha"],
         "ending_sha": boot_result["current_main_sha"],
         "files_read": boot_result.get("files_read", []),
@@ -156,6 +183,7 @@ def close_session(args: argparse.Namespace) -> int:
     handoff["evidence_ids"] = handoff["evidence_ids"] + tracker.evidence_ids if "evidence_ids" in handoff else tracker.evidence_ids
     handoff = stamp_result_sha256(handoff)
     output = Path(args.handoff_output)
+    archive_dir.mkdir(parents=True, exist_ok=True)
     write_json(output, handoff)
     archived = archive_dir / output.name
     write_json(archived, handoff)

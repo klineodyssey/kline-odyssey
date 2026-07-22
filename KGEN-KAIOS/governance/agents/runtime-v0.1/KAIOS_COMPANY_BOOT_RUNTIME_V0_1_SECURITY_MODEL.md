@@ -1,7 +1,7 @@
 # KAIOS Company Boot Runtime V0.1 Security Model
 
-Status: READY_FOR_HUMAN_RUNTIME_REVIEW
-Implementation: NOT_STARTED
+Status: READY_FOR_HUMAN_PR_REVIEW
+Implementation: LOCAL_CLI_PROTOTYPE_REPAIRED
 
 ## Security Goal
 
@@ -41,8 +41,13 @@ V0.1 capabilities are allowlisted:
 - CREATE_SESSION_RECORD
 - CREATE_HANDOFF_RECORD
 - ARCHIVE_SESSION
+- RELEASE_SESSION_LOCK
 
 All other capabilities are denied even when an operator asks for them inside a V0.1 boot session.
+
+Attestations must be active and unexpired, bind Life ID and Instance ID, carry approval evidence and issuer, match the registered capability profile, link to the Agent Registry hash and pass their integrity hash. Capability grants must be active, unexpired, unrevoked, limited to the V0.1 allowlist and match the WorkOrder's exact authorized paths under `runtime-v0.1`.
+
+`close-session` treats its Boot Result as untrusted input. It verifies hashes and all security gates before creating directories or files, and rejects unknown fields, secrets, stale/conflicted state or missing close-session capabilities.
 
 ## Revocation Controls
 
