@@ -1,0 +1,44 @@
+{
+  "status": "READY_FOR_HUMAN_IMPLEMENTATION_REVIEW",
+  "implementation_type": "LOCAL_CLI_PROTOTYPE_ONLY",
+  "branch": "codex/kaios-company-boot-runtime-v0.1",
+  "base_sha": "68d17fde53f1ce0b4f610ce9e8095e5d93c8cf9a",
+  "test_command": "PYTHONPATH=src python -m unittest discover -s tests -v",
+  "test_summary": {
+    "tests_run": 16,
+    "tests_passed": 16,
+    "tests_failed": 0,
+    "happy_path_tests": 1,
+    "failure_tests_required": 15,
+    "failure_tests_passed": 15
+  },
+  "failure_tests": [
+    { "id": "BOOT-V0.1-FAIL-001", "case": "Fake Life ID", "expected_failure_code": "FAKE_LIFE_ID", "result": "PASS" },
+    { "id": "BOOT-V0.1-FAIL-002", "case": "Fake Attestation", "expected_failure_code": "FAKE_ATTESTATION", "result": "PASS" },
+    { "id": "BOOT-V0.1-FAIL-003", "case": "Expired Capability", "expected_failure_code": "EXPIRED_CAPABILITY", "result": "PASS" },
+    { "id": "BOOT-V0.1-FAIL-004", "case": "Revoked Capability", "expected_failure_code": "REVOKED_CAPABILITY", "result": "PASS" },
+    { "id": "BOOT-V0.1-FAIL-005", "case": "Wrong Main SHA", "expected_failure_code": "WRONG_MAIN_SHA", "result": "PASS" },
+    { "id": "BOOT-V0.1-FAIL-006", "case": "Missing Parent Handoff", "expected_failure_code": "MISSING_PARENT_HANDOFF", "result": "PASS" },
+    { "id": "BOOT-V0.1-FAIL-007", "case": "Duplicate Session ID", "expected_failure_code": "DUPLICATE_SESSION_ID", "result": "PASS" },
+    { "id": "BOOT-V0.1-FAIL-008", "case": "Stale Session", "expected_failure_code": "STALE_SESSION", "result": "PASS" },
+    { "id": "BOOT-V0.1-FAIL-009", "case": "Current State conflict", "expected_failure_code": "CURRENT_STATE_CONFLICT", "result": "PASS" },
+    { "id": "BOOT-V0.1-FAIL-010", "case": "Secret appears in output", "expected_failure_code": "SECRET_IN_OUTPUT", "result": "PASS" },
+    { "id": "BOOT-V0.1-FAIL-011", "case": "Cache as current truth", "expected_failure_code": "CACHE_AS_CURRENT_TRUTH", "result": "PASS" },
+    { "id": "BOOT-V0.1-FAIL-012", "case": "Unauthorized WorkOrder", "expected_failure_code": "UNAUTHORIZED_WORKORDER", "result": "PASS" },
+    { "id": "BOOT-V0.1-FAIL-013", "case": "State SHA mismatch", "expected_failure_code": "STATE_SHA_MISMATCH", "result": "PASS" },
+    { "id": "BOOT-V0.1-FAIL-014", "case": "Handoff SHA mismatch", "expected_failure_code": "HANDOFF_SHA_MISMATCH", "result": "PASS" },
+    { "id": "BOOT-V0.1-FAIL-015", "case": "Session Lock conflict", "expected_failure_code": "SESSION_LOCK_CONFLICT", "result": "PASS" }
+  ],
+  "boundary_results": {
+    "no_product_file_modification": true,
+    "no_commit_from_runtime": true,
+    "no_push": true,
+    "no_pr": true,
+    "no_merge": true,
+    "no_cursor_dispatch": true,
+    "no_deployment": true,
+    "scheduler": false,
+    "auto_dispatch": false,
+    "real_kgen": false
+  }
+}

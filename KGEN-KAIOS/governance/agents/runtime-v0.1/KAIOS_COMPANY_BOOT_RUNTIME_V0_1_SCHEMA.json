@@ -1,0 +1,264 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "KAIOS_COMPANY_BOOT_RUNTIME_V0_1_SCHEMA",
+  "title": "KAIOS Company Boot Runtime V0.1 Schema Draft",
+  "status": "READY_FOR_HUMAN_RUNTIME_REVIEW",
+  "implementation_status": "NOT_STARTED",
+  "description": "Schema draft for the minimum read-only Company Boot Runtime V0.1 proof. This schema describes candidate records and does not create live registry state.",
+  "type": "object",
+  "required": [
+    "boot_input",
+    "boot_result",
+    "current_state_candidate",
+    "agent_registry_candidate",
+    "session_registry_candidate",
+    "read_only_boot_audit_result",
+    "session_handoff_record",
+    "failure_test_result"
+  ],
+  "properties": {
+    "boot_input": {
+      "type": "object",
+      "required": [
+        "life_id",
+        "instance_id",
+        "conversation_channel",
+        "assigned_workorder",
+        "base_main_sha",
+        "capability_grant_id",
+        "attestation_id"
+      ],
+      "properties": {
+        "life_id": { "type": "string", "pattern": "^KAIOS-AI-LIFE-[A-Z0-9-]+$" },
+        "instance_id": { "type": "string", "pattern": "^CODEX-[A-Z0-9-]+-[0-9]{8}-SESSION-[0-9]{4}$" },
+        "conversation_channel": { "type": "string" },
+        "parent_handoff_id": { "type": ["string", "null"] },
+        "assigned_workorder": { "type": ["string", "null"] },
+        "base_main_sha": { "type": "string", "pattern": "^[0-9a-f]{40}$" },
+        "capability_grant_id": { "type": "string" },
+        "attestation_id": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "boot_result": {
+      "type": "object",
+      "required": [
+        "company_boot_status",
+        "life_id",
+        "instance_id",
+        "attestation_status",
+        "capability_status",
+        "current_main_sha",
+        "expected_main_sha",
+        "main_sha_match",
+        "current_baseline_id",
+        "parent_handoff_status",
+        "assigned_workorder_status",
+        "session_lock_status",
+        "open_blockers",
+        "authorized_actions",
+        "forbidden_actions",
+        "evidence_ids",
+        "booted_at"
+      ],
+      "properties": {
+        "company_boot_status": { "enum": ["COMPANY_BOOT_PASS", "COMPANY_BOOT_FAILED"] },
+        "life_id": { "type": "string" },
+        "instance_id": { "type": "string" },
+        "attestation_status": { "enum": ["VALID", "INVALID", "EXPIRED", "REVOKED", "MISSING"] },
+        "capability_status": { "enum": ["VALID", "INVALID", "EXPIRED", "REVOKED", "MISSING"] },
+        "current_main_sha": { "type": "string", "pattern": "^[0-9a-f]{40}$" },
+        "expected_main_sha": { "type": "string", "pattern": "^[0-9a-f]{40}$" },
+        "main_sha_match": { "type": "boolean" },
+        "current_baseline_id": { "type": "string" },
+        "parent_handoff_status": { "enum": ["FOUND", "ROOT_SESSION_AUTHORIZED", "MISSING", "INVALID"] },
+        "assigned_workorder_status": { "enum": ["VALID", "NONE_ALLOWED", "MISSING", "INVALID", "NOT_AUTHORIZED"] },
+        "session_lock_status": { "enum": ["READ_ONLY_ALLOWED", "LOCK_ACTIVE", "LOCK_RELEASED", "LOCK_CONFLICT", "SESSION_STALE"] },
+        "open_blockers": { "type": "array", "items": { "type": "string" } },
+        "authorized_actions": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "READ",
+              "BOOT",
+              "VERIFY",
+              "AUDIT",
+              "CREATE_SESSION_RECORD",
+              "CREATE_HANDOFF_RECORD",
+              "ARCHIVE_SESSION"
+            ]
+          }
+        },
+        "forbidden_actions": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "WRITE_PRODUCT_CODE",
+              "MODIFY_RUNTIME_CURRENT",
+              "MODIFY_UNIVERSE_MAP_CURRENT",
+              "MODIFY_TOKEN",
+              "CREATE_BRANCH",
+              "COMMIT",
+              "PUSH",
+              "OPEN_PR",
+              "MERGE",
+              "DISPATCH_CURSOR",
+              "MODIFY_WORKQUEUE",
+              "SCHEDULER",
+              "DEPLOY",
+              "REAL_KGEN"
+            ]
+          }
+        },
+        "evidence_ids": { "type": "array", "items": { "type": "string" } },
+        "booted_at": { "type": "string", "format": "date-time" }
+      },
+      "additionalProperties": false
+    },
+    "current_state_candidate": {
+      "type": "object",
+      "required": [
+        "current_main_sha",
+        "current_baseline_id",
+        "current_recovery_point",
+        "active_workorders",
+        "active_sessions",
+        "active_agent_sessions",
+        "last_human_decision_id",
+        "state_sha256"
+      ],
+      "properties": {
+        "current_main_sha": { "type": "string" },
+        "current_baseline_id": { "type": "string" },
+        "current_recovery_point": { "type": "string" },
+        "active_workorders": { "type": "array", "items": { "type": "string" } },
+        "superseded_workorders": { "type": "array", "items": { "type": "string" } },
+        "active_sessions": { "type": "array", "items": { "type": "string" } },
+        "active_agent_sessions": { "type": "array", "items": { "type": "string" } },
+        "revoked_sessions": { "type": "array", "items": { "type": "string" } },
+        "last_human_decision_id": { "type": "string" },
+        "updated_at": { "type": "string", "format": "date-time" },
+        "updated_by": { "type": "string" },
+        "state_sha256": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "agent_registry_candidate": {
+      "type": "object",
+      "required": ["agents"],
+      "properties": {
+        "agents": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["life_id", "role", "status"],
+            "properties": {
+              "life_id": { "type": "string" },
+              "role": { "type": "array", "items": { "type": "string" } },
+              "status": { "enum": ["ACTIVE", "SUSPENDED", "ARCHIVED"] },
+              "attestation_ids": { "type": "array", "items": { "type": "string" } },
+              "allowed_capability_profiles": { "type": "array", "items": { "type": "string" } }
+            },
+            "additionalProperties": false
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "session_registry_candidate": {
+      "type": "object",
+      "required": ["sessions"],
+      "properties": {
+        "sessions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["instance_id", "life_id", "status", "base_main_sha"],
+            "properties": {
+              "instance_id": { "type": "string" },
+              "life_id": { "type": "string" },
+              "parent_handoff_id": { "type": ["string", "null"] },
+              "status": { "enum": ["BOOTING", "ACTIVE_READ_ONLY", "HANDOFF_REQUIRED", "ARCHIVED", "BLOCKED"] },
+              "base_main_sha": { "type": "string" },
+              "ending_main_sha": { "type": ["string", "null"] },
+              "lock_id": { "type": ["string", "null"] }
+            },
+            "additionalProperties": false
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "read_only_boot_audit_result": {
+      "type": "object",
+      "required": ["audit_id", "status", "files_read", "evidence_ids", "product_files_modified"],
+      "properties": {
+        "audit_id": { "type": "string" },
+        "status": { "enum": ["READ_ONLY_BOOT_AUDIT_PASS", "READ_ONLY_BOOT_AUDIT_FAILED"] },
+        "files_read": { "type": "array", "items": { "type": "string" } },
+        "evidence_ids": { "type": "array", "items": { "type": "string" } },
+        "product_files_modified": { "type": "boolean", "const": false }
+      },
+      "additionalProperties": false
+    },
+    "session_handoff_record": {
+      "type": "object",
+      "required": [
+        "handoff_id",
+        "from_life_id",
+        "from_instance_id",
+        "base_sha",
+        "ending_sha",
+        "files_read",
+        "actions_completed",
+        "actions_not_completed",
+        "tests_run",
+        "test_results",
+        "open_blockers",
+        "known_risks",
+        "human_decisions",
+        "required_next_actions",
+        "forbidden_next_actions",
+        "recovery_point",
+        "evidence_paths",
+        "created_at",
+        "signature"
+      ],
+      "properties": {
+        "handoff_id": { "type": "string" },
+        "from_life_id": { "type": "string" },
+        "from_instance_id": { "type": "string" },
+        "to_role": { "type": "string" },
+        "workorder_id": { "type": ["string", "null"] },
+        "base_sha": { "type": "string" },
+        "ending_sha": { "type": "string" },
+        "files_read": { "type": "array", "items": { "type": "string" } },
+        "files_changed": { "type": "array", "items": { "type": "string" } },
+        "actions_completed": { "type": "array", "items": { "type": "string" } },
+        "actions_not_completed": { "type": "array", "items": { "type": "string" } },
+        "required_next_actions": { "type": "array", "items": { "type": "string" } },
+        "forbidden_next_actions": { "type": "array", "items": { "type": "string" } },
+        "evidence_paths": { "type": "array", "items": { "type": "string" } },
+        "created_at": { "type": "string", "format": "date-time" },
+        "signature": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "failure_test_result": {
+      "type": "object",
+      "required": ["test_id", "failure_case", "boot_blocked", "no_product_modification", "no_commit", "no_push", "no_dispatch", "no_merge"],
+      "properties": {
+        "test_id": { "type": "string" },
+        "failure_case": { "type": "string" },
+        "boot_blocked": { "type": "boolean", "const": true },
+        "no_product_modification": { "type": "boolean", "const": true },
+        "no_commit": { "type": "boolean", "const": true },
+        "no_push": { "type": "boolean", "const": true },
+        "no_dispatch": { "type": "boolean", "const": true },
+        "no_merge": { "type": "boolean", "const": true }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}
