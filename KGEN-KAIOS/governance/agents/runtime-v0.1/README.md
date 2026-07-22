@@ -1,6 +1,6 @@
 # KAIOS Company Boot Runtime V0.1
 
-Status: LOCAL_CLI_PROTOTYPE
+Status: LOCAL_CLI_PROTOTYPE_REPAIRED
 Scheduler: NOT_APPROVED
 Auto Dispatch: NOT_APPROVED
 Cursor Dispatch: NOT_APPROVED
@@ -8,7 +8,15 @@ Deployment: NOT_STARTED
 
 This folder contains the minimum local CLI prototype for KAIOS Company Boot Runtime V0.1.
 
-The prototype verifies a session birth record, Life ID, identity attestation, capability grant, revocation status, canonical current state, main SHA, parent handoff, WorkOrder authorization and lock state. It can also close a passed session by producing a handoff record and archived copy.
+The prototype verifies a session birth record, Life ID, identity attestation, capability grant, revocation status, canonical current state, main SHA, baseline ID/status, parent handoff, WorkOrder authorization and lock state. It can also close a passed session by producing a handoff record and archived copy.
+
+Boot and handoff records include:
+
+- `content_sha256` for stable semantic content
+- `record_sha256` for full dynamic record evidence
+- `result_sha256` as a V0.1 compatibility alias for `record_sha256`
+
+The CLI enforces the approved state-machine transition guard. Invalid transitions return `COMPANY_BOOT_FAILED` with `INVALID_STATE_TRANSITION`.
 
 ## Commands
 
@@ -52,5 +60,8 @@ The prototype does not:
 
 ```powershell
 $env:PYTHONPATH = "src"
-python -m unittest discover -s tests
+$env:PYTHONDONTWRITEBYTECODE = "1"
+python -m unittest discover -s tests -v
 ```
+
+Current targeted-repair suite: 34 / 34 PASS.

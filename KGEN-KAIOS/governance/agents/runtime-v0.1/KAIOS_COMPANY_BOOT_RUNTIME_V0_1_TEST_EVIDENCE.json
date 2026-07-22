@@ -1,16 +1,23 @@
 {
-  "status": "READY_FOR_HUMAN_IMPLEMENTATION_REVIEW",
+  "status": "READY_FOR_HUMAN_REPAIR_REVIEW",
   "implementation_type": "LOCAL_CLI_PROTOTYPE_ONLY",
   "branch": "codex/kaios-company-boot-runtime-v0.1",
   "base_sha": "68d17fde53f1ce0b4f610ce9e8095e5d93c8cf9a",
   "test_command": "PYTHONPATH=src python -m unittest discover -s tests -v",
   "test_summary": {
-    "tests_run": 16,
-    "tests_passed": 16,
+    "tests_run": 34,
+    "tests_passed": 34,
     "tests_failed": 0,
     "happy_path_tests": 1,
+    "original_tests": 16,
     "failure_tests_required": 15,
-    "failure_tests_passed": 15
+    "failure_tests_passed": 15,
+    "new_hash_tests": 5,
+    "new_hash_tests_passed": 5,
+    "new_transition_enforcement_tests": 7,
+    "new_transition_enforcement_tests_passed": 7,
+    "new_baseline_gate_tests": 6,
+    "new_baseline_gate_tests_passed": 6
   },
   "failure_tests": [
     { "id": "BOOT-V0.1-FAIL-001", "case": "Fake Life ID", "expected_failure_code": "FAKE_LIFE_ID", "result": "PASS" },
@@ -28,6 +35,26 @@
     { "id": "BOOT-V0.1-FAIL-013", "case": "State SHA mismatch", "expected_failure_code": "STATE_SHA_MISMATCH", "result": "PASS" },
     { "id": "BOOT-V0.1-FAIL-014", "case": "Handoff SHA mismatch", "expected_failure_code": "HANDOFF_SHA_MISMATCH", "result": "PASS" },
     { "id": "BOOT-V0.1-FAIL-015", "case": "Session Lock conflict", "expected_failure_code": "SESSION_LOCK_CONFLICT", "result": "PASS" }
+  ],
+  "repair_tests": [
+    { "id": "HASH-001", "case": "Same semantic input with different timestamp has same content_sha256", "result": "PASS" },
+    { "id": "HASH-002", "case": "Same semantic input with different timestamp has different record_sha256", "result": "PASS" },
+    { "id": "HASH-003", "case": "Same record recalculation has same record_sha256", "result": "PASS" },
+    { "id": "HASH-004", "case": "Hash fields do not hash themselves", "result": "PASS" },
+    { "id": "HASH-005", "case": "Key order does not affect content_sha256", "result": "PASS" },
+    { "id": "STATE-001", "case": "Skipping identity validation blocked", "expected_failure_code": "INVALID_STATE_TRANSITION", "result": "PASS" },
+    { "id": "STATE-002", "case": "NEW directly to READ_ONLY_ACTIVE blocked", "expected_failure_code": "INVALID_STATE_TRANSITION", "result": "PASS" },
+    { "id": "STATE-003", "case": "ARCHIVED returning active blocked", "expected_failure_code": "INVALID_STATE_TRANSITION", "result": "PASS" },
+    { "id": "STATE-004", "case": "REVOKED continuing boot blocked", "expected_failure_code": "INVALID_STATE_TRANSITION", "result": "PASS" },
+    { "id": "STATE-005", "case": "FAILED continuing boot blocked", "expected_failure_code": "INVALID_STATE_TRANSITION", "result": "PASS" },
+    { "id": "STATE-006", "case": "STALE performing write action blocked", "expected_failure_code": "INVALID_STATE_TRANSITION", "result": "PASS" },
+    { "id": "STATE-007", "case": "CONFLICTED proceeding without Human resolution blocked", "expected_failure_code": "INVALID_STATE_TRANSITION", "result": "PASS" },
+    { "id": "BASELINE-001", "case": "Wrong baseline ID", "expected_failure_code": "BASELINE_VALIDATION_FAILED", "result": "PASS" },
+    { "id": "BASELINE-002", "case": "Missing baseline ID", "expected_failure_code": "BASELINE_VALIDATION_FAILED", "result": "PASS" },
+    { "id": "BASELINE-003", "case": "Superseded baseline", "expected_failure_code": "BASELINE_VALIDATION_FAILED", "result": "PASS" },
+    { "id": "BASELINE-004", "case": "Revoked baseline", "expected_failure_code": "BASELINE_VALIDATION_FAILED", "result": "PASS" },
+    { "id": "BASELINE-005", "case": "Unknown baseline status", "expected_failure_code": "BASELINE_VALIDATION_FAILED", "result": "PASS" },
+    { "id": "BASELINE-006", "case": "Correct active baseline pass", "result": "PASS" }
   ],
   "boundary_results": {
     "no_product_file_modification": true,

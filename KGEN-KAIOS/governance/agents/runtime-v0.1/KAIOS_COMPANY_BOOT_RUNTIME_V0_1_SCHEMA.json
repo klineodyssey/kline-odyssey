@@ -3,7 +3,7 @@
   "$id": "KAIOS_COMPANY_BOOT_RUNTIME_V0_1_SCHEMA",
   "title": "KAIOS Company Boot Runtime V0.1 Schema Draft",
   "status": "READY_FOR_HUMAN_RUNTIME_REVIEW",
-  "implementation_status": "NOT_STARTED",
+  "implementation_status": "LOCAL_CLI_PROTOTYPE_REPAIRED",
   "description": "Schema draft for the minimum read-only Company Boot Runtime V0.1 proof. This schema describes candidate records and does not create live registry state.",
   "type": "object",
   "required": [
@@ -25,6 +25,7 @@
         "conversation_channel",
         "assigned_workorder",
         "base_main_sha",
+        "expected_baseline_id",
         "capability_grant_id",
         "attestation_id"
       ],
@@ -35,6 +36,7 @@
         "parent_handoff_id": { "type": ["string", "null"] },
         "assigned_workorder": { "type": ["string", "null"] },
         "base_main_sha": { "type": "string", "pattern": "^[0-9a-f]{40}$" },
+        "expected_baseline_id": { "type": "string" },
         "capability_grant_id": { "type": "string" },
         "attestation_id": { "type": "string" }
       },
@@ -52,14 +54,19 @@
         "expected_main_sha",
         "main_sha_match",
         "current_baseline_id",
+        "expected_baseline_id",
+        "baseline_status",
         "parent_handoff_status",
         "assigned_workorder_status",
         "session_lock_status",
-        "open_blockers",
+        "state_path",
         "authorized_actions",
         "forbidden_actions",
         "evidence_ids",
-        "booted_at"
+        "booted_at",
+        "content_sha256",
+        "record_sha256",
+        "result_sha256"
       ],
       "properties": {
         "company_boot_status": { "enum": ["COMPANY_BOOT_PASS", "COMPANY_BOOT_FAILED"] },
@@ -71,10 +78,12 @@
         "expected_main_sha": { "type": "string", "pattern": "^[0-9a-f]{40}$" },
         "main_sha_match": { "type": "boolean" },
         "current_baseline_id": { "type": "string" },
+        "expected_baseline_id": { "type": "string" },
+        "baseline_status": { "enum": ["ARCHITECTURE_BASELINE_APPROVED"] },
         "parent_handoff_status": { "enum": ["FOUND", "ROOT_SESSION_AUTHORIZED", "MISSING", "INVALID"] },
         "assigned_workorder_status": { "enum": ["VALID", "NONE_ALLOWED", "MISSING", "INVALID", "NOT_AUTHORIZED"] },
         "session_lock_status": { "enum": ["READ_ONLY_ALLOWED", "LOCK_ACTIVE", "LOCK_RELEASED", "LOCK_CONFLICT", "SESSION_STALE"] },
-        "open_blockers": { "type": "array", "items": { "type": "string" } },
+        "state_path": { "type": "array", "items": { "type": "string" } },
         "authorized_actions": {
           "type": "array",
           "items": {
@@ -111,7 +120,10 @@
           }
         },
         "evidence_ids": { "type": "array", "items": { "type": "string" } },
-        "booted_at": { "type": "string", "format": "date-time" }
+        "booted_at": { "type": "string", "format": "date-time" },
+        "content_sha256": { "type": "string" },
+        "record_sha256": { "type": "string" },
+        "result_sha256": { "type": "string" }
       },
       "additionalProperties": false
     },
@@ -120,6 +132,7 @@
       "required": [
         "current_main_sha",
         "current_baseline_id",
+        "baseline_status",
         "current_recovery_point",
         "active_workorders",
         "active_sessions",
@@ -130,6 +143,7 @@
       "properties": {
         "current_main_sha": { "type": "string" },
         "current_baseline_id": { "type": "string" },
+        "baseline_status": { "enum": ["ARCHITECTURE_BASELINE_APPROVED", "DRAFT", "SUPERSEDED", "REVOKED", "CONFLICTED", "UNKNOWN"] },
         "current_recovery_point": { "type": "string" },
         "active_workorders": { "type": "array", "items": { "type": "string" } },
         "superseded_workorders": { "type": "array", "items": { "type": "string" } },
@@ -222,7 +236,10 @@
         "recovery_point",
         "evidence_paths",
         "created_at",
-        "signature"
+        "signature",
+        "content_sha256",
+        "record_sha256",
+        "result_sha256"
       ],
       "properties": {
         "handoff_id": { "type": "string" },
@@ -240,7 +257,10 @@
         "forbidden_next_actions": { "type": "array", "items": { "type": "string" } },
         "evidence_paths": { "type": "array", "items": { "type": "string" } },
         "created_at": { "type": "string", "format": "date-time" },
-        "signature": { "type": "string" }
+        "signature": { "type": "string" },
+        "content_sha256": { "type": "string" },
+        "record_sha256": { "type": "string" },
+        "result_sha256": { "type": "string" }
       },
       "additionalProperties": false
     },

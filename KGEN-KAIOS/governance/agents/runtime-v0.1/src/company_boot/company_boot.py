@@ -8,7 +8,8 @@ from pathlib import Path
 from typing import Any
 
 from .evidence import evidence_id, sha256_file, stamp_result_sha256
-from .models import AUTHORIZED_ACTIONS, BLOCKED_ACTIONS, FORBIDDEN_ACTIONS, BootFailure, BootStatus
+from .models import AUTHORIZED_ACTIONS, BLOCKED_ACTIONS, FORBIDDEN_ACTIONS, BootFailure, BootStatus, Stage
+from .state_machine import StateTracker
 from .validators import load_json, validate_boot_inputs
 
 
@@ -21,15 +22,18 @@ def utc_now_text() -> str:
     return datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
 
 
-def failure_result(exc: BootFailure, session: dict[str, Any] | None = None) -> dict[str, Any]:
+def failure_result(exc: BootFailure, session: dict[str, Any] | None = None, tracker: StateTracker | None = None) -> dict[str, Any]:
     session = session or {}
+    state_path = tracker.path if tracker else [Stage.NEW.value, Stage.FAILED.value]
+    state_evidence = tracker.evidence_ids if tracker else []
     result = {
         "company_boot_status": BootStatus.FAILED.value,
         "failure_code": exc.code.value,
         "failure_stage": exc.stage.value,
         "life_id_if_known": session.get("life_id"),
         "instance_id_if_known": session.get("instance_id"),
-        "evidence_ids": [evidence_id("BOOTFAIL", exc.code.value, exc.stage.value, exc.message)],
+        "state_path": state_path,
+        "evidence_ids": state_evidence + [evidence_id("BOOTFAIL", exc.code.value, exc.stage.value, exc.message)],
         "blocked_actions": BLOCKED_ACTIONS,
         "failed_at": utc_now_text(),
     }
@@ -38,7 +42,9 @@ def failure_result(exc: BootFailure, session: dict[str, Any] | None = None) -> d
 
 def validate_session(args: argparse.Namespace) -> int:
     session: dict[str, Any] | None = None
+    tracker = StateTracker()
     try:
+        tracker.transition(Stage.BOOTING)
         session = load_json(Path(args.session))
         current_state = load_json(Path(args.current_state))
         agent_registry = load_json(Path(args.agent_registry))
@@ -46,6 +52,11 @@ def validate_session(args: argparse.Namespace) -> int:
         handoff = load_json(handoff_path)
         handoff_sha = sha256_file(handoff_path)
         validate_boot_inputs(session, current_state, agent_registry, handoff, handoff_sha)
+        tracker.transition(Stage.IDENTITY_VERIFIED)
+        tracker.transition(Stage.CAPABILITY_VERIFIED)
+        tracker.transition(Stage.STATE_VERIFIED)
+        tracker.transition(Stage.HANDOFF_LOADED)
+        tracker.transition(Stage.READ_ONLY_ACTIVE)
 
         life_id = session["life_id"]
         instance_id = session["instance_id"]
@@ -61,15 +72,18 @@ def validate_session(args: argparse.Namespace) -> int:
             "expected_main_sha": session["base_main_sha"],
             "main_sha_match": session["base_main_sha"] == current_main_sha,
             "current_baseline_id": current_state["current_baseline_id"],
+            "expected_baseline_id": session["expected_baseline_id"],
+            "baseline_status": current_state["baseline_status"],
             "parent_handoff_status": "FOUND" if session.get("parent_handoff_id") else "ROOT_SESSION_AUTHORIZED",
             "assigned_workorder_status": "VALID",
             "session_lock_status": "READ_ONLY_ALLOWED",
+            "state_path": tracker.path,
             "authorized_actions": AUTHORIZED_ACTIONS,
             "forbidden_actions": FORBIDDEN_ACTIONS,
             "evidence_ids": [
                 evidence_id("BOOT", life_id, instance_id, current_main_sha),
                 evidence_id("HANDOFF", args.handoff, handoff_sha),
-            ],
+            ] + tracker.evidence_ids,
             "files_read": [
                 str(Path(args.session)),
                 str(Path(args.current_state)),
@@ -81,7 +95,8 @@ def validate_session(args: argparse.Namespace) -> int:
         write_json(Path(args.output), stamp_result_sha256(result))
         return 0
     except BootFailure as exc:
-        write_json(Path(args.output), failure_result(exc, session))
+        tracker.fail(exc.stage)
+        write_json(Path(args.output), failure_result(exc, session, tracker))
         return 2
 
 
@@ -125,6 +140,20 @@ def close_session(args: argparse.Namespace) -> int:
         "lock_status": "RELEASED",
         "ending_main_sha": boot_result["current_main_sha"],
     }
+    tracker = StateTracker()
+    for stage in (
+        Stage.BOOTING,
+        Stage.IDENTITY_VERIFIED,
+        Stage.CAPABILITY_VERIFIED,
+        Stage.STATE_VERIFIED,
+        Stage.HANDOFF_LOADED,
+        Stage.READ_ONLY_ACTIVE,
+        Stage.HANDOFF_WRITTEN,
+        Stage.ARCHIVED,
+    ):
+        tracker.transition(stage)
+    handoff["state_path"] = tracker.path
+    handoff["evidence_ids"] = handoff["evidence_ids"] + tracker.evidence_ids if "evidence_ids" in handoff else tracker.evidence_ids
     handoff = stamp_result_sha256(handoff)
     output = Path(args.handoff_output)
     write_json(output, handoff)

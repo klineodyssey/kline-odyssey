@@ -1,7 +1,7 @@
 # KAIOS Company Boot Runtime V0.1 State Machine
 
 Status: READY_FOR_HUMAN_RUNTIME_REVIEW
-Implementation: NOT_STARTED
+Implementation: LOCAL_CLI_PROTOTYPE_REPAIRED
 
 ## Canonical States
 
@@ -23,11 +23,17 @@ Implementation: NOT_STARTED
 
 ## Transition Rules
 
-Every transition must be evidence-backed. Chat memory cannot satisfy a transition by itself.
+Every transition must pass through the state-machine guard and be evidence-backed. Chat memory cannot satisfy a transition by itself.
 
-The state machine is fail closed. Missing evidence, stale main SHA, duplicate session ID, secret exposure, missing parent handoff, or unauthorized workorder all move to `COMPANY_BOOT_FAILED`.
+The state machine is fail closed. Missing evidence, stale main SHA, duplicate session ID, secret exposure, missing parent handoff, unauthorized WorkOrder, invalid baseline or invalid transition all move to `COMPANY_BOOT_FAILED`.
 
 There are no unrestricted jumps. The only normal forward path is:
+
+Invalid jumps return failure code:
+
+```text
+INVALID_STATE_TRANSITION
+```
 
 ## Read-Only Happy Path
 

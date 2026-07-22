@@ -10,7 +10,10 @@ import unittest
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
-from company_boot.evidence import canonical_json, sha256_file, sha256_text
+from company_boot.company_boot import failure_result
+from company_boot.evidence import canonical_json, sha256_file, sha256_text, stamp_hashes
+from company_boot.models import BootFailure, FailureCode, Stage
+from company_boot.state_machine import StateTracker
 
 
 RUNTIME_DIR = Path(__file__).resolve().parents[1]
@@ -59,6 +62,7 @@ class CompanyBootCliTests(unittest.TestCase):
             "parent_handoff_sha256": handoff_sha,
             "assigned_workorder": "KAIOS-COMPANY-BOOT-RUNTIME-V0.1",
             "base_main_sha": MAIN_SHA,
+            "expected_baseline_id": "KAIOS-AI-AGENT-LIFE-ARCHITECTURE-V1",
             "capability_grant_id": "GRANT-0001",
             "attestation_id": "ATTEST-0001",
         }
@@ -66,6 +70,7 @@ class CompanyBootCliTests(unittest.TestCase):
             {
                 "current_main_sha": MAIN_SHA,
                 "current_baseline_id": "KAIOS-AI-AGENT-LIFE-ARCHITECTURE-V1",
+                "baseline_status": "ARCHITECTURE_BASELINE_APPROVED",
                 "current_recovery_point": "RECOVERY-20260721-KAIOS-AGENT-LIFE-ARCHITECTURE-V1",
                 "active_workorders": ["KAIOS-COMPANY-BOOT-RUNTIME-V0.1"],
                 "superseded_workorders": [],
@@ -155,6 +160,10 @@ class CompanyBootCliTests(unittest.TestCase):
         self.assertEqual(result["current_main_sha"], MAIN_SHA)
         self.assertIn("CREATE_HANDOFF_RECORD", result["authorized_actions"])
         self.assertIn("PUSH", result["forbidden_actions"])
+        self.assertIn("content_sha256", result)
+        self.assertIn("record_sha256", result)
+        self.assertIn("result_sha256", result)
+        self.assertEqual(result["record_sha256"], result["result_sha256"])
 
         handoff_output = self.tmp / "handoff.json"
         archive_dir = self.tmp / "archive"
@@ -263,6 +272,97 @@ class CompanyBootCliTests(unittest.TestCase):
         self.base["current_state"] = with_state_sha(self.base["current_state"])
         self.write_case(self.base)
         self.assert_blocked("SESSION_LOCK_CONFLICT")
+
+    def test_hash_same_semantic_input_different_timestamp_content_same(self) -> None:
+        first = stamp_hashes({"status": "OK", "booted_at": "2026-07-22T00:00:00Z"})
+        second = stamp_hashes({"status": "OK", "booted_at": "2026-07-22T00:00:01Z"})
+        self.assertEqual(first["content_sha256"], second["content_sha256"])
+
+    def test_hash_same_semantic_input_different_timestamp_record_different(self) -> None:
+        first = stamp_hashes({"status": "OK", "booted_at": "2026-07-22T00:00:00Z"})
+        second = stamp_hashes({"status": "OK", "booted_at": "2026-07-22T00:00:01Z"})
+        self.assertNotEqual(first["record_sha256"], second["record_sha256"])
+
+    def test_hash_same_record_recalculation_record_same(self) -> None:
+        record = stamp_hashes({"status": "OK", "booted_at": "2026-07-22T00:00:00Z"})
+        recalculated = stamp_hashes(record)
+        self.assertEqual(record["record_sha256"], recalculated["record_sha256"])
+
+    def test_hash_field_does_not_hash_itself(self) -> None:
+        record = stamp_hashes({"status": "OK", "record_sha256": "bad", "content_sha256": "bad", "result_sha256": "bad"})
+        clean = stamp_hashes({"status": "OK"})
+        self.assertEqual(record["content_sha256"], clean["content_sha256"])
+        self.assertEqual(record["record_sha256"], clean["record_sha256"])
+
+    def test_hash_key_order_does_not_affect_content_sha256(self) -> None:
+        first = stamp_hashes({"a": 1, "b": 2})
+        second = stamp_hashes({"b": 2, "a": 1})
+        self.assertEqual(first["content_sha256"], second["content_sha256"])
+
+    def assert_invalid_transition_failed_result(self, current: Stage, next_state: Stage) -> None:
+        tracker = StateTracker(current=current, path=[current.value])
+        with self.assertRaises(BootFailure) as ctx:
+            tracker.transition(next_state)
+        result = failure_result(ctx.exception, {}, tracker)
+        self.assertEqual(result["company_boot_status"], "COMPANY_BOOT_FAILED")
+        self.assertEqual(result["failure_code"], "INVALID_STATE_TRANSITION")
+
+    def test_transition_skipping_identity_validation(self) -> None:
+        self.assert_invalid_transition_failed_result(Stage.BOOTING, Stage.CAPABILITY_VERIFIED)
+
+    def test_transition_new_to_read_only_active_blocked(self) -> None:
+        self.assert_invalid_transition_failed_result(Stage.NEW, Stage.READ_ONLY_ACTIVE)
+
+    def test_transition_archived_returning_to_active_blocked(self) -> None:
+        self.assert_invalid_transition_failed_result(Stage.ARCHIVED, Stage.READ_ONLY_ACTIVE)
+
+    def test_transition_revoked_continuing_boot_blocked(self) -> None:
+        self.assert_invalid_transition_failed_result(Stage.REVOKED, Stage.STATE_VERIFIED)
+
+    def test_transition_failed_continuing_boot_blocked(self) -> None:
+        self.assert_invalid_transition_failed_result(Stage.FAILED, Stage.STATE_VERIFIED)
+
+    def test_transition_stale_performing_write_action_blocked(self) -> None:
+        self.assert_invalid_transition_failed_result(Stage.STALE, Stage.READ_ONLY_ACTIVE)
+
+    def test_transition_conflicted_without_resolution_blocked(self) -> None:
+        self.assert_invalid_transition_failed_result(Stage.CONFLICTED, Stage.READ_ONLY_ACTIVE)
+
+    def test_wrong_baseline_id(self) -> None:
+        self.base["session"]["expected_baseline_id"] = "WRONG-BASELINE"
+        self.write_case(self.base)
+        self.assert_blocked("BASELINE_VALIDATION_FAILED")
+
+    def test_missing_baseline_id(self) -> None:
+        self.base["current_state"].pop("current_baseline_id")
+        self.base["current_state"] = with_state_sha(self.base["current_state"])
+        self.write_case(self.base)
+        self.assert_blocked("BASELINE_VALIDATION_FAILED")
+
+    def test_superseded_baseline(self) -> None:
+        self.base["current_state"]["baseline_status"] = "SUPERSEDED"
+        self.base["current_state"] = with_state_sha(self.base["current_state"])
+        self.write_case(self.base)
+        self.assert_blocked("BASELINE_VALIDATION_FAILED")
+
+    def test_revoked_baseline(self) -> None:
+        self.base["current_state"]["baseline_status"] = "REVOKED"
+        self.base["current_state"] = with_state_sha(self.base["current_state"])
+        self.write_case(self.base)
+        self.assert_blocked("BASELINE_VALIDATION_FAILED")
+
+    def test_unknown_baseline_status(self) -> None:
+        self.base["current_state"]["baseline_status"] = "UNKNOWN"
+        self.base["current_state"] = with_state_sha(self.base["current_state"])
+        self.write_case(self.base)
+        self.assert_blocked("BASELINE_VALIDATION_FAILED")
+
+    def test_correct_active_baseline_pass(self) -> None:
+        code, result = self.run_validate()
+        self.assertEqual(code, 0)
+        self.assertEqual(result["company_boot_status"], "COMPANY_BOOT_PASS")
+        self.assertEqual(result["current_baseline_id"], "KAIOS-AI-AGENT-LIFE-ARCHITECTURE-V1")
+        self.assertEqual(result["baseline_status"], "ARCHITECTURE_BASELINE_APPROVED")
 
 
 if __name__ == "__main__":

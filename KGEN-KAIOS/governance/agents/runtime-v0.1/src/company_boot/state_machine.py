@@ -1,6 +1,9 @@
 from __future__ import annotations
 
-from .models import Stage
+from dataclasses import dataclass, field
+
+from .evidence import evidence_id
+from .models import BootFailure, FailureCode, Stage
 
 
 ALLOWED_TRANSITIONS: dict[Stage, set[Stage]] = {
@@ -22,4 +25,29 @@ ALLOWED_TRANSITIONS: dict[Stage, set[Stage]] = {
 
 def assert_transition(current: Stage, next_state: Stage) -> None:
     if next_state not in ALLOWED_TRANSITIONS[current]:
-        raise ValueError(f"invalid transition {current.value} -> {next_state.value}")
+        raise BootFailure(
+            FailureCode.INVALID_STATE_TRANSITION,
+            current,
+            f"invalid transition {current.value} -> {next_state.value}",
+        )
+
+
+@dataclass
+class StateTracker:
+    current: Stage = Stage.NEW
+    path: list[str] = field(default_factory=lambda: [Stage.NEW.value])
+    evidence_ids: list[str] = field(default_factory=list)
+
+    def transition(self, next_state: Stage) -> None:
+        assert_transition(self.current, next_state)
+        self.evidence_ids.append(evidence_id("STATE", self.current.value, next_state.value))
+        self.current = next_state
+        self.path.append(next_state.value)
+
+    def fail(self, failure_state: Stage) -> None:
+        if failure_state == self.current:
+            return
+        try:
+            self.transition(failure_state)
+        except BootFailure:
+            self.transition(Stage.FAILED)

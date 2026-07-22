@@ -21,6 +21,8 @@ SECRET_PATTERNS = [
     re.compile(r"-----BEGIN [A-Z ]*PRIVATE KEY-----"),
 ]
 
+APPROVED_BASELINE_STATUSES = {"ARCHITECTURE_BASELINE_APPROVED"}
+
 
 def load_json(path: Path) -> dict[str, Any]:
     try:
@@ -35,6 +37,12 @@ def load_json(path: Path) -> dict[str, Any]:
 def require(data: dict[str, Any], field: str, stage: Stage) -> Any:
     if field not in data or data[field] in ("", None):
         raise BootFailure(FailureCode.MISSING_FIELD, stage, f"missing field: {field}")
+    return data[field]
+
+
+def require_baseline(data: dict[str, Any], field: str) -> Any:
+    if field not in data or data[field] in ("", None):
+        raise BootFailure(FailureCode.BASELINE_VALIDATION_FAILED, Stage.CONFLICTED, f"missing baseline field: {field}")
     return data[field]
 
 
@@ -96,6 +104,7 @@ def validate_boot_inputs(
     grant_id = require(session, "capability_grant_id", Stage.NEW)
     base_main_sha = require(session, "base_main_sha", Stage.NEW)
     assigned_workorder = require(session, "assigned_workorder", Stage.NEW)
+    expected_baseline_id = require_baseline(session, "expected_baseline_id")
 
     agent = find_agent(agent_registry, life_id)
     if agent.get("status") != "ACTIVE":
@@ -129,6 +138,13 @@ def validate_boot_inputs(
     validate_state_sha(current_state)
 
     current_main_sha = require(current_state, "current_main_sha", Stage.STATE_VERIFIED)
+    current_baseline_id = require_baseline(current_state, "current_baseline_id")
+    baseline_status = require_baseline(current_state, "baseline_status")
+    if expected_baseline_id != current_baseline_id:
+        raise BootFailure(FailureCode.BASELINE_VALIDATION_FAILED, Stage.STALE, "expected_baseline_id does not match current_baseline_id")
+    if baseline_status not in APPROVED_BASELINE_STATUSES:
+        raise BootFailure(FailureCode.BASELINE_VALIDATION_FAILED, Stage.CONFLICTED, f"baseline_status not approved: {baseline_status}")
+
     if base_main_sha != current_main_sha:
         if session.get("allow_stale") is True:
             raise BootFailure(FailureCode.STALE_SESSION, Stage.STALE, "stale session")
