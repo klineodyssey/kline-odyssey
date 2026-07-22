@@ -1,16 +1,16 @@
 # KAIOS World Life Law V2.1 P1 Human Decision Packet
 
-Status: `HUMAN_DECISION_REQUIRED`
+Status: `HUMAN_SELECTIONS_RECORDED / INTEGRATION_CANDIDATE_AUTHORIZED`
 
 Purpose: 整理 PR `#36` 尚未解決的五項 P1 Freeze 澄清，供 Human 選擇。本文是非規範性治理資料，不修改、啟用或凍結 World Life Law、Frozen Life OS、CURRENT、Runtime 或 Production。
 
 ## Decision Boundary
 
-- Amendment 001 與 Amendment 002：`PRESERVED_PENDING_DECISION`
+- Amendment 001 與 Amendment 002：`PRESERVED_FOR_INTEGRATION_CANDIDATE`
 - Freeze：`NOT_APPROVED`
 - PR `#36`：保持 `OPEN / DRAFT / UNMERGED`
 - Runtime authority：`false`
-- Human 必須逐項選擇或另行提出方案；Codex 推薦不是最終架構決定。
+- Human 已核准五項 P1 選擇方向；此核准不等於 Freeze、Runtime 或 Production 授權。
 
 ## Evidence
 
@@ -26,11 +26,11 @@ Current main `e4bcd8da90309a9557ce2f8eaba83ef0f8d990d4` does not contain these a
 
 | P1 ID | Topic | Codex recommendation | Human choice |
 |---|---|---|---|
-| `FZ-P1-001` | Death body and asset disposition | Option A | Pending |
-| `FZ-P1-002` | Reincarnation birth and body binding | Option B | Pending |
-| `FZ-P1-003` | Company role facets | Option A | Pending |
-| `FZ-P1-004` | Profession vocabulary | Option A | Pending |
-| `FZ-P1-005` | Normative source classification | Option A | Pending |
+| `FZ-P1-001` | Death body and asset disposition | Option A | `A / APPROVED` |
+| `FZ-P1-002` | Reincarnation birth and body binding | Option B | `B / APPROVED` |
+| `FZ-P1-003` | Company role facets | Option A | `A / APPROVED` |
+| `FZ-P1-004` | Profession vocabulary | Option A | `A / APPROVED` |
+| `FZ-P1-005` | Normative source classification | Option A | `A / APPROVED` |
 
 ## FZ-P1-001: Death Body And Asset Disposition
 
@@ -207,17 +207,17 @@ Current main `e4bcd8da90309a9557ce2f8eaba83ef0f8d990d4` does not contain these a
 | Frozen Life OS | Reference must not alter frozen files or invariants |
 | Runtime compatibility | Runtime must expose classification/version evidence; no Runtime enabled here |
 
-## Human Decision Form
+## Recorded Human Decision
 
-Human may answer with one selection per item:
+Human approved the following selections:
 
 ```text
-FZ-P1-001: A / B / C / CUSTOM
-FZ-P1-002: A / B / C / CUSTOM
-FZ-P1-003: A / B / C / CUSTOM
-FZ-P1-004: A / B / C / CUSTOM
-FZ-P1-005: A / B / C / CUSTOM
+FZ-P1-001: A
+FZ-P1-002: B
+FZ-P1-003: A
+FZ-P1-004: A
+FZ-P1-005: A
 FREEZE: NOT_APPROVED
 ```
 
-After Human decides all five items, a separately authorized amendment may update the Architecture candidate. Freeze still requires a repeat baseline review and an explicit Human Freeze decision.
+These selections authorize an Amendment Integration Candidate only. Freeze still requires integration review, a repeat baseline review, and a separate explicit Human Freeze decision.
