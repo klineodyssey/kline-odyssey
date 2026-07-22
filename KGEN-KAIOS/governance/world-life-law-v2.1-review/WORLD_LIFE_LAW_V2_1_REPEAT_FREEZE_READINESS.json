@@ -1,0 +1,101 @@
+{
+    "schema_version":  "1.0.0",
+    "artifact_id":  "WORLD-LIFE-LAW-V2.1-REPEAT-FREEZE-READINESS-001",
+    "status":  "NOT_READY_TO_FREEZE",
+    "reviewed_main_sha":  "e4bcd8da90309a9557ce2f8eaba83ef0f8d990d4",
+    "runtime_authority":  false,
+    "freeze":  "NOT_APPROVED",
+    "architecture_review":  {
+                                "law_count":  {
+                                                  "pass":  23,
+                                                  "total":  23
+                                              },
+                                "law_pairs":  {
+                                                  "pass":  253,
+                                                  "total":  253,
+                                                  "conflicts":  0
+                                              },
+                                "baseline_gates":  {
+                                                       "pass":  18,
+                                                       "total":  18,
+                                                       "clarification_required":  0,
+                                                       "missing":  0
+                                                   },
+                                "life_activity_gates":  {
+                                                            "pass":  5,
+                                                            "total":  5
+                                                        },
+                                "p0_remaining":  0,
+                                "p1_remaining":  0,
+                                "clarifications_remaining":  0
+                            },
+    "required_invariants":  {
+                                "dead_terminal":  true,
+                                "dream_mind_sub_activity":  true,
+                                "predecessor_sealed":  true,
+                                "life_os_body_asset_ownership":  false,
+                                "profession_automatic_authority":  false,
+                                "company_facet_automatic_authority":  false,
+                                "reincarnation_new_identity_chain":  true,
+                                "source_classification_versioned_and_pinned":  true
+                            },
+    "integrity":  {
+                      "source_hash_verification":  "PASS",
+                      "frozen_manifest":  {
+                                              "pass":  12,
+                                              "total":  13,
+                                              "status":  "FAIL_EXISTING_MAIN_MISMATCH",
+                                              "mismatch":  {
+                                                               "id":  "FRZ-HASH-001",
+                                                               "path":  "KGEN-KAIOS/life/README.md",
+                                                               "expected_sha256":  "cd56927bba9d54375e54887d64b952cef553c67783b6161c30a5814c87672490",
+                                                               "actual_sha256":  "877619910664c510e24a16b7622334591a848b75b9cdecac6de68bb59c7ebd60",
+                                                               "introduced_by_commit":  "e9fb9b462eb105ac1d455471a71753bc79c5d8c2"
+                                                           }
+                                          }
+                  },
+    "validation":  {
+                       "repository_json":  {
+                                               "pass":  468,
+                                               "total":  468,
+                                               "fail":  0
+                                           },
+                       "jsonl":  {
+                                     "files":  14,
+                                     "records":  75,
+                                     "fail":  0
+                                 },
+                       "markdown_links":  "PASS",
+                       "utf8":  "PASS",
+                       "corruption_scan":  "PASS",
+                       "git_diff_check":  "PASS",
+                       "secret_scan":  {
+                                           "status":  "PASS",
+                                           "hits":  0
+                                       },
+                       "protected_path_scan":  {
+                                                   "status":  "PASS",
+                                                   "violations":  0
+                                               }
+                   },
+    "source_hashes":  {
+                          "cumulative_amendment_candidate":  "9aae03be8a4df0b0200fcce67668c27223bbaf3e4164c6ef4799518a1f9d62de",
+                          "classification_candidate":  "4073960848af8c120f026abc6ef80ecc9fb1bf3dcf182d485cbafcfed5027b70",
+                          "conflict_matrix":  "cde72c6ea67a7c398cf7022cdf6b1cdbdc933c4642c7a4bc1f974a4a372124cc",
+                          "baseline_evidence":  "e71a74d9f627d8da271fdd8c18f288049cadfc6131d752d4a836ddf7e0a885a8",
+                          "repeat_review":  "a163e4baf511d49c2e9d07cc8f3a19c8068da43fa31524615e457add164519c1"
+                      },
+    "missing_items":  [
+                          {
+                              "id":  "FRZ-HASH-001",
+                              "status":  "OPEN",
+                              "blocks_freeze":  true
+                          }
+                      ],
+    "freeze_blockers":  [
+                            "FRZ-HASH-001",
+                            "EXPLICIT_HUMAN_FREEZE_DECISION_NOT_PRESENT"
+                        ],
+    "recommended_human_decision":  "RESOLVE_FROZEN_MANIFEST_HASH_MISMATCH_THEN_AUTHORIZE_FINAL_VERIFICATION",
+    "draft_only":  true
+}

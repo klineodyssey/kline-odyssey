@@ -1,0 +1,79 @@
+{
+    "schema_version":  "1.0.0",
+    "artifact_id":  "WORLD-LIFE-LAW-V2.1-REPEAT-REVIEW-INTEGRITY-MANIFEST-001",
+    "reviewed_main_sha":  "e4bcd8da90309a9557ce2f8eaba83ef0f8d990d4",
+    "runtime_authority":  false,
+    "freeze":  "NOT_APPROVED",
+    "normalization":  "UTF8_LF",
+    "artifacts":  [
+                      {
+                          "path":  "KGEN-KAIOS/governance/world-life-law-v2.1-review/WORLD_LIFE_LAW_V2_1_CUMULATIVE_AMENDMENT_CANDIDATE.md",
+                          "sha256":  "9aae03be8a4df0b0200fcce67668c27223bbaf3e4164c6ef4799518a1f9d62de",
+                          "normalization":  "UTF8_LF"
+                      },
+                      {
+                          "path":  "KGEN-KAIOS/governance/world-life-law-v2.1-review/WORLD_LIFE_LAW_V2_1_SOURCE_CLASSIFICATION_NORMATIVE_CANDIDATE.md",
+                          "sha256":  "4073960848af8c120f026abc6ef80ecc9fb1bf3dcf182d485cbafcfed5027b70",
+                          "normalization":  "UTF8_LF"
+                      },
+                      {
+                          "path":  "KGEN-KAIOS/governance/world-life-law-v2.1-review/WORLD_LIFE_LAW_V2_1_REPEAT_CONFLICT_MATRIX.json",
+                          "sha256":  "cde72c6ea67a7c398cf7022cdf6b1cdbdc933c4642c7a4bc1f974a4a372124cc",
+                          "normalization":  "UTF8_LF"
+                      },
+                      {
+                          "path":  "KGEN-KAIOS/governance/world-life-law-v2.1-review/WORLD_LIFE_LAW_V2_1_REPEAT_BASELINE_EVIDENCE.json",
+                          "sha256":  "e71a74d9f627d8da271fdd8c18f288049cadfc6131d752d4a836ddf7e0a885a8",
+                          "normalization":  "UTF8_LF"
+                      },
+                      {
+                          "path":  "KGEN-KAIOS/governance/world-life-law-v2.1-review/WORLD_LIFE_LAW_V2_1_REPEAT_BASELINE_REVIEW.md",
+                          "sha256":  "a163e4baf511d49c2e9d07cc8f3a19c8068da43fa31524615e457add164519c1",
+                          "normalization":  "UTF8_LF"
+                      },
+                      {
+                          "path":  "KGEN-KAIOS/governance/world-life-law-v2.1-review/WORLD_LIFE_LAW_V2_1_REPEAT_FREEZE_READINESS.json",
+                          "sha256":  "e67878d8d4f5250d656b7dd538f83f8c0babc1fd8af849ca100e1cb51220bcb7",
+                          "normalization":  "UTF8_LF"
+                      }
+                  ],
+    "canonical_sources":  [
+                              {
+                                  "path":  "KGEN-KAIOS/life/KAIOS_WORLD_LIFE_LAW.md",
+                                  "sha256":  "4199e1a36e7b823efab2f2733bb2cb37936a0c134cb42ebb186f3ef236b527f9"
+                              },
+                              {
+                                  "path":  "KGEN-KAIOS/life/kaios_world_life_law.json",
+                                  "sha256":  "eca96f3f5360c57b5771f605b7f5bc8d3275cc2b40832b8add4d5723f74c3a27"
+                              },
+                              {
+                                  "path":  "KGEN-KAIOS/life/life_os_architecture_baseline.json",
+                                  "sha256":  "23f4f6bcac9230478d79b1c4eb0fa468288412353772bc83560fedf333740f63"
+                              }
+                          ],
+    "pr_source_blobs":  [
+                            {
+                                "source":  "PR36_AMENDMENT_001",
+                                "commit":  "6b6672bf91c4de232dcc3452a7e6ce6a2eb66b1d",
+                                "sha256":  "6abeab8099e0af6252aa1b55f0907a2670788c304713848accdfc31fa2339892"
+                            },
+                            {
+                                "source":  "PR36_ACTIVITY_CONTRACT",
+                                "commit":  "6b6672bf91c4de232dcc3452a7e6ce6a2eb66b1d",
+                                "sha256":  "a39fd6255fabac6632e0b1f7ea0b14d7e5604b804145a4c77cb7c1b51c1ff984"
+                            },
+                            {
+                                "source":  "PR47_P1_INTEGRATION",
+                                "commit":  "a01ffe23807553067a5c23145e49b1c518c31612",
+                                "sha256":  "817d2e344a26bba75c0fb5d71dfe2a592c53111594f9bace6e35da801d545c20"
+                            }
+                        ],
+    "frozen_manifest":  {
+                            "members":  13,
+                            "pass":  12,
+                            "fail":  1,
+                            "status":  "FAIL_EXISTING_MAIN_MISMATCH",
+                            "mismatch_path":  "KGEN-KAIOS/life/README.md"
+                        },
+    "manifest_self_hash":  "EXCLUDED_TO_AVOID_SELF_REFERENCE"
+}
