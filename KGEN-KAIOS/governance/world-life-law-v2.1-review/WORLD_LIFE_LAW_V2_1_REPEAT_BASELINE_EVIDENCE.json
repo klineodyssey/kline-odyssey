@@ -17,7 +17,10 @@
                     "machine_law":  "KGEN-KAIOS/life/kaios_world_life_law.json",
                     "cumulative_amendment_candidate":  "KGEN-KAIOS/governance/world-life-law-v2.1-review/WORLD_LIFE_LAW_V2_1_CUMULATIVE_AMENDMENT_CANDIDATE.md",
                     "classification_candidate":  "KGEN-KAIOS/governance/world-life-law-v2.1-review/WORLD_LIFE_LAW_V2_1_SOURCE_CLASSIFICATION_NORMATIVE_CANDIDATE.md",
-                    "conflict_matrix":  "KGEN-KAIOS/governance/world-life-law-v2.1-review/WORLD_LIFE_LAW_V2_1_REPEAT_CONFLICT_MATRIX.json"
+                    "conflict_matrix":  "KGEN-KAIOS/governance/world-life-law-v2.1-review/WORLD_LIFE_LAW_V2_1_REPEAT_CONFLICT_MATRIX.json",
+                    "life_os_v1_1_manifest":  "KGEN-KAIOS/life/life_os_architecture_baseline_v1_1.json",
+                    "life_os_v1_1_lineage":  "KGEN-KAIOS/governance/world-life-law-v2.1-review/LIFE_OS_V1_1_BASELINE_LINEAGE.json",
+                    "frz_hash_001_resolution":  "KGEN-KAIOS/governance/world-life-law-v2.1-review/FRZ_HASH_001_RESOLUTION.json"
                 },
     "source_hashes":  {
                           "canonical_law_sha256":  "4199e1a36e7b823efab2f2733bb2cb37936a0c134cb42ebb186f3ef236b527f9",
@@ -27,7 +30,10 @@
                           "conflict_matrix_sha256":  "cde72c6ea67a7c398cf7022cdf6b1cdbdc933c4642c7a4bc1f974a4a372124cc",
                           "amendment_001_source_sha256":  "6abeab8099e0af6252aa1b55f0907a2670788c304713848accdfc31fa2339892",
                           "activity_contract_source_sha256":  "a39fd6255fabac6632e0b1f7ea0b14d7e5604b804145a4c77cb7c1b51c1ff984",
-                          "p1_integration_source_sha256":  "817d2e344a26bba75c0fb5d71dfe2a592c53111594f9bace6e35da801d545c20"
+                          "p1_integration_source_sha256":  "817d2e344a26bba75c0fb5d71dfe2a592c53111594f9bace6e35da801d545c20",
+                          "life_os_v1_1_manifest_sha256":  "b6b846259ef328b5c8e9be452979ad77fc48ddb897d8f8a75c6d6401c30d1d11",
+                          "life_os_v1_1_lineage_sha256":  "ad8791806daded0e9092f84d14e0183da6ac16a2e2d894c037b569c6525577b5",
+                          "frz_hash_001_resolution_sha256":  "21721d45998443a2234cf177a669a0f591b5d7be112419fb816247221d7d18fd"
                       },
     "law_review":  {
                        "law_count":  23,
@@ -351,13 +357,7 @@
     "p1_remaining":  0,
     "clarifications_remaining":  0,
     "missing_items":  [
-                          {
-                              "id":  "FRZ-HASH-001",
-                              "path":  "KGEN-KAIOS/life/README.md",
-                              "type":  "FROZEN_MANIFEST_HASH_MISMATCH",
-                              "status":  "OPEN",
-                              "introduced_by_commit":  "e9fb9b462eb105ac1d455471a71753bc79c5d8c2"
-                          }
+
                       ],
     "required_invariants":  {
                                 "dead_remains_terminal":  "PASS",
@@ -371,15 +371,24 @@
                             },
     "frozen_manifest":  {
                             "members":  13,
-                            "pass":  12,
-                            "fail":  1,
-                            "status":  "FAIL_EXISTING_MAIN_MISMATCH",
+                            "version":  "LIFE-OS-V1.1",
+                            "revision":  "2026-07-23.1",
+                            "manifest_path":  "KGEN-KAIOS/life/life_os_architecture_baseline_v1_1.json",
+                            "pass":  13,
+                            "fail":  0,
+                            "status":  "PASS",
+                            "historical_v1_0":  {
+                                                      "status":  "PASS_AT_FROZEN_COMMIT",
+                                                      "members":  13,
+                                                      "pass":  13,
+                                                      "manifest_rewritten":  false
+                                                  },
                             "files":  [
                                           {
                                               "path":  "KGEN-KAIOS/life/README.md",
-                                              "expected_sha256":  "cd56927bba9d54375e54887d64b952cef553c67783b6161c30a5814c87672490",
+                                              "expected_sha256":  "877619910664c510e24a16b7622334591a848b75b9cdecac6de68bb59c7ebd60",
                                               "actual_sha256":  "877619910664c510e24a16b7622334591a848b75b9cdecac6de68bb59c7ebd60",
-                                              "status":  "HASH_MISMATCH"
+                                              "status":  "PASS"
                                           },
                                           {
                                               "path":  "KGEN-KAIOS/life/LIFE_OPERATING_SYSTEM.md",
@@ -455,9 +464,17 @@
                                           }
                                       ]
                         },
-    "freeze_readiness":  "NOT_READY_TO_FREEZE",
+    "frz_hash_001_resolution":  {
+                                     "classification":  "LEGITIMATE_POST_FREEZE_DOCUMENT_UPDATE",
+                                     "resolution":  "NEW_BASELINE_VERSION_CREATED",
+                                     "historical_baseline_preserved":  true,
+                                     "old_manifest_rewritten":  false,
+                                     "semantic_invariant_change":  false,
+                                     "runtime_authority_change":  false,
+                                     "freeze_authority_change":  false
+                                 },
+    "freeze_readiness":  "READY_FOR_HUMAN_FREEZE_DECISION",
     "freeze_blockers":  [
-                            "FRZ-HASH-001",
                             "SEPARATE_EXPLICIT_HUMAN_FREEZE_DECISION_REQUIRED"
                         ],
     "protected_boundaries":  {

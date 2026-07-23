@@ -1,6 +1,6 @@
 # KAIOS World Life Law V2.1 Repeat Baseline Review
 
-Status: `REPEAT_REVIEW_COMPLETED / NOT_READY_TO_FREEZE`
+Status: `REPEAT_REVIEW_COMPLETED / READY_FOR_HUMAN_FREEZE_DECISION`
 
 Reviewed Main: `e4bcd8da90309a9557ce2f8eaba83ef0f8d990d4`
 
@@ -31,10 +31,10 @@ It does not modify the formal World Life Law, Frozen Life OS, Runtime CURRENT, U
 | P0 remaining | `0` |
 | P1 remaining | `0` |
 | Clarifications remaining | `0` |
-| Missing integrity items | `1` |
-| Freeze readiness | `NOT_READY_TO_FREEZE` |
+| Missing integrity items | `0` |
+| Freeze readiness | `READY_FOR_HUMAN_FREEZE_DECISION` |
 
-All Architecture clarification gates are resolved in candidate form. Freeze remains unavailable because the Frozen Life OS manifest currently verifies only `12 / 13` members against current main and because Freeze still requires a separate explicit Human decision.
+All Architecture clarification and integrity gates are resolved in candidate form. `LIFE-OS-V1.1` verifies `13 / 13` members against current canonical content while preserving the historical V1.0 manifest and evidence. Freeze remains unavailable because it still requires a separate explicit Human decision.
 
 ## 3. Human P1 Selection Review
 
@@ -79,38 +79,41 @@ The 13 gates already passing in PR `#36` remain PASS. The five former clarificat
 
 Life Activity, Offline activity, Cultivation, Travel and Dream remain `5 / 5 PASS`. Dream is not promoted to a physiological Life OS state or Reality mutation channel. Soul Journey remains a mythic interface unless separately authorized. Longevity remains distinct from absolute immortality.
 
-## 8. Frozen Manifest Finding
+## 8. Frozen Manifest Resolution
 
-The frozen manifest contains 13 members. Using UTF-8 with LF normalization:
+Human decision `FRZ-HASH-001 / OPTION D` authorizes a new append-only baseline version:
 
-- `12` members match.
-- `KGEN-KAIOS/life/README.md` does not match.
-- Expected SHA-256: `cd56927bba9d54375e54887d64b952cef553c67783b6161c30a5814c87672490`.
-- Current SHA-256: `877619910664c510e24a16b7622334591a848b75b9cdecac6de68bb59c7ebd60`.
-- The current content was changed by merged commit `e9fb9b462eb105ac1d455471a71753bc79c5d8c2` after the frozen baseline commit.
+- Historical `LIFE-OS-V1.0 / 2026-07-16.1` remains unchanged and verifies `13 / 13` at its frozen commit.
+- Candidate `LIFE-OS-V1.1 / 2026-07-23.1` verifies `13 / 13` against current canonical content.
+- README SHA-256: `877619910664c510e24a16b7622334591a848b75b9cdecac6de68bb59c7ebd60`.
+- Other frozen artifacts: `12 / 12 PASS`.
+- WALS references: `3 / 3 PASS`.
+- Classification: `LEGITIMATE_POST_FREEZE_DOCUMENT_UPDATE`.
+- Semantic, Runtime-authority and Freeze-authority deltas: `false`.
 
-This review branch does not modify the frozen file or manifest. Human must authorize a separate integrity disposition: restore the frozen member, approve a governed baseline revision, or provide another explicit resolution. Until then, Freeze is blocked.
+The original V1.0 manifest, hash, revision, commit and frozen artifacts were not rewritten. This resolution removes the integrity blocker but does not approve World Life Law V2.1 Freeze.
 
 ## 9. Validation Summary
 
-- Repository tracked JSON: `464 / 464 PASS` before adding this candidate package; final package validation is recorded in the readiness evidence.
+- Repository tracked JSON: `497 / 497 PASS`.
 - Repository JSONL: `14 files / 75 records PASS`.
 - Law count: `23 / 23 PASS`.
 - Law-pair matrix: `253 / 253 PASS`.
 - Baseline gates: `18 / 18 PASS`.
 - Life Activity gates: `5 / 5 PASS`.
 - Source hashes: `PASS`.
-- Frozen manifest: `12 / 13`, one existing-main mismatch.
+- Historical V1.0 manifest: `13 / 13 PASS` at its frozen commit.
+- Candidate V1.1 manifest: `13 / 13 PASS` against current canonical content.
 - Markdown links, UTF-8, corruption, `git diff --check`, secret and protected-path scans: final results are recorded in the readiness evidence and integrity manifest.
 
 ## 10. Final Verdict
 
 Architecture clarification result: `PASS_CANDIDATE`
 
-Freeze readiness: `NOT_READY_TO_FREEZE`
+Freeze readiness: `READY_FOR_HUMAN_FREEZE_DECISION`
 
 Runtime Authority: `false`
 
 Freeze: `NOT_APPROVED`
 
-Recommended Human Decision: resolve `FRZ-HASH-001` through a separate protected-baseline integrity decision, then authorize one more verification pass. An explicit Human Freeze Decision remains mandatory even after all integrity checks pass.
+Recommended Human Decision: review PR `#48`, then issue a separate explicit World Life Law V2.1 Freeze decision if Freeze is intended. Integrity readiness alone does not authorize Freeze.
