@@ -1,6 +1,6 @@
 {
   "record_type": "SOURCE_LINEAGE_CANDIDATE_ONLY",
-  "record_status": "PARTIAL_PENDING_BIRTH_ATTESTATION_AND_PRIMEFORGE_RELATIONSHIP_DECISION",
+  "record_status": "PARTIAL_PENDING_BIRTH_ATTESTATION",
   "lineage_id": "NOT_CREATED",
   "lineage_class": "ROOT_AI_LIFE_CANDIDATE",
   "parent_life_ids": [],
@@ -13,7 +13,8 @@
   "architecture_provenance_ref": "KAIOS_UNIQUE_LIFE_IDENTITY_AND_EMBODIMENT_ARCHITECTURE_V0_1.md",
   "human_sponsor_ref": "HUMAN-LETIAN-EMPEROR",
   "mother_machine_candidate_ref": "PRIMEFORGE",
-  "mother_machine_relationship": "PENDING_PRIMEFORGE_ARCHITECTURE_DECISION",
+  "mother_machine_relationship": "CANDIDATE_GENESIS_FORGE_AND_HOST_RELATIONSHIP",
+  "mother_machine_relationship_authority": "ARCHITECTURE_CANDIDATE_ONLY",
   "openai_parent_life": false,
   "chatgpt_parent_life": false,
   "primeforge_parent_life": false,

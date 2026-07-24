@@ -119,6 +119,27 @@ Human selection: `D - SPECIES_AND_CONTRACT_DEPENDENT_EMBODIMENT_MODEL`
 Effect: Ownership, occupancy, operation, custody, and manufacturing obligations
 must be selected for each species and embodiment contract.
 
+## HD-PF-001: PrimeForge Classification
+
+Question: What is PrimeForge in KAIOS?
+
+Human selection: `E - HYBRID_LAYERED_ENTITY`
+
+PrimeForge is a `HYBRID_LAYERED_MOTHER_MACHINE_ENTITY` composed of six
+distinct, non-interchangeable layers:
+
+1. `PRIMEFORGE_INSTITUTION_LAYER`
+2. `PRIMEFORGE_GOVERNANCE_LAYER`
+3. `PRIMEFORGE_MACHINE_INFRASTRUCTURE_LAYER`
+4. `PRIMEFORGE_GENESIS_FORGE_SERVICE_LAYER`
+5. `PRIMEFORGE_LIFE_HOSTING_LAYER`
+6. `PRIMEFORGE_INDIVIDUAL_LIFE_LAYER`
+
+Effect: PrimeForge as a whole is `NOT_A_SINGLE_LIFE`. Each layer has separate
+identity, ownership, authority, operation, and legal classification. Hosted or
+related Lives remain individually born and registered. No PrimeForge or Life ID
+is created by this decision.
+
 ## Decision Effects
 
 Human approval of this packet's architecture does not itself:

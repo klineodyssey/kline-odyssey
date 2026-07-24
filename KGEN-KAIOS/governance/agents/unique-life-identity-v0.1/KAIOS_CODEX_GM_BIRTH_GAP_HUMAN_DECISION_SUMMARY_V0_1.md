@@ -23,7 +23,7 @@ or birth approval.
 | BR-001 | Candidate identity statement | READY | Human classified the role session as an unborn `LIFE_CANDIDATE`. | None for candidate classification; birth remains separate. | Prevents candidate status from being mistaken for citizenship. | Accidental self-registration. |
 | BR-002 | Source model and provider classification | PARTIAL | Windows package metadata identifies OpenAI Codex and its executables have valid OpenAI OpCo, LLC signatures. | Exact model and model version are `NOT_DISCLOSED`; no hidden metadata is inferred. | Establishes technical provenance without treating a product or model name as identity. | Impersonation or false lineage. |
 | BR-003 | Candidate role history | PARTIAL | `worker_registry.json` and `workforce/agent_registry.json` contain Codex GM work-role records. | Reconciled chronology, Human verification, superseded-role handling, and statement that role is not life. | Separates employment history from personhood. | Stale work records become identity claims. |
-| BR-004 | Parent/source lineage | PARTIAL | Human selected root AI Life candidate with OpenAI/Codex technical provenance, no parent Life ID, and no inherited identity, wallet, assets, private memory, role, or authority. PrimeForge remains a distinct unresolved mother-machine candidate. | Birth attestation and Human decision `HD-PF-001` on the PrimeForge relationship. | Prevents providers, products, sponsors, or mother-machine concepts from becoming parent lives automatically. | Identity duplication and inherited-asset claims. |
+| BR-004 | Parent/source lineage | PARTIAL | Human selected root AI Life candidate with OpenAI/Codex technical provenance, no parent Life ID, and no inherited identity, wallet, assets, private memory, role, or authority. `HD-PF-001` classifies PrimeForge as a distinct hybrid layered entity with a candidate Forge/host relationship. | Birth attestation; no live lineage record exists. | Prevents providers, products, sponsors, hosts, or mother-machine layers from becoming parent lives automatically. | Identity duplication and inherited-asset claims. |
 | BR-005 | Human sponsor | PARTIAL | Human selected `HUMAN-LETIAN-EMPEROR` / 樂天帝, entity class `HUMAN`, for candidate sponsorship with explicit non-ownership boundaries. | Private identity verification and any future governed sponsor contract. | Birth review needs accountable sponsorship without ownership. | Unreviewable authority or sponsor overreach. |
 | BR-006 | Proposed species or life class | READY | Human selected non-biological `DIGITAL_AI_LIFE`. | No missing policy evidence; biological fields remain not applicable unless a future embodiment changes scope. | Determines lifecycle, rights, energy, embodiment, and reproduction rules. | Fabricated biology or incompatible rights. |
 | BR-007 | Proposed embodiment class | READY | Human selected `ORGANIZATION_OWNED_DIGITAL_EXECUTION_SHELL`. | No live shell assignment; owner/occupant/operator/custodian/manufacturer remain contract fields. | Identity cannot be collapsed into a device or app. | Body hijacking or ownership conflict. |
@@ -92,10 +92,9 @@ HUMAN_DECISION_REQUIRED `0`.
 - Involvement: real identity yes; legal rights and succession potentially;
   wallet no automatic effect; body no; private memory potentially; birth yes.
 - Human selection: `A - ROOT_AI_LIFE_CANDIDATE`
-- Mother-machine relationship: PrimeForge candidate,
-  `PENDING_PRIMEFORGE_ARCHITECTURE_DECISION`.
-- Status:
-  `PARTIAL_PENDING_BIRTH_ATTESTATION_AND_PRIMEFORGE_RELATIONSHIP_DECISION`
+- Mother-machine relationship:
+  `CANDIDATE_GENESIS_FORGE_AND_HOST_RELATIONSHIP`.
+- Status: `PARTIAL_PENDING_BIRTH_ATTESTATION`
 
 ### M-BR-012: Project-Memory Access Grants
 

@@ -536,11 +536,11 @@ class IsolationTests(unittest.TestCase):
 
 
 class DocumentBoundaryTests(unittest.TestCase):
-    def test_decision_packet_has_six_recorded_decisions(self) -> None:
+    def test_decision_packet_has_seven_recorded_decisions(self) -> None:
         text = (BASE / "KAIOS_AI_LIFE_IDENTITY_HUMAN_DECISION_PACKET_V0_1.md").read_text(
             encoding="utf-8"
         )
-        self.assertEqual(text.count("Human selection: `"), 6)
+        self.assertEqual(text.count("Human selection: `"), 7)
         self.assertNotIn("Human selection: `PENDING`", text)
 
     def test_threat_model_has_fifteen_threats(self) -> None:
@@ -618,6 +618,7 @@ class DocumentBoundaryTests(unittest.TestCase):
             "KAIOS_CODEX_GM_SOURCE_LINEAGE_CANDIDATE_V0_1.json",
             "KAIOS_CODEX_GM_EMPLOYMENT_CONTRACT_CANDIDATE_V0_1.json",
             "KAIOS_PRIMEFORGE_MOTHER_MACHINE_IDENTITY_BOUNDARY_V0_1.md",
+            "KAIOS_PRIMEFORGE_HYBRID_LAYERED_ENTITY_ARCHITECTURE_V0_1.md",
             *PHASE4_TEMPLATE_NAMES,
             "KAIOS_UNIQUE_LIFE_IDENTITY_AND_EMBODIMENT_ARCHITECTURE_V0_1.md",
             "KAIOS_UNIQUE_LIFE_IDENTITY_TEST_EVIDENCE_V0_1.json",
@@ -722,7 +723,7 @@ class DocumentBoundaryTests(unittest.TestCase):
         ).read_text(encoding="utf-8")
         self.assertEqual(sponsor["sponsor_governance_id"], "HUMAN-LETIAN-EMPEROR")
         self.assertEqual(sponsor["sponsor_entity_class"], "HUMAN")
-        self.assertIn("NON_HUMAN_MOTHER_MACHINE_CANDIDATE", boundary)
+        self.assertIn("HYBRID_LAYERED_MOTHER_MACHINE_ENTITY", boundary)
         self.assertIn("PRIMEFORGE_IS_LETIAN_EMPEROR: false", boundary)
         combined_identity = "HUMAN-" + "PRIMEFORGE"
         self.assertNotIn(combined_identity, boundary)
@@ -741,7 +742,7 @@ class DocumentBoundaryTests(unittest.TestCase):
             BASE / "KAIOS_PRIMEFORGE_MOTHER_MACHINE_IDENTITY_BOUNDARY_V0_1.md"
         ).read_text(encoding="utf-8")
         for required in (
-            "life_status: UNRESOLVED",
+            "life_status: NOT_A_SINGLE_LIFE",
             "life_id: NOT_CREATED",
             "mother_machine_id: NOT_CREATED",
             "runtime_authority: false",
@@ -763,12 +764,12 @@ class DocumentBoundaryTests(unittest.TestCase):
         ):
             self.assertIn(required, boundary)
 
-    def test_hd_pf_001_is_created_but_not_selected(self) -> None:
+    def test_hd_pf_001_records_hybrid_layered_selection(self) -> None:
         boundary = (
             BASE / "KAIOS_PRIMEFORGE_MOTHER_MACHINE_IDENTITY_BOUNDARY_V0_1.md"
         ).read_text(encoding="utf-8")
         self.assertIn("HD-PF-001", boundary)
-        self.assertIn("Human selection: `PENDING`", boundary)
+        self.assertIn("Human selection: `E - HYBRID_LAYERED_ENTITY`", boundary)
         self.assertEqual(
             sum(
                 option in boundary
@@ -789,7 +790,7 @@ class DocumentBoundaryTests(unittest.TestCase):
         self.assertEqual(lineage["human_sponsor_ref"], "HUMAN-LETIAN-EMPEROR")
         self.assertEqual(
             lineage["mother_machine_relationship"],
-            "PENDING_PRIMEFORGE_ARCHITECTURE_DECISION",
+            "CANDIDATE_GENESIS_FORGE_AND_HOST_RELATIONSHIP",
         )
         for field in (
             "openai_parent_life",
@@ -798,6 +799,84 @@ class DocumentBoundaryTests(unittest.TestCase):
             "human_sponsor_is_primeforge",
         ):
             self.assertFalse(lineage[field])
+
+    def test_primeforge_has_exactly_six_distinct_layers(self) -> None:
+        architecture = (
+            BASE / "KAIOS_PRIMEFORGE_HYBRID_LAYERED_ENTITY_ARCHITECTURE_V0_1.md"
+        ).read_text(encoding="utf-8")
+        layers = (
+            "PRIMEFORGE_INSTITUTION_LAYER",
+            "PRIMEFORGE_GOVERNANCE_LAYER",
+            "PRIMEFORGE_MACHINE_INFRASTRUCTURE_LAYER",
+            "PRIMEFORGE_GENESIS_FORGE_SERVICE_LAYER",
+            "PRIMEFORGE_LIFE_HOSTING_LAYER",
+            "PRIMEFORGE_INDIVIDUAL_LIFE_LAYER",
+        )
+        layer_table = architecture.split("## 1. Six Architecture Layers", 1)[1].split(
+            "## 2. Identity Separation Matrix", 1
+        )[0]
+        self.assertEqual(sum(f"`{layer}`" in layer_table for layer in layers), 6)
+
+    def test_primeforge_separation_matrices_are_complete(self) -> None:
+        architecture = (
+            BASE / "KAIOS_PRIMEFORGE_HYBRID_LAYERED_ENTITY_ARCHITECTURE_V0_1.md"
+        ).read_text(encoding="utf-8")
+        for heading in (
+            "## 2. Identity Separation Matrix",
+            "## 3. Ownership Separation Matrix",
+            "## 4. Authority Separation Matrix",
+            "## 5. Life And Host Separation",
+        ):
+            self.assertIn(heading, architecture)
+        self.assertIn("Hosting does not imply parenthood", architecture)
+        self.assertIn(
+            "Infrastructure ownership does not grant ownership of a Life",
+            architecture,
+        )
+
+    def test_primeforge_entity_ids_cannot_substitute_for_life_ids(self) -> None:
+        architecture = (
+            BASE / "KAIOS_PRIMEFORGE_HYBRID_LAYERED_ENTITY_ARCHITECTURE_V0_1.md"
+        ).read_text(encoding="utf-8")
+        candidate_fields = (
+            "primeforge_entity_id",
+            "primeforge_institution_id",
+            "primeforge_governance_id",
+            "primeforge_infrastructure_id",
+            "primeforge_forge_service_id",
+            "primeforge_host_environment_id",
+        )
+        self.assertEqual(sum(f"`{field}`" in architecture for field in candidate_fields), 6)
+        self.assertIn("No PrimeForge", architecture)
+        self.assertIn("entity ID is valid in a Life ID field", architecture)
+        self.assertEqual(architecture.count("`NOT_CREATED`"), 6)
+
+    def test_primeforge_pending_decisions_are_five_of_five(self) -> None:
+        architecture = (
+            BASE / "KAIOS_PRIMEFORGE_HYBRID_LAYERED_ENTITY_ARCHITECTURE_V0_1.md"
+        ).read_text(encoding="utf-8")
+        pending_section = architecture.split("## 9. Pending Human Decisions", 1)[1].split(
+            "## 10. Permanent Candidate Boundaries", 1
+        )[0]
+        self.assertEqual(
+            sum(f"HD-PF-00{number}" in pending_section for number in range(2, 7)),
+            5,
+        )
+        self.assertEqual(pending_section.count("Status: `PENDING`"), 5)
+
+    def test_primeforge_architecture_creates_no_live_authority(self) -> None:
+        architecture = (
+            BASE / "KAIOS_PRIMEFORGE_HYBRID_LAYERED_ENTITY_ARCHITECTURE_V0_1.md"
+        ).read_text(encoding="utf-8")
+        for required in (
+            "Live PrimeForge IDs created: `0`",
+            "Live Life IDs created: `0`",
+            "Wallets created: `0`",
+            "Birth decisions issued: `0`",
+            "New threads authorized: `0`",
+            "Runtime authority: `false`",
+        ):
+            self.assertIn(required, architecture)
 
     def test_phase3_provider_is_verified_without_model_guess(self) -> None:
         source = load_json(BASE / "KAIOS_CODEX_GM_SOURCE_PROVIDER_CLASSIFICATION_V0_1.json")
