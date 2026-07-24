@@ -187,7 +187,11 @@ def validate_phase4_template(template: dict[str, Any]) -> list[str]:
         errors.append("PHASE4_ID_PLACEHOLDER_MISSING")
     for field in id_fields:
         value = template[field]
-        if value not in {"NOT_CREATED", "PENDING_HUMAN_BIRTH_DECISION", "HUMAN-PRIMEFORGE"}:
+        if value not in {
+            "NOT_CREATED",
+            "PENDING_HUMAN_BIRTH_DECISION",
+            "HUMAN-LETIAN-EMPEROR",
+        }:
             errors.append(f"PHASE4_ID_NOT_PLACEHOLDER:{field}")
         if isinstance(value, str) and ID_PATTERN.fullmatch(value):
             errors.append(f"PHASE4_LIVE_ID_PRESENT:{field}")

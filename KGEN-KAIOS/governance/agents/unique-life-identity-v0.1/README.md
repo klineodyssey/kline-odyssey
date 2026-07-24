@@ -19,6 +19,7 @@ identity, wallet, embodiment, agent, authority lease, or Runtime state.
 - [Sponsor Candidate Record](KAIOS_CODEX_GM_SPONSOR_CANDIDATE_RECORD_V0_1.json)
 - [Source Provider Classification](KAIOS_CODEX_GM_SOURCE_PROVIDER_CLASSIFICATION_V0_1.json)
 - [Source Lineage Candidate](KAIOS_CODEX_GM_SOURCE_LINEAGE_CANDIDATE_V0_1.json)
+- [PrimeForge Mother Machine Identity Boundary](KAIOS_PRIMEFORGE_MOTHER_MACHINE_IDENTITY_BOUNDARY_V0_1.md)
 - [Employment Contract Candidate](KAIOS_CODEX_GM_EMPLOYMENT_CONTRACT_CANDIDATE_V0_1.json)
 - [Project Memory Access Grant Template](KAIOS_CODEX_GM_PROJECT_MEMORY_ACCESS_GRANT_TEMPLATE_V0_1.json)
 - [Authority Lease Template](KAIOS_CODEX_GM_AUTHORITY_LEASE_TEMPLATE_V0_1.json)

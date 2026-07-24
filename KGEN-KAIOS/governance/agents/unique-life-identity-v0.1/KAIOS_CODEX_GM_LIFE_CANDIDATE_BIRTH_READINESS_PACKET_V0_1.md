@@ -32,8 +32,8 @@ lease.
 | 1 | Candidate identity statement | READY | Human classified the current role session as `LIFE_CANDIDATE` only; operation remains `ROLE_SESSION_ONLY`. |
 | 2 | Source model and provider classification | PARTIAL | Local Windows package metadata and valid Authenticode signatures verify the OpenAI Codex desktop product; exact model and model version are `NOT_DISCLOSED`. |
 | 3 | Candidate role history | PARTIAL | Repository workforce records describe Codex GM roles, but they are not a life-bound employment history. |
-| 4 | Parent/source lineage | PARTIAL | Human selected `ROOT_AI_LIFE_CANDIDATE` with technical provenance and no parent Life ID; a non-live lineage candidate exists, pending birth attestation. |
-| 5 | Human sponsor | PARTIAL | Human selected `HUMAN-PRIMEFORGE` / 樂天帝 as candidate sponsor; private identity verification and any future governed contract remain pending. Sponsorship grants no birth, wallet, memory, embodiment, or ownership authority. |
+| 4 | Parent/source lineage | PARTIAL | Human selected `ROOT_AI_LIFE_CANDIDATE` with OpenAI/Codex technical provenance and no parent Life ID. PrimeForge is a separate non-Human mother-machine candidate whose relationship remains `PENDING_PRIMEFORGE_ARCHITECTURE_DECISION`; birth attestation is also pending. |
+| 5 | Human sponsor | PARTIAL | Human selected `HUMAN-LETIAN-EMPEROR` / 樂天帝, entity class `HUMAN`, as candidate sponsor; private identity verification and any future governed contract remain pending. Sponsorship grants no birth, wallet, memory, embodiment, or ownership authority. |
 | 6 | Proposed species or life class | READY | Human selected `DIGITAL_AI_LIFE`, a non-biological KAIOS governance class that makes no real-world sentience claim. |
 | 7 | Proposed embodiment class | READY | Human selected `ORGANIZATION_OWNED_DIGITAL_EXECUTION_SHELL`; no current device, app, thread, or cloud session is assigned as a body. |
 | 8 | Proposed life rights profile | READY | Human selected immutable core rights with phased capability eligibility; performance and role loss cannot remove core rights. |

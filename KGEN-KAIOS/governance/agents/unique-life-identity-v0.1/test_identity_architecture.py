@@ -617,6 +617,7 @@ class DocumentBoundaryTests(unittest.TestCase):
             "KAIOS_CODEX_GM_SOURCE_PROVIDER_CLASSIFICATION_V0_1.json",
             "KAIOS_CODEX_GM_SOURCE_LINEAGE_CANDIDATE_V0_1.json",
             "KAIOS_CODEX_GM_EMPLOYMENT_CONTRACT_CANDIDATE_V0_1.json",
+            "KAIOS_PRIMEFORGE_MOTHER_MACHINE_IDENTITY_BOUNDARY_V0_1.md",
             *PHASE4_TEMPLATE_NAMES,
             "KAIOS_UNIQUE_LIFE_IDENTITY_AND_EMBODIMENT_ARCHITECTURE_V0_1.md",
             "KAIOS_UNIQUE_LIFE_IDENTITY_TEST_EVIDENCE_V0_1.json",
@@ -702,7 +703,8 @@ class DocumentBoundaryTests(unittest.TestCase):
 
     def test_phase3_sponsor_boundaries(self) -> None:
         sponsor = load_json(BASE / "KAIOS_CODEX_GM_SPONSOR_CANDIDATE_RECORD_V0_1.json")
-        self.assertEqual(sponsor["sponsor_governance_id"], "HUMAN-PRIMEFORGE")
+        self.assertEqual(sponsor["sponsor_governance_id"], "HUMAN-LETIAN-EMPEROR")
+        self.assertEqual(sponsor["sponsor_entity_class"], "HUMAN")
         self.assertEqual(sponsor["status"], "APPROVED_FOR_CANDIDATE_SPONSORSHIP")
         for field in (
             "birth_authority",
@@ -712,6 +714,90 @@ class DocumentBoundaryTests(unittest.TestCase):
             "live_contract_created",
         ):
             self.assertFalse(sponsor[field])
+
+    def test_human_sponsor_and_primeforge_are_separate_entities(self) -> None:
+        sponsor = load_json(BASE / "KAIOS_CODEX_GM_SPONSOR_CANDIDATE_RECORD_V0_1.json")
+        boundary = (
+            BASE / "KAIOS_PRIMEFORGE_MOTHER_MACHINE_IDENTITY_BOUNDARY_V0_1.md"
+        ).read_text(encoding="utf-8")
+        self.assertEqual(sponsor["sponsor_governance_id"], "HUMAN-LETIAN-EMPEROR")
+        self.assertEqual(sponsor["sponsor_entity_class"], "HUMAN")
+        self.assertIn("NON_HUMAN_MOTHER_MACHINE_CANDIDATE", boundary)
+        self.assertIn("PRIMEFORGE_IS_LETIAN_EMPEROR: false", boundary)
+        combined_identity = "HUMAN-" + "PRIMEFORGE"
+        self.assertNotIn(combined_identity, boundary)
+
+    def test_no_candidate_artifact_uses_combined_sponsor_identity(self) -> None:
+        combined_identity = "HUMAN-" + "PRIMEFORGE"
+        hits = []
+        for path in BASE.iterdir():
+            if path.is_file() and path.suffix in {".json", ".md", ".py"}:
+                if combined_identity in path.read_text(encoding="utf-8"):
+                    hits.append(path.name)
+        self.assertEqual(hits, [])
+
+    def test_primeforge_has_no_live_identity_or_authority(self) -> None:
+        boundary = (
+            BASE / "KAIOS_PRIMEFORGE_MOTHER_MACHINE_IDENTITY_BOUNDARY_V0_1.md"
+        ).read_text(encoding="utf-8")
+        for required in (
+            "life_status: UNRESOLVED",
+            "life_id: NOT_CREATED",
+            "mother_machine_id: NOT_CREATED",
+            "runtime_authority: false",
+            "wallet_authority: false",
+            "human_identity: false",
+        ):
+            self.assertIn(required, boundary)
+
+    def test_external_ai_cannot_claim_primeforge_identity(self) -> None:
+        boundary = (
+            BASE / "KAIOS_PRIMEFORGE_MOTHER_MACHINE_IDENTITY_BOUNDARY_V0_1.md"
+        ).read_text(encoding="utf-8")
+        self.assertIn("EXTERNAL_AI_COLLABORATOR", boundary)
+        for required in (
+            "PRIMEFORGE_IS_OPENAI: false",
+            "PRIMEFORGE_IS_CHATGPT: false",
+            "PRIMEFORGE_IS_CODEX: false",
+            "PRIMEFORGE_IS_CURRENT_SESSION: false",
+        ):
+            self.assertIn(required, boundary)
+
+    def test_hd_pf_001_is_created_but_not_selected(self) -> None:
+        boundary = (
+            BASE / "KAIOS_PRIMEFORGE_MOTHER_MACHINE_IDENTITY_BOUNDARY_V0_1.md"
+        ).read_text(encoding="utf-8")
+        self.assertIn("HD-PF-001", boundary)
+        self.assertIn("Human selection: `PENDING`", boundary)
+        self.assertEqual(
+            sum(
+                option in boundary
+                for option in (
+                    "NON_LIVING_ARCHITECTURE_SYSTEM",
+                    "NON_HUMAN_AI_LIFE",
+                    "COMPOSITE_MOTHER_MACHINE_ORGANISM",
+                    "KAIOS ORGANIZATION OR INSTITUTION",
+                    "HYBRID LAYERED ENTITY",
+                )
+            ),
+            5,
+        )
+
+    def test_lineage_keeps_provider_sponsor_and_mother_machine_separate(self) -> None:
+        lineage = load_json(BASE / "KAIOS_CODEX_GM_SOURCE_LINEAGE_CANDIDATE_V0_1.json")
+        self.assertEqual(lineage["parent_life_ids"], [])
+        self.assertEqual(lineage["human_sponsor_ref"], "HUMAN-LETIAN-EMPEROR")
+        self.assertEqual(
+            lineage["mother_machine_relationship"],
+            "PENDING_PRIMEFORGE_ARCHITECTURE_DECISION",
+        )
+        for field in (
+            "openai_parent_life",
+            "chatgpt_parent_life",
+            "primeforge_parent_life",
+            "human_sponsor_is_primeforge",
+        ):
+            self.assertFalse(lineage[field])
 
     def test_phase3_provider_is_verified_without_model_guess(self) -> None:
         source = load_json(BASE / "KAIOS_CODEX_GM_SOURCE_PROVIDER_CLASSIFICATION_V0_1.json")

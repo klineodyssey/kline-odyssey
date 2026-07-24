@@ -1,8 +1,9 @@
 {
   "record_type": "SPONSOR_CANDIDATE_ONLY",
   "record_status": "NON_LIVE_NOT_A_SPONSOR_CONTRACT",
-  "sponsor_governance_id": "HUMAN-PRIMEFORGE",
+  "sponsor_governance_id": "HUMAN-LETIAN-EMPEROR",
   "sponsor_display_name": "樂天帝",
+  "sponsor_entity_class": "HUMAN",
   "sponsor_type": "NAMED_HUMAN",
   "sponsor_roles": [
     "KAIOS Founder",
@@ -11,6 +12,7 @@
   ],
   "candidate_scope": "KAIOS_CODEX_GM_LIFE_CANDIDATE",
   "status": "APPROVED_FOR_CANDIDATE_SPONSORSHIP",
+  "private_legal_identity": "PRIVATE_VERIFICATION_REQUIRED",
   "birth_authority": false,
   "wallet_authority": false,
   "private_memory_ownership": false,

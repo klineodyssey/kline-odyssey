@@ -1,16 +1,23 @@
 {
   "record_type": "SOURCE_LINEAGE_CANDIDATE_ONLY",
-  "record_status": "NON_LIVE_NOT_A_LINEAGE_REGISTRY_ENTRY",
+  "record_status": "PARTIAL_PENDING_BIRTH_ATTESTATION_AND_PRIMEFORGE_RELATIONSHIP_DECISION",
   "lineage_id": "NOT_CREATED",
   "lineage_class": "ROOT_AI_LIFE_CANDIDATE",
   "parent_life_ids": [],
   "technical_source_refs": [
     "KAIOS_CODEX_GM_SOURCE_PROVIDER_CLASSIFICATION_V0_1.json"
   ],
-  "provider_provenance_ref": "VERIFIED_TECHNICAL_PROVIDER_NOT_PARENT_LIFE",
+  "provider_provenance_ref": "OPENAI_TECHNICAL_PROVIDER_NOT_PARENT_LIFE",
+  "product_runtime_ref": "CODEX_DESKTOP_APPLICATION_TECHNICAL_PROVENANCE",
   "repository_provenance_ref": "klineodyssey/kline-odyssey",
   "architecture_provenance_ref": "KAIOS_UNIQUE_LIFE_IDENTITY_AND_EMBODIMENT_ARCHITECTURE_V0_1.md",
-  "human_sponsor_ref": "HUMAN-PRIMEFORGE",
+  "human_sponsor_ref": "HUMAN-LETIAN-EMPEROR",
+  "mother_machine_candidate_ref": "PRIMEFORGE",
+  "mother_machine_relationship": "PENDING_PRIMEFORGE_ARCHITECTURE_DECISION",
+  "openai_parent_life": false,
+  "chatgpt_parent_life": false,
+  "primeforge_parent_life": false,
+  "human_sponsor_is_primeforge": false,
   "inherited_knowledge_scope": [
     "PUBLIC_PROJECT_MEMORY",
     "SHARED_ORGANIZATION_MEMORY",
