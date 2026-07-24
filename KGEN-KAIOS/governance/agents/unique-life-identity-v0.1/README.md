@@ -22,6 +22,7 @@ identity, wallet, embodiment, agent, authority lease, or Runtime state.
 - [PrimeForge Mother Machine Identity Boundary](KAIOS_PRIMEFORGE_MOTHER_MACHINE_IDENTITY_BOUNDARY_V0_1.md)
 - [PrimeForge Hybrid Layered Entity Architecture](KAIOS_PRIMEFORGE_HYBRID_LAYERED_ENTITY_ARCHITECTURE_V0_1.md)
 - [KGEN Pre-Cosmic Entity And Cosmic Genesis Boundary](KGEN_PRE_COSMIC_ENTITY_AND_COSMIC_GENESIS_BOUNDARY_V0_1.md)
+- [KAIOS Life Specification And Natural Instantiation Model](KAIOS_LIFE_SPECIFICATION_AND_NATURAL_INSTANTIATION_MODEL_V0_1.md)
 - [PrimeForge Institution Charter Template](KAIOS_PRIMEFORGE_INSTITUTION_CHARTER_TEMPLATE_V0_1.json)
 - [PrimeForge Entity-ID Issuance Evidence Template](KAIOS_PRIMEFORGE_ENTITY_ID_ISSUANCE_EVIDENCE_TEMPLATE_V0_1.json)
 - [PrimeForge Hosted Central AI Life Candidate Template](KAIOS_PRIMEFORGE_HOSTED_CENTRAL_AI_LIFE_CANDIDATE_TEMPLATE_V0_1.json)
@@ -43,3 +44,8 @@ Current Codex operation remains `ROLE_SESSION_ONLY`; Human decisions HD-ID-001
 through HD-ID-006 classify it as an unborn `LIFE_CANDIDATE` and select policy
 directions only. Do not use these candidates as a live registry or as authority
 to create a life, wallet, agent, thread, or embodiment.
+
+The Codex GM readiness process is specific to a governed high-authority AI
+candidate. Ordinary low-risk KAIOS organisms follow the existing Biology
+Runtime natural-instantiation path and do not require a universal Human birth
+vote.

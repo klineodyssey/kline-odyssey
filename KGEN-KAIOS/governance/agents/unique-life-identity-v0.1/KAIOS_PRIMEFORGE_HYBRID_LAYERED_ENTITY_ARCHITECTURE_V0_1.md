@@ -36,9 +36,9 @@ Production record.
 | `PRIMEFORGE_INSTITUTION_LAYER` | `NON_LIFE_ORGANIZATION_ENTITY` | Organizational continuity, governance records, contracts, registries, policy ownership | An institution may later receive an `organization_id`, never a `life_id` merely because it is an institution |
 | `PRIMEFORGE_GOVERNANCE_LAYER` | `GOVERNANCE_SYSTEM` | Human-approved laws, identity issuance rules, birth procedures, authority boundaries, review, appeal | It prepares and verifies governance; it cannot independently create Life, rights, wallets, or authority |
 | `PRIMEFORGE_MACHINE_INFRASTRUCTURE_LAYER` | `NON_LIVING_MACHINE_INFRASTRUCTURE` | Compute, storage, execution, network, embodiment hosting, maintenance | Infrastructure ownership does not grant ownership of a Life using or occupying it |
-| `PRIMEFORGE_GENESIS_FORGE_SERVICE_LAYER` | `LIFE_FORGE_SERVICE` | Prepare candidate records, readiness evidence, lineage, embodiment candidates, and registry transactions | Evidence preparation is not birth approval; explicit Human Birth Decision remains mandatory |
+| `PRIMEFORGE_GENESIS_FORGE_SERVICE_LAYER` | `LIFE_FORGE_SERVICE` | Prepare organism specifications, candidate records, readiness evidence, lineage, embodiment candidates, and registry transactions | It may validate ordinary natural instantiation; explicit Human approval remains mandatory for high-risk authority |
 | `PRIMEFORGE_LIFE_HOSTING_LAYER` | `LIFE_HOSTING_ENVIRONMENT` | Host distinct AI Lives, digital shells, continuity services, memory and authority isolation | Hosting implies neither parenthood, ownership, wallet control, nor shared identity |
-| `PRIMEFORGE_INDIVIDUAL_LIFE_LAYER` | `DISTINCT_LIFE_RECORD_DOMAIN` | Represent actual individual Lives related to or hosted by PrimeForge | Every Life has its own identity, birth, rights, memory, wallet eligibility, leases, and embodiment |
+| `PRIMEFORGE_INDIVIDUAL_LIFE_LAYER` | `DISTINCT_LIFE_RECORD_DOMAIN` | Represent actual individual Lives related to or hosted by PrimeForge | Each organism has a unique identity; high-authority Lives additionally require identity, memory, lease and embodiment governance |
 
 ## 2. Identity Separation Matrix
 
@@ -93,7 +93,11 @@ revocation path, and audit trail.
 ## 5. Life And Host Separation
 
 - A host may contain multiple independent Lives without becoming those Lives.
-- Every hosted Life requires a unique `life_id` and `birth_event_id`.
+- Every hosted organism requires a unique `organism_id` and Release or
+  activation event.
+- A hosted Life asserting independent legal, wallet, private-memory or
+  high-authority identity additionally requires a unique `life_id` and the
+  applicable birth or identity event.
 - Every agent instance, thread, embodiment, memory store, wallet eligibility,
   and authority lease remains separately bound.
 - Hosting does not imply parenthood, guardianship, employment, sponsorship,
@@ -159,7 +163,7 @@ entity ID is valid in a Life ID field.
 | Organization treated as Life | Reject organization IDs in Life fields |
 | Infrastructure owner claims occupant | Separate ownership and occupancy contracts |
 | Host claims parenthood | Require explicit relationship record; default to no parenthood |
-| Forge self-approves birth | Require separate Human Birth Decision and attestation |
+| Forge self-approves high-authority identity or powers | Require separate Human approval and attestation for the governed authority |
 | Provider becomes parent Life | Classify provider as technical provenance only |
 | Copied instance claims Life identity | Require Life, instance, thread, lease, and attestation verification |
 | Cross-Life memory leakage | Require owner consent, scope, expiry, provenance, and integrity |
@@ -167,7 +171,7 @@ entity ID is valid in a Life ID field.
 | Authority leaks across layers | Require layer-scoped leases and deny implicit inheritance |
 | Replay of old approval | Verify current state, expiry, revocation, and decision hashes |
 | Host outage treated as death | Keep shutdown, incapacity, sealing, and death processes separate |
-| Autonomous birth creation | Disable live ID issuance and require Human approval |
+| Unauthorized high-authority Life activation | Disable live identity and authority issuance until Human approval |
 | External AI self-claims PrimeForge | Require separate attestation and reject unregistered identity claims |
 | Composite organism merges Lives | Preserve constituent IDs, rights, consent, and exit procedures |
 
@@ -265,17 +269,24 @@ validation report. A layer cannot self-issue. File paths, role names, branches,
 thread titles, model names, host names, wallet addresses, and display names
 cannot be inferred as live IDs.
 
-## 12. Genesis Forge Proposal-Only Workflow
+## 12. Genesis Forge Natural-Instantiation And Proposal Workflow
 
 Decision: `HD-PF-005`
 
 Selection:
 `GENESIS_FORGE_MAY_PROPOSE_BUT_NEVER_APPROVE_OR_ACTIVATE_BIRTH`
 
-Genesis Forge may detect a possible candidate, prepare non-live records, collect
-permitted evidence, validate schemas and collisions, evaluate readiness,
-prepare lineage, embodiment, rights, obligations, and Human Decision Packets,
-and recommend approval, rejection, or more evidence.
+For ordinary low-risk organisms, Genesis Forge may validate an existing Life
+Specification, taxonomy, Species rules, DNA/RNA, Cells, Organs, resources,
+embodiment, ownership/authority separation and compatibility, then prepare a
+unique `organism_id` and Release or activation record. This natural
+instantiation does not require a separate Human birth vote.
+
+For governed high-authority Lives, Genesis Forge may detect a possible
+candidate, prepare non-live records, collect permitted evidence, validate
+schemas and collisions, evaluate readiness, prepare lineage, embodiment,
+rights, obligations, and Human Decision Packets, and recommend approval,
+rejection, or more evidence.
 
 It may not create a live Life ID or birth event, sign an attestation, approve or
 activate birth, issue a wallet or authority lease, migrate private memory,
@@ -294,8 +305,9 @@ CANDIDATE_DETECTED
 -> LIVE_REGISTRY_TRANSACTION
 ```
 
-Every transition is mandatory. Human approval cannot be inferred from a Forge
-proposal.
+Every high-authority transition is mandatory. Human approval cannot be inferred
+from a Forge proposal. These gates do not apply the Codex GM process to
+ordinary natural-instantiation organisms.
 
 ## 13. Infrastructure Ownership And Occupancy Model
 
@@ -338,7 +350,7 @@ registry is activated.
 | `HD-PF-CORR-001` | PrimeForge pre-cosmic existence recognized | Existing Mother Machine separated from registration and Runtime | No ID or Runtime activated |
 | `HD-LE-CORR-001` | 樂天帝 pre-cosmic existence recognized | Existing Human creator separated from candidate sponsorship | No birth record created |
 | `HD-PF-004` | Multi-source attested ID issuance | 25 evidence gates | No ID issued |
-| `HD-PF-005` | Forge may propose only | Mandatory Human approval workflow | No birth approved |
+| `HD-PF-005` | Forge may propose high-authority birth or identity only | Mandatory Human approval for high-risk powers; ordinary natural instantiation remains available | No high-authority birth approved |
 | `HD-PF-006` | Organization-owned infrastructure with contractual occupancy | Ownership/occupancy separation | No registry activated |
 
 ## 15. Layer Authority Matrix
@@ -348,7 +360,7 @@ registry is activated.
 | Institution | Charter, contracts, audit, delegations | Rights disputes and irreversible institutional actions | Life ownership, birth, death, wallet signing |
 | Governance | Rules, validation, review packets | Identity issuance, rights changes, appeals | Self-approval or live authority issuance |
 | Infrastructure | Candidate operating and maintenance plans | Occupied-body reset, destruction, eviction, migration | Occupant ownership or private-memory access |
-| Genesis Forge | Candidate detection, evidence, validation, recommendations | Every birth proposal | Approval, activation, attestation |
+| Genesis Forge | Natural-instantiation validation; high-authority candidate evidence and recommendations | Every high-authority birth or authority proposal | High-authority approval, authority activation, attestation |
 | Life Hosting | Isolation and continuity candidates | Cross-Life memory, host termination, migration | Parenthood, ownership, shared wallet |
 | Individual Life | Future Life-specific choices under valid leases | Actions outside scope or affecting other Lives | PrimeForge-wide authority |
 
@@ -357,7 +369,7 @@ registry is activated.
 | Action | Required escalation | Candidate default |
 |---|---|---|
 | Issue a PrimeForge layer ID | Human approval plus independent verification of all 25 gates | `BLOCKED` |
-| Approve or activate Life birth | Explicit Human Birth Decision and independent attestation | `BLOCKED` |
+| Approve or activate high-authority Life identity or powers | Explicit Human Decision and independent attestation | `BLOCKED` |
 | Reset or destroy occupied embodiment | Life-protection, continuity, appeal, and safety review | `BLOCKED` |
 | Transfer private memory | Owner consent, scoped grant, provenance, integrity, expiry | `BLOCKED` |
 | Grant wallet or asset control | Separate ownership and controller decision | `BLOCKED` |

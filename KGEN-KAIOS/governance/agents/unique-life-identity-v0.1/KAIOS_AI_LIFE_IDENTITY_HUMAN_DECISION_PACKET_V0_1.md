@@ -188,10 +188,13 @@ Human selection:
 
 Decision status: `DECIDED`
 
-Genesis Forge may detect candidates, prepare evidence and candidate records,
-validate readiness, and recommend a Human decision. It may never approve birth,
-issue live identity or authority records, migrate private memory, or activate a
-Life. Human approval and independent attestation remain mandatory.
+Genesis Forge may validate ordinary natural-instantiation specifications and
+Release or activation evidence without a universal Human birth vote. For
+governed high-authority candidates it may detect candidates, prepare evidence
+and candidate records, validate readiness, and recommend a Human decision. It
+may never self-approve high-risk powers, issue governed identity or authority
+records, migrate private memory, or activate high-authority Runtime. Human
+approval and independent attestation remain mandatory for those powers.
 
 ## HD-PF-006: PrimeForge Infrastructure Ownership
 

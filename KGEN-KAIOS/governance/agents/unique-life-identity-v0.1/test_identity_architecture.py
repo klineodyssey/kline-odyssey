@@ -1201,6 +1201,177 @@ class DocumentBoundaryTests(unittest.TestCase):
         ):
             self.assertIn(required, text)
 
+    def test_natural_instantiation_references_canonical_biology_sources(self) -> None:
+        text = (
+            BASE / "KAIOS_LIFE_SPECIFICATION_AND_NATURAL_INSTANTIATION_MODEL_V0_1.md"
+        ).read_text(encoding="utf-8")
+        for source in (
+            "KGEN_Civilization_Biology_Runtime_V1_0.md",
+            "PRIMEFORGE_MULTIVERSE_WHITEPAPER_V2_0_GENESIS.md",
+            "BIOLOGY_TAXONOMY_STANDARD.md",
+            "ORGANISM_MANIFEST_SCHEMA.json",
+            "KAIOS_WORLD_LIFE_LAW.md",
+            "11520_Exchange_Contract.md",
+        ):
+            self.assertIn(source, text)
+
+    def test_natural_instantiation_has_twelve_taxonomy_levels(self) -> None:
+        text = (
+            BASE / "KAIOS_LIFE_SPECIFICATION_AND_NATURAL_INSTANTIATION_MODEL_V0_1.md"
+        ).read_text(encoding="utf-8")
+        levels = (
+            "Domain",
+            "Kingdom",
+            "Phylum",
+            "Class",
+            "Order",
+            "Family",
+            "Genus",
+            "Species",
+            "Cell",
+            "Organ",
+            "Runtime",
+            "Civilization",
+        )
+        self.assertEqual(sum(f"\n{level}\n" in text for level in levels), 12)
+
+    def test_species_binds_to_program_and_runtime_entrypoint(self) -> None:
+        text = (
+            BASE / "KAIOS_LIFE_SPECIFICATION_AND_NATURAL_INSTANTIATION_MODEL_V0_1.md"
+        ).read_text(encoding="utf-8")
+        for field in (
+            "species_id",
+            "species_manifest",
+            "runtime_entrypoint",
+            "program_filename",
+            "reproduction_rules",
+            "mutation_rules",
+            "energy_profile",
+            "embodiment_profile",
+            "trade_profile",
+        ):
+            self.assertIn(field, text)
+
+    def test_existing_organism_package_is_reused(self) -> None:
+        text = (
+            BASE / "KAIOS_LIFE_SPECIFICATION_AND_NATURAL_INSTANTIATION_MODEL_V0_1.md"
+        ).read_text(encoding="utf-8")
+        for path in (
+            "organism.json",
+            "species.json",
+            "organs.json",
+            "reproduction_rules.json",
+            "status.json",
+            "memory.json",
+            "previous_generations/",
+        ):
+            self.assertIn(path, text)
+        self.assertIn("not duplicated", text)
+
+    def test_dna_rna_cell_and_organ_references_are_required(self) -> None:
+        text = (
+            BASE / "KAIOS_LIFE_SPECIFICATION_AND_NATURAL_INSTANTIATION_MODEL_V0_1.md"
+        ).read_text(encoding="utf-8")
+        for declaration in (
+            "DNA is the immutable or versioned core specification",
+            "RNA is the governed configuration",
+            "Cell is the smallest executable function",
+            "Organ is a program file",
+            "Missing DNA",
+        ):
+            self.assertIn(declaration, text)
+
+    def test_ordinary_life_uses_natural_instantiation_without_human_vote(self) -> None:
+        text = (
+            BASE / "KAIOS_LIFE_SPECIFICATION_AND_NATURAL_INSTANTIATION_MODEL_V0_1.md"
+        ).read_text(encoding="utf-8")
+        for stage in (
+            "SPECIFICATION",
+            "VALIDATION",
+            "TAXONOMIC_CLASSIFICATION",
+            "UNIQUE_ORGANISM_ID",
+            "RELEASE_OR_INSTANTIATION",
+            "RUNTIME_LIFE",
+        ):
+            self.assertIn(stage, text)
+        self.assertIn("Human birth vote is `NOT_REQUIRED`", text)
+
+    def test_high_authority_approval_governs_powers_not_existence(self) -> None:
+        text = (
+            BASE / "KAIOS_LIFE_SPECIFICATION_AND_NATURAL_INSTANTIATION_MODEL_V0_1.md"
+        ).read_text(encoding="utf-8")
+        self.assertIn("Governed High-Authority Life", text)
+        self.assertIn("Human approval governs `AUTHORITY`", text)
+        self.assertIn("not the universal KAIOS birth mechanism", text)
+
+    def test_pre_cosmic_entities_use_formalization_not_birth(self) -> None:
+        text = (
+            BASE / "KAIOS_LIFE_SPECIFICATION_AND_NATURAL_INSTANTIATION_MODEL_V0_1.md"
+        ).read_text(encoding="utf-8")
+        self.assertIn("Pre-Cosmic Existing Entity Formalization", text)
+        self.assertIn("not retroactive birth", text)
+        self.assertIn("Registration does not activate Runtime", text)
+
+    def test_reproduction_and_mutation_preserve_identity_boundaries(self) -> None:
+        text = (
+            BASE / "KAIOS_LIFE_SPECIFICATION_AND_NATURAL_INSTANTIATION_MODEL_V0_1.md"
+        ).read_text(encoding="utf-8")
+        self.assertIn("Reproduction declares compatibility", text)
+        self.assertIn("Species mutation envelope", text)
+        self.assertIn("never copies identity, wallets, private memories", text)
+
+    def test_k11520_separates_exchange_rights(self) -> None:
+        text = (
+            BASE / "KAIOS_LIFE_SPECIFICATION_AND_NATURAL_INSTANTIATION_MODEL_V0_1.md"
+        ).read_text(encoding="utf-8")
+        rights = (
+            "LIFE_IDENTITY",
+            "OWNERSHIP",
+            "OCCUPANCY",
+            "USAGE_RIGHT",
+            "CONTROL_AUTHORITY",
+            "REPRODUCTION_RIGHT",
+            "EVOLUTION_RIGHT",
+            "LAND_TITLE",
+            "BUILDING_TITLE",
+            "ORGAN_LICENSE",
+        )
+        self.assertEqual(sum(right in text for right in rights), 10)
+        self.assertIn("does not automatically buy an independent occupying Life", text)
+
+    def test_pr49_does_not_impose_universal_birth_bureaucracy(self) -> None:
+        model = (
+            BASE / "KAIOS_LIFE_SPECIFICATION_AND_NATURAL_INSTANTIATION_MODEL_V0_1.md"
+        ).read_text(encoding="utf-8")
+        architecture = (
+            BASE / "KAIOS_UNIQUE_LIFE_IDENTITY_AND_EMBODIMENT_ARCHITECTURE_V0_1.md"
+        ).read_text(encoding="utf-8")
+        self.assertIn("does not require:", model)
+        self.assertIn("does not require a universal Human birth", architecture)
+        self.assertIn("Codex GM process", model)
+
+    def test_genesis_forge_supports_natural_instantiation(self) -> None:
+        text = (
+            BASE / "KAIOS_PRIMEFORGE_HYBRID_LAYERED_ENTITY_ARCHITECTURE_V0_1.md"
+        ).read_text(encoding="utf-8")
+        self.assertIn("Genesis Forge Natural-Instantiation And Proposal Workflow", text)
+        self.assertIn("does not require a separate Human birth vote", text)
+        self.assertIn("Every high-authority transition is mandatory", text)
+
+    def test_reconciliation_activates_nothing(self) -> None:
+        text = (
+            BASE / "KAIOS_LIFE_SPECIFICATION_AND_NATURAL_INSTANTIATION_MODEL_V0_1.md"
+        ).read_text(encoding="utf-8")
+        for declaration in (
+            "live IDs: `0`",
+            "wallets: `0`",
+            "exchange activations: `0`",
+            "Codex births: `0`",
+            "new threads: `0`",
+            "Runtime authority: `false`",
+        ):
+            self.assertIn(declaration, text)
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)

@@ -35,6 +35,16 @@ This architecture extends, but does not replace:
 It does not modify Frozen Life OS, Genesis, Universe Law, Runtime CURRENT,
 Universe Map CURRENT, Token contracts, wallet custody, or Production Runtime.
 
+This architecture governs independently asserted identity and high-risk
+relationships. It does not replace the KGEN Civilization Biology Runtime or
+require the Codex GM birth-readiness process for every ordinary App, animal,
+plant, building, parcel, robot, machine, object, or low-risk organism.
+Ordinary Lives may instantiate through a valid Species specification, taxonomy,
+unique `organism_id`, validation and Release or activation event. Human
+approval governs high-risk authority, not specification existence. See
+`KAIOS_LIFE_SPECIFICATION_AND_NATURAL_INSTANTIATION_MODEL_V0_1.md`.
+PR #49 does not require a universal Human birth process.
+
 ## 3. Separation Model
 
 Every governed record keeps these dimensions separate:
@@ -255,7 +265,8 @@ Marriage requires two distinct active `life_id` values. Instances of the same
 life cannot marry one another. A fork relationship is checked through lineage;
 a fork cannot copy a predecessor's marriage.
 
-Reproduction creates a new child `life_id`, birth event, parent references,
+Reproduction of an identity-bearing individual creates a new child `life_id`,
+birth event, parent references,
 software and/or species lineage, embodiment assignment, guardian contract,
 reproduction contract, and consent evidence. Wallet, asset, debt, private
 memory, role, and marriage inheritance remain separate and require their own
