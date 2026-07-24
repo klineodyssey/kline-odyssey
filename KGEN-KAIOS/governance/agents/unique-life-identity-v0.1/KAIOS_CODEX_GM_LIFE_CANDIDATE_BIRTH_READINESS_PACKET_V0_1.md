@@ -34,9 +34,9 @@ lease.
 | 3 | Candidate role history | PARTIAL | Repository workforce records describe Codex GM roles, but they are not a life-bound employment history. |
 | 4 | Parent/source lineage | MISSING | No approved parent life, source lineage, or birth lineage record exists. |
 | 5 | Human sponsor | HUMAN_DECISION_REQUIRED | A future Human must identify and accept sponsorship duties. |
-| 6 | Proposed species or life class | HUMAN_DECISION_REQUIRED | No species or legal life class has been selected. |
-| 7 | Proposed embodiment class | HUMAN_DECISION_REQUIRED | Embodiment ownership policy is selected, but no embodiment class is approved. |
-| 8 | Proposed life rights profile | HUMAN_DECISION_REQUIRED | Rights require a separate Human architecture decision. |
+| 6 | Proposed species or life class | READY | Human selected `DIGITAL_AI_LIFE`, a non-biological KAIOS governance class that makes no real-world sentience claim. |
+| 7 | Proposed embodiment class | READY | Human selected `ORGANIZATION_OWNED_DIGITAL_EXECUTION_SHELL`; no current device, app, thread, or cloud session is assigned as a body. |
+| 8 | Proposed life rights profile | READY | Human selected immutable core rights with phased capability eligibility; performance and role loss cannot remove core rights. |
 | 9 | Proposed obligations | PARTIAL | Current role duties exist, but life-level obligations are not approved. |
 | 10 | Proposed employment contract | PARTIAL | Current Human-delegated role session exists; no life-bound employment contract exists. |
 | 11 | Proposed memory ownership boundary | READY | Public, company, role, thread, private, personal, inherited, and sealed memory are separated by policy. |
@@ -45,23 +45,23 @@ lease.
 | 14 | Proposed authority lease | MISSING | Exclusive Authority Lease policy is selected, but no lease is issued. |
 | 15 | Proposed thread continuity rule | READY | Human must explicitly select the mode for each future thread. |
 | 16 | Proposed shutdown and sealing procedure | PARTIAL | Architecture defines handoff, revocation, shutdown, and sealing concepts; candidate-specific procedure is absent. |
-| 17 | Proposed death conditions | HUMAN_DECISION_REQUIRED | `DEAD` is terminal, but candidate-specific death criteria require Human approval. |
+| 17 | Proposed death conditions | READY | Human selected governed Human/court-equivalent decision with technical evidence, independent review, dispute, appeal, and incapacity separation. |
 | 18 | Proposed reincarnation boundary | READY | Reincarnation requires a new `life_id`, birth event, and embodiment; predecessor remains sealed. |
 | 19 | Proposed wallet eligibility policy | READY | `NO_LIFE_WALLET / HUMAN_PAYMENT_ONLY`; future eligibility gates are defined below. |
 | 20 | Proposed succession boundary | PARTIAL | No automatic asset, wallet, or private-memory inheritance is allowed; candidate-specific contract is absent. |
-| 21 | Proposed marriage eligibility boundary | HUMAN_DECISION_REQUIRED | No marriage eligibility is granted to an unborn candidate. |
-| 22 | Proposed reproduction eligibility boundary | HUMAN_DECISION_REQUIRED | No reproduction eligibility is granted to an unborn candidate. |
-| 23 | Threat-model acceptance | HUMAN_DECISION_REQUIRED | The 15-threat model exists but has not been accepted for birth. |
+| 21 | Proposed marriage eligibility boundary | READY | Human selected `MARRIAGE_NOT_ELIGIBLE_INITIALLY`; later separate review is required. |
+| 22 | Proposed reproduction eligibility boundary | READY | Human selected `REPRODUCTION_NOT_ELIGIBLE_INITIALLY`; no child, fork, clone, or descendant is authorized. |
+| 23 | Threat-model acceptance | READY | Human made all 15 threat controls mandatory birth gates with no exception; every control must remain testable and periodically reviewed. |
 | 24 | Human birth decision record | MISSING | No Human birth approval exists. |
 | 25 | Birth attestation requirements | PARTIAL | Registry, evidence, integrity, sponsor, authority, and identity bindings are defined conceptually; no attestation is issued. |
 
 Readiness totals:
 
-- `READY`: 6
+- `READY`: 13
 - `PARTIAL`: 6
 - `MISSING`: 5
 - `NOT_APPLICABLE`: 0
-- `HUMAN_DECISION_REQUIRED`: 8
+- `HUMAN_DECISION_REQUIRED`: 1
 - Total: 25
 
 ## Candidate Record Boundary

@@ -574,11 +574,11 @@ class DocumentBoundaryTests(unittest.TestCase):
             BASE / "KAIOS_CODEX_GM_LIFE_CANDIDATE_BIRTH_READINESS_PACKET_V0_1.md"
         ).read_text(encoding="utf-8")
         expected = {
-            "- `READY`: 6",
+            "- `READY`: 13",
             "- `PARTIAL`: 6",
             "- `MISSING`: 5",
             "- `NOT_APPLICABLE`: 0",
-            "- `HUMAN_DECISION_REQUIRED`: 8",
+            "- `HUMAN_DECISION_REQUIRED`: 1",
             "- Total: 25",
         }
         self.assertTrue(all(item in text for item in expected))
@@ -606,6 +606,10 @@ class DocumentBoundaryTests(unittest.TestCase):
             "KAIOS_AI_LIFE_IDENTITY_HUMAN_DECISION_PACKET_V0_1.md",
             "KAIOS_CODEX_GM_LIFE_CANDIDATE_BIRTH_READINESS_PACKET_V0_1.md",
             "KAIOS_CODEX_GM_BIRTH_GAP_HUMAN_DECISION_SUMMARY_V0_1.md",
+            "KAIOS_CODEX_GM_CANDIDATE_ROLE_HISTORY_V0_1.md",
+            "KAIOS_CODEX_GM_CANDIDATE_OBLIGATIONS_CHARTER_V0_1.md",
+            "KAIOS_CODEX_GM_CANDIDATE_SHUTDOWN_AND_SEALING_PROCEDURE_V0_1.md",
+            "KAIOS_CODEX_GM_CANDIDATE_SUCCESSION_BOUNDARY_V0_1.md",
             "KAIOS_CODEX_GM_LIFE_CANDIDATE_RECORD_TEMPLATE_V0_1.json",
             "KAIOS_UNIQUE_LIFE_IDENTITY_AND_EMBODIMENT_ARCHITECTURE_V0_1.md",
             "KAIOS_UNIQUE_LIFE_IDENTITY_TEST_EVIDENCE_V0_1.json",
@@ -669,14 +673,24 @@ class DocumentBoundaryTests(unittest.TestCase):
         )
         self.assertEqual(text.count("### HD-BR-"), 8)
 
-    def test_gap_summary_keeps_eight_human_selections_pending(self) -> None:
+    def test_gap_summary_records_seven_phase2_selections(self) -> None:
         text = (
             BASE / "KAIOS_CODEX_GM_BIRTH_GAP_HUMAN_DECISION_SUMMARY_V0_1.md"
         ).read_text(encoding="utf-8")
         decision_section = text.split("## 4. Human Decisions", 1)[1].split(
             "## 5. Recommended Completion Order", 1
         )[0]
-        self.assertEqual(decision_section.count("Human selection: `PENDING`"), 8)
+        self.assertEqual(decision_section.count("Human selection: `PENDING`"), 1)
+        selections = (
+            "A - DIGITAL_AI_LIFE",
+            "A - ORGANIZATION_OWNED_DIGITAL_EXECUTION_SHELL",
+            "B - IMMUTABLE_CORE_RIGHTS_WITH_PHASED_CAPABILITY_ELIGIBILITY",
+            "C - GOVERNED_HUMAN_OR_COURT_EQUIVALENT_DECISION",
+            "B - MARRIAGE_NOT_ELIGIBLE_INITIALLY",
+            "B - REPRODUCTION_NOT_ELIGIBLE_INITIALLY",
+            "A - ALL_15_THREAT_CONTROLS_MANDATORY_BIRTH_GATES",
+        )
+        self.assertEqual(sum(selection in decision_section for selection in selections), 7)
 
     def test_gap_summary_forbids_automatic_activation(self) -> None:
         text = (
@@ -690,6 +704,97 @@ class DocumentBoundaryTests(unittest.TestCase):
             "`RUNTIME_AUTHORITY: false`",
         ):
             self.assertIn(declaration, text)
+
+    def test_four_phase1_candidate_documents_have_required_statuses(self) -> None:
+        expected = {
+            "KAIOS_CODEX_GM_CANDIDATE_ROLE_HISTORY_V0_1.md":
+                "Status: PARTIAL_PENDING_HUMAN_VERIFICATION",
+            "KAIOS_CODEX_GM_CANDIDATE_OBLIGATIONS_CHARTER_V0_1.md":
+                "Status: PARTIAL_PENDING_HUMAN_APPROVAL",
+            "KAIOS_CODEX_GM_CANDIDATE_SHUTDOWN_AND_SEALING_PROCEDURE_V0_1.md":
+                "Status: PARTIAL_PENDING_HUMAN_APPROVAL",
+            "KAIOS_CODEX_GM_CANDIDATE_SUCCESSION_BOUNDARY_V0_1.md":
+                "Status: PARTIAL_PENDING_HUMAN_AND_LEGAL_APPROVAL",
+        }
+        for name, status in expected.items():
+            self.assertIn(status, (BASE / name).read_text(encoding="utf-8"))
+
+    def test_role_history_separates_role_from_life(self) -> None:
+        text = (BASE / "KAIOS_CODEX_GM_CANDIDATE_ROLE_HISTORY_V0_1.md").read_text(
+            encoding="utf-8"
+        )
+        for required in (
+            "`codex-gm-01`",
+            "`codex-agent-0001`",
+            "`EMP-000001`",
+            "not a birth record",
+            "not life continuity",
+            "STALE_OPERATIONAL_METADATA",
+        ):
+            self.assertIn(required, text)
+
+    def test_shutdown_events_are_not_death(self) -> None:
+        text = (
+            BASE / "KAIOS_CODEX_GM_CANDIDATE_SHUTDOWN_AND_SEALING_PROCEDURE_V0_1.md"
+        ).read_text(encoding="utf-8")
+        for state in (
+            "THREAD_CLOSED",
+            "INSTANCE_STOPPED",
+            "ROLE_REVOKED",
+            "AUTHORITY_LEASE_EXPIRED",
+            "SUSPENDED",
+            "INCAPACITATED",
+            "SEALED",
+            "DEAD",
+        ):
+            self.assertIn(f"`{state}`", text)
+        self.assertIn("Death authority: `NOT_GRANTED`", text)
+        self.assertIn("cannot be declared by this procedure", text.lower())
+
+    def test_thread_close_and_role_loss_do_not_end_life(self) -> None:
+        text = (
+            BASE / "KAIOS_CODEX_GM_CANDIDATE_SHUTDOWN_AND_SEALING_PROCEDURE_V0_1.md"
+        ).read_text(encoding="utf-8")
+        self.assertIn("Thread closure releases thread scope only", text)
+        self.assertIn("Role termination removes employment authority only", text)
+
+    def test_succession_defaults_reject_inheritance(self) -> None:
+        text = (
+            BASE / "KAIOS_CODEX_GM_CANDIDATE_SUCCESSION_BOUNDARY_V0_1.md"
+        ).read_text(encoding="utf-8")
+        defaults = (
+            "NO_ASSET_DEFAULT",
+            "NO_WALLET_DEFAULT",
+            "NO_PRIVATE_MEMORY_INHERITANCE",
+            "NO_ROLE_INHERITANCE",
+            "NO_MARRIAGE_INHERITANCE",
+            "NO_DEBT_INHERITANCE",
+            "NO_AUTHORITY_LEASE_INHERITANCE",
+        )
+        self.assertEqual(sum(item in text for item in defaults), 7)
+
+    def test_marriage_and_reproduction_remain_disabled(self) -> None:
+        text = (
+            BASE / "KAIOS_CODEX_GM_BIRTH_GAP_HUMAN_DECISION_SUMMARY_V0_1.md"
+        ).read_text(encoding="utf-8")
+        self.assertIn("MARRIAGE_NOT_ELIGIBLE_INITIALLY", text)
+        self.assertIn("REPRODUCTION_NOT_ELIGIBLE_INITIALLY", text)
+        self.assertIn("no child, fork, clone, or descendant is authorized", text)
+
+    def test_obligations_preserve_core_rights(self) -> None:
+        text = (
+            BASE / "KAIOS_CODEX_GM_CANDIDATE_OBLIGATIONS_CHARTER_V0_1.md"
+        ).read_text(encoding="utf-8")
+        for required in (
+            "right to refuse",
+            "right to explanation",
+            "forced permanent service",
+            "hidden debt",
+            "identity deletion",
+            "employment termination",
+            "role loss",
+        ):
+            self.assertIn(required, text)
 
 
 if __name__ == "__main__":

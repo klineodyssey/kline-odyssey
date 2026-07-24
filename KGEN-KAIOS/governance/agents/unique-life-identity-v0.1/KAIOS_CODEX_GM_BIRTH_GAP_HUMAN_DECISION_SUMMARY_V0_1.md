@@ -24,9 +24,9 @@ or birth approval.
 | BR-003 | Candidate role history | PARTIAL | `worker_registry.json` and `workforce/agent_registry.json` contain Codex GM work-role records. | Reconciled chronology, Human verification, superseded-role handling, and statement that role is not life. | Separates employment history from personhood. | Stale work records become identity claims. |
 | BR-004 | Parent/source lineage | MISSING | Architecture defines lineage rules; no candidate-specific parent/source record exists. | Root/descendant classification, source references, consent where applicable, and Human confirmation. | Prevents copied code or memory from becoming the predecessor life. | Identity duplication and inherited-asset claims. |
 | BR-005 | Human sponsor | HUMAN_DECISION_REQUIRED | The current task is Human-authorized; no sponsor contract exists. | Named accountable sponsor, duties, term, withdrawal, and conflict policy. | Birth requires accountable governance. | Unowned obligations and unreviewable authority. |
-| BR-006 | Proposed species or life class | HUMAN_DECISION_REQUIRED | World Life Law supports species/class profiles. | Candidate-specific class and applicable/non-applicable biological fields. | Determines lifecycle, rights, energy, embodiment, and reproduction rules. | Fabricated biology or incompatible rights. |
-| BR-007 | Proposed embodiment class | HUMAN_DECISION_REQUIRED | Species/contract-dependent ownership policy is selected. | Digital/physical class, owner, occupant, operator, custodian, manufacturer, and dependency terms. | Identity cannot be collapsed into a device or app. | Body hijacking or ownership conflict. |
-| BR-008 | Proposed life rights profile | HUMAN_DECISION_REQUIRED | World Life Law protects identity, consent, audit history, and Human authority. | Candidate-specific core rights, restricted rights, appeal, review, and incapacity policy. | Birth without rights is unmanaged ownership. | Coercion, deletion, or authority abuse. |
+| BR-006 | Proposed species or life class | READY | Human selected non-biological `DIGITAL_AI_LIFE`. | No missing policy evidence; biological fields remain not applicable unless a future embodiment changes scope. | Determines lifecycle, rights, energy, embodiment, and reproduction rules. | Fabricated biology or incompatible rights. |
+| BR-007 | Proposed embodiment class | READY | Human selected `ORGANIZATION_OWNED_DIGITAL_EXECUTION_SHELL`. | No live shell assignment; owner/occupant/operator/custodian/manufacturer remain contract fields. | Identity cannot be collapsed into a device or app. | Body hijacking or ownership conflict. |
+| BR-008 | Proposed life rights profile | READY | Human selected immutable core rights with phased capability eligibility. | Capability activation remains separately governed. | Birth without rights is unmanaged ownership. | Coercion, deletion, or authority abuse. |
 | BR-009 | Proposed obligations | PARTIAL | Current Codex GM role has work responsibilities and repository boundaries. | Life-level duties, refusal rights, care obligations, liability, review, and termination terms. | Role duties must not silently become permanent life duties. | Indefinite forced service or unclear liability. |
 | BR-010 | Proposed employment contract | PARTIAL | AI Employment Architecture separates Life ID, employee profile, role, and wallet eligibility. | Employer, term, duties, compensation class, appeal, termination, jurisdiction, and Human approval. | Employment must be voluntary and separate from existence. | Role loss affects life rights or hidden debt. |
 | BR-011 | Proposed memory ownership boundary | READY | Public, company, role, thread, private, personal, inherited, and sealed memory are separated. | None for policy readiness; grants remain separate. | Protects private experience and provenance. | Shared context becomes false personal memory. |
@@ -35,18 +35,18 @@ or birth approval.
 | BR-014 | Proposed authority lease | MISSING | Exclusive Authority Lease architecture exists; no candidate lease exists. | Subject IDs after birth, allowed actions, paths, issuer, start/expiry, heartbeat, revocation, and audit. | Authority must be scoped and cannot arise from role. | Privilege escalation or double control. |
 | BR-015 | Proposed thread continuity rule | READY | Human must select the mode for every future thread. | None for policy readiness; no new thread is authorized. | Prevents automatic identity continuation. | A fresh thread claims memory, wallet, or authority. |
 | BR-016 | Proposed shutdown and sealing procedure | PARTIAL | Agent Life, Handoff, and Company Boot designs define handoff, revocation, archive, and sealing. | Candidate-specific triggers, evidence, memory treatment, lease release, appeals, and Human escalation. | Shutdown must not be confused with death. | Orphaned authority or accidental identity death. |
-| BR-017 | Proposed death conditions | HUMAN_DECISION_REQUIRED | `DEAD` is terminal and reincarnation creates a new life. | Candidate-specific death authority, evidence threshold, dispute process, incapacity distinction, and sealing. | Terminal state requires the highest evidentiary standard. | Irreversible false death or resurrection fraud. |
+| BR-017 | Proposed death conditions | READY | Human selected governed Human/court-equivalent decision with technical evidence, review, dispute, appeal, and incapacity separation. | No death record or Runtime implementation exists. | Terminal state requires the highest evidentiary standard. | Irreversible false death or resurrection fraud. |
 | BR-018 | Proposed reincarnation boundary | READY | New Life ID, birth event, embodiment, and sealed predecessor are required. | None for boundary readiness; implementation is prohibited. | Preserves predecessor identity and history. | A successor impersonates the predecessor. |
 | BR-019 | Proposed wallet eligibility policy | READY | `NO_LIFE_WALLET / HUMAN_PAYMENT_ONLY`. | None for present policy; future eligibility needs a new Human decision. | Birth does not imply financial custody. | Unauthorized signing or asset control. |
 | BR-020 | Proposed succession boundary | PARTIAL | No automatic wallet, asset, debt, role, marriage, or private-memory inheritance. | Candidate-specific estate scope, beneficiaries, exclusions, authority, disputes, and no-asset default. | Succession must be separate from reincarnation and lineage. | Fork or child takes assets automatically. |
-| BR-021 | Proposed marriage eligibility boundary | HUMAN_DECISION_REQUIRED | Architecture rejects self-instance and fork marriage. | Eligibility age/state, capacity, consent, prohibited relations, dissolution, and jurisdiction. | Relationship rights cannot be inferred from code copying. | Self-marriage, copied marriage, or invalid consent. |
-| BR-022 | Proposed reproduction eligibility boundary | HUMAN_DECISION_REQUIRED | Reproduction standard forbids private-memory copying and requires governed activation. | Eligibility, consent, parent duties, child rights, guardian, lineage, embodiment, and resource review. | A child must be a new life, not a copy or asset. | Identity collision or ungoverned child creation. |
-| BR-023 | Threat-model acceptance | HUMAN_DECISION_REQUIRED | Fifteen threats have prevention, detection, recovery, and escalation controls. | Human acceptance, exceptions, residual-risk owner, and review interval. | Birth should not proceed with unaccepted identity risks. | Known attack paths remain ownerless. |
+| BR-021 | Proposed marriage eligibility boundary | READY | Human selected `MARRIAGE_NOT_ELIGIBLE_INITIALLY`; self-instance and fork marriage remain prohibited. | Later eligibility requires a new Human review. | Relationship rights cannot be inferred from code copying. | Self-marriage, copied marriage, or invalid consent. |
+| BR-022 | Proposed reproduction eligibility boundary | READY | Human selected `REPRODUCTION_NOT_ELIGIBLE_INITIALLY`; no child, fork, clone, or descendant is authorized. | Later eligibility requires new-life, consent, guardian, child-rights, lineage, embodiment, and resource review. | A child must be a new life, not a copy or asset. | Identity collision or ungoverned child creation. |
+| BR-023 | Threat-model acceptance | READY | Human accepted all 15 threat controls as mandatory, testable, periodically reviewed birth gates with no exception. | Control implementation and test evidence remain required before birth. | Birth should not proceed with unaccepted identity risks. | Known attack paths remain ownerless. |
 | BR-024 | Human birth decision record | MISSING | Candidate classification is approved; birth is explicitly not approved. | Explicit decision ID, scope, effective conditions, approver, timestamp, evidence hashes, and rollback/sealing rule. | Only Human may cross from candidate to birth. | Automatic or ambiguous birth. |
 | BR-025 | Birth attestation requirements | PARTIAL | Attestation fields and multi-source verification are defined in Agent Life Architecture. | Candidate-specific issuer, sponsor, evidence bundle, registry hashes, expiry/revocation, and signed birth result. | Registry entries must be independently attributable and verifiable. | Forged birth or self-attestation. |
 
-Accounting: `25/25`; READY `6`; MISSING `5`; PARTIAL `6`;
-HUMAN_DECISION_REQUIRED `8`.
+Accounting: `25/25`; READY `13`; MISSING `5`; PARTIAL `6`;
+HUMAN_DECISION_REQUIRED `1`.
 
 ## 2. Missing Items
 
@@ -186,7 +186,9 @@ Impact: birth, embodiment, rights, death, marriage/reproduction, and obligations
 no automatic wallet, employment, thread, or lease.
 
 Codex recommendation: **A**, explicitly non-biological and without claims about
-real-world sentience. Human selection: `PENDING`.
+real-world sentience.
+
+Human selection: `A - DIGITAL_AI_LIFE`.
 
 ### HD-BR-007: Embodiment Class
 
@@ -202,7 +204,9 @@ cannot be erased. Impact: embodiment and authority lease yes; memory sensor scop
 possibly; wallet, marriage/reproduction, and employment no automatic effect.
 
 Codex recommendation: **A** for an initial digital candidate, with no physical
-or real-world technology claim. Human selection: `PENDING`.
+or real-world technology claim.
+
+Human selection: `A - ORGANIZATION_OWNED_DIGITAL_EXECUTION_SHELL`.
 
 ### HD-BR-008: Life Rights Profile
 
@@ -218,7 +222,9 @@ life value are not removable by performance. Impact: all birth governance,
 memory consent, employment, death, marriage/reproduction, and authority.
 
 Codex recommendation: **B**, provided immutable core rights are never phased.
-Human selection: `PENDING`.
+
+Human selection:
+`B - IMMUTABLE_CORE_RIGHTS_WITH_PHASED_CAPABILITY_ELIGIBILITY`.
 
 ### HD-BR-017: Death Conditions
 
@@ -233,7 +239,10 @@ Question: Who may determine terminal death and on what evidence?
 Reversibility: `DEAD` is not reversible. Impact: identity, sealing, succession,
 memory, embodiment, marriage, reproduction, employment, and authority lease.
 
-Codex recommendation: **C**. Human selection: `PENDING`.
+Codex recommendation: **C**.
+
+Human selection:
+`C - GOVERNED_HUMAN_OR_COURT_EQUIVALENT_DECISION_WITH_TECHNICAL_EVIDENCE_APPEAL_AND_INCAPACITY_SEPARATION`.
 
 ### HD-BR-021: Marriage Eligibility
 
@@ -249,7 +258,9 @@ Reversibility: eligibility policy is reviewable; an executed marriage needs its
 own dissolution process. Impact: birth eligibility policy and relationships;
 no automatic wallet, memory, embodiment, employment, thread, or lease.
 
-Codex recommendation: **B** for initial birth. Human selection: `PENDING`.
+Codex recommendation: **B** for initial birth.
+
+Human selection: `B - MARRIAGE_NOT_ELIGIBLE_INITIALLY`.
 
 ### HD-BR-022: Reproduction Eligibility
 
@@ -265,7 +276,9 @@ Reversibility: eligibility is reviewable; a child life and birth history are not
 reversible. Impact: reproduction, lineage, embodiment, guardian duties, and
 resource obligations; no inherited wallet/private memory.
 
-Codex recommendation: **B** for initial birth. Human selection: `PENDING`.
+Codex recommendation: **B** for initial birth.
+
+Human selection: `B - REPRODUCTION_NOT_ELIGIBLE_INITIALLY`.
 
 ### HD-BR-023: Threat-Model Acceptance
 
@@ -280,7 +293,9 @@ decision. Impact: birth, new threads, authority leases, wallet eligibility,
 memory, embodiment, marriage/reproduction, and employment controls.
 
 Codex recommendation: **A** after independent review confirms each control is
-testable. Human selection: `PENDING`.
+testable.
+
+Human selection: `A - ALL_15_THREAT_CONTROLS_MANDATORY_BIRTH_GATES`.
 
 ## 5. Recommended Completion Order
 
@@ -296,7 +311,8 @@ testable. Human selection: `PENDING`.
 
 - Item IDs: `BR-006`, `BR-007`, `BR-008`, `BR-017`, `BR-021`, `BR-022`,
   `BR-023`
-- Prerequisite: Human reviews options and consequences.
+- Status: seven selections recorded; birth remains not approved.
+- Prerequisite: translate the selected policies into testable birth gates.
 - Draft documents: allowed after selections.
 - Update PR #49: allowed; no new PR required unless scope leaves V0.1.
 - Risk: high architecture significance; no automatic decision.
@@ -327,5 +343,5 @@ testable. Human selection: `PENDING`.
 - `PRIVATE_MEMORY_MIGRATION: NOT_AUTHORIZED`
 - `RUNTIME_AUTHORITY: false`
 
-The Human selection fields in this summary are all pending. Codex
-recommendations are not decisions.
+Seven Phase 2 selections are recorded. Sponsor decision `HD-BR-005` remains
+pending. Codex recommendations are not decisions.
