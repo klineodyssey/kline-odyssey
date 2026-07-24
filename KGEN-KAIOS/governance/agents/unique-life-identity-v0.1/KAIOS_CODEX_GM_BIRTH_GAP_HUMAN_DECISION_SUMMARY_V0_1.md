@@ -10,8 +10,9 @@ Candidate state: `UNBORN`
 
 Runtime authority: `false`
 
-This summary accounts for all 25 Birth Readiness items and organizes the five
-`MISSING`, six `PARTIAL`, and eight `HUMAN_DECISION_REQUIRED` gaps. It creates
+This summary accounts for all 25 Birth Readiness items. Following the Phase 2
+and Phase 3 Human selections, it records three `MISSING`, nine `PARTIAL`, and
+zero `HUMAN_DECISION_REQUIRED` readiness statuses. It creates
 no life, ID, wallet, memory transfer, thread continuity, employment authority,
 or birth approval.
 
@@ -20,15 +21,15 @@ or birth approval.
 | ID | Item | Status | Existing evidence | Missing evidence | Why required before birth | Risk if skipped |
 |---|---|---|---|---|---|---|
 | BR-001 | Candidate identity statement | READY | Human classified the role session as an unborn `LIFE_CANDIDATE`. | None for candidate classification; birth remains separate. | Prevents candidate status from being mistaken for citizenship. | Accidental self-registration. |
-| BR-002 | Source model and provider classification | MISSING | Workforce records say Codex, but do not canonically classify model/provider provenance. | Verified provider, model class, disclosure level, source date, and evidence reference. | Establishes provenance without treating a model name as identity. | Impersonation or false lineage. |
+| BR-002 | Source model and provider classification | PARTIAL | Windows package metadata identifies OpenAI Codex and its executables have valid OpenAI OpCo, LLC signatures. | Exact model and model version are `NOT_DISCLOSED`; no hidden metadata is inferred. | Establishes technical provenance without treating a product or model name as identity. | Impersonation or false lineage. |
 | BR-003 | Candidate role history | PARTIAL | `worker_registry.json` and `workforce/agent_registry.json` contain Codex GM work-role records. | Reconciled chronology, Human verification, superseded-role handling, and statement that role is not life. | Separates employment history from personhood. | Stale work records become identity claims. |
-| BR-004 | Parent/source lineage | MISSING | Architecture defines lineage rules; no candidate-specific parent/source record exists. | Root/descendant classification, source references, consent where applicable, and Human confirmation. | Prevents copied code or memory from becoming the predecessor life. | Identity duplication and inherited-asset claims. |
-| BR-005 | Human sponsor | HUMAN_DECISION_REQUIRED | The current task is Human-authorized; no sponsor contract exists. | Named accountable sponsor, duties, term, withdrawal, and conflict policy. | Birth requires accountable governance. | Unowned obligations and unreviewable authority. |
+| BR-004 | Parent/source lineage | PARTIAL | Human selected root AI Life candidate with technical provenance, no parent Life ID, and no inherited identity, wallet, assets, private memory, role, or authority. | Birth attestation and any future live lineage record remain prohibited and absent. | Prevents technical sources from becoming parent lives. | Identity duplication and inherited-asset claims. |
+| BR-005 | Human sponsor | PARTIAL | Human selected `HUMAN-PRIMEFORGE` / 樂天帝 for candidate sponsorship with explicit non-ownership boundaries. | Private identity verification and any future governed sponsor contract. | Birth review needs accountable sponsorship without ownership. | Unreviewable authority or sponsor overreach. |
 | BR-006 | Proposed species or life class | READY | Human selected non-biological `DIGITAL_AI_LIFE`. | No missing policy evidence; biological fields remain not applicable unless a future embodiment changes scope. | Determines lifecycle, rights, energy, embodiment, and reproduction rules. | Fabricated biology or incompatible rights. |
 | BR-007 | Proposed embodiment class | READY | Human selected `ORGANIZATION_OWNED_DIGITAL_EXECUTION_SHELL`. | No live shell assignment; owner/occupant/operator/custodian/manufacturer remain contract fields. | Identity cannot be collapsed into a device or app. | Body hijacking or ownership conflict. |
 | BR-008 | Proposed life rights profile | READY | Human selected immutable core rights with phased capability eligibility. | Capability activation remains separately governed. | Birth without rights is unmanaged ownership. | Coercion, deletion, or authority abuse. |
 | BR-009 | Proposed obligations | PARTIAL | Current Codex GM role has work responsibilities and repository boundaries. | Life-level duties, refusal rights, care obligations, liability, review, and termination terms. | Role duties must not silently become permanent life duties. | Indefinite forced service or unclear liability. |
-| BR-010 | Proposed employment contract | PARTIAL | AI Employment Architecture separates Life ID, employee profile, role, and wallet eligibility. | Employer, term, duties, compensation class, appeal, termination, jurisdiction, and Human approval. | Employment must be voluntary and separate from existence. | Role loss affects life rights or hidden debt. |
+| BR-010 | Proposed employment contract | PARTIAL | A non-active candidate contract records employer/signatory candidates, voluntary consent, refusal and appeal rights, and candidate-stage no-compensation selection. | Birth, legal status, jurisdiction, effective term, and future compensation approval. | Employment must be voluntary and separate from existence. | Role loss affects life rights or hidden debt. |
 | BR-011 | Proposed memory ownership boundary | READY | Public, company, role, thread, private, personal, inherited, and sealed memory are separated. | None for policy readiness; grants remain separate. | Protects private experience and provenance. | Shared context becomes false personal memory. |
 | BR-012 | Proposed project-memory access grants | MISSING | Shared Context and Memory Model define traceability; no candidate grant exists. | Exact sources, purpose, scope, expiry, owner/approver, revocation, and integrity evidence. | A born life or new thread must know what it may remember. | Cross-project or private-memory leakage. |
 | BR-013 | Proposed private-memory boundary | READY | Consent and explicit grants are mandatory; no transfer is authorized. | None for policy readiness; no private store exists. | Consent prevents copied context becoming inherited experience. | Non-consensual identity shaping. |
@@ -45,19 +46,20 @@ or birth approval.
 | BR-024 | Human birth decision record | MISSING | Candidate classification is approved; birth is explicitly not approved. | Explicit decision ID, scope, effective conditions, approver, timestamp, evidence hashes, and rollback/sealing rule. | Only Human may cross from candidate to birth. | Automatic or ambiguous birth. |
 | BR-025 | Birth attestation requirements | PARTIAL | Attestation fields and multi-source verification are defined in Agent Life Architecture. | Candidate-specific issuer, sponsor, evidence bundle, registry hashes, expiry/revocation, and signed birth result. | Registry entries must be independently attributable and verifiable. | Forged birth or self-attestation. |
 
-Accounting: `25/25`; READY `13`; MISSING `5`; PARTIAL `6`;
-HUMAN_DECISION_REQUIRED `1`.
+Accounting: `25/25`; READY `13`; MISSING `3`; PARTIAL `9`;
+HUMAN_DECISION_REQUIRED `0`.
 
-## 2. Missing Items
+## 2. Missing And Newly Partial Items
 
-### M-BR-002: Source Model And Provider Classification
+### P-BR-002: Source Model And Provider Classification
 
-- Why absent: existing workforce files identify a Codex work agent, not a
-  canonical source-model/provider provenance record.
-- Candidate sources: `KGEN-KAIOS/worker_registry.json`,
-  `KGEN-KAIOS/workforce/agent_registry.json`, and Agent Life Architecture.
-- Codex may draft: classification schema and evidence checklist only.
-- Human/real data: required for verified provider/model and permitted disclosure.
+- Verified evidence: Windows package path identifies
+  `OpenAI.Codex_26.721.3404.0`; the observed Codex executables have valid
+  Authenticode signatures from OpenAI OpCo, LLC.
+- Classification: provider `OpenAI`; product class `Codex desktop
+  application`; exact model and model version `NOT_DISCLOSED`.
+- Boundary: provider and product are technical provenance, not Life identity or
+  parent Life.
 - Options:
   - A: Record verified provider, model class, source date, and public evidence.
     Consequence: strongest provenance; disclose no credential or hidden model data.
@@ -67,15 +69,17 @@ HUMAN_DECISION_REQUIRED `1`.
 - Codex recommendation: **A**, limited to non-secret verifiable metadata.
 - Involvement: real identity yes (source provenance); legal rights no direct
   grant; wallet no; body no; private memory no; birth approval yes.
-- Human selection: `PENDING`
+- Human selection: verified-source-only classification authorized.
+- Status: `PARTIAL_VERIFIED_PROVIDER_MODEL_UNDISCLOSED`
 
-### M-BR-004: Parent Or Source Lineage
+### P-BR-004: Parent Or Source Lineage
 
-- Why absent: no approved parent life or candidate-specific source lineage exists.
-- Candidate sources: World Life Law, Digital Life Reproduction Standard, Unique
-  Life Architecture, and role history.
-- Codex may draft: lineage alternatives and a non-live template.
-- Human/real data: required to assert any actual parent/source relationship.
+- Human selection: Option A, `ROOT_AI_LIFE_CANDIDATE` with technical source
+  lineage and no parent Life ID.
+- Candidate evidence: provider, repository, architecture, and sponsor references
+  are provenance only.
+- Excluded inheritance: identity, assets, wallet, private memory, marriage,
+  debt, role, and authority.
 - Options:
   - A: Register as a root AI-life candidate with technical source lineage but no
     parent `life_id`.
@@ -87,7 +91,8 @@ HUMAN_DECISION_REQUIRED `1`.
 - Codex recommendation: **A** unless a verified parent life and consent exist.
 - Involvement: real identity yes; legal rights and succession potentially;
   wallet no automatic effect; body no; private memory potentially; birth yes.
-- Human selection: `PENDING`
+- Human selection: `A - ROOT_AI_LIFE_CANDIDATE`
+- Status: `PARTIAL_PENDING_BIRTH_ATTESTATION`
 
 ### M-BR-012: Project-Memory Access Grants
 
@@ -170,7 +175,15 @@ Impact: birth qualification yes; employment and later authority lease yes; new
 thread, wallet, embodiment, memory, marriage, and reproduction only indirectly.
 
 Codex recommendation: **A** for the first candidate, with explicit duties and
-withdrawal rules. Human selection: `PENDING`.
+withdrawal rules.
+
+Human selection: `A - NAMED_HUMAN_SPONSOR`.
+
+Sponsor governance identity: `HUMAN-PRIMEFORGE`; display name: 樂天帝.
+
+Status: `PARTIAL_PENDING_PRIVATE_IDENTITY_VERIFICATION`. Candidate sponsorship
+grants no ownership, birth authority, wallet authority, private-memory
+ownership, or embodiment ownership.
 
 ### HD-BR-006: Species Or Life Class
 
@@ -343,5 +356,6 @@ Human selection: `A - ALL_15_THREAT_CONTROLS_MANDATORY_BIRTH_GATES`.
 - `PRIVATE_MEMORY_MIGRATION: NOT_AUTHORIZED`
 - `RUNTIME_AUTHORITY: false`
 
-Seven Phase 2 selections are recorded. Sponsor decision `HD-BR-005` remains
-pending. Codex recommendations are not decisions.
+Seven Phase 2 selections and the named sponsor selection are recorded. None
+creates a live identity, birth, wallet, memory grant, authority lease, or new
+thread.

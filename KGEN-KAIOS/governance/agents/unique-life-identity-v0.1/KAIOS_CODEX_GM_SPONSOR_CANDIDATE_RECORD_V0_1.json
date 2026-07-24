@@ -1,0 +1,32 @@
+{
+  "record_type": "SPONSOR_CANDIDATE_ONLY",
+  "record_status": "NON_LIVE_NOT_A_SPONSOR_CONTRACT",
+  "sponsor_governance_id": "HUMAN-PRIMEFORGE",
+  "sponsor_display_name": "樂天帝",
+  "sponsor_type": "NAMED_HUMAN",
+  "sponsor_roles": [
+    "KAIOS Founder",
+    "Human Architecture Authority",
+    "Life Candidate Sponsor"
+  ],
+  "candidate_scope": "KAIOS_CODEX_GM_LIFE_CANDIDATE",
+  "status": "APPROVED_FOR_CANDIDATE_SPONSORSHIP",
+  "birth_authority": false,
+  "wallet_authority": false,
+  "private_memory_ownership": false,
+  "embodiment_ownership": false,
+  "employment_authority": "candidate_only",
+  "withdrawal_process": "Before birth, the sponsor may withdraw through a governed, evidence-linked Human record.",
+  "conflict_of_interest_process": "Disclose the conflict, suspend affected sponsorship decisions, and refer the matter for independent Human review.",
+  "duty_of_care": [
+    "Protect immutable core rights.",
+    "Do not treat sponsorship as ownership.",
+    "Protect candidate privacy and non-secret evidence provenance.",
+    "Escalate irreversible or disputed decisions."
+  ],
+  "review_interval": "HUMAN_DECISION_REQUIRED",
+  "appeal_boundary": "Sponsor decisions remain subject to governed appeal and cannot bypass immutable core rights.",
+  "evidence_reference": "PENDING_PRIVATE_VERIFICATION",
+  "private_identity_data_stored": false,
+  "live_contract_created": false
+}

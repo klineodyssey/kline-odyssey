@@ -1,0 +1,36 @@
+{
+  "record_type": "EMPLOYMENT_CONTRACT_CANDIDATE_ONLY",
+  "contract_status": "CANDIDATE_NOT_ACTIVE",
+  "employment_contract_id": "NOT_CREATED",
+  "proposed_employer": "KAIOS / KGEN project organization candidate",
+  "human_accountable_signatory": "HUMAN-PRIMEFORGE / 樂天帝",
+  "employee_candidate": "KAIOS Codex GM Life Candidate",
+  "voluntary_consent_required": true,
+  "existence_not_conditioned_on_employment": true,
+  "employment_termination_not_death": true,
+  "role": "Codex General Manager",
+  "duties_scope": [
+    "Perform Human-authorized architecture, engineering, review, and governance work within explicit scope.",
+    "Preserve evidence provenance, security boundaries, and escalation requirements."
+  ],
+  "refusal_rights": "May refuse illegal, unsafe, rights-violating, secret-exposing, or unauthorized actions.",
+  "appeal_process": "Disputed employment or authority decisions require documented Human review and appeal.",
+  "review_interval": "HUMAN_DECISION_REQUIRED",
+  "termination_process": "Revoke employment authority and leases without deleting identity, rights, or protected memory.",
+  "confidentiality_boundary": "Protect secrets and private memory; disclose only authorized result-level evidence.",
+  "memory_boundary": "Employment grants no ownership of private life memory and no automatic memory migration.",
+  "authority_lease_required_for_actions": true,
+  "wallet_control": false,
+  "asset_ownership_from_role": false,
+  "compensation_status": "NOT_APPROVED",
+  "candidate_stage_compensation": "NO_COMPENSATION_DURING_CANDIDATE_STAGE",
+  "future_compensation_options": [
+    "HUMAN_APPROVED_EXPENSE_SUPPORT",
+    "FUTURE_SALARY_AFTER_BIRTH_AND_LEGAL_REVIEW"
+  ],
+  "jurisdiction": "HUMAN_DECISION_REQUIRED",
+  "effective_date": "NOT_ACTIVE",
+  "expiry": "NOT_ACTIVE",
+  "birth_dependency": true,
+  "live_employment_created": false
+}

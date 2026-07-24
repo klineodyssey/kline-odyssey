@@ -1,0 +1,18 @@
+{
+  "record_type": "AUTHORITY_LEASE_TEMPLATE_ONLY",
+  "template_status": "NON_LIVE_NOT_ISSUED",
+  "validator_policy": "MUST_REJECT_AS_LIVE_RECORD",
+  "authority_lease_id": "NOT_CREATED",
+  "life_id": "PENDING_HUMAN_BIRTH_DECISION",
+  "agent_instance_id": "NOT_CREATED",
+  "thread_id": "NOT_CREATED",
+  "authority_scope": [],
+  "issued_at": "NOT_ACTIVE",
+  "expires_at": "NOT_ACTIVE",
+  "heartbeat_at": "NOT_ACTIVE",
+  "revocation_status": "NOT_ISSUED",
+  "issuer_evidence": "NOT_CREATED",
+  "integrity_hash": "NOT_CREATED",
+  "wallet_authority": false,
+  "runtime_authority": false
+}

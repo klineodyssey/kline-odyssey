@@ -30,15 +30,15 @@ lease.
 | # | Requirement | Status | Current evidence and missing work |
 |---|---|---|---|
 | 1 | Candidate identity statement | READY | Human classified the current role session as `LIFE_CANDIDATE` only; operation remains `ROLE_SESSION_ONLY`. |
-| 2 | Source model and provider classification | MISSING | No canonical candidate-specific model/provider classification is registered. |
+| 2 | Source model and provider classification | PARTIAL | Local Windows package metadata and valid Authenticode signatures verify the OpenAI Codex desktop product; exact model and model version are `NOT_DISCLOSED`. |
 | 3 | Candidate role history | PARTIAL | Repository workforce records describe Codex GM roles, but they are not a life-bound employment history. |
-| 4 | Parent/source lineage | MISSING | No approved parent life, source lineage, or birth lineage record exists. |
-| 5 | Human sponsor | HUMAN_DECISION_REQUIRED | A future Human must identify and accept sponsorship duties. |
+| 4 | Parent/source lineage | PARTIAL | Human selected `ROOT_AI_LIFE_CANDIDATE` with technical provenance and no parent Life ID; a non-live lineage candidate exists, pending birth attestation. |
+| 5 | Human sponsor | PARTIAL | Human selected `HUMAN-PRIMEFORGE` / 樂天帝 as candidate sponsor; private identity verification and any future governed contract remain pending. Sponsorship grants no birth, wallet, memory, embodiment, or ownership authority. |
 | 6 | Proposed species or life class | READY | Human selected `DIGITAL_AI_LIFE`, a non-biological KAIOS governance class that makes no real-world sentience claim. |
 | 7 | Proposed embodiment class | READY | Human selected `ORGANIZATION_OWNED_DIGITAL_EXECUTION_SHELL`; no current device, app, thread, or cloud session is assigned as a body. |
 | 8 | Proposed life rights profile | READY | Human selected immutable core rights with phased capability eligibility; performance and role loss cannot remove core rights. |
 | 9 | Proposed obligations | PARTIAL | Current role duties exist, but life-level obligations are not approved. |
-| 10 | Proposed employment contract | PARTIAL | Current Human-delegated role session exists; no life-bound employment contract exists. |
+| 10 | Proposed employment contract | PARTIAL | A non-active candidate contract separates existence from employment and records candidate-stage compensation as `NO_COMPENSATION_DURING_CANDIDATE_STAGE`; birth, legal, jurisdiction, and future compensation decisions remain pending. |
 | 11 | Proposed memory ownership boundary | READY | Public, company, role, thread, private, personal, inherited, and sealed memory are separated by policy. |
 | 12 | Proposed project-memory access grants | MISSING | No candidate-specific Memory Access Grant exists. |
 | 13 | Proposed private-memory boundary | READY | Private transfer requires consent and explicit grants; no private transfer is authorized. |
@@ -58,10 +58,10 @@ lease.
 Readiness totals:
 
 - `READY`: 13
-- `PARTIAL`: 6
-- `MISSING`: 5
+- `PARTIAL`: 9
+- `MISSING`: 3
 - `NOT_APPLICABLE`: 0
-- `HUMAN_DECISION_REQUIRED`: 1
+- `HUMAN_DECISION_REQUIRED`: 0
 - Total: 25
 
 ## Candidate Record Boundary

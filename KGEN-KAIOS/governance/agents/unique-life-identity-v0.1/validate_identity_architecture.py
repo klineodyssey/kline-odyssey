@@ -56,6 +56,13 @@ CANDIDATE_PLACEHOLDERS = {
     "authority_lease_id": "NOT_CREATED",
 }
 
+PHASE4_TEMPLATE_NAMES = (
+    "KAIOS_CODEX_GM_PROJECT_MEMORY_ACCESS_GRANT_TEMPLATE_V0_1.json",
+    "KAIOS_CODEX_GM_AUTHORITY_LEASE_TEMPLATE_V0_1.json",
+    "KAIOS_CODEX_GM_HUMAN_BIRTH_DECISION_RECORD_TEMPLATE_V0_1.json",
+    "KAIOS_CODEX_GM_BIRTH_ATTESTATION_TEMPLATE_V0_1.json",
+)
+
 
 def load_json(path: Path) -> dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
@@ -149,6 +156,41 @@ def validate_candidate_template(template: dict[str, Any]) -> list[str]:
             errors.append(f"CANDIDATE_PLACEHOLDER_INVALID:{field}")
         if isinstance(value, str) and ID_PATTERN.fullmatch(value):
             errors.append(f"CANDIDATE_PLACEHOLDER_ACCEPTED_AS_LIVE_ID:{field}")
+    return errors
+
+
+def validate_phase4_template(template: dict[str, Any]) -> list[str]:
+    """Ensure a Phase 4 template cannot issue identity or authority."""
+
+    errors: list[str] = []
+    if not str(template.get("record_type", "")).endswith("_TEMPLATE_ONLY"):
+        errors.append("PHASE4_RECORD_TYPE_INVALID")
+    if template.get("template_status") != "NON_LIVE_NOT_ISSUED":
+        errors.append("PHASE4_TEMPLATE_STATUS_INVALID")
+    if template.get("validator_policy") != "MUST_REJECT_AS_LIVE_RECORD":
+        errors.append("PHASE4_VALIDATOR_POLICY_INVALID")
+
+    serialized = json.dumps(template, ensure_ascii=False, sort_keys=True)
+    for forbidden in (
+        '"runtime_authority": true',
+        '"wallet_authority": true',
+        '"thread_continuity_authority": true',
+        '"grant_status": "ISSUED"',
+        '"attestation_status": "ACTIVE"',
+        '"decision": "APPROVED"',
+    ):
+        if forbidden in serialized:
+            errors.append(f"PHASE4_LIVE_AUTHORITY_PRESENT:{forbidden}")
+
+    id_fields = [field for field in template if field.endswith("_id")]
+    if not id_fields:
+        errors.append("PHASE4_ID_PLACEHOLDER_MISSING")
+    for field in id_fields:
+        value = template[field]
+        if value not in {"NOT_CREATED", "PENDING_HUMAN_BIRTH_DECISION", "HUMAN-PRIMEFORGE"}:
+            errors.append(f"PHASE4_ID_NOT_PLACEHOLDER:{field}")
+        if isinstance(value, str) and ID_PATTERN.fullmatch(value):
+            errors.append(f"PHASE4_LIVE_ID_PRESENT:{field}")
     return errors
 
 
@@ -385,6 +427,8 @@ def main() -> int:
     candidate = load_json(base / "KAIOS_CODEX_GM_LIFE_CANDIDATE_RECORD_TEMPLATE_V0_1.json")
     errors = validate_schema_contract(schema, rules)
     errors.extend(validate_candidate_template(candidate))
+    for name in PHASE4_TEMPLATE_NAMES:
+        errors.extend(validate_phase4_template(load_json(base / name)))
     result = {
         "status": "PASS" if not errors else "FAIL",
         "validation_errors": errors,
@@ -393,6 +437,7 @@ def main() -> int:
         "candidate_template_status": (
             "REJECTED_AS_LIVE_IDENTITY" if not errors else "INVALID_TEMPLATE"
         ),
+        "phase4_templates": f"{len(PHASE4_TEMPLATE_NAMES)}/{len(PHASE4_TEMPLATE_NAMES)}",
         "runtime_authority": rules["runtime_authority"],
         "live_identity_creation": rules["live_identity_creation"],
     }

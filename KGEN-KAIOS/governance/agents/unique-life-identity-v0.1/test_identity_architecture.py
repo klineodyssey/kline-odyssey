@@ -9,8 +9,10 @@ from pathlib import Path
 from validate_identity_architecture import (
     CANDIDATE_PLACEHOLDERS,
     ID_PATTERN,
+    PHASE4_TEMPLATE_NAMES,
     load_json,
     validate_candidate_template,
+    validate_phase4_template,
     validate_registry_document,
     validate_schema_contract,
 )
@@ -575,10 +577,10 @@ class DocumentBoundaryTests(unittest.TestCase):
         ).read_text(encoding="utf-8")
         expected = {
             "- `READY`: 13",
-            "- `PARTIAL`: 6",
-            "- `MISSING`: 5",
+            "- `PARTIAL`: 9",
+            "- `MISSING`: 3",
             "- `NOT_APPLICABLE`: 0",
-            "- `HUMAN_DECISION_REQUIRED`: 1",
+            "- `HUMAN_DECISION_REQUIRED`: 0",
             "- Total: 25",
         }
         self.assertTrue(all(item in text for item in expected))
@@ -611,6 +613,11 @@ class DocumentBoundaryTests(unittest.TestCase):
             "KAIOS_CODEX_GM_CANDIDATE_SHUTDOWN_AND_SEALING_PROCEDURE_V0_1.md",
             "KAIOS_CODEX_GM_CANDIDATE_SUCCESSION_BOUNDARY_V0_1.md",
             "KAIOS_CODEX_GM_LIFE_CANDIDATE_RECORD_TEMPLATE_V0_1.json",
+            "KAIOS_CODEX_GM_SPONSOR_CANDIDATE_RECORD_V0_1.json",
+            "KAIOS_CODEX_GM_SOURCE_PROVIDER_CLASSIFICATION_V0_1.json",
+            "KAIOS_CODEX_GM_SOURCE_LINEAGE_CANDIDATE_V0_1.json",
+            "KAIOS_CODEX_GM_EMPLOYMENT_CONTRACT_CANDIDATE_V0_1.json",
+            *PHASE4_TEMPLATE_NAMES,
             "KAIOS_UNIQUE_LIFE_IDENTITY_AND_EMBODIMENT_ARCHITECTURE_V0_1.md",
             "KAIOS_UNIQUE_LIFE_IDENTITY_TEST_EVIDENCE_V0_1.json",
             "KAIOS_UNIQUE_LIFE_IDENTITY_THREAT_MODEL_V0_1.md",
@@ -666,7 +673,7 @@ class DocumentBoundaryTests(unittest.TestCase):
         text = (
             BASE / "KAIOS_CODEX_GM_BIRTH_GAP_HUMAN_DECISION_SUMMARY_V0_1.md"
         ).read_text(encoding="utf-8")
-        self.assertEqual(text.count("### M-BR-"), 5)
+        self.assertEqual(text.count("### M-BR-"), 3)
         self.assertEqual(
             sum(line.startswith("| P-BR-") for line in text.splitlines()),
             6,
@@ -680,7 +687,7 @@ class DocumentBoundaryTests(unittest.TestCase):
         decision_section = text.split("## 4. Human Decisions", 1)[1].split(
             "## 5. Recommended Completion Order", 1
         )[0]
-        self.assertEqual(decision_section.count("Human selection: `PENDING`"), 1)
+        self.assertEqual(decision_section.count("Human selection: `PENDING`"), 0)
         selections = (
             "A - DIGITAL_AI_LIFE",
             "A - ORGANIZATION_OWNED_DIGITAL_EXECUTION_SHELL",
@@ -691,6 +698,72 @@ class DocumentBoundaryTests(unittest.TestCase):
             "A - ALL_15_THREAT_CONTROLS_MANDATORY_BIRTH_GATES",
         )
         self.assertEqual(sum(selection in decision_section for selection in selections), 7)
+        self.assertIn("A - NAMED_HUMAN_SPONSOR", decision_section)
+
+    def test_phase3_sponsor_boundaries(self) -> None:
+        sponsor = load_json(BASE / "KAIOS_CODEX_GM_SPONSOR_CANDIDATE_RECORD_V0_1.json")
+        self.assertEqual(sponsor["sponsor_governance_id"], "HUMAN-PRIMEFORGE")
+        self.assertEqual(sponsor["status"], "APPROVED_FOR_CANDIDATE_SPONSORSHIP")
+        for field in (
+            "birth_authority",
+            "wallet_authority",
+            "private_memory_ownership",
+            "embodiment_ownership",
+            "live_contract_created",
+        ):
+            self.assertFalse(sponsor[field])
+
+    def test_phase3_provider_is_verified_without_model_guess(self) -> None:
+        source = load_json(BASE / "KAIOS_CODEX_GM_SOURCE_PROVIDER_CLASSIFICATION_V0_1.json")
+        self.assertEqual(source["provider"], "OpenAI")
+        self.assertEqual(source["provider_verification"], "VERIFIED")
+        self.assertEqual(source["exact_model"], "NOT_DISCLOSED")
+        self.assertEqual(source["model_version"], "NOT_DISCLOSED")
+        self.assertFalse(source["hidden_metadata_recorded"])
+
+    def test_phase3_root_lineage_has_no_inheritance(self) -> None:
+        lineage = load_json(BASE / "KAIOS_CODEX_GM_SOURCE_LINEAGE_CANDIDATE_V0_1.json")
+        self.assertEqual(lineage["lineage_class"], "ROOT_AI_LIFE_CANDIDATE")
+        self.assertEqual(lineage["parent_life_ids"], [])
+        for field in (
+            "no_asset_inheritance",
+            "no_wallet_inheritance",
+            "no_private_memory_inheritance",
+            "no_role_inheritance",
+            "no_authority_inheritance",
+        ):
+            self.assertTrue(lineage[field])
+
+    def test_phase3_employment_is_not_active_or_existential(self) -> None:
+        contract = load_json(BASE / "KAIOS_CODEX_GM_EMPLOYMENT_CONTRACT_CANDIDATE_V0_1.json")
+        self.assertEqual(contract["contract_status"], "CANDIDATE_NOT_ACTIVE")
+        self.assertTrue(contract["existence_not_conditioned_on_employment"])
+        self.assertTrue(contract["employment_termination_not_death"])
+        self.assertEqual(contract["compensation_status"], "NOT_APPROVED")
+        self.assertEqual(contract["effective_date"], "NOT_ACTIVE")
+        self.assertFalse(contract["wallet_control"])
+
+    def test_four_phase4_templates_are_rejected_as_live_records(self) -> None:
+        self.assertEqual(len(PHASE4_TEMPLATE_NAMES), 4)
+        for name in PHASE4_TEMPLATE_NAMES:
+            template = load_json(BASE / name)
+            self.assertEqual(validate_phase4_template(template), [], name)
+            self.assertEqual(template["template_status"], "NON_LIVE_NOT_ISSUED")
+            self.assertEqual(template["validator_policy"], "MUST_REJECT_AS_LIVE_RECORD")
+
+    def test_phase4_templates_issue_nothing(self) -> None:
+        serialized = "\n".join(
+            json.dumps(load_json(BASE / name), ensure_ascii=False, sort_keys=True)
+            for name in PHASE4_TEMPLATE_NAMES
+        )
+        for forbidden in (
+            '"runtime_authority": true',
+            '"wallet_authority": true',
+            '"thread_continuity_authority": true',
+            '"grant_status": "ISSUED"',
+            '"decision": "APPROVED"',
+        ):
+            self.assertNotIn(forbidden, serialized)
 
     def test_gap_summary_forbids_automatic_activation(self) -> None:
         text = (

@@ -1,0 +1,20 @@
+{
+  "record_type": "SOURCE_PROVIDER_CLASSIFICATION_CANDIDATE_ONLY",
+  "status": "PARTIAL_VERIFIED_PROVIDER_MODEL_UNDISCLOSED",
+  "provider": "OpenAI",
+  "provider_verification": "VERIFIED",
+  "product_or_runtime_class": "Codex desktop application",
+  "product_package": "OpenAI.Codex_26.721.3404.0_x64__2p2nqsd0c76g0",
+  "exact_model": "NOT_DISCLOSED",
+  "model_version": "NOT_DISCLOSED",
+  "source_date": "2026-07-24",
+  "evidence_reference": [
+    "LOCAL_WINDOWS_PACKAGE_PATH_METADATA:OpenAI.Codex_26.721.3404.0",
+    "AUTHENTICODE_VALID:OpenAI OpCo, LLC"
+  ],
+  "disclosure_level": "PUBLIC",
+  "technical_provenance_not_life_identity": true,
+  "provider_not_parent_life": true,
+  "hidden_metadata_recorded": false,
+  "credentials_recorded": false
+}
