@@ -1,0 +1,6 @@
+{
+  "schema_version": "1.0",
+  "status": "NOT_ACTIVE",
+  "health_check": "SCHEMA_AND_REFERENCE_VALIDATION_ONLY",
+  "runtime_heartbeat": false
+}

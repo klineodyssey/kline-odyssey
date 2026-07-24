@@ -1,0 +1,7 @@
+{
+  "schema_version": "1.0",
+  "status": "CANDIDATE_ONLY",
+  "policy": "BOUNDED_SOFTWARE_CHANGE",
+  "allowed": ["schema-compatible candidate configuration", "reviewed module replacement"],
+  "forbidden": ["identity overwrite", "authority escalation", "secret inheritance", "production activation"]
+}

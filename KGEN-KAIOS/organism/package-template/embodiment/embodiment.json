@@ -1,0 +1,12 @@
+{
+  "schema_version": "1.0",
+  "status": "CANDIDATE_ONLY",
+  "embodiment_class": "DIGITAL_EXECUTION_SHELL",
+  "embodiment_id": "NOT_CREATED",
+  "owner_id": "NOT_ASSIGNED",
+  "occupant_id": "NOT_ASSIGNED",
+  "operator_id": "NOT_ASSIGNED",
+  "custodian_id": "NOT_ASSIGNED",
+  "manufacturer_id": "NOT_ASSIGNED",
+  "ownership_and_occupancy_separated": true
+}

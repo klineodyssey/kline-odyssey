@@ -235,6 +235,7 @@ KAIOS includes a first-stage governance layer for task source tracing, AI / Huma
 | `BIOLOGICAL_TAXONOMY_STANDARD.md` | Domain / Kingdom / Phylum / Class / Order / Family / Genus / Species |
 | `EVOLUTION_LINEAGE_STANDARD.md` | Governed evolution event rules |
 | `ORGANISM_MANIFEST_STANDARD.md` | Required organism manifest fields |
+| `organism/` | Shared canonical organism package, taxonomy and Species registries, dry-run natural-instantiation pipeline, migration guide, and tests |
 | `provenance/` | Author registry, file ownership registry, contribution logs, and schemas |
 | `examples/organisms/` | Temple, App, and Land organism examples |
 

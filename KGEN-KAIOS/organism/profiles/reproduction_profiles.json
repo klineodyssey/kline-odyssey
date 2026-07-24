@@ -1,0 +1,10 @@
+{
+  "schema_version": "1.0",
+  "status": "CANDIDATE_ONLY",
+  "profiles": {
+    "DIGITAL_RECOMBINATION_REVIEWED": {"mode": "DIGITAL_RECOMBINATION", "new_organism_id_required": true, "private_data_inheritance": false},
+    "BIOLOGICAL_SEXUAL_GOVERNED": {"mode": "BIOLOGICAL", "new_organism_id_required": true, "simulation_only": true},
+    "MANUFACTURING_ONLY": {"mode": "MANUFACTURING", "new_organism_id_required": true},
+    "NOT_APPLICABLE": {"mode": "NOT_APPLICABLE", "compatible_species": []}
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "schema_version": "1.0",
+  "status": "CANDIDATE_ONLY",
+  "profiles": {
+    "DIGITAL_COMPUTE": {"inputs": ["electricity", "compute", "storage"], "consumption": "metered execution resources"},
+    "BIOLOGICAL_GRAZER": {"inputs": ["water", "forage", "oxygen"], "consumption": "species and lifecycle dependent"},
+    "ELECTRIC_MACHINE": {"inputs": ["electricity", "cooling", "maintenance"], "consumption": "hardware profile dependent"},
+    "BUILDING_UTILITIES": {"inputs": ["electricity", "water", "maintenance"], "consumption": "occupancy and service dependent"},
+    "ECOSYSTEM_FLOW": {"inputs": ["sunlight", "water cycle", "soil", "ecosystem maintenance"], "consumption": "terrain lifecycle dependent"}
+  }
+}
