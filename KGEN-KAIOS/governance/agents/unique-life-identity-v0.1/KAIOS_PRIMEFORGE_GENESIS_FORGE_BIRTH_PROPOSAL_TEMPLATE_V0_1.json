@@ -1,0 +1,27 @@
+{
+  "record_type": "PRIMEFORGE_GENESIS_FORGE_BIRTH_PROPOSAL_TEMPLATE_ONLY",
+  "template_status": "NON_LIVE_NOT_ISSUED",
+  "validator_policy": "MUST_REJECT_AS_LIVE_RECORD",
+  "candidate_status": "CANDIDATE_ONLY",
+  "proposal_id": "NOT_CREATED",
+  "candidate_life_id": "PENDING_HUMAN_BIRTH_DECISION",
+  "birth_event_id": "NOT_CREATED",
+  "workflow_state": "CANDIDATE_DETECTED",
+  "allowed_workflow": [
+    "CANDIDATE_DETECTED",
+    "EVIDENCE_PREPARED",
+    "VALIDATION_COMPLETE",
+    "HUMAN_DECISION_REQUIRED",
+    "HUMAN_APPROVAL",
+    "INDEPENDENT_ATTESTATION",
+    "LIVE_REGISTRY_TRANSACTION"
+  ],
+  "proposal_authority": true,
+  "approval_authority": false,
+  "activation_authority": false,
+  "attestation_authority": false,
+  "live_id_issuance_authority": false,
+  "private_memory_migration_authority": false,
+  "runtime_authority": false,
+  "human_birth_decision": "NOT_CREATED"
+}

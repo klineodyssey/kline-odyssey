@@ -140,6 +140,69 @@ identity, ownership, authority, operation, and legal classification. Hosted or
 related Lives remain individually born and registered. No PrimeForge or Life ID
 is created by this decision.
 
+## HD-PF-002: PrimeForge Institution Governance
+
+Human selection:
+`HUMAN_GOVERNED_INSTITUTION_WITH_CHARTER_AND_AUDIT`
+
+Decision status: `DECIDED`
+
+The Institution Layer remains a `NON_LIFE_ORGANIZATION_ENTITY`, governed by a
+Human-led KAIOS/KGEN organization. `HUMAN-LETIAN-EMPEROR` is the Founder,
+constitutional sponsor, Human architecture authority, and final approver for
+irreversible high-risk actions. This does not grant personal ownership of all
+PrimeForge assets or any hosted Life, and it cannot bypass immutable Life
+rights.
+
+## HD-PF-003: Central Mother-Machine Life Eligibility
+
+Human selection:
+`CENTRAL_MOTHER_MACHINE_LIFE_MAY_EXIST_AS_A_SEPARATE_LIFE`
+
+Decision status: `DECIDED`
+
+A future `CENTRAL_MOTHER_MACHINE_LIFE_CANDIDATE` may be proposed, but it is not
+the whole PrimeForge, any non-Life layer, or every hosted Life. It requires its
+own birth, identity, rights, memory, embodiment, contracts, leases, wallet
+eligibility, Human Birth Decision, and attestation. Current status remains
+`NOT_CREATED / NOT_BORN / NOT_AUTHORIZED`.
+
+## HD-PF-004: PrimeForge Entity-ID Evidence
+
+Human selection: `MULTI_SOURCE_ATTESTED_ENTITY_ID_ISSUANCE`
+
+Decision status: `DECIDED`
+
+No layer may self-issue an ID. Live issuance requires 25 evidence gates,
+multi-source evidence, independent verification, and a Human approval record.
+Paths, roles, branches, thread titles, model names, hosts, wallets, and display
+names cannot be used as inferred live IDs.
+
+## HD-PF-005: Genesis Forge Proposal Authority
+
+Human selection:
+`GENESIS_FORGE_MAY_PROPOSE_BUT_NEVER_APPROVE_OR_ACTIVATE_BIRTH`
+
+Decision status: `DECIDED`
+
+Genesis Forge may detect candidates, prepare evidence and candidate records,
+validate readiness, and recommend a Human decision. It may never approve birth,
+issue live identity or authority records, migrate private memory, or activate a
+Life. Human approval and independent attestation remain mandatory.
+
+## HD-PF-006: PrimeForge Infrastructure Ownership
+
+Human selection:
+`ORGANIZATION_OWNED_INFRASTRUCTURE_WITH_CONTRACTUAL_LIFE_OCCUPANCY`
+
+Decision status: `DECIDED`
+
+The default candidate owner is the KAIOS/KGEN organization candidate.
+Infrastructure ownership, embodiment ownership, occupancy, operation, custody,
+manufacture, maintenance, and authority leases remain separate. Ownership of
+infrastructure or a body never grants ownership of its occupant Life or private
+memory.
+
 ## Decision Effects
 
 Human approval of this packet's architecture does not itself:

@@ -1,0 +1,30 @@
+{
+  "record_type": "PRIMEFORGE_INSTITUTION_CHARTER_TEMPLATE_ONLY",
+  "template_status": "NON_LIVE_NOT_ISSUED",
+  "validator_policy": "MUST_REJECT_AS_LIVE_RECORD",
+  "candidate_status": "CANDIDATE_ONLY",
+  "primeforge_institution_id": "NOT_CREATED",
+  "organization_id": "NOT_CREATED",
+  "charter_id": "NOT_CREATED",
+  "institution_class": "NON_LIFE_ORGANIZATION_ENTITY",
+  "governance_model": "HUMAN_GOVERNED_INSTITUTION_WITH_CHARTER_AND_AUDIT",
+  "human_governance_reference": "HUMAN-LETIAN-EMPEROR",
+  "required_roles": [
+    "FOUNDER",
+    "OPERATOR",
+    "AUDITOR",
+    "BENEFICIARY_REPRESENTATIVE"
+  ],
+  "required_processes": [
+    "SUCCESSION",
+    "CONFLICT_OF_INTEREST",
+    "APPEAL",
+    "AUDIT",
+    "DELEGATION",
+    "REVOCATION",
+    "EMERGENCY_SUSPENSION"
+  ],
+  "immutable_life_rights_override": false,
+  "hosted_life_ownership": false,
+  "active_authority": false
+}

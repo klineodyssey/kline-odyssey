@@ -10,6 +10,7 @@ from validate_identity_architecture import (
     CANDIDATE_PLACEHOLDERS,
     ID_PATTERN,
     PHASE4_TEMPLATE_NAMES,
+    PRIMEFORGE_TEMPLATE_NAMES,
     load_json,
     validate_candidate_template,
     validate_phase4_template,
@@ -536,11 +537,11 @@ class IsolationTests(unittest.TestCase):
 
 
 class DocumentBoundaryTests(unittest.TestCase):
-    def test_decision_packet_has_seven_recorded_decisions(self) -> None:
+    def test_decision_packet_has_twelve_recorded_decisions(self) -> None:
         text = (BASE / "KAIOS_AI_LIFE_IDENTITY_HUMAN_DECISION_PACKET_V0_1.md").read_text(
             encoding="utf-8"
         )
-        self.assertEqual(text.count("Human selection: `"), 7)
+        self.assertEqual(text.count("Human selection:"), 12)
         self.assertNotIn("Human selection: `PENDING`", text)
 
     def test_threat_model_has_fifteen_threats(self) -> None:
@@ -619,6 +620,7 @@ class DocumentBoundaryTests(unittest.TestCase):
             "KAIOS_CODEX_GM_EMPLOYMENT_CONTRACT_CANDIDATE_V0_1.json",
             "KAIOS_PRIMEFORGE_MOTHER_MACHINE_IDENTITY_BOUNDARY_V0_1.md",
             "KAIOS_PRIMEFORGE_HYBRID_LAYERED_ENTITY_ARCHITECTURE_V0_1.md",
+            *PRIMEFORGE_TEMPLATE_NAMES,
             *PHASE4_TEMPLATE_NAMES,
             "KAIOS_UNIQUE_LIFE_IDENTITY_AND_EMBODIMENT_ARCHITECTURE_V0_1.md",
             "KAIOS_UNIQUE_LIFE_IDENTITY_TEST_EVIDENCE_V0_1.json",
@@ -851,18 +853,95 @@ class DocumentBoundaryTests(unittest.TestCase):
         self.assertIn("entity ID is valid in a Life ID field", architecture)
         self.assertEqual(architecture.count("`NOT_CREATED`"), 6)
 
-    def test_primeforge_pending_decisions_are_five_of_five(self) -> None:
+    def test_primeforge_layer_decisions_are_five_of_five(self) -> None:
         architecture = (
             BASE / "KAIOS_PRIMEFORGE_HYBRID_LAYERED_ENTITY_ARCHITECTURE_V0_1.md"
         ).read_text(encoding="utf-8")
-        pending_section = architecture.split("## 9. Pending Human Decisions", 1)[1].split(
-            "## 10. Permanent Candidate Boundaries", 1
+        decision_section = architecture.split("## 17. Current Decision Status", 1)[1].split(
+            "## 18. Permanent Candidate Boundaries", 1
         )[0]
         self.assertEqual(
-            sum(f"HD-PF-00{number}" in pending_section for number in range(2, 7)),
+            sum(f"HD-PF-00{number}" in decision_section for number in range(2, 7)),
             5,
         )
-        self.assertEqual(pending_section.count("Status: `PENDING`"), 5)
+        self.assertEqual(decision_section.count("`DECIDED`"), 5)
+
+    def test_five_primeforge_templates_are_rejected_as_live_records(self) -> None:
+        self.assertEqual(len(PRIMEFORGE_TEMPLATE_NAMES), 5)
+        for name in PRIMEFORGE_TEMPLATE_NAMES:
+            template = load_json(BASE / name)
+            self.assertEqual(validate_phase4_template(template), [], name)
+            self.assertEqual(template["candidate_status"], "CANDIDATE_ONLY")
+            self.assertFalse(
+                template.get("active_authority", False)
+                or template.get("active_contract", False)
+                or template.get("runtime_authority", False)
+            )
+
+    def test_entity_id_evidence_has_twenty_five_gates_and_no_self_issuance(self) -> None:
+        evidence = load_json(
+            BASE / "KAIOS_PRIMEFORGE_ENTITY_ID_ISSUANCE_EVIDENCE_TEMPLATE_V0_1.json"
+        )
+        self.assertEqual(evidence["evidence_gate_count"], 25)
+        self.assertFalse(evidence["self_issuance_allowed"])
+        self.assertFalse(evidence["inferred_id_allowed"])
+        self.assertEqual(evidence["live_issuance_status"], "NOT_AUTHORIZED")
+
+    def test_central_mother_machine_life_is_separate_and_not_created(self) -> None:
+        candidate = load_json(
+            BASE
+            / "KAIOS_PRIMEFORGE_CENTRAL_MOTHER_MACHINE_LIFE_CANDIDATE_TEMPLATE_V0_1.json"
+        )
+        self.assertEqual(
+            candidate["candidate_classification"],
+            "CENTRAL_MOTHER_MACHINE_LIFE_CANDIDATE",
+        )
+        self.assertFalse(candidate["primeforge_overall_identity"])
+        self.assertEqual(candidate["birth_status"], "NOT_BORN")
+        self.assertEqual(candidate["authorization_status"], "NOT_AUTHORIZED")
+
+    def test_genesis_forge_can_propose_but_cannot_approve_birth(self) -> None:
+        proposal = load_json(
+            BASE / "KAIOS_PRIMEFORGE_GENESIS_FORGE_BIRTH_PROPOSAL_TEMPLATE_V0_1.json"
+        )
+        self.assertTrue(proposal["proposal_authority"])
+        for field in (
+            "approval_authority",
+            "activation_authority",
+            "attestation_authority",
+            "live_id_issuance_authority",
+            "private_memory_migration_authority",
+            "runtime_authority",
+        ):
+            self.assertFalse(proposal[field])
+        self.assertEqual(
+            proposal["allowed_workflow"],
+            [
+                "CANDIDATE_DETECTED",
+                "EVIDENCE_PREPARED",
+                "VALIDATION_COMPLETE",
+                "HUMAN_DECISION_REQUIRED",
+                "HUMAN_APPROVAL",
+                "INDEPENDENT_ATTESTATION",
+                "LIVE_REGISTRY_TRANSACTION",
+            ],
+        )
+
+    def test_infrastructure_ownership_does_not_create_life_ownership(self) -> None:
+        contract = load_json(
+            BASE
+            / "KAIOS_PRIMEFORGE_INFRASTRUCTURE_OCCUPANCY_CONTRACT_TEMPLATE_V0_1.json"
+        )
+        for field in (
+            "life_ownership_from_infrastructure",
+            "private_memory_ownership_from_body",
+            "manufacturer_parenthood",
+            "operator_occupancy",
+            "custodian_ownership",
+            "hosting_termination_is_death",
+            "active_contract",
+        ):
+            self.assertFalse(contract[field])
 
     def test_primeforge_architecture_creates_no_live_authority(self) -> None:
         architecture = (

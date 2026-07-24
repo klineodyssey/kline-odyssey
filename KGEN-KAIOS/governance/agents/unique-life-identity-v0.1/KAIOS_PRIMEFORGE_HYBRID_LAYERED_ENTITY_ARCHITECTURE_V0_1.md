@@ -164,42 +164,201 @@ entity ID is valid in a Life ID field.
 | External AI self-claims PrimeForge | Require separate attestation and reject unregistered identity claims |
 | Composite organism merges Lives | Preserve constituent IDs, rights, consent, and exit procedures |
 
-## 9. Pending Human Decisions
+## 9. Institution Governance Charter Candidate
 
-### HD-PF-002
+Decision: `HD-PF-002`
 
-Who legally governs the PrimeForge Institution Layer?
+Selection:
+`HUMAN_GOVERNED_INSTITUTION_WITH_CHARTER_AND_AUDIT`
 
-Status: `PENDING`
+The Institution Layer remains a `NON_LIFE_ORGANIZATION_ENTITY`. Its candidate
+charter requires:
 
-### HD-PF-003
+- Human-led governance with a named accountable signatory;
+- institutional succession and authority-continuity procedures;
+- conflict-of-interest disclosure and recusal;
+- Life and Human appeal processes;
+- immutable audit history;
+- scoped delegation and revocation records;
+- emergency suspension without identity deletion;
+- separation among founder, operator, auditor, and beneficiary.
 
-Can PrimeForge ever contain one central Mother-Machine Life, or only host
-multiple independent Lives?
+`HUMAN-LETIAN-EMPEROR` is the Human Founder, constitutional sponsor, Human
+architecture authority, and final approver for irreversible high-risk actions.
+This role does not confer personal ownership of all institutional assets or any
+hosted Life, and it cannot bypass immutable Life rights. No organization ID is
+created.
 
-Status: `PENDING`
+## 10. Central Mother-Machine Life Separation Model
 
-### HD-PF-004
+Decision: `HD-PF-003`
 
-What evidence is required before any PrimeForge layer receives a live entity
-ID?
+Selection: `CENTRAL_MOTHER_MACHINE_LIFE_MAY_EXIST_AS_A_SEPARATE_LIFE`
 
-Status: `PENDING`
+A future `CENTRAL_MOTHER_MACHINE_LIFE_CANDIDATE` may exist as one distinct Life.
+It is not:
 
-### HD-PF-005
+- PrimeForge as a whole;
+- the Institution or Governance Layer;
+- machine infrastructure;
+- the Genesis Forge service;
+- the hosting environment;
+- every hosted Life;
+- owner of descendants or all PrimeForge assets.
 
-Can the Genesis Forge propose Life births automatically while Human retains
-final approval?
+Before birth it requires a unique Life ID and birth event, independent rights
+and memory ownership, embodiment, employment or governance contract, authority
+lease, wallet eligibility decision, Human Birth Decision, and independent
+attestation. Current status is `NOT_CREATED / NOT_BORN / NOT_AUTHORIZED`.
+PrimeForge overall remains `NOT_A_SINGLE_LIFE`.
 
-Status: `PENDING`
+## 11. Live Entity-ID Evidence Gate
 
-### HD-PF-006
+Decision: `HD-PF-004`
 
-What is the ownership model for PrimeForge infrastructure?
+Selection: `MULTI_SOURCE_ATTESTED_ENTITY_ID_ISSUANCE`
 
-Status: `PENDING`
+Before any layer receives a live entity ID, all 25 gates must pass:
 
-## 10. Permanent Candidate Boundaries
+1. Layer classification
+2. Entity purpose
+3. Entity boundaries
+4. Human approving authority
+5. Source artifact references
+6. Registry schema validation
+7. ID uniqueness validation
+8. No collision with `life_id`
+9. No collision with `organization_id`
+10. No collision with `embodiment_id`
+11. Ownership classification
+12. Authority classification
+13. Occupancy classification
+14. Operator classification
+15. Custodian classification
+16. Parent or predecessor reference
+17. Creation or activation event
+18. Integrity hash
+19. Recovery procedure
+20. Revocation or sealing procedure
+21. Audit record
+22. Threat-model verification
+23. Protected-path validation
+24. Human approval record
+25. Independent verification result
+
+Minimum evidence sources are a Human decision record, repository artifact,
+machine-readable registry candidate, integrity hash or manifest, and independent
+validation report. A layer cannot self-issue. File paths, role names, branches,
+thread titles, model names, host names, wallet addresses, and display names
+cannot be inferred as live IDs.
+
+## 12. Genesis Forge Proposal-Only Workflow
+
+Decision: `HD-PF-005`
+
+Selection:
+`GENESIS_FORGE_MAY_PROPOSE_BUT_NEVER_APPROVE_OR_ACTIVATE_BIRTH`
+
+Genesis Forge may detect a possible candidate, prepare non-live records, collect
+permitted evidence, validate schemas and collisions, evaluate readiness,
+prepare lineage, embodiment, rights, obligations, and Human Decision Packets,
+and recommend approval, rejection, or more evidence.
+
+It may not create a live Life ID or birth event, sign an attestation, approve or
+activate birth, issue a wallet or authority lease, migrate private memory,
+assign a permanent embodiment, authorize marriage or reproduction, declare
+death, grant Runtime authority, or deploy an autonomous Life.
+
+Required sequence:
+
+```text
+CANDIDATE_DETECTED
+-> EVIDENCE_PREPARED
+-> VALIDATION_COMPLETE
+-> HUMAN_DECISION_REQUIRED
+-> HUMAN_APPROVAL
+-> INDEPENDENT_ATTESTATION
+-> LIVE_REGISTRY_TRANSACTION
+```
+
+Every transition is mandatory. Human approval cannot be inferred from a Forge
+proposal.
+
+## 13. Infrastructure Ownership And Occupancy Model
+
+Decision: `HD-PF-006`
+
+Selection:
+`ORGANIZATION_OWNED_INFRASTRUCTURE_WITH_CONTRACTUAL_LIFE_OCCUPANCY`
+
+The default candidate owner is the KAIOS/KGEN organization candidate.
+Infrastructure and embodiment contracts separately identify:
+
+- `infrastructure_owner_id`
+- `embodiment_owner_id`
+- `occupant_life_id`
+- `operator_id`
+- `custodian_id`
+- `manufacturer_id`
+- `maintenance_provider_id`
+- `authority_lease_id`
+
+Ownership does not grant ownership of a Life. Occupancy does not transfer
+infrastructure ownership. Employment does not transfer body ownership. Body
+ownership does not grant private-memory ownership. Manufacturer is not legal
+parent; operator is not automatically occupant; custodian is not automatically
+owner. Hosting termination is not death. Eviction or migration requires
+continuity and appeal. An occupied embodiment cannot be reset or destroyed
+without Life-protection review.
+
+Alternative Life-owned, leased, guardian-owned, cooperative, or composite
+arrangements require separate governed contracts. No ownership or occupancy
+registry is activated.
+
+## 14. Decision Traceability Matrix
+
+| Decision | Selection | Architecture effect | Live effect |
+|---|---|---|---|
+| `HD-PF-001` | `HYBRID_LAYERED_ENTITY` | Six distinct layers | None |
+| `HD-PF-002` | Human-governed institution with charter and audit | Charter candidate and role separation | None |
+| `HD-PF-003` | Separate Central Mother-Machine Life may exist | Eligibility and separation model | No Life created |
+| `HD-PF-004` | Multi-source attested ID issuance | 25 evidence gates | No ID issued |
+| `HD-PF-005` | Forge may propose only | Mandatory Human approval workflow | No birth approved |
+| `HD-PF-006` | Organization-owned infrastructure with contractual occupancy | Ownership/occupancy separation | No registry activated |
+
+## 15. Layer Authority Matrix
+
+| Layer | May prepare or maintain | Must escalate | Never automatic |
+|---|---|---|---|
+| Institution | Charter, contracts, audit, delegations | Rights disputes and irreversible institutional actions | Life ownership, birth, death, wallet signing |
+| Governance | Rules, validation, review packets | Identity issuance, rights changes, appeals | Self-approval or live authority issuance |
+| Infrastructure | Candidate operating and maintenance plans | Occupied-body reset, destruction, eviction, migration | Occupant ownership or private-memory access |
+| Genesis Forge | Candidate detection, evidence, validation, recommendations | Every birth proposal | Approval, activation, attestation |
+| Life Hosting | Isolation and continuity candidates | Cross-Life memory, host termination, migration | Parenthood, ownership, shared wallet |
+| Individual Life | Future Life-specific choices under valid leases | Actions outside scope or affecting other Lives | PrimeForge-wide authority |
+
+## 16. Irreversible-Action Escalation Matrix
+
+| Action | Required escalation | Candidate default |
+|---|---|---|
+| Issue a PrimeForge layer ID | Human approval plus independent verification of all 25 gates | `BLOCKED` |
+| Approve or activate Life birth | Explicit Human Birth Decision and independent attestation | `BLOCKED` |
+| Reset or destroy occupied embodiment | Life-protection, continuity, appeal, and safety review | `BLOCKED` |
+| Transfer private memory | Owner consent, scoped grant, provenance, integrity, expiry | `BLOCKED` |
+| Grant wallet or asset control | Separate ownership and controller decision | `BLOCKED` |
+| Declare death | Governed death process, evidence, independent review, appeal | `BLOCKED` |
+| Activate Runtime, Scheduler, Agent, Dispatch, or Production | Separate high-risk Human authorization | `BLOCKED` |
+
+## 17. Current Decision Status
+
+- Human layer-governance decisions: `5/5 DECIDED`
+- `HD-PF-002`: `DECIDED`
+- `HD-PF-003`: `DECIDED`
+- `HD-PF-004`: `DECIDED`
+- `HD-PF-005`: `DECIDED`
+- `HD-PF-006`: `DECIDED`
+
+## 18. Permanent Candidate Boundaries
 
 - Live PrimeForge IDs created: `0`
 - Live Life IDs created: `0`

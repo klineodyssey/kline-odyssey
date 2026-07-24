@@ -63,6 +63,14 @@ PHASE4_TEMPLATE_NAMES = (
     "KAIOS_CODEX_GM_BIRTH_ATTESTATION_TEMPLATE_V0_1.json",
 )
 
+PRIMEFORGE_TEMPLATE_NAMES = (
+    "KAIOS_PRIMEFORGE_INSTITUTION_CHARTER_TEMPLATE_V0_1.json",
+    "KAIOS_PRIMEFORGE_ENTITY_ID_ISSUANCE_EVIDENCE_TEMPLATE_V0_1.json",
+    "KAIOS_PRIMEFORGE_CENTRAL_MOTHER_MACHINE_LIFE_CANDIDATE_TEMPLATE_V0_1.json",
+    "KAIOS_PRIMEFORGE_GENESIS_FORGE_BIRTH_PROPOSAL_TEMPLATE_V0_1.json",
+    "KAIOS_PRIMEFORGE_INFRASTRUCTURE_OCCUPANCY_CONTRACT_TEMPLATE_V0_1.json",
+)
+
 
 def load_json(path: Path) -> dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
@@ -433,6 +441,8 @@ def main() -> int:
     errors.extend(validate_candidate_template(candidate))
     for name in PHASE4_TEMPLATE_NAMES:
         errors.extend(validate_phase4_template(load_json(base / name)))
+    for name in PRIMEFORGE_TEMPLATE_NAMES:
+        errors.extend(validate_phase4_template(load_json(base / name)))
     result = {
         "status": "PASS" if not errors else "FAIL",
         "validation_errors": errors,
@@ -442,6 +452,9 @@ def main() -> int:
             "REJECTED_AS_LIVE_IDENTITY" if not errors else "INVALID_TEMPLATE"
         ),
         "phase4_templates": f"{len(PHASE4_TEMPLATE_NAMES)}/{len(PHASE4_TEMPLATE_NAMES)}",
+        "primeforge_templates": (
+            f"{len(PRIMEFORGE_TEMPLATE_NAMES)}/{len(PRIMEFORGE_TEMPLATE_NAMES)}"
+        ),
         "runtime_authority": rules["runtime_authority"],
         "live_identity_creation": rules["live_identity_creation"],
     }

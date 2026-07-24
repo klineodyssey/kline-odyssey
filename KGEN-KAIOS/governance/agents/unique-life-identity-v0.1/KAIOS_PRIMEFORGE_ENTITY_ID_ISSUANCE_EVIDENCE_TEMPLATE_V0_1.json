@@ -1,0 +1,24 @@
+{
+  "record_type": "PRIMEFORGE_ENTITY_ID_ISSUANCE_EVIDENCE_TEMPLATE_ONLY",
+  "template_status": "NON_LIVE_NOT_ISSUED",
+  "validator_policy": "MUST_REJECT_AS_LIVE_RECORD",
+  "candidate_status": "CANDIDATE_ONLY",
+  "evidence_record_id": "NOT_CREATED",
+  "primeforge_entity_id": "NOT_CREATED",
+  "target_layer": "NOT_SELECTED",
+  "issuance_policy": "MULTI_SOURCE_ATTESTED_ENTITY_ID_ISSUANCE",
+  "evidence_gate_count": 25,
+  "evidence_gates": [],
+  "minimum_source_classes": [
+    "HUMAN_DECISION_RECORD",
+    "REPOSITORY_ARTIFACT",
+    "MACHINE_READABLE_REGISTRY_CANDIDATE",
+    "INTEGRITY_HASH_OR_MANIFEST",
+    "INDEPENDENT_VALIDATION_REPORT"
+  ],
+  "self_issuance_allowed": false,
+  "inferred_id_allowed": false,
+  "human_approval_record": "NOT_CREATED",
+  "independent_verification_result": "NOT_CREATED",
+  "live_issuance_status": "NOT_AUTHORIZED"
+}
