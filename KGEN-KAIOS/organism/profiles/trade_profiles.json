@@ -1,0 +1,24 @@
+{
+  "schema_version": "1.0",
+  "status": "CANDIDATE_ONLY",
+  "settlement_active": false,
+  "rights": [
+    "LIFE_IDENTITY",
+    "OWNERSHIP",
+    "OCCUPANCY",
+    "USAGE_RIGHT",
+    "CONTROL_AUTHORITY",
+    "REPRODUCTION_RIGHT",
+    "EVOLUTION_RIGHT",
+    "LAND_TITLE",
+    "BUILDING_TITLE",
+    "ORGAN_LICENSE"
+  ],
+  "profiles": {
+    "APP_LICENSE": {"classification": "LICENSE_ONLY", "identity_transfer": false},
+    "NON_TRANSFERABLE_LIFE": {"classification": "NON_TRANSFERABLE_LIFE", "identity_transfer": false},
+    "TRADEABLE_ASSET_NO_LIFE_CONTROL": {"classification": "TRADEABLE_ASSET", "life_control_transfer": false},
+    "BUILDING_TITLE": {"classification": "TITLE_TRANSFER", "title": "BUILDING_TITLE", "occupancy_transfer": false},
+    "LAND_TITLE": {"classification": "TITLE_TRANSFER", "title": "LAND_TITLE", "occupancy_transfer": false}
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "schema_version": "1.0",
+  "status": "CANDIDATE_ONLY",
+  "cells": [
+    {
+      "cell_id": "FUNCTION_CELL",
+      "organ_id": "PROGRAM_MODULE",
+      "function": "describe_lifecycle",
+      "required": true
+    }
+  ]
+}

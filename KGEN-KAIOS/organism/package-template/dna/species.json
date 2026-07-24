@@ -1,0 +1,8 @@
+{
+  "schema_version": "1.0",
+  "status": "CANDIDATE_ONLY",
+  "species_id": "KAIOS_APP_LIFE_V1",
+  "species_registry_ref": "KGEN-KAIOS/organism/species_registry.json#KAIOS_APP_LIFE_V1",
+  "program_filename": "KGEN-KAIOS/organism/runtime/non_executable_lifecycle.py",
+  "runtime_entrypoint": "KGEN-KAIOS/organism/runtime/non_executable_lifecycle.py#describe_lifecycle"
+}

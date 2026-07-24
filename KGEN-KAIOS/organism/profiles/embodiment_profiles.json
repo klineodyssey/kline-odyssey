@@ -1,0 +1,11 @@
+{
+  "schema_version": "1.0",
+  "status": "CANDIDATE_ONLY",
+  "profiles": {
+    "DIGITAL_EXECUTION_SHELL": {"class": "DIGITAL", "owner_occupant_separated": true},
+    "BIOLOGICAL_BODY": {"class": "BIOLOGICAL", "owner_occupant_separated": true},
+    "ROBOT_BODY": {"class": "MACHINE", "owner_occupant_separated": true},
+    "BUILDING_SHELL": {"class": "BUILDING", "owner_occupant_separated": true},
+    "LAND_PARCEL": {"class": "TERRAIN", "owner_occupant_separated": true}
+  }
+}

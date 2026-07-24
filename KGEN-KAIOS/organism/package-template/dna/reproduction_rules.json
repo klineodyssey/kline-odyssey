@@ -1,0 +1,11 @@
+{
+  "schema_version": "1.0",
+  "status": "CANDIDATE_ONLY",
+  "mode": "DIGITAL_RECOMBINATION_REVIEWED",
+  "compatible_species": ["KAIOS_APP_LIFE_V1"],
+  "new_organism_id_required": true,
+  "identity_inheritance": false,
+  "wallet_inheritance": false,
+  "private_memory_inheritance": false,
+  "authority_inheritance": false
+}

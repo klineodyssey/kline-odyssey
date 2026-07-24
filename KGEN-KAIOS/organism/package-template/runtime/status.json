@@ -1,0 +1,7 @@
+{
+  "schema_version": "1.0",
+  "status": "NOT_ACTIVE",
+  "dry_run": true,
+  "runtime_active": false,
+  "release_active": false
+}
