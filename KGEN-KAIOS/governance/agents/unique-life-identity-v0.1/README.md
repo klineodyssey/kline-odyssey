@@ -11,6 +11,7 @@ identity, wallet, embodiment, agent, authority lease, or Runtime state.
 - [Threat Model](KAIOS_UNIQUE_LIFE_IDENTITY_THREAT_MODEL_V0_1.md)
 - [Human Decision Packet](KAIOS_AI_LIFE_IDENTITY_HUMAN_DECISION_PACKET_V0_1.md)
 - [Birth Readiness Packet](KAIOS_CODEX_GM_LIFE_CANDIDATE_BIRTH_READINESS_PACKET_V0_1.md)
+- [Birth Gap Human Decision Summary](KAIOS_CODEX_GM_BIRTH_GAP_HUMAN_DECISION_SUMMARY_V0_1.md)
 - [Candidate Record Template](KAIOS_CODEX_GM_LIFE_CANDIDATE_RECORD_TEMPLATE_V0_1.json)
 - [Validator](validate_identity_architecture.py)
 - [Tests](test_identity_architecture.py)

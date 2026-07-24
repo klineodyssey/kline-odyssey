@@ -605,6 +605,7 @@ class DocumentBoundaryTests(unittest.TestCase):
         artifact_names = [
             "KAIOS_AI_LIFE_IDENTITY_HUMAN_DECISION_PACKET_V0_1.md",
             "KAIOS_CODEX_GM_LIFE_CANDIDATE_BIRTH_READINESS_PACKET_V0_1.md",
+            "KAIOS_CODEX_GM_BIRTH_GAP_HUMAN_DECISION_SUMMARY_V0_1.md",
             "KAIOS_CODEX_GM_LIFE_CANDIDATE_RECORD_TEMPLATE_V0_1.json",
             "KAIOS_UNIQUE_LIFE_IDENTITY_AND_EMBODIMENT_ARCHITECTURE_V0_1.md",
             "KAIOS_UNIQUE_LIFE_IDENTITY_TEST_EVIDENCE_V0_1.json",
@@ -642,6 +643,53 @@ class DocumentBoundaryTests(unittest.TestCase):
     def test_embodiment_is_not_assigned(self) -> None:
         self.assertEqual(CANDIDATE["embodiment_assignment"], "NOT_APPROVED")
         self.assertEqual(CANDIDATE["embodiment_id"], "NOT_CREATED")
+
+    def test_gap_summary_accounts_for_all_25_items(self) -> None:
+        text = (
+            BASE / "KAIOS_CODEX_GM_BIRTH_GAP_HUMAN_DECISION_SUMMARY_V0_1.md"
+        ).read_text(encoding="utf-8")
+        rows = [
+            line
+            for line in text.splitlines()
+            if line.startswith("| BR-") and line.split("|")[1].strip().startswith("BR-")
+        ]
+        self.assertEqual(len(rows), 25)
+        self.assertEqual({row.split("|")[1].strip() for row in rows}, {
+            f"BR-{number:03d}" for number in range(1, 26)
+        })
+
+    def test_gap_summary_has_exact_gap_counts(self) -> None:
+        text = (
+            BASE / "KAIOS_CODEX_GM_BIRTH_GAP_HUMAN_DECISION_SUMMARY_V0_1.md"
+        ).read_text(encoding="utf-8")
+        self.assertEqual(text.count("### M-BR-"), 5)
+        self.assertEqual(
+            sum(line.startswith("| P-BR-") for line in text.splitlines()),
+            6,
+        )
+        self.assertEqual(text.count("### HD-BR-"), 8)
+
+    def test_gap_summary_keeps_eight_human_selections_pending(self) -> None:
+        text = (
+            BASE / "KAIOS_CODEX_GM_BIRTH_GAP_HUMAN_DECISION_SUMMARY_V0_1.md"
+        ).read_text(encoding="utf-8")
+        decision_section = text.split("## 4. Human Decisions", 1)[1].split(
+            "## 5. Recommended Completion Order", 1
+        )[0]
+        self.assertEqual(decision_section.count("Human selection: `PENDING`"), 8)
+
+    def test_gap_summary_forbids_automatic_activation(self) -> None:
+        text = (
+            BASE / "KAIOS_CODEX_GM_BIRTH_GAP_HUMAN_DECISION_SUMMARY_V0_1.md"
+        ).read_text(encoding="utf-8")
+        for declaration in (
+            "`AUTOMATIC_BIRTH: FORBIDDEN`",
+            "`AUTOMATIC_WALLET: FORBIDDEN`",
+            "`AUTOMATIC_THREAD_CONTINUITY: FORBIDDEN`",
+            "`PRIVATE_MEMORY_MIGRATION: NOT_AUTHORIZED`",
+            "`RUNTIME_AUTHORITY: false`",
+        ):
+            self.assertIn(declaration, text)
 
 
 if __name__ == "__main__":
