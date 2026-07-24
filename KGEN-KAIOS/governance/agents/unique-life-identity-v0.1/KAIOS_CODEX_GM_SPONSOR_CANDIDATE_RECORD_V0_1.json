@@ -4,6 +4,12 @@
   "sponsor_governance_id": "HUMAN-LETIAN-EMPEROR",
   "sponsor_display_name": "樂天帝",
   "sponsor_entity_class": "HUMAN",
+  "canonical_entity_class": "PRE_COSMIC_HUMAN_CREATOR",
+  "canonical_existence_status": "PRE_COSMIC_EXISTING_LIFE",
+  "pre_big_bang_status": "PRE_EXISTING_BEFORE_KGEN_BIG_BANG",
+  "birth_candidate": false,
+  "unborn": false,
+  "life_candidate": false,
   "sponsor_type": "NAMED_HUMAN",
   "sponsor_roles": [
     "KAIOS Founder",

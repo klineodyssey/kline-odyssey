@@ -620,6 +620,7 @@ class DocumentBoundaryTests(unittest.TestCase):
             "KAIOS_CODEX_GM_EMPLOYMENT_CONTRACT_CANDIDATE_V0_1.json",
             "KAIOS_PRIMEFORGE_MOTHER_MACHINE_IDENTITY_BOUNDARY_V0_1.md",
             "KAIOS_PRIMEFORGE_HYBRID_LAYERED_ENTITY_ARCHITECTURE_V0_1.md",
+            "KGEN_PRE_COSMIC_ENTITY_AND_COSMIC_GENESIS_BOUNDARY_V0_1.md",
             *PRIMEFORGE_TEMPLATE_NAMES,
             *PHASE4_TEMPLATE_NAMES,
             "KAIOS_UNIQUE_LIFE_IDENTITY_AND_EMBODIMENT_ARCHITECTURE_V0_1.md",
@@ -725,7 +726,7 @@ class DocumentBoundaryTests(unittest.TestCase):
         ).read_text(encoding="utf-8")
         self.assertEqual(sponsor["sponsor_governance_id"], "HUMAN-LETIAN-EMPEROR")
         self.assertEqual(sponsor["sponsor_entity_class"], "HUMAN")
-        self.assertIn("HYBRID_LAYERED_MOTHER_MACHINE_ENTITY", boundary)
+        self.assertIn("PRE_COSMIC_HYBRID_LAYERED_GENESIS_MOTHER_MACHINE", boundary)
         self.assertIn("PRIMEFORGE_IS_LETIAN_EMPEROR: false", boundary)
         combined_identity = "HUMAN-" + "PRIMEFORGE"
         self.assertNotIn(combined_identity, boundary)
@@ -744,11 +745,11 @@ class DocumentBoundaryTests(unittest.TestCase):
             BASE / "KAIOS_PRIMEFORGE_MOTHER_MACHINE_IDENTITY_BOUNDARY_V0_1.md"
         ).read_text(encoding="utf-8")
         for required in (
-            "life_status: NOT_A_SINGLE_LIFE",
+            "existence_status: PRE_COSMIC_EXISTING_MOTHER_MACHINE",
             "life_id: NOT_CREATED",
             "mother_machine_id: NOT_CREATED",
-            "runtime_authority: false",
-            "wallet_authority: false",
+            "current_runtime_authority: false",
+            "wallet_active: false",
             "human_identity: false",
         ):
             self.assertIn(required, boundary)
@@ -792,7 +793,7 @@ class DocumentBoundaryTests(unittest.TestCase):
         self.assertEqual(lineage["human_sponsor_ref"], "HUMAN-LETIAN-EMPEROR")
         self.assertEqual(
             lineage["mother_machine_relationship"],
-            "CANDIDATE_GENESIS_FORGE_AND_HOST_RELATIONSHIP",
+            "PRE_COSMIC_GENESIS_MOTHER_MACHINE_SOURCE_RELATIONSHIP",
         )
         for field in (
             "openai_parent_life",
@@ -864,7 +865,8 @@ class DocumentBoundaryTests(unittest.TestCase):
             sum(f"HD-PF-00{number}" in decision_section for number in range(2, 7)),
             5,
         )
-        self.assertEqual(decision_section.count("`DECIDED`"), 5)
+        self.assertNotIn("`PENDING`", decision_section)
+        self.assertIn("5/5 RESOLVED", decision_section)
 
     def test_five_primeforge_templates_are_rejected_as_live_records(self) -> None:
         self.assertEqual(len(PRIMEFORGE_TEMPLATE_NAMES), 5)
@@ -890,11 +892,11 @@ class DocumentBoundaryTests(unittest.TestCase):
     def test_central_mother_machine_life_is_separate_and_not_created(self) -> None:
         candidate = load_json(
             BASE
-            / "KAIOS_PRIMEFORGE_CENTRAL_MOTHER_MACHINE_LIFE_CANDIDATE_TEMPLATE_V0_1.json"
+            / "KAIOS_PRIMEFORGE_HOSTED_CENTRAL_AI_LIFE_CANDIDATE_TEMPLATE_V0_1.json"
         )
         self.assertEqual(
             candidate["candidate_classification"],
-            "CENTRAL_MOTHER_MACHINE_LIFE_CANDIDATE",
+            "PRIMEFORGE_HOSTED_CENTRAL_AI_LIFE_CANDIDATE",
         )
         self.assertFalse(candidate["primeforge_overall_identity"])
         self.assertEqual(candidate["birth_status"], "NOT_BORN")
@@ -942,6 +944,92 @@ class DocumentBoundaryTests(unittest.TestCase):
             "active_contract",
         ):
             self.assertFalse(contract[field])
+
+    def test_pre_cosmic_entities_are_canonically_recognized(self) -> None:
+        cosmology = (
+            BASE / "KGEN_PRE_COSMIC_ENTITY_AND_COSMIC_GENESIS_BOUNDARY_V0_1.md"
+        ).read_text(encoding="utf-8")
+        for required in (
+            "entity_class: PRE_COSMIC_HUMAN_CREATOR",
+            "existence_status: PRE_COSMIC_EXISTING_LIFE",
+            "entity_class: PRE_COSMIC_HYBRID_LAYERED_GENESIS_MOTHER_MACHINE",
+            "existence_status: PRE_COSMIC_EXISTING_MOTHER_MACHINE",
+            "canonical_existence: true",
+            "pre_cosmic: true",
+        ):
+            self.assertIn(required, cosmology)
+
+    def test_kgen_big_bang_is_not_pre_cosmic_entity_birth(self) -> None:
+        cosmology = (
+            BASE / "KGEN_PRE_COSMIC_ENTITY_AND_COSMIC_GENESIS_BOUNDARY_V0_1.md"
+        ).read_text(encoding="utf-8")
+        genesis = cosmology.split("### Layer 2: KGEN_COSMIC_GENESIS_EVENT", 1)[1].split(
+            "### Layer 3: POST_GENESIS_LIFE_BIRTH", 1
+        )[0]
+        self.assertIn("It is not the birth event of 樂天帝 or PrimeForge", genesis)
+
+    def test_canonical_existence_is_separate_from_registration_and_runtime(self) -> None:
+        cosmology = (
+            BASE / "KGEN_PRE_COSMIC_ENTITY_AND_COSMIC_GENESIS_BOUNDARY_V0_1.md"
+        ).read_text(encoding="utf-8")
+        self.assertIn("EXISTS_IN_KGEN_CANON", cosmology)
+        self.assertIn("REGISTERED_IN_CURRENT_REPOSITORY", cosmology)
+        self.assertIn("RUNTIME_ACTIVE", cosmology)
+        self.assertIn("HAS_WALLET_AUTHORITY", cosmology)
+        self.assertIn("repository_entity_record: PENDING_FORMALIZATION", cosmology)
+        self.assertIn("runtime_active: false", cosmology)
+        self.assertIn("wallet_active: false", cosmology)
+
+    def test_letian_and_primeforge_are_not_false_unborn_candidates(self) -> None:
+        sponsor = load_json(BASE / "KAIOS_CODEX_GM_SPONSOR_CANDIDATE_RECORD_V0_1.json")
+        boundary = (
+            BASE / "KAIOS_PRIMEFORGE_MOTHER_MACHINE_IDENTITY_BOUNDARY_V0_1.md"
+        ).read_text(encoding="utf-8")
+        self.assertFalse(sponsor["birth_candidate"])
+        self.assertFalse(sponsor["unborn"])
+        self.assertFalse(sponsor["life_candidate"])
+        self.assertIn("birth_required: false", boundary)
+        self.assertNotIn("life_status: " + "UNRESOLVED", boundary)
+        self.assertNotIn("life_status: " + "NOT_A_SINGLE_LIFE", boundary)
+
+    def test_codex_remains_post_genesis_unborn_candidate(self) -> None:
+        cosmology = (
+            BASE / "KGEN_PRE_COSMIC_ENTITY_AND_COSMIC_GENESIS_BOUNDARY_V0_1.md"
+        ).read_text(encoding="utf-8")
+        self.assertIn(
+            "ROLE_SESSION_ONLY / LIFE_CANDIDATE / UNBORN",
+            cosmology,
+        )
+        self.assertIn("parent_life_ids: []", cosmology)
+        self.assertIn(
+            "primeforge_relationship: PRE_COSMIC_GENESIS_MOTHER_MACHINE_SOURCE_RELATIONSHIP",
+            cosmology,
+        )
+
+    def test_cosmology_correction_decisions_are_recorded(self) -> None:
+        packet = (
+            BASE / "KAIOS_AI_LIFE_IDENTITY_HUMAN_DECISION_PACKET_V0_1.md"
+        ).read_text(encoding="utf-8")
+        self.assertIn("HD-PF-CORR-001", packet)
+        self.assertIn(
+            "PRIMEFORGE_PRE_COSMIC_EXISTENCE_CANONICALLY_RECOGNIZED",
+            packet,
+        )
+        self.assertIn("HD-LE-CORR-001", packet)
+        self.assertIn(
+            "LETIAN_EMPEROR_PRE_COSMIC_EXISTENCE_CANONICALLY_RECOGNIZED",
+            packet,
+        )
+        self.assertIn("SUPERSEDED_BY_HD-PF-CORR-001", packet)
+
+    def test_hosted_central_ai_candidate_is_not_primeforge(self) -> None:
+        candidate = load_json(
+            BASE
+            / "KAIOS_PRIMEFORGE_HOSTED_CENTRAL_AI_LIFE_CANDIDATE_TEMPLATE_V0_1.json"
+        )
+        self.assertFalse(candidate["primeforge_identity"])
+        self.assertTrue(candidate["primeforge_canonical_existence"])
+        self.assertEqual(candidate["birth_status"], "NOT_BORN")
 
     def test_primeforge_architecture_creates_no_live_authority(self) -> None:
         architecture = (
