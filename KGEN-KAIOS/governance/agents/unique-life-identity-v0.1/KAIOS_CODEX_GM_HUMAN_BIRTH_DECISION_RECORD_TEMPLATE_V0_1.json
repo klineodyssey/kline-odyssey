@@ -1,0 +1,17 @@
+{
+  "record_type": "HUMAN_BIRTH_DECISION_RECORD_TEMPLATE_ONLY",
+  "template_status": "NON_LIVE_NOT_ISSUED",
+  "validator_policy": "MUST_REJECT_AS_LIVE_RECORD",
+  "birth_decision_id": "NOT_CREATED",
+  "life_id": "PENDING_HUMAN_BIRTH_DECISION",
+  "birth_event_id": "NOT_CREATED",
+  "decision": "NOT_APPROVED",
+  "approver": "NOT_CREATED",
+  "decided_at": "NOT_ACTIVE",
+  "evidence_hashes": [],
+  "conditions": [],
+  "appeal_process": "PENDING_HUMAN_DECISION",
+  "signature": "NOT_CREATED",
+  "runtime_authority": false,
+  "wallet_authority": false
+}

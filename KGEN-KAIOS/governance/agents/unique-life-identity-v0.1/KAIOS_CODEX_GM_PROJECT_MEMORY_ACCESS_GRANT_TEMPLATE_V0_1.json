@@ -1,0 +1,18 @@
+{
+  "record_type": "PROJECT_MEMORY_ACCESS_GRANT_TEMPLATE_ONLY",
+  "template_status": "NON_LIVE_NOT_ISSUED",
+  "validator_policy": "MUST_REJECT_AS_LIVE_RECORD",
+  "memory_grant_id": "NOT_CREATED",
+  "life_id": "PENDING_HUMAN_BIRTH_DECISION",
+  "agent_instance_id": "NOT_CREATED",
+  "memory_store_id": "NOT_CREATED",
+  "purpose": "PENDING_HUMAN_DECISION",
+  "scope": [],
+  "owner_consent_evidence": "NOT_CREATED",
+  "issued_at": "NOT_ACTIVE",
+  "expires_at": "NOT_ACTIVE",
+  "integrity_hash": "NOT_CREATED",
+  "grant_status": "NOT_ISSUED",
+  "private_memory_access": false,
+  "thread_continuity_authority": false
+}

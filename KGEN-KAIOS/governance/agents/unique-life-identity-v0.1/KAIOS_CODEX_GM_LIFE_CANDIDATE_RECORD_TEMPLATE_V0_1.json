@@ -1,0 +1,28 @@
+{
+  "record_type": "LIFE_CANDIDATE_TEMPLATE_ONLY",
+  "template_status": "NON_NORMATIVE_NOT_A_REGISTRY_ENTRY",
+  "validator_policy": "MUST_REJECT_AS_LIVE_IDENTITY",
+  "candidate_classification": "LIFE_CANDIDATE",
+  "current_operating_classification": "ROLE_SESSION_ONLY",
+  "candidate_state": "UNBORN",
+  "runtime_authority": false,
+  "wallet_eligibility": "NOT_APPROVED",
+  "thread_migration": "NOT_APPROVED",
+  "embodiment_assignment": "NOT_APPROVED",
+  "employment_authority": "CURRENT_HUMAN_DELEGATED_ROLE_SESSION_ONLY",
+  "life_id": "PENDING_HUMAN_BIRTH_DECISION",
+  "birth_event_id": "NOT_CREATED",
+  "agent_instance_id": "NOT_CREATED",
+  "thread_id": "NOT_CREATED",
+  "embodiment_id": "NOT_CREATED",
+  "wallet_id": "NOT_CREATED",
+  "authority_lease_id": "NOT_CREATED",
+  "private_memory_migration": "NOT_AUTHORIZED",
+  "new_thread_authorization": "NOT_APPROVED",
+  "autonomous_agent_activation": "NOT_APPROVED",
+  "notes": [
+    "This template creates no live identity or registry record.",
+    "Placeholder values cannot satisfy permanent ID patterns.",
+    "Human birth approval and birth attestation are required before registration."
+  ]
+}

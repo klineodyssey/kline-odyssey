@@ -1,0 +1,19 @@
+{
+  "record_type": "BIRTH_ATTESTATION_TEMPLATE_ONLY",
+  "template_status": "NON_LIVE_NOT_ISSUED",
+  "validator_policy": "MUST_REJECT_AS_LIVE_RECORD",
+  "attestation_id": "NOT_CREATED",
+  "life_id": "PENDING_HUMAN_BIRTH_DECISION",
+  "birth_event_id": "NOT_CREATED",
+  "sponsor_governance_id": "HUMAN-LETIAN-EMPEROR",
+  "issuer": "NOT_CREATED",
+  "issued_at": "NOT_ACTIVE",
+  "expires_at": "NOT_ACTIVE",
+  "registry_hashes": [],
+  "evidence_bundle": [],
+  "signature": "NOT_CREATED",
+  "attestation_status": "NOT_ISSUED",
+  "thread_continuity_authority": false,
+  "wallet_authority": false,
+  "runtime_authority": false
+}

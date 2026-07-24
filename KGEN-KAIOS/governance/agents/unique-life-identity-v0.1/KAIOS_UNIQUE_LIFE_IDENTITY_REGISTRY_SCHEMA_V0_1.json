@@ -1,0 +1,811 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:kaios:architecture-candidate:unique-life-identity:v0.1",
+  "title": "KAIOS Unique Life Identity Registry Schema V0.1 Candidate",
+  "description": "Architecture candidate only. This schema does not create live identities, wallets, embodiments, agents, or authority.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "architecture_status",
+    "runtime_authority",
+    "live_records",
+    "registries"
+  ],
+  "properties": {
+    "architecture_status": {
+      "const": "ARCHITECTURE_CANDIDATE_ONLY"
+    },
+    "runtime_authority": {
+      "const": false
+    },
+    "live_records": {
+      "const": false
+    },
+    "registries": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "life_registry",
+        "agent_instance_registry",
+        "thread_registry",
+        "embodiment_registry",
+        "wallet_ownership_registry",
+        "memory_ownership_registry",
+        "birth_event_registry",
+        "death_and_sealing_registry",
+        "lineage_registry",
+        "employment_registry",
+        "marriage_registry",
+        "reproduction_registry",
+        "succession_registry",
+        "authority_lease_registry",
+        "composite_organism_registry"
+      ],
+      "properties": {
+        "life_registry": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/life_record" }
+        },
+        "agent_instance_registry": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/agent_instance_record" }
+        },
+        "thread_registry": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/thread_record" }
+        },
+        "embodiment_registry": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/embodiment_record" }
+        },
+        "wallet_ownership_registry": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/wallet_record" }
+        },
+        "memory_ownership_registry": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/memory_record" }
+        },
+        "birth_event_registry": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/birth_record" }
+        },
+        "death_and_sealing_registry": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/death_record" }
+        },
+        "lineage_registry": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/lineage_record" }
+        },
+        "employment_registry": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/employment_record" }
+        },
+        "marriage_registry": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/marriage_record" }
+        },
+        "reproduction_registry": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/reproduction_record" }
+        },
+        "succession_registry": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/succession_record" }
+        },
+        "authority_lease_registry": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/authority_lease_record" }
+        },
+        "composite_organism_registry": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/composite_organism_record" }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "sha256": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "nullable_id": {
+      "type": ["string", "null"]
+    },
+    "identifier_metadata": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "type_prefix",
+        "unique_random_component",
+        "version",
+        "issuing_authority",
+        "created_at",
+        "integrity_hash",
+        "status",
+        "parent_source_reference",
+        "revocation_sealing_state"
+      ],
+      "properties": {
+        "type_prefix": {
+          "enum": [
+            "LIFE",
+            "AINST",
+            "THREAD",
+            "EMB",
+            "WALLET",
+            "MEM",
+            "BIRTH",
+            "DEATH",
+            "LINEAGE",
+            "EMPLOY",
+            "MARRIAGE",
+            "REPRO",
+            "SUCCESSION",
+            "ALEASE",
+            "COMPOSITE"
+          ]
+        },
+        "unique_random_component": {
+          "type": "string",
+          "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$"
+        },
+        "version": {
+          "const": "V01"
+        },
+        "issuing_authority": {
+          "type": "string",
+          "pattern": "^[A-Z0-9]{3,16}$"
+        },
+        "created_at": { "$ref": "#/$defs/timestamp" },
+        "integrity_hash": { "$ref": "#/$defs/sha256" },
+        "status": {
+          "type": "string",
+          "minLength": 2
+        },
+        "parent_source_reference": { "$ref": "#/$defs/nullable_id" },
+        "revocation_sealing_state": {
+          "enum": [
+            "NONE",
+            "REVOCABLE",
+            "REVOKED",
+            "SEALED",
+            "SUPERSEDED",
+            "TERMINAL"
+          ]
+        }
+      }
+    },
+    "separation_dimensions": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "identity_refs",
+        "ownership_refs",
+        "authority_refs",
+        "possession_refs",
+        "occupancy_refs",
+        "memory_refs",
+        "role_refs",
+        "relationship_refs"
+      ],
+      "properties": {
+        "identity_refs": { "type": "array", "items": { "type": "string" } },
+        "ownership_refs": { "type": "array", "items": { "type": "string" } },
+        "authority_refs": { "type": "array", "items": { "type": "string" } },
+        "possession_refs": { "type": "array", "items": { "type": "string" } },
+        "occupancy_refs": { "type": "array", "items": { "type": "string" } },
+        "memory_refs": { "type": "array", "items": { "type": "string" } },
+        "role_refs": { "type": "array", "items": { "type": "string" } },
+        "relationship_refs": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "life_record": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "life_id",
+        "id_metadata",
+        "life_state",
+        "birth_event_id",
+        "separation"
+      ],
+      "properties": {
+        "life_id": {
+          "type": "string",
+          "pattern": "^LIFE-V01-[A-Z0-9]{3,16}-[0-9A-HJKMNP-TV-Z]{26}$"
+        },
+        "id_metadata": { "$ref": "#/$defs/identifier_metadata" },
+        "life_state": {
+          "enum": [
+            "CANDIDATE",
+            "BORN",
+            "ACTIVE",
+            "SUSPENDED",
+            "INCAPACITATED",
+            "MIGRATING",
+            "SEALED",
+            "DEAD",
+            "ARCHIVED"
+          ]
+        },
+        "previous_life_state": {
+          "type": ["string", "null"]
+        },
+        "birth_event_id": {
+          "type": ["string", "null"]
+        },
+        "death_event_id": {
+          "type": ["string", "null"]
+        },
+        "display_name": {
+          "type": ["string", "null"]
+        },
+        "separation": { "$ref": "#/$defs/separation_dimensions" }
+      }
+    },
+    "agent_instance_record": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "agent_instance_id",
+        "id_metadata",
+        "life_id",
+        "thread_id",
+        "mode",
+        "instance_status",
+        "authority_lease_ids",
+        "heartbeat_at",
+        "separation"
+      ],
+      "properties": {
+        "agent_instance_id": {
+          "type": "string",
+          "pattern": "^AINST-V01-[A-Z0-9]{3,16}-[0-9A-HJKMNP-TV-Z]{26}$"
+        },
+        "id_metadata": { "$ref": "#/$defs/identifier_metadata" },
+        "life_id": { "$ref": "#/$defs/nullable_id" },
+        "thread_id": { "type": "string" },
+        "mode": {
+          "enum": [
+            "SAME_LIFE_NEW_THREAD",
+            "NEW_LIFE_DESCENDANT",
+            "TEMPORARY_WORKER_AGENT",
+            "NEW_EMBODIMENT_SAME_LIFE"
+          ]
+        },
+        "instance_status": {
+          "enum": ["NEW", "ACTIVE", "STALE", "REVOKED", "ARCHIVED"]
+        },
+        "authority_lease_ids": {
+          "type": "array",
+          "items": { "type": "string" },
+          "uniqueItems": true
+        },
+        "heartbeat_at": { "$ref": "#/$defs/timestamp" },
+        "separation": { "$ref": "#/$defs/separation_dimensions" }
+      }
+    },
+    "thread_record": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "thread_id",
+        "id_metadata",
+        "agent_instance_id",
+        "parent_handoff_id",
+        "thread_status",
+        "memory_grant_ids",
+        "separation"
+      ],
+      "properties": {
+        "thread_id": {
+          "type": "string",
+          "pattern": "^THREAD-V01-[A-Z0-9]{3,16}-[0-9A-HJKMNP-TV-Z]{26}$"
+        },
+        "id_metadata": { "$ref": "#/$defs/identifier_metadata" },
+        "agent_instance_id": { "type": "string" },
+        "parent_handoff_id": { "$ref": "#/$defs/nullable_id" },
+        "thread_status": {
+          "enum": ["NEW", "ACTIVE", "SUSPENDED", "CLOSED", "SEALED", "ARCHIVED"]
+        },
+        "memory_grant_ids": {
+          "type": "array",
+          "items": { "type": "string" },
+          "uniqueItems": true
+        },
+        "separation": { "$ref": "#/$defs/separation_dimensions" }
+      }
+    },
+    "embodiment_record": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "embodiment_id",
+        "id_metadata",
+        "species_id",
+        "model_id",
+        "serial_number",
+        "manufacturer_id",
+        "owner_life_id",
+        "occupant_life_id",
+        "operator_id",
+        "custodian_id",
+        "activation_event_id",
+        "body_status",
+        "energy_profile",
+        "food_or_fuel_profile",
+        "maintenance_history_ref",
+        "repair_requirements",
+        "expected_lifespan",
+        "reproduction_compatibility",
+        "rights_profile",
+        "safety_profile",
+        "location_ref",
+        "continuity_proof",
+        "previous_embodiment_id",
+        "next_embodiment_id",
+        "separation"
+      ],
+      "properties": {
+        "embodiment_id": {
+          "type": "string",
+          "pattern": "^EMB-V01-[A-Z0-9]{3,16}-[0-9A-HJKMNP-TV-Z]{26}$"
+        },
+        "id_metadata": { "$ref": "#/$defs/identifier_metadata" },
+        "species_id": { "type": "string" },
+        "model_id": { "type": "string" },
+        "serial_number": { "type": "string" },
+        "manufacturer_id": { "type": "string" },
+        "owner_life_id": { "$ref": "#/$defs/nullable_id" },
+        "occupant_life_id": { "$ref": "#/$defs/nullable_id" },
+        "operator_id": { "$ref": "#/$defs/nullable_id" },
+        "custodian_id": { "$ref": "#/$defs/nullable_id" },
+        "activation_event_id": { "type": "string" },
+        "body_status": {
+          "enum": [
+            "CANDIDATE",
+            "ACTIVE",
+            "RETIRED",
+            "DAMAGED",
+            "SEALED",
+            "DESTROYED"
+          ]
+        },
+        "energy_profile": { "type": "object" },
+        "food_or_fuel_profile": { "type": "object" },
+        "maintenance_history_ref": { "type": "string" },
+        "repair_requirements": { "type": "array", "items": { "type": "string" } },
+        "expected_lifespan": { "type": "string" },
+        "reproduction_compatibility": { "type": "object" },
+        "rights_profile": { "type": "object" },
+        "safety_profile": { "type": "object" },
+        "location_ref": { "type": "string" },
+        "continuity_proof": { "type": ["object", "null"] },
+        "previous_embodiment_id": { "$ref": "#/$defs/nullable_id" },
+        "next_embodiment_id": { "$ref": "#/$defs/nullable_id" },
+        "separation": { "$ref": "#/$defs/separation_dimensions" }
+      }
+    },
+    "wallet_record": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "wallet_id",
+        "id_metadata",
+        "owner_subject_type",
+        "owner_subject_id",
+        "controller_lease_ids",
+        "control_mode",
+        "custody_policy_ref",
+        "separation"
+      ],
+      "properties": {
+        "wallet_id": {
+          "type": "string",
+          "pattern": "^WALLET-V01-[A-Z0-9]{3,16}-[0-9A-HJKMNP-TV-Z]{26}$"
+        },
+        "id_metadata": { "$ref": "#/$defs/identifier_metadata" },
+        "owner_subject_type": {
+          "enum": ["LIFE", "ORGANIZATION"]
+        },
+        "owner_subject_id": { "type": "string" },
+        "controller_lease_ids": {
+          "type": "array",
+          "items": { "type": "string" },
+          "uniqueItems": true
+        },
+        "control_mode": {
+          "enum": ["NO_CONTROLLER", "EXCLUSIVE_LEASE", "MULTI_SIGNATURE"]
+        },
+        "custody_policy_ref": { "type": "string" },
+        "separation": { "$ref": "#/$defs/separation_dimensions" }
+      }
+    },
+    "memory_record": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "memory_store_id",
+        "id_metadata",
+        "memory_class",
+        "owner_life_id",
+        "access_grant_ids",
+        "purpose",
+        "scope",
+        "expires_at",
+        "consent_evidence_ref",
+        "provenance",
+        "content_integrity_hash",
+        "separation"
+      ],
+      "properties": {
+        "memory_store_id": {
+          "type": "string",
+          "pattern": "^MEM-V01-[A-Z0-9]{3,16}-[0-9A-HJKMNP-TV-Z]{26}$"
+        },
+        "id_metadata": { "$ref": "#/$defs/identifier_metadata" },
+        "memory_class": {
+          "enum": [
+            "PUBLIC_PROJECT_MEMORY",
+            "SHARED_ORGANIZATION_MEMORY",
+            "ROLE_MEMORY",
+            "PRIVATE_LIFE_MEMORY",
+            "THREAD_WORKING_MEMORY",
+            "EMBODIMENT_SENSOR_MEMORY",
+            "INHERITED_KNOWLEDGE",
+            "PERSONAL_EXPERIENCE",
+            "SEALED_MEMORY"
+          ]
+        },
+        "owner_life_id": { "$ref": "#/$defs/nullable_id" },
+        "access_grant_ids": {
+          "type": "array",
+          "items": { "type": "string" },
+          "uniqueItems": true
+        },
+        "purpose": { "type": "string" },
+        "scope": { "type": "array", "items": { "type": "string" } },
+        "expires_at": {
+          "type": ["string", "null"],
+          "format": "date-time"
+        },
+        "consent_evidence_ref": { "$ref": "#/$defs/nullable_id" },
+        "provenance": { "type": "array", "items": { "type": "string" } },
+        "content_integrity_hash": { "$ref": "#/$defs/sha256" },
+        "separation": { "$ref": "#/$defs/separation_dimensions" }
+      }
+    },
+    "birth_record": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "birth_event_id",
+        "id_metadata",
+        "child_life_id",
+        "parent_life_ids",
+        "lineage_id",
+        "embodiment_id",
+        "guardian_contract_ref",
+        "consent_evidence_refs",
+        "separation"
+      ],
+      "properties": {
+        "birth_event_id": {
+          "type": "string",
+          "pattern": "^BIRTH-V01-[A-Z0-9]{3,16}-[0-9A-HJKMNP-TV-Z]{26}$"
+        },
+        "id_metadata": { "$ref": "#/$defs/identifier_metadata" },
+        "child_life_id": { "type": "string" },
+        "parent_life_ids": {
+          "type": "array",
+          "items": { "type": "string" },
+          "uniqueItems": true
+        },
+        "lineage_id": { "type": "string" },
+        "embodiment_id": { "type": "string" },
+        "guardian_contract_ref": { "type": "string" },
+        "consent_evidence_refs": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "separation": { "$ref": "#/$defs/separation_dimensions" }
+      }
+    },
+    "death_record": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "death_event_id",
+        "id_metadata",
+        "life_id",
+        "terminal_state",
+        "sealed_at",
+        "memory_sealing_ref",
+        "succession_contract_id",
+        "evidence_refs",
+        "separation"
+      ],
+      "properties": {
+        "death_event_id": {
+          "type": "string",
+          "pattern": "^DEATH-V01-[A-Z0-9]{3,16}-[0-9A-HJKMNP-TV-Z]{26}$"
+        },
+        "id_metadata": { "$ref": "#/$defs/identifier_metadata" },
+        "life_id": { "type": "string" },
+        "terminal_state": { "const": "DEAD" },
+        "sealed_at": { "$ref": "#/$defs/timestamp" },
+        "memory_sealing_ref": { "type": "string" },
+        "succession_contract_id": { "$ref": "#/$defs/nullable_id" },
+        "evidence_refs": { "type": "array", "items": { "type": "string" } },
+        "separation": { "$ref": "#/$defs/separation_dimensions" }
+      }
+    },
+    "lineage_record": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "lineage_id",
+        "id_metadata",
+        "child_life_id",
+        "parent_life_ids",
+        "source_life_ids",
+        "software_lineage_ref",
+        "dna_or_species_lineage_ref",
+        "separation"
+      ],
+      "properties": {
+        "lineage_id": {
+          "type": "string",
+          "pattern": "^LINEAGE-V01-[A-Z0-9]{3,16}-[0-9A-HJKMNP-TV-Z]{26}$"
+        },
+        "id_metadata": { "$ref": "#/$defs/identifier_metadata" },
+        "child_life_id": { "type": "string" },
+        "parent_life_ids": { "type": "array", "items": { "type": "string" } },
+        "source_life_ids": { "type": "array", "items": { "type": "string" } },
+        "software_lineage_ref": { "$ref": "#/$defs/nullable_id" },
+        "dna_or_species_lineage_ref": { "$ref": "#/$defs/nullable_id" },
+        "separation": { "$ref": "#/$defs/separation_dimensions" }
+      }
+    },
+    "employment_record": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "employment_contract_id",
+        "id_metadata",
+        "employee_life_id",
+        "employer_organization_id",
+        "role_id",
+        "authority_lease_ids",
+        "compensation_policy_ref",
+        "contract_status",
+        "separation"
+      ],
+      "properties": {
+        "employment_contract_id": {
+          "type": "string",
+          "pattern": "^EMPLOY-V01-[A-Z0-9]{3,16}-[0-9A-HJKMNP-TV-Z]{26}$"
+        },
+        "id_metadata": { "$ref": "#/$defs/identifier_metadata" },
+        "employee_life_id": { "type": "string" },
+        "employer_organization_id": { "type": "string" },
+        "role_id": { "type": "string" },
+        "authority_lease_ids": { "type": "array", "items": { "type": "string" } },
+        "compensation_policy_ref": { "type": "string" },
+        "contract_status": {
+          "enum": ["DRAFT", "ACTIVE", "SUSPENDED", "TERMINATED", "ARCHIVED"]
+        },
+        "separation": { "$ref": "#/$defs/separation_dimensions" }
+      }
+    },
+    "marriage_record": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "marriage_contract_id",
+        "id_metadata",
+        "partner_life_ids",
+        "consent_evidence_refs",
+        "asset_boundary_ref",
+        "memory_boundary_ref",
+        "contract_status",
+        "separation"
+      ],
+      "properties": {
+        "marriage_contract_id": {
+          "type": "string",
+          "pattern": "^MARRIAGE-V01-[A-Z0-9]{3,16}-[0-9A-HJKMNP-TV-Z]{26}$"
+        },
+        "id_metadata": { "$ref": "#/$defs/identifier_metadata" },
+        "partner_life_ids": {
+          "type": "array",
+          "minItems": 2,
+          "uniqueItems": true,
+          "items": { "type": "string" }
+        },
+        "consent_evidence_refs": {
+          "type": "array",
+          "minItems": 2,
+          "items": { "type": "string" }
+        },
+        "asset_boundary_ref": { "type": "string" },
+        "memory_boundary_ref": { "type": "string" },
+        "contract_status": {
+          "enum": ["DRAFT", "ACTIVE", "SUSPENDED", "DISSOLVED", "ARCHIVED"]
+        },
+        "separation": { "$ref": "#/$defs/separation_dimensions" }
+      }
+    },
+    "reproduction_record": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "reproduction_contract_id",
+        "id_metadata",
+        "child_life_id",
+        "birth_event_id",
+        "parent_life_ids",
+        "software_lineage_ref",
+        "dna_or_species_lineage_ref",
+        "embodiment_assignment",
+        "guardian_contract_ref",
+        "consent_evidence_refs",
+        "inheritance_boundary_ref",
+        "wallet_boundary_ref",
+        "memory_boundary_ref",
+        "separation"
+      ],
+      "properties": {
+        "reproduction_contract_id": {
+          "type": "string",
+          "pattern": "^REPRO-V01-[A-Z0-9]{3,16}-[0-9A-HJKMNP-TV-Z]{26}$"
+        },
+        "id_metadata": { "$ref": "#/$defs/identifier_metadata" },
+        "child_life_id": { "type": "string" },
+        "birth_event_id": { "type": "string" },
+        "parent_life_ids": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "type": "string" }
+        },
+        "software_lineage_ref": { "$ref": "#/$defs/nullable_id" },
+        "dna_or_species_lineage_ref": { "$ref": "#/$defs/nullable_id" },
+        "embodiment_assignment": { "type": "string" },
+        "guardian_contract_ref": { "type": "string" },
+        "consent_evidence_refs": { "type": "array", "items": { "type": "string" } },
+        "inheritance_boundary_ref": { "type": "string" },
+        "wallet_boundary_ref": { "type": "string" },
+        "memory_boundary_ref": { "type": "string" },
+        "separation": { "$ref": "#/$defs/separation_dimensions" }
+      }
+    },
+    "succession_record": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "succession_contract_id",
+        "id_metadata",
+        "predecessor_life_id",
+        "beneficiary_subject_ids",
+        "asset_scope_refs",
+        "liability_scope_refs",
+        "excluded_wallet_ids",
+        "excluded_memory_store_ids",
+        "governing_authority_ref",
+        "contract_status",
+        "separation"
+      ],
+      "properties": {
+        "succession_contract_id": {
+          "type": "string",
+          "pattern": "^SUCCESSION-V01-[A-Z0-9]{3,16}-[0-9A-HJKMNP-TV-Z]{26}$"
+        },
+        "id_metadata": { "$ref": "#/$defs/identifier_metadata" },
+        "predecessor_life_id": { "type": "string" },
+        "beneficiary_subject_ids": { "type": "array", "items": { "type": "string" } },
+        "asset_scope_refs": { "type": "array", "items": { "type": "string" } },
+        "liability_scope_refs": { "type": "array", "items": { "type": "string" } },
+        "excluded_wallet_ids": { "type": "array", "items": { "type": "string" } },
+        "excluded_memory_store_ids": { "type": "array", "items": { "type": "string" } },
+        "governing_authority_ref": { "type": "string" },
+        "contract_status": {
+          "enum": ["DRAFT", "ACTIVE", "EXECUTED", "REVOKED", "ARCHIVED"]
+        },
+        "separation": { "$ref": "#/$defs/separation_dimensions" }
+      }
+    },
+    "authority_lease_record": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "authority_lease_id",
+        "id_metadata",
+        "subject_life_id",
+        "subject_agent_instance_id",
+        "authority_scope",
+        "allowed_actions",
+        "starts_at",
+        "expires_at",
+        "issued_by",
+        "signer_evidence_ref",
+        "revocation_status",
+        "heartbeat_at",
+        "exclusive_control",
+        "audit_trail_refs",
+        "separation"
+      ],
+      "properties": {
+        "authority_lease_id": {
+          "type": "string",
+          "pattern": "^ALEASE-V01-[A-Z0-9]{3,16}-[0-9A-HJKMNP-TV-Z]{26}$"
+        },
+        "id_metadata": { "$ref": "#/$defs/identifier_metadata" },
+        "subject_life_id": { "$ref": "#/$defs/nullable_id" },
+        "subject_agent_instance_id": { "type": "string" },
+        "authority_scope": { "type": "array", "items": { "type": "string" } },
+        "allowed_actions": { "type": "array", "items": { "type": "string" } },
+        "starts_at": { "$ref": "#/$defs/timestamp" },
+        "expires_at": { "$ref": "#/$defs/timestamp" },
+        "issued_by": { "type": "string" },
+        "signer_evidence_ref": { "type": "string" },
+        "revocation_status": {
+          "enum": ["ACTIVE", "REVOKED", "EXPIRED", "SUPERSEDED"]
+        },
+        "heartbeat_at": { "$ref": "#/$defs/timestamp" },
+        "exclusive_control": { "type": "boolean" },
+        "audit_trail_refs": { "type": "array", "items": { "type": "string" } },
+        "separation": { "$ref": "#/$defs/separation_dimensions" }
+      }
+    },
+    "composite_organism_record": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "composite_organism_id",
+        "id_metadata",
+        "member_life_ids",
+        "embodiment_ids",
+        "ownership_shares",
+        "occupancy_rules",
+        "authority_rules",
+        "conflict_resolution_ref",
+        "contract_status",
+        "separation"
+      ],
+      "properties": {
+        "composite_organism_id": {
+          "type": "string",
+          "pattern": "^COMPOSITE-V01-[A-Z0-9]{3,16}-[0-9A-HJKMNP-TV-Z]{26}$"
+        },
+        "id_metadata": { "$ref": "#/$defs/identifier_metadata" },
+        "member_life_ids": {
+          "type": "array",
+          "minItems": 2,
+          "uniqueItems": true,
+          "items": { "type": "string" }
+        },
+        "embodiment_ids": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "type": "string" }
+        },
+        "ownership_shares": { "type": "object" },
+        "occupancy_rules": { "type": "object" },
+        "authority_rules": { "type": "object" },
+        "conflict_resolution_ref": { "type": "string" },
+        "contract_status": {
+          "enum": ["DRAFT", "ACTIVE", "SUSPENDED", "DISSOLVED", "ARCHIVED"]
+        },
+        "separation": { "$ref": "#/$defs/separation_dimensions" }
+      }
+    }
+  }
+}

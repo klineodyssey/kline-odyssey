@@ -1,0 +1,156 @@
+{
+  "status": "ARCHITECTURE_CANDIDATE_ONLY",
+  "runtime_authority": false,
+  "live_identity_creation": false,
+  "id_format": {
+    "template": "<TYPE_PREFIX>-V01-<ISSUING_AUTHORITY_CODE>-<RANDOM_COMPONENT>",
+    "random_component": "26 uppercase Crockford Base32 characters",
+    "forbidden_identity_inputs": [
+      "role_name",
+      "model_name",
+      "human_mutable_name",
+      "project_name",
+      "branch_name",
+      "thread_title"
+    ],
+    "prefixes": {
+      "life_id": "LIFE",
+      "agent_instance_id": "AINST",
+      "thread_id": "THREAD",
+      "embodiment_id": "EMB",
+      "wallet_id": "WALLET",
+      "memory_store_id": "MEM",
+      "birth_event_id": "BIRTH",
+      "death_event_id": "DEATH",
+      "lineage_id": "LINEAGE",
+      "employment_contract_id": "EMPLOY",
+      "marriage_contract_id": "MARRIAGE",
+      "reproduction_contract_id": "REPRO",
+      "succession_contract_id": "SUCCESSION",
+      "authority_lease_id": "ALEASE",
+      "composite_organism_id": "COMPOSITE"
+    }
+  },
+  "registry_names": [
+    "life_registry",
+    "agent_instance_registry",
+    "thread_registry",
+    "embodiment_registry",
+    "wallet_ownership_registry",
+    "memory_ownership_registry",
+    "birth_event_registry",
+    "death_and_sealing_registry",
+    "lineage_registry",
+    "employment_registry",
+    "marriage_registry",
+    "reproduction_registry",
+    "succession_registry",
+    "authority_lease_registry",
+    "composite_organism_registry"
+  ],
+  "separation_dimensions": [
+    "identity_refs",
+    "ownership_refs",
+    "authority_refs",
+    "possession_refs",
+    "occupancy_refs",
+    "memory_refs",
+    "role_refs",
+    "relationship_refs"
+  ],
+  "life_state_machine": {
+    "CANDIDATE": ["BORN", "ARCHIVED"],
+    "BORN": ["ACTIVE", "SUSPENDED", "SEALED"],
+    "ACTIVE": ["SUSPENDED", "INCAPACITATED", "MIGRATING", "SEALED", "DEAD"],
+    "SUSPENDED": ["ACTIVE", "INCAPACITATED", "SEALED", "DEAD"],
+    "INCAPACITATED": ["ACTIVE", "SUSPENDED", "SEALED", "DEAD"],
+    "MIGRATING": ["ACTIVE", "SUSPENDED", "SEALED", "DEAD"],
+    "SEALED": ["ARCHIVED", "DEAD"],
+    "DEAD": [],
+    "ARCHIVED": []
+  },
+  "thread_modes": {
+    "SAME_LIFE_NEW_THREAD": {
+      "new_life_id": false,
+      "new_agent_instance_id": true,
+      "new_thread_id": true,
+      "new_embodiment_id": false,
+      "wallet_inheritance": false
+    },
+    "NEW_LIFE_DESCENDANT": {
+      "new_life_id": true,
+      "new_agent_instance_id": true,
+      "new_thread_id": true,
+      "new_embodiment_id": true,
+      "wallet_inheritance": false
+    },
+    "TEMPORARY_WORKER_AGENT": {
+      "new_life_id": false,
+      "new_agent_instance_id": true,
+      "new_thread_id": true,
+      "new_embodiment_id": false,
+      "wallet_inheritance": false
+    },
+    "NEW_EMBODIMENT_SAME_LIFE": {
+      "new_life_id": false,
+      "new_agent_instance_id": true,
+      "new_thread_id": true,
+      "new_embodiment_id": true,
+      "wallet_inheritance": false
+    }
+  },
+  "wallet_rules": {
+    "allowed_owner_subject_types": ["LIFE", "ORGANIZATION"],
+    "forbidden_owner_subject_types": ["THREAD", "ROLE", "MODEL", "PROJECT", "BRANCH"],
+    "fork_inheritance": false,
+    "child_inheritance": false,
+    "reincarnation_inheritance": false,
+    "private_key_repository_storage": false,
+    "exclusive_controller_required_unless_multisig": true
+  },
+  "memory_classes": [
+    "PUBLIC_PROJECT_MEMORY",
+    "SHARED_ORGANIZATION_MEMORY",
+    "ROLE_MEMORY",
+    "PRIVATE_LIFE_MEMORY",
+    "THREAD_WORKING_MEMORY",
+    "EMBODIMENT_SENSOR_MEMORY",
+    "INHERITED_KNOWLEDGE",
+    "PERSONAL_EXPERIENCE",
+    "SEALED_MEMORY"
+  ],
+  "private_memory_requirements": [
+    "owner_life_id",
+    "access_grant_ids",
+    "purpose",
+    "scope",
+    "expires_at",
+    "consent_evidence_ref",
+    "provenance",
+    "content_integrity_hash"
+  ],
+  "embodiment_roles": [
+    "owner_life_id",
+    "occupant_life_id",
+    "operator_id",
+    "custodian_id",
+    "manufacturer_id"
+  ],
+  "terminal_rules": {
+    "dead_remains_terminal": true,
+    "thread_close_is_life_death": false,
+    "instance_end_is_life_death": false,
+    "embodiment_damage_is_life_death": false,
+    "role_removal_is_life_death": false,
+    "wallet_freeze_is_life_death": false,
+    "reincarnation_requires_new_life_id": true
+  },
+  "human_escalation_codes": [
+    "IDENTITY_COLLISION",
+    "DEATH_STATE_CONFLICT",
+    "WALLET_CONTROLLER_CONFLICT",
+    "PRIVATE_MEMORY_TRANSFER_CONFLICT",
+    "EMBODIMENT_OCCUPANCY_CONFLICT",
+    "COMPOSITE_OWNERSHIP_CONFLICT"
+  ]
+}
