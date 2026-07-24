@@ -46,6 +46,16 @@ FORBIDDEN_IDENTITY_TOKENS = (
     "THREADTITLE",
 )
 
+CANDIDATE_PLACEHOLDERS = {
+    "life_id": "PENDING_HUMAN_BIRTH_DECISION",
+    "birth_event_id": "NOT_CREATED",
+    "agent_instance_id": "NOT_CREATED",
+    "thread_id": "NOT_CREATED",
+    "embodiment_id": "NOT_CREATED",
+    "wallet_id": "NOT_CREATED",
+    "authority_lease_id": "NOT_CREATED",
+}
+
 
 def load_json(path: Path) -> dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
@@ -107,6 +117,38 @@ def validate_schema_contract(
         errors.append("SCHEMA_RUNTIME_AUTHORITY_NOT_FALSE")
     if schema.get("properties", {}).get("live_records", {}).get("const") is not False:
         errors.append("SCHEMA_LIVE_RECORDS_NOT_FALSE")
+    return errors
+
+
+def validate_candidate_template(template: dict[str, Any]) -> list[str]:
+    """Ensure a candidate template cannot be mistaken for a live record."""
+
+    errors: list[str] = []
+    required_constants = {
+        "record_type": "LIFE_CANDIDATE_TEMPLATE_ONLY",
+        "template_status": "NON_NORMATIVE_NOT_A_REGISTRY_ENTRY",
+        "validator_policy": "MUST_REJECT_AS_LIVE_IDENTITY",
+        "candidate_classification": "LIFE_CANDIDATE",
+        "current_operating_classification": "ROLE_SESSION_ONLY",
+        "candidate_state": "UNBORN",
+        "runtime_authority": False,
+        "wallet_eligibility": "NOT_APPROVED",
+        "thread_migration": "NOT_APPROVED",
+        "embodiment_assignment": "NOT_APPROVED",
+        "private_memory_migration": "NOT_AUTHORIZED",
+        "new_thread_authorization": "NOT_APPROVED",
+        "autonomous_agent_activation": "NOT_APPROVED",
+    }
+    for field, expected in required_constants.items():
+        if template.get(field) != expected:
+            errors.append(f"CANDIDATE_TEMPLATE_BOUNDARY_INVALID:{field}")
+
+    for field, expected in CANDIDATE_PLACEHOLDERS.items():
+        value = template.get(field)
+        if value != expected:
+            errors.append(f"CANDIDATE_PLACEHOLDER_INVALID:{field}")
+        if isinstance(value, str) and ID_PATTERN.fullmatch(value):
+            errors.append(f"CANDIDATE_PLACEHOLDER_ACCEPTED_AS_LIVE_ID:{field}")
     return errors
 
 
@@ -340,12 +382,17 @@ def main() -> int:
     base = Path(__file__).resolve().parent
     schema = load_json(base / "KAIOS_UNIQUE_LIFE_IDENTITY_REGISTRY_SCHEMA_V0_1.json")
     rules = load_json(base / "KAIOS_UNIQUE_LIFE_IDENTITY_VALIDATION_RULES_V0_1.json")
+    candidate = load_json(base / "KAIOS_CODEX_GM_LIFE_CANDIDATE_RECORD_TEMPLATE_V0_1.json")
     errors = validate_schema_contract(schema, rules)
+    errors.extend(validate_candidate_template(candidate))
     result = {
         "status": "PASS" if not errors else "FAIL",
-        "schema_errors": errors,
+        "validation_errors": errors,
         "registry_schema_count": len(rules["registry_names"]),
         "id_type_count": len(rules["id_format"]["prefixes"]),
+        "candidate_template_status": (
+            "REJECTED_AS_LIVE_IDENTITY" if not errors else "INVALID_TEMPLATE"
+        ),
         "runtime_authority": rules["runtime_authority"],
         "live_identity_creation": rules["live_identity_creation"],
     }

@@ -7,7 +7,10 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 from validate_identity_architecture import (
+    CANDIDATE_PLACEHOLDERS,
+    ID_PATTERN,
     load_json,
+    validate_candidate_template,
     validate_registry_document,
     validate_schema_contract,
 )
@@ -16,6 +19,7 @@ from validate_identity_architecture import (
 BASE = Path(__file__).resolve().parent
 SCHEMA = load_json(BASE / "KAIOS_UNIQUE_LIFE_IDENTITY_REGISTRY_SCHEMA_V0_1.json")
 RULES = load_json(BASE / "KAIOS_UNIQUE_LIFE_IDENTITY_VALIDATION_RULES_V0_1.json")
+CANDIDATE = load_json(BASE / "KAIOS_CODEX_GM_LIFE_CANDIDATE_RECORD_TEMPLATE_V0_1.json")
 NOW = datetime(2026, 7, 24, 8, 0, tzinfo=timezone.utc)
 HASH = "a" * 64
 
@@ -530,11 +534,12 @@ class IsolationTests(unittest.TestCase):
 
 
 class DocumentBoundaryTests(unittest.TestCase):
-    def test_decision_packet_has_six_pending_decisions(self) -> None:
+    def test_decision_packet_has_six_recorded_decisions(self) -> None:
         text = (BASE / "KAIOS_AI_LIFE_IDENTITY_HUMAN_DECISION_PACKET_V0_1.md").read_text(
             encoding="utf-8"
         )
-        self.assertEqual(text.count("Human selection: `PENDING`"), 6)
+        self.assertEqual(text.count("Human selection: `"), 6)
+        self.assertNotIn("Human selection: `PENDING`", text)
 
     def test_threat_model_has_fifteen_threats(self) -> None:
         text = (BASE / "KAIOS_UNIQUE_LIFE_IDENTITY_THREAT_MODEL_V0_1.md").read_text(
@@ -552,6 +557,91 @@ class DocumentBoundaryTests(unittest.TestCase):
     def test_schema_contains_no_registry_records(self) -> None:
         self.assertNotIn("examples", SCHEMA)
         self.assertNotIn("default", SCHEMA)
+
+    def test_birth_readiness_has_25_items(self) -> None:
+        text = (
+            BASE / "KAIOS_CODEX_GM_LIFE_CANDIDATE_BIRTH_READINESS_PACKET_V0_1.md"
+        ).read_text(encoding="utf-8")
+        matrix_rows = [
+            line
+            for line in text.splitlines()
+            if line.startswith("| ") and line.split("|")[1].strip().isdigit()
+        ]
+        self.assertEqual(len(matrix_rows), 25)
+
+    def test_birth_readiness_status_totals(self) -> None:
+        text = (
+            BASE / "KAIOS_CODEX_GM_LIFE_CANDIDATE_BIRTH_READINESS_PACKET_V0_1.md"
+        ).read_text(encoding="utf-8")
+        expected = {
+            "- `READY`: 6",
+            "- `PARTIAL`: 6",
+            "- `MISSING`: 5",
+            "- `NOT_APPLICABLE`: 0",
+            "- `HUMAN_DECISION_REQUIRED`: 8",
+            "- Total: 25",
+        }
+        self.assertTrue(all(item in text for item in expected))
+
+    def test_candidate_template_is_non_live(self) -> None:
+        self.assertEqual(validate_candidate_template(CANDIDATE), [])
+        self.assertEqual(CANDIDATE["candidate_state"], "UNBORN")
+        self.assertFalse(CANDIDATE["runtime_authority"])
+
+    def test_all_placeholder_ids_are_rejected(self) -> None:
+        self.assertEqual(set(CANDIDATE_PLACEHOLDERS), {
+            "life_id",
+            "birth_event_id",
+            "agent_instance_id",
+            "thread_id",
+            "embodiment_id",
+            "wallet_id",
+            "authority_lease_id",
+        })
+        for value in CANDIDATE_PLACEHOLDERS.values():
+            self.assertIsNone(ID_PATTERN.fullmatch(value))
+
+    def test_persisted_candidate_artifacts_contain_no_live_id(self) -> None:
+        artifact_names = [
+            "KAIOS_AI_LIFE_IDENTITY_HUMAN_DECISION_PACKET_V0_1.md",
+            "KAIOS_CODEX_GM_LIFE_CANDIDATE_BIRTH_READINESS_PACKET_V0_1.md",
+            "KAIOS_CODEX_GM_LIFE_CANDIDATE_RECORD_TEMPLATE_V0_1.json",
+            "KAIOS_UNIQUE_LIFE_IDENTITY_AND_EMBODIMENT_ARCHITECTURE_V0_1.md",
+            "KAIOS_UNIQUE_LIFE_IDENTITY_TEST_EVIDENCE_V0_1.json",
+            "KAIOS_UNIQUE_LIFE_IDENTITY_THREAT_MODEL_V0_1.md",
+            "KAIOS_UNIQUE_LIFE_IDENTITY_VALIDATION_RULES_V0_1.json",
+            "README.md",
+        ]
+        for name in artifact_names:
+            text = (BASE / name).read_text(encoding="utf-8")
+            self.assertIsNone(ID_PATTERN.search(text), name)
+
+    def test_wallet_policy_denies_wallet_creation(self) -> None:
+        text = (
+            BASE / "KAIOS_CODEX_GM_LIFE_CANDIDATE_BIRTH_READINESS_PACKET_V0_1.md"
+        ).read_text(encoding="utf-8")
+        self.assertIn("NO_LIFE_WALLET", text)
+        self.assertIn("HUMAN_PAYMENT_ONLY", text)
+        self.assertEqual(CANDIDATE["wallet_id"], "NOT_CREATED")
+
+    def test_memory_policy_requires_consent_and_grants(self) -> None:
+        text = (
+            BASE / "KAIOS_CODEX_GM_LIFE_CANDIDATE_BIRTH_READINESS_PACKET_V0_1.md"
+        ).read_text(encoding="utf-8")
+        self.assertIn("CONSENT_AND_GRANT_BASED_MEMORY_TRANSFER", text)
+        self.assertEqual(CANDIDATE["private_memory_migration"], "NOT_AUTHORIZED")
+
+    def test_new_thread_identity_remains_unresolved(self) -> None:
+        text = (
+            BASE / "KAIOS_CODEX_GM_LIFE_CANDIDATE_BIRTH_READINESS_PACKET_V0_1.md"
+        ).read_text(encoding="utf-8")
+        self.assertIn("NEW_AGENT_INSTANCE_CANDIDATE", text)
+        self.assertIn("IDENTITY_UNRESOLVED", text)
+        self.assertEqual(CANDIDATE["thread_id"], "NOT_CREATED")
+
+    def test_embodiment_is_not_assigned(self) -> None:
+        self.assertEqual(CANDIDATE["embodiment_assignment"], "NOT_APPROVED")
+        self.assertEqual(CANDIDATE["embodiment_id"], "NOT_CREATED")
 
 
 if __name__ == "__main__":
