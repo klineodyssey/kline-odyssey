@@ -190,6 +190,14 @@ def content_hash(value: dict[str, Any]) -> str:
     return hashlib.sha256(canonical_json(payload)).hexdigest()
 
 
+def validate_integrity_hash(record: dict[str, Any]) -> None:
+    hash_value = record.get("integrity_hash", "")
+    if not re.fullmatch(r"[a-f0-9]{64}", hash_value):
+        raise ValidationError("invalid integrity hash format")
+    if hash_value != content_hash(record):
+        raise ValidationError("integrity hash mismatch")
+
+
 def _require_fields(record: dict[str, Any], fields: tuple[str, ...], label: str) -> None:
     missing = [field for field in fields if field not in record]
     if missing:
@@ -359,6 +367,8 @@ def validate_manifest(root: Path, manifest: dict[str, Any], live_record: bool = 
     hash_value = manifest.get("integrity_hash", "")
     if not re.fullmatch(r"[a-f0-9]{64}", hash_value):
         raise ValidationError("invalid integrity hash format")
+    if live_record:
+        validate_integrity_hash(manifest)
 
 
 def _flatten_strings(value: Any) -> set[str]:

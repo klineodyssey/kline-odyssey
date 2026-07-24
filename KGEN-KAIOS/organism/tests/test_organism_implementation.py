@@ -21,6 +21,7 @@ from validate_organism import (
     load_json,
     validate_all,
     validate_boundaries,
+    validate_integrity_hash,
     validate_manifest,
     validate_package,
     validate_species_registry,
@@ -229,6 +230,11 @@ class CanonicalOrganismImplementationTests(unittest.TestCase):
         first["integrity_hash"] = "0" * 64
         second["integrity_hash"] = "f" * 64
         self.assertEqual(content_hash(first), content_hash(second))
+        first["integrity_hash"] = content_hash(first)
+        validate_integrity_hash(first)
+        first["integrity_hash"] = "f" * 64
+        with self.assertRaisesRegex(ValidationError, "integrity hash mismatch"):
+            validate_integrity_hash(first)
 
     def test_41_full_validator_passes(self) -> None:
         result = validate_all(REPO_ROOT)
