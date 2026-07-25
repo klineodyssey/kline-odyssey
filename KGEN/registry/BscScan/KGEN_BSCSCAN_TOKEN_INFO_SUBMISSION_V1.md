@@ -67,11 +67,13 @@ Verified public contact email remains: **klineodyssey.io@gmail.com**
 
 ## Submission Status
 
-**PENDING_PUBLIC_URL_DEPLOYMENT**
+**READY_FOR_HUMAN_SUBMISSION**
 
-Do not mark this record **READY_FOR_HUMAN_SUBMISSION** until all three public
-logo URLs return HTTP 200 with the expected content type after GitHub Pages
-deployment. Human must then log into BscScan, verify contract ownership where
-required, sign the ownership-verification message, paste the prepared data, and
-submit the external form. Do not mark **SUBMITTED** until Human confirms
-external submission.
+GitHub Pages deployment run `30177479689` completed successfully. All three
+public logo URLs return HTTP 200 without login or redirect. The SVG returns
+`image/svg+xml`; both PNGs return `image/png` and retain their expected
+dimensions.
+
+Human must log into BscScan, verify contract ownership where required, sign the
+ownership-verification message, paste the prepared data, and submit the external
+form. Do not mark **SUBMITTED** until Human confirms external submission.

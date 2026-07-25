@@ -97,6 +97,11 @@ https://lin.ee/b8X18F7
 Telegram 官方通道：
 https://t.me/klineodyssey
 
+### BscScan token information package
+
+- `registry/BscScan/KGEN_BSCSCAN_TOKEN_INFO_SUBMISSION_V1.md`
+- `registry/BscScan/KGEN_BSCSCAN_LOGO_SUBMISSION_V1_MERGE_CLOSEOUT.md`
+
 ## 🫀 KGEN 宇宙生命體徵（Vitals）
 
 - 宇宙體溫（CTI）

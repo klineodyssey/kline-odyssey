@@ -73,6 +73,8 @@ Codex reran Company Boot and `git fetch origin --prune` at `2026-07-15T17:29:48+
 | `recovery_points/RECOVERY-PR50-KAIOS-CANONICAL-ORGANISM-V0-1.md` | PR #50 merged-baseline recovery anchor |
 | `recovery_points/RECOVERY-PR52-LAND-VIEWER-SCHEMA-V2-COMPATIBILITY.md` | PR #52 Land Viewer Schema V2 recovery anchor |
 | `company_status/COMPANY_STATUS_2026-07-26_PR52_LAND_VIEWER_SCHEMA_V2.md` | Post-merge Company Status for PR #52 |
+| `recovery_points/RECOVERY-PR51-KGEN-BSCSCAN-LOGO-V1.md` | PR #51 BscScan logo package recovery anchor |
+| `company_status/COMPANY_STATUS_2026-07-26_PR51_BSCSCAN_LOGO.md` | Post-merge Company Status for PR #51 |
 | `company_status/COMPANY_STATUS_2026-07-25_PR50_ORGANISM_BASELINE.md` | PR #50 closeout state and next-workline hold |
 | `COMPANY_INBOX.md` | Durable Human intake boundary that remains available during network failure |
 | `PRIORITY_SCHEDULER.md` | Review-first ordering and one-task scheduling contract |

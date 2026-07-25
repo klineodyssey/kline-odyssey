@@ -58,6 +58,7 @@ The worker must then stop without changing WorkQueue, creating a branch, editing
 | KAIOS-CANONICAL-ORGANISM-V0-1 | DONE | Codex | Codex | P1 | Life Architecture | `codex/kaios-canonical-organism-schema-v0-1` | `KGEN-KAIOS/organism/KAIOS_CANONICAL_ORGANISM_V0_1_BASELINE_MERGE_CLOSEOUT.md` |
 | LAND_VIEWER_SCHEMA_V2_COMPATIBILITY | DONE | Codex | Codex | P1 | Frontend | `codex/land-viewer-schema-v2-compatibility` | `KGEN-KAIOS/world-viewer/LAND_VIEWER_SCHEMA_V2_COMPATIBILITY_MERGE_CLOSEOUT.md` |
 | WORLD_VIEWER_ORGANISM_PACKAGE_INTEGRATION | HOLD | UNASSIGNED | Codex | P1 | Frontend | `NOT_CREATED` | `PENDING_SCOPE` |
+| KGEN-BSCSCAN-LOGO-001 | DONE | Cursor + Codex | Codex | P1 | Token Metadata | `cursor/kgen-bscscan-logo-submission-v1` | `KGEN/registry/BscScan/KGEN_BSCSCAN_LOGO_SUBMISSION_V1_MERGE_CLOSEOUT.md` |
 
 ### KAIOS-GM-V4-2026-0001 - General Manager Decision Engine
 
