@@ -23,6 +23,8 @@ second organism schema.
 | `natural_instantiation.py` | Dry-run instantiation pipeline |
 | `validate_organism.py` | Schema, package, taxonomy, and boundary validator |
 | `tests/` | Unit and boundary tests |
+| `KAIOS_COMPANY_BOOT_AND_WORKLINE_AUDIT_PR50.md` | PR #50 boot, workline, and operability audit |
+| `KAIOS_CANONICAL_ORGANISM_V0_1_BASELINE_MERGE_CLOSEOUT.md` | Merged baseline closeout and non-activation record |
 
 ## Canonical Path
 

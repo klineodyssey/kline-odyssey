@@ -55,6 +55,8 @@ The worker must then stop without changing WorkQueue, creating a branch, editing
 | KAIOS-WV-SPRINT-001 | DONE | Codex + isolated Worker Clones | Codex | P0 | Frontend | `codex/world-viewer-sprint-001` | `KGEN-AI-Company/reports/handoffs/KAIOS-WV-SPRINT-001/HANDOFF.md` |
 | KAIOS-WV-SPRINT-002 | DONE | Codex + isolated Worker Clones | Codex | P0 | Frontend | `codex/world-viewer-sprint-002-alpha` | `KGEN-AI-Company/reports/handoffs/KAIOS-WV-SPRINT-002/HANDOFF.md` |
 | KAIOS-WALS-V1-2026-0001 | DONE | Codex | Codex | P1 | Architecture | `codex/world-asset-life-spec-v1` | `KGEN-AI-Company/reports/KAIOS_WORLD_ASSET_LIFE_SPEC_V1_REVIEW.md` |
+| KAIOS-CANONICAL-ORGANISM-V0-1 | DONE | Codex | Codex | P1 | Life Architecture | `codex/kaios-canonical-organism-schema-v0-1` | `KGEN-KAIOS/organism/KAIOS_CANONICAL_ORGANISM_V0_1_BASELINE_MERGE_CLOSEOUT.md` |
+| LAND_VIEWER_SCHEMA_V2_COMPATIBILITY | HOLD | UNASSIGNED | Codex | P1 | Frontend | `NOT_CREATED` | `KGEN-KAIOS/world-viewer/tasks/LAND_VIEWER_SCHEMA_V2_COMPATIBILITY.task-envelope.json` |
 
 ### KAIOS-GM-V4-2026-0001 - General Manager Decision Engine
 

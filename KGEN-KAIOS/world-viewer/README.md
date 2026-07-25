@@ -189,6 +189,7 @@ World Viewer V1 therefore defines adapter boundaries and draft projections. It d
 | `technology/` | Research, Technology Tree, bounded Cosmic Material/Energy, Vehicle, Ability, Coordinate and Exploration runtimes and view |
 | `tests/cosmic_technology_integrity.mjs` | Fourteen-age gates, resource conservation, special abilities, UFO V2, coordinates and exploration integrity gate |
 | `tasks/KAIOS-WV-SPRINT-010.task-envelope.json` | Sprint 010 execution and closeout envelope |
+| `tasks/LAND_VIEWER_SCHEMA_V2_COMPATIBILITY.task-envelope.json` | Prepared, non-dispatched schema V2 compatibility workline |
 | `tasks/KAIOS-WV-SPRINT-010.HANDOFF.md` | Reviewed Sprint 010 claim, evidence and release handoff |
 | `tests/baselines/sprint-010/` | Required Sprint 010 device, orientation and theme visual baselines |
 | `tests/evidence/sprint-010-cosmic-technology/` | Product QA, integrity, performance, screenshots and visual diffs |

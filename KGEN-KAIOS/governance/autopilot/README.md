@@ -70,6 +70,8 @@ Codex reran Company Boot and `git fetch origin --prune` at `2026-07-15T17:29:48+
 | `codex_mainline_controller.json` | Machine-readable Codex mainline controller authority, escalation and recovery contract |
 | `recovery_points/` | Per-operation recovery points created before merge, batch update, closeout or dispatch |
 | `company_status/` | Daily Company Boot status reports |
+| `recovery_points/RECOVERY-PR50-KAIOS-CANONICAL-ORGANISM-V0-1.md` | PR #50 merged-baseline recovery anchor |
+| `company_status/COMPANY_STATUS_2026-07-25_PR50_ORGANISM_BASELINE.md` | PR #50 closeout state and next-workline hold |
 | `COMPANY_INBOX.md` | Durable Human intake boundary that remains available during network failure |
 | `PRIORITY_SCHEDULER.md` | Review-first ordering and one-task scheduling contract |
 | `REPOSITORY_MAINTENANCE_RUNTIME.md` | Fetch, compare, retry, recovery and health architecture |
