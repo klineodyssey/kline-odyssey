@@ -1,7 +1,7 @@
 # KGEN BscScan Token Info Submission V1
 
-Task ID: KGEN-BSCSCAN-LOGO-001  
-Prepared by: Cursor (implementation worker)  
+Task ID: KGEN-BSCSCAN-LOGO-001
+Prepared by: Cursor (implementation worker)
 Record version: V1
 
 ---
