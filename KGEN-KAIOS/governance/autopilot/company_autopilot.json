@@ -1,10 +1,10 @@
 {
   "metadata": {
     "architecture_id": "PRIMEFORGE-COMPANY-AUTOPILOT-ARCH-001",
-    "version": "0.4.0",
-    "revision": "2026-07-25.1",
+    "version": "0.4.1",
+    "revision": "2026-07-26.1",
     "status": "ACTIVE_OPERATOR_PROTOCOL_NO_BACKGROUND_SERVICE",
-    "last_updated": "2026-07-25",
+    "last_updated": "2026-07-26",
     "updated_by": "codex-gm-01",
     "reviewed_by": "HUMAN_PRIMEFORGE_FULL_AUTOPILOT_001",
     "human_decision_ids": [
@@ -13,8 +13,8 @@
       "HUMAN-COMPANY-OS-BOOT-001",
       "HUMAN-PRIMEFORGE-FULL-AUTOPILOT-001"
     ],
-    "source_commit": "ORIGIN_MAIN_5570756d9343fc83e16acfe594f93334ecb0e258",
-    "source_freshness": "REMOTE_VERIFIED_2026-07-25T21:51:37+08:00",
+    "source_commit": "ORIGIN_MAIN_7df3e48530fb00f56d2af49c40d38f64de46c475",
+    "source_freshness": "REMOTE_VERIFIED_2026-07-26T06:06:31+08:00",
     "source_of_truth": true
   },
   "system_identity": {
@@ -257,7 +257,7 @@
     "automatic_remote_branch_delete": false
   },
   "current_observation": {
-    "observed_at": "2026-07-25T21:51:37+08:00",
+    "observed_at": "2026-07-26T06:06:31+08:00",
     "dns": "HEALTHY",
     "github_tcp_443": "HEALTHY",
     "github_https": "HTTP_200",
@@ -268,7 +268,7 @@
     "pages_decision_center": "HTTP_200",
     "pages_workforce": "HTTP_200",
     "pages_operating_center": "HTTP_200",
-    "origin_main": "5570756d9343fc83e16acfe594f93334ecb0e258",
+    "origin_main": "7df3e48530fb00f56d2af49c40d38f64de46c475",
     "head_matches_origin_main": true,
     "human_main": "DIRTY_READ_ONLY_UNTOUCHED",
     "canonical_cursor_registry_state": "IDLE_NO_CURRENT_TASK",
@@ -292,12 +292,12 @@
   },
   "current_state_pointer": {
     "status": "CURRENT",
-    "baseline_merge_sha": "5570756d9343fc83e16acfe594f93334ecb0e258",
-    "completed_workline": "KAIOS-CANONICAL-ORGANISM-V0-1",
-    "active_workline": "LAND_VIEWER_SCHEMA_V2_COMPATIBILITY",
-    "active_workline_status": "HOLD_NOT_DISPATCHED",
-    "recovery_point": "RECOVERY-PR50-KAIOS-CANONICAL-ORGANISM-V0-1",
-    "company_status": "KGEN-KAIOS/governance/autopilot/company_status/COMPANY_STATUS_2026-07-25_PR50_ORGANISM_BASELINE.md",
+    "baseline_merge_sha": "7df3e48530fb00f56d2af49c40d38f64de46c475",
+    "completed_workline": "LAND_VIEWER_SCHEMA_V2_COMPATIBILITY",
+    "active_workline": "WORLD_VIEWER_ORGANISM_PACKAGE_INTEGRATION",
+    "active_workline_status": "HOLD_NOT_STARTED",
+    "recovery_point": "RECOVERY-PR52-LAND-VIEWER-SCHEMA-V2-COMPATIBILITY",
+    "company_status": "KGEN-KAIOS/governance/autopilot/company_status/COMPANY_STATUS_2026-07-26_PR52_LAND_VIEWER_SCHEMA_V2.md",
     "runtime_authority": false,
     "cursor_dispatch": false,
     "scheduler": false,

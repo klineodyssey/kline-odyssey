@@ -112,6 +112,7 @@ World Viewer V1 therefore defines adapter boundaries and draft projections. It d
 | `WORLD_VIEWER_ARCHITECTURE.md` | System boundary, hierarchy and review decisions |
 | `WORLD_VIEWER_RUNTIME.md` | Modules, state machine, loading and command boundaries |
 | `LAND_VIEWER_SCHEMA_V2_COMPATIBILITY.md` | Viewer data inventory, Schema V2 mapping and dry-run migration evidence |
+| `LAND_VIEWER_SCHEMA_V2_COMPATIBILITY_MERGE_CLOSEOUT.md` | PR #52 merge, validation and non-activation closeout |
 | `CAMERA_STANDARD.md` | Drag, zoom, semantic level and camera transitions |
 | `SELECTION_STANDARD.md` | Parcel picking, context menu and intent rules |
 | `COORDINATE_MAPPING_STANDARD.md` | K280 geodetic, screen and Local ENU mapping |
