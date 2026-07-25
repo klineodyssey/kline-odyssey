@@ -111,6 +111,7 @@ World Viewer V1 therefore defines adapter boundaries and draft projections. It d
 |---|---|
 | `WORLD_VIEWER_ARCHITECTURE.md` | System boundary, hierarchy and review decisions |
 | `WORLD_VIEWER_RUNTIME.md` | Modules, state machine, loading and command boundaries |
+| `LAND_VIEWER_SCHEMA_V2_COMPATIBILITY.md` | Viewer data inventory, Schema V2 mapping and dry-run migration evidence |
 | `CAMERA_STANDARD.md` | Drag, zoom, semantic level and camera transitions |
 | `SELECTION_STANDARD.md` | Parcel picking, context menu and intent rules |
 | `COORDINATE_MAPPING_STANDARD.md` | K280 geodetic, screen and Local ENU mapping |
@@ -135,6 +136,10 @@ World Viewer V1 therefore defines adapter boundaries and draft projections. It d
 | `land/`, `building/`, `room/`, `player/` | Local Land history, read-only structure integrity and player movement runtimes |
 | `ui/` | Responsive shell, context menu and visual system |
 | `data/` | Validated synthetic world fixture and loader |
+| `data/schema-v2-land-candidates.json` | Twelve generated non-live Schema V2 land candidates |
+| `adapters/organism-schema-v2-adapter.js` | Legacy and Schema V2 read-only parcel compatibility adapter |
+| `tools/migrate-land-parcels-v2.mjs` | Non-destructive candidate migration utility |
+| `tests/organism_schema_v2_compatibility.mjs` | Land mapping, integrity and non-activation tests |
 | `tests/acceptance_static.py` | Offline package, fixture and safety validation |
 | `tests/product_qa.py` | Browser, responsive, accessibility, interaction and performance gate |
 | `tests/runtime_integrity.mjs` | Land, Building, Room, Life and Player invariant gate |

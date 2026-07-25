@@ -123,7 +123,7 @@ button:focus-visible, canvas:focus-visible, [tabindex]:focus-visible {
 
 .map-status {
   position: absolute; left: 14px; top: 14px;
-  display: flex; align-items: center; gap: 8px; max-width: calc(100% - 28px); min-height: 34px;
+  display: flex; align-items: center; flex-wrap: wrap; gap: 8px; max-width: calc(100% - 28px); min-height: 34px;
   padding: 5px 8px; border: 1px solid var(--line); border-radius: 6px; background: var(--surface); box-shadow: var(--shadow);
   color: var(--muted); font-size: 11px; pointer-events: none;
 }

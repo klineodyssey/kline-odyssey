@@ -216,6 +216,28 @@ function formatArea(value) {
   return formatted === UNKNOWN_VALUE ? UNKNOWN_VALUE : `${formatted} m2`;
 }
 
+function formatTaxonomy(value) {
+  if (!isRecord(value)) return UNKNOWN_VALUE;
+  const levels = [
+    "domain",
+    "kingdom",
+    "phylum",
+    "class",
+    "order",
+    "family",
+    "genus",
+    "species",
+    "cell",
+    "organ",
+    "runtime",
+    "civilization"
+  ];
+  const resolved = levels
+    .map((level) => value[level])
+    .filter((entry) => typeof entry === "string" && entry.length > 0);
+  return resolved.length === levels.length ? resolved.join(" > ") : UNKNOWN_VALUE;
+}
+
 function formatCollection(value) {
   if (!isKnown(value)) return UNKNOWN_VALUE;
   if (Array.isArray(value)) {
@@ -683,6 +705,11 @@ export function createInspectorProjection({
   const draft = matchingProposal(proposal, resolved.id);
   const parcel = parentParcel(world, resolved);
   const parcelCanonical = isRecord(parcel?.canonical) ? parcel.canonical : {};
+  const schemaV2 = isRecord(entity.organism_schema_v2)
+    ? entity.organism_schema_v2
+    : isRecord(parcel?.organism_schema_v2)
+      ? parcel.organism_schema_v2
+      : {};
   const entityCoordinate = canonicalCoordinate(entity);
   const coordinate = entityCoordinate === UNKNOWN_VALUE && parcel && parcel !== entity
     ? canonicalCoordinate(parcel)
@@ -742,6 +769,27 @@ export function createInspectorProjection({
     ["Neighbor Impact", formatScalar(draft?.neighbor_impact)]
   ];
 
+  const schemaV2Rows = [
+    ["Schema Version", formatScalar(schemaV2.schema_version)],
+    ["Organism ID", formatScalar(schemaV2.organism_id)],
+    ["Species ID", formatScalar(schemaV2.species_id)],
+    ["Taxonomy", formatTaxonomy(schemaV2.taxonomy)],
+    ["Lifecycle Status", formatScalar(schemaV2.lifecycle_status)],
+    ["Energy Profile", formatScalar(schemaV2.energy_profile)],
+    ["Embodiment Profile", formatScalar(schemaV2.embodiment_profile)],
+    ["Trade Classification", formatScalar(schemaV2.trade_classification)],
+    ["Ownership Class", formatScalar(schemaV2.ownership_class)],
+    ["Occupancy Class", formatScalar(schemaV2.occupancy_class)],
+    ["Usage-Right Class", formatScalar(schemaV2.usage_right_class)],
+    ["Control-Authority Class", formatScalar(schemaV2.control_authority_class)],
+    ["Land Title", formatScalar(schemaV2.land_title_class)],
+    ["Building Title", formatScalar(schemaV2.building_title_class)],
+    ["Integrity Status", formatScalar(schemaV2.integrity_status)],
+    ["Safety Labels", schemaV2.synthetic === true
+      ? "SYNTHETIC / READ_ONLY / SANDBOX / NOT_LEGAL_TITLE / NO_REAL_SETTLEMENT"
+      : UNKNOWN_VALUE]
+  ];
+
   const combined = new Map([...canonicalRows, ...viewerRows, ...proposalRows]);
   const unknownRows = REQUIRED_FIELD_LABELS
     .filter((label) => !combined.has(label) || combined.get(label) === UNKNOWN_VALUE)
@@ -766,6 +814,7 @@ export function createInspectorProjection({
     canonicalData: Object.freeze(rowsToObject(canonicalRows)),
     viewerData: Object.freeze(rowsToObject(viewerRows)),
     proposalData: Object.freeze(rowsToObject(proposalRows)),
+    schemaV2Data: Object.freeze(rowsToObject(schemaV2Rows)),
     unknownData: Object.freeze(rowsToObject(unknownRows)),
     lifeProfiles: Object.freeze(lifeProfiles.map(projectLifeProfile)),
     lifeProfileSources: Object.freeze([...lifeProfiles]),
@@ -1094,6 +1143,7 @@ export function renderInspectorView(container, input = {}, callbacks = {}) {
   root.append(
     renderLandLifeSummary(documentRef, projection),
     renderDataGroup(documentRef, "Land Record (Read Only)", projection.canonicalData, "canonical"),
+    renderDataGroup(documentRef, "Organism Schema V2 (Read Only)", projection.schemaV2Data, "schema-v2"),
     renderDataGroup(documentRef, "Viewer Context", projection.viewerData, "viewer"),
     renderDataGroup(documentRef, "Local Proposal (Proposal Only)", projection.proposalData, "proposal"),
     renderLandRuntime(documentRef, projection, callbacks),
