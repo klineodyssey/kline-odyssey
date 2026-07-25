@@ -1,4 +1,5 @@
 import { LIFE_OS_FORBIDDEN_DOMAINS } from "../life/life-os-viewer.js";
+import { adaptLandParcels } from "../adapters/organism-schema-v2-adapter.js";
 
 const REQUIRED_COLLECTIONS = Object.freeze([
   "regions",
@@ -767,20 +768,48 @@ export function createWorldIndex(world) {
 
 export async function loadSyntheticWorld(url = new URL("./synthetic-world.json", import.meta.url)) {
   const atomCatalogUrl = new URL("../../genesis-dna/genesis_atom_catalog.json", import.meta.url);
-  const [worldResponse, atomResponse] = await Promise.all([
+  const landCandidatesUrl = new URL("./schema-v2-land-candidates.json", import.meta.url);
+  const [worldResponse, atomResponse, landCandidatesResponse] = await Promise.all([
     fetch(url, { cache: "no-store" }),
-    fetch(atomCatalogUrl, { cache: "no-store" })
+    fetch(atomCatalogUrl, { cache: "no-store" }),
+    fetch(landCandidatesUrl, { cache: "no-store" })
   ]);
   if (!worldResponse.ok) throw new Error(`Unable to load synthetic world (${worldResponse.status})`);
   if (!atomResponse.ok) throw new Error(`Unable to load public Genesis Atom catalog (${atomResponse.status})`);
+  if (!landCandidatesResponse.ok) {
+    throw new Error(`Unable to load Schema V2 land candidates (${landCandidatesResponse.status})`);
+  }
   const validatedWorld = validateWorldFixture(await worldResponse.json());
   const atomCatalog = await atomResponse.json();
+  const landCandidates = await landCandidatesResponse.json();
+  invariant(
+    landCandidates?.status === "CANDIDATE_ONLY"
+      && landCandidates?.operation === "DRY_RUN"
+      && landCandidates?.activation_status === "NOT_ACTIVE",
+    "Schema V2 land candidates must remain a non-active dry run"
+  );
+  const adaptedParcels = await adaptLandParcels({
+    legacyParcels: validatedWorld.parcels,
+    organismRecords: landCandidates.records,
+    sandboxMode: true
+  });
   invariant(atomCatalog?.metadata?.atom_count === 108, "Genesis Atom catalog must contain 108 public capability atoms");
   invariant(Array.isArray(atomCatalog?.domains) && atomCatalog.domains.length === 12, "Genesis Atom catalog must contain 12 domains");
   invariant(Array.isArray(atomCatalog?.atoms) && atomCatalog.atoms.length === 108, "Genesis Atom catalog is incomplete");
   const world = Object.freeze({
     ...validatedWorld,
-    reference_data: Object.freeze({ genesis_atom_catalog: Object.freeze(atomCatalog) })
+    parcels: Object.freeze(adaptedParcels),
+    reference_data: Object.freeze({
+      genesis_atom_catalog: Object.freeze(atomCatalog),
+      organism_schema_v2: Object.freeze({
+        schema: "KGEN-KAIOS/provenance/ORGANISM_MANIFEST_SCHEMA.json",
+        species_registry: "KGEN-KAIOS/organism/species_registry.json#KAIOS_LAND_PARCEL_V1",
+        candidate_count: landCandidates.generated_record_count,
+        status: "CANDIDATE_ONLY",
+        runtime_authority: false,
+        settlement_active: false
+      })
+    })
   });
   return Object.freeze({
     world,

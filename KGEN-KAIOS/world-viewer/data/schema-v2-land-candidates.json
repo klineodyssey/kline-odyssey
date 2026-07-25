@@ -1,0 +1,1784 @@
+{
+  "schema_version": "1.0",
+  "status": "CANDIDATE_ONLY",
+  "operation": "DRY_RUN",
+  "activation_status": "NOT_ACTIVE",
+  "source_fixture": "KGEN-KAIOS/world-viewer/data/synthetic-world.json",
+  "source_parcel_count": 12,
+  "generated_record_count": 12,
+  "source_data_modified": false,
+  "runtime_authority": false,
+  "wallet_created": false,
+  "settlement_active": false,
+  "records": [
+    {
+      "source_parcel_id": "parcel-001",
+      "organism_id_candidate": "candidate:land:parcel-001:v2",
+      "field_mappings": {
+        "parcel_id": "organism_id",
+        "land_classification": "taxonomy",
+        "parcel_status": "status",
+        "owner_id": "OWNERSHIP",
+        "building_ids": "BUILDING_TITLE",
+        "land_use": "USAGE_RIGHT",
+        "capabilities": "CONTROL_AUTHORITY"
+      },
+      "defaults": {
+        "species_id": "KAIOS_LAND_PARCEL_V1",
+        "runtime": "NON_EXECUTABLE_LIFECYCLE_HANDLER",
+        "trade_profile": "LAND_TITLE",
+        "settlement": "INACTIVE"
+      },
+      "missing_values": [],
+      "integrity_hash": "1500a6309e85383137292767212fef4dad71c3b2dc0e1412c349d60471401d21",
+      "rollback_path": "Discard candidate output; original synthetic-world.json remains unchanged.",
+      "organism_manifest": {
+        "schema_version": "2.0",
+        "organism_id": "candidate:land:parcel-001:v2",
+        "organism_name": "Starter Residence Land Organism Candidate",
+        "organism_version": "0.1.0",
+        "organism_class": "LAND_PARCEL",
+        "life_category": "NATURAL_KAIOS_INSTANTIATION",
+        "life_type": "Land Parcel",
+        "species_id": "KAIOS_LAND_PARCEL_V1",
+        "domain": "KGEN_UNIVERSE",
+        "kingdom": "CIVILIZATION_ASSET",
+        "phylum": "TERRAIN_ORGANISM",
+        "class": "LAND_ASSET",
+        "order": "GOVERNED_PARCEL",
+        "family": "KAIOS_LAND",
+        "genus": "KAIOS_TERRAIN",
+        "species": "KAIOS_LAND_PARCEL_V1",
+        "taxonomy": {
+          "domain": "KGEN_UNIVERSE",
+          "kingdom": "CIVILIZATION_ASSET",
+          "phylum": "TERRAIN_ORGANISM",
+          "class": "LAND_ASSET",
+          "order": "GOVERNED_PARCEL",
+          "family": "KAIOS_LAND",
+          "genus": "KAIOS_TERRAIN",
+          "species": "KAIOS_LAND_PARCEL_V1",
+          "cell": "TERRAIN_UNIT",
+          "organ": "ECOSYSTEM_OR_LAND_SYSTEM",
+          "runtime": "NON_EXECUTABLE_LIFECYCLE",
+          "civilization": "KAIOS"
+        },
+        "species_ref": "KGEN-KAIOS/organism/species_registry.json#KAIOS_LAND_PARCEL_V1",
+        "canonical_file": "KGEN-KAIOS/world-viewer/data/synthetic-world.json#parcel-001",
+        "runtime_entry": "KGEN-KAIOS/organism/runtime/non_executable_lifecycle.py#describe_lifecycle",
+        "dna_schema": "KGEN-KAIOS/provenance/ORGANISM_MANIFEST_SCHEMA.json",
+        "dna_ref": "KGEN-KAIOS/organism/species_registry.json#KAIOS_LAND_PARCEL_V1",
+        "rna_ref": "KGEN-KAIOS/organism/profiles/mutation_profiles.json#GOVERNED_LAND_CHANGE",
+        "organs_ref": "KGEN-KAIOS/organism/species_registry.json#KAIOS_LAND_PARCEL_V1",
+        "cells_ref": "KGEN-KAIOS/organism/species_registry.json#KAIOS_LAND_PARCEL_V1",
+        "runtime_ref": "KGEN-KAIOS/organism/runtime/non_executable_lifecycle.py",
+        "energy_profile_ref": "KGEN-KAIOS/organism/profiles/energy_profiles.json#ECOSYSTEM_FLOW",
+        "embodiment_profile_ref": "KGEN-KAIOS/organism/profiles/embodiment_profiles.json#LAND_PARCEL",
+        "lifecycle_ref": "KGEN-KAIOS/organism/species_registry.json#KAIOS_LAND_PARCEL_V1",
+        "reproduction_rules_ref": "KGEN-KAIOS/organism/profiles/reproduction_profiles.json#NOT_APPLICABLE",
+        "mutation_rules_ref": "KGEN-KAIOS/organism/profiles/mutation_profiles.json#GOVERNED_LAND_CHANGE",
+        "trade_profile_ref": "KGEN-KAIOS/organism/profiles/trade_profiles.json#LAND_TITLE",
+        "ownership_profile_ref": "KGEN-KAIOS/organism/profiles/trade_profiles.json#LAND_TITLE",
+        "authority_profile_ref": "KGEN-KAIOS/world-viewer/tasks/LAND_VIEWER_SCHEMA_V2_COMPATIBILITY.task-envelope.json",
+        "runtime_binding": {
+          "program_filename": "KGEN-KAIOS/organism/runtime/non_executable_lifecycle.py",
+          "runtime_entrypoint": "KGEN-KAIOS/organism/runtime/non_executable_lifecycle.py#describe_lifecycle",
+          "runtime_type": "NON_EXECUTABLE_LIFECYCLE_HANDLER",
+          "runtime_version": "0.1.0",
+          "execution_environment": "PYTHON_DRY_RUN",
+          "required_organs": [
+            "ECOSYSTEM_OR_LAND_SYSTEM"
+          ],
+          "required_cells": [
+            "TERRAIN_UNIT"
+          ],
+          "startup_contract": "VALIDATE_ONLY",
+          "shutdown_contract": "NO_RUNTIME_STARTED",
+          "health_check": "KAIOS_NON_EXECUTABLE_LIFECYCLE_NOT_ACTIVE",
+          "state_path": "KGEN-KAIOS/world-viewer/data/schema-v2-land-candidates.json",
+          "memory_path": "KGEN-KAIOS/world-viewer/data/synthetic-world.json",
+          "archive_path": "KGEN-KAIOS/organism/package-template/archive/previous_generations/README.md"
+        },
+        "life_behavior": {
+          "energy_input": [
+            "sunlight",
+            "water cycle",
+            "soil",
+            "ecosystem maintenance"
+          ],
+          "energy_consumption": "terrain lifecycle dependent",
+          "food_or_fuel_type": [
+            "NOT_APPLICABLE"
+          ],
+          "growth_rules": [
+            "governed land transformation only"
+          ],
+          "repair_rules": [
+            "restore from source fixture and migration report"
+          ],
+          "reproduction_mode": "NOT_APPLICABLE",
+          "compatible_species": [],
+          "offspring_identity_rule": "NOT_APPLICABLE",
+          "mutation_policy": "GOVERNED_LAND_CHANGE",
+          "evolution_policy": "reviewed versioned land change",
+          "death_or_shutdown_boundary": "land lifecycle archive is not biological death",
+          "trade_eligibility": "TITLE_TRANSFER",
+          "ownership_boundary": "land identity and ownership are separate",
+          "occupancy_boundary": "occupancy does not transfer ownership",
+          "authority_boundary": "control authority requires a separate governed grant"
+        },
+        "release": {
+          "release_id": "candidate-release:parcel-001:v2",
+          "release_status": "DRY_RUN",
+          "activation_status": "NOT_ACTIVE",
+          "production_authority": false,
+          "runtime_authority": false,
+          "wallet_authority": false,
+          "exchange_settlement": false
+        },
+        "created_at": "2026-07-26T00:00:00Z",
+        "integrity_hash": "1500a6309e85383137292767212fef4dad71c3b2dc0e1412c349d60471401d21",
+        "parent_species": null,
+        "ancestor_versions": [],
+        "compatible_mates": [],
+        "mutation_rules": [
+          "governed land change only"
+        ],
+        "fusion_rules": [],
+        "split_rules": [
+          "new parcel and organism identities required"
+        ],
+        "upgrade_path": [
+          "future reviewed candidate"
+        ],
+        "status": "CANDIDATE_ONLY",
+        "version": "2.0",
+        "author_agent": "Codex",
+        "reviewer_agent": "CODEX_AUTONOMOUS_MEDIUM_RISK_REVIEW",
+        "source_commit": "19229217dcbf793173103924995a5d5fd384aefe"
+      }
+    },
+    {
+      "source_parcel_id": "parcel-002",
+      "organism_id_candidate": "candidate:land:parcel-002:v2",
+      "field_mappings": {
+        "parcel_id": "organism_id",
+        "land_classification": "taxonomy",
+        "parcel_status": "status",
+        "owner_id": "OWNERSHIP",
+        "building_ids": "BUILDING_TITLE",
+        "land_use": "USAGE_RIGHT",
+        "capabilities": "CONTROL_AUTHORITY"
+      },
+      "defaults": {
+        "species_id": "KAIOS_LAND_PARCEL_V1",
+        "runtime": "NON_EXECUTABLE_LIFECYCLE_HANDLER",
+        "trade_profile": "LAND_TITLE",
+        "settlement": "INACTIVE"
+      },
+      "missing_values": [],
+      "integrity_hash": "7f5aa2287c1a2e6ada9019acca754cf2a7c6e7425868a69189824aa58c1f37f9",
+      "rollback_path": "Discard candidate output; original synthetic-world.json remains unchanged.",
+      "organism_manifest": {
+        "schema_version": "2.0",
+        "organism_id": "candidate:land:parcel-002:v2",
+        "organism_name": "Cooperative Farm Land Organism Candidate",
+        "organism_version": "0.1.0",
+        "organism_class": "LAND_PARCEL",
+        "life_category": "NATURAL_KAIOS_INSTANTIATION",
+        "life_type": "Land Parcel",
+        "species_id": "KAIOS_LAND_PARCEL_V1",
+        "domain": "KGEN_UNIVERSE",
+        "kingdom": "CIVILIZATION_ASSET",
+        "phylum": "TERRAIN_ORGANISM",
+        "class": "LAND_ASSET",
+        "order": "GOVERNED_PARCEL",
+        "family": "KAIOS_LAND",
+        "genus": "KAIOS_TERRAIN",
+        "species": "KAIOS_LAND_PARCEL_V1",
+        "taxonomy": {
+          "domain": "KGEN_UNIVERSE",
+          "kingdom": "CIVILIZATION_ASSET",
+          "phylum": "TERRAIN_ORGANISM",
+          "class": "LAND_ASSET",
+          "order": "GOVERNED_PARCEL",
+          "family": "KAIOS_LAND",
+          "genus": "KAIOS_TERRAIN",
+          "species": "KAIOS_LAND_PARCEL_V1",
+          "cell": "TERRAIN_UNIT",
+          "organ": "ECOSYSTEM_OR_LAND_SYSTEM",
+          "runtime": "NON_EXECUTABLE_LIFECYCLE",
+          "civilization": "KAIOS"
+        },
+        "species_ref": "KGEN-KAIOS/organism/species_registry.json#KAIOS_LAND_PARCEL_V1",
+        "canonical_file": "KGEN-KAIOS/world-viewer/data/synthetic-world.json#parcel-002",
+        "runtime_entry": "KGEN-KAIOS/organism/runtime/non_executable_lifecycle.py#describe_lifecycle",
+        "dna_schema": "KGEN-KAIOS/provenance/ORGANISM_MANIFEST_SCHEMA.json",
+        "dna_ref": "KGEN-KAIOS/organism/species_registry.json#KAIOS_LAND_PARCEL_V1",
+        "rna_ref": "KGEN-KAIOS/organism/profiles/mutation_profiles.json#GOVERNED_LAND_CHANGE",
+        "organs_ref": "KGEN-KAIOS/organism/species_registry.json#KAIOS_LAND_PARCEL_V1",
+        "cells_ref": "KGEN-KAIOS/organism/species_registry.json#KAIOS_LAND_PARCEL_V1",
+        "runtime_ref": "KGEN-KAIOS/organism/runtime/non_executable_lifecycle.py",
+        "energy_profile_ref": "KGEN-KAIOS/organism/profiles/energy_profiles.json#ECOSYSTEM_FLOW",
+        "embodiment_profile_ref": "KGEN-KAIOS/organism/profiles/embodiment_profiles.json#LAND_PARCEL",
+        "lifecycle_ref": "KGEN-KAIOS/organism/species_registry.json#KAIOS_LAND_PARCEL_V1",
+        "reproduction_rules_ref": "KGEN-KAIOS/organism/profiles/reproduction_profiles.json#NOT_APPLICABLE",
+        "mutation_rules_ref": "KGEN-KAIOS/organism/profiles/mutation_profiles.json#GOVERNED_LAND_CHANGE",
+        "trade_profile_ref": "KGEN-KAIOS/organism/profiles/trade_profiles.json#LAND_TITLE",
+        "ownership_profile_ref": "KGEN-KAIOS/organism/profiles/trade_profiles.json#LAND_TITLE",
+        "authority_profile_ref": "KGEN-KAIOS/world-viewer/tasks/LAND_VIEWER_SCHEMA_V2_COMPATIBILITY.task-envelope.json",
+        "runtime_binding": {
+          "program_filename": "KGEN-KAIOS/organism/runtime/non_executable_lifecycle.py",
+          "runtime_entrypoint": "KGEN-KAIOS/organism/runtime/non_executable_lifecycle.py#describe_lifecycle",
+          "runtime_type": "NON_EXECUTABLE_LIFECYCLE_HANDLER",
+          "runtime_version": "0.1.0",
+          "execution_environment": "PYTHON_DRY_RUN",
+          "required_organs": [
+            "ECOSYSTEM_OR_LAND_SYSTEM"
+          ],
+          "required_cells": [
+            "TERRAIN_UNIT"
+          ],
+          "startup_contract": "VALIDATE_ONLY",
+          "shutdown_contract": "NO_RUNTIME_STARTED",
+          "health_check": "KAIOS_NON_EXECUTABLE_LIFECYCLE_NOT_ACTIVE",
+          "state_path": "KGEN-KAIOS/world-viewer/data/schema-v2-land-candidates.json",
+          "memory_path": "KGEN-KAIOS/world-viewer/data/synthetic-world.json",
+          "archive_path": "KGEN-KAIOS/organism/package-template/archive/previous_generations/README.md"
+        },
+        "life_behavior": {
+          "energy_input": [
+            "sunlight",
+            "water cycle",
+            "soil",
+            "ecosystem maintenance"
+          ],
+          "energy_consumption": "terrain lifecycle dependent",
+          "food_or_fuel_type": [
+            "NOT_APPLICABLE"
+          ],
+          "growth_rules": [
+            "governed land transformation only"
+          ],
+          "repair_rules": [
+            "restore from source fixture and migration report"
+          ],
+          "reproduction_mode": "NOT_APPLICABLE",
+          "compatible_species": [],
+          "offspring_identity_rule": "NOT_APPLICABLE",
+          "mutation_policy": "GOVERNED_LAND_CHANGE",
+          "evolution_policy": "reviewed versioned land change",
+          "death_or_shutdown_boundary": "land lifecycle archive is not biological death",
+          "trade_eligibility": "TITLE_TRANSFER",
+          "ownership_boundary": "land identity and ownership are separate",
+          "occupancy_boundary": "occupancy does not transfer ownership",
+          "authority_boundary": "control authority requires a separate governed grant"
+        },
+        "release": {
+          "release_id": "candidate-release:parcel-002:v2",
+          "release_status": "DRY_RUN",
+          "activation_status": "NOT_ACTIVE",
+          "production_authority": false,
+          "runtime_authority": false,
+          "wallet_authority": false,
+          "exchange_settlement": false
+        },
+        "created_at": "2026-07-26T00:00:00Z",
+        "integrity_hash": "7f5aa2287c1a2e6ada9019acca754cf2a7c6e7425868a69189824aa58c1f37f9",
+        "parent_species": null,
+        "ancestor_versions": [],
+        "compatible_mates": [],
+        "mutation_rules": [
+          "governed land change only"
+        ],
+        "fusion_rules": [],
+        "split_rules": [
+          "new parcel and organism identities required"
+        ],
+        "upgrade_path": [
+          "future reviewed candidate"
+        ],
+        "status": "CANDIDATE_ONLY",
+        "version": "2.0",
+        "author_agent": "Codex",
+        "reviewer_agent": "CODEX_AUTONOMOUS_MEDIUM_RISK_REVIEW",
+        "source_commit": "19229217dcbf793173103924995a5d5fd384aefe"
+      }
+    },
+    {
+      "source_parcel_id": "parcel-003",
+      "organism_id_candidate": "candidate:land:parcel-003:v2",
+      "field_mappings": {
+        "parcel_id": "organism_id",
+        "land_classification": "taxonomy",
+        "parcel_status": "status",
+        "owner_id": "OWNERSHIP",
+        "building_ids": "BUILDING_TITLE",
+        "land_use": "USAGE_RIGHT",
+        "capabilities": "CONTROL_AUTHORITY"
+      },
+      "defaults": {
+        "species_id": "KAIOS_LAND_PARCEL_V1",
+        "runtime": "NON_EXECUTABLE_LIFECYCLE_HANDLER",
+        "trade_profile": "LAND_TITLE",
+        "settlement": "INACTIVE"
+      },
+      "missing_values": [],
+      "integrity_hash": "3bff13f7417b523370b2395e75fb4293a06b04b0d802d4fb09ce7f2387c30ba3",
+      "rollback_path": "Discard candidate output; original synthetic-world.json remains unchanged.",
+      "organism_manifest": {
+        "schema_version": "2.0",
+        "organism_id": "candidate:land:parcel-003:v2",
+        "organism_name": "Forest Reserve Land Organism Candidate",
+        "organism_version": "0.1.0",
+        "organism_class": "LAND_PARCEL",
+        "life_category": "NATURAL_KAIOS_INSTANTIATION",
+        "life_type": "Land Parcel",
+        "species_id": "KAIOS_LAND_PARCEL_V1",
+        "domain": "KGEN_UNIVERSE",
+        "kingdom": "CIVILIZATION_ASSET",
+        "phylum": "TERRAIN_ORGANISM",
+        "class": "LAND_ASSET",
+        "order": "GOVERNED_PARCEL",
+        "family": "KAIOS_LAND",
+        "genus": "KAIOS_TERRAIN",
+        "species": "KAIOS_LAND_PARCEL_V1",
+        "taxonomy": {
+          "domain": "KGEN_UNIVERSE",
+          "kingdom": "CIVILIZATION_ASSET",
+          "phylum": "TERRAIN_ORGANISM",
+          "class": "LAND_ASSET",
+          "order": "GOVERNED_PARCEL",
+          "family": "KAIOS_LAND",
+          "genus": "KAIOS_TERRAIN",
+          "species": "KAIOS_LAND_PARCEL_V1",
+          "cell": "TERRAIN_UNIT",
+          "organ": "ECOSYSTEM_OR_LAND_SYSTEM",
+          "runtime": "NON_EXECUTABLE_LIFECYCLE",
+          "civilization": "KAIOS"
+        },
+        "species_ref": "KGEN-KAIOS/organism/species_registry.json#KAIOS_LAND_PARCEL_V1",
+        "canonical_file": "KGEN-KAIOS/world-viewer/data/synthetic-world.json#parcel-003",
+        "runtime_entry": "KGEN-KAIOS/organism/runtime/non_executable_lifecycle.py#describe_lifecycle",
+        "dna_schema": "KGEN-KAIOS/provenance/ORGANISM_MANIFEST_SCHEMA.json",
+        "dna_ref": "KGEN-KAIOS/organism/species_registry.json#KAIOS_LAND_PARCEL_V1",
+        "rna_ref": "KGEN-KAIOS/organism/profiles/mutation_profiles.json#GOVERNED_LAND_CHANGE",
+        "organs_ref": "KGEN-KAIOS/organism/species_registry.json#KAIOS_LAND_PARCEL_V1",
+        "cells_ref": "KGEN-KAIOS/organism/species_registry.json#KAIOS_LAND_PARCEL_V1",
+        "runtime_ref": "KGEN-KAIOS/organism/runtime/non_executable_lifecycle.py",
+        "energy_profile_ref": "KGEN-KAIOS/organism/profiles/energy_profiles.json#ECOSYSTEM_FLOW",
+        "embodiment_profile_ref": "KGEN-KAIOS/organism/profiles/embodiment_profiles.json#LAND_PARCEL",
+        "lifecycle_ref": "KGEN-KAIOS/organism/species_registry.json#KAIOS_LAND_PARCEL_V1",
+        "reproduction_rules_ref": "KGEN-KAIOS/organism/profiles/reproduction_profiles.json#NOT_APPLICABLE",
+        "mutation_rules_ref": "KGEN-KAIOS/organism/profiles/mutation_profiles.json#GOVERNED_LAND_CHANGE",
+        "trade_profile_ref": "KGEN-KAIOS/organism/profiles/trade_profiles.json#LAND_TITLE",
+        "ownership_profile_ref": "KGEN-KAIOS/organism/profiles/trade_profiles.json#LAND_TITLE",
+        "authority_profile_ref": "KGEN-KAIOS/world-viewer/tasks/LAND_VIEWER_SCHEMA_V2_COMPATIBILITY.task-envelope.json",
+        "runtime_binding": {
+          "program_filename": "KGEN-KAIOS/organism/runtime/non_executable_lifecycle.py",
+          "runtime_entrypoint": "KGEN-KAIOS/organism/runtime/non_executable_lifecycle.py#describe_lifecycle",
+          "runtime_type": "NON_EXECUTABLE_LIFECYCLE_HANDLER",
+          "runtime_version": "0.1.0",
+          "execution_environment": "PYTHON_DRY_RUN",
+          "required_organs": [
+            "ECOSYSTEM_OR_LAND_SYSTEM"
+          ],
+          "required_cells": [
+            "TERRAIN_UNIT"
+          ],
+          "startup_contract": "VALIDATE_ONLY",
+          "shutdown_contract": "NO_RUNTIME_STARTED",
+          "health_check": "KAIOS_NON_EXECUTABLE_LIFECYCLE_NOT_ACTIVE",
+          "state_path": "KGEN-KAIOS/world-viewer/data/schema-v2-land-candidates.json",
+          "memory_path": "KGEN-KAIOS/world-viewer/data/synthetic-world.json",
+          "archive_path": "KGEN-KAIOS/organism/package-template/archive/previous_generations/README.md"
+        },
+        "life_behavior": {
+          "energy_input": [
+            "sunlight",
+            "water cycle",
+            "soil",
+            "ecosystem maintenance"
+          ],
+          "energy_consumption": "terrain lifecycle dependent",
+          "food_or_fuel_type": [
+            "NOT_APPLICABLE"
+          ],
+          "growth_rules": [
+            "governed land transformation only"
+          ],
+          "repair_rules": [
+            "restore from source fixture and migration report"
+          ],
+          "reproduction_mode": "NOT_APPLICABLE",
+          "compatible_species": [],
+          "offspring_identity_rule": "NOT_APPLICABLE",
+          "mutation_policy": "GOVERNED_LAND_CHANGE",
+          "evolution_policy": "reviewed versioned land change",
+          "death_or_shutdown_boundary": "land lifecycle archive is not biological death",
+          "trade_eligibility": "TITLE_TRANSFER",
+          "ownership_boundary": "land identity and ownership are separate",
+          "occupancy_boundary": "occupancy does not transfer ownership",
+          "authority_boundary": "control authority requires a separate governed grant"
+        },
+        "release": {
+          "release_id": "candidate-release:parcel-003:v2",
+          "release_status": "DRY_RUN",
+          "activation_status": "NOT_ACTIVE",
+          "production_authority": false,
+          "runtime_authority": false,
+          "wallet_authority": false,
+          "exchange_settlement": false
+        },
+        "created_at": "2026-07-26T00:00:00Z",
+        "integrity_hash": "3bff13f7417b523370b2395e75fb4293a06b04b0d802d4fb09ce7f2387c30ba3",
+        "parent_species": null,
+        "ancestor_versions": [],
+        "compatible_mates": [],
+        "mutation_rules": [
+          "governed land change only"
+        ],
+        "fusion_rules": [],
+        "split_rules": [
+          "new parcel and organism identities required"
+        ],
+        "upgrade_path": [
+          "future reviewed candidate"
+        ],
+        "status": "CANDIDATE_ONLY",
+        "version": "2.0",
+        "author_agent": "Codex",
+        "reviewer_agent": "CODEX_AUTONOMOUS_MEDIUM_RISK_REVIEW",
+        "source_commit": "19229217dcbf793173103924995a5d5fd384aefe"
+      }
+    },
+    {
+      "source_parcel_id": "parcel-004",
+      "organism_id_candidate": "candidate:land:parcel-004:v2",
+      "field_mappings": {
+        "parcel_id": "organism_id",
+        "land_classification": "taxonomy",
+        "parcel_status": "status",
+        "owner_id": "OWNERSHIP",
+        "building_ids": "BUILDING_TITLE",
+        "land_use": "USAGE_RIGHT",
+        "capabilities": "CONTROL_AUTHORITY"
+      },
+      "defaults": {
+        "species_id": "KAIOS_LAND_PARCEL_V1",
+        "runtime": "NON_EXECUTABLE_LIFECYCLE_HANDLER",
+        "trade_profile": "LAND_TITLE",
+        "settlement": "INACTIVE"
+      },
+      "missing_values": [],
+      "integrity_hash": "033f6534d69acf78c7d9530ae6b83562984fe657c6b0d54ee0d659d20bc7c3b7",
+      "rollback_path": "Discard candidate output; original synthetic-world.json remains unchanged.",
+      "organism_manifest": {
+        "schema_version": "2.0",
+        "organism_id": "candidate:land:parcel-004:v2",
+        "organism_name": "Open Development Lot Land Organism Candidate",
+        "organism_version": "0.1.0",
+        "organism_class": "LAND_PARCEL",
+        "life_category": "NATURAL_KAIOS_INSTANTIATION",
+        "life_type": "Land Parcel",
+        "species_id": "KAIOS_LAND_PARCEL_V1",
+        "domain": "KGEN_UNIVERSE",
+        "kingdom": "CIVILIZATION_ASSET",
+        "phylum": "TERRAIN_ORGANISM",
+        "class": "LAND_ASSET",
+        "order": "GOVERNED_PARCEL",
+        "family": "KAIOS_LAND",
+        "genus": "KAIOS_TERRAIN",
+        "species": "KAIOS_LAND_PARCEL_V1",
+        "taxonomy": {
+          "domain": "KGEN_UNIVERSE",
+          "kingdom": "CIVILIZATION_ASSET",
+          "phylum": "TERRAIN_ORGANISM",
+          "class": "LAND_ASSET",
+          "order": "GOVERNED_PARCEL",
+          "family": "KAIOS_LAND",
+          "genus": "KAIOS_TERRAIN",
+          "species": "KAIOS_LAND_PARCEL_V1",
+          "cell": "TERRAIN_UNIT",
+          "organ": "ECOSYSTEM_OR_LAND_SYSTEM",
+          "runtime": "NON_EXECUTABLE_LIFECYCLE",
+          "civilization": "KAIOS"
+        },
+        "species_ref": "KGEN-KAIOS/organism/species_registry.json#KAIOS_LAND_PARCEL_V1",
+        "canonical_file": "KGEN-KAIOS/world-viewer/data/synthetic-world.json#parcel-004",
+        "runtime_entry": "KGEN-KAIOS/organism/runtime/non_executable_lifecycle.py#describe_lifecycle",
+        "dna_schema": "KGEN-KAIOS/provenance/ORGANISM_MANIFEST_SCHEMA.json",
+        "dna_ref": "KGEN-KAIOS/organism/species_registry.json#KAIOS_LAND_PARCEL_V1",
+        "rna_ref": "KGEN-KAIOS/organism/profiles/mutation_profiles.json#GOVERNED_LAND_CHANGE",
+        "organs_ref": "KGEN-KAIOS/organism/species_registry.json#KAIOS_LAND_PARCEL_V1",
+        "cells_ref": "KGEN-KAIOS/organism/species_registry.json#KAIOS_LAND_PARCEL_V1",
+        "runtime_ref": "KGEN-KAIOS/organism/runtime/non_executable_lifecycle.py",
+        "energy_profile_ref": "KGEN-KAIOS/organism/profiles/energy_profiles.json#ECOSYSTEM_FLOW",
+        "embodiment_profile_ref": "KGEN-KAIOS/organism/profiles/embodiment_profiles.json#LAND_PARCEL",
+        "lifecycle_ref": "KGEN-KAIOS/organism/species_registry.json#KAIOS_LAND_PARCEL_V1",
+        "reproduction_rules_ref": "KGEN-KAIOS/organism/profiles/reproduction_profiles.json#NOT_APPLICABLE",
+        "mutation_rules_ref": "KGEN-KAIOS/organism/profiles/mutation_profiles.json#GOVERNED_LAND_CHANGE",
+        "trade_profile_ref": "KGEN-KAIOS/organism/profiles/trade_profiles.json#LAND_TITLE",
+        "ownership_profile_ref": "KGEN-KAIOS/organism/profiles/trade_profiles.json#LAND_TITLE",
+        "authority_profile_ref": "KGEN-KAIOS/world-viewer/tasks/LAND_VIEWER_SCHEMA_V2_COMPATIBILITY.task-envelope.json",
+        "runtime_binding": {
+          "program_filename": "KGEN-KAIOS/organism/runtime/non_executable_lifecycle.py",
+          "runtime_entrypoint": "KGEN-KAIOS/organism/runtime/non_executable_lifecycle.py#describe_lifecycle",
+          "runtime_type": "NON_EXECUTABLE_LIFECYCLE_HANDLER",
+          "runtime_version": "0.1.0",
+          "execution_environment": "PYTHON_DRY_RUN",
+          "required_organs": [
+            "ECOSYSTEM_OR_LAND_SYSTEM"
+          ],
+          "required_cells": [
+            "TERRAIN_UNIT"
+          ],
+          "startup_contract": "VALIDATE_ONLY",
+          "shutdown_contract": "NO_RUNTIME_STARTED",
+          "health_check": "KAIOS_NON_EXECUTABLE_LIFECYCLE_NOT_ACTIVE",
+          "state_path": "KGEN-KAIOS/world-viewer/data/schema-v2-land-candidates.json",
+          "memory_path": "KGEN-KAIOS/world-viewer/data/synthetic-world.json",
+          "archive_path": "KGEN-KAIOS/organism/package-template/archive/previous_generations/README.md"
+        },
+        "life_behavior": {
+          "energy_input": [
+            "sunlight",
+            "water cycle",
+            "soil",
+            "ecosystem maintenance"
+          ],
+          "energy_consumption": "terrain lifecycle dependent",
+          "food_or_fuel_type": [
+            "NOT_APPLICABLE"
+          ],
+          "growth_rules": [
+            "governed land transformation only"
+          ],
+          "repair_rules": [
+            "restore from source fixture and migration report"
+          ],
+          "reproduction_mode": "NOT_APPLICABLE",
+          "compatible_species": [],
+          "offspring_identity_rule": "NOT_APPLICABLE",
+          "mutation_policy": "GOVERNED_LAND_CHANGE",
+          "evolution_policy": "reviewed versioned land change",
+          "death_or_shutdown_boundary": "land lifecycle archive is not biological death",
+          "trade_eligibility": "TITLE_TRANSFER",
+          "ownership_boundary": "land identity and ownership are separate",
+          "occupancy_boundary": "occupancy does not transfer ownership",
+          "authority_boundary": "control authority requires a separate governed grant"
+        },
+        "release": {
+          "release_id": "candidate-release:parcel-004:v2",
+          "release_status": "DRY_RUN",
+          "activation_status": "NOT_ACTIVE",
+          "production_authority": false,
+          "runtime_authority": false,
+          "wallet_authority": false,
+          "exchange_settlement": false
+        },
+        "created_at": "2026-07-26T00:00:00Z",
+        "integrity_hash": "033f6534d69acf78c7d9530ae6b83562984fe657c6b0d54ee0d659d20bc7c3b7",
+        "parent_species": null,
+        "ancestor_versions": [],
+        "compatible_mates": [],
+        "mutation_rules": [
+          "governed land change only"
+        ],
+        "fusion_rules": [],
+        "split_rules": [
+          "new parcel and organism identities required"
+        ],
+        "upgrade_path": [
+          "future reviewed candidate"
+        ],
+        "status": "CANDIDATE_ONLY",
+        "version": "2.0",
+        "author_agent": "Codex",
+        "reviewer_agent": "CODEX_AUTONOMOUS_MEDIUM_RISK_REVIEW",
+        "source_commit": "19229217dcbf793173103924995a5d5fd384aefe"
+      }
+    },
+    {
+      "source_parcel_id": "parcel-005",
+      "organism_id_candidate": "candidate:land:parcel-005:v2",
+      "field_mappings": {
+        "parcel_id": "organism_id",
+        "land_classification": "taxonomy",
+        "parcel_status": "status",
+        "owner_id": "OWNERSHIP",
+        "building_ids": "BUILDING_TITLE",
+        "land_use": "USAGE_RIGHT",
+        "capabilities": "CONTROL_AUTHORITY"
+      },
+      "defaults": {
+        "species_id": "KAIOS_LAND_PARCEL_V1",
+        "runtime": "NON_EXECUTABLE_LIFECYCLE_HANDLER",
+        "trade_profile": "LAND_TITLE",
+        "settlement": "INACTIVE"
+      },
+      "missing_values": [],
+      "integrity_hash": "ab47f74c58b762786ed89e90e95c207e8eaffa62525b7f52571f70a8c6808b35",
+      "rollback_path": "Discard candidate output; original synthetic-world.json remains unchanged.",
+      "organism_manifest": {
+        "schema_version": "2.0",
+        "organism_id": "candidate:land:parcel-005:v2",
+        "organism_name": "Research Plot Land Organism Candidate",
+        "organism_version": "0.1.0",
+        "organism_class": "LAND_PARCEL",
+        "life_category": "NATURAL_KAIOS_INSTANTIATION",
+        "life_type": "Land Parcel",
+        "species_id": "KAIOS_LAND_PARCEL_V1",
+        "domain": "KGEN_UNIVERSE",
+        "kingdom": "CIVILIZATION_ASSET",
+        "phylum": "TERRAIN_ORGANISM",
+        "class": "LAND_ASSET",
+        "order": "GOVERNED_PARCEL",
+        "family": "KAIOS_LAND",
+        "genus": "KAIOS_TERRAIN",
+        "species": "KAIOS_LAND_PARCEL_V1",
+        "taxonomy": {
+          "domain": "KGEN_UNIVERSE",
+          "kingdom": "CIVILIZATION_ASSET",
+          "phylum": "TERRAIN_ORGANISM",
+          "class": "LAND_ASSET",
+          "order": "GOVERNED_PARCEL",
+          "family": "KAIOS_LAND",
+          "genus": "KAIOS_TERRAIN",
+          "species": "KAIOS_LAND_PARCEL_V1",
+          "cell": "TERRAIN_UNIT",
+          "organ": "ECOSYSTEM_OR_LAND_SYSTEM",
+          "runtime": "NON_EXECUTABLE_LIFECYCLE",
+          "civilization": "KAIOS"
+        },
+        "species_ref": "KGEN-KAIOS/organism/species_registry.json#KAIOS_LAND_PARCEL_V1",
+        "canonical_file": "KGEN-KAIOS/world-viewer/data/synthetic-world.json#parcel-005",
+        "runtime_entry": "KGEN-KAIOS/organism/runtime/non_executable_lifecycle.py#describe_lifecycle",
+        "dna_schema": "KGEN-KAIOS/provenance/ORGANISM_MANIFEST_SCHEMA.json",
+        "dna_ref": "KGEN-KAIOS/organism/species_registry.json#KAIOS_LAND_PARCEL_V1",
+        "rna_ref": "KGEN-KAIOS/organism/profiles/mutation_profiles.json#GOVERNED_LAND_CHANGE",
+        "organs_ref": "KGEN-KAIOS/organism/species_registry.json#KAIOS_LAND_PARCEL_V1",
+        "cells_ref": "KGEN-KAIOS/organism/species_registry.json#KAIOS_LAND_PARCEL_V1",
+        "runtime_ref": "KGEN-KAIOS/organism/runtime/non_executable_lifecycle.py",
+        "energy_profile_ref": "KGEN-KAIOS/organism/profiles/energy_profiles.json#ECOSYSTEM_FLOW",
+        "embodiment_profile_ref": "KGEN-KAIOS/organism/profiles/embodiment_profiles.json#LAND_PARCEL",
+        "lifecycle_ref": "KGEN-KAIOS/organism/species_registry.json#KAIOS_LAND_PARCEL_V1",
+        "reproduction_rules_ref": "KGEN-KAIOS/organism/profiles/reproduction_profiles.json#NOT_APPLICABLE",
+        "mutation_rules_ref": "KGEN-KAIOS/organism/profiles/mutation_profiles.json#GOVERNED_LAND_CHANGE",
+        "trade_profile_ref": "KGEN-KAIOS/organism/profiles/trade_profiles.json#LAND_TITLE",
+        "ownership_profile_ref": "KGEN-KAIOS/organism/profiles/trade_profiles.json#LAND_TITLE",
+        "authority_profile_ref": "KGEN-KAIOS/world-viewer/tasks/LAND_VIEWER_SCHEMA_V2_COMPATIBILITY.task-envelope.json",
+        "runtime_binding": {
+          "program_filename": "KGEN-KAIOS/organism/runtime/non_executable_lifecycle.py",
+          "runtime_entrypoint": "KGEN-KAIOS/organism/runtime/non_executable_lifecycle.py#describe_lifecycle",
+          "runtime_type": "NON_EXECUTABLE_LIFECYCLE_HANDLER",
+          "runtime_version": "0.1.0",
+          "execution_environment": "PYTHON_DRY_RUN",
+          "required_organs": [
+            "ECOSYSTEM_OR_LAND_SYSTEM"
+          ],
+          "required_cells": [
+            "TERRAIN_UNIT"
+          ],
+          "startup_contract": "VALIDATE_ONLY",
+          "shutdown_contract": "NO_RUNTIME_STARTED",
+          "health_check": "KAIOS_NON_EXECUTABLE_LIFECYCLE_NOT_ACTIVE",
+          "state_path": "KGEN-KAIOS/world-viewer/data/schema-v2-land-candidates.json",
+          "memory_path": "KGEN-KAIOS/world-viewer/data/synthetic-world.json",
+          "archive_path": "KGEN-KAIOS/organism/package-template/archive/previous_generations/README.md"
+        },
+        "life_behavior": {
+          "energy_input": [
+            "sunlight",
+            "water cycle",
+            "soil",
+            "ecosystem maintenance"
+          ],
+          "energy_consumption": "terrain lifecycle dependent",
+          "food_or_fuel_type": [
+            "NOT_APPLICABLE"
+          ],
+          "growth_rules": [
+            "governed land transformation only"
+          ],
+          "repair_rules": [
+            "restore from source fixture and migration report"
+          ],
+          "reproduction_mode": "NOT_APPLICABLE",
+          "compatible_species": [],
+          "offspring_identity_rule": "NOT_APPLICABLE",
+          "mutation_policy": "GOVERNED_LAND_CHANGE",
+          "evolution_policy": "reviewed versioned land change",
+          "death_or_shutdown_boundary": "land lifecycle archive is not biological death",
+          "trade_eligibility": "TITLE_TRANSFER",
+          "ownership_boundary": "land identity and ownership are separate",
+          "occupancy_boundary": "occupancy does not transfer ownership",
+          "authority_boundary": "control authority requires a separate governed grant"
+        },
+        "release": {
+          "release_id": "candidate-release:parcel-005:v2",
+          "release_status": "DRY_RUN",
+          "activation_status": "NOT_ACTIVE",
+          "production_authority": false,
+          "runtime_authority": false,
+          "wallet_authority": false,
+          "exchange_settlement": false
+        },
+        "created_at": "2026-07-26T00:00:00Z",
+        "integrity_hash": "ab47f74c58b762786ed89e90e95c207e8eaffa62525b7f52571f70a8c6808b35",
+        "parent_species": null,
+        "ancestor_versions": [],
+        "compatible_mates": [],
+        "mutation_rules": [
+          "governed land change only"
+        ],
+        "fusion_rules": [],
+        "split_rules": [
+          "new parcel and organism identities required"
+        ],
+        "upgrade_path": [
+          "future reviewed candidate"
+        ],
+        "status": "CANDIDATE_ONLY",
+        "version": "2.0",
+        "author_agent": "Codex",
+        "reviewer_agent": "CODEX_AUTONOMOUS_MEDIUM_RISK_REVIEW",
+        "source_commit": "19229217dcbf793173103924995a5d5fd384aefe"
+      }
+    },
+    {
+      "source_parcel_id": "parcel-006",
+      "organism_id_candidate": "candidate:land:parcel-006:v2",
+      "field_mappings": {
+        "parcel_id": "organism_id",
+        "land_classification": "taxonomy",
+        "parcel_status": "status",
+        "owner_id": "OWNERSHIP",
+        "building_ids": "BUILDING_TITLE",
+        "land_use": "USAGE_RIGHT",
+        "capabilities": "CONTROL_AUTHORITY"
+      },
+      "defaults": {
+        "species_id": "KAIOS_LAND_PARCEL_V1",
+        "runtime": "NON_EXECUTABLE_LIFECYCLE_HANDLER",
+        "trade_profile": "LAND_TITLE",
+        "settlement": "INACTIVE"
+      },
+      "missing_values": [
+        "area_m2"
+      ],
+      "integrity_hash": "e54a5899d1cf52dd8080529ebc5887d117503077122ec3b8f235d81ebb9605d7",
+      "rollback_path": "Discard candidate output; original synthetic-world.json remains unchanged.",
+      "organism_manifest": {
+        "schema_version": "2.0",
+        "organism_id": "candidate:land:parcel-006:v2",
+        "organism_name": "Restricted Utility Land Organism Candidate",
+        "organism_version": "0.1.0",
+        "organism_class": "LAND_PARCEL",
+        "life_category": "NATURAL_KAIOS_INSTANTIATION",
+        "life_type": "Land Parcel",
+        "species_id": "KAIOS_LAND_PARCEL_V1",
+        "domain": "KGEN_UNIVERSE",
+        "kingdom": "CIVILIZATION_ASSET",
+        "phylum": "TERRAIN_ORGANISM",
+        "class": "LAND_ASSET",
+        "order": "GOVERNED_PARCEL",
+        "family": "KAIOS_LAND",
+        "genus": "KAIOS_TERRAIN",
+        "species": "KAIOS_LAND_PARCEL_V1",
+        "taxonomy": {
+          "domain": "KGEN_UNIVERSE",
+          "kingdom": "CIVILIZATION_ASSET",
+          "phylum": "TERRAIN_ORGANISM",
+          "class": "LAND_ASSET",
+          "order": "GOVERNED_PARCEL",
+          "family": "KAIOS_LAND",
+          "genus": "KAIOS_TERRAIN",
+          "species": "KAIOS_LAND_PARCEL_V1",
+          "cell": "TERRAIN_UNIT",
+          "organ": "ECOSYSTEM_OR_LAND_SYSTEM",
+          "runtime": "NON_EXECUTABLE_LIFECYCLE",
+          "civilization": "KAIOS"
+        },
+        "species_ref": "KGEN-KAIOS/organism/species_registry.json#KAIOS_LAND_PARCEL_V1",
+        "canonical_file": "KGEN-KAIOS/world-viewer/data/synthetic-world.json#parcel-006",
+        "runtime_entry": "KGEN-KAIOS/organism/runtime/non_executable_lifecycle.py#describe_lifecycle",
+        "dna_schema": "KGEN-KAIOS/provenance/ORGANISM_MANIFEST_SCHEMA.json",
+        "dna_ref": "KGEN-KAIOS/organism/species_registry.json#KAIOS_LAND_PARCEL_V1",
+        "rna_ref": "KGEN-KAIOS/organism/profiles/mutation_profiles.json#GOVERNED_LAND_CHANGE",
+        "organs_ref": "KGEN-KAIOS/organism/species_registry.json#KAIOS_LAND_PARCEL_V1",
+        "cells_ref": "KGEN-KAIOS/organism/species_registry.json#KAIOS_LAND_PARCEL_V1",
+        "runtime_ref": "KGEN-KAIOS/organism/runtime/non_executable_lifecycle.py",
+        "energy_profile_ref": "KGEN-KAIOS/organism/profiles/energy_profiles.json#ECOSYSTEM_FLOW",
+        "embodiment_profile_ref": "KGEN-KAIOS/organism/profiles/embodiment_profiles.json#LAND_PARCEL",
+        "lifecycle_ref": "KGEN-KAIOS/organism/species_registry.json#KAIOS_LAND_PARCEL_V1",
+        "reproduction_rules_ref": "KGEN-KAIOS/organism/profiles/reproduction_profiles.json#NOT_APPLICABLE",
+        "mutation_rules_ref": "KGEN-KAIOS/organism/profiles/mutation_profiles.json#GOVERNED_LAND_CHANGE",
+        "trade_profile_ref": "KGEN-KAIOS/organism/profiles/trade_profiles.json#LAND_TITLE",
+        "ownership_profile_ref": "KGEN-KAIOS/organism/profiles/trade_profiles.json#LAND_TITLE",
+        "authority_profile_ref": "KGEN-KAIOS/world-viewer/tasks/LAND_VIEWER_SCHEMA_V2_COMPATIBILITY.task-envelope.json",
+        "runtime_binding": {
+          "program_filename": "KGEN-KAIOS/organism/runtime/non_executable_lifecycle.py",
+          "runtime_entrypoint": "KGEN-KAIOS/organism/runtime/non_executable_lifecycle.py#describe_lifecycle",
+          "runtime_type": "NON_EXECUTABLE_LIFECYCLE_HANDLER",
+          "runtime_version": "0.1.0",
+          "execution_environment": "PYTHON_DRY_RUN",
+          "required_organs": [
+            "ECOSYSTEM_OR_LAND_SYSTEM"
+          ],
+          "required_cells": [
+            "TERRAIN_UNIT"
+          ],
+          "startup_contract": "VALIDATE_ONLY",
+          "shutdown_contract": "NO_RUNTIME_STARTED",
+          "health_check": "KAIOS_NON_EXECUTABLE_LIFECYCLE_NOT_ACTIVE",
+          "state_path": "KGEN-KAIOS/world-viewer/data/schema-v2-land-candidates.json",
+          "memory_path": "KGEN-KAIOS/world-viewer/data/synthetic-world.json",
+          "archive_path": "KGEN-KAIOS/organism/package-template/archive/previous_generations/README.md"
+        },
+        "life_behavior": {
+          "energy_input": [
+            "sunlight",
+            "water cycle",
+            "soil",
+            "ecosystem maintenance"
+          ],
+          "energy_consumption": "terrain lifecycle dependent",
+          "food_or_fuel_type": [
+            "NOT_APPLICABLE"
+          ],
+          "growth_rules": [
+            "governed land transformation only"
+          ],
+          "repair_rules": [
+            "restore from source fixture and migration report"
+          ],
+          "reproduction_mode": "NOT_APPLICABLE",
+          "compatible_species": [],
+          "offspring_identity_rule": "NOT_APPLICABLE",
+          "mutation_policy": "GOVERNED_LAND_CHANGE",
+          "evolution_policy": "reviewed versioned land change",
+          "death_or_shutdown_boundary": "land lifecycle archive is not biological death",
+          "trade_eligibility": "TITLE_TRANSFER",
+          "ownership_boundary": "land identity and ownership are separate",
+          "occupancy_boundary": "occupancy does not transfer ownership",
+          "authority_boundary": "control authority requires a separate governed grant"
+        },
+        "release": {
+          "release_id": "candidate-release:parcel-006:v2",
+          "release_status": "DRY_RUN",
+          "activation_status": "NOT_ACTIVE",
+          "production_authority": false,
+          "runtime_authority": false,
+          "wallet_authority": false,
+          "exchange_settlement": false
+        },
+        "created_at": "2026-07-26T00:00:00Z",
+        "integrity_hash": "e54a5899d1cf52dd8080529ebc5887d117503077122ec3b8f235d81ebb9605d7",
+        "parent_species": null,
+        "ancestor_versions": [],
+        "compatible_mates": [],
+        "mutation_rules": [
+          "governed land change only"
+        ],
+        "fusion_rules": [],
+        "split_rules": [
+          "new parcel and organism identities required"
+        ],
+        "upgrade_path": [
+          "future reviewed candidate"
+        ],
+        "status": "CANDIDATE_ONLY",
+        "version": "2.0",
+        "author_agent": "Codex",
+        "reviewer_agent": "CODEX_AUTONOMOUS_MEDIUM_RISK_REVIEW",
+        "source_commit": "19229217dcbf793173103924995a5d5fd384aefe"
+      }
+    },
+    {
+      "source_parcel_id": "parcel-007",
+      "organism_id_candidate": "candidate:land:parcel-007:v2",
+      "field_mappings": {
+        "parcel_id": "organism_id",
+        "land_classification": "taxonomy",
+        "parcel_status": "status",
+        "owner_id": "OWNERSHIP",
+        "building_ids": "BUILDING_TITLE",
+        "land_use": "USAGE_RIGHT",
+        "capabilities": "CONTROL_AUTHORITY"
+      },
+      "defaults": {
+        "species_id": "KAIOS_LAND_PARCEL_V1",
+        "runtime": "NON_EXECUTABLE_LIFECYCLE_HANDLER",
+        "trade_profile": "LAND_TITLE",
+        "settlement": "INACTIVE"
+      },
+      "missing_values": [],
+      "integrity_hash": "119b198b23673c580516e250039ded4099d06fd2819aa3b7d4e530c21eba2ce4",
+      "rollback_path": "Discard candidate output; original synthetic-world.json remains unchanged.",
+      "organism_manifest": {
+        "schema_version": "2.0",
+        "organism_id": "candidate:land:parcel-007:v2",
+        "organism_name": "Market Square Land Organism Candidate",
+        "organism_version": "0.1.0",
+        "organism_class": "LAND_PARCEL",
+        "life_category": "NATURAL_KAIOS_INSTANTIATION",
+        "life_type": "Land Parcel",
+        "species_id": "KAIOS_LAND_PARCEL_V1",
+        "domain": "KGEN_UNIVERSE",
+        "kingdom": "CIVILIZATION_ASSET",
+        "phylum": "TERRAIN_ORGANISM",
+        "class": "LAND_ASSET",
+        "order": "GOVERNED_PARCEL",
+        "family": "KAIOS_LAND",
+        "genus": "KAIOS_TERRAIN",
+        "species": "KAIOS_LAND_PARCEL_V1",
+        "taxonomy": {
+          "domain": "KGEN_UNIVERSE",
+          "kingdom": "CIVILIZATION_ASSET",
+          "phylum": "TERRAIN_ORGANISM",
+          "class": "LAND_ASSET",
+          "order": "GOVERNED_PARCEL",
+          "family": "KAIOS_LAND",
+          "genus": "KAIOS_TERRAIN",
+          "species": "KAIOS_LAND_PARCEL_V1",
+          "cell": "TERRAIN_UNIT",
+          "organ": "ECOSYSTEM_OR_LAND_SYSTEM",
+          "runtime": "NON_EXECUTABLE_LIFECYCLE",
+          "civilization": "KAIOS"
+        },
+        "species_ref": "KGEN-KAIOS/organism/species_registry.json#KAIOS_LAND_PARCEL_V1",
+        "canonical_file": "KGEN-KAIOS/world-viewer/data/synthetic-world.json#parcel-007",
+        "runtime_entry": "KGEN-KAIOS/organism/runtime/non_executable_lifecycle.py#describe_lifecycle",
+        "dna_schema": "KGEN-KAIOS/provenance/ORGANISM_MANIFEST_SCHEMA.json",
+        "dna_ref": "KGEN-KAIOS/organism/species_registry.json#KAIOS_LAND_PARCEL_V1",
+        "rna_ref": "KGEN-KAIOS/organism/profiles/mutation_profiles.json#GOVERNED_LAND_CHANGE",
+        "organs_ref": "KGEN-KAIOS/organism/species_registry.json#KAIOS_LAND_PARCEL_V1",
+        "cells_ref": "KGEN-KAIOS/organism/species_registry.json#KAIOS_LAND_PARCEL_V1",
+        "runtime_ref": "KGEN-KAIOS/organism/runtime/non_executable_lifecycle.py",
+        "energy_profile_ref": "KGEN-KAIOS/organism/profiles/energy_profiles.json#ECOSYSTEM_FLOW",
+        "embodiment_profile_ref": "KGEN-KAIOS/organism/profiles/embodiment_profiles.json#LAND_PARCEL",
+        "lifecycle_ref": "KGEN-KAIOS/organism/species_registry.json#KAIOS_LAND_PARCEL_V1",
+        "reproduction_rules_ref": "KGEN-KAIOS/organism/profiles/reproduction_profiles.json#NOT_APPLICABLE",
+        "mutation_rules_ref": "KGEN-KAIOS/organism/profiles/mutation_profiles.json#GOVERNED_LAND_CHANGE",
+        "trade_profile_ref": "KGEN-KAIOS/organism/profiles/trade_profiles.json#LAND_TITLE",
+        "ownership_profile_ref": "KGEN-KAIOS/organism/profiles/trade_profiles.json#LAND_TITLE",
+        "authority_profile_ref": "KGEN-KAIOS/world-viewer/tasks/LAND_VIEWER_SCHEMA_V2_COMPATIBILITY.task-envelope.json",
+        "runtime_binding": {
+          "program_filename": "KGEN-KAIOS/organism/runtime/non_executable_lifecycle.py",
+          "runtime_entrypoint": "KGEN-KAIOS/organism/runtime/non_executable_lifecycle.py#describe_lifecycle",
+          "runtime_type": "NON_EXECUTABLE_LIFECYCLE_HANDLER",
+          "runtime_version": "0.1.0",
+          "execution_environment": "PYTHON_DRY_RUN",
+          "required_organs": [
+            "ECOSYSTEM_OR_LAND_SYSTEM"
+          ],
+          "required_cells": [
+            "TERRAIN_UNIT"
+          ],
+          "startup_contract": "VALIDATE_ONLY",
+          "shutdown_contract": "NO_RUNTIME_STARTED",
+          "health_check": "KAIOS_NON_EXECUTABLE_LIFECYCLE_NOT_ACTIVE",
+          "state_path": "KGEN-KAIOS/world-viewer/data/schema-v2-land-candidates.json",
+          "memory_path": "KGEN-KAIOS/world-viewer/data/synthetic-world.json",
+          "archive_path": "KGEN-KAIOS/organism/package-template/archive/previous_generations/README.md"
+        },
+        "life_behavior": {
+          "energy_input": [
+            "sunlight",
+            "water cycle",
+            "soil",
+            "ecosystem maintenance"
+          ],
+          "energy_consumption": "terrain lifecycle dependent",
+          "food_or_fuel_type": [
+            "NOT_APPLICABLE"
+          ],
+          "growth_rules": [
+            "governed land transformation only"
+          ],
+          "repair_rules": [
+            "restore from source fixture and migration report"
+          ],
+          "reproduction_mode": "NOT_APPLICABLE",
+          "compatible_species": [],
+          "offspring_identity_rule": "NOT_APPLICABLE",
+          "mutation_policy": "GOVERNED_LAND_CHANGE",
+          "evolution_policy": "reviewed versioned land change",
+          "death_or_shutdown_boundary": "land lifecycle archive is not biological death",
+          "trade_eligibility": "TITLE_TRANSFER",
+          "ownership_boundary": "land identity and ownership are separate",
+          "occupancy_boundary": "occupancy does not transfer ownership",
+          "authority_boundary": "control authority requires a separate governed grant"
+        },
+        "release": {
+          "release_id": "candidate-release:parcel-007:v2",
+          "release_status": "DRY_RUN",
+          "activation_status": "NOT_ACTIVE",
+          "production_authority": false,
+          "runtime_authority": false,
+          "wallet_authority": false,
+          "exchange_settlement": false
+        },
+        "created_at": "2026-07-26T00:00:00Z",
+        "integrity_hash": "119b198b23673c580516e250039ded4099d06fd2819aa3b7d4e530c21eba2ce4",
+        "parent_species": null,
+        "ancestor_versions": [],
+        "compatible_mates": [],
+        "mutation_rules": [
+          "governed land change only"
+        ],
+        "fusion_rules": [],
+        "split_rules": [
+          "new parcel and organism identities required"
+        ],
+        "upgrade_path": [
+          "future reviewed candidate"
+        ],
+        "status": "CANDIDATE_ONLY",
+        "version": "2.0",
+        "author_agent": "Codex",
+        "reviewer_agent": "CODEX_AUTONOMOUS_MEDIUM_RISK_REVIEW",
+        "source_commit": "19229217dcbf793173103924995a5d5fd384aefe"
+      }
+    },
+    {
+      "source_parcel_id": "parcel-008",
+      "organism_id_candidate": "candidate:land:parcel-008:v2",
+      "field_mappings": {
+        "parcel_id": "organism_id",
+        "land_classification": "taxonomy",
+        "parcel_status": "status",
+        "owner_id": "OWNERSHIP",
+        "building_ids": "BUILDING_TITLE",
+        "land_use": "USAGE_RIGHT",
+        "capabilities": "CONTROL_AUTHORITY"
+      },
+      "defaults": {
+        "species_id": "KAIOS_LAND_PARCEL_V1",
+        "runtime": "NON_EXECUTABLE_LIFECYCLE_HANDLER",
+        "trade_profile": "LAND_TITLE",
+        "settlement": "INACTIVE"
+      },
+      "missing_values": [],
+      "integrity_hash": "2f86a4ff1022b8f0a7f27d6992262624a3a47d34e4d301a10815b71224624522",
+      "rollback_path": "Discard candidate output; original synthetic-world.json remains unchanged.",
+      "organism_manifest": {
+        "schema_version": "2.0",
+        "organism_id": "candidate:land:parcel-008:v2",
+        "organism_name": "Stale Survey Parcel Land Organism Candidate",
+        "organism_version": "0.1.0",
+        "organism_class": "LAND_PARCEL",
+        "life_category": "NATURAL_KAIOS_INSTANTIATION",
+        "life_type": "Land Parcel",
+        "species_id": "KAIOS_LAND_PARCEL_V1",
+        "domain": "KGEN_UNIVERSE",
+        "kingdom": "CIVILIZATION_ASSET",
+        "phylum": "TERRAIN_ORGANISM",
+        "class": "LAND_ASSET",
+        "order": "GOVERNED_PARCEL",
+        "family": "KAIOS_LAND",
+        "genus": "KAIOS_TERRAIN",
+        "species": "KAIOS_LAND_PARCEL_V1",
+        "taxonomy": {
+          "domain": "KGEN_UNIVERSE",
+          "kingdom": "CIVILIZATION_ASSET",
+          "phylum": "TERRAIN_ORGANISM",
+          "class": "LAND_ASSET",
+          "order": "GOVERNED_PARCEL",
+          "family": "KAIOS_LAND",
+          "genus": "KAIOS_TERRAIN",
+          "species": "KAIOS_LAND_PARCEL_V1",
+          "cell": "TERRAIN_UNIT",
+          "organ": "ECOSYSTEM_OR_LAND_SYSTEM",
+          "runtime": "NON_EXECUTABLE_LIFECYCLE",
+          "civilization": "KAIOS"
+        },
+        "species_ref": "KGEN-KAIOS/organism/species_registry.json#KAIOS_LAND_PARCEL_V1",
+        "canonical_file": "KGEN-KAIOS/world-viewer/data/synthetic-world.json#parcel-008",
+        "runtime_entry": "KGEN-KAIOS/organism/runtime/non_executable_lifecycle.py#describe_lifecycle",
+        "dna_schema": "KGEN-KAIOS/provenance/ORGANISM_MANIFEST_SCHEMA.json",
+        "dna_ref": "KGEN-KAIOS/organism/species_registry.json#KAIOS_LAND_PARCEL_V1",
+        "rna_ref": "KGEN-KAIOS/organism/profiles/mutation_profiles.json#GOVERNED_LAND_CHANGE",
+        "organs_ref": "KGEN-KAIOS/organism/species_registry.json#KAIOS_LAND_PARCEL_V1",
+        "cells_ref": "KGEN-KAIOS/organism/species_registry.json#KAIOS_LAND_PARCEL_V1",
+        "runtime_ref": "KGEN-KAIOS/organism/runtime/non_executable_lifecycle.py",
+        "energy_profile_ref": "KGEN-KAIOS/organism/profiles/energy_profiles.json#ECOSYSTEM_FLOW",
+        "embodiment_profile_ref": "KGEN-KAIOS/organism/profiles/embodiment_profiles.json#LAND_PARCEL",
+        "lifecycle_ref": "KGEN-KAIOS/organism/species_registry.json#KAIOS_LAND_PARCEL_V1",
+        "reproduction_rules_ref": "KGEN-KAIOS/organism/profiles/reproduction_profiles.json#NOT_APPLICABLE",
+        "mutation_rules_ref": "KGEN-KAIOS/organism/profiles/mutation_profiles.json#GOVERNED_LAND_CHANGE",
+        "trade_profile_ref": "KGEN-KAIOS/organism/profiles/trade_profiles.json#LAND_TITLE",
+        "ownership_profile_ref": "KGEN-KAIOS/organism/profiles/trade_profiles.json#LAND_TITLE",
+        "authority_profile_ref": "KGEN-KAIOS/world-viewer/tasks/LAND_VIEWER_SCHEMA_V2_COMPATIBILITY.task-envelope.json",
+        "runtime_binding": {
+          "program_filename": "KGEN-KAIOS/organism/runtime/non_executable_lifecycle.py",
+          "runtime_entrypoint": "KGEN-KAIOS/organism/runtime/non_executable_lifecycle.py#describe_lifecycle",
+          "runtime_type": "NON_EXECUTABLE_LIFECYCLE_HANDLER",
+          "runtime_version": "0.1.0",
+          "execution_environment": "PYTHON_DRY_RUN",
+          "required_organs": [
+            "ECOSYSTEM_OR_LAND_SYSTEM"
+          ],
+          "required_cells": [
+            "TERRAIN_UNIT"
+          ],
+          "startup_contract": "VALIDATE_ONLY",
+          "shutdown_contract": "NO_RUNTIME_STARTED",
+          "health_check": "KAIOS_NON_EXECUTABLE_LIFECYCLE_NOT_ACTIVE",
+          "state_path": "KGEN-KAIOS/world-viewer/data/schema-v2-land-candidates.json",
+          "memory_path": "KGEN-KAIOS/world-viewer/data/synthetic-world.json",
+          "archive_path": "KGEN-KAIOS/organism/package-template/archive/previous_generations/README.md"
+        },
+        "life_behavior": {
+          "energy_input": [
+            "sunlight",
+            "water cycle",
+            "soil",
+            "ecosystem maintenance"
+          ],
+          "energy_consumption": "terrain lifecycle dependent",
+          "food_or_fuel_type": [
+            "NOT_APPLICABLE"
+          ],
+          "growth_rules": [
+            "governed land transformation only"
+          ],
+          "repair_rules": [
+            "restore from source fixture and migration report"
+          ],
+          "reproduction_mode": "NOT_APPLICABLE",
+          "compatible_species": [],
+          "offspring_identity_rule": "NOT_APPLICABLE",
+          "mutation_policy": "GOVERNED_LAND_CHANGE",
+          "evolution_policy": "reviewed versioned land change",
+          "death_or_shutdown_boundary": "land lifecycle archive is not biological death",
+          "trade_eligibility": "TITLE_TRANSFER",
+          "ownership_boundary": "land identity and ownership are separate",
+          "occupancy_boundary": "occupancy does not transfer ownership",
+          "authority_boundary": "control authority requires a separate governed grant"
+        },
+        "release": {
+          "release_id": "candidate-release:parcel-008:v2",
+          "release_status": "DRY_RUN",
+          "activation_status": "NOT_ACTIVE",
+          "production_authority": false,
+          "runtime_authority": false,
+          "wallet_authority": false,
+          "exchange_settlement": false
+        },
+        "created_at": "2026-07-26T00:00:00Z",
+        "integrity_hash": "2f86a4ff1022b8f0a7f27d6992262624a3a47d34e4d301a10815b71224624522",
+        "parent_species": null,
+        "ancestor_versions": [],
+        "compatible_mates": [],
+        "mutation_rules": [
+          "governed land change only"
+        ],
+        "fusion_rules": [],
+        "split_rules": [
+          "new parcel and organism identities required"
+        ],
+        "upgrade_path": [
+          "future reviewed candidate"
+        ],
+        "status": "CANDIDATE_ONLY",
+        "version": "2.0",
+        "author_agent": "Codex",
+        "reviewer_agent": "CODEX_AUTONOMOUS_MEDIUM_RISK_REVIEW",
+        "source_commit": "19229217dcbf793173103924995a5d5fd384aefe"
+      }
+    },
+    {
+      "source_parcel_id": "parcel-009",
+      "organism_id_candidate": "candidate:land:parcel-009:v2",
+      "field_mappings": {
+        "parcel_id": "organism_id",
+        "land_classification": "taxonomy",
+        "parcel_status": "status",
+        "owner_id": "OWNERSHIP",
+        "building_ids": "BUILDING_TITLE",
+        "land_use": "USAGE_RIGHT",
+        "capabilities": "CONTROL_AUTHORITY"
+      },
+      "defaults": {
+        "species_id": "KAIOS_LAND_PARCEL_V1",
+        "runtime": "NON_EXECUTABLE_LIFECYCLE_HANDLER",
+        "trade_profile": "LAND_TITLE",
+        "settlement": "INACTIVE"
+      },
+      "missing_values": [],
+      "integrity_hash": "126952be35e61ed2d48b5e5fd1c76a26a02ae6036548d413312ed41b54edc9d5",
+      "rollback_path": "Discard candidate output; original synthetic-world.json remains unchanged.",
+      "organism_manifest": {
+        "schema_version": "2.0",
+        "organism_id": "candidate:land:parcel-009:v2",
+        "organism_name": "Solar Yard Land Organism Candidate",
+        "organism_version": "0.1.0",
+        "organism_class": "LAND_PARCEL",
+        "life_category": "NATURAL_KAIOS_INSTANTIATION",
+        "life_type": "Land Parcel",
+        "species_id": "KAIOS_LAND_PARCEL_V1",
+        "domain": "KGEN_UNIVERSE",
+        "kingdom": "CIVILIZATION_ASSET",
+        "phylum": "TERRAIN_ORGANISM",
+        "class": "LAND_ASSET",
+        "order": "GOVERNED_PARCEL",
+        "family": "KAIOS_LAND",
+        "genus": "KAIOS_TERRAIN",
+        "species": "KAIOS_LAND_PARCEL_V1",
+        "taxonomy": {
+          "domain": "KGEN_UNIVERSE",
+          "kingdom": "CIVILIZATION_ASSET",
+          "phylum": "TERRAIN_ORGANISM",
+          "class": "LAND_ASSET",
+          "order": "GOVERNED_PARCEL",
+          "family": "KAIOS_LAND",
+          "genus": "KAIOS_TERRAIN",
+          "species": "KAIOS_LAND_PARCEL_V1",
+          "cell": "TERRAIN_UNIT",
+          "organ": "ECOSYSTEM_OR_LAND_SYSTEM",
+          "runtime": "NON_EXECUTABLE_LIFECYCLE",
+          "civilization": "KAIOS"
+        },
+        "species_ref": "KGEN-KAIOS/organism/species_registry.json#KAIOS_LAND_PARCEL_V1",
+        "canonical_file": "KGEN-KAIOS/world-viewer/data/synthetic-world.json#parcel-009",
+        "runtime_entry": "KGEN-KAIOS/organism/runtime/non_executable_lifecycle.py#describe_lifecycle",
+        "dna_schema": "KGEN-KAIOS/provenance/ORGANISM_MANIFEST_SCHEMA.json",
+        "dna_ref": "KGEN-KAIOS/organism/species_registry.json#KAIOS_LAND_PARCEL_V1",
+        "rna_ref": "KGEN-KAIOS/organism/profiles/mutation_profiles.json#GOVERNED_LAND_CHANGE",
+        "organs_ref": "KGEN-KAIOS/organism/species_registry.json#KAIOS_LAND_PARCEL_V1",
+        "cells_ref": "KGEN-KAIOS/organism/species_registry.json#KAIOS_LAND_PARCEL_V1",
+        "runtime_ref": "KGEN-KAIOS/organism/runtime/non_executable_lifecycle.py",
+        "energy_profile_ref": "KGEN-KAIOS/organism/profiles/energy_profiles.json#ECOSYSTEM_FLOW",
+        "embodiment_profile_ref": "KGEN-KAIOS/organism/profiles/embodiment_profiles.json#LAND_PARCEL",
+        "lifecycle_ref": "KGEN-KAIOS/organism/species_registry.json#KAIOS_LAND_PARCEL_V1",
+        "reproduction_rules_ref": "KGEN-KAIOS/organism/profiles/reproduction_profiles.json#NOT_APPLICABLE",
+        "mutation_rules_ref": "KGEN-KAIOS/organism/profiles/mutation_profiles.json#GOVERNED_LAND_CHANGE",
+        "trade_profile_ref": "KGEN-KAIOS/organism/profiles/trade_profiles.json#LAND_TITLE",
+        "ownership_profile_ref": "KGEN-KAIOS/organism/profiles/trade_profiles.json#LAND_TITLE",
+        "authority_profile_ref": "KGEN-KAIOS/world-viewer/tasks/LAND_VIEWER_SCHEMA_V2_COMPATIBILITY.task-envelope.json",
+        "runtime_binding": {
+          "program_filename": "KGEN-KAIOS/organism/runtime/non_executable_lifecycle.py",
+          "runtime_entrypoint": "KGEN-KAIOS/organism/runtime/non_executable_lifecycle.py#describe_lifecycle",
+          "runtime_type": "NON_EXECUTABLE_LIFECYCLE_HANDLER",
+          "runtime_version": "0.1.0",
+          "execution_environment": "PYTHON_DRY_RUN",
+          "required_organs": [
+            "ECOSYSTEM_OR_LAND_SYSTEM"
+          ],
+          "required_cells": [
+            "TERRAIN_UNIT"
+          ],
+          "startup_contract": "VALIDATE_ONLY",
+          "shutdown_contract": "NO_RUNTIME_STARTED",
+          "health_check": "KAIOS_NON_EXECUTABLE_LIFECYCLE_NOT_ACTIVE",
+          "state_path": "KGEN-KAIOS/world-viewer/data/schema-v2-land-candidates.json",
+          "memory_path": "KGEN-KAIOS/world-viewer/data/synthetic-world.json",
+          "archive_path": "KGEN-KAIOS/organism/package-template/archive/previous_generations/README.md"
+        },
+        "life_behavior": {
+          "energy_input": [
+            "sunlight",
+            "water cycle",
+            "soil",
+            "ecosystem maintenance"
+          ],
+          "energy_consumption": "terrain lifecycle dependent",
+          "food_or_fuel_type": [
+            "NOT_APPLICABLE"
+          ],
+          "growth_rules": [
+            "governed land transformation only"
+          ],
+          "repair_rules": [
+            "restore from source fixture and migration report"
+          ],
+          "reproduction_mode": "NOT_APPLICABLE",
+          "compatible_species": [],
+          "offspring_identity_rule": "NOT_APPLICABLE",
+          "mutation_policy": "GOVERNED_LAND_CHANGE",
+          "evolution_policy": "reviewed versioned land change",
+          "death_or_shutdown_boundary": "land lifecycle archive is not biological death",
+          "trade_eligibility": "TITLE_TRANSFER",
+          "ownership_boundary": "land identity and ownership are separate",
+          "occupancy_boundary": "occupancy does not transfer ownership",
+          "authority_boundary": "control authority requires a separate governed grant"
+        },
+        "release": {
+          "release_id": "candidate-release:parcel-009:v2",
+          "release_status": "DRY_RUN",
+          "activation_status": "NOT_ACTIVE",
+          "production_authority": false,
+          "runtime_authority": false,
+          "wallet_authority": false,
+          "exchange_settlement": false
+        },
+        "created_at": "2026-07-26T00:00:00Z",
+        "integrity_hash": "126952be35e61ed2d48b5e5fd1c76a26a02ae6036548d413312ed41b54edc9d5",
+        "parent_species": null,
+        "ancestor_versions": [],
+        "compatible_mates": [],
+        "mutation_rules": [
+          "governed land change only"
+        ],
+        "fusion_rules": [],
+        "split_rules": [
+          "new parcel and organism identities required"
+        ],
+        "upgrade_path": [
+          "future reviewed candidate"
+        ],
+        "status": "CANDIDATE_ONLY",
+        "version": "2.0",
+        "author_agent": "Codex",
+        "reviewer_agent": "CODEX_AUTONOMOUS_MEDIUM_RISK_REVIEW",
+        "source_commit": "19229217dcbf793173103924995a5d5fd384aefe"
+      }
+    },
+    {
+      "source_parcel_id": "parcel-010",
+      "organism_id_candidate": "candidate:land:parcel-010:v2",
+      "field_mappings": {
+        "parcel_id": "organism_id",
+        "land_classification": "taxonomy",
+        "parcel_status": "status",
+        "owner_id": "OWNERSHIP",
+        "building_ids": "BUILDING_TITLE",
+        "land_use": "USAGE_RIGHT",
+        "capabilities": "CONTROL_AUTHORITY"
+      },
+      "defaults": {
+        "species_id": "KAIOS_LAND_PARCEL_V1",
+        "runtime": "NON_EXECUTABLE_LIFECYCLE_HANDLER",
+        "trade_profile": "LAND_TITLE",
+        "settlement": "INACTIVE"
+      },
+      "missing_values": [],
+      "integrity_hash": "062489e2e58f14f370e5f1aba97f457add7d227d22cc89fe8f79b3ecb51a64f7",
+      "rollback_path": "Discard candidate output; original synthetic-world.json remains unchanged.",
+      "organism_manifest": {
+        "schema_version": "2.0",
+        "organism_id": "candidate:land:parcel-010:v2",
+        "organism_name": "Temple Garden Land Organism Candidate",
+        "organism_version": "0.1.0",
+        "organism_class": "LAND_PARCEL",
+        "life_category": "NATURAL_KAIOS_INSTANTIATION",
+        "life_type": "Land Parcel",
+        "species_id": "KAIOS_LAND_PARCEL_V1",
+        "domain": "KGEN_UNIVERSE",
+        "kingdom": "CIVILIZATION_ASSET",
+        "phylum": "TERRAIN_ORGANISM",
+        "class": "LAND_ASSET",
+        "order": "GOVERNED_PARCEL",
+        "family": "KAIOS_LAND",
+        "genus": "KAIOS_TERRAIN",
+        "species": "KAIOS_LAND_PARCEL_V1",
+        "taxonomy": {
+          "domain": "KGEN_UNIVERSE",
+          "kingdom": "CIVILIZATION_ASSET",
+          "phylum": "TERRAIN_ORGANISM",
+          "class": "LAND_ASSET",
+          "order": "GOVERNED_PARCEL",
+          "family": "KAIOS_LAND",
+          "genus": "KAIOS_TERRAIN",
+          "species": "KAIOS_LAND_PARCEL_V1",
+          "cell": "TERRAIN_UNIT",
+          "organ": "ECOSYSTEM_OR_LAND_SYSTEM",
+          "runtime": "NON_EXECUTABLE_LIFECYCLE",
+          "civilization": "KAIOS"
+        },
+        "species_ref": "KGEN-KAIOS/organism/species_registry.json#KAIOS_LAND_PARCEL_V1",
+        "canonical_file": "KGEN-KAIOS/world-viewer/data/synthetic-world.json#parcel-010",
+        "runtime_entry": "KGEN-KAIOS/organism/runtime/non_executable_lifecycle.py#describe_lifecycle",
+        "dna_schema": "KGEN-KAIOS/provenance/ORGANISM_MANIFEST_SCHEMA.json",
+        "dna_ref": "KGEN-KAIOS/organism/species_registry.json#KAIOS_LAND_PARCEL_V1",
+        "rna_ref": "KGEN-KAIOS/organism/profiles/mutation_profiles.json#GOVERNED_LAND_CHANGE",
+        "organs_ref": "KGEN-KAIOS/organism/species_registry.json#KAIOS_LAND_PARCEL_V1",
+        "cells_ref": "KGEN-KAIOS/organism/species_registry.json#KAIOS_LAND_PARCEL_V1",
+        "runtime_ref": "KGEN-KAIOS/organism/runtime/non_executable_lifecycle.py",
+        "energy_profile_ref": "KGEN-KAIOS/organism/profiles/energy_profiles.json#ECOSYSTEM_FLOW",
+        "embodiment_profile_ref": "KGEN-KAIOS/organism/profiles/embodiment_profiles.json#LAND_PARCEL",
+        "lifecycle_ref": "KGEN-KAIOS/organism/species_registry.json#KAIOS_LAND_PARCEL_V1",
+        "reproduction_rules_ref": "KGEN-KAIOS/organism/profiles/reproduction_profiles.json#NOT_APPLICABLE",
+        "mutation_rules_ref": "KGEN-KAIOS/organism/profiles/mutation_profiles.json#GOVERNED_LAND_CHANGE",
+        "trade_profile_ref": "KGEN-KAIOS/organism/profiles/trade_profiles.json#LAND_TITLE",
+        "ownership_profile_ref": "KGEN-KAIOS/organism/profiles/trade_profiles.json#LAND_TITLE",
+        "authority_profile_ref": "KGEN-KAIOS/world-viewer/tasks/LAND_VIEWER_SCHEMA_V2_COMPATIBILITY.task-envelope.json",
+        "runtime_binding": {
+          "program_filename": "KGEN-KAIOS/organism/runtime/non_executable_lifecycle.py",
+          "runtime_entrypoint": "KGEN-KAIOS/organism/runtime/non_executable_lifecycle.py#describe_lifecycle",
+          "runtime_type": "NON_EXECUTABLE_LIFECYCLE_HANDLER",
+          "runtime_version": "0.1.0",
+          "execution_environment": "PYTHON_DRY_RUN",
+          "required_organs": [
+            "ECOSYSTEM_OR_LAND_SYSTEM"
+          ],
+          "required_cells": [
+            "TERRAIN_UNIT"
+          ],
+          "startup_contract": "VALIDATE_ONLY",
+          "shutdown_contract": "NO_RUNTIME_STARTED",
+          "health_check": "KAIOS_NON_EXECUTABLE_LIFECYCLE_NOT_ACTIVE",
+          "state_path": "KGEN-KAIOS/world-viewer/data/schema-v2-land-candidates.json",
+          "memory_path": "KGEN-KAIOS/world-viewer/data/synthetic-world.json",
+          "archive_path": "KGEN-KAIOS/organism/package-template/archive/previous_generations/README.md"
+        },
+        "life_behavior": {
+          "energy_input": [
+            "sunlight",
+            "water cycle",
+            "soil",
+            "ecosystem maintenance"
+          ],
+          "energy_consumption": "terrain lifecycle dependent",
+          "food_or_fuel_type": [
+            "NOT_APPLICABLE"
+          ],
+          "growth_rules": [
+            "governed land transformation only"
+          ],
+          "repair_rules": [
+            "restore from source fixture and migration report"
+          ],
+          "reproduction_mode": "NOT_APPLICABLE",
+          "compatible_species": [],
+          "offspring_identity_rule": "NOT_APPLICABLE",
+          "mutation_policy": "GOVERNED_LAND_CHANGE",
+          "evolution_policy": "reviewed versioned land change",
+          "death_or_shutdown_boundary": "land lifecycle archive is not biological death",
+          "trade_eligibility": "TITLE_TRANSFER",
+          "ownership_boundary": "land identity and ownership are separate",
+          "occupancy_boundary": "occupancy does not transfer ownership",
+          "authority_boundary": "control authority requires a separate governed grant"
+        },
+        "release": {
+          "release_id": "candidate-release:parcel-010:v2",
+          "release_status": "DRY_RUN",
+          "activation_status": "NOT_ACTIVE",
+          "production_authority": false,
+          "runtime_authority": false,
+          "wallet_authority": false,
+          "exchange_settlement": false
+        },
+        "created_at": "2026-07-26T00:00:00Z",
+        "integrity_hash": "062489e2e58f14f370e5f1aba97f457add7d227d22cc89fe8f79b3ecb51a64f7",
+        "parent_species": null,
+        "ancestor_versions": [],
+        "compatible_mates": [],
+        "mutation_rules": [
+          "governed land change only"
+        ],
+        "fusion_rules": [],
+        "split_rules": [
+          "new parcel and organism identities required"
+        ],
+        "upgrade_path": [
+          "future reviewed candidate"
+        ],
+        "status": "CANDIDATE_ONLY",
+        "version": "2.0",
+        "author_agent": "Codex",
+        "reviewer_agent": "CODEX_AUTONOMOUS_MEDIUM_RISK_REVIEW",
+        "source_commit": "19229217dcbf793173103924995a5d5fd384aefe"
+      }
+    },
+    {
+      "source_parcel_id": "parcel-011",
+      "organism_id_candidate": "candidate:land:parcel-011:v2",
+      "field_mappings": {
+        "parcel_id": "organism_id",
+        "land_classification": "taxonomy",
+        "parcel_status": "status",
+        "owner_id": "OWNERSHIP",
+        "building_ids": "BUILDING_TITLE",
+        "land_use": "USAGE_RIGHT",
+        "capabilities": "CONTROL_AUTHORITY"
+      },
+      "defaults": {
+        "species_id": "KAIOS_LAND_PARCEL_V1",
+        "runtime": "NON_EXECUTABLE_LIFECYCLE_HANDLER",
+        "trade_profile": "LAND_TITLE",
+        "settlement": "INACTIVE"
+      },
+      "missing_values": [],
+      "integrity_hash": "c79de1f309c7bd71e331b1b9de28d1359b88feac32bd8d32d29734d0dea2011e",
+      "rollback_path": "Discard candidate output; original synthetic-world.json remains unchanged.",
+      "organism_manifest": {
+        "schema_version": "2.0",
+        "organism_id": "candidate:land:parcel-011:v2",
+        "organism_name": "Road Reserve Land Organism Candidate",
+        "organism_version": "0.1.0",
+        "organism_class": "LAND_PARCEL",
+        "life_category": "NATURAL_KAIOS_INSTANTIATION",
+        "life_type": "Land Parcel",
+        "species_id": "KAIOS_LAND_PARCEL_V1",
+        "domain": "KGEN_UNIVERSE",
+        "kingdom": "CIVILIZATION_ASSET",
+        "phylum": "TERRAIN_ORGANISM",
+        "class": "LAND_ASSET",
+        "order": "GOVERNED_PARCEL",
+        "family": "KAIOS_LAND",
+        "genus": "KAIOS_TERRAIN",
+        "species": "KAIOS_LAND_PARCEL_V1",
+        "taxonomy": {
+          "domain": "KGEN_UNIVERSE",
+          "kingdom": "CIVILIZATION_ASSET",
+          "phylum": "TERRAIN_ORGANISM",
+          "class": "LAND_ASSET",
+          "order": "GOVERNED_PARCEL",
+          "family": "KAIOS_LAND",
+          "genus": "KAIOS_TERRAIN",
+          "species": "KAIOS_LAND_PARCEL_V1",
+          "cell": "TERRAIN_UNIT",
+          "organ": "ECOSYSTEM_OR_LAND_SYSTEM",
+          "runtime": "NON_EXECUTABLE_LIFECYCLE",
+          "civilization": "KAIOS"
+        },
+        "species_ref": "KGEN-KAIOS/organism/species_registry.json#KAIOS_LAND_PARCEL_V1",
+        "canonical_file": "KGEN-KAIOS/world-viewer/data/synthetic-world.json#parcel-011",
+        "runtime_entry": "KGEN-KAIOS/organism/runtime/non_executable_lifecycle.py#describe_lifecycle",
+        "dna_schema": "KGEN-KAIOS/provenance/ORGANISM_MANIFEST_SCHEMA.json",
+        "dna_ref": "KGEN-KAIOS/organism/species_registry.json#KAIOS_LAND_PARCEL_V1",
+        "rna_ref": "KGEN-KAIOS/organism/profiles/mutation_profiles.json#GOVERNED_LAND_CHANGE",
+        "organs_ref": "KGEN-KAIOS/organism/species_registry.json#KAIOS_LAND_PARCEL_V1",
+        "cells_ref": "KGEN-KAIOS/organism/species_registry.json#KAIOS_LAND_PARCEL_V1",
+        "runtime_ref": "KGEN-KAIOS/organism/runtime/non_executable_lifecycle.py",
+        "energy_profile_ref": "KGEN-KAIOS/organism/profiles/energy_profiles.json#ECOSYSTEM_FLOW",
+        "embodiment_profile_ref": "KGEN-KAIOS/organism/profiles/embodiment_profiles.json#LAND_PARCEL",
+        "lifecycle_ref": "KGEN-KAIOS/organism/species_registry.json#KAIOS_LAND_PARCEL_V1",
+        "reproduction_rules_ref": "KGEN-KAIOS/organism/profiles/reproduction_profiles.json#NOT_APPLICABLE",
+        "mutation_rules_ref": "KGEN-KAIOS/organism/profiles/mutation_profiles.json#GOVERNED_LAND_CHANGE",
+        "trade_profile_ref": "KGEN-KAIOS/organism/profiles/trade_profiles.json#LAND_TITLE",
+        "ownership_profile_ref": "KGEN-KAIOS/organism/profiles/trade_profiles.json#LAND_TITLE",
+        "authority_profile_ref": "KGEN-KAIOS/world-viewer/tasks/LAND_VIEWER_SCHEMA_V2_COMPATIBILITY.task-envelope.json",
+        "runtime_binding": {
+          "program_filename": "KGEN-KAIOS/organism/runtime/non_executable_lifecycle.py",
+          "runtime_entrypoint": "KGEN-KAIOS/organism/runtime/non_executable_lifecycle.py#describe_lifecycle",
+          "runtime_type": "NON_EXECUTABLE_LIFECYCLE_HANDLER",
+          "runtime_version": "0.1.0",
+          "execution_environment": "PYTHON_DRY_RUN",
+          "required_organs": [
+            "ECOSYSTEM_OR_LAND_SYSTEM"
+          ],
+          "required_cells": [
+            "TERRAIN_UNIT"
+          ],
+          "startup_contract": "VALIDATE_ONLY",
+          "shutdown_contract": "NO_RUNTIME_STARTED",
+          "health_check": "KAIOS_NON_EXECUTABLE_LIFECYCLE_NOT_ACTIVE",
+          "state_path": "KGEN-KAIOS/world-viewer/data/schema-v2-land-candidates.json",
+          "memory_path": "KGEN-KAIOS/world-viewer/data/synthetic-world.json",
+          "archive_path": "KGEN-KAIOS/organism/package-template/archive/previous_generations/README.md"
+        },
+        "life_behavior": {
+          "energy_input": [
+            "sunlight",
+            "water cycle",
+            "soil",
+            "ecosystem maintenance"
+          ],
+          "energy_consumption": "terrain lifecycle dependent",
+          "food_or_fuel_type": [
+            "NOT_APPLICABLE"
+          ],
+          "growth_rules": [
+            "governed land transformation only"
+          ],
+          "repair_rules": [
+            "restore from source fixture and migration report"
+          ],
+          "reproduction_mode": "NOT_APPLICABLE",
+          "compatible_species": [],
+          "offspring_identity_rule": "NOT_APPLICABLE",
+          "mutation_policy": "GOVERNED_LAND_CHANGE",
+          "evolution_policy": "reviewed versioned land change",
+          "death_or_shutdown_boundary": "land lifecycle archive is not biological death",
+          "trade_eligibility": "TITLE_TRANSFER",
+          "ownership_boundary": "land identity and ownership are separate",
+          "occupancy_boundary": "occupancy does not transfer ownership",
+          "authority_boundary": "control authority requires a separate governed grant"
+        },
+        "release": {
+          "release_id": "candidate-release:parcel-011:v2",
+          "release_status": "DRY_RUN",
+          "activation_status": "NOT_ACTIVE",
+          "production_authority": false,
+          "runtime_authority": false,
+          "wallet_authority": false,
+          "exchange_settlement": false
+        },
+        "created_at": "2026-07-26T00:00:00Z",
+        "integrity_hash": "c79de1f309c7bd71e331b1b9de28d1359b88feac32bd8d32d29734d0dea2011e",
+        "parent_species": null,
+        "ancestor_versions": [],
+        "compatible_mates": [],
+        "mutation_rules": [
+          "governed land change only"
+        ],
+        "fusion_rules": [],
+        "split_rules": [
+          "new parcel and organism identities required"
+        ],
+        "upgrade_path": [
+          "future reviewed candidate"
+        ],
+        "status": "CANDIDATE_ONLY",
+        "version": "2.0",
+        "author_agent": "Codex",
+        "reviewer_agent": "CODEX_AUTONOMOUS_MEDIUM_RISK_REVIEW",
+        "source_commit": "19229217dcbf793173103924995a5d5fd384aefe"
+      }
+    },
+    {
+      "source_parcel_id": "parcel-012",
+      "organism_id_candidate": "candidate:land:parcel-012:v2",
+      "field_mappings": {
+        "parcel_id": "organism_id",
+        "land_classification": "taxonomy",
+        "parcel_status": "status",
+        "owner_id": "OWNERSHIP",
+        "building_ids": "BUILDING_TITLE",
+        "land_use": "USAGE_RIGHT",
+        "capabilities": "CONTROL_AUTHORITY"
+      },
+      "defaults": {
+        "species_id": "KAIOS_LAND_PARCEL_V1",
+        "runtime": "NON_EXECUTABLE_LIFECYCLE_HANDLER",
+        "trade_profile": "LAND_TITLE",
+        "settlement": "INACTIVE"
+      },
+      "missing_values": [
+        "coordinate",
+        "area_m2"
+      ],
+      "integrity_hash": "4be7d06632af59db0781cead6c2485d00225c69aed4297675432a4c4066b350b",
+      "rollback_path": "Discard candidate output; original synthetic-world.json remains unchanged.",
+      "organism_manifest": {
+        "schema_version": "2.0",
+        "organism_id": "candidate:land:parcel-012:v2",
+        "organism_name": "Unknown Survey Block Land Organism Candidate",
+        "organism_version": "0.1.0",
+        "organism_class": "LAND_PARCEL",
+        "life_category": "NATURAL_KAIOS_INSTANTIATION",
+        "life_type": "Land Parcel",
+        "species_id": "KAIOS_LAND_PARCEL_V1",
+        "domain": "KGEN_UNIVERSE",
+        "kingdom": "CIVILIZATION_ASSET",
+        "phylum": "TERRAIN_ORGANISM",
+        "class": "LAND_ASSET",
+        "order": "GOVERNED_PARCEL",
+        "family": "KAIOS_LAND",
+        "genus": "KAIOS_TERRAIN",
+        "species": "KAIOS_LAND_PARCEL_V1",
+        "taxonomy": {
+          "domain": "KGEN_UNIVERSE",
+          "kingdom": "CIVILIZATION_ASSET",
+          "phylum": "TERRAIN_ORGANISM",
+          "class": "LAND_ASSET",
+          "order": "GOVERNED_PARCEL",
+          "family": "KAIOS_LAND",
+          "genus": "KAIOS_TERRAIN",
+          "species": "KAIOS_LAND_PARCEL_V1",
+          "cell": "TERRAIN_UNIT",
+          "organ": "ECOSYSTEM_OR_LAND_SYSTEM",
+          "runtime": "NON_EXECUTABLE_LIFECYCLE",
+          "civilization": "KAIOS"
+        },
+        "species_ref": "KGEN-KAIOS/organism/species_registry.json#KAIOS_LAND_PARCEL_V1",
+        "canonical_file": "KGEN-KAIOS/world-viewer/data/synthetic-world.json#parcel-012",
+        "runtime_entry": "KGEN-KAIOS/organism/runtime/non_executable_lifecycle.py#describe_lifecycle",
+        "dna_schema": "KGEN-KAIOS/provenance/ORGANISM_MANIFEST_SCHEMA.json",
+        "dna_ref": "KGEN-KAIOS/organism/species_registry.json#KAIOS_LAND_PARCEL_V1",
+        "rna_ref": "KGEN-KAIOS/organism/profiles/mutation_profiles.json#GOVERNED_LAND_CHANGE",
+        "organs_ref": "KGEN-KAIOS/organism/species_registry.json#KAIOS_LAND_PARCEL_V1",
+        "cells_ref": "KGEN-KAIOS/organism/species_registry.json#KAIOS_LAND_PARCEL_V1",
+        "runtime_ref": "KGEN-KAIOS/organism/runtime/non_executable_lifecycle.py",
+        "energy_profile_ref": "KGEN-KAIOS/organism/profiles/energy_profiles.json#ECOSYSTEM_FLOW",
+        "embodiment_profile_ref": "KGEN-KAIOS/organism/profiles/embodiment_profiles.json#LAND_PARCEL",
+        "lifecycle_ref": "KGEN-KAIOS/organism/species_registry.json#KAIOS_LAND_PARCEL_V1",
+        "reproduction_rules_ref": "KGEN-KAIOS/organism/profiles/reproduction_profiles.json#NOT_APPLICABLE",
+        "mutation_rules_ref": "KGEN-KAIOS/organism/profiles/mutation_profiles.json#GOVERNED_LAND_CHANGE",
+        "trade_profile_ref": "KGEN-KAIOS/organism/profiles/trade_profiles.json#LAND_TITLE",
+        "ownership_profile_ref": "KGEN-KAIOS/organism/profiles/trade_profiles.json#LAND_TITLE",
+        "authority_profile_ref": "KGEN-KAIOS/world-viewer/tasks/LAND_VIEWER_SCHEMA_V2_COMPATIBILITY.task-envelope.json",
+        "runtime_binding": {
+          "program_filename": "KGEN-KAIOS/organism/runtime/non_executable_lifecycle.py",
+          "runtime_entrypoint": "KGEN-KAIOS/organism/runtime/non_executable_lifecycle.py#describe_lifecycle",
+          "runtime_type": "NON_EXECUTABLE_LIFECYCLE_HANDLER",
+          "runtime_version": "0.1.0",
+          "execution_environment": "PYTHON_DRY_RUN",
+          "required_organs": [
+            "ECOSYSTEM_OR_LAND_SYSTEM"
+          ],
+          "required_cells": [
+            "TERRAIN_UNIT"
+          ],
+          "startup_contract": "VALIDATE_ONLY",
+          "shutdown_contract": "NO_RUNTIME_STARTED",
+          "health_check": "KAIOS_NON_EXECUTABLE_LIFECYCLE_NOT_ACTIVE",
+          "state_path": "KGEN-KAIOS/world-viewer/data/schema-v2-land-candidates.json",
+          "memory_path": "KGEN-KAIOS/world-viewer/data/synthetic-world.json",
+          "archive_path": "KGEN-KAIOS/organism/package-template/archive/previous_generations/README.md"
+        },
+        "life_behavior": {
+          "energy_input": [
+            "sunlight",
+            "water cycle",
+            "soil",
+            "ecosystem maintenance"
+          ],
+          "energy_consumption": "terrain lifecycle dependent",
+          "food_or_fuel_type": [
+            "NOT_APPLICABLE"
+          ],
+          "growth_rules": [
+            "governed land transformation only"
+          ],
+          "repair_rules": [
+            "restore from source fixture and migration report"
+          ],
+          "reproduction_mode": "NOT_APPLICABLE",
+          "compatible_species": [],
+          "offspring_identity_rule": "NOT_APPLICABLE",
+          "mutation_policy": "GOVERNED_LAND_CHANGE",
+          "evolution_policy": "reviewed versioned land change",
+          "death_or_shutdown_boundary": "land lifecycle archive is not biological death",
+          "trade_eligibility": "TITLE_TRANSFER",
+          "ownership_boundary": "land identity and ownership are separate",
+          "occupancy_boundary": "occupancy does not transfer ownership",
+          "authority_boundary": "control authority requires a separate governed grant"
+        },
+        "release": {
+          "release_id": "candidate-release:parcel-012:v2",
+          "release_status": "DRY_RUN",
+          "activation_status": "NOT_ACTIVE",
+          "production_authority": false,
+          "runtime_authority": false,
+          "wallet_authority": false,
+          "exchange_settlement": false
+        },
+        "created_at": "2026-07-26T00:00:00Z",
+        "integrity_hash": "4be7d06632af59db0781cead6c2485d00225c69aed4297675432a4c4066b350b",
+        "parent_species": null,
+        "ancestor_versions": [],
+        "compatible_mates": [],
+        "mutation_rules": [
+          "governed land change only"
+        ],
+        "fusion_rules": [],
+        "split_rules": [
+          "new parcel and organism identities required"
+        ],
+        "upgrade_path": [
+          "future reviewed candidate"
+        ],
+        "status": "CANDIDATE_ONLY",
+        "version": "2.0",
+        "author_agent": "Codex",
+        "reviewer_agent": "CODEX_AUTONOMOUS_MEDIUM_RISK_REVIEW",
+        "source_commit": "19229217dcbf793173103924995a5d5fd384aefe"
+      }
+    }
+  ]
+}
