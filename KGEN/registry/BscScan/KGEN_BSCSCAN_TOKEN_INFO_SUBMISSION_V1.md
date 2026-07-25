@@ -67,6 +67,11 @@ Verified public contact email remains: **klineodyssey.io@gmail.com**
 
 ## Submission Status
 
-**READY_FOR_HUMAN_SUBMISSION**
+**PENDING_PUBLIC_URL_DEPLOYMENT**
 
-Human must log into BscScan, verify contract ownership where required, sign the ownership-verification message, paste the prepared data, and submit the external form. Do not mark **SUBMITTED** until Human confirms external submission.
+Do not mark this record **READY_FOR_HUMAN_SUBMISSION** until all three public
+logo URLs return HTTP 200 with the expected content type after GitHub Pages
+deployment. Human must then log into BscScan, verify contract ownership where
+required, sign the ownership-verification message, paste the prepared data, and
+submit the external form. Do not mark **SUBMITTED** until Human confirms
+external submission.
