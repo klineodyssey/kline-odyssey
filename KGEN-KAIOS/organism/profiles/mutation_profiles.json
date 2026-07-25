@@ -1,0 +1,11 @@
+{
+  "schema_version": "1.0",
+  "status": "CANDIDATE_ONLY",
+  "profiles": {
+    "BOUNDED_SOFTWARE_CHANGE": {"policy": "schema-compatible reviewed change", "production_mutation": false},
+    "SIMULATION_BOUNDED_BIOLOGICAL": {"policy": "simulation-only species envelope", "real_genetic_engineering": false},
+    "BOUNDED_HARDWARE_SOFTWARE": {"policy": "compatible reviewed module change", "autonomous_escalation": false},
+    "GOVERNED_RENOVATION": {"policy": "permit and integrity reviewed renovation", "automatic_title_change": false},
+    "GOVERNED_LAND_CHANGE": {"policy": "stewardship and environmental review", "automatic_title_change": false}
+  }
+}

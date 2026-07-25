@@ -1,0 +1,10 @@
+{
+  "schema_version": "1.0",
+  "status": "NOT_ACTIVE",
+  "runtime_type": "NON_EXECUTABLE_LIFECYCLE_HANDLER",
+  "program_filename": "KGEN-KAIOS/organism/runtime/non_executable_lifecycle.py",
+  "runtime_entrypoint": "KGEN-KAIOS/organism/runtime/non_executable_lifecycle.py#describe_lifecycle",
+  "runtime_authority": false,
+  "production_authority": false,
+  "high_risk_authority": false
+}

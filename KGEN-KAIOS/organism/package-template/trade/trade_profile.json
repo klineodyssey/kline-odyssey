@@ -1,0 +1,11 @@
+{
+  "schema_version": "1.0",
+  "status": "CANDIDATE_ONLY",
+  "classification": "LICENSE_ONLY",
+  "exchange": "K11520",
+  "listing_active": false,
+  "settlement_active": false,
+  "wallet_required": false,
+  "identity_transfer": false,
+  "rights": ["ORGAN_LICENSE", "USAGE_RIGHT"]
+}

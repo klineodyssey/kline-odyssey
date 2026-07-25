@@ -1,18 +1,19 @@
 {
   "metadata": {
-    "version": "1.0",
-    "revision": "2026-07-11.1",
-    "status": "ACTIVE",
-    "last_updated": "2026-07-11",
+    "version": "2.0",
+    "revision": "2026-07-25.1",
+    "status": "ACTIVE_CANDIDATE_EXTENSION",
+    "last_updated": "2026-07-25",
     "updated_by": "Codex",
-    "reviewed_by": "Codex",
-    "source_commit": "e0acc39c6c1b5d5dead5b619ad48c85a85743262",
-    "task_id": "KGEN-GOV-BIO-2026-0001",
-    "change_reason": "Define organism manifest schema.",
+    "reviewed_by": "HUMAN_REVIEW_REQUIRED",
+    "source_commit": "PENDING_PR",
+    "task_id": "KAIOS-CANONICAL-ORGANISM-V0-1",
+    "change_reason": "Extend the canonical organism manifest with versioned Species, Runtime, behavior, release, ownership, and authority bindings while preserving legacy 1.0 records.",
     "ancestor": "KGEN-KAIOS/ORGANISM_MANIFEST_STANDARD.md",
     "source_of_truth": true
   },
   "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "KGEN-KAIOS/provenance/ORGANISM_MANIFEST_SCHEMA.json",
   "title": "KGEN Organism Manifest",
   "type": "object",
   "required": [
@@ -43,30 +44,290 @@
     "source_commit"
   ],
   "properties": {
-    "organism_id": { "type": "string" },
-    "life_type": { "type": "string" },
-    "domain": { "type": "string" },
-    "kingdom": { "type": "string" },
-    "phylum": { "type": "string" },
-    "class": { "type": "string" },
-    "order": { "type": "string" },
-    "family": { "type": "string" },
-    "genus": { "type": "string" },
-    "species": { "type": "string" },
-    "canonical_file": { "type": "string" },
-    "runtime_entry": { "type": "string" },
-    "dna_schema": { "type": "string" },
+    "schema_version": {
+      "type": "string",
+      "enum": ["2.0"]
+    },
+    "organism_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "organism_name": { "type": "string", "minLength": 1 },
+    "organism_version": { "type": "string", "minLength": 1 },
+    "organism_class": { "type": "string", "minLength": 1 },
+    "life_category": {
+      "type": "string",
+      "enum": [
+        "NATURAL_KAIOS_INSTANTIATION",
+        "GOVERNED_HIGH_AUTHORITY_LIFE",
+        "PRE_COSMIC_EXISTING_ENTITY_FORMALIZATION"
+      ]
+    },
+    "life_type": { "type": "string", "minLength": 1 },
+    "domain": { "type": "string", "minLength": 1 },
+    "kingdom": { "type": "string", "minLength": 1 },
+    "phylum": { "type": "string", "minLength": 1 },
+    "class": { "type": "string", "minLength": 1 },
+    "order": { "type": "string", "minLength": 1 },
+    "family": { "type": "string", "minLength": 1 },
+    "genus": { "type": "string", "minLength": 1 },
+    "species": { "type": "string", "minLength": 1 },
+    "taxonomy": { "$ref": "#/$defs/taxonomy" },
+    "species_ref": { "$ref": "#/$defs/repositoryReference" },
+    "canonical_file": { "type": "string", "minLength": 1 },
+    "runtime_entry": { "type": "string", "minLength": 1 },
+    "dna_schema": { "type": "string", "minLength": 1 },
+    "dna_ref": { "$ref": "#/$defs/repositoryReference" },
+    "rna_ref": { "$ref": "#/$defs/repositoryReference" },
+    "organs_ref": { "$ref": "#/$defs/repositoryReference" },
+    "cells_ref": { "$ref": "#/$defs/repositoryReference" },
+    "runtime_ref": { "$ref": "#/$defs/repositoryReference" },
+    "energy_profile_ref": { "$ref": "#/$defs/repositoryReference" },
+    "embodiment_profile_ref": { "$ref": "#/$defs/repositoryReference" },
+    "lifecycle_ref": { "$ref": "#/$defs/repositoryReference" },
+    "reproduction_rules_ref": { "$ref": "#/$defs/repositoryReference" },
+    "mutation_rules_ref": { "$ref": "#/$defs/repositoryReference" },
+    "trade_profile_ref": { "$ref": "#/$defs/repositoryReference" },
+    "ownership_profile_ref": { "$ref": "#/$defs/repositoryReference" },
+    "authority_profile_ref": { "$ref": "#/$defs/repositoryReference" },
+    "runtime_binding": { "$ref": "#/$defs/runtimeBinding" },
+    "life_behavior": { "$ref": "#/$defs/lifeBehavior" },
+    "release": { "$ref": "#/$defs/release" },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "integrity_hash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
     "parent_species": { "type": ["string", "null"] },
-    "ancestor_versions": { "type": "array", "items": { "type": "string" } },
-    "compatible_mates": { "type": "array", "items": { "type": "string" } },
-    "mutation_rules": { "type": "array", "items": { "type": "string" } },
-    "fusion_rules": { "type": "array", "items": { "type": "string" } },
-    "split_rules": { "type": "array", "items": { "type": "string" } },
-    "upgrade_path": { "type": "array", "items": { "type": "string" } },
-    "status": { "type": "string" },
-    "version": { "type": "string" },
-    "author_agent": { "type": "string" },
-    "reviewer_agent": { "type": "string" },
-    "source_commit": { "type": "string" }
+    "ancestor_versions": {
+      "type": "array",
+      "items": { "type": "string" },
+      "uniqueItems": true
+    },
+    "compatible_mates": {
+      "type": "array",
+      "items": { "type": "string" },
+      "uniqueItems": true
+    },
+    "mutation_rules": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "fusion_rules": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "split_rules": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "upgrade_path": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "status": { "type": "string", "minLength": 1 },
+    "version": { "type": "string", "minLength": 1 },
+    "author_agent": { "type": "string", "minLength": 1 },
+    "reviewer_agent": { "type": "string", "minLength": 1 },
+    "source_commit": { "type": "string", "minLength": 1 }
+  },
+  "allOf": [
+    {
+      "if": {
+        "required": ["schema_version"],
+        "properties": {
+          "schema_version": { "const": "2.0" }
+        }
+      },
+      "then": {
+        "required": [
+          "organism_name",
+          "organism_version",
+          "organism_class",
+          "life_category",
+          "taxonomy",
+          "species_ref",
+          "dna_ref",
+          "rna_ref",
+          "organs_ref",
+          "cells_ref",
+          "runtime_ref",
+          "energy_profile_ref",
+          "embodiment_profile_ref",
+          "lifecycle_ref",
+          "reproduction_rules_ref",
+          "mutation_rules_ref",
+          "trade_profile_ref",
+          "ownership_profile_ref",
+          "authority_profile_ref",
+          "runtime_binding",
+          "life_behavior",
+          "release",
+          "created_at",
+          "integrity_hash"
+        ],
+        "properties": {
+          "status": {
+            "enum": ["DRY_RUN", "CANDIDATE_ONLY", "NOT_ACTIVE", "REFERENCE_EXAMPLE"]
+          }
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "repositoryReference": {
+      "type": "string",
+      "minLength": 3,
+      "pattern": "^(?![A-Za-z]:[\\\\/])(?!/)(?!.*\\.\\./).+$"
+    },
+    "taxonomy": {
+      "type": "object",
+      "required": [
+        "domain",
+        "kingdom",
+        "phylum",
+        "class",
+        "order",
+        "family",
+        "genus",
+        "species",
+        "cell",
+        "organ",
+        "runtime",
+        "civilization"
+      ],
+      "properties": {
+        "domain": { "type": "string", "minLength": 1 },
+        "kingdom": { "type": "string", "minLength": 1 },
+        "phylum": { "type": "string", "minLength": 1 },
+        "class": { "type": "string", "minLength": 1 },
+        "order": { "type": "string", "minLength": 1 },
+        "family": { "type": "string", "minLength": 1 },
+        "genus": { "type": "string", "minLength": 1 },
+        "species": { "type": "string", "minLength": 1 },
+        "cell": { "type": "string", "minLength": 1 },
+        "organ": { "type": "string", "minLength": 1 },
+        "runtime": { "type": "string", "minLength": 1 },
+        "civilization": { "type": "string", "minLength": 1 },
+        "extension_19_ref": { "$ref": "#/$defs/repositoryReference" }
+      },
+      "additionalProperties": false
+    },
+    "runtimeBinding": {
+      "type": "object",
+      "required": [
+        "program_filename",
+        "runtime_entrypoint",
+        "runtime_type",
+        "runtime_version",
+        "execution_environment",
+        "required_organs",
+        "required_cells",
+        "startup_contract",
+        "shutdown_contract",
+        "health_check",
+        "state_path",
+        "memory_path",
+        "archive_path"
+      ],
+      "properties": {
+        "program_filename": { "$ref": "#/$defs/repositoryReference" },
+        "runtime_entrypoint": { "$ref": "#/$defs/repositoryReference" },
+        "runtime_type": { "type": "string", "minLength": 1 },
+        "runtime_version": { "type": "string", "minLength": 1 },
+        "execution_environment": { "type": "string", "minLength": 1 },
+        "required_organs": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "uniqueItems": true
+        },
+        "required_cells": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "uniqueItems": true
+        },
+        "startup_contract": { "type": "string", "minLength": 1 },
+        "shutdown_contract": { "type": "string", "minLength": 1 },
+        "health_check": { "type": "string", "minLength": 1 },
+        "state_path": { "$ref": "#/$defs/repositoryReference" },
+        "memory_path": { "$ref": "#/$defs/repositoryReference" },
+        "archive_path": { "$ref": "#/$defs/repositoryReference" }
+      },
+      "additionalProperties": false
+    },
+    "lifeBehavior": {
+      "type": "object",
+      "required": [
+        "energy_input",
+        "energy_consumption",
+        "food_or_fuel_type",
+        "growth_rules",
+        "repair_rules",
+        "reproduction_mode",
+        "compatible_species",
+        "offspring_identity_rule",
+        "mutation_policy",
+        "evolution_policy",
+        "death_or_shutdown_boundary",
+        "trade_eligibility",
+        "ownership_boundary",
+        "occupancy_boundary",
+        "authority_boundary"
+      ],
+      "properties": {
+        "energy_input": { "type": "array", "items": { "type": "string" } },
+        "energy_consumption": { "type": "string", "minLength": 1 },
+        "food_or_fuel_type": { "type": "array", "items": { "type": "string" } },
+        "growth_rules": { "type": "array", "items": { "type": "string" } },
+        "repair_rules": { "type": "array", "items": { "type": "string" } },
+        "reproduction_mode": { "type": "string", "minLength": 1 },
+        "compatible_species": { "type": "array", "items": { "type": "string" } },
+        "offspring_identity_rule": { "type": "string", "minLength": 1 },
+        "mutation_policy": { "type": "string", "minLength": 1 },
+        "evolution_policy": { "type": "string", "minLength": 1 },
+        "death_or_shutdown_boundary": { "type": "string", "minLength": 1 },
+        "trade_eligibility": {
+          "enum": [
+            "TRADEABLE_ENTITY",
+            "TRADEABLE_ASSET",
+            "NON_TRANSFERABLE_LIFE",
+            "LICENSE_ONLY",
+            "OCCUPANCY_ONLY",
+            "USAGE_RIGHT_ONLY",
+            "TITLE_TRANSFER",
+            "NOT_TRADEABLE"
+          ]
+        },
+        "ownership_boundary": { "type": "string", "minLength": 1 },
+        "occupancy_boundary": { "type": "string", "minLength": 1 },
+        "authority_boundary": { "type": "string", "minLength": 1 }
+      },
+      "additionalProperties": false
+    },
+    "release": {
+      "type": "object",
+      "required": [
+        "release_id",
+        "release_status",
+        "activation_status",
+        "production_authority",
+        "runtime_authority",
+        "wallet_authority",
+        "exchange_settlement"
+      ],
+      "properties": {
+        "release_id": { "type": "string", "minLength": 1 },
+        "release_status": { "enum": ["DRY_RUN", "CANDIDATE_ONLY"] },
+        "activation_status": { "const": "NOT_ACTIVE" },
+        "production_authority": { "const": false },
+        "runtime_authority": { "const": false },
+        "wallet_authority": { "const": false },
+        "exchange_settlement": { "const": false }
+      },
+      "additionalProperties": false
+    }
   }
 }

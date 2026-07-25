@@ -14,7 +14,7 @@ This directory stores machine-readable authorship, file ownership, contribution,
 | `WORKORDER_PROVENANCE_SCHEMA.json` | Schema for task source fields required on WorkOrders |
 | `CURSOR_REPORT_RND_SCHEMA.json` | Schema for Cursor R&D suggestion report blocks |
 | `FILE_HEADER_METADATA_SCHEMA.json` | Schema for required formal file metadata |
-| `ORGANISM_MANIFEST_SCHEMA.json` | Schema for biological organism manifests |
+| `ORGANISM_MANIFEST_SCHEMA.json` | Canonical versioned organism schema; legacy 1.0 plus Species, Runtime, behavior, release, ownership, and authority bindings in 2.0 |
 | `EVOLUTION_EVENT_SCHEMA.json` | Schema for governed evolution events |
 
 ## Rule

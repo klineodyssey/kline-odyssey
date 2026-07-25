@@ -1,0 +1,8 @@
+{
+  "schema_version": "1.0",
+  "status": "CANDIDATE_ONLY",
+  "stages": ["SPECIFIED", "VALIDATED", "RELEASED", "RUNNING", "STOPPED", "ARCHIVED"],
+  "current_stage": "SPECIFIED",
+  "activation_status": "NOT_ACTIVE",
+  "shutdown_is_death": false
+}

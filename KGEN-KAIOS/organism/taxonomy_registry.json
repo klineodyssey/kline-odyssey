@@ -1,0 +1,161 @@
+{
+  "schema_version": "1.0",
+  "status": "CANDIDATE_ONLY",
+  "authoritative_activation": false,
+  "canonical_levels": [
+    "domain",
+    "kingdom",
+    "phylum",
+    "class",
+    "order",
+    "family",
+    "genus",
+    "species",
+    "cell",
+    "organ",
+    "runtime",
+    "civilization"
+  ],
+  "rank_parent_order": {
+    "domain": null,
+    "kingdom": "domain",
+    "phylum": "kingdom",
+    "class": "phylum",
+    "order": "class",
+    "family": "order",
+    "genus": "family",
+    "species": "genus",
+    "cell": "species",
+    "organ": "cell",
+    "runtime": "organ",
+    "civilization": "runtime"
+  },
+  "extension_19": {
+    "reference": "KGEN-KAIOS/civilization/BIOLOGY_TAXONOMY_STANDARD.md",
+    "levels": [
+      "Domain",
+      "Kingdom",
+      "Phylum",
+      "Class",
+      "Order",
+      "Family",
+      "Genus",
+      "Species",
+      "Individual",
+      "OrganSystem",
+      "Organ",
+      "Tissue",
+      "Cell",
+      "Organelle",
+      "Genome",
+      "DNA",
+      "RNA",
+      "Gene",
+      "Expression"
+    ]
+  },
+  "records": [
+    {
+      "species_id": "KAIOS_APP_LIFE_V1",
+      "taxonomy": {
+        "domain": "KGEN_UNIVERSE",
+        "kingdom": "APP",
+        "phylum": "DIGITAL_ORGANISM",
+        "class": "APPLICATION_LIFE",
+        "order": "GOVERNED_SOFTWARE",
+        "family": "KAIOS_APP",
+        "genus": "KAIOS_APPLICATION",
+        "species": "KAIOS_APP_LIFE_V1",
+        "cell": "FUNCTION_CELL",
+        "organ": "PROGRAM_MODULE",
+        "runtime": "APPLICATION_RUNTIME",
+        "civilization": "KAIOS"
+      }
+    },
+    {
+      "species_id": "BOS_TAURUS_KAIOS_V1",
+      "taxonomy": {
+        "domain": "EUKARYOTA",
+        "kingdom": "ANIMALIA",
+        "phylum": "CHORDATA",
+        "class": "MAMMALIA",
+        "order": "ARTIODACTYLA",
+        "family": "BOVIDAE",
+        "genus": "BOS",
+        "species": "BOS_TAURUS_KAIOS_V1",
+        "cell": "BIOLOGICAL_CELL",
+        "organ": "BOVINE_ORGAN_SYSTEM",
+        "runtime": "ANIMAL_LIFECYCLE_HANDLER",
+        "civilization": "KAIOS"
+      }
+    },
+    {
+      "species_id": "OVIS_ARIES_KAIOS_V1",
+      "taxonomy": {
+        "domain": "EUKARYOTA",
+        "kingdom": "ANIMALIA",
+        "phylum": "CHORDATA",
+        "class": "MAMMALIA",
+        "order": "ARTIODACTYLA",
+        "family": "BOVIDAE",
+        "genus": "OVIS",
+        "species": "OVIS_ARIES_KAIOS_V1",
+        "cell": "BIOLOGICAL_CELL",
+        "organ": "OVINE_ORGAN_SYSTEM",
+        "runtime": "ANIMAL_LIFECYCLE_HANDLER",
+        "civilization": "KAIOS"
+      }
+    },
+    {
+      "species_id": "KAIOS_ORDINARY_ROBOT_V1",
+      "taxonomy": {
+        "domain": "KGEN_UNIVERSE",
+        "kingdom": "MACHINE",
+        "phylum": "ROBOTIC_ORGANISM",
+        "class": "ORDINARY_ROBOT",
+        "order": "BOUNDED_AUTOMATION",
+        "family": "KAIOS_ROBOT",
+        "genus": "KAIOS_MACHINE_LIFE",
+        "species": "KAIOS_ORDINARY_ROBOT_V1",
+        "cell": "CONTROL_FUNCTION",
+        "organ": "HARDWARE_MODULE",
+        "runtime": "ROBOT_LIFECYCLE_HANDLER",
+        "civilization": "KAIOS"
+      }
+    },
+    {
+      "species_id": "KAIOS_HOUSE_V1",
+      "taxonomy": {
+        "domain": "KGEN_UNIVERSE",
+        "kingdom": "CIVILIZATION_ASSET",
+        "phylum": "BUILT_ENVIRONMENT",
+        "class": "BUILDING_LIFE",
+        "order": "RESIDENTIAL_STRUCTURE",
+        "family": "KAIOS_BUILDING",
+        "genus": "KAIOS_HOUSE",
+        "species": "KAIOS_HOUSE_V1",
+        "cell": "BUILDING_COMPONENT",
+        "organ": "BUILDING_SYSTEM",
+        "runtime": "BUILDING_LIFECYCLE_HANDLER",
+        "civilization": "KAIOS"
+      }
+    },
+    {
+      "species_id": "KAIOS_LAND_PARCEL_V1",
+      "taxonomy": {
+        "domain": "KGEN_UNIVERSE",
+        "kingdom": "TERRAIN",
+        "phylum": "LAND_LIFE",
+        "class": "LAND_PARCEL",
+        "order": "GOVERNED_TERRITORY",
+        "family": "KAIOS_LAND",
+        "genus": "KAIOS_PARCEL",
+        "species": "KAIOS_LAND_PARCEL_V1",
+        "cell": "TERRAIN_UNIT",
+        "organ": "ECOSYSTEM_OR_LAND_SYSTEM",
+        "runtime": "LAND_LIFECYCLE_HANDLER",
+        "civilization": "KAIOS"
+      }
+    }
+  ]
+}

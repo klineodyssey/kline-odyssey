@@ -1,0 +1,11 @@
+{
+  "schema_version": "1.0",
+  "status": "CANDIDATE_ONLY",
+  "organs": [
+    {
+      "organ_id": "PROGRAM_MODULE",
+      "implementation_ref": "KGEN-KAIOS/organism/runtime/non_executable_lifecycle.py",
+      "required": true
+    }
+  ]
+}
