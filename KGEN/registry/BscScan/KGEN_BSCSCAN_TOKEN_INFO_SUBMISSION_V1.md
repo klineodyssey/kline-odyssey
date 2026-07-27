@@ -1,8 +1,8 @@
 # KGEN BscScan Token Info Submission V1
 
-Task ID: KGEN-BSCSCAN-LOGO-001
-Prepared by: Cursor (implementation worker)
-Record version: V1
+Task ID: KGEN-BSCSCAN-SOCIAL-2026-0001
+Prepared by: Codex
+Record version: V1.1
 
 ---
 
@@ -25,23 +25,38 @@ Record version: V1
 | Official Email | klineodyssey.io@gmail.com |
 | GitHub | https://github.com/klineodyssey/kline-odyssey |
 | Telegram | https://t.me/klineodyssey |
-| Facebook | https://www.facebook.com/profile.php?id=61583248810891 |
+| Facebook | https://www.facebook.com/profile.php?id=61577842687206 |
 | YouTube | https://www.youtube.com/@klineodyssey |
-| Instagram | https://www.instagram.com/klineodyssey/ |
+| Instagram | https://www.instagram.com/klineaios/ |
+| Instagram Handle | `@klineaios` |
 | TikTok | https://www.tiktok.com/@klineodyssey |
 | LINE | https://lin.ee/b8X18F7 |
+
+## Submission Exclusions
+
+| Field | Value |
+|---|---|
+| Creator Profile | `EXCLUDED_FROM_CURRENT_SUBMISSION` |
+| Creator Profile Reason | `PUBLIC_ACCESS_BLOCKED` |
+| Deprecated Instagram | https://www.instagram.com/klineodyssey/ |
+| Deprecated Instagram Status | `DISABLED` / `DO_NOT_SUBMIT` |
 
 ## Project Description
 
 KLINE GENESIS (KGEN) is a BEP-20 utility token on BNB Smart Chain for the K線西遊記 and KAIOS ecosystem. KGEN supports ecosystem applications, digital assets, game functions, community participation and the development of the KAIOS life operating system. The project combines market visualization, digital civilization architecture, applications and blockchain-based utility within one ecosystem.
 
+## Additional Comment
+
+The official KLINE GENESIS social presence includes the verified K線西遊記
+Facebook fan page and the official Instagram ecosystem account `@klineaios`.
+
 ## Logo Assets (GitHub Pages)
 
 | Asset | Public URL |
 |---|---|
-| Logo SVG | https://klineodyssey.github.io/kline-odyssey/assets/kgen/kgen-logo.svg |
-| Logo PNG 64×64 | https://klineodyssey.github.io/kline-odyssey/assets/kgen/kgen-logo-64.png |
-| Logo PNG 256×256 | https://klineodyssey.github.io/kline-odyssey/assets/kgen/kgen-logo-256.png |
+| Primary Logo PNG 64×64 | https://klineodyssey.github.io/kline-odyssey/assets/kgen/kgen-logo-64.png |
+| Alternative Logo SVG | https://klineodyssey.github.io/kline-odyssey/assets/kgen/kgen-logo.svg |
+| High Resolution Logo PNG 256×256 | https://klineodyssey.github.io/kline-odyssey/assets/kgen/kgen-logo-256.png |
 
 Repository paths:
 
@@ -73,6 +88,12 @@ GitHub Pages deployment run `30177479689` completed successfully. All three
 public logo URLs return HTTP 200 without login or redirect. The SVG returns
 `image/svg+xml`; both PNGs return `image/png` and retain their expected
 dimensions.
+
+The current public submission includes the verified KLINE Odyssey Facebook fan
+page and the official Instagram ecosystem account `@klineaios`. The optional
+creator profile is excluded because its public access cannot currently be
+verified. The deprecated Instagram account is disabled and must not be
+submitted.
 
 Human must log into BscScan, verify contract ownership where required, sign the
 ownership-verification message, paste the prepared data, and submit the external
