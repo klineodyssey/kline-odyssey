@@ -439,9 +439,9 @@ KGEN Organization V2.0 is the AI company operating system for Codex and Cursor. 
 | X / Twitter | https://x.com/klineodyssey |
 | YouTube | https://www.youtube.com/@klineodyssey |
 | TikTok | https://www.tiktok.com/@klineodyssey |
-| Facebook Page | https://www.facebook.com/profile.php?id=61583248810891 |
-| Facebook Community | https://www.facebook.com/le.tian.di.2025 |
-| Instagram | https://www.instagram.com/klineodyssey/ |
+| Facebook Page | https://www.facebook.com/profile.php?id=61577842687206 |
+| Facebook Creator Profile | Optional; public access blocked; excluded from current public submission |
+| Instagram | https://www.instagram.com/klineaios/ (`@klineaios`) |
 | LINE Official | https://lin.ee/b8X18F7 |
 | GitHub | https://github.com/klineodyssey/kline-odyssey |
 
@@ -587,7 +587,7 @@ Homepage Quick Actions (Production Block)
     ▶️ 影片（YouTube）
   </a>
 
-  <a href="https://www.facebook.com/profile.php?id=61583248810891"
+  <a href="https://www.facebook.com/profile.php?id=61577842687206"
      target="_blank" rel="noopener"
      style="display:inline-flex;align-items:center;gap:8px;padding:10px 14px;border-radius:999px;font-weight:900;text-decoration:none;border:1px solid #111;background:#fff;">
     🔥 粉絲專頁
@@ -972,7 +972,8 @@ https://klineodyssey.github.io/kline-odyssey/whitepaper/donation/
 - 🐦 [X（Twitter）](https://x.com/klineodyssey)
 - 📺 [YouTube](https://www.youtube.com/@klineodyssey)
 - 🎵 [TikTok](https://www.tiktok.com/@klineodyssey)
-- 📘 [Facebook](https://www.facebook.com/le.tian.di.2025)
+- 📘 [Facebook](https://www.facebook.com/profile.php?id=61577842687206)
+- 📷 [Instagram](https://www.instagram.com/klineaios/)
 ---
 
 ## Investor Documents

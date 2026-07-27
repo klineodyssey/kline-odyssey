@@ -1,14 +1,14 @@
 {
   "metadata": {
     "status": "ACTIVE",
-    "version": "1.1",
-    "revision": "2026-07-12.official-social-canonical",
-    "last_updated": "2026-07-12",
+    "version": "1.2",
+    "revision": "2026-07-27.bscscan-public-social-final",
+    "last_updated": "2026-07-27",
     "updated_by": "Codex",
     "reviewed_by": "Codex",
     "source_commit": "d5d784cd97b50afc2e33f5de2a5a16674de50358",
-    "task_id": "KGEN-OFFICIAL-SOCIAL-2026-0001",
-    "change_reason": "Promote X and Telegram to official canonical entries and make OfficialLinks.json the public link source of truth.",
+    "task_id": "KGEN-BSCSCAN-SOCIAL-2026-0001",
+    "change_reason": "Promote the verified KGEN Facebook fan page and Instagram account while excluding the publicly blocked optional creator profile from the current BscScan submission.",
     "source_of_truth": false,
     "canonical_file": "OfficialLinks.json",
     "taxonomy": {
@@ -179,32 +179,37 @@
       "account": "@klineodyssey"
     },
     "facebook_page": {
-      "url": "https://www.facebook.com/profile.php?id=61583248810891",
+      "url": "https://www.facebook.com/profile.php?id=61577842687206",
       "status": "VERIFIED",
-      "verified_at": "2026-07-12",
+      "verified_at": "2026-07-27",
       "verified_by": "Codex",
-      "source": "User-confirmed official entry",
-      "notes": "Official Facebook Page.",
+      "source": "Human-confirmed official entry; independent public desktop and mobile verification",
+      "notes": "Official KLINE Odyssey Facebook fan page.",
       "label": "Facebook Page"
     },
     "facebook_community": {
       "url": "https://www.facebook.com/le.tian.di.2025",
-      "status": "VERIFIED",
-      "verified_at": "2026-07-12",
+      "status": "PUBLIC_ACCESS_BLOCKED",
+      "classification": "OPTIONAL_CREATOR_PROFILE",
+      "submission_policy": "EXCLUDED_FROM_CURRENT_SUBMISSION",
+      "verified_at": "2026-07-27",
       "verified_by": "Codex",
-      "source": "User-confirmed official entry; archive README",
-      "notes": "Official Facebook community / personal entry.",
-      "label": "Facebook Community"
+      "source": "Human-confirmed historical entry; public access could not be independently verified",
+      "notes": "Optional creator profile. Public access is currently blocked; this does not invalidate ownership and the URL must not be submitted to BscScan until independently verified.",
+      "label": "Facebook Creator Profile (Optional)"
     },
     "instagram": {
-      "url": "https://www.instagram.com/klineodyssey/",
+      "url": "https://www.instagram.com/klineaios/",
       "status": "VERIFIED",
-      "verified_at": "2026-07-12",
+      "verified_at": "2026-07-27",
       "verified_by": "Codex",
-      "source": "User-confirmed official entry",
-      "notes": "Official social link.",
+      "source": "Human-confirmed official entry; independent public desktop and mobile verification",
+      "notes": "Official KLINE Odyssey and KAIOS ecosystem account.",
       "label": "Instagram",
-      "account": "@klineodyssey"
+      "account": "@klineaios",
+      "deprecated_url": "https://www.instagram.com/klineodyssey/",
+      "deprecated_status": "DISABLED",
+      "deprecated_submission_policy": "DO_NOT_SUBMIT"
     },
     "line_official": {
       "url": "https://lin.ee/b8X18F7",
