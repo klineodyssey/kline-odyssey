@@ -51,6 +51,7 @@ Last optimized: 2026-06-11
 | GeckoTerminal | https://www.geckoterminal.com/bsc/pools/0xf36640d7327b53ba3d7fcc1d98dfc1b85574b6c2 |
 | CoinMarketCap DexScan | https://coinmarketcap.com/dexscan/bsc/0xf36640d7327b53ba3d7fcc1d98dfc1b85574b6c2/ |
 | 32×32 SVG Logo | https://raw.githubusercontent.com/klineodyssey/kline-odyssey/refs/heads/main/kgen32.svg |
+| CoinMarketCap 200×200 PNG Logo | https://klineodyssey.github.io/kline-odyssey/assets/kgen/kgen-logo-200.png |
 | GitHub Repository | https://github.com/klineodyssey/kline-odyssey |
 | Official Whitepaper | https://klineodyssey.github.io/kline-odyssey/KGEN/whitepaper/ |
 | Formal Whitepaper V7.5.2 | https://klineodyssey.github.io/kline-odyssey/KGEN/whitepaper/KGEN_Whitepaper_GalacticBank_500Y_Epoch_V7.5.2.html |
