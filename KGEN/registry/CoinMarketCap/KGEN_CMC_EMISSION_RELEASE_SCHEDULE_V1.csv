@@ -1,0 +1,4 @@
+Date,Event Type,Status,Max Supply KGEN,Total Supply KGEN,Circulating Supply KGEN,Emission Amount KGEN,Release Amount KGEN,Policy,Evidence
+2026-01-01,INITIAL_FIXED_SUPPLY,COMPLETED,72000000,72000000,NOT_MEASURED_AT_LAUNCH,72000000,NOT_APPLICABLE,Fixed initial supply minted once by the token constructor,https://github.com/klineodyssey/kline-odyssey/blob/main/KGEN/contracts/KGEN_Token_V7_5_2.sol
+2026-07-28,VERIFIED_SUPPLY_SNAPSHOT,VERIFIED,72000000,71980505.786117825703641,2896511.372639273602111511,0,0,Supply decreased by verified burns and circulating supply excludes non-public balances,https://klineodyssey.github.io/kline-odyssey/KGEN/registry/CoinMarketCap/KGEN_CMC_CIRCULATING_SUPPLY_VERIFICATION.md
+FUTURE,ADDITIONAL_EMISSION,NONE_SCHEDULED,72000000,NOT_APPLICABLE,NOT_APPLICABLE,0,0,NO_SCHEDULED_ADDITIONAL_EMISSION,https://github.com/klineodyssey/kline-odyssey/blob/main/KGEN/contracts/KGEN_Token_V7_5_2.sol

@@ -13,8 +13,10 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[3]
 REGISTRY = ROOT / "KGEN" / "registry" / "CoinMarketCap"
 SNAPSHOT = REGISTRY / "kgen_cmc_supply_snapshot.json"
-TOTAL_API = ROOT / "api" / "kgen" / "total-supply"
-CIRCULATING_API = ROOT / "api" / "kgen" / "circulating-supply"
+TOTAL_API = ROOT / "api" / "kgen" / "total-supply.txt"
+CIRCULATING_API = ROOT / "api" / "kgen" / "circulating-supply.txt"
+LEGACY_TOTAL_API = ROOT / "api" / "kgen" / "total-supply"
+LEGACY_CIRCULATING_API = ROOT / "api" / "kgen" / "circulating-supply"
 NUMBER = re.compile(rb"^(?:0|[1-9][0-9]*)(?:\.[0-9]+)?$")
 
 
@@ -103,6 +105,8 @@ class KgenCmcSupplyTests(unittest.TestCase):
         self.assertEqual(
             circulating_body.decode("ascii"), self.supply["circulating_supply"]
         )
+        self.assertEqual(LEGACY_TOTAL_API.read_bytes(), total_body)
+        self.assertEqual(LEGACY_CIRCULATING_API.read_bytes(), circulating_body)
 
     def test_snapshot_integrity_hash(self) -> None:
         unsigned = dict(self.data)
