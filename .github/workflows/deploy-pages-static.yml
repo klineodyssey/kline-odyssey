@@ -82,6 +82,7 @@ jobs:
           copy_dir "docs"
           copy_dir "archive"
           copy_dir "assets"
+          copy_dir "api"
           copy_dir "KGEN"
           copy_dir "KGEN-Genesis"
           copy_dir "KGEN-Runtime"

@@ -1,0 +1,165 @@
+{
+  "schema_version": "1.0.0",
+  "status": "VERIFIED_READ_ONLY_SNAPSHOT",
+  "network": "BNB Smart Chain",
+  "chain_id": 56,
+  "contract": "0xba3d3810e58735cb6813bc1cdc5458c0d71432be",
+  "decimals": 18,
+  "snapshot": {
+    "block_number": 112570686,
+    "block_hash": "0x0f2c4a7d148cf7737535c6e8113ea97857991041728ec86bec76d781e870532d",
+    "block_timestamp_utc": "2026-07-28T05:32:49Z",
+    "generated_at_utc": "2026-07-28T05:32:59.545797Z",
+    "rpc_method": "eth_call at frozen block",
+    "holder_index_source": "https://api.gopluslabs.io/api/v1/token_security/56?contract_addresses=0xba3d3810e58735cb6813bc1cdc5458c0d71432be",
+    "holder_count": 88,
+    "major_holder_threshold": "0.01"
+  },
+  "supply": {
+    "nominal_max_supply": "72000000",
+    "nominal_max_supply_raw": "72000000000000000000000000",
+    "total_supply": "71980505.786117825703641",
+    "total_supply_raw": "71980505786117825703641000",
+    "burned_supply": "19494.213882174296359",
+    "burned_supply_raw": "19494213882174296359000",
+    "excluded_current_balances": "69083994.413478552101529489",
+    "excluded_current_balances_raw": "69083994413478552101529489",
+    "circulating_supply": "2896511.372639273602111511",
+    "circulating_supply_raw": "2896511372639273602111511",
+    "reconciliation": {
+      "circulating_plus_excluded_equals_total": true,
+      "total_plus_burned_equals_nominal_max": true
+    }
+  },
+  "on_chain_roles": {
+    "owner": "0xb3c54ca96de0ded4ca0151f629ff9781506ba261",
+    "bank_wallet": "0xfa4d34c46e86058e672936fa03cfd79f4c7a4b3c",
+    "reward_wallet": "0x0fd21cf643211d067a18a416da219827da26e288",
+    "auto_lp_wallet": "0xe87f6975fa3d4f3d56dce49fc978884285a3ed85",
+    "liquidity_pair": "0xf36640d7327b53ba3d7fcc1d98dfc1b85574b6c2",
+    "mother_repository_reference": "0xcd60bf474e691f2484950a0276eaf507616ca4b9"
+  },
+  "major_holders": [
+    {
+      "address": "0xb3c54ca96de0ded4ca0151f629ff9781506ba261",
+      "balance": "41775638.372417177049704684",
+      "balance_raw": "41775638372417177049704684",
+      "share_of_total_supply": "0.580374337692887326",
+      "category": "FOUNDER_OR_TEAM_CONTROLLED",
+      "included_in_circulating": false,
+      "reason": "Current on-chain owner and original mint recipient.",
+      "bscscan_evidence": "https://bscscan.com/token/0xba3d3810e58735cb6813bc1cdc5458c0d71432be?a=0xb3c54ca96de0ded4ca0151f629ff9781506ba261",
+      "is_contract": false
+    },
+    {
+      "address": "0xe87f6975fa3d4f3d56dce49fc978884285a3ed85",
+      "balance": "7808747.10694108714818062",
+      "balance_raw": "7808747106941087148180620",
+      "share_of_total_supply": "0.108484193347347715",
+      "category": "TREASURY",
+      "included_in_circulating": false,
+      "reason": "Current on-chain autoLPWallet; project-controlled allocation.",
+      "bscscan_evidence": "https://bscscan.com/token/0xba3d3810e58735cb6813bc1cdc5458c0d71432be?a=0xe87f6975fa3d4f3d56dce49fc978884285a3ed85",
+      "is_contract": false
+    },
+    {
+      "address": "0xfa4d34c46e86058e672936fa03cfd79f4c7a4b3c",
+      "balance": "7219494.213882174296359",
+      "balance_raw": "7219494213882174296359000",
+      "share_of_total_supply": "0.100297908927371379",
+      "category": "BANK",
+      "included_in_circulating": false,
+      "reason": "Current on-chain bankWallet.",
+      "bscscan_evidence": "https://bscscan.com/token/0xba3d3810e58735cb6813bc1cdc5458c0d71432be?a=0xfa4d34c46e86058e672936fa03cfd79f4c7a4b3c",
+      "is_contract": false
+    },
+    {
+      "address": "0x0fd21cf643211d067a18a416da219827da26e288",
+      "balance": "7209747.106941087148179274",
+      "balance_raw": "7209747106941087148179274",
+      "share_of_total_supply": "0.100162495778566207",
+      "category": "REWARD",
+      "included_in_circulating": false,
+      "reason": "Current on-chain rewardWallet.",
+      "bscscan_evidence": "https://bscscan.com/token/0xba3d3810e58735cb6813bc1cdc5458c0d71432be?a=0x0fd21cf643211d067a18a416da219827da26e288",
+      "is_contract": false
+    },
+    {
+      "address": "0xcd60bf474e691f2484950a0276eaf507616ca4b9",
+      "balance": "3600000",
+      "balance_raw": "3600000000000000000000000",
+      "share_of_total_supply": "0.050013541314880517",
+      "category": "FOUNDER_OR_TEAM_CONTROLLED",
+      "included_in_circulating": false,
+      "reason": "Repository runtime records identify this address as MOTHER.",
+      "bscscan_evidence": "https://bscscan.com/token/0xba3d3810e58735cb6813bc1cdc5458c0d71432be?a=0xcd60bf474e691f2484950a0276eaf507616ca4b9",
+      "is_contract": false
+    },
+    {
+      "address": "0xf36640d7327b53ba3d7fcc1d98dfc1b85574b6c2",
+      "balance": "1060310.050838289978556142",
+      "balance_raw": "1060310050838289978556142",
+      "share_of_total_supply": "0.014730516815051077",
+      "category": "LIQUIDITY_POOL",
+      "included_in_circulating": true,
+      "reason": "Canonical PancakeSwap V2 pair; KGEN is available to the public market.",
+      "bscscan_evidence": "https://bscscan.com/token/0xba3d3810e58735cb6813bc1cdc5458c0d71432be?a=0xf36640d7327b53ba3d7fcc1d98dfc1b85574b6c2",
+      "is_contract": true
+    },
+    {
+      "address": "0xb73d6716005b37bec742d64482fa26033ee1a4e1",
+      "balance": "735378.46758893646604062",
+      "balance_raw": "735378467588936466040620",
+      "share_of_total_supply": "0.010216355936342444",
+      "category": "UNKNOWN",
+      "included_in_circulating": false,
+      "reason": "Control and public-float evidence is not recorded; excluded conservatively.",
+      "bscscan_evidence": "https://bscscan.com/token/0xba3d3810e58735cb6813bc1cdc5458c0d71432be?a=0xb73d6716005b37bec742d64482fa26033ee1a4e1",
+      "is_contract": false
+    },
+    {
+      "address": "0xef83804c264b47378fcf150086943b53fb90a90b",
+      "balance": "734989.145708089993065291",
+      "balance_raw": "734989145708089993065291",
+      "share_of_total_supply": "0.010210947223572304",
+      "category": "UNKNOWN",
+      "included_in_circulating": false,
+      "reason": "Control and public-float evidence is not recorded; excluded conservatively.",
+      "bscscan_evidence": "https://bscscan.com/token/0xba3d3810e58735cb6813bc1cdc5458c0d71432be?a=0xef83804c264b47378fcf150086943b53fb90a90b",
+      "is_contract": false
+    }
+  ],
+  "other_classifications": [
+    {
+      "address": "0x0000000000000000000000000000000000000000",
+      "balance": "0",
+      "category": "BURN_ADDRESS",
+      "included_in_circulating": false,
+      "note": "Burns reduce totalSupply; burned_supply is outside current holder balances and is not subtracted twice.",
+      "bscscan_evidence": "https://bscscan.com/token/0xba3d3810e58735cb6813bc1cdc5458c0d71432be?a=0x0000000000000000000000000000000000000000"
+    },
+    {
+      "address": "0xba3d3810e58735cb6813bc1cdc5458c0d71432be",
+      "balance": "0",
+      "category": "CONTRACT_HELD",
+      "included_in_circulating": false,
+      "note": "Any non-zero token-contract balance is excluded.",
+      "bscscan_evidence": "https://bscscan.com/token/0xba3d3810e58735cb6813bc1cdc5458c0d71432be?a=0xba3d3810e58735cb6813bc1cdc5458c0d71432be"
+    }
+  ],
+  "methodology": {
+    "formula": "circulating_supply = total_supply - excluded_current_balances",
+    "major_holder_rule": "balance >= 1% of frozen totalSupply",
+    "unknown_rule": "Major UNKNOWN balances are excluded until public-float evidence exists.",
+    "liquidity_rule": "Tokens in the public PancakeSwap pair are circulating; LP-token ownership is a separate classification.",
+    "coinmarketcap_reference": "https://support.coinmarketcap.com/hc/en-us/articles/360043396252-Supply-Circulating-Total-Max"
+  },
+  "non_actions": {
+    "token_transfer": false,
+    "wallet_connection": false,
+    "private_key_access": false,
+    "contract_change": false,
+    "token_configuration_change": false
+  },
+  "integrity_sha256": "3a96a0419788c804db1a81835cd5d6bca71eac9610bd65c547d4880628e1b4e0"
+}
