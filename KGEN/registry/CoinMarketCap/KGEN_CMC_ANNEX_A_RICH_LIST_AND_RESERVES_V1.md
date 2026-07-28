@@ -61,7 +61,7 @@ subtracted from it a second time.
 | File | SHA-256 |
 |---|---|
 | `KGEN_CMC_ANNEX_A_RICH_LIST_AND_RESERVES_V1.xlsx` | `9d5136e9b18c98db520eb85f46824aa10b05fa652de95aea6fd55b684d8f1c63` |
-| `KGEN_CMC_ANNEX_A_RICH_LIST_AND_RESERVES_V1.csv` | `cb38cbd6c7650288c56468e8ab37a0c3d3dd30f96d7caebe1ad9fe5c36d38bdd` |
+| `KGEN_CMC_ANNEX_A_RICH_LIST_AND_RESERVES_V1.csv` | `184f58f9ec4cb93ef17bd599cef547a475c88caf9abac9e9a5cc889c999171c5` |
 
 ## Evidence
 

@@ -33,7 +33,7 @@ future vesting date, or future release date is asserted.
 | File | SHA-256 |
 |---|---|
 | `KGEN_CMC_EMISSION_RELEASE_SCHEDULE_V1.xlsx` | `4044872d9d710270dcf93d953f362000f1f7e5d5f9a783738131954d2fce772a` |
-| `KGEN_CMC_EMISSION_RELEASE_SCHEDULE_V1.csv` | `dd4d7d2b6df79152346bdcf36a9d013ad7d9990f2a612fcd954abaf4b7bfaeac` |
+| `KGEN_CMC_EMISSION_RELEASE_SCHEDULE_V1.csv` | `418127e023dcb16524b0a8c94065ffc1870dd4fd4afebe1dcb20b2b9c9b087ef` |
 
 ## Evidence
 

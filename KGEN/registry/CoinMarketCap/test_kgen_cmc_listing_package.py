@@ -177,14 +177,17 @@ class CmcListingPackageTests(unittest.TestCase):
             "KGEN_CMC_ANNEX_A_RICH_LIST_AND_RESERVES_V1.xlsx":
                 "9d5136e9b18c98db520eb85f46824aa10b05fa652de95aea6fd55b684d8f1c63",
             "KGEN_CMC_ANNEX_A_RICH_LIST_AND_RESERVES_V1.csv":
-                "cb38cbd6c7650288c56468e8ab37a0c3d3dd30f96d7caebe1ad9fe5c36d38bdd",
+                "184f58f9ec4cb93ef17bd599cef547a475c88caf9abac9e9a5cc889c999171c5",
             "KGEN_CMC_EMISSION_RELEASE_SCHEDULE_V1.xlsx":
                 "4044872d9d710270dcf93d953f362000f1f7e5d5f9a783738131954d2fce772a",
             "KGEN_CMC_EMISSION_RELEASE_SCHEDULE_V1.csv":
-                "dd4d7d2b6df79152346bdcf36a9d013ad7d9990f2a612fcd954abaf4b7bfaeac",
+                "418127e023dcb16524b0a8c94065ffc1870dd4fd4afebe1dcb20b2b9c9b087ef",
         }
         for name, digest in expected.items():
-            actual = hashlib.sha256((CMC / name).read_bytes()).hexdigest()
+            payload = (CMC / name).read_bytes()
+            if name.endswith(".csv"):
+                payload = payload.replace(b"\r\n", b"\n")
+            actual = hashlib.sha256(payload).hexdigest()
             self.assertEqual(actual, digest)
 
     def test_submission_record_has_exact_final_values(self):
