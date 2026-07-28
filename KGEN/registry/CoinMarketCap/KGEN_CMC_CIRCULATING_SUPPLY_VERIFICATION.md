@@ -11,12 +11,16 @@ Decimals: `18`
 ## Public APIs
 
 - Total Supply:
-  https://klineodyssey.github.io/kline-odyssey/api/kgen/total-supply
+  https://klineodyssey.github.io/kline-odyssey/api/kgen/total-supply.txt
 - Circulating Supply:
-  https://klineodyssey.github.io/kline-odyssey/api/kgen/circulating-supply
+  https://klineodyssey.github.io/kline-odyssey/api/kgen/circulating-supply.txt
 
 Each endpoint contains one plain base-10 number only. Neither endpoint returns
 JSON, labels, markup, or wallet data.
+
+The original extensionless routes remain deployed for backward compatibility.
+The `.txt` routes are the canonical CoinMarketCap endpoints because GitHub Pages
+serves them with a plain-text Content-Type.
 
 ## Frozen Chain Snapshot
 
