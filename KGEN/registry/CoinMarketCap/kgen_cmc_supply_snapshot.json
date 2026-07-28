@@ -22,10 +22,10 @@
     "total_supply_raw": "71980505786117825703641000",
     "burned_supply": "19494.213882174296359",
     "burned_supply_raw": "19494213882174296359000",
-    "excluded_current_balances": "69083994.413478552101529489",
-    "excluded_current_balances_raw": "69083994413478552101529489",
-    "circulating_supply": "2896511.372639273602111511",
-    "circulating_supply_raw": "2896511372639273602111511",
+    "excluded_current_balances": "67613626.800181525642423578",
+    "excluded_current_balances_raw": "67613626800181525642423578",
+    "circulating_supply": "4366878.985936300061217422",
+    "circulating_supply_raw": "4366878985936300061217422",
     "reconciliation": {
       "circulating_plus_excluded_equals_total": true,
       "total_plus_burned_equals_nominal_max": true
@@ -111,9 +111,9 @@
       "balance": "735378.46758893646604062",
       "balance_raw": "735378467588936466040620",
       "share_of_total_supply": "0.010216355936342444",
-      "category": "UNKNOWN",
-      "included_in_circulating": false,
-      "reason": "Control and public-float evidence is not recorded; excluded conservatively.",
+      "category": "PUBLIC_CIRCULATING",
+      "included_in_circulating": true,
+      "reason": "Ownership is unverified; no evidence establishes project control, lock, vesting, or non-circulating status.",
       "bscscan_evidence": "https://bscscan.com/token/0xba3d3810e58735cb6813bc1cdc5458c0d71432be?a=0xb73d6716005b37bec742d64482fa26033ee1a4e1",
       "is_contract": false
     },
@@ -122,9 +122,9 @@
       "balance": "734989.145708089993065291",
       "balance_raw": "734989145708089993065291",
       "share_of_total_supply": "0.010210947223572304",
-      "category": "UNKNOWN",
-      "included_in_circulating": false,
-      "reason": "Control and public-float evidence is not recorded; excluded conservatively.",
+      "category": "PUBLIC_CIRCULATING",
+      "included_in_circulating": true,
+      "reason": "Ownership is unverified; no evidence establishes project control, lock, vesting, or non-circulating status.",
       "bscscan_evidence": "https://bscscan.com/token/0xba3d3810e58735cb6813bc1cdc5458c0d71432be?a=0xef83804c264b47378fcf150086943b53fb90a90b",
       "is_contract": false
     }
@@ -150,7 +150,7 @@
   "methodology": {
     "formula": "circulating_supply = total_supply - excluded_current_balances",
     "major_holder_rule": "balance >= 1% of frozen totalSupply",
-    "unknown_rule": "Major UNKNOWN balances are excluded until public-float evidence exists.",
+    "ownership_unverified_rule": "Ownership-unverified balances remain circulating unless evidence establishes project control, lock, vesting, or another non-circulating classification.",
     "liquidity_rule": "Tokens in the public PancakeSwap pair are circulating; LP-token ownership is a separate classification.",
     "coinmarketcap_reference": "https://support.coinmarketcap.com/hc/en-us/articles/360043396252-Supply-Circulating-Total-Max"
   },
@@ -161,5 +161,5 @@
     "contract_change": false,
     "token_configuration_change": false
   },
-  "integrity_sha256": "3a96a0419788c804db1a81835cd5d6bca71eac9610bd65c547d4880628e1b4e0"
+  "integrity_sha256": "4518cb3f4b4789efef22eac7f671afc026c9b399cc78c653546a36b9d7b7f85e"
 }

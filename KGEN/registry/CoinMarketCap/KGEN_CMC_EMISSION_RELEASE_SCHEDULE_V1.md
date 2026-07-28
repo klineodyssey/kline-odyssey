@@ -13,7 +13,7 @@ Policy: `NO_SCHEDULED_ADDITIONAL_EMISSION`
 - Verified total supply at BSC block `112570686`:
   `71980505.786117825703641 KGEN`
 - Verified circulating supply at that block:
-  `2896511.372639273602111511 KGEN`
+  `4366878.985936300061217422 KGEN`
 - Verified cumulative burn difference from max supply:
   `19494.213882174296359 KGEN`
 
@@ -32,8 +32,8 @@ future vesting date, or future release date is asserted.
 
 | File | SHA-256 |
 |---|---|
-| `KGEN_CMC_EMISSION_RELEASE_SCHEDULE_V1.xlsx` | `2f7ec2eece6168cb781d58a4f7965a14cf35b5a75e3d9f1802d5c46851a39d6e` |
-| `KGEN_CMC_EMISSION_RELEASE_SCHEDULE_V1.csv` | `970d2f6a2f1f2a8b21d3afceb43cc7563f53b31cefbf43575e5b4324d344a98f` |
+| `KGEN_CMC_EMISSION_RELEASE_SCHEDULE_V1.xlsx` | `4044872d9d710270dcf93d953f362000f1f7e5d5f9a783738131954d2fce772a` |
+| `KGEN_CMC_EMISSION_RELEASE_SCHEDULE_V1.csv` | `dd4d7d2b6df79152346bdcf36a9d013ad7d9990f2a612fcd954abaf4b7bfaeac` |
 
 ## Evidence
 

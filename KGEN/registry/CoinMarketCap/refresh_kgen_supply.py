@@ -24,12 +24,18 @@ GOPLUS_URL = (
 MAJOR_THRESHOLD = Decimal("0.01")
 ZERO_ADDRESS = "0x0000000000000000000000000000000000000000"
 MOTHER_ADDRESS = "0xcd60bf474e691f2484950a0276eaf507616ca4b9"
+PUBLIC_OWNERSHIP_UNVERIFIED_ADDRESSES = {
+    "0xb73d6716005b37bec742d64482fa26033ee1a4e1",
+    "0xef83804c264b47378fcf150086943b53fb90a90b",
+}
 
 ROOT = Path(__file__).resolve().parents[3]
 REGISTRY_DIR = ROOT / "KGEN" / "registry" / "CoinMarketCap"
 SNAPSHOT_PATH = REGISTRY_DIR / "kgen_cmc_supply_snapshot.json"
 TOTAL_API_PATH = ROOT / "api" / "kgen" / "total-supply"
 CIRCULATING_API_PATH = ROOT / "api" / "kgen" / "circulating-supply"
+TOTAL_API_TXT_PATH = ROOT / "api" / "kgen" / "total-supply.txt"
+CIRCULATING_API_TXT_PATH = ROOT / "api" / "kgen" / "circulating-supply.txt"
 
 
 def _request_json(url: str, payload: dict | None = None) -> dict:
@@ -140,10 +146,17 @@ def classify(
             "Canonical PancakeSwap V2 pair; KGEN is available to the public market.",
             evidence,
         )
+    if address in PUBLIC_OWNERSHIP_UNVERIFIED_ADDRESSES:
+        return (
+            "PUBLIC_CIRCULATING",
+            True,
+            "Ownership is unverified; no evidence establishes project control, lock, vesting, or non-circulating status.",
+            evidence,
+        )
     return (
-        "UNKNOWN",
-        False,
-        "Control and public-float evidence is not recorded; excluded conservatively.",
+        "PUBLIC_CIRCULATING",
+        True,
+        "No evidence establishes project control, lock, vesting, or non-circulating status.",
         evidence,
     )
 
@@ -287,8 +300,10 @@ def main() -> None:
         "methodology": {
             "formula": "circulating_supply = total_supply - excluded_current_balances",
             "major_holder_rule": "balance >= 1% of frozen totalSupply",
-            "unknown_rule": (
-                "Major UNKNOWN balances are excluded until public-float evidence exists."
+            "ownership_unverified_rule": (
+                "Ownership-unverified balances remain circulating unless evidence "
+                "establishes project control, lock, vesting, or another "
+                "non-circulating classification."
             ),
             "liquidity_rule": (
                 "Tokens in the public PancakeSwap pair are circulating; LP-token "
@@ -318,8 +333,10 @@ def main() -> None:
         encoding="utf-8",
     )
     TOTAL_API_PATH.parent.mkdir(parents=True, exist_ok=True)
-    TOTAL_API_PATH.write_text(token_string(total_raw), encoding="ascii")
-    CIRCULATING_API_PATH.write_text(token_string(circulating_raw), encoding="ascii")
+    for path in (TOTAL_API_PATH, TOTAL_API_TXT_PATH):
+        path.write_text(token_string(total_raw), encoding="ascii")
+    for path in (CIRCULATING_API_PATH, CIRCULATING_API_TXT_PATH):
+        path.write_text(token_string(circulating_raw), encoding="ascii")
     print(f"block={block_number}")
     print(f"total_supply={token_string(total_raw)}")
     print(f"excluded={token_string(excluded_raw)}")
