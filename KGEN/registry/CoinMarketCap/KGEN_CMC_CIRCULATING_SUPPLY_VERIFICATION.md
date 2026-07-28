@@ -34,8 +34,8 @@ serves them with a plain-text Content-Type.
 | Nominal maximum supply | `72,000,000 KGEN` |
 | Current totalSupply, net of burns | `71,980,505.786117825703641 KGEN` |
 | Verifiably burned | `19,494.213882174296359 KGEN` |
-| Excluded current balances | `69,083,994.413478552101529489 KGEN` |
-| Conservative circulating supply | `2,896,511.372639273602111511 KGEN` |
+| Excluded current balances | `67,613,626.800181525642423578 KGEN` |
+| Evidence-based circulating supply | `4,366,878.985936300061217422 KGEN` |
 
 The raw values, role addresses, integrity digest, and machine-readable evidence
 are in
@@ -58,11 +58,12 @@ below was then read again from the KGEN contract with `balanceOf` at the single
 frozen block above. The current contract roles were independently read with
 `owner`, `bankWallet`, `rewardWallet`, and `autoLPWallet`.
 
-Unknown addresses holding at least 1% are excluded conservatively until the
-project can furnish evidence that they are public-float holders. This avoids
-overstating supply. Tokens in the public PancakeSwap pair are included because
-they are available to the public market; ownership of the LP tokens is a
-separate question from the KGEN balance held by the pair.
+Ownership-unverified addresses remain circulating unless affirmative evidence
+shows project control, a lock, vesting, treasury or reserve custody, or another
+non-circulating condition. Lack of ownership evidence alone is not evidence for
+exclusion. Tokens in the public PancakeSwap pair are included because they are
+available to the public market; ownership of the LP tokens is a separate
+question from the KGEN balance held by the pair.
 
 ## Major Holders
 
@@ -74,8 +75,8 @@ separate question from the KGEN balance held by the pair.
 | `0x0fd21cf643211d067a18a416da219827da26e288` | `7,209,747.106941087148179274` | `REWARD` | No | [BscScan](https://bscscan.com/token/0xba3d3810e58735cb6813bc1cdc5458c0d71432be?a=0x0fd21cf643211d067a18a416da219827da26e288); current `rewardWallet` |
 | `0xcd60bf474e691f2484950a0276eaf507616ca4b9` | `3,600,000.000000000000000000` | `FOUNDER_OR_TEAM_CONTROLLED` | No | [BscScan](https://bscscan.com/token/0xba3d3810e58735cb6813bc1cdc5458c0d71432be?a=0xcd60bf474e691f2484950a0276eaf507616ca4b9); repository runtime records identify it as `MOTHER` |
 | `0xf36640d7327b53ba3d7fcc1d98dfc1b85574b6c2` | `1,060,310.050838289978556142` | `LIQUIDITY_POOL` | Yes | [BscScan](https://bscscan.com/token/0xba3d3810e58735cb6813bc1cdc5458c0d71432be?a=0xf36640d7327b53ba3d7fcc1d98dfc1b85574b6c2); canonical PancakeSwap V2 pair |
-| `0xb73d6716005b37bec742d64482fa26033ee1a4e1` | `735,378.467588936466040620` | `UNKNOWN` | No | [BscScan](https://bscscan.com/token/0xba3d3810e58735cb6813bc1cdc5458c0d71432be?a=0xb73d6716005b37bec742d64482fa26033ee1a4e1); public-float evidence not recorded |
-| `0xef83804c264b47378fcf150086943b53fb90a90b` | `734,989.145708089993065291` | `UNKNOWN` | No | [BscScan](https://bscscan.com/token/0xba3d3810e58735cb6813bc1cdc5458c0d71432be?a=0xef83804c264b47378fcf150086943b53fb90a90b); public-float evidence not recorded |
+| `0xb73d6716005b37bec742d64482fa26033ee1a4e1` | `735,378.467588936466040620` | `PUBLIC_CIRCULATING` | Yes | [BscScan](https://bscscan.com/token/0xba3d3810e58735cb6813bc1cdc5458c0d71432be?a=0xb73d6716005b37bec742d64482fa26033ee1a4e1); `OWNERSHIP_UNVERIFIED`; no evidence of project control, lock, vesting or non-circulation |
+| `0xef83804c264b47378fcf150086943b53fb90a90b` | `734,989.145708089993065291` | `PUBLIC_CIRCULATING` | Yes | [BscScan](https://bscscan.com/token/0xba3d3810e58735cb6813bc1cdc5458c0d71432be?a=0xef83804c264b47378fcf150086943b53fb90a90b); `OWNERSHIP_UNVERIFIED`; no evidence of project control, lock, vesting or non-circulation |
 
 The ranked source extended below 1%, so all holders meeting the declared
 major-holder threshold are included.
@@ -91,11 +92,32 @@ No separately evidenced `LOCKED` KGEN holder was present among major holders.
 The PancakeSwap LP tokens are reported as locked by the holder index, but the
 KGEN inside the public pair remains market liquidity.
 
+## CoinGecko Vested/Locked Wallet Submission Package
+
+Only the five evidenced project-controlled non-circulating wallets below belong
+in the submission package. `Lock Status` remains `NOT_EVIDENCED`; the package
+does not misrepresent project control as an on-chain time lock. No scheduled
+unlock has been established. CoinGecko's
+[Supply Update Form guide](https://support.coingecko.com/hc/en-us/articles/32227012396441-Guide-How-to-Use-the-CoinGecko-Supply-Update-Form)
+uses this field for locked, vested, foundation, treasury, and team allocations.
+
+| Address | Label | Balance KGEN | Classification | Unlock Date | Evidence |
+|---|---|---:|---|---|---|
+| `0xb3c54ca96de0ded4ca0151f629ff9781506ba261` | Contract owner and original mint recipient | `41,775,638.372417177049704684` | `PROJECT_CONTROLLED_NON_CIRCULATING` | `No scheduled unlock` | [BscScan](https://bscscan.com/token/0xba3d3810e58735cb6813bc1cdc5458c0d71432be?a=0xb3c54ca96de0ded4ca0151f629ff9781506ba261) |
+| `0xe87f6975fa3d4f3d56dce49fc978884285a3ed85` | autoLPWallet reserve | `7,808,747.106941087148180620` | `TREASURY_NON_CIRCULATING` | `No scheduled unlock` | [BscScan](https://bscscan.com/token/0xba3d3810e58735cb6813bc1cdc5458c0d71432be?a=0xe87f6975fa3d4f3d56dce49fc978884285a3ed85) |
+| `0xfa4d34c46e86058e672936fa03cfd79f4c7a4b3c` | bankWallet | `7,219,494.213882174296359000` | `BANK_NON_CIRCULATING` | `No scheduled unlock` | [BscScan](https://bscscan.com/token/0xba3d3810e58735cb6813bc1cdc5458c0d71432be?a=0xfa4d34c46e86058e672936fa03cfd79f4c7a4b3c) |
+| `0x0fd21cf643211d067a18a416da219827da26e288` | rewardWallet | `7,209,747.106941087148179274` | `REWARD_NON_CIRCULATING` | `No scheduled unlock` | [BscScan](https://bscscan.com/token/0xba3d3810e58735cb6813bc1cdc5458c0d71432be?a=0x0fd21cf643211d067a18a416da219827da26e288) |
+| `0xcd60bf474e691f2484950a0276eaf507616ca4b9` | MOTHER repository reference | `3,600,000.000000000000000000` | `PROJECT_CONTROLLED_NON_CIRCULATING` | `No scheduled unlock` | [BscScan](https://bscscan.com/token/0xba3d3810e58735cb6813bc1cdc5458c0d71432be?a=0xcd60bf474e691f2484950a0276eaf507616ca4b9) |
+
+The two `OWNERSHIP_UNVERIFIED` major holders are not included in this package
+and are not described as vested, locked, team, treasury, bank, or reward
+wallets.
+
 ## Reconciliation
 
 ```text
-2,896,511.372639273602111511
-+ 69,083,994.413478552101529489
+4,366,878.985936300061217422
++ 67,613,626.800181525642423578
 = 71,980,505.786117825703641
 ```
 

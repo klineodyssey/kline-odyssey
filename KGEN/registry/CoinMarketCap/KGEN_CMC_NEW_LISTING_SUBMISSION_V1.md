@@ -72,7 +72,7 @@ K線西遊記 and KAIOS digital ecosystem.
 
 **Total Supply:** 71980505.786117825703641
 
-**Circulating Supply:** 2896511.372639273602111511
+**Circulating Supply:** 4366878.985936300061217422
 
 **Total Supply API:** https://klineodyssey.github.io/kline-odyssey/api/kgen/total-supply.txt
 
@@ -133,8 +133,8 @@ reviewable through the links in this record.
 **Emission and Release:** KGEN has a fixed initial max supply of 72,000,000.
 There is no future minting or inflation schedule. The verified total supply is
 lower than max supply due to burn behavior. Circulating supply excludes
-project-controlled, treasury, bank, reward, conservatively unclassified, and
-other non-circulating balances documented in Annex A.
+only evidenced project-controlled, treasury, bank, reward, and other
+non-circulating balances documented in Annex A.
 
 ## Submission Boundary
 

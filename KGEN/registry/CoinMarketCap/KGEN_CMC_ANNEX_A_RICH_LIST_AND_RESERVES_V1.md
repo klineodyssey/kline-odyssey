@@ -14,13 +14,13 @@ Contract: `0xba3d3810e58735cb6813bc1cdc5458c0d71432be`
 |---|---:|
 | Max supply | 72000000 |
 | Verified total supply | 71980505.786117825703641 |
-| Verified circulating supply | 2896511.372639273602111511 |
-| Excluded current balances | 69083994.413478552101529489 |
+| Verified circulating supply | 4366878.985936300061217422 |
+| Excluded current balances | 67613626.800181525642423578 |
 | Verified burns outside current holder balances | 19494.213882174296359 |
 
 The Annex A arithmetic is exact:
 
-`2896511.372639273602111511 + 69083994.413478552101529489 = 71980505.786117825703641`
+`4366878.985936300061217422 + 67613626.800181525642423578 = 71980505.786117825703641`
 
 The max-supply reconciliation is also exact:
 
@@ -41,11 +41,14 @@ The package uses these CoinMarketCap supply-review classifications:
 - `CONTRACT_HELD`
 - `UNKNOWN`
 
-No holder is classified as `LOCKED` without verified lock evidence. Major
-`UNKNOWN` balances are conservatively excluded until public-float evidence is
-recorded. Public PancakeSwap V2 KGEN/WBNB liquidity is included because the
-tokens are available to the market; LP-token ownership is a separate question.
-Burned tokens reduce `totalSupply` and are not subtracted from it a second time.
+No holder is classified as `LOCKED` without verified lock evidence. The two
+major ownership-unverified balances are classified `PUBLIC_CIRCULATING`
+because no evidence establishes project control, lock, vesting, treasury or
+reserve custody. Public PancakeSwap V2 KGEN/WBNB liquidity is included because
+the tokens are available to the market; LP-token ownership is a separate
+question. Only the five evidenced project-controlled wallets with non-zero
+balances are excluded. Burned tokens reduce `totalSupply` and are not
+subtracted from it a second time.
 
 ## Public Downloads
 
@@ -57,8 +60,8 @@ Burned tokens reduce `totalSupply` and are not subtracted from it a second time.
 
 | File | SHA-256 |
 |---|---|
-| `KGEN_CMC_ANNEX_A_RICH_LIST_AND_RESERVES_V1.xlsx` | `c65ecb7eee667871a82f82bca1a89784cb11df76bac4974eea7c7cdb519059f4` |
-| `KGEN_CMC_ANNEX_A_RICH_LIST_AND_RESERVES_V1.csv` | `5534c66af24b2ab167b69b9eb295aa17514ac8cad94f5ce837a046e259b64826` |
+| `KGEN_CMC_ANNEX_A_RICH_LIST_AND_RESERVES_V1.xlsx` | `9d5136e9b18c98db520eb85f46824aa10b05fa652de95aea6fd55b684d8f1c63` |
+| `KGEN_CMC_ANNEX_A_RICH_LIST_AND_RESERVES_V1.csv` | `cb38cbd6c7650288c56468e8ab37a0c3d3dd30f96d7caebe1ad9fe5c36d38bdd` |
 
 ## Evidence
 

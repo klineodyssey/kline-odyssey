@@ -81,9 +81,23 @@ class KgenCmcSupplyTests(unittest.TestCase):
                 "LOCKED",
                 "BURN_ADDRESS",
                 "CONTRACT_HELD",
-                "UNKNOWN",
             }:
                 self.assertFalse(holder["included_in_circulating"])
+
+    def test_ownership_unverified_holders_are_circulating(self) -> None:
+        expected = {
+            "0xb73d6716005b37bec742d64482fa26033ee1a4e1",
+            "0xef83804c264b47378fcf150086943b53fb90a90b",
+        }
+        holders = {
+            item["address"]: item
+            for item in self.data["major_holders"]
+            if item["address"] in expected
+        }
+        self.assertEqual(set(holders), expected)
+        for holder in holders.values():
+            self.assertEqual(holder["category"], "PUBLIC_CIRCULATING")
+            self.assertTrue(holder["included_in_circulating"])
 
     def test_liquidity_is_separate_from_project_control(self) -> None:
         pools = [

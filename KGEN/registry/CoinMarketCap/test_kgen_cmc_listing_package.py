@@ -12,8 +12,8 @@ CMC = ROOT / "KGEN" / "registry" / "CoinMarketCap"
 API = ROOT / "api" / "kgen"
 
 TOTAL = Decimal("71980505.786117825703641")
-CIRCULATING = Decimal("2896511.372639273602111511")
-EXCLUDED = Decimal("69083994.413478552101529489")
+CIRCULATING = Decimal("4366878.985936300061217422")
+EXCLUDED = Decimal("67613626.800181525642423578")
 MAX_SUPPLY = Decimal("72000000")
 BURNED = Decimal("19494.213882174296359")
 
@@ -69,6 +69,61 @@ class CmcListingPackageTests(unittest.TestCase):
         self.assertEqual(Decimal(supply["burned_supply"]), BURNED)
         self.assertEqual(TOTAL + BURNED, MAX_SUPPLY)
 
+    def test_only_five_evidenced_project_wallets_are_excluded(self):
+        with (CMC / "KGEN_CMC_ANNEX_A_RICH_LIST_AND_RESERVES_V1.csv").open(
+            encoding="utf-8", newline=""
+        ) as handle:
+            rows = list(csv.DictReader(handle))
+        excluded = [
+            row
+            for row in rows
+            if row["Circulating Status"] == "NON_CIRCULATING"
+            and Decimal(row["Token Balance KGEN"]) > 0
+        ]
+        self.assertEqual(len(excluded), 5)
+        self.assertEqual(
+            {row["Classification"] for row in excluded},
+            {"FOUNDER_OR_TEAM_CONTROLLED", "TREASURY", "BANK", "REWARD"},
+        )
+        reclassified = {
+            row["Wallet Address"]: row
+            for row in rows
+            if row["Wallet Address"]
+            in {
+                "0xb73d6716005b37bec742d64482fa26033ee1a4e1",
+                "0xef83804c264b47378fcf150086943b53fb90a90b",
+            }
+        }
+        self.assertEqual(len(reclassified), 2)
+        for row in reclassified.values():
+            self.assertEqual(row["Classification"], "PUBLIC_CIRCULATING")
+            self.assertEqual(row["Circulating Status"], "CIRCULATING")
+            self.assertEqual(row["Project Control Status"], "OWNERSHIP_UNVERIFIED")
+
+    def test_coingecko_wallet_package_has_only_five_project_wallets(self):
+        report = (
+            CMC / "KGEN_CMC_CIRCULATING_SUPPLY_VERIFICATION.md"
+        ).read_text(encoding="utf-8")
+        section = report.split(
+            "## CoinGecko Vested/Locked Wallet Submission Package", 1
+        )[1].split("## Reconciliation", 1)[0]
+        expected = {
+            "0xb3c54ca96de0ded4ca0151f629ff9781506ba261",
+            "0xe87f6975fa3d4f3d56dce49fc978884285a3ed85",
+            "0xfa4d34c46e86058e672936fa03cfd79f4c7a4b3c",
+            "0x0fd21cf643211d067a18a416da219827da26e288",
+            "0xcd60bf474e691f2484950a0276eaf507616ca4b9",
+        }
+        for address in expected:
+            self.assertIn(address, section)
+        self.assertEqual(section.count("| `0x"), 5)
+        self.assertNotIn(
+            "0xb73d6716005b37bec742d64482fa26033ee1a4e1", section
+        )
+        self.assertNotIn(
+            "0xef83804c264b47378fcf150086943b53fb90a90b", section
+        )
+
     def test_all_annex_classifications_documented(self):
         report = (
             CMC / "KGEN_CMC_ANNEX_A_RICH_LIST_AND_RESERVES_V1.md"
@@ -120,13 +175,13 @@ class CmcListingPackageTests(unittest.TestCase):
     def test_artifact_sha256_values(self):
         expected = {
             "KGEN_CMC_ANNEX_A_RICH_LIST_AND_RESERVES_V1.xlsx":
-                "c65ecb7eee667871a82f82bca1a89784cb11df76bac4974eea7c7cdb519059f4",
+                "9d5136e9b18c98db520eb85f46824aa10b05fa652de95aea6fd55b684d8f1c63",
             "KGEN_CMC_ANNEX_A_RICH_LIST_AND_RESERVES_V1.csv":
-                "5534c66af24b2ab167b69b9eb295aa17514ac8cad94f5ce837a046e259b64826",
+                "cb38cbd6c7650288c56468e8ab37a0c3d3dd30f96d7caebe1ad9fe5c36d38bdd",
             "KGEN_CMC_EMISSION_RELEASE_SCHEDULE_V1.xlsx":
-                "2f7ec2eece6168cb781d58a4f7965a14cf35b5a75e3d9f1802d5c46851a39d6e",
+                "4044872d9d710270dcf93d953f362000f1f7e5d5f9a783738131954d2fce772a",
             "KGEN_CMC_EMISSION_RELEASE_SCHEDULE_V1.csv":
-                "970d2f6a2f1f2a8b21d3afceb43cc7563f53b31cefbf43575e5b4324d344a98f",
+                "dd4d7d2b6df79152346bdcf36a9d013ad7d9990f2a612fcd954abaf4b7bfaeac",
         }
         for name, digest in expected.items():
             actual = hashlib.sha256((CMC / name).read_bytes()).hexdigest()
