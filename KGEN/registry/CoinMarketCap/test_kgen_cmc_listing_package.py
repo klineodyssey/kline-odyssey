@@ -1,6 +1,7 @@
 import csv
 import hashlib
 import json
+import struct
 import unittest
 import zipfile
 from decimal import Decimal
@@ -215,6 +216,29 @@ class CmcListingPackageTests(unittest.TestCase):
         )
         self.assertIn("[INSERT_AFTER_SUBMISSION]", post)
         self.assertIn("DO_NOT_PUBLISH_BEFORE_REAL_TICKET_NUMBER", post)
+
+    def test_coingecko_project_banner_asset(self):
+        banner = ROOT / "assets" / "kgen" / "kgen-coingecko-banner-1360x430.png"
+        payload = banner.read_bytes()
+        self.assertTrue(payload.startswith(b"\x89PNG\r\n\x1a\n"))
+        self.assertLess(len(payload), 2 * 1024 * 1024)
+
+        length = struct.unpack(">I", payload[8:12])[0]
+        self.assertEqual(payload[12:16], b"IHDR")
+        self.assertEqual(length, 13)
+        width, height, bit_depth, color_type = struct.unpack(
+            ">IIBB", payload[16:26]
+        )
+        self.assertEqual((width, height), (1360, 430))
+        self.assertEqual(bit_depth, 8)
+        self.assertIn(color_type, {2, 6})
+
+        readme = (ROOT / "README.md").read_text(encoding="utf-8")
+        self.assertIn(
+            "https://klineodyssey.github.io/kline-odyssey/"
+            "assets/kgen/kgen-coingecko-banner-1360x430.png",
+            readme,
+        )
 
 
 if __name__ == "__main__":
