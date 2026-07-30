@@ -1,0 +1,48 @@
+{
+  "organ_systems": [
+    {
+      "organ_id": "SENSOR_ARRAY",
+      "functions": [
+        "PERCEIVE",
+        "VISION_SIMULATION",
+        "AUDIO_SIMULATION"
+      ],
+      "health": 100
+    },
+    {
+      "organ_id": "LOCOMOTION_SYSTEM",
+      "functions": [
+        "MOVE",
+        "ESCAPE_SIMULATION",
+        "HUNT_SIMULATION"
+      ],
+      "health": 100
+    },
+    {
+      "organ_id": "DIGITAL_METABOLISM",
+      "functions": [
+        "EAT",
+        "DRINK",
+        "ENERGY_BALANCE"
+      ],
+      "health": 100
+    },
+    {
+      "organ_id": "MEMORY_CORE",
+      "functions": [
+        "RECORD_MEMORY",
+        "REPLAY"
+      ],
+      "health": 100
+    },
+    {
+      "organ_id": "HEALTH_REGULATOR",
+      "functions": [
+        "HEALING_SIMULATION",
+        "TEMPERATURE_BALANCE"
+      ],
+      "health": 100
+    }
+  ],
+  "real_anatomy_instruction": false
+}

@@ -1,0 +1,13 @@
+{
+  "active_behavior": "WAKE",
+  "available_behaviors": [
+    "MOVE",
+    "PERCEIVE",
+    "EAT",
+    "DRINK",
+    "REST",
+    "SOCIAL_INTERACTION",
+    "HUNT_SIMULATION",
+    "ESCAPE_SIMULATION"
+  ]
+}

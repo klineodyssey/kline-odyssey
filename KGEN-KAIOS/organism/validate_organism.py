@@ -227,12 +227,26 @@ def _validate_entrypoint(root: Path, reference: str) -> None:
     function_name = reference.split("#", 1)[1]
     if not function_name:
         raise ValidationError(f"empty Runtime entrypoint: {reference}")
-    if path.suffix != ".py":
-        raise ValidationError(f"named Runtime entrypoint requires Python source: {reference}")
-    tree = ast.parse(path.read_text(encoding="utf-8"))
-    functions = {node.name for node in tree.body if isinstance(node, ast.FunctionDef)}
-    if function_name not in functions:
-        raise ValidationError(f"Runtime entrypoint does not resolve: {reference}")
+    source = path.read_text(encoding="utf-8")
+    if path.suffix == ".py":
+        tree = ast.parse(source)
+        functions = {node.name for node in tree.body if isinstance(node, ast.FunctionDef)}
+        if function_name not in functions:
+            raise ValidationError(f"Runtime entrypoint does not resolve: {reference}")
+        return
+    if path.suffix in {".js", ".mjs"}:
+        declaration = re.compile(
+            rf"^\s*export\s+(?:async\s+)?(?:class|function|const|let|var)\s+{re.escape(function_name)}\b",
+            re.MULTILINE,
+        )
+        export_list = re.compile(
+            rf"^\s*export\s*\{{[^}}]*\b{re.escape(function_name)}\b[^}}]*\}}",
+            re.MULTILINE,
+        )
+        if not declaration.search(source) and not export_list.search(source):
+            raise ValidationError(f"Runtime entrypoint does not resolve: {reference}")
+        return
+    raise ValidationError(f"named Runtime entrypoint source type is unsupported: {reference}")
 
 
 def validate_taxonomy_registry(registry: dict[str, Any]) -> None:

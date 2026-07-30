@@ -105,6 +105,7 @@ button:focus-visible, canvas:focus-visible, [tabindex]:focus-visible {
   min-width: 54px; min-height: 58px; padding: 7px 4px; border: 1px solid transparent; border-radius: 6px;
   background: transparent; color: var(--muted); cursor: pointer; display: grid; place-items: center; gap: 2px;
 }
+.mode-link { text-decoration: none; font: inherit; text-align: center; }
 .mode-button span:first-child { font-size: 20px; }
 .mode-button span:last-child { font-size: 10px; }
 .mode-button:hover, .mode-button.is-active { color: var(--text); background: var(--surface-2); border-color: var(--line); }
@@ -667,6 +668,13 @@ button:focus-visible, canvas:focus-visible, [tabindex]:focus-visible {
   .map-status { bottom: calc(142px + var(--safe-bottom)); }
   .toast-region { bottom: calc(146px + var(--safe-bottom)); }
   .context-menu.action-sheet { max-height: calc(100dvh - var(--safe-top)); }
+}
+
+@media (max-height: 520px) and (min-width: 901px) and (max-width: 960px) {
+  .mode-rail { min-height: 0; padding: 6px 5px; gap: 4px; overflow-y: auto; }
+  .mode-button { min-width: 48px; min-height: 48px; padding: 4px 3px; }
+  .mode-button span:first-child { font-size: 18px; }
+  .mode-button span:last-child { font-size: 9px; }
 }
 
 @media (prefers-reduced-motion: reduce) {

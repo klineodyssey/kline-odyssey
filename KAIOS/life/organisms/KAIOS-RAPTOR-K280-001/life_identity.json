@@ -1,0 +1,16 @@
+{
+  "life_id": "LIFE-KAIOS-RAPTOR-K280-001",
+  "organism_id": "KAIOS-RAPTOR-K280-001",
+  "species_id": "SPECIES-KAIOS-K280-RAPTOR",
+  "genome_id": "GENOME-KAIOS-RAPTOR-K280-001-G0",
+  "embodiment_id": "EMBODIMENT-KAIOS-RAPTOR-K280-001-DIGITAL",
+  "birth_event_id": "BIRTH-KAIOS-RAPTOR-K280-001",
+  "runtime_instance_id": "RUNTIME-KAIOS-RAPTOR-K280-001-LOCAL",
+  "identity_scope": "K280_DIGITAL_LIFE_MVP_ONLY",
+  "legal_personhood": false,
+  "sentience_claimed": false,
+  "real_biological_life": false,
+  "classification": "DIGITAL_LIFE_MVP",
+  "birth_mode": "NATURAL_KAIOS_INSTANTIATION",
+  "current_state": "BORN_IN_LOCAL_SIMULATION"
+}

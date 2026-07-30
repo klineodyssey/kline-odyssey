@@ -1,0 +1,27 @@
+{
+  "embodiment_id": "EMBODIMENT-KAIOS-RAPTOR-K280-001-DIGITAL",
+  "body_plan_id": "BODY-PLAN-K280-RAPTOR-V1",
+  "embodiment_class": "DIGITAL_EXECUTION_SHELL",
+  "morphology": "DIGITAL_RAPTOR_BIPEDAL",
+  "segments": [
+    "HEAD",
+    "TORSO",
+    "TAIL",
+    "LEFT_LEG",
+    "RIGHT_LEG",
+    "LEFT_ARM",
+    "RIGHT_ARM"
+  ],
+  "dimensions_meters": {
+    "length": 1.8,
+    "height": 1.1,
+    "width": 0.55
+  },
+  "collision_model": "BOUNDED_2D_CAPSULE",
+  "physical_body_assigned": false,
+  "simulation_only": true,
+  "occupant_life_id": "LIFE-KAIOS-RAPTOR-K280-001",
+  "owner_id": "UNASSIGNED_SIMULATION_PACKAGE",
+  "operator_id": "LOCAL_SIMULATION_OPERATOR",
+  "custodian_id": "KAIOS_K280_SANDBOX"
+}

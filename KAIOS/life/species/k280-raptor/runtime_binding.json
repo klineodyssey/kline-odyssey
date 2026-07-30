@@ -1,0 +1,32 @@
+{
+  "program_filename": "KAIOS/K280/runtime/k280-runtime.js",
+  "runtime_entrypoint": "KAIOS/K280/runtime/k280-runtime.js#K280LifeRuntime",
+  "runtime_type": "LOCAL_DETERMINISTIC_SIMULATION",
+  "runtime_version": "1.0.0",
+  "execution_environment": [
+    "BROWSER_ES_MODULE",
+    "NODE_ES_MODULE_TEST"
+  ],
+  "required_organs": [
+    "SENSOR_ARRAY",
+    "LOCOMOTION_SYSTEM",
+    "DIGITAL_METABOLISM",
+    "MEMORY_CORE",
+    "HEALTH_REGULATOR"
+  ],
+  "required_cells": [
+    "K280_DIGITAL_CELL",
+    "SENSOR_CELL",
+    "MOTOR_CELL",
+    "MEMORY_CELL",
+    "METABOLIC_CELL"
+  ],
+  "startup_contract": "VALIDATED_PACKAGE_REQUIRED",
+  "shutdown_contract": "SERIALIZE_STOP_ARCHIVE",
+  "health_check": "STATE_BOUNDS_AND_GENOME_CHECKSUM",
+  "state_path": "KAIOS/life/organisms/KAIOS-RAPTOR-K280-001/runtime_state.json",
+  "memory_path": "KAIOS/life/organisms/KAIOS-RAPTOR-K280-001/memory.json",
+  "archive_path": "KAIOS/life/organisms/KAIOS-RAPTOR-K280-001/event_log.json",
+  "production_authority": false,
+  "network_required": false
+}

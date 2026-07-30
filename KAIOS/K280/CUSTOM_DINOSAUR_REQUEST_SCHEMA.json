@@ -1,0 +1,128 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "KAIOS/K280/CUSTOM_DINOSAUR_REQUEST_SCHEMA.json",
+  "title": "K280 Customer Dinosaur Request",
+  "type": "object",
+  "required": [
+    "request_id",
+    "dinosaur_type",
+    "size",
+    "appearance",
+    "temperament",
+    "intelligence",
+    "diet",
+    "habitat",
+    "movement",
+    "social_behavior",
+    "lifespan",
+    "reproduction",
+    "mutation_range",
+    "civilization_affinity",
+    "allowed_rights",
+    "commercial_use_status",
+    "transferability",
+    "simulation_limits"
+  ],
+  "properties": {
+    "request_id": {
+      "type": "string",
+      "pattern": "^CUSTOM-K280-"
+    },
+    "dinosaur_type": {
+      "type": "string",
+      "minLength": 1
+    },
+    "size": {
+      "enum": [
+        "COMPACT",
+        "STANDARD",
+        "LARGE"
+      ]
+    },
+    "appearance": {
+      "type": "object"
+    },
+    "temperament": {
+      "enum": [
+        "CALM",
+        "CURIOUS",
+        "BALANCED",
+        "ASSERTIVE"
+      ]
+    },
+    "intelligence": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "diet": {
+      "enum": [
+        "SIMULATED_CARNIVORE",
+        "SIMULATED_HERBIVORE",
+        "SIMULATED_OMNIVORE"
+      ]
+    },
+    "habitat": {
+      "type": "string"
+    },
+    "movement": {
+      "type": "string"
+    },
+    "social_behavior": {
+      "type": "string"
+    },
+    "lifespan": {
+      "type": "integer",
+      "minimum": 100,
+      "maximum": 10000
+    },
+    "reproduction": {
+      "type": "object"
+    },
+    "mutation_range": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 0.25
+    },
+    "civilization_affinity": {
+      "type": "string"
+    },
+    "allowed_rights": {
+      "type": "array",
+      "items": {
+        "enum": [
+          "OWNERSHIP_RIGHT",
+          "CUSTODY_RIGHT",
+          "OPERATION_RIGHT",
+          "OCCUPANCY_RIGHT",
+          "USAGE_RIGHT",
+          "BREEDING_RIGHT",
+          "COMMERCIAL_LICENSE",
+          "TRANSFER_RIGHT",
+          "HABITAT_RIGHT",
+          "CONTROL_AUTHORITY"
+        ]
+      }
+    },
+    "commercial_use_status": {
+      "enum": [
+        "NOT_GRANTED",
+        "SIMULATED_REVIEW_ONLY"
+      ]
+    },
+    "transferability": {
+      "enum": [
+        "NOT_TRANSFERABLE",
+        "PACKAGE_LICENSE_ONLY"
+      ]
+    },
+    "simulation_limits": {
+      "type": "object",
+      "required": [
+        "maximum_organisms",
+        "maximum_ticks"
+      ]
+    }
+  },
+  "additionalProperties": false
+}

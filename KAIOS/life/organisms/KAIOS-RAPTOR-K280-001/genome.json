@@ -1,0 +1,138 @@
+{
+  "genome_id": "GENOME-KAIOS-RAPTOR-K280-001-G0",
+  "species_id": "SPECIES-KAIOS-K280-RAPTOR",
+  "parent_genome_ids": [],
+  "generation": 0,
+  "random_seed": "KAIOS-K280-GENESIS-SEED-001",
+  "allele_groups": {
+    "size": {
+      "dominant": 0.7366,
+      "recessive": 0.72
+    },
+    "energy_efficiency": {
+      "dominant": 1.0627,
+      "recessive": 0.9452
+    },
+    "sensory_range": {
+      "dominant": 1.3497,
+      "recessive": 1.35
+    },
+    "intelligence": {
+      "dominant": 0.5776,
+      "recessive": 0.5687
+    },
+    "aggression": {
+      "dominant": 0.4456,
+      "recessive": 0.4601
+    },
+    "sociability": {
+      "dominant": 0.434,
+      "recessive": 0.3836
+    },
+    "cold_adaptation": {
+      "dominant": 0.6618,
+      "recessive": 0.6427
+    },
+    "speed": {
+      "dominant": 0.7469,
+      "recessive": 0.7572
+    },
+    "healing": {
+      "dominant": 1.1378,
+      "recessive": 1.0949
+    },
+    "fertility": {
+      "dominant": 0.741,
+      "recessive": 0.7622
+    }
+  },
+  "dominant_traits": {
+    "size": 0.7366,
+    "energy_efficiency": 1.0627,
+    "sensory_range": 1.3497,
+    "intelligence": 0.5776,
+    "aggression": 0.4456,
+    "sociability": 0.434,
+    "cold_adaptation": 0.6618,
+    "speed": 0.7469,
+    "healing": 1.1378,
+    "fertility": 0.741
+  },
+  "recessive_traits": {
+    "size": 0.72,
+    "energy_efficiency": 0.9452,
+    "sensory_range": 1.35,
+    "intelligence": 0.5687,
+    "aggression": 0.4601,
+    "sociability": 0.3836,
+    "cold_adaptation": 0.6427,
+    "speed": 0.7572,
+    "healing": 1.0949,
+    "fertility": 0.7622
+  },
+  "mutation_history": [],
+  "phenotype_projection": {
+    "expressed_traits": {
+      "size": 0.732,
+      "energy_efficiency": 1.0298,
+      "sensory_range": 1.3498,
+      "intelligence": 0.5751,
+      "aggression": 0.4497,
+      "sociability": 0.4199,
+      "cold_adaptation": 0.6565,
+      "speed": 0.7498,
+      "healing": 1.1258,
+      "fertility": 0.7469
+    },
+    "size_class": "COMPACT",
+    "coloration": "K280-AMBER-66",
+    "morphology": "DIGITAL_RAPTOR_BIPEDAL",
+    "locomotion_profile": "BALANCED_RUNNER",
+    "sensory_profile": "LONG_RANGE",
+    "social_profile": "SOLITARY_LEANING"
+  },
+  "health_predispositions": {
+    "resilience": 1.1378,
+    "cold_stress": 0.7382
+  },
+  "metabolism_traits": {
+    "efficiency": 1.0627
+  },
+  "locomotion_traits": {
+    "speed": 0.7469
+  },
+  "sensory_traits": {
+    "range": 1.3497
+  },
+  "intelligence_traits": {
+    "adaptability": 0.5776
+  },
+  "aggression_traits": {
+    "intensity": 0.4456
+  },
+  "social_traits": {
+    "affinity": 0.434
+  },
+  "reproduction_traits": {
+    "fertility": 0.741
+  },
+  "environmental_adaptation": {
+    "cold": 0.6618
+  },
+  "lifespan_range_ticks": [
+    1800,
+    3200
+  ],
+  "size_range_meters": [
+    1.4,
+    2.1
+  ],
+  "coloration": "K280-AMBER-66",
+  "morphology": "DIGITAL_RAPTOR_BIPEDAL",
+  "mutation_probability": 0.08,
+  "inheritance_probability": 0.5,
+  "biological_instruction": false,
+  "simulation_only": true,
+  "checksum_algorithm": "K280_FNV1A64",
+  "integrity_checksum": "440065f6da65e0af8dea9a2a90493f8f1e3eb50f90d9293407f5915e7a8b4c47"
+}

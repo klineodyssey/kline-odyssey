@@ -1,0 +1,20 @@
+{
+  "expressed_traits": {
+    "size": 0.732,
+    "energy_efficiency": 1.0298,
+    "sensory_range": 1.3498,
+    "intelligence": 0.5751,
+    "aggression": 0.4497,
+    "sociability": 0.4199,
+    "cold_adaptation": 0.6565,
+    "speed": 0.7498,
+    "healing": 1.1258,
+    "fertility": 0.7469
+  },
+  "size_class": "COMPACT",
+  "coloration": "K280-AMBER-66",
+  "morphology": "DIGITAL_RAPTOR_BIPEDAL",
+  "locomotion_profile": "BALANCED_RUNNER",
+  "sensory_profile": "LONG_RANGE",
+  "social_profile": "SOLITARY_LEANING"
+}

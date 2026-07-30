@@ -1,0 +1,73 @@
+{
+  "listing_id": "LISTING-KAIOS-RAPTOR-K280-001",
+  "organism_id": "KAIOS-RAPTOR-K280-001",
+  "life_id": "LIFE-KAIOS-RAPTOR-K280-001",
+  "listing_type": "DIGITAL_ORGANISM_PACKAGE",
+  "listing_mode": "SIMULATED_LISTING",
+  "settlement_mode": "VIRTUAL_SETTLEMENT",
+  "currency": "SIMULATED_KGEN",
+  "real_kgen": "DISABLED",
+  "wallet": "NONE",
+  "onchain_transfer": "DISABLED",
+  "status": "NOT_ACTIVE",
+  "disclaimer": "Buying the digital organism package does not automatically transfer all rights.",
+  "parties": {
+    "owner": "MVP_PACKAGE_CUSTODIAN_UNASSIGNED",
+    "custodian": "KAIOS_K280_SANDBOX",
+    "operator": "LOCAL_SIMULATION_OPERATOR",
+    "occupant_life_id": "LIFE-KAIOS-RAPTOR-K280-001"
+  },
+  "rights": {
+    "OWNERSHIP_RIGHT": {
+      "included": false,
+      "transfer_mode": "SEPARATE_REVIEW_REQUIRED"
+    },
+    "CUSTODY_RIGHT": {
+      "included": false,
+      "transfer_mode": "SEPARATE_REVIEW_REQUIRED"
+    },
+    "OPERATION_RIGHT": {
+      "included": false,
+      "transfer_mode": "SEPARATE_REVIEW_REQUIRED"
+    },
+    "OCCUPANCY_RIGHT": {
+      "included": false,
+      "transfer_mode": "SEPARATE_REVIEW_REQUIRED"
+    },
+    "USAGE_RIGHT": {
+      "included": true,
+      "transfer_mode": "SIMULATED_LICENSE_ONLY"
+    },
+    "BREEDING_RIGHT": {
+      "included": false,
+      "transfer_mode": "SEPARATE_REVIEW_REQUIRED"
+    },
+    "COMMERCIAL_LICENSE": {
+      "included": false,
+      "transfer_mode": "SEPARATE_REVIEW_REQUIRED"
+    },
+    "TRANSFER_RIGHT": {
+      "included": false,
+      "transfer_mode": "SEPARATE_REVIEW_REQUIRED"
+    },
+    "HABITAT_RIGHT": {
+      "included": true,
+      "transfer_mode": "SIMULATED_LICENSE_ONLY"
+    },
+    "CONTROL_AUTHORITY": {
+      "included": false,
+      "transfer_mode": "SEPARATE_REVIEW_REQUIRED"
+    }
+  },
+  "package_rights": {
+    "display_rights": "SIMULATED_PREVIEW",
+    "reproduction_license_rights": "NOT_INCLUDED",
+    "resale_rights": "NOT_INCLUDED",
+    "modification_rights": "NOT_INCLUDED",
+    "genome_template_rights": "NOT_INCLUDED",
+    "species_template_rights": "NOT_INCLUDED",
+    "runtime_authority": "LOCAL_SIMULATION_ONLY",
+    "governance_authority": "NONE",
+    "termination_authority": "NONE"
+  }
+}

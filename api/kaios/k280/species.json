@@ -1,0 +1,179 @@
+{
+  "schema_version": "2.0",
+  "species_id": "SPECIES-KAIOS-K280-RAPTOR",
+  "display_name": "K280 原生迅猛龍",
+  "scientific_name": "Kaiosraptor k280 digitalis",
+  "species_version": "1.0.0",
+  "taxonomy": {
+    "domain": "KGEN_UNIVERSE",
+    "kingdom": "DIGITAL_ANIMAL_LIFE",
+    "phylum": "SIMULATED_CHORDATE",
+    "class": "DIGITAL_REPTILIAN",
+    "order": "K280_RAPTORIFORMES",
+    "family": "K280_DIGITAL_RAPTOR",
+    "genus": "KAIOS_RAPTOR",
+    "species": "SPECIES-KAIOS-K280-RAPTOR",
+    "cell": "K280_DIGITAL_CELL",
+    "organ": "K280_ORGAN_SYSTEM",
+    "runtime": "LOCAL_DETERMINISTIC_SIMULATION",
+    "civilization": "KAIOS_K280_CIVILIZATION_SANDBOX"
+  },
+  "taxonomy_extension_19_compatible": true,
+  "species_program": "KAIOS/K280/runtime/k280-runtime.js",
+  "genome_schema": "KAIOS/life/species/k280-raptor/genome.schema.json",
+  "body_plan": "KAIOS/life/species/k280-raptor/body_plan.json",
+  "cell_types": [
+    "K280_DIGITAL_CELL",
+    "SENSOR_CELL",
+    "MOTOR_CELL",
+    "MEMORY_CELL",
+    "METABOLIC_CELL"
+  ],
+  "organ_systems": [
+    "SENSOR_ARRAY",
+    "LOCOMOTION_SYSTEM",
+    "DIGITAL_METABOLISM",
+    "MEMORY_CORE",
+    "HEALTH_REGULATOR"
+  ],
+  "senses": [
+    "VISION_SIMULATION",
+    "AUDIO_SIMULATION",
+    "PROXIMITY",
+    "TEMPERATURE",
+    "RESOURCE_SIGNAL"
+  ],
+  "locomotion": {
+    "mode": "DIGITAL_BIPEDAL",
+    "bounded_world_coordinates": true,
+    "maximum_step_per_tick": 3
+  },
+  "metabolism": {
+    "mode": "SIMULATED_ENERGY_CONVERSION",
+    "real_biology": false
+  },
+  "health_model": {
+    "range": [
+      0,
+      100
+    ],
+    "terminal_at": 0,
+    "reversible_death": false
+  },
+  "energy_model": {
+    "range": [
+      0,
+      100
+    ],
+    "input": "SIMULATED_FOOD_ENERGY",
+    "free_energy": false
+  },
+  "hunger_model": {
+    "range": [
+      0,
+      100
+    ],
+    "increases_per_tick": 0.7
+  },
+  "hydration_model": {
+    "range": [
+      0,
+      100
+    ],
+    "decreases_per_tick": 0.45
+  },
+  "temperature_model": {
+    "unit": "SIMULATED_CELSIUS",
+    "viable_range": [
+      32,
+      42
+    ]
+  },
+  "age_model": {
+    "unit": "SIMULATION_TICK",
+    "deterministic": true
+  },
+  "growth_stages": [
+    "HATCHLING",
+    "JUVENILE",
+    "ADULT",
+    "ELDER",
+    "DEAD"
+  ],
+  "sex_model": {
+    "types": [
+      "FEMALE",
+      "MALE"
+    ],
+    "simulation_only": true
+  },
+  "reproduction_model": "KAIOS/life/species/k280-raptor/reproduction.json",
+  "heredity_model": {
+    "parent_genomes_required": 2,
+    "deterministic_seed_required": true
+  },
+  "mutation_model": "KAIOS/life/species/k280-raptor/mutation_rules.json",
+  "personality_traits": [
+    "CURIOSITY",
+    "CAUTION",
+    "SOCIABILITY",
+    "PERSISTENCE",
+    "AGGRESSION"
+  ],
+  "memory_model": "KAIOS/life/species/k280-raptor/memory_model.json",
+  "behavior_model": "KAIOS/life/species/k280-raptor/behavior_model.json",
+  "predator_behavior": {
+    "mode": "HUNT_SIMULATION",
+    "real_world_targeting": false
+  },
+  "social_behavior": {
+    "modes": [
+      "SOLITARY",
+      "PAIR",
+      "PACK_SIMULATION"
+    ]
+  },
+  "habitat_requirements": "KAIOS/life/species/k280-raptor/habitat_requirements.json",
+  "lifecycle_states": [
+    "SPECIFIED",
+    "VALIDATED",
+    "BORN_IN_SIMULATION",
+    "ACTIVE",
+    "SLEEPING",
+    "INJURED",
+    "ELDER",
+    "DEAD"
+  ],
+  "death_state": {
+    "terminal": true,
+    "does_not_delete_identity": true
+  },
+  "extinction_state": {
+    "population_zero_required": true,
+    "evidence_required": true
+  },
+  "civilization_affinity": "KAIOS/life/species/k280-raptor/civilization_affinity.json",
+  "embodiment_requirements": {
+    "class": "DIGITAL_EXECUTION_SHELL",
+    "physical_robot": false
+  },
+  "ownership_policy": "LIFE_IDENTITY_SEPARATE_FROM_PACKAGE_OWNERSHIP",
+  "custody_policy": "SIMULATION_CUSTODY_ONLY",
+  "operating_authority": "LOCAL_SIMULATION_ONLY",
+  "breeding_rights": "SEPARATE_REVIEWED_RIGHT",
+  "commercial_rights": "NOT_GRANTED_BY_LIFE_IDENTITY",
+  "transfer_rights": "PACKAGE_RIGHTS_ONLY_NO_LIFE_TRANSFER",
+  "integrity": {
+    "algorithm": "SHA-256",
+    "manifest_required": true
+  },
+  "provenance": {
+    "source": "KAIOS-K280-DIGITAL-LIFE-GENESIS-MVP-001",
+    "canonical_schema": "KGEN-KAIOS/provenance/ORGANISM_MANIFEST_SCHEMA.json",
+    "base_sha": "37362ca5477fa120a54b4828a71da0cbdaf99718",
+    "real_biological_instruction": false
+  },
+  "status": "DIGITAL_LIFE_MVP",
+  "simulation_only": true,
+  "production_authority": false
+}

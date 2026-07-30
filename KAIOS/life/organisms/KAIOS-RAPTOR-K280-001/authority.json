@@ -1,0 +1,7 @@
+{
+  "authority": "NO_PRODUCTION_AUTHORITY",
+  "runtime_authority": false,
+  "governance_authority": false,
+  "wallet_authority": false,
+  "termination_authority": false
+}

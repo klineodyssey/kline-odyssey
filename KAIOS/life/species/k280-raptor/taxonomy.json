@@ -1,0 +1,19 @@
+{
+  "schema_version": "1.0",
+  "species_id": "SPECIES-KAIOS-K280-RAPTOR",
+  "taxonomy": {
+    "domain": "KGEN_UNIVERSE",
+    "kingdom": "DIGITAL_ANIMAL_LIFE",
+    "phylum": "SIMULATED_CHORDATE",
+    "class": "DIGITAL_REPTILIAN",
+    "order": "K280_RAPTORIFORMES",
+    "family": "K280_DIGITAL_RAPTOR",
+    "genus": "KAIOS_RAPTOR",
+    "species": "SPECIES-KAIOS-K280-RAPTOR",
+    "cell": "K280_DIGITAL_CELL",
+    "organ": "K280_ORGAN_SYSTEM",
+    "runtime": "LOCAL_DETERMINISTIC_SIMULATION",
+    "civilization": "KAIOS_K280_CIVILIZATION_SANDBOX"
+  },
+  "extension_19_compatible": true
+}

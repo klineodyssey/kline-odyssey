@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="color-scheme" content="dark">
+  <meta name="theme-color" content="#090b09">
+  <meta name="description" content="K280 deterministic digital-life simulation for KAIOS">
+  <link rel="icon" href="./raptor-avatar.svg" type="image/svg+xml">
+  <title>K280 Digital Life Lab</title>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <a class="brand" href="../" aria-label="Back to KAIOS World Viewer">
+        <span class="brand-mark">K</span>
+        <span><strong>K280</strong><small>Digital Life Lab</small></span>
+      </a>
+      <div class="status-strip" aria-label="Simulation boundaries">
+        <span>DIGITAL_LIFE_MVP</span>
+        <span>SIMULATION_ONLY</span>
+        <span>NO WALLET</span>
+        <span>NO REAL KGEN</span>
+      </div>
+      <div class="runtime-state">
+        <span class="pulse" id="runtime-pulse"></span>
+        <strong id="runtime-status">READY</strong>
+      </div>
+    </header>
+
+    <main class="workspace">
+      <section class="habitat" aria-label="K280 habitat scene">
+        <div class="habitat-sky" aria-hidden="true"></div>
+        <div class="aurora" aria-hidden="true"></div>
+        <div class="mountain mountain-a" aria-hidden="true"></div>
+        <div class="mountain mountain-b" aria-hidden="true"></div>
+        <div class="terrain" aria-hidden="true"></div>
+        <div class="habitat-label">
+          <span>K280 寒武紀生命大爆發實驗場</span>
+          <strong id="habitat-pressure">Habitat pressure 0.01</strong>
+        </div>
+        <img class="raptor-avatar" id="raptor-avatar" src="./raptor-avatar.svg" alt="K280 原生迅猛龍數位生物視覺">
+        <div class="organism-tag" id="organism-tag">
+          <span>GEN 0</span>
+          <strong>K280 原生迅猛龍</strong>
+          <small>HATCHLING · CURIOUS</small>
+        </div>
+        <div class="environment-readout">
+          <span><b id="environment-temperature">7°C</b> temperature</span>
+          <span><b id="environment-food">100%</b> food</span>
+          <span><b id="environment-population">1</b> population</span>
+        </div>
+      </section>
+
+      <section class="control-deck" aria-label="Simulation controls">
+        <div class="transport" role="toolbar" aria-label="Runtime playback">
+          <button id="start-button" type="button" title="Start"><span aria-hidden="true">▶</span><span>Start</span></button>
+          <button id="pause-button" type="button" title="Pause"><span aria-hidden="true">Ⅱ</span><span>Pause</span></button>
+          <button id="step-button" type="button" title="Step one tick"><span aria-hidden="true">▸</span><span>Step</span></button>
+          <button id="reset-button" type="button" title="Reset"><span aria-hidden="true">↺</span><span>Reset</span></button>
+          <button id="replay-button" type="button" title="Replay"><span aria-hidden="true">↶</span><span>Replay</span></button>
+        </div>
+        <label class="speed-control" for="speed-select">Speed
+          <select id="speed-select">
+            <option value="1000">1×</option>
+            <option value="500">2×</option>
+            <option value="200">5×</option>
+            <option value="80">12×</option>
+          </select>
+        </label>
+        <div class="clock">
+          <span>SIMULATION TIME</span>
+          <strong id="simulation-time">T+0000</strong>
+        </div>
+      </section>
+
+      <section class="vitals-band" aria-label="Organism vital signs">
+        <article><span>Health</span><strong id="health-value">100</strong><meter id="health-meter" min="0" max="100" value="100"></meter></article>
+        <article><span>Energy</span><strong id="energy-value">86</strong><meter id="energy-meter" min="0" max="100" value="86"></meter></article>
+        <article><span>Hunger</span><strong id="hunger-value">12</strong><meter id="hunger-meter" min="0" max="100" value="12"></meter></article>
+        <article><span>Hydration</span><strong id="hydration-value">88</strong><meter id="hydration-meter" min="0" max="100" value="88"></meter></article>
+        <article><span>Age</span><strong id="age-value">0</strong><small>simulation ticks</small></article>
+        <article><span>Behavior</span><strong id="behavior-value">WAKE</strong><small id="emotion-value">CURIOUS</small></article>
+      </section>
+
+      <section class="data-workspace">
+        <div class="identity-panel">
+          <header>
+            <span class="eyebrow">FIRST DIGITAL ORGANISM</span>
+            <h1>K280 原生迅猛龍</h1>
+            <p>Kaiosraptor k280 digitalis</p>
+          </header>
+          <dl class="identity-list">
+            <div><dt>Life ID</dt><dd id="life-id">-</dd></div>
+            <div><dt>Organism ID</dt><dd id="organism-id">-</dd></div>
+            <div><dt>Species ID</dt><dd id="species-id">-</dd></div>
+            <div><dt>Genome ID</dt><dd id="genome-id">-</dd></div>
+            <div><dt>Embodiment</dt><dd id="embodiment-id">-</dd></div>
+            <div><dt>Growth</dt><dd id="growth-stage">HATCHLING</dd></div>
+          </dl>
+          <div class="identity-boundary">
+            Software organism · no sentience claim · not a biological dinosaur
+          </div>
+        </div>
+
+        <div class="inspector-panel">
+          <nav class="tabs" aria-label="K280 inspector">
+            <button class="is-active" data-tab="genome" type="button">Genome</button>
+            <button data-tab="organs" type="button">Organs</button>
+            <button data-tab="rights" type="button">Rights</button>
+            <button data-tab="civilization" type="button">Civilization</button>
+            <button data-tab="listing" type="button">K11520</button>
+          </nav>
+          <div class="tab-content" id="tab-content" aria-live="polite"></div>
+        </div>
+
+        <div class="timeline-panel">
+          <header>
+            <div><span class="eyebrow">REPLAYABLE EVENTS</span><h2>Life timeline</h2></div>
+            <strong id="event-count">0 events</strong>
+          </header>
+          <ol id="event-timeline" class="event-timeline"></ol>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <span>K280_CAMBRIAN_EXPLOSION · project simulation name</span>
+      <span>LOCAL_DETERMINISTIC_SIMULATION · SETTLEMENT_INACTIVE</span>
+    </footer>
+  </div>
+  <script type="module" src="./k280-viewer.js"></script>
+</body>
+</html>

@@ -1,0 +1,17 @@
+{
+  "habitat_id": "HABITAT-K280-CAMBRIAN-LAB",
+  "display_name": "K280 寒武紀生命大爆發實驗場",
+  "temperature_range": [
+    2,
+    16
+  ],
+  "water_required": true,
+  "food_resource_required": true,
+  "coordinate_bounds": [
+    0,
+    0,
+    100,
+    100
+  ],
+  "production_environment": false
+}

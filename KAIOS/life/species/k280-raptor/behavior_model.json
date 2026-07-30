@@ -1,0 +1,17 @@
+{
+  "behavior_model_id": "K280-BEHAVIOR-V1",
+  "states": [
+    "WAKE",
+    "SLEEP",
+    "REST",
+    "MOVE",
+    "OBSERVE",
+    "EXPLORE",
+    "FORAGE",
+    "SEEK_WATER",
+    "HUNT_SIMULATION",
+    "ESCAPE_SIMULATION"
+  ],
+  "deterministic_selection": true,
+  "external_actions": false
+}

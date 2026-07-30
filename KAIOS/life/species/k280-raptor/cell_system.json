@@ -1,0 +1,40 @@
+{
+  "cells": [
+    {
+      "cell_id": "K280_DIGITAL_CELL",
+      "organ_id": "SENSOR_ARRAY",
+      "cell_type": "SOFTWARE_STATE_CELL",
+      "update_order": 1,
+      "bounded": true
+    },
+    {
+      "cell_id": "SENSOR_CELL",
+      "organ_id": "LOCOMOTION_SYSTEM",
+      "cell_type": "SOFTWARE_STATE_CELL",
+      "update_order": 2,
+      "bounded": true
+    },
+    {
+      "cell_id": "MOTOR_CELL",
+      "organ_id": "DIGITAL_METABOLISM",
+      "cell_type": "SOFTWARE_STATE_CELL",
+      "update_order": 3,
+      "bounded": true
+    },
+    {
+      "cell_id": "MEMORY_CELL",
+      "organ_id": "MEMORY_CORE",
+      "cell_type": "SOFTWARE_STATE_CELL",
+      "update_order": 4,
+      "bounded": true
+    },
+    {
+      "cell_id": "METABOLIC_CELL",
+      "organ_id": "HEALTH_REGULATOR",
+      "cell_type": "SOFTWARE_STATE_CELL",
+      "update_order": 5,
+      "bounded": true
+    }
+  ],
+  "tissue_engineering_instruction": false
+}
