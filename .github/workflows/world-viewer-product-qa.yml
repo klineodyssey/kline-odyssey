@@ -4,10 +4,16 @@ on:
   pull_request:
     paths:
       - "KGEN-KAIOS/world-viewer/**"
+      - "world-viewer/**"
+      - "api/kaios/k280/**"
+      - "index.html"
       - ".github/workflows/world-viewer-product-qa.yml"
   push:
     paths:
       - "KGEN-KAIOS/world-viewer/**"
+      - "world-viewer/**"
+      - "api/kaios/k280/**"
+      - "index.html"
       - ".github/workflows/world-viewer-product-qa.yml"
 
 permissions:
@@ -89,6 +95,12 @@ jobs:
         continue-on-error: true
         shell: bash
         run: node KGEN-KAIOS/world-viewer/tests/runtime_integrity.mjs
+
+      - name: Run K280 official-site integration
+        id: k280-site
+        continue-on-error: true
+        shell: bash
+        run: node --test KAIOS/K280/tests/k280-site-integration.test.mjs
 
       - name: Run Civilization runtime integrity
         id: civilization
@@ -209,14 +221,16 @@ jobs:
           GENESIS_OUTCOME: ${{ steps.genesis.outcome }}
           CIVILIZATION_OUTCOME: ${{ steps.civilization.outcome }}
           RUNTIME_OUTCOME: ${{ steps.runtime.outcome }}
+          K280_SITE_OUTCOME: ${{ steps.k280-site.outcome }}
           STATIC_OUTCOME: ${{ steps.static.outcome }}
           SYNTAX_OUTCOME: ${{ steps.syntax.outcome }}
         run: |
-          printf 'syntax=%s\nstatic=%s\nruntime=%s\ncivilization=%s\ngenesis=%s\nproduction=%s\nsettlement=%s\ngovernance=%s\nbiology=%s\nnation_timeline=%s\ncosmic_technology=%s\nproduct=%s\n' \
-            "$SYNTAX_OUTCOME" "$STATIC_OUTCOME" "$RUNTIME_OUTCOME" "$CIVILIZATION_OUTCOME" "$GENESIS_OUTCOME" "$PRODUCTION_OUTCOME" "$SETTLEMENT_OUTCOME" "$GOVERNANCE_OUTCOME" "$BIOLOGY_OUTCOME" "$NATION_TIMELINE_OUTCOME" "$COSMIC_TECHNOLOGY_OUTCOME" "$PRODUCT_OUTCOME"
+          printf 'syntax=%s\nstatic=%s\nruntime=%s\nk280_site=%s\ncivilization=%s\ngenesis=%s\nproduction=%s\nsettlement=%s\ngovernance=%s\nbiology=%s\nnation_timeline=%s\ncosmic_technology=%s\nproduct=%s\n' \
+            "$SYNTAX_OUTCOME" "$STATIC_OUTCOME" "$RUNTIME_OUTCOME" "$K280_SITE_OUTCOME" "$CIVILIZATION_OUTCOME" "$GENESIS_OUTCOME" "$PRODUCTION_OUTCOME" "$SETTLEMENT_OUTCOME" "$GOVERNANCE_OUTCOME" "$BIOLOGY_OUTCOME" "$NATION_TIMELINE_OUTCOME" "$COSMIC_TECHNOLOGY_OUTCOME" "$PRODUCT_OUTCOME"
           [[ "$SYNTAX_OUTCOME" == "success" ]]
           [[ "$STATIC_OUTCOME" == "success" ]]
           [[ "$RUNTIME_OUTCOME" == "success" ]]
+          [[ "$K280_SITE_OUTCOME" == "success" ]]
           [[ "$CIVILIZATION_OUTCOME" == "success" ]]
           [[ "$GENESIS_OUTCOME" == "success" ]]
           [[ "$PRODUCTION_OUTCOME" == "success" ]]

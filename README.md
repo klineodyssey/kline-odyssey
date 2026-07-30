@@ -41,7 +41,7 @@ Last optimized: 2026-06-11
 | Civilization Economy Runtime V1 Baseline | [KGEN-KAIOS/civilization/CIVILIZATION_ECONOMY_ARCHITECTURE_BASELINE.md](KGEN-KAIOS/civilization/CIVILIZATION_ECONOMY_ARCHITECTURE_BASELINE.md) |
 | UI Governor Architecture | [KGEN-KAIOS/ui-governor/README.md](KGEN-KAIOS/ui-governor/README.md) |
 | KAIOS World Viewer Sprint 009 Nation and Timeline Alpha | [KGEN-KAIOS/world-viewer/index.html](KGEN-KAIOS/world-viewer/index.html) |
-| K280 Digital Life Genesis MVP | [KGEN-KAIOS/world-viewer/k280/index.html](KGEN-KAIOS/world-viewer/k280/index.html) |
+| K280 Digital Life Genesis MVP | [K280 World Viewer](https://klineodyssey.github.io/kline-odyssey/world-viewer/k280/) |
 | PrimeForge Boot CURRENT | https://klineodyssey.github.io/kline-odyssey/boot/ |
 | Official Contact Email | klineodyssey.io@gmail.com |
 | BNB Smart Chain Token Contract | `0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be` |
