@@ -94,6 +94,7 @@ jobs:
           copy_dir "KGEN-AI-Company"
           copy_dir "KGEN-KAIOS"
           copy_dir "KAIOS"
+          copy_dir "world-viewer"
           copy_dir "boot"
           copy_dir "operating-center"
           copy_dir "ai-company"

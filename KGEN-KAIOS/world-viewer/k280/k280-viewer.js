@@ -6,7 +6,7 @@ import {
   runCambrianExplosion
 } from "../../../KAIOS/K280/runtime/k280-runtime.js";
 
-const apiRoot = "../../../api/kaios/k280";
+const apiRoot = new URL("../../../api/kaios/k280/", import.meta.url);
 const $ = (selector) => document.querySelector(selector);
 const $$ = (selector) => [...document.querySelectorAll(selector)];
 
@@ -23,7 +23,7 @@ let speed = 1000;
 let activeTab = "genome";
 
 async function loadJson(name) {
-  const response = await fetch(`${apiRoot}/${name}.json`, { cache: "no-store" });
+  const response = await fetch(new URL(`${name}.json`, apiRoot), { cache: "no-store" });
   if (!response.ok) throw new Error(`${name} API returned ${response.status}`);
   return response.json();
 }
@@ -150,13 +150,26 @@ function replay() {
 }
 
 async function boot() {
-  [species, organism, listing, rights, population] = await Promise.all([
-    loadJson("species"),
-    loadJson("organism"),
-    loadJson("listing"),
-    loadJson("rights"),
-    loadJson("population")
-  ]);
+  const message = $("#data-load-message");
+  const loadState = $("#data-load-state");
+  const retry = $("#retry-button");
+  message.textContent = "正在載入 K280 數位生命資料…";
+  loadState.classList.remove("is-error", "is-success");
+  retry.hidden = true;
+
+  const names = ["species", "organism", "state", "events", "civilization", "population", "listing", "rights"];
+  const results = await Promise.allSettled(names.map(loadJson));
+  const failed = results
+    .map((result, index) => result.status === "rejected" ? names[index] : null)
+    .filter(Boolean);
+  if (failed.length) {
+    showLoadFailure(failed);
+    return;
+  }
+  const data = Object.fromEntries(
+    results.map(({ value }, index) => [names[index], value])
+  );
+  ({ species, organism, population, listing, rights } = data);
   birthPipeline = buildBirthPipeline({ species });
   runtime = new K280LifeRuntime({ genome: birthPipeline.genome });
   civilization = new CivilizationEngine();
@@ -169,6 +182,20 @@ async function boot() {
   $("#environment-food").textContent = `${Math.round(population.food_availability * 100)}%`;
   $("#habitat-pressure").textContent = `Habitat pressure ${population.habitat_pressure}`;
   render();
+  message.textContent = "K280 數位生命資料已載入。";
+  loadState.classList.add("is-success");
+  document.documentElement.dataset.k280Rendered = "true";
+}
+
+function showLoadFailure(categories) {
+  $("#data-load-message").textContent = `K280 資料載入失敗：${categories.join("、")}。`;
+  $("#data-load-state").classList.add("is-error");
+  $("#retry-button").hidden = false;
+  $("#runtime-status").textContent = "BOOT FAILED";
+}
+
+function runBoot() {
+  boot().catch(() => showLoadFailure(["runtime"]));
 }
 
 $("#start-button").addEventListener("click", start);
@@ -189,10 +216,7 @@ $$(".tabs button").forEach((button) => button.addEventListener("click", () => {
 }));
 
 window.addEventListener("pagehide", pause);
-boot().catch((error) => {
-  $("#runtime-status").textContent = "BOOT FAILED";
-  $("#tab-content").textContent = error.message;
-  throw error;
-});
+$("#retry-button").addEventListener("click", runBoot);
+runBoot();
 
 export { runCambrianExplosion };

@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <meta name="description" content="Public, read-only K280 digital-life simulation data.">
+  <title>K280 Digital Life Public Data</title>
+  <style>
+    :root { color-scheme: dark; font-family: system-ui, sans-serif; }
+    * { box-sizing: border-box; }
+    body { margin: 0; color: #f4efd9; background: #080b08; }
+    main { width: min(100% - 32px, 860px); margin: 0 auto; padding: 48px 0; }
+    h1 { margin: 0 0 8px; font-size: 2rem; letter-spacing: 0; }
+    p { color: #bfc5bb; line-height: 1.65; }
+    nav, ul { display: grid; gap: 10px; padding: 0; list-style: none; }
+    nav { grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); margin: 28px 0; }
+    a { min-height: 44px; display: flex; align-items: center; border: 1px solid #465348; padding: 10px 12px; color: #f2d77c; background: #101510; text-decoration: none; }
+    a:focus-visible { outline: 3px solid #7bd7f4; outline-offset: 3px; }
+    .boundary { border-left: 3px solid #79bc86; padding-left: 14px; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>K280 Digital Life Public Data</h1>
+    <p class="boundary">READ_ONLY · SIMULATION_ONLY · NO WALLET · NO REAL KGEN · NO PRODUCTION AUTHORITY</p>
+    <nav aria-label="K280 public data files">
+      <a href="species.json">Species</a>
+      <a href="organism.json">Organism</a>
+      <a href="state.json">Runtime State</a>
+      <a href="events.json">Events</a>
+      <a href="civilization.json">Civilization</a>
+      <a href="population.json">Population</a>
+      <a href="listing.json">Listing</a>
+      <a href="rights.json">Rights</a>
+    </nav>
+    <nav aria-label="K280 site navigation">
+      <a href="../../../world-viewer/k280/">返回 K280 World Viewer</a>
+      <a href="../../../">返回官方首頁</a>
+    </nav>
+  </main>
+</body>
+</html>

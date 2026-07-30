@@ -117,6 +117,10 @@
       font-size: 0.88rem;
     }
 
+    .mobile-nav-label {
+      display: none;
+    }
+
     .nav-links a,
     .button {
       min-height: 40px;
@@ -438,6 +442,98 @@
       color: #fff;
     }
 
+    .k280-layout {
+      display: grid;
+      grid-template-columns: minmax(260px, 0.72fr) minmax(0, 1.28fr);
+      gap: 24px;
+      align-items: center;
+      border: 1px solid rgba(118, 240, 178, 0.3);
+      border-radius: 8px;
+      padding: 24px;
+      background: #0c120e;
+      box-shadow: 0 20px 56px rgba(0, 0, 0, 0.24);
+    }
+
+    .k280-visual {
+      min-height: 320px;
+      display: grid;
+      place-items: center;
+      border: 1px solid rgba(118, 240, 178, 0.2);
+      border-radius: 6px;
+      overflow: hidden;
+      background:
+        radial-gradient(circle at 50% 42%, rgba(118, 240, 178, 0.18), transparent 15rem),
+        #07100b;
+    }
+
+    .k280-visual img {
+      width: min(88%, 360px);
+      aspect-ratio: 1;
+      object-fit: contain;
+    }
+
+    .k280-copy h2 {
+      margin-bottom: 4px;
+      font-size: 2rem;
+      line-height: 1.15;
+      color: #fff8e1;
+    }
+
+    .k280-copy h3 {
+      margin-bottom: 10px;
+      color: var(--green);
+      font-size: 1.05rem;
+    }
+
+    .k280-identity {
+      color: var(--gold);
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 0.86rem;
+      font-weight: 800;
+    }
+
+    .k280-metrics {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 8px;
+      margin: 18px 0;
+    }
+
+    .k280-metrics div {
+      min-height: 64px;
+      padding: 9px;
+      border: 1px solid rgba(255, 255, 255, 0.13);
+      border-radius: 6px;
+      background: rgba(255, 255, 255, 0.035);
+    }
+
+    .k280-metrics b,
+    .k280-metrics span {
+      display: block;
+    }
+
+    .k280-metrics b {
+      color: #fff;
+      font-size: 1rem;
+    }
+
+    .k280-metrics span {
+      color: var(--muted);
+      font-size: 0.76rem;
+    }
+
+    .k280-disclaimer {
+      margin: 16px 0 0;
+      color: var(--muted);
+      font-size: 0.84rem;
+    }
+
+    a:focus-visible,
+    button:focus-visible {
+      outline: 3px solid var(--cyan);
+      outline-offset: 3px;
+    }
+
     .token-address {
       display: block;
       margin: 10px 0 12px;
@@ -595,6 +691,14 @@
         flex: 1 1 auto;
       }
 
+      .desktop-nav-label {
+        display: none;
+      }
+
+      .mobile-nav-label {
+        display: inline;
+      }
+
       .hero {
         min-height: 86svh;
         align-items: flex-end;
@@ -629,8 +733,17 @@
 
       .hero-stats,
       .map-panel,
-      .support-layout {
+      .support-layout,
+      .k280-layout {
         grid-template-columns: 1fr;
+      }
+
+      .k280-visual {
+        min-height: 260px;
+      }
+
+      .k280-metrics {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
       }
 
       .section-heading {
@@ -668,6 +781,10 @@
       .support-copy {
         padding: 12px;
       }
+
+      .k280-layout {
+        padding: 12px;
+      }
     }
   </style>
 </head>
@@ -679,6 +796,7 @@
         <span>KLINE ODYSSEY</span>
       </a>
       <div class="nav-links">
+        <a href="./world-viewer/k280/"><span class="desktop-nav-label">K280 世界</span><span class="mobile-nav-label">K280 數位生命世界</span></a>
         <a href="#operating">Operating Center</a>
         <a href="#temples">Temples</a>
         <a href="#token">Token</a>
@@ -707,6 +825,38 @@
           <div class="stat"><b>123</b><span>Universe Map coordinates</span></div>
           <div class="stat"><b>13+</b><span>神殿與文明節點</span></div>
           <div class="stat"><b>V3.0</b><span>Official portal generation</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="band-dark" id="k280-world" aria-labelledby="k280-title">
+      <div class="section-inner">
+        <div class="k280-layout">
+          <div class="k280-visual">
+            <img src="KGEN-KAIOS/world-viewer/k280/raptor-avatar.svg" alt="K280 原生迅猛龍數位生命視覺">
+          </div>
+          <div class="k280-copy">
+            <p class="eyebrow">K280 World Viewer</p>
+            <h2 id="k280-title">K280 數位生命世界</h2>
+            <h3>KAIOS 第一隻可運行數位恐龍</h3>
+            <p>觀看 KAIOS 第一隻數位恐龍的出生、Genome、生命狀態、成長、繁殖、突變、文明演化與 K11520 模擬上架。</p>
+            <p class="k280-identity">KAIOS-RAPTOR-K280-001 · SPECIES-KAIOS-K280-RAPTOR</p>
+            <div class="k280-metrics" aria-label="K280 simulation summary">
+              <div><b>10 / 10</b><span>出生流程</span></div>
+              <div><b>31</b><span>出生數</span></div>
+              <div><b>6</b><span>死亡數</span></div>
+              <div><b>25</b><span>存活數</span></div>
+              <div><b>5</b><span>世代數</span></div>
+              <div><b>38</b><span>突變數</span></div>
+              <div><b>1</b><span>候選物種分支</span></div>
+              <div><b>12</b><span>文明階段</span></div>
+            </div>
+            <div class="action-row">
+              <a class="button primary" href="./world-viewer/k280/">進入 K280 World Viewer</a>
+              <a class="button dark" href="./api/kaios/k280/">查看數位生命資料</a>
+            </div>
+            <p class="k280-disclaimer">K280 原生迅猛龍是 KAIOS 數位生命模擬，不是現實世界的恐龍復活、複製或生物工程產品。</p>
+          </div>
         </div>
       </div>
     </section>
@@ -1039,6 +1189,7 @@
       <p>PrimeForge 創世，讓市場成為神話，讓文明在 K 線、AI、信念與鏈上紀錄中繼續演化。</p>
       <p><strong>花果山台灣・信念不滅・市場無界</strong></p>
       <p>KLINE ODYSSEY - Where the Market Becomes the Myth.</p>
+      <p><a href="./world-viewer/k280/">K280 World Viewer</a></p>
       <div class="community-grid" style="margin-top:16px" data-official-links="x,telegram,youtube,tiktok,facebook_page,instagram,line_official,github" data-official-links-show-status="false"></div>
     </div>
   </footer>

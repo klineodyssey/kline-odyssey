@@ -53,14 +53,20 @@ The runtime has one executable entry:
 KGEN-KAIOS/world-viewer/index.html
 ```
 
-The K280 digital-life MVP is a subordinate simulation route:
+The K280 digital-life MVP uses the shared simulation assets here:
 
 ```text
 KGEN-KAIOS/world-viewer/k280/index.html
 ```
 
-It reuses the canonical organism schema, has no wallet or real settlement, and
-does not replace the World Viewer entry point.
+Its stable public entry is:
+
+```text
+world-viewer/k280/index.html
+```
+
+It reuses the canonical organism schema and shared runtime assets, has no
+wallet or real settlement, and does not replace the World Viewer entry point.
 
 The intended permanent public alias is:
 
