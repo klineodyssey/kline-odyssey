@@ -2,9 +2,9 @@
   "metadata": {
     "architecture_id": "PRIMEFORGE-COMPANY-AUTOPILOT-ARCH-001",
     "version": "0.4.2",
-    "revision": "2026-07-26.2",
+    "revision": "2026-07-30.1",
     "status": "ACTIVE_OPERATOR_PROTOCOL_NO_BACKGROUND_SERVICE",
-    "last_updated": "2026-07-26",
+    "last_updated": "2026-07-30",
     "updated_by": "codex-gm-01",
     "reviewed_by": "HUMAN_PRIMEFORGE_FULL_AUTOPILOT_001",
     "human_decision_ids": [
@@ -13,8 +13,8 @@
       "HUMAN-COMPANY-OS-BOOT-001",
       "HUMAN-PRIMEFORGE-FULL-AUTOPILOT-001"
     ],
-    "source_commit": "ORIGIN_MAIN_9df04ef84019f508defb89a0c807307d6fbd3712",
-    "source_freshness": "REMOTE_VERIFIED_2026-07-26T06:25:40+08:00",
+    "source_commit": "ORIGIN_MAIN_00bb3ed70ca4134c537bf61bdacaa6e42e2304e3",
+    "source_freshness": "REMOTE_VERIFIED_2026-07-30T19:00:11+08:00",
     "source_of_truth": true
   },
   "system_identity": {
@@ -257,7 +257,7 @@
     "automatic_remote_branch_delete": false
   },
   "current_observation": {
-    "observed_at": "2026-07-26T06:25:40+08:00",
+    "observed_at": "2026-07-30T19:00:11+08:00",
     "dns": "HEALTHY",
     "github_tcp_443": "HEALTHY",
     "github_https": "HTTP_200",
@@ -268,7 +268,7 @@
     "pages_decision_center": "HTTP_200",
     "pages_workforce": "HTTP_200",
     "pages_operating_center": "HTTP_200",
-    "origin_main": "9df04ef84019f508defb89a0c807307d6fbd3712",
+    "origin_main": "00bb3ed70ca4134c537bf61bdacaa6e42e2304e3",
     "head_matches_origin_main": true,
     "human_main": "DIRTY_READ_ONLY_UNTOUCHED",
     "canonical_cursor_registry_state": "IDLE_NO_CURRENT_TASK",
@@ -292,12 +292,12 @@
   },
   "current_state_pointer": {
     "status": "CURRENT",
-    "baseline_merge_sha": "9df04ef84019f508defb89a0c807307d6fbd3712",
-    "completed_workline": "KGEN-BSCSCAN-LOGO-001",
-    "active_workline": "WORLD_VIEWER_ORGANISM_PACKAGE_INTEGRATION",
+    "baseline_merge_sha": "00bb3ed70ca4134c537bf61bdacaa6e42e2304e3",
+    "completed_workline": "KAIOS-K280-DIGITAL-LIFE-GENESIS-MVP-001",
+    "active_workline": "K280_POPULATION_OBSERVATORY_AND_SPECIES_BRANCH_REVIEW",
     "active_workline_status": "HOLD_NOT_STARTED",
-    "recovery_point": "RECOVERY-PR51-KGEN-BSCSCAN-LOGO-V1",
-    "company_status": "KGEN-KAIOS/governance/autopilot/company_status/COMPANY_STATUS_2026-07-26_PR51_BSCSCAN_LOGO.md",
+    "recovery_point": "RECOVERY-KAIOS-K280-DIGITAL-LIFE-MVP",
+    "company_status": "KGEN-KAIOS/governance/autopilot/company_status/COMPANY_STATUS_2026-07-30_KAIOS_K280_DIGITAL_LIFE_MVP.md",
     "runtime_authority": false,
     "cursor_dispatch": false,
     "scheduler": false,
