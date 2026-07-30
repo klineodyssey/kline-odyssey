@@ -1,0 +1,49 @@
+{
+  "schema_version": "1.0",
+  "species_id": "SPECIES-KAIOS-K280-RAPTOR",
+  "species_name": "K280 原生迅猛龍",
+  "species_version": "1.0.0",
+  "taxonomy_ref": "KGEN-KAIOS/organism/taxonomy_registry.json#SPECIES-KAIOS-K280-RAPTOR",
+  "species_manifest": "KAIOS/life/species/k280-raptor/species.json",
+  "program_filename": "KAIOS/K280/runtime/k280-runtime.js",
+  "runtime_entrypoint": "KAIOS/K280/runtime/k280-runtime.js#K280LifeRuntime",
+  "compatibility": [
+    "KAIOS_WEB_STATIC",
+    "LOCAL_NODE_TEST",
+    "BIOLOGICAL_SIMULATION_ONLY",
+    "TAXONOMY_EXTENSION_19"
+  ],
+  "reproduction_rules_ref": "KAIOS/life/species/k280-raptor/reproduction.json#K280_REPRODUCTION",
+  "mutation_rules_ref": "KAIOS/life/species/k280-raptor/mutation_rules.json",
+  "energy_profile_ref": "KAIOS/life/species/k280-raptor/energy_profile.json",
+  "embodiment_profile_ref": "KAIOS/life/species/k280-raptor/body_plan.json",
+  "trade_profile_ref": "KAIOS/exchange/11520/listings/KAIOS-RAPTOR-K280-001.listing.json",
+  "organ_requirements": [
+    "SENSOR_ARRAY",
+    "LOCOMOTION_SYSTEM",
+    "DIGITAL_METABOLISM",
+    "MEMORY_CORE",
+    "HEALTH_REGULATOR"
+  ],
+  "cell_requirements": [
+    "K280_DIGITAL_CELL",
+    "SENSOR_CELL",
+    "MOTOR_CELL",
+    "MEMORY_CELL",
+    "METABOLIC_CELL"
+  ],
+  "lifecycle": [
+    "SPECIFIED",
+    "VALIDATED",
+    "BORN_IN_SIMULATION",
+    "ACTIVE",
+    "SLEEPING",
+    "INJURED",
+    "ELDER",
+    "DEAD"
+  ],
+  "release_policy": "DRY_RUN_ONLY",
+  "organism_schema_version": "2.0",
+  "status": "CANDIDATE_ONLY",
+  "integrity_hash": "0796bbfd38e3ae3e403d085f06f114a0016d416daf52c30810684f44f523330d"
+}

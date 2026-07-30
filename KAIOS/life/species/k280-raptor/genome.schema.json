@@ -1,0 +1,75 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "KAIOS/K280/genome.schema.json",
+  "title": "K280 Digital Genome",
+  "type": "object",
+  "required": [
+    "genome_id",
+    "parent_genome_ids",
+    "species_id",
+    "generation",
+    "random_seed",
+    "allele_groups",
+    "mutation_history",
+    "phenotype_projection",
+    "mutation_probability",
+    "inheritance_probability",
+    "integrity_checksum"
+  ],
+  "properties": {
+    "genome_id": {
+      "type": "string",
+      "pattern": "^GENOME-K280-|^GENOME-KAIOS-RAPTOR-"
+    },
+    "parent_genome_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "maxItems": 2
+    },
+    "species_id": {
+      "const": "SPECIES-KAIOS-K280-RAPTOR"
+    },
+    "generation": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 100
+    },
+    "random_seed": {
+      "type": "string",
+      "minLength": 1
+    },
+    "allele_groups": {
+      "type": "object",
+      "minProperties": 10
+    },
+    "mutation_history": {
+      "type": "array"
+    },
+    "phenotype_projection": {
+      "type": "object"
+    },
+    "mutation_probability": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 0.25
+    },
+    "inheritance_probability": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "integrity_checksum": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "biological_instruction": {
+      "const": false
+    },
+    "simulation_only": {
+      "const": true
+    }
+  },
+  "additionalProperties": true
+}

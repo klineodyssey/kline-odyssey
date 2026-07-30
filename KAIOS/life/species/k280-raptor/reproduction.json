@@ -1,0 +1,27 @@
+{
+  "profiles": {
+    "K280_REPRODUCTION": {
+      "mode": "BIOLOGICAL",
+      "execution": "DIGITAL_RECOMBINATION_SIMULATION",
+      "sex_compatibility": [
+        [
+          "FEMALE",
+          "MALE"
+        ]
+      ],
+      "maturity_stage": "ADULT",
+      "minimum_health": 70,
+      "minimum_energy": 55,
+      "proximity_threshold": 12,
+      "relationship_threshold": 0.4,
+      "cooldown_ticks": 40,
+      "parent_genomes_required": 2,
+      "maximum_organisms_default": 100,
+      "maximum_organisms_hard": 500,
+      "capacity_stop_required": true,
+      "external_agent_creation": false,
+      "wallet_creation": false,
+      "biological_instruction": false
+    }
+  }
+}

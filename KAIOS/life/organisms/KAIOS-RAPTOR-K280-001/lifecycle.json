@@ -1,0 +1,29 @@
+{
+  "states": [
+    "SPECIFIED",
+    "VALIDATED",
+    "BORN_IN_SIMULATION",
+    "ACTIVE",
+    "SLEEPING",
+    "INJURED",
+    "ELDER",
+    "DEAD"
+  ],
+  "growth_thresholds": {
+    "HATCHLING": 0,
+    "JUVENILE": 90,
+    "ADULT": 300,
+    "ELDER": 900
+  },
+  "death_conditions": [
+    "HEALTH_ZERO",
+    "AGE_LIMIT",
+    "SIMULATION_TERMINAL_EVENT"
+  ],
+  "death_terminal": true,
+  "archive_on_death": true,
+  "resurrection": false,
+  "unit": "SIMULATION_TICK",
+  "current_state": "BORN_IN_SIMULATION",
+  "current_growth_stage": "HATCHLING"
+}

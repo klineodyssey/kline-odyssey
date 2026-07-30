@@ -1,0 +1,9 @@
+{
+  "habitat_id": "HABITAT-K280-CAMBRIAN-LAB",
+  "occupancy": "SIMULATED",
+  "position": {
+    "x": 48,
+    "y": 52
+  },
+  "rights": "HABITAT_RIGHT_SIMULATION_ONLY"
+}

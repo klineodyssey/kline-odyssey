@@ -1,0 +1,8 @@
+{
+  "task_id": "KAIOS-K280-DIGITAL-LIFE-GENESIS-MVP-001",
+  "source_species_id": "SPECIES-KAIOS-K280-RAPTOR",
+  "canonical_schema": "KGEN-KAIOS/provenance/ORGANISM_MANIFEST_SCHEMA.json",
+  "base_sha": "37362ca5477fa120a54b4828a71da0cbdaf99718",
+  "generated_by": "codex-gm-01",
+  "technical_provenance_not_parent_life": true
+}

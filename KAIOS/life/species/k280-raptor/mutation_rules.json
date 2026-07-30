@@ -1,0 +1,28 @@
+{
+  "mutation_policy_id": "K280-BOUNDED-MUTATION-V1",
+  "default_probability": 0.08,
+  "maximum_probability": 0.25,
+  "mutable_traits": [
+    "size",
+    "energy_efficiency",
+    "sensory_range",
+    "intelligence",
+    "aggression",
+    "sociability",
+    "cold_adaptation",
+    "speed",
+    "healing",
+    "fertility"
+  ],
+  "permitted_outputs": [
+    "SIZE_VARIATION",
+    "COLORATION_VARIATION",
+    "ENERGY_EFFICIENCY_VARIATION",
+    "SENSORY_VARIATION",
+    "SOCIAL_VARIATION",
+    "ENVIRONMENTAL_ADAPTATION"
+  ],
+  "species_branch_status": "CANDIDATE_SPECIES_BRANCH",
+  "automatic_species_activation": false,
+  "real_genetic_engineering": false
+}

@@ -1,0 +1,48 @@
+{
+  "policy": "SEPARATED_RIGHTS",
+  "rights": {
+    "OWNERSHIP_RIGHT": {
+      "status": "NOT_GRANTED",
+      "independently_reviewed": true
+    },
+    "CUSTODY_RIGHT": {
+      "status": "NOT_GRANTED",
+      "independently_reviewed": true
+    },
+    "OPERATION_RIGHT": {
+      "status": "NOT_GRANTED",
+      "independently_reviewed": true
+    },
+    "OCCUPANCY_RIGHT": {
+      "status": "NOT_GRANTED",
+      "independently_reviewed": true
+    },
+    "USAGE_RIGHT": {
+      "status": "SIMULATION_GRANTED",
+      "independently_reviewed": true
+    },
+    "BREEDING_RIGHT": {
+      "status": "NOT_GRANTED",
+      "independently_reviewed": true
+    },
+    "COMMERCIAL_LICENSE": {
+      "status": "NOT_GRANTED",
+      "independently_reviewed": true
+    },
+    "TRANSFER_RIGHT": {
+      "status": "NOT_GRANTED",
+      "independently_reviewed": true
+    },
+    "HABITAT_RIGHT": {
+      "status": "SIMULATION_GRANTED",
+      "independently_reviewed": true
+    },
+    "CONTROL_AUTHORITY": {
+      "status": "NOT_GRANTED",
+      "independently_reviewed": true
+    }
+  },
+  "life_identity_transferable": false,
+  "wallet_rights": false,
+  "production_authority": false
+}

@@ -105,6 +105,7 @@ button:focus-visible, canvas:focus-visible, [tabindex]:focus-visible {
   min-width: 54px; min-height: 58px; padding: 7px 4px; border: 1px solid transparent; border-radius: 6px;
   background: transparent; color: var(--muted); cursor: pointer; display: grid; place-items: center; gap: 2px;
 }
+.mode-link { text-decoration: none; font: inherit; text-align: center; }
 .mode-button span:first-child { font-size: 20px; }
 .mode-button span:last-child { font-size: 10px; }
 .mode-button:hover, .mode-button.is-active { color: var(--text); background: var(--surface-2); border-color: var(--line); }

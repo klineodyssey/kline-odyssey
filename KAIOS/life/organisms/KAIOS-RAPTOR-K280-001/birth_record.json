@@ -1,0 +1,9 @@
+{
+  "birth_event_id": "BIRTH-KAIOS-RAPTOR-K280-001",
+  "birth_mode": "NATURAL_KAIOS_INSTANTIATION",
+  "pipeline_id": "PIPELINE-K280-634681c59dee",
+  "timestamp": "2026-07-30T00:00:00.000Z",
+  "release_scope": "LOCAL_DETERMINISTIC_SIMULATION",
+  "legal_birth": false,
+  "real_biological_birth": false
+}

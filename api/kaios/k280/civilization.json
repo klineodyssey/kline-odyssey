@@ -1,0 +1,18 @@
+{
+  "stage": "PRIMITIVE_FORAGING",
+  "stages": [
+    "PRIMITIVE_FORAGING",
+    "AGRICULTURAL",
+    "URBAN",
+    "INDUSTRIAL",
+    "ELECTRICAL",
+    "INFORMATION",
+    "AI_CIVILIZATION",
+    "SPACEFARING",
+    "INTERSTELLAR",
+    "IMMORTAL_CIVILIZATION",
+    "DEITY_CIVILIZATION",
+    "DIVINE_ARMY_CIVILIZATION"
+  ],
+  "current_authority": "NONE"
+}

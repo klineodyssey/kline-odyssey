@@ -1,0 +1,25 @@
+{
+  "runtime_instance_id": "RUNTIME-KAIOS-RAPTOR-K280-001-LOCAL",
+  "simulation_time": 0,
+  "age": 0,
+  "health": 100,
+  "energy": 86,
+  "hunger": 12,
+  "hydration": 88,
+  "temperature": 37.2,
+  "position": {
+    "x": 48,
+    "y": 52
+  },
+  "active_behavior": "WAKE",
+  "emotional_state": "CURIOUS",
+  "lifecycle_stage": "HATCHLING",
+  "growth_stage": "HATCHLING",
+  "sex": "FEMALE",
+  "alive": true,
+  "runtime_mode": "LOCAL_DETERMINISTIC_SIMULATION",
+  "authority": "NO_PRODUCTION_AUTHORITY",
+  "production_authority": false,
+  "network_required": false,
+  "wallet": null
+}

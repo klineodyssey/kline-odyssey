@@ -27,6 +27,7 @@ from validate_organism import (
     validate_species_registry,
     validate_taxonomy_registry,
     validate_unique_organism_ids,
+    _validate_entrypoint,
 )
 
 
@@ -55,6 +56,13 @@ class CanonicalOrganismImplementationTests(unittest.TestCase):
     def test_04_runtime_entrypoint_resolution(self) -> None:
         result = dry_run(REPO_ROOT, self.package)
         self.assertEqual("RELEASE", result["completed_through"])
+
+    def test_04b_missing_javascript_export_is_rejected(self) -> None:
+        with self.assertRaisesRegex(ValidationError, "does not resolve"):
+            _validate_entrypoint(
+                REPO_ROOT,
+                "KAIOS/K280/runtime/k280-runtime.js#MissingRuntimeExport",
+            )
 
     def test_05_organism_package_is_complete(self) -> None:
         self.assertEqual(16, len(PACKAGE_FILES))
@@ -238,7 +246,7 @@ class CanonicalOrganismImplementationTests(unittest.TestCase):
 
     def test_41_full_validator_passes(self) -> None:
         result = validate_all(REPO_ROOT)
-        self.assertEqual(6, result["species"])
+        self.assertEqual(7, result["species"])
 
     def test_42_missing_species_implementation_is_rejected(self) -> None:
         candidate_taxonomy = copy.deepcopy(self.taxonomy)

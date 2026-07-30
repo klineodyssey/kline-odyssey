@@ -1,0 +1,318 @@
+{
+  "pipeline_id": "PIPELINE-K280-634681c59dee",
+  "stages": [
+    {
+      "stage": "SPECIFICATION",
+      "input": "SPECIES-KAIOS-K280-RAPTOR",
+      "output": "SPECIFICATION",
+      "timestamp": "2026-07-30T00:00:00.000Z",
+      "validation_status": "PASS",
+      "source_version": "1.0.0",
+      "deterministic_seed": "KAIOS-K280-GENESIS-SEED-001",
+      "integrity_checksum": "23c1d97ec40233d772a6151e1ddf3c3364667aa8dd8c5c7f07bd21a36734184e"
+    },
+    {
+      "stage": "VALIDATION",
+      "input": "SPECIFICATION",
+      "output": "VALIDATION",
+      "timestamp": "2026-07-30T00:00:01.000Z",
+      "validation_status": "PASS",
+      "source_version": "1.0.0",
+      "deterministic_seed": "KAIOS-K280-GENESIS-SEED-001",
+      "integrity_checksum": "56ad79ff649c9fc26e5d5b46becf756b2cea397857e1c50fd950ee4d7154bdd8"
+    },
+    {
+      "stage": "TAXONOMY",
+      "input": "VALIDATION",
+      "output": "TAXONOMY",
+      "timestamp": "2026-07-30T00:00:02.000Z",
+      "validation_status": "PASS",
+      "source_version": "1.0.0",
+      "deterministic_seed": "KAIOS-K280-GENESIS-SEED-001",
+      "integrity_checksum": "4ce2559245a8c9a3d9cade29c0b496d0cc2e2a7f15719fa41d1f205b88740406"
+    },
+    {
+      "stage": "SPECIES_PROGRAM_BINDING",
+      "input": "TAXONOMY",
+      "output": "SPECIES_PROGRAM_BINDING",
+      "timestamp": "2026-07-30T00:00:03.000Z",
+      "validation_status": "PASS",
+      "source_version": "1.0.0",
+      "deterministic_seed": "KAIOS-K280-GENESIS-SEED-001",
+      "integrity_checksum": "e9ea322f69ba5d322ca8ff330cf6e85215a7e04a6e9d8e356fbb5682e4935183"
+    },
+    {
+      "stage": "GENOME_GENERATION",
+      "input": "SPECIES_PROGRAM_BINDING",
+      "output": "GENOME_GENERATION",
+      "timestamp": "2026-07-30T00:00:04.000Z",
+      "validation_status": "PASS",
+      "source_version": "1.0.0",
+      "deterministic_seed": "KAIOS-K280-GENESIS-SEED-001",
+      "integrity_checksum": "0aa0bd60dbea2d099dfa6ae2034516f72feab8ee09a7b46911f62c357331aa00"
+    },
+    {
+      "stage": "ORGANISM_ID_ASSIGNMENT",
+      "input": "GENOME_GENERATION",
+      "output": "ORGANISM_ID_ASSIGNMENT",
+      "timestamp": "2026-07-30T00:00:05.000Z",
+      "validation_status": "PASS",
+      "source_version": "1.0.0",
+      "deterministic_seed": "KAIOS-K280-GENESIS-SEED-001",
+      "integrity_checksum": "b0395d76ea7f132f09fa6c3bc812d6aaee2588f74f08c0cc8340fb98634352b1"
+    },
+    {
+      "stage": "EMBODIMENT_BINDING",
+      "input": "ORGANISM_ID_ASSIGNMENT",
+      "output": "EMBODIMENT_BINDING",
+      "timestamp": "2026-07-30T00:00:06.000Z",
+      "validation_status": "PASS",
+      "source_version": "1.0.0",
+      "deterministic_seed": "KAIOS-K280-GENESIS-SEED-001",
+      "integrity_checksum": "6e2c34c1e96b03541c9ee440e8c992edff4a79c760111f1c5de4c393ed9fe79e"
+    },
+    {
+      "stage": "BIRTH_RECORD",
+      "input": "EMBODIMENT_BINDING",
+      "output": "BIRTH_RECORD",
+      "timestamp": "2026-07-30T00:00:07.000Z",
+      "validation_status": "PASS",
+      "source_version": "1.0.0",
+      "deterministic_seed": "KAIOS-K280-GENESIS-SEED-001",
+      "integrity_checksum": "dee2421b87575a3689278d83dc80efc2ac7092c67f5d11b1f48eb527c551237a"
+    },
+    {
+      "stage": "RELEASE",
+      "input": "BIRTH_RECORD",
+      "output": "RELEASE",
+      "timestamp": "2026-07-30T00:00:08.000Z",
+      "validation_status": "PASS",
+      "source_version": "1.0.0",
+      "deterministic_seed": "KAIOS-K280-GENESIS-SEED-001",
+      "integrity_checksum": "a699a10c57f851fdc5885f098627b470bd5c3d504342985709976b10b79f6b89"
+    },
+    {
+      "stage": "DIGITAL_RUNTIME_LIFE",
+      "input": "RELEASE",
+      "output": "RUNTIME-KAIOS-RAPTOR-K280-001-LOCAL",
+      "timestamp": "2026-07-30T00:00:09.000Z",
+      "validation_status": "PASS",
+      "source_version": "1.0.0",
+      "deterministic_seed": "KAIOS-K280-GENESIS-SEED-001",
+      "integrity_checksum": "5b0e12f24a0d6a03bc54bb459443d8ac109d1ddbcf2ab97064838d6861b63a21"
+    }
+  ],
+  "genome": {
+    "genome_id": "GENOME-KAIOS-RAPTOR-K280-001-G0",
+    "species_id": "SPECIES-KAIOS-K280-RAPTOR",
+    "parent_genome_ids": [],
+    "generation": 0,
+    "random_seed": "KAIOS-K280-GENESIS-SEED-001",
+    "allele_groups": {
+      "size": {
+        "dominant": 0.7366,
+        "recessive": 0.72
+      },
+      "energy_efficiency": {
+        "dominant": 1.0627,
+        "recessive": 0.9452
+      },
+      "sensory_range": {
+        "dominant": 1.3497,
+        "recessive": 1.35
+      },
+      "intelligence": {
+        "dominant": 0.5776,
+        "recessive": 0.5687
+      },
+      "aggression": {
+        "dominant": 0.4456,
+        "recessive": 0.4601
+      },
+      "sociability": {
+        "dominant": 0.434,
+        "recessive": 0.3836
+      },
+      "cold_adaptation": {
+        "dominant": 0.6618,
+        "recessive": 0.6427
+      },
+      "speed": {
+        "dominant": 0.7469,
+        "recessive": 0.7572
+      },
+      "healing": {
+        "dominant": 1.1378,
+        "recessive": 1.0949
+      },
+      "fertility": {
+        "dominant": 0.741,
+        "recessive": 0.7622
+      }
+    },
+    "dominant_traits": {
+      "size": 0.7366,
+      "energy_efficiency": 1.0627,
+      "sensory_range": 1.3497,
+      "intelligence": 0.5776,
+      "aggression": 0.4456,
+      "sociability": 0.434,
+      "cold_adaptation": 0.6618,
+      "speed": 0.7469,
+      "healing": 1.1378,
+      "fertility": 0.741
+    },
+    "recessive_traits": {
+      "size": 0.72,
+      "energy_efficiency": 0.9452,
+      "sensory_range": 1.35,
+      "intelligence": 0.5687,
+      "aggression": 0.4601,
+      "sociability": 0.3836,
+      "cold_adaptation": 0.6427,
+      "speed": 0.7572,
+      "healing": 1.0949,
+      "fertility": 0.7622
+    },
+    "mutation_history": [],
+    "phenotype_projection": {
+      "expressed_traits": {
+        "size": 0.732,
+        "energy_efficiency": 1.0298,
+        "sensory_range": 1.3498,
+        "intelligence": 0.5751,
+        "aggression": 0.4497,
+        "sociability": 0.4199,
+        "cold_adaptation": 0.6565,
+        "speed": 0.7498,
+        "healing": 1.1258,
+        "fertility": 0.7469
+      },
+      "size_class": "COMPACT",
+      "coloration": "K280-AMBER-66",
+      "morphology": "DIGITAL_RAPTOR_BIPEDAL",
+      "locomotion_profile": "BALANCED_RUNNER",
+      "sensory_profile": "LONG_RANGE",
+      "social_profile": "SOLITARY_LEANING"
+    },
+    "health_predispositions": {
+      "resilience": 1.1378,
+      "cold_stress": 0.7382
+    },
+    "metabolism_traits": {
+      "efficiency": 1.0627
+    },
+    "locomotion_traits": {
+      "speed": 0.7469
+    },
+    "sensory_traits": {
+      "range": 1.3497
+    },
+    "intelligence_traits": {
+      "adaptability": 0.5776
+    },
+    "aggression_traits": {
+      "intensity": 0.4456
+    },
+    "social_traits": {
+      "affinity": 0.434
+    },
+    "reproduction_traits": {
+      "fertility": 0.741
+    },
+    "environmental_adaptation": {
+      "cold": 0.6618
+    },
+    "lifespan_range_ticks": [
+      1800,
+      3200
+    ],
+    "size_range_meters": [
+      1.4,
+      2.1
+    ],
+    "coloration": "K280-AMBER-66",
+    "morphology": "DIGITAL_RAPTOR_BIPEDAL",
+    "mutation_probability": 0.08,
+    "inheritance_probability": 0.5,
+    "biological_instruction": false,
+    "simulation_only": true,
+    "checksum_algorithm": "K280_FNV1A64",
+    "integrity_checksum": "440065f6da65e0af8dea9a2a90493f8f1e3eb50f90d9293407f5915e7a8b4c47"
+  },
+  "identity": {
+    "life_id": "LIFE-KAIOS-RAPTOR-K280-001",
+    "organism_id": "KAIOS-RAPTOR-K280-001",
+    "species_id": "SPECIES-KAIOS-K280-RAPTOR",
+    "genome_id": "GENOME-KAIOS-RAPTOR-K280-001-G0",
+    "embodiment_id": "EMBODIMENT-KAIOS-RAPTOR-K280-001-DIGITAL",
+    "birth_event_id": "BIRTH-KAIOS-RAPTOR-K280-001",
+    "runtime_instance_id": "RUNTIME-KAIOS-RAPTOR-K280-001-LOCAL"
+  },
+  "release": "LOCAL_DETERMINISTIC_SIMULATION",
+  "production_authority": false,
+  "wallet": null,
+  "real_kgen": false,
+  "event_log": [
+    {
+      "event": "SPECIFICATION",
+      "timestamp": "2026-07-30T00:00:00.000Z",
+      "status": "PASS",
+      "integrity_checksum": "23c1d97ec40233d772a6151e1ddf3c3364667aa8dd8c5c7f07bd21a36734184e"
+    },
+    {
+      "event": "VALIDATION",
+      "timestamp": "2026-07-30T00:00:01.000Z",
+      "status": "PASS",
+      "integrity_checksum": "56ad79ff649c9fc26e5d5b46becf756b2cea397857e1c50fd950ee4d7154bdd8"
+    },
+    {
+      "event": "TAXONOMY",
+      "timestamp": "2026-07-30T00:00:02.000Z",
+      "status": "PASS",
+      "integrity_checksum": "4ce2559245a8c9a3d9cade29c0b496d0cc2e2a7f15719fa41d1f205b88740406"
+    },
+    {
+      "event": "SPECIES_PROGRAM_BINDING",
+      "timestamp": "2026-07-30T00:00:03.000Z",
+      "status": "PASS",
+      "integrity_checksum": "e9ea322f69ba5d322ca8ff330cf6e85215a7e04a6e9d8e356fbb5682e4935183"
+    },
+    {
+      "event": "GENOME_GENERATION",
+      "timestamp": "2026-07-30T00:00:04.000Z",
+      "status": "PASS",
+      "integrity_checksum": "0aa0bd60dbea2d099dfa6ae2034516f72feab8ee09a7b46911f62c357331aa00"
+    },
+    {
+      "event": "ORGANISM_ID_ASSIGNMENT",
+      "timestamp": "2026-07-30T00:00:05.000Z",
+      "status": "PASS",
+      "integrity_checksum": "b0395d76ea7f132f09fa6c3bc812d6aaee2588f74f08c0cc8340fb98634352b1"
+    },
+    {
+      "event": "EMBODIMENT_BINDING",
+      "timestamp": "2026-07-30T00:00:06.000Z",
+      "status": "PASS",
+      "integrity_checksum": "6e2c34c1e96b03541c9ee440e8c992edff4a79c760111f1c5de4c393ed9fe79e"
+    },
+    {
+      "event": "BIRTH_RECORD",
+      "timestamp": "2026-07-30T00:00:07.000Z",
+      "status": "PASS",
+      "integrity_checksum": "dee2421b87575a3689278d83dc80efc2ac7092c67f5d11b1f48eb527c551237a"
+    },
+    {
+      "event": "RELEASE",
+      "timestamp": "2026-07-30T00:00:08.000Z",
+      "status": "PASS",
+      "integrity_checksum": "a699a10c57f851fdc5885f098627b470bd5c3d504342985709976b10b79f6b89"
+    },
+    {
+      "event": "DIGITAL_RUNTIME_LIFE",
+      "timestamp": "2026-07-30T00:00:09.000Z",
+      "status": "PASS",
+      "integrity_checksum": "5b0e12f24a0d6a03bc54bb459443d8ac109d1ddbcf2ab97064838d6861b63a21"
+    }
+  ]
+}

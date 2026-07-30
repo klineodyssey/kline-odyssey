@@ -1,0 +1,11 @@
+{
+  "memory_model_id": "K280-MEMORY-V1",
+  "maximum_records": 80,
+  "classes": [
+    "WORKING_SIMULATION",
+    "HABITAT_EVENT",
+    "SOCIAL_EVENT"
+  ],
+  "private_human_memory": false,
+  "replayable": true
+}

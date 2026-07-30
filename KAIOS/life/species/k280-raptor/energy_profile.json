@@ -1,0 +1,10 @@
+{
+  "profile_id": "K280-SIMULATED-METABOLISM",
+  "input": "SIMULATED_FOOD_ENERGY",
+  "consumption_per_tick": 0.55,
+  "storage_range": [
+    0,
+    100
+  ],
+  "free_energy": false
+}

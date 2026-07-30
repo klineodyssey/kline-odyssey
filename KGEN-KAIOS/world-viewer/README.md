@@ -53,6 +53,15 @@ The runtime has one executable entry:
 KGEN-KAIOS/world-viewer/index.html
 ```
 
+The K280 digital-life MVP is a subordinate simulation route:
+
+```text
+KGEN-KAIOS/world-viewer/k280/index.html
+```
+
+It reuses the canonical organism schema, has no wallet or real settlement, and
+does not replace the World Viewer entry point.
+
 The intended permanent public alias is:
 
 ```text
@@ -113,6 +122,7 @@ World Viewer V1 therefore defines adapter boundaries and draft projections. It d
 | `WORLD_VIEWER_RUNTIME.md` | Modules, state machine, loading and command boundaries |
 | `LAND_VIEWER_SCHEMA_V2_COMPATIBILITY.md` | Viewer data inventory, Schema V2 mapping and dry-run migration evidence |
 | `LAND_VIEWER_SCHEMA_V2_COMPATIBILITY_MERGE_CLOSEOUT.md` | PR #52 merge, validation and non-activation closeout |
+| `k280/` | Responsive K280 digital-organism habitat and deterministic simulation viewer |
 | `CAMERA_STANDARD.md` | Drag, zoom, semantic level and camera transitions |
 | `SELECTION_STANDARD.md` | Parcel picking, context menu and intent rules |
 | `COORDINATE_MAPPING_STANDARD.md` | K280 geodetic, screen and Local ENU mapping |

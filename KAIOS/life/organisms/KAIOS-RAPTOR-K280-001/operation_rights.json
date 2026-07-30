@@ -1,0 +1,5 @@
+{
+  "operator_id": "LOCAL_SIMULATION_OPERATOR",
+  "scope": "START_PAUSE_STEP_RESET_REPLAY",
+  "production": false
+}
