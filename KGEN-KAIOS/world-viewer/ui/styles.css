@@ -670,6 +670,13 @@ button:focus-visible, canvas:focus-visible, [tabindex]:focus-visible {
   .context-menu.action-sheet { max-height: calc(100dvh - var(--safe-top)); }
 }
 
+@media (max-height: 520px) and (min-width: 901px) and (max-width: 960px) {
+  .mode-rail { min-height: 0; padding: 6px 5px; gap: 4px; overflow-y: auto; }
+  .mode-button { min-width: 48px; min-height: 48px; padding: 4px 3px; }
+  .mode-button span:first-child { font-size: 18px; }
+  .mode-button span:last-child { font-size: 9px; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; transition-duration: 0.001ms !important; scroll-behavior: auto !important; }
 }
