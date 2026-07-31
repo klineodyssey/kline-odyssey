@@ -1,8 +1,8 @@
 {
   "metadata": {
     "architecture_id": "PRIMEFORGE-COMPANY-AUTOPILOT-ARCH-001",
-    "version": "0.4.3",
-    "revision": "2026-07-31.1",
+    "version": "0.4.4",
+    "revision": "2026-07-31.2",
     "status": "ACTIVE_OPERATOR_PROTOCOL_NO_BACKGROUND_SERVICE",
     "last_updated": "2026-07-31",
     "updated_by": "codex-gm-01",
@@ -13,8 +13,8 @@
       "HUMAN-COMPANY-OS-BOOT-001",
       "HUMAN-PRIMEFORGE-FULL-AUTOPILOT-001"
     ],
-    "source_commit": "ORIGIN_MAIN_d5468ff113ed90eeaa7064c1a8646a5127f317dd",
-    "source_freshness": "REMOTE_VERIFIED_2026-07-31T05:40:55+08:00",
+    "source_commit": "ORIGIN_MAIN_af2bf7f4e28a6cf5436b46b1d435a9064b82614a",
+    "source_freshness": "REMOTE_VERIFIED_2026-07-31T15:45:56+08:00",
     "source_of_truth": true
   },
   "system_identity": {
@@ -257,7 +257,7 @@
     "automatic_remote_branch_delete": false
   },
   "current_observation": {
-    "observed_at": "2026-07-31T05:40:55+08:00",
+    "observed_at": "2026-07-31T15:45:56+08:00",
     "dns": "HEALTHY",
     "github_tcp_443": "HEALTHY",
     "github_https": "HTTP_200",
@@ -268,7 +268,7 @@
     "pages_decision_center": "HTTP_200",
     "pages_workforce": "HTTP_200",
     "pages_operating_center": "HTTP_200",
-    "origin_main": "d5468ff113ed90eeaa7064c1a8646a5127f317dd",
+    "origin_main": "af2bf7f4e28a6cf5436b46b1d435a9064b82614a",
     "head_matches_origin_main": true,
     "human_main": "CLEAN_SYNCHRONIZED",
     "canonical_cursor_registry_state": "IDLE_NO_CURRENT_TASK",
@@ -286,18 +286,18 @@
     "pending_repair": 22,
     "local_only_commits": 0,
     "pending_push_patch_count": 0,
-    "open_pull_requests_observed": 1,
+    "open_pull_requests_observed": 19,
     "protected_path_violations": 0,
     "overall": "GREEN_MANUAL_OPERATION_BOOT_PARTIAL_SAFE"
   },
   "current_state_pointer": {
     "status": "CURRENT",
-    "baseline_merge_sha": "d5468ff113ed90eeaa7064c1a8646a5127f317dd",
-    "completed_workline": "KAIOS-K280-WORLD-VIEWER-WEBSITE-LINK-001",
-    "active_workline": "K280_POPULATION_OBSERVATORY_AND_SPECIES_BRANCH_REVIEW",
+    "baseline_merge_sha": "af2bf7f4e28a6cf5436b46b1d435a9064b82614a",
+    "completed_workline": "KAIOS-FULL-WORLD-VIEWER-OFFICIAL-WEBSITE-001",
+    "active_workline": "KAIOS_LAND_BUILDING_CONSTRUCTION_SYSTEM",
     "active_workline_status": "HOLD_NOT_STARTED",
-    "recovery_point": "RECOVERY-KAIOS-K280-WORLD-VIEWER-WEBSITE-LINK",
-    "company_status": "KGEN-KAIOS/governance/autopilot/company_status/COMPANY_STATUS_2026-07-31_K280_WORLD_VIEWER_WEBSITE_LINK.md",
+    "recovery_point": "RECOVERY-KAIOS-FULL-WORLD-VIEWER-OFFICIAL-WEBSITE",
+    "company_status": "KGEN-KAIOS/governance/autopilot/company_status/COMPANY_STATUS_2026-07-31_KAIOS_FULL_WORLD_VIEWER.md",
     "runtime_authority": false,
     "cursor_dispatch": false,
     "scheduler": false,
