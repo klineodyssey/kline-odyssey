@@ -10,6 +10,7 @@ organism is `KAIOS-RAPTOR-K280-001`.
 
 Public interfaces:
 
+- [KAIOS Full World Viewer](../world-viewer/)
 - [K280 World Viewer](../world-viewer/k280/)
 - [K280 public data](../api/kaios/k280/)
 
