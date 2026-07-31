@@ -56,6 +56,7 @@ Kernel V1 is `UNDER_REVIEW / RESEARCH_ONLY`. The independent Review Resolution i
 | General Manager Decision Center | https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/decision/ | Daily Operation gate, manager decisions, network health and readiness |
 | KAIOS Constitution | https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/constitution/KAIOS_CONSTITUTION.md | Permanent KAIOS governance below Human Final Authority |
 | KAIOS World Viewer | https://klineodyssey.github.io/kline-odyssey/world-viewer/ | Stable Full World route for synthetic land, buildings, agriculture, civilization, nation, technology, and space exploration |
+| KAIOS Player Genesis | https://klineodyssey.github.io/kline-odyssey/world-viewer/player-genesis/ | Local deterministic player, AI household, work review, simulated payroll and living-cost loop |
 | AI Company | https://klineodyssey.github.io/kline-odyssey/ai-company/ | Codex / Cursor company workflow |
 | WorkQueue | https://klineodyssey.github.io/kline-odyssey/workqueue/ | Official task queue entry |
 | PrimeForge Boot CURRENT | https://klineodyssey.github.io/kline-odyssey/boot/ | Stable Boot source of truth |

@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#101411">
+  <meta name="description" content="建立 KAIOS 玩家、AI 伙伴、起家地、第一塊土地與第一份模擬工作。">
+  <link rel="canonical" href="https://klineodyssey.github.io/kline-odyssey/world-viewer/player-genesis/">
+  <title>開始 KAIOS 人生｜Player Genesis</title>
+  <style>body{margin:0;min-height:100vh;display:grid;place-items:center;color:#f2f5f2;background:#0c100d;font-family:system-ui,sans-serif}.route-state{width:min(90vw,520px);padding:24px;border:1px solid #344139;border-radius:8px;background:#151b16}.route-state p{color:#a8b5ac}</style>
+</head>
+<body>
+  <main class="route-state" id="route-state" role="status" aria-live="polite"><h1>開始 KAIOS 人生</h1><p>正在載入 Player Genesis 本地模擬…</p></main>
+  <script>
+    (async () => {
+      const state = document.getElementById("route-state");
+      try {
+        const base = "../../KGEN-KAIOS/world-viewer/player-genesis/";
+        const assetVersion = "20260731-player-genesis-1";
+        const response = await fetch(`${base}index.html`, { cache: "no-store" });
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const parsed = new DOMParser().parseFromString(await response.text(), "text/html");
+        const appShell = parsed.querySelector("#player-genesis-app");
+        if (!appShell) throw new Error("Canonical app shell missing");
+        document.body.replaceChildren(appShell);
+        const stylesheet = document.createElement("link");
+        stylesheet.rel = "stylesheet";
+        stylesheet.href = `${base}styles.css?v=${assetVersion}`;
+        document.head.append(stylesheet);
+        const app = document.createElement("script");
+        app.type = "module";
+        app.src = `${base}app.js?v=${assetVersion}`;
+        document.body.append(app);
+      } catch (error) {
+        state.setAttribute("role", "alert");
+        state.innerHTML = `<h1>KAIOS Player Genesis 載入失敗</h1><p>${String(error.message).replace(/[<>]/g, "")}</p><button type="button" onclick="location.reload()">重新載入</button>`;
+      }
+    })();
+  </script>
+</body>
+</html>

@@ -41,6 +41,7 @@ Last optimized: 2026-06-11
 | Civilization Economy Runtime V1 Baseline | [KGEN-KAIOS/civilization/CIVILIZATION_ECONOMY_ARCHITECTURE_BASELINE.md](KGEN-KAIOS/civilization/CIVILIZATION_ECONOMY_ARCHITECTURE_BASELINE.md) |
 | UI Governor Architecture | [KGEN-KAIOS/ui-governor/README.md](KGEN-KAIOS/ui-governor/README.md) |
 | KAIOS World Viewer | [Full World Viewer](https://klineodyssey.github.io/kline-odyssey/world-viewer/) |
+| KAIOS Player Genesis | [Player, AI Household and Work Simulation](https://klineodyssey.github.io/kline-odyssey/world-viewer/player-genesis/) |
 | K280 Digital Life Genesis MVP | [K280 World Viewer](https://klineodyssey.github.io/kline-odyssey/world-viewer/k280/) |
 | PrimeForge Boot CURRENT | https://klineodyssey.github.io/kline-odyssey/boot/ |
 | Official Contact Email | klineodyssey.io@gmail.com |
