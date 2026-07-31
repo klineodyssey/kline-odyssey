@@ -1019,8 +1019,8 @@ Where the Market Becomes the Myth.
 
 ## 🔥 Latest Video｜最新發布
 
-▶ KAIOS 是 KGEN AI Operating System，不是遊戲、不是交易所、不是錢包，而是串聯 AI、文明與市場的作業系統。《K線西遊記》只是第一個文明，更多內容請見官方網站。#KAIOS  
-👉 https://www.youtube.com/watch?v=LyVOgcQ4BWQ
+▶ #KAIOS #KGEN #K線西遊記 #花果山台灣【KAIOS 人生起點】KAIOS 正逐步從 Web Simulation 邁向真實世界。  
+👉 https://www.youtube.com/shorts/gzWyF-jB8mc
 
 （本區由 GitHub Actions 自動更新；首頁 iframe 保持固定世界觀主軸影片）
 <!-- LATEST_VIDEO_END -->
