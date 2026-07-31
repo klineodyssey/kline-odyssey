@@ -74,7 +74,11 @@ The intended permanent public alias is:
 /world-viewer/
 ```
 
-JavaScript, CSS and synthetic data are subordinate resources; they are not alternate application entry points. The repository path is directly compatible with static HTTP hosting and GitHub Pages.
+The alias is implemented by `world-viewer/index.html`, which loads this
+canonical shell and its existing modules without duplicating runtime logic.
+JavaScript, CSS and synthetic data are subordinate resources; they are not
+alternate application entry points. The repository path is directly compatible
+with static HTTP hosting and GitHub Pages.
 
 ## 3. Required Navigation Hierarchy
 
@@ -128,6 +132,8 @@ World Viewer V1 therefore defines adapter boundaries and draft projections. It d
 | `WORLD_VIEWER_RUNTIME.md` | Modules, state machine, loading and command boundaries |
 | `LAND_VIEWER_SCHEMA_V2_COMPATIBILITY.md` | Viewer data inventory, Schema V2 mapping and dry-run migration evidence |
 | `LAND_VIEWER_SCHEMA_V2_COMPATIBILITY_MERGE_CLOSEOUT.md` | PR #52 merge, validation and non-activation closeout |
+| `FULL_WORLD_VIEWER_CAPABILITY_AUDIT.md` | Evidence-based implementation status for land, buildings, production, civilization and technology |
+| `FULL_WORLD_VIEWER_OFFICIAL_ROUTE_REPORT.md` | Stable public route, homepage integration and GitHub Pages boundary |
 | `k280/` | Responsive K280 digital-organism habitat and deterministic simulation viewer |
 | `CAMERA_STANDARD.md` | Drag, zoom, semantic level and camera transitions |
 | `SELECTION_STANDARD.md` | Parcel picking, context menu and intent rules |

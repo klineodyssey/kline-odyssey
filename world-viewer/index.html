@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#111512">
+  <meta name="description" content="探索 KAIOS 的土地、城市、建築、農業、工廠、企業、文明、生物、國家、科技與太空演化系統。">
+  <link rel="canonical" href="https://klineodyssey.github.io/kline-odyssey/world-viewer/">
+  <meta property="og:title" content="KAIOS 完整世界｜KGEN">
+  <meta property="og:description" content="探索 KAIOS 的土地、城市、建築、農業、工廠、企業、文明、生物、國家、科技與太空演化系統。">
+  <meta property="og:url" content="https://klineodyssey.github.io/kline-odyssey/world-viewer/">
+  <meta property="og:image" content="https://klineodyssey.github.io/kline-odyssey/assets/kgen/kgen-logo-256.png">
+  <title>KAIOS 完整世界｜KGEN</title>
+  <style>
+    :root { color-scheme: dark; font-family: Inter, "Segoe UI", system-ui, sans-serif; }
+    * { box-sizing: border-box; }
+    body { margin: 0; min-height: 100vh; display: grid; place-items: center; color: #f1f5f2; background: #0d100e; }
+    .route-state { width: min(92vw, 520px); padding: 24px; border: 1px solid #344039; border-radius: 8px; background: #151a16; }
+    .route-state h1 { margin: 0 0 10px; font-size: 1.35rem; letter-spacing: 0; }
+    .route-state p { color: #a8b3ab; line-height: 1.6; }
+    .route-state button { min-height: 44px; border: 1px solid #63d391; border-radius: 6px; padding: 8px 14px; color: #f1f5f2; background: #1c231e; cursor: pointer; }
+    .route-state button:focus-visible { outline: 3px solid #f5d06f; outline-offset: 2px; }
+  </style>
+</head>
+<body>
+  <main class="route-state" id="full-viewer-route-state" role="status" aria-live="polite">
+    <h1>KAIOS 完整世界</h1>
+    <p>正在載入土地、城市、建築、農業、文明與科技系統…</p>
+  </main>
+  <script>
+    (() => {
+      const canonicalDocument = "../KGEN-KAIOS/world-viewer/index.html";
+      const canonicalStyles = "../KGEN-KAIOS/world-viewer/ui/styles.css";
+      const canonicalApp = "../KGEN-KAIOS/world-viewer/app.js";
+
+      async function loadFullViewer() {
+        const state = document.getElementById("full-viewer-route-state");
+        try {
+          const response = await fetch(canonicalDocument, { cache: "no-store" });
+          if (!response.ok) throw new Error(`HTTP ${response.status}`);
+          const source = await response.text();
+          const parsed = new DOMParser().parseFromString(source, "text/html");
+          const shell = parsed.querySelector("#app-shell");
+          if (!shell) throw new Error("Canonical app shell is missing");
+
+          document.body.replaceChildren(shell);
+          const stylesheet = document.createElement("link");
+          stylesheet.rel = "stylesheet";
+          stylesheet.href = canonicalStyles;
+          document.head.append(stylesheet);
+
+          const app = document.createElement("script");
+          app.type = "module";
+          app.src = canonicalApp;
+          document.body.append(app);
+        } catch (error) {
+          state.setAttribute("role", "alert");
+          state.innerHTML = "";
+          const title = document.createElement("h1");
+          title.textContent = "KAIOS 完整世界載入失敗";
+          const detail = document.createElement("p");
+          detail.textContent = `無法載入公開 Viewer（${error.message}）。`;
+          const retry = document.createElement("button");
+          retry.type = "button";
+          retry.textContent = "重新載入";
+          retry.addEventListener("click", () => location.reload());
+          state.append(title, detail, retry);
+        }
+      }
+
+      loadFullViewer();
+    })();
+  </script>
+</body>
+</html>
