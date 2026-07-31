@@ -78,6 +78,8 @@ Codex reran Company Boot and `git fetch origin --prune` at `2026-07-15T17:29:48+
 | `company_status/COMPANY_STATUS_2026-07-25_PR50_ORGANISM_BASELINE.md` | PR #50 closeout state and next-workline hold |
 | `recovery_points/RECOVERY-KAIOS-PLAYER-AI-HOUSEHOLD-WORK-GENESIS.md` | PR #62 Player, AI household, work, payroll, and deployment recovery anchor |
 | `company_status/COMPANY_STATUS_2026-07-31_PLAYER_AI_HOUSEHOLD_WORK_GENESIS.md` | PR #62 post-merge Company Status and held follow-up worklines |
+| `recovery_points/RECOVERY-KAIOS-REAL-CAUSAL-WORLD-RUNTIME.md` | PR #63 deterministic terrain, transport, construction, economy and deployment recovery anchor |
+| `company_status/COMPANY_STATUS_2026-08-01_REAL_CAUSAL_WORLD_RUNTIME.md` | PR #63 post-merge Company Status and held follow-up worklines |
 | `COMPANY_INBOX.md` | Durable Human intake boundary that remains available during network failure |
 | `PRIORITY_SCHEDULER.md` | Review-first ordering and one-task scheduling contract |
 | `REPOSITORY_MAINTENANCE_RUNTIME.md` | Fetch, compare, retry, recovery and health architecture |

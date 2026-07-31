@@ -45,6 +45,7 @@ Last optimized: 2026-06-11
 | KAIOS Real Causal World | [Terrain, Route, Transport and Construction Simulation](https://klineodyssey.github.io/kline-odyssey/world-viewer/causal-runtime/) |
 | Causal World Specification | [Runtime rules and authority boundaries](KAIOS_REAL_CAUSAL_WORLD_RUNTIME_SPEC.md) |
 | Causal World Report | [Implementation and scenario evidence](KAIOS_REAL_CAUSAL_WORLD_RUNTIME_REPORT.md) |
+| Causal World Closeout | [PR #63 merge, deployment and recovery evidence](KAIOS_REAL_CAUSAL_WORLD_RUNTIME_CLOSEOUT.md) |
 | K280 Digital Life Genesis MVP | [K280 World Viewer](https://klineodyssey.github.io/kline-odyssey/world-viewer/k280/) |
 | PrimeForge Boot CURRENT | https://klineodyssey.github.io/kline-odyssey/boot/ |
 | Official Contact Email | klineodyssey.io@gmail.com |
