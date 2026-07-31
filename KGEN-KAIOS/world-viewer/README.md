@@ -39,6 +39,15 @@ blockchain settlement, server authority or Production Runtime.
 
 **Public URL:** https://klineodyssey.github.io/kline-odyssey/world-viewer/player-genesis/
 
+## Real Causal World
+
+`causal-runtime/` extends the synthetic Viewer with deterministic terrain,
+roads, rivers, bridges, transport time, fuel, gravity, wear, materials, labor,
+construction stages, balanced costs, and causal blocking. It remains local,
+replayable, non-authoritative, and disconnected from real wallets or KGEN.
+
+**Public URL:** https://klineodyssey.github.io/kline-odyssey/world-viewer/causal-runtime/
+
 ## 1. Decision Status
 
 | Field | Value |

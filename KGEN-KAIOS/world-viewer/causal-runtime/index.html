@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#101512">
+  <meta name="description" content="KAIOS 真實因果世界以本地決定性模擬呈現距離、地形、道路、河流、橋梁、燃料、損耗、材料與施工時間。">
+  <link rel="canonical" href="https://klineodyssey.github.io/kline-odyssey/world-viewer/causal-runtime/">
+  <meta property="og:title" content="KAIOS 真實因果世界｜KGEN">
+  <meta property="og:description" content="距離、道路、河流、橋梁、運輸、燃料、損耗、材料與施工時間。">
+  <meta property="og:url" content="https://klineodyssey.github.io/kline-odyssey/world-viewer/causal-runtime/">
+  <meta property="og:image" content="https://klineodyssey.github.io/kline-odyssey/assets/kgen/kgen-logo-256.png">
+  <link rel="icon" type="image/png" href="../../../assets/kgen/kgen-logo-64.png">
+  <title>KAIOS 真實因果世界｜KGEN</title>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <div class="app" id="causal-runtime-app">
+    <header class="topbar">
+      <a class="brand" href="https://klineodyssey.github.io/kline-odyssey/" aria-label="返回官方首頁"><span class="brand-mark" aria-hidden="true">K</span><span><strong>KAIOS REAL CAUSAL WORLD</strong><small>DETERMINISTIC FOUNDATION</small></span></a>
+      <nav aria-label="Official navigation">
+        <a href="https://klineodyssey.github.io/kline-odyssey/">官方首頁</a>
+        <a href="https://klineodyssey.github.io/kline-odyssey/world-viewer/">完整世界</a>
+        <a href="https://klineodyssey.github.io/kline-odyssey/world-viewer/player-genesis/">Player Genesis</a>
+        <a href="https://klineodyssey.github.io/kline-odyssey/world-viewer/k280/">K280</a>
+      </nav>
+      <div class="boundaries" aria-label="Simulation boundaries"><span>SIMULATION_ONLY</span><span>NO REAL KGEN</span><span>NO WALLET</span></div>
+    </header>
+
+    <main>
+      <section class="intro" aria-labelledby="page-title">
+        <div><p class="eyebrow">LOCAL_DETERMINISTIC_SIMULATION</p><h1 id="page-title">KAIOS 真實因果世界</h1><p>沒有道路就不能通行，沒有橋就不能過河，沒有燃料、工人、工具、材料與時間就不能完成運輸或施工。</p></div>
+        <dl><div><dt>單位</dt><dd>SI BASE</dd></div><div><dt>重力</dt><dd id="gravity-value">9.80665 m/s²</dd></div><div><dt>權限</dt><dd>LOCAL ONLY</dd></div></dl>
+      </section>
+
+      <div class="loading-state" id="loading-state" role="status">正在載入 KAIOS 因果世界資料…</div>
+      <section class="empty-state" id="empty-state" hidden><h2>尚無模擬結果</h2><p>選擇情境並計算路線。</p></section>
+      <section class="error-state" id="error-state" role="alert" hidden><strong>KAIOS 因果世界載入失敗。</strong><p id="error-detail"></p><button type="button" id="retry-button">重新載入</button></section>
+
+      <section class="workspace" id="workspace" hidden>
+        <aside class="control-panel" aria-label="Causal simulation controls">
+          <h2>路線控制</h2>
+          <label>起點<select id="origin"><option>高雄 synthetic city node</option></select></label>
+          <label>目的地<select id="destination"><option>新竹 synthetic city node</option></select></label>
+          <label>貨物<select id="cargo"><option value="STEEL">STEEL · 12,000 kg</option></select></label>
+          <label>車輛<select id="vehicle"><option value="TRUCK">TRUCK · 8,200 kg</option></select></label>
+          <label>示範情境<select id="scenario"><option value="VALID">A · Valid road + bridge + fuel</option><option value="RIVER">B · River without bridge</option><option value="BRIDGE_LOAD">C · Bridge load too low</option><option value="FUEL">D · Insufficient fuel</option><option value="WEAR">E · Critical wear failure</option></select></label>
+          <label>重力 m/s²<input id="gravity" type="number" min="0.1" max="40" step="0.01" value="9.80665"></label>
+          <div class="button-grid">
+            <button type="button" id="calculate-route">計算路線</button><button type="button" id="start-simulation">開始模擬</button>
+            <button type="button" id="pause-simulation">暫停</button><button type="button" id="resume-simulation">繼續</button>
+            <button type="button" id="advance-time">推進 1 小時</button><button type="button" id="refuel">模擬加油</button>
+            <button type="button" id="recharge">模擬充電</button>
+            <button type="button" id="maintenance">安排維護</button><button type="button" id="start-project">施工 1 小時</button>
+          </div>
+          <p class="control-status" id="control-status" role="status">READY</p>
+        </aside>
+
+        <div class="content">
+          <section class="route-map" aria-labelledby="map-title">
+            <header><div><p class="eyebrow">MAP / ROUTE</p><h2 id="map-title">高雄 → 新竹</h2></div><span id="route-status">NOT_EVALUATED</span></header>
+            <div class="map-canvas" role="img" aria-label="Synthetic route from Kaohsiung to Hsinchu crossing a river and bridge">
+              <div class="terrain terrain-plain">PLAIN</div><div class="terrain terrain-hill">HILL</div><div class="terrain terrain-urban">URBAN</div>
+              <span class="node node-origin">高雄</span><span class="road"></span><span class="river">RIVER</span><span class="bridge">BRIDGE</span><span class="node node-destination">新竹</span><span class="vehicle-marker" id="vehicle-marker">TRUCK</span>
+            </div>
+            <div class="route-metrics" id="route-metrics"></div>
+          </section>
+
+          <nav class="tabs" aria-label="Causal runtime views">
+            <button type="button" data-panel="infrastructure-panel" aria-pressed="true">基礎設施</button><button type="button" data-panel="vehicle-panel">車輛 / 貨物</button><button type="button" data-panel="project-panel">施工</button><button type="button" data-panel="economy-panel">成本</button><button type="button" data-panel="timeline-panel">時間線</button>
+          </nav>
+
+          <section class="panel" id="infrastructure-panel"><h2>Terrain · Roads · Rivers · Bridges</h2><div class="card-grid" id="infrastructure-grid"></div></section>
+          <section class="panel" id="vehicle-panel" hidden><h2>Vehicle · Cargo · Fuel · Wear</h2><div class="card-grid" id="vehicle-grid"></div></section>
+          <section class="panel" id="project-panel" hidden><h2>BASIC_HOUSE_FOUNDATION</h2><div class="project-layout"><div id="project-summary"></div><div><h3>Workers</h3><div id="worker-summary"></div><h3>Materials</h3><div id="material-summary"></div></div></div></section>
+          <section class="panel" id="economy-panel" hidden><h2>Balanced Cost Ledger</h2><div class="card-grid" id="account-grid"></div><div class="ledger" id="ledger"></div></section>
+          <section class="panel" id="timeline-panel" hidden><h2>Replayable Causal Events</h2><ol class="timeline" id="timeline"></ol></section>
+        </div>
+      </section>
+    </main>
+
+    <footer class="dock" aria-label="Local simulation storage controls"><button type="button" id="save-button">本地儲存</button><button type="button" id="export-button">匯出 JSON</button><label>匯入 JSON<input type="file" id="import-input" accept="application/json"></label><button type="button" id="reset-button">重置模擬</button><button type="button" id="replay-button">重播時間線</button><span>NON_AUTHORITATIVE_SIMULATION</span></footer>
+  </div>
+  <script type="module" src="./app.js"></script>
+</body>
+</html>

@@ -105,7 +105,7 @@ article h3, .ledger h3 { margin: 0 0 9px; font-size: .88rem; }
   .app { padding-bottom: 132px; }
   .topbar { position: static; display: block; width: 100%; min-width: 0; max-width: 100%; padding: 10px 14px; }
   .brand { width: 100%; min-width: 0; }
-  .topbar nav { width: 100%; min-width: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); margin-top: 9px; }
+  .topbar nav { width: 100%; min-width: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); margin-top: 9px; }
   .topbar nav a { min-width: 0; justify-content: center; padding: 5px 2px; overflow-wrap: anywhere; font-size: .65rem; }
   .boundary-badges { width: 100%; min-width: 0; max-width: 100%; margin-top: 6px; }
   main { width: calc(100% - 20px); max-width: 1240px; }
