@@ -29,6 +29,16 @@ CANONICAL_FILE: "KGEN-KAIOS/world-viewer/README.md"
 
 # KAIOS World Viewer V1
 
+## Player Genesis
+
+`player-genesis/` extends the existing synthetic Viewer with a deterministic,
+local-only player and AI household workflow. It provides optional consent,
+manual location fallback, separate simulated accounts, reviewed work, balanced
+payroll and living-cost simulation without real wallets, KGEN, GPS history,
+blockchain settlement, server authority or Production Runtime.
+
+**Public URL:** https://klineodyssey.github.io/kline-odyssey/world-viewer/player-genesis/
+
 ## 1. Decision Status
 
 | Field | Value |
