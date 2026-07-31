@@ -1,8 +1,8 @@
 {
   "metadata": {
     "architecture_id": "PRIMEFORGE-COMPANY-AUTOPILOT-ARCH-001",
-    "version": "0.4.4",
-    "revision": "2026-07-31.2",
+    "version": "0.4.5",
+    "revision": "2026-07-31.3",
     "status": "ACTIVE_OPERATOR_PROTOCOL_NO_BACKGROUND_SERVICE",
     "last_updated": "2026-07-31",
     "updated_by": "codex-gm-01",
@@ -13,8 +13,8 @@
       "HUMAN-COMPANY-OS-BOOT-001",
       "HUMAN-PRIMEFORGE-FULL-AUTOPILOT-001"
     ],
-    "source_commit": "ORIGIN_MAIN_af2bf7f4e28a6cf5436b46b1d435a9064b82614a",
-    "source_freshness": "REMOTE_VERIFIED_2026-07-31T15:45:56+08:00",
+    "source_commit": "ORIGIN_MAIN_b3bb63f7bb6435f0dd30ac8b2f1f2dad7eeb1bfa",
+    "source_freshness": "REMOTE_VERIFIED_2026-07-31T22:51:55+08:00",
     "source_of_truth": true
   },
   "system_identity": {
@@ -292,12 +292,19 @@
   },
   "current_state_pointer": {
     "status": "CURRENT",
-    "baseline_merge_sha": "af2bf7f4e28a6cf5436b46b1d435a9064b82614a",
-    "completed_workline": "KAIOS-FULL-WORLD-VIEWER-OFFICIAL-WEBSITE-001",
-    "active_workline": "KAIOS_LAND_BUILDING_CONSTRUCTION_SYSTEM",
-    "active_workline_status": "HOLD_NOT_STARTED",
-    "recovery_point": "RECOVERY-KAIOS-FULL-WORLD-VIEWER-OFFICIAL-WEBSITE",
-    "company_status": "KGEN-KAIOS/governance/autopilot/company_status/COMPANY_STATUS_2026-07-31_KAIOS_FULL_WORLD_VIEWER.md",
+    "baseline_merge_sha": "b3bb63f7bb6435f0dd30ac8b2f1f2dad7eeb1bfa",
+    "completed_workline": "KAIOS-PLAYER-AI-HOUSEHOLD-WORK-GENESIS-001",
+    "active_workline": null,
+    "active_workline_status": "NO_ACTIVE_WORKLINE",
+    "next_worklines": [
+      {"workline": "KAIOS_REAL_CAUSAL_WORLD_RUNTIME", "status": "HOLD_NOT_STARTED"},
+      {"workline": "KAIOS_LAND_BUILDING_CONSTRUCTION_SYSTEM", "status": "HOLD_NOT_STARTED"},
+      {"workline": "KAIOS_AI_COMPANY_CREATOR_MARKETPLACE", "status": "HOLD_NOT_STARTED"},
+      {"workline": "KAIOS_ECONOMIC_CLOSED_LOOP_V2", "status": "HOLD_NOT_STARTED"},
+      {"workline": "KAIOS_MOBILE_OS_NATIVE_DEVICE", "status": "HOLD_NOT_STARTED"}
+    ],
+    "recovery_point": "RECOVERY-KAIOS-PLAYER-AI-HOUSEHOLD-WORK-GENESIS",
+    "company_status": "KGEN-KAIOS/governance/autopilot/company_status/COMPANY_STATUS_2026-07-31_PLAYER_AI_HOUSEHOLD_WORK_GENESIS.md",
     "runtime_authority": false,
     "cursor_dispatch": false,
     "scheduler": false,
