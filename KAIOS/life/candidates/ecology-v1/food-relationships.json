@@ -1,0 +1,134 @@
+{
+  "schema_version": "1.0.0-candidate",
+  "dataset_id": "KAIOS-ECOLOGY-V1-FOUNDATIONAL-FOOD-RELATIONSHIPS-CANDIDATE",
+  "status": "CANDIDATE_ONLY",
+  "authority": "NO_PRODUCTION_AUTHORITY",
+  "simulation_only": true,
+  "data_only": true,
+  "species_scope": [
+    "SPECIES-KAIOS-FOUNDATIONAL-GRASS",
+    "SPECIES-KAIOS-FOUNDATIONAL-TREE",
+    "SPECIES-KAIOS-FOUNDATIONAL-FISH",
+    "SPECIES-KAIOS-FOUNDATIONAL-SHRIMP",
+    "SPECIES-KAIOS-FOUNDATIONAL-MOUNTAIN",
+    "SPECIES-KAIOS-FOUNDATIONAL-SOIL",
+    "SPECIES-KAIOS-FOUNDATIONAL-WATER",
+    "SPECIES-KAIOS-FOUNDATIONAL-RIVER"
+  ],
+  "abstract_resources": [
+    {
+      "resource_id": "AQUATIC_PRIMARY_FOOD_POOL",
+      "classification": "ABSTRACT_RESOURCE_POOL",
+      "runtime_status": "NOT_FULL_LIFE_RUNTIME",
+      "bounded": true
+    },
+    {
+      "resource_id": "DETRITUS_POOL",
+      "classification": "ABSTRACT_RESOURCE_POOL",
+      "runtime_status": "NOT_FULL_LIFE_RUNTIME",
+      "bounded": true
+    },
+    {
+      "resource_id": "MICROBIAL_DECOMPOSITION_PROXY",
+      "classification": "ABSTRACT_RESOURCE_POOL",
+      "runtime_status": "NOT_FULL_LIFE_RUNTIME",
+      "bounded": true
+    }
+  ],
+  "relationships": [
+    {
+      "relationship_id": "FOOD-GRASS-PRODUCER",
+      "relationship_type": "BIOMASS_PRODUCER",
+      "producer_species_id": "SPECIES-KAIOS-FOUNDATIONAL-GRASS",
+      "output": "PLANT_BIOMASS",
+      "causal_inputs": ["WATER", "SOIL_NUTRIENTS", "SUNLIGHT", "TIME"]
+    },
+    {
+      "relationship_id": "FOOD-TREE-PRODUCER",
+      "relationship_type": "BIOMASS_AND_SEED_SOURCE",
+      "producer_species_id": "SPECIES-KAIOS-FOUNDATIONAL-TREE",
+      "output": "DECLARED_PLANT_BIOMASS",
+      "causal_inputs": ["WATER", "SOIL_NUTRIENTS", "SUNLIGHT", "TIME"]
+    },
+    {
+      "relationship_id": "FOOD-AQUATIC-PRIMARY-TO-FISH",
+      "relationship_type": "RESOURCE_CONSUMPTION",
+      "resource_id": "AQUATIC_PRIMARY_FOOD_POOL",
+      "consumer_species_id": "SPECIES-KAIOS-FOUNDATIONAL-FISH",
+      "mass_transfer_required": true
+    },
+    {
+      "relationship_id": "FOOD-AQUATIC-PRIMARY-TO-SHRIMP",
+      "relationship_type": "RESOURCE_CONSUMPTION",
+      "resource_id": "AQUATIC_PRIMARY_FOOD_POOL",
+      "consumer_species_id": "SPECIES-KAIOS-FOUNDATIONAL-SHRIMP",
+      "mass_transfer_required": true
+    },
+    {
+      "relationship_id": "FOOD-DETRITUS-TO-SHRIMP",
+      "relationship_type": "RESOURCE_CONSUMPTION",
+      "resource_id": "DETRITUS_POOL",
+      "consumer_species_id": "SPECIES-KAIOS-FOUNDATIONAL-SHRIMP",
+      "mass_transfer_required": true
+    },
+    {
+      "relationship_id": "FLOW-DEAD-BIOMASS-TO-DETRITUS",
+      "relationship_type": "MATERIAL_RETURN",
+      "source_material": "DEAD_BIOMASS",
+      "resource_id": "DETRITUS_POOL",
+      "mass_transfer_required": true
+    },
+    {
+      "relationship_id": "FLOW-DETRITUS-TO-DECOMPOSITION",
+      "relationship_type": "DECOMPOSITION_PROXY",
+      "source_resource_id": "DETRITUS_POOL",
+      "resource_id": "MICROBIAL_DECOMPOSITION_PROXY",
+      "mass_transfer_required": true
+    },
+    {
+      "relationship_id": "FLOW-DECOMPOSITION-TO-SOIL",
+      "relationship_type": "NUTRIENT_RETURN",
+      "resource_id": "MICROBIAL_DECOMPOSITION_PROXY",
+      "recipient_species_id": "SPECIES-KAIOS-FOUNDATIONAL-SOIL",
+      "output": "SOIL_NUTRIENTS",
+      "mass_transfer_required": true
+    },
+    {
+      "relationship_id": "SUPPORT-WATER-DEPENDENCY",
+      "relationship_type": "ENVIRONMENTAL_DEPENDENCY",
+      "provider_species_id": "SPECIES-KAIOS-FOUNDATIONAL-WATER",
+      "dependent_species_ids": [
+        "SPECIES-KAIOS-FOUNDATIONAL-GRASS",
+        "SPECIES-KAIOS-FOUNDATIONAL-TREE",
+        "SPECIES-KAIOS-FOUNDATIONAL-FISH",
+        "SPECIES-KAIOS-FOUNDATIONAL-SHRIMP"
+      ],
+      "consumption_accounting_required": true
+    },
+    {
+      "relationship_id": "SUPPORT-RIVER-AQUATIC-HABITAT",
+      "relationship_type": "HABITAT_AND_TRANSPORT",
+      "provider_species_id": "SPECIES-KAIOS-FOUNDATIONAL-RIVER",
+      "dependent_species_ids": [
+        "SPECIES-KAIOS-FOUNDATIONAL-FISH"
+      ],
+      "water_balance_required": true
+    },
+    {
+      "relationship_id": "SUPPORT-MOUNTAIN-RUNOFF",
+      "relationship_type": "RUNOFF_AND_MINERAL_CONTRIBUTION",
+      "provider_species_id": "SPECIES-KAIOS-FOUNDATIONAL-MOUNTAIN",
+      "recipient_species_id": "SPECIES-KAIOS-FOUNDATIONAL-RIVER",
+      "mass_transfer_required": true
+    }
+  ],
+  "boundaries": {
+    "active_plankton_life": false,
+    "active_microbe_life": false,
+    "active_predator_life": false,
+    "unbounded_resource_generation": false,
+    "real_bioengineering": false,
+    "real_kgen": "NO_REAL_KGEN",
+    "wallet": "NONE"
+  }
+}

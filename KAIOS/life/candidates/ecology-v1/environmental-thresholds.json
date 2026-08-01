@@ -1,0 +1,101 @@
+{
+  "schema_version": "1.0.0-candidate",
+  "dataset_id": "KAIOS-ECOLOGY-V1-ENVIRONMENTAL-THRESHOLDS-CANDIDATE",
+  "status": "CANDIDATE_ONLY",
+  "authority": "NO_PRODUCTION_AUTHORITY",
+  "simulation_only": true,
+  "data_only": true,
+  "source_policy": "VALUES_REUSE_EXISTING_CANDIDATE_PACKAGES",
+  "species_thresholds": [
+    {
+      "species_id": "SPECIES-KAIOS-FOUNDATIONAL-GRASS",
+      "life_type": "PLANT_LIFE",
+      "temperature_c": {"minimum": 5, "maximum": 35},
+      "water_l_per_m2_day": {"minimum": 1.5, "maximum": 4.0},
+      "sunlight_need": "partial_to_full",
+      "compatible_soils": ["loam", "sandy_loam", "clay_loam"],
+      "seasons": ["spring", "summer", "autumn"],
+      "reproduction_modes": ["SEED_PROPAGATION", "VEGETATIVE_PROPAGATION"],
+      "population_cap_required": true
+    },
+    {
+      "species_id": "SPECIES-KAIOS-FOUNDATIONAL-TREE",
+      "life_type": "PLANT_LIFE",
+      "temperature_c": {"minimum": -5, "maximum": 38},
+      "water_l_per_day": {"minimum": 20, "maximum": 120},
+      "sunlight_need": "medium_to_full",
+      "compatible_soils": ["loam", "deep_alluvial_soil"],
+      "seasons": ["perennial"],
+      "reproduction_modes": ["SEED_PROPAGATION"],
+      "population_cap_required": true
+    },
+    {
+      "species_id": "SPECIES-KAIOS-FOUNDATIONAL-FISH",
+      "life_type": "MARINE_LIFE",
+      "temperature_c": {"minimum": 12, "maximum": 28},
+      "oxygen_mg_l": {"minimum": 5, "maximum": 12},
+      "salinity_ppt": {"minimum": 0, "maximum": 10},
+      "compatible_water_types": ["freshwater", "brackish"],
+      "food_resources": ["AQUATIC_PRIMARY_FOOD_POOL"],
+      "reproduction_modes": ["SEXUAL_REPRODUCTION", "SPAWNING"],
+      "population_cap_required": true
+    },
+    {
+      "species_id": "SPECIES-KAIOS-FOUNDATIONAL-SHRIMP",
+      "life_type": "MARINE_LIFE",
+      "temperature_c": {"minimum": 20, "maximum": 32},
+      "oxygen_mg_l": {"minimum": 4.5, "maximum": 10},
+      "salinity_ppt": {"minimum": 5, "maximum": 35},
+      "compatible_water_types": ["brackish", "marine"],
+      "water_quality_sensitivity": "high",
+      "food_resources": ["AQUATIC_PRIMARY_FOOD_POOL", "DETRITUS_POOL"],
+      "larval_stages": ["nauplius", "zoea", "mysis", "post_larva"],
+      "reproduction_modes": ["SEXUAL_REPRODUCTION", "LARVAL_DEVELOPMENT"],
+      "population_cap_required": true
+    },
+    {
+      "species_id": "SPECIES-KAIOS-FOUNDATIONAL-MOUNTAIN",
+      "life_type": "TERRAIN_LIFE",
+      "formation_time_years": {"minimum": 1000000, "maximum": 50000000},
+      "hazards": ["landslide", "rockfall", "avalanche_optional"],
+      "reproduction_modes": ["NO_REPRODUCTION"],
+      "change_modes": ["FORMATION", "EROSION", "WEATHERING", "COLLAPSE"]
+    },
+    {
+      "species_id": "SPECIES-KAIOS-FOUNDATIONAL-SOIL",
+      "life_type": "LAND_LIFE",
+      "ph": {"minimum": 6.0, "maximum": 7.2},
+      "moisture": "moderate",
+      "fertility": "medium",
+      "reproduction_modes": ["NO_REPRODUCTION"],
+      "change_modes": ["FORMATION", "ACCUMULATION", "EROSION", "CONTAMINATION", "REPAIR"]
+    },
+    {
+      "species_id": "SPECIES-KAIOS-FOUNDATIONAL-WATER",
+      "life_type": "WATER_BODY_LIFE",
+      "temperature_c": {"minimum": 0, "maximum": 35},
+      "availability": "bounded_by_volume",
+      "reproduction_modes": ["NO_REPRODUCTION"],
+      "change_modes": ["STATE_TRANSFER", "VOLUME_TRANSFER", "EVAPORATION", "FREEZING", "BOILING"]
+    },
+    {
+      "species_id": "SPECIES-KAIOS-FOUNDATIONAL-RIVER",
+      "life_type": "WATER_BODY_LIFE",
+      "temperature_c": {"minimum": 4, "maximum": 26},
+      "oxygen_mg_l": {"minimum": 6, "maximum": 12},
+      "source_elevation_m": 520,
+      "outflow_elevation_m": 400,
+      "downhill_flow_required": true,
+      "reproduction_modes": ["NO_REPRODUCTION"],
+      "change_modes": ["FORMATION", "FLOW", "CHANNEL_CHANGE", "FLOOD", "DROUGHT"]
+    }
+  ],
+  "boundaries": {
+    "unrestricted_mutation": false,
+    "automatic_new_species": false,
+    "real_bioengineering": false,
+    "production_authority": false,
+    "real_kgen": "NO_REAL_KGEN",
+    "wallet": "NONE"
+  }
+}

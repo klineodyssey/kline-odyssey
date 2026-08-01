@@ -1,0 +1,105 @@
+{
+  "schema_version": "1.0.0-candidate",
+  "dataset_id": "KAIOS-ECOLOGY-V1-HABITAT-COMPATIBILITY-CANDIDATE",
+  "status": "CANDIDATE_ONLY",
+  "authority": "NO_PRODUCTION_AUTHORITY",
+  "simulation_only": true,
+  "data_only": true,
+  "compatibility_scale": ["REQUIRED", "SUITABLE", "CONDITIONAL", "STRUCTURAL_SUPPORT", "INCOMPATIBLE"],
+  "habitats": [
+    {
+      "habitat_id": "HABITAT-GRASSLAND-V1",
+      "habitat_type": "GRASSLAND",
+      "area_m2": 10000,
+      "population_capacity_model": "SIMULATION_APPROXIMATION",
+      "species": [
+        {"species_id": "SPECIES-KAIOS-FOUNDATIONAL-GRASS", "compatibility": "SUITABLE", "maximum_count": 800},
+        {"species_id": "SPECIES-KAIOS-FOUNDATIONAL-TREE", "compatibility": "CONDITIONAL", "maximum_count": 40},
+        {"species_id": "SPECIES-KAIOS-FOUNDATIONAL-SOIL", "compatibility": "REQUIRED", "maximum_count": 1},
+        {"species_id": "SPECIES-KAIOS-FOUNDATIONAL-WATER", "compatibility": "REQUIRED", "maximum_count": 1}
+      ]
+    },
+    {
+      "habitat_id": "HABITAT-FOREST-V1",
+      "habitat_type": "FOREST",
+      "area_m2": 20000,
+      "population_capacity_model": "SIMULATION_APPROXIMATION",
+      "species": [
+        {"species_id": "SPECIES-KAIOS-FOUNDATIONAL-TREE", "compatibility": "SUITABLE", "maximum_count": 600},
+        {"species_id": "SPECIES-KAIOS-FOUNDATIONAL-GRASS", "compatibility": "CONDITIONAL", "maximum_count": 500},
+        {"species_id": "SPECIES-KAIOS-FOUNDATIONAL-SOIL", "compatibility": "REQUIRED", "maximum_count": 1},
+        {"species_id": "SPECIES-KAIOS-FOUNDATIONAL-WATER", "compatibility": "REQUIRED", "maximum_count": 1}
+      ]
+    },
+    {
+      "habitat_id": "HABITAT-FISHPOND-V1",
+      "habitat_type": "FISHPOND",
+      "area_m2": 2500,
+      "mode": "ECOLOGICAL_SIMULATION_ONLY",
+      "commercial_settlement": false,
+      "population_capacity_model": "SIMULATION_APPROXIMATION",
+      "species": [
+        {"species_id": "SPECIES-KAIOS-FOUNDATIONAL-FISH", "compatibility": "SUITABLE", "maximum_count": 500},
+        {"species_id": "SPECIES-KAIOS-FOUNDATIONAL-SHRIMP", "compatibility": "CONDITIONAL", "maximum_count": 2500},
+        {"species_id": "SPECIES-KAIOS-FOUNDATIONAL-WATER", "compatibility": "REQUIRED", "maximum_count": 1},
+        {"species_id": "SPECIES-KAIOS-FOUNDATIONAL-SOIL", "compatibility": "STRUCTURAL_SUPPORT", "maximum_count": 1}
+      ]
+    },
+    {
+      "habitat_id": "HABITAT-RIVER-V1",
+      "habitat_type": "RIVER_HABITAT",
+      "area_m2": 40000,
+      "population_capacity_model": "SIMULATION_APPROXIMATION",
+      "species": [
+        {"species_id": "SPECIES-KAIOS-FOUNDATIONAL-RIVER", "compatibility": "REQUIRED", "maximum_count": 1},
+        {"species_id": "SPECIES-KAIOS-FOUNDATIONAL-WATER", "compatibility": "REQUIRED", "maximum_count": 1},
+        {"species_id": "SPECIES-KAIOS-FOUNDATIONAL-FISH", "compatibility": "SUITABLE", "maximum_count": 900},
+        {"species_id": "SPECIES-KAIOS-FOUNDATIONAL-SHRIMP", "compatibility": "CONDITIONAL", "maximum_count": 1200}
+      ]
+    },
+    {
+      "habitat_id": "HABITAT-WETLAND-V1",
+      "habitat_type": "WETLAND",
+      "area_m2": 12000,
+      "population_capacity_model": "SIMULATION_APPROXIMATION",
+      "species": [
+        {"species_id": "SPECIES-KAIOS-FOUNDATIONAL-GRASS", "compatibility": "CONDITIONAL", "maximum_count": 600},
+        {"species_id": "SPECIES-KAIOS-FOUNDATIONAL-SHRIMP", "compatibility": "CONDITIONAL", "maximum_count": 800},
+        {"species_id": "SPECIES-KAIOS-FOUNDATIONAL-WATER", "compatibility": "REQUIRED", "maximum_count": 1},
+        {"species_id": "SPECIES-KAIOS-FOUNDATIONAL-SOIL", "compatibility": "REQUIRED", "maximum_count": 1}
+      ]
+    },
+    {
+      "habitat_id": "HABITAT-SOIL-V1",
+      "habitat_type": "SOIL_HABITAT",
+      "area_m2": 1000,
+      "population_capacity_model": "SIMULATION_APPROXIMATION",
+      "species": [
+        {"species_id": "SPECIES-KAIOS-FOUNDATIONAL-SOIL", "compatibility": "REQUIRED", "maximum_count": 1},
+        {"species_id": "SPECIES-KAIOS-FOUNDATIONAL-GRASS", "compatibility": "SUITABLE", "maximum_count": 100},
+        {"species_id": "SPECIES-KAIOS-FOUNDATIONAL-TREE", "compatibility": "CONDITIONAL", "maximum_count": 12},
+        {"species_id": "SPECIES-KAIOS-FOUNDATIONAL-WATER", "compatibility": "REQUIRED", "maximum_count": 1}
+      ]
+    },
+    {
+      "habitat_id": "HABITAT-MOUNTAIN-WATERSHED-V1",
+      "habitat_type": "MOUNTAIN_WATERSHED",
+      "area_m2": 2000000000,
+      "population_capacity_model": "SIMULATION_APPROXIMATION",
+      "species": [
+        {"species_id": "SPECIES-KAIOS-FOUNDATIONAL-MOUNTAIN", "compatibility": "REQUIRED", "maximum_count": 1},
+        {"species_id": "SPECIES-KAIOS-FOUNDATIONAL-RIVER", "compatibility": "STRUCTURAL_SUPPORT", "maximum_count": 1},
+        {"species_id": "SPECIES-KAIOS-FOUNDATIONAL-WATER", "compatibility": "STRUCTURAL_SUPPORT", "maximum_count": 1},
+        {"species_id": "SPECIES-KAIOS-FOUNDATIONAL-TREE", "compatibility": "CONDITIONAL", "maximum_count": 300},
+        {"species_id": "SPECIES-KAIOS-FOUNDATIONAL-GRASS", "compatibility": "CONDITIONAL", "maximum_count": 500}
+      ]
+    }
+  ],
+  "boundaries": {
+    "finite_capacity_required": true,
+    "runtime_engine": false,
+    "production_authority": false,
+    "real_kgen": "NO_REAL_KGEN",
+    "wallet": "NONE"
+  }
+}

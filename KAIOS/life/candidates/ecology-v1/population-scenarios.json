@@ -1,0 +1,89 @@
+{
+  "schema_version": "1.0.0-candidate",
+  "dataset_id": "KAIOS-ECOLOGY-V1-POPULATION-SCENARIOS-CANDIDATE",
+  "status": "CANDIDATE_ONLY",
+  "authority": "NO_PRODUCTION_AUTHORITY",
+  "simulation_only": true,
+  "data_only": true,
+  "model_label": "SIMULATION_APPROXIMATION",
+  "deterministic_seed": "KAIOS-ECOLOGY-V1-CANDIDATE-SCENARIOS-001",
+  "global_limits": {
+    "maximum_population_records": 1000,
+    "maximum_generation": 5,
+    "birth_cooldown_ticks": 12,
+    "automatic_new_species": false,
+    "recursive_agent_creation": false
+  },
+  "baseline_populations": [
+    {"population_id": "POP-GRASS-001", "species_id": "SPECIES-KAIOS-FOUNDATIONAL-GRASS", "habitat_id": "HABITAT-GRASSLAND-V1", "count": 240, "carrying_capacity": 800, "reproduction_mode": "SEED_PROPAGATION", "generation": 0},
+    {"population_id": "POP-TREE-001", "species_id": "SPECIES-KAIOS-FOUNDATIONAL-TREE", "habitat_id": "HABITAT-FOREST-V1", "count": 36, "carrying_capacity": 600, "reproduction_mode": "SEED_PROPAGATION", "generation": 0},
+    {"population_id": "POP-FISH-001", "species_id": "SPECIES-KAIOS-FOUNDATIONAL-FISH", "habitat_id": "HABITAT-RIVER-V1", "count": 120, "carrying_capacity": 900, "reproduction_mode": "SPAWNING", "generation": 0},
+    {"population_id": "POP-SHRIMP-001", "species_id": "SPECIES-KAIOS-FOUNDATIONAL-SHRIMP", "habitat_id": "HABITAT-FISHPOND-V1", "count": 1800, "carrying_capacity": 2500, "reproduction_mode": "LARVAL_DEVELOPMENT", "generation": 0},
+    {"population_id": "POP-MOUNTAIN-001", "species_id": "SPECIES-KAIOS-FOUNDATIONAL-MOUNTAIN", "habitat_id": "HABITAT-MOUNTAIN-WATERSHED-V1", "count": 1, "carrying_capacity": 1, "reproduction_mode": "NO_REPRODUCTION", "population_semantics": "FORMATION_ENTITY_COUNT"},
+    {"population_id": "POP-SOIL-001", "species_id": "SPECIES-KAIOS-FOUNDATIONAL-SOIL", "habitat_id": "HABITAT-SOIL-V1", "count": 1, "carrying_capacity": 1, "reproduction_mode": "NO_REPRODUCTION", "population_semantics": "FORMATION_ENTITY_COUNT"},
+    {"population_id": "POP-WATER-001", "species_id": "SPECIES-KAIOS-FOUNDATIONAL-WATER", "habitat_id": "HABITAT-RIVER-V1", "count": 1, "carrying_capacity": 1, "reproduction_mode": "NO_REPRODUCTION", "population_semantics": "BOUNDED_RESOURCE_BODY_COUNT"},
+    {"population_id": "POP-RIVER-001", "species_id": "SPECIES-KAIOS-FOUNDATIONAL-RIVER", "habitat_id": "HABITAT-RIVER-V1", "count": 1, "carrying_capacity": 1, "reproduction_mode": "NO_REPRODUCTION", "population_semantics": "FORMATION_ENTITY_COUNT"}
+  ],
+  "scenarios": [
+    {
+      "scenario_id": "SCENARIO-BASELINE-STABLE",
+      "name": "Stable bounded baseline",
+      "duration_ticks": 48,
+      "environment_changes": [],
+      "expected_population_states": ["STABLE", "GROWING"],
+      "expected_events": ["RESOURCE_EVALUATION", "CARRYING_CAPACITY_EVALUATION"]
+    },
+    {
+      "scenario_id": "SCENARIO-DROUGHT",
+      "name": "Reduced mountain runoff and river inflow",
+      "duration_ticks": 36,
+      "environment_changes": [
+        {"target": "SPECIES-KAIOS-FOUNDATIONAL-RIVER", "field": "inflow", "operation": "REDUCE", "factor": 0.75},
+        {"target": "SPECIES-KAIOS-FOUNDATIONAL-SOIL", "field": "moisture", "operation": "REDUCE", "factor": 0.55}
+      ],
+      "expected_population_states": ["RESOURCE_STRESSED", "DECLINING"],
+      "expected_events": ["DROUGHT", "LOW_SOIL_MOISTURE"]
+    },
+    {
+      "scenario_id": "SCENARIO-POLLUTION",
+      "name": "Aquatic pollution pressure",
+      "duration_ticks": 24,
+      "environment_changes": [
+        {"target": "SPECIES-KAIOS-FOUNDATIONAL-WATER", "field": "pollution", "operation": "INCREASE", "factor": 0.7},
+        {"target": "SPECIES-KAIOS-FOUNDATIONAL-RIVER", "field": "oxygen", "operation": "REDUCE", "factor": 0.45}
+      ],
+      "expected_population_states": ["POLLUTION_STRESSED", "DECLINING"],
+      "expected_events": ["HIGH_POLLUTION", "LOW_OXYGEN"]
+    },
+    {
+      "scenario_id": "SCENARIO-OVERCAPACITY",
+      "name": "Finite habitat capacity pressure",
+      "duration_ticks": 20,
+      "environment_changes": [
+        {"target": "SPECIES-KAIOS-FOUNDATIONAL-SHRIMP", "field": "count", "operation": "SET", "value": 2600}
+      ],
+      "expected_population_states": ["OVER_CAPACITY", "RESOURCE_STRESSED"],
+      "expected_events": ["REPRODUCTION_BLOCKED", "COMPETITION_EVENT"]
+    },
+    {
+      "scenario_id": "SCENARIO-RESTORATION",
+      "name": "Bounded water and soil restoration",
+      "duration_ticks": 48,
+      "environment_changes": [
+        {"target": "SPECIES-KAIOS-FOUNDATIONAL-WATER", "field": "pollution", "operation": "REDUCE", "factor": 0.6},
+        {"target": "SPECIES-KAIOS-FOUNDATIONAL-SOIL", "field": "organic_matter", "operation": "INCREASE_WITH_INPUT", "factor": 0.25}
+      ],
+      "expected_population_states": ["RECOVERING", "STABLE"],
+      "expected_events": ["RESTORATION_EVENT", "NUTRIENT_RETURN"]
+    }
+  ],
+  "boundaries": {
+    "unbounded_reproduction": false,
+    "unrestricted_mutation": false,
+    "automatic_species_creation": false,
+    "runtime_engine": false,
+    "production_authority": false,
+    "real_kgen": "NO_REAL_KGEN",
+    "wallet": "NONE"
+  }
+}
