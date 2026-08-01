@@ -1,0 +1,20 @@
+{
+  "schema_version": "1.0.0",
+  "runtime": "KAIOS_REPRODUCTION_ECOLOGY_RUNTIME_V1",
+  "mode": "STATIC_READ_ONLY_PROJECTION",
+  "generated_from_seed": "KAIOS-ECOLOGY-V1-001",
+  "simulation_only": true,
+  "read_only": true,
+  "authority": "NO_PRODUCTION_AUTHORITY",
+  "wallet": "NONE",
+  "real_kgen": "NO_REAL_KGEN",
+  "endpoints": [
+    "state.json",
+    "habitats.json",
+    "populations.json",
+    "food-web.json",
+    "resources.json",
+    "events.json",
+    "status.json"
+  ]
+}

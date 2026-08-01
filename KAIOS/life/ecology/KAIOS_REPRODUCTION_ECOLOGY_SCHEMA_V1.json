@@ -4,7 +4,7 @@
   "title": "KAIOS Reproduction and Ecology Runtime V1 State",
   "type": "object",
   "additionalProperties": false,
-  "required": ["schema_version", "runtime", "mode", "seed", "simulation_time", "status", "entities", "habitats", "populations", "resources", "events", "boundaries"],
+  "required": ["schema_version", "runtime", "mode", "seed", "simulation_time", "status", "entities", "habitats", "populations", "resources", "exported_population_count", "conditions", "candidate_lineages", "events", "action_log", "revision", "boundaries"],
   "properties": {
     "schema_version": { "const": "1.0.0" },
     "runtime": { "const": "KAIOS_REPRODUCTION_ECOLOGY_RUNTIME_V1" },
@@ -16,7 +16,13 @@
     "habitats": { "type": "array", "maxItems": 7, "items": { "$ref": "#/$defs/habitat" } },
     "populations": { "type": "array", "maxItems": 8, "items": { "$ref": "#/$defs/population" } },
     "resources": { "$ref": "#/$defs/resources" },
+    "exported_population_count": { "type": "object", "additionalProperties": { "type": "integer", "minimum": 0 } },
+    "conditions": { "type": "array", "uniqueItems": true, "items": { "type": "string" } },
+    "candidate_lineages": { "type": "array", "maxItems": 500, "items": { "type": "object" } },
     "events": { "type": "array", "maxItems": 1000, "items": { "$ref": "#/$defs/event" } },
+    "action_log": { "type": "array", "maxItems": 10000, "items": { "$ref": "#/$defs/action" } },
+    "revision": { "type": "integer", "minimum": 0 },
+    "integrity": { "type": "object" },
     "boundaries": { "$ref": "#/$defs/boundaries" }
   },
   "$defs": {
@@ -45,7 +51,7 @@
     "habitat": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["id", "type", "location", "simulation_time", "status", "source", "authority", "simulation_only", "history", "previous_state_hash", "next_state_hash", "area_m2", "water_l", "temperature_c", "oxygen_mg_l", "salinity_ppt", "pollution", "shelter", "season", "restoration_state"],
+      "required": ["id", "type", "location", "simulation_time", "status", "source", "authority", "simulation_only", "history", "previous_state_hash", "next_state_hash", "area_m2", "water_l", "temperature_c", "oxygen_mg_l", "salinity_ppt", "soil_fertility", "pollution", "shelter", "season", "restoration_state", "flow_status"],
       "properties": {
         "id": { "type": "string", "minLength": 1 },
         "type": { "$ref": "#/$defs/habitatType" },
@@ -67,13 +73,14 @@
         "pollution": { "type": "number", "minimum": 0, "maximum": 1 },
         "shelter": { "type": "number", "minimum": 0, "maximum": 1 },
         "season": { "enum": ["SPRING", "SUMMER", "AUTUMN", "WINTER"] },
-        "restoration_state": { "enum": ["NONE", "PLANNED", "ACTIVE", "RECOVERING", "RESTORED"] }
+        "restoration_state": { "enum": ["NONE", "PLANNED", "ACTIVE", "RECOVERING", "RESTORED"] },
+        "flow_status": { "enum": ["FLOWING_DOWNHILL", "NOT_APPLICABLE", "RIVER_FLOW_BLOCKED"] }
       }
     },
     "population": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["population_id", "species_id", "habitat_id", "count", "age_distribution", "health_distribution", "energy_reserve", "food_requirement", "water_requirement", "space_requirement", "birth_rate", "death_rate", "migration_rate", "disease_rate", "predation_rate", "carrying_capacity", "genetic_diversity_proxy", "generation", "population_status", "reproduction_modes", "cooldown_ticks"],
+      "required": ["population_id", "species_id", "habitat_id", "count", "age_distribution", "sex_distribution", "health_distribution", "energy_reserve", "food_requirement", "water_requirement", "space_requirement", "birth_rate", "death_rate", "migration_rate", "disease_rate", "predation_rate", "carrying_capacity", "genetic_diversity_proxy", "generation", "population_status", "reproduction_modes", "cooldown_ticks", "traits"],
       "properties": {
         "population_id": { "type": "string", "minLength": 1 },
         "species_id": { "enum": ["SPECIES-KAIOS-FOUNDATIONAL-GRASS", "SPECIES-KAIOS-FOUNDATIONAL-TREE", "SPECIES-KAIOS-FOUNDATIONAL-FISH", "SPECIES-KAIOS-FOUNDATIONAL-SHRIMP", "SPECIES-KAIOS-FOUNDATIONAL-MOUNTAIN", "SPECIES-KAIOS-FOUNDATIONAL-SOIL", "SPECIES-KAIOS-FOUNDATIONAL-WATER", "SPECIES-KAIOS-FOUNDATIONAL-RIVER"] },
@@ -96,22 +103,40 @@
         "generation": { "type": "integer", "minimum": 0, "maximum": 100 },
         "population_status": { "$ref": "#/$defs/populationStatus" },
         "reproduction_modes": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "$ref": "#/$defs/reproductionMode" } },
-        "cooldown_ticks": { "type": "integer", "minimum": 0, "maximum": 1000 }
+        "cooldown_ticks": { "type": "integer", "minimum": 0, "maximum": 1000 },
+        "traits": { "type": "object", "additionalProperties": { "type": "number", "minimum": 0, "maximum": 1 } }
       }
     },
     "resources": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["water_l", "biomass_kg", "nutrients_kg", "dead_biomass_kg", "decomposition_kg", "aquatic_primary_food_kg", "detritus_kg", "energy_proxy"],
+      "required": ["water_l", "atmospheric_water_l", "exported_water_l", "restoration_water_reserve_l", "mountain_snowpack_l", "biomass_kg", "consumer_biomass_kg", "exported_biomass_kg", "nutrients_kg", "restoration_nutrient_reserve_kg", "dead_biomass_kg", "decomposition_kg", "aquatic_primary_food_kg", "detritus_kg", "sediment_kg", "energy_proxy"],
       "properties": {
         "water_l": { "type": "number", "minimum": 0 },
+        "atmospheric_water_l": { "type": "number", "minimum": 0 },
+        "exported_water_l": { "type": "number", "minimum": 0 },
+        "restoration_water_reserve_l": { "type": "number", "minimum": 0 },
+        "mountain_snowpack_l": { "type": "number", "minimum": 0 },
         "biomass_kg": { "type": "number", "minimum": 0 },
+        "consumer_biomass_kg": { "type": "number", "minimum": 0 },
+        "exported_biomass_kg": { "type": "number", "minimum": 0 },
         "nutrients_kg": { "type": "number", "minimum": 0 },
+        "restoration_nutrient_reserve_kg": { "type": "number", "minimum": 0 },
         "dead_biomass_kg": { "type": "number", "minimum": 0 },
         "decomposition_kg": { "type": "number", "minimum": 0 },
         "aquatic_primary_food_kg": { "type": "number", "minimum": 0 },
         "detritus_kg": { "type": "number", "minimum": 0 },
+        "sediment_kg": { "type": "number", "minimum": 0 },
         "energy_proxy": { "type": "number", "minimum": 0 }
+      }
+    },
+    "action": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["command", "args"],
+      "properties": {
+        "command": { "type": "string", "minLength": 1 },
+        "args": { "type": "object" }
       }
     },
     "event": {
@@ -139,7 +164,7 @@
     "boundaries": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["simulation_only", "wallet", "real_kgen", "onchain_transfer", "real_bioengineering", "production_authority", "automatic_new_species", "uncontrolled_reproduction", "public_mutation_endpoints"],
+      "required": ["simulation_only", "wallet", "real_kgen", "onchain_transfer", "real_bioengineering", "production_authority", "automatic_new_species", "uncontrolled_reproduction", "public_mutation_endpoints", "maximum_total_population"],
       "properties": {
         "simulation_only": { "const": true },
         "wallet": { "const": "NONE" },
@@ -149,7 +174,8 @@
         "production_authority": { "const": false },
         "automatic_new_species": { "const": false },
         "uncontrolled_reproduction": { "const": false },
-        "public_mutation_endpoints": { "const": false }
+        "public_mutation_endpoints": { "const": false },
+        "maximum_total_population": { "const": 500 }
       }
     }
   }

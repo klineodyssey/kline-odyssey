@@ -1,0 +1,31 @@
+{
+  "schema_version": "1.0.0",
+  "runtime": "KAIOS_REPRODUCTION_ECOLOGY_RUNTIME_V1",
+  "mode": "STATIC_READ_ONLY_PROJECTION",
+  "generated_from_seed": "KAIOS-ECOLOGY-V1-001",
+  "simulation_only": true,
+  "read_only": true,
+  "authority": "NO_PRODUCTION_AUTHORITY",
+  "wallet": "NONE",
+  "real_kgen": "NO_REAL_KGEN",
+  "resources": {
+    "water_l": 95493.866109,
+    "atmospheric_water_l": 8060.083721,
+    "exported_water_l": 36.05017,
+    "restoration_water_reserve_l": 24000,
+    "mountain_snowpack_l": 14910,
+    "biomass_kg": 4999.536344,
+    "consumer_biomass_kg": 185.33612,
+    "exported_biomass_kg": 0,
+    "nutrients_kg": 1396.496816,
+    "restoration_nutrient_reserve_kg": 240,
+    "dead_biomass_kg": 0.2775,
+    "decomposition_kg": 0.08934,
+    "aquatic_primary_food_kg": 899.751,
+    "detritus_kg": 249.91288,
+    "sediment_kg": 3.6,
+    "energy_proxy": 49987.976446
+  },
+  "conditions": [],
+  "accounting": "BOUNDED_MASS_TRANSFER"
+}

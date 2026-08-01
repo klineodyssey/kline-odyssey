@@ -1,0 +1,28 @@
+{
+  "schema_version": "1.0.0",
+  "runtime": "KAIOS_REPRODUCTION_ECOLOGY_RUNTIME_V1",
+  "mode": "STATIC_READ_ONLY_PROJECTION",
+  "generated_from_seed": "KAIOS-ECOLOGY-V1-001",
+  "simulation_only": true,
+  "read_only": true,
+  "authority": "NO_PRODUCTION_AUTHORITY",
+  "wallet": "NONE",
+  "real_kgen": "NO_REAL_KGEN",
+  "status": "PAUSED",
+  "integrity": {
+    "ok": true,
+    "issues": [],
+    "state_hash": "fnv1a-e0db8e69",
+    "total_biological_population": 462,
+    "maximum_total_population": 500,
+    "event_count": 33
+  },
+  "deterministic": true,
+  "serializable": true,
+  "stoppable": true,
+  "resumable": true,
+  "replayable": true,
+  "auditable": true,
+  "automatic_new_species": false,
+  "uncontrolled_reproduction": false
+}
