@@ -1,0 +1,24 @@
+{
+  "schema_version": "candidate-1.0.0",
+  "status": "CURSOR_RESEARCH_CANDIDATE_ONLY",
+  "mode": "SIMULATION_ONLY",
+  "food_safety": "NO_REAL_FOOD_SAFETY_CERTIFICATION",
+  "parameters": [
+    {"parameter_name":"deterministic_seed","unit":"integer_seed","minimum":1,"default":280,"maximum":999999,"rationale":"Provides repeatable candidate scenarios without external randomness.","source_type":"ASSUMPTION","confidence":"HIGH","risk":"Seed semantics must match the Codex Runtime.","validation_required":true},
+    {"parameter_name":"scenario_tick_limit","unit":"simulation_ticks","minimum":1,"default":120,"maximum":10000,"rationale":"Bounds scenario resource use and prevents uncontrolled progression.","source_type":"RESEARCH_PROPOSAL","confidence":"MEDIUM","risk":"Tick duration remains Runtime-owned.","validation_required":true}
+  ],
+  "scenarios": [
+    {"scenario_id":"AQ-001-NO-EXCAVATOR","actions":["SELECT_LAND","START_CONSTRUCTION"],"expected":"BLOCKED_EQUIPMENT"},
+    {"scenario_id":"AQ-002-NO-WORKERS","actions":["SELECT_LAND","PROVIDE_EXCAVATOR","START_CONSTRUCTION"],"expected":"BLOCKED_LABOR"},
+    {"scenario_id":"AQ-003-WATER-POLLUTION","actions":["COMPLETE_POND","FILL_POLLUTED_WATER","STOCK_FISH"],"expected":"WATER_UNSTABLE"},
+    {"scenario_id":"AQ-004-OVERSTOCK","actions":["STABILIZE_WATER","DELIVER_FISH_STOCK","EXCEED_CAPACITY"],"expected":"OVER_CARRYING_CAPACITY"},
+    {"scenario_id":"AQ-005-OVERFEED","actions":["STOCK_WITHIN_CAPACITY","FEED_ABOVE_SCHEDULE","ADVANCE_TIME"],"expected":"HIGH_ORGANIC_LOAD"},
+    {"scenario_id":"AQ-006-POWER-OUTAGE","actions":["START_AERATION","CUT_SIMULATED_POWER","ADVANCE_TIME"],"expected":"EMERGENCY_AERATION_REQUIRED"},
+    {"scenario_id":"AQ-007-MORTALITY","actions":["LOWER_OXYGEN","ADVANCE_TIME","RECORD_MORTALITY"],"expected":"DEAD_BIOMASS_ACCOUNTED"},
+    {"scenario_id":"AQ-008-HARVEST","actions":["REACH_HARVEST_READINESS","SCHEDULE_WORKERS","HARVEST","GRADE"],"expected":"MASS_BALANCED_INVENTORY"},
+    {"scenario_id":"AQ-009-COLD-CHAIN","actions":["CHILL","STORE","DISPATCH","TRIGGER_POWER_OUTAGE"],"expected":"SPOILAGE_RISK"},
+    {"scenario_id":"AQ-010-NO-BUYER","actions":["HARVEST","STORE","REMOVE_DEMAND"],"expected":"SALES_PENDING"},
+    {"scenario_id":"AQ-011-INSOLVENCY","actions":["ACCUMULATE_STORAGE_COST","MISS_PAYMENT","RESTRUCTURE_SIMULATION"],"expected":"ASSET_CONTINUITY_PRESERVED"},
+    {"scenario_id":"AQ-012-REPLAY","actions":["EXPORT_STATE","RESET","IMPORT_STATE","REPLAY_EVENTS"],"expected":"IDENTICAL_FINAL_STATE_HASH"}
+  ]
+}

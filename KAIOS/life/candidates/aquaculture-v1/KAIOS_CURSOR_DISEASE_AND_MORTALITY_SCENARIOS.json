@@ -1,0 +1,17 @@
+{
+  "schema_version": "candidate-1.0.0",
+  "status": "CURSOR_RESEARCH_CANDIDATE_ONLY",
+  "mode": "SIMULATION_ONLY",
+  "food_safety": "NO_REAL_FOOD_SAFETY_CERTIFICATION",
+  "diagnostic_authority": "NONE",
+  "parameters": [
+    {"parameter_name":"risk_index","unit":"normalized_index","minimum":0.0,"default":0.1,"maximum":1.0,"rationale":"Aggregates recorded stressors for scenario branching only.","source_type":"MODEL_INFERENCE","confidence":"LOW","risk":"Not a veterinary diagnosis.","validation_required":true},
+    {"parameter_name":"mortality_fraction_per_event","unit":"fraction_of_population","minimum":0.0,"default":0.02,"maximum":0.25,"rationale":"Bounded loss parameter used only after an explicit mortality event.","source_type":"RESEARCH_PROPOSAL","confidence":"LOW","risk":"Must be constrained by population count and scenario severity.","validation_required":true},
+    {"parameter_name":"dead_biomass_removal_fraction","unit":"fraction_of_dead_biomass","minimum":0.0,"default":0.8,"maximum":1.0,"rationale":"Ensures removed and retained remains are both accounted for.","source_type":"MODEL_INFERENCE","confidence":"MEDIUM","risk":"Removal requires labor, time, storage, and disposal records.","validation_required":true}
+  ],
+  "scenarios": [
+    {"scenario_id":"AQ-DISEASE-LOW-OXYGEN","triggers":["LOW_OXYGEN","HIGH_DENSITY"],"state_path":["AT_RISK","SYMPTOMATIC_SIMULATION","MORTALITY_EVENT"],"required_records":["population_delta","biomass_delta","dead_biomass","pollution_delta"]},
+    {"scenario_id":"AQ-DISEASE-POLLUTION","triggers":["POLLUTED","HIGH_ORGANIC_LOAD"],"state_path":["AT_RISK","ISOLATION_REQUIRED","TREATMENT_SIMULATION","RECOVERING"],"required_records":["water_quality","treatment_cost","elapsed_time"]},
+    {"scenario_id":"AQ-DISEASE-TRANSPORT-STRESS","triggers":["DELIVERY_DELAYED","TEMPERATURE_EXCURSION"],"state_path":["AT_RISK","HEALTH_CHECK_FAILED_SIMULATION"],"required_records":["travel_time","stock_inventory_delta","rejected_stock"]}
+  ]
+}

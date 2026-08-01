@@ -1,0 +1,18 @@
+{
+  "schema_version": "candidate-1.0.0",
+  "status": "CURSOR_RESEARCH_CANDIDATE_ONLY",
+  "mode": "SIMULATION_ONLY",
+  "food_safety": "NO_REAL_FOOD_SAFETY_CERTIFICATION",
+  "species_ids": ["SPECIES-KAIOS-FOUNDATIONAL-FISH", "SPECIES-KAIOS-FOUNDATIONAL-SHRIMP"],
+  "parameters": [
+    {"parameter_name":"daily_feed_fraction_fish","unit":"fraction_of_biomass_per_simulation_day","minimum":0.005,"default":0.02,"maximum":0.05,"rationale":"Candidate control range for deterministic feed inventory and growth tests.","source_type":"MODEL_INFERENCE","confidence":"LOW","risk":"Not species-, stage-, or temperature-specific advice.","validation_required":true},
+    {"parameter_name":"daily_feed_fraction_shrimp","unit":"fraction_of_biomass_per_simulation_day","minimum":0.01,"default":0.035,"maximum":0.08,"rationale":"Candidate control range for a higher-frequency feeding scenario.","source_type":"RESEARCH_PROPOSAL","confidence":"LOW","risk":"Simplifies molting stage and feed form.","validation_required":true},
+    {"parameter_name":"feed_conversion_proxy","unit":"kg_feed_per_kg_biomass_proxy","minimum":1.0,"default":1.7,"maximum":3.0,"rationale":"Bounded accounting proxy linking feed mass to possible biomass gain and waste.","source_type":"MODEL_INFERENCE","confidence":"LOW","risk":"Must not be presented as production performance.","validation_required":true},
+    {"parameter_name":"feed_storage_life","unit":"simulation_days","minimum":7.0,"default":30.0,"maximum":90.0,"rationale":"Supports deterministic spoilage and inventory scenarios.","source_type":"ASSUMPTION","confidence":"LOW","risk":"Actual stability depends on formulation and storage.","validation_required":true},
+    {"parameter_name":"overfeeding_waste_fraction","unit":"fraction_of_excess_feed","minimum":0.2,"default":0.6,"maximum":1.0,"rationale":"Transfers excess feed into organic-load and detritus proxies instead of deleting mass.","source_type":"MODEL_INFERENCE","confidence":"MEDIUM","risk":"Simplifies consumption and settling.","validation_required":true},
+    {"parameter_name":"underfeeding_growth_multiplier","unit":"normalized_multiplier","minimum":0.0,"default":0.5,"maximum":1.0,"rationale":"Bounds reduced growth when available feed is below scheduled need.","source_type":"RESEARCH_PROPOSAL","confidence":"LOW","risk":"Does not model compensatory growth.","validation_required":true},
+    {"parameter_name":"maximum_growth_fraction_per_tick","unit":"fraction_of_biomass","minimum":0.0,"default":0.002,"maximum":0.01,"rationale":"Prevents instant biomass creation and keeps growth bounded by input mass and elapsed time.","source_type":"MODEL_INFERENCE","confidence":"MEDIUM","risk":"Tick duration must be fixed by Codex.","validation_required":true}
+  ],
+  "required_gates": ["FEED_AVAILABLE", "FEED_NOT_SPOILED", "LABOR_AVAILABLE", "OXYGEN_COMPATIBLE", "WATER_QUALITY_COMPATIBLE", "ELAPSED_TIME"],
+  "mass_flow": "feed_consumed -> biomass_gain + waste + metabolism_proxy"
+}

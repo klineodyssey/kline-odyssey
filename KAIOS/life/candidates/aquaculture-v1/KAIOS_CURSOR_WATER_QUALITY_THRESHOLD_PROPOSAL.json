@@ -1,0 +1,20 @@
+{
+  "schema_version": "candidate-1.0.0",
+  "status": "CURSOR_RESEARCH_CANDIDATE_ONLY",
+  "mode": "SIMULATION_ONLY",
+  "food_safety": "NO_REAL_FOOD_SAFETY_CERTIFICATION",
+  "habitat_id": "HABITAT-FISHPOND-V1",
+  "scope": "BOUNDED_SIMULATION_THRESHOLDS_NOT_REAL_WORLD_GUIDANCE",
+  "parameters": [
+    {"parameter_name":"dissolved_oxygen","unit":"mg/L","minimum":3.0,"default":6.0,"maximum":10.0,"rationale":"The bounds combine fish and shrimp candidate compatibility into a conservative simulation envelope; they are a model inference, not a biological fact.","source_type":"MODEL_INFERENCE","confidence":"MEDIUM","risk":"A single proxy cannot represent species, age, weather, or management differences.","validation_required":true},
+    {"parameter_name":"temperature","unit":"degC","minimum":18.0,"default":26.0,"maximum":34.0,"rationale":"The bounds combine fish and shrimp candidate compatibility into a conservative simulation envelope; they are a model inference, not a biological fact.","source_type":"MODEL_INFERENCE","confidence":"MEDIUM","risk":"Not species-specific husbandry guidance.","validation_required":true},
+    {"parameter_name":"pH_proxy","unit":"index","minimum":6.0,"default":7.5,"maximum":9.0,"rationale":"Proposed bounded state input for deterministic compatibility checks.","source_type":"RESEARCH_PROPOSAL","confidence":"LOW","risk":"Proxy omits alkalinity and buffering dynamics.","validation_required":true},
+    {"parameter_name":"salinity","unit":"ppt","minimum":0.0,"default":5.0,"maximum":35.0,"rationale":"Covers candidate freshwater-to-marine simulation while species compatibility remains separately gated.","source_type":"REPOSITORY_DERIVED","confidence":"MEDIUM","risk":"Abrupt change sensitivity is not represented by the absolute value alone.","validation_required":true},
+    {"parameter_name":"ammonia_proxy","unit":"normalized_index","minimum":0.0,"default":0.1,"maximum":1.0,"rationale":"Normalized proposal for waste accumulation and treatment effects without asserting laboratory precision.","source_type":"MODEL_INFERENCE","confidence":"LOW","risk":"Not a chemical concentration or diagnostic threshold.","validation_required":true},
+    {"parameter_name":"nitrite_proxy","unit":"normalized_index","minimum":0.0,"default":0.08,"maximum":1.0,"rationale":"Normalized nitrogen-cycle stress signal for deterministic scenarios.","source_type":"MODEL_INFERENCE","confidence":"LOW","risk":"Not a measured concentration.","validation_required":true},
+    {"parameter_name":"nitrate_proxy","unit":"normalized_index","minimum":0.0,"default":0.15,"maximum":1.0,"rationale":"Normalized accumulation signal linked to feed, waste, exchange, and treatment.","source_type":"MODEL_INFERENCE","confidence":"LOW","risk":"Simplifies multiple biological and chemical processes.","validation_required":true},
+    {"parameter_name":"turbidity_proxy","unit":"normalized_index","minimum":0.0,"default":0.2,"maximum":1.0,"rationale":"Provides a causal sediment and organic-load indicator for the simulation.","source_type":"RESEARCH_PROPOSAL","confidence":"LOW","risk":"Not equivalent to a field instrument reading.","validation_required":true},
+    {"parameter_name":"pollution_index","unit":"normalized_index","minimum":0.0,"default":0.05,"maximum":1.0,"rationale":"Aligns with the existing Ecology pollution model while retaining bounded aquaculture states.","source_type":"REPOSITORY_DERIVED","confidence":"MEDIUM","risk":"Aggregates distinct pollutants.","validation_required":true},
+    {"parameter_name":"pathogen_risk_proxy","unit":"normalized_index","minimum":0.0,"default":0.05,"maximum":1.0,"rationale":"Risk-only input for scenarios; never a diagnosis.","source_type":"RESEARCH_PROPOSAL","confidence":"LOW","risk":"Could be mistaken for medical certainty unless clearly labeled.","validation_required":true}
+  ]
+}

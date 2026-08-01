@@ -1,0 +1,65 @@
+{
+  "schema_version": "KAIOS_CURSOR_TASK_ENVELOPE_V1",
+  "task_id": "KAIOS-CURSOR-FISHPOND-AQUACULTURE-RESEARCH-001",
+  "parent_task_id": "KAIOS-FISHPOND-AQUACULTURE-RUNTIME-V1-001",
+  "worker_id": "cursor-01",
+  "branch": "cursor-handoff/KAIOS-CURSOR-FISHPOND-AQUACULTURE-RESEARCH-001",
+  "decision": "CURSOR_RESEARCH_ONLY",
+  "status": "CURSOR_RESEARCH_CANDIDATE_ONLY",
+  "allowed_paths": [
+    "KAIOS/life/candidates/aquaculture-v1/"
+  ],
+  "allowed_outputs": [
+    "KAIOS_CURSOR_AQUACULTURE_RESEARCH_REPORT.md",
+    "KAIOS_CURSOR_FISH_STOCKING_MODEL_PROPOSAL.md",
+    "KAIOS_CURSOR_SHRIMP_STOCKING_MODEL_PROPOSAL.md",
+    "KAIOS_CURSOR_WATER_QUALITY_THRESHOLD_PROPOSAL.json",
+    "KAIOS_CURSOR_FEED_AND_GROWTH_MODEL_PROPOSAL.json",
+    "KAIOS_CURSOR_DISEASE_AND_MORTALITY_SCENARIOS.json",
+    "KAIOS_CURSOR_POND_HABITAT_COMPATIBILITY_MATRIX.json",
+    "KAIOS_CURSOR_HARVEST_AND_GRADING_PROPOSAL.json",
+    "KAIOS_CURSOR_COLD_CHAIN_LOGISTICS_PROPOSAL.md",
+    "KAIOS_CURSOR_AQUACULTURE_TEST_SCENARIOS.json",
+    "KAIOS_CURSOR_AQUACULTURE_UI_PROPOSAL.md",
+    "KAIOS_CURSOR_AQUACULTURE_IMPROVEMENT_PROPOSAL.md"
+  ],
+  "forbidden": [
+    "CURRENT",
+    "CONSTITUTION_SOURCE",
+    "CANONICAL_LIFE_SCHEMA",
+    "ORGANISM_SCHEMA_V2",
+    "RUNTIME",
+    "PHYSICS_AUTHORITY",
+    "ECONOMY_AUTHORITY",
+    "RIGHTS_AUTHORITY",
+    "WALLET",
+    "KGEN",
+    "CONTRACTS",
+    "SETTLEMENT",
+    "DEPLOYMENT",
+    "MERGE"
+  ],
+  "parameter_requirements": [
+    "parameter_name",
+    "unit",
+    "minimum",
+    "default",
+    "maximum",
+    "rationale",
+    "source_type",
+    "confidence",
+    "risk",
+    "validation_required"
+  ],
+  "source_labels": [
+    "SOURCE_DERIVED",
+    "REPOSITORY_DERIVED",
+    "MODEL_INFERENCE",
+    "RESEARCH_PROPOSAL",
+    "ASSUMPTION",
+    "SOURCE_UNDERSPECIFIED"
+  ],
+  "reviewer": "codex-gm-01",
+  "merge_authority": "CODEX_ONLY",
+  "production_authority": false
+}
