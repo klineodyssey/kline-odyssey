@@ -4,7 +4,7 @@ Task: `KAIOS-CHARTER-REPRODUCTION-ECOLOGY-PROGRAM-001 / PR A`
 
 PR: `#75`
 
-Status: `DRAFT_VALIDATED_CURSOR_REVIEW_PENDING`
+Status: `VALIDATED_READY_FOR_REVIEW`
 
 Base main: `46518a75ec7aedd5fce10290952f47b9fca96963`
 
@@ -33,4 +33,6 @@ Unresolved P1: `0`
 
 Unresolved P2: `0`
 
-Cursor output remains pending independent Codex review. PR #75 must not be marked Ready until that review and all CI gates pass.
+Cursor review: `APPROVED_WITH_REPAIRS`; P1 population-cap issue repaired at Cursor head `2bc81b0d7caab0a598a478e7c04e026b24d5f3ab`.
+
+Independent review: `P0=0 / unresolved P1=0 / unresolved P2=0`.
