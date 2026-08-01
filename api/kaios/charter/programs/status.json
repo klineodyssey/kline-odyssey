@@ -11,6 +11,24 @@
     "SPECIFICATION_ONLY": 46
   },
   "promotion_ceiling": "REVIEWED_REQUIREMENT_UNLESS_REPOSITORY_EVIDENCE",
+  "foundation_gap_closure_v1": {
+    "workline": "KAIOS_CHARTER_FOUNDATION_GAP_CLOSURE_V1",
+    "status": "IMPLEMENTED_SIMULATION",
+    "runtime": "KGEN-KAIOS/world-viewer/foundation/charter-foundation-runtime.js",
+    "components": [
+      "SHARED_SIMULATION_CLOCK_ADAPTER",
+      "DETERMINISTIC_EVENT_ENVELOPE",
+      "SHARED_ENVIRONMENT_STATE_PROJECTION",
+      "ENERGY_MATERIAL_RIGHTS_CAPABILITY_INTERFACES"
+    ],
+    "program_ids": [
+      "KAIOS-CH-002-004-UNIVERSE_PHYSICS",
+      "KAIOS-CH-005-007-ENERGY",
+      "KAIOS-CH-031-073-IDENTITY"
+    ],
+    "authority": "SIMULATION_ONLY",
+    "production_authority": false
+  },
   "safety": [
     "SIMULATION_ONLY",
     "NO_REAL_WALLET",
