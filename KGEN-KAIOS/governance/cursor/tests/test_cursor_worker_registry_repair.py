@@ -33,6 +33,46 @@ def normalize_cursor_branch(policy, task_id, requested_branch):
     raise ValueError(policy["mismatch_result"])
 
 
+KNOWN_CLAIM_STATES = {
+    "DISPATCHED",
+    "CLAIMED",
+    "ACTIVE",
+    "IN_PROGRESS",
+    "REVIEW",
+    "REPAIR",
+    "APPROVED",
+    "CLOSED",
+    "RELEASED",
+    "BLOCKED",
+    "REJECTED",
+    "CANCELLED",
+    "EXPIRED",
+    "ABANDONED",
+    "COMPLETED_CODEX_REVIEWED",
+}
+
+UNLOCKED_CLAIM_STATES = {"RELEASED", "COMPLETED_CODEX_REVIEWED"}
+
+
+def lock_holding_claims(dispatch_history):
+    observed = {item["status"] for item in dispatch_history}
+    unknown = observed - KNOWN_CLAIM_STATES
+    if unknown:
+        raise ValueError(f"UNKNOWN_CLAIM_STATE:{sorted(unknown)}")
+    return [
+        item
+        for item in dispatch_history
+        if item["status"] not in UNLOCKED_CLAIM_STATES
+    ]
+
+
+def validate_one_task_lock(dispatch_history):
+    locked = lock_holding_claims(dispatch_history)
+    if len(locked) > 1:
+        raise ValueError("CURSOR_ONE_TASK_LOCK_CONFLICT")
+    return locked
+
+
 class CursorWorkerRegistryRepairTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
@@ -137,36 +177,9 @@ class CursorWorkerRegistryRepairTests(unittest.TestCase):
         )
 
     def test_forest_candidate_dispatch_is_the_only_active_claim(self):
-        active_states = {
-            "DISPATCHED",
-            "CLAIMED",
-            "ACTIVE",
-            "IN_PROGRESS",
-            "REVIEW",
-            "REPAIR",
-        }
-        terminal_states = {
-            "APPROVED",
-            "COMPLETED_CODEX_REVIEWED",
-            "CLOSED",
-            "RELEASED",
-            "BLOCKED",
-            "REJECTED",
-            "CANCELLED",
-            "EXPIRED",
-            "ABANDONED",
-        }
-        observed_states = {
-            item["status"] for item in self.registry["dispatch_history"]
-        }
-        self.assertFalse(observed_states - active_states - terminal_states)
-        active = [
-            item
-            for item in self.registry["dispatch_history"]
-            if item["status"] in active_states
-        ]
-        self.assertEqual(len(active), 1)
-        dispatch = active[0]
+        locked = validate_one_task_lock(self.registry["dispatch_history"])
+        self.assertEqual(len(locked), 1)
+        dispatch = locked[0]
         self.assertEqual(dispatch["task_id"], "KAIOS-CURSOR-FOREST-LIFE-PACKAGES-001")
         self.assertEqual(dispatch["worker_id"], self.cursor["worker_id"])
         self.assertEqual(
@@ -196,6 +209,24 @@ class CursorWorkerRegistryRepairTests(unittest.TestCase):
             <= set(queue["next_dispatch_requires"])
         )
         self.assertTrue(queue["one_task_at_a_time"])
+
+    def test_approved_or_closed_claim_still_holds_lock_until_release(self):
+        next_claim = {"task_id": "NEXT", "status": "DISPATCHED"}
+        for status in ("APPROVED", "CLOSED"):
+            previous_claim = {"task_id": "PREVIOUS", "status": status}
+            with self.assertRaisesRegex(
+                ValueError, "CURSOR_ONE_TASK_LOCK_CONFLICT"
+            ):
+                validate_one_task_lock([previous_claim, next_claim])
+
+        released_claim = {"task_id": "PREVIOUS", "status": "RELEASED"}
+        self.assertEqual(
+            validate_one_task_lock([released_claim, next_claim]), [next_claim]
+        )
+
+    def test_unknown_claim_state_fails_closed(self):
+        with self.assertRaisesRegex(ValueError, "UNKNOWN_CLAIM_STATE"):
+            validate_one_task_lock([{"task_id": "UNKNOWN", "status": "DONE"}])
 
     def test_every_continuous_queue_work_class_is_authorized(self):
         queue_work = {item["work"] for item in self.forest_queue["queue"]}

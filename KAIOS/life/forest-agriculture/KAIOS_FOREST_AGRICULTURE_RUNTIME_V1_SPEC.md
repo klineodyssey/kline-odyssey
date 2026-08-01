@@ -43,6 +43,25 @@ of an entity owned by another Runtime.
 | Market listings/orders, inventory accounting and financial ledger entries | `KGEN-KAIOS/world-viewer/economy/economy-runtime.js` under Supply Chain rules | Reference order/lot/ledger IDs; never duplicate balances |
 | Rights and capabilities | Existing Rights authority | Request capability decisions; never grant rights locally |
 
+The remaining domain entities have one explicit owner:
+
+| Domain entity | Authoritative owner | Cross-runtime references |
+|---|---|---|
+| `IRRIGATION_NETWORK` | Agriculture Alpha facility state | Causal World construction-project ID; Ecology water-pool IDs |
+| `FERTILIZER_BATCH` | Economy Runtime inventory lot | Agriculture application event; Ecology nutrient delta |
+| `COMPOST_BATCH` | Ecology Runtime decomposition/nutrient pool | Source Economy lot IDs and optional completed-output lot ID |
+| `HOUSEHOLD_FOOD_ACCOUNT` | Economy Runtime inventory and ledger keyed by the Player Genesis household ID | Player Genesis household ID only |
+| `ORGANIC_WASTE_BATCH` | Ecology Runtime decomposition pool | Economy custody/inventory reference where storage applies |
+| `NUTRIENT_RETURN_EVENT` | Ecology Runtime event history | Agriculture plot ID and source batch ID |
+| `FOREST_REGENERATION_PROJECT` | Ecology Runtime restoration event/state | Physical Labor shift IDs and Economy cost-entry IDs |
+
+Where a row names cross-runtime references, those referenced Runtimes retain
+their own authoritative truth. For example, Agriculture owns the irrigation
+facility lifecycle but cannot copy a Causal World construction state or an
+Ecology water balance. A completed compost output may receive a new Economy lot
+ID, but the Ecology decomposition record remains the sole transformation and
+mass-accounting source.
+
 `FOREST_STAND`, `GRASSLAND`, `SOIL_PROFILE` and `WATER_SOURCE` are Ecology
 or Life projections. `FARM_PLOT`, `CROP_BATCH`, `HARVEST_BATCH` and
 `WAREHOUSE_LOT` are Agriculture projections. `WORK_SHIFT` and

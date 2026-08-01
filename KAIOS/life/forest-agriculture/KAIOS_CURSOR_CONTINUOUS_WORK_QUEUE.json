@@ -18,7 +18,7 @@
   "output_authority": "CANDIDATE_ONLY_OR_RESEARCH_PROPOSAL_ONLY",
   "queue": [
     { "priority": 1, "task_id": "KAIOS-CURSOR-FOREST-LIFE-PACKAGES-001", "work": "FOREST_LIFE_PACKAGE_RESEARCH", "status": "DISPATCHED" },
-    { "priority": 2, "task_id": "KAIOS-CURSOR-CROP-LIFE-PACKAGES-001", "work": "CROP_LIFE_PACKAGE", "status": "READY_AFTER_REVIEW" },
+    { "priority": 2, "task_id": "KAIOS-CURSOR-CROP-LIFE-PACKAGES-001", "work": "CROP_LIFE_PACKAGE", "status": "QUEUED" },
     { "priority": 3, "task_id": "KAIOS-CURSOR-FRUIT-TREE-PACKAGES-001", "work": "FRUIT_TREE_PACKAGE", "status": "QUEUED" },
     { "priority": 4, "task_id": "KAIOS-CURSOR-VEGETABLE-PACKAGES-001", "work": "VEGETABLE_PACKAGE", "status": "QUEUED" },
     { "priority": 5, "task_id": "KAIOS-CURSOR-SOIL-TYPES-001", "work": "SOIL_TYPE_DATASET", "status": "QUEUED" },
