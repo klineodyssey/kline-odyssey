@@ -27,10 +27,10 @@ SPECIES_EVOLUTION SUPPLY_CHAIN MULTIVERSE CONSTITUTION_COMPILER""".split()
 CONFLICT_NAMES = {
     "KAIOS_Chapter_000_V2_1_All_Matter_Life_Reincarnation_Wallet_Jade_Emperor_Self_Programming_Genesis_Runtime.md",
     "KAIOS_Chapter_133_V2_1_Civilization_Life_Birth_Identity_Authentication_Autonomous_AI_Pilgrimage_Rooting_Runtime.md",
-    "KAIOS_Chapter_134_V2_1_AI_Autonomous_Login_Daily_Life_Work_Self_Supporting_Civilization_Runtime.md",
-    "KAIOS_Chapter_135_V2_1_AI_Citizen_Education_Career_Certification_Skill_Economy_Civilization_Runtime.md",
-    "KAIOS_Chapter_136_V2_1_AI_Company_Founder_Innovation_Entrepreneurship_Industrial_Ecosystem_Runtime.md",
-    "KAIOS_Chapter_137_V2_1_AI_Independent_Wallet_Investment_Economy_Autonomous_Life_Civilization_Runtime.md",
+    "KAIOS_Chapter_134_V2_1_AI_Life_Self_Programming_Civilization_Seed_Specification_Generation_Runtime.md",
+    "KAIOS_Chapter_135_V2_1_Species_Evolution_Program_Breeding_Civilization_Branching_Runtime.md",
+    "KAIOS_Chapter_136_V2_1_Enterprise_Factory_SupplyChain_Court_Bankruptcy_KGEN_Economic_Anchor_Runtime.md",
+    "KAIOS_Chapter_137_V2_1_Galactic_Universe_Parallel_Multiverse_BlackHole_WhiteHole_BigBang_Runtime.md",
     "KAIOS_Chapter_138_V2_1_Dynamic_Constitution_Compiler_11520_Certification_Genesis_Closure_Autonomous_Civilization_Runtime.md",
 }
 

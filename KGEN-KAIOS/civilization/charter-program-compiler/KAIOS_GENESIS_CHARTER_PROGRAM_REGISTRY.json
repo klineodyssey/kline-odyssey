@@ -6329,9 +6329,12 @@
         "11. AI自我測試不得自我通過"
       ],
       "ambiguities": [
-        "UI contract is SOURCE_UNDERSPECIFIED"
+        "UI contract is SOURCE_UNDERSPECIFIED",
+        "Local source and repository V2.1 derivative differ; no silent reconciliation"
       ],
-      "conflicts": [],
+      "conflicts": [
+        "SEVEN_PAIR_LINEAGE_CONFLICT"
+      ],
       "source_status": "DO_NOT_IMPORT",
       "format": "Markdown",
       "sha256": "e95c2e3b57be4f35c25016d496d6c31909a265c654289ce07b7da8a439a979db",
@@ -6425,9 +6428,12 @@
         "18. 演化測試"
       ],
       "ambiguities": [
-        "UI contract is SOURCE_UNDERSPECIFIED"
+        "UI contract is SOURCE_UNDERSPECIFIED",
+        "Local source and repository V2.1 derivative differ; no silent reconciliation"
       ],
-      "conflicts": [],
+      "conflicts": [
+        "SEVEN_PAIR_LINEAGE_CONFLICT"
+      ],
       "source_status": "DO_NOT_IMPORT",
       "format": "Markdown",
       "sha256": "a875befabee0fc9b49729e62d000ae0f2bdd7a9aedaa4f3fea2e6328163039ce",
@@ -6526,9 +6532,12 @@
       ],
       "ambiguities": [
         "UI contract is SOURCE_UNDERSPECIFIED",
-        "Executable acceptance tests are SOURCE_UNDERSPECIFIED"
+        "Executable acceptance tests are SOURCE_UNDERSPECIFIED",
+        "Local source and repository V2.1 derivative differ; no silent reconciliation"
       ],
-      "conflicts": [],
+      "conflicts": [
+        "SEVEN_PAIR_LINEAGE_CONFLICT"
+      ],
       "source_status": "DO_NOT_IMPORT",
       "format": "Markdown",
       "sha256": "770db84bb31c16451633aa805d29f4e6d016a5db578a02106c6ed3f36f42eabf",
@@ -6622,9 +6631,12 @@
       ],
       "ambiguities": [
         "UI contract is SOURCE_UNDERSPECIFIED",
-        "Executable acceptance tests are SOURCE_UNDERSPECIFIED"
+        "Executable acceptance tests are SOURCE_UNDERSPECIFIED",
+        "Local source and repository V2.1 derivative differ; no silent reconciliation"
       ],
-      "conflicts": [],
+      "conflicts": [
+        "SEVEN_PAIR_LINEAGE_CONFLICT"
+      ],
       "source_status": "DO_NOT_IMPORT",
       "format": "Markdown",
       "sha256": "be43bcb2fb9fd8555d8d72304cca5f0b766ac652d7149a32974086f5dc0ef54c",
@@ -31346,7 +31358,9 @@
       ],
       "implementation_status": "IMPLEMENTED_PARTIAL",
       "coverage": 76,
-      "conflicts": [],
+      "conflicts": [
+        "SEVEN_PAIR_LINEAGE_CONFLICT"
+      ],
       "priority": "P0_FOUNDATION",
       "risk": "MEDIUM",
       "authorized_mode": "SIMULATION_ONLY",
@@ -31447,9 +31461,12 @@
           "11. AI自我測試不得自我通過"
         ],
         "ambiguities": [
-          "UI contract is SOURCE_UNDERSPECIFIED"
+          "UI contract is SOURCE_UNDERSPECIFIED",
+          "Local source and repository V2.1 derivative differ; no silent reconciliation"
         ],
-        "conflicts": [],
+        "conflicts": [
+          "SEVEN_PAIR_LINEAGE_CONFLICT"
+        ],
         "source_status": "DO_NOT_IMPORT",
         "format": "Markdown",
         "sha256": "e95c2e3b57be4f35c25016d496d6c31909a265c654289ce07b7da8a439a979db",
@@ -31580,7 +31597,9 @@
       ],
       "implementation_status": "IMPLEMENTED_PARTIAL",
       "coverage": 76,
-      "conflicts": [],
+      "conflicts": [
+        "SEVEN_PAIR_LINEAGE_CONFLICT"
+      ],
       "priority": "P4_ADVANCED_TECHNOLOGY",
       "risk": "MEDIUM",
       "authorized_mode": "SIMULATION_ONLY",
@@ -31680,9 +31699,12 @@
           "18. 演化測試"
         ],
         "ambiguities": [
-          "UI contract is SOURCE_UNDERSPECIFIED"
+          "UI contract is SOURCE_UNDERSPECIFIED",
+          "Local source and repository V2.1 derivative differ; no silent reconciliation"
         ],
-        "conflicts": [],
+        "conflicts": [
+          "SEVEN_PAIR_LINEAGE_CONFLICT"
+        ],
         "source_status": "DO_NOT_IMPORT",
         "format": "Markdown",
         "sha256": "a875befabee0fc9b49729e62d000ae0f2bdd7a9aedaa4f3fea2e6328163039ce",
@@ -31809,7 +31831,9 @@
       ],
       "implementation_status": "SPECIFICATION_ONLY",
       "coverage": 34,
-      "conflicts": [],
+      "conflicts": [
+        "SEVEN_PAIR_LINEAGE_CONFLICT"
+      ],
       "priority": "P4_ADVANCED_TECHNOLOGY",
       "risk": "MEDIUM",
       "authorized_mode": "SIMULATION_ONLY",
@@ -31914,9 +31938,12 @@
         ],
         "ambiguities": [
           "UI contract is SOURCE_UNDERSPECIFIED",
-          "Executable acceptance tests are SOURCE_UNDERSPECIFIED"
+          "Executable acceptance tests are SOURCE_UNDERSPECIFIED",
+          "Local source and repository V2.1 derivative differ; no silent reconciliation"
         ],
-        "conflicts": [],
+        "conflicts": [
+          "SEVEN_PAIR_LINEAGE_CONFLICT"
+        ],
         "source_status": "DO_NOT_IMPORT",
         "format": "Markdown",
         "sha256": "770db84bb31c16451633aa805d29f4e6d016a5db578a02106c6ed3f36f42eabf",
@@ -32031,7 +32058,9 @@
       "current_PRs": [],
       "implementation_status": "PROHIBITED_UNDER_CURRENT_BOUNDARY",
       "coverage": 0,
-      "conflicts": [],
+      "conflicts": [
+        "SEVEN_PAIR_LINEAGE_CONFLICT"
+      ],
       "priority": "HOLD_HIGH_RISK",
       "risk": "HIGH",
       "authorized_mode": "PROHIBITED_UNDER_CURRENT_BOUNDARY",
@@ -32131,9 +32160,12 @@
         ],
         "ambiguities": [
           "UI contract is SOURCE_UNDERSPECIFIED",
-          "Executable acceptance tests are SOURCE_UNDERSPECIFIED"
+          "Executable acceptance tests are SOURCE_UNDERSPECIFIED",
+          "Local source and repository V2.1 derivative differ; no silent reconciliation"
         ],
-        "conflicts": [],
+        "conflicts": [
+          "SEVEN_PAIR_LINEAGE_CONFLICT"
+        ],
         "source_status": "DO_NOT_IMPORT",
         "format": "Markdown",
         "sha256": "be43bcb2fb9fd8555d8d72304cca5f0b766ac652d7149a32974086f5dc0ef54c",

@@ -96,6 +96,8 @@ assert.equal(publicStatus.foundation_gap_closure_v1.status, "IMPLEMENTED_SIMULAT
 assert.equal(publicStatus.foundation_gap_closure_v1.production_authority, false);
 assert.equal(publicStatus.foundation_gap_closure_v1.components.length, 4);
 assert(existsSync(resolve(root, publicStatus.foundation_gap_closure_v1.runtime)));
+assert.equal(registry.programs.filter(({ conflicts }) => conflicts.length > 0).length, 7);
+assert.equal(publicConflicts.conflict_count, 7);
 
 const viewerHtml = readFileSync(resolve(root, "KGEN-KAIOS/world-viewer/index.html"), "utf8");
 const viewerApp = readFileSync(resolve(root, "KGEN-KAIOS/world-viewer/app.js"), "utf8");
