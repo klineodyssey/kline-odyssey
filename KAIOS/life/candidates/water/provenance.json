@@ -1,0 +1,10 @@
+{
+  "author": "cursor-01",
+  "base_snapshot_sha": "a29a0f5228022bbbf054f9ae9d486264cc957998",
+  "created_at": "2026-08-01T06:25:03Z",
+  "current_origin_main_sha": "74009c7906ef671c1fe250199b901c0d0045c6dc",
+  "schema_version": "1.0.0",
+  "source": "PR66 Canonical Life Schema and Package Template",
+  "source_commit": "74009c7906ef671c1fe250199b901c0d0045c6dc",
+  "task_id": "KAIOS-PR67-CURSOR-FOUNDATIONAL-LIFE-CANDIDATES-001"
+}

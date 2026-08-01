@@ -1,0 +1,38 @@
+{
+  "constraints": [
+    "Shrimp growth is stage and molting dependent and cannot occur without resources and elapsed time."
+  ],
+  "density": {
+    "unit": "kg/m3",
+    "value": 1052.631579
+  },
+  "density_check": {
+    "computed_kg_per_m3": 1052.631579,
+    "formula": "mass_kg / volume_m3"
+  },
+  "dimensions": {
+    "body_width_m": [
+      0.003,
+      0.02
+    ],
+    "length_range_m": [
+      0.02,
+      0.12
+    ]
+  },
+  "energy_model": {
+    "metabolism": "aerobic_aquatic",
+    "oxygen_required": true,
+    "simulation_only": true,
+    "source": "diet"
+  },
+  "mass": {
+    "unit": "kg",
+    "value": 0.02
+  },
+  "schema_version": "1.0.0",
+  "volume": {
+    "unit": "m3",
+    "value": 1.9e-05
+  }
+}

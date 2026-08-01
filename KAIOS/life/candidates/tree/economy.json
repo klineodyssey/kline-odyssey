@@ -1,0 +1,27 @@
+{
+  "candidate_only": true,
+  "economic_role": {
+    "K11520_eligibility": "SIMULATED_K11520_ONLY",
+    "civilization_requirement": "reviewed simulation context",
+    "economic_value": {
+      "basis": "Simulated wood output, shade, habitat, and long-cycle stewardship value only.",
+      "mode": "SIMULATED"
+    },
+    "harvest_or_output": "simulated wood_output and fruit_optional",
+    "labor_requirement": "simulated stewardship labor only",
+    "maintenance_cost": "simulated monitoring cost only",
+    "market_role": "SIMULATED_FOUNDATIONAL_RESOURCE",
+    "resource_value": "candidate wood and habitat role",
+    "rights_package": {
+      "settlement": false,
+      "status": "CANDIDATE_ONLY",
+      "wallet": "NONE"
+    },
+    "supply_chain_inputs": [],
+    "supply_chain_outputs": [],
+    "technology_requirement": "local JSON validation only",
+    "value_basis": "Simulated wood output, shade, habitat, and long-cycle stewardship value only."
+  },
+  "schema_version": "1.0.0",
+  "settlement": false
+}

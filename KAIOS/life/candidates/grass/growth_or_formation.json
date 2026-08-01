@@ -1,0 +1,36 @@
+{
+  "erosion_control_role": "root mat topsoil stabilization",
+  "grazing_role": "candidate forage",
+  "growth_rate": "0.2-1.2 cm/day",
+  "height_range_m": [
+    0.05,
+    0.6
+  ],
+  "mass_range_kg": [
+    0.05,
+    0.8
+  ],
+  "root_depth_m": [
+    0.05,
+    0.35
+  ],
+  "schema_version": "1.0.0",
+  "season": [
+    "spring",
+    "summer",
+    "autumn"
+  ],
+  "soil_compatibility": [
+    "loam",
+    "sandy_loam",
+    "clay_loam"
+  ],
+  "species_program": "KAIOS_GRASS_FOUNDATIONAL_PROGRAM",
+  "sunlight_need": "partial_to_full",
+  "taxonomy": "grass",
+  "temperature_range_c": [
+    5,
+    35
+  ],
+  "water_need": "low_to_medium"
+}

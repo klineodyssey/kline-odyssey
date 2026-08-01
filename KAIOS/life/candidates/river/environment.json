@@ -1,0 +1,40 @@
+{
+  "environment_requirements": {
+    "oxygen_mg_l": [
+      6,
+      12
+    ],
+    "path": "downhill channel from elevation 520 m to 400 m",
+    "pollution": "none_recorded",
+    "source": "upland spring candidate",
+    "temperature_c": [
+      4,
+      26
+    ]
+  },
+  "resource_inputs": [
+    {
+      "elevation_m": 520,
+      "resource": "headwater_source"
+    },
+    {
+      "resource": "inflow",
+      "tributary_count": 2
+    },
+    {
+      "mode": "seasonal",
+      "resource": "precipitation"
+    }
+  ],
+  "resource_outputs": [
+    {
+      "elevation_m": 400,
+      "resource": "outflow"
+    },
+    {
+      "mode": "downstream",
+      "resource": "sediment_transport"
+    }
+  ],
+  "schema_version": "1.0.0"
+}

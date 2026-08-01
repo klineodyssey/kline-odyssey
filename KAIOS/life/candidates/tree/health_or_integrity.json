@@ -1,0 +1,34 @@
+{
+  "aging": "multi-year ring accumulation",
+  "damage": {
+    "risks": [
+      "drought",
+      "windthrow",
+      "fire",
+      "pest_pressure"
+    ]
+  },
+  "death": "resource starvation or terminal structural failure",
+  "disease": [
+    "root_rot",
+    "borer_damage",
+    "leaf_blight"
+  ],
+  "health_or_integrity": {
+    "disease": [
+      "root_rot",
+      "borer_damage",
+      "leaf_blight"
+    ],
+    "structural_integrity": "tracked"
+  },
+  "repair_or_healing": {
+    "mechanism": "callus_growth_and_branch_replacement",
+    "requires": [
+      "stored_energy",
+      "water",
+      "time"
+    ]
+  },
+  "schema_version": "1.0.0"
+}

@@ -1,0 +1,25 @@
+{
+  "death_or_termination": {
+    "conditions": [
+      "anoxia",
+      "temperature_out_of_range",
+      "salinity_shock",
+      "predation"
+    ]
+  },
+  "lifespan": "2-8 years",
+  "mutation_or_change": {
+    "movement": "swim_speed_energy_limited",
+    "mutation": "not modeled"
+  },
+  "offspring": "larvae",
+  "reproduction": "egg spawning",
+  "reproduction_or_replication": {
+    "offspring": "larvae_candidate",
+    "real_biological_engineering": false,
+    "reproduction": "egg_spawning_simulated",
+    "sex": "gonochoristic_candidate"
+  },
+  "schema_version": "1.0.0",
+  "sex": "candidate"
+}

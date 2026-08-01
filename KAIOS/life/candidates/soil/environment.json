@@ -1,0 +1,37 @@
+{
+  "environment_requirements": {
+    "compaction": "low_to_moderate",
+    "contamination": "none_recorded",
+    "fertility": "medium",
+    "moisture": "moderate",
+    "ph": [
+      6.0,
+      7.2
+    ]
+  },
+  "resource_inputs": [
+    {
+      "mode": "fertility_input",
+      "resource": "organic_matter"
+    },
+    {
+      "mode": "moisture_balance",
+      "resource": "water"
+    },
+    {
+      "mode": "parent_material",
+      "resource": "weathered_minerals"
+    }
+  ],
+  "resource_outputs": [
+    {
+      "mode": "simulated_support",
+      "resource": "crop_support"
+    },
+    {
+      "mode": "hydrologic_service",
+      "resource": "water_retention"
+    }
+  ],
+  "schema_version": "1.0.0"
+}

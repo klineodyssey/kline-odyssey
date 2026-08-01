@@ -1,0 +1,19 @@
+{
+  "change": "formation erosion contamination repair only",
+  "death_or_termination": {
+    "conditions": [
+      "severe_contamination",
+      "complete_erosion",
+      "sterilization"
+    ]
+  },
+  "mutation_or_change": {
+    "erosion": "water or wind driven",
+    "fertility_change": "requires material or biological cause"
+  },
+  "reproduction_or_replication": {
+    "reason": "Soil changes by formation, erosion, contamination, and repair, not reproduction.",
+    "status": "NOT_APPLICABLE"
+  },
+  "schema_version": "1.0.0"
+}

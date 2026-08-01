@@ -1,0 +1,35 @@
+{
+  "environment_requirements": {
+    "climate_exposure": "variable",
+    "hazards": [
+      "landslide",
+      "rockfall",
+      "avalanche_optional"
+    ],
+    "stability": "slope_and_weathering_dependent"
+  },
+  "resource_inputs": [
+    {
+      "resource": "tectonic_uplift",
+      "timescale_years": [
+        1000000,
+        50000000
+      ]
+    },
+    {
+      "mode": "continuous",
+      "resource": "weathering"
+    }
+  ],
+  "resource_outputs": [
+    {
+      "mode": "erosion_output",
+      "resource": "sediment"
+    },
+    {
+      "mode": "water_source_role",
+      "resource": "headwater_flow"
+    }
+  ],
+  "schema_version": "1.0.0"
+}

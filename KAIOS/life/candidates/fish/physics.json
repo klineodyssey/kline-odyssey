@@ -1,0 +1,38 @@
+{
+  "constraints": [
+    "Fish cannot survive outside compatible water with oxygen and temperature bounds."
+  ],
+  "density": {
+    "unit": "kg/m3",
+    "value": 1052.631579
+  },
+  "density_check": {
+    "computed_kg_per_m3": 1052.631579,
+    "formula": "mass_kg / volume_m3"
+  },
+  "dimensions": {
+    "body_depth_m": [
+      0.02,
+      0.16
+    ],
+    "length_range_m": [
+      0.1,
+      0.8
+    ]
+  },
+  "energy_model": {
+    "metabolism": "aerobic_aquatic",
+    "oxygen_required": true,
+    "simulation_only": true,
+    "source": "diet"
+  },
+  "mass": {
+    "unit": "kg",
+    "value": 2.0
+  },
+  "schema_version": "1.0.0",
+  "volume": {
+    "unit": "m3",
+    "value": 0.0019
+  }
+}

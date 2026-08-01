@@ -1,0 +1,13 @@
+{
+  "events": [
+    {
+      "event_id": "EVT-LIFE-KAIOS-FOUNDATIONAL-TREE-001-0001",
+      "next_state_hash": "27bbbe1ad52369af7e5f30abfdcb7b76153131e8f263765b114e4a5200d0f23b",
+      "previous_state_hash": null,
+      "status": "PENDING_CODEX_REVIEW",
+      "timestamp": "2026-08-01T06:25:03Z",
+      "type": "CANDIDATE_PACKAGE_CREATED"
+    }
+  ],
+  "schema_version": "1.0.0"
+}

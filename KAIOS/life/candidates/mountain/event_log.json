@@ -1,0 +1,13 @@
+{
+  "events": [
+    {
+      "event_id": "EVT-LIFE-KAIOS-FOUNDATIONAL-MOUNTAIN-001-0001",
+      "next_state_hash": "9c47086b43189adc4c6c9fd28abe1028c5909540fd239524eaead0d6f1d63fef",
+      "previous_state_hash": null,
+      "status": "PENDING_CODEX_REVIEW",
+      "timestamp": "2026-08-01T06:25:03Z",
+      "type": "CANDIDATE_PACKAGE_CREATED"
+    }
+  ],
+  "schema_version": "1.0.0"
+}

@@ -1,0 +1,38 @@
+{
+  "damage": {
+    "risks": [
+      "low_oxygen",
+      "thermal_stress",
+      "predation",
+      "disease"
+    ]
+  },
+  "diet": [
+    "algae",
+    "invertebrates",
+    "prepared_feed"
+  ],
+  "health": "oxygen temperature diet bounded",
+  "health_or_integrity": {
+    "health": "bounded by oxygen, temperature, salinity, diet, and disease exposure"
+  },
+  "oxygen": ">=5 mg/L",
+  "repair_or_healing": {
+    "mechanism": "biological_healing_simulation",
+    "requires": [
+      "energy",
+      "oxygen",
+      "time"
+    ]
+  },
+  "salinity": "0-10 ppt",
+  "schema_version": "1.0.0",
+  "temperature": [
+    12,
+    28
+  ],
+  "water_type": [
+    "freshwater",
+    "brackish"
+  ]
+}

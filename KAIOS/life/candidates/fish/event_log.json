@@ -1,0 +1,13 @@
+{
+  "events": [
+    {
+      "event_id": "EVT-LIFE-KAIOS-FOUNDATIONAL-FISH-001-0001",
+      "next_state_hash": "9d1e8e5b0659b5719449ae03090e65246df2cfef5b5d2a4ee0f722db38118923",
+      "previous_state_hash": null,
+      "status": "PENDING_CODEX_REVIEW",
+      "timestamp": "2026-08-01T06:25:03Z",
+      "type": "CANDIDATE_PACKAGE_CREATED"
+    }
+  ],
+  "schema_version": "1.0.0"
+}

@@ -1,0 +1,22 @@
+{
+  "damage": {
+    "evaporation": "reduces volume",
+    "freezing": "state_change",
+    "pollution": "reduces purity"
+  },
+  "health_or_integrity": {
+    "availability": "finite_volume",
+    "pollution": "none_recorded",
+    "purity": "fresh_candidate"
+  },
+  "pollution": "none_recorded",
+  "purity": "fresh candidate",
+  "repair_or_healing": {
+    "mechanism": "filtration_dilution_or_source_replenishment",
+    "requires": [
+      "clean_inflow",
+      "time"
+    ]
+  },
+  "schema_version": "1.0.0"
+}

@@ -1,0 +1,36 @@
+{
+  "constraints": [
+    "Soil fertility cannot increase without organic, mineral, water, biological, labor, and time causes."
+  ],
+  "density": {
+    "unit": "kg/m3",
+    "value": 1300.0
+  },
+  "density_check": {
+    "computed_kg_per_m3": 1300.0,
+    "formula": "mass_kg / volume_m3"
+  },
+  "dimensions": {
+    "area_m2": 1000,
+    "depth_m": 1.0,
+    "profile_layers": [
+      "O",
+      "A",
+      "B",
+      "C"
+    ]
+  },
+  "energy_model": {
+    "simulation_only": true,
+    "source": "organic_matter_and_microclimate"
+  },
+  "mass": {
+    "unit": "kg",
+    "value": 1300000.0
+  },
+  "schema_version": "1.0.0",
+  "volume": {
+    "unit": "m3",
+    "value": 1000.0
+  }
+}

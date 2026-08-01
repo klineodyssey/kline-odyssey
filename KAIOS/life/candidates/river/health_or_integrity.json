@@ -1,0 +1,23 @@
+{
+  "damage": {
+    "drought": "flow depletion",
+    "flood": "overbank condition",
+    "pollution": "reduces water quality"
+  },
+  "drought": "source deficit",
+  "flood": "inflow exceeds capacity",
+  "health_or_integrity": {
+    "integrity": "flow_and_water_quality_dependent",
+    "oxygen": "6-12 mg/L"
+  },
+  "pollution": "none_recorded",
+  "repair_or_healing": {
+    "mechanism": "clean_inflow_sediment_balance_and_time",
+    "requires": [
+      "source_flow",
+      "reduced_pollution",
+      "time"
+    ]
+  },
+  "schema_version": "1.0.0"
+}

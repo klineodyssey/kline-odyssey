@@ -1,0 +1,48 @@
+{
+  "environment_requirements": {
+    "season": [
+      "spring",
+      "summer",
+      "autumn"
+    ],
+    "soil_compatibility": [
+      "loam",
+      "sandy_loam",
+      "clay_loam"
+    ],
+    "sunlight_need": "partial_to_full",
+    "temperature_range_c": [
+      5,
+      35
+    ],
+    "water_need": "low_to_medium"
+  },
+  "resource_inputs": [
+    {
+      "range_l_per_m2_day": [
+        1.5,
+        4.0
+      ],
+      "resource": "water"
+    },
+    {
+      "need": "partial_to_full",
+      "resource": "sunlight"
+    },
+    {
+      "need": "low_to_medium",
+      "resource": "soil_nutrients"
+    }
+  ],
+  "resource_outputs": [
+    {
+      "mode": "simulated_growth",
+      "resource": "biomass"
+    },
+    {
+      "mode": "ground_cover",
+      "resource": "erosion_control"
+    }
+  ],
+  "schema_version": "1.0.0"
+}

@@ -1,0 +1,45 @@
+{
+  "environment_requirements": {
+    "season": [
+      "perennial"
+    ],
+    "soil_compatibility": [
+      "loam",
+      "deep_alluvial_soil"
+    ],
+    "sunlight_need": "medium_to_full",
+    "temperature_range_c": [
+      -5,
+      38
+    ],
+    "water_need": "medium"
+  },
+  "resource_inputs": [
+    {
+      "range_l_per_day": [
+        20,
+        120
+      ],
+      "resource": "water"
+    },
+    {
+      "need": "medium_to_full",
+      "resource": "sunlight"
+    },
+    {
+      "need": "medium",
+      "resource": "soil_nutrients"
+    }
+  ],
+  "resource_outputs": [
+    {
+      "mode": "simulated_only",
+      "resource": "wood_output"
+    },
+    {
+      "mode": "ecosystem_role",
+      "resource": "shade_and_habitat"
+    }
+  ],
+  "schema_version": "1.0.0"
+}

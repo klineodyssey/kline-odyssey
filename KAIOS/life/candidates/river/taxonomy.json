@@ -1,0 +1,22 @@
+{
+  "extensions": [
+    "WATER_BODY_EXTENSION"
+  ],
+  "life_type": "WATER_BODY_LIFE",
+  "schema_version": "1.0.0",
+  "taxonomy": {
+    "CLASS": "RIVER_ANALOG",
+    "DOMAIN": "KGEN_UNIVERSE",
+    "FAMILY": "KAIOS_FOUNDATIONAL_CANDIDATES",
+    "GENUS": "KAIOS_RIVER",
+    "KINGDOM": "WATER_BODY_LIFE",
+    "LIFE_INSTANCE": "LIFE-KAIOS-FOUNDATIONAL-RIVER-001",
+    "ORDER": "FLUVIAL_CANDIDATE",
+    "PHYLUM": "HYDROLOGIC_BODY",
+    "SPECIES": "SPECIES-KAIOS-FOUNDATIONAL-RIVER",
+    "extension_19": {
+      "reason": "Canonical 19-layer biological taxonomy is not forced onto non-biological terrain, soil, or water-body life.",
+      "status": "NOT_APPLICABLE"
+    }
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "extensions": [
+    "LAND_EXTENSION",
+    "SOIL_EXTENSION"
+  ],
+  "life_type": "LAND_LIFE",
+  "schema_version": "1.0.0",
+  "taxonomy": {
+    "CLASS": "SOIL_ANALOG",
+    "DOMAIN": "KGEN_UNIVERSE",
+    "FAMILY": "KAIOS_FOUNDATIONAL_CANDIDATES",
+    "GENUS": "KAIOS_SOIL",
+    "KINGDOM": "LAND_LIFE",
+    "LIFE_INSTANCE": "LIFE-KAIOS-FOUNDATIONAL-SOIL-001",
+    "ORDER": "PEDON_CANDIDATE",
+    "PHYLUM": "SOIL_LAND_LAYER",
+    "SPECIES": "SPECIES-KAIOS-FOUNDATIONAL-SOIL",
+    "extension_19": {
+      "reason": "Canonical 19-layer biological taxonomy is not forced onto non-biological terrain, soil, or water-body life.",
+      "status": "NOT_APPLICABLE"
+    }
+  }
+}

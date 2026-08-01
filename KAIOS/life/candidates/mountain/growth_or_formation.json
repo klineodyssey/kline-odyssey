@@ -1,0 +1,28 @@
+{
+  "density_kg_m3": 2700.0,
+  "elevation_m": 1800,
+  "elapsed_time_required": true,
+  "formation": "tectonic uplift and erosion over geologic time",
+  "geology": [
+    "granite",
+    "gneiss"
+  ],
+  "hazards": [
+    "landslide",
+    "rockfall"
+  ],
+  "instant_formation": false,
+  "mass_kg": 2700000000000000.0,
+  "resource_deposits": [
+    "stone",
+    "trace_minerals"
+  ],
+  "schema_version": "1.0.0",
+  "slope_degrees": [
+    5,
+    42
+  ],
+  "transport_barrier": true,
+  "volume_m3": 1000000000000.0,
+  "water_source_role": "headwater capture"
+}

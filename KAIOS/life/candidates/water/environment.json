@@ -1,0 +1,33 @@
+{
+  "environment_requirements": {
+    "availability": "bounded_by_volume",
+    "pollution": "none_recorded",
+    "purity": "fresh_candidate",
+    "state": "liquid",
+    "temperature_c": [
+      0,
+      35
+    ]
+  },
+  "resource_inputs": [
+    {
+      "mode": "precipitation_or_source",
+      "resource": "inflow"
+    },
+    {
+      "mode": "temperature_change",
+      "resource": "heat_exchange"
+    }
+  ],
+  "resource_outputs": [
+    {
+      "mode": "water_loss",
+      "resource": "evaporation"
+    },
+    {
+      "mode": "simulated_life_support",
+      "resource": "consumption"
+    }
+  ],
+  "schema_version": "1.0.0"
+}

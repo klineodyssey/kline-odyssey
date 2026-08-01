@@ -1,0 +1,27 @@
+{
+  "death_or_termination": {
+    "conditions": [
+      "extended_drought",
+      "soil_toxicity",
+      "persistent_freeze"
+    ]
+  },
+  "mutation_or_change": {
+    "mutation": "not modeled",
+    "seasonal_change": true
+  },
+  "reproduction": "seed and tiller",
+  "reproduction_or_replication": {
+    "real_biological_engineering": false,
+    "reproduction": "seed_and_tiller",
+    "seed": {
+      "dispersal": [
+        "wind",
+        "gravity"
+      ],
+      "viable": true
+    }
+  },
+  "schema_version": "1.0.0",
+  "seed": "deterministic seed bank"
+}

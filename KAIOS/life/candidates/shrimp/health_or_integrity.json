@@ -1,0 +1,38 @@
+{
+  "damage": {
+    "risks": [
+      "ammonia_spike",
+      "low_oxygen",
+      "failed_molt",
+      "disease"
+    ]
+  },
+  "diet": [
+    "detritus",
+    "algae",
+    "prepared_feed"
+  ],
+  "health": "water-quality sensitive",
+  "health_or_integrity": {
+    "health": "high sensitivity to oxygen, ammonia, salinity shock, and disease"
+  },
+  "oxygen": ">=4.5 mg/L",
+  "repair_or_healing": {
+    "mechanism": "post_molt_hardening_and_tissue_repair",
+    "requires": [
+      "minerals",
+      "energy",
+      "time"
+    ]
+  },
+  "salinity": "5-35 ppt",
+  "schema_version": "1.0.0",
+  "temperature": [
+    20,
+    32
+  ],
+  "water_type": [
+    "brackish",
+    "marine"
+  ]
+}

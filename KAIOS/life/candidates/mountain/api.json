@@ -1,0 +1,11 @@
+{
+  "api_binding": {
+    "authority": "NO_PRODUCTION_AUTHORITY",
+    "mode": "READ_ONLY",
+    "reference": "api.json"
+  },
+  "mode": "READ_ONLY_EXPORT",
+  "production_authority": false,
+  "schema_version": "1.0.0",
+  "writes_allowed": false
+}

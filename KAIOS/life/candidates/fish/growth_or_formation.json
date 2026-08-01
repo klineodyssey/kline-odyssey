@@ -1,0 +1,18 @@
+{
+  "aquaculture_role": "candidate pond culture",
+  "body_plan": "finned vertebrate candidate",
+  "energy": "diet plus dissolved oxygen",
+  "growth": "feed and temperature dependent",
+  "length_range_m": [
+    0.1,
+    0.8
+  ],
+  "mass_range_kg": [
+    0.02,
+    8.0
+  ],
+  "movement": "swimming energy-limited",
+  "predator_prey_role": "mid trophic link",
+  "schema_version": "1.0.0",
+  "taxonomy": "fish"
+}

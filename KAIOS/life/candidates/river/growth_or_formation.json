@@ -1,0 +1,32 @@
+{
+  "depth_m": 0.5,
+  "flow": {
+    "direction": "downhill",
+    "mouth_elevation_m": 400,
+    "no_unexplained_uphill_flow": true,
+    "source_elevation_m": 520
+  },
+  "formation": "sustained inflow and channel incision over elapsed time",
+  "inflow": [
+    "headwater",
+    "tributaries",
+    "precipitation"
+  ],
+  "instant_formation": false,
+  "length_m": 5000,
+  "outflow": "downstream mouth",
+  "oxygen_mg_l": [
+    6,
+    12
+  ],
+  "path": "downhill channel",
+  "schema_version": "1.0.0",
+  "sediment": "downstream transport",
+  "source": "upland spring candidate",
+  "temperature_c": [
+    4,
+    26
+  ],
+  "volume_m3": 2000,
+  "width_m": 8
+}

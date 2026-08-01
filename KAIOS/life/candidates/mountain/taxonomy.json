@@ -1,0 +1,22 @@
+{
+  "extensions": [
+    "TERRAIN_EXTENSION"
+  ],
+  "life_type": "TERRAIN_LIFE",
+  "schema_version": "1.0.0",
+  "taxonomy": {
+    "CLASS": "MOUNTAIN_ANALOG",
+    "DOMAIN": "KGEN_UNIVERSE",
+    "FAMILY": "KAIOS_FOUNDATIONAL_CANDIDATES",
+    "GENUS": "KAIOS_MOUNTAIN",
+    "KINGDOM": "TERRAIN_LIFE",
+    "LIFE_INSTANCE": "LIFE-KAIOS-FOUNDATIONAL-MOUNTAIN-001",
+    "ORDER": "OROGENIC_CANDIDATE",
+    "PHYLUM": "GEOLOGIC_TERRAIN",
+    "SPECIES": "SPECIES-KAIOS-FOUNDATIONAL-MOUNTAIN",
+    "extension_19": {
+      "reason": "Canonical 19-layer biological taxonomy is not forced onto non-biological terrain, soil, or water-body life.",
+      "status": "NOT_APPLICABLE"
+    }
+  }
+}
