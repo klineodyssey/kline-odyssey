@@ -28,6 +28,8 @@
     {"parameter_name":"nutrient_balance_tolerance","unit":"kilogram","minimum":0,"default":0.000001,"maximum":0.001,"rationale":"A bounded numerical tolerance supports paired nutrient transfers.","source_type":"RESEARCH_PROPOSAL","confidence":"MEDIUM","risk":"A proxy nutrient pool is not a chemical nutrient model.","validation_required":true},
     {"parameter_name":"energy_balance_tolerance","unit":"joule_proxy","minimum":0,"default":0.000001,"maximum":0.001,"rationale":"A bounded numerical tolerance supports paired source, store and dissipation energy-proxy transfers.","source_type":"RESEARCH_PROPOSAL","confidence":"MEDIUM","risk":"Energy values are simulation proxies and not engineering-grade measurements.","validation_required":true},
     {"parameter_name":"rainfall_volume_rounding_precision","unit":"decimal_places","minimum":0,"default":6,"maximum":12,"rationale":"A fixed decimal precision makes rainfall conversion and replay deterministic across supported serializers.","source_type":"RESEARCH_PROPOSAL","confidence":"MEDIUM","risk":"Different host rounding modes must not be substituted silently.","validation_required":true},
+    {"parameter_name":"transition_decimal_places","unit":"decimal_places","minimum":6,"default":6,"maximum":6,"rationale":"The fixed six-place transition scale prevents binary floating-point drift during deterministic state updates.","source_type":"RESEARCH_PROPOSAL","confidence":"HIGH","risk":"Changing this constant would invalidate serialized states and oracle hashes.","validation_required":true},
+    {"parameter_name":"transition_scale","unit":"micro_units_per_unit","minimum":1000000,"default":1000000,"maximum":1000000,"rationale":"Every ingested pool value and event delta is represented as a signed integer count of one-millionth units.","source_type":"RESEARCH_PROPOSAL","confidence":"HIGH","risk":"Implementations that use Number additions instead of integer micro-units will diverge.","validation_required":true},
     {"parameter_name":"decomposition_return_share","unit":"normalized_fraction","minimum":0,"default":0.55,"maximum":0.95,"rationale":"The share proposes a bounded split from decomposed biomass to soil organic matter, with all remaining mass assigned to named loss or residue proxies.","source_type":"MODEL_INFERENCE","confidence":"LOW","risk":"Gas, leachate and microbial pathways are abstracted.","validation_required":true},
     {"parameter_name":"plant_water_atmospheric_return_share","unit":"normalized_fraction","minimum":0.2,"default":0.65,"maximum":0.95,"rationale":"The share aligns conceptually with existing Ecology plant-growth accounting and keeps water transfers paired.","source_type":"REPOSITORY_DERIVED","confidence":"MEDIUM","risk":"It is an aggregate proxy rather than a physiological transpiration model.","validation_required":true},
     {"parameter_name":"runoff_to_river_share","unit":"normalized_fraction","minimum":0,"default":0.25,"maximum":1,"rationale":"The share bounds transfer from surface runoff to the existing river pool.","source_type":"RESEARCH_PROPOSAL","confidence":"LOW","risk":"Terrain, infiltration and drainage geometry are simplified.","validation_required":true}
@@ -75,6 +77,21 @@
       "destination_delta_rule":"destination_delta_liter = total_rainfall_liter",
       "acceptance_rule":"abs(source_delta_liter + destination_delta_liter) <= water_balance_tolerance"
     }
+  },
+  "deterministic_transition_arithmetic": {
+    "algorithm_id":"KAIOS_FIXED_POINT_DECIMAL_V1",
+    "decimal_places_parameter":"transition_decimal_places",
+    "scale_parameter":"transition_scale",
+    "decimal_places":6,
+    "scale_micro_units_per_unit":1000000,
+    "rounding_mode_at_ingestion":"ROUND_HALF_TO_EVEN",
+    "ingestion":"Convert every finite initial pool value and event delta to its ECMAScript Number.prototype.toString decimal form, parse that decimal or exponent form exactly, multiply by scale, and round any excess precision with ROUND_HALF_TO_EVEN.",
+    "state_representation":"Signed arbitrary-precision integer micro-units; negative zero is canonicalized to integer zero.",
+    "transition_rule":"Apply every pool debit and credit using integer addition only. Binary floating-point state addition is forbidden.",
+    "normalization":"Serialize micro-units as an exact base-10 finite decimal: integer quotient plus a six-digit fractional remainder, trim trailing fractional zeros, omit the decimal point when the remainder is zero, and render negative zero as 0.",
+    "overflow_policy":"FAIL_CLOSED_BEFORE_STATE_CHANGE",
+    "non_finite_policy":"REJECT_NAN_POSITIVE_INFINITY_AND_NEGATIVE_INFINITY",
+    "required_event_fields":["arithmetic_algorithm_id","scale_micro_units_per_unit","input_micro_units","delta_micro_units","output_micro_units"]
   },
   "flows": [
     {"flow_id":"RAIN_TO_SURFACE","debit":"ATMOSPHERIC_RAIN_INPUT","credit":"FOREST_SURFACE_WATER","quantity":"round_half_to_even(daily_rainfall_l_per_m2_per_day * habitat_area_m2 * elapsed_days, rainfall_volume_rounding_precision)","unit":"liter","cause":"RAINFALL_CONVERSION_EVENT"},

@@ -70,6 +70,12 @@ authoritative copy of Life or Ecology state.
 9. `FOREST-NUMERICAL-ORACLE-001` supplies complete initial pools, ten ordered
    event deltas, exact final pools and reproducible final-state SHA-256
    `1802f41c085121f051ce165212b762ae2503a7d7153aa1067defe5d8e88afe1e`.
+10. State transitions use `KAIOS_FIXED_POINT_DECIMAL_V1`: every initial value
+    and event delta is ingested at six decimal places as signed integer
+    micro-units with `ROUND_HALF_TO_EVEN`; transitions use integer addition;
+    normalized serialization trims trailing zeros and maps negative zero to
+    `0`. Thus `800000 - 500000 = 300000` micro-units serializes as `0.3`
+    without ECMAScript binary drift.
 
 ## Artifact Map
 
@@ -91,15 +97,30 @@ The same task and branch were repaired after `REWORK_REQUIRED` review:
   transfer and complete event contract;
 - `FOREST-NUMERICAL-ORACLE-001` provides exact initial state, ten ordered
   actions, exact final state, canonical serialization and a reproducible hash;
+- the oracle transition contract now explicitly requires six-place fixed-point
+  integer arithmetic; direct binary floating-point state addition is forbidden;
 - structural biomass, nutrient stores, atmospheric carbon/material and energy
   source/store/dissipation proxies are separate and conserved;
 - all five JSON artifacts carry immutable source provenance;
 - the only Ecology owner identifier is
   `KAIOS_REPRODUCTION_ECOLOGY_RUNTIME_V1`.
 
-The original 39 numeric parameter contracts remain unchanged. Two added
-parameters use the same required metadata contract for rainfall precision and
-energy balance tolerance.
+The original 39 numeric parameter contracts remain unchanged. Four added
+parameters use the same required metadata contract for rainfall precision,
+energy balance tolerance, transition decimal places and transition scale.
+
+## Fixed-Point Replay Evidence
+
+An independent Node.js replay implementing the stated decimal-string parser,
+half-even ingestion, BigInt micro-unit state and normalized decimal serializer
+produced:
+
+- native ECMAScript witness: `0.8 - 0.5 = 0.30000000000000004`;
+- fixed-point witness: `800000 - 500000 = 300000` micro-units, normalized
+  as `0.3`;
+- ordered oracle events: `10`;
+- final SHA-256:
+  `1802f41c085121f051ce165212b762ae2503a7d7153aa1067defe5d8e88afe1e`.
 
 ## Provenance
 
