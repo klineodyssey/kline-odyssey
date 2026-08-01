@@ -27,7 +27,7 @@ test("canonical Viewer exposes hierarchy, navigation, and honest catalog states"
   for (const marker of ["KAIOS 完整世界", "返回官方首頁", "觀看第一隻 KAIOS 數位恐龍", "LAND_PARCEL", "FISHPOND", "FARM", "HOUSE", "SHOPPING_MALL", "FACTORY", "TECHNOLOGY_BUILDING"]) {
     assert.match(viewer, new RegExp(marker));
   }
-  assert.match(viewer, /FISHPOND[\s\S]*IMPLEMENTED_INTERACTIVE \/ SIMULATION ONLY/);
+  assert.match(viewer, /FISHPOND[\s\S]*RUNTIME V1 \/ SIMULATION ONLY/);
   assert.match(viewer, /world-viewer\/aquaculture-v1\//);
   assert.match(viewer, /SHOPPING_MALL[\s\S]*MISSING/);
   assert.match(viewer, /TECHNOLOGY_BUILDING[\s\S]*MISSING/);

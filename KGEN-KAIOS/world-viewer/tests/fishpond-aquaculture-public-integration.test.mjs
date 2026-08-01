@@ -32,7 +32,7 @@ test("official homepage exposes fishpond navigation, feature card, API and foote
 test("full World Viewer exposes the interactive fishpond capability and stable route", async () => {
   const html = await read("KGEN-KAIOS/world-viewer/index.html");
   assert.match(html, /data-capability="FISHPOND"/);
-  assert.match(html, /IMPLEMENTED_INTERACTIVE \/ SIMULATION ONLY/);
+  assert.match(html, /RUNTIME V1 \/ SIMULATION ONLY/);
   assert.match(html, /world-viewer\/aquaculture-v1\//);
 });
 

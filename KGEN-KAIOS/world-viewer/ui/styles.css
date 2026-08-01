@@ -103,16 +103,15 @@ button:focus-visible, canvas:focus-visible, [tabindex]:focus-visible {
   gap: 6px; overflow-x: auto; scrollbar-width: thin;
 }
 .building-catalog article {
+  position: relative;
   min-height: 48px; display: grid; grid-template-columns: 1fr auto; gap: 2px 6px; align-content: center;
   padding: 6px 8px; border: 1px solid var(--line); border-radius: 6px; background: var(--surface);
 }
 .building-catalog article strong { font-size: 11px; }
 .building-catalog article span { color: var(--accent-strong); font-size: 9px; font-weight: 700; }
 .building-catalog article .catalog-route {
-  display: inline-flex; min-height: var(--touch); align-items: center; justify-content: center;
-  color: var(--accent-strong); font-size: 9px; font-weight: 700; text-decoration: none;
+  position: absolute; inset: 0; z-index: 1; border-radius: inherit;
 }
-.building-catalog article .catalog-route:hover { text-decoration: underline; }
 .building-catalog article .catalog-route:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
 .building-catalog article small { grid-column: 1 / -1; color: var(--muted); font-size: 8px; overflow-wrap: anywhere; }
 .building-catalog article[data-capability="FISHPOND"] span,
