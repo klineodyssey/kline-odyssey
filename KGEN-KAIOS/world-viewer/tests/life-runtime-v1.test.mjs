@@ -10,7 +10,7 @@ const [page, app, styles, worldViewer, catalogText, stateText] = await Promise.a
   read("world-viewer/life-runtime/index.html"),
   read("world-viewer/life-runtime/app.js"),
   read("world-viewer/life-runtime/styles.css"),
-  read("KGEN-KAIOS/world-viewer/index.html"),
+  read("KGEN-KAIOS/world-viewer/README.md"),
   read("api/kaios/life-runtime-v1/catalog.json"),
   read("api/kaios/life-runtime-v1/state.json")
 ]);
@@ -25,7 +25,7 @@ assert.ok(app.includes("createFoundationalLifeRuntime"));
 assert.ok(app.includes("loadFoundationalLifeDefinitions"));
 assert.ok(styles.includes("@media (max-width:600px)"));
 assert.ok(styles.includes("prefers-reduced-motion"));
-assert.ok(worldViewer.includes("world-viewer/life-runtime/"));
+assert.ok(worldViewer.includes("../../world-viewer/life-runtime/"));
 
 const catalog = JSON.parse(catalogText);
 const state = JSON.parse(stateText);
