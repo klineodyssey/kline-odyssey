@@ -1,0 +1,489 @@
+{
+    "schema_version":  "2.0.0",
+    "artifact_id":  "WORLD-LIFE-LAW-V2.1-REPEAT-BASELINE-EVIDENCE-001",
+    "artifact_type":  "MACHINE_READABLE_REPEAT_BASELINE_REVIEW",
+    "reviewed_main_sha":  "e4bcd8da90309a9557ce2f8eaba83ef0f8d990d4",
+    "human_selections":  {
+                             "FZ-P1-001":  "A",
+                             "FZ-P1-002":  "B",
+                             "FZ-P1-003":  "A",
+                             "FZ-P1-004":  "A",
+                             "FZ-P1-005":  "A"
+                         },
+    "runtime_authority":  false,
+    "freeze":  "NOT_APPROVED",
+    "sources":  {
+                    "canonical_law":  "KGEN-KAIOS/life/KAIOS_WORLD_LIFE_LAW.md",
+                    "machine_law":  "KGEN-KAIOS/life/kaios_world_life_law.json",
+                    "cumulative_amendment_candidate":  "KGEN-KAIOS/governance/world-life-law-v2.1-review/WORLD_LIFE_LAW_V2_1_CUMULATIVE_AMENDMENT_CANDIDATE.md",
+                    "classification_candidate":  "KGEN-KAIOS/governance/world-life-law-v2.1-review/WORLD_LIFE_LAW_V2_1_SOURCE_CLASSIFICATION_NORMATIVE_CANDIDATE.md",
+                    "conflict_matrix":  "KGEN-KAIOS/governance/world-life-law-v2.1-review/WORLD_LIFE_LAW_V2_1_REPEAT_CONFLICT_MATRIX.json",
+                    "life_os_v1_1_manifest":  "KGEN-KAIOS/life/life_os_architecture_baseline_v1_1.json",
+                    "life_os_v1_1_lineage":  "KGEN-KAIOS/governance/world-life-law-v2.1-review/LIFE_OS_V1_1_BASELINE_LINEAGE.json",
+                    "frz_hash_001_resolution":  "KGEN-KAIOS/governance/world-life-law-v2.1-review/FRZ_HASH_001_RESOLUTION.json"
+                },
+    "source_hashes":  {
+                          "canonical_law_sha256":  "4199e1a36e7b823efab2f2733bb2cb37936a0c134cb42ebb186f3ef236b527f9",
+                          "machine_law_sha256":  "eca96f3f5360c57b5771f605b7f5bc8d3275cc2b40832b8add4d5723f74c3a27",
+                          "cumulative_candidate_sha256":  "9aae03be8a4df0b0200fcce67668c27223bbaf3e4164c6ef4799518a1f9d62de",
+                          "classification_candidate_sha256":  "4073960848af8c120f026abc6ef80ecc9fb1bf3dcf182d485cbafcfed5027b70",
+                          "conflict_matrix_sha256":  "cde72c6ea67a7c398cf7022cdf6b1cdbdc933c4642c7a4bc1f974a4a372124cc",
+                          "amendment_001_source_sha256":  "6abeab8099e0af6252aa1b55f0907a2670788c304713848accdfc31fa2339892",
+                          "activity_contract_source_sha256":  "a39fd6255fabac6632e0b1f7ea0b14d7e5604b804145a4c77cb7c1b51c1ff984",
+                          "p1_integration_source_sha256":  "817d2e344a26bba75c0fb5d71dfe2a592c53111594f9bace6e35da801d545c20",
+                          "life_os_v1_1_manifest_sha256":  "b6b846259ef328b5c8e9be452979ad77fc48ddb897d8f8a75c6d6401c30d1d11",
+                          "life_os_v1_1_lineage_sha256":  "ad8791806daded0e9092f84d14e0183da6ac16a2e2d894c037b569c6525577b5",
+                          "frz_hash_001_resolution_sha256":  "21721d45998443a2234cf177a669a0f591b5d7be112419fb816247221d7d18fd"
+                      },
+    "law_review":  {
+                       "law_count":  23,
+                       "laws_pass":  23,
+                       "pair_count":  253,
+                       "pairs_pass":  253,
+                       "direct_conflicts":  0
+                   },
+    "baseline_gates":  {
+                           "total":  18,
+                           "pass":  18,
+                           "clarification_required":  0,
+                           "missing":  0,
+                           "items":  [
+                                         {
+                                             "gate_id":  "RG-01",
+                                             "title":  "TWENTY_THREE_LAW_CONSISTENCY",
+                                             "status":  "PASS",
+                                             "evidence":  [
+                                                              "23 unique laws",
+                                                              "253 unique pairs",
+                                                              "0 conflict exceptions"
+                                                          ],
+                                             "missing":  [
+
+                                                         ]
+                                         },
+                                         {
+                                             "gate_id":  "RG-02",
+                                             "title":  "LIFE_IDENTITY",
+                                             "status":  "PASS",
+                                             "evidence":  [
+                                                              "LifeIdentity contract",
+                                                              "conditional dna_ref",
+                                                              "class-specific adapters"
+                                                          ],
+                                             "missing":  [
+
+                                                         ]
+                                         },
+                                         {
+                                             "gate_id":  "RG-03",
+                                             "title":  "ENERGY_RUNTIME",
+                                             "status":  "PASS",
+                                             "evidence":  [
+                                                              "WL-03",
+                                                              "WL-20",
+                                                              "energy_profile_ref"
+                                                          ],
+                                             "missing":  [
+
+                                                         ]
+                                         },
+                                         {
+                                             "gate_id":  "RG-04",
+                                             "title":  "FOOD_RUNTIME",
+                                             "status":  "PASS",
+                                             "evidence":  [
+                                                              "WL-04 food web",
+                                                              "Amendment 001 Food Lifecycle Contract",
+                                                              "Amendment 001 Species Energy Contract"
+                                                          ],
+                                             "missing":  [
+
+                                                         ]
+                                         },
+                                         {
+                                             "gate_id":  "RG-05",
+                                             "title":  "DEATH_RUNTIME",
+                                             "status":  "PASS",
+                                             "evidence":  [
+                                                              "WL-07",
+                                                              "history preserved",
+                                                              "property succession preserved",
+                                                              "P1 Option A sealed body_record_id",
+                                                              "governed body disposition",
+                                                              "external asset_succession_ref",
+                                                              "Life OS ownership prohibited"
+                                                          ],
+                                             "missing":  [
+
+                                                         ]
+                                         },
+                                         {
+                                             "gate_id":  "RG-06",
+                                             "title":  "REINCARNATION_RUNTIME",
+                                             "status":  "PASS",
+                                             "evidence":  [
+                                                              "new life_id",
+                                                              "predecessor link",
+                                                              "Soul Core authorization",
+                                                              "P1 Option B new Life ID",
+                                                              "new birth event",
+                                                              "new embodiment_id",
+                                                              "sealed predecessor",
+                                                              "DEAD terminal"
+                                                          ],
+                                             "missing":  [
+
+                                                         ]
+                                         },
+                                         {
+                                             "gate_id":  "RG-07",
+                                             "title":  "TIMELINE",
+                                             "status":  "PASS",
+                                             "evidence":  [
+                                                              "CURRENT_TIMELINE default",
+                                                              "technology gate",
+                                                              "permission gate",
+                                                              "approved vehicle"
+                                                          ],
+                                             "missing":  [
+
+                                                         ]
+                                         },
+                                         {
+                                             "gate_id":  "RG-08",
+                                             "title":  "FAMILY_RUNTIME",
+                                             "status":  "PASS",
+                                             "evidence":  [
+                                                              "all-participant consent",
+                                                              "coarse optional location",
+                                                              "revocation",
+                                                              "no kinship proof"
+                                                          ],
+                                             "missing":  [
+
+                                                         ]
+                                         },
+                                         {
+                                             "gate_id":  "RG-09",
+                                             "title":  "BLOODLINE_RUNTIME",
+                                             "status":  "PASS",
+                                             "evidence":  [
+                                                              "family_id",
+                                                              "bloodline_id",
+                                                              "dna_id",
+                                                              "generation",
+                                                              "Amendment 001 Guardian Separation Contract"
+                                                          ],
+                                             "missing":  [
+
+                                                         ]
+                                         },
+                                         {
+                                             "gate_id":  "RG-10",
+                                             "title":  "HOUSE_RUNTIME",
+                                             "status":  "PASS",
+                                             "evidence":  [
+                                                              "House ID",
+                                                              "owner and family separation",
+                                                              "energy",
+                                                              "food and water storage",
+                                                              "memory",
+                                                              "repair",
+                                                              "inheritance",
+                                                              "timeline"
+                                                          ],
+                                             "missing":  [
+
+                                                         ]
+                                         },
+                                         {
+                                             "gate_id":  "RG-11",
+                                             "title":  "TEMPLE_RUNTIME",
+                                             "status":  "PASS",
+                                             "evidence":  [
+                                                              "one-image one-temple approval rule",
+                                                              "Temple identity",
+                                                              "memory",
+                                                              "guardian",
+                                                              "energy",
+                                                              "timeline"
+                                                          ],
+                                             "missing":  [
+
+                                                         ]
+                                         },
+                                         {
+                                             "gate_id":  "RG-12",
+                                             "title":  "COMPANY_RUNTIME",
+                                             "status":  "PASS",
+                                             "evidence":  [
+                                                              "AI Organization",
+                                                              "organizational life",
+                                                              "employees",
+                                                              "finance boundary",
+                                                              "trademark safety",
+                                                              "P1 Option A versioned Company facet registry",
+                                                              "five domain-owned facets",
+                                                              "Life identity grants no authority"
+                                                          ],
+                                             "missing":  [
+
+                                                         ]
+                                         },
+                                         {
+                                             "gate_id":  "RG-13",
+                                             "title":  "NPC_RUNTIME",
+                                             "status":  "PASS",
+                                             "evidence":  [
+                                                              "NPC identity",
+                                                              "lifecycle",
+                                                              "Species rules",
+                                                              "Amendment 001 Compute Levels 0 through 6",
+                                                              "bounded budgets and degrade policy"
+                                                          ],
+                                             "missing":  [
+
+                                                         ]
+                                         },
+                                         {
+                                             "gate_id":  "RG-14",
+                                             "title":  "PROFESSION_RUNTIME",
+                                             "status":  "PASS",
+                                             "evidence":  [
+                                                              "extensible profession examples",
+                                                              "Citizen Runtime boundary",
+                                                              "capability and consent gates",
+                                                              "P1 Option A versioned core profession IDs",
+                                                              "governed Civilization extensions",
+                                                              "profession grants no authority"
+                                                          ],
+                                             "missing":  [
+
+                                                         ]
+                                         },
+                                         {
+                                             "gate_id":  "RG-15",
+                                             "title":  "CIVILIZATION_BOOTSTRAP",
+                                             "status":  "PASS",
+                                             "evidence":  [
+                                                              "viable pre-existing world",
+                                                              "core services",
+                                                              "capacity",
+                                                              "resource flows",
+                                                              "no spawn ownership transfer"
+                                                          ],
+                                             "missing":  [
+
+                                                         ]
+                                         },
+                                         {
+                                             "gate_id":  "RG-16",
+                                             "title":  "OFFLINE_RUNTIME",
+                                             "status":  "PASS",
+                                             "evidence":  [
+                                                              "Amendment 001 Offline Protection Contract",
+                                                              "care state escalation",
+                                                              "prohibited ordinary-absence outcomes",
+                                                              "return reconciliation"
+                                                          ],
+                                             "missing":  [
+
+                                                         ]
+                                         },
+                                         {
+                                             "gate_id":  "RG-17",
+                                             "title":  "LIFE_NOT_RIGHTS",
+                                             "status":  "PASS",
+                                             "evidence":  [
+                                                              "Life registration grants no rights",
+                                                              "intelligence tier grants no personhood",
+                                                              "domain authority remains separate"
+                                                          ],
+                                             "missing":  [
+
+                                                         ]
+                                         },
+                                         {
+                                             "gate_id":  "RG-18",
+                                             "title":  "PUBLIC_SOURCE_AUDIT",
+                                             "status":  "PASS",
+                                             "evidence":  [
+                                                              "source classification review artifact",
+                                                              "science-setting separation",
+                                                              "P1 Option A versioned normative classification candidate",
+                                                              "artifact ID",
+                                                              "version",
+                                                              "integrity hash pin"
+                                                          ],
+                                             "missing":  [
+
+                                                         ]
+                                         }
+                                     ]
+                       },
+    "life_activity_gates":  {
+                                "total":  5,
+                                "pass":  5,
+                                "conflicts":  0,
+                                "items":  [
+                                              {
+                                                  "id":  "ACT-001",
+                                                  "name":  "LIFE_ACTIVITY",
+                                                  "status":  "PASS"
+                                              },
+                                              {
+                                                  "id":  "ACT-002",
+                                                  "name":  "OFFLINE_ACTIVITY",
+                                                  "status":  "PASS"
+                                              },
+                                              {
+                                                  "id":  "ACT-003",
+                                                  "name":  "CULTIVATION",
+                                                  "status":  "PASS"
+                                              },
+                                              {
+                                                  "id":  "ACT-004",
+                                                  "name":  "TRAVEL",
+                                                  "status":  "PASS"
+                                              },
+                                              {
+                                                  "id":  "ACT-005",
+                                                  "name":  "DREAM",
+                                                  "status":  "PASS"
+                                              }
+                                          ]
+                            },
+    "p0_remaining":  0,
+    "p1_remaining":  0,
+    "clarifications_remaining":  0,
+    "missing_items":  [
+
+                      ],
+    "required_invariants":  {
+                                "dead_remains_terminal":  "PASS",
+                                "dream_remains_mind_sub_activity":  "PASS",
+                                "predecessor_remains_sealed":  "PASS",
+                                "life_os_owns_body_or_assets":  false,
+                                "profession_grants_authority":  false,
+                                "company_facet_grants_authority":  false,
+                                "reincarnation_new_life_birth_embodiment":  "PASS",
+                                "source_classification_versioned_and_pinned":  "PASS_CANDIDATE"
+                            },
+    "frozen_manifest":  {
+                            "members":  13,
+                            "version":  "LIFE-OS-V1.1",
+                            "revision":  "2026-07-23.1",
+                            "manifest_path":  "KGEN-KAIOS/life/life_os_architecture_baseline_v1_1.json",
+                            "pass":  13,
+                            "fail":  0,
+                            "status":  "PASS",
+                            "historical_v1_0":  {
+                                                      "status":  "PASS_AT_FROZEN_COMMIT",
+                                                      "members":  13,
+                                                      "pass":  13,
+                                                      "manifest_rewritten":  false
+                                                  },
+                            "files":  [
+                                          {
+                                              "path":  "KGEN-KAIOS/life/README.md",
+                                              "expected_sha256":  "877619910664c510e24a16b7622334591a848b75b9cdecac6de68bb59c7ebd60",
+                                              "actual_sha256":  "877619910664c510e24a16b7622334591a848b75b9cdecac6de68bb59c7ebd60",
+                                              "status":  "PASS"
+                                          },
+                                          {
+                                              "path":  "KGEN-KAIOS/life/LIFE_OPERATING_SYSTEM.md",
+                                              "expected_sha256":  "8cf21fbffc8865a5be5cf4dd79b8d7d877f11b481f76d08ba1af35ec69ea2846",
+                                              "actual_sha256":  "8cf21fbffc8865a5be5cf4dd79b8d7d877f11b481f76d08ba1af35ec69ea2846",
+                                              "status":  "PASS"
+                                          },
+                                          {
+                                              "path":  "KGEN-KAIOS/life/life_operating_system.json",
+                                              "expected_sha256":  "ec6010c1aa32eda036576d64bcea59d073a8ec713bd61f8a7289555da17c57dc",
+                                              "actual_sha256":  "ec6010c1aa32eda036576d64bcea59d073a8ec713bd61f8a7289555da17c57dc",
+                                              "status":  "PASS"
+                                          },
+                                          {
+                                              "path":  "KGEN-KAIOS/life/LIFE_STATE_MACHINE.md",
+                                              "expected_sha256":  "42d12d81cd5077fe8248f39f36fa7844b7043b5157eab554aadd0078d9415950",
+                                              "actual_sha256":  "42d12d81cd5077fe8248f39f36fa7844b7043b5157eab554aadd0078d9415950",
+                                              "status":  "PASS"
+                                          },
+                                          {
+                                              "path":  "KGEN-KAIOS/life/LIFE_API.md",
+                                              "expected_sha256":  "77047ec71717a085fe4607407479e5f75b65e8adcd9028977b52391475b2ce69",
+                                              "actual_sha256":  "77047ec71717a085fe4607407479e5f75b65e8adcd9028977b52391475b2ce69",
+                                              "status":  "PASS"
+                                          },
+                                          {
+                                              "path":  "KGEN-KAIOS/life/LIFE_EVENT_CONTRACT.md",
+                                              "expected_sha256":  "c4e0069f72b31c1832be6225b78c75b4b09bca490c8bd3b8609bd4a454a0fb88",
+                                              "actual_sha256":  "c4e0069f72b31c1832be6225b78c75b4b09bca490c8bd3b8609bd4a454a0fb88",
+                                              "status":  "PASS"
+                                          },
+                                          {
+                                              "path":  "KGEN-KAIOS/life/LIFE_OS_ARCHITECTURE_REVIEW.md",
+                                              "expected_sha256":  "eb627d946f7c8a948534543e9e5f841bd6cf8610ff9e208fd9c87f7c0a563a44",
+                                              "actual_sha256":  "eb627d946f7c8a948534543e9e5f841bd6cf8610ff9e208fd9c87f7c0a563a44",
+                                              "status":  "PASS"
+                                          },
+                                          {
+                                              "path":  "KGEN-KAIOS/life/life_os_architecture_review.json",
+                                              "expected_sha256":  "3c165cf23922aee655f8f991bcfee8a3baf9407bcab73384f15a4cb042f1630b",
+                                              "actual_sha256":  "3c165cf23922aee655f8f991bcfee8a3baf9407bcab73384f15a4cb042f1630b",
+                                              "status":  "PASS"
+                                          },
+                                          {
+                                              "path":  "KGEN-KAIOS/life/LIFE_OS_ARCHITECTURE_RESOLUTION.md",
+                                              "expected_sha256":  "f7705b789081431ebdc995b74d2e10c08c0eaca1d1ba30edd2de392e365f75f8",
+                                              "actual_sha256":  "f7705b789081431ebdc995b74d2e10c08c0eaca1d1ba30edd2de392e365f75f8",
+                                              "status":  "PASS"
+                                          },
+                                          {
+                                              "path":  "KGEN-KAIOS/life/life_os_architecture_resolution.json",
+                                              "expected_sha256":  "0d8c8b64349906ccc812862d62439a57add65d6c90907adb0ad6effb6f175b4e",
+                                              "actual_sha256":  "0d8c8b64349906ccc812862d62439a57add65d6c90907adb0ad6effb6f175b4e",
+                                              "status":  "PASS"
+                                          },
+                                          {
+                                              "path":  "KGEN-KAIOS/life/ADR/ADR-LIFE-001-SPECIES-SCOPED-LIFE-OS.md",
+                                              "expected_sha256":  "abad0e83189bb7c7dac6d843d1e3f0a612934c863005cb3dfaa128b72e2ce291",
+                                              "actual_sha256":  "abad0e83189bb7c7dac6d843d1e3f0a612934c863005cb3dfaa128b72e2ce291",
+                                              "status":  "PASS"
+                                          },
+                                          {
+                                              "path":  "KGEN-KAIOS/life/LIFE_OS_ARCHITECTURE_BASELINE.md",
+                                              "expected_sha256":  "fef4253c5557a9fec73c4ca334cb3493d6ca4e6306743037f8c0ed00355e9bdc",
+                                              "actual_sha256":  "fef4253c5557a9fec73c4ca334cb3493d6ca4e6306743037f8c0ed00355e9bdc",
+                                              "status":  "PASS"
+                                          },
+                                          {
+                                              "path":  "KGEN-KAIOS/life/life_os_architecture_evolution_log.jsonl",
+                                              "expected_sha256":  "45c20e77b73ec7af567d1abe6a0699dc40ef6615e01d30ac0c8ee5488cdf55ef",
+                                              "actual_sha256":  "45c20e77b73ec7af567d1abe6a0699dc40ef6615e01d30ac0c8ee5488cdf55ef",
+                                              "status":  "PASS"
+                                          }
+                                      ]
+                        },
+    "frz_hash_001_resolution":  {
+                                     "classification":  "LEGITIMATE_POST_FREEZE_DOCUMENT_UPDATE",
+                                     "resolution":  "NEW_BASELINE_VERSION_CREATED",
+                                     "historical_baseline_preserved":  true,
+                                     "old_manifest_rewritten":  false,
+                                     "semantic_invariant_change":  false,
+                                     "runtime_authority_change":  false,
+                                     "freeze_authority_change":  false
+                                 },
+    "freeze_readiness":  "READY_FOR_HUMAN_FREEZE_DECISION",
+    "freeze_blockers":  [
+                            "SEPARATE_EXPLICIT_HUMAN_FREEZE_DECISION_REQUIRED"
+                        ],
+    "protected_boundaries":  {
+                                 "frozen_files_modified":  false,
+                                 "runtime_current_modified":  false,
+                                 "universe_map_current_modified":  false,
+                                 "genesis_modified":  false,
+                                 "token_modified":  false,
+                                 "production_runtime_enabled":  false,
+                                 "real_kgen_enabled":  false
+                             }
+}
