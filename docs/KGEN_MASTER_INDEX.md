@@ -747,3 +747,6 @@ wallets, real KGEN, on-chain transfer or K11520 settlement.
 | `KAIOS_CANONICAL_LIFE_VALIDATION_PLAN.md` | Contract, regression and repository gates. |
 | `KAIOS_CANONICAL_LIFE_CURSOR_DISPATCH_PLAN.md` | Held future candidate-migration plan; no dispatch. |
 | `KGEN-KAIOS/world-viewer/tests/canonical_life_spec.test.mjs` | Executable specification-contract tests. |
+| `KGEN-KAIOS/governance/autopilot/recovery_points/RECOVERY-KAIOS-PR66-CANONICAL-LIFE-SPEC.md` | Post-merge recovery point. |
+| `KAIOS_PR66_CANONICAL_LIFE_SPEC_CLOSEOUT.md` | Post-merge review, merge and validation evidence. |
+| `KGEN-KAIOS/governance/autopilot/company_status/COMPANY_STATUS_2026-08-01_PR66_CANONICAL_LIFE_SPEC.md` | Current completed-workline status. |
