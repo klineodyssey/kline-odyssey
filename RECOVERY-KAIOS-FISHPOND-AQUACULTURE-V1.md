@@ -8,6 +8,18 @@ Specification main: `1e4eeab9c2c8851fcd83306ccb83a78e0148c3a6`
 
 Runtime branch: `codex/kaios-fishpond-aquaculture-runtime-v1`
 
+Runtime PR: `#81`
+
+Runtime merge: `74da556366445ce845ccae8a256e33d62868fbd2`
+
+Production-QA repair PR: `#82`
+
+Production-QA repair merge: `64f92eb91deebf83fcdf56f2f1d641b262f2a1b8`
+
+Pages runs: `30719231518 / 30719949668` (`SUCCESS`)
+
+Production verification: `HTTP 200 / 189 of 189 Product QA / 4 of 4 responsive viewports`
+
 ## Scope
 
 - Runtime: `KGEN-KAIOS/world-viewer/aquaculture/`
@@ -19,7 +31,7 @@ Runtime branch: `codex/kaios-fishpond-aquaculture-runtime-v1`
 
 ## Rollback
 
-Revert the Runtime merge commit after identifying it from PR history. This
+Revert Runtime merge commit `74da556366445ce845ccae8a256e33d62868fbd2`. This
 removes the orchestrator, dedicated Viewer, static API projection, navigation
 entries, tests and reports without changing Canonical Life, Organism Schema V2,
 Ecology Runtime, Causal Runtime, Constitution sources, Wallet, KGEN or CURRENT.
