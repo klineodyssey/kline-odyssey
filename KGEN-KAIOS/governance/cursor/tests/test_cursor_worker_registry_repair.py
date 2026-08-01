@@ -77,6 +77,10 @@ class CursorWorkerRegistryRepairTests(unittest.TestCase):
 
     def test_foundational_life_creator_scope(self):
         self.assertEqual(self.cursor["worker_class"], "FOUNDATIONAL_LIFE_CREATOR")
+        self.assertEqual(
+            self.cursor["worker_classes"],
+            ["FOUNDATIONAL_LIFE_CREATOR", "LIFE_RESEARCH_ANALYST"],
+        )
         self.assertEqual(self.cursor["permission"], "worker_code_limited")
         self.assertTrue(
             {"GRASS", "TREE", "FISH", "SHRIMP", "MOUNTAIN", "SOIL", "WATER", "RIVER"}
@@ -97,6 +101,26 @@ class CursorWorkerRegistryRepairTests(unittest.TestCase):
         )
         self.assertFalse(self.cursor["can_push_main"])
         self.assertEqual(self.cursor["reviewer"], "codex-gm-01")
+
+    def test_ecology_candidate_dispatch_is_bounded(self):
+        self.assertEqual(
+            self.cursor["current_task"], "KAIOS-ECOLOGY-V1-CANDIDATE-DATA-001"
+        )
+        self.assertEqual(
+            self.cursor["current_branch"],
+            "cursor-handoff/KAIOS-ECOLOGY-V1-CANDIDATE-DATA-001",
+        )
+        self.assertTrue(
+            {
+                "FOUNDATIONAL_FOOD_RELATIONSHIP_DATASET",
+                "HABITAT_COMPATIBILITY_MATRIX",
+                "SPECIES_ENVIRONMENTAL_THRESHOLD_DATASET",
+                "POPULATION_SCENARIO_FIXTURE",
+                "ECOSYSTEM_VIEWER_CARD_DATA",
+                "CANDIDATE_ECOLOGY_TEST",
+            }
+            <= set(self.cursor["allowed_work"])
+        )
 
 
 if __name__ == "__main__":

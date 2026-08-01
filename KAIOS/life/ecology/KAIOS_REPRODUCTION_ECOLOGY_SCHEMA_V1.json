@@ -1,0 +1,136 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://klineodyssey.github.io/kline-odyssey/KAIOS/life/ecology/KAIOS_REPRODUCTION_ECOLOGY_SCHEMA_V1.json",
+  "title": "KAIOS Reproduction and Ecology Runtime V1 State",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "runtime", "mode", "seed", "simulation_time", "status", "habitats", "populations", "resources", "events", "boundaries"],
+  "properties": {
+    "schema_version": { "const": "1.0.0" },
+    "runtime": { "const": "KAIOS_REPRODUCTION_ECOLOGY_RUNTIME_V1" },
+    "mode": { "const": "LOCAL_DETERMINISTIC_SIMULATION" },
+    "seed": { "type": "string", "minLength": 1, "maxLength": 128 },
+    "simulation_time": { "type": "integer", "minimum": 0, "maximum": 10000 },
+    "status": { "enum": ["PAUSED", "RUNNING", "STOPPED"] },
+    "habitats": { "type": "array", "maxItems": 7, "items": { "$ref": "#/$defs/habitat" } },
+    "populations": { "type": "array", "maxItems": 8, "items": { "$ref": "#/$defs/population" } },
+    "resources": { "$ref": "#/$defs/resources" },
+    "events": { "type": "array", "maxItems": 1000, "items": { "$ref": "#/$defs/event" } },
+    "boundaries": { "$ref": "#/$defs/boundaries" }
+  },
+  "$defs": {
+    "habitatType": { "enum": ["GRASSLAND", "FOREST", "FISHPOND", "RIVER_HABITAT", "WETLAND", "SOIL_HABITAT", "MOUNTAIN_WATERSHED"] },
+    "populationStatus": { "enum": ["STABLE", "GROWING", "DECLINING", "OVER_CAPACITY", "RESOURCE_STRESSED", "DISEASE_STRESSED", "POLLUTION_STRESSED", "COLLAPSING", "EXTINCT_LOCAL", "RECOVERING"] },
+    "reproductionMode": { "enum": ["SEED_PROPAGATION", "VEGETATIVE_PROPAGATION", "SEXUAL_REPRODUCTION", "SPAWNING", "LARVAL_DEVELOPMENT", "NATURAL_FORMATION_CHANGE", "NO_REPRODUCTION"] },
+    "habitat": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "type", "location", "simulation_time", "status", "source", "authority", "simulation_only", "history", "previous_state_hash", "next_state_hash", "area_m2", "water_l", "temperature_c", "oxygen_mg_l", "salinity_ppt", "pollution", "shelter", "season", "restoration_state"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "type": { "$ref": "#/$defs/habitatType" },
+        "location": { "type": "string", "minLength": 1 },
+        "simulation_time": { "type": "integer", "minimum": 0 },
+        "status": { "type": "string", "minLength": 1 },
+        "source": { "type": "string", "minLength": 1 },
+        "authority": { "const": "SIMULATION_ONLY" },
+        "simulation_only": { "const": true },
+        "history": { "type": "array", "maxItems": 1000 },
+        "previous_state_hash": { "type": "string" },
+        "next_state_hash": { "type": "string" },
+        "area_m2": { "type": "number", "exclusiveMinimum": 0 },
+        "water_l": { "type": "number", "minimum": 0 },
+        "temperature_c": { "type": "number", "minimum": -80, "maximum": 80 },
+        "soil_fertility": { "type": "number", "minimum": 0, "maximum": 1 },
+        "oxygen_mg_l": { "type": "number", "minimum": 0, "maximum": 30 },
+        "salinity_ppt": { "type": "number", "minimum": 0, "maximum": 60 },
+        "pollution": { "type": "number", "minimum": 0, "maximum": 1 },
+        "shelter": { "type": "number", "minimum": 0, "maximum": 1 },
+        "season": { "enum": ["SPRING", "SUMMER", "AUTUMN", "WINTER"] },
+        "restoration_state": { "enum": ["NONE", "PLANNED", "ACTIVE", "RECOVERING", "RESTORED"] }
+      }
+    },
+    "population": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["population_id", "species_id", "habitat_id", "count", "age_distribution", "health_distribution", "energy_reserve", "food_requirement", "water_requirement", "space_requirement", "birth_rate", "death_rate", "migration_rate", "disease_rate", "predation_rate", "carrying_capacity", "genetic_diversity_proxy", "generation", "population_status", "reproduction_modes", "cooldown_ticks"],
+      "properties": {
+        "population_id": { "type": "string", "minLength": 1 },
+        "species_id": { "enum": ["SPECIES-KAIOS-FOUNDATIONAL-GRASS", "SPECIES-KAIOS-FOUNDATIONAL-TREE", "SPECIES-KAIOS-FOUNDATIONAL-FISH", "SPECIES-KAIOS-FOUNDATIONAL-SHRIMP", "SPECIES-KAIOS-FOUNDATIONAL-MOUNTAIN", "SPECIES-KAIOS-FOUNDATIONAL-SOIL", "SPECIES-KAIOS-FOUNDATIONAL-WATER", "SPECIES-KAIOS-FOUNDATIONAL-RIVER"] },
+        "habitat_id": { "type": "string", "minLength": 1 },
+        "count": { "type": "integer", "minimum": 0, "maximum": 500 },
+        "age_distribution": { "type": "object", "additionalProperties": { "type": "integer", "minimum": 0 } },
+        "sex_distribution": { "type": "object", "additionalProperties": { "type": "integer", "minimum": 0 } },
+        "health_distribution": { "type": "object", "additionalProperties": { "type": "integer", "minimum": 0 } },
+        "energy_reserve": { "type": "number", "minimum": 0 },
+        "food_requirement": { "type": "number", "minimum": 0 },
+        "water_requirement": { "type": "number", "minimum": 0 },
+        "space_requirement": { "type": "number", "minimum": 0 },
+        "birth_rate": { "type": "number", "minimum": 0, "maximum": 1 },
+        "death_rate": { "type": "number", "minimum": 0, "maximum": 1 },
+        "migration_rate": { "type": "number", "minimum": 0, "maximum": 1 },
+        "disease_rate": { "type": "number", "minimum": 0, "maximum": 1 },
+        "predation_rate": { "type": "number", "minimum": 0, "maximum": 1 },
+        "carrying_capacity": { "type": "integer", "minimum": 0, "maximum": 500 },
+        "genetic_diversity_proxy": { "type": "number", "minimum": 0, "maximum": 1 },
+        "generation": { "type": "integer", "minimum": 0, "maximum": 100 },
+        "population_status": { "$ref": "#/$defs/populationStatus" },
+        "reproduction_modes": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "$ref": "#/$defs/reproductionMode" } },
+        "cooldown_ticks": { "type": "integer", "minimum": 0, "maximum": 1000 }
+      }
+    },
+    "resources": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["water_l", "biomass_kg", "nutrients_kg", "dead_biomass_kg", "decomposition_kg", "aquatic_primary_food_kg", "detritus_kg", "energy_proxy"],
+      "properties": {
+        "water_l": { "type": "number", "minimum": 0 },
+        "biomass_kg": { "type": "number", "minimum": 0 },
+        "nutrients_kg": { "type": "number", "minimum": 0 },
+        "dead_biomass_kg": { "type": "number", "minimum": 0 },
+        "decomposition_kg": { "type": "number", "minimum": 0 },
+        "aquatic_primary_food_kg": { "type": "number", "minimum": 0 },
+        "detritus_kg": { "type": "number", "minimum": 0 },
+        "energy_proxy": { "type": "number", "minimum": 0 }
+      }
+    },
+    "event": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["event_id", "type", "location", "simulation_time", "status", "source", "authority", "simulation_only", "history", "previous_state_hash", "next_state_hash", "inputs", "outputs", "resource_delta", "reason"],
+      "properties": {
+        "event_id": { "type": "string", "minLength": 1 },
+        "type": { "enum": ["REPRODUCTION_EVENT", "BIRTH_EVENT", "DEATH_EVENT", "MIGRATION_EVENT", "PREDATION_EVENT", "COMPETITION_EVENT", "DISEASE_EVENT", "POLLUTION_EVENT", "RESTORATION_EVENT", "SEASON_EVENT", "GROWTH_EVENT", "DECOMPOSITION_EVENT", "WATER_CYCLE_EVENT", "SOIL_CYCLE_EVENT"] },
+        "location": { "type": "string" },
+        "simulation_time": { "type": "integer", "minimum": 0 },
+        "status": { "type": "string" },
+        "source": { "type": "string" },
+        "authority": { "const": "SIMULATION_ONLY" },
+        "simulation_only": { "const": true },
+        "history": { "type": "array" },
+        "previous_state_hash": { "type": "string" },
+        "next_state_hash": { "type": "string" },
+        "inputs": { "type": "object" },
+        "outputs": { "type": "object" },
+        "resource_delta": { "type": "object" },
+        "reason": { "type": "string" }
+      }
+    },
+    "boundaries": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["simulation_only", "wallet", "real_kgen", "onchain_transfer", "real_bioengineering", "production_authority", "automatic_new_species", "uncontrolled_reproduction", "public_mutation_endpoints"],
+      "properties": {
+        "simulation_only": { "const": true },
+        "wallet": { "const": "NONE" },
+        "real_kgen": { "const": "NO_REAL_KGEN" },
+        "onchain_transfer": { "const": false },
+        "real_bioengineering": { "const": false },
+        "production_authority": { "const": false },
+        "automatic_new_species": { "const": false },
+        "uncontrolled_reproduction": { "const": false },
+        "public_mutation_endpoints": { "const": false }
+      }
+    }
+  }
+}
