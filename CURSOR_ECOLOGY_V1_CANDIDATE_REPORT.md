@@ -90,6 +90,8 @@ The pre-existing `KAIOS/life/tests/validate_foundational_life_candidates.py` ass
 
 ## FINAL REPORT
 
+- Codex review decision: `APPROVED_WITH_REPAIRS`
+- P1 repair: applied hard total population cap `500`; all habitat and species capacities are `<=500`; biological baseline total is `476`; candidate tests enforce both limits
 - Result: `PASS_WITH_OUT_OF_SCOPE_INTEGRATION_NOTE`
 - Output status: `CANDIDATE_ONLY / PENDING_CODEX_REVIEW`
 - Files added: 7
@@ -107,6 +109,7 @@ The pre-existing `KAIOS/life/tests/validate_foundational_life_candidates.py` ass
 - No terrain/soil/water/river reproduction: `PASS`
 - Abstract resource boundary: `PASS (3/3)`
 - Finite population limits: `PASS`
+- Codex P1 population-cap repair: `PASS`
 - UTF-8: `PASS`
 - BOM scan: `PASS`
 - Secret scan: `PASS`

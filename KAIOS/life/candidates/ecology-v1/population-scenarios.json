@@ -8,17 +8,18 @@
   "model_label": "SIMULATION_APPROXIMATION",
   "deterministic_seed": "KAIOS-ECOLOGY-V1-CANDIDATE-SCENARIOS-001",
   "global_limits": {
-    "maximum_population_records": 1000,
+    "maximum_population_records": 500,
+    "maximum_total_population": 500,
     "maximum_generation": 5,
     "birth_cooldown_ticks": 12,
     "automatic_new_species": false,
     "recursive_agent_creation": false
   },
   "baseline_populations": [
-    {"population_id": "POP-GRASS-001", "species_id": "SPECIES-KAIOS-FOUNDATIONAL-GRASS", "habitat_id": "HABITAT-GRASSLAND-V1", "count": 240, "carrying_capacity": 800, "reproduction_mode": "SEED_PROPAGATION", "generation": 0},
-    {"population_id": "POP-TREE-001", "species_id": "SPECIES-KAIOS-FOUNDATIONAL-TREE", "habitat_id": "HABITAT-FOREST-V1", "count": 36, "carrying_capacity": 600, "reproduction_mode": "SEED_PROPAGATION", "generation": 0},
-    {"population_id": "POP-FISH-001", "species_id": "SPECIES-KAIOS-FOUNDATIONAL-FISH", "habitat_id": "HABITAT-RIVER-V1", "count": 120, "carrying_capacity": 900, "reproduction_mode": "SPAWNING", "generation": 0},
-    {"population_id": "POP-SHRIMP-001", "species_id": "SPECIES-KAIOS-FOUNDATIONAL-SHRIMP", "habitat_id": "HABITAT-FISHPOND-V1", "count": 1800, "carrying_capacity": 2500, "reproduction_mode": "LARVAL_DEVELOPMENT", "generation": 0},
+    {"population_id": "POP-GRASS-001", "species_id": "SPECIES-KAIOS-FOUNDATIONAL-GRASS", "habitat_id": "HABITAT-GRASSLAND-V1", "count": 240, "carrying_capacity": 500, "reproduction_mode": "SEED_PROPAGATION", "generation": 0},
+    {"population_id": "POP-TREE-001", "species_id": "SPECIES-KAIOS-FOUNDATIONAL-TREE", "habitat_id": "HABITAT-FOREST-V1", "count": 36, "carrying_capacity": 500, "reproduction_mode": "SEED_PROPAGATION", "generation": 0},
+    {"population_id": "POP-FISH-001", "species_id": "SPECIES-KAIOS-FOUNDATIONAL-FISH", "habitat_id": "HABITAT-RIVER-V1", "count": 120, "carrying_capacity": 500, "reproduction_mode": "SPAWNING", "generation": 0},
+    {"population_id": "POP-SHRIMP-001", "species_id": "SPECIES-KAIOS-FOUNDATIONAL-SHRIMP", "habitat_id": "HABITAT-FISHPOND-V1", "count": 80, "carrying_capacity": 100, "reproduction_mode": "LARVAL_DEVELOPMENT", "generation": 0},
     {"population_id": "POP-MOUNTAIN-001", "species_id": "SPECIES-KAIOS-FOUNDATIONAL-MOUNTAIN", "habitat_id": "HABITAT-MOUNTAIN-WATERSHED-V1", "count": 1, "carrying_capacity": 1, "reproduction_mode": "NO_REPRODUCTION", "population_semantics": "FORMATION_ENTITY_COUNT"},
     {"population_id": "POP-SOIL-001", "species_id": "SPECIES-KAIOS-FOUNDATIONAL-SOIL", "habitat_id": "HABITAT-SOIL-V1", "count": 1, "carrying_capacity": 1, "reproduction_mode": "NO_REPRODUCTION", "population_semantics": "FORMATION_ENTITY_COUNT"},
     {"population_id": "POP-WATER-001", "species_id": "SPECIES-KAIOS-FOUNDATIONAL-WATER", "habitat_id": "HABITAT-RIVER-V1", "count": 1, "carrying_capacity": 1, "reproduction_mode": "NO_REPRODUCTION", "population_semantics": "BOUNDED_RESOURCE_BODY_COUNT"},
@@ -60,7 +61,7 @@
       "name": "Finite habitat capacity pressure",
       "duration_ticks": 20,
       "environment_changes": [
-        {"target": "SPECIES-KAIOS-FOUNDATIONAL-SHRIMP", "field": "count", "operation": "SET", "value": 2600}
+        {"target": "SPECIES-KAIOS-FOUNDATIONAL-SHRIMP", "field": "count", "operation": "SET", "value": 120}
       ],
       "expected_population_states": ["OVER_CAPACITY", "RESOURCE_STRESSED"],
       "expected_events": ["REPRODUCTION_BLOCKED", "COMPETITION_EVENT"]

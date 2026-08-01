@@ -13,7 +13,7 @@
       "area_m2": 10000,
       "population_capacity_model": "SIMULATION_APPROXIMATION",
       "species": [
-        {"species_id": "SPECIES-KAIOS-FOUNDATIONAL-GRASS", "compatibility": "SUITABLE", "maximum_count": 800},
+        {"species_id": "SPECIES-KAIOS-FOUNDATIONAL-GRASS", "compatibility": "SUITABLE", "maximum_count": 500},
         {"species_id": "SPECIES-KAIOS-FOUNDATIONAL-TREE", "compatibility": "CONDITIONAL", "maximum_count": 40},
         {"species_id": "SPECIES-KAIOS-FOUNDATIONAL-SOIL", "compatibility": "REQUIRED", "maximum_count": 1},
         {"species_id": "SPECIES-KAIOS-FOUNDATIONAL-WATER", "compatibility": "REQUIRED", "maximum_count": 1}
@@ -25,7 +25,7 @@
       "area_m2": 20000,
       "population_capacity_model": "SIMULATION_APPROXIMATION",
       "species": [
-        {"species_id": "SPECIES-KAIOS-FOUNDATIONAL-TREE", "compatibility": "SUITABLE", "maximum_count": 600},
+        {"species_id": "SPECIES-KAIOS-FOUNDATIONAL-TREE", "compatibility": "SUITABLE", "maximum_count": 500},
         {"species_id": "SPECIES-KAIOS-FOUNDATIONAL-GRASS", "compatibility": "CONDITIONAL", "maximum_count": 500},
         {"species_id": "SPECIES-KAIOS-FOUNDATIONAL-SOIL", "compatibility": "REQUIRED", "maximum_count": 1},
         {"species_id": "SPECIES-KAIOS-FOUNDATIONAL-WATER", "compatibility": "REQUIRED", "maximum_count": 1}
@@ -40,7 +40,7 @@
       "population_capacity_model": "SIMULATION_APPROXIMATION",
       "species": [
         {"species_id": "SPECIES-KAIOS-FOUNDATIONAL-FISH", "compatibility": "SUITABLE", "maximum_count": 500},
-        {"species_id": "SPECIES-KAIOS-FOUNDATIONAL-SHRIMP", "compatibility": "CONDITIONAL", "maximum_count": 2500},
+        {"species_id": "SPECIES-KAIOS-FOUNDATIONAL-SHRIMP", "compatibility": "CONDITIONAL", "maximum_count": 500},
         {"species_id": "SPECIES-KAIOS-FOUNDATIONAL-WATER", "compatibility": "REQUIRED", "maximum_count": 1},
         {"species_id": "SPECIES-KAIOS-FOUNDATIONAL-SOIL", "compatibility": "STRUCTURAL_SUPPORT", "maximum_count": 1}
       ]
@@ -53,8 +53,8 @@
       "species": [
         {"species_id": "SPECIES-KAIOS-FOUNDATIONAL-RIVER", "compatibility": "REQUIRED", "maximum_count": 1},
         {"species_id": "SPECIES-KAIOS-FOUNDATIONAL-WATER", "compatibility": "REQUIRED", "maximum_count": 1},
-        {"species_id": "SPECIES-KAIOS-FOUNDATIONAL-FISH", "compatibility": "SUITABLE", "maximum_count": 900},
-        {"species_id": "SPECIES-KAIOS-FOUNDATIONAL-SHRIMP", "compatibility": "CONDITIONAL", "maximum_count": 1200}
+        {"species_id": "SPECIES-KAIOS-FOUNDATIONAL-FISH", "compatibility": "SUITABLE", "maximum_count": 500},
+        {"species_id": "SPECIES-KAIOS-FOUNDATIONAL-SHRIMP", "compatibility": "CONDITIONAL", "maximum_count": 500}
       ]
     },
     {
@@ -63,8 +63,8 @@
       "area_m2": 12000,
       "population_capacity_model": "SIMULATION_APPROXIMATION",
       "species": [
-        {"species_id": "SPECIES-KAIOS-FOUNDATIONAL-GRASS", "compatibility": "CONDITIONAL", "maximum_count": 600},
-        {"species_id": "SPECIES-KAIOS-FOUNDATIONAL-SHRIMP", "compatibility": "CONDITIONAL", "maximum_count": 800},
+        {"species_id": "SPECIES-KAIOS-FOUNDATIONAL-GRASS", "compatibility": "CONDITIONAL", "maximum_count": 500},
+        {"species_id": "SPECIES-KAIOS-FOUNDATIONAL-SHRIMP", "compatibility": "CONDITIONAL", "maximum_count": 500},
         {"species_id": "SPECIES-KAIOS-FOUNDATIONAL-WATER", "compatibility": "REQUIRED", "maximum_count": 1},
         {"species_id": "SPECIES-KAIOS-FOUNDATIONAL-SOIL", "compatibility": "REQUIRED", "maximum_count": 1}
       ]

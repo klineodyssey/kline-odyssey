@@ -28,6 +28,7 @@ const ABSTRACT_RESOURCES = [
   "MICROBIAL_DECOMPOSITION_PROXY"
 ];
 const NON_REPRODUCTIVE = new Set(SPECIES_IDS.slice(4));
+const MAXIMUM_TOTAL_POPULATION = 500;
 
 async function load(name) {
   const raw = await readFile(path.join(DATA_DIR, name));
@@ -76,6 +77,7 @@ for (const habitat of habitats.habitats) {
   for (const entry of habitat.species) {
     assert.ok(SPECIES_IDS.includes(entry.species_id), `noncanonical species: ${entry.species_id}`);
     assert.ok(Number.isInteger(entry.maximum_count) && entry.maximum_count > 0);
+    assert.ok(entry.maximum_count <= MAXIMUM_TOTAL_POPULATION, `${habitat.habitat_id}: capacity exceeds hard cap`);
     habitatSpecies.add(entry.species_id);
   }
 }
@@ -98,13 +100,21 @@ for (const speciesId of NON_REPRODUCTIVE) {
 assert.equal(scenarios.model_label, "SIMULATION_APPROXIMATION");
 assert.ok(Number.isInteger(scenarios.global_limits.maximum_generation));
 assert.ok(scenarios.global_limits.maximum_generation > 0 && scenarios.global_limits.maximum_generation <= 5);
+assert.equal(scenarios.global_limits.maximum_population_records, MAXIMUM_TOTAL_POPULATION);
+assert.equal(scenarios.global_limits.maximum_total_population, MAXIMUM_TOTAL_POPULATION);
 assert.equal(scenarios.global_limits.automatic_new_species, false);
 assert.deepEqual(scenarios.baseline_populations.map(({ species_id }) => species_id), SPECIES_IDS);
 for (const population of scenarios.baseline_populations) {
   assert.ok(Number.isInteger(population.count) && population.count >= 0);
   assert.ok(Number.isInteger(population.carrying_capacity) && population.carrying_capacity > 0);
+  assert.ok(population.count <= MAXIMUM_TOTAL_POPULATION, `${population.population_id}: count exceeds hard cap`);
+  assert.ok(population.carrying_capacity <= MAXIMUM_TOTAL_POPULATION, `${population.population_id}: capacity exceeds hard cap`);
   if (NON_REPRODUCTIVE.has(population.species_id)) assert.equal(population.reproduction_mode, "NO_REPRODUCTION");
 }
+const biologicalBaselineTotal = scenarios.baseline_populations
+  .filter(({ species_id }) => !NON_REPRODUCTIVE.has(species_id))
+  .reduce((total, { count }) => total + count, 0);
+assert.ok(biologicalBaselineTotal <= MAXIMUM_TOTAL_POPULATION, `biological baseline ${biologicalBaselineTotal} exceeds hard cap`);
 assert.deepEqual(scenarios.scenarios.map(({ scenario_id }) => scenario_id), [
   "SCENARIO-BASELINE-STABLE",
   "SCENARIO-DROUGHT",
@@ -113,6 +123,13 @@ assert.deepEqual(scenarios.scenarios.map(({ scenario_id }) => scenario_id), [
   "SCENARIO-RESTORATION"
 ]);
 assert.equal(scenarios.scenarios.every(({ duration_ticks }) => Number.isInteger(duration_ticks) && duration_ticks > 0), true);
+for (const scenario of scenarios.scenarios) {
+  for (const change of scenario.environment_changes) {
+    if (change.field === "count" && Object.hasOwn(change, "value")) {
+      assert.ok(change.value <= MAXIMUM_TOTAL_POPULATION, `${scenario.scenario_id}: fixture count exceeds hard cap`);
+    }
+  }
+}
 
 assert.equal(viewer.viewer_mode, "READ_ONLY_CANDIDATE_PREVIEW");
 assert.deepEqual(viewer.cards.map(({ species_id }) => species_id), SPECIES_IDS);
