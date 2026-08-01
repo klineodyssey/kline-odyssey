@@ -1325,11 +1325,16 @@ def run_proposal_permissions(browser: Browser, args: argparse.Namespace, gate: G
                 open_parcel_menu_with_mouse(page, starter)
 
         static_land_use = page.evaluate(
-            """async ({url, id}) => {
+            """async ({id}) => {
+              const app = [...document.scripts].find(script =>
+                script.src.includes("/KGEN-KAIOS/world-viewer/app.js")
+              );
+              if (!app) throw new Error("Canonical World Viewer app script is missing");
+              const url = new URL("./data/synthetic-world.json", app.src);
               const data = await fetch(url, {cache: "no-store"}).then(response => response.json());
               return data.parcels.find(parcel => parcel.id === id)?.land_use ?? "UNKNOWN";
             }""",
-            {"url": "./data/synthetic-world.json", "id": starter["id"]},
+            {"id": starter["id"]},
         )
         gate.expect(
             "proposal.all-eight-local-only",
@@ -1814,11 +1819,16 @@ def run_digital_earth_alpha(browser: Browser, args: argparse.Namespace, gate: Ga
         start_mock_session(page, with_location=False)
         page.locator("#proposal-bar").wait_for(state="visible")
         canonical_use = page.evaluate(
-            """async ({url, id}) => {
+            """async ({id}) => {
+              const app = [...document.scripts].find(script =>
+                script.src.includes("/KGEN-KAIOS/world-viewer/app.js")
+              );
+              if (!app) throw new Error("Canonical World Viewer app script is missing");
+              const url = new URL("./data/synthetic-world.json", app.src);
               const data = await fetch(url, {cache: "no-store"}).then(response => response.json());
               return data.parcels.find(parcel => parcel.id === id)?.land_use ?? "UNKNOWN";
             }""",
-            {"url": "./data/synthetic-world.json", "id": starter["id"]},
+            {"id": starter["id"]},
         )
         gate.expect(
             "digital-earth.reload-recovery",
