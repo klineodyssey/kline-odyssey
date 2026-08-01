@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="color-scheme" content="dark">
+  <meta name="theme-color" content="#101411">
+  <meta name="description" content="Run the eight KAIOS foundational life candidates in a bounded deterministic local simulation.">
+  <link rel="icon" href="data:,">
+  <link rel="canonical" href="https://klineodyssey.github.io/kline-odyssey/world-viewer/life-runtime/">
+  <title>KAIOS Life Runtime V1</title>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="../" aria-label="Return to KAIOS World Viewer">
+      <span class="brand-mark" aria-hidden="true">K</span>
+      <span><strong>KAIOS Life Runtime V1</strong><small>Foundational life simulation</small></span>
+    </a>
+    <nav aria-label="Runtime navigation">
+      <a href="../">World Viewer</a>
+      <a href="../k280/">K280</a>
+      <a href="../../api/kaios/life-runtime-v1/">Public Data</a>
+    </nav>
+  </header>
+  <main>
+    <section class="runtime-heading" aria-labelledby="runtime-title">
+      <div><span class="eyebrow">LOCAL_DETERMINISTIC_SIMULATION</span><h1 id="runtime-title">Eight lives. One causal clock.</h1><p>Growth, formation, energy, water balance, environmental pressure, health, integrity and event history remain bounded inside this browser.</p></div>
+      <div class="boundary-list" aria-label="Authority boundaries"><span>SIMULATION_ONLY</span><span>NO_REAL_KGEN</span><span>NO_WALLET</span><span>NO_PRODUCTION_AUTHORITY</span></div>
+    </section>
+    <section class="toolbar" aria-label="Simulation controls">
+      <button id="start-button" type="button" title="Start simulation" aria-label="Start simulation">&#9654;</button>
+      <button id="pause-button" type="button" title="Pause simulation" aria-label="Pause simulation">&#8545;</button>
+      <button id="step-button" type="button">Step all</button><button id="replay-button" type="button">Replay</button><button id="reset-button" type="button">Reset</button><button id="export-button" type="button">Export</button>
+      <label class="import-control">Import<input id="import-input" type="file" accept="application/json"></label>
+      <label class="speed-control">Speed<select id="speed-select"><option value="2000">1x</option><option value="1000">2x</option><option value="400">5x</option></select></label>
+      <output id="runtime-status" role="status" aria-live="polite">Loading candidate definitions...</output>
+    </section>
+    <section id="error-state" class="error-state" role="alert" hidden><strong>Life Runtime data could not be loaded.</strong><span id="error-detail"></span><button id="retry-button" type="button">Retry</button></section>
+    <section class="life-grid" id="life-grid" aria-label="Foundational life states" aria-busy="true"></section>
+    <section class="timeline" aria-labelledby="timeline-title"><div class="section-heading"><div><span class="eyebrow">EVENT HISTORY</span><h2 id="timeline-title">Causal timeline</h2></div><output id="tick-count">Tick 0</output></div><ol id="event-list"><li>No events yet.</li></ol></section>
+  </main>
+  <script type="module" src="./app.js"></script>
+</body>
+</html>
