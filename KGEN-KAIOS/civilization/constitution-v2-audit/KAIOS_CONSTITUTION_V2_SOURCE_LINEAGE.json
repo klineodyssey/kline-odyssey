@@ -1,0 +1,58 @@
+{
+  "schema_version": "1.0.0",
+  "task_id": "KAIOS-CONSTITUTION-V2-LINEAGE-RESOLUTION-001",
+  "generated_at": "2026-08-01T10:37:29.0395140Z",
+  "canonical_lineage": null,
+  "overwrite_allowed": false,
+  "constitution_import_authorized": false,
+  "sources": [
+    {
+      "source_id": "LOCAL_V2_0",
+      "source_name": "KAIOS 創世憲章 V2.0 local source collection",
+      "source_path": "C:\\Desktop\\kline-odyssey\\KAIOS 創世憲章 V2.0",
+      "source_type": "LOCAL_WORKSTATION_SOURCE",
+      "classification": "SOURCE_ORIGINAL_V2_0",
+      "declared_version": "V2.0",
+      "observed_version": "MIXED_V2_0_CONTAINER_WITH_V2_1_DRAFT_FILES",
+      "file_count": 144,
+      "chapter_range": "000-138",
+      "sha256_manifest": "f9ce783653ece5c294c8a536135bdee319a8f61a0bdcfb35bbd1af12efcec686",
+      "created_at": "2026-07-20T07:15:47.8799632Z",
+      "modified_at": "2026-07-20T05:42:29.0000000Z",
+      "authority": "READ_ONLY_SOURCE",
+      "canonical_status": "NOT_CANONICAL",
+      "import_status": "NOT_IMPORTED",
+      "read_only": true,
+      "provenance": {
+        "custody": "LOCAL_COPY_PRIMARY_AUDIT_SOURCE",
+        "manifest": "KAIOS_CONSTITUTION_V2_FILE_MANIFEST.json",
+        "original_modified_by_audit": false
+      },
+      "notes": "Primary audit evidence. The directory name declares V2.0 while seven contained filenames and VERSION fields declare V2.1. No source file may be overwritten."
+    },
+    {
+      "source_id": "REPOSITORY_V2_1",
+      "source_name": "KAIOS Genesis V2.1 repaired repository reference",
+      "source_path": "KGEN-KAIOS/constitution/genesis-v2.1-source",
+      "source_type": "GIT_REPOSITORY_DERIVATIVE",
+      "classification": "DERIVED_REPOSITORY_V2_1",
+      "declared_version": "V2.1",
+      "observed_version": "V2.1_REPAIRED_METADATA_REFERENCE",
+      "file_count": 7,
+      "chapter_range": "000,133-138",
+      "sha256_manifest": "d2fec118ccdf0dbf202aea71f544f9e8bbce2bf76085fbfaef9937ad71152363",
+      "created_at": "2026-07-20T16:38:26+08:00",
+      "modified_at": "2026-07-20T17:24:10+08:00",
+      "authority": "READ_ONLY_REFERENCE",
+      "canonical_status": "NOT_CANONICAL",
+      "import_status": "NOT_IMPORTED",
+      "read_only": true,
+      "provenance": {
+        "initial_commit": "e3a68db4300a08a909b04f026d0b2e1bd3d985ba",
+        "repair_commit": "4cf73bfd47880cafc9643333e14f8e5346e6b534",
+        "historical_audit": "KGEN-KAIOS/civilization/KAIOS_GENESIS_CHAPTER_000_138_SOURCE_INTEGRITY_AUDIT.md"
+      },
+      "notes": "Derived repaired copies with V2.1 headings, revised navigation metadata, and repository signature footers. Current task explicitly withholds Canonical and Production authority."
+    }
+  ]
+}
