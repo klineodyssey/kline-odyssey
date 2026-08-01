@@ -1123,3 +1123,15 @@ food-safety certification, legal effect or Production authority.
 - [Fishpond Aquaculture Viewer](world-viewer/aquaculture-v1/)
 - [Read-only Aquaculture APIs](api/kaios/aquaculture/v1/)
 - [Runtime Implementation Report](KAIOS/life/aquaculture/KAIOS_FISHPOND_AQUACULTURE_RUNTIME_V1_REPORT.md)
+
+## KAIOS Forest and Agriculture Runtime V1
+
+The workline has started with an evidence-based source crosswalk, a causal
+Runtime specification and a bounded 20-item Cursor candidate/research queue.
+It reuses the current Agriculture, Ecology, Life, Causal World, labor and
+supply-chain owners and does not activate Production authority.
+
+- [Runtime V1 Specification](KAIOS/life/forest-agriculture/KAIOS_FOREST_AGRICULTURE_RUNTIME_V1_SPEC.md)
+- [Source Crosswalk](KAIOS/life/forest-agriculture/KAIOS_FOREST_AGRICULTURE_SOURCE_CROSSWALK.md)
+- [Cursor Continuous Work Queue](KAIOS/life/forest-agriculture/KAIOS_CURSOR_CONTINUOUS_WORK_QUEUE.json)
+- [AI Company Order and Project Specification](KGEN-KAIOS/V10/runtime/KAIOS_AI_COMPANY_ORDER_AND_PROJECT_RUNTIME_SPEC.md)
