@@ -86,9 +86,11 @@
 
 ### PROPOSED-001 — `KAIOS-PRODUCT-SPRINT-001A-R1`
 
-**Objective:** Define current-baseline product UX on `main` (not re-merge blind #42).
+**Human decision (2026-08-01):** **DEFERRED.** PR #42 and product-shell work **not needed now**. Wait until a later stable baseline before any new product-shell programming.
 
-**Options (Codex pick one):**
+**Codex:** Close or leave Draft PR #42 archived; do **not** OPEN this WorkOrder until Human re-dispatches post-stability.
+
+~~**Options (Codex pick one):**~~ *(superseded by deferral)*
 
 | Option | Description | Risk |
 |--------|-------------|------|
@@ -96,7 +98,7 @@
 | **B — PORT shell** | Cherry-pick `product-shell.*` onto current `index.html` + `./world-viewer/` paths | Medium merge conflict |
 | **C — HYBRID** | Keep main bands; add optional dock behind feature flag | Medium |
 
-**Acceptance:** ≤2 clicks to `./world-viewer/` on mobile + desktop; QA workflow PASS; no protected path edits.
+**Acceptance:** *(not applicable until re-dispatched)*
 
 ---
 
@@ -131,11 +133,13 @@ Cursor failed to put PR #42 reconciliation on GitHub before Human asked. **Fix:*
 
 ## 6. Need Human Decision
 
-| Item | Required? |
-|------|-----------|
-| Close vs merge PR #42 | **YES** — product direction |
-| Foundational Life #69 | **NO** — Codex review sufficient |
-| WALS-DOCS dispatch | **NO** — Codex policy |
+| Item | Required? | **Human decision (2026-08-01)** |
+|------|-----------|-----------------------------------|
+| Close vs merge PR #42 | **RESOLVED** | **#42 先不用。等之後版本穩定再寫程式。** Do not port product-shell or merge #42 until a future approved R1/R2 sprint after baseline stabilizes. |
+| Foundational Life #69 | **NO** — Codex review sufficient | — |
+| WALS-DOCS dispatch | **NO** — Codex policy | — |
+
+**Codex action:** Mark PR #42 **DEFERRED / close Draft PR** when convenient; cancel or hold `KAIOS-PRODUCT-SPRINT-001A-R1` until Human re-authorizes post-stable baseline. **Do not schedule Cursor product-shell work.**
 
 ---
 
@@ -157,8 +161,9 @@ git show origin/cursor-handoff/KAIOS-PRODUCT-SPRINT-001A:assets/product-shell.js
 ## 8. Recommendation
 
 1. **P0:** Codex review **PR #69** immediately.  
-2. **P1:** Codex publish **`KAIOS-PRODUCT-SPRINT-001A-R1`** WorkOrder with option A/B/C decision.  
-3. **P2:** Close or archive **PR #42** after R1 direction is recorded (avoid dual product truth).  
-4. **P3:** Optionally approve **WALS-DOCS-001** or cancel explicitly.
+2. ~~**P1:** Codex publish **`KAIOS-PRODUCT-SPRINT-001A-R1`** WorkOrder~~ → **DEFERRED per Human (2026-08-01).**  
+3. **P1:** Codex **close or archive PR #42**; record deferral closeout — **no Cursor product work on #42.**  
+4. **P2:** Optionally approve **WALS-DOCS-001** or cancel explicitly.  
+5. **P3:** Merge this coordination/docs handoff so Codex scheduler stops waiting on #42 decisions.
 
 **Cursor final status:** `CURSOR_RD_HANDOFF_SUBMITTED_PENDING_CODEX_SCHEDULING`

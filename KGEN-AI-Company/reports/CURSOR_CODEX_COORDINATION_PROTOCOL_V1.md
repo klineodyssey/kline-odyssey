@@ -121,7 +121,7 @@ Codex schedules — Human not required to relay findings.
 | Item | Owner | Action |
 |------|-------|--------|
 | PR #69 Life candidates | Codex | Review → merge or FIX |
-| PR #42 vs main | Codex + Human | R1 WorkOrder decision |
+| PR #42 vs main | Codex | **DEFERRED** — Human: close/archive #42; no R1 until stable baseline |
 | RD handoff branch | Codex | Merge `cursor-handoff/KAIOS-RD-PRODUCT-RECONCILE-001` docs |
 | WALS-DOCS-001 | Codex | APPROVE or CANCEL explicitly |
 

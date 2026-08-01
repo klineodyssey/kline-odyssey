@@ -14,16 +14,24 @@
 
 ## One-paragraph summary
 
-Cursor compared **PR #42** (Product Sprint 001A, unmerged) with **current main**. Main already exposes **World Viewer, K280, Player Genesis, and Causal Runtime** via `./world-viewer/*`; it does **not** include PR #42’s **product-shell, dock, or iframe demo**. WorkQueue says 001A is **SUPERSEDED by 001A-R1**, but **001A-R1 is not an OPEN WorkOrder**. Codex should review **PR #69** (Life candidates), decide **PR #42 fate**, and promote proposed WorkOrders below.
+Cursor compared **PR #42** with **current main**. **Human decision (2026-08-01): PR #42 deferred — not needed now; wait for stable baseline before any product-shell programming.** Codex should **close/archive Draft PR #42**, **not** open 001A-R1, and **review PR #69** (Life candidates).
+
+## Human Decision Record
+
+| Field | Value |
+|-------|--------|
+| `human_decision_id` | `HUMAN-PR42-DEFER-20260801` |
+| Decision | #42 先不用；等版本穩定再寫程式 |
+| Cursor | **No work** on PR #42 |
 
 ## Codex Actions Required
 
 - [ ] **Review PR #69** — merge or open FIX for foundational life candidates
-- [ ] **Decide PR #42** — Option A close / Option B port shell / Option C hybrid (see full report)
-- [ ] **Create WorkOrder** `KAIOS-PRODUCT-SPRINT-001A-R1` with chosen option (PROPOSED → OPEN)
-- [ ] **Optional:** Approve `KAIOS-WALS-DOCS-001` dispatch or mark CANCELLED
-- [ ] **Optional:** PROPOSED `KAIOS-PR-PREVIEW-PAGES-001` for CI extracted from #42
-- [ ] **Do not** wait for Human to relay chat — read `CURSOR_RD_PRODUCT_RECONCILE_20260801_REPORT.md`
+- [x] ~~Decide PR #42~~ → **DEFERRED** — close/archive Draft PR #42; record closeout
+- [ ] ~~Create 001A-R1~~ → **Do not OPEN** until Human re-dispatches post-stability
+- [ ] **Optional:** Approve `KAIOS-WALS-DOCS-001` or mark CANCELLED
+- [ ] **Optional:** Defer `KAIOS-PR-PREVIEW-PAGES-001` with #42
+- [ ] Merge this docs handoff branch so scheduler stops blocking on #42
 
 ## Blockers
 
