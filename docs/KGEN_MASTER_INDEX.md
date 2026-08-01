@@ -722,3 +722,28 @@ effects.
 | `KGEN-KAIOS/world-viewer/tests/industrial_supply_chain_spec.test.mjs` | Executable specification-contract tests. |
 | `KGEN-KAIOS/governance/autopilot/recovery_points/RECOVERY-KAIOS-PR65-SUPPLY-CHAIN-ECONOMY-SPEC.md` | Post-merge recovery point. |
 | `KAIOS_PR65_SUPPLY_CHAIN_ECONOMY_CLOSEOUT.md` | Post-merge closeout evidence. |
+
+## KAIOS Canonical Life Specification V1
+
+Task: `KAIOS-PR66-CANONICAL-LIFE-SPEC-001`
+
+This specification defines a universal Life envelope using
+`SHARED_CORE + APPROVED_TYPE_EXTENSION`. It preserves Organism Manifest Schema
+V2, the canonical 19-layer biological taxonomy extension and protected CURRENT
+authority. It does not migrate existing Life packages or activate runtime,
+wallets, real KGEN, on-chain transfer or K11520 settlement.
+
+| Repository path | Purpose |
+|---|---|
+| `KAIOS_CANONICAL_LIFE_SOURCE_AUDIT.md` | Canonical-source inventory, hierarchy and conflict resolution. |
+| `KAIOS_CANONICAL_LIFE_SPEC_V1.md` | Universal Core, applicability, extension and adoption contract. |
+| `KAIOS_CANONICAL_LIFE_SCHEMA_V1.json` | Draft 2020-12 machine contract for all supported Life types. |
+| `KAIOS_CANONICAL_LIFE_TAXONOMY_V1.json` | Nine universal ranks and 19-layer compatibility contract. |
+| `KAIOS_CANONICAL_LIFE_TYPE_EXTENSIONS_V1.json` | Approved extension registry and Life-type mapping. |
+| `KAIOS_CANONICAL_LIFE_PHYSICS_BINDING_V1.md` | Conservation and causal physics binding. |
+| `KAIOS_CANONICAL_LIFE_ECONOMY_BINDING_V1.md` | Demand-grounded value and simulated economy binding. |
+| `KAIOS_CANONICAL_LIFE_RIGHTS_V1.md` | Separate rights and tradeability contract. |
+| `KAIOS_CANONICAL_LIFE_PACKAGE_TEMPLATE_V1/` | Non-executable candidate package template. |
+| `KAIOS_CANONICAL_LIFE_VALIDATION_PLAN.md` | Contract, regression and repository gates. |
+| `KAIOS_CANONICAL_LIFE_CURSOR_DISPATCH_PLAN.md` | Held future candidate-migration plan; no dispatch. |
+| `KGEN-KAIOS/world-viewer/tests/canonical_life_spec.test.mjs` | Executable specification-contract tests. |

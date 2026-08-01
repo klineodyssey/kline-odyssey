@@ -1082,3 +1082,14 @@ All users are responsible for their own decisions. Cryptocurrency involves risk,
 KGEN AI Company Automation V5.0 formally uses Cursor Handoff Branch Workflow. Cursor completes one WorkOrder, pushes `cursor-handoff/<Task-ID>`, and stops. Codex fetches that branch, reviews diff/report/protected paths/Canon, then merges approved work into main.
 
 - Handoff Workflow: [KGEN-AI-Company/CURSOR_HANDOFF_BRANCH_WORKFLOW.md](KGEN-AI-Company/CURSOR_HANDOFF_BRANCH_WORKFLOW.md)
+
+## KAIOS Canonical Life V1
+
+The specification-only Canonical Life package defines a shared Life core with
+approved type extensions for biological, digital, robotic, environmental and
+civilization systems. It preserves existing organism and physics authority and
+does not activate wallets, real KGEN, on-chain transfers or Production Runtime.
+
+- [Canonical Life Specification](KAIOS_CANONICAL_LIFE_SPEC_V1.md)
+- [Canonical Life Schema](KAIOS_CANONICAL_LIFE_SCHEMA_V1.json)
+- [Package Template](KAIOS_CANONICAL_LIFE_PACKAGE_TEMPLATE_V1/README.md)
