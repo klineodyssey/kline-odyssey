@@ -18,13 +18,13 @@
   "output_authority": "CANDIDATE_ONLY_OR_RESEARCH_PROPOSAL_ONLY",
   "queue": [
     { "priority": 1, "task_id": "KAIOS-CURSOR-FOREST-LIFE-PACKAGES-001", "work": "FOREST_LIFE_PACKAGE_RESEARCH", "status": "DISPATCHED" },
-    { "priority": 2, "task_id": "KAIOS-CURSOR-CROP-LIFE-PACKAGES-001", "work": "CROP_LIFE_PACKAGES", "status": "READY_AFTER_REVIEW" },
-    { "priority": 3, "task_id": "KAIOS-CURSOR-FRUIT-TREE-PACKAGES-001", "work": "FRUIT_TREE_PACKAGES", "status": "QUEUED" },
-    { "priority": 4, "task_id": "KAIOS-CURSOR-VEGETABLE-PACKAGES-001", "work": "VEGETABLE_PACKAGES", "status": "QUEUED" },
-    { "priority": 5, "task_id": "KAIOS-CURSOR-SOIL-TYPES-001", "work": "SOIL_TYPE_DATASETS", "status": "QUEUED" },
-    { "priority": 6, "task_id": "KAIOS-CURSOR-FERTILIZER-MODELS-001", "work": "FERTILIZER_MODEL_PROPOSALS", "status": "QUEUED" },
-    { "priority": 7, "task_id": "KAIOS-CURSOR-COMPOST-MODELS-001", "work": "COMPOST_MODEL_PROPOSALS", "status": "QUEUED" },
-    { "priority": 8, "task_id": "KAIOS-CURSOR-INSECT-CANDIDATES-001", "work": "INSECT_CANDIDATE_PACKAGES", "status": "QUEUED" },
+    { "priority": 2, "task_id": "KAIOS-CURSOR-CROP-LIFE-PACKAGES-001", "work": "CROP_LIFE_PACKAGE", "status": "READY_AFTER_REVIEW" },
+    { "priority": 3, "task_id": "KAIOS-CURSOR-FRUIT-TREE-PACKAGES-001", "work": "FRUIT_TREE_PACKAGE", "status": "QUEUED" },
+    { "priority": 4, "task_id": "KAIOS-CURSOR-VEGETABLE-PACKAGES-001", "work": "VEGETABLE_PACKAGE", "status": "QUEUED" },
+    { "priority": 5, "task_id": "KAIOS-CURSOR-SOIL-TYPES-001", "work": "SOIL_TYPE_DATASET", "status": "QUEUED" },
+    { "priority": 6, "task_id": "KAIOS-CURSOR-FERTILIZER-MODELS-001", "work": "FERTILIZER_MODEL_PROPOSAL", "status": "QUEUED" },
+    { "priority": 7, "task_id": "KAIOS-CURSOR-COMPOST-MODELS-001", "work": "COMPOST_MODEL_PROPOSAL", "status": "QUEUED" },
+    { "priority": 8, "task_id": "KAIOS-CURSOR-INSECT-CANDIDATES-001", "work": "INSECT_CANDIDATE_PACKAGE", "status": "QUEUED" },
     { "priority": 9, "task_id": "KAIOS-CURSOR-POLLINATOR-RESEARCH-001", "work": "POLLINATOR_RESEARCH", "status": "QUEUED" },
     { "priority": 10, "task_id": "KAIOS-CURSOR-EARTHWORM-CANDIDATE-001", "work": "EARTHWORM_CANDIDATE_PACKAGE", "status": "QUEUED" },
     { "priority": 11, "task_id": "KAIOS-CURSOR-FUNGI-CANDIDATE-001", "work": "FUNGI_CANDIDATE_PACKAGE", "status": "QUEUED" },
@@ -34,9 +34,9 @@
     { "priority": 15, "task_id": "KAIOS-CURSOR-RAINFALL-DATASET-001", "work": "RAINFALL_DATASET", "status": "QUEUED" },
     { "priority": 16, "task_id": "KAIOS-CURSOR-FOREST-UI-001", "work": "FOREST_UI_PROPOSAL", "status": "QUEUED" },
     { "priority": 17, "task_id": "KAIOS-CURSOR-AGRICULTURE-UI-001", "work": "AGRICULTURE_UI_PROPOSAL", "status": "QUEUED" },
-    { "priority": 18, "task_id": "KAIOS-CURSOR-WORLD-VIEWER-CARDS-001", "work": "WORLD_VIEWER_CARD_CANDIDATES", "status": "QUEUED" },
-    { "priority": 19, "task_id": "KAIOS-CURSOR-FOREST-AG-API-CANDIDATES-001", "work": "CANDIDATE_API_PROJECTIONS", "status": "QUEUED" },
-    { "priority": 20, "task_id": "KAIOS-CURSOR-FOREST-AG-REGRESSION-001", "work": "CANDIDATE_REGRESSION_TESTS", "status": "QUEUED" }
+    { "priority": 18, "task_id": "KAIOS-CURSOR-WORLD-VIEWER-CARDS-001", "work": "WORLD_VIEWER_CARD_CANDIDATE", "status": "QUEUED" },
+    { "priority": 19, "task_id": "KAIOS-CURSOR-FOREST-AG-API-CANDIDATES-001", "work": "CANDIDATE_API_PROJECTION", "status": "QUEUED" },
+    { "priority": 20, "task_id": "KAIOS-CURSOR-FOREST-AG-REGRESSION-001", "work": "CANDIDATE_REGRESSION_TEST", "status": "QUEUED" }
   ],
   "forbidden": [
     "CURRENT",

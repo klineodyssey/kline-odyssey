@@ -197,6 +197,11 @@ class CursorWorkerRegistryRepairTests(unittest.TestCase):
         )
         self.assertTrue(queue["one_task_at_a_time"])
 
+    def test_every_continuous_queue_work_class_is_authorized(self):
+        queue_work = {item["work"] for item in self.forest_queue["queue"]}
+        self.assertTrue(queue_work)
+        self.assertFalse(queue_work - set(self.cursor["allowed_work"]))
+
     def test_dispatch_history_preserves_foundational_life_lineage(self):
         dispatch = next(
             item
