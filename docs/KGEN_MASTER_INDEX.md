@@ -694,3 +694,31 @@ construction, wallets, KGEN settlement or Production Runtime.
 | `KGEN-KAIOS/world-viewer/tests/physical_labor_spec.test.mjs` | Executable specification-contract tests. |
 | `KGEN-KAIOS/governance/autopilot/recovery_points/RECOVERY-KAIOS-PR64-PHYSICAL-LABOR-SPEC.md` | Post-merge recovery point. |
 | `KAIOS_PR64_PHYSICAL_LABOR_SPEC_CLOSEOUT.md` | Post-merge closeout evidence. |
+
+## KAIOS Industrial Supply Chain Economy Specification
+
+Task: `KAIOS-PR65-INDUSTRIAL-SUPPLY-CHAIN-ECONOMY-SPEC-001`
+
+This package specifies complete product dependencies, inventory, demand,
+balanced company finance, insolvency and simulated liquidation. It does not
+modify existing production/economy runtimes or create real legal or financial
+effects.
+
+| Repository path | Purpose |
+|---|---|
+| `KAIOS_INDUSTRIAL_SUPPLY_CHAIN_SPEC.md` | End-to-end industrial dependency and closed-loop contract. |
+| `KAIOS_PRODUCT_DEPENDENCY_GRAPH_SPEC.md` | Seven generic product dependency trees. |
+| `KAIOS_INVENTORY_WAREHOUSE_SPEC.md` | Inventory classes, warehouse capacity and stock risks. |
+| `KAIOS_DEMAND_AND_SALES_SPEC.md` | Demand, orders, channels and revenue-recognition rules. |
+| `KAIOS_CASH_FLOW_SPEC.md` | Double-entry cash-flow and working-capital contract. |
+| `KAIOS_COMPANY_INSOLVENCY_SPEC.md` | Distress, restructuring and dissolution state machine. |
+| `KAIOS_SIMULATED_COURT_AND_LIQUIDATION_SPEC.md` | No-legal-effect court and asset disposition contract. |
+| `KAIOS_SUPPLY_CHAIN_SCHEMA.json` | Supply-chain, product, order and production-plan schema. |
+| `KAIOS_INVENTORY_SCHEMA.json` | Warehouse and inventory schema. |
+| `KAIOS_COMPANY_FINANCE_SCHEMA.json` | Company accounts and balanced-ledger schema. |
+| `KAIOS_BANKRUPTCY_SCHEMA.json` | Simulated bankruptcy, claims and distribution schema. |
+| `KAIOS_PR65_IMPLEMENTATION_PLAN.md` | Held future runtime implementation sequence. |
+| `KAIOS_PR65_TEST_PLAN.md` | Specification and regression validation plan. |
+| `KGEN-KAIOS/world-viewer/tests/industrial_supply_chain_spec.test.mjs` | Executable specification-contract tests. |
+| `KGEN-KAIOS/governance/autopilot/recovery_points/RECOVERY-KAIOS-PR65-SUPPLY-CHAIN-ECONOMY-SPEC.md` | Post-merge recovery point. |
+| `KAIOS_PR65_SUPPLY_CHAIN_ECONOMY_CLOSEOUT.md` | Post-merge closeout evidence. |

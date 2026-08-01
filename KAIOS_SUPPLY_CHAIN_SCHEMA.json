@@ -1,0 +1,108 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://klineodyssey.github.io/kline-odyssey/KAIOS_SUPPLY_CHAIN_SCHEMA.json",
+  "title": "KAIOS Industrial Supply Chain Specification Contract",
+  "type": "object",
+  "required": ["schema_version", "mode", "authority", "supply_chain_id", "product", "dependency_chain", "status", "block_reasons", "orders", "production_plan", "history"],
+  "properties": {
+    "schema_version": { "const": "1.0.0" },
+    "mode": { "const": "SPECIFICATION_ONLY" },
+    "authority": { "const": "NO_PRODUCTION_AUTHORITY" },
+    "supply_chain_id": { "type": "string", "minLength": 1 },
+    "product": { "$ref": "#/$defs/product" },
+    "dependency_chain": {
+      "prefixItems": [
+        { "const": "market_demand" }, { "const": "product_design" }, { "const": "technology" },
+        { "const": "license" }, { "const": "raw_materials" }, { "const": "components" },
+        { "const": "machines" }, { "const": "factory" }, { "const": "electricity" },
+        { "const": "water" }, { "const": "workers" }, { "const": "transport" },
+        { "const": "warehouse" }, { "const": "quality_assurance" }, { "const": "sales_channel" },
+        { "const": "service" }, { "const": "recycling" }
+      ],
+      "items": false,
+      "minItems": 17,
+      "maxItems": 17
+    },
+    "status": { "$ref": "#/$defs/productionStatus" },
+    "block_reasons": { "type": "array", "uniqueItems": true, "items": { "$ref": "#/$defs/blockReason" } },
+    "orders": { "type": "array", "items": { "$ref": "#/$defs/order" } },
+    "production_plan": { "$ref": "#/$defs/productionPlan" },
+    "history": { "type": "array", "items": { "$ref": "#/$defs/event" } }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "productionStatus": { "enum": ["PLANNED", "MATERIALS_PENDING", "EQUIPMENT_PENDING", "LABOR_PENDING", "ENERGY_PENDING", "TRANSPORT_PENDING", "PRODUCTION_READY", "IN_PRODUCTION", "QUALITY_HOLD", "WAREHOUSE_PENDING", "SALES_PENDING", "PRODUCTION_BLOCKED"] },
+    "blockReason": { "enum": ["NO_DEMAND", "NO_DESIGN", "NO_LICENSE", "NO_RAW_MATERIAL", "NO_COMPONENT", "NO_MACHINE", "NO_FACTORY", "NO_POWER", "NO_WATER", "NO_WORKERS", "NO_TRANSPORT", "NO_WAREHOUSE", "NO_SALES_CHANNEL", "NO_WORKING_CAPITAL"] },
+    "productType": { "enum": ["AUTOMOBILE", "REFRIGERATOR", "ELECTRIC_RICE_COOKER", "BASIC_PHONE", "INDUSTRIAL_MACHINE", "SMARTPHONE_PLATFORM", "ADVANCED_COMPUTE_CHIP"] },
+    "requirement": {
+      "type": "object",
+      "required": ["item_id", "quantity", "unit"],
+      "properties": {
+        "item_id": { "type": "string", "minLength": 1 },
+        "quantity": { "type": "number", "exclusiveMinimum": 0 },
+        "unit": { "type": "string", "minLength": 1 }
+      },
+      "additionalProperties": false
+    },
+    "product": {
+      "type": "object",
+      "required": ["product_id", "product_type", "required_components", "required_materials", "required_machines", "required_factories", "required_technology", "required_workers", "required_energy", "required_water", "required_transport", "required_warehouse", "required_sales_channels", "required_service", "required_recycling"],
+      "properties": {
+        "product_id": { "type": "string", "minLength": 1 },
+        "product_type": { "$ref": "#/$defs/productType" },
+        "required_components": { "type": "array", "items": { "$ref": "#/$defs/requirement" } },
+        "required_materials": { "type": "array", "items": { "$ref": "#/$defs/requirement" } },
+        "required_machines": { "type": "array", "items": { "type": "string" } },
+        "required_factories": { "type": "array", "items": { "type": "string" } },
+        "required_technology": { "type": "array", "items": { "type": "string" } },
+        "required_workers": { "type": "array", "items": { "type": "string" } },
+        "required_energy": { "type": "array", "items": { "$ref": "#/$defs/requirement" } },
+        "required_water": { "type": "array", "items": { "$ref": "#/$defs/requirement" } },
+        "required_transport": { "type": "array", "items": { "type": "string" } },
+        "required_warehouse": { "type": "array", "items": { "type": "string" } },
+        "required_sales_channels": { "type": "array", "items": { "type": "string" } },
+        "required_service": { "type": "array", "items": { "type": "string" } },
+        "required_recycling": { "type": "array", "items": { "type": "string" } }
+      },
+      "additionalProperties": false
+    },
+    "order": {
+      "type": "object",
+      "required": ["order_id", "demand_source", "product_id", "quantity", "unit_price", "status", "funded"],
+      "properties": {
+        "order_id": { "type": "string" },
+        "demand_source": { "enum": ["household", "company", "city", "government_simulation", "research", "industrial", "transport", "healthcare", "energy", "technology"] },
+        "product_id": { "type": "string" },
+        "quantity": { "type": "number", "exclusiveMinimum": 0 },
+        "unit_price": { "type": "number", "minimum": 0 },
+        "status": { "enum": ["FORECAST", "CONFIRMED", "IN_PRODUCTION", "FULFILLED", "CANCELLED"] },
+        "funded": { "type": "boolean" }
+      },
+      "additionalProperties": false
+    },
+    "productionPlan": {
+      "type": "object",
+      "required": ["plan_id", "confirmed_order_quantity", "forecast_quantity", "safety_stock", "planned_quantity", "working_capital_required", "working_capital_available"],
+      "properties": {
+        "plan_id": { "type": "string" },
+        "confirmed_order_quantity": { "type": "number", "minimum": 0 },
+        "forecast_quantity": { "type": "number", "minimum": 0 },
+        "safety_stock": { "type": "number", "minimum": 0 },
+        "planned_quantity": { "type": "number", "minimum": 0 },
+        "working_capital_required": { "type": "number", "minimum": 0 },
+        "working_capital_available": { "type": "number", "minimum": 0 }
+      },
+      "additionalProperties": false
+    },
+    "event": {
+      "type": "object",
+      "required": ["event_id", "time", "action", "inputs", "outputs", "status", "previous_state_hash", "next_state_hash"],
+      "properties": {
+        "event_id": { "type": "string" }, "time": { "type": "number", "minimum": 0 },
+        "action": { "type": "string" }, "inputs": { "type": "object" }, "outputs": { "type": "object" },
+        "status": { "type": "string" }, "previous_state_hash": { "type": "string" }, "next_state_hash": { "type": "string" }
+      },
+      "additionalProperties": false
+    }
+  }
+}

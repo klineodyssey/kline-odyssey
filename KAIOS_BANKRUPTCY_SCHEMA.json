@@ -1,0 +1,75 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://klineodyssey.github.io/kline-odyssey/KAIOS_BANKRUPTCY_SCHEMA.json",
+  "title": "KAIOS Simulated Bankruptcy And Liquidation Contract",
+  "type": "object",
+  "required": ["schema_version", "mode", "legal_effect", "case_id", "company_id", "company_status", "process", "assets", "liabilities", "distributions", "history"],
+  "properties": {
+    "schema_version": { "const": "1.0.0" },
+    "mode": { "const": "SIMULATED_COURT" },
+    "legal_effect": { "const": "NO_REAL_LEGAL_EFFECT" },
+    "case_id": { "type": "string" }, "company_id": { "type": "string" },
+    "company_status": { "enum": ["INSOLVENT", "RESTRUCTURING", "COURT_PROTECTION", "LIQUIDATION", "DISSOLVED"] },
+    "process": {
+      "prefixItems": [
+        { "const": "payment_default" }, { "const": "filing" }, { "const": "asset_transfer_freeze" },
+        { "const": "asset_inventory" }, { "const": "liability_inventory" }, { "const": "employee_wage_claims" },
+        { "const": "tax_claims" }, { "const": "secured_claims" }, { "const": "unsecured_claims" },
+        { "const": "inventory_sale" }, { "const": "equipment_sale" }, { "const": "land_right_transfer" },
+        { "const": "contract_termination" }, { "const": "employee_placement_or_dismissal" },
+        { "const": "distribution" }, { "const": "dissolution" }
+      ],
+      "items": false,
+      "minItems": 16,
+      "maxItems": 16
+    },
+    "assets": { "type": "array", "items": { "$ref": "#/$defs/asset" } },
+    "liabilities": { "type": "array", "items": { "$ref": "#/$defs/claim" } },
+    "distributions": { "type": "array", "items": { "$ref": "#/$defs/distribution" } },
+    "history": { "type": "array", "items": { "$ref": "#/$defs/event" } }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "asset": {
+      "type": "object",
+      "required": ["asset_id", "asset_type", "owner_company", "book_value", "realized_value", "custodian", "result", "destination", "history_preserved"],
+      "properties": {
+        "asset_id": { "type": "string" }, "asset_type": { "type": "string" }, "owner_company": { "type": "string" },
+        "book_value": { "type": "number", "minimum": 0 }, "realized_value": { "type": "number", "minimum": 0 },
+        "custodian": { "type": "string" },
+        "result": { "enum": ["AUCTIONED", "TRANSFERRED", "SOLD", "LEASED", "SCRAPPED", "RECYCLED", "ABANDONED_WITH_CUSTODIAN"] },
+        "destination": { "type": "string" }, "history_preserved": { "const": true }
+      },
+      "additionalProperties": false
+    },
+    "claim": {
+      "type": "object",
+      "required": ["claim_id", "claimant", "claim_class", "amount", "verified", "priority"],
+      "properties": {
+        "claim_id": { "type": "string" }, "claimant": { "type": "string" },
+        "claim_class": { "enum": ["EMPLOYEE_WAGE", "TAX_SIMULATION", "SECURED", "UNSECURED"] },
+        "amount": { "type": "number", "minimum": 0 }, "verified": { "type": "boolean" }, "priority": { "type": "integer", "minimum": 1 }
+      },
+      "additionalProperties": false
+    },
+    "distribution": {
+      "type": "object",
+      "required": ["distribution_id", "claim_id", "amount", "source_asset_ids", "balanced"],
+      "properties": {
+        "distribution_id": { "type": "string" }, "claim_id": { "type": "string" }, "amount": { "type": "number", "minimum": 0 },
+        "source_asset_ids": { "type": "array", "items": { "type": "string" } }, "balanced": { "const": true }
+      },
+      "additionalProperties": false
+    },
+    "event": {
+      "type": "object",
+      "required": ["event_id", "time", "stage", "inputs", "outputs", "previous_state_hash", "next_state_hash"],
+      "properties": {
+        "event_id": { "type": "string" }, "time": { "type": "number", "minimum": 0 }, "stage": { "type": "string" },
+        "inputs": { "type": "object" }, "outputs": { "type": "object" },
+        "previous_state_hash": { "type": "string" }, "next_state_hash": { "type": "string" }
+      },
+      "additionalProperties": false
+    }
+  }
+}

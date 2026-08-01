@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://klineodyssey.github.io/kline-odyssey/KAIOS_COMPANY_FINANCE_SCHEMA.json",
+  "title": "KAIOS Company Finance Specification Contract",
+  "type": "object",
+  "required": ["schema_version", "mode", "currency", "company_id", "period", "accounts", "ledger", "company_status", "warnings"],
+  "properties": {
+    "schema_version": { "const": "1.0.0" },
+    "mode": { "const": "SPECIFICATION_ONLY" },
+    "currency": { "const": "SIMULATED_CURRENCY" },
+    "company_id": { "type": "string" }, "period": { "type": "string" },
+    "accounts": { "$ref": "#/$defs/accounts" },
+    "ledger": { "type": "array", "items": { "$ref": "#/$defs/entry" } },
+    "company_status": { "$ref": "#/$defs/companyStatus" },
+    "warnings": { "type": "array", "uniqueItems": true, "items": { "$ref": "#/$defs/warning" } }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "amount": { "type": "number", "minimum": 0 },
+    "companyStatus": { "enum": ["OPERATING", "CASH_FLOW_WARNING", "PAYMENT_DELAY", "DISTRESS", "INSOLVENT", "RESTRUCTURING", "COURT_PROTECTION", "LIQUIDATION", "DISSOLVED"] },
+    "warning": { "enum": ["CASH_FLOW_WARNING", "PAYMENT_DELAY", "WORKING_CAPITAL_SHORTAGE", "PAYROLL_RISK", "SUPPLIER_DEFAULT_RISK", "DEBT_SERVICE_FAILURE"] },
+    "accounts": {
+      "type": "object",
+      "required": ["orders", "revenue", "cost_of_goods", "payroll", "rent", "energy", "transport", "maintenance", "interest", "tax_simulation", "receivables", "payables", "inventory_value", "cash", "debt", "working_capital", "capital_expenditure", "depreciation", "assets", "liabilities", "equity"],
+      "properties": {
+        "orders": { "$ref": "#/$defs/amount" }, "revenue": { "$ref": "#/$defs/amount" }, "cost_of_goods": { "$ref": "#/$defs/amount" },
+        "payroll": { "$ref": "#/$defs/amount" }, "rent": { "$ref": "#/$defs/amount" }, "energy": { "$ref": "#/$defs/amount" },
+        "transport": { "$ref": "#/$defs/amount" }, "maintenance": { "$ref": "#/$defs/amount" }, "interest": { "$ref": "#/$defs/amount" },
+        "tax_simulation": { "$ref": "#/$defs/amount" }, "receivables": { "$ref": "#/$defs/amount" }, "payables": { "$ref": "#/$defs/amount" },
+        "inventory_value": { "$ref": "#/$defs/amount" }, "cash": { "$ref": "#/$defs/amount" }, "debt": { "$ref": "#/$defs/amount" },
+        "working_capital": { "type": "number" }, "capital_expenditure": { "$ref": "#/$defs/amount" }, "depreciation": { "$ref": "#/$defs/amount" },
+        "assets": { "$ref": "#/$defs/amount" }, "liabilities": { "$ref": "#/$defs/amount" }, "equity": { "type": "number" }
+      },
+      "additionalProperties": false
+    },
+    "entry": {
+      "type": "object",
+      "required": ["entry_id", "time", "event", "debit_account", "credit_account", "amount", "balanced", "source_document", "simulation_only"],
+      "properties": {
+        "entry_id": { "type": "string" }, "time": { "type": "number", "minimum": 0 }, "event": { "type": "string" },
+        "debit_account": { "type": "string" }, "credit_account": { "type": "string" }, "amount": { "type": "number", "exclusiveMinimum": 0 },
+        "balanced": { "const": true }, "source_document": { "type": "string" }, "simulation_only": { "const": true }
+      },
+      "additionalProperties": false
+    }
+  }
+}
