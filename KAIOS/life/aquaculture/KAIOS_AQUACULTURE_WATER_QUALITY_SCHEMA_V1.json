@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://klineodyssey.github.io/kline-odyssey/KAIOS/life/aquaculture/KAIOS_AQUACULTURE_WATER_QUALITY_SCHEMA_V1.json",
+  "title": "Aquaculture Water Quality V1",
+  "type": "object",
+  "required": ["temperature_c", "dissolved_oxygen_mg_l", "ph", "salinity_ppt", "ammonia_proxy", "nitrite_proxy", "nitrate_proxy", "turbidity_proxy", "organic_load", "pollution_index", "pathogen_risk_proxy", "state"],
+  "properties": {
+    "temperature_c": { "type": "number", "minimum": -10, "maximum": 60 }, "dissolved_oxygen_mg_l": { "type": "number", "minimum": 0, "maximum": 30 },
+    "ph": { "type": "number", "minimum": 0, "maximum": 14 }, "salinity_ppt": { "type": "number", "minimum": 0, "maximum": 50 },
+    "ammonia_proxy": { "type": "number", "minimum": 0, "maximum": 1 }, "nitrite_proxy": { "type": "number", "minimum": 0, "maximum": 1 },
+    "nitrate_proxy": { "type": "number", "minimum": 0, "maximum": 1 }, "turbidity_proxy": { "type": "number", "minimum": 0, "maximum": 1 },
+    "organic_load": { "type": "number", "minimum": 0, "maximum": 1 }, "pollution_index": { "type": "number", "minimum": 0, "maximum": 1 },
+    "pathogen_risk_proxy": { "type": "number", "minimum": 0, "maximum": 1 },
+    "state": { "enum": ["STABLE", "LOW_OXYGEN", "HIGH_AMMONIA", "HIGH_TURBIDITY", "POLLUTED", "TEMPERATURE_STRESS", "SALINITY_STRESS", "DISEASE_RISK", "WATER_CHANGE_REQUIRED", "EMERGENCY_AERATION_REQUIRED", "UNFIT_FOR_STOCKING"] }
+  }, "additionalProperties": false
+}

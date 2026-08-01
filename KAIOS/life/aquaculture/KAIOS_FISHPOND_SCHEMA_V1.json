@@ -1,0 +1,64 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://klineodyssey.github.io/kline-odyssey/KAIOS/life/aquaculture/KAIOS_FISHPOND_SCHEMA_V1.json",
+  "title": "KAIOS Fishpond Runtime State V1",
+  "type": "object",
+  "required": ["schema_version", "runtime", "mode", "seed", "simulation_time", "status", "land", "pond", "construction", "water_quality", "populations", "enterprise", "events", "boundaries"],
+  "properties": {
+    "schema_version": { "const": "1.0.0" },
+    "runtime": { "const": "KAIOS_FISHPOND_AQUACULTURE_RUNTIME_V1" },
+    "mode": { "const": "LOCAL_DETERMINISTIC_SIMULATION" },
+    "seed": { "type": "string", "minLength": 1, "maxLength": 128 },
+    "simulation_time": { "type": "integer", "minimum": 0, "maximum": 100000 },
+    "status": { "enum": ["PAUSED", "RUNNING", "STOPPED"] },
+    "land": { "$ref": "#/$defs/land" },
+    "pond": { "$ref": "#/$defs/pond" },
+    "construction": { "$ref": "KAIOS_AQUACULTURE_CONSTRUCTION_SCHEMA_V1.json" },
+    "water_quality": { "$ref": "KAIOS_AQUACULTURE_WATER_QUALITY_SCHEMA_V1.json" },
+    "populations": { "type": "array", "maxItems": 2, "items": { "$ref": "KAIOS_AQUACULTURE_POPULATION_SCHEMA_V1.json" } },
+    "feed": { "type": "object" },
+    "harvests": { "type": "array", "maxItems": 1000, "items": { "$ref": "KAIOS_AQUACULTURE_HARVEST_SCHEMA_V1.json" } },
+    "inventory": { "type": "array", "maxItems": 1000, "items": { "type": "object" } },
+    "orders": { "type": "array", "maxItems": 1000, "items": { "type": "object" } },
+    "enterprise": { "$ref": "KAIOS_AQUACULTURE_ENTERPRISE_LEDGER_SCHEMA_V1.json" },
+    "events": { "type": "array", "maxItems": 5000, "items": { "$ref": "KAIOS_AQUACULTURE_EVENT_SCHEMA_V1.json" } },
+    "action_log": { "type": "array", "maxItems": 10000, "items": { "type": "object" } },
+    "boundaries": { "$ref": "#/$defs/boundaries" }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "land": {
+      "type": "object",
+      "required": ["land_parcel_id", "usage_right", "area_m2", "elevation_m", "slope_percent", "soil_type", "soil_permeability", "groundwater_risk", "flood_risk", "water_source_distance_m", "road_access", "electricity_access", "environmental_capacity", "pollution_risk"],
+      "properties": {
+        "land_parcel_id": { "type": "string" }, "usage_right": { "const": "SIMULATED_LAND_USAGE_RIGHT" },
+        "area_m2": { "type": "number", "minimum": 0 }, "elevation_m": { "type": "number" }, "slope_percent": { "type": "number", "minimum": 0, "maximum": 100 },
+        "soil_type": { "type": "string" }, "soil_permeability": { "type": "number", "minimum": 0, "maximum": 1 },
+        "groundwater_risk": { "type": "number", "minimum": 0, "maximum": 1 }, "flood_risk": { "type": "number", "minimum": 0, "maximum": 1 },
+        "water_source_distance_m": { "type": "number", "minimum": 0 }, "road_access": { "type": "boolean" }, "electricity_access": { "type": "boolean" },
+        "environmental_capacity": { "type": "number", "minimum": 0, "maximum": 1 }, "pollution_risk": { "type": "number", "minimum": 0, "maximum": 1 }
+      }, "additionalProperties": false
+    },
+    "pond": {
+      "type": "object",
+      "required": ["pond_id", "habitat_id", "area_m2", "depth_m", "capacity_l", "water_volume_l", "status", "water_source", "inlet_installed", "outlet_installed", "aerator_installed", "cold_storage_installed"],
+      "properties": {
+        "pond_id": { "type": "string" }, "habitat_id": { "const": "HABITAT-FISHPOND-V1" }, "area_m2": { "type": "number", "minimum": 0 }, "depth_m": { "type": "number", "minimum": 0 },
+        "capacity_l": { "type": "number", "minimum": 0 }, "water_volume_l": { "type": "number", "minimum": 0 },
+        "status": { "enum": ["PLANNED", "UNDER_CONSTRUCTION", "STABILIZING", "READY_FOR_STOCKING", "OPERATING", "DAMAGED"] },
+        "water_source": { "enum": ["RIVER", "GROUNDWATER_SIMULATION", "RESERVOIR_SIMULATION", "RAINWATER_STORAGE", "TREATED_WATER_SOURCE"] },
+        "inlet_installed": { "type": "boolean" }, "outlet_installed": { "type": "boolean" }, "aerator_installed": { "type": "boolean" }, "cold_storage_installed": { "type": "boolean" }
+      }, "additionalProperties": false
+    },
+    "boundaries": {
+      "type": "object",
+      "required": ["simulation_only", "wallet", "real_kgen", "onchain_transfer", "real_bioengineering", "real_food_safety_certification", "real_legal_effect", "production_authority", "uncontrolled_reproduction", "mutation_endpoints", "maximum_population"],
+      "properties": {
+        "simulation_only": { "const": true }, "wallet": { "const": "NONE" }, "real_kgen": { "const": "NO_REAL_KGEN" }, "onchain_transfer": { "const": false },
+        "real_bioengineering": { "const": false }, "real_food_safety_certification": { "const": false }, "real_legal_effect": { "const": false },
+        "production_authority": { "const": false }, "uncontrolled_reproduction": { "const": false }, "mutation_endpoints": { "const": false },
+        "maximum_population": { "type": "integer", "minimum": 1, "maximum": 500 }
+      }, "additionalProperties": false
+    }
+  }
+}

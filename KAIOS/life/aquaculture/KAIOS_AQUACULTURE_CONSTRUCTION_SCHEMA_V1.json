@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://klineodyssey.github.io/kline-odyssey/KAIOS/life/aquaculture/KAIOS_AQUACULTURE_CONSTRUCTION_SCHEMA_V1.json",
+  "title": "Aquaculture Pond Construction V1",
+  "type": "object",
+  "required": ["project_id", "stage", "completed_stages", "progress_hours", "workers", "equipment", "materials", "energy_kwh", "blocked_reason"],
+  "properties": {
+    "project_id": { "type": "string" },
+    "stage": { "enum": ["SITE_SURVEY", "DESIGN", "PERMIT_SIMULATION", "SITE_CLEARING", "EXCAVATION", "EMBANKMENT", "LINING_OR_SOIL_COMPACTION", "INLET_INSTALLATION", "OUTLET_INSTALLATION", "DRAINAGE_INSTALLATION", "AERATION_INFRASTRUCTURE", "ELECTRICAL_CONNECTION", "WATER_FILLING", "LEAK_TEST", "WATER_STABILIZATION", "INSPECTION", "READY_FOR_STOCKING"] },
+    "completed_stages": { "type": "array", "maxItems": 17, "items": { "type": "string" }, "uniqueItems": true },
+    "progress_hours": { "type": "number", "minimum": 0 }, "workers": { "type": "array", "maxItems": 100, "items": { "type": "object" } },
+    "equipment": { "type": "object", "additionalProperties": { "type": "number", "minimum": 0 } }, "materials": { "type": "object", "additionalProperties": { "type": "number", "minimum": 0 } },
+    "energy_kwh": { "type": "number", "minimum": 0 },
+    "blocked_reason": { "type": ["string", "null"], "enum": [null, "NO_LAND_RIGHT", "INSUFFICIENT_AREA", "SLOPE_TOO_HIGH", "SOIL_NOT_COMPATIBLE", "NO_WATER_SOURCE", "NO_ACCESS_ROUTE", "FLOOD_RISK_UNMITIGATED", "POLLUTION_RISK_TOO_HIGH", "TECHNOLOGY_NOT_AVAILABLE", "CIVILIZATION_LEVEL_TOO_LOW", "BLOCKED_EQUIPMENT", "BLOCKED_LABOR", "BLOCKED_MATERIAL", "BLOCKED_ACCESS", "BLOCKED_ENERGY"] }
+  }, "additionalProperties": false
+}

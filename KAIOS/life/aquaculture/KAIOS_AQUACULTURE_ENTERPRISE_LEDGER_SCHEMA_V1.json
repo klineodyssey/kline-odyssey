@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://klineodyssey.github.io/kline-odyssey/KAIOS/life/aquaculture/KAIOS_AQUACULTURE_ENTERPRISE_LEDGER_SCHEMA_V1.json",
+  "title": "Aquaculture Enterprise Ledger V1",
+  "type": "object",
+  "required": ["enterprise_id", "currency", "status", "accounts", "ledger", "assets", "liabilities", "profit_or_loss"],
+  "properties": {
+    "enterprise_id": { "type": "string" }, "currency": { "const": "SIMULATED_CURRENCY" },
+    "status": { "enum": ["PLANNING", "CONSTRUCTION", "PRE_STOCKING", "OPERATING", "HARVESTING", "SALES_PENDING", "CASH_FLOW_WARNING", "PAYMENT_DELAY", "DISTRESS", "INSOLVENT", "RESTRUCTURING_SIMULATION", "COURT_PROTECTION_SIMULATION", "LIQUIDATION_SIMULATION", "DISSOLVED"] },
+    "accounts": { "type": "object", "additionalProperties": { "type": "number" } },
+    "ledger": { "type": "array", "maxItems": 5000, "items": { "$ref": "#/$defs/entry" } },
+    "assets": { "type": "array", "maxItems": 1000, "items": { "type": "object" } }, "liabilities": { "type": "number", "minimum": 0 }, "profit_or_loss": { "type": "number" }
+  }, "additionalProperties": false,
+  "$defs": {
+    "entry": {
+      "type": "object", "required": ["entry_id", "simulation_time", "event", "debit_account", "credit_account", "amount", "balanced", "source_event", "simulation_only"],
+      "properties": { "entry_id": { "type": "string" }, "simulation_time": { "type": "integer", "minimum": 0 }, "event": { "type": "string" }, "debit_account": { "type": "string" }, "credit_account": { "type": "string" }, "amount": { "type": "number", "exclusiveMinimum": 0 }, "balanced": { "const": true }, "source_event": { "type": "string" }, "simulation_only": { "const": true } },
+      "additionalProperties": false
+    }
+  }
+}
