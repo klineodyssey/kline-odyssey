@@ -671,3 +671,26 @@ The following proposal files were added after the 2026-07-05 generated inventory
 | `company/dispatcher_runtime.json` | JSON | Disabled Dispatcher model | ARCHITECTURE_ONLY |
 | `company/COMPANY_GOVERNANCE_FLOW.md` | Markdown | Boot-to-review governance and migration flow | ARCHITECTURE_ONLY |
 | `company/COMPANY_MESSAGE_STANDARD.md` | Markdown | Provider-neutral eight-family message contract | ARCHITECTURE_ONLY |
+
+## KAIOS Physical Labor And Causal Construction Specification
+
+Task: `KAIOS-PR64-PHYSICAL-LABOR-CONSTRUCTION-SPEC-001`
+
+This registration is specification-only. It does not replace Universe Physics
+Runtime CURRENT, modify the PR #63 causal runtime, or activate real labor,
+construction, wallets, KGEN settlement or Production Runtime.
+
+| Repository path | Purpose |
+|---|---|
+| `KAIOS_SINGLE_LIFE_TIMELINE_SPEC.md` | Single physical body, location, activity and travel-time contract. |
+| `KAIOS_DIGITAL_AI_CONCURRENCY_SPEC.md` | Bounded digital concurrency and physical embodiment boundary. |
+| `KAIOS_WORK_SHIFT_SPEC.md` | Shift states, conflicts and effective-work accounting. |
+| `KAIOS_PHYSICAL_LABOR_ACCOUNTING_SPEC.md` | Brick model and mass, distance, time and energy conservation. |
+| `KAIOS_WORKFORCE_REQUIREMENTS_SPEC.md` | Skills, supervision, safety, operators, capacity and crowding. |
+| `KAIOS_CONSTRUCTION_CAUSALITY_SPEC.md` | Ordered full-house dependency and stage specification. |
+| `KAIOS_PHYSICAL_LABOR_SCHEMA.json` | Machine contract for timeline, shift, AI concurrency and labor records. |
+| `KAIOS_CONSTRUCTION_SCHEMA.json` | Machine contract for causal construction stages and workforce. |
+| `KAIOS_PHYSICAL_LABOR_TEST_PLAN.md` | Specification, regression and repository validation plan. |
+| `KGEN-KAIOS/world-viewer/tests/physical_labor_spec.test.mjs` | Executable specification-contract tests. |
+| `KGEN-KAIOS/governance/autopilot/recovery_points/RECOVERY-KAIOS-PR64-PHYSICAL-LABOR-SPEC.md` | Post-merge recovery point. |
+| `KAIOS_PR64_PHYSICAL_LABOR_SPEC_CLOSEOUT.md` | Post-merge closeout evidence. |

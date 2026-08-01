@@ -1,0 +1,203 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://klineodyssey.github.io/kline-odyssey/KAIOS_PHYSICAL_LABOR_SCHEMA.json",
+  "title": "KAIOS Physical Labor Specification Contract",
+  "description": "Specification-only contract for single-body timelines, physical shifts, digital AI concurrency and conserved labor accounting.",
+  "type": "object",
+  "required": ["schema_version", "mode", "authority", "timeline", "shift", "labor_accounting", "conflicts"],
+  "properties": {
+    "schema_version": { "const": "1.0.0" },
+    "mode": { "const": "SPECIFICATION_ONLY" },
+    "authority": { "const": "NO_PRODUCTION_AUTHORITY" },
+    "timeline": { "$ref": "#/$defs/lifeTimeline" },
+    "shift": { "$ref": "#/$defs/workShift" },
+    "digital_ai_concurrency": { "$ref": "#/$defs/digitalAiConcurrency" },
+    "labor_accounting": { "$ref": "#/$defs/brickAccounting" },
+    "conflicts": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/conflictCode" }
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "nonNegativeNumber": { "type": "number", "minimum": 0 },
+    "positiveNumber": { "type": "number", "exclusiveMinimum": 0 },
+    "conflictCode": {
+      "enum": [
+        "ROLE_TIME_CONFLICT", "LOCATION_CONFLICT", "TRAVEL_TIME_CONFLICT",
+        "REST_REQUIREMENT_CONFLICT", "SLEEP_REQUIREMENT_CONFLICT",
+        "BODY_INSTANCE_CONFLICT", "SHIFT_OVERLAP", "INSUFFICIENT_WORKFORCE",
+        "MISSING_REQUIRED_SKILL", "NO_SUPERVISOR", "NO_SAFETY_STAFF",
+        "NO_MACHINE_OPERATOR", "WORKSPACE_OVERCAPACITY"
+      ]
+    },
+    "timelineState": {
+      "enum": [
+        "OFF_DUTY", "COMMUTING", "CLOCKED_IN", "SETUP", "ACTIVE_WORK",
+        "MEETING", "WAITING", "MEAL", "TOILET", "REST",
+        "EQUIPMENT_DOWNTIME", "CLEANUP", "CLOCKED_OUT", "SLEEPING"
+      ]
+    },
+    "event": {
+      "type": "object",
+      "required": ["event_id", "timestamp", "state", "location", "source"],
+      "properties": {
+        "event_id": { "type": "string", "minLength": 1 },
+        "timestamp": { "type": "string", "format": "date-time" },
+        "state": { "$ref": "#/$defs/timelineState" },
+        "location": { "type": "string", "minLength": 1 },
+        "source": { "type": "string", "minLength": 1 },
+        "previous_state_hash": { "type": ["string", "null"] },
+        "next_state_hash": { "type": "string", "minLength": 1 }
+      },
+      "additionalProperties": false
+    },
+    "lifeTimeline": {
+      "type": "object",
+      "required": [
+        "life_id", "body_instance_id", "current_location", "current_activity",
+        "activity_start", "activity_end", "travel_start", "travel_end",
+        "work_shift_id", "meal_state", "toilet_state", "rest_state",
+        "sleep_state", "health_state", "stamina", "availability",
+        "attendance", "time_log", "event_log"
+      ],
+      "properties": {
+        "life_id": { "type": "string", "minLength": 1 },
+        "body_instance_id": { "type": "string", "minLength": 1 },
+        "current_location": { "type": "string", "minLength": 1 },
+        "current_activity": { "$ref": "#/$defs/timelineState" },
+        "activity_start": { "type": ["string", "null"], "format": "date-time" },
+        "activity_end": { "type": ["string", "null"], "format": "date-time" },
+        "travel_start": { "type": ["string", "null"], "format": "date-time" },
+        "travel_end": { "type": ["string", "null"], "format": "date-time" },
+        "work_shift_id": { "type": ["string", "null"] },
+        "meal_state": { "enum": ["NOT_DUE", "DUE", "ACTIVE", "COMPLETE"] },
+        "toilet_state": { "enum": ["NOT_REQUIRED", "REQUIRED", "ACTIVE", "COMPLETE"] },
+        "rest_state": { "enum": ["NOT_DUE", "DUE", "ACTIVE", "COMPLETE"] },
+        "sleep_state": { "enum": ["AWAKE", "SLEEP_DUE", "SLEEPING", "RESTED"] },
+        "health_state": { "enum": ["FIT", "LIMITED", "INJURED", "UNFIT_FOR_WORK", "DECEASED"] },
+        "stamina": { "type": "number", "minimum": 0, "maximum": 100 },
+        "availability": { "enum": ["AVAILABLE", "RESERVED", "UNAVAILABLE"] },
+        "attendance": { "type": "array", "items": { "type": "string" } },
+        "time_log": { "type": "array", "items": { "$ref": "#/$defs/event" } },
+        "event_log": { "type": "array", "items": { "$ref": "#/$defs/event" } }
+      },
+      "additionalProperties": false
+    },
+    "workShift": {
+      "type": "object",
+      "required": [
+        "work_shift_id", "life_id", "body_instance_id", "location_id",
+        "role", "scheduled_start", "scheduled_end", "scheduled_time_minutes",
+        "commute_minutes", "meal_minutes", "toilet_minutes", "rest_minutes",
+        "waiting_minutes", "equipment_downtime_minutes",
+        "material_shortage_minutes", "effective_work_time_minutes", "status"
+      ],
+      "properties": {
+        "work_shift_id": { "type": "string", "minLength": 1 },
+        "life_id": { "type": "string", "minLength": 1 },
+        "body_instance_id": { "type": "string", "minLength": 1 },
+        "location_id": { "type": "string", "minLength": 1 },
+        "role": { "type": "string", "minLength": 1 },
+        "scheduled_start": { "type": "string", "format": "date-time" },
+        "scheduled_end": { "type": "string", "format": "date-time" },
+        "scheduled_time_minutes": { "$ref": "#/$defs/nonNegativeNumber" },
+        "commute_minutes": { "$ref": "#/$defs/nonNegativeNumber" },
+        "meal_minutes": { "$ref": "#/$defs/nonNegativeNumber" },
+        "toilet_minutes": { "$ref": "#/$defs/nonNegativeNumber" },
+        "rest_minutes": { "$ref": "#/$defs/nonNegativeNumber" },
+        "waiting_minutes": { "$ref": "#/$defs/nonNegativeNumber" },
+        "equipment_downtime_minutes": { "$ref": "#/$defs/nonNegativeNumber" },
+        "material_shortage_minutes": { "$ref": "#/$defs/nonNegativeNumber" },
+        "effective_work_time_minutes": { "$ref": "#/$defs/nonNegativeNumber" },
+        "status": { "$ref": "#/$defs/timelineState" }
+      },
+      "additionalProperties": false
+    },
+    "digitalAiConcurrency": {
+      "type": "object",
+      "required": [
+        "life_id", "compute_capacity", "memory_capacity", "context_capacity",
+        "energy_budget", "concurrency_limit", "active_task_count",
+        "waiting_task_count", "quality_risk", "latency", "review_queue", "tasks"
+      ],
+      "properties": {
+        "life_id": { "type": "string", "minLength": 1 },
+        "compute_capacity": { "$ref": "#/$defs/nonNegativeNumber" },
+        "memory_capacity": { "$ref": "#/$defs/nonNegativeNumber" },
+        "context_capacity": { "$ref": "#/$defs/nonNegativeNumber" },
+        "energy_budget": { "$ref": "#/$defs/nonNegativeNumber" },
+        "concurrency_limit": { "type": "integer", "minimum": 1 },
+        "active_task_count": { "type": "integer", "minimum": 0 },
+        "waiting_task_count": { "type": "integer", "minimum": 0 },
+        "quality_risk": { "type": "number", "minimum": 0, "maximum": 1 },
+        "latency": { "$ref": "#/$defs/nonNegativeNumber" },
+        "review_queue": { "type": "array", "items": { "type": "string" } },
+        "tasks": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["task_id", "state", "compute_cost", "memory_cost", "context_cost", "energy_cost"],
+            "properties": {
+              "task_id": { "type": "string" },
+              "state": { "enum": ["ACTIVE_COMPUTE", "WAITING_EXTERNAL", "WAITING_TEST", "WAITING_REVIEW", "PAUSED", "COMPLETED"] },
+              "compute_cost": { "$ref": "#/$defs/nonNegativeNumber" },
+              "memory_cost": { "$ref": "#/$defs/nonNegativeNumber" },
+              "context_cost": { "$ref": "#/$defs/nonNegativeNumber" },
+              "energy_cost": { "$ref": "#/$defs/nonNegativeNumber" }
+            },
+            "additionalProperties": false
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "brickAccounting": {
+      "type": "object",
+      "required": [
+        "mode", "brick_count", "mass_per_brick", "total_mass", "pickup_distance",
+        "carry_distance", "vertical_height", "bricks_per_trip", "worker_speed",
+        "worker_strength", "worker_stamina", "gravity", "terrain", "stairs",
+        "tools", "safety_limit", "load_time", "unload_time", "rest_interval",
+        "trips", "distance_walked", "mass_moved", "vertical_work", "active_minutes",
+        "rest_minutes", "total_worker_hours", "required_workers",
+        "estimated_completion", "injury_risk", "fatigue", "blocked_reason"
+      ],
+      "properties": {
+        "mode": { "enum": ["ONE_STEP_ONE_RECORD", "AGGREGATED_BATCH"] },
+        "brick_count": { "type": "integer", "minimum": 0 },
+        "mass_per_brick": { "$ref": "#/$defs/positiveNumber" },
+        "total_mass": { "$ref": "#/$defs/nonNegativeNumber" },
+        "pickup_distance": { "$ref": "#/$defs/nonNegativeNumber" },
+        "carry_distance": { "$ref": "#/$defs/nonNegativeNumber" },
+        "vertical_height": { "$ref": "#/$defs/nonNegativeNumber" },
+        "bricks_per_trip": { "type": "integer", "minimum": 1 },
+        "worker_speed": { "$ref": "#/$defs/positiveNumber" },
+        "worker_strength": { "$ref": "#/$defs/positiveNumber" },
+        "worker_stamina": { "type": "number", "minimum": 0, "maximum": 100 },
+        "gravity": { "$ref": "#/$defs/positiveNumber" },
+        "terrain": { "type": "string", "minLength": 1 },
+        "stairs": { "type": "boolean" },
+        "tools": { "type": "array", "items": { "type": "string" } },
+        "safety_limit": { "$ref": "#/$defs/positiveNumber" },
+        "load_time": { "$ref": "#/$defs/nonNegativeNumber" },
+        "unload_time": { "$ref": "#/$defs/nonNegativeNumber" },
+        "rest_interval": { "$ref": "#/$defs/nonNegativeNumber" },
+        "trips": { "type": "integer", "minimum": 0 },
+        "distance_walked": { "$ref": "#/$defs/nonNegativeNumber" },
+        "mass_moved": { "$ref": "#/$defs/nonNegativeNumber" },
+        "vertical_work": { "$ref": "#/$defs/nonNegativeNumber" },
+        "active_minutes": { "$ref": "#/$defs/nonNegativeNumber" },
+        "rest_minutes": { "$ref": "#/$defs/nonNegativeNumber" },
+        "total_worker_hours": { "$ref": "#/$defs/nonNegativeNumber" },
+        "required_workers": { "type": "integer", "minimum": 0 },
+        "estimated_completion": { "type": ["string", "null"], "format": "date-time" },
+        "injury_risk": { "type": "number", "minimum": 0, "maximum": 1 },
+        "fatigue": { "type": "number", "minimum": 0, "maximum": 100 },
+        "blocked_reason": { "type": ["string", "null"] }
+      },
+      "additionalProperties": false
+    }
+  }
+}

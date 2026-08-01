@@ -1,0 +1,117 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://klineodyssey.github.io/kline-odyssey/KAIOS_CONSTRUCTION_SCHEMA.json",
+  "title": "KAIOS Causal Construction Specification Contract",
+  "description": "Specification-only contract for ordered construction, explicit resources, workforce limits and causal blocking.",
+  "type": "object",
+  "required": ["schema_version", "mode", "authority", "project_id", "project_type", "dependency_chain", "stage_order", "stages", "status", "history"],
+  "properties": {
+    "schema_version": { "const": "1.0.0" },
+    "mode": { "const": "SPECIFICATION_ONLY" },
+    "authority": { "const": "NO_PRODUCTION_AUTHORITY" },
+    "project_id": { "type": "string", "minLength": 1 },
+    "project_type": { "const": "HOUSE_CONSTRUCTION" },
+    "dependency_chain": {
+      "prefixItems": [
+        { "const": "land_right" }, { "const": "survey" }, { "const": "design" },
+        { "const": "permit_simulation" }, { "const": "site_access" },
+        { "const": "workforce" }, { "const": "materials" }, { "const": "equipment" },
+        { "const": "energy" }, { "const": "transport" }, { "const": "construction" },
+        { "const": "inspection" }, { "const": "rework" }, { "const": "completion" }
+      ],
+      "items": false,
+      "minItems": 14,
+      "maxItems": 14
+    },
+    "stage_order": {
+      "prefixItems": [
+        { "const": "SURVEY" }, { "const": "DESIGN" }, { "const": "SITE_CLEARING" },
+        { "const": "EXCAVATION" }, { "const": "FOUNDATION" }, { "const": "STRUCTURE" },
+        { "const": "ROOF" }, { "const": "UTILITIES" }, { "const": "INTERIOR" },
+        { "const": "INSPECTION" }, { "const": "REWORK" }, { "const": "COMPLETE" }
+      ],
+      "items": false,
+      "minItems": 12,
+      "maxItems": 12
+    },
+    "stages": {
+      "type": "array",
+      "minItems": 12,
+      "maxItems": 12,
+      "items": { "$ref": "#/$defs/stage" }
+    },
+    "status": { "enum": ["PLANNED", "BLOCKED", "ACTIVE", "WAITING_INSPECTION", "REWORK_REQUIRED", "COMPLETE"] },
+    "current_stage": { "$ref": "#/$defs/stageCode" },
+    "blocked_reason": { "type": ["string", "null"] },
+    "history": { "type": "array", "items": { "$ref": "#/$defs/historyEvent" } }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "nonNegativeNumber": { "type": "number", "minimum": 0 },
+    "stageCode": { "enum": ["SURVEY", "DESIGN", "SITE_CLEARING", "EXCAVATION", "FOUNDATION", "STRUCTURE", "ROOF", "UTILITIES", "INTERIOR", "INSPECTION", "REWORK", "COMPLETE"] },
+    "roleCode": { "enum": ["surveyor", "site_supervisor", "general_laborer", "excavator_operator", "steel_worker", "concrete_worker", "electrician", "plumber", "safety_officer", "inspector"] },
+    "quantity": {
+      "type": "object",
+      "required": ["item", "quantity", "unit"],
+      "properties": {
+        "item": { "type": "string", "minLength": 1 },
+        "quantity": { "type": "number", "exclusiveMinimum": 0 },
+        "unit": { "type": "string", "minLength": 1 }
+      },
+      "additionalProperties": false
+    },
+    "workforce": {
+      "type": "object",
+      "required": ["minimum_workers", "optimal_workers", "maximum_effective_workers", "required_skills", "supervisor_count", "safety_staff", "machine_operators", "workspace_capacity", "diminishing_returns", "crowding_penalty"],
+      "properties": {
+        "minimum_workers": { "type": "integer", "minimum": 0 },
+        "optimal_workers": { "type": "integer", "minimum": 0 },
+        "maximum_effective_workers": { "type": "integer", "minimum": 0 },
+        "required_skills": { "type": "array", "uniqueItems": true, "items": { "$ref": "#/$defs/roleCode" } },
+        "supervisor_count": { "type": "integer", "minimum": 0 },
+        "safety_staff": { "type": "integer", "minimum": 0 },
+        "machine_operators": { "type": "integer", "minimum": 0 },
+        "workspace_capacity": { "type": "integer", "minimum": 1 },
+        "diminishing_returns": { "type": "boolean" },
+        "crowding_penalty": { "type": "number", "minimum": 0, "maximum": 1 }
+      },
+      "additionalProperties": false
+    },
+    "stage": {
+      "type": "object",
+      "required": ["stage", "bill_of_materials", "tools", "machines", "workers", "skills", "energy", "water", "time", "site_access", "technology_gate", "safety_gate", "inspection_gate", "status"],
+      "properties": {
+        "stage": { "$ref": "#/$defs/stageCode" },
+        "bill_of_materials": { "type": "array", "items": { "$ref": "#/$defs/quantity" } },
+        "tools": { "type": "array", "uniqueItems": true, "items": { "type": "string" } },
+        "machines": { "type": "array", "uniqueItems": true, "items": { "type": "string" } },
+        "workers": { "$ref": "#/$defs/workforce" },
+        "skills": { "type": "array", "uniqueItems": true, "items": { "$ref": "#/$defs/roleCode" } },
+        "energy": { "$ref": "#/$defs/nonNegativeNumber" },
+        "water": { "$ref": "#/$defs/nonNegativeNumber" },
+        "time": { "type": "number", "exclusiveMinimum": 0 },
+        "site_access": { "type": "boolean" },
+        "technology_gate": { "type": "string", "minLength": 1 },
+        "safety_gate": { "type": "boolean" },
+        "inspection_gate": { "type": "boolean" },
+        "status": { "enum": ["NOT_STARTED", "BLOCKED", "ACTIVE", "WAITING_INSPECTION", "REWORK_REQUIRED", "COMPLETE"] }
+      },
+      "additionalProperties": false
+    },
+    "historyEvent": {
+      "type": "object",
+      "required": ["event_id", "time", "stage", "status", "inputs", "outputs", "previous_state_hash", "next_state_hash"],
+      "properties": {
+        "event_id": { "type": "string", "minLength": 1 },
+        "time": { "type": "number", "minimum": 0 },
+        "stage": { "$ref": "#/$defs/stageCode" },
+        "status": { "type": "string", "minLength": 1 },
+        "inputs": { "type": "object" },
+        "outputs": { "type": "object" },
+        "previous_state_hash": { "type": "string", "minLength": 1 },
+        "next_state_hash": { "type": "string", "minLength": 1 }
+      },
+      "additionalProperties": false
+    }
+  }
+}
