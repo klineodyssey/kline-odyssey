@@ -3,7 +3,7 @@
 **Status:** Active / Draft for Review  
 **Manager:** Codex  
 **Worker:** Cursor  
-**Branch Pattern:** `cursor-handoff/<Task-ID>`
+**Branch Pattern:** `cursor-handoff/<Task-ID>` (sole executable namespace)
 
 ## Problem Solved
 
@@ -23,6 +23,18 @@ For each WorkOrder, Cursor must:
 
 Cursor must not push `main`. Cursor must not force push. Cursor must not modify protected paths.
 
+## Dispatch Branch Normalization
+
+The dispatcher normalizes branch input before a claim or Git branch exists:
+
+| Requested input | Effective branch |
+|---|---|
+| `cursor-handoff/<Task-ID>` | `cursor-handoff/<Task-ID>` |
+| `cursor/<feature-name>` | `cursor-handoff/<Task-ID>` |
+| anything else | `BRANCH_POLICY_MISMATCH` |
+
+`cursor/<feature-name>` is an input alias only. Cursor must never create, commit, push, review, recover, or close out that alias. The Task ID is authoritative, so normalization is deterministic and does not derive identity from the feature slug.
+
 ## Codex Review Rule
 
 Codex must:
@@ -34,6 +46,13 @@ Codex must:
 5. Check protected paths and Canon alignment.
 6. If approved, merge to main and push `origin main`.
 7. If rejected, write the rejection in `CODEX_REVIEW_LOG.md`, mark the task REJECTED, and create a FIX task for Cursor.
+
+## Completion, Closeout, And Recovery
+
+- Cursor completion means a report, commit, pushed canonical handoff branch, and `PENDING_CODEX_REVIEW`; it does not mean approval or Canonical status.
+- Codex alone records review outcome, merge eligibility, closeout, and any promotion from candidate status.
+- Recovery keeps the same Task ID and claim lineage and resumes only `cursor-handoff/<Task-ID>`.
+- Cursor never merges, deploys, pushes main, or closes its own task.
 
 ## Branch Names
 

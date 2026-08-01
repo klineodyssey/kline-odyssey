@@ -16,7 +16,15 @@
     "last_report",
     "allowed_branch_pattern",
     "can_push_main",
-    "reviewer"
+    "reviewer",
+    "employee_status",
+    "trust_level",
+    "boot_acknowledged",
+    "canon_acknowledged",
+    "workspace_policy_acknowledged",
+    "do_not_touch_acknowledged",
+    "suspension",
+    "autonomy_scope"
   ],
   "properties": {
     "worker_id": { "type": "string", "minLength": 1 },
@@ -27,20 +35,53 @@
     "role": { "type": "string", "minLength": 1 },
     "permission": {
       "type": "string",
-      "enum": ["ceo_reviewer", "reviewer", "worker_docs", "worker_code_limited", "research_readonly", "guest_readonly"]
+      "enum": ["system_maintainer", "ceo_reviewer", "reviewer", "worker_docs", "worker_code_limited", "research_readonly", "guest_readonly", "pending", "pending_readonly"]
     },
     "workspace": { "type": "string", "minLength": 1 },
     "current_task": { "type": ["string", "null"] },
     "current_branch": { "type": ["string", "null"] },
     "status": {
       "type": "string",
-      "enum": ["IDLE", "CLAIMED", "IN_PROGRESS", "REVIEW", "BLOCKED", "OFFLINE"]
+      "enum": ["ACTIVE", "IDLE", "CLAIMED", "IN_PROGRESS", "REVIEW", "BLOCKED", "OFFLINE"]
     },
     "heartbeat": { "type": ["string", "null"] },
     "last_report": { "type": ["string", "null"] },
     "allowed_branch_pattern": { "type": "string", "minLength": 1 },
     "can_push_main": { "type": "boolean" },
-    "reviewer": { "type": "string", "minLength": 1 }
+    "reviewer": { "type": "string", "minLength": 1 },
+    "employee_status": {
+      "type": "string",
+      "enum": ["ACTIVE", "TRUSTED", "SENIOR_TRUSTED", "PENDING_REGISTRATION", "SUSPENDED", "REVOKED", "ARCHIVED"]
+    },
+    "trust_level": { "type": "string", "enum": ["T0", "T1", "T2", "T3", "T4", "T5"] },
+    "boot_acknowledged": { "type": "boolean" },
+    "canon_acknowledged": { "type": "boolean" },
+    "workspace_policy_acknowledged": { "type": "boolean" },
+    "do_not_touch_acknowledged": { "type": "boolean" },
+    "suspension": { "type": ["object", "string", "null"] },
+    "autonomy_scope": { "type": "string", "minLength": 1 },
+    "worker_class": { "type": "string", "minLength": 1 },
+    "allowed_work": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 },
+      "uniqueItems": true
+    },
+    "forbidden_work": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 },
+      "uniqueItems": true
+    },
+    "branch_input_aliases": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 },
+      "uniqueItems": true
+    },
+    "branch_normalization": { "type": "string", "minLength": 1 },
+    "dispatch_rule": { "type": "string", "minLength": 1 },
+    "review_rule": { "type": "string", "minLength": 1 },
+    "completion_rule": { "type": "string", "minLength": 1 },
+    "closeout_rule": { "type": "string", "minLength": 1 },
+    "recovery_rule": { "type": "string", "minLength": 1 }
   },
   "additionalProperties": false
 }

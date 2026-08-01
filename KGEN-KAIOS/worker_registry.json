@@ -1,13 +1,13 @@
 {
   "metadata": {
-    "version": "KAIOS_WORKER_REGISTRY_WITH_TRUST_V1",
+    "version": "KAIOS_WORKER_REGISTRY_WITH_TRUST_V1_1",
     "status": "ACTIVE",
-    "updated": "2026-07-25",
+    "updated": "2026-08-01",
     "updated_by": "Codex",
     "reviewed_by": "Codex",
-    "source_commit": "5570756d9343fc83e16acfe594f93334ecb0e258",
-    "task_id": "PR50_POST_MERGE_CLOSEOUT",
-    "change_reason": "Synchronize the managed workspace and the next HOLD workline without changing permissions or dispatch state.",
+    "source_commit": "29c5d51769f35ff7cd4af14e97f63958e6e201a0",
+    "task_id": "KAIOS-CURSOR-WORKER-REGISTRY-REPAIR-001",
+    "change_reason": "Keep cursor-handoff/<Task-ID> as the sole executable namespace, normalize cursor/<feature-name> dispatch aliases, and register cursor-01 for bounded foundational-life candidate work.",
     "source_of_truth": true
   },
   "formal_employee_requirements": [
@@ -22,6 +22,30 @@
     "do_not_touch_acknowledged is true",
     "no active suspension, ban, expired credential, or blocking violation exists"
   ],
+  "cursor_branch_policy": {
+    "policy_id": "CURSOR_BRANCH_POLICY_V1_1",
+    "canonical_template": "cursor-handoff/<Task-ID>",
+    "executable_namespace_count": 1,
+    "input_aliases": [
+      "cursor/<feature-name>"
+    ],
+    "normalization": {
+      "cursor-handoff/<Task-ID>": "cursor-handoff/<Task-ID>",
+      "cursor/<feature-name>": "cursor-handoff/<Task-ID>"
+    },
+    "task_id_source": "AUTHORIZED_TASK_ENVELOPE",
+    "normalize_before": [
+      "CLAIM",
+      "BRANCH_CREATE",
+      "COMMIT",
+      "PUSH",
+      "REVIEW",
+      "RECOVERY",
+      "CLOSEOUT"
+    ],
+    "reject_unlisted": true,
+    "mismatch_result": "BRANCH_POLICY_MISMATCH"
+  },
   "workers": [
     {
       "worker_id": "codex-gm-01",
@@ -49,8 +73,9 @@
     {
       "worker_id": "cursor-01",
       "worker_type": "Cursor",
-      "role": "Construction / Documentation / QA Worker",
-      "permission": "worker_docs",
+      "role": "Foundational Life Candidate Creator / Documentation / QA Worker",
+      "permission": "worker_code_limited",
+      "worker_class": "FOUNDATIONAL_LIFE_CREATOR",
       "workspace": "cursor-worker-workspace",
       "current_task": null,
       "current_branch": null,
@@ -60,8 +85,40 @@
       "heartbeat": "2026-07-16T02:12:41Z",
       "last_report": "KGEN-AI-Company/reports/ORG-P2-003F_FIX1_12345_MODULE_NAMING_MIGRATION_PLAN.md",
       "allowed_branch_pattern": "cursor-handoff/<Task-ID>",
+      "branch_input_aliases": [
+        "cursor/<feature-name>"
+      ],
+      "branch_normalization": "ALIAS_INPUT_ONLY -> cursor-handoff/<Task-ID>",
       "can_push_main": false,
       "reviewer": "codex-gm-01",
+      "allowed_work": [
+        "GRASS",
+        "TREE",
+        "FISH",
+        "SHRIMP",
+        "MOUNTAIN",
+        "SOIL",
+        "WATER",
+        "RIVER",
+        "CANDIDATE_LIFE_PACKAGE",
+        "CANDIDATE_TEST",
+        "CANDIDATE_REPORT"
+      ],
+      "forbidden_work": [
+        "WALLET",
+        "KGEN",
+        "CURRENT",
+        "CANONICAL_SCHEMA",
+        "UNIVERSE_LAW",
+        "RUNTIME",
+        "DEPLOYMENT",
+        "MERGE"
+      ],
+      "dispatch_rule": "ONE_EXPLICIT_TASK; NORMALIZE_BRANCH_BEFORE_CLAIM; ISOLATED_WORKTREE",
+      "review_rule": "CODEX_FINAL_REVIEW_REQUIRED; CURSOR_SELF_APPROVAL_DENIED",
+      "completion_rule": "CANDIDATE_ONLY; DRAFT_PR; STOP_AT_PENDING_CODEX_REVIEW",
+      "closeout_rule": "CODEX_ONLY_AFTER_REVIEW; CURSOR_MUST_NOT_MARK_CANONICAL",
+      "recovery_rule": "KEEP_TASK_ID_AND_CLAIM_LINEAGE; RESUME_ON_CANONICAL_HANDOFF_BRANCH",
       "boot_acknowledged": true,
       "canon_acknowledged": true,
       "workspace_policy_acknowledged": true,
