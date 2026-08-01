@@ -18,6 +18,7 @@ EXPECTED_PACKAGES = {
     "water": ("WATER_BODY_LIFE", ["WATER_BODY_EXTENSION"]),
     "river": ("WATER_BODY_LIFE", ["WATER_BODY_EXTENSION"]),
 }
+ALLOWED_DATA_DIRECTORIES = {"ecology-v1"}
 EXPECTED_FILES = {
     "README.md",
     "life.manifest.json",
@@ -47,8 +48,10 @@ ALLOWED_CHANGED_PREFIXES = (
     "KAIOS/life/candidates/soil/",
     "KAIOS/life/candidates/water/",
     "KAIOS/life/candidates/river/",
+    "KAIOS/life/candidates/ecology-v1/",
     "KAIOS/life/tests/",
     "CURSOR_FOUNDATIONAL_LIFE_PACKAGE_REPORT.md",
+    "CURSOR_ECOLOGY_V1_CANDIDATE_REPORT.md",
 )
 DOMAIN_FIELDS = {
     "grass": ["taxonomy", "species_program", "mass_range", "height_range", "root_depth", "water_need", "sunlight_need", "soil_compatibility", "growth_rate", "seed", "reproduction", "season", "temperature_range", "disease", "grazing_role", "erosion_control_role", "economic_role", "event_log"],
@@ -273,7 +276,10 @@ def assert_protected_changes():
 def main():
     schema = load_json(SCHEMA_PATH)
     extension_map = load_json(EXTENSIONS_PATH)
-    actual_packages = {path.name for path in CANDIDATES.iterdir() if path.is_dir()}
+    candidate_directories = {path.name for path in CANDIDATES.iterdir() if path.is_dir()}
+    unknown_directories = candidate_directories - set(EXPECTED_PACKAGES) - ALLOWED_DATA_DIRECTORIES
+    assert not unknown_directories, f"unexpected candidate dirs: {unknown_directories}"
+    actual_packages = candidate_directories & set(EXPECTED_PACKAGES)
     assert actual_packages == set(EXPECTED_PACKAGES), f"unexpected package dirs: {actual_packages}"
     for package_name in sorted(EXPECTED_PACKAGES):
         package_dir = CANDIDATES / package_name
