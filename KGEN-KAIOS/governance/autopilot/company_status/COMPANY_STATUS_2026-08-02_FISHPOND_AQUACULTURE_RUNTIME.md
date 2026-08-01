@@ -2,7 +2,7 @@
 
 Task: `KAIOS-FISHPOND-AQUACULTURE-RUNTIME-V1-001`
 
-Status: `EXECUTIVE_REVIEW_PASS_PENDING_PR_MERGE`
+Status: `KAIOS_FISHPOND_AQUACULTURE_RUNTIME_V1_DEPLOYED`
 
 Base main: `1e4eeab9c2c8851fcd83306ccb83a78e0148c3a6`
 
@@ -11,6 +11,14 @@ Canonical owner: `KGEN-KAIOS/world-viewer/aquaculture/aquaculture-runtime.js`
 Cursor contribution: `RESEARCH_CANDIDATE_ONLY / APPROVED_FOR_SPEC_INPUT / PR #79`
 
 Specification: `MERGED / PR #80`
+
+Runtime: `MERGED / PR #81 / 74da556366445ce845ccae8a256e33d62868fbd2`
+
+Production-QA repair: `MERGED / PR #82 / 64f92eb91deebf83fcdf56f2f1d641b262f2a1b8`
+
+GitHub Pages: `SUCCESS / 30719231518 / 30719949668`
+
+Production verification: `189 / 189 PASS / HTTP 200 / CACHE VERIFIED`
 
 Runtime mode: `LOCAL_DETERMINISTIC_SIMULATION`
 
