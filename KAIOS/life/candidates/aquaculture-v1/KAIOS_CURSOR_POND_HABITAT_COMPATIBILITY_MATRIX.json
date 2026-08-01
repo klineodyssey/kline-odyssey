@@ -1,0 +1,18 @@
+{
+  "schema_version": "candidate-1.0.0",
+  "status": "CURSOR_RESEARCH_CANDIDATE_ONLY",
+  "mode": "SIMULATION_ONLY",
+  "food_safety": "NO_REAL_FOOD_SAFETY_CERTIFICATION",
+  "habitat_id": "HABITAT-FISHPOND-V1",
+  "parameters": [
+    {"parameter_name":"usable_area_fraction","unit":"fraction_of_land_area","minimum":0.2,"default":0.6,"maximum":0.85,"rationale":"Reserves nonpond space for embankments, access, drainage, and equipment in a synthetic site model.","source_type":"ASSUMPTION","confidence":"LOW","risk":"Site geometry may require different allocation.","validation_required":true},
+    {"parameter_name":"maximum_site_slope","unit":"percent_grade","minimum":0.0,"default":3.0,"maximum":8.0,"rationale":"Candidate land-suitability gate, not a construction standard.","source_type":"RESEARCH_PROPOSAL","confidence":"LOW","risk":"Geotechnical design is out of scope.","validation_required":true},
+    {"parameter_name":"minimum_water_reliability","unit":"normalized_index","minimum":0.0,"default":0.8,"maximum":1.0,"rationale":"Provides a deterministic water-source availability gate.","source_type":"MODEL_INFERENCE","confidence":"LOW","risk":"Does not guarantee actual supply.","validation_required":true},
+    {"parameter_name":"maximum_pollution_risk","unit":"normalized_index","minimum":0.0,"default":0.2,"maximum":1.0,"rationale":"Candidate blocking threshold for synthetic nearby pollution sources.","source_type":"RESEARCH_PROPOSAL","confidence":"LOW","risk":"Aggregates different contaminants.","validation_required":true}
+  ],
+  "compatibility": [
+    {"species_id":"SPECIES-KAIOS-FOUNDATIONAL-FISH","habitat_type":"FISHPOND","water_types":["freshwater","brackish_candidate"],"decision":"CONDITIONAL","gates":["WATER_STABLE","OXYGEN_COMPATIBLE","TEMPERATURE_COMPATIBLE","SALINITY_COMPATIBLE","CAPACITY_AVAILABLE"]},
+    {"species_id":"SPECIES-KAIOS-FOUNDATIONAL-SHRIMP","habitat_type":"FISHPOND","water_types":["brackish","marine_candidate"],"decision":"CONDITIONAL","gates":["WATER_STABLE","OXYGEN_COMPATIBLE","TEMPERATURE_COMPATIBLE","SALINITY_COMPATIBLE","LARVAL_STAGE_ACCEPTED","CAPACITY_AVAILABLE"]}
+  ],
+  "site_blockers": ["NO_LAND_RIGHT","INSUFFICIENT_AREA","SLOPE_TOO_HIGH","SOIL_NOT_COMPATIBLE","NO_WATER_SOURCE","NO_ACCESS_ROUTE","FLOOD_RISK_UNMITIGATED","POLLUTION_RISK_TOO_HIGH"]
+}

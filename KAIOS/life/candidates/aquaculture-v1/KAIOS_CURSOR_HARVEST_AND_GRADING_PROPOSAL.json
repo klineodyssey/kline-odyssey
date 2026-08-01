@@ -1,0 +1,15 @@
+{
+  "schema_version": "candidate-1.0.0",
+  "status": "CURSOR_RESEARCH_CANDIDATE_ONLY",
+  "mode": "SIMULATION_ONLY",
+  "food_safety": "NO_REAL_FOOD_SAFETY_CERTIFICATION",
+  "parameters": [
+    {"parameter_name":"minimum_harvest_readiness","unit":"normalized_index","minimum":0.0,"default":0.8,"maximum":1.0,"rationale":"Candidate gate combining elapsed growth stage, health, and buyer requirements.","source_type":"MODEL_INFERENCE","confidence":"LOW","risk":"Not a biological maturity standard.","validation_required":true},
+    {"parameter_name":"capture_loss_fraction","unit":"fraction_of_gross_mass","minimum":0.0,"default":0.02,"maximum":0.15,"rationale":"Accounts for bounded handling and mortality loss rather than assuming perfect yield.","source_type":"RESEARCH_PROPOSAL","confidence":"LOW","risk":"Scenario-dependent and not a production benchmark.","validation_required":true},
+    {"parameter_name":"rejected_mass_fraction","unit":"fraction_of_gross_mass","minimum":0.0,"default":0.05,"maximum":0.4,"rationale":"Creates explicit rejected inventory for disposal or processing simulation.","source_type":"RESEARCH_PROPOSAL","confidence":"LOW","risk":"No food-safety certification or real grading meaning.","validation_required":true},
+    {"parameter_name":"chilling_delay","unit":"simulation_minutes","minimum":0.0,"default":30.0,"maximum":240.0,"rationale":"Supports deterministic cold-chain risk transitions.","source_type":"ASSUMPTION","confidence":"LOW","risk":"Not a food-safety limit.","validation_required":true}
+  ],
+  "stages": ["HARVEST_PLANNED","PARTIAL_DRAIN","CAPTURE","SORTING","WEIGHING","GRADING","CHILLING","PACKING","COLD_STORAGE","DISPATCH","COMPLETE"],
+  "mass_identity": "gross_mass = marketable_mass + rejected_mass + mortality_loss",
+  "grades": ["GRADE_A_SIMULATION","GRADE_B_SIMULATION","PROCESSING_ONLY_SIMULATION","REJECTED_SIMULATION"]
+}
