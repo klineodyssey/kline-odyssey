@@ -1093,3 +1093,16 @@ does not activate wallets, real KGEN, on-chain transfers or Production Runtime.
 - [Canonical Life Specification](KAIOS_CANONICAL_LIFE_SPEC_V1.md)
 - [Canonical Life Schema](KAIOS_CANONICAL_LIFE_SCHEMA_V1.json)
 - [Package Template](KAIOS_CANONICAL_LIFE_PACKAGE_TEMPLATE_V1/README.md)
+
+## KAIOS Reproduction and Ecology Runtime V1
+
+The approved specification defines bounded populations, reproduction, carrying
+capacity, foundational food relationships, water and soil cycles, death,
+decomposition and restoration for the eight Life Runtime V1 packages. It is a
+deterministic simulation with no real bioengineering, Wallet, KGEN, on-chain
+transfer, automatic species promotion or Production authority.
+
+- [Runtime V1 Specification](KAIOS/life/ecology/KAIOS_REPRODUCTION_ECOLOGY_RUNTIME_V1_SPEC.md)
+- [Charter Source Crosswalk](KAIOS/life/ecology/KAIOS_REPRODUCTION_ECOLOGY_SOURCE_CROSSWALK.md)
+- [State Schema](KAIOS/life/ecology/KAIOS_REPRODUCTION_ECOLOGY_SCHEMA_V1.json)
+- [Test Plan](KAIOS/life/ecology/KAIOS_REPRODUCTION_ECOLOGY_TEST_PLAN.md)

@@ -61,6 +61,11 @@
     "suspension": { "type": ["object", "string", "null"] },
     "autonomy_scope": { "type": "string", "minLength": 1 },
     "worker_class": { "type": "string", "minLength": 1 },
+    "worker_classes": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 },
+      "uniqueItems": true
+    },
     "allowed_work": {
       "type": "array",
       "items": { "type": "string", "minLength": 1 },

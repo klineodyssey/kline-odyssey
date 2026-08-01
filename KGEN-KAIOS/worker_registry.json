@@ -6,8 +6,8 @@
     "updated_by": "Codex",
     "reviewed_by": "Codex",
     "source_commit": "29c5d51769f35ff7cd4af14e97f63958e6e201a0",
-    "task_id": "KAIOS-CURSOR-WORKER-REGISTRY-REPAIR-001",
-    "change_reason": "Keep cursor-handoff/<Task-ID> as the sole executable namespace, normalize cursor/<feature-name> dispatch aliases, and register cursor-01 for bounded foundational-life candidate work.",
+    "task_id": "KAIOS-CHARTER-REPRODUCTION-ECOLOGY-PROGRAM-001",
+    "change_reason": "Close the merged PR #69 claim and authorize cursor-01 for bounded, candidate-only ecosystem datasets under Codex review.",
     "source_of_truth": true
   },
   "formal_employee_requirements": [
@@ -73,16 +73,20 @@
     {
       "worker_id": "cursor-01",
       "worker_type": "Cursor",
-      "role": "Foundational Life Candidate Creator / Documentation / QA Worker",
+      "role": "Foundational Life Candidate Creator / Life Research Analyst / Documentation / QA Worker",
       "permission": "worker_code_limited",
       "worker_class": "FOUNDATIONAL_LIFE_CREATOR",
+      "worker_classes": [
+        "FOUNDATIONAL_LIFE_CREATOR",
+        "LIFE_RESEARCH_ANALYST"
+      ],
       "workspace": "cursor-worker-workspace",
-      "current_task": "KAIOS-PR67-CURSOR-FOUNDATIONAL-LIFE-CANDIDATES-001",
-      "current_branch": "cursor-handoff/KAIOS-PR67-CURSOR-FOUNDATIONAL-LIFE-CANDIDATES-001",
+      "current_task": "KAIOS-ECOLOGY-V1-CANDIDATE-DATA-001",
+      "current_branch": "cursor-handoff/KAIOS-ECOLOGY-V1-CANDIDATE-DATA-001",
       "status": "CLAIMED",
       "employee_status": "ACTIVE",
       "trust_level": "T2",
-      "heartbeat": "2026-08-01T06:25:03Z",
+      "heartbeat": "2026-08-01T13:10:00Z",
       "last_report": "KGEN-AI-Company/reports/ORG-P2-003F_FIX1_12345_MODULE_NAMING_MIGRATION_PLAN.md",
       "allowed_branch_pattern": "cursor-handoff/<Task-ID>",
       "branch_input_aliases": [
@@ -102,7 +106,13 @@
         "RIVER",
         "CANDIDATE_LIFE_PACKAGE",
         "CANDIDATE_TEST",
-        "CANDIDATE_REPORT"
+        "CANDIDATE_REPORT",
+        "FOUNDATIONAL_FOOD_RELATIONSHIP_DATASET",
+        "HABITAT_COMPATIBILITY_MATRIX",
+        "SPECIES_ENVIRONMENTAL_THRESHOLD_DATASET",
+        "POPULATION_SCENARIO_FIXTURE",
+        "ECOSYSTEM_VIEWER_CARD_DATA",
+        "CANDIDATE_ECOLOGY_TEST"
       ],
       "forbidden_work": [
         "WALLET",
