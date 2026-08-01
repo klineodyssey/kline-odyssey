@@ -1,0 +1,22 @@
+{
+  "extensions": [
+    "WATER_BODY_EXTENSION"
+  ],
+  "life_type": "WATER_BODY_LIFE",
+  "schema_version": "1.0.0",
+  "taxonomy": {
+    "CLASS": "WATER_ANALOG",
+    "DOMAIN": "KGEN_UNIVERSE",
+    "FAMILY": "KAIOS_FOUNDATIONAL_CANDIDATES",
+    "GENUS": "KAIOS_WATER",
+    "KINGDOM": "WATER_BODY_LIFE",
+    "LIFE_INSTANCE": "LIFE-KAIOS-FOUNDATIONAL-WATER-001",
+    "ORDER": "AQUA_CANDIDATE",
+    "PHYLUM": "HYDROLOGIC_BODY",
+    "SPECIES": "SPECIES-KAIOS-FOUNDATIONAL-WATER",
+    "extension_19": {
+      "reason": "Canonical 19-layer biological taxonomy is not forced onto non-biological terrain, soil, or water-body life.",
+      "status": "NOT_APPLICABLE"
+    }
+  }
+}

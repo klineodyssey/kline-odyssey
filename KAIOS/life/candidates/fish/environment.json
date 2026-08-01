@@ -1,0 +1,52 @@
+{
+  "environment_requirements": {
+    "oxygen_mg_l": [
+      5,
+      12
+    ],
+    "salinity_ppt": [
+      0,
+      10
+    ],
+    "temperature_c": [
+      12,
+      28
+    ],
+    "water_type": [
+      "freshwater",
+      "brackish"
+    ]
+  },
+  "resource_inputs": [
+    {
+      "minimum_mg_l": 5,
+      "resource": "dissolved_oxygen"
+    },
+    {
+      "diet": [
+        "algae",
+        "invertebrates",
+        "prepared_feed"
+      ],
+      "resource": "feed_or_prey"
+    },
+    {
+      "resource": "compatible_water",
+      "water_type": [
+        "freshwater",
+        "brackish"
+      ]
+    }
+  ],
+  "resource_outputs": [
+    {
+      "mode": "simulated_harvest_output",
+      "resource": "biomass"
+    },
+    {
+      "mode": "water_quality_load",
+      "resource": "nutrient_waste"
+    }
+  ],
+  "schema_version": "1.0.0"
+}

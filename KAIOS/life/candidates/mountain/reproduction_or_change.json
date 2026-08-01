@@ -1,0 +1,22 @@
+{
+  "change": "formation erosion weathering collapse only",
+  "death_or_termination": {
+    "conditions": [
+      "eroded_below_terrain_threshold",
+      "catastrophic_collapse"
+    ]
+  },
+  "mutation_or_change": {
+    "collapse_conditions": [
+      "slope_over_critical_angle",
+      "water_saturation",
+      "seismic_shock"
+    ],
+    "erosion": "time based"
+  },
+  "reproduction_or_replication": {
+    "reason": "Mountain changes through formation, erosion, and collapse, not reproduction.",
+    "status": "NOT_APPLICABLE"
+  },
+  "schema_version": "1.0.0"
+}

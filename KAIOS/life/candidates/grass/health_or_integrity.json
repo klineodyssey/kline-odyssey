@@ -1,0 +1,28 @@
+{
+  "damage": {
+    "risks": [
+      "drought",
+      "overgrazing",
+      "soil_compaction"
+    ]
+  },
+  "disease": [
+    "fungal_blight",
+    "root_rot"
+  ],
+  "health_or_integrity": {
+    "disease": [
+      "fungal_blight",
+      "root_rot"
+    ],
+    "grazing_tolerance": "moderate"
+  },
+  "repair_or_healing": {
+    "mechanism": "regrowth_from_crown_or_seed_bank",
+    "requires": [
+      "water",
+      "time"
+    ]
+  },
+  "schema_version": "1.0.0"
+}

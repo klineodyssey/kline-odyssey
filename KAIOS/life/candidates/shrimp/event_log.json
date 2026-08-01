@@ -1,0 +1,13 @@
+{
+  "events": [
+    {
+      "event_id": "EVT-LIFE-KAIOS-FOUNDATIONAL-SHRIMP-001-0001",
+      "next_state_hash": "a9c322b6c580134a80e374573d074dc7b54f6137f262d426200a6a5bfae66530",
+      "previous_state_hash": null,
+      "status": "PENDING_CODEX_REVIEW",
+      "timestamp": "2026-08-01T06:25:03Z",
+      "type": "CANDIDATE_PACKAGE_CREATED"
+    }
+  ],
+  "schema_version": "1.0.0"
+}

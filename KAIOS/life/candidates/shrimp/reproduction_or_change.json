@@ -1,0 +1,33 @@
+{
+  "death_or_termination": {
+    "conditions": [
+      "anoxia",
+      "ammonia_toxicity",
+      "failed_molt",
+      "salinity_shock"
+    ]
+  },
+  "larval_stages": [
+    "nauplius",
+    "zoea",
+    "mysis",
+    "post_larva"
+  ],
+  "lifespan": "6-24 months",
+  "mutation_or_change": {
+    "molting": "stage transition",
+    "mutation": "not modeled"
+  },
+  "reproduction": "egg bearing",
+  "reproduction_or_replication": {
+    "larval_stages": [
+      "nauplius",
+      "zoea",
+      "mysis",
+      "post_larva"
+    ],
+    "real_biological_engineering": false,
+    "reproduction": "egg_bearing_simulated"
+  },
+  "schema_version": "1.0.0"
+}

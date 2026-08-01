@@ -1,0 +1,10 @@
+{
+  "display": "Foundational River Candidate",
+  "mode": "READ_ONLY_CANDIDATE_PREVIEW",
+  "schema_version": "1.0.0",
+  "world_viewer_binding": {
+    "authority": "NO_PRODUCTION_AUTHORITY",
+    "mode": "READ_ONLY",
+    "reference": "viewer.json"
+  }
+}

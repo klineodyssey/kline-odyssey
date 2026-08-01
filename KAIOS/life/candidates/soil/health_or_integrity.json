@@ -1,0 +1,24 @@
+{
+  "compaction": "low_to_moderate",
+  "contamination": "none_recorded",
+  "damage": {
+    "compaction": "porosity reduction",
+    "contamination": "toxicity risk",
+    "erosion": "topsoil loss"
+  },
+  "erosion": "tracked",
+  "health_or_integrity": {
+    "fertility": "medium",
+    "integrity": "erosion_compaction_contamination_dependent"
+  },
+  "repair_or_healing": {
+    "mechanism": "organic_amendment_decompaction_and_time",
+    "requires": [
+      "material_input",
+      "labor",
+      "water",
+      "time"
+    ]
+  },
+  "schema_version": "1.0.0"
+}

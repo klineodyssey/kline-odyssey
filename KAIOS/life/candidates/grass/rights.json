@@ -1,0 +1,75 @@
+{
+  "authority_boundary": "NO_PRODUCTION_AUTHORITY",
+  "legal_personhood": false,
+  "rights": {
+    "BREEDING_RIGHTS": {
+      "authority": "NO_PRODUCTION_AUTHORITY",
+      "candidate_only": true,
+      "holder": "UNASSIGNED",
+      "scope": "NO_REAL_BREEDING_AUTHORITY"
+    },
+    "COMMERCIAL_LICENSE": {
+      "authority": "NO_PRODUCTION_AUTHORITY",
+      "candidate_only": true,
+      "holder": "UNASSIGNED",
+      "scope": "NO_COMMERCIAL_LICENSE"
+    },
+    "CONTROL_AUTHORITY": {
+      "authority": "NO_PRODUCTION_AUTHORITY",
+      "candidate_only": true,
+      "holder": "UNASSIGNED",
+      "scope": "NO_RUNTIME_CONTROL_AUTHORITY"
+    },
+    "CUSTODIAN": {
+      "authority": "NO_PRODUCTION_AUTHORITY",
+      "candidate_only": true,
+      "holder": "UNASSIGNED",
+      "scope": "REVIEW_CUSTODY_PENDING_CODEX"
+    },
+    "HABITAT_RIGHTS": {
+      "authority": "NO_PRODUCTION_AUTHORITY",
+      "candidate_only": true,
+      "holder": "UNASSIGNED",
+      "scope": "NO_REAL_HABITAT_CLAIM"
+    },
+    "HARVEST_RIGHTS": {
+      "authority": "NO_PRODUCTION_AUTHORITY",
+      "candidate_only": true,
+      "holder": "UNASSIGNED",
+      "scope": "NO_REAL_HARVEST_AUTHORITY"
+    },
+    "OCCUPANT": {
+      "authority": "NO_PRODUCTION_AUTHORITY",
+      "candidate_only": true,
+      "holder": "UNASSIGNED",
+      "scope": "NO_OCCUPANT_CLAIM"
+    },
+    "OPERATOR": {
+      "authority": "NO_PRODUCTION_AUTHORITY",
+      "candidate_only": true,
+      "holder": "UNASSIGNED",
+      "scope": "LOCAL_VALIDATION_ONLY"
+    },
+    "OWNER": {
+      "authority": "NO_PRODUCTION_AUTHORITY",
+      "candidate_only": true,
+      "holder": "UNASSIGNED",
+      "scope": "PACKAGE_RECORD_ONLY_NOT_LEGAL_OWNERSHIP"
+    },
+    "TRANSFER_RIGHTS": {
+      "authority": "NO_PRODUCTION_AUTHORITY",
+      "candidate_only": true,
+      "holder": "UNASSIGNED",
+      "scope": "NO_ONCHAIN_OR_LEGAL_TRANSFER"
+    },
+    "USAGE_RIGHTS": {
+      "authority": "NO_PRODUCTION_AUTHORITY",
+      "candidate_only": true,
+      "holder": "UNASSIGNED",
+      "scope": "SIMULATION_REFERENCE_ONLY"
+    },
+    "tradeability": "FUTURE_REVIEW_REQUIRED"
+  },
+  "schema_version": "1.0.0",
+  "wallet": "NONE"
+}

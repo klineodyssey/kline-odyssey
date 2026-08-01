@@ -1,0 +1,32 @@
+{
+  "constraints": [
+    "Water availability decreases through consumption and evaporation unless replenished by inflow."
+  ],
+  "density": {
+    "unit": "kg/m3",
+    "value": 1000.0
+  },
+  "density_check": {
+    "computed_kg_per_m3": 1000.0,
+    "formula": "mass_kg / volume_m3"
+  },
+  "dimensions": {
+    "container_volume_m3": 1000,
+    "depth_m": 2.0,
+    "surface_area_m2": 500
+  },
+  "energy_model": {
+    "simulation_only": true,
+    "source": "thermal_environment",
+    "state": "liquid"
+  },
+  "mass": {
+    "unit": "kg",
+    "value": 1000000.0
+  },
+  "schema_version": "1.0.0",
+  "volume": {
+    "unit": "m3",
+    "value": 1000.0
+  }
+}

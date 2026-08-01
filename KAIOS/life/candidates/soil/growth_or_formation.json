@@ -1,0 +1,20 @@
+{
+  "composition": "sand/silt/clay/organic matter",
+  "crop_support": "candidate",
+  "density_kg_m3": 1300.0,
+  "elapsed_time_required": true,
+  "fertility": "medium",
+  "formation": "weathered mineral plus organic accumulation over elapsed time",
+  "foundation_support": "candidate",
+  "instant_formation": false,
+  "mass_kg": 1300000.0,
+  "moisture": "moderate",
+  "organic_matter": "5 percent",
+  "ph": [
+    6.0,
+    7.2
+  ],
+  "schema_version": "1.0.0",
+  "volume_m3": 1000.0,
+  "water_retention": "moderate"
+}

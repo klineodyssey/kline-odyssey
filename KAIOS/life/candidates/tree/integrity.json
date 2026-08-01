@@ -1,0 +1,28 @@
+{
+  "algorithm": "SHA-256",
+  "checksum": "ada91777af39c66708bc52d88df1d111ef33402719b8eba8e6d8f4d1bbbc6246",
+  "covers": [
+    "README.md",
+    "life.manifest.json",
+    "taxonomy.json",
+    "physics.json",
+    "environment.json",
+    "growth_or_formation.json",
+    "health_or_integrity.json",
+    "reproduction_or_change.json",
+    "economy.json",
+    "rights.json",
+    "runtime.json",
+    "viewer.json",
+    "api.json",
+    "provenance.json",
+    "event_log.json"
+  ],
+  "excludes": [
+    "integrity.json",
+    "life.manifest.json#/integrity/checksum"
+  ],
+  "procedure": "Sort declared component names; exclude integrity.json; canonicalize JSON as UTF-8 with sorted keys and no insignificant whitespace; set life.manifest.json integrity.checksum to 64 zeroes before hashing; hash filename, byte length, bytes, and separators with SHA-256.",
+  "recomputed_at_generation": true,
+  "schema_version": "1.0.0"
+}

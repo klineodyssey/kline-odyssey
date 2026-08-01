@@ -1,0 +1,29 @@
+{
+  "growth_stages": [
+    "seed",
+    "sapling",
+    "juvenile",
+    "mature",
+    "senescent"
+  ],
+  "habitat_role": "shade and nesting",
+  "height_range_m": [
+    2,
+    30
+  ],
+  "mass_range_kg": [
+    10,
+    2500
+  ],
+  "root_system": "taproot_and_lateral_roots",
+  "schema_version": "1.0.0",
+  "soil_compatibility": [
+    "loam",
+    "deep_alluvial_soil"
+  ],
+  "species_program": "KAIOS_TREE_FOUNDATIONAL_PROGRAM",
+  "sunlight_need": "medium_to_full",
+  "taxonomy": "tree",
+  "water_need": "medium",
+  "wood_output": "simulated only"
+}

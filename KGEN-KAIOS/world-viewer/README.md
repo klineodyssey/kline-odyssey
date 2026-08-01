@@ -48,6 +48,18 @@ replayable, non-authoritative, and disconnected from real wallets or KGEN.
 
 **Public URL:** https://klineodyssey.github.io/kline-odyssey/world-viewer/causal-runtime/
 
+## Foundational Life Runtime V1
+
+`../../world-viewer/life-runtime/` is the stable read-only simulation route for
+the PR #69 Grass, Tree, Fish, Shrimp, Mountain, Soil, Water, and River
+candidates. It loads the shared candidate packages and the single bounded
+engine under `KAIOS/life/runtime/`; it does not duplicate the existing person
+Life Runtime or the K280 species runtime.
+
+**Public URL:** https://klineodyssey.github.io/kline-odyssey/world-viewer/life-runtime/
+
+**Public data:** https://klineodyssey.github.io/kline-odyssey/api/kaios/life-runtime-v1/
+
 ## 1. Decision Status
 
 | Field | Value |

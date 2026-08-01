@@ -1,0 +1,24 @@
+{
+  "bridge_interaction": "requires clearance and foundation review",
+  "change": "flow sediment flood drought channel migration",
+  "death_or_termination": {
+    "conditions": [
+      "source_ceases",
+      "channel_filled",
+      "complete_diversion"
+    ]
+  },
+  "irrigation_role": "candidate supply",
+  "mutation_or_change": {
+    "bridge_interaction": "bridge requires clearance and foundation review",
+    "drought": "source inflow below loss threshold",
+    "flood": "inflow exceeds channel capacity",
+    "transport_blocking": "river may block ground travel without crossing"
+  },
+  "reproduction_or_replication": {
+    "reason": "River changes through hydrology and channel evolution, not reproduction.",
+    "status": "NOT_APPLICABLE"
+  },
+  "schema_version": "1.0.0",
+  "transport_blocking": true
+}

@@ -1,0 +1,13 @@
+{
+  "executable": false,
+  "production_authority": false,
+  "runtime_binding": {
+    "authority": "NO_PRODUCTION_AUTHORITY",
+    "mode": "NON_EXECUTABLE_BINDING",
+    "reference": "runtime.json"
+  },
+  "schema_version": "1.0.0",
+  "settlement": false,
+  "simulation_only": true,
+  "wallet": "NONE"
+}

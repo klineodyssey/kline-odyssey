@@ -1,0 +1,552 @@
+{
+  "aging": {
+    "mode": "profile_development"
+  },
+  "api_binding": {
+    "authority": "NO_PRODUCTION_AUTHORITY",
+    "mode": "READ_ONLY",
+    "reference": "api.json"
+  },
+  "authority": {
+    "legal_authority": false,
+    "production_authority": false,
+    "runtime_authority": false
+  },
+  "birth_or_formation_record": {
+    "formation": "weathered mineral plus organic accumulation over time",
+    "instant_formation": false,
+    "status": "CANDIDATE_ONLY"
+  },
+  "civilization_role": {
+    "crop_support": "candidate crop rooting medium",
+    "foundation_support": "candidate load support",
+    "status": "CANDIDATE_ONLY",
+    "water_retention": "moderate"
+  },
+  "custody": {
+    "custodian": "codex-gm-01-after-pr-review",
+    "status": "PENDING_CODEX_REVIEW"
+  },
+  "damage": {
+    "compaction": "porosity reduction",
+    "contamination": "toxicity risk",
+    "erosion": "topsoil loss"
+  },
+  "death_or_termination": {
+    "conditions": [
+      "severe_contamination",
+      "complete_erosion",
+      "sterilization"
+    ]
+  },
+  "density": {
+    "unit": "kg/m3",
+    "value": 1300.0
+  },
+  "deterministic_seed": "KAIOS-PR67-SEED-SOIL-001",
+  "dimensions": {
+    "area_m2": 1000,
+    "depth_m": 1.0,
+    "profile_layers": [
+      "O",
+      "A",
+      "B",
+      "C"
+    ]
+  },
+  "display_name": "Foundational Soil Candidate",
+  "economic_role": {
+    "K11520_eligibility": "SIMULATED_K11520_ONLY",
+    "civilization_requirement": "reviewed simulation context",
+    "economic_value": {
+      "basis": "Simulated crop support, foundation support, water retention, and fertility service value only.",
+      "mode": "SIMULATED"
+    },
+    "harvest_or_output": "no direct harvest; supports simulated crops",
+    "labor_requirement": "simulated stewardship labor only",
+    "maintenance_cost": "simulated monitoring cost only",
+    "market_role": "SIMULATED_FOUNDATIONAL_RESOURCE",
+    "resource_value": "crop support and foundation support",
+    "rights_package": {
+      "settlement": false,
+      "status": "CANDIDATE_ONLY",
+      "wallet": "NONE"
+    },
+    "supply_chain_inputs": [],
+    "supply_chain_outputs": [],
+    "technology_requirement": "local JSON validation only",
+    "value_basis": "Simulated crop support, foundation support, water retention, and fertility service value only."
+  },
+  "energy_model": {
+    "simulation_only": true,
+    "source": "organic_matter_and_microclimate"
+  },
+  "environment_requirements": {
+    "compaction": "low_to_moderate",
+    "contamination": "none_recorded",
+    "fertility": "medium",
+    "moisture": "moderate",
+    "ph": [
+      6.0,
+      7.2
+    ]
+  },
+  "event_log": [
+    {
+      "event_id": "EVT-LIFE-KAIOS-FOUNDATIONAL-SOIL-001-0001",
+      "next_state_hash": "6228d81a90e8edf010b8b433389a34abbd06ae33e63bddf6d878cd8a2b7cffd3",
+      "previous_state_hash": null,
+      "status": "PENDING_CODEX_REVIEW",
+      "timestamp": "2026-08-01T06:25:03Z",
+      "type": "CANDIDATE_PACKAGE_CREATED"
+    }
+  ],
+  "extensions": [
+    {
+      "data": {
+        "land_use": "simulation_only",
+        "occupancy_separation": "no occupant ownership",
+        "parcel_identity": "candidate_soil_plot",
+        "soil_profile": "O-A-B-C",
+        "terrain_profile": "flat_to_gentle",
+        "title_separation": "no title authority"
+      },
+      "extension_id": "LAND_EXTENSION",
+      "schema_version": "1.0.0"
+    },
+    {
+      "data": {
+        "compaction": "low_to_moderate",
+        "composition": "sand_silt_clay_organic",
+        "contamination": "none_recorded",
+        "crop_support": "candidate",
+        "erosion": "tracked",
+        "fertility": "medium",
+        "foundation_support": "candidate",
+        "moisture": "moderate",
+        "organic_matter": "5 percent",
+        "ph": "6.0-7.2"
+      },
+      "extension_id": "SOIL_EXTENSION",
+      "schema_version": "1.0.0"
+    }
+  ],
+  "field_applicability": {
+    "aging": {
+      "reason": "aging is optional for LAND_LIFE candidate validation.",
+      "status": "OPTIONAL"
+    },
+    "api_binding": {
+      "reason": "api_binding is required for LAND_LIFE candidate validation.",
+      "status": "REQUIRED"
+    },
+    "authority": {
+      "reason": "authority is required for LAND_LIFE candidate validation.",
+      "status": "REQUIRED"
+    },
+    "birth_or_formation_record": {
+      "reason": "birth_or_formation_record is required for LAND_LIFE candidate validation.",
+      "status": "REQUIRED"
+    },
+    "civilization_role": {
+      "reason": "civilization_role is required for LAND_LIFE candidate validation.",
+      "status": "REQUIRED"
+    },
+    "custody": {
+      "reason": "custody is required for LAND_LIFE candidate validation.",
+      "status": "REQUIRED"
+    },
+    "damage": {
+      "reason": "damage is required for LAND_LIFE candidate validation.",
+      "status": "REQUIRED"
+    },
+    "death_or_termination": {
+      "reason": "death_or_termination is required for LAND_LIFE candidate validation.",
+      "status": "REQUIRED"
+    },
+    "density": {
+      "reason": "density is required for LAND_LIFE candidate validation.",
+      "status": "REQUIRED"
+    },
+    "deterministic_seed": {
+      "reason": "deterministic_seed is required for LAND_LIFE candidate validation.",
+      "status": "REQUIRED"
+    },
+    "dimensions": {
+      "reason": "dimensions is required for LAND_LIFE candidate validation.",
+      "status": "REQUIRED"
+    },
+    "display_name": {
+      "reason": "display_name is required for LAND_LIFE candidate validation.",
+      "status": "REQUIRED"
+    },
+    "economic_role": {
+      "reason": "economic_role is required for LAND_LIFE candidate validation.",
+      "status": "REQUIRED"
+    },
+    "energy_model": {
+      "reason": "energy_model is required for LAND_LIFE candidate validation.",
+      "status": "REQUIRED"
+    },
+    "environment_requirements": {
+      "reason": "environment_requirements is required for LAND_LIFE candidate validation.",
+      "status": "REQUIRED"
+    },
+    "event_log": {
+      "reason": "event_log is required for LAND_LIFE candidate validation.",
+      "status": "REQUIRED"
+    },
+    "growth_or_development": {
+      "reason": "growth_or_development is required for LAND_LIFE candidate validation.",
+      "status": "REQUIRED"
+    },
+    "health_or_integrity": {
+      "reason": "health_or_integrity is required for LAND_LIFE candidate validation.",
+      "status": "REQUIRED"
+    },
+    "history": {
+      "reason": "history is required for LAND_LIFE candidate validation.",
+      "status": "REQUIRED"
+    },
+    "integrity": {
+      "reason": "integrity is required for LAND_LIFE candidate validation.",
+      "status": "REQUIRED"
+    },
+    "life_id": {
+      "reason": "life_id is required for LAND_LIFE candidate validation.",
+      "status": "REQUIRED"
+    },
+    "life_type": {
+      "reason": "life_type is required for LAND_LIFE candidate validation.",
+      "status": "REQUIRED"
+    },
+    "location": {
+      "reason": "location is required for LAND_LIFE candidate validation.",
+      "status": "REQUIRED"
+    },
+    "mass": {
+      "reason": "mass is required for LAND_LIFE candidate validation.",
+      "status": "REQUIRED"
+    },
+    "material_composition": {
+      "reason": "material_composition is required for LAND_LIFE candidate validation.",
+      "status": "REQUIRED"
+    },
+    "mutation_or_change": {
+      "reason": "mutation_or_change is required for LAND_LIFE candidate validation.",
+      "status": "REQUIRED"
+    },
+    "operation": {
+      "reason": "operation is required for LAND_LIFE candidate validation.",
+      "status": "REQUIRED"
+    },
+    "origin": {
+      "reason": "origin is required for LAND_LIFE candidate validation.",
+      "status": "REQUIRED"
+    },
+    "ownership": {
+      "reason": "ownership is required for LAND_LIFE candidate validation.",
+      "status": "REQUIRED"
+    },
+    "provenance": {
+      "reason": "provenance is required for LAND_LIFE candidate validation.",
+      "status": "REQUIRED"
+    },
+    "repair_or_healing": {
+      "reason": "repair_or_healing is required for LAND_LIFE candidate validation.",
+      "status": "REQUIRED"
+    },
+    "reproduction_or_replication": {
+      "reason": "reproduction_or_replication is optional for LAND_LIFE candidate validation.",
+      "status": "OPTIONAL"
+    },
+    "resource_inputs": {
+      "reason": "resource_inputs is required for LAND_LIFE candidate validation.",
+      "status": "REQUIRED"
+    },
+    "resource_outputs": {
+      "reason": "resource_outputs is required for LAND_LIFE candidate validation.",
+      "status": "REQUIRED"
+    },
+    "rights": {
+      "reason": "rights is required for LAND_LIFE candidate validation.",
+      "status": "REQUIRED"
+    },
+    "runtime_binding": {
+      "reason": "runtime_binding is required for LAND_LIFE candidate validation.",
+      "status": "REQUIRED"
+    },
+    "schema_version": {
+      "reason": "schema_version is required for LAND_LIFE candidate validation.",
+      "status": "REQUIRED"
+    },
+    "scientific_or_system_name": {
+      "reason": "scientific_or_system_name is required for LAND_LIFE candidate validation.",
+      "status": "REQUIRED"
+    },
+    "species_id": {
+      "reason": "species_id is optional for LAND_LIFE candidate validation.",
+      "status": "OPTIONAL"
+    },
+    "taxonomy": {
+      "reason": "taxonomy is required for LAND_LIFE candidate validation.",
+      "status": "REQUIRED"
+    },
+    "transfer": {
+      "reason": "transfer is required for LAND_LIFE candidate validation.",
+      "status": "REQUIRED"
+    },
+    "usage": {
+      "reason": "usage is required for LAND_LIFE candidate validation.",
+      "status": "REQUIRED"
+    },
+    "volume": {
+      "reason": "volume is required for LAND_LIFE candidate validation.",
+      "status": "REQUIRED"
+    },
+    "world_viewer_binding": {
+      "reason": "world_viewer_binding is required for LAND_LIFE candidate validation.",
+      "status": "REQUIRED"
+    }
+  },
+  "growth_or_development": {
+    "formation": "weathering_and_organic_matter_accumulation",
+    "requires": [
+      "parent_material",
+      "organic_input",
+      "water",
+      "time"
+    ]
+  },
+  "health_or_integrity": {
+    "fertility": "medium",
+    "integrity": "erosion_compaction_contamination_dependent"
+  },
+  "history": [
+    {
+      "status": "CANDIDATE_CREATED",
+      "task_id": "KAIOS-PR67-CURSOR-FOUNDATIONAL-LIFE-CANDIDATES-001",
+      "timestamp": "2026-08-01T06:25:03Z"
+    }
+  ],
+  "integrity": {
+    "algorithm": "SHA-256",
+    "checksum": "cda354afb7a4dcb01d78932561b179532c1685ae95bc1b286fdc06cefdc6bdd7",
+    "covers": [
+      "README.md",
+      "life.manifest.json",
+      "taxonomy.json",
+      "physics.json",
+      "environment.json",
+      "growth_or_formation.json",
+      "health_or_integrity.json",
+      "reproduction_or_change.json",
+      "economy.json",
+      "rights.json",
+      "runtime.json",
+      "viewer.json",
+      "api.json",
+      "provenance.json",
+      "event_log.json"
+    ]
+  },
+  "life_id": "LIFE-KAIOS-FOUNDATIONAL-SOIL-001",
+  "life_type": "LAND_LIFE",
+  "location": {
+    "mode": "SIMULATION_ONLY",
+    "production_authority": false,
+    "world": "KAIOS_FOUNDATIONAL_LIFE_SANDBOX"
+  },
+  "mass": {
+    "unit": "kg",
+    "value": 1300000.0
+  },
+  "material_composition": {
+    "clay_fraction": 0.2,
+    "organic_matter_fraction": 0.05,
+    "sand_fraction": 0.4,
+    "silt_fraction": 0.35
+  },
+  "mutation_or_change": {
+    "erosion": "water or wind driven",
+    "fertility_change": "requires material or biological cause"
+  },
+  "operation": {
+    "execution": false,
+    "mode": "LOCAL_VALIDATION_ONLY",
+    "simulation_only": true
+  },
+  "origin": {
+    "candidate_state": "CANDIDATE_LIFE_PACKAGES",
+    "mode": "CURSOR_BOUNDED_LIFE_CREATION",
+    "review_state": "PENDING_CODEX_REVIEW",
+    "task_id": "KAIOS-PR67-CURSOR-FOUNDATIONAL-LIFE-CANDIDATES-001"
+  },
+  "ownership": {
+    "legal_title": false,
+    "onchain_title": false,
+    "status": "UNASSIGNED"
+  },
+  "provenance": {
+    "author": "cursor-01",
+    "created_at": "2026-08-01T06:25:03Z",
+    "source": "PR66 Canonical Life Schema and Package Template",
+    "source_commit": "74009c7906ef671c1fe250199b901c0d0045c6dc",
+    "task_id": "KAIOS-PR67-CURSOR-FOUNDATIONAL-LIFE-CANDIDATES-001"
+  },
+  "repair_or_healing": {
+    "mechanism": "organic_amendment_decompaction_and_time",
+    "requires": [
+      "material_input",
+      "labor",
+      "water",
+      "time"
+    ]
+  },
+  "reproduction_or_replication": {
+    "reason": "Soil changes by formation, erosion, contamination, and repair, not reproduction.",
+    "status": "NOT_APPLICABLE"
+  },
+  "resource_inputs": [
+    {
+      "mode": "fertility_input",
+      "resource": "organic_matter"
+    },
+    {
+      "mode": "moisture_balance",
+      "resource": "water"
+    },
+    {
+      "mode": "parent_material",
+      "resource": "weathered_minerals"
+    }
+  ],
+  "resource_outputs": [
+    {
+      "mode": "simulated_support",
+      "resource": "crop_support"
+    },
+    {
+      "mode": "hydrologic_service",
+      "resource": "water_retention"
+    }
+  ],
+  "rights": {
+    "BREEDING_RIGHTS": {
+      "authority": "NO_PRODUCTION_AUTHORITY",
+      "candidate_only": true,
+      "holder": "UNASSIGNED",
+      "scope": "NO_REAL_BREEDING_AUTHORITY"
+    },
+    "COMMERCIAL_LICENSE": {
+      "authority": "NO_PRODUCTION_AUTHORITY",
+      "candidate_only": true,
+      "holder": "UNASSIGNED",
+      "scope": "NO_COMMERCIAL_LICENSE"
+    },
+    "CONTROL_AUTHORITY": {
+      "authority": "NO_PRODUCTION_AUTHORITY",
+      "candidate_only": true,
+      "holder": "UNASSIGNED",
+      "scope": "NO_RUNTIME_CONTROL_AUTHORITY"
+    },
+    "CUSTODIAN": {
+      "authority": "NO_PRODUCTION_AUTHORITY",
+      "candidate_only": true,
+      "holder": "UNASSIGNED",
+      "scope": "REVIEW_CUSTODY_PENDING_CODEX"
+    },
+    "HABITAT_RIGHTS": {
+      "authority": "NO_PRODUCTION_AUTHORITY",
+      "candidate_only": true,
+      "holder": "UNASSIGNED",
+      "scope": "NO_REAL_HABITAT_CLAIM"
+    },
+    "HARVEST_RIGHTS": {
+      "authority": "NO_PRODUCTION_AUTHORITY",
+      "candidate_only": true,
+      "holder": "UNASSIGNED",
+      "scope": "NO_REAL_HARVEST_AUTHORITY"
+    },
+    "OCCUPANT": {
+      "authority": "NO_PRODUCTION_AUTHORITY",
+      "candidate_only": true,
+      "holder": "UNASSIGNED",
+      "scope": "NO_OCCUPANT_CLAIM"
+    },
+    "OPERATOR": {
+      "authority": "NO_PRODUCTION_AUTHORITY",
+      "candidate_only": true,
+      "holder": "UNASSIGNED",
+      "scope": "LOCAL_VALIDATION_ONLY"
+    },
+    "OWNER": {
+      "authority": "NO_PRODUCTION_AUTHORITY",
+      "candidate_only": true,
+      "holder": "UNASSIGNED",
+      "scope": "PACKAGE_RECORD_ONLY_NOT_LEGAL_OWNERSHIP"
+    },
+    "TRANSFER_RIGHTS": {
+      "authority": "NO_PRODUCTION_AUTHORITY",
+      "candidate_only": true,
+      "holder": "UNASSIGNED",
+      "scope": "NO_ONCHAIN_OR_LEGAL_TRANSFER"
+    },
+    "USAGE_RIGHTS": {
+      "authority": "NO_PRODUCTION_AUTHORITY",
+      "candidate_only": true,
+      "holder": "UNASSIGNED",
+      "scope": "SIMULATION_REFERENCE_ONLY"
+    },
+    "tradeability": "FUTURE_REVIEW_REQUIRED"
+  },
+  "runtime_binding": {
+    "authority": "NO_PRODUCTION_AUTHORITY",
+    "mode": "NON_EXECUTABLE_BINDING",
+    "reference": "runtime.json"
+  },
+  "safety_boundaries": {
+    "k11520": "SIMULATED_K11520_ONLY",
+    "legal_personhood": false,
+    "onchain_transfer": "NO_ONCHAIN_TRANSFER",
+    "production_runtime": false,
+    "real_kgen": "NO_REAL_KGEN",
+    "wallet": "NONE"
+  },
+  "schema_version": "1.0.0",
+  "scientific_or_system_name": "KAIOS solum candidate",
+  "species_id": "SPECIES-KAIOS-FOUNDATIONAL-SOIL",
+  "taxonomy": {
+    "CLASS": "SOIL_ANALOG",
+    "DOMAIN": "KGEN_UNIVERSE",
+    "FAMILY": "KAIOS_FOUNDATIONAL_CANDIDATES",
+    "GENUS": "KAIOS_SOIL",
+    "KINGDOM": "LAND_LIFE",
+    "LIFE_INSTANCE": "LIFE-KAIOS-FOUNDATIONAL-SOIL-001",
+    "ORDER": "PEDON_CANDIDATE",
+    "PHYLUM": "SOIL_LAND_LAYER",
+    "SPECIES": "SPECIES-KAIOS-FOUNDATIONAL-SOIL",
+    "extension_19": {
+      "reason": "Canonical 19-layer biological taxonomy is not forced onto non-biological terrain, soil, or water-body life.",
+      "status": "NOT_APPLICABLE"
+    }
+  },
+  "transfer": {
+    "enabled": false,
+    "onchain_transfer": "NO_ONCHAIN_TRANSFER",
+    "wallet": "NONE"
+  },
+  "usage": {
+    "mode": "REFERENCE_ONLY",
+    "real_world_use_authority": false
+  },
+  "volume": {
+    "unit": "m3",
+    "value": 1000.0
+  },
+  "world_viewer_binding": {
+    "authority": "NO_PRODUCTION_AUTHORITY",
+    "mode": "READ_ONLY",
+    "reference": "viewer.json"
+  }
+}

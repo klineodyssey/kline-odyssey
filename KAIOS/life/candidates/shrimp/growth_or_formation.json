@@ -1,0 +1,17 @@
+{
+  "aquaculture_role": "candidate pond or tank culture",
+  "body_plan": "crustacean candidate",
+  "growth": "molting stage dependent",
+  "length_range_m": [
+    0.02,
+    0.12
+  ],
+  "mass_range_kg": [
+    0.001,
+    0.05
+  ],
+  "molting": "required for growth",
+  "schema_version": "1.0.0",
+  "taxonomy": "shrimp",
+  "water_quality_sensitivity": "high"
+}

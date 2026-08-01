@@ -1,0 +1,13 @@
+{
+  "schema_version":"1.0.0","runtime":"KAIOS_LIFE_RUNTIME_V1","mode":"LOCAL_DETERMINISTIC_SIMULATION","simulation_only":true,"production_authority":false,"wallet":"NONE","real_kgen":"NO_REAL_KGEN","settlement":false,"viewer":"../../../world-viewer/life-runtime/","approval_status":["CANDIDATE_PACKAGE","RUNTIME_VALIDATED","CANONICAL_SCHEMA_COMPATIBLE","NOT_PRODUCTION_AUTHORIZED"],"canonical_life_schema":"../../../KAIOS_CANONICAL_LIFE_SCHEMA_V1.json","organism_schema_v2":"../../../KGEN-KAIOS/provenance/ORGANISM_MANIFEST_SCHEMA.json",
+  "packages":[
+    {"name":"grass","life_id":"LIFE-KAIOS-FOUNDATIONAL-GRASS-001","manifest":"../../../KAIOS/life/candidates/grass/life.manifest.json"},
+    {"name":"tree","life_id":"LIFE-KAIOS-FOUNDATIONAL-TREE-001","manifest":"../../../KAIOS/life/candidates/tree/life.manifest.json"},
+    {"name":"fish","life_id":"LIFE-KAIOS-FOUNDATIONAL-FISH-001","manifest":"../../../KAIOS/life/candidates/fish/life.manifest.json"},
+    {"name":"shrimp","life_id":"LIFE-KAIOS-FOUNDATIONAL-SHRIMP-001","manifest":"../../../KAIOS/life/candidates/shrimp/life.manifest.json"},
+    {"name":"mountain","life_id":"LIFE-KAIOS-FOUNDATIONAL-MOUNTAIN-001","manifest":"../../../KAIOS/life/candidates/mountain/life.manifest.json"},
+    {"name":"soil","life_id":"LIFE-KAIOS-FOUNDATIONAL-SOIL-001","manifest":"../../../KAIOS/life/candidates/soil/life.manifest.json"},
+    {"name":"water","life_id":"LIFE-KAIOS-FOUNDATIONAL-WATER-001","manifest":"../../../KAIOS/life/candidates/water/life.manifest.json"},
+    {"name":"river","life_id":"LIFE-KAIOS-FOUNDATIONAL-RIVER-001","manifest":"../../../KAIOS/life/candidates/river/life.manifest.json"}
+  ]
+}

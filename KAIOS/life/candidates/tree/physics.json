@@ -1,0 +1,42 @@
+{
+  "constraints": [
+    "Tree growth cannot occur without water, photosynthetic energy, nutrients, and elapsed seasons."
+  ],
+  "density": {
+    "unit": "kg/m3",
+    "value": 750.0
+  },
+  "density_check": {
+    "computed_kg_per_m3": 750.0,
+    "formula": "mass_kg / volume_m3"
+  },
+  "dimensions": {
+    "canopy_radius_m": [
+      0.5,
+      8
+    ],
+    "height_range_m": [
+      2,
+      30
+    ],
+    "root_depth_m": [
+      0.5,
+      3.5
+    ]
+  },
+  "energy_model": {
+    "minimum_daily_light_hours": 5,
+    "process": "photosynthesis",
+    "simulation_only": true,
+    "source": "sunlight"
+  },
+  "mass": {
+    "unit": "kg",
+    "value": 900.0
+  },
+  "schema_version": "1.0.0",
+  "volume": {
+    "unit": "m3",
+    "value": 1.2
+  }
+}

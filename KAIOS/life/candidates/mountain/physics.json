@@ -1,0 +1,35 @@
+{
+  "constraints": [
+    "Mountain formation requires geologic time; no instant formation is permitted."
+  ],
+  "density": {
+    "unit": "kg/m3",
+    "value": 2700.0
+  },
+  "density_check": {
+    "computed_kg_per_m3": 2700.0,
+    "formula": "mass_kg / volume_m3"
+  },
+  "dimensions": {
+    "base_area_m2": 2000000000,
+    "elevation_m": 1800,
+    "slope_degrees": [
+      5,
+      42
+    ]
+  },
+  "energy_model": {
+    "no_instant_formation": true,
+    "simulation_only": true,
+    "source": "tectonic_uplift_and_gravity"
+  },
+  "mass": {
+    "unit": "kg",
+    "value": 2700000000000000.0
+  },
+  "schema_version": "1.0.0",
+  "volume": {
+    "unit": "m3",
+    "value": 1000000000000.0
+  }
+}

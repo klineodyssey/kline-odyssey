@@ -1,0 +1,27 @@
+{
+  "candidate_only": true,
+  "economic_role": {
+    "K11520_eligibility": "SIMULATED_K11520_ONLY",
+    "civilization_requirement": "reviewed simulation context",
+    "economic_value": {
+      "basis": "Simulated aquaculture role, water-quality-sensitive harvest output, and detritivore value only.",
+      "mode": "SIMULATED"
+    },
+    "harvest_or_output": "simulated shrimp biomass",
+    "labor_requirement": "simulated stewardship labor only",
+    "maintenance_cost": "simulated monitoring cost only",
+    "market_role": "SIMULATED_FOUNDATIONAL_RESOURCE",
+    "resource_value": "aquaculture candidate",
+    "rights_package": {
+      "settlement": false,
+      "status": "CANDIDATE_ONLY",
+      "wallet": "NONE"
+    },
+    "supply_chain_inputs": [],
+    "supply_chain_outputs": [],
+    "technology_requirement": "local JSON validation only",
+    "value_basis": "Simulated aquaculture role, water-quality-sensitive harvest output, and detritivore value only."
+  },
+  "schema_version": "1.0.0",
+  "settlement": false
+}

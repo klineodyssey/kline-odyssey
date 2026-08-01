@@ -1,0 +1,27 @@
+{
+  "collapse_conditions": [
+    "slope_over_critical_angle",
+    "water_saturation",
+    "seismic_shock"
+  ],
+  "damage": {
+    "erosion": "reduces volume gradually",
+    "hazards": [
+      "collapse",
+      "landslide",
+      "rockfall"
+    ],
+    "weathering": "fractures rock"
+  },
+  "erosion": "gradual sediment output",
+  "health_or_integrity": {
+    "stability": "candidate stable unless erosion, saturation, quake, or oversteepening exceeds threshold"
+  },
+  "repair_or_healing": {
+    "mechanism": "none_fast",
+    "natural_rebalancing": "deposition_or_slope_relaxation_over_time"
+  },
+  "schema_version": "1.0.0",
+  "stability": "slope weathering dependent",
+  "weathering": "continuous fracture and chemical weathering"
+}

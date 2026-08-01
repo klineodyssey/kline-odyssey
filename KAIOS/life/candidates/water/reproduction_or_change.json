@@ -1,0 +1,19 @@
+{
+  "change": "state and volume transition only",
+  "death_or_termination": {
+    "conditions": [
+      "complete_evaporation",
+      "severe_pollution_unusable"
+    ]
+  },
+  "mutation_or_change": {
+    "boiling": "at 100 C under standard pressure",
+    "evaporation": "temperature and exposure dependent",
+    "freezing": "below 0 C"
+  },
+  "reproduction_or_replication": {
+    "reason": "Water changes state and volume, not reproduction.",
+    "status": "NOT_APPLICABLE"
+  },
+  "schema_version": "1.0.0"
+}

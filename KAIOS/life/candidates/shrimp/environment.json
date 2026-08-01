@@ -1,0 +1,53 @@
+{
+  "environment_requirements": {
+    "oxygen_mg_l": [
+      4.5,
+      10
+    ],
+    "salinity_ppt": [
+      5,
+      35
+    ],
+    "temperature_c": [
+      20,
+      32
+    ],
+    "water_quality_sensitivity": "high",
+    "water_type": [
+      "brackish",
+      "marine"
+    ]
+  },
+  "resource_inputs": [
+    {
+      "minimum_mg_l": 4.5,
+      "resource": "dissolved_oxygen"
+    },
+    {
+      "diet": [
+        "detritus",
+        "algae",
+        "prepared_feed"
+      ],
+      "resource": "feed_or_detritus"
+    },
+    {
+      "resource": "compatible_water",
+      "water_type": [
+        "brackish",
+        "marine"
+      ]
+    }
+  ],
+  "resource_outputs": [
+    {
+      "mode": "simulated_harvest_output",
+      "resource": "biomass"
+    },
+    {
+      "mode": "chitin_candidate",
+      "resource": "molted_shell"
+    }
+  ],
+  "schema_version": "1.0.0"
+}

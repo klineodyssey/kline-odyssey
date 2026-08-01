@@ -1,0 +1,20 @@
+{
+  "availability": "bounded by volume",
+  "boiling": "100 C standard pressure",
+  "composition": "H2O with dissolved minerals",
+  "consumption": "reduces volume",
+  "elapsed_time_required": true,
+  "energy": "thermal environment",
+  "evaporation": "temperature exposure dependent",
+  "formation": "accumulated inflow over elapsed time",
+  "freezing": "below 0 C",
+  "instant_formation": false,
+  "mass_kg": 1000000.0,
+  "schema_version": "1.0.0",
+  "state": "liquid",
+  "temperature_c": [
+    0,
+    35
+  ],
+  "volume_m3": 1000.0
+}

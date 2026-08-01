@@ -1,0 +1,34 @@
+{
+  "constraints": [
+    "River flow follows downhill gravity gradient from 520 m to 400 m; no unexplained uphill flow.",
+    "River formation requires sustained source, channel path, and elapsed time; no instant formation."
+  ],
+  "density": {
+    "unit": "kg/m3",
+    "value": 1000.0
+  },
+  "density_check": {
+    "computed_kg_per_m3": 1000.0,
+    "formula": "mass_kg / volume_m3"
+  },
+  "dimensions": {
+    "depth_m": 0.5,
+    "length_m": 5000,
+    "slope_drop_m": 120,
+    "width_m": 8
+  },
+  "energy_model": {
+    "flow_direction": "downhill",
+    "simulation_only": true,
+    "source": "gravity_gradient"
+  },
+  "mass": {
+    "unit": "kg",
+    "value": 2000000.0
+  },
+  "schema_version": "1.0.0",
+  "volume": {
+    "unit": "m3",
+    "value": 2000.0
+  }
+}

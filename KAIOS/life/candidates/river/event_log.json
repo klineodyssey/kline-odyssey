@@ -1,0 +1,13 @@
+{
+  "events": [
+    {
+      "event_id": "EVT-LIFE-KAIOS-FOUNDATIONAL-RIVER-001-0001",
+      "next_state_hash": "ce89529da4da94d17190f875d6dc2f9d0c10a395b1033a3623f5188b3817fc26",
+      "previous_state_hash": null,
+      "status": "PENDING_CODEX_REVIEW",
+      "timestamp": "2026-08-01T06:25:03Z",
+      "type": "CANDIDATE_PACKAGE_CREATED"
+    }
+  ],
+  "schema_version": "1.0.0"
+}

@@ -1,0 +1,26 @@
+{
+  "death_or_termination": {
+    "conditions": [
+      "severe_fire",
+      "prolonged_drought",
+      "root_failure"
+    ],
+    "death": "terminal integrity loss or resource starvation"
+  },
+  "flower": "seasonal",
+  "fruit_optional": true,
+  "mutation_or_change": {
+    "mutation": "not modeled",
+    "pruning_response": "simulated"
+  },
+  "reproduction_or_replication": {
+    "flower": "seasonal_candidate",
+    "fruit_optional": true,
+    "real_biological_engineering": false,
+    "seed": {
+      "viable": true
+    }
+  },
+  "schema_version": "1.0.0",
+  "seed": "deterministic seed"
+}
