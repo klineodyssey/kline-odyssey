@@ -11,6 +11,7 @@ import { createLifeRuntime } from "./life/life-runtime.js";
 import { createLifeOsViewer, resolveLifeProfiles } from "./life/life-os-viewer.js";
 import { createLodController } from "./lod/lod-controller.js";
 import { createPlayerController } from "./player/player-controller.js";
+import { createProgramCenterView } from "./program-center/program-center-view.js";
 import { createMapRenderer, getItemBounds } from "./renderer/map-renderer.js";
 import { createRoomRuntime } from "./room/room-runtime.js";
 import { createSelectionController } from "./selection/selection-controller.js";
@@ -55,6 +56,7 @@ let input = null;
 let inspector = null;
 let lifeViewer = null;
 let civilizationView = null;
+let programCenterView = null;
 let genesisView = null;
 let contextMenu = null;
 
@@ -287,7 +289,11 @@ function renderInspector() {
   if (!world) return;
   const entity = currentEntity() ?? lod.getScene().current ?? world.earth;
 
-  if (mode === "CIVILIZATION") {
+  if (mode === "PROGRAMS") {
+    inspectorKind.textContent = "READ_ONLY PROGRAM REGISTRY";
+    inspectorTitle.textContent = "KAIOS Genesis Charter Program Center";
+    programCenterView.render();
+  } else if (mode === "CIVILIZATION") {
     inspectorKind.textContent = "CIVILIZATION";
     inspectorTitle.textContent = "Hsinchu Living District";
     civilizationView.render(civilizationRuntime.getSnapshot());
@@ -990,6 +996,8 @@ async function start() {
       "Timeline vehicle returned to the origin era."
     )
   });
+  programCenterView = createProgramCenterView(inspectorContent);
+  await programCenterView.load();
   inspector = createInspectorView({
     container: inspectorContent,
     onClose: () => shell.setInspectorOpen(false),
@@ -1134,6 +1142,7 @@ window.addEventListener("beforeunload", () => {
   renderer?.destroy();
   landRuntime?.destroy();
   civilizationRuntime?.destroy();
+  programCenterView?.destroy();
   lifeRuntime?.destroy();
   playerController?.destroy();
   shell.destroy();
