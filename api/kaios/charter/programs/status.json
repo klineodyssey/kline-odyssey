@@ -1,0 +1,24 @@
+{
+  "schema_version": "1.0.0",
+  "read_only": true,
+  "program_count": 143,
+  "implementation_status_counts": {
+    "IMPLEMENTED_DEMO_ONLY": 59,
+    "IMPLEMENTED_PARTIAL": 18,
+    "IMPLEMENTED_PRODUCTION_SAFE_SIMULATION": 16,
+    "IMPLEMENTED_READ_ONLY": 1,
+    "PROHIBITED_UNDER_CURRENT_BOUNDARY": 3,
+    "SPECIFICATION_ONLY": 46
+  },
+  "promotion_ceiling": "REVIEWED_REQUIREMENT_UNLESS_REPOSITORY_EVIDENCE",
+  "safety": [
+    "SIMULATION_ONLY",
+    "NO_REAL_WALLET",
+    "NO_REAL_KGEN",
+    "NO_ONCHAIN_TRANSFER",
+    "NO_REAL_LEGAL_EFFECT",
+    "NO_PRODUCTION_AUTHORITY",
+    "NO_CONSTITUTION_SOURCE_MODIFICATION",
+    "NO_LINEAGE_OVERWRITE"
+  ]
+}

@@ -222,6 +222,24 @@ button:focus-visible, canvas:focus-visible, [tabindex]:focus-visible {
 .sheet-handle { display: none; }
 .inspector-close { display: none; }
 .inspector-content { min-height: 0; overflow: auto; padding: 10px 16px 20px; overscroll-behavior: contain; }
+
+.program-center { display: grid; gap: 12px; }
+.program-center__boundary { margin: 0; padding: 9px 10px; border: 1px solid var(--line); color: var(--muted); font-size: .72rem; line-height: 1.45; }
+.program-center__controls { display: grid; gap: 8px; }
+.program-center__controls input { width: 100%; min-height: 42px; border: 1px solid var(--line); border-radius: 6px; padding: 8px 10px; color: var(--text); background: var(--surface-2); font: inherit; }
+.program-center__filters { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 4px; }
+.program-center__filters button, .program-center__retry { min-height: 38px; border: 1px solid var(--line); border-radius: 6px; padding: 6px 9px; color: var(--text); background: var(--surface-2); font: inherit; font-size: .72rem; white-space: nowrap; cursor: pointer; }
+.program-center__filters button[aria-pressed="true"] { border-color: var(--accent); color: var(--accent); }
+.program-center__filters button:focus-visible, .program-center__retry:focus-visible, .program-center__controls input:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+.program-center__summary, .program-center__state { margin: 0; color: var(--muted); line-height: 1.5; }
+.program-center__list { display: grid; gap: 8px; }
+.program-center__card { border: 1px solid var(--line); border-radius: 7px; padding: 10px; background: var(--surface-2); }
+.program-center__card h2 { margin: 0; font-size: .92rem; line-height: 1.35; overflow-wrap: anywhere; }
+.program-center__meta { margin: 4px 0 8px; color: var(--accent); font-size: .72rem; }
+.program-center__card dl { display: grid; gap: 5px; margin: 0; }
+.program-center__card dl div { display: grid; grid-template-columns: minmax(76px, .35fr) minmax(0, 1fr); gap: 8px; font-size: .72rem; line-height: 1.4; }
+.program-center__card dt { color: var(--muted); }
+.program-center__card dd { margin: 0; overflow-wrap: anywhere; }
 .inspector-view__header { display: none; }
 .inspector-view__summary, .inspector-view__group, .inspector-view__life, .life-os-viewer__profile {
   padding: 11px 0 15px;
@@ -504,14 +522,14 @@ button:focus-visible, canvas:focus-visible, [tabindex]:focus-visible {
 }
 .genesis-dialog:not([open]) { display: none; }
 .genesis-dialog::backdrop { background: rgba(3, 6, 4, 0.86); }
-.genesis-dialog__surface { max-height: inherit; display: grid; grid-template-rows: auto minmax(0, 1fr) auto; }
+.genesis-dialog__surface { max-height: inherit; display: grid; grid-template-rows: auto minmax(0, 1fr) auto; overflow: hidden; }
 .genesis-dialog__header {
   display: grid; grid-template-columns: minmax(0, 1fr) var(--touch); align-items: center; gap: 12px;
   padding: 18px; border-bottom: 1px solid var(--line);
 }
 .genesis-dialog__header h2 { margin: 4px 0 0; font-size: 22px; line-height: 1.2; }
 .genesis-dialog__header .icon-button { width: var(--touch); height: var(--touch); }
-.genesis-dialog__body { min-height: 0; overflow: auto; display: grid; gap: 14px; padding: 16px 18px; overscroll-behavior: contain; }
+.genesis-dialog__body { position: relative; z-index: 1; min-height: 0; overflow: auto; display: grid; gap: 14px; padding: 16px 18px; overscroll-behavior: contain; }
 .genesis-planet, .genesis-receipt {
   display: grid; gap: 5px; padding: 12px; border: 1px solid var(--cyan); border-radius: 6px; background: var(--surface-2);
 }
@@ -533,7 +551,7 @@ button:focus-visible, canvas:focus-visible, [tabindex]:focus-visible {
 .genesis-fortune__choice:not(:disabled):hover, .genesis-fortune__choice:not(:disabled):focus-visible { border-color: var(--accent); color: var(--accent-strong); }
 .genesis-fortune__choice:disabled { opacity: 0.45; }
 .genesis-dialog__footer {
-  display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 12px;
+  position: relative; z-index: 2; display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 12px;
   padding: 12px 18px calc(12px + var(--safe-bottom)); border-top: 1px solid var(--line); background: var(--surface-2);
 }
 .genesis-dialog__footer span { color: var(--muted); font-size: 10px; }
@@ -653,10 +671,13 @@ button:focus-visible, canvas:focus-visible, [tabindex]:focus-visible {
   .inspector-panel {
     position: fixed; left: var(--safe-left); right: var(--safe-right); bottom: 0; height: min(72dvh, 620px);
     border: 1px solid var(--line); border-bottom: 0; border-radius: 8px 8px 0 0; box-shadow: var(--shadow);
-    transform: translateY(calc(100% - 72px - var(--safe-bottom))); transition: transform 180ms ease; z-index: 70;
+    transform: translateY(calc(100% - 72px - var(--safe-bottom))); z-index: 70;
   }
   .inspector-panel.is-open { transform: translateY(0); }
-  .inspector-header { grid-template-columns: var(--touch) 1fr auto; min-height: 72px; padding: 10px 12px; }
+  .inspector-header {
+    box-sizing: border-box; width: calc(100vw - var(--safe-left) - var(--safe-right));
+    grid-template-columns: var(--touch) minmax(0, 1fr) auto; min-height: 72px; padding: 10px 12px;
+  }
   .inspector-header h1 { font-size: 15px; }
   .sheet-handle { display: block; width: var(--touch); height: var(--touch); border: 0; background: transparent; position: relative; }
   .sheet-handle::after { content: ""; position: absolute; width: 28px; height: 4px; left: 8px; top: 8px; background: var(--line); border-radius: 4px; }
@@ -674,7 +695,14 @@ button:focus-visible, canvas:focus-visible, [tabindex]:focus-visible {
   .technology-age-track, .technology-resource-grid, .technology-list-grid { grid-template-columns: 1fr; }
   .technology-age-card { min-height: 118px; }
   .technology-card-actions .civilization-action, .technology-resource-card .civilization-action, .technology-list-card .civilization-action { min-height: var(--touch); }
-  .genesis-dialog { width: calc(100vw - var(--safe-left) - var(--safe-right)); height: calc(100dvh - var(--safe-top) - var(--safe-bottom)); max-height: none; border-radius: 0; }
+  .genesis-dialog {
+    box-sizing: border-box;
+    width: calc(100vw - var(--safe-left) - var(--safe-right));
+    height: calc(100dvh - var(--safe-top) - var(--safe-bottom));
+    max-width: none; max-height: none;
+    inset: var(--safe-top) auto auto var(--safe-left);
+    margin: 0; border-radius: 0;
+  }
   .genesis-dialog__surface { height: 100%; }
   .genesis-steps { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .genesis-fortune__choices { grid-template-columns: repeat(3, minmax(0, 1fr)); }

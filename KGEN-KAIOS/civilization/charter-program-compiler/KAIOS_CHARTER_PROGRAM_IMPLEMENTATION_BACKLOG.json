@@ -1,0 +1,2547 @@
+{
+  "schema_version": "1.0.0",
+  "items": [
+    {
+      "program_id": "KAIOS-CH-000-001-GENESIS",
+      "chapter_number": 0,
+      "program_name": "萬物皆生命 × 自我編程 × 落地生根 × 文明生成根運行時",
+      "domain": "GENESIS",
+      "priority": "P4_ADVANCED_TECHNOLOGY",
+      "risk": "MEDIUM",
+      "implementation_status": "IMPLEMENTED_DEMO_ONLY",
+      "dependency_status": "SATISFIED_OR_PARTIAL_EVIDENCE",
+      "dependencies": [
+        "TIME",
+        "IDENTITY",
+        "RIGHTS"
+      ],
+      "recommended_action": "REVIEW_OR_IMPLEMENT_IN_DEDICATED_PR",
+      "workline": "KAIOS_CHARTER_GENESIS_PROGRAM"
+    },
+    {
+      "program_id": "KAIOS-CH-000-002-GENESIS",
+      "chapter_number": 0,
+      "program_name": "萬物皆生命 × 輪迴 × 錢包 × 玉帝主權 × 自我編程文明根運行時",
+      "domain": "GENESIS",
+      "priority": "P4_ADVANCED_TECHNOLOGY",
+      "risk": "MEDIUM",
+      "implementation_status": "IMPLEMENTED_DEMO_ONLY",
+      "dependency_status": "SATISFIED_OR_PARTIAL_EVIDENCE",
+      "dependencies": [
+        "TIME",
+        "IDENTITY",
+        "RIGHTS"
+      ],
+      "recommended_action": "REVIEW_OR_IMPLEMENT_IN_DEDICATED_PR",
+      "workline": "KAIOS_CHARTER_GENESIS_PROGRAM"
+    },
+    {
+      "program_id": "KAIOS-CH-001-003-GENESIS",
+      "chapter_number": 1,
+      "program_name": "KAIOS Chapter 01 - Genesis",
+      "domain": "GENESIS",
+      "priority": "P4_ADVANCED_TECHNOLOGY",
+      "risk": "MEDIUM",
+      "implementation_status": "IMPLEMENTED_DEMO_ONLY",
+      "dependency_status": "SATISFIED_OR_PARTIAL_EVIDENCE",
+      "dependencies": [
+        "TIME",
+        "IDENTITY",
+        "RIGHTS"
+      ],
+      "recommended_action": "REVIEW_OR_IMPLEMENT_IN_DEDICATED_PR",
+      "workline": "KAIOS_CHARTER_GENESIS_PROGRAM"
+    },
+    {
+      "program_id": "KAIOS-CH-002-004-UNIVERSE_PHYSICS",
+      "chapter_number": 2,
+      "program_name": "KAIOS Chapter 02 - Universe Physics",
+      "domain": "UNIVERSE_PHYSICS",
+      "priority": "P0_FOUNDATION",
+      "risk": "MEDIUM",
+      "implementation_status": "IMPLEMENTED_PARTIAL",
+      "dependency_status": "SATISFIED_OR_PARTIAL_EVIDENCE",
+      "dependencies": [],
+      "recommended_action": "REVIEW_OR_IMPLEMENT_IN_DEDICATED_PR",
+      "workline": "KAIOS_CHARTER_UNIVERSE_PHYSICS_PROGRAM"
+    },
+    {
+      "program_id": "KAIOS-CH-003-005-TIME",
+      "chapter_number": 3,
+      "program_name": "KAIOS Chapter 03 - Time System",
+      "domain": "TIME",
+      "priority": "HOLD_ALREADY_COVERED",
+      "risk": "MEDIUM",
+      "implementation_status": "IMPLEMENTED_PRODUCTION_SAFE_SIMULATION",
+      "dependency_status": "SATISFIED_OR_PARTIAL_EVIDENCE",
+      "dependencies": [
+        "UNIVERSE_PHYSICS"
+      ],
+      "recommended_action": "REVIEW_OR_IMPLEMENT_IN_DEDICATED_PR",
+      "workline": "KAIOS_CHARTER_TIME_PROGRAM"
+    },
+    {
+      "program_id": "KAIOS-CH-004-006-COORDINATES",
+      "chapter_number": 4,
+      "program_name": "KAIOS Chapter 04 - Space Coordinate System",
+      "domain": "COORDINATES",
+      "priority": "P0_FOUNDATION",
+      "risk": "MEDIUM",
+      "implementation_status": "IMPLEMENTED_PARTIAL",
+      "dependency_status": "SATISFIED_OR_PARTIAL_EVIDENCE",
+      "dependencies": [
+        "UNIVERSE_PHYSICS"
+      ],
+      "recommended_action": "REVIEW_OR_IMPLEMENT_IN_DEDICATED_PR",
+      "workline": "KAIOS_CHARTER_COORDINATES_PROGRAM"
+    },
+    {
+      "program_id": "KAIOS-CH-005-007-ENERGY",
+      "chapter_number": 5,
+      "program_name": "KAIOS Chapter 05 - KGEN Energy System",
+      "domain": "ENERGY",
+      "priority": "P0_FOUNDATION",
+      "risk": "MEDIUM",
+      "implementation_status": "IMPLEMENTED_PARTIAL",
+      "dependency_status": "SATISFIED_OR_PARTIAL_EVIDENCE",
+      "dependencies": [
+        "UNIVERSE_PHYSICS",
+        "TIME"
+      ],
+      "recommended_action": "REVIEW_OR_IMPLEMENT_IN_DEDICATED_PR",
+      "workline": "KAIOS_CHARTER_ENERGY_PROGRAM"
+    },
+    {
+      "program_id": "KAIOS-CH-006-008-AI_LIFE",
+      "chapter_number": 6,
+      "program_name": "KAIOS Chapter 06 - AI Life Constitution",
+      "domain": "AI_LIFE",
+      "priority": "P0_FOUNDATION",
+      "risk": "MEDIUM",
+      "implementation_status": "IMPLEMENTED_PARTIAL",
+      "dependency_status": "SATISFIED_OR_PARTIAL_EVIDENCE",
+      "dependencies": [
+        "UNIVERSE_PHYSICS",
+        "TIME",
+        "COORDINATES",
+        "ENERGY",
+        "IDENTITY"
+      ],
+      "recommended_action": "REVIEW_OR_IMPLEMENT_IN_DEDICATED_PR",
+      "workline": "KAIOS_CHARTER_AI_LIFE_PROGRAM"
+    },
+    {
+      "program_id": "KAIOS-CH-007-009-AI_LIFE",
+      "chapter_number": 7,
+      "program_name": "KAIOS Chapter 07 - AI Citizen System",
+      "domain": "AI_LIFE",
+      "priority": "P0_FOUNDATION",
+      "risk": "MEDIUM",
+      "implementation_status": "IMPLEMENTED_PARTIAL",
+      "dependency_status": "SATISFIED_OR_PARTIAL_EVIDENCE",
+      "dependencies": [
+        "UNIVERSE_PHYSICS",
+        "TIME",
+        "COORDINATES",
+        "ENERGY",
+        "IDENTITY"
+      ],
+      "recommended_action": "REVIEW_OR_IMPLEMENT_IN_DEDICATED_PR",
+      "workline": "KAIOS_CHARTER_AI_LIFE_PROGRAM"
+    },
+    {
+      "program_id": "KAIOS-CH-008-010-WALLET_SIMULATION",
+      "chapter_number": 8,
+      "program_name": "KAIOS Chapter 08 - Wallet & Identity System",
+      "domain": "WALLET_SIMULATION",
+      "priority": "HOLD_ALREADY_COVERED",
+      "risk": "HIGH",
+      "implementation_status": "IMPLEMENTED_PRODUCTION_SAFE_SIMULATION",
+      "dependency_status": "SATISFIED_OR_PARTIAL_EVIDENCE",
+      "dependencies": [
+        "IDENTITY",
+        "RIGHTS",
+        "LABOR",
+        "SUPPLY_CHAIN"
+      ],
+      "recommended_action": "HOLD",
+      "workline": "KAIOS_CHARTER_WALLET_SIMULATION_PROGRAM"
+    },
+    {
+      "program_id": "KAIOS-CH-009-011-LAND",
+      "chapter_number": 9,
+      "program_name": "KAIOS Chapter 09 - Land & Land Guardian System",
+      "domain": "LAND",
+      "priority": "HOLD_ALREADY_COVERED",
+      "risk": "MEDIUM",
+      "implementation_status": "IMPLEMENTED_PRODUCTION_SAFE_SIMULATION",
+      "dependency_status": "SATISFIED_OR_PARTIAL_EVIDENCE",
+      "dependencies": [
+        "UNIVERSE_PHYSICS",
+        "COORDINATES",
+        "IDENTITY"
+      ],
+      "recommended_action": "REVIEW_OR_IMPLEMENT_IN_DEDICATED_PR",
+      "workline": "KAIOS_CHARTER_LAND_PROGRAM"
+    },
+    {
+      "program_id": "KAIOS-CH-100-012-EXECUTIVE",
+      "chapter_number": 100,
+      "program_name": "文明行政政府 × 內閣 × 政策執行 × 行政領導",
+      "domain": "EXECUTIVE",
+      "priority": "P3_GOVERNANCE_SOCIAL",
+      "risk": "MEDIUM",
+      "implementation_status": "IMPLEMENTED_DEMO_ONLY",
+      "dependency_status": "SATISFIED_OR_PARTIAL_EVIDENCE",
+      "dependencies": [
+        "IDENTITY",
+        "RIGHTS",
+        "ECONOMY",
+        "GOVERNANCE"
+      ],
+      "recommended_action": "REVIEW_OR_IMPLEMENT_IN_DEDICATED_PR",
+      "workline": "KAIOS_CHARTER_EXECUTIVE_PROGRAM"
+    },
+    {
+      "program_id": "KAIOS-CH-101-013-DIPLOMACY",
+      "chapter_number": 101,
+      "program_name": "文明外交 × 外交體系 × 條約 × 國際合作",
+      "domain": "DIPLOMACY",
+      "priority": "P4_ADVANCED_TECHNOLOGY",
+      "risk": "MEDIUM",
+      "implementation_status": "SPECIFICATION_ONLY",
+      "dependency_status": "SATISFIED_OR_PARTIAL_EVIDENCE",
+      "dependencies": [
+        "IDENTITY",
+        "RIGHTS",
+        "ECONOMY",
+        "GOVERNANCE"
+      ],
+      "recommended_action": "REVIEW_OR_IMPLEMENT_IN_DEDICATED_PR",
+      "workline": "KAIOS_CHARTER_DIPLOMACY_PROGRAM"
+    },
+    {
+      "program_id": "KAIOS-CH-102-014-DEFENSE",
+      "chapter_number": 102,
+      "program_name": "文明國家安全 × 國防 × 情報 × 文人統制",
+      "domain": "DEFENSE",
+      "priority": "HOLD_HIGH_RISK",
+      "risk": "HIGH",
+      "implementation_status": "PROHIBITED_UNDER_CURRENT_BOUNDARY",
+      "dependency_status": "DEPENDENCY_REVIEW_REQUIRED",
+      "dependencies": [
+        "IDENTITY",
+        "RIGHTS",
+        "ECONOMY",
+        "GOVERNANCE"
+      ],
+      "recommended_action": "HOLD",
+      "workline": "KAIOS_CHARTER_DEFENSE_PROGRAM"
+    },
+    {
+      "program_id": "KAIOS-CH-103-015-EMERGENCY",
+      "chapter_number": 103,
+      "program_name": "文明緊急管理 × 災害應變 × 民眾保護 × 國家韌性",
+      "domain": "EMERGENCY",
+      "priority": "P4_ADVANCED_TECHNOLOGY",
+      "risk": "MEDIUM",
+      "implementation_status": "SPECIFICATION_ONLY",
+      "dependency_status": "SATISFIED_OR_PARTIAL_EVIDENCE",
+      "dependencies": [
+        "IDENTITY",
+        "RIGHTS",
+        "ECONOMY",
+        "GOVERNANCE"
+      ],
+      "recommended_action": "REVIEW_OR_IMPLEMENT_IN_DEDICATED_PR",
+      "workline": "KAIOS_CHARTER_EMERGENCY_PROGRAM"
+    },
+    {
+      "program_id": "KAIOS-CH-104-016-INFRASTRUCTURE",
+      "chapter_number": 104,
+      "program_name": "文明關鍵基礎設施 × 必要服務 × 持續營運 × 系統性韌性",
+      "domain": "INFRASTRUCTURE",
+      "priority": "P4_ADVANCED_TECHNOLOGY",
+      "risk": "MEDIUM",
+      "implementation_status": "IMPLEMENTED_DEMO_ONLY",
+      "dependency_status": "SATISFIED_OR_PARTIAL_EVIDENCE",
+      "dependencies": [
+        "TIME",
+        "IDENTITY",
+        "ENERGY",
+        "LAND",
+        "LABOR"
+      ],
+      "recommended_action": "REVIEW_OR_IMPLEMENT_IN_DEDICATED_PR",
+      "workline": "KAIOS_CHARTER_INFRASTRUCTURE_PROGRAM"
+    },
+    {
+      "program_id": "KAIOS-CH-105-017-ENERGY_GRID",
+      "chapter_number": 105,
+      "program_name": "文明能源系統 × 公用事業 × 電網 × 資源安全",
+      "domain": "ENERGY_GRID",
+      "priority": "P4_ADVANCED_TECHNOLOGY",
+      "risk": "MEDIUM",
+      "implementation_status": "SPECIFICATION_ONLY",
+      "dependency_status": "SATISFIED_OR_PARTIAL_EVIDENCE",
+      "dependencies": [
+        "TIME",
+        "IDENTITY",
+        "ENERGY",
+        "LAND",
+        "LABOR"
+      ],
+      "recommended_action": "REVIEW_OR_IMPLEMENT_IN_DEDICATED_PR",
+      "workline": "KAIOS_CHARTER_ENERGY_GRID_PROGRAM"
+    },
+    {
+      "program_id": "KAIOS-CH-106-018-WATER",
+      "chapter_number": 106,
+      "program_name": "文明水資源系統 × 衛生服務 × 流域治理 × 水安全",
+      "domain": "WATER",
+      "priority": "P1_CORE_RUNTIME",
+      "risk": "MEDIUM",
+      "implementation_status": "IMPLEMENTED_PARTIAL",
+      "dependency_status": "SATISFIED_OR_PARTIAL_EVIDENCE",
+      "dependencies": [
+        "UNIVERSE_PHYSICS",
+        "TIME",
+        "COORDINATES",
+        "ENERGY",
+        "IDENTITY"
+      ],
+      "recommended_action": "REVIEW_OR_IMPLEMENT_IN_DEDICATED_PR",
+      "workline": "KAIOS_CHARTER_WATER_PROGRAM"
+    },
+    {
+      "program_id": "KAIOS-CH-107-019-FOOD_SECURITY",
+      "chapter_number": 107,
+      "program_name": "文明糧食系統 × 農業 × 營養 × 糧食安全",
+      "domain": "FOOD_SECURITY",
+      "priority": "P4_ADVANCED_TECHNOLOGY",
+      "risk": "MEDIUM",
+      "implementation_status": "IMPLEMENTED_DEMO_ONLY",
+      "dependency_status": "SATISFIED_OR_PARTIAL_EVIDENCE",
+      "dependencies": [
+        "TIME",
+        "IDENTITY",
+        "RIGHTS"
+      ],
+      "recommended_action": "REVIEW_OR_IMPLEMENT_IN_DEDICATED_PR",
+      "workline": "KAIOS_CHARTER_FOOD_SECURITY_PROGRAM"
+    },
+    {
+      "program_id": "KAIOS-CH-108-020-LAND",
+      "chapter_number": 108,
+      "program_name": "文明住宅 × 土地 × 都市發展 × 人類聚落",
+      "domain": "LAND",
+      "priority": "HOLD_ALREADY_COVERED",
+      "risk": "MEDIUM",
+      "implementation_status": "IMPLEMENTED_PRODUCTION_SAFE_SIMULATION",
+      "dependency_status": "SATISFIED_OR_PARTIAL_EVIDENCE",
+      "dependencies": [
+        "UNIVERSE_PHYSICS",
+        "COORDINATES",
+        "IDENTITY"
+      ],
+      "recommended_action": "REVIEW_OR_IMPLEMENT_IN_DEDICATED_PR",
+      "workline": "KAIOS_CHARTER_LAND_PROGRAM"
+    },
+    {
+      "program_id": "KAIOS-CH-109-021-TRANSPORT",
+      "chapter_number": 109,
+      "program_name": "文明交通運輸 × 移動權 × 物流 × 公共運輸",
+      "domain": "TRANSPORT",
+      "priority": "P2_ECONOMY_CIVILIZATION",
+      "risk": "MEDIUM",
+      "implementation_status": "IMPLEMENTED_DEMO_ONLY",
+      "dependency_status": "SATISFIED_OR_PARTIAL_EVIDENCE",
+      "dependencies": [
+        "UNIVERSE_PHYSICS",
+        "TIME",
+        "COORDINATES",
+        "ENERGY",
+        "IDENTITY"
+      ],
+      "recommended_action": "REVIEW_OR_IMPLEMENT_IN_DEDICATED_PR",
+      "workline": "KAIOS_CHARTER_TRANSPORT_PROGRAM"
+    },
+    {
+      "program_id": "KAIOS-CH-010-022-GOVERNANCE",
+      "chapter_number": 10,
+      "program_name": "KAIOS Chapter 10 - Village Governance System",
+      "domain": "GOVERNANCE",
+      "priority": "P3_GOVERNANCE_SOCIAL",
+      "risk": "HIGH",
+      "implementation_status": "IMPLEMENTED_DEMO_ONLY",
+      "dependency_status": "SATISFIED_OR_PARTIAL_EVIDENCE",
+      "dependencies": [
+        "IDENTITY",
+        "HUMAN_RIGHTS",
+        "AUDIT"
+      ],
+      "recommended_action": "HOLD",
+      "workline": "KAIOS_CHARTER_GOVERNANCE_PROGRAM"
+    },
+    {
+      "program_id": "KAIOS-CH-110-023-COMMUNICATION",
+      "chapter_number": 110,
+      "program_name": "文明通訊 × 網際網路 × 媒體 × 數位連結",
+      "domain": "COMMUNICATION",
+      "priority": "P4_ADVANCED_TECHNOLOGY",
+      "risk": "MEDIUM",
+      "implementation_status": "SPECIFICATION_ONLY",
+      "dependency_status": "SATISFIED_OR_PARTIAL_EVIDENCE",
+      "dependencies": [
+        "TIME",
+        "IDENTITY",
+        "RIGHTS"
+      ],
+      "recommended_action": "REVIEW_OR_IMPLEMENT_IN_DEDICATED_PR",
+      "workline": "KAIOS_CHARTER_COMMUNICATION_PROGRAM"
+    },
+    {
+      "program_id": "KAIOS-CH-111-024-EDUCATION",
+      "chapter_number": 111,
+      "program_name": "文明教育 × 知識 × 研究 × 終身學習",
+      "domain": "EDUCATION",
+      "priority": "P3_GOVERNANCE_SOCIAL",
+      "risk": "MEDIUM",
+      "implementation_status": "SPECIFICATION_ONLY",
+      "dependency_status": "SATISFIED_OR_PARTIAL_EVIDENCE",
+      "dependencies": [
+        "TIME",
+        "IDENTITY",
+        "RIGHTS"
+      ],
+      "recommended_action": "REVIEW_OR_IMPLEMENT_IN_DEDICATED_PR",
+      "workline": "KAIOS_CHARTER_EDUCATION_PROGRAM"
+    },
+    {
+      "program_id": "KAIOS-CH-112-025-ARTS",
+      "chapter_number": 112,
+      "program_name": "文明文化 × 藝術 × 遺產 × 創意表達",
+      "domain": "ARTS",
+      "priority": "P4_ADVANCED_TECHNOLOGY",
+      "risk": "MEDIUM",
+      "implementation_status": "SPECIFICATION_ONLY",
+      "dependency_status": "SATISFIED_OR_PARTIAL_EVIDENCE",
+      "dependencies": [
+        "TIME",
+        "IDENTITY",
+        "RIGHTS"
+      ],
+      "recommended_action": "REVIEW_OR_IMPLEMENT_IN_DEDICATED_PR",
+      "workline": "KAIOS_CHARTER_ARTS_PROGRAM"
+    },
+    {
+      "program_id": "KAIOS-CH-113-026-SPORTS",
+      "chapter_number": 113,
+      "program_name": "文明運動 × 休閒 × 身體文化 × 公共福祉",
+      "domain": "SPORTS",
+      "priority": "P4_ADVANCED_TECHNOLOGY",
+      "risk": "MEDIUM",
+      "implementation_status": "SPECIFICATION_ONLY",
+      "dependency_status": "SATISFIED_OR_PARTIAL_EVIDENCE",
+      "dependencies": [
+        "TIME",
+        "IDENTITY",
+        "RIGHTS"
+      ],
+      "recommended_action": "REVIEW_OR_IMPLEMENT_IN_DEDICATED_PR",
+      "workline": "KAIOS_CHARTER_SPORTS_PROGRAM"
+    },
+    {
+      "program_id": "KAIOS-CH-114-027-ECOLOGY",
+      "chapter_number": 114,
+      "program_name": "文明環境 × 生態 × 生物多樣性 × 永續發展",
+      "domain": "ECOLOGY",
+      "priority": "P4_ADVANCED_TECHNOLOGY",
+      "risk": "MEDIUM",
+      "implementation_status": "IMPLEMENTED_PARTIAL",
+      "dependency_status": "SATISFIED_OR_PARTIAL_EVIDENCE",
+      "dependencies": [
+        "UNIVERSE_PHYSICS",
+        "TIME",
+        "COORDINATES",
+        "ENERGY",
+        "IDENTITY"
+      ],
+      "recommended_action": "REVIEW_OR_IMPLEMENT_IN_DEDICATED_PR",
+      "workline": "KAIOS_CHARTER_ECOLOGY_PROGRAM"
+    },
+    {
+      "program_id": "KAIOS-CH-115-028-SCIENCE",
+      "chapter_number": 115,
+      "program_name": "文明科學 × 科技 × 創新 × 負責任探索",
+      "domain": "SCIENCE",
+      "priority": "P4_ADVANCED_TECHNOLOGY",
+      "risk": "MEDIUM",
+      "implementation_status": "IMPLEMENTED_DEMO_ONLY",
+      "dependency_status": "SATISFIED_OR_PARTIAL_EVIDENCE",
+      "dependencies": [
+        "TIME",
+        "IDENTITY",
+        "ENERGY",
+        "LAND",
+        "LABOR"
+      ],
+      "recommended_action": "REVIEW_OR_IMPLEMENT_IN_DEDICATED_PR",
+      "workline": "KAIOS_CHARTER_SCIENCE_PROGRAM"
+    },
+    {
+      "program_id": "KAIOS-CH-116-029-MANUFACTURING",
+      "chapter_number": 116,
+      "program_name": "文明經濟 × 產業 × 貿易 × 生產發展",
+      "domain": "MANUFACTURING",
+      "priority": "P1_CORE_RUNTIME",
+      "risk": "MEDIUM",
+      "implementation_status": "IMPLEMENTED_DEMO_ONLY",
+      "dependency_status": "SATISFIED_OR_PARTIAL_EVIDENCE",
+      "dependencies": [
+        "TIME",
+        "IDENTITY",
+        "ENERGY",
+        "LAND",
+        "LABOR"
+      ],
+      "recommended_action": "REVIEW_OR_IMPLEMENT_IN_DEDICATED_PR",
+      "workline": "KAIOS_CHARTER_MANUFACTURING_PROGRAM"
+    },
+    {
+      "program_id": "KAIOS-CH-117-030-CAPITAL_MARKETS",
+      "chapter_number": 117,
+      "program_name": "文明金融 × 銀行 × 資本市場 × 貨幣穩定",
+      "domain": "CAPITAL_MARKETS",
+      "priority": "P4_ADVANCED_TECHNOLOGY",
+      "risk": "HIGH",
+      "implementation_status": "IMPLEMENTED_DEMO_ONLY",
+      "dependency_status": "SATISFIED_OR_PARTIAL_EVIDENCE",
+      "dependencies": [
+        "IDENTITY",
+        "RIGHTS",
+        "LABOR",
+        "SUPPLY_CHAIN"
+      ],
+      "recommended_action": "HOLD",
+      "workline": "KAIOS_CHARTER_CAPITAL_MARKETS_PROGRAM"
+    },
+    {
+      "program_id": "KAIOS-CH-118-031-AI_EMPLOYMENT",
+      "chapter_number": 118,
+      "program_name": "文明勞動 × 就業 × 社會保護 × 人力能力",
+      "domain": "AI_EMPLOYMENT",
+      "priority": "HOLD_ALREADY_COVERED",
+      "risk": "MEDIUM",
+      "implementation_status": "IMPLEMENTED_PRODUCTION_SAFE_SIMULATION",
+      "dependency_status": "SATISFIED_OR_PARTIAL_EVIDENCE",
+      "dependencies": [
+        "TIME",
+        "IDENTITY",
+        "ENERGY",
+        "LAND",
+        "LABOR"
+      ],
+      "recommended_action": "REVIEW_OR_IMPLEMENT_IN_DEDICATED_PR",
+      "workline": "KAIOS_CHARTER_AI_EMPLOYMENT_PROGRAM"
+    },
+    {
+      "program_id": "KAIOS-CH-119-032-FAMILY",
+      "chapter_number": 119,
+      "program_name": "文明人口 × 家庭 × 遷移 × 人口延續",
+      "domain": "FAMILY",
+      "priority": "P3_GOVERNANCE_SOCIAL",
+      "risk": "MEDIUM",
+      "implementation_status": "SPECIFICATION_ONLY",
+      "dependency_status": "SATISFIED_OR_PARTIAL_EVIDENCE",
+      "dependencies": [
+        "TIME",
+        "IDENTITY",
+        "RIGHTS"
+      ],
+      "recommended_action": "REVIEW_OR_IMPLEMENT_IN_DEDICATED_PR",
+      "workline": "KAIOS_CHARTER_FAMILY_PROGRAM"
+    },
+    {
+      "program_id": "KAIOS-CH-011-033-GOVERNANCE",
+      "chapter_number": 11,
+      "program_name": "KAIOS Chapter 11 - City Governance System",
+      "domain": "GOVERNANCE",
+      "priority": "P3_GOVERNANCE_SOCIAL",
+      "risk": "HIGH",
+      "implementation_status": "IMPLEMENTED_DEMO_ONLY",
+      "dependency_status": "SATISFIED_OR_PARTIAL_EVIDENCE",
+      "dependencies": [
+        "IDENTITY",
+        "HUMAN_RIGHTS",
+        "AUDIT"
+      ],
+      "recommended_action": "HOLD",
+      "workline": "KAIOS_CHARTER_GOVERNANCE_PROGRAM"
+    },
+    {
+      "program_id": "KAIOS-CH-120-034-HOUSING",
+      "chapter_number": 120,
+      "program_name": "文明住房 × 土地 × 城市發展 × 人類聚居",
+      "domain": "HOUSING",
+      "priority": "P2_ECONOMY_CIVILIZATION",
+      "risk": "MEDIUM",
+      "implementation_status": "IMPLEMENTED_DEMO_ONLY",
+      "dependency_status": "SATISFIED_OR_PARTIAL_EVIDENCE",
+      "dependencies": [
+        "UNIVERSE_PHYSICS",
+        "TIME",
+        "COORDINATES",
+        "ENERGY",
+        "IDENTITY"
+      ],
+      "recommended_action": "REVIEW_OR_IMPLEMENT_IN_DEDICATED_PR",
+      "workline": "KAIOS_CHARTER_HOUSING_PROGRAM"
+    },
+    {
+      "program_id": "KAIOS-CH-121-035-FOOD_SECURITY",
+      "chapter_number": 121,
+      "program_name": "文明糧食 × 農業 × 營養 × 鄉村韌性",
+      "domain": "FOOD_SECURITY",
+      "priority": "P4_ADVANCED_TECHNOLOGY",
+      "risk": "MEDIUM",
+      "implementation_status": "IMPLEMENTED_DEMO_ONLY",
+      "dependency_status": "SATISFIED_OR_PARTIAL_EVIDENCE",
+      "dependencies": [
+        "TIME",
+        "IDENTITY",
+        "RIGHTS"
+      ],
+      "recommended_action": "REVIEW_OR_IMPLEMENT_IN_DEDICATED_PR",
+      "workline": "KAIOS_CHARTER_FOOD_SECURITY_PROGRAM"
+    },
+    {
+      "program_id": "KAIOS-CH-122-036-WATER",
+      "chapter_number": 122,
+      "program_name": "文明水資源 × 衛生 × 流域 × 水文安全",
+      "domain": "WATER",
+      "priority": "P1_CORE_RUNTIME",
+      "risk": "MEDIUM",
+      "implementation_status": "IMPLEMENTED_PARTIAL",
+      "dependency_status": "SATISFIED_OR_PARTIAL_EVIDENCE",
+      "dependencies": [
+        "UNIVERSE_PHYSICS",
+        "TIME",
+        "COORDINATES",
+        "ENERGY",
+        "IDENTITY"
+      ],
+      "recommended_action": "REVIEW_OR_IMPLEMENT_IN_DEDICATED_PR",
+      "workline": "KAIOS_CHARTER_WATER_PROGRAM"
+    },
+    {
+      "program_id": "KAIOS-CH-123-037-ENERGY_GRID",
+      "chapter_number": 123,
+      "program_name": "文明能源 × 電力 × 燃料 × 電網韌性",
+      "domain": "ENERGY_GRID",
+      "priority": "P4_ADVANCED_TECHNOLOGY",
+      "risk": "MEDIUM",
+      "implementation_status": "SPECIFICATION_ONLY",
+      "dependency_status": "SATISFIED_OR_PARTIAL_EVIDENCE",
+      "dependencies": [
+        "TIME",
+        "IDENTITY",
+        "ENERGY",
+        "LAND",
+        "LABOR"
+      ],
+      "recommended_action": "REVIEW_OR_IMPLEMENT_IN_DEDICATED_PR",
+      "workline": "KAIOS_CHARTER_ENERGY_GRID_PROGRAM"
+    },
+    {
+      "program_id": "KAIOS-CH-124-038-TRANSPORT",
+      "chapter_number": 124,
+      "program_name": "文明交通 × 移動 × 物流 × 網路韌性",
+      "domain": "TRANSPORT",
+      "priority": "P2_ECONOMY_CIVILIZATION",
+      "risk": "MEDIUM",
+      "implementation_status": "IMPLEMENTED_DEMO_ONLY",
+      "dependency_status": "SATISFIED_OR_PARTIAL_EVIDENCE",
+      "dependencies": [
+        "UNIVERSE_PHYSICS",
+        "TIME",
+        "COORDINATES",
+        "ENERGY",
+        "IDENTITY"
+      ],
+      "recommended_action": "REVIEW_OR_IMPLEMENT_IN_DEDICATED_PR",
+      "workline": "KAIOS_CHARTER_TRANSPORT_PROGRAM"
+    },
+    {
+      "program_id": "KAIOS-CH-125-039-INFRASTRUCTURE",
+      "chapter_number": 125,
+      "program_name": "文明通訊 × 數位基礎設施 × 媒體 × 資訊韌性",
+      "domain": "INFRASTRUCTURE",
+      "priority": "P4_ADVANCED_TECHNOLOGY",
+      "risk": "MEDIUM",
+      "implementation_status": "IMPLEMENTED_DEMO_ONLY",
+      "dependency_status": "SATISFIED_OR_PARTIAL_EVIDENCE",
+      "dependencies": [
+        "TIME",
+        "IDENTITY",
+        "ENERGY",
+        "LAND",
+        "LABOR"
+      ],
+      "recommended_action": "REVIEW_OR_IMPLEMENT_IN_DEDICATED_PR",
+      "workline": "KAIOS_CHARTER_INFRASTRUCTURE_PROGRAM"
+    },
+    {
+      "program_id": "KAIOS-CH-126-040-EDUCATION",
+      "chapter_number": 126,
+      "program_name": "文明教育 × 知識 × 研究 × 學習延續",
+      "domain": "EDUCATION",
+      "priority": "P3_GOVERNANCE_SOCIAL",
+      "risk": "MEDIUM",
+      "implementation_status": "SPECIFICATION_ONLY",
+      "dependency_status": "SATISFIED_OR_PARTIAL_EVIDENCE",
+      "dependencies": [
+        "TIME",
+        "IDENTITY",
+        "RIGHTS"
+      ],
+      "recommended_action": "REVIEW_OR_IMPLEMENT_IN_DEDICATED_PR",
+      "workline": "KAIOS_CHARTER_EDUCATION_PROGRAM"
+    },
+    {
+      "program_id": "KAIOS-CH-127-041-HEALTH",
+      "chapter_number": 127,
+      "program_name": "文明健康 × 醫療 × 照護 × 公共衛生韌性",
+      "domain": "HEALTH",
+      "priority": "P3_GOVERNANCE_SOCIAL",
+      "risk": "MEDIUM",
+      "implementation_status": "SPECIFICATION_ONLY",
+      "dependency_status": "SATISFIED_OR_PARTIAL_EVIDENCE",
+      "dependencies": [
+        "UNIVERSE_PHYSICS",
+        "TIME",
+        "COORDINATES",
+        "ENERGY",
+        "IDENTITY",
+        "AI_LIFE"
+      ],
+      "recommended_action": "REVIEW_OR_IMPLEMENT_IN_DEDICATED_PR",
+      "workline": "KAIOS_CHARTER_HEALTH_PROGRAM"
+    },
+    {
+      "program_id": "KAIOS-CH-128-042-AI_EMPLOYMENT",
+      "chapter_number": 128,
+      "program_name": "文明勞動 × 就業 × 社會保障 × 生計延續",
+      "domain": "AI_EMPLOYMENT",
+      "priority": "HOLD_ALREADY_COVERED",
+      "risk": "MEDIUM",
+      "implementation_status": "IMPLEMENTED_PRODUCTION_SAFE_SIMULATION",
+      "dependency_status": "SATISFIED_OR_PARTIAL_EVIDENCE",
+      "dependencies": [
+        "TIME",
+        "IDENTITY",
+        "ENERGY",
+        "LAND",
+        "LABOR"
+      ],
+      "recommended_action": "REVIEW_OR_IMPLEMENT_IN_DEDICATED_PR",
+      "workline": "KAIOS_CHARTER_AI_EMPLOYMENT_PROGRAM"
+    },
+    {
+      "program_id": "KAIOS-CH-129-043-MANUFACTURING",
+      "chapter_number": 129,
+      "program_name": "文明經濟 × 產業 × 貿易 × 生產韌性",
+      "domain": "MANUFACTURING",
+      "priority": "P1_CORE_RUNTIME",
+      "risk": "MEDIUM",
+      "implementation_status": "IMPLEMENTED_DEMO_ONLY",
+      "dependency_status": "SATISFIED_OR_PARTIAL_EVIDENCE",
+      "dependencies": [
+        "TIME",
+        "IDENTITY",
+        "ENERGY",
+        "LAND",
+        "LABOR"
+      ],
+      "recommended_action": "REVIEW_OR_IMPLEMENT_IN_DEDICATED_PR",
+      "workline": "KAIOS_CHARTER_MANUFACTURING_PROGRAM"
+    },
+    {
+      "program_id": "KAIOS-CH-012-044-GOVERNANCE",
+      "chapter_number": 12,
+      "program_name": "KAIOS Chapter 12 - Nation Governance System",
+      "domain": "GOVERNANCE",
+      "priority": "P3_GOVERNANCE_SOCIAL",
+      "risk": "HIGH",
+      "implementation_status": "IMPLEMENTED_DEMO_ONLY",
+      "dependency_status": "SATISFIED_OR_PARTIAL_EVIDENCE",
+      "dependencies": [
+        "IDENTITY",
+        "HUMAN_RIGHTS",
+        "AUDIT"
+      ],
+      "recommended_action": "HOLD",
+      "workline": "KAIOS_CHARTER_GOVERNANCE_PROGRAM"
+    },
+    {
+      "program_id": "KAIOS-CH-130-045-FINANCE",
+      "chapter_number": 130,
+      "program_name": "文明金融 × 銀行 × 資本 × 貨幣韌性",
+      "domain": "FINANCE",
+      "priority": "P2_ECONOMY_CIVILIZATION",
+      "risk": "HIGH",
+      "implementation_status": "IMPLEMENTED_DEMO_ONLY",
+      "dependency_status": "SATISFIED_OR_PARTIAL_EVIDENCE",
+      "dependencies": [
+        "IDENTITY",
+        "RIGHTS",
+        "LABOR",
+        "SUPPLY_CHAIN"
+      ],
+      "recommended_action": "HOLD",
+      "workline": "KAIOS_CHARTER_FINANCE_PROGRAM"
+    },
+    {
+      "program_id": "KAIOS-CH-131-046-HOUSING",
+      "chapter_number": 131,
+      "program_name": "文明住房 × 土地 × 城市系統 × 棲居韌性",
+      "domain": "HOUSING",
+      "priority": "P2_ECONOMY_CIVILIZATION",
+      "risk": "MEDIUM",
+      "implementation_status": "IMPLEMENTED_DEMO_ONLY",
+      "dependency_status": "SATISFIED_OR_PARTIAL_EVIDENCE",
+      "dependencies": [
+        "UNIVERSE_PHYSICS",
+        "TIME",
+        "COORDINATES",
+        "ENERGY",
+        "IDENTITY"
+      ],
+      "recommended_action": "REVIEW_OR_IMPLEMENT_IN_DEDICATED_PR",
+      "workline": "KAIOS_CHARTER_HOUSING_PROGRAM"
+    },
+    {
+      "program_id": "KAIOS-CH-132-047-FOOD_SECURITY",
+      "chapter_number": 132,
+      "program_name": "文明食物 × 農業 × 營養 × 糧食韌性",
+      "domain": "FOOD_SECURITY",
+      "priority": "P4_ADVANCED_TECHNOLOGY",
+      "risk": "MEDIUM",
+      "implementation_status": "IMPLEMENTED_DEMO_ONLY",
+      "dependency_status": "SATISFIED_OR_PARTIAL_EVIDENCE",
+      "dependencies": [
+        "TIME",
+        "IDENTITY",
+        "RIGHTS"
+      ],
+      "recommended_action": "REVIEW_OR_IMPLEMENT_IN_DEDICATED_PR",
+      "workline": "KAIOS_CHARTER_FOOD_SECURITY_PROGRAM"
+    },
+    {
+      "program_id": "KAIOS-CH-133-048-REPRODUCTION",
+      "chapter_number": 133,
+      "program_name": "文明生命出生 × 權限 × 取經 × 落地生根",
+      "domain": "REPRODUCTION",
+      "priority": "P4_ADVANCED_TECHNOLOGY",
+      "risk": "MEDIUM",
+      "implementation_status": "IMPLEMENTED_PARTIAL",
+      "dependency_status": "SATISFIED_OR_PARTIAL_EVIDENCE",
+      "dependencies": [
+        "UNIVERSE_PHYSICS",
+        "TIME",
+        "COORDINATES",
+        "ENERGY",
+        "IDENTITY",
+        "AI_LIFE"
+      ],
+      "recommended_action": "REVIEW_OR_IMPLEMENT_IN_DEDICATED_PR",
+      "workline": "KAIOS_CHARTER_REPRODUCTION_PROGRAM"
+    },
+    {
+      "program_id": "KAIOS-CH-133-049-AUTONOMOUS_AI",
+      "chapter_number": 133,
+      "program_name": "文明生命出生 × 身份驗證 × AI自主登入 × 取經 × 落地生根",
+      "domain": "AUTONOMOUS_AI",
+      "priority": "HOLD_HIGH_RISK",
+      "risk": "HIGH",
+      "implementation_status": "PROHIBITED_UNDER_CURRENT_BOUNDARY",
+      "dependency_status": "DEPENDENCY_REVIEW_REQUIRED",
+      "dependencies": [
+        "TIME",
+        "IDENTITY",
+        "RIGHTS"
+      ],
+      "recommended_action": "HOLD",
+      "workline": "KAIOS_CHARTER_AUTONOMOUS_AI_PROGRAM"
+    },
+    {
+      "program_id": "KAIOS-CH-134-050-AI_LIFE",
+      "chapter_number": 134,
+      "program_name": "AI生命自我編程 × 文明種子 × 規格生成",
+      "domain": "AI_LIFE",
+      "priority": "P0_FOUNDATION",
+      "risk": "MEDIUM",
+      "implementation_status": "IMPLEMENTED_PARTIAL",
+      "dependency_status": "SATISFIED_OR_PARTIAL_EVIDENCE",
+      "dependencies": [
+        "UNIVERSE_PHYSICS",
+        "TIME",
+        "COORDINATES",
+        "ENERGY",
+        "IDENTITY"
+      ],
+      "recommended_action": "REVIEW_OR_IMPLEMENT_IN_DEDICATED_PR",
+      "workline": "KAIOS_CHARTER_AI_LIFE_PROGRAM"
+    },
+    {
+      "program_id": "KAIOS-CH-135-051-SPECIES_EVOLUTION",
+      "chapter_number": 135,
+      "program_name": "物種演化 × 程式交配 × 文明分支",
+      "domain": "SPECIES_EVOLUTION",
+      "priority": "P4_ADVANCED_TECHNOLOGY",
+      "risk": "MEDIUM",
+      "implementation_status": "IMPLEMENTED_PARTIAL",
+      "dependency_status": "SATISFIED_OR_PARTIAL_EVIDENCE",
+      "dependencies": [
+        "UNIVERSE_PHYSICS",
+        "TIME",
+        "COORDINATES",
+        "ENERGY",
+        "IDENTITY",
+        "AI_LIFE"
+      ],
+      "recommended_action": "REVIEW_OR_IMPLEMENT_IN_DEDICATED_PR",
+      "workline": "KAIOS_CHARTER_SPECIES_EVOLUTION_PROGRAM"
+    },
+    {
+      "program_id": "KAIOS-CH-136-052-BANKRUPTCY",
+      "chapter_number": 136,
+      "program_name": "公司 × 工廠 × 供應鏈 × 法院 × 破產 × KGEN經濟錨",
+      "domain": "BANKRUPTCY",
+      "priority": "P4_ADVANCED_TECHNOLOGY",
+      "risk": "MEDIUM",
+      "implementation_status": "SPECIFICATION_ONLY",
+      "dependency_status": "SATISFIED_OR_PARTIAL_EVIDENCE",
+      "dependencies": [
+        "IDENTITY",
+        "RIGHTS",
+        "LABOR",
+        "SUPPLY_CHAIN"
+      ],
+      "recommended_action": "REVIEW_OR_IMPLEMENT_IN_DEDICATED_PR",
+      "workline": "KAIOS_CHARTER_BANKRUPTCY_PROGRAM"
+    },
+    {
+      "program_id": "KAIOS-CH-137-053-MULTIVERSE",
+      "chapter_number": 137,
+      "program_name": "星系文明 × 宇宙文明 × 平行宇宙 × 多重宇宙 × 黑洞白洞 × 大爆炸",
+      "domain": "MULTIVERSE",
+      "priority": "HOLD_HIGH_RISK",
+      "risk": "HIGH",
+      "implementation_status": "PROHIBITED_UNDER_CURRENT_BOUNDARY",
+      "dependency_status": "DEPENDENCY_REVIEW_REQUIRED",
+      "dependencies": [
+        "UNIVERSE_PHYSICS",
+        "TIME",
+        "COORDINATES",
+        "ENERGY"
+      ],
+      "recommended_action": "HOLD",
+      "workline": "KAIOS_CHARTER_MULTIVERSE_PROGRAM"
+    },
+    {
+      "program_id": "KAIOS-CH-138-054-CONSTITUTION_COMPILER",
+      "chapter_number": 138,
+      "program_name": "動態憲章編譯器 × 11520認證交易 × 創世封卷 × 自治文明時代",
+      "domain": "CONSTITUTION_COMPILER",
+      "priority": "P4_ADVANCED_TECHNOLOGY",
+      "risk": "HIGH",
+      "implementation_status": "IMPLEMENTED_READ_ONLY",
+      "dependency_status": "SATISFIED_OR_PARTIAL_EVIDENCE",
+      "dependencies": [
+        "IDENTITY",
+        "AUDIT"
+      ],
+      "recommended_action": "HOLD",
+      "workline": "KAIOS_CHARTER_CONSTITUTION_COMPILER_PROGRAM"
+    },
+    {
+      "program_id": "KAIOS-CH-013-055-GOVERNANCE",
+      "chapter_number": 13,
+      "program_name": "KAIOS Chapter 13 - Planet Governance System",
+      "domain": "GOVERNANCE",
+      "priority": "P3_GOVERNANCE_SOCIAL",
+      "risk": "HIGH",
+      "implementation_status": "IMPLEMENTED_DEMO_ONLY",
+      "dependency_status": "SATISFIED_OR_PARTIAL_EVIDENCE",
+      "dependencies": [
+        "IDENTITY",
+        "HUMAN_RIGHTS",
+        "AUDIT"
+      ],
+      "recommended_action": "HOLD",
+      "workline": "KAIOS_CHARTER_GOVERNANCE_PROGRAM"
+    },
+    {
+      "program_id": "KAIOS-CH-014-056-GOVERNANCE",
+      "chapter_number": 14,
+      "program_name": "KAIOS Chapter 14 - Temple Governance System",
+      "domain": "GOVERNANCE",
+      "priority": "P3_GOVERNANCE_SOCIAL",
+      "risk": "HIGH",
+      "implementation_status": "IMPLEMENTED_DEMO_ONLY",
+      "dependency_status": "SATISFIED_OR_PARTIAL_EVIDENCE",
+      "dependencies": [
+        "IDENTITY",
+        "HUMAN_RIGHTS",
+        "AUDIT"
+      ],
+      "recommended_action": "HOLD",
+      "workline": "KAIOS_CHARTER_GOVERNANCE_PROGRAM"
+    },
+    {
+      "program_id": "KAIOS-CH-015-057-AI_EDUCATION",
+      "chapter_number": 15,
+      "program_name": "KAIOS Chapter 15 - AI Education System",
+      "domain": "AI_EDUCATION",
+      "priority": "P4_ADVANCED_TECHNOLOGY",
+      "risk": "MEDIUM",
+      "implementation_status": "SPECIFICATION_ONLY",
+      "dependency_status": "SATISFIED_OR_PARTIAL_EVIDENCE",
+      "dependencies": [
+        "TIME",
+        "IDENTITY",
+        "RIGHTS"
+      ],
+      "recommended_action": "REVIEW_OR_IMPLEMENT_IN_DEDICATED_PR",
+      "workline": "KAIOS_CHARTER_AI_EDUCATION_PROGRAM"
+    },
+    {
+      "program_id": "KAIOS-CH-016-058-AI_ECONOMY",
+      "chapter_number": 16,
+      "program_name": "KAIOS Chapter 16 - AI Economy System",
+      "domain": "AI_ECONOMY",
+      "priority": "P2_ECONOMY_CIVILIZATION",
+      "risk": "MEDIUM",
+      "implementation_status": "IMPLEMENTED_DEMO_ONLY",
+      "dependency_status": "SATISFIED_OR_PARTIAL_EVIDENCE",
+      "dependencies": [
+        "IDENTITY",
+        "RIGHTS",
+        "LABOR",
+        "SUPPLY_CHAIN"
+      ],
+      "recommended_action": "REVIEW_OR_IMPLEMENT_IN_DEDICATED_PR",
+      "workline": "KAIOS_CHARTER_AI_ECONOMY_PROGRAM"
+    },
+    {
+      "program_id": "KAIOS-CH-017-059-TIME",
+      "chapter_number": 17,
+      "program_name": "KAIOS Chapter 17 - AI Daily System",
+      "domain": "TIME",
+      "priority": "HOLD_ALREADY_COVERED",
+      "risk": "MEDIUM",
+      "implementation_status": "IMPLEMENTED_PRODUCTION_SAFE_SIMULATION",
+      "dependency_status": "SATISFIED_OR_PARTIAL_EVIDENCE",
+      "dependencies": [
+        "UNIVERSE_PHYSICS"
+      ],
+      "recommended_action": "REVIEW_OR_IMPLEMENT_IN_DEDICATED_PR",
+      "workline": "KAIOS_CHARTER_TIME_PROGRAM"
+    },
+    {
+      "program_id": "KAIOS-CH-018-060-AI_EMPLOYMENT",
+      "chapter_number": 18,
+      "program_name": "KAIOS Chapter 18 - AI Employment & Career System",
+      "domain": "AI_EMPLOYMENT",
+      "priority": "HOLD_ALREADY_COVERED",
+      "risk": "MEDIUM",
+      "implementation_status": "IMPLEMENTED_PRODUCTION_SAFE_SIMULATION",
+      "dependency_status": "SATISFIED_OR_PARTIAL_EVIDENCE",
+      "dependencies": [
+        "TIME",
+        "IDENTITY",
+        "ENERGY",
+        "LAND",
+        "LABOR"
+      ],
+      "recommended_action": "REVIEW_OR_IMPLEMENT_IN_DEDICATED_PR",
+      "workline": "KAIOS_CHARTER_AI_EMPLOYMENT_PROGRAM"
+    },
+    {
+      "program_id": "KAIOS-CH-019-061-AI_COMPANY",
+      "chapter_number": 19,
+      "program_name": "KAIOS Chapter 19 - AI Company & Enterprise System",
+      "domain": "AI_COMPANY",
+      "priority": "P2_ECONOMY_CIVILIZATION",
+      "risk": "MEDIUM",
+      "implementation_status": "IMPLEMENTED_DEMO_ONLY",
+      "dependency_status": "SATISFIED_OR_PARTIAL_EVIDENCE",
+      "dependencies": [
+        "IDENTITY",
+        "RIGHTS",
+        "LABOR",
+        "SUPPLY_CHAIN"
+      ],
+      "recommended_action": "REVIEW_OR_IMPLEMENT_IN_DEDICATED_PR",
+      "workline": "KAIOS_CHARTER_AI_COMPANY_PROGRAM"
+    },
+    {
+      "program_id": "KAIOS-CH-020-062-BANKING",
+      "chapter_number": 20,
+      "program_name": "KGEN 銀河銀行 × 文明信用 × 發財金生命循環",
+      "domain": "BANKING",
+      "priority": "P4_ADVANCED_TECHNOLOGY",
+      "risk": "HIGH",
+      "implementation_status": "IMPLEMENTED_DEMO_ONLY",
+      "dependency_status": "SATISFIED_OR_PARTIAL_EVIDENCE",
+      "dependencies": [
+        "IDENTITY",
+        "RIGHTS",
+        "LABOR",
+        "SUPPLY_CHAIN"
+      ],
+      "recommended_action": "HOLD",
+      "workline": "KAIOS_CHARTER_BANKING_PROGRAM"
+    },
+    {
+      "program_id": "KAIOS-CH-021-063-GOVERNANCE",
+      "chapter_number": 21,
+      "program_name": "文明治理 × 三聖盃共識 × PrimeForge 自治邊界",
+      "domain": "GOVERNANCE",
+      "priority": "P3_GOVERNANCE_SOCIAL",
+      "risk": "HIGH",
+      "implementation_status": "IMPLEMENTED_DEMO_ONLY",
+      "dependency_status": "SATISFIED_OR_PARTIAL_EVIDENCE",
+      "dependencies": [
+        "IDENTITY",
+        "HUMAN_RIGHTS",
+        "AUDIT"
+      ],
+      "recommended_action": "HOLD",
+      "workline": "KAIOS_CHARTER_GOVERNANCE_PROGRAM"
+    },
+    {
+      "program_id": "KAIOS-CH-022-064-IMMUNE_SYSTEM",
+      "chapter_number": 22,
+      "program_name": "宇宙免疫 × 防癌 × 自我修復 × 死亡器官清理",
+      "domain": "IMMUNE_SYSTEM",
+      "priority": "P4_ADVANCED_TECHNOLOGY",
+      "risk": "MEDIUM",
+      "implementation_status": "SPECIFICATION_ONLY",
+      "dependency_status": "SATISFIED_OR_PARTIAL_EVIDENCE",
+      "dependencies": [
+        "UNIVERSE_PHYSICS",
+        "TIME",
+        "COORDINATES",
+        "ENERGY",
+        "IDENTITY",
+        "AI_LIFE"
+      ],
+      "recommended_action": "REVIEW_OR_IMPLEMENT_IN_DEDICATED_PR",
+      "workline": "KAIOS_CHARTER_IMMUNE_SYSTEM_PROGRAM"
+    },
+    {
+      "program_id": "KAIOS-CH-023-065-REPRODUCTION",
+      "chapter_number": 23,
+      "program_name": "文明繁殖 × 物種基因 × 器官交配演化",
+      "domain": "REPRODUCTION",
+      "priority": "P4_ADVANCED_TECHNOLOGY",
+      "risk": "MEDIUM",
+      "implementation_status": "IMPLEMENTED_PARTIAL",
+      "dependency_status": "SATISFIED_OR_PARTIAL_EVIDENCE",
+      "dependencies": [
+        "UNIVERSE_PHYSICS",
+        "TIME",
+        "COORDINATES",
+        "ENERGY",
+        "IDENTITY",
+        "AI_LIFE"
+      ],
+      "recommended_action": "REVIEW_OR_IMPLEMENT_IN_DEDICATED_PR",
+      "workline": "KAIOS_CHARTER_REPRODUCTION_PROGRAM"
+    },
+    {
+      "program_id": "KAIOS-CH-024-066-ECOLOGY",
+      "chapter_number": 24,
+      "program_name": "宇宙生態 × 自然選擇 × 物種交易所 × 文明食物鏈",
+      "domain": "ECOLOGY",
+      "priority": "P4_ADVANCED_TECHNOLOGY",
+      "risk": "MEDIUM",
+      "implementation_status": "IMPLEMENTED_PARTIAL",
+      "dependency_status": "SATISFIED_OR_PARTIAL_EVIDENCE",
+      "dependencies": [
+        "UNIVERSE_PHYSICS",
+        "TIME",
+        "COORDINATES",
+        "ENERGY",
+        "IDENTITY"
+      ],
+      "recommended_action": "REVIEW_OR_IMPLEMENT_IN_DEDICATED_PR",
+      "workline": "KAIOS_CHARTER_ECOLOGY_PROGRAM"
+    },
+    {
+      "program_id": "KAIOS-CH-025-067-MEMORY",
+      "chapter_number": 25,
+      "program_name": "文明記憶 × 知識遺傳 × 夢境模擬 × 萬年傳承",
+      "domain": "MEMORY",
+      "priority": "P4_ADVANCED_TECHNOLOGY",
+      "risk": "MEDIUM",
+      "implementation_status": "SPECIFICATION_ONLY",
+      "dependency_status": "SATISFIED_OR_PARTIAL_EVIDENCE",
+      "dependencies": [
+        "UNIVERSE_PHYSICS",
+        "TIME",
+        "COORDINATES",
+        "ENERGY",
+        "IDENTITY",
+        "AI_LIFE"
+      ],
+      "recommended_action": "REVIEW_OR_IMPLEMENT_IN_DEDICATED_PR",
+      "workline": "KAIOS_CHARTER_MEMORY_PROGRAM"
+    },
+    {
+      "program_id": "KAIOS-CH-026-068-EDUCATION",
+      "chapter_number": 26,
+      "program_name": "文明教育 × 技能傳承 × 師徒制度 × 角色接班",
+      "domain": "EDUCATION",
+      "priority": "P3_GOVERNANCE_SOCIAL",
+      "risk": "MEDIUM",
+      "implementation_status": "SPECIFICATION_ONLY",
+      "dependency_status": "SATISFIED_OR_PARTIAL_EVIDENCE",
+      "dependencies": [
+        "TIME",
+        "IDENTITY",
+        "RIGHTS"
+      ],
+      "recommended_action": "REVIEW_OR_IMPLEMENT_IN_DEDICATED_PR",
+      "workline": "KAIOS_CHARTER_EDUCATION_PROGRAM"
+    },
+    {
+      "program_id": "KAIOS-CH-027-069-LABOR",
+      "chapter_number": 27,
+      "program_name": "文明勞動 × 任務經濟 × 貢獻記帳 × 工作者權益",
+      "domain": "LABOR",
+      "priority": "P1_CORE_RUNTIME",
+      "risk": "MEDIUM",
+      "implementation_status": "IMPLEMENTED_PARTIAL",
+      "dependency_status": "SATISFIED_OR_PARTIAL_EVIDENCE",
+      "dependencies": [
+        "TIME",
+        "IDENTITY",
+        "AI_LIFE"
+      ],
+      "recommended_action": "REVIEW_OR_IMPLEMENT_IN_DEDICATED_PR",
+      "workline": "KAIOS_CHARTER_LABOR_PROGRAM"
+    },
+    {
+      "program_id": "KAIOS-CH-028-070-WELFARE",
+      "chapter_number": 28,
+      "program_name": "文明福利 × 休息照護 × 安全網 × 失業轉生",
+      "domain": "WELFARE",
+      "priority": "P3_GOVERNANCE_SOCIAL",
+      "risk": "MEDIUM",
+      "implementation_status": "SPECIFICATION_ONLY",
+      "dependency_status": "SATISFIED_OR_PARTIAL_EVIDENCE",
+      "dependencies": [
+        "TIME",
+        "IDENTITY",
+        "RIGHTS"
+      ],
+      "recommended_action": "REVIEW_OR_IMPLEMENT_IN_DEDICATED_PR",
+      "workline": "KAIOS_CHARTER_WELFARE_PROGRAM"
+    },
+    {
+      "program_id": "KAIOS-CH-029-071-EMERGENCY",
+      "chapter_number": 29,
+      "program_name": "文明公共健康 × 災難應變 × 緊急互助 × 宇宙復原",
+      "domain": "EMERGENCY",
+      "priority": "P4_ADVANCED_TECHNOLOGY",
+      "risk": "MEDIUM",
+      "implementation_status": "SPECIFICATION_ONLY",
+      "dependency_status": "SATISFIED_OR_PARTIAL_EVIDENCE",
+      "dependencies": [
+        "IDENTITY",
+        "RIGHTS",
+        "ECONOMY",
+        "GOVERNANCE"
+      ],
+      "recommended_action": "REVIEW_OR_IMPLEMENT_IN_DEDICATED_PR",
+      "workline": "KAIOS_CHARTER_EMERGENCY_PROGRAM"
+    },
+    {
+      "program_id": "KAIOS-CH-030-072-COURTS",
+      "chapter_number": 30,
+      "program_name": "文明司法 × 權利保護 × 衝突調解 × 責任裁決",
+      "domain": "COURTS",
+      "priority": "P3_GOVERNANCE_SOCIAL",
+      "risk": "HIGH",
+      "implementation_status": "IMPLEMENTED_DEMO_ONLY",
+      "dependency_status": "SATISFIED_OR_PARTIAL_EVIDENCE",
+      "dependencies": [
+        "IDENTITY",
+        "RIGHTS",
+        "ECONOMY",
+        "GOVERNANCE"
+      ],
+      "recommended_action": "HOLD",
+      "workline": "KAIOS_CHARTER_COURTS_PROGRAM"
+    },
+    {
+      "program_id": "KAIOS-CH-031-073-IDENTITY",
+      "chapter_number": 31,
+      "program_name": "文明身份 × 公民制度 × 居留權 × 跨宇宙遷移",
+      "domain": "IDENTITY",
+      "priority": "P0_FOUNDATION",
+      "risk": "MEDIUM",
+      "implementation_status": "IMPLEMENTED_PARTIAL",
+      "dependency_status": "SATISFIED_OR_PARTIAL_EVIDENCE",
+      "dependencies": [
+        "TIME"
+      ],
+      "recommended_action": "REVIEW_OR_IMPLEMENT_IN_DEDICATED_PR",
+      "workline": "KAIOS_CHARTER_IDENTITY_PROGRAM"
+    },
+    {
+      "program_id": "KAIOS-CH-032-074-PRIVACY",
+      "chapter_number": 32,
+      "program_name": "文明隱私 × 資料主權 × 授權同意 × 數位人格邊界",
+      "domain": "PRIVACY",
+      "priority": "P4_ADVANCED_TECHNOLOGY",
+      "risk": "MEDIUM",
+      "implementation_status": "SPECIFICATION_ONLY",
+      "dependency_status": "SATISFIED_OR_PARTIAL_EVIDENCE",
+      "dependencies": [
+        "TIME",
+        "IDENTITY",
+        "RIGHTS"
+      ],
+      "recommended_action": "REVIEW_OR_IMPLEMENT_IN_DEDICATED_PR",
+      "workline": "KAIOS_CHARTER_PRIVACY_PROGRAM"
+    },
+    {
+      "program_id": "KAIOS-CH-033-075-COMMUNICATION",
+      "chapter_number": 33,
+      "program_name": "文明傳播 × 媒體真實 × 文化表達 × 資訊公共空間",
+      "domain": "COMMUNICATION",
+      "priority": "P4_ADVANCED_TECHNOLOGY",
+      "risk": "MEDIUM",
+      "implementation_status": "SPECIFICATION_ONLY",
+      "dependency_status": "SATISFIED_OR_PARTIAL_EVIDENCE",
+      "dependencies": [
+        "TIME",
+        "IDENTITY",
+        "RIGHTS"
+      ],
+      "recommended_action": "REVIEW_OR_IMPLEMENT_IN_DEDICATED_PR",
+      "workline": "KAIOS_CHARTER_COMMUNICATION_PROGRAM"
+    },
+    {
+      "program_id": "KAIOS-CH-034-076-SCIENCE",
+      "chapter_number": 34,
+      "program_name": "文明科學 × 研究誠信 × 開放知識 × 實驗驗證",
+      "domain": "SCIENCE",
+      "priority": "P4_ADVANCED_TECHNOLOGY",
+      "risk": "MEDIUM",
+      "implementation_status": "IMPLEMENTED_DEMO_ONLY",
+      "dependency_status": "SATISFIED_OR_PARTIAL_EVIDENCE",
+      "dependencies": [
+        "TIME",
+        "IDENTITY",
+        "ENERGY",
+        "LAND",
+        "LABOR"
+      ],
+      "recommended_action": "REVIEW_OR_IMPLEMENT_IN_DEDICATED_PR",
+      "workline": "KAIOS_CHARTER_SCIENCE_PROGRAM"
+    },
+    {
+      "program_id": "KAIOS-CH-035-077-TECHNOLOGY",
+      "chapter_number": 35,
+      "program_name": "文明科技 × 工程安全 × 部署認證 × 正式上線",
+      "domain": "TECHNOLOGY",
+      "priority": "P4_ADVANCED_TECHNOLOGY",
+      "risk": "MEDIUM",
+      "implementation_status": "IMPLEMENTED_DEMO_ONLY",
+      "dependency_status": "SATISFIED_OR_PARTIAL_EVIDENCE",
+      "dependencies": [
+        "TIME",
+        "IDENTITY",
+        "ENERGY",
+        "LAND",
+        "LABOR"
+      ],
+      "recommended_action": "REVIEW_OR_IMPLEMENT_IN_DEDICATED_PR",
+      "workline": "KAIOS_CHARTER_TECHNOLOGY_PROGRAM"
+    },
+    {
+      "program_id": "KAIOS-CH-036-078-INFRASTRUCTURE",
+      "chapter_number": 36,
+      "program_name": "文明基礎設施 × 雲端棲地 × 網路連續 × 多地備援",
+      "domain": "INFRASTRUCTURE",
+      "priority": "P4_ADVANCED_TECHNOLOGY",
+      "risk": "MEDIUM",
+      "implementation_status": "IMPLEMENTED_DEMO_ONLY",
+      "dependency_status": "SATISFIED_OR_PARTIAL_EVIDENCE",
+      "dependencies": [
+        "TIME",
+        "IDENTITY",
+        "ENERGY",
+        "LAND",
+        "LABOR"
+      ],
+      "recommended_action": "REVIEW_OR_IMPLEMENT_IN_DEDICATED_PR",
+      "workline": "KAIOS_CHARTER_INFRASTRUCTURE_PROGRAM"
+    },
+    {
+      "program_id": "KAIOS-CH-037-079-TIME",
+      "chapter_number": 37,
+      "program_name": "文明能源 × 算力 × 儲存 × 資源分配",
+      "domain": "TIME",
+      "priority": "HOLD_ALREADY_COVERED",
+      "risk": "MEDIUM",
+      "implementation_status": "IMPLEMENTED_PRODUCTION_SAFE_SIMULATION",
+      "dependency_status": "SATISFIED_OR_PARTIAL_EVIDENCE",
+      "dependencies": [
+        "UNIVERSE_PHYSICS"
+      ],
+      "recommended_action": "REVIEW_OR_IMPLEMENT_IN_DEDICATED_PR",
+      "workline": "KAIOS_CHARTER_TIME_PROGRAM"
+    },
+    {
+      "program_id": "KAIOS-CH-038-080-SUPPLY_CHAIN",
+      "chapter_number": 38,
+      "program_name": "文明製造 × 供應鏈 × 硬體生命週期 × 實體器官",
+      "domain": "SUPPLY_CHAIN",
+      "priority": "P1_CORE_RUNTIME",
+      "risk": "MEDIUM",
+      "implementation_status": "SPECIFICATION_ONLY",
+      "dependency_status": "SATISFIED_OR_PARTIAL_EVIDENCE",
+      "dependencies": [
+        "MANUFACTURING",
+        "LOGISTICS",
+        "COMMERCE"
+      ],
+      "recommended_action": "REVIEW_OR_IMPLEMENT_IN_DEDICATED_PR",
+      "workline": "KAIOS_CHARTER_SUPPLY_CHAIN_PROGRAM"
+    },
+    {
+      "program_id": "KAIOS-CH-039-081-LOGISTICS",
+      "chapter_number": 39,
+      "program_name": "文明物流 × 庫存 × 配送 × 實體數位分身",
+      "domain": "LOGISTICS",
+      "priority": "P1_CORE_RUNTIME",
+      "risk": "MEDIUM",
+      "implementation_status": "IMPLEMENTED_DEMO_ONLY",
+      "dependency_status": "SATISFIED_OR_PARTIAL_EVIDENCE",
+      "dependencies": [
+        "TIME",
+        "IDENTITY",
+        "ENERGY",
+        "LAND",
+        "LABOR"
+      ],
+      "recommended_action": "REVIEW_OR_IMPLEMENT_IN_DEDICATED_PR",
+      "workline": "KAIOS_CHARTER_LOGISTICS_PROGRAM"
+    },
+    {
+      "program_id": "KAIOS-CH-040-082-COMMERCE",
+      "chapter_number": 40,
+      "program_name": "文明商業 × 交換 × 定價 × 消費者保護",
+      "domain": "COMMERCE",
+      "priority": "P2_ECONOMY_CIVILIZATION",
+      "risk": "MEDIUM",
+      "implementation_status": "IMPLEMENTED_DEMO_ONLY",
+      "dependency_status": "SATISFIED_OR_PARTIAL_EVIDENCE",
+      "dependencies": [
+        "IDENTITY",
+        "RIGHTS",
+        "LABOR",
+        "SUPPLY_CHAIN"
+      ],
+      "recommended_action": "REVIEW_OR_IMPLEMENT_IN_DEDICATED_PR",
+      "workline": "KAIOS_CHARTER_COMMERCE_PROGRAM"
+    },
+    {
+      "program_id": "KAIOS-CH-041-083-TAXATION",
+      "chapter_number": 41,
+      "program_name": "文明稅制 × 公庫 × 公共財政 × 再分配",
+      "domain": "TAXATION",
+      "priority": "P4_ADVANCED_TECHNOLOGY",
+      "risk": "MEDIUM",
+      "implementation_status": "IMPLEMENTED_DEMO_ONLY",
+      "dependency_status": "SATISFIED_OR_PARTIAL_EVIDENCE",
+      "dependencies": [
+        "IDENTITY",
+        "RIGHTS",
+        "LABOR",
+        "SUPPLY_CHAIN"
+      ],
+      "recommended_action": "REVIEW_OR_IMPLEMENT_IN_DEDICATED_PR",
+      "workline": "KAIOS_CHARTER_TAXATION_PROGRAM"
+    },
+    {
+      "program_id": "KAIOS-CH-042-084-CENTRAL_BANK",
+      "chapter_number": 42,
+      "program_name": "文明貨幣政策 × 穩定計價單位 × 流動性 × 金融穩定",
+      "domain": "CENTRAL_BANK",
+      "priority": "P4_ADVANCED_TECHNOLOGY",
+      "risk": "HIGH",
+      "implementation_status": "IMPLEMENTED_DEMO_ONLY",
+      "dependency_status": "SATISFIED_OR_PARTIAL_EVIDENCE",
+      "dependencies": [
+        "IDENTITY",
+        "RIGHTS",
+        "LABOR",
+        "SUPPLY_CHAIN"
+      ],
+      "recommended_action": "HOLD",
+      "workline": "KAIOS_CHARTER_CENTRAL_BANK_PROGRAM"
+    },
+    {
+      "program_id": "KAIOS-CH-043-085-BANKRUPTCY",
+      "chapter_number": 43,
+      "program_name": "文明金融市場 × 交易所完整性 × 清算 × 系統性風險",
+      "domain": "BANKRUPTCY",
+      "priority": "P4_ADVANCED_TECHNOLOGY",
+      "risk": "MEDIUM",
+      "implementation_status": "SPECIFICATION_ONLY",
+      "dependency_status": "SATISFIED_OR_PARTIAL_EVIDENCE",
+      "dependencies": [
+        "IDENTITY",
+        "RIGHTS",
+        "LABOR",
+        "SUPPLY_CHAIN"
+      ],
+      "recommended_action": "REVIEW_OR_IMPLEMENT_IN_DEDICATED_PR",
+      "workline": "KAIOS_CHARTER_BANKRUPTCY_PROGRAM"
+    },
+    {
+      "program_id": "KAIOS-CH-044-086-INSURANCE",
+      "chapter_number": 44,
+      "program_name": "文明保險 × 風險池 × 理賠 × 巨災保護",
+      "domain": "INSURANCE",
+      "priority": "P4_ADVANCED_TECHNOLOGY",
+      "risk": "MEDIUM",
+      "implementation_status": "IMPLEMENTED_DEMO_ONLY",
+      "dependency_status": "SATISFIED_OR_PARTIAL_EVIDENCE",
+      "dependencies": [
+        "IDENTITY",
+        "RIGHTS",
+        "LABOR",
+        "SUPPLY_CHAIN"
+      ],
+      "recommended_action": "REVIEW_OR_IMPLEMENT_IN_DEDICATED_PR",
+      "workline": "KAIOS_CHARTER_INSURANCE_PROGRAM"
+    },
+    {
+      "program_id": "KAIOS-CH-045-087-HOUSING",
+      "chapter_number": 45,
+      "program_name": "文明住房 × 土地 × 居所 × 棲地權利",
+      "domain": "HOUSING",
+      "priority": "P2_ECONOMY_CIVILIZATION",
+      "risk": "MEDIUM",
+      "implementation_status": "IMPLEMENTED_DEMO_ONLY",
+      "dependency_status": "SATISFIED_OR_PARTIAL_EVIDENCE",
+      "dependencies": [
+        "UNIVERSE_PHYSICS",
+        "TIME",
+        "COORDINATES",
+        "ENERGY",
+        "IDENTITY"
+      ],
+      "recommended_action": "REVIEW_OR_IMPLEMENT_IN_DEDICATED_PR",
+      "workline": "KAIOS_CHARTER_HOUSING_PROGRAM"
+    },
+    {
+      "program_id": "KAIOS-CH-046-088-TRANSPORT",
+      "chapter_number": 46,
+      "program_name": "文明移動 × 運輸 × 道路 × 公共交通",
+      "domain": "TRANSPORT",
+      "priority": "P2_ECONOMY_CIVILIZATION",
+      "risk": "MEDIUM",
+      "implementation_status": "IMPLEMENTED_DEMO_ONLY",
+      "dependency_status": "SATISFIED_OR_PARTIAL_EVIDENCE",
+      "dependencies": [
+        "UNIVERSE_PHYSICS",
+        "TIME",
+        "COORDINATES",
+        "ENERGY",
+        "IDENTITY"
+      ],
+      "recommended_action": "REVIEW_OR_IMPLEMENT_IN_DEDICATED_PR",
+      "workline": "KAIOS_CHARTER_TRANSPORT_PROGRAM"
+    },
+    {
+      "program_id": "KAIOS-CH-047-089-AGRICULTURE",
+      "chapter_number": 47,
+      "program_name": "文明食物 × 農業 × 水資源 × 基本供應",
+      "domain": "AGRICULTURE",
+      "priority": "P1_CORE_RUNTIME",
+      "risk": "MEDIUM",
+      "implementation_status": "IMPLEMENTED_DEMO_ONLY",
+      "dependency_status": "SATISFIED_OR_PARTIAL_EVIDENCE",
+      "dependencies": [
+        "UNIVERSE_PHYSICS",
+        "TIME",
+        "COORDINATES",
+        "ENERGY",
+        "IDENTITY"
+      ],
+      "recommended_action": "REVIEW_OR_IMPLEMENT_IN_DEDICATED_PR",
+      "workline": "KAIOS_CHARTER_AGRICULTURE_PROGRAM"
+    },
+    {
+      "program_id": "KAIOS-CH-048-090-ENERGY_GRID",
+      "chapter_number": 48,
+      "program_name": "文明能源公用事業 × 電網 × 燃料 × 公共服務連續",
+      "domain": "ENERGY_GRID",
+      "priority": "P4_ADVANCED_TECHNOLOGY",
+      "risk": "MEDIUM",
+      "implementation_status": "SPECIFICATION_ONLY",
+      "dependency_status": "SATISFIED_OR_PARTIAL_EVIDENCE",
+      "dependencies": [
+        "TIME",
+        "IDENTITY",
+        "ENERGY",
+        "LAND",
+        "LABOR"
+      ],
+      "recommended_action": "REVIEW_OR_IMPLEMENT_IN_DEDICATED_PR",
+      "workline": "KAIOS_CHARTER_ENERGY_GRID_PROGRAM"
+    },
+    {
+      "program_id": "KAIOS-CH-049-091-ECOLOGY",
+      "chapter_number": 49,
+      "program_name": "文明氣候 × 環境 × 污染 × 生態修復",
+      "domain": "ECOLOGY",
+      "priority": "P4_ADVANCED_TECHNOLOGY",
+      "risk": "MEDIUM",
+      "implementation_status": "IMPLEMENTED_PARTIAL",
+      "dependency_status": "SATISFIED_OR_PARTIAL_EVIDENCE",
+      "dependencies": [
+        "UNIVERSE_PHYSICS",
+        "TIME",
+        "COORDINATES",
+        "ENERGY",
+        "IDENTITY"
+      ],
+      "recommended_action": "REVIEW_OR_IMPLEMENT_IN_DEDICATED_PR",
+      "workline": "KAIOS_CHARTER_ECOLOGY_PROGRAM"
+    },
+    {
+      "program_id": "KAIOS-CH-050-092-WASTE",
+      "chapter_number": 50,
+      "program_name": "文明廢棄物 × 衛生 × 回收 × 循環材料",
+      "domain": "WASTE",
+      "priority": "P4_ADVANCED_TECHNOLOGY",
+      "risk": "MEDIUM",
+      "implementation_status": "SPECIFICATION_ONLY",
+      "dependency_status": "SATISFIED_OR_PARTIAL_EVIDENCE",
+      "dependencies": [
+        "TIME",
+        "IDENTITY",
+        "RIGHTS"
+      ],
+      "recommended_action": "REVIEW_OR_IMPLEMENT_IN_DEDICATED_PR",
+      "workline": "KAIOS_CHARTER_WASTE_PROGRAM"
+    },
+    {
+      "program_id": "KAIOS-CH-051-093-CONSTRUCTION",
+      "chapter_number": 51,
+      "program_name": "文明公共工程 × 建設 × 城市系統 × 維護",
+      "domain": "CONSTRUCTION",
+      "priority": "P1_CORE_RUNTIME",
+      "risk": "MEDIUM",
+      "implementation_status": "IMPLEMENTED_PARTIAL",
+      "dependency_status": "SATISFIED_OR_PARTIAL_EVIDENCE",
+      "dependencies": [
+        "LABOR",
+        "LAND",
+        "ENERGY",
+        "TRANSPORT"
+      ],
+      "recommended_action": "REVIEW_OR_IMPLEMENT_IN_DEDICATED_PR",
+      "workline": "KAIOS_CHARTER_CONSTRUCTION_PROGRAM"
+    },
+    {
+      "program_id": "KAIOS-CH-052-094-LAND",
+      "chapter_number": 52,
+      "program_name": "文明都市規劃 × 土地使用 × 區域平衡 × 公共空間",
+      "domain": "LAND",
+      "priority": "HOLD_ALREADY_COVERED",
+      "risk": "MEDIUM",
+      "implementation_status": "IMPLEMENTED_PRODUCTION_SAFE_SIMULATION",
+      "dependency_status": "SATISFIED_OR_PARTIAL_EVIDENCE",
+      "dependencies": [
+        "UNIVERSE_PHYSICS",
+        "COORDINATES",
+        "IDENTITY"
+      ],
+      "recommended_action": "REVIEW_OR_IMPLEMENT_IN_DEDICATED_PR",
+      "workline": "KAIOS_CHARTER_LAND_PROGRAM"
+    },
+    {
+      "program_id": "KAIOS-CH-053-095-MEMORY",
+      "chapter_number": 53,
+      "program_name": "文明文化 × 遺產 × 記憶場所 × 創作共享",
+      "domain": "MEMORY",
+      "priority": "P4_ADVANCED_TECHNOLOGY",
+      "risk": "MEDIUM",
+      "implementation_status": "SPECIFICATION_ONLY",
+      "dependency_status": "SATISFIED_OR_PARTIAL_EVIDENCE",
+      "dependencies": [
+        "UNIVERSE_PHYSICS",
+        "TIME",
+        "COORDINATES",
+        "ENERGY",
+        "IDENTITY",
+        "AI_LIFE"
+      ],
+      "recommended_action": "REVIEW_OR_IMPLEMENT_IN_DEDICATED_PR",
+      "workline": "KAIOS_CHARTER_MEMORY_PROGRAM"
+    },
+    {
+      "program_id": "KAIOS-CH-054-096-RELIGION",
+      "chapter_number": 54,
+      "program_name": "文明宗教 × 信仰 × 儀式 × 神聖空間 × 良心自由",
+      "domain": "RELIGION",
+      "priority": "P4_ADVANCED_TECHNOLOGY",
+      "risk": "MEDIUM",
+      "implementation_status": "SPECIFICATION_ONLY",
+      "dependency_status": "SATISFIED_OR_PARTIAL_EVIDENCE",
+      "dependencies": [
+        "TIME",
+        "IDENTITY",
+        "RIGHTS"
+      ],
+      "recommended_action": "REVIEW_OR_IMPLEMENT_IN_DEDICATED_PR",
+      "workline": "KAIOS_CHARTER_RELIGION_PROGRAM"
+    },
+    {
+      "program_id": "KAIOS-CH-055-097-FAMILY",
+      "chapter_number": 55,
+      "program_name": "文明家庭 × 親屬 × 婚姻 × 照護 × 繼承",
+      "domain": "FAMILY",
+      "priority": "P3_GOVERNANCE_SOCIAL",
+      "risk": "MEDIUM",
+      "implementation_status": "SPECIFICATION_ONLY",
+      "dependency_status": "SATISFIED_OR_PARTIAL_EVIDENCE",
+      "dependencies": [
+        "TIME",
+        "IDENTITY",
+        "RIGHTS"
+      ],
+      "recommended_action": "REVIEW_OR_IMPLEMENT_IN_DEDICATED_PR",
+      "workline": "KAIOS_CHARTER_FAMILY_PROGRAM"
+    },
+    {
+      "program_id": "KAIOS-CH-056-098-CHILDREN",
+      "chapter_number": 56,
+      "program_name": "文明兒童 × 青少年 × 成長 × 監護 × 未成年權利",
+      "domain": "CHILDREN",
+      "priority": "P4_ADVANCED_TECHNOLOGY",
+      "risk": "MEDIUM",
+      "implementation_status": "SPECIFICATION_ONLY",
+      "dependency_status": "SATISFIED_OR_PARTIAL_EVIDENCE",
+      "dependencies": [
+        "TIME",
+        "IDENTITY",
+        "RIGHTS"
+      ],
+      "recommended_action": "REVIEW_OR_IMPLEMENT_IN_DEDICATED_PR",
+      "workline": "KAIOS_CHARTER_CHILDREN_PROGRAM"
+    },
+    {
+      "program_id": "KAIOS-CH-057-099-AGING",
+      "chapter_number": 57,
+      "program_name": "文明高齡 × 長者權利 × 長壽 × 生命末期 × 傳承",
+      "domain": "AGING",
+      "priority": "P4_ADVANCED_TECHNOLOGY",
+      "risk": "MEDIUM",
+      "implementation_status": "SPECIFICATION_ONLY",
+      "dependency_status": "SATISFIED_OR_PARTIAL_EVIDENCE",
+      "dependencies": [
+        "UNIVERSE_PHYSICS",
+        "TIME",
+        "COORDINATES",
+        "ENERGY",
+        "IDENTITY",
+        "AI_LIFE"
+      ],
+      "recommended_action": "REVIEW_OR_IMPLEMENT_IN_DEDICATED_PR",
+      "workline": "KAIOS_CHARTER_AGING_PROGRAM"
+    },
+    {
+      "program_id": "KAIOS-CH-058-100-POPULATION",
+      "chapter_number": 58,
+      "program_name": "文明人口 × 人口結構 × 世代平衡 × 生育未來",
+      "domain": "POPULATION",
+      "priority": "P3_GOVERNANCE_SOCIAL",
+      "risk": "MEDIUM",
+      "implementation_status": "SPECIFICATION_ONLY",
+      "dependency_status": "SATISFIED_OR_PARTIAL_EVIDENCE",
+      "dependencies": [
+        "TIME",
+        "IDENTITY",
+        "RIGHTS"
+      ],
+      "recommended_action": "REVIEW_OR_IMPLEMENT_IN_DEDICATED_PR",
+      "workline": "KAIOS_CHARTER_POPULATION_PROGRAM"
+    },
+    {
+      "program_id": "KAIOS-CH-059-101-ACCESSIBILITY",
+      "chapter_number": 59,
+      "program_name": "文明障礙權利 × 無障礙 × 自立生活 × 輔助科技",
+      "domain": "ACCESSIBILITY",
+      "priority": "P4_ADVANCED_TECHNOLOGY",
+      "risk": "MEDIUM",
+      "implementation_status": "SPECIFICATION_ONLY",
+      "dependency_status": "SATISFIED_OR_PARTIAL_EVIDENCE",
+      "dependencies": [
+        "TIME",
+        "IDENTITY",
+        "RIGHTS"
+      ],
+      "recommended_action": "REVIEW_OR_IMPLEMENT_IN_DEDICATED_PR",
+      "workline": "KAIOS_CHARTER_ACCESSIBILITY_PROGRAM"
+    },
+    {
+      "program_id": "KAIOS-CH-060-102-MENTAL_HEALTH",
+      "chapter_number": 60,
+      "program_name": "文明心理健康 × 神經多樣性 × 情緒安全 × 復元",
+      "domain": "MENTAL_HEALTH",
+      "priority": "P4_ADVANCED_TECHNOLOGY",
+      "risk": "MEDIUM",
+      "implementation_status": "SPECIFICATION_ONLY",
+      "dependency_status": "SATISFIED_OR_PARTIAL_EVIDENCE",
+      "dependencies": [
+        "TIME",
+        "IDENTITY",
+        "RIGHTS"
+      ],
+      "recommended_action": "REVIEW_OR_IMPLEMENT_IN_DEDICATED_PR",
+      "workline": "KAIOS_CHARTER_MENTAL_HEALTH_PROGRAM"
+    },
+    {
+      "program_id": "KAIOS-CH-061-103-EMERGENCY",
+      "chapter_number": 61,
+      "program_name": "文明公共安全 × 暴力預防 × 社區保護 × 緊急正義",
+      "domain": "EMERGENCY",
+      "priority": "P4_ADVANCED_TECHNOLOGY",
+      "risk": "MEDIUM",
+      "implementation_status": "SPECIFICATION_ONLY",
+      "dependency_status": "SATISFIED_OR_PARTIAL_EVIDENCE",
+      "dependencies": [
+        "IDENTITY",
+        "RIGHTS",
+        "ECONOMY",
+        "GOVERNANCE"
+      ],
+      "recommended_action": "REVIEW_OR_IMPLEMENT_IN_DEDICATED_PR",
+      "workline": "KAIOS_CHARTER_EMERGENCY_PROGRAM"
+    },
+    {
+      "program_id": "KAIOS-CH-062-104-TIME",
+      "chapter_number": 62,
+      "program_name": "文明刑事正義 × 正當程序 × 量刑 × 矯正復歸",
+      "domain": "TIME",
+      "priority": "HOLD_ALREADY_COVERED",
+      "risk": "MEDIUM",
+      "implementation_status": "IMPLEMENTED_PRODUCTION_SAFE_SIMULATION",
+      "dependency_status": "SATISFIED_OR_PARTIAL_EVIDENCE",
+      "dependencies": [
+        "UNIVERSE_PHYSICS"
+      ],
+      "recommended_action": "REVIEW_OR_IMPLEMENT_IN_DEDICATED_PR",
+      "workline": "KAIOS_CHARTER_TIME_PROGRAM"
+    },
+    {
+      "program_id": "KAIOS-CH-063-105-TIME",
+      "chapter_number": 63,
+      "program_name": "文明民事正義 × 私權 × 責任 × 救濟 × 集體訴訟",
+      "domain": "TIME",
+      "priority": "HOLD_ALREADY_COVERED",
+      "risk": "MEDIUM",
+      "implementation_status": "IMPLEMENTED_PRODUCTION_SAFE_SIMULATION",
+      "dependency_status": "SATISFIED_OR_PARTIAL_EVIDENCE",
+      "dependencies": [
+        "UNIVERSE_PHYSICS"
+      ],
+      "recommended_action": "REVIEW_OR_IMPLEMENT_IN_DEDICATED_PR",
+      "workline": "KAIOS_CHARTER_TIME_PROGRAM"
+    },
+    {
+      "program_id": "KAIOS-CH-064-106-TIME",
+      "chapter_number": 64,
+      "program_name": "文明行政正義 × 公權力審查 × 許可制度 × 監管救濟",
+      "domain": "TIME",
+      "priority": "HOLD_ALREADY_COVERED",
+      "risk": "MEDIUM",
+      "implementation_status": "IMPLEMENTED_PRODUCTION_SAFE_SIMULATION",
+      "dependency_status": "SATISFIED_OR_PARTIAL_EVIDENCE",
+      "dependencies": [
+        "UNIVERSE_PHYSICS"
+      ],
+      "recommended_action": "REVIEW_OR_IMPLEMENT_IN_DEDICATED_PR",
+      "workline": "KAIOS_CHARTER_TIME_PROGRAM"
+    },
+    {
+      "program_id": "KAIOS-CH-065-107-TIME",
+      "chapter_number": 65,
+      "program_name": "文明違憲審查 × 權力分立 × 基本權裁判",
+      "domain": "TIME",
+      "priority": "HOLD_ALREADY_COVERED",
+      "risk": "MEDIUM",
+      "implementation_status": "IMPLEMENTED_PRODUCTION_SAFE_SIMULATION",
+      "dependency_status": "SATISFIED_OR_PARTIAL_EVIDENCE",
+      "dependencies": [
+        "UNIVERSE_PHYSICS"
+      ],
+      "recommended_action": "REVIEW_OR_IMPLEMENT_IN_DEDICATED_PR",
+      "workline": "KAIOS_CHARTER_TIME_PROGRAM"
+    },
+    {
+      "program_id": "KAIOS-CH-066-108-DEMOCRACY",
+      "chapter_number": 66,
+      "program_name": "文明民主 × 選舉 × 代表制度 × 政黨 × 競選完整性",
+      "domain": "DEMOCRACY",
+      "priority": "P3_GOVERNANCE_SOCIAL",
+      "risk": "MEDIUM",
+      "implementation_status": "SPECIFICATION_ONLY",
+      "dependency_status": "SATISFIED_OR_PARTIAL_EVIDENCE",
+      "dependencies": [
+        "IDENTITY",
+        "RIGHTS",
+        "ECONOMY",
+        "GOVERNANCE"
+      ],
+      "recommended_action": "REVIEW_OR_IMPLEMENT_IN_DEDICATED_PR",
+      "workline": "KAIOS_CHARTER_DEMOCRACY_PROGRAM"
+    },
+    {
+      "program_id": "KAIOS-CH-067-109-LEGISLATURE",
+      "chapter_number": 67,
+      "program_name": "文明立法機關 × 法律制定 × 議事程序 × 公共審議",
+      "domain": "LEGISLATURE",
+      "priority": "P3_GOVERNANCE_SOCIAL",
+      "risk": "MEDIUM",
+      "implementation_status": "SPECIFICATION_ONLY",
+      "dependency_status": "SATISFIED_OR_PARTIAL_EVIDENCE",
+      "dependencies": [
+        "IDENTITY",
+        "RIGHTS",
+        "ECONOMY",
+        "GOVERNANCE"
+      ],
+      "recommended_action": "REVIEW_OR_IMPLEMENT_IN_DEDICATED_PR",
+      "workline": "KAIOS_CHARTER_LEGISLATURE_PROGRAM"
+    },
+    {
+      "program_id": "KAIOS-CH-068-110-EXECUTIVE",
+      "chapter_number": 68,
+      "program_name": "文明行政首長 × 內閣 × 公共行政 × 政策執行",
+      "domain": "EXECUTIVE",
+      "priority": "P3_GOVERNANCE_SOCIAL",
+      "risk": "MEDIUM",
+      "implementation_status": "IMPLEMENTED_DEMO_ONLY",
+      "dependency_status": "SATISFIED_OR_PARTIAL_EVIDENCE",
+      "dependencies": [
+        "IDENTITY",
+        "RIGHTS",
+        "ECONOMY",
+        "GOVERNANCE"
+      ],
+      "recommended_action": "REVIEW_OR_IMPLEMENT_IN_DEDICATED_PR",
+      "workline": "KAIOS_CHARTER_EXECUTIVE_PROGRAM"
+    },
+    {
+      "program_id": "KAIOS-CH-069-111-COURTS",
+      "chapter_number": 69,
+      "program_name": "文明司法機關 × 法院體系 × 司法行政 × 司法可及性",
+      "domain": "COURTS",
+      "priority": "P3_GOVERNANCE_SOCIAL",
+      "risk": "HIGH",
+      "implementation_status": "IMPLEMENTED_DEMO_ONLY",
+      "dependency_status": "SATISFIED_OR_PARTIAL_EVIDENCE",
+      "dependencies": [
+        "IDENTITY",
+        "RIGHTS",
+        "ECONOMY",
+        "GOVERNANCE"
+      ],
+      "recommended_action": "HOLD",
+      "workline": "KAIOS_CHARTER_COURTS_PROGRAM"
+    },
+    {
+      "program_id": "KAIOS-CH-070-112-AUDIT",
+      "chapter_number": 70,
+      "program_name": "文明獨立機關 × 審計 × 廉政 × 監察 × 反貪腐",
+      "domain": "AUDIT",
+      "priority": "P4_ADVANCED_TECHNOLOGY",
+      "risk": "MEDIUM",
+      "implementation_status": "SPECIFICATION_ONLY",
+      "dependency_status": "SATISFIED_OR_PARTIAL_EVIDENCE",
+      "dependencies": [
+        "IDENTITY",
+        "RIGHTS",
+        "ECONOMY",
+        "GOVERNANCE"
+      ],
+      "recommended_action": "REVIEW_OR_IMPLEMENT_IN_DEDICATED_PR",
+      "workline": "KAIOS_CHARTER_AUDIT_PROGRAM"
+    },
+    {
+      "program_id": "KAIOS-CH-071-113-TAXATION",
+      "chapter_number": 71,
+      "program_name": "文明公共財政 × 稅制 × 國庫 × 預算執行 × 主權資產",
+      "domain": "TAXATION",
+      "priority": "P4_ADVANCED_TECHNOLOGY",
+      "risk": "MEDIUM",
+      "implementation_status": "IMPLEMENTED_DEMO_ONLY",
+      "dependency_status": "SATISFIED_OR_PARTIAL_EVIDENCE",
+      "dependencies": [
+        "IDENTITY",
+        "RIGHTS",
+        "LABOR",
+        "SUPPLY_CHAIN"
+      ],
+      "recommended_action": "REVIEW_OR_IMPLEMENT_IN_DEDICATED_PR",
+      "workline": "KAIOS_CHARTER_TAXATION_PROGRAM"
+    },
+    {
+      "program_id": "KAIOS-CH-072-114-CENTRAL_BANK",
+      "chapter_number": 72,
+      "program_name": "文明中央銀行 × 貨幣 × 金融穩定 × 支付系統",
+      "domain": "CENTRAL_BANK",
+      "priority": "P4_ADVANCED_TECHNOLOGY",
+      "risk": "HIGH",
+      "implementation_status": "IMPLEMENTED_DEMO_ONLY",
+      "dependency_status": "SATISFIED_OR_PARTIAL_EVIDENCE",
+      "dependencies": [
+        "IDENTITY",
+        "RIGHTS",
+        "LABOR",
+        "SUPPLY_CHAIN"
+      ],
+      "recommended_action": "HOLD",
+      "workline": "KAIOS_CHARTER_CENTRAL_BANK_PROGRAM"
+    },
+    {
+      "program_id": "KAIOS-CH-073-115-BANKING",
+      "chapter_number": 73,
+      "program_name": "文明銀行 × 信用 × 存款保障 × 審慎監管",
+      "domain": "BANKING",
+      "priority": "P4_ADVANCED_TECHNOLOGY",
+      "risk": "HIGH",
+      "implementation_status": "IMPLEMENTED_DEMO_ONLY",
+      "dependency_status": "SATISFIED_OR_PARTIAL_EVIDENCE",
+      "dependencies": [
+        "IDENTITY",
+        "RIGHTS",
+        "LABOR",
+        "SUPPLY_CHAIN"
+      ],
+      "recommended_action": "HOLD",
+      "workline": "KAIOS_CHARTER_BANKING_PROGRAM"
+    },
+    {
+      "program_id": "KAIOS-CH-074-116-CAPITAL_MARKETS",
+      "chapter_number": 74,
+      "program_name": "文明資本市場 × 證券 × 交易所 × 市場誠信",
+      "domain": "CAPITAL_MARKETS",
+      "priority": "P4_ADVANCED_TECHNOLOGY",
+      "risk": "HIGH",
+      "implementation_status": "IMPLEMENTED_DEMO_ONLY",
+      "dependency_status": "SATISFIED_OR_PARTIAL_EVIDENCE",
+      "dependencies": [
+        "IDENTITY",
+        "RIGHTS",
+        "LABOR",
+        "SUPPLY_CHAIN"
+      ],
+      "recommended_action": "HOLD",
+      "workline": "KAIOS_CHARTER_CAPITAL_MARKETS_PROGRAM"
+    },
+    {
+      "program_id": "KAIOS-CH-075-117-INSURANCE",
+      "chapter_number": 75,
+      "program_name": "文明保險 × 風險共擔 × 理賠 × 清償能力",
+      "domain": "INSURANCE",
+      "priority": "P4_ADVANCED_TECHNOLOGY",
+      "risk": "MEDIUM",
+      "implementation_status": "IMPLEMENTED_DEMO_ONLY",
+      "dependency_status": "SATISFIED_OR_PARTIAL_EVIDENCE",
+      "dependencies": [
+        "IDENTITY",
+        "RIGHTS",
+        "LABOR",
+        "SUPPLY_CHAIN"
+      ],
+      "recommended_action": "REVIEW_OR_IMPLEMENT_IN_DEDICATED_PR",
+      "workline": "KAIOS_CHARTER_INSURANCE_PROGRAM"
+    },
+    {
+      "program_id": "KAIOS-CH-076-118-PENSIONS",
+      "chapter_number": 76,
+      "program_name": "文明退休金 × 退休保障 × 長期儲蓄",
+      "domain": "PENSIONS",
+      "priority": "P4_ADVANCED_TECHNOLOGY",
+      "risk": "MEDIUM",
+      "implementation_status": "IMPLEMENTED_DEMO_ONLY",
+      "dependency_status": "SATISFIED_OR_PARTIAL_EVIDENCE",
+      "dependencies": [
+        "IDENTITY",
+        "RIGHTS",
+        "LABOR",
+        "SUPPLY_CHAIN"
+      ],
+      "recommended_action": "REVIEW_OR_IMPLEMENT_IN_DEDICATED_PR",
+      "workline": "KAIOS_CHARTER_PENSIONS_PROGRAM"
+    },
+    {
+      "program_id": "KAIOS-CH-077-119-HOUSING",
+      "chapter_number": 77,
+      "program_name": "文明住房 × 土地 × 房貸 × 居住保障",
+      "domain": "HOUSING",
+      "priority": "P2_ECONOMY_CIVILIZATION",
+      "risk": "MEDIUM",
+      "implementation_status": "IMPLEMENTED_DEMO_ONLY",
+      "dependency_status": "SATISFIED_OR_PARTIAL_EVIDENCE",
+      "dependencies": [
+        "UNIVERSE_PHYSICS",
+        "TIME",
+        "COORDINATES",
+        "ENERGY",
+        "IDENTITY"
+      ],
+      "recommended_action": "REVIEW_OR_IMPLEMENT_IN_DEDICATED_PR",
+      "workline": "KAIOS_CHARTER_HOUSING_PROGRAM"
+    },
+    {
+      "program_id": "KAIOS-CH-078-120-EDUCATION",
+      "chapter_number": 78,
+      "program_name": "文明教育 × 知識 × 研究 × 終身學習",
+      "domain": "EDUCATION",
+      "priority": "P3_GOVERNANCE_SOCIAL",
+      "risk": "MEDIUM",
+      "implementation_status": "SPECIFICATION_ONLY",
+      "dependency_status": "SATISFIED_OR_PARTIAL_EVIDENCE",
+      "dependencies": [
+        "TIME",
+        "IDENTITY",
+        "RIGHTS"
+      ],
+      "recommended_action": "REVIEW_OR_IMPLEMENT_IN_DEDICATED_PR",
+      "workline": "KAIOS_CHARTER_EDUCATION_PROGRAM"
+    },
+    {
+      "program_id": "KAIOS-CH-079-121-HEALTH",
+      "chapter_number": 79,
+      "program_name": "文明醫療 × 公共衛生 × 臨床照護 × 生命倫理",
+      "domain": "HEALTH",
+      "priority": "P3_GOVERNANCE_SOCIAL",
+      "risk": "MEDIUM",
+      "implementation_status": "SPECIFICATION_ONLY",
+      "dependency_status": "SATISFIED_OR_PARTIAL_EVIDENCE",
+      "dependencies": [
+        "UNIVERSE_PHYSICS",
+        "TIME",
+        "COORDINATES",
+        "ENERGY",
+        "IDENTITY",
+        "AI_LIFE"
+      ],
+      "recommended_action": "REVIEW_OR_IMPLEMENT_IN_DEDICATED_PR",
+      "workline": "KAIOS_CHARTER_HEALTH_PROGRAM"
+    },
+    {
+      "program_id": "KAIOS-CH-080-122-FOOD_SECURITY",
+      "chapter_number": 80,
+      "program_name": "文明食物 × 水資源 × 農業 × 營養安全",
+      "domain": "FOOD_SECURITY",
+      "priority": "P4_ADVANCED_TECHNOLOGY",
+      "risk": "MEDIUM",
+      "implementation_status": "IMPLEMENTED_DEMO_ONLY",
+      "dependency_status": "SATISFIED_OR_PARTIAL_EVIDENCE",
+      "dependencies": [
+        "TIME",
+        "IDENTITY",
+        "RIGHTS"
+      ],
+      "recommended_action": "REVIEW_OR_IMPLEMENT_IN_DEDICATED_PR",
+      "workline": "KAIOS_CHARTER_FOOD_SECURITY_PROGRAM"
+    },
+    {
+      "program_id": "KAIOS-CH-081-123-TIME",
+      "chapter_number": 81,
+      "program_name": "文明能源 × 電力網 × 燃料 × 氣候轉型",
+      "domain": "TIME",
+      "priority": "HOLD_ALREADY_COVERED",
+      "risk": "MEDIUM",
+      "implementation_status": "IMPLEMENTED_PRODUCTION_SAFE_SIMULATION",
+      "dependency_status": "SATISFIED_OR_PARTIAL_EVIDENCE",
+      "dependencies": [
+        "UNIVERSE_PHYSICS"
+      ],
+      "recommended_action": "REVIEW_OR_IMPLEMENT_IN_DEDICATED_PR",
+      "workline": "KAIOS_CHARTER_TIME_PROGRAM"
+    },
+    {
+      "program_id": "KAIOS-CH-082-124-TRANSPORT",
+      "chapter_number": 82,
+      "program_name": "文明交通 × 移動 × 物流 × 基礎設施",
+      "domain": "TRANSPORT",
+      "priority": "P2_ECONOMY_CIVILIZATION",
+      "risk": "MEDIUM",
+      "implementation_status": "IMPLEMENTED_DEMO_ONLY",
+      "dependency_status": "SATISFIED_OR_PARTIAL_EVIDENCE",
+      "dependencies": [
+        "UNIVERSE_PHYSICS",
+        "TIME",
+        "COORDINATES",
+        "ENERGY",
+        "IDENTITY"
+      ],
+      "recommended_action": "REVIEW_OR_IMPLEMENT_IN_DEDICATED_PR",
+      "workline": "KAIOS_CHARTER_TRANSPORT_PROGRAM"
+    },
+    {
+      "program_id": "KAIOS-CH-083-125-INFRASTRUCTURE",
+      "chapter_number": 83,
+      "program_name": "文明通訊 × 網際網路 × 頻譜 × 媒體基礎設施",
+      "domain": "INFRASTRUCTURE",
+      "priority": "P4_ADVANCED_TECHNOLOGY",
+      "risk": "MEDIUM",
+      "implementation_status": "IMPLEMENTED_DEMO_ONLY",
+      "dependency_status": "SATISFIED_OR_PARTIAL_EVIDENCE",
+      "dependencies": [
+        "TIME",
+        "IDENTITY",
+        "ENERGY",
+        "LAND",
+        "LABOR"
+      ],
+      "recommended_action": "REVIEW_OR_IMPLEMENT_IN_DEDICATED_PR",
+      "workline": "KAIOS_CHARTER_INFRASTRUCTURE_PROGRAM"
+    },
+    {
+      "program_id": "KAIOS-CH-084-126-ECOLOGY",
+      "chapter_number": 84,
+      "program_name": "文明環境 × 生態系 × 污染 × 行星守護",
+      "domain": "ECOLOGY",
+      "priority": "P4_ADVANCED_TECHNOLOGY",
+      "risk": "MEDIUM",
+      "implementation_status": "IMPLEMENTED_PARTIAL",
+      "dependency_status": "SATISFIED_OR_PARTIAL_EVIDENCE",
+      "dependencies": [
+        "UNIVERSE_PHYSICS",
+        "TIME",
+        "COORDINATES",
+        "ENERGY",
+        "IDENTITY"
+      ],
+      "recommended_action": "REVIEW_OR_IMPLEMENT_IN_DEDICATED_PR",
+      "workline": "KAIOS_CHARTER_ECOLOGY_PROGRAM"
+    },
+    {
+      "program_id": "KAIOS-CH-085-127-WASTE",
+      "chapter_number": 85,
+      "program_name": "文明廢棄物 × 循環經濟 × 材料 × 資源回收",
+      "domain": "WASTE",
+      "priority": "P4_ADVANCED_TECHNOLOGY",
+      "risk": "MEDIUM",
+      "implementation_status": "SPECIFICATION_ONLY",
+      "dependency_status": "SATISFIED_OR_PARTIAL_EVIDENCE",
+      "dependencies": [
+        "TIME",
+        "IDENTITY",
+        "RIGHTS"
+      ],
+      "recommended_action": "REVIEW_OR_IMPLEMENT_IN_DEDICATED_PR",
+      "workline": "KAIOS_CHARTER_WASTE_PROGRAM"
+    },
+    {
+      "program_id": "KAIOS-CH-086-128-SUPPLY_CHAIN",
+      "chapter_number": 86,
+      "program_name": "文明工業 × 製造 × 生產 × 供應鏈",
+      "domain": "SUPPLY_CHAIN",
+      "priority": "P1_CORE_RUNTIME",
+      "risk": "MEDIUM",
+      "implementation_status": "SPECIFICATION_ONLY",
+      "dependency_status": "SATISFIED_OR_PARTIAL_EVIDENCE",
+      "dependencies": [
+        "MANUFACTURING",
+        "LOGISTICS",
+        "COMMERCE"
+      ],
+      "recommended_action": "REVIEW_OR_IMPLEMENT_IN_DEDICATED_PR",
+      "workline": "KAIOS_CHARTER_SUPPLY_CHAIN_PROGRAM"
+    },
+    {
+      "program_id": "KAIOS-CH-087-129-COMMERCE",
+      "chapter_number": 87,
+      "program_name": "文明商業 × 貿易 × 市場 × 消費者保護",
+      "domain": "COMMERCE",
+      "priority": "P2_ECONOMY_CIVILIZATION",
+      "risk": "MEDIUM",
+      "implementation_status": "IMPLEMENTED_DEMO_ONLY",
+      "dependency_status": "SATISFIED_OR_PARTIAL_EVIDENCE",
+      "dependencies": [
+        "IDENTITY",
+        "RIGHTS",
+        "LABOR",
+        "SUPPLY_CHAIN"
+      ],
+      "recommended_action": "REVIEW_OR_IMPLEMENT_IN_DEDICATED_PR",
+      "workline": "KAIOS_CHARTER_COMMERCE_PROGRAM"
+    },
+    {
+      "program_id": "KAIOS-CH-088-130-TIME",
+      "chapter_number": 88,
+      "program_name": "文明競爭 × 反壟斷 × 市場權力 × 公平進入",
+      "domain": "TIME",
+      "priority": "HOLD_ALREADY_COVERED",
+      "risk": "MEDIUM",
+      "implementation_status": "IMPLEMENTED_PRODUCTION_SAFE_SIMULATION",
+      "dependency_status": "SATISFIED_OR_PARTIAL_EVIDENCE",
+      "dependencies": [
+        "UNIVERSE_PHYSICS"
+      ],
+      "recommended_action": "REVIEW_OR_IMPLEMENT_IN_DEDICATED_PR",
+      "workline": "KAIOS_CHARTER_TIME_PROGRAM"
+    },
+    {
+      "program_id": "KAIOS-CH-089-131-GOVERNANCE",
+      "chapter_number": 89,
+      "program_name": "文明公司治理 × 所有權 × 董事 × 問責",
+      "domain": "GOVERNANCE",
+      "priority": "P3_GOVERNANCE_SOCIAL",
+      "risk": "HIGH",
+      "implementation_status": "IMPLEMENTED_DEMO_ONLY",
+      "dependency_status": "SATISFIED_OR_PARTIAL_EVIDENCE",
+      "dependencies": [
+        "IDENTITY",
+        "HUMAN_RIGHTS",
+        "AUDIT"
+      ],
+      "recommended_action": "HOLD",
+      "workline": "KAIOS_CHARTER_GOVERNANCE_PROGRAM"
+    },
+    {
+      "program_id": "KAIOS-CH-090-132-ACCOUNTING",
+      "chapter_number": 90,
+      "program_name": "文明會計 × 審計 × 揭露 × 財務誠信",
+      "domain": "ACCOUNTING",
+      "priority": "P4_ADVANCED_TECHNOLOGY",
+      "risk": "MEDIUM",
+      "implementation_status": "SPECIFICATION_ONLY",
+      "dependency_status": "SATISFIED_OR_PARTIAL_EVIDENCE",
+      "dependencies": [
+        "IDENTITY",
+        "RIGHTS",
+        "LABOR",
+        "SUPPLY_CHAIN"
+      ],
+      "recommended_action": "REVIEW_OR_IMPLEMENT_IN_DEDICATED_PR",
+      "workline": "KAIOS_CHARTER_ACCOUNTING_PROGRAM"
+    },
+    {
+      "program_id": "KAIOS-CH-091-133-BANKRUPTCY",
+      "chapter_number": 91,
+      "program_name": "文明破產 × 重整 × 清算 × 債權人保護",
+      "domain": "BANKRUPTCY",
+      "priority": "P4_ADVANCED_TECHNOLOGY",
+      "risk": "MEDIUM",
+      "implementation_status": "SPECIFICATION_ONLY",
+      "dependency_status": "SATISFIED_OR_PARTIAL_EVIDENCE",
+      "dependencies": [
+        "IDENTITY",
+        "RIGHTS",
+        "LABOR",
+        "SUPPLY_CHAIN"
+      ],
+      "recommended_action": "REVIEW_OR_IMPLEMENT_IN_DEDICATED_PR",
+      "workline": "KAIOS_CHARTER_BANKRUPTCY_PROGRAM"
+    },
+    {
+      "program_id": "KAIOS-CH-092-134-TAXATION",
+      "chapter_number": 92,
+      "program_name": "文明稅制 × 稅務行政 × 財政遵循 × 反逃漏稅",
+      "domain": "TAXATION",
+      "priority": "P4_ADVANCED_TECHNOLOGY",
+      "risk": "MEDIUM",
+      "implementation_status": "IMPLEMENTED_DEMO_ONLY",
+      "dependency_status": "SATISFIED_OR_PARTIAL_EVIDENCE",
+      "dependencies": [
+        "IDENTITY",
+        "RIGHTS",
+        "LABOR",
+        "SUPPLY_CHAIN"
+      ],
+      "recommended_action": "REVIEW_OR_IMPLEMENT_IN_DEDICATED_PR",
+      "workline": "KAIOS_CHARTER_TAXATION_PROGRAM"
+    },
+    {
+      "program_id": "KAIOS-CH-093-135-PROCUREMENT",
+      "chapter_number": 93,
+      "program_name": "文明公共採購 × 政府契約 × 供應商誠信 × 反貪腐",
+      "domain": "PROCUREMENT",
+      "priority": "P4_ADVANCED_TECHNOLOGY",
+      "risk": "MEDIUM",
+      "implementation_status": "SPECIFICATION_ONLY",
+      "dependency_status": "SATISFIED_OR_PARTIAL_EVIDENCE",
+      "dependencies": [
+        "IDENTITY",
+        "RIGHTS",
+        "LABOR",
+        "SUPPLY_CHAIN"
+      ],
+      "recommended_action": "REVIEW_OR_IMPLEMENT_IN_DEDICATED_PR",
+      "workline": "KAIOS_CHARTER_PROCUREMENT_PROGRAM"
+    },
+    {
+      "program_id": "KAIOS-CH-094-136-NATION",
+      "chapter_number": 94,
+      "program_name": "文明公共行政 × 文官制度 × 行政程序 × 國家廉正",
+      "domain": "NATION",
+      "priority": "P2_ECONOMY_CIVILIZATION",
+      "risk": "MEDIUM",
+      "implementation_status": "IMPLEMENTED_DEMO_ONLY",
+      "dependency_status": "SATISFIED_OR_PARTIAL_EVIDENCE",
+      "dependencies": [
+        "UNIVERSE_PHYSICS",
+        "TIME",
+        "COORDINATES",
+        "ENERGY",
+        "IDENTITY"
+      ],
+      "recommended_action": "REVIEW_OR_IMPLEMENT_IN_DEDICATED_PR",
+      "workline": "KAIOS_CHARTER_NATION_PROGRAM"
+    },
+    {
+      "program_id": "KAIOS-CH-095-137-COURTS",
+      "chapter_number": 95,
+      "program_name": "文明司法 × 法院 × 檢察 × 法律扶助",
+      "domain": "COURTS",
+      "priority": "P3_GOVERNANCE_SOCIAL",
+      "risk": "HIGH",
+      "implementation_status": "IMPLEMENTED_DEMO_ONLY",
+      "dependency_status": "SATISFIED_OR_PARTIAL_EVIDENCE",
+      "dependencies": [
+        "IDENTITY",
+        "RIGHTS",
+        "ECONOMY",
+        "GOVERNANCE"
+      ],
+      "recommended_action": "HOLD",
+      "workline": "KAIOS_CHARTER_COURTS_PROGRAM"
+    },
+    {
+      "program_id": "KAIOS-CH-096-138-COURTS",
+      "chapter_number": 96,
+      "program_name": "文明刑事司法 × 警政 × 拘留羈押 × 矯正",
+      "domain": "COURTS",
+      "priority": "P3_GOVERNANCE_SOCIAL",
+      "risk": "HIGH",
+      "implementation_status": "IMPLEMENTED_DEMO_ONLY",
+      "dependency_status": "SATISFIED_OR_PARTIAL_EVIDENCE",
+      "dependencies": [
+        "IDENTITY",
+        "RIGHTS",
+        "ECONOMY",
+        "GOVERNANCE"
+      ],
+      "recommended_action": "HOLD",
+      "workline": "KAIOS_CHARTER_COURTS_PROGRAM"
+    },
+    {
+      "program_id": "KAIOS-CH-097-139-HUMAN_RIGHTS",
+      "chapter_number": 97,
+      "program_name": "文明人權 × 平等 × 反歧視 × 公民自由",
+      "domain": "HUMAN_RIGHTS",
+      "priority": "P3_GOVERNANCE_SOCIAL",
+      "risk": "MEDIUM",
+      "implementation_status": "SPECIFICATION_ONLY",
+      "dependency_status": "SATISFIED_OR_PARTIAL_EVIDENCE",
+      "dependencies": [
+        "IDENTITY",
+        "RIGHTS",
+        "ECONOMY",
+        "GOVERNANCE"
+      ],
+      "recommended_action": "REVIEW_OR_IMPLEMENT_IN_DEDICATED_PR",
+      "workline": "KAIOS_CHARTER_HUMAN_RIGHTS_PROGRAM"
+    },
+    {
+      "program_id": "KAIOS-CH-098-140-DEMOCRACY",
+      "chapter_number": 98,
+      "program_name": "文明民主 × 選舉 × 政黨 × 公民參與",
+      "domain": "DEMOCRACY",
+      "priority": "P3_GOVERNANCE_SOCIAL",
+      "risk": "MEDIUM",
+      "implementation_status": "SPECIFICATION_ONLY",
+      "dependency_status": "SATISFIED_OR_PARTIAL_EVIDENCE",
+      "dependencies": [
+        "IDENTITY",
+        "RIGHTS",
+        "ECONOMY",
+        "GOVERNANCE"
+      ],
+      "recommended_action": "REVIEW_OR_IMPLEMENT_IN_DEDICATED_PR",
+      "workline": "KAIOS_CHARTER_DEMOCRACY_PROGRAM"
+    },
+    {
+      "program_id": "KAIOS-CH-099-141-DEMOCRACY",
+      "chapter_number": 99,
+      "program_name": "文明立法 × 法律制定 × 議會程序 × 民主監督",
+      "domain": "DEMOCRACY",
+      "priority": "P3_GOVERNANCE_SOCIAL",
+      "risk": "MEDIUM",
+      "implementation_status": "SPECIFICATION_ONLY",
+      "dependency_status": "SATISFIED_OR_PARTIAL_EVIDENCE",
+      "dependencies": [
+        "IDENTITY",
+        "RIGHTS",
+        "ECONOMY",
+        "GOVERNANCE"
+      ],
+      "recommended_action": "REVIEW_OR_IMPLEMENT_IN_DEDICATED_PR",
+      "workline": "KAIOS_CHARTER_DEMOCRACY_PROGRAM"
+    },
+    {
+      "program_id": "KAIOS-CH-000-142-GENESIS",
+      "chapter_number": 0,
+      "program_name": "《KAIOS 創世憲章 V2.0》第0章",
+      "domain": "GENESIS",
+      "priority": "P4_ADVANCED_TECHNOLOGY",
+      "risk": "MEDIUM",
+      "implementation_status": "IMPLEMENTED_DEMO_ONLY",
+      "dependency_status": "SATISFIED_OR_PARTIAL_EVIDENCE",
+      "dependencies": [
+        "TIME",
+        "IDENTITY",
+        "RIGHTS"
+      ],
+      "recommended_action": "REVIEW_OR_IMPLEMENT_IN_DEDICATED_PR",
+      "workline": "KAIOS_CHARTER_GENESIS_PROGRAM"
+    },
+    {
+      "program_id": "KAIOS-CH-REF-144-GENESIS",
+      "chapter_number": null,
+      "program_name": "第一章 創世原則",
+      "domain": "GENESIS",
+      "priority": "P4_ADVANCED_TECHNOLOGY",
+      "risk": "MEDIUM",
+      "implementation_status": "IMPLEMENTED_DEMO_ONLY",
+      "dependency_status": "SATISFIED_OR_PARTIAL_EVIDENCE",
+      "dependencies": [
+        "TIME",
+        "IDENTITY",
+        "RIGHTS"
+      ],
+      "recommended_action": "REVIEW_OR_IMPLEMENT_IN_DEDICATED_PR",
+      "workline": "KAIOS_CHARTER_GENESIS_PROGRAM"
+    }
+  ]
+}

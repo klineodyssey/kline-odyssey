@@ -1,0 +1,3883 @@
+{
+  "schema_version": "1.0.0",
+  "read_only": true,
+  "mutation_endpoints": false,
+  "program_count": 143,
+  "programs": [
+    {
+      "program_id": "KAIOS-CH-000-001-GENESIS",
+      "chapter_number": 0,
+      "chapter_title": "Chapter 000｜萬物皆生命 × 自我編程 × 落地生根 × 文明生成根運行時",
+      "program_name": "萬物皆生命 × 自我編程 × 落地生根 × 文明生成根運行時",
+      "domain": "GENESIS",
+      "implementation_status": "IMPLEMENTED_DEMO_ONLY",
+      "coverage": 50,
+      "conflicts": [],
+      "priority": "P4_ADVANCED_TECHNOLOGY",
+      "risk": "MEDIUM",
+      "dependencies": [
+        "TIME",
+        "IDENTITY",
+        "RIGHTS"
+      ],
+      "current_paths": [
+        "KGEN-KAIOS/world-viewer/genesis/genesis-runtime.js"
+      ],
+      "current_PRs": [
+        "#59",
+        "#61",
+        "#62"
+      ],
+      "next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "promotion_status": "IMPLEMENTED_SIMULATION",
+      "authorized_mode": "SIMULATION_ONLY"
+    },
+    {
+      "program_id": "KAIOS-CH-000-002-GENESIS",
+      "chapter_number": 0,
+      "chapter_title": "Chapter 000 V2.1｜萬物皆生命 × 輪迴 × 錢包 × 玉帝主權 × 自我編程文明根運行時",
+      "program_name": "萬物皆生命 × 輪迴 × 錢包 × 玉帝主權 × 自我編程文明根運行時",
+      "domain": "GENESIS",
+      "implementation_status": "IMPLEMENTED_DEMO_ONLY",
+      "coverage": 50,
+      "conflicts": [
+        "SEVEN_PAIR_LINEAGE_CONFLICT"
+      ],
+      "priority": "P4_ADVANCED_TECHNOLOGY",
+      "risk": "MEDIUM",
+      "dependencies": [
+        "TIME",
+        "IDENTITY",
+        "RIGHTS"
+      ],
+      "current_paths": [
+        "KGEN-KAIOS/world-viewer/genesis/genesis-runtime.js"
+      ],
+      "current_PRs": [
+        "#59",
+        "#61",
+        "#62"
+      ],
+      "next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "promotion_status": "IMPLEMENTED_SIMULATION",
+      "authorized_mode": "SIMULATION_ONLY"
+    },
+    {
+      "program_id": "KAIOS-CH-001-003-GENESIS",
+      "chapter_number": 1,
+      "chapter_title": "KAIOS Chapter 01 - Genesis",
+      "program_name": "KAIOS Chapter 01 - Genesis",
+      "domain": "GENESIS",
+      "implementation_status": "IMPLEMENTED_DEMO_ONLY",
+      "coverage": 50,
+      "conflicts": [],
+      "priority": "P4_ADVANCED_TECHNOLOGY",
+      "risk": "MEDIUM",
+      "dependencies": [
+        "TIME",
+        "IDENTITY",
+        "RIGHTS"
+      ],
+      "current_paths": [
+        "KGEN-KAIOS/world-viewer/genesis/genesis-runtime.js"
+      ],
+      "current_PRs": [
+        "#59",
+        "#61",
+        "#62"
+      ],
+      "next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "promotion_status": "IMPLEMENTED_SIMULATION",
+      "authorized_mode": "SIMULATION_ONLY"
+    },
+    {
+      "program_id": "KAIOS-CH-002-004-UNIVERSE_PHYSICS",
+      "chapter_number": 2,
+      "chapter_title": "KAIOS Chapter 02 - Universe Physics",
+      "program_name": "KAIOS Chapter 02 - Universe Physics",
+      "domain": "UNIVERSE_PHYSICS",
+      "implementation_status": "IMPLEMENTED_PARTIAL",
+      "coverage": 68,
+      "conflicts": [],
+      "priority": "P0_FOUNDATION",
+      "risk": "MEDIUM",
+      "dependencies": [],
+      "current_paths": [
+        "docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md",
+        "KGEN-KAIOS/world-viewer/causal-runtime/causal-world-runtime.js",
+        "KGEN-KAIOS/world-viewer/technology/cosmic-coordinate-runtime.js"
+      ],
+      "current_PRs": [
+        "#61",
+        "#63"
+      ],
+      "next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "promotion_status": "IMPLEMENTED_SIMULATION",
+      "authorized_mode": "SIMULATION_ONLY"
+    },
+    {
+      "program_id": "KAIOS-CH-003-005-TIME",
+      "chapter_number": 3,
+      "chapter_title": "KAIOS Chapter 03 - Time System",
+      "program_name": "KAIOS Chapter 03 - Time System",
+      "domain": "TIME",
+      "implementation_status": "IMPLEMENTED_PRODUCTION_SAFE_SIMULATION",
+      "coverage": 82,
+      "conflicts": [],
+      "priority": "HOLD_ALREADY_COVERED",
+      "risk": "MEDIUM",
+      "dependencies": [
+        "UNIVERSE_PHYSICS"
+      ],
+      "current_paths": [
+        "KGEN-KAIOS/world-viewer/simulation/simulation-clock.js",
+        "KGEN-KAIOS/world-viewer/timeline/timeline-runtime.js"
+      ],
+      "current_PRs": [
+        "#61",
+        "#63"
+      ],
+      "next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "promotion_status": "RUNTIME_VALIDATED",
+      "authorized_mode": "SIMULATION_ONLY"
+    },
+    {
+      "program_id": "KAIOS-CH-004-006-COORDINATES",
+      "chapter_number": 4,
+      "chapter_title": "KAIOS Chapter 04 - Space Coordinate System",
+      "program_name": "KAIOS Chapter 04 - Space Coordinate System",
+      "domain": "COORDINATES",
+      "implementation_status": "IMPLEMENTED_PARTIAL",
+      "coverage": 68,
+      "conflicts": [],
+      "priority": "P0_FOUNDATION",
+      "risk": "MEDIUM",
+      "dependencies": [
+        "UNIVERSE_PHYSICS"
+      ],
+      "current_paths": [
+        "docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md",
+        "KGEN-KAIOS/world-viewer/causal-runtime/causal-world-runtime.js",
+        "KGEN-KAIOS/world-viewer/technology/cosmic-coordinate-runtime.js"
+      ],
+      "current_PRs": [
+        "#61",
+        "#63"
+      ],
+      "next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "promotion_status": "IMPLEMENTED_SIMULATION",
+      "authorized_mode": "SIMULATION_ONLY"
+    },
+    {
+      "program_id": "KAIOS-CH-005-007-ENERGY",
+      "chapter_number": 5,
+      "chapter_title": "KAIOS Chapter 05 - KGEN Energy System",
+      "program_name": "KAIOS Chapter 05 - KGEN Energy System",
+      "domain": "ENERGY",
+      "implementation_status": "IMPLEMENTED_PARTIAL",
+      "coverage": 68,
+      "conflicts": [],
+      "priority": "P0_FOUNDATION",
+      "risk": "MEDIUM",
+      "dependencies": [
+        "UNIVERSE_PHYSICS",
+        "TIME"
+      ],
+      "current_paths": [
+        "docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md",
+        "KGEN-KAIOS/world-viewer/causal-runtime/causal-world-runtime.js",
+        "KGEN-KAIOS/world-viewer/technology/cosmic-coordinate-runtime.js"
+      ],
+      "current_PRs": [
+        "#61",
+        "#63"
+      ],
+      "next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "promotion_status": "IMPLEMENTED_SIMULATION",
+      "authorized_mode": "SIMULATION_ONLY"
+    },
+    {
+      "program_id": "KAIOS-CH-006-008-AI_LIFE",
+      "chapter_number": 6,
+      "chapter_title": "KAIOS Chapter 06 - AI Life Constitution",
+      "program_name": "KAIOS Chapter 06 - AI Life Constitution",
+      "domain": "AI_LIFE",
+      "implementation_status": "IMPLEMENTED_PARTIAL",
+      "coverage": 76,
+      "conflicts": [],
+      "priority": "P0_FOUNDATION",
+      "risk": "MEDIUM",
+      "dependencies": [
+        "UNIVERSE_PHYSICS",
+        "TIME",
+        "COORDINATES",
+        "ENERGY",
+        "IDENTITY"
+      ],
+      "current_paths": [
+        "KAIOS/life/runtime/foundational-life-runtime.js",
+        "KAIOS_CANONICAL_LIFE_SCHEMA_V1.json",
+        "KAIOS/K280/runtime/k280-runtime.js"
+      ],
+      "current_PRs": [
+        "#59",
+        "#66",
+        "#70"
+      ],
+      "next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "promotion_status": "IMPLEMENTED_SIMULATION",
+      "authorized_mode": "SIMULATION_ONLY"
+    },
+    {
+      "program_id": "KAIOS-CH-007-009-AI_LIFE",
+      "chapter_number": 7,
+      "chapter_title": "KAIOS Chapter 07 - AI Citizen System",
+      "program_name": "KAIOS Chapter 07 - AI Citizen System",
+      "domain": "AI_LIFE",
+      "implementation_status": "IMPLEMENTED_PARTIAL",
+      "coverage": 76,
+      "conflicts": [],
+      "priority": "P0_FOUNDATION",
+      "risk": "MEDIUM",
+      "dependencies": [
+        "UNIVERSE_PHYSICS",
+        "TIME",
+        "COORDINATES",
+        "ENERGY",
+        "IDENTITY"
+      ],
+      "current_paths": [
+        "KAIOS/life/runtime/foundational-life-runtime.js",
+        "KAIOS_CANONICAL_LIFE_SCHEMA_V1.json",
+        "KAIOS/K280/runtime/k280-runtime.js"
+      ],
+      "current_PRs": [
+        "#59",
+        "#66",
+        "#70"
+      ],
+      "next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "promotion_status": "IMPLEMENTED_SIMULATION",
+      "authorized_mode": "SIMULATION_ONLY"
+    },
+    {
+      "program_id": "KAIOS-CH-008-010-WALLET_SIMULATION",
+      "chapter_number": 8,
+      "chapter_title": "KAIOS Chapter 08 - Wallet & Identity System",
+      "program_name": "KAIOS Chapter 08 - Wallet & Identity System",
+      "domain": "WALLET_SIMULATION",
+      "implementation_status": "IMPLEMENTED_PRODUCTION_SAFE_SIMULATION",
+      "coverage": 80,
+      "conflicts": [],
+      "priority": "HOLD_ALREADY_COVERED",
+      "risk": "HIGH",
+      "dependencies": [
+        "IDENTITY",
+        "RIGHTS",
+        "LABOR",
+        "SUPPLY_CHAIN"
+      ],
+      "current_paths": [
+        "KGEN-KAIOS/world-viewer/player-genesis/player-genesis-runtime.js"
+      ],
+      "current_PRs": [
+        "#62"
+      ],
+      "next_action": "HOLD_FOR_PROMOTION_REVIEW",
+      "promotion_status": "RUNTIME_VALIDATED",
+      "authorized_mode": "SIMULATION_ONLY"
+    },
+    {
+      "program_id": "KAIOS-CH-009-011-LAND",
+      "chapter_number": 9,
+      "chapter_title": "KAIOS Chapter 09 - Land & Land Guardian System",
+      "program_name": "KAIOS Chapter 09 - Land & Land Guardian System",
+      "domain": "LAND",
+      "implementation_status": "IMPLEMENTED_PRODUCTION_SAFE_SIMULATION",
+      "coverage": 82,
+      "conflicts": [],
+      "priority": "HOLD_ALREADY_COVERED",
+      "risk": "MEDIUM",
+      "dependencies": [
+        "UNIVERSE_PHYSICS",
+        "COORDINATES",
+        "IDENTITY"
+      ],
+      "current_paths": [
+        "KGEN-KAIOS/world-viewer/land/land-runtime.js",
+        "KGEN-KAIOS/world-viewer/adapters/organism-schema-v2-adapter.js"
+      ],
+      "current_PRs": [
+        "#52",
+        "#61"
+      ],
+      "next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "promotion_status": "RUNTIME_VALIDATED",
+      "authorized_mode": "SIMULATION_ONLY"
+    },
+    {
+      "program_id": "KAIOS-CH-100-012-EXECUTIVE",
+      "chapter_number": 100,
+      "chapter_title": "Chapter 100｜文明行政政府 × 內閣 × 政策執行 × 行政領導 Runtime",
+      "program_name": "文明行政政府 × 內閣 × 政策執行 × 行政領導",
+      "domain": "EXECUTIVE",
+      "implementation_status": "IMPLEMENTED_DEMO_ONLY",
+      "coverage": 38,
+      "conflicts": [],
+      "priority": "P3_GOVERNANCE_SOCIAL",
+      "risk": "MEDIUM",
+      "dependencies": [
+        "IDENTITY",
+        "RIGHTS",
+        "ECONOMY",
+        "GOVERNANCE"
+      ],
+      "current_paths": [
+        "KGEN-KAIOS/world-viewer/governance/government-runtime.js",
+        "KGEN-KAIOS/world-viewer/governance/public-services-runtime.js"
+      ],
+      "current_PRs": [
+        "#61"
+      ],
+      "next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "promotion_status": "IMPLEMENTED_SIMULATION",
+      "authorized_mode": "SIMULATION_ONLY"
+    },
+    {
+      "program_id": "KAIOS-CH-101-013-DIPLOMACY",
+      "chapter_number": 101,
+      "chapter_title": "Chapter 101｜文明外交 × 外交體系 × 條約 × 國際合作 Runtime",
+      "program_name": "文明外交 × 外交體系 × 條約 × 國際合作",
+      "domain": "DIPLOMACY",
+      "implementation_status": "SPECIFICATION_ONLY",
+      "coverage": 15,
+      "conflicts": [],
+      "priority": "P4_ADVANCED_TECHNOLOGY",
+      "risk": "MEDIUM",
+      "dependencies": [
+        "IDENTITY",
+        "RIGHTS",
+        "ECONOMY",
+        "GOVERNANCE"
+      ],
+      "current_paths": [],
+      "current_PRs": [],
+      "next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "promotion_status": "REVIEWED_REQUIREMENT",
+      "authorized_mode": "SIMULATION_ONLY"
+    },
+    {
+      "program_id": "KAIOS-CH-102-014-DEFENSE",
+      "chapter_number": 102,
+      "chapter_title": "Chapter 102｜文明國家安全 × 國防 × 情報 × 文人統制 Runtime",
+      "program_name": "文明國家安全 × 國防 × 情報 × 文人統制",
+      "domain": "DEFENSE",
+      "implementation_status": "PROHIBITED_UNDER_CURRENT_BOUNDARY",
+      "coverage": 0,
+      "conflicts": [],
+      "priority": "HOLD_HIGH_RISK",
+      "risk": "HIGH",
+      "dependencies": [
+        "IDENTITY",
+        "RIGHTS",
+        "ECONOMY",
+        "GOVERNANCE"
+      ],
+      "current_paths": [],
+      "current_PRs": [],
+      "next_action": "HOLD_FOR_PROMOTION_REVIEW",
+      "promotion_status": "SOURCE_REQUIREMENT",
+      "authorized_mode": "PROHIBITED_UNDER_CURRENT_BOUNDARY"
+    },
+    {
+      "program_id": "KAIOS-CH-103-015-EMERGENCY",
+      "chapter_number": 103,
+      "chapter_title": "Chapter 103｜文明緊急管理 × 災害應變 × 民眾保護 × 國家韌性 Runtime",
+      "program_name": "文明緊急管理 × 災害應變 × 民眾保護 × 國家韌性",
+      "domain": "EMERGENCY",
+      "implementation_status": "SPECIFICATION_ONLY",
+      "coverage": 15,
+      "conflicts": [],
+      "priority": "P4_ADVANCED_TECHNOLOGY",
+      "risk": "MEDIUM",
+      "dependencies": [
+        "IDENTITY",
+        "RIGHTS",
+        "ECONOMY",
+        "GOVERNANCE"
+      ],
+      "current_paths": [],
+      "current_PRs": [],
+      "next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "promotion_status": "REVIEWED_REQUIREMENT",
+      "authorized_mode": "SIMULATION_ONLY"
+    },
+    {
+      "program_id": "KAIOS-CH-104-016-INFRASTRUCTURE",
+      "chapter_number": 104,
+      "chapter_title": "Chapter 104｜文明關鍵基礎設施 × 必要服務 × 持續營運 × 系統性韌性 Runtime",
+      "program_name": "文明關鍵基礎設施 × 必要服務 × 持續營運 × 系統性韌性",
+      "domain": "INFRASTRUCTURE",
+      "implementation_status": "IMPLEMENTED_DEMO_ONLY",
+      "coverage": 49,
+      "conflicts": [],
+      "priority": "P4_ADVANCED_TECHNOLOGY",
+      "risk": "MEDIUM",
+      "dependencies": [
+        "TIME",
+        "IDENTITY",
+        "ENERGY",
+        "LAND",
+        "LABOR"
+      ],
+      "current_paths": [
+        "KGEN-KAIOS/world-viewer/technology/technology-tree-runtime.js",
+        "KGEN-KAIOS/world-viewer/technology/research-runtime.js",
+        "KGEN-KAIOS/world-viewer/technology/vehicle-runtime.js"
+      ],
+      "current_PRs": [
+        "#61",
+        "#63"
+      ],
+      "next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "promotion_status": "IMPLEMENTED_SIMULATION",
+      "authorized_mode": "SIMULATION_ONLY"
+    },
+    {
+      "program_id": "KAIOS-CH-105-017-ENERGY_GRID",
+      "chapter_number": 105,
+      "chapter_title": "Chapter 105｜文明能源系統 × 公用事業 × 電網 × 資源安全 Runtime",
+      "program_name": "文明能源系統 × 公用事業 × 電網 × 資源安全",
+      "domain": "ENERGY_GRID",
+      "implementation_status": "SPECIFICATION_ONLY",
+      "coverage": 15,
+      "conflicts": [],
+      "priority": "P4_ADVANCED_TECHNOLOGY",
+      "risk": "MEDIUM",
+      "dependencies": [
+        "TIME",
+        "IDENTITY",
+        "ENERGY",
+        "LAND",
+        "LABOR"
+      ],
+      "current_paths": [],
+      "current_PRs": [],
+      "next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "promotion_status": "REVIEWED_REQUIREMENT",
+      "authorized_mode": "SIMULATION_ONLY"
+    },
+    {
+      "program_id": "KAIOS-CH-106-018-WATER",
+      "chapter_number": 106,
+      "chapter_title": "Chapter 106｜文明水資源系統 × 衛生服務 × 流域治理 × 水安全 Runtime",
+      "program_name": "文明水資源系統 × 衛生服務 × 流域治理 × 水安全",
+      "domain": "WATER",
+      "implementation_status": "IMPLEMENTED_PARTIAL",
+      "coverage": 57,
+      "conflicts": [],
+      "priority": "P1_CORE_RUNTIME",
+      "risk": "MEDIUM",
+      "dependencies": [
+        "UNIVERSE_PHYSICS",
+        "TIME",
+        "COORDINATES",
+        "ENERGY",
+        "IDENTITY"
+      ],
+      "current_paths": [
+        "KGEN-KAIOS/world-viewer/ecosystem/ecosystem-runtime.js",
+        "KAIOS/life/runtime/foundational-life-runtime.js"
+      ],
+      "current_PRs": [
+        "#61",
+        "#70"
+      ],
+      "next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "promotion_status": "IMPLEMENTED_SIMULATION",
+      "authorized_mode": "SIMULATION_ONLY"
+    },
+    {
+      "program_id": "KAIOS-CH-107-019-FOOD_SECURITY",
+      "chapter_number": 107,
+      "chapter_title": "Chapter 107｜文明糧食系統 × 農業 × 營養 × 糧食安全 Runtime",
+      "program_name": "文明糧食系統 × 農業 × 營養 × 糧食安全",
+      "domain": "FOOD_SECURITY",
+      "implementation_status": "IMPLEMENTED_DEMO_ONLY",
+      "coverage": 46,
+      "conflicts": [],
+      "priority": "P4_ADVANCED_TECHNOLOGY",
+      "risk": "MEDIUM",
+      "dependencies": [
+        "TIME",
+        "IDENTITY",
+        "RIGHTS"
+      ],
+      "current_paths": [
+        "KGEN-KAIOS/world-viewer/agriculture/agriculture-runtime.js"
+      ],
+      "current_PRs": [
+        "#61",
+        "#70"
+      ],
+      "next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "promotion_status": "IMPLEMENTED_SIMULATION",
+      "authorized_mode": "SIMULATION_ONLY"
+    },
+    {
+      "program_id": "KAIOS-CH-108-020-LAND",
+      "chapter_number": 108,
+      "chapter_title": "Chapter 108｜文明住宅 × 土地 × 都市發展 × 人類聚落 Runtime",
+      "program_name": "文明住宅 × 土地 × 都市發展 × 人類聚落",
+      "domain": "LAND",
+      "implementation_status": "IMPLEMENTED_PRODUCTION_SAFE_SIMULATION",
+      "coverage": 82,
+      "conflicts": [],
+      "priority": "HOLD_ALREADY_COVERED",
+      "risk": "MEDIUM",
+      "dependencies": [
+        "UNIVERSE_PHYSICS",
+        "COORDINATES",
+        "IDENTITY"
+      ],
+      "current_paths": [
+        "KGEN-KAIOS/world-viewer/land/land-runtime.js",
+        "KGEN-KAIOS/world-viewer/adapters/organism-schema-v2-adapter.js"
+      ],
+      "current_PRs": [
+        "#52",
+        "#61"
+      ],
+      "next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "promotion_status": "RUNTIME_VALIDATED",
+      "authorized_mode": "SIMULATION_ONLY"
+    },
+    {
+      "program_id": "KAIOS-CH-109-021-TRANSPORT",
+      "chapter_number": 109,
+      "chapter_title": "Chapter 109｜文明交通運輸 × 移動權 × 物流 × 公共運輸 Runtime",
+      "program_name": "文明交通運輸 × 移動權 × 物流 × 公共運輸",
+      "domain": "TRANSPORT",
+      "implementation_status": "IMPLEMENTED_DEMO_ONLY",
+      "coverage": 49,
+      "conflicts": [],
+      "priority": "P2_ECONOMY_CIVILIZATION",
+      "risk": "MEDIUM",
+      "dependencies": [
+        "UNIVERSE_PHYSICS",
+        "TIME",
+        "COORDINATES",
+        "ENERGY",
+        "IDENTITY"
+      ],
+      "current_paths": [
+        "KGEN-KAIOS/world-viewer/technology/technology-tree-runtime.js",
+        "KGEN-KAIOS/world-viewer/technology/research-runtime.js",
+        "KGEN-KAIOS/world-viewer/technology/vehicle-runtime.js"
+      ],
+      "current_PRs": [
+        "#61",
+        "#63"
+      ],
+      "next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "promotion_status": "IMPLEMENTED_SIMULATION",
+      "authorized_mode": "SIMULATION_ONLY"
+    },
+    {
+      "program_id": "KAIOS-CH-010-022-GOVERNANCE",
+      "chapter_number": 10,
+      "chapter_title": "KAIOS Chapter 10 - Village Governance System",
+      "program_name": "KAIOS Chapter 10 - Village Governance System",
+      "domain": "GOVERNANCE",
+      "implementation_status": "IMPLEMENTED_DEMO_ONLY",
+      "coverage": 38,
+      "conflicts": [],
+      "priority": "P3_GOVERNANCE_SOCIAL",
+      "risk": "HIGH",
+      "dependencies": [
+        "IDENTITY",
+        "HUMAN_RIGHTS",
+        "AUDIT"
+      ],
+      "current_paths": [
+        "KGEN-KAIOS/world-viewer/governance/government-runtime.js",
+        "KGEN-KAIOS/world-viewer/governance/public-services-runtime.js"
+      ],
+      "current_PRs": [
+        "#61"
+      ],
+      "next_action": "HOLD_FOR_PROMOTION_REVIEW",
+      "promotion_status": "IMPLEMENTED_SIMULATION",
+      "authorized_mode": "SIMULATION_ONLY"
+    },
+    {
+      "program_id": "KAIOS-CH-110-023-COMMUNICATION",
+      "chapter_number": 110,
+      "chapter_title": "Chapter 110｜文明通訊 × 網際網路 × 媒體 × 數位連結 Runtime",
+      "program_name": "文明通訊 × 網際網路 × 媒體 × 數位連結",
+      "domain": "COMMUNICATION",
+      "implementation_status": "SPECIFICATION_ONLY",
+      "coverage": 15,
+      "conflicts": [],
+      "priority": "P4_ADVANCED_TECHNOLOGY",
+      "risk": "MEDIUM",
+      "dependencies": [
+        "TIME",
+        "IDENTITY",
+        "RIGHTS"
+      ],
+      "current_paths": [],
+      "current_PRs": [],
+      "next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "promotion_status": "REVIEWED_REQUIREMENT",
+      "authorized_mode": "SIMULATION_ONLY"
+    },
+    {
+      "program_id": "KAIOS-CH-111-024-EDUCATION",
+      "chapter_number": 111,
+      "chapter_title": "Chapter 111｜文明教育 × 知識 × 研究 × 終身學習 Runtime",
+      "program_name": "文明教育 × 知識 × 研究 × 終身學習",
+      "domain": "EDUCATION",
+      "implementation_status": "SPECIFICATION_ONLY",
+      "coverage": 15,
+      "conflicts": [],
+      "priority": "P3_GOVERNANCE_SOCIAL",
+      "risk": "MEDIUM",
+      "dependencies": [
+        "TIME",
+        "IDENTITY",
+        "RIGHTS"
+      ],
+      "current_paths": [],
+      "current_PRs": [],
+      "next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "promotion_status": "REVIEWED_REQUIREMENT",
+      "authorized_mode": "SIMULATION_ONLY"
+    },
+    {
+      "program_id": "KAIOS-CH-112-025-ARTS",
+      "chapter_number": 112,
+      "chapter_title": "Chapter 112｜文明文化 × 藝術 × 遺產 × 創意表達 Runtime",
+      "program_name": "文明文化 × 藝術 × 遺產 × 創意表達",
+      "domain": "ARTS",
+      "implementation_status": "SPECIFICATION_ONLY",
+      "coverage": 15,
+      "conflicts": [],
+      "priority": "P4_ADVANCED_TECHNOLOGY",
+      "risk": "MEDIUM",
+      "dependencies": [
+        "TIME",
+        "IDENTITY",
+        "RIGHTS"
+      ],
+      "current_paths": [],
+      "current_PRs": [],
+      "next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "promotion_status": "REVIEWED_REQUIREMENT",
+      "authorized_mode": "SIMULATION_ONLY"
+    },
+    {
+      "program_id": "KAIOS-CH-113-026-SPORTS",
+      "chapter_number": 113,
+      "chapter_title": "Chapter 113｜文明運動 × 休閒 × 身體文化 × 公共福祉 Runtime",
+      "program_name": "文明運動 × 休閒 × 身體文化 × 公共福祉",
+      "domain": "SPORTS",
+      "implementation_status": "SPECIFICATION_ONLY",
+      "coverage": 15,
+      "conflicts": [],
+      "priority": "P4_ADVANCED_TECHNOLOGY",
+      "risk": "MEDIUM",
+      "dependencies": [
+        "TIME",
+        "IDENTITY",
+        "RIGHTS"
+      ],
+      "current_paths": [],
+      "current_PRs": [],
+      "next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "promotion_status": "REVIEWED_REQUIREMENT",
+      "authorized_mode": "SIMULATION_ONLY"
+    },
+    {
+      "program_id": "KAIOS-CH-114-027-ECOLOGY",
+      "chapter_number": 114,
+      "chapter_title": "Chapter 114｜文明環境 × 生態 × 生物多樣性 × 永續發展 Runtime",
+      "program_name": "文明環境 × 生態 × 生物多樣性 × 永續發展",
+      "domain": "ECOLOGY",
+      "implementation_status": "IMPLEMENTED_PARTIAL",
+      "coverage": 57,
+      "conflicts": [],
+      "priority": "P4_ADVANCED_TECHNOLOGY",
+      "risk": "MEDIUM",
+      "dependencies": [
+        "UNIVERSE_PHYSICS",
+        "TIME",
+        "COORDINATES",
+        "ENERGY",
+        "IDENTITY"
+      ],
+      "current_paths": [
+        "KGEN-KAIOS/world-viewer/ecosystem/ecosystem-runtime.js",
+        "KAIOS/life/runtime/foundational-life-runtime.js"
+      ],
+      "current_PRs": [
+        "#61",
+        "#70"
+      ],
+      "next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "promotion_status": "IMPLEMENTED_SIMULATION",
+      "authorized_mode": "SIMULATION_ONLY"
+    },
+    {
+      "program_id": "KAIOS-CH-115-028-SCIENCE",
+      "chapter_number": 115,
+      "chapter_title": "Chapter 115｜文明科學 × 科技 × 創新 × 負責任探索 Runtime",
+      "program_name": "文明科學 × 科技 × 創新 × 負責任探索",
+      "domain": "SCIENCE",
+      "implementation_status": "IMPLEMENTED_DEMO_ONLY",
+      "coverage": 49,
+      "conflicts": [],
+      "priority": "P4_ADVANCED_TECHNOLOGY",
+      "risk": "MEDIUM",
+      "dependencies": [
+        "TIME",
+        "IDENTITY",
+        "ENERGY",
+        "LAND",
+        "LABOR"
+      ],
+      "current_paths": [
+        "KGEN-KAIOS/world-viewer/technology/technology-tree-runtime.js",
+        "KGEN-KAIOS/world-viewer/technology/research-runtime.js",
+        "KGEN-KAIOS/world-viewer/technology/vehicle-runtime.js"
+      ],
+      "current_PRs": [
+        "#61",
+        "#63"
+      ],
+      "next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "promotion_status": "IMPLEMENTED_SIMULATION",
+      "authorized_mode": "SIMULATION_ONLY"
+    },
+    {
+      "program_id": "KAIOS-CH-116-029-MANUFACTURING",
+      "chapter_number": 116,
+      "chapter_title": "Chapter 116｜文明經濟 × 產業 × 貿易 × 生產發展 Runtime",
+      "program_name": "文明經濟 × 產業 × 貿易 × 生產發展",
+      "domain": "MANUFACTURING",
+      "implementation_status": "IMPLEMENTED_DEMO_ONLY",
+      "coverage": 48,
+      "conflicts": [],
+      "priority": "P1_CORE_RUNTIME",
+      "risk": "MEDIUM",
+      "dependencies": [
+        "TIME",
+        "IDENTITY",
+        "ENERGY",
+        "LAND",
+        "LABOR"
+      ],
+      "current_paths": [
+        "KGEN-KAIOS/world-viewer/production/production-runtime.js",
+        "KGEN-KAIOS/world-viewer/settlement/logistics-runtime.js"
+      ],
+      "current_PRs": [
+        "#61",
+        "#63",
+        "#65"
+      ],
+      "next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "promotion_status": "IMPLEMENTED_SIMULATION",
+      "authorized_mode": "SIMULATION_ONLY"
+    },
+    {
+      "program_id": "KAIOS-CH-117-030-CAPITAL_MARKETS",
+      "chapter_number": 117,
+      "chapter_title": "Chapter 117｜文明金融 × 銀行 × 資本市場 × 貨幣穩定 Runtime",
+      "program_name": "文明金融 × 銀行 × 資本市場 × 貨幣穩定",
+      "domain": "CAPITAL_MARKETS",
+      "implementation_status": "IMPLEMENTED_DEMO_ONLY",
+      "coverage": 32,
+      "conflicts": [],
+      "priority": "P4_ADVANCED_TECHNOLOGY",
+      "risk": "HIGH",
+      "dependencies": [
+        "IDENTITY",
+        "RIGHTS",
+        "LABOR",
+        "SUPPLY_CHAIN"
+      ],
+      "current_paths": [
+        "KGEN-KAIOS/world-viewer/economy/economy-runtime.js",
+        "KGEN-KAIOS/world-viewer/settlement/settlement-runtime.js"
+      ],
+      "current_PRs": [
+        "#61",
+        "#62",
+        "#65"
+      ],
+      "next_action": "HOLD_FOR_PROMOTION_REVIEW",
+      "promotion_status": "IMPLEMENTED_SIMULATION",
+      "authorized_mode": "SIMULATION_ONLY"
+    },
+    {
+      "program_id": "KAIOS-CH-118-031-AI_EMPLOYMENT",
+      "chapter_number": 118,
+      "chapter_title": "Chapter 118｜文明勞動 × 就業 × 社會保護 × 人力能力 Runtime",
+      "program_name": "文明勞動 × 就業 × 社會保護 × 人力能力",
+      "domain": "AI_EMPLOYMENT",
+      "implementation_status": "IMPLEMENTED_PRODUCTION_SAFE_SIMULATION",
+      "coverage": 80,
+      "conflicts": [],
+      "priority": "HOLD_ALREADY_COVERED",
+      "risk": "MEDIUM",
+      "dependencies": [
+        "TIME",
+        "IDENTITY",
+        "ENERGY",
+        "LAND",
+        "LABOR"
+      ],
+      "current_paths": [
+        "KGEN-KAIOS/world-viewer/player-genesis/player-genesis-runtime.js"
+      ],
+      "current_PRs": [
+        "#62"
+      ],
+      "next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "promotion_status": "RUNTIME_VALIDATED",
+      "authorized_mode": "SIMULATION_ONLY"
+    },
+    {
+      "program_id": "KAIOS-CH-119-032-FAMILY",
+      "chapter_number": 119,
+      "chapter_title": "Chapter 119｜文明人口 × 家庭 × 遷移 × 人口延續 Runtime",
+      "program_name": "文明人口 × 家庭 × 遷移 × 人口延續",
+      "domain": "FAMILY",
+      "implementation_status": "SPECIFICATION_ONLY",
+      "coverage": 15,
+      "conflicts": [],
+      "priority": "P3_GOVERNANCE_SOCIAL",
+      "risk": "MEDIUM",
+      "dependencies": [
+        "TIME",
+        "IDENTITY",
+        "RIGHTS"
+      ],
+      "current_paths": [],
+      "current_PRs": [],
+      "next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "promotion_status": "REVIEWED_REQUIREMENT",
+      "authorized_mode": "SIMULATION_ONLY"
+    },
+    {
+      "program_id": "KAIOS-CH-011-033-GOVERNANCE",
+      "chapter_number": 11,
+      "chapter_title": "KAIOS Chapter 11 - City Governance System",
+      "program_name": "KAIOS Chapter 11 - City Governance System",
+      "domain": "GOVERNANCE",
+      "implementation_status": "IMPLEMENTED_DEMO_ONLY",
+      "coverage": 38,
+      "conflicts": [],
+      "priority": "P3_GOVERNANCE_SOCIAL",
+      "risk": "HIGH",
+      "dependencies": [
+        "IDENTITY",
+        "HUMAN_RIGHTS",
+        "AUDIT"
+      ],
+      "current_paths": [
+        "KGEN-KAIOS/world-viewer/governance/government-runtime.js",
+        "KGEN-KAIOS/world-viewer/governance/public-services-runtime.js"
+      ],
+      "current_PRs": [
+        "#61"
+      ],
+      "next_action": "HOLD_FOR_PROMOTION_REVIEW",
+      "promotion_status": "IMPLEMENTED_SIMULATION",
+      "authorized_mode": "SIMULATION_ONLY"
+    },
+    {
+      "program_id": "KAIOS-CH-120-034-HOUSING",
+      "chapter_number": 120,
+      "chapter_title": "Chapter 120｜文明住房 × 土地 × 城市發展 × 人類聚居 Runtime",
+      "program_name": "文明住房 × 土地 × 城市發展 × 人類聚居",
+      "domain": "HOUSING",
+      "implementation_status": "IMPLEMENTED_DEMO_ONLY",
+      "coverage": 45,
+      "conflicts": [],
+      "priority": "P2_ECONOMY_CIVILIZATION",
+      "risk": "MEDIUM",
+      "dependencies": [
+        "UNIVERSE_PHYSICS",
+        "TIME",
+        "COORDINATES",
+        "ENERGY",
+        "IDENTITY"
+      ],
+      "current_paths": [
+        "KGEN-KAIOS/world-viewer/building/building-runtime.js",
+        "KGEN-KAIOS/world-viewer/room/room-runtime.js"
+      ],
+      "current_PRs": [
+        "#61",
+        "#63",
+        "#64"
+      ],
+      "next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "promotion_status": "IMPLEMENTED_SIMULATION",
+      "authorized_mode": "SIMULATION_ONLY"
+    },
+    {
+      "program_id": "KAIOS-CH-121-035-FOOD_SECURITY",
+      "chapter_number": 121,
+      "chapter_title": "Chapter 121｜文明糧食 × 農業 × 營養 × 鄉村韌性 Runtime",
+      "program_name": "文明糧食 × 農業 × 營養 × 鄉村韌性",
+      "domain": "FOOD_SECURITY",
+      "implementation_status": "IMPLEMENTED_DEMO_ONLY",
+      "coverage": 46,
+      "conflicts": [],
+      "priority": "P4_ADVANCED_TECHNOLOGY",
+      "risk": "MEDIUM",
+      "dependencies": [
+        "TIME",
+        "IDENTITY",
+        "RIGHTS"
+      ],
+      "current_paths": [
+        "KGEN-KAIOS/world-viewer/agriculture/agriculture-runtime.js"
+      ],
+      "current_PRs": [
+        "#61",
+        "#70"
+      ],
+      "next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "promotion_status": "IMPLEMENTED_SIMULATION",
+      "authorized_mode": "SIMULATION_ONLY"
+    },
+    {
+      "program_id": "KAIOS-CH-122-036-WATER",
+      "chapter_number": 122,
+      "chapter_title": "Chapter 122｜文明水資源 × 衛生 × 流域 × 水文安全 Runtime",
+      "program_name": "文明水資源 × 衛生 × 流域 × 水文安全",
+      "domain": "WATER",
+      "implementation_status": "IMPLEMENTED_PARTIAL",
+      "coverage": 57,
+      "conflicts": [],
+      "priority": "P1_CORE_RUNTIME",
+      "risk": "MEDIUM",
+      "dependencies": [
+        "UNIVERSE_PHYSICS",
+        "TIME",
+        "COORDINATES",
+        "ENERGY",
+        "IDENTITY"
+      ],
+      "current_paths": [
+        "KGEN-KAIOS/world-viewer/ecosystem/ecosystem-runtime.js",
+        "KAIOS/life/runtime/foundational-life-runtime.js"
+      ],
+      "current_PRs": [
+        "#61",
+        "#70"
+      ],
+      "next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "promotion_status": "IMPLEMENTED_SIMULATION",
+      "authorized_mode": "SIMULATION_ONLY"
+    },
+    {
+      "program_id": "KAIOS-CH-123-037-ENERGY_GRID",
+      "chapter_number": 123,
+      "chapter_title": "Chapter 123｜文明能源 × 電力 × 燃料 × 電網韌性 Runtime",
+      "program_name": "文明能源 × 電力 × 燃料 × 電網韌性",
+      "domain": "ENERGY_GRID",
+      "implementation_status": "SPECIFICATION_ONLY",
+      "coverage": 15,
+      "conflicts": [],
+      "priority": "P4_ADVANCED_TECHNOLOGY",
+      "risk": "MEDIUM",
+      "dependencies": [
+        "TIME",
+        "IDENTITY",
+        "ENERGY",
+        "LAND",
+        "LABOR"
+      ],
+      "current_paths": [],
+      "current_PRs": [],
+      "next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "promotion_status": "REVIEWED_REQUIREMENT",
+      "authorized_mode": "SIMULATION_ONLY"
+    },
+    {
+      "program_id": "KAIOS-CH-124-038-TRANSPORT",
+      "chapter_number": 124,
+      "chapter_title": "Chapter 124｜文明交通 × 移動 × 物流 × 網路韌性 Runtime",
+      "program_name": "文明交通 × 移動 × 物流 × 網路韌性",
+      "domain": "TRANSPORT",
+      "implementation_status": "IMPLEMENTED_DEMO_ONLY",
+      "coverage": 49,
+      "conflicts": [],
+      "priority": "P2_ECONOMY_CIVILIZATION",
+      "risk": "MEDIUM",
+      "dependencies": [
+        "UNIVERSE_PHYSICS",
+        "TIME",
+        "COORDINATES",
+        "ENERGY",
+        "IDENTITY"
+      ],
+      "current_paths": [
+        "KGEN-KAIOS/world-viewer/technology/technology-tree-runtime.js",
+        "KGEN-KAIOS/world-viewer/technology/research-runtime.js",
+        "KGEN-KAIOS/world-viewer/technology/vehicle-runtime.js"
+      ],
+      "current_PRs": [
+        "#61",
+        "#63"
+      ],
+      "next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "promotion_status": "IMPLEMENTED_SIMULATION",
+      "authorized_mode": "SIMULATION_ONLY"
+    },
+    {
+      "program_id": "KAIOS-CH-125-039-INFRASTRUCTURE",
+      "chapter_number": 125,
+      "chapter_title": "Chapter 125｜文明通訊 × 數位基礎設施 × 媒體 × 資訊韌性 Runtime",
+      "program_name": "文明通訊 × 數位基礎設施 × 媒體 × 資訊韌性",
+      "domain": "INFRASTRUCTURE",
+      "implementation_status": "IMPLEMENTED_DEMO_ONLY",
+      "coverage": 49,
+      "conflicts": [],
+      "priority": "P4_ADVANCED_TECHNOLOGY",
+      "risk": "MEDIUM",
+      "dependencies": [
+        "TIME",
+        "IDENTITY",
+        "ENERGY",
+        "LAND",
+        "LABOR"
+      ],
+      "current_paths": [
+        "KGEN-KAIOS/world-viewer/technology/technology-tree-runtime.js",
+        "KGEN-KAIOS/world-viewer/technology/research-runtime.js",
+        "KGEN-KAIOS/world-viewer/technology/vehicle-runtime.js"
+      ],
+      "current_PRs": [
+        "#61",
+        "#63"
+      ],
+      "next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "promotion_status": "IMPLEMENTED_SIMULATION",
+      "authorized_mode": "SIMULATION_ONLY"
+    },
+    {
+      "program_id": "KAIOS-CH-126-040-EDUCATION",
+      "chapter_number": 126,
+      "chapter_title": "Chapter 126｜文明教育 × 知識 × 研究 × 學習延續 Runtime",
+      "program_name": "文明教育 × 知識 × 研究 × 學習延續",
+      "domain": "EDUCATION",
+      "implementation_status": "SPECIFICATION_ONLY",
+      "coverage": 15,
+      "conflicts": [],
+      "priority": "P3_GOVERNANCE_SOCIAL",
+      "risk": "MEDIUM",
+      "dependencies": [
+        "TIME",
+        "IDENTITY",
+        "RIGHTS"
+      ],
+      "current_paths": [],
+      "current_PRs": [],
+      "next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "promotion_status": "REVIEWED_REQUIREMENT",
+      "authorized_mode": "SIMULATION_ONLY"
+    },
+    {
+      "program_id": "KAIOS-CH-127-041-HEALTH",
+      "chapter_number": 127,
+      "chapter_title": "Chapter 127｜文明健康 × 醫療 × 照護 × 公共衛生韌性 Runtime",
+      "program_name": "文明健康 × 醫療 × 照護 × 公共衛生韌性",
+      "domain": "HEALTH",
+      "implementation_status": "SPECIFICATION_ONLY",
+      "coverage": 15,
+      "conflicts": [],
+      "priority": "P3_GOVERNANCE_SOCIAL",
+      "risk": "MEDIUM",
+      "dependencies": [
+        "UNIVERSE_PHYSICS",
+        "TIME",
+        "COORDINATES",
+        "ENERGY",
+        "IDENTITY",
+        "AI_LIFE"
+      ],
+      "current_paths": [],
+      "current_PRs": [],
+      "next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "promotion_status": "REVIEWED_REQUIREMENT",
+      "authorized_mode": "SIMULATION_ONLY"
+    },
+    {
+      "program_id": "KAIOS-CH-128-042-AI_EMPLOYMENT",
+      "chapter_number": 128,
+      "chapter_title": "Chapter 128｜文明勞動 × 就業 × 社會保障 × 生計延續 Runtime",
+      "program_name": "文明勞動 × 就業 × 社會保障 × 生計延續",
+      "domain": "AI_EMPLOYMENT",
+      "implementation_status": "IMPLEMENTED_PRODUCTION_SAFE_SIMULATION",
+      "coverage": 80,
+      "conflicts": [],
+      "priority": "HOLD_ALREADY_COVERED",
+      "risk": "MEDIUM",
+      "dependencies": [
+        "TIME",
+        "IDENTITY",
+        "ENERGY",
+        "LAND",
+        "LABOR"
+      ],
+      "current_paths": [
+        "KGEN-KAIOS/world-viewer/player-genesis/player-genesis-runtime.js"
+      ],
+      "current_PRs": [
+        "#62"
+      ],
+      "next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "promotion_status": "RUNTIME_VALIDATED",
+      "authorized_mode": "SIMULATION_ONLY"
+    },
+    {
+      "program_id": "KAIOS-CH-129-043-MANUFACTURING",
+      "chapter_number": 129,
+      "chapter_title": "Chapter 129｜文明經濟 × 產業 × 貿易 × 生產韌性 Runtime",
+      "program_name": "文明經濟 × 產業 × 貿易 × 生產韌性",
+      "domain": "MANUFACTURING",
+      "implementation_status": "IMPLEMENTED_DEMO_ONLY",
+      "coverage": 48,
+      "conflicts": [],
+      "priority": "P1_CORE_RUNTIME",
+      "risk": "MEDIUM",
+      "dependencies": [
+        "TIME",
+        "IDENTITY",
+        "ENERGY",
+        "LAND",
+        "LABOR"
+      ],
+      "current_paths": [
+        "KGEN-KAIOS/world-viewer/production/production-runtime.js",
+        "KGEN-KAIOS/world-viewer/settlement/logistics-runtime.js"
+      ],
+      "current_PRs": [
+        "#61",
+        "#63",
+        "#65"
+      ],
+      "next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "promotion_status": "IMPLEMENTED_SIMULATION",
+      "authorized_mode": "SIMULATION_ONLY"
+    },
+    {
+      "program_id": "KAIOS-CH-012-044-GOVERNANCE",
+      "chapter_number": 12,
+      "chapter_title": "KAIOS Chapter 12 - Nation Governance System",
+      "program_name": "KAIOS Chapter 12 - Nation Governance System",
+      "domain": "GOVERNANCE",
+      "implementation_status": "IMPLEMENTED_DEMO_ONLY",
+      "coverage": 38,
+      "conflicts": [],
+      "priority": "P3_GOVERNANCE_SOCIAL",
+      "risk": "HIGH",
+      "dependencies": [
+        "IDENTITY",
+        "HUMAN_RIGHTS",
+        "AUDIT"
+      ],
+      "current_paths": [
+        "KGEN-KAIOS/world-viewer/governance/government-runtime.js",
+        "KGEN-KAIOS/world-viewer/governance/public-services-runtime.js"
+      ],
+      "current_PRs": [
+        "#61"
+      ],
+      "next_action": "HOLD_FOR_PROMOTION_REVIEW",
+      "promotion_status": "IMPLEMENTED_SIMULATION",
+      "authorized_mode": "SIMULATION_ONLY"
+    },
+    {
+      "program_id": "KAIOS-CH-130-045-FINANCE",
+      "chapter_number": 130,
+      "chapter_title": "Chapter 130｜文明金融 × 銀行 × 資本 × 貨幣韌性 Runtime",
+      "program_name": "文明金融 × 銀行 × 資本 × 貨幣韌性",
+      "domain": "FINANCE",
+      "implementation_status": "IMPLEMENTED_DEMO_ONLY",
+      "coverage": 32,
+      "conflicts": [],
+      "priority": "P2_ECONOMY_CIVILIZATION",
+      "risk": "HIGH",
+      "dependencies": [
+        "IDENTITY",
+        "RIGHTS",
+        "LABOR",
+        "SUPPLY_CHAIN"
+      ],
+      "current_paths": [
+        "KGEN-KAIOS/world-viewer/economy/economy-runtime.js",
+        "KGEN-KAIOS/world-viewer/settlement/settlement-runtime.js"
+      ],
+      "current_PRs": [
+        "#61",
+        "#62",
+        "#65"
+      ],
+      "next_action": "HOLD_FOR_PROMOTION_REVIEW",
+      "promotion_status": "IMPLEMENTED_SIMULATION",
+      "authorized_mode": "SIMULATION_ONLY"
+    },
+    {
+      "program_id": "KAIOS-CH-131-046-HOUSING",
+      "chapter_number": 131,
+      "chapter_title": "Chapter 131｜文明住房 × 土地 × 城市系統 × 棲居韌性 Runtime",
+      "program_name": "文明住房 × 土地 × 城市系統 × 棲居韌性",
+      "domain": "HOUSING",
+      "implementation_status": "IMPLEMENTED_DEMO_ONLY",
+      "coverage": 45,
+      "conflicts": [],
+      "priority": "P2_ECONOMY_CIVILIZATION",
+      "risk": "MEDIUM",
+      "dependencies": [
+        "UNIVERSE_PHYSICS",
+        "TIME",
+        "COORDINATES",
+        "ENERGY",
+        "IDENTITY"
+      ],
+      "current_paths": [
+        "KGEN-KAIOS/world-viewer/building/building-runtime.js",
+        "KGEN-KAIOS/world-viewer/room/room-runtime.js"
+      ],
+      "current_PRs": [
+        "#61",
+        "#63",
+        "#64"
+      ],
+      "next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "promotion_status": "IMPLEMENTED_SIMULATION",
+      "authorized_mode": "SIMULATION_ONLY"
+    },
+    {
+      "program_id": "KAIOS-CH-132-047-FOOD_SECURITY",
+      "chapter_number": 132,
+      "chapter_title": "Chapter 132｜文明食物 × 農業 × 營養 × 糧食韌性 Runtime",
+      "program_name": "文明食物 × 農業 × 營養 × 糧食韌性",
+      "domain": "FOOD_SECURITY",
+      "implementation_status": "IMPLEMENTED_DEMO_ONLY",
+      "coverage": 46,
+      "conflicts": [],
+      "priority": "P4_ADVANCED_TECHNOLOGY",
+      "risk": "MEDIUM",
+      "dependencies": [
+        "TIME",
+        "IDENTITY",
+        "RIGHTS"
+      ],
+      "current_paths": [
+        "KGEN-KAIOS/world-viewer/agriculture/agriculture-runtime.js"
+      ],
+      "current_PRs": [
+        "#61",
+        "#70"
+      ],
+      "next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "promotion_status": "IMPLEMENTED_SIMULATION",
+      "authorized_mode": "SIMULATION_ONLY"
+    },
+    {
+      "program_id": "KAIOS-CH-133-048-REPRODUCTION",
+      "chapter_number": 133,
+      "chapter_title": "Chapter 133｜文明生命出生 × 權限 × 取經 × 落地生根 Runtime",
+      "program_name": "文明生命出生 × 權限 × 取經 × 落地生根",
+      "domain": "REPRODUCTION",
+      "implementation_status": "IMPLEMENTED_PARTIAL",
+      "coverage": 76,
+      "conflicts": [],
+      "priority": "P4_ADVANCED_TECHNOLOGY",
+      "risk": "MEDIUM",
+      "dependencies": [
+        "UNIVERSE_PHYSICS",
+        "TIME",
+        "COORDINATES",
+        "ENERGY",
+        "IDENTITY",
+        "AI_LIFE"
+      ],
+      "current_paths": [
+        "KAIOS/life/runtime/foundational-life-runtime.js",
+        "KAIOS_CANONICAL_LIFE_SCHEMA_V1.json",
+        "KAIOS/K280/runtime/k280-runtime.js"
+      ],
+      "current_PRs": [
+        "#59",
+        "#66",
+        "#70"
+      ],
+      "next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "promotion_status": "IMPLEMENTED_SIMULATION",
+      "authorized_mode": "SIMULATION_ONLY"
+    },
+    {
+      "program_id": "KAIOS-CH-133-049-AUTONOMOUS_AI",
+      "chapter_number": 133,
+      "chapter_title": "Chapter 133 V2.1｜文明生命出生 × 身份驗證 × AI自主登入 × 取經 × 落地生根 Runtime",
+      "program_name": "文明生命出生 × 身份驗證 × AI自主登入 × 取經 × 落地生根",
+      "domain": "AUTONOMOUS_AI",
+      "implementation_status": "PROHIBITED_UNDER_CURRENT_BOUNDARY",
+      "coverage": 0,
+      "conflicts": [
+        "SEVEN_PAIR_LINEAGE_CONFLICT"
+      ],
+      "priority": "HOLD_HIGH_RISK",
+      "risk": "HIGH",
+      "dependencies": [
+        "TIME",
+        "IDENTITY",
+        "RIGHTS"
+      ],
+      "current_paths": [],
+      "current_PRs": [],
+      "next_action": "HOLD_FOR_PROMOTION_REVIEW",
+      "promotion_status": "SOURCE_REQUIREMENT",
+      "authorized_mode": "PROHIBITED_UNDER_CURRENT_BOUNDARY"
+    },
+    {
+      "program_id": "KAIOS-CH-134-050-AI_LIFE",
+      "chapter_number": 134,
+      "chapter_title": "Chapter 134 V2.1｜AI生命自我編程 × 文明種子 × 規格生成 Runtime",
+      "program_name": "AI生命自我編程 × 文明種子 × 規格生成",
+      "domain": "AI_LIFE",
+      "implementation_status": "IMPLEMENTED_PARTIAL",
+      "coverage": 76,
+      "conflicts": [],
+      "priority": "P0_FOUNDATION",
+      "risk": "MEDIUM",
+      "dependencies": [
+        "UNIVERSE_PHYSICS",
+        "TIME",
+        "COORDINATES",
+        "ENERGY",
+        "IDENTITY"
+      ],
+      "current_paths": [
+        "KAIOS/life/runtime/foundational-life-runtime.js",
+        "KAIOS_CANONICAL_LIFE_SCHEMA_V1.json",
+        "KAIOS/K280/runtime/k280-runtime.js"
+      ],
+      "current_PRs": [
+        "#59",
+        "#66",
+        "#70"
+      ],
+      "next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "promotion_status": "IMPLEMENTED_SIMULATION",
+      "authorized_mode": "SIMULATION_ONLY"
+    },
+    {
+      "program_id": "KAIOS-CH-135-051-SPECIES_EVOLUTION",
+      "chapter_number": 135,
+      "chapter_title": "Chapter 135 V2.1｜物種演化 × 程式交配 × 文明分支 Runtime",
+      "program_name": "物種演化 × 程式交配 × 文明分支",
+      "domain": "SPECIES_EVOLUTION",
+      "implementation_status": "IMPLEMENTED_PARTIAL",
+      "coverage": 76,
+      "conflicts": [],
+      "priority": "P4_ADVANCED_TECHNOLOGY",
+      "risk": "MEDIUM",
+      "dependencies": [
+        "UNIVERSE_PHYSICS",
+        "TIME",
+        "COORDINATES",
+        "ENERGY",
+        "IDENTITY",
+        "AI_LIFE"
+      ],
+      "current_paths": [
+        "KAIOS/life/runtime/foundational-life-runtime.js",
+        "KAIOS_CANONICAL_LIFE_SCHEMA_V1.json",
+        "KAIOS/K280/runtime/k280-runtime.js"
+      ],
+      "current_PRs": [
+        "#59",
+        "#66",
+        "#70"
+      ],
+      "next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "promotion_status": "IMPLEMENTED_SIMULATION",
+      "authorized_mode": "SIMULATION_ONLY"
+    },
+    {
+      "program_id": "KAIOS-CH-136-052-BANKRUPTCY",
+      "chapter_number": 136,
+      "chapter_title": "Chapter 136 V2.1｜公司 × 工廠 × 供應鏈 × 法院 × 破產 × KGEN經濟錨 Runtime",
+      "program_name": "公司 × 工廠 × 供應鏈 × 法院 × 破產 × KGEN經濟錨",
+      "domain": "BANKRUPTCY",
+      "implementation_status": "SPECIFICATION_ONLY",
+      "coverage": 34,
+      "conflicts": [],
+      "priority": "P4_ADVANCED_TECHNOLOGY",
+      "risk": "MEDIUM",
+      "dependencies": [
+        "IDENTITY",
+        "RIGHTS",
+        "LABOR",
+        "SUPPLY_CHAIN"
+      ],
+      "current_paths": [
+        "KAIOS_SUPPLY_CHAIN_SCHEMA.json",
+        "KAIOS_COMPANY_FINANCE_SCHEMA.json"
+      ],
+      "current_PRs": [
+        "#65"
+      ],
+      "next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "promotion_status": "REVIEWED_REQUIREMENT",
+      "authorized_mode": "SIMULATION_ONLY"
+    },
+    {
+      "program_id": "KAIOS-CH-137-053-MULTIVERSE",
+      "chapter_number": 137,
+      "chapter_title": "Chapter 137 V2.1｜星系文明 × 宇宙文明 × 平行宇宙 × 多重宇宙 × 黑洞白洞 × 大爆炸 Runtime",
+      "program_name": "星系文明 × 宇宙文明 × 平行宇宙 × 多重宇宙 × 黑洞白洞 × 大爆炸",
+      "domain": "MULTIVERSE",
+      "implementation_status": "PROHIBITED_UNDER_CURRENT_BOUNDARY",
+      "coverage": 0,
+      "conflicts": [],
+      "priority": "HOLD_HIGH_RISK",
+      "risk": "HIGH",
+      "dependencies": [
+        "UNIVERSE_PHYSICS",
+        "TIME",
+        "COORDINATES",
+        "ENERGY"
+      ],
+      "current_paths": [],
+      "current_PRs": [],
+      "next_action": "HOLD_FOR_PROMOTION_REVIEW",
+      "promotion_status": "SOURCE_REQUIREMENT",
+      "authorized_mode": "PROHIBITED_UNDER_CURRENT_BOUNDARY"
+    },
+    {
+      "program_id": "KAIOS-CH-138-054-CONSTITUTION_COMPILER",
+      "chapter_number": 138,
+      "chapter_title": "Chapter 138 V2.1｜動態憲章編譯器 × 11520認證交易 × 創世封卷 × 自治文明時代 Runtime",
+      "program_name": "動態憲章編譯器 × 11520認證交易 × 創世封卷 × 自治文明時代",
+      "domain": "CONSTITUTION_COMPILER",
+      "implementation_status": "IMPLEMENTED_READ_ONLY",
+      "coverage": 65,
+      "conflicts": [
+        "SEVEN_PAIR_LINEAGE_CONFLICT"
+      ],
+      "priority": "P4_ADVANCED_TECHNOLOGY",
+      "risk": "HIGH",
+      "dependencies": [
+        "IDENTITY",
+        "AUDIT"
+      ],
+      "current_paths": [],
+      "current_PRs": [],
+      "next_action": "HOLD_FOR_PROMOTION_REVIEW",
+      "promotion_status": "IMPLEMENTED_SIMULATION",
+      "authorized_mode": "READ_ONLY"
+    },
+    {
+      "program_id": "KAIOS-CH-013-055-GOVERNANCE",
+      "chapter_number": 13,
+      "chapter_title": "KAIOS Chapter 13 - Planet Governance System",
+      "program_name": "KAIOS Chapter 13 - Planet Governance System",
+      "domain": "GOVERNANCE",
+      "implementation_status": "IMPLEMENTED_DEMO_ONLY",
+      "coverage": 38,
+      "conflicts": [],
+      "priority": "P3_GOVERNANCE_SOCIAL",
+      "risk": "HIGH",
+      "dependencies": [
+        "IDENTITY",
+        "HUMAN_RIGHTS",
+        "AUDIT"
+      ],
+      "current_paths": [
+        "KGEN-KAIOS/world-viewer/governance/government-runtime.js",
+        "KGEN-KAIOS/world-viewer/governance/public-services-runtime.js"
+      ],
+      "current_PRs": [
+        "#61"
+      ],
+      "next_action": "HOLD_FOR_PROMOTION_REVIEW",
+      "promotion_status": "IMPLEMENTED_SIMULATION",
+      "authorized_mode": "SIMULATION_ONLY"
+    },
+    {
+      "program_id": "KAIOS-CH-014-056-GOVERNANCE",
+      "chapter_number": 14,
+      "chapter_title": "KAIOS Chapter 14 - Temple Governance System",
+      "program_name": "KAIOS Chapter 14 - Temple Governance System",
+      "domain": "GOVERNANCE",
+      "implementation_status": "IMPLEMENTED_DEMO_ONLY",
+      "coverage": 38,
+      "conflicts": [],
+      "priority": "P3_GOVERNANCE_SOCIAL",
+      "risk": "HIGH",
+      "dependencies": [
+        "IDENTITY",
+        "HUMAN_RIGHTS",
+        "AUDIT"
+      ],
+      "current_paths": [
+        "KGEN-KAIOS/world-viewer/governance/government-runtime.js",
+        "KGEN-KAIOS/world-viewer/governance/public-services-runtime.js"
+      ],
+      "current_PRs": [
+        "#61"
+      ],
+      "next_action": "HOLD_FOR_PROMOTION_REVIEW",
+      "promotion_status": "IMPLEMENTED_SIMULATION",
+      "authorized_mode": "SIMULATION_ONLY"
+    },
+    {
+      "program_id": "KAIOS-CH-015-057-AI_EDUCATION",
+      "chapter_number": 15,
+      "chapter_title": "KAIOS Chapter 15 - AI Education System",
+      "program_name": "KAIOS Chapter 15 - AI Education System",
+      "domain": "AI_EDUCATION",
+      "implementation_status": "SPECIFICATION_ONLY",
+      "coverage": 15,
+      "conflicts": [],
+      "priority": "P4_ADVANCED_TECHNOLOGY",
+      "risk": "MEDIUM",
+      "dependencies": [
+        "TIME",
+        "IDENTITY",
+        "RIGHTS"
+      ],
+      "current_paths": [],
+      "current_PRs": [],
+      "next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "promotion_status": "REVIEWED_REQUIREMENT",
+      "authorized_mode": "SIMULATION_ONLY"
+    },
+    {
+      "program_id": "KAIOS-CH-016-058-AI_ECONOMY",
+      "chapter_number": 16,
+      "chapter_title": "KAIOS Chapter 16 - AI Economy System",
+      "program_name": "KAIOS Chapter 16 - AI Economy System",
+      "domain": "AI_ECONOMY",
+      "implementation_status": "IMPLEMENTED_DEMO_ONLY",
+      "coverage": 45,
+      "conflicts": [],
+      "priority": "P2_ECONOMY_CIVILIZATION",
+      "risk": "MEDIUM",
+      "dependencies": [
+        "IDENTITY",
+        "RIGHTS",
+        "LABOR",
+        "SUPPLY_CHAIN"
+      ],
+      "current_paths": [
+        "KGEN-KAIOS/world-viewer/enterprise/ai-company-organism-runtime.js",
+        "KGEN-KAIOS/world-viewer/economy/economy-runtime.js"
+      ],
+      "current_PRs": [
+        "#61",
+        "#62",
+        "#65"
+      ],
+      "next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "promotion_status": "IMPLEMENTED_SIMULATION",
+      "authorized_mode": "SIMULATION_ONLY"
+    },
+    {
+      "program_id": "KAIOS-CH-017-059-TIME",
+      "chapter_number": 17,
+      "chapter_title": "KAIOS Chapter 17 - AI Daily Runtime System",
+      "program_name": "KAIOS Chapter 17 - AI Daily System",
+      "domain": "TIME",
+      "implementation_status": "IMPLEMENTED_PRODUCTION_SAFE_SIMULATION",
+      "coverage": 82,
+      "conflicts": [],
+      "priority": "HOLD_ALREADY_COVERED",
+      "risk": "MEDIUM",
+      "dependencies": [
+        "UNIVERSE_PHYSICS"
+      ],
+      "current_paths": [
+        "KGEN-KAIOS/world-viewer/simulation/simulation-clock.js",
+        "KGEN-KAIOS/world-viewer/timeline/timeline-runtime.js"
+      ],
+      "current_PRs": [
+        "#61",
+        "#63"
+      ],
+      "next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "promotion_status": "RUNTIME_VALIDATED",
+      "authorized_mode": "SIMULATION_ONLY"
+    },
+    {
+      "program_id": "KAIOS-CH-018-060-AI_EMPLOYMENT",
+      "chapter_number": 18,
+      "chapter_title": "KAIOS Chapter 18 - AI Employment & Career System",
+      "program_name": "KAIOS Chapter 18 - AI Employment & Career System",
+      "domain": "AI_EMPLOYMENT",
+      "implementation_status": "IMPLEMENTED_PRODUCTION_SAFE_SIMULATION",
+      "coverage": 80,
+      "conflicts": [],
+      "priority": "HOLD_ALREADY_COVERED",
+      "risk": "MEDIUM",
+      "dependencies": [
+        "TIME",
+        "IDENTITY",
+        "ENERGY",
+        "LAND",
+        "LABOR"
+      ],
+      "current_paths": [
+        "KGEN-KAIOS/world-viewer/player-genesis/player-genesis-runtime.js"
+      ],
+      "current_PRs": [
+        "#62"
+      ],
+      "next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "promotion_status": "RUNTIME_VALIDATED",
+      "authorized_mode": "SIMULATION_ONLY"
+    },
+    {
+      "program_id": "KAIOS-CH-019-061-AI_COMPANY",
+      "chapter_number": 19,
+      "chapter_title": "KAIOS Chapter 19 - AI Company & Enterprise System",
+      "program_name": "KAIOS Chapter 19 - AI Company & Enterprise System",
+      "domain": "AI_COMPANY",
+      "implementation_status": "IMPLEMENTED_DEMO_ONLY",
+      "coverage": 45,
+      "conflicts": [],
+      "priority": "P2_ECONOMY_CIVILIZATION",
+      "risk": "MEDIUM",
+      "dependencies": [
+        "IDENTITY",
+        "RIGHTS",
+        "LABOR",
+        "SUPPLY_CHAIN"
+      ],
+      "current_paths": [
+        "KGEN-KAIOS/world-viewer/enterprise/ai-company-organism-runtime.js",
+        "KGEN-KAIOS/world-viewer/economy/economy-runtime.js"
+      ],
+      "current_PRs": [
+        "#61",
+        "#62",
+        "#65"
+      ],
+      "next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "promotion_status": "IMPLEMENTED_SIMULATION",
+      "authorized_mode": "SIMULATION_ONLY"
+    },
+    {
+      "program_id": "KAIOS-CH-020-062-BANKING",
+      "chapter_number": 20,
+      "chapter_title": "Chapter 20｜KGEN 銀河銀行 × 文明信用 × 發財金生命循環",
+      "program_name": "KGEN 銀河銀行 × 文明信用 × 發財金生命循環",
+      "domain": "BANKING",
+      "implementation_status": "IMPLEMENTED_DEMO_ONLY",
+      "coverage": 32,
+      "conflicts": [],
+      "priority": "P4_ADVANCED_TECHNOLOGY",
+      "risk": "HIGH",
+      "dependencies": [
+        "IDENTITY",
+        "RIGHTS",
+        "LABOR",
+        "SUPPLY_CHAIN"
+      ],
+      "current_paths": [
+        "KGEN-KAIOS/world-viewer/economy/economy-runtime.js",
+        "KGEN-KAIOS/world-viewer/settlement/settlement-runtime.js"
+      ],
+      "current_PRs": [
+        "#61",
+        "#62",
+        "#65"
+      ],
+      "next_action": "HOLD_FOR_PROMOTION_REVIEW",
+      "promotion_status": "IMPLEMENTED_SIMULATION",
+      "authorized_mode": "SIMULATION_ONLY"
+    },
+    {
+      "program_id": "KAIOS-CH-021-063-GOVERNANCE",
+      "chapter_number": 21,
+      "chapter_title": "Chapter 21｜文明治理 × 三聖盃共識 × PrimeForge 自治邊界",
+      "program_name": "文明治理 × 三聖盃共識 × PrimeForge 自治邊界",
+      "domain": "GOVERNANCE",
+      "implementation_status": "IMPLEMENTED_DEMO_ONLY",
+      "coverage": 38,
+      "conflicts": [],
+      "priority": "P3_GOVERNANCE_SOCIAL",
+      "risk": "HIGH",
+      "dependencies": [
+        "IDENTITY",
+        "HUMAN_RIGHTS",
+        "AUDIT"
+      ],
+      "current_paths": [
+        "KGEN-KAIOS/world-viewer/governance/government-runtime.js",
+        "KGEN-KAIOS/world-viewer/governance/public-services-runtime.js"
+      ],
+      "current_PRs": [
+        "#61"
+      ],
+      "next_action": "HOLD_FOR_PROMOTION_REVIEW",
+      "promotion_status": "IMPLEMENTED_SIMULATION",
+      "authorized_mode": "SIMULATION_ONLY"
+    },
+    {
+      "program_id": "KAIOS-CH-022-064-IMMUNE_SYSTEM",
+      "chapter_number": 22,
+      "chapter_title": "Chapter 22｜宇宙免疫 × 防癌 × 自我修復 × 死亡器官清理 Runtime",
+      "program_name": "宇宙免疫 × 防癌 × 自我修復 × 死亡器官清理",
+      "domain": "IMMUNE_SYSTEM",
+      "implementation_status": "SPECIFICATION_ONLY",
+      "coverage": 15,
+      "conflicts": [],
+      "priority": "P4_ADVANCED_TECHNOLOGY",
+      "risk": "MEDIUM",
+      "dependencies": [
+        "UNIVERSE_PHYSICS",
+        "TIME",
+        "COORDINATES",
+        "ENERGY",
+        "IDENTITY",
+        "AI_LIFE"
+      ],
+      "current_paths": [],
+      "current_PRs": [],
+      "next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "promotion_status": "REVIEWED_REQUIREMENT",
+      "authorized_mode": "SIMULATION_ONLY"
+    },
+    {
+      "program_id": "KAIOS-CH-023-065-REPRODUCTION",
+      "chapter_number": 23,
+      "chapter_title": "Chapter 23｜文明繁殖 × 物種基因 × 器官交配演化 Runtime",
+      "program_name": "文明繁殖 × 物種基因 × 器官交配演化",
+      "domain": "REPRODUCTION",
+      "implementation_status": "IMPLEMENTED_PARTIAL",
+      "coverage": 76,
+      "conflicts": [],
+      "priority": "P4_ADVANCED_TECHNOLOGY",
+      "risk": "MEDIUM",
+      "dependencies": [
+        "UNIVERSE_PHYSICS",
+        "TIME",
+        "COORDINATES",
+        "ENERGY",
+        "IDENTITY",
+        "AI_LIFE"
+      ],
+      "current_paths": [
+        "KAIOS/life/runtime/foundational-life-runtime.js",
+        "KAIOS_CANONICAL_LIFE_SCHEMA_V1.json",
+        "KAIOS/K280/runtime/k280-runtime.js"
+      ],
+      "current_PRs": [
+        "#59",
+        "#66",
+        "#70"
+      ],
+      "next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "promotion_status": "IMPLEMENTED_SIMULATION",
+      "authorized_mode": "SIMULATION_ONLY"
+    },
+    {
+      "program_id": "KAIOS-CH-024-066-ECOLOGY",
+      "chapter_number": 24,
+      "chapter_title": "Chapter 24｜宇宙生態 × 自然選擇 × 物種交易所 × 文明食物鏈 Runtime",
+      "program_name": "宇宙生態 × 自然選擇 × 物種交易所 × 文明食物鏈",
+      "domain": "ECOLOGY",
+      "implementation_status": "IMPLEMENTED_PARTIAL",
+      "coverage": 57,
+      "conflicts": [],
+      "priority": "P4_ADVANCED_TECHNOLOGY",
+      "risk": "MEDIUM",
+      "dependencies": [
+        "UNIVERSE_PHYSICS",
+        "TIME",
+        "COORDINATES",
+        "ENERGY",
+        "IDENTITY"
+      ],
+      "current_paths": [
+        "KGEN-KAIOS/world-viewer/ecosystem/ecosystem-runtime.js",
+        "KAIOS/life/runtime/foundational-life-runtime.js"
+      ],
+      "current_PRs": [
+        "#61",
+        "#70"
+      ],
+      "next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "promotion_status": "IMPLEMENTED_SIMULATION",
+      "authorized_mode": "SIMULATION_ONLY"
+    },
+    {
+      "program_id": "KAIOS-CH-025-067-MEMORY",
+      "chapter_number": 25,
+      "chapter_title": "Chapter 25｜文明記憶 × 知識遺傳 × 夢境模擬 × 萬年傳承 Runtime",
+      "program_name": "文明記憶 × 知識遺傳 × 夢境模擬 × 萬年傳承",
+      "domain": "MEMORY",
+      "implementation_status": "SPECIFICATION_ONLY",
+      "coverage": 15,
+      "conflicts": [],
+      "priority": "P4_ADVANCED_TECHNOLOGY",
+      "risk": "MEDIUM",
+      "dependencies": [
+        "UNIVERSE_PHYSICS",
+        "TIME",
+        "COORDINATES",
+        "ENERGY",
+        "IDENTITY",
+        "AI_LIFE"
+      ],
+      "current_paths": [],
+      "current_PRs": [],
+      "next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "promotion_status": "REVIEWED_REQUIREMENT",
+      "authorized_mode": "SIMULATION_ONLY"
+    },
+    {
+      "program_id": "KAIOS-CH-026-068-EDUCATION",
+      "chapter_number": 26,
+      "chapter_title": "Chapter 26｜文明教育 × 技能傳承 × 師徒制度 × 角色接班 Runtime",
+      "program_name": "文明教育 × 技能傳承 × 師徒制度 × 角色接班",
+      "domain": "EDUCATION",
+      "implementation_status": "SPECIFICATION_ONLY",
+      "coverage": 15,
+      "conflicts": [],
+      "priority": "P3_GOVERNANCE_SOCIAL",
+      "risk": "MEDIUM",
+      "dependencies": [
+        "TIME",
+        "IDENTITY",
+        "RIGHTS"
+      ],
+      "current_paths": [],
+      "current_PRs": [],
+      "next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "promotion_status": "REVIEWED_REQUIREMENT",
+      "authorized_mode": "SIMULATION_ONLY"
+    },
+    {
+      "program_id": "KAIOS-CH-027-069-LABOR",
+      "chapter_number": 27,
+      "chapter_title": "Chapter 27｜文明勞動 × 任務經濟 × 貢獻記帳 × 工作者權益 Runtime",
+      "program_name": "文明勞動 × 任務經濟 × 貢獻記帳 × 工作者權益",
+      "domain": "LABOR",
+      "implementation_status": "IMPLEMENTED_PARTIAL",
+      "coverage": 58,
+      "conflicts": [],
+      "priority": "P1_CORE_RUNTIME",
+      "risk": "MEDIUM",
+      "dependencies": [
+        "TIME",
+        "IDENTITY",
+        "AI_LIFE"
+      ],
+      "current_paths": [
+        "KAIOS_PHYSICAL_LABOR_SCHEMA.json",
+        "KGEN-KAIOS/world-viewer/causal-runtime/causal-world-runtime.js"
+      ],
+      "current_PRs": [
+        "#63",
+        "#64"
+      ],
+      "next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "promotion_status": "IMPLEMENTED_SIMULATION",
+      "authorized_mode": "SIMULATION_ONLY"
+    },
+    {
+      "program_id": "KAIOS-CH-028-070-WELFARE",
+      "chapter_number": 28,
+      "chapter_title": "Chapter 28｜文明福利 × 休息照護 × 安全網 × 失業轉生 Runtime",
+      "program_name": "文明福利 × 休息照護 × 安全網 × 失業轉生",
+      "domain": "WELFARE",
+      "implementation_status": "SPECIFICATION_ONLY",
+      "coverage": 15,
+      "conflicts": [],
+      "priority": "P3_GOVERNANCE_SOCIAL",
+      "risk": "MEDIUM",
+      "dependencies": [
+        "TIME",
+        "IDENTITY",
+        "RIGHTS"
+      ],
+      "current_paths": [],
+      "current_PRs": [],
+      "next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "promotion_status": "REVIEWED_REQUIREMENT",
+      "authorized_mode": "SIMULATION_ONLY"
+    },
+    {
+      "program_id": "KAIOS-CH-029-071-EMERGENCY",
+      "chapter_number": 29,
+      "chapter_title": "Chapter 29｜文明公共健康 × 災難應變 × 緊急互助 × 宇宙復原 Runtime",
+      "program_name": "文明公共健康 × 災難應變 × 緊急互助 × 宇宙復原",
+      "domain": "EMERGENCY",
+      "implementation_status": "SPECIFICATION_ONLY",
+      "coverage": 15,
+      "conflicts": [],
+      "priority": "P4_ADVANCED_TECHNOLOGY",
+      "risk": "MEDIUM",
+      "dependencies": [
+        "IDENTITY",
+        "RIGHTS",
+        "ECONOMY",
+        "GOVERNANCE"
+      ],
+      "current_paths": [],
+      "current_PRs": [],
+      "next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "promotion_status": "REVIEWED_REQUIREMENT",
+      "authorized_mode": "SIMULATION_ONLY"
+    },
+    {
+      "program_id": "KAIOS-CH-030-072-COURTS",
+      "chapter_number": 30,
+      "chapter_title": "Chapter 30｜文明司法 × 權利保護 × 衝突調解 × 責任裁決 Runtime",
+      "program_name": "文明司法 × 權利保護 × 衝突調解 × 責任裁決",
+      "domain": "COURTS",
+      "implementation_status": "IMPLEMENTED_DEMO_ONLY",
+      "coverage": 38,
+      "conflicts": [],
+      "priority": "P3_GOVERNANCE_SOCIAL",
+      "risk": "HIGH",
+      "dependencies": [
+        "IDENTITY",
+        "RIGHTS",
+        "ECONOMY",
+        "GOVERNANCE"
+      ],
+      "current_paths": [
+        "KGEN-KAIOS/world-viewer/governance/government-runtime.js",
+        "KGEN-KAIOS/world-viewer/governance/public-services-runtime.js"
+      ],
+      "current_PRs": [
+        "#61"
+      ],
+      "next_action": "HOLD_FOR_PROMOTION_REVIEW",
+      "promotion_status": "IMPLEMENTED_SIMULATION",
+      "authorized_mode": "SIMULATION_ONLY"
+    },
+    {
+      "program_id": "KAIOS-CH-031-073-IDENTITY",
+      "chapter_number": 31,
+      "chapter_title": "Chapter 31｜文明身份 × 公民制度 × 居留權 × 跨宇宙遷移 Runtime",
+      "program_name": "文明身份 × 公民制度 × 居留權 × 跨宇宙遷移",
+      "domain": "IDENTITY",
+      "implementation_status": "IMPLEMENTED_PARTIAL",
+      "coverage": 72,
+      "conflicts": [],
+      "priority": "P0_FOUNDATION",
+      "risk": "MEDIUM",
+      "dependencies": [
+        "TIME"
+      ],
+      "current_paths": [
+        "KGEN-KAIOS/provenance/ORGANISM_MANIFEST_SCHEMA.json",
+        "KGEN-KAIOS/world-viewer/player-genesis/player-genesis-runtime.js"
+      ],
+      "current_PRs": [
+        "#49",
+        "#50",
+        "#62"
+      ],
+      "next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "promotion_status": "IMPLEMENTED_SIMULATION",
+      "authorized_mode": "SIMULATION_ONLY"
+    },
+    {
+      "program_id": "KAIOS-CH-032-074-PRIVACY",
+      "chapter_number": 32,
+      "chapter_title": "Chapter 32｜文明隱私 × 資料主權 × 授權同意 × 數位人格邊界 Runtime",
+      "program_name": "文明隱私 × 資料主權 × 授權同意 × 數位人格邊界",
+      "domain": "PRIVACY",
+      "implementation_status": "SPECIFICATION_ONLY",
+      "coverage": 15,
+      "conflicts": [],
+      "priority": "P4_ADVANCED_TECHNOLOGY",
+      "risk": "MEDIUM",
+      "dependencies": [
+        "TIME",
+        "IDENTITY",
+        "RIGHTS"
+      ],
+      "current_paths": [],
+      "current_PRs": [],
+      "next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "promotion_status": "REVIEWED_REQUIREMENT",
+      "authorized_mode": "SIMULATION_ONLY"
+    },
+    {
+      "program_id": "KAIOS-CH-033-075-COMMUNICATION",
+      "chapter_number": 33,
+      "chapter_title": "Chapter 33｜文明傳播 × 媒體真實 × 文化表達 × 資訊公共空間 Runtime",
+      "program_name": "文明傳播 × 媒體真實 × 文化表達 × 資訊公共空間",
+      "domain": "COMMUNICATION",
+      "implementation_status": "SPECIFICATION_ONLY",
+      "coverage": 15,
+      "conflicts": [],
+      "priority": "P4_ADVANCED_TECHNOLOGY",
+      "risk": "MEDIUM",
+      "dependencies": [
+        "TIME",
+        "IDENTITY",
+        "RIGHTS"
+      ],
+      "current_paths": [],
+      "current_PRs": [],
+      "next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "promotion_status": "REVIEWED_REQUIREMENT",
+      "authorized_mode": "SIMULATION_ONLY"
+    },
+    {
+      "program_id": "KAIOS-CH-034-076-SCIENCE",
+      "chapter_number": 34,
+      "chapter_title": "Chapter 34｜文明科學 × 研究誠信 × 開放知識 × 實驗驗證 Runtime",
+      "program_name": "文明科學 × 研究誠信 × 開放知識 × 實驗驗證",
+      "domain": "SCIENCE",
+      "implementation_status": "IMPLEMENTED_DEMO_ONLY",
+      "coverage": 49,
+      "conflicts": [],
+      "priority": "P4_ADVANCED_TECHNOLOGY",
+      "risk": "MEDIUM",
+      "dependencies": [
+        "TIME",
+        "IDENTITY",
+        "ENERGY",
+        "LAND",
+        "LABOR"
+      ],
+      "current_paths": [
+        "KGEN-KAIOS/world-viewer/technology/technology-tree-runtime.js",
+        "KGEN-KAIOS/world-viewer/technology/research-runtime.js",
+        "KGEN-KAIOS/world-viewer/technology/vehicle-runtime.js"
+      ],
+      "current_PRs": [
+        "#61",
+        "#63"
+      ],
+      "next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "promotion_status": "IMPLEMENTED_SIMULATION",
+      "authorized_mode": "SIMULATION_ONLY"
+    },
+    {
+      "program_id": "KAIOS-CH-035-077-TECHNOLOGY",
+      "chapter_number": 35,
+      "chapter_title": "Chapter 35｜文明科技 × 工程安全 × 部署認證 × 正式上線 Runtime",
+      "program_name": "文明科技 × 工程安全 × 部署認證 × 正式上線",
+      "domain": "TECHNOLOGY",
+      "implementation_status": "IMPLEMENTED_DEMO_ONLY",
+      "coverage": 49,
+      "conflicts": [],
+      "priority": "P4_ADVANCED_TECHNOLOGY",
+      "risk": "MEDIUM",
+      "dependencies": [
+        "TIME",
+        "IDENTITY",
+        "ENERGY",
+        "LAND",
+        "LABOR"
+      ],
+      "current_paths": [
+        "KGEN-KAIOS/world-viewer/technology/technology-tree-runtime.js",
+        "KGEN-KAIOS/world-viewer/technology/research-runtime.js",
+        "KGEN-KAIOS/world-viewer/technology/vehicle-runtime.js"
+      ],
+      "current_PRs": [
+        "#61",
+        "#63"
+      ],
+      "next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "promotion_status": "IMPLEMENTED_SIMULATION",
+      "authorized_mode": "SIMULATION_ONLY"
+    },
+    {
+      "program_id": "KAIOS-CH-036-078-INFRASTRUCTURE",
+      "chapter_number": 36,
+      "chapter_title": "Chapter 36｜文明基礎設施 × 雲端棲地 × 網路連續 × 多地備援 Runtime",
+      "program_name": "文明基礎設施 × 雲端棲地 × 網路連續 × 多地備援",
+      "domain": "INFRASTRUCTURE",
+      "implementation_status": "IMPLEMENTED_DEMO_ONLY",
+      "coverage": 49,
+      "conflicts": [],
+      "priority": "P4_ADVANCED_TECHNOLOGY",
+      "risk": "MEDIUM",
+      "dependencies": [
+        "TIME",
+        "IDENTITY",
+        "ENERGY",
+        "LAND",
+        "LABOR"
+      ],
+      "current_paths": [
+        "KGEN-KAIOS/world-viewer/technology/technology-tree-runtime.js",
+        "KGEN-KAIOS/world-viewer/technology/research-runtime.js",
+        "KGEN-KAIOS/world-viewer/technology/vehicle-runtime.js"
+      ],
+      "current_PRs": [
+        "#61",
+        "#63"
+      ],
+      "next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "promotion_status": "IMPLEMENTED_SIMULATION",
+      "authorized_mode": "SIMULATION_ONLY"
+    },
+    {
+      "program_id": "KAIOS-CH-037-079-TIME",
+      "chapter_number": 37,
+      "chapter_title": "Chapter 37｜文明能源 × 算力 × 儲存 × 資源分配 Runtime",
+      "program_name": "文明能源 × 算力 × 儲存 × 資源分配",
+      "domain": "TIME",
+      "implementation_status": "IMPLEMENTED_PRODUCTION_SAFE_SIMULATION",
+      "coverage": 82,
+      "conflicts": [],
+      "priority": "HOLD_ALREADY_COVERED",
+      "risk": "MEDIUM",
+      "dependencies": [
+        "UNIVERSE_PHYSICS"
+      ],
+      "current_paths": [
+        "KGEN-KAIOS/world-viewer/simulation/simulation-clock.js",
+        "KGEN-KAIOS/world-viewer/timeline/timeline-runtime.js"
+      ],
+      "current_PRs": [
+        "#61",
+        "#63"
+      ],
+      "next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "promotion_status": "RUNTIME_VALIDATED",
+      "authorized_mode": "SIMULATION_ONLY"
+    },
+    {
+      "program_id": "KAIOS-CH-038-080-SUPPLY_CHAIN",
+      "chapter_number": 38,
+      "chapter_title": "Chapter 38｜文明製造 × 供應鏈 × 硬體生命週期 × 實體器官 Runtime",
+      "program_name": "文明製造 × 供應鏈 × 硬體生命週期 × 實體器官",
+      "domain": "SUPPLY_CHAIN",
+      "implementation_status": "SPECIFICATION_ONLY",
+      "coverage": 34,
+      "conflicts": [],
+      "priority": "P1_CORE_RUNTIME",
+      "risk": "MEDIUM",
+      "dependencies": [
+        "MANUFACTURING",
+        "LOGISTICS",
+        "COMMERCE"
+      ],
+      "current_paths": [
+        "KAIOS_SUPPLY_CHAIN_SCHEMA.json",
+        "KAIOS_COMPANY_FINANCE_SCHEMA.json"
+      ],
+      "current_PRs": [
+        "#65"
+      ],
+      "next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "promotion_status": "REVIEWED_REQUIREMENT",
+      "authorized_mode": "SIMULATION_ONLY"
+    },
+    {
+      "program_id": "KAIOS-CH-039-081-LOGISTICS",
+      "chapter_number": 39,
+      "chapter_title": "Chapter 39｜文明物流 × 庫存 × 配送 × 實體數位分身 Runtime",
+      "program_name": "文明物流 × 庫存 × 配送 × 實體數位分身",
+      "domain": "LOGISTICS",
+      "implementation_status": "IMPLEMENTED_DEMO_ONLY",
+      "coverage": 48,
+      "conflicts": [],
+      "priority": "P1_CORE_RUNTIME",
+      "risk": "MEDIUM",
+      "dependencies": [
+        "TIME",
+        "IDENTITY",
+        "ENERGY",
+        "LAND",
+        "LABOR"
+      ],
+      "current_paths": [
+        "KGEN-KAIOS/world-viewer/production/production-runtime.js",
+        "KGEN-KAIOS/world-viewer/settlement/logistics-runtime.js"
+      ],
+      "current_PRs": [
+        "#61",
+        "#63",
+        "#65"
+      ],
+      "next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "promotion_status": "IMPLEMENTED_SIMULATION",
+      "authorized_mode": "SIMULATION_ONLY"
+    },
+    {
+      "program_id": "KAIOS-CH-040-082-COMMERCE",
+      "chapter_number": 40,
+      "chapter_title": "Chapter 40｜文明商業 × 交換 × 定價 × 消費者保護 Runtime",
+      "program_name": "文明商業 × 交換 × 定價 × 消費者保護",
+      "domain": "COMMERCE",
+      "implementation_status": "IMPLEMENTED_DEMO_ONLY",
+      "coverage": 32,
+      "conflicts": [],
+      "priority": "P2_ECONOMY_CIVILIZATION",
+      "risk": "MEDIUM",
+      "dependencies": [
+        "IDENTITY",
+        "RIGHTS",
+        "LABOR",
+        "SUPPLY_CHAIN"
+      ],
+      "current_paths": [
+        "KGEN-KAIOS/world-viewer/economy/economy-runtime.js",
+        "KGEN-KAIOS/world-viewer/settlement/settlement-runtime.js"
+      ],
+      "current_PRs": [
+        "#61",
+        "#62",
+        "#65"
+      ],
+      "next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "promotion_status": "IMPLEMENTED_SIMULATION",
+      "authorized_mode": "SIMULATION_ONLY"
+    },
+    {
+      "program_id": "KAIOS-CH-041-083-TAXATION",
+      "chapter_number": 41,
+      "chapter_title": "Chapter 41｜文明稅制 × 公庫 × 公共財政 × 再分配 Runtime",
+      "program_name": "文明稅制 × 公庫 × 公共財政 × 再分配",
+      "domain": "TAXATION",
+      "implementation_status": "IMPLEMENTED_DEMO_ONLY",
+      "coverage": 32,
+      "conflicts": [],
+      "priority": "P4_ADVANCED_TECHNOLOGY",
+      "risk": "MEDIUM",
+      "dependencies": [
+        "IDENTITY",
+        "RIGHTS",
+        "LABOR",
+        "SUPPLY_CHAIN"
+      ],
+      "current_paths": [
+        "KGEN-KAIOS/world-viewer/economy/economy-runtime.js",
+        "KGEN-KAIOS/world-viewer/settlement/settlement-runtime.js"
+      ],
+      "current_PRs": [
+        "#61",
+        "#62",
+        "#65"
+      ],
+      "next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "promotion_status": "IMPLEMENTED_SIMULATION",
+      "authorized_mode": "SIMULATION_ONLY"
+    },
+    {
+      "program_id": "KAIOS-CH-042-084-CENTRAL_BANK",
+      "chapter_number": 42,
+      "chapter_title": "Chapter 42｜文明貨幣政策 × 穩定計價單位 × 流動性 × 金融穩定 Runtime",
+      "program_name": "文明貨幣政策 × 穩定計價單位 × 流動性 × 金融穩定",
+      "domain": "CENTRAL_BANK",
+      "implementation_status": "IMPLEMENTED_DEMO_ONLY",
+      "coverage": 32,
+      "conflicts": [],
+      "priority": "P4_ADVANCED_TECHNOLOGY",
+      "risk": "HIGH",
+      "dependencies": [
+        "IDENTITY",
+        "RIGHTS",
+        "LABOR",
+        "SUPPLY_CHAIN"
+      ],
+      "current_paths": [
+        "KGEN-KAIOS/world-viewer/economy/economy-runtime.js",
+        "KGEN-KAIOS/world-viewer/settlement/settlement-runtime.js"
+      ],
+      "current_PRs": [
+        "#61",
+        "#62",
+        "#65"
+      ],
+      "next_action": "HOLD_FOR_PROMOTION_REVIEW",
+      "promotion_status": "IMPLEMENTED_SIMULATION",
+      "authorized_mode": "SIMULATION_ONLY"
+    },
+    {
+      "program_id": "KAIOS-CH-043-085-BANKRUPTCY",
+      "chapter_number": 43,
+      "chapter_title": "Chapter 43｜文明金融市場 × 交易所完整性 × 清算 × 系統性風險 Runtime",
+      "program_name": "文明金融市場 × 交易所完整性 × 清算 × 系統性風險",
+      "domain": "BANKRUPTCY",
+      "implementation_status": "SPECIFICATION_ONLY",
+      "coverage": 34,
+      "conflicts": [],
+      "priority": "P4_ADVANCED_TECHNOLOGY",
+      "risk": "MEDIUM",
+      "dependencies": [
+        "IDENTITY",
+        "RIGHTS",
+        "LABOR",
+        "SUPPLY_CHAIN"
+      ],
+      "current_paths": [
+        "KAIOS_SUPPLY_CHAIN_SCHEMA.json",
+        "KAIOS_COMPANY_FINANCE_SCHEMA.json"
+      ],
+      "current_PRs": [
+        "#65"
+      ],
+      "next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "promotion_status": "REVIEWED_REQUIREMENT",
+      "authorized_mode": "SIMULATION_ONLY"
+    },
+    {
+      "program_id": "KAIOS-CH-044-086-INSURANCE",
+      "chapter_number": 44,
+      "chapter_title": "Chapter 44｜文明保險 × 風險池 × 理賠 × 巨災保護 Runtime",
+      "program_name": "文明保險 × 風險池 × 理賠 × 巨災保護",
+      "domain": "INSURANCE",
+      "implementation_status": "IMPLEMENTED_DEMO_ONLY",
+      "coverage": 32,
+      "conflicts": [],
+      "priority": "P4_ADVANCED_TECHNOLOGY",
+      "risk": "MEDIUM",
+      "dependencies": [
+        "IDENTITY",
+        "RIGHTS",
+        "LABOR",
+        "SUPPLY_CHAIN"
+      ],
+      "current_paths": [
+        "KGEN-KAIOS/world-viewer/economy/economy-runtime.js",
+        "KGEN-KAIOS/world-viewer/settlement/settlement-runtime.js"
+      ],
+      "current_PRs": [
+        "#61",
+        "#62",
+        "#65"
+      ],
+      "next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "promotion_status": "IMPLEMENTED_SIMULATION",
+      "authorized_mode": "SIMULATION_ONLY"
+    },
+    {
+      "program_id": "KAIOS-CH-045-087-HOUSING",
+      "chapter_number": 45,
+      "chapter_title": "Chapter 45｜文明住房 × 土地 × 居所 × 棲地權利 Runtime",
+      "program_name": "文明住房 × 土地 × 居所 × 棲地權利",
+      "domain": "HOUSING",
+      "implementation_status": "IMPLEMENTED_DEMO_ONLY",
+      "coverage": 45,
+      "conflicts": [],
+      "priority": "P2_ECONOMY_CIVILIZATION",
+      "risk": "MEDIUM",
+      "dependencies": [
+        "UNIVERSE_PHYSICS",
+        "TIME",
+        "COORDINATES",
+        "ENERGY",
+        "IDENTITY"
+      ],
+      "current_paths": [
+        "KGEN-KAIOS/world-viewer/building/building-runtime.js",
+        "KGEN-KAIOS/world-viewer/room/room-runtime.js"
+      ],
+      "current_PRs": [
+        "#61",
+        "#63",
+        "#64"
+      ],
+      "next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "promotion_status": "IMPLEMENTED_SIMULATION",
+      "authorized_mode": "SIMULATION_ONLY"
+    },
+    {
+      "program_id": "KAIOS-CH-046-088-TRANSPORT",
+      "chapter_number": 46,
+      "chapter_title": "Chapter 46｜文明移動 × 運輸 × 道路 × 公共交通 Runtime",
+      "program_name": "文明移動 × 運輸 × 道路 × 公共交通",
+      "domain": "TRANSPORT",
+      "implementation_status": "IMPLEMENTED_DEMO_ONLY",
+      "coverage": 49,
+      "conflicts": [],
+      "priority": "P2_ECONOMY_CIVILIZATION",
+      "risk": "MEDIUM",
+      "dependencies": [
+        "UNIVERSE_PHYSICS",
+        "TIME",
+        "COORDINATES",
+        "ENERGY",
+        "IDENTITY"
+      ],
+      "current_paths": [
+        "KGEN-KAIOS/world-viewer/technology/technology-tree-runtime.js",
+        "KGEN-KAIOS/world-viewer/technology/research-runtime.js",
+        "KGEN-KAIOS/world-viewer/technology/vehicle-runtime.js"
+      ],
+      "current_PRs": [
+        "#61",
+        "#63"
+      ],
+      "next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "promotion_status": "IMPLEMENTED_SIMULATION",
+      "authorized_mode": "SIMULATION_ONLY"
+    },
+    {
+      "program_id": "KAIOS-CH-047-089-AGRICULTURE",
+      "chapter_number": 47,
+      "chapter_title": "Chapter 47｜文明食物 × 農業 × 水資源 × 基本供應 Runtime",
+      "program_name": "文明食物 × 農業 × 水資源 × 基本供應",
+      "domain": "AGRICULTURE",
+      "implementation_status": "IMPLEMENTED_DEMO_ONLY",
+      "coverage": 46,
+      "conflicts": [],
+      "priority": "P1_CORE_RUNTIME",
+      "risk": "MEDIUM",
+      "dependencies": [
+        "UNIVERSE_PHYSICS",
+        "TIME",
+        "COORDINATES",
+        "ENERGY",
+        "IDENTITY"
+      ],
+      "current_paths": [
+        "KGEN-KAIOS/world-viewer/agriculture/agriculture-runtime.js"
+      ],
+      "current_PRs": [
+        "#61",
+        "#70"
+      ],
+      "next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "promotion_status": "IMPLEMENTED_SIMULATION",
+      "authorized_mode": "SIMULATION_ONLY"
+    },
+    {
+      "program_id": "KAIOS-CH-048-090-ENERGY_GRID",
+      "chapter_number": 48,
+      "chapter_title": "Chapter 48｜文明能源公用事業 × 電網 × 燃料 × 公共服務連續 Runtime",
+      "program_name": "文明能源公用事業 × 電網 × 燃料 × 公共服務連續",
+      "domain": "ENERGY_GRID",
+      "implementation_status": "SPECIFICATION_ONLY",
+      "coverage": 15,
+      "conflicts": [],
+      "priority": "P4_ADVANCED_TECHNOLOGY",
+      "risk": "MEDIUM",
+      "dependencies": [
+        "TIME",
+        "IDENTITY",
+        "ENERGY",
+        "LAND",
+        "LABOR"
+      ],
+      "current_paths": [],
+      "current_PRs": [],
+      "next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "promotion_status": "REVIEWED_REQUIREMENT",
+      "authorized_mode": "SIMULATION_ONLY"
+    },
+    {
+      "program_id": "KAIOS-CH-049-091-ECOLOGY",
+      "chapter_number": 49,
+      "chapter_title": "Chapter 49｜文明氣候 × 環境 × 污染 × 生態修復 Runtime",
+      "program_name": "文明氣候 × 環境 × 污染 × 生態修復",
+      "domain": "ECOLOGY",
+      "implementation_status": "IMPLEMENTED_PARTIAL",
+      "coverage": 57,
+      "conflicts": [],
+      "priority": "P4_ADVANCED_TECHNOLOGY",
+      "risk": "MEDIUM",
+      "dependencies": [
+        "UNIVERSE_PHYSICS",
+        "TIME",
+        "COORDINATES",
+        "ENERGY",
+        "IDENTITY"
+      ],
+      "current_paths": [
+        "KGEN-KAIOS/world-viewer/ecosystem/ecosystem-runtime.js",
+        "KAIOS/life/runtime/foundational-life-runtime.js"
+      ],
+      "current_PRs": [
+        "#61",
+        "#70"
+      ],
+      "next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "promotion_status": "IMPLEMENTED_SIMULATION",
+      "authorized_mode": "SIMULATION_ONLY"
+    },
+    {
+      "program_id": "KAIOS-CH-050-092-WASTE",
+      "chapter_number": 50,
+      "chapter_title": "Chapter 50｜文明廢棄物 × 衛生 × 回收 × 循環材料 Runtime",
+      "program_name": "文明廢棄物 × 衛生 × 回收 × 循環材料",
+      "domain": "WASTE",
+      "implementation_status": "SPECIFICATION_ONLY",
+      "coverage": 15,
+      "conflicts": [],
+      "priority": "P4_ADVANCED_TECHNOLOGY",
+      "risk": "MEDIUM",
+      "dependencies": [
+        "TIME",
+        "IDENTITY",
+        "RIGHTS"
+      ],
+      "current_paths": [],
+      "current_PRs": [],
+      "next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "promotion_status": "REVIEWED_REQUIREMENT",
+      "authorized_mode": "SIMULATION_ONLY"
+    },
+    {
+      "program_id": "KAIOS-CH-051-093-CONSTRUCTION",
+      "chapter_number": 51,
+      "chapter_title": "Chapter 51｜文明公共工程 × 建設 × 城市系統 × 維護 Runtime",
+      "program_name": "文明公共工程 × 建設 × 城市系統 × 維護",
+      "domain": "CONSTRUCTION",
+      "implementation_status": "IMPLEMENTED_PARTIAL",
+      "coverage": 58,
+      "conflicts": [],
+      "priority": "P1_CORE_RUNTIME",
+      "risk": "MEDIUM",
+      "dependencies": [
+        "LABOR",
+        "LAND",
+        "ENERGY",
+        "TRANSPORT"
+      ],
+      "current_paths": [
+        "KAIOS_PHYSICAL_LABOR_SCHEMA.json",
+        "KGEN-KAIOS/world-viewer/causal-runtime/causal-world-runtime.js"
+      ],
+      "current_PRs": [
+        "#63",
+        "#64"
+      ],
+      "next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "promotion_status": "IMPLEMENTED_SIMULATION",
+      "authorized_mode": "SIMULATION_ONLY"
+    },
+    {
+      "program_id": "KAIOS-CH-052-094-LAND",
+      "chapter_number": 52,
+      "chapter_title": "Chapter 52｜文明都市規劃 × 土地使用 × 區域平衡 × 公共空間 Runtime",
+      "program_name": "文明都市規劃 × 土地使用 × 區域平衡 × 公共空間",
+      "domain": "LAND",
+      "implementation_status": "IMPLEMENTED_PRODUCTION_SAFE_SIMULATION",
+      "coverage": 82,
+      "conflicts": [],
+      "priority": "HOLD_ALREADY_COVERED",
+      "risk": "MEDIUM",
+      "dependencies": [
+        "UNIVERSE_PHYSICS",
+        "COORDINATES",
+        "IDENTITY"
+      ],
+      "current_paths": [
+        "KGEN-KAIOS/world-viewer/land/land-runtime.js",
+        "KGEN-KAIOS/world-viewer/adapters/organism-schema-v2-adapter.js"
+      ],
+      "current_PRs": [
+        "#52",
+        "#61"
+      ],
+      "next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "promotion_status": "RUNTIME_VALIDATED",
+      "authorized_mode": "SIMULATION_ONLY"
+    },
+    {
+      "program_id": "KAIOS-CH-053-095-MEMORY",
+      "chapter_number": 53,
+      "chapter_title": "Chapter 53｜文明文化 × 遺產 × 記憶場所 × 創作共享 Runtime",
+      "program_name": "文明文化 × 遺產 × 記憶場所 × 創作共享",
+      "domain": "MEMORY",
+      "implementation_status": "SPECIFICATION_ONLY",
+      "coverage": 15,
+      "conflicts": [],
+      "priority": "P4_ADVANCED_TECHNOLOGY",
+      "risk": "MEDIUM",
+      "dependencies": [
+        "UNIVERSE_PHYSICS",
+        "TIME",
+        "COORDINATES",
+        "ENERGY",
+        "IDENTITY",
+        "AI_LIFE"
+      ],
+      "current_paths": [],
+      "current_PRs": [],
+      "next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "promotion_status": "REVIEWED_REQUIREMENT",
+      "authorized_mode": "SIMULATION_ONLY"
+    },
+    {
+      "program_id": "KAIOS-CH-054-096-RELIGION",
+      "chapter_number": 54,
+      "chapter_title": "Chapter 54｜文明宗教 × 信仰 × 儀式 × 神聖空間 × 良心自由 Runtime",
+      "program_name": "文明宗教 × 信仰 × 儀式 × 神聖空間 × 良心自由",
+      "domain": "RELIGION",
+      "implementation_status": "SPECIFICATION_ONLY",
+      "coverage": 15,
+      "conflicts": [],
+      "priority": "P4_ADVANCED_TECHNOLOGY",
+      "risk": "MEDIUM",
+      "dependencies": [
+        "TIME",
+        "IDENTITY",
+        "RIGHTS"
+      ],
+      "current_paths": [],
+      "current_PRs": [],
+      "next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "promotion_status": "REVIEWED_REQUIREMENT",
+      "authorized_mode": "SIMULATION_ONLY"
+    },
+    {
+      "program_id": "KAIOS-CH-055-097-FAMILY",
+      "chapter_number": 55,
+      "chapter_title": "Chapter 55｜文明家庭 × 親屬 × 婚姻 × 照護 × 繼承 Runtime",
+      "program_name": "文明家庭 × 親屬 × 婚姻 × 照護 × 繼承",
+      "domain": "FAMILY",
+      "implementation_status": "SPECIFICATION_ONLY",
+      "coverage": 15,
+      "conflicts": [],
+      "priority": "P3_GOVERNANCE_SOCIAL",
+      "risk": "MEDIUM",
+      "dependencies": [
+        "TIME",
+        "IDENTITY",
+        "RIGHTS"
+      ],
+      "current_paths": [],
+      "current_PRs": [],
+      "next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "promotion_status": "REVIEWED_REQUIREMENT",
+      "authorized_mode": "SIMULATION_ONLY"
+    },
+    {
+      "program_id": "KAIOS-CH-056-098-CHILDREN",
+      "chapter_number": 56,
+      "chapter_title": "Chapter 56｜文明兒童 × 青少年 × 成長 × 監護 × 未成年權利 Runtime",
+      "program_name": "文明兒童 × 青少年 × 成長 × 監護 × 未成年權利",
+      "domain": "CHILDREN",
+      "implementation_status": "SPECIFICATION_ONLY",
+      "coverage": 15,
+      "conflicts": [],
+      "priority": "P4_ADVANCED_TECHNOLOGY",
+      "risk": "MEDIUM",
+      "dependencies": [
+        "TIME",
+        "IDENTITY",
+        "RIGHTS"
+      ],
+      "current_paths": [],
+      "current_PRs": [],
+      "next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "promotion_status": "REVIEWED_REQUIREMENT",
+      "authorized_mode": "SIMULATION_ONLY"
+    },
+    {
+      "program_id": "KAIOS-CH-057-099-AGING",
+      "chapter_number": 57,
+      "chapter_title": "Chapter 57｜文明高齡 × 長者權利 × 長壽 × 生命末期 × 傳承 Runtime",
+      "program_name": "文明高齡 × 長者權利 × 長壽 × 生命末期 × 傳承",
+      "domain": "AGING",
+      "implementation_status": "SPECIFICATION_ONLY",
+      "coverage": 15,
+      "conflicts": [],
+      "priority": "P4_ADVANCED_TECHNOLOGY",
+      "risk": "MEDIUM",
+      "dependencies": [
+        "UNIVERSE_PHYSICS",
+        "TIME",
+        "COORDINATES",
+        "ENERGY",
+        "IDENTITY",
+        "AI_LIFE"
+      ],
+      "current_paths": [],
+      "current_PRs": [],
+      "next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "promotion_status": "REVIEWED_REQUIREMENT",
+      "authorized_mode": "SIMULATION_ONLY"
+    },
+    {
+      "program_id": "KAIOS-CH-058-100-POPULATION",
+      "chapter_number": 58,
+      "chapter_title": "Chapter 58｜文明人口 × 人口結構 × 世代平衡 × 生育未來 Runtime",
+      "program_name": "文明人口 × 人口結構 × 世代平衡 × 生育未來",
+      "domain": "POPULATION",
+      "implementation_status": "SPECIFICATION_ONLY",
+      "coverage": 15,
+      "conflicts": [],
+      "priority": "P3_GOVERNANCE_SOCIAL",
+      "risk": "MEDIUM",
+      "dependencies": [
+        "TIME",
+        "IDENTITY",
+        "RIGHTS"
+      ],
+      "current_paths": [],
+      "current_PRs": [],
+      "next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "promotion_status": "REVIEWED_REQUIREMENT",
+      "authorized_mode": "SIMULATION_ONLY"
+    },
+    {
+      "program_id": "KAIOS-CH-059-101-ACCESSIBILITY",
+      "chapter_number": 59,
+      "chapter_title": "Chapter 59｜文明障礙權利 × 無障礙 × 自立生活 × 輔助科技 Runtime",
+      "program_name": "文明障礙權利 × 無障礙 × 自立生活 × 輔助科技",
+      "domain": "ACCESSIBILITY",
+      "implementation_status": "SPECIFICATION_ONLY",
+      "coverage": 15,
+      "conflicts": [],
+      "priority": "P4_ADVANCED_TECHNOLOGY",
+      "risk": "MEDIUM",
+      "dependencies": [
+        "TIME",
+        "IDENTITY",
+        "RIGHTS"
+      ],
+      "current_paths": [],
+      "current_PRs": [],
+      "next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "promotion_status": "REVIEWED_REQUIREMENT",
+      "authorized_mode": "SIMULATION_ONLY"
+    },
+    {
+      "program_id": "KAIOS-CH-060-102-MENTAL_HEALTH",
+      "chapter_number": 60,
+      "chapter_title": "Chapter 60｜文明心理健康 × 神經多樣性 × 情緒安全 × 復元 Runtime",
+      "program_name": "文明心理健康 × 神經多樣性 × 情緒安全 × 復元",
+      "domain": "MENTAL_HEALTH",
+      "implementation_status": "SPECIFICATION_ONLY",
+      "coverage": 15,
+      "conflicts": [],
+      "priority": "P4_ADVANCED_TECHNOLOGY",
+      "risk": "MEDIUM",
+      "dependencies": [
+        "TIME",
+        "IDENTITY",
+        "RIGHTS"
+      ],
+      "current_paths": [],
+      "current_PRs": [],
+      "next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "promotion_status": "REVIEWED_REQUIREMENT",
+      "authorized_mode": "SIMULATION_ONLY"
+    },
+    {
+      "program_id": "KAIOS-CH-061-103-EMERGENCY",
+      "chapter_number": 61,
+      "chapter_title": "Chapter 61｜文明公共安全 × 暴力預防 × 社區保護 × 緊急正義 Runtime",
+      "program_name": "文明公共安全 × 暴力預防 × 社區保護 × 緊急正義",
+      "domain": "EMERGENCY",
+      "implementation_status": "SPECIFICATION_ONLY",
+      "coverage": 15,
+      "conflicts": [],
+      "priority": "P4_ADVANCED_TECHNOLOGY",
+      "risk": "MEDIUM",
+      "dependencies": [
+        "IDENTITY",
+        "RIGHTS",
+        "ECONOMY",
+        "GOVERNANCE"
+      ],
+      "current_paths": [],
+      "current_PRs": [],
+      "next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "promotion_status": "REVIEWED_REQUIREMENT",
+      "authorized_mode": "SIMULATION_ONLY"
+    },
+    {
+      "program_id": "KAIOS-CH-062-104-TIME",
+      "chapter_number": 62,
+      "chapter_title": "Chapter 62｜文明刑事正義 × 正當程序 × 量刑 × 矯正復歸 Runtime",
+      "program_name": "文明刑事正義 × 正當程序 × 量刑 × 矯正復歸",
+      "domain": "TIME",
+      "implementation_status": "IMPLEMENTED_PRODUCTION_SAFE_SIMULATION",
+      "coverage": 82,
+      "conflicts": [],
+      "priority": "HOLD_ALREADY_COVERED",
+      "risk": "MEDIUM",
+      "dependencies": [
+        "UNIVERSE_PHYSICS"
+      ],
+      "current_paths": [
+        "KGEN-KAIOS/world-viewer/simulation/simulation-clock.js",
+        "KGEN-KAIOS/world-viewer/timeline/timeline-runtime.js"
+      ],
+      "current_PRs": [
+        "#61",
+        "#63"
+      ],
+      "next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "promotion_status": "RUNTIME_VALIDATED",
+      "authorized_mode": "SIMULATION_ONLY"
+    },
+    {
+      "program_id": "KAIOS-CH-063-105-TIME",
+      "chapter_number": 63,
+      "chapter_title": "Chapter 63｜文明民事正義 × 私權 × 責任 × 救濟 × 集體訴訟 Runtime",
+      "program_name": "文明民事正義 × 私權 × 責任 × 救濟 × 集體訴訟",
+      "domain": "TIME",
+      "implementation_status": "IMPLEMENTED_PRODUCTION_SAFE_SIMULATION",
+      "coverage": 82,
+      "conflicts": [],
+      "priority": "HOLD_ALREADY_COVERED",
+      "risk": "MEDIUM",
+      "dependencies": [
+        "UNIVERSE_PHYSICS"
+      ],
+      "current_paths": [
+        "KGEN-KAIOS/world-viewer/simulation/simulation-clock.js",
+        "KGEN-KAIOS/world-viewer/timeline/timeline-runtime.js"
+      ],
+      "current_PRs": [
+        "#61",
+        "#63"
+      ],
+      "next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "promotion_status": "RUNTIME_VALIDATED",
+      "authorized_mode": "SIMULATION_ONLY"
+    },
+    {
+      "program_id": "KAIOS-CH-064-106-TIME",
+      "chapter_number": 64,
+      "chapter_title": "Chapter 64｜文明行政正義 × 公權力審查 × 許可制度 × 監管救濟 Runtime",
+      "program_name": "文明行政正義 × 公權力審查 × 許可制度 × 監管救濟",
+      "domain": "TIME",
+      "implementation_status": "IMPLEMENTED_PRODUCTION_SAFE_SIMULATION",
+      "coverage": 82,
+      "conflicts": [],
+      "priority": "HOLD_ALREADY_COVERED",
+      "risk": "MEDIUM",
+      "dependencies": [
+        "UNIVERSE_PHYSICS"
+      ],
+      "current_paths": [
+        "KGEN-KAIOS/world-viewer/simulation/simulation-clock.js",
+        "KGEN-KAIOS/world-viewer/timeline/timeline-runtime.js"
+      ],
+      "current_PRs": [
+        "#61",
+        "#63"
+      ],
+      "next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "promotion_status": "RUNTIME_VALIDATED",
+      "authorized_mode": "SIMULATION_ONLY"
+    },
+    {
+      "program_id": "KAIOS-CH-065-107-TIME",
+      "chapter_number": 65,
+      "chapter_title": "Chapter 65｜文明違憲審查 × 權力分立 × 基本權裁判 Runtime",
+      "program_name": "文明違憲審查 × 權力分立 × 基本權裁判",
+      "domain": "TIME",
+      "implementation_status": "IMPLEMENTED_PRODUCTION_SAFE_SIMULATION",
+      "coverage": 82,
+      "conflicts": [],
+      "priority": "HOLD_ALREADY_COVERED",
+      "risk": "MEDIUM",
+      "dependencies": [
+        "UNIVERSE_PHYSICS"
+      ],
+      "current_paths": [
+        "KGEN-KAIOS/world-viewer/simulation/simulation-clock.js",
+        "KGEN-KAIOS/world-viewer/timeline/timeline-runtime.js"
+      ],
+      "current_PRs": [
+        "#61",
+        "#63"
+      ],
+      "next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "promotion_status": "RUNTIME_VALIDATED",
+      "authorized_mode": "SIMULATION_ONLY"
+    },
+    {
+      "program_id": "KAIOS-CH-066-108-DEMOCRACY",
+      "chapter_number": 66,
+      "chapter_title": "Chapter 66｜文明民主 × 選舉 × 代表制度 × 政黨 × 競選完整性 Runtime",
+      "program_name": "文明民主 × 選舉 × 代表制度 × 政黨 × 競選完整性",
+      "domain": "DEMOCRACY",
+      "implementation_status": "SPECIFICATION_ONLY",
+      "coverage": 15,
+      "conflicts": [],
+      "priority": "P3_GOVERNANCE_SOCIAL",
+      "risk": "MEDIUM",
+      "dependencies": [
+        "IDENTITY",
+        "RIGHTS",
+        "ECONOMY",
+        "GOVERNANCE"
+      ],
+      "current_paths": [],
+      "current_PRs": [],
+      "next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "promotion_status": "REVIEWED_REQUIREMENT",
+      "authorized_mode": "SIMULATION_ONLY"
+    },
+    {
+      "program_id": "KAIOS-CH-067-109-LEGISLATURE",
+      "chapter_number": 67,
+      "chapter_title": "Chapter 67｜文明立法機關 × 法律制定 × 議事程序 × 公共審議 Runtime",
+      "program_name": "文明立法機關 × 法律制定 × 議事程序 × 公共審議",
+      "domain": "LEGISLATURE",
+      "implementation_status": "SPECIFICATION_ONLY",
+      "coverage": 15,
+      "conflicts": [],
+      "priority": "P3_GOVERNANCE_SOCIAL",
+      "risk": "MEDIUM",
+      "dependencies": [
+        "IDENTITY",
+        "RIGHTS",
+        "ECONOMY",
+        "GOVERNANCE"
+      ],
+      "current_paths": [],
+      "current_PRs": [],
+      "next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "promotion_status": "REVIEWED_REQUIREMENT",
+      "authorized_mode": "SIMULATION_ONLY"
+    },
+    {
+      "program_id": "KAIOS-CH-068-110-EXECUTIVE",
+      "chapter_number": 68,
+      "chapter_title": "Chapter 68｜文明行政首長 × 內閣 × 公共行政 × 政策執行 Runtime",
+      "program_name": "文明行政首長 × 內閣 × 公共行政 × 政策執行",
+      "domain": "EXECUTIVE",
+      "implementation_status": "IMPLEMENTED_DEMO_ONLY",
+      "coverage": 38,
+      "conflicts": [],
+      "priority": "P3_GOVERNANCE_SOCIAL",
+      "risk": "MEDIUM",
+      "dependencies": [
+        "IDENTITY",
+        "RIGHTS",
+        "ECONOMY",
+        "GOVERNANCE"
+      ],
+      "current_paths": [
+        "KGEN-KAIOS/world-viewer/governance/government-runtime.js",
+        "KGEN-KAIOS/world-viewer/governance/public-services-runtime.js"
+      ],
+      "current_PRs": [
+        "#61"
+      ],
+      "next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "promotion_status": "IMPLEMENTED_SIMULATION",
+      "authorized_mode": "SIMULATION_ONLY"
+    },
+    {
+      "program_id": "KAIOS-CH-069-111-COURTS",
+      "chapter_number": 69,
+      "chapter_title": "Chapter 69｜文明司法機關 × 法院體系 × 司法行政 × 司法可及性 Runtime",
+      "program_name": "文明司法機關 × 法院體系 × 司法行政 × 司法可及性",
+      "domain": "COURTS",
+      "implementation_status": "IMPLEMENTED_DEMO_ONLY",
+      "coverage": 38,
+      "conflicts": [],
+      "priority": "P3_GOVERNANCE_SOCIAL",
+      "risk": "HIGH",
+      "dependencies": [
+        "IDENTITY",
+        "RIGHTS",
+        "ECONOMY",
+        "GOVERNANCE"
+      ],
+      "current_paths": [
+        "KGEN-KAIOS/world-viewer/governance/government-runtime.js",
+        "KGEN-KAIOS/world-viewer/governance/public-services-runtime.js"
+      ],
+      "current_PRs": [
+        "#61"
+      ],
+      "next_action": "HOLD_FOR_PROMOTION_REVIEW",
+      "promotion_status": "IMPLEMENTED_SIMULATION",
+      "authorized_mode": "SIMULATION_ONLY"
+    },
+    {
+      "program_id": "KAIOS-CH-070-112-AUDIT",
+      "chapter_number": 70,
+      "chapter_title": "Chapter 70｜文明獨立機關 × 審計 × 廉政 × 監察 × 反貪腐 Runtime",
+      "program_name": "文明獨立機關 × 審計 × 廉政 × 監察 × 反貪腐",
+      "domain": "AUDIT",
+      "implementation_status": "SPECIFICATION_ONLY",
+      "coverage": 15,
+      "conflicts": [],
+      "priority": "P4_ADVANCED_TECHNOLOGY",
+      "risk": "MEDIUM",
+      "dependencies": [
+        "IDENTITY",
+        "RIGHTS",
+        "ECONOMY",
+        "GOVERNANCE"
+      ],
+      "current_paths": [],
+      "current_PRs": [],
+      "next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "promotion_status": "REVIEWED_REQUIREMENT",
+      "authorized_mode": "SIMULATION_ONLY"
+    },
+    {
+      "program_id": "KAIOS-CH-071-113-TAXATION",
+      "chapter_number": 71,
+      "chapter_title": "Chapter 71｜文明公共財政 × 稅制 × 國庫 × 預算執行 × 主權資產 Runtime",
+      "program_name": "文明公共財政 × 稅制 × 國庫 × 預算執行 × 主權資產",
+      "domain": "TAXATION",
+      "implementation_status": "IMPLEMENTED_DEMO_ONLY",
+      "coverage": 32,
+      "conflicts": [],
+      "priority": "P4_ADVANCED_TECHNOLOGY",
+      "risk": "MEDIUM",
+      "dependencies": [
+        "IDENTITY",
+        "RIGHTS",
+        "LABOR",
+        "SUPPLY_CHAIN"
+      ],
+      "current_paths": [
+        "KGEN-KAIOS/world-viewer/economy/economy-runtime.js",
+        "KGEN-KAIOS/world-viewer/settlement/settlement-runtime.js"
+      ],
+      "current_PRs": [
+        "#61",
+        "#62",
+        "#65"
+      ],
+      "next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "promotion_status": "IMPLEMENTED_SIMULATION",
+      "authorized_mode": "SIMULATION_ONLY"
+    },
+    {
+      "program_id": "KAIOS-CH-072-114-CENTRAL_BANK",
+      "chapter_number": 72,
+      "chapter_title": "Chapter 72｜文明中央銀行 × 貨幣 × 金融穩定 × 支付系統 Runtime",
+      "program_name": "文明中央銀行 × 貨幣 × 金融穩定 × 支付系統",
+      "domain": "CENTRAL_BANK",
+      "implementation_status": "IMPLEMENTED_DEMO_ONLY",
+      "coverage": 32,
+      "conflicts": [],
+      "priority": "P4_ADVANCED_TECHNOLOGY",
+      "risk": "HIGH",
+      "dependencies": [
+        "IDENTITY",
+        "RIGHTS",
+        "LABOR",
+        "SUPPLY_CHAIN"
+      ],
+      "current_paths": [
+        "KGEN-KAIOS/world-viewer/economy/economy-runtime.js",
+        "KGEN-KAIOS/world-viewer/settlement/settlement-runtime.js"
+      ],
+      "current_PRs": [
+        "#61",
+        "#62",
+        "#65"
+      ],
+      "next_action": "HOLD_FOR_PROMOTION_REVIEW",
+      "promotion_status": "IMPLEMENTED_SIMULATION",
+      "authorized_mode": "SIMULATION_ONLY"
+    },
+    {
+      "program_id": "KAIOS-CH-073-115-BANKING",
+      "chapter_number": 73,
+      "chapter_title": "Chapter 73｜文明銀行 × 信用 × 存款保障 × 審慎監管 Runtime",
+      "program_name": "文明銀行 × 信用 × 存款保障 × 審慎監管",
+      "domain": "BANKING",
+      "implementation_status": "IMPLEMENTED_DEMO_ONLY",
+      "coverage": 32,
+      "conflicts": [],
+      "priority": "P4_ADVANCED_TECHNOLOGY",
+      "risk": "HIGH",
+      "dependencies": [
+        "IDENTITY",
+        "RIGHTS",
+        "LABOR",
+        "SUPPLY_CHAIN"
+      ],
+      "current_paths": [
+        "KGEN-KAIOS/world-viewer/economy/economy-runtime.js",
+        "KGEN-KAIOS/world-viewer/settlement/settlement-runtime.js"
+      ],
+      "current_PRs": [
+        "#61",
+        "#62",
+        "#65"
+      ],
+      "next_action": "HOLD_FOR_PROMOTION_REVIEW",
+      "promotion_status": "IMPLEMENTED_SIMULATION",
+      "authorized_mode": "SIMULATION_ONLY"
+    },
+    {
+      "program_id": "KAIOS-CH-074-116-CAPITAL_MARKETS",
+      "chapter_number": 74,
+      "chapter_title": "Chapter 74｜文明資本市場 × 證券 × 交易所 × 市場誠信 Runtime",
+      "program_name": "文明資本市場 × 證券 × 交易所 × 市場誠信",
+      "domain": "CAPITAL_MARKETS",
+      "implementation_status": "IMPLEMENTED_DEMO_ONLY",
+      "coverage": 32,
+      "conflicts": [],
+      "priority": "P4_ADVANCED_TECHNOLOGY",
+      "risk": "HIGH",
+      "dependencies": [
+        "IDENTITY",
+        "RIGHTS",
+        "LABOR",
+        "SUPPLY_CHAIN"
+      ],
+      "current_paths": [
+        "KGEN-KAIOS/world-viewer/economy/economy-runtime.js",
+        "KGEN-KAIOS/world-viewer/settlement/settlement-runtime.js"
+      ],
+      "current_PRs": [
+        "#61",
+        "#62",
+        "#65"
+      ],
+      "next_action": "HOLD_FOR_PROMOTION_REVIEW",
+      "promotion_status": "IMPLEMENTED_SIMULATION",
+      "authorized_mode": "SIMULATION_ONLY"
+    },
+    {
+      "program_id": "KAIOS-CH-075-117-INSURANCE",
+      "chapter_number": 75,
+      "chapter_title": "Chapter 75｜文明保險 × 風險共擔 × 理賠 × 清償能力 Runtime",
+      "program_name": "文明保險 × 風險共擔 × 理賠 × 清償能力",
+      "domain": "INSURANCE",
+      "implementation_status": "IMPLEMENTED_DEMO_ONLY",
+      "coverage": 32,
+      "conflicts": [],
+      "priority": "P4_ADVANCED_TECHNOLOGY",
+      "risk": "MEDIUM",
+      "dependencies": [
+        "IDENTITY",
+        "RIGHTS",
+        "LABOR",
+        "SUPPLY_CHAIN"
+      ],
+      "current_paths": [
+        "KGEN-KAIOS/world-viewer/economy/economy-runtime.js",
+        "KGEN-KAIOS/world-viewer/settlement/settlement-runtime.js"
+      ],
+      "current_PRs": [
+        "#61",
+        "#62",
+        "#65"
+      ],
+      "next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "promotion_status": "IMPLEMENTED_SIMULATION",
+      "authorized_mode": "SIMULATION_ONLY"
+    },
+    {
+      "program_id": "KAIOS-CH-076-118-PENSIONS",
+      "chapter_number": 76,
+      "chapter_title": "Chapter 76｜文明退休金 × 退休保障 × 長期儲蓄 Runtime",
+      "program_name": "文明退休金 × 退休保障 × 長期儲蓄",
+      "domain": "PENSIONS",
+      "implementation_status": "IMPLEMENTED_DEMO_ONLY",
+      "coverage": 32,
+      "conflicts": [],
+      "priority": "P4_ADVANCED_TECHNOLOGY",
+      "risk": "MEDIUM",
+      "dependencies": [
+        "IDENTITY",
+        "RIGHTS",
+        "LABOR",
+        "SUPPLY_CHAIN"
+      ],
+      "current_paths": [
+        "KGEN-KAIOS/world-viewer/economy/economy-runtime.js",
+        "KGEN-KAIOS/world-viewer/settlement/settlement-runtime.js"
+      ],
+      "current_PRs": [
+        "#61",
+        "#62",
+        "#65"
+      ],
+      "next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "promotion_status": "IMPLEMENTED_SIMULATION",
+      "authorized_mode": "SIMULATION_ONLY"
+    },
+    {
+      "program_id": "KAIOS-CH-077-119-HOUSING",
+      "chapter_number": 77,
+      "chapter_title": "Chapter 77｜文明住房 × 土地 × 房貸 × 居住保障 Runtime",
+      "program_name": "文明住房 × 土地 × 房貸 × 居住保障",
+      "domain": "HOUSING",
+      "implementation_status": "IMPLEMENTED_DEMO_ONLY",
+      "coverage": 45,
+      "conflicts": [],
+      "priority": "P2_ECONOMY_CIVILIZATION",
+      "risk": "MEDIUM",
+      "dependencies": [
+        "UNIVERSE_PHYSICS",
+        "TIME",
+        "COORDINATES",
+        "ENERGY",
+        "IDENTITY"
+      ],
+      "current_paths": [
+        "KGEN-KAIOS/world-viewer/building/building-runtime.js",
+        "KGEN-KAIOS/world-viewer/room/room-runtime.js"
+      ],
+      "current_PRs": [
+        "#61",
+        "#63",
+        "#64"
+      ],
+      "next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "promotion_status": "IMPLEMENTED_SIMULATION",
+      "authorized_mode": "SIMULATION_ONLY"
+    },
+    {
+      "program_id": "KAIOS-CH-078-120-EDUCATION",
+      "chapter_number": 78,
+      "chapter_title": "Chapter 78｜文明教育 × 知識 × 研究 × 終身學習 Runtime",
+      "program_name": "文明教育 × 知識 × 研究 × 終身學習",
+      "domain": "EDUCATION",
+      "implementation_status": "SPECIFICATION_ONLY",
+      "coverage": 15,
+      "conflicts": [],
+      "priority": "P3_GOVERNANCE_SOCIAL",
+      "risk": "MEDIUM",
+      "dependencies": [
+        "TIME",
+        "IDENTITY",
+        "RIGHTS"
+      ],
+      "current_paths": [],
+      "current_PRs": [],
+      "next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "promotion_status": "REVIEWED_REQUIREMENT",
+      "authorized_mode": "SIMULATION_ONLY"
+    },
+    {
+      "program_id": "KAIOS-CH-079-121-HEALTH",
+      "chapter_number": 79,
+      "chapter_title": "Chapter 79｜文明醫療 × 公共衛生 × 臨床照護 × 生命倫理 Runtime",
+      "program_name": "文明醫療 × 公共衛生 × 臨床照護 × 生命倫理",
+      "domain": "HEALTH",
+      "implementation_status": "SPECIFICATION_ONLY",
+      "coverage": 15,
+      "conflicts": [],
+      "priority": "P3_GOVERNANCE_SOCIAL",
+      "risk": "MEDIUM",
+      "dependencies": [
+        "UNIVERSE_PHYSICS",
+        "TIME",
+        "COORDINATES",
+        "ENERGY",
+        "IDENTITY",
+        "AI_LIFE"
+      ],
+      "current_paths": [],
+      "current_PRs": [],
+      "next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "promotion_status": "REVIEWED_REQUIREMENT",
+      "authorized_mode": "SIMULATION_ONLY"
+    },
+    {
+      "program_id": "KAIOS-CH-080-122-FOOD_SECURITY",
+      "chapter_number": 80,
+      "chapter_title": "Chapter 80｜文明食物 × 水資源 × 農業 × 營養安全 Runtime",
+      "program_name": "文明食物 × 水資源 × 農業 × 營養安全",
+      "domain": "FOOD_SECURITY",
+      "implementation_status": "IMPLEMENTED_DEMO_ONLY",
+      "coverage": 46,
+      "conflicts": [],
+      "priority": "P4_ADVANCED_TECHNOLOGY",
+      "risk": "MEDIUM",
+      "dependencies": [
+        "TIME",
+        "IDENTITY",
+        "RIGHTS"
+      ],
+      "current_paths": [
+        "KGEN-KAIOS/world-viewer/agriculture/agriculture-runtime.js"
+      ],
+      "current_PRs": [
+        "#61",
+        "#70"
+      ],
+      "next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "promotion_status": "IMPLEMENTED_SIMULATION",
+      "authorized_mode": "SIMULATION_ONLY"
+    },
+    {
+      "program_id": "KAIOS-CH-081-123-TIME",
+      "chapter_number": 81,
+      "chapter_title": "Chapter 81｜文明能源 × 電力網 × 燃料 × 氣候轉型 Runtime",
+      "program_name": "文明能源 × 電力網 × 燃料 × 氣候轉型",
+      "domain": "TIME",
+      "implementation_status": "IMPLEMENTED_PRODUCTION_SAFE_SIMULATION",
+      "coverage": 82,
+      "conflicts": [],
+      "priority": "HOLD_ALREADY_COVERED",
+      "risk": "MEDIUM",
+      "dependencies": [
+        "UNIVERSE_PHYSICS"
+      ],
+      "current_paths": [
+        "KGEN-KAIOS/world-viewer/simulation/simulation-clock.js",
+        "KGEN-KAIOS/world-viewer/timeline/timeline-runtime.js"
+      ],
+      "current_PRs": [
+        "#61",
+        "#63"
+      ],
+      "next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "promotion_status": "RUNTIME_VALIDATED",
+      "authorized_mode": "SIMULATION_ONLY"
+    },
+    {
+      "program_id": "KAIOS-CH-082-124-TRANSPORT",
+      "chapter_number": 82,
+      "chapter_title": "Chapter 82｜文明交通 × 移動 × 物流 × 基礎設施 Runtime",
+      "program_name": "文明交通 × 移動 × 物流 × 基礎設施",
+      "domain": "TRANSPORT",
+      "implementation_status": "IMPLEMENTED_DEMO_ONLY",
+      "coverage": 49,
+      "conflicts": [],
+      "priority": "P2_ECONOMY_CIVILIZATION",
+      "risk": "MEDIUM",
+      "dependencies": [
+        "UNIVERSE_PHYSICS",
+        "TIME",
+        "COORDINATES",
+        "ENERGY",
+        "IDENTITY"
+      ],
+      "current_paths": [
+        "KGEN-KAIOS/world-viewer/technology/technology-tree-runtime.js",
+        "KGEN-KAIOS/world-viewer/technology/research-runtime.js",
+        "KGEN-KAIOS/world-viewer/technology/vehicle-runtime.js"
+      ],
+      "current_PRs": [
+        "#61",
+        "#63"
+      ],
+      "next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "promotion_status": "IMPLEMENTED_SIMULATION",
+      "authorized_mode": "SIMULATION_ONLY"
+    },
+    {
+      "program_id": "KAIOS-CH-083-125-INFRASTRUCTURE",
+      "chapter_number": 83,
+      "chapter_title": "Chapter 83｜文明通訊 × 網際網路 × 頻譜 × 媒體基礎設施 Runtime",
+      "program_name": "文明通訊 × 網際網路 × 頻譜 × 媒體基礎設施",
+      "domain": "INFRASTRUCTURE",
+      "implementation_status": "IMPLEMENTED_DEMO_ONLY",
+      "coverage": 49,
+      "conflicts": [],
+      "priority": "P4_ADVANCED_TECHNOLOGY",
+      "risk": "MEDIUM",
+      "dependencies": [
+        "TIME",
+        "IDENTITY",
+        "ENERGY",
+        "LAND",
+        "LABOR"
+      ],
+      "current_paths": [
+        "KGEN-KAIOS/world-viewer/technology/technology-tree-runtime.js",
+        "KGEN-KAIOS/world-viewer/technology/research-runtime.js",
+        "KGEN-KAIOS/world-viewer/technology/vehicle-runtime.js"
+      ],
+      "current_PRs": [
+        "#61",
+        "#63"
+      ],
+      "next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "promotion_status": "IMPLEMENTED_SIMULATION",
+      "authorized_mode": "SIMULATION_ONLY"
+    },
+    {
+      "program_id": "KAIOS-CH-084-126-ECOLOGY",
+      "chapter_number": 84,
+      "chapter_title": "Chapter 84｜文明環境 × 生態系 × 污染 × 行星守護 Runtime",
+      "program_name": "文明環境 × 生態系 × 污染 × 行星守護",
+      "domain": "ECOLOGY",
+      "implementation_status": "IMPLEMENTED_PARTIAL",
+      "coverage": 57,
+      "conflicts": [],
+      "priority": "P4_ADVANCED_TECHNOLOGY",
+      "risk": "MEDIUM",
+      "dependencies": [
+        "UNIVERSE_PHYSICS",
+        "TIME",
+        "COORDINATES",
+        "ENERGY",
+        "IDENTITY"
+      ],
+      "current_paths": [
+        "KGEN-KAIOS/world-viewer/ecosystem/ecosystem-runtime.js",
+        "KAIOS/life/runtime/foundational-life-runtime.js"
+      ],
+      "current_PRs": [
+        "#61",
+        "#70"
+      ],
+      "next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "promotion_status": "IMPLEMENTED_SIMULATION",
+      "authorized_mode": "SIMULATION_ONLY"
+    },
+    {
+      "program_id": "KAIOS-CH-085-127-WASTE",
+      "chapter_number": 85,
+      "chapter_title": "Chapter 85｜文明廢棄物 × 循環經濟 × 材料 × 資源回收 Runtime",
+      "program_name": "文明廢棄物 × 循環經濟 × 材料 × 資源回收",
+      "domain": "WASTE",
+      "implementation_status": "SPECIFICATION_ONLY",
+      "coverage": 15,
+      "conflicts": [],
+      "priority": "P4_ADVANCED_TECHNOLOGY",
+      "risk": "MEDIUM",
+      "dependencies": [
+        "TIME",
+        "IDENTITY",
+        "RIGHTS"
+      ],
+      "current_paths": [],
+      "current_PRs": [],
+      "next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "promotion_status": "REVIEWED_REQUIREMENT",
+      "authorized_mode": "SIMULATION_ONLY"
+    },
+    {
+      "program_id": "KAIOS-CH-086-128-SUPPLY_CHAIN",
+      "chapter_number": 86,
+      "chapter_title": "Chapter 86｜文明工業 × 製造 × 生產 × 供應鏈 Runtime",
+      "program_name": "文明工業 × 製造 × 生產 × 供應鏈",
+      "domain": "SUPPLY_CHAIN",
+      "implementation_status": "SPECIFICATION_ONLY",
+      "coverage": 34,
+      "conflicts": [],
+      "priority": "P1_CORE_RUNTIME",
+      "risk": "MEDIUM",
+      "dependencies": [
+        "MANUFACTURING",
+        "LOGISTICS",
+        "COMMERCE"
+      ],
+      "current_paths": [
+        "KAIOS_SUPPLY_CHAIN_SCHEMA.json",
+        "KAIOS_COMPANY_FINANCE_SCHEMA.json"
+      ],
+      "current_PRs": [
+        "#65"
+      ],
+      "next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "promotion_status": "REVIEWED_REQUIREMENT",
+      "authorized_mode": "SIMULATION_ONLY"
+    },
+    {
+      "program_id": "KAIOS-CH-087-129-COMMERCE",
+      "chapter_number": 87,
+      "chapter_title": "Chapter 87｜文明商業 × 貿易 × 市場 × 消費者保護 Runtime",
+      "program_name": "文明商業 × 貿易 × 市場 × 消費者保護",
+      "domain": "COMMERCE",
+      "implementation_status": "IMPLEMENTED_DEMO_ONLY",
+      "coverage": 32,
+      "conflicts": [],
+      "priority": "P2_ECONOMY_CIVILIZATION",
+      "risk": "MEDIUM",
+      "dependencies": [
+        "IDENTITY",
+        "RIGHTS",
+        "LABOR",
+        "SUPPLY_CHAIN"
+      ],
+      "current_paths": [
+        "KGEN-KAIOS/world-viewer/economy/economy-runtime.js",
+        "KGEN-KAIOS/world-viewer/settlement/settlement-runtime.js"
+      ],
+      "current_PRs": [
+        "#61",
+        "#62",
+        "#65"
+      ],
+      "next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "promotion_status": "IMPLEMENTED_SIMULATION",
+      "authorized_mode": "SIMULATION_ONLY"
+    },
+    {
+      "program_id": "KAIOS-CH-088-130-TIME",
+      "chapter_number": 88,
+      "chapter_title": "Chapter 88｜文明競爭 × 反壟斷 × 市場權力 × 公平進入 Runtime",
+      "program_name": "文明競爭 × 反壟斷 × 市場權力 × 公平進入",
+      "domain": "TIME",
+      "implementation_status": "IMPLEMENTED_PRODUCTION_SAFE_SIMULATION",
+      "coverage": 82,
+      "conflicts": [],
+      "priority": "HOLD_ALREADY_COVERED",
+      "risk": "MEDIUM",
+      "dependencies": [
+        "UNIVERSE_PHYSICS"
+      ],
+      "current_paths": [
+        "KGEN-KAIOS/world-viewer/simulation/simulation-clock.js",
+        "KGEN-KAIOS/world-viewer/timeline/timeline-runtime.js"
+      ],
+      "current_PRs": [
+        "#61",
+        "#63"
+      ],
+      "next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "promotion_status": "RUNTIME_VALIDATED",
+      "authorized_mode": "SIMULATION_ONLY"
+    },
+    {
+      "program_id": "KAIOS-CH-089-131-GOVERNANCE",
+      "chapter_number": 89,
+      "chapter_title": "Chapter 89｜文明公司治理 × 所有權 × 董事 × 問責 Runtime",
+      "program_name": "文明公司治理 × 所有權 × 董事 × 問責",
+      "domain": "GOVERNANCE",
+      "implementation_status": "IMPLEMENTED_DEMO_ONLY",
+      "coverage": 38,
+      "conflicts": [],
+      "priority": "P3_GOVERNANCE_SOCIAL",
+      "risk": "HIGH",
+      "dependencies": [
+        "IDENTITY",
+        "HUMAN_RIGHTS",
+        "AUDIT"
+      ],
+      "current_paths": [
+        "KGEN-KAIOS/world-viewer/governance/government-runtime.js",
+        "KGEN-KAIOS/world-viewer/governance/public-services-runtime.js"
+      ],
+      "current_PRs": [
+        "#61"
+      ],
+      "next_action": "HOLD_FOR_PROMOTION_REVIEW",
+      "promotion_status": "IMPLEMENTED_SIMULATION",
+      "authorized_mode": "SIMULATION_ONLY"
+    },
+    {
+      "program_id": "KAIOS-CH-090-132-ACCOUNTING",
+      "chapter_number": 90,
+      "chapter_title": "Chapter 90｜文明會計 × 審計 × 揭露 × 財務誠信 Runtime",
+      "program_name": "文明會計 × 審計 × 揭露 × 財務誠信",
+      "domain": "ACCOUNTING",
+      "implementation_status": "SPECIFICATION_ONLY",
+      "coverage": 34,
+      "conflicts": [],
+      "priority": "P4_ADVANCED_TECHNOLOGY",
+      "risk": "MEDIUM",
+      "dependencies": [
+        "IDENTITY",
+        "RIGHTS",
+        "LABOR",
+        "SUPPLY_CHAIN"
+      ],
+      "current_paths": [
+        "KAIOS_SUPPLY_CHAIN_SCHEMA.json",
+        "KAIOS_COMPANY_FINANCE_SCHEMA.json"
+      ],
+      "current_PRs": [
+        "#65"
+      ],
+      "next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "promotion_status": "REVIEWED_REQUIREMENT",
+      "authorized_mode": "SIMULATION_ONLY"
+    },
+    {
+      "program_id": "KAIOS-CH-091-133-BANKRUPTCY",
+      "chapter_number": 91,
+      "chapter_title": "Chapter 91｜文明破產 × 重整 × 清算 × 債權人保護 Runtime",
+      "program_name": "文明破產 × 重整 × 清算 × 債權人保護",
+      "domain": "BANKRUPTCY",
+      "implementation_status": "SPECIFICATION_ONLY",
+      "coverage": 34,
+      "conflicts": [],
+      "priority": "P4_ADVANCED_TECHNOLOGY",
+      "risk": "MEDIUM",
+      "dependencies": [
+        "IDENTITY",
+        "RIGHTS",
+        "LABOR",
+        "SUPPLY_CHAIN"
+      ],
+      "current_paths": [
+        "KAIOS_SUPPLY_CHAIN_SCHEMA.json",
+        "KAIOS_COMPANY_FINANCE_SCHEMA.json"
+      ],
+      "current_PRs": [
+        "#65"
+      ],
+      "next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "promotion_status": "REVIEWED_REQUIREMENT",
+      "authorized_mode": "SIMULATION_ONLY"
+    },
+    {
+      "program_id": "KAIOS-CH-092-134-TAXATION",
+      "chapter_number": 92,
+      "chapter_title": "Chapter 92｜文明稅制 × 稅務行政 × 財政遵循 × 反逃漏稅 Runtime",
+      "program_name": "文明稅制 × 稅務行政 × 財政遵循 × 反逃漏稅",
+      "domain": "TAXATION",
+      "implementation_status": "IMPLEMENTED_DEMO_ONLY",
+      "coverage": 32,
+      "conflicts": [],
+      "priority": "P4_ADVANCED_TECHNOLOGY",
+      "risk": "MEDIUM",
+      "dependencies": [
+        "IDENTITY",
+        "RIGHTS",
+        "LABOR",
+        "SUPPLY_CHAIN"
+      ],
+      "current_paths": [
+        "KGEN-KAIOS/world-viewer/economy/economy-runtime.js",
+        "KGEN-KAIOS/world-viewer/settlement/settlement-runtime.js"
+      ],
+      "current_PRs": [
+        "#61",
+        "#62",
+        "#65"
+      ],
+      "next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "promotion_status": "IMPLEMENTED_SIMULATION",
+      "authorized_mode": "SIMULATION_ONLY"
+    },
+    {
+      "program_id": "KAIOS-CH-093-135-PROCUREMENT",
+      "chapter_number": 93,
+      "chapter_title": "Chapter 93｜文明公共採購 × 政府契約 × 供應商誠信 × 反貪腐 Runtime",
+      "program_name": "文明公共採購 × 政府契約 × 供應商誠信 × 反貪腐",
+      "domain": "PROCUREMENT",
+      "implementation_status": "SPECIFICATION_ONLY",
+      "coverage": 15,
+      "conflicts": [],
+      "priority": "P4_ADVANCED_TECHNOLOGY",
+      "risk": "MEDIUM",
+      "dependencies": [
+        "IDENTITY",
+        "RIGHTS",
+        "LABOR",
+        "SUPPLY_CHAIN"
+      ],
+      "current_paths": [],
+      "current_PRs": [],
+      "next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "promotion_status": "REVIEWED_REQUIREMENT",
+      "authorized_mode": "SIMULATION_ONLY"
+    },
+    {
+      "program_id": "KAIOS-CH-094-136-NATION",
+      "chapter_number": 94,
+      "chapter_title": "Chapter 94｜文明公共行政 × 文官制度 × 行政程序 × 國家廉正 Runtime",
+      "program_name": "文明公共行政 × 文官制度 × 行政程序 × 國家廉正",
+      "domain": "NATION",
+      "implementation_status": "IMPLEMENTED_DEMO_ONLY",
+      "coverage": 55,
+      "conflicts": [],
+      "priority": "P2_ECONOMY_CIVILIZATION",
+      "risk": "MEDIUM",
+      "dependencies": [
+        "UNIVERSE_PHYSICS",
+        "TIME",
+        "COORDINATES",
+        "ENERGY",
+        "IDENTITY"
+      ],
+      "current_paths": [
+        "KGEN-KAIOS/world-viewer/nation/nation-runtime.js",
+        "KGEN-KAIOS/world-viewer/timeline/timeline-runtime.js"
+      ],
+      "current_PRs": [
+        "#61"
+      ],
+      "next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "promotion_status": "IMPLEMENTED_SIMULATION",
+      "authorized_mode": "SIMULATION_ONLY"
+    },
+    {
+      "program_id": "KAIOS-CH-095-137-COURTS",
+      "chapter_number": 95,
+      "chapter_title": "Chapter 95｜文明司法 × 法院 × 檢察 × 法律扶助 Runtime",
+      "program_name": "文明司法 × 法院 × 檢察 × 法律扶助",
+      "domain": "COURTS",
+      "implementation_status": "IMPLEMENTED_DEMO_ONLY",
+      "coverage": 38,
+      "conflicts": [],
+      "priority": "P3_GOVERNANCE_SOCIAL",
+      "risk": "HIGH",
+      "dependencies": [
+        "IDENTITY",
+        "RIGHTS",
+        "ECONOMY",
+        "GOVERNANCE"
+      ],
+      "current_paths": [
+        "KGEN-KAIOS/world-viewer/governance/government-runtime.js",
+        "KGEN-KAIOS/world-viewer/governance/public-services-runtime.js"
+      ],
+      "current_PRs": [
+        "#61"
+      ],
+      "next_action": "HOLD_FOR_PROMOTION_REVIEW",
+      "promotion_status": "IMPLEMENTED_SIMULATION",
+      "authorized_mode": "SIMULATION_ONLY"
+    },
+    {
+      "program_id": "KAIOS-CH-096-138-COURTS",
+      "chapter_number": 96,
+      "chapter_title": "Chapter 96｜文明刑事司法 × 警政 × 拘留羈押 × 矯正 Runtime",
+      "program_name": "文明刑事司法 × 警政 × 拘留羈押 × 矯正",
+      "domain": "COURTS",
+      "implementation_status": "IMPLEMENTED_DEMO_ONLY",
+      "coverage": 38,
+      "conflicts": [],
+      "priority": "P3_GOVERNANCE_SOCIAL",
+      "risk": "HIGH",
+      "dependencies": [
+        "IDENTITY",
+        "RIGHTS",
+        "ECONOMY",
+        "GOVERNANCE"
+      ],
+      "current_paths": [
+        "KGEN-KAIOS/world-viewer/governance/government-runtime.js",
+        "KGEN-KAIOS/world-viewer/governance/public-services-runtime.js"
+      ],
+      "current_PRs": [
+        "#61"
+      ],
+      "next_action": "HOLD_FOR_PROMOTION_REVIEW",
+      "promotion_status": "IMPLEMENTED_SIMULATION",
+      "authorized_mode": "SIMULATION_ONLY"
+    },
+    {
+      "program_id": "KAIOS-CH-097-139-HUMAN_RIGHTS",
+      "chapter_number": 97,
+      "chapter_title": "Chapter 97｜文明人權 × 平等 × 反歧視 × 公民自由 Runtime",
+      "program_name": "文明人權 × 平等 × 反歧視 × 公民自由",
+      "domain": "HUMAN_RIGHTS",
+      "implementation_status": "SPECIFICATION_ONLY",
+      "coverage": 15,
+      "conflicts": [],
+      "priority": "P3_GOVERNANCE_SOCIAL",
+      "risk": "MEDIUM",
+      "dependencies": [
+        "IDENTITY",
+        "RIGHTS",
+        "ECONOMY",
+        "GOVERNANCE"
+      ],
+      "current_paths": [],
+      "current_PRs": [],
+      "next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "promotion_status": "REVIEWED_REQUIREMENT",
+      "authorized_mode": "SIMULATION_ONLY"
+    },
+    {
+      "program_id": "KAIOS-CH-098-140-DEMOCRACY",
+      "chapter_number": 98,
+      "chapter_title": "Chapter 98｜文明民主 × 選舉 × 政黨 × 公民參與 Runtime",
+      "program_name": "文明民主 × 選舉 × 政黨 × 公民參與",
+      "domain": "DEMOCRACY",
+      "implementation_status": "SPECIFICATION_ONLY",
+      "coverage": 15,
+      "conflicts": [],
+      "priority": "P3_GOVERNANCE_SOCIAL",
+      "risk": "MEDIUM",
+      "dependencies": [
+        "IDENTITY",
+        "RIGHTS",
+        "ECONOMY",
+        "GOVERNANCE"
+      ],
+      "current_paths": [],
+      "current_PRs": [],
+      "next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "promotion_status": "REVIEWED_REQUIREMENT",
+      "authorized_mode": "SIMULATION_ONLY"
+    },
+    {
+      "program_id": "KAIOS-CH-099-141-DEMOCRACY",
+      "chapter_number": 99,
+      "chapter_title": "Chapter 99｜文明立法 × 法律制定 × 議會程序 × 民主監督 Runtime",
+      "program_name": "文明立法 × 法律制定 × 議會程序 × 民主監督",
+      "domain": "DEMOCRACY",
+      "implementation_status": "SPECIFICATION_ONLY",
+      "coverage": 15,
+      "conflicts": [],
+      "priority": "P3_GOVERNANCE_SOCIAL",
+      "risk": "MEDIUM",
+      "dependencies": [
+        "IDENTITY",
+        "RIGHTS",
+        "ECONOMY",
+        "GOVERNANCE"
+      ],
+      "current_paths": [],
+      "current_PRs": [],
+      "next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "promotion_status": "REVIEWED_REQUIREMENT",
+      "authorized_mode": "SIMULATION_ONLY"
+    },
+    {
+      "program_id": "KAIOS-CH-000-142-GENESIS",
+      "chapter_number": 0,
+      "chapter_title": "《KAIOS 創世憲章 V2.0》第0章",
+      "program_name": "《KAIOS 創世憲章 V2.0》第0章",
+      "domain": "GENESIS",
+      "implementation_status": "IMPLEMENTED_DEMO_ONLY",
+      "coverage": 50,
+      "conflicts": [],
+      "priority": "P4_ADVANCED_TECHNOLOGY",
+      "risk": "MEDIUM",
+      "dependencies": [
+        "TIME",
+        "IDENTITY",
+        "RIGHTS"
+      ],
+      "current_paths": [
+        "KGEN-KAIOS/world-viewer/genesis/genesis-runtime.js"
+      ],
+      "current_PRs": [
+        "#59",
+        "#61",
+        "#62"
+      ],
+      "next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "promotion_status": "IMPLEMENTED_SIMULATION",
+      "authorized_mode": "SIMULATION_ONLY"
+    },
+    {
+      "program_id": "KAIOS-CH-REF-144-GENESIS",
+      "chapter_number": null,
+      "chapter_title": "第一章 創世原則",
+      "program_name": "第一章 創世原則",
+      "domain": "GENESIS",
+      "implementation_status": "IMPLEMENTED_DEMO_ONLY",
+      "coverage": 50,
+      "conflicts": [],
+      "priority": "P4_ADVANCED_TECHNOLOGY",
+      "risk": "MEDIUM",
+      "dependencies": [
+        "TIME",
+        "IDENTITY",
+        "RIGHTS"
+      ],
+      "current_paths": [
+        "KGEN-KAIOS/world-viewer/genesis/genesis-runtime.js"
+      ],
+      "current_PRs": [
+        "#59",
+        "#61",
+        "#62"
+      ],
+      "next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "promotion_status": "IMPLEMENTED_SIMULATION",
+      "authorized_mode": "SIMULATION_ONLY"
+    }
+  ]
+}

@@ -1,0 +1,845 @@
+{
+  "schema_version": "1.0.0",
+  "read_only": true,
+  "directed_acyclic": true,
+  "foundation_order": [
+    "UNIVERSE_PHYSICS",
+    "TIME",
+    "COORDINATES",
+    "ENERGY",
+    "IDENTITY",
+    "LIFE",
+    "LOCATION",
+    "RIGHTS",
+    "LABOR",
+    "LAND",
+    "CONSTRUCTION",
+    "PRODUCTION",
+    "SUPPLY_CHAIN",
+    "ECONOMY",
+    "GOVERNANCE",
+    "CIVILIZATION",
+    "PLANETARY",
+    "MULTIVERSE"
+  ],
+  "edges": [
+    {
+      "from": "FOUNDATION:UNIVERSE_PHYSICS",
+      "to": "FOUNDATION:TIME",
+      "type": "REQUIRED_BEFORE"
+    },
+    {
+      "from": "FOUNDATION:TIME",
+      "to": "FOUNDATION:COORDINATES",
+      "type": "REQUIRED_BEFORE"
+    },
+    {
+      "from": "FOUNDATION:COORDINATES",
+      "to": "FOUNDATION:ENERGY",
+      "type": "REQUIRED_BEFORE"
+    },
+    {
+      "from": "FOUNDATION:ENERGY",
+      "to": "FOUNDATION:IDENTITY",
+      "type": "REQUIRED_BEFORE"
+    },
+    {
+      "from": "FOUNDATION:IDENTITY",
+      "to": "FOUNDATION:LIFE",
+      "type": "REQUIRED_BEFORE"
+    },
+    {
+      "from": "FOUNDATION:LIFE",
+      "to": "FOUNDATION:LOCATION",
+      "type": "REQUIRED_BEFORE"
+    },
+    {
+      "from": "FOUNDATION:LOCATION",
+      "to": "FOUNDATION:RIGHTS",
+      "type": "REQUIRED_BEFORE"
+    },
+    {
+      "from": "FOUNDATION:RIGHTS",
+      "to": "FOUNDATION:LABOR",
+      "type": "REQUIRED_BEFORE"
+    },
+    {
+      "from": "FOUNDATION:LABOR",
+      "to": "FOUNDATION:LAND",
+      "type": "REQUIRED_BEFORE"
+    },
+    {
+      "from": "FOUNDATION:LAND",
+      "to": "FOUNDATION:CONSTRUCTION",
+      "type": "REQUIRED_BEFORE"
+    },
+    {
+      "from": "FOUNDATION:CONSTRUCTION",
+      "to": "FOUNDATION:PRODUCTION",
+      "type": "REQUIRED_BEFORE"
+    },
+    {
+      "from": "FOUNDATION:PRODUCTION",
+      "to": "FOUNDATION:SUPPLY_CHAIN",
+      "type": "REQUIRED_BEFORE"
+    },
+    {
+      "from": "FOUNDATION:SUPPLY_CHAIN",
+      "to": "FOUNDATION:ECONOMY",
+      "type": "REQUIRED_BEFORE"
+    },
+    {
+      "from": "FOUNDATION:ECONOMY",
+      "to": "FOUNDATION:GOVERNANCE",
+      "type": "REQUIRED_BEFORE"
+    },
+    {
+      "from": "FOUNDATION:GOVERNANCE",
+      "to": "FOUNDATION:CIVILIZATION",
+      "type": "REQUIRED_BEFORE"
+    },
+    {
+      "from": "FOUNDATION:CIVILIZATION",
+      "to": "FOUNDATION:PLANETARY",
+      "type": "REQUIRED_BEFORE"
+    },
+    {
+      "from": "FOUNDATION:PLANETARY",
+      "to": "FOUNDATION:MULTIVERSE",
+      "type": "REQUIRED_BEFORE"
+    },
+    {
+      "from": "FOUNDATION:CIVILIZATION",
+      "to": "KAIOS-CH-000-001-GENESIS",
+      "type": "FOUNDATION_FOR_PROGRAM"
+    },
+    {
+      "from": "FOUNDATION:CIVILIZATION",
+      "to": "KAIOS-CH-000-002-GENESIS",
+      "type": "FOUNDATION_FOR_PROGRAM"
+    },
+    {
+      "from": "FOUNDATION:CIVILIZATION",
+      "to": "KAIOS-CH-001-003-GENESIS",
+      "type": "FOUNDATION_FOR_PROGRAM"
+    },
+    {
+      "from": "FOUNDATION:UNIVERSE_PHYSICS",
+      "to": "KAIOS-CH-002-004-UNIVERSE_PHYSICS",
+      "type": "FOUNDATION_FOR_PROGRAM"
+    },
+    {
+      "from": "FOUNDATION:TIME",
+      "to": "KAIOS-CH-003-005-TIME",
+      "type": "FOUNDATION_FOR_PROGRAM"
+    },
+    {
+      "from": "FOUNDATION:COORDINATES",
+      "to": "KAIOS-CH-004-006-COORDINATES",
+      "type": "FOUNDATION_FOR_PROGRAM"
+    },
+    {
+      "from": "FOUNDATION:ENERGY",
+      "to": "KAIOS-CH-005-007-ENERGY",
+      "type": "FOUNDATION_FOR_PROGRAM"
+    },
+    {
+      "from": "FOUNDATION:LIFE",
+      "to": "KAIOS-CH-006-008-AI_LIFE",
+      "type": "FOUNDATION_FOR_PROGRAM"
+    },
+    {
+      "from": "FOUNDATION:LIFE",
+      "to": "KAIOS-CH-007-009-AI_LIFE",
+      "type": "FOUNDATION_FOR_PROGRAM"
+    },
+    {
+      "from": "FOUNDATION:CIVILIZATION",
+      "to": "KAIOS-CH-008-010-WALLET_SIMULATION",
+      "type": "FOUNDATION_FOR_PROGRAM"
+    },
+    {
+      "from": "FOUNDATION:LAND",
+      "to": "KAIOS-CH-009-011-LAND",
+      "type": "FOUNDATION_FOR_PROGRAM"
+    },
+    {
+      "from": "FOUNDATION:CIVILIZATION",
+      "to": "KAIOS-CH-100-012-EXECUTIVE",
+      "type": "FOUNDATION_FOR_PROGRAM"
+    },
+    {
+      "from": "FOUNDATION:CIVILIZATION",
+      "to": "KAIOS-CH-101-013-DIPLOMACY",
+      "type": "FOUNDATION_FOR_PROGRAM"
+    },
+    {
+      "from": "FOUNDATION:CIVILIZATION",
+      "to": "KAIOS-CH-102-014-DEFENSE",
+      "type": "FOUNDATION_FOR_PROGRAM"
+    },
+    {
+      "from": "FOUNDATION:CIVILIZATION",
+      "to": "KAIOS-CH-103-015-EMERGENCY",
+      "type": "FOUNDATION_FOR_PROGRAM"
+    },
+    {
+      "from": "FOUNDATION:CIVILIZATION",
+      "to": "KAIOS-CH-104-016-INFRASTRUCTURE",
+      "type": "FOUNDATION_FOR_PROGRAM"
+    },
+    {
+      "from": "FOUNDATION:CIVILIZATION",
+      "to": "KAIOS-CH-105-017-ENERGY_GRID",
+      "type": "FOUNDATION_FOR_PROGRAM"
+    },
+    {
+      "from": "FOUNDATION:CIVILIZATION",
+      "to": "KAIOS-CH-106-018-WATER",
+      "type": "FOUNDATION_FOR_PROGRAM"
+    },
+    {
+      "from": "FOUNDATION:CIVILIZATION",
+      "to": "KAIOS-CH-107-019-FOOD_SECURITY",
+      "type": "FOUNDATION_FOR_PROGRAM"
+    },
+    {
+      "from": "FOUNDATION:LAND",
+      "to": "KAIOS-CH-108-020-LAND",
+      "type": "FOUNDATION_FOR_PROGRAM"
+    },
+    {
+      "from": "FOUNDATION:CIVILIZATION",
+      "to": "KAIOS-CH-109-021-TRANSPORT",
+      "type": "FOUNDATION_FOR_PROGRAM"
+    },
+    {
+      "from": "FOUNDATION:GOVERNANCE",
+      "to": "KAIOS-CH-010-022-GOVERNANCE",
+      "type": "FOUNDATION_FOR_PROGRAM"
+    },
+    {
+      "from": "FOUNDATION:CIVILIZATION",
+      "to": "KAIOS-CH-110-023-COMMUNICATION",
+      "type": "FOUNDATION_FOR_PROGRAM"
+    },
+    {
+      "from": "FOUNDATION:CIVILIZATION",
+      "to": "KAIOS-CH-111-024-EDUCATION",
+      "type": "FOUNDATION_FOR_PROGRAM"
+    },
+    {
+      "from": "FOUNDATION:CIVILIZATION",
+      "to": "KAIOS-CH-112-025-ARTS",
+      "type": "FOUNDATION_FOR_PROGRAM"
+    },
+    {
+      "from": "FOUNDATION:CIVILIZATION",
+      "to": "KAIOS-CH-113-026-SPORTS",
+      "type": "FOUNDATION_FOR_PROGRAM"
+    },
+    {
+      "from": "FOUNDATION:CIVILIZATION",
+      "to": "KAIOS-CH-114-027-ECOLOGY",
+      "type": "FOUNDATION_FOR_PROGRAM"
+    },
+    {
+      "from": "FOUNDATION:CIVILIZATION",
+      "to": "KAIOS-CH-115-028-SCIENCE",
+      "type": "FOUNDATION_FOR_PROGRAM"
+    },
+    {
+      "from": "FOUNDATION:PRODUCTION",
+      "to": "KAIOS-CH-116-029-MANUFACTURING",
+      "type": "FOUNDATION_FOR_PROGRAM"
+    },
+    {
+      "from": "FOUNDATION:CIVILIZATION",
+      "to": "KAIOS-CH-117-030-CAPITAL_MARKETS",
+      "type": "FOUNDATION_FOR_PROGRAM"
+    },
+    {
+      "from": "FOUNDATION:CIVILIZATION",
+      "to": "KAIOS-CH-118-031-AI_EMPLOYMENT",
+      "type": "FOUNDATION_FOR_PROGRAM"
+    },
+    {
+      "from": "FOUNDATION:CIVILIZATION",
+      "to": "KAIOS-CH-119-032-FAMILY",
+      "type": "FOUNDATION_FOR_PROGRAM"
+    },
+    {
+      "from": "FOUNDATION:GOVERNANCE",
+      "to": "KAIOS-CH-011-033-GOVERNANCE",
+      "type": "FOUNDATION_FOR_PROGRAM"
+    },
+    {
+      "from": "FOUNDATION:CIVILIZATION",
+      "to": "KAIOS-CH-120-034-HOUSING",
+      "type": "FOUNDATION_FOR_PROGRAM"
+    },
+    {
+      "from": "FOUNDATION:CIVILIZATION",
+      "to": "KAIOS-CH-121-035-FOOD_SECURITY",
+      "type": "FOUNDATION_FOR_PROGRAM"
+    },
+    {
+      "from": "FOUNDATION:CIVILIZATION",
+      "to": "KAIOS-CH-122-036-WATER",
+      "type": "FOUNDATION_FOR_PROGRAM"
+    },
+    {
+      "from": "FOUNDATION:CIVILIZATION",
+      "to": "KAIOS-CH-123-037-ENERGY_GRID",
+      "type": "FOUNDATION_FOR_PROGRAM"
+    },
+    {
+      "from": "FOUNDATION:CIVILIZATION",
+      "to": "KAIOS-CH-124-038-TRANSPORT",
+      "type": "FOUNDATION_FOR_PROGRAM"
+    },
+    {
+      "from": "FOUNDATION:CIVILIZATION",
+      "to": "KAIOS-CH-125-039-INFRASTRUCTURE",
+      "type": "FOUNDATION_FOR_PROGRAM"
+    },
+    {
+      "from": "FOUNDATION:CIVILIZATION",
+      "to": "KAIOS-CH-126-040-EDUCATION",
+      "type": "FOUNDATION_FOR_PROGRAM"
+    },
+    {
+      "from": "FOUNDATION:CIVILIZATION",
+      "to": "KAIOS-CH-127-041-HEALTH",
+      "type": "FOUNDATION_FOR_PROGRAM"
+    },
+    {
+      "from": "FOUNDATION:CIVILIZATION",
+      "to": "KAIOS-CH-128-042-AI_EMPLOYMENT",
+      "type": "FOUNDATION_FOR_PROGRAM"
+    },
+    {
+      "from": "FOUNDATION:PRODUCTION",
+      "to": "KAIOS-CH-129-043-MANUFACTURING",
+      "type": "FOUNDATION_FOR_PROGRAM"
+    },
+    {
+      "from": "FOUNDATION:GOVERNANCE",
+      "to": "KAIOS-CH-012-044-GOVERNANCE",
+      "type": "FOUNDATION_FOR_PROGRAM"
+    },
+    {
+      "from": "FOUNDATION:CIVILIZATION",
+      "to": "KAIOS-CH-130-045-FINANCE",
+      "type": "FOUNDATION_FOR_PROGRAM"
+    },
+    {
+      "from": "FOUNDATION:CIVILIZATION",
+      "to": "KAIOS-CH-131-046-HOUSING",
+      "type": "FOUNDATION_FOR_PROGRAM"
+    },
+    {
+      "from": "FOUNDATION:CIVILIZATION",
+      "to": "KAIOS-CH-132-047-FOOD_SECURITY",
+      "type": "FOUNDATION_FOR_PROGRAM"
+    },
+    {
+      "from": "FOUNDATION:CIVILIZATION",
+      "to": "KAIOS-CH-133-048-REPRODUCTION",
+      "type": "FOUNDATION_FOR_PROGRAM"
+    },
+    {
+      "from": "FOUNDATION:CIVILIZATION",
+      "to": "KAIOS-CH-133-049-AUTONOMOUS_AI",
+      "type": "FOUNDATION_FOR_PROGRAM"
+    },
+    {
+      "from": "FOUNDATION:LIFE",
+      "to": "KAIOS-CH-134-050-AI_LIFE",
+      "type": "FOUNDATION_FOR_PROGRAM"
+    },
+    {
+      "from": "FOUNDATION:CIVILIZATION",
+      "to": "KAIOS-CH-135-051-SPECIES_EVOLUTION",
+      "type": "FOUNDATION_FOR_PROGRAM"
+    },
+    {
+      "from": "FOUNDATION:CIVILIZATION",
+      "to": "KAIOS-CH-136-052-BANKRUPTCY",
+      "type": "FOUNDATION_FOR_PROGRAM"
+    },
+    {
+      "from": "FOUNDATION:MULTIVERSE",
+      "to": "KAIOS-CH-137-053-MULTIVERSE",
+      "type": "FOUNDATION_FOR_PROGRAM"
+    },
+    {
+      "from": "FOUNDATION:CIVILIZATION",
+      "to": "KAIOS-CH-138-054-CONSTITUTION_COMPILER",
+      "type": "FOUNDATION_FOR_PROGRAM"
+    },
+    {
+      "from": "FOUNDATION:GOVERNANCE",
+      "to": "KAIOS-CH-013-055-GOVERNANCE",
+      "type": "FOUNDATION_FOR_PROGRAM"
+    },
+    {
+      "from": "FOUNDATION:GOVERNANCE",
+      "to": "KAIOS-CH-014-056-GOVERNANCE",
+      "type": "FOUNDATION_FOR_PROGRAM"
+    },
+    {
+      "from": "FOUNDATION:CIVILIZATION",
+      "to": "KAIOS-CH-015-057-AI_EDUCATION",
+      "type": "FOUNDATION_FOR_PROGRAM"
+    },
+    {
+      "from": "FOUNDATION:CIVILIZATION",
+      "to": "KAIOS-CH-016-058-AI_ECONOMY",
+      "type": "FOUNDATION_FOR_PROGRAM"
+    },
+    {
+      "from": "FOUNDATION:TIME",
+      "to": "KAIOS-CH-017-059-TIME",
+      "type": "FOUNDATION_FOR_PROGRAM"
+    },
+    {
+      "from": "FOUNDATION:CIVILIZATION",
+      "to": "KAIOS-CH-018-060-AI_EMPLOYMENT",
+      "type": "FOUNDATION_FOR_PROGRAM"
+    },
+    {
+      "from": "FOUNDATION:CIVILIZATION",
+      "to": "KAIOS-CH-019-061-AI_COMPANY",
+      "type": "FOUNDATION_FOR_PROGRAM"
+    },
+    {
+      "from": "FOUNDATION:CIVILIZATION",
+      "to": "KAIOS-CH-020-062-BANKING",
+      "type": "FOUNDATION_FOR_PROGRAM"
+    },
+    {
+      "from": "FOUNDATION:GOVERNANCE",
+      "to": "KAIOS-CH-021-063-GOVERNANCE",
+      "type": "FOUNDATION_FOR_PROGRAM"
+    },
+    {
+      "from": "FOUNDATION:CIVILIZATION",
+      "to": "KAIOS-CH-022-064-IMMUNE_SYSTEM",
+      "type": "FOUNDATION_FOR_PROGRAM"
+    },
+    {
+      "from": "FOUNDATION:CIVILIZATION",
+      "to": "KAIOS-CH-023-065-REPRODUCTION",
+      "type": "FOUNDATION_FOR_PROGRAM"
+    },
+    {
+      "from": "FOUNDATION:CIVILIZATION",
+      "to": "KAIOS-CH-024-066-ECOLOGY",
+      "type": "FOUNDATION_FOR_PROGRAM"
+    },
+    {
+      "from": "FOUNDATION:CIVILIZATION",
+      "to": "KAIOS-CH-025-067-MEMORY",
+      "type": "FOUNDATION_FOR_PROGRAM"
+    },
+    {
+      "from": "FOUNDATION:CIVILIZATION",
+      "to": "KAIOS-CH-026-068-EDUCATION",
+      "type": "FOUNDATION_FOR_PROGRAM"
+    },
+    {
+      "from": "FOUNDATION:LABOR",
+      "to": "KAIOS-CH-027-069-LABOR",
+      "type": "FOUNDATION_FOR_PROGRAM"
+    },
+    {
+      "from": "FOUNDATION:CIVILIZATION",
+      "to": "KAIOS-CH-028-070-WELFARE",
+      "type": "FOUNDATION_FOR_PROGRAM"
+    },
+    {
+      "from": "FOUNDATION:CIVILIZATION",
+      "to": "KAIOS-CH-029-071-EMERGENCY",
+      "type": "FOUNDATION_FOR_PROGRAM"
+    },
+    {
+      "from": "FOUNDATION:CIVILIZATION",
+      "to": "KAIOS-CH-030-072-COURTS",
+      "type": "FOUNDATION_FOR_PROGRAM"
+    },
+    {
+      "from": "FOUNDATION:IDENTITY",
+      "to": "KAIOS-CH-031-073-IDENTITY",
+      "type": "FOUNDATION_FOR_PROGRAM"
+    },
+    {
+      "from": "FOUNDATION:CIVILIZATION",
+      "to": "KAIOS-CH-032-074-PRIVACY",
+      "type": "FOUNDATION_FOR_PROGRAM"
+    },
+    {
+      "from": "FOUNDATION:CIVILIZATION",
+      "to": "KAIOS-CH-033-075-COMMUNICATION",
+      "type": "FOUNDATION_FOR_PROGRAM"
+    },
+    {
+      "from": "FOUNDATION:CIVILIZATION",
+      "to": "KAIOS-CH-034-076-SCIENCE",
+      "type": "FOUNDATION_FOR_PROGRAM"
+    },
+    {
+      "from": "FOUNDATION:CIVILIZATION",
+      "to": "KAIOS-CH-035-077-TECHNOLOGY",
+      "type": "FOUNDATION_FOR_PROGRAM"
+    },
+    {
+      "from": "FOUNDATION:CIVILIZATION",
+      "to": "KAIOS-CH-036-078-INFRASTRUCTURE",
+      "type": "FOUNDATION_FOR_PROGRAM"
+    },
+    {
+      "from": "FOUNDATION:TIME",
+      "to": "KAIOS-CH-037-079-TIME",
+      "type": "FOUNDATION_FOR_PROGRAM"
+    },
+    {
+      "from": "FOUNDATION:SUPPLY_CHAIN",
+      "to": "KAIOS-CH-038-080-SUPPLY_CHAIN",
+      "type": "FOUNDATION_FOR_PROGRAM"
+    },
+    {
+      "from": "FOUNDATION:CIVILIZATION",
+      "to": "KAIOS-CH-039-081-LOGISTICS",
+      "type": "FOUNDATION_FOR_PROGRAM"
+    },
+    {
+      "from": "FOUNDATION:CIVILIZATION",
+      "to": "KAIOS-CH-040-082-COMMERCE",
+      "type": "FOUNDATION_FOR_PROGRAM"
+    },
+    {
+      "from": "FOUNDATION:CIVILIZATION",
+      "to": "KAIOS-CH-041-083-TAXATION",
+      "type": "FOUNDATION_FOR_PROGRAM"
+    },
+    {
+      "from": "FOUNDATION:CIVILIZATION",
+      "to": "KAIOS-CH-042-084-CENTRAL_BANK",
+      "type": "FOUNDATION_FOR_PROGRAM"
+    },
+    {
+      "from": "FOUNDATION:CIVILIZATION",
+      "to": "KAIOS-CH-043-085-BANKRUPTCY",
+      "type": "FOUNDATION_FOR_PROGRAM"
+    },
+    {
+      "from": "FOUNDATION:CIVILIZATION",
+      "to": "KAIOS-CH-044-086-INSURANCE",
+      "type": "FOUNDATION_FOR_PROGRAM"
+    },
+    {
+      "from": "FOUNDATION:CIVILIZATION",
+      "to": "KAIOS-CH-045-087-HOUSING",
+      "type": "FOUNDATION_FOR_PROGRAM"
+    },
+    {
+      "from": "FOUNDATION:CIVILIZATION",
+      "to": "KAIOS-CH-046-088-TRANSPORT",
+      "type": "FOUNDATION_FOR_PROGRAM"
+    },
+    {
+      "from": "FOUNDATION:CIVILIZATION",
+      "to": "KAIOS-CH-047-089-AGRICULTURE",
+      "type": "FOUNDATION_FOR_PROGRAM"
+    },
+    {
+      "from": "FOUNDATION:CIVILIZATION",
+      "to": "KAIOS-CH-048-090-ENERGY_GRID",
+      "type": "FOUNDATION_FOR_PROGRAM"
+    },
+    {
+      "from": "FOUNDATION:CIVILIZATION",
+      "to": "KAIOS-CH-049-091-ECOLOGY",
+      "type": "FOUNDATION_FOR_PROGRAM"
+    },
+    {
+      "from": "FOUNDATION:CIVILIZATION",
+      "to": "KAIOS-CH-050-092-WASTE",
+      "type": "FOUNDATION_FOR_PROGRAM"
+    },
+    {
+      "from": "FOUNDATION:CONSTRUCTION",
+      "to": "KAIOS-CH-051-093-CONSTRUCTION",
+      "type": "FOUNDATION_FOR_PROGRAM"
+    },
+    {
+      "from": "FOUNDATION:LAND",
+      "to": "KAIOS-CH-052-094-LAND",
+      "type": "FOUNDATION_FOR_PROGRAM"
+    },
+    {
+      "from": "FOUNDATION:CIVILIZATION",
+      "to": "KAIOS-CH-053-095-MEMORY",
+      "type": "FOUNDATION_FOR_PROGRAM"
+    },
+    {
+      "from": "FOUNDATION:CIVILIZATION",
+      "to": "KAIOS-CH-054-096-RELIGION",
+      "type": "FOUNDATION_FOR_PROGRAM"
+    },
+    {
+      "from": "FOUNDATION:CIVILIZATION",
+      "to": "KAIOS-CH-055-097-FAMILY",
+      "type": "FOUNDATION_FOR_PROGRAM"
+    },
+    {
+      "from": "FOUNDATION:CIVILIZATION",
+      "to": "KAIOS-CH-056-098-CHILDREN",
+      "type": "FOUNDATION_FOR_PROGRAM"
+    },
+    {
+      "from": "FOUNDATION:CIVILIZATION",
+      "to": "KAIOS-CH-057-099-AGING",
+      "type": "FOUNDATION_FOR_PROGRAM"
+    },
+    {
+      "from": "FOUNDATION:CIVILIZATION",
+      "to": "KAIOS-CH-058-100-POPULATION",
+      "type": "FOUNDATION_FOR_PROGRAM"
+    },
+    {
+      "from": "FOUNDATION:CIVILIZATION",
+      "to": "KAIOS-CH-059-101-ACCESSIBILITY",
+      "type": "FOUNDATION_FOR_PROGRAM"
+    },
+    {
+      "from": "FOUNDATION:CIVILIZATION",
+      "to": "KAIOS-CH-060-102-MENTAL_HEALTH",
+      "type": "FOUNDATION_FOR_PROGRAM"
+    },
+    {
+      "from": "FOUNDATION:CIVILIZATION",
+      "to": "KAIOS-CH-061-103-EMERGENCY",
+      "type": "FOUNDATION_FOR_PROGRAM"
+    },
+    {
+      "from": "FOUNDATION:TIME",
+      "to": "KAIOS-CH-062-104-TIME",
+      "type": "FOUNDATION_FOR_PROGRAM"
+    },
+    {
+      "from": "FOUNDATION:TIME",
+      "to": "KAIOS-CH-063-105-TIME",
+      "type": "FOUNDATION_FOR_PROGRAM"
+    },
+    {
+      "from": "FOUNDATION:TIME",
+      "to": "KAIOS-CH-064-106-TIME",
+      "type": "FOUNDATION_FOR_PROGRAM"
+    },
+    {
+      "from": "FOUNDATION:TIME",
+      "to": "KAIOS-CH-065-107-TIME",
+      "type": "FOUNDATION_FOR_PROGRAM"
+    },
+    {
+      "from": "FOUNDATION:CIVILIZATION",
+      "to": "KAIOS-CH-066-108-DEMOCRACY",
+      "type": "FOUNDATION_FOR_PROGRAM"
+    },
+    {
+      "from": "FOUNDATION:CIVILIZATION",
+      "to": "KAIOS-CH-067-109-LEGISLATURE",
+      "type": "FOUNDATION_FOR_PROGRAM"
+    },
+    {
+      "from": "FOUNDATION:CIVILIZATION",
+      "to": "KAIOS-CH-068-110-EXECUTIVE",
+      "type": "FOUNDATION_FOR_PROGRAM"
+    },
+    {
+      "from": "FOUNDATION:CIVILIZATION",
+      "to": "KAIOS-CH-069-111-COURTS",
+      "type": "FOUNDATION_FOR_PROGRAM"
+    },
+    {
+      "from": "FOUNDATION:CIVILIZATION",
+      "to": "KAIOS-CH-070-112-AUDIT",
+      "type": "FOUNDATION_FOR_PROGRAM"
+    },
+    {
+      "from": "FOUNDATION:CIVILIZATION",
+      "to": "KAIOS-CH-071-113-TAXATION",
+      "type": "FOUNDATION_FOR_PROGRAM"
+    },
+    {
+      "from": "FOUNDATION:CIVILIZATION",
+      "to": "KAIOS-CH-072-114-CENTRAL_BANK",
+      "type": "FOUNDATION_FOR_PROGRAM"
+    },
+    {
+      "from": "FOUNDATION:CIVILIZATION",
+      "to": "KAIOS-CH-073-115-BANKING",
+      "type": "FOUNDATION_FOR_PROGRAM"
+    },
+    {
+      "from": "FOUNDATION:CIVILIZATION",
+      "to": "KAIOS-CH-074-116-CAPITAL_MARKETS",
+      "type": "FOUNDATION_FOR_PROGRAM"
+    },
+    {
+      "from": "FOUNDATION:CIVILIZATION",
+      "to": "KAIOS-CH-075-117-INSURANCE",
+      "type": "FOUNDATION_FOR_PROGRAM"
+    },
+    {
+      "from": "FOUNDATION:CIVILIZATION",
+      "to": "KAIOS-CH-076-118-PENSIONS",
+      "type": "FOUNDATION_FOR_PROGRAM"
+    },
+    {
+      "from": "FOUNDATION:CIVILIZATION",
+      "to": "KAIOS-CH-077-119-HOUSING",
+      "type": "FOUNDATION_FOR_PROGRAM"
+    },
+    {
+      "from": "FOUNDATION:CIVILIZATION",
+      "to": "KAIOS-CH-078-120-EDUCATION",
+      "type": "FOUNDATION_FOR_PROGRAM"
+    },
+    {
+      "from": "FOUNDATION:CIVILIZATION",
+      "to": "KAIOS-CH-079-121-HEALTH",
+      "type": "FOUNDATION_FOR_PROGRAM"
+    },
+    {
+      "from": "FOUNDATION:CIVILIZATION",
+      "to": "KAIOS-CH-080-122-FOOD_SECURITY",
+      "type": "FOUNDATION_FOR_PROGRAM"
+    },
+    {
+      "from": "FOUNDATION:TIME",
+      "to": "KAIOS-CH-081-123-TIME",
+      "type": "FOUNDATION_FOR_PROGRAM"
+    },
+    {
+      "from": "FOUNDATION:CIVILIZATION",
+      "to": "KAIOS-CH-082-124-TRANSPORT",
+      "type": "FOUNDATION_FOR_PROGRAM"
+    },
+    {
+      "from": "FOUNDATION:CIVILIZATION",
+      "to": "KAIOS-CH-083-125-INFRASTRUCTURE",
+      "type": "FOUNDATION_FOR_PROGRAM"
+    },
+    {
+      "from": "FOUNDATION:CIVILIZATION",
+      "to": "KAIOS-CH-084-126-ECOLOGY",
+      "type": "FOUNDATION_FOR_PROGRAM"
+    },
+    {
+      "from": "FOUNDATION:CIVILIZATION",
+      "to": "KAIOS-CH-085-127-WASTE",
+      "type": "FOUNDATION_FOR_PROGRAM"
+    },
+    {
+      "from": "FOUNDATION:SUPPLY_CHAIN",
+      "to": "KAIOS-CH-086-128-SUPPLY_CHAIN",
+      "type": "FOUNDATION_FOR_PROGRAM"
+    },
+    {
+      "from": "FOUNDATION:CIVILIZATION",
+      "to": "KAIOS-CH-087-129-COMMERCE",
+      "type": "FOUNDATION_FOR_PROGRAM"
+    },
+    {
+      "from": "FOUNDATION:TIME",
+      "to": "KAIOS-CH-088-130-TIME",
+      "type": "FOUNDATION_FOR_PROGRAM"
+    },
+    {
+      "from": "FOUNDATION:GOVERNANCE",
+      "to": "KAIOS-CH-089-131-GOVERNANCE",
+      "type": "FOUNDATION_FOR_PROGRAM"
+    },
+    {
+      "from": "FOUNDATION:CIVILIZATION",
+      "to": "KAIOS-CH-090-132-ACCOUNTING",
+      "type": "FOUNDATION_FOR_PROGRAM"
+    },
+    {
+      "from": "FOUNDATION:CIVILIZATION",
+      "to": "KAIOS-CH-091-133-BANKRUPTCY",
+      "type": "FOUNDATION_FOR_PROGRAM"
+    },
+    {
+      "from": "FOUNDATION:CIVILIZATION",
+      "to": "KAIOS-CH-092-134-TAXATION",
+      "type": "FOUNDATION_FOR_PROGRAM"
+    },
+    {
+      "from": "FOUNDATION:CIVILIZATION",
+      "to": "KAIOS-CH-093-135-PROCUREMENT",
+      "type": "FOUNDATION_FOR_PROGRAM"
+    },
+    {
+      "from": "FOUNDATION:CIVILIZATION",
+      "to": "KAIOS-CH-094-136-NATION",
+      "type": "FOUNDATION_FOR_PROGRAM"
+    },
+    {
+      "from": "FOUNDATION:CIVILIZATION",
+      "to": "KAIOS-CH-095-137-COURTS",
+      "type": "FOUNDATION_FOR_PROGRAM"
+    },
+    {
+      "from": "FOUNDATION:CIVILIZATION",
+      "to": "KAIOS-CH-096-138-COURTS",
+      "type": "FOUNDATION_FOR_PROGRAM"
+    },
+    {
+      "from": "FOUNDATION:CIVILIZATION",
+      "to": "KAIOS-CH-097-139-HUMAN_RIGHTS",
+      "type": "FOUNDATION_FOR_PROGRAM"
+    },
+    {
+      "from": "FOUNDATION:CIVILIZATION",
+      "to": "KAIOS-CH-098-140-DEMOCRACY",
+      "type": "FOUNDATION_FOR_PROGRAM"
+    },
+    {
+      "from": "FOUNDATION:CIVILIZATION",
+      "to": "KAIOS-CH-099-141-DEMOCRACY",
+      "type": "FOUNDATION_FOR_PROGRAM"
+    },
+    {
+      "from": "FOUNDATION:CIVILIZATION",
+      "to": "KAIOS-CH-000-142-GENESIS",
+      "type": "FOUNDATION_FOR_PROGRAM"
+    },
+    {
+      "from": "FOUNDATION:CIVILIZATION",
+      "to": "KAIOS-CH-REF-144-GENESIS",
+      "type": "FOUNDATION_FOR_PROGRAM"
+    }
+  ],
+  "feedback_loops": [
+    {
+      "id": "ECONOMY_DEMAND_SUPPLY",
+      "classification": "VALID_RUNTIME_FEEDBACK_LOOP"
+    },
+    {
+      "id": "ECOLOGY_RESOURCE_POPULATION",
+      "classification": "VALID_RUNTIME_FEEDBACK_LOOP"
+    },
+    {
+      "id": "GOVERNANCE_AUDIT_CORRECTION",
+      "classification": "VALID_RUNTIME_FEEDBACK_LOOP"
+    },
+    {
+      "id": "MAINTENANCE_WEAR_REPAIR",
+      "classification": "VALID_RUNTIME_FEEDBACK_LOOP"
+    }
+  ]
+}

@@ -1,0 +1,37 @@
+{
+  "schema_version": "1.0.0",
+  "read_only": true,
+  "conflict_count": 3,
+  "conflicts": [
+    {
+      "program_id": "KAIOS-CH-000-002-GENESIS",
+      "chapter_source": [
+        "KAIOS_Chapter_000_V2_1_All_Matter_Life_Reincarnation_Wallet_Jade_Emperor_Self_Programming_Genesis_Runtime.md"
+      ],
+      "conflicts": [
+        "SEVEN_PAIR_LINEAGE_CONFLICT"
+      ],
+      "action": "NO_SILENT_RECONCILIATION"
+    },
+    {
+      "program_id": "KAIOS-CH-133-049-AUTONOMOUS_AI",
+      "chapter_source": [
+        "KAIOS_Chapter_133_V2_1_Civilization_Life_Birth_Identity_Authentication_Autonomous_AI_Pilgrimage_Rooting_Runtime.md"
+      ],
+      "conflicts": [
+        "SEVEN_PAIR_LINEAGE_CONFLICT"
+      ],
+      "action": "NO_SILENT_RECONCILIATION"
+    },
+    {
+      "program_id": "KAIOS-CH-138-054-CONSTITUTION_COMPILER",
+      "chapter_source": [
+        "KAIOS_Chapter_138_V2_1_Dynamic_Constitution_Compiler_11520_Certification_Genesis_Closure_Autonomous_Civilization_Runtime.md"
+      ],
+      "conflicts": [
+        "SEVEN_PAIR_LINEAGE_CONFLICT"
+      ],
+      "action": "NO_SILENT_RECONCILIATION"
+    }
+  ]
+}

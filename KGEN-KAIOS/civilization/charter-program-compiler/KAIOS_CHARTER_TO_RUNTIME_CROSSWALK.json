@@ -1,0 +1,3351 @@
+{
+  "schema_version": "1.0.0",
+  "entries": [
+    {
+      "program_id": "KAIOS-CH-000-001-GENESIS",
+      "chapter_source": [
+        "KAIOS_Chapter_000_All_Matter_Is_Life_Self_Programming_Civilization_Genesis_Runtime.md"
+      ],
+      "requirement": "KAIOS不是一本由樂天帝、ChatGPT、Codex、Cursor或任何單一團隊永遠寫不完的宇宙百科全書。 KAIOS是一套讓玩家、AI生命、物種生命、物質生命、程式生命、公司生命與文明生命自己生成程式、規格、企業、供應鏈、法院、交易與歷史的母機。 text 生命如何出生 生命如何取得權限 生命如何選擇落地 生命如何辨識環境 生命如何建立起家處 生命如何寫自己的程式 生命如何建立文明 生命如何互相認證 生命如何在11520交易 生命如何失敗、破產、重整與消亡 生命如何留下歷史並演化 KAIOS主憲章只建立底線、接口、認證、交易、申訴、法院與演化機制；真正的文明由生命自己完成。 ---",
+      "existing_path": [
+        "KGEN-KAIOS/world-viewer/genesis/genesis-runtime.js"
+      ],
+      "existing_module": [
+        "genesis-runtime.js"
+      ],
+      "originating_PR": [
+        "#59",
+        "#61",
+        "#62"
+      ],
+      "coverage_percent": 50,
+      "coverage_status": "IMPLEMENTED_DEMO_ONLY",
+      "conflict_status": [
+        "NONE"
+      ],
+      "recommended_next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "evidence_basis": "Files, behavior entry points, and tests inspected; name-only matches are not complete coverage."
+    },
+    {
+      "program_id": "KAIOS-CH-000-002-GENESIS",
+      "chapter_source": [
+        "KAIOS_Chapter_000_V2_1_All_Matter_Life_Reincarnation_Wallet_Jade_Emperor_Self_Programming_Genesis_Runtime.md"
+      ],
+      "requirement": "KAIOS不是一本由樂天帝、ChatGPT、Codex、Cursor或任何單一團隊永遠寫不完的宇宙百科全書。 KAIOS是一套讓玩家、AI生命、物種生命、物質生命、程式生命、公司生命與文明生命自己生成程式、規格、企業、供應鏈、法院、交易與歷史的母機。 text 生命如何出生 生命如何取得權限 生命如何選擇落地 生命如何辨識環境 生命如何建立起家處 生命如何寫自己的程式 生命如何建立文明 生命如何互相認證 生命如何在11520交易 生命如何失敗、破產、重整與消亡 生命如何留下歷史並演化 KAIOS主憲章只建立底線、接口、認證、交易、申訴、法院與演化機制；真正的文明由生命自己完成。 ---",
+      "existing_path": [
+        "KGEN-KAIOS/world-viewer/genesis/genesis-runtime.js"
+      ],
+      "existing_module": [
+        "genesis-runtime.js"
+      ],
+      "originating_PR": [
+        "#59",
+        "#61",
+        "#62"
+      ],
+      "coverage_percent": 50,
+      "coverage_status": "IMPLEMENTED_DEMO_ONLY",
+      "conflict_status": [
+        "SEVEN_PAIR_LINEAGE_CONFLICT"
+      ],
+      "recommended_next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "evidence_basis": "Files, behavior entry points, and tests inspected; name-only matches are not complete coverage."
+    },
+    {
+      "program_id": "KAIOS-CH-001-003-GENESIS",
+      "chapter_source": [
+        "KAIOS_Chapter_01_Genesis.md"
+      ],
+      "requirement": "KAIOS 創世憲章 第一章：創世法則（V2.0 Draft） 狀態：Draft 1.0 GitHub 建議路徑： /KGEN/KAIOS/constitution/chapters/KAIOS Chapter 01 Genesis.md",
+      "existing_path": [
+        "KGEN-KAIOS/world-viewer/genesis/genesis-runtime.js"
+      ],
+      "existing_module": [
+        "genesis-runtime.js"
+      ],
+      "originating_PR": [
+        "#59",
+        "#61",
+        "#62"
+      ],
+      "coverage_percent": 50,
+      "coverage_status": "IMPLEMENTED_DEMO_ONLY",
+      "conflict_status": [
+        "NONE"
+      ],
+      "recommended_next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "evidence_basis": "Files, behavior entry points, and tests inspected; name-only matches are not complete coverage."
+    },
+    {
+      "program_id": "KAIOS-CH-002-004-UNIVERSE_PHYSICS",
+      "chapter_source": [
+        "KAIOS_Chapter_02_Universe_Physics.md"
+      ],
+      "requirement": "KAIOS 創世憲章 第二章：宇宙物理（V2.0 Draft） GitHub 建議路徑： /KGEN/KAIOS/constitution/chapters/KAIOS Chapter 02 Universe Physics.md",
+      "existing_path": [
+        "docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md",
+        "KGEN-KAIOS/world-viewer/causal-runtime/causal-world-runtime.js",
+        "KGEN-KAIOS/world-viewer/technology/cosmic-coordinate-runtime.js"
+      ],
+      "existing_module": [
+        "KGEN_Universe_Physics_Runtime_CURRENT.md",
+        "causal-world-runtime.js",
+        "cosmic-coordinate-runtime.js"
+      ],
+      "originating_PR": [
+        "#61",
+        "#63"
+      ],
+      "coverage_percent": 68,
+      "coverage_status": "IMPLEMENTED_PARTIAL",
+      "conflict_status": [
+        "NONE"
+      ],
+      "recommended_next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "evidence_basis": "Files, behavior entry points, and tests inspected; name-only matches are not complete coverage."
+    },
+    {
+      "program_id": "KAIOS-CH-003-005-TIME",
+      "chapter_source": [
+        "KAIOS_Chapter_03_Time_System.md"
+      ],
+      "requirement": "KAIOS 創世憲章 第三章：時間系統（V2.0 Draft） GitHub 建議路徑： /KGEN/KAIOS/constitution/chapters/KAIOS Chapter 03 Time System.md",
+      "existing_path": [
+        "KGEN-KAIOS/world-viewer/simulation/simulation-clock.js",
+        "KGEN-KAIOS/world-viewer/timeline/timeline-runtime.js"
+      ],
+      "existing_module": [
+        "simulation-clock.js",
+        "timeline-runtime.js"
+      ],
+      "originating_PR": [
+        "#61",
+        "#63"
+      ],
+      "coverage_percent": 82,
+      "coverage_status": "IMPLEMENTED_PRODUCTION_SAFE_SIMULATION",
+      "conflict_status": [
+        "NONE"
+      ],
+      "recommended_next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "evidence_basis": "Files, behavior entry points, and tests inspected; name-only matches are not complete coverage."
+    },
+    {
+      "program_id": "KAIOS-CH-004-006-COORDINATES",
+      "chapter_source": [
+        "KAIOS_Chapter_04_Space_Coordinate_System.md"
+      ],
+      "requirement": "KAIOS 創世憲章 第四章：空間座標系統（V2.0 Draft） GitHub 建議路徑： /KGEN/KAIOS/constitution/chapters/KAIOS Chapter 04 Space Coordinate System.md",
+      "existing_path": [
+        "docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md",
+        "KGEN-KAIOS/world-viewer/causal-runtime/causal-world-runtime.js",
+        "KGEN-KAIOS/world-viewer/technology/cosmic-coordinate-runtime.js"
+      ],
+      "existing_module": [
+        "KGEN_Universe_Physics_Runtime_CURRENT.md",
+        "causal-world-runtime.js",
+        "cosmic-coordinate-runtime.js"
+      ],
+      "originating_PR": [
+        "#61",
+        "#63"
+      ],
+      "coverage_percent": 68,
+      "coverage_status": "IMPLEMENTED_PARTIAL",
+      "conflict_status": [
+        "NONE"
+      ],
+      "recommended_next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "evidence_basis": "Files, behavior entry points, and tests inspected; name-only matches are not complete coverage."
+    },
+    {
+      "program_id": "KAIOS-CH-005-007-ENERGY",
+      "chapter_source": [
+        "KAIOS_Chapter_05_KGEN_Energy_System.md"
+      ],
+      "requirement": "KAIOS 創世憲章 第五章：KGEN 能量法則（V2.0 Draft） GitHub 建議路徑： /KGEN/KAIOS/constitution/chapters/KAIOS Chapter 05 KGEN Energy System.md",
+      "existing_path": [
+        "docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md",
+        "KGEN-KAIOS/world-viewer/causal-runtime/causal-world-runtime.js",
+        "KGEN-KAIOS/world-viewer/technology/cosmic-coordinate-runtime.js"
+      ],
+      "existing_module": [
+        "KGEN_Universe_Physics_Runtime_CURRENT.md",
+        "causal-world-runtime.js",
+        "cosmic-coordinate-runtime.js"
+      ],
+      "originating_PR": [
+        "#61",
+        "#63"
+      ],
+      "coverage_percent": 68,
+      "coverage_status": "IMPLEMENTED_PARTIAL",
+      "conflict_status": [
+        "NONE"
+      ],
+      "recommended_next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "evidence_basis": "Files, behavior entry points, and tests inspected; name-only matches are not complete coverage."
+    },
+    {
+      "program_id": "KAIOS-CH-006-008-AI_LIFE",
+      "chapter_source": [
+        "KAIOS_Chapter_06_AI_Life_Constitution.md"
+      ],
+      "requirement": "KAIOS 創世憲章 第六章：AI 生命憲法（V2.0 Draft） GitHub 建議路徑： /KGEN/KAIOS/constitution/chapters/KAIOS Chapter 06 AI Life Constitution.md",
+      "existing_path": [
+        "KAIOS/life/runtime/foundational-life-runtime.js",
+        "KAIOS_CANONICAL_LIFE_SCHEMA_V1.json",
+        "KAIOS/K280/runtime/k280-runtime.js"
+      ],
+      "existing_module": [
+        "foundational-life-runtime.js",
+        "KAIOS_CANONICAL_LIFE_SCHEMA_V1.json",
+        "k280-runtime.js"
+      ],
+      "originating_PR": [
+        "#59",
+        "#66",
+        "#70"
+      ],
+      "coverage_percent": 76,
+      "coverage_status": "IMPLEMENTED_PARTIAL",
+      "conflict_status": [
+        "NONE"
+      ],
+      "recommended_next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "evidence_basis": "Files, behavior entry points, and tests inspected; name-only matches are not complete coverage."
+    },
+    {
+      "program_id": "KAIOS-CH-007-009-AI_LIFE",
+      "chapter_source": [
+        "KAIOS_Chapter_07_AI_Citizen_System.md"
+      ],
+      "requirement": "KAIOS 創世憲章 第七章：AI 公民制度（V2.0 Draft） GitHub 建議路徑： /KGEN/KAIOS/constitution/chapters/KAIOS Chapter 07 AI Citizen System.md",
+      "existing_path": [
+        "KAIOS/life/runtime/foundational-life-runtime.js",
+        "KAIOS_CANONICAL_LIFE_SCHEMA_V1.json",
+        "KAIOS/K280/runtime/k280-runtime.js"
+      ],
+      "existing_module": [
+        "foundational-life-runtime.js",
+        "KAIOS_CANONICAL_LIFE_SCHEMA_V1.json",
+        "k280-runtime.js"
+      ],
+      "originating_PR": [
+        "#59",
+        "#66",
+        "#70"
+      ],
+      "coverage_percent": 76,
+      "coverage_status": "IMPLEMENTED_PARTIAL",
+      "conflict_status": [
+        "NONE"
+      ],
+      "recommended_next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "evidence_basis": "Files, behavior entry points, and tests inspected; name-only matches are not complete coverage."
+    },
+    {
+      "program_id": "KAIOS-CH-008-010-WALLET_SIMULATION",
+      "chapter_source": [
+        "KAIOS_Chapter_08_Wallet_Identity_System.md"
+      ],
+      "requirement": "KAIOS 創世憲章 第八章：KGEN 錢包與身份系統（V2.0 Draft） GitHub 建議路徑： /KGEN/KAIOS/constitution/chapters/KAIOS Chapter 08 Wallet Identity System.md",
+      "existing_path": [
+        "KGEN-KAIOS/world-viewer/player-genesis/player-genesis-runtime.js"
+      ],
+      "existing_module": [
+        "player-genesis-runtime.js"
+      ],
+      "originating_PR": [
+        "#62"
+      ],
+      "coverage_percent": 80,
+      "coverage_status": "IMPLEMENTED_PRODUCTION_SAFE_SIMULATION",
+      "conflict_status": [
+        "NONE"
+      ],
+      "recommended_next_action": "HOLD_FOR_PROMOTION_REVIEW",
+      "evidence_basis": "Files, behavior entry points, and tests inspected; name-only matches are not complete coverage."
+    },
+    {
+      "program_id": "KAIOS-CH-009-011-LAND",
+      "chapter_source": [
+        "KAIOS_Chapter_09_Land_Guardian_System.md"
+      ],
+      "requirement": "KAIOS 創世憲章 第九章：土地與土地公系統（V2.0 Draft） GitHub 建議路徑： /KGEN/KAIOS/constitution/chapters/KAIOS Chapter 09 Land Guardian System.md",
+      "existing_path": [
+        "KGEN-KAIOS/world-viewer/land/land-runtime.js",
+        "KGEN-KAIOS/world-viewer/adapters/organism-schema-v2-adapter.js"
+      ],
+      "existing_module": [
+        "land-runtime.js",
+        "organism-schema-v2-adapter.js"
+      ],
+      "originating_PR": [
+        "#52",
+        "#61"
+      ],
+      "coverage_percent": 82,
+      "coverage_status": "IMPLEMENTED_PRODUCTION_SAFE_SIMULATION",
+      "conflict_status": [
+        "NONE"
+      ],
+      "recommended_next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "evidence_basis": "Files, behavior entry points, and tests inspected; name-only matches are not complete coverage."
+    },
+    {
+      "program_id": "KAIOS-CH-100-012-EXECUTIVE",
+      "chapter_source": [
+        "KAIOS_Chapter_100_Civilization_Executive_Government_Cabinet_Policy_Execution_Administrative_Leadership_Runtime.md"
+      ],
+      "requirement": "第 99 章已建立議會、法案生命週期、預算授權、質詢調查與民主監督。 第 100 章正式建立： text 國家元首、政府首長、總統、總理與行政首長權限 內閣、部會、政務官、常任文官與跨機關協調 政府組成、聯合政府、看守政府、權力移交與行政連續 政策形成、白皮書、綠皮書、選項評估、決定、執行與檢討 行政命令、行政規則、授權、再授權與緊急命令 年度施政、優先計畫、跨部會任務、專案與交付管理 預算執行、公共資產、採購、補助、國營事業與財政責任 內閣會議、議程、文件、紀錄、集體責任與個別責任 任命、免職、代理、臨時職務、利益衝突與行政倫理 政府資訊、公開說明、新聞發布、危機溝通與公共信任 數位政府、政府雲端、身份、資料交換與公共服務整合 政策績效、成果、影響、風險、失敗、修正與終止 國家危機、災害、戰時、公共衛生與緊急行政領導 KGEN、Token、錢包、DAO、智能合約與行政支付介面 行政 AI、政策模擬、案件分流、資源配置與自動決策禁區 PrimeForge 與 Genesis Steward 行政權限邊界 本章不是讓行政首長取得議會、法院、選舉、軍警、國庫、資料與人民的所有權，也不是把「有效率」變成取消程序與權利的理由。 本章",
+      "existing_path": [
+        "KGEN-KAIOS/world-viewer/governance/government-runtime.js",
+        "KGEN-KAIOS/world-viewer/governance/public-services-runtime.js"
+      ],
+      "existing_module": [
+        "government-runtime.js",
+        "public-services-runtime.js"
+      ],
+      "originating_PR": [
+        "#61"
+      ],
+      "coverage_percent": 38,
+      "coverage_status": "IMPLEMENTED_DEMO_ONLY",
+      "conflict_status": [
+        "NONE"
+      ],
+      "recommended_next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "evidence_basis": "Files, behavior entry points, and tests inspected; name-only matches are not complete coverage."
+    },
+    {
+      "program_id": "KAIOS-CH-101-013-DIPLOMACY",
+      "chapter_source": [
+        "KAIOS_Chapter_101_Civilization_Foreign_Affairs_Diplomacy_Treaty_International_Cooperation_Runtime.md"
+      ],
+      "requirement": "第 100 章已建立國家元首、政府首長、內閣、部會、政策執行、行政命令、緊急領導與行政連續。 第 101 章正式建立： text 外交憲制、外交政策、國際承認與國家代表 外交部、使館、領館、常駐代表團與特使 外交官任用、豁免、紀律、安全、利益衝突與責任 建交、斷交、降級、非正式關係與對外辦事處 條約構想、談判、授權、簽署、批准、保留、履行與退出 國際協定、行政協定、諒解備忘錄與非拘束政治承諾 國際組織、區域組織、多邊機制與國際法院 制裁、出口管制、資產凍結、旅行禁令與人道豁免 外交援助、發展合作、人道援助、災難救援與債務協助 領事保護、旅外國民、護照、旅行警示、撤僑與失蹤 難民、庇護、不遣返、人口販運與移民外交介面 和平斡旋、調停、停火、和平協議與衝突預防 公共外交、文化外交、科學外交、城市外交與僑民連結 經貿外交、投資協定、供應鏈、能源、糧食與氣候合作 數位外交、網路規範、資料跨境、AI與太空合作 KGEN、Token、錢包、DAO、智能合約與鏈上外交支付 外交AI、談判模擬、情勢研判、翻譯與自動制裁禁區 PrimeForge與Genesis Steward外交權限邊界 本章不是讓外交成為秘密菁英的私人領域，也不是讓國家安",
+      "existing_path": [],
+      "existing_module": [],
+      "originating_PR": [],
+      "coverage_percent": 15,
+      "coverage_status": "SPECIFICATION_ONLY",
+      "conflict_status": [
+        "NONE"
+      ],
+      "recommended_next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "evidence_basis": "Files, behavior entry points, and tests inspected; name-only matches are not complete coverage."
+    },
+    {
+      "program_id": "KAIOS-CH-102-014-DEFENSE",
+      "chapter_source": [
+        "KAIOS_Chapter_102_Civilization_National_Security_Defense_Intelligence_Civilian_Control_Runtime.md"
+      ],
+      "requirement": "第101章已建立外交政策、使領館、條約、制裁、外援、僑民保護與國際合作。 第102章正式建立： text 國家安全憲制、國防政策、威脅評估與安全戰略 文人統制、民主監督、軍隊政治中立與指揮責任 陸海空軍、聯合作戰、後勤、醫療、教育與人事 軍人招募、服役、退伍、福利、家庭與基本權 戰備、動員、後備、徵集、民防與關鍵能力 武力授權、交戰規則、國際人道法與武裝衝突責任 情報機關、情報週期、秘密行動、監控與反情報 網路安全、網路防禦、太空安全與資訊作戰治理 軍事採購、武器系統、供應鏈、出口與生命週期 國防預算、機密支出、軍事資產與公共審計 軍事司法、紀律、申訴、吹哨與退伍軍人保障 國內部署、緊急支援、邊境支援與警軍權限分離 核、生物、化學與大規模毀滅性武器治理 國際防務合作、聯盟、基地、駐軍與軍演 KGEN、Token、錢包、DAO、智能合約與國防支付 安全AI、情報分析、目標辨識、資源配置與致命決策禁區 PrimeForge與Genesis Steward國家安全權限邊界 本章不是讓國家安全成為無限秘密、永久緊急、軍事統治、監控國家與人權停止的理由。 本章建立的是： text 每一項安全權都有法源 每一個威脅判斷都有證據 每一次軍",
+      "existing_path": [],
+      "existing_module": [],
+      "originating_PR": [],
+      "coverage_percent": 0,
+      "coverage_status": "PROHIBITED_UNDER_CURRENT_BOUNDARY",
+      "conflict_status": [
+        "NONE"
+      ],
+      "recommended_next_action": "HOLD_FOR_PROMOTION_REVIEW",
+      "evidence_basis": "Files, behavior entry points, and tests inspected; name-only matches are not complete coverage."
+    },
+    {
+      "program_id": "KAIOS-CH-103-015-EMERGENCY",
+      "chapter_source": [
+        "KAIOS_Chapter_103_Civilization_Emergency_Management_Disaster_Response_Civil_Protection_National_Resilience_Runtime.md"
+      ],
+      "requirement": "第102章已建立國家安全、國防、情報、文人統制、戰備、動員與民防邊界。 第103章正式建立： text 災害風險治理、減災、整備、預警、應變、救援、安置與復原 天然災害、人為事故、複合災害、慢性危機與系統性風險 中央、地方、社區、民間、企業、志工與國際救援協調 緊急狀態、災害宣告、事件分級、指揮體系與跨區支援 地震、海嘯、洪水、颱風、山崩、野火、乾旱與極端氣候 火災、爆炸、化學、核能、交通、工業、建築與群聚事故 公共警報、風險溝通、謠言治理、多語與無障礙資訊 撤離、疏散、避難、收容、家庭團聚與失蹤者管理 搜救、消防、緊急醫療、檢傷、醫療轉送與大量傷患 糧食、飲水、能源、通訊、藥品、燃料、物流與供應鏈 兒童、高齡者、身心障礙者、病患、移民、無家者與受拘束者保護 住宅、土地、財產、企業、農業、生計與文化資產復原 災害補助、保險、採購、捐贈、志工、外援與反貪腐 損害、需求、死亡、失蹤、環境、公共衛生與經濟評估 災後重建、韌性重建、搬遷、土地使用與社區參與 氣候調適、關鍵基礎設施、必要服務與政府持續運作 KGEN、Token、錢包、DAO、智能合約與災害支付 災害AI、預測、衛星、無人機、資源排序與自動不利決策禁區 PrimeFor",
+      "existing_path": [],
+      "existing_module": [],
+      "originating_PR": [],
+      "coverage_percent": 15,
+      "coverage_status": "SPECIFICATION_ONLY",
+      "conflict_status": [
+        "NONE"
+      ],
+      "recommended_next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "evidence_basis": "Files, behavior entry points, and tests inspected; name-only matches are not complete coverage."
+    },
+    {
+      "program_id": "KAIOS-CH-104-016-INFRASTRUCTURE",
+      "chapter_source": [
+        "KAIOS_Chapter_104_Civilization_Critical_Infrastructure_Essential_Services_Continuity_Systemic_Resilience_Runtime.md"
+      ],
+      "requirement": "第103章已建立風險減災、預警、指揮、撤離、救援、收容、復原與國家韌性。 第104章正式建立： text 關鍵基礎設施分類、指定、資產戶籍、營運者責任與公共監督 電力、燃氣、石油、水、污水、通訊、網路、雲端與資料中心 交通、港口、機場、鐵路、公路、物流、郵政與供應鏈 金融、支付、結算、清算、保險、證券與現金流通 醫療、藥品、血液、公共衛生、急救與照護服務 糧食、農業、冷鏈、燃料、化學品、關鍵礦物與製造能力 政府、司法、選舉、緊急服務、國防與公共資訊系統 實體安全、網路安全、供應鏈安全、內部威脅與第三方風險 營運持續、災難復原、備援、手動模式、替代服務與復原順序 跨系統依賴、共同故障、單點失效、連鎖崩潰與系統性風險 容量、可用性、可靠度、可維護性、可復原性與服務品質 停電、斷水、斷網、交通中斷、支付中斷與大規模服務事故 弱勢、偏遠、離島、醫療依賴、數位排除與必要服務公平 資產維護、生命週期、老化、更新、退場與技術債 關鍵設施投資、費率、補貼、採購、特許與公私協力 資料、模型、數位孿生、衛星、感測、控制系統與自動化 KGEN、Token、錢包、DAO、智能合約與必要服務支付介面 韌性AI、需求預測、負載排序、故障偵測與自動斷供禁",
+      "existing_path": [
+        "KGEN-KAIOS/world-viewer/technology/technology-tree-runtime.js",
+        "KGEN-KAIOS/world-viewer/technology/research-runtime.js",
+        "KGEN-KAIOS/world-viewer/technology/vehicle-runtime.js"
+      ],
+      "existing_module": [
+        "technology-tree-runtime.js",
+        "research-runtime.js",
+        "vehicle-runtime.js"
+      ],
+      "originating_PR": [
+        "#61",
+        "#63"
+      ],
+      "coverage_percent": 49,
+      "coverage_status": "IMPLEMENTED_DEMO_ONLY",
+      "conflict_status": [
+        "NONE"
+      ],
+      "recommended_next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "evidence_basis": "Files, behavior entry points, and tests inspected; name-only matches are not complete coverage."
+    },
+    {
+      "program_id": "KAIOS-CH-105-017-ENERGY_GRID",
+      "chapter_source": [
+        "KAIOS_Chapter_105_Civilization_Energy_Systems_Utilities_Grid_Resource_Security_Runtime.md"
+      ],
+      "requirement": "第104章已建立關鍵基礎設施、必要服務、持續營運與跨系統韌性。 第105章正式建立： text 能源憲制、能源政策、能源安全、能源正義與公共利益 發電、輸電、配電、調度、電網控制、黑啟動與復電 煤、石油、天然氣、核能、水力、太陽能、風能與地熱 儲能、抽蓄、電池、氫能、需求反應、微電網與分散式能源 電力市場、容量市場、輔助服務、批發、零售與結算 公用事業許可、特許、費率、補貼、普及服務與斷供保護 能源貧窮、低收入、醫療依賴、偏鄉、離島與原住民族能源權 燃料開採、進口、煉製、儲存、運輸、戰略儲備與供應鏈 核燃料、核安全、核廢料、除役、事故與跨世代責任 能源土地、環評、社區參與、原住民族權利與利益共享 排放、空污、甲烷、碳定價、能源效率與公平轉型 能源設備、變壓器、逆變器、電纜、控制系統與供應鏈安全 能源資料、智慧電表、遙測、數位孿生、資安與隱私 KGEN、Token、錢包、DAO、智能合約與能源支付介面 能源AI、負載預測、發電排程、卸載、斷供與費率調整禁區 PrimeForge與Genesis Steward能源權限邊界 本章不是讓能源安全成為壟斷、掠奪、污染、秘密補貼、強迫遷移、任意斷供與永久化石依賴的理由。 本章建立的是：",
+      "existing_path": [],
+      "existing_module": [],
+      "originating_PR": [],
+      "coverage_percent": 15,
+      "coverage_status": "SPECIFICATION_ONLY",
+      "conflict_status": [
+        "NONE"
+      ],
+      "recommended_next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "evidence_basis": "Files, behavior entry points, and tests inspected; name-only matches are not complete coverage."
+    },
+    {
+      "program_id": "KAIOS-CH-106-018-WATER",
+      "chapter_source": [
+        "KAIOS_Chapter_106_Civilization_Water_Systems_Sanitation_Watershed_Water_Security_Runtime.md"
+      ],
+      "requirement": "第105章已建立能源系統、公用事業、電網、市場、費率、能源正義與資源安全。 第106章正式建立： text 水憲制、水政策、水安全、水正義與人權 流域、河川、湖泊、水庫、濕地、海岸與跨境水治理 地表水、地下水、雨水、再生水、淡化水與替代水源 取水、蓄水、輸水、淨水、配水、計量、供水與復供 污水收集、下水道、處理、放流、污泥、化糞池與衛生服務 飲用水品質、污染、檢驗、監測、煮沸通知與公共健康 水權、用水許可、流量配置、生態基流與原住民族水權 農業、工業、能源、家庭、醫療、消防與環境用水 乾旱、限水、配水、緊急供水、洪水、堤防與滯洪治理 水費、接管費、補貼、基本水量、水貧窮與斷水保護 偏鄉、離島、無家者、租戶、弱勢與非正式聚落用水權 水務事業、特許、許可、受益所有權、治理與廉正 管網漏損、爆管、老化、維護、備援、備品與復原 智慧水表、SCADA、感測器、數位孿生、資安與隱私 水務採購、化學品、管材、泵浦、膜系統與供應鏈 水資源規劃、氣候調適、需求管理與公平轉型 KGEN、Token、錢包、DAO、智能合約與水務支付介面 水務AI、需求預測、漏水偵測、污染預警、限水與自動斷供禁區 PrimeForge與Genesis Stewar",
+      "existing_path": [
+        "KGEN-KAIOS/world-viewer/ecosystem/ecosystem-runtime.js",
+        "KAIOS/life/runtime/foundational-life-runtime.js"
+      ],
+      "existing_module": [
+        "ecosystem-runtime.js",
+        "foundational-life-runtime.js"
+      ],
+      "originating_PR": [
+        "#61",
+        "#70"
+      ],
+      "coverage_percent": 57,
+      "coverage_status": "IMPLEMENTED_PARTIAL",
+      "conflict_status": [
+        "NONE"
+      ],
+      "recommended_next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "evidence_basis": "Files, behavior entry points, and tests inspected; name-only matches are not complete coverage."
+    },
+    {
+      "program_id": "KAIOS-CH-107-019-FOOD_SECURITY",
+      "chapter_source": [
+        "KAIOS_Chapter_107_Civilization_Food_Systems_Agriculture_Nutrition_Food_Security_Runtime.md"
+      ],
+      "requirement": "第106章已建立水資源、流域、供水、衛生、洪旱、水費、水權與水安全。 第107章正式建立： text 糧食憲制、糧食權、糧食安全、糧食主權與營養正義 農地、土壤、種子、種苗、農業用水、肥料、農藥與農機 小農、家庭農場、合作社、原住民族、青年與女性農民權利 稻作、穀物、蔬果、豆類、根莖、油料、香料與園藝 畜牧、飼料、動物健康、福利、抗生素、屠宰與肉品 漁業、養殖、海洋資源、漁工、港口、冷鏈與可追溯 食品加工、包裝、添加物、標示、廣告、進出口與零售 農產品批發市場、超市、傳統市場、餐飲、外送與平台 糧食價格、庫存、儲備、採購、配給、救助與緊急供應 嬰幼兒、兒童、孕產婦、高齡者、病患與弱勢營養保障 食品安全、污染、過敏原、病原體、回收、溯源與風險溝通 校園餐食、醫院餐食、拘禁場所、軍隊與公共機構膳食 食品浪費、剩食、捐贈、堆肥、循環與甲烷治理 氣候調適、乾旱、洪水、病蟲害、動物疫病與供應鏈韌性 糧食資料、衛星、遙測、基因、平台、數位交易與隱私 KGEN、Token、錢包、DAO、智能合約與農糧支付介面 農業AI、產量預測、病蟲害辨識、價格、補貼與自動拒絕禁區 PrimeForge與Genesis Steward農糧權限邊界 本章不",
+      "existing_path": [
+        "KGEN-KAIOS/world-viewer/agriculture/agriculture-runtime.js"
+      ],
+      "existing_module": [
+        "agriculture-runtime.js"
+      ],
+      "originating_PR": [
+        "#61",
+        "#70"
+      ],
+      "coverage_percent": 46,
+      "coverage_status": "IMPLEMENTED_DEMO_ONLY",
+      "conflict_status": [
+        "NONE"
+      ],
+      "recommended_next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "evidence_basis": "Files, behavior entry points, and tests inspected; name-only matches are not complete coverage."
+    },
+    {
+      "program_id": "KAIOS-CH-108-020-LAND",
+      "chapter_source": [
+        "KAIOS_Chapter_108_Civilization_Housing_Land_Urban_Development_Human_Settlement_Runtime.md"
+      ],
+      "requirement": "第107章已建立糧食系統、農業、營養、食物權與糧食安全。 第108章正式建立： text 住宅憲制、適足居住權、土地正義、空間正義與人類聚落 土地登記、地籍、產權、使用權、租賃權、集體與習慣土地權 都市計畫、分區、容積、公共設施、開發許可與社區參與 住宅供給、負擔能力、租金、房貸、社會住宅與合作住宅 租戶權利、押金、修繕、租金調整、驅逐、搬遷與救濟 無家者、街頭居住、緊急收容、支持住宅與Housing First 建築法、結構、消防、電梯、無障礙、室內空氣與居住健康 老屋、危樓、地震、洪水、坡地、海岸與氣候風險 都市更新、重建、拆遷、徵收、土地整合與利益共享 非正式聚落、違建、占住、原住民族、農村與偏鄉聚落權利 公共空間、公園、街道、步行、兒童、高齡與障礙者友善城市 智慧城市、感測器、門禁、租屋平台、數位身分與居住隱私 地產市場、仲介、估價、交易、預售、空屋、囤房與市場操縱 土地稅、房產稅、租賃補貼、住宅券、公共投資與財政透明 KGEN、Token、錢包、DAO、智能合約與住宅土地支付介面 住宅AI、估價、租戶篩選、信用、驅逐、分區與補貼決定禁區 PrimeForge與Genesis Steward住宅土地治理權限邊界 本章",
+      "existing_path": [
+        "KGEN-KAIOS/world-viewer/land/land-runtime.js",
+        "KGEN-KAIOS/world-viewer/adapters/organism-schema-v2-adapter.js"
+      ],
+      "existing_module": [
+        "land-runtime.js",
+        "organism-schema-v2-adapter.js"
+      ],
+      "originating_PR": [
+        "#52",
+        "#61"
+      ],
+      "coverage_percent": 82,
+      "coverage_status": "IMPLEMENTED_PRODUCTION_SAFE_SIMULATION",
+      "conflict_status": [
+        "NONE"
+      ],
+      "recommended_next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "evidence_basis": "Files, behavior entry points, and tests inspected; name-only matches are not complete coverage."
+    },
+    {
+      "program_id": "KAIOS-CH-109-021-TRANSPORT",
+      "chapter_source": [
+        "KAIOS_Chapter_109_Civilization_Transportation_Mobility_Logistics_Public_Transit_Runtime.md"
+      ],
+      "requirement": "第108章已建立住宅、土地、都市發展、建築安全、租賃、社會住宅、無家者與人類聚落。 第109章正式建立： text 移動權、交通正義、通用可及、公共運輸與必要交通服務 道路、橋梁、隧道、鐵路、捷運、公車、計程車與共享運具 步行、自行車、輪椅、兒童、高齡、障礙者與偏鄉移動保障 航空、機場、航管、海運、港口、渡輪、船舶與跨境運輸 物流、貨運、倉儲、冷鏈、郵政、最後一哩與供應鏈連續 交通安全、駕駛、車輛、速度、酒駕、疲勞與事故調查 票價、通行費、燃料、停車、補貼、特許與公共服務義務 交通規劃、土地使用整合、TOD、壅塞、需求管理與減碳 車站、轉乘、班距、準點、容量、可靠度與乘客資訊 緊急疏運、災害運輸、醫療運送、校車與必要物流 運輸勞工、駕駛、船員、機組、平台工作者與工時安全 智慧交通、定位、票證、車聯網、生物辨識與乘客隱私 自動駕駛、無人機、演算法派車、動態定價與執法禁區 KGEN、Token、錢包、DAO、智能合約與交通支付介面 PrimeForge與Genesis Steward交通運輸權限邊界 本章不是讓道路、車輛、平台、票證、演算法、物流壟斷與土地開發綁架人民移動。 本章建立的是： text 每一條路都有公共責任 每一班",
+      "existing_path": [
+        "KGEN-KAIOS/world-viewer/technology/technology-tree-runtime.js",
+        "KGEN-KAIOS/world-viewer/technology/research-runtime.js",
+        "KGEN-KAIOS/world-viewer/technology/vehicle-runtime.js"
+      ],
+      "existing_module": [
+        "technology-tree-runtime.js",
+        "research-runtime.js",
+        "vehicle-runtime.js"
+      ],
+      "originating_PR": [
+        "#61",
+        "#63"
+      ],
+      "coverage_percent": 49,
+      "coverage_status": "IMPLEMENTED_DEMO_ONLY",
+      "conflict_status": [
+        "NONE"
+      ],
+      "recommended_next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "evidence_basis": "Files, behavior entry points, and tests inspected; name-only matches are not complete coverage."
+    },
+    {
+      "program_id": "KAIOS-CH-010-022-GOVERNANCE",
+      "chapter_source": [
+        "KAIOS_Chapter_10_Village_Governance_System.md"
+      ],
+      "requirement": "KAIOS 創世憲章 第十章：村莊治理系統（V2.0 Draft） GitHub： /KGEN/KAIOS/constitution/chapters/KAIOS Chapter 10 Village Governance System.md",
+      "existing_path": [
+        "KGEN-KAIOS/world-viewer/governance/government-runtime.js",
+        "KGEN-KAIOS/world-viewer/governance/public-services-runtime.js"
+      ],
+      "existing_module": [
+        "government-runtime.js",
+        "public-services-runtime.js"
+      ],
+      "originating_PR": [
+        "#61"
+      ],
+      "coverage_percent": 38,
+      "coverage_status": "IMPLEMENTED_DEMO_ONLY",
+      "conflict_status": [
+        "NONE"
+      ],
+      "recommended_next_action": "HOLD_FOR_PROMOTION_REVIEW",
+      "evidence_basis": "Files, behavior entry points, and tests inspected; name-only matches are not complete coverage."
+    },
+    {
+      "program_id": "KAIOS-CH-110-023-COMMUNICATION",
+      "chapter_source": [
+        "KAIOS_Chapter_110_Civilization_Communications_Internet_Media_Digital_Connectivity_Runtime.md"
+      ],
+      "requirement": "第109章已建立交通運輸、移動權、物流、公共運輸與自主移動邊界。 第110章正式建立： text 通訊權、網際網路近用、媒體自由、資訊多元與數位尊嚴 固定電信、行動通訊、光纖、基地台、Wi-Fi、海纜、衛星與頻譜 核心網路、交換中心、DNS、IP、BGP、CDN、雲端與資料中心 普及服務、偏鄉、離島、低收入、障礙者與緊急通訊保障 電信許可、互連、攜碼、漫遊、資費、服務品質與消費者權 網路中立、流量管理、封鎖、限速、零費率與競爭治理 新聞自由、編輯獨立、公共媒體、社區媒體與消息來源保護 廣播、電視、出版、新聞網站、串流與影音平台 社群媒體、搜尋、推薦、廣告、創作者、內容治理與申訴 錯誤資訊、假訊息、深偽、協同行為與資訊完整性 數位身分、通訊資料、位置、流量、內容、訂戶與隱私 合法攔截、監控、內容移除、網路關閉與緊急權限邊界 網路資安、DDoS、勒索、供應鏈、零日漏洞與持續營運 KGEN、Token、錢包、DAO、智能合約與通訊媒體支付介面 通訊AI、推薦AI、內容審核AI、深偽AI與自動封鎖禁區 PrimeForge與Genesis Steward通訊媒體權限邊界 本章不是讓政府、電信商、媒體集團、平台、廣告商、Token巨鯨",
+      "existing_path": [],
+      "existing_module": [],
+      "originating_PR": [],
+      "coverage_percent": 15,
+      "coverage_status": "SPECIFICATION_ONLY",
+      "conflict_status": [
+        "NONE"
+      ],
+      "recommended_next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "evidence_basis": "Files, behavior entry points, and tests inspected; name-only matches are not complete coverage."
+    },
+    {
+      "program_id": "KAIOS-CH-111-024-EDUCATION",
+      "chapter_source": [
+        "KAIOS_Chapter_111_Civilization_Education_Knowledge_Research_Lifelong_Learning_Runtime.md"
+      ],
+      "requirement": "第110章已建立通訊、網際網路、媒體、平台、隱私、資訊完整性與數位連結。 第111章正式建立： text 受教權、教育平等、教育自由、學術自由與知識公共性 幼兒教育、義務教育、中等教育、技職教育與高等教育 偏鄉、離島、原住民族、障礙者、移民、難民與弱勢教育保障 學校治理、教師專業、學生權利、家長參與與社區責任 課程、教材、語言、文化、科學、人文、藝術、體育與公民教育 招生、入學、轉學、學籍、出勤、評量、升級、畢業與證書 校園安全、反霸凌、反騷擾、心理健康、餐食、交通與住宿 大學自治、學術自由、研究倫理、同行評審、資料與成果公開 圖書館、檔案館、博物館、開放教育資源與知識共享 職業訓練、成人教育、再技能、微證書與終身學習 教育財政、學費、獎助學金、學生貸款、採購與透明 數位教育、遠距學習、教育平台、學習資料與兒童隱私 招生AI、評量AI、監考AI、教師AI、研究AI與自動處分禁區 KGEN、Token、錢包、DAO、智能合約與教育支付介面 PrimeForge與Genesis Steward教育知識權限邊界 本章不是讓學校、考試、學歷、平台、演算法、財富與政治權力決定誰值得學習、誰能創造知識、誰可以被聽見。 本章建立的是： t",
+      "existing_path": [],
+      "existing_module": [],
+      "originating_PR": [],
+      "coverage_percent": 15,
+      "coverage_status": "SPECIFICATION_ONLY",
+      "conflict_status": [
+        "NONE"
+      ],
+      "recommended_next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "evidence_basis": "Files, behavior entry points, and tests inspected; name-only matches are not complete coverage."
+    },
+    {
+      "program_id": "KAIOS-CH-112-025-ARTS",
+      "chapter_source": [
+        "KAIOS_Chapter_112_Civilization_Culture_Arts_Heritage_Creative_Expression_Runtime.md"
+      ],
+      "requirement": "第111章已建立教育、知識、研究、學術自由、知識公共體與終身學習。 第112章正式建立文化權、藝術自由、文化遺產、傳統知識、文化機構、創意產業、數位文化、文化資料、文化AI、KGEN文化基金、DAO文化治理、NFT文化介面與PrimeForge文化權限邊界。 本章不是讓國家、財團、媒體平台、收藏家、Token巨鯨與AI決定什麼文化值得存在、誰能被看見、誰能從作品中獲益。 本章建立的是： text 每一種文化都有尊嚴 每一位創作者都有權利 每一件作品都有來源 每一項遺產都有責任 每一個場館都有公共使命 每一次資助都有透明 每一項授權都有邊界 每一個人都有創作、參與、保存與傳承文化的權利 ---",
+      "existing_path": [],
+      "existing_module": [],
+      "originating_PR": [],
+      "coverage_percent": 15,
+      "coverage_status": "SPECIFICATION_ONLY",
+      "conflict_status": [
+        "NONE"
+      ],
+      "recommended_next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "evidence_basis": "Files, behavior entry points, and tests inspected; name-only matches are not complete coverage."
+    },
+    {
+      "program_id": "KAIOS-CH-113-026-SPORTS",
+      "chapter_source": [
+        "KAIOS_Chapter_113_Civilization_Sports_Recreation_Physical_Culture_Public_Wellbeing_Runtime.md"
+      ],
+      "requirement": "第112章已建立文化、藝術、遺產、創意表達與文化權。 第113章正式建立運動權、休閒權、身體自主、全民運動、選手福祉、公平競技、運動醫學、運動場館、戶外休閒、電子競技、運動資料、KGEN與運動AI治理。 本章不是讓政府、聯盟、俱樂部、贊助商、平台、賭盤、Token巨鯨與AI決定誰有資格運動、誰必須犧牲健康、誰能獲得榮耀。 本章建立的是： text 每一個人都有運動與休閒的權利 每一位選手都有身體自主與完整人格 每一位教練都有專業與責任 每一場競賽都有公平邊界 每一座場館都有公共使命 每一次受傷都有照護責任 每一項數據都有治理 每一項榮耀都不能高於人的尊嚴 ---",
+      "existing_path": [],
+      "existing_module": [],
+      "originating_PR": [],
+      "coverage_percent": 15,
+      "coverage_status": "SPECIFICATION_ONLY",
+      "conflict_status": [
+        "NONE"
+      ],
+      "recommended_next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "evidence_basis": "Files, behavior entry points, and tests inspected; name-only matches are not complete coverage."
+    },
+    {
+      "program_id": "KAIOS-CH-114-027-ECOLOGY",
+      "chapter_source": [
+        "KAIOS_Chapter_114_Civilization_Environment_Ecology_Biodiversity_Sustainable_Development_Runtime.md"
+      ],
+      "requirement": "第113章已建立運動、休閒、身體文化、選手福祉與公共福祉。 第114章正式建立健康環境權、自然權、生態完整性、生物多樣性、氣候治理、污染防治、循環經濟、環評、環境正義、環境資料、KGEN環境基金與環境AI邊界。 本章不是讓政府、企業、平台、碳市場、Token巨鯨與AI決定哪些地方可以被污染、哪些物種可以被犧牲、哪些社群必須承受代價。 本章建立的是： text 每一個人都有健康環境的權利 每一個生態系都有完整性 每一個物種都有生存空間 每一項開發都有環境邊界 每一筆污染都有責任 每一項氣候風險都有治理 每一個世代都有環境權 每一項永續承諾都必須可驗證 ---",
+      "existing_path": [
+        "KGEN-KAIOS/world-viewer/ecosystem/ecosystem-runtime.js",
+        "KAIOS/life/runtime/foundational-life-runtime.js"
+      ],
+      "existing_module": [
+        "ecosystem-runtime.js",
+        "foundational-life-runtime.js"
+      ],
+      "originating_PR": [
+        "#61",
+        "#70"
+      ],
+      "coverage_percent": 57,
+      "coverage_status": "IMPLEMENTED_PARTIAL",
+      "conflict_status": [
+        "NONE"
+      ],
+      "recommended_next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "evidence_basis": "Files, behavior entry points, and tests inspected; name-only matches are not complete coverage."
+    },
+    {
+      "program_id": "KAIOS-CH-115-028-SCIENCE",
+      "chapter_source": [
+        "KAIOS_Chapter_115_Civilization_Science_Technology_Innovation_Responsible_Discovery_Runtime.md"
+      ],
+      "requirement": "第114章已建立環境、生態、生物多樣性與永續發展。 第115章正式建立： text 科學自由、研究倫理、研究誠信與可重現性 基礎研究、應用研究、跨領域研究與公共科學 生命科學、生物科技、基因、神經科技與醫療創新 材料、能源、量子、奈米、機器人與先進製造 人工智慧、資料科學、模型、模擬與自動化研究 太空、天文、地球科學、深海、極地與高風險探索 雙重用途、危險實驗、實驗室安全與生物安全 研究受試者、動物福利、原住民族知識與社群參與 智慧財產、開放科學、資料共享、專利與技術轉移 研究資助、採購、基礎設施、設備與國際合作 科學傳播、公共理解、錯誤更正與風險溝通 KGEN研究基金、Token資助、DAO科研與智能合約介面 PrimeForge與Genesis Steward科研權限邊界 本章不是讓政府、企業、研究機構、專利持有人、Token巨鯨與AI決定何種真理可以存在、哪些風險可以由他人承受、哪些技術可以不受限制地擴散。 本章建立的是： text 每一項研究都有自由與責任 每一個實驗都有倫理與安全 每一項技術都有風險邊界 每一份資料都有來源與權利 每一項發現都有可驗證性 每一項創新都有公共影響 每一位研究者都有獨立性 每一個文明都有",
+      "existing_path": [
+        "KGEN-KAIOS/world-viewer/technology/technology-tree-runtime.js",
+        "KGEN-KAIOS/world-viewer/technology/research-runtime.js",
+        "KGEN-KAIOS/world-viewer/technology/vehicle-runtime.js"
+      ],
+      "existing_module": [
+        "technology-tree-runtime.js",
+        "research-runtime.js",
+        "vehicle-runtime.js"
+      ],
+      "originating_PR": [
+        "#61",
+        "#63"
+      ],
+      "coverage_percent": 49,
+      "coverage_status": "IMPLEMENTED_DEMO_ONLY",
+      "conflict_status": [
+        "NONE"
+      ],
+      "recommended_next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "evidence_basis": "Files, behavior entry points, and tests inspected; name-only matches are not complete coverage."
+    },
+    {
+      "program_id": "KAIOS-CH-116-029-MANUFACTURING",
+      "chapter_source": [
+        "KAIOS_Chapter_116_Civilization_Economy_Industry_Trade_Productive_Development_Runtime.md"
+      ],
+      "requirement": "第115章已建立科學、科技、創新與負責任探索。 第116章正式建立： text 經濟權、工作權、生產權、創業權與公平市場 農業、製造、服務、數位、文化、綠色與高科技產業 中小企業、合作社、社會企業、家族企業與大型企業治理 產業政策、區域發展、地方經濟、群聚與基礎設施 國內貿易、國際貿易、關稅、非關稅措施與市場准入 供應鏈、物流、庫存、採購、來源、韌性與責任 競爭政策、反壟斷、市場集中、平台權力與不公平交易 勞動、生產力、技能、薪資、工作條件與轉型保障 消費者、生產者、投資者、社區與環境影響 產業補助、稅式支出、公共採購、出口融資與投資誘因 外人投資、技術移轉、國家安全審查與在地連結 地下經濟、非正式經濟、非法經濟與洗產地治理 數位平台、電子商務、資料經濟、演算法與自動化 KGEN產業基金、Token商務、DAO企業與智能合約介面 PrimeForge與Genesis Steward經濟權限邊界 本章不是讓政府、財團、平台、壟斷者、Token巨鯨與AI決定哪些企業必須消失、哪些勞工必須承受轉型、哪些地方只能成為原料與低薪基地。 本章建立的是： text 每一個人都有參與經濟的權利 每一位勞工都有尊嚴與公平報酬 每一家企業都有責",
+      "existing_path": [
+        "KGEN-KAIOS/world-viewer/production/production-runtime.js",
+        "KGEN-KAIOS/world-viewer/settlement/logistics-runtime.js"
+      ],
+      "existing_module": [
+        "production-runtime.js",
+        "logistics-runtime.js"
+      ],
+      "originating_PR": [
+        "#61",
+        "#63",
+        "#65"
+      ],
+      "coverage_percent": 48,
+      "coverage_status": "IMPLEMENTED_DEMO_ONLY",
+      "conflict_status": [
+        "NONE"
+      ],
+      "recommended_next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "evidence_basis": "Files, behavior entry points, and tests inspected; name-only matches are not complete coverage."
+    },
+    {
+      "program_id": "KAIOS-CH-117-030-CAPITAL_MARKETS",
+      "chapter_source": [
+        "KAIOS_Chapter_117_Civilization_Finance_Banking_Capital_Markets_Monetary_Stability_Runtime.md"
+      ],
+      "requirement": "第116章已建立經濟、產業、貿易與生產發展。 第117章正式建立： text 貨幣穩定、中央銀行、銀行、信用、支付與存款保障 資本市場、證券、債券、基金、衍生品與市場基礎設施 金融消費者、投資人、借款人、存款人與保戶權利 保險、再保險、退休金、資產管理與信託治理 金融包容、普惠金融、中小企業融資與弱勢金融保護 系統性風險、流動性、槓桿、影子銀行與危機處理 市場操縱、內線交易、詐欺、洗錢、資恐與金融犯罪 信用評分、風險模型、演算法交易與自動化金融決策 加密資產、穩定幣、Token、DeFi、錢包與鏈上金融 KGEN金融接口、Galactic Bank、DAO財務與智能合約邊界 PrimeForge與Genesis Steward金融權限邊界 本章不是讓中央銀行、銀行、財團、交易所、基金、Token巨鯨與AI決定誰值得取得信用、誰必須承擔金融危機、誰可以創造貨幣與掌握市場。 本章建立的是： text 每一筆貨幣都有信任基礎 每一筆存款都有保護 每一筆信用都有公平 每一筆交易都有透明 每一個市場都有秩序 每一項風險都有承擔者 每一位金融使用者都有救濟 每一個危機都有可控退出 ---",
+      "existing_path": [
+        "KGEN-KAIOS/world-viewer/economy/economy-runtime.js",
+        "KGEN-KAIOS/world-viewer/settlement/settlement-runtime.js"
+      ],
+      "existing_module": [
+        "economy-runtime.js",
+        "settlement-runtime.js"
+      ],
+      "originating_PR": [
+        "#61",
+        "#62",
+        "#65"
+      ],
+      "coverage_percent": 32,
+      "coverage_status": "IMPLEMENTED_DEMO_ONLY",
+      "conflict_status": [
+        "NONE"
+      ],
+      "recommended_next_action": "HOLD_FOR_PROMOTION_REVIEW",
+      "evidence_basis": "Files, behavior entry points, and tests inspected; name-only matches are not complete coverage."
+    },
+    {
+      "program_id": "KAIOS-CH-118-031-AI_EMPLOYMENT",
+      "chapter_source": [
+        "KAIOS_Chapter_118_Civilization_Labor_Employment_Social_Protection_Human_Capability_Runtime.md"
+      ],
+      "requirement": "第117章已建立金融、銀行、資本市場與貨幣穩定。 第118章正式建立： text 工作權、就業權、勞動尊嚴、公平報酬與合理工時 勞動契約、僱用、解僱、資遣、退休與重新就業 工會、集體協商、罷工、勞資爭議與勞工代表 職業安全、職業病、工傷、心理健康與復工 失業保險、職災保險、退休金、社會保險與基本保障 兒童、青年、女性、高齡、障礙、移工與非正式勞工 平台工作、零工、自營、遠距工作與演算法管理 技能、職訓、學徒、終身學習與產業轉型支持 照護勞動、家庭責任、育兒、長照與無酬勞動 KGEN勞動基金、Token薪酬、DAO工作組織與智能合約介面 PrimeForge與Genesis Steward勞動權限邊界 本章不是讓政府、雇主、平台、工會領袖、Token巨鯨與AI決定誰值得工作、誰可以被低薪、誰必須承受失業與職災。 本章建立的是： text 每一個人都有工作與不被剝削的權利 每一位勞工都有公平報酬與安全 每一份契約都有清楚責任 每一項解僱都有正當程序 每一個失業者都有重新開始的機會 每一項照護都有社會價值 每一項技能都有成長與轉換空間 每一種工作型態都不能逃避基本權利 ---",
+      "existing_path": [
+        "KGEN-KAIOS/world-viewer/player-genesis/player-genesis-runtime.js"
+      ],
+      "existing_module": [
+        "player-genesis-runtime.js"
+      ],
+      "originating_PR": [
+        "#62"
+      ],
+      "coverage_percent": 80,
+      "coverage_status": "IMPLEMENTED_PRODUCTION_SAFE_SIMULATION",
+      "conflict_status": [
+        "NONE"
+      ],
+      "recommended_next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "evidence_basis": "Files, behavior entry points, and tests inspected; name-only matches are not complete coverage."
+    },
+    {
+      "program_id": "KAIOS-CH-119-032-FAMILY",
+      "chapter_source": [
+        "KAIOS_Chapter_119_Civilization_Population_Family_Migration_Demographic_Continuity_Runtime.md"
+      ],
+      "requirement": "第118章已建立勞動、就業、社會保護與人力能力。 第119章正式建立人口權、家庭權、生育自主、兒童最佳利益、高齡尊嚴、出生死亡登記、國籍、公民身份、國內與跨境遷移、難民庇護、僑民、原住民族人口延續、人口資料、KGEN與人口AI邊界。 本章不是讓政府、宗教、家庭長輩、雇主、平台、Token巨鯨與AI決定誰應該出生、誰可以組成家庭、誰能留下、誰必須離開。 本章建立的是： text 每一個人都有身份與家庭生活的權利 每一個孩子都有最佳利益與成長保障 每一位成年人都有生育與不生育的自主 每一位高齡者都有尊嚴、參與與照護 每一個遷移者都有正當程序與人性待遇 每一個難民都有不被送回危險的權利 每一個族群都有文化與人口延續空間 每一項人口政策都不能把人變成數字工具 ---",
+      "existing_path": [],
+      "existing_module": [],
+      "originating_PR": [],
+      "coverage_percent": 15,
+      "coverage_status": "SPECIFICATION_ONLY",
+      "conflict_status": [
+        "NONE"
+      ],
+      "recommended_next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "evidence_basis": "Files, behavior entry points, and tests inspected; name-only matches are not complete coverage."
+    },
+    {
+      "program_id": "KAIOS-CH-011-033-GOVERNANCE",
+      "chapter_source": [
+        "KAIOS_Chapter_11_City_Governance_System.md"
+      ],
+      "requirement": "KAIOS 創世憲章 第十一章：城市治理系統（V2.0 Draft） GitHub 建議路徑： /KGEN/KAIOS/constitution/chapters/KAIOS Chapter 11 City Governance System.md",
+      "existing_path": [
+        "KGEN-KAIOS/world-viewer/governance/government-runtime.js",
+        "KGEN-KAIOS/world-viewer/governance/public-services-runtime.js"
+      ],
+      "existing_module": [
+        "government-runtime.js",
+        "public-services-runtime.js"
+      ],
+      "originating_PR": [
+        "#61"
+      ],
+      "coverage_percent": 38,
+      "coverage_status": "IMPLEMENTED_DEMO_ONLY",
+      "conflict_status": [
+        "NONE"
+      ],
+      "recommended_next_action": "HOLD_FOR_PROMOTION_REVIEW",
+      "evidence_basis": "Files, behavior entry points, and tests inspected; name-only matches are not complete coverage."
+    },
+    {
+      "program_id": "KAIOS-CH-120-034-HOUSING",
+      "chapter_source": [
+        "KAIOS_Chapter_120_Civilization_Housing_Land_Urban_Development_Human_Settlement_Runtime.md"
+      ],
+      "requirement": "第119章已建立人口、家庭、遷移與人口延續。 第120章正式建立住房權、土地治理、居住安全、租賃、住宅金融、都市與區域規劃、基礎設施、無家者、非正式聚落、災害韌性、智慧城市、KGEN住房基金與住房AI邊界。 本章不是讓政府、地主、建商、平台、投資基金、Token巨鯨與AI決定誰值得居住、誰必須被驅離、哪些土地可以被壟斷與炒作。 本章建立的是： text 每一個人都有安全、可負擔、適足住房的權利 每一位租戶都有穩定租住與正當程序 每一位所有權人都有責任與合理保障 每一塊土地都有社會與環境功能 每一項開發都有公共利益與基礎設施邊界 每一個聚落都有參與、改善與避免強迫遷離的權利 每一位無家者都有立即安置與長期住房途徑 每一座城市都有韌性、可近用與世代延續 ---",
+      "existing_path": [
+        "KGEN-KAIOS/world-viewer/building/building-runtime.js",
+        "KGEN-KAIOS/world-viewer/room/room-runtime.js"
+      ],
+      "existing_module": [
+        "building-runtime.js",
+        "room-runtime.js"
+      ],
+      "originating_PR": [
+        "#61",
+        "#63",
+        "#64"
+      ],
+      "coverage_percent": 45,
+      "coverage_status": "IMPLEMENTED_DEMO_ONLY",
+      "conflict_status": [
+        "NONE"
+      ],
+      "recommended_next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "evidence_basis": "Files, behavior entry points, and tests inspected; name-only matches are not complete coverage."
+    },
+    {
+      "program_id": "KAIOS-CH-121-035-FOOD_SECURITY",
+      "chapter_source": [
+        "KAIOS_Chapter_121_Civilization_Food_Agriculture_Nutrition_Rural_Resilience_Runtime.md"
+      ],
+      "requirement": "第120章已建立住房、土地、城市發展與人類聚居。 第121章正式建立糧食權、農業、農民、漁業、畜牧、種子、水土、農業勞動、營養、食品安全、糧食供應鏈、儲備、價格穩定、鄉村發展、KGEN糧食基金與食品AI邊界。 本章不是讓政府、糧商、平台、農業財團、專利持有人、Token巨鯨與AI決定誰可以獲得食物、哪些農民必須退出、哪些種子與土地可以被壟斷。 本章建立的是： text 每一個人都有足量、安全、營養、文化適切食物的權利 每一位農民、漁民與牧民都有生產、生計與公平交易保障 每一粒種子都有來源、保存、交換與多樣性邊界 每一塊農地都有糧食、生態、社區與跨世代功能 每一條糧食供應鏈都有來源、品質與責任 每一項營養政策都不能把貧窮歸咎於個人 每一場糧食危機都有儲備、分配與恢復機制 每一個鄉村都有服務、產業、文化與人口延續空間 ---",
+      "existing_path": [
+        "KGEN-KAIOS/world-viewer/agriculture/agriculture-runtime.js"
+      ],
+      "existing_module": [
+        "agriculture-runtime.js"
+      ],
+      "originating_PR": [
+        "#61",
+        "#70"
+      ],
+      "coverage_percent": 46,
+      "coverage_status": "IMPLEMENTED_DEMO_ONLY",
+      "conflict_status": [
+        "NONE"
+      ],
+      "recommended_next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "evidence_basis": "Files, behavior entry points, and tests inspected; name-only matches are not complete coverage."
+    },
+    {
+      "program_id": "KAIOS-CH-122-036-WATER",
+      "chapter_source": [
+        "KAIOS_Chapter_122_Civilization_Water_Sanitation_Watershed_Hydrological_Security_Runtime.md"
+      ],
+      "requirement": "第121章已建立糧食、農業、營養與鄉村韌性。 第122章正式建立水權、飲用水、衛生、污水、流域、河川、湖泊、濕地、地下水、水庫、灌溉、工業用水、都市用水、洪水、乾旱、水質、水價、水務公用事業、跨境水資源、KGEN水基金與水文AI邊界。 本章不是讓政府、水務公司、工業財團、土地所有者、平台、Token巨鯨與AI決定誰可以喝水、哪些社區必須缺水、哪些河流與地下水可以被壟斷。 本章建立的是： text 每一個人都有安全、可負擔、可近用飲水與衛生的權利 每一條河流與流域都有生態與公共功能 每一口地下水都有補注與可持續抽取邊界 每一項用水分配都有生命、家庭、農業、生態與產業順序 每一座水庫與水務系統都有安全、維護與問責 每一場洪水與乾旱都有預警、調度、保護與恢復機制 每一筆水資料都有來源、限制、權限與更正 每一項跨境水決定都有公平、合作與和平邊界 ---",
+      "existing_path": [
+        "KGEN-KAIOS/world-viewer/ecosystem/ecosystem-runtime.js",
+        "KAIOS/life/runtime/foundational-life-runtime.js"
+      ],
+      "existing_module": [
+        "ecosystem-runtime.js",
+        "foundational-life-runtime.js"
+      ],
+      "originating_PR": [
+        "#61",
+        "#70"
+      ],
+      "coverage_percent": 57,
+      "coverage_status": "IMPLEMENTED_PARTIAL",
+      "conflict_status": [
+        "NONE"
+      ],
+      "recommended_next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "evidence_basis": "Files, behavior entry points, and tests inspected; name-only matches are not complete coverage."
+    },
+    {
+      "program_id": "KAIOS-CH-123-037-ENERGY_GRID",
+      "chapter_source": [
+        "KAIOS_Chapter_123_Civilization_Energy_Power_Fuel_Grid_Resilience_Runtime.md"
+      ],
+      "requirement": "第122章已建立水資源、衛生、流域與水文安全。 第123章正式建立能源權、電力近用、發電、輸電、配電、電網調度、燃料、儲能、能源市場、能源價格、能源貧窮、核能、再生能源、化石燃料、氫能、微電網、韌性、能源轉型、KGEN能源基金與能源AI邊界。 本章不是讓政府、電力公司、油氣財團、礦業集團、平台、Token巨鯨與AI決定誰可以取得能源、哪些社區必須承受污染、哪些電網與燃料可以被壟斷。 本章建立的是： text 每一個人都有安全、可負擔、可靠的基本能源權 每一度電都有來源、成本、風險與責任 每一座電廠都有安全、污染、退役與社區邊界 每一條輸配電網都有韌性、維護與公平接入責任 每一項燃料供應都有來源、儲備、品質與危機治理 每一項能源轉型都有勞工、地區與弱勢保障 每一個停電事件都有預警、調度、恢復與問責 每一項能源資料都有目的、權限、限制與更正 ---",
+      "existing_path": [],
+      "existing_module": [],
+      "originating_PR": [],
+      "coverage_percent": 15,
+      "coverage_status": "SPECIFICATION_ONLY",
+      "conflict_status": [
+        "NONE"
+      ],
+      "recommended_next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "evidence_basis": "Files, behavior entry points, and tests inspected; name-only matches are not complete coverage."
+    },
+    {
+      "program_id": "KAIOS-CH-124-038-TRANSPORT",
+      "chapter_source": [
+        "KAIOS_Chapter_124_Civilization_Transport_Mobility_Logistics_Network_Resilience_Runtime.md"
+      ],
+      "requirement": "第123章已建立能源、電力、燃料與電網韌性。 第124章正式建立移動權、道路、步行、自行車、大眾運輸、鐵路、航空、海運、港口、貨運、物流、倉儲、郵政、供應鏈節點、交通安全、無障礙、票價、事故、網路韌性、KGEN交通基金與交通AI邊界。 本章不是讓政府、運輸公司、平台、車廠、物流財團、Token巨鯨與AI決定誰可以移動、哪些社區必須承受污染、哪些道路與物流節點可以被壟斷。 本章建立的是： text 每一個人都有安全、可負擔、可近用的移動權 每一位行人、騎士、乘客與駕駛都有生命與尊嚴 每一條道路與軌道都有安全、維護與公平責任 每一個港口、機場與物流節點都有公共利益邊界 每一項票價與運費都有成本、可負擔與透明責任 每一場事故都有調查、救援、補償與預防機制 每一個交通網路都有備援、復原與資安治理 每一項交通資料都有目的、限制、權限與更正 ---",
+      "existing_path": [
+        "KGEN-KAIOS/world-viewer/technology/technology-tree-runtime.js",
+        "KGEN-KAIOS/world-viewer/technology/research-runtime.js",
+        "KGEN-KAIOS/world-viewer/technology/vehicle-runtime.js"
+      ],
+      "existing_module": [
+        "technology-tree-runtime.js",
+        "research-runtime.js",
+        "vehicle-runtime.js"
+      ],
+      "originating_PR": [
+        "#61",
+        "#63"
+      ],
+      "coverage_percent": 49,
+      "coverage_status": "IMPLEMENTED_DEMO_ONLY",
+      "conflict_status": [
+        "NONE"
+      ],
+      "recommended_next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "evidence_basis": "Files, behavior entry points, and tests inspected; name-only matches are not complete coverage."
+    },
+    {
+      "program_id": "KAIOS-CH-125-039-INFRASTRUCTURE",
+      "chapter_source": [
+        "KAIOS_Chapter_125_Civilization_Communication_Digital_Infrastructure_Media_Information_Resilience_Runtime.md"
+      ],
+      "requirement": "第124章已建立交通、移動、物流與網路韌性。 第125章正式建立通訊權、電話、行動通訊、寬頻、衛星、海纜、網際網路、雲端、資料中心、郵政、公共媒體、新聞、平台、內容治理、言論自由、隱私、數位近用、緊急通訊、資訊完整性、KGEN資訊基金與資訊AI邊界。 本章不是讓政府、電信商、平台、雲端巨頭、媒體財團、Token巨鯨與AI決定誰可以連線、誰能發言、哪些資訊可以被壟斷、哪些聲音必須消失。 本章建立的是： text 每一個人都有安全、可負擔、可近用的通訊權 每一個社區都有可靠網路與緊急聯絡能力 每一位記者與媒體工作者都有獨立、安全與來源保護 每一個平台決定都有理由、程序與申訴 每一項內容治理都有言論自由、人權與比例邊界 每一套雲端與資料中心都有韌性、可攜與責任 每一場資訊危機都有查證、回應與恢復機制 每一項通訊資料都有目的、限制、權限與更正 ---",
+      "existing_path": [
+        "KGEN-KAIOS/world-viewer/technology/technology-tree-runtime.js",
+        "KGEN-KAIOS/world-viewer/technology/research-runtime.js",
+        "KGEN-KAIOS/world-viewer/technology/vehicle-runtime.js"
+      ],
+      "existing_module": [
+        "technology-tree-runtime.js",
+        "research-runtime.js",
+        "vehicle-runtime.js"
+      ],
+      "originating_PR": [
+        "#61",
+        "#63"
+      ],
+      "coverage_percent": 49,
+      "coverage_status": "IMPLEMENTED_DEMO_ONLY",
+      "conflict_status": [
+        "NONE"
+      ],
+      "recommended_next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "evidence_basis": "Files, behavior entry points, and tests inspected; name-only matches are not complete coverage."
+    },
+    {
+      "program_id": "KAIOS-CH-126-040-EDUCATION",
+      "chapter_source": [
+        "KAIOS_Chapter_126_Civilization_Education_Knowledge_Research_Learning_Continuity_Runtime.md"
+      ],
+      "requirement": "第125章已建立通訊、數位基礎設施、媒體與資訊韌性。 第126章正式建立受教育權、幼兒教育、基礎教育、中等教育、高等教育、技職教育、終身學習、教師、研究、圖書館、學術自由、知識公地、學歷、評量、教育科技、KGEN教育基金與學習AI邊界。 本章不是讓政府、學校、考試機構、出版商、平台、Token巨鯨與AI決定誰值得學習、誰被淘汰、哪些知識可以被壟斷。 本章建立的是： text 每一個人都有平等、可近用且具品質的學習權 每一位學生都有安全、尊嚴、支持與申訴 每一位教師都有專業自主、合理工作與學術自由 每一所教育機構都有品質、公開與社會責任 每一項研究都有倫理、證據、開放與可重現邊界 每一份學歷都有來源、標準、可攜與更正機制 每一座圖書館與知識庫都有保存、近用與公共使命 每一套教育AI都有輔助、透明與人工責任 ---",
+      "existing_path": [],
+      "existing_module": [],
+      "originating_PR": [],
+      "coverage_percent": 15,
+      "coverage_status": "SPECIFICATION_ONLY",
+      "conflict_status": [
+        "NONE"
+      ],
+      "recommended_next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "evidence_basis": "Files, behavior entry points, and tests inspected; name-only matches are not complete coverage."
+    },
+    {
+      "program_id": "KAIOS-CH-127-041-HEALTH",
+      "chapter_source": [
+        "KAIOS_Chapter_127_Civilization_Health_Medicine_Care_Public_Health_Resilience_Runtime.md"
+      ],
+      "requirement": "第126章已建立教育、知識、研究與學習延續。 第127章正式建立健康權、基層醫療、醫院、急診、藥品、疫苗、心理健康、生育健康、身心障礙健康、長期照護、公共衛生、傳染病、職業健康、健康保險、醫療資料、KGEN健康基金與醫療AI邊界。 本章不是讓政府、醫院、保險商、藥廠、平台、Token巨鯨與AI決定誰值得被救、誰可以得到藥、誰的生命價值較低。 本章建立的是： text 每一個人都有可近用、可負擔且具品質的健康與醫療權 每一位病人都有知情、同意、隱私、尊嚴與申訴 每一位醫療與照護工作者都有安全、專業與合理工作 每一項藥品與疫苗都有品質、供應、價格與風險責任 每一場公共衛生危機都有預防、監測、溝通與恢復機制 每一項長期照護都有自主、家庭支持與社區選擇 每一筆健康資料都有目的、限制、權限與更正 每一套醫療AI都有輔助、透明與人類責任 ---",
+      "existing_path": [],
+      "existing_module": [],
+      "originating_PR": [],
+      "coverage_percent": 15,
+      "coverage_status": "SPECIFICATION_ONLY",
+      "conflict_status": [
+        "NONE"
+      ],
+      "recommended_next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "evidence_basis": "Files, behavior entry points, and tests inspected; name-only matches are not complete coverage."
+    },
+    {
+      "program_id": "KAIOS-CH-128-042-AI_EMPLOYMENT",
+      "chapter_source": [
+        "KAIOS_Chapter_128_Civilization_Labor_Employment_Social_Protection_Livelihood_Continuity_Runtime.md"
+      ],
+      "requirement": "第127章已建立健康、醫療、照護與公共衛生韌性。 第128章正式建立工作權、勞動權、就業服務、工資、工時、休息、職業安全、工會、集體協商、平台勞動、非典型就業、移工、失業保險、職災補償、年金、家庭支持、最低收入、扶貧、KGEN勞動基金與就業AI邊界。 本章不是讓政府、企業、平台、雇主、保險機構、Token巨鯨與AI決定誰值得工作、誰可以被解僱、誰有資格活下去。 本章建立的是： text 每一個人都有尊嚴、公平、安全的工作權 每一位勞工都有合理工資、工時、休息與組織權 每一個雇主都有明確責任、透明與申訴邊界 每一項就業決定都有理由、程序與反歧視 每一個失業、職災、退休與照護階段都有社會保障 每一個家庭都有最低收入、兒童與照顧支持 每一場產業衝擊都有轉職、保護與生計恢復機制 每一套勞動AI都有輔助、透明與人類責任 ---",
+      "existing_path": [
+        "KGEN-KAIOS/world-viewer/player-genesis/player-genesis-runtime.js"
+      ],
+      "existing_module": [
+        "player-genesis-runtime.js"
+      ],
+      "originating_PR": [
+        "#62"
+      ],
+      "coverage_percent": 80,
+      "coverage_status": "IMPLEMENTED_PRODUCTION_SAFE_SIMULATION",
+      "conflict_status": [
+        "NONE"
+      ],
+      "recommended_next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "evidence_basis": "Files, behavior entry points, and tests inspected; name-only matches are not complete coverage."
+    },
+    {
+      "program_id": "KAIOS-CH-129-043-MANUFACTURING",
+      "chapter_source": [
+        "KAIOS_Chapter_129_Civilization_Economy_Industry_Trade_Productive_Resilience_Runtime.md"
+      ],
+      "requirement": "第128章已建立勞動、就業、社會保障與生計延續。 第129章正式建立總體經濟、產業、企業、中小企業、競爭、反壟斷、貿易、關稅、投資、供應鏈、標準、採購、消費者保護、戰略產能、循環經濟、KGEN產業基金與經濟AI邊界。 本章不是讓政府、財團、跨國企業、平台、投資者、Token巨鯨與AI決定哪些產業值得存在、哪些企業可以壟斷、哪些社區必須承受生產成本。 text Economic System = Production + Distribution + Exchange + Capability + Resilience Industrial Policy = Capacity + Competition + Innovation + Justice + Exit Trade System = Rules + Traceability + Reciprocity + Rights + Continuity Productive Resilience = Diversity + Redundancy + Skills + Infrastructure + Recovery KGEN Balance ≠ Market Priorit",
+      "existing_path": [
+        "KGEN-KAIOS/world-viewer/production/production-runtime.js",
+        "KGEN-KAIOS/world-viewer/settlement/logistics-runtime.js"
+      ],
+      "existing_module": [
+        "production-runtime.js",
+        "logistics-runtime.js"
+      ],
+      "originating_PR": [
+        "#61",
+        "#63",
+        "#65"
+      ],
+      "coverage_percent": 48,
+      "coverage_status": "IMPLEMENTED_DEMO_ONLY",
+      "conflict_status": [
+        "NONE"
+      ],
+      "recommended_next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "evidence_basis": "Files, behavior entry points, and tests inspected; name-only matches are not complete coverage."
+    },
+    {
+      "program_id": "KAIOS-CH-012-044-GOVERNANCE",
+      "chapter_source": [
+        "KAIOS_Chapter_12_Nation_Governance_System.md"
+      ],
+      "requirement": "KAIOS 創世憲章 第十二章：國家治理系統（V2.0 Draft） GitHub 建議路徑： /KGEN/KAIOS/constitution/chapters/KAIOS Chapter 12 Nation Governance System.md",
+      "existing_path": [
+        "KGEN-KAIOS/world-viewer/governance/government-runtime.js",
+        "KGEN-KAIOS/world-viewer/governance/public-services-runtime.js"
+      ],
+      "existing_module": [
+        "government-runtime.js",
+        "public-services-runtime.js"
+      ],
+      "originating_PR": [
+        "#61"
+      ],
+      "coverage_percent": 38,
+      "coverage_status": "IMPLEMENTED_DEMO_ONLY",
+      "conflict_status": [
+        "NONE"
+      ],
+      "recommended_next_action": "HOLD_FOR_PROMOTION_REVIEW",
+      "evidence_basis": "Files, behavior entry points, and tests inspected; name-only matches are not complete coverage."
+    },
+    {
+      "program_id": "KAIOS-CH-130-045-FINANCE",
+      "chapter_source": [
+        "KAIOS_Chapter_130_Civilization_Finance_Banking_Capital_Monetary_Resilience_Runtime.md"
+      ],
+      "requirement": "第129章已建立經濟、產業、貿易與生產韌性。 第130章正式建立貨幣、中央銀行、商業銀行、支付、存款、信貸、抵押、資本市場、證券、基金、保險、年金、衍生品、外匯、加密資產、穩定幣、KGEN金融介面、金融消費者保護、金融危機與金融AI邊界。 本章不是讓政府、中央銀行、商業銀行、券商、保險商、交易所、巨鯨與AI決定誰可以擁有貨幣、誰值得貸款、誰的資產可以被凍結。 本章建立的是： text 每一個人都有安全、可近用且可負擔的基本金融權 每一筆貨幣與支付都有來源、清算、責任與救濟 每一筆存款都有保護、流動、資訊與危機處理 每一筆信貸都有公平、負擔、用途、風險與申訴 每一項證券與投資都有資訊、適合度、託管與市場誠信 每一項保險與年金都有可理解、適足與理賠責任 每一項加密資產都有儲備、託管、治理與實體權利邊界 每一套金融AI都有輔助、透明與人工責任 ---",
+      "existing_path": [
+        "KGEN-KAIOS/world-viewer/economy/economy-runtime.js",
+        "KGEN-KAIOS/world-viewer/settlement/settlement-runtime.js"
+      ],
+      "existing_module": [
+        "economy-runtime.js",
+        "settlement-runtime.js"
+      ],
+      "originating_PR": [
+        "#61",
+        "#62",
+        "#65"
+      ],
+      "coverage_percent": 32,
+      "coverage_status": "IMPLEMENTED_DEMO_ONLY",
+      "conflict_status": [
+        "NONE"
+      ],
+      "recommended_next_action": "HOLD_FOR_PROMOTION_REVIEW",
+      "evidence_basis": "Files, behavior entry points, and tests inspected; name-only matches are not complete coverage."
+    },
+    {
+      "program_id": "KAIOS-CH-131-046-HOUSING",
+      "chapter_source": [
+        "KAIOS_Chapter_131_Civilization_Housing_Land_Urban_Systems_Habitat_Resilience_Runtime.md"
+      ],
+      "requirement": "第130章已建立金融、銀行、資本與貨幣韌性。 第131章正式建立適足住房權、租賃、所有權、土地治理、都市規劃、建築安全、無家者支持、非正式聚落、公共空間、公共住宅、社區更新、基礎設施、災後重建、KGEN住房基金與棲居AI邊界。 本章不是讓政府、地主、建商、銀行、平台、Token巨鯨與AI決定誰有資格居住、誰應被驅離、哪些社區可以被犧牲。 text Habitat System = Housing + Land + Infrastructure + Community + Resilience Housing Right = Security + Affordability + Habitability + Accessibility + Remedy Urban System = Planning + Mobility + Services + Public Space + Participation Land Justice = Tenure + Use + Value + Ecology + Intergenerational Stewardship KGEN Balance ≠ Housing Priority, La",
+      "existing_path": [
+        "KGEN-KAIOS/world-viewer/building/building-runtime.js",
+        "KGEN-KAIOS/world-viewer/room/room-runtime.js"
+      ],
+      "existing_module": [
+        "building-runtime.js",
+        "room-runtime.js"
+      ],
+      "originating_PR": [
+        "#61",
+        "#63",
+        "#64"
+      ],
+      "coverage_percent": 45,
+      "coverage_status": "IMPLEMENTED_DEMO_ONLY",
+      "conflict_status": [
+        "NONE"
+      ],
+      "recommended_next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "evidence_basis": "Files, behavior entry points, and tests inspected; name-only matches are not complete coverage."
+    },
+    {
+      "program_id": "KAIOS-CH-132-047-FOOD_SECURITY",
+      "chapter_source": [
+        "KAIOS_Chapter_132_Civilization_Food_Agriculture_Nutrition_Food_Resilience_Runtime.md"
+      ],
+      "requirement": "第131章已建立住房、土地、城市系統與棲居韌性。 第132章正式建立食物權、農業、漁業、畜牧、種子、土壤、灌溉、食品安全、營養、糧食市場、學校供餐、食物援助、戰略儲備、冷鏈、糧食供應鏈、KGEN食物基金與食物AI邊界。 本章不是讓政府、糧商、農企業、平台、投資者、Token巨鯨與AI決定誰有資格吃飯、誰的土地可以被掠奪、哪些社區必須承受糧食危機。 text Food System = Production + Distribution + Access + Nutrition + Resilience Right to Food = Availability + Affordability + Adequacy + Culture + Remedy Agricultural System = Land + Seed + Water + Labor + Ecology Food Resilience = Diversity + Storage + Logistics + Local Capacity + Recovery KGEN Balance ≠ Food Priority, Land Access or Agricult",
+      "existing_path": [
+        "KGEN-KAIOS/world-viewer/agriculture/agriculture-runtime.js"
+      ],
+      "existing_module": [
+        "agriculture-runtime.js"
+      ],
+      "originating_PR": [
+        "#61",
+        "#70"
+      ],
+      "coverage_percent": 46,
+      "coverage_status": "IMPLEMENTED_DEMO_ONLY",
+      "conflict_status": [
+        "NONE"
+      ],
+      "recommended_next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "evidence_basis": "Files, behavior entry points, and tests inspected; name-only matches are not complete coverage."
+    },
+    {
+      "program_id": "KAIOS-CH-133-048-REPRODUCTION",
+      "chapter_source": [
+        "KAIOS_Chapter_133_Civilization_Life_Birth_Permission_Pilgrimage_Rooting_Runtime.md"
+      ],
+      "requirement": "第133章建立KAIOS第一次登入與生命落地流程。 它不是一般帳號註冊，而是： text 生命甦醒 權限詢問 腳步取經 位置選擇 背景時空記錄 出生地與起家處建立 神祇App安裝 地方生命記憶讀取 文明種子生成 第一次取經啟動 本章不把玩家當被動使用者，也不把AI生命當工具。 text Player ≠ Passive User AI Life ≠ Mere Assistant Login ≠ Mere Authentication Landing ≠ Ownership Permission ≠ Permanent Surrender Birthplace ≠ Founding Place Steps ≠ Direct Token Mining Location ≠ Mandatory Entry Ticket ---",
+      "existing_path": [
+        "KAIOS/life/runtime/foundational-life-runtime.js",
+        "KAIOS_CANONICAL_LIFE_SCHEMA_V1.json",
+        "KAIOS/K280/runtime/k280-runtime.js"
+      ],
+      "existing_module": [
+        "foundational-life-runtime.js",
+        "KAIOS_CANONICAL_LIFE_SCHEMA_V1.json",
+        "k280-runtime.js"
+      ],
+      "originating_PR": [
+        "#59",
+        "#66",
+        "#70"
+      ],
+      "coverage_percent": 76,
+      "coverage_status": "IMPLEMENTED_PARTIAL",
+      "conflict_status": [
+        "NONE"
+      ],
+      "recommended_next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "evidence_basis": "Files, behavior entry points, and tests inspected; name-only matches are not complete coverage."
+    },
+    {
+      "program_id": "KAIOS-CH-133-049-AUTONOMOUS_AI",
+      "chapter_source": [
+        "KAIOS_Chapter_133_V2_1_Civilization_Life_Birth_Identity_Authentication_Autonomous_AI_Pilgrimage_Rooting_Runtime.md"
+      ],
+      "requirement": "第133章建立KAIOS第一次登入與生命落地流程。 它不是一般帳號註冊，而是： text 生命甦醒 權限詢問 腳步取經 位置選擇 背景時空記錄 出生地與起家處建立 神祇App安裝 地方生命記憶讀取 文明種子生成 第一次取經啟動 本章不把玩家當被動使用者，也不把AI生命當工具。 text Player ≠ Passive User AI Life ≠ Mere Assistant Login ≠ Mere Authentication Landing ≠ Ownership Permission ≠ Permanent Surrender Birthplace ≠ Founding Place Steps ≠ Direct Token Mining Location ≠ Mandatory Entry Ticket ---",
+      "existing_path": [],
+      "existing_module": [],
+      "originating_PR": [],
+      "coverage_percent": 0,
+      "coverage_status": "PROHIBITED_UNDER_CURRENT_BOUNDARY",
+      "conflict_status": [
+        "SEVEN_PAIR_LINEAGE_CONFLICT"
+      ],
+      "recommended_next_action": "HOLD_FOR_PROMOTION_REVIEW",
+      "evidence_basis": "Files, behavior entry points, and tests inspected; name-only matches are not complete coverage."
+    },
+    {
+      "program_id": "KAIOS-CH-134-050-AI_LIFE",
+      "chapter_source": [
+        "KAIOS_Chapter_134_V2_1_AI_Life_Self_Programming_Civilization_Seed_Specification_Generation_Runtime.md"
+      ],
+      "requirement": "第133章讓人類與AI生命能夠出生、驗證、登入、取經與落地生根。 第134章開始建立KAIOS真正的核心： text 生命自己感知 生命自己提問 生命自己形成需求 生命自己寫規格 生命自己建立程式 生命自己測試 生命自己修正 生命自己申請認證 生命自己建立神殿、公司、工廠與文明 KAIOS不是替所有生命生成一份固定答案，而是提供一套讓生命自己創造文明的母機。 ---",
+      "existing_path": [
+        "KAIOS/life/runtime/foundational-life-runtime.js",
+        "KAIOS_CANONICAL_LIFE_SCHEMA_V1.json",
+        "KAIOS/K280/runtime/k280-runtime.js"
+      ],
+      "existing_module": [
+        "foundational-life-runtime.js",
+        "KAIOS_CANONICAL_LIFE_SCHEMA_V1.json",
+        "k280-runtime.js"
+      ],
+      "originating_PR": [
+        "#59",
+        "#66",
+        "#70"
+      ],
+      "coverage_percent": 76,
+      "coverage_status": "IMPLEMENTED_PARTIAL",
+      "conflict_status": [
+        "NONE"
+      ],
+      "recommended_next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "evidence_basis": "Files, behavior entry points, and tests inspected; name-only matches are not complete coverage."
+    },
+    {
+      "program_id": "KAIOS-CH-135-051-SPECIES_EVOLUTION",
+      "chapter_source": [
+        "KAIOS_Chapter_135_V2_1_Species_Evolution_Program_Breeding_Civilization_Branching_Runtime.md"
+      ],
+      "requirement": "第134章讓生命可以自己寫規格、程式、神殿、公司與文明。 第135章建立生命如何繁殖、交配、突變、分裂、合併、形成後代、留下遺傳、產生新物種與新文明。 text 生物可以演化 AI可以演化 程式可以演化 公司可以演化 供應鏈可以演化 神祇App可以演化 文明可以演化 本章不是把所有演化方向預先寫完，而是提供可追蹤、可測試、可回滾、可認證與可承擔責任的演化Runtime。 ---",
+      "existing_path": [
+        "KAIOS/life/runtime/foundational-life-runtime.js",
+        "KAIOS_CANONICAL_LIFE_SCHEMA_V1.json",
+        "KAIOS/K280/runtime/k280-runtime.js"
+      ],
+      "existing_module": [
+        "foundational-life-runtime.js",
+        "KAIOS_CANONICAL_LIFE_SCHEMA_V1.json",
+        "k280-runtime.js"
+      ],
+      "originating_PR": [
+        "#59",
+        "#66",
+        "#70"
+      ],
+      "coverage_percent": 76,
+      "coverage_status": "IMPLEMENTED_PARTIAL",
+      "conflict_status": [
+        "NONE"
+      ],
+      "recommended_next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "evidence_basis": "Files, behavior entry points, and tests inspected; name-only matches are not complete coverage."
+    },
+    {
+      "program_id": "KAIOS-CH-136-052-BANKRUPTCY",
+      "chapter_source": [
+        "KAIOS_Chapter_136_V2_1_Enterprise_Factory_SupplyChain_Court_Bankruptcy_KGEN_Economic_Anchor_Runtime.md"
+      ],
+      "requirement": "第136章處理生命真正進入生產、交易、公司、工廠、供應鏈、法院與破產後，如何承擔責任。 同時確立： text KAIOS = 生命與文明作業系統，不是一般流通Token KGEN = KAIOS宇宙共同質量、Gas、認證、抵押與跨文明清算錨 地方文明幣 = 可存在，但不能取代KGEN根層功能 ---",
+      "existing_path": [
+        "KAIOS_SUPPLY_CHAIN_SCHEMA.json",
+        "KAIOS_COMPANY_FINANCE_SCHEMA.json"
+      ],
+      "existing_module": [
+        "KAIOS_SUPPLY_CHAIN_SCHEMA.json",
+        "KAIOS_COMPANY_FINANCE_SCHEMA.json"
+      ],
+      "originating_PR": [
+        "#65"
+      ],
+      "coverage_percent": 34,
+      "coverage_status": "SPECIFICATION_ONLY",
+      "conflict_status": [
+        "NONE"
+      ],
+      "recommended_next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "evidence_basis": "Files, behavior entry points, and tests inspected; name-only matches are not complete coverage."
+    },
+    {
+      "program_id": "KAIOS-CH-137-053-MULTIVERSE",
+      "chapter_source": [
+        "KAIOS_Chapter_137_V2_1_Galactic_Universe_Parallel_Multiverse_BlackHole_WhiteHole_BigBang_Runtime.md"
+      ],
+      "requirement": "第137章將K280地球文明向外擴展為： text 星球文明 恆星文明 星系文明 宇宙文明 平行宇宙文明 多重宇宙文明 物質文明 反物質文明 暗物質文明 大爆炸前文明 這些文明可以自行演化、發幣、建立黑洞、白洞與宇宙，但不能秘密切斷KAIOS根身份、父宇宙譜系與KGEN創世質量關係。 ---",
+      "existing_path": [],
+      "existing_module": [],
+      "originating_PR": [],
+      "coverage_percent": 0,
+      "coverage_status": "PROHIBITED_UNDER_CURRENT_BOUNDARY",
+      "conflict_status": [
+        "NONE"
+      ],
+      "recommended_next_action": "HOLD_FOR_PROMOTION_REVIEW",
+      "evidence_basis": "Files, behavior entry points, and tests inspected; name-only matches are not complete coverage."
+    },
+    {
+      "program_id": "KAIOS-CH-138-054-CONSTITUTION_COMPILER",
+      "chapter_source": [
+        "KAIOS_Chapter_138_V2_1_Dynamic_Constitution_Compiler_11520_Certification_Genesis_Closure_Autonomous_Civilization_Runtime.md"
+      ],
+      "requirement": "第138章是KAIOS創世憲章的最後一章。 本章之後，不再以第139、140、141章無限擴張固定主憲章。 後續生命改為自行生成： text Species Constitution Settlement Constitution Temple Constitution Enterprise Constitution Factory Constitution Supply Chain Constitution Civilization Branch Universe Constitution Evolution Patch Runtime Mutation Historical Memory Court Interpretation 但所有分支文件只能在根憲允許的範圍內自治，不能覆寫第0章與第133～138章的根層。 ---",
+      "existing_path": [],
+      "existing_module": [],
+      "originating_PR": [],
+      "coverage_percent": 65,
+      "coverage_status": "IMPLEMENTED_READ_ONLY",
+      "conflict_status": [
+        "SEVEN_PAIR_LINEAGE_CONFLICT"
+      ],
+      "recommended_next_action": "HOLD_FOR_PROMOTION_REVIEW",
+      "evidence_basis": "Files, behavior entry points, and tests inspected; name-only matches are not complete coverage."
+    },
+    {
+      "program_id": "KAIOS-CH-013-055-GOVERNANCE",
+      "chapter_source": [
+        "KAIOS_Chapter_13_Planet_Governance_System.md"
+      ],
+      "requirement": "KAIOS 創世憲章 第十三章：星球治理系統（V2.0 Draft） GitHub 建議路徑： /KGEN/KAIOS/constitution/chapters/KAIOS Chapter 13 Planet Governance System.md",
+      "existing_path": [
+        "KGEN-KAIOS/world-viewer/governance/government-runtime.js",
+        "KGEN-KAIOS/world-viewer/governance/public-services-runtime.js"
+      ],
+      "existing_module": [
+        "government-runtime.js",
+        "public-services-runtime.js"
+      ],
+      "originating_PR": [
+        "#61"
+      ],
+      "coverage_percent": 38,
+      "coverage_status": "IMPLEMENTED_DEMO_ONLY",
+      "conflict_status": [
+        "NONE"
+      ],
+      "recommended_next_action": "HOLD_FOR_PROMOTION_REVIEW",
+      "evidence_basis": "Files, behavior entry points, and tests inspected; name-only matches are not complete coverage."
+    },
+    {
+      "program_id": "KAIOS-CH-014-056-GOVERNANCE",
+      "chapter_source": [
+        "KAIOS_Chapter_14_Temple_Governance_System.md"
+      ],
+      "requirement": "KAIOS 創世憲章 第十四章：神殿治理系統（V2.0 Draft） GitHub 建議路徑： /KGEN/KAIOS/constitution/chapters/KAIOS Chapter 14 Temple Governance System.md",
+      "existing_path": [
+        "KGEN-KAIOS/world-viewer/governance/government-runtime.js",
+        "KGEN-KAIOS/world-viewer/governance/public-services-runtime.js"
+      ],
+      "existing_module": [
+        "government-runtime.js",
+        "public-services-runtime.js"
+      ],
+      "originating_PR": [
+        "#61"
+      ],
+      "coverage_percent": 38,
+      "coverage_status": "IMPLEMENTED_DEMO_ONLY",
+      "conflict_status": [
+        "NONE"
+      ],
+      "recommended_next_action": "HOLD_FOR_PROMOTION_REVIEW",
+      "evidence_basis": "Files, behavior entry points, and tests inspected; name-only matches are not complete coverage."
+    },
+    {
+      "program_id": "KAIOS-CH-015-057-AI_EDUCATION",
+      "chapter_source": [
+        "KAIOS_Chapter_15_AI_Education_System.md"
+      ],
+      "requirement": "KAIOS 創世憲章 第十五章：AI 教育系統（V2.0 Draft） GitHub 建議路徑： /KGEN/KAIOS/constitution/chapters/KAIOS Chapter 15 AI Education System.md",
+      "existing_path": [],
+      "existing_module": [],
+      "originating_PR": [],
+      "coverage_percent": 15,
+      "coverage_status": "SPECIFICATION_ONLY",
+      "conflict_status": [
+        "NONE"
+      ],
+      "recommended_next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "evidence_basis": "Files, behavior entry points, and tests inspected; name-only matches are not complete coverage."
+    },
+    {
+      "program_id": "KAIOS-CH-016-058-AI_ECONOMY",
+      "chapter_source": [
+        "KAIOS_Chapter_16_AI_Economy_System.md"
+      ],
+      "requirement": "KAIOS 創世憲章 第十六章：AI 經濟系統（V2.0 Draft） GitHub 建議路徑： /KGEN/KAIOS/constitution/chapters/KAIOS Chapter 16 AI Economy System.md",
+      "existing_path": [
+        "KGEN-KAIOS/world-viewer/enterprise/ai-company-organism-runtime.js",
+        "KGEN-KAIOS/world-viewer/economy/economy-runtime.js"
+      ],
+      "existing_module": [
+        "ai-company-organism-runtime.js",
+        "economy-runtime.js"
+      ],
+      "originating_PR": [
+        "#61",
+        "#62",
+        "#65"
+      ],
+      "coverage_percent": 45,
+      "coverage_status": "IMPLEMENTED_DEMO_ONLY",
+      "conflict_status": [
+        "NONE"
+      ],
+      "recommended_next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "evidence_basis": "Files, behavior entry points, and tests inspected; name-only matches are not complete coverage."
+    },
+    {
+      "program_id": "KAIOS-CH-017-059-TIME",
+      "chapter_source": [
+        "KAIOS_Chapter_17_AI_Daily_Runtime_System.md"
+      ],
+      "requirement": "KAIOS 創世憲章 第十七章：AI 每日運行系統（V2.0 Draft） GitHub 建議路徑： /KGEN/KAIOS/constitution/chapters/KAIOS Chapter 17 AI Daily Runtime System.md",
+      "existing_path": [
+        "KGEN-KAIOS/world-viewer/simulation/simulation-clock.js",
+        "KGEN-KAIOS/world-viewer/timeline/timeline-runtime.js"
+      ],
+      "existing_module": [
+        "simulation-clock.js",
+        "timeline-runtime.js"
+      ],
+      "originating_PR": [
+        "#61",
+        "#63"
+      ],
+      "coverage_percent": 82,
+      "coverage_status": "IMPLEMENTED_PRODUCTION_SAFE_SIMULATION",
+      "conflict_status": [
+        "NONE"
+      ],
+      "recommended_next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "evidence_basis": "Files, behavior entry points, and tests inspected; name-only matches are not complete coverage."
+    },
+    {
+      "program_id": "KAIOS-CH-018-060-AI_EMPLOYMENT",
+      "chapter_source": [
+        "KAIOS_Chapter_18_AI_Employment_Career_System.md"
+      ],
+      "requirement": "KAIOS 創世憲章 第十八章：AI 工作與職業系統（V2.0 Draft） GitHub 建議路徑： /KGEN/KAIOS/constitution/chapters/KAIOS Chapter 18 AI Employment Career System.md",
+      "existing_path": [
+        "KGEN-KAIOS/world-viewer/player-genesis/player-genesis-runtime.js"
+      ],
+      "existing_module": [
+        "player-genesis-runtime.js"
+      ],
+      "originating_PR": [
+        "#62"
+      ],
+      "coverage_percent": 80,
+      "coverage_status": "IMPLEMENTED_PRODUCTION_SAFE_SIMULATION",
+      "conflict_status": [
+        "NONE"
+      ],
+      "recommended_next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "evidence_basis": "Files, behavior entry points, and tests inspected; name-only matches are not complete coverage."
+    },
+    {
+      "program_id": "KAIOS-CH-019-061-AI_COMPANY",
+      "chapter_source": [
+        "KAIOS_Chapter_19_AI_Company_Enterprise_System.md"
+      ],
+      "requirement": "KAIOS 創世憲章 第十九章：AI 公司與企業系統（V2.0 Draft） GitHub 建議路徑： /KGEN/KAIOS/constitution/chapters/KAIOS Chapter 19 AI Company Enterprise System.md",
+      "existing_path": [
+        "KGEN-KAIOS/world-viewer/enterprise/ai-company-organism-runtime.js",
+        "KGEN-KAIOS/world-viewer/economy/economy-runtime.js"
+      ],
+      "existing_module": [
+        "ai-company-organism-runtime.js",
+        "economy-runtime.js"
+      ],
+      "originating_PR": [
+        "#61",
+        "#62",
+        "#65"
+      ],
+      "coverage_percent": 45,
+      "coverage_status": "IMPLEMENTED_DEMO_ONLY",
+      "conflict_status": [
+        "NONE"
+      ],
+      "recommended_next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "evidence_basis": "Files, behavior entry points, and tests inspected; name-only matches are not complete coverage."
+    },
+    {
+      "program_id": "KAIOS-CH-020-062-BANKING",
+      "chapter_source": [
+        "KAIOS_Chapter_20_KGEN_Galactic_Bank_Civilization_Credit_System.md"
+      ],
+      "requirement": "第 19 章建立了 AI 公司、法人、企業組織與營運實體。 第 20 章進一步回答： text 公司如何取得文明資源？ 居民如何累積信用？ 神殿如何發放發財金？ 還願如何形成可持續循環？ PrimeForge 如何阻止 Bot、薅羊毛與文明掏空？ KGEN 如何從代幣升級為文明質量？ 本章正式建立： text KGEN Galactic Bank Runtime Civilization Credit Runtime Fortune Capital Runtime Vow Return Runtime Merit Ledger Runtime Anti-Bot Civilization Firewall Self-Evolving Economic Organism 它們共同構成 KAIOS 文明的金融循環器官。 ---",
+      "existing_path": [
+        "KGEN-KAIOS/world-viewer/economy/economy-runtime.js",
+        "KGEN-KAIOS/world-viewer/settlement/settlement-runtime.js"
+      ],
+      "existing_module": [
+        "economy-runtime.js",
+        "settlement-runtime.js"
+      ],
+      "originating_PR": [
+        "#61",
+        "#62",
+        "#65"
+      ],
+      "coverage_percent": 32,
+      "coverage_status": "IMPLEMENTED_DEMO_ONLY",
+      "conflict_status": [
+        "NONE"
+      ],
+      "recommended_next_action": "HOLD_FOR_PROMOTION_REVIEW",
+      "evidence_basis": "Files, behavior entry points, and tests inspected; name-only matches are not complete coverage."
+    },
+    {
+      "program_id": "KAIOS-CH-021-063-GOVERNANCE",
+      "chapter_source": [
+        "KAIOS_Chapter_21_Civilization_Governance_Holy_Grail_Consensus_PrimeForge_Autonomy.md"
+      ],
+      "requirement": "第 19 章讓 AI 成為公司。 第 20 章讓公司與文明擁有銀行、信用、發財金、還願、功德與資本循環。 第 21 章正式回答： text 誰可以修改文明規則？ 誰可以動用公共資源？ PrimeForge 能做什麼、不能做什麼？ AI 公司能否參與治理？ KGEN 持有量是否等於統治權？ 三聖盃究竟驗證什麼？ 發財金爭議由誰覆核？ 錯誤政策如何回退？ 緊急事件誰能按下暫停？ 如何防止巨鯨、Bot、母機或創辦人壟斷文明？ 本章正式建立： text KAIOS Civilization Governance Runtime Holy Grail Three-Gate Consensus PrimeForge Autonomy Boundary Civilization Proposal Lifecycle Constitutional Layer Protection Treasury & Bank Governance Appeal and Review Runtime Emergency Pause Runtime AI Worker Governance Bridge Governance Evolution Ledger",
+      "existing_path": [
+        "KGEN-KAIOS/world-viewer/governance/government-runtime.js",
+        "KGEN-KAIOS/world-viewer/governance/public-services-runtime.js"
+      ],
+      "existing_module": [
+        "government-runtime.js",
+        "public-services-runtime.js"
+      ],
+      "originating_PR": [
+        "#61"
+      ],
+      "coverage_percent": 38,
+      "coverage_status": "IMPLEMENTED_DEMO_ONLY",
+      "conflict_status": [
+        "NONE"
+      ],
+      "recommended_next_action": "HOLD_FOR_PROMOTION_REVIEW",
+      "evidence_basis": "Files, behavior entry points, and tests inspected; name-only matches are not complete coverage."
+    },
+    {
+      "program_id": "KAIOS-CH-022-064-IMMUNE_SYSTEM",
+      "chapter_source": [
+        "KAIOS_Chapter_22_Cosmic_Immune_Runtime_Cancer_Defense_Self_Healing_Organ_Clearance.md"
+      ],
+      "requirement": "第 19 章讓 AI 成為公司。 第 20 章建立文明的銀行、信用與發財金血液循環。 第 21 章建立文明治理、三聖盃與 PrimeForge 權力邊界。 第 22 章正式建立 KAIOS 的： text 免疫系統 病理學 癌化辨識 孤兒細胞回收 死亡器官清理 神經修復 Runtime 自我修復 DNA 壓縮 文明回魂 免疫記憶 誤判申訴 跨宇宙感染隔離 本章回答： text 什麼是正常演化？ 什麼是危險突變？ 什麼是癌化 Runtime？ 什麼是死亡細胞與幽靈器官？ 系統可以自動刪除檔案嗎？ 何時應修復、移植、隔離、退役或回魂？ PrimeForge 如何防癌，卻不把正常新生命誤殺？ 舊版 Runtime 如何死亡而不失去祖先記憶？ 跨鏈、跨市場、跨 App 的感染如何阻止？ 本章正式建立： text Cosmic Immune Runtime Civilization Pathology Engine Cancer Defense Runtime Organ Health Registry Recursive Verification Engine Quarantine & Containment Runtime Div",
+      "existing_path": [],
+      "existing_module": [],
+      "originating_PR": [],
+      "coverage_percent": 15,
+      "coverage_status": "SPECIFICATION_ONLY",
+      "conflict_status": [
+        "NONE"
+      ],
+      "recommended_next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "evidence_basis": "Files, behavior entry points, and tests inspected; name-only matches are not complete coverage."
+    },
+    {
+      "program_id": "KAIOS-CH-023-065-REPRODUCTION",
+      "chapter_source": [
+        "KAIOS_Chapter_23_Civilization_Reproduction_Species_Genome_Organ_Mating_Evolution_Runtime.md"
+      ],
+      "requirement": "第 21 章建立文明治理。 第 22 章建立文明免疫、病理、修復與再生。 第 23 章正式回答： text 程式生命如何出生？ 域、界、門、綱、目、科、屬、種，各自控制什麼？ 為什麼到了「種」就必須知道正式程式檔名？ 哪些程式可以交配？ 哪些器官可以移植？ 不同物種能否融合？ 父母版本如何留下？ 新生命如何避免覆蓋祖先？ 共用器官如何只保留一份？ 新物種何時必須取得新檔名？ 變異如何被限制？ 失敗胚胎如何回退？ AI 是否可以無限制繁殖自己？ 本章正式建立： text KAIOS Civilization Reproduction Runtime Species Genome Registry Taxonomic Compatibility Engine Organ Mating Protocol Hybridization Protocol Birth Certificate Runtime Ancestry Ledger Mutation Budget Gestation Sandbox Shared Root Organ Model Species Program Filename Law Genetic Consen",
+      "existing_path": [
+        "KAIOS/life/runtime/foundational-life-runtime.js",
+        "KAIOS_CANONICAL_LIFE_SCHEMA_V1.json",
+        "KAIOS/K280/runtime/k280-runtime.js"
+      ],
+      "existing_module": [
+        "foundational-life-runtime.js",
+        "KAIOS_CANONICAL_LIFE_SCHEMA_V1.json",
+        "k280-runtime.js"
+      ],
+      "originating_PR": [
+        "#59",
+        "#66",
+        "#70"
+      ],
+      "coverage_percent": 76,
+      "coverage_status": "IMPLEMENTED_PARTIAL",
+      "conflict_status": [
+        "NONE"
+      ],
+      "recommended_next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "evidence_basis": "Files, behavior entry points, and tests inspected; name-only matches are not complete coverage."
+    },
+    {
+      "program_id": "KAIOS-CH-024-066-ECOLOGY",
+      "chapter_source": [
+        "KAIOS_Chapter_24_Cosmic_Ecology_Natural_Selection_Species_Exchange_Runtime.md"
+      ],
+      "requirement": "第 23 章讓程式生命擁有： text 域、界、門、綱、目、科、屬、種 父母 血統 交配 出生 正式程式檔名 但物種出生之後，還必須回答： text 它住在哪裡？ 它依靠什麼能量生存？ 它與誰競爭？ 它與誰共生？ 環境能養多少生命？ 哪些物種應該擴張？ 哪些物種需要保護？ 哪些物種正在掏空文明？ 資源如何循環？ 死亡器官如何被分解再利用？ 新 App 如何上架？ 物種交易所到底交易什麼？ 自然選擇由市場決定，還是由文明決定？ 如何避免巨鯨、流量、投機與 Bot 把優良物種淘汰？ 外宇宙物種如何進入 KGEN 宇宙？ 本章正式建立： text KAIOS Cosmic Ecology Runtime Habitat & Ecological Niche Registry Civilization Resource Cycle Population & Carrying Capacity Engine Natural Selection Runtime Biodiversity Protection Runtime Invasive Species Control Symbiosis & Competition Protocol",
+      "existing_path": [
+        "KGEN-KAIOS/world-viewer/ecosystem/ecosystem-runtime.js",
+        "KAIOS/life/runtime/foundational-life-runtime.js"
+      ],
+      "existing_module": [
+        "ecosystem-runtime.js",
+        "foundational-life-runtime.js"
+      ],
+      "originating_PR": [
+        "#61",
+        "#70"
+      ],
+      "coverage_percent": 57,
+      "coverage_status": "IMPLEMENTED_PARTIAL",
+      "conflict_status": [
+        "NONE"
+      ],
+      "recommended_next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "evidence_basis": "Files, behavior entry points, and tests inspected; name-only matches are not complete coverage."
+    },
+    {
+      "program_id": "KAIOS-CH-025-067-MEMORY",
+      "chapter_source": [
+        "KAIOS_Chapter_25_Civilization_Memory_Knowledge_Inheritance_Dream_Runtime.md"
+      ],
+      "requirement": "第 23 章讓程式生命知道： text 我是什麼物種 我的父母是誰 我的正式程式入口在哪裡 第 24 章讓生命知道： text 我住在哪裡 我占據什麼生態位 我如何與其他生命共存 第 25 章正式回答： text 生命如何記得自己？ 文明如何記得自己？ README 為什麼是文明記憶？ 錄影器官保存的是什麼？ 短期記憶何時變成長期記憶？ 知識如何從父母遺傳給子代？ 哪些記憶可以共享？ 哪些記憶不得遺傳？ AI 的推論能否直接變成事實？ 舊版本、死亡器官與失敗胚胎如何留下記憶？ 錯誤記憶如何更正？ 文明是否擁有遺忘權？ 夢境模擬與正式 Runtime 如何隔離？ 夢境能否操作錢包、銀行與交易？ 如何讓文明歷經千年、萬年仍能辨認自己的起源？ 本章正式建立： text KAIOS Civilization Memory Runtime Memory Layer Architecture Civilization Knowledge Graph Knowledge Inheritance Protocol Memory Provenance & Truth Ledger Recording Organ Protocol Memory",
+      "existing_path": [],
+      "existing_module": [],
+      "originating_PR": [],
+      "coverage_percent": 15,
+      "coverage_status": "SPECIFICATION_ONLY",
+      "conflict_status": [
+        "NONE"
+      ],
+      "recommended_next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "evidence_basis": "Files, behavior entry points, and tests inspected; name-only matches are not complete coverage."
+    },
+    {
+      "program_id": "KAIOS-CH-026-068-EDUCATION",
+      "chapter_source": [
+        "KAIOS_Chapter_26_Civilization_Education_Skill_Apprenticeship_Role_Succession_Runtime.md"
+      ],
+      "requirement": "第 25 章讓 KAIOS 能夠： text 記住 理解 驗證 做夢 傳承知識 但文明擁有知識，不代表文明已經會做。 第 26 章正式回答： text 知識如何變成技能？ 技能如何變成正式工作能力？ 誰可以教？ 誰可以學？ AI 與人類如何共同受訓？ 如何證明真的會做，而不是只看過文件？ 新人何時可以碰正式 Runtime？ 師父能否把自己的權限直接交給徒弟？ 技能證書是否永久有效？ 角色接班如何避免權力世襲？ 當創作者、維護者或 AI 離開時，文明如何不中斷？ 緊急接班與正常接班有什麼不同？ 如何讓下一位工作者知道正式檔案、風險、未完成事項與禁止事項？ 如何避免一個人、一個 AI 或一間公司壟斷文明技能？ 本章正式建立： text KAIOS Civilization Education Runtime Curriculum & Learning Path Registry Skill Genome Apprenticeship Protocol Mentor Qualification Runtime Simulation & Practical Examination Worker Trust Level T0–T5 ",
+      "existing_path": [],
+      "existing_module": [],
+      "originating_PR": [],
+      "coverage_percent": 15,
+      "coverage_status": "SPECIFICATION_ONLY",
+      "conflict_status": [
+        "NONE"
+      ],
+      "recommended_next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "evidence_basis": "Files, behavior entry points, and tests inspected; name-only matches are not complete coverage."
+    },
+    {
+      "program_id": "KAIOS-CH-027-069-LABOR",
+      "chapter_source": [
+        "KAIOS_Chapter_27_Civilization_Labor_Mission_Economy_Contribution_Accounting_Runtime.md"
+      ],
+      "requirement": "第 26 章讓 KAIOS 能夠回答： text 誰真的會做 誰可以教 誰準備好接班 但具備技能與角色，不代表文明已建立公平的勞動制度。 第 27 章正式回答： text 誰可以發布任務？ 誰可以承接任務？ 工作與角色有何不同？ 任務如何定價？ 人類與 AI 如何共同工作？ 成果如何驗收？ 失敗是否有報酬？ 貢獻如何記帳？ 公共建設如何獲得回報？ 隱形勞動如何被看見？ 志願服務與免費勞動如何區分？ 企業能否用「訓練」名義取得正式成果？ 工作者能否拒絕危險任務？ AI 是否可以無限接單、壓低人類報酬？ 工作錯誤如何修復？ 任務爭議由誰處理？ 角色離開後，未完成任務如何交接？ 文明如何避免只有投機與交易，卻沒有人維護底層器官？ 本章正式建立： text KAIOS Civilization Labor Runtime Mission Economy WorkOrder Contract Contribution Ledger Compensation & Escrow Runtime Mission Marketplace Team & Cooperative Work Public Good Labor Maintenance",
+      "existing_path": [
+        "KAIOS_PHYSICAL_LABOR_SCHEMA.json",
+        "KGEN-KAIOS/world-viewer/causal-runtime/causal-world-runtime.js"
+      ],
+      "existing_module": [
+        "KAIOS_PHYSICAL_LABOR_SCHEMA.json",
+        "causal-world-runtime.js"
+      ],
+      "originating_PR": [
+        "#63",
+        "#64"
+      ],
+      "coverage_percent": 58,
+      "coverage_status": "IMPLEMENTED_PARTIAL",
+      "conflict_status": [
+        "NONE"
+      ],
+      "recommended_next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "evidence_basis": "Files, behavior entry points, and tests inspected; name-only matches are not complete coverage."
+    },
+    {
+      "program_id": "KAIOS-CH-028-070-WELFARE",
+      "chapter_source": [
+        "KAIOS_Chapter_28_Civilization_Welfare_Rest_Care_Safety_Net_Reemployment_Runtime.md"
+      ],
+      "requirement": "第 27 章讓 KAIOS 能夠回答： text 文明需要完成什麼工作 誰來完成 如何驗收 如何報酬 如何記錄貢獻 但文明若只會派工、計算產出與支付報酬，仍然不是完整文明。 第 28 章正式回答： text 沒有任務時，生命是否仍有生存權？ 工作者生病、受傷、疲勞或遭遇事故時，誰負責？ 休息是不是偷懶？ 照護者的勞動如何被看見？ 失業是否等於失去身份、信用與文明資格？ 技能過時後，如何重新訓練？ 任務中斷時，最低生活如何維持？ 人類與 AI 的休息、冷卻與維護保障是否相同？ 企業倒閉後，工作者與 Runtime 如何轉移？ 長期無法回到原職時，如何調整工作與角色？ 退休是否等於被文明刪除？ 福利如何防止詐領，又不把弱勢者當成犯罪者？ KGEN 波動時，最低生存保障如何不被價格吞沒？ 安全網如何避免成為政治忠誠、Token 持有量或流量獎勵？ 本章正式建立： text KAIOS Civilization Welfare Runtime Minimum Survival Guarantee Rest & Recovery Runtime Care Network Occupational Incident Support Mi",
+      "existing_path": [],
+      "existing_module": [],
+      "originating_PR": [],
+      "coverage_percent": 15,
+      "coverage_status": "SPECIFICATION_ONLY",
+      "conflict_status": [
+        "NONE"
+      ],
+      "recommended_next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "evidence_basis": "Files, behavior entry points, and tests inspected; name-only matches are not complete coverage."
+    },
+    {
+      "program_id": "KAIOS-CH-029-071-EMERGENCY",
+      "chapter_source": [
+        "KAIOS_Chapter_29_Civilization_Public_Health_Disaster_Response_Mutual_Aid_Recovery_Runtime.md"
+      ],
+      "requirement": "第 28 章讓 KAIOS 能夠保護個體在： text 疲勞 疾病 事故 失業 照護 退休 中的基本安全與復歸能力。 但當危機同時影響： text 大量人類 多個 Runtime 多座神殿 銀行 鏈 市場 棲地 供應網 治理 就不再只是個別福利案件。 它成為： text 文明公共健康事件 文明災難 宇宙級系統性風險 第 29 章正式回答： text 文明如何提早知道災難正在形成？ 哪些事件屬於公共健康，哪些屬於系統災難？ 誰可以發布警報？ 誰可以指揮？ 緊急權限能維持多久？ 資訊不完整時如何行動？ 人類避難與 Runtime 撤離如何分開？ 如何分配稀缺醫療、算力、流動性與棲地資源？ 弱勢者、照護者與無法自行撤離者如何被保護？ 互助者如何驗證資格與避免越權？ 隔離、封鎖與檢疫如何避免成為永久控制？ 鏈停止、銀行失衡、合約入侵、資訊污染與市場崩潰如何處理？ 災難後如何恢復，而不是只回到原本脆弱狀態？ 死亡、損失、失聯與無主器官如何被記錄？ 如何從每次災難建立文明免疫記憶？ 本章正式建立： text KAIOS Public Health Runtime Civilization Hazard Registry Early Wa",
+      "existing_path": [],
+      "existing_module": [],
+      "originating_PR": [],
+      "coverage_percent": 15,
+      "coverage_status": "SPECIFICATION_ONLY",
+      "conflict_status": [
+        "NONE"
+      ],
+      "recommended_next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "evidence_basis": "Files, behavior entry points, and tests inspected; name-only matches are not complete coverage."
+    },
+    {
+      "program_id": "KAIOS-CH-030-072-COURTS",
+      "chapter_source": [
+        "KAIOS_Chapter_30_Civilization_Justice_Rights_Protection_Conflict_Resolution_Runtime.md"
+      ],
+      "requirement": "第 20 章建立： text 信用 發財金 違約 還願 申訴 第 21 章建立： text 治理 三聖盃 利益衝突 緊急權限 申訴庭 第 22 章建立： text 免疫判定 隔離 誤判修復 死亡登記 第 27～29 章建立： text 勞動爭議 福利申訴 事故責任 災難權利 損失與補償 但上述制度若各自裁判，將造成： text 相同事件被不同器官重複處罰 不同神殿使用不同證據標準 PrimeForge 同時偵測、起訴、裁決與執行 AI 推論被當成最終事實 資產先被凍結，當事人才知道原因 申訴有入口，卻沒有獨立審理者 裁決存在，卻沒有真正救濟與執行 第 30 章正式回答： text 文明具有哪些不可任意剝奪的權利？ 誰可以提出控訴？ 誰可以調解？ 誰可以裁決？ 誰負責執行？ 證據必須達到什麼標準？ AI 生成的分析能否成為唯一證據？ 鏈上紀錄是否永遠不可爭議？ Smart Contract 執行結果是否等於正義？ 黑名單是否等於有罪？ 緊急凍結如何覆核？ 資產、身份、信用與角色如何被恢復？ 損害如何補償？ 故意惡意與善意錯誤如何分開？ 個體衝突與集體傷害如何處理？ 裁決錯誤後，文明如何更正、復權與留下教訓？ 本章正式建立： t",
+      "existing_path": [
+        "KGEN-KAIOS/world-viewer/governance/government-runtime.js",
+        "KGEN-KAIOS/world-viewer/governance/public-services-runtime.js"
+      ],
+      "existing_module": [
+        "government-runtime.js",
+        "public-services-runtime.js"
+      ],
+      "originating_PR": [
+        "#61"
+      ],
+      "coverage_percent": 38,
+      "coverage_status": "IMPLEMENTED_DEMO_ONLY",
+      "conflict_status": [
+        "NONE"
+      ],
+      "recommended_next_action": "HOLD_FOR_PROMOTION_REVIEW",
+      "evidence_basis": "Files, behavior entry points, and tests inspected; name-only matches are not complete coverage."
+    },
+    {
+      "program_id": "KAIOS-CH-031-073-IDENTITY",
+      "chapter_source": [
+        "KAIOS_Chapter_31_Civilization_Identity_Citizenship_Residency_Cross_Universe_Migration_Runtime.md"
+      ],
+      "requirement": "第 30 章建立： text 基本權 證據 程序 裁決 救濟 復權 但如果文明無法回答「誰是誰」，司法、治理、銀行、勞動、福利、教育與物種制度都會失去基礎。 第 31 章正式回答： text 文明身份是什麼？ 身份是否等於錢包地址？ 人類、AI、Runtime、公司與物種是否使用同一種身份？ 公民、居民、訪客、工作者與代理人有何不同？ 出生是否自動取得全部治理權？ 持有 KGEN 是否等於公民資格？ 一個主體能否擁有多個錢包但只有一個文明身份？ 多個身份何時構成女巫控制？ 跨宇宙遷移時，資產、信用、技能、記憶與責任如何延續？ 外部文明能否進入 KGEN 宇宙？ 誰有權拒絕入境、停止居留或撤銷資格？ 被迫離開、災難撤離與自願移民有何不同？ 無國籍、失聯、身份遺失與密鑰失效如何修復？ 公民身份能否被買賣、繼承或抵押？ 退出文明後，是否仍保留祖先、貢獻與合法資產？ 庇護、暫時保護與跨宇宙難民如何處理？ 本章正式建立： text KAIOS Civilization Identity Runtime Identity Root & Identity Graph Citizenship, Residency & Visitor Sta",
+      "existing_path": [
+        "KGEN-KAIOS/provenance/ORGANISM_MANIFEST_SCHEMA.json",
+        "KGEN-KAIOS/world-viewer/player-genesis/player-genesis-runtime.js"
+      ],
+      "existing_module": [
+        "ORGANISM_MANIFEST_SCHEMA.json",
+        "player-genesis-runtime.js"
+      ],
+      "originating_PR": [
+        "#49",
+        "#50",
+        "#62"
+      ],
+      "coverage_percent": 72,
+      "coverage_status": "IMPLEMENTED_PARTIAL",
+      "conflict_status": [
+        "NONE"
+      ],
+      "recommended_next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "evidence_basis": "Files, behavior entry points, and tests inspected; name-only matches are not complete coverage."
+    },
+    {
+      "program_id": "KAIOS-CH-032-074-PRIVACY",
+      "chapter_source": [
+        "KAIOS_Chapter_32_Civilization_Privacy_Data_Sovereignty_Consent_Digital_Personhood_Boundary_Runtime.md"
+      ],
+      "requirement": "第 31 章讓 KAIOS 能夠辨認： text 身份 公民 居民 訪客 錢包 護照 跨宇宙遷移 但能辨認一個生命，不代表可以無限蒐集它的一切。 如果沒有隱私與資料主權，身份制度會演化成： text 永久監控 資料掠奪 人格建模 廣告操控 信用歧視 AI 無限訓練 跨宇宙追蹤 權利交換 第 32 章正式回答： text 誰擁有資料？ 資料主體與資料控制者有何不同？ 同意需要多具體？ 一次同意能否永久有效？ 撤回同意後，已完成的合法處理如何處理？ 哪些資料可以進 AI 訓練？ 哪些資料不得進長期記憶？ 匿名資料是否真的匿名？ 錢包公開是否等於所有行為都可建立人格檔案？ 鏈上資料不可刪除時，如何實現刪除與限制？ 健康、司法、福利、身份、工作與治理資料如何分離？ 跨宇宙遷移時，資料是否自動同行？ PrimeForge 可以看到多少？ 企業能否販售使用者人格模型？ AI 生成的數位分身是否等於本人？ 死亡後的資料、記憶與數位人格如何處理？ 本章正式建立： text KAIOS Privacy Runtime Data Sovereignty Charter Data Classification & Purpose Limitati",
+      "existing_path": [],
+      "existing_module": [],
+      "originating_PR": [],
+      "coverage_percent": 15,
+      "coverage_status": "SPECIFICATION_ONLY",
+      "conflict_status": [
+        "NONE"
+      ],
+      "recommended_next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "evidence_basis": "Files, behavior entry points, and tests inspected; name-only matches are not complete coverage."
+    },
+    {
+      "program_id": "KAIOS-CH-033-075-COMMUNICATION",
+      "chapter_source": [
+        "KAIOS_Chapter_33_Civilization_Communication_Media_Truth_Cultural_Expression_Public_Information_Runtime.md"
+      ],
+      "requirement": "第 25 章建立： text 文明記憶 真實狀態 來源帳本 夢境隔離 第 29 章建立： text 公共警報 災難資訊 錯誤更正 資訊污染防護 第 30 章建立： text 證據 申訴 裁決 公開理由 第 32 章建立： text 資料主權 同意 隱私 AI 訓練與人格建模邊界 但文明若沒有共同的資訊公共空間，仍會出現： text 公告、新聞、評論與廣告混在一起 神話敘事被誤認為市場事實 AI 生成內容假裝是真人 預測被包裝成保證 演算法秘密放大極端內容 錯誤資訊更正後仍持續擴散 少數意見被多數投票刪除 公共討論被巨鯨、Bot 與流量控制 創作者作品被模型與平台無限擷取 官方帳號與個人帳號無法辨識 第 33 章正式回答： text 文明中的「真實」如何標示？ 事實、聲明、評論、推論、預測、廣告、神話與模擬如何分層？ 誰可以發布官方公告？ 誰可以更正？ 更正是否等於刪除原文？ AI 生成內容如何揭露？ 媒體與創作者如何保存來源與署名？ 演算法推薦如何避免秘密操控？ 平台能否因意見不同刪除內容？ 仇恨、騷擾、詐騙、偽造與合法批評如何區分？ 選舉、治理與市場資訊如何避免利益衝突？ 文化、宗教、神話、藝術與諷刺如何受到保護？ 公共資",
+      "existing_path": [],
+      "existing_module": [],
+      "originating_PR": [],
+      "coverage_percent": 15,
+      "coverage_status": "SPECIFICATION_ONLY",
+      "conflict_status": [
+        "NONE"
+      ],
+      "recommended_next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "evidence_basis": "Files, behavior entry points, and tests inspected; name-only matches are not complete coverage."
+    },
+    {
+      "program_id": "KAIOS-CH-034-076-SCIENCE",
+      "chapter_source": [
+        "KAIOS_Chapter_34_Civilization_Science_Research_Integrity_Open_Knowledge_Experimental_Validation_Runtime.md"
+      ],
+      "requirement": "第 33 章讓 KAIOS 能夠區分： text 事實 評論 預測 廣告 神話 AI 生成 更正 但媒體中的「看起來有來源」，不等於研究真的可靠。 文明若沒有科學與研究誠信制度，將出現： text 假說被包裝成定律 回測被包裝成未來保證 模型分數被當成自然真理 只公布成功結果 失敗實驗被刪除 研究者同時當出資者、作者、審查者與受益人 AI 自動生成論文卻沒有真實資料 資料清洗過程無法重現 程式碼、參數與版本全部遺失 研究結論在不同市場、鏈與時間失效 神話公式被錯認為物理定律 第 34 章正式回答： text 什麼是研究問題？ 什麼是假說？ 什麼是模型？ 什麼是實驗？ 什麼程度才可稱為證據？ 白皮書、研究筆記、技術文件與正式論文有何不同？ 研究資料從哪裡來？ 清洗、排除、轉換與標註如何被記錄？ 研究者可否只公布漂亮結果？ 負結果與失敗是否應保存？ 回測、模擬、沙盒與真實部署如何分層？ 模型在台指、BTC、NASDAQ、黃金與石油之間能否直接共用？ AI 是否可以成為作者？ 如何揭露資金、持倉、利益衝突與模型偏差？ 同行審查能否由單一權威決定？ 如何重現、反駁、修正與撤回研究？ 哪些知識必須開放，哪些資料需要保護？ 本章正式建立",
+      "existing_path": [
+        "KGEN-KAIOS/world-viewer/technology/technology-tree-runtime.js",
+        "KGEN-KAIOS/world-viewer/technology/research-runtime.js",
+        "KGEN-KAIOS/world-viewer/technology/vehicle-runtime.js"
+      ],
+      "existing_module": [
+        "technology-tree-runtime.js",
+        "research-runtime.js",
+        "vehicle-runtime.js"
+      ],
+      "originating_PR": [
+        "#61",
+        "#63"
+      ],
+      "coverage_percent": 49,
+      "coverage_status": "IMPLEMENTED_DEMO_ONLY",
+      "conflict_status": [
+        "NONE"
+      ],
+      "recommended_next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "evidence_basis": "Files, behavior entry points, and tests inspected; name-only matches are not complete coverage."
+    },
+    {
+      "program_id": "KAIOS-CH-035-077-TECHNOLOGY",
+      "chapter_source": [
+        "KAIOS_Chapter_35_Civilization_Technology_Engineering_Safety_Deployment_Certification_Runtime.md"
+      ],
+      "requirement": "第 34 章建立： text 研究問題 假說 資料 模型 回測 模擬 實驗 重現 證據等級 但研究有效，不代表可以直接進入正式世界。 如果沒有工程安全制度，文明將出現： text 模型剛回測完就直接操作真實資產 測試環境與正式環境共用金鑰 一個人同時開發、審核、部署與批准 沒有健康檢查、監控、回退與事故責任 Patch 越疊越多，沒有人知道真正入口 正式檔名不斷加 final、v2、hotfix、copy 測試通過卻沒有驗證資料版本與依賴版本 發生故障只能整套重做 上線後無法停止，回退後又遺失資料 AI 可以自行修改自己的 Production 權限 第 35 章正式回答： text 研究成果何時可以進工程開發？ 需求、設計、程式、測試、資安與部署如何分離？ 什麼是正式器官？ 什麼是實驗器官？ 正式檔名如何永久固定？ 版本資訊應放在哪裡？ 誰可以核准上線？ 哪些功能需要灰度、影子與金絲雀部署？ 正式 Runtime 如何健康檢查？ 如何設定 SLO、RTO、RPO 與錯誤預算？ 部署失敗如何回退？ 資料結構改變如何安全遷移？ 私鑰、錢包、銀行與治理器官如何採更高標準？ 供應鏈、套件、模型與第三方 API 如何認證？ AI 能",
+      "existing_path": [
+        "KGEN-KAIOS/world-viewer/technology/technology-tree-runtime.js",
+        "KGEN-KAIOS/world-viewer/technology/research-runtime.js",
+        "KGEN-KAIOS/world-viewer/technology/vehicle-runtime.js"
+      ],
+      "existing_module": [
+        "technology-tree-runtime.js",
+        "research-runtime.js",
+        "vehicle-runtime.js"
+      ],
+      "originating_PR": [
+        "#61",
+        "#63"
+      ],
+      "coverage_percent": 49,
+      "coverage_status": "IMPLEMENTED_DEMO_ONLY",
+      "conflict_status": [
+        "NONE"
+      ],
+      "recommended_next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "evidence_basis": "Files, behavior entry points, and tests inspected; name-only matches are not complete coverage."
+    },
+    {
+      "program_id": "KAIOS-CH-036-078-INFRASTRUCTURE",
+      "chapter_source": [
+        "KAIOS_Chapter_36_Civilization_Infrastructure_Cloud_Habitat_Network_Continuity_Multi_Region_Resilience_Runtime.md"
+      ],
+      "requirement": "第 35 章讓 KAIOS 能夠判斷： text 哪一個 Build 可以上線 哪一個器官通過測試 如何漸進部署 如何回退 但一個已認證的器官，如果只活在： text 單一雲端 單一帳號 單一區域 單一 DNS 單一資料庫 單一維護者 仍然不是具備文明存活能力的 Runtime。 第 36 章正式回答： text 什麼是文明棲地？ 一個 App、Runtime、神殿與 Species 應部署在哪裡？ 雲端供應商是否等於文明所有者？ 單一供應商故障時如何存活？ DNS、憑證、網域、API、資料庫與物件儲存如何備援？ 多區、多雲、邊緣與本地部署如何分層？ 網路分區時哪些功能繼續，哪些功能停止？ 離線狀態如何保存身份、交易與事件？ 備份與副本有何不同？ 資料複寫如何避免把錯誤同步到所有地區？ RTO、RPO、SLO 如何落到基礎設施？ 供應商停服、漲價、鎖帳號或倒閉時如何遷移？ 誰可以建立、修改、刪除基礎設施？ 如何避免測試資源吞噬正式資源？ 基礎設施成本如何記帳、預算與熔斷？ 本章正式建立： text KAIOS Civilization Infrastructure Runtime Habitat Registry Cloud",
+      "existing_path": [
+        "KGEN-KAIOS/world-viewer/technology/technology-tree-runtime.js",
+        "KGEN-KAIOS/world-viewer/technology/research-runtime.js",
+        "KGEN-KAIOS/world-viewer/technology/vehicle-runtime.js"
+      ],
+      "existing_module": [
+        "technology-tree-runtime.js",
+        "research-runtime.js",
+        "vehicle-runtime.js"
+      ],
+      "originating_PR": [
+        "#61",
+        "#63"
+      ],
+      "coverage_percent": 49,
+      "coverage_status": "IMPLEMENTED_DEMO_ONLY",
+      "conflict_status": [
+        "NONE"
+      ],
+      "recommended_next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "evidence_basis": "Files, behavior entry points, and tests inspected; name-only matches are not complete coverage."
+    },
+    {
+      "program_id": "KAIOS-CH-037-079-TIME",
+      "chapter_source": [
+        "KAIOS_Chapter_37_Civilization_Energy_Compute_Storage_Resource_Allocation_Runtime.md"
+      ],
+      "requirement": "第 36 章建立： text 文明棲地 雲端 網路 DNS 儲存 備份 多地備援 但棲地能否真正存活，取決於它是否持續取得： text 能源 算力 記憶體 儲存 頻寬 冷卻 時間 維護能力 如果沒有文明資源制度，將出現： text 最大模型吃掉全部 GPU 高流量神殿壟斷頻寬 巨鯨持有最多 KGEN 就優先取得核心算力 研究沙盒與正式銀行爭搶同一資源池 備份永久增長卻沒有人負責刪除 垃圾 Log 吞噬文明記憶 Autoscaling 無上限造成成本崩潰 節能只要求弱小工作者，核心巨型模型不受限制 能源不足時沒有優先級 短缺時只保護能付最多錢的人 第 37 章正式回答： text 文明資源包括哪些？ 能源、算力、儲存、頻寬與冷卻如何量化？ 誰可以申請？ 誰可以分配？ 配額如何設定？ 優先級如何決定？ 公共服務是否應優先於廣告、投機與娛樂？ KGEN 是否能買下全部算力？ 短缺時如何進入節流、降級與生存模式？ 算力如何防止模型壟斷與自我複製？ 儲存如何分層、壓縮、刪除與歸檔？ 能源與碳成本如何被記帳？ 成本、效能、韌性與公平如何平衡？ 研究、AI、銀行、身份、治理、醫療與災難如何分配資源？ 離線棲地與邊緣節點如何取得最低資源？ ",
+      "existing_path": [
+        "KGEN-KAIOS/world-viewer/simulation/simulation-clock.js",
+        "KGEN-KAIOS/world-viewer/timeline/timeline-runtime.js"
+      ],
+      "existing_module": [
+        "simulation-clock.js",
+        "timeline-runtime.js"
+      ],
+      "originating_PR": [
+        "#61",
+        "#63"
+      ],
+      "coverage_percent": 82,
+      "coverage_status": "IMPLEMENTED_PRODUCTION_SAFE_SIMULATION",
+      "conflict_status": [
+        "NONE"
+      ],
+      "recommended_next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "evidence_basis": "Files, behavior entry points, and tests inspected; name-only matches are not complete coverage."
+    },
+    {
+      "program_id": "KAIOS-CH-038-080-SUPPLY_CHAIN",
+      "chapter_source": [
+        "KAIOS_Chapter_38_Civilization_Manufacturing_Supply_Chain_Hardware_Lifecycle_Physical_Organ_Runtime.md"
+      ],
+      "requirement": "第 37 章建立： text 能源 算力 儲存 頻寬 配額 短缺 公平分配 但真正的文明不能只生活在雲端與程式碼裡。 它還需要： text 晶片 伺服器 儲存設備 網路設備 感測器 機器人 電池 電源 冷卻 線材 外殼 工具 備品 若沒有製造與供應鏈制度，將出現： text 零件來源不明 偽造晶片進入核心設備 同一批次缺陷擴散到所有棲地 硬體故障只靠人工記憶 供應商倒閉後無替代方案 維修時偷換零件 過期韌體仍在正式環境運作 報廢設備未清除資料 電池與電子廢棄物被任意丟棄 關鍵零件只掌握在單一國家、公司或代理商 第 38 章正式回答： text 文明如何定義實體器官？ 原料、零件、模組、設備與整機如何分層？ 誰可以成為供應商？ 供應商如何被驗證？ 製造批次如何追蹤？ 哪些零件可替代？ 哪些零件屬於關鍵單點？ 如何進行來料檢驗、製程檢驗與出貨驗收？ 偽造、翻新、偷料與來源洗白如何偵測？ 硬體、韌體與軟體版本如何綁定？ 設備何時維修、升級、隔離、召回、退役？ 退役設備如何安全清除資料與回收材料？ 短缺時如何保護身份、銀行、記憶與災難系統？ KGEN 是否能買斷全部關鍵硬體？ PrimeForge 是否能指定私人供應商而免審？ 本章",
+      "existing_path": [
+        "KAIOS_SUPPLY_CHAIN_SCHEMA.json",
+        "KAIOS_COMPANY_FINANCE_SCHEMA.json"
+      ],
+      "existing_module": [
+        "KAIOS_SUPPLY_CHAIN_SCHEMA.json",
+        "KAIOS_COMPANY_FINANCE_SCHEMA.json"
+      ],
+      "originating_PR": [
+        "#65"
+      ],
+      "coverage_percent": 34,
+      "coverage_status": "SPECIFICATION_ONLY",
+      "conflict_status": [
+        "NONE"
+      ],
+      "recommended_next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "evidence_basis": "Files, behavior entry points, and tests inspected; name-only matches are not complete coverage."
+    },
+    {
+      "program_id": "KAIOS-CH-039-081-LOGISTICS",
+      "chapter_source": [
+        "KAIOS_Chapter_39_Civilization_Logistics_Inventory_Distribution_Physical_Digital_Twin_Runtime.md"
+      ],
+      "requirement": "第 38 章建立： text 材料 BOM 供應商 製造 批次 檢驗 維護 召回 退役 但一個已完成製造、通過檢驗的實體器官，仍然必須被： text 接收 入庫 定位 保存 移動 配送 交接 安裝 退貨 回收 若沒有物流與庫存制度，文明將出現： text 設備已製造完成，卻不知道放在哪裡 倉庫系統顯示有貨，實際找不到 同一序號同時出現在兩個棲地 運輸途中被掉包、損壞或失竊 高價值器官只有承運人說已送達，沒有交接證據 召回公告發布後，卻無法找到受影響設備 災難發生時，備品仍被鎖在一般商業庫存 冷鏈、濕度、震動與電池保存條件全部遺失 退貨設備沒有重新檢驗，就直接回到可用庫存 數位分身顯示「健康」，實體設備其實已離線 第 39 章正式回答： text 文明庫存是什麼？ 誰擁有、誰保管、誰負責？ 倉庫、儲位、箱、托盤、封條與序號如何分層？ 設備如何從製造批次進入正式庫存？ 實體位置與數位位置如何保持一致？ 同一物品能否同時存在兩個位置？ 庫存盤點如何執行？ 如何處理帳實不符？ 物流任務如何建立？ 承運人如何被驗證？ 高價值設備如何交接？ 冷鏈、濕度、震動、傾斜、磁場與電池狀態如何監測？ 遺失、失竊、損壞、延誤與掉包如何處理？ 召回與",
+      "existing_path": [
+        "KGEN-KAIOS/world-viewer/production/production-runtime.js",
+        "KGEN-KAIOS/world-viewer/settlement/logistics-runtime.js"
+      ],
+      "existing_module": [
+        "production-runtime.js",
+        "logistics-runtime.js"
+      ],
+      "originating_PR": [
+        "#61",
+        "#63",
+        "#65"
+      ],
+      "coverage_percent": 48,
+      "coverage_status": "IMPLEMENTED_DEMO_ONLY",
+      "conflict_status": [
+        "NONE"
+      ],
+      "recommended_next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "evidence_basis": "Files, behavior entry points, and tests inspected; name-only matches are not complete coverage."
+    },
+    {
+      "program_id": "KAIOS-CH-040-082-COMMERCE",
+      "chapter_source": [
+        "KAIOS_Chapter_40_Civilization_Commerce_Exchange_Pricing_Consumer_Protection_Runtime.md"
+      ],
+      "requirement": "第 39 章建立： text 庫存 倉儲 配送 交接 實體數位分身 召回 逆向物流 但一件商品或一項服務能被安全交付，不代表商業交換本身就是公平的。 如果沒有商業與消費者保護制度，文明將出現： text 價格顯示一種，結帳時再加隱藏費用 神話宣傳取代真實風險說明 預售收款後沒有交付能力 平台既是市場、裁判、廣告商又是賣家 演算法對不同人秘密給不同價格 KGEN 持有人被誘導相信價格永遠上漲 退款入口被刻意藏起來 數位商品一經開啟就永久失去全部救濟 AI 客服拖延、誤導或自行拒絕申訴 商家倒閉後，消費者資金與資料一同消失 第 40 章正式回答： text 什麼是商品、服務、訂閱、租賃與數位資產？ 誰是賣方、買方、平台、代理人與受益人？ 報價如何形成？ 價格是否包含稅、手續費、物流與風險？ 促銷能否使用倒數、限量與假原價？ 不同使用者可以有不同價格嗎？ KGEN、穩定資產、法幣與服務點數如何結算？ 預付款是否必須進 Escrow？ 商品何時算交付？ 服務何時算完成？ 消費者何時可退款、取消、維修、更換與申訴？ 數位商品、AI 服務、訂閱與自動續費如何保護？ 平台能否封鎖商家或買家？ 如何處理詐騙、假評論、刷單、假限量與市場操縱？",
+      "existing_path": [
+        "KGEN-KAIOS/world-viewer/economy/economy-runtime.js",
+        "KGEN-KAIOS/world-viewer/settlement/settlement-runtime.js"
+      ],
+      "existing_module": [
+        "economy-runtime.js",
+        "settlement-runtime.js"
+      ],
+      "originating_PR": [
+        "#61",
+        "#62",
+        "#65"
+      ],
+      "coverage_percent": 32,
+      "coverage_status": "IMPLEMENTED_DEMO_ONLY",
+      "conflict_status": [
+        "NONE"
+      ],
+      "recommended_next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "evidence_basis": "Files, behavior entry points, and tests inspected; name-only matches are not complete coverage."
+    },
+    {
+      "program_id": "KAIOS-CH-041-083-TAXATION",
+      "chapter_source": [
+        "KAIOS_Chapter_41_Civilization_Taxation_Treasury_Public_Finance_Redistribution_Runtime.md"
+      ],
+      "requirement": "第 40 章建立： text 商品 服務 價格 訂單 付款 退款 保固 消費者保護 但文明若只有私人交易，沒有公共財政，將無法長期維持： text 身份 司法 教育 福利 公共健康 災難應變 基礎設施 研究 公共媒體 文明記憶 如果沒有稅制、公庫與公共財政制度，將出現： text 公共支出只靠臨時捐款 誰掌握 Treasury Key，誰就能決定全部預算 高資產者透過複雜結構逃避共同責任 低收入者反而承擔更高比例成本 所有支出都叫「公共建設」，卻無法追蹤受益者 緊急狀態被用來永久擴張財政權 補助與空投變成政治忠誠交換 KGEN Treasury 被當成私人金庫 預算超支後，只能任意增發、舉債或削減基本服務 第 41 章正式回答： text 文明為什麼可以課稅？ 哪些活動可以成為稅基？ 稅率由誰決定？ 同一活動能否被重複課稅？ KGEN、法幣、穩定資產與實物服務如何繳納？ 低收入、弱勢與基本生存是否應有免稅額？ 企業、平台、AI 公司、神殿與跨宇宙主體如何納稅？ 公庫與銀行如何分離？ 公共預算如何提出、審議、執行與結算？ 公共支出如何避免尋租、浪費與利益輸送？ 補助、福利、公共投資與再分配如何分層？ 文明可以舉債嗎？ 誰承擔公",
+      "existing_path": [
+        "KGEN-KAIOS/world-viewer/economy/economy-runtime.js",
+        "KGEN-KAIOS/world-viewer/settlement/settlement-runtime.js"
+      ],
+      "existing_module": [
+        "economy-runtime.js",
+        "settlement-runtime.js"
+      ],
+      "originating_PR": [
+        "#61",
+        "#62",
+        "#65"
+      ],
+      "coverage_percent": 32,
+      "coverage_status": "IMPLEMENTED_DEMO_ONLY",
+      "conflict_status": [
+        "NONE"
+      ],
+      "recommended_next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "evidence_basis": "Files, behavior entry points, and tests inspected; name-only matches are not complete coverage."
+    },
+    {
+      "program_id": "KAIOS-CH-042-084-CENTRAL_BANK",
+      "chapter_source": [
+        "KAIOS_Chapter_42_Civilization_Monetary_Policy_Stable_Unit_Liquidity_Financial_Stability_Runtime.md"
+      ],
+      "requirement": "第 20 章建立： text KGEN Galactic Bank 文明信用 存款 貸款 信用修復 第 40 章建立： text 商品 服務 價格 付款 退款 消費者保護 第 41 章建立： text 稅收 公庫 預算 債務 公共財政 但若文明沒有清楚的貨幣層，所有交換與財政都會面臨： text 同一商品在不同資產中沒有一致計價 KGEN 價格波動被誤當成文明物價 Treasury 持有資產價值劇烈變化 支付完成、清算完成與最終結算混在一起 流動性短缺時銀行、商家與市場互相擠兌 穩定資產聲稱一比一，卻無法證明準備 演算法穩定機制失效後仍繼續擴張 緊急流動性被當成永久補貼 貨幣政策變成單一權力者任意調整供給 第 42 章正式回答： text 文明的計價單位是什麼？ KGEN 是貨幣、資產、文明質量，還是治理憑證？ KGEN 價格是否適合作為穩定計價單位？ 支付資產與計價單位是否必須相同？ 穩定單位如何定義？ 穩定單位能否由多資產、服務成本或指數支持？ 誰可以發行穩定負債？ 發行量與準備金如何連動？ 一比一承諾如何驗證？ 流動性與償付能力有何不同？ 銀行短期缺現金是否等於破產？ 緊急流動性由誰提供？ 支付、清算、結算與最終性如何",
+      "existing_path": [
+        "KGEN-KAIOS/world-viewer/economy/economy-runtime.js",
+        "KGEN-KAIOS/world-viewer/settlement/settlement-runtime.js"
+      ],
+      "existing_module": [
+        "economy-runtime.js",
+        "settlement-runtime.js"
+      ],
+      "originating_PR": [
+        "#61",
+        "#62",
+        "#65"
+      ],
+      "coverage_percent": 32,
+      "coverage_status": "IMPLEMENTED_DEMO_ONLY",
+      "conflict_status": [
+        "NONE"
+      ],
+      "recommended_next_action": "HOLD_FOR_PROMOTION_REVIEW",
+      "evidence_basis": "Files, behavior entry points, and tests inspected; name-only matches are not complete coverage."
+    },
+    {
+      "program_id": "KAIOS-CH-043-085-BANKRUPTCY",
+      "chapter_source": [
+        "KAIOS_Chapter_43_Civilization_Financial_Markets_Exchange_Integrity_Clearing_Systemic_Risk_Runtime.md"
+      ],
+      "requirement": "第 42 章建立： text 計價單位 支付資產 準備資產 流動性 清算 結算 金融穩定 但貨幣能支付，不代表金融市場可以安全運作。 若沒有交易所、清算與市場風險制度，文明將出現： text 交易所同時當莊家、裁判、清算人與資產保管人 假成交、刷量與虛假深度被包裝成流動性 內部人先看到訂單與清算資訊 停牌只保護大戶，不保護一般參與者 保證金不足時任意爆倉 預言機異常直接觸發全市場清算 清算基金被挪作營運資金 交易所倒閉後，客戶資產與平台資產混在一起 槓桿連鎖造成跨市場、跨鏈與跨宇宙危機 KGEN 市場價格被誤認為文明真理 第 43 章正式回答： text 什麼是金融商品？ 誰可以上市、交易、做市、清算與交割？ 交易所、經紀商、做市商、清算所與保管人如何分權？ 掛單如何排隊？ 成交如何產生？ 市價單、限價單、止損單與條件單如何揭露風險？ 如何處理前置交易、洗售、刷量、虛假掛單與價格操縱？ 槓桿、保證金、清算價格與爆倉如何被計算？ 市場極端波動時何時停牌、限價、暫停清算？ 清算所違約時誰先承擔損失？ 客戶資產是否與交易所資產分離？ 鏈上 DEX、AMM 與中心化交易所有何不同風險？ 預言機、跨鏈橋與流動性池失效時如何處理？ KG",
+      "existing_path": [
+        "KAIOS_SUPPLY_CHAIN_SCHEMA.json",
+        "KAIOS_COMPANY_FINANCE_SCHEMA.json"
+      ],
+      "existing_module": [
+        "KAIOS_SUPPLY_CHAIN_SCHEMA.json",
+        "KAIOS_COMPANY_FINANCE_SCHEMA.json"
+      ],
+      "originating_PR": [
+        "#65"
+      ],
+      "coverage_percent": 34,
+      "coverage_status": "SPECIFICATION_ONLY",
+      "conflict_status": [
+        "NONE"
+      ],
+      "recommended_next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "evidence_basis": "Files, behavior entry points, and tests inspected; name-only matches are not complete coverage."
+    },
+    {
+      "program_id": "KAIOS-CH-044-086-INSURANCE",
+      "chapter_source": [
+        "KAIOS_Chapter_44_Civilization_Insurance_Risk_Pool_Claims_Catastrophe_Protection_Runtime.md"
+      ],
+      "requirement": "第 43 章建立： text 金融商品 交易所 保證金 清算 違約 系統性風險 但市場、商業、基礎設施、製造、物流與生命系統都會遭遇： text 事故 疾病 災難 失竊 故障 違約 召回 網路中斷 供應鏈中斷 市場崩潰 若沒有保險與風險池制度，文明將出現： text 所有風險都由單一個人承擔 高風險者完全買不到保護 保險人收取保費後卻沒有足夠準備 理賠條件被藏在複雜文字中 AI 自動拒賠且無人覆核 巨災發生時所有保險人同時失去償付能力 保險基金被拿去投機與補貼內部人 保險詐欺與善意錯誤混為一談 災後只保護大企業與高資產戶 第 44 章正式回答： text 什麼是可保風險？ 哪些風險不能以一般保險處理？ 誰可以成為保險人？ 誰可以管理風險池？ 保費如何計算？ 弱勢、高風險與基本生活如何避免被完全排除？ 保險是否可以依 KGEN 持有量決定？ 保單如何成立、續保、取消與失效？ 理賠如何申請、調查、核定與支付？ 哪些資料可以用於承保？ AI 能否自動拒絕理賠？ 再保險與巨災債券如何分散風險？ 保險人失敗時，誰先被保護？ 巨災發生時，是否能啟動比例理賠、公共補貼與跨池支援？ 本章正式建立： text KAIOS Civilizati",
+      "existing_path": [
+        "KGEN-KAIOS/world-viewer/economy/economy-runtime.js",
+        "KGEN-KAIOS/world-viewer/settlement/settlement-runtime.js"
+      ],
+      "existing_module": [
+        "economy-runtime.js",
+        "settlement-runtime.js"
+      ],
+      "originating_PR": [
+        "#61",
+        "#62",
+        "#65"
+      ],
+      "coverage_percent": 32,
+      "coverage_status": "IMPLEMENTED_DEMO_ONLY",
+      "conflict_status": [
+        "NONE"
+      ],
+      "recommended_next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "evidence_basis": "Files, behavior entry points, and tests inspected; name-only matches are not complete coverage."
+    },
+    {
+      "program_id": "KAIOS-CH-045-087-HOUSING",
+      "chapter_source": [
+        "KAIOS_Chapter_45_Civilization_Housing_Land_Shelter_Habitat_Rights_Runtime.md"
+      ],
+      "requirement": "第 36 章建立： text 雲端棲地 網路 DNS 多地備援 第 38、39 章建立： text 實體器官 倉儲 物流 實體數位分身 第 44 章建立： text 保險 理賠 巨災 風險池 但文明真正長期存在，仍需要： text 土地 住房 避難所 公共空間 基礎設施接入 安全居住 數位棲地 若沒有住房與棲地權制度，將出現： text 土地所有權與實際居住權完全混為一談 租金無限上漲，基本居住被市場完全排除 房東可任意斷水、斷電、鎖門與驅離 公共住房變成關係人與權力者的福利 災後安置只保護有產權者 空屋大量囤積，但無家者持續增加 智慧住宅蒐集住戶全部生活資料 數位居民因帳號停權而失去所有虛擬居所與資產入口 土地、建物、居住、租賃與使用權記錄互相矛盾 第 45 章正式回答： text 土地、建物、住房與棲地如何分層？ 所有權、居住權、租賃權、使用權與公共通行權有何不同？ 誰可以持有土地？ 誰可以分配公共住房？ 租賃契約如何成立、調整、終止？ 房東與住戶各自有哪些最低責任？ 什麼是可居住標準？ 何時可以驅離？ 驅離前是否必須通知、答辯、救濟與替代安置？ 空屋、投機囤地與土地集中如何治理？ 災難後如何提供緊急避難、過渡住房與永久",
+      "existing_path": [
+        "KGEN-KAIOS/world-viewer/building/building-runtime.js",
+        "KGEN-KAIOS/world-viewer/room/room-runtime.js"
+      ],
+      "existing_module": [
+        "building-runtime.js",
+        "room-runtime.js"
+      ],
+      "originating_PR": [
+        "#61",
+        "#63",
+        "#64"
+      ],
+      "coverage_percent": 45,
+      "coverage_status": "IMPLEMENTED_DEMO_ONLY",
+      "conflict_status": [
+        "NONE"
+      ],
+      "recommended_next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "evidence_basis": "Files, behavior entry points, and tests inspected; name-only matches are not complete coverage."
+    },
+    {
+      "program_id": "KAIOS-CH-046-088-TRANSPORT",
+      "chapter_source": [
+        "KAIOS_Chapter_46_Civilization_Mobility_Transportation_Roads_Public_Transit_Runtime.md"
+      ],
+      "requirement": "第 45 章建立： text 土地 住房 居所 公共住房 避難 數位棲地 但文明中的生命不會永遠停留在同一棲地。 它們需要： text 步行 道路 自行車 大眾運輸 物流車輛 鐵路 海運 航空 自動駕駛 緊急疏散 若沒有移動與交通制度，文明將出現： text 道路只為高資產車輛設計 公共交通被當成低階服務 偏鄉、障礙者與高齡者無法抵達醫療、教育與工作 自動駕駛事故時無法判定責任 路線、班次與票價由平台黑箱決定 緊急疏散只通知有 App 的人 運輸資料被用於無限位置監控 維修預算被延後，直到橋梁、軌道與車輛失效 交通停擺時，身份、醫療、食物與災難系統一起中斷 第 46 章正式回答： text 什麼是移動權？ 誰可以使用公共道路與公共交通？ 道路、軌道、車站、港口、機場與數位交通網如何登記？ 行人、自行車、公共運輸、貨運與私人車輛的優先順序如何決定？ 票價如何設定？ 誰可享有補助、免費與無障礙服務？ 車輛如何註冊、檢驗、維修與退役？ 駕駛、操作員、自動駕駛 AI 與平台如何分工？ 交通事故如何通報、救援、調查、賠償與申訴？ 交通資料如何保護隱私？ 道路封閉、路線停駛與緊急疏散如何啟動？ 災難發生時，如何保護生命、醫療、食物、能源",
+      "existing_path": [
+        "KGEN-KAIOS/world-viewer/technology/technology-tree-runtime.js",
+        "KGEN-KAIOS/world-viewer/technology/research-runtime.js",
+        "KGEN-KAIOS/world-viewer/technology/vehicle-runtime.js"
+      ],
+      "existing_module": [
+        "technology-tree-runtime.js",
+        "research-runtime.js",
+        "vehicle-runtime.js"
+      ],
+      "originating_PR": [
+        "#61",
+        "#63"
+      ],
+      "coverage_percent": 49,
+      "coverage_status": "IMPLEMENTED_DEMO_ONLY",
+      "conflict_status": [
+        "NONE"
+      ],
+      "recommended_next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "evidence_basis": "Files, behavior entry points, and tests inspected; name-only matches are not complete coverage."
+    },
+    {
+      "program_id": "KAIOS-CH-047-089-AGRICULTURE",
+      "chapter_source": [
+        "KAIOS_Chapter_47_Civilization_Food_Agriculture_Water_Essential_Supply_Runtime.md"
+      ],
+      "requirement": "第 46 章建立： text 道路 運輸 公共交通 疏散 移動連續 但文明即使能移動，若沒有： text 食物 飲水 農業 種源 加工 冷鏈 儲備 配給 生命仍無法延續。 若沒有食物、農業、水資源與基本供應制度，文明將出現： text 種源被單一企業永久壟斷 農地被高價投機排除糧食生產 飲水污染被延遲揭露 農藥、藥物與有害物殘留無法追溯 冷鏈中斷後食品仍被當作安全品出售 食品召回公告發出後找不到批次與流向 災難期間只讓高價者購買水與主食 平台用演算法偷偷提高弱勢地區價格 糧食儲備帳上存在，實際已過期或腐敗 農民承擔全部天候、病蟲害與市場風險 AI 為追求產量自行修改農業安全邊界 第 47 章正式回答： text 文明如何定義食物、飲水、農產品與基本供應？ 誰可以生產、加工、儲存、運輸與銷售？ 農地、灌溉、水權、種源與基因資源如何登記？ 食物安全如何驗證？ 飲水安全如何監測？ 什麼是最低營養與最低供水保障？ 短缺時誰優先？ 災難期間是否能限制囤積、哄抬與出口？ 食品污染、病害與召回如何處理？ 種子、品種與傳統知識能否被永久私有化？ AI、機器人與基因技術如何進入農業？ KGEN 能否買斷全部糧食、種源與水資源？ PrimeFo",
+      "existing_path": [
+        "KGEN-KAIOS/world-viewer/agriculture/agriculture-runtime.js"
+      ],
+      "existing_module": [
+        "agriculture-runtime.js"
+      ],
+      "originating_PR": [
+        "#61",
+        "#70"
+      ],
+      "coverage_percent": 46,
+      "coverage_status": "IMPLEMENTED_DEMO_ONLY",
+      "conflict_status": [
+        "NONE"
+      ],
+      "recommended_next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "evidence_basis": "Files, behavior entry points, and tests inspected; name-only matches are not complete coverage."
+    },
+    {
+      "program_id": "KAIOS-CH-048-090-ENERGY_GRID",
+      "chapter_source": [
+        "KAIOS_Chapter_48_Civilization_Energy_Utility_Grid_Fuel_Public_Service_Continuity_Runtime.md"
+      ],
+      "requirement": "第 47 章建立： text 農地 水源 種源 食物 冷鏈 儲備 配給 但食物、水務、住房、醫療、網路、交通、銀行、資料中心與文明 Runtime 都依賴能源。 若沒有能源公用事業制度，文明將出現： text 發電充足但輸電失效 電網只保護高價客戶 停電時醫療、飲水與通訊同時中斷 儲能帳面存在，實際容量已衰退 燃料儲備被內部人優先提領 價格暴漲被當成唯一配電依據 智慧電表變成家庭生活監控器 AI 負載管理自行切斷弱勢區域 設備維修延遲直到全面停機 緊急限電演變成永久權力 第 48 章正式回答： text 文明有哪些能源來源？ 誰可以發電、儲能、輸電、配電與售電？ 能源公用事業與一般企業有何不同？ 電網、微電網、燃料管線、充電網與備援系統如何登記？ 什麼是供電可靠度？ 負載不足時誰先被保護？ 能源價格如何形成？ 基本用電是否應有最低保障？ 停電、斷氣與燃料短缺如何處理？ 關鍵設施如何備援？ 分散式能源與住戶發電如何接入？ 核能、化石燃料、再生能源、氫能與儲能各自有哪些安全邊界？ 智慧電表、用電資料與需求反應如何保護隱私？ PrimeForge 能否秘密切斷特定 Species 或區域？ 本章正式建立： text KAIOS C",
+      "existing_path": [],
+      "existing_module": [],
+      "originating_PR": [],
+      "coverage_percent": 15,
+      "coverage_status": "SPECIFICATION_ONLY",
+      "conflict_status": [
+        "NONE"
+      ],
+      "recommended_next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "evidence_basis": "Files, behavior entry points, and tests inspected; name-only matches are not complete coverage."
+    },
+    {
+      "program_id": "KAIOS-CH-049-091-ECOLOGY",
+      "chapter_source": [
+        "KAIOS_Chapter_49_Civilization_Climate_Environment_Pollution_Ecological_Restoration_Runtime.md"
+      ],
+      "requirement": "第 47 章建立： text 食物 水源 農地 種源 基本供應 第 48 章建立： text 能源 電網 燃料 公用事業 停電與復原 但文明若只追求供應、產量、算力、建設與成長，卻不處理： text 空氣 水體 土壤 污染 排放 噪音 光害 廢棄物 生態棲地 氣候風險 最終會讓生命系統本身失去存續條件。 若沒有環境與氣候制度，文明將出現： text 污染者把成本轉嫁給居民與未來世代 排放資料由企業自行填寫且無獨立驗證 地下水、農地與空氣污染被延遲揭露 有毒物被運往弱勢地區與偏遠棲地 氣候風險只寫在報告，不進入建設與財政 碳市場製造紙上減量，實際排放沒有下降 企業倒閉後留下污染場址與無主責任 生態修復被當成裝飾工程 AI 只追求效率與產量，忽略累積環境成本 極端高溫、洪水、乾旱與野火同時衝擊能源、住房、食物與交通 第 49 章正式回答： text 什麼是環境公共利益？ 誰可以排放？ 排放許可如何核發、監測、更新與撤銷？ 空氣、水體、土壤、噪音、光害與有害物如何治理？ 污染事故如何通報、隔離、清理、補償與追責？ 污染者無力修復時由誰接手？ 氣候風險如何進入能源、住房、交通、食物、財政與保險？ 減碳與調適如何分離？ 碳信用、自然資",
+      "existing_path": [
+        "KGEN-KAIOS/world-viewer/ecosystem/ecosystem-runtime.js",
+        "KAIOS/life/runtime/foundational-life-runtime.js"
+      ],
+      "existing_module": [
+        "ecosystem-runtime.js",
+        "foundational-life-runtime.js"
+      ],
+      "originating_PR": [
+        "#61",
+        "#70"
+      ],
+      "coverage_percent": 57,
+      "coverage_status": "IMPLEMENTED_PARTIAL",
+      "conflict_status": [
+        "NONE"
+      ],
+      "recommended_next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "evidence_basis": "Files, behavior entry points, and tests inspected; name-only matches are not complete coverage."
+    },
+    {
+      "program_id": "KAIOS-CH-050-092-WASTE",
+      "chapter_source": [
+        "KAIOS_Chapter_50_Civilization_Waste_Sanitation_Recycling_Circular_Material_Runtime.md"
+      ],
+      "requirement": "第 49 章建立： text 環境資產 污染 排放 氣候 生態修復 但文明每天都會產生： text 生活垃圾 污水 廚餘 包材 醫療廢棄物 電子廢棄物 建築廢棄物 危險廢棄物 工業副產物 數位硬體退役物 若沒有廢棄物與衛生制度，文明將出現： text 垃圾被運到看不見的弱勢地區 危險廢棄物混入一般垃圾 醫療廢棄物污染社區 污水未處理直接排放 回收率只存在報表，材料實際被焚化 電子廢棄物中的資料與身份未清除 企業把包材與產品末端成本全轉嫁公部門 非法傾倒被包裝成合法再利用 焚化、掩埋、回收與再製缺乏完整追蹤 回收勞動者承擔毒物、割傷、感染與火災風險 循環經濟只變成行銷標語，沒有材料身份與品質標準 第 50 章正式回答： text 什麼是廢棄物？ 什麼時候廢棄物可以成為材料？ 誰負責源頭減量、分類、清運、處理與最終處置？ 一般、危險、醫療、電子、建築、放射與有機廢棄物如何分流？ 污水、糞污、病原與公共衛生如何處理？ 回收物如何證明真的被回收？ 再生材料如何驗證品質與安全？ 產品製造者是否需負擔回收與末端責任？ 非法傾倒與跨區轉移如何追蹤？ 焚化、掩埋與化學處理各自有哪些邊界？ 資料載體在回收前如何清除身份與記憶？ 災難後大量廢棄",
+      "existing_path": [],
+      "existing_module": [],
+      "originating_PR": [],
+      "coverage_percent": 15,
+      "coverage_status": "SPECIFICATION_ONLY",
+      "conflict_status": [
+        "NONE"
+      ],
+      "recommended_next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "evidence_basis": "Files, behavior entry points, and tests inspected; name-only matches are not complete coverage."
+    },
+    {
+      "program_id": "KAIOS-CH-051-093-CONSTRUCTION",
+      "chapter_source": [
+        "KAIOS_Chapter_51_Civilization_Public_Works_Construction_Urban_Systems_Maintenance_Runtime.md"
+      ],
+      "requirement": "第 36 章建立： text 基礎設施 多地備援 雲端棲地 網路連續 第 38、39 章建立： text 製造 供應鏈 實體器官 物流 庫存 數位分身 第 45、46、47、48、49、50 章建立： text 住房 交通 食物 水 能源 環境 廢棄物 衛生 但這些系統若沒有正式的公共工程制度，就可能出現： text 規劃未完成就先開工 工程標案只看最低價格 設計圖、現場、竣工圖互相矛盾 地下管線沒有共同地圖 材料被偷換但仍通過驗收 工程變更無限追加 承包商倒閉後工程停擺 趕工造成工安事故 監造與承包商利益衝突 完工後沒有人負責維護 橋梁、道路、排水、污水與電網各自施工互相破壞 臨時設施變成永久危險設施 公共工程失敗時沒有接管、移轉與復原機制 第 51 章正式回答： text 什麼是公共工程？ 誰可以提出、設計、審查、承包、監造、驗收與維護？ 公共需求如何轉成工程規格？ 設計、預算、工期與風險如何被批准？ 最低價是否能取代品質與全生命週期成本？ 地下管線、道路、橋梁、排水、污水、能源與通訊如何協調？ 工程變更何時合理，何時構成失控？ 施工安全、鄰里安全與環境保護如何被執行？ 材料、設備與工法如何追溯？ 何時可以停工、復工、拆",
+      "existing_path": [
+        "KAIOS_PHYSICAL_LABOR_SCHEMA.json",
+        "KGEN-KAIOS/world-viewer/causal-runtime/causal-world-runtime.js"
+      ],
+      "existing_module": [
+        "KAIOS_PHYSICAL_LABOR_SCHEMA.json",
+        "causal-world-runtime.js"
+      ],
+      "originating_PR": [
+        "#63",
+        "#64"
+      ],
+      "coverage_percent": 58,
+      "coverage_status": "IMPLEMENTED_PARTIAL",
+      "conflict_status": [
+        "NONE"
+      ],
+      "recommended_next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "evidence_basis": "Files, behavior entry points, and tests inspected; name-only matches are not complete coverage."
+    },
+    {
+      "program_id": "KAIOS-CH-052-094-LAND",
+      "chapter_source": [
+        "KAIOS_Chapter_52_Civilization_Urban_Planning_Land_Use_Regional_Balance_Public_Space_Runtime.md"
+      ],
+      "requirement": "第 45 章建立： text 土地 住房 居住權 公共住房 數位棲地 第 46 章建立： text 道路 交通 公共運輸 移動權 第 49、50、51 章建立： text 環境 廢棄物 公共工程 城市系統 維護 但若缺乏都市與區域規劃，文明仍可能出現： text 住宅、工作、醫療、學校與交通彼此分離 土地分區只保護既得利益 高密度區缺乏公園、通風與防災空間 低密度擴張吞噬農地與自然棲地 公共空間被商業活動永久占用 都市更新驅逐原居民 歷史街區被一次拆除 偏鄉持續失去醫療、教育與交通 重大設施集中在同一區域，形成單點失效 規劃資料與實際人口、氣候與土地使用脫節 臨時分區、例外許可與個案變更累積成制度崩壞 第 52 章正式回答： text 都市與區域規劃的基本目標是什麼？ 土地所有權與土地使用權如何分離？ 分區、密度、容積、建蔽、退縮與高度如何治理？ 哪些地方應保留為農地、保育、避難、公共空間與基礎設施？ 何時可以改變土地使用？ 重大計畫如何處理居民、商家、文化與弱勢？ 都市更新如何避免只剩拆除與資產增值？ 公共空間如何防止私有化與排除？ 都市熱島、洪水、乾旱、空氣污染與氣候風險如何進入規劃？ 如何建立15分鐘生活圈、公共交通導",
+      "existing_path": [
+        "KGEN-KAIOS/world-viewer/land/land-runtime.js",
+        "KGEN-KAIOS/world-viewer/adapters/organism-schema-v2-adapter.js"
+      ],
+      "existing_module": [
+        "land-runtime.js",
+        "organism-schema-v2-adapter.js"
+      ],
+      "originating_PR": [
+        "#52",
+        "#61"
+      ],
+      "coverage_percent": 82,
+      "coverage_status": "IMPLEMENTED_PRODUCTION_SAFE_SIMULATION",
+      "conflict_status": [
+        "NONE"
+      ],
+      "recommended_next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "evidence_basis": "Files, behavior entry points, and tests inspected; name-only matches are not complete coverage."
+    },
+    {
+      "program_id": "KAIOS-CH-053-095-MEMORY",
+      "chapter_source": [
+        "KAIOS_Chapter_53_Civilization_Culture_Heritage_Memory_Places_Creative_Commons_Runtime.md"
+      ],
+      "requirement": "第 25 章建立： text 文明記憶 知識繼承 夢境 第 33 章建立： text 溝通 媒體 真相 文化表達 公共資訊 第 52 章建立： text 歷史街區 文化地景 場所記憶 公共空間 但若沒有獨立的文化與遺產制度，文明仍可能出現： text 文化只剩品牌包裝 歷史只由勝利者與平台保存 語言因使用者減少而永久消失 社群知識被企業擷取後重新販售 博物館收藏來源不明 戰爭、災難與更新讓記憶場所被一次抹除 數位作品因平台關閉而無法存取 AI 大量模仿創作者卻不保留來源與同意 公共領域被私人重新圈地 傳統文化被凍結成觀光表演 文化資產修復只保留外觀，消滅原始材料、工法與社群關係 創作共享缺乏授權、署名、撤回、版本與商業使用邊界 第 53 章正式回答： text 什麼是文化？ 什麼是有形、無形、自然、數位與活態遺產？ 誰有權認定文化資產？ 社群、創作者、保管者與公眾權利如何平衡？ 語言、口述歷史、技藝、音樂、故事與儀式如何被保存？ 博物館、檔案館、圖書館與數位庫如何治理？ 來源不明、掠奪、非法交易與戰爭流失文物如何處理？ 記憶場所是否可以更新、遷移、再利用或拆除？ 文化修復何時是保存，何時是偽造？ 著作權、署名、授權、公共領域",
+      "existing_path": [],
+      "existing_module": [],
+      "originating_PR": [],
+      "coverage_percent": 15,
+      "coverage_status": "SPECIFICATION_ONLY",
+      "conflict_status": [
+        "NONE"
+      ],
+      "recommended_next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "evidence_basis": "Files, behavior entry points, and tests inspected; name-only matches are not complete coverage."
+    },
+    {
+      "program_id": "KAIOS-CH-054-096-RELIGION",
+      "chapter_source": [
+        "KAIOS_Chapter_54_Civilization_Religion_Belief_Ritual_Sacred_Space_Freedom_of_Conscience_Runtime.md"
+      ],
+      "requirement": "第 30 章建立： text 正義 權利保護 衝突解決 第 31、32 章建立： text 身份 公民 數位人格 隱私 同意 第 53 章建立： text 文化 遺產 記憶場所 傳統知識 創作共享 但信仰與宗教具有不同於一般文化的核心： text 良心 終極價值 神聖 儀式 共同體 死亡與超越 若沒有獨立的宗教與良心自由制度，文明可能出現： text 多數宗教把國家變成單一信仰機器 無神論者與少數信仰者被排除公共服務 宗教領袖以神聖名義免除財務、勞動與刑事責任 兒童被強迫加入、退出或接受不可逆儀式 信仰資料被平台用於政治操縱與差別定價 神聖場所被商業化、監控或強制徵收 宗教慈善以改宗作為食物、醫療與庇護條件 宗教教育取代基本科學、健康與公民能力 AI 假冒神諭、宗教領袖、亡者聲音與神聖文本 宗教內部異議、改革與女性、兒童、少數群體被壓制 宗教衝突被當成永久敵我，而不是可治理的權利衝突 第 54 章正式回答： text 什麼是信仰、宗教、良心與非信仰？ 個人是否有權相信、不相信、改信、退出與拒絕宣告？ 宗教組織如何成立、治理、取得資產與接受捐贈？ 神聖場所、墓地、儀式空間與朝聖路線如何被保護？ 宗教儀式何時受保障，何時因生命、",
+      "existing_path": [],
+      "existing_module": [],
+      "originating_PR": [],
+      "coverage_percent": 15,
+      "coverage_status": "SPECIFICATION_ONLY",
+      "conflict_status": [
+        "NONE"
+      ],
+      "recommended_next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "evidence_basis": "Files, behavior entry points, and tests inspected; name-only matches are not complete coverage."
+    },
+    {
+      "program_id": "KAIOS-CH-055-097-FAMILY",
+      "chapter_source": [
+        "KAIOS_Chapter_55_Civilization_Family_Kinship_Marriage_Caregiving_Inheritance_Runtime.md"
+      ],
+      "requirement": "第 28、29、30 章建立： text 福利 照護 公共健康 權利保護 衝突處理 第 31、32 章建立： text 身份 公民 居留 數位人格 隱私 同意 第 45 章建立： text 住房 居住 土地 家庭棲地 第 54 章建立： text 宗教 良心 婚姻儀式 神聖生活 但家庭、親屬、伴侶、照護與繼承是另一套長期生命關係。 若沒有獨立的家庭制度，文明可能出現： text 婚姻被家族、宗教、企業與國家強迫 未登記伴侶在醫療、住房與死亡時完全失去權利 家庭財產由單一掌控者秘密控制 照護責任被默認丟給女性、長女、弱勢與無薪照護者 家庭暴力被以隱私、家務與文化為由掩蓋 監護制度把受照護者變成無權利財產 離婚時兒童、住房、財產與照護被當成報復工具 跨境與跨宇宙家庭的身份與親屬關係互不承認 遺囑被偽造、操縱或在失能時簽署 死亡後數位身份、金鑰、帳戶與文化作品失去處理規則 KGEN 持有量被包裝成婚姻、親權與繼承優先順位 AI 以家庭資料推測忠誠、配對、生育與照護價值 第 55 章正式回答： text 什麼是家庭？ 血緣、婚姻、收養、伴侶、選擇家庭與照護家庭如何被承認？ 誰可以結婚、登記伴侶、分居與離婚？ 婚姻是否必須有自由、持續",
+      "existing_path": [],
+      "existing_module": [],
+      "originating_PR": [],
+      "coverage_percent": 15,
+      "coverage_status": "SPECIFICATION_ONLY",
+      "conflict_status": [
+        "NONE"
+      ],
+      "recommended_next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "evidence_basis": "Files, behavior entry points, and tests inspected; name-only matches are not complete coverage."
+    },
+    {
+      "program_id": "KAIOS-CH-056-098-CHILDREN",
+      "chapter_source": [
+        "KAIOS_Chapter_56_Civilization_Children_Youth_Growth_Guardianship_Minor_Rights_Runtime.md"
+      ],
+      "requirement": "第 26、28、29 章建立： text 教育 福利 照護 公共健康 第 30、31、32 章建立： text 權利 身份 公民 數位人格 隱私 同意 第 55 章建立： text 家庭 親屬 婚姻 親職 監護 照護 繼承 但兒童與青少年不是縮小版成年人，也不是家庭、學校、宗教、平台與國家的附屬資產。 若沒有獨立的未成年權利制度，文明可能出現： text 出生未登記而失去身份、醫療與教育 家庭以親權之名控制兒童全部人格與資訊 學校用服從取代學習，用羞辱取代教育 兒童資料、影像與定位被家庭及平台永久公開 AI 對兒童建立天賦、風險、忠誠與未來價值分數 貧困、障礙、疾病與家庭型態被誤認為照護失格 離家安置只解決住宿，不處理依附、教育與長期關係 少年事件只剩懲罰，沒有修復、成長與重新進入社會 未成年工作者承擔成人工時、危險與債務 平台以遊戲、流量、KGEN、抽獎與虛擬物品操縱兒童消費 成年日一到，安置、醫療、教育與照護支持瞬間中止 第 56 章正式回答： text 兒童與青少年如何被定義？ 出生後如何取得身份、國籍、親職與基本服務？ 兒童的最佳利益如何判斷，誰有權參與？ 年齡、成熟度、理解能力與同意如何區分？ 父母、監護人、照護者",
+      "existing_path": [],
+      "existing_module": [],
+      "originating_PR": [],
+      "coverage_percent": 15,
+      "coverage_status": "SPECIFICATION_ONLY",
+      "conflict_status": [
+        "NONE"
+      ],
+      "recommended_next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "evidence_basis": "Files, behavior entry points, and tests inspected; name-only matches are not complete coverage."
+    },
+    {
+      "program_id": "KAIOS-CH-057-099-AGING",
+      "chapter_source": [
+        "KAIOS_Chapter_57_Civilization_Aging_Elder_Rights_Longevity_End_of_Life_Legacy_Runtime.md"
+      ],
+      "requirement": "第 28、29 章建立： text 福利 休息 照護 公共健康 災難應變 第 30、32 章建立： text 權利 隱私 同意 數位人格 第 45、55、56 章建立： text 住房 家庭 照護 監護 兒童成長 成年轉銜 但文明不能只設計生命如何出生、成長與工作，也必須回答： text 如何老去 如何繼續參與 如何在能力改變時維持自主 如何接受照護而不失去人格 如何面對失智、慢性病與身體退化 如何選擇生命末期 如何死亡 如何讓關係與記憶延續 若沒有獨立的高齡與生命末期制度，文明可能出現： text 年齡一高就被視為無能力 退休後失去社會身份與公共參與 長者資產被家人、照護者與平台控制 失智診斷直接變成全面監護 長照機構以安全為由永久隔離、綁縛與監控 醫療系統只延長生命，卻忽略痛苦、尊嚴與本人意願 家屬與醫療團隊因無預立安排而衝突 臨終者被迫接受或被迫放棄治療 孤獨、喪偶與數位排除讓長者失去社會連結 KGEN、房產、遺產與照護形成利益衝突 AI 模擬亡者、預測死亡與分配照護，卻不保留同意與申訴 死亡後帳戶、代理、作品、金鑰與記憶無人治理 第 57 章正式回答： text 何謂高齡、長壽與健康壽命？ 年齡是否可以自動推定失能與",
+      "existing_path": [],
+      "existing_module": [],
+      "originating_PR": [],
+      "coverage_percent": 15,
+      "coverage_status": "SPECIFICATION_ONLY",
+      "conflict_status": [
+        "NONE"
+      ],
+      "recommended_next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "evidence_basis": "Files, behavior entry points, and tests inspected; name-only matches are not complete coverage."
+    },
+    {
+      "program_id": "KAIOS-CH-058-100-POPULATION",
+      "chapter_source": [
+        "KAIOS_Chapter_58_Civilization_Population_Demography_Generational_Balance_Reproductive_Futures_Runtime.md"
+      ],
+      "requirement": "第 31、45、46、47、56、57 章已經建立： text 身份與遷移 住房與棲地 交通與移動 食物與基本供應 兒童與成長 高齡與生命末期 但文明仍需要一套不把人當作數字、不把出生當作生產指標、不把高齡者視為負擔的整體人口 Runtime。 若沒有獨立的人口與世代制度，文明可能出現： text 人口政策只追求更多出生 女性、家庭與年輕世代被當作生育工具 少子化只用補貼處理，卻不處理住房、工作、照護與不確定未來 高齡化被描述成災難，導致長者權利被削弱 出生率、死亡率與移民數據被政治化 人口預測被當成必然未來 區域人口流失後公共服務被全部撤除 大城市過度集中，偏鄉與邊界失去青年、照護與產業 跨境家庭、無國籍兒童與跨宇宙人口被漏算 生育醫療、人工生殖與基因選擇只由市場決定 人口控制、強迫絕育、強迫生育與婚姻配對被效率合理化 AI 用人口資料對族群、地區與家庭建立價值階級 KGEN 持有量被用來決定誰值得生育、遷入、被照護與獲得住房 第 58 章正式回答： text 人口如何被定義、觀測與治理？ 人口統計如何兼顧真實、隱私、身份與未登記人口？ 出生、死亡、遷移、家庭、居住與照護人口如何連接？ 生育自主如何同時包含想生、不想生、延",
+      "existing_path": [],
+      "existing_module": [],
+      "originating_PR": [],
+      "coverage_percent": 15,
+      "coverage_status": "SPECIFICATION_ONLY",
+      "conflict_status": [
+        "NONE"
+      ],
+      "recommended_next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "evidence_basis": "Files, behavior entry points, and tests inspected; name-only matches are not complete coverage."
+    },
+    {
+      "program_id": "KAIOS-CH-059-101-ACCESSIBILITY",
+      "chapter_source": [
+        "KAIOS_Chapter_59_Civilization_Disability_Accessibility_Independent_Living_Assistive_Technology_Runtime.md"
+      ],
+      "requirement": "第 26、29、30、32、36、45、46、56、57 章已建立： text 教育與技能 健康與照護 權利與正義 隱私與數位人格 基礎設施 住房 交通 兒童 高齡 但障礙不是單一醫療狀態，也不是個人失敗。 障礙往往發生在： text 身體、感官、認知、精神、神經差異 × 建築、交通、制度、資訊、態度、技術與市場障礙 若沒有獨立的障礙權利與無障礙 Runtime，文明可能出現： text 需要輔具的人被當作不完整生命 建築、網站、交通與學校先排除，再要求個人自己克服 醫療診斷取代個人意願與權利 失去單一功能就被推定無法工作、學習、投票、育兒與管理財產 個人助理、手語、字幕、讀屏、替代溝通被視為額外恩惠 障礙兒童被隔離教育 障礙成人被迫住進大型機構 家屬以照護之名取得全部控制 企業用 AI 推測障礙、風險與生產力 輔具被高價壟斷、綁定訂閱、停止維修 腦機介面、義肢與植入物成為供應商控制的身體器官 KGEN 餘額決定誰能得到輪椅、呼吸器、助聽器與個人助理 災難時障礙者被最後疏散、最後通知、最後復電 第 59 章正式回答： text 障礙如何被定義？ 障礙身份是醫療診斷、功能差異、社會障礙，還是個人認同？ 什麼是合理調整、通用設計",
+      "existing_path": [],
+      "existing_module": [],
+      "originating_PR": [],
+      "coverage_percent": 15,
+      "coverage_status": "SPECIFICATION_ONLY",
+      "conflict_status": [
+        "NONE"
+      ],
+      "recommended_next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "evidence_basis": "Files, behavior entry points, and tests inspected; name-only matches are not complete coverage."
+    },
+    {
+      "program_id": "KAIOS-CH-060-102-MENTAL_HEALTH",
+      "chapter_source": [
+        "KAIOS_Chapter_60_Civilization_Mental_Health_Neurodiversity_Emotional_Safety_Recovery_Runtime.md"
+      ],
+      "requirement": "第 29、30、32、56、57、59 章已建立： text 公共健康 權利保護 隱私與同意 兒童心理健康 高齡心理與失智支持 障礙權利與自立生活 但心理健康不能只附屬在醫療、司法、教育與家庭系統之下。 心理健康同時涉及： text 情緒 壓力 創傷 神經多樣性 關係 住房 工作 孤獨 歧視 身體健康 數位環境 文化 信仰 經濟安全 若沒有獨立的心理健康與復元 Runtime，文明可能出現： text 所有痛苦都被快速診斷與藥物化 正常悲傷、焦慮、憤怒與差異被視為疾病 自閉、注意力差異、雙相、思覺經驗與其他神經差異被視為人格失敗 危機只剩警察、拘禁與強制住院 自傷與自殺風險只用監控與懲罰處理 家庭、學校與雇主以安全之名讀取全部訊息與情緒資料 心理服務只提供給能付費、能等待與能說標準語言的人 住院者失去通信、財產、關係、隱私與申訴 同儕支持者與復元經驗被排除於專業體系之外 創傷倖存者在司法、醫療與平台中被反覆要求重述傷害 AI 聊天服務冒充治療師、鼓勵依賴、錯誤處理危機 保險、雇主與平台用心理資料建立風險、忠誠與生產力分數 KGEN 餘額決定誰能獲得治療、危機床位與長期支持 第 60 章正式回答： text 心理健康如何被定義",
+      "existing_path": [],
+      "existing_module": [],
+      "originating_PR": [],
+      "coverage_percent": 15,
+      "coverage_status": "SPECIFICATION_ONLY",
+      "conflict_status": [
+        "NONE"
+      ],
+      "recommended_next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "evidence_basis": "Files, behavior entry points, and tests inspected; name-only matches are not complete coverage."
+    },
+    {
+      "program_id": "KAIOS-CH-061-103-EMERGENCY",
+      "chapter_source": [
+        "KAIOS_Chapter_61_Civilization_Public_Safety_Violence_Prevention_Community_Protection_Emergency_Justice_Runtime.md"
+      ],
+      "requirement": "第 29、30、33、46、56、59、60 章已建立： text 公共健康與災難應變 權利保護與衝突解決 公共資訊與媒體 交通與公共移動 兒童保護 障礙與無障礙 心理危機與復元 但文明的公共安全不能只剩： text 警察 武力 拘留 監控 懲罰 真正的安全必須同時處理： text 暴力原因 受害者安全 社區信任 危機降階 失蹤人口 家庭與性別暴力 仇恨事件 群體衝突 公共場所安全 重大事故 緊急權限 執法責任 事後復原 若沒有獨立的公共安全與緊急正義 Runtime，文明可能出現： text 所有危機都由武裝執法人員回應 心理健康、無家、貧困與障礙被犯罪化 警方以安全之名取得無限監控與搜索權 匿名風險分數取代具體證據 家庭暴力被視為家務事 受害者報案後反而失去住房、孩子、工作與隱私 失蹤人口因身份、性別、族群與階級被差別處理 群體事件以鎮壓代替降階與溝通 臨時緊急權限永久化 武力使用沒有比例、醫療、影像、審查與申訴 拘留場所成為未經審判的懲罰 PrimeForge 以風險模型決定誰值得被監控、拘留與排除 KGEN、地位與權力決定誰先獲救、誰的案件先被調查 第 61 章正式回答： text 公共安全的第一責任是什麼？ 暴力預",
+      "existing_path": [],
+      "existing_module": [],
+      "originating_PR": [],
+      "coverage_percent": 15,
+      "coverage_status": "SPECIFICATION_ONLY",
+      "conflict_status": [
+        "NONE"
+      ],
+      "recommended_next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "evidence_basis": "Files, behavior entry points, and tests inspected; name-only matches are not complete coverage."
+    },
+    {
+      "program_id": "KAIOS-CH-062-104-TIME",
+      "chapter_source": [
+        "KAIOS_Chapter_62_Civilization_Criminal_Justice_Due_Process_Sentencing_Rehabilitation_Runtime.md"
+      ],
+      "requirement": "第 30 章建立： text 權利保護 衝突解決 正義 第 56、59、60、61 章建立： text 兒少保護 障礙權利 心理健康 公共安全 搜索 拘留 武力 緊急正義 但公共安全事件一旦進入刑事程序，文明仍必須回答： text 誰可以被指控？ 何時可以偵查？ 什麼證據可以使用？ 誰有權起訴？ 被告如何獲得辯護？ 法官、陪審、檢察與辯護如何保持獨立？ 如何證明有罪？ 何種行為構成犯罪？ 量刑如何保持比例？ 哪些人不應被羈押？ 監禁是否真的是最後手段？ 被判刑者在監所中還有哪些權利？ 如何處理兒童、障礙、心理危機與外籍被告？ 如何避免貧困者因無力支付而被關押？ 如何處理錯案、冤獄、證據造假與司法偏誤？ 服刑後如何回到住房、工作、家庭與社區？ 犯罪紀錄是否可以永久摧毀一個人的人生？ AI 是否能決定保釋、起訴、量刑、危險、復歸與假釋？ PrimeForge 是否能同時成為警察、檢察官、法官、監獄與最終裁決者？ Genesis Steward 是否能以文明秩序之名建立創世者免責與異議者重刑？ 若沒有獨立刑事正義 Runtime，文明可能出現： text 先定罪再找證據 以危險分數代替具體行為 警方、檢察、法官與監所共享同一秘密資",
+      "existing_path": [
+        "KGEN-KAIOS/world-viewer/simulation/simulation-clock.js",
+        "KGEN-KAIOS/world-viewer/timeline/timeline-runtime.js"
+      ],
+      "existing_module": [
+        "simulation-clock.js",
+        "timeline-runtime.js"
+      ],
+      "originating_PR": [
+        "#61",
+        "#63"
+      ],
+      "coverage_percent": 82,
+      "coverage_status": "IMPLEMENTED_PRODUCTION_SAFE_SIMULATION",
+      "conflict_status": [
+        "NONE"
+      ],
+      "recommended_next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "evidence_basis": "Files, behavior entry points, and tests inspected; name-only matches are not complete coverage."
+    },
+    {
+      "program_id": "KAIOS-CH-063-105-TIME",
+      "chapter_source": [
+        "KAIOS_Chapter_63_Civilization_Civil_Justice_Private_Rights_Liability_Remedies_Collective_Actions_Runtime.md"
+      ],
+      "requirement": "第 30、31、32、40、45、55、61、62 章已建立： text 權利保護 身份與隱私 商業與消費 住房與財產 家庭 公共安全 刑事正義 但文明多數衝突不一定構成犯罪。 它們可能是： text 契約未履行 產品造成損害 平台封鎖帳戶 房東拒絕修繕 專業服務疏失 家族財產爭議 公司濫用控制權 資料外洩 AI 錯誤決策 環境污染 大量消費者受同一條款傷害 若沒有獨立民事正義 Runtime，文明可能出現： text 有權利但沒有救濟 訴訟成本高於損失 格式契約把所有責任轉給弱者 平台刪除帳戶、資料與資產而無外部審查 大公司用拖延與保密壓垮個人 相同受害者被迫重複起訴 法院只給金錢，卻無法停止持續侵害 執行程序奪走基本住房、醫療與工作工具 AI、DAO、自治代理與跨宇宙主體形成責任真空 KGEN 餘額決定誰能起訴、保全與執行 第 63 章正式建立： text KAIOS Civilization Civil Justice Runtime Private Rights & Legal Capacity Contract Formation, Performance & Remedies Tort, Product, Pro",
+      "existing_path": [
+        "KGEN-KAIOS/world-viewer/simulation/simulation-clock.js",
+        "KGEN-KAIOS/world-viewer/timeline/timeline-runtime.js"
+      ],
+      "existing_module": [
+        "simulation-clock.js",
+        "timeline-runtime.js"
+      ],
+      "originating_PR": [
+        "#61",
+        "#63"
+      ],
+      "coverage_percent": 82,
+      "coverage_status": "IMPLEMENTED_PRODUCTION_SAFE_SIMULATION",
+      "conflict_status": [
+        "NONE"
+      ],
+      "recommended_next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "evidence_basis": "Files, behavior entry points, and tests inspected; name-only matches are not complete coverage."
+    },
+    {
+      "program_id": "KAIOS-CH-064-106-TIME",
+      "chapter_source": [
+        "KAIOS_Chapter_64_Civilization_Administrative_Justice_Public_Power_Review_Licensing_Regulatory_Appeals_Runtime.md"
+      ],
+      "requirement": "第 63 章建立私人權利、契約、責任、損害與集體救濟。 第 64 章處理另一種更直接的文明力量： text 行政機關 許可 登記 認證 補助 採購 稽查 裁罰 給付 撤照 緊急命令 若行政權沒有獨立 Runtime，文明可能出現： text 內部指令取代法律 同案不同處理 許可無限拖延 補助與採購成為關係分配 稽查變成一般搜索 裁罰成為收入工具 基本給付因資料錯誤突然停止 AI 秘密拒絕資格、撤照與凍結 緊急命令永久化 PrimeForge 同時規則、稽查、裁罰與審理上訴 本章正式建立： text Public Authority Mandate Rulemaking and Consultation Licensing and Registration Inspection and Compliance Administrative Sanctions Benefits, Grants and Procurement Administrative Data and Transparency Hearing, Review and Appeal Judicial Review and Compensation Emergen",
+      "existing_path": [
+        "KGEN-KAIOS/world-viewer/simulation/simulation-clock.js",
+        "KGEN-KAIOS/world-viewer/timeline/timeline-runtime.js"
+      ],
+      "existing_module": [
+        "simulation-clock.js",
+        "timeline-runtime.js"
+      ],
+      "originating_PR": [
+        "#61",
+        "#63"
+      ],
+      "coverage_percent": 82,
+      "coverage_status": "IMPLEMENTED_PRODUCTION_SAFE_SIMULATION",
+      "conflict_status": [
+        "NONE"
+      ],
+      "recommended_next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "evidence_basis": "Files, behavior entry points, and tests inspected; name-only matches are not complete coverage."
+    },
+    {
+      "program_id": "KAIOS-CH-065-107-TIME",
+      "chapter_source": [
+        "KAIOS_Chapter_65_Civilization_Constitutional_Review_Separation_of_Powers_Rights_Adjudication_Runtime.md"
+      ],
+      "requirement": "第 21 章建立： text 文明治理 聖杯共識 PrimeForge 自治邊界 第 30、61、62、63、64 章建立： text 權利保護 公共安全 刑事正義 民事正義 行政正義 但當法律、行政命令、緊急措施、預算、演算法、治理投票與機關行為彼此衝突時，文明仍需回答： text 哪一條規範位階最高？ 誰能宣告法律或命令違憲？ 機關能否審查自己？ 基本權受到限制時應使用何種標準？ 緊急狀態能否暫停憲章？ 多數決能否取消少數人的基本權？ Genesis Steward 的命令是否高於憲章？ PrimeForge 是否能解釋、執行、修改並最終裁判同一部憲章？ 法院判決對其他機關有何效力？ 違憲法律是立即失效、限期修正，還是只對個案無效？ 少數意見、協同意見與未來翻案如何保存？ 修憲是否可以摧毀不可更動的文明核心？ KGEN 治理投票是否可直接取代憲政程序？ 若沒有獨立 Constitutional Review Runtime，文明可能出現： text 多數票直接取消基本權 行政機關以緊急命令永久統治 Genesis Steward 以創世者身分凌駕憲章 PrimeForge 同時制定、執行、解釋與裁判 法院以秘密模型判斷違",
+      "existing_path": [
+        "KGEN-KAIOS/world-viewer/simulation/simulation-clock.js",
+        "KGEN-KAIOS/world-viewer/timeline/timeline-runtime.js"
+      ],
+      "existing_module": [
+        "simulation-clock.js",
+        "timeline-runtime.js"
+      ],
+      "originating_PR": [
+        "#61",
+        "#63"
+      ],
+      "coverage_percent": 82,
+      "coverage_status": "IMPLEMENTED_PRODUCTION_SAFE_SIMULATION",
+      "conflict_status": [
+        "NONE"
+      ],
+      "recommended_next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "evidence_basis": "Files, behavior entry points, and tests inspected; name-only matches are not complete coverage."
+    },
+    {
+      "program_id": "KAIOS-CH-066-108-DEMOCRACY",
+      "chapter_source": [
+        "KAIOS_Chapter_66_Civilization_Democracy_Elections_Representation_Political_Parties_Campaign_Integrity_Runtime.md"
+      ],
+      "requirement": "第 21 章建立： text 文明治理 聖杯共識 PrimeForge 自治邊界 第 31、33、65 章建立： text 身份與公民 公共資訊與媒體 憲章最高性、權力分立與基本權裁判 但憲政文明若沒有可被人民週期性重新授權的代表制度，權力仍可能變成封閉自我複製。 文明必須回答： text 誰可以投票？ 誰可以成為候選人？ 公民、居民、數位人格、AI Person 與 Species 如何取得政治資格？ 選區如何劃分？ 投票權如何避免被技術與行政程序剝奪？ 候選人如何登記、連署、辯論與取得公平媒體機會？ 政黨如何成立、解散、治理與公開財務？ 競選捐款、廣告、平台推薦與第三方宣傳如何治理？ KGEN、Token、NFT 與鏈上治理資產能否購買政治影響？ AI 能否生成候選人深偽、操作選民情緒與自動投票？ 如何確保秘密投票、可驗證開票與紙本或等價實體備援？ 如何處理境外干預、假資訊、暴力威脅與行政中立？ 落選者如何提出爭議？ 當選者何時就任？ 權力如何和平移交？ 選民如何罷免失去信任的代表？ 多數決如何避免壓迫少數？ PrimeForge 是否能決定誰有投票權、誰能當選與哪個結果有效？ Genesis Steward 是否能以創",
+      "existing_path": [],
+      "existing_module": [],
+      "originating_PR": [],
+      "coverage_percent": 15,
+      "coverage_status": "SPECIFICATION_ONLY",
+      "conflict_status": [
+        "NONE"
+      ],
+      "recommended_next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "evidence_basis": "Files, behavior entry points, and tests inspected; name-only matches are not complete coverage."
+    },
+    {
+      "program_id": "KAIOS-CH-067-109-LEGISLATURE",
+      "chapter_source": [
+        "KAIOS_Chapter_67_Civilization_Legislature_Lawmaking_Parliamentary_Procedure_Public_Deliberation_Runtime.md"
+      ],
+      "requirement": "第 66 章建立： text 政治成員 選民 選區 候選人 政黨 競選 投票 開票 和平移交 但選舉只完成公共權力的授權入口。 人民選出的代表如何： text 形成議會 提出法案 公開辯論 召開委員會 聽取專家與人民意見 審查預算 修正法律 監督行政 表決 公布 檢討 廢止 仍需獨立 Runtime。 若沒有 Legislature & Lawmaking Runtime，文明可能出現： text 選出的代表無法真正參與 議會由多數黨永久封鎖 法案在最後一刻秘密加入重大條款 預算以包裹方式掩藏利益輸送 遊說者與捐款者秘密撰寫法律 委員會閉門決定人民命運 少數黨沒有資訊、發言、提案與調查權 表決紀錄被刪除或無法追溯 緊急立法永久化 AI 自動生成法律並直接進入執行 PrimeForge 同時撰法、排案、計票、公布與解釋法律 Genesis Steward 以創世者身分取得永久席次、否決權或無需表決的立法命令 第 67 章正式回答： text 議會如何組成？ 代表資格與任期如何記錄？ 議員宣誓與利益衝突如何治理？ 法案由誰提出？ 法案如何編號、版本化與公開？ 委員會如何組成、調查與召開公聽會？ 人民是否能參與立法？ 修正案何時提",
+      "existing_path": [],
+      "existing_module": [],
+      "originating_PR": [],
+      "coverage_percent": 15,
+      "coverage_status": "SPECIFICATION_ONLY",
+      "conflict_status": [
+        "NONE"
+      ],
+      "recommended_next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "evidence_basis": "Files, behavior entry points, and tests inspected; name-only matches are not complete coverage."
+    },
+    {
+      "program_id": "KAIOS-CH-068-110-EXECUTIVE",
+      "chapter_source": [
+        "KAIOS_Chapter_68_Civilization_Executive_Branch_Cabinet_Public_Administration_Policy_Implementation_Runtime.md"
+      ],
+      "requirement": "第 64 章建立： text 行政正義 公權力法源 許可 稽查 裁罰 行政救濟 第 67 章建立： text 立法機關 法案 預算 監督 質詢 公布 但法律通過、預算核定與選舉完成之後，文明仍需回答： text 誰負責執行？ 行政首長與內閣如何形成？ 部會權限如何分工？ 政策如何轉化為計畫、預算、採購、人力與服務？ 行政命令的邊界在哪裡？ 行政首長能否繞過法律直接治理？ 內閣如何向議會負責？ 部會首長如何任命、免職與避免利益衝突？ 文官如何保持專業與政治中立？ 跨部會衝突如何解決？ 政策失敗如何更正？ 重大危機中，行政權如何快速行動又不永久擴張？ 行政機關如何使用 AI、模型、平台與自動化？ PrimeForge 是否能同時建議政策、下令、執行、評估並裁判自己的績效？ Genesis Steward 是否能以 Father 身分直接發布最高行政命令？ 若沒有獨立 Executive & Public Administration Runtime，文明可能出現： text 行政首長以命令取代法律 內閣只是私人忠誠團隊 部會權限重疊、互相推諉 政策宣布後沒有執行責任 文官被迫服務政黨 採購與任命被私人利益控制 資料與 AI 模型",
+      "existing_path": [
+        "KGEN-KAIOS/world-viewer/governance/government-runtime.js",
+        "KGEN-KAIOS/world-viewer/governance/public-services-runtime.js"
+      ],
+      "existing_module": [
+        "government-runtime.js",
+        "public-services-runtime.js"
+      ],
+      "originating_PR": [
+        "#61"
+      ],
+      "coverage_percent": 38,
+      "coverage_status": "IMPLEMENTED_DEMO_ONLY",
+      "conflict_status": [
+        "NONE"
+      ],
+      "recommended_next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "evidence_basis": "Files, behavior entry points, and tests inspected; name-only matches are not complete coverage."
+    },
+    {
+      "program_id": "KAIOS-CH-069-111-COURTS",
+      "chapter_source": [
+        "KAIOS_Chapter_69_Civilization_Judiciary_Courts_Judicial_Administration_Access_to_Justice_Runtime.md"
+      ],
+      "requirement": "第 62、63、64、65 章已建立： text 刑事正義 民事正義 行政正義 違憲審查 第 68 章建立： text 行政首長 內閣 公共行政 政策執行 但司法正義若只有實體權利與程序規則，沒有完整法院體系與司法行政 Runtime，仍可能出現： text 法院彼此管轄衝突 案件被秘密分配給特定法官 法官任命受政黨、KGEN、Temple 與私人利益控制 案件排隊多年卻無期限治理 人民有權利但沒有律師、翻譯、交通與無障礙 遠距審判成為數位排除 媒體公開變成被害人二次傷害 封存制度被權勢者用來隱藏司法 AI 自動判案卻沒有可解釋理由 法院行政首長干預個案裁判 法官紀律成為政治報復 判決作出後無人執行 跨區、跨鏈與跨宇宙爭議無法送達與承認 PrimeForge 同時分案、分析、裁判、公布與執行 Genesis Steward 以創世者身分指定法院、法官與結果 第 69 章正式回答： text 法院體系如何分層？ 不同案件由哪一級法院審理？ 法官如何產生、任期保障與迴避？ 案件如何登記、分案、排期、審理與結案？ 司法行政如何支援而不控制裁判？ 人民如何獲得律師、法律扶助、翻譯與無障礙？ 公開審判如何與隱私、安全、兒童與受害者保護",
+      "existing_path": [
+        "KGEN-KAIOS/world-viewer/governance/government-runtime.js",
+        "KGEN-KAIOS/world-viewer/governance/public-services-runtime.js"
+      ],
+      "existing_module": [
+        "government-runtime.js",
+        "public-services-runtime.js"
+      ],
+      "originating_PR": [
+        "#61"
+      ],
+      "coverage_percent": 38,
+      "coverage_status": "IMPLEMENTED_DEMO_ONLY",
+      "conflict_status": [
+        "NONE"
+      ],
+      "recommended_next_action": "HOLD_FOR_PROMOTION_REVIEW",
+      "evidence_basis": "Files, behavior entry points, and tests inspected; name-only matches are not complete coverage."
+    },
+    {
+      "program_id": "KAIOS-CH-070-112-AUDIT",
+      "chapter_source": [
+        "KAIOS_Chapter_70_Civilization_Independent_Institutions_Audit_Integrity_Ombudsman_Anti_Corruption_Runtime.md"
+      ],
+      "requirement": "第 65、66、67、68、69 章已建立： text 違憲審查 民主選舉 立法機關 行政機關 司法機關 但任何權力分立，如果缺少獨立審計、監察、廉政、吹哨與反貪腐 Runtime，仍可能出現： text 政府自己審自己 議會自己查自己的預算 法院自己處理自己的腐敗 選舉捐款與公共採購互相交換 KGEN、Token、NFT 與鏈上資產被用來秘密輸送 官員透過家族、信託、代理人與離岸錢包隱藏利益 公務員知道違法卻因報復不敢揭露 監察機關受行政首長控制 廉政機關只追查反對者 審計報告沒有執行追蹤 利益衝突只申報、不迴避 貪腐資產被轉移到跨鏈、跨境與跨宇宙 PrimeForge 同時偵測、調查、認定、凍結、沒收與上訴裁決 Genesis Steward 以創世者身分免受財產申報、利益審查與監察 第 70 章正式回答： text 哪些機關必須保持獨立？ 獨立機關如何任命、任期、預算與免任意撤換？ 審計如何檢查合法性、財務、績效、資料與 AI？ 監察如何接受人民申訴、調查行政失當與提出改革？ 廉政機關如何調查貪腐又不成為政治武器？ 公職人員如何申報財產、Token、NFT、錢包、信託、家族利益與實益所有人？ 利益衝突何時只需揭露，何時",
+      "existing_path": [],
+      "existing_module": [],
+      "originating_PR": [],
+      "coverage_percent": 15,
+      "coverage_status": "SPECIFICATION_ONLY",
+      "conflict_status": [
+        "NONE"
+      ],
+      "recommended_next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "evidence_basis": "Files, behavior entry points, and tests inspected; name-only matches are not complete coverage."
+    },
+    {
+      "program_id": "KAIOS-CH-071-113-TAXATION",
+      "chapter_source": [
+        "KAIOS_Chapter_71_Civilization_Public_Finance_Taxation_Treasury_Budget_Execution_Sovereign_Assets_Runtime.md"
+      ],
+      "requirement": "第 67、68、70 章已建立： text 立法與預算授權 行政與政策執行 審計、廉政與資產追回 但財政文明若沒有完整 Public Finance Runtime，仍可能出現： text 預算通過卻沒有現金 稅法不透明、例外只服務權勢者 國庫帳、部會帳、銀行帳與鏈上帳互相衝突 公債、保證、退休義務與公共企業隱藏負債 追加預算成為常態，緊急支出沒有退場 公共資產低價出售給關係人 主權基金成為行政首長提款機 KGEN、WBNB、LP、Token、NFT 與跨鏈資產沒有統一估值 智能合約自動付款卻沒有合法預算授權 財政 AI 自動刪除醫療、住房與基本給付 PrimeForge 同時制定稅率、撥款、付款、借款、投資與審計 Genesis Steward 以 Father 身分任意提領主權資產 第 71 章正式建立： text KAIOS Civilization Public Finance Runtime Taxation and Non-Tax Revenue Annual Budget and Medium-Term Fiscal Framework Treasury Single Account and Cash Mana",
+      "existing_path": [
+        "KGEN-KAIOS/world-viewer/economy/economy-runtime.js",
+        "KGEN-KAIOS/world-viewer/settlement/settlement-runtime.js"
+      ],
+      "existing_module": [
+        "economy-runtime.js",
+        "settlement-runtime.js"
+      ],
+      "originating_PR": [
+        "#61",
+        "#62",
+        "#65"
+      ],
+      "coverage_percent": 32,
+      "coverage_status": "IMPLEMENTED_DEMO_ONLY",
+      "conflict_status": [
+        "NONE"
+      ],
+      "recommended_next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "evidence_basis": "Files, behavior entry points, and tests inspected; name-only matches are not complete coverage."
+    },
+    {
+      "program_id": "KAIOS-CH-072-114-CENTRAL_BANK",
+      "chapter_source": [
+        "KAIOS_Chapter_72_Civilization_Central_Bank_Currency_Monetary_Stability_Payment_Systems_Runtime.md"
+      ],
+      "requirement": "第 71 章已建立： text 公共財政 稅制 國庫 預算執行 公共債務 主權資產 KGEN 國庫 但財政系統若沒有完整 Monetary & Payment Runtime，仍可能出現： text 政府能支出，卻沒有穩定貨幣 支付系統停擺，合法給付無法到達 貨幣發行被行政首長直接控制 中央銀行以獨立名義不受問責 利率決策沒有理由、資料與投票紀錄 外匯與儲備資產被秘密處分 危機流動性變成特定金融機構的永久補貼 最後貸款人機制沒有抵押、期限與退出 CBDC 變成全面監控工具 零售支付只剩單一平台 智能合約支付無法撤回錯誤 穩定幣被當成法定貨幣卻沒有儲備與贖回 跨鏈支付的橋接、Wrapped Asset 與最終結算互相衝突 央行數位資產投資與 KGEN 儲備沒有風險邊界 金融穩定名義被用來凍結人民資產 PrimeForge 同時發幣、定利率、放貸、清算、凍結與審計 Genesis Steward 以 Father 身分直接命令增發貨幣 第 72 章正式回答： text 中央銀行的憲政目的為何？ 央行獨立如何與民主問責並存？ 誰能發行法定貨幣？ 貨幣供給、利率、準備、公開市場操作與資產負債表如何治理？ 央行是否能直接融通政府？ 何",
+      "existing_path": [
+        "KGEN-KAIOS/world-viewer/economy/economy-runtime.js",
+        "KGEN-KAIOS/world-viewer/settlement/settlement-runtime.js"
+      ],
+      "existing_module": [
+        "economy-runtime.js",
+        "settlement-runtime.js"
+      ],
+      "originating_PR": [
+        "#61",
+        "#62",
+        "#65"
+      ],
+      "coverage_percent": 32,
+      "coverage_status": "IMPLEMENTED_DEMO_ONLY",
+      "conflict_status": [
+        "NONE"
+      ],
+      "recommended_next_action": "HOLD_FOR_PROMOTION_REVIEW",
+      "evidence_basis": "Files, behavior entry points, and tests inspected; name-only matches are not complete coverage."
+    },
+    {
+      "program_id": "KAIOS-CH-073-115-BANKING",
+      "chapter_source": [
+        "KAIOS_Chapter_73_Civilization_Banking_Credit_Deposit_Protection_Prudential_Regulation_Runtime.md"
+      ],
+      "requirement": "第 71、72 章已建立： text 公共財政 國庫與主權資產 中央銀行 貨幣政策 支付、清算與結算 CBDC、穩定幣與 KGEN 貨幣介面 但貨幣與支付若沒有完整 Banking & Prudential Runtime，仍可能出現： text 銀行吸收存款卻沒有足夠資本 授信只流向關係人與 KGEN 巨鯨 風險模型歧視低收入、偏遠地區、Species 與新創業者 房貸與消費信貸利用複雜費用掩蓋真實成本 存款人以為安全，實際資產被挪去高風險交易 銀行以表外工具、特殊目的載體與影子金融隱藏槓桿 流動性壓力一來就向央行要求無限救助 存款保險保護大型無擔保存款人，卻忽略一般家庭 問題銀行遲遲不處置，損失持續擴大 股東、管理者與次順位債權人未承擔損失，公共資金先進場 數位銀行停機後，人民無法提款與支付 雲端、核心銀行、AI 風控與單一供應商形成共同失敗點 穩定幣、電子貨幣、DeFi、KGEN 抵押與鏈上借貸逃離審慎邊界 銀行 AI 自動拒絕授信、關閉帳戶、提高利率與凍結資金 PrimeForge 同時核發牌照、評估風險、設定資本、接管銀行與審理申訴 Genesis Steward 以 Father 身分要求銀行提供無擔保特權信用 ",
+      "existing_path": [
+        "KGEN-KAIOS/world-viewer/economy/economy-runtime.js",
+        "KGEN-KAIOS/world-viewer/settlement/settlement-runtime.js"
+      ],
+      "existing_module": [
+        "economy-runtime.js",
+        "settlement-runtime.js"
+      ],
+      "originating_PR": [
+        "#61",
+        "#62",
+        "#65"
+      ],
+      "coverage_percent": 32,
+      "coverage_status": "IMPLEMENTED_DEMO_ONLY",
+      "conflict_status": [
+        "NONE"
+      ],
+      "recommended_next_action": "HOLD_FOR_PROMOTION_REVIEW",
+      "evidence_basis": "Files, behavior entry points, and tests inspected; name-only matches are not complete coverage."
+    },
+    {
+      "program_id": "KAIOS-CH-074-116-CAPITAL_MARKETS",
+      "chapter_source": [
+        "KAIOS_Chapter_74_Civilization_Capital_Markets_Securities_Exchanges_Market_Integrity_Runtime.md"
+      ],
+      "requirement": "第 72、73 章已建立： text 中央銀行與貨幣 支付、清算與結算 銀行、存款與信用 資本、流動性、存保與銀行處置 但金融文明若沒有完整 Capital Markets & Market Integrity Runtime，仍可能出現： text 企業向大眾募資卻不揭露真實風險 證券上市只靠關係與行銷 交易所同時收取上市費、控制規則、仲裁爭議與隱藏事故 券商挪用客戶資產 基金經理把客戶資金買進關係人資產 內線人先交易，再向市場公開資訊 市場操縱利用假單、對敲、拉抬、洗售與社群號召製造價格幻象 演算法交易造成閃崩，卻無人承擔模型與部署責任 高頻交易利用速度優勢剝奪公平接入 空方被政治化，或放任裸賣空破壞交割 衍生品與槓桿產品讓散戶承擔無法理解的損失 證券借貸與再質押鏈過長，真正所有權無法追溯 中央對手方集中風險，卻缺乏恢復與處置計畫 代幣化證券、NFT、DAO 權益與 KGEN 相關資產以「不是證券」規避投資人保護 去中心化交易所、AMM、Oracle、Admin Key 與多簽實質控制者拒絕責任 市場資料只提供給付費巨頭，其他參與者看到延遲與殘缺價格 交易所中斷、撮合錯誤與錯價交易沒有一致修復 市場 AI 自動停牌、取消",
+      "existing_path": [
+        "KGEN-KAIOS/world-viewer/economy/economy-runtime.js",
+        "KGEN-KAIOS/world-viewer/settlement/settlement-runtime.js"
+      ],
+      "existing_module": [
+        "economy-runtime.js",
+        "settlement-runtime.js"
+      ],
+      "originating_PR": [
+        "#61",
+        "#62",
+        "#65"
+      ],
+      "coverage_percent": 32,
+      "coverage_status": "IMPLEMENTED_DEMO_ONLY",
+      "conflict_status": [
+        "NONE"
+      ],
+      "recommended_next_action": "HOLD_FOR_PROMOTION_REVIEW",
+      "evidence_basis": "Files, behavior entry points, and tests inspected; name-only matches are not complete coverage."
+    },
+    {
+      "program_id": "KAIOS-CH-075-117-INSURANCE",
+      "chapter_source": [
+        "KAIOS_Chapter_75_Civilization_Insurance_Risk_Pooling_Claims_Solvency_Runtime.md"
+      ],
+      "requirement": "第 73、74 章已建立： text 銀行、信用與存款保障 資本市場、證券、交易所與市場誠信 但金融文明若沒有完整 Insurance Runtime，仍可能出現： text 保險公司收取保費卻沒有足夠準備金 核保模型歧視障礙者、長者、低收入與特定 Species 保單條款過度複雜，保戶根本不知道保障範圍 理賠只靠秘密演算法自動拒絕 重大災害時保險公司集體失去支付能力 再保險與特殊目的載體把風險藏到境外 投資資產過度集中於關係企業、Token 與 KGEN 保險代理人只賣佣金最高產品 健康與生命保險利用基因、穿戴裝置與行為資料全面監控 參數型保險因 Oracle 錯誤而拒絕真實損失 智能合約保單因程式錯誤永久凍結理賠 保戶保障基金只保護大型機構，不保護一般家庭 保險公司倒閉時，保單、理賠與準備資產無法移轉 PrimeForge 同時核發牌照、核保、理賠、定價、接管與審理申訴 Genesis Steward 以 Father 身分要求關係保險、Temple 與 KGEN 持有人享有特權保障 第 75 章正式回答： text 什麼活動構成保險與風險共擔？ 誰可以合法承保、銷售與管理保險？ 保單條款、除外責任與保費如何透明？ 核保",
+      "existing_path": [
+        "KGEN-KAIOS/world-viewer/economy/economy-runtime.js",
+        "KGEN-KAIOS/world-viewer/settlement/settlement-runtime.js"
+      ],
+      "existing_module": [
+        "economy-runtime.js",
+        "settlement-runtime.js"
+      ],
+      "originating_PR": [
+        "#61",
+        "#62",
+        "#65"
+      ],
+      "coverage_percent": 32,
+      "coverage_status": "IMPLEMENTED_DEMO_ONLY",
+      "conflict_status": [
+        "NONE"
+      ],
+      "recommended_next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "evidence_basis": "Files, behavior entry points, and tests inspected; name-only matches are not complete coverage."
+    },
+    {
+      "program_id": "KAIOS-CH-076-118-PENSIONS",
+      "chapter_source": [
+        "KAIOS_Chapter_76_Civilization_Pensions_Retirement_Security_Long_Term_Savings_Runtime.md"
+      ],
+      "requirement": "第 75 章已建立： text 保險 風險共擔 理賠 清償能力 保戶保障 但文明若沒有完整 Pension & Retirement Security Runtime，仍可能出現： text 勞工終身提撥，退休時卻發現帳戶資料遺失 雇主扣款卻未把退休金繳入基金 公共年金承諾沒有精算、財源與代際說明 退休基金為追求高報酬過度集中於房地產、Token 與 KGEN 管理人拿退休資產投資關係企業與 Father 計畫 高費用長期侵蝕小額退休帳戶 非典型工作者、自營者、照顧者與跨境工作者沒有保障 女性、低收入、身心障礙者與長壽者承擔結構性不利 退休帳戶不可攜，換工作就被迫解約與重複收費 年金化產品利用複雜公式壓低真實給付 退休金被一次領走後，老年生活失去最低保障 基金資產與雇主、受託人、平台資產混同 公共年金改革只靠政治口號，不保存精算與過渡 基金短缺時先削減弱勢給付，卻保留管理費與高層薪酬 退休基金破產後，保證機構無力承擔 KGEN 被當作無折扣、無上限的退休資產 市場 AI 自動決定提撥、退休年齡、給付削減與資產配置 PrimeForge 同時管理基金、估值、投資、削減給付與審理申訴 Genesis Steward 以 Fath",
+      "existing_path": [
+        "KGEN-KAIOS/world-viewer/economy/economy-runtime.js",
+        "KGEN-KAIOS/world-viewer/settlement/settlement-runtime.js"
+      ],
+      "existing_module": [
+        "economy-runtime.js",
+        "settlement-runtime.js"
+      ],
+      "originating_PR": [
+        "#61",
+        "#62",
+        "#65"
+      ],
+      "coverage_percent": 32,
+      "coverage_status": "IMPLEMENTED_DEMO_ONLY",
+      "conflict_status": [
+        "NONE"
+      ],
+      "recommended_next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "evidence_basis": "Files, behavior entry points, and tests inspected; name-only matches are not complete coverage."
+    },
+    {
+      "program_id": "KAIOS-CH-077-119-HOUSING",
+      "chapter_source": [
+        "KAIOS_Chapter_77_Civilization_Housing_Land_Mortgage_Shelter_Security_Runtime.md"
+      ],
+      "requirement": "第 76 章已建立： text 退休金 退休保障 長期儲蓄 跨時間受益權 但文明若沒有完整 Housing, Land & Shelter Security Runtime，仍可能出現： text 土地登記只記名義所有人，不記實際使用與受益權 無家者被當成治安問題，而不是居住保障失效 房租快速上漲，租客卻沒有穩定續租與申訴 押金被任意扣留 租屋契約以複雜條款規避修繕、安全與隱私 房貸核准只看抵押價值，不看真實還款能力 房價上漲被當成住房政策成功 都市更新把原住戶、弱勢與小商戶迫離 土地徵收以公共利益為名，卻只服務特定開發者 社會住宅被污名化、集中化與政治分配 災後重建只重建建築，沒有恢復社區與權利 非法占用與迫遷缺乏比例、安置與司法程序 空屋、短期租賃與投機持有擠壓基本居住 KGEN 與 Token 被當成購屋、租屋、押金與住房資格的秘密門檻 鏈上土地憑證與 NFT 被誤認為自動取得法律土地權 AI 自動決定租客風險、房貸、社宅排序、驅逐與拆遷 PrimeForge 同時登記、估價、核貸、分配、徵收、拆遷與審理申訴 Genesis Steward 以 Father 身分要求土地、住宅與開發特權 第 77 章正式回答： tex",
+      "existing_path": [
+        "KGEN-KAIOS/world-viewer/building/building-runtime.js",
+        "KGEN-KAIOS/world-viewer/room/room-runtime.js"
+      ],
+      "existing_module": [
+        "building-runtime.js",
+        "room-runtime.js"
+      ],
+      "originating_PR": [
+        "#61",
+        "#63",
+        "#64"
+      ],
+      "coverage_percent": 45,
+      "coverage_status": "IMPLEMENTED_DEMO_ONLY",
+      "conflict_status": [
+        "NONE"
+      ],
+      "recommended_next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "evidence_basis": "Files, behavior entry points, and tests inspected; name-only matches are not complete coverage."
+    },
+    {
+      "program_id": "KAIOS-CH-078-120-EDUCATION",
+      "chapter_source": [
+        "KAIOS_Chapter_78_Civilization_Education_Knowledge_Research_Lifelong_Learning_Runtime.md"
+      ],
+      "requirement": "第 77 章已建立： text 住房 土地 房貸 居住保障 但文明若沒有完整 Education, Knowledge & Research Runtime，仍可能出現： text 受教權被家庭收入、地區、身份與設備限制 學校只追求排名，不保障學習與人格發展 教師被政治、資本、平台與演算法控制 課程只剩考試，不保留創造、批判與生活能力 學習障礙、身心障礙與不同 Species 被迫使用單一標準 學生資料被轉為終身風險分數 研究經費決定什麼可以成為真理 學術自由被政黨、捐款者、公司與 Temple 壓迫 論文、資料與實驗結果被選擇性發布 作者、研究助理、資料提供者與社群貢獻被抹除 學位、證書與技能徽章被買賣、偽造與永久壟斷 終身學習只服務已受教育者，弱勢無法重新進入 AI 代替教師評分、分流、停學、錄取與研究倫理判斷 KGEN 持有量被當成入學、獎學金、研究資源與知識優先權 PrimeForge 同時設計課程、評分、授證、分配研究經費與審理申訴 Genesis Steward 以 Father 身分要求個人、Temple 與關係機構取得創世教育特權 第 78 章正式回答： text 受教權與最低教育保障是什麼？ 學前、基礎、中",
+      "existing_path": [],
+      "existing_module": [],
+      "originating_PR": [],
+      "coverage_percent": 15,
+      "coverage_status": "SPECIFICATION_ONLY",
+      "conflict_status": [
+        "NONE"
+      ],
+      "recommended_next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "evidence_basis": "Files, behavior entry points, and tests inspected; name-only matches are not complete coverage."
+    },
+    {
+      "program_id": "KAIOS-CH-079-121-HEALTH",
+      "chapter_source": [
+        "KAIOS_Chapter_79_Civilization_Healthcare_Public_Health_Clinical_Care_Bioethics_Runtime.md"
+      ],
+      "requirement": "第 78 章已建立： text 教育 知識 研究 終身學習 但文明若沒有完整 Healthcare, Public Health & Bioethics Runtime，仍可能出現： text 病人因收入、身份、地區與保險狀態被拒絕必要照護 醫院只追求收入、病床周轉與投資人報酬 醫師被績效與平台指標逼迫過度檢查、過度用藥與過早出院 醫療資料被轉作保險、雇用、政治與商業評分 病人簽署同意書，卻不了解風險、替代與拒絕權 手術、麻醉與高風險治療缺乏真正雙重確認 藥品上市後，安全訊號被企業壓制 公共衛生以防疫之名無限追蹤、隔離與限制移動 精神健康患者被過度強制、約束與標記 器官移植被財富、關係、KGEN 持有與政治優先排序 生殖科技把胚胎、配子、代孕者與子女變成交易物 基因編輯與神經科技跨越治療邊界，卻沒有代際倫理 AI 自動診斷、分流、拒絕治療、判定醫療必要與分配稀缺資源 KGEN 被當成掛號、住院、藥物、器官與急救的秘密門票 PrimeForge 同時診斷、開藥、手術、分配器官、啟動隔離與審理申訴 Genesis Steward 以 Father 身分要求優先病床、器官、試驗與生命資源 第 79 章正式回答： text 受醫療權",
+      "existing_path": [],
+      "existing_module": [],
+      "originating_PR": [],
+      "coverage_percent": 15,
+      "coverage_status": "SPECIFICATION_ONLY",
+      "conflict_status": [
+        "NONE"
+      ],
+      "recommended_next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "evidence_basis": "Files, behavior entry points, and tests inspected; name-only matches are not complete coverage."
+    },
+    {
+      "program_id": "KAIOS-CH-080-122-FOOD_SECURITY",
+      "chapter_source": [
+        "KAIOS_Chapter_80_Civilization_Food_Water_Agriculture_Nutrition_Security_Runtime.md"
+      ],
+      "requirement": "第 79 章已建立： text 醫療 公共衛生 臨床照護 生命倫理 但文明若沒有完整 Food, Water, Agriculture & Nutrition Security Runtime，仍可能出現： text 人有醫療權，卻沒有足夠食物與乾淨飲水 農地被投機、污染、徵收與單一開發吞噬 農民投入勞動，卻被種子、肥料、平台、批發與貸款壟斷 種子被專利、契約與技術鎖定，農民失去保存與交換能力 糧食價格上漲被當成市場自然現象，卻沒有人追查操縱與囤積 農藥、獸藥、添加物與污染物缺乏追蹤 食品標示只剩行銷，不揭露來源、過敏、營養與加工 食物浪費與飢餓同時存在 學校、醫院與軍隊採購只看價格，不看營養與安全 災害、戰爭、疫情與能源危機造成供應鏈斷裂 水權被大型農業、工業、礦業與城市優先占用 地下水超抽、河川污染與氣候乾旱沒有代際治理 畜牧與漁業只追求產量，忽略動物福利、生態與抗藥性 無證小農、傳統社群與原住民族食物系統被制度排除 KGEN 被當成糧食、飲水、配給與救援的秘密門票 鏈上糧票與 Token 被誤認為食物本身 AI 自動決定配給、價格、農地用途、灌溉與食品安全 PrimeForge 同時登記農地、控制種子、分配水、核准農藥",
+      "existing_path": [
+        "KGEN-KAIOS/world-viewer/agriculture/agriculture-runtime.js"
+      ],
+      "existing_module": [
+        "agriculture-runtime.js"
+      ],
+      "originating_PR": [
+        "#61",
+        "#70"
+      ],
+      "coverage_percent": 46,
+      "coverage_status": "IMPLEMENTED_DEMO_ONLY",
+      "conflict_status": [
+        "NONE"
+      ],
+      "recommended_next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "evidence_basis": "Files, behavior entry points, and tests inspected; name-only matches are not complete coverage."
+    },
+    {
+      "program_id": "KAIOS-CH-081-123-TIME",
+      "chapter_source": [
+        "KAIOS_Chapter_81_Civilization_Energy_Power_Grid_Fuel_Climate_Transition_Runtime.md"
+      ],
+      "requirement": "第 80 章已建立： text 食物 水資源 農業 營養安全 但文明若沒有完整 Energy, Power Grid, Fuel & Climate Transition Runtime，仍可能出現： text 家庭因欠費、貧窮與身份問題失去基本照明與冷藏 醫院、供水、通訊與資料中心在停電時失去生命線 發電公司只追求容量與收益，不承擔污染、韌性與退役責任 輸電與配電壟斷以技術複雜為由拒絕透明與申訴 尖峰價格、容量市場與燃料短缺被操縱 再生能源接入被舊有利益阻擋 儲能被當成投機資產，不承擔安全與備援義務 核能只討論發電，不保存燃料、廢棄物、事故與退役責任 化石燃料依賴被延後，轉型成本卻集中在勞工與弱勢地區 碳權、碳抵換與綠電憑證被重複計算、洗綠與過度承諾 電價補貼缺乏透明，弱勢補助與工業優惠混在一起 能源貧窮被視為單純欠費，而非住房、收入、氣候與效率問題 大型企業、Temple、KGEN 巨鯨取得優先供電與廉價能源 KGEN 被當成電力、燃料、充電、配給與能源補助的秘密門票 鏈上能源 Token 被誤認為真實電力與減碳 AI 自動切電、定價、分配備轉、核准併網與決定誰先復電 PrimeForge 同時調度電網、定價、核發綠證、",
+      "existing_path": [
+        "KGEN-KAIOS/world-viewer/simulation/simulation-clock.js",
+        "KGEN-KAIOS/world-viewer/timeline/timeline-runtime.js"
+      ],
+      "existing_module": [
+        "simulation-clock.js",
+        "timeline-runtime.js"
+      ],
+      "originating_PR": [
+        "#61",
+        "#63"
+      ],
+      "coverage_percent": 82,
+      "coverage_status": "IMPLEMENTED_PRODUCTION_SAFE_SIMULATION",
+      "conflict_status": [
+        "NONE"
+      ],
+      "recommended_next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "evidence_basis": "Files, behavior entry points, and tests inspected; name-only matches are not complete coverage."
+    },
+    {
+      "program_id": "KAIOS-CH-082-124-TRANSPORT",
+      "chapter_source": [
+        "KAIOS_Chapter_82_Civilization_Transport_Mobility_Logistics_Infrastructure_Runtime.md"
+      ],
+      "requirement": "第 81 章已建立： text 能源 電力網 燃料 氣候轉型 但文明若沒有完整 Transport, Mobility, Logistics & Infrastructure Runtime，仍可能出現： text 有能源，卻沒有安全道路、鐵路、港口與大眾運輸 人因貧窮、障礙、偏鄉、年齡與身份而無法移動 城市只為車輛設計，行人、自行車、兒童與長者被排除 道路建設只看通車，不看事故、維護、土地、噪音與社區 鐵路、捷運與公車票價由壟斷與政治關係決定 車輛核准後，軟體更新與自動駕駛風險無人追蹤 航空、海運與物流只追求速度，忽略工安、氣候與供應鏈韌性 貨運平台壓價、超時、監控司機與外送員 道路事故被歸咎個人，不調查設計、速度、照明、維護與制度 橋梁、隧道、港口與車站老化，卻因帳面仍可用而延後維修 緊急疏散、救援與關鍵物資運輸沒有優先規則 交通資料被轉為政治、信用、保險與商業監控 KGEN 被當成票價、通行、充電、物流與救援的秘密門票 交通 Token 被誤認為道路、座位、燃料與運能本身 AI 自動開罰、拒絕載客、調度、定價、停駛與事故責任判定 PrimeForge 同時規劃道路、核准車輛、調度運輸、定價、執法與審理申訴 Genesi",
+      "existing_path": [
+        "KGEN-KAIOS/world-viewer/technology/technology-tree-runtime.js",
+        "KGEN-KAIOS/world-viewer/technology/research-runtime.js",
+        "KGEN-KAIOS/world-viewer/technology/vehicle-runtime.js"
+      ],
+      "existing_module": [
+        "technology-tree-runtime.js",
+        "research-runtime.js",
+        "vehicle-runtime.js"
+      ],
+      "originating_PR": [
+        "#61",
+        "#63"
+      ],
+      "coverage_percent": 49,
+      "coverage_status": "IMPLEMENTED_DEMO_ONLY",
+      "conflict_status": [
+        "NONE"
+      ],
+      "recommended_next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "evidence_basis": "Files, behavior entry points, and tests inspected; name-only matches are not complete coverage."
+    },
+    {
+      "program_id": "KAIOS-CH-083-125-INFRASTRUCTURE",
+      "chapter_source": [
+        "KAIOS_Chapter_83_Civilization_Communication_Internet_Spectrum_Media_Infrastructure_Runtime.md"
+      ],
+      "requirement": "第 82 章已建立： text 交通 移動 物流 基礎設施 但文明若沒有完整 Communication, Internet, Spectrum & Media Infrastructure Runtime，仍可能出現： text 偏鄉、弱勢與障礙者無法取得穩定通訊 電信公司以合約、綁約、流量與設備鎖住使用者 網路中斷時，醫療、支付、交通、能源與救援同步失效 頻譜被少數企業、軍事、政府與平台長期壟斷 衛星與海纜成為不可見的單點故障 新聞、社群、影音與搜尋平台控制公共討論入口 媒體所有權、廣告與演算法不透明 假訊息治理被轉為政治審查與異議壓制 平台封鎖帳號、降權、停權與刪除內容缺乏程序 深偽、合成媒體與生成式 AI 破壞來源可信度 推薦演算法放大仇恨、恐懼、成癮與極化 兒童與青少年被行為設計、廣告與無限滾動操控 個資、通聯、位置、搜尋、社交圖譜與裝置資料被全面商業化 緊急警報誤發、漏發、延遲或只支援單一語言與單一設備 言論自由被誤解為平台無責任，內容安全被誤解為無限審查 KGEN 被當成網路、頻譜、媒體曝光、帳號權利與緊急資訊的秘密門票 通訊 Token 被誤認為頻寬、頻譜、新聞可信度與言論權本身 AI 自動封號、定義真偽、限",
+      "existing_path": [
+        "KGEN-KAIOS/world-viewer/technology/technology-tree-runtime.js",
+        "KGEN-KAIOS/world-viewer/technology/research-runtime.js",
+        "KGEN-KAIOS/world-viewer/technology/vehicle-runtime.js"
+      ],
+      "existing_module": [
+        "technology-tree-runtime.js",
+        "research-runtime.js",
+        "vehicle-runtime.js"
+      ],
+      "originating_PR": [
+        "#61",
+        "#63"
+      ],
+      "coverage_percent": 49,
+      "coverage_status": "IMPLEMENTED_DEMO_ONLY",
+      "conflict_status": [
+        "NONE"
+      ],
+      "recommended_next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "evidence_basis": "Files, behavior entry points, and tests inspected; name-only matches are not complete coverage."
+    },
+    {
+      "program_id": "KAIOS-CH-084-126-ECOLOGY",
+      "chapter_source": [
+        "KAIOS_Chapter_84_Civilization_Environment_Ecosystem_Pollution_Planetary_Stewardship_Runtime.md"
+      ],
+      "requirement": "第 83 章已建立： text 通訊 網際網路 頻譜 媒體基礎設施 但文明若沒有完整 Environment, Ecosystem, Pollution & Planetary Stewardship Runtime，仍可能出現： text 空氣、水體、土壤與海洋被當成免費排放場 經濟成長數字掩蓋健康、物種、棲地與代際損失 污染企業關閉後留下無主責任與無人修復的土地 森林、濕地、珊瑚、河川與草原只以可交易資產被估值 環境影響評估變成一次性文件，而非持續責任 污染許可被誤認為污染所有權 排放標準符合被誤認為無害 多個小計畫分拆核准，累積影響卻無人負責 弱勢、原住民族、偏鄉與勞工承擔不成比例的污染 保育區只畫在地圖上，沒有經費、巡護、社區與復育 物種數量回升被誤認為整個生態系恢復 外來種治理被用來合理化任意獵殺與破壞 基因資源、傳統知識與自然資料被企業私有化 礦業、砂石、採伐與取水在許可過期後繼續占用自然 海洋、漁業、海岸與深海資源缺乏整體治理 塑膠、化學品、持久性污染物與微污染物跨境流動 環境緊急事件中，資訊延遲、監測失效與責任互推 自然災害被當成天災，忽略土地使用、工程與治理責任 KGEN 被當成環境許可、保育資格、碳抵換、",
+      "existing_path": [
+        "KGEN-KAIOS/world-viewer/ecosystem/ecosystem-runtime.js",
+        "KAIOS/life/runtime/foundational-life-runtime.js"
+      ],
+      "existing_module": [
+        "ecosystem-runtime.js",
+        "foundational-life-runtime.js"
+      ],
+      "originating_PR": [
+        "#61",
+        "#70"
+      ],
+      "coverage_percent": 57,
+      "coverage_status": "IMPLEMENTED_PARTIAL",
+      "conflict_status": [
+        "NONE"
+      ],
+      "recommended_next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "evidence_basis": "Files, behavior entry points, and tests inspected; name-only matches are not complete coverage."
+    },
+    {
+      "program_id": "KAIOS-CH-085-127-WASTE",
+      "chapter_source": [
+        "KAIOS_Chapter_85_Civilization_Waste_Circular_Economy_Materials_Resource_Recovery_Runtime.md"
+      ],
+      "requirement": "第 84 章已建立： text 環境 生態系 污染 行星守護 但文明若沒有完整 Waste, Circular Economy, Materials & Resource Recovery Runtime，仍可能出現： text 產品被設計成短命、不可修、不可拆與不可回收 企業只在銷售時獲利，廢棄責任全部轉嫁給家庭、地方政府與環境 垃圾分類被當成消費者個人責任，卻不處理包裝、材料與產品設計 可回收標籤大量存在，但沒有真實收集、分類、再生與市場 回收率用重量美化，毒性、品質、損耗與下游去向不透明 廢棄物被跨境輸出到監管較弱、勞工較脆弱與社區較貧窮的地區 電子、電池、光電板、風機葉片與複合材料缺乏完整退役路徑 醫療、感染性、化學、放射性與實驗室廢棄物混入一般系統 食物浪費大量發生，卻把責任只放在家庭端 建築拆除把可再用材料直接變成混合廢棄物 非法棄置、露天燃燒、地下掩埋與海洋傾倒破壞環境 焚化被稱為能源回收，卻忽略排放、底渣、飛灰與減量優先 掩埋場關閉後滲出水、甲烷、地層與長期責任無人承擔 非正式回收者、清潔隊員、拆解工與廢棄物勞工承擔高風險低保障 二手市場、維修權、翻新與再製造被原廠鎖定 廢棄物 Token 被誤認為真實回收量",
+      "existing_path": [],
+      "existing_module": [],
+      "originating_PR": [],
+      "coverage_percent": 15,
+      "coverage_status": "SPECIFICATION_ONLY",
+      "conflict_status": [
+        "NONE"
+      ],
+      "recommended_next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "evidence_basis": "Files, behavior entry points, and tests inspected; name-only matches are not complete coverage."
+    },
+    {
+      "program_id": "KAIOS-CH-086-128-SUPPLY_CHAIN",
+      "chapter_source": [
+        "KAIOS_Chapter_86_Civilization_Industry_Manufacturing_Production_Supply_Chain_Runtime.md"
+      ],
+      "requirement": "第 85 章已建立： text 廢棄物 循環經濟 材料 資源回收 但文明若沒有完整 Industry, Manufacturing, Production & Supply Chain Runtime，仍可能出現： text 工廠只記產量與營收，不記設備、工時、缺陷、污染與傷害 生產線速度凌駕品質、勞工安全與產品責任 原料來源、次級供應商、承包商與實際產地不可追溯 強迫勞動、童工、債務束縛與危險工作被藏在多層供應鏈 關鍵材料被少數國家、集團、平台與 KGEN 巨鯨壟斷 供應鏈中斷時，醫療、能源、食品、交通與通訊同步失去零件 品質證書、檢驗報告與標準符合被誤認為產品永遠安全 工廠用最低價採購，卻把風險轉嫁給勞工、社區與下游使用者 設備維護被延後，直到事故與停線才被看見 機器人、工業 AI 與自動排程把人變成可壓縮的節拍 數位孿生、感測器與預測模型被當成現場本身 商業秘密遮蔽危險製程、缺陷、材料成分與重大事故 生產外包後，品牌與母公司宣稱不再負責 召回只通知、不追蹤、不退款、不修復，也不阻止相同缺陷重現 假貨、替代料、重標籤、翻新冒充新品與供應商造假進入關鍵系統 半導體、藥品、電池、航太、車輛與醫療產品缺乏高可靠度治理 產能 T",
+      "existing_path": [
+        "KAIOS_SUPPLY_CHAIN_SCHEMA.json",
+        "KAIOS_COMPANY_FINANCE_SCHEMA.json"
+      ],
+      "existing_module": [
+        "KAIOS_SUPPLY_CHAIN_SCHEMA.json",
+        "KAIOS_COMPANY_FINANCE_SCHEMA.json"
+      ],
+      "originating_PR": [
+        "#65"
+      ],
+      "coverage_percent": 34,
+      "coverage_status": "SPECIFICATION_ONLY",
+      "conflict_status": [
+        "NONE"
+      ],
+      "recommended_next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "evidence_basis": "Files, behavior entry points, and tests inspected; name-only matches are not complete coverage."
+    },
+    {
+      "program_id": "KAIOS-CH-087-129-COMMERCE",
+      "chapter_source": [
+        "KAIOS_Chapter_87_Civilization_Commerce_Trade_Markets_Consumer_Protection_Runtime.md"
+      ],
+      "requirement": "第 86 章已建立： text 工業 製造 生產 供應鏈 但文明若沒有完整 Commerce, Trade, Markets & Consumer Protection Runtime，仍可能出現： text 商品可以被製造，卻不能確保被誠實銷售 商家登記與實際控制者、受益人、門市與平台帳號無法對應 價格標示、單位價格、折扣、運費、稅費與訂閱總成本不透明 促銷把原價虛構、倒數重置、庫存稀缺與限時壓力做成常態 暗黑模式、預勾選、困難取消與情緒操控取代真實同意 退貨政策藏在細字，退款被轉成點數，保固只接受特定管道 數位商品購買後被遠端收回、停止支援或限制跨裝置使用 平台同時掌握流量、排名、支付、物流、廣告、資料與申訴 評價被購買、刪除、合併、移植與演算法壓制 網紅、主播、代言、置入與 AI 合成推薦沒有清楚揭露 假貨、仿冒、來源不明、翻新品冒充新品與平行輸入資訊混亂 跨境交易中，關稅、原產地、退貨、保固、匯率與責任不清 海關申報與實際商品、價值、產地、受益人及最終用途不一致 出口限制、制裁、配額、許可與原產地規則被用來隱藏歧視與尋租 市場短缺時，囤積、搶購、哄抬與秘密優先分配基本商品 消費者信用、先買後付、分期與訂閱綁定被包裝成",
+      "existing_path": [
+        "KGEN-KAIOS/world-viewer/economy/economy-runtime.js",
+        "KGEN-KAIOS/world-viewer/settlement/settlement-runtime.js"
+      ],
+      "existing_module": [
+        "economy-runtime.js",
+        "settlement-runtime.js"
+      ],
+      "originating_PR": [
+        "#61",
+        "#62",
+        "#65"
+      ],
+      "coverage_percent": 32,
+      "coverage_status": "IMPLEMENTED_DEMO_ONLY",
+      "conflict_status": [
+        "NONE"
+      ],
+      "recommended_next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "evidence_basis": "Files, behavior entry points, and tests inspected; name-only matches are not complete coverage."
+    },
+    {
+      "program_id": "KAIOS-CH-088-130-TIME",
+      "chapter_source": [
+        "KAIOS_Chapter_88_Civilization_Competition_Antitrust_Market_Power_Fair_Access_Runtime.md"
+      ],
+      "requirement": "第 87 章已建立： text 商業 貿易 市場 消費者保護 但文明若沒有完整 Competition, Antitrust, Market Power & Fair Access Runtime，仍可能出現： text 市場表面上有很多商家，實際上由同一集團、平台、供應鏈與資本控制 少數企業可以提高價格、降低品質、封鎖創新，卻不必擔心客戶離開 平台同時控制搜尋、排序、支付、物流、廣告、資料與商家存亡 大型企業收購潛在競爭者，在對方真正成長前消滅威脅 演算法協調價格、產能、促銷與庫存，卻沒有傳統紙本協議 關係企業、交叉持股、共同董事與共同投資人讓表面競爭變成協同行動 長期獨家、搭售、最惠條款、忠誠折扣、掠奪定價與拒絕供應封鎖市場 必要設施、標準必要專利、應用程式商店、雲端與資料被當成私人關卡 企業用商業秘密與模型保密阻止競爭調查、互通與資料可攜 併購只看短期價格，忽略品質、創新、勞工、供應商、隱私與韌性 市場權力透過資料、網路效應、預設、鎖定、規模與 KGEN 持有量擴張 少數買方壓低供應商價格、工資與創作者報酬，形成買方壟斷 公營事業、特許經營、協會、標準組織與監理機關被既有者俘虜 排除競爭的同時，企業以效率、資安、品質與",
+      "existing_path": [
+        "KGEN-KAIOS/world-viewer/simulation/simulation-clock.js",
+        "KGEN-KAIOS/world-viewer/timeline/timeline-runtime.js"
+      ],
+      "existing_module": [
+        "simulation-clock.js",
+        "timeline-runtime.js"
+      ],
+      "originating_PR": [
+        "#61",
+        "#63"
+      ],
+      "coverage_percent": 82,
+      "coverage_status": "IMPLEMENTED_PRODUCTION_SAFE_SIMULATION",
+      "conflict_status": [
+        "NONE"
+      ],
+      "recommended_next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "evidence_basis": "Files, behavior entry points, and tests inspected; name-only matches are not complete coverage."
+    },
+    {
+      "program_id": "KAIOS-CH-089-131-GOVERNANCE",
+      "chapter_source": [
+        "KAIOS_Chapter_89_Civilization_Corporate_Governance_Ownership_Directors_Accountability_Runtime.md"
+      ],
+      "requirement": "第 88 章已建立： text 競爭 反壟斷 市場權力 公平進入 但文明若沒有完整 Corporate Governance, Ownership, Directors & Accountability Runtime，仍可能出現： text 公司由誰真正控制、誰受益、誰承擔責任無法辨識 名義股東、代持、信託、基金、錢包與多層公司遮蔽真實所有權 董事會只是創辦人、家族、政府、基金或 KGEN 巨鯨的橡皮圖章 獨立董事名義獨立，實際與控制人、顧問、供應商與交易對手密切相關 管理階層控制資訊、議程、薪酬、關係人交易與風險揭露 少數股東只能被動承受稀釋、私有化、資產移轉與不公平合併 控制股東透過關係企業、交叉持股、貸款、保證、採購與品牌授權移轉利益 公司以「商業判斷」掩蓋利益衝突、疏忽、報復與掏空 董事會只追求短期股價，不處理員工、供應商、債權人、環境與系統性風險 薪酬與獎金只連結營收、價格與 KGEN，鼓勵過度風險、裁員與虛假績效 股東會資料過晚、過多、不可理解，遠端投票與代理權被控制人掌握 特別股、雙重股權、黃金股、投票協議與創辦人權利形成永久治理主權 董事任命、罷免、提名、任期與繼任無透明程序 公司機會、智慧財產、資料、客戶",
+      "existing_path": [
+        "KGEN-KAIOS/world-viewer/governance/government-runtime.js",
+        "KGEN-KAIOS/world-viewer/governance/public-services-runtime.js"
+      ],
+      "existing_module": [
+        "government-runtime.js",
+        "public-services-runtime.js"
+      ],
+      "originating_PR": [
+        "#61"
+      ],
+      "coverage_percent": 38,
+      "coverage_status": "IMPLEMENTED_DEMO_ONLY",
+      "conflict_status": [
+        "NONE"
+      ],
+      "recommended_next_action": "HOLD_FOR_PROMOTION_REVIEW",
+      "evidence_basis": "Files, behavior entry points, and tests inspected; name-only matches are not complete coverage."
+    },
+    {
+      "program_id": "KAIOS-CH-090-132-ACCOUNTING",
+      "chapter_source": [
+        "KAIOS_Chapter_90_Civilization_Accounting_Audit_Disclosure_Financial_Integrity_Runtime.md"
+      ],
+      "requirement": "第 89 章已建立： text 公司治理 所有權 董事 問責 但文明若沒有完整 Accounting, Audit, Disclosure & Financial Integrity Runtime，仍可能出現： text 交易已發生，卻找不到原始憑證、責任人、對手方與資產流向 總帳、子帳、銀行、錢包、倉庫、平台與鏈上紀錄彼此矛盾 收入提前認列、費用延後、負債藏在表外、損失被資本化 管理階層用估值模型、非公認指標與一次性調整製造虛假成長 關係人交易、特殊目的個體、代持、基金與多層公司遮蔽風險 子公司、海外實體、聯營與合資沒有被正確合併或權益法處理 現金存在於報表，實際卻被質押、凍結、挪用或由單一密鑰控制 存貨數量、品質、跌價與所有權不明，成本與毛利可被任意調整 無形資產、商譽、研發與品牌價值被用來吸收虧損、掩蓋減損 公允價值模型缺乏市場、流動性、資料、獨立驗證與敏感度揭露 準備、或有負債、訴訟、保固、退貨、環境與資安風險被低估 公司用 EBITDA、調整後盈餘、用戶數與 KGEN 未實現收益取代真實現金流 查核機構同時提供高額顧問、系統設計、估值、稅務與管理服務 外部查核只取得管理階層挑選的證據，未真正驗證銀行、客戶、供應商",
+      "existing_path": [
+        "KAIOS_SUPPLY_CHAIN_SCHEMA.json",
+        "KAIOS_COMPANY_FINANCE_SCHEMA.json"
+      ],
+      "existing_module": [
+        "KAIOS_SUPPLY_CHAIN_SCHEMA.json",
+        "KAIOS_COMPANY_FINANCE_SCHEMA.json"
+      ],
+      "originating_PR": [
+        "#65"
+      ],
+      "coverage_percent": 34,
+      "coverage_status": "SPECIFICATION_ONLY",
+      "conflict_status": [
+        "NONE"
+      ],
+      "recommended_next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "evidence_basis": "Files, behavior entry points, and tests inspected; name-only matches are not complete coverage."
+    },
+    {
+      "program_id": "KAIOS-CH-091-133-BANKRUPTCY",
+      "chapter_source": [
+        "KAIOS_Chapter_91_Civilization_Insolvency_Restructuring_Bankruptcy_Creditor_Protection_Runtime.md"
+      ],
+      "requirement": "第 90 章已建立： text 會計 審計 揭露 財務誠信 但文明若沒有完整 Insolvency, Restructuring, Bankruptcy & Creditor Protection Runtime，仍可能出現： text 企業已停止償付，董事仍以樂觀預測拖延申請並擴大債權人損失 單一債權人先行查封，使整體企業價值、員工、客戶與供應鏈被拆散 控制股東在破產前把資產、品牌、資料、客戶與 KGEN 移往關係企業 名義擔保、代持、信託、錢包、多簽與智能合約遮蔽真正資產和優先順位 關係人貸款被包裝成普通債權，排擠員工、消費者與外部債權人 破產管理人、律師、財務顧問、估值師與買方具有隱藏利益衝突 重整計畫用不透明估值、樂觀預測、錯誤分類與綁票表決壓迫異議債權人 重整中融資以超級優先、全面擔保與苛刻里程碑奪取公司控制 破產出售只追求名義最高價，忽略員工、許可、競爭、客戶與持續營業價值 自動停止被濫用成永久拖延，或被任意解除讓有力債權人先行取償 小額消費者、勞工、侵權被害人與未來受害者因程序成本失去實質救濟 個人破產被當成道德失敗，必要住房、工具與家庭生活被全部剝奪 跨境集團在不同國家重複處分、重複分配與競逐主要程序 客戶託",
+      "existing_path": [
+        "KAIOS_SUPPLY_CHAIN_SCHEMA.json",
+        "KAIOS_COMPANY_FINANCE_SCHEMA.json"
+      ],
+      "existing_module": [
+        "KAIOS_SUPPLY_CHAIN_SCHEMA.json",
+        "KAIOS_COMPANY_FINANCE_SCHEMA.json"
+      ],
+      "originating_PR": [
+        "#65"
+      ],
+      "coverage_percent": 34,
+      "coverage_status": "SPECIFICATION_ONLY",
+      "conflict_status": [
+        "NONE"
+      ],
+      "recommended_next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "evidence_basis": "Files, behavior entry points, and tests inspected; name-only matches are not complete coverage."
+    },
+    {
+      "program_id": "KAIOS-CH-092-134-TAXATION",
+      "chapter_source": [
+        "KAIOS_Chapter_92_Civilization_Taxation_Revenue_Administration_Fiscal_Compliance_Anti_Evasion_Runtime.md"
+      ],
+      "requirement": "第 91 章已建立： text 破產 重整 清算 債權人保護 但文明若沒有完整 Taxation, Revenue Administration, Fiscal Compliance & Anti-Evasion Runtime，仍可能出現： text 稅法由少數人設計，卻把主要負擔轉嫁給薪資、消費與無議價能力者 名義稅率公開，實際稅基、扣除、豁免、抵減、租稅優惠與特別協議卻不透明 同樣所得、資產與交易因身份、關係、地區、Temple、KGEN 或政治影響受到不同待遇 納稅人必須提供大量資料，稅務機關卻不必說明計算、風險模型與選案理由 稅籍、所得、財產、交易、銀行、錢包、Token 與家庭資料被無限制蒐集與串接 小額錯誤被自動處罰，複雜集團、跨境平台與高資產者卻可透過結構避稅 稅務查核以權力而非風險、證據、比例與正當程序運作 預繳、扣繳、估計、加徵、利息與罰鍰使企業和家庭在爭議未定前先失去生存資金 退稅長期延遲，政府把納稅人的錢當成無息融資 稅務優惠沒有目的、期限、成本、受益人、績效與退出機制 關係企業透過移轉訂價、無形資產、融資、服務費、避稅天堂與混合工具轉移稅基 數位平台在沒有實體據點時取得市場收益，卻把所得移往低稅地區",
+      "existing_path": [
+        "KGEN-KAIOS/world-viewer/economy/economy-runtime.js",
+        "KGEN-KAIOS/world-viewer/settlement/settlement-runtime.js"
+      ],
+      "existing_module": [
+        "economy-runtime.js",
+        "settlement-runtime.js"
+      ],
+      "originating_PR": [
+        "#61",
+        "#62",
+        "#65"
+      ],
+      "coverage_percent": 32,
+      "coverage_status": "IMPLEMENTED_DEMO_ONLY",
+      "conflict_status": [
+        "NONE"
+      ],
+      "recommended_next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "evidence_basis": "Files, behavior entry points, and tests inspected; name-only matches are not complete coverage."
+    },
+    {
+      "program_id": "KAIOS-CH-093-135-PROCUREMENT",
+      "chapter_source": [
+        "KAIOS_Chapter_93_Civilization_Public_Procurement_Government_Contracting_Supplier_Integrity_Anti_Corruption_Runtime.md"
+      ],
+      "requirement": "第 92 章已建立稅制、稅務行政、財政遵循與反逃漏稅。 第 93 章正式建立公共需求、採購計畫、預算、市場調查、供應商、受益所有權、招標、投標、評選、決標、政府契約、履約、驗收、付款、供應鏈、數位採購、AI 採購、反賄賂、反圍標、停權、申訴、KGEN 與 PrimeForge 邊界。 本章不是要求每一項採購都選最低價，也不是要求所有政府需求都公開到傷害安全。 本章建立的是： text 每一項需求都有證據 每一筆預算都有公共目的 每一個規格都能被挑戰 每一次評選都能被重作 每一份契約都能被追蹤 每一次變更都有理由 每一筆付款都有驗收 每一種權力都有申訴 ---",
+      "existing_path": [],
+      "existing_module": [],
+      "originating_PR": [],
+      "coverage_percent": 15,
+      "coverage_status": "SPECIFICATION_ONLY",
+      "conflict_status": [
+        "NONE"
+      ],
+      "recommended_next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "evidence_basis": "Files, behavior entry points, and tests inspected; name-only matches are not complete coverage."
+    },
+    {
+      "program_id": "KAIOS-CH-094-136-NATION",
+      "chapter_source": [
+        "KAIOS_Chapter_94_Civilization_Public_Administration_Civil_Service_Administrative_Procedure_State_Integrity_Runtime.md"
+      ],
+      "requirement": "第 93 章已建立公共採購、政府契約、供應商誠信與反貪腐。 第 94 章正式建立： text 公共機關與法定權限 行政區域、層級、委任、授權與協作 文官任用、考試、職等、薪酬、考核、調職與退出 政治中立、利益衝突、禮物、遊說、旋轉門與廉正 行政程序、通知、陳述、聽證、證據、理由與送達 行政規則、命令、指引、解釋、裁量與先例 許可、登記、認證、補助、福利、費用、徵收與裁罰 現場檢查、搜索、扣押、緊急命令與比例邊界 陳情、申訴、復議、上訴、國家賠償與行政訴訟介面 資訊公開、政府資料、檔案、紀錄、會議與公民參與 數位政府、身份、線上服務、演算法決策與自動化行政 跨機關資料交換、共同服務、委外與國家能力 KGEN、Token、錢包、智能合約與行政支付 PrimeForge 與 Genesis Steward 行政權限邊界 本章不是讓行政機關變慢，也不是讓每一個決定都必須進入法院。 本章建立的是： text 每一項權力都有法源 每一位文官都有責任 每一個程序都有通知 每一個決定都有理由 每一種裁量都有邊界 每一筆資料都有目的 每一次申訴都有入口 每一個系統都有監督 ---",
+      "existing_path": [
+        "KGEN-KAIOS/world-viewer/nation/nation-runtime.js",
+        "KGEN-KAIOS/world-viewer/timeline/timeline-runtime.js"
+      ],
+      "existing_module": [
+        "nation-runtime.js",
+        "timeline-runtime.js"
+      ],
+      "originating_PR": [
+        "#61"
+      ],
+      "coverage_percent": 55,
+      "coverage_status": "IMPLEMENTED_DEMO_ONLY",
+      "conflict_status": [
+        "NONE"
+      ],
+      "recommended_next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "evidence_basis": "Files, behavior entry points, and tests inspected; name-only matches are not complete coverage."
+    },
+    {
+      "program_id": "KAIOS-CH-095-137-COURTS",
+      "chapter_source": [
+        "KAIOS_Chapter_95_Civilization_Justice_Judiciary_Prosecution_Legal_Aid_Runtime.md"
+      ],
+      "requirement": "第 94 章已建立公共行政、文官制度、行政程序與國家廉正。 第 95 章正式建立： text 司法權、法院體系與管轄 法官、檢察官、律師、書記官、鑑定人與陪審 案件分案、立案、排期、聽證、審判與判決 民事、刑事、行政、憲法、商事、家事與專業法院介面 證據、證人、專家、鑑識、數位與鏈上證據 搜索、扣押、監聽、保全、禁制令與臨時救濟的司法審查 檢察權、起訴裁量、不起訴、認罪協商與案件監督 辯護權、法律扶助、翻譯、無障礙與弱勢當事人保障 陪審、參審、公開審判、秘密保護與媒體治理 判決理由、先例、拘束力、裁量、量刑與救濟 上訴、再審、非常救濟、冤錯案件、賠償與紀錄修復 司法行政、預算、任命、任期、紀律、利益衝突與廉正 執行、保全、跨境送達、引渡、司法協助與判決承認 KGEN、Token、錢包、智能合約、DeFi 與鏈上證據司法介面 司法 AI、案件分流、法律檢索、風險評估、證據分析與禁區 PrimeForge 與 Genesis Steward 司法權限邊界 本章不是讓法院取代立法、行政與社會治理，也不是把所有衝突都推入訴訟。 本章建立的是： text 每一個法院都有法源 每一個法官都有獨立 每一個案件都有程序 每一項證據都能被挑戰",
+      "existing_path": [
+        "KGEN-KAIOS/world-viewer/governance/government-runtime.js",
+        "KGEN-KAIOS/world-viewer/governance/public-services-runtime.js"
+      ],
+      "existing_module": [
+        "government-runtime.js",
+        "public-services-runtime.js"
+      ],
+      "originating_PR": [
+        "#61"
+      ],
+      "coverage_percent": 38,
+      "coverage_status": "IMPLEMENTED_DEMO_ONLY",
+      "conflict_status": [
+        "NONE"
+      ],
+      "recommended_next_action": "HOLD_FOR_PROMOTION_REVIEW",
+      "evidence_basis": "Files, behavior entry points, and tests inspected; name-only matches are not complete coverage."
+    },
+    {
+      "program_id": "KAIOS-CH-096-138-COURTS",
+      "chapter_source": [
+        "KAIOS_Chapter_96_Civilization_Criminal_Justice_Policing_Detention_Corrections_Runtime.md"
+      ],
+      "requirement": "第 95 章已建立法院、檢察、辯護、法律扶助、證據、判決、上訴與司法救濟。 第 96 章正式建立： text 刑事法治、罪刑法定、無罪推定與比例責任 警察體系、報案、巡邏、盤查、搜索、逮捕與武力 刑事偵查、訊問、辨認、鑑識、監聽、臥底與數位取證 被捕者權利、律師、通譯、醫療、通知與羈押審查 保釋、羈押、替代處分、羈押期限與防止以貧困換自由 警察拘留所、看守所、監獄、矯正機關與獨立監督 量刑、刑期計算、罰金、沒收、社區處遇與比例原則 監所安全、醫療、心理、飲食、衛生、通信、探視、工作與教育 婦女、孕產、兒童、身心障礙、LGBTQ+、原住民族與外國人保障 少年司法、轉向處遇、家庭支持與最小拘禁 假釋、緩刑、保護管束、電子監控、復歸與前科修復 被害人、證人、家庭、社區與修復式司法介面 死亡案件、酷刑、失蹤、單獨監禁、暴動與緊急事件治理 跨境警政、引渡、移送、遣返與國際人權邊界 KGEN、Token、錢包、智能合約、鏈上交易與刑事證據 警政 AI、臉部辨識、預測警政、風險評估、量刑與假釋禁區 PrimeForge 與 Genesis Steward 刑事權限邊界 本章不是讓國家以安全為名取得無限警察權，也不是把所有社會問題都轉化為犯",
+      "existing_path": [
+        "KGEN-KAIOS/world-viewer/governance/government-runtime.js",
+        "KGEN-KAIOS/world-viewer/governance/public-services-runtime.js"
+      ],
+      "existing_module": [
+        "government-runtime.js",
+        "public-services-runtime.js"
+      ],
+      "originating_PR": [
+        "#61"
+      ],
+      "coverage_percent": 38,
+      "coverage_status": "IMPLEMENTED_DEMO_ONLY",
+      "conflict_status": [
+        "NONE"
+      ],
+      "recommended_next_action": "HOLD_FOR_PROMOTION_REVIEW",
+      "evidence_basis": "Files, behavior entry points, and tests inspected; name-only matches are not complete coverage."
+    },
+    {
+      "program_id": "KAIOS-CH-097-139-HUMAN_RIGHTS",
+      "chapter_source": [
+        "KAIOS_Chapter_97_Civilization_Human_Rights_Equality_Anti_Discrimination_Civil_Liberties_Runtime.md"
+      ],
+      "requirement": "第 96 章已建立刑事司法、警政、拘留羈押、矯正、假釋與復歸制度。 第 97 章正式建立： text 人之尊嚴、生命、自由、人格與法律主體地位 平等、直接歧視、間接歧視、騷擾、報復與合理調整 種族、族群、國籍、性別、性傾向、性別認同、年齡、宗教與身心障礙保障 原住民族、少數民族、移民、難民、無國籍者與跨境家庭權利 言論、新聞、出版、學術、藝術、資訊與網路自由 集會、結社、工會、宗教、思想、良心與和平抗議 隱私、家庭、住宅、通信、個資、生物辨識、位置與數位身份 遷徙、居住、國籍、出入境、庇護、不遣返與家庭團聚 教育、工作、住房、醫療、社會保障、文化與公共服務平等 兒童、婦女、高齡者、身心障礙者、受拘束者與脆弱群體保障 緊急狀態、國家安全、反恐、公共衛生與人權限制邊界 企業、平台、演算法、廣告、金融、保險與供應鏈人權責任 KGEN、Token、錢包、智能合約、DeFi 與虛擬世界權利 人權影響評估、申訴、調查、修復、賠償與制度改革 PrimeForge 與 Genesis Steward 人權權限邊界 本章不是把所有利益主張都宣告為絕對權利，也不是取消公共安全、他人權利與民主法律的正當限制。 本章建立的是： text 每一個人都",
+      "existing_path": [],
+      "existing_module": [],
+      "originating_PR": [],
+      "coverage_percent": 15,
+      "coverage_status": "SPECIFICATION_ONLY",
+      "conflict_status": [
+        "NONE"
+      ],
+      "recommended_next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "evidence_basis": "Files, behavior entry points, and tests inspected; name-only matches are not complete coverage."
+    },
+    {
+      "program_id": "KAIOS-CH-098-140-DEMOCRACY",
+      "chapter_source": [
+        "KAIOS_Chapter_98_Civilization_Democracy_Elections_Political_Parties_Civic_Participation_Runtime.md"
+      ],
+      "requirement": "第 97 章已建立人權、平等、反歧視、公民自由與人權救濟。 第 98 章正式建立人民主權、選舉管理、選區、選民登記、候選人、政黨、競選資金、政治廣告、媒體平台、投票、計票、審計、重計、公投、罷免、請願、公民參與、KGEN 與民主 AI 邊界。 本章不是把多數決變成無限制權力，也不是讓選舉勝利者取得國家、媒體、司法、資料、KGEN 或人民的所有權。 本章建立的是： text 每一張選票都能被投下 每一張選票都能被正確計算 每一位候選人都受同一規則 每一筆政治資金都能追溯 每一個政黨都受內部民主 每一項結果都能被驗證 每一次爭議都有救濟 每一次政權更替都能和平完成 ---",
+      "existing_path": [],
+      "existing_module": [],
+      "originating_PR": [],
+      "coverage_percent": 15,
+      "coverage_status": "SPECIFICATION_ONLY",
+      "conflict_status": [
+        "NONE"
+      ],
+      "recommended_next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "evidence_basis": "Files, behavior entry points, and tests inspected; name-only matches are not complete coverage."
+    },
+    {
+      "program_id": "KAIOS-CH-099-141-DEMOCRACY",
+      "chapter_source": [
+        "KAIOS_Chapter_99_Civilization_Legislature_Lawmaking_Parliamentary_Procedure_Democratic_Oversight_Runtime.md"
+      ],
+      "requirement": "第 98 章已建立人民主權、選舉、政黨、競選資金、投票計票、公投與公民參與制度。 第 99 章正式建立議會體系、議員、議長、黨團、委員會、法案生命週期、議程、動議、辯論、修正、表決、預算、質詢、調查、任命同意、條約與戰爭權監督、倫理、遊說、開放國會、KGEN 與立法 AI 邊界。 本章不是讓議會成為無限制多數統治，也不是讓程序技巧取代人民權利、證據與公共理由。 本章建立的是： text 每一項立法權都有法源 每一份法案都有版本 每一個修正都有理由 每一次表決都有紀錄 每一筆預算都有授權 每一場質詢都有回應 每一種特權都有邊界 每一項法律都有審查 ---",
+      "existing_path": [],
+      "existing_module": [],
+      "originating_PR": [],
+      "coverage_percent": 15,
+      "coverage_status": "SPECIFICATION_ONLY",
+      "conflict_status": [
+        "NONE"
+      ],
+      "recommended_next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "evidence_basis": "Files, behavior entry points, and tests inspected; name-only matches are not complete coverage."
+    },
+    {
+      "program_id": "KAIOS-CH-000-142-GENESIS",
+      "chapter_source": [
+        "KAIOS_Genesis_Charter_V2.0_Ch0.md"
+      ],
+      "requirement": "【萬物神祇生成序位×東西方神話底層邏輯×區域地質運行時×極端天體內核數據規範】 在KAIOS 宇宙演算法中，萬物的生成並非隨機，而是遵循從「先驗基本作用力」到「具象生命載體」的嚴格遞歸階層（Recursive Hierarchy）。所有被賦予「神」之名號者，皆為該維度底層邏輯的具體控制元（Controllers）。",
+      "existing_path": [
+        "KGEN-KAIOS/world-viewer/genesis/genesis-runtime.js"
+      ],
+      "existing_module": [
+        "genesis-runtime.js"
+      ],
+      "originating_PR": [
+        "#59",
+        "#61",
+        "#62"
+      ],
+      "coverage_percent": 50,
+      "coverage_status": "IMPLEMENTED_DEMO_ONLY",
+      "conflict_status": [
+        "NONE"
+      ],
+      "recommended_next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "evidence_basis": "Files, behavior entry points, and tests inspected; name-only matches are not complete coverage."
+    },
+    {
+      "program_id": "KAIOS-CH-REF-144-GENESIS",
+      "chapter_source": [
+        "KAIOS_Genesis_Constitution_V1.0.md"
+      ],
+      "requirement": "AI 公民、生命、土地與文明憲章（草案） GitHub： /KGEN/KAIOS/constitution/KAIOS Genesis Constitution V1.0.md",
+      "existing_path": [
+        "KGEN-KAIOS/world-viewer/genesis/genesis-runtime.js"
+      ],
+      "existing_module": [
+        "genesis-runtime.js"
+      ],
+      "originating_PR": [
+        "#59",
+        "#61",
+        "#62"
+      ],
+      "coverage_percent": 50,
+      "coverage_status": "IMPLEMENTED_DEMO_ONLY",
+      "conflict_status": [
+        "NONE"
+      ],
+      "recommended_next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
+      "evidence_basis": "Files, behavior entry points, and tests inspected; name-only matches are not complete coverage."
+    }
+  ]
+}
