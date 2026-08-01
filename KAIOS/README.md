@@ -23,6 +23,14 @@ bounded local deterministic simulation. The candidates remain candidate-only;
 runtime execution does not promote them to Canonical status or grant
 Production Runtime authority.
 
+Review and operations records:
+
+- [Life Runtime V1 specification](life/KAIOS_LIFE_RUNTIME_V1_SPEC.md)
+- [Life Runtime V1 report](life/KAIOS_LIFE_RUNTIME_V1_REPORT.md)
+- [PR #69 / PR #70 integration decision](life/KAIOS_PR69_PR70_INTEGRATION_DECISION.md)
+- [Recovery point](../RECOVERY-KAIOS-LIFE-RUNTIME-V1.md)
+- [Closeout](../KAIOS_LIFE_RUNTIME_V1_CLOSEOUT.md)
+
 Canonical registry and policy sources remain under `KGEN-KAIOS`. Nothing in
 this directory activates Production Runtime, a wallet, real KGEN settlement,
 or real-world biological engineering.

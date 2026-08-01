@@ -44,6 +44,14 @@
           if (!shell) throw new Error("Canonical app shell is missing");
 
           document.body.replaceChildren(shell);
+          const routeNav = shell.querySelector(".official-route-nav");
+          if (routeNav) {
+            const lifeRuntimeLink = document.createElement("a");
+            lifeRuntimeLink.href = "./life-runtime/";
+            lifeRuntimeLink.setAttribute("aria-label", "Open KAIOS Life Runtime V1");
+            lifeRuntimeLink.innerHTML = '<span class="route-nav-desktop">Life Runtime V1</span><span class="route-nav-mobile">Life V1</span>';
+            routeNav.append(lifeRuntimeLink);
+          }
           const stylesheet = document.createElement("link");
           stylesheet.rel = "stylesheet";
           stylesheet.href = canonicalStyles;

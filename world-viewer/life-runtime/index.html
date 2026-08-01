@@ -37,6 +37,15 @@
       <output id="runtime-status" role="status" aria-live="polite">Loading candidate definitions...</output>
     </section>
     <section id="error-state" class="error-state" role="alert" hidden><strong>Life Runtime data could not be loaded.</strong><span id="error-detail"></span><button id="retry-button" type="button">Retry</button></section>
+    <section class="catalog" aria-labelledby="catalog-title">
+      <div class="section-heading"><div><span class="eyebrow">RUNTIME-VALIDATED CANDIDATE PACKAGES</span><h2 id="catalog-title">Foundational life catalog</h2></div><span>Canonical Schema compatible / not Production-authorized</span></div>
+      <div class="catalog-groups">
+        <p><strong>植物生命</strong><span>草 / Grass</span><span>樹 / Tree</span></p>
+        <p><strong>水生生命</strong><span>魚 / Fish</span><span>蝦 / Shrimp</span></p>
+        <p><strong>地形生命</strong><span>山 / Mountain</span><span>土 / Soil</span></p>
+        <p><strong>水體生命</strong><span>水 / Water</span><span>河 / River</span></p>
+      </div>
+    </section>
     <section class="life-grid" id="life-grid" aria-label="Foundational life states" aria-busy="true"></section>
     <section class="timeline" aria-labelledby="timeline-title"><div class="section-heading"><div><span class="eyebrow">EVENT HISTORY</span><h2 id="timeline-title">Causal timeline</h2></div><output id="tick-count">Tick 0</output></div><ol id="event-list"><li>No events yet.</li></ol></section>
   </main>
