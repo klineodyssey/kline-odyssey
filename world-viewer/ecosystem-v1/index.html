@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="color-scheme" content="dark">
+  <meta name="theme-color" content="#101512">
+  <meta name="description" content="KAIOS 生態系世界：草、樹、魚、蝦、山、土、水與河的決定性族群與資源循環模擬。">
+  <link rel="canonical" href="https://klineodyssey.github.io/kline-odyssey/world-viewer/ecosystem-v1/">
+  <meta property="og:title" content="KAIOS 生態系世界｜KGEN">
+  <meta property="og:description" content="觀察族群、繁殖、承載量、食物關係、水土循環、死亡、分解與生態復原。">
+  <meta property="og:url" content="https://klineodyssey.github.io/kline-odyssey/world-viewer/ecosystem-v1/">
+  <meta property="og:image" content="https://klineodyssey.github.io/kline-odyssey/assets/kgen/kgen-logo-256.png">
+  <title>KAIOS 生態系世界｜KGEN</title>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="../" aria-label="返回 KAIOS 完整世界"><img src="../../assets/kgen/kgen-logo-256.png" alt="KGEN"><span><strong>KAIOS / KGEN</strong><small>KAIOS 生態系世界</small></span></a>
+    <nav aria-label="生態系導覽"><a href="../../">官方首頁</a><a href="../">完整世界</a><a href="../life-runtime/">生命 Runtime</a><a href="../../api/kaios/ecosystem/v1/">公開資料</a></nav>
+  </header>
+  <main>
+    <section class="intro" aria-labelledby="title">
+      <div><p class="eyebrow">LOCAL_DETERMINISTIC_SIMULATION</p><h1 id="title">KAIOS 生態系世界</h1><p>八種基礎生命與形成實體，在同一套有限水、土壤養分、生物量與棲地承載量中共同演進。</p></div>
+      <div class="boundaries" aria-label="安全邊界"><span>SIMULATION ONLY</span><span>NO REAL KGEN</span><span>NO REAL BIOENGINEERING</span><span>NO PRODUCTION AUTHORITY</span></div>
+    </section>
+
+    <section class="controls" aria-label="Runtime 控制">
+      <button id="start" type="button" title="開始" aria-label="開始模擬">&#9654;</button>
+      <button id="pause" type="button" title="暫停" aria-label="暫停模擬">&#8545;</button>
+      <button id="resume" type="button">繼續</button><button id="advance" type="button">推進 1 Tick</button><button id="reset" type="button">重設</button><button id="export" type="button">匯出</button>
+      <label class="file-control">匯入<input id="import" type="file" accept="application/json"></label>
+      <select id="scenario" aria-label="選擇情境"><option value="BASELINE">基準情境</option><option value="DROUGHT">乾旱</option><option value="POLLUTION">污染</option><option value="RESTORATION">復原</option></select>
+      <button id="run-scenario" type="button">執行情境</button>
+      <output id="status" role="status" aria-live="polite">正在載入 KAIOS 生態資料…</output>
+    </section>
+    <section id="error" class="error" role="alert" hidden><strong>KAIOS 生態資料載入失敗。</strong><span id="error-detail"></span><button id="retry" type="button">重新載入</button></section>
+
+    <section class="summary" aria-label="生態系摘要">
+      <article><span>Runtime</span><strong id="runtime-state">PAUSED</strong></article><article><span>Simulation Tick</span><strong id="tick">0</strong></article><article><span>Biological Population</span><strong id="population-total">0 / 500</strong></article><article><span>Conditions</span><strong id="condition-count">0</strong></article>
+    </section>
+
+    <div class="workspace">
+      <nav class="tabs" aria-label="資料檢視">
+        <button class="active" data-view="map" type="button">Ecosystem Map</button><button data-view="habitats" type="button">Habitats</button><button data-view="populations" type="button">Species Populations</button><button data-view="food" type="button">Food Relationships</button><button data-view="resources" type="button">Water / Soil / Nutrients</button><button data-view="capacity" type="button">Carrying Capacity</button><button data-view="events" type="button">Event Timeline</button>
+      </nav>
+      <section class="view" id="view" aria-live="polite" aria-busy="true"></section>
+    </div>
+  </main>
+  <script type="module" src="./app.js"></script>
+</body>
+</html>

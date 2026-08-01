@@ -1,0 +1,357 @@
+{
+  "schema_version": "1.0.0",
+  "runtime": "KAIOS_REPRODUCTION_ECOLOGY_RUNTIME_V1",
+  "mode": "STATIC_READ_ONLY_PROJECTION",
+  "generated_from_seed": "KAIOS-ECOLOGY-V1-001",
+  "simulation_only": true,
+  "read_only": true,
+  "authority": "NO_PRODUCTION_AUTHORITY",
+  "wallet": "NONE",
+  "real_kgen": "NO_REAL_KGEN",
+  "populations": [
+    {
+      "population_id": "POP-GRASS-001",
+      "species_id": "SPECIES-KAIOS-FOUNDATIONAL-GRASS",
+      "habitat_id": "HABITAT-GRASSLAND-V1",
+      "count": 234,
+      "age_distribution": {
+        "juvenile": 48,
+        "mature": 186
+      },
+      "sex_distribution": {
+        "female": 117,
+        "male": 117
+      },
+      "health_distribution": {
+        "healthy": 234,
+        "stressed": 0
+      },
+      "energy_reserve": 95.004785,
+      "food_requirement": 0.08,
+      "water_requirement": 0.02,
+      "space_requirement": 1,
+      "birth_rate": 0.018,
+      "death_rate": 0.006,
+      "migration_rate": 0.002,
+      "disease_rate": 0.001,
+      "predation_rate": 0,
+      "carrying_capacity": 209,
+      "genetic_diversity_proxy": 0.7,
+      "generation": 0,
+      "population_status": "OVER_CAPACITY",
+      "reproduction_modes": [
+        "SEED_PROPAGATION",
+        "VEGETATIVE_PROPAGATION"
+      ],
+      "cooldown_ticks": 0,
+      "traits": {
+        "water_efficiency": 0.5,
+        "temperature_tolerance": 0.5,
+        "growth_rate": 0.5,
+        "disease_resistance": 0.5,
+        "oxygen_tolerance": 0.5,
+        "salinity_tolerance": 0.5,
+        "body_size_proxy": 0.5
+      }
+    },
+    {
+      "population_id": "POP-TREE-001",
+      "species_id": "SPECIES-KAIOS-FOUNDATIONAL-TREE",
+      "habitat_id": "HABITAT-FOREST-V1",
+      "count": 36,
+      "age_distribution": {
+        "juvenile": 7,
+        "mature": 29
+      },
+      "sex_distribution": {
+        "female": 18,
+        "male": 18
+      },
+      "health_distribution": {
+        "healthy": 36,
+        "stressed": 0
+      },
+      "energy_reserve": 100,
+      "food_requirement": 0.5,
+      "water_requirement": 0.12,
+      "space_requirement": 1,
+      "birth_rate": 0.008,
+      "death_rate": 0.003,
+      "migration_rate": 0.002,
+      "disease_rate": 0.001,
+      "predation_rate": 0,
+      "carrying_capacity": 38,
+      "genetic_diversity_proxy": 0.7,
+      "generation": 0,
+      "population_status": "STABLE",
+      "reproduction_modes": [
+        "SEED_PROPAGATION"
+      ],
+      "cooldown_ticks": 0,
+      "traits": {
+        "water_efficiency": 0.5,
+        "temperature_tolerance": 0.5,
+        "growth_rate": 0.5,
+        "disease_resistance": 0.5,
+        "oxygen_tolerance": 0.5,
+        "salinity_tolerance": 0.5,
+        "body_size_proxy": 0.5
+      }
+    },
+    {
+      "population_id": "POP-FISH-001",
+      "species_id": "SPECIES-KAIOS-FOUNDATIONAL-FISH",
+      "habitat_id": "HABITAT-RIVER-V1",
+      "count": 111,
+      "age_distribution": {
+        "juvenile": 23,
+        "mature": 88
+      },
+      "sex_distribution": {
+        "female": 55,
+        "male": 56
+      },
+      "health_distribution": {
+        "healthy": 111,
+        "stressed": 0
+      },
+      "energy_reserve": 99.5,
+      "food_requirement": 0.025,
+      "water_requirement": 0.015,
+      "space_requirement": 1,
+      "birth_rate": 0.012,
+      "death_rate": 0.007,
+      "migration_rate": 0.002,
+      "disease_rate": 0.001,
+      "predation_rate": 0,
+      "carrying_capacity": 124,
+      "genetic_diversity_proxy": 0.7,
+      "generation": 1,
+      "population_status": "STABLE",
+      "reproduction_modes": [
+        "SEXUAL_REPRODUCTION",
+        "SPAWNING"
+      ],
+      "cooldown_ticks": 10,
+      "traits": {
+        "water_efficiency": 0.5,
+        "temperature_tolerance": 0.5,
+        "growth_rate": 0.5,
+        "disease_resistance": 0.5,
+        "oxygen_tolerance": 0.5,
+        "salinity_tolerance": 0.5,
+        "body_size_proxy": 0.5
+      }
+    },
+    {
+      "population_id": "POP-SHRIMP-001",
+      "species_id": "SPECIES-KAIOS-FOUNDATIONAL-SHRIMP",
+      "habitat_id": "HABITAT-FISHPOND-V1",
+      "count": 81,
+      "age_distribution": {
+        "juvenile": 17,
+        "mature": 64
+      },
+      "sex_distribution": {
+        "female": 40,
+        "male": 41
+      },
+      "health_distribution": {
+        "healthy": 81,
+        "stressed": 0
+      },
+      "energy_reserve": 99.5,
+      "food_requirement": 0.012,
+      "water_requirement": 0.01,
+      "space_requirement": 1,
+      "birth_rate": 0.014,
+      "death_rate": 0.008,
+      "migration_rate": 0.002,
+      "disease_rate": 0.001,
+      "predation_rate": 0,
+      "carrying_capacity": 96,
+      "genetic_diversity_proxy": 0.7,
+      "generation": 1,
+      "population_status": "STABLE",
+      "reproduction_modes": [
+        "SEXUAL_REPRODUCTION",
+        "LARVAL_DEVELOPMENT"
+      ],
+      "cooldown_ticks": 10,
+      "traits": {
+        "water_efficiency": 0.5,
+        "temperature_tolerance": 0.5,
+        "growth_rate": 0.5,
+        "disease_resistance": 0.5,
+        "oxygen_tolerance": 0.5,
+        "salinity_tolerance": 0.5,
+        "body_size_proxy": 0.5
+      }
+    },
+    {
+      "population_id": "POP-MOUNTAIN-001",
+      "species_id": "SPECIES-KAIOS-FOUNDATIONAL-MOUNTAIN",
+      "habitat_id": "HABITAT-MOUNTAIN-WATERSHED-V1",
+      "count": 1,
+      "age_distribution": {
+        "juvenile": 0,
+        "mature": 1
+      },
+      "sex_distribution": {},
+      "health_distribution": {
+        "healthy": 1,
+        "stressed": 0
+      },
+      "energy_reserve": 100,
+      "food_requirement": 0,
+      "water_requirement": 0,
+      "space_requirement": 1,
+      "birth_rate": 0,
+      "death_rate": 0.00001,
+      "migration_rate": 0.002,
+      "disease_rate": 0.001,
+      "predation_rate": 0,
+      "carrying_capacity": 1,
+      "genetic_diversity_proxy": 0.7,
+      "generation": 0,
+      "population_status": "STABLE",
+      "reproduction_modes": [
+        "NO_REPRODUCTION"
+      ],
+      "cooldown_ticks": 0,
+      "traits": {
+        "water_efficiency": 0.5,
+        "temperature_tolerance": 0.5,
+        "growth_rate": 0.5,
+        "disease_resistance": 0.5,
+        "oxygen_tolerance": 0.5,
+        "salinity_tolerance": 0.5,
+        "body_size_proxy": 0.5
+      }
+    },
+    {
+      "population_id": "POP-SOIL-001",
+      "species_id": "SPECIES-KAIOS-FOUNDATIONAL-SOIL",
+      "habitat_id": "HABITAT-SOIL-V1",
+      "count": 1,
+      "age_distribution": {
+        "juvenile": 0,
+        "mature": 1
+      },
+      "sex_distribution": {},
+      "health_distribution": {
+        "healthy": 1,
+        "stressed": 0
+      },
+      "energy_reserve": 100,
+      "food_requirement": 0,
+      "water_requirement": 0,
+      "space_requirement": 1,
+      "birth_rate": 0,
+      "death_rate": 0.00001,
+      "migration_rate": 0.002,
+      "disease_rate": 0.001,
+      "predation_rate": 0,
+      "carrying_capacity": 1,
+      "genetic_diversity_proxy": 0.7,
+      "generation": 0,
+      "population_status": "STABLE",
+      "reproduction_modes": [
+        "NO_REPRODUCTION"
+      ],
+      "cooldown_ticks": 0,
+      "traits": {
+        "water_efficiency": 0.5,
+        "temperature_tolerance": 0.5,
+        "growth_rate": 0.5,
+        "disease_resistance": 0.5,
+        "oxygen_tolerance": 0.5,
+        "salinity_tolerance": 0.5,
+        "body_size_proxy": 0.5
+      }
+    },
+    {
+      "population_id": "POP-WATER-001",
+      "species_id": "SPECIES-KAIOS-FOUNDATIONAL-WATER",
+      "habitat_id": "HABITAT-RIVER-V1",
+      "count": 1,
+      "age_distribution": {
+        "juvenile": 0,
+        "mature": 1
+      },
+      "sex_distribution": {},
+      "health_distribution": {
+        "healthy": 1,
+        "stressed": 0
+      },
+      "energy_reserve": 100,
+      "food_requirement": 0,
+      "water_requirement": 0,
+      "space_requirement": 1,
+      "birth_rate": 0,
+      "death_rate": 0,
+      "migration_rate": 0.002,
+      "disease_rate": 0.001,
+      "predation_rate": 0,
+      "carrying_capacity": 1,
+      "genetic_diversity_proxy": 0.7,
+      "generation": 0,
+      "population_status": "STABLE",
+      "reproduction_modes": [
+        "NO_REPRODUCTION"
+      ],
+      "cooldown_ticks": 0,
+      "traits": {
+        "water_efficiency": 0.5,
+        "temperature_tolerance": 0.5,
+        "growth_rate": 0.5,
+        "disease_resistance": 0.5,
+        "oxygen_tolerance": 0.5,
+        "salinity_tolerance": 0.5,
+        "body_size_proxy": 0.5
+      }
+    },
+    {
+      "population_id": "POP-RIVER-001",
+      "species_id": "SPECIES-KAIOS-FOUNDATIONAL-RIVER",
+      "habitat_id": "HABITAT-RIVER-V1",
+      "count": 1,
+      "age_distribution": {
+        "juvenile": 0,
+        "mature": 1
+      },
+      "sex_distribution": {},
+      "health_distribution": {
+        "healthy": 1,
+        "stressed": 0
+      },
+      "energy_reserve": 100,
+      "food_requirement": 0,
+      "water_requirement": 0,
+      "space_requirement": 1,
+      "birth_rate": 0,
+      "death_rate": 0.00001,
+      "migration_rate": 0.002,
+      "disease_rate": 0.001,
+      "predation_rate": 0,
+      "carrying_capacity": 1,
+      "genetic_diversity_proxy": 0.7,
+      "generation": 0,
+      "population_status": "STABLE",
+      "reproduction_modes": [
+        "NO_REPRODUCTION"
+      ],
+      "cooldown_ticks": 0,
+      "traits": {
+        "water_efficiency": 0.5,
+        "temperature_tolerance": 0.5,
+        "growth_rate": 0.5,
+        "disease_resistance": 0.5,
+        "oxygen_tolerance": 0.5,
+        "salinity_tolerance": 0.5,
+        "body_size_proxy": 0.5
+      }
+    }
+  ],
+  "maximum_total_population": 500
+}

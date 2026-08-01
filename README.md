@@ -1106,3 +1106,6 @@ transfer, automatic species promotion or Production authority.
 - [Charter Source Crosswalk](KAIOS/life/ecology/KAIOS_REPRODUCTION_ECOLOGY_SOURCE_CROSSWALK.md)
 - [State Schema](KAIOS/life/ecology/KAIOS_REPRODUCTION_ECOLOGY_SCHEMA_V1.json)
 - [Test Plan](KAIOS/life/ecology/KAIOS_REPRODUCTION_ECOLOGY_TEST_PLAN.md)
+- [Ecosystem Runtime V1](world-viewer/ecosystem-v1/)
+- [Read-only Ecosystem APIs](api/kaios/ecosystem/v1/)
+- [Runtime Implementation Report](KAIOS/life/ecology/KAIOS_REPRODUCTION_ECOLOGY_RUNTIME_V1_REPORT.md)

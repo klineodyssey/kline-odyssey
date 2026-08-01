@@ -1,0 +1,1655 @@
+{
+  "schema_version": "1.0.0",
+  "runtime": "KAIOS_REPRODUCTION_ECOLOGY_RUNTIME_V1",
+  "mode": "STATIC_READ_ONLY_PROJECTION",
+  "generated_from_seed": "KAIOS-ECOLOGY-V1-001",
+  "simulation_only": true,
+  "read_only": true,
+  "authority": "NO_PRODUCTION_AUTHORITY",
+  "wallet": "NONE",
+  "real_kgen": "NO_REAL_KGEN",
+  "state": {
+    "schema_version": "1.0.0",
+    "runtime": "KAIOS_REPRODUCTION_ECOLOGY_RUNTIME_V1",
+    "mode": "LOCAL_DETERMINISTIC_SIMULATION",
+    "seed": "KAIOS-ECOLOGY-V1-001",
+    "simulation_time": 3,
+    "status": "PAUSED",
+    "entities": [
+      {
+        "id": "ECOSYSTEM-K280-V1",
+        "type": "ECOSYSTEM",
+        "location": "K280-SYNTHETIC-ECOSYSTEM",
+        "simulation_time": 0,
+        "status": "ACTIVE",
+        "source": "KAIOS_REPRODUCTION_ECOLOGY_RUNTIME_V1_SPEC",
+        "authority": "SIMULATION_ONLY",
+        "simulation_only": true,
+        "history": [],
+        "previous_state_hash": "GENESIS",
+        "next_state_hash": "GENESIS"
+      },
+      {
+        "id": "HABITAT-GRASSLAND-V1",
+        "type": "HABITAT",
+        "location": "HABITAT-GRASSLAND-V1",
+        "simulation_time": 0,
+        "status": "ACTIVE",
+        "source": "KAIOS_REPRODUCTION_ECOLOGY_RUNTIME_V1_SPEC",
+        "authority": "SIMULATION_ONLY",
+        "simulation_only": true,
+        "history": [],
+        "previous_state_hash": "GENESIS",
+        "next_state_hash": "GENESIS"
+      },
+      {
+        "id": "HABITAT-FOREST-V1",
+        "type": "HABITAT",
+        "location": "HABITAT-FOREST-V1",
+        "simulation_time": 0,
+        "status": "ACTIVE",
+        "source": "KAIOS_REPRODUCTION_ECOLOGY_RUNTIME_V1_SPEC",
+        "authority": "SIMULATION_ONLY",
+        "simulation_only": true,
+        "history": [],
+        "previous_state_hash": "GENESIS",
+        "next_state_hash": "GENESIS"
+      },
+      {
+        "id": "HABITAT-FISHPOND-V1",
+        "type": "HABITAT",
+        "location": "HABITAT-FISHPOND-V1",
+        "simulation_time": 0,
+        "status": "ACTIVE",
+        "source": "KAIOS_REPRODUCTION_ECOLOGY_RUNTIME_V1_SPEC",
+        "authority": "SIMULATION_ONLY",
+        "simulation_only": true,
+        "history": [],
+        "previous_state_hash": "GENESIS",
+        "next_state_hash": "GENESIS"
+      },
+      {
+        "id": "HABITAT-RIVER-V1",
+        "type": "HABITAT",
+        "location": "HABITAT-RIVER-V1",
+        "simulation_time": 0,
+        "status": "ACTIVE",
+        "source": "KAIOS_REPRODUCTION_ECOLOGY_RUNTIME_V1_SPEC",
+        "authority": "SIMULATION_ONLY",
+        "simulation_only": true,
+        "history": [],
+        "previous_state_hash": "GENESIS",
+        "next_state_hash": "GENESIS"
+      },
+      {
+        "id": "HABITAT-WETLAND-V1",
+        "type": "HABITAT",
+        "location": "HABITAT-WETLAND-V1",
+        "simulation_time": 0,
+        "status": "ACTIVE",
+        "source": "KAIOS_REPRODUCTION_ECOLOGY_RUNTIME_V1_SPEC",
+        "authority": "SIMULATION_ONLY",
+        "simulation_only": true,
+        "history": [],
+        "previous_state_hash": "GENESIS",
+        "next_state_hash": "GENESIS"
+      },
+      {
+        "id": "HABITAT-SOIL-V1",
+        "type": "HABITAT",
+        "location": "HABITAT-SOIL-V1",
+        "simulation_time": 0,
+        "status": "ACTIVE",
+        "source": "KAIOS_REPRODUCTION_ECOLOGY_RUNTIME_V1_SPEC",
+        "authority": "SIMULATION_ONLY",
+        "simulation_only": true,
+        "history": [],
+        "previous_state_hash": "GENESIS",
+        "next_state_hash": "GENESIS"
+      },
+      {
+        "id": "HABITAT-MOUNTAIN-WATERSHED-V1",
+        "type": "HABITAT",
+        "location": "HABITAT-MOUNTAIN-WATERSHED-V1",
+        "simulation_time": 0,
+        "status": "ACTIVE",
+        "source": "KAIOS_REPRODUCTION_ECOLOGY_RUNTIME_V1_SPEC",
+        "authority": "SIMULATION_ONLY",
+        "simulation_only": true,
+        "history": [],
+        "previous_state_hash": "GENESIS",
+        "next_state_hash": "GENESIS"
+      }
+    ],
+    "habitats": [
+      {
+        "id": "HABITAT-GRASSLAND-V1",
+        "type": "GRASSLAND",
+        "location": "HABITAT-GRASSLAND-V1",
+        "simulation_time": 0,
+        "status": "ACTIVE",
+        "source": "KAIOS_REPRODUCTION_ECOLOGY_RUNTIME_V1_SPEC",
+        "authority": "SIMULATION_ONLY",
+        "simulation_only": true,
+        "history": [],
+        "previous_state_hash": "GENESIS",
+        "next_state_hash": "GENESIS",
+        "area_m2": 10000,
+        "water_l": 6499.58268,
+        "temperature_c": 24,
+        "oxygen_mg_l": 8,
+        "salinity_ppt": 0,
+        "soil_fertility": 0.78,
+        "pollution": 0.04,
+        "shelter": 0.65,
+        "season": "SPRING",
+        "restoration_state": "NONE",
+        "flow_status": "NOT_APPLICABLE"
+      },
+      {
+        "id": "HABITAT-FOREST-V1",
+        "type": "FOREST",
+        "location": "HABITAT-FOREST-V1",
+        "simulation_time": 0,
+        "status": "ACTIVE",
+        "source": "KAIOS_REPRODUCTION_ECOLOGY_RUNTIME_V1_SPEC",
+        "authority": "SIMULATION_ONLY",
+        "simulation_only": true,
+        "history": [],
+        "previous_state_hash": "GENESIS",
+        "next_state_hash": "GENESIS",
+        "area_m2": 20000,
+        "water_l": 8999.422171,
+        "temperature_c": 21,
+        "oxygen_mg_l": 8,
+        "salinity_ppt": 0,
+        "soil_fertility": 0.84,
+        "pollution": 0.04,
+        "shelter": 0.65,
+        "season": "SPRING",
+        "restoration_state": "NONE",
+        "flow_status": "NOT_APPLICABLE"
+      },
+      {
+        "id": "HABITAT-FISHPOND-V1",
+        "type": "FISHPOND",
+        "location": "HABITAT-FISHPOND-V1",
+        "simulation_time": 0,
+        "status": "ACTIVE",
+        "source": "KAIOS_REPRODUCTION_ECOLOGY_RUNTIME_V1_SPEC",
+        "authority": "SIMULATION_ONLY",
+        "simulation_only": true,
+        "history": [],
+        "previous_state_hash": "GENESIS",
+        "next_state_hash": "GENESIS",
+        "area_m2": 2500,
+        "water_l": 17998.843346,
+        "temperature_c": 25,
+        "oxygen_mg_l": 7.4,
+        "salinity_ppt": 1.5,
+        "soil_fertility": 0.72,
+        "pollution": 0.04,
+        "shelter": 0.65,
+        "season": "SPRING",
+        "restoration_state": "NONE",
+        "flow_status": "NOT_APPLICABLE"
+      },
+      {
+        "id": "HABITAT-RIVER-V1",
+        "type": "RIVER_HABITAT",
+        "location": "HABITAT-RIVER-V1",
+        "simulation_time": 0,
+        "status": "ACTIVE",
+        "source": "KAIOS_REPRODUCTION_ECOLOGY_RUNTIME_V1_SPEC",
+        "authority": "SIMULATION_ONLY",
+        "simulation_only": true,
+        "history": [],
+        "previous_state_hash": "GENESIS",
+        "next_state_hash": "GENESIS",
+        "area_m2": 40000,
+        "water_l": 34997.751394,
+        "temperature_c": 22,
+        "oxygen_mg_l": 8.2,
+        "salinity_ppt": 0.5,
+        "soil_fertility": 0.76,
+        "pollution": 0.04,
+        "shelter": 0.65,
+        "season": "SPRING",
+        "restoration_state": "NONE",
+        "flow_status": "FLOWING_DOWNHILL"
+      },
+      {
+        "id": "HABITAT-WETLAND-V1",
+        "type": "WETLAND",
+        "location": "HABITAT-WETLAND-V1",
+        "simulation_time": 0,
+        "status": "ACTIVE",
+        "source": "KAIOS_REPRODUCTION_ECOLOGY_RUNTIME_V1_SPEC",
+        "authority": "SIMULATION_ONLY",
+        "simulation_only": true,
+        "history": [],
+        "previous_state_hash": "GENESIS",
+        "next_state_hash": "GENESIS",
+        "area_m2": 12000,
+        "water_l": 13999.101157,
+        "temperature_c": 23,
+        "oxygen_mg_l": 7.5,
+        "salinity_ppt": 0.7,
+        "soil_fertility": 0.68,
+        "pollution": 0.04,
+        "shelter": 0.65,
+        "season": "SPRING",
+        "restoration_state": "NONE",
+        "flow_status": "NOT_APPLICABLE"
+      },
+      {
+        "id": "HABITAT-SOIL-V1",
+        "type": "SOIL_HABITAT",
+        "location": "HABITAT-SOIL-V1",
+        "simulation_time": 0,
+        "status": "ACTIVE",
+        "source": "KAIOS_REPRODUCTION_ECOLOGY_RUNTIME_V1_SPEC",
+        "authority": "SIMULATION_ONLY",
+        "simulation_only": true,
+        "history": [],
+        "previous_state_hash": "GENESIS",
+        "next_state_hash": "GENESIS",
+        "area_m2": 1000,
+        "water_l": 999.935798,
+        "temperature_c": 22,
+        "oxygen_mg_l": 8,
+        "salinity_ppt": 0,
+        "soil_fertility": 0.73964,
+        "pollution": 0.04,
+        "shelter": 0.65,
+        "season": "SPRING",
+        "restoration_state": "NONE",
+        "flow_status": "NOT_APPLICABLE"
+      },
+      {
+        "id": "HABITAT-MOUNTAIN-WATERSHED-V1",
+        "type": "MOUNTAIN_WATERSHED",
+        "location": "HABITAT-MOUNTAIN-WATERSHED-V1",
+        "simulation_time": 0,
+        "status": "ACTIVE",
+        "source": "KAIOS_REPRODUCTION_ECOLOGY_RUNTIME_V1_SPEC",
+        "authority": "SIMULATION_ONLY",
+        "simulation_only": true,
+        "history": [],
+        "previous_state_hash": "GENESIS",
+        "next_state_hash": "GENESIS",
+        "area_m2": 2000000000,
+        "water_l": 11999.229563,
+        "temperature_c": 12,
+        "oxygen_mg_l": 9,
+        "salinity_ppt": 0,
+        "soil_fertility": 0.62,
+        "pollution": 0.04,
+        "shelter": 0.65,
+        "season": "SPRING",
+        "restoration_state": "NONE",
+        "flow_status": "NOT_APPLICABLE"
+      }
+    ],
+    "populations": [
+      {
+        "population_id": "POP-GRASS-001",
+        "species_id": "SPECIES-KAIOS-FOUNDATIONAL-GRASS",
+        "habitat_id": "HABITAT-GRASSLAND-V1",
+        "count": 234,
+        "age_distribution": {
+          "juvenile": 48,
+          "mature": 186
+        },
+        "sex_distribution": {
+          "female": 117,
+          "male": 117
+        },
+        "health_distribution": {
+          "healthy": 234,
+          "stressed": 0
+        },
+        "energy_reserve": 95.004785,
+        "food_requirement": 0.08,
+        "water_requirement": 0.02,
+        "space_requirement": 1,
+        "birth_rate": 0.018,
+        "death_rate": 0.006,
+        "migration_rate": 0.002,
+        "disease_rate": 0.001,
+        "predation_rate": 0,
+        "carrying_capacity": 209,
+        "genetic_diversity_proxy": 0.7,
+        "generation": 0,
+        "population_status": "OVER_CAPACITY",
+        "reproduction_modes": [
+          "SEED_PROPAGATION",
+          "VEGETATIVE_PROPAGATION"
+        ],
+        "cooldown_ticks": 0,
+        "traits": {
+          "water_efficiency": 0.5,
+          "temperature_tolerance": 0.5,
+          "growth_rate": 0.5,
+          "disease_resistance": 0.5,
+          "oxygen_tolerance": 0.5,
+          "salinity_tolerance": 0.5,
+          "body_size_proxy": 0.5
+        }
+      },
+      {
+        "population_id": "POP-TREE-001",
+        "species_id": "SPECIES-KAIOS-FOUNDATIONAL-TREE",
+        "habitat_id": "HABITAT-FOREST-V1",
+        "count": 36,
+        "age_distribution": {
+          "juvenile": 7,
+          "mature": 29
+        },
+        "sex_distribution": {
+          "female": 18,
+          "male": 18
+        },
+        "health_distribution": {
+          "healthy": 36,
+          "stressed": 0
+        },
+        "energy_reserve": 100,
+        "food_requirement": 0.5,
+        "water_requirement": 0.12,
+        "space_requirement": 1,
+        "birth_rate": 0.008,
+        "death_rate": 0.003,
+        "migration_rate": 0.002,
+        "disease_rate": 0.001,
+        "predation_rate": 0,
+        "carrying_capacity": 38,
+        "genetic_diversity_proxy": 0.7,
+        "generation": 0,
+        "population_status": "STABLE",
+        "reproduction_modes": [
+          "SEED_PROPAGATION"
+        ],
+        "cooldown_ticks": 0,
+        "traits": {
+          "water_efficiency": 0.5,
+          "temperature_tolerance": 0.5,
+          "growth_rate": 0.5,
+          "disease_resistance": 0.5,
+          "oxygen_tolerance": 0.5,
+          "salinity_tolerance": 0.5,
+          "body_size_proxy": 0.5
+        }
+      },
+      {
+        "population_id": "POP-FISH-001",
+        "species_id": "SPECIES-KAIOS-FOUNDATIONAL-FISH",
+        "habitat_id": "HABITAT-RIVER-V1",
+        "count": 111,
+        "age_distribution": {
+          "juvenile": 23,
+          "mature": 88
+        },
+        "sex_distribution": {
+          "female": 55,
+          "male": 56
+        },
+        "health_distribution": {
+          "healthy": 111,
+          "stressed": 0
+        },
+        "energy_reserve": 99.5,
+        "food_requirement": 0.025,
+        "water_requirement": 0.015,
+        "space_requirement": 1,
+        "birth_rate": 0.012,
+        "death_rate": 0.007,
+        "migration_rate": 0.002,
+        "disease_rate": 0.001,
+        "predation_rate": 0,
+        "carrying_capacity": 124,
+        "genetic_diversity_proxy": 0.7,
+        "generation": 1,
+        "population_status": "STABLE",
+        "reproduction_modes": [
+          "SEXUAL_REPRODUCTION",
+          "SPAWNING"
+        ],
+        "cooldown_ticks": 10,
+        "traits": {
+          "water_efficiency": 0.5,
+          "temperature_tolerance": 0.5,
+          "growth_rate": 0.5,
+          "disease_resistance": 0.5,
+          "oxygen_tolerance": 0.5,
+          "salinity_tolerance": 0.5,
+          "body_size_proxy": 0.5
+        }
+      },
+      {
+        "population_id": "POP-SHRIMP-001",
+        "species_id": "SPECIES-KAIOS-FOUNDATIONAL-SHRIMP",
+        "habitat_id": "HABITAT-FISHPOND-V1",
+        "count": 81,
+        "age_distribution": {
+          "juvenile": 17,
+          "mature": 64
+        },
+        "sex_distribution": {
+          "female": 40,
+          "male": 41
+        },
+        "health_distribution": {
+          "healthy": 81,
+          "stressed": 0
+        },
+        "energy_reserve": 99.5,
+        "food_requirement": 0.012,
+        "water_requirement": 0.01,
+        "space_requirement": 1,
+        "birth_rate": 0.014,
+        "death_rate": 0.008,
+        "migration_rate": 0.002,
+        "disease_rate": 0.001,
+        "predation_rate": 0,
+        "carrying_capacity": 96,
+        "genetic_diversity_proxy": 0.7,
+        "generation": 1,
+        "population_status": "STABLE",
+        "reproduction_modes": [
+          "SEXUAL_REPRODUCTION",
+          "LARVAL_DEVELOPMENT"
+        ],
+        "cooldown_ticks": 10,
+        "traits": {
+          "water_efficiency": 0.5,
+          "temperature_tolerance": 0.5,
+          "growth_rate": 0.5,
+          "disease_resistance": 0.5,
+          "oxygen_tolerance": 0.5,
+          "salinity_tolerance": 0.5,
+          "body_size_proxy": 0.5
+        }
+      },
+      {
+        "population_id": "POP-MOUNTAIN-001",
+        "species_id": "SPECIES-KAIOS-FOUNDATIONAL-MOUNTAIN",
+        "habitat_id": "HABITAT-MOUNTAIN-WATERSHED-V1",
+        "count": 1,
+        "age_distribution": {
+          "juvenile": 0,
+          "mature": 1
+        },
+        "sex_distribution": {},
+        "health_distribution": {
+          "healthy": 1,
+          "stressed": 0
+        },
+        "energy_reserve": 100,
+        "food_requirement": 0,
+        "water_requirement": 0,
+        "space_requirement": 1,
+        "birth_rate": 0,
+        "death_rate": 0.00001,
+        "migration_rate": 0.002,
+        "disease_rate": 0.001,
+        "predation_rate": 0,
+        "carrying_capacity": 1,
+        "genetic_diversity_proxy": 0.7,
+        "generation": 0,
+        "population_status": "STABLE",
+        "reproduction_modes": [
+          "NO_REPRODUCTION"
+        ],
+        "cooldown_ticks": 0,
+        "traits": {
+          "water_efficiency": 0.5,
+          "temperature_tolerance": 0.5,
+          "growth_rate": 0.5,
+          "disease_resistance": 0.5,
+          "oxygen_tolerance": 0.5,
+          "salinity_tolerance": 0.5,
+          "body_size_proxy": 0.5
+        }
+      },
+      {
+        "population_id": "POP-SOIL-001",
+        "species_id": "SPECIES-KAIOS-FOUNDATIONAL-SOIL",
+        "habitat_id": "HABITAT-SOIL-V1",
+        "count": 1,
+        "age_distribution": {
+          "juvenile": 0,
+          "mature": 1
+        },
+        "sex_distribution": {},
+        "health_distribution": {
+          "healthy": 1,
+          "stressed": 0
+        },
+        "energy_reserve": 100,
+        "food_requirement": 0,
+        "water_requirement": 0,
+        "space_requirement": 1,
+        "birth_rate": 0,
+        "death_rate": 0.00001,
+        "migration_rate": 0.002,
+        "disease_rate": 0.001,
+        "predation_rate": 0,
+        "carrying_capacity": 1,
+        "genetic_diversity_proxy": 0.7,
+        "generation": 0,
+        "population_status": "STABLE",
+        "reproduction_modes": [
+          "NO_REPRODUCTION"
+        ],
+        "cooldown_ticks": 0,
+        "traits": {
+          "water_efficiency": 0.5,
+          "temperature_tolerance": 0.5,
+          "growth_rate": 0.5,
+          "disease_resistance": 0.5,
+          "oxygen_tolerance": 0.5,
+          "salinity_tolerance": 0.5,
+          "body_size_proxy": 0.5
+        }
+      },
+      {
+        "population_id": "POP-WATER-001",
+        "species_id": "SPECIES-KAIOS-FOUNDATIONAL-WATER",
+        "habitat_id": "HABITAT-RIVER-V1",
+        "count": 1,
+        "age_distribution": {
+          "juvenile": 0,
+          "mature": 1
+        },
+        "sex_distribution": {},
+        "health_distribution": {
+          "healthy": 1,
+          "stressed": 0
+        },
+        "energy_reserve": 100,
+        "food_requirement": 0,
+        "water_requirement": 0,
+        "space_requirement": 1,
+        "birth_rate": 0,
+        "death_rate": 0,
+        "migration_rate": 0.002,
+        "disease_rate": 0.001,
+        "predation_rate": 0,
+        "carrying_capacity": 1,
+        "genetic_diversity_proxy": 0.7,
+        "generation": 0,
+        "population_status": "STABLE",
+        "reproduction_modes": [
+          "NO_REPRODUCTION"
+        ],
+        "cooldown_ticks": 0,
+        "traits": {
+          "water_efficiency": 0.5,
+          "temperature_tolerance": 0.5,
+          "growth_rate": 0.5,
+          "disease_resistance": 0.5,
+          "oxygen_tolerance": 0.5,
+          "salinity_tolerance": 0.5,
+          "body_size_proxy": 0.5
+        }
+      },
+      {
+        "population_id": "POP-RIVER-001",
+        "species_id": "SPECIES-KAIOS-FOUNDATIONAL-RIVER",
+        "habitat_id": "HABITAT-RIVER-V1",
+        "count": 1,
+        "age_distribution": {
+          "juvenile": 0,
+          "mature": 1
+        },
+        "sex_distribution": {},
+        "health_distribution": {
+          "healthy": 1,
+          "stressed": 0
+        },
+        "energy_reserve": 100,
+        "food_requirement": 0,
+        "water_requirement": 0,
+        "space_requirement": 1,
+        "birth_rate": 0,
+        "death_rate": 0.00001,
+        "migration_rate": 0.002,
+        "disease_rate": 0.001,
+        "predation_rate": 0,
+        "carrying_capacity": 1,
+        "genetic_diversity_proxy": 0.7,
+        "generation": 0,
+        "population_status": "STABLE",
+        "reproduction_modes": [
+          "NO_REPRODUCTION"
+        ],
+        "cooldown_ticks": 0,
+        "traits": {
+          "water_efficiency": 0.5,
+          "temperature_tolerance": 0.5,
+          "growth_rate": 0.5,
+          "disease_resistance": 0.5,
+          "oxygen_tolerance": 0.5,
+          "salinity_tolerance": 0.5,
+          "body_size_proxy": 0.5
+        }
+      }
+    ],
+    "resources": {
+      "water_l": 95493.866109,
+      "atmospheric_water_l": 8060.083721,
+      "exported_water_l": 36.05017,
+      "restoration_water_reserve_l": 24000,
+      "mountain_snowpack_l": 14910,
+      "biomass_kg": 4999.536344,
+      "consumer_biomass_kg": 185.33612,
+      "exported_biomass_kg": 0,
+      "nutrients_kg": 1396.496816,
+      "restoration_nutrient_reserve_kg": 240,
+      "dead_biomass_kg": 0.2775,
+      "decomposition_kg": 0.08934,
+      "aquatic_primary_food_kg": 899.751,
+      "detritus_kg": 249.91288,
+      "sediment_kg": 3.6,
+      "energy_proxy": 49987.976446
+    },
+    "exported_population_count": {},
+    "conditions": [],
+    "candidate_lineages": [],
+    "events": [
+      {
+        "event_id": "ECO-EVT-000001",
+        "type": "SEASON_EVENT",
+        "location": "K280-SYNTHETIC-ECOSYSTEM",
+        "simulation_time": 0,
+        "status": "APPLIED",
+        "source": "KAIOS_REPRODUCTION_ECOLOGY_RUNTIME_V1",
+        "authority": "SIMULATION_ONLY",
+        "simulation_only": true,
+        "history": [],
+        "previous_state_hash": "fnv1a-c03c2d0c",
+        "next_state_hash": "fnv1a-49a5127c",
+        "inputs": {},
+        "outputs": {
+          "ecosystem_id": "ECOSYSTEM-K280-V1"
+        },
+        "resource_delta": {},
+        "reason": "APPROVED_INITIALIZATION_CAUSE"
+      },
+      {
+        "event_id": "ECO-EVT-000002",
+        "type": "WATER_CYCLE_EVENT",
+        "location": "K280-SYNTHETIC-ECOSYSTEM",
+        "simulation_time": 1,
+        "status": "APPLIED",
+        "source": "KAIOS_REPRODUCTION_ECOLOGY_RUNTIME_V1",
+        "authority": "SIMULATION_ONLY",
+        "simulation_only": true,
+        "history": [],
+        "previous_state_hash": "fnv1a-49a5127c",
+        "next_state_hash": "fnv1a-da8553c1",
+        "inputs": {
+          "mountain_runoff_l": 30
+        },
+        "outputs": {
+          "evaporation_l": 20,
+          "river_outflow_l": 12
+        },
+        "resource_delta": {
+          "water_l": -2,
+          "atmospheric_water_l": 20,
+          "exported_water_l": 12,
+          "energy_proxy": -4
+        },
+        "reason": "MOUNTAIN_RUNOFF_RIVER_INFLOW_EVAPORATION"
+      },
+      {
+        "event_id": "ECO-EVT-000003",
+        "type": "SOIL_CYCLE_EVENT",
+        "location": "K280-SYNTHETIC-ECOSYSTEM",
+        "simulation_time": 1,
+        "status": "APPLIED",
+        "source": "KAIOS_REPRODUCTION_ECOLOGY_RUNTIME_V1",
+        "authority": "SIMULATION_ONLY",
+        "simulation_only": true,
+        "history": [],
+        "previous_state_hash": "fnv1a-da8553c1",
+        "next_state_hash": "fnv1a-70d4139c",
+        "inputs": {},
+        "outputs": {
+          "erosion_kg": 1.2
+        },
+        "resource_delta": {
+          "nutrients_kg": -1.2,
+          "sediment_kg": 1.2
+        },
+        "reason": "BOUNDED_EROSION"
+      },
+      {
+        "event_id": "ECO-EVT-000004",
+        "type": "COMPETITION_EVENT",
+        "location": "K280-SYNTHETIC-ECOSYSTEM",
+        "simulation_time": 1,
+        "status": "APPLIED",
+        "source": "KAIOS_REPRODUCTION_ECOLOGY_RUNTIME_V1",
+        "authority": "SIMULATION_ONLY",
+        "simulation_only": true,
+        "history": [],
+        "previous_state_hash": "fnv1a-70d4139c",
+        "next_state_hash": "fnv1a-af707331",
+        "inputs": {},
+        "outputs": {
+          "capacities": [
+            {
+              "population_id": "POP-GRASS-001",
+              "carrying_capacity": 209
+            },
+            {
+              "population_id": "POP-TREE-001",
+              "carrying_capacity": 38
+            },
+            {
+              "population_id": "POP-FISH-001",
+              "carrying_capacity": 124
+            },
+            {
+              "population_id": "POP-SHRIMP-001",
+              "carrying_capacity": 96
+            },
+            {
+              "population_id": "POP-MOUNTAIN-001",
+              "carrying_capacity": 1
+            },
+            {
+              "population_id": "POP-SOIL-001",
+              "carrying_capacity": 1
+            },
+            {
+              "population_id": "POP-WATER-001",
+              "carrying_capacity": 1
+            },
+            {
+              "population_id": "POP-RIVER-001",
+              "carrying_capacity": 1
+            }
+          ]
+        },
+        "resource_delta": {},
+        "reason": "SIMULATION_APPROXIMATION"
+      },
+      {
+        "event_id": "ECO-EVT-000005",
+        "type": "GROWTH_EVENT",
+        "location": "K280-SYNTHETIC-ECOSYSTEM",
+        "simulation_time": 1,
+        "status": "APPLIED",
+        "source": "KAIOS_REPRODUCTION_ECOLOGY_RUNTIME_V1",
+        "authority": "SIMULATION_ONLY",
+        "simulation_only": true,
+        "history": [],
+        "previous_state_hash": "fnv1a-af707331",
+        "next_state_hash": "fnv1a-a0e55273",
+        "inputs": {
+          "aquatic_food_kg": 0.0825,
+          "detritus_kg": 0.0288
+        },
+        "outputs": {
+          "consumer_biomass_kg": 0.1113
+        },
+        "resource_delta": {
+          "aquatic_primary_food_kg": -0.0825,
+          "detritus_kg": -0.0288,
+          "consumer_biomass_kg": 0.1113
+        },
+        "reason": "FOOD_MASS_TRANSFER"
+      },
+      {
+        "event_id": "ECO-EVT-000006",
+        "type": "GROWTH_EVENT",
+        "location": "K280-SYNTHETIC-ECOSYSTEM",
+        "simulation_time": 1,
+        "status": "APPLIED",
+        "source": "KAIOS_REPRODUCTION_ECOLOGY_RUNTIME_V1",
+        "authority": "SIMULATION_ONLY",
+        "simulation_only": true,
+        "history": [],
+        "previous_state_hash": "fnv1a-a0e55273",
+        "next_state_hash": "fnv1a-c1c76659",
+        "inputs": {
+          "water_l": 0.0456,
+          "nutrients_kg": 0.005472,
+          "sunlight_energy_proxy": 0.008208
+        },
+        "outputs": {
+          "plant_biomass_kg": 0.005472
+        },
+        "resource_delta": {
+          "water_l": -0.0456,
+          "atmospheric_water_l": 0.029640000000000003,
+          "exported_water_l": 0.01596,
+          "nutrients_kg": -0.005472,
+          "biomass_kg": 0.005472
+        },
+        "reason": "CAUSAL_PLANT_GROWTH"
+      },
+      {
+        "event_id": "ECO-EVT-000007",
+        "type": "COMPETITION_EVENT",
+        "location": "K280-SYNTHETIC-ECOSYSTEM",
+        "simulation_time": 1,
+        "status": "APPLIED",
+        "source": "KAIOS_REPRODUCTION_ECOLOGY_RUNTIME_V1",
+        "authority": "SIMULATION_ONLY",
+        "simulation_only": true,
+        "history": [],
+        "previous_state_hash": "fnv1a-c1c76659",
+        "next_state_hash": "fnv1a-7846ea66",
+        "inputs": {},
+        "outputs": {
+          "statuses": [
+            {
+              "population_id": "POP-GRASS-001",
+              "population_status": "OVER_CAPACITY"
+            },
+            {
+              "population_id": "POP-TREE-001",
+              "population_status": "STABLE"
+            },
+            {
+              "population_id": "POP-FISH-001",
+              "population_status": "STABLE"
+            },
+            {
+              "population_id": "POP-SHRIMP-001",
+              "population_status": "STABLE"
+            },
+            {
+              "population_id": "POP-MOUNTAIN-001",
+              "population_status": "STABLE"
+            },
+            {
+              "population_id": "POP-SOIL-001",
+              "population_status": "STABLE"
+            },
+            {
+              "population_id": "POP-WATER-001",
+              "population_status": "STABLE"
+            },
+            {
+              "population_id": "POP-RIVER-001",
+              "population_status": "STABLE"
+            }
+          ]
+        },
+        "resource_delta": {},
+        "reason": "FINITE_CARRYING_CAPACITY"
+      },
+      {
+        "event_id": "ECO-EVT-000008",
+        "type": "REPRODUCTION_EVENT",
+        "location": "HABITAT-FOREST-V1",
+        "simulation_time": 1,
+        "status": "APPLIED",
+        "source": "KAIOS_REPRODUCTION_ECOLOGY_RUNTIME_V1",
+        "authority": "SIMULATION_ONLY",
+        "simulation_only": true,
+        "history": [],
+        "previous_state_hash": "fnv1a-7846ea66",
+        "next_state_hash": "fnv1a-7846ea66",
+        "inputs": {
+          "parents_or_source": 36,
+          "mode": "SEED_PROPAGATION"
+        },
+        "outputs": {
+          "births": 0,
+          "generation": 0
+        },
+        "resource_delta": {},
+        "reason": "REPRODUCTION_BLOCKED"
+      },
+      {
+        "event_id": "ECO-EVT-000009",
+        "type": "REPRODUCTION_EVENT",
+        "location": "HABITAT-RIVER-V1",
+        "simulation_time": 1,
+        "status": "APPLIED",
+        "source": "KAIOS_REPRODUCTION_ECOLOGY_RUNTIME_V1",
+        "authority": "SIMULATION_ONLY",
+        "simulation_only": true,
+        "history": [],
+        "previous_state_hash": "fnv1a-7846ea66",
+        "next_state_hash": "fnv1a-477eacd0",
+        "inputs": {
+          "parents_or_source": 110,
+          "mode": "SEXUAL_REPRODUCTION"
+        },
+        "outputs": {
+          "births": 1,
+          "generation": 1
+        },
+        "resource_delta": {},
+        "reason": "BOUNDED_REPRODUCTION"
+      },
+      {
+        "event_id": "ECO-EVT-000010",
+        "type": "REPRODUCTION_EVENT",
+        "location": "HABITAT-FISHPOND-V1",
+        "simulation_time": 1,
+        "status": "APPLIED",
+        "source": "KAIOS_REPRODUCTION_ECOLOGY_RUNTIME_V1",
+        "authority": "SIMULATION_ONLY",
+        "simulation_only": true,
+        "history": [],
+        "previous_state_hash": "fnv1a-477eacd0",
+        "next_state_hash": "fnv1a-217ac493",
+        "inputs": {
+          "parents_or_source": 80,
+          "mode": "SEXUAL_REPRODUCTION"
+        },
+        "outputs": {
+          "births": 1,
+          "generation": 1
+        },
+        "resource_delta": {},
+        "reason": "BOUNDED_REPRODUCTION"
+      },
+      {
+        "event_id": "ECO-EVT-000011",
+        "type": "DEATH_EVENT",
+        "location": "HABITAT-GRASSLAND-V1",
+        "simulation_time": 1,
+        "status": "APPLIED",
+        "source": "KAIOS_REPRODUCTION_ECOLOGY_RUNTIME_V1",
+        "authority": "SIMULATION_ONLY",
+        "simulation_only": true,
+        "history": [],
+        "previous_state_hash": "fnv1a-217ac493",
+        "next_state_hash": "fnv1a-0f512c42",
+        "inputs": {
+          "population_id": "POP-GRASS-001"
+        },
+        "outputs": {
+          "deaths": 2,
+          "dead_biomass_kg": 0.16,
+          "status": "OVER_CAPACITY"
+        },
+        "resource_delta": {},
+        "reason": "OVER_CAPACITY"
+      },
+      {
+        "event_id": "ECO-EVT-000012",
+        "type": "DECOMPOSITION_EVENT",
+        "location": "K280-SYNTHETIC-ECOSYSTEM",
+        "simulation_time": 1,
+        "status": "APPLIED",
+        "source": "KAIOS_REPRODUCTION_ECOLOGY_RUNTIME_V1",
+        "authority": "SIMULATION_ONLY",
+        "simulation_only": true,
+        "history": [],
+        "previous_state_hash": "fnv1a-0f512c42",
+        "next_state_hash": "fnv1a-49943af5",
+        "inputs": {
+          "dead_biomass_kg": 0.04
+        },
+        "outputs": {
+          "nutrient_return_kg": 0.016
+        },
+        "resource_delta": {
+          "dead_biomass_kg": -0.04,
+          "decomposition_kg": 0.024,
+          "nutrients_kg": 0.016
+        },
+        "reason": "MICROBIAL_DECOMPOSITION_PROXY"
+      },
+      {
+        "event_id": "ECO-EVT-000013",
+        "type": "SEASON_EVENT",
+        "location": "K280-SYNTHETIC-ECOSYSTEM",
+        "simulation_time": 1,
+        "status": "APPLIED",
+        "source": "KAIOS_REPRODUCTION_ECOLOGY_RUNTIME_V1",
+        "authority": "SIMULATION_ONLY",
+        "simulation_only": true,
+        "history": [],
+        "previous_state_hash": "fnv1a-49943af5",
+        "next_state_hash": "fnv1a-49943af5",
+        "inputs": {},
+        "outputs": {
+          "tick": 1
+        },
+        "resource_delta": {},
+        "reason": "DETERMINISTIC_TICK_COMPLETE"
+      },
+      {
+        "event_id": "ECO-EVT-000014",
+        "type": "WATER_CYCLE_EVENT",
+        "location": "K280-SYNTHETIC-ECOSYSTEM",
+        "simulation_time": 2,
+        "status": "APPLIED",
+        "source": "KAIOS_REPRODUCTION_ECOLOGY_RUNTIME_V1",
+        "authority": "SIMULATION_ONLY",
+        "simulation_only": true,
+        "history": [],
+        "previous_state_hash": "fnv1a-49943af5",
+        "next_state_hash": "fnv1a-6e9ed132",
+        "inputs": {
+          "mountain_runoff_l": 30
+        },
+        "outputs": {
+          "evaporation_l": 19.998397,
+          "river_outflow_l": 12
+        },
+        "resource_delta": {
+          "water_l": -1.998397,
+          "atmospheric_water_l": 19.998397,
+          "exported_water_l": 12,
+          "energy_proxy": -3.999679
+        },
+        "reason": "MOUNTAIN_RUNOFF_RIVER_INFLOW_EVAPORATION"
+      },
+      {
+        "event_id": "ECO-EVT-000015",
+        "type": "SOIL_CYCLE_EVENT",
+        "location": "K280-SYNTHETIC-ECOSYSTEM",
+        "simulation_time": 2,
+        "status": "APPLIED",
+        "source": "KAIOS_REPRODUCTION_ECOLOGY_RUNTIME_V1",
+        "authority": "SIMULATION_ONLY",
+        "simulation_only": true,
+        "history": [],
+        "previous_state_hash": "fnv1a-6e9ed132",
+        "next_state_hash": "fnv1a-77f99c29",
+        "inputs": {},
+        "outputs": {
+          "erosion_kg": 1.2
+        },
+        "resource_delta": {
+          "nutrients_kg": -1.2,
+          "sediment_kg": 1.2
+        },
+        "reason": "BOUNDED_EROSION"
+      },
+      {
+        "event_id": "ECO-EVT-000016",
+        "type": "COMPETITION_EVENT",
+        "location": "K280-SYNTHETIC-ECOSYSTEM",
+        "simulation_time": 2,
+        "status": "APPLIED",
+        "source": "KAIOS_REPRODUCTION_ECOLOGY_RUNTIME_V1",
+        "authority": "SIMULATION_ONLY",
+        "simulation_only": true,
+        "history": [],
+        "previous_state_hash": "fnv1a-77f99c29",
+        "next_state_hash": "fnv1a-77f99c29",
+        "inputs": {},
+        "outputs": {
+          "capacities": [
+            {
+              "population_id": "POP-GRASS-001",
+              "carrying_capacity": 209
+            },
+            {
+              "population_id": "POP-TREE-001",
+              "carrying_capacity": 38
+            },
+            {
+              "population_id": "POP-FISH-001",
+              "carrying_capacity": 124
+            },
+            {
+              "population_id": "POP-SHRIMP-001",
+              "carrying_capacity": 96
+            },
+            {
+              "population_id": "POP-MOUNTAIN-001",
+              "carrying_capacity": 1
+            },
+            {
+              "population_id": "POP-SOIL-001",
+              "carrying_capacity": 1
+            },
+            {
+              "population_id": "POP-WATER-001",
+              "carrying_capacity": 1
+            },
+            {
+              "population_id": "POP-RIVER-001",
+              "carrying_capacity": 1
+            }
+          ]
+        },
+        "resource_delta": {},
+        "reason": "SIMULATION_APPROXIMATION"
+      },
+      {
+        "event_id": "ECO-EVT-000017",
+        "type": "GROWTH_EVENT",
+        "location": "K280-SYNTHETIC-ECOSYSTEM",
+        "simulation_time": 2,
+        "status": "APPLIED",
+        "source": "KAIOS_REPRODUCTION_ECOLOGY_RUNTIME_V1",
+        "authority": "SIMULATION_ONLY",
+        "simulation_only": true,
+        "history": [],
+        "previous_state_hash": "fnv1a-77f99c29",
+        "next_state_hash": "fnv1a-0c5967e6",
+        "inputs": {
+          "aquatic_food_kg": 0.08325,
+          "detritus_kg": 0.02916
+        },
+        "outputs": {
+          "consumer_biomass_kg": 0.11241
+        },
+        "resource_delta": {
+          "aquatic_primary_food_kg": -0.08325,
+          "detritus_kg": -0.02916,
+          "consumer_biomass_kg": 0.11241
+        },
+        "reason": "FOOD_MASS_TRANSFER"
+      },
+      {
+        "event_id": "ECO-EVT-000018",
+        "type": "GROWTH_EVENT",
+        "location": "K280-SYNTHETIC-ECOSYSTEM",
+        "simulation_time": 2,
+        "status": "APPLIED",
+        "source": "KAIOS_REPRODUCTION_ECOLOGY_RUNTIME_V1",
+        "authority": "SIMULATION_ONLY",
+        "simulation_only": true,
+        "history": [],
+        "previous_state_hash": "fnv1a-0c5967e6",
+        "next_state_hash": "fnv1a-378fdde8",
+        "inputs": {
+          "water_l": 0.0454,
+          "nutrients_kg": 0.005448,
+          "sunlight_energy_proxy": 0.008171999999999999
+        },
+        "outputs": {
+          "plant_biomass_kg": 0.005448
+        },
+        "resource_delta": {
+          "water_l": -0.0454,
+          "atmospheric_water_l": 0.02951,
+          "exported_water_l": 0.01589,
+          "nutrients_kg": -0.005448,
+          "biomass_kg": 0.005448
+        },
+        "reason": "CAUSAL_PLANT_GROWTH"
+      },
+      {
+        "event_id": "ECO-EVT-000019",
+        "type": "COMPETITION_EVENT",
+        "location": "K280-SYNTHETIC-ECOSYSTEM",
+        "simulation_time": 2,
+        "status": "APPLIED",
+        "source": "KAIOS_REPRODUCTION_ECOLOGY_RUNTIME_V1",
+        "authority": "SIMULATION_ONLY",
+        "simulation_only": true,
+        "history": [],
+        "previous_state_hash": "fnv1a-378fdde8",
+        "next_state_hash": "fnv1a-12aceffc",
+        "inputs": {},
+        "outputs": {
+          "statuses": [
+            {
+              "population_id": "POP-GRASS-001",
+              "population_status": "OVER_CAPACITY"
+            },
+            {
+              "population_id": "POP-TREE-001",
+              "population_status": "STABLE"
+            },
+            {
+              "population_id": "POP-FISH-001",
+              "population_status": "STABLE"
+            },
+            {
+              "population_id": "POP-SHRIMP-001",
+              "population_status": "STABLE"
+            },
+            {
+              "population_id": "POP-MOUNTAIN-001",
+              "population_status": "STABLE"
+            },
+            {
+              "population_id": "POP-SOIL-001",
+              "population_status": "STABLE"
+            },
+            {
+              "population_id": "POP-WATER-001",
+              "population_status": "STABLE"
+            },
+            {
+              "population_id": "POP-RIVER-001",
+              "population_status": "STABLE"
+            }
+          ]
+        },
+        "resource_delta": {},
+        "reason": "FINITE_CARRYING_CAPACITY"
+      },
+      {
+        "event_id": "ECO-EVT-000020",
+        "type": "REPRODUCTION_EVENT",
+        "location": "HABITAT-FOREST-V1",
+        "simulation_time": 2,
+        "status": "APPLIED",
+        "source": "KAIOS_REPRODUCTION_ECOLOGY_RUNTIME_V1",
+        "authority": "SIMULATION_ONLY",
+        "simulation_only": true,
+        "history": [],
+        "previous_state_hash": "fnv1a-12aceffc",
+        "next_state_hash": "fnv1a-12aceffc",
+        "inputs": {
+          "parents_or_source": 36,
+          "mode": "SEED_PROPAGATION"
+        },
+        "outputs": {
+          "births": 0,
+          "generation": 0
+        },
+        "resource_delta": {},
+        "reason": "REPRODUCTION_BLOCKED"
+      },
+      {
+        "event_id": "ECO-EVT-000021",
+        "type": "DEATH_EVENT",
+        "location": "HABITAT-GRASSLAND-V1",
+        "simulation_time": 2,
+        "status": "APPLIED",
+        "source": "KAIOS_REPRODUCTION_ECOLOGY_RUNTIME_V1",
+        "authority": "SIMULATION_ONLY",
+        "simulation_only": true,
+        "history": [],
+        "previous_state_hash": "fnv1a-12aceffc",
+        "next_state_hash": "fnv1a-d0209172",
+        "inputs": {
+          "population_id": "POP-GRASS-001"
+        },
+        "outputs": {
+          "deaths": 2,
+          "dead_biomass_kg": 0.16,
+          "status": "OVER_CAPACITY"
+        },
+        "resource_delta": {},
+        "reason": "OVER_CAPACITY"
+      },
+      {
+        "event_id": "ECO-EVT-000022",
+        "type": "DECOMPOSITION_EVENT",
+        "location": "K280-SYNTHETIC-ECOSYSTEM",
+        "simulation_time": 2,
+        "status": "APPLIED",
+        "source": "KAIOS_REPRODUCTION_ECOLOGY_RUNTIME_V1",
+        "authority": "SIMULATION_ONLY",
+        "simulation_only": true,
+        "history": [],
+        "previous_state_hash": "fnv1a-d0209172",
+        "next_state_hash": "fnv1a-ebe9e6c7",
+        "inputs": {
+          "dead_biomass_kg": 0.07
+        },
+        "outputs": {
+          "nutrient_return_kg": 0.0376
+        },
+        "resource_delta": {
+          "dead_biomass_kg": -0.07,
+          "decomposition_kg": 0.0324,
+          "nutrients_kg": 0.0376
+        },
+        "reason": "MICROBIAL_DECOMPOSITION_PROXY"
+      },
+      {
+        "event_id": "ECO-EVT-000023",
+        "type": "SEASON_EVENT",
+        "location": "K280-SYNTHETIC-ECOSYSTEM",
+        "simulation_time": 2,
+        "status": "APPLIED",
+        "source": "KAIOS_REPRODUCTION_ECOLOGY_RUNTIME_V1",
+        "authority": "SIMULATION_ONLY",
+        "simulation_only": true,
+        "history": [],
+        "previous_state_hash": "fnv1a-ebe9e6c7",
+        "next_state_hash": "fnv1a-ebe9e6c7",
+        "inputs": {},
+        "outputs": {
+          "tick": 2
+        },
+        "resource_delta": {},
+        "reason": "DETERMINISTIC_TICK_COMPLETE"
+      },
+      {
+        "event_id": "ECO-EVT-000024",
+        "type": "WATER_CYCLE_EVENT",
+        "location": "K280-SYNTHETIC-ECOSYSTEM",
+        "simulation_time": 3,
+        "status": "APPLIED",
+        "source": "KAIOS_REPRODUCTION_ECOLOGY_RUNTIME_V1",
+        "authority": "SIMULATION_ONLY",
+        "simulation_only": true,
+        "history": [],
+        "previous_state_hash": "fnv1a-ebe9e6c7",
+        "next_state_hash": "fnv1a-0adf6847",
+        "inputs": {
+          "mountain_runoff_l": 30
+        },
+        "outputs": {
+          "evaporation_l": 19.996794,
+          "river_outflow_l": 12
+        },
+        "resource_delta": {
+          "water_l": -1.996794,
+          "atmospheric_water_l": 19.996794,
+          "exported_water_l": 12,
+          "energy_proxy": -3.999359
+        },
+        "reason": "MOUNTAIN_RUNOFF_RIVER_INFLOW_EVAPORATION"
+      },
+      {
+        "event_id": "ECO-EVT-000025",
+        "type": "SOIL_CYCLE_EVENT",
+        "location": "K280-SYNTHETIC-ECOSYSTEM",
+        "simulation_time": 3,
+        "status": "APPLIED",
+        "source": "KAIOS_REPRODUCTION_ECOLOGY_RUNTIME_V1",
+        "authority": "SIMULATION_ONLY",
+        "simulation_only": true,
+        "history": [],
+        "previous_state_hash": "fnv1a-0adf6847",
+        "next_state_hash": "fnv1a-967f3120",
+        "inputs": {},
+        "outputs": {
+          "erosion_kg": 1.2
+        },
+        "resource_delta": {
+          "nutrients_kg": -1.2,
+          "sediment_kg": 1.2
+        },
+        "reason": "BOUNDED_EROSION"
+      },
+      {
+        "event_id": "ECO-EVT-000026",
+        "type": "COMPETITION_EVENT",
+        "location": "K280-SYNTHETIC-ECOSYSTEM",
+        "simulation_time": 3,
+        "status": "APPLIED",
+        "source": "KAIOS_REPRODUCTION_ECOLOGY_RUNTIME_V1",
+        "authority": "SIMULATION_ONLY",
+        "simulation_only": true,
+        "history": [],
+        "previous_state_hash": "fnv1a-967f3120",
+        "next_state_hash": "fnv1a-967f3120",
+        "inputs": {},
+        "outputs": {
+          "capacities": [
+            {
+              "population_id": "POP-GRASS-001",
+              "carrying_capacity": 209
+            },
+            {
+              "population_id": "POP-TREE-001",
+              "carrying_capacity": 38
+            },
+            {
+              "population_id": "POP-FISH-001",
+              "carrying_capacity": 124
+            },
+            {
+              "population_id": "POP-SHRIMP-001",
+              "carrying_capacity": 96
+            },
+            {
+              "population_id": "POP-MOUNTAIN-001",
+              "carrying_capacity": 1
+            },
+            {
+              "population_id": "POP-SOIL-001",
+              "carrying_capacity": 1
+            },
+            {
+              "population_id": "POP-WATER-001",
+              "carrying_capacity": 1
+            },
+            {
+              "population_id": "POP-RIVER-001",
+              "carrying_capacity": 1
+            }
+          ]
+        },
+        "resource_delta": {},
+        "reason": "SIMULATION_APPROXIMATION"
+      },
+      {
+        "event_id": "ECO-EVT-000027",
+        "type": "GROWTH_EVENT",
+        "location": "K280-SYNTHETIC-ECOSYSTEM",
+        "simulation_time": 3,
+        "status": "APPLIED",
+        "source": "KAIOS_REPRODUCTION_ECOLOGY_RUNTIME_V1",
+        "authority": "SIMULATION_ONLY",
+        "simulation_only": true,
+        "history": [],
+        "previous_state_hash": "fnv1a-967f3120",
+        "next_state_hash": "fnv1a-2b93d9a8",
+        "inputs": {
+          "aquatic_food_kg": 0.08325,
+          "detritus_kg": 0.02916
+        },
+        "outputs": {
+          "consumer_biomass_kg": 0.11241
+        },
+        "resource_delta": {
+          "aquatic_primary_food_kg": -0.08325,
+          "detritus_kg": -0.02916,
+          "consumer_biomass_kg": 0.11241
+        },
+        "reason": "FOOD_MASS_TRANSFER"
+      },
+      {
+        "event_id": "ECO-EVT-000028",
+        "type": "GROWTH_EVENT",
+        "location": "K280-SYNTHETIC-ECOSYSTEM",
+        "simulation_time": 3,
+        "status": "APPLIED",
+        "source": "KAIOS_REPRODUCTION_ECOLOGY_RUNTIME_V1",
+        "authority": "SIMULATION_ONLY",
+        "simulation_only": true,
+        "history": [],
+        "previous_state_hash": "fnv1a-2b93d9a8",
+        "next_state_hash": "fnv1a-ec78d04a",
+        "inputs": {
+          "water_l": 0.0452,
+          "nutrients_kg": 0.005424,
+          "sunlight_energy_proxy": 0.008136000000000001
+        },
+        "outputs": {
+          "plant_biomass_kg": 0.005424
+        },
+        "resource_delta": {
+          "water_l": -0.0452,
+          "atmospheric_water_l": 0.02938,
+          "exported_water_l": 0.015819999999999997,
+          "nutrients_kg": -0.005424,
+          "biomass_kg": 0.005424
+        },
+        "reason": "CAUSAL_PLANT_GROWTH"
+      },
+      {
+        "event_id": "ECO-EVT-000029",
+        "type": "COMPETITION_EVENT",
+        "location": "K280-SYNTHETIC-ECOSYSTEM",
+        "simulation_time": 3,
+        "status": "APPLIED",
+        "source": "KAIOS_REPRODUCTION_ECOLOGY_RUNTIME_V1",
+        "authority": "SIMULATION_ONLY",
+        "simulation_only": true,
+        "history": [],
+        "previous_state_hash": "fnv1a-ec78d04a",
+        "next_state_hash": "fnv1a-8a84142e",
+        "inputs": {},
+        "outputs": {
+          "statuses": [
+            {
+              "population_id": "POP-GRASS-001",
+              "population_status": "OVER_CAPACITY"
+            },
+            {
+              "population_id": "POP-TREE-001",
+              "population_status": "STABLE"
+            },
+            {
+              "population_id": "POP-FISH-001",
+              "population_status": "STABLE"
+            },
+            {
+              "population_id": "POP-SHRIMP-001",
+              "population_status": "STABLE"
+            },
+            {
+              "population_id": "POP-MOUNTAIN-001",
+              "population_status": "STABLE"
+            },
+            {
+              "population_id": "POP-SOIL-001",
+              "population_status": "STABLE"
+            },
+            {
+              "population_id": "POP-WATER-001",
+              "population_status": "STABLE"
+            },
+            {
+              "population_id": "POP-RIVER-001",
+              "population_status": "STABLE"
+            }
+          ]
+        },
+        "resource_delta": {},
+        "reason": "FINITE_CARRYING_CAPACITY"
+      },
+      {
+        "event_id": "ECO-EVT-000030",
+        "type": "REPRODUCTION_EVENT",
+        "location": "HABITAT-FOREST-V1",
+        "simulation_time": 3,
+        "status": "APPLIED",
+        "source": "KAIOS_REPRODUCTION_ECOLOGY_RUNTIME_V1",
+        "authority": "SIMULATION_ONLY",
+        "simulation_only": true,
+        "history": [],
+        "previous_state_hash": "fnv1a-8a84142e",
+        "next_state_hash": "fnv1a-8a84142e",
+        "inputs": {
+          "parents_or_source": 36,
+          "mode": "SEED_PROPAGATION"
+        },
+        "outputs": {
+          "births": 0,
+          "generation": 0
+        },
+        "resource_delta": {},
+        "reason": "REPRODUCTION_BLOCKED"
+      },
+      {
+        "event_id": "ECO-EVT-000031",
+        "type": "DEATH_EVENT",
+        "location": "HABITAT-GRASSLAND-V1",
+        "simulation_time": 3,
+        "status": "APPLIED",
+        "source": "KAIOS_REPRODUCTION_ECOLOGY_RUNTIME_V1",
+        "authority": "SIMULATION_ONLY",
+        "simulation_only": true,
+        "history": [],
+        "previous_state_hash": "fnv1a-8a84142e",
+        "next_state_hash": "fnv1a-59749ab6",
+        "inputs": {
+          "population_id": "POP-GRASS-001"
+        },
+        "outputs": {
+          "deaths": 2,
+          "dead_biomass_kg": 0.16,
+          "status": "OVER_CAPACITY"
+        },
+        "resource_delta": {},
+        "reason": "OVER_CAPACITY"
+      },
+      {
+        "event_id": "ECO-EVT-000032",
+        "type": "DECOMPOSITION_EVENT",
+        "location": "K280-SYNTHETIC-ECOSYSTEM",
+        "simulation_time": 3,
+        "status": "APPLIED",
+        "source": "KAIOS_REPRODUCTION_ECOLOGY_RUNTIME_V1",
+        "authority": "SIMULATION_ONLY",
+        "simulation_only": true,
+        "history": [],
+        "previous_state_hash": "fnv1a-59749ab6",
+        "next_state_hash": "fnv1a-e0db8e69",
+        "inputs": {
+          "dead_biomass_kg": 0.0925
+        },
+        "outputs": {
+          "nutrient_return_kg": 0.05956
+        },
+        "resource_delta": {
+          "dead_biomass_kg": -0.0925,
+          "decomposition_kg": 0.03294,
+          "nutrients_kg": 0.05956
+        },
+        "reason": "MICROBIAL_DECOMPOSITION_PROXY"
+      },
+      {
+        "event_id": "ECO-EVT-000033",
+        "type": "SEASON_EVENT",
+        "location": "K280-SYNTHETIC-ECOSYSTEM",
+        "simulation_time": 3,
+        "status": "APPLIED",
+        "source": "KAIOS_REPRODUCTION_ECOLOGY_RUNTIME_V1",
+        "authority": "SIMULATION_ONLY",
+        "simulation_only": true,
+        "history": [],
+        "previous_state_hash": "fnv1a-e0db8e69",
+        "next_state_hash": "fnv1a-e0db8e69",
+        "inputs": {},
+        "outputs": {
+          "tick": 3
+        },
+        "resource_delta": {},
+        "reason": "DETERMINISTIC_TICK_COMPLETE"
+      }
+    ],
+    "action_log": [
+      {
+        "command": "createEcosystem",
+        "args": {}
+      },
+      {
+        "command": "advanceTime",
+        "args": {
+          "ticks": 3
+        }
+      }
+    ],
+    "revision": 33,
+    "boundaries": {
+      "simulation_only": true,
+      "wallet": "NONE",
+      "real_kgen": "NO_REAL_KGEN",
+      "onchain_transfer": false,
+      "real_bioengineering": false,
+      "production_authority": false,
+      "automatic_new_species": false,
+      "uncontrolled_reproduction": false,
+      "public_mutation_endpoints": false,
+      "maximum_total_population": 500
+    },
+    "integrity": {
+      "ok": true,
+      "issues": [],
+      "state_hash": "fnv1a-e0db8e69",
+      "total_biological_population": 462,
+      "maximum_total_population": 500,
+      "event_count": 33
+    }
+  }
+}

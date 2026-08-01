@@ -329,3 +329,13 @@ Timeline travel spans nine Civilization eras and requires era research, civiliza
 Sprint 010 adds one shared Technology Runtime beneath the existing Civilization UI. Fourteen dependency-ordered ages span Stone through Multiverse; every unlock requires reviewed Research, Knowledge, Civilization capacity, Materials, Energy and predecessor technologies. Twelve Cosmic Materials and eight Energy types use bounded conserved ledgers.
 
 Nine vehicle blueprints, nine special ability profiles, fixture-driven Cosmic coordinates and five Space Exploration activities now form a playable synthetic progression. Pocket Time Cloaked UFO V2 reads the shared Technology state and remains the only Timeline transport. Clone and Colony Planning remain proposal-only, and coordinate discovery grants no ownership or sovereignty. The reviewed browser gate reports `189 PASS / 0 FAIL / 0 SKIP`; see `SPRINT_010_COSMIC_TECHNOLOGY_REPORT.md` and `tests/evidence/sprint-010-cosmic-technology/`.
+
+## Reproduction and Ecosystem Runtime V1
+
+The public route `world-viewer/ecosystem-v1/` projects the bounded deterministic
+population Runtime owned by `ecosystem/ecosystem-runtime.js`. It covers seven
+habitats and the eight foundational Life packages with carrying capacity,
+causal reproduction, food-resource transfer, water and soil cycles, mortality,
+decomposition, pollution and restoration. Public JSON under
+`api/kaios/ecosystem/v1/` is a static read-only projection. No wallet, KGEN,
+bioengineering or Production authority is available.
