@@ -72,6 +72,8 @@ State flow: `NOT_STOCKED -> STOCKING_BLOCKED | TRANSPORT_PENDING -> QUARANTINE_S
 
 The schema couples fish only to `FISH_JUVENILE_STOCK` and shrimp only to `SHRIMP_POST_LARVAL_STOCK`. Runtime validation enforces `sum(population.count) <= boundaries.maximum_population`; per-population schema maxima never replace this shared invariant.
 
+`aquaculture-spec-validator.mjs` is the specification-owned executable validator for this cross-record invariant. Runtime V1 must call or preserve equivalent behavior; a descriptive schema annotation alone is insufficient.
+
 ## 17. Feed
 
 Feed is inventory with quantity, quality, expiry and delivery history. Feeding consumes stock and labor. Spoiled or absent feed cannot create growth.

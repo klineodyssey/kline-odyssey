@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { resolve } from "node:path";
+import { validatePopulationContract } from "../aquaculture/aquaculture-spec-validator.mjs";
 
 const root=resolve(import.meta.dirname,"../../..");
 const base=resolve(root,"KAIOS/life/aquaculture");
@@ -25,11 +26,20 @@ assert.equal(population.allOf.length,2);
 assert.equal(population.allOf[0].then.properties.stock_type.const,"FISH_JUVENILE_STOCK");
 assert.equal(population.allOf[1].then.properties.stock_type.const,"SHRIMP_POST_LARVAL_STOCK");
 for(const reason of ["POND_NOT_READY","WATER_UNSTABLE","LOW_OXYGEN","WRONG_TEMPERATURE","WRONG_SALINITY","STOCK_NOT_AVAILABLE","TRANSPORT_NOT_AVAILABLE","OVER_CARRYING_CAPACITY","HEALTH_CHECK_FAILED_SIMULATION","QUARANTINE_NOT_COMPLETE"])assert.ok(population.properties.blocked_reason.enum.includes(reason));
-const stockMatches=(species,stock)=>species.endsWith("-FISH")?stock==="FISH_JUVENILE_STOCK":species.endsWith("-SHRIMP")&&stock==="SHRIMP_POST_LARVAL_STOCK";
-assert.equal(stockMatches("SPECIES-KAIOS-FOUNDATIONAL-FISH","SHRIMP_POST_LARVAL_STOCK"),false);
-assert.equal(stockMatches("SPECIES-KAIOS-FOUNDATIONAL-SHRIMP","FISH_JUVENILE_STOCK"),false);
-const withinSharedCap=(counts,cap)=>counts.reduce((sum,count)=>sum+count,0)<=cap;
-assert.equal(withinSharedCap([300,250],500),false);
+const boundaries={maximum_population:500};
+const mismatched=validatePopulationContract([{population_id:"FISH-1",species_id:"SPECIES-KAIOS-FOUNDATIONAL-FISH",stock_type:"SHRIMP_POST_LARVAL_STOCK",count:10}],boundaries,population,main);
+assert.equal(mismatched.valid,false);
+assert.deepEqual(mismatched.issues,["STOCK_TYPE_MISMATCH:FISH-1"]);
+const overCap=validatePopulationContract([
+  {population_id:"FISH-1",species_id:"SPECIES-KAIOS-FOUNDATIONAL-FISH",stock_type:"FISH_JUVENILE_STOCK",count:300},
+  {population_id:"SHRIMP-1",species_id:"SPECIES-KAIOS-FOUNDATIONAL-SHRIMP",stock_type:"SHRIMP_POST_LARVAL_STOCK",count:250}
+],boundaries,population,main);
+assert.equal(overCap.valid,false);
+assert.deepEqual(overCap.issues,["POPULATION_CAP_REACHED"]);
+assert.equal(validatePopulationContract([
+  {population_id:"FISH-1",species_id:"SPECIES-KAIOS-FOUNDATIONAL-FISH",stock_type:"FISH_JUVENILE_STOCK",count:250},
+  {population_id:"SHRIMP-1",species_id:"SPECIES-KAIOS-FOUNDATIONAL-SHRIMP",stock_type:"SHRIMP_POST_LARVAL_STOCK",count:250}
+],boundaries,population,main).valid,true);
 const construction=JSON.parse(await readFile(resolve(base,"KAIOS_AQUACULTURE_CONSTRUCTION_SCHEMA_V1.json"),"utf8"));
 assert.equal(construction.properties.completed_stages.items.enum.length,17);
 assert.equal(construction.properties.completed_stages.items.enum.includes("INSTANT_COMPLETE"),false);
