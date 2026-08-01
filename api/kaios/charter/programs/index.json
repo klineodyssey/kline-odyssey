@@ -1357,7 +1357,9 @@
       "domain": "AI_LIFE",
       "implementation_status": "IMPLEMENTED_PARTIAL",
       "coverage": 76,
-      "conflicts": [],
+      "conflicts": [
+        "SEVEN_PAIR_LINEAGE_CONFLICT"
+      ],
       "priority": "P0_FOUNDATION",
       "risk": "MEDIUM",
       "dependencies": [
@@ -1389,7 +1391,9 @@
       "domain": "SPECIES_EVOLUTION",
       "implementation_status": "IMPLEMENTED_PARTIAL",
       "coverage": 76,
-      "conflicts": [],
+      "conflicts": [
+        "SEVEN_PAIR_LINEAGE_CONFLICT"
+      ],
       "priority": "P4_ADVANCED_TECHNOLOGY",
       "risk": "MEDIUM",
       "dependencies": [
@@ -1422,7 +1426,9 @@
       "domain": "BANKRUPTCY",
       "implementation_status": "SPECIFICATION_ONLY",
       "coverage": 34,
-      "conflicts": [],
+      "conflicts": [
+        "SEVEN_PAIR_LINEAGE_CONFLICT"
+      ],
       "priority": "P4_ADVANCED_TECHNOLOGY",
       "risk": "MEDIUM",
       "dependencies": [
@@ -1450,7 +1456,9 @@
       "domain": "MULTIVERSE",
       "implementation_status": "PROHIBITED_UNDER_CURRENT_BOUNDARY",
       "coverage": 0,
-      "conflicts": [],
+      "conflicts": [
+        "SEVEN_PAIR_LINEAGE_CONFLICT"
+      ],
       "priority": "HOLD_HIGH_RISK",
       "risk": "HIGH",
       "dependencies": [

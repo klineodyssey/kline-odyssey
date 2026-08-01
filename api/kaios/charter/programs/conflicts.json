@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0.0",
   "read_only": true,
-  "conflict_count": 3,
+  "conflict_count": 7,
   "conflicts": [
     {
       "program_id": "KAIOS-CH-000-002-GENESIS",
@@ -17,6 +17,46 @@
       "program_id": "KAIOS-CH-133-049-AUTONOMOUS_AI",
       "chapter_source": [
         "KAIOS_Chapter_133_V2_1_Civilization_Life_Birth_Identity_Authentication_Autonomous_AI_Pilgrimage_Rooting_Runtime.md"
+      ],
+      "conflicts": [
+        "SEVEN_PAIR_LINEAGE_CONFLICT"
+      ],
+      "action": "NO_SILENT_RECONCILIATION"
+    },
+    {
+      "program_id": "KAIOS-CH-134-050-AI_LIFE",
+      "chapter_source": [
+        "KAIOS_Chapter_134_V2_1_AI_Life_Self_Programming_Civilization_Seed_Specification_Generation_Runtime.md"
+      ],
+      "conflicts": [
+        "SEVEN_PAIR_LINEAGE_CONFLICT"
+      ],
+      "action": "NO_SILENT_RECONCILIATION"
+    },
+    {
+      "program_id": "KAIOS-CH-135-051-SPECIES_EVOLUTION",
+      "chapter_source": [
+        "KAIOS_Chapter_135_V2_1_Species_Evolution_Program_Breeding_Civilization_Branching_Runtime.md"
+      ],
+      "conflicts": [
+        "SEVEN_PAIR_LINEAGE_CONFLICT"
+      ],
+      "action": "NO_SILENT_RECONCILIATION"
+    },
+    {
+      "program_id": "KAIOS-CH-136-052-BANKRUPTCY",
+      "chapter_source": [
+        "KAIOS_Chapter_136_V2_1_Enterprise_Factory_SupplyChain_Court_Bankruptcy_KGEN_Economic_Anchor_Runtime.md"
+      ],
+      "conflicts": [
+        "SEVEN_PAIR_LINEAGE_CONFLICT"
+      ],
+      "action": "NO_SILENT_RECONCILIATION"
+    },
+    {
+      "program_id": "KAIOS-CH-137-053-MULTIVERSE",
+      "chapter_source": [
+        "KAIOS_Chapter_137_V2_1_Galactic_Universe_Parallel_Multiverse_BlackHole_WhiteHole_BigBang_Runtime.md"
       ],
       "conflicts": [
         "SEVEN_PAIR_LINEAGE_CONFLICT"

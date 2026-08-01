@@ -1191,7 +1191,7 @@
       "coverage_percent": 76,
       "coverage_status": "IMPLEMENTED_PARTIAL",
       "conflict_status": [
-        "NONE"
+        "SEVEN_PAIR_LINEAGE_CONFLICT"
       ],
       "recommended_next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
       "evidence_basis": "Files, behavior entry points, and tests inspected; name-only matches are not complete coverage."
@@ -1220,7 +1220,7 @@
       "coverage_percent": 76,
       "coverage_status": "IMPLEMENTED_PARTIAL",
       "conflict_status": [
-        "NONE"
+        "SEVEN_PAIR_LINEAGE_CONFLICT"
       ],
       "recommended_next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
       "evidence_basis": "Files, behavior entry points, and tests inspected; name-only matches are not complete coverage."
@@ -1245,7 +1245,7 @@
       "coverage_percent": 34,
       "coverage_status": "SPECIFICATION_ONLY",
       "conflict_status": [
-        "NONE"
+        "SEVEN_PAIR_LINEAGE_CONFLICT"
       ],
       "recommended_next_action": "FOLLOW_DEPENDENCY_ORDER_AND_OPEN_DEDICATED_WORKLINE",
       "evidence_basis": "Files, behavior entry points, and tests inspected; name-only matches are not complete coverage."
@@ -1262,7 +1262,7 @@
       "coverage_percent": 0,
       "coverage_status": "PROHIBITED_UNDER_CURRENT_BOUNDARY",
       "conflict_status": [
-        "NONE"
+        "SEVEN_PAIR_LINEAGE_CONFLICT"
       ],
       "recommended_next_action": "HOLD_FOR_PROMOTION_REVIEW",
       "evidence_basis": "Files, behavior entry points, and tests inspected; name-only matches are not complete coverage."
