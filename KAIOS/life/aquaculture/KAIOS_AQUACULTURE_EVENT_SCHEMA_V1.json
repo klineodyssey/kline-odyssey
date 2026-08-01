@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://klineodyssey.github.io/kline-odyssey/KAIOS/life/aquaculture/KAIOS_AQUACULTURE_EVENT_SCHEMA_V1.json",
+  "title": "Aquaculture Event V1",
+  "type": "object",
+  "required": ["event_id", "enterprise_id", "pond_id", "land_id", "habitat_id", "population_id", "life_id_or_species_id", "simulation_time", "location", "event_type", "actor", "inputs", "outputs", "water_delta", "oxygen_delta", "feed_delta", "population_delta", "biomass_delta", "energy_delta", "inventory_delta", "cash_delta", "health_delta", "pollution_delta", "previous_state_hash", "next_state_hash", "seed", "status", "reason"],
+  "properties": {
+    "event_id": { "type": "string" }, "enterprise_id": { "type": "string" }, "pond_id": { "type": "string" }, "land_id": { "type": "string" }, "habitat_id": { "type": "string" },
+    "population_id": { "type": ["string", "null"] }, "life_id_or_species_id": { "type": ["string", "null"] }, "simulation_time": { "type": "integer", "minimum": 0 },
+    "location": { "type": "string" }, "event_type": { "type": "string" }, "actor": { "type": "string" }, "inputs": { "type": "object" }, "outputs": { "type": "object" },
+    "water_delta": { "type": "number" }, "oxygen_delta": { "type": "number" }, "feed_delta": { "type": "number" }, "population_delta": { "type": "integer" },
+    "biomass_delta": { "type": "number" }, "energy_delta": { "type": "number" }, "inventory_delta": { "type": "number" }, "cash_delta": { "type": "number" },
+    "health_delta": { "type": "number" }, "pollution_delta": { "type": "number" }, "previous_state_hash": { "type": "string" }, "next_state_hash": { "type": "string" },
+    "seed": { "type": "string" }, "status": { "enum": ["PASS", "BLOCKED", "FAILED", "COMPLETE"] }, "reason": { "type": "string" }
+  }, "additionalProperties": false
+}

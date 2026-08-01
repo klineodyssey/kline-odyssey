@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://klineodyssey.github.io/kline-odyssey/KAIOS/life/aquaculture/KAIOS_AQUACULTURE_COLD_CHAIN_SCHEMA_V1.json",
+  "title": "Aquaculture Cold Chain V1",
+  "type": "object",
+  "required": ["delivery_id", "inventory_id", "state", "temperature_c", "maximum_temperature_c", "storage_hours", "vehicle_id", "route_id", "fuel_required_l", "fuel_available_l", "travel_hours", "elapsed_hours", "spoilage_risk", "blocked_reason"],
+  "properties": {
+    "delivery_id": { "type": "string" }, "inventory_id": { "type": "string" },
+    "state": { "enum": ["CHILLED", "COLD_STORAGE", "LOADING", "IN_TRANSIT", "DELIVERY_DELAYED", "TEMPERATURE_EXCURSION", "SPOILAGE_RISK", "DELIVERED", "REJECTED"] },
+    "temperature_c": { "type": "number", "minimum": -30, "maximum": 60 }, "maximum_temperature_c": { "type": "number", "minimum": -30, "maximum": 60 },
+    "storage_hours": { "type": "number", "minimum": 0 }, "vehicle_id": { "type": "string" }, "route_id": { "type": "string" },
+    "fuel_required_l": { "type": "number", "minimum": 0 }, "fuel_available_l": { "type": "number", "minimum": 0 },
+    "travel_hours": { "type": "number", "minimum": 0 }, "elapsed_hours": { "type": "number", "minimum": 0 },
+    "spoilage_risk": { "type": "number", "minimum": 0, "maximum": 1 }, "blocked_reason": { "type": ["string", "null"] }
+  }, "additionalProperties": false
+}

@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://klineodyssey.github.io/kline-odyssey/KAIOS/life/aquaculture/KAIOS_AQUACULTURE_HARVEST_SCHEMA_V1.json",
+  "title": "Aquaculture Harvest V1",
+  "type": "object",
+  "required": ["harvest_id", "population_id", "species_id", "stage", "count", "gross_mass_kg", "marketable_mass_kg", "rejected_mass_kg", "mortality_loss_kg", "grade", "unit_cost", "inventory_id", "simulation_time"],
+  "properties": {
+    "harvest_id": { "type": "string" }, "population_id": { "type": "string" }, "species_id": { "type": "string" },
+    "stage": { "enum": ["HARVEST_PLANNED", "PARTIAL_DRAIN", "CAPTURE", "SORTING", "WEIGHING", "GRADING", "CHILLING", "PACKING", "COLD_STORAGE", "DISPATCH", "COMPLETE"] },
+    "count": { "type": "integer", "minimum": 0 }, "gross_mass_kg": { "type": "number", "minimum": 0 }, "marketable_mass_kg": { "type": "number", "minimum": 0 },
+    "rejected_mass_kg": { "type": "number", "minimum": 0 }, "mortality_loss_kg": { "type": "number", "minimum": 0 },
+    "grade": { "enum": ["A", "B", "C", "REJECTED"] }, "unit_cost": { "type": "number", "minimum": 0 }, "inventory_id": { "type": "string" }, "simulation_time": { "type": "integer", "minimum": 0 }
+  }, "additionalProperties": false
+}

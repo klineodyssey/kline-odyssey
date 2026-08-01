@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://klineodyssey.github.io/kline-odyssey/KAIOS/life/aquaculture/KAIOS_AQUACULTURE_POPULATION_SCHEMA_V1.json",
+  "title": "Aquaculture Population V1",
+  "type": "object",
+  "required": ["population_id", "species_id", "stock_type", "count", "average_mass_kg", "total_biomass_kg", "age_hours", "health_index", "stress_index", "feed_requirement_kg", "feed_consumed_kg", "feed_conversion_proxy", "mortality_count", "growth_stage", "carrying_capacity", "harvest_readiness", "quarantine_complete", "status", "blocked_reason"],
+  "properties": {
+    "population_id": { "type": "string" },
+    "species_id": { "enum": ["SPECIES-KAIOS-FOUNDATIONAL-FISH", "SPECIES-KAIOS-FOUNDATIONAL-SHRIMP"] },
+    "stock_type": { "enum": ["FISH_JUVENILE_STOCK", "SHRIMP_POST_LARVAL_STOCK"] },
+    "count": { "type": "integer", "minimum": 0, "maximum": 500 }, "average_mass_kg": { "type": "number", "minimum": 0 }, "total_biomass_kg": { "type": "number", "minimum": 0 },
+    "age_hours": { "type": "number", "minimum": 0 }, "health_index": { "type": "number", "minimum": 0, "maximum": 100 }, "stress_index": { "type": "number", "minimum": 0, "maximum": 100 },
+    "feed_requirement_kg": { "type": "number", "minimum": 0 }, "feed_consumed_kg": { "type": "number", "minimum": 0 }, "feed_conversion_proxy": { "type": "number", "minimum": 0, "maximum": 10 },
+    "mortality_count": { "type": "integer", "minimum": 0 }, "growth_stage": { "enum": ["JUVENILE", "GROWING", "MATURE", "HARVEST_READY"] },
+    "carrying_capacity": { "type": "integer", "minimum": 0, "maximum": 500 }, "harvest_readiness": { "type": "number", "minimum": 0, "maximum": 1 },
+    "quarantine_complete": { "type": "boolean" }, "status": { "enum": ["NOT_STOCKED", "STOCKING_BLOCKED", "HEALTHY", "AT_RISK", "SYMPTOMATIC_SIMULATION", "ISOLATION_REQUIRED", "TREATMENT_SIMULATION", "RECOVERING", "MORTALITY_EVENT", "HARVESTED"] },
+    "blocked_reason": { "type": ["string", "null"], "enum": [null, "POND_NOT_READY", "WATER_UNSTABLE", "LOW_OXYGEN", "WRONG_TEMPERATURE", "WRONG_SALINITY", "STOCK_NOT_AVAILABLE", "TRANSPORT_NOT_AVAILABLE", "OVER_CARRYING_CAPACITY", "HEALTH_CHECK_FAILED_SIMULATION", "QUARANTINE_NOT_COMPLETE"] }
+  },
+  "allOf": [
+    { "if": { "properties": { "species_id": { "const": "SPECIES-KAIOS-FOUNDATIONAL-FISH" } }, "required": ["species_id"] }, "then": { "properties": { "stock_type": { "const": "FISH_JUVENILE_STOCK" } } } },
+    { "if": { "properties": { "species_id": { "const": "SPECIES-KAIOS-FOUNDATIONAL-SHRIMP" } }, "required": ["species_id"] }, "then": { "properties": { "stock_type": { "const": "SHRIMP_POST_LARVAL_STOCK" } } } }
+  ],
+  "additionalProperties": false
+}
