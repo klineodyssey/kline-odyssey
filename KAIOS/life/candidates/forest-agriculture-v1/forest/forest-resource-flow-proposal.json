@@ -1,0 +1,56 @@
+{
+  "schema_version": "candidate-1.0.0",
+  "dataset_id": "KAIOS-FOREST-RESOURCE-FLOW-PROPOSAL-001",
+  "status": "CURSOR_RESEARCH_CANDIDATE_ONLY",
+  "review_status": "PENDING_CODEX_REVIEW",
+  "model_label": "SIMULATION_APPROXIMATION",
+  "authority": "NO_PRODUCTION_AUTHORITY",
+  "simulation_only": true,
+  "authoritative_pool_owner": "KAIOS_ECOLOGY_RUNTIME_V1",
+  "tolerance_parameters": [
+    {"parameter_name":"water_balance_tolerance","unit":"liter","minimum":0,"default":0.000001,"maximum":0.001,"rationale":"A bounded numerical tolerance supports deterministic floating-point water checks without permitting material creation.","source_type":"RESEARCH_PROPOSAL","confidence":"MEDIUM","risk":"Tolerance must scale carefully if future states use much larger pools.","validation_required":true},
+    {"parameter_name":"mass_balance_tolerance","unit":"kilogram","minimum":0,"default":0.000001,"maximum":0.001,"rationale":"A bounded numerical tolerance supports biomass and residue conservation assertions.","source_type":"RESEARCH_PROPOSAL","confidence":"MEDIUM","risk":"Rounding strategy must be identical across serialization and replay.","validation_required":true},
+    {"parameter_name":"nutrient_balance_tolerance","unit":"kilogram","minimum":0,"default":0.000001,"maximum":0.001,"rationale":"A bounded numerical tolerance supports paired nutrient transfers.","source_type":"RESEARCH_PROPOSAL","confidence":"MEDIUM","risk":"A proxy nutrient pool is not a chemical nutrient model.","validation_required":true},
+    {"parameter_name":"decomposition_return_share","unit":"normalized_fraction","minimum":0,"default":0.55,"maximum":0.95,"rationale":"The share proposes a bounded split from decomposed biomass to soil organic matter, with all remaining mass assigned to named loss or residue proxies.","source_type":"MODEL_INFERENCE","confidence":"LOW","risk":"Gas, leachate and microbial pathways are abstracted.","validation_required":true},
+    {"parameter_name":"plant_water_atmospheric_return_share","unit":"normalized_fraction","minimum":0.2,"default":0.65,"maximum":0.95,"rationale":"The share aligns conceptually with existing Ecology plant-growth accounting and keeps water transfers paired.","source_type":"REPOSITORY_DERIVED","confidence":"MEDIUM","risk":"It is an aggregate proxy rather than a physiological transpiration model.","validation_required":true},
+    {"parameter_name":"runoff_to_river_share","unit":"normalized_fraction","minimum":0,"default":0.25,"maximum":1,"rationale":"The share bounds transfer from surface runoff to the existing river pool.","source_type":"RESEARCH_PROPOSAL","confidence":"LOW","risk":"Terrain, infiltration and drainage geometry are simplified.","validation_required":true}
+  ],
+  "pools": [
+    "ATMOSPHERIC_RAIN_INPUT",
+    "FOREST_SURFACE_WATER",
+    "FOREST_SOIL_MOISTURE",
+    "PLANT_WATER_STORE",
+    "ATMOSPHERIC_WATER_PROXY",
+    "RIVER_WATER_POOL",
+    "SOIL_NUTRIENT_POOL",
+    "PLANT_BIOMASS_POOL",
+    "DEAD_BIOMASS_POOL",
+    "DECOMPOSITION_POOL",
+    "SOIL_ORGANIC_MATTER_POOL",
+    "NAMED_EXPORT_CUSTODY",
+    "RECORDED_LOSS_PROXY"
+  ],
+  "flows": [
+    {"flow_id":"RAIN_TO_SURFACE","debit":"ATMOSPHERIC_RAIN_INPUT","credit":"FOREST_SURFACE_WATER","quantity":"recorded_rainfall_volume","unit":"liter","cause":"RAINFALL_EVENT"},
+    {"flow_id":"INFILTRATION","debit":"FOREST_SURFACE_WATER","credit":"FOREST_SOIL_MOISTURE","quantity":"bounded_infiltration_volume","unit":"liter","cause":"SOIL_INFILTRATION_EVENT"},
+    {"flow_id":"PLANT_UPTAKE","debit":"FOREST_SOIL_MOISTURE","credit":"PLANT_WATER_STORE","quantity":"bounded_uptake_volume","unit":"liter","cause":"PLANT_GROWTH_EVENT"},
+    {"flow_id":"TRANSPIRATION","debit":"PLANT_WATER_STORE","credit":"ATMOSPHERIC_WATER_PROXY","quantity":"uptake_times_atmospheric_return_share","unit":"liter","cause":"TRANSPIRATION_PROXY_EVENT"},
+    {"flow_id":"SURFACE_RUNOFF","debit":"FOREST_SURFACE_WATER","credit":"RIVER_WATER_POOL","quantity":"runoff_times_river_share","unit":"liter","cause":"RUNOFF_EVENT"},
+    {"flow_id":"NUTRIENT_UPTAKE","debit":"SOIL_NUTRIENT_POOL","credit":"PLANT_BIOMASS_POOL","quantity":"growth_nutrient_mass","unit":"kilogram","cause":"CAUSAL_GROWTH_EVENT"},
+    {"flow_id":"PLANT_DEATH","debit":"PLANT_BIOMASS_POOL","credit":"DEAD_BIOMASS_POOL","quantity":"recorded_death_biomass","unit":"kilogram","cause":"DEATH_EVENT"},
+    {"flow_id":"DECOMPOSITION_ENTRY","debit":"DEAD_BIOMASS_POOL","credit":"DECOMPOSITION_POOL","quantity":"processed_dead_biomass","unit":"kilogram","cause":"DECOMPOSITION_EVENT"},
+    {"flow_id":"ORGANIC_MATTER_RETURN","debit":"DECOMPOSITION_POOL","credit":"SOIL_ORGANIC_MATTER_POOL","quantity":"decomposed_mass_times_return_share","unit":"kilogram","cause":"NUTRIENT_RETURN_EVENT"},
+    {"flow_id":"DECOMPOSITION_REMAINDER","debit":"DECOMPOSITION_POOL","credit":"RECORDED_LOSS_PROXY","quantity":"decomposed_mass_minus_organic_return","unit":"kilogram","cause":"DECOMPOSITION_LOSS_PROXY_EVENT"},
+    {"flow_id":"MANAGED_HARVEST","debit":"PLANT_BIOMASS_POOL","credit":"NAMED_EXPORT_CUSTODY","quantity":"approved_harvest_biomass","unit":"kilogram","cause":"SIMULATED_HARVEST_EVENT"}
+  ],
+  "invariants": [
+    "EACH_TRANSFER_HAS_ONE_DEBIT_AND_ONE_CREDIT",
+    "TOTAL_WATER_DELTA_WITHIN_TOLERANCE",
+    "TOTAL_BIOMASS_AND_RECORDED_OUTPUT_DELTA_WITHIN_TOLERANCE",
+    "NUTRIENT_INCREASE_REQUIRES_NAMED_INPUT_OR_TRANSFER",
+    "DEAD_BIOMASS_REQUIRES_DECOMPOSITION_CUSTODY_OR_REMOVAL",
+    "EXTERNAL_BOUNDARY_TRANSFER_REQUIRES_SOURCE_DESTINATION_AMOUNT_UNIT_REASON_AND_EVENT_ID",
+    "ALL_STATE_MUTATION_REMAINS_WITH_AUTHORITATIVE_RUNTIME"
+  ],
+  "boundaries": {"full_hydrology_model":false,"full_soil_chemistry":false,"runtime_engine":false,"canonical_promotion":false,"production_authority":false}
+}

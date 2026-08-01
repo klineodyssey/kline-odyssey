@@ -1,0 +1,61 @@
+{
+  "schema_version": "candidate-1.0.0",
+  "dataset_id": "KAIOS-FOREST-COMPOSITION-CANDIDATES-001",
+  "status": "CURSOR_RESEARCH_CANDIDATE_ONLY",
+  "review_status": "PENDING_CODEX_REVIEW",
+  "model_label": "SIMULATION_APPROXIMATION",
+  "authority": "NO_PRODUCTION_AUTHORITY",
+  "simulation_only": true,
+  "authoritative_state_owner": "KAIOS_ECOLOGY_RUNTIME_V1",
+  "habitat_id": "HABITAT-FOREST-V1",
+  "composition": [
+    {
+      "layer_id": "FOREST-CANOPY-TREE",
+      "species_id": "SPECIES-KAIOS-FOUNDATIONAL-TREE",
+      "role": "CANOPY_AND_LONG_CYCLE_BIOMASS",
+      "parameters": [
+        {"parameter_name":"tree_density","unit":"individuals_per_hectare","minimum":40,"default":180,"maximum":500,"rationale":"A bounded density proxy supplies a deterministic carrying-capacity input without claiming a universal forest density.","source_type":"RESEARCH_PROPOSAL","confidence":"LOW","risk":"Actual density varies by species, age, climate and management.","validation_required":true},
+        {"parameter_name":"canopy_cover","unit":"normalized_fraction","minimum":0.15,"default":0.65,"maximum":0.95,"rationale":"The canopy proxy links tree abundance to shade, rainfall interception and regeneration scenarios.","source_type":"MODEL_INFERENCE","confidence":"LOW","risk":"A single fraction omits crown geometry and seasonal leaf change.","validation_required":true},
+        {"parameter_name":"standing_biomass","unit":"kilogram_per_hectare","minimum":1000,"default":18000,"maximum":90000,"rationale":"A bounded standing pool is needed for mass-transfer tests and disturbance accounting.","source_type":"RESEARCH_PROPOSAL","confidence":"LOW","risk":"Not calibrated to a particular forest type or tree species.","validation_required":true}
+      ]
+    },
+    {
+      "layer_id": "FOREST-GROUND-GRASS",
+      "species_id": "SPECIES-KAIOS-FOUNDATIONAL-GRASS",
+      "role": "GROUND_COVER_AND_EROSION_CONTROL",
+      "parameters": [
+        {"parameter_name":"ground_cover","unit":"normalized_fraction","minimum":0.05,"default":0.45,"maximum":0.9,"rationale":"Ground cover is a bounded input to erosion and moisture-retention proposals.","source_type":"MODEL_INFERENCE","confidence":"LOW","risk":"Does not represent non-grass understory species.","validation_required":true},
+        {"parameter_name":"grass_biomass","unit":"kilogram_per_hectare","minimum":50,"default":900,"maximum":5000,"rationale":"The pool permits causal grazing, death and decomposition accounting while reusing the existing grass Life owner.","source_type":"RESEARCH_PROPOSAL","confidence":"LOW","risk":"Seasonal and forest-light variation is simplified.","validation_required":true}
+      ]
+    },
+    {
+      "layer_id": "FOREST-SOIL",
+      "species_id": "SPECIES-KAIOS-FOUNDATIONAL-SOIL",
+      "role": "ROOT_SUPPORT_WATER_AND_NUTRIENT_POOL",
+      "parameters": [
+        {"parameter_name":"soil_depth","unit":"meter","minimum":0.15,"default":0.8,"maximum":3,"rationale":"A bounded depth proxy supports root compatibility and water-storage calculations.","source_type":"RESEARCH_PROPOSAL","confidence":"LOW","risk":"Layering, bedrock and texture are not represented.","validation_required":true},
+        {"parameter_name":"soil_fertility","unit":"normalized_index","minimum":0,"default":0.62,"maximum":1,"rationale":"This reuses the Ecology normalized fertility convention for deterministic growth gates.","source_type":"REPOSITORY_DERIVED","confidence":"MEDIUM","risk":"The index is not a laboratory soil assessment.","validation_required":true},
+        {"parameter_name":"soil_organic_matter","unit":"kilogram_per_hectare","minimum":100,"default":2400,"maximum":12000,"rationale":"An explicit organic-matter pool is required for decomposition and nutrient-return conservation proposals.","source_type":"RESEARCH_PROPOSAL","confidence":"LOW","risk":"Carbon content and decomposition chemistry are abstracted.","validation_required":true}
+      ]
+    },
+    {
+      "layer_id": "FOREST-WATER",
+      "species_id": "SPECIES-KAIOS-FOUNDATIONAL-WATER",
+      "related_species_id": "SPECIES-KAIOS-FOUNDATIONAL-RIVER",
+      "role": "BOUNDED_SOIL_MOISTURE_RUNOFF_AND_PLANT_UPTAKE",
+      "parameters": [
+        {"parameter_name":"available_water","unit":"liter_per_hectare","minimum":1000,"default":18000,"maximum":120000,"rationale":"A finite water pool allows uptake, runoff and evaporation to use paired transfers.","source_type":"MODEL_INFERENCE","confidence":"LOW","risk":"Not a watershed or hydrological calibration.","validation_required":true},
+        {"parameter_name":"river_connection_share","unit":"normalized_fraction","minimum":0,"default":0.25,"maximum":1,"rationale":"The share bounds how much recorded runoff may enter the existing river owner.","source_type":"RESEARCH_PROPOSAL","confidence":"LOW","risk":"Topography and drainage networks are simplified.","validation_required":true}
+      ]
+    }
+  ],
+  "composition_rules": [
+    "ALL_LIFE_STATE_REMAINS_WITH_EXISTING_OWNER",
+    "TOTAL_AREA_SHARE_MUST_NOT_EXCEED_HABITAT_AREA",
+    "POPULATION_MUST_NOT_EXCEED_CARRYING_CAPACITY",
+    "BIOMASS_CHANGE_REQUIRES_MASS_ENERGY_RESOURCE_AND_TIME_EVENTS",
+    "NO_UNDECLARED_LIFE_POPULATION",
+    "NO_INSTANT_MATURE_FOREST"
+  ],
+  "boundaries": {"runtime_code":false,"canonical_promotion":false,"real_bioengineering":false,"wallet":"NONE","real_kgen":"NO_REAL_KGEN","production_authority":false}
+}

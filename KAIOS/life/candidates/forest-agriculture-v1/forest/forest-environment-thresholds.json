@@ -1,0 +1,32 @@
+{
+  "schema_version": "candidate-1.0.0",
+  "dataset_id": "KAIOS-FOREST-ENVIRONMENT-THRESHOLDS-001",
+  "status": "CURSOR_RESEARCH_CANDIDATE_ONLY",
+  "review_status": "PENDING_CODEX_REVIEW",
+  "model_label": "SIMULATION_APPROXIMATION",
+  "authority": "NO_PRODUCTION_AUTHORITY",
+  "simulation_only": true,
+  "habitat_id": "HABITAT-FOREST-V1",
+  "parameters": [
+    {"parameter_name":"air_temperature","unit":"degree_celsius","minimum":-5,"default":22,"maximum":38,"rationale":"The envelope reuses the existing foundational tree candidate temperature range and remains species-generic.","source_type":"REPOSITORY_DERIVED","confidence":"MEDIUM","risk":"A single temperature value omits duration, frost exposure and microclimate.","validation_required":true},
+    {"parameter_name":"daily_rainfall_input","unit":"liter_per_square_meter_per_day","minimum":0,"default":3,"maximum":80,"rationale":"A bounded external input supports drought, baseline and storm scenarios with explicit water credits.","source_type":"RESEARCH_PROPOSAL","confidence":"LOW","risk":"Not weather forecasting or a location-specific rainfall distribution.","validation_required":true},
+    {"parameter_name":"soil_moisture","unit":"normalized_fraction","minimum":0.08,"default":0.48,"maximum":0.9,"rationale":"The normalized proxy gates plant growth and stress while conserving the associated water pool separately.","source_type":"MODEL_INFERENCE","confidence":"LOW","risk":"Not equivalent to volumetric water content for a real soil.","validation_required":true},
+    {"parameter_name":"soil_fertility","unit":"normalized_index","minimum":0.2,"default":0.62,"maximum":1,"rationale":"The envelope aligns with the existing Ecology fertility model and supports deterministic growth and degradation states.","source_type":"REPOSITORY_DERIVED","confidence":"MEDIUM","risk":"The aggregate index hides individual nutrient limitations.","validation_required":true},
+    {"parameter_name":"soil_ph","unit":"pH_proxy","minimum":5,"default":6.5,"maximum":7.8,"rationale":"A broad compatibility proposal permits deterministic stress checks without asserting a universal forestry target.","source_type":"RESEARCH_PROPOSAL","confidence":"LOW","risk":"Species-specific tolerances and buffering are omitted.","validation_required":true},
+    {"parameter_name":"sunlight_availability","unit":"normalized_fraction","minimum":0.1,"default":0.65,"maximum":1,"rationale":"The proxy links canopy cover to grass and tree growth gates.","source_type":"MODEL_INFERENCE","confidence":"LOW","risk":"Aspect, cloud cover and seasonal photoperiod are simplified.","validation_required":true},
+    {"parameter_name":"pollution_index","unit":"normalized_index","minimum":0,"default":0.04,"maximum":1,"rationale":"The default aligns with the existing Ecology habitat initialization and supports pollution-stress scenarios.","source_type":"REPOSITORY_DERIVED","confidence":"MEDIUM","risk":"Distinct pollutants are aggregated into one proxy.","validation_required":true},
+    {"parameter_name":"erosion_risk","unit":"normalized_index","minimum":0,"default":0.18,"maximum":1,"rationale":"A deterministic proxy relates slope, ground cover, rainfall and disturbance to nutrient and sediment transfers.","source_type":"MODEL_INFERENCE","confidence":"LOW","risk":"Not an engineering erosion assessment.","validation_required":true},
+    {"parameter_name":"tree_water_demand","unit":"liter_per_tree_per_day","minimum":20,"default":55,"maximum":120,"rationale":"The envelope directly reuses the existing foundational tree candidate water requirement.","source_type":"REPOSITORY_DERIVED","confidence":"MEDIUM","risk":"Demand varies by tree size, species, climate and season.","validation_required":true},
+    {"parameter_name":"grass_water_demand","unit":"liter_per_square_meter_per_day","minimum":1.5,"default":2.5,"maximum":4,"rationale":"The envelope directly reuses the foundational grass candidate range.","source_type":"REPOSITORY_DERIVED","confidence":"MEDIUM","risk":"Shade, soil and season can materially change actual demand.","validation_required":true},
+    {"parameter_name":"regeneration_capacity","unit":"normalized_fraction","minimum":0,"default":0.45,"maximum":1,"rationale":"This bounded index combines seed source, open area, water, nutrients and protection for scenario gating.","source_type":"RESEARCH_PROPOSAL","confidence":"LOW","risk":"Not a measured ecological regeneration rate.","validation_required":true},
+    {"parameter_name":"stress_duration","unit":"simulation_day","minimum":1,"default":30,"maximum":365,"rationale":"Elapsed duration prevents threshold crossings from causing instant mature-state changes.","source_type":"RESEARCH_PROPOSAL","confidence":"LOW","risk":"Biological response timing is species- and stress-specific.","validation_required":true}
+  ],
+  "derived_states": [
+    {"state":"DROUGHT_STRESS","required_signals":["LOW_SOIL_MOISTURE","WATER_DEMAND_EXCEEDS_AVAILABLE_POOL"]},
+    {"state":"NUTRIENT_STRESS","required_signals":["LOW_FERTILITY","NO_RECORDED_NUTRIENT_INPUT"]},
+    {"state":"EROSION_RISK","required_signals":["LOW_GROUND_COVER","RAINFALL_OR_RUNOFF_EVENT"]},
+    {"state":"POLLUTION_STRESS","required_signals":["HIGH_POLLUTION"]},
+    {"state":"REGENERATION_ELIGIBLE","required_signals":["SEED_SOURCE_AVAILABLE","CAPACITY_AVAILABLE","WATER_AVAILABLE","TIME_ADVANCED"]}
+  ],
+  "boundaries": {"universal_forestry_guidance":false,"runtime_code":false,"canonical_promotion":false,"production_authority":false}
+}

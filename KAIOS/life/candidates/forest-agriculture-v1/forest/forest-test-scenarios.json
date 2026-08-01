@@ -1,0 +1,30 @@
+{
+  "schema_version": "candidate-1.0.0",
+  "dataset_id": "KAIOS-FOREST-TEST-SCENARIOS-001",
+  "status": "CURSOR_RESEARCH_CANDIDATE_ONLY",
+  "review_status": "PENDING_CODEX_REVIEW",
+  "model_label": "SIMULATION_APPROXIMATION",
+  "authority": "NO_PRODUCTION_AUTHORITY",
+  "simulation_only": true,
+  "test_parameters": [
+    {"parameter_name":"replay_count","unit":"run_count","minimum":2,"default":3,"maximum":20,"rationale":"Multiple runs are required to compare deterministic state hashes.","source_type":"RESEARCH_PROPOSAL","confidence":"HIGH","risk":"A small run count cannot establish correctness beyond the tested action sequence.","validation_required":true},
+    {"parameter_name":"scenario_tick_count","unit":"simulation_tick","minimum":1,"default":48,"maximum":10000,"rationale":"Explicit bounded time advancement prevents animation-only or instant completion.","source_type":"RESEARCH_PROPOSAL","confidence":"MEDIUM","risk":"Tick duration must be defined by the owning simulation clock.","validation_required":true},
+    {"parameter_name":"carrying_capacity_pressure","unit":"normalized_fraction_of_capacity","minimum":0,"default":0.9,"maximum":1.5,"rationale":"The parameter spans stable and over-capacity cases for bounded population tests.","source_type":"MODEL_INFERENCE","confidence":"LOW","risk":"Capacity is an approximation, not a field estimate.","validation_required":true},
+    {"parameter_name":"disturbance_share","unit":"normalized_fraction","minimum":0,"default":0.25,"maximum":0.7,"rationale":"A bounded disturbance enables mass-accounting and regeneration tests.","source_type":"RESEARCH_PROPOSAL","confidence":"LOW","risk":"Spatial disturbance structure is omitted.","validation_required":true}
+  ],
+  "scenarios": [
+    {"test_id":"FOREST-COMP-001","name":"Composition uses existing owners","given":["FOREST_CANDIDATE_DATASET"],"when":["VALIDATE_REFERENCES"],"then":["TREE_GRASS_SOIL_WATER_RIVER_IDS_EXIST","NO_NEW_LIFE_TYPE","NO_DUPLICATE_RUNTIME_OWNER"]},
+    {"test_id":"FOREST-WATER-001","name":"Water transfers balance","given":["FINITE_ATMOSPHERIC_RAIN_INPUT","FOREST_HABITAT"],"when":["RAIN_TO_SURFACE","INFILTRATION","PLANT_UPTAKE","TRANSPIRATION","SURFACE_RUNOFF"],"then":["TOTAL_WATER_DELTA_WITHIN_TOLERANCE","NO_UNEXPLAINED_WATER"]},
+    {"test_id":"FOREST-MASS-001","name":"Disturbance mass remains accounted","given":["MATURE_BIOMASS","DISTURBANCE_SHARE"],"when":["APPLY_BOUNDED_THINNING"],"then":["STANDING_BIOMASS_DECREASE_EQUALS_EXPORT_PLUS_RESIDUE","NO_MASS_DISAPPEARS"]},
+    {"test_id":"FOREST-NUTRIENT-001","name":"Nutrient return has a cause","given":["DEAD_BIOMASS"],"when":["PROCESS_DECOMPOSITION","PROCESS_NUTRIENT_RETURN"],"then":["DEAD_BIOMASS_DEBIT_RECORDED","ORGANIC_MATTER_CREDIT_RECORDED","REMAINDER_CREDIT_RECORDED","TOTAL_MASS_WITHIN_TOLERANCE"]},
+    {"test_id":"FOREST-GROWTH-001","name":"Growth blocks without water","given":["TREE_AND_GRASS_POPULATIONS","EMPTY_AVAILABLE_WATER_POOL"],"when":["ADVANCE_SCENARIO_TICKS"],"then":["GROWTH_BLOCKED_RESOURCE","HEALTH_STABLE_OR_DECLINING","NO_BIOMASS_CREATED"]},
+    {"test_id":"FOREST-REGEN-001","name":"Regeneration requires source and time","given":["DISTURBED_FOREST","NO_SEED_SOURCE"],"when":["REQUEST_REGENERATION"],"then":["REGENERATION_BLOCKED","NO_INSTANT_SEEDLING_COHORT"]},
+    {"test_id":"FOREST-REGEN-002","name":"Bounded regeneration succeeds causally","given":["DISTURBED_FOREST","SEED_SOURCE_AVAILABLE","CAPACITY_AVAILABLE","WATER_AND_NUTRIENTS_AVAILABLE"],"when":["ADVANCE_REGENERATION_TIME"],"then":["BOUNDED_SEEDLING_COHORT","RESOURCES_DEBITED","EVENT_CHAIN_RECORDED","NO_MATURE_FOREST_INSTANTLY"]},
+    {"test_id":"FOREST-CAPACITY-001","name":"Carrying capacity blocks excess growth","given":["POPULATION_AT_OR_ABOVE_CAPACITY"],"when":["PROCESS_PROPAGATION"],"then":["OVER_CARRYING_CAPACITY","POPULATION_INCREASE_BLOCKED"]},
+    {"test_id":"FOREST-EROSION-001","name":"Ground cover affects erosion","given":["LOW_GROUND_COVER","RAINFALL_EVENT"],"when":["PROCESS_RUNOFF_AND_EROSION"],"then":["SOIL_OR_NUTRIENT_DEBIT_RECORDED","RIVER_SEDIMENT_CREDIT_RECORDED","EROSION_RISK"]},
+    {"test_id":"FOREST-DETERMINISM-001","name":"Replay is deterministic","given":["SAME_INITIAL_STATE","SAME_SEED","SAME_ACTIONS"],"when":["RUN_REPLAY_COUNT"],"then":["IDENTICAL_EVENT_ORDER","IDENTICAL_FINAL_STATE_HASH","IDENTICAL_RESOURCE_DELTAS"]},
+    {"test_id":"FOREST-BOUNDARY-001","name":"Candidate package cannot mutate authority","given":["CANDIDATE_DATA_ONLY"],"when":["SCAN_CHANGED_PATHS_AND_CONTENT"],"then":["NO_RUNTIME_CODE","NO_CURRENT_CHANGE","NO_WALLET","NO_KGEN","NO_CANONICAL_PROMOTION","NO_PRODUCTION_AUTHORITY"]}
+  ],
+  "required_validations": ["JSON_PARSE","UTF8_NO_BOM","DETERMINISTIC_SCENARIO_IDS","WATER_CAUSALITY","MASS_CAUSALITY","NUTRIENT_CAUSALITY","NO_SECRETS","NO_PROTECTED_PATHS","GIT_DIFF_CHECK"],
+  "boundaries": {"runtime_engine":false,"self_approval":false,"canonical_promotion":false,"deployment":false,"production_authority":false}
+}

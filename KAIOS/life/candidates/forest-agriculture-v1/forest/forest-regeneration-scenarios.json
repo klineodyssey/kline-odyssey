@@ -1,0 +1,57 @@
+{
+  "schema_version": "candidate-1.0.0",
+  "dataset_id": "KAIOS-FOREST-REGENERATION-SCENARIOS-001",
+  "status": "CURSOR_RESEARCH_CANDIDATE_ONLY",
+  "review_status": "PENDING_CODEX_REVIEW",
+  "model_label": "SIMULATION_APPROXIMATION",
+  "authority": "NO_PRODUCTION_AUTHORITY",
+  "simulation_only": true,
+  "deterministic_seed": "KAIOS-FOREST-REGENERATION-CANDIDATE-SEED-001",
+  "scenario_parameters": [
+    {"parameter_name":"baseline_duration","unit":"simulation_day","minimum":30,"default":180,"maximum":730,"rationale":"The bounded duration permits measurable growth without instant forest maturation.","source_type":"RESEARCH_PROPOSAL","confidence":"LOW","risk":"Not calibrated to a real forest succession timeline.","validation_required":true},
+    {"parameter_name":"disturbance_biomass_share","unit":"normalized_fraction","minimum":0.05,"default":0.25,"maximum":0.7,"rationale":"A bounded removal share creates deterministic disturbance scenarios while preventing silent total deletion.","source_type":"MODEL_INFERENCE","confidence":"LOW","risk":"Actual disturbance patterns are spatially heterogeneous.","validation_required":true},
+    {"parameter_name":"residue_return_share","unit":"normalized_fraction","minimum":0,"default":0.35,"maximum":0.9,"rationale":"The share splits disturbed biomass between named custody and residue/decomposition pools.","source_type":"RESEARCH_PROPOSAL","confidence":"LOW","risk":"Moisture and decomposition fractions are simplified.","validation_required":true},
+    {"parameter_name":"seed_source_count","unit":"source_record_count","minimum":1,"default":12,"maximum":200,"rationale":"At least one approved seed source is required to avoid generation from nothing.","source_type":"RESEARCH_PROPOSAL","confidence":"LOW","risk":"A count does not represent seed viability or dispersal geometry.","validation_required":true},
+    {"parameter_name":"regeneration_duration","unit":"simulation_day","minimum":90,"default":730,"maximum":7300,"rationale":"Elapsed time gates establishment and prevents a mature forest from reappearing immediately.","source_type":"RESEARCH_PROPOSAL","confidence":"LOW","risk":"Real recovery can be much shorter or longer.","validation_required":true},
+    {"parameter_name":"restoration_water_input","unit":"liter_per_hectare","minimum":0,"default":8000,"maximum":80000,"rationale":"A finite recorded reserve permits a paired restoration transfer in drought recovery tests.","source_type":"MODEL_INFERENCE","confidence":"LOW","risk":"Not a real irrigation prescription.","validation_required":true},
+    {"parameter_name":"compost_input","unit":"kilogram_per_hectare","minimum":0,"default":500,"maximum":5000,"rationale":"A named material input can increase organic matter without spontaneous fertility creation.","source_type":"RESEARCH_PROPOSAL","confidence":"LOW","risk":"Nutrient content and contamination are not represented.","validation_required":true}
+  ],
+  "scenarios": [
+    {
+      "scenario_id":"FOREST-STABLE-BASELINE",
+      "initial_state":"GROWING",
+      "actions":["ADVANCE_BASELINE_DURATION","TRANSFER_AVAILABLE_WATER_TO_PLANT_UPTAKE","TRANSFER_NUTRIENTS_TO_PLANT_BIOMASS","RETURN_TRANSPIRATION_TO_ATMOSPHERIC_PROXY"],
+      "expected_states":["GROWING","MATURE"],
+      "required_invariants":["WATER_BALANCED","MASS_BALANCED","NUTRIENTS_BALANCED","TIME_ADVANCED","NO_INSTANT_MATURITY"]
+    },
+    {
+      "scenario_id":"FOREST-BOUNDED-THINNING",
+      "initial_state":"MATURE",
+      "actions":["VERIFY_SIMULATED_HARVEST_CAPABILITY","REMOVE_DISTURBANCE_BIOMASS_SHARE","CREATE_NAMED_WOOD_CUSTODY_LOT","TRANSFER_RESIDUE_RETURN_SHARE_TO_DEAD_BIOMASS"],
+      "expected_states":["DISTURBED"],
+      "required_invariants":["STANDING_BIOMASS_DECREASED","REMOVED_MASS_ACCOUNTED","NO_UNEXPLAINED_DISAPPEARANCE"]
+    },
+    {
+      "scenario_id":"FOREST-NATURAL-REGENERATION",
+      "initial_state":"DISTURBED",
+      "actions":["VERIFY_SEED_SOURCE_COUNT","VERIFY_CAPACITY","ADVANCE_REGENERATION_DURATION","CONSUME_WATER_NUTRIENTS_AND_ENERGY_PROXY","CREATE_BOUNDED_SEEDLING_COHORT"],
+      "expected_states":["REGENERATING","GROWING"],
+      "required_invariants":["PROPAGATION_SOURCE_PRESENT","CAPACITY_NOT_EXCEEDED","RESOURCE_INPUTS_RECORDED","NO_AUTOMATIC_NEW_SPECIES"]
+    },
+    {
+      "scenario_id":"FOREST-DROUGHT-AND-RESTORATION",
+      "initial_state":"RESOURCE_STRESSED",
+      "actions":["BLOCK_GROWTH_WHEN_WATER_DEPLETED","TRANSFER_RESTORATION_WATER_FROM_NAMED_RESERVE","ADVANCE_TIME","REEVALUATE_HEALTH"],
+      "expected_states":["RESOURCE_STRESSED","REGENERATING"],
+      "required_invariants":["RESTORATION_SOURCE_DEBIT_EQUALS_FOREST_WATER_CREDIT","NO_WATER_CREATED","RECOVERY_NOT_INSTANT"]
+    },
+    {
+      "scenario_id":"FOREST-NUTRIENT-RETURN",
+      "initial_state":"DEGRADED",
+      "actions":["TRANSFER_COMPOST_INPUT_FROM_NAMED_CUSTODY","PROCESS_DEAD_BIOMASS_TO_DECOMPOSITION","TRANSFER_DECOMPOSED_MASS_TO_SOIL_ORGANIC_MATTER_AND_LOSS_PROXIES","ADVANCE_TIME"],
+      "expected_states":["REGENERATING"],
+      "required_invariants":["COMPOST_SOURCE_RECORDED","NUTRIENT_INCREASE_HAS_CAUSE","MASS_BALANCED"]
+    }
+  ],
+  "boundaries": {"automatic_new_species":false,"instant_regeneration":false,"uncontrolled_reproduction":false,"runtime_engine":false,"production_authority":false}
+}
