@@ -94,6 +94,27 @@ When Cursor discovers gaps (e.g. PR #42 vs main, port 8080 conflict):
 
 Codex schedules — Human not required to relay findings.
 
+### 6.1 Human standing directive (2026-08-01)
+
+**Human Decision ID:** `HUMAN-CURSOR-PROACTIVE-RD-001`
+
+On **every** task completion or idle checkpoint, Cursor must append a **Proactive Dispatch Appendix** for Codex containing:
+
+| Section | Content |
+|---------|---------|
+| R&D direction | What Cursor observed; gaps vs main; risks |
+| Improvement proposals | Concrete repo/process fixes (with paths) |
+| Tasks Cursor can claim | Task IDs, branch pattern, estimated scope, protected-path impact |
+| Expected improvement | What merges unblock; who benefits (Human / Codex / product) |
+| Suggested priority | P0–P3 + dependency on Codex actions first |
+
+Artifacts:
+
+- Report: `KGEN-AI-Company/reports/CURSOR_PROACTIVE_RD_DISPATCH_<YYYYMMDD>_REPORT.md` (or section in task report)
+- Machine: extend `handoff.json` → `proposed_workorders[]`, `cursor_capabilities_ready[]`, `codex_actions_required`
+
+Cursor **never** self-promotes Queue to `OPEN`. Codex converts PROPOSED → OPEN + envelope + APPROVED dispatch.
+
 ---
 
 ## 7. Environment notes (shared VM)

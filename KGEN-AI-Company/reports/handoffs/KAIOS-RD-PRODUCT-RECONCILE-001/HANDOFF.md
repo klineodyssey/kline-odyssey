@@ -23,22 +23,32 @@ Cursor compared **PR #42** with **current main**. **Human decision (2026-08-01):
 | `human_decision_id` | `HUMAN-PR42-DEFER-20260801` |
 | Decision | #42 先不用；等版本穩定再寫程式 |
 | Cursor | **No work** on PR #42 |
+| `human_standing_directive` | `HUMAN-CURSOR-PROACTIVE-RD-001` — 每次交工附 R&D / 提案 / 可接任務給 Codex 排程 |
+
+## Proactive Dispatch (for Codex scheduler)
+
+Full appendix: `KGEN-AI-Company/reports/CURSOR_PROACTIVE_RD_DISPATCH_20260801_REPORT.md`
+
+**Top pick to OPEN:** `KAIOS-WALS-DOCS-001` (P1, docs-only, cursor-ready)
+
+Also PROPOSED: `KAIOS-COORD-PROTOCOL-MERGE-001`, `KAIOS-BOOT-SUMMARY-ZH-001`, `KAIOS-WV-SMOKE-QA-001`, `KAIOS-TX-BTC-PIPELINE-SMOKE-001`
 
 ## Codex Actions Required
 
 - [ ] **Review PR #69** — merge or open FIX for foundational life candidates
 - [x] ~~Decide PR #42~~ → **DEFERRED** — close/archive Draft PR #42; record closeout
 - [ ] ~~Create 001A-R1~~ → **Do not OPEN** until Human re-dispatches post-stability
-- [ ] **Optional:** Approve `KAIOS-WALS-DOCS-001` or mark CANCELLED
-- [ ] **Optional:** Defer `KAIOS-PR-PREVIEW-PAGES-001` with #42
-- [ ] Merge this docs handoff branch so scheduler stops blocking on #42
+- [ ] **OPEN + APPROVE** `KAIOS-WALS-DOCS-001` (task envelope) — Cursor idle until this
+- [ ] **Optional:** OPEN other PROPOSED tasks from proactive dispatch report
+- [ ] Sync WorkQueue: PR67 row → DONE if merged
+- [ ] Merge this docs handoff branch so coordination protocol + dispatch land on main
 
 ## Blockers
 
 | Code | Owner | Unblock |
 |------|-------|---------|
 | `NONE` for this handoff | — | — |
-| `PR42_PRODUCT_DIRECTION_UNDECIDED` | Human + Codex | Pick A/B/C in R1 WorkOrder |
+| `PR42_PRODUCT_DIRECTION_UNDECIDED` | — | **RESOLVED** — `HUMAN-PR42-DEFER-20260801` |
 | `PR69_PENDING_CODEX_REVIEW` | Codex | Review PR #69 |
 
 ## Boundaries

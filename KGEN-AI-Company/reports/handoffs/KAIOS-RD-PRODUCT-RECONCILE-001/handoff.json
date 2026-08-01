@@ -23,6 +23,13 @@
   "stop_code": "NONE",
   "human_action_required": false,
   "human_decision_id": "HUMAN-PR42-DEFER-20260801",
+  "human_standing_directives": [
+    {
+      "id": "HUMAN-CURSOR-PROACTIVE-RD-001",
+      "summary": "Cursor must append R&D direction, improvement proposals, and claimable tasks to every handoff for Codex scheduling",
+      "recorded_at": "2026-08-01T12:43:00Z"
+    }
+  ],
   "human_decision": {
     "pr_42": "DEFERRED",
     "detail": "Do not merge or port PR #42; wait for stable baseline before future product-shell work",
@@ -34,10 +41,17 @@
     "defer_pr_42_close_archive": true,
     "create_workorder_001a_r1": false,
     "promote_proposed_workorders": [
-      "KAIOS-PRODUCT-SPRINT-001A-R1",
-      "KAIOS-PR-PREVIEW-PAGES-001",
-      "KAIOS-WALS-DOCS-001"
+      "KAIOS-WALS-DOCS-001",
+      "KAIOS-COORD-PROTOCOL-MERGE-001",
+      "KAIOS-BOOT-SUMMARY-ZH-001",
+      "KAIOS-WV-SMOKE-QA-001",
+      "KAIOS-TX-BTC-PIPELINE-SMOKE-001",
+      "KAIOS-PR-PREVIEW-PAGES-001"
     ],
+    "sync_workqueue_stale_rows": [
+      "KAIOS-PR67-CURSOR-FOUNDATIONAL-LIFE-CANDIDATES-001"
+    ],
+    "read_proactive_dispatch_report": "KGEN-AI-Company/reports/CURSOR_PROACTIVE_RD_DISPATCH_20260801_REPORT.md",
     "merge_allowed": false
   },
   "findings": {
@@ -49,23 +63,69 @@
   },
   "proposed_workorders": [
     {
-      "task_id": "KAIOS-PRODUCT-SPRINT-001A-R1",
-      "status": "DEFERRED_HUMAN",
+      "task_id": "KAIOS-WALS-DOCS-001",
+      "status": "PROPOSED_ACTIVATION",
       "priority": "P1",
-      "human_decision": "HUMAN-PR42-DEFER-20260801",
-      "options": ["CLOSE_PR42", "PORT_PRODUCT_SHELL", "HYBRID"]
+      "current_queue_state": "HOLD_NOT_APPROVED",
+      "cursor_ready": true,
+      "branch": "cursor-handoff/KAIOS-WALS-DOCS-001",
+      "improves": "WALS spec discoverability in indexes and Boot cross-links"
+    },
+    {
+      "task_id": "KAIOS-COORD-PROTOCOL-MERGE-001",
+      "status": "PROPOSED",
+      "priority": "P2",
+      "cursor_ready": true,
+      "branch": "cursor-handoff/KAIOS-COORD-PROTOCOL-MERGE-001",
+      "improves": "Standing Cursor↔Codex coordination without Human relay"
+    },
+    {
+      "task_id": "KAIOS-BOOT-SUMMARY-ZH-001",
+      "status": "PROPOSED",
+      "priority": "P2",
+      "cursor_ready": true,
+      "branch": "cursor-handoff/KAIOS-BOOT-SUMMARY-ZH-001",
+      "improves": "Onboarding and boot layer clarity for all workers"
+    },
+    {
+      "task_id": "KAIOS-WV-SMOKE-QA-001",
+      "status": "PROPOSED",
+      "priority": "P2",
+      "cursor_ready": true,
+      "branch": "cursor-handoff/KAIOS-WV-SMOKE-QA-001",
+      "improves": "Post-merge World Viewer regression evidence on port 8765"
+    },
+    {
+      "task_id": "KAIOS-TX-BTC-PIPELINE-SMOKE-001",
+      "status": "PROPOSED",
+      "priority": "P3",
+      "cursor_ready": true,
+      "branch": "cursor-handoff/KAIOS-TX-BTC-PIPELINE-SMOKE-001",
+      "improves": "Taifex/BTC pipeline CI-aligned smoke on sample CSV"
     },
     {
       "task_id": "KAIOS-PR-PREVIEW-PAGES-001",
       "status": "PROPOSED",
-      "priority": "P2"
+      "priority": "P2",
+      "cursor_ready": true,
+      "improves": "Draft PR Pages preview for review workflow"
     },
     {
-      "task_id": "KAIOS-WALS-DOCS-001",
-      "status": "PROPOSED_ACTIVATION",
+      "task_id": "KAIOS-PRODUCT-SPRINT-001A-R1",
+      "status": "DEFERRED_HUMAN",
       "priority": "P1",
-      "current_queue_state": "HOLD_NOT_APPROVED"
+      "human_decision": "HUMAN-PR42-DEFER-20260801",
+      "cursor_ready": false,
+      "options": ["CLOSE_PR42", "PORT_PRODUCT_SHELL", "HYBRID"]
     }
+  ],
+  "cursor_capabilities_ready": [
+    "documentation_index_integration",
+    "coordination_protocol_docs",
+    "static_smoke_qa_world_viewer",
+    "python_pipeline_smoke_tx_btc",
+    "handoff_triple_reports",
+    "foundational_life_candidate_packages"
   ],
   "blockers": [
     {
@@ -82,6 +142,7 @@
     }
   ],
   "report_path": "KGEN-AI-Company/reports/CURSOR_RD_PRODUCT_RECONCILE_20260801_REPORT.md",
+  "proactive_dispatch_report": "KGEN-AI-Company/reports/CURSOR_PROACTIVE_RD_DISPATCH_20260801_REPORT.md",
   "coordination_protocol": "KGEN-AI-Company/reports/CURSOR_CODEX_COORDINATION_PROTOCOL_V1.md",
   "env_notes": [
     {
