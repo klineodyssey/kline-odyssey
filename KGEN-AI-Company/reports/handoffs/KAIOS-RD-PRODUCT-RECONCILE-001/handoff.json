@@ -73,5 +73,13 @@
     }
   ],
   "report_path": "KGEN-AI-Company/reports/CURSOR_RD_PRODUCT_RECONCILE_20260801_REPORT.md",
+  "coordination_protocol": "KGEN-AI-Company/reports/CURSOR_CODEX_COORDINATION_PROTOCOL_V1.md",
+  "env_notes": [
+    {
+      "code": "TEST_INFRA_PORT_8080_CONFLICT",
+      "detail": "Cursor Cloud VM keeps python3 http.server on 8080 for demo; product_qa and CI expect 8080 — stop demo server or use alternate port before QA",
+      "product_at_fault": false
+    }
+  ],
   "protected_paths_modified": false
 }
