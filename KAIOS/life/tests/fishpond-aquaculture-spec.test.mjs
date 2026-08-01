@@ -15,4 +15,11 @@ const main=JSON.parse(await readFile(resolve(base,"KAIOS_FISHPOND_SCHEMA_V1.json
 assert.equal(main.properties.boundaries.$ref,"#/$defs/boundaries");
 assert.equal(main.$defs.boundaries.properties.production_authority.const,false);
 assert.equal(main.$defs.boundaries.properties.maximum_population.maximum,500);
+const envelope=JSON.parse(await readFile(resolve(base,"KAIOS_AQUACULTURE_CURSOR_TASK_ENVELOPE.json"),"utf8"));
+const registry=JSON.parse(await readFile(resolve(root,"KGEN-KAIOS/worker_registry.json"),"utf8"));
+const dispatch=registry.dispatch_history.find(({task_id})=>task_id===envelope.task_id);
+assert.equal(dispatch.worker_id,envelope.worker_id);
+assert.equal(dispatch.branch,envelope.branch);
+assert.equal(dispatch.status,"COMPLETED_CODEX_REVIEWED");
+assert.equal(registry.workers.find(({worker_id})=>worker_id===envelope.worker_id).current_task,null);
 console.log("KAIOS_FISHPOND_AQUACULTURE_SPEC_TEST_PASS");

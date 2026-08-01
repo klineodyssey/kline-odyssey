@@ -46,6 +46,24 @@
     "reject_unlisted": true,
     "mismatch_result": "BRANCH_POLICY_MISMATCH"
   },
+  "dispatch_history": [
+    {
+      "task_id": "KAIOS-ECOLOGY-V1-CANDIDATE-DATA-001",
+      "worker_id": "cursor-01",
+      "branch": "cursor-handoff/KAIOS-ECOLOGY-V1-CANDIDATE-DATA-001",
+      "output_status": "CANDIDATE_ONLY",
+      "reviewer": "codex-gm-01",
+      "status": "COMPLETED_CODEX_REVIEWED"
+    },
+    {
+      "task_id": "KAIOS-CURSOR-FISHPOND-AQUACULTURE-RESEARCH-001",
+      "worker_id": "cursor-01",
+      "branch": "cursor-handoff/KAIOS-CURSOR-FISHPOND-AQUACULTURE-RESEARCH-001",
+      "output_status": "CURSOR_RESEARCH_CANDIDATE_ONLY",
+      "reviewer": "codex-gm-01",
+      "status": "COMPLETED_CODEX_REVIEWED"
+    }
+  ],
   "workers": [
     {
       "worker_id": "codex-gm-01",
@@ -81,9 +99,9 @@
         "LIFE_RESEARCH_ANALYST"
       ],
       "workspace": "cursor-worker-workspace",
-      "current_task": "KAIOS-CURSOR-FISHPOND-AQUACULTURE-RESEARCH-001",
-      "current_branch": "cursor-handoff/KAIOS-CURSOR-FISHPOND-AQUACULTURE-RESEARCH-001",
-      "status": "CLAIMED",
+      "current_task": null,
+      "current_branch": null,
+      "status": "ACTIVE",
       "employee_status": "ACTIVE",
       "trust_level": "T2",
       "heartbeat": "2026-08-01T13:10:00Z",

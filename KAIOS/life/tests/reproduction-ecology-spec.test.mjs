@@ -11,6 +11,7 @@ const registry = JSON.parse(read("KGEN-KAIOS/worker_registry.json"));
 const spec = read("KAIOS/life/ecology/KAIOS_REPRODUCTION_ECOLOGY_RUNTIME_V1_SPEC.md");
 const crosswalk = read("KAIOS/life/ecology/KAIOS_REPRODUCTION_ECOLOGY_SOURCE_CROSSWALK.md");
 const cursor = registry.workers.find(({ worker_id: id }) => id === "cursor-01");
+const dispatch = registry.dispatch_history.find(({ task_id: id }) => id === envelope.task_id);
 
 assert.equal(schema.$schema, "https://json-schema.org/draft/2020-12/schema");
 assert.equal(schema.properties.runtime.const, "KAIOS_REPRODUCTION_ECOLOGY_RUNTIME_V1");
@@ -34,8 +35,9 @@ for (const chapter of [23, 24, 47, 49, 58, 80, 84, 107, 114, 121, 122, 132, 135]
 assert(crosswalk.includes("does not promote"));
 
 assert.deepEqual(cursor.worker_classes, ["FOUNDATIONAL_LIFE_CREATOR", "LIFE_RESEARCH_ANALYST"]);
-assert.equal(cursor.current_task, envelope.task_id);
-assert.equal(cursor.current_branch, envelope.branch_name);
+assert.equal(dispatch.worker_id, cursor.worker_id);
+assert.equal(dispatch.branch, envelope.branch_name);
+assert.equal(dispatch.status, "COMPLETED_CODEX_REVIEWED");
 assert.equal(envelope.output_status, "CANDIDATE_ONLY");
 assert.equal(envelope.merge_allowed, false);
 assert.equal(envelope.deploy_allowed, false);
