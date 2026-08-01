@@ -2,7 +2,7 @@
 
 Decision: `OPTION_A`
 
-PR #70 consumes the PR #69 candidate commit through Git ancestry and is merged to `main` as one non-duplicated integration. After that merge, PR #69 is closed as superseded, not merged separately.
+PR #70 consumes the PR #69 candidate commit through Git ancestry and is merged to `main` as one non-duplicated integration. GitHub consequently marks PR #69 `MERGED` because its head commit is reachable from `main`; no separate PR #69 merge commit is created.
 
 ## Reasons
 
@@ -24,3 +24,11 @@ Cursor worker: `cursor-01 / FOUNDATIONAL_LIFE_CREATOR`
 Task: `KAIOS-PR67-CURSOR-FOUNDATIONAL-LIFE-CANDIDATES-001`
 
 The package `provenance.json`, source commit references, review report, and commit co-author metadata remain unchanged.
+
+## Final Repository State
+
+PR #70 merge commit: `388e4b40477e46befbfee8847630cf26ebe3eacc`
+
+PR #69 GitHub state: `MERGED_BY_ANCESTRY_THROUGH_PR70`
+
+Canonical promotion: `NOT_PERFORMED`

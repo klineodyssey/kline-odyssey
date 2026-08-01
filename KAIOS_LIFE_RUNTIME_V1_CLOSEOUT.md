@@ -1,6 +1,6 @@
 # KAIOS Life Runtime V1 Closeout
 
-Status: `READY_TO_MERGE`
+Status: `KAIOS_LIFE_RUNTIME_V1_DEPLOYED`
 
 Task: `KAIOS-PR70-LIFE-RUNTIME-V1-FINALIZE-001`
 
@@ -21,4 +21,14 @@ Wallet `NONE`; real KGEN `DISABLED`; on-chain transfer `DISABLED`; Production Ru
 
 ## Deployment
 
-Merge commit, final main SHA, Pages run, production HTTP verification, and final status are recorded after merge.
+- Merge method: `MERGE_COMMIT`
+- Merge commit and main SHA: `388e4b40477e46befbfee8847630cf26ebe3eacc`
+- Pages run: `30693291561` - `SUCCESS`
+- Main Product QA run: `30693291576` - `SUCCESS`
+- Homepage: `https://klineodyssey.github.io/kline-odyssey/` - HTTP 200
+- World Viewer: `https://klineodyssey.github.io/kline-odyssey/world-viewer/` - HTTP 200
+- Life Runtime: `https://klineodyssey.github.io/kline-odyssey/world-viewer/life-runtime/` - HTTP 200, eight cards, no console errors
+- API catalog: `https://klineodyssey.github.io/kline-odyssey/api/kaios/life-runtime-v1/catalog.json` - HTTP 200, eight packages
+- API state: `https://klineodyssey.github.io/kline-odyssey/api/kaios/life-runtime-v1/state.json` - HTTP 200, eight initial states
+
+GitHub automatically marked PR #69 `MERGED` when its candidate commit became reachable through PR #70. There is no separate PR #69 merge commit or duplicate package integration. Candidate authority remains unchanged.

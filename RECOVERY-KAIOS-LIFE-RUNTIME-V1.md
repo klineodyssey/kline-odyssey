@@ -8,7 +8,7 @@ Feature branch: `codex/kaios-life-runtime-v1`
 
 PR: `#70`
 
-Integration: `OPTION_A`; PR #70 carries Cursor candidate commit `b8e3c0324b6aa3f933dd0d1e95e20c35d1def4b7`. PR #69 is closed as superseded after merge and is not merged separately.
+Integration: `OPTION_A`; PR #70 carries Cursor candidate commit `b8e3c0324b6aa3f933dd0d1e95e20c35d1def4b7`. GitHub automatically marked PR #69 `MERGED` because that commit became reachable through PR #70. PR #69 has no separate merge commit and its packages remain candidate-only.
 
 ## Recovery Boundary
 
@@ -18,4 +18,6 @@ This work adds the eight candidate packages, one bounded deterministic runtime, 
 
 Revert the PR #70 merge commit with a new audited revert commit. Do not delete candidate provenance or rewrite Git history. The public route can be withdrawn by reverting the same merge; no on-chain or persistent production state exists.
 
-Merge commit and final main SHA are recorded in the post-merge closeout update.
+Merge commit and final main SHA: `388e4b40477e46befbfee8847630cf26ebe3eacc`.
+
+Verified deployment run: `30693291561`. Main Product QA run: `30693291576`. Both completed successfully.

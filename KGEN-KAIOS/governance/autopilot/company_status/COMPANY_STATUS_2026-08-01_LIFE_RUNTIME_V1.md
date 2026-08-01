@@ -10,13 +10,19 @@ PR: `#70`
 
 ## Workline
 
-Status: `READY_TO_MERGE`
+Status: `KAIOS_LIFE_RUNTIME_V1_DEPLOYED`
 
 Integration: `OPTION_A`
 
 Candidate packages: `GRASS, TREE, FISH, SHRIMP, MOUNTAIN, SOIL, WATER, RIVER`
 
 Candidate authority: `CANDIDATE_PACKAGE / RUNTIME_VALIDATED / CANONICAL_SCHEMA_COMPATIBLE / NOT_PRODUCTION_AUTHORIZED`
+
+Merge commit: `388e4b40477e46befbfee8847630cf26ebe3eacc`
+
+Pages run: `30693291561 / SUCCESS`
+
+Production route: `https://klineodyssey.github.io/kline-odyssey/world-viewer/life-runtime/`
 
 ## Company Operation
 

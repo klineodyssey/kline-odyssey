@@ -21,7 +21,9 @@ Authority remains `NO_PRODUCTION_AUTHORITY`; wallet is `NONE`; real KGEN and set
 
 The final implementation consumes all Canonical and candidate records through the shared loader, exposes package-specific causal state, emits complete deterministic audit events, and provides pause, resume, replay, reset, export, and hash-verified import.
 
-PR #69 integration uses `OPTION_A`: PR #70 carries the Cursor candidate commit and merges one copy of the stack to `main`; PR #69 is then closed as superseded. Candidate status and Cursor provenance are preserved.
+PR #69 integration uses `OPTION_A`: PR #70 carries the Cursor candidate commit and merges one copy of the stack to `main`. GitHub marks PR #69 merged by ancestry, without a separate merge commit. Candidate status and Cursor provenance are preserved; Canonical promotion is not performed.
+
+Production deployment is verified at `https://klineodyssey.github.io/kline-odyssey/world-viewer/life-runtime/`. The Viewer and both read-only JSON projections return HTTP 200.
 
 ## Held Worklines
 
