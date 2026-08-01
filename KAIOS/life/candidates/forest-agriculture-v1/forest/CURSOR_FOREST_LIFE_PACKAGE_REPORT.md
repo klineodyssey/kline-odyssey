@@ -17,6 +17,9 @@ Source base commit:
 Initial candidate commit:
 `6feccef5d7d9cbeabc74fe2fd02dab2018c6ee2a`
 
+Provenance hash basis:
+`SHA256_OF_GIT_BLOB_CONTENT_AT_SOURCE_BASE_COMMIT`
+
 ## Scope
 
 These six artifacts describe a managed-forest research candidate assembled
@@ -106,18 +109,20 @@ Allowed labels are `SOURCE_DERIVED`, `REPOSITORY_DERIVED`,
 `REPOSITORY_DERIVED`; all numerical envelopes remain proposals requiring
 validation.
 
-The following immutable references were hashed from the source base commit.
-Inferred defaults remain separately labeled `MODEL_INFERENCE` or
+The following immutable references were hashed from the exact Git blob bytes
+returned by `git show eaa63455fcf5f807b9d852a79157759b11293b2e:<path>`.
+Checkout bytes are not used because line-ending conversion can change their
+hash. Inferred defaults remain separately labeled `MODEL_INFERENCE` or
 `RESEARCH_PROPOSAL` and are not repository facts.
 
 | Source | Exact path | Schema/version | SHA-256 |
 |---|---|---|---|
-| Tree | `KAIOS/life/candidates/tree/life.manifest.json` | `1.0.0` | `7fbe4bf48d95aaef5c7e3445e94a447e0537c1e6ab93f8d1d5b7a0dc8d90b8d4` |
-| Grass | `KAIOS/life/candidates/grass/life.manifest.json` | `1.0.0` | `368915e71dd3fe66a0bbdacd97cc212dbf4bc74d1e789d54763d5a88b6e3abd8` |
-| Soil | `KAIOS/life/candidates/soil/life.manifest.json` | `1.0.0` | `534744355f9c6d224606a5346c3a4f7d6c067f0dce4943ebbda9ed15ac6a30bc` |
-| Water | `KAIOS/life/candidates/water/life.manifest.json` | `1.0.0` | `16cd4f59be7c292657bb700a41f4d0e2428e0b4d721348a9a56f829d0ea385a9` |
-| River | `KAIOS/life/candidates/river/life.manifest.json` | `1.0.0` | `03a34c1c4108d77dd08f8321beab0d92eff64f74992424d300b55d230813fe45` |
-| Ecology | `KGEN-KAIOS/world-viewer/ecosystem/ecosystem-runtime.js` | Ecology schema `1.0.0`; owner `KAIOS_REPRODUCTION_ECOLOGY_RUNTIME_V1` | `dd8a2b96eb704630a9b38afbb27b136dc5c68075f0e0a0d03747e1ed45986548` |
+| Tree | `KAIOS/life/candidates/tree/life.manifest.json` | `1.0.0` | `e9f264eb81f13d68afa69b94acc57278f3acbc656d28bb059f089e8995b35084` |
+| Grass | `KAIOS/life/candidates/grass/life.manifest.json` | `1.0.0` | `42d9e9ee6e1f6fb03679dd8755a89ac184fd60cf6d10014829f94f337e05c430` |
+| Soil | `KAIOS/life/candidates/soil/life.manifest.json` | `1.0.0` | `afc569084c467e92ed967559e0a99ce8c1877dea1a43c3f0c7efc8183b61aeb9` |
+| Water | `KAIOS/life/candidates/water/life.manifest.json` | `1.0.0` | `8764d1bde87565c87f0b50a1f4776760b694881654b4743b765728541a9e9fee` |
+| River | `KAIOS/life/candidates/river/life.manifest.json` | `1.0.0` | `fe2075a704959d9f2c2962067400e39ae62f884b76b88fb1a2a9143888bcaa61` |
+| Ecology | `KGEN-KAIOS/world-viewer/ecosystem/ecosystem-runtime.js` | Ecology schema `1.0.0`; owner `KAIOS_REPRODUCTION_ECOLOGY_RUNTIME_V1` | `9b2cd9d4501727d3134ea332e1a30cd77d5d7d647300820f51d9c264784ef537` |
 
 Every JSON artifact repeats this branch, source base, initial candidate commit,
 exact source path, source schema/version and SHA-256 registry so that each file
