@@ -1,0 +1,28 @@
+{
+  "schema_version": "1.0.0",
+  "runtime": "KAIOS_FISHPOND_AQUACULTURE_RUNTIME_V1",
+  "mode": "STATIC_READ_ONLY_PROJECTION",
+  "generated_from_seed": "KAIOS-AQUACULTURE-PUBLIC-001",
+  "simulation_only": true,
+  "read_only": true,
+  "mutation_endpoints": false,
+  "authority": "NO_PRODUCTION_AUTHORITY",
+  "wallet": "NONE",
+  "real_kgen": "NO_REAL_KGEN",
+  "real_food_safety_certification": false,
+  "orders": [
+    {
+      "order_id": "ORDER-0001",
+      "buyer": "SYNTHETIC-KAOHSIUNG-WHOLESALER",
+      "quantity_kg": 4,
+      "grade": "A",
+      "unit_price": 12,
+      "channel": "WHOLESALE",
+      "confirmed": true,
+      "delivery_window_hours": 72,
+      "payment_terms": "SIMULATED_CASH_ON_ACCEPTANCE",
+      "status": "CONFIRMED"
+    }
+  ],
+  "revenue_rule": "ACCEPTED_DELIVERY_ONLY"
+}

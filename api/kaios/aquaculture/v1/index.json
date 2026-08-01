@@ -1,0 +1,25 @@
+{
+  "schema_version": "1.0.0",
+  "runtime": "KAIOS_FISHPOND_AQUACULTURE_RUNTIME_V1",
+  "mode": "STATIC_READ_ONLY_PROJECTION",
+  "generated_from_seed": "KAIOS-AQUACULTURE-PUBLIC-001",
+  "simulation_only": true,
+  "read_only": true,
+  "mutation_endpoints": false,
+  "authority": "NO_PRODUCTION_AUTHORITY",
+  "wallet": "NONE",
+  "real_kgen": "NO_REAL_KGEN",
+  "real_food_safety_certification": false,
+  "endpoints": [
+    "ponds.json",
+    "water-quality.json",
+    "populations.json",
+    "feed.json",
+    "harvests.json",
+    "inventory.json",
+    "orders.json",
+    "ledger.json",
+    "events.json",
+    "status.json"
+  ]
+}

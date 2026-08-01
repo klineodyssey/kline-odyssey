@@ -1,0 +1,50 @@
+{
+  "schema_version": "1.0.0",
+  "runtime": "KAIOS_FISHPOND_AQUACULTURE_RUNTIME_V1",
+  "mode": "STATIC_READ_ONLY_PROJECTION",
+  "generated_from_seed": "KAIOS-AQUACULTURE-PUBLIC-001",
+  "simulation_only": true,
+  "read_only": true,
+  "mutation_endpoints": false,
+  "authority": "NO_PRODUCTION_AUTHORITY",
+  "wallet": "NONE",
+  "real_kgen": "NO_REAL_KGEN",
+  "real_food_safety_certification": false,
+  "status": "PAUSED",
+  "integrity": {
+    "ok": true,
+    "issues": [],
+    "deterministic": true,
+    "serializable": true,
+    "stoppable": true,
+    "resumable": true,
+    "replayable": true,
+    "auditable": true,
+    "mutation_endpoints": false,
+    "ecology_binding": {
+      "runtime": "KAIOS_REPRODUCTION_ECOLOGY_RUNTIME_V1",
+      "habitat_id": "HABITAT-FISHPOND-V1",
+      "simulation_only": true,
+      "authority": "NO_PRODUCTION_AUTHORITY"
+    }
+  },
+  "deterministic": true,
+  "serializable": true,
+  "stoppable": true,
+  "resumable": true,
+  "replayable": true,
+  "auditable": true,
+  "boundaries": {
+    "simulation_only": true,
+    "wallet": "NONE",
+    "real_kgen": "NO_REAL_KGEN",
+    "onchain_transfer": false,
+    "real_bioengineering": false,
+    "real_food_safety_certification": false,
+    "real_legal_effect": false,
+    "production_authority": false,
+    "uncontrolled_reproduction": false,
+    "mutation_endpoints": false,
+    "maximum_population": 500
+  }
+}

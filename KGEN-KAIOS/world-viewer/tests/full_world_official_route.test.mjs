@@ -27,7 +27,8 @@ test("canonical Viewer exposes hierarchy, navigation, and honest catalog states"
   for (const marker of ["KAIOS 完整世界", "返回官方首頁", "觀看第一隻 KAIOS 數位恐龍", "LAND_PARCEL", "FISHPOND", "FARM", "HOUSE", "SHOPPING_MALL", "FACTORY", "TECHNOLOGY_BUILDING"]) {
     assert.match(viewer, new RegExp(marker));
   }
-  assert.match(viewer, /FISHPOND[\s\S]*PLANNED \/ AUTHORITY NONE/);
+  assert.match(viewer, /FISHPOND[\s\S]*RUNTIME V1 \/ SIMULATION ONLY/);
+  assert.match(viewer, /world-viewer\/aquaculture-v1\//);
   assert.match(viewer, /SHOPPING_MALL[\s\S]*MISSING/);
   assert.match(viewer, /TECHNOLOGY_BUILDING[\s\S]*MISSING/);
   const prohibitedTerms = [
@@ -39,7 +40,8 @@ test("canonical Viewer exposes hierarchy, navigation, and honest catalog states"
 
 test("capability audit preserves static simulation boundaries", async () => {
   const audit = await read("../FULL_WORLD_VIEWER_CAPABILITY_AUDIT.md");
-  assert.match(audit, /FISH_FARM.*not `FISHPOND`/);
+  assert.match(audit, /FISHPOND[\s\S]*IMPLEMENTED_INTERACTIVE/);
+  assert.match(audit, /no real property, water right, food certification, wallet, KGEN, or production authority/i);
   assert.match(audit, /LOCAL_SIMULATION_ONLY/);
   assert.match(audit, /Production Runtime authority: `false`/);
   assert.match(audit, /KAIOS_LAND_BUILDING_CONSTRUCTION_SYSTEM|construction workline/i);

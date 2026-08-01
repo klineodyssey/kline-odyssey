@@ -1,0 +1,45 @@
+{
+  "schema_version": "1.0.0",
+  "runtime": "KAIOS_FISHPOND_AQUACULTURE_RUNTIME_V1",
+  "mode": "STATIC_READ_ONLY_PROJECTION",
+  "generated_from_seed": "KAIOS-AQUACULTURE-PUBLIC-001",
+  "simulation_only": true,
+  "read_only": true,
+  "mutation_endpoints": false,
+  "authority": "NO_PRODUCTION_AUTHORITY",
+  "wallet": "NONE",
+  "real_kgen": "NO_REAL_KGEN",
+  "real_food_safety_certification": false,
+  "inventory": [
+    {
+      "inventory_id": "INVENTORY-0001",
+      "species_id": "SPECIES-KAIOS-FOUNDATIONAL-FISH",
+      "quantity_kg": 2.947,
+      "reserved_kg": 0,
+      "available_kg": 2.947,
+      "grade": "A",
+      "condition": "CHILLED",
+      "storage_cost": 0,
+      "book_value": 13514.79
+    }
+  ],
+  "cold_chain": [
+    {
+      "delivery_id": "DELIVERY-0001",
+      "inventory_id": "INVENTORY-0001",
+      "state": "COLD_STORAGE",
+      "temperature_c": 2,
+      "maximum_temperature_c": 5,
+      "storage_hours": 0,
+      "vehicle_id": "TRUCK-AQUA-001",
+      "route_id": "ROUTE-PENDING",
+      "fuel_required_l": 0,
+      "fuel_consumed_l": 0,
+      "refrigeration_energy_kwh": 0,
+      "travel_hours": 0,
+      "elapsed_hours": 0,
+      "spoilage_risk": 0,
+      "blocked_reason": null
+    }
+  ]
+}
