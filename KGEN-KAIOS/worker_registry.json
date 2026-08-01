@@ -48,6 +48,14 @@
   },
   "dispatch_history": [
     {
+      "task_id": "KAIOS-PR67-CURSOR-FOUNDATIONAL-LIFE-CANDIDATES-001",
+      "worker_id": "cursor-01",
+      "branch": "cursor-handoff/KAIOS-PR67-CURSOR-FOUNDATIONAL-LIFE-CANDIDATES-001",
+      "output_status": "CANDIDATE_ONLY",
+      "reviewer": "codex-gm-01",
+      "status": "COMPLETED_CODEX_REVIEWED"
+    },
+    {
       "task_id": "KAIOS-ECOLOGY-V1-CANDIDATE-DATA-001",
       "worker_id": "cursor-01",
       "branch": "cursor-handoff/KAIOS-ECOLOGY-V1-CANDIDATE-DATA-001",

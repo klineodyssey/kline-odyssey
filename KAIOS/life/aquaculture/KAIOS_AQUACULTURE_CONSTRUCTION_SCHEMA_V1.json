@@ -7,7 +7,7 @@
   "properties": {
     "project_id": { "type": "string" },
     "stage": { "enum": ["SITE_SURVEY", "DESIGN", "PERMIT_SIMULATION", "SITE_CLEARING", "EXCAVATION", "EMBANKMENT", "LINING_OR_SOIL_COMPACTION", "INLET_INSTALLATION", "OUTLET_INSTALLATION", "DRAINAGE_INSTALLATION", "AERATION_INFRASTRUCTURE", "ELECTRICAL_CONNECTION", "WATER_FILLING", "LEAK_TEST", "WATER_STABILIZATION", "INSPECTION", "READY_FOR_STOCKING"] },
-    "completed_stages": { "type": "array", "maxItems": 17, "items": { "type": "string" }, "uniqueItems": true },
+    "completed_stages": { "type": "array", "maxItems": 17, "items": { "enum": ["SITE_SURVEY", "DESIGN", "PERMIT_SIMULATION", "SITE_CLEARING", "EXCAVATION", "EMBANKMENT", "LINING_OR_SOIL_COMPACTION", "INLET_INSTALLATION", "OUTLET_INSTALLATION", "DRAINAGE_INSTALLATION", "AERATION_INFRASTRUCTURE", "ELECTRICAL_CONNECTION", "WATER_FILLING", "LEAK_TEST", "WATER_STABILIZATION", "INSPECTION", "READY_FOR_STOCKING"] }, "uniqueItems": true },
     "progress_hours": { "type": "number", "minimum": 0 }, "workers": { "type": "array", "maxItems": 100, "items": { "type": "object" } },
     "equipment": { "type": "object", "additionalProperties": { "type": "number", "minimum": 0 } }, "materials": { "type": "object", "additionalProperties": { "type": "number", "minimum": 0 } },
     "energy_kwh": { "type": "number", "minimum": 0 },

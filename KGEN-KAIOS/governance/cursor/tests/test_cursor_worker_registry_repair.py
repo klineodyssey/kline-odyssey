@@ -103,13 +103,19 @@ class CursorWorkerRegistryRepairTests(unittest.TestCase):
         self.assertEqual(self.cursor["reviewer"], "codex-gm-01")
 
     def test_ecology_candidate_dispatch_is_bounded(self):
-        self.assertEqual(
-            self.cursor["current_task"], "KAIOS-ECOLOGY-V1-CANDIDATE-DATA-001"
+        dispatch = next(
+            item
+            for item in self.registry["dispatch_history"]
+            if item["task_id"] == "KAIOS-ECOLOGY-V1-CANDIDATE-DATA-001"
         )
+        self.assertEqual(dispatch["worker_id"], self.cursor["worker_id"])
         self.assertEqual(
-            self.cursor["current_branch"],
+            dispatch["branch"],
             "cursor-handoff/KAIOS-ECOLOGY-V1-CANDIDATE-DATA-001",
         )
+        self.assertEqual(dispatch["status"], "COMPLETED_CODEX_REVIEWED")
+        self.assertIsNone(self.cursor["current_task"])
+        self.assertIsNone(self.cursor["current_branch"])
         self.assertTrue(
             {
                 "FOUNDATIONAL_FOOD_RELATIONSHIP_DATASET",
@@ -121,6 +127,18 @@ class CursorWorkerRegistryRepairTests(unittest.TestCase):
             }
             <= set(self.cursor["allowed_work"])
         )
+
+    def test_dispatch_history_preserves_foundational_life_lineage(self):
+        dispatch = next(
+            item
+            for item in self.registry["dispatch_history"]
+            if item["task_id"] == "KAIOS-PR67-CURSOR-FOUNDATIONAL-LIFE-CANDIDATES-001"
+        )
+        self.assertEqual(
+            dispatch["branch"],
+            "cursor-handoff/KAIOS-PR67-CURSOR-FOUNDATIONAL-LIFE-CANDIDATES-001",
+        )
+        self.assertEqual(dispatch["output_status"], "CANDIDATE_ONLY")
 
 
 if __name__ == "__main__":
