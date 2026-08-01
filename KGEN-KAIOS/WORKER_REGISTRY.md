@@ -74,7 +74,11 @@ Continuous means that Codex dispatches the next reviewed queue item without
 Human routing; it does not waive the one-task rule. Cursor still completes one
 canonical `cursor-handoff/<Task-ID>` assignment, stops at Codex review, and may
 not self-approve, merge, deploy or modify authoritative Runtime, CURRENT,
-Canonical Schema, Rights authority, Economy authority, Wallet or KGEN.
+Canonical Schema, Rights authority, Economy authority, Wallet or KGEN. The next
+item is eligible only after the previous task is Codex-reviewed, formally
+closed, and its lease is released. Codex must then issue an explicit task
+envelope and obtain a successful atomic claim. No unreviewed or overlapping
+automatic dispatch is permitted.
 
 ## Permission Model
 
