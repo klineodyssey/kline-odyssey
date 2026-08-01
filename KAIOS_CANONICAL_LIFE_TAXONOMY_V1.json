@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "KAIOS_CANONICAL_LIFE_TAXONOMY_V1.json",
+  "schema_version": "1.0.0",
+  "status": "CANONICAL_SPECIFICATION",
+  "minimum_levels": [
+    "DOMAIN", "KINGDOM", "PHYLUM", "CLASS", "ORDER", "FAMILY", "GENUS", "SPECIES", "LIFE_INSTANCE"
+  ],
+  "canonical_extension_19": [
+    "Domain", "Kingdom", "Phylum", "Class", "Order", "Family", "Genus", "Species", "Individual",
+    "OrganSystem", "Organ", "Tissue", "Cell", "Organelle", "Genome", "DNA", "RNA", "Gene", "Expression"
+  ],
+  "compatibility": {
+    "source": "KGEN-KAIOS/civilization/BIOLOGY_TAXONOMY_STANDARD.md",
+    "life_instance_maps_to": "Individual",
+    "legacy_12_level_source": "KGEN-KAIOS/organism/taxonomy_registry.json",
+    "legacy_optional_levels": ["cell", "organ", "runtime", "civilization"],
+    "rule": "The nine minimum levels are universal. The 19-layer biological extension is preserved when applicable and must not be forced onto non-biological life."
+  },
+  "non_biological_rule": "Non-biological life uses system-native values for the universal ranks and marks biological-only extension ranks NOT_APPLICABLE.",
+  "authority": {
+    "runtime_authority": false,
+    "production_authority": false,
+    "automatic_registration": false
+  }
+}

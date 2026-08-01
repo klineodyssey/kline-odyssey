@@ -1,0 +1,51 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "KAIOS_CANONICAL_LIFE_TYPE_EXTENSIONS_V1.json",
+  "schema_version": "1.0.0",
+  "status": "CANONICAL_SPECIFICATION",
+  "composition_rule": "SHARED_CORE + APPROVED_TYPE_EXTENSION",
+  "applicability": ["REQUIRED", "OPTIONAL", "NOT_APPLICABLE"],
+  "extensions": {
+    "PLANT_EXTENSION": ["photosynthesis", "root_system", "water_need", "soil_need", "sunlight_need", "growth_rate", "seed", "flower", "fruit", "season", "disease", "reproduction"],
+    "ANIMAL_EXTENSION": ["body_plan", "organs", "senses", "movement", "metabolism", "diet", "predator_prey", "health", "sex", "reproduction", "offspring", "lifespan"],
+    "MARINE_EXTENSION": ["body_plan", "organs", "senses", "movement", "metabolism", "diet", "predator_prey", "health", "sex", "reproduction", "offspring", "lifespan", "water_compatibility", "dissolved_oxygen_need", "salinity_range"],
+    "MICROBIAL_EXTENSION": ["cell_structure", "metabolism", "substrate_need", "replication", "colony_model", "environment_tolerance"],
+    "TERRAIN_EXTENSION": ["geology", "elevation", "slope", "erosion", "stability", "resource_deposits", "weathering", "hazards", "formation", "collapse"],
+    "WATER_BODY_EXTENSION": ["source", "flow", "volume", "depth", "width", "temperature", "oxygen", "salinity", "pollution", "sediment", "evaporation", "inflow", "outflow", "flood", "drought"],
+    "SOIL_EXTENSION": ["composition", "moisture", "fertility", "ph", "organic_matter", "compaction", "erosion", "contamination", "crop_support", "foundation_support"],
+    "BUILDING_EXTENSION": ["building_systems", "occupancy_capacity", "structural_integrity", "utilities", "maintenance_plan", "construction_record"],
+    "INFRASTRUCTURE_EXTENSION": ["network_role", "capacity", "throughput", "service_area", "condition", "maintenance_plan"],
+    "COMPANY_EXTENSION": ["legal_effect", "business_model", "workforce", "assets", "liabilities", "governance_model", "insolvency_state"],
+    "CITY_EXTENSION": ["population", "land_use", "infrastructure", "services", "governance_model", "ecological_state"],
+    "PLANET_EXTENSION": ["gravity", "atmosphere", "orbit", "climate", "geology", "biosphere"],
+    "TEMPLE_EXTENSION": ["site", "structure", "ritual_role", "custodianship", "cultural_provenance"],
+    "UNIVERSE_EXTENSION": ["cosmology_model", "spacetime_model", "energy_budget", "contained_systems", "boundary_conditions"],
+    "DIGITAL_EXTENSION": ["compute_capacity", "memory_capacity", "software_integrity", "data_dependencies", "concurrency_limit"],
+    "ROBOTIC_EXTENSION": ["body_plan", "actuators", "sensors", "energy_storage", "maintenance_plan", "operator_boundary"],
+    "LAND_EXTENSION": ["parcel_identity", "terrain_profile", "soil_profile", "land_use", "title_separation", "occupancy_separation"]
+  },
+  "type_extension_map": {
+    "BIOLOGICAL_LIFE": { "required_one_of": ["PLANT_EXTENSION", "ANIMAL_EXTENSION", "MARINE_EXTENSION", "MICROBIAL_EXTENSION"] },
+    "DIGITAL_LIFE": { "required": ["DIGITAL_EXTENSION"] },
+    "ROBOTIC_LIFE": { "required": ["ROBOTIC_EXTENSION"] },
+    "PLANT_LIFE": { "required": ["PLANT_EXTENSION"] },
+    "ANIMAL_LIFE": { "required": ["ANIMAL_EXTENSION"] },
+    "MARINE_LIFE": { "required": ["MARINE_EXTENSION"] },
+    "MICROBIAL_LIFE": { "required": ["MICROBIAL_EXTENSION"] },
+    "TERRAIN_LIFE": { "required": ["TERRAIN_EXTENSION"] },
+    "WATER_BODY_LIFE": { "required": ["WATER_BODY_EXTENSION"] },
+    "LAND_LIFE": { "required": ["LAND_EXTENSION"], "optional": ["SOIL_EXTENSION", "TERRAIN_EXTENSION"] },
+    "BUILDING_LIFE": { "required": ["BUILDING_EXTENSION"] },
+    "INFRASTRUCTURE_LIFE": { "required": ["INFRASTRUCTURE_EXTENSION"] },
+    "COMPANY_LIFE": { "required": ["COMPANY_EXTENSION"] },
+    "CITY_LIFE": { "required": ["CITY_EXTENSION"] },
+    "PLANET_LIFE": { "required": ["PLANET_EXTENSION"] },
+    "TEMPLE_LIFE": { "required": ["TEMPLE_EXTENSION"] },
+    "UNIVERSE_LIFE": { "required": ["UNIVERSE_EXTENSION"] }
+  },
+  "rules": [
+    "Animal physiology fields must not be required for terrain, water, soil, building, company, city, planet, temple or universe life.",
+    "An extension may be attached only when listed for the life_type.",
+    "NOT_APPLICABLE must carry an explicit reason and must not be encoded as fabricated biological data."
+  ]
+}
