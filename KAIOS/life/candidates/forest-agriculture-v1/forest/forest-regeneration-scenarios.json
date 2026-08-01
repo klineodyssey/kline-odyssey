@@ -6,6 +6,20 @@
   "model_label": "SIMULATION_APPROXIMATION",
   "authority": "NO_PRODUCTION_AUTHORITY",
   "simulation_only": true,
+  "immutable_provenance": {
+    "canonical_branch": "cursor-handoff/KAIOS-CURSOR-FOREST-LIFE-PACKAGES-001",
+    "source_base_commit": "eaa63455fcf5f807b9d852a79157759b11293b2e",
+    "initial_candidate_commit": "6feccef5d7d9cbeabc74fe2fd02dab2018c6ee2a",
+    "inferred_defaults_label": "MODEL_INFERENCE_OR_RESEARCH_PROPOSAL_NOT_CANONICAL",
+    "repository_sources": [
+      {"source_id":"TREE","path":"KAIOS/life/candidates/tree/life.manifest.json","schema_version":"1.0.0","sha256":"7fbe4bf48d95aaef5c7e3445e94a447e0537c1e6ab93f8d1d5b7a0dc8d90b8d4"},
+      {"source_id":"GRASS","path":"KAIOS/life/candidates/grass/life.manifest.json","schema_version":"1.0.0","sha256":"368915e71dd3fe66a0bbdacd97cc212dbf4bc74d1e789d54763d5a88b6e3abd8"},
+      {"source_id":"SOIL","path":"KAIOS/life/candidates/soil/life.manifest.json","schema_version":"1.0.0","sha256":"534744355f9c6d224606a5346c3a4f7d6c067f0dce4943ebbda9ed15ac6a30bc"},
+      {"source_id":"WATER","path":"KAIOS/life/candidates/water/life.manifest.json","schema_version":"1.0.0","sha256":"16cd4f59be7c292657bb700a41f4d0e2428e0b4d721348a9a56f829d0ea385a9"},
+      {"source_id":"RIVER","path":"KAIOS/life/candidates/river/life.manifest.json","schema_version":"1.0.0","sha256":"03a34c1c4108d77dd08f8321beab0d92eff64f74992424d300b55d230813fe45"},
+      {"source_id":"ECOLOGY","path":"KGEN-KAIOS/world-viewer/ecosystem/ecosystem-runtime.js","schema_version":"1.0.0","owner_id":"KAIOS_REPRODUCTION_ECOLOGY_RUNTIME_V1","sha256":"dd8a2b96eb704630a9b38afbb27b136dc5c68075f0e0a0d03747e1ed45986548"}
+    ]
+  },
   "deterministic_seed": "KAIOS-FOREST-REGENERATION-CANDIDATE-SEED-001",
   "scenario_parameters": [
     {"parameter_name":"baseline_duration","unit":"simulation_day","minimum":30,"default":180,"maximum":730,"rationale":"The bounded duration permits measurable growth without instant forest maturation.","source_type":"RESEARCH_PROPOSAL","confidence":"LOW","risk":"Not calibrated to a real forest succession timeline.","validation_required":true},
