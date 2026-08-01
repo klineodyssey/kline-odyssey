@@ -14,7 +14,7 @@ means an authoritative registry, legal title, wallet, or on-chain state.
 | Capability | Chinese Name | Repository Path | UI Entry | Runtime Module | Data Source | Current Status | Interactive | Persistent | Synthetic Only | Production Authority | Known Limitation | Recommended Next Action |
 |---|---|---|---|---|---|---|---:|---:|---:|---:|---|---|
 | `LAND_PARCEL` | 土地 | `land/`, `renderer/`, `selection/` | Map / Land | `land-runtime.js` | `synthetic-world.json`, Schema V2 candidates | `IMPLEMENTED_INTERACTIVE` | Yes | Local drafts | Yes | No | No legal title or registry mutation | Preserve and add construction simulation separately |
-| `FISHPOND` | 魚塭 | None | Building Catalog | None | None | `MISSING` | No | No | N/A | No | Existing `FISH_FARM` is an agriculture facility, not `FISHPOND` | Define water area, species, stocking, feeding, oxygen, quality, growth, disease, harvest, energy, labor, and output |
+| `FISHPOND` | 魚塭 | `aquaculture/`, `../../world-viewer/aquaculture-v1/` | Building Catalog / Fishpond Viewer | `aquaculture-runtime.js` | Deterministic scenario state and read-only public API projections | `IMPLEMENTED_INTERACTIVE` | Yes | Export/import | Yes | No | Bounded simulation; no real property, water right, food certification, wallet, KGEN, or production authority | Extend only through separately reviewed aquaculture worklines |
 | `FARM` | 農場 | `agriculture/` | Civilization / Farm | `agriculture-runtime.js` | `agriculture_facilities` | `IMPLEMENTED_SYNTHETIC_DEMO` | Yes | Session | Yes | No | No authoritative farm asset or land title | Reuse in construction workline |
 | `HOUSE` | 住宅 | `building/`, `room/` | Land hierarchy | `building-runtime.js`, `room-runtime.js` | `building-home-001` | `IMPLEMENTED_SYNTHETIC_DEMO` | Yes | Session | Yes | No | Existing house can be inspected; no placement workflow | Add bounded placement and maintenance simulation |
 | `SHOPPING_MALL` | 商場 | None | Building Catalog | None | None | `MISSING` | No | No | N/A | No | `SHOP` / Market Hall is not a shopping mall implementation | Define mall template and room plan |
@@ -39,7 +39,7 @@ means an authoritative registry, legal title, wallet, or on-chain state.
 
 No catalog item is advertised as generally buildable. Current evidence supports
 inspection or synthetic operation for land, farm, house, and factory.
-`FISHPOND`, `SHOPPING_MALL`, and `TECHNOLOGY_BUILDING` remain planned or
+`SHOPPING_MALL` and `TECHNOLOGY_BUILDING` remain planned or
 missing. The next construction workline must remain `HOLD_NOT_STARTED`.
 
 ## Authority Boundary

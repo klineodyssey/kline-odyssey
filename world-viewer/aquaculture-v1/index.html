@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>KAIOS 魚塭水產世界｜KGEN</title>
+  <meta name="description" content="KAIOS 魚塭水產世界：土地、施工、水質、魚蝦、收成、冷鏈、市場與模擬財務的因果 Runtime。">
+  <link rel="canonical" href="https://klineodyssey.github.io/kline-odyssey/world-viewer/aquaculture-v1/">
+  <meta property="og:title" content="KAIOS 魚塭水產世界｜KGEN">
+  <meta property="og:description" content="因果式魚塭施工、養殖、生態、物流與模擬經濟。">
+  <meta property="og:url" content="https://klineodyssey.github.io/kline-odyssey/world-viewer/aquaculture-v1/">
+  <meta property="og:image" content="https://klineodyssey.github.io/kline-odyssey/assets/og-cover.jpg">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand"><span>KAIOS / KGEN</span><strong>KAIOS 魚塭水產世界</strong><small>Fishpond Aquaculture Runtime V1</small></div>
+    <nav aria-label="Viewer navigation"><a href="../../">返回官方首頁</a><a href="../">完整世界</a><a href="../ecosystem-v1/">生態系</a><a href="../../api/kaios/aquaculture/v1/">公開資料</a></nav>
+  </header>
+
+  <main>
+    <section class="summary" aria-labelledby="page-title">
+      <div><p class="eyebrow">LOCAL DETERMINISTIC SIMULATION</p><h1 id="page-title">KAIOS Fishpond Aquaculture Runtime V1</h1><p>土地、施工、水源、水質、魚蝦、飼料、氧氣、收成、冷鏈、需求、庫存與模擬企業財務。</p></div>
+      <div class="boundary" role="note"><strong>SIMULATION ONLY</strong><span>NO REAL KGEN</span><span>NO REAL WALLET</span><span>NO REAL FOOD-SAFETY CERTIFICATION</span><span>NO PRODUCTION AUTHORITY</span></div>
+    </section>
+
+    <section class="metrics" aria-label="Runtime metrics">
+      <div><span>Runtime</span><strong id="runtime-state">LOADING</strong></div><div><span>時間</span><strong id="clock">0 h</strong></div><div><span>施工</span><strong id="construction">0 / 17</strong></div><div><span>水質</span><strong id="water-state">--</strong></div><div><span>生物數</span><strong id="population">0 / 500</strong></div><div><span>現金</span><strong id="cash">0</strong></div>
+    </section>
+
+    <section class="workbench">
+      <aside class="controls" aria-label="Simulation controls">
+        <label for="view-select">檢視</label>
+        <select id="view-select">
+          <option value="land">Land</option><option value="construction">Pond Construction</option><option value="water-source">Water Source</option><option value="water-quality">Water Quality</option><option value="fish">Fish Population</option><option value="shrimp">Shrimp Population</option><option value="feed">Feed</option><option value="oxygen">Oxygen / Aeration</option><option value="disease">Disease Risk</option><option value="mortality">Mortality</option><option value="harvest">Harvest</option><option value="cold-storage">Cold Storage</option><option value="transport">Transport</option><option value="orders">Market Orders</option><option value="inventory">Inventory</option><option value="costs">Costs</option><option value="revenue">Revenue</option><option value="cash-flow">Cash Flow</option><option value="enterprise">Enterprise Status</option><option value="events">Event Timeline</option>
+        </select>
+        <div class="control-grid">
+          <button id="select-land" type="button">選擇土地</button><button id="design" type="button">設計魚塭</button><button id="construct" type="button">推進施工</button><button id="start" type="button">開始</button><button id="pause" type="button">暫停</button><button id="resume" type="button">繼續</button><button id="advance" type="button">推進 24h</button><button id="fill" type="button">注水</button><button id="test-water" type="button">檢測水質</button><button id="stock-fish" type="button">放養魚</button><button id="stock-shrimp" type="button">放養蝦</button><button id="feed-action" type="button">餵食</button><button id="aerate" type="button">啟動增氧</button><button id="exchange" type="button">換水</button><button id="health" type="button">健康檢查模擬</button><button id="harvest-action" type="button">收成</button><button id="cold" type="button">移入冷藏</button><button id="delivery" type="button">建立運輸單</button><button id="market" type="button">市場情境</button>
+        </div>
+        <label for="scenario">失敗 / 恢復情境</label>
+        <div class="scenario-row"><select id="scenario"><option value="drought">乾旱</option><option value="flood">洪水</option><option value="power">停電</option><option value="oxygen">低氧</option><option value="pollution">污染</option><option value="restoration">復育</option></select><button id="run-scenario" type="button">執行</button></div>
+        <div class="io-row"><button id="export" type="button">匯出</button><label class="file-button">匯入<input id="import" type="file" accept="application/json"></label><button id="reset" type="button">重置</button></div>
+      </aside>
+
+      <section class="viewport" aria-live="polite">
+        <div class="view-header"><div><span>Current View</span><h2 id="view-title">Land</h2></div><span id="integrity" class="status">LOADING</span></div>
+        <div id="loading" class="message">正在載入魚塭水產模擬…</div>
+        <div id="error" class="message error" role="alert" hidden><strong>魚塭 Runtime 載入失敗。</strong><span id="error-detail"></span><button id="retry" type="button">重新載入</button></div>
+        <div id="empty" class="message" hidden>此檢視目前沒有資料。</div>
+        <div id="view" class="view" aria-busy="true"></div>
+      </section>
+    </section>
+  </main>
+  <script type="module" src="app.js"></script>
+</body>
+</html>

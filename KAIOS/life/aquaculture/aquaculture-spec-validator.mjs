@@ -1,3 +1,14 @@
+export const AQUACULTURE_POPULATION_CONTRACT = Object.freeze({
+  allOf: [
+    { if: { properties: { species_id: { const: "SPECIES-KAIOS-FOUNDATIONAL-FISH" } } }, then: { properties: { stock_type: { const: "FISH_JUVENILE_STOCK" } } } },
+    { if: { properties: { species_id: { const: "SPECIES-KAIOS-FOUNDATIONAL-SHRIMP" } } }, then: { properties: { stock_type: { const: "SHRIMP_POST_LARVAL_STOCK" } } } }
+  ]
+});
+
+export const AQUACULTURE_ROOT_INVARIANTS = Object.freeze({
+  "x-kaios-invariants": ["sum(populations[*].count) <= boundaries.maximum_population"]
+});
+
 export function validatePopulationContract(populations, boundaries, populationSchema, rootSchema) {
   const issues = [];
   const populationRules = populationSchema.allOf ?? [];

@@ -43,6 +43,7 @@ Last optimized: 2026-06-11
 | KAIOS World Viewer | [Full World Viewer](https://klineodyssey.github.io/kline-odyssey/world-viewer/) |
 | KAIOS Player Genesis | [Player, AI Household and Work Simulation](https://klineodyssey.github.io/kline-odyssey/world-viewer/player-genesis/) |
 | KAIOS Real Causal World | [Terrain, Route, Transport and Construction Simulation](https://klineodyssey.github.io/kline-odyssey/world-viewer/causal-runtime/) |
+| KAIOS Fishpond Aquaculture Runtime V1 | [Causal fishpond industry simulation](https://klineodyssey.github.io/kline-odyssey/world-viewer/aquaculture-v1/) |
 | Causal World Specification | [Runtime rules and authority boundaries](KAIOS_REAL_CAUSAL_WORLD_RUNTIME_SPEC.md) |
 | Causal World Report | [Implementation and scenario evidence](KAIOS_REAL_CAUSAL_WORLD_RUNTIME_REPORT.md) |
 | Causal World Closeout | [PR #63 merge, deployment and recovery evidence](KAIOS_REAL_CAUSAL_WORLD_RUNTIME_CLOSEOUT.md) |
@@ -1109,3 +1110,16 @@ transfer, automatic species promotion or Production authority.
 - [Ecosystem Runtime V1](world-viewer/ecosystem-v1/)
 - [Read-only Ecosystem APIs](api/kaios/ecosystem/v1/)
 - [Runtime Implementation Report](KAIOS/life/ecology/KAIOS_REPRODUCTION_ECOLOGY_RUNTIME_V1_REPORT.md)
+
+## KAIOS Fishpond Aquaculture Runtime V1
+
+The fishpond runtime connects suitable land, staged construction, water and
+ecology, bounded fish and shrimp populations, labor, cold-chain logistics,
+confirmed market demand, inventory and balanced simulated finance. It remains
+deterministic and read-only in public deployment, with no real Wallet, KGEN,
+food-safety certification, legal effect or Production authority.
+
+- [Runtime V1 Specification](KAIOS/life/aquaculture/KAIOS_FISHPOND_AQUACULTURE_RUNTIME_V1_SPEC.md)
+- [Fishpond Aquaculture Viewer](world-viewer/aquaculture-v1/)
+- [Read-only Aquaculture APIs](api/kaios/aquaculture/v1/)
+- [Runtime Implementation Report](KAIOS/life/aquaculture/KAIOS_FISHPOND_AQUACULTURE_RUNTIME_V1_REPORT.md)

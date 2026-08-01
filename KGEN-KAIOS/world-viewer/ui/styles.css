@@ -108,6 +108,12 @@ button:focus-visible, canvas:focus-visible, [tabindex]:focus-visible {
 }
 .building-catalog article strong { font-size: 11px; }
 .building-catalog article span { color: var(--accent-strong); font-size: 9px; font-weight: 700; }
+.building-catalog article .catalog-route {
+  display: inline-flex; min-height: var(--touch); align-items: center; justify-content: center;
+  color: var(--accent-strong); font-size: 9px; font-weight: 700; text-decoration: none;
+}
+.building-catalog article .catalog-route:hover { text-decoration: underline; }
+.building-catalog article .catalog-route:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
 .building-catalog article small { grid-column: 1 / -1; color: var(--muted); font-size: 8px; overflow-wrap: anywhere; }
 .building-catalog article[data-capability="FISHPOND"] span,
 .building-catalog article[data-capability="SHOPPING_MALL"] span,
