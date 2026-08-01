@@ -1,0 +1,77 @@
+{
+  "schema_name": "KAIOS_CURSOR_CODEX_HANDOFF",
+  "schema_version": "1.0.0",
+  "message_type": "PROACTIVE_RD_HANDOFF",
+  "task_id": "KAIOS-RD-PRODUCT-RECONCILE-001",
+  "worker_id": "cursor-01",
+  "worker_channel": "cursor-cloud",
+  "reviewer": "codex-gm-01",
+  "created_at": "2026-08-01T07:05:00Z",
+  "base_sha": "74009c7906ef671c1fe250199b901c0d0045c6dc",
+  "branch": "cursor-handoff/KAIOS-RD-PRODUCT-RECONCILE-001",
+  "pr_number": null,
+  "state_progress": {
+    "BOOT": "PASS",
+    "CLAIM": "SKIPPED_PROACTIVE_RD",
+    "WORK": "PASS",
+    "TEST": "PASS",
+    "REPORT": "PASS",
+    "REVIEW": "PENDING_CODEX",
+    "MERGE": "DENIED_CURSOR"
+  },
+  "result": "HANDOFF_SUBMITTED",
+  "stop_code": "NONE",
+  "human_action_required": true,
+  "human_action_reason": "PR #42 close vs port vs hybrid product direction",
+  "codex_actions_required": {
+    "review_pr_69": true,
+    "decide_pr_42": true,
+    "create_workorder_001a_r1": true,
+    "promote_proposed_workorders": [
+      "KAIOS-PRODUCT-SPRINT-001A-R1",
+      "KAIOS-PR-PREVIEW-PAGES-001",
+      "KAIOS-WALS-DOCS-001"
+    ],
+    "merge_allowed": false
+  },
+  "findings": {
+    "pr_42_superseded_for_navigation": true,
+    "pr_42_product_shell_not_on_main": true,
+    "main_has_world_viewer_k280_genesis_causal": true,
+    "workqueue_001a_r1_missing": true,
+    "pr_69_awaiting_codex_review": true
+  },
+  "proposed_workorders": [
+    {
+      "task_id": "KAIOS-PRODUCT-SPRINT-001A-R1",
+      "status": "PROPOSED",
+      "priority": "P1",
+      "options": ["CLOSE_PR42", "PORT_PRODUCT_SHELL", "HYBRID"]
+    },
+    {
+      "task_id": "KAIOS-PR-PREVIEW-PAGES-001",
+      "status": "PROPOSED",
+      "priority": "P2"
+    },
+    {
+      "task_id": "KAIOS-WALS-DOCS-001",
+      "status": "PROPOSED_ACTIVATION",
+      "priority": "P1",
+      "current_queue_state": "HOLD_NOT_APPROVED"
+    }
+  ],
+  "blockers": [
+    {
+      "code": "PR42_PRODUCT_DIRECTION_UNDECIDED",
+      "owner": "HUMAN_AND_CODEX",
+      "unblock_by": "Create KAIOS-PRODUCT-SPRINT-001A-R1 with explicit option A/B/C"
+    },
+    {
+      "code": "PR69_PENDING_CODEX_REVIEW",
+      "owner": "CODEX",
+      "unblock_by": "Review and merge or FIX PR #69"
+    }
+  ],
+  "report_path": "KGEN-AI-Company/reports/CURSOR_RD_PRODUCT_RECONCILE_20260801_REPORT.md",
+  "protected_paths_modified": false
+}
