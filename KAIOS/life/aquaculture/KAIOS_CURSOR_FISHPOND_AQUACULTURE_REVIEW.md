@@ -8,6 +8,8 @@ Branch: `cursor-handoff/KAIOS-CURSOR-FISHPOND-AQUACULTURE-RESEARCH-001`
 
 Cursor commit: `e80fb2e4527685860cd86cb67accce966d2a730a`
 
+Repair commit: `037439755b7923fb1edd4a2c389615f612553c6d`
+
 Authorship: `Cursor / KAIOS Life Research and Candidate Development Division`
 
 Status: `CURSOR_RESEARCH_CANDIDATE_ONLY`
@@ -35,6 +37,8 @@ The 12 artifacts are research proposals, not authoritative Runtime or Canonical 
 - UTF-8/BOM: `PASS / 0`
 - `git diff --check`: `PASS`
 
+The initial independent review found one P2 provenance issue: the dissolved-oxygen and temperature envelopes were labeled `REPOSITORY_DERIVED` even though they combine fish and shrimp candidate ranges. The repair relabeled both as `MODEL_INFERENCE`, clarified the rationale, and preserved every numeric bound. Focused re-review found no unresolved issue.
+
 ## Parameter Adoption Rule
 
 Cursor defaults remain `SIMULATION_APPROXIMATION`. They are not universal biological facts. Runtime imports must enforce bounded ranges and transactionally reject out-of-range values or authority escalation.
@@ -43,4 +47,4 @@ P0: `0`
 
 P1: `0`
 
-P2: `0`
+P2: `1 repaired / 0 unresolved`
