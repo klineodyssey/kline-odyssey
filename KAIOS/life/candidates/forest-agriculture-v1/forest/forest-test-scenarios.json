@@ -1,0 +1,94 @@
+{
+  "schema_version": "candidate-1.0.0",
+  "dataset_id": "KAIOS-FOREST-TEST-SCENARIOS-001",
+  "status": "CURSOR_RESEARCH_CANDIDATE_ONLY",
+  "review_status": "PENDING_CODEX_REVIEW",
+  "model_label": "SIMULATION_APPROXIMATION",
+  "authority": "NO_PRODUCTION_AUTHORITY",
+  "simulation_only": true,
+  "immutable_provenance": {
+    "canonical_branch": "cursor-handoff/KAIOS-CURSOR-FOREST-LIFE-PACKAGES-001",
+    "source_base_commit": "eaa63455fcf5f807b9d852a79157759b11293b2e",
+    "initial_candidate_commit": "6feccef5d7d9cbeabc74fe2fd02dab2018c6ee2a",
+    "hash_basis": "SHA256_OF_GIT_BLOB_CONTENT_AT_SOURCE_BASE_COMMIT",
+    "inferred_defaults_label": "MODEL_INFERENCE_OR_RESEARCH_PROPOSAL_NOT_CANONICAL",
+    "repository_sources": [
+      {"source_id":"TREE","path":"KAIOS/life/candidates/tree/life.manifest.json","schema_version":"1.0.0","sha256":"e9f264eb81f13d68afa69b94acc57278f3acbc656d28bb059f089e8995b35084"},
+      {"source_id":"GRASS","path":"KAIOS/life/candidates/grass/life.manifest.json","schema_version":"1.0.0","sha256":"42d9e9ee6e1f6fb03679dd8755a89ac184fd60cf6d10014829f94f337e05c430"},
+      {"source_id":"SOIL","path":"KAIOS/life/candidates/soil/life.manifest.json","schema_version":"1.0.0","sha256":"afc569084c467e92ed967559e0a99ce8c1877dea1a43c3f0c7efc8183b61aeb9"},
+      {"source_id":"WATER","path":"KAIOS/life/candidates/water/life.manifest.json","schema_version":"1.0.0","sha256":"8764d1bde87565c87f0b50a1f4776760b694881654b4743b765728541a9e9fee"},
+      {"source_id":"RIVER","path":"KAIOS/life/candidates/river/life.manifest.json","schema_version":"1.0.0","sha256":"fe2075a704959d9f2c2962067400e39ae62f884b76b88fb1a2a9143888bcaa61"},
+      {"source_id":"ECOLOGY","path":"KGEN-KAIOS/world-viewer/ecosystem/ecosystem-runtime.js","schema_version":"1.0.0","owner_id":"KAIOS_REPRODUCTION_ECOLOGY_RUNTIME_V1","sha256":"9b2cd9d4501727d3134ea332e1a30cd77d5d7d647300820f51d9c264784ef537"}
+    ]
+  },
+  "test_parameters": [
+    {"parameter_name":"replay_count","unit":"run_count","minimum":2,"default":3,"maximum":20,"rationale":"Multiple runs are required to compare deterministic state hashes.","source_type":"RESEARCH_PROPOSAL","confidence":"HIGH","risk":"A small run count cannot establish correctness beyond the tested action sequence.","validation_required":true},
+    {"parameter_name":"scenario_tick_count","unit":"simulation_tick","minimum":1,"default":48,"maximum":10000,"rationale":"Explicit bounded time advancement prevents animation-only or instant completion.","source_type":"RESEARCH_PROPOSAL","confidence":"MEDIUM","risk":"Tick duration must be defined by the owning simulation clock.","validation_required":true},
+    {"parameter_name":"carrying_capacity_pressure","unit":"normalized_fraction_of_capacity","minimum":0,"default":0.9,"maximum":1.5,"rationale":"The parameter spans stable and over-capacity cases for bounded population tests.","source_type":"MODEL_INFERENCE","confidence":"LOW","risk":"Capacity is an approximation, not a field estimate.","validation_required":true},
+    {"parameter_name":"disturbance_share","unit":"normalized_fraction","minimum":0,"default":0.25,"maximum":0.7,"rationale":"A bounded disturbance enables mass-accounting and regeneration tests.","source_type":"RESEARCH_PROPOSAL","confidence":"LOW","risk":"Spatial disturbance structure is omitted.","validation_required":true}
+  ],
+  "numerical_oracle": {
+    "oracle_id": "FOREST-NUMERICAL-ORACLE-001",
+    "fixture_value_policy": "RAW_NUMBERS_ARE_IMMUTABLE_EXACT_TEST_VALUES_NOT_TUNABLE_PARAMETERS",
+    "units": {"water_pools_l":"liter","mass_and_nutrient_pools_kg":"kilogram","energy_pools_j":"joule_proxy","elapsed_time":"day","habitat_area":"square_meter","rainfall_rate":"liter_per_square_meter_per_day"},
+    "transition_arithmetic": {
+      "algorithm_id":"KAIOS_FIXED_POINT_DECIMAL_V1",
+      "decimal_places":6,
+      "scale_micro_units_per_unit":1000000,
+      "rounding_mode_at_ingestion":"ROUND_HALF_TO_EVEN",
+      "ingestion_rule":"Convert each finite initial value and event delta through its ECMAScript Number.prototype.toString decimal form to a signed integer micro-unit value before the first transition.",
+      "addition_rule":"All state transitions add signed integer micro-units only; direct binary floating-point state addition is forbidden.",
+      "normalization_rule":"Render signed micro-units as exact finite decimal tokens at scale six, trim trailing fractional zeros, and normalize negative zero to 0.",
+      "regression_witness":"0.8 unit ingests as 800000 micro-units; subtracting 0.5 unit as 500000 micro-units yields 300000 micro-units and serializes as 0.3, never 0.30000000000000004."
+    },
+    "rainfall_inputs": {"daily_rainfall_l_per_m2_per_day":2,"habitat_area_m2":100,"elapsed_days":2,"formula":"2 liter_per_square_meter_per_day * 100 square_meter * 2 day = 400 liter","rounding_mode":"ROUND_HALF_TO_EVEN","decimal_places":6,"total_rainfall_liter":400},
+    "initial_state": {
+      "oracle_id":"FOREST-NUMERICAL-ORACLE-001",
+      "water_pools_l":{"atmospheric_rain_input_l":1000,"forest_surface_water_l":100,"forest_soil_moisture_l":500,"plant_water_store_l":50,"atmospheric_water_proxy_l":200,"river_water_pool_l":300},
+      "mass_and_nutrient_pools_kg":{"atmospheric_carbon_material_proxy_kg":1000,"plant_structural_biomass_kg":500,"soil_nutrient_pool_kg":100,"plant_nutrient_store_kg":20,"dead_biomass_kg":50,"dead_nutrient_store_kg":5,"decomposition_biomass_kg":0,"decomposition_nutrient_store_kg":0,"soil_organic_matter_pool_kg":200,"named_export_custody_kg":0,"recorded_material_dissipation_proxy_kg":0},
+      "energy_pools_j":{"solar_energy_source_proxy_j":100000,"plant_embedded_energy_store_proxy_j":5000,"dead_biomass_embedded_energy_store_proxy_j":500,"decomposition_energy_store_proxy_j":0,"environmental_heat_dissipation_proxy_j":0}
+    },
+    "initial_totals": {"water_l":2150,"mass_including_nutrients_kg":1875,"nutrient_subsystem_kg":125,"energy_proxy_j":105500},
+    "ordered_actions": [
+      {"sequence":1,"event_id":"ORACLE-EVT-001","event_type":"RAINFALL_CONVERSION_EVENT","calculation":"2 * 100 * 2 = 400 liter","deltas":{"water_pools_l":{"atmospheric_rain_input_l":-400,"forest_surface_water_l":400}}},
+      {"sequence":2,"event_id":"ORACLE-EVT-002","event_type":"SOIL_INFILTRATION_EVENT","deltas":{"water_pools_l":{"forest_surface_water_l":-300,"forest_soil_moisture_l":300}}},
+      {"sequence":3,"event_id":"ORACLE-EVT-003","event_type":"PLANT_GROWTH_WATER_UPTAKE_EVENT","deltas":{"water_pools_l":{"forest_soil_moisture_l":-120,"plant_water_store_l":120}}},
+      {"sequence":4,"event_id":"ORACLE-EVT-004","event_type":"TRANSPIRATION_PROXY_EVENT","deltas":{"water_pools_l":{"plant_water_store_l":-80,"atmospheric_water_proxy_l":80}}},
+      {"sequence":5,"event_id":"ORACLE-EVT-005","event_type":"CAUSAL_GROWTH_EVENT","deltas":{"mass_and_nutrient_pools_kg":{"atmospheric_carbon_material_proxy_kg":-25,"plant_structural_biomass_kg":25,"soil_nutrient_pool_kg":-5,"plant_nutrient_store_kg":5},"energy_pools_j":{"solar_energy_source_proxy_j":-10000,"plant_embedded_energy_store_proxy_j":2000,"environmental_heat_dissipation_proxy_j":8000}}},
+      {"sequence":6,"event_id":"ORACLE-EVT-006","event_type":"PLANT_DEATH_EVENT","deltas":{"mass_and_nutrient_pools_kg":{"plant_structural_biomass_kg":-30,"dead_biomass_kg":30,"plant_nutrient_store_kg":-1,"dead_nutrient_store_kg":1},"energy_pools_j":{"plant_embedded_energy_store_proxy_j":-300,"dead_biomass_embedded_energy_store_proxy_j":300}}},
+      {"sequence":7,"event_id":"ORACLE-EVT-007","event_type":"DECOMPOSITION_EVENT","deltas":{"mass_and_nutrient_pools_kg":{"dead_biomass_kg":-20,"decomposition_biomass_kg":20,"dead_nutrient_store_kg":-0.8,"decomposition_nutrient_store_kg":0.8},"energy_pools_j":{"dead_biomass_embedded_energy_store_proxy_j":-200,"decomposition_energy_store_proxy_j":50,"environmental_heat_dissipation_proxy_j":150}}},
+      {"sequence":8,"event_id":"ORACLE-EVT-008","event_type":"NUTRIENT_RETURN_EVENT","deltas":{"mass_and_nutrient_pools_kg":{"decomposition_biomass_kg":-10,"soil_organic_matter_pool_kg":7,"atmospheric_carbon_material_proxy_kg":3,"decomposition_nutrient_store_kg":-0.5,"soil_nutrient_pool_kg":0.5}}},
+      {"sequence":9,"event_id":"ORACLE-EVT-009","event_type":"SIMULATED_HARVEST_EVENT","deltas":{"mass_and_nutrient_pools_kg":{"plant_structural_biomass_kg":-40,"named_export_custody_kg":40}}},
+      {"sequence":10,"event_id":"ORACLE-EVT-010","event_type":"RUNOFF_EVENT","deltas":{"water_pools_l":{"forest_surface_water_l":-50,"river_water_pool_l":50}}}
+    ],
+    "expected_final_state": {
+      "oracle_id":"FOREST-NUMERICAL-ORACLE-001",
+      "water_pools_l":{"atmospheric_rain_input_l":600,"forest_surface_water_l":150,"forest_soil_moisture_l":680,"plant_water_store_l":90,"atmospheric_water_proxy_l":280,"river_water_pool_l":350},
+      "mass_and_nutrient_pools_kg":{"atmospheric_carbon_material_proxy_kg":978,"plant_structural_biomass_kg":455,"soil_nutrient_pool_kg":95.5,"plant_nutrient_store_kg":24,"dead_biomass_kg":60,"dead_nutrient_store_kg":5.2,"decomposition_biomass_kg":10,"decomposition_nutrient_store_kg":0.3,"soil_organic_matter_pool_kg":207,"named_export_custody_kg":40,"recorded_material_dissipation_proxy_kg":0},
+      "energy_pools_j":{"solar_energy_source_proxy_j":90000,"plant_embedded_energy_store_proxy_j":6700,"dead_biomass_embedded_energy_store_proxy_j":600,"decomposition_energy_store_proxy_j":50,"environmental_heat_dissipation_proxy_j":8150}
+    },
+    "expected_final_totals": {"water_l":2150,"mass_including_nutrients_kg":1875,"nutrient_subsystem_kg":125,"energy_proxy_j":105500},
+    "canonical_serialization": {"algorithm_id":"KAIOS_CANONICAL_JSON_V1_WITH_FIXED_POINT_DECIMAL_V1","transition_arithmetic":"KAIOS_FIXED_POINT_DECIMAL_V1","object_keys":"ascending Unicode code-point order; all current keys are ASCII","array_order":"preserved","number_format":"Pool values are emitted from signed integer micro-units as exact normalized base-10 finite decimal tokens at scale six; trailing fractional zeros are removed and negative zero is serialized as 0.","string_format":"JSON.stringify escaping","whitespace":"none","encoding":"UTF-8 without BOM or trailing newline","hash":"SHA-256 lowercase hexadecimal","hash_payload":"numerical_oracle.expected_final_state reconstructed from final integer micro-unit pools only"},
+    "expected_final_sha256": "1802f41c085121f051ce165212b762ae2503a7d7153aa1067defe5d8e88afe1e",
+    "objective_assertions": ["INGEST_ALL_INITIAL_VALUES_AND_DELTAS_AS_SIGNED_INTEGER_MICRO_UNITS","ROUND_EXCESS_PRECISION_HALF_TO_EVEN","APPLY_ORDERED_ACTIONS_WITH_INTEGER_ADDITION_ONLY","DECOMPOSITION_NUTRIENT_800000_MINUS_500000_EQUALS_300000_MICRO_UNITS","NORMALIZED_DECOMPOSITION_NUTRIENT_VALUE_EQUALS_0_3","EACH_ACTION_DELTA_SUM_IS_ZERO_PER_CONSERVED_DOMAIN","FINAL_POOLS_EQUAL_EXPECTED_FINAL_STATE","WATER_TOTAL_EQUALS_INITIAL_TOTAL","MASS_TOTAL_EQUALS_INITIAL_TOTAL","NUTRIENT_SUBSYSTEM_TOTAL_EQUALS_INITIAL_TOTAL","ENERGY_TOTAL_EQUALS_INITIAL_TOTAL","CANONICAL_SHA256_EQUALS_EXPECTED_FINAL_SHA256","SECOND_REPLAY_PRODUCES_IDENTICAL_FINAL_SHA256"]
+  },
+  "scenarios": [
+    {"test_id":"FOREST-COMP-001","name":"Composition uses existing owners","given":["FOREST_CANDIDATE_DATASET"],"when":["VALIDATE_REFERENCES"],"then":["TREE_GRASS_SOIL_WATER_RIVER_IDS_EXIST","NO_NEW_LIFE_TYPE","NO_DUPLICATE_RUNTIME_OWNER"]},
+    {"test_id":"FOREST-WATER-001","name":"Water transfers balance","given":["FINITE_ATMOSPHERIC_RAIN_INPUT","FOREST_HABITAT"],"when":["RAIN_TO_SURFACE","INFILTRATION","PLANT_UPTAKE","TRANSPIRATION","SURFACE_RUNOFF"],"then":["TOTAL_WATER_DELTA_WITHIN_TOLERANCE","NO_UNEXPLAINED_WATER"]},
+    {"test_id":"FOREST-MASS-001","name":"Disturbance mass remains accounted","given":["MATURE_BIOMASS","DISTURBANCE_SHARE"],"when":["APPLY_BOUNDED_THINNING"],"then":["STANDING_BIOMASS_DECREASE_EQUALS_EXPORT_PLUS_RESIDUE","NO_MASS_DISAPPEARS"]},
+    {"test_id":"FOREST-NUTRIENT-001","name":"Nutrient return has a cause","given":["DEAD_BIOMASS"],"when":["PROCESS_DECOMPOSITION","PROCESS_NUTRIENT_RETURN"],"then":["DEAD_BIOMASS_DEBIT_RECORDED","ORGANIC_MATTER_CREDIT_RECORDED","REMAINDER_CREDIT_RECORDED","TOTAL_MASS_WITHIN_TOLERANCE"]},
+    {"test_id":"FOREST-GROWTH-001","name":"Growth blocks without water","given":["TREE_AND_GRASS_POPULATIONS","EMPTY_AVAILABLE_WATER_POOL"],"when":["ADVANCE_SCENARIO_TICKS"],"then":["GROWTH_BLOCKED_RESOURCE","HEALTH_STABLE_OR_DECLINING","NO_BIOMASS_CREATED"]},
+    {"test_id":"FOREST-REGEN-001","name":"Regeneration requires source and time","given":["DISTURBED_FOREST","NO_SEED_SOURCE"],"when":["REQUEST_REGENERATION"],"then":["REGENERATION_BLOCKED","NO_INSTANT_SEEDLING_COHORT"]},
+    {"test_id":"FOREST-REGEN-002","name":"Bounded regeneration succeeds causally","given":["DISTURBED_FOREST","SEED_SOURCE_AVAILABLE","CAPACITY_AVAILABLE","WATER_AND_NUTRIENTS_AVAILABLE"],"when":["ADVANCE_REGENERATION_TIME"],"then":["BOUNDED_SEEDLING_COHORT","RESOURCES_DEBITED","EVENT_CHAIN_RECORDED","NO_MATURE_FOREST_INSTANTLY"]},
+    {"test_id":"FOREST-CAPACITY-001","name":"Carrying capacity blocks excess growth","given":["POPULATION_AT_OR_ABOVE_CAPACITY"],"when":["PROCESS_PROPAGATION"],"then":["OVER_CARRYING_CAPACITY","POPULATION_INCREASE_BLOCKED"]},
+    {"test_id":"FOREST-EROSION-001","name":"Ground cover affects erosion","given":["LOW_GROUND_COVER","RAINFALL_EVENT"],"when":["PROCESS_RUNOFF_AND_EROSION"],"then":["SOIL_OR_NUTRIENT_DEBIT_RECORDED","RIVER_SEDIMENT_CREDIT_RECORDED","EROSION_RISK"]},
+    {"test_id":"FOREST-DETERMINISM-001","name":"Replay is deterministic","given":["SAME_INITIAL_STATE","SAME_SEED","SAME_ACTIONS"],"when":["RUN_REPLAY_COUNT"],"then":["IDENTICAL_EVENT_ORDER","IDENTICAL_FINAL_STATE_HASH","IDENTICAL_RESOURCE_DELTAS"]},
+    {"test_id":"FOREST-ORACLE-001","name":"Exact numerical oracle conserves every modeled domain","given":["NUMERICAL_ORACLE_INITIAL_STATE","TEN_ORDERED_ORACLE_EVENTS"],"when":["APPLY_ORDERED_ACTIONS_EXACTLY"],"then":["FINAL_POOLS_EQUAL_EXPECTED_FINAL_STATE","WATER_TOTAL_EQUALS_2150_LITER","MASS_TOTAL_EQUALS_1875_KILOGRAM","NUTRIENT_SUBSYSTEM_EQUALS_125_KILOGRAM","ENERGY_TOTAL_EQUALS_105500_JOULE_PROXY"]},
+    {"test_id":"FOREST-ORACLE-002","name":"Exact numerical oracle hash replays","given":["KAIOS_CANONICAL_JSON_V1_WITH_FIXED_POINT_DECIMAL_V1","EXPECTED_FINAL_STATE"],"when":["INGEST_TO_INTEGER_MICRO_UNITS","APPLY_INTEGER_TRANSITIONS","CANONICALIZE_UTF8_SHA256","REPLAY_FROM_INITIAL_STATE"],"then":["HASH_EQUALS_EXPECTED_FINAL_SHA256","REPLAY_HASH_EQUALS_EXPECTED_FINAL_SHA256"]},
+    {"test_id":"FOREST-FIXED-POINT-001","name":"Fixed-point transition avoids ECMAScript binary drift","given":["KAIOS_FIXED_POINT_DECIMAL_V1","DECOMPOSITION_NUTRIENT_STORE_INGESTED_AS_800000_MICRO_UNITS"],"when":["SUBTRACT_500000_MICRO_UNITS_WITH_INTEGER_ADDITION"],"then":["RESULT_EQUALS_300000_MICRO_UNITS","NORMALIZED_DECIMAL_EQUALS_0_3","RESULT_DOES_NOT_EQUAL_BINARY_FLOAT_DRIFT_VALUE"]},
+    {"test_id":"FOREST-ENERGY-001","name":"Energy source store and dissipation balance","given":["SOLAR_SOURCE","PLANT_AND_DEAD_BIOMASS_STORES","DECOMPOSITION_STORE","HEAT_DISSIPATION_POOL"],"when":["PROCESS_GROWTH_DEATH_AND_DECOMPOSITION"],"then":["TOTAL_ENERGY_SOURCE_STORE_AND_DISSIPATION_DELTA_WITHIN_TOLERANCE","NO_ENERGY_CREATED"]},
+    {"test_id":"FOREST-BOUNDARY-001","name":"Candidate package cannot mutate authority","given":["CANDIDATE_DATA_ONLY"],"when":["SCAN_CHANGED_PATHS_AND_CONTENT"],"then":["NO_RUNTIME_CODE","NO_CURRENT_CHANGE","NO_WALLET","NO_KGEN","NO_CANONICAL_PROMOTION","NO_PRODUCTION_AUTHORITY"]}
+  ],
+  "required_validations": ["JSON_PARSE_WITH_DUPLICATE_KEY_REJECTION","PARAMETER_RANGE_MIN_DEFAULT_MAX","UTF8_NO_BOM","DETERMINISTIC_SCENARIO_IDS","KAIOS_FIXED_POINT_DECIMAL_V1_INTEGER_TRANSITIONS","ROUND_HALF_TO_EVEN_INGESTION","NEGATIVE_ZERO_NORMALIZATION","EXACT_NUMERICAL_ORACLE","CANONICAL_SHA256_REPLAY","WATER_CAUSALITY","MASS_CAUSALITY","NUTRIENT_CAUSALITY","ENERGY_CAUSALITY","NO_SECRETS","NO_PROTECTED_PATHS","GIT_DIFF_CHECK"],
+  "boundaries": {"runtime_engine":false,"self_approval":false,"canonical_promotion":false,"deployment":false,"production_authority":false}
+}
