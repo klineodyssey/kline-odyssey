@@ -6,6 +6,14 @@ Base main: `fc3a15109f5dfb7c383485e4aad20a280df330b6`
 
 Branch: `codex/kaios-reproduction-ecology-runtime-v1`
 
+Runtime PR: `#77`
+
+Merge commit: `2dfff1db7290d10e3c9b119b1018c237e898ac79`
+
+Pages run: `30706655692`
+
+Production Viewer: `https://klineodyssey.github.io/kline-odyssey/world-viewer/ecosystem-v1/`
+
 ## Scope
 
 - additive Runtime V1 factory in the established ecosystem owner
