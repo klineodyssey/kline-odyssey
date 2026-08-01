@@ -6,7 +6,15 @@
   "reviewer": "codex-gm-01",
   "branch_template": "cursor-handoff/<Task-ID>",
   "one_task_at_a_time": true,
-  "auto_dispatch_next_after_codex_review": true,
+  "continuous_dispatch_mode": "CODEX_CONTROLLED_AFTER_FORMAL_RELEASE",
+  "automatic_unreviewed_dispatch": false,
+  "next_dispatch_requires": [
+    "PREVIOUS_TASK_CODEX_REVIEWED",
+    "PREVIOUS_TASK_CLOSED",
+    "PREVIOUS_LEASE_RELEASED",
+    "EXPLICIT_TASK_ENVELOPE",
+    "ATOMIC_CLAIM_SUCCEEDED"
+  ],
   "output_authority": "CANDIDATE_ONLY_OR_RESEARCH_PROPOSAL_ONLY",
   "queue": [
     { "priority": 1, "task_id": "KAIOS-CURSOR-FOREST-LIFE-PACKAGES-001", "work": "FOREST_LIFE_PACKAGE_RESEARCH", "status": "DISPATCHED" },

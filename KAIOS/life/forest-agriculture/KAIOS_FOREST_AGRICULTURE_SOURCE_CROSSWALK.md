@@ -36,7 +36,18 @@ authoritative.
 - Existing ecology owner: `KGEN-KAIOS/world-viewer/ecosystem/ecosystem-runtime.js`
 - Existing route owner: `KGEN-KAIOS/world-viewer/causal-runtime/causal-world-runtime.js`
 - Existing life owner: `KAIOS/life/runtime/foundational-life-runtime.js`
+- Existing market, inventory and ledger owner: `KGEN-KAIOS/world-viewer/economy/economy-runtime.js`
 - V1 orchestration target: `KGEN-KAIOS/world-viewer/forest-agriculture/`
 
 The orchestration target may coordinate these owners but may not redefine their
-Canonical schemas, authority or protected CURRENT files.
+Canonical schemas, authority or protected CURRENT files. Habitat, population,
+soil, water, nutrient and decomposition truth remains in Ecology V1; plots,
+crops, harvests and basic warehouse lots remain in Agriculture Alpha; routes,
+deliveries and vehicles remain in Causal World; work shifts remain in Physical
+Labor; and market listings/orders, inventory balances and ledger entries remain
+in the existing Economy Runtime under Supply Chain rules. The new coordinator stores only foreign IDs,
+commands, projections and hash-linked trace events.
+
+Irrigation is represented as paired transfers across source, network, soil,
+crop, runoff/drainage and atmospheric proxy pools. No irrigation debit is an
+unpaired sink, and no pool gains water without a named source event.

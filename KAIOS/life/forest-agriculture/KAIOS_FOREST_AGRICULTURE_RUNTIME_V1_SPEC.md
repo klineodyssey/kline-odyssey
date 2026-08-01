@@ -24,7 +24,32 @@ a second Life, Ecology, route, labor, inventory, ledger or authority engine.
 - Life Runtime V1 owns foundational grass, tree, soil, water and river state.
 - Causal World owns route feasibility, travel time, fuel, load and wear.
 - Physical Labor owns worker location, time, shift, skill and rest gates.
-- Supply Chain specifications own demand, inventory and balanced-ledger rules.
+- Economy Runtime owns market listings, inventories and the balanced synthetic
+  ledger; the Supply Chain specification supplies additional causal gates.
+
+### Authoritative Entity Ownership
+
+The V1 coordinator persists only foreign IDs, command envelopes, projections
+and event/hash links. It must never persist an independent authoritative copy
+of an entity owned by another Runtime.
+
+| Entity truth | Authoritative owner | V1 coordinator contract |
+|---|---|---|
+| Grass, tree, soil, water and river life state | Life Runtime V1 | Reference Life IDs and consume validated events |
+| Forest/grassland habitat, populations, soil/water/nutrient/decomposition pools | Ecology Runtime V1 | Submit bounded commands and project returned state |
+| Farm plots, crop batches, harvest batches and basic warehouse lots | Agriculture Alpha | Extend through its existing state and event interfaces |
+| Worker shifts, attendance, location and effective labor | Physical Labor | Reference work-shift IDs and validated time logs |
+| Routes, delivery orders, vehicles, fuel, wear and travel | Real Causal World | Reference route/delivery IDs and transport events |
+| Market listings/orders, inventory accounting and financial ledger entries | `KGEN-KAIOS/world-viewer/economy/economy-runtime.js` under Supply Chain rules | Reference order/lot/ledger IDs; never duplicate balances |
+| Rights and capabilities | Existing Rights authority | Request capability decisions; never grant rights locally |
+
+`FOREST_STAND`, `GRASSLAND`, `SOIL_PROFILE` and `WATER_SOURCE` are Ecology
+or Life projections. `FARM_PLOT`, `CROP_BATCH`, `HARVEST_BATCH` and
+`WAREHOUSE_LOT` are Agriculture projections. `WORK_SHIFT` and
+`DELIVERY_ORDER` are foreign references. `MARKET_ORDER` and all inventory or
+cash balances are Economy projections. V1-owned records are limited to
+orchestration commands, action results, foreign identifiers and hash-linked
+trace events.
 
 ## Entities
 
@@ -73,10 +98,25 @@ Crop states: `PLANNED`, `SOIL_PREPARATION`, `PLANTED`, `GERMINATING`,
 
 ## Water, Rainfall and Irrigation
 
-The conserved water equation is:
+Water moves through paired pool transfers; irrigation is not an unexplained
+sink. For each transfer, one pool debit equals another pool credit within the
+configured tolerance:
 
-`previous + rainfall + source withdrawal - irrigation - runoff - evaporation -
-seepage - recorded removal = next` within configured tolerance.
+- source withdrawal: `water_source -= x`, `irrigation_network += x`
+- field delivery: `irrigation_network -= x`, `soil_moisture += x`
+- crop uptake: `soil_moisture -= x`, `crop_water_store += x`
+- runoff: `soil_moisture -= x`, `runoff_or_river_pool += x`
+- drainage: `soil_moisture -= x`, `drainage_pool += x`
+- evaporation/transpiration: liquid pool debit is paired with an atmospheric
+  water-proxy credit
+- recorded removal: originating pool debit is paired with a named external
+  custody/removal record
+
+Rainfall credits the receiving surface/soil pool and debits the bounded
+atmospheric rainfall input. The sum of source, network, soil, crop, runoff,
+drainage and atmospheric proxy deltas must be zero, except for explicitly
+declared external boundary transfers. Every boundary transfer records source,
+destination, amount, unit, reason and event ID.
 
 Irrigation requires a compatible water source, usage capability, route or pipe,
 equipment, energy where powered, maintenance and elapsed time. Required blocks:

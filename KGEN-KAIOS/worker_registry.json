@@ -187,7 +187,9 @@
         "UNIVERSE_LAW",
         "RUNTIME",
         "DEPLOYMENT",
-        "MERGE"
+        "MERGE",
+        "RIGHTS_AUTHORITY",
+        "ECONOMY_AUTHORITY"
       ],
       "dispatch_rule": "ONE_EXPLICIT_TASK; NORMALIZE_BRANCH_BEFORE_CLAIM; ISOLATED_WORKTREE",
       "review_rule": "CODEX_FINAL_REVIEW_REQUIRED; CURSOR_SELF_APPROVAL_DENIED",
