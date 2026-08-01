@@ -1,0 +1,14 @@
+{
+  "task_id": "KAIOS-PR67-CURSOR-FOUNDATIONAL-LIFE-CANDIDATES-001",
+  "worker_id": "cursor-01",
+  "worker_type": "Cursor",
+  "status": "CLAIMED",
+  "branch": "cursor-handoff/KAIOS-PR67-CURSOR-FOUNDATIONAL-LIFE-CANDIDATES-001",
+  "base_commit": "a29a0f5228022bbbf054f9ae9d486264cc957998",
+  "claimed_at": "2026-08-01T06:25:03Z",
+  "lease_expires_at": "2026-08-01T18:25:03Z",
+  "heartbeat": "2026-08-01T06:25:03Z",
+  "report_path": "CURSOR_FOUNDATIONAL_LIFE_PACKAGE_REPORT.md",
+  "reviewer": "codex-gm-01",
+  "notes": "Continuation of the original PR67 workline after governance repair. Requested cursor/kaios-foundational-life-candidates-v1 was normalized before claim under CURSOR_BRANCH_POLICY_V1_1. Candidate-only output; Codex final review required."
+}

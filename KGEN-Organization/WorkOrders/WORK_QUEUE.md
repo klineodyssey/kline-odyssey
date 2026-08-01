@@ -1634,6 +1634,29 @@ Decision `HUMAN-PHASE2-HANDOFF-RECONCILIATION-001` moved ORG-P2-005 through ORG-
   - Keep all recommendations advisory until Codex reviews the handoff report.
   - Task remains dispatch-held until Codex explicitly releases it for Cursor.
 
+## KAIOS PR67 Foundational Life Candidates
+
+### KAIOS-PR67-CURSOR-FOUNDATIONAL-LIFE-CANDIDATES-001 - Foundational Life Candidate Packages
+
+- Status: CLAIMED
+- Owner: cursor-01
+- Worker Class: FOUNDATIONAL_LIFE_CREATOR
+- Reviewer: codex-gm-01
+- Priority: URGENT
+- Risk: R2_MEDIUM_CANDIDATE_DATA
+- Claim ID: `CLAIM-KAIOS-PR67-20260801T062503Z-cursor-01`
+- Branch: `cursor-handoff/KAIOS-PR67-CURSOR-FOUNDATIONAL-LIFE-CANDIDATES-001`
+- Requested Branch Alias: `cursor/kaios-foundational-life-candidates-v1`
+- Branch Normalization: `NORMALIZED_BEFORE_CLAIM`
+- Task Envelope: `KGEN-AI-Company/reports/task-envelopes/KAIOS-PR67-CURSOR-FOUNDATIONAL-LIFE-CANDIDATES-001_task_envelope.json`
+- Claim Record: `KGEN-AI-Company/reports/claims/KAIOS-PR67-CURSOR-FOUNDATIONAL-LIFE-CANDIDATES-001_claim.json`
+- Output Report: `CURSOR_FOUNDATIONAL_LIFE_PACKAGE_REPORT.md`
+- Allowed Packages: Grass, Tree, Fish, Shrimp, Mountain, Soil, Water, River
+- Output Status: `CANDIDATE_ONLY / PENDING_CODEX_REVIEW`
+- Merge: Cursor denied
+- Deployment: denied
+- Canonical promotion: Codex review required
+
 ## Company Rule
 
 Cursor cannot push unreviewed work. Codex reviews every REVIEW task and writes decisions to KGEN-AI-Company/reports/CODEX_REVIEW_LOG.md.
