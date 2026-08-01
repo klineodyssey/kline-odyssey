@@ -1,0 +1,31 @@
+{
+  "schema_version": "1.0.0-candidate",
+  "dataset_id": "KAIOS-ECOLOGY-V1-VIEWER-CARDS-CANDIDATE",
+  "status": "CANDIDATE_ONLY",
+  "authority": "NO_PRODUCTION_AUTHORITY",
+  "simulation_only": true,
+  "data_only": true,
+  "viewer_mode": "READ_ONLY_CANDIDATE_PREVIEW",
+  "cards": [
+    {"card_id": "ECO-CARD-GRASS", "species_id": "SPECIES-KAIOS-FOUNDATIONAL-GRASS", "title": "Foundational Grass", "category": "PLANT", "role": "Plant biomass producer and erosion-control cover", "habitat_types": ["GRASSLAND", "FOREST", "SOIL_HABITAT", "MOUNTAIN_WATERSHED"], "reproduction_label": "Seed and vegetative propagation", "status_badges": ["CANDIDATE_ONLY", "SIMULATION_ONLY"]},
+    {"card_id": "ECO-CARD-TREE", "species_id": "SPECIES-KAIOS-FOUNDATIONAL-TREE", "title": "Foundational Tree", "category": "PLANT", "role": "Plant biomass, seed, shade and habitat source", "habitat_types": ["FOREST", "GRASSLAND", "SOIL_HABITAT", "MOUNTAIN_WATERSHED"], "reproduction_label": "Seed propagation", "status_badges": ["CANDIDATE_ONLY", "SIMULATION_ONLY"]},
+    {"card_id": "ECO-CARD-FISH", "species_id": "SPECIES-KAIOS-FOUNDATIONAL-FISH", "title": "Foundational Fish", "category": "AQUATIC", "role": "Bounded aquatic consumer", "habitat_types": ["RIVER_HABITAT", "FISHPOND"], "reproduction_label": "Sexual reproduction and spawning", "status_badges": ["CANDIDATE_ONLY", "SIMULATION_ONLY"]},
+    {"card_id": "ECO-CARD-SHRIMP", "species_id": "SPECIES-KAIOS-FOUNDATIONAL-SHRIMP", "title": "Foundational Shrimp", "category": "AQUATIC", "role": "Bounded aquatic and detritus consumer", "habitat_types": ["FISHPOND", "RIVER_HABITAT", "WETLAND"], "reproduction_label": "Sexual reproduction and larval development", "status_badges": ["CANDIDATE_ONLY", "SIMULATION_ONLY"]},
+    {"card_id": "ECO-CARD-MOUNTAIN", "species_id": "SPECIES-KAIOS-FOUNDATIONAL-MOUNTAIN", "title": "Foundational Mountain", "category": "TERRAIN", "role": "Elevation, runoff source, barrier and mineral contribution", "habitat_types": ["MOUNTAIN_WATERSHED"], "reproduction_label": "NO_REPRODUCTION", "status_badges": ["CANDIDATE_ONLY", "FORMATION_ONLY"]},
+    {"card_id": "ECO-CARD-SOIL", "species_id": "SPECIES-KAIOS-FOUNDATIONAL-SOIL", "title": "Foundational Soil", "category": "LAND", "role": "Moisture, nutrient, crop and foundation support", "habitat_types": ["SOIL_HABITAT", "GRASSLAND", "FOREST", "FISHPOND", "WETLAND"], "reproduction_label": "NO_REPRODUCTION", "status_badges": ["CANDIDATE_ONLY", "TRANSFORMATION_ONLY"]},
+    {"card_id": "ECO-CARD-WATER", "species_id": "SPECIES-KAIOS-FOUNDATIONAL-WATER", "title": "Foundational Water", "category": "WATER_BODY", "role": "Bounded water transfer and life-support dependency", "habitat_types": ["FISHPOND", "RIVER_HABITAT", "WETLAND", "SOIL_HABITAT", "MOUNTAIN_WATERSHED"], "reproduction_label": "NO_REPRODUCTION", "status_badges": ["CANDIDATE_ONLY", "STATE_TRANSFER_ONLY"]},
+    {"card_id": "ECO-CARD-RIVER", "species_id": "SPECIES-KAIOS-FOUNDATIONAL-RIVER", "title": "Foundational River", "category": "WATER_BODY", "role": "Downhill water and sediment transport with aquatic habitat", "habitat_types": ["RIVER_HABITAT", "MOUNTAIN_WATERSHED"], "reproduction_label": "NO_REPRODUCTION", "status_badges": ["CANDIDATE_ONLY", "FLOW_AND_CHANNEL_CHANGE_ONLY"]}
+  ],
+  "warnings": [
+    "SIMULATION ONLY",
+    "NO REAL KGEN",
+    "NO REAL BIOENGINEERING",
+    "NO PRODUCTION AUTHORITY"
+  ],
+  "interactions": {
+    "read_only": true,
+    "mutation_controls": false,
+    "wallet_controls": false,
+    "settlement_controls": false
+  }
+}
