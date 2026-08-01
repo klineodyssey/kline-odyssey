@@ -4,7 +4,7 @@
   "title": "KAIOS Reproduction and Ecology Runtime V1 State",
   "type": "object",
   "additionalProperties": false,
-  "required": ["schema_version", "runtime", "mode", "seed", "simulation_time", "status", "habitats", "populations", "resources", "events", "boundaries"],
+  "required": ["schema_version", "runtime", "mode", "seed", "simulation_time", "status", "entities", "habitats", "populations", "resources", "events", "boundaries"],
   "properties": {
     "schema_version": { "const": "1.0.0" },
     "runtime": { "const": "KAIOS_REPRODUCTION_ECOLOGY_RUNTIME_V1" },
@@ -12,6 +12,7 @@
     "seed": { "type": "string", "minLength": 1, "maxLength": 128 },
     "simulation_time": { "type": "integer", "minimum": 0, "maximum": 10000 },
     "status": { "enum": ["PAUSED", "RUNNING", "STOPPED"] },
+    "entities": { "type": "array", "maxItems": 200, "items": { "$ref": "#/$defs/entity" } },
     "habitats": { "type": "array", "maxItems": 7, "items": { "$ref": "#/$defs/habitat" } },
     "populations": { "type": "array", "maxItems": 8, "items": { "$ref": "#/$defs/population" } },
     "resources": { "$ref": "#/$defs/resources" },
@@ -19,6 +20,25 @@
     "boundaries": { "$ref": "#/$defs/boundaries" }
   },
   "$defs": {
+    "entityType": { "enum": ["ECOSYSTEM", "HABITAT", "POPULATION", "SPECIES_POPULATION", "FOOD_RELATION", "RESOURCE_POOL", "WATER_POOL", "SOIL_POOL", "NUTRIENT_POOL", "DECOMPOSITION_POOL", "CARRYING_CAPACITY", "REPRODUCTION_EVENT", "BIRTH_EVENT", "DEATH_EVENT", "MIGRATION_EVENT", "PREDATION_EVENT", "COMPETITION_EVENT", "DISEASE_EVENT", "POLLUTION_EVENT", "RESTORATION_EVENT", "SEASON_EVENT"] },
+    "entity": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["id", "type", "location", "simulation_time", "status", "source", "authority", "simulation_only", "history", "previous_state_hash", "next_state_hash"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "type": { "$ref": "#/$defs/entityType" },
+        "location": { "type": "string" },
+        "simulation_time": { "type": "integer", "minimum": 0 },
+        "status": { "type": "string", "minLength": 1 },
+        "source": { "type": "string", "minLength": 1 },
+        "authority": { "const": "SIMULATION_ONLY" },
+        "simulation_only": { "const": true },
+        "history": { "type": "array", "maxItems": 1000 },
+        "previous_state_hash": { "type": "string" },
+        "next_state_hash": { "type": "string" }
+      }
+    },
     "habitatType": { "enum": ["GRASSLAND", "FOREST", "FISHPOND", "RIVER_HABITAT", "WETLAND", "SOIL_HABITAT", "MOUNTAIN_WATERSHED"] },
     "populationStatus": { "enum": ["STABLE", "GROWING", "DECLINING", "OVER_CAPACITY", "RESOURCE_STRESSED", "DISEASE_STRESSED", "POLLUTION_STRESSED", "COLLAPSING", "EXTINCT_LOCAL", "RECOVERING"] },
     "reproductionMode": { "enum": ["SEED_PROPAGATION", "VEGETATIVE_PROPAGATION", "SEXUAL_REPRODUCTION", "SPAWNING", "LARVAL_DEVELOPMENT", "NATURAL_FORMATION_CHANGE", "NO_REPRODUCTION"] },

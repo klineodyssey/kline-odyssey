@@ -19,6 +19,9 @@ assert.equal(schema.$defs.boundaries.properties.automatic_new_species.const, fal
 assert.equal(schema.$defs.boundaries.properties.production_authority.const, false);
 assert.equal(schema.$defs.population.properties.count.maximum, 500);
 assert.equal(schema.properties.events.maxItems, 1000);
+assert.equal(schema.properties.entities.maxItems, 200);
+assert.equal(schema.$defs.entityType.enum.length, 21);
+for (const field of ["id", "type", "location", "simulation_time", "status", "source", "authority", "simulation_only", "history", "previous_state_hash", "next_state_hash"]) assert(schema.$defs.entity.required.includes(field));
 
 const modes = schema.$defs.reproductionMode.enum;
 for (const mode of ["SEED_PROPAGATION", "VEGETATIVE_PROPAGATION", "SEXUAL_REPRODUCTION", "SPAWNING", "LARVAL_DEVELOPMENT", "NO_REPRODUCTION"]) assert(modes.includes(mode));
