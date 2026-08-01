@@ -442,7 +442,7 @@ All adapters deterministic, no duplicate clock owner, no state mutation, P0/P1/P
         encoding="utf-8",
     )
     (output / "KAIOS_CHARTER_PROGRAM_COMPILER_CLOSEOUT.md").write_text(
-        "# KAIOS Charter Program Compiler Closeout\n\nStatus: `PR_A_READY_FOR_REVIEW`\n\nAll 144 sources were read, 143 Program Units were extracted, lineage remained separated, and the first tranche specification is bounded to shared simulation adapters. PR and merge identifiers remain authoritative in repository history.\n",
+        "# KAIOS Charter Program Compiler Closeout\n\nStatus: `PR_A_MERGED_AND_PRODUCTION_VERIFIED`\n\nAll 144 sources were read, 143 Program Units were extracted, lineage remained separated, and the first tranche specification is bounded to shared simulation adapters. PR #72 merged as `38e765975573abcb9192c2e7168a9aa89585b75a`.\n\nValidation: `181 PRODUCT_QA PASS / 0 FAIL`, all World Viewer `.mjs` tests pass, 755 repository JSON files parse, source SHA mismatch is 0, and P0/P1/P2 unresolved findings are 0.\n",
         encoding="utf-8",
     )
 
@@ -593,7 +593,17 @@ def compile_registry(repo: Path, source: Path) -> tuple[dict, dict]:
     status_counts = Counter(item["implementation_status"] for item in programs)
     domain_counts = Counter(item["domain"] for item in programs)
     write_json(api / "index.json", {"schema_version": "1.0.0", "read_only": True, "mutation_endpoints": False, "program_count": len(public), "programs": public})
-    write_json(api / "status.json", {"schema_version": "1.0.0", "read_only": True, "program_count": len(programs), "implementation_status_counts": dict(sorted(status_counts.items())), "promotion_ceiling": "REVIEWED_REQUIREMENT_UNLESS_REPOSITORY_EVIDENCE", "safety": SAFETY})
+    foundation_runtime = repo / "KGEN-KAIOS/world-viewer/foundation/charter-foundation-runtime.js"
+    foundation_status = {
+        "workline": "KAIOS_CHARTER_FOUNDATION_GAP_CLOSURE_V1",
+        "status": "IMPLEMENTED_SIMULATION" if foundation_runtime.exists() else "APPROVED_SPECIFICATION",
+        "runtime": "KGEN-KAIOS/world-viewer/foundation/charter-foundation-runtime.js" if foundation_runtime.exists() else None,
+        "components": ["SHARED_SIMULATION_CLOCK_ADAPTER", "DETERMINISTIC_EVENT_ENVELOPE", "SHARED_ENVIRONMENT_STATE_PROJECTION", "ENERGY_MATERIAL_RIGHTS_CAPABILITY_INTERFACES"],
+        "program_ids": ["KAIOS-CH-002-004-UNIVERSE_PHYSICS", "KAIOS-CH-005-007-ENERGY", "KAIOS-CH-031-073-IDENTITY"],
+        "authority": "SIMULATION_ONLY",
+        "production_authority": False,
+    }
+    write_json(api / "status.json", {"schema_version": "1.0.0", "read_only": True, "program_count": len(programs), "implementation_status_counts": dict(sorted(status_counts.items())), "promotion_ceiling": "REVIEWED_REQUIREMENT_UNLESS_REPOSITORY_EVIDENCE", "foundation_gap_closure_v1": foundation_status, "safety": SAFETY})
     write_json(api / "dependencies.json", {"schema_version": "1.0.0", "read_only": True, "directed_acyclic": True, "foundation_order": foundation, "edges": edges, "feedback_loops": feedback})
     bands = {"implemented": sum(item["coverage"] >= 75 for item in programs), "partial": sum(35 <= item["coverage"] < 75 for item in programs), "specification_only": sum(0 < item["coverage"] < 35 for item in programs), "missing_or_held": sum(item["coverage"] == 0 for item in programs)}
     write_json(api / "coverage.json", {"schema_version": "1.0.0", "read_only": True, "bands": bands, "domain_counts": dict(sorted(domain_counts.items())), "average_coverage_percent": round(sum(item["coverage"] for item in programs) / len(programs), 2)})

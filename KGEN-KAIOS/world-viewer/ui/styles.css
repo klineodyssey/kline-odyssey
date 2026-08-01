@@ -225,6 +225,7 @@ button:focus-visible, canvas:focus-visible, [tabindex]:focus-visible {
 
 .program-center { display: grid; gap: 12px; }
 .program-center__boundary { margin: 0; padding: 9px 10px; border: 1px solid var(--line); color: var(--muted); font-size: .72rem; line-height: 1.45; }
+.program-center__foundation { margin: 0; padding: 8px 10px; border-left: 3px solid var(--accent); background: var(--surface-2); color: var(--accent-strong); font-size: .72rem; line-height: 1.45; }
 .program-center__controls { display: grid; gap: 8px; }
 .program-center__controls input { width: 100%; min-height: 42px; border: 1px solid var(--line); border-radius: 6px; padding: 8px 10px; color: var(--text); background: var(--surface-2); font: inherit; }
 .program-center__filters { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 4px; }

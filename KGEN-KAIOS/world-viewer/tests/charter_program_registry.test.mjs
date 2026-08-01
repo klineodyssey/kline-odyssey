@@ -92,6 +92,10 @@ for (const payload of [publicIndex, publicStatus, publicDependencies, publicCove
 assert.equal(publicIndex.mutation_endpoints, false);
 assert.equal(publicIndex.program_count, registry.programs.length);
 assert.equal(publicIndex.programs.some((program) => Object.hasOwn(program, "source_analysis")), false);
+assert.equal(publicStatus.foundation_gap_closure_v1.status, "IMPLEMENTED_SIMULATION");
+assert.equal(publicStatus.foundation_gap_closure_v1.production_authority, false);
+assert.equal(publicStatus.foundation_gap_closure_v1.components.length, 4);
+assert(existsSync(resolve(root, publicStatus.foundation_gap_closure_v1.runtime)));
 
 const viewerHtml = readFileSync(resolve(root, "KGEN-KAIOS/world-viewer/index.html"), "utf8");
 const viewerApp = readFileSync(resolve(root, "KGEN-KAIOS/world-viewer/app.js"), "utf8");
@@ -100,6 +104,7 @@ assert.match(viewerHtml, /data-mode="PROGRAMS"/);
 assert.match(viewerApp, /KAIOS Genesis Charter Program Center/);
 assert.match(centerView, /READ_ONLY REQUIREMENTS/);
 assert.match(centerView, /mutation_endpoints !== false/);
+assert.match(centerView, /foundation_gap_closure_v1/);
 assert.doesNotMatch(centerView, /walletConnect|eth_sendTransaction|privateKey|seed phrase/i);
 
 console.log(`Charter program registry: ${registry.source_records.length} sources / ${registry.programs.length} programs / PASS`);

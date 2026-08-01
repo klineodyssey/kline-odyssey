@@ -1,4 +1,5 @@
 const PROGRAMS_URL = new URL("../../../api/kaios/charter/programs/index.json", import.meta.url);
+const STATUS_URL = new URL("../../../api/kaios/charter/programs/status.json", import.meta.url);
 
 const FILTERS = [
   "ALL",
@@ -28,6 +29,7 @@ const GOVERNANCE_DOMAINS = new Set([
 
 export function createProgramCenterView(container, { fetchImpl = globalThis.fetch } = {}) {
   let programs = [];
+  let foundationStatus = null;
   let state = "LOADING";
   let errorMessage = "";
   let filter = "ALL";
@@ -37,13 +39,22 @@ export function createProgramCenterView(container, { fetchImpl = globalThis.fetc
     state = "LOADING";
     render();
     try {
-      const response = await fetchImpl(PROGRAMS_URL, { cache: "no-store" });
-      if (!response.ok) throw new Error(`HTTP ${response.status}`);
-      const payload = await response.json();
+      const [response, statusResponse] = await Promise.all([
+        fetchImpl(PROGRAMS_URL, { cache: "no-store" }),
+        fetchImpl(STATUS_URL, { cache: "no-store" })
+      ]);
+      if (!response.ok || !statusResponse.ok) throw new Error(`HTTP ${response.status}/${statusResponse.status}`);
+      const [payload, statusPayload] = await Promise.all([response.json(), statusResponse.json()]);
       if (payload?.read_only !== true || payload?.mutation_endpoints !== false || !Array.isArray(payload?.programs)) {
         throw new Error("Program registry failed the read-only contract");
       }
+      if (statusPayload?.read_only !== true
+        || statusPayload?.foundation_gap_closure_v1?.production_authority !== false
+        || !Array.isArray(statusPayload?.foundation_gap_closure_v1?.components)) {
+        throw new Error("Program status failed the simulation-only contract");
+      }
       programs = payload.programs;
+      foundationStatus = statusPayload.foundation_gap_closure_v1;
       state = programs.length ? "READY" : "EMPTY";
       errorMessage = "";
     } catch (error) {
@@ -85,6 +96,13 @@ export function createProgramCenterView(container, { fetchImpl = globalThis.fetc
     boundary.className = "program-center__boundary";
     boundary.textContent = "READ_ONLY REQUIREMENTS • NO RUNTIME ACTIVATION • NO WALLET • NO KGEN";
     root.append(boundary);
+
+    if (foundationStatus) {
+      const foundation = document.createElement("p");
+      foundation.className = "program-center__foundation";
+      foundation.textContent = `Foundation Gap Closure V1 • ${foundationStatus.status} • ${foundationStatus.components.length} bounded adapters`;
+      root.append(foundation);
+    }
 
     if (state === "LOADING") {
       root.append(statusMessage("Loading Charter program registry…", "status"));
@@ -155,6 +173,7 @@ export function createProgramCenterView(container, { fetchImpl = globalThis.fetc
 
   function destroy() {
     programs = [];
+    foundationStatus = null;
     container.replaceChildren();
   }
 
