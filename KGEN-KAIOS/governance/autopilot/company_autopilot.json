@@ -2,7 +2,7 @@
   "metadata": {
     "architecture_id": "PRIMEFORGE-COMPANY-AUTOPILOT-ARCH-001",
     "version": "0.4.6",
-    "revision": "2026-08-01.1",
+    "revision": "2026-08-01.2",
     "status": "ACTIVE_OPERATOR_PROTOCOL_NO_BACKGROUND_SERVICE",
     "last_updated": "2026-08-01",
     "updated_by": "codex-gm-01",
@@ -13,8 +13,8 @@
       "HUMAN-COMPANY-OS-BOOT-001",
       "HUMAN-PRIMEFORGE-FULL-AUTOPILOT-001"
     ],
-    "source_commit": "ORIGIN_MAIN_826c8486e656de13fa578abfbe54bbd98c259883",
-    "source_freshness": "REMOTE_VERIFIED_2026-08-01T05:17:42+08:00",
+    "source_commit": "ORIGIN_MAIN_6510caea03a9e34dbbbce9a06ac9f8de1d97e86b",
+    "source_freshness": "REMOTE_VERIFIED_2026-08-01T10:01:16+08:00",
     "source_of_truth": true
   },
   "system_identity": {
@@ -292,8 +292,8 @@
   },
   "current_state_pointer": {
     "status": "CURRENT",
-    "baseline_merge_sha": "826c8486e656de13fa578abfbe54bbd98c259883",
-    "completed_workline": "KAIOS-REAL-CAUSAL-WORLD-RUNTIME-001",
+    "baseline_merge_sha": "6510caea03a9e34dbbbce9a06ac9f8de1d97e86b",
+    "completed_workline": "KAIOS-PR64-PHYSICAL-LABOR-CONSTRUCTION-SPEC-001",
     "active_workline": null,
     "active_workline_status": "NO_ACTIVE_WORKLINE",
     "next_worklines": [
@@ -303,8 +303,8 @@
       {"workline": "KAIOS_INDUSTRIAL_SUPPLY_CHAIN_RUNTIME", "status": "HOLD_NOT_STARTED"},
       {"workline": "KAIOS_TAIWAN_LOGISTICS_NETWORK", "status": "HOLD_NOT_STARTED"}
     ],
-    "recovery_point": "RECOVERY-KAIOS-REAL-CAUSAL-WORLD-RUNTIME",
-    "company_status": "KGEN-KAIOS/governance/autopilot/company_status/COMPANY_STATUS_2026-08-01_REAL_CAUSAL_WORLD_RUNTIME.md",
+    "recovery_point": "RECOVERY-KAIOS-PR64-PHYSICAL-LABOR-SPEC",
+    "company_status": "KGEN-KAIOS/governance/autopilot/company_status/COMPANY_STATUS_2026-08-01_PR64_PHYSICAL_LABOR_SPEC.md",
     "runtime_authority": false,
     "cursor_dispatch": false,
     "scheduler": false,
