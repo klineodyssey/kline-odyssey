@@ -49,6 +49,8 @@ Every envelope must contain all of the following fields:
 | `required_tests` | Tests required before handoff. |
 | `required_evidence` | Evidence artifacts required before handoff. |
 | `branch_name` | Must match the registered worker branch pattern. |
+| `requested_branch` | Optional Human-facing input; never executable before normalization. |
+| `branch_normalization` | Required when `requested_branch` differs from `branch_name`; records deterministic alias rewrite evidence. |
 | `worktree_name` | Must identify an isolated worker worktree. |
 | `base_sha` | Full commit SHA validated against current origin state. |
 | `commit_allowed` | Explicit Boolean. |
@@ -96,7 +98,7 @@ An envelope passes only when all checks pass:
 5. `authorized_paths` do not intersect protected or forbidden paths.
 6. Planned actions are a subset of `authorized_actions`.
 7. `base_sha` is visible and not stale for the authorized scope.
-8. Branch matches the Worker Registry pattern. The current Cursor pattern is `cursor-handoff/<Task-ID>`.
+8. Effective `branch_name` matches the Worker Registry pattern. The sole Cursor pattern is `cursor-handoff/<Task-ID>`; a requested `cursor/<feature-name>` alias must be rewritten before claim or branch creation and recorded in `branch_normalization`.
 9. Worktree is isolated from Human Main.
 10. Dependencies exist and are satisfied.
 11. Required CURRENT selectors, baseline and exact ADRs are visible.

@@ -1,6 +1,6 @@
 # Worker Registry
 
-**Version:** V7.1 Minimal Worker Layer
+**Version:** V7.1.1 Minimal Worker Layer
 **Status:** Active / Draft for Review
 **Scope:** Multi-worker identity, permission, workspace, branch, and review routing model.
 
@@ -25,6 +25,11 @@ The Worker Registry lets KAIOS manage Cursor, Codex, Claude, Gemini, OpenHands, 
 | `allowed_branch_pattern` | Yes | Branch namespace allowed for that worker |
 | `can_push_main` | Yes | Boolean main push permission |
 | `reviewer` | Yes | Reviewer identity, normally Codex |
+| `worker_class` | Scoped | Registered specialist class for a bounded worker assignment |
+| `allowed_work` | Scoped | Exact candidate domains the class may produce |
+| `forbidden_work` | Scoped | Explicit domain denylist; denial always wins |
+| `branch_input_aliases` | Scoped | Dispatch-only aliases that must be normalized before branch creation |
+| `branch_normalization` | Scoped | Deterministic mapping to the one executable branch namespace |
 
 ## Supported Worker Types
 
@@ -39,6 +44,27 @@ The Worker Registry lets KAIOS manage Cursor, Codex, Claude, Gemini, OpenHands, 
 | ChatGPT | Worker | `chatgpt-handoff/<Task-ID>` | No |
 | Deep Research | Research Worker | `deep-research-handoff/<Task-ID>` | No |
 | Human Engineer | Human Worker | `human-handoff/<Task-ID>` | No by default |
+
+## Canonical Cursor Branch Policy
+
+KAIOS uses exactly one executable Cursor branch rule:
+
+```text
+cursor-handoff/<Task-ID>
+```
+
+`cursor/<feature-name>` is accepted only as a Human-facing dispatch input alias. Before claim creation, branch creation, commit, push, review, recovery, or closeout, the dispatcher must replace the alias with `cursor-handoff/<Task-ID>` using the exact Task ID. The alias is never a valid Git branch for Cursor work and never creates a second policy.
+
+Normalization is fail-closed:
+
+1. If the requested branch already equals `cursor-handoff/<Task-ID>`, keep it.
+2. If it matches `cursor/<feature-name>`, rewrite it to `cursor-handoff/<Task-ID>`.
+3. Otherwise return `BRANCH_POLICY_MISMATCH` and do not create a branch.
+4. Recovery always resumes the canonical handoff branch and preserves the Task ID and claim lineage.
+
+## Registered Foundational Life Creator
+
+`cursor-01` is registered as `FOUNDATIONAL_LIFE_CREATOR` with `worker_code_limited` permission. Its allowed candidate domains are Grass, Tree, Fish, Shrimp, Mountain, Soil, Water, and River, plus their candidate tests and report. It may not modify Wallet, KGEN, CURRENT, Canonical Schema, Universe Law, Runtime, deployment, or merge state. Every output remains `CANDIDATE_ONLY` until Codex final review.
 
 ## Permission Model
 

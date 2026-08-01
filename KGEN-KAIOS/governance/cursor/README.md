@@ -57,6 +57,7 @@ Human Approval Required: true
 | `cursor_control_runtime.json` | Machine-readable control state、schema draft 與 12 項 compliance cases |
 | `cursor_boot_manifest.json` | 有序必讀來源、優先級與 legacy suppression |
 | `cursor_start_command.json` | 啟動指令的 machine-readable companion |
+| `tests/test_cursor_worker_registry_repair.py` | Validates the sole handoff namespace, alias normalization, cursor-01 class scope, and denylist. |
 
 ## 3. Existing Rule Audit
 
@@ -85,7 +86,7 @@ Human Approval Required: true
 | `CC-002` | Legacy flow automatically selects the first OPEN row. | A complete Human Decision, Task Envelope and eligible WorkQueue entry are all required. |
 | `CC-003` | Legacy instructions use `git pull origin main` before checking workspace. | Fetch in an isolated worker workspace; never pull into dirty Human Main. |
 | `CC-004` | Agent Office queue still contains OPEN history. | Suppress it because its banner names Organization WorkQueue as live. |
-| `CC-005` | Suggested `cursor/<task>-<name>` differs from Registry pattern. | Keep effective `cursor-handoff/<Task-ID>` until Human approves registry migration. |
+| `CC-005` | Suggested `cursor/<task>-<name>` differs from Registry pattern. | Resolved by `KAIOS-CURSOR-WORKER-REGISTRY-REPAIR-001`: treat `cursor/<feature-name>` as dispatch input only and normalize it to the sole executable `cursor-handoff/<Task-ID>` branch before claim. |
 | `CC-006` | “Latest ADR” could mean newest by timestamp rather than relevant approved ADR. | Task Envelope lists exact required ADR IDs and accepted status. |
 | `CC-007` | Chat memory or old prompts may appear newer than repository evidence. | Human Decision and CURRENT/Frozen sources win; conflicts cause STOP. |
 | `CC-008` | Cursor can currently change WorkQueue status while delivering its own branch. | Envelope must explicitly authorize any WorkQueue edit; no implicit queue mutation. |
