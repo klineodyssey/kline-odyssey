@@ -15,6 +15,8 @@ Public interfaces:
 - [K280 public data](../api/kaios/k280/)
 - [Life Runtime V1](../world-viewer/life-runtime/)
 - [Life Runtime V1 public data](../api/kaios/life-runtime-v1/)
+- [Forest and Agriculture Runtime V1 specification](life/forest-agriculture/KAIOS_FOREST_AGRICULTURE_RUNTIME_V1_SPEC.md)
+- [Forest and Agriculture Cursor queue](life/forest-agriculture/KAIOS_CURSOR_CONTINUOUS_WORK_QUEUE.json)
 
 ## Foundational Life Runtime V1
 

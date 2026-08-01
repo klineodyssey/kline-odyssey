@@ -114,8 +114,6 @@ class CursorWorkerRegistryRepairTests(unittest.TestCase):
             "cursor-handoff/KAIOS-ECOLOGY-V1-CANDIDATE-DATA-001",
         )
         self.assertEqual(dispatch["status"], "COMPLETED_CODEX_REVIEWED")
-        self.assertIsNone(self.cursor["current_task"])
-        self.assertIsNone(self.cursor["current_branch"])
         self.assertTrue(
             {
                 "FOUNDATIONAL_FOOD_RELATIONSHIP_DATASET",
@@ -127,6 +125,25 @@ class CursorWorkerRegistryRepairTests(unittest.TestCase):
             }
             <= set(self.cursor["allowed_work"])
         )
+
+    def test_forest_candidate_dispatch_is_the_only_active_claim(self):
+        active = [
+            item
+            for item in self.registry["dispatch_history"]
+            if item["status"] in {"DISPATCHED", "IN_PROGRESS", "REVIEW"}
+        ]
+        self.assertEqual(len(active), 1)
+        dispatch = active[0]
+        self.assertEqual(dispatch["task_id"], "KAIOS-CURSOR-FOREST-LIFE-PACKAGES-001")
+        self.assertEqual(dispatch["worker_id"], self.cursor["worker_id"])
+        self.assertEqual(
+            dispatch["branch"],
+            "cursor-handoff/KAIOS-CURSOR-FOREST-LIFE-PACKAGES-001",
+        )
+        self.assertEqual(dispatch["output_status"], "CURSOR_RESEARCH_CANDIDATE_ONLY")
+        self.assertEqual(self.cursor["current_task"], dispatch["task_id"])
+        self.assertEqual(self.cursor["current_branch"], dispatch["branch"])
+        self.assertIn("FOREST_LIFE_PACKAGE_RESEARCH", self.cursor["allowed_work"])
 
     def test_dispatch_history_preserves_foundational_life_lineage(self):
         dispatch = next(

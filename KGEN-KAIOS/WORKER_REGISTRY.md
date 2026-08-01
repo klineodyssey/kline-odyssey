@@ -66,6 +66,16 @@ Normalization is fail-closed:
 
 `cursor-01` is registered as `FOUNDATIONAL_LIFE_CREATOR` with `worker_code_limited` permission. Its allowed candidate domains are Grass, Tree, Fish, Shrimp, Mountain, Soil, Water, and River, plus their candidate tests and report. It may not modify Wallet, KGEN, CURRENT, Canonical Schema, Universe Law, Runtime, deployment, or merge state. Every output remains `CANDIDATE_ONLY` until Codex final review.
 
+### Forest and Agriculture Continuous Queue
+
+`cursor-01` may also execute the bounded candidate and research classes listed
+in `KAIOS/life/forest-agriculture/KAIOS_CURSOR_CONTINUOUS_WORK_QUEUE.json`.
+Continuous means that Codex dispatches the next reviewed queue item without
+Human routing; it does not waive the one-task rule. Cursor still completes one
+canonical `cursor-handoff/<Task-ID>` assignment, stops at Codex review, and may
+not self-approve, merge, deploy or modify authoritative Runtime, CURRENT,
+Canonical Schema, Rights authority, Economy authority, Wallet or KGEN.
+
 ## Permission Model
 
 | Permission | Allowed Actions |

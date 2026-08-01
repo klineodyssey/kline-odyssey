@@ -6,8 +6,8 @@
     "updated_by": "Codex",
     "reviewed_by": "Codex",
     "source_commit": "29c5d51769f35ff7cd4af14e97f63958e6e201a0",
-    "task_id": "KAIOS-FISHPOND-AQUACULTURE-RUNTIME-V1-001",
-    "change_reason": "Close the completed ecology candidate claim and authorize cursor-01 for bounded, research-only aquaculture proposals under Codex review.",
+    "task_id": "KAIOS-FOREST-AGRICULTURE-RUNTIME-V1-001",
+    "change_reason": "Start the bounded forest and agriculture candidate queue and dispatch cursor-01 to forest ecosystem research under Codex review.",
     "source_of_truth": true
   },
   "formal_employee_requirements": [
@@ -70,6 +70,14 @@
       "output_status": "CURSOR_RESEARCH_CANDIDATE_ONLY",
       "reviewer": "codex-gm-01",
       "status": "COMPLETED_CODEX_REVIEWED"
+    },
+    {
+      "task_id": "KAIOS-CURSOR-FOREST-LIFE-PACKAGES-001",
+      "worker_id": "cursor-01",
+      "branch": "cursor-handoff/KAIOS-CURSOR-FOREST-LIFE-PACKAGES-001",
+      "output_status": "CURSOR_RESEARCH_CANDIDATE_ONLY",
+      "reviewer": "codex-gm-01",
+      "status": "DISPATCHED"
     }
   ],
   "workers": [
@@ -107,8 +115,8 @@
         "LIFE_RESEARCH_ANALYST"
       ],
       "workspace": "cursor-worker-workspace",
-      "current_task": null,
-      "current_branch": null,
+      "current_task": "KAIOS-CURSOR-FOREST-LIFE-PACKAGES-001",
+      "current_branch": "cursor-handoff/KAIOS-CURSOR-FOREST-LIFE-PACKAGES-001",
       "status": "ACTIVE",
       "employee_status": "ACTIVE",
       "trust_level": "T2",
@@ -149,7 +157,27 @@
         "HARVEST_AND_GRADING_PROPOSAL",
         "COLD_CHAIN_LOGISTICS_PROPOSAL",
         "AQUACULTURE_TEST_SCENARIO",
-        "AQUACULTURE_UI_PROPOSAL"
+        "AQUACULTURE_UI_PROPOSAL",
+        "FOREST_LIFE_PACKAGE_RESEARCH",
+        "CROP_LIFE_PACKAGE",
+        "FRUIT_TREE_PACKAGE",
+        "VEGETABLE_PACKAGE",
+        "SOIL_TYPE_DATASET",
+        "FERTILIZER_MODEL_PROPOSAL",
+        "COMPOST_MODEL_PROPOSAL",
+        "INSECT_CANDIDATE_PACKAGE",
+        "POLLINATOR_RESEARCH",
+        "EARTHWORM_CANDIDATE_PACKAGE",
+        "FUNGI_CANDIDATE_PACKAGE",
+        "MICROBIAL_RESEARCH",
+        "WEATHER_DATASET",
+        "SEASON_DATASET",
+        "RAINFALL_DATASET",
+        "FOREST_UI_PROPOSAL",
+        "AGRICULTURE_UI_PROPOSAL",
+        "WORLD_VIEWER_CARD_CANDIDATE",
+        "CANDIDATE_API_PROJECTION",
+        "CANDIDATE_REGRESSION_TEST"
       ],
       "forbidden_work": [
         "WALLET",
