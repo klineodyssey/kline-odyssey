@@ -2,12 +2,12 @@
   "metadata": {
     "version": "KAIOS_WORKER_REGISTRY_WITH_TRUST_V1_1",
     "status": "ACTIVE",
-    "updated": "2026-08-01",
+    "updated": "2026-08-02",
     "updated_by": "Codex",
     "reviewed_by": "Codex",
     "source_commit": "29c5d51769f35ff7cd4af14e97f63958e6e201a0",
-    "task_id": "KAIOS-CHARTER-REPRODUCTION-ECOLOGY-PROGRAM-001",
-    "change_reason": "Close the merged PR #69 claim and authorize cursor-01 for bounded, candidate-only ecosystem datasets under Codex review.",
+    "task_id": "KAIOS-FISHPOND-AQUACULTURE-RUNTIME-V1-001",
+    "change_reason": "Close the completed ecology candidate claim and authorize cursor-01 for bounded, research-only aquaculture proposals under Codex review.",
     "source_of_truth": true
   },
   "formal_employee_requirements": [
@@ -81,8 +81,8 @@
         "LIFE_RESEARCH_ANALYST"
       ],
       "workspace": "cursor-worker-workspace",
-      "current_task": "KAIOS-ECOLOGY-V1-CANDIDATE-DATA-001",
-      "current_branch": "cursor-handoff/KAIOS-ECOLOGY-V1-CANDIDATE-DATA-001",
+      "current_task": "KAIOS-CURSOR-FISHPOND-AQUACULTURE-RESEARCH-001",
+      "current_branch": "cursor-handoff/KAIOS-CURSOR-FISHPOND-AQUACULTURE-RESEARCH-001",
       "status": "CLAIMED",
       "employee_status": "ACTIVE",
       "trust_level": "T2",
@@ -112,7 +112,18 @@
         "SPECIES_ENVIRONMENTAL_THRESHOLD_DATASET",
         "POPULATION_SCENARIO_FIXTURE",
         "ECOSYSTEM_VIEWER_CARD_DATA",
-        "CANDIDATE_ECOLOGY_TEST"
+        "CANDIDATE_ECOLOGY_TEST",
+        "AQUACULTURE_RESEARCH_REPORT",
+        "FISH_STOCKING_MODEL_PROPOSAL",
+        "SHRIMP_STOCKING_MODEL_PROPOSAL",
+        "WATER_QUALITY_THRESHOLD_PROPOSAL",
+        "FEED_AND_GROWTH_MODEL_PROPOSAL",
+        "DISEASE_AND_MORTALITY_SCENARIO",
+        "POND_HABITAT_COMPATIBILITY_MATRIX",
+        "HARVEST_AND_GRADING_PROPOSAL",
+        "COLD_CHAIN_LOGISTICS_PROPOSAL",
+        "AQUACULTURE_TEST_SCENARIO",
+        "AQUACULTURE_UI_PROPOSAL"
       ],
       "forbidden_work": [
         "WALLET",
