@@ -409,11 +409,16 @@ test("Draft 2020-12 structure is executed before semantic approval", () => {
 });
 
 test("Draft date-time validation rejects syntactically shaped impossible dates", () => {
-  const record = createValidRecord();
-  record.compatibility_review.reviewed_at = "2026-99-99T11:00:00.000Z";
-  const result = validateJsonSchema202012(record, schema);
-  assert.equal(result.ok, false);
-  assert.ok(result.errors.some(({ keyword, path }) => keyword === "format" && path.endsWith("compatibility_review.reviewed_at")));
+  for (const impossible of ["2026-99-99T11:00:00.000Z", "2026-02-30T11:00:00.000Z"]) {
+    const record = createValidRecord();
+    record.compatibility_review.reviewed_at = impossible;
+    const result = validateJsonSchema202012(record, schema);
+    assert.equal(result.ok, false, impossible);
+    assert.ok(
+      result.errors.some(({ keyword, path }) => keyword === "format" && path.endsWith("compatibility_review.reviewed_at")),
+      impossible,
+    );
+  }
 });
 
 test("semantic validator accepts one identity-bound deterministic transplant", () => {

@@ -122,6 +122,26 @@ const jsonPointerValue = (document, pointer) => {
   ), document);
 };
 
+const isValidRfc3339DateTime = (value) => {
+  const match = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})(?:\.\d+)?(?:Z|[+-](\d{2}):(\d{2}))$/.exec(value);
+  if (!match) return false;
+
+  const [, yearText, monthText, dayText, hourText, minuteText, secondText, offsetHourText, offsetMinuteText] = match;
+  const year = Number(yearText);
+  const month = Number(monthText);
+  const day = Number(dayText);
+  const hour = Number(hourText);
+  const minute = Number(minuteText);
+  const second = Number(secondText);
+  const leapYear = year % 4 === 0 && (year % 100 !== 0 || year % 400 === 0);
+  const daysInMonth = [31, leapYear ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+
+  if (year === 0 || month < 1 || month > 12 || day < 1 || day > daysInMonth[month - 1]) return false;
+  if (hour > 23 || minute > 59 || second > 59) return false;
+  if (offsetHourText !== undefined && (Number(offsetHourText) > 23 || Number(offsetMinuteText) > 59)) return false;
+  return Number.isFinite(Date.parse(value));
+};
+
 const typeMatches = (value, type) => {
   if (type === "null") return value === null;
   if (type === "array") return Array.isArray(value);
@@ -175,10 +195,7 @@ const schemaErrors = (value, schema, rootSchema, path) => {
   if (typeof value === "string") {
     if (schema.minLength !== undefined && value.length < schema.minLength) add("minLength", `minimum length is ${schema.minLength}`);
     if (schema.pattern && !(new RegExp(schema.pattern, "u")).test(value)) add("pattern", `value does not match ${schema.pattern}`);
-    if (schema.format === "date-time" && (
-      !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})$/.test(value)
-      || !Number.isFinite(Date.parse(value))
-    )) {
+    if (schema.format === "date-time" && !isValidRfc3339DateTime(value)) {
       add("format", "value must be an RFC 3339 date-time");
     }
   }
