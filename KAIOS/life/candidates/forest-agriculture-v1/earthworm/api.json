@@ -1,0 +1,56 @@
+{
+  "record_id": "KAIOS-EARTHWORM-CANDIDATE-API-V1",
+  "schema_version": "1.0.0-candidate",
+  "status": "CURSOR_RESEARCH_CANDIDATE_ONLY",
+  "review_status": "PENDING_CODEX_REVIEW",
+  "authority": "NO_PRODUCTION_AUTHORITY",
+  "task_id": "KAIOS-CURSOR-EARTHWORM-CANDIDATE-001",
+  "mode": "READ_ONLY_STATIC_DATA_CONTRACT",
+  "api_route": null,
+  "api_registered": false,
+  "writes_allowed": false,
+  "commands_allowed": false,
+  "public_mutation_endpoints": false,
+  "production_authority": false,
+  "exports": [
+    "candidate_identity",
+    "taxonomy_projection",
+    "bounded_parameter_metadata",
+    "owner_admission_status",
+    "deterministic_fixture_summary",
+    "closed_ledger_summary",
+    "hash_link_summary",
+    "provenance_summary",
+    "boundary_summary"
+  ],
+  "forbidden_exports": [
+    "REAL_BIOLOGY_GUIDANCE",
+    "SOIL_MANAGEMENT_GUIDANCE",
+    "BREEDING_OR_RELEASE_INSTRUCTION",
+    "PRICE_OR_YIELD",
+    "WALLET_OR_KGEN_STATE",
+    "RIGHTS_DECISION",
+    "OWNER_MUTATION_COMMAND"
+  ],
+  "source_files": [
+    "life.manifest.json",
+    "taxonomy.json",
+    "physics.json",
+    "environment.json",
+    "growth_or_formation.json",
+    "health_or_integrity.json",
+    "reproduction_or_change.json",
+    "runtime.json",
+    "provenance.json",
+    "integrity.json",
+    "event_log.json"
+  ],
+  "integrity_rule": "Reject projection when package integrity, source provenance, or event hash validation fails.",
+  "boundaries": [
+    "NO_API_REGISTRATION",
+    "READ_ONLY",
+    "NO_COMMANDS",
+    "NO_NETWORK_DEPENDENCY",
+    "NO_PRODUCTION_AUTHORITY"
+  ]
+}

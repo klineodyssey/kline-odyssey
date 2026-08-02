@@ -1,0 +1,94 @@
+{
+  "record_id": "KAIOS-EARTHWORM-CANDIDATE-HEALTH-V1",
+  "schema_version": "1.0.0-candidate",
+  "status": "CURSOR_RESEARCH_CANDIDATE_ONLY",
+  "review_status": "PENDING_CODEX_REVIEW",
+  "authority": "NO_PRODUCTION_AUTHORITY",
+  "task_id": "KAIOS-CURSOR-EARTHWORM-CANDIDATE-001",
+  "model": "ABSTRACT_RESOURCE_AND_ENVIRONMENT_STRESS_PROXY",
+  "numeric_parameter_contract": {
+    "required_fields": ["parameter_name", "unit", "minimum", "default", "maximum", "rationale", "source_type", "confidence", "risk", "validation_required"],
+    "range_rule": "minimum <= default <= maximum",
+    "allowed_source_types": ["SOURCE_DERIVED", "REPOSITORY_DERIVED", "MODEL_INFERENCE", "RESEARCH_PROPOSAL", "ASSUMPTION", "SOURCE_UNDERSPECIFIED"],
+    "validation_required_must_equal_true": true
+  },
+  "numeric_parameters": [
+    {
+      "parameter_name": "initial_health_integrity_proxy",
+      "unit": "health_basis_point",
+      "minimum": 0,
+      "default": 8000,
+      "maximum": 10000,
+      "rationale": "Provides a bounded synthetic initial state for deterministic stress tests.",
+      "source_type": "RESEARCH_PROPOSAL",
+      "confidence": "LOW",
+      "risk": "The score is not a diagnosis, welfare metric, or biological health measurement.",
+      "validation_required": true
+    },
+    {
+      "parameter_name": "environment_stress_decrement_proxy",
+      "unit": "health_basis_point_per_failed_tick",
+      "minimum": 1,
+      "default": 1000,
+      "maximum": 5000,
+      "rationale": "Makes repeated failed environment gates causally visible in hypothetical validation fixtures.",
+      "source_type": "RESEARCH_PROPOSAL",
+      "confidence": "LOW",
+      "risk": "The decrement has no clinical or biological interpretation.",
+      "validation_required": true
+    },
+    {
+      "parameter_name": "mortality_gate_health_proxy",
+      "unit": "health_basis_point",
+      "minimum": 0,
+      "default": 1000,
+      "maximum": 3000,
+      "rationale": "Provides a bounded synthetic mortality gate while retaining an explicit recorded cause requirement.",
+      "source_type": "MODEL_INFERENCE",
+      "confidence": "LOW",
+      "risk": "The threshold is not a survival threshold or animal-care recommendation.",
+      "validation_required": true
+    },
+    {
+      "parameter_name": "natural_recovery_proxy_per_tick",
+      "unit": "health_basis_point_per_simulation_tick",
+      "minimum": 0,
+      "default": 500,
+      "maximum": 2000,
+      "rationale": "Bounds an optional state-integrity recovery proxy when all resource and environment gates pass.",
+      "source_type": "RESEARCH_PROPOSAL",
+      "confidence": "LOW",
+      "risk": "No healing mechanism, treatment, or intervention guidance is modeled.",
+      "validation_required": true
+    }
+  ],
+  "state_order": ["STABLE_PROXY", "RESOURCE_STRESSED_PROXY", "ENVIRONMENT_STRESSED_PROXY", "DECLINING_PROXY", "MORTALITY_PENDING_CUSTODY", "DEAD_BIOMASS_CUSTODY"],
+  "stress_inputs": [
+    "INSUFFICIENT_DETRITUS",
+    "INSUFFICIENT_WATER",
+    "MOISTURE_FIT_OUTSIDE_CANDIDATE_ENVELOPE",
+    "TEMPERATURE_FIT_OUTSIDE_CANDIDATE_ENVELOPE",
+    "OXYGEN_AVAILABILITY_FIT_BELOW_CANDIDATE_MINIMUM",
+    "CONTAMINATION_STRESS_ABOVE_CANDIDATE_CEILING",
+    "POPULATION_CAPACITY_STRESS"
+  ],
+  "transition_contract": {
+    "health_improvement_requires": ["ALL_RESOURCE_GATES_PASS", "ALL_ENVIRONMENT_GATES_PASS", "ELAPSED_TIME", "AVAILABLE_ENERGY_PROXY"],
+    "mortality_requires": ["RECORDED_CAUSE", "COUNT_DECREMENT", "DEAD_BIOMASS_MASS_TRANSFER", "WATER_TRANSFER", "ENERGY_TRANSFER", "EVENT_HASH_LINK"],
+    "diagnosis": "NOT_MODELED",
+    "disease": "NOT_MODELED",
+    "treatment": "NOT_MODELED",
+    "pesticide_or_chemical_response": "NOT_MODELED"
+  },
+  "blocked_results": [
+    {"trigger": "RECOVERY_WITHOUT_RESOURCES_OR_TIME", "result": "RECOVERY_REJECTED", "state_delta": "ALL_ZERO"},
+    {"trigger": "MORTALITY_WITHOUT_DEAD_BIOMASS_CUSTODY", "result": "MORTALITY_EVENT_REJECTED", "state_delta": "ALL_ZERO"},
+    {"trigger": "DIAGNOSIS_OR_TREATMENT_REQUEST", "result": "OUT_OF_SCOPE_NOT_MODELED", "state_delta": "ALL_ZERO"}
+  ],
+  "guidance_boundary": {
+    "animal_health_guidance": false,
+    "diagnostic_claim": false,
+    "treatment_claim": false,
+    "survival_guarantee": false
+  }
+}

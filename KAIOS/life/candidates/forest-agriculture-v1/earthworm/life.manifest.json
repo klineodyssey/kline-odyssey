@@ -1,0 +1,426 @@
+{
+  "schema_version": "1.0.0",
+  "life_type": "ANIMAL_LIFE",
+  "life_id": "LIFE-KAIOS-EARTHWORM-CANDIDATE-001",
+  "species_id": "SPECIES-KAIOS-EARTHWORM-CANDIDATE",
+  "display_name": "Earthworm Analog Candidate",
+  "scientific_or_system_name": "KAIOS lumbricus terrae candidate",
+  "taxonomy": {
+    "DOMAIN": "EUKARYOTA",
+    "KINGDOM": "ANIMALIA",
+    "PHYLUM": "ANNELIDA",
+    "CLASS": "CLITELLATA",
+    "ORDER": "HAPLOTAXIDA",
+    "FAMILY": "KAIOS_LUMBRICIDAE_CANDIDATE",
+    "GENUS": "KAIOS_LUMBRICUS",
+    "SPECIES": "KAIOS_LUMBRICUS_TERRAE_CANDIDATE",
+    "LIFE_INSTANCE": "LIFE-KAIOS-EARTHWORM-CANDIDATE-001",
+    "proposal_status": "NONCANONICAL_CANDIDATE",
+    "extension_19": {
+      "Domain": "EUKARYOTA",
+      "Kingdom": "ANIMALIA",
+      "Phylum": "ANNELIDA",
+      "Class": "CLITELLATA",
+      "Order": "HAPLOTAXIDA",
+      "Family": "KAIOS_LUMBRICIDAE_CANDIDATE",
+      "Genus": "KAIOS_LUMBRICUS",
+      "Species": "KAIOS_LUMBRICUS_TERRAE_CANDIDATE",
+      "Individual": "LIFE-KAIOS-EARTHWORM-CANDIDATE-001",
+      "OrganSystem": "ABSTRACT_ANIMAL_SYSTEM_PROXY",
+      "Organ": "ABSTRACT_ANIMAL_ORGAN_PROXY",
+      "Tissue": "ABSTRACT_ANIMAL_TISSUE_PROXY",
+      "Cell": "ABSTRACT_CELLULAR_LAYER_PROXY",
+      "Organelle": "ABSTRACT_ORGANELLE_LAYER_PROXY",
+      "Genome": "GENOME-KAIOS-EARTHWORM-CANDIDATE-001",
+      "DNA": "DNA-KAIOS-EARTHWORM-CANDIDATE-001",
+      "RNA": "RNA-KAIOS-EARTHWORM-CANDIDATE-001",
+      "Gene": "GENE-KAIOS-EARTHWORM-CANDIDATE-PROXY-001",
+      "Expression": "LOCAL_DETERMINISTIC_PROXY_ONLY"
+    }
+  },
+  "origin": {
+    "mode": "BOUNDED_CANDIDATE_RESEARCH",
+    "task_id": "KAIOS-CURSOR-EARTHWORM-CANDIDATE-001",
+    "candidate_status": "CURSOR_RESEARCH_CANDIDATE_ONLY",
+    "review_status": "PENDING_CODEX_REVIEW",
+    "source_base_commit": "745952dc389d62cf85545a86b18e279d8eca9c73",
+    "dispatch_branch_base_commit": "4f0c6f05c85a3d39adb9ac8d4ce335f207fe42eb"
+  },
+  "birth_or_formation_record": {
+    "status": "NOT_INSTANTIATED_CANDIDATE",
+    "instant_formation": false,
+    "causal_lifecycle_required": true,
+    "owner_acceptance_required": true
+  },
+  "location": {
+    "mode": "UNASSIGNED_UNTIL_FOREIGN_OWNER_VALIDATION",
+    "candidate_habitat_refs": [
+      "HABITAT-SOIL-V1",
+      "HABITAT-FOREST-V1",
+      "HABITAT-GRASSLAND-V1"
+    ],
+    "ecology_admission": false,
+    "real_habitat_claim": false
+  },
+  "mass": {
+    "value": null,
+    "unit": null
+  },
+  "volume": {
+    "value": null,
+    "unit": null
+  },
+  "density": {
+    "value": null,
+    "unit": null
+  },
+  "dimensions": {
+    "proposal_ref": "physics.json#/numeric_parameters",
+    "empirical_dimensions": "NOT_CLAIMED"
+  },
+  "material_composition": {
+    "mode": "BOUNDED_ACCOUNTING_PROXY_ONLY",
+    "empirical_chemistry": "NOT_MODELED",
+    "carbon_model": "NOT_MODELED"
+  },
+  "energy_model": {
+    "mode": "FINITE_ENERGY_PROXY",
+    "source": "DETRITUS_ENERGY_SOURCE_CUSTODY_PROXY",
+    "conservation_required": true,
+    "empirical_metabolism": "NOT_CLAIMED"
+  },
+  "resource_inputs": [
+    {
+      "resource_id": "DETRITUS_POOL",
+      "owner": "KAIOS_REPRODUCTION_ECOLOGY_RUNTIME_V1",
+      "status": "ABSTRACT_RESOURCE_POOL_NOT_FULL_LIFE_RUNTIME",
+      "mass_transfer_required": true
+    },
+    {
+      "resource_id": "HABITAT_WATER_CUSTODY",
+      "owner": "KAIOS_REPRODUCTION_ECOLOGY_RUNTIME_V1",
+      "status": "FOREIGN_OWNER_REFERENCE_ONLY",
+      "water_transfer_required": true
+    },
+    {
+      "resource_id": "SOIL_OXYGEN_AVAILABILITY_PROXY",
+      "owner": "KAIOS_REPRODUCTION_ECOLOGY_RUNTIME_V1",
+      "status": "FIT_GATE_ONLY_NOT_GAS_CHEMISTRY"
+    }
+  ],
+  "resource_outputs": [
+    {
+      "resource_id": "PROCESSED_DETRITUS_WASTE_PROXY",
+      "status": "EXPLICIT_CUSTODY_REQUIRED",
+      "automatic_soil_effect": false
+    },
+    {
+      "resource_id": "DEAD_BIOMASS",
+      "status": "EXPLICIT_CUSTODY_REQUIRED_ON_MORTALITY"
+    },
+    {
+      "resource_id": "PENDING_ECOLOGY_DECOMPOSITION_CUSTODY",
+      "status": "PENDING_OWNER_ACCEPTANCE_NOT_OWNER_STATE"
+    }
+  ],
+  "environment_requirements": {
+    "proposal_ref": "environment.json",
+    "required_gates": [
+      "ECOLOGY_OWNER_ADMISSION",
+      "LOCATION",
+      "HABITAT",
+      "SOIL_COMPATIBILITY_PROXY",
+      "MOISTURE_FIT_PROXY",
+      "TEMPERATURE_FIT_PROXY",
+      "OXYGEN_AVAILABILITY_PROXY",
+      "DETRITUS",
+      "WATER",
+      "ELAPSED_TIME"
+    ]
+  },
+  "growth_or_development": {
+    "proposal_ref": "growth_or_formation.json",
+    "instant_growth": false,
+    "stage_skipping": false
+  },
+  "aging": {
+    "mode": "BOUNDED_STAGE_AND_TICK_PROXY",
+    "empirical_lifespan": "NOT_CLAIMED"
+  },
+  "health_or_integrity": {
+    "proposal_ref": "health_or_integrity.json",
+    "mode": "RESOURCE_AND_ENVIRONMENT_GATE_PROXY",
+    "diagnosis": "NOT_MODELED"
+  },
+  "damage": {
+    "mode": "ABSTRACT_STRESS_PROXY",
+    "disease_behavior": "NOT_MODELED",
+    "injury_guidance": "NOT_PROVIDED"
+  },
+  "repair_or_healing": {
+    "mode": "NOT_MODELED",
+    "reason": "No validated repair or healing model exists in this candidate scope."
+  },
+  "reproduction_or_replication": {
+    "proposal_ref": "reproduction_or_change.json",
+    "mode": "BOUNDED_COCOON_STAGE_PROPOSAL",
+    "authorized": false,
+    "population_cap_required": true,
+    "generation_cap_required": true
+  },
+  "mutation_or_change": {
+    "mode": "NOT_MODELED",
+    "automatic_new_species": false,
+    "genome_editing": false
+  },
+  "death_or_termination": {
+    "mode": "BOUNDED_MORTALITY_PROXY",
+    "count_decrement_required": true,
+    "dead_biomass_transfer_required": true,
+    "deletion_without_custody": false
+  },
+  "history": [
+    {
+      "event": "CANDIDATE_PACKAGE_CREATED",
+      "task_id": "KAIOS-CURSOR-EARTHWORM-CANDIDATE-001",
+      "status": "PENDING_CODEX_REVIEW"
+    }
+  ],
+  "rights": {
+    "OWNER": {
+      "holder": "UNASSIGNED",
+      "authority": "NO_PRODUCTION_AUTHORITY",
+      "scope": "PACKAGE_RECORD_ONLY_NOT_LEGAL_OWNERSHIP"
+    },
+    "CUSTODIAN": {
+      "holder": "UNASSIGNED",
+      "authority": "NO_PRODUCTION_AUTHORITY",
+      "scope": "REVIEW_CUSTODY_PENDING_CODEX"
+    },
+    "OPERATOR": {
+      "holder": "UNASSIGNED",
+      "authority": "NO_PRODUCTION_AUTHORITY",
+      "scope": "NO_OPERATION_AUTHORITY"
+    },
+    "OCCUPANT": {
+      "holder": "UNASSIGNED",
+      "authority": "NO_PRODUCTION_AUTHORITY",
+      "scope": "NO_OCCUPANT_CLAIM"
+    },
+    "USAGE_RIGHTS": {
+      "holder": "UNASSIGNED",
+      "scope": "NO_REAL_USE_AUTHORITY"
+    },
+    "HARVEST_RIGHTS": {
+      "holder": "UNASSIGNED",
+      "scope": "NO_REAL_HARVEST_AUTHORITY"
+    },
+    "BREEDING_RIGHTS": {
+      "holder": "UNASSIGNED",
+      "scope": "NO_REAL_BREEDING_AUTHORITY"
+    },
+    "COMMERCIAL_LICENSE": {
+      "holder": "UNASSIGNED",
+      "scope": "NONE"
+    },
+    "TRANSFER_RIGHTS": {
+      "holder": "UNASSIGNED",
+      "scope": "NO_TRANSFER"
+    },
+    "HABITAT_RIGHTS": {
+      "holder": "UNASSIGNED",
+      "scope": "NO_REAL_HABITAT_CLAIM"
+    },
+    "CONTROL_AUTHORITY": {
+      "holder": "UNASSIGNED",
+      "scope": "NO_RUNTIME_CONTROL"
+    },
+    "tradeability": "NOT_TRADEABLE"
+  },
+  "authority": {
+    "status": "NONE",
+    "runtime_authority": false,
+    "production_authority": false,
+    "legal_authority": false,
+    "ecology_admission_authority": false
+  },
+  "ownership": {
+    "status": "UNASSIGNED",
+    "legal_title": false,
+    "onchain_title": false,
+    "land_rights_do_not_imply_occupant_ownership": true
+  },
+  "custody": {
+    "status": "PENDING_CODEX_REVIEW",
+    "candidate_record_only": true,
+    "ecology_resource_custody": false
+  },
+  "operation": {
+    "status": "DISABLED",
+    "mode": "LOCAL_VALIDATION_ONLY",
+    "simulation_only": true,
+    "executable": false
+  },
+  "usage": {
+    "status": "NOT_AUTHORIZED",
+    "mode": "RESEARCH_REFERENCE_ONLY",
+    "real_world_use_authority": false
+  },
+  "transfer": {
+    "status": "DISABLED",
+    "enabled": false,
+    "onchain_transfer": "NO_ONCHAIN_TRANSFER",
+    "wallet": "NONE"
+  },
+  "economic_role": {
+    "economic_value": null,
+    "resource_value": null,
+    "labor_requirement": null,
+    "maintenance_cost": null,
+    "harvest_or_output": null,
+    "market_role": "NONE",
+    "supply_chain_inputs": [],
+    "supply_chain_outputs": [],
+    "civilization_requirement": null,
+    "technology_requirement": null,
+    "K11520_eligibility": "SIMULATED_K11520_ONLY",
+    "rights_package": {
+      "status": "NO_RIGHTS_GRANTED"
+    },
+    "value_basis": "No demand, sale, harvest, decomposition service, soil effect, or production use is validated."
+  },
+  "civilization_role": {
+    "status": "NONE",
+    "soil_service_claim": false,
+    "decomposition_service_claim": false
+  },
+  "runtime_binding": {
+    "mode": "NON_EXECUTABLE_BINDING",
+    "reference": "runtime.json",
+    "authority": "NO_PRODUCTION_AUTHORITY"
+  },
+  "world_viewer_binding": {
+    "mode": "READ_ONLY",
+    "reference": "viewer.json",
+    "authority": "NO_PRODUCTION_AUTHORITY"
+  },
+  "api_binding": {
+    "mode": "READ_ONLY",
+    "reference": "api.json",
+    "authority": "NO_PRODUCTION_AUTHORITY"
+  },
+  "provenance": {
+    "source": "KAIOS_CANONICAL_LIFE_SHARED_CORE_AND_ANIMAL_EXTENSION_READ_ONLY",
+    "created_at": "2026-08-02T00:00:00Z",
+    "author": "cursor-01",
+    "source_commit": "745952dc389d62cf85545a86b18e279d8eca9c73",
+    "task_id": "KAIOS-CURSOR-EARTHWORM-CANDIDATE-001",
+    "details_reference": "provenance.json"
+  },
+  "integrity": {
+    "algorithm": "SHA-256",
+    "checksum": "81a8a6c62bb8038984b4dda1517b23ee074143750b56ef95c8efbad543dea48b",
+    "covers": [
+      "README.md",
+      "api.json",
+      "economy.json",
+      "environment.json",
+      "event_log.json",
+      "growth_or_formation.json",
+      "health_or_integrity.json",
+      "life.manifest.json",
+      "physics.json",
+      "provenance.json",
+      "reproduction_or_change.json",
+      "rights.json",
+      "runtime.json",
+      "taxonomy.json",
+      "viewer.json"
+    ]
+  },
+  "deterministic_seed": "KAIOS-EARTHWORM-CANDIDATE-SEED-001",
+  "event_log": [
+    {
+      "event_id": "EVT-LIFE-KAIOS-EARTHWORM-CANDIDATE-001-0001",
+      "timestamp": "2026-08-02T00:00:00Z",
+      "type": "CANDIDATE_PACKAGE_CREATED",
+      "status": "PENDING_CODEX_REVIEW",
+      "previous_state_hash": null,
+      "next_state_hash": "ee141added2455c4cb87976294289e52073a456d12842a1998272e30513d3b20"
+    }
+  ],
+  "field_applicability": {
+    "schema_version": {"status": "REQUIRED", "reason": "Required by the Canonical Life shared core."},
+    "life_type": {"status": "REQUIRED", "reason": "Selects the approved ANIMAL_EXTENSION profile."},
+    "life_id": {"status": "REQUIRED", "reason": "The candidate package has one explicit noncanonical Life ID."},
+    "species_id": {"status": "REQUIRED", "reason": "The candidate proposal has one explicit noncanonical Species ID."},
+    "display_name": {"status": "REQUIRED", "reason": "Human-readable inspection is required."},
+    "scientific_or_system_name": {"status": "REQUIRED", "reason": "A clearly candidate system name is required."},
+    "taxonomy": {"status": "REQUIRED", "reason": "The universal ranks and biological extension crosswalk are explicit."},
+    "origin": {"status": "REQUIRED", "reason": "Candidate lineage and immutable source base are required."},
+    "birth_or_formation_record": {"status": "REQUIRED", "reason": "No instant formation is allowed."},
+    "location": {"status": "REQUIRED", "reason": "Location remains unassigned until a foreign owner validates it."},
+    "mass": {"status": "REQUIRED", "reason": "Manifest value remains unresolved; bounded proxy parameters are in physics.json."},
+    "volume": {"status": "REQUIRED", "reason": "Manifest value remains unresolved; bounded proxy parameters are in physics.json."},
+    "density": {"status": "REQUIRED", "reason": "Manifest value remains unresolved; bounded proxy parameters are in physics.json."},
+    "dimensions": {"status": "REQUIRED", "reason": "Physical dimensions are candidate proxies only."},
+    "material_composition": {"status": "REQUIRED", "reason": "Accounting scope is explicit without empirical chemistry."},
+    "energy_model": {"status": "REQUIRED", "reason": "Finite energy-proxy accounting is required."},
+    "resource_inputs": {"status": "REQUIRED", "reason": "Food, water, and oxygen-fit dependencies are explicit."},
+    "resource_outputs": {"status": "REQUIRED", "reason": "Waste, dead biomass, and pending custody are explicit."},
+    "environment_requirements": {"status": "REQUIRED", "reason": "Habitat and environmental gates are mandatory."},
+    "growth_or_development": {"status": "REQUIRED", "reason": "Lifecycle stages require resources and elapsed time."},
+    "aging": {"status": "REQUIRED", "reason": "A bounded tick-age proxy is required."},
+    "health_or_integrity": {"status": "REQUIRED", "reason": "Resource and environment stress must be representable."},
+    "damage": {"status": "REQUIRED", "reason": "Abstract stress states must be explicit."},
+    "repair_or_healing": {"status": "REQUIRED", "reason": "The explicit NOT_MODELED decision prevents fabricated biology."},
+    "reproduction_or_replication": {"status": "REQUIRED", "reason": "Reproduction remains bounded and unauthorized."},
+    "mutation_or_change": {"status": "REQUIRED", "reason": "Automatic species or genome change is forbidden."},
+    "death_or_termination": {"status": "REQUIRED", "reason": "Mortality requires count and dead-biomass custody."},
+    "history": {"status": "REQUIRED", "reason": "Candidate history is retained."},
+    "rights": {"status": "REQUIRED", "reason": "Rights remain separated and ungranted."},
+    "authority": {"status": "REQUIRED", "reason": "Authority is explicitly none."},
+    "ownership": {"status": "REQUIRED", "reason": "Ownership is unassigned and separate from habitat rights."},
+    "custody": {"status": "REQUIRED", "reason": "Candidate review custody is explicit."},
+    "operation": {"status": "REQUIRED", "reason": "Operation is disabled."},
+    "usage": {"status": "REQUIRED", "reason": "Usage is not authorized."},
+    "transfer": {"status": "REQUIRED", "reason": "Transfer is disabled."},
+    "economic_role": {"status": "REQUIRED", "reason": "No economic value or service claim is asserted."},
+    "civilization_role": {"status": "REQUIRED", "reason": "No civilization role is assigned."},
+    "runtime_binding": {"status": "REQUIRED", "reason": "The runtime binding is non-executable."},
+    "world_viewer_binding": {"status": "REQUIRED", "reason": "Only a read-only candidate projection is permitted."},
+    "api_binding": {"status": "REQUIRED", "reason": "Only a read-only static data contract is permitted."},
+    "provenance": {"status": "REQUIRED", "reason": "Immutable source history is mandatory."},
+    "integrity": {"status": "REQUIRED", "reason": "The package is bound by SHA-256."},
+    "deterministic_seed": {"status": "REQUIRED", "reason": "Replay requires a stable seed."},
+    "event_log": {"status": "REQUIRED", "reason": "Candidate and fixture history is hash-linked."}
+  },
+  "extensions": [
+    {
+      "extension_id": "ANIMAL_EXTENSION",
+      "schema_version": "1.0.0",
+      "data": {
+        "body_plan": "SEGMENTED_SOIL_INVERTEBRATE_ANALOG_CANDIDATE",
+        "organs": ["ABSTRACT_DIGESTIVE_SYSTEM", "ABSTRACT_CIRCULATORY_SYSTEM", "ABSTRACT_REPRODUCTIVE_SYSTEM"],
+        "senses": ["ABSTRACT_CHEMICAL_SENSING", "ABSTRACT_LIGHT_SENSING", "ABSTRACT_TOUCH_SENSING"],
+        "movement": "BOUNDED_SOIL_DISPLACEMENT_PROXY",
+        "metabolism": "FINITE_DETRITUS_WATER_ENERGY_PROXY",
+        "diet": ["DETRITUS_POOL"],
+        "predator_prey": "DETRITIVORE_RELATIONSHIP_PROPOSAL_ONLY_NO_ACTIVE_FOOD_CHAIN",
+        "health": "RESOURCE_AND_ENVIRONMENT_GATE_PROXY",
+        "sex": "ABSTRACT_ELIGIBLE_PARENT_COHORTS",
+        "reproduction": "BOUNDED_COCOON_STAGE_PROPOSAL",
+        "offspring": "COCOON_STAGE_CANDIDATE",
+        "lifespan": "BOUNDED_SIMULATION_TICKS_NOT_EMPIRICAL"
+      }
+    }
+  ],
+  "safety_boundaries": {
+    "real_kgen": "NO_REAL_KGEN",
+    "onchain_transfer": "NO_ONCHAIN_TRANSFER",
+    "k11520": "SIMULATED_K11520_ONLY",
+    "production_runtime": false,
+    "wallet": "NONE",
+    "legal_personhood": false
+  }
+}
