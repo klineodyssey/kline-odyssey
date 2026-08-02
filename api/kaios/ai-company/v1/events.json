@@ -93,8 +93,9 @@
       "cash_delta": 0,
       "progress_delta": 0,
       "risk_delta": 0,
-      "previous_state_hash": "f449c6aa53f01ea984db9269852322da642a996ee84b82ae39fd5cd2f300880b",
-      "next_state_hash": "83ca6f97eeb96032a0fd573694a5c39f04cbddd1db38b3c09c36868ab708ba5c",
+      "previous_state_hash": "60f60494e8860249e266f70bd7f318d9f3d618e83b5e99443a60834b60972b2f",
+      "event_payload_hash": "53fd3406067897c338eaddf497d7b65b4e53a32a1a24484b3c742fde755e2e14",
+      "next_state_hash": "58a7f6d32930b32815a592a05010c1cf594db5ad5deed8afb6e958c691df7ac1",
       "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
       "status": "COMPLETED",
       "reason": null
@@ -185,8 +186,9 @@
       "cash_delta": 0,
       "progress_delta": 0,
       "risk_delta": 0,
-      "previous_state_hash": "83ca6f97eeb96032a0fd573694a5c39f04cbddd1db38b3c09c36868ab708ba5c",
-      "next_state_hash": "c8b700e855c4109c54848256b431c4d59e480a06b0682940d8d135b4c72b45e1",
+      "previous_state_hash": "58a7f6d32930b32815a592a05010c1cf594db5ad5deed8afb6e958c691df7ac1",
+      "event_payload_hash": "cbf591a97bb0b320c749240a6d74268a984c7a1b9388dfe19e68a481a1fbd6ff",
+      "next_state_hash": "1b0b420e9cadb8168ea0ada96d499506c465b73ee05042bec43765d9a9cc4594",
       "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
       "status": "COMPLETED",
       "reason": null
@@ -323,8 +325,9 @@
       "cash_delta": 0,
       "progress_delta": 0,
       "risk_delta": 0,
-      "previous_state_hash": "c8b700e855c4109c54848256b431c4d59e480a06b0682940d8d135b4c72b45e1",
-      "next_state_hash": "2ded813f2567828898f2f0b79f010dc18516b7565d3ba2d57a723577ac959cac",
+      "previous_state_hash": "1b0b420e9cadb8168ea0ada96d499506c465b73ee05042bec43765d9a9cc4594",
+      "event_payload_hash": "306dea88e2134434432977fd579cc6473aec27c06053cf5d415f9a423ebc84f1",
+      "next_state_hash": "c7960f832345c0d039a3b416eefb1707229dc50f62c7b067028486fab45c7c23",
       "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
       "status": "COMPLETED",
       "reason": null
@@ -354,6 +357,44 @@
           "estimated_duration": 43,
           "feasibility_review_id": "AI-COMPANY-FEASIBILITY-00001",
           "assumptions": [],
+          "risk_assessment": [
+            {
+              "risk_id": "FISHPOND_PROJECT-RISK-01",
+              "risk_type": "SCHEDULE_RISK",
+              "probability": 0.25,
+              "impact": "MEDIUM",
+              "mitigation": "DEPENDENCY_AND_TIME_BUFFER",
+              "status": "MONITORED",
+              "simulation_only": true
+            },
+            {
+              "risk_id": "FISHPOND_PROJECT-RISK-02",
+              "risk_type": "RESOURCE_AVAILABILITY_RISK",
+              "probability": 0.3,
+              "impact": "MEDIUM",
+              "mitigation": "EXPLICIT_PROCUREMENT_GATES",
+              "status": "MONITORED",
+              "simulation_only": true
+            },
+            {
+              "risk_id": "FISHPOND_PROJECT-RISK-03",
+              "risk_type": "FINANCIAL_EXPOSURE_RISK",
+              "probability": 0.2,
+              "impact": "LOW",
+              "mitigation": "BOUNDED_BUDGET_AND_CAPACITY",
+              "status": "MONITORED",
+              "simulation_only": true
+            },
+            {
+              "risk_id": "FISHPOND_PROJECT-RISK-04",
+              "risk_type": "SITE_SAFETY_RISK",
+              "probability": 0.2,
+              "impact": "LOW",
+              "mitigation": "STAGE_SAFETY_INSPECTIONS",
+              "status": "MONITORED",
+              "simulation_only": true
+            }
+          ],
           "status": "CUSTOMER_REVIEW",
           "simulation_only": true
         }
@@ -366,8 +407,9 @@
       "cash_delta": 0,
       "progress_delta": 0,
       "risk_delta": 0,
-      "previous_state_hash": "2ded813f2567828898f2f0b79f010dc18516b7565d3ba2d57a723577ac959cac",
-      "next_state_hash": "48a89579504a757c39f7fdd4a50af09738fdd18aa1e00fd5f1b535e6c525d6a1",
+      "previous_state_hash": "c7960f832345c0d039a3b416eefb1707229dc50f62c7b067028486fab45c7c23",
+      "event_payload_hash": "bd690eda2f7f565bbdd54a542f07bfda2b6472d1a52ed458803f656263934ebf",
+      "next_state_hash": "0a87bd85d81c5f4acb86f406e3c186ea41ad7783f83913388874a12303f761ab",
       "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
       "status": "COMPLETED",
       "reason": null
@@ -399,8 +441,9 @@
       "cash_delta": 0,
       "progress_delta": 0,
       "risk_delta": 0,
-      "previous_state_hash": "48a89579504a757c39f7fdd4a50af09738fdd18aa1e00fd5f1b535e6c525d6a1",
-      "next_state_hash": "e88d25e2b686b55a4913527beaba94ee3550ba6f34da5ce36d94d594d9c3f24e",
+      "previous_state_hash": "0a87bd85d81c5f4acb86f406e3c186ea41ad7783f83913388874a12303f761ab",
+      "event_payload_hash": "5bcf73972f45e7e002470526486c72e595ff4513b500f6e6ce89d5c40f574ad0",
+      "next_state_hash": "fa8856c76f48525fd8dcb55f45a646d724d293fda0c4d53cc85c9da23d20b34e",
       "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
       "status": "ACCEPTED",
       "reason": null
@@ -439,7 +482,44 @@
           "budget": null,
           "schedule": null,
           "contract_id": null,
-          "risks": [],
+          "risks": [
+            {
+              "risk_id": "FISHPOND_PROJECT-RISK-01",
+              "risk_type": "SCHEDULE_RISK",
+              "probability": 0.25,
+              "impact": "MEDIUM",
+              "mitigation": "DEPENDENCY_AND_TIME_BUFFER",
+              "status": "MONITORED",
+              "simulation_only": true
+            },
+            {
+              "risk_id": "FISHPOND_PROJECT-RISK-02",
+              "risk_type": "RESOURCE_AVAILABILITY_RISK",
+              "probability": 0.3,
+              "impact": "MEDIUM",
+              "mitigation": "EXPLICIT_PROCUREMENT_GATES",
+              "status": "MONITORED",
+              "simulation_only": true
+            },
+            {
+              "risk_id": "FISHPOND_PROJECT-RISK-03",
+              "risk_type": "FINANCIAL_EXPOSURE_RISK",
+              "probability": 0.2,
+              "impact": "LOW",
+              "mitigation": "BOUNDED_BUDGET_AND_CAPACITY",
+              "status": "MONITORED",
+              "simulation_only": true
+            },
+            {
+              "risk_id": "FISHPOND_PROJECT-RISK-04",
+              "risk_type": "SITE_SAFETY_RISK",
+              "probability": 0.2,
+              "impact": "LOW",
+              "mitigation": "STAGE_SAFETY_INSPECTIONS",
+              "status": "MONITORED",
+              "simulation_only": true
+            }
+          ],
           "issues": [],
           "progress_percent": 0,
           "domain_binding": "AQUACULTURE_RUNTIME_V1",
@@ -448,7 +528,8 @@
             "integrity_verified": true,
             "simulation_only": true,
             "authority": "NO_PRODUCTION_AUTHORITY",
-            "adapter": "EXISTING_RUNTIME_REFERENCE"
+            "adapter": "EXISTING_RUNTIME_REFERENCE",
+            "execution_status": "PENDING"
           },
           "simulation_only": true,
           "compute_reservation": 0,
@@ -473,8 +554,9 @@
       "cash_delta": 0,
       "progress_delta": 0,
       "risk_delta": 0,
-      "previous_state_hash": "e88d25e2b686b55a4913527beaba94ee3550ba6f34da5ce36d94d594d9c3f24e",
-      "next_state_hash": "70e8b493bfcd153973f1b9df5ad37ef6bd5fa49465bc035dbfb84ec850626a9b",
+      "previous_state_hash": "fa8856c76f48525fd8dcb55f45a646d724d293fda0c4d53cc85c9da23d20b34e",
+      "event_payload_hash": "9cc248b9bae1cefae3b51c5b2c8ae8e5750911e6f3c7b85c6dd7cb3f80b61641",
+      "next_state_hash": "073f0a121e8c853e4752044be8538d0b775839f3bfc56d9226c3ab891b38510c",
       "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
       "status": "COMPLETED",
       "reason": null
@@ -851,7 +933,8 @@
           "integrity_verified": true,
           "simulation_only": true,
           "authority": "NO_PRODUCTION_AUTHORITY",
-          "adapter": "EXISTING_RUNTIME_REFERENCE"
+          "adapter": "EXISTING_RUNTIME_REFERENCE",
+          "execution_status": "PENDING"
         }
       },
       "material_delta": 0,
@@ -862,8 +945,9 @@
       "cash_delta": 0,
       "progress_delta": 0,
       "risk_delta": 0,
-      "previous_state_hash": "70e8b493bfcd153973f1b9df5ad37ef6bd5fa49465bc035dbfb84ec850626a9b",
-      "next_state_hash": "a0f6980762692c48b88713f6f746d6db6551c0cc9cc91b7b56285dc422f07e94",
+      "previous_state_hash": "073f0a121e8c853e4752044be8538d0b775839f3bfc56d9226c3ab891b38510c",
+      "event_payload_hash": "d1558d9d89558b598098d1674491f0148fde598d6296a9487cae8a759c9743e7",
+      "next_state_hash": "9cd787b26e2418e6378aa6715819202efb76fe655661ce2cdfb7928d7ca99c26",
       "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
       "status": "COMPLETED",
       "reason": null
@@ -938,8 +1022,9 @@
       "cash_delta": 0,
       "progress_delta": 0,
       "risk_delta": 0,
-      "previous_state_hash": "a0f6980762692c48b88713f6f746d6db6551c0cc9cc91b7b56285dc422f07e94",
-      "next_state_hash": "7e0e567cd6e0be09b5a6ab749027cdb46ed4b9754275fa744221672e7e728ec7",
+      "previous_state_hash": "9cd787b26e2418e6378aa6715819202efb76fe655661ce2cdfb7928d7ca99c26",
+      "event_payload_hash": "bac457d4b9362ad6429cf7fa04e33dd83b149516340849559184a3aade86de39",
+      "next_state_hash": "16754c789d0515507ee67891fadcf0f04cf987752e6ea428da08918d9d768c0c",
       "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
       "status": "COMPLETED",
       "reason": null
@@ -1011,8 +1096,8 @@
             "description": "LINING",
             "quantity": 24,
             "unit": "SIMULATION_UNIT",
-            "unit_mass": 10,
-            "total_mass": 240,
+            "unit_mass": 4,
+            "total_mass": 96,
             "required_quality": "STANDARD_SIMULATION",
             "supplier": "SIMULATED-SUPPLIER-LINING",
             "availability": 24,
@@ -1047,7 +1132,7 @@
             "status": "PLANNED"
           }
         ],
-        "total_mass": 408
+        "total_mass": 264
       },
       "material_delta": 0,
       "energy_delta": 0,
@@ -1057,8 +1142,9 @@
       "cash_delta": 0,
       "progress_delta": 0,
       "risk_delta": 0,
-      "previous_state_hash": "7e0e567cd6e0be09b5a6ab749027cdb46ed4b9754275fa744221672e7e728ec7",
-      "next_state_hash": "f9e4cefcf020347b81dd2514624975fcd9a5cb430a02e6039cbd4006dfe8a94f",
+      "previous_state_hash": "16754c789d0515507ee67891fadcf0f04cf987752e6ea428da08918d9d768c0c",
+      "event_payload_hash": "fe1cf421c70082d77688fedb67145e470b23f0750d3741d517657779760ab606",
+      "next_state_hash": "851496accdda71ab118d6468fba6d5d74945621d6418c9ee0a5a26fdea9449bd",
       "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
       "status": "COMPLETED",
       "reason": null
@@ -1272,8 +1358,9 @@
       "cash_delta": 0,
       "progress_delta": 0,
       "risk_delta": 0,
-      "previous_state_hash": "f9e4cefcf020347b81dd2514624975fcd9a5cb430a02e6039cbd4006dfe8a94f",
-      "next_state_hash": "7e2752a2e9cda29aeaeb2c842f86662954e906eac693dbb2c9b0554b3882ee9a",
+      "previous_state_hash": "851496accdda71ab118d6468fba6d5d74945621d6418c9ee0a5a26fdea9449bd",
+      "event_payload_hash": "1dae0f17a9a3c498598e0f04a2d69ea47f6f5b5cec1d6a0b0eafbd82dd930ff2",
+      "next_state_hash": "275bcbbfe17b05927e00e8fa375496ffc37e2573d441e49220209eaa0c058b86",
       "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
       "status": "COMPLETED",
       "reason": null
@@ -1326,7 +1413,7 @@
             "fuel_or_charge": 100,
             "maintenance_state": "READY",
             "wear": 0,
-            "transport_requirement": "STANDARD_ROUTE",
+            "transport_requirement": "HEAVY_CAUSAL_TRANSPORT",
             "reservation_start": 0,
             "reservation_end": 0,
             "cost": 75,
@@ -1362,7 +1449,7 @@
             "fuel_or_charge": 100,
             "maintenance_state": "READY",
             "wear": 0,
-            "transport_requirement": "STANDARD_ROUTE",
+            "transport_requirement": "HEAVY_CAUSAL_TRANSPORT",
             "reservation_start": 0,
             "reservation_end": 0,
             "cost": 75,
@@ -1380,7 +1467,7 @@
             "fuel_or_charge": 100,
             "maintenance_state": "READY",
             "wear": 0,
-            "transport_requirement": "STANDARD_ROUTE",
+            "transport_requirement": "HEAVY_CAUSAL_TRANSPORT",
             "reservation_start": 0,
             "reservation_end": 0,
             "cost": 75,
@@ -1397,8 +1484,9 @@
       "cash_delta": 0,
       "progress_delta": 0,
       "risk_delta": 0,
-      "previous_state_hash": "7e2752a2e9cda29aeaeb2c842f86662954e906eac693dbb2c9b0554b3882ee9a",
-      "next_state_hash": "276657f10243d78ceddc6f2d4b5f5631fc87c052569a5aa6d6ac5404e970f403",
+      "previous_state_hash": "275bcbbfe17b05927e00e8fa375496ffc37e2573d441e49220209eaa0c058b86",
+      "event_payload_hash": "b576a9b03648b4873ada4c968b6cf5e451f70580fb617e3365d10cd5ab6e5421",
+      "next_state_hash": "148a44144c59cacca8a6d89dda77448e9813c4899cea7ed1ba135887d985078a",
       "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
       "status": "COMPLETED",
       "reason": null
@@ -1423,6 +1511,7 @@
         "supply_chain": [
           {
             "transport_id": "AI-COMPANY-PROJECT-00001-TRANSPORT-001",
+            "bom_id": "AI-COMPANY-PROJECT-00001-BOM-001",
             "origin": "SIMULATED-SUPPLIER-GRAVEL",
             "destination": "LAND-SIM-FISHPOND-001",
             "route": "CAUSAL-ROUTE-001",
@@ -1439,6 +1528,7 @@
           },
           {
             "transport_id": "AI-COMPANY-PROJECT-00001-TRANSPORT-002",
+            "bom_id": "AI-COMPANY-PROJECT-00001-BOM-002",
             "origin": "SIMULATED-SUPPLIER-PIPE",
             "destination": "LAND-SIM-FISHPOND-001",
             "route": "CAUSAL-ROUTE-002",
@@ -1455,22 +1545,24 @@
           },
           {
             "transport_id": "AI-COMPANY-PROJECT-00001-TRANSPORT-003",
+            "bom_id": "AI-COMPANY-PROJECT-00001-BOM-003",
             "origin": "SIMULATED-SUPPLIER-LINING",
             "destination": "LAND-SIM-FISHPOND-001",
             "route": "CAUSAL-ROUTE-003",
             "quantity": 24,
-            "mass": 240,
+            "mass": 96,
             "vehicle": "SIMULATED-TRUCK-001",
-            "fuel": 2.24,
+            "fuel": 2.096,
             "loading_time": 1,
             "travel_time": 5,
             "unloading_time": 1,
-            "cost": 52,
+            "cost": 44.8,
             "risk": 0.1,
             "status": "PLANNED"
           },
           {
             "transport_id": "AI-COMPANY-PROJECT-00001-TRANSPORT-004",
+            "bom_id": "AI-COMPANY-PROJECT-00001-BOM-004",
             "origin": "SIMULATED-SUPPLIER-FISH_JUVENILE_STOCK",
             "destination": "LAND-SIM-FISHPOND-001",
             "route": "CAUSAL-ROUTE-004",
@@ -1495,8 +1587,9 @@
       "cash_delta": 0,
       "progress_delta": 0,
       "risk_delta": 0,
-      "previous_state_hash": "276657f10243d78ceddc6f2d4b5f5631fc87c052569a5aa6d6ac5404e970f403",
-      "next_state_hash": "0c3af13cc680df9d122898f13d0e9a642beb5e5b50fbc5bb16c3720db207c0b5",
+      "previous_state_hash": "148a44144c59cacca8a6d89dda77448e9813c4899cea7ed1ba135887d985078a",
+      "event_payload_hash": "820ed1a647b4f1b309122321e366b0ccac19d9774b61ed948a81e8d4c747d502",
+      "next_state_hash": "c4d847e6ccb33fc39a5993bca3315c8a5b642d7d5f7ff9706758e5aa5dbabdb3",
       "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
       "status": "COMPLETED",
       "reason": null
@@ -1525,7 +1618,7 @@
           "labor_cost": 7150,
           "equipment_cost": 2200,
           "energy_cost": 222,
-          "transport_cost": 180.4,
+          "transport_cost": 173.2,
           "storage_cost": 20.16,
           "inspection_cost": 700,
           "risk_reserve": 556.32,
@@ -1534,12 +1627,12 @@
           "insurance_simulation": 139.08,
           "interest_simulation": 0,
           "contingency": 695.4,
-          "total_estimated_cost": 14627.68,
+          "total_estimated_cost": 14620.48,
           "approved_budget": 250000,
           "spent": 0,
           "committed": 0,
           "remaining": 250000,
-          "forecast_at_completion": 14627.68,
+          "forecast_at_completion": 14620.48,
           "funding_source": "CUSTOMER_SIMULATED_WALLET",
           "status": "APPROVED"
         }
@@ -1552,8 +1645,9 @@
       "cash_delta": 0,
       "progress_delta": 0,
       "risk_delta": 0,
-      "previous_state_hash": "0c3af13cc680df9d122898f13d0e9a642beb5e5b50fbc5bb16c3720db207c0b5",
-      "next_state_hash": "0791c28ba6ba4e0882e26f8a72d37381b0d9e2eca2361c8e16a9bb2c6d7b1422",
+      "previous_state_hash": "c4d847e6ccb33fc39a5993bca3315c8a5b642d7d5f7ff9706758e5aa5dbabdb3",
+      "event_payload_hash": "1094021d9e4aa76f22de5df8659af59e7b16ad1f37f5f385d898eba1ac7e1e11",
+      "next_state_hash": "6590c7bf7c9dde50635d77356fd48a57f130964c16af244f072a7dd06162b781",
       "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
       "status": "COMPLETED",
       "reason": null
@@ -1621,6 +1715,7 @@
           "weather_delay": 0,
           "inspection_delay": 0,
           "rework_delay": 0,
+          "execution_pause_delay": 0,
           "transport_delay": 0,
           "actual_start": null,
           "actual_end": null,
@@ -1667,8 +1762,9 @@
       "cash_delta": 0,
       "progress_delta": 0,
       "risk_delta": 0,
-      "previous_state_hash": "0791c28ba6ba4e0882e26f8a72d37381b0d9e2eca2361c8e16a9bb2c6d7b1422",
-      "next_state_hash": "89425642f8aaaf237b5d88014c2862732ce40bcd53ee84db4256b75acc5e93d1",
+      "previous_state_hash": "6590c7bf7c9dde50635d77356fd48a57f130964c16af244f072a7dd06162b781",
+      "event_payload_hash": "426d34a745268fb104bc77be797670b8752c029ccbd45b8e2832371c09e12cf8",
+      "next_state_hash": "3c87d99938d8c59a388e514c710bcc5c43e96f928bcd7e72e0790b07aceed4b3",
       "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
       "status": "COMPLETED",
       "reason": null
@@ -1746,8 +1842,9 @@
       "cash_delta": 25000,
       "progress_delta": 0,
       "risk_delta": 0,
-      "previous_state_hash": "89425642f8aaaf237b5d88014c2862732ce40bcd53ee84db4256b75acc5e93d1",
-      "next_state_hash": "9702d68671c7ab3b972633b1a6b9cc4dcbbfb57e63e087498a51f28d3588d44b",
+      "previous_state_hash": "3c87d99938d8c59a388e514c710bcc5c43e96f928bcd7e72e0790b07aceed4b3",
+      "event_payload_hash": "d46c0a04e3dbc00614ce2f3bf6ca434b9a8094898ec9aeb3c72617e7cd7c751f",
+      "next_state_hash": "37533ffc9d96e425b5be2187b4700f2856fc0e93c878d54f46c51a0ff2cfbd42",
       "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
       "status": "COMPLETED",
       "reason": null
@@ -1765,7 +1862,8 @@
       "location": null,
       "event_type": "START_PROCUREMENT",
       "inputs": {
-        "projectId": "AI-COMPANY-PROJECT-00001"
+        "projectId": "AI-COMPANY-PROJECT-00001",
+        "options": {}
       },
       "outputs": {
         "orders": [
@@ -1779,7 +1877,35 @@
             "transport_cost": 46,
             "ordered_at": 0,
             "arrival_time": 7,
-            "status": "IN_TRANSIT",
+            "supplier_candidates": [
+              "SIMULATED-SUPPLIER-GRAVEL-QUALITY",
+              "SIMULATED-SUPPLIER-GRAVEL-CAPACITY"
+            ],
+            "selection_basis": [
+              "QUALITY",
+              "DELIVERY",
+              "CAPACITY",
+              "RISK",
+              "TOTAL_COST"
+            ],
+            "selected_supplier": "SIMULATED-SUPPLIER-GRAVEL",
+            "phase_times": {
+              "rfq_created": 0,
+              "quotes_received": 0.25,
+              "supplier_selected": 0.5,
+              "order_placed": 0.75,
+              "in_production": 1,
+              "in_transit": 2,
+              "received": 7
+            },
+            "state_history": [
+              {
+                "status": "RFQ_CREATED",
+                "simulation_time": 0
+              }
+            ],
+            "inspection_outcome": "PASS",
+            "status": "RFQ_CREATED",
             "simulation_only": true
           },
           {
@@ -1792,7 +1918,35 @@
             "transport_cost": 41.8,
             "ordered_at": 0,
             "arrival_time": 9,
-            "status": "IN_TRANSIT",
+            "supplier_candidates": [
+              "SIMULATED-SUPPLIER-PIPE-QUALITY",
+              "SIMULATED-SUPPLIER-PIPE-CAPACITY"
+            ],
+            "selection_basis": [
+              "QUALITY",
+              "DELIVERY",
+              "CAPACITY",
+              "RISK",
+              "TOTAL_COST"
+            ],
+            "selected_supplier": "SIMULATED-SUPPLIER-PIPE",
+            "phase_times": {
+              "rfq_created": 0,
+              "quotes_received": 0.25,
+              "supplier_selected": 0.5,
+              "order_placed": 0.75,
+              "in_production": 1,
+              "in_transit": 3,
+              "received": 9
+            },
+            "state_history": [
+              {
+                "status": "RFQ_CREATED",
+                "simulation_time": 0
+              }
+            ],
+            "inspection_outcome": "PASS",
+            "status": "RFQ_CREATED",
             "simulation_only": true
           },
           {
@@ -1802,10 +1956,38 @@
             "material_id": "LINING",
             "quantity": 24,
             "material_cost": 288,
-            "transport_cost": 52,
+            "transport_cost": 44.8,
             "ordered_at": 0,
             "arrival_time": 11,
-            "status": "IN_TRANSIT",
+            "supplier_candidates": [
+              "SIMULATED-SUPPLIER-LINING-QUALITY",
+              "SIMULATED-SUPPLIER-LINING-CAPACITY"
+            ],
+            "selection_basis": [
+              "QUALITY",
+              "DELIVERY",
+              "CAPACITY",
+              "RISK",
+              "TOTAL_COST"
+            ],
+            "selected_supplier": "SIMULATED-SUPPLIER-LINING",
+            "phase_times": {
+              "rfq_created": 0,
+              "quotes_received": 0.25,
+              "supplier_selected": 0.5,
+              "order_placed": 0.75,
+              "in_production": 1,
+              "in_transit": 4,
+              "received": 11
+            },
+            "state_history": [
+              {
+                "status": "RFQ_CREATED",
+                "simulation_time": 0
+              }
+            ],
+            "inspection_outcome": "PASS",
+            "status": "RFQ_CREATED",
             "simulation_only": true
           },
           {
@@ -1818,11 +2000,39 @@
             "transport_cost": 40.6,
             "ordered_at": 0,
             "arrival_time": 13,
-            "status": "IN_TRANSIT",
+            "supplier_candidates": [
+              "SIMULATED-SUPPLIER-FISH_JUVENILE_STOCK-QUALITY",
+              "SIMULATED-SUPPLIER-FISH_JUVENILE_STOCK-CAPACITY"
+            ],
+            "selection_basis": [
+              "QUALITY",
+              "DELIVERY",
+              "CAPACITY",
+              "RISK",
+              "TOTAL_COST"
+            ],
+            "selected_supplier": "SIMULATED-SUPPLIER-FISH_JUVENILE_STOCK",
+            "phase_times": {
+              "rfq_created": 0,
+              "quotes_received": 0.25,
+              "supplier_selected": 0.5,
+              "order_placed": 0.75,
+              "in_production": 1,
+              "in_transit": 5,
+              "received": 13
+            },
+            "state_history": [
+              {
+                "status": "RFQ_CREATED",
+                "simulation_time": 0
+              }
+            ],
+            "inspection_outcome": "PASS",
+            "status": "RFQ_CREATED",
             "simulation_only": true
           }
         ],
-        "committed": 1188.4
+        "committed": 1181.2
       },
       "material_delta": 0,
       "energy_delta": 0,
@@ -1832,8 +2042,9 @@
       "cash_delta": 0,
       "progress_delta": 0,
       "risk_delta": 0,
-      "previous_state_hash": "9702d68671c7ab3b972633b1a6b9cc4dcbbfb57e63e087498a51f28d3588d44b",
-      "next_state_hash": "25492242c3509eb442b2c411f6f5f117e440d3e848328ccdf4deac1e22e19fe3",
+      "previous_state_hash": "37533ffc9d96e425b5be2187b4700f2856fc0e93c878d54f46c51a0ff2cfbd42",
+      "event_payload_hash": "c46e8e126530bcffc7d7e2c66fe1fa419461d36622342908e813ea72a5663221",
+      "next_state_hash": "fcf317237a667c176ea5e092bbbd1d2d2110e79d42af89b75574638bf5dd886e",
       "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
       "status": "COMPLETED",
       "reason": null
@@ -1862,8 +2073,9 @@
       "cash_delta": 0,
       "progress_delta": 0,
       "risk_delta": 0,
-      "previous_state_hash": "25492242c3509eb442b2c411f6f5f117e440d3e848328ccdf4deac1e22e19fe3",
-      "next_state_hash": "3180348d7ed0e3c28e85426852f0b4302b3425470f5985f0f2d2c1d3e0783021",
+      "previous_state_hash": "fcf317237a667c176ea5e092bbbd1d2d2110e79d42af89b75574638bf5dd886e",
+      "event_payload_hash": "df6ef731131307c66a3ac97ac4500114b6f03e66d718cf54f1c8de63a23f4fe6",
+      "next_state_hash": "dbc328e4a156eab160d12a500c238f86141758f9fc48cfdd876bc4cde47e4dc8",
       "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
       "status": "COMPLETED",
       "reason": null
@@ -1895,8 +2107,9 @@
       "cash_delta": 0,
       "progress_delta": 0,
       "risk_delta": 0,
-      "previous_state_hash": "3180348d7ed0e3c28e85426852f0b4302b3425470f5985f0f2d2c1d3e0783021",
-      "next_state_hash": "ff6fce65fc16aba37c71e6a019f0dc0e33073d3255d9716f77fe072bd47f9750",
+      "previous_state_hash": "dbc328e4a156eab160d12a500c238f86141758f9fc48cfdd876bc4cde47e4dc8",
+      "event_payload_hash": "ba1c695c22d92856f8f01e759765b92076ca6eee4b9a3ade7e25bf57d3edb2b2",
+      "next_state_hash": "7f808e5369ec8475b3dc3dc9d1ca5c855e37db01b792b4b89a24a07c8059a743",
       "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
       "status": "COMPLETED",
       "reason": null
@@ -1935,8 +2148,9 @@
       "cash_delta": -190,
       "progress_delta": 0,
       "risk_delta": 0,
-      "previous_state_hash": "ff6fce65fc16aba37c71e6a019f0dc0e33073d3255d9716f77fe072bd47f9750",
-      "next_state_hash": "036104ca97a1e86cceeda75afd188aa651fddd70ff8064739b77188297b25031",
+      "previous_state_hash": "7f808e5369ec8475b3dc3dc9d1ca5c855e37db01b792b4b89a24a07c8059a743",
+      "event_payload_hash": "4b25fa14717f7df107531ce3289954fe00a2b36991f5a9fe156b8ddf7cc4e457",
+      "next_state_hash": "d6ff6b384e6f299e0b6d7b96d384a2b8bf87cd74d038348b6064ae26d99e4ec6",
       "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
       "status": "COMPLETED",
       "reason": null
@@ -1975,8 +2189,9 @@
       "cash_delta": -257.8,
       "progress_delta": 0,
       "risk_delta": 0,
-      "previous_state_hash": "036104ca97a1e86cceeda75afd188aa651fddd70ff8064739b77188297b25031",
-      "next_state_hash": "2883ac948b604834f03c9560f6a7e8d0f82fb93a6836425c234431f01c9fe372",
+      "previous_state_hash": "d6ff6b384e6f299e0b6d7b96d384a2b8bf87cd74d038348b6064ae26d99e4ec6",
+      "event_payload_hash": "a2418a40c862632d8ecbfd9e7ca27b4c6b86092900241f8b791a4d9dad40a574",
+      "next_state_hash": "a6bf4565e6078d3633d9a617494b59b02fae01d23e45a8be667238a90b1018f2",
       "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
       "status": "COMPLETED",
       "reason": null
@@ -2001,7 +2216,7 @@
         "material_id": "LINING",
         "inventory": {
           "quantity": 24,
-          "mass": 240,
+          "mass": 96,
           "project_allocations": {
             "AI-COMPANY-PROJECT-00001": 24
           }
@@ -2012,11 +2227,12 @@
       "labor_delta": 0,
       "equipment_delta": 0,
       "inventory_delta": 24,
-      "cash_delta": -340,
+      "cash_delta": -332.8,
       "progress_delta": 0,
       "risk_delta": 0,
-      "previous_state_hash": "2883ac948b604834f03c9560f6a7e8d0f82fb93a6836425c234431f01c9fe372",
-      "next_state_hash": "340f83cfa60afe9b143bf79350b1db70084eb6caa35f1c2e24c5fa45db6e29a9",
+      "previous_state_hash": "a6bf4565e6078d3633d9a617494b59b02fae01d23e45a8be667238a90b1018f2",
+      "event_payload_hash": "8797b8caa745629ec11f51a2fe5872ac09bc41cd1e77a46949cdf06d151625e8",
+      "next_state_hash": "dc9441cf6d97f68ae12289f4ecc1f046cfa462395baef59a90f0c1e7b087ab3e",
       "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
       "status": "COMPLETED",
       "reason": null
@@ -2055,8 +2271,9 @@
       "cash_delta": -400.6,
       "progress_delta": 0,
       "risk_delta": 0,
-      "previous_state_hash": "340f83cfa60afe9b143bf79350b1db70084eb6caa35f1c2e24c5fa45db6e29a9",
-      "next_state_hash": "6a017ddbd4f45f18d59bbfc0fbe9014e97d3af5075bb795079c1d67d597bbc9a",
+      "previous_state_hash": "dc9441cf6d97f68ae12289f4ecc1f046cfa462395baef59a90f0c1e7b087ab3e",
+      "event_payload_hash": "9d32fa5ece377a276e3b61c7ced1be1aafb095b82ae9e565551b1347c07f863f",
+      "next_state_hash": "479ccb1b21390c68612a06e703786072db220ca55daafe216fea057572748910",
       "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
       "status": "COMPLETED",
       "reason": null
@@ -2124,6 +2341,7 @@
           "weather_delay": 0,
           "inspection_delay": 0,
           "rework_delay": 0,
+          "execution_pause_delay": 0,
           "transport_delay": 0,
           "actual_start": null,
           "actual_end": null,
@@ -2170,8 +2388,9 @@
       "cash_delta": 0,
       "progress_delta": 0,
       "risk_delta": 0,
-      "previous_state_hash": "6a017ddbd4f45f18d59bbfc0fbe9014e97d3af5075bb795079c1d67d597bbc9a",
-      "next_state_hash": "0d33df11b4c80ed36c29c36b4bacac8c1eacc955f2f0653ae9570931b519bcf2",
+      "previous_state_hash": "479ccb1b21390c68612a06e703786072db220ca55daafe216fea057572748910",
+      "event_payload_hash": "2823a4e88553caf9516b6b09ab42bf643e827263ac0544af9342819ea3d25ccb",
+      "next_state_hash": "ef05594d7c0cbcbccb0eea6981692ad61e74a0217b1a6a0d113fc41c35cc028f",
       "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
       "status": "COMPLETED",
       "reason": null
@@ -2216,8 +2435,9 @@
       "cash_delta": 0,
       "progress_delta": 0,
       "risk_delta": 0,
-      "previous_state_hash": "0d33df11b4c80ed36c29c36b4bacac8c1eacc955f2f0653ae9570931b519bcf2",
-      "next_state_hash": "5b4e8df6ffe79e23ade05de8e942fa8e60c8b8e5bc02335392ac72447c9f5bae",
+      "previous_state_hash": "ef05594d7c0cbcbccb0eea6981692ad61e74a0217b1a6a0d113fc41c35cc028f",
+      "event_payload_hash": "d84ba6d049cba6dfea2582a255d5c88c4df311a52b48d8ce1dbc5033f6c7fe3e",
+      "next_state_hash": "209b1c7220be3d6f2de086d86b388e7c3b0ad5f5ec7dd0301f584be1102b42c7",
       "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
       "status": "COMPLETED",
       "reason": null
@@ -2259,8 +2479,9 @@
       "cash_delta": 0,
       "progress_delta": 0,
       "risk_delta": 0,
-      "previous_state_hash": "5b4e8df6ffe79e23ade05de8e942fa8e60c8b8e5bc02335392ac72447c9f5bae",
-      "next_state_hash": "17b54bba4b735118ccf99136f12a699644e8a9eb549fcd3e7f2a46dc7c8374be",
+      "previous_state_hash": "209b1c7220be3d6f2de086d86b388e7c3b0ad5f5ec7dd0301f584be1102b42c7",
+      "event_payload_hash": "e8ad8effad12a608002033343bd5315bfa18fe1eca0da0094a066ea207717c0c",
+      "next_state_hash": "518d8a39224ab127b65ab818709c7e4ca0b906c11d6d9ba2fb926bb76c808ec2",
       "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
       "status": "COMPLETED",
       "reason": null
@@ -2305,8 +2526,9 @@
       "cash_delta": 0,
       "progress_delta": 0,
       "risk_delta": 0,
-      "previous_state_hash": "17b54bba4b735118ccf99136f12a699644e8a9eb549fcd3e7f2a46dc7c8374be",
-      "next_state_hash": "c33c4ada3aebb0ce400d2ad28148f6dab291dec3740ab6120b0bc37dc55eb543",
+      "previous_state_hash": "518d8a39224ab127b65ab818709c7e4ca0b906c11d6d9ba2fb926bb76c808ec2",
+      "event_payload_hash": "314d10f13c266da612e169052c3f1dfde3a3aad2cf8e9f255c68000ac8f32a6b",
+      "next_state_hash": "0699fadff629b5ec4ea76e80f721bb4ef0d14e2eeb56bbaf0f2a002dd22d8024",
       "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
       "status": "COMPLETED",
       "reason": null
@@ -2351,8 +2573,9 @@
       "cash_delta": 0,
       "progress_delta": 0,
       "risk_delta": 0,
-      "previous_state_hash": "c33c4ada3aebb0ce400d2ad28148f6dab291dec3740ab6120b0bc37dc55eb543",
-      "next_state_hash": "8c5655cf03e547a1538d75590eceb67fa7214c093f97f392aa6e261f4b4e5b5d",
+      "previous_state_hash": "0699fadff629b5ec4ea76e80f721bb4ef0d14e2eeb56bbaf0f2a002dd22d8024",
+      "event_payload_hash": "715810f1599ae4f9502e1d69e43bb86d25380a754b0eaea8c4660253db9048b0",
+      "next_state_hash": "52d531d0baf0dd9fd9c5270ae3e5d436cc6e7c61d0c22073645ee472c6c773fd",
       "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
       "status": "COMPLETED",
       "reason": null
@@ -2397,8 +2620,9 @@
       "cash_delta": 0,
       "progress_delta": 0,
       "risk_delta": 0,
-      "previous_state_hash": "8c5655cf03e547a1538d75590eceb67fa7214c093f97f392aa6e261f4b4e5b5d",
-      "next_state_hash": "25ccb0eb638f007fc09c34300c7e2c9bc776001a606e8ff81881ffbbcb74c70f",
+      "previous_state_hash": "52d531d0baf0dd9fd9c5270ae3e5d436cc6e7c61d0c22073645ee472c6c773fd",
+      "event_payload_hash": "ed8c61516117a4e889225c3b3748b65e7a0a3fc15c07b62509da889b522f1dbf",
+      "next_state_hash": "92b1bb9316a9e5eee68088fa1f8f0b8b3f23300a9c867e67e099e5e0efc88eb7",
       "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
       "status": "COMPLETED",
       "reason": null
@@ -2443,8 +2667,9 @@
       "cash_delta": 0,
       "progress_delta": 0,
       "risk_delta": 0,
-      "previous_state_hash": "25ccb0eb638f007fc09c34300c7e2c9bc776001a606e8ff81881ffbbcb74c70f",
-      "next_state_hash": "de472ec47e8ea28a95df89a6a258bda13ed0d27c85b784934baa8cffc679a19a",
+      "previous_state_hash": "92b1bb9316a9e5eee68088fa1f8f0b8b3f23300a9c867e67e099e5e0efc88eb7",
+      "event_payload_hash": "5489ff997460a60376724844c39c2d0dc1cdabf73cb104067d1ddec679c31fe6",
+      "next_state_hash": "05b8d8aff59217f6d1554c4f7e1a7c12809461682df5da366f39329496234dd3",
       "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
       "status": "COMPLETED",
       "reason": null
@@ -2486,8 +2711,9 @@
       "cash_delta": 0,
       "progress_delta": 0,
       "risk_delta": 0,
-      "previous_state_hash": "de472ec47e8ea28a95df89a6a258bda13ed0d27c85b784934baa8cffc679a19a",
-      "next_state_hash": "5280fdeb52f343241e3d5adf9f623c391242557a51ef786d07fa15a19e4d0244",
+      "previous_state_hash": "05b8d8aff59217f6d1554c4f7e1a7c12809461682df5da366f39329496234dd3",
+      "event_payload_hash": "76742ef0722081dfaa0969eccf48dbfab3ad7dc38681b163bd891136e8fab86c",
+      "next_state_hash": "a35fcffac081fba45099f7ab50fb93152cd450b99def578bc2333dc172393575",
       "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
       "status": "COMPLETED",
       "reason": null
@@ -2532,8 +2758,9 @@
       "cash_delta": 0,
       "progress_delta": 0,
       "risk_delta": 0,
-      "previous_state_hash": "5280fdeb52f343241e3d5adf9f623c391242557a51ef786d07fa15a19e4d0244",
-      "next_state_hash": "7d34a45a4c2292a567aefbc3479b2e3d21f579aa6ed39f8e82ad4b2af17afd47",
+      "previous_state_hash": "a35fcffac081fba45099f7ab50fb93152cd450b99def578bc2333dc172393575",
+      "event_payload_hash": "f556515b05b150530f7b31d058a14bb025a06598138f9f81b9c9093c267f40e5",
+      "next_state_hash": "54678881e83e9428cb135b9b7c4c5ec2ee788ad529c79122d01862c82823c7ee",
       "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
       "status": "COMPLETED",
       "reason": null
@@ -2578,8 +2805,9 @@
       "cash_delta": 0,
       "progress_delta": 0,
       "risk_delta": 0,
-      "previous_state_hash": "7d34a45a4c2292a567aefbc3479b2e3d21f579aa6ed39f8e82ad4b2af17afd47",
-      "next_state_hash": "adae8ef3cffecd58b002b9691354b5672148eadafd9449f42ba4da70ba64b1b8",
+      "previous_state_hash": "54678881e83e9428cb135b9b7c4c5ec2ee788ad529c79122d01862c82823c7ee",
+      "event_payload_hash": "3b759bc31826de967a9a1d101a03d12016f412b40b010d5755a8820a40be18d1",
+      "next_state_hash": "be152ad454ec57b871425497ac838e3c283b96e672dc9c04be122b70294c960e",
       "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
       "status": "COMPLETED",
       "reason": null
@@ -2621,8 +2849,9 @@
       "cash_delta": 0,
       "progress_delta": 0,
       "risk_delta": 0,
-      "previous_state_hash": "adae8ef3cffecd58b002b9691354b5672148eadafd9449f42ba4da70ba64b1b8",
-      "next_state_hash": "774e04a5b04290d1854958da00bd8126f166c84619f95c43b2e2f6421e322370",
+      "previous_state_hash": "be152ad454ec57b871425497ac838e3c283b96e672dc9c04be122b70294c960e",
+      "event_payload_hash": "7d102cd217f27e39193fa0db2bcdef71d14c871f67cfb9c9d577a6fb842e0a38",
+      "next_state_hash": "39dd584cda269e34bb7d22d504316b51f8285ca388fa193f76a8a0c8a050296e",
       "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
       "status": "COMPLETED",
       "reason": null
@@ -2664,8 +2893,9 @@
       "cash_delta": 0,
       "progress_delta": 0,
       "risk_delta": 0,
-      "previous_state_hash": "774e04a5b04290d1854958da00bd8126f166c84619f95c43b2e2f6421e322370",
-      "next_state_hash": "f4ad6170b31fcb5c748d6742256d111ee4f7d1d16c93edfe5eff9f41d2f6be81",
+      "previous_state_hash": "39dd584cda269e34bb7d22d504316b51f8285ca388fa193f76a8a0c8a050296e",
+      "event_payload_hash": "2b32f0436bec923d9b2133e098c4e757e1815d8610f08d6e642a2997cb26869e",
+      "next_state_hash": "b0ad1aaa8d1f0e3e75a51cff64df1d7f9363bdf9f27bb6e48c19595e49f191c9",
       "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
       "status": "COMPLETED",
       "reason": null
@@ -2710,8 +2940,9 @@
       "cash_delta": 0,
       "progress_delta": 0,
       "risk_delta": 0,
-      "previous_state_hash": "f4ad6170b31fcb5c748d6742256d111ee4f7d1d16c93edfe5eff9f41d2f6be81",
-      "next_state_hash": "1a3b963953e7cc9ccdc139093eaa81d5a59e1c748877b4d9219095d56a493e21",
+      "previous_state_hash": "b0ad1aaa8d1f0e3e75a51cff64df1d7f9363bdf9f27bb6e48c19595e49f191c9",
+      "event_payload_hash": "11ca07af440f203fef9d8385bfd9116cc4acfb401a1c205b748556194924dee0",
+      "next_state_hash": "8b4244c53f757c32050116de3ce6a47361bd77d356f2eda6b5ec678897073529",
       "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
       "status": "COMPLETED",
       "reason": null
@@ -2756,8 +2987,9 @@
       "cash_delta": 0,
       "progress_delta": 0,
       "risk_delta": 0,
-      "previous_state_hash": "1a3b963953e7cc9ccdc139093eaa81d5a59e1c748877b4d9219095d56a493e21",
-      "next_state_hash": "f0ee147128bbeaf5979d4deb44894618462c4135ef83817935e1425fa94ccd94",
+      "previous_state_hash": "8b4244c53f757c32050116de3ce6a47361bd77d356f2eda6b5ec678897073529",
+      "event_payload_hash": "7f8189179d47d08aac9df97410f48505177ac13b028cc80fae46d2ce187ddfb9",
+      "next_state_hash": "1d17a986cb2c4404c7c99b2e8cdefae1d40046ed5bfbd3acf16633bceb103d76",
       "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
       "status": "COMPLETED",
       "reason": null
@@ -2799,8 +3031,9 @@
       "cash_delta": 0,
       "progress_delta": 0,
       "risk_delta": 0,
-      "previous_state_hash": "f0ee147128bbeaf5979d4deb44894618462c4135ef83817935e1425fa94ccd94",
-      "next_state_hash": "d113d6cbd4448b08d9932081198da20c24678a6e0d7f7ff08d96a101126e3b38",
+      "previous_state_hash": "1d17a986cb2c4404c7c99b2e8cdefae1d40046ed5bfbd3acf16633bceb103d76",
+      "event_payload_hash": "1f5c5aaa9dbbd35652daaa70257c31b6758a8c5e1175ea65e56aa9c0f6010415",
+      "next_state_hash": "abd388f380dcc7034c233b901db8d6277ac382fd4e9c0d59b908dd8ade143c55",
       "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
       "status": "COMPLETED",
       "reason": null
@@ -2845,8 +3078,9 @@
       "cash_delta": 0,
       "progress_delta": 0,
       "risk_delta": 0,
-      "previous_state_hash": "d113d6cbd4448b08d9932081198da20c24678a6e0d7f7ff08d96a101126e3b38",
-      "next_state_hash": "15d4129297df381f36155e19b92b4b080fa3e212e2fa1b5a6757a5b04aa2fc76",
+      "previous_state_hash": "abd388f380dcc7034c233b901db8d6277ac382fd4e9c0d59b908dd8ade143c55",
+      "event_payload_hash": "747de5f7a4ed9d35e53ebccace1467d0a490dce0898bc0bd96764a76ae9ea5d4",
+      "next_state_hash": "933b2b1ff0d9ff3e7f83c7f9eece8789fae9953f315fe14426478e5f8dd00aac",
       "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
       "status": "COMPLETED",
       "reason": null
@@ -2878,8 +3112,9 @@
       "cash_delta": 0,
       "progress_delta": 0,
       "risk_delta": 0,
-      "previous_state_hash": "15d4129297df381f36155e19b92b4b080fa3e212e2fa1b5a6757a5b04aa2fc76",
-      "next_state_hash": "1302a674f2a131968367e50c566ccccf82761b467f0125fc26c1140dc2f43489",
+      "previous_state_hash": "933b2b1ff0d9ff3e7f83c7f9eece8789fae9953f315fe14426478e5f8dd00aac",
+      "event_payload_hash": "037a416fff3851111f883fc4a7931aa6162451f2c5b0ff96ef376347d8c8d1fc",
+      "next_state_hash": "637b87c972d982d8753944baf3e75d5ff67df6f5b8ec850a5d100c0bea9d99d8",
       "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
       "status": "COMPLETED",
       "reason": null
@@ -2911,8 +3146,9 @@
       "cash_delta": -600,
       "progress_delta": 100,
       "risk_delta": 0,
-      "previous_state_hash": "1302a674f2a131968367e50c566ccccf82761b467f0125fc26c1140dc2f43489",
-      "next_state_hash": "4f976560ded5ba625ddb8f57b2993b7e7d5d5d75952841f0fa94ca8db42207f2",
+      "previous_state_hash": "637b87c972d982d8753944baf3e75d5ff67df6f5b8ec850a5d100c0bea9d99d8",
+      "event_payload_hash": "bccbd1275cbcca04f6e3305a01beeaf7df3b5b3ebfb711f415312d24736d623d",
+      "next_state_hash": "9c7febddcbc41d2e2f36f453c0a1cde5c59ce5cb249aab078afdf8395fb5e732",
       "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
       "status": "COMPLETED",
       "reason": null
@@ -2968,8 +3204,9 @@
       "cash_delta": 0,
       "progress_delta": 0,
       "risk_delta": 0,
-      "previous_state_hash": "4f976560ded5ba625ddb8f57b2993b7e7d5d5d75952841f0fa94ca8db42207f2",
-      "next_state_hash": "eb3fc7e158db69940f2499ed5acee09b8e4fc18b134c332adc1d6573bb2053fc",
+      "previous_state_hash": "9c7febddcbc41d2e2f36f453c0a1cde5c59ce5cb249aab078afdf8395fb5e732",
+      "event_payload_hash": "1fe52d0dbaca63d21b1477b0e2fdaf4095de072685825419c0b77359907f5c8d",
+      "next_state_hash": "cf3dee0923bd810f080898c7149d396d696a67b63b2b034cc1aee8c2694db119",
       "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
       "status": "COMPLETED",
       "reason": null
@@ -3002,8 +3239,9 @@
       "cash_delta": 0,
       "progress_delta": 0,
       "risk_delta": 0,
-      "previous_state_hash": "eb3fc7e158db69940f2499ed5acee09b8e4fc18b134c332adc1d6573bb2053fc",
-      "next_state_hash": "cd5a305cd14a7972c015f0572215737c260a15da2c329ef34df2b847addd92b5",
+      "previous_state_hash": "cf3dee0923bd810f080898c7149d396d696a67b63b2b034cc1aee8c2694db119",
+      "event_payload_hash": "fc077a7ccf4bab373c8aa297a0535366d0a0d2b01b08c65a66c7c06b0fbf0670",
+      "next_state_hash": "7f8d73a5c4e99021e49186f82fef9f068767c38815f1cd504d51ed76af5e602e",
       "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
       "status": "COMPLETED",
       "reason": null
@@ -3035,8 +3273,9 @@
       "cash_delta": 0,
       "progress_delta": 0,
       "risk_delta": 0,
-      "previous_state_hash": "cd5a305cd14a7972c015f0572215737c260a15da2c329ef34df2b847addd92b5",
-      "next_state_hash": "7ee3275c8d631251e4fe3ebba291278aa9b20020d6eb84138dd5fada5ddeca31",
+      "previous_state_hash": "7f8d73a5c4e99021e49186f82fef9f068767c38815f1cd504d51ed76af5e602e",
+      "event_payload_hash": "32dd5c26a4f286d7020e94a2fa79b64c107da1da6c26695a1a253880d5bcf8a8",
+      "next_state_hash": "eb13f702d7391c42a932494f0e73a377f1ac0e6d7544fd4e1b624316dd50df0a",
       "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
       "status": "COMPLETED",
       "reason": null
@@ -3068,8 +3307,9 @@
       "cash_delta": -1200,
       "progress_delta": 100,
       "risk_delta": 0,
-      "previous_state_hash": "7ee3275c8d631251e4fe3ebba291278aa9b20020d6eb84138dd5fada5ddeca31",
-      "next_state_hash": "1538009183fc0b33af50fbb46dbaef9f5fe71f5be18ebabf2e465d6feecc5afc",
+      "previous_state_hash": "eb13f702d7391c42a932494f0e73a377f1ac0e6d7544fd4e1b624316dd50df0a",
+      "event_payload_hash": "152fe98be6f5624afb8f8df66fae98e81713dfe049d06138a2e7278ed0636e95",
+      "next_state_hash": "14a125ad1d5b8d0adfdb5c71e3f3f4fd0cf109de73d2dac901583620e9a147fd",
       "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
       "status": "COMPLETED",
       "reason": null
@@ -3125,8 +3365,9 @@
       "cash_delta": 0,
       "progress_delta": 0,
       "risk_delta": 0,
-      "previous_state_hash": "1538009183fc0b33af50fbb46dbaef9f5fe71f5be18ebabf2e465d6feecc5afc",
-      "next_state_hash": "d690950d6ddcc91f1644c6d3e985e13d13ad6e4ca354eaf41efe36e2b75fd2a4",
+      "previous_state_hash": "14a125ad1d5b8d0adfdb5c71e3f3f4fd0cf109de73d2dac901583620e9a147fd",
+      "event_payload_hash": "7db5a023783d682dc34e1d275faf4cb497a34af9ccae21bc5696747329a248dc",
+      "next_state_hash": "ab44e830c0341d157e2b0cb70e1566e59b5f13cb7873c74ff565e67c8d03fc81",
       "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
       "status": "COMPLETED",
       "reason": null
@@ -3159,8 +3400,9 @@
       "cash_delta": 0,
       "progress_delta": 0,
       "risk_delta": 0,
-      "previous_state_hash": "d690950d6ddcc91f1644c6d3e985e13d13ad6e4ca354eaf41efe36e2b75fd2a4",
-      "next_state_hash": "46b694fcc2ca57534ba4742765621e867aed19fd202007ba45c20c93c4512e14",
+      "previous_state_hash": "ab44e830c0341d157e2b0cb70e1566e59b5f13cb7873c74ff565e67c8d03fc81",
+      "event_payload_hash": "b90abc0eba98084dc5079c481aedc254ce55886bd8ca7a99b960fa3802704c13",
+      "next_state_hash": "2a5641b28154239b6e53b4900cd520526b89f823be2a3c7531c20b73a7e45ed8",
       "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
       "status": "COMPLETED",
       "reason": null
@@ -3192,8 +3434,9 @@
       "cash_delta": 0,
       "progress_delta": 0,
       "risk_delta": 0,
-      "previous_state_hash": "46b694fcc2ca57534ba4742765621e867aed19fd202007ba45c20c93c4512e14",
-      "next_state_hash": "3a99d96333387d6286f97c3fd06d20eabd1d7f289722cf4535e6d7f9c3953e7c",
+      "previous_state_hash": "2a5641b28154239b6e53b4900cd520526b89f823be2a3c7531c20b73a7e45ed8",
+      "event_payload_hash": "ca70e5b05245d289afafbf20d98407ce84721d7b9be77d2f015b0380125c0355",
+      "next_state_hash": "ed536f578abe682a031b332ff51e1a146c0200d9319d29fd825f514bd4e3735a",
       "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
       "status": "COMPLETED",
       "reason": null
@@ -3225,8 +3468,9 @@
       "cash_delta": -4200,
       "progress_delta": 100,
       "risk_delta": 0,
-      "previous_state_hash": "3a99d96333387d6286f97c3fd06d20eabd1d7f289722cf4535e6d7f9c3953e7c",
-      "next_state_hash": "2fa332a3d6043c96f312ecb1dbabb2fe1a237a65884f8630185059412bcf32e1",
+      "previous_state_hash": "ed536f578abe682a031b332ff51e1a146c0200d9319d29fd825f514bd4e3735a",
+      "event_payload_hash": "99cc67155c96ecdc18252486b6ae4d4aecfb33d38b752ecb53f4107e6263a996",
+      "next_state_hash": "218ce0aa79886283f61e445f2c589895fd01bc943458597bd6caef119f9cd97e",
       "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
       "status": "COMPLETED",
       "reason": null
@@ -3282,8 +3526,9 @@
       "cash_delta": 0,
       "progress_delta": 0,
       "risk_delta": 0,
-      "previous_state_hash": "2fa332a3d6043c96f312ecb1dbabb2fe1a237a65884f8630185059412bcf32e1",
-      "next_state_hash": "34af2b7145284b608cd2a1e469aedc86352a1bbae8d06add8da84c2036999676",
+      "previous_state_hash": "218ce0aa79886283f61e445f2c589895fd01bc943458597bd6caef119f9cd97e",
+      "event_payload_hash": "e3adabd9cc9c69fb2e554b23345dcdea34f41e3a77d024c93357568556c121e1",
+      "next_state_hash": "65afb57a3e7df64beadaf2486ccb894f8af42089b0cb6f9a7ce6181647e7d0e8",
       "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
       "status": "COMPLETED",
       "reason": null
@@ -3316,8 +3561,9 @@
       "cash_delta": 0,
       "progress_delta": 0,
       "risk_delta": 0,
-      "previous_state_hash": "34af2b7145284b608cd2a1e469aedc86352a1bbae8d06add8da84c2036999676",
-      "next_state_hash": "d2b841aa1e6b62350ef5680b607be809e9f3dde3e9757ce40e7a808b73f26aa5",
+      "previous_state_hash": "65afb57a3e7df64beadaf2486ccb894f8af42089b0cb6f9a7ce6181647e7d0e8",
+      "event_payload_hash": "5315c133fe60342943a95057bcefb92bf4e18b722540418e09ee78567a6a5a42",
+      "next_state_hash": "1748d8f43ed6c67f5f2d9da8fac1e258d973c5c9f9048daaa4db2739ef2ed460",
       "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
       "status": "COMPLETED",
       "reason": null
@@ -3349,8 +3595,9 @@
       "cash_delta": 0,
       "progress_delta": 0,
       "risk_delta": 0,
-      "previous_state_hash": "d2b841aa1e6b62350ef5680b607be809e9f3dde3e9757ce40e7a808b73f26aa5",
-      "next_state_hash": "ac0178d5e79344e0cc39e45573870243666774adf855112d6177c03b34bc176d",
+      "previous_state_hash": "1748d8f43ed6c67f5f2d9da8fac1e258d973c5c9f9048daaa4db2739ef2ed460",
+      "event_payload_hash": "a8a3f157a0de8092a6129173a5a75d7f24df3e58ac62970eccef978cddf5d203",
+      "next_state_hash": "b1e54e450ad7d6e0d6e0b372092b23c04d4639cf4cb1e1c67de47a97279f1fd3",
       "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
       "status": "COMPLETED",
       "reason": null
@@ -3382,8 +3629,9 @@
       "cash_delta": -3600,
       "progress_delta": 100,
       "risk_delta": 0,
-      "previous_state_hash": "ac0178d5e79344e0cc39e45573870243666774adf855112d6177c03b34bc176d",
-      "next_state_hash": "39f9efe3a27361f8cbecaf7d7f6badd7d527ea47f147b189ec25e6cd06ad5d6d",
+      "previous_state_hash": "b1e54e450ad7d6e0d6e0b372092b23c04d4639cf4cb1e1c67de47a97279f1fd3",
+      "event_payload_hash": "cfa310117fe1a8c0132a08ce6cf3023055206e30c4a8265a2bf7cc44fb77d870",
+      "next_state_hash": "cfde980c7f421b33f41c7372e2533e503e366041c6db5d261ba54c4f7d5363c0",
       "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
       "status": "COMPLETED",
       "reason": null
@@ -3439,8 +3687,9 @@
       "cash_delta": 0,
       "progress_delta": 0,
       "risk_delta": 0,
-      "previous_state_hash": "39f9efe3a27361f8cbecaf7d7f6badd7d527ea47f147b189ec25e6cd06ad5d6d",
-      "next_state_hash": "ed473dd449ecaeba7b15d5fd4532c871f4448d46ba20414587d400b745da4955",
+      "previous_state_hash": "cfde980c7f421b33f41c7372e2533e503e366041c6db5d261ba54c4f7d5363c0",
+      "event_payload_hash": "c04c6809271fb508d4888e803909181a1a79683d4d25a7ad6f6ba13ce9ce24ef",
+      "next_state_hash": "4c61f197aa962d1f1355d9cd430a72fc0a287c51b5b279d1a5f6b344a8cdcab1",
       "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
       "status": "COMPLETED",
       "reason": null
@@ -3473,8 +3722,9 @@
       "cash_delta": 0,
       "progress_delta": 0,
       "risk_delta": 0,
-      "previous_state_hash": "ed473dd449ecaeba7b15d5fd4532c871f4448d46ba20414587d400b745da4955",
-      "next_state_hash": "09f201afba35c0101368d4309ae7f39f2dce128a6b988e58d9bca5c3d3abf5ab",
+      "previous_state_hash": "4c61f197aa962d1f1355d9cd430a72fc0a287c51b5b279d1a5f6b344a8cdcab1",
+      "event_payload_hash": "59be665ff3a235e6c39e6bdba4f44aeabbf2e39ba27d38fd06839ee9852690e5",
+      "next_state_hash": "96bb53f395120969ccbf4899a2e88221d778b24756427a27843922e50f204446",
       "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
       "status": "COMPLETED",
       "reason": null
@@ -3506,8 +3756,9 @@
       "cash_delta": 0,
       "progress_delta": 0,
       "risk_delta": 0,
-      "previous_state_hash": "09f201afba35c0101368d4309ae7f39f2dce128a6b988e58d9bca5c3d3abf5ab",
-      "next_state_hash": "f85cabc81d13e642833ce91a0b884dd4f8476cd8a7578be7fbd49dc8b86846a1",
+      "previous_state_hash": "96bb53f395120969ccbf4899a2e88221d778b24756427a27843922e50f204446",
+      "event_payload_hash": "0c9666da5b7c8c7d4dba06a3c390d628a26907cf13bd3a6c7b1481c734c34909",
+      "next_state_hash": "8782215a5e3616861b837596db33040c91a4e88be87b6ff041b5643250611c2e",
       "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
       "status": "COMPLETED",
       "reason": null
@@ -3539,8 +3790,9 @@
       "cash_delta": -2600,
       "progress_delta": 100,
       "risk_delta": 0,
-      "previous_state_hash": "f85cabc81d13e642833ce91a0b884dd4f8476cd8a7578be7fbd49dc8b86846a1",
-      "next_state_hash": "69c924c2b1a3ddaba5e548e630ce8a46b19c835278daf1af720729e4a785126f",
+      "previous_state_hash": "8782215a5e3616861b837596db33040c91a4e88be87b6ff041b5643250611c2e",
+      "event_payload_hash": "2c30ecf6e6b0b2dc7f8802efdac9f8d350fe079371503af095119d8c21e1ea0a",
+      "next_state_hash": "afd867ebeab24bb349c66c055c8f9683ee983de32d38bcc6bd4eae958affbe74",
       "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
       "status": "COMPLETED",
       "reason": null
@@ -3596,8 +3848,9 @@
       "cash_delta": 0,
       "progress_delta": 0,
       "risk_delta": 0,
-      "previous_state_hash": "69c924c2b1a3ddaba5e548e630ce8a46b19c835278daf1af720729e4a785126f",
-      "next_state_hash": "292f3e0968d5d250248d329c1fafb239aed3805abef79faafe78b24e33c94a4c",
+      "previous_state_hash": "afd867ebeab24bb349c66c055c8f9683ee983de32d38bcc6bd4eae958affbe74",
+      "event_payload_hash": "9aa9b558d84ddfe8da332988a7204419cc0fe7f3e6e5be939642146fa995d4e5",
+      "next_state_hash": "c62e1c9b184ab97cb079d2f8675269966df35d8123608a80698939e51073e6bb",
       "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
       "status": "COMPLETED",
       "reason": null
@@ -3630,8 +3883,9 @@
       "cash_delta": 0,
       "progress_delta": 0,
       "risk_delta": 0,
-      "previous_state_hash": "292f3e0968d5d250248d329c1fafb239aed3805abef79faafe78b24e33c94a4c",
-      "next_state_hash": "b0387e9014f102b49e0b77ee0f697ae6143e735cd492f136b620488c096b5995",
+      "previous_state_hash": "c62e1c9b184ab97cb079d2f8675269966df35d8123608a80698939e51073e6bb",
+      "event_payload_hash": "ddd4b6d492c76e2fef9cf68de18f2a40190931cacb373098c3e5cfe88a038d01",
+      "next_state_hash": "2034c3a62345474713dd4828517e88218b5ee618d630ffbafd94ca431b8fe904",
       "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
       "status": "COMPLETED",
       "reason": null
@@ -3663,8 +3917,9 @@
       "cash_delta": 0,
       "progress_delta": 0,
       "risk_delta": 0,
-      "previous_state_hash": "b0387e9014f102b49e0b77ee0f697ae6143e735cd492f136b620488c096b5995",
-      "next_state_hash": "f71ebefd44cd13e6a1ab03cb9f20ba7e21164be6a6d8a2ebbc688cfc48e6148c",
+      "previous_state_hash": "2034c3a62345474713dd4828517e88218b5ee618d630ffbafd94ca431b8fe904",
+      "event_payload_hash": "8becfc1b11a27c1bf834c3cc896138fa729eb45be87b0e0f7685effb01ab65f9",
+      "next_state_hash": "3a1220847bc39f65cb66fa28b3bc0984f80009d49ea9591ed04ad274535e1d77",
       "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
       "status": "COMPLETED",
       "reason": null
@@ -3696,8 +3951,9 @@
       "cash_delta": -700,
       "progress_delta": 100,
       "risk_delta": 0,
-      "previous_state_hash": "f71ebefd44cd13e6a1ab03cb9f20ba7e21164be6a6d8a2ebbc688cfc48e6148c",
-      "next_state_hash": "1cabc4b3f67acf9565607c0d4d0fda2cdef07d3c81f7ae56c98394e948557ac0",
+      "previous_state_hash": "3a1220847bc39f65cb66fa28b3bc0984f80009d49ea9591ed04ad274535e1d77",
+      "event_payload_hash": "3d0f1d4f106ffe22c95dd8bb6284b1c96fbbad866efcb044fbd80d1edb5f0208",
+      "next_state_hash": "cce5e62ff423855718cf5a5e06d039ca0784771d34e9553d26c1e0c013b59612",
       "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
       "status": "COMPLETED",
       "reason": null
@@ -3753,8 +4009,9 @@
       "cash_delta": 0,
       "progress_delta": 0,
       "risk_delta": 0,
-      "previous_state_hash": "1cabc4b3f67acf9565607c0d4d0fda2cdef07d3c81f7ae56c98394e948557ac0",
-      "next_state_hash": "71d4427acdace0a9d14ae36dec3f2645ade882f0f859aeab992ad1237e27ec3f",
+      "previous_state_hash": "cce5e62ff423855718cf5a5e06d039ca0784771d34e9553d26c1e0c013b59612",
+      "event_payload_hash": "e8c4db2268c5763ff104b28c210542a6d69f9ef40d777e2e64424c83b417dbad",
+      "next_state_hash": "523a3cfd0e37f632be53003eea2a3125ed729b92cd39f4be482ab7e7c21d7bad",
       "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
       "status": "COMPLETED",
       "reason": null
@@ -3787,8 +4044,9 @@
       "cash_delta": 0,
       "progress_delta": 0,
       "risk_delta": 0,
-      "previous_state_hash": "71d4427acdace0a9d14ae36dec3f2645ade882f0f859aeab992ad1237e27ec3f",
-      "next_state_hash": "601a9a87da6ab612133a1a1340064c89b8110e9e08e4a539be95f938dd3dc78e",
+      "previous_state_hash": "523a3cfd0e37f632be53003eea2a3125ed729b92cd39f4be482ab7e7c21d7bad",
+      "event_payload_hash": "1afc6a434634a3ea7d12d33958141f32c6556b789a58e25fcabe5b0e9bff927a",
+      "next_state_hash": "418882bbc66a1acbf3d12f763f80db2c624ea3d343d3ac8e52350de1a2ca5f76",
       "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
       "status": "COMPLETED",
       "reason": null
@@ -3834,8 +4092,9 @@
       "cash_delta": 0,
       "progress_delta": 0,
       "risk_delta": 0,
-      "previous_state_hash": "601a9a87da6ab612133a1a1340064c89b8110e9e08e4a539be95f938dd3dc78e",
-      "next_state_hash": "889accf3a2151fb5cf0dcf42d5a4a4f87a4a385e7ee0076a1f48e00ed74434e2",
+      "previous_state_hash": "418882bbc66a1acbf3d12f763f80db2c624ea3d343d3ac8e52350de1a2ca5f76",
+      "event_payload_hash": "5de1f4c0b8f949ade07c5ae962366a6de1ccb21583d2e13ee48cf90c618b5aae",
+      "next_state_hash": "e595422f8c9ae492ae9c95ea7dd7a3754c111feacb67cad8bf4e127e3917dc51",
       "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
       "status": "COMPLETED",
       "reason": null
@@ -3879,8 +4138,9 @@
       "cash_delta": 0,
       "progress_delta": 0,
       "risk_delta": 0,
-      "previous_state_hash": "889accf3a2151fb5cf0dcf42d5a4a4f87a4a385e7ee0076a1f48e00ed74434e2",
-      "next_state_hash": "8e7debe61529250c710415a8af11124ed9799a9e67ba7553285928f609d18ee3",
+      "previous_state_hash": "e595422f8c9ae492ae9c95ea7dd7a3754c111feacb67cad8bf4e127e3917dc51",
+      "event_payload_hash": "e024912a24b2c128793062fa1730c8e8b66689ddb9ee1504a6e3a93ba46fe180",
+      "next_state_hash": "f650d58d6af7b17a5ec0eb09903ffbaa952a6d4139d510a3933a3c6e570ca589",
       "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
       "status": "COMPLETED",
       "reason": null
@@ -3914,8 +4174,9 @@
       "cash_delta": 0,
       "progress_delta": 0,
       "risk_delta": 0,
-      "previous_state_hash": "8e7debe61529250c710415a8af11124ed9799a9e67ba7553285928f609d18ee3",
-      "next_state_hash": "f753d9d9488a3c0035977b1bbeec9c954f815d90bc41187089e56a715445bc18",
+      "previous_state_hash": "f650d58d6af7b17a5ec0eb09903ffbaa952a6d4139d510a3933a3c6e570ca589",
+      "event_payload_hash": "3dca92a09181a8f2dc9153a4c8e3bcf40ad20ee0e38c9f8893460c1bff2e21b7",
+      "next_state_hash": "0e6f5d4863f9b9529e99167a0e2ce48eaedbc4cb5211179a0971b8f84510a264",
       "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
       "status": "ACCEPTED",
       "reason": null
@@ -3937,7 +4198,7 @@
       },
       "outputs": {
         "closeout_status": "CLOSED_BALANCED_SIMULATION",
-        "profit_or_loss": 235911.6
+        "profit_or_loss": 235918.8
       },
       "material_delta": 0,
       "energy_delta": 0,
@@ -3947,8 +4208,9 @@
       "cash_delta": 0,
       "progress_delta": 0,
       "risk_delta": 0,
-      "previous_state_hash": "f753d9d9488a3c0035977b1bbeec9c954f815d90bc41187089e56a715445bc18",
-      "next_state_hash": "f488d418e1955e770af0cd34a8f8ed2035bdbc20449d2b3121580a2b855cc6b3",
+      "previous_state_hash": "0e6f5d4863f9b9529e99167a0e2ce48eaedbc4cb5211179a0971b8f84510a264",
+      "event_payload_hash": "d677a26e87b3ad6a8a6c4da0f309e920257d4f67e04ca64964184448ff17fd72",
+      "next_state_hash": "948f5b93a69c2cc2874c39109228886124a9645196270caf4fd871a122375626",
       "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
       "status": "COMPLETED",
       "reason": null

@@ -50,16 +50,42 @@
       "closeout_status": "CLOSED_BALANCED_SIMULATION",
       "domain_binding": "AQUACULTURE_RUNTIME_V1",
       "domain_evidence": {
+        "ok": true,
+        "reason": null,
         "runtime": "KAIOS_FISHPOND_AQUACULTURE_RUNTIME_V1",
+        "adapter": "EXECUTED_CANONICAL_RUNTIME",
+        "execution_status": "COMPLETE",
+        "construction_stages": [
+          "SITE_SURVEY",
+          "DESIGN",
+          "PERMIT_SIMULATION",
+          "SITE_CLEARING",
+          "EXCAVATION",
+          "EMBANKMENT",
+          "LINING_OR_SOIL_COMPACTION",
+          "INLET_INSTALLATION",
+          "OUTLET_INSTALLATION",
+          "DRAINAGE_INSTALLATION",
+          "AERATION_INFRASTRUCTURE",
+          "ELECTRICAL_CONNECTION",
+          "WATER_FILLING",
+          "LEAK_TEST",
+          "WATER_STABILIZATION",
+          "INSPECTION",
+          "READY_FOR_STOCKING"
+        ],
+        "final_stage": "READY_FOR_STOCKING",
+        "pond_status": "OPERATING",
+        "population_count": 120,
+        "event_count": 22,
         "integrity_verified": true,
         "simulation_only": true,
-        "authority": "NO_PRODUCTION_AUTHORITY",
-        "adapter": "EXISTING_RUNTIME_REFERENCE"
+        "authority": "NO_PRODUCTION_AUTHORITY"
       },
       "approval_status": "RUNTIME_VALIDATED_SIMULATION",
       "external_deployment": false,
       "event_count": 66,
-      "state_hash": "3e81187dee55854c1ffc155c11b2a62df030550459defd88695fa03494b8aba2"
+      "state_hash": "356936205d5e324fcefcc8358deaee2cb8ddf754bbbeb3aa79ebc619a6733b69"
     },
     "basic_house": {
       "project_id": "AI-COMPANY-PROJECT-00001",
@@ -67,16 +93,30 @@
       "closeout_status": "CLOSED_BALANCED_SIMULATION",
       "domain_binding": "CAUSAL_WORLD_CONSTRUCTION",
       "domain_evidence": {
+        "ok": true,
+        "reason": null,
         "runtime": "REAL_CAUSAL_WORLD_FOUNDATION",
+        "adapter": "EXECUTED_CANONICAL_RUNTIME",
+        "execution_status": "COMPLETE",
+        "construction_stages": [
+          "SURVEY",
+          "SITE_CLEARING",
+          "EXCAVATION",
+          "FOUNDATION",
+          "STRUCTURE",
+          "UTILITIES",
+          "INSPECTION"
+        ],
+        "final_stage": "COMPLETE",
+        "event_count": 9,
         "integrity_verified": true,
         "simulation_only": true,
-        "authority": "NO_PRODUCTION_AUTHORITY",
-        "adapter": "EXISTING_RUNTIME_REFERENCE"
+        "authority": "NO_PRODUCTION_AUTHORITY"
       },
       "approval_status": "RUNTIME_VALIDATED_SIMULATION",
       "external_deployment": false,
       "event_count": 74,
-      "state_hash": "2a35408c314c606a911afb15ccde9298fc58962ca1ed7b6f50cbbc2228859914"
+      "state_hash": "d291af77f69acd57b17d286304aff60b968d00465a63a385db196340e8f3b764"
     },
     "blocked_small_farm": {
       "status": "BLOCKED_DEPENDENCY",
@@ -99,7 +139,7 @@
       "approval_status": "CANDIDATE_ONLY",
       "external_deployment": false,
       "event_count": 45,
-      "state_hash": "5d97f89c8ec931f36bb031cfb0e18e7aa3ae96fc1105a4c4d03674caa0482642"
+      "state_hash": "d8131add1f5966e1bd4154e3d2f651fd6c32f18160255140e6ea6157ea13c876"
     },
     "software_module": {
       "project_id": "AI-COMPANY-PROJECT-00001",
@@ -116,7 +156,7 @@
       "approval_status": "RUNTIME_VALIDATED_SIMULATION",
       "external_deployment": false,
       "event_count": 46,
-      "state_hash": "1a6f710132799eaceadfa9cd0cc9f6bfa62696d74eea05b91ec2d698f7936589"
+      "state_hash": "366a217480f8973fa28fbaacb9d31541f138923bd8d207c7447d4db7952d845b"
     },
     "boundaries": {
       "simulation_only": true,

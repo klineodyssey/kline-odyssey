@@ -12,6 +12,7 @@ import {
 } from "../ai-company/ai-company-project-runtime.js";
 
 const RUNTIME_SOURCE = new URL("../ai-company/ai-company-project-runtime.js", import.meta.url);
+const VIEWER_APP_SOURCE = new URL("../../../world-viewer/ai-company-v1/app.js", import.meta.url);
 
 function requestFor(templateId, overrides = {}) {
   const catalog = {
@@ -124,7 +125,8 @@ test("primary factory exposes stable commands, canonical catalogs, and disabled 
     "createSimulatedContract", "startProcurement", "assignWorker", "reserveEquipment", "receiveMaterial",
     "startTask", "pauseTask", "resumeTask", "blockTask", "completeTask", "inspectTask", "requestRework",
     "submitChangeOrder", "approveChangeOrder", "deliverProject", "acceptProject", "scheduleMaintenance",
-    "closeProject", "exportState", "importState", "resetState", "replayEvents"
+    "closeProject", "restructureCompany", "enterCourtProtection", "liquidateCompany", "dissolveCompany",
+    "exportState", "importState", "resetState", "replayEvents"
   ];
   for (const command of requiredCommands) assert.equal(typeof runtime[command], "function", command);
   assert.equal(REQUIRED_DIVISIONS.length, 21);
@@ -166,6 +168,19 @@ test("request analysis requires clarification and records visible simulation ass
   assert.equal(analyzed.outputs.analysis.assumptions[0].label, "SIMULATION_ASSUMPTION");
   assert.equal(analyzed.outputs.analysis.assumptions[0].customer_visibility, true);
   assert.equal(analyzed.outputs.analysis.assumptions[0].approval_status, "APPROVED");
+
+  const defaultsRuntime = createKaiosAiCompanyRuntimeV1({ seed: "VISIBLE-DEFAULTS" });
+  const defaulted = defaultsRuntime.submitRequest({
+    request_text: "I need a basic house.", requested_object: "HOUSE",
+    requested_location: "LAND-DEFAULTS-001", requested_budget: 220000,
+    intended_use: "SIMULATED_HOUSING", rights_context: ["SIMULATED_USAGE_RIGHT"]
+  });
+  const defaultsAnalysis = defaultsRuntime.analyzeRequirements(defaulted.outputs.request.request_id).outputs.analysis;
+  assert.deepEqual(defaultsAnalysis.assumptions.map(({ field }) => field), [
+    "customer_life_id", "customer_type", "requested_quantity", "requested_quality",
+    "civilization_context", "risk_level", "priority", "requested_deadline"
+  ]);
+  assert.ok(defaultsAnalysis.assumptions.every(({ label, customer_visibility, approval_status }) => label === "SIMULATION_ASSUMPTION" && customer_visibility && approval_status === "APPROVED"));
 });
 
 test("all sixteen feasibility gates are explicit and a failed gate creates no project", () => {
@@ -198,6 +213,7 @@ test("resource plans fail closed for materials, skills, equipment, routes, and w
     ["material", (runtime, projectId) => runtime.createBOM(projectId, { unavailable: ["CONCRETE"] }), "NO_MATERIAL"],
     ["workforce", (runtime, projectId) => { runtime.createBOM(projectId); return runtime.createWorkforcePlan(projectId, { omit_skills: ["SURVEYOR"] }); }, "SKILL_NOT_AVAILABLE"],
     ["equipment", (runtime, projectId) => { runtime.createBOM(projectId); runtime.createWorkforcePlan(projectId); return runtime.createEquipmentPlan(projectId, { unavailable: ["SURVEY_TOOL"] }); }, "NO_EQUIPMENT"],
+    ["retired-equipment", (runtime, projectId) => { runtime.createBOM(projectId); runtime.createWorkforcePlan(projectId); return runtime.createEquipmentPlan(projectId, { equipment_states: { SURVEY_TOOL: "RETIRED" } }); }, "NO_EQUIPMENT"],
     ["route", (runtime, projectId) => { runtime.createBOM(projectId); return runtime.createSupplyChainPlan(projectId, { route_available: false }); }, "NO_ROUTE"],
     ["warehouse", (runtime, projectId) => runtime.createBOM(projectId, { warehouse_capacity: 1 }), "NO_WAREHOUSE"]
   ]) {
@@ -225,6 +241,14 @@ test("funding, simulated deposit, procurement timing, spending, and ledger remai
   const state = runtime.getState();
   assert.ok(state.finance.cash < cashAfterDeposit);
   assert.ok(Object.keys(state.material_inventory).length > 0);
+  for (const order of state.procurement_orders) {
+    assert.deepEqual(order.state_history.map(({ status }) => status), [
+      "RFQ_CREATED", "QUOTES_RECEIVED", "SUPPLIER_SELECTED", "ORDER_PLACED",
+      "IN_PRODUCTION", "IN_TRANSIT", "RECEIVED", "ACCEPTED", "PAYMENT_APPROVED"
+    ]);
+    assert.deepEqual(order.selection_basis, ["QUALITY", "DELIVERY", "CAPACITY", "RISK", "TOTAL_COST"]);
+  }
+  assert.ok(state.projects[0].risks.length >= 4);
   assert.ok(state.ledger.length > 0);
   assert.ok(state.ledger.every((entry) => entry.balanced && entry.debit_amount === entry.credit_amount));
   assert.equal(runtime.integrityReport().ledger_balanced, true);
@@ -269,6 +293,33 @@ test("equipment requires an assigned operator and ready simulated energy", () =>
   const requestId = runtime.submitRequest(requestFor("FISHPOND_PROJECT")).outputs.request.request_id;
   runtime.analyzeRequirements(requestId);
   assert.equal(runtime.evaluateFeasibility(requestId, { energy_available: false }).outputs.review.gates.find(({ gate_id }) => gate_id === "ENERGY_GATE").reason, "NO_ENERGY");
+});
+
+test("task execution enforces schedule windows and full worker reservation coverage", () => {
+  const future = createKaiosAiCompanyRuntimeV1({ seed: "FUTURE-WINDOW" });
+  const { projectId: futureProjectId } = approvedProject(future, "SOFTWARE_MODULE_PROJECT");
+  planProject(future, futureProjectId, { schedule: { planned_start: 100 } });
+  future.startProcurement(futureProjectId);
+  assignProject(future, futureProjectId);
+  future.start();
+  const futureTask = future.getState().projects[0].tasks[0];
+  assert.equal(future.startTask(futureProjectId, futureTask.task_id).reason, "TASK_WINDOW_NOT_OPEN");
+  future.advanceTime(100);
+  assert.equal(future.startTask(futureProjectId, futureTask.task_id).status, "COMPLETED");
+
+  const shortShift = createKaiosAiCompanyRuntimeV1({ seed: "SHORT-SHIFT" });
+  const { projectId: shortProjectId } = approvedProject(shortShift, "SOFTWARE_MODULE_PROJECT");
+  planProject(shortShift, shortProjectId);
+  shortShift.startProcurement(shortProjectId);
+  const shortState = shortShift.getState();
+  const shortTask = shortState.projects[0].tasks[0];
+  const shortPlan = shortState.resource_plans[0];
+  const worker = shortPlan.workforce.find(({ skill }) => skill === shortTask.skills[0]);
+  const equipment = shortPlan.equipment.find(({ type }) => type === shortTask.equipment[0]);
+  assert.equal(shortShift.assignWorker(shortProjectId, shortTask.task_id, worker.worker_id, { start: 0, end: 1 }).status, "COMPLETED");
+  assert.equal(shortShift.reserveEquipment(shortProjectId, shortTask.task_id, equipment.equipment_id, { start: 0, end: shortTask.duration_hours }).status, "COMPLETED");
+  shortShift.start();
+  assert.equal(shortShift.startTask(shortProjectId, shortTask.task_id).reason, "SHIFT_OVERLAP");
 });
 
 test("execution consumes explicit time and supports runtime and task pause-resume", () => {
@@ -321,12 +372,17 @@ test("failed inspection creates explicit rework and keeps downstream work blocke
   runtime.inspectTask(projectId, firstTask.task_id, "PASS");
   runtime.completeTask(projectId, firstTask.task_id);
   assert.equal(runtime.getState().projects[0].tasks.find(({ task_id }) => task_id === secondTask.task_id).status, "READY");
+  for (const pendingTask of runtime.getState().projects[0].tasks.filter(({ status }) => status !== "COMPLETE")) executeTask(runtime, projectId, pendingTask.task_id);
+  runtime.scheduleMaintenance(projectId);
+  assert.equal(runtime.deliverProject(projectId).status, "COMPLETED");
 });
 
 test("change orders explicitly recalculate budget, schedule, materials, rights, and safety", () => {
   const runtime = createKaiosAiCompanyRuntimeV1({ seed: "CHANGE-ORDER-TEST" });
   const { projectId } = approvedProject(runtime, "BASIC_HOUSE_PROJECT");
   planProject(runtime, projectId);
+  assert.equal(runtime.submitChangeOrder(projectId, { added_cost: 100, materials: { STEEL: -1 } }).reason, "INVALID_CHANGE_MATERIAL_QUANTITY");
+  assert.equal(runtime.submitChangeOrder(projectId, { added_cost: 100, materials: { UNOBTAINIUM: 1 } }).reason, "UNKNOWN_CHANGE_MATERIAL");
   const before = runtime.getState().projects[0];
   const change = runtime.submitChangeOrder(projectId, { description: "Add reinforced entry", added_cost: 5000, added_duration: 8, materials: { STEEL: 2 }, rights_review: true, safety_review: true }).outputs.change_order;
   assert.equal(change.status, "CHANGE_REQUESTED");
@@ -335,7 +391,18 @@ test("change orders explicitly recalculate budget, schedule, materials, rights, 
   assert.equal(after.budget.approved_budget, before.budget.approved_budget + 5000);
   assert.equal(after.budget.total_estimated_cost, before.budget.total_estimated_cost + 5000);
   assert.equal(after.schedule.planned_end, before.schedule.planned_end + 8);
-  assert.equal(runtime.getState().change_orders[0].dependencies_reviewed, true);
+  const approvedChange = runtime.getState().change_orders.find(({ change_order_id }) => change.change_order_id);
+  assert.equal(approvedChange.dependencies_reviewed, true);
+  assert.deepEqual(approvedChange.impact_analysis, {
+    budget: "RECALCULATED", schedule: "RECALCULATED", materials: "PROCUREMENT_REQUIRED",
+    workforce: "REVALIDATED", equipment: "REVALIDATED", rights: "PASS_SIMULATION",
+    safety: "PASS_SIMULATION", dependencies: "RECALCULATED", procurement: "REQUIRED",
+    financial_exposure: after.capacity_reserved
+  });
+  const oversized = runtime.submitChangeOrder(projectId, { added_cost: 900000, materials: { STEEL: 20000 } }).outputs.change_order;
+  assert.equal(runtime.approveChangeOrder(oversized.change_order_id).reason, "NO_WAREHOUSE");
+  const overexposed = runtime.submitChangeOrder(projectId, { added_cost: 3000000 }).outputs.change_order;
+  assert.equal(runtime.approveChangeOrder(overexposed.change_order_id).reason, "COMPANY_CAPACITY_EXCEEDED");
 });
 
 test("delivery requires completion and maintenance, then acceptance recognizes revenue and closeout releases capacity", () => {
@@ -349,6 +416,9 @@ test("delivery requires completion and maintenance, then acceptance recognizes r
   assert.equal(state.maintenance_plans[0].status, "ACTIVE");
   assert.ok(state.finance.project_revenue > 0);
   assert.equal(state.capacity.active_projects, 0);
+  const accountingBefore = structuredClone(state.projects[0].accounting);
+  assert.equal(runtime.calculateBudget(state.projects[0].project_id).reason, "PROJECT_PLANNING_LOCKED");
+  assert.deepEqual(runtime.getState().projects[0].accounting, accountingBefore);
   assert.equal(runtime.integrityReport().ok, true);
 });
 
@@ -375,6 +445,16 @@ test("company capacity blocks excess projects and simulated insolvency remains b
   const insolvent = insolvencyRuntime.getState();
   assert.equal(insolvent.company.status, "INSOLVENT");
   assert.ok(insolvent.finance.payables > 0);
+  assert.equal(insolvencyRuntime.restructureCompany().status, "COMPLETED");
+  assert.equal(insolvencyRuntime.enterCourtProtection().status, "COMPLETED");
+  const liquidation = insolvencyRuntime.liquidateCompany();
+  assert.equal(liquidation.status, "COMPLETED");
+  assert.equal(liquidation.outputs.recovery.asset_records_preserved, true);
+  assert.ok(liquidation.outputs.recovery.assets.equipment.length > 0);
+  assert.equal(insolvencyRuntime.dissolveCompany().status, "COMPLETED");
+  assert.equal(insolvencyRuntime.getState().company.status, "DISSOLVED");
+  assert.deepEqual(insolvencyRuntime.replayEvents(), insolvencyRuntime.getState());
+  assert.equal(insolvencyRuntime.integrityReport().ok, true);
   assert.equal(insolvencyRuntime.integrityReport().ledger_balanced, true);
 });
 
@@ -383,8 +463,15 @@ test("five deterministic demonstrations have truthful completion and domain bind
   const second = createAiCompanyDemonstrationFlows({ seed: "DEMO-CONTRACT" });
   assert.equal(first.fishpond.status, "COMPLETE");
   assert.equal(first.fishpond.domain_evidence.runtime, "KAIOS_FISHPOND_AQUACULTURE_RUNTIME_V1");
+  assert.equal(first.fishpond.domain_evidence.adapter, "EXECUTED_CANONICAL_RUNTIME");
+  assert.equal(first.fishpond.domain_evidence.execution_status, "COMPLETE");
+  assert.equal(first.fishpond.domain_evidence.integrity_verified, true);
+  assert.ok(first.fishpond.domain_evidence.construction_stages.length >= 17);
   assert.equal(first.basic_house.status, "COMPLETE");
   assert.equal(first.basic_house.domain_evidence.runtime, "REAL_CAUSAL_WORLD_FOUNDATION");
+  assert.equal(first.basic_house.domain_evidence.adapter, "EXECUTED_CANONICAL_RUNTIME");
+  assert.equal(first.basic_house.domain_evidence.final_stage, "COMPLETE");
+  assert.equal(first.basic_house.domain_evidence.integrity_verified, true);
   assert.equal(first.blocked_small_farm.status, "BLOCKED_DEPENDENCY");
   assert.equal(first.blocked_small_farm.automatic_completion, false);
   assert.equal(first.candidate_life_package.approval_status, "CANDIDATE_ONLY");
@@ -408,6 +495,9 @@ test("serialization, strict import, reset, hash-chain validation, and determinis
   const tampered = runtime.exportState();
   tampered.state.events.at(-1).next_state_hash = "0".repeat(64);
   assert.throws(() => imported.importState(tampered), /STATE_HASH_MISMATCH/);
+  const payloadTampered = runtime.exportState();
+  payloadTampered.state.events[1].actor_life_id = "LIFE-TAMPERED-ACTOR";
+  assert.throws(() => imported.importState(payloadTampered), /EVENT_PAYLOAD_HASH_MISMATCH/);
   assert.throws(() => imported.importState('{"state":{},"state":{}}'), /DUPLICATE_JSON_KEY:state/);
   const reset = imported.resetState();
   assert.equal(reset.events.length, 0);
@@ -434,9 +524,11 @@ test("imports reject authority and ledger tampering transactionally", () => {
 });
 
 test("runtime source has no external execution, wallet connector, or transaction signer", async () => {
-  const source = await readFile(RUNTIME_SOURCE, "utf8");
+  const [source, viewerSource] = await Promise.all([readFile(RUNTIME_SOURCE, "utf8"), readFile(VIEWER_APP_SOURCE, "utf8")]);
   for (const prohibited of [/\bfetch\s*\(/, /XMLHttpRequest/, /\bWebSocket\s*\(/, /window\.ethereum/, /privateKey/, /signTransaction/, /sendTransaction/]) assert.doesNotMatch(source, prohibited);
   assert.match(source, /NO_PRODUCTION_AUTHORITY/);
   assert.match(source, /external_autonomous_execution:\s*false/);
   assert.match(source, /real_kgen:\s*false/);
+  assert.doesNotMatch(viewerSource, /importState\(JSON\.parse/);
+  assert.match(viewerSource, /importState\(await file\.text\(\)\)/);
 });

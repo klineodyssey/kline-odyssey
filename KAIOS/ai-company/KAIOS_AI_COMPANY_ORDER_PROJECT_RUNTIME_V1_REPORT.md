@@ -2,7 +2,7 @@
 
 Task ID: `KAIOS-AI-COMPANY-ORDER-PROJECT-RUNTIME-V1-001`
 
-Status: `LOCAL_VALIDATION_PASS / INDEPENDENT_REVIEW_PENDING`
+Status: `LOCAL_VALIDATION_PASS / FINAL_EXECUTIVE_REVIEW_IN_PROGRESS`
 
 ## Objective
 
@@ -36,24 +36,29 @@ authority.
 
 | Demonstration | Required domain behavior | Status |
 |---|---|---|
-| Fishpond | Reuses `KAIOS_FISHPOND_AQUACULTURE_RUNTIME_V1` through an evidence adapter | `COMPLETE / CLOSED_BALANCED_SIMULATION` |
-| Basic House | Reuses `REAL_CAUSAL_WORLD_FOUNDATION` through a construction evidence adapter | `COMPLETE / CLOSED_BALANCED_SIMULATION` |
+| Fishpond | Executes `KAIOS_FISHPOND_AQUACULTURE_RUNTIME_V1` through a bounded canonical adapter | `COMPLETE / CLOSED_BALANCED_SIMULATION` |
+| Basic House | Executes `REAL_CAUSAL_WORLD_FOUNDATION` through a bounded construction adapter | `COMPLETE / CLOSED_BALANCED_SIMULATION` |
 | Small Farm | Fails closed while Forest/Agriculture Runtime is unavailable | `BLOCKED_DEPENDENCY` |
 | Life Package | Uses the Worker Registry candidate workflow without Canonical promotion | `COMPLETE / CANDIDATE_ONLY` |
 | Software Module | Uses a local specification, implementation, test and review workflow | `COMPLETE / NO_EXTERNAL_DEPLOYMENT` |
 
 ## Local Verification
 
-- Runtime contract, failure gates, execution, finance and replay: `17/17 PASS`.
+- Runtime contract, failure gates, execution, finance and replay: `18/18 PASS`.
 - Official-site and public API integration: `7/7 PASS`.
+- Repository Node regression: `275/275 PASS`.
+- Company Boot: `74/74 PASS`; Identity: `86/86 PASS`; Worker Registry:
+  `12/12 PASS`; K280 package: `10/10 PASS`; Organism: `47/47 PASS`.
+- Browser Product QA: `189/189 PASS` against the repository sprint-010
+  baselines.
 - Responsive browser QA: `360x800`, `390x844`, `768x1024` and `1440x900` pass.
 - The browser run submits and analyzes a request, renders all 23 populated
   views, completes the fishpond demonstration and verifies the farm dependency
   block without a console-breaking error or horizontal overflow.
 - Public projection generator emits 18 deterministic, read-only JSON files.
 
-Independent review, full regression and production evidence remain pending and
-will be recorded in `KAIOS_AI_COMPANY_RUNTIME_V1_CLOSEOUT.md`.
+The final independent review and production evidence are recorded in
+`KAIOS_AI_COMPANY_RUNTIME_V1_CLOSEOUT.md` after PR `#97` completes.
 
 ## Safety
 

@@ -49,13 +49,13 @@
       "priority": 5,
       "task_id": "KAIOS-CURSOR-SOIL-TYPES-001",
       "work": "SOIL_TYPE_DATASET",
-      "status": "DISPATCHED"
+      "status": "RELEASED"
     },
     {
       "priority": 6,
       "task_id": "KAIOS-CURSOR-FERTILIZER-MODELS-001",
       "work": "FERTILIZER_MODEL_PROPOSAL",
-      "status": "QUEUED"
+      "status": "DISPATCHED"
     },
     {
       "priority": 7,

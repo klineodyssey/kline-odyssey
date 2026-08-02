@@ -19,15 +19,22 @@ Concurrency: `ONE_TASK_AT_A_TIME`
 
 The vegetable assignment was allowed to complete before its lease was released.
 
+- Soil-type candidate data: PR `#96`, independently reviewed and merged as
+  `CANDIDATE_ONLY` in
+  `1650191f35567d43016473420cfd2cba22b00aea`.
+- Soil release and fertilizer dispatch governance: PR `#98`, independently
+  reviewed at `P0=0 / P1=0 / P2=0` and merged in
+  `1e38b59a6fde788f4eee214b8ed503553d4a007b`.
+
 ## Current Assignment
 
-- Task: `KAIOS-CURSOR-SOIL-TYPES-001`
-- Branch: `cursor-handoff/KAIOS-CURSOR-SOIL-TYPES-001`
-- Status: `DISPATCHED / ONE_TASK_AT_A_TIME`
+- Task: `KAIOS-CURSOR-FERTILIZER-MODELS-001`
+- Branch: `cursor-handoff/KAIOS-CURSOR-FERTILIZER-MODELS-001`
+- Status: `ACTIVE / ONE_TASK_AT_A_TIME`
 - Output authority: `CANDIDATE_ONLY_OR_RESEARCH_PROPOSAL_ONLY`
 
-The next safe task will be released only after Codex independently reviews and
-formally closes the soil-types assignment.
+The next safe queue item is compost-model research. It may be dispatched only
+after Codex independently reviews and formally releases the fertilizer claim.
 
 ## Boundaries
 

@@ -60,6 +60,7 @@
       "weather_delay": 0,
       "inspection_delay": 0,
       "rework_delay": 0,
+      "execution_pause_delay": 0,
       "transport_delay": 0,
       "actual_start": 13,
       "actual_end": 56,

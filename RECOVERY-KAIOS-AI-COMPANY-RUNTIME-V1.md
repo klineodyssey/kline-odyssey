@@ -10,7 +10,7 @@ Specification merge commit: `f2e433766b36857a0c86773b042398b7624ed082`
 
 Runtime branch: `codex/kaios-ai-company-order-project-runtime-v1`
 
-Runtime PR: `PENDING`
+Runtime PR: `#97 / https://github.com/klineodyssey/kline-odyssey/pull/97`
 
 Runtime merge commit: `PENDING`
 

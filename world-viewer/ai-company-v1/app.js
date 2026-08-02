@@ -287,7 +287,7 @@ $("import").addEventListener("change", async (event) => {
   if (!file) return;
   try {
     if (file.size > MAX_IMPORT_BYTES) throw new Error("匯入檔案不可超過 2 MB。");
-    runtime.importState(JSON.parse(await file.text()));
+    runtime.importState(await file.text());
     render();
   } catch (error) {
     $("error-detail").textContent = error instanceof Error ? error.message : "Import failed";

@@ -17,6 +17,7 @@
       "resource_plan_id": "AI-COMPANY-RESOURCE-PLAN-00001",
       "project_id": "AI-COMPANY-PROJECT-00001",
       "transport_id": "AI-COMPANY-PROJECT-00001-TRANSPORT-001",
+      "bom_id": "AI-COMPANY-PROJECT-00001-BOM-001",
       "origin": "SIMULATED-SUPPLIER-GRAVEL",
       "destination": "LAND-SIM-FISHPOND-001",
       "route": "CAUSAL-ROUTE-001",
@@ -35,6 +36,7 @@
       "resource_plan_id": "AI-COMPANY-RESOURCE-PLAN-00001",
       "project_id": "AI-COMPANY-PROJECT-00001",
       "transport_id": "AI-COMPANY-PROJECT-00001-TRANSPORT-002",
+      "bom_id": "AI-COMPANY-PROJECT-00001-BOM-002",
       "origin": "SIMULATED-SUPPLIER-PIPE",
       "destination": "LAND-SIM-FISHPOND-001",
       "route": "CAUSAL-ROUTE-002",
@@ -53,17 +55,18 @@
       "resource_plan_id": "AI-COMPANY-RESOURCE-PLAN-00001",
       "project_id": "AI-COMPANY-PROJECT-00001",
       "transport_id": "AI-COMPANY-PROJECT-00001-TRANSPORT-003",
+      "bom_id": "AI-COMPANY-PROJECT-00001-BOM-003",
       "origin": "SIMULATED-SUPPLIER-LINING",
       "destination": "LAND-SIM-FISHPOND-001",
       "route": "CAUSAL-ROUTE-003",
       "quantity": 24,
-      "mass": 240,
+      "mass": 96,
       "vehicle": "SIMULATED-TRUCK-001",
-      "fuel": 2.24,
+      "fuel": 2.096,
       "loading_time": 1,
       "travel_time": 5,
       "unloading_time": 1,
-      "cost": 52,
+      "cost": 44.8,
       "risk": 0.1,
       "status": "DELIVERED"
     },
@@ -71,6 +74,7 @@
       "resource_plan_id": "AI-COMPANY-RESOURCE-PLAN-00001",
       "project_id": "AI-COMPANY-PROJECT-00001",
       "transport_id": "AI-COMPANY-PROJECT-00001-TRANSPORT-004",
+      "bom_id": "AI-COMPANY-PROJECT-00001-BOM-004",
       "origin": "SIMULATED-SUPPLIER-FISH_JUVENILE_STOCK",
       "destination": "LAND-SIM-FISHPOND-001",
       "route": "CAUSAL-ROUTE-004",
@@ -97,7 +101,67 @@
       "transport_cost": 46,
       "ordered_at": 0,
       "arrival_time": 7,
-      "status": "RECEIVED",
+      "supplier_candidates": [
+        "SIMULATED-SUPPLIER-GRAVEL-QUALITY",
+        "SIMULATED-SUPPLIER-GRAVEL-CAPACITY"
+      ],
+      "selection_basis": [
+        "QUALITY",
+        "DELIVERY",
+        "CAPACITY",
+        "RISK",
+        "TOTAL_COST"
+      ],
+      "selected_supplier": "SIMULATED-SUPPLIER-GRAVEL",
+      "phase_times": {
+        "rfq_created": 0,
+        "quotes_received": 0.25,
+        "supplier_selected": 0.5,
+        "order_placed": 0.75,
+        "in_production": 1,
+        "in_transit": 2,
+        "received": 7
+      },
+      "state_history": [
+        {
+          "status": "RFQ_CREATED",
+          "simulation_time": 0
+        },
+        {
+          "status": "QUOTES_RECEIVED",
+          "simulation_time": 0.25
+        },
+        {
+          "status": "SUPPLIER_SELECTED",
+          "simulation_time": 0.5
+        },
+        {
+          "status": "ORDER_PLACED",
+          "simulation_time": 0.75
+        },
+        {
+          "status": "IN_PRODUCTION",
+          "simulation_time": 1
+        },
+        {
+          "status": "IN_TRANSIT",
+          "simulation_time": 2
+        },
+        {
+          "status": "RECEIVED",
+          "simulation_time": 13
+        },
+        {
+          "status": "ACCEPTED",
+          "simulation_time": 13
+        },
+        {
+          "status": "PAYMENT_APPROVED",
+          "simulation_time": 13
+        }
+      ],
+      "inspection_outcome": "PASS",
+      "status": "PAYMENT_APPROVED",
       "simulation_only": true
     },
     {
@@ -110,7 +174,67 @@
       "transport_cost": 41.8,
       "ordered_at": 0,
       "arrival_time": 9,
-      "status": "RECEIVED",
+      "supplier_candidates": [
+        "SIMULATED-SUPPLIER-PIPE-QUALITY",
+        "SIMULATED-SUPPLIER-PIPE-CAPACITY"
+      ],
+      "selection_basis": [
+        "QUALITY",
+        "DELIVERY",
+        "CAPACITY",
+        "RISK",
+        "TOTAL_COST"
+      ],
+      "selected_supplier": "SIMULATED-SUPPLIER-PIPE",
+      "phase_times": {
+        "rfq_created": 0,
+        "quotes_received": 0.25,
+        "supplier_selected": 0.5,
+        "order_placed": 0.75,
+        "in_production": 1,
+        "in_transit": 3,
+        "received": 9
+      },
+      "state_history": [
+        {
+          "status": "RFQ_CREATED",
+          "simulation_time": 0
+        },
+        {
+          "status": "QUOTES_RECEIVED",
+          "simulation_time": 0.25
+        },
+        {
+          "status": "SUPPLIER_SELECTED",
+          "simulation_time": 0.5
+        },
+        {
+          "status": "ORDER_PLACED",
+          "simulation_time": 0.75
+        },
+        {
+          "status": "IN_PRODUCTION",
+          "simulation_time": 1
+        },
+        {
+          "status": "IN_TRANSIT",
+          "simulation_time": 3
+        },
+        {
+          "status": "RECEIVED",
+          "simulation_time": 13
+        },
+        {
+          "status": "ACCEPTED",
+          "simulation_time": 13
+        },
+        {
+          "status": "PAYMENT_APPROVED",
+          "simulation_time": 13
+        }
+      ],
+      "inspection_outcome": "PASS",
+      "status": "PAYMENT_APPROVED",
       "simulation_only": true
     },
     {
@@ -120,10 +244,70 @@
       "material_id": "LINING",
       "quantity": 24,
       "material_cost": 288,
-      "transport_cost": 52,
+      "transport_cost": 44.8,
       "ordered_at": 0,
       "arrival_time": 11,
-      "status": "RECEIVED",
+      "supplier_candidates": [
+        "SIMULATED-SUPPLIER-LINING-QUALITY",
+        "SIMULATED-SUPPLIER-LINING-CAPACITY"
+      ],
+      "selection_basis": [
+        "QUALITY",
+        "DELIVERY",
+        "CAPACITY",
+        "RISK",
+        "TOTAL_COST"
+      ],
+      "selected_supplier": "SIMULATED-SUPPLIER-LINING",
+      "phase_times": {
+        "rfq_created": 0,
+        "quotes_received": 0.25,
+        "supplier_selected": 0.5,
+        "order_placed": 0.75,
+        "in_production": 1,
+        "in_transit": 4,
+        "received": 11
+      },
+      "state_history": [
+        {
+          "status": "RFQ_CREATED",
+          "simulation_time": 0
+        },
+        {
+          "status": "QUOTES_RECEIVED",
+          "simulation_time": 0.25
+        },
+        {
+          "status": "SUPPLIER_SELECTED",
+          "simulation_time": 0.5
+        },
+        {
+          "status": "ORDER_PLACED",
+          "simulation_time": 0.75
+        },
+        {
+          "status": "IN_PRODUCTION",
+          "simulation_time": 1
+        },
+        {
+          "status": "IN_TRANSIT",
+          "simulation_time": 4
+        },
+        {
+          "status": "RECEIVED",
+          "simulation_time": 13
+        },
+        {
+          "status": "ACCEPTED",
+          "simulation_time": 13
+        },
+        {
+          "status": "PAYMENT_APPROVED",
+          "simulation_time": 13
+        }
+      ],
+      "inspection_outcome": "PASS",
+      "status": "PAYMENT_APPROVED",
       "simulation_only": true
     },
     {
@@ -136,7 +320,67 @@
       "transport_cost": 40.6,
       "ordered_at": 0,
       "arrival_time": 13,
-      "status": "RECEIVED",
+      "supplier_candidates": [
+        "SIMULATED-SUPPLIER-FISH_JUVENILE_STOCK-QUALITY",
+        "SIMULATED-SUPPLIER-FISH_JUVENILE_STOCK-CAPACITY"
+      ],
+      "selection_basis": [
+        "QUALITY",
+        "DELIVERY",
+        "CAPACITY",
+        "RISK",
+        "TOTAL_COST"
+      ],
+      "selected_supplier": "SIMULATED-SUPPLIER-FISH_JUVENILE_STOCK",
+      "phase_times": {
+        "rfq_created": 0,
+        "quotes_received": 0.25,
+        "supplier_selected": 0.5,
+        "order_placed": 0.75,
+        "in_production": 1,
+        "in_transit": 5,
+        "received": 13
+      },
+      "state_history": [
+        {
+          "status": "RFQ_CREATED",
+          "simulation_time": 0
+        },
+        {
+          "status": "QUOTES_RECEIVED",
+          "simulation_time": 0.25
+        },
+        {
+          "status": "SUPPLIER_SELECTED",
+          "simulation_time": 0.5
+        },
+        {
+          "status": "ORDER_PLACED",
+          "simulation_time": 0.75
+        },
+        {
+          "status": "IN_PRODUCTION",
+          "simulation_time": 1
+        },
+        {
+          "status": "IN_TRANSIT",
+          "simulation_time": 5
+        },
+        {
+          "status": "RECEIVED",
+          "simulation_time": 13
+        },
+        {
+          "status": "ACCEPTED",
+          "simulation_time": 13
+        },
+        {
+          "status": "PAYMENT_APPROVED",
+          "simulation_time": 13
+        }
+      ],
+      "inspection_outcome": "PASS",
+      "status": "PAYMENT_APPROVED",
       "simulation_only": true
     }
   ]

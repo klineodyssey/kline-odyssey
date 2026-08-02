@@ -271,6 +271,44 @@
       "estimated_duration": 43,
       "feasibility_review_id": "AI-COMPANY-FEASIBILITY-00001",
       "assumptions": [],
+      "risk_assessment": [
+        {
+          "risk_id": "FISHPOND_PROJECT-RISK-01",
+          "risk_type": "SCHEDULE_RISK",
+          "probability": 0.25,
+          "impact": "MEDIUM",
+          "mitigation": "DEPENDENCY_AND_TIME_BUFFER",
+          "status": "MONITORED",
+          "simulation_only": true
+        },
+        {
+          "risk_id": "FISHPOND_PROJECT-RISK-02",
+          "risk_type": "RESOURCE_AVAILABILITY_RISK",
+          "probability": 0.3,
+          "impact": "MEDIUM",
+          "mitigation": "EXPLICIT_PROCUREMENT_GATES",
+          "status": "MONITORED",
+          "simulation_only": true
+        },
+        {
+          "risk_id": "FISHPOND_PROJECT-RISK-03",
+          "risk_type": "FINANCIAL_EXPOSURE_RISK",
+          "probability": 0.2,
+          "impact": "LOW",
+          "mitigation": "BOUNDED_BUDGET_AND_CAPACITY",
+          "status": "MONITORED",
+          "simulation_only": true
+        },
+        {
+          "risk_id": "FISHPOND_PROJECT-RISK-04",
+          "risk_type": "SITE_SAFETY_RISK",
+          "probability": 0.2,
+          "impact": "LOW",
+          "mitigation": "STAGE_SAFETY_INSPECTIONS",
+          "status": "MONITORED",
+          "simulation_only": true
+        }
+      ],
       "status": "APPROVED_SIMULATION",
       "simulation_only": true
     }
