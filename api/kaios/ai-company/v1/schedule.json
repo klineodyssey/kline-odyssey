@@ -1,0 +1,101 @@
+{
+  "schema_version": "1.0.0",
+  "runtime": "KAIOS_AI_COMPANY_ORDER_AND_PROJECT_RUNTIME_V1",
+  "mode": "STATIC_READ_ONLY_PROJECTION",
+  "generated_from_seed": "KAIOS-AI-COMPANY-PUBLIC-001",
+  "simulation_only": true,
+  "authority": "NO_PRODUCTION_AUTHORITY",
+  "read_only": true,
+  "mutation_endpoints": false,
+  "real_wallet": false,
+  "real_kgen": false,
+  "onchain_transfer": false,
+  "real_legal_effect": false,
+  "external_autonomy": false,
+  "schedules": [
+    {
+      "project_id": "AI-COMPANY-PROJECT-00001",
+      "planned_start": 13,
+      "planned_end": 56,
+      "estimated_duration": 43,
+      "critical_path": [
+        "AI-COMPANY-PROJECT-00001-TASK-001",
+        "AI-COMPANY-PROJECT-00001-TASK-002",
+        "AI-COMPANY-PROJECT-00001-TASK-003",
+        "AI-COMPANY-PROJECT-00001-TASK-004",
+        "AI-COMPANY-PROJECT-00001-TASK-005",
+        "AI-COMPANY-PROJECT-00001-TASK-006"
+      ],
+      "task_dependencies": [
+        "AI-COMPANY-PROJECT-00001-DEPENDENCY-001",
+        "AI-COMPANY-PROJECT-00001-DEPENDENCY-002",
+        "AI-COMPANY-PROJECT-00001-DEPENDENCY-003",
+        "AI-COMPANY-PROJECT-00001-DEPENDENCY-004",
+        "AI-COMPANY-PROJECT-00001-DEPENDENCY-005"
+      ],
+      "worker_availability": {
+        "AI-COMPANY-WORKER-001": true,
+        "AI-COMPANY-WORKER-002": true,
+        "AI-COMPANY-WORKER-003": true,
+        "AI-COMPANY-WORKER-005": true,
+        "AI-COMPANY-WORKER-004": true,
+        "AI-COMPANY-WORKER-006": true,
+        "AI-COMPANY-WORKER-008": true,
+        "AI-COMPANY-WORKER-009": true,
+        "AI-COMPANY-WORKER-010": true
+      },
+      "equipment_availability": {
+        "AI-COMPANY-EQUIPMENT-001": true,
+        "AI-COMPANY-EQUIPMENT-002": true,
+        "AI-COMPANY-EQUIPMENT-003": true,
+        "AI-COMPANY-EQUIPMENT-004": true,
+        "AI-COMPANY-EQUIPMENT-005": true
+      },
+      "material_arrival": {
+        "GRAVEL": 15,
+        "PIPE": 16,
+        "LINING": 17,
+        "FISH_JUVENILE_STOCK": 18
+      },
+      "weather_delay": 0,
+      "inspection_delay": 0,
+      "rework_delay": 0,
+      "transport_delay": 0,
+      "actual_start": 13,
+      "actual_end": 56,
+      "status": "COMPLETE"
+    }
+  ],
+  "task_windows": {
+    "AI-COMPANY-PROJECT-00001-TASK-001": {
+      "start": 13,
+      "end": 17,
+      "location": "LAND-SIM-FISHPOND-001"
+    },
+    "AI-COMPANY-PROJECT-00001-TASK-002": {
+      "start": 17,
+      "end": 23,
+      "location": "LAND-SIM-FISHPOND-001"
+    },
+    "AI-COMPANY-PROJECT-00001-TASK-003": {
+      "start": 23,
+      "end": 35,
+      "location": "LAND-SIM-FISHPOND-001"
+    },
+    "AI-COMPANY-PROJECT-00001-TASK-004": {
+      "start": 35,
+      "end": 45,
+      "location": "LAND-SIM-FISHPOND-001"
+    },
+    "AI-COMPANY-PROJECT-00001-TASK-005": {
+      "start": 45,
+      "end": 53,
+      "location": "LAND-SIM-FISHPOND-001"
+    },
+    "AI-COMPANY-PROJECT-00001-TASK-006": {
+      "start": 53,
+      "end": 56,
+      "location": "LAND-SIM-FISHPOND-001"
+    }
+  }
+}

@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>KAIOS AI 公司創造中心｜KGEN</title>
+  <meta name="description" content="KAIOS AI Company：從玩家需求、可行性、專案拆解與資源計畫，到施工、生產、驗收、交付與維護的決定性模擬。">
+  <link rel="canonical" href="https://klineodyssey.github.io/kline-odyssey/world-viewer/ai-company-v1/">
+  <meta property="og:title" content="KAIOS AI 公司創造中心｜KGEN">
+  <meta property="og:description" content="需求、專案、供應鏈、工人、設備、預算、驗收與交付的因果模擬。">
+  <meta property="og:url" content="https://klineodyssey.github.io/kline-odyssey/world-viewer/ai-company-v1/">
+  <meta property="og:image" content="https://klineodyssey.github.io/kline-odyssey/assets/og-cover.jpg">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="../../" aria-label="返回 KLINE ODYSSEY 官方首頁">
+      <img src="../../assets/kgen/kgen-logo-256.png" alt="KGEN KAIOS 標誌">
+      <span><b>KAIOS / KGEN</b><strong>KAIOS AI 公司創造中心</strong><small>Order × Project × Delivery Runtime V1</small></span>
+    </a>
+    <nav aria-label="Viewer navigation">
+      <a href="../../">返回官方首頁</a>
+      <a href="../">完整世界</a>
+      <a href="../aquaculture-v1/">魚塭 Runtime</a>
+      <a href="../../api/kaios/ai-company/v1/">公開資料</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="summary" aria-labelledby="page-title">
+      <div>
+        <p class="eyebrow">LOCAL DETERMINISTIC SIMULATION</p>
+        <h1 id="page-title">KAIOS AI Company</h1>
+        <p>把模擬需求拆解成有依賴、有資源、有時間、有驗收的專案；條件不足時，專案會清楚阻擋，不會瞬間完成。</p>
+      </div>
+      <div class="boundary" role="note">
+        <strong>SIMULATION ONLY</strong><span>NO REAL WALLET</span><span>NO REAL KGEN</span><span>NO REAL CONTRACT</span><span>NO PRODUCTION AUTHORITY</span><span>NO EXTERNAL AUTONOMY</span>
+      </div>
+    </section>
+
+    <section class="metrics" aria-label="Runtime metrics">
+      <div><span>Runtime</span><strong id="runtime-state">LOADING</strong></div>
+      <div><span>Simulation Time</span><strong id="clock">0 h</strong></div>
+      <div><span>Requests</span><strong id="request-count">0</strong></div>
+      <div><span>Active Projects</span><strong id="project-count">0 / 0</strong></div>
+      <div><span>Company Cash</span><strong id="cash">0 SIM</strong></div>
+      <div><span>Review Queue</span><strong id="review-queue">0 / 0</strong></div>
+    </section>
+
+    <section class="request-bar" aria-labelledby="request-title">
+      <div>
+        <span class="section-label">CUSTOMER REQUEST</span>
+        <h2 id="request-title">提出模擬需求</h2>
+      </div>
+      <label><span>專案範本</span><select id="template-select"><option value="FISHPOND_PROJECT">Fishpond</option><option value="BASIC_HOUSE_PROJECT">Basic House</option><option value="SMALL_FARM_PROJECT">Small Farm</option><option value="WAREHOUSE_PROJECT">Warehouse</option><option value="BASIC_ROAD_PROJECT">Basic Road</option><option value="SMALL_BRIDGE_PROJECT">Small Bridge</option><option value="WORKSHOP_PROJECT">Workshop</option><option value="LIFE_PACKAGE_PROJECT">Life Package</option><option value="SOFTWARE_MODULE_PROJECT">Software Module</option></select></label>
+      <label class="request-copy"><span>需求</span><textarea id="request-text" rows="2">I need a fishpond.</textarea></label>
+      <label><span>模擬預算</span><input id="request-budget" type="number" min="0" step="1000" value="250000"></label>
+      <button class="primary-action" id="submit-request" type="button">提交需求</button>
+    </section>
+
+    <section class="workbench">
+      <aside class="controls" aria-label="Simulation controls">
+        <label for="view-select">工作檢視</label>
+        <select id="view-select">
+          <option value="requests">Customer Requests</option><option value="analysis">Requirement Analysis</option><option value="gates">Feasibility Gates</option><option value="proposals">Project Proposals</option><option value="projects">Active Projects</option><option value="dependencies">Dependency Graph</option><option value="materials">Materials</option><option value="workforce">Workers</option><option value="equipment">Equipment</option><option value="supply-chain">Supply Chain</option><option value="budget">Budget</option><option value="schedule">Schedule</option><option value="procurement">Procurement</option><option value="execution">Construction / Production</option><option value="inspections">Inspections</option><option value="changes">Change Orders</option><option value="delivery">Delivery</option><option value="maintenance">Maintenance</option><option value="capacity">Company Capacity</option><option value="finance">Company Finance</option><option value="risks">Risks</option><option value="events">Event Timeline</option><option value="cursor">Cursor Work Queue</option>
+        </select>
+
+        <div class="control-group" aria-labelledby="planning-controls">
+          <h3 id="planning-controls">規劃</h3>
+          <div class="control-grid"><button id="clarify" type="button">要求釐清</button><button id="analyze" type="button">分析需求</button><button id="feasibility" type="button">檢查可行性</button><button id="proposal" type="button">建立提案</button><button id="approve" type="button">核准提案</button><button id="create-project" type="button">建立專案</button><button id="plan-project" type="button">產生完整計畫</button><button id="contract" type="button">模擬合約</button></div>
+        </div>
+
+        <div class="control-group" aria-labelledby="execution-controls">
+          <h3 id="execution-controls">執行與驗收</h3>
+          <div class="control-grid"><button id="procure" type="button">開始採購</button><button id="start-task" type="button">配置並開始工作</button><button id="pause-task" type="button">暫停工作</button><button id="resume-task" type="button">繼續工作</button><button id="complete-task" type="button">完成工作</button><button id="inspect" type="button">執行驗收</button><button id="rework" type="button">建立返工</button><button id="change-order" type="button">提交變更訂單</button><button id="approve-change-order" type="button">核准變更訂單</button><button id="deliver" type="button">提交交付</button><button id="accept" type="button">接受交付</button><button id="maintenance" type="button">排定維護</button><button id="close-project" type="button">專案結案</button></div>
+        </div>
+
+        <div class="runtime-row"><button id="start" type="button" title="Start simulation">開始</button><button id="pause" type="button" title="Pause simulation">暫停</button><button id="resume" type="button" title="Resume simulation">繼續</button><button id="advance" type="button" title="Advance simulation time">+8 h</button></div>
+        <label for="demo-select">決定性示範</label>
+        <div class="scenario-row"><select id="demo-select"><option value="FISHPOND_PROJECT">Fishpond Project</option><option value="BASIC_HOUSE_PROJECT">Basic House Project</option><option value="SMALL_FARM_PROJECT">Blocked Farm Project</option><option value="LIFE_PACKAGE_PROJECT">Life Package Project</option><option value="SOFTWARE_MODULE_PROJECT">Software Module Project</option></select><button id="run-demo" type="button">執行</button></div>
+        <div class="io-row"><button id="export" type="button">匯出</button><label class="file-button">匯入<input id="import" type="file" accept="application/json"></label><button id="reset" type="button">重置</button></div>
+      </aside>
+
+      <section class="viewport" aria-live="polite">
+        <div class="view-header"><div><span>Current View</span><h2 id="view-title">Customer Requests</h2></div><span id="integrity" class="status">LOADING</span></div>
+        <div id="loading" class="message">正在載入 AI Company 模擬…</div>
+        <div id="error" class="message error" role="alert" hidden><strong>AI Company Runtime 載入失敗。</strong><span id="error-detail"></span><button id="retry" type="button">重新載入</button></div>
+        <div id="notice" class="message" role="status" hidden></div>
+        <div id="empty" class="message" hidden>此檢視目前沒有資料。</div>
+        <div id="view" class="view" aria-busy="true"></div>
+      </section>
+    </section>
+  </main>
+  <script type="module" src="app.js"></script>
+</body>
+</html>

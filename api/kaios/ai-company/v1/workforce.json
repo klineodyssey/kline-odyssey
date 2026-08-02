@@ -1,0 +1,356 @@
+{
+  "schema_version": "1.0.0",
+  "runtime": "KAIOS_AI_COMPANY_ORDER_AND_PROJECT_RUNTIME_V1",
+  "mode": "STATIC_READ_ONLY_PROJECTION",
+  "generated_from_seed": "KAIOS-AI-COMPANY-PUBLIC-001",
+  "simulation_only": true,
+  "authority": "NO_PRODUCTION_AUTHORITY",
+  "read_only": true,
+  "mutation_endpoints": false,
+  "real_wallet": false,
+  "real_kgen": false,
+  "onchain_transfer": false,
+  "real_legal_effect": false,
+  "external_autonomy": false,
+  "workforce_plans": [
+    {
+      "resource_plan_id": "AI-COMPANY-RESOURCE-PLAN-00001",
+      "project_id": "AI-COMPANY-PROJECT-00001",
+      "worker_id": "AI-COMPANY-WORKER-001",
+      "life_id": "LIFE-AI-COMPANY-WORKER-001",
+      "role": "SURVEYOR",
+      "skill": "SURVEYOR",
+      "body_type": "PHYSICAL",
+      "location": "KAIOS-SIMULATION-YARD",
+      "shift": {
+        "start": 0,
+        "end": 24,
+        "maximum_hours": 12
+      },
+      "cost": 30,
+      "availability": true,
+      "travel_time": 1,
+      "assigned_tasks": [
+        "AI-COMPANY-PROJECT-00001-TASK-001"
+      ],
+      "safety_qualification": true,
+      "equipment_qualification": true,
+      "status": "AVAILABLE"
+    },
+    {
+      "resource_plan_id": "AI-COMPANY-RESOURCE-PLAN-00001",
+      "project_id": "AI-COMPANY-PROJECT-00001",
+      "worker_id": "AI-COMPANY-WORKER-002",
+      "life_id": "LIFE-AI-COMPANY-WORKER-002",
+      "role": "ARCHITECT",
+      "skill": "ARCHITECT",
+      "body_type": "DIGITAL",
+      "location": "LOCAL_SIMULATION_WORKSPACE",
+      "shift": {
+        "start": 0,
+        "end": 24,
+        "maximum_hours": 16
+      },
+      "cost": 42,
+      "availability": true,
+      "travel_time": 0,
+      "assigned_tasks": [
+        "AI-COMPANY-PROJECT-00001-TASK-002"
+      ],
+      "safety_qualification": true,
+      "equipment_qualification": true,
+      "status": "AVAILABLE"
+    },
+    {
+      "resource_plan_id": "AI-COMPANY-RESOURCE-PLAN-00001",
+      "project_id": "AI-COMPANY-PROJECT-00001",
+      "worker_id": "AI-COMPANY-WORKER-003",
+      "life_id": "LIFE-AI-COMPANY-WORKER-003",
+      "role": "SITE_SUPERVISOR",
+      "skill": "SITE_SUPERVISOR",
+      "body_type": "PHYSICAL",
+      "location": "KAIOS-SIMULATION-YARD",
+      "shift": {
+        "start": 0,
+        "end": 24,
+        "maximum_hours": 12
+      },
+      "cost": 30,
+      "availability": true,
+      "travel_time": 1,
+      "assigned_tasks": [
+        "AI-COMPANY-PROJECT-00001-TASK-002",
+        "AI-COMPANY-PROJECT-00001-TASK-003"
+      ],
+      "safety_qualification": true,
+      "equipment_qualification": true,
+      "status": "AVAILABLE"
+    },
+    {
+      "resource_plan_id": "AI-COMPANY-RESOURCE-PLAN-00001",
+      "project_id": "AI-COMPANY-PROJECT-00001",
+      "worker_id": "AI-COMPANY-WORKER-005",
+      "life_id": "LIFE-AI-COMPANY-WORKER-005",
+      "role": "EXCAVATOR_OPERATOR",
+      "skill": "EXCAVATOR_OPERATOR",
+      "body_type": "PHYSICAL",
+      "location": "KAIOS-SIMULATION-YARD",
+      "shift": {
+        "start": 0,
+        "end": 24,
+        "maximum_hours": 12
+      },
+      "cost": 30,
+      "availability": true,
+      "travel_time": 1,
+      "assigned_tasks": [
+        "AI-COMPANY-PROJECT-00001-TASK-003"
+      ],
+      "safety_qualification": true,
+      "equipment_qualification": true,
+      "status": "AVAILABLE"
+    },
+    {
+      "resource_plan_id": "AI-COMPANY-RESOURCE-PLAN-00001",
+      "project_id": "AI-COMPANY-PROJECT-00001",
+      "worker_id": "AI-COMPANY-WORKER-004",
+      "life_id": "LIFE-AI-COMPANY-WORKER-004",
+      "role": "GENERAL_LABORER",
+      "skill": "GENERAL_LABORER",
+      "body_type": "PHYSICAL",
+      "location": "KAIOS-SIMULATION-YARD",
+      "shift": {
+        "start": 0,
+        "end": 24,
+        "maximum_hours": 12
+      },
+      "cost": 30,
+      "availability": true,
+      "travel_time": 1,
+      "assigned_tasks": [
+        "AI-COMPANY-PROJECT-00001-TASK-004"
+      ],
+      "safety_qualification": true,
+      "equipment_qualification": true,
+      "status": "AVAILABLE"
+    },
+    {
+      "resource_plan_id": "AI-COMPANY-RESOURCE-PLAN-00001",
+      "project_id": "AI-COMPANY-PROJECT-00001",
+      "worker_id": "AI-COMPANY-WORKER-006",
+      "life_id": "LIFE-AI-COMPANY-WORKER-006",
+      "role": "PIPE_INSTALLER",
+      "skill": "PIPE_INSTALLER",
+      "body_type": "PHYSICAL",
+      "location": "KAIOS-SIMULATION-YARD",
+      "shift": {
+        "start": 0,
+        "end": 24,
+        "maximum_hours": 12
+      },
+      "cost": 30,
+      "availability": true,
+      "travel_time": 1,
+      "assigned_tasks": [
+        "AI-COMPANY-PROJECT-00001-TASK-004"
+      ],
+      "safety_qualification": true,
+      "equipment_qualification": true,
+      "status": "AVAILABLE"
+    },
+    {
+      "resource_plan_id": "AI-COMPANY-RESOURCE-PLAN-00001",
+      "project_id": "AI-COMPANY-PROJECT-00001",
+      "worker_id": "AI-COMPANY-WORKER-008",
+      "life_id": "LIFE-AI-COMPANY-WORKER-008",
+      "role": "AQUACULTURE_WORKER",
+      "skill": "AQUACULTURE_WORKER",
+      "body_type": "PHYSICAL",
+      "location": "KAIOS-SIMULATION-YARD",
+      "shift": {
+        "start": 0,
+        "end": 24,
+        "maximum_hours": 12
+      },
+      "cost": 30,
+      "availability": true,
+      "travel_time": 1,
+      "assigned_tasks": [
+        "AI-COMPANY-PROJECT-00001-TASK-005"
+      ],
+      "safety_qualification": true,
+      "equipment_qualification": true,
+      "status": "AVAILABLE"
+    },
+    {
+      "resource_plan_id": "AI-COMPANY-RESOURCE-PLAN-00001",
+      "project_id": "AI-COMPANY-PROJECT-00001",
+      "worker_id": "AI-COMPANY-WORKER-009",
+      "life_id": "LIFE-AI-COMPANY-WORKER-009",
+      "role": "WATER_QUALITY_TECHNICIAN",
+      "skill": "WATER_QUALITY_TECHNICIAN",
+      "body_type": "PHYSICAL",
+      "location": "KAIOS-SIMULATION-YARD",
+      "shift": {
+        "start": 0,
+        "end": 24,
+        "maximum_hours": 12
+      },
+      "cost": 30,
+      "availability": true,
+      "travel_time": 1,
+      "assigned_tasks": [
+        "AI-COMPANY-PROJECT-00001-TASK-005"
+      ],
+      "safety_qualification": true,
+      "equipment_qualification": true,
+      "status": "AVAILABLE"
+    },
+    {
+      "resource_plan_id": "AI-COMPANY-RESOURCE-PLAN-00001",
+      "project_id": "AI-COMPANY-PROJECT-00001",
+      "worker_id": "AI-COMPANY-WORKER-010",
+      "life_id": "LIFE-AI-COMPANY-WORKER-010",
+      "role": "QA_INSPECTOR",
+      "skill": "QA_INSPECTOR",
+      "body_type": "PHYSICAL",
+      "location": "KAIOS-SIMULATION-YARD",
+      "shift": {
+        "start": 0,
+        "end": 24,
+        "maximum_hours": 12
+      },
+      "cost": 30,
+      "availability": true,
+      "travel_time": 1,
+      "assigned_tasks": [
+        "AI-COMPANY-PROJECT-00001-TASK-006"
+      ],
+      "safety_qualification": true,
+      "equipment_qualification": true,
+      "status": "AVAILABLE"
+    }
+  ],
+  "reservations": [
+    {
+      "reservation_id": "AI-COMPANY-WORKER-RES-00001",
+      "project_id": "AI-COMPANY-PROJECT-00001",
+      "task_id": "AI-COMPANY-PROJECT-00001-TASK-001",
+      "worker_id": "AI-COMPANY-WORKER-001",
+      "life_id": "LIFE-AI-COMPANY-WORKER-001",
+      "body_type": "PHYSICAL",
+      "location": "LAND-SIM-FISHPOND-001",
+      "start": 13,
+      "end": 17,
+      "status": "RELEASED"
+    },
+    {
+      "reservation_id": "AI-COMPANY-WORKER-RES-00002",
+      "project_id": "AI-COMPANY-PROJECT-00001",
+      "task_id": "AI-COMPANY-PROJECT-00001-TASK-002",
+      "worker_id": "AI-COMPANY-WORKER-002",
+      "life_id": "LIFE-AI-COMPANY-WORKER-002",
+      "body_type": "DIGITAL",
+      "location": "LAND-SIM-FISHPOND-001",
+      "start": 17,
+      "end": 23,
+      "status": "RELEASED"
+    },
+    {
+      "reservation_id": "AI-COMPANY-WORKER-RES-00003",
+      "project_id": "AI-COMPANY-PROJECT-00001",
+      "task_id": "AI-COMPANY-PROJECT-00001-TASK-002",
+      "worker_id": "AI-COMPANY-WORKER-003",
+      "life_id": "LIFE-AI-COMPANY-WORKER-003",
+      "body_type": "PHYSICAL",
+      "location": "LAND-SIM-FISHPOND-001",
+      "start": 17,
+      "end": 23,
+      "status": "RELEASED"
+    },
+    {
+      "reservation_id": "AI-COMPANY-WORKER-RES-00004",
+      "project_id": "AI-COMPANY-PROJECT-00001",
+      "task_id": "AI-COMPANY-PROJECT-00001-TASK-003",
+      "worker_id": "AI-COMPANY-WORKER-005",
+      "life_id": "LIFE-AI-COMPANY-WORKER-005",
+      "body_type": "PHYSICAL",
+      "location": "LAND-SIM-FISHPOND-001",
+      "start": 23,
+      "end": 35,
+      "status": "RELEASED"
+    },
+    {
+      "reservation_id": "AI-COMPANY-WORKER-RES-00005",
+      "project_id": "AI-COMPANY-PROJECT-00001",
+      "task_id": "AI-COMPANY-PROJECT-00001-TASK-003",
+      "worker_id": "AI-COMPANY-WORKER-003",
+      "life_id": "LIFE-AI-COMPANY-WORKER-003",
+      "body_type": "PHYSICAL",
+      "location": "LAND-SIM-FISHPOND-001",
+      "start": 23,
+      "end": 35,
+      "status": "RELEASED"
+    },
+    {
+      "reservation_id": "AI-COMPANY-WORKER-RES-00006",
+      "project_id": "AI-COMPANY-PROJECT-00001",
+      "task_id": "AI-COMPANY-PROJECT-00001-TASK-004",
+      "worker_id": "AI-COMPANY-WORKER-004",
+      "life_id": "LIFE-AI-COMPANY-WORKER-004",
+      "body_type": "PHYSICAL",
+      "location": "LAND-SIM-FISHPOND-001",
+      "start": 35,
+      "end": 45,
+      "status": "RELEASED"
+    },
+    {
+      "reservation_id": "AI-COMPANY-WORKER-RES-00007",
+      "project_id": "AI-COMPANY-PROJECT-00001",
+      "task_id": "AI-COMPANY-PROJECT-00001-TASK-004",
+      "worker_id": "AI-COMPANY-WORKER-006",
+      "life_id": "LIFE-AI-COMPANY-WORKER-006",
+      "body_type": "PHYSICAL",
+      "location": "LAND-SIM-FISHPOND-001",
+      "start": 35,
+      "end": 45,
+      "status": "RELEASED"
+    },
+    {
+      "reservation_id": "AI-COMPANY-WORKER-RES-00008",
+      "project_id": "AI-COMPANY-PROJECT-00001",
+      "task_id": "AI-COMPANY-PROJECT-00001-TASK-005",
+      "worker_id": "AI-COMPANY-WORKER-008",
+      "life_id": "LIFE-AI-COMPANY-WORKER-008",
+      "body_type": "PHYSICAL",
+      "location": "LAND-SIM-FISHPOND-001",
+      "start": 45,
+      "end": 53,
+      "status": "RELEASED"
+    },
+    {
+      "reservation_id": "AI-COMPANY-WORKER-RES-00009",
+      "project_id": "AI-COMPANY-PROJECT-00001",
+      "task_id": "AI-COMPANY-PROJECT-00001-TASK-005",
+      "worker_id": "AI-COMPANY-WORKER-009",
+      "life_id": "LIFE-AI-COMPANY-WORKER-009",
+      "body_type": "PHYSICAL",
+      "location": "LAND-SIM-FISHPOND-001",
+      "start": 45,
+      "end": 53,
+      "status": "RELEASED"
+    },
+    {
+      "reservation_id": "AI-COMPANY-WORKER-RES-00010",
+      "project_id": "AI-COMPANY-PROJECT-00001",
+      "task_id": "AI-COMPANY-PROJECT-00001-TASK-006",
+      "worker_id": "AI-COMPANY-WORKER-010",
+      "life_id": "LIFE-AI-COMPANY-WORKER-010",
+      "body_type": "PHYSICAL",
+      "location": "LAND-SIM-FISHPOND-001",
+      "start": 53,
+      "end": 56,
+      "status": "RELEASED"
+    }
+  ]
+}

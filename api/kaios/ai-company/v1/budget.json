@@ -1,0 +1,43 @@
+{
+  "schema_version": "1.0.0",
+  "runtime": "KAIOS_AI_COMPANY_ORDER_AND_PROJECT_RUNTIME_V1",
+  "mode": "STATIC_READ_ONLY_PROJECTION",
+  "generated_from_seed": "KAIOS-AI-COMPANY-PUBLIC-001",
+  "simulation_only": true,
+  "authority": "NO_PRODUCTION_AUTHORITY",
+  "read_only": true,
+  "mutation_endpoints": false,
+  "real_wallet": false,
+  "real_kgen": false,
+  "onchain_transfer": false,
+  "real_legal_effect": false,
+  "external_autonomy": false,
+  "budgets": [
+    {
+      "project_id": "AI-COMPANY-PROJECT-00001",
+      "project_budget": 250000,
+      "design_cost": 1200,
+      "material_cost": 1008,
+      "labor_cost": 7150,
+      "equipment_cost": 2200,
+      "energy_cost": 222,
+      "transport_cost": 180.4,
+      "storage_cost": 20.16,
+      "inspection_cost": 700,
+      "risk_reserve": 556.32,
+      "maintenance_reserve": 417.24,
+      "tax_simulation": 139.08,
+      "insurance_simulation": 139.08,
+      "interest_simulation": 0,
+      "contingency": 695.4,
+      "total_estimated_cost": 14627.68,
+      "approved_budget": 250000,
+      "spent": 14088.4,
+      "committed": 0,
+      "remaining": 235911.6,
+      "forecast_at_completion": 14627.68,
+      "funding_source": "CUSTOMER_SIMULATED_WALLET",
+      "status": "APPROVED"
+    }
+  ]
+}

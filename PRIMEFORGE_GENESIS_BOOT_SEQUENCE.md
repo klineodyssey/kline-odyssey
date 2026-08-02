@@ -79,6 +79,16 @@ do not load an authoritative Runtime or grant external execution authority.
 | `KGEN-KAIOS/world-viewer/tests/ai-company-spec.test.mjs` | Node specification and schema regression tests. |
 | `KGEN-KAIOS/governance/autopilot/recovery_points/RECOVERY-KAIOS-AI-COMPANY-SPEC-V1.md` | Specification rollback anchor. |
 | `KGEN-KAIOS/governance/autopilot/company_status/COMPANY_STATUS_2026-08-02_AI_COMPANY_SPEC.md` | Current workline and Cursor queue status. |
+| `KGEN-KAIOS/world-viewer/ai-company/ai-company-project-runtime.js` | Deterministic AI Company order, project, inspection and delivery Runtime V1. |
+| `world-viewer/ai-company-v1/index.html` | Public AI Company local-simulation Viewer route. |
+| `KAIOS/ai-company/generate-ai-company-v1-api.mjs` | Read-only static API projection generator. |
+| `api/kaios/ai-company/v1/index.html` | Public AI Company API directory. |
+| `KAIOS/ai-company/KAIOS_AI_COMPANY_ORDER_PROJECT_RUNTIME_V1_REPORT.md` | Runtime implementation and validation report. |
+| `KAIOS/ai-company/KAIOS_AI_COMPANY_WORLD_VIEWER_REPORT.md` | Viewer, navigation and responsive QA report. |
+| `KAIOS/ai-company/KAIOS_CURSOR_CONTINUOUS_QUEUE_REPORT.md` | One-task Cursor queue and provenance report. |
+| `RECOVERY-KAIOS-AI-COMPANY-RUNTIME-V1.md` | Runtime rollback and deployment anchor. |
+| `KAIOS_AI_COMPANY_RUNTIME_V1_CLOSEOUT.md` | Runtime merge and production closeout. |
+| `KGEN-KAIOS/governance/autopilot/company_status/COMPANY_STATUS_2026-08-02_AI_COMPANY_RUNTIME.md` | Runtime workline and authority status. |
 PUBLIC_ENTRY: https://klineodyssey.github.io/kline-odyssey/boot/  
 RAW_ENTRY: https://klineodyssey.github.io/kline-odyssey/PRIMEFORGE_GENESIS_BOOT_SEQUENCE.md  
 

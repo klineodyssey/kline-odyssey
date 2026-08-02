@@ -1,0 +1,157 @@
+{
+  "schema_version": "1.0.0",
+  "runtime": "KAIOS_AI_COMPANY_ORDER_AND_PROJECT_RUNTIME_V1",
+  "mode": "STATIC_READ_ONLY_PROJECTION",
+  "generated_from_seed": "KAIOS-AI-COMPANY-PUBLIC-001",
+  "simulation_only": true,
+  "authority": "NO_PRODUCTION_AUTHORITY",
+  "read_only": true,
+  "mutation_endpoints": false,
+  "real_wallet": false,
+  "real_kgen": false,
+  "onchain_transfer": false,
+  "real_legal_effect": false,
+  "external_autonomy": false,
+  "task_id": "KAIOS-FOREST-AGRICULTURE-RUNTIME-V1-001",
+  "status": "ACTIVE",
+  "worker_id": "cursor-01",
+  "reviewer": "codex-gm-01",
+  "branch_template": "cursor-handoff/<Task-ID>",
+  "one_task_at_a_time": true,
+  "continuous_dispatch_mode": "CODEX_CONTROLLED_AFTER_FORMAL_RELEASE",
+  "output_authority": "CANDIDATE_ONLY_OR_RESEARCH_PROPOSAL_ONLY",
+  "queue": [
+    {
+      "priority": 1,
+      "task_id": "KAIOS-CURSOR-FOREST-LIFE-PACKAGES-001",
+      "work": "FOREST_LIFE_PACKAGE_RESEARCH",
+      "status": "RELEASED"
+    },
+    {
+      "priority": 2,
+      "task_id": "KAIOS-CURSOR-CROP-LIFE-PACKAGES-001",
+      "work": "CROP_LIFE_PACKAGE",
+      "status": "RELEASED"
+    },
+    {
+      "priority": 3,
+      "task_id": "KAIOS-CURSOR-FRUIT-TREE-PACKAGES-001",
+      "work": "FRUIT_TREE_PACKAGE",
+      "status": "RELEASED"
+    },
+    {
+      "priority": 4,
+      "task_id": "KAIOS-CURSOR-VEGETABLE-PACKAGES-001",
+      "work": "VEGETABLE_PACKAGE",
+      "status": "DISPATCHED"
+    },
+    {
+      "priority": 5,
+      "task_id": "KAIOS-CURSOR-SOIL-TYPES-001",
+      "work": "SOIL_TYPE_DATASET",
+      "status": "QUEUED"
+    },
+    {
+      "priority": 6,
+      "task_id": "KAIOS-CURSOR-FERTILIZER-MODELS-001",
+      "work": "FERTILIZER_MODEL_PROPOSAL",
+      "status": "QUEUED"
+    },
+    {
+      "priority": 7,
+      "task_id": "KAIOS-CURSOR-COMPOST-MODELS-001",
+      "work": "COMPOST_MODEL_PROPOSAL",
+      "status": "QUEUED"
+    },
+    {
+      "priority": 8,
+      "task_id": "KAIOS-CURSOR-INSECT-CANDIDATES-001",
+      "work": "INSECT_CANDIDATE_PACKAGE",
+      "status": "QUEUED"
+    },
+    {
+      "priority": 9,
+      "task_id": "KAIOS-CURSOR-POLLINATOR-RESEARCH-001",
+      "work": "POLLINATOR_RESEARCH",
+      "status": "QUEUED"
+    },
+    {
+      "priority": 10,
+      "task_id": "KAIOS-CURSOR-EARTHWORM-CANDIDATE-001",
+      "work": "EARTHWORM_CANDIDATE_PACKAGE",
+      "status": "QUEUED"
+    },
+    {
+      "priority": 11,
+      "task_id": "KAIOS-CURSOR-FUNGI-CANDIDATE-001",
+      "work": "FUNGI_CANDIDATE_PACKAGE",
+      "status": "QUEUED"
+    },
+    {
+      "priority": 12,
+      "task_id": "KAIOS-CURSOR-MICROBIAL-RESEARCH-001",
+      "work": "MICROBIAL_RESEARCH",
+      "status": "QUEUED"
+    },
+    {
+      "priority": 13,
+      "task_id": "KAIOS-CURSOR-WEATHER-DATASET-001",
+      "work": "WEATHER_DATASET",
+      "status": "QUEUED"
+    },
+    {
+      "priority": 14,
+      "task_id": "KAIOS-CURSOR-SEASON-DATASET-001",
+      "work": "SEASON_DATASET",
+      "status": "QUEUED"
+    },
+    {
+      "priority": 15,
+      "task_id": "KAIOS-CURSOR-RAINFALL-DATASET-001",
+      "work": "RAINFALL_DATASET",
+      "status": "QUEUED"
+    },
+    {
+      "priority": 16,
+      "task_id": "KAIOS-CURSOR-FOREST-UI-001",
+      "work": "FOREST_UI_PROPOSAL",
+      "status": "QUEUED"
+    },
+    {
+      "priority": 17,
+      "task_id": "KAIOS-CURSOR-AGRICULTURE-UI-001",
+      "work": "AGRICULTURE_UI_PROPOSAL",
+      "status": "QUEUED"
+    },
+    {
+      "priority": 18,
+      "task_id": "KAIOS-CURSOR-WORLD-VIEWER-CARDS-001",
+      "work": "WORLD_VIEWER_CARD_CANDIDATE",
+      "status": "QUEUED"
+    },
+    {
+      "priority": 19,
+      "task_id": "KAIOS-CURSOR-FOREST-AG-API-CANDIDATES-001",
+      "work": "CANDIDATE_API_PROJECTION",
+      "status": "QUEUED"
+    },
+    {
+      "priority": 20,
+      "task_id": "KAIOS-CURSOR-FOREST-AG-REGRESSION-001",
+      "work": "CANDIDATE_REGRESSION_TEST",
+      "status": "QUEUED"
+    }
+  ],
+  "forbidden": [
+    "CURRENT",
+    "WALLET",
+    "KGEN",
+    "CANONICAL_SCHEMA",
+    "UNIVERSE_LAW",
+    "AUTHORITATIVE_RUNTIME",
+    "DEPLOYMENT",
+    "MERGE",
+    "RIGHTS_AUTHORITY",
+    "ECONOMY_AUTHORITY"
+  ]
+}

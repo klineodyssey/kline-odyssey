@@ -1,0 +1,48 @@
+{
+  "schema_version": "1.0.0",
+  "runtime": "KAIOS_AI_COMPANY_ORDER_AND_PROJECT_RUNTIME_V1",
+  "mode": "STATIC_READ_ONLY_PROJECTION",
+  "generated_from_seed": "KAIOS-AI-COMPANY-PUBLIC-001",
+  "simulation_only": true,
+  "authority": "NO_PRODUCTION_AUTHORITY",
+  "read_only": true,
+  "mutation_endpoints": false,
+  "real_wallet": false,
+  "real_kgen": false,
+  "onchain_transfer": false,
+  "real_legal_effect": false,
+  "external_autonomy": false,
+  "deliveries": [
+    {
+      "delivery_id": "AI-COMPANY-DELIVERY-00001",
+      "project_id": "AI-COMPANY-PROJECT-00001",
+      "deliverable_ids": [
+        "AI-COMPANY-PROJECT-00001-DELIVERABLE-001"
+      ],
+      "documentation_complete": true,
+      "rights_package": "SIMULATED_RIGHTS_PACKAGE",
+      "maintenance_plan_complete": true,
+      "final_accounting_complete": true,
+      "status": "ACCEPTED",
+      "customer_outcome": "ACCEPTED",
+      "simulation_only": true
+    }
+  ],
+  "maintenance_plans": [
+    {
+      "maintenance_id": "AI-COMPANY-MAINTENANCE-00001",
+      "project_id": "AI-COMPANY-PROJECT-00001",
+      "maintenance_schedule": "EVERY_720_SIMULATION_HOURS",
+      "inspection_schedule": "EVERY_360_SIMULATION_HOURS",
+      "wear_monitoring": true,
+      "repair_responsibility": "SIMULATED_AI_COMPANY",
+      "spare_parts": [],
+      "energy_requirements": 1,
+      "operating_cost": 100,
+      "failure_response": "PAUSE_AND_REPAIR_SIMULATION",
+      "asset_status": "OPERATIONAL",
+      "status": "ACTIVE",
+      "simulation_only": true
+    }
+  ]
+}

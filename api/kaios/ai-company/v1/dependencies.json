@@ -1,0 +1,57 @@
+{
+  "schema_version": "1.0.0",
+  "runtime": "KAIOS_AI_COMPANY_ORDER_AND_PROJECT_RUNTIME_V1",
+  "mode": "STATIC_READ_ONLY_PROJECTION",
+  "generated_from_seed": "KAIOS-AI-COMPANY-PUBLIC-001",
+  "simulation_only": true,
+  "authority": "NO_PRODUCTION_AUTHORITY",
+  "read_only": true,
+  "mutation_endpoints": false,
+  "real_wallet": false,
+  "real_kgen": false,
+  "onchain_transfer": false,
+  "real_legal_effect": false,
+  "external_autonomy": false,
+  "dependencies": [
+    {
+      "project_id": "AI-COMPANY-PROJECT-00001",
+      "dependency_id": "AI-COMPANY-PROJECT-00001-DEPENDENCY-001",
+      "predecessor_task_id": "AI-COMPANY-PROJECT-00001-TASK-001",
+      "successor_task_id": "AI-COMPANY-PROJECT-00001-TASK-002",
+      "mandatory": true,
+      "status": "SATISFIED"
+    },
+    {
+      "project_id": "AI-COMPANY-PROJECT-00001",
+      "dependency_id": "AI-COMPANY-PROJECT-00001-DEPENDENCY-002",
+      "predecessor_task_id": "AI-COMPANY-PROJECT-00001-TASK-002",
+      "successor_task_id": "AI-COMPANY-PROJECT-00001-TASK-003",
+      "mandatory": true,
+      "status": "SATISFIED"
+    },
+    {
+      "project_id": "AI-COMPANY-PROJECT-00001",
+      "dependency_id": "AI-COMPANY-PROJECT-00001-DEPENDENCY-003",
+      "predecessor_task_id": "AI-COMPANY-PROJECT-00001-TASK-003",
+      "successor_task_id": "AI-COMPANY-PROJECT-00001-TASK-004",
+      "mandatory": true,
+      "status": "SATISFIED"
+    },
+    {
+      "project_id": "AI-COMPANY-PROJECT-00001",
+      "dependency_id": "AI-COMPANY-PROJECT-00001-DEPENDENCY-004",
+      "predecessor_task_id": "AI-COMPANY-PROJECT-00001-TASK-004",
+      "successor_task_id": "AI-COMPANY-PROJECT-00001-TASK-005",
+      "mandatory": true,
+      "status": "SATISFIED"
+    },
+    {
+      "project_id": "AI-COMPANY-PROJECT-00001",
+      "dependency_id": "AI-COMPANY-PROJECT-00001-DEPENDENCY-005",
+      "predecessor_task_id": "AI-COMPANY-PROJECT-00001-TASK-005",
+      "successor_task_id": "AI-COMPANY-PROJECT-00001-TASK-006",
+      "mandatory": true,
+      "status": "SATISFIED"
+    }
+  ]
+}

@@ -1,0 +1,3958 @@
+{
+  "schema_version": "1.0.0",
+  "runtime": "KAIOS_AI_COMPANY_ORDER_AND_PROJECT_RUNTIME_V1",
+  "mode": "STATIC_READ_ONLY_PROJECTION",
+  "generated_from_seed": "KAIOS-AI-COMPANY-PUBLIC-001",
+  "simulation_only": true,
+  "authority": "NO_PRODUCTION_AUTHORITY",
+  "read_only": true,
+  "mutation_endpoints": false,
+  "real_wallet": false,
+  "real_kgen": false,
+  "onchain_transfer": false,
+  "real_legal_effect": false,
+  "external_autonomy": false,
+  "events": [
+    {
+      "event_id": "AI-COMPANY-EVT-000001",
+      "company_id": "KAIOS_AI_COMPANY_V1",
+      "request_id": "AI-COMPANY-REQ-00001",
+      "project_id": null,
+      "work_package_id": null,
+      "task_id": null,
+      "actor_life_id": "LIFE-SIMULATED-DEMO-CUSTOMER",
+      "division_id": "CUSTOMER_SERVICE_DIVISION",
+      "simulation_time": 0,
+      "location": null,
+      "event_type": "SUBMIT_REQUEST",
+      "inputs": {
+        "input": {
+          "customer_life_id": "LIFE-SIMULATED-DEMO-CUSTOMER",
+          "customer_type": "PLAYER",
+          "request_text": "I need a fishpond.",
+          "requested_object": "FISHPOND",
+          "requested_location": "LAND-SIM-FISHPOND-001",
+          "requested_quantity": 1,
+          "requested_quality": "STANDARD_SIMULATION",
+          "requested_deadline": 1000,
+          "requested_budget": 250000,
+          "intended_use": "DETERMINISTIC_DEMONSTRATION",
+          "civilization_context": "INDUSTRIAL",
+          "rights_context": [
+            "SIMULATED_USAGE_RIGHT"
+          ],
+          "risk_level": "MEDIUM",
+          "priority": "NORMAL"
+        }
+      },
+      "outputs": {
+        "request": {
+          "request_id": "AI-COMPANY-REQ-00001",
+          "customer_life_id": "LIFE-SIMULATED-DEMO-CUSTOMER",
+          "customer_type": "PLAYER",
+          "request_text": "I need a fishpond.",
+          "requested_object": "FISHPOND",
+          "requested_location": "LAND-SIM-FISHPOND-001",
+          "requested_quantity": 1,
+          "requested_quality": "STANDARD_SIMULATION",
+          "requested_deadline": 1000,
+          "requested_budget": 250000,
+          "intended_use": "DETERMINISTIC_DEMONSTRATION",
+          "civilization_context": "INDUSTRIAL",
+          "rights_context": [
+            "SIMULATED_USAGE_RIGHT"
+          ],
+          "risk_level": "MEDIUM",
+          "priority": "NORMAL",
+          "created_at": 0,
+          "status": "SUBMITTED",
+          "structured_requirements": {
+            "functional": [],
+            "physical": [],
+            "location": [],
+            "resource": [],
+            "worker": [],
+            "technology": [],
+            "rights": [],
+            "civilization": [],
+            "safety": [],
+            "economic": [],
+            "quality": [],
+            "delivery": [],
+            "maintenance": []
+          },
+          "assumptions": [],
+          "template_id": "FISHPOND_PROJECT"
+        }
+      },
+      "material_delta": 0,
+      "energy_delta": 0,
+      "labor_delta": 0,
+      "equipment_delta": 0,
+      "inventory_delta": 0,
+      "cash_delta": 0,
+      "progress_delta": 0,
+      "risk_delta": 0,
+      "previous_state_hash": "f449c6aa53f01ea984db9269852322da642a996ee84b82ae39fd5cd2f300880b",
+      "next_state_hash": "83ca6f97eeb96032a0fd573694a5c39f04cbddd1db38b3c09c36868ab708ba5c",
+      "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
+      "status": "COMPLETED",
+      "reason": null
+    },
+    {
+      "event_id": "AI-COMPANY-EVT-000002",
+      "company_id": "KAIOS_AI_COMPANY_V1",
+      "request_id": "AI-COMPANY-REQ-00001",
+      "project_id": null,
+      "work_package_id": null,
+      "task_id": null,
+      "actor_life_id": "KAIOS-SIMULATED-COMPANY-OPERATOR",
+      "division_id": "REQUIREMENTS_DIVISION",
+      "simulation_time": 0,
+      "location": null,
+      "event_type": "ANALYZE_REQUIREMENTS",
+      "inputs": {
+        "requestId": "AI-COMPANY-REQ-00001",
+        "options": {}
+      },
+      "outputs": {
+        "analysis": {
+          "analysis_id": "AI-COMPANY-ANALYSIS-00001",
+          "request_id": "AI-COMPANY-REQ-00001",
+          "template_id": "FISHPOND_PROJECT",
+          "structured_requirements": {
+            "functional": [
+              "DELIVER_SIMULATED_CAUSAL_FISHPOND"
+            ],
+            "physical": [
+              "TIME_MATERIAL_ENERGY_LOCATION_CAUSALITY"
+            ],
+            "location": [
+              "LAND-SIM-FISHPOND-001"
+            ],
+            "resource": [
+              "GRAVEL",
+              "PIPE",
+              "LINING",
+              "FISH_JUVENILE_STOCK"
+            ],
+            "worker": [
+              "SURVEYOR",
+              "ARCHITECT",
+              "SITE_SUPERVISOR",
+              "EXCAVATOR_OPERATOR",
+              "GENERAL_LABORER",
+              "PIPE_INSTALLER",
+              "AQUACULTURE_WORKER",
+              "WATER_QUALITY_TECHNICIAN",
+              "QA_INSPECTOR"
+            ],
+            "technology": [
+              "AQUACULTURE_RUNTIME_V1"
+            ],
+            "rights": [
+              "SIMULATED_USAGE_RIGHT"
+            ],
+            "civilization": [
+              "INDUSTRIAL"
+            ],
+            "safety": [
+              "SIMULATION_SAFETY_GATE"
+            ],
+            "economic": [
+              "APPROVED_SIMULATED_FUNDING",
+              "BALANCED_LEDGER"
+            ],
+            "quality": [
+              "STANDARD_SIMULATION"
+            ],
+            "delivery": [
+              "INSPECTION_AND_CUSTOMER_ACCEPTANCE"
+            ],
+            "maintenance": [
+              "MAINTENANCE_PLAN_REQUIRED"
+            ]
+          },
+          "assumptions": [],
+          "status": "COMPLETE"
+        }
+      },
+      "material_delta": 0,
+      "energy_delta": 0,
+      "labor_delta": 0,
+      "equipment_delta": 0,
+      "inventory_delta": 0,
+      "cash_delta": 0,
+      "progress_delta": 0,
+      "risk_delta": 0,
+      "previous_state_hash": "83ca6f97eeb96032a0fd573694a5c39f04cbddd1db38b3c09c36868ab708ba5c",
+      "next_state_hash": "c8b700e855c4109c54848256b431c4d59e480a06b0682940d8d135b4c72b45e1",
+      "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
+      "status": "COMPLETED",
+      "reason": null
+    },
+    {
+      "event_id": "AI-COMPANY-EVT-000003",
+      "company_id": "KAIOS_AI_COMPANY_V1",
+      "request_id": "AI-COMPANY-REQ-00001",
+      "project_id": null,
+      "work_package_id": null,
+      "task_id": null,
+      "actor_life_id": "KAIOS-SIMULATED-COMPANY-OPERATOR",
+      "division_id": "ARCHITECTURE_DIVISION",
+      "simulation_time": 0,
+      "location": null,
+      "event_type": "EVALUATE_FEASIBILITY",
+      "inputs": {
+        "requestId": "AI-COMPANY-REQ-00001",
+        "context": {}
+      },
+      "outputs": {
+        "review": {
+          "review_id": "AI-COMPANY-FEASIBILITY-00001",
+          "request_id": "AI-COMPANY-REQ-00001",
+          "template_id": "FISHPOND_PROJECT",
+          "gates": [
+            {
+              "gate_id": "PHYSICS_GATE",
+              "outcome": "PASS",
+              "reason": null,
+              "required_to_unblock": []
+            },
+            {
+              "gate_id": "TIME_GATE",
+              "outcome": "PASS",
+              "reason": null,
+              "required_to_unblock": []
+            },
+            {
+              "gate_id": "LOCATION_GATE",
+              "outcome": "PASS",
+              "reason": null,
+              "required_to_unblock": []
+            },
+            {
+              "gate_id": "LAND_GATE",
+              "outcome": "PASS",
+              "reason": null,
+              "required_to_unblock": []
+            },
+            {
+              "gate_id": "RIGHTS_GATE",
+              "outcome": "PASS",
+              "reason": null,
+              "required_to_unblock": []
+            },
+            {
+              "gate_id": "CIVILIZATION_GATE",
+              "outcome": "PASS",
+              "reason": null,
+              "required_to_unblock": []
+            },
+            {
+              "gate_id": "TECHNOLOGY_GATE",
+              "outcome": "PASS",
+              "reason": null,
+              "required_to_unblock": []
+            },
+            {
+              "gate_id": "ENERGY_GATE",
+              "outcome": "PASS",
+              "reason": null,
+              "required_to_unblock": []
+            },
+            {
+              "gate_id": "MATERIAL_GATE",
+              "outcome": "PASS",
+              "reason": null,
+              "required_to_unblock": []
+            },
+            {
+              "gate_id": "LABOR_GATE",
+              "outcome": "PASS",
+              "reason": null,
+              "required_to_unblock": []
+            },
+            {
+              "gate_id": "EQUIPMENT_GATE",
+              "outcome": "PASS",
+              "reason": null,
+              "required_to_unblock": []
+            },
+            {
+              "gate_id": "LOGISTICS_GATE",
+              "outcome": "PASS",
+              "reason": null,
+              "required_to_unblock": []
+            },
+            {
+              "gate_id": "ECONOMY_GATE",
+              "outcome": "PASS",
+              "reason": null,
+              "required_to_unblock": []
+            },
+            {
+              "gate_id": "SAFETY_GATE",
+              "outcome": "PASS",
+              "reason": null,
+              "required_to_unblock": []
+            },
+            {
+              "gate_id": "ENVIRONMENT_GATE",
+              "outcome": "PASS",
+              "reason": null,
+              "required_to_unblock": []
+            },
+            {
+              "gate_id": "QUALITY_GATE",
+              "outcome": "PASS",
+              "reason": null,
+              "required_to_unblock": []
+            }
+          ],
+          "status": "PASS",
+          "reason": null,
+          "dependency_status": "READY"
+        }
+      },
+      "material_delta": 0,
+      "energy_delta": 0,
+      "labor_delta": 0,
+      "equipment_delta": 0,
+      "inventory_delta": 0,
+      "cash_delta": 0,
+      "progress_delta": 0,
+      "risk_delta": 0,
+      "previous_state_hash": "c8b700e855c4109c54848256b431c4d59e480a06b0682940d8d135b4c72b45e1",
+      "next_state_hash": "2ded813f2567828898f2f0b79f010dc18516b7565d3ba2d57a723577ac959cac",
+      "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
+      "status": "COMPLETED",
+      "reason": null
+    },
+    {
+      "event_id": "AI-COMPANY-EVT-000004",
+      "company_id": "KAIOS_AI_COMPANY_V1",
+      "request_id": "AI-COMPANY-REQ-00001",
+      "project_id": null,
+      "work_package_id": null,
+      "task_id": null,
+      "actor_life_id": "KAIOS-SIMULATED-COMPANY-OPERATOR",
+      "division_id": "DESIGN_DIVISION",
+      "simulation_time": 0,
+      "location": null,
+      "event_type": "CREATE_PROPOSAL",
+      "inputs": {
+        "requestId": "AI-COMPANY-REQ-00001"
+      },
+      "outputs": {
+        "proposal": {
+          "proposal_id": "AI-COMPANY-PROPOSAL-00001",
+          "request_id": "AI-COMPANY-REQ-00001",
+          "template_id": "FISHPOND_PROJECT",
+          "objective": "Deliver SIMULATED_CAUSAL_FISHPOND",
+          "estimated_cost": 85000,
+          "estimated_duration": 43,
+          "feasibility_review_id": "AI-COMPANY-FEASIBILITY-00001",
+          "assumptions": [],
+          "status": "CUSTOMER_REVIEW",
+          "simulation_only": true
+        }
+      },
+      "material_delta": 0,
+      "energy_delta": 0,
+      "labor_delta": 0,
+      "equipment_delta": 0,
+      "inventory_delta": 0,
+      "cash_delta": 0,
+      "progress_delta": 0,
+      "risk_delta": 0,
+      "previous_state_hash": "2ded813f2567828898f2f0b79f010dc18516b7565d3ba2d57a723577ac959cac",
+      "next_state_hash": "48a89579504a757c39f7fdd4a50af09738fdd18aa1e00fd5f1b535e6c525d6a1",
+      "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
+      "status": "COMPLETED",
+      "reason": null
+    },
+    {
+      "event_id": "AI-COMPANY-EVT-000005",
+      "company_id": "KAIOS_AI_COMPANY_V1",
+      "request_id": "AI-COMPANY-REQ-00001",
+      "project_id": null,
+      "work_package_id": null,
+      "task_id": null,
+      "actor_life_id": "KAIOS-SIMULATED-COMPANY-OPERATOR",
+      "division_id": "CUSTOMER_SERVICE_DIVISION",
+      "simulation_time": 0,
+      "location": null,
+      "event_type": "APPROVE_PROPOSAL",
+      "inputs": {
+        "proposalId": "AI-COMPANY-PROPOSAL-00001"
+      },
+      "outputs": {
+        "proposal_id": "AI-COMPANY-PROPOSAL-00001",
+        "warning": "SIMULATION_ONLY"
+      },
+      "material_delta": 0,
+      "energy_delta": 0,
+      "labor_delta": 0,
+      "equipment_delta": 0,
+      "inventory_delta": 0,
+      "cash_delta": 0,
+      "progress_delta": 0,
+      "risk_delta": 0,
+      "previous_state_hash": "48a89579504a757c39f7fdd4a50af09738fdd18aa1e00fd5f1b535e6c525d6a1",
+      "next_state_hash": "e88d25e2b686b55a4913527beaba94ee3550ba6f34da5ce36d94d594d9c3f24e",
+      "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
+      "status": "ACCEPTED",
+      "reason": null
+    },
+    {
+      "event_id": "AI-COMPANY-EVT-000006",
+      "company_id": "KAIOS_AI_COMPANY_V1",
+      "request_id": "AI-COMPANY-REQ-00001",
+      "project_id": "AI-COMPANY-PROJECT-00001",
+      "work_package_id": null,
+      "task_id": null,
+      "actor_life_id": "KAIOS-SIMULATED-COMPANY-OPERATOR",
+      "division_id": "ARCHITECTURE_DIVISION",
+      "simulation_time": 0,
+      "location": "LAND-SIM-FISHPOND-001",
+      "event_type": "CREATE_PROJECT",
+      "inputs": {
+        "proposalId": "AI-COMPANY-PROPOSAL-00001"
+      },
+      "outputs": {
+        "project": {
+          "project_id": "AI-COMPANY-PROJECT-00001",
+          "request_id": "AI-COMPANY-REQ-00001",
+          "proposal_id": "AI-COMPANY-PROPOSAL-00001",
+          "template_id": "FISHPOND_PROJECT",
+          "objective": "Deliver SIMULATED_CAUSAL_FISHPOND",
+          "location": "LAND-SIM-FISHPOND-001",
+          "status": "PLANNED",
+          "project_kind": "PHYSICAL",
+          "milestones": [],
+          "work_packages": [],
+          "tasks": [],
+          "dependencies": [],
+          "deliverables": [],
+          "resource_plan_id": "AI-COMPANY-RESOURCE-PLAN-00001",
+          "budget": null,
+          "schedule": null,
+          "contract_id": null,
+          "risks": [],
+          "issues": [],
+          "progress_percent": 0,
+          "domain_binding": "AQUACULTURE_RUNTIME_V1",
+          "domain_evidence": {
+            "runtime": "KAIOS_FISHPOND_AQUACULTURE_RUNTIME_V1",
+            "integrity_verified": true,
+            "simulation_only": true,
+            "authority": "NO_PRODUCTION_AUTHORITY",
+            "adapter": "EXISTING_RUNTIME_REFERENCE"
+          },
+          "simulation_only": true,
+          "compute_reservation": 0,
+          "capacity_reserved": 85000,
+          "accounting": {
+            "cost": 0,
+            "revenue": 0,
+            "work_in_progress": 0
+          },
+          "approval_status": "RUNTIME_VALIDATED_SIMULATION",
+          "external_deployment": false,
+          "created_at": 0,
+          "closed_at": null,
+          "closeout_status": null
+        }
+      },
+      "material_delta": 0,
+      "energy_delta": 0,
+      "labor_delta": 0,
+      "equipment_delta": 0,
+      "inventory_delta": 0,
+      "cash_delta": 0,
+      "progress_delta": 0,
+      "risk_delta": 0,
+      "previous_state_hash": "e88d25e2b686b55a4913527beaba94ee3550ba6f34da5ce36d94d594d9c3f24e",
+      "next_state_hash": "70e8b493bfcd153973f1b9df5ad37ef6bd5fa49465bc035dbfb84ec850626a9b",
+      "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
+      "status": "COMPLETED",
+      "reason": null
+    },
+    {
+      "event_id": "AI-COMPANY-EVT-000007",
+      "company_id": "KAIOS_AI_COMPANY_V1",
+      "request_id": null,
+      "project_id": "AI-COMPANY-PROJECT-00001",
+      "work_package_id": "AI-COMPANY-PROJECT-00001-WORK-PACKAGE-001",
+      "task_id": null,
+      "actor_life_id": "KAIOS-SIMULATED-COMPANY-OPERATOR",
+      "division_id": "ARCHITECTURE_DIVISION",
+      "simulation_time": 0,
+      "location": null,
+      "event_type": "DECOMPOSE_PROJECT",
+      "inputs": {
+        "projectId": "AI-COMPANY-PROJECT-00001"
+      },
+      "outputs": {
+        "tasks": [
+          {
+            "task_id": "AI-COMPANY-PROJECT-00001-TASK-001",
+            "task_code": "SITE_SURVEY",
+            "work_package_id": "AI-COMPANY-PROJECT-00001-WORK-PACKAGE-001",
+            "objective": "SITE SURVEY",
+            "location": "LAND-SIM-FISHPOND-001",
+            "start_condition": [
+              "PROJECT_AUTHORIZED"
+            ],
+            "end_condition": [
+              "TIME_COMPLETE",
+              "RESOURCES_CONSUMED",
+              "INSPECTION_PASS"
+            ],
+            "duration_hours": 4,
+            "remaining_hours": 4,
+            "workers": [],
+            "skills": [
+              "SURVEYOR"
+            ],
+            "materials": {},
+            "equipment": [
+              "SURVEY_TOOL"
+            ],
+            "energy": 2,
+            "transport": [],
+            "cost": 600,
+            "predecessors": [],
+            "successors": [
+              "AI-COMPANY-PROJECT-00001-TASK-002"
+            ],
+            "quality_gate": "STAGE_INSPECTION",
+            "safety_gate": "SIMULATED_SITE_SAFETY",
+            "status": "READY",
+            "progress_percent": 0,
+            "consumed": {
+              "labor_hours": 0,
+              "energy": 0,
+              "materials": {},
+              "equipment_wear": 0,
+              "cost": 0
+            },
+            "blocked_reason": null,
+            "actual_start": null,
+            "actual_end": null,
+            "rework_for_task_id": null
+          },
+          {
+            "task_id": "AI-COMPANY-PROJECT-00001-TASK-002",
+            "task_code": "POND_DESIGN",
+            "work_package_id": "AI-COMPANY-PROJECT-00001-WORK-PACKAGE-001",
+            "objective": "POND DESIGN",
+            "location": "LAND-SIM-FISHPOND-001",
+            "start_condition": [
+              "PREDECESSOR_1_COMPLETE"
+            ],
+            "end_condition": [
+              "TIME_COMPLETE",
+              "RESOURCES_CONSUMED",
+              "INSPECTION_PASS"
+            ],
+            "duration_hours": 6,
+            "remaining_hours": 6,
+            "workers": [],
+            "skills": [
+              "ARCHITECT",
+              "SITE_SUPERVISOR"
+            ],
+            "materials": {},
+            "equipment": [],
+            "energy": 3,
+            "transport": [],
+            "cost": 1200,
+            "predecessors": [
+              "AI-COMPANY-PROJECT-00001-TASK-001"
+            ],
+            "successors": [
+              "AI-COMPANY-PROJECT-00001-TASK-003"
+            ],
+            "quality_gate": "STAGE_INSPECTION",
+            "safety_gate": "SIMULATED_SITE_SAFETY",
+            "status": "NOT_READY",
+            "progress_percent": 0,
+            "consumed": {
+              "labor_hours": 0,
+              "energy": 0,
+              "materials": {},
+              "equipment_wear": 0,
+              "cost": 0
+            },
+            "blocked_reason": null,
+            "actual_start": null,
+            "actual_end": null,
+            "rework_for_task_id": null
+          },
+          {
+            "task_id": "AI-COMPANY-PROJECT-00001-TASK-003",
+            "task_code": "EXCAVATION",
+            "work_package_id": "AI-COMPANY-PROJECT-00001-WORK-PACKAGE-001",
+            "objective": "EXCAVATION",
+            "location": "LAND-SIM-FISHPOND-001",
+            "start_condition": [
+              "PREDECESSOR_2_COMPLETE"
+            ],
+            "end_condition": [
+              "TIME_COMPLETE",
+              "RESOURCES_CONSUMED",
+              "INSPECTION_PASS"
+            ],
+            "duration_hours": 12,
+            "remaining_hours": 12,
+            "workers": [],
+            "skills": [
+              "EXCAVATOR_OPERATOR",
+              "SITE_SUPERVISOR"
+            ],
+            "materials": {
+              "GRAVEL": 12
+            },
+            "equipment": [
+              "EXCAVATOR"
+            ],
+            "energy": 48,
+            "transport": [
+              "GRAVEL"
+            ],
+            "cost": 4200,
+            "predecessors": [
+              "AI-COMPANY-PROJECT-00001-TASK-002"
+            ],
+            "successors": [
+              "AI-COMPANY-PROJECT-00001-TASK-004"
+            ],
+            "quality_gate": "STAGE_INSPECTION",
+            "safety_gate": "SIMULATED_SITE_SAFETY",
+            "status": "NOT_READY",
+            "progress_percent": 0,
+            "consumed": {
+              "labor_hours": 0,
+              "energy": 0,
+              "materials": {
+                "GRAVEL": 0
+              },
+              "equipment_wear": 0,
+              "cost": 0
+            },
+            "blocked_reason": null,
+            "actual_start": null,
+            "actual_end": null,
+            "rework_for_task_id": null
+          },
+          {
+            "task_id": "AI-COMPANY-PROJECT-00001-TASK-004",
+            "task_code": "POND_INFRASTRUCTURE",
+            "work_package_id": "AI-COMPANY-PROJECT-00001-WORK-PACKAGE-001",
+            "objective": "POND INFRASTRUCTURE",
+            "location": "LAND-SIM-FISHPOND-001",
+            "start_condition": [
+              "PREDECESSOR_3_COMPLETE"
+            ],
+            "end_condition": [
+              "TIME_COMPLETE",
+              "RESOURCES_CONSUMED",
+              "INSPECTION_PASS"
+            ],
+            "duration_hours": 10,
+            "remaining_hours": 10,
+            "workers": [],
+            "skills": [
+              "GENERAL_LABORER",
+              "PIPE_INSTALLER"
+            ],
+            "materials": {
+              "PIPE": 18,
+              "LINING": 24
+            },
+            "equipment": [
+              "HAND_TOOL",
+              "PUMP"
+            ],
+            "energy": 32,
+            "transport": [
+              "PIPE",
+              "LINING"
+            ],
+            "cost": 3600,
+            "predecessors": [
+              "AI-COMPANY-PROJECT-00001-TASK-003"
+            ],
+            "successors": [
+              "AI-COMPANY-PROJECT-00001-TASK-005"
+            ],
+            "quality_gate": "STAGE_INSPECTION",
+            "safety_gate": "SIMULATED_SITE_SAFETY",
+            "status": "NOT_READY",
+            "progress_percent": 0,
+            "consumed": {
+              "labor_hours": 0,
+              "energy": 0,
+              "materials": {
+                "PIPE": 0,
+                "LINING": 0
+              },
+              "equipment_wear": 0,
+              "cost": 0
+            },
+            "blocked_reason": null,
+            "actual_start": null,
+            "actual_end": null,
+            "rework_for_task_id": null
+          },
+          {
+            "task_id": "AI-COMPANY-PROJECT-00001-TASK-005",
+            "task_code": "AQUACULTURE_RUNTIME_BINDING",
+            "work_package_id": "AI-COMPANY-PROJECT-00001-WORK-PACKAGE-001",
+            "objective": "AQUACULTURE RUNTIME BINDING",
+            "location": "LAND-SIM-FISHPOND-001",
+            "start_condition": [
+              "PREDECESSOR_4_COMPLETE"
+            ],
+            "end_condition": [
+              "TIME_COMPLETE",
+              "RESOURCES_CONSUMED",
+              "INSPECTION_PASS"
+            ],
+            "duration_hours": 8,
+            "remaining_hours": 8,
+            "workers": [],
+            "skills": [
+              "AQUACULTURE_WORKER",
+              "WATER_QUALITY_TECHNICIAN"
+            ],
+            "materials": {
+              "FISH_JUVENILE_STOCK": 120
+            },
+            "equipment": [
+              "AERATOR"
+            ],
+            "energy": 24,
+            "transport": [
+              "FISH_JUVENILE_STOCK"
+            ],
+            "cost": 2600,
+            "predecessors": [
+              "AI-COMPANY-PROJECT-00001-TASK-004"
+            ],
+            "successors": [
+              "AI-COMPANY-PROJECT-00001-TASK-006"
+            ],
+            "quality_gate": "STAGE_INSPECTION",
+            "safety_gate": "SIMULATED_SITE_SAFETY",
+            "status": "NOT_READY",
+            "progress_percent": 0,
+            "consumed": {
+              "labor_hours": 0,
+              "energy": 0,
+              "materials": {
+                "FISH_JUVENILE_STOCK": 0
+              },
+              "equipment_wear": 0,
+              "cost": 0
+            },
+            "blocked_reason": null,
+            "actual_start": null,
+            "actual_end": null,
+            "rework_for_task_id": null
+          },
+          {
+            "task_id": "AI-COMPANY-PROJECT-00001-TASK-006",
+            "task_code": "FINAL_ACCEPTANCE",
+            "work_package_id": "AI-COMPANY-PROJECT-00001-WORK-PACKAGE-001",
+            "objective": "FINAL ACCEPTANCE",
+            "location": "LAND-SIM-FISHPOND-001",
+            "start_condition": [
+              "PREDECESSOR_5_COMPLETE"
+            ],
+            "end_condition": [
+              "TIME_COMPLETE",
+              "RESOURCES_CONSUMED",
+              "INSPECTION_PASS"
+            ],
+            "duration_hours": 3,
+            "remaining_hours": 3,
+            "workers": [],
+            "skills": [
+              "QA_INSPECTOR"
+            ],
+            "materials": {},
+            "equipment": [],
+            "energy": 2,
+            "transport": [],
+            "cost": 700,
+            "predecessors": [
+              "AI-COMPANY-PROJECT-00001-TASK-005"
+            ],
+            "successors": [],
+            "quality_gate": "FINAL_ACCEPTANCE",
+            "safety_gate": "SIMULATED_SITE_SAFETY",
+            "status": "NOT_READY",
+            "progress_percent": 0,
+            "consumed": {
+              "labor_hours": 0,
+              "energy": 0,
+              "materials": {},
+              "equipment_wear": 0,
+              "cost": 0
+            },
+            "blocked_reason": null,
+            "actual_start": null,
+            "actual_end": null,
+            "rework_for_task_id": null
+          }
+        ],
+        "dependencies": [
+          {
+            "dependency_id": "AI-COMPANY-PROJECT-00001-DEPENDENCY-001",
+            "predecessor_task_id": "AI-COMPANY-PROJECT-00001-TASK-001",
+            "successor_task_id": "AI-COMPANY-PROJECT-00001-TASK-002",
+            "mandatory": true,
+            "status": "UNSATISFIED"
+          },
+          {
+            "dependency_id": "AI-COMPANY-PROJECT-00001-DEPENDENCY-002",
+            "predecessor_task_id": "AI-COMPANY-PROJECT-00001-TASK-002",
+            "successor_task_id": "AI-COMPANY-PROJECT-00001-TASK-003",
+            "mandatory": true,
+            "status": "UNSATISFIED"
+          },
+          {
+            "dependency_id": "AI-COMPANY-PROJECT-00001-DEPENDENCY-003",
+            "predecessor_task_id": "AI-COMPANY-PROJECT-00001-TASK-003",
+            "successor_task_id": "AI-COMPANY-PROJECT-00001-TASK-004",
+            "mandatory": true,
+            "status": "UNSATISFIED"
+          },
+          {
+            "dependency_id": "AI-COMPANY-PROJECT-00001-DEPENDENCY-004",
+            "predecessor_task_id": "AI-COMPANY-PROJECT-00001-TASK-004",
+            "successor_task_id": "AI-COMPANY-PROJECT-00001-TASK-005",
+            "mandatory": true,
+            "status": "UNSATISFIED"
+          },
+          {
+            "dependency_id": "AI-COMPANY-PROJECT-00001-DEPENDENCY-005",
+            "predecessor_task_id": "AI-COMPANY-PROJECT-00001-TASK-005",
+            "successor_task_id": "AI-COMPANY-PROJECT-00001-TASK-006",
+            "mandatory": true,
+            "status": "UNSATISFIED"
+          }
+        ],
+        "domain_evidence": {
+          "runtime": "KAIOS_FISHPOND_AQUACULTURE_RUNTIME_V1",
+          "integrity_verified": true,
+          "simulation_only": true,
+          "authority": "NO_PRODUCTION_AUTHORITY",
+          "adapter": "EXISTING_RUNTIME_REFERENCE"
+        }
+      },
+      "material_delta": 0,
+      "energy_delta": 0,
+      "labor_delta": 0,
+      "equipment_delta": 0,
+      "inventory_delta": 0,
+      "cash_delta": 0,
+      "progress_delta": 0,
+      "risk_delta": 0,
+      "previous_state_hash": "70e8b493bfcd153973f1b9df5ad37ef6bd5fa49465bc035dbfb84ec850626a9b",
+      "next_state_hash": "a0f6980762692c48b88713f6f746d6db6551c0cc9cc91b7b56285dc422f07e94",
+      "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
+      "status": "COMPLETED",
+      "reason": null
+    },
+    {
+      "event_id": "AI-COMPANY-EVT-000008",
+      "company_id": "KAIOS_AI_COMPANY_V1",
+      "request_id": null,
+      "project_id": "AI-COMPANY-PROJECT-00001",
+      "work_package_id": null,
+      "task_id": null,
+      "actor_life_id": "KAIOS-SIMULATED-COMPANY-OPERATOR",
+      "division_id": "ARCHITECTURE_DIVISION",
+      "simulation_time": 0,
+      "location": null,
+      "event_type": "CALCULATE_DEPENDENCIES",
+      "inputs": {
+        "projectId": "AI-COMPANY-PROJECT-00001"
+      },
+      "outputs": {
+        "order": [
+          "AI-COMPANY-PROJECT-00001-TASK-001",
+          "AI-COMPANY-PROJECT-00001-TASK-002",
+          "AI-COMPANY-PROJECT-00001-TASK-003",
+          "AI-COMPANY-PROJECT-00001-TASK-004",
+          "AI-COMPANY-PROJECT-00001-TASK-005",
+          "AI-COMPANY-PROJECT-00001-TASK-006"
+        ],
+        "dependencies": [
+          {
+            "dependency_id": "AI-COMPANY-PROJECT-00001-DEPENDENCY-001",
+            "predecessor_task_id": "AI-COMPANY-PROJECT-00001-TASK-001",
+            "successor_task_id": "AI-COMPANY-PROJECT-00001-TASK-002",
+            "mandatory": true,
+            "status": "UNSATISFIED"
+          },
+          {
+            "dependency_id": "AI-COMPANY-PROJECT-00001-DEPENDENCY-002",
+            "predecessor_task_id": "AI-COMPANY-PROJECT-00001-TASK-002",
+            "successor_task_id": "AI-COMPANY-PROJECT-00001-TASK-003",
+            "mandatory": true,
+            "status": "UNSATISFIED"
+          },
+          {
+            "dependency_id": "AI-COMPANY-PROJECT-00001-DEPENDENCY-003",
+            "predecessor_task_id": "AI-COMPANY-PROJECT-00001-TASK-003",
+            "successor_task_id": "AI-COMPANY-PROJECT-00001-TASK-004",
+            "mandatory": true,
+            "status": "UNSATISFIED"
+          },
+          {
+            "dependency_id": "AI-COMPANY-PROJECT-00001-DEPENDENCY-004",
+            "predecessor_task_id": "AI-COMPANY-PROJECT-00001-TASK-004",
+            "successor_task_id": "AI-COMPANY-PROJECT-00001-TASK-005",
+            "mandatory": true,
+            "status": "UNSATISFIED"
+          },
+          {
+            "dependency_id": "AI-COMPANY-PROJECT-00001-DEPENDENCY-005",
+            "predecessor_task_id": "AI-COMPANY-PROJECT-00001-TASK-005",
+            "successor_task_id": "AI-COMPANY-PROJECT-00001-TASK-006",
+            "mandatory": true,
+            "status": "UNSATISFIED"
+          }
+        ]
+      },
+      "material_delta": 0,
+      "energy_delta": 0,
+      "labor_delta": 0,
+      "equipment_delta": 0,
+      "inventory_delta": 0,
+      "cash_delta": 0,
+      "progress_delta": 0,
+      "risk_delta": 0,
+      "previous_state_hash": "a0f6980762692c48b88713f6f746d6db6551c0cc9cc91b7b56285dc422f07e94",
+      "next_state_hash": "7e0e567cd6e0be09b5a6ab749027cdb46ed4b9754275fa744221672e7e728ec7",
+      "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
+      "status": "COMPLETED",
+      "reason": null
+    },
+    {
+      "event_id": "AI-COMPANY-EVT-000009",
+      "company_id": "KAIOS_AI_COMPANY_V1",
+      "request_id": null,
+      "project_id": "AI-COMPANY-PROJECT-00001",
+      "work_package_id": null,
+      "task_id": null,
+      "actor_life_id": "KAIOS-SIMULATED-COMPANY-OPERATOR",
+      "division_id": "PROCUREMENT_DIVISION",
+      "simulation_time": 0,
+      "location": null,
+      "event_type": "CREATE_BOM",
+      "inputs": {
+        "projectId": "AI-COMPANY-PROJECT-00001",
+        "options": {}
+      },
+      "outputs": {
+        "bill_of_materials": [
+          {
+            "bom_id": "AI-COMPANY-PROJECT-00001-BOM-001",
+            "project_id": "AI-COMPANY-PROJECT-00001",
+            "material_id": "GRAVEL",
+            "description": "GRAVEL",
+            "quantity": 12,
+            "unit": "SIMULATION_UNIT",
+            "unit_mass": 10,
+            "total_mass": 120,
+            "required_quality": "STANDARD_SIMULATION",
+            "supplier": "SIMULATED-SUPPLIER-GRAVEL",
+            "availability": 12,
+            "lead_time": 2,
+            "unit_cost": 12,
+            "total_cost": 144,
+            "storage_requirement": "SIMULATED_WAREHOUSE",
+            "transport_requirement": "CAUSAL_ROUTE",
+            "waste_factor": 0.05,
+            "recyclable": true,
+            "status": "PLANNED"
+          },
+          {
+            "bom_id": "AI-COMPANY-PROJECT-00001-BOM-002",
+            "project_id": "AI-COMPANY-PROJECT-00001",
+            "material_id": "PIPE",
+            "description": "PIPE",
+            "quantity": 18,
+            "unit": "SIMULATION_UNIT",
+            "unit_mass": 2,
+            "total_mass": 36,
+            "required_quality": "STANDARD_SIMULATION",
+            "supplier": "SIMULATED-SUPPLIER-PIPE",
+            "availability": 18,
+            "lead_time": 3,
+            "unit_cost": 12,
+            "total_cost": 216,
+            "storage_requirement": "SIMULATED_WAREHOUSE",
+            "transport_requirement": "CAUSAL_ROUTE",
+            "waste_factor": 0.05,
+            "recyclable": true,
+            "status": "PLANNED"
+          },
+          {
+            "bom_id": "AI-COMPANY-PROJECT-00001-BOM-003",
+            "project_id": "AI-COMPANY-PROJECT-00001",
+            "material_id": "LINING",
+            "description": "LINING",
+            "quantity": 24,
+            "unit": "SIMULATION_UNIT",
+            "unit_mass": 10,
+            "total_mass": 240,
+            "required_quality": "STANDARD_SIMULATION",
+            "supplier": "SIMULATED-SUPPLIER-LINING",
+            "availability": 24,
+            "lead_time": 4,
+            "unit_cost": 12,
+            "total_cost": 288,
+            "storage_requirement": "SIMULATED_WAREHOUSE",
+            "transport_requirement": "CAUSAL_ROUTE",
+            "waste_factor": 0.05,
+            "recyclable": true,
+            "status": "PLANNED"
+          },
+          {
+            "bom_id": "AI-COMPANY-PROJECT-00001-BOM-004",
+            "project_id": "AI-COMPANY-PROJECT-00001",
+            "material_id": "FISH_JUVENILE_STOCK",
+            "description": "FISH JUVENILE STOCK",
+            "quantity": 120,
+            "unit": "SIMULATION_UNIT",
+            "unit_mass": 0.1,
+            "total_mass": 12,
+            "required_quality": "STANDARD_SIMULATION",
+            "supplier": "SIMULATED-SUPPLIER-FISH_JUVENILE_STOCK",
+            "availability": 120,
+            "lead_time": 5,
+            "unit_cost": 3,
+            "total_cost": 360,
+            "storage_requirement": "SIMULATED_WAREHOUSE",
+            "transport_requirement": "CAUSAL_ROUTE",
+            "waste_factor": 0.05,
+            "recyclable": false,
+            "status": "PLANNED"
+          }
+        ],
+        "total_mass": 408
+      },
+      "material_delta": 0,
+      "energy_delta": 0,
+      "labor_delta": 0,
+      "equipment_delta": 0,
+      "inventory_delta": 0,
+      "cash_delta": 0,
+      "progress_delta": 0,
+      "risk_delta": 0,
+      "previous_state_hash": "7e0e567cd6e0be09b5a6ab749027cdb46ed4b9754275fa744221672e7e728ec7",
+      "next_state_hash": "f9e4cefcf020347b81dd2514624975fcd9a5cb430a02e6039cbd4006dfe8a94f",
+      "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
+      "status": "COMPLETED",
+      "reason": null
+    },
+    {
+      "event_id": "AI-COMPANY-EVT-000010",
+      "company_id": "KAIOS_AI_COMPANY_V1",
+      "request_id": null,
+      "project_id": "AI-COMPANY-PROJECT-00001",
+      "work_package_id": null,
+      "task_id": null,
+      "actor_life_id": "KAIOS-SIMULATED-COMPANY-OPERATOR",
+      "division_id": "LABOR_DIVISION",
+      "simulation_time": 0,
+      "location": null,
+      "event_type": "CREATE_WORKFORCE_PLAN",
+      "inputs": {
+        "projectId": "AI-COMPANY-PROJECT-00001",
+        "options": {}
+      },
+      "outputs": {
+        "workforce": [
+          {
+            "worker_id": "AI-COMPANY-WORKER-001",
+            "life_id": "LIFE-AI-COMPANY-WORKER-001",
+            "role": "SURVEYOR",
+            "skill": "SURVEYOR",
+            "body_type": "PHYSICAL",
+            "location": "KAIOS-SIMULATION-YARD",
+            "shift": {
+              "start": 0,
+              "end": 24,
+              "maximum_hours": 12
+            },
+            "cost": 30,
+            "availability": true,
+            "travel_time": 1,
+            "assigned_tasks": [],
+            "safety_qualification": true,
+            "equipment_qualification": true,
+            "status": "AVAILABLE"
+          },
+          {
+            "worker_id": "AI-COMPANY-WORKER-002",
+            "life_id": "LIFE-AI-COMPANY-WORKER-002",
+            "role": "ARCHITECT",
+            "skill": "ARCHITECT",
+            "body_type": "DIGITAL",
+            "location": "LOCAL_SIMULATION_WORKSPACE",
+            "shift": {
+              "start": 0,
+              "end": 24,
+              "maximum_hours": 16
+            },
+            "cost": 42,
+            "availability": true,
+            "travel_time": 0,
+            "assigned_tasks": [],
+            "safety_qualification": true,
+            "equipment_qualification": true,
+            "status": "AVAILABLE"
+          },
+          {
+            "worker_id": "AI-COMPANY-WORKER-003",
+            "life_id": "LIFE-AI-COMPANY-WORKER-003",
+            "role": "SITE_SUPERVISOR",
+            "skill": "SITE_SUPERVISOR",
+            "body_type": "PHYSICAL",
+            "location": "KAIOS-SIMULATION-YARD",
+            "shift": {
+              "start": 0,
+              "end": 24,
+              "maximum_hours": 12
+            },
+            "cost": 30,
+            "availability": true,
+            "travel_time": 1,
+            "assigned_tasks": [],
+            "safety_qualification": true,
+            "equipment_qualification": true,
+            "status": "AVAILABLE"
+          },
+          {
+            "worker_id": "AI-COMPANY-WORKER-005",
+            "life_id": "LIFE-AI-COMPANY-WORKER-005",
+            "role": "EXCAVATOR_OPERATOR",
+            "skill": "EXCAVATOR_OPERATOR",
+            "body_type": "PHYSICAL",
+            "location": "KAIOS-SIMULATION-YARD",
+            "shift": {
+              "start": 0,
+              "end": 24,
+              "maximum_hours": 12
+            },
+            "cost": 30,
+            "availability": true,
+            "travel_time": 1,
+            "assigned_tasks": [],
+            "safety_qualification": true,
+            "equipment_qualification": true,
+            "status": "AVAILABLE"
+          },
+          {
+            "worker_id": "AI-COMPANY-WORKER-004",
+            "life_id": "LIFE-AI-COMPANY-WORKER-004",
+            "role": "GENERAL_LABORER",
+            "skill": "GENERAL_LABORER",
+            "body_type": "PHYSICAL",
+            "location": "KAIOS-SIMULATION-YARD",
+            "shift": {
+              "start": 0,
+              "end": 24,
+              "maximum_hours": 12
+            },
+            "cost": 30,
+            "availability": true,
+            "travel_time": 1,
+            "assigned_tasks": [],
+            "safety_qualification": true,
+            "equipment_qualification": true,
+            "status": "AVAILABLE"
+          },
+          {
+            "worker_id": "AI-COMPANY-WORKER-006",
+            "life_id": "LIFE-AI-COMPANY-WORKER-006",
+            "role": "PIPE_INSTALLER",
+            "skill": "PIPE_INSTALLER",
+            "body_type": "PHYSICAL",
+            "location": "KAIOS-SIMULATION-YARD",
+            "shift": {
+              "start": 0,
+              "end": 24,
+              "maximum_hours": 12
+            },
+            "cost": 30,
+            "availability": true,
+            "travel_time": 1,
+            "assigned_tasks": [],
+            "safety_qualification": true,
+            "equipment_qualification": true,
+            "status": "AVAILABLE"
+          },
+          {
+            "worker_id": "AI-COMPANY-WORKER-008",
+            "life_id": "LIFE-AI-COMPANY-WORKER-008",
+            "role": "AQUACULTURE_WORKER",
+            "skill": "AQUACULTURE_WORKER",
+            "body_type": "PHYSICAL",
+            "location": "KAIOS-SIMULATION-YARD",
+            "shift": {
+              "start": 0,
+              "end": 24,
+              "maximum_hours": 12
+            },
+            "cost": 30,
+            "availability": true,
+            "travel_time": 1,
+            "assigned_tasks": [],
+            "safety_qualification": true,
+            "equipment_qualification": true,
+            "status": "AVAILABLE"
+          },
+          {
+            "worker_id": "AI-COMPANY-WORKER-009",
+            "life_id": "LIFE-AI-COMPANY-WORKER-009",
+            "role": "WATER_QUALITY_TECHNICIAN",
+            "skill": "WATER_QUALITY_TECHNICIAN",
+            "body_type": "PHYSICAL",
+            "location": "KAIOS-SIMULATION-YARD",
+            "shift": {
+              "start": 0,
+              "end": 24,
+              "maximum_hours": 12
+            },
+            "cost": 30,
+            "availability": true,
+            "travel_time": 1,
+            "assigned_tasks": [],
+            "safety_qualification": true,
+            "equipment_qualification": true,
+            "status": "AVAILABLE"
+          },
+          {
+            "worker_id": "AI-COMPANY-WORKER-010",
+            "life_id": "LIFE-AI-COMPANY-WORKER-010",
+            "role": "QA_INSPECTOR",
+            "skill": "QA_INSPECTOR",
+            "body_type": "PHYSICAL",
+            "location": "KAIOS-SIMULATION-YARD",
+            "shift": {
+              "start": 0,
+              "end": 24,
+              "maximum_hours": 12
+            },
+            "cost": 30,
+            "availability": true,
+            "travel_time": 1,
+            "assigned_tasks": [],
+            "safety_qualification": true,
+            "equipment_qualification": true,
+            "status": "AVAILABLE"
+          }
+        ],
+        "missing_skills": []
+      },
+      "material_delta": 0,
+      "energy_delta": 0,
+      "labor_delta": 0,
+      "equipment_delta": 0,
+      "inventory_delta": 0,
+      "cash_delta": 0,
+      "progress_delta": 0,
+      "risk_delta": 0,
+      "previous_state_hash": "f9e4cefcf020347b81dd2514624975fcd9a5cb430a02e6039cbd4006dfe8a94f",
+      "next_state_hash": "7e2752a2e9cda29aeaeb2c842f86662954e906eac693dbb2c9b0554b3882ee9a",
+      "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
+      "status": "COMPLETED",
+      "reason": null
+    },
+    {
+      "event_id": "AI-COMPANY-EVT-000011",
+      "company_id": "KAIOS_AI_COMPANY_V1",
+      "request_id": null,
+      "project_id": "AI-COMPANY-PROJECT-00001",
+      "work_package_id": null,
+      "task_id": null,
+      "actor_life_id": "KAIOS-SIMULATED-COMPANY-OPERATOR",
+      "division_id": "CONSTRUCTION_DIVISION",
+      "simulation_time": 0,
+      "location": null,
+      "event_type": "CREATE_EQUIPMENT_PLAN",
+      "inputs": {
+        "projectId": "AI-COMPANY-PROJECT-00001",
+        "options": {}
+      },
+      "outputs": {
+        "equipment": [
+          {
+            "equipment_id": "AI-COMPANY-EQUIPMENT-001",
+            "type": "SURVEY_TOOL",
+            "owner": "KAIOS_SIMULATED_EQUIPMENT_POOL",
+            "operator_requirement": "SURVEYOR",
+            "location": "KAIOS-SIMULATION-YARD",
+            "availability": true,
+            "capacity": 1,
+            "energy_type": "MANUAL",
+            "fuel_or_charge": 1,
+            "maintenance_state": "READY",
+            "wear": 0,
+            "transport_requirement": "STANDARD_ROUTE",
+            "reservation_start": 0,
+            "reservation_end": 0,
+            "cost": 10,
+            "status": "AVAILABLE"
+          },
+          {
+            "equipment_id": "AI-COMPANY-EQUIPMENT-002",
+            "type": "EXCAVATOR",
+            "owner": "KAIOS_SIMULATED_EQUIPMENT_POOL",
+            "operator_requirement": "EXCAVATOR_OPERATOR",
+            "location": "KAIOS-SIMULATION-YARD",
+            "availability": true,
+            "capacity": 8000,
+            "energy_type": "FUEL",
+            "fuel_or_charge": 100,
+            "maintenance_state": "READY",
+            "wear": 0,
+            "transport_requirement": "STANDARD_ROUTE",
+            "reservation_start": 0,
+            "reservation_end": 0,
+            "cost": 75,
+            "status": "AVAILABLE"
+          },
+          {
+            "equipment_id": "AI-COMPANY-EQUIPMENT-003",
+            "type": "HAND_TOOL",
+            "owner": "KAIOS_SIMULATED_EQUIPMENT_POOL",
+            "operator_requirement": "PHYSICAL_TASK_ASSIGNEE",
+            "location": "KAIOS-SIMULATION-YARD",
+            "availability": true,
+            "capacity": 100,
+            "energy_type": "MANUAL",
+            "fuel_or_charge": 1,
+            "maintenance_state": "READY",
+            "wear": 0,
+            "transport_requirement": "STANDARD_ROUTE",
+            "reservation_start": 0,
+            "reservation_end": 0,
+            "cost": 10,
+            "status": "AVAILABLE"
+          },
+          {
+            "equipment_id": "AI-COMPANY-EQUIPMENT-004",
+            "type": "PUMP",
+            "owner": "KAIOS_SIMULATED_EQUIPMENT_POOL",
+            "operator_requirement": "PIPE_INSTALLER",
+            "location": "KAIOS-SIMULATION-YARD",
+            "availability": true,
+            "capacity": 5000,
+            "energy_type": "ELECTRICITY",
+            "fuel_or_charge": 100,
+            "maintenance_state": "READY",
+            "wear": 0,
+            "transport_requirement": "STANDARD_ROUTE",
+            "reservation_start": 0,
+            "reservation_end": 0,
+            "cost": 75,
+            "status": "AVAILABLE"
+          },
+          {
+            "equipment_id": "AI-COMPANY-EQUIPMENT-005",
+            "type": "AERATOR",
+            "owner": "KAIOS_SIMULATED_EQUIPMENT_POOL",
+            "operator_requirement": "AQUACULTURE_WORKER",
+            "location": "KAIOS-SIMULATION-YARD",
+            "availability": true,
+            "capacity": 5000,
+            "energy_type": "ELECTRICITY",
+            "fuel_or_charge": 100,
+            "maintenance_state": "READY",
+            "wear": 0,
+            "transport_requirement": "STANDARD_ROUTE",
+            "reservation_start": 0,
+            "reservation_end": 0,
+            "cost": 75,
+            "status": "AVAILABLE"
+          }
+        ],
+        "missing_equipment": []
+      },
+      "material_delta": 0,
+      "energy_delta": 0,
+      "labor_delta": 0,
+      "equipment_delta": 0,
+      "inventory_delta": 0,
+      "cash_delta": 0,
+      "progress_delta": 0,
+      "risk_delta": 0,
+      "previous_state_hash": "7e2752a2e9cda29aeaeb2c842f86662954e906eac693dbb2c9b0554b3882ee9a",
+      "next_state_hash": "276657f10243d78ceddc6f2d4b5f5631fc87c052569a5aa6d6ac5404e970f403",
+      "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
+      "status": "COMPLETED",
+      "reason": null
+    },
+    {
+      "event_id": "AI-COMPANY-EVT-000012",
+      "company_id": "KAIOS_AI_COMPANY_V1",
+      "request_id": null,
+      "project_id": "AI-COMPANY-PROJECT-00001",
+      "work_package_id": null,
+      "task_id": null,
+      "actor_life_id": "KAIOS-SIMULATED-COMPANY-OPERATOR",
+      "division_id": "SUPPLY_CHAIN_DIVISION",
+      "simulation_time": 0,
+      "location": null,
+      "event_type": "CREATE_SUPPLY_CHAIN_PLAN",
+      "inputs": {
+        "projectId": "AI-COMPANY-PROJECT-00001",
+        "options": {}
+      },
+      "outputs": {
+        "supply_chain": [
+          {
+            "transport_id": "AI-COMPANY-PROJECT-00001-TRANSPORT-001",
+            "origin": "SIMULATED-SUPPLIER-GRAVEL",
+            "destination": "LAND-SIM-FISHPOND-001",
+            "route": "CAUSAL-ROUTE-001",
+            "quantity": 12,
+            "mass": 120,
+            "vehicle": "SIMULATED-TRUCK-001",
+            "fuel": 2.12,
+            "loading_time": 1,
+            "travel_time": 3,
+            "unloading_time": 1,
+            "cost": 46,
+            "risk": 0.1,
+            "status": "PLANNED"
+          },
+          {
+            "transport_id": "AI-COMPANY-PROJECT-00001-TRANSPORT-002",
+            "origin": "SIMULATED-SUPPLIER-PIPE",
+            "destination": "LAND-SIM-FISHPOND-001",
+            "route": "CAUSAL-ROUTE-002",
+            "quantity": 18,
+            "mass": 36,
+            "vehicle": "SIMULATED-TRUCK-001",
+            "fuel": 2.036,
+            "loading_time": 1,
+            "travel_time": 4,
+            "unloading_time": 1,
+            "cost": 41.8,
+            "risk": 0.1,
+            "status": "PLANNED"
+          },
+          {
+            "transport_id": "AI-COMPANY-PROJECT-00001-TRANSPORT-003",
+            "origin": "SIMULATED-SUPPLIER-LINING",
+            "destination": "LAND-SIM-FISHPOND-001",
+            "route": "CAUSAL-ROUTE-003",
+            "quantity": 24,
+            "mass": 240,
+            "vehicle": "SIMULATED-TRUCK-001",
+            "fuel": 2.24,
+            "loading_time": 1,
+            "travel_time": 5,
+            "unloading_time": 1,
+            "cost": 52,
+            "risk": 0.1,
+            "status": "PLANNED"
+          },
+          {
+            "transport_id": "AI-COMPANY-PROJECT-00001-TRANSPORT-004",
+            "origin": "SIMULATED-SUPPLIER-FISH_JUVENILE_STOCK",
+            "destination": "LAND-SIM-FISHPOND-001",
+            "route": "CAUSAL-ROUTE-004",
+            "quantity": 120,
+            "mass": 12,
+            "vehicle": "SIMULATED-TRUCK-001",
+            "fuel": 2.012,
+            "loading_time": 1,
+            "travel_time": 6,
+            "unloading_time": 1,
+            "cost": 40.6,
+            "risk": 0.1,
+            "status": "PLANNED"
+          }
+        ]
+      },
+      "material_delta": 0,
+      "energy_delta": 0,
+      "labor_delta": 0,
+      "equipment_delta": 0,
+      "inventory_delta": 0,
+      "cash_delta": 0,
+      "progress_delta": 0,
+      "risk_delta": 0,
+      "previous_state_hash": "276657f10243d78ceddc6f2d4b5f5631fc87c052569a5aa6d6ac5404e970f403",
+      "next_state_hash": "0c3af13cc680df9d122898f13d0e9a642beb5e5b50fbc5bb16c3720db207c0b5",
+      "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
+      "status": "COMPLETED",
+      "reason": null
+    },
+    {
+      "event_id": "AI-COMPANY-EVT-000013",
+      "company_id": "KAIOS_AI_COMPANY_V1",
+      "request_id": null,
+      "project_id": "AI-COMPANY-PROJECT-00001",
+      "work_package_id": null,
+      "task_id": null,
+      "actor_life_id": "KAIOS-SIMULATED-COMPANY-OPERATOR",
+      "division_id": "FINANCE_DIVISION",
+      "simulation_time": 0,
+      "location": null,
+      "event_type": "CALCULATE_BUDGET",
+      "inputs": {
+        "projectId": "AI-COMPANY-PROJECT-00001",
+        "options": {}
+      },
+      "outputs": {
+        "budget": {
+          "project_budget": 250000,
+          "design_cost": 1200,
+          "material_cost": 1008,
+          "labor_cost": 7150,
+          "equipment_cost": 2200,
+          "energy_cost": 222,
+          "transport_cost": 180.4,
+          "storage_cost": 20.16,
+          "inspection_cost": 700,
+          "risk_reserve": 556.32,
+          "maintenance_reserve": 417.24,
+          "tax_simulation": 139.08,
+          "insurance_simulation": 139.08,
+          "interest_simulation": 0,
+          "contingency": 695.4,
+          "total_estimated_cost": 14627.68,
+          "approved_budget": 250000,
+          "spent": 0,
+          "committed": 0,
+          "remaining": 250000,
+          "forecast_at_completion": 14627.68,
+          "funding_source": "CUSTOMER_SIMULATED_WALLET",
+          "status": "APPROVED"
+        }
+      },
+      "material_delta": 0,
+      "energy_delta": 0,
+      "labor_delta": 0,
+      "equipment_delta": 0,
+      "inventory_delta": 0,
+      "cash_delta": 0,
+      "progress_delta": 0,
+      "risk_delta": 0,
+      "previous_state_hash": "0c3af13cc680df9d122898f13d0e9a642beb5e5b50fbc5bb16c3720db207c0b5",
+      "next_state_hash": "0791c28ba6ba4e0882e26f8a72d37381b0d9e2eca2361c8e16a9bb2c6d7b1422",
+      "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
+      "status": "COMPLETED",
+      "reason": null
+    },
+    {
+      "event_id": "AI-COMPANY-EVT-000014",
+      "company_id": "KAIOS_AI_COMPANY_V1",
+      "request_id": null,
+      "project_id": "AI-COMPANY-PROJECT-00001",
+      "work_package_id": null,
+      "task_id": null,
+      "actor_life_id": "KAIOS-SIMULATED-COMPANY-OPERATOR",
+      "division_id": "ARCHITECTURE_DIVISION",
+      "simulation_time": 0,
+      "location": null,
+      "event_type": "CALCULATE_SCHEDULE",
+      "inputs": {
+        "projectId": "AI-COMPANY-PROJECT-00001",
+        "options": {}
+      },
+      "outputs": {
+        "schedule": {
+          "planned_start": 0,
+          "planned_end": 43,
+          "estimated_duration": 43,
+          "critical_path": [
+            "AI-COMPANY-PROJECT-00001-TASK-001",
+            "AI-COMPANY-PROJECT-00001-TASK-002",
+            "AI-COMPANY-PROJECT-00001-TASK-003",
+            "AI-COMPANY-PROJECT-00001-TASK-004",
+            "AI-COMPANY-PROJECT-00001-TASK-005",
+            "AI-COMPANY-PROJECT-00001-TASK-006"
+          ],
+          "task_dependencies": [
+            "AI-COMPANY-PROJECT-00001-DEPENDENCY-001",
+            "AI-COMPANY-PROJECT-00001-DEPENDENCY-002",
+            "AI-COMPANY-PROJECT-00001-DEPENDENCY-003",
+            "AI-COMPANY-PROJECT-00001-DEPENDENCY-004",
+            "AI-COMPANY-PROJECT-00001-DEPENDENCY-005"
+          ],
+          "worker_availability": {
+            "AI-COMPANY-WORKER-001": true,
+            "AI-COMPANY-WORKER-002": true,
+            "AI-COMPANY-WORKER-003": true,
+            "AI-COMPANY-WORKER-005": true,
+            "AI-COMPANY-WORKER-004": true,
+            "AI-COMPANY-WORKER-006": true,
+            "AI-COMPANY-WORKER-008": true,
+            "AI-COMPANY-WORKER-009": true,
+            "AI-COMPANY-WORKER-010": true
+          },
+          "equipment_availability": {
+            "AI-COMPANY-EQUIPMENT-001": true,
+            "AI-COMPANY-EQUIPMENT-002": true,
+            "AI-COMPANY-EQUIPMENT-003": true,
+            "AI-COMPANY-EQUIPMENT-004": true,
+            "AI-COMPANY-EQUIPMENT-005": true
+          },
+          "material_arrival": {
+            "GRAVEL": 2,
+            "PIPE": 3,
+            "LINING": 4,
+            "FISH_JUVENILE_STOCK": 5
+          },
+          "weather_delay": 0,
+          "inspection_delay": 0,
+          "rework_delay": 0,
+          "transport_delay": 0,
+          "actual_start": null,
+          "actual_end": null,
+          "status": "ON_SCHEDULE"
+        },
+        "task_windows": {
+          "AI-COMPANY-PROJECT-00001-TASK-001": {
+            "start": 0,
+            "end": 4,
+            "location": "LAND-SIM-FISHPOND-001"
+          },
+          "AI-COMPANY-PROJECT-00001-TASK-002": {
+            "start": 4,
+            "end": 10,
+            "location": "LAND-SIM-FISHPOND-001"
+          },
+          "AI-COMPANY-PROJECT-00001-TASK-003": {
+            "start": 10,
+            "end": 22,
+            "location": "LAND-SIM-FISHPOND-001"
+          },
+          "AI-COMPANY-PROJECT-00001-TASK-004": {
+            "start": 22,
+            "end": 32,
+            "location": "LAND-SIM-FISHPOND-001"
+          },
+          "AI-COMPANY-PROJECT-00001-TASK-005": {
+            "start": 32,
+            "end": 40,
+            "location": "LAND-SIM-FISHPOND-001"
+          },
+          "AI-COMPANY-PROJECT-00001-TASK-006": {
+            "start": 40,
+            "end": 43,
+            "location": "LAND-SIM-FISHPOND-001"
+          }
+        }
+      },
+      "material_delta": 0,
+      "energy_delta": 0,
+      "labor_delta": 0,
+      "equipment_delta": 0,
+      "inventory_delta": 0,
+      "cash_delta": 0,
+      "progress_delta": 0,
+      "risk_delta": 0,
+      "previous_state_hash": "0791c28ba6ba4e0882e26f8a72d37381b0d9e2eca2361c8e16a9bb2c6d7b1422",
+      "next_state_hash": "89425642f8aaaf237b5d88014c2862732ce40bcd53ee84db4256b75acc5e93d1",
+      "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
+      "status": "COMPLETED",
+      "reason": null
+    },
+    {
+      "event_id": "AI-COMPANY-EVT-000015",
+      "company_id": "KAIOS_AI_COMPANY_V1",
+      "request_id": null,
+      "project_id": "AI-COMPANY-PROJECT-00001",
+      "work_package_id": null,
+      "task_id": null,
+      "actor_life_id": "KAIOS-SIMULATED-COMPANY-OPERATOR",
+      "division_id": "LEGAL_SIMULATION_DIVISION",
+      "simulation_time": 0,
+      "location": null,
+      "event_type": "CREATE_SIMULATED_CONTRACT",
+      "inputs": {
+        "projectId": "AI-COMPANY-PROJECT-00001",
+        "options": {}
+      },
+      "outputs": {
+        "contract": {
+          "contract_id": "AI-COMPANY-CONTRACT-00001",
+          "project_id": "AI-COMPANY-PROJECT-00001",
+          "parties": [
+            "CUSTOMER",
+            "AI_COMPANY",
+            "SUPPLIER",
+            "CONTRACTOR",
+            "WORKER",
+            "INSPECTOR_SIMULATION",
+            "TRANSPORT_OPERATOR"
+          ],
+          "scope": "Deliver SIMULATED_CAUSAL_FISHPOND",
+          "deliverables": [
+            "AI-COMPANY-PROJECT-00001-DELIVERABLE-001"
+          ],
+          "price": 250000,
+          "deposit_amount": 25000,
+          "payment_schedule": [
+            {
+              "milestone": "SIMULATED_APPROVAL",
+              "amount": 25000
+            },
+            {
+              "milestone": "ACCEPTANCE",
+              "amount": 225000
+            }
+          ],
+          "timeline": {
+            "start": 0,
+            "end": 43
+          },
+          "quality_standard": [
+            "SIMULATED_INSPECTION_PASS"
+          ],
+          "change_policy": "EXPLICIT_CHANGE_ORDER_ONLY",
+          "cancellation_policy": "SIMULATED_CANCELLATION_WITH_ACCOUNTING",
+          "warranty_simulation": "SIMULATED_WARRANTY_ONLY",
+          "maintenance_terms": "MAINTENANCE_PLAN_REQUIRED",
+          "rights": [
+            "SIMULATED_USAGE_RIGHT"
+          ],
+          "liability_simulation": "NO_REAL_LEGAL_EFFECT",
+          "status": "ACTIVE_SIMULATION",
+          "warning": "SIMULATED_CONTRACT / NO_REAL_LEGAL_EFFECT",
+          "real_legal_effect": false
+        }
+      },
+      "material_delta": 0,
+      "energy_delta": 0,
+      "labor_delta": 0,
+      "equipment_delta": 0,
+      "inventory_delta": 0,
+      "cash_delta": 25000,
+      "progress_delta": 0,
+      "risk_delta": 0,
+      "previous_state_hash": "89425642f8aaaf237b5d88014c2862732ce40bcd53ee84db4256b75acc5e93d1",
+      "next_state_hash": "9702d68671c7ab3b972633b1a6b9cc4dcbbfb57e63e087498a51f28d3588d44b",
+      "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
+      "status": "COMPLETED",
+      "reason": null
+    },
+    {
+      "event_id": "AI-COMPANY-EVT-000016",
+      "company_id": "KAIOS_AI_COMPANY_V1",
+      "request_id": null,
+      "project_id": "AI-COMPANY-PROJECT-00001",
+      "work_package_id": null,
+      "task_id": null,
+      "actor_life_id": "KAIOS-SIMULATED-COMPANY-OPERATOR",
+      "division_id": "PROCUREMENT_DIVISION",
+      "simulation_time": 0,
+      "location": null,
+      "event_type": "START_PROCUREMENT",
+      "inputs": {
+        "projectId": "AI-COMPANY-PROJECT-00001"
+      },
+      "outputs": {
+        "orders": [
+          {
+            "order_id": "AI-COMPANY-PROJECT-00001-PROCUREMENT-001",
+            "project_id": "AI-COMPANY-PROJECT-00001",
+            "bom_id": "AI-COMPANY-PROJECT-00001-BOM-001",
+            "material_id": "GRAVEL",
+            "quantity": 12,
+            "material_cost": 144,
+            "transport_cost": 46,
+            "ordered_at": 0,
+            "arrival_time": 7,
+            "status": "IN_TRANSIT",
+            "simulation_only": true
+          },
+          {
+            "order_id": "AI-COMPANY-PROJECT-00001-PROCUREMENT-002",
+            "project_id": "AI-COMPANY-PROJECT-00001",
+            "bom_id": "AI-COMPANY-PROJECT-00001-BOM-002",
+            "material_id": "PIPE",
+            "quantity": 18,
+            "material_cost": 216,
+            "transport_cost": 41.8,
+            "ordered_at": 0,
+            "arrival_time": 9,
+            "status": "IN_TRANSIT",
+            "simulation_only": true
+          },
+          {
+            "order_id": "AI-COMPANY-PROJECT-00001-PROCUREMENT-003",
+            "project_id": "AI-COMPANY-PROJECT-00001",
+            "bom_id": "AI-COMPANY-PROJECT-00001-BOM-003",
+            "material_id": "LINING",
+            "quantity": 24,
+            "material_cost": 288,
+            "transport_cost": 52,
+            "ordered_at": 0,
+            "arrival_time": 11,
+            "status": "IN_TRANSIT",
+            "simulation_only": true
+          },
+          {
+            "order_id": "AI-COMPANY-PROJECT-00001-PROCUREMENT-004",
+            "project_id": "AI-COMPANY-PROJECT-00001",
+            "bom_id": "AI-COMPANY-PROJECT-00001-BOM-004",
+            "material_id": "FISH_JUVENILE_STOCK",
+            "quantity": 120,
+            "material_cost": 360,
+            "transport_cost": 40.6,
+            "ordered_at": 0,
+            "arrival_time": 13,
+            "status": "IN_TRANSIT",
+            "simulation_only": true
+          }
+        ],
+        "committed": 1188.4
+      },
+      "material_delta": 0,
+      "energy_delta": 0,
+      "labor_delta": 0,
+      "equipment_delta": 0,
+      "inventory_delta": 0,
+      "cash_delta": 0,
+      "progress_delta": 0,
+      "risk_delta": 0,
+      "previous_state_hash": "9702d68671c7ab3b972633b1a6b9cc4dcbbfb57e63e087498a51f28d3588d44b",
+      "next_state_hash": "25492242c3509eb442b2c411f6f5f117e440d3e848328ccdf4deac1e22e19fe3",
+      "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
+      "status": "COMPLETED",
+      "reason": null
+    },
+    {
+      "event_id": "AI-COMPANY-EVT-000017",
+      "company_id": "KAIOS_AI_COMPANY_V1",
+      "request_id": null,
+      "project_id": null,
+      "work_package_id": null,
+      "task_id": null,
+      "actor_life_id": "KAIOS-SIMULATED-COMPANY-OPERATOR",
+      "division_id": "ARCHITECTURE_DIVISION",
+      "simulation_time": 0,
+      "location": null,
+      "event_type": "START_RUNTIME",
+      "inputs": {},
+      "outputs": {
+        "runtime_status": "RUNNING"
+      },
+      "material_delta": 0,
+      "energy_delta": 0,
+      "labor_delta": 0,
+      "equipment_delta": 0,
+      "inventory_delta": 0,
+      "cash_delta": 0,
+      "progress_delta": 0,
+      "risk_delta": 0,
+      "previous_state_hash": "25492242c3509eb442b2c411f6f5f117e440d3e848328ccdf4deac1e22e19fe3",
+      "next_state_hash": "3180348d7ed0e3c28e85426852f0b4302b3425470f5985f0f2d2c1d3e0783021",
+      "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
+      "status": "COMPLETED",
+      "reason": null
+    },
+    {
+      "event_id": "AI-COMPANY-EVT-000018",
+      "company_id": "KAIOS_AI_COMPANY_V1",
+      "request_id": null,
+      "project_id": null,
+      "work_package_id": null,
+      "task_id": null,
+      "actor_life_id": "KAIOS-SIMULATED-COMPANY-OPERATOR",
+      "division_id": "CONSTRUCTION_DIVISION",
+      "simulation_time": 13,
+      "location": null,
+      "event_type": "ADVANCE_TIME",
+      "inputs": {
+        "hours": 13
+      },
+      "outputs": {
+        "advanced_hours": 13,
+        "active_tasks": 0
+      },
+      "material_delta": 0,
+      "energy_delta": 0,
+      "labor_delta": 0,
+      "equipment_delta": 0,
+      "inventory_delta": 0,
+      "cash_delta": 0,
+      "progress_delta": 0,
+      "risk_delta": 0,
+      "previous_state_hash": "3180348d7ed0e3c28e85426852f0b4302b3425470f5985f0f2d2c1d3e0783021",
+      "next_state_hash": "ff6fce65fc16aba37c71e6a019f0dc0e33073d3255d9716f77fe072bd47f9750",
+      "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
+      "status": "COMPLETED",
+      "reason": null
+    },
+    {
+      "event_id": "AI-COMPANY-EVT-000019",
+      "company_id": "KAIOS_AI_COMPANY_V1",
+      "request_id": null,
+      "project_id": "AI-COMPANY-PROJECT-00001",
+      "work_package_id": null,
+      "task_id": null,
+      "actor_life_id": "KAIOS-SIMULATED-COMPANY-OPERATOR",
+      "division_id": "PROCUREMENT_DIVISION",
+      "simulation_time": 13,
+      "location": null,
+      "event_type": "RECEIVE_MATERIAL",
+      "inputs": {
+        "projectId": "AI-COMPANY-PROJECT-00001",
+        "materialId": "GRAVEL"
+      },
+      "outputs": {
+        "material_id": "GRAVEL",
+        "inventory": {
+          "quantity": 12,
+          "mass": 120,
+          "project_allocations": {
+            "AI-COMPANY-PROJECT-00001": 12
+          }
+        }
+      },
+      "material_delta": 12,
+      "energy_delta": 0,
+      "labor_delta": 0,
+      "equipment_delta": 0,
+      "inventory_delta": 12,
+      "cash_delta": -190,
+      "progress_delta": 0,
+      "risk_delta": 0,
+      "previous_state_hash": "ff6fce65fc16aba37c71e6a019f0dc0e33073d3255d9716f77fe072bd47f9750",
+      "next_state_hash": "036104ca97a1e86cceeda75afd188aa651fddd70ff8064739b77188297b25031",
+      "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
+      "status": "COMPLETED",
+      "reason": null
+    },
+    {
+      "event_id": "AI-COMPANY-EVT-000020",
+      "company_id": "KAIOS_AI_COMPANY_V1",
+      "request_id": null,
+      "project_id": "AI-COMPANY-PROJECT-00001",
+      "work_package_id": null,
+      "task_id": null,
+      "actor_life_id": "KAIOS-SIMULATED-COMPANY-OPERATOR",
+      "division_id": "PROCUREMENT_DIVISION",
+      "simulation_time": 13,
+      "location": null,
+      "event_type": "RECEIVE_MATERIAL",
+      "inputs": {
+        "projectId": "AI-COMPANY-PROJECT-00001",
+        "materialId": "PIPE"
+      },
+      "outputs": {
+        "material_id": "PIPE",
+        "inventory": {
+          "quantity": 18,
+          "mass": 36,
+          "project_allocations": {
+            "AI-COMPANY-PROJECT-00001": 18
+          }
+        }
+      },
+      "material_delta": 18,
+      "energy_delta": 0,
+      "labor_delta": 0,
+      "equipment_delta": 0,
+      "inventory_delta": 18,
+      "cash_delta": -257.8,
+      "progress_delta": 0,
+      "risk_delta": 0,
+      "previous_state_hash": "036104ca97a1e86cceeda75afd188aa651fddd70ff8064739b77188297b25031",
+      "next_state_hash": "2883ac948b604834f03c9560f6a7e8d0f82fb93a6836425c234431f01c9fe372",
+      "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
+      "status": "COMPLETED",
+      "reason": null
+    },
+    {
+      "event_id": "AI-COMPANY-EVT-000021",
+      "company_id": "KAIOS_AI_COMPANY_V1",
+      "request_id": null,
+      "project_id": "AI-COMPANY-PROJECT-00001",
+      "work_package_id": null,
+      "task_id": null,
+      "actor_life_id": "KAIOS-SIMULATED-COMPANY-OPERATOR",
+      "division_id": "PROCUREMENT_DIVISION",
+      "simulation_time": 13,
+      "location": null,
+      "event_type": "RECEIVE_MATERIAL",
+      "inputs": {
+        "projectId": "AI-COMPANY-PROJECT-00001",
+        "materialId": "LINING"
+      },
+      "outputs": {
+        "material_id": "LINING",
+        "inventory": {
+          "quantity": 24,
+          "mass": 240,
+          "project_allocations": {
+            "AI-COMPANY-PROJECT-00001": 24
+          }
+        }
+      },
+      "material_delta": 24,
+      "energy_delta": 0,
+      "labor_delta": 0,
+      "equipment_delta": 0,
+      "inventory_delta": 24,
+      "cash_delta": -340,
+      "progress_delta": 0,
+      "risk_delta": 0,
+      "previous_state_hash": "2883ac948b604834f03c9560f6a7e8d0f82fb93a6836425c234431f01c9fe372",
+      "next_state_hash": "340f83cfa60afe9b143bf79350b1db70084eb6caa35f1c2e24c5fa45db6e29a9",
+      "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
+      "status": "COMPLETED",
+      "reason": null
+    },
+    {
+      "event_id": "AI-COMPANY-EVT-000022",
+      "company_id": "KAIOS_AI_COMPANY_V1",
+      "request_id": null,
+      "project_id": "AI-COMPANY-PROJECT-00001",
+      "work_package_id": null,
+      "task_id": null,
+      "actor_life_id": "KAIOS-SIMULATED-COMPANY-OPERATOR",
+      "division_id": "PROCUREMENT_DIVISION",
+      "simulation_time": 13,
+      "location": null,
+      "event_type": "RECEIVE_MATERIAL",
+      "inputs": {
+        "projectId": "AI-COMPANY-PROJECT-00001",
+        "materialId": "FISH_JUVENILE_STOCK"
+      },
+      "outputs": {
+        "material_id": "FISH_JUVENILE_STOCK",
+        "inventory": {
+          "quantity": 120,
+          "mass": 12,
+          "project_allocations": {
+            "AI-COMPANY-PROJECT-00001": 120
+          }
+        }
+      },
+      "material_delta": 120,
+      "energy_delta": 0,
+      "labor_delta": 0,
+      "equipment_delta": 0,
+      "inventory_delta": 120,
+      "cash_delta": -400.6,
+      "progress_delta": 0,
+      "risk_delta": 0,
+      "previous_state_hash": "340f83cfa60afe9b143bf79350b1db70084eb6caa35f1c2e24c5fa45db6e29a9",
+      "next_state_hash": "6a017ddbd4f45f18d59bbfc0fbe9014e97d3af5075bb795079c1d67d597bbc9a",
+      "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
+      "status": "COMPLETED",
+      "reason": null
+    },
+    {
+      "event_id": "AI-COMPANY-EVT-000023",
+      "company_id": "KAIOS_AI_COMPANY_V1",
+      "request_id": null,
+      "project_id": "AI-COMPANY-PROJECT-00001",
+      "work_package_id": null,
+      "task_id": null,
+      "actor_life_id": "KAIOS-SIMULATED-COMPANY-OPERATOR",
+      "division_id": "ARCHITECTURE_DIVISION",
+      "simulation_time": 13,
+      "location": null,
+      "event_type": "CALCULATE_SCHEDULE",
+      "inputs": {
+        "projectId": "AI-COMPANY-PROJECT-00001",
+        "options": {}
+      },
+      "outputs": {
+        "schedule": {
+          "planned_start": 13,
+          "planned_end": 56,
+          "estimated_duration": 43,
+          "critical_path": [
+            "AI-COMPANY-PROJECT-00001-TASK-001",
+            "AI-COMPANY-PROJECT-00001-TASK-002",
+            "AI-COMPANY-PROJECT-00001-TASK-003",
+            "AI-COMPANY-PROJECT-00001-TASK-004",
+            "AI-COMPANY-PROJECT-00001-TASK-005",
+            "AI-COMPANY-PROJECT-00001-TASK-006"
+          ],
+          "task_dependencies": [
+            "AI-COMPANY-PROJECT-00001-DEPENDENCY-001",
+            "AI-COMPANY-PROJECT-00001-DEPENDENCY-002",
+            "AI-COMPANY-PROJECT-00001-DEPENDENCY-003",
+            "AI-COMPANY-PROJECT-00001-DEPENDENCY-004",
+            "AI-COMPANY-PROJECT-00001-DEPENDENCY-005"
+          ],
+          "worker_availability": {
+            "AI-COMPANY-WORKER-001": true,
+            "AI-COMPANY-WORKER-002": true,
+            "AI-COMPANY-WORKER-003": true,
+            "AI-COMPANY-WORKER-005": true,
+            "AI-COMPANY-WORKER-004": true,
+            "AI-COMPANY-WORKER-006": true,
+            "AI-COMPANY-WORKER-008": true,
+            "AI-COMPANY-WORKER-009": true,
+            "AI-COMPANY-WORKER-010": true
+          },
+          "equipment_availability": {
+            "AI-COMPANY-EQUIPMENT-001": true,
+            "AI-COMPANY-EQUIPMENT-002": true,
+            "AI-COMPANY-EQUIPMENT-003": true,
+            "AI-COMPANY-EQUIPMENT-004": true,
+            "AI-COMPANY-EQUIPMENT-005": true
+          },
+          "material_arrival": {
+            "GRAVEL": 15,
+            "PIPE": 16,
+            "LINING": 17,
+            "FISH_JUVENILE_STOCK": 18
+          },
+          "weather_delay": 0,
+          "inspection_delay": 0,
+          "rework_delay": 0,
+          "transport_delay": 0,
+          "actual_start": null,
+          "actual_end": null,
+          "status": "ON_SCHEDULE"
+        },
+        "task_windows": {
+          "AI-COMPANY-PROJECT-00001-TASK-001": {
+            "start": 13,
+            "end": 17,
+            "location": "LAND-SIM-FISHPOND-001"
+          },
+          "AI-COMPANY-PROJECT-00001-TASK-002": {
+            "start": 17,
+            "end": 23,
+            "location": "LAND-SIM-FISHPOND-001"
+          },
+          "AI-COMPANY-PROJECT-00001-TASK-003": {
+            "start": 23,
+            "end": 35,
+            "location": "LAND-SIM-FISHPOND-001"
+          },
+          "AI-COMPANY-PROJECT-00001-TASK-004": {
+            "start": 35,
+            "end": 45,
+            "location": "LAND-SIM-FISHPOND-001"
+          },
+          "AI-COMPANY-PROJECT-00001-TASK-005": {
+            "start": 45,
+            "end": 53,
+            "location": "LAND-SIM-FISHPOND-001"
+          },
+          "AI-COMPANY-PROJECT-00001-TASK-006": {
+            "start": 53,
+            "end": 56,
+            "location": "LAND-SIM-FISHPOND-001"
+          }
+        }
+      },
+      "material_delta": 0,
+      "energy_delta": 0,
+      "labor_delta": 0,
+      "equipment_delta": 0,
+      "inventory_delta": 0,
+      "cash_delta": 0,
+      "progress_delta": 0,
+      "risk_delta": 0,
+      "previous_state_hash": "6a017ddbd4f45f18d59bbfc0fbe9014e97d3af5075bb795079c1d67d597bbc9a",
+      "next_state_hash": "0d33df11b4c80ed36c29c36b4bacac8c1eacc955f2f0653ae9570931b519bcf2",
+      "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
+      "status": "COMPLETED",
+      "reason": null
+    },
+    {
+      "event_id": "AI-COMPANY-EVT-000024",
+      "company_id": "KAIOS_AI_COMPANY_V1",
+      "request_id": null,
+      "project_id": "AI-COMPANY-PROJECT-00001",
+      "work_package_id": null,
+      "task_id": "AI-COMPANY-PROJECT-00001-TASK-001",
+      "actor_life_id": "KAIOS-SIMULATED-COMPANY-OPERATOR",
+      "division_id": "LABOR_DIVISION",
+      "simulation_time": 13,
+      "location": null,
+      "event_type": "ASSIGN_WORKER",
+      "inputs": {
+        "projectId": "AI-COMPANY-PROJECT-00001",
+        "taskId": "AI-COMPANY-PROJECT-00001-TASK-001",
+        "workerId": "AI-COMPANY-WORKER-001",
+        "options": {}
+      },
+      "outputs": {
+        "reservation": {
+          "reservation_id": "AI-COMPANY-WORKER-RES-00001",
+          "project_id": "AI-COMPANY-PROJECT-00001",
+          "task_id": "AI-COMPANY-PROJECT-00001-TASK-001",
+          "worker_id": "AI-COMPANY-WORKER-001",
+          "life_id": "LIFE-AI-COMPANY-WORKER-001",
+          "body_type": "PHYSICAL",
+          "location": "LAND-SIM-FISHPOND-001",
+          "start": 13,
+          "end": 17,
+          "status": "RESERVED"
+        }
+      },
+      "material_delta": 0,
+      "energy_delta": 0,
+      "labor_delta": 1,
+      "equipment_delta": 0,
+      "inventory_delta": 0,
+      "cash_delta": 0,
+      "progress_delta": 0,
+      "risk_delta": 0,
+      "previous_state_hash": "0d33df11b4c80ed36c29c36b4bacac8c1eacc955f2f0653ae9570931b519bcf2",
+      "next_state_hash": "5b4e8df6ffe79e23ade05de8e942fa8e60c8b8e5bc02335392ac72447c9f5bae",
+      "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
+      "status": "COMPLETED",
+      "reason": null
+    },
+    {
+      "event_id": "AI-COMPANY-EVT-000025",
+      "company_id": "KAIOS_AI_COMPANY_V1",
+      "request_id": null,
+      "project_id": "AI-COMPANY-PROJECT-00001",
+      "work_package_id": null,
+      "task_id": "AI-COMPANY-PROJECT-00001-TASK-001",
+      "actor_life_id": "KAIOS-SIMULATED-COMPANY-OPERATOR",
+      "division_id": "CONSTRUCTION_DIVISION",
+      "simulation_time": 13,
+      "location": null,
+      "event_type": "RESERVE_EQUIPMENT",
+      "inputs": {
+        "projectId": "AI-COMPANY-PROJECT-00001",
+        "taskId": "AI-COMPANY-PROJECT-00001-TASK-001",
+        "equipmentId": "AI-COMPANY-EQUIPMENT-001",
+        "options": {}
+      },
+      "outputs": {
+        "reservation": {
+          "reservation_id": "AI-COMPANY-EQUIPMENT-RES-00001",
+          "project_id": "AI-COMPANY-PROJECT-00001",
+          "task_id": "AI-COMPANY-PROJECT-00001-TASK-001",
+          "equipment_id": "AI-COMPANY-EQUIPMENT-001",
+          "start": 13,
+          "end": 17,
+          "status": "RESERVED"
+        }
+      },
+      "material_delta": 0,
+      "energy_delta": 0,
+      "labor_delta": 0,
+      "equipment_delta": 1,
+      "inventory_delta": 0,
+      "cash_delta": 0,
+      "progress_delta": 0,
+      "risk_delta": 0,
+      "previous_state_hash": "5b4e8df6ffe79e23ade05de8e942fa8e60c8b8e5bc02335392ac72447c9f5bae",
+      "next_state_hash": "17b54bba4b735118ccf99136f12a699644e8a9eb549fcd3e7f2a46dc7c8374be",
+      "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
+      "status": "COMPLETED",
+      "reason": null
+    },
+    {
+      "event_id": "AI-COMPANY-EVT-000026",
+      "company_id": "KAIOS_AI_COMPANY_V1",
+      "request_id": null,
+      "project_id": "AI-COMPANY-PROJECT-00001",
+      "work_package_id": null,
+      "task_id": "AI-COMPANY-PROJECT-00001-TASK-002",
+      "actor_life_id": "KAIOS-SIMULATED-COMPANY-OPERATOR",
+      "division_id": "LABOR_DIVISION",
+      "simulation_time": 13,
+      "location": null,
+      "event_type": "ASSIGN_WORKER",
+      "inputs": {
+        "projectId": "AI-COMPANY-PROJECT-00001",
+        "taskId": "AI-COMPANY-PROJECT-00001-TASK-002",
+        "workerId": "AI-COMPANY-WORKER-002",
+        "options": {}
+      },
+      "outputs": {
+        "reservation": {
+          "reservation_id": "AI-COMPANY-WORKER-RES-00002",
+          "project_id": "AI-COMPANY-PROJECT-00001",
+          "task_id": "AI-COMPANY-PROJECT-00001-TASK-002",
+          "worker_id": "AI-COMPANY-WORKER-002",
+          "life_id": "LIFE-AI-COMPANY-WORKER-002",
+          "body_type": "DIGITAL",
+          "location": "LAND-SIM-FISHPOND-001",
+          "start": 17,
+          "end": 23,
+          "status": "RESERVED"
+        }
+      },
+      "material_delta": 0,
+      "energy_delta": 0,
+      "labor_delta": 1,
+      "equipment_delta": 0,
+      "inventory_delta": 0,
+      "cash_delta": 0,
+      "progress_delta": 0,
+      "risk_delta": 0,
+      "previous_state_hash": "17b54bba4b735118ccf99136f12a699644e8a9eb549fcd3e7f2a46dc7c8374be",
+      "next_state_hash": "c33c4ada3aebb0ce400d2ad28148f6dab291dec3740ab6120b0bc37dc55eb543",
+      "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
+      "status": "COMPLETED",
+      "reason": null
+    },
+    {
+      "event_id": "AI-COMPANY-EVT-000027",
+      "company_id": "KAIOS_AI_COMPANY_V1",
+      "request_id": null,
+      "project_id": "AI-COMPANY-PROJECT-00001",
+      "work_package_id": null,
+      "task_id": "AI-COMPANY-PROJECT-00001-TASK-002",
+      "actor_life_id": "KAIOS-SIMULATED-COMPANY-OPERATOR",
+      "division_id": "LABOR_DIVISION",
+      "simulation_time": 13,
+      "location": null,
+      "event_type": "ASSIGN_WORKER",
+      "inputs": {
+        "projectId": "AI-COMPANY-PROJECT-00001",
+        "taskId": "AI-COMPANY-PROJECT-00001-TASK-002",
+        "workerId": "AI-COMPANY-WORKER-003",
+        "options": {}
+      },
+      "outputs": {
+        "reservation": {
+          "reservation_id": "AI-COMPANY-WORKER-RES-00003",
+          "project_id": "AI-COMPANY-PROJECT-00001",
+          "task_id": "AI-COMPANY-PROJECT-00001-TASK-002",
+          "worker_id": "AI-COMPANY-WORKER-003",
+          "life_id": "LIFE-AI-COMPANY-WORKER-003",
+          "body_type": "PHYSICAL",
+          "location": "LAND-SIM-FISHPOND-001",
+          "start": 17,
+          "end": 23,
+          "status": "RESERVED"
+        }
+      },
+      "material_delta": 0,
+      "energy_delta": 0,
+      "labor_delta": 1,
+      "equipment_delta": 0,
+      "inventory_delta": 0,
+      "cash_delta": 0,
+      "progress_delta": 0,
+      "risk_delta": 0,
+      "previous_state_hash": "c33c4ada3aebb0ce400d2ad28148f6dab291dec3740ab6120b0bc37dc55eb543",
+      "next_state_hash": "8c5655cf03e547a1538d75590eceb67fa7214c093f97f392aa6e261f4b4e5b5d",
+      "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
+      "status": "COMPLETED",
+      "reason": null
+    },
+    {
+      "event_id": "AI-COMPANY-EVT-000028",
+      "company_id": "KAIOS_AI_COMPANY_V1",
+      "request_id": null,
+      "project_id": "AI-COMPANY-PROJECT-00001",
+      "work_package_id": null,
+      "task_id": "AI-COMPANY-PROJECT-00001-TASK-003",
+      "actor_life_id": "KAIOS-SIMULATED-COMPANY-OPERATOR",
+      "division_id": "LABOR_DIVISION",
+      "simulation_time": 13,
+      "location": null,
+      "event_type": "ASSIGN_WORKER",
+      "inputs": {
+        "projectId": "AI-COMPANY-PROJECT-00001",
+        "taskId": "AI-COMPANY-PROJECT-00001-TASK-003",
+        "workerId": "AI-COMPANY-WORKER-005",
+        "options": {}
+      },
+      "outputs": {
+        "reservation": {
+          "reservation_id": "AI-COMPANY-WORKER-RES-00004",
+          "project_id": "AI-COMPANY-PROJECT-00001",
+          "task_id": "AI-COMPANY-PROJECT-00001-TASK-003",
+          "worker_id": "AI-COMPANY-WORKER-005",
+          "life_id": "LIFE-AI-COMPANY-WORKER-005",
+          "body_type": "PHYSICAL",
+          "location": "LAND-SIM-FISHPOND-001",
+          "start": 23,
+          "end": 35,
+          "status": "RESERVED"
+        }
+      },
+      "material_delta": 0,
+      "energy_delta": 0,
+      "labor_delta": 1,
+      "equipment_delta": 0,
+      "inventory_delta": 0,
+      "cash_delta": 0,
+      "progress_delta": 0,
+      "risk_delta": 0,
+      "previous_state_hash": "8c5655cf03e547a1538d75590eceb67fa7214c093f97f392aa6e261f4b4e5b5d",
+      "next_state_hash": "25ccb0eb638f007fc09c34300c7e2c9bc776001a606e8ff81881ffbbcb74c70f",
+      "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
+      "status": "COMPLETED",
+      "reason": null
+    },
+    {
+      "event_id": "AI-COMPANY-EVT-000029",
+      "company_id": "KAIOS_AI_COMPANY_V1",
+      "request_id": null,
+      "project_id": "AI-COMPANY-PROJECT-00001",
+      "work_package_id": null,
+      "task_id": "AI-COMPANY-PROJECT-00001-TASK-003",
+      "actor_life_id": "KAIOS-SIMULATED-COMPANY-OPERATOR",
+      "division_id": "LABOR_DIVISION",
+      "simulation_time": 13,
+      "location": null,
+      "event_type": "ASSIGN_WORKER",
+      "inputs": {
+        "projectId": "AI-COMPANY-PROJECT-00001",
+        "taskId": "AI-COMPANY-PROJECT-00001-TASK-003",
+        "workerId": "AI-COMPANY-WORKER-003",
+        "options": {}
+      },
+      "outputs": {
+        "reservation": {
+          "reservation_id": "AI-COMPANY-WORKER-RES-00005",
+          "project_id": "AI-COMPANY-PROJECT-00001",
+          "task_id": "AI-COMPANY-PROJECT-00001-TASK-003",
+          "worker_id": "AI-COMPANY-WORKER-003",
+          "life_id": "LIFE-AI-COMPANY-WORKER-003",
+          "body_type": "PHYSICAL",
+          "location": "LAND-SIM-FISHPOND-001",
+          "start": 23,
+          "end": 35,
+          "status": "RESERVED"
+        }
+      },
+      "material_delta": 0,
+      "energy_delta": 0,
+      "labor_delta": 1,
+      "equipment_delta": 0,
+      "inventory_delta": 0,
+      "cash_delta": 0,
+      "progress_delta": 0,
+      "risk_delta": 0,
+      "previous_state_hash": "25ccb0eb638f007fc09c34300c7e2c9bc776001a606e8ff81881ffbbcb74c70f",
+      "next_state_hash": "de472ec47e8ea28a95df89a6a258bda13ed0d27c85b784934baa8cffc679a19a",
+      "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
+      "status": "COMPLETED",
+      "reason": null
+    },
+    {
+      "event_id": "AI-COMPANY-EVT-000030",
+      "company_id": "KAIOS_AI_COMPANY_V1",
+      "request_id": null,
+      "project_id": "AI-COMPANY-PROJECT-00001",
+      "work_package_id": null,
+      "task_id": "AI-COMPANY-PROJECT-00001-TASK-003",
+      "actor_life_id": "KAIOS-SIMULATED-COMPANY-OPERATOR",
+      "division_id": "CONSTRUCTION_DIVISION",
+      "simulation_time": 13,
+      "location": null,
+      "event_type": "RESERVE_EQUIPMENT",
+      "inputs": {
+        "projectId": "AI-COMPANY-PROJECT-00001",
+        "taskId": "AI-COMPANY-PROJECT-00001-TASK-003",
+        "equipmentId": "AI-COMPANY-EQUIPMENT-002",
+        "options": {}
+      },
+      "outputs": {
+        "reservation": {
+          "reservation_id": "AI-COMPANY-EQUIPMENT-RES-00002",
+          "project_id": "AI-COMPANY-PROJECT-00001",
+          "task_id": "AI-COMPANY-PROJECT-00001-TASK-003",
+          "equipment_id": "AI-COMPANY-EQUIPMENT-002",
+          "start": 23,
+          "end": 35,
+          "status": "RESERVED"
+        }
+      },
+      "material_delta": 0,
+      "energy_delta": 0,
+      "labor_delta": 0,
+      "equipment_delta": 1,
+      "inventory_delta": 0,
+      "cash_delta": 0,
+      "progress_delta": 0,
+      "risk_delta": 0,
+      "previous_state_hash": "de472ec47e8ea28a95df89a6a258bda13ed0d27c85b784934baa8cffc679a19a",
+      "next_state_hash": "5280fdeb52f343241e3d5adf9f623c391242557a51ef786d07fa15a19e4d0244",
+      "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
+      "status": "COMPLETED",
+      "reason": null
+    },
+    {
+      "event_id": "AI-COMPANY-EVT-000031",
+      "company_id": "KAIOS_AI_COMPANY_V1",
+      "request_id": null,
+      "project_id": "AI-COMPANY-PROJECT-00001",
+      "work_package_id": null,
+      "task_id": "AI-COMPANY-PROJECT-00001-TASK-004",
+      "actor_life_id": "KAIOS-SIMULATED-COMPANY-OPERATOR",
+      "division_id": "LABOR_DIVISION",
+      "simulation_time": 13,
+      "location": null,
+      "event_type": "ASSIGN_WORKER",
+      "inputs": {
+        "projectId": "AI-COMPANY-PROJECT-00001",
+        "taskId": "AI-COMPANY-PROJECT-00001-TASK-004",
+        "workerId": "AI-COMPANY-WORKER-004",
+        "options": {}
+      },
+      "outputs": {
+        "reservation": {
+          "reservation_id": "AI-COMPANY-WORKER-RES-00006",
+          "project_id": "AI-COMPANY-PROJECT-00001",
+          "task_id": "AI-COMPANY-PROJECT-00001-TASK-004",
+          "worker_id": "AI-COMPANY-WORKER-004",
+          "life_id": "LIFE-AI-COMPANY-WORKER-004",
+          "body_type": "PHYSICAL",
+          "location": "LAND-SIM-FISHPOND-001",
+          "start": 35,
+          "end": 45,
+          "status": "RESERVED"
+        }
+      },
+      "material_delta": 0,
+      "energy_delta": 0,
+      "labor_delta": 1,
+      "equipment_delta": 0,
+      "inventory_delta": 0,
+      "cash_delta": 0,
+      "progress_delta": 0,
+      "risk_delta": 0,
+      "previous_state_hash": "5280fdeb52f343241e3d5adf9f623c391242557a51ef786d07fa15a19e4d0244",
+      "next_state_hash": "7d34a45a4c2292a567aefbc3479b2e3d21f579aa6ed39f8e82ad4b2af17afd47",
+      "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
+      "status": "COMPLETED",
+      "reason": null
+    },
+    {
+      "event_id": "AI-COMPANY-EVT-000032",
+      "company_id": "KAIOS_AI_COMPANY_V1",
+      "request_id": null,
+      "project_id": "AI-COMPANY-PROJECT-00001",
+      "work_package_id": null,
+      "task_id": "AI-COMPANY-PROJECT-00001-TASK-004",
+      "actor_life_id": "KAIOS-SIMULATED-COMPANY-OPERATOR",
+      "division_id": "LABOR_DIVISION",
+      "simulation_time": 13,
+      "location": null,
+      "event_type": "ASSIGN_WORKER",
+      "inputs": {
+        "projectId": "AI-COMPANY-PROJECT-00001",
+        "taskId": "AI-COMPANY-PROJECT-00001-TASK-004",
+        "workerId": "AI-COMPANY-WORKER-006",
+        "options": {}
+      },
+      "outputs": {
+        "reservation": {
+          "reservation_id": "AI-COMPANY-WORKER-RES-00007",
+          "project_id": "AI-COMPANY-PROJECT-00001",
+          "task_id": "AI-COMPANY-PROJECT-00001-TASK-004",
+          "worker_id": "AI-COMPANY-WORKER-006",
+          "life_id": "LIFE-AI-COMPANY-WORKER-006",
+          "body_type": "PHYSICAL",
+          "location": "LAND-SIM-FISHPOND-001",
+          "start": 35,
+          "end": 45,
+          "status": "RESERVED"
+        }
+      },
+      "material_delta": 0,
+      "energy_delta": 0,
+      "labor_delta": 1,
+      "equipment_delta": 0,
+      "inventory_delta": 0,
+      "cash_delta": 0,
+      "progress_delta": 0,
+      "risk_delta": 0,
+      "previous_state_hash": "7d34a45a4c2292a567aefbc3479b2e3d21f579aa6ed39f8e82ad4b2af17afd47",
+      "next_state_hash": "adae8ef3cffecd58b002b9691354b5672148eadafd9449f42ba4da70ba64b1b8",
+      "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
+      "status": "COMPLETED",
+      "reason": null
+    },
+    {
+      "event_id": "AI-COMPANY-EVT-000033",
+      "company_id": "KAIOS_AI_COMPANY_V1",
+      "request_id": null,
+      "project_id": "AI-COMPANY-PROJECT-00001",
+      "work_package_id": null,
+      "task_id": "AI-COMPANY-PROJECT-00001-TASK-004",
+      "actor_life_id": "KAIOS-SIMULATED-COMPANY-OPERATOR",
+      "division_id": "CONSTRUCTION_DIVISION",
+      "simulation_time": 13,
+      "location": null,
+      "event_type": "RESERVE_EQUIPMENT",
+      "inputs": {
+        "projectId": "AI-COMPANY-PROJECT-00001",
+        "taskId": "AI-COMPANY-PROJECT-00001-TASK-004",
+        "equipmentId": "AI-COMPANY-EQUIPMENT-003",
+        "options": {}
+      },
+      "outputs": {
+        "reservation": {
+          "reservation_id": "AI-COMPANY-EQUIPMENT-RES-00003",
+          "project_id": "AI-COMPANY-PROJECT-00001",
+          "task_id": "AI-COMPANY-PROJECT-00001-TASK-004",
+          "equipment_id": "AI-COMPANY-EQUIPMENT-003",
+          "start": 35,
+          "end": 45,
+          "status": "RESERVED"
+        }
+      },
+      "material_delta": 0,
+      "energy_delta": 0,
+      "labor_delta": 0,
+      "equipment_delta": 1,
+      "inventory_delta": 0,
+      "cash_delta": 0,
+      "progress_delta": 0,
+      "risk_delta": 0,
+      "previous_state_hash": "adae8ef3cffecd58b002b9691354b5672148eadafd9449f42ba4da70ba64b1b8",
+      "next_state_hash": "774e04a5b04290d1854958da00bd8126f166c84619f95c43b2e2f6421e322370",
+      "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
+      "status": "COMPLETED",
+      "reason": null
+    },
+    {
+      "event_id": "AI-COMPANY-EVT-000034",
+      "company_id": "KAIOS_AI_COMPANY_V1",
+      "request_id": null,
+      "project_id": "AI-COMPANY-PROJECT-00001",
+      "work_package_id": null,
+      "task_id": "AI-COMPANY-PROJECT-00001-TASK-004",
+      "actor_life_id": "KAIOS-SIMULATED-COMPANY-OPERATOR",
+      "division_id": "CONSTRUCTION_DIVISION",
+      "simulation_time": 13,
+      "location": null,
+      "event_type": "RESERVE_EQUIPMENT",
+      "inputs": {
+        "projectId": "AI-COMPANY-PROJECT-00001",
+        "taskId": "AI-COMPANY-PROJECT-00001-TASK-004",
+        "equipmentId": "AI-COMPANY-EQUIPMENT-004",
+        "options": {}
+      },
+      "outputs": {
+        "reservation": {
+          "reservation_id": "AI-COMPANY-EQUIPMENT-RES-00004",
+          "project_id": "AI-COMPANY-PROJECT-00001",
+          "task_id": "AI-COMPANY-PROJECT-00001-TASK-004",
+          "equipment_id": "AI-COMPANY-EQUIPMENT-004",
+          "start": 35,
+          "end": 45,
+          "status": "RESERVED"
+        }
+      },
+      "material_delta": 0,
+      "energy_delta": 0,
+      "labor_delta": 0,
+      "equipment_delta": 1,
+      "inventory_delta": 0,
+      "cash_delta": 0,
+      "progress_delta": 0,
+      "risk_delta": 0,
+      "previous_state_hash": "774e04a5b04290d1854958da00bd8126f166c84619f95c43b2e2f6421e322370",
+      "next_state_hash": "f4ad6170b31fcb5c748d6742256d111ee4f7d1d16c93edfe5eff9f41d2f6be81",
+      "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
+      "status": "COMPLETED",
+      "reason": null
+    },
+    {
+      "event_id": "AI-COMPANY-EVT-000035",
+      "company_id": "KAIOS_AI_COMPANY_V1",
+      "request_id": null,
+      "project_id": "AI-COMPANY-PROJECT-00001",
+      "work_package_id": null,
+      "task_id": "AI-COMPANY-PROJECT-00001-TASK-005",
+      "actor_life_id": "KAIOS-SIMULATED-COMPANY-OPERATOR",
+      "division_id": "LABOR_DIVISION",
+      "simulation_time": 13,
+      "location": null,
+      "event_type": "ASSIGN_WORKER",
+      "inputs": {
+        "projectId": "AI-COMPANY-PROJECT-00001",
+        "taskId": "AI-COMPANY-PROJECT-00001-TASK-005",
+        "workerId": "AI-COMPANY-WORKER-008",
+        "options": {}
+      },
+      "outputs": {
+        "reservation": {
+          "reservation_id": "AI-COMPANY-WORKER-RES-00008",
+          "project_id": "AI-COMPANY-PROJECT-00001",
+          "task_id": "AI-COMPANY-PROJECT-00001-TASK-005",
+          "worker_id": "AI-COMPANY-WORKER-008",
+          "life_id": "LIFE-AI-COMPANY-WORKER-008",
+          "body_type": "PHYSICAL",
+          "location": "LAND-SIM-FISHPOND-001",
+          "start": 45,
+          "end": 53,
+          "status": "RESERVED"
+        }
+      },
+      "material_delta": 0,
+      "energy_delta": 0,
+      "labor_delta": 1,
+      "equipment_delta": 0,
+      "inventory_delta": 0,
+      "cash_delta": 0,
+      "progress_delta": 0,
+      "risk_delta": 0,
+      "previous_state_hash": "f4ad6170b31fcb5c748d6742256d111ee4f7d1d16c93edfe5eff9f41d2f6be81",
+      "next_state_hash": "1a3b963953e7cc9ccdc139093eaa81d5a59e1c748877b4d9219095d56a493e21",
+      "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
+      "status": "COMPLETED",
+      "reason": null
+    },
+    {
+      "event_id": "AI-COMPANY-EVT-000036",
+      "company_id": "KAIOS_AI_COMPANY_V1",
+      "request_id": null,
+      "project_id": "AI-COMPANY-PROJECT-00001",
+      "work_package_id": null,
+      "task_id": "AI-COMPANY-PROJECT-00001-TASK-005",
+      "actor_life_id": "KAIOS-SIMULATED-COMPANY-OPERATOR",
+      "division_id": "LABOR_DIVISION",
+      "simulation_time": 13,
+      "location": null,
+      "event_type": "ASSIGN_WORKER",
+      "inputs": {
+        "projectId": "AI-COMPANY-PROJECT-00001",
+        "taskId": "AI-COMPANY-PROJECT-00001-TASK-005",
+        "workerId": "AI-COMPANY-WORKER-009",
+        "options": {}
+      },
+      "outputs": {
+        "reservation": {
+          "reservation_id": "AI-COMPANY-WORKER-RES-00009",
+          "project_id": "AI-COMPANY-PROJECT-00001",
+          "task_id": "AI-COMPANY-PROJECT-00001-TASK-005",
+          "worker_id": "AI-COMPANY-WORKER-009",
+          "life_id": "LIFE-AI-COMPANY-WORKER-009",
+          "body_type": "PHYSICAL",
+          "location": "LAND-SIM-FISHPOND-001",
+          "start": 45,
+          "end": 53,
+          "status": "RESERVED"
+        }
+      },
+      "material_delta": 0,
+      "energy_delta": 0,
+      "labor_delta": 1,
+      "equipment_delta": 0,
+      "inventory_delta": 0,
+      "cash_delta": 0,
+      "progress_delta": 0,
+      "risk_delta": 0,
+      "previous_state_hash": "1a3b963953e7cc9ccdc139093eaa81d5a59e1c748877b4d9219095d56a493e21",
+      "next_state_hash": "f0ee147128bbeaf5979d4deb44894618462c4135ef83817935e1425fa94ccd94",
+      "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
+      "status": "COMPLETED",
+      "reason": null
+    },
+    {
+      "event_id": "AI-COMPANY-EVT-000037",
+      "company_id": "KAIOS_AI_COMPANY_V1",
+      "request_id": null,
+      "project_id": "AI-COMPANY-PROJECT-00001",
+      "work_package_id": null,
+      "task_id": "AI-COMPANY-PROJECT-00001-TASK-005",
+      "actor_life_id": "KAIOS-SIMULATED-COMPANY-OPERATOR",
+      "division_id": "CONSTRUCTION_DIVISION",
+      "simulation_time": 13,
+      "location": null,
+      "event_type": "RESERVE_EQUIPMENT",
+      "inputs": {
+        "projectId": "AI-COMPANY-PROJECT-00001",
+        "taskId": "AI-COMPANY-PROJECT-00001-TASK-005",
+        "equipmentId": "AI-COMPANY-EQUIPMENT-005",
+        "options": {}
+      },
+      "outputs": {
+        "reservation": {
+          "reservation_id": "AI-COMPANY-EQUIPMENT-RES-00005",
+          "project_id": "AI-COMPANY-PROJECT-00001",
+          "task_id": "AI-COMPANY-PROJECT-00001-TASK-005",
+          "equipment_id": "AI-COMPANY-EQUIPMENT-005",
+          "start": 45,
+          "end": 53,
+          "status": "RESERVED"
+        }
+      },
+      "material_delta": 0,
+      "energy_delta": 0,
+      "labor_delta": 0,
+      "equipment_delta": 1,
+      "inventory_delta": 0,
+      "cash_delta": 0,
+      "progress_delta": 0,
+      "risk_delta": 0,
+      "previous_state_hash": "f0ee147128bbeaf5979d4deb44894618462c4135ef83817935e1425fa94ccd94",
+      "next_state_hash": "d113d6cbd4448b08d9932081198da20c24678a6e0d7f7ff08d96a101126e3b38",
+      "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
+      "status": "COMPLETED",
+      "reason": null
+    },
+    {
+      "event_id": "AI-COMPANY-EVT-000038",
+      "company_id": "KAIOS_AI_COMPANY_V1",
+      "request_id": null,
+      "project_id": "AI-COMPANY-PROJECT-00001",
+      "work_package_id": null,
+      "task_id": "AI-COMPANY-PROJECT-00001-TASK-006",
+      "actor_life_id": "KAIOS-SIMULATED-COMPANY-OPERATOR",
+      "division_id": "LABOR_DIVISION",
+      "simulation_time": 13,
+      "location": null,
+      "event_type": "ASSIGN_WORKER",
+      "inputs": {
+        "projectId": "AI-COMPANY-PROJECT-00001",
+        "taskId": "AI-COMPANY-PROJECT-00001-TASK-006",
+        "workerId": "AI-COMPANY-WORKER-010",
+        "options": {}
+      },
+      "outputs": {
+        "reservation": {
+          "reservation_id": "AI-COMPANY-WORKER-RES-00010",
+          "project_id": "AI-COMPANY-PROJECT-00001",
+          "task_id": "AI-COMPANY-PROJECT-00001-TASK-006",
+          "worker_id": "AI-COMPANY-WORKER-010",
+          "life_id": "LIFE-AI-COMPANY-WORKER-010",
+          "body_type": "PHYSICAL",
+          "location": "LAND-SIM-FISHPOND-001",
+          "start": 53,
+          "end": 56,
+          "status": "RESERVED"
+        }
+      },
+      "material_delta": 0,
+      "energy_delta": 0,
+      "labor_delta": 1,
+      "equipment_delta": 0,
+      "inventory_delta": 0,
+      "cash_delta": 0,
+      "progress_delta": 0,
+      "risk_delta": 0,
+      "previous_state_hash": "d113d6cbd4448b08d9932081198da20c24678a6e0d7f7ff08d96a101126e3b38",
+      "next_state_hash": "15d4129297df381f36155e19b92b4b080fa3e212e2fa1b5a6757a5b04aa2fc76",
+      "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
+      "status": "COMPLETED",
+      "reason": null
+    },
+    {
+      "event_id": "AI-COMPANY-EVT-000039",
+      "company_id": "KAIOS_AI_COMPANY_V1",
+      "request_id": null,
+      "project_id": "AI-COMPANY-PROJECT-00001",
+      "work_package_id": null,
+      "task_id": "AI-COMPANY-PROJECT-00001-TASK-001",
+      "actor_life_id": "KAIOS-SIMULATED-COMPANY-OPERATOR",
+      "division_id": "CONSTRUCTION_DIVISION",
+      "simulation_time": 13,
+      "location": null,
+      "event_type": "START_TASK",
+      "inputs": {
+        "projectId": "AI-COMPANY-PROJECT-00001",
+        "taskId": "AI-COMPANY-PROJECT-00001-TASK-001"
+      },
+      "outputs": {
+        "task_status": "IN_PROGRESS"
+      },
+      "material_delta": 0,
+      "energy_delta": 0,
+      "labor_delta": 0,
+      "equipment_delta": 0,
+      "inventory_delta": 0,
+      "cash_delta": 0,
+      "progress_delta": 0,
+      "risk_delta": 0,
+      "previous_state_hash": "15d4129297df381f36155e19b92b4b080fa3e212e2fa1b5a6757a5b04aa2fc76",
+      "next_state_hash": "1302a674f2a131968367e50c566ccccf82761b467f0125fc26c1140dc2f43489",
+      "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
+      "status": "COMPLETED",
+      "reason": null
+    },
+    {
+      "event_id": "AI-COMPANY-EVT-000040",
+      "company_id": "KAIOS_AI_COMPANY_V1",
+      "request_id": null,
+      "project_id": null,
+      "work_package_id": null,
+      "task_id": null,
+      "actor_life_id": "KAIOS-SIMULATED-COMPANY-OPERATOR",
+      "division_id": "CONSTRUCTION_DIVISION",
+      "simulation_time": 17,
+      "location": null,
+      "event_type": "ADVANCE_TIME",
+      "inputs": {
+        "hours": 4
+      },
+      "outputs": {
+        "advanced_hours": 4,
+        "active_tasks": 1
+      },
+      "material_delta": 0,
+      "energy_delta": -2,
+      "labor_delta": 4,
+      "equipment_delta": 0.02,
+      "inventory_delta": 0,
+      "cash_delta": -600,
+      "progress_delta": 100,
+      "risk_delta": 0,
+      "previous_state_hash": "1302a674f2a131968367e50c566ccccf82761b467f0125fc26c1140dc2f43489",
+      "next_state_hash": "4f976560ded5ba625ddb8f57b2993b7e7d5d5d75952841f0fa94ca8db42207f2",
+      "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
+      "status": "COMPLETED",
+      "reason": null
+    },
+    {
+      "event_id": "AI-COMPANY-EVT-000041",
+      "company_id": "KAIOS_AI_COMPANY_V1",
+      "request_id": null,
+      "project_id": "AI-COMPANY-PROJECT-00001",
+      "work_package_id": null,
+      "task_id": "AI-COMPANY-PROJECT-00001-TASK-001",
+      "actor_life_id": "KAIOS-SIMULATED-COMPANY-OPERATOR",
+      "division_id": "QA_INSPECTION_DIVISION",
+      "simulation_time": 17,
+      "location": null,
+      "event_type": "INSPECT_TASK",
+      "inputs": {
+        "projectId": "AI-COMPANY-PROJECT-00001",
+        "taskId": "AI-COMPANY-PROJECT-00001-TASK-001",
+        "outcome": "PASS",
+        "details": {}
+      },
+      "outputs": {
+        "inspection": {
+          "inspection_id": "AI-COMPANY-INSPECTION-00001",
+          "project_id": "AI-COMPANY-PROJECT-00001",
+          "task_id": "AI-COMPANY-PROJECT-00001-TASK-001",
+          "inspection_type": "STAGE_INSPECTION",
+          "inspector": "KAIOS-SIMULATED-QA-INSPECTOR",
+          "criteria": [
+            "TIME_COMPLETE",
+            "RESOURCES_CONSUMED",
+            "INSPECTION_PASS"
+          ],
+          "measurements": {
+            "progress_percent": 100
+          },
+          "evidence": [
+            "DETERMINISTIC_EVENT_HISTORY"
+          ],
+          "result": "PASS",
+          "defects": [],
+          "rework": [],
+          "status": "COMPLETE",
+          "simulation_only": true
+        }
+      },
+      "material_delta": 0,
+      "energy_delta": 0,
+      "labor_delta": 0,
+      "equipment_delta": 0,
+      "inventory_delta": 0,
+      "cash_delta": 0,
+      "progress_delta": 0,
+      "risk_delta": 0,
+      "previous_state_hash": "4f976560ded5ba625ddb8f57b2993b7e7d5d5d75952841f0fa94ca8db42207f2",
+      "next_state_hash": "eb3fc7e158db69940f2499ed5acee09b8e4fc18b134c332adc1d6573bb2053fc",
+      "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
+      "status": "COMPLETED",
+      "reason": null
+    },
+    {
+      "event_id": "AI-COMPANY-EVT-000042",
+      "company_id": "KAIOS_AI_COMPANY_V1",
+      "request_id": null,
+      "project_id": "AI-COMPANY-PROJECT-00001",
+      "work_package_id": null,
+      "task_id": "AI-COMPANY-PROJECT-00001-TASK-001",
+      "actor_life_id": "KAIOS-SIMULATED-COMPANY-OPERATOR",
+      "division_id": "QA_INSPECTION_DIVISION",
+      "simulation_time": 17,
+      "location": null,
+      "event_type": "COMPLETE_TASK",
+      "inputs": {
+        "projectId": "AI-COMPANY-PROJECT-00001",
+        "taskId": "AI-COMPANY-PROJECT-00001-TASK-001"
+      },
+      "outputs": {
+        "task_status": "COMPLETE",
+        "project_status": "IN_PROGRESS"
+      },
+      "material_delta": 0,
+      "energy_delta": 0,
+      "labor_delta": 0,
+      "equipment_delta": 0,
+      "inventory_delta": 0,
+      "cash_delta": 0,
+      "progress_delta": 0,
+      "risk_delta": 0,
+      "previous_state_hash": "eb3fc7e158db69940f2499ed5acee09b8e4fc18b134c332adc1d6573bb2053fc",
+      "next_state_hash": "cd5a305cd14a7972c015f0572215737c260a15da2c329ef34df2b847addd92b5",
+      "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
+      "status": "COMPLETED",
+      "reason": null
+    },
+    {
+      "event_id": "AI-COMPANY-EVT-000043",
+      "company_id": "KAIOS_AI_COMPANY_V1",
+      "request_id": null,
+      "project_id": "AI-COMPANY-PROJECT-00001",
+      "work_package_id": null,
+      "task_id": "AI-COMPANY-PROJECT-00001-TASK-002",
+      "actor_life_id": "KAIOS-SIMULATED-COMPANY-OPERATOR",
+      "division_id": "CONSTRUCTION_DIVISION",
+      "simulation_time": 17,
+      "location": null,
+      "event_type": "START_TASK",
+      "inputs": {
+        "projectId": "AI-COMPANY-PROJECT-00001",
+        "taskId": "AI-COMPANY-PROJECT-00001-TASK-002"
+      },
+      "outputs": {
+        "task_status": "IN_PROGRESS"
+      },
+      "material_delta": 0,
+      "energy_delta": 0,
+      "labor_delta": 0,
+      "equipment_delta": 0,
+      "inventory_delta": 0,
+      "cash_delta": 0,
+      "progress_delta": 0,
+      "risk_delta": 0,
+      "previous_state_hash": "cd5a305cd14a7972c015f0572215737c260a15da2c329ef34df2b847addd92b5",
+      "next_state_hash": "7ee3275c8d631251e4fe3ebba291278aa9b20020d6eb84138dd5fada5ddeca31",
+      "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
+      "status": "COMPLETED",
+      "reason": null
+    },
+    {
+      "event_id": "AI-COMPANY-EVT-000044",
+      "company_id": "KAIOS_AI_COMPANY_V1",
+      "request_id": null,
+      "project_id": null,
+      "work_package_id": null,
+      "task_id": null,
+      "actor_life_id": "KAIOS-SIMULATED-COMPANY-OPERATOR",
+      "division_id": "CONSTRUCTION_DIVISION",
+      "simulation_time": 23,
+      "location": null,
+      "event_type": "ADVANCE_TIME",
+      "inputs": {
+        "hours": 6
+      },
+      "outputs": {
+        "advanced_hours": 6,
+        "active_tasks": 1
+      },
+      "material_delta": 0,
+      "energy_delta": -3,
+      "labor_delta": 12,
+      "equipment_delta": 0,
+      "inventory_delta": 0,
+      "cash_delta": -1200,
+      "progress_delta": 100,
+      "risk_delta": 0,
+      "previous_state_hash": "7ee3275c8d631251e4fe3ebba291278aa9b20020d6eb84138dd5fada5ddeca31",
+      "next_state_hash": "1538009183fc0b33af50fbb46dbaef9f5fe71f5be18ebabf2e465d6feecc5afc",
+      "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
+      "status": "COMPLETED",
+      "reason": null
+    },
+    {
+      "event_id": "AI-COMPANY-EVT-000045",
+      "company_id": "KAIOS_AI_COMPANY_V1",
+      "request_id": null,
+      "project_id": "AI-COMPANY-PROJECT-00001",
+      "work_package_id": null,
+      "task_id": "AI-COMPANY-PROJECT-00001-TASK-002",
+      "actor_life_id": "KAIOS-SIMULATED-COMPANY-OPERATOR",
+      "division_id": "QA_INSPECTION_DIVISION",
+      "simulation_time": 23,
+      "location": null,
+      "event_type": "INSPECT_TASK",
+      "inputs": {
+        "projectId": "AI-COMPANY-PROJECT-00001",
+        "taskId": "AI-COMPANY-PROJECT-00001-TASK-002",
+        "outcome": "PASS",
+        "details": {}
+      },
+      "outputs": {
+        "inspection": {
+          "inspection_id": "AI-COMPANY-INSPECTION-00002",
+          "project_id": "AI-COMPANY-PROJECT-00001",
+          "task_id": "AI-COMPANY-PROJECT-00001-TASK-002",
+          "inspection_type": "STAGE_INSPECTION",
+          "inspector": "KAIOS-SIMULATED-QA-INSPECTOR",
+          "criteria": [
+            "TIME_COMPLETE",
+            "RESOURCES_CONSUMED",
+            "INSPECTION_PASS"
+          ],
+          "measurements": {
+            "progress_percent": 100
+          },
+          "evidence": [
+            "DETERMINISTIC_EVENT_HISTORY"
+          ],
+          "result": "PASS",
+          "defects": [],
+          "rework": [],
+          "status": "COMPLETE",
+          "simulation_only": true
+        }
+      },
+      "material_delta": 0,
+      "energy_delta": 0,
+      "labor_delta": 0,
+      "equipment_delta": 0,
+      "inventory_delta": 0,
+      "cash_delta": 0,
+      "progress_delta": 0,
+      "risk_delta": 0,
+      "previous_state_hash": "1538009183fc0b33af50fbb46dbaef9f5fe71f5be18ebabf2e465d6feecc5afc",
+      "next_state_hash": "d690950d6ddcc91f1644c6d3e985e13d13ad6e4ca354eaf41efe36e2b75fd2a4",
+      "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
+      "status": "COMPLETED",
+      "reason": null
+    },
+    {
+      "event_id": "AI-COMPANY-EVT-000046",
+      "company_id": "KAIOS_AI_COMPANY_V1",
+      "request_id": null,
+      "project_id": "AI-COMPANY-PROJECT-00001",
+      "work_package_id": null,
+      "task_id": "AI-COMPANY-PROJECT-00001-TASK-002",
+      "actor_life_id": "KAIOS-SIMULATED-COMPANY-OPERATOR",
+      "division_id": "QA_INSPECTION_DIVISION",
+      "simulation_time": 23,
+      "location": null,
+      "event_type": "COMPLETE_TASK",
+      "inputs": {
+        "projectId": "AI-COMPANY-PROJECT-00001",
+        "taskId": "AI-COMPANY-PROJECT-00001-TASK-002"
+      },
+      "outputs": {
+        "task_status": "COMPLETE",
+        "project_status": "IN_PROGRESS"
+      },
+      "material_delta": 0,
+      "energy_delta": 0,
+      "labor_delta": 0,
+      "equipment_delta": 0,
+      "inventory_delta": 0,
+      "cash_delta": 0,
+      "progress_delta": 0,
+      "risk_delta": 0,
+      "previous_state_hash": "d690950d6ddcc91f1644c6d3e985e13d13ad6e4ca354eaf41efe36e2b75fd2a4",
+      "next_state_hash": "46b694fcc2ca57534ba4742765621e867aed19fd202007ba45c20c93c4512e14",
+      "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
+      "status": "COMPLETED",
+      "reason": null
+    },
+    {
+      "event_id": "AI-COMPANY-EVT-000047",
+      "company_id": "KAIOS_AI_COMPANY_V1",
+      "request_id": null,
+      "project_id": "AI-COMPANY-PROJECT-00001",
+      "work_package_id": null,
+      "task_id": "AI-COMPANY-PROJECT-00001-TASK-003",
+      "actor_life_id": "KAIOS-SIMULATED-COMPANY-OPERATOR",
+      "division_id": "CONSTRUCTION_DIVISION",
+      "simulation_time": 23,
+      "location": null,
+      "event_type": "START_TASK",
+      "inputs": {
+        "projectId": "AI-COMPANY-PROJECT-00001",
+        "taskId": "AI-COMPANY-PROJECT-00001-TASK-003"
+      },
+      "outputs": {
+        "task_status": "IN_PROGRESS"
+      },
+      "material_delta": 0,
+      "energy_delta": 0,
+      "labor_delta": 0,
+      "equipment_delta": 0,
+      "inventory_delta": 0,
+      "cash_delta": 0,
+      "progress_delta": 0,
+      "risk_delta": 0,
+      "previous_state_hash": "46b694fcc2ca57534ba4742765621e867aed19fd202007ba45c20c93c4512e14",
+      "next_state_hash": "3a99d96333387d6286f97c3fd06d20eabd1d7f289722cf4535e6d7f9c3953e7c",
+      "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
+      "status": "COMPLETED",
+      "reason": null
+    },
+    {
+      "event_id": "AI-COMPANY-EVT-000048",
+      "company_id": "KAIOS_AI_COMPANY_V1",
+      "request_id": null,
+      "project_id": null,
+      "work_package_id": null,
+      "task_id": null,
+      "actor_life_id": "KAIOS-SIMULATED-COMPANY-OPERATOR",
+      "division_id": "CONSTRUCTION_DIVISION",
+      "simulation_time": 35,
+      "location": null,
+      "event_type": "ADVANCE_TIME",
+      "inputs": {
+        "hours": 12
+      },
+      "outputs": {
+        "advanced_hours": 12,
+        "active_tasks": 1
+      },
+      "material_delta": -12,
+      "energy_delta": -48,
+      "labor_delta": 24,
+      "equipment_delta": 0.02,
+      "inventory_delta": 0,
+      "cash_delta": -4200,
+      "progress_delta": 100,
+      "risk_delta": 0,
+      "previous_state_hash": "3a99d96333387d6286f97c3fd06d20eabd1d7f289722cf4535e6d7f9c3953e7c",
+      "next_state_hash": "2fa332a3d6043c96f312ecb1dbabb2fe1a237a65884f8630185059412bcf32e1",
+      "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
+      "status": "COMPLETED",
+      "reason": null
+    },
+    {
+      "event_id": "AI-COMPANY-EVT-000049",
+      "company_id": "KAIOS_AI_COMPANY_V1",
+      "request_id": null,
+      "project_id": "AI-COMPANY-PROJECT-00001",
+      "work_package_id": null,
+      "task_id": "AI-COMPANY-PROJECT-00001-TASK-003",
+      "actor_life_id": "KAIOS-SIMULATED-COMPANY-OPERATOR",
+      "division_id": "QA_INSPECTION_DIVISION",
+      "simulation_time": 35,
+      "location": null,
+      "event_type": "INSPECT_TASK",
+      "inputs": {
+        "projectId": "AI-COMPANY-PROJECT-00001",
+        "taskId": "AI-COMPANY-PROJECT-00001-TASK-003",
+        "outcome": "PASS",
+        "details": {}
+      },
+      "outputs": {
+        "inspection": {
+          "inspection_id": "AI-COMPANY-INSPECTION-00003",
+          "project_id": "AI-COMPANY-PROJECT-00001",
+          "task_id": "AI-COMPANY-PROJECT-00001-TASK-003",
+          "inspection_type": "STAGE_INSPECTION",
+          "inspector": "KAIOS-SIMULATED-QA-INSPECTOR",
+          "criteria": [
+            "TIME_COMPLETE",
+            "RESOURCES_CONSUMED",
+            "INSPECTION_PASS"
+          ],
+          "measurements": {
+            "progress_percent": 100
+          },
+          "evidence": [
+            "DETERMINISTIC_EVENT_HISTORY"
+          ],
+          "result": "PASS",
+          "defects": [],
+          "rework": [],
+          "status": "COMPLETE",
+          "simulation_only": true
+        }
+      },
+      "material_delta": 0,
+      "energy_delta": 0,
+      "labor_delta": 0,
+      "equipment_delta": 0,
+      "inventory_delta": 0,
+      "cash_delta": 0,
+      "progress_delta": 0,
+      "risk_delta": 0,
+      "previous_state_hash": "2fa332a3d6043c96f312ecb1dbabb2fe1a237a65884f8630185059412bcf32e1",
+      "next_state_hash": "34af2b7145284b608cd2a1e469aedc86352a1bbae8d06add8da84c2036999676",
+      "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
+      "status": "COMPLETED",
+      "reason": null
+    },
+    {
+      "event_id": "AI-COMPANY-EVT-000050",
+      "company_id": "KAIOS_AI_COMPANY_V1",
+      "request_id": null,
+      "project_id": "AI-COMPANY-PROJECT-00001",
+      "work_package_id": null,
+      "task_id": "AI-COMPANY-PROJECT-00001-TASK-003",
+      "actor_life_id": "KAIOS-SIMULATED-COMPANY-OPERATOR",
+      "division_id": "QA_INSPECTION_DIVISION",
+      "simulation_time": 35,
+      "location": null,
+      "event_type": "COMPLETE_TASK",
+      "inputs": {
+        "projectId": "AI-COMPANY-PROJECT-00001",
+        "taskId": "AI-COMPANY-PROJECT-00001-TASK-003"
+      },
+      "outputs": {
+        "task_status": "COMPLETE",
+        "project_status": "IN_PROGRESS"
+      },
+      "material_delta": 0,
+      "energy_delta": 0,
+      "labor_delta": 0,
+      "equipment_delta": 0,
+      "inventory_delta": 0,
+      "cash_delta": 0,
+      "progress_delta": 0,
+      "risk_delta": 0,
+      "previous_state_hash": "34af2b7145284b608cd2a1e469aedc86352a1bbae8d06add8da84c2036999676",
+      "next_state_hash": "d2b841aa1e6b62350ef5680b607be809e9f3dde3e9757ce40e7a808b73f26aa5",
+      "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
+      "status": "COMPLETED",
+      "reason": null
+    },
+    {
+      "event_id": "AI-COMPANY-EVT-000051",
+      "company_id": "KAIOS_AI_COMPANY_V1",
+      "request_id": null,
+      "project_id": "AI-COMPANY-PROJECT-00001",
+      "work_package_id": null,
+      "task_id": "AI-COMPANY-PROJECT-00001-TASK-004",
+      "actor_life_id": "KAIOS-SIMULATED-COMPANY-OPERATOR",
+      "division_id": "CONSTRUCTION_DIVISION",
+      "simulation_time": 35,
+      "location": null,
+      "event_type": "START_TASK",
+      "inputs": {
+        "projectId": "AI-COMPANY-PROJECT-00001",
+        "taskId": "AI-COMPANY-PROJECT-00001-TASK-004"
+      },
+      "outputs": {
+        "task_status": "IN_PROGRESS"
+      },
+      "material_delta": 0,
+      "energy_delta": 0,
+      "labor_delta": 0,
+      "equipment_delta": 0,
+      "inventory_delta": 0,
+      "cash_delta": 0,
+      "progress_delta": 0,
+      "risk_delta": 0,
+      "previous_state_hash": "d2b841aa1e6b62350ef5680b607be809e9f3dde3e9757ce40e7a808b73f26aa5",
+      "next_state_hash": "ac0178d5e79344e0cc39e45573870243666774adf855112d6177c03b34bc176d",
+      "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
+      "status": "COMPLETED",
+      "reason": null
+    },
+    {
+      "event_id": "AI-COMPANY-EVT-000052",
+      "company_id": "KAIOS_AI_COMPANY_V1",
+      "request_id": null,
+      "project_id": null,
+      "work_package_id": null,
+      "task_id": null,
+      "actor_life_id": "KAIOS-SIMULATED-COMPANY-OPERATOR",
+      "division_id": "CONSTRUCTION_DIVISION",
+      "simulation_time": 45,
+      "location": null,
+      "event_type": "ADVANCE_TIME",
+      "inputs": {
+        "hours": 10
+      },
+      "outputs": {
+        "advanced_hours": 10,
+        "active_tasks": 1
+      },
+      "material_delta": -42,
+      "energy_delta": -32,
+      "labor_delta": 20,
+      "equipment_delta": 0.04,
+      "inventory_delta": 0,
+      "cash_delta": -3600,
+      "progress_delta": 100,
+      "risk_delta": 0,
+      "previous_state_hash": "ac0178d5e79344e0cc39e45573870243666774adf855112d6177c03b34bc176d",
+      "next_state_hash": "39f9efe3a27361f8cbecaf7d7f6badd7d527ea47f147b189ec25e6cd06ad5d6d",
+      "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
+      "status": "COMPLETED",
+      "reason": null
+    },
+    {
+      "event_id": "AI-COMPANY-EVT-000053",
+      "company_id": "KAIOS_AI_COMPANY_V1",
+      "request_id": null,
+      "project_id": "AI-COMPANY-PROJECT-00001",
+      "work_package_id": null,
+      "task_id": "AI-COMPANY-PROJECT-00001-TASK-004",
+      "actor_life_id": "KAIOS-SIMULATED-COMPANY-OPERATOR",
+      "division_id": "QA_INSPECTION_DIVISION",
+      "simulation_time": 45,
+      "location": null,
+      "event_type": "INSPECT_TASK",
+      "inputs": {
+        "projectId": "AI-COMPANY-PROJECT-00001",
+        "taskId": "AI-COMPANY-PROJECT-00001-TASK-004",
+        "outcome": "PASS",
+        "details": {}
+      },
+      "outputs": {
+        "inspection": {
+          "inspection_id": "AI-COMPANY-INSPECTION-00004",
+          "project_id": "AI-COMPANY-PROJECT-00001",
+          "task_id": "AI-COMPANY-PROJECT-00001-TASK-004",
+          "inspection_type": "STAGE_INSPECTION",
+          "inspector": "KAIOS-SIMULATED-QA-INSPECTOR",
+          "criteria": [
+            "TIME_COMPLETE",
+            "RESOURCES_CONSUMED",
+            "INSPECTION_PASS"
+          ],
+          "measurements": {
+            "progress_percent": 100
+          },
+          "evidence": [
+            "DETERMINISTIC_EVENT_HISTORY"
+          ],
+          "result": "PASS",
+          "defects": [],
+          "rework": [],
+          "status": "COMPLETE",
+          "simulation_only": true
+        }
+      },
+      "material_delta": 0,
+      "energy_delta": 0,
+      "labor_delta": 0,
+      "equipment_delta": 0,
+      "inventory_delta": 0,
+      "cash_delta": 0,
+      "progress_delta": 0,
+      "risk_delta": 0,
+      "previous_state_hash": "39f9efe3a27361f8cbecaf7d7f6badd7d527ea47f147b189ec25e6cd06ad5d6d",
+      "next_state_hash": "ed473dd449ecaeba7b15d5fd4532c871f4448d46ba20414587d400b745da4955",
+      "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
+      "status": "COMPLETED",
+      "reason": null
+    },
+    {
+      "event_id": "AI-COMPANY-EVT-000054",
+      "company_id": "KAIOS_AI_COMPANY_V1",
+      "request_id": null,
+      "project_id": "AI-COMPANY-PROJECT-00001",
+      "work_package_id": null,
+      "task_id": "AI-COMPANY-PROJECT-00001-TASK-004",
+      "actor_life_id": "KAIOS-SIMULATED-COMPANY-OPERATOR",
+      "division_id": "QA_INSPECTION_DIVISION",
+      "simulation_time": 45,
+      "location": null,
+      "event_type": "COMPLETE_TASK",
+      "inputs": {
+        "projectId": "AI-COMPANY-PROJECT-00001",
+        "taskId": "AI-COMPANY-PROJECT-00001-TASK-004"
+      },
+      "outputs": {
+        "task_status": "COMPLETE",
+        "project_status": "IN_PROGRESS"
+      },
+      "material_delta": 0,
+      "energy_delta": 0,
+      "labor_delta": 0,
+      "equipment_delta": 0,
+      "inventory_delta": 0,
+      "cash_delta": 0,
+      "progress_delta": 0,
+      "risk_delta": 0,
+      "previous_state_hash": "ed473dd449ecaeba7b15d5fd4532c871f4448d46ba20414587d400b745da4955",
+      "next_state_hash": "09f201afba35c0101368d4309ae7f39f2dce128a6b988e58d9bca5c3d3abf5ab",
+      "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
+      "status": "COMPLETED",
+      "reason": null
+    },
+    {
+      "event_id": "AI-COMPANY-EVT-000055",
+      "company_id": "KAIOS_AI_COMPANY_V1",
+      "request_id": null,
+      "project_id": "AI-COMPANY-PROJECT-00001",
+      "work_package_id": null,
+      "task_id": "AI-COMPANY-PROJECT-00001-TASK-005",
+      "actor_life_id": "KAIOS-SIMULATED-COMPANY-OPERATOR",
+      "division_id": "CONSTRUCTION_DIVISION",
+      "simulation_time": 45,
+      "location": null,
+      "event_type": "START_TASK",
+      "inputs": {
+        "projectId": "AI-COMPANY-PROJECT-00001",
+        "taskId": "AI-COMPANY-PROJECT-00001-TASK-005"
+      },
+      "outputs": {
+        "task_status": "IN_PROGRESS"
+      },
+      "material_delta": 0,
+      "energy_delta": 0,
+      "labor_delta": 0,
+      "equipment_delta": 0,
+      "inventory_delta": 0,
+      "cash_delta": 0,
+      "progress_delta": 0,
+      "risk_delta": 0,
+      "previous_state_hash": "09f201afba35c0101368d4309ae7f39f2dce128a6b988e58d9bca5c3d3abf5ab",
+      "next_state_hash": "f85cabc81d13e642833ce91a0b884dd4f8476cd8a7578be7fbd49dc8b86846a1",
+      "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
+      "status": "COMPLETED",
+      "reason": null
+    },
+    {
+      "event_id": "AI-COMPANY-EVT-000056",
+      "company_id": "KAIOS_AI_COMPANY_V1",
+      "request_id": null,
+      "project_id": null,
+      "work_package_id": null,
+      "task_id": null,
+      "actor_life_id": "KAIOS-SIMULATED-COMPANY-OPERATOR",
+      "division_id": "CONSTRUCTION_DIVISION",
+      "simulation_time": 53,
+      "location": null,
+      "event_type": "ADVANCE_TIME",
+      "inputs": {
+        "hours": 8
+      },
+      "outputs": {
+        "advanced_hours": 8,
+        "active_tasks": 1
+      },
+      "material_delta": -120,
+      "energy_delta": -24,
+      "labor_delta": 16,
+      "equipment_delta": 0.02,
+      "inventory_delta": 0,
+      "cash_delta": -2600,
+      "progress_delta": 100,
+      "risk_delta": 0,
+      "previous_state_hash": "f85cabc81d13e642833ce91a0b884dd4f8476cd8a7578be7fbd49dc8b86846a1",
+      "next_state_hash": "69c924c2b1a3ddaba5e548e630ce8a46b19c835278daf1af720729e4a785126f",
+      "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
+      "status": "COMPLETED",
+      "reason": null
+    },
+    {
+      "event_id": "AI-COMPANY-EVT-000057",
+      "company_id": "KAIOS_AI_COMPANY_V1",
+      "request_id": null,
+      "project_id": "AI-COMPANY-PROJECT-00001",
+      "work_package_id": null,
+      "task_id": "AI-COMPANY-PROJECT-00001-TASK-005",
+      "actor_life_id": "KAIOS-SIMULATED-COMPANY-OPERATOR",
+      "division_id": "QA_INSPECTION_DIVISION",
+      "simulation_time": 53,
+      "location": null,
+      "event_type": "INSPECT_TASK",
+      "inputs": {
+        "projectId": "AI-COMPANY-PROJECT-00001",
+        "taskId": "AI-COMPANY-PROJECT-00001-TASK-005",
+        "outcome": "PASS",
+        "details": {}
+      },
+      "outputs": {
+        "inspection": {
+          "inspection_id": "AI-COMPANY-INSPECTION-00005",
+          "project_id": "AI-COMPANY-PROJECT-00001",
+          "task_id": "AI-COMPANY-PROJECT-00001-TASK-005",
+          "inspection_type": "STAGE_INSPECTION",
+          "inspector": "KAIOS-SIMULATED-QA-INSPECTOR",
+          "criteria": [
+            "TIME_COMPLETE",
+            "RESOURCES_CONSUMED",
+            "INSPECTION_PASS"
+          ],
+          "measurements": {
+            "progress_percent": 100
+          },
+          "evidence": [
+            "DETERMINISTIC_EVENT_HISTORY"
+          ],
+          "result": "PASS",
+          "defects": [],
+          "rework": [],
+          "status": "COMPLETE",
+          "simulation_only": true
+        }
+      },
+      "material_delta": 0,
+      "energy_delta": 0,
+      "labor_delta": 0,
+      "equipment_delta": 0,
+      "inventory_delta": 0,
+      "cash_delta": 0,
+      "progress_delta": 0,
+      "risk_delta": 0,
+      "previous_state_hash": "69c924c2b1a3ddaba5e548e630ce8a46b19c835278daf1af720729e4a785126f",
+      "next_state_hash": "292f3e0968d5d250248d329c1fafb239aed3805abef79faafe78b24e33c94a4c",
+      "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
+      "status": "COMPLETED",
+      "reason": null
+    },
+    {
+      "event_id": "AI-COMPANY-EVT-000058",
+      "company_id": "KAIOS_AI_COMPANY_V1",
+      "request_id": null,
+      "project_id": "AI-COMPANY-PROJECT-00001",
+      "work_package_id": null,
+      "task_id": "AI-COMPANY-PROJECT-00001-TASK-005",
+      "actor_life_id": "KAIOS-SIMULATED-COMPANY-OPERATOR",
+      "division_id": "QA_INSPECTION_DIVISION",
+      "simulation_time": 53,
+      "location": null,
+      "event_type": "COMPLETE_TASK",
+      "inputs": {
+        "projectId": "AI-COMPANY-PROJECT-00001",
+        "taskId": "AI-COMPANY-PROJECT-00001-TASK-005"
+      },
+      "outputs": {
+        "task_status": "COMPLETE",
+        "project_status": "IN_PROGRESS"
+      },
+      "material_delta": 0,
+      "energy_delta": 0,
+      "labor_delta": 0,
+      "equipment_delta": 0,
+      "inventory_delta": 0,
+      "cash_delta": 0,
+      "progress_delta": 0,
+      "risk_delta": 0,
+      "previous_state_hash": "292f3e0968d5d250248d329c1fafb239aed3805abef79faafe78b24e33c94a4c",
+      "next_state_hash": "b0387e9014f102b49e0b77ee0f697ae6143e735cd492f136b620488c096b5995",
+      "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
+      "status": "COMPLETED",
+      "reason": null
+    },
+    {
+      "event_id": "AI-COMPANY-EVT-000059",
+      "company_id": "KAIOS_AI_COMPANY_V1",
+      "request_id": null,
+      "project_id": "AI-COMPANY-PROJECT-00001",
+      "work_package_id": null,
+      "task_id": "AI-COMPANY-PROJECT-00001-TASK-006",
+      "actor_life_id": "KAIOS-SIMULATED-COMPANY-OPERATOR",
+      "division_id": "CONSTRUCTION_DIVISION",
+      "simulation_time": 53,
+      "location": null,
+      "event_type": "START_TASK",
+      "inputs": {
+        "projectId": "AI-COMPANY-PROJECT-00001",
+        "taskId": "AI-COMPANY-PROJECT-00001-TASK-006"
+      },
+      "outputs": {
+        "task_status": "IN_PROGRESS"
+      },
+      "material_delta": 0,
+      "energy_delta": 0,
+      "labor_delta": 0,
+      "equipment_delta": 0,
+      "inventory_delta": 0,
+      "cash_delta": 0,
+      "progress_delta": 0,
+      "risk_delta": 0,
+      "previous_state_hash": "b0387e9014f102b49e0b77ee0f697ae6143e735cd492f136b620488c096b5995",
+      "next_state_hash": "f71ebefd44cd13e6a1ab03cb9f20ba7e21164be6a6d8a2ebbc688cfc48e6148c",
+      "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
+      "status": "COMPLETED",
+      "reason": null
+    },
+    {
+      "event_id": "AI-COMPANY-EVT-000060",
+      "company_id": "KAIOS_AI_COMPANY_V1",
+      "request_id": null,
+      "project_id": null,
+      "work_package_id": null,
+      "task_id": null,
+      "actor_life_id": "KAIOS-SIMULATED-COMPANY-OPERATOR",
+      "division_id": "CONSTRUCTION_DIVISION",
+      "simulation_time": 56,
+      "location": null,
+      "event_type": "ADVANCE_TIME",
+      "inputs": {
+        "hours": 3
+      },
+      "outputs": {
+        "advanced_hours": 3,
+        "active_tasks": 1
+      },
+      "material_delta": 0,
+      "energy_delta": -2,
+      "labor_delta": 3,
+      "equipment_delta": 0,
+      "inventory_delta": 0,
+      "cash_delta": -700,
+      "progress_delta": 100,
+      "risk_delta": 0,
+      "previous_state_hash": "f71ebefd44cd13e6a1ab03cb9f20ba7e21164be6a6d8a2ebbc688cfc48e6148c",
+      "next_state_hash": "1cabc4b3f67acf9565607c0d4d0fda2cdef07d3c81f7ae56c98394e948557ac0",
+      "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
+      "status": "COMPLETED",
+      "reason": null
+    },
+    {
+      "event_id": "AI-COMPANY-EVT-000061",
+      "company_id": "KAIOS_AI_COMPANY_V1",
+      "request_id": null,
+      "project_id": "AI-COMPANY-PROJECT-00001",
+      "work_package_id": null,
+      "task_id": "AI-COMPANY-PROJECT-00001-TASK-006",
+      "actor_life_id": "KAIOS-SIMULATED-COMPANY-OPERATOR",
+      "division_id": "QA_INSPECTION_DIVISION",
+      "simulation_time": 56,
+      "location": null,
+      "event_type": "INSPECT_TASK",
+      "inputs": {
+        "projectId": "AI-COMPANY-PROJECT-00001",
+        "taskId": "AI-COMPANY-PROJECT-00001-TASK-006",
+        "outcome": "PASS",
+        "details": {}
+      },
+      "outputs": {
+        "inspection": {
+          "inspection_id": "AI-COMPANY-INSPECTION-00006",
+          "project_id": "AI-COMPANY-PROJECT-00001",
+          "task_id": "AI-COMPANY-PROJECT-00001-TASK-006",
+          "inspection_type": "FINAL_ACCEPTANCE",
+          "inspector": "KAIOS-SIMULATED-QA-INSPECTOR",
+          "criteria": [
+            "TIME_COMPLETE",
+            "RESOURCES_CONSUMED",
+            "INSPECTION_PASS"
+          ],
+          "measurements": {
+            "progress_percent": 100
+          },
+          "evidence": [
+            "DETERMINISTIC_EVENT_HISTORY"
+          ],
+          "result": "PASS",
+          "defects": [],
+          "rework": [],
+          "status": "COMPLETE",
+          "simulation_only": true
+        }
+      },
+      "material_delta": 0,
+      "energy_delta": 0,
+      "labor_delta": 0,
+      "equipment_delta": 0,
+      "inventory_delta": 0,
+      "cash_delta": 0,
+      "progress_delta": 0,
+      "risk_delta": 0,
+      "previous_state_hash": "1cabc4b3f67acf9565607c0d4d0fda2cdef07d3c81f7ae56c98394e948557ac0",
+      "next_state_hash": "71d4427acdace0a9d14ae36dec3f2645ade882f0f859aeab992ad1237e27ec3f",
+      "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
+      "status": "COMPLETED",
+      "reason": null
+    },
+    {
+      "event_id": "AI-COMPANY-EVT-000062",
+      "company_id": "KAIOS_AI_COMPANY_V1",
+      "request_id": null,
+      "project_id": "AI-COMPANY-PROJECT-00001",
+      "work_package_id": null,
+      "task_id": "AI-COMPANY-PROJECT-00001-TASK-006",
+      "actor_life_id": "KAIOS-SIMULATED-COMPANY-OPERATOR",
+      "division_id": "QA_INSPECTION_DIVISION",
+      "simulation_time": 56,
+      "location": null,
+      "event_type": "COMPLETE_TASK",
+      "inputs": {
+        "projectId": "AI-COMPANY-PROJECT-00001",
+        "taskId": "AI-COMPANY-PROJECT-00001-TASK-006"
+      },
+      "outputs": {
+        "task_status": "COMPLETE",
+        "project_status": "DELIVERY_PENDING"
+      },
+      "material_delta": 0,
+      "energy_delta": 0,
+      "labor_delta": 0,
+      "equipment_delta": 0,
+      "inventory_delta": 0,
+      "cash_delta": 0,
+      "progress_delta": 0,
+      "risk_delta": 0,
+      "previous_state_hash": "71d4427acdace0a9d14ae36dec3f2645ade882f0f859aeab992ad1237e27ec3f",
+      "next_state_hash": "601a9a87da6ab612133a1a1340064c89b8110e9e08e4a539be95f938dd3dc78e",
+      "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
+      "status": "COMPLETED",
+      "reason": null
+    },
+    {
+      "event_id": "AI-COMPANY-EVT-000063",
+      "company_id": "KAIOS_AI_COMPANY_V1",
+      "request_id": null,
+      "project_id": "AI-COMPANY-PROJECT-00001",
+      "work_package_id": null,
+      "task_id": null,
+      "actor_life_id": "KAIOS-SIMULATED-COMPANY-OPERATOR",
+      "division_id": "MAINTENANCE_DIVISION",
+      "simulation_time": 56,
+      "location": null,
+      "event_type": "SCHEDULE_MAINTENANCE",
+      "inputs": {
+        "projectId": "AI-COMPANY-PROJECT-00001",
+        "options": {}
+      },
+      "outputs": {
+        "maintenance_plan": {
+          "maintenance_id": "AI-COMPANY-MAINTENANCE-00001",
+          "project_id": "AI-COMPANY-PROJECT-00001",
+          "maintenance_schedule": "EVERY_720_SIMULATION_HOURS",
+          "inspection_schedule": "EVERY_360_SIMULATION_HOURS",
+          "wear_monitoring": true,
+          "repair_responsibility": "SIMULATED_AI_COMPANY",
+          "spare_parts": [],
+          "energy_requirements": 1,
+          "operating_cost": 100,
+          "failure_response": "PAUSE_AND_REPAIR_SIMULATION",
+          "asset_status": "OPERATIONAL",
+          "status": "ACTIVE",
+          "simulation_only": true
+        }
+      },
+      "material_delta": 0,
+      "energy_delta": 0,
+      "labor_delta": 0,
+      "equipment_delta": 0,
+      "inventory_delta": 0,
+      "cash_delta": 0,
+      "progress_delta": 0,
+      "risk_delta": 0,
+      "previous_state_hash": "601a9a87da6ab612133a1a1340064c89b8110e9e08e4a539be95f938dd3dc78e",
+      "next_state_hash": "889accf3a2151fb5cf0dcf42d5a4a4f87a4a385e7ee0076a1f48e00ed74434e2",
+      "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
+      "status": "COMPLETED",
+      "reason": null
+    },
+    {
+      "event_id": "AI-COMPANY-EVT-000064",
+      "company_id": "KAIOS_AI_COMPANY_V1",
+      "request_id": null,
+      "project_id": "AI-COMPANY-PROJECT-00001",
+      "work_package_id": null,
+      "task_id": null,
+      "actor_life_id": "KAIOS-SIMULATED-COMPANY-OPERATOR",
+      "division_id": "DELIVERY_DIVISION",
+      "simulation_time": 56,
+      "location": null,
+      "event_type": "DELIVER_PROJECT",
+      "inputs": {
+        "projectId": "AI-COMPANY-PROJECT-00001"
+      },
+      "outputs": {
+        "delivery": {
+          "delivery_id": "AI-COMPANY-DELIVERY-00001",
+          "project_id": "AI-COMPANY-PROJECT-00001",
+          "deliverable_ids": [
+            "AI-COMPANY-PROJECT-00001-DELIVERABLE-001"
+          ],
+          "documentation_complete": true,
+          "rights_package": "SIMULATED_RIGHTS_PACKAGE",
+          "maintenance_plan_complete": true,
+          "final_accounting_complete": true,
+          "status": "DELIVERED",
+          "customer_outcome": null,
+          "simulation_only": true
+        }
+      },
+      "material_delta": 0,
+      "energy_delta": 0,
+      "labor_delta": 0,
+      "equipment_delta": 0,
+      "inventory_delta": 0,
+      "cash_delta": 0,
+      "progress_delta": 0,
+      "risk_delta": 0,
+      "previous_state_hash": "889accf3a2151fb5cf0dcf42d5a4a4f87a4a385e7ee0076a1f48e00ed74434e2",
+      "next_state_hash": "8e7debe61529250c710415a8af11124ed9799a9e67ba7553285928f609d18ee3",
+      "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
+      "status": "COMPLETED",
+      "reason": null
+    },
+    {
+      "event_id": "AI-COMPANY-EVT-000065",
+      "company_id": "KAIOS_AI_COMPANY_V1",
+      "request_id": null,
+      "project_id": "AI-COMPANY-PROJECT-00001",
+      "work_package_id": null,
+      "task_id": null,
+      "actor_life_id": "KAIOS-SIMULATED-COMPANY-OPERATOR",
+      "division_id": "DELIVERY_DIVISION",
+      "simulation_time": 56,
+      "location": null,
+      "event_type": "ACCEPT_PROJECT",
+      "inputs": {
+        "projectId": "AI-COMPANY-PROJECT-00001",
+        "outcome": "ACCEPTED"
+      },
+      "outputs": {
+        "project_status": "COMPLETE",
+        "approval_status": "RUNTIME_VALIDATED_SIMULATION",
+        "external_deployment": false
+      },
+      "material_delta": 0,
+      "energy_delta": 0,
+      "labor_delta": 0,
+      "equipment_delta": 0,
+      "inventory_delta": 0,
+      "cash_delta": 0,
+      "progress_delta": 0,
+      "risk_delta": 0,
+      "previous_state_hash": "8e7debe61529250c710415a8af11124ed9799a9e67ba7553285928f609d18ee3",
+      "next_state_hash": "f753d9d9488a3c0035977b1bbeec9c954f815d90bc41187089e56a715445bc18",
+      "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
+      "status": "ACCEPTED",
+      "reason": null
+    },
+    {
+      "event_id": "AI-COMPANY-EVT-000066",
+      "company_id": "KAIOS_AI_COMPANY_V1",
+      "request_id": null,
+      "project_id": "AI-COMPANY-PROJECT-00001",
+      "work_package_id": null,
+      "task_id": null,
+      "actor_life_id": "KAIOS-SIMULATED-COMPANY-OPERATOR",
+      "division_id": "FINANCE_DIVISION",
+      "simulation_time": 56,
+      "location": null,
+      "event_type": "CLOSE_PROJECT",
+      "inputs": {
+        "projectId": "AI-COMPANY-PROJECT-00001"
+      },
+      "outputs": {
+        "closeout_status": "CLOSED_BALANCED_SIMULATION",
+        "profit_or_loss": 235911.6
+      },
+      "material_delta": 0,
+      "energy_delta": 0,
+      "labor_delta": 0,
+      "equipment_delta": 0,
+      "inventory_delta": 0,
+      "cash_delta": 0,
+      "progress_delta": 0,
+      "risk_delta": 0,
+      "previous_state_hash": "f753d9d9488a3c0035977b1bbeec9c954f815d90bc41187089e56a715445bc18",
+      "next_state_hash": "f488d418e1955e770af0cd34a8f8ed2035bdbc20449d2b3121580a2b855cc6b3",
+      "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
+      "status": "COMPLETED",
+      "reason": null
+    }
+  ],
+  "event_count": 66
+}

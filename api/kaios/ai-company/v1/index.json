@@ -1,0 +1,129 @@
+{
+  "schema_version": "1.0.0",
+  "runtime": "KAIOS_AI_COMPANY_ORDER_AND_PROJECT_RUNTIME_V1",
+  "mode": "STATIC_READ_ONLY_PROJECTION",
+  "generated_from_seed": "KAIOS-AI-COMPANY-PUBLIC-001",
+  "simulation_only": true,
+  "authority": "NO_PRODUCTION_AUTHORITY",
+  "read_only": true,
+  "mutation_endpoints": false,
+  "real_wallet": false,
+  "real_kgen": false,
+  "onchain_transfer": false,
+  "real_legal_effect": false,
+  "external_autonomy": false,
+  "endpoints": [
+    "requests.json",
+    "projects.json",
+    "tasks.json",
+    "dependencies.json",
+    "materials.json",
+    "workforce.json",
+    "equipment.json",
+    "supply-chain.json",
+    "budget.json",
+    "schedule.json",
+    "inspections.json",
+    "deliveries.json",
+    "capacity.json",
+    "ledger.json",
+    "events.json",
+    "status.json",
+    "cursor-queue.json"
+  ],
+  "project_templates": [
+    "FISHPOND_PROJECT",
+    "BASIC_HOUSE_PROJECT",
+    "SMALL_FARM_PROJECT",
+    "WAREHOUSE_PROJECT",
+    "BASIC_ROAD_PROJECT",
+    "SMALL_BRIDGE_PROJECT",
+    "WORKSHOP_PROJECT",
+    "LIFE_PACKAGE_PROJECT",
+    "SOFTWARE_MODULE_PROJECT"
+  ],
+  "demonstrations": {
+    "seed": "KAIOS-AI-COMPANY-PUBLIC-DEMO-V1",
+    "fishpond": {
+      "project_id": "AI-COMPANY-PROJECT-00001",
+      "status": "COMPLETE",
+      "closeout_status": "CLOSED_BALANCED_SIMULATION",
+      "domain_binding": "AQUACULTURE_RUNTIME_V1",
+      "domain_evidence": {
+        "runtime": "KAIOS_FISHPOND_AQUACULTURE_RUNTIME_V1",
+        "integrity_verified": true,
+        "simulation_only": true,
+        "authority": "NO_PRODUCTION_AUTHORITY",
+        "adapter": "EXISTING_RUNTIME_REFERENCE"
+      },
+      "approval_status": "RUNTIME_VALIDATED_SIMULATION",
+      "external_deployment": false,
+      "event_count": 66,
+      "state_hash": "3e81187dee55854c1ffc155c11b2a62df030550459defd88695fa03494b8aba2"
+    },
+    "basic_house": {
+      "project_id": "AI-COMPANY-PROJECT-00001",
+      "status": "COMPLETE",
+      "closeout_status": "CLOSED_BALANCED_SIMULATION",
+      "domain_binding": "CAUSAL_WORLD_CONSTRUCTION",
+      "domain_evidence": {
+        "runtime": "REAL_CAUSAL_WORLD_FOUNDATION",
+        "integrity_verified": true,
+        "simulation_only": true,
+        "authority": "NO_PRODUCTION_AUTHORITY",
+        "adapter": "EXISTING_RUNTIME_REFERENCE"
+      },
+      "approval_status": "RUNTIME_VALIDATED_SIMULATION",
+      "external_deployment": false,
+      "event_count": 74,
+      "state_hash": "2a35408c314c606a911afb15ccde9298fc58962ca1ed7b6f50cbbc2228859914"
+    },
+    "blocked_small_farm": {
+      "status": "BLOCKED_DEPENDENCY",
+      "request_id": "AI-COMPANY-REQ-00001",
+      "required_dependency": "KAIOS_FOREST_AND_AGRICULTURE_RUNTIME_V1",
+      "automatic_completion": false
+    },
+    "candidate_life_package": {
+      "project_id": "AI-COMPANY-PROJECT-00001",
+      "status": "COMPLETE",
+      "closeout_status": "CLOSED_BALANCED_SIMULATION",
+      "domain_binding": "CANDIDATE_LIFE_WORKFLOW",
+      "domain_evidence": {
+        "runtime": "WORKER_REGISTRY_CANDIDATE_WORKFLOW",
+        "integrity_verified": true,
+        "simulation_only": true,
+        "authority": "CANDIDATE_ONLY",
+        "adapter": "EXISTING_GOVERNANCE_REFERENCE"
+      },
+      "approval_status": "CANDIDATE_ONLY",
+      "external_deployment": false,
+      "event_count": 45,
+      "state_hash": "5d97f89c8ec931f36bb031cfb0e18e7aa3ae96fc1105a4c4d03674caa0482642"
+    },
+    "software_module": {
+      "project_id": "AI-COMPANY-PROJECT-00001",
+      "status": "COMPLETE",
+      "closeout_status": "CLOSED_BALANCED_SIMULATION",
+      "domain_binding": "SOFTWARE_PROJECT_WORKFLOW",
+      "domain_evidence": {
+        "runtime": "LOCAL_SOFTWARE_PROJECT_WORKFLOW",
+        "integrity_verified": true,
+        "simulation_only": true,
+        "authority": "NO_EXTERNAL_DEPLOYMENT",
+        "adapter": "LOCAL_SIMULATION_ONLY"
+      },
+      "approval_status": "RUNTIME_VALIDATED_SIMULATION",
+      "external_deployment": false,
+      "event_count": 46,
+      "state_hash": "1a6f710132799eaceadfa9cd0cc9f6bfa62696d74eea05b91ec2d698f7936589"
+    },
+    "boundaries": {
+      "simulation_only": true,
+      "wallet_access": false,
+      "real_kgen": false,
+      "production_authority": false,
+      "external_execution": false
+    }
+  }
+}
