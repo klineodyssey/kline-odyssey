@@ -1,0 +1,602 @@
+{
+  "dataset_id": "KAIOS-POLLINATION-RESOURCE-TIME-RESEARCH-V1",
+  "schema_version": "1.0.0",
+  "status": "RESEARCH_PROPOSAL_ONLY",
+  "review_status": "PENDING_CODEX_REVIEW",
+  "authority": "NO_PRODUCTION_AUTHORITY",
+  "task_id": "KAIOS-CURSOR-POLLINATOR-RESEARCH-001",
+  "worker_id": "cursor-01",
+  "branch": "cursor-handoff/KAIOS-CURSOR-POLLINATOR-RESEARCH-001",
+  "dispatch_branch_base_commit": "cbe49d67bca14fff06e2d1d1209ccc7e8836beb8",
+  "source_base_commit": "c91d736c9812781d309bfda422b8ed42cd12eb49",
+  "source_hash_basis": "SHA256_OF_EXACT_GIT_BLOB_BYTES_AT_SOURCE_BASE_COMMIT",
+  "mode": "DETERMINISTIC_INTEGER_TEST_FIXTURE_ONLY",
+  "fixed_point_contract": {
+    "algorithm_id": "KAIOS_CANONICAL_JSON_INTEGER_V1",
+    "integer_scale": 1000000,
+    "time_unit": "micro_minute",
+    "mass_unit": "micro_gram_proxy",
+    "water_unit": "micro_milliliter_proxy",
+    "energy_unit": "micro_energy_proxy_unit",
+    "pollen_unit": "micro_pollen_transfer_proxy_unit",
+    "signed_integer_addition_only": true,
+    "binary_floating_point_state_addition": false,
+    "negative_pool_rejected_after_each_action": true
+  },
+  "resource_custody_contract": {
+    "structural_mass": "Pollinator biomass, source plant biomass, destination plant biomass and habitat detritus are a closed structural mass domain.",
+    "water": "Habitat, pollinator body, source plant, destination plant and atmospheric proxy water are a closed water domain.",
+    "energy_proxy": "Habitat reserve, pollinator store, plant stores and environmental dissipation are a closed energy-proxy domain.",
+    "pollen_transfer_proxy": "Dimensionless event-custody tokens are conserved separately and have no mass, grain-count, viability or chemistry conversion.",
+    "visitation_events": "Attempted equals completed plus blocked at fixture closure; event identities are unique and replay ordered.",
+    "population": "The fixture population is constant, has no births or deaths and remains below its candidate cap.",
+    "worker_independence": "No worker, labor capacity, equipment, farm service or intervention event participates in the oracle.",
+    "yield_effect": "NOT_MODELED / NO_OWNER_MUTATION / NO_INVENTORY_DELTA"
+  },
+  "oracle_parameters": [
+    {
+      "parameter_name": "oracle_population_count",
+      "unit": "individual_count_proxy",
+      "minimum": 1,
+      "default": 12,
+      "maximum": 20,
+      "rationale": "Uses a small integer test cohort without importing a synthetic-world population or defining colony size.",
+      "source_type": "RESEARCH_PROPOSAL",
+      "confidence": "LOW",
+      "risk": "The fixture count is not a release, stocking or carrying-capacity recommendation.",
+      "validation_required": true
+    },
+    {
+      "parameter_name": "oracle_population_cap",
+      "unit": "individual_count_proxy",
+      "minimum": 1,
+      "default": 20,
+      "maximum": 100,
+      "rationale": "Bounds the local replay below the Ecology default hard cap while granting no owner admission.",
+      "source_type": "MODEL_INFERENCE",
+      "confidence": "MEDIUM",
+      "risk": "The cap is a test invariant and not ecological capacity evidence.",
+      "validation_required": true
+    },
+    {
+      "parameter_name": "oracle_resource_gate_and_start_duration",
+      "unit": "micro_minute",
+      "minimum": 1000000,
+      "default": 5000000,
+      "maximum": 60000000,
+      "rationale": "Requires positive time before the first visitation attempt is recorded.",
+      "source_type": "RESEARCH_PROPOSAL",
+      "confidence": "LOW",
+      "risk": "The duration is a deterministic fixture value, not observed behavior.",
+      "validation_required": true
+    },
+    {
+      "parameter_name": "oracle_source_visit_duration",
+      "unit": "micro_minute",
+      "minimum": 1000000,
+      "default": 10000000,
+      "maximum": 60000000,
+      "rationale": "Prevents instant source visitation and pickup-proxy transfer.",
+      "source_type": "RESEARCH_PROPOSAL",
+      "confidence": "LOW",
+      "risk": "The value is not a handling-time or visitation-frequency claim.",
+      "validation_required": true
+    },
+    {
+      "parameter_name": "oracle_destination_visit_duration",
+      "unit": "micro_minute",
+      "minimum": 1000000,
+      "default": 10000000,
+      "maximum": 60000000,
+      "rationale": "Prevents instant destination visitation and deposition-proxy transfer.",
+      "source_type": "RESEARCH_PROPOSAL",
+      "confidence": "LOW",
+      "risk": "The value is not a biological transfer-duration claim.",
+      "validation_required": true
+    },
+    {
+      "parameter_name": "oracle_proxy_custody_close_duration",
+      "unit": "micro_minute",
+      "minimum": 1000000,
+      "default": 5000000,
+      "maximum": 60000000,
+      "rationale": "Requires positive time before remaining carried proxy custody is closed.",
+      "source_type": "RESEARCH_PROPOSAL",
+      "confidence": "LOW",
+      "risk": "Closure timing is an accounting fixture, not a biological process estimate.",
+      "validation_required": true
+    },
+    {
+      "parameter_name": "oracle_habitat_energy_transfer",
+      "unit": "micro_energy_proxy_unit",
+      "minimum": 1,
+      "default": 1000000,
+      "maximum": 10000000,
+      "rationale": "Creates a finite paired habitat-to-pollinator energy-proxy transfer for gate testing.",
+      "source_type": "MODEL_INFERENCE",
+      "confidence": "LOW",
+      "risk": "The proxy has no food, nectar, metabolic or joule conversion.",
+      "validation_required": true
+    },
+    {
+      "parameter_name": "oracle_visit_energy_cost",
+      "unit": "micro_energy_proxy_unit",
+      "minimum": 1,
+      "default": 500000,
+      "maximum": 1000000,
+      "rationale": "Pairs each completed visitation with finite energy storage and dissipation deltas.",
+      "source_type": "MODEL_INFERENCE",
+      "confidence": "LOW",
+      "risk": "The value is not a metabolic cost or foraging-efficiency claim.",
+      "validation_required": true
+    },
+    {
+      "parameter_name": "oracle_visit_water_cost",
+      "unit": "micro_milliliter_proxy",
+      "minimum": 1,
+      "default": 100000,
+      "maximum": 1000000,
+      "rationale": "Pairs each completed visitation with a finite body-to-atmosphere water-proxy transfer.",
+      "source_type": "MODEL_INFERENCE",
+      "confidence": "LOW",
+      "risk": "The value is not hydration advice or an evaporation measurement.",
+      "validation_required": true
+    },
+    {
+      "parameter_name": "oracle_pollen_pickup_proxy",
+      "unit": "micro_pollen_transfer_proxy_unit",
+      "minimum": 1,
+      "default": 3000000,
+      "maximum": 10000000,
+      "rationale": "Provides finite source-to-carried custody for deterministic proxy replay.",
+      "source_type": "RESEARCH_PROPOSAL",
+      "confidence": "LOW",
+      "risk": "The proxy cannot be interpreted as pollen mass, grains or viability.",
+      "validation_required": true
+    },
+    {
+      "parameter_name": "oracle_pollen_deposition_proxy",
+      "unit": "micro_pollen_transfer_proxy_unit",
+      "minimum": 1,
+      "default": 2000000,
+      "maximum": 10000000,
+      "rationale": "Provides finite carried-to-destination custody while preserving a separately closed remainder.",
+      "source_type": "RESEARCH_PROPOSAL",
+      "confidence": "LOW",
+      "risk": "Deposition proxy is not fertilization, fruit set or yield evidence.",
+      "validation_required": true
+    }
+  ],
+  "deterministic_normal_oracle": {
+    "oracle_id": "POLLINATOR-RESOURCE-TIME-ORACLE-001",
+    "relationship_id": "POLLINATOR-REL-BEE-FRUIT-RESEARCH-001",
+    "fixture_status": "OBJECTIVE_TEST_FIXTURE_NOT_RUNTIME_PARAMETER",
+    "initial_state": {
+      "oracle_id": "POLLINATOR-RESOURCE-TIME-ORACLE-001",
+      "simulation_elapsed_micro_minute": 0,
+      "location_id": "RESEARCH-LOCATION-ORCHARD-CELL-001",
+      "season_label": "SPRING",
+      "temperature_milli_degree_celsius_proxy": 24000,
+      "population_count": 12,
+      "visitation_event_counts": {
+        "attempted": 0,
+        "blocked": 0,
+        "completed": 0
+      },
+      "pollen_transfer_proxy_pools": {
+        "carried_proxy": 0,
+        "deposited_proxy": 0,
+        "returned_or_rejected_proxy": 0,
+        "source_available_proxy": 10000000
+      },
+      "structural_mass_pools_micro_gram_proxy": {
+        "destination_plant_biomass": 100000000,
+        "habitat_detritus_custody": 0,
+        "pollinator_biomass": 12000000,
+        "source_plant_biomass": 100000000
+      },
+      "water_pools_micro_milliliter_proxy": {
+        "atmospheric_water_proxy": 0,
+        "destination_plant_water": 20000000,
+        "habitat_water_custody": 50000000,
+        "pollinator_body_water": 3000000,
+        "source_plant_water": 20000000
+      },
+      "energy_pools_micro_energy_proxy_unit": {
+        "destination_plant_energy_store": 15000000,
+        "environmental_dissipation_proxy": 0,
+        "habitat_energy_reserve": 30000000,
+        "pollinator_energy_store": 5000000,
+        "source_plant_energy_store": 15000000
+      },
+      "yield_effect": {
+        "status": "NOT_MODELED",
+        "mutation_authorized": false,
+        "quantity": null,
+        "unit": null
+      }
+    },
+    "initial_totals": {
+      "structural_mass_micro_gram_proxy": 212000000,
+      "water_micro_milliliter_proxy": 93000000,
+      "energy_micro_energy_proxy_unit": 65000000,
+      "pollen_transfer_micro_proxy_unit": 10000000,
+      "population_count": 12,
+      "visitation_attempted": 0,
+      "visitation_completed": 0,
+      "visitation_blocked": 0
+    },
+    "ordered_actions": [
+      {
+        "sequence": "001",
+        "event_id": "POLLINATOR-ORACLE-EVT-001",
+        "event_type": "RESOURCE_GATE_AND_VISIT_START_PROXY",
+        "required_gates": [
+          "LOCAL_RESEARCH_FIXTURE_SCOPE",
+          "EXPLICIT_LOCATION",
+          "CANDIDATE_HABITAT_CELL",
+          "DECLARED_SEASON_OPEN",
+          "TEMPERATURE_PROXY_IN_RANGE",
+          "WATER_PROXY_AVAILABLE",
+          "ENERGY_PROXY_AVAILABLE",
+          "POPULATION_BELOW_CANDIDATE_CAP",
+          "POSITIVE_ELAPSED_TIME"
+        ],
+        "state_deltas": {
+          "simulation_elapsed_micro_minute": 5000000
+        },
+        "count_deltas": {
+          "visitation_event_counts": {
+            "attempted": 1
+          }
+        },
+        "deltas": {
+          "energy_pools_micro_energy_proxy_unit": {
+            "habitat_energy_reserve": -1000000,
+            "pollinator_energy_store": 1000000
+          }
+        }
+      },
+      {
+        "sequence": "002",
+        "event_id": "POLLINATOR-ORACLE-EVT-002",
+        "event_type": "SOURCE_VISIT_AND_PICKUP_PROXY",
+        "required_gates": [
+          "VISIT_ATTEMPT_OPEN",
+          "FLOWERING_OR_FRUITING_STAGE_REFERENCE",
+          "SOURCE_POLLEN_PROXY_AVAILABLE",
+          "POSITIVE_ELAPSED_TIME"
+        ],
+        "state_deltas": {
+          "simulation_elapsed_micro_minute": 10000000
+        },
+        "count_deltas": {
+          "visitation_event_counts": {
+            "completed": 1
+          }
+        },
+        "deltas": {
+          "pollen_transfer_proxy_pools": {
+            "carried_proxy": 3000000,
+            "source_available_proxy": -3000000
+          },
+          "water_pools_micro_milliliter_proxy": {
+            "atmospheric_water_proxy": 100000,
+            "pollinator_body_water": -100000
+          },
+          "energy_pools_micro_energy_proxy_unit": {
+            "environmental_dissipation_proxy": 500000,
+            "pollinator_energy_store": -500000
+          }
+        }
+      },
+      {
+        "sequence": "003",
+        "event_id": "POLLINATOR-ORACLE-EVT-003",
+        "event_type": "DESTINATION_VISIT_AND_DEPOSITION_PROXY",
+        "required_gates": [
+          "EXPLICIT_DESTINATION_LOCATION",
+          "CARRIED_POLLEN_PROXY_AVAILABLE",
+          "DESTINATION_RECEPTIVITY_PROXY_DECLARED",
+          "POSITIVE_ELAPSED_TIME"
+        ],
+        "state_deltas": {
+          "simulation_elapsed_micro_minute": 10000000
+        },
+        "count_deltas": {
+          "visitation_event_counts": {
+            "attempted": 1,
+            "completed": 1
+          }
+        },
+        "deltas": {
+          "pollen_transfer_proxy_pools": {
+            "carried_proxy": -2000000,
+            "deposited_proxy": 2000000
+          },
+          "water_pools_micro_milliliter_proxy": {
+            "atmospheric_water_proxy": 100000,
+            "pollinator_body_water": -100000
+          },
+          "energy_pools_micro_energy_proxy_unit": {
+            "environmental_dissipation_proxy": 500000,
+            "pollinator_energy_store": -500000
+          }
+        }
+      },
+      {
+        "sequence": "004",
+        "event_id": "POLLINATOR-ORACLE-EVT-004",
+        "event_type": "POLLEN_PROXY_CUSTODY_CLOSE",
+        "required_gates": [
+          "CARRIED_PROXY_REMAINDER_ACCOUNTED",
+          "YIELD_EFFECT_STILL_NOT_MODELED",
+          "POSITIVE_ELAPSED_TIME"
+        ],
+        "state_deltas": {
+          "simulation_elapsed_micro_minute": 5000000
+        },
+        "deltas": {
+          "pollen_transfer_proxy_pools": {
+            "carried_proxy": -1000000,
+            "returned_or_rejected_proxy": 1000000
+          }
+        }
+      }
+    ],
+    "expected_final_state": {
+      "oracle_id": "POLLINATOR-RESOURCE-TIME-ORACLE-001",
+      "simulation_elapsed_micro_minute": 30000000,
+      "location_id": "RESEARCH-LOCATION-ORCHARD-CELL-001",
+      "season_label": "SPRING",
+      "temperature_milli_degree_celsius_proxy": 24000,
+      "population_count": 12,
+      "visitation_event_counts": {
+        "attempted": 2,
+        "blocked": 0,
+        "completed": 2
+      },
+      "pollen_transfer_proxy_pools": {
+        "carried_proxy": 0,
+        "deposited_proxy": 2000000,
+        "returned_or_rejected_proxy": 1000000,
+        "source_available_proxy": 7000000
+      },
+      "structural_mass_pools_micro_gram_proxy": {
+        "destination_plant_biomass": 100000000,
+        "habitat_detritus_custody": 0,
+        "pollinator_biomass": 12000000,
+        "source_plant_biomass": 100000000
+      },
+      "water_pools_micro_milliliter_proxy": {
+        "atmospheric_water_proxy": 200000,
+        "destination_plant_water": 20000000,
+        "habitat_water_custody": 50000000,
+        "pollinator_body_water": 2800000,
+        "source_plant_water": 20000000
+      },
+      "energy_pools_micro_energy_proxy_unit": {
+        "destination_plant_energy_store": 15000000,
+        "environmental_dissipation_proxy": 1000000,
+        "habitat_energy_reserve": 29000000,
+        "pollinator_energy_store": 5000000,
+        "source_plant_energy_store": 15000000
+      },
+      "yield_effect": {
+        "status": "NOT_MODELED",
+        "mutation_authorized": false,
+        "quantity": null,
+        "unit": null
+      }
+    },
+    "expected_final_totals": {
+      "structural_mass_micro_gram_proxy": 212000000,
+      "water_micro_milliliter_proxy": 93000000,
+      "energy_micro_energy_proxy_unit": 65000000,
+      "pollen_transfer_micro_proxy_unit": 10000000,
+      "population_count": 12,
+      "population_cap": 20,
+      "visitation_attempted": 2,
+      "visitation_completed": 2,
+      "visitation_blocked": 0,
+      "simulation_elapsed_micro_minute": 30000000
+    },
+    "closed_ledgers": {
+      "structural_mass": {
+        "initial": 212000000,
+        "final": 212000000,
+        "residual": 0,
+        "closed": true
+      },
+      "water": {
+        "initial": 93000000,
+        "final": 93000000,
+        "residual": 0,
+        "closed": true
+      },
+      "energy_proxy": {
+        "initial": 65000000,
+        "final": 65000000,
+        "residual": 0,
+        "closed": true
+      },
+      "pollen_transfer_proxy": {
+        "initial": 10000000,
+        "source_available_final": 7000000,
+        "carried_final": 0,
+        "deposited_final": 2000000,
+        "returned_or_rejected_final": 1000000,
+        "residual": 0,
+        "closed": true
+      },
+      "visitation_event_accounting": {
+        "attempted": 2,
+        "completed": 2,
+        "blocked": 0,
+        "identity": "ATTEMPTED = COMPLETED + BLOCKED",
+        "residual": 0,
+        "closed": true
+      },
+      "population": {
+        "initial": 12,
+        "births": 0,
+        "deaths": 0,
+        "migration": 0,
+        "final": 12,
+        "candidate_cap": 20,
+        "residual": 0,
+        "closed": true
+      },
+      "time": {
+        "action_duration_sum": 30000000,
+        "final_elapsed": 30000000,
+        "all_actions_positive_time": true,
+        "residual": 0,
+        "closed": true
+      }
+    },
+    "canonical_serialization": {
+      "hash_payload": "deterministic_normal_oracle.expected_final_state",
+      "object_keys": "ascending Unicode code-point order; all current keys are ASCII",
+      "array_order": "preserved",
+      "number_format": "base-10 safe integer without exponent",
+      "whitespace": "none",
+      "encoding": "UTF-8 without BOM or trailing newline",
+      "hash": "SHA-256 lowercase hexadecimal"
+    },
+    "expected_final_sha256": "e7a0fab6589918a6054583f33a5053add3d7ad7877426bbae4233988b2e37e29",
+    "objective_assertions": [
+      "APPLY_ACTIONS_IN_SEQUENCE_ORDER",
+      "USE_SIGNED_INTEGER_MICRO_UNITS_ONLY",
+      "REJECT_NEGATIVE_POOL_AFTER_EACH_ACTION",
+      "EACH_PRESENT_CONSERVED_DOMAIN_DELTA_SUM_EQUALS_ZERO",
+      "EVERY_ACTION_HAS_POSITIVE_ELAPSED_TIME",
+      "VISITATION_ATTEMPTED_EQUALS_COMPLETED_PLUS_BLOCKED_AT_CLOSURE",
+      "POLLEN_PROXY_IS_NOT_STRUCTURAL_MASS",
+      "POLLEN_PROXY_CUSTODY_CLOSES",
+      "STRUCTURAL_MASS_TOTAL_EQUALS_INITIAL_TOTAL",
+      "WATER_TOTAL_EQUALS_INITIAL_TOTAL",
+      "ENERGY_PROXY_TOTAL_EQUALS_INITIAL_TOTAL",
+      "POPULATION_REMAINS_CONSTANT_AND_BELOW_CAP",
+      "YIELD_EFFECT_REMAINS_NOT_MODELED",
+      "FINAL_STATE_EQUALS_EXPECTED_FINAL_STATE",
+      "CANONICAL_SHA256_EQUALS_EXPECTED_FINAL_SHA256",
+      "SECOND_REPLAY_PRODUCES_IDENTICAL_SHA256"
+    ]
+  },
+  "failure_scenarios": [
+    {
+      "scenario_id": "POLLINATOR-RESOURCE-FAIL-LOCATION-001",
+      "fault": "LOCATION_MISSING",
+      "expected_result": "REJECT_WITH_ZERO_DELTAS"
+    },
+    {
+      "scenario_id": "POLLINATOR-RESOURCE-FAIL-SEASON-001",
+      "fault": "SEASON_OPEN_FLAG_FALSE_OR_MISSING",
+      "expected_result": "REJECT_WITH_ZERO_DELTAS"
+    },
+    {
+      "scenario_id": "POLLINATOR-RESOURCE-FAIL-ENERGY-001",
+      "fault": "INSUFFICIENT_ENERGY_PROXY",
+      "expected_result": "REJECT_WITH_ZERO_DELTAS"
+    },
+    {
+      "scenario_id": "POLLINATOR-RESOURCE-FAIL-WATER-001",
+      "fault": "INSUFFICIENT_WATER_PROXY",
+      "expected_result": "REJECT_WITH_ZERO_DELTAS"
+    },
+    {
+      "scenario_id": "POLLINATOR-RESOURCE-FAIL-POPULATION-001",
+      "fault": "POPULATION_CAP_REACHED",
+      "expected_result": "REJECT_WITH_ZERO_DELTAS"
+    },
+    {
+      "scenario_id": "POLLINATOR-RESOURCE-FAIL-TIME-001",
+      "fault": "ZERO_OR_NEGATIVE_ELAPSED_TIME",
+      "expected_result": "REJECT_WITH_ZERO_DELTAS"
+    },
+    {
+      "scenario_id": "POLLINATOR-RESOURCE-FAIL-POLLEN-001",
+      "fault": "POLLEN_PROXY_SOURCE_UNAVAILABLE",
+      "expected_result": "REJECT_WITH_ZERO_DELTAS"
+    },
+    {
+      "scenario_id": "POLLINATOR-RESOURCE-FAIL-LEDGER-001",
+      "fault": "ANY_MASS_WATER_ENERGY_OR_POLLEN_PROXY_RESIDUAL_NONZERO",
+      "expected_result": "REJECT_FIXTURE"
+    },
+    {
+      "scenario_id": "POLLINATOR-RESOURCE-FAIL-REPLAY-001",
+      "fault": "DUPLICATE_EVENT_ID_OR_OUT_OF_ORDER_SEQUENCE",
+      "expected_result": "REJECT_FIXTURE"
+    },
+    {
+      "scenario_id": "POLLINATOR-RESOURCE-FAIL-YIELD-001",
+      "fault": "YIELD_EFFECT_QUANTITY_OR_MUTATION_PRESENT",
+      "expected_result": "REJECT_FIXTURE"
+    }
+  ],
+  "provenance": [
+    {
+      "source_type": "REPOSITORY_DERIVED",
+      "source_path": "docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md",
+      "source_commit": "c91d736c9812781d309bfda422b8ed42cd12eb49",
+      "git_object": "f9748c99501ec1c1ea6ba5c39833909684c0ffbe",
+      "sha256": "6d71cd7946f0b4057a9b5289923d3c7b424e409140feb7404f5b433a309ab00b"
+    },
+    {
+      "source_type": "REPOSITORY_DERIVED",
+      "source_path": "KAIOS/life/KAIOS_LIFE_RUNTIME_V1_SPEC.md",
+      "source_commit": "c91d736c9812781d309bfda422b8ed42cd12eb49",
+      "git_object": "e1df7d486971684f9cd8020b9005a9fdcc389ce4",
+      "sha256": "bc69596af470812bdfcbaa1989cf4cb59887c35f46f1c97d52f6d3dba87eb655"
+    },
+    {
+      "source_type": "REPOSITORY_DERIVED",
+      "source_path": "KAIOS/life/ecology/KAIOS_REPRODUCTION_ECOLOGY_RUNTIME_V1_SPEC.md",
+      "source_commit": "c91d736c9812781d309bfda422b8ed42cd12eb49",
+      "git_object": "0f4399751f4e75727aeac45343a8b3a8900ec534",
+      "sha256": "7fb277af16f552b16db2f4cb511fd060e4e3a5217855198f30fcf59371b8eda1"
+    },
+    {
+      "source_type": "REPOSITORY_DERIVED",
+      "source_path": "KAIOS/life/candidates/ecology-v1/population-scenarios.json",
+      "source_commit": "c91d736c9812781d309bfda422b8ed42cd12eb49",
+      "git_object": "80d2c522ff439280a932bd96914dc8ee04815c5d",
+      "sha256": "7d0a4ae68343ac672362750f1db87bcb9776df6f362e50857613a6bd6bb3beda"
+    },
+    {
+      "source_type": "REPOSITORY_DERIVED",
+      "source_path": "KAIOS/life/candidates/forest-agriculture-v1/insect-candidates/insect-lifecycle-resource-proposals.json",
+      "source_commit": "c91d736c9812781d309bfda422b8ed42cd12eb49",
+      "git_object": "2599143c6b49b596bfe5012c779ab0ab789585cf",
+      "sha256": "ec5cafbaec837b82ffcfdee30bc2ca2d6771acecb47400f8d51eeed05638528a"
+    },
+    {
+      "source_type": "REPOSITORY_DERIVED",
+      "source_path": "KAIOS/life/candidates/forest-agriculture-v1/fruit-trees/fruit-tree-growth-stage-proposals.json",
+      "source_commit": "c91d736c9812781d309bfda422b8ed42cd12eb49",
+      "git_object": "136ffbc7ad3800b8b53e1d9760e855381d3f4553",
+      "sha256": "dc33547e13b34196eb42b36add945225538e955a7bfa024fb385425ea37eddba"
+    },
+    {
+      "source_type": "REPOSITORY_DERIVED",
+      "source_path": "KGEN-KAIOS/world-viewer/agriculture/agriculture-runtime.js",
+      "source_commit": "c91d736c9812781d309bfda422b8ed42cd12eb49",
+      "git_object": "f09478806a47c10825258385ee855faa74f51a79",
+      "sha256": "4557d6b449ce3979f2bf4ca10cc48f271ead2ddb34cc127e60b264ce26b577c2"
+    }
+  ],
+  "boundaries": {
+    "research_proposal_only": true,
+    "pending_codex_review": true,
+    "production_authority": false,
+    "pollination_runtime_created": false,
+    "owner_event_created": false,
+    "yield_modeled": false,
+    "pollen_chemistry_modeled": false,
+    "real_biology_modeled": false,
+    "labor_or_equipment_consumed": false,
+    "births_or_reproduction_created": false
+  }
+}
