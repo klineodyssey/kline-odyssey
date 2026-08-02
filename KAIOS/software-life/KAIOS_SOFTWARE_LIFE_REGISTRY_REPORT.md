@@ -50,6 +50,11 @@ It does not edit or supersede them. Every entry carries all exact twelve-level
 and 19-layer bindings, Git birth lineage, current code hash, aggregate artifact
 hash, dependency references, rights, security and event history.
 
+The dedicated Organ and Transplant standards add a full-detail compatibility
+record beside these compact Registry references. Registry entries now use
+`CONTROLLED_REVIEW_ONLY` for transplant policy: automation remains false and
+no transplant exists until a complete Codex-reviewed simulation record passes.
+
 ## Migration State
 
 Nine lives have a planned version-free path and remain
@@ -74,5 +79,6 @@ DEPRECATION_PENDING` projection.
 - Wallet, real KGEN, on-chain transfer, external autonomy and Production
   authority: false
 
-No executable, public route, CURRENT, Constitution source, Wallet or KGEN file
-is changed by this package.
+The Registry generator changes only to emit the reviewed controlled transplant
+policy. No Runtime executable, public route, CURRENT, Constitution source,
+Wallet or KGEN file is changed by this package.

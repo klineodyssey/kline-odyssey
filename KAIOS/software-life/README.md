@@ -33,6 +33,19 @@ Organism Manifest, taxonomy, Physics, Rights and Genome authorities.
 - `tests/software-life-registry.test.mjs`: identity, taxonomy, ownership,
   dependency, hash, replay and security validation.
 
+## Organs, Interfaces And Transplantation
+
+- `KAIOS_SOFTWARE_ORGAN_STANDARD.md`: complete organ identity, interface,
+  resource, energy, lifecycle and compatibility contract.
+- `KAIOS_SOFTWARE_ORGAN_TRANSPLANT_STANDARD.md`: fail-closed donor/host review,
+  migration, rollback and event-history process.
+- `KAIOS_SOFTWARE_ORGAN_COMPATIBILITY_SCHEMA.json`: machine-readable Organ
+  Manifest, fourteen-gate compatibility review and transplant record.
+- `tools/validate-software-organ-transplant.mjs`: fail-closed cross-record
+  identity, evidence, rights, transition, hash-chain and rollback validator.
+- `tests/software-organ-standards.test.mjs`: structural and semantic valid and
+  invalid fixtures, Registry policy and denied-authority validation.
+
 ## Operations
 
 - `KAIOS_AI_WORKFORCE_24H_SCHEDULER.md`: bounded execution and stop policy.
@@ -41,6 +54,6 @@ Organism Manifest, taxonomy, Physics, Rights and Genome authorities.
 - `tests/software-life-naming-audit.test.mjs`: audit, taxonomy and boundary
   validation.
 
-The naming and Registry packages perform no rename and create no public route. Runtime,
-CURRENT, Wallet, KGEN, contracts, Constitution sources and Production
-authority are outside its write scope.
+The naming, Registry and organ-governance packages perform no rename, organ
+transplant or public-route change. Runtime, CURRENT, Wallet, KGEN, contracts,
+Constitution sources and Production authority are outside their write scope.

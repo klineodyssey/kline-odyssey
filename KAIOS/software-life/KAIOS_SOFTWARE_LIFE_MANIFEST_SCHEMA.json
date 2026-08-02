@@ -91,7 +91,7 @@
     "compatibility": { "$ref": "#/$defs/compatibility" },
     "reproduction_policy": { "$ref": "#/$defs/governedPolicy" },
     "mutation_policy": { "$ref": "#/$defs/governedPolicy" },
-    "transplant_policy": { "$ref": "#/$defs/governedPolicy" },
+    "transplant_policy": { "$ref": "#/$defs/transplantPolicy" },
     "marketplace_policy": { "$ref": "#/$defs/marketplacePolicy" },
     "lifecycle_state": {
       "enum": [
@@ -232,12 +232,15 @@
       },
       "additionalProperties": false
     },
+    "organType": {
+      "enum": ["INPUT_ORGAN", "OUTPUT_ORGAN", "MEMORY_ORGAN", "IDENTITY_ORGAN", "PHYSICS_ORGAN", "TIME_ORGAN", "LOCATION_ORGAN", "ENERGY_ORGAN", "ECONOMY_ORGAN", "RIGHTS_ORGAN", "SECURITY_ORGAN", "COMMUNICATION_ORGAN", "PROCESSING_ORGAN", "STORAGE_ORGAN", "VIEWER_ORGAN", "API_ORGAN", "MUTATION_ORGAN", "REPRODUCTION_ORGAN", "HEALING_ORGAN", "AUDIT_ORGAN"]
+    },
     "organReference": {
       "type": "object",
       "required": ["organ_id", "organ_type", "path", "content_hash"],
       "properties": {
         "organ_id": { "$ref": "#/$defs/stableId" },
-        "organ_type": { "enum": ["INPUT_ORGAN", "OUTPUT_ORGAN", "MEMORY_ORGAN", "IDENTITY_ORGAN", "TIME_ORGAN", "RIGHTS_ORGAN", "SECURITY_ORGAN", "COMMUNICATION_ORGAN", "PROCESSING_ORGAN", "STORAGE_ORGAN", "VIEWER_ORGAN", "API_ORGAN", "AUDIT_ORGAN"] },
+        "organ_type": { "$ref": "#/$defs/organType" },
         "path": { "$ref": "#/$defs/repositoryPath" },
         "content_hash": { "$ref": "#/$defs/sha256" }
       },
@@ -270,6 +273,16 @@
       "required": ["mode", "automatic", "codex_review_required"],
       "properties": {
         "mode": { "enum": ["PROHIBITED_UNTIL_STANDARD", "BOUNDED_REVIEW_ONLY", "SPECIFICATION_ONLY"] },
+        "automatic": { "const": false },
+        "codex_review_required": { "const": true }
+      },
+      "additionalProperties": false
+    },
+    "transplantPolicy": {
+      "type": "object",
+      "required": ["mode", "automatic", "codex_review_required"],
+      "properties": {
+        "mode": { "enum": ["PROHIBITED_UNTIL_STANDARD", "CONTROLLED_REVIEW_ONLY"] },
         "automatic": { "const": false },
         "codex_review_required": { "const": true }
       },

@@ -1,0 +1,494 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "KAIOS_SOFTWARE_ORGAN_COMPATIBILITY_SCHEMA.json",
+  "title": "KAIOS Software Organ Compatibility and Transplant Record",
+  "description": "Simulation-only cumulative contract for an identified software organ, its host compatibility review and a controlled transplant record.",
+  "x-kaios-life": {
+    "life_id": "LIFE-KAIOS-SOFTWARE-ORGAN-COMPATIBILITY-SCHEMA",
+    "species_id": "SPECIES-KAIOS-SOFTWARE-SCHEMA",
+    "genome_id": "GENOME-KAIOS-SOFTWARE-ORGAN-COMPATIBILITY-SCHEMA",
+    "genome_version": "1.0.0",
+    "generation": 1,
+    "canonical_filename": "KAIOS_SOFTWARE_ORGAN_COMPATIBILITY_SCHEMA.json",
+    "lifecycle_state": "ACTIVE",
+    "authority": "SIMULATION_ONLY"
+  },
+  "x-kaios-invariants": [
+    "organ.organ_id equals compatibility_review.organ_id and transplant.organ_id",
+    "compatibility_review donor and host Life IDs equal transplant donor and host Life IDs",
+    "every gate_evidence result equals the corresponding compatibility_review.gates value",
+    "transplant.compatibility_review_id equals compatibility_review.review_id",
+    "owner and dependency IDs resolve in KAIOS_SOFTWARE_LIFE_REGISTRY.json or its approved organ projection",
+    "event hashes form one deterministic chain",
+    "canonical executable and organ paths contain no version token"
+  ],
+  "type": "object",
+  "required": ["metadata", "organ", "compatibility_review", "transplant", "security_boundary"],
+  "properties": {
+    "metadata": { "$ref": "#/$defs/metadata" },
+    "organ": { "$ref": "#/$defs/organ" },
+    "compatibility_review": { "$ref": "#/$defs/compatibilityReview" },
+    "transplant": { "$ref": "#/$defs/transplant" },
+    "security_boundary": { "$ref": "#/$defs/securityBoundary" }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "transplant": {
+            "properties": {
+              "state": {
+                "enum": ["APPROVED_SIMULATION", "TRANSPLANTING", "INTEGRATION_TEST", "ACCEPTED", "COMPLETE"]
+              }
+            },
+            "required": ["state"]
+          }
+        },
+        "required": ["transplant"]
+      },
+      "then": {
+        "properties": {
+          "compatibility_review": {
+            "properties": {
+              "decision": { "const": "APPROVED_SIMULATION" },
+              "gates": { "$ref": "#/$defs/passedCompatibilityGates" },
+              "gate_evidence": { "$ref": "#/$defs/passedGateEvidenceSet" },
+              "rights_record": { "$ref": "#/$defs/approvedRightsRecord" }
+            },
+            "required": ["decision", "gates", "gate_evidence", "rights_record"]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "compatibility_review": {
+            "properties": { "decision": { "const": "APPROVED_SIMULATION" } },
+            "required": ["decision"]
+          }
+        },
+        "required": ["compatibility_review"]
+      },
+      "then": {
+        "properties": {
+          "compatibility_review": {
+            "properties": {
+              "gates": { "$ref": "#/$defs/passedCompatibilityGates" },
+              "gate_evidence": { "$ref": "#/$defs/passedGateEvidenceSet" },
+              "rights_record": { "$ref": "#/$defs/approvedRightsRecord" }
+            },
+            "required": ["gates", "gate_evidence", "rights_record"]
+          }
+        }
+      }
+    }
+  ],
+  "additionalProperties": false,
+  "$defs": {
+    "stableId": {
+      "type": "string",
+      "pattern": "^[A-Z][A-Z0-9-]{2,127}$"
+    },
+    "sha256": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "repositoryCommit": {
+      "type": "string",
+      "pattern": "^(?:[a-f0-9]{40}|[a-f0-9]{64})$"
+    },
+    "repositoryPath": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^(?![A-Za-z]:)(?!/)(?!.*(?:^|/)\\.\\.(?:/|$)).+$"
+    },
+    "metadata": {
+      "type": "object",
+      "required": ["schema_version", "standard_id", "standard_version", "runtime_revision", "status", "authority"],
+      "properties": {
+        "schema_version": { "const": "1.0.0" },
+        "standard_id": { "const": "KAIOS-SOFTWARE-ORGAN-STANDARD" },
+        "standard_version": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$" },
+        "runtime_revision": { "type": "string", "pattern": "^[0-9]{4}\\.[0-9]{2}\\.[0-9]{2}$" },
+        "status": { "enum": ["CANDIDATE_ONLY", "UNDER_REVIEW", "APPROVED_SIMULATION", "REJECTED", "COMPLETE"] },
+        "authority": { "const": "SIMULATION_ONLY" }
+      },
+      "additionalProperties": false
+    },
+    "interface": {
+      "type": "object",
+      "required": ["interface_id", "direction", "protocol", "contract_hash", "data_classification", "cardinality", "required", "mutation_allowed"],
+      "properties": {
+        "interface_id": { "$ref": "#/$defs/stableId" },
+        "direction": { "enum": ["INPUT", "OUTPUT", "BIDIRECTIONAL"] },
+        "protocol": { "enum": ["STATIC_HTML", "ECMASCRIPT_MODULE", "JSON_DOCUMENT", "LOCAL_STORAGE", "PYTHON_MODULE", "MARKDOWN_CONTRACT", "EVENT_ENVELOPE", "IN_PROCESS_CALL"] },
+        "contract_hash": { "$ref": "#/$defs/sha256" },
+        "data_classification": { "enum": ["PUBLIC_READ_ONLY", "LOCAL_SIMULATION", "REPOSITORY_INTERNAL", "CANDIDATE_ONLY"] },
+        "cardinality": { "enum": ["ONE", "ZERO_OR_ONE", "ONE_OR_MORE", "ZERO_OR_MORE"] },
+        "required": { "type": "boolean" },
+        "mutation_allowed": { "const": false },
+        "adapter_organ_id": { "oneOf": [{ "$ref": "#/$defs/stableId" }, { "type": "null" }] }
+      },
+      "additionalProperties": false
+    },
+    "quantity": {
+      "type": "object",
+      "required": ["value", "unit", "bounded"],
+      "properties": {
+        "value": { "type": "number", "minimum": 0 },
+        "unit": { "type": "string", "minLength": 1 },
+        "bounded": { "const": true }
+      },
+      "additionalProperties": false
+    },
+    "genomeContract": {
+      "type": "object",
+      "required": ["genome_id", "expression_contract_id", "compatibility_epoch", "minimum_genome_version", "state_schema_hash", "event_schema_hash", "code_or_artifact_hash", "required_host_life_types"],
+      "properties": {
+        "genome_id": { "$ref": "#/$defs/stableId" },
+        "expression_contract_id": { "$ref": "#/$defs/stableId" },
+        "compatibility_epoch": { "type": "string", "minLength": 1 },
+        "minimum_genome_version": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$" },
+        "state_schema_hash": { "$ref": "#/$defs/sha256" },
+        "event_schema_hash": { "$ref": "#/$defs/sha256" },
+        "code_or_artifact_hash": { "$ref": "#/$defs/sha256" },
+        "required_host_life_types": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "enum": ["APPLICATION", "RUNTIME", "API", "SCHEMA", "VIEWER", "WORKER", "DATA_PACKAGE"] }
+        }
+      },
+      "additionalProperties": false
+    },
+    "organEvent": {
+      "type": "object",
+      "required": ["event_id", "simulation_time", "actor", "action", "inputs", "outputs", "resource_delta", "energy_delta", "rights_decision", "seed", "status", "reason", "previous_state_hash", "next_state_hash"],
+      "properties": {
+        "event_id": { "$ref": "#/$defs/stableId" },
+        "simulation_time": { "type": "string", "format": "date-time" },
+        "actor": { "type": "string", "minLength": 1 },
+        "action": { "type": "string", "minLength": 1 },
+        "inputs": { "type": "object" },
+        "outputs": { "type": "object" },
+        "resource_delta": { "type": "object" },
+        "energy_delta": { "type": "object" },
+        "rights_decision": { "type": ["string", "null"] },
+        "seed": { "type": "integer", "minimum": 0 },
+        "status": { "enum": ["RECORDED", "PASS", "FAIL", "BLOCKED", "REJECTED", "COMPLETE"] },
+        "reason": { "type": "string", "minLength": 1 },
+        "previous_state_hash": { "oneOf": [{ "$ref": "#/$defs/sha256" }, { "type": "null" }] },
+        "next_state_hash": { "$ref": "#/$defs/sha256" }
+      },
+      "additionalProperties": false
+    },
+    "versionMetadata": {
+      "type": "object",
+      "required": ["genome_version", "organ_revision", "generation", "compatibility_epoch", "previous_revision", "changelog_ref"],
+      "properties": {
+        "genome_version": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$" },
+        "organ_revision": { "type": "string", "minLength": 1 },
+        "generation": { "type": "integer", "minimum": 1 },
+        "compatibility_epoch": { "type": "string", "minLength": 1 },
+        "previous_revision": { "type": ["string", "null"] },
+        "changelog_ref": { "$ref": "#/$defs/repositoryPath" }
+      },
+      "additionalProperties": false
+    },
+    "organ": {
+      "type": "object",
+      "required": ["organ_id", "organ_type", "owner_life_id", "genome_contract", "input_interface", "output_interface", "resource_cost", "energy_cost", "state", "health", "compatibility_signature", "transplantable", "required_host_capabilities", "forbidden_hosts", "dependency_list", "event_history", "version_metadata"],
+      "properties": {
+        "organ_id": { "$ref": "#/$defs/stableId" },
+        "organ_type": {
+          "enum": ["INPUT_ORGAN", "OUTPUT_ORGAN", "MEMORY_ORGAN", "IDENTITY_ORGAN", "PHYSICS_ORGAN", "TIME_ORGAN", "LOCATION_ORGAN", "ENERGY_ORGAN", "ECONOMY_ORGAN", "RIGHTS_ORGAN", "SECURITY_ORGAN", "COMMUNICATION_ORGAN", "PROCESSING_ORGAN", "STORAGE_ORGAN", "VIEWER_ORGAN", "API_ORGAN", "MUTATION_ORGAN", "REPRODUCTION_ORGAN", "HEALING_ORGAN", "AUDIT_ORGAN"]
+        },
+        "owner_life_id": { "$ref": "#/$defs/stableId" },
+        "genome_contract": { "$ref": "#/$defs/genomeContract" },
+        "input_interface": { "type": "array", "items": { "$ref": "#/$defs/interface" } },
+        "output_interface": { "type": "array", "items": { "$ref": "#/$defs/interface" } },
+        "resource_cost": {
+          "type": "object",
+          "required": ["compute", "memory", "storage", "network"],
+          "properties": {
+            "compute": { "$ref": "#/$defs/quantity" },
+            "memory": { "$ref": "#/$defs/quantity" },
+            "storage": { "$ref": "#/$defs/quantity" },
+            "network": { "$ref": "#/$defs/quantity" }
+          },
+          "additionalProperties": false
+        },
+        "energy_cost": {
+          "type": "object",
+          "required": ["per_operation", "maximum_per_time_step", "energy_type"],
+          "properties": {
+            "per_operation": { "$ref": "#/$defs/quantity" },
+            "maximum_per_time_step": { "$ref": "#/$defs/quantity" },
+            "energy_type": { "enum": ["COMPUTE_ELECTRICITY_SIMULATION", "STATIC_ARTIFACT_STORAGE_SIMULATION", "HOST_ACCOUNTED_SIMULATION"] }
+          },
+          "additionalProperties": false
+        },
+        "state": { "enum": ["CONCEIVED", "SPECIFIED", "AVAILABLE", "ACTIVE", "PAUSED", "STRESSED", "DEGRADED", "HEALING", "TRANSPLANT_REVIEW", "TRANSPLANTING", "RETIRED", "ARCHIVED", "FAILED"] },
+        "health": { "enum": ["HEALTHY", "AT_RISK", "DEGRADED", "FAILED", "HEALING", "UNKNOWN"] },
+        "compatibility_signature": { "$ref": "#/$defs/sha256" },
+        "transplantable": { "type": "boolean" },
+        "required_host_capabilities": { "type": "array", "uniqueItems": true, "items": { "type": "string", "minLength": 1 } },
+        "forbidden_hosts": { "type": "array", "uniqueItems": true, "items": { "$ref": "#/$defs/stableId" } },
+        "dependency_list": { "type": "array", "uniqueItems": true, "items": { "$ref": "#/$defs/stableId" } },
+        "event_history": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/organEvent" } },
+        "version_metadata": { "$ref": "#/$defs/versionMetadata" }
+      },
+      "additionalProperties": false
+    },
+    "gateResult": {
+      "enum": ["PASS", "FAIL", "NOT_EVALUATED"]
+    },
+    "evidenceReference": {
+      "anyOf": [
+        { "$ref": "#/$defs/repositoryPath" },
+        { "$ref": "#/$defs/stableId" }
+      ]
+    },
+    "gateEvidence": {
+      "type": "object",
+      "required": ["result", "evidence_refs", "evidence_hash", "reviewer", "reason", "reviewed_at"],
+      "properties": {
+        "result": { "$ref": "#/$defs/gateResult" },
+        "evidence_refs": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "$ref": "#/$defs/evidenceReference" } },
+        "evidence_hash": { "$ref": "#/$defs/sha256" },
+        "reviewer": { "type": "string", "minLength": 1 },
+        "reason": { "type": "string", "minLength": 1 },
+        "reviewed_at": { "type": "string", "format": "date-time" }
+      },
+      "additionalProperties": false
+    },
+    "compatibilityGates": {
+      "type": "object",
+      "required": ["DONOR_IDENTITY_VALID", "HOST_IDENTITY_VALID", "ORGAN_TYPE_COMPATIBLE", "GENOME_CONTRACT_COMPATIBLE", "INTERFACE_COMPATIBLE", "RIGHTS_APPROVED", "SECURITY_APPROVED", "RESOURCE_CAPACITY_AVAILABLE", "ENERGY_CAPACITY_AVAILABLE", "DEPENDENCIES_AVAILABLE", "LICENSE_OR_USAGE_RIGHT_VALID_SIMULATION", "MIGRATION_PLAN_READY", "ROLLBACK_PLAN_READY", "TESTS_PASS"],
+      "properties": {
+        "DONOR_IDENTITY_VALID": { "$ref": "#/$defs/gateResult" },
+        "HOST_IDENTITY_VALID": { "$ref": "#/$defs/gateResult" },
+        "ORGAN_TYPE_COMPATIBLE": { "$ref": "#/$defs/gateResult" },
+        "GENOME_CONTRACT_COMPATIBLE": { "$ref": "#/$defs/gateResult" },
+        "INTERFACE_COMPATIBLE": { "$ref": "#/$defs/gateResult" },
+        "RIGHTS_APPROVED": { "$ref": "#/$defs/gateResult" },
+        "SECURITY_APPROVED": { "$ref": "#/$defs/gateResult" },
+        "RESOURCE_CAPACITY_AVAILABLE": { "$ref": "#/$defs/gateResult" },
+        "ENERGY_CAPACITY_AVAILABLE": { "$ref": "#/$defs/gateResult" },
+        "DEPENDENCIES_AVAILABLE": { "$ref": "#/$defs/gateResult" },
+        "LICENSE_OR_USAGE_RIGHT_VALID_SIMULATION": { "$ref": "#/$defs/gateResult" },
+        "MIGRATION_PLAN_READY": { "$ref": "#/$defs/gateResult" },
+        "ROLLBACK_PLAN_READY": { "$ref": "#/$defs/gateResult" },
+        "TESTS_PASS": { "$ref": "#/$defs/gateResult" }
+      },
+      "additionalProperties": false
+    },
+    "passedCompatibilityGates": {
+      "type": "object",
+      "required": ["DONOR_IDENTITY_VALID", "HOST_IDENTITY_VALID", "ORGAN_TYPE_COMPATIBLE", "GENOME_CONTRACT_COMPATIBLE", "INTERFACE_COMPATIBLE", "RIGHTS_APPROVED", "SECURITY_APPROVED", "RESOURCE_CAPACITY_AVAILABLE", "ENERGY_CAPACITY_AVAILABLE", "DEPENDENCIES_AVAILABLE", "LICENSE_OR_USAGE_RIGHT_VALID_SIMULATION", "MIGRATION_PLAN_READY", "ROLLBACK_PLAN_READY", "TESTS_PASS"],
+      "properties": {
+        "DONOR_IDENTITY_VALID": { "const": "PASS" },
+        "HOST_IDENTITY_VALID": { "const": "PASS" },
+        "ORGAN_TYPE_COMPATIBLE": { "const": "PASS" },
+        "GENOME_CONTRACT_COMPATIBLE": { "const": "PASS" },
+        "INTERFACE_COMPATIBLE": { "const": "PASS" },
+        "RIGHTS_APPROVED": { "const": "PASS" },
+        "SECURITY_APPROVED": { "const": "PASS" },
+        "RESOURCE_CAPACITY_AVAILABLE": { "const": "PASS" },
+        "ENERGY_CAPACITY_AVAILABLE": { "const": "PASS" },
+        "DEPENDENCIES_AVAILABLE": { "const": "PASS" },
+        "LICENSE_OR_USAGE_RIGHT_VALID_SIMULATION": { "const": "PASS" },
+        "MIGRATION_PLAN_READY": { "const": "PASS" },
+        "ROLLBACK_PLAN_READY": { "const": "PASS" },
+        "TESTS_PASS": { "const": "PASS" }
+      },
+      "additionalProperties": false
+    },
+    "gateEvidenceSet": {
+      "type": "object",
+      "required": ["DONOR_IDENTITY_VALID", "HOST_IDENTITY_VALID", "ORGAN_TYPE_COMPATIBLE", "GENOME_CONTRACT_COMPATIBLE", "INTERFACE_COMPATIBLE", "RIGHTS_APPROVED", "SECURITY_APPROVED", "RESOURCE_CAPACITY_AVAILABLE", "ENERGY_CAPACITY_AVAILABLE", "DEPENDENCIES_AVAILABLE", "LICENSE_OR_USAGE_RIGHT_VALID_SIMULATION", "MIGRATION_PLAN_READY", "ROLLBACK_PLAN_READY", "TESTS_PASS"],
+      "properties": {
+        "DONOR_IDENTITY_VALID": { "$ref": "#/$defs/gateEvidence" },
+        "HOST_IDENTITY_VALID": { "$ref": "#/$defs/gateEvidence" },
+        "ORGAN_TYPE_COMPATIBLE": { "$ref": "#/$defs/gateEvidence" },
+        "GENOME_CONTRACT_COMPATIBLE": { "$ref": "#/$defs/gateEvidence" },
+        "INTERFACE_COMPATIBLE": { "$ref": "#/$defs/gateEvidence" },
+        "RIGHTS_APPROVED": { "$ref": "#/$defs/gateEvidence" },
+        "SECURITY_APPROVED": { "$ref": "#/$defs/gateEvidence" },
+        "RESOURCE_CAPACITY_AVAILABLE": { "$ref": "#/$defs/gateEvidence" },
+        "ENERGY_CAPACITY_AVAILABLE": { "$ref": "#/$defs/gateEvidence" },
+        "DEPENDENCIES_AVAILABLE": { "$ref": "#/$defs/gateEvidence" },
+        "LICENSE_OR_USAGE_RIGHT_VALID_SIMULATION": { "$ref": "#/$defs/gateEvidence" },
+        "MIGRATION_PLAN_READY": { "$ref": "#/$defs/gateEvidence" },
+        "ROLLBACK_PLAN_READY": { "$ref": "#/$defs/gateEvidence" },
+        "TESTS_PASS": { "$ref": "#/$defs/gateEvidence" }
+      },
+      "additionalProperties": false
+    },
+    "passedGateEvidence": {
+      "allOf": [
+        { "$ref": "#/$defs/gateEvidence" },
+        {
+          "type": "object",
+          "properties": { "result": { "const": "PASS" } },
+          "required": ["result"]
+        }
+      ]
+    },
+    "passedGateEvidenceSet": {
+      "type": "object",
+      "required": ["DONOR_IDENTITY_VALID", "HOST_IDENTITY_VALID", "ORGAN_TYPE_COMPATIBLE", "GENOME_CONTRACT_COMPATIBLE", "INTERFACE_COMPATIBLE", "RIGHTS_APPROVED", "SECURITY_APPROVED", "RESOURCE_CAPACITY_AVAILABLE", "ENERGY_CAPACITY_AVAILABLE", "DEPENDENCIES_AVAILABLE", "LICENSE_OR_USAGE_RIGHT_VALID_SIMULATION", "MIGRATION_PLAN_READY", "ROLLBACK_PLAN_READY", "TESTS_PASS"],
+      "properties": {
+        "DONOR_IDENTITY_VALID": { "$ref": "#/$defs/passedGateEvidence" },
+        "HOST_IDENTITY_VALID": { "$ref": "#/$defs/passedGateEvidence" },
+        "ORGAN_TYPE_COMPATIBLE": { "$ref": "#/$defs/passedGateEvidence" },
+        "GENOME_CONTRACT_COMPATIBLE": { "$ref": "#/$defs/passedGateEvidence" },
+        "INTERFACE_COMPATIBLE": { "$ref": "#/$defs/passedGateEvidence" },
+        "RIGHTS_APPROVED": { "$ref": "#/$defs/passedGateEvidence" },
+        "SECURITY_APPROVED": { "$ref": "#/$defs/passedGateEvidence" },
+        "RESOURCE_CAPACITY_AVAILABLE": { "$ref": "#/$defs/passedGateEvidence" },
+        "ENERGY_CAPACITY_AVAILABLE": { "$ref": "#/$defs/passedGateEvidence" },
+        "DEPENDENCIES_AVAILABLE": { "$ref": "#/$defs/passedGateEvidence" },
+        "LICENSE_OR_USAGE_RIGHT_VALID_SIMULATION": { "$ref": "#/$defs/passedGateEvidence" },
+        "MIGRATION_PLAN_READY": { "$ref": "#/$defs/passedGateEvidence" },
+        "ROLLBACK_PLAN_READY": { "$ref": "#/$defs/passedGateEvidence" },
+        "TESTS_PASS": { "$ref": "#/$defs/passedGateEvidence" }
+      },
+      "additionalProperties": false
+    },
+    "rightsRecord": {
+      "type": "object",
+      "required": ["donor_owner", "donor_custodian", "host_owner", "host_operator", "transplant_right", "license_or_usage_right", "decision_event_id", "real_legal_effect"],
+      "properties": {
+        "donor_owner": { "type": "string", "minLength": 1 },
+        "donor_custodian": { "type": "string", "minLength": 1 },
+        "host_owner": { "type": "string", "minLength": 1 },
+        "host_operator": { "type": "string", "minLength": 1 },
+        "transplant_right": { "enum": ["NOT_GRANTED", "CODEX_REVIEW_REQUIRED", "APPROVED_SIMULATION"] },
+        "license_or_usage_right": { "enum": ["NOT_GRANTED", "SIMULATED_USE_ONLY", "APPROVED_SIMULATION"] },
+        "decision_event_id": { "$ref": "#/$defs/stableId" },
+        "real_legal_effect": { "const": false }
+      },
+      "additionalProperties": false
+    },
+    "approvedRightsRecord": {
+      "allOf": [
+        { "$ref": "#/$defs/rightsRecord" },
+        {
+          "type": "object",
+          "properties": {
+            "transplant_right": { "const": "APPROVED_SIMULATION" },
+            "license_or_usage_right": { "const": "APPROVED_SIMULATION" }
+          },
+          "required": ["transplant_right", "license_or_usage_right"]
+        }
+      ]
+    },
+    "plan": {
+      "type": "object",
+      "required": ["plan_id", "owner", "baseline_commit", "baseline_state_hash", "artifact_hash", "affected_paths", "steps", "resource_budget", "energy_budget", "maximum_downtime_seconds", "verification_commands", "recovery_ref"],
+      "properties": {
+        "plan_id": { "$ref": "#/$defs/stableId" },
+        "owner": { "type": "string", "minLength": 1 },
+        "baseline_commit": { "$ref": "#/$defs/repositoryCommit" },
+        "baseline_state_hash": { "$ref": "#/$defs/sha256" },
+        "artifact_hash": { "$ref": "#/$defs/sha256" },
+        "affected_paths": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "$ref": "#/$defs/repositoryPath" } },
+        "steps": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 } },
+        "resource_budget": { "$ref": "#/$defs/quantity" },
+        "energy_budget": { "$ref": "#/$defs/quantity" },
+        "maximum_downtime_seconds": { "type": "integer", "minimum": 0 },
+        "verification_commands": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 } },
+        "recovery_ref": { "$ref": "#/$defs/repositoryPath" }
+      },
+      "additionalProperties": false
+    },
+    "compatibilityReview": {
+      "type": "object",
+      "required": ["review_id", "donor_life_id", "donor_genome_id", "host_life_id", "host_genome_id", "host_life_type", "host_capabilities", "organ_id", "reviewer", "gates", "gate_evidence", "rights_record", "decision", "reason", "reviewed_at"],
+      "properties": {
+        "review_id": { "$ref": "#/$defs/stableId" },
+        "donor_life_id": { "$ref": "#/$defs/stableId" },
+        "donor_genome_id": { "$ref": "#/$defs/stableId" },
+        "host_life_id": { "$ref": "#/$defs/stableId" },
+        "host_genome_id": { "$ref": "#/$defs/stableId" },
+        "host_life_type": { "enum": ["APPLICATION", "RUNTIME", "API", "SCHEMA", "VIEWER", "WORKER", "DATA_PACKAGE"] },
+        "host_capabilities": { "type": "array", "uniqueItems": true, "items": { "type": "string", "minLength": 1 } },
+        "organ_id": { "$ref": "#/$defs/stableId" },
+        "reviewer": { "const": "CODEX_CANONICAL_REVIEW" },
+        "gates": { "$ref": "#/$defs/compatibilityGates" },
+        "gate_evidence": { "$ref": "#/$defs/gateEvidenceSet" },
+        "rights_record": { "$ref": "#/$defs/rightsRecord" },
+        "decision": { "enum": ["NOT_EVALUATED", "REJECTED", "REWORK_REQUIRED", "APPROVED_SIMULATION"] },
+        "reason": { "type": "string", "minLength": 1 },
+        "reviewed_at": { "type": "string", "format": "date-time" }
+      },
+      "additionalProperties": false
+    },
+    "transplantState": {
+      "enum": ["PROPOSED", "DONOR_REVIEW", "HOST_REVIEW", "COMPATIBILITY_TEST", "REJECTED", "APPROVED_SIMULATION", "TRANSPLANTING", "INTEGRATION_TEST", "ACCEPTED", "REWORK_REQUIRED", "ROLLED_BACK", "COMPLETE"]
+    },
+    "transplantEvent": {
+      "type": "object",
+      "required": ["event_id", "transplant_id", "donor_life_id", "host_life_id", "organ_id", "simulation_time", "actor", "action", "inputs", "outputs", "resource_delta", "energy_delta", "rights_decision", "seed", "status", "reason", "previous_transplant_state", "next_transplant_state", "previous_state_hash", "next_state_hash"],
+      "properties": {
+        "event_id": { "$ref": "#/$defs/stableId" },
+        "transplant_id": { "$ref": "#/$defs/stableId" },
+        "donor_life_id": { "$ref": "#/$defs/stableId" },
+        "host_life_id": { "$ref": "#/$defs/stableId" },
+        "organ_id": { "$ref": "#/$defs/stableId" },
+        "simulation_time": { "type": "string", "format": "date-time" },
+        "actor": { "type": "string", "minLength": 1 },
+        "action": { "type": "string", "minLength": 1 },
+        "inputs": { "type": "object" },
+        "outputs": { "type": "object" },
+        "resource_delta": { "type": "object" },
+        "energy_delta": { "type": "object" },
+        "rights_decision": { "type": ["string", "null"] },
+        "seed": { "type": "integer", "minimum": 0 },
+        "status": { "enum": ["RECORDED", "PASS", "FAIL", "BLOCKED", "REJECTED", "COMPLETE"] },
+        "reason": { "type": "string", "minLength": 1 },
+        "previous_transplant_state": { "anyOf": [{ "$ref": "#/$defs/transplantState" }, { "type": "null" }] },
+        "next_transplant_state": { "$ref": "#/$defs/transplantState" },
+        "previous_state_hash": { "anyOf": [{ "$ref": "#/$defs/sha256" }, { "type": "null" }] },
+        "next_state_hash": { "$ref": "#/$defs/sha256" }
+      },
+      "additionalProperties": false
+    },
+    "transplant": {
+      "type": "object",
+      "required": ["transplant_id", "compatibility_review_id", "donor_life_id", "host_life_id", "organ_id", "state", "automatic", "migration_plan", "rollback_plan", "events"],
+      "properties": {
+        "transplant_id": { "$ref": "#/$defs/stableId" },
+        "compatibility_review_id": { "$ref": "#/$defs/stableId" },
+        "donor_life_id": { "$ref": "#/$defs/stableId" },
+        "host_life_id": { "$ref": "#/$defs/stableId" },
+        "organ_id": { "$ref": "#/$defs/stableId" },
+        "state": { "$ref": "#/$defs/transplantState" },
+        "automatic": { "const": false },
+        "migration_plan": { "$ref": "#/$defs/plan" },
+        "rollback_plan": { "$ref": "#/$defs/plan" },
+        "events": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "$ref": "#/$defs/transplantEvent" } }
+      },
+      "additionalProperties": false
+    },
+    "securityBoundary": {
+      "type": "object",
+      "required": ["simulation_only", "real_wallet", "real_kgen", "onchain_transfer", "external_autonomy", "production_authority", "self_modifying_production_code", "protected_current_modification", "constitution_source_modification", "real_ownership_transfer"],
+      "properties": {
+        "simulation_only": { "const": true },
+        "real_wallet": { "const": false },
+        "real_kgen": { "const": false },
+        "onchain_transfer": { "const": false },
+        "external_autonomy": { "const": false },
+        "production_authority": { "const": false },
+        "self_modifying_production_code": { "const": false },
+        "protected_current_modification": { "const": false },
+        "constitution_source_modification": { "const": false },
+        "real_ownership_transfer": { "const": false }
+      },
+      "additionalProperties": false
+    }
+  }
+}

@@ -91,6 +91,7 @@ Codex reran Company Boot and `git fetch origin --prune` at `2026-07-15T17:29:48+
 | `company_status/COMPANY_STATUS_2026-08-02_POLLINATOR_RELEASED_EARTHWORM_DISPATCHED.md` | Pollinator research release and sole active earthworm candidate dispatch |
 | `company_status/COMPANY_STATUS_2026-08-02_SOFTWARE_LIFE_NAMING_STANDARDS.md` | Software Life naming audit and standards workline status |
 | `company_status/COMPANY_STATUS_2026-08-02_SOFTWARE_LIFE_REGISTRY.md` | Deterministic Software Life Manifest and Registry status |
+| `company_status/COMPANY_STATUS_2026-08-02_SOFTWARE_ORGAN_TRANSPLANT_STANDARDS.md` | Software Organ, interface and controlled transplant standards status |
 | `recovery_points/RECOVERY-KAIOS-AI-COMPANY-SPEC-V1.md` | AI Company V1 specification rollback anchor |
 | `company_status/COMPANY_STATUS_2026-08-02_AI_COMPANY_SPEC.md` | AI Company specification and sequential Cursor queue status |
 | `COMPANY_INBOX.md` | Durable Human intake boundary that remains available during network failure |

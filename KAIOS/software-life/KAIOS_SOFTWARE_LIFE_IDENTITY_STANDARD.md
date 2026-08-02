@@ -184,8 +184,11 @@ consumer and rollback evidence.
 An application decomposes into organs with identity, owner, input/output
 contracts, resource and energy costs, dependencies, health, event history and
 compatibility signatures. A function can be a cell-level expression without
-receiving a separate Life ID. Organ transplantation and software reproduction
-remain prohibited until their dedicated standards and review gates pass.
+receiving a separate Life ID. Organ transplantation is governed by
+`KAIOS_SOFTWARE_ORGAN_TRANSPLANT_STANDARD.md`: it defaults to denied and may
+advance only through a complete Codex-reviewed simulation record. Software
+reproduction remains prohibited until its dedicated standard and review gates
+pass.
 
 ## 9. Reproduction and Mutation
 
