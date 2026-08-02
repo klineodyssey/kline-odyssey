@@ -1,0 +1,354 @@
+{
+  "dataset_id": "KAIOS-POLLINATOR-RELATIONSHIP-RESEARCH-V1",
+  "schema_version": "1.0.0",
+  "status": "RESEARCH_PROPOSAL_ONLY",
+  "review_status": "PENDING_CODEX_REVIEW",
+  "authority": "NO_PRODUCTION_AUTHORITY",
+  "task_id": "KAIOS-CURSOR-POLLINATOR-RESEARCH-001",
+  "worker_id": "cursor-01",
+  "branch": "cursor-handoff/KAIOS-CURSOR-POLLINATOR-RESEARCH-001",
+  "dispatch_branch_base_commit": "cbe49d67bca14fff06e2d1d1209ccc7e8836beb8",
+  "source_base_commit": "c91d736c9812781d309bfda422b8ed42cd12eb49",
+  "source_hash_basis": "SHA256_OF_EXACT_GIT_BLOB_BYTES_AT_SOURCE_BASE_COMMIT",
+  "mode": "NONCANONICAL_NONEXECUTABLE_RESEARCH_OVERLAY",
+  "composition_boundary": {
+    "canonical_life_contract": "READ_ONLY_NO_NEW_LIFE_MANIFEST",
+    "life_runtime_contract": "READ_ONLY_NO_RUNTIME_ACTION",
+    "ecology_runtime_contract": "READ_ONLY_NO_OWNER_EVENT",
+    "ecology_pollination_entity_at_source_base": false,
+    "ecology_pollination_event_at_source_base": false,
+    "ecology_admits_bee_alpha": false,
+    "ecology_admits_insect_candidate_ids": false,
+    "owner_schema_and_runtime_review_required_before_any_activation": true
+  },
+  "relationship_contract": {
+    "ordered_research_states": [
+      "VISITATION_OBSERVATION_PROXY",
+      "POLLEN_PICKUP_PROXY",
+      "POLLEN_DEPOSITION_PROXY",
+      "FUTURE_YIELD_EFFECT_REFERENCE"
+    ],
+    "separation_rules": [
+      "VISITATION_IS_NOT_POLLEN_TRANSFER",
+      "POLLEN_PICKUP_PROXY_IS_NOT_DEPOSITION",
+      "POLLEN_DEPOSITION_PROXY_IS_NOT_FERTILIZATION",
+      "POLLEN_DEPOSITION_PROXY_IS_NOT_YIELD",
+      "POLLEN_PROXY_HAS_NO_MASS_OR_CHEMISTRY_CONVERSION",
+      "YIELD_EFFECT_REMAINS_NOT_MODELED",
+      "FAILED_GATE_CREATES_NO_RESOURCE_OR_OWNER_DELTA"
+    ],
+    "allowed_proposal_statuses": [
+      "ELIGIBLE_FOR_CANDIDATE_REPLAY_ONLY",
+      "BLOCKED_SOURCE_UNDERSPECIFIED",
+      "BLOCKED_NO_POLLINATOR_TRAIT",
+      "BLOCKED_OWNER_ADMISSION_REQUIRED"
+    ],
+    "executable": false,
+    "canonical": false
+  },
+  "identity_links": {
+    "synthetic_pollinator_reference": {
+      "species_id": "BEE_ALPHA",
+      "taxonomy_status": "REPOSITORY_DEFINED_SYNTHETIC_ALPHA",
+      "canonical_life_instance": null,
+      "ecology_admission": "NOT_ADMITTED_CURRENT_SCHEMA_ENUM",
+      "population_imported_from_synthetic_world": false,
+      "evolution_stage_imported_from_synthetic_world": false,
+      "use": "IDENTITY_REFERENCE_FOR_LOCAL_RESEARCH_FIXTURE_ONLY"
+    },
+    "plant_references": [
+      {
+        "candidate_reference_kind": "CANDIDATE_PACKAGE_ID",
+        "candidate_reference_id": "CANDIDATE-FRUIT-TREE-AGGREGATE-V1",
+        "owner_species_id": "FRUIT_ALPHA",
+        "plant_stage_reference": "FLOWERING_OR_FRUITING",
+        "species_resolution": "SOURCE_UNDERSPECIFIED_AGGREGATE",
+        "use": "CANDIDATE_REPLAY_ONLY"
+      },
+      {
+        "candidate_reference_kind": "FOREST_LAYER_ID",
+        "candidate_reference_id": "FOREST-CANOPY-TREE",
+        "owner_species_id": "SPECIES-KAIOS-FOUNDATIONAL-TREE",
+        "plant_stage_reference": null,
+        "species_resolution": "FOUNDATIONAL_OWNER_WITHOUT_FLOWERING_STATE",
+        "use": "BLOCKED_RELATIONSHIP_EVIDENCE"
+      },
+      {
+        "candidate_reference_kind": "CANDIDATE_PACKAGE_ID",
+        "candidate_reference_id": "CANDIDATE-VEGETABLE-AGGREGATE-PLOT-V1",
+        "owner_species_id": null,
+        "plant_stage_reference": null,
+        "species_resolution": "SOURCE_UNDERSPECIFIED",
+        "use": "BLOCKED_RELATIONSHIP_EVIDENCE"
+      }
+    ]
+  },
+  "proposal_parameters": [
+    {
+      "parameter_name": "candidate_visitation_attempt_cap_per_replay",
+      "unit": "visitation_attempt_count",
+      "minimum": 1,
+      "default": 2,
+      "maximum": 20,
+      "rationale": "Bounds local replay event accounting without asserting a biological visitation rate.",
+      "source_type": "RESEARCH_PROPOSAL",
+      "confidence": "LOW",
+      "risk": "The value is a fixture limit and must not become a field or colony expectation.",
+      "validation_required": true
+    },
+    {
+      "parameter_name": "candidate_pollen_pickup_proxy_cap_per_visit",
+      "unit": "micro_pollen_transfer_proxy_unit",
+      "minimum": 1,
+      "default": 3000000,
+      "maximum": 10000000,
+      "rationale": "Provides finite dimensionless custody for deterministic pickup and deposition tests.",
+      "source_type": "MODEL_INFERENCE",
+      "confidence": "LOW",
+      "risk": "Proxy units have no conversion to pollen grains, mass, viability or chemistry.",
+      "validation_required": true
+    },
+    {
+      "parameter_name": "candidate_relationship_location_edge_cap",
+      "unit": "research_location_edge_count",
+      "minimum": 0,
+      "default": 1,
+      "maximum": 10,
+      "rationale": "Requires an explicit bounded source-to-destination location link before a replay can continue.",
+      "source_type": "RESEARCH_PROPOSAL",
+      "confidence": "LOW",
+      "risk": "An edge count is not physical distance or a foraging-range claim.",
+      "validation_required": true
+    },
+    {
+      "parameter_name": "candidate_relationship_replay_event_cap",
+      "unit": "event_count",
+      "minimum": 1,
+      "default": 20,
+      "maximum": 100,
+      "rationale": "Keeps candidate event history finite and rejects uncontrolled replay growth.",
+      "source_type": "MODEL_INFERENCE",
+      "confidence": "MEDIUM",
+      "risk": "The cap is package-local and does not amend Life or Ecology Runtime limits.",
+      "validation_required": true
+    }
+  ],
+  "relationship_proposals": [
+    {
+      "relationship_id": "POLLINATOR-REL-BEE-FRUIT-RESEARCH-001",
+      "pollinator_species_reference": "BEE_ALPHA",
+      "plant_candidate_reference_kind": "CANDIDATE_PACKAGE_ID",
+      "plant_candidate_reference_id": "CANDIDATE-FRUIT-TREE-AGGREGATE-V1",
+      "plant_owner_reference": "FRUIT_ALPHA",
+      "relationship_status": "ELIGIBLE_FOR_CANDIDATE_REPLAY_ONLY",
+      "required_gates": [
+        "LOCAL_RESEARCH_FIXTURE_SCOPE",
+        "EXPLICIT_LOCATION",
+        "CANDIDATE_HABITAT_CELL",
+        "DECLARED_SEASON_LABEL",
+        "FLOWERING_OR_FRUITING_STAGE_REFERENCE",
+        "TEMPERATURE_PROXY_IN_CANDIDATE_ENVELOPE",
+        "WATER_PROXY_AVAILABLE",
+        "ENERGY_PROXY_AVAILABLE",
+        "POPULATION_BELOW_CANDIDATE_CAP",
+        "SOURCE_POLLEN_PROXY_AVAILABLE",
+        "DESTINATION_RECEPTIVITY_PROXY_DECLARED",
+        "POSITIVE_ELAPSED_TIME"
+      ],
+      "visitation_observation": "COUNTED_FIXTURE_EVENT_ONLY",
+      "pollen_pickup": "DIMENSIONLESS_CUSTODY_PROXY_ONLY",
+      "pollen_deposition": "DIMENSIONLESS_CUSTODY_PROXY_ONLY",
+      "future_yield_effect": "NOT_MODELED",
+      "owner_state_mutation": false,
+      "runtime_event_emission": false
+    },
+    {
+      "relationship_id": "POLLINATOR-REL-BEE-TREE-BLOCKED-001",
+      "pollinator_species_reference": "BEE_ALPHA",
+      "plant_candidate_reference_kind": "FOREST_LAYER_ID",
+      "plant_candidate_reference_id": "FOREST-CANOPY-TREE",
+      "plant_owner_reference": "SPECIES-KAIOS-FOUNDATIONAL-TREE",
+      "relationship_status": "BLOCKED_SOURCE_UNDERSPECIFIED",
+      "block_reasons": [
+        "NO_FLOWERING_STATE_IN_FOREST_COMPOSITION_CANDIDATE",
+        "BEE_ALPHA_NOT_ADMITTED_BY_ECOLOGY_SCHEMA",
+        "NO_POLLINATION_OWNER_EVENT"
+      ],
+      "future_yield_effect": "NOT_MODELED",
+      "owner_state_mutation": false,
+      "runtime_event_emission": false
+    },
+    {
+      "relationship_id": "POLLINATOR-REL-BEE-VEGETABLE-BLOCKED-001",
+      "pollinator_species_reference": "BEE_ALPHA",
+      "plant_candidate_reference_kind": "CANDIDATE_PACKAGE_ID",
+      "plant_candidate_reference_id": "CANDIDATE-VEGETABLE-AGGREGATE-PLOT-V1",
+      "plant_owner_reference": null,
+      "relationship_status": "BLOCKED_SOURCE_UNDERSPECIFIED",
+      "block_reasons": [
+        "VEGETABLE_SPECIES_UNRESOLVED",
+        "FLOWERING_STATE_UNRESOLVED",
+        "BEE_ALPHA_NOT_ADMITTED_BY_ECOLOGY_SCHEMA",
+        "NO_POLLINATION_OWNER_EVENT"
+      ],
+      "future_yield_effect": "NOT_MODELED",
+      "owner_state_mutation": false,
+      "runtime_event_emission": false
+    }
+  ],
+  "blocked_insect_candidate_crosswalks": [
+    {
+      "candidate_package_id": "CANDIDATE-INSECT-HERBIVORE-V1",
+      "species_id": "SPECIES-KAIOS-INSECT-HERBIVORE-CANDIDATE",
+      "pollinator_trait_status": "NOT_DECLARED",
+      "relationship_status": "BLOCKED_NO_POLLINATOR_TRAIT",
+      "reason": "The approved insect candidate package explicitly excludes pollination behavior."
+    },
+    {
+      "candidate_package_id": "CANDIDATE-INSECT-PREDATOR-V1",
+      "species_id": "SPECIES-KAIOS-INSECT-PREDATOR-CANDIDATE",
+      "pollinator_trait_status": "NOT_DECLARED",
+      "relationship_status": "BLOCKED_NO_POLLINATOR_TRAIT",
+      "reason": "The role proposal cannot be converted into pollination, predation or pest-control behavior."
+    },
+    {
+      "candidate_package_id": "CANDIDATE-INSECT-DETRITIVORE-V1",
+      "species_id": "SPECIES-KAIOS-INSECT-DETRITIVORE-CANDIDATE",
+      "pollinator_trait_status": "NOT_DECLARED",
+      "relationship_status": "BLOCKED_NO_POLLINATOR_TRAIT",
+      "reason": "The role proposal cannot be converted into pollination or decomposition service behavior."
+    }
+  ],
+  "yield_boundary": {
+    "yield_formula": null,
+    "yield_delta": null,
+    "harvest_delta": null,
+    "inventory_delta": null,
+    "economic_value": null,
+    "status": "NOT_MODELED",
+    "reason": "Visitation and pollen-transfer proxies provide no authority or evidence for a future yield effect."
+  },
+  "foreign_owner_links": [
+    {
+      "link_id": "LINK-CANONICAL-LIFE-SCHEMA",
+      "source_path": "KAIOS_CANONICAL_LIFE_SCHEMA_V1.json",
+      "target": "SHARED_CORE_READ_ONLY",
+      "link_status": "RESOLVED_AT_SOURCE_BASE"
+    },
+    {
+      "link_id": "LINK-ECOLOGY-SCHEMA",
+      "source_path": "KAIOS/life/ecology/KAIOS_REPRODUCTION_ECOLOGY_SCHEMA_V1.json",
+      "target": "SPECIES_AND_EVENT_ENUM_BOUNDARY",
+      "link_status": "RESOLVED_AT_SOURCE_BASE"
+    },
+    {
+      "link_id": "LINK-INSECT-MANIFESTS",
+      "source_path": "KAIOS/life/candidates/forest-agriculture-v1/insect-candidates/insect-candidate-manifests.json",
+      "target": "THREE_NON_POLLINATOR_CANDIDATE_PACKAGES",
+      "link_status": "RESOLVED_AT_SOURCE_BASE"
+    },
+    {
+      "link_id": "LINK-FRUIT-TREE-CATALOG",
+      "source_path": "KAIOS/life/candidates/forest-agriculture-v1/fruit-trees/fruit-tree-catalog-candidates.json",
+      "target": "CANDIDATE-FRUIT-TREE-AGGREGATE-V1",
+      "link_status": "RESOLVED_AT_SOURCE_BASE"
+    },
+    {
+      "link_id": "LINK-FRUIT-TREE-STAGES",
+      "source_path": "KAIOS/life/candidates/forest-agriculture-v1/fruit-trees/fruit-tree-growth-stage-proposals.json",
+      "target": "FLOWERING_OR_FRUITING",
+      "link_status": "RESOLVED_AT_SOURCE_BASE"
+    },
+    {
+      "link_id": "LINK-VEGETABLE-CATALOG",
+      "source_path": "KAIOS/life/candidates/forest-agriculture-v1/vegetables/vegetable-catalog-candidates.json",
+      "target": "CANDIDATE-VEGETABLE-AGGREGATE-PLOT-V1",
+      "link_status": "RESOLVED_AT_SOURCE_BASE"
+    },
+    {
+      "link_id": "LINK-TAXONOMY-BEE",
+      "source_path": "KGEN-KAIOS/world-viewer/biology/taxonomy-standard.js",
+      "target": "BEE_ALPHA",
+      "link_status": "RESOLVED_AT_SOURCE_BASE"
+    }
+  ],
+  "provenance": [
+    {
+      "source_type": "REPOSITORY_DERIVED",
+      "source_path": "KAIOS_CANONICAL_LIFE_SCHEMA_V1.json",
+      "source_commit": "c91d736c9812781d309bfda422b8ed42cd12eb49",
+      "git_object": "3bfcea2e0fc3854a6ff674a93ef32edc2ee0aab5",
+      "sha256": "d1ced898d043e4890142df40a9033145762d4ceb28fd0e49eae39dc43bf224c5"
+    },
+    {
+      "source_type": "REPOSITORY_DERIVED",
+      "source_path": "KAIOS/life/ecology/KAIOS_REPRODUCTION_ECOLOGY_SCHEMA_V1.json",
+      "source_commit": "c91d736c9812781d309bfda422b8ed42cd12eb49",
+      "git_object": "c99eb0eba386af67c009bfd115e88b934d1c9000",
+      "sha256": "3257f8cd1f0ba482f0c6bc8d98fbfb4748c8a1172c9c88d4bf9a2981c90af9f0"
+    },
+    {
+      "source_type": "REPOSITORY_DERIVED",
+      "source_path": "KAIOS/life/candidates/forest-agriculture-v1/insect-candidates/insect-candidate-manifests.json",
+      "source_commit": "c91d736c9812781d309bfda422b8ed42cd12eb49",
+      "git_object": "68e1bc28ea9821f87d20a1d66fc27fd64e0bd444",
+      "sha256": "97e7ce2e2e45f1a4eac24ce8a5db7b5673bd9d5f9920b2e270aa9c21db5a3af7"
+    },
+    {
+      "source_type": "REPOSITORY_DERIVED",
+      "source_path": "KAIOS/life/candidates/forest-agriculture-v1/insect-candidates/insect-taxonomy-proposals.json",
+      "source_commit": "c91d736c9812781d309bfda422b8ed42cd12eb49",
+      "git_object": "f8b2438cb67aea4892885cc9d33e7174aa84c9d1",
+      "sha256": "aa3b771c531f2366dc7e2531bfde421b31835ee9335219cdbd4dba063a759fae"
+    },
+    {
+      "source_type": "REPOSITORY_DERIVED",
+      "source_path": "KAIOS/life/candidates/forest-agriculture-v1/fruit-trees/fruit-tree-catalog-candidates.json",
+      "source_commit": "c91d736c9812781d309bfda422b8ed42cd12eb49",
+      "git_object": "2c11bdd2985c8e8c56fa6d91dbb5f50d00888136",
+      "sha256": "fcbaa9bc1ad6f4823aca7c25640daeb2159fb319ea781b770d92d457b9b78153"
+    },
+    {
+      "source_type": "REPOSITORY_DERIVED",
+      "source_path": "KAIOS/life/candidates/forest-agriculture-v1/fruit-trees/fruit-tree-growth-stage-proposals.json",
+      "source_commit": "c91d736c9812781d309bfda422b8ed42cd12eb49",
+      "git_object": "136ffbc7ad3800b8b53e1d9760e855381d3f4553",
+      "sha256": "dc33547e13b34196eb42b36add945225538e955a7bfa024fb385425ea37eddba"
+    },
+    {
+      "source_type": "REPOSITORY_DERIVED",
+      "source_path": "KAIOS/life/candidates/forest-agriculture-v1/vegetables/vegetable-catalog-candidates.json",
+      "source_commit": "c91d736c9812781d309bfda422b8ed42cd12eb49",
+      "git_object": "5f33d11528d7ea14eb26417224a85cece1392144",
+      "sha256": "77cc5dd2e4b6264d5fe8d015881858a2c76f5a522d567a185061b919bbad8cd6"
+    },
+    {
+      "source_type": "REPOSITORY_DERIVED",
+      "source_path": "KGEN-KAIOS/world-viewer/biology/taxonomy-standard.js",
+      "source_commit": "c91d736c9812781d309bfda422b8ed42cd12eb49",
+      "git_object": "f4cc78d30bccf375bb3e55f5e3cb2df63d0a4683",
+      "sha256": "2c7eb6d439ac320176751c4985d1f510b68a5656ef4b4ef041dc46b4f55dcc28"
+    },
+    {
+      "source_type": "REPOSITORY_DERIVED",
+      "source_path": "KGEN-KAIOS/world-viewer/data/synthetic-world.json",
+      "source_commit": "c91d736c9812781d309bfda422b8ed42cd12eb49",
+      "git_object": "76ddff32f74c2b41ca7d9d9309b7b39a2a2618c8",
+      "sha256": "4be4c1b83420bb24604742fb722a8aedba8b3d2c163f7f18ccd871628ee7f34f"
+    }
+  ],
+  "boundaries": {
+    "research_proposal_only": true,
+    "pending_codex_review": true,
+    "production_authority": false,
+    "runtime_activation": false,
+    "canonical_promotion": false,
+    "new_life_package": false,
+    "yield_claim": false,
+    "pest_control_behavior": false,
+    "disease_behavior": false,
+    "pesticide_behavior": false,
+    "uncontrolled_reproduction": false,
+    "external_autonomy": false
+  }
+}

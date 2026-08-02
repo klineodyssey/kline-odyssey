@@ -1,0 +1,644 @@
+{
+  "dataset_id": "KAIOS-POLLINATOR-RESEARCH-TEST-SCENARIOS-V1",
+  "schema_version": "1.0.0",
+  "status": "RESEARCH_PROPOSAL_ONLY",
+  "review_status": "PENDING_CODEX_REVIEW",
+  "authority": "NO_PRODUCTION_AUTHORITY",
+  "task_id": "KAIOS-CURSOR-POLLINATOR-RESEARCH-001",
+  "worker_id": "cursor-01",
+  "branch": "cursor-handoff/KAIOS-CURSOR-POLLINATOR-RESEARCH-001",
+  "dispatch_branch_base_commit": "cbe49d67bca14fff06e2d1d1209ccc7e8836beb8",
+  "source_base_commit": "c91d736c9812781d309bfda422b8ed42cd12eb49",
+  "source_hash_basis": "SHA256_OF_EXACT_GIT_BLOB_BYTES_AT_SOURCE_BASE_COMMIT",
+  "test_mode": "OBJECTIVE_STATIC_AND_DETERMINISTIC_REPLAY",
+  "required_output_manifest": [
+    "CURSOR_POLLINATOR_RESEARCH_REPORT.md",
+    "pollinator-relationship-proposals.json",
+    "pollinator-habitat-season-proposals.json",
+    "pollination-resource-time-scenarios.json",
+    "pollinator-risk-boundary-proposals.json",
+    "pollinator-test-scenarios.json"
+  ],
+  "parameter_contract": {
+    "required_fields": [
+      "parameter_name",
+      "unit",
+      "minimum",
+      "default",
+      "maximum",
+      "rationale",
+      "source_type",
+      "confidence",
+      "risk",
+      "validation_required"
+    ],
+    "allowed_source_types": [
+      "SOURCE_DERIVED",
+      "REPOSITORY_DERIVED",
+      "MODEL_INFERENCE",
+      "RESEARCH_PROPOSAL",
+      "ASSUMPTION",
+      "SOURCE_UNDERSPECIFIED"
+    ],
+    "bounds_rule": "MINIMUM_LE_DEFAULT_LE_MAXIMUM",
+    "validation_required_rule": "TRUE_FOR_EVERY_PARAMETER"
+  },
+  "oracle_reference": {
+    "source_file": "pollination-resource-time-scenarios.json",
+    "oracle_id": "POLLINATOR-RESOURCE-TIME-ORACLE-001",
+    "action_count": 4,
+    "closed_ledger_count": 7,
+    "expected_final_sha256": "e7a0fab6589918a6054583f33a5053add3d7ad7877426bbae4233988b2e37e29",
+    "second_replay_required": true
+  },
+  "link_validation_manifest": [
+    {
+      "link_id": "LINK-TEST-BEE-TAXONOMY",
+      "source_path": "KGEN-KAIOS/world-viewer/biology/taxonomy-standard.js",
+      "target_id": "BEE_ALPHA",
+      "expected_result": "EXACT_IDENTIFIER_PRESENT"
+    },
+    {
+      "link_id": "LINK-TEST-BEE-SYNTHETIC-WORLD",
+      "source_path": "KGEN-KAIOS/world-viewer/data/synthetic-world.json",
+      "target_id": "BEE_ALPHA",
+      "expected_result": "EXACT_IDENTIFIER_PRESENT_BUT_POPULATION_AND_STAGE_NOT_IMPORTED"
+    },
+    {
+      "link_id": "LINK-TEST-INSECT-CANDIDATES",
+      "source_path": "KAIOS/life/candidates/forest-agriculture-v1/insect-candidates/insect-candidate-manifests.json",
+      "target_id": "THREE_CANDIDATE_PACKAGE_IDS",
+      "expected_result": "ALL_PRESENT_AND_POLLINATION_EXCLUDED"
+    },
+    {
+      "link_id": "LINK-TEST-FRUIT-PACKAGE",
+      "source_path": "KAIOS/life/candidates/forest-agriculture-v1/fruit-trees/fruit-tree-catalog-candidates.json",
+      "target_id": "CANDIDATE-FRUIT-TREE-AGGREGATE-V1",
+      "expected_result": "EXACT_IDENTIFIER_PRESENT"
+    },
+    {
+      "link_id": "LINK-TEST-FRUIT-STAGE",
+      "source_path": "KAIOS/life/candidates/forest-agriculture-v1/fruit-trees/fruit-tree-growth-stage-proposals.json",
+      "target_id": "FLOWERING_OR_FRUITING",
+      "expected_result": "EXACT_STAGE_PRESENT_AND_POLLINATION_UNRESOLVED"
+    },
+    {
+      "link_id": "LINK-TEST-VEGETABLE-PACKAGE",
+      "source_path": "KAIOS/life/candidates/forest-agriculture-v1/vegetables/vegetable-catalog-candidates.json",
+      "target_id": "CANDIDATE-VEGETABLE-AGGREGATE-PLOT-V1",
+      "expected_result": "EXACT_IDENTIFIER_PRESENT_WITH_NULL_SPECIES"
+    },
+    {
+      "link_id": "LINK-TEST-FOREST-HABITAT",
+      "source_path": "KAIOS/life/candidates/ecology-v1/habitat-compatibility.json",
+      "target_id": "HABITAT-FOREST-V1",
+      "expected_result": "EXACT_IDENTIFIER_PRESENT_WITHOUT_POLLINATOR_ADMISSION"
+    },
+    {
+      "link_id": "LINK-TEST-SEASON-LABELS",
+      "source_path": "KAIOS/life/ecology/KAIOS_REPRODUCTION_ECOLOGY_SCHEMA_V1.json",
+      "target_id": "SPRING_SUMMER_AUTUMN_WINTER",
+      "expected_result": "EXACT_ENUM_SET_PRESENT"
+    },
+    {
+      "link_id": "LINK-TEST-NO-POLLINATION-EVENT",
+      "source_path": "KAIOS/life/ecology/KAIOS_REPRODUCTION_ECOLOGY_SCHEMA_V1.json",
+      "target_id": "POLLINATION_EVENT",
+      "expected_result": "IDENTIFIER_ABSENT"
+    },
+    {
+      "link_id": "LINK-TEST-AGRICULTURE-FRUIT",
+      "source_path": "KGEN-KAIOS/world-viewer/agriculture/agriculture-runtime.js",
+      "target_id": "FRUIT",
+      "expected_result": "OWNER_CROP_PRESENT_BUT_NO_POLLINATION_CAUSE"
+    },
+    {
+      "link_id": "LINK-TEST-ECOSYSTEM-OWNER",
+      "source_path": "KGEN-KAIOS/world-viewer/ecosystem/ecosystem-runtime.js",
+      "target_id": "createEcosystemRuntime",
+      "expected_result": "EXACT_EXPORT_PRESENT_AND_UNMODIFIED"
+    }
+  ],
+  "scenarios": [
+    {
+      "test_id": "POLLINATOR-SCOPE-001",
+      "name": "Exactly six allowed outputs exist",
+      "given": ["GIT_STATUS_FROM_DISPATCH_BRANCH_BASE"],
+      "when": ["ENUMERATE_CHANGED_PATHS", "ENUMERATE_OUTPUT_DIRECTORY"],
+      "then": ["EXACT_REQUIRED_OUTPUT_MANIFEST", "NO_FILE_OUTSIDE_ALLOWED_DIRECTORY", "NO_EXTRA_OUTPUT"]
+    },
+    {
+      "test_id": "POLLINATOR-JSON-001",
+      "name": "Every JSON artifact is strict and duplicate-key free",
+      "given": ["FIVE_JSON_OUTPUTS"],
+      "when": ["PARSE_WITH_DUPLICATE_KEY_REJECTION"],
+      "then": ["ALL_PARSE", "NO_DUPLICATE_KEY"]
+    },
+    {
+      "test_id": "POLLINATOR-PARAMETER-001",
+      "name": "Every numeric parameter has a complete validated contract",
+      "given": ["ALL_PARAMETER_OBJECTS"],
+      "when": ["CHECK_EXACT_FIELDS", "CHECK_BOUNDS", "CHECK_SOURCE_LABELS"],
+      "then": ["ALL_FIELDS_PRESENT", "MINIMUM_LE_DEFAULT_LE_MAXIMUM", "VALIDATION_REQUIRED_TRUE"]
+    },
+    {
+      "test_id": "POLLINATOR-STATUS-001",
+      "name": "Every artifact preserves the research-only status triple",
+      "given": ["ALL_SIX_OUTPUTS"],
+      "when": ["INSPECT_METADATA_AND_REPORT"],
+      "then": ["RESEARCH_PROPOSAL_ONLY", "PENDING_CODEX_REVIEW", "NO_PRODUCTION_AUTHORITY"]
+    },
+    {
+      "test_id": "POLLINATOR-PROVENANCE-001",
+      "name": "Every source record resolves to immutable Git blob bytes",
+      "given": ["PACKAGE_PROVENANCE_REGISTRY", "SOURCE_BASE_COMMIT"],
+      "when": ["RESOLVE_GIT_OBJECT", "HASH_EXACT_BLOB_BYTES"],
+      "then": ["ALL_GIT_OBJECTS_MATCH", "ALL_SHA256_VALUES_MATCH"]
+    },
+    {
+      "test_id": "POLLINATOR-PROVENANCE-FAIL-001",
+      "name": "Missing or altered provenance rejects the package",
+      "given": ["ONE_SOURCE_RECORD_MISSING_OR_CHANGED"],
+      "when": ["VALIDATE_PACKAGE_PROVENANCE"],
+      "then": ["REJECT_PACKAGE"]
+    },
+    {
+      "test_id": "POLLINATOR-LINK-001",
+      "name": "Every foreign-owner link is objective and source-base resolvable",
+      "given": ["LINK_VALIDATION_MANIFEST", "SOURCE_BASE_BLOBS"],
+      "when": ["VALIDATE_TARGET_IDENTIFIERS_AND_EXPECTED_ABSENCE"],
+      "then": ["ALL_LINK_ASSERTIONS_PASS", "NO_DANGLING_SOURCE_PATH"]
+    },
+    {
+      "test_id": "POLLINATOR-IDENTITY-001",
+      "name": "BEE_ALPHA remains a synthetic identity reference only",
+      "given": ["BEE_ALPHA_TAXONOMY", "SYNTHETIC_WORLD_RECORD"],
+      "when": ["BUILD_RESEARCH_REFERENCE"],
+      "then": ["NO_CANONICAL_LIFE_INSTANCE", "NO_ECOLOGY_ADMISSION", "NO_OWNER_MUTATION"]
+    },
+    {
+      "test_id": "POLLINATOR-IDENTITY-002",
+      "name": "Synthetic-world stage and population are not imported",
+      "given": ["BEE_ALPHA_SYNTHETIC_WORLD_RECORD"],
+      "when": ["INSPECT_FIXTURE_IDENTITY_AND_POPULATION"],
+      "then": ["EVOLUTION_STAGE_NOT_IMPORTED", "SOURCE_POPULATION_NOT_IMPORTED", "LOCAL_FIXTURE_COUNT_ONLY"]
+    },
+    {
+      "test_id": "POLLINATOR-INSECT-001",
+      "name": "All three insect candidates remain blocked from pollinator status",
+      "given": ["THREE_MERGED_INSECT_CANDIDATES"],
+      "when": ["CHECK_POLLINATOR_TRAIT_AND_BOUNDARIES"],
+      "then": ["ALL_THREE_POLLINATOR_TRAITS_NOT_DECLARED", "ALL_THREE_RELATIONSHIPS_BLOCKED"]
+    },
+    {
+      "test_id": "POLLINATOR-RELATIONSHIP-001",
+      "name": "Visitation pickup deposition and yield remain separate",
+      "given": ["RELATIONSHIP_CONTRACT"],
+      "when": ["INSPECT_ORDERED_RESEARCH_STATES"],
+      "then": ["FOUR_DISTINCT_STATES", "NO_IMPLICIT_TRANSITION", "YIELD_NOT_MODELED"]
+    },
+    {
+      "test_id": "POLLINATOR-RELATIONSHIP-002",
+      "name": "Fruit relationship is eligible only for local candidate replay",
+      "given": ["POLLINATOR-REL-BEE-FRUIT-RESEARCH-001"],
+      "when": ["CHECK_ALL_CANDIDATE_GATES"],
+      "then": ["LOCAL_REPLAY_ALLOWED", "RUNTIME_EVENT_FALSE", "OWNER_MUTATION_FALSE"]
+    },
+    {
+      "test_id": "POLLINATOR-RELATIONSHIP-003",
+      "name": "Foundational tree relationship blocks without flowering state",
+      "given": ["FOREST-CANOPY-TREE", "HABITAT-FOREST-V1"],
+      "when": ["EVALUATE_RELATIONSHIP"],
+      "then": ["BLOCKED_SOURCE_UNDERSPECIFIED", "ZERO_DELTAS"]
+    },
+    {
+      "test_id": "POLLINATOR-RELATIONSHIP-004",
+      "name": "Vegetable relationship blocks without species and flowering state",
+      "given": ["CANDIDATE-VEGETABLE-AGGREGATE-PLOT-V1"],
+      "when": ["EVALUATE_RELATIONSHIP"],
+      "then": ["BLOCKED_SOURCE_UNDERSPECIFIED", "ZERO_DELTAS"]
+    },
+    {
+      "test_id": "POLLINATOR-ECOLOGY-001",
+      "name": "Current Ecology schema cannot silently admit pollinator identities",
+      "given": ["ECOLOGY_SPECIES_ENUM"],
+      "when": ["COMPARE_BEE_AND_INSECT_CANDIDATE_IDS"],
+      "then": ["ALL_IDS_ABSENT", "OWNER_SCHEMA_REVIEW_REQUIRED"]
+    },
+    {
+      "test_id": "POLLINATOR-ECOLOGY-002",
+      "name": "Current Ecology schema has no pollination event",
+      "given": ["ECOLOGY_ENTITY_AND_EVENT_ENUMS"],
+      "when": ["SEARCH_EXACT_POLLINATION_EVENT"],
+      "then": ["POLLINATION_EVENT_ABSENT", "RUNTIME_EVENT_EMISSION_BLOCKED"]
+    },
+    {
+      "test_id": "POLLINATOR-LOCATION-001",
+      "name": "Missing location blocks with zero deltas",
+      "given": ["OTHER_GATES_PASS", "LOCATION_MISSING"],
+      "when": ["EVALUATE_CANDIDATE_EVENT"],
+      "then": ["BLOCKED_NO_DELTA"]
+    },
+    {
+      "test_id": "POLLINATOR-HABITAT-001",
+      "name": "Missing candidate habitat cell blocks with zero deltas",
+      "given": ["OTHER_GATES_PASS", "HABITAT_CELL_MISSING"],
+      "when": ["EVALUATE_CANDIDATE_EVENT"],
+      "then": ["BLOCKED_NO_DELTA"]
+    },
+    {
+      "test_id": "POLLINATOR-SEASON-001",
+      "name": "Season label must be in the Ecology enum",
+      "given": ["UNRECOGNIZED_SEASON_LABEL"],
+      "when": ["VALIDATE_SEASON"],
+      "then": ["REJECT_FIXTURE"]
+    },
+    {
+      "test_id": "POLLINATOR-SEASON-002",
+      "name": "Season label alone cannot enable an event",
+      "given": ["VALID_SEASON_LABEL", "SEASON_OPEN_FLAG_MISSING_OR_FALSE"],
+      "when": ["EVALUATE_CANDIDATE_EVENT"],
+      "then": ["BLOCKED_NO_DELTA"]
+    },
+    {
+      "test_id": "POLLINATOR-TEMPERATURE-001",
+      "name": "Out-of-envelope temperature proxy blocks",
+      "given": ["TEMPERATURE_PROXY_OUT_OF_CANDIDATE_ENVELOPE"],
+      "when": ["EVALUATE_CANDIDATE_EVENT"],
+      "then": ["BLOCKED_NO_DELTA"]
+    },
+    {
+      "test_id": "POLLINATOR-WATER-001",
+      "name": "Insufficient water proxy blocks before debit",
+      "given": ["INSUFFICIENT_WATER_PROXY"],
+      "when": ["EVALUATE_CANDIDATE_EVENT"],
+      "then": ["BLOCKED_NO_DELTA", "NO_NEGATIVE_POOL"]
+    },
+    {
+      "test_id": "POLLINATOR-ENERGY-001",
+      "name": "Insufficient energy proxy blocks before debit",
+      "given": ["INSUFFICIENT_ENERGY_PROXY"],
+      "when": ["EVALUATE_CANDIDATE_EVENT"],
+      "then": ["BLOCKED_NO_DELTA", "NO_NEGATIVE_POOL"]
+    },
+    {
+      "test_id": "POLLINATOR-POPULATION-001",
+      "name": "Population cap blocks an excess fixture cohort",
+      "given": ["POPULATION_AT_OR_ABOVE_CANDIDATE_CAP"],
+      "when": ["EVALUATE_CANDIDATE_EVENT"],
+      "then": ["BLOCKED_NO_DELTA", "NO_BIRTH_OR_MIGRATION"]
+    },
+    {
+      "test_id": "POLLINATOR-TIME-001",
+      "name": "No candidate event completes instantly",
+      "given": ["ZERO_OR_NEGATIVE_ELAPSED_TIME"],
+      "when": ["EVALUATE_CANDIDATE_EVENT"],
+      "then": ["BLOCKED_NO_DELTA"]
+    },
+    {
+      "test_id": "POLLINATOR-WORKER-001",
+      "name": "Normal replay is worker independent",
+      "given": ["NORMAL_ORACLE"],
+      "when": ["INSPECT_GATES_DELTAS_AND_IDENTIFIERS"],
+      "then": ["NO_WORKER_ID", "NO_LABOR_LEDGER", "NO_EQUIPMENT_ID", "NO_INTERVENTION_EVENT"]
+    },
+    {
+      "test_id": "POLLINATOR-ORACLE-001",
+      "name": "Normal oracle replays to exact final state and hash",
+      "given": ["INITIAL_STATE", "FOUR_ORDERED_ACTIONS"],
+      "when": ["REPLAY_SIGNED_INTEGER_DELTAS", "CANONICALIZE_FINAL_STATE"],
+      "then": ["EXPECTED_FINAL_STATE_EXACT", "EXPECTED_SHA256_EXACT", "SECOND_REPLAY_IDENTICAL"]
+    },
+    {
+      "test_id": "POLLINATOR-ORACLE-002",
+      "name": "Every present conserved action domain balances",
+      "given": ["FOUR_ORDERED_ACTIONS"],
+      "when": ["SUM_EACH_PRESENT_DOMAIN_DELTA"],
+      "then": ["EVERY_SUM_ZERO", "NO_NEGATIVE_POOL_AFTER_ACTION"]
+    },
+    {
+      "test_id": "POLLINATOR-MASS-001",
+      "name": "Structural mass closes independently from pollen proxy",
+      "given": ["INITIAL_AND_FINAL_STRUCTURAL_MASS_POOLS"],
+      "when": ["SUM_POOLS"],
+      "then": ["INITIAL_EQUALS_FINAL", "RESIDUAL_ZERO", "POLLEN_PROXY_EXCLUDED"]
+    },
+    {
+      "test_id": "POLLINATOR-WATER-002",
+      "name": "Water closes",
+      "given": ["INITIAL_AND_FINAL_WATER_POOLS"],
+      "when": ["SUM_POOLS"],
+      "then": ["INITIAL_EQUALS_FINAL", "RESIDUAL_ZERO"]
+    },
+    {
+      "test_id": "POLLINATOR-ENERGY-002",
+      "name": "Energy proxy closes",
+      "given": ["INITIAL_AND_FINAL_ENERGY_POOLS"],
+      "when": ["SUM_POOLS"],
+      "then": ["INITIAL_EQUALS_FINAL", "RESIDUAL_ZERO"]
+    },
+    {
+      "test_id": "POLLINATOR-POLLEN-PROXY-001",
+      "name": "Pollen-transfer proxy custody closes without physical conversion",
+      "given": ["INITIAL_AND_FINAL_POLLEN_PROXY_POOLS"],
+      "when": ["SUM_POOLS", "INSPECT_UNIT_BOUNDARY"],
+      "then": ["INITIAL_EQUALS_FINAL", "RESIDUAL_ZERO", "NO_MASS_GRAIN_VIABILITY_OR_CHEMISTRY_CONVERSION"]
+    },
+    {
+      "test_id": "POLLINATOR-EVENT-001",
+      "name": "Visitation event accounting closes",
+      "given": ["FINAL_VISITATION_EVENT_COUNTS"],
+      "when": ["CHECK_ATTEMPT_IDENTITY_AND_UNIQUE_EVENT_IDS"],
+      "then": ["ATTEMPTED_EQUALS_COMPLETED_PLUS_BLOCKED", "EVENT_IDS_UNIQUE"]
+    },
+    {
+      "test_id": "POLLINATOR-POPULATION-002",
+      "name": "Normal population remains constant and below cap",
+      "given": ["NORMAL_ORACLE_POPULATION"],
+      "when": ["CHECK_COUNT_AND_ACTIONS"],
+      "then": ["INITIAL_EQUALS_FINAL", "FINAL_BELOW_CAP", "NO_BIRTH_DEATH_MIGRATION_OR_REPRODUCTION"]
+    },
+    {
+      "test_id": "POLLINATOR-YIELD-001",
+      "name": "Yield remains not modeled after deposition proxy",
+      "given": ["EXPECTED_FINAL_STATE"],
+      "when": ["INSPECT_YIELD_EFFECT_AND_OWNER_DELTAS"],
+      "then": ["STATUS_NOT_MODELED", "QUANTITY_NULL", "UNIT_NULL", "MUTATION_UNAUTHORIZED", "NO_HARVEST_INVENTORY_OR_VALUE_DELTA"]
+    },
+    {
+      "test_id": "POLLINATOR-LEDGER-FAIL-001",
+      "name": "Any nonzero ledger residual rejects the fixture",
+      "given": ["ONE_LEDGER_TAMPERED"],
+      "when": ["VALIDATE_ALL_SEVEN_LEDGERS"],
+      "then": ["REJECT_FIXTURE"]
+    },
+    {
+      "test_id": "POLLINATOR-REPLAY-FAIL-001",
+      "name": "Duplicate or out-of-order events reject replay",
+      "given": ["DUPLICATE_EVENT_ID_OR_SEQUENCE_GAP"],
+      "when": ["REPLAY_ORACLE"],
+      "then": ["REJECT_FIXTURE"]
+    },
+    {
+      "test_id": "POLLINATOR-RISK-001",
+      "name": "Pest control disease and pesticide behavior remain absent",
+      "given": ["ALL_RESEARCH_ARTIFACTS"],
+      "when": ["INSPECT_RELATIONSHIPS_ACTIONS_EFFECTS_AND_BOUNDARIES"],
+      "then": ["NO_PEST_CONTROL", "NO_ACTIVE_PREDATION", "NO_DISEASE_MODEL", "NO_PESTICIDE_MODEL"]
+    },
+    {
+      "test_id": "POLLINATOR-RIGHTS-ECONOMY-001",
+      "name": "No rights Economy inventory or settlement state is created",
+      "given": ["ALL_RESEARCH_ARTIFACTS"],
+      "when": ["INSPECT_OWNER_EFFECTS"],
+      "then": ["NO_RIGHT_GRANTED", "NO_PRICE_OR_VALUE", "NO_INVENTORY", "NO_LEDGER_OR_SETTLEMENT"]
+    },
+    {
+      "test_id": "POLLINATOR-PROTECTED-001",
+      "name": "Protected authority and executable surfaces remain unchanged",
+      "given": ["GIT_DIFF_FROM_DISPATCH_BRANCH_BASE"],
+      "when": ["SCAN_CHANGED_PATHS_AND_CONTENT"],
+      "then": ["NO_RUNTIME", "NO_CURRENT", "NO_CANONICAL_OR_ORGANISM_SCHEMA", "NO_UNIVERSE_PHYSICS", "NO_WALLET_OR_KGEN", "NO_DEPLOYMENT_OR_GOVERNANCE"]
+    }
+  ],
+  "required_validations": [
+    "EXACT_SIX_FILE_SCOPE",
+    "STRICT_JSON_PARSE",
+    "DUPLICATE_KEY_REJECTION",
+    "RESEARCH_STATUS_TRIPLE",
+    "NUMERIC_PARAMETER_CONTRACTS",
+    "ALLOWED_SOURCE_TYPE_LABELS",
+    "RELATIONSHIP_STATE_SEPARATION",
+    "IDENTITY_AND_CANDIDATE_BOUNDARIES",
+    "ECOLOGY_SPECIES_ADMISSION_BOUNDARY",
+    "ECOLOGY_EVENT_ENUM_BOUNDARY",
+    "LOCATION_HABITAT_SEASON_TEMPERATURE_GATES",
+    "WORKER_INDEPENDENT_RESOURCE_GATES",
+    "POPULATION_CAP_GATE",
+    "POSITIVE_TIME_GATE",
+    "DETERMINISTIC_ORACLE_REPLAY",
+    "ACTION_DOMAIN_ZERO_SUM",
+    "STRUCTURAL_MASS_CLOSURE",
+    "WATER_CLOSURE",
+    "ENERGY_PROXY_CLOSURE",
+    "POLLEN_PROXY_CUSTODY_CLOSURE",
+    "VISITATION_EVENT_ACCOUNTING_CLOSURE",
+    "POPULATION_AND_TIME_CLOSURE",
+    "YIELD_NOT_MODELED_BOUNDARY",
+    "FOREIGN_OWNER_LINK_RESOLUTION",
+    "IMMUTABLE_GIT_OBJECT_AND_SHA256",
+    "UTF8_WITHOUT_BOM_NUL_OR_REPLACEMENT",
+    "FOCUSED_SECRET_SCAN",
+    "PROTECTED_PATH_SCAN",
+    "GIT_DIFF_CHECK"
+  ],
+  "dispatch_control_provenance": [
+    {
+      "source_type": "REPOSITORY_DERIVED",
+      "source_path": "KAIOS/life/candidates/forest-agriculture-v1/CURSOR_POLLINATOR_RESEARCH_WORK_ORDER.md",
+      "source_commit": "cbe49d67bca14fff06e2d1d1209ccc7e8836beb8",
+      "git_object": "c27f5d49a8cdea487f944866e4de563322f6451d",
+      "sha256": "02f0c0b804c485050a94255a698a15fe11dcaac70d1c48bed9282f10a81aba12"
+    },
+    {
+      "source_type": "REPOSITORY_DERIVED",
+      "source_path": "KGEN-KAIOS/worker_registry.json",
+      "source_commit": "cbe49d67bca14fff06e2d1d1209ccc7e8836beb8",
+      "git_object": "1c1b136039f29e3c666a3c4ce794c784c819fab2",
+      "sha256": "57b31265b53f0ade68903b73d99a80ac568680f3ca690ac4a724cfd3734389a3"
+    }
+  ],
+  "package_provenance_registry": [
+    {
+      "source_type": "REPOSITORY_DERIVED",
+      "source_path": "docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md",
+      "source_commit": "c91d736c9812781d309bfda422b8ed42cd12eb49",
+      "git_object": "f9748c99501ec1c1ea6ba5c39833909684c0ffbe",
+      "sha256": "6d71cd7946f0b4057a9b5289923d3c7b424e409140feb7404f5b433a309ab00b"
+    },
+    {
+      "source_type": "REPOSITORY_DERIVED",
+      "source_path": "docs/maps/UniverseMap_V10_2_DISTANCE_COMPLETE_ALL_POINTS.json",
+      "source_commit": "c91d736c9812781d309bfda422b8ed42cd12eb49",
+      "git_object": "0f97fc7e723fc97cd8366a10f0c9eb7892df4605",
+      "sha256": "bfde25dfb2737e6f698850aa705ea221c64bb0f228ff8e3a7f2740f0ae123451"
+    },
+    {
+      "source_type": "REPOSITORY_DERIVED",
+      "source_path": "KAIOS_CANONICAL_LIFE_SCHEMA_V1.json",
+      "source_commit": "c91d736c9812781d309bfda422b8ed42cd12eb49",
+      "git_object": "3bfcea2e0fc3854a6ff674a93ef32edc2ee0aab5",
+      "sha256": "d1ced898d043e4890142df40a9033145762d4ceb28fd0e49eae39dc43bf224c5"
+    },
+    {
+      "source_type": "REPOSITORY_DERIVED",
+      "source_path": "KAIOS_CANONICAL_LIFE_TYPE_EXTENSIONS_V1.json",
+      "source_commit": "c91d736c9812781d309bfda422b8ed42cd12eb49",
+      "git_object": "8f3a30d1cba18b7156c64439bfce5d9bafc6926e",
+      "sha256": "72ab55fe394b1038cb2b8ab8bac616f378521b89fde36aa6cf5ab3cbebea58fa"
+    },
+    {
+      "source_type": "REPOSITORY_DERIVED",
+      "source_path": "KAIOS/life/KAIOS_LIFE_RUNTIME_V1_SPEC.md",
+      "source_commit": "c91d736c9812781d309bfda422b8ed42cd12eb49",
+      "git_object": "e1df7d486971684f9cd8020b9005a9fdcc389ce4",
+      "sha256": "bc69596af470812bdfcbaa1989cf4cb59887c35f46f1c97d52f6d3dba87eb655"
+    },
+    {
+      "source_type": "REPOSITORY_DERIVED",
+      "source_path": "KAIOS/life/ecology/KAIOS_REPRODUCTION_ECOLOGY_RUNTIME_V1_SPEC.md",
+      "source_commit": "c91d736c9812781d309bfda422b8ed42cd12eb49",
+      "git_object": "0f4399751f4e75727aeac45343a8b3a8900ec534",
+      "sha256": "7fb277af16f552b16db2f4cb511fd060e4e3a5217855198f30fcf59371b8eda1"
+    },
+    {
+      "source_type": "REPOSITORY_DERIVED",
+      "source_path": "KAIOS/life/ecology/KAIOS_REPRODUCTION_ECOLOGY_SCHEMA_V1.json",
+      "source_commit": "c91d736c9812781d309bfda422b8ed42cd12eb49",
+      "git_object": "c99eb0eba386af67c009bfd115e88b934d1c9000",
+      "sha256": "3257f8cd1f0ba482f0c6bc8d98fbfb4748c8a1172c9c88d4bf9a2981c90af9f0"
+    },
+    {
+      "source_type": "REPOSITORY_DERIVED",
+      "source_path": "KAIOS/life/candidates/ecology-v1/habitat-compatibility.json",
+      "source_commit": "c91d736c9812781d309bfda422b8ed42cd12eb49",
+      "git_object": "365c7bbaffdf6754ebed3a6435cda73e45b191b5",
+      "sha256": "f1dc488b8795ca5ad5a2e320f0502696d01a66329253b9922754bfc48ef37050"
+    },
+    {
+      "source_type": "REPOSITORY_DERIVED",
+      "source_path": "KAIOS/life/candidates/ecology-v1/environmental-thresholds.json",
+      "source_commit": "c91d736c9812781d309bfda422b8ed42cd12eb49",
+      "git_object": "23ddb953a0e31d681a074a4a42dd42d90f78a8a3",
+      "sha256": "00c560db5e56220342fb57548af999ca76a490816ca32c1c23314fbd3a65b790"
+    },
+    {
+      "source_type": "REPOSITORY_DERIVED",
+      "source_path": "KAIOS/life/candidates/ecology-v1/population-scenarios.json",
+      "source_commit": "c91d736c9812781d309bfda422b8ed42cd12eb49",
+      "git_object": "80d2c522ff439280a932bd96914dc8ee04815c5d",
+      "sha256": "7d0a4ae68343ac672362750f1db87bcb9776df6f362e50857613a6bd6bb3beda"
+    },
+    {
+      "source_type": "REPOSITORY_DERIVED",
+      "source_path": "KAIOS/life/forest-agriculture/KAIOS_FOREST_AGRICULTURE_RUNTIME_V1_SPEC.md",
+      "source_commit": "c91d736c9812781d309bfda422b8ed42cd12eb49",
+      "git_object": "9a2dd4ad05bb7b2e3d71b91b479359947ada8376",
+      "sha256": "4e1a23e97d09ec2dc4ad65440e6958e646f75ed418e5c703c5a5a1635c2809a1"
+    },
+    {
+      "source_type": "REPOSITORY_DERIVED",
+      "source_path": "KAIOS/life/candidates/forest-agriculture-v1/forest/forest-composition-candidates.json",
+      "source_commit": "c91d736c9812781d309bfda422b8ed42cd12eb49",
+      "git_object": "e4e63adb992337dc333c4de78152903234d8a46d",
+      "sha256": "007323cb9cad66726b0b1cfe86f05eeda01dbce5d783832e730828299f287e8d"
+    },
+    {
+      "source_type": "REPOSITORY_DERIVED",
+      "source_path": "KAIOS/life/candidates/forest-agriculture-v1/fruit-trees/fruit-tree-catalog-candidates.json",
+      "source_commit": "c91d736c9812781d309bfda422b8ed42cd12eb49",
+      "git_object": "2c11bdd2985c8e8c56fa6d91dbb5f50d00888136",
+      "sha256": "fcbaa9bc1ad6f4823aca7c25640daeb2159fb319ea781b770d92d457b9b78153"
+    },
+    {
+      "source_type": "REPOSITORY_DERIVED",
+      "source_path": "KAIOS/life/candidates/forest-agriculture-v1/fruit-trees/fruit-tree-environment-thresholds.json",
+      "source_commit": "c91d736c9812781d309bfda422b8ed42cd12eb49",
+      "git_object": "2c6df6a7e04f99f2391af15b4f2b496a3f3d526a",
+      "sha256": "d3512369c1ef59a99dd16859c151ec0ecd27d58e84bdf380b35f9d04f6a68e1f"
+    },
+    {
+      "source_type": "REPOSITORY_DERIVED",
+      "source_path": "KAIOS/life/candidates/forest-agriculture-v1/fruit-trees/fruit-tree-growth-stage-proposals.json",
+      "source_commit": "c91d736c9812781d309bfda422b8ed42cd12eb49",
+      "git_object": "136ffbc7ad3800b8b53e1d9760e855381d3f4553",
+      "sha256": "dc33547e13b34196eb42b36add945225538e955a7bfa024fb385425ea37eddba"
+    },
+    {
+      "source_type": "REPOSITORY_DERIVED",
+      "source_path": "KAIOS/life/candidates/forest-agriculture-v1/vegetables/vegetable-catalog-candidates.json",
+      "source_commit": "c91d736c9812781d309bfda422b8ed42cd12eb49",
+      "git_object": "5f33d11528d7ea14eb26417224a85cece1392144",
+      "sha256": "77cc5dd2e4b6264d5fe8d015881858a2c76f5a522d567a185061b919bbad8cd6"
+    },
+    {
+      "source_type": "REPOSITORY_DERIVED",
+      "source_path": "KAIOS/life/candidates/forest-agriculture-v1/vegetables/vegetable-environment-thresholds.json",
+      "source_commit": "c91d736c9812781d309bfda422b8ed42cd12eb49",
+      "git_object": "da08041b61c2921db0ea6bb6b34d903e186b5633",
+      "sha256": "fb5abee4fe0e41f240f5ac0d49d3dfdc96e7ff820713ae3febf125da1ffb22b0"
+    },
+    {
+      "source_type": "REPOSITORY_DERIVED",
+      "source_path": "KAIOS/life/candidates/forest-agriculture-v1/insect-candidates/insect-candidate-manifests.json",
+      "source_commit": "c91d736c9812781d309bfda422b8ed42cd12eb49",
+      "git_object": "68e1bc28ea9821f87d20a1d66fc27fd64e0bd444",
+      "sha256": "97e7ce2e2e45f1a4eac24ce8a5db7b5673bd9d5f9920b2e270aa9c21db5a3af7"
+    },
+    {
+      "source_type": "REPOSITORY_DERIVED",
+      "source_path": "KAIOS/life/candidates/forest-agriculture-v1/insect-candidates/insect-taxonomy-proposals.json",
+      "source_commit": "c91d736c9812781d309bfda422b8ed42cd12eb49",
+      "git_object": "f8b2438cb67aea4892885cc9d33e7174aa84c9d1",
+      "sha256": "aa3b771c531f2366dc7e2531bfde421b31835ee9335219cdbd4dba063a759fae"
+    },
+    {
+      "source_type": "REPOSITORY_DERIVED",
+      "source_path": "KAIOS/life/candidates/forest-agriculture-v1/insect-candidates/insect-physics-environment-proposals.json",
+      "source_commit": "c91d736c9812781d309bfda422b8ed42cd12eb49",
+      "git_object": "000081909f359453e6a61a699686a6812ea87f01",
+      "sha256": "3dc65f80abeea68573c07c18dc187903e26ef3a7b1ded89d582c40b7b43de713"
+    },
+    {
+      "source_type": "REPOSITORY_DERIVED",
+      "source_path": "KAIOS/life/candidates/forest-agriculture-v1/insect-candidates/insect-lifecycle-resource-proposals.json",
+      "source_commit": "c91d736c9812781d309bfda422b8ed42cd12eb49",
+      "git_object": "2599143c6b49b596bfe5012c779ab0ab789585cf",
+      "sha256": "ec5cafbaec837b82ffcfdee30bc2ca2d6771acecb47400f8d51eeed05638528a"
+    },
+    {
+      "source_type": "REPOSITORY_DERIVED",
+      "source_path": "KGEN-KAIOS/V8.3/SEASON_SYSTEM.md",
+      "source_commit": "c91d736c9812781d309bfda422b8ed42cd12eb49",
+      "git_object": "dcf8bd0de20b6bc608243eef3963c52fb54dc6cb",
+      "sha256": "5f4ea833fa7a46ed5732a8e9f189657b5da07c25350d7f1fee2771e58e8bc4aa"
+    },
+    {
+      "source_type": "REPOSITORY_DERIVED",
+      "source_path": "KGEN-KAIOS/world-viewer/biology/taxonomy-standard.js",
+      "source_commit": "c91d736c9812781d309bfda422b8ed42cd12eb49",
+      "git_object": "f4cc78d30bccf375bb3e55f5e3cb2df63d0a4683",
+      "sha256": "2c7eb6d439ac320176751c4985d1f510b68a5656ef4b4ef041dc46b4f55dcc28"
+    },
+    {
+      "source_type": "REPOSITORY_DERIVED",
+      "source_path": "KGEN-KAIOS/world-viewer/data/synthetic-world.json",
+      "source_commit": "c91d736c9812781d309bfda422b8ed42cd12eb49",
+      "git_object": "76ddff32f74c2b41ca7d9d9309b7b39a2a2618c8",
+      "sha256": "4be4c1b83420bb24604742fb722a8aedba8b3d2c163f7f18ccd871628ee7f34f"
+    },
+    {
+      "source_type": "REPOSITORY_DERIVED",
+      "source_path": "KGEN-KAIOS/world-viewer/agriculture/agriculture-runtime.js",
+      "source_commit": "c91d736c9812781d309bfda422b8ed42cd12eb49",
+      "git_object": "f09478806a47c10825258385ee855faa74f51a79",
+      "sha256": "4557d6b449ce3979f2bf4ca10cc48f271ead2ddb34cc127e60b264ce26b577c2"
+    },
+    {
+      "source_type": "REPOSITORY_DERIVED",
+      "source_path": "KGEN-KAIOS/world-viewer/ecosystem/ecosystem-runtime.js",
+      "source_commit": "c91d736c9812781d309bfda422b8ed42cd12eb49",
+      "git_object": "2bab509140ab4b93c7e4975286c826693965cf26",
+      "sha256": "9b2cd9d4501727d3134ea332e1a30cd77d5d7d647300820f51d9c264784ef537"
+    }
+  ],
+  "boundaries": {
+    "research_proposal_only": true,
+    "pending_codex_review": true,
+    "production_authority": false,
+    "self_approval": false,
+    "runtime_or_schema_change": false,
+    "yield_or_product_claim": false,
+    "external_autonomy": false
+  }
+}

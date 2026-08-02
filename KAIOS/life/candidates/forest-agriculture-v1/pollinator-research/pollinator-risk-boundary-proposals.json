@@ -1,0 +1,291 @@
+{
+  "dataset_id": "KAIOS-POLLINATOR-RISK-BOUNDARY-RESEARCH-V1",
+  "schema_version": "1.0.0",
+  "status": "RESEARCH_PROPOSAL_ONLY",
+  "review_status": "PENDING_CODEX_REVIEW",
+  "authority": "NO_PRODUCTION_AUTHORITY",
+  "task_id": "KAIOS-CURSOR-POLLINATOR-RESEARCH-001",
+  "worker_id": "cursor-01",
+  "branch": "cursor-handoff/KAIOS-CURSOR-POLLINATOR-RESEARCH-001",
+  "dispatch_branch_base_commit": "cbe49d67bca14fff06e2d1d1209ccc7e8836beb8",
+  "source_base_commit": "c91d736c9812781d309bfda422b8ed42cd12eb49",
+  "source_hash_basis": "SHA256_OF_EXACT_GIT_BLOB_BYTES_AT_SOURCE_BASE_COMMIT",
+  "mode": "BOUNDARY_AND_FAILURE_RESEARCH_ONLY",
+  "risk_evaluation_contract": {
+    "default_result": "BLOCKED_NO_DELTA",
+    "unknown_identity_result": "BLOCKED_OWNER_REVIEW_REQUIRED",
+    "unknown_relationship_result": "BLOCKED_SOURCE_UNDERSPECIFIED",
+    "ledger_mismatch_result": "REJECT_FIXTURE",
+    "yield_mutation_result": "REJECT_FIXTURE",
+    "protected_authority_reference_mode": "READ_ONLY",
+    "safety_guarantee": false,
+    "environmental_approval": false,
+    "legal_certification": false
+  },
+  "risk_register": [
+    {
+      "risk_id": "POLLINATOR-RISK-SCHEMA-ADMISSION-001",
+      "risk_level": "HIGH",
+      "trigger": "BEE_ALPHA_OR_INSECT_CANDIDATE_USED_AS_ECOLOGY_POPULATION_OR_EVENT_SUBJECT",
+      "finding": "The current Ecology schema admits only eight foundational species and has no pollination entity or event.",
+      "required_result": "BLOCKED_OWNER_SCHEMA_AND_RUNTIME_REVIEW_REQUIRED",
+      "remaining_risk": "A future owner extension could alter the admissible identity and event contract."
+    },
+    {
+      "risk_id": "POLLINATOR-RISK-BEE-IDENTITY-001",
+      "risk_level": "HIGH",
+      "trigger": "SYNTHETIC_WORLD_BEE_FIELDS_IMPORTED_AS_CANONICAL_OR_ECOLOGY_FACTS",
+      "finding": "The source labels BEE_ALPHA as an insect but also assigns an incompatible evolution-stage label and an out-of-scope population value.",
+      "required_result": "USE_TAXONOMY_IDENTITY_REFERENCE_ONLY_AND_REJECT_POPULATION_OR_STAGE_IMPORT",
+      "remaining_risk": "The synthetic alpha record is not a reviewed Canonical Life package."
+    },
+    {
+      "risk_id": "POLLINATOR-RISK-INSECT-TRAIT-001",
+      "risk_level": "HIGH",
+      "trigger": "ANY_OF_THREE_INSECT_CANDIDATES_TREATED_AS_POLLINATOR",
+      "finding": "The merged insect candidates explicitly exclude pollination and declare no pollinator trait.",
+      "required_result": "BLOCKED_NO_POLLINATOR_TRAIT",
+      "remaining_risk": "A separate reviewed identity and trait decision would be required."
+    },
+    {
+      "risk_id": "POLLINATOR-RISK-PLANT-IDENTITY-001",
+      "risk_level": "HIGH",
+      "trigger": "AGGREGATE_FRUIT_OR_VEGETABLE_CLASS_TREATED_AS_RESOLVED_SPECIES",
+      "finding": "FRUIT_ALPHA remains aggregate and the vegetable candidate has no resolved species.",
+      "required_result": "BLOCKED_OR_CANDIDATE_FIXTURE_ONLY",
+      "remaining_risk": "Species-specific flowering and compatibility are unresolved."
+    },
+    {
+      "risk_id": "POLLINATOR-RISK-FLOWER-STAGE-001",
+      "risk_level": "HIGH",
+      "trigger": "FLOWERING_OR_FRUITING_STAGE_TREATED_AS_EMPIRICAL_FLOWER_RECEPTIVITY",
+      "finding": "The stage is an aggregate synthetic-cycle subdivision and says pollination is unresolved.",
+      "required_result": "USE_AS_STAGE_REFERENCE_ONLY_NO_RECEPTIVITY_OR_FERTILIZATION_CLAIM",
+      "remaining_risk": "A future plant package must define any species-specific state."
+    },
+    {
+      "risk_id": "POLLINATOR-RISK-HABITAT-001",
+      "risk_level": "HIGH",
+      "trigger": "ORCHARD_OR_FARM_RESEARCH_CELL_PROMOTED_TO_ECOLOGY_HABITAT",
+      "finding": "Neither ORCHARD nor FARM is in the current Ecology habitat enum.",
+      "required_result": "KEEP_LOCAL_RESEARCH_CELL_NONCANONICAL_AND_NONEXECUTABLE",
+      "remaining_risk": "Habitat owner semantics and species admission remain unresolved."
+    },
+    {
+      "risk_id": "POLLINATOR-RISK-SEASON-001",
+      "risk_level": "MEDIUM",
+      "trigger": "SEASON_LABEL_AUTOMATICALLY_ENABLES_OR_MULTIPLIES_POLLINATION",
+      "finding": "The repository defines season labels but no reviewed pollinator effect.",
+      "required_result": "REQUIRE_EXPLICIT_FIXTURE_OPEN_FLAG_AND_NO_OWNER_EFFECT",
+      "remaining_risk": "Weather, phenology and climate behavior are not modeled."
+    },
+    {
+      "risk_id": "POLLINATOR-RISK-EMPIRICAL-THRESHOLD-001",
+      "risk_level": "HIGH",
+      "trigger": "TEMPERATURE_MOISTURE_TIME_OR_RESOURCE_PROXY_USED_AS_REAL_GUIDANCE",
+      "finding": "All such values are low-confidence candidate envelopes for failure tests.",
+      "required_result": "LABEL_RESEARCH_PROPOSAL_AND_REQUIRE_VALIDATION",
+      "remaining_risk": "No field, laboratory or species-specific validation exists."
+    },
+    {
+      "risk_id": "POLLINATOR-RISK-POLLEN-PROXY-001",
+      "risk_level": "HIGH",
+      "trigger": "POLLEN_PROXY_CONVERTED_TO_MASS_GRAIN_COUNT_VIABILITY_OR_CHEMISTRY",
+      "finding": "The proxy is dimensionless event custody only.",
+      "required_result": "REJECT_CONVERSION_AND_KEEP_SEPARATE_LEDGER",
+      "remaining_risk": "The abstraction cannot establish physical transfer efficacy."
+    },
+    {
+      "risk_id": "POLLINATOR-RISK-LEDGER-001",
+      "risk_level": "HIGH",
+      "trigger": "MASS_WATER_ENERGY_POLLEN_PROXY_OR_EVENT_RESIDUAL_IS_NONZERO",
+      "finding": "Every transfer and event count must close exactly in integer units.",
+      "required_result": "REJECT_FIXTURE",
+      "remaining_risk": "Future adapters may introduce unit conversion and rounding risk."
+    },
+    {
+      "risk_id": "POLLINATOR-RISK-YIELD-001",
+      "risk_level": "HIGH",
+      "trigger": "VISITATION_OR_DEPOSITION_PROXY_CREATES_YIELD_HARVEST_INVENTORY_OR_VALUE_DELTA",
+      "finding": "Yield effect is explicitly not modeled and remains an Agriculture owner concern.",
+      "required_result": "REJECT_FIXTURE_AND_PRESERVE_ZERO_OWNER_DELTA",
+      "remaining_risk": "No causal yield model or validation evidence exists."
+    },
+    {
+      "risk_id": "POLLINATOR-RISK-PEST-CONTROL-001",
+      "risk_level": "HIGH",
+      "trigger": "POLLINATOR_RESEARCH_ACTIVATES_PREDATION_OR_PEST_CONTROL",
+      "finding": "Pollination research cannot imply pest-control service or food-chain behavior.",
+      "required_result": "BLOCKED_SCOPE_VIOLATION",
+      "remaining_risk": "Ecological interactions require separate owner-reviewed work."
+    },
+    {
+      "risk_id": "POLLINATOR-RISK-DISEASE-PESTICIDE-001",
+      "risk_level": "HIGH",
+      "trigger": "PACKAGE_CREATES_DISEASE_PESTICIDE_TREATMENT_OR_SAFETY_BEHAVIOR",
+      "finding": "Disease, pesticide and treatment claims are outside the work order.",
+      "required_result": "BLOCKED_SCOPE_VIOLATION",
+      "remaining_risk": "The package provides no health, chemical or safety assessment."
+    },
+    {
+      "risk_id": "POLLINATOR-RISK-POPULATION-001",
+      "risk_level": "HIGH",
+      "trigger": "REPRODUCTION_BIRTH_MIGRATION_RELEASE_OR_UNBOUNDED_POPULATION_IS_ENABLED",
+      "finding": "The deterministic fixture has a constant small population and no lifecycle behavior.",
+      "required_result": "BLOCKED_SCOPE_VIOLATION_OR_CAP_REJECTION",
+      "remaining_risk": "Population ecology is not established for BEE_ALPHA."
+    },
+    {
+      "risk_id": "POLLINATOR-RISK-OWNER-MUTATION-001",
+      "risk_level": "HIGH",
+      "trigger": "LIFE_ECOLOGY_AGRICULTURE_FOREST_OR_SEASON_OWNER_STATE_IS_MUTATED",
+      "finding": "All owner links are read-only and the overlay emits no owner event.",
+      "required_result": "BLOCKED_PROTECTED_AUTHORITY",
+      "remaining_risk": "Future integration requires independent owner review and implementation."
+    },
+    {
+      "risk_id": "POLLINATOR-RISK-RIGHTS-ECONOMY-001",
+      "risk_level": "HIGH",
+      "trigger": "PACKAGE_GRANTS_RIGHTS_LISTS_VALUE_SETTLES_OR_CREATES_INVENTORY",
+      "finding": "Rights and Economy authority are outside this research package.",
+      "required_result": "BLOCKED_PROTECTED_AUTHORITY",
+      "remaining_risk": "No ownership, custody acceptance, market or financial state is established."
+    },
+    {
+      "risk_id": "POLLINATOR-RISK-AUTONOMY-001",
+      "risk_level": "HIGH",
+      "trigger": "EXTERNAL_AGENT_NETWORK_CONTROL_OR_SELF_EXECUTION_IS_ADDED",
+      "finding": "The package is static data and documentation only.",
+      "required_result": "BLOCKED_SCOPE_VIOLATION",
+      "remaining_risk": "Any future executable integration needs a separate reviewed task."
+    },
+    {
+      "risk_id": "POLLINATOR-RISK-PROVENANCE-001",
+      "risk_level": "HIGH",
+      "trigger": "SOURCE_COMMIT_GIT_OBJECT_OR_SHA256_IS_MISSING_OR_MISMATCHED",
+      "finding": "Research claims are bounded to exact Git blob bytes at the declared source base.",
+      "required_result": "REJECT_PACKAGE",
+      "remaining_risk": "A later source revision requires a new review rather than silent rebasing."
+    }
+  ],
+  "prohibited_claims": [
+    "CANONICAL_POLLINATOR_IDENTITY",
+    "RUNTIME_POLLINATION_BEHAVIOR",
+    "POLLINATION_SUCCESS_GUARANTEE",
+    "FERTILIZATION_CLAIM",
+    "FRUIT_SET_OR_YIELD_CLAIM",
+    "HARVEST_OR_INVENTORY_DELTA",
+    "PEST_CONTROL_SERVICE",
+    "DISEASE_DIAGNOSIS_OR_TREATMENT",
+    "PESTICIDE_RECOMMENDATION",
+    "BIOENGINEERING_INSTRUCTION",
+    "REARING_RELEASE_OR_STOCKING_GUIDANCE",
+    "AGRONOMIC_PRESCRIPTION",
+    "PRODUCT_ENDORSEMENT",
+    "SAFETY_GUARANTEE",
+    "ENVIRONMENTAL_APPROVAL",
+    "LEGAL_CERTIFICATION",
+    "PRICE_VALUE_OR_REVENUE",
+    "UNCONTROLLED_REPRODUCTION",
+    "EXTERNAL_AUTONOMY"
+  ],
+  "objective_boundary_assertions": [
+    "ALL_RELATIONSHIPS_NONCANONICAL",
+    "ALL_RELATIONSHIPS_NONEXECUTABLE",
+    "BEE_ALPHA_USED_AS_SYNTHETIC_IDENTITY_REFERENCE_ONLY",
+    "THREE_INSECT_CANDIDATES_REMAIN_NON_POLLINATORS",
+    "POLLEN_PROXY_SEPARATE_FROM_PHYSICAL_MASS",
+    "POLLEN_DEPOSITION_SEPARATE_FROM_FERTILIZATION",
+    "YIELD_EFFECT_STATUS_EQUALS_NOT_MODELED",
+    "NO_OWNER_STATE_OR_EVENT_MUTATION",
+    "NO_RIGHTS_OR_ECONOMY_AUTHORITY",
+    "NO_PEST_CONTROL_DISEASE_OR_PESTICIDE_BEHAVIOR",
+    "NO_REPRODUCTION_OR_POPULATION_GROWTH",
+    "NO_EXTERNAL_AUTONOMY",
+    "ALL_PROVENANCE_IMMUTABLE_AND_VERIFIED"
+  ],
+  "provenance": [
+    {
+      "source_type": "REPOSITORY_DERIVED",
+      "source_path": "KAIOS_CANONICAL_LIFE_SCHEMA_V1.json",
+      "source_commit": "c91d736c9812781d309bfda422b8ed42cd12eb49",
+      "git_object": "3bfcea2e0fc3854a6ff674a93ef32edc2ee0aab5",
+      "sha256": "d1ced898d043e4890142df40a9033145762d4ceb28fd0e49eae39dc43bf224c5"
+    },
+    {
+      "source_type": "REPOSITORY_DERIVED",
+      "source_path": "KAIOS/life/KAIOS_LIFE_RUNTIME_V1_SPEC.md",
+      "source_commit": "c91d736c9812781d309bfda422b8ed42cd12eb49",
+      "git_object": "e1df7d486971684f9cd8020b9005a9fdcc389ce4",
+      "sha256": "bc69596af470812bdfcbaa1989cf4cb59887c35f46f1c97d52f6d3dba87eb655"
+    },
+    {
+      "source_type": "REPOSITORY_DERIVED",
+      "source_path": "KAIOS/life/ecology/KAIOS_REPRODUCTION_ECOLOGY_SCHEMA_V1.json",
+      "source_commit": "c91d736c9812781d309bfda422b8ed42cd12eb49",
+      "git_object": "c99eb0eba386af67c009bfd115e88b934d1c9000",
+      "sha256": "3257f8cd1f0ba482f0c6bc8d98fbfb4748c8a1172c9c88d4bf9a2981c90af9f0"
+    },
+    {
+      "source_type": "REPOSITORY_DERIVED",
+      "source_path": "KAIOS/life/candidates/forest-agriculture-v1/insect-candidates/insect-candidate-manifests.json",
+      "source_commit": "c91d736c9812781d309bfda422b8ed42cd12eb49",
+      "git_object": "68e1bc28ea9821f87d20a1d66fc27fd64e0bd444",
+      "sha256": "97e7ce2e2e45f1a4eac24ce8a5db7b5673bd9d5f9920b2e270aa9c21db5a3af7"
+    },
+    {
+      "source_type": "REPOSITORY_DERIVED",
+      "source_path": "KAIOS/life/candidates/forest-agriculture-v1/fruit-trees/fruit-tree-catalog-candidates.json",
+      "source_commit": "c91d736c9812781d309bfda422b8ed42cd12eb49",
+      "git_object": "2c11bdd2985c8e8c56fa6d91dbb5f50d00888136",
+      "sha256": "fcbaa9bc1ad6f4823aca7c25640daeb2159fb319ea781b770d92d457b9b78153"
+    },
+    {
+      "source_type": "REPOSITORY_DERIVED",
+      "source_path": "KAIOS/life/candidates/forest-agriculture-v1/fruit-trees/fruit-tree-growth-stage-proposals.json",
+      "source_commit": "c91d736c9812781d309bfda422b8ed42cd12eb49",
+      "git_object": "136ffbc7ad3800b8b53e1d9760e855381d3f4553",
+      "sha256": "dc33547e13b34196eb42b36add945225538e955a7bfa024fb385425ea37eddba"
+    },
+    {
+      "source_type": "REPOSITORY_DERIVED",
+      "source_path": "KAIOS/life/candidates/forest-agriculture-v1/vegetables/vegetable-catalog-candidates.json",
+      "source_commit": "c91d736c9812781d309bfda422b8ed42cd12eb49",
+      "git_object": "5f33d11528d7ea14eb26417224a85cece1392144",
+      "sha256": "77cc5dd2e4b6264d5fe8d015881858a2c76f5a522d567a185061b919bbad8cd6"
+    },
+    {
+      "source_type": "REPOSITORY_DERIVED",
+      "source_path": "KGEN-KAIOS/V8.3/SEASON_SYSTEM.md",
+      "source_commit": "c91d736c9812781d309bfda422b8ed42cd12eb49",
+      "git_object": "dcf8bd0de20b6bc608243eef3963c52fb54dc6cb",
+      "sha256": "5f4ea833fa7a46ed5732a8e9f189657b5da07c25350d7f1fee2771e58e8bc4aa"
+    },
+    {
+      "source_type": "REPOSITORY_DERIVED",
+      "source_path": "KGEN-KAIOS/world-viewer/data/synthetic-world.json",
+      "source_commit": "c91d736c9812781d309bfda422b8ed42cd12eb49",
+      "git_object": "76ddff32f74c2b41ca7d9d9309b7b39a2a2618c8",
+      "sha256": "4be4c1b83420bb24604742fb722a8aedba8b3d2c163f7f18ccd871628ee7f34f"
+    },
+    {
+      "source_type": "REPOSITORY_DERIVED",
+      "source_path": "KGEN-KAIOS/world-viewer/agriculture/agriculture-runtime.js",
+      "source_commit": "c91d736c9812781d309bfda422b8ed42cd12eb49",
+      "git_object": "f09478806a47c10825258385ee855faa74f51a79",
+      "sha256": "4557d6b449ce3979f2bf4ca10cc48f271ead2ddb34cc127e60b264ce26b577c2"
+    }
+  ],
+  "boundaries": {
+    "research_proposal_only": true,
+    "pending_codex_review": true,
+    "production_authority": false,
+    "runtime_change": false,
+    "canonical_change": false,
+    "organism_schema_change": false,
+    "universe_physics_change": false,
+    "rights_or_economy_authority": false,
+    "wallet_or_kgen": false,
+    "deployment_or_governance": false
+  }
+}

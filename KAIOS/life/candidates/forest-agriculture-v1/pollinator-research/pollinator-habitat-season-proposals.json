@@ -1,0 +1,351 @@
+{
+  "dataset_id": "KAIOS-POLLINATOR-HABITAT-SEASON-RESEARCH-V1",
+  "schema_version": "1.0.0",
+  "status": "RESEARCH_PROPOSAL_ONLY",
+  "review_status": "PENDING_CODEX_REVIEW",
+  "authority": "NO_PRODUCTION_AUTHORITY",
+  "task_id": "KAIOS-CURSOR-POLLINATOR-RESEARCH-001",
+  "worker_id": "cursor-01",
+  "branch": "cursor-handoff/KAIOS-CURSOR-POLLINATOR-RESEARCH-001",
+  "dispatch_branch_base_commit": "cbe49d67bca14fff06e2d1d1209ccc7e8836beb8",
+  "source_base_commit": "c91d736c9812781d309bfda422b8ed42cd12eb49",
+  "source_hash_basis": "SHA256_OF_EXACT_GIT_BLOB_BYTES_AT_SOURCE_BASE_COMMIT",
+  "mode": "LOCAL_RESEARCH_FIXTURE_ONLY",
+  "owner_findings": {
+    "ecology_season_labels": [
+      "SPRING",
+      "SUMMER",
+      "AUTUMN",
+      "WINTER"
+    ],
+    "season_effect_authority": "SOURCE_UNDERSPECIFIED",
+    "season_system_status": "DRAFT_FOR_REVIEW_PROTOTYPE",
+    "ecology_habitat_ids_admitting_bee_alpha": [],
+    "ecology_habitat_ids_admitting_insect_candidates": [],
+    "orchard_habitat_in_ecology_enum": false,
+    "farm_habitat_in_ecology_enum": false,
+    "forest_habitat_reference": "HABITAT-FOREST-V1",
+    "forest_reference_admits_pollinator_identity": false
+  },
+  "evaluation_contract": {
+    "gate_order": [
+      "LOCAL_RESEARCH_FIXTURE_SCOPE",
+      "EXPLICIT_LOCATION",
+      "CANDIDATE_HABITAT_CELL",
+      "DECLARED_SEASON_LABEL",
+      "EXPLICIT_SCENARIO_SEASON_OPEN_FLAG",
+      "PLANT_STAGE_REFERENCE",
+      "TEMPERATURE_PROXY",
+      "HABITAT_MOISTURE_PROXY",
+      "WATER_PROXY",
+      "ENERGY_PROXY",
+      "POPULATION_CAP",
+      "POSITIVE_ELAPSED_TIME"
+    ],
+    "all_gates_required": true,
+    "failed_gate_result": "POLLINATOR_RESEARCH_EVENT_BLOCKED_NO_DELTA",
+    "failed_gate_has_no_resource_delta": true,
+    "failed_gate_has_no_owner_delta": true,
+    "worker_independent": true,
+    "physical_labor_required": false,
+    "worker_or_equipment_id_allowed": false,
+    "instant_location_change": false,
+    "instant_visitation": false
+  },
+  "season_contract": {
+    "label_source": "KAIOS_REPRODUCTION_ECOLOGY_SCHEMA_V1",
+    "effect_source": "SOURCE_UNDERSPECIFIED",
+    "default_fixture_label": "SPRING",
+    "default_fixture_label_is_biological_claim": false,
+    "open_or_closed_effect_must_be_declared_per_scenario": true,
+    "season_label_alone_authorizes_event": false,
+    "season_transition_mutates_owner": false
+  },
+  "candidate_parameters": [
+    {
+      "parameter_name": "candidate_temperature_compatibility_proxy",
+      "unit": "degree_celsius_proxy",
+      "minimum": 5,
+      "default": 24,
+      "maximum": 40,
+      "rationale": "Provides a broad deterministic failure-test envelope aligned with an existing insect candidate proposal, not with a real pollinator species.",
+      "source_type": "MODEL_INFERENCE",
+      "confidence": "LOW",
+      "risk": "The envelope is not rearing, release, habitat-management or field guidance.",
+      "validation_required": true
+    },
+    {
+      "parameter_name": "candidate_habitat_moisture_proxy",
+      "unit": "fraction_0_to_1_proxy",
+      "minimum": 0.2,
+      "default": 0.6,
+      "maximum": 0.95,
+      "rationale": "Creates a finite habitat gate while leaving weather, soil and canopy interactions unresolved.",
+      "source_type": "MODEL_INFERENCE",
+      "confidence": "LOW",
+      "risk": "The fraction is not an irrigation, rainfall or soil-moisture prescription.",
+      "validation_required": true
+    },
+    {
+      "parameter_name": "candidate_habitat_water_reserve",
+      "unit": "micro_milliliter_proxy",
+      "minimum": 1000000,
+      "default": 50000000,
+      "maximum": 100000000,
+      "rationale": "Supplies a finite water custody pool for closed deterministic transfers.",
+      "source_type": "RESEARCH_PROPOSAL",
+      "confidence": "LOW",
+      "risk": "Proxy water is not a habitat sizing or watering recommendation.",
+      "validation_required": true
+    },
+    {
+      "parameter_name": "candidate_habitat_energy_reserve",
+      "unit": "micro_energy_proxy_unit",
+      "minimum": 1000000,
+      "default": 30000000,
+      "maximum": 100000000,
+      "rationale": "Supplies finite worker-independent energy custody for candidate replay accounting.",
+      "source_type": "RESEARCH_PROPOSAL",
+      "confidence": "LOW",
+      "risk": "The proxy has no joule, food, nectar or metabolic conversion.",
+      "validation_required": true
+    },
+    {
+      "parameter_name": "candidate_fixture_population_count",
+      "unit": "individual_count_proxy",
+      "minimum": 1,
+      "default": 12,
+      "maximum": 20,
+      "rationale": "Uses a small integer fixture population without importing the incompatible synthetic-world population value.",
+      "source_type": "RESEARCH_PROPOSAL",
+      "confidence": "LOW",
+      "risk": "The count is not a colony size, stocking target or release quantity.",
+      "validation_required": true
+    },
+    {
+      "parameter_name": "candidate_fixture_population_cap",
+      "unit": "individual_count_proxy",
+      "minimum": 1,
+      "default": 20,
+      "maximum": 100,
+      "rationale": "Keeps the local fixture below the Ecology default hard cap while granting no Ecology admission.",
+      "source_type": "MODEL_INFERENCE",
+      "confidence": "MEDIUM",
+      "risk": "The value is a replay bound, not ecological carrying capacity.",
+      "validation_required": true
+    },
+    {
+      "parameter_name": "candidate_visitation_elapsed_time",
+      "unit": "elapsed_minute_proxy",
+      "minimum": 1,
+      "default": 10,
+      "maximum": 60,
+      "rationale": "Requires positive elapsed time for each source or destination visitation fixture event.",
+      "source_type": "RESEARCH_PROPOSAL",
+      "confidence": "LOW",
+      "risk": "The duration is not an observed handling-time or activity-rate claim.",
+      "validation_required": true
+    },
+    {
+      "parameter_name": "candidate_location_edge_cap",
+      "unit": "research_location_edge_count",
+      "minimum": 0,
+      "default": 1,
+      "maximum": 10,
+      "rationale": "Bounds explicit source-to-destination fixture links without inventing physical distance.",
+      "source_type": "RESEARCH_PROPOSAL",
+      "confidence": "LOW",
+      "risk": "Edge count must never be represented as flight range or spatial suitability.",
+      "validation_required": true
+    },
+    {
+      "parameter_name": "candidate_season_window_duration",
+      "unit": "simulation_tick_proxy",
+      "minimum": 1,
+      "default": 12,
+      "maximum": 100,
+      "rationale": "Provides a finite candidate season-window fixture while the repository season effect remains underspecified.",
+      "source_type": "SOURCE_UNDERSPECIFIED",
+      "confidence": "LOW",
+      "risk": "The value is not a calendar, phenology or climate claim.",
+      "validation_required": true
+    }
+  ],
+  "research_habitat_cells": [
+    {
+      "cell_id": "POLLINATOR-RESEARCH-CELL-ORCHARD-001",
+      "location_id": "RESEARCH-LOCATION-ORCHARD-CELL-001",
+      "owner_habitat_reference": null,
+      "owner_habitat_status": "ORCHARD_NOT_IN_ECOLOGY_HABITAT_ENUM",
+      "pollinator_reference": "BEE_ALPHA",
+      "plant_reference": "FRUIT_ALPHA",
+      "relationship_reference": "POLLINATOR-REL-BEE-FRUIT-RESEARCH-001",
+      "fixture_replay_allowed": true,
+      "runtime_admission": false,
+      "owner_mutation": false
+    },
+    {
+      "cell_id": "POLLINATOR-RESEARCH-CELL-FOREST-EDGE-001",
+      "location_id": "RESEARCH-LOCATION-FOREST-EDGE-001",
+      "owner_habitat_reference": "HABITAT-FOREST-V1",
+      "owner_habitat_status": "REFERENCE_EXISTS_BUT_IDENTITIES_NOT_ADMITTED",
+      "pollinator_reference": "BEE_ALPHA",
+      "plant_reference": "SPECIES-KAIOS-FOUNDATIONAL-TREE",
+      "relationship_reference": "POLLINATOR-REL-BEE-TREE-BLOCKED-001",
+      "fixture_replay_allowed": false,
+      "runtime_admission": false,
+      "owner_mutation": false
+    },
+    {
+      "cell_id": "POLLINATOR-RESEARCH-CELL-VEGETABLE-PLOT-001",
+      "location_id": "RESEARCH-LOCATION-VEGETABLE-PLOT-001",
+      "owner_habitat_reference": null,
+      "owner_habitat_status": "FARM_NOT_IN_ECOLOGY_HABITAT_ENUM",
+      "pollinator_reference": "BEE_ALPHA",
+      "plant_reference": "CANDIDATE-VEGETABLE-AGGREGATE-PLOT-V1",
+      "relationship_reference": "POLLINATOR-REL-BEE-VEGETABLE-BLOCKED-001",
+      "fixture_replay_allowed": false,
+      "runtime_admission": false,
+      "owner_mutation": false
+    }
+  ],
+  "blocked_scenarios": [
+    {
+      "scenario_id": "POLLINATOR-HABITAT-BLOCK-LOCATION-001",
+      "missing_gate": "EXPLICIT_LOCATION",
+      "expected_result": "POLLINATOR_RESEARCH_EVENT_BLOCKED_NO_DELTA"
+    },
+    {
+      "scenario_id": "POLLINATOR-HABITAT-BLOCK-HABITAT-001",
+      "missing_gate": "CANDIDATE_HABITAT_CELL",
+      "expected_result": "POLLINATOR_RESEARCH_EVENT_BLOCKED_NO_DELTA"
+    },
+    {
+      "scenario_id": "POLLINATOR-SEASON-BLOCK-UNDECLARED-001",
+      "missing_gate": "EXPLICIT_SCENARIO_SEASON_OPEN_FLAG",
+      "expected_result": "POLLINATOR_RESEARCH_EVENT_BLOCKED_NO_DELTA"
+    },
+    {
+      "scenario_id": "POLLINATOR-TEMPERATURE-BLOCK-001",
+      "missing_gate": "TEMPERATURE_PROXY_IN_CANDIDATE_ENVELOPE",
+      "expected_result": "POLLINATOR_RESEARCH_EVENT_BLOCKED_NO_DELTA"
+    },
+    {
+      "scenario_id": "POLLINATOR-WATER-BLOCK-001",
+      "missing_gate": "WATER_PROXY_AVAILABLE",
+      "expected_result": "POLLINATOR_RESEARCH_EVENT_BLOCKED_NO_DELTA"
+    },
+    {
+      "scenario_id": "POLLINATOR-ENERGY-BLOCK-001",
+      "missing_gate": "ENERGY_PROXY_AVAILABLE",
+      "expected_result": "POLLINATOR_RESEARCH_EVENT_BLOCKED_NO_DELTA"
+    },
+    {
+      "scenario_id": "POLLINATOR-POPULATION-BLOCK-001",
+      "missing_gate": "POPULATION_BELOW_CANDIDATE_CAP",
+      "expected_result": "POLLINATOR_RESEARCH_EVENT_BLOCKED_NO_DELTA"
+    },
+    {
+      "scenario_id": "POLLINATOR-TIME-BLOCK-001",
+      "missing_gate": "POSITIVE_ELAPSED_TIME",
+      "expected_result": "POLLINATOR_RESEARCH_EVENT_BLOCKED_NO_DELTA"
+    }
+  ],
+  "provenance": [
+    {
+      "source_type": "REPOSITORY_DERIVED",
+      "source_path": "docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md",
+      "source_commit": "c91d736c9812781d309bfda422b8ed42cd12eb49",
+      "git_object": "f9748c99501ec1c1ea6ba5c39833909684c0ffbe",
+      "sha256": "6d71cd7946f0b4057a9b5289923d3c7b424e409140feb7404f5b433a309ab00b"
+    },
+    {
+      "source_type": "REPOSITORY_DERIVED",
+      "source_path": "docs/maps/UniverseMap_V10_2_DISTANCE_COMPLETE_ALL_POINTS.json",
+      "source_commit": "c91d736c9812781d309bfda422b8ed42cd12eb49",
+      "git_object": "0f97fc7e723fc97cd8366a10f0c9eb7892df4605",
+      "sha256": "bfde25dfb2737e6f698850aa705ea221c64bb0f228ff8e3a7f2740f0ae123451"
+    },
+    {
+      "source_type": "REPOSITORY_DERIVED",
+      "source_path": "KAIOS/life/ecology/KAIOS_REPRODUCTION_ECOLOGY_RUNTIME_V1_SPEC.md",
+      "source_commit": "c91d736c9812781d309bfda422b8ed42cd12eb49",
+      "git_object": "0f4399751f4e75727aeac45343a8b3a8900ec534",
+      "sha256": "7fb277af16f552b16db2f4cb511fd060e4e3a5217855198f30fcf59371b8eda1"
+    },
+    {
+      "source_type": "REPOSITORY_DERIVED",
+      "source_path": "KAIOS/life/ecology/KAIOS_REPRODUCTION_ECOLOGY_SCHEMA_V1.json",
+      "source_commit": "c91d736c9812781d309bfda422b8ed42cd12eb49",
+      "git_object": "c99eb0eba386af67c009bfd115e88b934d1c9000",
+      "sha256": "3257f8cd1f0ba482f0c6bc8d98fbfb4748c8a1172c9c88d4bf9a2981c90af9f0"
+    },
+    {
+      "source_type": "REPOSITORY_DERIVED",
+      "source_path": "KAIOS/life/candidates/ecology-v1/habitat-compatibility.json",
+      "source_commit": "c91d736c9812781d309bfda422b8ed42cd12eb49",
+      "git_object": "365c7bbaffdf6754ebed3a6435cda73e45b191b5",
+      "sha256": "f1dc488b8795ca5ad5a2e320f0502696d01a66329253b9922754bfc48ef37050"
+    },
+    {
+      "source_type": "REPOSITORY_DERIVED",
+      "source_path": "KAIOS/life/candidates/ecology-v1/environmental-thresholds.json",
+      "source_commit": "c91d736c9812781d309bfda422b8ed42cd12eb49",
+      "git_object": "23ddb953a0e31d681a074a4a42dd42d90f78a8a3",
+      "sha256": "00c560db5e56220342fb57548af999ca76a490816ca32c1c23314fbd3a65b790"
+    },
+    {
+      "source_type": "REPOSITORY_DERIVED",
+      "source_path": "KAIOS/life/candidates/ecology-v1/population-scenarios.json",
+      "source_commit": "c91d736c9812781d309bfda422b8ed42cd12eb49",
+      "git_object": "80d2c522ff439280a932bd96914dc8ee04815c5d",
+      "sha256": "7d0a4ae68343ac672362750f1db87bcb9776df6f362e50857613a6bd6bb3beda"
+    },
+    {
+      "source_type": "REPOSITORY_DERIVED",
+      "source_path": "KAIOS/life/candidates/forest-agriculture-v1/forest/forest-composition-candidates.json",
+      "source_commit": "c91d736c9812781d309bfda422b8ed42cd12eb49",
+      "git_object": "e4e63adb992337dc333c4de78152903234d8a46d",
+      "sha256": "007323cb9cad66726b0b1cfe86f05eeda01dbce5d783832e730828299f287e8d"
+    },
+    {
+      "source_type": "REPOSITORY_DERIVED",
+      "source_path": "KAIOS/life/candidates/forest-agriculture-v1/fruit-trees/fruit-tree-environment-thresholds.json",
+      "source_commit": "c91d736c9812781d309bfda422b8ed42cd12eb49",
+      "git_object": "2c6df6a7e04f99f2391af15b4f2b496a3f3d526a",
+      "sha256": "d3512369c1ef59a99dd16859c151ec0ecd27d58e84bdf380b35f9d04f6a68e1f"
+    },
+    {
+      "source_type": "REPOSITORY_DERIVED",
+      "source_path": "KAIOS/life/candidates/forest-agriculture-v1/vegetables/vegetable-environment-thresholds.json",
+      "source_commit": "c91d736c9812781d309bfda422b8ed42cd12eb49",
+      "git_object": "da08041b61c2921db0ea6bb6b34d903e186b5633",
+      "sha256": "fb5abee4fe0e41f240f5ac0d49d3dfdc96e7ff820713ae3febf125da1ffb22b0"
+    },
+    {
+      "source_type": "REPOSITORY_DERIVED",
+      "source_path": "KAIOS/life/candidates/forest-agriculture-v1/insect-candidates/insect-physics-environment-proposals.json",
+      "source_commit": "c91d736c9812781d309bfda422b8ed42cd12eb49",
+      "git_object": "000081909f359453e6a61a699686a6812ea87f01",
+      "sha256": "3dc65f80abeea68573c07c18dc187903e26ef3a7b1ded89d582c40b7b43de713"
+    },
+    {
+      "source_type": "REPOSITORY_DERIVED",
+      "source_path": "KGEN-KAIOS/V8.3/SEASON_SYSTEM.md",
+      "source_commit": "c91d736c9812781d309bfda422b8ed42cd12eb49",
+      "git_object": "dcf8bd0de20b6bc608243eef3963c52fb54dc6cb",
+      "sha256": "5f4ea833fa7a46ed5732a8e9f189657b5da07c25350d7f1fee2771e58e8bc4aa"
+    }
+  ],
+  "boundaries": {
+    "research_proposal_only": true,
+    "pending_codex_review": true,
+    "production_authority": false,
+    "runtime_habitat_created": false,
+    "runtime_season_effect_created": false,
+    "weather_model_created": false,
+    "worker_action_created": false,
+    "agronomic_guidance": false,
+    "release_or_stocking_guidance": false
+  }
+}
