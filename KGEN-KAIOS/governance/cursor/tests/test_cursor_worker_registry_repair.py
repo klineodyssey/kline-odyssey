@@ -176,39 +176,39 @@ class CursorWorkerRegistryRepairTests(unittest.TestCase):
             <= set(self.cursor["allowed_work"])
         )
 
-    def test_fertilizer_model_dispatch_is_the_only_active_claim(self):
+    def test_compost_model_dispatch_is_the_only_active_claim(self):
         metadata = self.registry["metadata"]
         self.assertEqual(
             metadata["source_commit"],
-            "1650191f35567d43016473420cfd2cba22b00aea",
+            "976f91ac59ecf43a5e28b0afa5df0a9f948d9c76",
         )
         self.assertEqual(
-            metadata["task_id"], "KAIOS-CURSOR-SOIL-TYPES-001-RELEASE"
+            metadata["task_id"], "KAIOS-CURSOR-FERTILIZER-MODELS-001-RELEASE"
         )
-        self.assertIn("fertilizer-model research task", metadata["change_reason"])
+        self.assertIn("compost-model research task", metadata["change_reason"])
 
         locked = validate_one_task_lock(self.registry["dispatch_history"])
         self.assertEqual(len(locked), 1)
         dispatch = locked[0]
         self.assertEqual(
-            dispatch["task_id"], "KAIOS-CURSOR-FERTILIZER-MODELS-001"
+            dispatch["task_id"], "KAIOS-CURSOR-COMPOST-MODELS-001"
         )
         self.assertEqual(dispatch["worker_id"], self.cursor["worker_id"])
         self.assertEqual(
             dispatch["branch"],
-            "cursor-handoff/KAIOS-CURSOR-FERTILIZER-MODELS-001",
+            "cursor-handoff/KAIOS-CURSOR-COMPOST-MODELS-001",
         )
         self.assertEqual(dispatch["output_status"], "CURSOR_RESEARCH_CANDIDATE_ONLY")
         self.assertEqual(self.cursor["current_task"], dispatch["task_id"])
         self.assertEqual(self.cursor["current_branch"], dispatch["branch"])
-        self.assertIn("FERTILIZER_MODEL_PROPOSAL", self.cursor["allowed_work"])
+        self.assertIn("COMPOST_MODEL_PROPOSAL", self.cursor["allowed_work"])
 
-        soil_dispatch = next(
+        fertilizer_dispatch = next(
             item
             for item in self.registry["dispatch_history"]
-            if item["task_id"] == "KAIOS-CURSOR-SOIL-TYPES-001"
+            if item["task_id"] == "KAIOS-CURSOR-FERTILIZER-MODELS-001"
         )
-        self.assertEqual(soil_dispatch["status"], "RELEASED")
+        self.assertEqual(fertilizer_dispatch["status"], "RELEASED")
 
     def test_continuous_queue_requires_formal_release_and_atomic_claim(self):
         queue = self.forest_queue
@@ -234,8 +234,9 @@ class CursorWorkerRegistryRepairTests(unittest.TestCase):
         self.assertEqual(by_priority[3]["status"], "RELEASED")
         self.assertEqual(by_priority[4]["status"], "RELEASED")
         self.assertEqual(by_priority[5]["status"], "RELEASED")
-        self.assertEqual(by_priority[6]["status"], "DISPATCHED")
-        self.assertEqual(by_priority[6]["task_id"], self.cursor["current_task"])
+        self.assertEqual(by_priority[6]["status"], "RELEASED")
+        self.assertEqual(by_priority[7]["status"], "DISPATCHED")
+        self.assertEqual(by_priority[7]["task_id"], self.cursor["current_task"])
 
     def test_approved_or_closed_claim_still_holds_lock_until_release(self):
         next_claim = {"task_id": "NEXT", "status": "DISPATCHED"}
