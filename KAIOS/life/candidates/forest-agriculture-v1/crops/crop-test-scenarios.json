@@ -15,11 +15,11 @@
     "oracle_id": "CROP-RICE-NUMERICAL-ORACLE-001",
     "fixed_point_contract": "KAIOS_FIXED_POINT_DECIMAL_V1",
     "canonical_serialization": "KAIOS_CANONICAL_JSON_INTEGER_V1",
-    "expected_final_sha256": "62ad9997a125620630e52778870a9b3a242c6333998552b3767607efc42cbd24"
+    "expected_final_sha256": "919d123983ff8e516f66ef9acca9acabb0873a76a6a8d13297d080d025818081"
   },
   "scenarios": [
     { "test_id": "CROP-CATALOG-001", "name": "Existing crop IDs are reused", "given": ["CANDIDATE_CATALOG"], "when": ["VALIDATE_CROP_REFERENCES"], "then": ["RICE_EXISTS_IN_AGRICULTURE_ALPHA", "VEGETABLE_EXISTS_IN_AGRICULTURE_ALPHA", "FRUIT_EXISTS_IN_AGRICULTURE_ALPHA", "NO_SECOND_CROP_OWNER"] },
-    { "test_id": "CROP-TAXONOMY-001", "name": "Resolved taxonomy references stay exact", "given": ["RICE_ALPHA", "FRUIT_ALPHA"], "when": ["COMPARE_TAXONOMY_STANDARD_AT_BASE_COMMIT"], "then": ["RICE_TAXONOMY_EXACT", "FRUIT_TAXONOMY_EXACT", "NO_CANONICAL_PROMOTION"] },
+    { "test_id": "CROP-TAXONOMY-001", "name": "Owner taxonomy and Canonical Life instance semantics stay distinct", "given": ["RICE_ALPHA", "FRUIT_ALPHA"], "when": ["COMPARE_OWNER_TAXONOMY_AT_BASE_COMMIT", "VALIDATE_CANONICAL_TAXONOMY_CROSSWALK"], "then": ["OWNER_RECORDS_INCLUDE_SUBSPECIES_AND_CATEGORY", "SUBSPECIES_IS_NOT_LIFE_INSTANCE", "LIFE_INSTANCE_REMAINS_UNASSIGNED", "NO_CANONICAL_PROMOTION"] },
     { "test_id": "CROP-TAXONOMY-002", "name": "Vegetable taxonomy gap is not fabricated", "given": ["VEGETABLE_ALPHA_REFERENCE", "NO_VEGETABLE_ALPHA_TAXONOMY_DEFINITION"], "when": ["VALIDATE_VEGETABLE_CANDIDATE"], "then": ["SPECIES_REFERENCE_IS_NULL", "SOURCE_UNDERSPECIFIED", "FUTURE_SPECIES_RESOLUTION_REQUIRED"] },
     { "test_id": "CROP-SEED-001", "name": "Planting blocks without propagation source", "given": ["EMPTY_SEED_OR_PROPAGATION_SOURCE", "COMPATIBLE_PLOT"], "when": ["REQUEST_PLANTING"], "then": ["NO_SEED_OR_PROPAGATION_SOURCE", "NO_CROP_BATCH_CREATED", "NO_RESOURCE_DEBIT"] },
     { "test_id": "CROP-SOIL-001", "name": "Growth blocks on incompatible soil", "given": ["PLANTED_CROP", "SOIL_OUTSIDE_COMPATIBILITY"], "when": ["ADVANCE_STAGE"], "then": ["SOIL_NOT_COMPATIBLE", "NO_GROWTH_DELTA", "NO_BIOMASS_CREATED"] },

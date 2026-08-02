@@ -79,10 +79,10 @@
     {
       "parameter_name": "oracle_simulation_duration",
       "unit": "minute",
-      "minimum": 2880,
-      "default": 2880,
-      "maximum": 2880,
-      "rationale": "Two ordered 24-hour synthetic owner-cycle intervals make elapsed time explicit.",
+      "minimum": 1440,
+      "default": 1440,
+      "maximum": 1440,
+      "rationale": "Two ordered 12-hour growth phases together equal the Agriculture Alpha RICE owner cycle of 24 hours.",
       "source_type": "RESEARCH_PROPOSAL",
       "confidence": "HIGH",
       "risk": "Fixture duration is not a real rice growth duration.",
@@ -182,7 +182,7 @@
         "sequence": "005",
         "event_id": "CROP-ORACLE-EVT-005",
         "event_type": "CAUSAL_GROWTH_PHASE_ONE_EVENT",
-        "state_deltas": { "simulation_elapsed_micro_minute": 1440000000 },
+        "state_deltas": { "simulation_elapsed_micro_minute": 720000000 },
         "deltas": {
           "structural_mass_pools_micro_kilogram": { "atmospheric_carbon_material_proxy": -20000000, "plant_structural_biomass": 20000000 },
           "nutrient_pools_micro_kilogram_nutrient_proxy": { "plant_nutrient_store": 2000000, "soil_nutrient_pool": -2000000 },
@@ -205,7 +205,7 @@
         "sequence": "008",
         "event_id": "CROP-ORACLE-EVT-008",
         "event_type": "CAUSAL_GROWTH_PHASE_TWO_EVENT",
-        "state_deltas": { "simulation_elapsed_micro_minute": 1440000000 },
+        "state_deltas": { "simulation_elapsed_micro_minute": 720000000 },
         "deltas": {
           "structural_mass_pools_micro_kilogram": { "atmospheric_carbon_material_proxy": -10000000, "plant_structural_biomass": 10000000 },
           "nutrient_pools_micro_kilogram_nutrient_proxy": { "plant_nutrient_store": 1000000, "soil_nutrient_pool": -1000000 },
@@ -258,7 +258,7 @@
     ],
     "expected_final_state": {
       "oracle_id": "CROP-RICE-NUMERICAL-ORACLE-001",
-      "simulation_elapsed_micro_minute": 2880000000,
+      "simulation_elapsed_micro_minute": 1440000000,
       "water_pools_micro_liter": {
         "atmospheric_water_proxy": 230000000,
         "drainage_return": 30000000,
@@ -321,7 +321,7 @@
       "encoding": "UTF-8 without BOM or trailing newline",
       "hash": "SHA-256 lowercase hexadecimal"
     },
-    "expected_final_sha256": "62ad9997a125620630e52778870a9b3a242c6333998552b3767607efc42cbd24",
+    "expected_final_sha256": "919d123983ff8e516f66ef9acca9acabb0873a76a6a8d13297d080d025818081",
     "objective_assertions": [
       "APPLY_ACTIONS_IN_SEQUENCE_ORDER",
       "USE_SIGNED_INTEGER_MICRO_UNITS_ONLY",

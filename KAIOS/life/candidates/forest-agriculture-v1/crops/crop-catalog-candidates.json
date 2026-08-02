@@ -28,7 +28,7 @@
       "extension_id": "PLANT_EXTENSION",
       "species_reference": "RICE_ALPHA",
       "species_reference_status": "REPOSITORY_DEFINED_SYNTHETIC_ALPHA",
-      "taxonomy": {
+      "owner_taxonomy_record": {
         "domain": "EUKARYOTA",
         "kingdom": "PLANTAE",
         "phylum": "TRACHEOPHYTA",
@@ -37,7 +37,15 @@
         "family": "POACEAE",
         "genus": "ORYZA",
         "species": "ORYZA_SATIVA",
-        "life_instance": "SYNTHETIC_ALPHA"
+        "subspecies": "SYNTHETIC_ALPHA",
+        "category": "PLANT"
+      },
+      "canonical_taxonomy_crosswalk": {
+        "domain_through_species": "DIRECT_RANK_MATCH",
+        "owner_subspecies": "SYNTHETIC_ALPHA",
+        "life_instance": null,
+        "life_instance_status": "ASSIGNED_ONLY_WHEN_AN_INDIVIDUAL_LIFE_INSTANCE_IS_CREATED",
+        "owner_category": "PLANT"
       },
       "propagation_source": "AGRICULTURE_ALPHA_SEEDS.RICE",
       "economy_seed_reference": "SEED_RICE",
@@ -186,7 +194,7 @@
       "extension_id": "PLANT_EXTENSION",
       "species_reference": "FRUIT_ALPHA",
       "species_reference_status": "REPOSITORY_DEFINED_SYNTHETIC_ALPHA",
-      "taxonomy": {
+      "owner_taxonomy_record": {
         "domain": "EUKARYOTA",
         "kingdom": "PLANTAE",
         "phylum": "TRACHEOPHYTA",
@@ -195,7 +203,15 @@
         "family": "ROSACEAE",
         "genus": "KAIOS_POMUM",
         "species": "KAIOS_POMUM_ALPHA",
-        "life_instance": "SYNTHETIC_ALPHA"
+        "subspecies": "SYNTHETIC_ALPHA",
+        "category": "PLANT"
+      },
+      "canonical_taxonomy_crosswalk": {
+        "domain_through_species": "DIRECT_RANK_MATCH",
+        "owner_subspecies": "SYNTHETIC_ALPHA",
+        "life_instance": null,
+        "life_instance_status": "ASSIGNED_ONLY_WHEN_AN_INDIVIDUAL_LIFE_INSTANCE_IS_CREATED",
+        "owner_category": "PLANT"
       },
       "propagation_source": "AGRICULTURE_ALPHA_SEEDS.FRUIT",
       "economy_seed_reference": null,

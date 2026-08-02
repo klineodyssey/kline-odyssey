@@ -49,10 +49,12 @@ owner state.
 
 ## Taxonomy Finding
 
-- `RICE_ALPHA` is defined in the existing taxonomy registry and is referenced
-  exactly as written there.
+- `RICE_ALPHA` is defined in the existing taxonomy registry. Its owner-native
+  record preserves `subspecies` and `category`; a separate Canonical Life
+  crosswalk deliberately leaves the individual `life_instance` unassigned.
 - `FRUIT_ALPHA` is defined in the existing taxonomy registry, but remains a
-  synthetic aggregate. It does not replace the queued fruit-tree package task.
+  synthetic aggregate. Its owner `subspecies` is not treated as a Canonical
+  Life individual, and it does not replace the queued fruit-tree package task.
 - `VEGETABLE_ALPHA` is referenced by `synthetic-world.json` but is not defined
   in `taxonomy-standard.js`. The candidate therefore sets its species reference
   and taxonomy to `null`, records `SOURCE_UNDERSPECIFIED`, and requires future
@@ -73,7 +75,7 @@ owner state.
    custody use paired debits and credits.
 7. Residue moves into a referenced compost feedstock before bounded nutrient
    return. Nothing disappears merely because a stage completes.
-8. Fifty-two numeric parameter contracts carry the required name, unit,
+8. Fifty-five numeric parameter contracts carry the required name, unit,
    minimum, default, maximum, rationale, source type, confidence, risk and
    validation flag.
 9. Aggregate `VEGETABLE` and `FRUIT` thresholds remain low-confidence proposals
@@ -107,9 +109,10 @@ The canonical payload is the recursively key-sorted
 `numerical_oracle.expected_final_state`, compact JSON encoded as UTF-8 without
 BOM or trailing newline. Its reproducible SHA-256 is:
 
-`62ad9997a125620630e52778870a9b3a242c6333998552b3767607efc42cbd24`
+`919d123983ff8e516f66ef9acca9acabb0873a76a6a8d13297d080d025818081`
 
-The fixture ends after `2,880` simulated minutes with product custody in the
+The fixture ends after `1,440` simulated minutes, split into two ordered
+12-hour phases that together match one RICE owner cycle, with custody in the
 owner warehouse projection, named crop residue, compost feedstock and a
 recorded nutrient-return event. It recognizes no revenue and changes no ledger.
 
@@ -150,13 +153,21 @@ checkout bytes.
 
 - required output count: `6 / 6`
 - JSON parse and duplicate-key scan: `PASS`
-- numeric parameter contracts: `52 / 52 PASS`
+- numeric parameter contracts: `55 / 55 PASS`
 - fixed-point oracle event balance: `12 / 12 PASS`
 - final-state replay and SHA-256: `PASS`
 - source Git-blob hashes: `9 / 9 PASS`
 - UTF-8 without BOM: `PASS`
 - secret and protected-scope scan: `PASS`
 - `git diff --check`: `PASS`
+
+## Codex Review Repairs
+
+The independent review found two P1 and two P2 issues. Codex repaired the
+Ecology fertility unit to the owner-native `0..1` fraction, separated owner
+`subspecies` from Canonical Life `life_instance`, wrapped owner cycle values in
+complete numeric contracts, and aligned the oracle to one 24-hour RICE cycle.
+Cursor authorship and source provenance remain preserved.
 
 ## Boundaries
 

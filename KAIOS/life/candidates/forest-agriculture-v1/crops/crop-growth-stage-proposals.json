@@ -23,7 +23,18 @@
     {
       "crop_id": "RICE",
       "species_reference": "RICE_ALPHA",
-      "owner_cycle_hours": "24",
+      "owner_cycle": {
+        "parameter_name": "owner_cycle_hours",
+        "unit": "hour",
+        "minimum": 24,
+        "default": 24,
+        "maximum": 24,
+        "rationale": "Exact Agriculture Alpha RICE cycle at the declared source commit.",
+        "source_type": "REPOSITORY_DERIVED",
+        "confidence": "HIGH",
+        "risk": "Owner Runtime changes require candidate revalidation.",
+        "validation_required": false
+      },
       "default_duration_sum_contract": "Stage defaults sum exactly to the Agriculture Alpha cycle of 24 hours.",
       "stages": [
         {
@@ -66,7 +77,18 @@
       "crop_id": "VEGETABLE",
       "species_reference": null,
       "species_reference_status": "SOURCE_UNDERSPECIFIED",
-      "owner_cycle_hours": "12",
+      "owner_cycle": {
+        "parameter_name": "owner_cycle_hours",
+        "unit": "hour",
+        "minimum": 12,
+        "default": 12,
+        "maximum": 12,
+        "rationale": "Exact Agriculture Alpha VEGETABLE cycle at the declared source commit.",
+        "source_type": "REPOSITORY_DERIVED",
+        "confidence": "HIGH",
+        "risk": "The owner class remains aggregate and is not a resolved species package.",
+        "validation_required": false
+      },
       "default_duration_sum_contract": "Stage defaults sum exactly to the Agriculture Alpha cycle of 12 hours.",
       "stages": [
         {
@@ -108,7 +130,18 @@
     {
       "crop_id": "FRUIT",
       "species_reference": "FRUIT_ALPHA",
-      "owner_cycle_hours": "48",
+      "owner_cycle": {
+        "parameter_name": "owner_cycle_hours",
+        "unit": "hour",
+        "minimum": 48,
+        "default": 48,
+        "maximum": 48,
+        "rationale": "Exact Agriculture Alpha FRUIT cycle at the declared source commit.",
+        "source_type": "REPOSITORY_DERIVED",
+        "confidence": "HIGH",
+        "risk": "The aggregate owner cycle does not establish a species-specific orchard model.",
+        "validation_required": false
+      },
       "default_duration_sum_contract": "Stage defaults sum exactly to the Agriculture Alpha cycle of 48 hours.",
       "stages": [
         {
