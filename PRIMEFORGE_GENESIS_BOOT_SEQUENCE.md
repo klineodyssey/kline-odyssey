@@ -60,6 +60,9 @@ Rights, Economy, Wallet or KGEN authority.
 | `KAIOS/life/forest-agriculture/KAIOS_CURSOR_FERTILIZER_MODELS_REVIEW_CLOSEOUT.md` | Independent fertilizer-model candidate review and formal lease release evidence. |
 | `KAIOS/life/candidates/forest-agriculture-v1/CURSOR_COMPOST_MODELS_WORK_ORDER.md` | Explicit research-only envelope for the sole active compost-model claim. |
 | `KGEN-KAIOS/governance/autopilot/company_status/COMPANY_STATUS_2026-08-02_FERTILIZER_RELEASED_COMPOST_MODELS_DISPATCHED.md` | Company status projection for fertilizer release and compost-model dispatch. |
+| `KAIOS/life/forest-agriculture/KAIOS_CURSOR_COMPOST_MODELS_REVIEW_CLOSEOUT.md` | Independent compost-model candidate review and formal lease release evidence. |
+| `KAIOS/life/candidates/forest-agriculture-v1/CURSOR_INSECT_CANDIDATES_WORK_ORDER.md` | Explicit candidate-only envelope for the sole active insect-candidate claim. |
+| `KGEN-KAIOS/governance/autopilot/company_status/COMPANY_STATUS_2026-08-02_COMPOST_RELEASED_INSECT_CANDIDATES_DISPATCHED.md` | Company status projection for compost release and insect-candidate dispatch. |
 
 ## AI Company Order And Project Specification Registration
 

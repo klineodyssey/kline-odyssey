@@ -35,6 +35,9 @@ Public interfaces:
 - [Fertilizer model Codex review closeout](life/forest-agriculture/KAIOS_CURSOR_FERTILIZER_MODELS_REVIEW_CLOSEOUT.md)
 - [Compost model Cursor work order](life/candidates/forest-agriculture-v1/CURSOR_COMPOST_MODELS_WORK_ORDER.md)
 - [Fertilizer release and compost dispatch Company Status](../KGEN-KAIOS/governance/autopilot/company_status/COMPANY_STATUS_2026-08-02_FERTILIZER_RELEASED_COMPOST_MODELS_DISPATCHED.md)
+- [Compost model Codex review closeout](life/forest-agriculture/KAIOS_CURSOR_COMPOST_MODELS_REVIEW_CLOSEOUT.md)
+- [Insect candidate Cursor work order](life/candidates/forest-agriculture-v1/CURSOR_INSECT_CANDIDATES_WORK_ORDER.md)
+- [Compost release and insect dispatch Company Status](../KGEN-KAIOS/governance/autopilot/company_status/COMPANY_STATUS_2026-08-02_COMPOST_RELEASED_INSECT_CANDIDATES_DISPATCHED.md)
 
 ## AI Company Order And Project Runtime V1
 
