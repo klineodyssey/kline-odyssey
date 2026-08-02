@@ -10,6 +10,30 @@
     "status": { "enum": ["OPERATING", "OVER_CAPACITY", "CASH_FLOW_WARNING", "PAYMENT_DELAY", "DISTRESS", "INSOLVENT", "RESTRUCTURING_SIMULATION", "COURT_PROTECTION_SIMULATION", "LIQUIDATION_SIMULATION", "DISSOLVED"] },
     "divisions": {
       "type": "array", "minItems": 21, "maxItems": 21,
+      "uniqueItems": true,
+      "allOf": [
+        { "contains": { "type": "object", "required": ["division_id"], "properties": { "division_id": { "const": "CUSTOMER_SERVICE_DIVISION" } } }, "minContains": 1, "maxContains": 1 },
+        { "contains": { "type": "object", "required": ["division_id"], "properties": { "division_id": { "const": "REQUIREMENTS_DIVISION" } } }, "minContains": 1, "maxContains": 1 },
+        { "contains": { "type": "object", "required": ["division_id"], "properties": { "division_id": { "const": "ARCHITECTURE_DIVISION" } } }, "minContains": 1, "maxContains": 1 },
+        { "contains": { "type": "object", "required": ["division_id"], "properties": { "division_id": { "const": "LIFE_CREATION_DIVISION" } } }, "minContains": 1, "maxContains": 1 },
+        { "contains": { "type": "object", "required": ["division_id"], "properties": { "division_id": { "const": "DESIGN_DIVISION" } } }, "minContains": 1, "maxContains": 1 },
+        { "contains": { "type": "object", "required": ["division_id"], "properties": { "division_id": { "const": "PHYSICS_REVIEW_DIVISION" } } }, "minContains": 1, "maxContains": 1 },
+        { "contains": { "type": "object", "required": ["division_id"], "properties": { "division_id": { "const": "ECONOMY_REVIEW_DIVISION" } } }, "minContains": 1, "maxContains": 1 },
+        { "contains": { "type": "object", "required": ["division_id"], "properties": { "division_id": { "const": "RIGHTS_REVIEW_DIVISION" } } }, "minContains": 1, "maxContains": 1 },
+        { "contains": { "type": "object", "required": ["division_id"], "properties": { "division_id": { "const": "CIVILIZATION_REVIEW_DIVISION" } } }, "minContains": 1, "maxContains": 1 },
+        { "contains": { "type": "object", "required": ["division_id"], "properties": { "division_id": { "const": "PROCUREMENT_DIVISION" } } }, "minContains": 1, "maxContains": 1 },
+        { "contains": { "type": "object", "required": ["division_id"], "properties": { "division_id": { "const": "SUPPLY_CHAIN_DIVISION" } } }, "minContains": 1, "maxContains": 1 },
+        { "contains": { "type": "object", "required": ["division_id"], "properties": { "division_id": { "const": "LABOR_DIVISION" } } }, "minContains": 1, "maxContains": 1 },
+        { "contains": { "type": "object", "required": ["division_id"], "properties": { "division_id": { "const": "CONSTRUCTION_DIVISION" } } }, "minContains": 1, "maxContains": 1 },
+        { "contains": { "type": "object", "required": ["division_id"], "properties": { "division_id": { "const": "MANUFACTURING_DIVISION" } } }, "minContains": 1, "maxContains": 1 },
+        { "contains": { "type": "object", "required": ["division_id"], "properties": { "division_id": { "const": "LOGISTICS_DIVISION" } } }, "minContains": 1, "maxContains": 1 },
+        { "contains": { "type": "object", "required": ["division_id"], "properties": { "division_id": { "const": "QA_INSPECTION_DIVISION" } } }, "minContains": 1, "maxContains": 1 },
+        { "contains": { "type": "object", "required": ["division_id"], "properties": { "division_id": { "const": "FINANCE_DIVISION" } } }, "minContains": 1, "maxContains": 1 },
+        { "contains": { "type": "object", "required": ["division_id"], "properties": { "division_id": { "const": "RISK_DIVISION" } } }, "minContains": 1, "maxContains": 1 },
+        { "contains": { "type": "object", "required": ["division_id"], "properties": { "division_id": { "const": "LEGAL_SIMULATION_DIVISION" } } }, "minContains": 1, "maxContains": 1 },
+        { "contains": { "type": "object", "required": ["division_id"], "properties": { "division_id": { "const": "MAINTENANCE_DIVISION" } } }, "minContains": 1, "maxContains": 1 },
+        { "contains": { "type": "object", "required": ["division_id"], "properties": { "division_id": { "const": "DELIVERY_DIVISION" } } }, "minContains": 1, "maxContains": 1 }
+      ],
       "items": {
         "type": "object",
         "required": ["division_id", "authority", "allowed_actions", "forbidden_actions", "required_inputs", "outputs", "review_gate", "responsible_agent", "event_history", "cost_center", "status"],
@@ -20,7 +44,8 @@
           "forbidden_actions": { "type": "array", "items": { "type": "string" } },
           "required_inputs": { "type": "array", "items": { "type": "string" } },
           "outputs": { "type": "array", "items": { "type": "string" } },
-          "review_gate": { "type": "string" }, "responsible_agent": { "type": "string" },
+          "review_gate": { "type": "string" },
+          "responsible_agent": { "type": "string", "pattern": "^KAIOS-SIMULATED-[A-Z0-9_-]+$", "maxLength": 128 },
           "event_history": { "type": "array", "maxItems": 1000, "items": { "type": "string" } },
           "cost_center": { "type": "string" }, "status": { "enum": ["READY", "BUSY", "BLOCKED", "PAUSED", "CLOSED"] }
         }, "additionalProperties": false

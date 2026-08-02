@@ -2,11 +2,11 @@
 
 Task ID: `KAIOS-AI-COMPANY-ORDER-PROJECT-RUNTIME-V1-001`
 
-Status: `READY_FOR_INDEPENDENT_REVIEW`
+Status: `REVIEW_REPAIRED_PENDING_FINAL_REVIEW`
 
 Branch: `codex/kaios-ai-company-order-project-spec-v1`
 
-PR: `PENDING_DRAFT_CREATION`
+PR: `#93 / https://github.com/klineodyssey/kline-odyssey/pull/93`
 
 ## Completed
 
@@ -20,6 +20,15 @@ PR: `PENDING_DRAFT_CREATION`
 - defined deterministic events, read-only APIs, World Viewer and rollback;
 - kept Forest/Agriculture-dependent farm work visibly blocked;
 - preserved the one-task queue through Fruit Tree release and bounded Vegetable dispatch.
+
+## Independent Review Repair
+
+Initial independent review reported `P0=0 / P1=2 / P2=0`: division IDs were
+not provably unique in instances, and the test loader did not reject duplicate
+JSON keys. The repaired schema now requires every one of the 21 division IDs
+exactly once and restricts each responsible agent to a simulated ID. The strict
+JSON parser rejects duplicate keys, including Unicode-escaped aliases. The
+specialized suite now reports `6 / 6 PASS`.
 
 ## Gates
 

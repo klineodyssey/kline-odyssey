@@ -6,7 +6,7 @@ Previous main: `6b8654995cf04a5227b7980d74a113ffb83c3adc`
 
 Branch: `codex/kaios-ai-company-order-project-spec-v1`
 
-PR: `PENDING_DRAFT_CREATION`
+PR: `#93 / https://github.com/klineodyssey/kline-odyssey/pull/93`
 
 ## Scope
 

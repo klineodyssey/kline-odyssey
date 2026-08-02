@@ -1,3 +1,96 @@
+export function parseStrictJson(text) {
+  let cursor = 0;
+  const fail = (code) => { throw new SyntaxError(`${code}@${cursor}`); };
+  const skipWhitespace = () => {
+    while (cursor < text.length && /\s/.test(text[cursor])) cursor += 1;
+  };
+  const parseString = () => {
+    if (text[cursor] !== '"') fail("EXPECTED_JSON_STRING");
+    const start = cursor++;
+    while (cursor < text.length) {
+      if (text[cursor] === "\\") {
+        cursor += 2;
+        continue;
+      }
+      if (text[cursor] === '"') {
+        cursor += 1;
+        return JSON.parse(text.slice(start, cursor));
+      }
+      cursor += 1;
+    }
+    fail("UNTERMINATED_JSON_STRING");
+  };
+  const parseValue = () => {
+    skipWhitespace();
+    if (text[cursor] === '"') return parseString();
+    if (text[cursor] === "{") return parseObject();
+    if (text[cursor] === "[") return parseArray();
+    for (const [literal, value] of [["true", true], ["false", false], ["null", null]]) {
+      if (text.startsWith(literal, cursor)) {
+        cursor += literal.length;
+        return value;
+      }
+    }
+    const number = text.slice(cursor).match(/^-?(?:0|[1-9]\d*)(?:\.\d+)?(?:[eE][+-]?\d+)?/);
+    if (!number) fail("INVALID_JSON_VALUE");
+    cursor += number[0].length;
+    return Number(number[0]);
+  };
+  const parseArray = () => {
+    const result = [];
+    cursor += 1;
+    skipWhitespace();
+    if (text[cursor] === "]") {
+      cursor += 1;
+      return result;
+    }
+    while (cursor < text.length) {
+      result.push(parseValue());
+      skipWhitespace();
+      if (text[cursor] === "]") {
+        cursor += 1;
+        return result;
+      }
+      if (text[cursor] !== ",") fail("EXPECTED_ARRAY_SEPARATOR");
+      cursor += 1;
+    }
+    fail("UNTERMINATED_JSON_ARRAY");
+  };
+  const parseObject = () => {
+    const result = {};
+    const keys = new Set();
+    cursor += 1;
+    skipWhitespace();
+    if (text[cursor] === "}") {
+      cursor += 1;
+      return result;
+    }
+    while (cursor < text.length) {
+      skipWhitespace();
+      const key = parseString();
+      if (keys.has(key)) fail(`DUPLICATE_JSON_KEY:${key}`);
+      keys.add(key);
+      skipWhitespace();
+      if (text[cursor] !== ":") fail("EXPECTED_OBJECT_COLON");
+      cursor += 1;
+      result[key] = parseValue();
+      skipWhitespace();
+      if (text[cursor] === "}") {
+        cursor += 1;
+        return result;
+      }
+      if (text[cursor] !== ",") fail("EXPECTED_OBJECT_SEPARATOR");
+      cursor += 1;
+    }
+    fail("UNTERMINATED_JSON_OBJECT");
+  };
+
+  const result = parseValue();
+  skipWhitespace();
+  if (cursor !== text.length) fail("TRAILING_JSON_CONTENT");
+  return result;
+}
+
 export const REQUIRED_DIVISIONS = Object.freeze([
   "CUSTOMER_SERVICE_DIVISION", "REQUIREMENTS_DIVISION", "ARCHITECTURE_DIVISION",
   "LIFE_CREATION_DIVISION", "DESIGN_DIVISION", "PHYSICS_REVIEW_DIVISION",
