@@ -115,6 +115,14 @@ Artifacts:
 
 Cursor **never** self-promotes Queue to `OPEN`. Codex converts PROPOSED → OPEN + envelope + APPROVED dispatch.
 
+### 6.2 Human doctrine — life is agency, not wallet
+
+**Human doctrine ID:** `HUMAN-LIFE-AGENCY-NOT-WALLET-001`
+
+> 能自動自發才是生命；有錢包只是行尸走肉。
+
+Cursor records this and related R&D notes in **`KGEN-AI-Company/reports/CURSOR_RD_HANDOFF_JOURNAL.md`** (研發交接簿). Proactive handoffs implement **governed agency** (idle R&D, proposals, Codex scheduling)—not uncontrolled autonomy or wallet-only execution.
+
 ---
 
 ## 7. Environment notes (shared VM)

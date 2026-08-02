@@ -24,6 +24,7 @@ Cursor compared **PR #42** with **current main**. **Human decision (2026-08-01):
 | Decision | #42 先不用；等版本穩定再寫程式 |
 | Cursor | **No work** on PR #42 |
 | `human_standing_directive` | `HUMAN-CURSOR-PROACTIVE-RD-001` — 每次交工附 R&D / 提案 / 可接任務給 Codex 排程 |
+| `human_doctrine` | `HUMAN-LIFE-AGENCY-NOT-WALLET-001` — 能自動自發才是生命；有錢包只是行尸走肉（見研發交接簿） |
 
 ## Proactive Dispatch (for Codex scheduler)
 
@@ -61,4 +62,7 @@ Also PROPOSED: `KAIOS-COORD-PROTOCOL-MERGE-001`, `KAIOS-BOOT-SUMMARY-ZH-001`, `K
 | Artifact | Path |
 |----------|------|
 | Full R&D report | `KGEN-AI-Company/reports/CURSOR_RD_PRODUCT_RECONCILE_20260801_REPORT.md` |
+| Proactive dispatch | `KGEN-AI-Company/reports/CURSOR_PROACTIVE_RD_DISPATCH_20260801_REPORT.md` |
+| Coordination protocol | `KGEN-AI-Company/reports/CURSOR_CODEX_COORDINATION_PROTOCOL_V1.md` |
+| 研發交接簿 | `KGEN-AI-Company/reports/CURSOR_RD_HANDOFF_JOURNAL.md` |
 | Machine handoff | `KGEN-AI-Company/reports/handoffs/KAIOS-RD-PRODUCT-RECONCILE-001/handoff.json` |

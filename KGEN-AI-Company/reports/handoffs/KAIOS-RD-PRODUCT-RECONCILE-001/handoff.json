@@ -30,6 +30,15 @@
       "recorded_at": "2026-08-01T12:43:00Z"
     }
   ],
+  "human_doctrines": [
+    {
+      "id": "HUMAN-LIFE-AGENCY-NOT-WALLET-001",
+      "text": "能自動自發才是生命；有錢包只是行尸走肉",
+      "summary": "Agency and spontaneous proactive action define life in KGEN; wallet-only execution is walking-dead automation",
+      "recorded_at": "2026-08-02T08:29:00Z",
+      "journal": "KGEN-AI-Company/reports/CURSOR_RD_HANDOFF_JOURNAL.md"
+    }
+  ],
   "human_decision": {
     "pr_42": "DEFERRED",
     "detail": "Do not merge or port PR #42; wait for stable baseline before future product-shell work",
