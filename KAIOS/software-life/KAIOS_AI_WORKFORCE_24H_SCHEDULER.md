@@ -44,17 +44,25 @@ releases the claim and atomically dispatches the next approved item. Cursor
 cannot rename authoritative software, change Canonical schemas, merge, deploy,
 or approve itself.
 
-Current Cursor task:
+Current Cursor state:
 
-- `KAIOS-CURSOR-MICROBIAL-RESEARCH-001`
-- branch `cursor-handoff/KAIOS-CURSOR-MICROBIAL-RESEARCH-001`
+- current task: `null`
+- current branch: `null`
+- status: `IDLE / ZERO_ACTIVE_CLAIMS`
+- prepared task: `KAIOS-CURSOR-MICROBIAL-RESEARCH-001`
+- prepared status: `READY_FOR_ATOMIC_CLAIM`
 - output `RESEARCH_PROPOSAL_ONLY / PENDING_CODEX_REVIEW`
+- reviewer: `codex-gm-01`
+- source base: `beb982fda885fa7acc4dc35407df611d1019a544`
+- authorized path: `KAIOS/life/candidates/forest-agriculture-v1/microbial-research/`
+- expected files: exactly eight, bound by the prepared work-order envelope
 
-Earthworm and fungi candidate packages completed independent Codex review and
-were released from their worker claims. The microbial decomposer research task
-is the sole active claim; the weather dataset proposal is next. The software-life
-manifest candidate task remains queued behind the pre-existing
-forest/agriculture queue and does not preempt an active claim.
+Earthworm and fungi candidate packages completed independent Codex review. The
+Fungi claim was explicitly closed and then released; no active claim remains.
+The microbial decomposer research task is prepared for a future atomic claim,
+not dispatched. The weather dataset proposal is next after that task completes
+its future review and release cycle. The software-life manifest candidate task
+remains queued behind the pre-existing forest/agriculture queue.
 
 ## Mandatory Stops
 

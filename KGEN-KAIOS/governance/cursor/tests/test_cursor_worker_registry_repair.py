@@ -49,9 +49,14 @@ KNOWN_CLAIM_STATES = {
     "EXPIRED",
     "ABANDONED",
     "COMPLETED_CODEX_REVIEWED",
+    "READY_FOR_ATOMIC_CLAIM",
 }
 
-UNLOCKED_CLAIM_STATES = {"RELEASED", "COMPLETED_CODEX_REVIEWED"}
+UNLOCKED_CLAIM_STATES = {
+    "RELEASED",
+    "COMPLETED_CODEX_REVIEWED",
+    "READY_FOR_ATOMIC_CLAIM",
+}
 
 
 def lock_holding_claims(dispatch_history):
@@ -176,20 +181,44 @@ class CursorWorkerRegistryRepairTests(unittest.TestCase):
             <= set(self.cursor["allowed_work"])
         )
 
-    def test_microbial_research_dispatch_is_the_only_active_claim(self):
+    def test_fungi_close_release_order_leaves_zero_active_claims(self):
         metadata = self.registry["metadata"]
         self.assertEqual(
             metadata["source_commit"],
             "beb982fda885fa7acc4dc35407df611d1019a544",
         )
         self.assertEqual(
-            metadata["task_id"], "KAIOS-CURSOR-FUNGI-CANDIDATE-001-RELEASE"
+            metadata["task_id"],
+            "KAIOS-CURSOR-FUNGI-CANDIDATE-001-RELEASE-PREPARE-MICROBIAL",
         )
-        self.assertIn("microbial decomposer research", metadata["change_reason"])
+        self.assertIn("Close and release", metadata["change_reason"])
 
         locked = validate_one_task_lock(self.registry["dispatch_history"])
-        self.assertEqual(len(locked), 1)
-        dispatch = locked[0]
+        self.assertEqual(locked, [])
+        self.assertEqual(self.registry["active_claims"], [])
+
+        events = [
+            event
+            for event in self.registry["claim_events"]
+            if event["task_id"] == "KAIOS-CURSOR-FUNGI-CANDIDATE-001"
+        ]
+        self.assertEqual(
+            [event["event_type"] for event in events],
+            ["CLAIM_CLOSED", "CLAIM_RELEASED"],
+        )
+        self.assertEqual([event["sequence"] for event in events], [1, 2])
+        self.assertEqual(
+            events[1]["previous_event_id"], events[0]["event_id"]
+        )
+
+    def test_microbial_research_is_prepared_but_not_claimed(self):
+        dispatch = next(
+            item
+            for item in self.registry["dispatch_history"]
+            if item["task_id"] == "KAIOS-CURSOR-MICROBIAL-RESEARCH-001"
+        )
+        self.assertEqual(dispatch["status"], "READY_FOR_ATOMIC_CLAIM")
+        self.assertEqual(dispatch["claim_state"], "UNCLAIMED")
         self.assertEqual(
             dispatch["task_id"], "KAIOS-CURSOR-MICROBIAL-RESEARCH-001"
         )
@@ -199,16 +228,64 @@ class CursorWorkerRegistryRepairTests(unittest.TestCase):
             "cursor-handoff/KAIOS-CURSOR-MICROBIAL-RESEARCH-001",
         )
         self.assertEqual(dispatch["output_status"], "CURSOR_RESEARCH_PROPOSAL_ONLY")
-        self.assertEqual(self.cursor["current_task"], dispatch["task_id"])
-        self.assertEqual(self.cursor["current_branch"], dispatch["branch"])
+        self.assertIsNone(self.cursor["current_task"])
+        self.assertIsNone(self.cursor["current_branch"])
+        self.assertEqual(self.cursor["status"], "IDLE")
         self.assertIn("MICROBIAL_RESEARCH", self.cursor["allowed_work"])
 
-        fungi_dispatch = next(
-            item
-            for item in self.registry["dispatch_history"]
-            if item["task_id"] == "KAIOS-CURSOR-FUNGI-CANDIDATE-001"
+        envelope = dispatch["prepared_task_envelope"]
+        self.assertEqual(envelope["status"], "READY_FOR_ATOMIC_CLAIM")
+        self.assertEqual(envelope["claim_state"], "UNCLAIMED")
+        self.assertEqual(envelope["claim_required"], "ATOMIC_CLAIM_BEFORE_WORK")
+        self.assertEqual(
+            envelope["authorized_paths"],
+            [
+                "KAIOS/life/candidates/forest-agriculture-v1/microbial-research/"
+            ],
         )
-        self.assertEqual(fungi_dispatch["status"], "RELEASED")
+        self.assertEqual(
+            envelope["expected_files"],
+            [
+                "CURSOR_MICROBIAL_DECOMPOSER_RESEARCH_REPORT.md",
+                "microbial-decomposer-process-proposals.json",
+                "microbial-environment-threshold-proposals.json",
+                "microbial-resource-accounting-scenarios.json",
+                "microbial-competition-and-succession-proposals.json",
+                "microbial-safety-boundaries.json",
+                "microbial-test-scenarios.json",
+                "CURSOR_MICROBIAL_RESEARCH_IMPROVEMENT_PROPOSAL.md",
+            ],
+        )
+        self.assertEqual(
+            envelope["actions"],
+            [
+                "READ_REPOSITORY_CONTEXT",
+                "WRITE_ONLY_EXPECTED_FILES_UNDER_AUTHORIZED_PATH",
+                "RUN_BOUNDED_LOCAL_TESTS",
+                "RECORD_GIT_OBJECT_AND_SHA256_PROVENANCE",
+                "COMMIT_EXACTLY_EXPECTED_FILES",
+                "STOP_AT_PENDING_CODEX_REVIEW",
+            ],
+        )
+        self.assertEqual(envelope["reviewer"], "codex-gm-01")
+        self.assertEqual(
+            envelope["source_base"],
+            "beb982fda885fa7acc4dc35407df611d1019a544",
+        )
+        self.assertEqual(
+            envelope["forbidden_paths"],
+            [
+                "KGEN-KAIOS/**",
+                "KGEN/**",
+                "KAIOS/**/Runtime/**",
+                "KAIOS/**/Wallet/**",
+                "**/*CURRENT*",
+                "api/**",
+                "docs/**",
+                "README.md",
+                "PRIMEFORGE_GENESIS_BOOT_SEQUENCE_V1_4.md",
+            ],
+        )
 
     def test_continuous_queue_requires_formal_release_and_atomic_claim(self):
         queue = self.forest_queue
@@ -240,8 +317,12 @@ class CursorWorkerRegistryRepairTests(unittest.TestCase):
         self.assertEqual(by_priority[9]["status"], "RELEASED")
         self.assertEqual(by_priority[10]["status"], "RELEASED")
         self.assertEqual(by_priority[11]["status"], "RELEASED")
-        self.assertEqual(by_priority[12]["status"], "DISPATCHED")
-        self.assertEqual(by_priority[12]["task_id"], self.cursor["current_task"])
+        self.assertEqual(by_priority[12]["status"], "READY_FOR_ATOMIC_CLAIM")
+        self.assertEqual(by_priority[12]["task_id"], "KAIOS-CURSOR-MICROBIAL-RESEARCH-001")
+        self.assertEqual(queue["active_claims"], [])
+        self.assertIsNone(queue["worker_state"]["current_task"])
+        self.assertIsNone(queue["worker_state"]["current_branch"])
+        self.assertEqual(queue["prepared_task"]["expected_files"], self.registry["dispatch_history"][-1]["prepared_task_envelope"]["expected_files"])
 
     def test_approved_or_closed_claim_still_holds_lock_until_release(self):
         next_claim = {"task_id": "NEXT", "status": "DISPATCHED"}

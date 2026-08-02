@@ -6,7 +6,16 @@ Worker: `cursor-01`
 
 Branch: `cursor-handoff/KAIOS-CURSOR-FUNGI-CANDIDATE-001`
 
-Status: `DISPATCHED / CURSOR_RESEARCH_CANDIDATE_ONLY`
+Status: `CLOSED -> RELEASED / CURSOR_RESEARCH_CANDIDATE_ONLY`
+
+Claim events: `CLAIM_CLOSED` (sequence 1) -> `CLAIM_RELEASED` (sequence 2)
+
+Claim event IDs:
+
+- `CLAIM-EVENT-KAIOS-CURSOR-FUNGI-CANDIDATE-001-001`
+- `CLAIM-EVENT-KAIOS-CURSOR-FUNGI-CANDIDATE-001-002`
+
+Active claims after release: `0`
 
 Source base commit: `eb17536ff6affb34f93bce6c5622d7bab018d230`
 

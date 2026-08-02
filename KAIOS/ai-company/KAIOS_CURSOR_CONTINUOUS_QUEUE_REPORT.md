@@ -56,20 +56,30 @@ The vegetable assignment was allowed to complete before its lease was released.
 
 ## Current Assignment
 
-- Task: `KAIOS-CURSOR-MICROBIAL-RESEARCH-001`
-- Branch: `cursor-handoff/KAIOS-CURSOR-MICROBIAL-RESEARCH-001`
-- Status: `ACTIVE / ONE_TASK_AT_A_TIME`
+- Worker: `cursor-01`
+- Current task: `null`
+- Current branch: `null`
+- Status: `IDLE / ZERO_ACTIVE_CLAIMS`
+- Prepared task: `KAIOS-CURSOR-MICROBIAL-RESEARCH-001`
+- Prepared status: `READY_FOR_ATOMIC_CLAIM`
 - Output authority: `CURSOR_RESEARCH_PROPOSAL_ONLY / PENDING_CODEX_REVIEW`
+- Reviewer: `codex-gm-01`
+- Source base: `beb982fda885fa7acc4dc35407df611d1019a544`
+- Authorized path: `KAIOS/life/candidates/forest-agriculture-v1/microbial-research/`
+- Expected files: exactly `8`, as listed in the Microbial work order.
 
-The next safe queue item is the weather-dataset proposal. It may be dispatched
-only after Codex independently reviews and formally releases the microbial
-research claim.
+The Microbial task is prepared but is not dispatched or claimed. It may be
+atomically claimed only after the exact envelope is revalidated. The next
+queue item remains the weather-dataset proposal after the Microbial task has
+completed its future review and release cycle.
 
 ## Boundaries
 
 Cursor cannot modify Runtime authority, CURRENT, Canonical schemas, Universe
 Law, Rights authority, Economy authority, Wallet, KGEN, deployment or merge
-state. Cursor output never becomes Canonical without Codex review.
+state. Cursor output never becomes Canonical without Codex review. The Fungi
+claim event order is append-only: `CLAIM_CLOSED`, then `CLAIM_RELEASED`; after
+release, the active claim set is empty.
 
 The read-only AI Company API and Viewer expose the queue without granting the
 Runtime any dispatch, merge or deployment mutation endpoint.

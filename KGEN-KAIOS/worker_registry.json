@@ -6,10 +6,38 @@
     "updated_by": "Codex",
     "reviewed_by": "Codex",
     "source_commit": "beb982fda885fa7acc4dc35407df611d1019a544",
-    "task_id": "KAIOS-CURSOR-FUNGI-CANDIDATE-001-RELEASE",
-    "change_reason": "Release the independently reviewed fungi candidate claim and atomically dispatch cursor-01 to bounded microbial decomposer research.",
+    "task_id": "KAIOS-CURSOR-FUNGI-CANDIDATE-001-RELEASE-PREPARE-MICROBIAL",
+    "change_reason": "Close and release the independently reviewed fungi claim, then prepare (without claiming) the bounded microbial decomposer research envelope.",
     "source_of_truth": true
   },
+  "claim_events": [
+    {
+      "event_id": "CLAIM-EVENT-KAIOS-CURSOR-FUNGI-CANDIDATE-001-001",
+      "event_type": "CLAIM_CLOSED",
+      "sequence": 1,
+      "task_id": "KAIOS-CURSOR-FUNGI-CANDIDATE-001",
+      "worker_id": "cursor-01",
+      "branch": "cursor-handoff/KAIOS-CURSOR-FUNGI-CANDIDATE-001",
+      "reviewer": "codex-gm-01",
+      "source_commit": "beb982fda885fa7acc4dc35407df611d1019a544",
+      "recorded_by": "codex-gm-01",
+      "reason": "Independent review and candidate closeout completed before lease release."
+    },
+    {
+      "event_id": "CLAIM-EVENT-KAIOS-CURSOR-FUNGI-CANDIDATE-001-002",
+      "event_type": "CLAIM_RELEASED",
+      "sequence": 2,
+      "task_id": "KAIOS-CURSOR-FUNGI-CANDIDATE-001",
+      "worker_id": "cursor-01",
+      "branch": "cursor-handoff/KAIOS-CURSOR-FUNGI-CANDIDATE-001",
+      "reviewer": "codex-gm-01",
+      "source_commit": "beb982fda885fa7acc4dc35407df611d1019a544",
+      "previous_event_id": "CLAIM-EVENT-KAIOS-CURSOR-FUNGI-CANDIDATE-001-001",
+      "recorded_by": "codex-gm-01",
+      "reason": "Lease released only after the claim was explicitly closed."
+    }
+  ],
+  "active_claims": [],
   "formal_employee_requirements": [
     "worker_id exists",
     "employee_status is ACTIVE, TRUSTED, or SENIOR_TRUSTED",
@@ -157,7 +185,11 @@
       "branch": "cursor-handoff/KAIOS-CURSOR-FUNGI-CANDIDATE-001",
       "output_status": "CURSOR_RESEARCH_CANDIDATE_ONLY",
       "reviewer": "codex-gm-01",
-      "status": "RELEASED"
+      "status": "RELEASED",
+      "claim_event_ids": [
+        "CLAIM-EVENT-KAIOS-CURSOR-FUNGI-CANDIDATE-001-001",
+        "CLAIM-EVENT-KAIOS-CURSOR-FUNGI-CANDIDATE-001-002"
+      ]
     },
     {
       "task_id": "KAIOS-CURSOR-MICROBIAL-RESEARCH-001",
@@ -165,7 +197,51 @@
       "branch": "cursor-handoff/KAIOS-CURSOR-MICROBIAL-RESEARCH-001",
       "output_status": "CURSOR_RESEARCH_PROPOSAL_ONLY",
       "reviewer": "codex-gm-01",
-      "status": "DISPATCHED"
+      "status": "READY_FOR_ATOMIC_CLAIM",
+      "claim_state": "UNCLAIMED",
+      "prepared_task_envelope": {
+        "envelope_id": "TASK-ENVELOPE-KAIOS-CURSOR-MICROBIAL-RESEARCH-001-V1",
+        "task_id": "KAIOS-CURSOR-MICROBIAL-RESEARCH-001",
+        "worker_id": "cursor-01",
+        "reviewer": "codex-gm-01",
+        "source_base": "beb982fda885fa7acc4dc35407df611d1019a544",
+        "branch": "cursor-handoff/KAIOS-CURSOR-MICROBIAL-RESEARCH-001",
+        "status": "READY_FOR_ATOMIC_CLAIM",
+        "claim_state": "UNCLAIMED",
+        "claim_required": "ATOMIC_CLAIM_BEFORE_WORK",
+        "authorized_paths": [
+          "KAIOS/life/candidates/forest-agriculture-v1/microbial-research/"
+        ],
+        "expected_files": [
+          "CURSOR_MICROBIAL_DECOMPOSER_RESEARCH_REPORT.md",
+          "microbial-decomposer-process-proposals.json",
+          "microbial-environment-threshold-proposals.json",
+          "microbial-resource-accounting-scenarios.json",
+          "microbial-competition-and-succession-proposals.json",
+          "microbial-safety-boundaries.json",
+          "microbial-test-scenarios.json",
+          "CURSOR_MICROBIAL_RESEARCH_IMPROVEMENT_PROPOSAL.md"
+        ],
+        "actions": [
+          "READ_REPOSITORY_CONTEXT",
+          "WRITE_ONLY_EXPECTED_FILES_UNDER_AUTHORIZED_PATH",
+          "RUN_BOUNDED_LOCAL_TESTS",
+          "RECORD_GIT_OBJECT_AND_SHA256_PROVENANCE",
+          "COMMIT_EXACTLY_EXPECTED_FILES",
+          "STOP_AT_PENDING_CODEX_REVIEW"
+        ],
+        "forbidden_paths": [
+          "KGEN-KAIOS/**",
+          "KGEN/**",
+          "KAIOS/**/Runtime/**",
+          "KAIOS/**/Wallet/**",
+          "**/*CURRENT*",
+          "api/**",
+          "docs/**",
+          "README.md",
+          "PRIMEFORGE_GENESIS_BOOT_SEQUENCE_V1_4.md"
+        ]
+      }
     }
   ],
   "workers": [
@@ -203,9 +279,9 @@
         "LIFE_RESEARCH_ANALYST"
       ],
       "workspace": "cursor-worker-workspace",
-      "current_task": "KAIOS-CURSOR-MICROBIAL-RESEARCH-001",
-      "current_branch": "cursor-handoff/KAIOS-CURSOR-MICROBIAL-RESEARCH-001",
-      "status": "ACTIVE",
+      "current_task": null,
+      "current_branch": null,
+      "status": "IDLE",
       "employee_status": "ACTIVE",
       "trust_level": "T2",
       "heartbeat": "2026-08-02T12:12:00Z",

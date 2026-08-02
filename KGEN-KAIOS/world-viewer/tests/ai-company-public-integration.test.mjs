@@ -89,6 +89,50 @@ test("public Cursor queue projection matches the canonical governance queue", as
   }
 });
 
+test("public Cursor queue exposes a claim-free prepared Microbial envelope", async () => {
+  const canonical = JSON.parse(await read(
+    "KAIOS/life/forest-agriculture/KAIOS_CURSOR_CONTINUOUS_WORK_QUEUE.json"
+  ));
+  const projection = JSON.parse(await read("api/kaios/ai-company/v1/cursor-queue.json"));
+  assert.deepEqual(projection.active_claims, []);
+  assert.deepEqual(projection.worker_state, {
+    worker_id: "cursor-01",
+    current_task: null,
+    current_branch: null,
+    status: "IDLE"
+  });
+  assert.deepEqual(projection.prepared_task, canonical.prepared_task);
+  assert.equal(projection.prepared_task.status, "READY_FOR_ATOMIC_CLAIM");
+  assert.equal(projection.prepared_task.claim_state, "UNCLAIMED");
+  assert.equal(projection.prepared_task.claim_required, "ATOMIC_CLAIM_BEFORE_WORK");
+  assert.deepEqual(projection.prepared_task.authorized_paths, [
+    "KAIOS/life/candidates/forest-agriculture-v1/microbial-research/"
+  ]);
+  assert.equal(projection.prepared_task.expected_files.length, 8);
+  assert.equal(projection.prepared_task.reviewer, "codex-gm-01");
+  assert.equal(projection.prepared_task.source_base,
+    "beb982fda885fa7acc4dc35407df611d1019a544");
+  assert.deepEqual(projection.prepared_task.actions, [
+    "READ_REPOSITORY_CONTEXT",
+    "WRITE_ONLY_EXPECTED_FILES_UNDER_AUTHORIZED_PATH",
+    "RUN_BOUNDED_LOCAL_TESTS",
+    "RECORD_GIT_OBJECT_AND_SHA256_PROVENANCE",
+    "COMMIT_EXACTLY_EXPECTED_FILES",
+    "STOP_AT_PENDING_CODEX_REVIEW"
+  ]);
+  assert.deepEqual(projection.prepared_task.forbidden_paths, [
+    "KGEN-KAIOS/**",
+    "KGEN/**",
+    "KAIOS/**/Runtime/**",
+    "KAIOS/**/Wallet/**",
+    "**/*CURRENT*",
+    "api/**",
+    "docs/**",
+    "README.md",
+    "PRIMEFORGE_GENESIS_BOOT_SEQUENCE_V1_4.md"
+  ]);
+});
+
 test("API directory links only to declared static projections", async () => {
   const html = await read("api/kaios/ai-company/v1/index.html");
   for (const filename of API_FILES) {

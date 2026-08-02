@@ -46,5 +46,13 @@ fixtures.
 
 No Runtime, Canonical Schema, Organism Schema, CURRENT, Universe Law, Rights
 authority, Economy authority, Wallet, KGEN, Production authority, deployment
-or external autonomy was changed. The Fungi claim is formally `RELEASED`. The
-only next active Cursor claim is `KAIOS-CURSOR-MICROBIAL-RESEARCH-001`.
+or external autonomy was changed. The Fungi claim is formally `CLOSED`, then
+`RELEASED`. The ordered append-only events are `CLAIM_CLOSED` (sequence 1)
+followed by `CLAIM_RELEASED` (sequence 2). There are zero active claims after
+release. The Microbial task is only `READY_FOR_ATOMIC_CLAIM`; it is prepared
+but not claimed, and `cursor-01` has no current task or branch.
+
+The prepared Microbial envelope binds reviewer `codex-gm-01`, source base
+`beb982fda885fa7acc4dc35407df611d1019a544`, and exactly the eight files under
+`KAIOS/life/candidates/forest-agriculture-v1/microbial-research/` listed in its
+work order. It does not authorize any path outside that envelope.
