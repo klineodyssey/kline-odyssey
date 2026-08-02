@@ -88,6 +88,7 @@ Codex reran Company Boot and `git fetch origin --prune` at `2026-07-15T17:29:48+
 | `company_status/COMPANY_STATUS_2026-08-02_FERTILIZER_RELEASED_COMPOST_MODELS_DISPATCHED.md` | Fertilizer candidate release and sole active compost-model research dispatch |
 | `company_status/COMPANY_STATUS_2026-08-02_COMPOST_RELEASED_INSECT_CANDIDATES_DISPATCHED.md` | Compost candidate release and sole active insect-candidate package dispatch |
 | `company_status/COMPANY_STATUS_2026-08-02_INSECT_RELEASED_POLLINATOR_RESEARCH_DISPATCHED.md` | Insect candidate release and sole active pollinator research dispatch |
+| `company_status/COMPANY_STATUS_2026-08-02_POLLINATOR_RELEASED_EARTHWORM_DISPATCHED.md` | Pollinator research release and sole active earthworm candidate dispatch |
 | `recovery_points/RECOVERY-KAIOS-AI-COMPANY-SPEC-V1.md` | AI Company V1 specification rollback anchor |
 | `company_status/COMPANY_STATUS_2026-08-02_AI_COMPANY_SPEC.md` | AI Company specification and sequential Cursor queue status |
 | `COMPANY_INBOX.md` | Durable Human intake boundary that remains available during network failure |

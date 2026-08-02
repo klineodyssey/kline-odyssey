@@ -1159,6 +1159,9 @@ supply-chain owners and does not activate Production authority.
 - [Insect Candidate Codex Review Closeout](KAIOS/life/forest-agriculture/KAIOS_CURSOR_INSECT_CANDIDATES_REVIEW_CLOSEOUT.md)
 - [Pollinator Research Cursor Work Order](KAIOS/life/candidates/forest-agriculture-v1/CURSOR_POLLINATOR_RESEARCH_WORK_ORDER.md)
 - [Insect Release and Pollinator Research Dispatch Company Status](KGEN-KAIOS/governance/autopilot/company_status/COMPANY_STATUS_2026-08-02_INSECT_RELEASED_POLLINATOR_RESEARCH_DISPATCHED.md)
+- [Pollinator Research Codex Review Closeout](KAIOS/life/forest-agriculture/KAIOS_CURSOR_POLLINATOR_RESEARCH_REVIEW_CLOSEOUT.md)
+- [Earthworm Candidate Cursor Work Order](KAIOS/life/candidates/forest-agriculture-v1/CURSOR_EARTHWORM_CANDIDATE_WORK_ORDER.md)
+- [Pollinator Release and Earthworm Candidate Dispatch Company Status](KGEN-KAIOS/governance/autopilot/company_status/COMPANY_STATUS_2026-08-02_POLLINATOR_RELEASED_EARTHWORM_DISPATCHED.md)
 - [AI Company Order and Project Specification](KAIOS/ai-company/KAIOS_AI_COMPANY_ORDER_PROJECT_RUNTIME_V1_SPEC.md)
 
 ## KAIOS AI Company Order and Project Runtime V1 Specification
