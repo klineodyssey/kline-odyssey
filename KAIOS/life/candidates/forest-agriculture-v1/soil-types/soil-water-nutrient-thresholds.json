@@ -1,0 +1,875 @@
+{
+  "dataset_id": "KAIOS-SOIL-WATER-NUTRIENT-THRESHOLDS-V1",
+  "schema_version": "1.0.0-candidate",
+  "status": "CURSOR_RESEARCH_CANDIDATE_ONLY",
+  "review_status": "PENDING_CODEX_REVIEW",
+  "task_id": "KAIOS-CURSOR-SOIL-TYPES-001",
+  "worker_id": "cursor-01",
+  "branch": "cursor-handoff/KAIOS-CURSOR-SOIL-TYPES-001",
+  "source_base_commit": "614b4e02edb8f705848ad7cb49132ae37e8f5b7e",
+  "source_hash_basis": "SHA256_OF_GIT_BLOB_CONTENT_AT_SOURCE_BASE_COMMIT",
+  "mode": "SIMULATION_ONLY_THRESHOLD_PROPOSALS",
+  "authority": "NO_PRODUCTION_AUTHORITY",
+  "canonical_promotion": false,
+  "scope": "Candidate water-state, nutrient-retention, organic-matter and pH screening envelopes. They are deterministic model inputs, not irrigation schedules, fertilizer prescriptions, contamination limits or field recommendations.",
+  "owner_native_thresholds": [
+    {
+      "parameter_name": "foundational_life_crop_support_fertility_minimum",
+      "unit": "foundational_life_score_0_to_100",
+      "minimum": 25,
+      "default": 25,
+      "maximum": 25,
+      "rationale": "Exact existing Soil Life Runtime condition for candidate crop_support.",
+      "source_type": "REPOSITORY_DERIVED",
+      "confidence": "HIGH",
+      "risk": "The synthetic score is not a soil-test nutrient concentration or agronomic threshold.",
+      "validation_required": false
+    },
+    {
+      "parameter_name": "foundational_life_crop_support_contamination_exclusive_maximum",
+      "unit": "foundational_life_score_0_to_100",
+      "minimum": 35,
+      "default": 35,
+      "maximum": 35,
+      "rationale": "Exact existing Soil Life Runtime exclusive contamination boundary for candidate crop_support.",
+      "source_type": "REPOSITORY_DERIVED",
+      "confidence": "HIGH",
+      "risk": "The score is not a contaminant concentration, regulatory threshold or safety certification.",
+      "validation_required": false
+    },
+    {
+      "parameter_name": "foundational_life_foundation_support_compaction_exclusive_maximum",
+      "unit": "foundational_life_score_0_to_100",
+      "minimum": 80,
+      "default": 80,
+      "maximum": 80,
+      "rationale": "Exact existing Soil Life Runtime exclusive compaction boundary for candidate foundation_support.",
+      "source_type": "REPOSITORY_DERIVED",
+      "confidence": "HIGH",
+      "risk": "The score is not a density, penetration, bearing or geotechnical measurement.",
+      "validation_required": false
+    },
+    {
+      "parameter_name": "foundational_life_foundation_support_integrity_minimum",
+      "unit": "foundational_life_score_0_to_100",
+      "minimum": 40,
+      "default": 40,
+      "maximum": 40,
+      "rationale": "Exact existing Soil Life Runtime integrity boundary for candidate foundation_support.",
+      "source_type": "REPOSITORY_DERIVED",
+      "confidence": "HIGH",
+      "risk": "The normalized integrity score cannot authorize construction or establish bearing capacity.",
+      "validation_required": false
+    },
+    {
+      "parameter_name": "ecology_low_fertility_trigger",
+      "unit": "ecology_fraction_0_to_1",
+      "minimum": 0.35,
+      "default": 0.35,
+      "maximum": 0.35,
+      "rationale": "Exact Ecology V1 condition that labels habitat fertility below this fraction as LOW_FERTILITY.",
+      "source_type": "REPOSITORY_DERIVED",
+      "confidence": "HIGH",
+      "risk": "The Ecology fraction is a simulation state and not a laboratory nutrient measurement.",
+      "validation_required": false
+    }
+  ],
+  "unit_contracts": [
+    {
+      "source_unit": "foundational_life_score_0_to_100",
+      "target_unit": "candidate_fraction_0_to_1",
+      "conversion": "target = source / 100",
+      "inverse": "source = target * 100",
+      "reversible": true,
+      "scope": "Only normalized screening values; no physical quantity is inferred.",
+      "status": "PROPOSED_EXPLICIT_CONVERSION"
+    },
+    {
+      "source_unit": "volumetric_water_fraction",
+      "target_unit": "liter",
+      "conversion": "liter = fraction * measured_soil_volume_cubic_meter * 1000",
+      "inverse": "fraction = liter / (measured_soil_volume_cubic_meter * 1000)",
+      "reversible": true,
+      "scope": "Requires an explicit measured soil volume and separate pool custody.",
+      "status": "PROPOSED_GEOMETRY_DEPENDENT_CONVERSION"
+    },
+    {
+      "source_unit": "millimeter_per_hour",
+      "target_unit": "liter_per_hour",
+      "conversion": "liter_per_hour = millimeter_per_hour * measured_area_square_meter",
+      "inverse": "millimeter_per_hour = liter_per_hour / measured_area_square_meter",
+      "reversible": true,
+      "scope": "Requires positive measured area; runoff and drainage remain separate destination pools.",
+      "status": "PROPOSED_GEOMETRY_DEPENDENT_CONVERSION"
+    },
+    {
+      "source_unit": "candidate_nutrient_retention_fraction",
+      "target_unit": "ecology_nutrient_kilogram",
+      "conversion": "UNASSIGNED",
+      "inverse": "UNASSIGNED",
+      "reversible": false,
+      "scope": "A retention index never creates nutrient mass.",
+      "status": "MASS_SOURCE_EVENT_REQUIRED"
+    }
+  ],
+  "state_flow_contract": {
+    "water": "Every debit has a named credit among source, surface, soil-mobile, soil-retained, crop, runoff, drainage, atmospheric proxy or external custody pools.",
+    "nutrients": "Fertility and nutrient mass increase only through fertilizer, compost, decomposition, sediment deposition or another named transfer event.",
+    "organic_matter": "Organic matter increases only through a recorded biomass, compost, residue or imported amendment mass transfer.",
+    "erosion": "Topsoil loss becomes sediment, runoff custody or declared external export; it never disappears.",
+    "contamination": "Contaminant mass enters from a named source and leaves only through named removal custody or an explicitly modeled transformation.",
+    "compaction": "Compaction is a response state driven by loading or management; it does not substitute for soil mass or foundation approval.",
+    "restoration": "Restoration requires material, water where used, labor, elapsed time and destination pool credits."
+  },
+  "threshold_profiles": [
+    {
+      "profile_id": "SOIL-WN-SANDY-V1",
+      "soil_type_id": "SOIL-SANDY-ANALOG-V1",
+      "numeric_parameters": [
+        {
+          "parameter_name": "candidate_field_capacity",
+          "unit": "volumetric_water_fraction",
+          "minimum": 0.06,
+          "default": 0.12,
+          "maximum": 0.2,
+          "rationale": "Low-retention screening envelope for the sandy analog.",
+          "source_type": "RESEARCH_PROPOSAL",
+          "confidence": "LOW",
+          "risk": "Layering and organic matter can materially change retained water.",
+          "validation_required": true
+        },
+        {
+          "parameter_name": "candidate_wilting_point",
+          "unit": "volumetric_water_fraction",
+          "minimum": 0.02,
+          "default": 0.04,
+          "maximum": 0.08,
+          "rationale": "Proposes a lower water-state boundary for deterministic drought tests.",
+          "source_type": "RESEARCH_PROPOSAL",
+          "confidence": "LOW",
+          "risk": "Actual plant response is species-specific and is not authorized here.",
+          "validation_required": true
+        },
+        {
+          "parameter_name": "candidate_saturation",
+          "unit": "volumetric_water_fraction",
+          "minimum": 0.3,
+          "default": 0.4,
+          "maximum": 0.5,
+          "rationale": "Provides a bounded saturation state for water-pool routing.",
+          "source_type": "MODEL_INFERENCE",
+          "confidence": "LOW",
+          "risk": "Entrapped air and structure make saturation site dependent.",
+          "validation_required": true
+        },
+        {
+          "parameter_name": "candidate_infiltration_capacity",
+          "unit": "millimeter_per_hour",
+          "minimum": 30,
+          "default": 120,
+          "maximum": 300,
+          "rationale": "Matches the sandy physical-profile proposal for deterministic routing.",
+          "source_type": "RESEARCH_PROPOSAL",
+          "confidence": "LOW",
+          "risk": "This is not an irrigation rate or field infiltration test result.",
+          "validation_required": true
+        },
+        {
+          "parameter_name": "candidate_drought_trigger_relative_to_field_capacity",
+          "unit": "fraction_of_candidate_field_capacity",
+          "minimum": 0.3,
+          "default": 0.45,
+          "maximum": 0.6,
+          "rationale": "Creates a deterministic warning state before the proposed lower water boundary.",
+          "source_type": "RESEARCH_PROPOSAL",
+          "confidence": "LOW",
+          "risk": "The warning is not crop-specific drought advice.",
+          "validation_required": true
+        },
+        {
+          "parameter_name": "candidate_nutrient_retention_index",
+          "unit": "candidate_fraction_0_to_1",
+          "minimum": 0.1,
+          "default": 0.25,
+          "maximum": 0.45,
+          "rationale": "Represents low candidate retention without creating nutrient mass.",
+          "source_type": "MODEL_INFERENCE",
+          "confidence": "LOW",
+          "risk": "No conversion to nutrient kilograms or fertilizer quantity is authorized.",
+          "validation_required": true
+        },
+        {
+          "parameter_name": "candidate_organic_matter_fraction",
+          "unit": "fraction_of_dry_total_soil_mass",
+          "minimum": 0.005,
+          "default": 0.02,
+          "maximum": 0.04,
+          "rationale": "Keeps organic matter as a separately sourced material state for the sandy analog.",
+          "source_type": "RESEARCH_PROPOSAL",
+          "confidence": "LOW",
+          "risk": "Organic matter cannot rise without a recorded material transfer.",
+          "validation_required": true
+        },
+        {
+          "parameter_name": "candidate_ph_screen",
+          "unit": "ph",
+          "minimum": 4.5,
+          "default": 6.5,
+          "maximum": 8.5,
+          "rationale": "Broad simulation screen only; species and laboratory requirements remain unresolved.",
+          "source_type": "SOURCE_UNDERSPECIFIED",
+          "confidence": "LOW",
+          "risk": "The envelope is not a liming, amendment or crop recommendation.",
+          "validation_required": true
+        }
+      ]
+    },
+    {
+      "profile_id": "SOIL-WN-SANDY-LOAM-V1",
+      "soil_type_id": "SOIL-SANDY-LOAM-ANALOG-V1",
+      "numeric_parameters": [
+        {
+          "parameter_name": "candidate_field_capacity",
+          "unit": "volumetric_water_fraction",
+          "minimum": 0.12,
+          "default": 0.2,
+          "maximum": 0.3,
+          "rationale": "Moderate-low retention screen for the sandy-loam analog.",
+          "source_type": "RESEARCH_PROPOSAL",
+          "confidence": "LOW",
+          "risk": "The range is not a measured site value.",
+          "validation_required": true
+        },
+        {
+          "parameter_name": "candidate_wilting_point",
+          "unit": "volumetric_water_fraction",
+          "minimum": 0.04,
+          "default": 0.08,
+          "maximum": 0.14,
+          "rationale": "Proposes a deterministic lower water-state boundary.",
+          "source_type": "RESEARCH_PROPOSAL",
+          "confidence": "LOW",
+          "risk": "Plant response remains species-specific.",
+          "validation_required": true
+        },
+        {
+          "parameter_name": "candidate_saturation",
+          "unit": "volumetric_water_fraction",
+          "minimum": 0.34,
+          "default": 0.44,
+          "maximum": 0.54,
+          "rationale": "Provides a bounded saturation state for routing tests.",
+          "source_type": "MODEL_INFERENCE",
+          "confidence": "LOW",
+          "risk": "Structure and compaction can invalidate the type-level estimate.",
+          "validation_required": true
+        },
+        {
+          "parameter_name": "candidate_infiltration_capacity",
+          "unit": "millimeter_per_hour",
+          "minimum": 15,
+          "default": 40,
+          "maximum": 120,
+          "rationale": "Matches the sandy-loam physical-profile proposal.",
+          "source_type": "RESEARCH_PROPOSAL",
+          "confidence": "LOW",
+          "risk": "It is not an irrigation schedule or field test.",
+          "validation_required": true
+        },
+        {
+          "parameter_name": "candidate_drought_trigger_relative_to_field_capacity",
+          "unit": "fraction_of_candidate_field_capacity",
+          "minimum": 0.35,
+          "default": 0.5,
+          "maximum": 0.65,
+          "rationale": "Creates a deterministic water-stress warning state.",
+          "source_type": "RESEARCH_PROPOSAL",
+          "confidence": "LOW",
+          "risk": "The trigger is not species-specific drought guidance.",
+          "validation_required": true
+        },
+        {
+          "parameter_name": "candidate_nutrient_retention_index",
+          "unit": "candidate_fraction_0_to_1",
+          "minimum": 0.25,
+          "default": 0.45,
+          "maximum": 0.65,
+          "rationale": "Represents moderate-low candidate retention without changing nutrient custody.",
+          "source_type": "MODEL_INFERENCE",
+          "confidence": "LOW",
+          "risk": "The index cannot be converted to fertilizer rates.",
+          "validation_required": true
+        },
+        {
+          "parameter_name": "candidate_organic_matter_fraction",
+          "unit": "fraction_of_dry_total_soil_mass",
+          "minimum": 0.01,
+          "default": 0.035,
+          "maximum": 0.07,
+          "rationale": "Tracks organic matter independently from mineral texture.",
+          "source_type": "RESEARCH_PROPOSAL",
+          "confidence": "LOW",
+          "risk": "Any increase requires a named organic material source.",
+          "validation_required": true
+        },
+        {
+          "parameter_name": "candidate_ph_screen",
+          "unit": "ph",
+          "minimum": 4.5,
+          "default": 6.5,
+          "maximum": 8.5,
+          "rationale": "Broad unresolved simulation envelope.",
+          "source_type": "SOURCE_UNDERSPECIFIED",
+          "confidence": "LOW",
+          "risk": "No crop or amendment decision may be made from this screen.",
+          "validation_required": true
+        }
+      ]
+    },
+    {
+      "profile_id": "SOIL-WN-LOAM-V1",
+      "soil_type_id": "SOIL-LOAM-ANALOG-V1",
+      "numeric_parameters": [
+        {
+          "parameter_name": "candidate_field_capacity",
+          "unit": "volumetric_water_fraction",
+          "minimum": 0.18,
+          "default": 0.28,
+          "maximum": 0.38,
+          "rationale": "Balanced retention screen for the loam analog.",
+          "source_type": "RESEARCH_PROPOSAL",
+          "confidence": "LOW",
+          "risk": "Horizon structure and organic matter remain separate inputs.",
+          "validation_required": true
+        },
+        {
+          "parameter_name": "candidate_wilting_point",
+          "unit": "volumetric_water_fraction",
+          "minimum": 0.06,
+          "default": 0.12,
+          "maximum": 0.2,
+          "rationale": "Proposes a deterministic lower water-state boundary.",
+          "source_type": "RESEARCH_PROPOSAL",
+          "confidence": "LOW",
+          "risk": "The value is not a species response curve.",
+          "validation_required": true
+        },
+        {
+          "parameter_name": "candidate_saturation",
+          "unit": "volumetric_water_fraction",
+          "minimum": 0.38,
+          "default": 0.48,
+          "maximum": 0.6,
+          "rationale": "Provides a bounded saturation state for routing.",
+          "source_type": "MODEL_INFERENCE",
+          "confidence": "LOW",
+          "risk": "Compaction and entrapped air can move saturation outside the proposal.",
+          "validation_required": true
+        },
+        {
+          "parameter_name": "candidate_infiltration_capacity",
+          "unit": "millimeter_per_hour",
+          "minimum": 5,
+          "default": 15,
+          "maximum": 50,
+          "rationale": "Matches the loam physical-profile proposal.",
+          "source_type": "RESEARCH_PROPOSAL",
+          "confidence": "LOW",
+          "risk": "It is not an irrigation or drainage design value.",
+          "validation_required": true
+        },
+        {
+          "parameter_name": "candidate_drought_trigger_relative_to_field_capacity",
+          "unit": "fraction_of_candidate_field_capacity",
+          "minimum": 0.4,
+          "default": 0.55,
+          "maximum": 0.7,
+          "rationale": "Creates a deterministic warning before the lower water boundary.",
+          "source_type": "RESEARCH_PROPOSAL",
+          "confidence": "LOW",
+          "risk": "The warning is not crop-specific guidance.",
+          "validation_required": true
+        },
+        {
+          "parameter_name": "candidate_nutrient_retention_index",
+          "unit": "candidate_fraction_0_to_1",
+          "minimum": 0.45,
+          "default": 0.65,
+          "maximum": 0.82,
+          "rationale": "Represents moderate candidate retention while nutrient mass remains owner-controlled.",
+          "source_type": "MODEL_INFERENCE",
+          "confidence": "LOW",
+          "risk": "The index cannot create fertility or nutrient inventory.",
+          "validation_required": true
+        },
+        {
+          "parameter_name": "candidate_organic_matter_fraction",
+          "unit": "fraction_of_dry_total_soil_mass",
+          "minimum": 0.02,
+          "default": 0.05,
+          "maximum": 0.1,
+          "rationale": "Tracks organic matter as a distinct sourced pool.",
+          "source_type": "RESEARCH_PROPOSAL",
+          "confidence": "LOW",
+          "risk": "A type label cannot assert organic matter without a recorded source or observation.",
+          "validation_required": true
+        },
+        {
+          "parameter_name": "candidate_ph_screen",
+          "unit": "ph",
+          "minimum": 4.5,
+          "default": 6.5,
+          "maximum": 8.5,
+          "rationale": "Broad unresolved simulation envelope.",
+          "source_type": "SOURCE_UNDERSPECIFIED",
+          "confidence": "LOW",
+          "risk": "The screen is not a treatment recommendation.",
+          "validation_required": true
+        }
+      ]
+    },
+    {
+      "profile_id": "SOIL-WN-SILT-LOAM-V1",
+      "soil_type_id": "SOIL-SILT-LOAM-ANALOG-V1",
+      "numeric_parameters": [
+        {
+          "parameter_name": "candidate_field_capacity",
+          "unit": "volumetric_water_fraction",
+          "minimum": 0.22,
+          "default": 0.32,
+          "maximum": 0.42,
+          "rationale": "Moderate-high retention screen for the silt-loam analog.",
+          "source_type": "RESEARCH_PROPOSAL",
+          "confidence": "LOW",
+          "risk": "Surface sealing and structure require independent state inputs.",
+          "validation_required": true
+        },
+        {
+          "parameter_name": "candidate_wilting_point",
+          "unit": "volumetric_water_fraction",
+          "minimum": 0.08,
+          "default": 0.15,
+          "maximum": 0.23,
+          "rationale": "Proposes a deterministic lower water-state boundary.",
+          "source_type": "RESEARCH_PROPOSAL",
+          "confidence": "LOW",
+          "risk": "No real plant response is certified.",
+          "validation_required": true
+        },
+        {
+          "parameter_name": "candidate_saturation",
+          "unit": "volumetric_water_fraction",
+          "minimum": 0.4,
+          "default": 0.5,
+          "maximum": 0.62,
+          "rationale": "Provides a bounded saturation state for simulation.",
+          "source_type": "MODEL_INFERENCE",
+          "confidence": "LOW",
+          "risk": "The value is not a field observation.",
+          "validation_required": true
+        },
+        {
+          "parameter_name": "candidate_infiltration_capacity",
+          "unit": "millimeter_per_hour",
+          "minimum": 3,
+          "default": 10,
+          "maximum": 35,
+          "rationale": "Matches the silt-loam physical-profile proposal.",
+          "source_type": "RESEARCH_PROPOSAL",
+          "confidence": "LOW",
+          "risk": "Crusting and erosion may reduce infiltration.",
+          "validation_required": true
+        },
+        {
+          "parameter_name": "candidate_drought_trigger_relative_to_field_capacity",
+          "unit": "fraction_of_candidate_field_capacity",
+          "minimum": 0.42,
+          "default": 0.58,
+          "maximum": 0.72,
+          "rationale": "Creates a deterministic warning state for water depletion.",
+          "source_type": "RESEARCH_PROPOSAL",
+          "confidence": "LOW",
+          "risk": "It is not crop-specific water-management advice.",
+          "validation_required": true
+        },
+        {
+          "parameter_name": "candidate_nutrient_retention_index",
+          "unit": "candidate_fraction_0_to_1",
+          "minimum": 0.5,
+          "default": 0.7,
+          "maximum": 0.86,
+          "rationale": "Represents moderate-high candidate retention without changing Ecology nutrient mass.",
+          "source_type": "MODEL_INFERENCE",
+          "confidence": "LOW",
+          "risk": "The index is not a fertilizer recommendation.",
+          "validation_required": true
+        },
+        {
+          "parameter_name": "candidate_organic_matter_fraction",
+          "unit": "fraction_of_dry_total_soil_mass",
+          "minimum": 0.015,
+          "default": 0.045,
+          "maximum": 0.09,
+          "rationale": "Keeps organic matter separate from silt-dominant texture.",
+          "source_type": "RESEARCH_PROPOSAL",
+          "confidence": "LOW",
+          "risk": "No organic mass may appear without a source event.",
+          "validation_required": true
+        },
+        {
+          "parameter_name": "candidate_ph_screen",
+          "unit": "ph",
+          "minimum": 4.5,
+          "default": 6.5,
+          "maximum": 8.5,
+          "rationale": "Broad unresolved simulation envelope.",
+          "source_type": "SOURCE_UNDERSPECIFIED",
+          "confidence": "LOW",
+          "risk": "The screen does not authorize amendments or crop selection.",
+          "validation_required": true
+        }
+      ]
+    },
+    {
+      "profile_id": "SOIL-WN-CLAY-LOAM-V1",
+      "soil_type_id": "SOIL-CLAY-LOAM-ANALOG-V1",
+      "numeric_parameters": [
+        {
+          "parameter_name": "candidate_field_capacity",
+          "unit": "volumetric_water_fraction",
+          "minimum": 0.25,
+          "default": 0.36,
+          "maximum": 0.48,
+          "rationale": "High-retention screening envelope for clay loam.",
+          "source_type": "RESEARCH_PROPOSAL",
+          "confidence": "LOW",
+          "risk": "Retained water is not necessarily plant available.",
+          "validation_required": true
+        },
+        {
+          "parameter_name": "candidate_wilting_point",
+          "unit": "volumetric_water_fraction",
+          "minimum": 0.12,
+          "default": 0.2,
+          "maximum": 0.3,
+          "rationale": "Proposes a deterministic lower water-state boundary.",
+          "source_type": "RESEARCH_PROPOSAL",
+          "confidence": "LOW",
+          "risk": "Species response and clay mineralogy remain unresolved.",
+          "validation_required": true
+        },
+        {
+          "parameter_name": "candidate_saturation",
+          "unit": "volumetric_water_fraction",
+          "minimum": 0.44,
+          "default": 0.54,
+          "maximum": 0.66,
+          "rationale": "Provides a bounded saturation state for water routing.",
+          "source_type": "MODEL_INFERENCE",
+          "confidence": "LOW",
+          "risk": "Cracks can bypass the matrix response.",
+          "validation_required": true
+        },
+        {
+          "parameter_name": "candidate_infiltration_capacity",
+          "unit": "millimeter_per_hour",
+          "minimum": 1,
+          "default": 5,
+          "maximum": 20,
+          "rationale": "Matches the clay-loam physical-profile proposal.",
+          "source_type": "RESEARCH_PROPOSAL",
+          "confidence": "LOW",
+          "risk": "It is not a drainage or irrigation design value.",
+          "validation_required": true
+        },
+        {
+          "parameter_name": "candidate_drought_trigger_relative_to_field_capacity",
+          "unit": "fraction_of_candidate_field_capacity",
+          "minimum": 0.45,
+          "default": 0.6,
+          "maximum": 0.75,
+          "rationale": "Creates a deterministic warning state while keeping water pools conserved.",
+          "source_type": "RESEARCH_PROPOSAL",
+          "confidence": "LOW",
+          "risk": "It is not crop-specific management advice.",
+          "validation_required": true
+        },
+        {
+          "parameter_name": "candidate_nutrient_retention_index",
+          "unit": "candidate_fraction_0_to_1",
+          "minimum": 0.58,
+          "default": 0.78,
+          "maximum": 0.92,
+          "rationale": "Represents high candidate retention without adding nutrient mass.",
+          "source_type": "MODEL_INFERENCE",
+          "confidence": "LOW",
+          "risk": "Retention does not establish nutrient availability or a fertilizer rate.",
+          "validation_required": true
+        },
+        {
+          "parameter_name": "candidate_organic_matter_fraction",
+          "unit": "fraction_of_dry_total_soil_mass",
+          "minimum": 0.015,
+          "default": 0.045,
+          "maximum": 0.09,
+          "rationale": "Keeps organic matter distinct from clay content.",
+          "source_type": "RESEARCH_PROPOSAL",
+          "confidence": "LOW",
+          "risk": "Any increase requires named material custody.",
+          "validation_required": true
+        },
+        {
+          "parameter_name": "candidate_ph_screen",
+          "unit": "ph",
+          "minimum": 4.5,
+          "default": 6.5,
+          "maximum": 8.5,
+          "rationale": "Broad unresolved simulation envelope.",
+          "source_type": "SOURCE_UNDERSPECIFIED",
+          "confidence": "LOW",
+          "risk": "No amendment, crop or safety conclusion follows from this value.",
+          "validation_required": true
+        }
+      ]
+    },
+    {
+      "profile_id": "SOIL-WN-CLAY-V1",
+      "soil_type_id": "SOIL-CLAY-ANALOG-V1",
+      "numeric_parameters": [
+        {
+          "parameter_name": "candidate_field_capacity",
+          "unit": "volumetric_water_fraction",
+          "minimum": 0.3,
+          "default": 0.42,
+          "maximum": 0.55,
+          "rationale": "High-retention screening envelope for clay.",
+          "source_type": "RESEARCH_PROPOSAL",
+          "confidence": "LOW",
+          "risk": "High retained water may coexist with poor availability or drainage.",
+          "validation_required": true
+        },
+        {
+          "parameter_name": "candidate_wilting_point",
+          "unit": "volumetric_water_fraction",
+          "minimum": 0.18,
+          "default": 0.28,
+          "maximum": 0.38,
+          "rationale": "Proposes a deterministic lower water-state boundary.",
+          "source_type": "RESEARCH_PROPOSAL",
+          "confidence": "LOW",
+          "risk": "Plant response and clay activity require independent validation.",
+          "validation_required": true
+        },
+        {
+          "parameter_name": "candidate_saturation",
+          "unit": "volumetric_water_fraction",
+          "minimum": 0.48,
+          "default": 0.58,
+          "maximum": 0.72,
+          "rationale": "Provides a bounded saturation state for simulation.",
+          "source_type": "MODEL_INFERENCE",
+          "confidence": "LOW",
+          "risk": "Cracking and structure can invalidate matrix assumptions.",
+          "validation_required": true
+        },
+        {
+          "parameter_name": "candidate_infiltration_capacity",
+          "unit": "millimeter_per_hour",
+          "minimum": 0.1,
+          "default": 1,
+          "maximum": 8,
+          "rationale": "Matches the clay matrix-flow proposal.",
+          "source_type": "RESEARCH_PROPOSAL",
+          "confidence": "LOW",
+          "risk": "Preferential crack flow can exceed this range and must be modeled separately.",
+          "validation_required": true
+        },
+        {
+          "parameter_name": "candidate_drought_trigger_relative_to_field_capacity",
+          "unit": "fraction_of_candidate_field_capacity",
+          "minimum": 0.5,
+          "default": 0.65,
+          "maximum": 0.8,
+          "rationale": "Creates a deterministic water-stress warning state.",
+          "source_type": "RESEARCH_PROPOSAL",
+          "confidence": "LOW",
+          "risk": "It is not irrigation guidance.",
+          "validation_required": true
+        },
+        {
+          "parameter_name": "candidate_nutrient_retention_index",
+          "unit": "candidate_fraction_0_to_1",
+          "minimum": 0.65,
+          "default": 0.85,
+          "maximum": 0.98,
+          "rationale": "Represents high candidate retention while availability and mass stay separate.",
+          "source_type": "MODEL_INFERENCE",
+          "confidence": "LOW",
+          "risk": "Retention is not nutrient availability and does not prescribe fertilizer.",
+          "validation_required": true
+        },
+        {
+          "parameter_name": "candidate_organic_matter_fraction",
+          "unit": "fraction_of_dry_total_soil_mass",
+          "minimum": 0.01,
+          "default": 0.04,
+          "maximum": 0.08,
+          "rationale": "Tracks organic matter separately from the high clay fraction.",
+          "source_type": "RESEARCH_PROPOSAL",
+          "confidence": "LOW",
+          "risk": "No organic matter is inferred without source evidence.",
+          "validation_required": true
+        },
+        {
+          "parameter_name": "candidate_ph_screen",
+          "unit": "ph",
+          "minimum": 4.5,
+          "default": 6.5,
+          "maximum": 8.5,
+          "rationale": "Broad unresolved simulation envelope.",
+          "source_type": "SOURCE_UNDERSPECIFIED",
+          "confidence": "LOW",
+          "risk": "No real treatment or suitability conclusion follows.",
+          "validation_required": true
+        }
+      ]
+    },
+    {
+      "profile_id": "SOIL-WN-ORGANIC-RICH-MINERAL-V1",
+      "soil_type_id": "SOIL-ORGANIC-RICH-MINERAL-ANALOG-V1",
+      "numeric_parameters": [
+        {
+          "parameter_name": "candidate_field_capacity",
+          "unit": "volumetric_water_fraction",
+          "minimum": 0.25,
+          "default": 0.4,
+          "maximum": 0.6,
+          "rationale": "Broad high-retention envelope for an organic-rich mineral analog.",
+          "source_type": "RESEARCH_PROPOSAL",
+          "confidence": "LOW",
+          "risk": "Organic composition, decomposition and hydrophobicity can produce opposing behavior.",
+          "validation_required": true
+        },
+        {
+          "parameter_name": "candidate_wilting_point",
+          "unit": "volumetric_water_fraction",
+          "minimum": 0.08,
+          "default": 0.18,
+          "maximum": 0.3,
+          "rationale": "Proposes a deterministic lower water-state boundary.",
+          "source_type": "RESEARCH_PROPOSAL",
+          "confidence": "LOW",
+          "risk": "No species response is implied.",
+          "validation_required": true
+        },
+        {
+          "parameter_name": "candidate_saturation",
+          "unit": "volumetric_water_fraction",
+          "minimum": 0.5,
+          "default": 0.68,
+          "maximum": 0.85,
+          "rationale": "Provides a broad high-porosity saturation screen.",
+          "source_type": "MODEL_INFERENCE",
+          "confidence": "LOW",
+          "risk": "The profile is not a peat classification and may settle under saturation.",
+          "validation_required": true
+        },
+        {
+          "parameter_name": "candidate_infiltration_capacity",
+          "unit": "millimeter_per_hour",
+          "minimum": 2,
+          "default": 12,
+          "maximum": 60,
+          "rationale": "Matches the broad variable-flow physical proposal.",
+          "source_type": "RESEARCH_PROPOSAL",
+          "confidence": "LOW",
+          "risk": "Layering and decomposition can reverse drainage behavior.",
+          "validation_required": true
+        },
+        {
+          "parameter_name": "candidate_drought_trigger_relative_to_field_capacity",
+          "unit": "fraction_of_candidate_field_capacity",
+          "minimum": 0.4,
+          "default": 0.55,
+          "maximum": 0.75,
+          "rationale": "Creates a deterministic warning state without prescribing irrigation.",
+          "source_type": "RESEARCH_PROPOSAL",
+          "confidence": "LOW",
+          "risk": "Hydrophobic drying behavior is not represented.",
+          "validation_required": true
+        },
+        {
+          "parameter_name": "candidate_nutrient_retention_index",
+          "unit": "candidate_fraction_0_to_1",
+          "minimum": 0.6,
+          "default": 0.85,
+          "maximum": 0.98,
+          "rationale": "Represents high candidate retention while nutrient mass and fertility remain source-bound.",
+          "source_type": "MODEL_INFERENCE",
+          "confidence": "LOW",
+          "risk": "Organic matter does not guarantee nutrient availability or safety.",
+          "validation_required": true
+        },
+        {
+          "parameter_name": "candidate_organic_matter_fraction",
+          "unit": "fraction_of_dry_total_soil_mass",
+          "minimum": 0.08,
+          "default": 0.15,
+          "maximum": 0.3,
+          "rationale": "Defines the separate organic-rich state used by this mineral-soil analog.",
+          "source_type": "RESEARCH_PROPOSAL",
+          "confidence": "LOW",
+          "risk": "The value requires measured or event-sourced organic material and is not a peat definition.",
+          "validation_required": true
+        },
+        {
+          "parameter_name": "candidate_ph_screen",
+          "unit": "ph",
+          "minimum": 4,
+          "default": 6.3,
+          "maximum": 8,
+          "rationale": "Broad unresolved simulation envelope for a variable organic-rich profile.",
+          "source_type": "SOURCE_UNDERSPECIFIED",
+          "confidence": "LOW",
+          "risk": "The screen is not a liming, amendment or crop recommendation.",
+          "validation_required": true
+        }
+      ]
+    }
+  ],
+  "provenance": [
+    {
+      "source_path": "KAIOS/life/runtime/foundational-life-runtime.js",
+      "source_commit": "614b4e02edb8f705848ad7cb49132ae37e8f5b7e",
+      "git_object": "9187c14774b34c25e9ae23cf21749fbb5dbb891d",
+      "sha256": "4d72be28bbad06ff65d1dddb44043e6f3e2086a095a8bf105e2f08cbed648779",
+      "usage": "Owner-native normalized soil thresholds and causal change inputs"
+    },
+    {
+      "source_path": "KGEN-KAIOS/world-viewer/ecosystem/ecosystem-runtime.js",
+      "source_commit": "614b4e02edb8f705848ad7cb49132ae37e8f5b7e",
+      "git_object": "2bab509140ab4b93c7e4975286c826693965cf26",
+      "sha256": "9b2cd9d4501727d3134ea332e1a30cd77d5d7d647300820f51d9c264784ef537",
+      "usage": "Water, nutrient, sediment, decomposition and restoration pool ownership"
+    },
+    {
+      "source_path": "KAIOS/life/forest-agriculture/KAIOS_FOREST_AGRICULTURE_RUNTIME_V1_SPEC.md",
+      "source_commit": "614b4e02edb8f705848ad7cb49132ae37e8f5b7e",
+      "git_object": "9a2dd4ad05bb7b2e3d71b91b479359947ada8376",
+      "sha256": "4e1a23e97d09ec2dc4ad65440e6958e646f75ed418e5c703c5a5a1635c2809a1",
+      "usage": "Paired water, nutrient, erosion, contamination and restoration flow requirements"
+    }
+  ],
+  "boundaries": [
+    "CANDIDATE_ONLY",
+    "SIMULATION_ONLY",
+    "NO_IRRIGATION_SCHEDULE",
+    "NO_FERTILIZER_PRESCRIPTION",
+    "NO_CONTAMINATION_SAFETY_LIMIT",
+    "NO_FOOD_SAFETY_CLAIM",
+    "NO_FERTILITY_WITHOUT_RECORDED_SOURCE",
+    "NO_SOIL_MASS_WITHOUT_RECORDED_SOURCE",
+    "NO_CANONICAL_PROMOTION",
+    "NO_RUNTIME_CHANGE"
+  ]
+}

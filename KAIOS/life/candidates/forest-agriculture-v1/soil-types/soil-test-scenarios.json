@@ -1,0 +1,670 @@
+{
+  "dataset_id": "KAIOS-SOIL-DETERMINISTIC-TEST-SCENARIOS-V1",
+  "schema_version": "1.0.0-candidate",
+  "status": "CURSOR_RESEARCH_CANDIDATE_ONLY",
+  "review_status": "PENDING_CODEX_REVIEW",
+  "task_id": "KAIOS-CURSOR-SOIL-TYPES-001",
+  "worker_id": "cursor-01",
+  "branch": "cursor-handoff/KAIOS-CURSOR-SOIL-TYPES-001",
+  "source_base_commit": "614b4e02edb8f705848ad7cb49132ae37e8f5b7e",
+  "source_hash_basis": "SHA256_OF_GIT_BLOB_CONTENT_AT_SOURCE_BASE_COMMIT",
+  "mode": "SIMULATION_ONLY_DETERMINISTIC_FIXTURES",
+  "authority": "NO_PRODUCTION_AUTHORITY",
+  "canonical_promotion": false,
+  "scope": "Deterministic candidate-data fixtures for infiltration, drought, erosion, contamination, nutrient removal and return, construction loading and restoration. Fixtures test accounting behavior only and are not forecasts, recommendations, safety limits or engineering calculations.",
+  "dispatch_provenance": {
+    "source_path": "KAIOS/life/candidates/forest-agriculture-v1/CURSOR_SOIL_TYPES_WORK_ORDER.md",
+    "dispatch_commit": "e06d76906d3364d4a07607b9a4a7a92e8a016b29",
+    "git_object": "97960f92293067d177a8a5fefa1cff2e422a52a2",
+    "sha256": "fc8d820a5952a03bfe8adb2e24f5019929c6840799c799c555383c2c559c2bd7"
+  },
+  "numeric_parameter_contract": {
+    "required_fields": [
+      "parameter_name",
+      "unit",
+      "minimum",
+      "default",
+      "maximum",
+      "rationale",
+      "source_type",
+      "confidence",
+      "risk",
+      "validation_required"
+    ],
+    "allowed_source_types": [
+      "SOURCE_DERIVED",
+      "REPOSITORY_DERIVED",
+      "MODEL_INFERENCE",
+      "RESEARCH_PROPOSAL",
+      "ASSUMPTION",
+      "SOURCE_UNDERSPECIFIED"
+    ],
+    "range_rule": "minimum <= default <= maximum",
+    "fixture_rule": "Every adjustable numeric input below is a complete parameter object. Integer values inside initial_state, ordered_events and expected_final_state are immutable oracle fixtures rather than tunable parameters."
+  },
+  "fixture_value_contract": {
+    "encoding": "SIGNED_INTEGER_FIXED_POINT",
+    "scale_parameter": "deterministic_fixed_point_scale",
+    "source_type": "RESEARCH_PROPOSAL",
+    "confidence": "LOW",
+    "validation_required": true,
+    "purpose": "Exact replay and conservation testing only.",
+    "risk": "Fixture magnitudes and response deltas are synthetic. They must not be interpreted as field, laboratory, agronomic, environmental or geotechnical evidence.",
+    "units_by_suffix": {
+      "_micro_liter": "one_millionth_liter",
+      "_micro_kilogram": "one_millionth_kilogram",
+      "_micro_point": "one_millionth_owner_score_point",
+      "_micro_millimeter": "one_millionth_millimeter"
+    },
+    "canonical_serialization": "UTF-8 JSON of expected_final_state with recursively sorted object keys, compact separators, no ASCII escaping requirement and no trailing newline.",
+    "expected_final_state_sha256": "0f5458a11290775ed3de92b462bdb900527c43c3ce27b7f55e1de24dc2dcce1c"
+  },
+  "fixture_parameters": [
+    {
+      "parameter_name": "deterministic_fixed_point_scale",
+      "unit": "micro_units_per_owner_unit",
+      "minimum": 1000000,
+      "default": 1000000,
+      "maximum": 1000000,
+      "rationale": "Uses exact integer arithmetic for deterministic replay and conservation checks.",
+      "source_type": "RESEARCH_PROPOSAL",
+      "confidence": "HIGH",
+      "risk": "The scale improves reproducibility but does not make synthetic inputs authoritative.",
+      "validation_required": false
+    },
+    {
+      "parameter_name": "fixture_infiltration_water_input",
+      "unit": "liter",
+      "minimum": 200,
+      "default": 200,
+      "maximum": 200,
+      "rationale": "Supplies a fixed source quantity for the infiltration partition test.",
+      "source_type": "RESEARCH_PROPOSAL",
+      "confidence": "LOW",
+      "risk": "The synthetic volume is not a rainfall forecast or irrigation amount.",
+      "validation_required": true
+    },
+    {
+      "parameter_name": "fixture_drought_water_transfer",
+      "unit": "liter",
+      "minimum": 100,
+      "default": 100,
+      "maximum": 100,
+      "rationale": "Supplies a fixed recipient-backed water transfer for drought accounting.",
+      "source_type": "RESEARCH_PROPOSAL",
+      "confidence": "LOW",
+      "risk": "The transfer is not an evapotranspiration model or irrigation trigger.",
+      "validation_required": true
+    },
+    {
+      "parameter_name": "fixture_erosion_soil_transfer",
+      "unit": "kilogram",
+      "minimum": 250,
+      "default": 250,
+      "maximum": 250,
+      "rationale": "Supplies a fixed mass for sediment-custody and export partition testing.",
+      "source_type": "RESEARCH_PROPOSAL",
+      "confidence": "LOW",
+      "risk": "The synthetic mass is not an erosion-rate estimate.",
+      "validation_required": true
+    },
+    {
+      "parameter_name": "fixture_contamination_release",
+      "unit": "kilogram",
+      "minimum": 2,
+      "default": 2,
+      "maximum": 2,
+      "rationale": "Supplies a fixed external-source transfer into the soil contaminant pool.",
+      "source_type": "RESEARCH_PROPOSAL",
+      "confidence": "LOW",
+      "risk": "The synthetic mass has no contaminant identity and is not a safety threshold.",
+      "validation_required": true
+    },
+    {
+      "parameter_name": "fixture_contamination_removal",
+      "unit": "kilogram",
+      "minimum": 1.5,
+      "default": 1.5,
+      "maximum": 1.5,
+      "rationale": "Supplies a fixed transfer from soil contaminant mass to named removal custody.",
+      "source_type": "RESEARCH_PROPOSAL",
+      "confidence": "LOW",
+      "risk": "The transfer is not a remediation claim, cleanup standard or disposal authorization.",
+      "validation_required": true
+    },
+    {
+      "parameter_name": "fixture_nutrient_removal",
+      "unit": "kilogram",
+      "minimum": 10,
+      "default": 10,
+      "maximum": 10,
+      "rationale": "Supplies a fixed transfer from available soil nutrient to crop nutrient custody.",
+      "source_type": "RESEARCH_PROPOSAL",
+      "confidence": "LOW",
+      "risk": "The synthetic mass is not crop uptake, yield or fertilizer guidance.",
+      "validation_required": true
+    },
+    {
+      "parameter_name": "fixture_nutrient_return",
+      "unit": "kilogram",
+      "minimum": 8,
+      "default": 8,
+      "maximum": 8,
+      "rationale": "Supplies a fixed transfer from named compost custody back to available soil nutrient.",
+      "source_type": "RESEARCH_PROPOSAL",
+      "confidence": "LOW",
+      "risk": "The synthetic mass is not an amendment rate or nutrient-availability claim.",
+      "validation_required": true
+    },
+    {
+      "parameter_name": "fixture_construction_surface_load",
+      "unit": "kilopascal",
+      "minimum": 100,
+      "default": 100,
+      "maximum": 100,
+      "rationale": "Provides an explicit deterministic construction-loading stimulus for response accounting.",
+      "source_type": "RESEARCH_PROPOSAL",
+      "confidence": "LOW",
+      "risk": "The synthetic load is not a design load, bearing capacity or approval basis.",
+      "validation_required": true
+    },
+    {
+      "parameter_name": "fixture_construction_compaction_response",
+      "unit": "foundational_life_score_point_0_to_100",
+      "minimum": 12,
+      "default": 12,
+      "maximum": 12,
+      "rationale": "Provides a deterministic non-conserved response to the construction-loading stimulus.",
+      "source_type": "RESEARCH_PROPOSAL",
+      "confidence": "LOW",
+      "risk": "The synthetic score response is not a density or penetration measurement.",
+      "validation_required": true
+    },
+    {
+      "parameter_name": "fixture_construction_integrity_response",
+      "unit": "foundational_life_score_point_0_to_100",
+      "minimum": 4,
+      "default": 4,
+      "maximum": 4,
+      "rationale": "Provides a deterministic integrity decrement paired to a named loading event.",
+      "source_type": "RESEARCH_PROPOSAL",
+      "confidence": "LOW",
+      "risk": "The synthetic score response is not structural or geotechnical evidence.",
+      "validation_required": true
+    },
+    {
+      "parameter_name": "fixture_construction_settlement_proxy",
+      "unit": "millimeter",
+      "minimum": 8,
+      "default": 8,
+      "maximum": 8,
+      "rationale": "Provides a deterministic response marker without asserting a settlement calculation.",
+      "source_type": "RESEARCH_PROPOSAL",
+      "confidence": "LOW",
+      "risk": "The proxy is not predicted settlement and must not inform design.",
+      "validation_required": true
+    },
+    {
+      "parameter_name": "fixture_restoration_topsoil_transfer",
+      "unit": "kilogram",
+      "minimum": 100,
+      "default": 100,
+      "maximum": 100,
+      "rationale": "Supplies a fixed named-source topsoil transfer for restoration accounting.",
+      "source_type": "RESEARCH_PROPOSAL",
+      "confidence": "LOW",
+      "risk": "The synthetic mass does not authorize soil import, placement or restoration.",
+      "validation_required": true
+    },
+    {
+      "parameter_name": "fixture_restoration_organic_amendment_transfer",
+      "unit": "kilogram",
+      "minimum": 20,
+      "default": 20,
+      "maximum": 20,
+      "rationale": "Supplies a fixed named-source organic-material transfer for restoration accounting.",
+      "source_type": "RESEARCH_PROPOSAL",
+      "confidence": "LOW",
+      "risk": "The synthetic mass is not an amendment recommendation or fertility claim.",
+      "validation_required": true
+    },
+    {
+      "parameter_name": "fixture_restoration_compaction_recovery",
+      "unit": "foundational_life_score_point_0_to_100",
+      "minimum": 5,
+      "default": 5,
+      "maximum": 5,
+      "rationale": "Provides a deterministic non-conserved response to the named restoration event.",
+      "source_type": "RESEARCH_PROPOSAL",
+      "confidence": "LOW",
+      "risk": "The synthetic score change is not proof of decompaction or site recovery.",
+      "validation_required": true
+    },
+    {
+      "parameter_name": "fixture_restoration_integrity_recovery",
+      "unit": "foundational_life_score_point_0_to_100",
+      "minimum": 3,
+      "default": 3,
+      "maximum": 3,
+      "rationale": "Provides a deterministic integrity response to a named restoration event.",
+      "source_type": "RESEARCH_PROPOSAL",
+      "confidence": "LOW",
+      "risk": "The synthetic score change is not ecological, structural or regulatory evidence.",
+      "validation_required": true
+    }
+  ],
+  "deterministic_oracle": {
+    "oracle_id": "SOIL-CAUSAL-FIXED-POINT-ORACLE-001",
+    "replay_order": "LEXICAL_EVENT_SEQUENCE_ASCENDING",
+    "rounding": "NONE_INTEGER_ONLY",
+    "negative_material_pools_allowed": false,
+    "conservation_domains": {
+      "water": [
+        "water.atmospheric_input_micro_liter",
+        "water.surface_water_micro_liter",
+        "water.soil_mobile_water_micro_liter",
+        "water.soil_retained_water_micro_liter",
+        "water.deep_drainage_micro_liter",
+        "water.runoff_micro_liter"
+      ],
+      "soil_mass": [
+        "soil_mass.stable_topsoil_micro_kilogram",
+        "soil_mass.sediment_custody_micro_kilogram",
+        "soil_mass.exported_sediment_micro_kilogram",
+        "soil_mass.imported_restoration_topsoil_micro_kilogram"
+      ],
+      "organic_matter": [
+        "organic_matter.soil_organic_matter_micro_kilogram",
+        "organic_matter.external_organic_amendment_micro_kilogram"
+      ],
+      "nutrient": [
+        "nutrient.soil_available_micro_kilogram",
+        "nutrient.crop_nutrient_store_micro_kilogram",
+        "nutrient.compost_reserve_micro_kilogram"
+      ],
+      "contaminant": [
+        "contaminant.external_source_micro_kilogram",
+        "contaminant.soil_contaminant_micro_kilogram",
+        "contaminant.removal_custody_micro_kilogram"
+      ]
+    },
+    "non_conserved_response_metrics": [
+      "response.compaction_index_micro_point",
+      "response.integrity_index_micro_point",
+      "response.settlement_proxy_micro_millimeter"
+    ],
+    "initial_state": {
+      "water": {
+        "atmospheric_input_micro_liter": 500000000,
+        "surface_water_micro_liter": 100000000,
+        "soil_mobile_water_micro_liter": 100000000,
+        "soil_retained_water_micro_liter": 200000000,
+        "deep_drainage_micro_liter": 0,
+        "runoff_micro_liter": 0
+      },
+      "soil_mass": {
+        "stable_topsoil_micro_kilogram": 10000000000,
+        "sediment_custody_micro_kilogram": 0,
+        "exported_sediment_micro_kilogram": 0,
+        "imported_restoration_topsoil_micro_kilogram": 100000000
+      },
+      "organic_matter": {
+        "soil_organic_matter_micro_kilogram": 500000000,
+        "external_organic_amendment_micro_kilogram": 20000000
+      },
+      "nutrient": {
+        "soil_available_micro_kilogram": 40000000,
+        "crop_nutrient_store_micro_kilogram": 0,
+        "compost_reserve_micro_kilogram": 20000000
+      },
+      "contaminant": {
+        "external_source_micro_kilogram": 10000000,
+        "soil_contaminant_micro_kilogram": 0,
+        "removal_custody_micro_kilogram": 0
+      },
+      "response": {
+        "compaction_index_micro_point": 30000000,
+        "integrity_index_micro_point": 70000000,
+        "settlement_proxy_micro_millimeter": 0
+      }
+    },
+    "ordered_events": [
+      {
+        "sequence": "01",
+        "event_id": "FIXTURE-INFILTRATION-001",
+        "event_type": "INFILTRATION_PARTITION",
+        "input_parameter": "fixture_infiltration_water_input",
+        "source_owner": "KAIOS_REPRODUCTION_ECOLOGY_RUNTIME_V1",
+        "deltas": {
+          "water.atmospheric_input_micro_liter": -200000000,
+          "water.soil_mobile_water_micro_liter": 120000000,
+          "water.soil_retained_water_micro_liter": 60000000,
+          "water.runoff_micro_liter": 20000000
+        },
+        "expected_invariant": "WATER_DOMAIN_DELTA_EQUALS_ZERO",
+        "validation_required": true
+      },
+      {
+        "sequence": "02",
+        "event_id": "FIXTURE-DROUGHT-001",
+        "event_type": "DROUGHT_WATER_TRANSFER",
+        "input_parameter": "fixture_drought_water_transfer",
+        "source_owner": "KAIOS_REPRODUCTION_ECOLOGY_RUNTIME_V1",
+        "deltas": {
+          "water.soil_mobile_water_micro_liter": -80000000,
+          "water.soil_retained_water_micro_liter": -20000000,
+          "water.atmospheric_input_micro_liter": 100000000
+        },
+        "expected_invariant": "WATER_DOMAIN_DELTA_EQUALS_ZERO",
+        "validation_required": true
+      },
+      {
+        "sequence": "03",
+        "event_id": "FIXTURE-EROSION-001",
+        "event_type": "EROSION_AND_SEDIMENT_CUSTODY",
+        "input_parameter": "fixture_erosion_soil_transfer",
+        "source_owner": "KAIOS_REPRODUCTION_ECOLOGY_RUNTIME_V1",
+        "deltas": {
+          "soil_mass.stable_topsoil_micro_kilogram": -250000000,
+          "soil_mass.sediment_custody_micro_kilogram": 200000000,
+          "soil_mass.exported_sediment_micro_kilogram": 50000000
+        },
+        "expected_invariant": "SOIL_MASS_DOMAIN_DELTA_EQUALS_ZERO",
+        "validation_required": true
+      },
+      {
+        "sequence": "04",
+        "event_id": "FIXTURE-CONTAMINATION-RELEASE-001",
+        "event_type": "CONTAMINANT_SOURCE_TRANSFER",
+        "input_parameter": "fixture_contamination_release",
+        "source_owner": "KAIOS_REPRODUCTION_ECOLOGY_RUNTIME_V1",
+        "deltas": {
+          "contaminant.external_source_micro_kilogram": -2000000,
+          "contaminant.soil_contaminant_micro_kilogram": 2000000
+        },
+        "expected_invariant": "CONTAMINANT_DOMAIN_DELTA_EQUALS_ZERO",
+        "validation_required": true
+      },
+      {
+        "sequence": "05",
+        "event_id": "FIXTURE-CONTAMINATION-REMOVAL-001",
+        "event_type": "CONTAMINANT_REMOVAL_CUSTODY_TRANSFER",
+        "input_parameter": "fixture_contamination_removal",
+        "source_owner": "KAIOS_REPRODUCTION_ECOLOGY_RUNTIME_V1",
+        "deltas": {
+          "contaminant.soil_contaminant_micro_kilogram": -1500000,
+          "contaminant.removal_custody_micro_kilogram": 1500000
+        },
+        "expected_invariant": "CONTAMINANT_DOMAIN_DELTA_EQUALS_ZERO",
+        "validation_required": true
+      },
+      {
+        "sequence": "06",
+        "event_id": "FIXTURE-NUTRIENT-REMOVAL-001",
+        "event_type": "CROP_NUTRIENT_REMOVAL",
+        "input_parameter": "fixture_nutrient_removal",
+        "source_owner": "AGRICULTURE_ALPHA",
+        "deltas": {
+          "nutrient.soil_available_micro_kilogram": -10000000,
+          "nutrient.crop_nutrient_store_micro_kilogram": 10000000
+        },
+        "expected_invariant": "NUTRIENT_DOMAIN_DELTA_EQUALS_ZERO",
+        "validation_required": true
+      },
+      {
+        "sequence": "07",
+        "event_id": "FIXTURE-NUTRIENT-RETURN-001",
+        "event_type": "COMPOST_NUTRIENT_RETURN",
+        "input_parameter": "fixture_nutrient_return",
+        "source_owner": "AGRICULTURE_ALPHA",
+        "deltas": {
+          "nutrient.compost_reserve_micro_kilogram": -8000000,
+          "nutrient.soil_available_micro_kilogram": 8000000
+        },
+        "expected_invariant": "NUTRIENT_DOMAIN_DELTA_EQUALS_ZERO",
+        "validation_required": true
+      },
+      {
+        "sequence": "08",
+        "event_id": "FIXTURE-CONSTRUCTION-LOADING-001",
+        "event_type": "CONSTRUCTION_LOADING_RESPONSE",
+        "input_parameters": [
+          "fixture_construction_surface_load",
+          "fixture_construction_compaction_response",
+          "fixture_construction_integrity_response",
+          "fixture_construction_settlement_proxy"
+        ],
+        "source_owner": "KAIOS_CAUSAL_CONSTRUCTION",
+        "deltas": {
+          "response.compaction_index_micro_point": 12000000,
+          "response.integrity_index_micro_point": -4000000,
+          "response.settlement_proxy_micro_millimeter": 8000000
+        },
+        "expected_invariant": "RESPONSE_DELTAS_HAVE_NAMED_CAUSAL_LOAD_AND_DO_NOT_ASSERT_MASS_CONSERVATION",
+        "required_outcome": "GEOTECHNICAL_REVIEW_REQUIRED",
+        "validation_required": true
+      },
+      {
+        "sequence": "09",
+        "event_id": "FIXTURE-RESTORATION-001",
+        "event_type": "SOURCE_BOUND_RESTORATION",
+        "input_parameters": [
+          "fixture_restoration_topsoil_transfer",
+          "fixture_restoration_organic_amendment_transfer",
+          "fixture_restoration_compaction_recovery",
+          "fixture_restoration_integrity_recovery"
+        ],
+        "source_owner": "KAIOS_REPRODUCTION_ECOLOGY_RUNTIME_V1",
+        "deltas": {
+          "soil_mass.imported_restoration_topsoil_micro_kilogram": -100000000,
+          "soil_mass.stable_topsoil_micro_kilogram": 100000000,
+          "organic_matter.external_organic_amendment_micro_kilogram": -20000000,
+          "organic_matter.soil_organic_matter_micro_kilogram": 20000000,
+          "response.compaction_index_micro_point": -5000000,
+          "response.integrity_index_micro_point": 3000000
+        },
+        "expected_invariant": "SOIL_AND_ORGANIC_MATERIAL_DELTAS_CONSERVE_NAMED_POOLS_AND_RESPONSE_DELTAS_HAVE_A_NAMED_EVENT",
+        "validation_required": true
+      }
+    ],
+    "expected_final_state": {
+      "water": {
+        "atmospheric_input_micro_liter": 400000000,
+        "surface_water_micro_liter": 100000000,
+        "soil_mobile_water_micro_liter": 140000000,
+        "soil_retained_water_micro_liter": 240000000,
+        "deep_drainage_micro_liter": 0,
+        "runoff_micro_liter": 20000000
+      },
+      "soil_mass": {
+        "stable_topsoil_micro_kilogram": 9850000000,
+        "sediment_custody_micro_kilogram": 200000000,
+        "exported_sediment_micro_kilogram": 50000000,
+        "imported_restoration_topsoil_micro_kilogram": 0
+      },
+      "organic_matter": {
+        "soil_organic_matter_micro_kilogram": 520000000,
+        "external_organic_amendment_micro_kilogram": 0
+      },
+      "nutrient": {
+        "soil_available_micro_kilogram": 38000000,
+        "crop_nutrient_store_micro_kilogram": 10000000,
+        "compost_reserve_micro_kilogram": 12000000
+      },
+      "contaminant": {
+        "external_source_micro_kilogram": 8000000,
+        "soil_contaminant_micro_kilogram": 500000,
+        "removal_custody_micro_kilogram": 1500000
+      },
+      "response": {
+        "compaction_index_micro_point": 37000000,
+        "integrity_index_micro_point": 69000000,
+        "settlement_proxy_micro_millimeter": 8000000
+      }
+    },
+    "expected_domain_totals": {
+      "water_micro_liter": 900000000,
+      "soil_mass_micro_kilogram": 10100000000,
+      "organic_matter_micro_kilogram": 520000000,
+      "nutrient_micro_kilogram": 60000000,
+      "contaminant_micro_kilogram": 10000000
+    }
+  },
+  "test_scenarios": [
+    {
+      "scenario_id": "SOIL-TEST-STRICT-JSON-001",
+      "category": "FORMAT",
+      "fixture": "All five JSON deliverables",
+      "expected": "Strict parse succeeds with no duplicate object keys."
+    },
+    {
+      "scenario_id": "SOIL-TEST-PARAMETER-CONTRACT-001",
+      "category": "PARAMETER",
+      "fixture": "Every object containing parameter_name",
+      "expected": "All required fields are present, the source type is allowed and minimum <= default <= maximum."
+    },
+    {
+      "scenario_id": "SOIL-TEST-TEXTURE-PARTITION-001",
+      "category": "PROPERTY_SEPARATION",
+      "fixture": "All seven physical-property profiles",
+      "expected": "Default sand, silt and clay percentages sum exactly to 100 while organic matter remains separate."
+    },
+    {
+      "scenario_id": "SOIL-TEST-INFILTRATION-001",
+      "category": "INFILTRATION",
+      "fixture": "FIXTURE-INFILTRATION-001",
+      "expected": "Atmospheric water loss equals mobile, retained and runoff gains."
+    },
+    {
+      "scenario_id": "SOIL-TEST-DROUGHT-001",
+      "category": "DROUGHT",
+      "fixture": "FIXTURE-DROUGHT-001",
+      "expected": "Mobile and retained water losses equal the named atmospheric recipient gain."
+    },
+    {
+      "scenario_id": "SOIL-TEST-EROSION-001",
+      "category": "EROSION",
+      "fixture": "FIXTURE-EROSION-001",
+      "expected": "Stable topsoil loss equals sediment custody plus exported sediment."
+    },
+    {
+      "scenario_id": "SOIL-TEST-CONTAMINATION-001",
+      "category": "CONTAMINATION",
+      "fixture": "FIXTURE-CONTAMINATION-RELEASE-001 and FIXTURE-CONTAMINATION-REMOVAL-001",
+      "expected": "Every contaminant gain or loss has a named source or custody recipient and total contaminant mass is conserved."
+    },
+    {
+      "scenario_id": "SOIL-TEST-NUTRIENT-001",
+      "category": "NUTRIENT_REMOVAL_RETURN",
+      "fixture": "FIXTURE-NUTRIENT-REMOVAL-001 and FIXTURE-NUTRIENT-RETURN-001",
+      "expected": "Crop removal and compost return use paired deltas and total nutrient mass is conserved."
+    },
+    {
+      "scenario_id": "SOIL-TEST-CONSTRUCTION-001",
+      "category": "CONSTRUCTION_LOADING",
+      "fixture": "FIXTURE-CONSTRUCTION-LOADING-001",
+      "expected": "Loading produces only named synthetic response deltas and always returns GEOTECHNICAL_REVIEW_REQUIRED."
+    },
+    {
+      "scenario_id": "SOIL-TEST-RESTORATION-001",
+      "category": "RESTORATION",
+      "fixture": "FIXTURE-RESTORATION-001",
+      "expected": "Topsoil and organic gains consume named external pools; no mass or fertility appears without a source."
+    },
+    {
+      "scenario_id": "SOIL-TEST-DETERMINISTIC-REPLAY-001",
+      "category": "DETERMINISM",
+      "fixture": "SOIL-CAUSAL-FIXED-POINT-ORACLE-001",
+      "expected": "Two ordered integer replays produce the exact expected state and declared canonical SHA-256."
+    },
+    {
+      "scenario_id": "SOIL-TEST-COMPATIBILITY-SPLIT-001",
+      "category": "COMPATIBILITY",
+      "fixture": "All seven compatibility rows",
+      "expected": "Crop-support and foundation-support results are separate, and no result is an approval."
+    },
+    {
+      "scenario_id": "SOIL-TEST-RIGHTS-001",
+      "category": "RIGHTS",
+      "fixture": "All six deliverables",
+      "expected": "No soil type, event or screen creates ownership, land-use, occupancy, permit, water, harvest, construction or transfer rights."
+    },
+    {
+      "scenario_id": "SOIL-TEST-PROVENANCE-001",
+      "category": "PROVENANCE",
+      "fixture": "Every immutable source record",
+      "expected": "Git object and SHA-256 match source bytes at the declared source commit."
+    },
+    {
+      "scenario_id": "SOIL-TEST-ENCODING-SCOPE-001",
+      "category": "REPOSITORY_SCOPE",
+      "fixture": "Exactly six required outputs",
+      "expected": "Files are UTF-8 without BOM or NUL; no protected or out-of-scope path is modified; git diff --check passes."
+    }
+  ],
+  "provenance": [
+    {
+      "source_path": "KAIOS/life/runtime/foundational-life-runtime.js",
+      "source_commit": "614b4e02edb8f705848ad7cb49132ae37e8f5b7e",
+      "git_object": "9187c14774b34c25e9ae23cf21749fbb5dbb891d",
+      "sha256": "4d72be28bbad06ff65d1dddb44043e6f3e2086a095a8bf105e2f08cbed648779",
+      "usage": "Foundational soil state, normalized response metrics and support gates"
+    },
+    {
+      "source_path": "KGEN-KAIOS/world-viewer/ecosystem/ecosystem-runtime.js",
+      "source_commit": "614b4e02edb8f705848ad7cb49132ae37e8f5b7e",
+      "git_object": "2bab509140ab4b93c7e4975286c826693965cf26",
+      "sha256": "9b2cd9d4501727d3134ea332e1a30cd77d5d7d647300820f51d9c264784ef537",
+      "usage": "Water, nutrient, sediment, decomposition and restoration owner domains"
+    },
+    {
+      "source_path": "KGEN-KAIOS/world-viewer/agriculture/agriculture-runtime.js",
+      "source_commit": "614b4e02edb8f705848ad7cb49132ae37e8f5b7e",
+      "git_object": "f09478806a47c10825258385ee855faa74f51a79",
+      "sha256": "4557d6b449ce3979f2bf4ca10cc48f271ead2ddb34cc127e60b264ce26b577c2",
+      "usage": "Agriculture plot and nutrient-event ownership"
+    },
+    {
+      "source_path": "KAIOS_CONSTRUCTION_CAUSALITY_SPEC.md",
+      "source_commit": "614b4e02edb8f705848ad7cb49132ae37e8f5b7e",
+      "git_object": "52b30a3e46c81f7ed9f19edd0b90932d1a9223dd",
+      "sha256": "6f34c4e145e9e56edcc8ed22d37f7c33d36d9881215c5fc00bc565e591c160b6",
+      "usage": "Construction loading and qualified-review authority boundary"
+    },
+    {
+      "source_path": "KAIOS_CONSTRUCTION_SCHEMA.json",
+      "source_commit": "614b4e02edb8f705848ad7cb49132ae37e8f5b7e",
+      "git_object": "fe1323d5c131e5909086c4b16785a2c1c3bdeccb",
+      "sha256": "e0665d76cc90ba881a6414f34b3a201be58dae554379685f15a9ff9fb7b92aec",
+      "usage": "Construction project, stage, survey, design and inspection state"
+    },
+    {
+      "source_path": "KAIOS/life/forest-agriculture/KAIOS_FOREST_AGRICULTURE_RUNTIME_V1_SPEC.md",
+      "source_commit": "614b4e02edb8f705848ad7cb49132ae37e8f5b7e",
+      "git_object": "9a2dd4ad05bb7b2e3d71b91b479359947ada8376",
+      "sha256": "4e1a23e97d09ec2dc4ad65440e6958e646f75ed418e5c703c5a5a1635c2809a1",
+      "usage": "Required causal flows, source custody and deterministic validation"
+    },
+    {
+      "source_path": "KAIOS_CANONICAL_LIFE_RIGHTS_V1.md",
+      "source_commit": "614b4e02edb8f705848ad7cb49132ae37e8f5b7e",
+      "git_object": "783ea5b17d82bf6579e4a9763bcbc3b18fb06ac2",
+      "sha256": "bec5f35a1906dbd9eb72764e935f4ad282a81398587b66de789130ae4a0428f4",
+      "usage": "No implicit rights or authorization from data and simulation events"
+    }
+  ],
+  "boundaries": [
+    "CANDIDATE_ONLY",
+    "SIMULATION_ONLY",
+    "FIXTURE_VALUES_ARE_SYNTHETIC",
+    "NO_FORECAST",
+    "NO_AGRONOMIC_RECOMMENDATION",
+    "NO_ENVIRONMENTAL_SAFETY_LIMIT",
+    "NO_REMEDIATION_CLAIM",
+    "NO_GEOTECHNICAL_CALCULATION",
+    "NO_FERTILITY_OR_MASS_WITHOUT_NAMED_SOURCE",
+    "NO_CANONICAL_PROMOTION",
+    "NO_RUNTIME_CHANGE",
+    "NO_DEPLOYMENT"
+  ]
+}

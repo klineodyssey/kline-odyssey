@@ -1,0 +1,527 @@
+{
+  "dataset_id": "KAIOS-SOIL-COMPATIBILITY-MATRIX-V1",
+  "schema_version": "1.0.0-candidate",
+  "status": "CURSOR_RESEARCH_CANDIDATE_ONLY",
+  "review_status": "PENDING_CODEX_REVIEW",
+  "task_id": "KAIOS-CURSOR-SOIL-TYPES-001",
+  "worker_id": "cursor-01",
+  "branch": "cursor-handoff/KAIOS-CURSOR-SOIL-TYPES-001",
+  "source_base_commit": "614b4e02edb8f705848ad7cb49132ae37e8f5b7e",
+  "source_hash_basis": "SHA256_OF_GIT_BLOB_CONTENT_AT_SOURCE_BASE_COMMIT",
+  "mode": "SIMULATION_ONLY_COMPATIBILITY_SCREENING",
+  "authority": "NO_PRODUCTION_AUTHORITY",
+  "canonical_promotion": false,
+  "scope": "Candidate soil-type screening relationships for forest and aggregate crop classes, with a separate foundation-support screen. Results are not agronomic recommendations, engineering design values, permits, certifications or Canonical Life decisions.",
+  "decision_contract": {
+    "soil_type_alone_authorizes_crop_support": false,
+    "soil_type_alone_authorizes_foundation_support": false,
+    "crop_and_foundation_support_are_independent": true,
+    "current_state_required": [
+      "moisture",
+      "fertility",
+      "organic_matter",
+      "compaction",
+      "erosion",
+      "contamination"
+    ],
+    "crop_owner_decision_required": "AGRICULTURE_ALPHA_OR_SUCCESSOR_OWNER",
+    "foundation_owner_decision_required": "KAIOS_CAUSAL_CONSTRUCTION_AND_QUALIFIED_SITE_REVIEW",
+    "rights_decision_required": "EXISTING_RIGHTS_AUTHORITY",
+    "result_semantics": "A provisional compatibility label only indicates a candidate relationship worth testing. It never approves planting, harvest, occupancy, construction, water use, land use or transfer."
+  },
+  "screening_status_definitions": [
+    {
+      "status": "PROVISIONAL_FIT",
+      "meaning": "Candidate profile has no type-level conflict for this target, but owner state and site validation remain mandatory."
+    },
+    {
+      "status": "CONDITIONAL",
+      "meaning": "Candidate profile may be testable only after the named limiting conditions are resolved."
+    },
+    {
+      "status": "LOW_PROVISIONAL_FIT",
+      "meaning": "Candidate profile has a material type-level limitation and should not be selected without contrary measured evidence."
+    },
+    {
+      "status": "NOT_SUPPORTED_BY_CANDIDATE",
+      "meaning": "This candidate dataset does not provide affirmative support; an external qualified workflow would be required."
+    }
+  ],
+  "crop_screen_targets": [
+    {
+      "target_id": "CANDIDATE-CROP-CLASS-RICE-V1",
+      "target_kind": "AGGREGATE_CROP_CLASS",
+      "owner": "AGRICULTURE_ALPHA",
+      "screen_only": true
+    },
+    {
+      "target_id": "CANDIDATE-VEGETABLE-AGGREGATE-PLOT-V1",
+      "target_kind": "AGGREGATE_VEGETABLE_PLOT",
+      "owner": "AGRICULTURE_ALPHA",
+      "screen_only": true
+    },
+    {
+      "target_id": "CANDIDATE-FRUIT-TREE-AGGREGATE-V1",
+      "target_kind": "AGGREGATE_FRUIT_TREE_CLASS",
+      "owner": "AGRICULTURE_ALPHA",
+      "screen_only": true
+    },
+    {
+      "target_id": "HABITAT-FOREST-V1",
+      "target_kind": "FOREST_HABITAT",
+      "owner": "KAIOS_REPRODUCTION_ECOLOGY_RUNTIME_V1",
+      "screen_only": true
+    }
+  ],
+  "matrix": [
+    {
+      "soil_type_id": "SOIL-SANDY-ANALOG-V1",
+      "crop_support_profile_id": "SOIL-CROP-SCREEN-SANDY-V1",
+      "crop_support": [
+        {
+          "target_id": "CANDIDATE-CROP-CLASS-RICE-V1",
+          "status": "LOW_PROVISIONAL_FIT",
+          "conditions": "Measured water-retention behavior, water-source authority and nutrient-source accounting are unresolved.",
+          "source_type": "MODEL_INFERENCE",
+          "confidence": "LOW",
+          "risk": "Rapid drainage and low candidate nutrient retention may conflict with the aggregate class, while local layering may invalidate the type inference.",
+          "validation_required": true
+        },
+        {
+          "target_id": "CANDIDATE-VEGETABLE-AGGREGATE-PLOT-V1",
+          "status": "CONDITIONAL",
+          "conditions": "Owner-approved water and nutrient events plus erosion controls must be represented as paired pool deltas.",
+          "source_type": "MODEL_INFERENCE",
+          "confidence": "LOW",
+          "risk": "A type-level label can hide drought, leaching and surface-loss behavior.",
+          "validation_required": true
+        },
+        {
+          "target_id": "CANDIDATE-FRUIT-TREE-AGGREGATE-V1",
+          "status": "CONDITIONAL",
+          "conditions": "Root-zone depth, anchorage, water availability and erosion exposure require site evidence.",
+          "source_type": "MODEL_INFERENCE",
+          "confidence": "LOW",
+          "risk": "Texture alone cannot establish long-term anchorage or water supply.",
+          "validation_required": true
+        },
+        {
+          "target_id": "HABITAT-FOREST-V1",
+          "status": "CONDITIONAL",
+          "conditions": "Species composition, regeneration state, water balance and erosion custody remain owner decisions.",
+          "source_type": "MODEL_INFERENCE",
+          "confidence": "LOW",
+          "risk": "Forest habitat suitability cannot be inferred from a texture analog alone.",
+          "validation_required": true
+        }
+      ],
+      "foundation_support": {
+        "foundation_support_profile_id": "SOIL-FOUNDATION-SCREEN-SANDY-V1",
+        "status": "CONDITIONAL",
+        "conditions": "Density, saturation, scour, liquefaction susceptibility, settlement and load path require qualified site investigation.",
+        "source_type": "SOURCE_UNDERSPECIFIED",
+        "confidence": "LOW",
+        "risk": "Loose or saturated sandy material may respond differently under construction loading.",
+        "validation_required": true,
+        "required_owner_outcome": "GEOTECHNICAL_REVIEW_REQUIRED"
+      }
+    },
+    {
+      "soil_type_id": "SOIL-SANDY-LOAM-ANALOG-V1",
+      "crop_support_profile_id": "SOIL-CROP-SCREEN-SANDY-LOAM-V1",
+      "crop_support": [
+        {
+          "target_id": "CANDIDATE-CROP-CLASS-RICE-V1",
+          "status": "CONDITIONAL",
+          "conditions": "Measured retention, hydraulic boundaries and authorized water inputs must support the simulated water state.",
+          "source_type": "MODEL_INFERENCE",
+          "confidence": "LOW",
+          "risk": "The aggregate crop class may require water behavior not supplied by this profile.",
+          "validation_required": true
+        },
+        {
+          "target_id": "CANDIDATE-VEGETABLE-AGGREGATE-PLOT-V1",
+          "status": "PROVISIONAL_FIT",
+          "conditions": "Current fertility, contamination, water and erosion states must pass owner validation.",
+          "source_type": "MODEL_INFERENCE",
+          "confidence": "LOW",
+          "risk": "A favorable texture screen does not establish nutrient sufficiency, safety or crop-specific performance.",
+          "validation_required": true
+        },
+        {
+          "target_id": "CANDIDATE-FRUIT-TREE-AGGREGATE-V1",
+          "status": "PROVISIONAL_FIT",
+          "conditions": "Root-zone depth, water balance, anchorage and species-specific evidence remain required.",
+          "source_type": "MODEL_INFERENCE",
+          "confidence": "LOW",
+          "risk": "Aggregate fruit-tree compatibility can conceal species and site constraints.",
+          "validation_required": true
+        },
+        {
+          "target_id": "HABITAT-FOREST-V1",
+          "status": "PROVISIONAL_FIT",
+          "conditions": "Forest composition and regeneration must be evaluated by the ecology owner with site state.",
+          "source_type": "MODEL_INFERENCE",
+          "confidence": "LOW",
+          "risk": "No species or succession outcome follows from the type screen.",
+          "validation_required": true
+        }
+      ],
+      "foundation_support": {
+        "foundation_support_profile_id": "SOIL-FOUNDATION-SCREEN-SANDY-LOAM-V1",
+        "status": "CONDITIONAL",
+        "conditions": "Density, saturation, bearing response and settlement require qualified site investigation and design.",
+        "source_type": "SOURCE_UNDERSPECIFIED",
+        "confidence": "LOW",
+        "risk": "Profile variability and loading history are not represented by the type label.",
+        "validation_required": true,
+        "required_owner_outcome": "GEOTECHNICAL_REVIEW_REQUIRED"
+      }
+    },
+    {
+      "soil_type_id": "SOIL-LOAM-ANALOG-V1",
+      "crop_support_profile_id": "SOIL-CROP-SCREEN-LOAM-V1",
+      "crop_support": [
+        {
+          "target_id": "CANDIDATE-CROP-CLASS-RICE-V1",
+          "status": "CONDITIONAL",
+          "conditions": "Water-retention state, authorized water inputs and field hydraulic boundaries require owner evidence.",
+          "source_type": "MODEL_INFERENCE",
+          "confidence": "LOW",
+          "risk": "Generalized loam behavior cannot establish aggregate rice-class water compatibility.",
+          "validation_required": true
+        },
+        {
+          "target_id": "CANDIDATE-VEGETABLE-AGGREGATE-PLOT-V1",
+          "status": "PROVISIONAL_FIT",
+          "conditions": "Current fertility, contamination, moisture and crop-specific thresholds must be supplied by owners.",
+          "source_type": "MODEL_INFERENCE",
+          "confidence": "LOW",
+          "risk": "The screen is not a planting, amendment or food-safety recommendation.",
+          "validation_required": true
+        },
+        {
+          "target_id": "CANDIDATE-FRUIT-TREE-AGGREGATE-V1",
+          "status": "PROVISIONAL_FIT",
+          "conditions": "Root-zone depth, drainage, anchorage and species-specific state remain unresolved.",
+          "source_type": "MODEL_INFERENCE",
+          "confidence": "LOW",
+          "risk": "Type-level compatibility does not predict perennial performance.",
+          "validation_required": true
+        },
+        {
+          "target_id": "HABITAT-FOREST-V1",
+          "status": "PROVISIONAL_FIT",
+          "conditions": "Ecology owner validation of species, water, nutrients, decomposition and regeneration remains required.",
+          "source_type": "MODEL_INFERENCE",
+          "confidence": "LOW",
+          "risk": "A generalized physical profile cannot authorize forest composition or restoration.",
+          "validation_required": true
+        }
+      ],
+      "foundation_support": {
+        "foundation_support_profile_id": "SOIL-FOUNDATION-SCREEN-LOAM-V1",
+        "status": "CONDITIONAL",
+        "conditions": "Layering, density, water state, settlement, bearing response and load path require qualified site investigation.",
+        "source_type": "SOURCE_UNDERSPECIFIED",
+        "confidence": "LOW",
+        "risk": "Agricultural compatibility is not evidence of foundation support.",
+        "validation_required": true,
+        "required_owner_outcome": "GEOTECHNICAL_REVIEW_REQUIRED"
+      }
+    },
+    {
+      "soil_type_id": "SOIL-SILT-LOAM-ANALOG-V1",
+      "crop_support_profile_id": "SOIL-CROP-SCREEN-SILT-LOAM-V1",
+      "crop_support": [
+        {
+          "target_id": "CANDIDATE-CROP-CLASS-RICE-V1",
+          "status": "PROVISIONAL_FIT",
+          "conditions": "Measured water state, drainage boundaries, erosion controls and authorized water sources remain mandatory.",
+          "source_type": "MODEL_INFERENCE",
+          "confidence": "LOW",
+          "risk": "Surface sealing, erosion and local drainage can invalidate the provisional screen.",
+          "validation_required": true
+        },
+        {
+          "target_id": "CANDIDATE-VEGETABLE-AGGREGATE-PLOT-V1",
+          "status": "PROVISIONAL_FIT",
+          "conditions": "Current aeration, fertility, contamination and erosion states must be owner-validated.",
+          "source_type": "MODEL_INFERENCE",
+          "confidence": "LOW",
+          "risk": "Wetness and surface loss are not resolved by the type label.",
+          "validation_required": true
+        },
+        {
+          "target_id": "CANDIDATE-FRUIT-TREE-AGGREGATE-V1",
+          "status": "CONDITIONAL",
+          "conditions": "Drainage, root-zone aeration, anchorage and erosion exposure require site evidence.",
+          "source_type": "MODEL_INFERENCE",
+          "confidence": "LOW",
+          "risk": "Perennial root response may conflict with seasonal saturation or layering.",
+          "validation_required": true
+        },
+        {
+          "target_id": "HABITAT-FOREST-V1",
+          "status": "PROVISIONAL_FIT",
+          "conditions": "Species, succession, water and sediment states remain ecology-owner decisions.",
+          "source_type": "MODEL_INFERENCE",
+          "confidence": "LOW",
+          "risk": "Erosion-prone or saturated sites may diverge from this generalized screen.",
+          "validation_required": true
+        }
+      ],
+      "foundation_support": {
+        "foundation_support_profile_id": "SOIL-FOUNDATION-SCREEN-SILT-LOAM-V1",
+        "status": "LOW_PROVISIONAL_FIT",
+        "conditions": "Settlement, saturation, frost or cyclic response where relevant, density and bearing behavior require qualified site investigation.",
+        "source_type": "SOURCE_UNDERSPECIFIED",
+        "confidence": "LOW",
+        "risk": "Moisture-sensitive settlement and surface erosion are not bounded by this candidate profile.",
+        "validation_required": true,
+        "required_owner_outcome": "GEOTECHNICAL_REVIEW_REQUIRED"
+      }
+    },
+    {
+      "soil_type_id": "SOIL-CLAY-LOAM-ANALOG-V1",
+      "crop_support_profile_id": "SOIL-CROP-SCREEN-CLAY-LOAM-V1",
+      "crop_support": [
+        {
+          "target_id": "CANDIDATE-CROP-CLASS-RICE-V1",
+          "status": "PROVISIONAL_FIT",
+          "conditions": "Hydraulic boundaries, water authority, compaction and nutrient source must be represented in owner state.",
+          "source_type": "MODEL_INFERENCE",
+          "confidence": "LOW",
+          "risk": "Slow drainage does not itself establish water availability or crop performance.",
+          "validation_required": true
+        },
+        {
+          "target_id": "CANDIDATE-VEGETABLE-AGGREGATE-PLOT-V1",
+          "status": "CONDITIONAL",
+          "conditions": "Aeration, workability, compaction, fertility and contamination require owner evidence.",
+          "source_type": "MODEL_INFERENCE",
+          "confidence": "LOW",
+          "risk": "Wetness and compaction may materially constrain the aggregate class.",
+          "validation_required": true
+        },
+        {
+          "target_id": "CANDIDATE-FRUIT-TREE-AGGREGATE-V1",
+          "status": "CONDITIONAL",
+          "conditions": "Drainage, shrink-swell behavior, root-zone depth and anchorage require site validation.",
+          "source_type": "MODEL_INFERENCE",
+          "confidence": "LOW",
+          "risk": "Perennial roots and structures may respond to unmodeled volume change.",
+          "validation_required": true
+        },
+        {
+          "target_id": "HABITAT-FOREST-V1",
+          "status": "CONDITIONAL",
+          "conditions": "Species tolerance, water state, compaction and regeneration are ecology-owner decisions.",
+          "source_type": "MODEL_INFERENCE",
+          "confidence": "LOW",
+          "risk": "The texture analog cannot establish forest succession or habitat quality.",
+          "validation_required": true
+        }
+      ],
+      "foundation_support": {
+        "foundation_support_profile_id": "SOIL-FOUNDATION-SCREEN-CLAY-LOAM-V1",
+        "status": "CONDITIONAL",
+        "conditions": "Shrink-swell potential, saturation, consolidation, bearing response and load path require qualified site investigation and design.",
+        "source_type": "SOURCE_UNDERSPECIFIED",
+        "confidence": "LOW",
+        "risk": "Texture class does not quantify volume change or structural response.",
+        "validation_required": true,
+        "required_owner_outcome": "GEOTECHNICAL_REVIEW_REQUIRED"
+      }
+    },
+    {
+      "soil_type_id": "SOIL-CLAY-ANALOG-V1",
+      "crop_support_profile_id": "SOIL-CROP-SCREEN-CLAY-V1",
+      "crop_support": [
+        {
+          "target_id": "CANDIDATE-CROP-CLASS-RICE-V1",
+          "status": "CONDITIONAL",
+          "conditions": "Water depth, drainage boundary, compaction, source-authorized nutrients and crop owner state remain required.",
+          "source_type": "MODEL_INFERENCE",
+          "confidence": "LOW",
+          "risk": "Clay texture can coexist with incompatible chemistry, structure or hydrology.",
+          "validation_required": true
+        },
+        {
+          "target_id": "CANDIDATE-VEGETABLE-AGGREGATE-PLOT-V1",
+          "status": "LOW_PROVISIONAL_FIT",
+          "conditions": "Aeration, workability, drainage and compaction need contrary measured evidence before simulation selection.",
+          "source_type": "MODEL_INFERENCE",
+          "confidence": "LOW",
+          "risk": "Slow drainage and compaction sensitivity may constrain the aggregate class.",
+          "validation_required": true
+        },
+        {
+          "target_id": "CANDIDATE-FRUIT-TREE-AGGREGATE-V1",
+          "status": "LOW_PROVISIONAL_FIT",
+          "conditions": "Root-zone drainage, shrink-swell behavior and anchorage need contrary measured evidence.",
+          "source_type": "MODEL_INFERENCE",
+          "confidence": "LOW",
+          "risk": "Volume change and seasonal saturation may affect perennial roots and structures.",
+          "validation_required": true
+        },
+        {
+          "target_id": "HABITAT-FOREST-V1",
+          "status": "CONDITIONAL",
+          "conditions": "Species tolerance, drainage, compaction and regeneration require ecology-owner evidence.",
+          "source_type": "MODEL_INFERENCE",
+          "confidence": "LOW",
+          "risk": "No habitat or succession outcome follows from the clay analog alone.",
+          "validation_required": true
+        }
+      ],
+      "foundation_support": {
+        "foundation_support_profile_id": "SOIL-FOUNDATION-SCREEN-CLAY-V1",
+        "status": "LOW_PROVISIONAL_FIT",
+        "conditions": "Shrink-swell, saturation, consolidation, settlement and bearing response require qualified site investigation and engineered design.",
+        "source_type": "SOURCE_UNDERSPECIFIED",
+        "confidence": "LOW",
+        "risk": "The candidate does not quantify mineralogy, volume change or loading history.",
+        "validation_required": true,
+        "required_owner_outcome": "GEOTECHNICAL_REVIEW_REQUIRED"
+      }
+    },
+    {
+      "soil_type_id": "SOIL-ORGANIC-RICH-MINERAL-ANALOG-V1",
+      "crop_support_profile_id": "SOIL-CROP-SCREEN-ORGANIC-RICH-MINERAL-V1",
+      "crop_support": [
+        {
+          "target_id": "CANDIDATE-CROP-CLASS-RICE-V1",
+          "status": "CONDITIONAL",
+          "conditions": "Water-table behavior, decomposition, nutrient custody and authorized water inputs require owner evidence.",
+          "source_type": "MODEL_INFERENCE",
+          "confidence": "LOW",
+          "risk": "Organic-rich state does not establish water control, nutrient availability or safety.",
+          "validation_required": true
+        },
+        {
+          "target_id": "CANDIDATE-VEGETABLE-AGGREGATE-PLOT-V1",
+          "status": "PROVISIONAL_FIT",
+          "conditions": "Organic material source, decomposition, contamination, moisture and fertility require recorded owner state.",
+          "source_type": "MODEL_INFERENCE",
+          "confidence": "LOW",
+          "risk": "Organic matter does not itself establish crop nutrition or food safety.",
+          "validation_required": true
+        },
+        {
+          "target_id": "CANDIDATE-FRUIT-TREE-AGGREGATE-V1",
+          "status": "CONDITIONAL",
+          "conditions": "Root anchorage, subsidence, decomposition, drainage and species-specific state require validation.",
+          "source_type": "MODEL_INFERENCE",
+          "confidence": "LOW",
+          "risk": "High porosity may coexist with compressibility or long-term elevation change.",
+          "validation_required": true
+        },
+        {
+          "target_id": "HABITAT-FOREST-V1",
+          "status": "PROVISIONAL_FIT",
+          "conditions": "Organic source, decomposition, species composition, hydrology and regeneration remain ecology-owner decisions.",
+          "source_type": "MODEL_INFERENCE",
+          "confidence": "LOW",
+          "risk": "The profile is not a peat classification and does not authorize restoration actions.",
+          "validation_required": true
+        }
+      ],
+      "foundation_support": {
+        "foundation_support_profile_id": "SOIL-FOUNDATION-SCREEN-ORGANIC-RICH-MINERAL-V1",
+        "status": "NOT_SUPPORTED_BY_CANDIDATE",
+        "conditions": "Compressibility, decomposition, saturation, subsidence, settlement and bearing response require an external qualified workflow.",
+        "source_type": "SOURCE_UNDERSPECIFIED",
+        "confidence": "LOW",
+        "risk": "The candidate profile supplies no affirmative foundation-support basis.",
+        "validation_required": true,
+        "required_owner_outcome": "GEOTECHNICAL_REVIEW_REQUIRED"
+      }
+    }
+  ],
+  "owner_gate_rules": [
+    "CROP_SUPPORT_REQUIRES_FOUNDATIONAL_FERTILITY_SCORE_AT_OR_ABOVE_OWNER_MINIMUM",
+    "CROP_SUPPORT_REQUIRES_FOUNDATIONAL_CONTAMINATION_SCORE_BELOW_OWNER_EXCLUSIVE_MAXIMUM",
+    "FOUNDATION_SUPPORT_REQUIRES_FOUNDATIONAL_COMPACTION_SCORE_BELOW_OWNER_EXCLUSIVE_MAXIMUM",
+    "FOUNDATION_SUPPORT_REQUIRES_FOUNDATIONAL_INTEGRITY_SCORE_AT_OR_ABOVE_OWNER_MINIMUM",
+    "ALL_SUPPORT_RESULTS_REMAIN_CANDIDATE_SCREENING_ONLY",
+    "NO_COMPATIBILITY_RESULT_CREATES_A_RIGHT_OR_APPROVAL"
+  ],
+  "provenance": [
+    {
+      "source_path": "KAIOS/life/runtime/foundational-life-runtime.js",
+      "source_commit": "614b4e02edb8f705848ad7cb49132ae37e8f5b7e",
+      "git_object": "9187c14774b34c25e9ae23cf21749fbb5dbb891d",
+      "sha256": "4d72be28bbad06ff65d1dddb44043e6f3e2086a095a8bf105e2f08cbed648779",
+      "usage": "Existing crop_support and foundation_support owner gates"
+    },
+    {
+      "source_path": "KGEN-KAIOS/world-viewer/agriculture/agriculture-runtime.js",
+      "source_commit": "614b4e02edb8f705848ad7cb49132ae37e8f5b7e",
+      "git_object": "f09478806a47c10825258385ee855faa74f51a79",
+      "sha256": "4557d6b449ce3979f2bf4ca10cc48f271ead2ddb34cc127e60b264ce26b577c2",
+      "usage": "Agriculture plot and aggregate crop-class ownership"
+    },
+    {
+      "source_path": "KAIOS/life/candidates/forest-agriculture-v1/crops/crop-catalog-candidates.json",
+      "source_commit": "614b4e02edb8f705848ad7cb49132ae37e8f5b7e",
+      "git_object": "1d4a445a1548ad61ee96810411135e7d88d9e30a",
+      "sha256": "f824773458c31a4725eced0f83102a8eefefdcabf27dd71b4e59806684244a57",
+      "usage": "Aggregate rice crop-class target identifier"
+    },
+    {
+      "source_path": "KAIOS/life/candidates/forest-agriculture-v1/vegetables/vegetable-catalog-candidates.json",
+      "source_commit": "614b4e02edb8f705848ad7cb49132ae37e8f5b7e",
+      "git_object": "5f33d11528d7ea14eb26417224a85cece1392144",
+      "sha256": "77cc5dd2e4b6264d5fe8d015881858a2c76f5a522d567a185061b919bbad8cd6",
+      "usage": "Aggregate vegetable-plot target identifier"
+    },
+    {
+      "source_path": "KAIOS/life/candidates/forest-agriculture-v1/fruit-trees/fruit-tree-catalog-candidates.json",
+      "source_commit": "614b4e02edb8f705848ad7cb49132ae37e8f5b7e",
+      "git_object": "2c11bdd2985c8e8c56fa6d91dbb5f50d00888136",
+      "sha256": "fcbaa9bc1ad6f4823aca7c25640daeb2159fb319ea781b770d92d457b9b78153",
+      "usage": "Aggregate fruit-tree target identifier"
+    },
+    {
+      "source_path": "KAIOS/life/candidates/forest-agriculture-v1/forest/forest-composition-candidates.json",
+      "source_commit": "614b4e02edb8f705848ad7cb49132ae37e8f5b7e",
+      "git_object": "e4e63adb992337dc333c4de78152903234d8a46d",
+      "sha256": "007323cb9cad66726b0b1cfe86f05eeda01dbce5d783832e730828299f287e8d",
+      "usage": "Forest habitat target identifier and ecology-owner boundary"
+    },
+    {
+      "source_path": "KAIOS_CONSTRUCTION_CAUSALITY_SPEC.md",
+      "source_commit": "614b4e02edb8f705848ad7cb49132ae37e8f5b7e",
+      "git_object": "52b30a3e46c81f7ed9f19edd0b90932d1a9223dd",
+      "sha256": "6f34c4e145e9e56edcc8ed22d37f7c33d36d9881215c5fc00bc565e591c160b6",
+      "usage": "Construction loading, survey, design and inspection authority boundary"
+    },
+    {
+      "source_path": "KAIOS_CONSTRUCTION_SCHEMA.json",
+      "source_commit": "614b4e02edb8f705848ad7cb49132ae37e8f5b7e",
+      "git_object": "fe1323d5c131e5909086c4b16785a2c1c3bdeccb",
+      "sha256": "e0665d76cc90ba881a6414f34b3a201be58dae554379685f15a9ff9fb7b92aec",
+      "usage": "Construction project and inspection-state compatibility boundary"
+    },
+    {
+      "source_path": "KAIOS_CANONICAL_LIFE_RIGHTS_V1.md",
+      "source_commit": "614b4e02edb8f705848ad7cb49132ae37e8f5b7e",
+      "git_object": "783ea5b17d82bf6579e4a9763bcbc3b18fb06ac2",
+      "sha256": "bec5f35a1906dbd9eb72764e935f4ad282a81398587b66de789130ae4a0428f4",
+      "usage": "No implicit ownership, land-use, occupancy, water, harvest or transfer rights"
+    }
+  ],
+  "boundaries": [
+    "CANDIDATE_ONLY",
+    "SIMULATION_ONLY",
+    "NO_AGRONOMIC_RECOMMENDATION",
+    "NO_FOUNDATION_CERTIFICATION",
+    "NO_GEOTECHNICAL_DESIGN",
+    "NO_PERMIT_OR_INSPECTION_APPROVAL",
+    "NO_LEGAL_OR_OWNERSHIP_INFERENCE",
+    "NO_CANONICAL_PROMOTION",
+    "NO_RUNTIME_CHANGE",
+    "NO_DEPLOYMENT"
+  ]
+}
