@@ -1143,6 +1143,9 @@ supply-chain owners and does not activate Production authority.
 - [Fruit Tree Candidate Codex Review Closeout](KAIOS/life/forest-agriculture/KAIOS_CURSOR_FRUIT_TREE_PACKAGE_REVIEW_CLOSEOUT.md)
 - [Vegetable Candidate Cursor Work Order](KAIOS/life/candidates/forest-agriculture-v1/CURSOR_VEGETABLE_PACKAGES_WORK_ORDER.md)
 - [Fruit Tree Release and Vegetable Dispatch Company Status](KGEN-KAIOS/governance/autopilot/company_status/COMPANY_STATUS_2026-08-02_FRUIT_TREE_RELEASED_VEGETABLE_DISPATCHED.md)
+- [Vegetable Candidate Codex Review Closeout](KAIOS/life/forest-agriculture/KAIOS_CURSOR_VEGETABLE_PACKAGE_REVIEW_CLOSEOUT.md)
+- [Soil Type Candidate Cursor Work Order](KAIOS/life/candidates/forest-agriculture-v1/CURSOR_SOIL_TYPES_WORK_ORDER.md)
+- [Vegetable Release and Soil Types Dispatch Company Status](KGEN-KAIOS/governance/autopilot/company_status/COMPANY_STATUS_2026-08-02_VEGETABLE_RELEASED_SOIL_TYPES_DISPATCHED.md)
 - [AI Company Order and Project Specification](KAIOS/ai-company/KAIOS_AI_COMPANY_ORDER_PROJECT_RUNTIME_V1_SPEC.md)
 
 ## KAIOS AI Company Order and Project Runtime V1 Specification

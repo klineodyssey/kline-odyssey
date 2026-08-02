@@ -176,29 +176,29 @@ class CursorWorkerRegistryRepairTests(unittest.TestCase):
             <= set(self.cursor["allowed_work"])
         )
 
-    def test_vegetable_candidate_dispatch_is_the_only_active_claim(self):
+    def test_soil_type_candidate_dispatch_is_the_only_active_claim(self):
         locked = validate_one_task_lock(self.registry["dispatch_history"])
         self.assertEqual(len(locked), 1)
         dispatch = locked[0]
         self.assertEqual(
-            dispatch["task_id"], "KAIOS-CURSOR-VEGETABLE-PACKAGES-001"
+            dispatch["task_id"], "KAIOS-CURSOR-SOIL-TYPES-001"
         )
         self.assertEqual(dispatch["worker_id"], self.cursor["worker_id"])
         self.assertEqual(
             dispatch["branch"],
-            "cursor-handoff/KAIOS-CURSOR-VEGETABLE-PACKAGES-001",
+            "cursor-handoff/KAIOS-CURSOR-SOIL-TYPES-001",
         )
         self.assertEqual(dispatch["output_status"], "CURSOR_RESEARCH_CANDIDATE_ONLY")
         self.assertEqual(self.cursor["current_task"], dispatch["task_id"])
         self.assertEqual(self.cursor["current_branch"], dispatch["branch"])
-        self.assertIn("VEGETABLE_PACKAGE", self.cursor["allowed_work"])
+        self.assertIn("SOIL_TYPE_DATASET", self.cursor["allowed_work"])
 
-        fruit_tree_dispatch = next(
+        vegetable_dispatch = next(
             item
             for item in self.registry["dispatch_history"]
-            if item["task_id"] == "KAIOS-CURSOR-FRUIT-TREE-PACKAGES-001"
+            if item["task_id"] == "KAIOS-CURSOR-VEGETABLE-PACKAGES-001"
         )
-        self.assertEqual(fruit_tree_dispatch["status"], "RELEASED")
+        self.assertEqual(vegetable_dispatch["status"], "RELEASED")
 
     def test_continuous_queue_requires_formal_release_and_atomic_claim(self):
         queue = self.forest_queue
@@ -222,8 +222,9 @@ class CursorWorkerRegistryRepairTests(unittest.TestCase):
         self.assertEqual(by_priority[1]["status"], "RELEASED")
         self.assertEqual(by_priority[2]["status"], "RELEASED")
         self.assertEqual(by_priority[3]["status"], "RELEASED")
-        self.assertEqual(by_priority[4]["status"], "DISPATCHED")
-        self.assertEqual(by_priority[4]["task_id"], self.cursor["current_task"])
+        self.assertEqual(by_priority[4]["status"], "RELEASED")
+        self.assertEqual(by_priority[5]["status"], "DISPATCHED")
+        self.assertEqual(by_priority[5]["task_id"], self.cursor["current_task"])
 
     def test_approved_or_closed_claim_still_holds_lock_until_release(self):
         next_claim = {"task_id": "NEXT", "status": "DISPATCHED"}
