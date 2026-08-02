@@ -41,6 +41,9 @@ Public interfaces:
 - [Insect candidate Codex review closeout](life/forest-agriculture/KAIOS_CURSOR_INSECT_CANDIDATES_REVIEW_CLOSEOUT.md)
 - [Pollinator research Cursor work order](life/candidates/forest-agriculture-v1/CURSOR_POLLINATOR_RESEARCH_WORK_ORDER.md)
 - [Insect release and pollinator dispatch Company Status](../KGEN-KAIOS/governance/autopilot/company_status/COMPANY_STATUS_2026-08-02_INSECT_RELEASED_POLLINATOR_RESEARCH_DISPATCHED.md)
+- [Pollinator research Codex review closeout](life/forest-agriculture/KAIOS_CURSOR_POLLINATOR_RESEARCH_REVIEW_CLOSEOUT.md)
+- [Earthworm candidate Cursor work order](life/candidates/forest-agriculture-v1/CURSOR_EARTHWORM_CANDIDATE_WORK_ORDER.md)
+- [Pollinator release and earthworm dispatch Company Status](../KGEN-KAIOS/governance/autopilot/company_status/COMPANY_STATUS_2026-08-02_POLLINATOR_RELEASED_EARTHWORM_DISPATCHED.md)
 
 ## AI Company Order And Project Runtime V1
 

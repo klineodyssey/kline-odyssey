@@ -781,6 +781,9 @@ Task: `KAIOS-FOREST-AGRICULTURE-RUNTIME-V1-001`
 | `KAIOS/life/forest-agriculture/KAIOS_CURSOR_INSECT_CANDIDATES_REVIEW_CLOSEOUT.md` | Independent insect-candidate review and formal lease release evidence. |
 | `KAIOS/life/candidates/forest-agriculture-v1/CURSOR_POLLINATOR_RESEARCH_WORK_ORDER.md` | Bounded pollinator research work order and allowed-path contract. |
 | `KGEN-KAIOS/governance/autopilot/company_status/COMPANY_STATUS_2026-08-02_INSECT_RELEASED_POLLINATOR_RESEARCH_DISPATCHED.md` | Company status for the atomic insect-to-pollinator queue transition. |
+| `KAIOS/life/forest-agriculture/KAIOS_CURSOR_POLLINATOR_RESEARCH_REVIEW_CLOSEOUT.md` | Codex review and formal release of bounded pollinator research. |
+| `KAIOS/life/candidates/forest-agriculture-v1/CURSOR_EARTHWORM_CANDIDATE_WORK_ORDER.md` | Bounded earthworm candidate work order and allowed-path contract. |
+| `KGEN-KAIOS/governance/autopilot/company_status/COMPANY_STATUS_2026-08-02_POLLINATOR_RELEASED_EARTHWORM_DISPATCHED.md` | Company status for the atomic pollinator-to-earthworm queue transition. |
 
 ## AI Company Order And Project Runtime V1 Specification
 

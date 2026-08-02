@@ -41,17 +41,21 @@ The vegetable assignment was allowed to complete before its lease was released.
   `P0=0 / P1=0 / P2=0` and merged as
   `CURSOR_RESEARCH_CANDIDATE_ONLY` in
   `c91d736c9812781d309bfda422b8ed42cd12eb49`.
+- Pollinator research: PR `#106`, independently reviewed at
+  `P0=0 / P1=0 / P2=0` and merged as
+  `RESEARCH_PROPOSAL_ONLY` in
+  `745952dc389d62cf85545a86b18e279d8eca9c73`.
 
 ## Current Assignment
 
-- Task: `KAIOS-CURSOR-POLLINATOR-RESEARCH-001`
-- Branch: `cursor-handoff/KAIOS-CURSOR-POLLINATOR-RESEARCH-001`
+- Task: `KAIOS-CURSOR-EARTHWORM-CANDIDATE-001`
+- Branch: `cursor-handoff/KAIOS-CURSOR-EARTHWORM-CANDIDATE-001`
 - Status: `ACTIVE / ONE_TASK_AT_A_TIME`
-- Output authority: `RESEARCH_PROPOSAL_ONLY / PENDING_CODEX_REVIEW`
+- Output authority: `CURSOR_RESEARCH_CANDIDATE_ONLY / PENDING_CODEX_REVIEW`
 
-The next safe queue item is the earthworm candidate package. It may be
-dispatched only after Codex independently reviews and formally releases the
-pollinator research claim.
+The next safe queue item is the fungi candidate package. It may be dispatched
+only after Codex independently reviews and formally releases the earthworm
+candidate claim.
 
 ## Boundaries
 

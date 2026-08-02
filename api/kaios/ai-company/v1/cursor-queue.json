@@ -73,13 +73,13 @@
       "priority": 9,
       "task_id": "KAIOS-CURSOR-POLLINATOR-RESEARCH-001",
       "work": "POLLINATOR_RESEARCH",
-      "status": "DISPATCHED"
+      "status": "RELEASED"
     },
     {
       "priority": 10,
       "task_id": "KAIOS-CURSOR-EARTHWORM-CANDIDATE-001",
       "work": "EARTHWORM_CANDIDATE_PACKAGE",
-      "status": "QUEUED"
+      "status": "DISPATCHED"
     },
     {
       "priority": 11,
