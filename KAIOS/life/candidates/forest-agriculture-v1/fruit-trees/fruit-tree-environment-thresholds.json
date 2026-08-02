@@ -1,0 +1,159 @@
+{
+  "dataset_id": "KAIOS-FRUIT-TREE-ENVIRONMENT-THRESHOLDS-V1",
+  "schema_version": "1.0.0-candidate",
+  "status": "CURSOR_RESEARCH_CANDIDATE_ONLY",
+  "review_status": "PENDING_CODEX_REVIEW",
+  "task_id": "KAIOS-CURSOR-FRUIT-TREE-PACKAGES-001",
+  "worker_id": "cursor-01",
+  "branch": "cursor-handoff/KAIOS-CURSOR-FRUIT-TREE-PACKAGES-001",
+  "source_base_commit": "6b8654995cf04a5227b7980d74a113ffb83c3adc",
+  "source_hash_basis": "SHA256_OF_GIT_BLOB_CONTENT_AT_SOURCE_BASE_COMMIT",
+  "scope": "Aggregate TREE_ALPHA and FRUIT_ALPHA simulation compatibility only; no species-specific agronomy.",
+  "species_specific_values": "SOURCE_UNDERSPECIFIED",
+  "boolean_gates": [
+    "PROPAGATION_SOURCE_PRESENT",
+    "COMPATIBLE_SOIL_TRUE",
+    "WATER_SOURCE_COMPATIBLE",
+    "NUTRIENTS_AVAILABLE",
+    "SUNLIGHT_AVAILABLE",
+    "TEMPERATURE_COMPATIBLE",
+    "PHYSICAL_LABOR_VALIDATED",
+    "ELAPSED_TIME_POSITIVE"
+  ],
+  "threshold_parameters": [
+    {
+      "parameter_name": "tree_alpha_water_support",
+      "unit": "normalized_fraction_0_to_1",
+      "minimum": 0.35,
+      "default": 0.7,
+      "maximum": 1,
+      "rationale": "Life Runtime V1 requires plant support of at least 0.35 and defines TREE_ALPHA water default 0.70.",
+      "source_type": "REPOSITORY_DERIVED",
+      "confidence": "HIGH",
+      "risk": "Normalized support is not liters and must not be physically interpreted.",
+      "validation_required": false
+    },
+    {
+      "parameter_name": "tree_alpha_sunlight_support",
+      "unit": "normalized_fraction_0_to_1",
+      "minimum": 0.35,
+      "default": 0.78,
+      "maximum": 1,
+      "rationale": "Life Runtime V1 plant support gate and TREE_ALPHA default are retained in owner-native normalized units.",
+      "source_type": "REPOSITORY_DERIVED",
+      "confidence": "HIGH",
+      "risk": "This fraction has no reviewed conversion to irradiance.",
+      "validation_required": false
+    },
+    {
+      "parameter_name": "tree_alpha_soil_nutrient_support",
+      "unit": "normalized_fraction_0_to_1",
+      "minimum": 0.35,
+      "default": 0.72,
+      "maximum": 1,
+      "rationale": "Life Runtime V1 plant support gate and TREE_ALPHA soil nutrient default are retained.",
+      "source_type": "REPOSITORY_DERIVED",
+      "confidence": "HIGH",
+      "risk": "This support score is distinct from Ecology nutrients_kg.",
+      "validation_required": false
+    },
+    {
+      "parameter_name": "tree_alpha_temperature",
+      "unit": "degree_celsius",
+      "minimum": 5,
+      "default": 21,
+      "maximum": 38,
+      "rationale": "Exact Life Runtime V1 generic plant compatibility range with TREE_ALPHA default temperature.",
+      "source_type": "REPOSITORY_DERIVED",
+      "confidence": "HIGH",
+      "risk": "Generic owner range is not a species-specific orchard threshold.",
+      "validation_required": true
+    },
+    {
+      "parameter_name": "ecology_soil_fertility_fraction",
+      "unit": "fraction_0_to_1",
+      "minimum": 0.35,
+      "default": 0.72,
+      "maximum": 1,
+      "rationale": "Ecology V1 marks fertility below 0.35 as low; the default crosswalk uses TREE_ALPHA nutrient support without changing units.",
+      "source_type": "MODEL_INFERENCE",
+      "confidence": "MEDIUM",
+      "risk": "The 0.72 cross-owner default requires future adapter validation even though both owners use 0..1 fractions.",
+      "validation_required": true
+    },
+    {
+      "parameter_name": "tree_alpha_disease_pressure",
+      "unit": "normalized_fraction_0_to_1",
+      "minimum": 0,
+      "default": 0,
+      "maximum": 0.6,
+      "rationale": "TREE_ALPHA defaults to zero disease pressure and Life Runtime V1 classifies pressure above 0.60 as active disease.",
+      "source_type": "REPOSITORY_DERIVED",
+      "confidence": "HIGH",
+      "risk": "The generic pressure proxy does not model a real pathogen or treatment.",
+      "validation_required": true
+    },
+    {
+      "parameter_name": "established_tree_cycle_water_rate",
+      "unit": "agriculture_alpha_water_unit_per_hour",
+      "minimum": 0.75,
+      "default": 0.75,
+      "maximum": 0.75,
+      "rationale": "Exact Agriculture Alpha FRUIT owner-native rate, intentionally not converted to Ecology liters.",
+      "source_type": "REPOSITORY_DERIVED",
+      "confidence": "HIGH",
+      "risk": "No reversible physical conversion exists for the synthetic Agriculture unit.",
+      "validation_required": true
+    },
+    {
+      "parameter_name": "established_tree_cycle_energy_rate",
+      "unit": "agriculture_alpha_energy_unit_per_hour",
+      "minimum": 0.35,
+      "default": 0.35,
+      "maximum": 0.35,
+      "rationale": "Exact Agriculture Alpha FRUIT owner-native energy rate.",
+      "source_type": "REPOSITORY_DERIVED",
+      "confidence": "HIGH",
+      "risk": "It must not be mixed with Ecology energy_proxy or physical energy.",
+      "validation_required": true
+    }
+  ],
+  "unit_contracts": [
+    {
+      "source_unit": "normalized_fraction_0_to_1",
+      "target_unit": "fraction_0_to_1",
+      "conversion": "target = source",
+      "inverse": "source = target",
+      "reversible": true,
+      "scope": "Only normalized fraction fields explicitly listed in this candidate."
+    },
+    {
+      "source_unit": "agriculture_alpha_water_unit_per_hour",
+      "target_unit": null,
+      "conversion": "UNASSIGNED",
+      "inverse": "UNASSIGNED",
+      "reversible": false,
+      "scope": "No conversion to liter is authorized."
+    },
+    {
+      "source_unit": "agriculture_alpha_energy_unit_per_hour",
+      "target_unit": null,
+      "conversion": "UNASSIGNED",
+      "inverse": "UNASSIGNED",
+      "reversible": false,
+      "scope": "No conversion to joule or Ecology energy_proxy is authorized."
+    }
+  ],
+  "provenance": [
+    { "source_type": "REPOSITORY_DERIVED", "source_path": "KAIOS/life/runtime/foundational-life-runtime.js", "source_commit": "6b8654995cf04a5227b7980d74a113ffb83c3adc", "git_object": "9187c14774b34c25e9ae23cf21749fbb5dbb891d", "sha256": "4d72be28bbad06ff65d1dddb44043e6f3e2086a095a8bf105e2f08cbed648779", "purpose": "TREE_ALPHA generic plant gates, defaults, temperature and disease pressure." },
+    { "source_type": "REPOSITORY_DERIVED", "source_path": "KGEN-KAIOS/world-viewer/ecosystem/ecosystem-runtime.js", "source_commit": "6b8654995cf04a5227b7980d74a113ffb83c3adc", "git_object": "2bab509140ab4b93c7e4975286c826693965cf26", "sha256": "9b2cd9d4501727d3134ea332e1a30cd77d5d7d647300820f51d9c264784ef537", "purpose": "Owner-native soil fertility fraction and resource units." },
+    { "source_type": "REPOSITORY_DERIVED", "source_path": "KGEN-KAIOS/world-viewer/agriculture/agriculture-runtime.js", "source_commit": "6b8654995cf04a5227b7980d74a113ffb83c3adc", "git_object": "f09478806a47c10825258385ee855faa74f51a79", "sha256": "4557d6b449ce3979f2bf4ca10cc48f271ead2ddb34cc127e60b264ce26b577c2", "purpose": "Owner-native FRUIT water and energy rates." },
+    { "source_type": "REPOSITORY_DERIVED", "source_path": "KAIOS/life/forest-agriculture/KAIOS_FOREST_AGRICULTURE_RUNTIME_V1_SPEC.md", "source_commit": "6b8654995cf04a5227b7980d74a113ffb83c3adc", "git_object": "9a2dd4ad05bb7b2e3d71b91b479359947ada8376", "sha256": "4e1a23e97d09ec2dc4ad65440e6958e646f75ed418e5c703c5a5a1635c2809a1", "purpose": "Required soil, water, nutrient, sunlight, temperature, labor and elapsed-time gates." }
+  ],
+  "boundaries": {
+    "species_specific_guidance": false,
+    "runtime_change": false,
+    "canonical_promotion": false,
+    "production_authority": false
+  }
+}

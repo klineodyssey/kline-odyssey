@@ -1,0 +1,223 @@
+{
+  "dataset_id": "KAIOS-FRUIT-TREE-GROWTH-STAGE-PROPOSALS-V1",
+  "schema_version": "1.0.0-candidate",
+  "status": "CURSOR_RESEARCH_CANDIDATE_ONLY",
+  "review_status": "PENDING_CODEX_REVIEW",
+  "task_id": "KAIOS-CURSOR-FRUIT-TREE-PACKAGES-001",
+  "worker_id": "cursor-01",
+  "branch": "cursor-handoff/KAIOS-CURSOR-FRUIT-TREE-PACKAGES-001",
+  "source_base_commit": "6b8654995cf04a5227b7980d74a113ffb83c3adc",
+  "source_hash_basis": "SHA256_OF_GIT_BLOB_CONTENT_AT_SOURCE_BASE_COMMIT",
+  "proposal_scope": "Aggregate stage gates for TREE_ALPHA plus established-tree FRUIT_ALPHA output. No real fruit-tree species or production schedule is asserted.",
+  "tree_establishment_stages": [
+    {
+      "stage_id": "PROPAGATION_SOURCE_VERIFIED",
+      "entry_requirements": ["OWNER_PROPAGATION_SOURCE_REFERENCE", "COMPATIBLE_SOIL", "WATER", "NUTRIENTS", "SUNLIGHT", "TEMPERATURE", "LABOR"],
+      "exit_requirements": ["PROPAGATION_EVENT_RECORDED", "ELAPSED_TIME_SATISFIED", "NO_NEGATIVE_RESOURCE_POOL"],
+      "duration": {
+        "parameter_name": "propagation_source_verification_duration",
+        "unit": "elapsed_day",
+        "minimum": 1,
+        "default": 7,
+        "maximum": 30,
+        "rationale": "Bounded research proposal that prevents zero-time propagation; repository evidence does not resolve a species-specific duration.",
+        "source_type": "SOURCE_UNDERSPECIFIED",
+        "confidence": "LOW",
+        "risk": "Aggregate duration may be unsuitable for any real propagation method.",
+        "validation_required": true
+      }
+    },
+    {
+      "stage_id": "ROOT_ESTABLISHMENT",
+      "entry_requirements": ["PROPAGATION_SOURCE_VERIFIED", "SOIL_COMPATIBLE", "WATER_AVAILABLE", "LABOR_SHIFT_VALID"],
+      "exit_requirements": ["ROOT_ESTABLISHMENT_REVIEW", "ELAPSED_TIME_SATISFIED", "TREE_OWNER_STATE_ALIVE"],
+      "duration": {
+        "parameter_name": "root_establishment_duration",
+        "unit": "elapsed_day",
+        "minimum": 30,
+        "default": 180,
+        "maximum": 730,
+        "rationale": "Class-level simulation proposal with nonzero elapsed time; no repository species evidence supports a narrower value.",
+        "source_type": "SOURCE_UNDERSPECIFIED",
+        "confidence": "LOW",
+        "risk": "Must not be used as an agronomic schedule.",
+        "validation_required": true
+      }
+    },
+    {
+      "stage_id": "JUVENILE_TREE_GROWTH",
+      "entry_requirements": ["ROOT_ESTABLISHMENT", "WATER", "NUTRIENTS", "SUNLIGHT", "TEMPERATURE", "MAINTENANCE_LABOR"],
+      "exit_requirements": ["OWNER_TREE_MATURITY_REVIEW", "ELAPSED_TIME_SATISFIED", "STRUCTURAL_BIOMASS_ACCOUNTED"],
+      "duration": {
+        "parameter_name": "juvenile_tree_growth_duration",
+        "unit": "elapsed_day",
+        "minimum": 365,
+        "default": 3650,
+        "maximum": 12000,
+        "rationale": "Broad aggregate proposal bounded by the FRUIT_ALPHA synthetic lifecycle value, not a real maturity claim.",
+        "source_type": "SOURCE_UNDERSPECIFIED",
+        "confidence": "LOW",
+        "risk": "Fruit-tree species differ materially; review is mandatory before any specialization.",
+        "validation_required": true
+      }
+    },
+    {
+      "stage_id": "ESTABLISHED_TREE_REVIEW",
+      "entry_requirements": ["JUVENILE_TREE_GROWTH", "TREE_ALPHA_OWNER_REFERENCE", "HEALTH_REVIEW", "RESOURCE_REVIEW"],
+      "exit_requirements": ["ESTABLISHED_TREE_REFERENCE_ISSUED_BY_OWNER", "NO_CANONICAL_PROMOTION", "ELAPSED_TIME_SATISFIED"],
+      "duration": {
+        "parameter_name": "established_tree_review_duration",
+        "unit": "elapsed_day",
+        "minimum": 1,
+        "default": 30,
+        "maximum": 365,
+        "rationale": "A nonzero review gate separates tree establishment from any fruit cycle.",
+        "source_type": "RESEARCH_PROPOSAL",
+        "confidence": "LOW",
+        "risk": "This candidate has no authority to issue or promote owner state.",
+        "validation_required": true
+      }
+    }
+  ],
+  "established_tree_fruit_cycle": {
+    "owner_cycle": {
+      "parameter_name": "agriculture_alpha_fruit_cycle_total",
+      "unit": "hour",
+      "minimum": 48,
+      "default": 48,
+      "maximum": 48,
+      "rationale": "Exact Agriculture Alpha FRUIT cycle retained as a synthetic regression total for an already-established tree.",
+      "source_type": "REPOSITORY_DERIVED",
+      "confidence": "HIGH",
+      "risk": "It is not establishment, maturation or real fruit-development time.",
+      "validation_required": false
+    },
+    "default_stage_duration_sum_hours": "48",
+    "stages": [
+      {
+        "stage_id": "RESOURCE_AND_LABOR_CHECK",
+        "duration": {
+          "parameter_name": "resource_and_labor_check_duration",
+          "unit": "hour",
+          "minimum": 1,
+          "default": 2,
+          "maximum": 4,
+          "rationale": "Proposed nonzero pre-cycle check within the existing 48-hour synthetic total.",
+          "source_type": "RESEARCH_PROPOSAL",
+          "confidence": "LOW",
+          "risk": "Stage split is not owner-defined.",
+          "validation_required": true
+        }
+      },
+      {
+        "stage_id": "ORCHARD_MAINTENANCE",
+        "duration": {
+          "parameter_name": "orchard_maintenance_duration",
+          "unit": "hour",
+          "minimum": 8,
+          "default": 12,
+          "maximum": 18,
+          "rationale": "Candidate subdivision requiring water, nutrients, sunlight, temperature and labor before fruiting.",
+          "source_type": "RESEARCH_PROPOSAL",
+          "confidence": "LOW",
+          "risk": "Not a real orchard maintenance interval.",
+          "validation_required": true
+        }
+      },
+      {
+        "stage_id": "FLOWERING_OR_FRUITING",
+        "duration": {
+          "parameter_name": "flowering_or_fruiting_duration",
+          "unit": "hour",
+          "minimum": 8,
+          "default": 12,
+          "maximum": 18,
+          "rationale": "Candidate split of the aggregate owner cycle; pollination and species behavior remain unresolved.",
+          "source_type": "SOURCE_UNDERSPECIFIED",
+          "confidence": "LOW",
+          "risk": "FRUIT_ALPHA cannot represent all fruiting mechanisms.",
+          "validation_required": true
+        }
+      },
+      {
+        "stage_id": "FRUIT_DEVELOPMENT",
+        "duration": {
+          "parameter_name": "fruit_development_duration",
+          "unit": "hour",
+          "minimum": 16,
+          "default": 18,
+          "maximum": 24,
+          "rationale": "Candidate split of the synthetic established-tree cycle with explicit elapsed time.",
+          "source_type": "SOURCE_UNDERSPECIFIED",
+          "confidence": "LOW",
+          "risk": "No species-specific biological support exists.",
+          "validation_required": true
+        }
+      },
+      {
+        "stage_id": "HARVEST_READINESS_ASSESSMENT",
+        "duration": {
+          "parameter_name": "harvest_readiness_assessment_duration",
+          "unit": "hour",
+          "minimum": 2,
+          "default": 4,
+          "maximum": 8,
+          "rationale": "Nonzero readiness gate prevents automatic or instant harvest.",
+          "source_type": "RESEARCH_PROPOSAL",
+          "confidence": "LOW",
+          "risk": "Readiness criteria require future species and food-safety review.",
+          "validation_required": true
+        }
+      }
+    ],
+    "transition_rules": [
+      "DEFAULT_STAGE_DURATIONS_MUST_SUM_TO_OWNER_CYCLE",
+      "NO_STAGE_SKIP",
+      "NO_FRUITING_WITHOUT_ESTABLISHED_TREE_REFERENCE",
+      "NO_PROGRESS_WITHOUT_ALL_CAUSAL_INPUTS",
+      "NO_HARVEST_WITHOUT_HARVEST_READY_LABOR_TOOLS_CONTAINERS_AND_CAPACITY",
+      "FAILED_INPUT_GATE_STOPS_TIME_PROGRESS_FOR_THE_STAGE"
+    ]
+  },
+  "labor_parameters": [
+    {
+      "parameter_name": "minimum_effective_labor_per_establishment_action",
+      "unit": "worker_minute",
+      "minimum": 30,
+      "default": 60,
+      "maximum": 480,
+      "rationale": "Candidate Physical Labor time-log gate; duration is not species-specific and cannot overlap another location.",
+      "source_type": "RESEARCH_PROPOSAL",
+      "confidence": "LOW",
+      "risk": "Actual work depends on method, tools and site.",
+      "validation_required": true
+    },
+    {
+      "parameter_name": "minimum_effective_labor_per_harvest_action",
+      "unit": "worker_minute",
+      "minimum": 30,
+      "default": 120,
+      "maximum": 480,
+      "rationale": "Candidate harvest gate using the Physical Labor owner-native minute unit.",
+      "source_type": "RESEARCH_PROPOSAL",
+      "confidence": "LOW",
+      "risk": "Aggregate FRUIT_ALPHA has no species, canopy or yield-specific labor evidence.",
+      "validation_required": true
+    }
+  ],
+  "provenance": [
+    { "source_type": "REPOSITORY_DERIVED", "source_path": "KAIOS/life/runtime/foundational-life-runtime.js", "source_commit": "6b8654995cf04a5227b7980d74a113ffb83c3adc", "git_object": "9187c14774b34c25e9ae23cf21749fbb5dbb891d", "sha256": "4d72be28bbad06ff65d1dddb44043e6f3e2086a095a8bf105e2f08cbed648779", "purpose": "TREE_ALPHA stages, daily ticks and causal growth gates." },
+    { "source_type": "REPOSITORY_DERIVED", "source_path": "KGEN-KAIOS/world-viewer/agriculture/agriculture-runtime.js", "source_commit": "6b8654995cf04a5227b7980d74a113ffb83c3adc", "git_object": "f09478806a47c10825258385ee855faa74f51a79", "sha256": "4557d6b449ce3979f2bf4ca10cc48f271ead2ddb34cc127e60b264ce26b577c2", "purpose": "Established-tree FRUIT 48-hour synthetic owner cycle." },
+    { "source_type": "REPOSITORY_DERIVED", "source_path": "KGEN-KAIOS/world-viewer/data/synthetic-world.json", "source_commit": "6b8654995cf04a5227b7980d74a113ffb83c3adc", "git_object": "76ddff32f74c2b41ca7d9d9309b7b39a2a2618c8", "sha256": "4be4c1b83420bb24604742fb722a8aedba8b3d2c163f7f18ccd871628ee7f34f", "purpose": "Aggregate FRUIT_ALPHA lifecycle evidence." },
+    { "source_type": "REPOSITORY_DERIVED", "source_path": "KAIOS_PHYSICAL_LABOR_SCHEMA.json", "source_commit": "6b8654995cf04a5227b7980d74a113ffb83c3adc", "git_object": "357b00093f4a912e616e9d39edf04753aacf94f7", "sha256": "21060f7bdf64f0a3af827f1fcd7d95d3170affef54c01bbeb449b9361fdd2f43", "purpose": "Worker-minute, location and non-overlap owner boundary." },
+    { "source_type": "REPOSITORY_DERIVED", "source_path": "KAIOS/life/forest-agriculture/KAIOS_FOREST_AGRICULTURE_RUNTIME_V1_SPEC.md", "source_commit": "6b8654995cf04a5227b7980d74a113ffb83c3adc", "git_object": "9a2dd4ad05bb7b2e3d71b91b479359947ada8376", "sha256": "4e1a23e97d09ec2dc4ad65440e6958e646f75ed418e5c703c5a5a1635c2809a1", "purpose": "Causal stage and harvest requirements." }
+  ],
+  "boundaries": {
+    "instant_tree": false,
+    "instant_fruit": false,
+    "instant_harvest": false,
+    "species_created": false,
+    "runtime_change": false,
+    "production_schedule": false
+  }
+}
