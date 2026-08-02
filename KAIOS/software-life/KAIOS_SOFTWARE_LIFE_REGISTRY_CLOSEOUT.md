@@ -20,12 +20,21 @@ authority: SIMULATION_ONLY
 
 ## Review Gates
 
+Draft PR: `#109`
+
 P0: `0`
 
 Unresolved P1: `0`
 
 Unresolved P2: `0`
 
+Independent review repaired one P1: the generator now rejects output paths
+outside the repository. It also repaired two P2 findings: creator attribution
+retains the Git author name without republishing email addresses, and the
+versioned Canonical Life JSON schema is now `MIGRATION_PENDING` rather than a
+document-version exception.
+
 The package performs no rename, Runtime activation, public-route mutation,
 wallet access, KGEN settlement, on-chain transfer or Production authorization.
-PR number, merge commit and final main SHA are recorded after GitHub review.
+Merge commit and final main SHA are recorded in the next cumulative execution
+log revision after GitHub creates them.
