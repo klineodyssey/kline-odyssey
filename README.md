@@ -1134,4 +1134,7 @@ supply-chain owners and does not activate Production authority.
 - [Runtime V1 Specification](KAIOS/life/forest-agriculture/KAIOS_FOREST_AGRICULTURE_RUNTIME_V1_SPEC.md)
 - [Source Crosswalk](KAIOS/life/forest-agriculture/KAIOS_FOREST_AGRICULTURE_SOURCE_CROSSWALK.md)
 - [Cursor Continuous Work Queue](KAIOS/life/forest-agriculture/KAIOS_CURSOR_CONTINUOUS_WORK_QUEUE.json)
+- [Forest Candidate Codex Review Closeout](KAIOS/life/forest-agriculture/KAIOS_CURSOR_FOREST_LIFE_PACKAGE_REVIEW_CLOSEOUT.md)
+- [Crop Candidate Cursor Work Order](KAIOS/life/candidates/forest-agriculture-v1/CURSOR_CROP_LIFE_PACKAGES_WORK_ORDER.md)
+- [Forest Release and Crop Dispatch Company Status](KGEN-KAIOS/governance/autopilot/company_status/COMPANY_STATUS_2026-08-02_FOREST_CANDIDATE_RELEASED_CROP_DISPATCHED.md)
 - [AI Company Order and Project Specification](KGEN-KAIOS/V10/runtime/KAIOS_AI_COMPANY_ORDER_AND_PROJECT_RUNTIME_SPEC.md)

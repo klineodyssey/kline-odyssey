@@ -225,6 +225,14 @@ Can Claude, Gemini, OpenHands, GitHub Copilot, ChatGPT, Deep Research, Cursor, C
 | `task_claim_schema.json` | Machine-readable JSON Schema for task claims and lease records |
 | `worker_status_schema.json` | Machine-readable JSON Schema for worker status records |
 
+### Forest And Agriculture Candidate Queue
+
+| File | Purpose |
+|---|---|
+| `../KAIOS/life/forest-agriculture/KAIOS_CURSOR_FOREST_LIFE_PACKAGE_REVIEW_CLOSEOUT.md` | Reviewed forest candidate closeout and release evidence. |
+| `../KAIOS/life/candidates/forest-agriculture-v1/CURSOR_CROP_LIFE_PACKAGES_WORK_ORDER.md` | Candidate-only crop task envelope for `cursor-01`. |
+| `governance/autopilot/company_status/COMPANY_STATUS_2026-08-02_FOREST_CANDIDATE_RELEASED_CROP_DISPATCHED.md` | Company status for the controlled queue transition. |
+
 ## R&D Provenance And Biological Evolution Governance
 
 KAIOS includes a first-stage governance layer for task source tracing, AI / Human authorship, formal file metadata, biological taxonomy, organism manifests, evolution lineage, and Cursor R&D suggestions.

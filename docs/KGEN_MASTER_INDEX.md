@@ -750,3 +750,13 @@ wallets, real KGEN, on-chain transfer or K11520 settlement.
 | `KGEN-KAIOS/governance/autopilot/recovery_points/RECOVERY-KAIOS-PR66-CANONICAL-LIFE-SPEC.md` | Post-merge recovery point. |
 | `KAIOS_PR66_CANONICAL_LIFE_SPEC_CLOSEOUT.md` | Post-merge review, merge and validation evidence. |
 | `KGEN-KAIOS/governance/autopilot/company_status/COMPANY_STATUS_2026-08-01_PR66_CANONICAL_LIFE_SPEC.md` | Current completed-workline status. |
+
+## Forest And Agriculture Candidate Queue
+
+Task: `KAIOS-FOREST-AGRICULTURE-RUNTIME-V1-001`
+
+| Repository path | Purpose |
+|---|---|
+| `KAIOS/life/forest-agriculture/KAIOS_CURSOR_FOREST_LIFE_PACKAGE_REVIEW_CLOSEOUT.md` | Forest candidate Codex review, complete Cursor commit lineage and lease release evidence. |
+| `KAIOS/life/candidates/forest-agriculture-v1/CURSOR_CROP_LIFE_PACKAGES_WORK_ORDER.md` | Bounded crop candidate work order and allowed-path contract. |
+| `KGEN-KAIOS/governance/autopilot/company_status/COMPANY_STATUS_2026-08-02_FOREST_CANDIDATE_RELEASED_CROP_DISPATCHED.md` | Company status for the atomic forest-to-crop queue transition. |
