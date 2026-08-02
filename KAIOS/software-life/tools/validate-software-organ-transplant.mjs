@@ -28,6 +28,7 @@ const CANONICAL_REMOTE_URL = "https://github.com/klineodyssey/kline-odyssey.git"
 const CANONICAL_LINEAGE_ANCHOR = "cc80135f2c6e6a74aad11f34e793c65ac0ee1938";
 const TRUSTED_AUTHORITY_COMMIT = CANONICAL_LINEAGE_ANCHOR;
 const gitRootCache = new Map();
+const resolvedCommitCache = new Map();
 const commitCache = new Map();
 const reachableCommitCache = new Map();
 const strictAncestorCache = new Map();
@@ -307,9 +308,15 @@ const gitRoot = (repositoryRoot) => {
 
 const resolveCommit = (repositoryRoot, commit) => {
   if (!repositoryRoot || !commit) return null;
+  const immutableRef = /^[a-f0-9]{40}$/i.test(commit);
+  const key = `${resolve(repositoryRoot)}\0${commit.toLowerCase()}`;
+  if (immutableRef && resolvedCommitCache.has(key)) return resolvedCommitCache.get(key);
   try {
-    return git(repositoryRoot, ["rev-parse", `${commit}^{commit}`]).trim();
+    const resolvedValue = git(repositoryRoot, ["rev-parse", `${commit}^{commit}`]).trim();
+    if (immutableRef) resolvedCommitCache.set(key, resolvedValue);
+    return resolvedValue;
   } catch {
+    if (immutableRef) resolvedCommitCache.set(key, null);
     return null;
   }
 };
@@ -330,9 +337,9 @@ const commitExists = (repositoryRoot, commit) => {
   }
 };
 
-const commitReachableFromHead = (repositoryRoot, commit) => {
+const commitReachableFromHead = (repositoryRoot, commit, head = "HEAD") => {
   const resolvedCommit = resolveCommit(repositoryRoot, commit);
-  const resolvedHead = resolveCommit(repositoryRoot, "HEAD");
+  const resolvedHead = resolveCommit(repositoryRoot, head);
   if (!resolvedCommit || !resolvedHead) return false;
   const key = `${resolve(repositoryRoot)}\0${resolvedCommit}\0${resolvedHead}`;
   if (reachableCommitCache.has(key)) return reachableCommitCache.get(key);
@@ -520,7 +527,7 @@ const loadCanonicalGovernance = (repositoryRoot, errors) => {
   });
   const snapshotKey = canonicalJson({ root, remoteUrl, headCommit, snapshotDigests, trustedDigests, trustedCommit: TRUSTED_AUTHORITY_COMMIT });
   if (governanceSnapshotCache.has(snapshotKey)) return governanceSnapshotCache.get(snapshotKey);
-  if (!commitReachableFromHead(root, CANONICAL_LINEAGE_ANCHOR)) {
+  if (!commitReachableFromHead(root, CANONICAL_LINEAGE_ANCHOR, headCommit)) {
     push(errors, "CANONICAL_REPOSITORY_LINEAGE_INVALID", "repositoryRoot", "HEAD must descend from the reviewed Software Life Registry lineage anchor");
   }
   const registry = readCanonicalJson(root, CANONICAL_REGISTRY_PATH, errors);
@@ -572,6 +579,7 @@ const loadCanonicalGovernance = (repositoryRoot, errors) => {
   }
   const governance = {
     root,
+    headCommit,
     registry,
     trustedRegistry,
     schema,
@@ -702,7 +710,7 @@ export const validateSoftwareOrganTransplant = (record, options = {}) => {
     push(errors, "CALLER_SCHEMA_FORBIDDEN", "options.schema", `Schema input must come only from ${CANONICAL_SCHEMA_PATH}`);
   }
   const governance = loadCanonicalGovernance(options.repositoryRoot, errors);
-  const { registry, trustedRegistry, schema, workerRegistry, root: repositoryRoot } = governance;
+  const { registry, trustedRegistry, schema, workerRegistry, root: repositoryRoot, headCommit } = governance;
   if (schema) {
     const structural = validateJsonSchema202012(record, schema);
     for (const error of structural.errors) {
@@ -848,9 +856,9 @@ export const validateSoftwareOrganTransplant = (record, options = {}) => {
     if (plan.artifact_hash !== computePlanArtifactHash(plan)) {
       push(errors, "PLAN_ARTIFACT_HASH_INVALID", `transplant.${name}.artifact_hash`, "artifact_hash must bind the complete deterministic plan");
     }
-    if (!commitReachableFromHead(repositoryRoot, plan.baseline_commit)) {
+    if (!commitReachableFromHead(repositoryRoot, plan.baseline_commit, headCommit)) {
       push(errors, "BASELINE_COMMIT_NOT_REACHABLE", `transplant.${name}.baseline_commit`, "baseline_commit must be reachable from canonical HEAD");
-    } else if (!commitStrictAncestor(repositoryRoot, plan.baseline_commit, "HEAD")) {
+    } else if (!commitStrictAncestor(repositoryRoot, plan.baseline_commit, headCommit)) {
       push(errors, "BASELINE_COMMIT_NOT_PRE_TRANSPLANT", `transplant.${name}.baseline_commit`, "baseline_commit must be a strict ancestor of canonical HEAD, never HEAD itself");
     }
     const expectedHostPath = hostLife?.location?.canonical_path;
@@ -935,7 +943,7 @@ export const validateSoftwareOrganTransplant = (record, options = {}) => {
     if (evidence && !isAuthorizedWorker(workerRegistry, evidence.reviewer, true)) {
       push(errors, "GATE_REVIEWER_NOT_AUTHORIZED", `compatibility_review.gate_evidence.${gate}.reviewer`, "gate reviewer must resolve to the canonical reviewer in Worker Registry");
     }
-    if (evidence && !commitReachableFromHead(repositoryRoot, evidence.evidence_commit)) {
+    if (evidence && !commitReachableFromHead(repositoryRoot, evidence.evidence_commit, headCommit)) {
       push(errors, "EVIDENCE_COMMIT_NOT_REACHABLE", `compatibility_review.gate_evidence.${gate}.evidence_commit`, "evidence_commit must be reachable from canonical HEAD");
     } else if (evidence && !commitStrictAncestor(repositoryRoot, migrationPlan.baseline_commit, evidence.evidence_commit)) {
       push(errors, "EVIDENCE_NOT_AFTER_BASELINE", `compatibility_review.gate_evidence.${gate}.evidence_commit`, "review evidence must be committed after the immutable pre-transplant baseline");
@@ -1171,7 +1179,7 @@ export const validateSoftwareOrganTransplant = (record, options = {}) => {
       if (completion.attestation_hash !== computeCompletionEvidenceHash(completion)) {
         push(errors, "COMPLETION_EVIDENCE_HASH_INVALID", "transplant.events[-1].outputs.completion_evidence.attestation_hash", "completion attestation must bind the full evidence envelope");
       }
-      if (!commitReachableFromHead(repositoryRoot, completion.completion_commit)) {
+      if (!commitReachableFromHead(repositoryRoot, completion.completion_commit, headCommit)) {
         push(errors, "COMPLETION_COMMIT_NOT_REACHABLE", "transplant.events[-1].outputs.completion_evidence.completion_commit", "completion commit must be reachable from canonical HEAD");
       } else if (!commitStrictAncestor(repositoryRoot, migrationPlan.baseline_commit, completion.completion_commit)) {
         push(errors, "COMPLETION_COMMIT_NOT_AFTER_BASELINE", "transplant.events[-1].outputs.completion_evidence.completion_commit", "completion commit must descend strictly from the pre-transplant baseline");
