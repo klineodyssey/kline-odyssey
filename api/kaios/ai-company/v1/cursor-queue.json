@@ -61,13 +61,13 @@
       "priority": 7,
       "task_id": "KAIOS-CURSOR-COMPOST-MODELS-001",
       "work": "COMPOST_MODEL_PROPOSAL",
-      "status": "DISPATCHED"
+      "status": "RELEASED"
     },
     {
       "priority": 8,
       "task_id": "KAIOS-CURSOR-INSECT-CANDIDATES-001",
       "work": "INSECT_CANDIDATE_PACKAGE",
-      "status": "QUEUED"
+      "status": "DISPATCHED"
     },
     {
       "priority": 9,
