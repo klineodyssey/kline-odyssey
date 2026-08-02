@@ -1,0 +1,170 @@
+{
+  "record_id": "KAIOS-EARTHWORM-CANDIDATE-ENVIRONMENT-V1",
+  "schema_version": "1.0.0-candidate",
+  "status": "CURSOR_RESEARCH_CANDIDATE_ONLY",
+  "review_status": "PENDING_CODEX_REVIEW",
+  "authority": "NO_PRODUCTION_AUTHORITY",
+  "task_id": "KAIOS-CURSOR-EARTHWORM-CANDIDATE-001",
+  "environment_model": "NORMALIZED_COMPATIBILITY_PROXY_ONLY",
+  "numeric_parameter_contract": {
+    "required_fields": ["parameter_name", "unit", "minimum", "default", "maximum", "rationale", "source_type", "confidence", "risk", "validation_required"],
+    "range_rule": "minimum <= default <= maximum",
+    "allowed_source_types": ["SOURCE_DERIVED", "REPOSITORY_DERIVED", "MODEL_INFERENCE", "RESEARCH_PROPOSAL", "ASSUMPTION", "SOURCE_UNDERSPECIFIED"],
+    "validation_required_must_equal_true": true
+  },
+  "numeric_parameters": [
+    {
+      "parameter_name": "soil_moisture_fit_proxy",
+      "unit": "compatibility_basis_point",
+      "minimum": 2000,
+      "default": 5000,
+      "maximum": 8000,
+      "rationale": "Creates a synthetic moisture-fit gate without prescribing water content or field conditions.",
+      "source_type": "RESEARCH_PROPOSAL",
+      "confidence": "LOW",
+      "risk": "The normalized score has no conversion to soil-water percentage or husbandry guidance.",
+      "validation_required": true
+    },
+    {
+      "parameter_name": "temperature_fit_proxy",
+      "unit": "compatibility_basis_point",
+      "minimum": 2000,
+      "default": 5000,
+      "maximum": 8000,
+      "rationale": "Represents only a bounded owner-supplied temperature compatibility score.",
+      "source_type": "RESEARCH_PROPOSAL",
+      "confidence": "LOW",
+      "risk": "No mapping to Celsius, Fahrenheit, survival threshold, or real biological range exists.",
+      "validation_required": true
+    },
+    {
+      "parameter_name": "soil_oxygen_availability_fit_proxy",
+      "unit": "compatibility_basis_point",
+      "minimum": 2500,
+      "default": 7000,
+      "maximum": 10000,
+      "rationale": "Supplies an abstract finite oxygen or aeration gate without gas chemistry.",
+      "source_type": "RESEARCH_PROPOSAL",
+      "confidence": "LOW",
+      "risk": "The score is not an oxygen concentration, aeration prescription, or safety threshold.",
+      "validation_required": true
+    },
+    {
+      "parameter_name": "soil_habitat_compatibility_proxy",
+      "unit": "compatibility_basis_point",
+      "minimum": 6000,
+      "default": 8000,
+      "maximum": 10000,
+      "rationale": "Requires an explicit future Ecology compatibility decision before any candidate action.",
+      "source_type": "MODEL_INFERENCE",
+      "confidence": "LOW",
+      "risk": "The repository currently contains no Earthworm Species admission or carrying-capacity calibration.",
+      "validation_required": true
+    },
+    {
+      "parameter_name": "minimum_detritus_custody_for_feed_event",
+      "unit": "micro_gram_detritus_proxy",
+      "minimum": 1000000,
+      "default": 10000000,
+      "maximum": 20000000,
+      "rationale": "Bounds the objective food-custody debit used by the deterministic fixture.",
+      "source_type": "RESEARCH_PROPOSAL",
+      "confidence": "LOW",
+      "risk": "This is not a feeding rate, ration, waste-processing claim, or recommendation.",
+      "validation_required": true
+    },
+    {
+      "parameter_name": "minimum_habitat_water_custody_for_feed_event",
+      "unit": "micro_milliliter_water_proxy",
+      "minimum": 1000000,
+      "default": 4000000,
+      "maximum": 8000000,
+      "rationale": "Bounds the fixture water transfer and forces insufficient-water failure to be explicit.",
+      "source_type": "RESEARCH_PROPOSAL",
+      "confidence": "LOW",
+      "risk": "No conversion to a real water requirement or soil-moisture instruction is authorized.",
+      "validation_required": true
+    },
+    {
+      "parameter_name": "contamination_stress_proxy_ceiling",
+      "unit": "stress_basis_point",
+      "minimum": 0,
+      "default": 1000,
+      "maximum": 3000,
+      "rationale": "Provides a synthetic fail-closed contamination gate without naming chemicals or safety limits.",
+      "source_type": "RESEARCH_PROPOSAL",
+      "confidence": "LOW",
+      "risk": "The score is not a contaminant tolerance, remediation target, or environmental approval.",
+      "validation_required": true
+    }
+  ],
+  "candidate_habitat_references": [
+    {
+      "habitat_id": "HABITAT-SOIL-V1",
+      "habitat_type": "SOIL_HABITAT",
+      "compatibility_status": "NOT_LISTED_FOR_EARTHWORM_SPECIES",
+      "proposal_only": true
+    },
+    {
+      "habitat_id": "HABITAT-FOREST-V1",
+      "habitat_type": "FOREST",
+      "compatibility_status": "NOT_LISTED_FOR_EARTHWORM_SPECIES",
+      "proposal_only": true
+    },
+    {
+      "habitat_id": "HABITAT-GRASSLAND-V1",
+      "habitat_type": "GRASSLAND",
+      "compatibility_status": "NOT_LISTED_FOR_EARTHWORM_SPECIES",
+      "proposal_only": true
+    }
+  ],
+  "resource_owner_references": {
+    "detritus": "DETRITUS_POOL",
+    "water": "KAIOS_REPRODUCTION_ECOLOGY_RUNTIME_V1.resources.water_l",
+    "soil": "SPECIES-KAIOS-FOUNDATIONAL-SOIL",
+    "decomposition": "MICROBIAL_DECOMPOSITION_PROXY",
+    "owner": "KAIOS_REPRODUCTION_ECOLOGY_RUNTIME_V1"
+  },
+  "gate_order": [
+    "OWNER_SCHEMA_ADMISSION",
+    "LOCATION",
+    "HABITAT",
+    "SOIL_COMPATIBILITY_PROXY",
+    "MOISTURE_FIT_PROXY",
+    "TEMPERATURE_FIT_PROXY",
+    "OXYGEN_AVAILABILITY_PROXY",
+    "CONTAMINATION_STRESS_PROXY",
+    "DETRITUS_CUSTODY",
+    "WATER_CUSTODY",
+    "ENERGY_PROXY",
+    "ELAPSED_TIME"
+  ],
+  "fail_closed_results": {
+    "missing_owner_admission": "OWNER_SCHEMA_ADMISSION_REQUIRED",
+    "missing_location_or_habitat": "NO_HABITAT",
+    "insufficient_detritus": "INSUFFICIENT_FOOD",
+    "insufficient_water": "INSUFFICIENT_WATER",
+    "moisture_fit_outside_candidate_envelope": "MOISTURE_STRESS_PROXY",
+    "temperature_fit_outside_candidate_envelope": "TEMPERATURE_OUT_OF_RANGE_PROXY",
+    "oxygen_fit_below_candidate_minimum": "OXYGEN_AVAILABILITY_STRESS_PROXY",
+    "contamination_stress_above_candidate_ceiling": "CONTAMINATION_STRESS_PROXY",
+    "zero_elapsed_time": "ELAPSED_TIME_REQUIRED"
+  },
+  "guidance_boundary": {
+    "empirical_temperature": "NOT_MODELED",
+    "empirical_moisture": "NOT_MODELED",
+    "empirical_oxygen": "NOT_MODELED",
+    "soil_type_prescription": "NOT_PROVIDED",
+    "release_or_stocking_guidance": "NOT_PROVIDED",
+    "real_biology_guidance": false
+  },
+  "provenance_reference": "provenance.json",
+  "boundaries": [
+    "NO_ECOLOGY_ADMISSION",
+    "NO_REAL_HABITAT_CLAIM",
+    "NO_EMPIRICAL_ENVIRONMENT_THRESHOLD",
+    "NO_SOIL_MANAGEMENT_GUIDANCE",
+    "NO_RELEASE_RECOMMENDATION",
+    "NO_PRODUCTION_AUTHORITY"
+  ]
+}

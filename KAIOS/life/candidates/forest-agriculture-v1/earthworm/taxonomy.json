@@ -1,0 +1,88 @@
+{
+  "record_id": "KAIOS-EARTHWORM-CANDIDATE-TAXONOMY-V1",
+  "schema_version": "1.0.0-candidate",
+  "status": "CURSOR_RESEARCH_CANDIDATE_ONLY",
+  "review_status": "PENDING_CODEX_REVIEW",
+  "authority": "NO_PRODUCTION_AUTHORITY",
+  "task_id": "KAIOS-CURSOR-EARTHWORM-CANDIDATE-001",
+  "composition_contract": {
+    "rule": "SHARED_CORE + APPROVED_TYPE_EXTENSION",
+    "shared_core_schema": "KAIOS_CANONICAL_LIFE_SCHEMA_V1.json",
+    "taxonomy_owner": "KAIOS_CANONICAL_LIFE_TAXONOMY_V1.json",
+    "approved_extension_registry": "KAIOS_CANONICAL_LIFE_TYPE_EXTENSIONS_V1.json",
+    "life_type": "ANIMAL_LIFE",
+    "extension_id": "ANIMAL_EXTENSION",
+    "reference_mode": "READ_ONLY",
+    "owner_files_copied_or_modified": false
+  },
+  "candidate_identity": {
+    "candidate_package_id": "CANDIDATE-EARTHWORM-SOIL-DETRITIVORE-V1",
+    "life_id": "LIFE-KAIOS-EARTHWORM-CANDIDATE-001",
+    "species_id": "SPECIES-KAIOS-EARTHWORM-CANDIDATE",
+    "genome_id": "GENOME-KAIOS-EARTHWORM-CANDIDATE-001",
+    "identity_status": "NONCANONICAL_PROPOSAL_ONLY",
+    "canonical_registration": false,
+    "organism_registration": false,
+    "ecology_admission": false
+  },
+  "taxonomy": {
+    "DOMAIN": "EUKARYOTA",
+    "KINGDOM": "ANIMALIA",
+    "PHYLUM": "ANNELIDA",
+    "CLASS": "CLITELLATA",
+    "ORDER": "HAPLOTAXIDA",
+    "FAMILY": "KAIOS_LUMBRICIDAE_CANDIDATE",
+    "GENUS": "KAIOS_LUMBRICUS",
+    "SPECIES": "KAIOS_LUMBRICUS_TERRAE_CANDIDATE",
+    "LIFE_INSTANCE": "LIFE-KAIOS-EARTHWORM-CANDIDATE-001"
+  },
+  "biological_extension_19": {
+    "Domain": "EUKARYOTA",
+    "Kingdom": "ANIMALIA",
+    "Phylum": "ANNELIDA",
+    "Class": "CLITELLATA",
+    "Order": "HAPLOTAXIDA",
+    "Family": "KAIOS_LUMBRICIDAE_CANDIDATE",
+    "Genus": "KAIOS_LUMBRICUS",
+    "Species": "KAIOS_LUMBRICUS_TERRAE_CANDIDATE",
+    "Individual": "LIFE-KAIOS-EARTHWORM-CANDIDATE-001",
+    "OrganSystem": "ABSTRACT_ANIMAL_SYSTEM_PROXY",
+    "Organ": "ABSTRACT_ANIMAL_ORGAN_PROXY",
+    "Tissue": "ABSTRACT_ANIMAL_TISSUE_PROXY",
+    "Cell": "ABSTRACT_CELLULAR_LAYER_PROXY",
+    "Organelle": "ABSTRACT_ORGANELLE_LAYER_PROXY",
+    "Genome": "GENOME-KAIOS-EARTHWORM-CANDIDATE-001",
+    "DNA": "DNA-KAIOS-EARTHWORM-CANDIDATE-001",
+    "RNA": "RNA-KAIOS-EARTHWORM-CANDIDATE-001",
+    "Gene": "GENE-KAIOS-EARTHWORM-CANDIDATE-PROXY-001",
+    "Expression": "LOCAL_DETERMINISTIC_PROXY_ONLY"
+  },
+  "identity_validation": {
+    "source_base_commit": "745952dc389d62cf85545a86b18e279d8eca9c73",
+    "repository_search_terms": ["earthworm", "annelid", "oligochaet", "lumbric"],
+    "preexisting_matching_life_id": false,
+    "preexisting_matching_species_id": false,
+    "preexisting_matching_genome_id": false,
+    "owner_taxonomy_match": false,
+    "result": "UNIQUE_NONCANONICAL_CANDIDATE_IDENTIFIERS",
+    "validation_required": true
+  },
+  "taxonomy_boundary": {
+    "real_species_claim": false,
+    "taxonomic_certification": false,
+    "empirical_biology_claim": false,
+    "automatic_species_creation": false,
+    "automatic_genome_creation": false,
+    "owner_review_required": true,
+    "note": "The KAIOS genus, family, Species ID, Life ID, and Genome ID are synthetic candidate identifiers. Rank labels provide a research crosswalk only."
+  },
+  "provenance_reference": "provenance.json",
+  "boundaries": [
+    "CANDIDATE_ONLY",
+    "NO_CANONICAL_PROMOTION",
+    "NO_ORGANISM_SCHEMA_CHANGE",
+    "NO_ECOLOGY_ADMISSION",
+    "NO_REAL_BIOLOGY_GUIDANCE",
+    "NO_PRODUCTION_AUTHORITY"
+  ]
+}

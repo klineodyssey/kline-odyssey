@@ -1,0 +1,146 @@
+{
+  "record_id": "KAIOS-EARTHWORM-CANDIDATE-EVENT-LOG-V1",
+  "schema_version": "1.0.0-candidate",
+  "status": "CURSOR_RESEARCH_CANDIDATE_ONLY",
+  "review_status": "PENDING_CODEX_REVIEW",
+  "authority": "NO_PRODUCTION_AUTHORITY",
+  "task_id": "KAIOS-CURSOR-EARTHWORM-CANDIDATE-001",
+  "deterministic_seed": "KAIOS-EARTHWORM-CANDIDATE-SEED-001",
+  "package_event_hash_contract": {
+    "algorithm": "SHA-256",
+    "encoding": "UTF-8",
+    "payload": "deterministic_seed|life_id|CREATED_CANDIDATE",
+    "life_id": "LIFE-KAIOS-EARTHWORM-CANDIDATE-001"
+  },
+  "package_events": [
+    {
+      "event_id": "EVT-LIFE-KAIOS-EARTHWORM-CANDIDATE-001-0001",
+      "timestamp": "2026-08-02T00:00:00Z",
+      "type": "CANDIDATE_PACKAGE_CREATED",
+      "status": "PENDING_CODEX_REVIEW",
+      "previous_state_hash": null,
+      "next_state_hash": "ee141added2455c4cb87976294289e52073a456d12842a1998272e30513d3b20",
+      "owner_state_change": false,
+      "canonical_promotion": false
+    }
+  ],
+  "fixture_state_hash_contract": {
+    "oracle_reference": "runtime.json#/deterministic_positive_fixture",
+    "algorithm": "SHA-256",
+    "payload": "FULL_ORACLE_STATE_AFTER_THE_REFERENCED_ACTION",
+    "canonicalization": "RECURSIVELY_KEY_SORTED_COMPACT_UTF8_JSON",
+    "number_format": "BASE_10_SAFE_INTEGER_NO_EXPONENT",
+    "encoding": "UTF-8_WITHOUT_BOM_OR_TRAILING_NEWLINE",
+    "initial_state_hash": "18ca515c92ee2ef8d4c99d5e1130917494ba8734e9165c983a3d7d0d2ffbb938",
+    "expected_chain_length": 8
+  },
+  "fixture_events": [
+    {
+      "event_id": "EARTHWORM-ORACLE-EVT-001",
+      "sequence": "001",
+      "simulation_time_micro_minute": 1440000000,
+      "type": "FEED_HYDRATE_AND_WASTE_PROXY_EVENT",
+      "status": "OBJECTIVE_FIXTURE_APPLIED",
+      "previous_state_hash": "18ca515c92ee2ef8d4c99d5e1130917494ba8734e9165c983a3d7d0d2ffbb938",
+      "next_state_hash": "85b2a6b0cd9861a5c08ed189bb653f8a4b06f216cdcba487006ffc080ce2b128",
+      "action_reference": "runtime.json#/deterministic_positive_fixture/ordered_actions/0",
+      "owner_state_change": false
+    },
+    {
+      "event_id": "EARTHWORM-ORACLE-EVT-002",
+      "sequence": "002",
+      "simulation_time_micro_minute": 4320000000,
+      "type": "BOUNDED_REPRODUCTION_ALLOCATION_PROXY_EVENT",
+      "status": "OBJECTIVE_FIXTURE_APPLIED",
+      "previous_state_hash": "85b2a6b0cd9861a5c08ed189bb653f8a4b06f216cdcba487006ffc080ce2b128",
+      "next_state_hash": "3d9d97f8aec6d110d2f9242a3b67ef529ae7563a3323f91436a815c07fce50ba",
+      "action_reference": "runtime.json#/deterministic_positive_fixture/ordered_actions/1",
+      "owner_state_change": false
+    },
+    {
+      "event_id": "EARTHWORM-ORACLE-EVT-003",
+      "sequence": "003",
+      "simulation_time_micro_minute": 8640000000,
+      "type": "COCOON_TO_JUVENILE_STAGE_PROXY_EVENT",
+      "status": "OBJECTIVE_FIXTURE_APPLIED",
+      "previous_state_hash": "3d9d97f8aec6d110d2f9242a3b67ef529ae7563a3323f91436a815c07fce50ba",
+      "next_state_hash": "a704bde8d92155e4062905b47658831881e2ef91d178da85ffcb1fc2de70b866",
+      "action_reference": "runtime.json#/deterministic_positive_fixture/ordered_actions/2",
+      "owner_state_change": false
+    },
+    {
+      "event_id": "EARTHWORM-ORACLE-EVT-004",
+      "sequence": "004",
+      "simulation_time_micro_minute": 10080000000,
+      "type": "JUVENILE_MORTALITY_PROXY_EVENT",
+      "status": "OBJECTIVE_FIXTURE_APPLIED",
+      "previous_state_hash": "a704bde8d92155e4062905b47658831881e2ef91d178da85ffcb1fc2de70b866",
+      "next_state_hash": "cca822fa88af19236c2dc24da79a15bcb80caebae67454de227d3646b4d8dbe6",
+      "action_reference": "runtime.json#/deterministic_positive_fixture/ordered_actions/3",
+      "owner_state_change": false
+    },
+    {
+      "event_id": "EARTHWORM-ORACLE-EVT-005",
+      "sequence": "005",
+      "simulation_time_micro_minute": 15840000000,
+      "type": "JUVENILE_TO_ADULT_STAGE_PROXY_EVENT",
+      "status": "OBJECTIVE_FIXTURE_APPLIED",
+      "previous_state_hash": "cca822fa88af19236c2dc24da79a15bcb80caebae67454de227d3646b4d8dbe6",
+      "next_state_hash": "771fb45a740d5d47925ec49b61c34e642a89ccbac374c51214af42f0cd8d798d",
+      "action_reference": "runtime.json#/deterministic_positive_fixture/ordered_actions/4",
+      "owner_state_change": false
+    },
+    {
+      "event_id": "EARTHWORM-ORACLE-EVT-006",
+      "sequence": "006",
+      "simulation_time_micro_minute": 17280000000,
+      "type": "ADULT_MORTALITY_PROXY_EVENT",
+      "status": "OBJECTIVE_FIXTURE_APPLIED",
+      "previous_state_hash": "771fb45a740d5d47925ec49b61c34e642a89ccbac374c51214af42f0cd8d798d",
+      "next_state_hash": "d72fdd2f99f73859eb94d992aa1fdbe372ad140a4344f133d0fcde463c90a906",
+      "action_reference": "runtime.json#/deterministic_positive_fixture/ordered_actions/5",
+      "owner_state_change": false
+    },
+    {
+      "event_id": "EARTHWORM-ORACLE-EVT-007",
+      "sequence": "007",
+      "simulation_time_micro_minute": 18720000000,
+      "type": "WASTE_TO_PENDING_ECOLOGY_CUSTODY_EVENT",
+      "status": "OBJECTIVE_FIXTURE_APPLIED_PENDING_OWNER_ACCEPTANCE",
+      "previous_state_hash": "d72fdd2f99f73859eb94d992aa1fdbe372ad140a4344f133d0fcde463c90a906",
+      "next_state_hash": "93e9bc5dc99008db29f874b566a03453f9941aad5e836029fd05f1c95e05778f",
+      "action_reference": "runtime.json#/deterministic_positive_fixture/ordered_actions/6",
+      "owner_state_change": false
+    },
+    {
+      "event_id": "EARTHWORM-ORACLE-EVT-008",
+      "sequence": "008",
+      "simulation_time_micro_minute": 20160000000,
+      "type": "DEAD_BIOMASS_TO_PENDING_ECOLOGY_CUSTODY_EVENT",
+      "status": "OBJECTIVE_FIXTURE_APPLIED_PENDING_OWNER_ACCEPTANCE",
+      "previous_state_hash": "93e9bc5dc99008db29f874b566a03453f9941aad5e836029fd05f1c95e05778f",
+      "next_state_hash": "5e360cb95d034e234e1ae2f60eaf7e82dccc076e55d395d91ad61ebba71fb28d",
+      "action_reference": "runtime.json#/deterministic_positive_fixture/ordered_actions/7",
+      "owner_state_change": false
+    }
+  ],
+  "final_state_hash": "5e360cb95d034e234e1ae2f60eaf7e82dccc076e55d395d91ad61ebba71fb28d",
+  "chain_assertions": [
+    "PACKAGE_EVENT_MATCHES_LIFE_MANIFEST_EVENT",
+    "FIXTURE_INITIAL_HASH_MATCHES_CANONICAL_INITIAL_STATE",
+    "EACH_EVENT_PREVIOUS_HASH_EQUALS_PRIOR_STATE_HASH",
+    "EACH_EVENT_NEXT_HASH_EQUALS_CANONICAL_POST_ACTION_STATE_HASH",
+    "EVENT_ORDER_MATCHES_ORDERED_ACTIONS",
+    "LAST_EVENT_NEXT_HASH_EQUALS_RUNTIME_EXPECTED_FINAL_SHA256",
+    "SECOND_REPLAY_PRODUCES_IDENTICAL_CHAIN",
+    "NO_EVENT_MUTATES_A_FOREIGN_OWNER"
+  ],
+  "retention_boundary": {
+    "append_only_candidate_record": true,
+    "production_event_log": false,
+    "ecology_event_log": false,
+    "rights_event_log": false,
+    "economy_event_log": false
+  },
+  "provenance_reference": "provenance.json"
+}

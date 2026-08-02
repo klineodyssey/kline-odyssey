@@ -1,0 +1,116 @@
+{
+  "record_id": "KAIOS-EARTHWORM-CANDIDATE-GROWTH-V1",
+  "schema_version": "1.0.0-candidate",
+  "status": "CURSOR_RESEARCH_CANDIDATE_ONLY",
+  "review_status": "PENDING_CODEX_REVIEW",
+  "authority": "NO_PRODUCTION_AUTHORITY",
+  "task_id": "KAIOS-CURSOR-EARTHWORM-CANDIDATE-001",
+  "model": "BOUNDED_STAGE_AND_RESOURCE_PROXY",
+  "numeric_parameter_contract": {
+    "required_fields": ["parameter_name", "unit", "minimum", "default", "maximum", "rationale", "source_type", "confidence", "risk", "validation_required"],
+    "range_rule": "minimum <= default <= maximum",
+    "allowed_source_types": ["SOURCE_DERIVED", "REPOSITORY_DERIVED", "MODEL_INFERENCE", "RESEARCH_PROPOSAL", "ASSUMPTION", "SOURCE_UNDERSPECIFIED"],
+    "validation_required_must_equal_true": true
+  },
+  "numeric_parameters": [
+    {
+      "parameter_name": "cocoon_stage_duration_proxy",
+      "unit": "simulation_tick",
+      "minimum": 2,
+      "default": 3,
+      "maximum": 10,
+      "rationale": "Creates a nonzero deterministic candidate interval before the juvenile stage.",
+      "source_type": "RESEARCH_PROPOSAL",
+      "confidence": "LOW",
+      "risk": "The value is not an incubation period or real lifecycle estimate.",
+      "validation_required": true
+    },
+    {
+      "parameter_name": "juvenile_stage_duration_proxy",
+      "unit": "simulation_tick",
+      "minimum": 2,
+      "default": 4,
+      "maximum": 12,
+      "rationale": "Bounds causal juvenile-stage progression in objective fixtures.",
+      "source_type": "RESEARCH_PROPOSAL",
+      "confidence": "LOW",
+      "risk": "The value is not a maturation period or husbandry expectation.",
+      "validation_required": true
+    },
+    {
+      "parameter_name": "adult_stage_duration_proxy",
+      "unit": "simulation_tick",
+      "minimum": 4,
+      "default": 20,
+      "maximum": 60,
+      "rationale": "Bounds candidate aging and mortality tests without asserting lifespan.",
+      "source_type": "RESEARCH_PROPOSAL",
+      "confidence": "LOW",
+      "risk": "The value must not be represented as a real lifespan or production cycle.",
+      "validation_required": true
+    },
+    {
+      "parameter_name": "maximum_structural_growth_allocation_per_feed_event",
+      "unit": "micro_gram_structural_proxy",
+      "minimum": 0,
+      "default": 4000000,
+      "maximum": 4000000,
+      "rationale": "Closes the deterministic food ledger by bounding the fixture allocation to organism biomass.",
+      "source_type": "RESEARCH_PROPOSAL",
+      "confidence": "LOW",
+      "risk": "This accounting split is not a feed-conversion, growth-rate, or biomass-yield claim.",
+      "validation_required": true
+    }
+  ],
+  "stage_contract": {
+    "stage_order": ["COCOON", "JUVENILE", "ADULT", "DEAD_BIOMASS_CUSTODY"],
+    "initial_instance_stage": "NOT_INSTANTIATED",
+    "instant_formation": false,
+    "instant_growth": false,
+    "stage_skipping": false,
+    "stage_transition_requires": [
+      "OWNER_SCHEMA_ADMISSION",
+      "PRIOR_STAGE_PRESENT",
+      "LOCATION",
+      "COMPATIBLE_HABITAT",
+      "ENVIRONMENT_FIT",
+      "AVAILABLE_FOOD",
+      "AVAILABLE_WATER",
+      "AVAILABLE_ENERGY_PROXY",
+      "REQUIRED_ELAPSED_TIME"
+    ]
+  },
+  "growth_accounting": {
+    "food_source": "DETRITUS_POOL",
+    "food_debit_destinations": ["ORGANISM_STRUCTURAL_BIOMASS_PROXY", "PROCESSED_DETRITUS_WASTE_PROXY"],
+    "water_debit_destinations": ["ORGANISM_BODY_WATER_PROXY", "WASTE_WATER_PROXY", "ATMOSPHERIC_WATER_PROXY"],
+    "energy_debit_destinations": ["ORGANISM_ENERGY_STORE_PROXY", "WASTE_ENERGY_PROXY", "ENVIRONMENTAL_DISSIPATION_PROXY"],
+    "unexplained_mass_gain": false,
+    "unexplained_water_gain": false,
+    "unexplained_energy_gain": false,
+    "fixture_reference": "runtime.json#/deterministic_positive_fixture"
+  },
+  "decomposition_contribution_boundary": {
+    "mode": "PENDING_MASS_CUSTODY_TRANSFER_ONLY",
+    "source_pools": ["PROCESSED_DETRITUS_WASTE_PROXY", "DEAD_BIOMASS"],
+    "destination": "PENDING_ECOLOGY_DECOMPOSITION_CUSTODY",
+    "ecology_acceptance_in_fixture": false,
+    "soil_nutrient_delta": 0,
+    "microbial_activity": "MICROBIAL_DECOMPOSITION_PROXY / ABSTRACT_RESOURCE_POOL / NOT_FULL_LIFE_RUNTIME",
+    "creates_microbes_or_other_life": false,
+    "carbon_model": "NOT_MODELED",
+    "empirical_chemistry": "NOT_MODELED"
+  },
+  "blocked_transitions": [
+    {"trigger": "ZERO_ELAPSED_TIME", "result": "ELAPSED_TIME_REQUIRED", "state_delta": "ALL_ZERO"},
+    {"trigger": "STAGE_SKIP", "result": "INVALID_STAGE_ORDER", "state_delta": "ALL_ZERO"},
+    {"trigger": "RESOURCE_GATE_FAILED", "result": "GROWTH_BLOCKED", "state_delta": "ALL_ZERO"},
+    {"trigger": "OWNER_ADMISSION_MISSING", "result": "OWNER_SCHEMA_ADMISSION_REQUIRED", "state_delta": "ALL_ZERO"}
+  ],
+  "guidance_boundary": {
+    "real_lifecycle_timing": "NOT_CLAIMED",
+    "growth_rate": "NOT_CLAIMED",
+    "feed_conversion": "NOT_CLAIMED",
+    "decomposition_performance": "NOT_CLAIMED"
+  }
+}

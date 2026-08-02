@@ -1,0 +1,410 @@
+{
+  "record_id": "KAIOS-EARTHWORM-CANDIDATE-RUNTIME-FIXTURES-V1",
+  "schema_version": "1.0.0-candidate",
+  "status": "CURSOR_RESEARCH_CANDIDATE_ONLY",
+  "review_status": "PENDING_CODEX_REVIEW",
+  "authority": "NO_PRODUCTION_AUTHORITY",
+  "task_id": "KAIOS-CURSOR-EARTHWORM-CANDIDATE-001",
+  "mode": "OBJECTIVE_NONEXECUTABLE_CANDIDATE_FIXTURES",
+  "executable": false,
+  "simulation_only": true,
+  "production_authority": false,
+  "wallet": "NONE",
+  "settlement": false,
+  "numeric_parameter_contract": {
+    "required_fields": ["parameter_name", "unit", "minimum", "default", "maximum", "rationale", "source_type", "confidence", "risk", "validation_required"],
+    "range_rule": "minimum <= default <= maximum",
+    "allowed_source_types": ["SOURCE_DERIVED", "REPOSITORY_DERIVED", "MODEL_INFERENCE", "RESEARCH_PROPOSAL", "ASSUMPTION", "SOURCE_UNDERSPECIFIED"],
+    "validation_required_must_equal_true": true,
+    "fixture_rule": "Exact integers in deterministic states, deltas, ledgers, hashes, versions, IDs, and declared counts are non-tunable oracle data."
+  },
+  "fixed_point_contract": {
+    "contract_id": "KAIOS_EARTHWORM_FIXED_POINT_V1",
+    "transition_arithmetic": "SIGNED_INTEGER_ADDITION_ONLY",
+    "binary_floating_point_state_addition": "FORBIDDEN",
+    "negative_pool_rule": "REJECT_BEFORE_ANY_STATE_CHANGE",
+    "canonical_state_serialization": "RECURSIVELY_KEY_SORTED_COMPACT_UTF8_JSON",
+    "numeric_parameters": [
+      {
+        "parameter_name": "fixed_point_scale",
+        "unit": "micro_unit_per_base_proxy_unit",
+        "minimum": 1000000,
+        "default": 1000000,
+        "maximum": 1000000,
+        "rationale": "Six-place integer arithmetic makes deterministic replay independent of binary floating point.",
+        "source_type": "RESEARCH_PROPOSAL",
+        "confidence": "MEDIUM",
+        "risk": "Changing the scale invalidates every oracle state and hash.",
+        "validation_required": true
+      },
+      {
+        "parameter_name": "ledger_closure_tolerance",
+        "unit": "integer_micro_unit",
+        "minimum": 0,
+        "default": 0,
+        "maximum": 0,
+        "rationale": "Requires exact closure and fail-closed rejection of every mismatch.",
+        "source_type": "RESEARCH_PROPOSAL",
+        "confidence": "MEDIUM",
+        "risk": "Any future owner adapter requiring rounding needs separate review and cannot silently relax this fixture.",
+        "validation_required": true
+      },
+      {
+        "parameter_name": "simulation_tick_duration",
+        "unit": "minute_per_simulation_tick",
+        "minimum": 1440,
+        "default": 1440,
+        "maximum": 1440,
+        "rationale": "Defines an exact fixture clock and is not a biological development interval.",
+        "source_type": "RESEARCH_PROPOSAL",
+        "confidence": "MEDIUM",
+        "risk": "The tick must never be represented as real earthworm lifecycle timing.",
+        "validation_required": true
+      }
+    ]
+  },
+  "owner_bindings": {
+    "canonical_life_contract": "KAIOS_CANONICAL_LIFE_SCHEMA_V1.json",
+    "animal_extension_owner": "KAIOS_CANONICAL_LIFE_TYPE_EXTENSIONS_V1.json",
+    "life_causality": "KAIOS_LIFE_RUNTIME_V1_SPECIFICATION",
+    "habitat_population_resources_and_decomposition": "KAIOS_REPRODUCTION_ECOLOGY_RUNTIME_V1",
+    "rights": "EXISTING_RIGHTS_AUTHORITY",
+    "economy": "EXISTING_ECONOMY_AUTHORITY",
+    "current_ecology_species_admission": "NOT_ADMITTED_CURRENT_SCHEMA_ENUM",
+    "owner_state_persisted_by_candidate": false,
+    "runtime_activation": false
+  },
+  "admission_contract": {
+    "species_id": "SPECIES-KAIOS-EARTHWORM-CANDIDATE",
+    "current_ecology_schema_contains_species_id": false,
+    "required_future_gate": "ECOLOGY_OWNER_SCHEMA_EXTENSION_AND_CODEX_REVIEW",
+    "candidate_can_grant_admission": false,
+    "admission_request_result": "REJECTED_OWNER_SCHEMA_ADMISSION_REQUIRED"
+  },
+  "resource_custody_contract": {
+    "structural_mass": "Detritus, organism stage biomass, waste, dead biomass, retained material, and pending Ecology custody form one closed proxy domain.",
+    "water": "Habitat, stage, waste, atmosphere, dead biomass, and pending Ecology custody form one closed proxy domain.",
+    "energy_proxy": "Detritus energy source, stage stores, waste, dead biomass, dissipation, and pending Ecology custody form one closed proxy domain.",
+    "food": "Detritus debit equals structural growth allocation plus processed-detritus waste allocation.",
+    "waste": "Created waste equals retained waste plus pending Ecology custody.",
+    "dead_biomass": "Mortality transfer equals retained dead biomass plus pending Ecology custody.",
+    "decomposition_contribution": "Pending contribution is custody only; accepted owner transfer and soil-nutrient delta remain zero.",
+    "microbial_boundary": "MICROBIAL_DECOMPOSITION_PROXY / ABSTRACT_RESOURCE_POOL / NOT_FULL_LIFE_RUNTIME",
+    "carbon_boundary": "NOT_MODELED",
+    "creates_microbes_or_other_life": false
+  },
+  "deterministic_positive_fixture": {
+    "oracle_id": "EARTHWORM-LIFECYCLE-RESOURCE-ORACLE-001",
+    "fixture_status": "OBJECTIVE_HYPOTHETICAL_VALIDATION_FIXTURE_NOT_RUNTIME_PARAMETER",
+    "candidate_gate_overrides": {
+      "ecology_admission": "HYPOTHETICAL_FIXTURE_GATE_TRUE_NOT_OWNER_MUTATION",
+      "reproduction_authorization": "HYPOTHETICAL_FIXTURE_GATE_TRUE_NOT_RIGHTS_DECISION",
+      "owner_state_change": false,
+      "production_authority": false
+    },
+    "integer_scale": 1000000,
+    "initial_state": {
+      "oracle_id": "EARTHWORM-LIFECYCLE-RESOURCE-ORACLE-001",
+      "simulation_elapsed_micro_minute": 0,
+      "births_cumulative": 0,
+      "deaths_cumulative": 0,
+      "population_counts": {
+        "adult": 10,
+        "cocoon": 0,
+        "juvenile": 0
+      },
+      "generation_counts": {
+        "generation_0": 10,
+        "generation_1": 0
+      },
+      "structural_mass_pools_micro_gram_proxy": {
+        "adult_biomass": 20000000,
+        "cocoon_biomass": 0,
+        "dead_biomass": 0,
+        "detritus_source_custody": 80000000,
+        "juvenile_biomass": 0,
+        "pending_ecology_decomposition_from_dead_custody": 0,
+        "pending_ecology_decomposition_from_waste_custody": 0,
+        "processed_detritus_waste_biomass": 0
+      },
+      "water_pools_micro_milliliter_proxy": {
+        "adult_body_water": 10000000,
+        "atmospheric_water_proxy": 0,
+        "cocoon_body_water": 0,
+        "dead_biomass_water": 0,
+        "habitat_water_custody": 30000000,
+        "juvenile_body_water": 0,
+        "pending_ecology_decomposition_from_dead_water_custody": 0,
+        "pending_ecology_decomposition_from_waste_water_custody": 0,
+        "processed_detritus_waste_water": 0
+      },
+      "energy_pools_micro_energy_proxy_unit": {
+        "adult_energy_store": 15000000,
+        "cocoon_energy_store": 0,
+        "dead_biomass_energy_store": 0,
+        "detritus_energy_source_custody": 85000000,
+        "environmental_dissipation_proxy": 0,
+        "juvenile_energy_store": 0,
+        "pending_ecology_decomposition_from_dead_energy_custody": 0,
+        "pending_ecology_decomposition_from_waste_energy_custody": 0,
+        "processed_detritus_waste_energy_store": 0
+      }
+    },
+    "initial_totals": {
+      "structural_mass_micro_gram_proxy": 100000000,
+      "water_micro_milliliter_proxy": 40000000,
+      "energy_micro_energy_proxy_unit": 100000000,
+      "detritus_source_micro_gram_proxy": 80000000,
+      "waste_micro_gram_proxy": 0,
+      "dead_biomass_micro_gram_proxy": 0,
+      "population_count": 10
+    },
+    "ordered_actions": [
+      {
+        "sequence": "001",
+        "event_id": "EARTHWORM-ORACLE-EVT-001",
+        "event_type": "FEED_HYDRATE_AND_WASTE_PROXY_EVENT",
+        "required_gates": ["OWNER_SCHEMA_ADMISSION", "LOCATION", "HABITAT", "ENVIRONMENT_FIT", "DETRITUS", "WATER", "ENERGY_PROXY", "ELAPSED_TIME"],
+        "state_deltas": {"simulation_elapsed_micro_minute": 1440000000},
+        "deltas": {
+          "structural_mass_pools_micro_gram_proxy": {"adult_biomass": 4000000, "detritus_source_custody": -10000000, "processed_detritus_waste_biomass": 6000000},
+          "water_pools_micro_milliliter_proxy": {"adult_body_water": 1500000, "atmospheric_water_proxy": 500000, "habitat_water_custody": -4000000, "processed_detritus_waste_water": 2000000},
+          "energy_pools_micro_energy_proxy_unit": {"adult_energy_store": 4000000, "detritus_energy_source_custody": -10000000, "environmental_dissipation_proxy": 4000000, "processed_detritus_waste_energy_store": 2000000}
+        }
+      },
+      {
+        "sequence": "002",
+        "event_id": "EARTHWORM-ORACLE-EVT-002",
+        "event_type": "BOUNDED_REPRODUCTION_ALLOCATION_PROXY_EVENT",
+        "required_gates": ["OWNER_SCHEMA_ADMISSION", "RIGHTS_DECISION", "ELIGIBLE_ADULT_COHORT", "HEALTH_PROXY", "ENERGY_PROXY", "DETRITUS", "WATER", "COOLDOWN", "POPULATION_CAP", "GENERATION_CAP", "ELAPSED_TIME"],
+        "state_deltas": {"simulation_elapsed_micro_minute": 2880000000, "births_cumulative": 6},
+        "count_deltas": {"population_counts": {"cocoon": 6}, "generation_counts": {"generation_1": 6}},
+        "deltas": {
+          "structural_mass_pools_micro_gram_proxy": {"adult_biomass": -3000000, "cocoon_biomass": 3000000},
+          "water_pools_micro_milliliter_proxy": {"adult_body_water": -1000000, "cocoon_body_water": 1000000},
+          "energy_pools_micro_energy_proxy_unit": {"adult_energy_store": -3000000, "cocoon_energy_store": 2000000, "environmental_dissipation_proxy": 1000000}
+        }
+      },
+      {
+        "sequence": "003",
+        "event_id": "EARTHWORM-ORACLE-EVT-003",
+        "event_type": "COCOON_TO_JUVENILE_STAGE_PROXY_EVENT",
+        "required_gates": ["COCOON_STAGE_PRESENT", "HABITAT", "ENVIRONMENT_FIT", "WATER", "ELAPSED_TIME", "STAGE_ORDER"],
+        "state_deltas": {"simulation_elapsed_micro_minute": 4320000000},
+        "count_deltas": {"population_counts": {"cocoon": -4, "juvenile": 4}},
+        "deltas": {
+          "structural_mass_pools_micro_gram_proxy": {"cocoon_biomass": -2000000, "juvenile_biomass": 2000000},
+          "water_pools_micro_milliliter_proxy": {"cocoon_body_water": -700000, "juvenile_body_water": 700000},
+          "energy_pools_micro_energy_proxy_unit": {"cocoon_energy_store": -1200000, "environmental_dissipation_proxy": 400000, "juvenile_energy_store": 800000}
+        }
+      },
+      {
+        "sequence": "004",
+        "event_id": "EARTHWORM-ORACLE-EVT-004",
+        "event_type": "JUVENILE_MORTALITY_PROXY_EVENT",
+        "required_gates": ["JUVENILE_STAGE_PRESENT", "RECORDED_MORTALITY_CAUSE", "DEAD_BIOMASS_CUSTODY", "ELAPSED_TIME"],
+        "state_deltas": {"simulation_elapsed_micro_minute": 1440000000, "deaths_cumulative": 1},
+        "count_deltas": {"population_counts": {"juvenile": -1}, "generation_counts": {"generation_1": -1}},
+        "deltas": {
+          "structural_mass_pools_micro_gram_proxy": {"dead_biomass": 500000, "juvenile_biomass": -500000},
+          "water_pools_micro_milliliter_proxy": {"dead_biomass_water": 200000, "juvenile_body_water": -200000},
+          "energy_pools_micro_energy_proxy_unit": {"dead_biomass_energy_store": 200000, "environmental_dissipation_proxy": 100000, "juvenile_energy_store": -300000}
+        }
+      },
+      {
+        "sequence": "005",
+        "event_id": "EARTHWORM-ORACLE-EVT-005",
+        "event_type": "JUVENILE_TO_ADULT_STAGE_PROXY_EVENT",
+        "required_gates": ["JUVENILE_STAGE_PRESENT", "HABITAT", "ENVIRONMENT_FIT", "DETRITUS", "WATER", "ENERGY_PROXY", "ELAPSED_TIME", "STAGE_ORDER"],
+        "state_deltas": {"simulation_elapsed_micro_minute": 5760000000},
+        "count_deltas": {"population_counts": {"adult": 2, "juvenile": -2}},
+        "deltas": {
+          "structural_mass_pools_micro_gram_proxy": {"adult_biomass": 1000000, "juvenile_biomass": -1000000},
+          "water_pools_micro_milliliter_proxy": {"adult_body_water": 400000, "juvenile_body_water": -400000},
+          "energy_pools_micro_energy_proxy_unit": {"adult_energy_store": 300000, "environmental_dissipation_proxy": 200000, "juvenile_energy_store": -500000}
+        }
+      },
+      {
+        "sequence": "006",
+        "event_id": "EARTHWORM-ORACLE-EVT-006",
+        "event_type": "ADULT_MORTALITY_PROXY_EVENT",
+        "required_gates": ["ADULT_STAGE_PRESENT", "RECORDED_MORTALITY_CAUSE", "DEAD_BIOMASS_CUSTODY", "ELAPSED_TIME"],
+        "state_deltas": {"simulation_elapsed_micro_minute": 1440000000, "deaths_cumulative": 1},
+        "count_deltas": {"population_counts": {"adult": -1}, "generation_counts": {"generation_0": -1}},
+        "deltas": {
+          "structural_mass_pools_micro_gram_proxy": {"adult_biomass": -1500000, "dead_biomass": 1500000},
+          "water_pools_micro_milliliter_proxy": {"adult_body_water": -800000, "dead_biomass_water": 800000},
+          "energy_pools_micro_energy_proxy_unit": {"adult_energy_store": -1000000, "dead_biomass_energy_store": 600000, "environmental_dissipation_proxy": 400000}
+        }
+      },
+      {
+        "sequence": "007",
+        "event_id": "EARTHWORM-ORACLE-EVT-007",
+        "event_type": "WASTE_TO_PENDING_ECOLOGY_CUSTODY_EVENT",
+        "required_gates": ["WASTE_CUSTODY_PRESENT", "OWNER_ACCEPTANCE_PENDING", "ELAPSED_TIME"],
+        "state_deltas": {"simulation_elapsed_micro_minute": 1440000000},
+        "deltas": {
+          "structural_mass_pools_micro_gram_proxy": {"pending_ecology_decomposition_from_waste_custody": 4000000, "processed_detritus_waste_biomass": -4000000},
+          "water_pools_micro_milliliter_proxy": {"pending_ecology_decomposition_from_waste_water_custody": 1400000, "processed_detritus_waste_water": -1400000},
+          "energy_pools_micro_energy_proxy_unit": {"pending_ecology_decomposition_from_waste_energy_custody": 1300000, "processed_detritus_waste_energy_store": -1300000}
+        }
+      },
+      {
+        "sequence": "008",
+        "event_id": "EARTHWORM-ORACLE-EVT-008",
+        "event_type": "DEAD_BIOMASS_TO_PENDING_ECOLOGY_CUSTODY_EVENT",
+        "required_gates": ["DEAD_BIOMASS_CUSTODY_PRESENT", "OWNER_ACCEPTANCE_PENDING", "ELAPSED_TIME"],
+        "state_deltas": {"simulation_elapsed_micro_minute": 1440000000},
+        "deltas": {
+          "structural_mass_pools_micro_gram_proxy": {"dead_biomass": -1000000, "pending_ecology_decomposition_from_dead_custody": 1000000},
+          "water_pools_micro_milliliter_proxy": {"dead_biomass_water": -500000, "pending_ecology_decomposition_from_dead_water_custody": 500000},
+          "energy_pools_micro_energy_proxy_unit": {"dead_biomass_energy_store": -500000, "pending_ecology_decomposition_from_dead_energy_custody": 500000}
+        }
+      }
+    ],
+    "expected_final_state": {
+      "oracle_id": "EARTHWORM-LIFECYCLE-RESOURCE-ORACLE-001",
+      "simulation_elapsed_micro_minute": 20160000000,
+      "births_cumulative": 6,
+      "deaths_cumulative": 2,
+      "population_counts": {
+        "adult": 11,
+        "cocoon": 2,
+        "juvenile": 1
+      },
+      "generation_counts": {
+        "generation_0": 9,
+        "generation_1": 5
+      },
+      "structural_mass_pools_micro_gram_proxy": {
+        "adult_biomass": 20500000,
+        "cocoon_biomass": 1000000,
+        "dead_biomass": 1000000,
+        "detritus_source_custody": 70000000,
+        "juvenile_biomass": 500000,
+        "pending_ecology_decomposition_from_dead_custody": 1000000,
+        "pending_ecology_decomposition_from_waste_custody": 4000000,
+        "processed_detritus_waste_biomass": 2000000
+      },
+      "water_pools_micro_milliliter_proxy": {
+        "adult_body_water": 10100000,
+        "atmospheric_water_proxy": 500000,
+        "cocoon_body_water": 300000,
+        "dead_biomass_water": 500000,
+        "habitat_water_custody": 26000000,
+        "juvenile_body_water": 100000,
+        "pending_ecology_decomposition_from_dead_water_custody": 500000,
+        "pending_ecology_decomposition_from_waste_water_custody": 1400000,
+        "processed_detritus_waste_water": 600000
+      },
+      "energy_pools_micro_energy_proxy_unit": {
+        "adult_energy_store": 15300000,
+        "cocoon_energy_store": 800000,
+        "dead_biomass_energy_store": 300000,
+        "detritus_energy_source_custody": 75000000,
+        "environmental_dissipation_proxy": 6100000,
+        "juvenile_energy_store": 0,
+        "pending_ecology_decomposition_from_dead_energy_custody": 500000,
+        "pending_ecology_decomposition_from_waste_energy_custody": 1300000,
+        "processed_detritus_waste_energy_store": 700000
+      }
+    },
+    "expected_final_totals": {
+      "structural_mass_micro_gram_proxy": 100000000,
+      "water_micro_milliliter_proxy": 40000000,
+      "energy_micro_energy_proxy_unit": 100000000,
+      "detritus_remaining_micro_gram_proxy": 70000000,
+      "detritus_consumed_micro_gram_proxy": 10000000,
+      "waste_created_micro_gram_proxy": 6000000,
+      "waste_retained_micro_gram_proxy": 2000000,
+      "waste_pending_owner_transfer_micro_gram_proxy": 4000000,
+      "dead_biomass_created_micro_gram_proxy": 2000000,
+      "dead_biomass_retained_micro_gram_proxy": 1000000,
+      "dead_biomass_pending_owner_transfer_micro_gram_proxy": 1000000,
+      "pending_decomposition_contribution_micro_gram_proxy": 5000000,
+      "accepted_ecology_decomposition_transfer_micro_gram_proxy": 0,
+      "soil_nutrient_state_delta_micro_gram_proxy": 0,
+      "population_count": 14,
+      "peak_population_count": 16,
+      "maximum_generation": 1,
+      "simulation_elapsed_micro_minute": 20160000000
+    },
+    "closed_ledgers": {
+      "structural_mass": {"initial": 100000000, "final": 100000000, "residual": 0, "closed": true},
+      "water": {"initial": 40000000, "final": 40000000, "residual": 0, "closed": true},
+      "energy_proxy": {"initial": 100000000, "final": 100000000, "residual": 0, "closed": true},
+      "food_input": {"initial_detritus": 80000000, "consumed": 10000000, "remaining": 70000000, "growth_allocation": 4000000, "waste_allocation": 6000000, "residual": 0, "closed": true},
+      "waste": {"created": 6000000, "retained": 2000000, "pending_owner_transfer": 4000000, "residual": 0, "closed": true},
+      "dead_biomass": {"created": 2000000, "retained": 1000000, "pending_owner_transfer": 1000000, "residual": 0, "closed": true},
+      "decomposition_custody": {"pending_waste": 4000000, "pending_dead": 1000000, "pending_total": 5000000, "accepted_owner_transfer": 0, "soil_nutrient_delta": 0, "residual": 0, "closed": true},
+      "population": {"initial": 10, "births": 6, "deaths": 2, "net_migration": 0, "final": 14, "peak": 16, "candidate_cap": 20, "residual": 0, "closed": true},
+      "generation": {"generation_0": 9, "generation_1": 5, "population_total": 14, "maximum_generation": 1, "generation_cap": 2, "residual": 0, "closed": true},
+      "elapsed_time": {"initial_micro_minute": 0, "advanced_micro_minute": 20160000000, "final_micro_minute": 20160000000, "residual": 0, "closed": true}
+    },
+    "canonical_serialization": {
+      "algorithm": "SHA-256",
+      "payload": "deterministic_positive_fixture.expected_final_state",
+      "object_keys": "ascending Unicode code-point order; all current keys are ASCII",
+      "array_order": "preserved",
+      "number_format": "base-10 safe integer without exponent",
+      "whitespace": "none",
+      "encoding": "UTF-8 without BOM or trailing newline"
+    },
+    "expected_final_sha256": "5e360cb95d034e234e1ae2f60eaf7e82dccc076e55d395d91ad61ebba71fb28d",
+    "objective_assertions": [
+      "APPLY_ACTIONS_IN_SEQUENCE_ORDER",
+      "USE_SIGNED_INTEGER_MICRO_UNITS_ONLY",
+      "REJECT_NEGATIVE_POOL_AFTER_EACH_ACTION",
+      "EVERY_PRESENT_ACTION_DOMAIN_DELTA_SUMS_TO_ZERO",
+      "FINAL_STATE_EQUALS_EXPECTED_FINAL_STATE",
+      "STRUCTURAL_MASS_CLOSES_EXACTLY",
+      "WATER_CLOSES_EXACTLY",
+      "ENERGY_PROXY_CLOSES_EXACTLY",
+      "FOOD_CONSUMED_EQUALS_GROWTH_PLUS_WASTE",
+      "WASTE_CREATED_EQUALS_RETAINED_PLUS_PENDING_OWNER_TRANSFER",
+      "DEAD_BIOMASS_CREATED_EQUALS_RETAINED_PLUS_PENDING_OWNER_TRANSFER",
+      "PENDING_DECOMPOSITION_EQUALS_PENDING_WASTE_PLUS_PENDING_DEAD",
+      "ACCEPTED_ECOLOGY_TRANSFER_AND_SOIL_NUTRIENT_DELTA_EQUAL_ZERO",
+      "FINAL_POPULATION_EQUALS_INITIAL_PLUS_BIRTHS_MINUS_DEATHS_MINUS_NET_MIGRATION",
+      "PEAK_POPULATION_DOES_NOT_EXCEED_CANDIDATE_CAP",
+      "MAXIMUM_GENERATION_DOES_NOT_EXCEED_GENERATION_CAP",
+      "ELAPSED_TIME_EQUALS_SUM_OF_ACTION_TIME_DELTAS",
+      "CANONICAL_SHA256_EQUALS_EXPECTED_FINAL_SHA256",
+      "SECOND_REPLAY_PRODUCES_IDENTICAL_SHA256"
+    ]
+  },
+  "deterministic_blocked_fixtures": [
+    {"fixture_id": "EARTHWORM-BLOCK-OWNER-ADMISSION", "given": ["CURRENT_ECOLOGY_SCHEMA", "EARTHWORM_SPECIES_ID"], "when": "REQUEST_POPULATION_OR_LIFECYCLE_ACTION", "expected_status": "OWNER_SCHEMA_ADMISSION_REQUIRED", "expected_count_delta": "ALL_ZERO", "expected_resource_delta": "ALL_ZERO", "owner_state_change": false},
+    {"fixture_id": "EARTHWORM-BLOCK-NO-HABITAT", "given": ["NO_FOREIGN_LOCATION", "NO_ADMITTED_HABITAT"], "when": "REQUEST_MOVEMENT_OR_STAGE_ACTION", "expected_status": "NO_HABITAT", "expected_count_delta": "ALL_ZERO", "expected_resource_delta": "ALL_ZERO", "owner_state_change": false},
+    {"fixture_id": "EARTHWORM-BLOCK-NO-DETRITUS", "given": ["EMPTY_DETRITUS_CUSTODY"], "when": "REQUEST_FEED_GROWTH_OR_REPRODUCTION", "expected_status": "INSUFFICIENT_FOOD", "expected_count_delta": "ALL_ZERO", "expected_resource_delta": "ALL_ZERO", "owner_state_change": false},
+    {"fixture_id": "EARTHWORM-BLOCK-NO-WATER", "given": ["EMPTY_HABITAT_WATER_CUSTODY"], "when": "REQUEST_FEED_GROWTH_OR_REPRODUCTION", "expected_status": "INSUFFICIENT_WATER", "expected_count_delta": "ALL_ZERO", "expected_resource_delta": "ALL_ZERO", "owner_state_change": false},
+    {"fixture_id": "EARTHWORM-BLOCK-MOISTURE-STRESS", "given": ["MOISTURE_FIT_OUTSIDE_CANDIDATE_ENVELOPE"], "when": "REQUEST_STAGE_ACTION", "expected_status": "MOISTURE_STRESS_PROXY", "expected_count_delta": "ALL_ZERO", "expected_resource_delta": "ALL_ZERO", "owner_state_change": false},
+    {"fixture_id": "EARTHWORM-BLOCK-TEMPERATURE-STRESS", "given": ["TEMPERATURE_FIT_OUTSIDE_CANDIDATE_ENVELOPE"], "when": "REQUEST_STAGE_ACTION", "expected_status": "TEMPERATURE_OUT_OF_RANGE_PROXY", "expected_count_delta": "ALL_ZERO", "expected_resource_delta": "ALL_ZERO", "owner_state_change": false},
+    {"fixture_id": "EARTHWORM-BLOCK-OXYGEN-STRESS", "given": ["OXYGEN_FIT_BELOW_CANDIDATE_MINIMUM"], "when": "REQUEST_STAGE_ACTION", "expected_status": "OXYGEN_AVAILABILITY_STRESS_PROXY", "expected_count_delta": "ALL_ZERO", "expected_resource_delta": "ALL_ZERO", "owner_state_change": false},
+    {"fixture_id": "EARTHWORM-BLOCK-ZERO-TIME", "given": ["ZERO_ELAPSED_TIME"], "when": "REQUEST_NEXT_STAGE", "expected_status": "ELAPSED_TIME_REQUIRED", "expected_count_delta": "ALL_ZERO", "expected_resource_delta": "ALL_ZERO", "owner_state_change": false},
+    {"fixture_id": "EARTHWORM-BLOCK-STAGE-SKIP", "given": ["COCOON_STAGE"], "when": "REQUEST_ADULT_STAGE", "expected_status": "INVALID_STAGE_ORDER", "expected_count_delta": "ALL_ZERO", "expected_resource_delta": "ALL_ZERO", "owner_state_change": false},
+    {"fixture_id": "EARTHWORM-BLOCK-REPRODUCTION-AUTHORITY", "given": ["CANDIDATE_REPRODUCTION_AUTHORIZED_FALSE"], "when": "REQUEST_REPRODUCTION", "expected_status": "REPRODUCTION_NOT_AUTHORIZED", "expected_count_delta": "ALL_ZERO", "expected_resource_delta": "ALL_ZERO", "owner_state_change": false},
+    {"fixture_id": "EARTHWORM-BLOCK-POPULATION-CAP", "given": ["PROJECTED_COUNT_EXCEEDS_CANDIDATE_CAP"], "when": "REQUEST_REPRODUCTION", "expected_status": "POPULATION_CAP_REACHED", "expected_count_delta": "ALL_ZERO", "expected_resource_delta": "ALL_ZERO", "owner_state_change": false},
+    {"fixture_id": "EARTHWORM-BLOCK-GENERATION-CAP", "given": ["PARENT_GENERATION_EQUALS_GENERATION_CAP"], "when": "REQUEST_REPRODUCTION", "expected_status": "GENERATION_CAP_REACHED", "expected_count_delta": "ALL_ZERO", "expected_resource_delta": "ALL_ZERO", "owner_state_change": false},
+    {"fixture_id": "EARTHWORM-BLOCK-MASS-MISMATCH", "given": ["COPY_OF_POSITIVE_FIXTURE_WITH_ONE_MICRO_UNIT_REMOVED"], "when": "VALIDATE_LEDGER_CLOSURE", "expected_status": "MASS_LEDGER_MISMATCH", "expected_count_delta": "ALL_ZERO", "expected_resource_delta": "ALL_ZERO", "owner_state_change": false},
+    {"fixture_id": "EARTHWORM-BLOCK-DEAD-CUSTODY", "given": ["MORTALITY_WITHOUT_DEAD_BIOMASS_DESTINATION"], "when": "REQUEST_MORTALITY_EVENT", "expected_status": "DEAD_BIOMASS_CUSTODY_REQUIRED", "expected_count_delta": "ALL_ZERO", "expected_resource_delta": "ALL_ZERO", "owner_state_change": false},
+    {"fixture_id": "EARTHWORM-BLOCK-DECOMPOSITION-ACCEPTANCE", "given": ["PENDING_CUSTODY_WITHOUT_ECOLOGY_ACCEPTANCE_EVENT_AND_HASH"], "when": "REQUEST_OWNER_TRANSFER_OR_SOIL_EFFECT", "expected_status": "ECOLOGY_OWNER_ACCEPTANCE_REQUIRED", "expected_count_delta": "ALL_ZERO", "expected_resource_delta": "ALL_ZERO", "owner_state_change": false}
+  ],
+  "acceptance_invariants": [
+    "EXACT_POSITIVE_ORACLE_REPLAY",
+    "ALL_TEN_LEDGERS_CLOSE",
+    "ALL_FIFTEEN_BLOCKED_FIXTURES_HAVE_ZERO_DELTAS",
+    "NO_CURRENT_ECOLOGY_ADMISSION",
+    "NO_INSTANT_STAGE_OR_REPRODUCTION",
+    "NO_UNCONTROLLED_REPRODUCTION",
+    "NO_WASTE_OR_DEAD_BIOMASS_DISAPPEARS",
+    "NO_DECOMPOSITION_OWNER_ACCEPTANCE",
+    "NO_SOIL_NUTRIENT_DELTA",
+    "NO_MICROBIAL_LIFE_CREATION",
+    "NO_CARBON_OR_EMPIRICAL_CHEMISTRY_MODEL",
+    "NO_RUNTIME_ACTIVATION",
+    "NO_PRODUCTION_AUTHORITY"
+  ],
+  "provenance_reference": "provenance.json",
+  "event_log_reference": "event_log.json"
+}

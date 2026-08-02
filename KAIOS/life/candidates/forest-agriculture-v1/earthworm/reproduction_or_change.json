@@ -1,0 +1,153 @@
+{
+  "record_id": "KAIOS-EARTHWORM-CANDIDATE-REPRODUCTION-V1",
+  "schema_version": "1.0.0-candidate",
+  "status": "CURSOR_RESEARCH_CANDIDATE_ONLY",
+  "review_status": "PENDING_CODEX_REVIEW",
+  "authority": "NO_PRODUCTION_AUTHORITY",
+  "task_id": "KAIOS-CURSOR-EARTHWORM-CANDIDATE-001",
+  "model": "BOUNDED_UNAUTHORIZED_REPRODUCTION_PROPOSAL",
+  "numeric_parameter_contract": {
+    "required_fields": ["parameter_name", "unit", "minimum", "default", "maximum", "rationale", "source_type", "confidence", "risk", "validation_required"],
+    "range_rule": "minimum <= default <= maximum",
+    "allowed_source_types": ["SOURCE_DERIVED", "REPOSITORY_DERIVED", "MODEL_INFERENCE", "RESEARCH_PROPOSAL", "ASSUMPTION", "SOURCE_UNDERSPECIFIED"],
+    "validation_required_must_equal_true": true
+  },
+  "numeric_parameters": [
+    {
+      "parameter_name": "minimum_eligible_adult_count_proxy",
+      "unit": "individual_count",
+      "minimum": 2,
+      "default": 4,
+      "maximum": 10,
+      "rationale": "Prevents reproduction without an explicit bounded eligible cohort.",
+      "source_type": "MODEL_INFERENCE",
+      "confidence": "LOW",
+      "risk": "No mating system, sex ratio, or real breeding requirement is implied.",
+      "validation_required": true
+    },
+    {
+      "parameter_name": "offspring_per_reproduction_event_cap",
+      "unit": "individual_count",
+      "minimum": 0,
+      "default": 6,
+      "maximum": 6,
+      "rationale": "Matches the bounded positive oracle and prevents an unbounded birth event.",
+      "source_type": "RESEARCH_PROPOSAL",
+      "confidence": "LOW",
+      "risk": "The cap is not a fecundity, cocoon count, or production claim.",
+      "validation_required": true
+    },
+    {
+      "parameter_name": "reproduction_cooldown_proxy",
+      "unit": "simulation_tick",
+      "minimum": 1,
+      "default": 2,
+      "maximum": 10,
+      "rationale": "Prevents repeated births within one causal interval.",
+      "source_type": "RESEARCH_PROPOSAL",
+      "confidence": "LOW",
+      "risk": "The synthetic cooldown is not a real breeding interval.",
+      "validation_required": true
+    },
+    {
+      "parameter_name": "candidate_population_cap",
+      "unit": "individual_count",
+      "minimum": 1,
+      "default": 20,
+      "maximum": 20,
+      "rationale": "Keeps the objective fixture far below the Ecology absolute maximum while preserving fail-closed candidate scope.",
+      "source_type": "MODEL_INFERENCE",
+      "confidence": "LOW",
+      "risk": "The value is not carrying capacity, stocking density, or release guidance.",
+      "validation_required": true
+    },
+    {
+      "parameter_name": "candidate_generation_cap",
+      "unit": "generation_index",
+      "minimum": 0,
+      "default": 2,
+      "maximum": 2,
+      "rationale": "Bounds recursive reproduction in deterministic candidate fixtures.",
+      "source_type": "MODEL_INFERENCE",
+      "confidence": "MEDIUM",
+      "risk": "Generation is only a simulation counter and carries no genetics claim.",
+      "validation_required": true
+    },
+    {
+      "parameter_name": "lifetime_reproduction_event_cap_proxy",
+      "unit": "event_count_per_candidate_individual",
+      "minimum": 0,
+      "default": 2,
+      "maximum": 2,
+      "rationale": "Adds a second independent recursion bound to the candidate proposal.",
+      "source_type": "RESEARCH_PROPOSAL",
+      "confidence": "LOW",
+      "risk": "The value is not a lifetime breeding count or husbandry target.",
+      "validation_required": true
+    }
+  ],
+  "reproduction_contract": {
+    "mode": "BOUNDED_COCOON_STAGE_PROPOSAL",
+    "candidate_authorized": false,
+    "real_breeding_authority": false,
+    "required_gate_order": [
+      "OWNER_SCHEMA_ADMISSION",
+      "EXISTING_RIGHTS_AUTHORITY_DECISION",
+      "LOCATION",
+      "HABITAT",
+      "ELIGIBLE_ADULT_COHORT",
+      "MINIMUM_STAGE_AGE",
+      "HEALTH_PROXY",
+      "ENERGY_PROXY",
+      "DETRITUS",
+      "WATER",
+      "ENVIRONMENT_FIT",
+      "COOLDOWN",
+      "LIFETIME_EVENT_CAP",
+      "POPULATION_CAP",
+      "GENERATION_CAP",
+      "ELAPSED_TIME"
+    ],
+    "birth_allocation_requires": ["PARENT_STRUCTURAL_MASS_DEBIT", "COCOON_STRUCTURAL_MASS_CREDIT", "PARENT_WATER_DEBIT", "COCOON_WATER_CREDIT", "PARENT_ENERGY_DEBIT", "COCOON_ENERGY_AND_DISSIPATION_CREDIT"],
+    "instant_birth": false,
+    "uncontrolled_reproduction": false
+  },
+  "population_accounting": {
+    "identity": "FINAL_COUNT = INITIAL_COUNT + BIRTHS - DEATHS - NET_MIGRATION",
+    "count_arithmetic": "INTEGER_ONLY",
+    "net_migration_in_fixture": 0,
+    "count_change_without_event": false,
+    "fixture_reference": "runtime.json#/deterministic_positive_fixture"
+  },
+  "mortality_contract": {
+    "recorded_cause_required": true,
+    "count_decrement_required": true,
+    "generation_count_decrement_required": true,
+    "dead_biomass_custody_required": true,
+    "water_and_energy_custody_required": true,
+    "deletion_without_custody": false
+  },
+  "change_boundary": {
+    "mutation": "NOT_MODELED",
+    "genome_editing": false,
+    "trait_selection": "NOT_MODELED",
+    "automatic_new_species": false,
+    "unrestricted_lineage": false
+  },
+  "blocked_results": [
+    {"trigger": "CANDIDATE_REPRODUCTION_AUTHORITY_FALSE", "result": "REPRODUCTION_NOT_AUTHORIZED", "count_and_resource_delta": "ALL_ZERO"},
+    {"trigger": "OWNER_ADMISSION_MISSING", "result": "OWNER_SCHEMA_ADMISSION_REQUIRED", "count_and_resource_delta": "ALL_ZERO"},
+    {"trigger": "ELIGIBLE_COHORT_MISSING", "result": "NO_MATE_OR_PROPAGATION_SOURCE", "count_and_resource_delta": "ALL_ZERO"},
+    {"trigger": "COOLDOWN_NOT_ELAPSED", "result": "REPRODUCTION_COOLDOWN", "count_and_resource_delta": "ALL_ZERO"},
+    {"trigger": "POPULATION_CAP_REACHED", "result": "POPULATION_CAP_REACHED", "count_and_resource_delta": "ALL_ZERO"},
+    {"trigger": "GENERATION_CAP_REACHED", "result": "GENERATION_CAP_REACHED", "count_and_resource_delta": "ALL_ZERO"},
+    {"trigger": "LIFETIME_EVENT_CAP_REACHED", "result": "REPRODUCTION_EVENT_CAP_REACHED", "count_and_resource_delta": "ALL_ZERO"}
+  ],
+  "guidance_boundary": {
+    "real_reproduction_guidance": false,
+    "release_guidance": false,
+    "population_prediction": false,
+    "fecundity_claim": false,
+    "lifespan_claim": false
+  }
+}
