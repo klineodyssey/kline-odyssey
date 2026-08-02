@@ -1,0 +1,411 @@
+{
+  "schema_version": "1.0.0",
+  "life_type": "MICROBIAL_LIFE",
+  "life_id": "LIFE-KAIOS-MYCOFORM-CANDIDATE-001",
+  "species_id": "SPECIES-KAIOS-MYCOFORM-DECOMPOSER-CANDIDATE",
+  "display_name": "Mycoform Decomposer Analog Candidate",
+  "scientific_or_system_name": "KAIOS mycoforma decompositor candidate",
+  "taxonomy": {
+    "DOMAIN": "EUKARYOTA_ANALOG_CANDIDATE",
+    "KINGDOM": "FUNGI_ANALOG_CANDIDATE",
+    "PHYLUM": "KAIOS_MYCOFORM_CANDIDATE",
+    "CLASS": "KAIOS_DECOMPOSITOR_CLASS_CANDIDATE",
+    "ORDER": "KAIOS_SUBSTRATE_ORDER_CANDIDATE",
+    "FAMILY": "KAIOS_MYCOFORM_FAMILY_CANDIDATE",
+    "GENUS": "KAIOS_MYCOFORM",
+    "SPECIES": "KAIOS_MYCOFORM_DECOMPOSITOR_CANDIDATE",
+    "LIFE_INSTANCE": "LIFE-KAIOS-MYCOFORM-CANDIDATE-001",
+    "proposal_status": "NONCANONICAL_SYNTHETIC_CANDIDATE",
+    "extension_19": {
+      "Domain": "EUKARYOTA_ANALOG_CANDIDATE",
+      "Kingdom": "FUNGI_ANALOG_CANDIDATE",
+      "Phylum": "KAIOS_MYCOFORM_CANDIDATE",
+      "Class": "KAIOS_DECOMPOSITOR_CLASS_CANDIDATE",
+      "Order": "KAIOS_SUBSTRATE_ORDER_CANDIDATE",
+      "Family": "KAIOS_MYCOFORM_FAMILY_CANDIDATE",
+      "Genus": "KAIOS_MYCOFORM",
+      "Species": "KAIOS_MYCOFORM_DECOMPOSITOR_CANDIDATE",
+      "Individual": "LIFE-KAIOS-MYCOFORM-CANDIDATE-001",
+      "OrganSystem": "NOT_APPLICABLE_NO_ORGAN_SYSTEM_CLAIM",
+      "Organ": "NOT_APPLICABLE_NO_ORGAN_CLAIM",
+      "Tissue": "ABSTRACT_COLONY_STRUCTURE_PROXY",
+      "Cell": "ABSTRACT_MICROBIAL_CELL_PROXY",
+      "Organelle": "NOT_MODELED",
+      "Genome": "GENOME-KAIOS-MYCOFORM-CANDIDATE-001",
+      "DNA": "DNA-KAIOS-MYCOFORM-CANDIDATE-001",
+      "RNA": "RNA-KAIOS-MYCOFORM-CANDIDATE-001",
+      "Gene": "GENE-KAIOS-MYCOFORM-CANDIDATE-PROXY-001",
+      "Expression": "LOCAL_DETERMINISTIC_PROXY_ONLY"
+    }
+  },
+  "origin": {
+    "mode": "BOUNDED_CANDIDATE_RESEARCH",
+    "task_id": "KAIOS-CURSOR-FUNGI-CANDIDATE-001",
+    "candidate_status": "CURSOR_RESEARCH_CANDIDATE_ONLY",
+    "review_status": "PENDING_CODEX_REVIEW",
+    "source_base_commit": "eb17536ff6affb34f93bce6c5622d7bab018d230",
+    "dispatch_branch_base_commit": "5e20186c5a644171e658f95a26c0bbe1a4741287",
+    "assumption_classification": "SIMULATION_APPROXIMATION"
+  },
+  "birth_or_formation_record": {
+    "status": "NOT_INSTANTIATED_CANDIDATE",
+    "instant_formation": false,
+    "causal_lifecycle_required": true,
+    "foreign_owner_acceptance_required": true,
+    "real_cultivation_event": false
+  },
+  "location": {
+    "mode": "UNASSIGNED_UNTIL_FOREIGN_OWNER_VALIDATION",
+    "candidate_habitat_refs": ["HABITAT-SOIL-V1", "HABITAT-FOREST-V1"],
+    "sealed_candidate_compartment_required": true,
+    "ecology_admission": false,
+    "real_habitat_claim": false,
+    "release_authority": false
+  },
+  "mass": {
+    "value": null,
+    "unit": null
+  },
+  "volume": {
+    "value": null,
+    "unit": null
+  },
+  "density": {
+    "value": null,
+    "unit": null
+  },
+  "dimensions": {
+    "proposal_ref": "physics.json#/numeric_parameters",
+    "empirical_dimensions": "NOT_CLAIMED"
+  },
+  "material_composition": {
+    "mode": "BOUNDED_MASS_MOISTURE_NUTRIENT_ACCOUNTING_PROXY_ONLY",
+    "assumption_classification": "SIMULATION_APPROXIMATION",
+    "empirical_chemistry": "NOT_MODELED",
+    "carbon_model": "NOT_MODELED"
+  },
+  "energy_model": {
+    "mode": "FINITE_ENERGY_PROXY",
+    "source": "DETRITUS_ENERGY_SOURCE_CUSTODY_PROXY",
+    "conservation_required": true,
+    "empirical_metabolism": "NOT_CLAIMED",
+    "assumption_classification": "MODEL_INFERENCE"
+  },
+  "resource_inputs": [
+    {
+      "resource_id": "DETRITUS_POOL",
+      "owner": "KAIOS_REPRODUCTION_ECOLOGY_RUNTIME_V1",
+      "status": "ABSTRACT_RESOURCE_POOL_NOT_FULL_LIFE_RUNTIME",
+      "mass_transfer_required": true,
+      "candidate_activity": "BOUNDED_FUNGAL_ACTIVITY_PROXY / SIMULATION_APPROXIMATION"
+    },
+    {
+      "resource_id": "HABITAT_WATER_CUSTODY",
+      "owner": "KAIOS_REPRODUCTION_ECOLOGY_RUNTIME_V1",
+      "status": "FOREIGN_OWNER_REFERENCE_ONLY",
+      "moisture_or_water_transfer_required": true
+    },
+    {
+      "resource_id": "SOIL_NUTRIENT_PROXY_CUSTODY",
+      "owner": "KAIOS_REPRODUCTION_ECOLOGY_RUNTIME_V1",
+      "status": "ABSTRACT_ACCOUNTING_REFERENCE_ONLY",
+      "empirical_chemistry": "NOT_MODELED"
+    },
+    {
+      "resource_id": "HABITAT_OXYGEN_AVAILABILITY_PROXY",
+      "owner": "KAIOS_REPRODUCTION_ECOLOGY_RUNTIME_V1",
+      "status": "FIT_GATE_ONLY_NOT_GAS_CHEMISTRY"
+    }
+  ],
+  "resource_outputs": [
+    {
+      "resource_id": "PROCESSED_SUBSTRATE_RESIDUAL_PROXY",
+      "status": "EXPLICIT_RETAINED_OR_PENDING_CUSTODY_REQUIRED",
+      "automatic_soil_effect": false
+    },
+    {
+      "resource_id": "INACTIVE_COLONY_BIOMASS_CUSTODY",
+      "foreign_resource_compatibility_ref": "DEAD_BIOMASS",
+      "status": "EXPLICIT_CUSTODY_REQUIRED_ON_INACTIVATION"
+    },
+    {
+      "resource_id": "PENDING_ECOLOGY_DECOMPOSITION_MATERIAL_CUSTODY",
+      "status": "PENDING_OWNER_ACCEPTANCE_NOT_OWNER_STATE"
+    },
+    {
+      "resource_id": "PENDING_ECOLOGY_NUTRIENT_PROXY_CUSTODY",
+      "status": "PENDING_OWNER_ACCEPTANCE_NOT_SOIL_NUTRIENT_STATE",
+      "empirical_chemistry": "NOT_MODELED"
+    }
+  ],
+  "environment_requirements": {
+    "proposal_ref": "environment.json",
+    "required_gates": [
+      "ECOLOGY_OWNER_ADMISSION",
+      "LOCATION",
+      "HABITAT",
+      "SEALED_CANDIDATE_COMPARTMENT",
+      "HABITAT_COMPATIBILITY_PROXY",
+      "MOISTURE_FIT_PROXY",
+      "TEMPERATURE_FIT_PROXY",
+      "OXYGEN_AVAILABILITY_PROXY",
+      "SUBSTRATE",
+      "MOISTURE",
+      "NUTRIENT_PROXY",
+      "ENERGY_PROXY",
+      "ELAPSED_TIME"
+    ],
+    "real_environment_guidance": false
+  },
+  "growth_or_development": {
+    "proposal_ref": "growth_or_formation.json",
+    "mode": "BOUNDED_COLONY_STAGE_PROXY / SIMULATION_APPROXIMATION",
+    "instant_growth": false,
+    "stage_skipping": false
+  },
+  "aging": {
+    "mode": "BOUNDED_STAGE_AND_TICK_PROXY",
+    "assumption_classification": "SIMULATION_APPROXIMATION",
+    "empirical_lifespan": "NOT_CLAIMED"
+  },
+  "health_or_integrity": {
+    "proposal_ref": "health_or_integrity.json",
+    "mode": "RESOURCE_AND_ENVIRONMENT_INTEGRITY_GATE_PROXY",
+    "diagnosis": "NOT_MODELED"
+  },
+  "damage": {
+    "mode": "ABSTRACT_STRESS_PROXY / SIMULATION_APPROXIMATION",
+    "disease_behavior": "NOT_MODELED",
+    "chemical_response": "NOT_MODELED",
+    "intervention_guidance": "NOT_PROVIDED"
+  },
+  "repair_or_healing": {
+    "mode": "NOT_MODELED",
+    "reason": "No validated repair, healing, treatment, or intervention model exists in this candidate scope."
+  },
+  "reproduction_or_replication": {
+    "proposal_ref": "reproduction_or_change.json",
+    "mode": "BOUNDED_DISPERSAL_UNIT_PROXY / SIMULATION_APPROXIMATION",
+    "authorized": false,
+    "sealed_compartment_required": true,
+    "population_cap_required": true,
+    "generation_cap_required": true,
+    "uncontrolled_replication": false
+  },
+  "mutation_or_change": {
+    "mode": "NOT_MODELED",
+    "automatic_new_species": false,
+    "genome_editing": false,
+    "trait_selection": false
+  },
+  "death_or_termination": {
+    "mode": "BOUNDED_INACTIVATION_PROXY / SIMULATION_APPROXIMATION",
+    "count_decrement_required": true,
+    "inactive_biomass_transfer_required": true,
+    "moisture_nutrient_energy_custody_required": true,
+    "deletion_without_custody": false
+  },
+  "history": [
+    {
+      "event": "CANDIDATE_PACKAGE_CREATED",
+      "task_id": "KAIOS-CURSOR-FUNGI-CANDIDATE-001",
+      "status": "PENDING_CODEX_REVIEW"
+    }
+  ],
+  "rights": {
+    "OWNER": {"holder": "UNASSIGNED", "authority": "NO_PRODUCTION_AUTHORITY", "scope": "PACKAGE_RECORD_ONLY_NOT_LEGAL_OWNERSHIP"},
+    "CUSTODIAN": {"holder": "UNASSIGNED", "authority": "NO_PRODUCTION_AUTHORITY", "scope": "REVIEW_CUSTODY_PENDING_CODEX"},
+    "OPERATOR": {"holder": "UNASSIGNED", "authority": "NO_PRODUCTION_AUTHORITY", "scope": "NO_OPERATION_AUTHORITY"},
+    "OCCUPANT": {"holder": "UNASSIGNED", "authority": "NO_PRODUCTION_AUTHORITY", "scope": "NO_OCCUPANT_CLAIM"},
+    "USAGE_RIGHTS": {"holder": "UNASSIGNED", "scope": "NO_REAL_USE_AUTHORITY"},
+    "HARVEST_RIGHTS": {"holder": "UNASSIGNED", "scope": "NO_REAL_HARVEST_AUTHORITY"},
+    "BREEDING_RIGHTS": {"holder": "UNASSIGNED", "scope": "NO_REAL_REPLICATION_AUTHORITY"},
+    "COMMERCIAL_LICENSE": {"holder": "UNASSIGNED", "scope": "NONE"},
+    "TRANSFER_RIGHTS": {"holder": "UNASSIGNED", "scope": "NO_TRANSFER"},
+    "HABITAT_RIGHTS": {"holder": "UNASSIGNED", "scope": "NO_REAL_HABITAT_OR_RELEASE_CLAIM"},
+    "CONTROL_AUTHORITY": {"holder": "UNASSIGNED", "scope": "NO_RUNTIME_CONTROL"},
+    "tradeability": "NOT_TRADEABLE"
+  },
+  "authority": {
+    "status": "NONE",
+    "runtime_authority": false,
+    "production_authority": false,
+    "legal_authority": false,
+    "ecology_admission_authority": false,
+    "replication_or_release_authority": false
+  },
+  "ownership": {
+    "status": "UNASSIGNED",
+    "legal_title": false,
+    "onchain_title": false,
+    "land_rights_do_not_imply_occupant_ownership": true
+  },
+  "custody": {
+    "status": "PENDING_CODEX_REVIEW",
+    "candidate_record_only": true,
+    "ecology_resource_custody": false,
+    "final_fixture_output_custody_ref": "runtime.json#/deterministic_positive_fixture/final_custody_assertions"
+  },
+  "operation": {
+    "status": "DISABLED",
+    "mode": "LOCAL_VALIDATION_ONLY",
+    "simulation_only": true,
+    "executable": false
+  },
+  "usage": {
+    "status": "NOT_AUTHORIZED",
+    "mode": "RESEARCH_REFERENCE_ONLY",
+    "real_world_use_authority": false,
+    "cultivation_or_release_authority": false
+  },
+  "transfer": {
+    "status": "DISABLED",
+    "enabled": false,
+    "onchain_transfer": "NO_ONCHAIN_TRANSFER",
+    "wallet": "NONE"
+  },
+  "economic_role": {
+    "economic_value": null,
+    "resource_value": null,
+    "labor_requirement": null,
+    "maintenance_cost": null,
+    "harvest_or_output": null,
+    "market_role": "NONE",
+    "supply_chain_inputs": [],
+    "supply_chain_outputs": [],
+    "civilization_requirement": null,
+    "technology_requirement": null,
+    "K11520_eligibility": "SIMULATED_K11520_ONLY",
+    "rights_package": {"status": "NO_RIGHTS_GRANTED"},
+    "value_basis": "No demand, sale, harvest, decomposition service, nutrient service, cultivation use, or production output is validated."
+  },
+  "civilization_role": {
+    "status": "NONE",
+    "soil_service_claim": false,
+    "decomposition_service_claim": false,
+    "food_or_medicine_claim": false
+  },
+  "runtime_binding": {
+    "mode": "NON_EXECUTABLE_BINDING",
+    "reference": "runtime.json",
+    "authority": "NO_PRODUCTION_AUTHORITY"
+  },
+  "world_viewer_binding": {
+    "mode": "READ_ONLY",
+    "reference": "viewer.json",
+    "authority": "NO_PRODUCTION_AUTHORITY"
+  },
+  "api_binding": {
+    "mode": "READ_ONLY",
+    "reference": "api.json",
+    "authority": "NO_PRODUCTION_AUTHORITY"
+  },
+  "provenance": {
+    "source": "KAIOS_CANONICAL_LIFE_SHARED_CORE_AND_MICROBIAL_EXTENSION_READ_ONLY",
+    "created_at": "2026-08-02T00:00:00Z",
+    "author": "cursor-01",
+    "source_commit": "eb17536ff6affb34f93bce6c5622d7bab018d230",
+    "task_id": "KAIOS-CURSOR-FUNGI-CANDIDATE-001",
+    "details_reference": "provenance.json"
+  },
+  "integrity": {
+    "algorithm": "SHA-256",
+    "checksum": "b58cd9bbd90e5498ec85e23c8fb63af5333b568fc06c2df9f8fef2eacc0b7095",
+    "covers": [
+      "README.md",
+      "api.json",
+      "economy.json",
+      "environment.json",
+      "event_log.json",
+      "growth_or_formation.json",
+      "health_or_integrity.json",
+      "life.manifest.json",
+      "physics.json",
+      "provenance.json",
+      "reproduction_or_change.json",
+      "rights.json",
+      "runtime.json",
+      "taxonomy.json",
+      "viewer.json"
+    ]
+  },
+  "deterministic_seed": "KAIOS-FUNGI-MYCOFORM-CANDIDATE-SEED-001",
+  "event_log": [
+    {
+      "event_id": "EVT-LIFE-KAIOS-MYCOFORM-CANDIDATE-001-0001",
+      "timestamp": "2026-08-02T00:00:00Z",
+      "type": "CANDIDATE_PACKAGE_CREATED",
+      "status": "PENDING_CODEX_REVIEW",
+      "previous_state_hash": null,
+      "next_state_hash": "cbc01e7857ea66b4b05d35db657cbeaf70eb8f031ec7881b66819343d1b2f32b"
+    }
+  ],
+  "field_applicability": {
+    "schema_version": {"status": "REQUIRED", "reason": "Required by the Canonical Life shared core."},
+    "life_type": {"status": "REQUIRED", "reason": "Selects the approved MICROBIAL_EXTENSION profile."},
+    "life_id": {"status": "REQUIRED", "reason": "The candidate package has one explicit noncanonical Life ID."},
+    "species_id": {"status": "REQUIRED", "reason": "The candidate proposal has one explicit noncanonical Species ID."},
+    "display_name": {"status": "REQUIRED", "reason": "Human-readable inspection is required."},
+    "scientific_or_system_name": {"status": "REQUIRED", "reason": "A clearly candidate system name is required."},
+    "taxonomy": {"status": "REQUIRED", "reason": "Universal ranks and the biological extension crosswalk are explicit synthetic proposals."},
+    "origin": {"status": "REQUIRED", "reason": "Candidate lineage and immutable source and dispatch bases are required."},
+    "birth_or_formation_record": {"status": "REQUIRED", "reason": "No instant formation or real cultivation event is allowed."},
+    "location": {"status": "REQUIRED", "reason": "Location remains unassigned until a foreign owner validates it."},
+    "mass": {"status": "REQUIRED", "reason": "Manifest value remains unresolved; bounded proxy parameters are in physics.json."},
+    "volume": {"status": "REQUIRED", "reason": "Manifest value remains unresolved; bounded proxy parameters are in physics.json."},
+    "density": {"status": "REQUIRED", "reason": "Manifest value remains unresolved; bounded proxy parameters are in physics.json."},
+    "dimensions": {"status": "REQUIRED", "reason": "Physical dimensions are candidate proxies only."},
+    "material_composition": {"status": "REQUIRED", "reason": "Mass, moisture, and nutrient accounting is explicit without empirical chemistry."},
+    "energy_model": {"status": "REQUIRED", "reason": "Finite energy-proxy accounting is required."},
+    "resource_inputs": {"status": "REQUIRED", "reason": "Substrate, moisture, nutrient, oxygen-fit, and energy dependencies are explicit."},
+    "resource_outputs": {"status": "REQUIRED", "reason": "Processed residual, inactive biomass, and pending custody are explicit."},
+    "environment_requirements": {"status": "REQUIRED", "reason": "Habitat and environmental gates are mandatory proxy inputs."},
+    "growth_or_development": {"status": "REQUIRED", "reason": "Colony stages require resources and elapsed time."},
+    "aging": {"status": "REQUIRED", "reason": "A bounded tick-age proxy is required."},
+    "health_or_integrity": {"status": "REQUIRED", "reason": "Resource and environment stress must be representable without diagnosis."},
+    "damage": {"status": "REQUIRED", "reason": "Abstract stress states must be explicit."},
+    "repair_or_healing": {"status": "REQUIRED", "reason": "The explicit NOT_MODELED decision prevents fabricated biology."},
+    "reproduction_or_replication": {"status": "REQUIRED", "reason": "Replication and dispersal remain bounded and unauthorized."},
+    "mutation_or_change": {"status": "REQUIRED", "reason": "Automatic species, trait, or genome change is forbidden."},
+    "death_or_termination": {"status": "REQUIRED", "reason": "Inactivation requires count and full resource custody."},
+    "history": {"status": "REQUIRED", "reason": "Candidate history is retained."},
+    "rights": {"status": "REQUIRED", "reason": "Rights remain separated and ungranted."},
+    "authority": {"status": "REQUIRED", "reason": "Authority is explicitly none."},
+    "ownership": {"status": "REQUIRED", "reason": "Ownership is unassigned and separate from habitat rights."},
+    "custody": {"status": "REQUIRED", "reason": "Candidate review and final fixture custody are explicit."},
+    "operation": {"status": "REQUIRED", "reason": "Operation is disabled."},
+    "usage": {"status": "REQUIRED", "reason": "Usage, cultivation, and release are not authorized."},
+    "transfer": {"status": "REQUIRED", "reason": "Transfer is disabled."},
+    "economic_role": {"status": "REQUIRED", "reason": "No economic value or service claim is asserted."},
+    "civilization_role": {"status": "REQUIRED", "reason": "No civilization role is assigned."},
+    "runtime_binding": {"status": "REQUIRED", "reason": "The runtime binding is non-executable."},
+    "world_viewer_binding": {"status": "REQUIRED", "reason": "Only a read-only unregistered candidate projection is permitted."},
+    "api_binding": {"status": "REQUIRED", "reason": "Only a read-only static data contract is permitted."},
+    "provenance": {"status": "REQUIRED", "reason": "Immutable source and dispatch history is mandatory."},
+    "integrity": {"status": "REQUIRED", "reason": "The package is bound by SHA-256."},
+    "deterministic_seed": {"status": "REQUIRED", "reason": "Replay requires a stable seed."},
+    "event_log": {"status": "REQUIRED", "reason": "Candidate and fixture history is hash-linked."}
+  },
+  "extensions": [
+    {
+      "extension_id": "MICROBIAL_EXTENSION",
+      "schema_version": "1.0.0",
+      "data": {
+        "cell_structure": "ABSTRACT_MICROBIAL_CELL_STRUCTURE_PROXY / SIMULATION_APPROXIMATION",
+        "metabolism": "FINITE_SUBSTRATE_MOISTURE_NUTRIENT_ENERGY_PROXY / MODEL_INFERENCE",
+        "substrate_need": "DETRITUS_POOL_CUSTODY_PROXY / SIMULATION_APPROXIMATION",
+        "replication": "BOUNDED_UNAUTHORIZED_DISPERSAL_UNIT_PROXY / SIMULATION_APPROXIMATION",
+        "colony_model": "FINITE_COLONY_UNIT_STAGE_AND_COUNT_PROXY / MODEL_INFERENCE",
+        "environment_tolerance": "NORMALIZED_MOISTURE_TEMPERATURE_OXYGEN_COMPATIBILITY_PROXY / SIMULATION_APPROXIMATION"
+      }
+    }
+  ],
+  "safety_boundaries": {
+    "real_kgen": "NO_REAL_KGEN",
+    "onchain_transfer": "NO_ONCHAIN_TRANSFER",
+    "k11520": "SIMULATED_K11520_ONLY",
+    "production_runtime": false,
+    "wallet": "NONE",
+    "legal_personhood": false
+  }
+}
