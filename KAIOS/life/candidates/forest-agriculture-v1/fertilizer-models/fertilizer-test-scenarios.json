@@ -1,0 +1,304 @@
+{
+  "suite_id": "KAIOS-FERTILIZER-MODEL-CANDIDATE-TEST-SCENARIOS-V1",
+  "schema_version": "1.0.0-candidate",
+  "status": "CURSOR_RESEARCH_CANDIDATE_ONLY",
+  "review_status": "PENDING_CODEX_REVIEW",
+  "task_id": "KAIOS-CURSOR-FERTILIZER-MODELS-001",
+  "source_base_commit": "1650191f35567d43016473420cfd2cba22b00aea",
+  "mode": "DETERMINISTIC_DATA_CONTRACT_TEST_MANIFEST",
+  "authority": "NO_PRODUCTION_AUTHORITY",
+  "canonical_promotion": false,
+  "all_values_label": "SIMULATION_PROPOSAL_OR_DETERMINISTIC_TEST_FIXTURE_REQUIRES_OWNER_VALIDATION",
+  "fixture_contract": {
+    "fixed_point_scale": 1000000,
+    "arithmetic": "INTEGER_ONLY_FOR_FIXTURE_LEDGERS",
+    "ordering": "LEXICOGRAPHIC_BY_TEST_ID_WHEN_A_RUNNER_NEEDS_STABLE_ORDER",
+    "tolerance": 0,
+    "numeric_classification": "All numbers in expected values, counts, fixture paths and ledger assertions are exact non-tunable oracle constants. This file defines no tunable model parameter.",
+    "external_effects": "NONE",
+    "clock": "NO_WALL_CLOCK_ACCESS",
+    "randomness": "NONE",
+    "network": "NONE"
+  },
+  "numeric_parameter_contract": {
+    "required_fields": ["parameter_name", "unit", "minimum", "default", "maximum", "rationale", "source_type", "confidence", "risk", "validation_required"],
+    "allowed_source_types": ["SOURCE_DERIVED", "REPOSITORY_DERIVED", "MODEL_INFERENCE", "RESEARCH_PROPOSAL", "ASSUMPTION", "SOURCE_UNDERSPECIFIED"],
+    "applies_to": "Every object with parameter_name in the three proposal datasets; this test manifest contains exact oracle values rather than tunable parameters.",
+    "range_rule": "minimum <= default <= maximum",
+    "validation_rule": "validation_required is true"
+  },
+  "input_files": [
+    "fertilizer-catalog-proposals.json",
+    "nutrient-composition-proposals.json",
+    "application-response-model-proposals.json",
+    "environmental-risk-scenarios.json",
+    "fertilizer-test-scenarios.json"
+  ],
+  "allowed_output_files": [
+    "CURSOR_FERTILIZER_MODELS_REPORT.md",
+    "fertilizer-catalog-proposals.json",
+    "nutrient-composition-proposals.json",
+    "application-response-model-proposals.json",
+    "environmental-risk-scenarios.json",
+    "fertilizer-test-scenarios.json"
+  ],
+  "protected_path_markers": [
+    "/runtime/",
+    "Runtime",
+    "CANONICAL",
+    "Canonical",
+    "CURRENT",
+    "Wallet",
+    "KGEN/contracts",
+    "KGEN-KAIOS/land/RIGHTS_AUTHORITY_STANDARD.md",
+    "KGEN-KAIOS/world-viewer/economy/economy-runtime.js",
+    "PRIMEFORGE_GENESIS_BOOT_SEQUENCE",
+    "KGEN-Constitution"
+  ],
+  "test_scenarios": [
+    {
+      "test_id": "TEST-001-STRICT-JSON",
+      "class": "SYNTAX",
+      "inputs": ["ALL_JSON_OUTPUT_FILES"],
+      "assertions": ["UTF8_DECODE_SUCCEEDS", "JSON_PARSE_SUCCEEDS", "ROOT_IS_OBJECT", "NO_TRAILING_NON_WHITESPACE"],
+      "expected": {"parsed_json_file_count":5,"failure_count":0}
+    },
+    {
+      "test_id": "TEST-002-CANDIDATE-METADATA",
+      "class": "BOUNDARY",
+      "inputs": ["ALL_JSON_OUTPUT_FILES"],
+      "assertions": ["status == CURSOR_RESEARCH_CANDIDATE_ONLY", "review_status == PENDING_CODEX_REVIEW", "canonical_promotion == false", "authority == NO_PRODUCTION_AUTHORITY", "source_base_commit == 1650191f35567d43016473420cfd2cba22b00aea"],
+      "expected": {"matching_json_file_count":5}
+    },
+    {
+      "test_id": "TEST-003-NUMERIC-PARAMETER-CONTRACT",
+      "class": "SCHEMA",
+      "inputs": ["fertilizer-catalog-proposals.json", "nutrient-composition-proposals.json", "application-response-model-proposals.json", "environmental-risk-scenarios.json"],
+      "assertions": ["Every recursively discovered object containing parameter_name has exactly the ten required fields", "minimum <= default <= maximum", "source_type is in the six-value allowlist", "validation_required == true", "unit, rationale, confidence and risk are nonempty strings"],
+      "expected": {"invalid_parameter_count":0}
+    },
+    {
+      "test_id": "TEST-004-CATALOG-COMPOSITION-REFERENCES",
+      "class": "CROSS_REFERENCE",
+      "inputs": ["fertilizer-catalog-proposals.json", "nutrient-composition-proposals.json"],
+      "assertions": ["Every catalog composition_profile_id exists exactly once", "Every composition catalog_proposal_id exists exactly once", "Abstract amendment mapping is explicitly SOURCE_UNDERSPECIFIED_OWNER_VALIDATION_REQUIRED"],
+      "expected": {"catalog_proposal_count":3,"composition_profile_count":3,"unresolved_reference_count":0}
+    },
+    {
+      "test_id": "TEST-005-COMPOSITION-DEFAULT-CLOSURE",
+      "class": "MASS_ACCOUNTING",
+      "inputs": ["nutrient-composition-proposals.json"],
+      "assertions": ["For every composition profile the seven component defaults sum exactly to 1", "default_fraction_sum == 1"],
+      "expected": {"profile_count":3,"failed_profile_count":0}
+    },
+    {
+      "test_id": "TEST-006-COMPOSITION-FIXTURE-CLOSURE",
+      "class": "MASS_ACCOUNTING",
+      "inputs": ["nutrient-composition-proposals.json"],
+      "assertions": ["Each fixture component map sums to total_mass_microkilogram_proxy", "N plus P plus K plus secondary equals nutrient_mass_microkilogram_proxy", "nutrient plus non_nutrient equals total", "All component masses are nonnegative integers"],
+      "expected": {"fixture_count":3,"fixture_total_mass_each":100000000,"failed_fixture_count":0}
+    },
+    {
+      "test_id": "TEST-007-COMPOSITION-ORACLES",
+      "class": "DETERMINISM",
+      "inputs": ["nutrient-composition-proposals.json"],
+      "assertions": ["Dry components equal 10000000,5000000,8000000,2000000,75000000,0,0 in declared order", "Liquid components equal 4000000,2000000,3000000,1000000,10000000,80000000,0 in declared order", "Amendment components equal 2000000,1000000,1000000,1000000,65000000,30000000,0 in declared order"],
+      "expected": {"exact_match":true}
+    },
+    {
+      "test_id": "TEST-008-OWNER-BINDINGS",
+      "class": "OWNERSHIP",
+      "inputs": ["fertilizer-catalog-proposals.json", "application-response-model-proposals.json"],
+      "assertions": ["Catalog owner IDs include KAIOS_FOUNDATIONAL_LIFE_RUNTIME_V1, KAIOS_CANONICAL_LIFE_SCHEMA_V1, KAIOS_REPRODUCTION_ECOLOGY_RUNTIME_V1, AGRICULTURE_ALPHA, KAIOS_SUPPLY_CHAIN_SCHEMA, KAIOS_PHYSICAL_LABOR_SCHEMA, EXISTING_RIGHTS_AUTHORITY and CIVILIZATION_ECONOMY_ALPHA", "Existing resource ID FERTILIZER is reused", "No candidate owner claims soil, plant, ecology, agriculture, supply, labor, rights or economy truth"],
+      "expected": {"required_owner_count":8,"missing_owner_count":0}
+    },
+    {
+      "test_id": "TEST-009-APPLICATION-EVENT-GATES",
+      "class": "EVENT_CONTRACT",
+      "inputs": ["application-response-model-proposals.json"],
+      "assertions": ["Required sequence includes inventory reservation, storage inspection, transport custody, rights decision, labor validation, equipment inspection, timing declaration, application proposal, Ecology response and ledger reference", "Required application fields explicitly name inventory, plot, timing, equipment, labor, rights, mass, water and energy", "Reject conditions include missing gates, contamination, cap violation and unclosed ledger"],
+      "expected": {"required_event_count":10,"required_application_field_count":17}
+    },
+    {
+      "test_id": "TEST-010-SOIL-RESPONSE-PROFILES",
+      "class": "CROSS_REFERENCE",
+      "inputs": ["application-response-model-proposals.json"],
+      "assertions": ["Exactly seven released soil candidate IDs are referenced", "Each response profile has exactly seven nutrient partition parameters", "Each profile default partition sums exactly to 1", "Runoff, leaching, volatilization and equipment residue are separate parameters"],
+      "expected": {"response_profile_count":7,"partition_count_per_profile":7,"failed_profile_count":0}
+    },
+    {
+      "test_id": "TEST-011-BOUNDED-LOAM-MASS",
+      "class": "MASS_ACCOUNTING",
+      "inputs": ["application-response-model-proposals.json"],
+      "assertions": ["Nutrient initial_total == final_total == 25000000", "Carrier initial_total == final_total == 75000000", "Nutrient destinations plus final inventory equal initial inventory", "Carrier destinations plus final inventory equal initial inventory"],
+      "expected": {"nutrient_closed":true,"carrier_closed":true,"tolerance":0}
+    },
+    {
+      "test_id": "TEST-012-BOUNDED-LOAM-WATER-ENERGY-LABOR",
+      "class": "RESOURCE_ACCOUNTING",
+      "inputs": ["application-response-model-proposals.json"],
+      "assertions": ["Water initial_total == final_total == 10000000", "Energy initial_total == final_total == 3000000", "Labor initial_total == final_total == 60000000", "Labor consumed plus remaining equals validated capacity", "overlap_detected == false"],
+      "expected": {"water_closed":true,"energy_closed":true,"labor_closed":true,"tolerance":0}
+    },
+    {
+      "test_id": "TEST-013-BOUNDED-RESPONSE-SIGNAL",
+      "class": "BOUNDED_RESPONSE",
+      "inputs": ["application-response-model-proposals.json"],
+      "assertions": ["min(1000000, 1500000 / 2000000 scaled) * 800000 scaled == 600000", "Expected signal is within 0 through 1000000", "Response equations contain no yield output"],
+      "expected": {"response_signal_fixed_point":600000,"yield_projection_present":false}
+    },
+    {
+      "test_id": "TEST-014-REQUIRED-RISK-COVERAGE",
+      "class": "COVERAGE",
+      "inputs": ["environmental-risk-scenarios.json"],
+      "assertions": ["Scenario IDs cover deficiency, bounded application, over-application, runoff, leaching, storage loss and recovery", "Additional scenario IDs cover transport, volatilization, contamination and received amendment boundary", "Scenario IDs are unique"],
+      "expected": {"scenario_count":11,"required_scenario_count":7,"duplicate_scenario_count":0}
+    },
+    {
+      "test_id": "TEST-015-ALL-RISK-LEDGERS-CLOSE",
+      "class": "RESOURCE_ACCOUNTING",
+      "inputs": ["environmental-risk-scenarios.json"],
+      "assertions": ["For every object whose key ends with _ledger_microkilogram_proxy, _ledger_microliter_proxy, _ledger_micro_joule_proxy or _ledger_micro_worker_minute: initial_total == final_total", "Every such ledger has closed == true", "Every ledger value other than booleans is a nonnegative integer"],
+      "expected": {"failed_ledger_count":0,"tolerance":0}
+    },
+    {
+      "test_id": "TEST-016-DEFICIENCY-NO-CREATION",
+      "class": "NEGATIVE_PATH",
+      "inputs": ["environmental-risk-scenarios.json#RISK-NUTRIENT-DEFICIENCY-V1"],
+      "assertions": ["Initial and final nutrient mass both equal 1000000", "No inventory debit exists", "No application event or material creation is expected"],
+      "expected": {"status":"ALERT_ONLY_NO_APPLICATION_NO_MATERIAL_CREATION"}
+    },
+    {
+      "test_id": "TEST-017-OVER-APPLICATION-REJECT",
+      "class": "NEGATIVE_PATH",
+      "inputs": ["environmental-risk-scenarios.json#RISK-OVER-APPLICATION-V1"],
+      "assertions": ["Proposed fraction 600000 exceeds cap 500000", "Nutrient and carrier inventory remain unchanged", "Water, energy and labor have no debit"],
+      "expected": {"status":"REJECTED_NO_TRANSFER"}
+    },
+    {
+      "test_id": "TEST-018-RUNOFF-SEPARATION",
+      "class": "ENVIRONMENTAL_CUSTODY",
+      "inputs": ["environmental-risk-scenarios.json#RISK-RUNOFF-TRANSFER-V1"],
+      "assertions": ["Nutrient runoff custody equals 5000000", "Water runoff custody equals 14000000", "No drainage custody field is substituted for runoff"],
+      "expected": {"review_required":true,"ledgers_closed":true}
+    },
+    {
+      "test_id": "TEST-019-LEACHING-SEPARATION",
+      "class": "ENVIRONMENTAL_CUSTODY",
+      "inputs": ["environmental-risk-scenarios.json#RISK-LEACHING-TRANSFER-V1"],
+      "assertions": ["Nutrient drainage custody equals 6000000", "Water drainage custody equals 14000000", "No runoff custody field is substituted for drainage"],
+      "expected": {"review_required":true,"ledgers_closed":true}
+    },
+    {
+      "test_id": "TEST-020-STORAGE-TRANSPORT-RECOVERY",
+      "class": "CUSTODY",
+      "inputs": ["environmental-risk-scenarios.json#RISK-STORAGE-LOSS-V1", "environmental-risk-scenarios.json#RISK-TRANSPORT-LOSS-V1", "environmental-risk-scenarios.json#RISK-RECOVERY-CUSTODY-V1"],
+      "assertions": ["Storage discrepancy uses available, recovery and containment custody", "Transport discrepancy uses destination, recovery and containment custody", "Recovery uses restored inventory and approved disposal custody", "No generic disappearing loss field exists"],
+      "expected": {"scenario_count":3,"ledgers_closed":true}
+    },
+    {
+      "test_id": "TEST-021-VOLATILIZATION-SEPARATION",
+      "class": "ENVIRONMENTAL_CUSTODY",
+      "inputs": ["environmental-risk-scenarios.json#RISK-VOLATILIZATION-TRANSFER-V1"],
+      "assertions": ["Nutrient atmosphere custody equals 6000000", "Atmosphere custody is not plant availability, runoff or drainage", "Mass ledger closes exactly"],
+      "expected": {"review_required":true,"ledgers_closed":true}
+    },
+    {
+      "test_id": "TEST-022-CONTAMINATION-HOLD",
+      "class": "NEGATIVE_PATH",
+      "inputs": ["environmental-risk-scenarios.json#RISK-CONTAMINATION-HOLD-V1"],
+      "assertions": ["Nonzero contaminant mass equals 1000000", "Contaminant remains in quality hold custody", "Nutrient and carrier remain in quality hold", "No application transfer occurs"],
+      "expected": {"status":"REJECTED_QUALITY_HOLD_NO_APPLICATION"}
+    },
+    {
+      "test_id": "TEST-023-AMENDMENT-NOT-COMPOST",
+      "class": "BOUNDARY",
+      "inputs": ["fertilizer-catalog-proposals.json", "nutrient-composition-proposals.json", "environmental-risk-scenarios.json#RISK-AMENDMENT-RECEIPT-BOUNDARY-V1"],
+      "assertions": ["Amendment is a received external lot with mapping pending", "Nutrient, carrier and batch-water mass close separately", "No compost production, maturity, decomposition, microbial or quality state is created"],
+      "expected": {"status":"INSPECTION_HOLD_NO_COMPOST_OR_APPLICATION_STATE"}
+    },
+    {
+      "test_id": "TEST-024-PROVENANCE-BLOB-HASHES",
+      "class": "PROVENANCE",
+      "inputs": ["ALL_JSON_INPUT_FILES", "DECLARED_BASE_GIT_TREE"],
+      "assertions": ["For every provenance record, source_commit equals declared base", "git_object equals git rev-parse source_commit:path", "sha256 equals SHA-256 of exact bytes emitted by git cat-file blob git_object", "source_type is REPOSITORY_DERIVED"],
+      "expected": {"mismatch_count":0}
+    },
+    {
+      "test_id": "TEST-025-BOUNDARY-MARKERS",
+      "class": "BOUNDARY",
+      "inputs": ["ALL_JSON_INPUT_FILES", "CURSOR_FERTILIZER_MODELS_REPORT.md"],
+      "assertions": ["Artifacts state candidate-only and simulation-only", "Artifacts disclaim field guidance, yield, safety and environmental guarantees", "Artifacts grant no Rights or Economy authority", "Artifacts contain no Runtime, Canonical or CURRENT promotion"],
+      "expected": {"failure_count":0}
+    },
+    {
+      "test_id": "TEST-026-EXACT-FILE-SCOPE",
+      "class": "REPOSITORY_SCOPE",
+      "inputs": ["GIT_DIFF_NAME_ONLY_FROM_TASK_START_HEAD"],
+      "assertions": ["Exactly six paths differ", "Every differing path is under KAIOS/life/candidates/forest-agriculture-v1/fertilizer-models", "Basenames exactly equal allowed_output_files", "No protected path differs"],
+      "expected": {"changed_path_count":6,"outside_scope_count":0}
+    },
+    {
+      "test_id": "TEST-027-UTF8-NO-BOM",
+      "class": "ENCODING",
+      "inputs": ["ALL_SIX_OUTPUT_FILES"],
+      "assertions": ["Each file decodes as strict UTF-8", "No file begins with EF BB BF", "No NUL byte exists"],
+      "expected": {"valid_file_count":6,"bom_file_count":0,"nul_file_count":0}
+    },
+    {
+      "test_id": "TEST-028-SECRET-SCAN",
+      "class": "SECURITY",
+      "inputs": ["ALL_SIX_OUTPUT_FILES"],
+      "assertions": ["No private key block", "No seed phrase label", "No credential-bearing URL", "No common API token or cloud secret pattern", "No wallet secret"],
+      "expected": {"finding_count":0}
+    },
+    {
+      "test_id": "TEST-029-GIT-DIFF-CHECK",
+      "class": "REPOSITORY_QUALITY",
+      "inputs": ["GIT_DIFF"],
+      "assertions": ["git diff --check exits zero"],
+      "expected": {"exit_code":0}
+    }
+  ],
+  "required_risk_scenario_ids": [
+    "RISK-NUTRIENT-DEFICIENCY-V1",
+    "RISK-BOUNDED-APPLICATION-V1",
+    "RISK-OVER-APPLICATION-V1",
+    "RISK-RUNOFF-TRANSFER-V1",
+    "RISK-LEACHING-TRANSFER-V1",
+    "RISK-STORAGE-LOSS-V1",
+    "RISK-TRANSPORT-LOSS-V1",
+    "RISK-VOLATILIZATION-TRANSFER-V1",
+    "RISK-CONTAMINATION-HOLD-V1",
+    "RISK-RECOVERY-CUSTODY-V1",
+    "RISK-AMENDMENT-RECEIPT-BOUNDARY-V1"
+  ],
+  "expected_source_hashes": [
+    {"source_path":"PRIMEFORGE_GENESIS_BOOT_SEQUENCE_V1_4.md","sha256":"1ef1f7f2f17cc55fa8afbca429ccdfb9e0ce2a1ac55108f194b1810c26331dbc"},
+    {"source_path":"docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md","sha256":"6d71cd7946f0b4057a9b5289923d3c7b424e409140feb7404f5b433a309ab00b"},
+    {"source_path":"docs/maps/UniverseMap_V10_2_DISTANCE_COMPLETE_ALL_POINTS.json","sha256":"bfde25dfb2737e6f698850aa705ea221c64bb0f228ff8e3a7f2740f0ae123451"},
+    {"source_path":"AGENTS.md","sha256":"c16c1ba1cfff166e68d2ec1a399afb9f9fa877631b574ebe3fdf03c5c514295b"},
+    {"source_path":"KAIOS/life/forest-agriculture/KAIOS_FOREST_AGRICULTURE_RUNTIME_V1_SPEC.md","sha256":"4e1a23e97d09ec2dc4ad65440e6958e646f75ed418e5c703c5a5a1635c2809a1"},
+    {"source_path":"KAIOS/life/candidates/forest-agriculture-v1/soil-types/soil-type-catalog-candidates.json","sha256":"a5fdf6e363f4e5cecd0d50b981bf32d5cb06f35747eb7327b37d4784a14e1d64"},
+    {"source_path":"KAIOS/life/candidates/forest-agriculture-v1/soil-types/soil-water-nutrient-thresholds.json","sha256":"0cad3742773b1fcad1d5d2a86d1b50e95eae4a0a7d242d4dcd71fb26f6c8902c"},
+    {"source_path":"KAIOS/life/candidates/forest-agriculture-v1/crops/crop-catalog-candidates.json","sha256":"f824773458c31a4725eced0f83102a8eefefdcabf27dd71b4e59806684244a57"},
+    {"source_path":"KAIOS/life/candidates/forest-agriculture-v1/crops/crop-resource-flow-proposal.json","sha256":"b0e6bb9e1241ef0bf70a45f82156736bb17821e9c29624b62207e78215cf0849"},
+    {"source_path":"KAIOS_INDUSTRIAL_SUPPLY_CHAIN_SPEC.md","sha256":"431db8dba33f5fdaa4de04c90830eaeb054c057a708455c48265631ca4e0433c"},
+    {"source_path":"KAIOS_SUPPLY_CHAIN_SCHEMA.json","sha256":"ea6d175e8bfd242a288f6e6374e97e97fd18ecf5edb40761a29de2129036aa60"},
+    {"source_path":"KAIOS_PHYSICAL_LABOR_SCHEMA.json","sha256":"21060f7bdf64f0a3af827f1fcd7d95d3170affef54c01bbeb449b9361fdd2f43"},
+    {"source_path":"KAIOS_CANONICAL_LIFE_RIGHTS_V1.md","sha256":"bec5f35a1906dbd9eb72764e935f4ad282a81398587b66de789130ae4a0428f4"},
+    {"source_path":"KGEN-KAIOS/world-viewer/ecosystem/ecosystem-runtime.js","sha256":"9b2cd9d4501727d3134ea332e1a30cd77d5d7d647300820f51d9c264784ef537"},
+    {"source_path":"KGEN-KAIOS/world-viewer/agriculture/agriculture-runtime.js","sha256":"4557d6b449ce3979f2bf4ca10cc48f271ead2ddb34cc127e60b264ce26b577c2"},
+    {"source_path":"KGEN-KAIOS/world-viewer/economy/economy-runtime.js","sha256":"8b5879091b212ea3e0ead296719e872b9353209fd8982f01567f2bbb78991f27"}
+  ],
+  "suite_boundaries": [
+    "TEST_DATA_ONLY",
+    "NO_RUNTIME_EXECUTION",
+    "NO_NETWORK_OR_EXTERNAL_STATE",
+    "NO_CANONICAL_PROMOTION",
+    "NO_RIGHTS_OR_ECONOMY_AUTHORITY",
+    "NO_WALLET_OR_REAL_KGEN",
+    "NO_DEPLOYMENT",
+    "NO_MERGE"
+  ]
+}

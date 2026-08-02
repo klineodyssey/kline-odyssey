@@ -1,0 +1,406 @@
+{
+  "dataset_id": "KAIOS-APPLICATION-RESPONSE-MODEL-PROPOSALS-V1",
+  "schema_version": "1.0.0-candidate",
+  "status": "CURSOR_RESEARCH_CANDIDATE_ONLY",
+  "review_status": "PENDING_CODEX_REVIEW",
+  "task_id": "KAIOS-CURSOR-FERTILIZER-MODELS-001",
+  "source_base_commit": "1650191f35567d43016473420cfd2cba22b00aea",
+  "source_hash_basis": "SHA256_OF_EXACT_GIT_BLOB_BYTES_AT_SOURCE_BASE_COMMIT",
+  "mode": "LOCAL_DETERMINISTIC_FIXED_POINT_SIMULATION_PROPOSAL",
+  "authority": "NO_PRODUCTION_AUTHORITY",
+  "canonical_promotion": false,
+  "all_values_label": "SIMULATION_PROPOSAL_OR_DETERMINISTIC_TEST_FIXTURE_REQUIRES_OWNER_VALIDATION",
+  "response_boundary": "The model proposes bounded custody transfers and a dimensionless response signal. It does not prescribe field use, mutate owner state, predict yield, certify safety or guarantee environmental outcomes.",
+  "fixed_point_contract": {
+    "scale": 1000000,
+    "mass_unit": "microkilogram_proxy",
+    "water_unit": "microliter_proxy",
+    "energy_unit": "micro_joule_proxy",
+    "labor_unit": "micro_worker_minute",
+    "rounding": "ROUND_HALF_DOWN_TO_INTEGER_AT_FINAL_POOL_ALLOCATION_WITH_REMAINDER_ASSIGNED_TO_SOIL_RETAINED_POOL",
+    "nonnegative_rule": "All custody balances and deltas must remain nonnegative.",
+    "fixture_value_rule": "Numbers inside deterministic_fixture are exact bounded oracle inputs and outputs, not tunable model parameters or operational guidance."
+  },
+  "numeric_parameter_contract": {
+    "required_fields": ["parameter_name", "unit", "minimum", "default", "maximum", "rationale", "source_type", "confidence", "risk", "validation_required"],
+    "allowed_source_types": ["SOURCE_DERIVED", "REPOSITORY_DERIVED", "MODEL_INFERENCE", "RESEARCH_PROPOSAL", "ASSUMPTION", "SOURCE_UNDERSPECIFIED"],
+    "range_rule": "minimum <= default <= maximum",
+    "validation_rule": "Every numeric parameter is a simulation proposal and validation_required is true."
+  },
+  "owner_interface_contract": {
+    "read_only_foreign_inputs": [
+      "economy_inventory_lot_id",
+      "supply_chain_order_id",
+      "warehouse_id",
+      "transport_event_id",
+      "agriculture_plot_id",
+      "agriculture_crop_id",
+      "soil_state_observation_id",
+      "soil_type_candidate_id",
+      "ecology_habitat_id",
+      "rights_decision_id",
+      "labor_shift_id",
+      "equipment_inspection_id",
+      "timing_window_id"
+    ],
+    "proposal_outputs": [
+      "inventory_lot_delta_proposal",
+      "soil_nutrient_pool_delta_proposal",
+      "soil_carrier_pool_delta_proposal",
+      "plant_available_nutrient_delta_proposal",
+      "runoff_custody_delta_proposal",
+      "drainage_custody_delta_proposal",
+      "atmosphere_custody_delta_proposal",
+      "equipment_residue_delta_proposal",
+      "water_custody_delta_proposal",
+      "energy_custody_delta_proposal",
+      "labor_capacity_delta_proposal",
+      "application_event_proposal"
+    ],
+    "write_rule": "No output is authoritative until the named owner validates and applies it.",
+    "rights_rule": "A proposal consumes an existing ALLOW decision reference; it never grants land, water, operation or application capability.",
+    "economy_rule": "A proposal references inventory and ledger IDs; it never creates quantity, ownership, price, cost or balanced-ledger truth."
+  },
+  "application_event_contract": {
+    "required_event_sequence": [
+      "INVENTORY_LOT_RESERVATION_EVENT",
+      "STORAGE_INSPECTION_EVENT",
+      "TRANSPORT_CUSTODY_EVENT",
+      "RIGHTS_CAPABILITY_DECISION_EVENT",
+      "LABOR_SHIFT_VALIDATION_EVENT",
+      "EQUIPMENT_INSPECTION_EVENT",
+      "TIMING_WINDOW_DECLARATION_EVENT",
+      "APPLICATION_PROPOSAL_EVENT",
+      "ECOLOGY_RESPONSE_EVENT",
+      "OWNER_LEDGER_REFERENCE_EVENT"
+    ],
+    "required_application_fields": [
+      "application_event_id",
+      "catalog_proposal_id",
+      "composition_profile_id",
+      "method_id",
+      "source_inventory_lot_id",
+      "source_location_id",
+      "destination_plot_id",
+      "destination_soil_observation_id",
+      "application_start_tick",
+      "application_end_tick",
+      "applied_mass_microkilogram_proxy",
+      "added_water_microliter_proxy",
+      "energy_debit_micro_joule_proxy",
+      "labor_debit_micro_worker_minute",
+      "equipment_id",
+      "operator_shift_id",
+      "rights_decision_id"
+    ],
+    "reject_conditions": [
+      "MISSING_OR_NON_ALLOW_RIGHTS_DECISION",
+      "MISSING_OR_UNAVAILABLE_INVENTORY_LOT",
+      "COMPOSITION_PROFILE_MISMATCH",
+      "NONZERO_UNRESOLVED_CONTAMINATION",
+      "FAILED_STORAGE_OR_TRANSPORT_CUSTODY",
+      "MISSING_OR_OVERLAPPING_LABOR_SHIFT",
+      "MISSING_OR_FAILED_EQUIPMENT_INSPECTION",
+      "APPLICATION_OUTSIDE_DECLARED_TIMING_WINDOW",
+      "APPLICATION_ABOVE_BOUNDED_SIMULATION_CAP",
+      "NEGATIVE_BALANCE_OR_UNCLOSED_LEDGER"
+    ]
+  },
+  "application_methods": [
+    {
+      "method_id": "METHOD-DRY-SURFACE-PLACEMENT-PROXY",
+      "eligible_catalog_proposal_ids": ["FERT-PROPOSAL-DRY-NUTRIENT-BLEND-V1"],
+      "label": "SIMULATION_PLACEMENT_LABEL_NOT_FIELD_INSTRUCTION",
+      "numeric_parameters": [
+        {"parameter_name":"application_fraction_of_available_lot","unit":"fraction_of_owner_validated_available_lot_mass","minimum":0.01,"default":0.2,"maximum":0.5,"rationale":"Bounds one deterministic transfer without defining a field rate.","source_type":"RESEARCH_PROPOSAL","confidence":"LOW","risk":"Could be mistaken for operational application guidance.","validation_required":true},
+        {"parameter_name":"timing_window_after_soil_observation","unit":"simulation_hour","minimum":0,"default":24,"maximum":168,"rationale":"Requires a finite link between owner observation and proposed event timing.","source_type":"MODEL_INFERENCE","confidence":"LOW","risk":"Not a crop-stage, weather or agronomic timing recommendation.","validation_required":true},
+        {"parameter_name":"equipment_residue_fraction","unit":"fraction_of_applied_mass","minimum":0,"default":0.02,"maximum":0.2,"rationale":"Preserves mass retained by inspected equipment in named custody.","source_type":"RESEARCH_PROPOSAL","confidence":"LOW","risk":"Equipment-specific residue is unvalidated.","validation_required":true}
+      ]
+    },
+    {
+      "method_id": "METHOD-DRY-BANDED-PLACEMENT-PROXY",
+      "eligible_catalog_proposal_ids": ["FERT-PROPOSAL-DRY-NUTRIENT-BLEND-V1"],
+      "label": "SIMULATION_PLACEMENT_LABEL_NOT_FIELD_INSTRUCTION",
+      "numeric_parameters": [
+        {"parameter_name":"application_fraction_of_available_lot","unit":"fraction_of_owner_validated_available_lot_mass","minimum":0.01,"default":0.15,"maximum":0.4,"rationale":"Bounds a second abstract placement event for comparative simulation only.","source_type":"RESEARCH_PROPOSAL","confidence":"LOW","risk":"No placement depth, spacing or agronomic suitability is represented.","validation_required":true},
+        {"parameter_name":"timing_window_after_soil_observation","unit":"simulation_hour","minimum":0,"default":24,"maximum":168,"rationale":"Requires recent owner state for deterministic evaluation.","source_type":"MODEL_INFERENCE","confidence":"LOW","risk":"Not a real timing recommendation.","validation_required":true},
+        {"parameter_name":"equipment_residue_fraction","unit":"fraction_of_applied_mass","minimum":0,"default":0.02,"maximum":0.2,"rationale":"Preserves equipment residue in a separate material pool.","source_type":"RESEARCH_PROPOSAL","confidence":"LOW","risk":"No machinery suitability or calibration is established.","validation_required":true}
+      ]
+    },
+    {
+      "method_id": "METHOD-LIQUID-METERED-PLACEMENT-PROXY",
+      "eligible_catalog_proposal_ids": ["FERT-PROPOSAL-LIQUID-NUTRIENT-SOLUTION-V1"],
+      "label": "SIMULATION_METERING_LABEL_NOT_MIXING_OR_FIELD_INSTRUCTION",
+      "numeric_parameters": [
+        {"parameter_name":"application_fraction_of_available_lot","unit":"fraction_of_owner_validated_available_lot_mass","minimum":0.01,"default":0.1,"maximum":0.35,"rationale":"Bounds a liquid proxy transfer without defining dilution or application rate.","source_type":"RESEARCH_PROPOSAL","confidence":"LOW","risk":"Could be misread as mixing or application guidance.","validation_required":true},
+        {"parameter_name":"timing_window_after_soil_observation","unit":"simulation_hour","minimum":0,"default":12,"maximum":96,"rationale":"Requires finite observation age in the simulation.","source_type":"MODEL_INFERENCE","confidence":"LOW","risk":"Not weather, crop-stage or field timing guidance.","validation_required":true},
+        {"parameter_name":"equipment_residue_fraction","unit":"fraction_of_applied_mass","minimum":0,"default":0.03,"maximum":0.25,"rationale":"Keeps container and metering residue explicit.","source_type":"RESEARCH_PROPOSAL","confidence":"LOW","risk":"No pressure, compatibility or equipment-safety conclusion is supported.","validation_required":true}
+      ]
+    },
+    {
+      "method_id": "METHOD-AMENDMENT-SURFACE-PLACEMENT-PROXY",
+      "eligible_catalog_proposal_ids": ["AMENDMENT-PROPOSAL-ORGANIC-CARRIER-V1"],
+      "label": "RECEIVED_AMENDMENT_SIMULATION_LABEL_NOT_COMPOST_OR_FIELD_INSTRUCTION",
+      "numeric_parameters": [
+        {"parameter_name":"application_fraction_of_available_lot","unit":"fraction_of_owner_validated_available_lot_mass","minimum":0.01,"default":0.2,"maximum":0.5,"rationale":"Bounds a received amendment proxy transfer without defining a soil treatment rate.","source_type":"RESEARCH_PROPOSAL","confidence":"LOW","risk":"Could be mistaken for amendment or compost guidance.","validation_required":true},
+        {"parameter_name":"timing_window_after_soil_observation","unit":"simulation_hour","minimum":0,"default":24,"maximum":168,"rationale":"Requires owner soil state to be temporally linked to the proposal.","source_type":"MODEL_INFERENCE","confidence":"LOW","risk":"Not a real field timing recommendation.","validation_required":true},
+        {"parameter_name":"equipment_residue_fraction","unit":"fraction_of_applied_mass","minimum":0,"default":0.04,"maximum":0.3,"rationale":"Preserves moist carrier residue in explicit equipment custody.","source_type":"RESEARCH_PROPOSAL","confidence":"LOW","risk":"No equipment, cleanup or exposure procedure is approved.","validation_required":true}
+      ]
+    }
+  ],
+  "shared_response_parameters": [
+    {"parameter_name":"response_reference_available_nutrient_mass","unit":"microkilogram_proxy_per_bounded_fixture","minimum":1000000,"default":2000000,"maximum":10000000,"rationale":"Normalizes a dimensionless simulation signal without asserting plant demand or a field rate.","source_type":"RESEARCH_PROPOSAL","confidence":"LOW","risk":"The reference cannot be used as an agronomic requirement.","validation_required":true},
+    {"parameter_name":"response_signal_upper_bound","unit":"dimensionless_signal","minimum":1,"default":1,"maximum":1,"rationale":"Prevents the candidate response signal from exceeding its declared normalized range.","source_type":"MODEL_INFERENCE","confidence":"MEDIUM","risk":"A bounded signal still does not predict yield or health.","validation_required":true},
+    {"parameter_name":"carrier_to_soil_fraction","unit":"fraction_of_applied_carrier_mass","minimum":0.7,"default":0.98,"maximum":1,"rationale":"Transfers carrier into Ecology soil custody while leaving room for explicit residue.","source_type":"RESEARCH_PROPOSAL","confidence":"LOW","risk":"No soil-structure benefit or decomposition behavior is established.","validation_required":true},
+    {"parameter_name":"carrier_to_equipment_residue_fraction","unit":"fraction_of_applied_carrier_mass","minimum":0,"default":0.02,"maximum":0.3,"rationale":"Closes applied carrier mass in a named equipment pool.","source_type":"RESEARCH_PROPOSAL","confidence":"LOW","risk":"Real equipment residue requires validation.","validation_required":true},
+    {"parameter_name":"event_water_to_soil_fraction","unit":"fraction_of_event_water_volume","minimum":0,"default":0.7,"maximum":1,"rationale":"Partitions optional event water into soil water custody.","source_type":"RESEARCH_PROPOSAL","confidence":"LOW","risk":"Not an infiltration or irrigation estimate.","validation_required":true},
+    {"parameter_name":"event_water_to_runoff_fraction","unit":"fraction_of_event_water_volume","minimum":0,"default":0.2,"maximum":1,"rationale":"Keeps runoff water explicit for environmental scenarios.","source_type":"RESEARCH_PROPOSAL","confidence":"LOW","risk":"Not a hydrology prediction.","validation_required":true},
+    {"parameter_name":"event_water_to_atmosphere_fraction","unit":"fraction_of_event_water_volume","minimum":0,"default":0.1,"maximum":1,"rationale":"Closes the bounded water volume in a named atmosphere proxy pool.","source_type":"MODEL_INFERENCE","confidence":"LOW","risk":"Not an evaporation estimate.","validation_required":true},
+    {"parameter_name":"event_energy_to_heat_fraction","unit":"fraction_of_event_energy","minimum":1,"default":1,"maximum":1,"rationale":"Conserves the finite handling energy proxy by transferring it to a heat/dissipation pool.","source_type":"MODEL_INFERENCE","confidence":"MEDIUM","risk":"Not a thermodynamic equipment model.","validation_required":true}
+  ],
+  "nutrient_response_partition_profiles": [
+    {
+      "response_profile_id": "RESPONSE-SANDY-ANALOG-V1",
+      "soil_type_candidate_id": "SOIL-SANDY-ANALOG-V1",
+      "soil_water_nutrient_profile_id": "SOIL-WN-SANDY-ANALOG-V1",
+      "numeric_parameters": [
+        {"parameter_name":"plant_available_fraction","unit":"fraction_of_applied_nutrient_mass","minimum":0,"default":0.2,"maximum":1,"rationale":"Candidate plant-available custody share.","source_type":"MODEL_INFERENCE","confidence":"LOW","risk":"Not nutrient uptake or yield prediction.","validation_required":true},
+        {"parameter_name":"soil_retained_fraction","unit":"fraction_of_applied_nutrient_mass","minimum":0,"default":0.15,"maximum":1,"rationale":"Candidate retained soil pool.","source_type":"MODEL_INFERENCE","confidence":"LOW","risk":"No retention chemistry is modeled.","validation_required":true},
+        {"parameter_name":"soil_mobile_fraction","unit":"fraction_of_applied_nutrient_mass","minimum":0,"default":0.2,"maximum":1,"rationale":"Candidate mobile soil pool.","source_type":"MODEL_INFERENCE","confidence":"LOW","risk":"No transport kinetics are modeled.","validation_required":true},
+        {"parameter_name":"runoff_fraction","unit":"fraction_of_applied_nutrient_mass","minimum":0,"default":0.05,"maximum":1,"rationale":"Explicit surface-runoff custody share.","source_type":"RESEARCH_PROPOSAL","confidence":"LOW","risk":"Not a runoff prediction.","validation_required":true},
+        {"parameter_name":"leaching_fraction","unit":"fraction_of_applied_nutrient_mass","minimum":0,"default":0.3,"maximum":1,"rationale":"Explicit drainage/leaching custody share.","source_type":"RESEARCH_PROPOSAL","confidence":"LOW","risk":"Not a groundwater-impact estimate.","validation_required":true},
+        {"parameter_name":"volatilization_fraction","unit":"fraction_of_applied_nutrient_mass","minimum":0,"default":0.08,"maximum":1,"rationale":"Explicit atmosphere custody share.","source_type":"RESEARCH_PROPOSAL","confidence":"LOW","risk":"No chemistry or air-impact conclusion is supported.","validation_required":true},
+        {"parameter_name":"equipment_residue_fraction","unit":"fraction_of_applied_nutrient_mass","minimum":0,"default":0.02,"maximum":1,"rationale":"Explicit equipment custody share.","source_type":"RESEARCH_PROPOSAL","confidence":"LOW","risk":"Equipment behavior is unvalidated.","validation_required":true}
+      ],
+      "default_partition_sum": 1
+    },
+    {
+      "response_profile_id": "RESPONSE-SANDY-LOAM-ANALOG-V1",
+      "soil_type_candidate_id": "SOIL-SANDY-LOAM-ANALOG-V1",
+      "soil_water_nutrient_profile_id": "SOIL-WN-SANDY-LOAM-ANALOG-V1",
+      "numeric_parameters": [
+        {"parameter_name":"plant_available_fraction","unit":"fraction_of_applied_nutrient_mass","minimum":0,"default":0.25,"maximum":1,"rationale":"Candidate plant-available custody share.","source_type":"MODEL_INFERENCE","confidence":"LOW","risk":"Not nutrient uptake or yield prediction.","validation_required":true},
+        {"parameter_name":"soil_retained_fraction","unit":"fraction_of_applied_nutrient_mass","minimum":0,"default":0.2,"maximum":1,"rationale":"Candidate retained soil pool.","source_type":"MODEL_INFERENCE","confidence":"LOW","risk":"No retention chemistry is modeled.","validation_required":true},
+        {"parameter_name":"soil_mobile_fraction","unit":"fraction_of_applied_nutrient_mass","minimum":0,"default":0.2,"maximum":1,"rationale":"Candidate mobile soil pool.","source_type":"MODEL_INFERENCE","confidence":"LOW","risk":"No transport kinetics are modeled.","validation_required":true},
+        {"parameter_name":"runoff_fraction","unit":"fraction_of_applied_nutrient_mass","minimum":0,"default":0.08,"maximum":1,"rationale":"Explicit surface-runoff custody share.","source_type":"RESEARCH_PROPOSAL","confidence":"LOW","risk":"Not a runoff prediction.","validation_required":true},
+        {"parameter_name":"leaching_fraction","unit":"fraction_of_applied_nutrient_mass","minimum":0,"default":0.17,"maximum":1,"rationale":"Explicit drainage/leaching custody share.","source_type":"RESEARCH_PROPOSAL","confidence":"LOW","risk":"Not a groundwater-impact estimate.","validation_required":true},
+        {"parameter_name":"volatilization_fraction","unit":"fraction_of_applied_nutrient_mass","minimum":0,"default":0.08,"maximum":1,"rationale":"Explicit atmosphere custody share.","source_type":"RESEARCH_PROPOSAL","confidence":"LOW","risk":"No chemistry or air-impact conclusion is supported.","validation_required":true},
+        {"parameter_name":"equipment_residue_fraction","unit":"fraction_of_applied_nutrient_mass","minimum":0,"default":0.02,"maximum":1,"rationale":"Explicit equipment custody share.","source_type":"RESEARCH_PROPOSAL","confidence":"LOW","risk":"Equipment behavior is unvalidated.","validation_required":true}
+      ],
+      "default_partition_sum": 1
+    },
+    {
+      "response_profile_id": "RESPONSE-LOAM-ANALOG-V1",
+      "soil_type_candidate_id": "SOIL-LOAM-ANALOG-V1",
+      "soil_water_nutrient_profile_id": "SOIL-WN-LOAM-ANALOG-V1",
+      "numeric_parameters": [
+        {"parameter_name":"plant_available_fraction","unit":"fraction_of_applied_nutrient_mass","minimum":0,"default":0.3,"maximum":1,"rationale":"Candidate plant-available custody share.","source_type":"MODEL_INFERENCE","confidence":"LOW","risk":"Not nutrient uptake or yield prediction.","validation_required":true},
+        {"parameter_name":"soil_retained_fraction","unit":"fraction_of_applied_nutrient_mass","minimum":0,"default":0.25,"maximum":1,"rationale":"Candidate retained soil pool.","source_type":"MODEL_INFERENCE","confidence":"LOW","risk":"No retention chemistry is modeled.","validation_required":true},
+        {"parameter_name":"soil_mobile_fraction","unit":"fraction_of_applied_nutrient_mass","minimum":0,"default":0.15,"maximum":1,"rationale":"Candidate mobile soil pool.","source_type":"MODEL_INFERENCE","confidence":"LOW","risk":"No transport kinetics are modeled.","validation_required":true},
+        {"parameter_name":"runoff_fraction","unit":"fraction_of_applied_nutrient_mass","minimum":0,"default":0.1,"maximum":1,"rationale":"Explicit surface-runoff custody share.","source_type":"RESEARCH_PROPOSAL","confidence":"LOW","risk":"Not a runoff prediction.","validation_required":true},
+        {"parameter_name":"leaching_fraction","unit":"fraction_of_applied_nutrient_mass","minimum":0,"default":0.1,"maximum":1,"rationale":"Explicit drainage/leaching custody share.","source_type":"RESEARCH_PROPOSAL","confidence":"LOW","risk":"Not a groundwater-impact estimate.","validation_required":true},
+        {"parameter_name":"volatilization_fraction","unit":"fraction_of_applied_nutrient_mass","minimum":0,"default":0.08,"maximum":1,"rationale":"Explicit atmosphere custody share.","source_type":"RESEARCH_PROPOSAL","confidence":"LOW","risk":"No chemistry or air-impact conclusion is supported.","validation_required":true},
+        {"parameter_name":"equipment_residue_fraction","unit":"fraction_of_applied_nutrient_mass","minimum":0,"default":0.02,"maximum":1,"rationale":"Explicit equipment custody share.","source_type":"RESEARCH_PROPOSAL","confidence":"LOW","risk":"Equipment behavior is unvalidated.","validation_required":true}
+      ],
+      "default_partition_sum": 1
+    },
+    {
+      "response_profile_id": "RESPONSE-SILT-LOAM-ANALOG-V1",
+      "soil_type_candidate_id": "SOIL-SILT-LOAM-ANALOG-V1",
+      "soil_water_nutrient_profile_id": "SOIL-WN-SILT-LOAM-ANALOG-V1",
+      "numeric_parameters": [
+        {"parameter_name":"plant_available_fraction","unit":"fraction_of_applied_nutrient_mass","minimum":0,"default":0.28,"maximum":1,"rationale":"Candidate plant-available custody share.","source_type":"MODEL_INFERENCE","confidence":"LOW","risk":"Not nutrient uptake or yield prediction.","validation_required":true},
+        {"parameter_name":"soil_retained_fraction","unit":"fraction_of_applied_nutrient_mass","minimum":0,"default":0.28,"maximum":1,"rationale":"Candidate retained soil pool.","source_type":"MODEL_INFERENCE","confidence":"LOW","risk":"No retention chemistry is modeled.","validation_required":true},
+        {"parameter_name":"soil_mobile_fraction","unit":"fraction_of_applied_nutrient_mass","minimum":0,"default":0.14,"maximum":1,"rationale":"Candidate mobile soil pool.","source_type":"MODEL_INFERENCE","confidence":"LOW","risk":"No transport kinetics are modeled.","validation_required":true},
+        {"parameter_name":"runoff_fraction","unit":"fraction_of_applied_nutrient_mass","minimum":0,"default":0.12,"maximum":1,"rationale":"Explicit surface-runoff custody share.","source_type":"RESEARCH_PROPOSAL","confidence":"LOW","risk":"Not a runoff prediction.","validation_required":true},
+        {"parameter_name":"leaching_fraction","unit":"fraction_of_applied_nutrient_mass","minimum":0,"default":0.08,"maximum":1,"rationale":"Explicit drainage/leaching custody share.","source_type":"RESEARCH_PROPOSAL","confidence":"LOW","risk":"Not a groundwater-impact estimate.","validation_required":true},
+        {"parameter_name":"volatilization_fraction","unit":"fraction_of_applied_nutrient_mass","minimum":0,"default":0.08,"maximum":1,"rationale":"Explicit atmosphere custody share.","source_type":"RESEARCH_PROPOSAL","confidence":"LOW","risk":"No chemistry or air-impact conclusion is supported.","validation_required":true},
+        {"parameter_name":"equipment_residue_fraction","unit":"fraction_of_applied_nutrient_mass","minimum":0,"default":0.02,"maximum":1,"rationale":"Explicit equipment custody share.","source_type":"RESEARCH_PROPOSAL","confidence":"LOW","risk":"Equipment behavior is unvalidated.","validation_required":true}
+      ],
+      "default_partition_sum": 1
+    },
+    {
+      "response_profile_id": "RESPONSE-CLAY-LOAM-ANALOG-V1",
+      "soil_type_candidate_id": "SOIL-CLAY-LOAM-ANALOG-V1",
+      "soil_water_nutrient_profile_id": "SOIL-WN-CLAY-LOAM-ANALOG-V1",
+      "numeric_parameters": [
+        {"parameter_name":"plant_available_fraction","unit":"fraction_of_applied_nutrient_mass","minimum":0,"default":0.25,"maximum":1,"rationale":"Candidate plant-available custody share.","source_type":"MODEL_INFERENCE","confidence":"LOW","risk":"Not nutrient uptake or yield prediction.","validation_required":true},
+        {"parameter_name":"soil_retained_fraction","unit":"fraction_of_applied_nutrient_mass","minimum":0,"default":0.35,"maximum":1,"rationale":"Candidate retained soil pool.","source_type":"MODEL_INFERENCE","confidence":"LOW","risk":"No retention chemistry is modeled.","validation_required":true},
+        {"parameter_name":"soil_mobile_fraction","unit":"fraction_of_applied_nutrient_mass","minimum":0,"default":0.12,"maximum":1,"rationale":"Candidate mobile soil pool.","source_type":"MODEL_INFERENCE","confidence":"LOW","risk":"No transport kinetics are modeled.","validation_required":true},
+        {"parameter_name":"runoff_fraction","unit":"fraction_of_applied_nutrient_mass","minimum":0,"default":0.15,"maximum":1,"rationale":"Explicit surface-runoff custody share.","source_type":"RESEARCH_PROPOSAL","confidence":"LOW","risk":"Not a runoff prediction.","validation_required":true},
+        {"parameter_name":"leaching_fraction","unit":"fraction_of_applied_nutrient_mass","minimum":0,"default":0.04,"maximum":1,"rationale":"Explicit drainage/leaching custody share.","source_type":"RESEARCH_PROPOSAL","confidence":"LOW","risk":"Not a groundwater-impact estimate.","validation_required":true},
+        {"parameter_name":"volatilization_fraction","unit":"fraction_of_applied_nutrient_mass","minimum":0,"default":0.07,"maximum":1,"rationale":"Explicit atmosphere custody share.","source_type":"RESEARCH_PROPOSAL","confidence":"LOW","risk":"No chemistry or air-impact conclusion is supported.","validation_required":true},
+        {"parameter_name":"equipment_residue_fraction","unit":"fraction_of_applied_nutrient_mass","minimum":0,"default":0.02,"maximum":1,"rationale":"Explicit equipment custody share.","source_type":"RESEARCH_PROPOSAL","confidence":"LOW","risk":"Equipment behavior is unvalidated.","validation_required":true}
+      ],
+      "default_partition_sum": 1
+    },
+    {
+      "response_profile_id": "RESPONSE-CLAY-ANALOG-V1",
+      "soil_type_candidate_id": "SOIL-CLAY-ANALOG-V1",
+      "soil_water_nutrient_profile_id": "SOIL-WN-CLAY-ANALOG-V1",
+      "numeric_parameters": [
+        {"parameter_name":"plant_available_fraction","unit":"fraction_of_applied_nutrient_mass","minimum":0,"default":0.2,"maximum":1,"rationale":"Candidate plant-available custody share.","source_type":"MODEL_INFERENCE","confidence":"LOW","risk":"Not nutrient uptake or yield prediction.","validation_required":true},
+        {"parameter_name":"soil_retained_fraction","unit":"fraction_of_applied_nutrient_mass","minimum":0,"default":0.4,"maximum":1,"rationale":"Candidate retained soil pool.","source_type":"MODEL_INFERENCE","confidence":"LOW","risk":"No retention chemistry is modeled.","validation_required":true},
+        {"parameter_name":"soil_mobile_fraction","unit":"fraction_of_applied_nutrient_mass","minimum":0,"default":0.1,"maximum":1,"rationale":"Candidate mobile soil pool.","source_type":"MODEL_INFERENCE","confidence":"LOW","risk":"No transport kinetics are modeled.","validation_required":true},
+        {"parameter_name":"runoff_fraction","unit":"fraction_of_applied_nutrient_mass","minimum":0,"default":0.2,"maximum":1,"rationale":"Explicit surface-runoff custody share.","source_type":"RESEARCH_PROPOSAL","confidence":"LOW","risk":"Not a runoff prediction.","validation_required":true},
+        {"parameter_name":"leaching_fraction","unit":"fraction_of_applied_nutrient_mass","minimum":0,"default":0.02,"maximum":1,"rationale":"Explicit drainage/leaching custody share.","source_type":"RESEARCH_PROPOSAL","confidence":"LOW","risk":"Not a groundwater-impact estimate.","validation_required":true},
+        {"parameter_name":"volatilization_fraction","unit":"fraction_of_applied_nutrient_mass","minimum":0,"default":0.06,"maximum":1,"rationale":"Explicit atmosphere custody share.","source_type":"RESEARCH_PROPOSAL","confidence":"LOW","risk":"No chemistry or air-impact conclusion is supported.","validation_required":true},
+        {"parameter_name":"equipment_residue_fraction","unit":"fraction_of_applied_nutrient_mass","minimum":0,"default":0.02,"maximum":1,"rationale":"Explicit equipment custody share.","source_type":"RESEARCH_PROPOSAL","confidence":"LOW","risk":"Equipment behavior is unvalidated.","validation_required":true}
+      ],
+      "default_partition_sum": 1
+    },
+    {
+      "response_profile_id": "RESPONSE-ORGANIC-RICH-MINERAL-ANALOG-V1",
+      "soil_type_candidate_id": "SOIL-ORGANIC-RICH-MINERAL-ANALOG-V1",
+      "soil_water_nutrient_profile_id": "SOIL-WN-ORGANIC-RICH-MINERAL-ANALOG-V1",
+      "numeric_parameters": [
+        {"parameter_name":"plant_available_fraction","unit":"fraction_of_applied_nutrient_mass","minimum":0,"default":0.3,"maximum":1,"rationale":"Candidate plant-available custody share.","source_type":"MODEL_INFERENCE","confidence":"LOW","risk":"Not nutrient uptake or yield prediction.","validation_required":true},
+        {"parameter_name":"soil_retained_fraction","unit":"fraction_of_applied_nutrient_mass","minimum":0,"default":0.38,"maximum":1,"rationale":"Candidate retained soil pool.","source_type":"MODEL_INFERENCE","confidence":"LOW","risk":"No retention chemistry is modeled.","validation_required":true},
+        {"parameter_name":"soil_mobile_fraction","unit":"fraction_of_applied_nutrient_mass","minimum":0,"default":0.12,"maximum":1,"rationale":"Candidate mobile soil pool.","source_type":"MODEL_INFERENCE","confidence":"LOW","risk":"No transport kinetics are modeled.","validation_required":true},
+        {"parameter_name":"runoff_fraction","unit":"fraction_of_applied_nutrient_mass","minimum":0,"default":0.08,"maximum":1,"rationale":"Explicit surface-runoff custody share.","source_type":"RESEARCH_PROPOSAL","confidence":"LOW","risk":"Not a runoff prediction.","validation_required":true},
+        {"parameter_name":"leaching_fraction","unit":"fraction_of_applied_nutrient_mass","minimum":0,"default":0.04,"maximum":1,"rationale":"Explicit drainage/leaching custody share.","source_type":"RESEARCH_PROPOSAL","confidence":"LOW","risk":"Not a groundwater-impact estimate.","validation_required":true},
+        {"parameter_name":"volatilization_fraction","unit":"fraction_of_applied_nutrient_mass","minimum":0,"default":0.06,"maximum":1,"rationale":"Explicit atmosphere custody share.","source_type":"RESEARCH_PROPOSAL","confidence":"LOW","risk":"No chemistry or air-impact conclusion is supported.","validation_required":true},
+        {"parameter_name":"equipment_residue_fraction","unit":"fraction_of_applied_nutrient_mass","minimum":0,"default":0.02,"maximum":1,"rationale":"Explicit equipment custody share.","source_type":"RESEARCH_PROPOSAL","confidence":"LOW","risk":"Equipment behavior is unvalidated.","validation_required":true}
+      ],
+      "default_partition_sum": 1
+    }
+  ],
+  "response_equations": {
+    "applied_component_mass": "owner_validated_lot_component_mass * selected_application_fraction",
+    "nutrient_pool_mass": "applied_nutrient_mass * selected_soil_response_partition_fraction",
+    "response_signal": "min(response_signal_upper_bound, max(0, plant_available_nutrient_mass / response_reference_available_nutrient_mass)) * owner_supplied_deficiency_index",
+    "carrier_pool_mass": "applied_carrier_mass * selected_carrier_partition_fraction",
+    "water_pool_volume": "event_water_volume * selected_water_partition_fraction",
+    "energy_pool": "event_energy_debit * event_energy_to_heat_fraction",
+    "labor_capacity": "owner_validated_shift_capacity = consumed_worker_minutes + remaining_worker_minutes",
+    "prohibition": "No equation converts a signal into crop yield, soil quality, safety, rights, money or canonical state."
+  },
+  "selection_constraints": [
+    "selected_carrier_to_soil_fraction = 1 - selected_method_equipment_residue_fraction",
+    "selected_water_partition_fractions sum exactly to 1",
+    "selected_soil_nutrient_partition_fractions sum exactly to 1",
+    "all selected values remain within their complete numeric parameter contracts"
+  ],
+  "deterministic_fixture": {
+    "fixture_id": "FIXTURE-BOUNDED-LOAM-APPLICATION-V1",
+    "description": "A fixed-point arithmetic oracle for one accepted dry proxy application. Values are deliberately abstract and are not field quantities.",
+    "foreign_reference_ids": {
+      "inventory_lot_id": "FIXTURE-LOT-DRY-001",
+      "supply_chain_order_id": "FIXTURE-ORDER-001",
+      "transport_event_id": "FIXTURE-TRANSPORT-001",
+      "agriculture_plot_id": "FIXTURE-PLOT-001",
+      "agriculture_crop_id": "RICE",
+      "soil_observation_id": "FIXTURE-SOIL-OBS-001",
+      "soil_type_candidate_id": "SOIL-LOAM-ANALOG-V1",
+      "ecology_habitat_id": "HABITAT-SOIL-V1",
+      "rights_decision_id": "FIXTURE-RIGHTS-ALLOW-001",
+      "labor_shift_id": "FIXTURE-SHIFT-001",
+      "equipment_inspection_id": "FIXTURE-EQUIPMENT-PASS-001",
+      "timing_window_id": "FIXTURE-TIMING-001",
+      "application_event_id": "FIXTURE-APPLICATION-001"
+    },
+    "selected_ids": {
+      "catalog_proposal_id": "FERT-PROPOSAL-DRY-NUTRIENT-BLEND-V1",
+      "composition_profile_id": "COMPOSITION-DRY-NUTRIENT-BLEND-V1",
+      "method_id": "METHOD-DRY-SURFACE-PLACEMENT-PROXY",
+      "response_profile_id": "RESPONSE-LOAM-ANALOG-V1"
+    },
+    "inputs": {
+      "initial_inventory_nutrient_mass_microkilogram_proxy": 25000000,
+      "initial_inventory_carrier_mass_microkilogram_proxy": 75000000,
+      "application_fraction_fixed_point": 200000,
+      "applied_nutrient_mass_microkilogram_proxy": 5000000,
+      "applied_carrier_mass_microkilogram_proxy": 15000000,
+      "event_water_microliter_proxy": 10000000,
+      "event_energy_micro_joule_proxy": 3000000,
+      "validated_labor_capacity_micro_worker_minute": 60000000,
+      "consumed_labor_micro_worker_minute": 45000000,
+      "owner_supplied_deficiency_index_fixed_point": 800000,
+      "response_reference_available_nutrient_mass_microkilogram_proxy": 2000000
+    },
+    "expected_nutrient_mass_ledger_microkilogram_proxy": {
+      "initial_inventory": 25000000,
+      "final_inventory": 20000000,
+      "plant_available": 1500000,
+      "soil_retained": 1250000,
+      "soil_mobile": 750000,
+      "runoff_custody": 500000,
+      "drainage_custody": 500000,
+      "atmosphere_custody": 400000,
+      "equipment_residue_custody": 100000,
+      "initial_total": 25000000,
+      "final_total": 25000000,
+      "closed": true
+    },
+    "expected_carrier_mass_ledger_microkilogram_proxy": {
+      "initial_inventory": 75000000,
+      "final_inventory": 60000000,
+      "soil_custody": 14700000,
+      "equipment_residue_custody": 300000,
+      "initial_total": 75000000,
+      "final_total": 75000000,
+      "closed": true
+    },
+    "expected_water_ledger_microliter_proxy": {
+      "source_debit": 10000000,
+      "soil_custody": 7000000,
+      "runoff_custody": 2000000,
+      "atmosphere_custody": 1000000,
+      "initial_total": 10000000,
+      "final_total": 10000000,
+      "closed": true
+    },
+    "expected_energy_ledger_micro_joule_proxy": {
+      "source_debit": 3000000,
+      "heat_dissipation_custody": 3000000,
+      "initial_total": 3000000,
+      "final_total": 3000000,
+      "closed": true
+    },
+    "expected_labor_ledger_micro_worker_minute": {
+      "validated_capacity": 60000000,
+      "consumed": 45000000,
+      "remaining": 15000000,
+      "initial_total": 60000000,
+      "final_total": 60000000,
+      "closed": true,
+      "overlap_detected": false
+    },
+    "expected_response_signal_fixed_point": 600000,
+    "expected_status": "PROPOSAL_ACCEPTABLE_FOR_OWNER_REVIEW_NOT_APPLIED"
+  },
+  "acceptance_invariants": [
+    "SELECTED_NUTRIENT_PARTITION_DEFAULTS_SUM_EXACTLY_TO_ONE",
+    "SELECTED_CARRIER_PARTITION_DEFAULTS_SUM_EXACTLY_TO_ONE",
+    "SELECTED_WATER_PARTITION_DEFAULTS_SUM_EXACTLY_TO_ONE",
+    "MASS_WATER_ENERGY_AND_LABOR_LEDGERS_CLOSE_INDEPENDENTLY",
+    "RUNOFF_LEACHING_VOLATILIZATION_AND_EQUIPMENT_RESIDUE_HAVE_SEPARATE_CUSTODY",
+    "CONTAMINATION_NEVER_ENTERS_RESPONSE_PARTITIONS",
+    "APPLICATION_REQUIRES_INVENTORY_LABOR_EQUIPMENT_TIMING_RIGHTS_AND_OWNER_EVENTS",
+    "RESPONSE_SIGNAL_IS_BOUNDED_FROM_ZERO_TO_ONE_AND_HAS_NO_YIELD_SEMANTICS",
+    "NO_AUTHORITATIVE_OWNER_STATE_IS_MUTATED_BY_THIS_CANDIDATE"
+  ],
+  "provenance": [
+    {"source_type":"REPOSITORY_DERIVED","source_path":"KAIOS/life/forest-agriculture/KAIOS_FOREST_AGRICULTURE_RUNTIME_V1_SPEC.md","source_commit":"1650191f35567d43016473420cfd2cba22b00aea","git_object":"9a2dd4ad05bb7b2e3d71b91b479359947ada8376","sha256":"4e1a23e97d09ec2dc4ad65440e6958e646f75ed418e5c703c5a5a1635c2809a1","usage":"Owner boundaries, fertilizer inputs and Agriculture/Ecology integration."},
+    {"source_type":"REPOSITORY_DERIVED","source_path":"KAIOS/life/candidates/forest-agriculture-v1/soil-types/soil-type-catalog-candidates.json","source_commit":"1650191f35567d43016473420cfd2cba22b00aea","git_object":"aeae3970108c6f41ad461c22e6cf5d7e2d1a774b","sha256":"a5fdf6e363f4e5cecd0d50b981bf32d5cb06f35747eb7327b37d4784a14e1d64","usage":"Released candidate soil IDs used as foreign references."},
+    {"source_type":"REPOSITORY_DERIVED","source_path":"KAIOS/life/candidates/forest-agriculture-v1/soil-types/soil-water-nutrient-thresholds.json","source_commit":"1650191f35567d43016473420cfd2cba22b00aea","git_object":"f5c829459159e5de8acefbd6e11667c2090b9391","sha256":"0cad3742773b1fcad1d5d2a86d1b50e95eae4a0a7d242d4dcd71fb26f6c8902c","usage":"Candidate soil water/nutrient profile IDs and bounded vocabulary."},
+    {"source_type":"REPOSITORY_DERIVED","source_path":"KAIOS/life/candidates/forest-agriculture-v1/crops/crop-catalog-candidates.json","source_commit":"1650191f35567d43016473420cfd2cba22b00aea","git_object":"1d4a445a1548ad61ee96810411135e7d88d9e30a","sha256":"f824773458c31a4725eced0f83102a8eefefdcabf27dd71b4e59806684244a57","usage":"Released crop candidate references without ownership duplication."},
+    {"source_type":"REPOSITORY_DERIVED","source_path":"KAIOS/life/candidates/forest-agriculture-v1/crops/crop-resource-flow-proposal.json","source_commit":"1650191f35567d43016473420cfd2cba22b00aea","git_object":"969a300fd867055de75359167225b1b98f97635b","sha256":"b0e6bb9e1241ef0bf70a45f82156736bb17821e9c29624b62207e78215cf0849","usage":"Candidate resource-flow separation and conservation style."},
+    {"source_type":"REPOSITORY_DERIVED","source_path":"KAIOS_PHYSICAL_LABOR_SCHEMA.json","source_commit":"1650191f35567d43016473420cfd2cba22b00aea","git_object":"357b00093f4a912e616e9d39edf04753aacf94f7","sha256":"21060f7bdf64f0a3af827f1fcd7d95d3170affef54c01bbeb449b9361fdd2f43","usage":"Labor shift, capacity and non-overlap boundary."},
+    {"source_type":"REPOSITORY_DERIVED","source_path":"KGEN-KAIOS/world-viewer/ecosystem/ecosystem-runtime.js","source_commit":"1650191f35567d43016473420cfd2cba22b00aea","git_object":"2bab509140ab4b93c7e4975286c826693965cf26","sha256":"9b2cd9d4501727d3134ea332e1a30cd77d5d7d647300820f51d9c264784ef537","usage":"Ecology owner IDs and soil habitat references."}
+  ],
+  "boundaries": [
+    "CANDIDATE_ONLY",
+    "SIMULATION_ONLY",
+    "NO_FIELD_APPLICATION_GUIDANCE",
+    "NO_YIELD_OR_GROWTH_GUARANTEE",
+    "NO_ENVIRONMENTAL_OR_SAFETY_GUARANTEE",
+    "NO_RUNTIME_OR_CURRENT_CHANGE",
+    "NO_CANONICAL_PROMOTION",
+    "NO_WALLET_OR_REAL_KGEN",
+    "NO_RIGHTS_AUTHORITY",
+    "NO_ECONOMY_AUTHORITY",
+    "NO_DEPLOYMENT",
+    "NO_MERGE"
+  ]
+}

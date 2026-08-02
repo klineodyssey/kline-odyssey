@@ -1,0 +1,187 @@
+{
+  "dataset_id": "KAIOS-FERTILIZER-CATALOG-PROPOSALS-V1",
+  "schema_version": "1.0.0-candidate",
+  "status": "CURSOR_RESEARCH_CANDIDATE_ONLY",
+  "review_status": "PENDING_CODEX_REVIEW",
+  "task_id": "KAIOS-CURSOR-FERTILIZER-MODELS-001",
+  "worker_id": "cursor-01",
+  "branch": "cursor-handoff/KAIOS-CURSOR-FERTILIZER-MODELS-001",
+  "work_order_declared_base_commit": "1650191f35567d43016473420cfd2cba22b00aea",
+  "source_base_commit": "1650191f35567d43016473420cfd2cba22b00aea",
+  "source_hash_basis": "SHA256_OF_EXACT_GIT_BLOB_BYTES_AT_SOURCE_BASE_COMMIT",
+  "mode": "LOCAL_DETERMINISTIC_SIMULATION_PROPOSAL",
+  "authority": "NO_PRODUCTION_AUTHORITY",
+  "canonical_promotion": false,
+  "all_values_label": "SIMULATION_PROPOSAL_REQUIRES_OWNER_VALIDATION",
+  "scope": "Bounded fertilizer and soil-amendment catalog proposals for deterministic simulation. Entries are abstract material classes, not products, formulations, endorsements, prescriptions, environmental approvals or safety determinations.",
+  "owner_bindings": [
+    {
+      "truth": "foundational_soil_life_state",
+      "owner_id": "KAIOS_FOUNDATIONAL_LIFE_RUNTIME_V1",
+      "canonical_ids": ["SPECIES-KAIOS-FOUNDATIONAL-SOIL"],
+      "candidate_behavior": "Reference owner state only; do not copy or mutate soil truth."
+    },
+    {
+      "truth": "plant_life_contract_and_foundational_plant_identity",
+      "owner_id": "KAIOS_CANONICAL_LIFE_SCHEMA_V1",
+      "canonical_ids": ["SPECIES-KAIOS-FOUNDATIONAL-GRASS", "SPECIES-KAIOS-FOUNDATIONAL-TREE"],
+      "candidate_behavior": "Return response projections only; do not create a new Plant owner or species."
+    },
+    {
+      "truth": "soil_water_nutrient_biomass_decomposition_and_environmental_custody",
+      "owner_id": "KAIOS_REPRODUCTION_ECOLOGY_RUNTIME_V1",
+      "canonical_ids": ["HABITAT-SOIL-V1", "POP-SOIL-001"],
+      "candidate_behavior": "Submit proposed paired deltas and accept owner validation; never persist authoritative balances."
+    },
+    {
+      "truth": "plot_crop_batch_and_application_event",
+      "owner_id": "AGRICULTURE_ALPHA",
+      "canonical_ids": ["RICE", "VEGETABLE", "FRUIT"],
+      "candidate_behavior": "Reference plot and crop IDs and propose an application envelope; do not change Agriculture state."
+    },
+    {
+      "truth": "dependency_chain_storage_transport_and_lot_custody_specification",
+      "owner_id": "KAIOS_SUPPLY_CHAIN_SCHEMA",
+      "canonical_ids": ["FERTILIZER"],
+      "candidate_behavior": "Require owner lot, order, warehouse and transport references; do not create inventory truth."
+    },
+    {
+      "truth": "worker_location_time_capacity_and_non_overlap",
+      "owner_id": "KAIOS_PHYSICAL_LABOR_SCHEMA",
+      "canonical_ids": [],
+      "candidate_behavior": "Require a validated work-shift reference and owner-native worker-minute accounting."
+    },
+    {
+      "truth": "land_water_operation_and_application_capability_decisions",
+      "owner_id": "EXISTING_RIGHTS_AUTHORITY",
+      "canonical_ids": [],
+      "candidate_behavior": "Request a decision only; no proposal grants a right or capability."
+    },
+    {
+      "truth": "inventory_market_and_balanced_ledger",
+      "owner_id": "CIVILIZATION_ECONOMY_ALPHA",
+      "canonical_ids": ["FERTILIZER"],
+      "candidate_behavior": "Reference lot, inventory and ledger IDs only; do not create balances, prices, costs or entries."
+    }
+  ],
+  "separation_contract": {
+    "soil_amendment": "A structural or organic carrier transfer proposed to change a soil-state proxy. It is not automatically a nutrient input, fertilizer, compost, contaminant remedy or owner-approved soil change.",
+    "nutrient_input": "A named nutrient-proxy mass transfer into Ecology custody. It cannot appear from an Agriculture facility unit or a fertility score without an owner-approved unit adapter.",
+    "fertilizer_inventory": "An Economy and Supply Chain lot reference. Inventory quantity, ownership, price, quality and location remain foreign truth.",
+    "compost_boundary": "No compost production, decomposition kinetics, microbial process or compost-quality claim is modeled in this task.",
+    "product_boundary": "Proposal IDs are abstract simulation classes and are not commercial products or endorsements."
+  },
+  "numeric_parameter_contract": {
+    "required_fields": ["parameter_name", "unit", "minimum", "default", "maximum", "rationale", "source_type", "confidence", "risk", "validation_required"],
+    "allowed_source_types": ["SOURCE_DERIVED", "REPOSITORY_DERIVED", "MODEL_INFERENCE", "RESEARCH_PROPOSAL", "ASSUMPTION", "SOURCE_UNDERSPECIFIED"],
+    "range_rule": "minimum <= default <= maximum",
+    "validation_rule": "Every catalog numeric parameter is a simulation proposal and validation_required is true."
+  },
+  "required_owner_events": [
+    "INVENTORY_LOT_RESERVATION_EVENT",
+    "STORAGE_INSPECTION_EVENT",
+    "TRANSPORT_CUSTODY_EVENT",
+    "RIGHTS_CAPABILITY_DECISION_EVENT",
+    "LABOR_SHIFT_VALIDATION_EVENT",
+    "EQUIPMENT_INSPECTION_EVENT",
+    "APPLICATION_PROPOSAL_EVENT",
+    "ECOLOGY_RESPONSE_EVENT",
+    "LEDGER_REFERENCE_EVENT"
+  ],
+  "catalog_proposals": [
+    {
+      "proposal_id": "FERT-PROPOSAL-DRY-NUTRIENT-BLEND-V1",
+      "display_name": "Dry Nutrient Blend Proxy",
+      "primary_role": "NUTRIENT_INPUT",
+      "physical_form": "DRY_GRANULAR_PROXY",
+      "existing_inventory_resource_id": "FERTILIZER",
+      "composition_profile_id": "COMPOSITION-DRY-NUTRIENT-BLEND-V1",
+      "candidate_application_method_ids": ["METHOD-DRY-SURFACE-PLACEMENT-PROXY", "METHOD-DRY-BANDED-PLACEMENT-PROXY"],
+      "method_status": "SIMULATION_LABEL_ONLY_NOT_FIELD_GUIDANCE",
+      "required_gates": ["OWNER_INVENTORY_LOT", "STORAGE_INSPECTION", "TRANSPORT_CUSTODY", "RIGHTS_DECISION", "VALIDATED_LABOR_SHIFT", "INSPECTED_EQUIPMENT", "DECLARED_PLOT_AND_TIMING", "APPLICATION_EVENT", "ECOLOGY_ACCEPTED_DELTAS"],
+      "numeric_parameters": [
+        {"parameter_name":"reference_batch_mass","unit":"kilogram_total_batch_mass","minimum":1,"default":100,"maximum":1000,"rationale":"Provides a closed mass-accounting basis for an abstract dry lot, not an application amount.","source_type":"RESEARCH_PROPOSAL","confidence":"LOW","risk":"A reference lot can be mistaken for a purchase or field recommendation.","validation_required":true},
+        {"parameter_name":"storage_loss_fraction","unit":"candidate_fraction_of_stored_batch_mass","minimum":0,"default":0.01,"maximum":0.25,"rationale":"Bounds a deterministic transfer from storage custody to named recovery or release custody.","source_type":"MODEL_INFERENCE","confidence":"LOW","risk":"Real storage behavior depends on packaging, climate, handling and material properties.","validation_required":true},
+        {"parameter_name":"transport_loss_fraction","unit":"candidate_fraction_of_transported_batch_mass","minimum":0,"default":0.005,"maximum":0.2,"rationale":"Supports paired transport-loss custody without allowing material to disappear.","source_type":"MODEL_INFERENCE","confidence":"LOW","risk":"The proposal is not a logistics loss estimate.","validation_required":true},
+        {"parameter_name":"application_equipment_residue_fraction","unit":"candidate_fraction_of_application_batch_mass","minimum":0,"default":0.02,"maximum":0.2,"rationale":"Keeps material retained by equipment in an explicit custody pool.","source_type":"RESEARCH_PROPOSAL","confidence":"LOW","risk":"Equipment-specific residue requires measurement and owner validation.","validation_required":true},
+        {"parameter_name":"handling_labor_capacity","unit":"worker_minute_per_reference_batch","minimum":1,"default":45,"maximum":240,"rationale":"Requires explicit Physical Labor capacity for storage, transport handoff and application.","source_type":"RESEARCH_PROPOSAL","confidence":"LOW","risk":"The value is not a staffing or occupational-safety estimate.","validation_required":true},
+        {"parameter_name":"handling_and_application_energy","unit":"micro_joule_proxy_per_reference_batch","minimum":0,"default":3000000,"maximum":100000000,"rationale":"Creates a finite energy debit paired with a named dissipation or storage credit.","source_type":"RESEARCH_PROPOSAL","confidence":"LOW","risk":"The proxy is not equipment power demand or fuel guidance.","validation_required":true}
+      ]
+    },
+    {
+      "proposal_id": "FERT-PROPOSAL-LIQUID-NUTRIENT-SOLUTION-V1",
+      "display_name": "Liquid Nutrient Solution Proxy",
+      "primary_role": "NUTRIENT_INPUT",
+      "physical_form": "LIQUID_SOLUTION_PROXY",
+      "existing_inventory_resource_id": "FERTILIZER",
+      "composition_profile_id": "COMPOSITION-LIQUID-NUTRIENT-SOLUTION-V1",
+      "candidate_application_method_ids": ["METHOD-LIQUID-METERED-PLACEMENT-PROXY"],
+      "method_status": "SIMULATION_LABEL_ONLY_NOT_FIELD_GUIDANCE",
+      "required_gates": ["OWNER_INVENTORY_LOT", "CONTAINER_AND_STORAGE_INSPECTION", "TRANSPORT_CUSTODY", "RIGHTS_DECISION", "VALIDATED_LABOR_SHIFT", "INSPECTED_METERING_EQUIPMENT", "DECLARED_PLOT_AND_TIMING", "APPLICATION_EVENT", "ECOLOGY_ACCEPTED_DELTAS"],
+      "numeric_parameters": [
+        {"parameter_name":"reference_batch_mass","unit":"kilogram_total_batch_mass","minimum":1,"default":100,"maximum":1000,"rationale":"Provides a closed mass basis for the liquid fixture and is not an application amount.","source_type":"RESEARCH_PROPOSAL","confidence":"LOW","risk":"A reference batch can be mistaken for real mixing guidance.","validation_required":true},
+        {"parameter_name":"storage_loss_fraction","unit":"candidate_fraction_of_stored_batch_mass","minimum":0,"default":0.02,"maximum":0.3,"rationale":"Bounds a contained storage-loss scenario with named destination custody.","source_type":"MODEL_INFERENCE","confidence":"LOW","risk":"Container compatibility and real leakage behavior are not represented.","validation_required":true},
+        {"parameter_name":"transport_loss_fraction","unit":"candidate_fraction_of_transported_batch_mass","minimum":0,"default":0.01,"maximum":0.25,"rationale":"Supports deterministic transport custody and spill-recovery scenarios.","source_type":"MODEL_INFERENCE","confidence":"LOW","risk":"The value is not a transport safety or loss estimate.","validation_required":true},
+        {"parameter_name":"application_equipment_residue_fraction","unit":"candidate_fraction_of_application_batch_mass","minimum":0,"default":0.03,"maximum":0.25,"rationale":"Keeps metering and container residue as explicit material custody.","source_type":"RESEARCH_PROPOSAL","confidence":"LOW","risk":"Real residue depends on equipment and formulation properties.","validation_required":true},
+        {"parameter_name":"handling_labor_capacity","unit":"worker_minute_per_reference_batch","minimum":1,"default":60,"maximum":300,"rationale":"Requires an explicit non-overlapping labor shift for handling and metered application.","source_type":"RESEARCH_PROPOSAL","confidence":"LOW","risk":"The value is not a staffing or exposure-control recommendation.","validation_required":true},
+        {"parameter_name":"handling_and_application_energy","unit":"micro_joule_proxy_per_reference_batch","minimum":0,"default":4000000,"maximum":120000000,"rationale":"Provides a finite energy proxy for pumping or metering events with paired accounting.","source_type":"RESEARCH_PROPOSAL","confidence":"LOW","risk":"No real pump, pressure, electricity or fuel requirement is established.","validation_required":true}
+      ]
+    },
+    {
+      "proposal_id": "AMENDMENT-PROPOSAL-ORGANIC-CARRIER-V1",
+      "display_name": "Received Organic Carrier Amendment Proxy",
+      "primary_role": "SOIL_AMENDMENT",
+      "physical_form": "MOIST_STRUCTURAL_CARRIER_PROXY",
+      "candidate_inventory_resource_id": "SOIL_AMENDMENT_CANDIDATE",
+      "owner_resource_mapping": "SOURCE_UNDERSPECIFIED_OWNER_VALIDATION_REQUIRED",
+      "composition_profile_id": "COMPOSITION-ORGANIC-CARRIER-AMENDMENT-V1",
+      "candidate_application_method_ids": ["METHOD-AMENDMENT-SURFACE-PLACEMENT-PROXY"],
+      "method_status": "SIMULATION_LABEL_ONLY_NOT_FIELD_GUIDANCE",
+      "compost_boundary": "RECEIVED_LOT_ONLY_NO_COMPOST_PROCESS_OR_QUALITY_MODEL",
+      "required_gates": ["OWNER_ACCEPTED_EXTERNAL_LOT_MAPPING", "STORAGE_INSPECTION", "TRANSPORT_CUSTODY", "RIGHTS_DECISION", "VALIDATED_LABOR_SHIFT", "INSPECTED_EQUIPMENT", "DECLARED_PLOT_AND_TIMING", "APPLICATION_EVENT", "ECOLOGY_ACCEPTED_STRUCTURAL_AND_NUTRIENT_DELTAS"],
+      "numeric_parameters": [
+        {"parameter_name":"reference_batch_mass","unit":"kilogram_total_batch_mass","minimum":1,"default":100,"maximum":1000,"rationale":"Provides a closed fixture basis for a received amendment lot, not a production recipe or field amount.","source_type":"RESEARCH_PROPOSAL","confidence":"LOW","risk":"The abstract lot could be mistaken for compost or soil-treatment guidance.","validation_required":true},
+        {"parameter_name":"storage_loss_fraction","unit":"candidate_fraction_of_stored_batch_mass","minimum":0,"default":0.05,"maximum":0.35,"rationale":"Bounds moisture, structural mass and nutrient transfers to named storage-loss pools.","source_type":"MODEL_INFERENCE","confidence":"LOW","risk":"No decomposition, microbial or storage-quality process is validated.","validation_required":true},
+        {"parameter_name":"transport_loss_fraction","unit":"candidate_fraction_of_transported_batch_mass","minimum":0,"default":0.02,"maximum":0.3,"rationale":"Requires structural carrier, nutrient and water losses to retain destination custody.","source_type":"MODEL_INFERENCE","confidence":"LOW","risk":"The value is not a transport or containment estimate.","validation_required":true},
+        {"parameter_name":"application_equipment_residue_fraction","unit":"candidate_fraction_of_application_batch_mass","minimum":0,"default":0.04,"maximum":0.3,"rationale":"Keeps moist amendment residue in a named equipment-cleanout pool.","source_type":"RESEARCH_PROPOSAL","confidence":"LOW","risk":"No equipment suitability or cleaning procedure is approved.","validation_required":true},
+        {"parameter_name":"handling_labor_capacity","unit":"worker_minute_per_reference_batch","minimum":1,"default":90,"maximum":480,"rationale":"Requires explicit labor for material handling without asserting a staffing level.","source_type":"RESEARCH_PROPOSAL","confidence":"LOW","risk":"Real handling effort, ergonomics and hazards are unvalidated.","validation_required":true},
+        {"parameter_name":"handling_and_application_energy","unit":"micro_joule_proxy_per_reference_batch","minimum":0,"default":5000000,"maximum":150000000,"rationale":"Provides finite handling energy with paired dissipation accounting.","source_type":"RESEARCH_PROPOSAL","confidence":"LOW","risk":"The proxy is not machinery, fuel or electricity guidance.","validation_required":true}
+      ]
+    }
+  ],
+  "inventory_lot_reference_contract": {
+    "required_foreign_ids": ["economy_inventory_lot_id", "supply_chain_order_id", "warehouse_id", "custodian_id", "location_id", "composition_profile_id", "source_event_id"],
+    "required_states": ["AVAILABLE", "RESERVED", "IN_TRANSIT", "STAGED", "PARTIALLY_APPLIED", "EXHAUSTED", "QUALITY_HOLD", "RECOVERY_CUSTODY"],
+    "mass_fields": ["nutrient_mass", "carrier_mass", "batch_water_mass", "contaminant_mass", "packaging_mass_separate"],
+    "rule": "Candidate files may reference owner lot IDs and propose paired deltas but never create authoritative inventory, ownership, quality, price or ledger state."
+  },
+  "provenance": [
+    {"source_type":"REPOSITORY_DERIVED","source_path":"KAIOS/life/forest-agriculture/KAIOS_FOREST_AGRICULTURE_RUNTIME_V1_SPEC.md","source_commit":"1650191f35567d43016473420cfd2cba22b00aea","git_object":"9a2dd4ad05bb7b2e3d71b91b479359947ada8376","sha256":"4e1a23e97d09ec2dc4ad65440e6958e646f75ed418e5c703c5a5a1635c2809a1","usage":"Authoritative owner map and fertilizer batch boundary."},
+    {"source_type":"REPOSITORY_DERIVED","source_path":"KAIOS_INDUSTRIAL_SUPPLY_CHAIN_SPEC.md","source_commit":"1650191f35567d43016473420cfd2cba22b00aea","git_object":"02ab662fad21d8365bca68d00e7eccec3a884889","sha256":"431db8dba33f5fdaa4de04c90830eaeb054c057a708455c48265631ca4e0433c","usage":"Storage, transport, dependency and lot custody gates."},
+    {"source_type":"REPOSITORY_DERIVED","source_path":"KAIOS_SUPPLY_CHAIN_SCHEMA.json","source_commit":"1650191f35567d43016473420cfd2cba22b00aea","git_object":"56bc0ff72042100cb74ace45ee3c30d7703a48e9","sha256":"ea6d175e8bfd242a288f6e6374e97e97fd18ecf5edb40761a29de2129036aa60","usage":"Supply Chain foreign-record contract."},
+    {"source_type":"REPOSITORY_DERIVED","source_path":"KAIOS_PHYSICAL_LABOR_SCHEMA.json","source_commit":"1650191f35567d43016473420cfd2cba22b00aea","git_object":"357b00093f4a912e616e9d39edf04753aacf94f7","sha256":"21060f7bdf64f0a3af827f1fcd7d95d3170affef54c01bbeb449b9361fdd2f43","usage":"Worker timeline, shift and capacity owner boundary."},
+    {"source_type":"REPOSITORY_DERIVED","source_path":"KAIOS_CANONICAL_LIFE_RIGHTS_V1.md","source_commit":"1650191f35567d43016473420cfd2cba22b00aea","git_object":"783ea5b17d82bf6579e4a9763bcbc3b18fb06ac2","sha256":"bec5f35a1906dbd9eb72764e935f4ad282a81398587b66de789130ae4a0428f4","usage":"Separated Rights and capability boundary."},
+    {"source_type":"REPOSITORY_DERIVED","source_path":"KGEN-KAIOS/world-viewer/economy/economy-runtime.js","source_commit":"1650191f35567d43016473420cfd2cba22b00aea","git_object":"2b1a37dba8cf3863eb4b30d4547995f281a6bc62","sha256":"8b5879091b212ea3e0ead296719e872b9353209fd8982f01567f2bbb78991f27","usage":"CIVILIZATION_ECONOMY_ALPHA inventory and ledger owner, including FERTILIZER resource ID."},
+    {"source_type":"REPOSITORY_DERIVED","source_path":"KGEN-KAIOS/world-viewer/agriculture/agriculture-runtime.js","source_commit":"1650191f35567d43016473420cfd2cba22b00aea","git_object":"f09478806a47c10825258385ee855faa74f51a79","sha256":"4557d6b449ce3979f2bf4ca10cc48f271ead2ddb34cc127e60b264ce26b577c2","usage":"AGRICULTURE_ALPHA crop, plot, facility and event owner boundary."}
+  ],
+  "boundaries": [
+    "CANDIDATE_ONLY",
+    "SIMULATION_ONLY",
+    "RESEARCH_PROPOSAL_ONLY",
+    "NO_PRODUCT_ENDORSEMENT",
+    "NO_AGRONOMIC_RECOMMENDATION",
+    "NO_YIELD_GUARANTEE",
+    "NO_SAFETY_GUARANTEE",
+    "NO_ENVIRONMENTAL_APPROVAL",
+    "NO_COMPOST_RUNTIME",
+    "NO_CANONICAL_PROMOTION",
+    "NO_RUNTIME_CODE",
+    "NO_CURRENT_CHANGE",
+    "NO_RIGHTS_AUTHORITY",
+    "NO_ECONOMY_AUTHORITY",
+    "NO_WALLET",
+    "NO_REAL_KGEN",
+    "NO_DEPLOYMENT",
+    "NO_MERGE"
+  ]
+}
