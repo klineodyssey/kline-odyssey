@@ -1,0 +1,264 @@
+{
+  "dataset_id": "KAIOS-COMPOST-FEEDSTOCK-CATALOG-PROPOSALS-V1",
+  "schema_version": "1.0.0-candidate",
+  "status": "CURSOR_RESEARCH_CANDIDATE_ONLY",
+  "review_status": "PENDING_CODEX_REVIEW",
+  "task_id": "KAIOS-CURSOR-COMPOST-MODELS-001",
+  "worker_id": "cursor-01",
+  "branch": "cursor-handoff/KAIOS-CURSOR-COMPOST-MODELS-001",
+  "source_base_commit": "38901fddd3a513b5121b8828dce43898a7ed74b6",
+  "source_hash_basis": "SHA256_OF_EXACT_GIT_BLOB_BYTES_AT_SOURCE_BASE_COMMIT",
+  "mode": "LOCAL_DETERMINISTIC_SIMULATION_PROPOSAL",
+  "authority": "NO_PRODUCTION_AUTHORITY",
+  "canonical_promotion": false,
+  "all_values_label": "SIMULATION_PROPOSAL_OR_DETERMINISTIC_TEST_FIXTURE_REQUIRES_OWNER_VALIDATION",
+  "scope": "Abstract compost-feedstock custody proposals for deterministic simulation. They are not collection instructions, compost formulas, products, agronomic prescriptions, safety determinations, environmental approvals or legal classifications.",
+  "numeric_parameter_contract": {
+    "required_fields": [
+      "parameter_name",
+      "unit",
+      "minimum",
+      "default",
+      "maximum",
+      "rationale",
+      "source_type",
+      "confidence",
+      "risk",
+      "validation_required"
+    ],
+    "allowed_source_types": [
+      "SOURCE_DERIVED",
+      "REPOSITORY_DERIVED",
+      "MODEL_INFERENCE",
+      "RESEARCH_PROPOSAL",
+      "ASSUMPTION",
+      "SOURCE_UNDERSPECIFIED"
+    ],
+    "range_rule": "minimum <= default <= maximum",
+    "validation_rule": "Every numeric parameter requires validation_required equal to true.",
+    "fixture_rule": "Exact integers in deterministic_fixture, identity strings, schema versions and declared counts are non-tunable oracle data rather than numeric parameters."
+  },
+  "owner_bindings": [
+    {
+      "truth": "crop_plot_crop_batch_harvest_batch_and_residue_source_event",
+      "owner_id": "AGRICULTURE_ALPHA",
+      "canonical_ids": ["RICE", "VEGETABLE", "FRUIT"],
+      "candidate_behavior": "Reference owner events and candidate residue-pool projections only; create no crop, harvest or warehouse truth."
+    },
+    {
+      "truth": "decomposition_nutrient_water_biomass_and_environmental_custody",
+      "owner_id": "KAIOS_REPRODUCTION_ECOLOGY_RUNTIME_V1",
+      "canonical_ids": ["HABITAT-SOIL-V1", "POP-SOIL-001", "DECOMPOSITION_POOL", "DECOMPOSITION_EVENT"],
+      "candidate_behavior": "Submit bounded command and paired-delta proposals; never persist authoritative Ecology balances."
+    },
+    {
+      "truth": "foundational_soil_state",
+      "owner_id": "KAIOS_FOUNDATIONAL_LIFE_RUNTIME_V1",
+      "canonical_ids": ["SPECIES-KAIOS-FOUNDATIONAL-SOIL"],
+      "candidate_behavior": "Reference soil identity only; create no soil state or nutrient truth."
+    },
+    {
+      "truth": "source_lot_storage_transport_and_finished_lot_custody",
+      "owner_id": "KAIOS_SUPPLY_CHAIN_SCHEMA",
+      "canonical_ids": [],
+      "candidate_behavior": "Require foreign lot, storage, transport and quality-event IDs; create no inventory record."
+    },
+    {
+      "truth": "inventory_market_and_balanced_ledger",
+      "owner_id": "CIVILIZATION_ECONOMY_ALPHA",
+      "canonical_ids": ["FERTILIZER"],
+      "candidate_behavior": "Reference owner lot and ledger IDs only; do not create quantity, ownership, value, price, cost or fertilizer inventory."
+    },
+    {
+      "truth": "worker_location_time_shift_capacity_and_non_overlap",
+      "owner_id": "KAIOS_PHYSICAL_LABOR_SCHEMA",
+      "canonical_ids": [],
+      "candidate_behavior": "Require owner-native work-shift validation and worker-minute accounting."
+    },
+    {
+      "truth": "land_water_operation_transport_and_disposal_capability",
+      "owner_id": "EXISTING_RIGHTS_AUTHORITY",
+      "canonical_ids": [],
+      "candidate_behavior": "Consume explicit decision references only; no proposal grants a right or capability."
+    }
+  ],
+  "state_separation_contract": {
+    "compost_feedstock": "An owner-referenced incoming material custody record before a compost process proposal begins.",
+    "in_process_batch": "COMPOST_BATCH is Ecology-owned decomposition and nutrient-pool state; this dataset only proposes foreign references and event envelopes.",
+    "finished_candidate_output": "A closed candidate material output awaiting owner acceptance and optional Economy lot creation. It is not automatically fertilizer, safe, mature or suitable.",
+    "fertilizer_inventory": "The existing Economy resource ID FERTILIZER remains separate and receives no automatic credit from compost output.",
+    "soil_nutrient_state": "Ecology nutrients_kg and soil nutrient pools remain separate; finished output cannot increase them without a later owner-approved NUTRIENT_RETURN_EVENT.",
+    "soil_amendment_candidate": "AMENDMENT-PROPOSAL-ORGANIC-CARRIER-V1 is only a possible later review target and never an automatic mapping."
+  },
+  "feedstock_component_contract": {
+    "reference_basis": "Each deterministic fixture is a closed 100 kilogram wet-mass accounting oracle, not a collection quantity or production formula.",
+    "components": [
+      "STRUCTURAL_DRY_MATTER_PROXY",
+      "NUTRIENT_MASS_PROXY",
+      "CONTAINED_WATER_MASS_PROXY",
+      "CONTAMINANT_MASS_PROXY"
+    ],
+    "default_closure_rule": "The four component default fractions sum exactly to one for each proposal.",
+    "contamination_rule": "Any nonzero unresolved contaminant fixture enters quality hold and cannot enter an in-process batch.",
+    "custody_rule": "Every component requires an owner source-event debit and a named receiving-custody credit."
+  },
+  "feedstock_proposals": [
+    {
+      "feedstock_proposal_id": "COMPOST-FEEDSTOCK-CROP-RESIDUE-PROXY-V1",
+      "display_name": "Crop Residue Feedstock Proxy",
+      "source_owner_id": "AGRICULTURE_ALPHA",
+      "source_crop_ids": ["RICE", "VEGETABLE", "FRUIT"],
+      "source_candidate_flow_id": "CROP-RESIDUE-TO-COMPOST",
+      "source_candidate_pool_ids": ["crop_residue_structural_mass", "crop_residue_nutrient_store", "compost_feedstock_structural_mass", "compost_nutrient_store"],
+      "required_source_events": ["HARVEST_EVENT", "RESIDUE_SEGREGATION_EVENT", "SOURCE_CUSTODY_RELEASE_EVENT", "RECEIPT_QUALITY_EVENT"],
+      "numeric_parameters": [
+        {"parameter_name":"reference_wet_batch_mass","unit":"kilogram_total_wet_mass","minimum":1,"default":100,"maximum":1000,"rationale":"Provides a closed abstract accounting basis and is not a collection or processing amount.","source_type":"RESEARCH_PROPOSAL","confidence":"LOW","risk":"The reference basis could be mistaken for operational batch guidance.","validation_required":true},
+        {"parameter_name":"structural_dry_matter_fraction","unit":"fraction_of_total_wet_mass","minimum":0,"default":0.55,"maximum":1,"rationale":"Keeps structural residue mass explicit and separate from water and nutrient custody.","source_type":"MODEL_INFERENCE","confidence":"LOW","risk":"No crop-specific residue composition is established.","validation_required":true},
+        {"parameter_name":"contained_water_mass_fraction","unit":"fraction_of_total_wet_mass","minimum":0,"default":0.4,"maximum":1,"rationale":"Tracks feedstock water as physical mass and as a parallel water-custody subledger.","source_type":"MODEL_INFERENCE","confidence":"LOW","risk":"The value is not a moisture specification or handling recommendation.","validation_required":true},
+        {"parameter_name":"nutrient_mass_proxy_fraction","unit":"fraction_of_total_wet_mass","minimum":0,"default":0.05,"maximum":1,"rationale":"Preserves an abstract nutrient subset without inferring chemistry or availability.","source_type":"RESEARCH_PROPOSAL","confidence":"LOW","risk":"The proxy cannot support an agronomic or fertilizer claim.","validation_required":true},
+        {"parameter_name":"unresolved_contaminant_acceptance_fraction","unit":"fraction_of_total_wet_mass","minimum":0,"default":0,"maximum":0,"rationale":"Forces every nonzero unresolved contaminant fixture into quality hold.","source_type":"ASSUMPTION","confidence":"LOW","risk":"Zero is a simulation gate and not a purity or safety threshold.","validation_required":true}
+      ],
+      "default_component_fraction_sum": 1,
+      "deterministic_fixture": {
+        "fixture_id": "FIXTURE-COMPOST-FEEDSTOCK-CROP-100KG-V1",
+        "total_wet_mass_microkilogram_proxy": 100000000,
+        "component_mass_microkilogram_proxy": {
+          "STRUCTURAL_DRY_MATTER_PROXY": 55000000,
+          "NUTRIENT_MASS_PROXY": 5000000,
+          "CONTAINED_WATER_MASS_PROXY": 40000000,
+          "CONTAMINANT_MASS_PROXY": 0
+        },
+        "closure_expected": true
+      }
+    },
+    {
+      "feedstock_proposal_id": "COMPOST-FEEDSTOCK-VEGETABLE-RESIDUE-PROXY-V1",
+      "display_name": "Vegetable Residue Feedstock Proxy",
+      "source_owner_id": "AGRICULTURE_ALPHA",
+      "source_crop_ids": ["VEGETABLE"],
+      "source_candidate_flow_id": "WAREHOUSE_INTAKE_AND_RESIDUE_CUSTODY_EVENT",
+      "source_candidate_pool_ids": ["residue_structural_mass", "rejected_biomass_structural_mass", "residue_nutrient_store", "rejected_biomass_nutrient_store", "residue_water", "rejected_biomass_water"],
+      "required_source_events": ["HARVEST_GRADING_AND_BATCH_CUSTODY_EVENT", "WAREHOUSE_INTAKE_AND_RESIDUE_CUSTODY_EVENT", "SOURCE_CUSTODY_RELEASE_EVENT", "RECEIPT_QUALITY_EVENT"],
+      "numeric_parameters": [
+        {"parameter_name":"reference_wet_batch_mass","unit":"kilogram_total_wet_mass","minimum":1,"default":100,"maximum":1000,"rationale":"Provides a common deterministic accounting basis and is not a collection amount.","source_type":"RESEARCH_PROPOSAL","confidence":"LOW","risk":"The basis could be misread as a processing recommendation.","validation_required":true},
+        {"parameter_name":"structural_dry_matter_fraction","unit":"fraction_of_total_wet_mass","minimum":0,"default":0.35,"maximum":1,"rationale":"Keeps structural vegetable residue separate from water and nutrient subsets.","source_type":"MODEL_INFERENCE","confidence":"LOW","risk":"No species, cultivar or waste-stream composition is represented.","validation_required":true},
+        {"parameter_name":"contained_water_mass_fraction","unit":"fraction_of_total_wet_mass","minimum":0,"default":0.6,"maximum":1,"rationale":"Creates a closed water-custody subset for the abstract wet residue fixture.","source_type":"MODEL_INFERENCE","confidence":"LOW","risk":"Not a real moisture measurement or storage instruction.","validation_required":true},
+        {"parameter_name":"nutrient_mass_proxy_fraction","unit":"fraction_of_total_wet_mass","minimum":0,"default":0.05,"maximum":1,"rationale":"Keeps abstract nutrient mass visible without claiming availability.","source_type":"RESEARCH_PROPOSAL","confidence":"LOW","risk":"The proxy cannot establish fertilizer value or crop response.","validation_required":true},
+        {"parameter_name":"unresolved_contaminant_acceptance_fraction","unit":"fraction_of_total_wet_mass","minimum":0,"default":0,"maximum":0,"rationale":"Requires quality hold for any nonzero unresolved contamination.","source_type":"ASSUMPTION","confidence":"LOW","risk":"This is not a regulatory or toxicological limit.","validation_required":true}
+      ],
+      "default_component_fraction_sum": 1,
+      "deterministic_fixture": {
+        "fixture_id": "FIXTURE-COMPOST-FEEDSTOCK-VEGETABLE-100KG-V1",
+        "total_wet_mass_microkilogram_proxy": 100000000,
+        "component_mass_microkilogram_proxy": {
+          "STRUCTURAL_DRY_MATTER_PROXY": 35000000,
+          "NUTRIENT_MASS_PROXY": 5000000,
+          "CONTAINED_WATER_MASS_PROXY": 60000000,
+          "CONTAMINANT_MASS_PROXY": 0
+        },
+        "closure_expected": true
+      }
+    },
+    {
+      "feedstock_proposal_id": "COMPOST-FEEDSTOCK-FOREST-DEAD-BIOMASS-PROXY-V1",
+      "display_name": "Forest Dead Biomass Feedstock Proxy",
+      "source_owner_id": "KAIOS_REPRODUCTION_ECOLOGY_RUNTIME_V1",
+      "source_habitat_ids": ["HABITAT-FOREST-V1"],
+      "source_candidate_flow_id": "DECOMPOSITION_ENTRY",
+      "source_candidate_pool_ids": ["DEAD_BIOMASS_POOL", "DEAD_NUTRIENT_STORE", "dead_biomass_kg"],
+      "living_biomass_boundary": "LIVING_OR_STANDING_BIOMASS_IS_INELIGIBLE_WITHOUT_A_SEPARATE_OWNER_APPROVED_HARVEST_AND_CUSTODY_EVENT",
+      "required_source_events": ["DEATH_EVENT_OR_APPROVED_RESIDUE_EVENT", "ECOLOGY_SOURCE_CUSTODY_RELEASE_EVENT", "FOREST_CUSTODIAN_DECISION_EVENT", "RECEIPT_QUALITY_EVENT"],
+      "numeric_parameters": [
+        {"parameter_name":"reference_wet_batch_mass","unit":"kilogram_total_wet_mass","minimum":1,"default":100,"maximum":1000,"rationale":"Provides an abstract closed accounting basis and is not a harvest amount.","source_type":"RESEARCH_PROPOSAL","confidence":"LOW","risk":"Could be misconstrued as authorization to remove forest biomass.","validation_required":true},
+        {"parameter_name":"structural_dry_matter_fraction","unit":"fraction_of_total_wet_mass","minimum":0,"default":0.68,"maximum":1,"rationale":"Separates dead structural biomass from contained water and nutrients.","source_type":"MODEL_INFERENCE","confidence":"LOW","risk":"Forest material properties vary and living biomass remains excluded.","validation_required":true},
+        {"parameter_name":"contained_water_mass_fraction","unit":"fraction_of_total_wet_mass","minimum":0,"default":0.3,"maximum":1,"rationale":"Tracks contained water as a named subset of wet mass.","source_type":"MODEL_INFERENCE","confidence":"LOW","risk":"Not a dryness, storage or combustion specification.","validation_required":true},
+        {"parameter_name":"nutrient_mass_proxy_fraction","unit":"fraction_of_total_wet_mass","minimum":0,"default":0.02,"maximum":1,"rationale":"Preserves a bounded nutrient subset through owner review.","source_type":"RESEARCH_PROPOSAL","confidence":"LOW","risk":"No nutrient availability or soil benefit is established.","validation_required":true},
+        {"parameter_name":"unresolved_contaminant_acceptance_fraction","unit":"fraction_of_total_wet_mass","minimum":0,"default":0,"maximum":0,"rationale":"Blocks nonzero unresolved contamination from entering a batch.","source_type":"ASSUMPTION","confidence":"LOW","risk":"Zero is not evidence of safety or material purity.","validation_required":true}
+      ],
+      "default_component_fraction_sum": 1,
+      "deterministic_fixture": {
+        "fixture_id": "FIXTURE-COMPOST-FEEDSTOCK-FOREST-100KG-V1",
+        "total_wet_mass_microkilogram_proxy": 100000000,
+        "component_mass_microkilogram_proxy": {
+          "STRUCTURAL_DRY_MATTER_PROXY": 68000000,
+          "NUTRIENT_MASS_PROXY": 2000000,
+          "CONTAINED_WATER_MASS_PROXY": 30000000,
+          "CONTAMINANT_MASS_PROXY": 0
+        },
+        "closure_expected": true
+      }
+    },
+    {
+      "feedstock_proposal_id": "COMPOST-FEEDSTOCK-ORGANIC-WASTE-PROXY-V1",
+      "display_name": "Organic Waste Batch Feedstock Proxy",
+      "source_owner_id": "KAIOS_REPRODUCTION_ECOLOGY_RUNTIME_V1",
+      "source_domain_entity_id": "ORGANIC_WASTE_BATCH",
+      "source_entity_status": "SPECIFICATION_DEFINED_OWNER_ENTITY_NOT_PRESENT_IN_CURRENT_ECOLOGY_SCHEMA",
+      "storage_custody_owner_id": "CIVILIZATION_ECONOMY_ALPHA",
+      "source_candidate_pool_ids": ["ORGANIC_WASTE_BATCH"],
+      "required_source_events": ["ORGANIC_WASTE_GENERATION_EVENT", "SOURCE_SEGREGATION_EVENT", "STORAGE_CUSTODY_EVENT_WHEN_APPLICABLE", "SOURCE_CUSTODY_RELEASE_EVENT", "RECEIPT_QUALITY_EVENT"],
+      "numeric_parameters": [
+        {"parameter_name":"reference_wet_batch_mass","unit":"kilogram_total_wet_mass","minimum":1,"default":100,"maximum":1000,"rationale":"Provides a closed accounting basis for an abstract owner-referenced waste lot.","source_type":"RESEARCH_PROPOSAL","confidence":"LOW","risk":"The fixture is not collection, sorting or processing guidance.","validation_required":true},
+        {"parameter_name":"structural_dry_matter_fraction","unit":"fraction_of_total_wet_mass","minimum":0,"default":0.27,"maximum":1,"rationale":"Separates structural organic material from water and nutrient subsets.","source_type":"MODEL_INFERENCE","confidence":"LOW","risk":"Actual waste streams are heterogeneous and source mapping is underspecified.","validation_required":true},
+        {"parameter_name":"contained_water_mass_fraction","unit":"fraction_of_total_wet_mass","minimum":0,"default":0.7,"maximum":1,"rationale":"Keeps contained water explicit in the wet-mass fixture.","source_type":"MODEL_INFERENCE","confidence":"LOW","risk":"Not a moisture or storage specification.","validation_required":true},
+        {"parameter_name":"nutrient_mass_proxy_fraction","unit":"fraction_of_total_wet_mass","minimum":0,"default":0.03,"maximum":1,"rationale":"Tracks a low-resolution nutrient subset without assigning fertilizer value.","source_type":"RESEARCH_PROPOSAL","confidence":"LOW","risk":"No composition, maturity or agronomic outcome can be inferred.","validation_required":true},
+        {"parameter_name":"unresolved_contaminant_acceptance_fraction","unit":"fraction_of_total_wet_mass","minimum":0,"default":0,"maximum":0,"rationale":"Requires any nonzero unresolved contaminant mass to remain on hold.","source_type":"ASSUMPTION","confidence":"LOW","risk":"The gate is not a safety, food-waste or legal acceptance criterion.","validation_required":true}
+      ],
+      "default_component_fraction_sum": 1,
+      "deterministic_fixture": {
+        "fixture_id": "FIXTURE-COMPOST-FEEDSTOCK-ORGANIC-WASTE-100KG-V1",
+        "total_wet_mass_microkilogram_proxy": 100000000,
+        "component_mass_microkilogram_proxy": {
+          "STRUCTURAL_DRY_MATTER_PROXY": 27000000,
+          "NUTRIENT_MASS_PROXY": 3000000,
+          "CONTAINED_WATER_MASS_PROXY": 70000000,
+          "CONTAMINANT_MASS_PROXY": 0
+        },
+        "closure_expected": true
+      }
+    }
+  ],
+  "acceptance_invariants": [
+    "FEEDSTOCK_DEFAULT_COMPONENT_FRACTIONS_SUM_EXACTLY_TO_ONE",
+    "FIXTURE_COMPONENT_MASSES_SUM_EXACTLY_TO_TOTAL_WET_MASS",
+    "EVERY_SOURCE_HAS_OWNER_EVENT_AND_CUSTODY_REFERENCE",
+    "NONZERO_UNRESOLVED_CONTAMINATION_REQUIRES_QUALITY_HOLD",
+    "LIVING_FOREST_BIOMASS_IS_NOT_IMPLICIT_FEEDSTOCK",
+    "NO_FEEDSTOCK_REFERENCE_CREATES_COMPOST_BATCH_STATE",
+    "NO_FEEDSTOCK_REFERENCE_CREATES_FERTILIZER_INVENTORY_OR_SOIL_NUTRIENT_STATE"
+  ],
+  "provenance": [
+    {"source_type":"REPOSITORY_DERIVED","source_path":"KAIOS/life/forest-agriculture/KAIOS_FOREST_AGRICULTURE_RUNTIME_V1_SPEC.md","source_commit":"38901fddd3a513b5121b8828dce43898a7ed74b6","git_object":"9a2dd4ad05bb7b2e3d71b91b479359947ada8376","sha256":"4e1a23e97d09ec2dc4ad65440e6958e646f75ed418e5c703c5a5a1635c2809a1","usage":"Compost, organic-waste, fertilizer, owner and custody boundaries."},
+    {"source_type":"REPOSITORY_DERIVED","source_path":"KAIOS/life/candidates/forest-agriculture-v1/crops/crop-catalog-candidates.json","source_commit":"38901fddd3a513b5121b8828dce43898a7ed74b6","git_object":"1d4a445a1548ad61ee96810411135e7d88d9e30a","sha256":"f824773458c31a4725eced0f83102a8eefefdcabf27dd71b4e59806684244a57","usage":"Existing RICE, VEGETABLE and FRUIT foreign crop IDs."},
+    {"source_type":"REPOSITORY_DERIVED","source_path":"KAIOS/life/candidates/forest-agriculture-v1/crops/crop-resource-flow-proposal.json","source_commit":"38901fddd3a513b5121b8828dce43898a7ed74b6","git_object":"969a300fd867055de75359167225b1b98f97635b","sha256":"b0e6bb9e1241ef0bf70a45f82156736bb17821e9c29624b62207e78215cf0849","usage":"Crop residue feedstock and conserved pool vocabulary."},
+    {"source_type":"REPOSITORY_DERIVED","source_path":"KAIOS/life/candidates/forest-agriculture-v1/vegetables/vegetable-catalog-candidates.json","source_commit":"38901fddd3a513b5121b8828dce43898a7ed74b6","git_object":"5f33d11528d7ea14eb26417224a85cece1392144","sha256":"77cc5dd2e4b6264d5fe8d015881858a2c76f5a522d567a185061b919bbad8cd6","usage":"VEGETABLE aggregate owner and identity boundary."},
+    {"source_type":"REPOSITORY_DERIVED","source_path":"KAIOS/life/candidates/forest-agriculture-v1/vegetables/vegetable-resource-flow-proposal.json","source_commit":"38901fddd3a513b5121b8828dce43898a7ed74b6","git_object":"a318188622731c0f9a52c47a41f4ef784aa86113","sha256":"444b9b1a843c74ba3eddf51819cb3507be058275de8271f34e367f231856aab3","usage":"Vegetable rejected-biomass and residue custody vocabulary."},
+    {"source_type":"REPOSITORY_DERIVED","source_path":"KAIOS/life/candidates/forest-agriculture-v1/forest/forest-composition-candidates.json","source_commit":"38901fddd3a513b5121b8828dce43898a7ed74b6","git_object":"e4e63adb992337dc333c4de78152903234d8a46d","sha256":"007323cb9cad66726b0b1cfe86f05eeda01dbce5d783832e730828299f287e8d","usage":"Forest habitat and foundational Life IDs."},
+    {"source_type":"REPOSITORY_DERIVED","source_path":"KAIOS/life/candidates/forest-agriculture-v1/forest/forest-resource-flow-proposal.json","source_commit":"38901fddd3a513b5121b8828dce43898a7ed74b6","git_object":"4bf0ea0ee3ad5b1612a76debdef9efdf7ed1a90d","sha256":"444da4c272fe05a176ae9771251e581143b2288a3956323cce32b6638f90f0ea","usage":"Dead biomass, decomposition and environmental pool separation."},
+    {"source_type":"REPOSITORY_DERIVED","source_path":"KAIOS/life/ecology/KAIOS_REPRODUCTION_ECOLOGY_SCHEMA_V1.json","source_commit":"38901fddd3a513b5121b8828dce43898a7ed74b6","git_object":"c99eb0eba386af67c009bfd115e88b934d1c9000","sha256":"3257f8cd1f0ba482f0c6bc8d98fbfb4748c8a1172c9c88d4bf9a2981c90af9f0","usage":"Ecology resource, entity and event schema boundary."},
+    {"source_type":"REPOSITORY_DERIVED","source_path":"KAIOS_SUPPLY_CHAIN_SCHEMA.json","source_commit":"38901fddd3a513b5121b8828dce43898a7ed74b6","git_object":"56bc0ff72042100cb74ace45ee3c30d7703a48e9","sha256":"ea6d175e8bfd242a288f6e6374e97e97fd18ecf5edb40761a29de2129036aa60","usage":"Foreign lot, storage, transport and quality-hold contract."},
+    {"source_type":"REPOSITORY_DERIVED","source_path":"KAIOS_PHYSICAL_LABOR_SCHEMA.json","source_commit":"38901fddd3a513b5121b8828dce43898a7ed74b6","git_object":"357b00093f4a912e616e9d39edf04753aacf94f7","sha256":"21060f7bdf64f0a3af827f1fcd7d95d3170affef54c01bbeb449b9361fdd2f43","usage":"Worker timeline, shift, capacity and non-overlap boundary."},
+    {"source_type":"REPOSITORY_DERIVED","source_path":"KGEN-KAIOS/world-viewer/ecosystem/ecosystem-runtime.js","source_commit":"38901fddd3a513b5121b8828dce43898a7ed74b6","git_object":"2bab509140ab4b93c7e4975286c826693965cf26","sha256":"9b2cd9d4501727d3134ea332e1a30cd77d5d7d647300820f51d9c264784ef537","usage":"Ecology owner IDs and current decomposition resource vocabulary."},
+    {"source_type":"REPOSITORY_DERIVED","source_path":"KGEN-KAIOS/world-viewer/agriculture/agriculture-runtime.js","source_commit":"38901fddd3a513b5121b8828dce43898a7ed74b6","git_object":"f09478806a47c10825258385ee855faa74f51a79","sha256":"4557d6b449ce3979f2bf4ca10cc48f271ead2ddb34cc127e60b264ce26b577c2","usage":"Agriculture owner and crop IDs."},
+    {"source_type":"REPOSITORY_DERIVED","source_path":"KGEN-KAIOS/world-viewer/economy/economy-runtime.js","source_commit":"38901fddd3a513b5121b8828dce43898a7ed74b6","git_object":"2b1a37dba8cf3863eb4b30d4547995f281a6bc62","sha256":"8b5879091b212ea3e0ead296719e872b9353209fd8982f01567f2bbb78991f27","usage":"Economy inventory owner and existing FERTILIZER resource separation."}
+  ],
+  "boundaries": [
+    "CANDIDATE_ONLY",
+    "SIMULATION_ONLY",
+    "NO_COLLECTION_OR_PROCESS_FORMULA",
+    "NO_AGRONOMIC_PRESCRIPTION",
+    "NO_PRODUCT_ENDORSEMENT",
+    "NO_SAFETY_GUARANTEE",
+    "NO_YIELD_PROMISE",
+    "NO_ENVIRONMENTAL_APPROVAL",
+    "NO_LEGAL_CERTIFICATION",
+    "NO_LIFE_CREATION",
+    "NO_FERTILIZER_INVENTORY_CREATION",
+    "NO_SOIL_NUTRIENT_MUTATION",
+    "NO_RUNTIME_OR_CANONICAL_PROMOTION",
+    "NO_RIGHTS_OR_ECONOMY_AUTHORITY",
+    "NO_WALLET_OR_REAL_KGEN",
+    "NO_DEPLOYMENT",
+    "NO_MERGE"
+  ]
+}

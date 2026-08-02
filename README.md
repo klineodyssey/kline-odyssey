@@ -1153,6 +1153,9 @@ supply-chain owners and does not activate Production authority.
 - [Fertilizer Model Candidate Codex Review Closeout](KAIOS/life/forest-agriculture/KAIOS_CURSOR_FERTILIZER_MODELS_REVIEW_CLOSEOUT.md)
 - [Compost Model Cursor Work Order](KAIOS/life/candidates/forest-agriculture-v1/CURSOR_COMPOST_MODELS_WORK_ORDER.md)
 - [Fertilizer Release and Compost Models Dispatch Company Status](KGEN-KAIOS/governance/autopilot/company_status/COMPANY_STATUS_2026-08-02_FERTILIZER_RELEASED_COMPOST_MODELS_DISPATCHED.md)
+- [Compost Model Candidate Codex Review Closeout](KAIOS/life/forest-agriculture/KAIOS_CURSOR_COMPOST_MODELS_REVIEW_CLOSEOUT.md)
+- [Insect Candidate Cursor Work Order](KAIOS/life/candidates/forest-agriculture-v1/CURSOR_INSECT_CANDIDATES_WORK_ORDER.md)
+- [Compost Release and Insect Candidates Dispatch Company Status](KGEN-KAIOS/governance/autopilot/company_status/COMPANY_STATUS_2026-08-02_COMPOST_RELEASED_INSECT_CANDIDATES_DISPATCHED.md)
 - [AI Company Order and Project Specification](KAIOS/ai-company/KAIOS_AI_COMPANY_ORDER_PROJECT_RUNTIME_V1_SPEC.md)
 
 ## KAIOS AI Company Order and Project Runtime V1 Specification
