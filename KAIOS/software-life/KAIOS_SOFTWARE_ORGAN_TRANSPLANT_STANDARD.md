@@ -78,7 +78,8 @@ evidence hash is SHA-256 over the canonical key-sorted gate, result, references,
 commit, content hashes, reviewer, reason and review time.
 
 Every gate requires at least one repository artifact. A repository reference
-must be a regular file in the current worktree and a Git `blob` at the recorded
+must be a non-symbolic regular file in the current worktree and a Git regular
+file (`100644` or `100755`) at the recorded
 commit. Its content hash is computed from that immutable blob, not from a path
 name or caller-provided metadata. Event references are supplementary and bind
 the canonical event envelope hash. A directory, untracked path, missing commit,
@@ -185,10 +186,12 @@ Both migration and rollback plans bind the repository commit, registered host
 canonical state reference, baseline state hash, artifact hash, affected paths,
 bounded resource and energy budgets, maximum downtime, verification commands
 and recovery record. The semantic validator recomputes each plan artifact
-hash. The commit must exist and be reachable from canonical `HEAD`; dangling
-local objects are not authority. The canonical state reference must
-resolve to a Git blob at that commit, and its computed SHA-256 must equal the
-recorded baseline hash.
+hash. The baseline commit must be a strict ancestor of canonical `HEAD`, not
+`HEAD` itself; dangling local objects are not authority. The baseline Registry
+must contain the host but must not yet contain the transplant identity, and
+review evidence must be committed after that baseline. The canonical state
+reference must resolve to a non-symbolic regular Git file at that commit, and
+its computed SHA-256 must equal the recorded baseline hash.
 
 No authoritative source is overwritten without a recoverable history. A
 versioned legacy path may survive only as a thin alias to the canonical organ.
@@ -264,9 +267,12 @@ Every event repeats the transplant, donor, host and organ identities. Event IDs
 are unique, times are nondecreasing, state transitions follow the state
 machine, and each `previous_state_hash` equals the preceding
 `next_state_hash`. The next hash is SHA-256 over the canonical key-sorted event
-envelope with `next_state_hash` omitted. The validator also executes the
-canonical transition interpreter, accumulates only planned resource and energy
-units, enforces the migration budgets and recomputes each
+envelope with `next_state_hash` omitted. Each event binds its zero-based plan
+step index and canonical action. Its resource delta must equal the organ's
+declared compute cost exactly, and its energy delta must equal the organ's
+declared per-operation energy cost exactly; both costs must be positive for a
+transplantable organ. The validator derives these totals independently,
+enforces the migration budgets and recomputes each
 `outputs.replay_state_hash`. Rehashing a fabricated envelope without the same
 replayed state is rejected. A rollback event must record
 `restored_commit` and `restored_state_hash` equal to the migration plan's
@@ -280,10 +286,14 @@ The Rights record's `decision_event_id` must resolve to the event that enters
 ## 10. Acceptance And Ownership
 
 `ACCEPTED` means the host integration tests passed in simulation. `COMPLETE`
-means evidence, Registry projection, Genome revision, maintenance ownership and
-rollback retention are recorded as reachable Git blobs with matching SHA-256
-values. The host Registry projection must contain the transplant identity; an
-empty or caller-asserted completion envelope fails closed. Canonical review,
+means metadata and transplant state both say `COMPLETE`, and evidence, Registry
+projection, Genome revision, maintenance ownership and rollback retention are
+recorded as reachable regular Git files with matching SHA-256 values. Genome
+and integration evidence must be structured JSON attestations binding the
+review, donor, host, both Genome IDs, organ and transplant. The host Registry
+projection must contain a structured completed-transplant record with those
+same identities and completion commit; a bare string, arbitrary blob, empty or
+caller-asserted completion envelope fails closed. Canonical review,
 rework, rejection, acceptance, rollback and completion events must be emitted
 by the registered Codex reviewer. Neither state transfers real ownership.
 

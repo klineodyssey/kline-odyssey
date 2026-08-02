@@ -84,6 +84,44 @@
           }
         }
       }
+    },
+    {
+      "if": {
+        "properties": {
+          "metadata": {
+            "properties": { "status": { "const": "COMPLETE" } },
+            "required": ["status"]
+          }
+        },
+        "required": ["metadata"]
+      },
+      "then": {
+        "properties": {
+          "transplant": {
+            "properties": { "state": { "const": "COMPLETE" } },
+            "required": ["state"]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "transplant": {
+            "properties": { "state": { "const": "COMPLETE" } },
+            "required": ["state"]
+          }
+        },
+        "required": ["transplant"]
+      },
+      "then": {
+        "properties": {
+          "metadata": {
+            "properties": { "status": { "const": "COMPLETE" } },
+            "required": ["status"]
+          }
+        }
+      }
     }
   ],
   "additionalProperties": false,
@@ -445,9 +483,11 @@
     },
     "completionEvidence": {
       "type": "object",
-      "required": ["completion_commit", "registry_projection_ref", "registry_projection_hash", "genome_revision_ref", "genome_revision_hash", "integration_evidence_refs", "integration_evidence_hashes", "maintenance_owner", "rollback_retention_ref", "rollback_retention_hash", "attestation_hash"],
+      "required": ["completion_commit", "donor_genome_id", "host_genome_id", "registry_projection_ref", "registry_projection_hash", "genome_revision_ref", "genome_revision_hash", "integration_evidence_refs", "integration_evidence_hashes", "maintenance_owner", "rollback_retention_ref", "rollback_retention_hash", "attestation_hash"],
       "properties": {
         "completion_commit": { "$ref": "#/$defs/repositoryCommit" },
+        "donor_genome_id": { "$ref": "#/$defs/stableId" },
+        "host_genome_id": { "$ref": "#/$defs/stableId" },
         "registry_projection_ref": { "$ref": "#/$defs/repositoryPath" },
         "registry_projection_hash": { "$ref": "#/$defs/sha256" },
         "genome_revision_ref": { "$ref": "#/$defs/repositoryPath" },
@@ -467,6 +507,15 @@
         "rollback_retention_ref": { "$ref": "#/$defs/repositoryPath" },
         "rollback_retention_hash": { "$ref": "#/$defs/sha256" },
         "attestation_hash": { "$ref": "#/$defs/sha256" }
+      },
+      "additionalProperties": false
+    },
+    "transplantEventInputs": {
+      "type": "object",
+      "required": ["plan_step_index", "plan_step_action"],
+      "properties": {
+        "plan_step_index": { "type": "integer", "minimum": 0 },
+        "plan_step_action": { "type": "string", "minLength": 1 }
       },
       "additionalProperties": false
     },
@@ -494,7 +543,7 @@
         "simulation_time": { "type": "string", "format": "date-time" },
         "actor": { "type": "string", "minLength": 1 },
         "action": { "type": "string", "minLength": 1 },
-        "inputs": { "type": "object" },
+        "inputs": { "$ref": "#/$defs/transplantEventInputs" },
         "outputs": { "$ref": "#/$defs/eventOutputs" },
         "resource_delta": { "$ref": "#/$defs/deltaMap" },
         "energy_delta": { "$ref": "#/$defs/deltaMap" },

@@ -72,10 +72,11 @@ const createValidRecord = () => {
   const host = registry.software_lives.find(({ life_id }) => life_id === "LIFE-KAIOS-OFFICIAL-HOMEPAGE");
   const organ = donor.organs[0];
   const baselineCommit = registry.metadata.source_commit;
+  const evidenceCommit = execFileSync("git", ["rev-parse", "HEAD"], { cwd: root, encoding: "utf8" }).trim();
   const baselineStateRef = host.location.canonical_path;
   const baselineStateHash = computeContentHash(gitBlob(baselineCommit, baselineStateRef));
   const evidenceRef = "KAIOS/software-life/KAIOS_SOFTWARE_LIFE_REGISTRY.json";
-  const evidenceContentHash = computeContentHash(gitBlob(baselineCommit, evidenceRef));
+  const evidenceContentHash = computeContentHash(gitBlob(evidenceCommit, evidenceRef));
   const reviewId = "REVIEW-ORGAN-TRANSPLANT-001";
   const transplantId = "TRANSPLANT-ORGAN-001";
   const path = ["PROPOSED", "DONOR_REVIEW", "HOST_REVIEW", "COMPATIBILITY_TEST", "APPROVED_SIMULATION"];
@@ -96,7 +97,10 @@ const createValidRecord = () => {
       simulation_time: new Date(Date.UTC(2026, 7, 2, 11, 0, index)).toISOString(),
       actor: "CODEX_CANONICAL_REVIEW",
       action: `TRANSITION-${nextState}`,
-      inputs: {},
+      inputs: {
+        plan_step_index: index,
+        plan_step_action: `TRANSITION-${nextState}`
+      },
       outputs: {
         replay_state_hash: computeReplayStateHash({
           seed: 11520,
@@ -130,7 +134,7 @@ const createValidRecord = () => {
     const item = {
       result: "PASS",
       evidence_refs: [evidenceRef],
-      evidence_commit: baselineCommit,
+      evidence_commit: evidenceCommit,
       evidence_content_hashes: { [evidenceRef]: evidenceContentHash },
       reviewer: "CODEX_CANONICAL_REVIEW",
       reason: `${gate} fixture evidence`,
@@ -149,7 +153,7 @@ const createValidRecord = () => {
       baseline_state_hash: baselineStateHash,
       artifact_hash: "",
       affected_paths: ["KAIOS/software-life/KAIOS_SOFTWARE_ORGAN_STANDARD.md"],
-      steps: ["Apply deterministic fixture step"],
+      steps: path.map((state) => `TRANSITION-${state}`),
       resource_budget: quantity(16, "compute_millisecond"),
       energy_budget: quantity(16, "compute_joule_proxy"),
       maximum_downtime_seconds: 0,
@@ -301,6 +305,7 @@ const rebuildEventChain = (record) => {
     event.previous_transplant_state = previousState;
     event.previous_state_hash = previousHash;
     event.action = canonicalActionForState(event.next_transplant_state);
+    event.inputs = { plan_step_index: index, plan_step_action: event.action };
     event.status = canonicalStatusForState(event.next_transplant_state);
     event.rights_decision = event.next_transplant_state === "APPROVED_SIMULATION" ? "APPROVED_SIMULATION" : null;
     for (const [unit, value] of Object.entries(event.resource_delta)) resourceTotals[unit] = (resourceTotals[unit] ?? 0) + value;
@@ -324,6 +329,11 @@ const rebuildEventChain = (record) => {
 
 const appendTransition = (record, state, outputs = {}) => {
   const index = record.transplant.events.length;
+  const action = canonicalActionForState(state);
+  for (const plan of [record.transplant.migration_plan, record.transplant.rollback_plan]) {
+    plan.steps.push(action);
+    plan.artifact_hash = computePlanArtifactHash(plan);
+  }
   record.transplant.events.push({
     event_id: `EVENT-TRANSPLANT-${String(index + 1).padStart(3, "0")}`,
     transplant_id: record.transplant.transplant_id,
@@ -332,8 +342,8 @@ const appendTransition = (record, state, outputs = {}) => {
     organ_id: record.transplant.organ_id,
     simulation_time: new Date(Date.UTC(2026, 7, 2, 11, 0, index)).toISOString(),
     actor: "CODEX_CANONICAL_REVIEW",
-    action: canonicalActionForState(state),
-    inputs: {},
+    action,
+    inputs: { plan_step_index: index, plan_step_action: action },
     outputs: { replay_state_hash: hash("0"), ...outputs },
     resource_delta: { compute_millisecond: 1 },
     energy_delta: { compute_joule_proxy: 1 },
@@ -347,6 +357,7 @@ const appendTransition = (record, state, outputs = {}) => {
     next_state_hash: hash("0")
   });
   rebuildEventChain(record);
+  if (state === "COMPLETE") record.metadata.status = "COMPLETE";
 };
 
 const validate = (record, options = {}) => validateSoftwareOrganTransplant(record, { repositoryRoot: root, ...options });
@@ -516,6 +527,14 @@ test("semantic validator accepts one identity-bound deterministic transplant", (
   assert.deepEqual(result, { ok: true, errors: [] });
 });
 
+test("metadata cannot claim COMPLETE before the transplant completes", () => {
+  const record = createValidRecord();
+  record.metadata.status = "COMPLETE";
+  const codes = new Set(validate(record).errors.map(({ code }) => code));
+  assert.ok(codes.has("SCHEMA_VALIDATION_FAILED"));
+  assert.ok(codes.has("METADATA_STATUS_TRANSPLANT_STATE_MISMATCH"));
+});
+
 test("semantic validator rejects unevidenced approval and missing simulated rights", () => {
   const record = createValidRecord();
   record.compatibility_review.gate_evidence.TESTS_PASS.result = "FAIL";
@@ -581,6 +600,27 @@ test("deterministic replay rejects fabricated deltas despite a rehashed envelope
   const result = validate(record);
   assert.equal(result.ok, false);
   assert.ok(result.errors.some(({ code }) => code === "REPLAY_STATE_HASH_INVALID"));
+});
+
+test("deterministic replay derives nonzero cost from the organ contract", () => {
+  const record = createValidRecord();
+  for (const event of record.transplant.events) {
+    event.resource_delta.compute_millisecond = 0;
+    event.energy_delta.compute_joule_proxy = 0;
+  }
+  rebuildEventChain(record);
+  const codes = new Set(validate(record).errors.map(({ code }) => code));
+  assert.ok(codes.has("EVENT_RESOURCE_COST_MISMATCH"));
+  assert.ok(codes.has("EVENT_ENERGY_COST_MISMATCH"));
+  assert.ok(codes.has("REPLAY_STATE_HASH_INVALID"));
+});
+
+test("event execution must bind the matching migration plan step", () => {
+  const record = createValidRecord();
+  record.transplant.migration_plan.steps[0] = "UNRELATED-STEP";
+  record.transplant.migration_plan.artifact_hash = computePlanArtifactHash(record.transplant.migration_plan);
+  const result = validate(record);
+  assert.ok(result.errors.some(({ code }) => code === "EVENT_NOT_IN_MIGRATION_PLAN"));
 });
 
 test("existing but unreachable Git commits cannot authorize evidence or baselines", () => {
@@ -727,6 +767,20 @@ test("matching fabricated baseline values cannot bypass Git snapshot verificatio
   assert.ok(codes.has("BASELINE_STATE_NOT_REPRODUCIBLE"));
 });
 
+test("HEAD cannot be declared as a pre-transplant baseline", () => {
+  const record = createValidRecord();
+  const head = execFileSync("git", ["rev-parse", "HEAD"], { cwd: root, encoding: "utf8" }).trim();
+  const hostRef = record.transplant.migration_plan.baseline_state_ref;
+  for (const plan of [record.transplant.migration_plan, record.transplant.rollback_plan]) {
+    plan.baseline_commit = head;
+    plan.baseline_state_hash = computeContentHash(gitBlob(head, hostRef));
+    plan.artifact_hash = computePlanArtifactHash(plan);
+  }
+  const codes = new Set(validate(record).errors.map(({ code }) => code));
+  assert.ok(codes.has("BASELINE_COMMIT_NOT_PRE_TRANSPLANT"));
+  assert.ok(codes.has("EVIDENCE_NOT_AFTER_BASELINE"));
+});
+
 test("semantic validator rejects automatic execution and authority escalation", () => {
   const record = createValidRecord();
   record.transplant.automatic = true;
@@ -778,6 +832,8 @@ test("COMPLETE requires a real Registry projection and immutable completion evid
   const rollbackRef = record.transplant.rollback_plan.recovery_ref;
   const completion = {
     completion_commit: completionCommit,
+    donor_genome_id: record.compatibility_review.donor_genome_id,
+    host_genome_id: record.compatibility_review.host_genome_id,
     registry_projection_ref: registryRef,
     registry_projection_hash: computeContentHash(gitBlob(completionCommit, registryRef)),
     genome_revision_ref: genomeRef,
@@ -794,6 +850,8 @@ test("COMPLETE requires a real Registry projection and immutable completion evid
   const result = validate(record);
   assert.equal(result.ok, false);
   assert.ok(result.errors.some(({ code }) => code === "COMPLETION_REGISTRY_PROJECTION_MISSING"));
+  assert.ok(result.errors.some(({ code }) => code === "COMPLETION_GENOME_REVISION_IDENTITY_INVALID"));
+  assert.ok(result.errors.some(({ code }) => code === "COMPLETION_INTEGRATION_EVIDENCE_INVALID"));
 });
 
 test("rollback must record restoration of the exact baseline state hash", () => {

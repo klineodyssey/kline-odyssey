@@ -13,7 +13,7 @@
 
 import { createHash } from "node:crypto";
 import { execFileSync } from "node:child_process";
-import { readFileSync, statSync } from "node:fs";
+import { lstatSync, readFileSync, realpathSync } from "node:fs";
 import { readFile } from "node:fs/promises";
 import { dirname, isAbsolute, relative, resolve } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
@@ -29,6 +29,7 @@ const CANONICAL_LINEAGE_ANCHOR = "cc80135f2c6e6a74aad11f34e793c65ac0ee1938";
 const gitRootCache = new Map();
 const commitCache = new Map();
 const blobCache = new Map();
+const regularBlobCache = new Map();
 const canonicalJsonCache = new Map();
 
 export const COMPATIBILITY_GATES = Object.freeze([
@@ -307,6 +308,19 @@ const commitReachableFromHead = (repositoryRoot, commit) => {
   }
 };
 
+const commitStrictAncestor = (repositoryRoot, ancestor, descendant = "HEAD") => {
+  if (!commitExists(repositoryRoot, ancestor) || !commitExists(repositoryRoot, descendant)) return false;
+  try {
+    const resolvedAncestor = git(repositoryRoot, ["rev-parse", `${ancestor}^{commit}`]).trim();
+    const resolvedDescendant = git(repositoryRoot, ["rev-parse", `${descendant}^{commit}`]).trim();
+    if (resolvedAncestor === resolvedDescendant) return false;
+    git(repositoryRoot, ["merge-base", "--is-ancestor", resolvedAncestor, resolvedDescendant]);
+    return true;
+  } catch {
+    return false;
+  }
+};
+
 const gitBlob = (repositoryRoot, commit, repositoryPath) => {
   if (!repositoryRoot || !commit || !repositoryPath) return null;
   const key = `${resolve(repositoryRoot)}\0${commit}\0${repositoryPath}`;
@@ -326,6 +340,24 @@ const gitBlob = (repositoryRoot, commit, repositoryPath) => {
   }
 };
 
+const gitRegularFileBlob = (repositoryRoot, commit, repositoryPath) => {
+  if (!repositoryRoot || !commit || !repositoryPath) return null;
+  const normalizedPath = repositoryPath.replaceAll("\\", "/");
+  const key = `${resolve(repositoryRoot)}\0${commit}\0${normalizedPath}`;
+  if (regularBlobCache.has(key)) return regularBlobCache.get(key);
+  try {
+    const entry = git(repositoryRoot, ["ls-tree", "-z", commit, "--", normalizedPath], null);
+    const header = entry.toString("utf8").split("\0", 1)[0] ?? "";
+    const match = /^(100644|100755) blob [a-f0-9]+\t/.exec(header);
+    const value = match ? gitBlob(repositoryRoot, commit, normalizedPath) : null;
+    regularBlobCache.set(key, value);
+    return value;
+  } catch {
+    regularBlobCache.set(key, null);
+    return null;
+  }
+};
+
 const repositoryFile = (repositoryRoot, repositoryPath) => {
   const root = resolve(repositoryRoot);
   const target = resolve(root, repositoryPath);
@@ -335,7 +367,19 @@ const repositoryFile = (repositoryRoot, repositoryPath) => {
     || isAbsolute(relativeTarget);
   if (escapesRoot) return null;
   try {
-    return statSync(target).isFile() ? target : null;
+    const rootReal = realpathSync(root);
+    const targetReal = realpathSync(target);
+    const relativeRealTarget = relative(rootReal, targetReal);
+    const escapesRealRoot = relativeRealTarget === ".."
+      || relativeRealTarget.startsWith(`..${process.platform === "win32" ? "\\" : "/"}`)
+      || isAbsolute(relativeRealTarget);
+    if (escapesRealRoot || lstatSync(target).isSymbolicLink() || !lstatSync(target).isFile()) return null;
+    let cursor = root;
+    for (const component of relativeTarget.split(/[\\/]+/u).filter(Boolean)) {
+      cursor = resolve(cursor, component);
+      if (lstatSync(cursor).isSymbolicLink()) return null;
+    }
+    return target;
   } catch {
     return null;
   }
@@ -347,7 +391,7 @@ const readCanonicalJson = (repositoryRoot, path, errors) => {
     push(errors, "CANONICAL_GOVERNANCE_FILE_MISSING", path, `${path} must be a regular file in the repository`);
     return null;
   }
-  const headBlob = gitBlob(repositoryRoot, "HEAD", path);
+  const headBlob = gitRegularFileBlob(repositoryRoot, "HEAD", path);
   if (!headBlob) {
     push(errors, "CANONICAL_GOVERNANCE_FILE_UNTRACKED", path, `${path} must be an immutable Git blob at HEAD`);
     return null;
@@ -489,14 +533,10 @@ const CANONICAL_DECISION_STATES = new Set([
   "COMPLETE"
 ]);
 
-const applyDeterministicDelta = (totals, delta, expectedUnit, errors, path) => {
-  for (const [unit, value] of Object.entries(delta ?? {})) {
-    if (unit !== expectedUnit) push(errors, "EVENT_DELTA_UNIT_NOT_PLANNED", `${path}.${unit}`, `${unit} is not the migration plan unit ${expectedUnit}`);
-    if (typeof value !== "number" || !Number.isFinite(value) || value < 0) {
-      push(errors, "EVENT_DELTA_INVALID", `${path}.${unit}`, "event deltas must be finite nonnegative numbers");
-      continue;
-    }
-    totals[unit] = (totals[unit] ?? 0) + value;
+const validateExactDelta = (delta, expectedUnit, expectedValue, errors, path, code) => {
+  const entries = Object.entries(delta ?? {});
+  if (entries.length !== 1 || entries[0][0] !== expectedUnit || entries[0][1] !== expectedValue) {
+    push(errors, code, path, `delta must equal exactly { ${expectedUnit}: ${expectedValue} } from the registered organ contract`);
   }
 };
 
@@ -596,7 +636,7 @@ export const validateSoftwareOrganTransplant = (record, options = {}) => {
       if (registeredOrgan.content_hash !== organ.genome_contract?.code_or_artifact_hash) {
         push(errors, "REGISTERED_ORGAN_HASH_MISMATCH", "organ.genome_contract.code_or_artifact_hash", "organ artifact hash must equal the authoritative Registry projection");
       }
-      const registeredBlob = gitBlob(repositoryRoot, registry?.metadata?.source_commit, registeredOrgan.path);
+      const registeredBlob = gitRegularFileBlob(repositoryRoot, registry?.metadata?.source_commit, registeredOrgan.path);
       if (!registeredBlob) {
         push(errors, "REGISTERED_ORGAN_PROVENANCE_MISSING", "organ.genome_contract.code_or_artifact_hash", "registered organ path must resolve at the Registry source commit");
       } else if (registeredOrgan.content_hash !== computeContentHash(registeredBlob)) {
@@ -638,18 +678,40 @@ export const validateSoftwareOrganTransplant = (record, options = {}) => {
     }
     if (!commitReachableFromHead(repositoryRoot, plan.baseline_commit)) {
       push(errors, "BASELINE_COMMIT_NOT_REACHABLE", `transplant.${name}.baseline_commit`, "baseline_commit must be reachable from canonical HEAD");
+    } else if (!commitStrictAncestor(repositoryRoot, plan.baseline_commit, "HEAD")) {
+      push(errors, "BASELINE_COMMIT_NOT_PRE_TRANSPLANT", `transplant.${name}.baseline_commit`, "baseline_commit must be a strict ancestor of canonical HEAD, never HEAD itself");
     }
     const expectedHostPath = hostLife?.location?.canonical_path;
     if (expectedHostPath && plan.baseline_state_ref !== expectedHostPath) {
       push(errors, "BASELINE_HOST_REFERENCE_MISMATCH", `transplant.${name}.baseline_state_ref`, "baseline_state_ref must equal the registered host canonical path");
     }
     const baselineBlob = repositoryRoot && plan.baseline_commit && plan.baseline_state_ref
-      ? gitBlob(repositoryRoot, plan.baseline_commit, plan.baseline_state_ref)
+      ? gitRegularFileBlob(repositoryRoot, plan.baseline_commit, plan.baseline_state_ref)
       : null;
     if (!baselineBlob) {
       push(errors, "BASELINE_STATE_NOT_REPRODUCIBLE", `transplant.${name}.baseline_state_ref`, "baseline state must resolve to an immutable Git blob at baseline_commit");
     } else if (plan.baseline_state_hash !== computeContentHash(baselineBlob)) {
       push(errors, "BASELINE_STATE_HASH_INVALID", `transplant.${name}.baseline_state_hash`, "baseline_state_hash must equal the referenced Git blob SHA-256");
+    }
+  }
+  const baselineRegistryBlob = repositoryRoot && migrationPlan.baseline_commit
+    ? gitRegularFileBlob(repositoryRoot, migrationPlan.baseline_commit, CANONICAL_REGISTRY_PATH)
+    : null;
+  if (!baselineRegistryBlob) {
+    push(errors, "BASELINE_REGISTRY_NOT_REPRODUCIBLE", "transplant.migration_plan.baseline_commit", "pre-transplant baseline must contain the canonical Software Life Registry as a regular Git file");
+  } else {
+    try {
+      const baselineRegistry = JSON.parse(baselineRegistryBlob.toString("utf8"));
+      const baselineHost = baselineRegistry.software_lives?.find(({ life_id }) => life_id === transplant.host_life_id);
+      if (!baselineHost) {
+        push(errors, "BASELINE_HOST_NOT_REGISTERED", "transplant.migration_plan.baseline_commit", "host Life must exist in the pre-transplant Registry baseline");
+      } else if ((baselineHost.transplants ?? []).some((item) => (
+        item === transplant.transplant_id || item?.transplant_id === transplant.transplant_id
+      ))) {
+        push(errors, "BASELINE_ALREADY_CONTAINS_TRANSPLANT", "transplant.migration_plan.baseline_commit", "pre-transplant Registry baseline must not already contain the transplant identity");
+      }
+    } catch {
+      push(errors, "BASELINE_REGISTRY_INVALID", "transplant.migration_plan.baseline_commit", "pre-transplant Registry baseline must contain valid JSON");
     }
   }
   if (organ.transplantable !== true) {
@@ -703,6 +765,8 @@ export const validateSoftwareOrganTransplant = (record, options = {}) => {
     }
     if (evidence && !commitReachableFromHead(repositoryRoot, evidence.evidence_commit)) {
       push(errors, "EVIDENCE_COMMIT_NOT_REACHABLE", `compatibility_review.gate_evidence.${gate}.evidence_commit`, "evidence_commit must be reachable from canonical HEAD");
+    } else if (evidence && !commitStrictAncestor(repositoryRoot, migrationPlan.baseline_commit, evidence.evidence_commit)) {
+      push(errors, "EVIDENCE_NOT_AFTER_BASELINE", `compatibility_review.gate_evidence.${gate}.evidence_commit`, "review evidence must be committed after the immutable pre-transplant baseline");
     }
     const referencedHashes = evidence?.evidence_content_hashes ?? {};
     const referencedKeys = new Set(evidence?.evidence_refs ?? []);
@@ -721,7 +785,7 @@ export const validateSoftwareOrganTransplant = (record, options = {}) => {
           push(errors, "EVIDENCE_REFERENCE_NOT_REGULAR_FILE", path, `${reference} must resolve to a regular file under the repository root`);
         }
         const blob = repositoryRoot && evidence?.evidence_commit
-          ? gitBlob(repositoryRoot, evidence.evidence_commit, reference)
+          ? gitRegularFileBlob(repositoryRoot, evidence.evidence_commit, reference)
           : null;
         if (!blob) {
           push(errors, "EVIDENCE_GIT_BLOB_NOT_FOUND", path, `${reference} must resolve to an immutable Git blob at evidence_commit`);
@@ -792,6 +856,22 @@ export const validateSoftwareOrganTransplant = (record, options = {}) => {
   const energyTotals = {};
   const resourceUnit = migrationPlan.resource_budget?.unit;
   const energyUnit = migrationPlan.energy_budget?.unit;
+  const expectedResourceUnit = organ.resource_cost?.compute?.unit;
+  const expectedEnergyUnit = organ.energy_cost?.per_operation?.unit;
+  const expectedResourceValue = organ.resource_cost?.compute?.value;
+  const expectedEnergyValue = organ.energy_cost?.per_operation?.value;
+  if (resourceUnit !== expectedResourceUnit) {
+    push(errors, "PLAN_RESOURCE_UNIT_MISMATCH", "transplant.migration_plan.resource_budget.unit", "migration resource budget unit must equal the organ compute-cost unit");
+  }
+  if (energyUnit !== expectedEnergyUnit) {
+    push(errors, "PLAN_ENERGY_UNIT_MISMATCH", "transplant.migration_plan.energy_budget.unit", "migration energy budget unit must equal the organ per-operation energy unit");
+  }
+  if (!(expectedResourceValue > 0)) {
+    push(errors, "ORGAN_TRANSPLANT_RESOURCE_COST_NOT_POSITIVE", "organ.resource_cost.compute.value", "transplantable organ events require a positive declared compute cost");
+  }
+  if (!(expectedEnergyValue > 0)) {
+    push(errors, "ORGAN_TRANSPLANT_ENERGY_COST_NOT_POSITIVE", "organ.energy_cost.per_operation.value", "transplantable organ events require a positive declared energy cost");
+  }
   for (const [index, event] of events.entries()) {
     const path = `transplant.events[${index}]`;
     if (eventIds.has(event.event_id)) push(errors, "DUPLICATE_EVENT_ID", `${path}.event_id`, "event_id must be unique");
@@ -821,12 +901,20 @@ export const validateSoftwareOrganTransplant = (record, options = {}) => {
     if (event.status !== canonicalStatusForState(event.next_transplant_state)) {
       push(errors, "EVENT_STATUS_NOT_DETERMINISTIC", `${path}.status`, `status must equal ${canonicalStatusForState(event.next_transplant_state)}`);
     }
+    if (event.inputs?.plan_step_index !== index || event.inputs?.plan_step_action !== event.action) {
+      push(errors, "EVENT_PLAN_STEP_BINDING_INVALID", `${path}.inputs`, "event must bind its zero-based migration plan step index and canonical action");
+    }
+    if (migrationPlan.steps?.[index] !== event.action) {
+      push(errors, "EVENT_NOT_IN_MIGRATION_PLAN", `${path}.action`, "event action must equal the migration plan step at the same deterministic index");
+    }
     const expectedRightsDecision = event.next_transplant_state === "APPROVED_SIMULATION" ? "APPROVED_SIMULATION" : null;
     if (event.rights_decision !== expectedRightsDecision) {
       push(errors, "EVENT_RIGHTS_DECISION_NOT_DETERMINISTIC", `${path}.rights_decision`, "rights decision must be emitted only by the approved-simulation transition");
     }
-    applyDeterministicDelta(resourceTotals, event.resource_delta, resourceUnit, errors, `${path}.resource_delta`);
-    applyDeterministicDelta(energyTotals, event.energy_delta, energyUnit, errors, `${path}.energy_delta`);
+    validateExactDelta(event.resource_delta, expectedResourceUnit, expectedResourceValue, errors, `${path}.resource_delta`, "EVENT_RESOURCE_COST_MISMATCH");
+    validateExactDelta(event.energy_delta, expectedEnergyUnit, expectedEnergyValue, errors, `${path}.energy_delta`, "EVENT_ENERGY_COST_MISMATCH");
+    resourceTotals[expectedResourceUnit] = (resourceTotals[expectedResourceUnit] ?? 0) + expectedResourceValue;
+    energyTotals[expectedEnergyUnit] = (energyTotals[expectedEnergyUnit] ?? 0) + expectedEnergyValue;
     const replayProjection = {
       seed,
       sequence: index + 1,
@@ -847,6 +935,9 @@ export const validateSoftwareOrganTransplant = (record, options = {}) => {
     const currentTime = Date.parse(event.simulation_time);
     if (!Number.isFinite(currentTime) || (priorTime !== null && currentTime < priorTime)) {
       push(errors, "EVENT_TIME_INVALID", `${path}.simulation_time`, "event times must be valid and nondecreasing");
+    }
+    if (index === 0 && currentTime < Date.parse(review.reviewed_at)) {
+      push(errors, "EVENT_PRECEDES_REVIEW", `${path}.simulation_time`, "transplant execution cannot precede the canonical compatibility review");
     }
     if (event.next_transplant_state === "ROLLED_BACK") {
       if (event.outputs?.restored_state_hash !== transplant.migration_plan?.baseline_state_hash) {
@@ -874,6 +965,9 @@ export const validateSoftwareOrganTransplant = (record, options = {}) => {
   if (priorState !== transplant.state) {
     push(errors, "FINAL_STATE_MISMATCH", "transplant.state", "transplant state must equal the final event state");
   }
+  if ((record.metadata?.status === "COMPLETE") !== (transplant.state === "COMPLETE")) {
+    push(errors, "METADATA_STATUS_TRANSPLANT_STATE_MISMATCH", "metadata.status", "metadata COMPLETE and transplant COMPLETE must be claimed together");
+  }
   if (transplant.state === "COMPLETE") {
     const finalEvent = events.at(-1);
     const completion = finalEvent?.outputs?.completion_evidence;
@@ -885,6 +979,14 @@ export const validateSoftwareOrganTransplant = (record, options = {}) => {
       }
       if (!commitReachableFromHead(repositoryRoot, completion.completion_commit)) {
         push(errors, "COMPLETION_COMMIT_NOT_REACHABLE", "transplant.events[-1].outputs.completion_evidence.completion_commit", "completion commit must be reachable from canonical HEAD");
+      } else if (!commitStrictAncestor(repositoryRoot, migrationPlan.baseline_commit, completion.completion_commit)) {
+        push(errors, "COMPLETION_COMMIT_NOT_AFTER_BASELINE", "transplant.events[-1].outputs.completion_evidence.completion_commit", "completion commit must descend strictly from the pre-transplant baseline");
+      }
+      if (completion.donor_genome_id !== review.donor_genome_id) {
+        push(errors, "COMPLETION_DONOR_GENOME_MISMATCH", "transplant.events[-1].outputs.completion_evidence.donor_genome_id", "completion must bind the reviewed donor Genome identity");
+      }
+      if (completion.host_genome_id !== review.host_genome_id) {
+        push(errors, "COMPLETION_HOST_GENOME_MISMATCH", "transplant.events[-1].outputs.completion_evidence.host_genome_id", "completion must bind the reviewed host Genome identity");
       }
       if (!isAuthorizedWorker(workerRegistry, completion.maintenance_owner, true)) {
         push(errors, "COMPLETION_MAINTENANCE_OWNER_NOT_AUTHORIZED", "transplant.events[-1].outputs.completion_evidence.maintenance_owner", "maintenance ownership must be accepted by the canonical Codex authority");
@@ -896,9 +998,9 @@ export const validateSoftwareOrganTransplant = (record, options = {}) => {
         push(errors, "COMPLETION_ROLLBACK_RETENTION_INVALID", "transplant.events[-1].outputs.completion_evidence.rollback_retention_ref", "completion must retain the reviewed rollback recovery artifact");
       }
       const verifyCompletionBlob = (reference, claimedHash, path) => {
-        const blob = gitBlob(repositoryRoot, completion.completion_commit, reference);
+        const blob = gitRegularFileBlob(repositoryRoot, completion.completion_commit, reference);
         if (!blob) {
-          push(errors, "COMPLETION_EVIDENCE_BLOB_MISSING", path, `${reference} must resolve to a Git blob at completion_commit`);
+          push(errors, "COMPLETION_EVIDENCE_BLOB_MISSING", path, `${reference} must resolve to a regular Git file at completion_commit`);
           return null;
         }
         if (claimedHash !== computeContentHash(blob)) {
@@ -911,7 +1013,7 @@ export const validateSoftwareOrganTransplant = (record, options = {}) => {
         completion.registry_projection_hash,
         "transplant.events[-1].outputs.completion_evidence.registry_projection_hash"
       );
-      verifyCompletionBlob(
+      const genomeBlob = verifyCompletionBlob(
         completion.genome_revision_ref,
         completion.genome_revision_hash,
         "transplant.events[-1].outputs.completion_evidence.genome_revision_hash"
@@ -929,22 +1031,76 @@ export const validateSoftwareOrganTransplant = (record, options = {}) => {
         if (!Object.hasOwn(completion.integration_evidence_hashes ?? {}, reference)) {
           push(errors, "COMPLETION_EVIDENCE_CONTENT_HASH_MISSING", `transplant.events[-1].outputs.completion_evidence.integration_evidence_refs[${index}]`, `${reference} requires a content hash`);
         } else {
-          verifyCompletionBlob(
+          const integrationBlob = verifyCompletionBlob(
             reference,
             completion.integration_evidence_hashes[reference],
             `transplant.events[-1].outputs.completion_evidence.integration_evidence_hashes.${reference}`
           );
+          if (integrationBlob) {
+            try {
+              const integration = JSON.parse(integrationBlob.toString("utf8"));
+              const expected = {
+                artifact_type: "SOFTWARE_ORGAN_INTEGRATION_EVIDENCE",
+                transplant_id: transplant.transplant_id,
+                compatibility_review_id: transplant.compatibility_review_id,
+                donor_life_id: transplant.donor_life_id,
+                donor_genome_id: review.donor_genome_id,
+                host_life_id: transplant.host_life_id,
+                host_genome_id: review.host_genome_id,
+                organ_id: transplant.organ_id,
+                state: "COMPLETE",
+                result: "PASS"
+              };
+              if (Object.entries(expected).some(([field, value]) => integration[field] !== value)) {
+                push(errors, "COMPLETION_INTEGRATION_EVIDENCE_IDENTITY_INVALID", `transplant.events[-1].outputs.completion_evidence.integration_evidence_refs[${index}]`, "integration evidence must bind the completed donor, host, Genome, organ, review and transplant identities");
+              }
+            } catch {
+              push(errors, "COMPLETION_INTEGRATION_EVIDENCE_INVALID", `transplant.events[-1].outputs.completion_evidence.integration_evidence_refs[${index}]`, "integration evidence must be a structured JSON attestation");
+            }
+          }
+        }
+      }
+      if (genomeBlob) {
+        try {
+          const genomeRevision = JSON.parse(genomeBlob.toString("utf8"));
+          const expected = {
+            artifact_type: "SOFTWARE_GENOME_REVISION_EVIDENCE",
+            life_id: transplant.host_life_id,
+            genome_id: review.host_genome_id,
+            donor_life_id: transplant.donor_life_id,
+            donor_genome_id: review.donor_genome_id,
+            transplant_id: transplant.transplant_id,
+            organ_id: transplant.organ_id,
+            state: "COMPLETE"
+          };
+          if (Object.entries(expected).some(([field, value]) => genomeRevision[field] !== value)) {
+            push(errors, "COMPLETION_GENOME_REVISION_IDENTITY_INVALID", "transplant.events[-1].outputs.completion_evidence.genome_revision_ref", "Genome revision evidence must bind the completed host, donor, Genome, organ and transplant identities");
+          }
+        } catch {
+          push(errors, "COMPLETION_GENOME_REVISION_INVALID", "transplant.events[-1].outputs.completion_evidence.genome_revision_ref", "Genome revision evidence must be a structured JSON attestation");
         }
       }
       if (registryBlob) {
         try {
           const completionRegistry = JSON.parse(registryBlob.toString("utf8"));
           const projectedHost = completionRegistry.software_lives?.find(({ life_id }) => life_id === transplant.host_life_id);
-          const projected = projectedHost?.transplants?.some((item) => (
-            item === transplant.transplant_id || item?.transplant_id === transplant.transplant_id
-          ));
+          const projected = projectedHost?.transplants?.find((item) => item?.transplant_id === transplant.transplant_id);
           if (!projected) {
             push(errors, "COMPLETION_REGISTRY_PROJECTION_MISSING", "transplant.events[-1].outputs.completion_evidence.registry_projection_ref", "host Registry projection must contain the completed transplant identity");
+          } else {
+            const expected = {
+              compatibility_review_id: transplant.compatibility_review_id,
+              donor_life_id: transplant.donor_life_id,
+              donor_genome_id: review.donor_genome_id,
+              host_life_id: transplant.host_life_id,
+              host_genome_id: review.host_genome_id,
+              organ_id: transplant.organ_id,
+              state: "COMPLETE",
+              completion_commit: completion.completion_commit
+            };
+            if (Object.entries(expected).some(([field, value]) => projected[field] !== value)) {
+              push(errors, "COMPLETION_REGISTRY_PROJECTION_IDENTITY_INVALID", "transplant.events[-1].outputs.completion_evidence.registry_projection_ref", "Registry projection must bind the completed review, donor, host, Genome, organ and completion commit identities");
+            }
           }
         } catch {
           push(errors, "COMPLETION_REGISTRY_PROJECTION_INVALID", "transplant.events[-1].outputs.completion_evidence.registry_projection_ref", "completion Registry projection must contain valid JSON");
