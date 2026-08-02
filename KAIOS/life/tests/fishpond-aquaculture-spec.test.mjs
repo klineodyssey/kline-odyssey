@@ -49,5 +49,13 @@ const dispatch=registry.dispatch_history.find(({task_id})=>task_id===envelope.ta
 assert.equal(dispatch.worker_id,envelope.worker_id);
 assert.equal(dispatch.branch,envelope.branch);
 assert.equal(dispatch.status,"COMPLETED_CODEX_REVIEWED");
-assert.equal(registry.workers.find(({worker_id})=>worker_id===envelope.worker_id).current_task,null);
+const worker=registry.workers.find(({worker_id})=>worker_id===envelope.worker_id);
+if(worker.current_task!==null){
+  const active=registry.dispatch_history.find(({task_id})=>task_id===worker.current_task);
+  assert.ok(active,"current Cursor task must have a dispatch record");
+  assert.equal(active.worker_id,worker.worker_id);
+  assert.equal(active.branch,worker.current_branch);
+  assert.equal(active.status,"DISPATCHED");
+  assert.notEqual(active.task_id,envelope.task_id,"completed fishpond lease cannot remain active");
+}
 console.log("KAIOS_FISHPOND_AQUACULTURE_SPEC_TEST_PASS");
