@@ -1,0 +1,63 @@
+# KGEN cursor-01 dispatch wake (HUMAN-AUTO-CLOCKIN-001 / option 2)
+# Launches a Cursor Cloud Agent when Codex merges a codex/* dispatch PR to main.
+# Requires repo secret: CURSOR_API_KEY (Cursor Dashboard → API Keys)
+# Docs: KGEN-AI-Company/automation/README.md
+
+name: KGEN Cursor Dispatch Wake
+
+on:
+  pull_request:
+    types: [closed]
+    branches: [main]
+
+concurrency:
+  group: kgen-cursor-dispatch-wake
+  cancel-in-progress: false
+
+jobs:
+  wake-cursor-01:
+    if: >-
+      github.event.pull_request.merged == true &&
+      startsWith(github.event.pull_request.head.ref, 'codex/')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Launch Cursor Cloud Agent
+        if: ${{ secrets.CURSOR_API_KEY != '' }}
+        env:
+          CURSOR_API_KEY: ${{ secrets.CURSOR_API_KEY }}
+        run: |
+          set -euo pipefail
+          BODY=$(python3 <<'PY'
+          import json, pathlib
+          prompt = pathlib.Path("KGEN-AI-Company/automation/cursor-dispatch-wake-prompt.txt").read_text()
+          print(json.dumps({
+              "name": "KGEN-Cursor-Dispatch-Wake",
+              "prompt": {"text": prompt},
+              "repos": [{
+                  "url": "https://github.com/klineodyssey/kline-odyssey",
+                  "startingRef": "main"
+              }],
+              "autoCreatePR": False
+          }))
+          PY
+          )
+          HTTP=$(curl -sS -w "%{http_code}" -o /tmp/cursor-agent.json \
+            -X POST "https://api.cursor.com/v1/agents" \
+            -H "Authorization: Bearer ${CURSOR_API_KEY}" \
+            -H "Content-Type: application/json" \
+            -d "$BODY")
+          echo "Cursor API HTTP ${HTTP}"
+          cat /tmp/cursor-agent.json
+          test "$HTTP" -ge 200 -a "$HTTP" -lt 300
+
+      - name: Secret missing — log only
+        if: ${{ secrets.CURSOR_API_KEY == '' }}
+        run: |
+          echo "::notice::CURSOR_API_KEY not set. Add it in GitHub repo secrets to auto-wake cursor-01 on Codex dispatch merges."
+          echo "Merged PR: #${{ github.event.pull_request.number }} (${{ github.event.pull_request.head.ref }})"
+          echo "See KGEN-AI-Company/automation/README.md"

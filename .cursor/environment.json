@@ -1,0 +1,3 @@
+{
+  "install": "pip install --quiet pandas openpyxl numpy requests matplotlib"
+}

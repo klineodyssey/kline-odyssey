@@ -83,6 +83,26 @@ Only after ①② complete (or explicit Human override 「只聊天」).
 
 ---
 
+## Repo-native wiring (installed)
+
+| Layer | Path | Status |
+|-------|------|--------|
+| Cursor rule (every chat) | `.cursor/rules/kgen-session-clockin.mdc` | **ACTIVE** on clone |
+| Cloud VM deps | `.cursor/environment.json` | install script |
+| GHA dispatch wake | `.github/workflows/kgen-cursor-dispatch-wake.yml` | needs `CURSOR_API_KEY` secret |
+| Prompt payload | `KGEN-AI-Company/automation/cursor-dispatch-wake-prompt.txt` | shared |
+| Setup doc | `KGEN-AI-Company/automation/README.md` | Human one secret |
+
+### One secret to finish webhook path
+
+GitHub **Settings → Secrets → Actions → `CURSOR_API_KEY`** from [Cursor Dashboard → API Keys](https://cursor.com/dashboard/api).
+
+Until set, GHA logs `::notice::` only; **`.cursor/rules` still enforces boot order in every chat.**
+
+Optional duplicate: Cursor Automations UI (same prompt) — use GHA **or** UI, not both.
+
+---
+
 ## Cursor Automation setup (方案 2 — webhook / GitHub trigger)
 
 Configure at [cursor.com/automations](https://cursor.com/automations).

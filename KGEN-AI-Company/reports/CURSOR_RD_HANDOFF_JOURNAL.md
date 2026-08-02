@@ -245,13 +245,17 @@ Human：我需要一支 iPhone
 - 每次如來 dispatch merge 喚醒：~$0.03–0.15 巡檢；若接工 +$0.5–5+
 - 月估（2–4 dispatch/天）：**~$5–20** + 正常聊天
 
-#### Human 待辦（Cursor 無法代做）
+#### Repo wiring status（2026-08-02）
 
-1. [cursor.com/automations](https://cursor.com/automations) 建立 `KGEN-Cursor-Dispatch-Wake`（設定見 SOP）
-2. Cloud Agent **spend limit** 建議先 $20–50/月
-3. 可選：GitHub secret `CURSOR_DISPATCH_WEBHOOK_URL` — 需 Codex OPEN `KAIOS-CURSOR-DISPATCH-WEBHOOK-GHA-001`
+| 已自動生效 | 需 Human 一次 |
+|------------|---------------|
+| `.cursor/rules/kgen-session-clockin.mdc` 每次對話上工 | GitHub secret `CURSOR_API_KEY` → GHA 喚醒 |
+| `.github/workflows/kgen-cursor-dispatch-wake.yml` | Cloud Agent spend limit |
+| `.cursor/environment.json` | （可選）cursor.com/automations 原生 trigger |
 
-#### Artifacts
+Browser 登入 cursor.com 建 Automation **blocked**（Cloud VM 無 web session）；**GHA+API 為等價替代**。
+
+---
 
 - `KGEN-AI-Company/CURSOR_SESSION_CLOCKIN_SOP.md`
 - `AGENTS.md` § Cursor session clock-in
@@ -300,6 +304,7 @@ Human 親自督導時可優先問如來三件事：
 | `KAIOS-SETTLEMENT-KGEN-VS-KAIOS-RD-001` | **P0** Human 强制：薪資用 KGEN 还是 KAIOS |
 | `KAIOS-AI-WORKER-PAYROLL-WALLET-V0-001` | AI 工人 simulation 钱包 + 发薪闭环 v0 |
 | `KAIOS-PLAYER-FUNDED-LIFE-ORDER-DEMO-001` | 玩家预付 → AI Company 派工造生命 |
+| `KAIOS-CURSOR-DISPATCH-WEBHOOK-GHA-001` | 可选：GitHub Actions POST → Cursor Automation webhook（需 secret） |
 
 ---
 
