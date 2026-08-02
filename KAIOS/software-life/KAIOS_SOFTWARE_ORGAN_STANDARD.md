@@ -230,7 +230,14 @@ An organ is reviewable only when:
 8. automatic mutation, reproduction and transplant are false;
 9. real Wallet, KGEN, on-chain transfer, external autonomy and Production
    authority are false; and
-10. deterministic tests, rollback and event-chain checks pass.
+10. deterministic tests, rollback and event-chain checks pass;
+11. every passing gate binds a gate-specific semantic subject hash, not only a
+    check-token label;
+12. historical Worker Registry authority provides only the maximum grant and
+    the current Registry has not revoked or suspended the actor; and
+13. review provenance binds an immutable repository authority epoch and
+    evidence bundle while explicitly declaring that Git provenance is not
+    cryptographic user authentication.
 
 Cross-record identity, evidence, state-transition, event-hash and rollback
 rules are enforced by

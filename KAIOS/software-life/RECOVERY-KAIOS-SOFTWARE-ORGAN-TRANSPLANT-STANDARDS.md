@@ -35,7 +35,14 @@ authority.
    are fixed-path tracked Git blobs and reject caller overrides.
 7. Confirm evidence commits/blobs and migration/rollback baseline commits,
    host references and hashes reproduce exactly.
-8. Confirm protected-path hashes and the working tree.
+8. Confirm historical Worker Registry grants cannot override a current
+   revocation or suspension.
+9. Confirm each passing gate recomputes its semantic subject hash and validates
+   finite capacity, exact plans or exact executed commands as applicable.
+10. Confirm completion uses a strict implementation-commit then
+    Registry-projection-commit sequence and that the current Registry still has
+    zero completed or active transplants.
+11. Confirm protected-path hashes and the working tree.
 
 No data migration or active transplant requires reversal because this package
 executes none.

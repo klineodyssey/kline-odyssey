@@ -89,11 +89,30 @@ is invalid.
 Every gate also requires exactly one typed semantic attestation. The
 attestation binds its gate-specific evidence type and check to the review,
 transplant, donor Life and Genome, host Life and Genome, organ, reviewer,
-result and review time. An unrelated repository file cannot satisfy a gate
-merely because its bytes and commit are valid. Reviewer and Life identity
-authority is resolved from the immutable reviewed Registry epoch at commit
-`cc80135f2c6e6a74aad11f34e793c65ac0ee1938`; branch-local authority drift is
+result, review time and a SHA-256 of the complete gate-specific subject. The
+resource and energy attestations bind exact bounded budgets and finite
+available capacity. Migration and rollback attestations bind plan ID, plan
+artifact hash, maximum downtime and verification commands. `TESTS_PASS` binds
+the exact commands, zero exit codes, nonzero pass count, zero fail count,
+output hash, review time and a reachable tested commit. Rehashing a changed
+plan cannot reuse an older attestation.
+
+An unrelated repository file cannot satisfy a gate merely because its bytes
+and commit are valid. Reviewer and Life identity authority is resolved from
+the immutable reviewed Registry epoch at commit
+`cc80135f2c6e6a74aad11f34e793c65ac0ee1938`; that epoch is the maximum grant,
+not a permanent bypass. The current Worker Registry must still contain an
+active, acknowledged, unsuspended actor. Current revocation or suspension
+fails closed, while branch-local attempts to expand historical authority are
 rejected.
+
+The compatibility review also records an immutable repository provenance
+attestation binding the canonical reviewer alias, Worker ID, authority commit,
+Worker Registry blob, semantic review subject and evidence bundle. This proves
+repository lineage and merge-review accountability only. It explicitly sets
+`cryptographic_user_authentication` to `false`; process identity remains an
+out-of-band repository merge-authority boundary and is not misrepresented as
+a cryptographic user signature.
 
 An approved state also requires `transplant_right` and
 `license_or_usage_right` to equal `APPROVED_SIMULATION`. Schema conditionals
@@ -203,8 +222,10 @@ reference must resolve to a non-symbolic regular Git file at that commit, and
 its computed SHA-256 must equal the recorded baseline hash.
 
 Every event names the owning plan ID, plan-step index and action. Ordinary
-execution maps one-to-one to ordered migration steps. A rollback event instead
-binds the rollback plan, whose deterministic V1 action is exactly
+execution must be an exact prefix of the reviewed ordered migration steps;
+future steps may remain pending before completion, while `COMPLETE` must
+consume the entire plan. A rollback event instead binds the rollback plan,
+whose deterministic V1 action is exactly
 `ROLLBACK-RESTORE`; a placeholder or unexecuted rollback step is invalid.
 
 No authoritative source is overwritten without a recoverable history. A
@@ -306,15 +327,21 @@ recorded as reachable regular Git files with matching SHA-256 values. Genome
 and integration evidence must be structured JSON attestations binding the
 review, donor, host, both Genome IDs, organ and transplant. The host Registry
 projection must contain a structured completed-transplant record with those
-same identities and completion commit; a bare string, arbitrary blob, empty or
-caller-asserted completion envelope fails closed. Canonical review,
+same identities and the implementation commit. The implementation commit must
+be strictly after the baseline and strictly before the later Registry
+projection commit. This two-commit sequence avoids requiring a Git commit to
+contain its own hash. A bare string, arbitrary blob, empty or caller-asserted
+completion envelope fails closed. Canonical review,
 rework, rejection, acceptance, rollback and completion events must be emitted
 by the registered Codex reviewer. Neither state transfers real ownership.
 
 Gate evidence commits must strictly precede the completion commit. Completion
 references must remain non-symbolic regular files in the current worktree as
 well as regular Git blobs at the completion commit. Genome completion evidence
-also binds the compatibility review ID.
+also binds the compatibility review ID. A historical completion fixture may
+exist in Git history for validation while the current Registry returns to zero
+active transplants; that fixture is evidence, not a claim that a real organ was
+transplanted.
 
 Donor authorship and provenance cannot be erased. A host may reference or
 embed a licensed organ while the donor remains a separate historical source.

@@ -43,7 +43,7 @@ Constitution source modification: `FALSE`
 
 ## Independent Review
 
-Six attack-review rounds found twenty-two P1 and ten P2 issues in total. Repairs
+Seven attack-review rounds found twenty-four P1 and eleven P2 issues in total. Repairs
 added:
 
 - evidence-derived approval and simulated Rights enforcement;
@@ -97,10 +97,21 @@ added:
   bound exactly to `ROLLBACK-RESTORE`;
 - current-worktree regular-file checks for every completion reference and
   compatibility-review binding in Genome completion evidence.
+- gate-specific semantic subject hashes plus finite capacity, exact plan and
+  executed-command attestations that cannot be reused after a rehashed change;
+- immutable maximum authority combined with fail-closed current Worker
+  Registry revocation and suspension checks;
+- repository-bound reviewer provenance that explicitly does not claim
+  cryptographic user authentication;
+- a non-self-referential implementation-commit then Registry-projection-commit
+  completion sequence, with a positive historical projection fixture;
+- reviewed-plan prefix execution before completion and full-plan consumption
+  at `COMPLETE`;
+- direct directory-symlink regression coverage for completion references.
 
-Focused semantic and structural fixtures: `38/38 PASS`.
+Focused semantic and structural fixtures: `43/43 PASS`.
 
-All Software Life tests: `55/55 PASS`.
+All Software Life tests: `60/60 PASS`.
 
 P0: `0`
 

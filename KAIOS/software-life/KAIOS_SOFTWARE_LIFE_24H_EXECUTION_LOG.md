@@ -29,6 +29,7 @@ execution.
 | 2026-08-02T11:33Z | 2026-08-02T12:03Z | Organ standards attack-review hardening | PR `#112` | third review found/repaired 4 P1: executed Schema, fixed governance paths, Git-blob evidence, authorized reviewers/Rights and real rollback baseline; 26/26 fixtures PASS | `FINAL_REVIEW_PENDING` | independent re-review |
 | 2026-08-02T12:04Z | 2026-08-02T12:51Z | Organ standards canonical replay hardening | PR `#112` | fourth review found/repaired 4 P1 and 2 P2: validator-owned repo, reachable commits, real replay, recomputed signatures, Codex terminal authority and Registry-backed completion; 32/32 PASS | `FINAL_REVIEW_PENDING` | independent re-review |
 | 2026-08-02T12:52Z | 2026-08-02T13:38Z | Organ standards completion-semantics hardening | PR `#112` | fifth review found/repaired 4 P1 and 1 P2: COMPLETE coupling, structured identity attestations, plan-derived nonzero replay costs, strict pre-transplant Registry baseline and symlink/non-regular-mode rejection; 36/36 PASS in 14 seconds after content-keyed governance caching | `FINAL_REVIEW_PENDING` | independent re-review |
+| 2026-08-02T13:39Z | 2026-08-02T14:24Z | Organ standards gate/provenance hardening | PR `#112` | seventh review repaired 2 P1 and 1 P2: semantic gate subjects, finite capacity and exact plan/test execution, current revocation, explicit non-cryptographic reviewer provenance, non-self-referential COMPLETE fixture and direct symlink regression; focused 43/43 and all Software Life 60/60 PASS | `FINAL_REVIEW_PENDING` | final independent re-review |
 
 ## Cursor Assignment
 
@@ -59,11 +60,13 @@ unfenced dispatch is treated as active.
 - Unresolved P2: `0`
 - PR #109 independent review: P1 found/repaired `1/1`; P2 found/repaired
   `2/2`; unresolved P1/P2 `0/0`.
-- Organ standards attack reviews: P1 found/repaired `22/22`; P2
-  found/repaired `10/10`; sixth-round repairs add typed gate evidence,
+- Organ standards attack reviews: P1 found/repaired `24/24`; P2
+  found/repaired `11/11`; sixth-round repairs add typed gate evidence,
   immutable authority anchoring, resolved-HEAD cache keys, completion ordering,
-  rollback-plan execution binding and completion-reference hardening; final
-  independent re-review pending.
+  rollback-plan execution binding and completion-reference hardening;
+  seventh-round repairs add semantic gate subjects, current revocation,
+  repository provenance boundaries and a valid non-self-referential COMPLETE
+  fixture. Final independent re-review pending.
 - Baseline test debt observed: the older foundational-candidate validator does
   not yet recognize the already-merged `aquaculture-v1` and
   `forest-agriculture-v1` aggregate candidate directories. It is unchanged by
