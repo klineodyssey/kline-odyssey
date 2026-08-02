@@ -59,8 +59,11 @@ unfenced dispatch is treated as active.
 - Unresolved P2: `0`
 - PR #109 independent review: P1 found/repaired `1/1`; P2 found/repaired
   `2/2`; unresolved P1/P2 `0/0`.
-- Organ standards attack reviews: P1 found/repaired `17/17`; P2
-  found/repaired `8/8`; final independent re-review pending.
+- Organ standards attack reviews: P1 found/repaired `22/22`; P2
+  found/repaired `10/10`; sixth-round repairs add typed gate evidence,
+  immutable authority anchoring, resolved-HEAD cache keys, completion ordering,
+  rollback-plan execution binding and completion-reference hardening; final
+  independent re-review pending.
 - Baseline test debt observed: the older foundational-candidate validator does
   not yet recognize the already-merged `aquaculture-v1` and
   `forest-agriculture-v1` aggregate candidate directories. It is unchanged by

@@ -104,5 +104,6 @@ dedicated migration or integration batch passes review and compatibility tests.
 - [Software Organ standard](software-life/KAIOS_SOFTWARE_ORGAN_STANDARD.md)
 - [Organ transplant standard](software-life/KAIOS_SOFTWARE_ORGAN_TRANSPLANT_STANDARD.md)
 - [Organ compatibility schema](software-life/KAIOS_SOFTWARE_ORGAN_COMPATIBILITY_SCHEMA.json)
+- [Typed gate evidence fixture](software-life/evidence/SOFTWARE_ORGAN_GATE_EVIDENCE_FIXTURE.json)
 - [Organ transplant semantic validator](software-life/tools/validate-software-organ-transplant.mjs)
 - [Rename plan](software-life/KAIOS_SOFTWARE_LIFE_RENAME_PLAN.json)

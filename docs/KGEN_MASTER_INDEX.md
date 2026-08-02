@@ -798,6 +798,7 @@ Task: `KAIOS-FOREST-AGRICULTURE-RUNTIME-V1-001`
 | `KAIOS/software-life/KAIOS_SOFTWARE_ORGAN_STANDARD.md` | Full Software Organ identity, interface, resource, lifecycle and compatibility standard. |
 | `KAIOS/software-life/KAIOS_SOFTWARE_ORGAN_TRANSPLANT_STANDARD.md` | Fail-closed simulation-only organ transplant review, migration and rollback standard. |
 | `KAIOS/software-life/KAIOS_SOFTWARE_ORGAN_COMPATIBILITY_SCHEMA.json` | Machine-readable Organ Manifest, compatibility gates and transplant event contract. |
+| `KAIOS/software-life/evidence/SOFTWARE_ORGAN_GATE_EVIDENCE_FIXTURE.json` | Fixture-only typed semantic attestations for all fourteen identity-bound transplant gates. |
 | `KAIOS/software-life/tools/validate-software-organ-transplant.mjs` | Fail-closed semantic validator for cross-record identity, approval evidence, event hashes and rollback restoration. |
 | `KAIOS/software-life/tests/software-organ-standards.test.mjs` | Organ, interface, transplant, Registry policy and authority-boundary validation. |
 | `KAIOS/software-life/RECOVERY-KAIOS-SOFTWARE-ORGAN-TRANSPLANT-STANDARDS.md` | Organ standards rollback and Registry regeneration procedure. |

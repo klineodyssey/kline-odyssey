@@ -43,7 +43,7 @@ Constitution source modification: `FALSE`
 
 ## Independent Review
 
-Five attack-review rounds found seventeen P1 and eight P2 issues in total. Repairs
+Six attack-review rounds found twenty-two P1 and ten P2 issues in total. Repairs
 added:
 
 - evidence-derived approval and simulated Rights enforcement;
@@ -86,8 +86,21 @@ added:
   completion evidence;
 - content-keyed immutable governance snapshot caches that preserve drift
   detection while reducing the complete focused suite from 133 seconds to 14.
+- gate-specific typed attestations bound to review, transplant, donor, host,
+  Genome and organ identities, with an explicit fixture-only evidence bundle;
+- immutable authority-epoch Registry and Worker Registry resolution, including
+  branch-local reviewer and Life authority drift rejection;
+- resolved-commit cache keys that cannot retain reachability across HEAD
+  changes;
+- strict review-evidence ancestry before completion;
+- separate migration and rollback plan identities, with rollback execution
+  bound exactly to `ROLLBACK-RESTORE`;
+- current-worktree regular-file checks for every completion reference and
+  compatibility-review binding in Genome completion evidence.
 
-Semantic and structural valid/negative fixtures: `36/36 PASS`.
+Focused semantic and structural fixtures: `38/38 PASS`.
+
+All Software Life tests: `55/55 PASS`.
 
 P0: `0`
 

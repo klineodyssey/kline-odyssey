@@ -1179,6 +1179,7 @@ supply-chain owners and does not activate Production authority.
 - [Software Organ Standard](KAIOS/software-life/KAIOS_SOFTWARE_ORGAN_STANDARD.md)
 - [Organ Transplant Standard](KAIOS/software-life/KAIOS_SOFTWARE_ORGAN_TRANSPLANT_STANDARD.md)
 - [Organ Compatibility Schema](KAIOS/software-life/KAIOS_SOFTWARE_ORGAN_COMPATIBILITY_SCHEMA.json)
+- [Typed Gate Evidence Fixture](KAIOS/software-life/evidence/SOFTWARE_ORGAN_GATE_EVIDENCE_FIXTURE.json)
 - [Organ Transplant Semantic Validator](KAIOS/software-life/tools/validate-software-organ-transplant.mjs)
 - [Controlled Rename Plan](KAIOS/software-life/KAIOS_SOFTWARE_LIFE_RENAME_PLAN.json)
 - [24H Scheduler](KAIOS/software-life/KAIOS_AI_WORKFORCE_24H_SCHEDULER.md)

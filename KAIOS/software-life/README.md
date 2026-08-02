@@ -41,6 +41,8 @@ Organism Manifest, taxonomy, Physics, Rights and Genome authorities.
   migration, rollback and event-history process.
 - `KAIOS_SOFTWARE_ORGAN_COMPATIBILITY_SCHEMA.json`: machine-readable Organ
   Manifest, fourteen-gate compatibility review and transplant record.
+- `evidence/SOFTWARE_ORGAN_GATE_EVIDENCE_FIXTURE.json`: fixture-only typed
+  gate-attestation bundle for identity-bound negative and replay tests.
 - `tools/validate-software-organ-transplant.mjs`: fail-closed cross-record
   identity, evidence, rights, transition, hash-chain and rollback validator.
 - `tests/software-organ-standards.test.mjs`: structural and semantic valid and
