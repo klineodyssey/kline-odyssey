@@ -8,7 +8,7 @@
 
 ## 使用規則
 
-1. Cursor 在 **有空創作** 或 **idle / 交工後** 可追加條目；不必等 Human 轉述。
+1. Cursor 在 **有工作施工時順便** 追加條目；**idle / 交工後** 亦可寫。不必等 Human 轉述，不必另開「只写簿」工單。
 2. 條目 **不得** 自行把 WorkQueue 改為 OPEN；僅 **PROPOSED** + handoff。
 3. 每條 Human 定見需有 `human_decision_id` 或 `human_doctrine_id`。
 4. Codex 可引用本簿排工、寫 Review Log，或升格為 Canon / ADR（需 Human 或 Codex 正式流程）。
