@@ -190,58 +190,52 @@
         "CLAIM-EVENT-KAIOS-CURSOR-FUNGI-CANDIDATE-001-001",
         "CLAIM-EVENT-KAIOS-CURSOR-FUNGI-CANDIDATE-001-002"
       ]
-    },
+    }
+  ],
+  "prepared_tasks": [
     {
+      "envelope_id": "TASK-ENVELOPE-KAIOS-CURSOR-MICROBIAL-RESEARCH-001-V1",
       "task_id": "KAIOS-CURSOR-MICROBIAL-RESEARCH-001",
       "worker_id": "cursor-01",
-      "branch": "cursor-handoff/KAIOS-CURSOR-MICROBIAL-RESEARCH-001",
-      "output_status": "CURSOR_RESEARCH_PROPOSAL_ONLY",
       "reviewer": "codex-gm-01",
+      "source_base": "beb982fda885fa7acc4dc35407df611d1019a544",
+      "branch": "cursor-handoff/KAIOS-CURSOR-MICROBIAL-RESEARCH-001",
       "status": "READY_FOR_ATOMIC_CLAIM",
       "claim_state": "UNCLAIMED",
-      "prepared_task_envelope": {
-        "envelope_id": "TASK-ENVELOPE-KAIOS-CURSOR-MICROBIAL-RESEARCH-001-V1",
-        "task_id": "KAIOS-CURSOR-MICROBIAL-RESEARCH-001",
-        "worker_id": "cursor-01",
-        "reviewer": "codex-gm-01",
-        "source_base": "beb982fda885fa7acc4dc35407df611d1019a544",
-        "branch": "cursor-handoff/KAIOS-CURSOR-MICROBIAL-RESEARCH-001",
-        "status": "READY_FOR_ATOMIC_CLAIM",
-        "claim_state": "UNCLAIMED",
-        "claim_required": "ATOMIC_CLAIM_BEFORE_WORK",
-        "authorized_paths": [
-          "KAIOS/life/candidates/forest-agriculture-v1/microbial-research/"
-        ],
-        "expected_files": [
-          "CURSOR_MICROBIAL_DECOMPOSER_RESEARCH_REPORT.md",
-          "microbial-decomposer-process-proposals.json",
-          "microbial-environment-threshold-proposals.json",
-          "microbial-resource-accounting-scenarios.json",
-          "microbial-competition-and-succession-proposals.json",
-          "microbial-safety-boundaries.json",
-          "microbial-test-scenarios.json",
-          "CURSOR_MICROBIAL_RESEARCH_IMPROVEMENT_PROPOSAL.md"
-        ],
-        "actions": [
-          "READ_REPOSITORY_CONTEXT",
-          "WRITE_ONLY_EXPECTED_FILES_UNDER_AUTHORIZED_PATH",
-          "RUN_BOUNDED_LOCAL_TESTS",
-          "RECORD_GIT_OBJECT_AND_SHA256_PROVENANCE",
-          "COMMIT_EXACTLY_EXPECTED_FILES",
-          "STOP_AT_PENDING_CODEX_REVIEW"
-        ],
-        "forbidden_paths": [
-          "KGEN-KAIOS/**",
-          "KGEN/**",
-          "KAIOS/**/Runtime/**",
-          "KAIOS/**/Wallet/**",
-          "**/*CURRENT*",
-          "api/**",
-          "docs/**",
-          "README.md",
-          "PRIMEFORGE_GENESIS_BOOT_SEQUENCE_V1_4.md"
-        ]
-      }
+      "claim_required": "ATOMIC_CLAIM_BEFORE_WORK",
+      "output_status": "CURSOR_RESEARCH_PROPOSAL_ONLY",
+      "authorized_paths": [
+        "KAIOS/life/candidates/forest-agriculture-v1/microbial-research/"
+      ],
+      "expected_files": [
+        "CURSOR_MICROBIAL_DECOMPOSER_RESEARCH_REPORT.md",
+        "microbial-decomposer-process-proposals.json",
+        "microbial-environment-threshold-proposals.json",
+        "microbial-resource-accounting-scenarios.json",
+        "microbial-competition-and-succession-proposals.json",
+        "microbial-safety-boundaries.json",
+        "microbial-test-scenarios.json",
+        "CURSOR_MICROBIAL_RESEARCH_IMPROVEMENT_PROPOSAL.md"
+      ],
+      "actions": [
+        "READ_REPOSITORY_CONTEXT",
+        "WRITE_ONLY_EXPECTED_FILES_UNDER_AUTHORIZED_PATH",
+        "RUN_BOUNDED_LOCAL_TESTS",
+        "RECORD_GIT_OBJECT_AND_SHA256_PROVENANCE",
+        "COMMIT_EXACTLY_EXPECTED_FILES",
+        "STOP_AT_PENDING_CODEX_REVIEW"
+      ],
+      "forbidden_paths": [
+        "KGEN-KAIOS/**",
+        "KGEN/**",
+        "KAIOS/**/Runtime/**",
+        "KAIOS/**/Wallet/**",
+        "**/*CURRENT*",
+        "api/**",
+        "docs/**",
+        "README.md",
+        "PRIMEFORGE_GENESIS_BOOT_SEQUENCE_V1_4.md"
+      ]
     }
   ],
   "workers": [

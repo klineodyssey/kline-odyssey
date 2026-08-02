@@ -49,13 +49,11 @@ KNOWN_CLAIM_STATES = {
     "EXPIRED",
     "ABANDONED",
     "COMPLETED_CODEX_REVIEWED",
-    "READY_FOR_ATOMIC_CLAIM",
 }
 
 UNLOCKED_CLAIM_STATES = {
     "RELEASED",
     "COMPLETED_CODEX_REVIEWED",
-    "READY_FOR_ATOMIC_CLAIM",
 }
 
 
@@ -211,29 +209,43 @@ class CursorWorkerRegistryRepairTests(unittest.TestCase):
             events[1]["previous_event_id"], events[0]["event_id"]
         )
 
+    def test_dispatch_history_ends_with_released_fungi_and_excludes_microbial(self):
+        final_dispatch = self.registry["dispatch_history"][-1]
+        self.assertEqual(
+            final_dispatch["task_id"], "KAIOS-CURSOR-FUNGI-CANDIDATE-001"
+        )
+        self.assertEqual(final_dispatch["status"], "RELEASED")
+        self.assertNotIn(
+            "KAIOS-CURSOR-MICROBIAL-RESEARCH-001",
+            {item["task_id"] for item in self.registry["dispatch_history"]},
+        )
+
     def test_microbial_research_is_prepared_but_not_claimed(self):
-        dispatch = next(
+        prepared_task = next(
             item
-            for item in self.registry["dispatch_history"]
+            for item in self.registry["prepared_tasks"]
             if item["task_id"] == "KAIOS-CURSOR-MICROBIAL-RESEARCH-001"
         )
-        self.assertEqual(dispatch["status"], "READY_FOR_ATOMIC_CLAIM")
-        self.assertEqual(dispatch["claim_state"], "UNCLAIMED")
+        self.assertEqual(len(self.registry["prepared_tasks"]), 1)
+        self.assertEqual(prepared_task["status"], "READY_FOR_ATOMIC_CLAIM")
+        self.assertEqual(prepared_task["claim_state"], "UNCLAIMED")
         self.assertEqual(
-            dispatch["task_id"], "KAIOS-CURSOR-MICROBIAL-RESEARCH-001"
+            prepared_task["task_id"], "KAIOS-CURSOR-MICROBIAL-RESEARCH-001"
         )
-        self.assertEqual(dispatch["worker_id"], self.cursor["worker_id"])
+        self.assertEqual(prepared_task["worker_id"], self.cursor["worker_id"])
         self.assertEqual(
-            dispatch["branch"],
+            prepared_task["branch"],
             "cursor-handoff/KAIOS-CURSOR-MICROBIAL-RESEARCH-001",
         )
-        self.assertEqual(dispatch["output_status"], "CURSOR_RESEARCH_PROPOSAL_ONLY")
+        self.assertEqual(
+            prepared_task["output_status"], "CURSOR_RESEARCH_PROPOSAL_ONLY"
+        )
         self.assertIsNone(self.cursor["current_task"])
         self.assertIsNone(self.cursor["current_branch"])
         self.assertEqual(self.cursor["status"], "IDLE")
         self.assertIn("MICROBIAL_RESEARCH", self.cursor["allowed_work"])
 
-        envelope = dispatch["prepared_task_envelope"]
+        envelope = prepared_task
         self.assertEqual(envelope["status"], "READY_FOR_ATOMIC_CLAIM")
         self.assertEqual(envelope["claim_state"], "UNCLAIMED")
         self.assertEqual(envelope["claim_required"], "ATOMIC_CLAIM_BEFORE_WORK")
@@ -322,7 +334,10 @@ class CursorWorkerRegistryRepairTests(unittest.TestCase):
         self.assertEqual(queue["active_claims"], [])
         self.assertIsNone(queue["worker_state"]["current_task"])
         self.assertIsNone(queue["worker_state"]["current_branch"])
-        self.assertEqual(queue["prepared_task"]["expected_files"], self.registry["dispatch_history"][-1]["prepared_task_envelope"]["expected_files"])
+        self.assertEqual(
+            queue["prepared_task"]["expected_files"],
+            self.registry["prepared_tasks"][0]["expected_files"],
+        )
 
     def test_approved_or_closed_claim_still_holds_lock_until_release(self):
         next_claim = {"task_id": "NEXT", "status": "DISPATCHED"}
