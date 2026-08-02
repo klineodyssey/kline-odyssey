@@ -99,13 +99,16 @@ Initial and final conserved totals:
 | Energy proxy | `500,000,000 micro_energy_proxy` |
 | Labor capacity | `480,000,000 micro_worker_minute` |
 
-All eight ordered events balance every touched domain exactly, no pool becomes
-negative, and replay equals the declared final state. The canonical payload is
+The first four ordered events now advance through the minimum candidate
+establishment duration of `397` days and issue the explicit owner-simulation
+reference `TREE-ESTABLISHED-REFERENCE-ORACLE-001` before fruiting. All eight
+events balance every touched domain exactly, no pool becomes negative, and
+replay equals the declared final state. The canonical payload is
 the recursively key-sorted `numerical_oracle.expected_final_state`, compact
 JSON encoded as UTF-8 without BOM or trailing newline. Its reproducible
 SHA-256 is:
 
-`ef69180a6d8d39e43a904504ffa5df5b66e7688b622f5c19cb896ad88f439a8a`
+`85e0560512382f38e74972cdb96974afd1ff9892896ff3cc1836acaec365d16f`
 
 ## Artifact Map
 
@@ -147,11 +150,22 @@ Hashes use exact Git blob bytes at source commit
 - numeric parameter contracts: `30 / 30 PASS`
 - embedded source Git-object and blob-byte provenance: `22 / 22 PASS`
 - fixed-point event conservation: `8 / 8 PASS`
+- establishment duration/reference prerequisite: `PASS`
 - exact final-state replay and reproducible SHA-256: `PASS`
 - strict UTF-8 without BOM or NUL: `6 / 6 PASS`
 - secret scan: `PASS`
 - protected-path and staged-scope scan: `PASS`
 - `git diff --cached --check`: `PASS`
+
+## Codex Review Repair
+
+Independent review found that the first oracle revision conserved resources but
+did not issue its required established-tree reference before fruiting. Codex
+repaired the candidate fixture by making the four establishment stages consume
+at least `397` elapsed days, recording the owner-simulation reference as an
+explicit state change, gating fruiting on that reference and regenerating the
+deterministic final-state hash. This repair does not promote the candidate or
+change any Runtime owner.
 
 ## Boundaries
 

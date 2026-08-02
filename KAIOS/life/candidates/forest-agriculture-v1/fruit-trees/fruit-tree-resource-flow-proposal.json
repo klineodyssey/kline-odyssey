@@ -107,12 +107,17 @@
       "temperature_compatible": true,
       "physical_labor_available": true,
       "elapsed_time_required": true,
+      "established_tree_reference_initially_present": false,
+      "owner_issued_established_tree_reference_required": true,
+      "minimum_cumulative_establishment_micro_minute": 571680000000,
       "tools_and_containers_available_at_harvest": true,
       "warehouse_capacity_available": true
     },
     "initial_state": {
       "oracle_id": "FRUIT-TREE-AGGREGATE-NUMERICAL-ORACLE-001",
       "simulation_elapsed_micro_minute": 0,
+      "tree_stage": "PROPAGATION_SOURCE_VERIFIED",
+      "established_tree_reference": null,
       "water_pools_micro_liter": {
         "atmospheric_water_proxy": 150000000,
         "compost_water": 0,
@@ -163,7 +168,10 @@
       {
         "sequence": "001",
         "event_type": "PROPAGATION_AND_PLANTING_EVENT",
-        "elapsed_micro_minute_delta": 60000000,
+        "elapsed_micro_minute_delta": 1440000000,
+        "state_changes": {
+          "tree_stage": { "from": "PROPAGATION_SOURCE_VERIFIED", "to": "ROOT_ESTABLISHMENT" }
+        },
         "deltas": {
           "water_pools_micro_liter": { "propagation_material_water": -50000000, "tree_water": 50000000 },
           "structural_mass_pools_micro_kilogram_biomass": { "propagation_material_structural_mass": -100000000, "tree_structural_mass": 100000000 },
@@ -174,8 +182,11 @@
       },
       {
         "sequence": "002",
-        "event_type": "IRRIGATION_EVENT",
-        "elapsed_micro_minute_delta": 90000000,
+        "event_type": "ROOT_ESTABLISHMENT_AND_IRRIGATION_EVENT",
+        "elapsed_micro_minute_delta": 43200000000,
+        "state_changes": {
+          "tree_stage": { "from": "ROOT_ESTABLISHMENT", "to": "JUVENILE_TREE_GROWTH" }
+        },
         "deltas": {
           "water_pools_micro_liter": { "irrigation_reservoir": -300000000, "soil_water": 300000000 },
           "energy_pools_micro_energy_proxy": { "sunlight_energy_source_proxy": -10000000, "environmental_heat_dissipation_proxy": 10000000 },
@@ -184,8 +195,8 @@
       },
       {
         "sequence": "003",
-        "event_type": "TREE_UPTAKE_EVENT",
-        "elapsed_micro_minute_delta": 1440000000,
+        "event_type": "JUVENILE_TREE_UPTAKE_EVENT",
+        "elapsed_micro_minute_delta": 525600000000,
         "deltas": {
           "water_pools_micro_liter": { "soil_water": -250000000, "tree_water": 250000000 },
           "nutrient_pools_micro_kilogram_nutrient_proxy": { "soil_nutrient_pool": -20000000, "tree_nutrient_store": 20000000 },
@@ -194,8 +205,21 @@
       },
       {
         "sequence": "004",
-        "event_type": "NONINSTANT_TREE_GROWTH_EVENT",
-        "elapsed_micro_minute_delta": 525600000000,
+        "event_type": "NONINSTANT_TREE_GROWTH_AND_ESTABLISHMENT_REVIEW_EVENT",
+        "elapsed_micro_minute_delta": 1440000000,
+        "preconditions": [
+          "CUMULATIVE_ESTABLISHMENT_TIME_AT_LEAST_571680000000_MICRO_MINUTE",
+          "TREE_STAGE_JUVENILE_TREE_GROWTH"
+        ],
+        "state_changes": {
+          "tree_stage": { "from": "JUVENILE_TREE_GROWTH", "to": "ESTABLISHED_TREE" },
+          "established_tree_reference": {
+            "from": null,
+            "to": "TREE-ESTABLISHED-REFERENCE-ORACLE-001",
+            "issued_by": "TREE_ALPHA_OWNER_SIMULATION",
+            "authority": "CANDIDATE_FIXTURE_ONLY"
+          }
+        },
         "deltas": {
           "water_pools_micro_liter": { "tree_water": -150000000, "atmospheric_water_proxy": 150000000 },
           "structural_mass_pools_micro_kilogram_biomass": { "atmospheric_carbon_material_proxy": -500000000, "tree_structural_mass": 500000000 },
@@ -207,6 +231,11 @@
         "sequence": "005",
         "event_type": "NONINSTANT_FRUITING_EVENT",
         "elapsed_micro_minute_delta": 2880000000,
+        "preconditions": [
+          "TREE_STAGE_ESTABLISHED_TREE",
+          "ESTABLISHED_TREE_REFERENCE_TREE-ESTABLISHED-REFERENCE-ORACLE-001",
+          "OWNER_ISSUED_ESTABLISHED_TREE_REFERENCE_PRESENT"
+        ],
         "deltas": {
           "water_pools_micro_liter": { "tree_water": -50000000, "fruit_water": 50000000 },
           "structural_mass_pools_micro_kilogram_biomass": { "atmospheric_carbon_material_proxy": -200000000, "fruit_structural_mass": 200000000 },
@@ -253,7 +282,9 @@
     ],
     "expected_final_state": {
       "oracle_id": "FRUIT-TREE-AGGREGATE-NUMERICAL-ORACLE-001",
-      "simulation_elapsed_micro_minute": 573570000000,
+      "simulation_elapsed_micro_minute": 618060000000,
+      "tree_stage": "ESTABLISHED_TREE",
+      "established_tree_reference": "TREE-ESTABLISHED-REFERENCE-ORACLE-001",
       "water_pools_micro_liter": {
         "atmospheric_water_proxy": 302000000,
         "compost_water": 0,
@@ -318,13 +349,15 @@
       "encoding": "UTF-8 without BOM or trailing newline",
       "hash": "SHA-256 lowercase hexadecimal"
     },
-    "expected_final_sha256": "ef69180a6d8d39e43a904504ffa5df5b66e7688b622f5c19cb896ad88f439a8a",
+    "expected_final_sha256": "85e0560512382f38e74972cdb96974afd1ff9892896ff3cc1836acaec365d16f",
     "objective_assertions": [
       "APPLY_EVENTS_IN_SEQUENCE_ORDER",
       "ADD_ELAPSED_MICRO_MINUTE_DELTAS_EXACTLY",
       "USE_SIGNED_INTEGER_MICRO_UNITS_ONLY",
       "REJECT_NEGATIVE_POOL_AFTER_EACH_EVENT",
       "EACH_EVENT_DELTA_SUM_EQUALS_ZERO_PER_CONSERVED_DOMAIN",
+      "ESTABLISHMENT_EVENTS_REACH_MINIMUM_397_DAY_CUMULATIVE_DURATION_BEFORE_FRUITING",
+      "OWNER_ISSUED_ESTABLISHED_TREE_REFERENCE_EXISTS_BEFORE_FRUITING",
       "FINAL_STATE_EQUALS_EXPECTED_FINAL_STATE",
       "ALL_FIVE_TOTALS_EQUAL_INITIAL_TOTALS",
       "CANONICAL_SHA256_EQUALS_EXPECTED_FINAL_SHA256",
