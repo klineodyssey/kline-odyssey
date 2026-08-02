@@ -86,12 +86,15 @@ or real-world biological engineering.
 ## Software Life Canonicalization
 
 `software-life/` contains the version-free software-life naming audit,
-identity and taxonomy compatibility standards, controlled rename plan and
-rolling execution evidence. The initial package is audit-only: no executable,
-Life ID or public route is renamed until its dedicated migration batch passes
-review and compatibility tests.
+identity and taxonomy compatibility standards, deterministic Manifest and
+Registry, controlled rename plan and rolling execution evidence. The current
+packages are audit and registry only: no executable or public route is renamed
+until its dedicated migration batch passes review and compatibility tests.
 
 - [Software Life center](software-life/README.md)
 - [Naming audit report](software-life/KAIOS_SOFTWARE_LIFE_NAMING_AUDIT_REPORT.md)
 - [Identity standard](software-life/KAIOS_SOFTWARE_LIFE_IDENTITY_STANDARD.md)
+- [Manifest schema](software-life/KAIOS_SOFTWARE_LIFE_MANIFEST_SCHEMA.json)
+- [Software Life Registry](software-life/KAIOS_SOFTWARE_LIFE_REGISTRY.json)
+- [Registry report](software-life/KAIOS_SOFTWARE_LIFE_REGISTRY_REPORT.md)
 - [Rename plan](software-life/KAIOS_SOFTWARE_LIFE_RENAME_PLAN.json)

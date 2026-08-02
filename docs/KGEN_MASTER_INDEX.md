@@ -789,6 +789,13 @@ Task: `KAIOS-FOREST-AGRICULTURE-RUNTIME-V1-001`
 | `KAIOS/software-life/KAIOS_SOFTWARE_LIFE_NAMING_AUDIT_REPORT.md` | Human-readable naming audit result and batch policy. |
 | `KAIOS/software-life/KAIOS_SOFTWARE_LIFE_IDENTITY_STANDARD.md` | Stable identity, version metadata and lifecycle standard. |
 | `KAIOS/software-life/KAIOS_SOFTWARE_LIFE_TAXONOMY_CROSSWALK.json` | Exact compatibility binding to the existing taxonomy owners. |
+| `KAIOS/software-life/KAIOS_SOFTWARE_LIFE_MANIFEST_SCHEMA.json` | Compatibility manifest for stable Software Life identity, taxonomy, organs, rights, lifecycle and provenance. |
+| `KAIOS/software-life/KAIOS_SOFTWARE_LIFE_REGISTRY.json` | Deterministic registry of 33 existing software lives and all public API projection owners. |
+| `KAIOS/software-life/KAIOS_SOFTWARE_LIFE_REGISTRY_REPORT.md` | Registry coverage, hashes, migration state and authority boundaries. |
+| `KAIOS/software-life/tools/generate-software-life-registry.mjs` | Git-lineage and artifact-hash Registry generator. |
+| `KAIOS/software-life/tests/software-life-registry.test.mjs` | Registry identity, taxonomy, dependency, ownership, hash and replay tests. |
+| `KAIOS/software-life/RECOVERY-KAIOS-SOFTWARE-LIFE-REGISTRY.md` | Registry package rollback and reproduction procedure. |
+| `KAIOS/software-life/KAIOS_SOFTWARE_LIFE_REGISTRY_CLOSEOUT.md` | Registry review and scope closeout. |
 | `KAIOS/software-life/KAIOS_SOFTWARE_LIFE_RENAME_PLAN.json` | Reversible controlled migration plan; no rename is executed by the plan. |
 | `KAIOS/software-life/KAIOS_AI_WORKFORCE_24H_QUEUE.json` | Dependency-ordered Codex queue and sole Cursor assignment. |
 | `KAIOS/software-life/KAIOS_SOFTWARE_LIFE_24H_EXECUTION_LOG.md` | Honest command, PR, wait and continuation record. |
