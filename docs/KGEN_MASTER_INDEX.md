@@ -775,6 +775,9 @@ Task: `KAIOS-FOREST-AGRICULTURE-RUNTIME-V1-001`
 | `KAIOS/life/forest-agriculture/KAIOS_CURSOR_FERTILIZER_MODELS_REVIEW_CLOSEOUT.md` | Independent fertilizer-model candidate review and formal lease release. |
 | `KAIOS/life/candidates/forest-agriculture-v1/CURSOR_COMPOST_MODELS_WORK_ORDER.md` | Bounded compost model research work order and allowed-path contract. |
 | `KGEN-KAIOS/governance/autopilot/company_status/COMPANY_STATUS_2026-08-02_FERTILIZER_RELEASED_COMPOST_MODELS_DISPATCHED.md` | Company status for the atomic fertilizer-to-compost queue transition. |
+| `KAIOS/life/forest-agriculture/KAIOS_CURSOR_COMPOST_MODELS_REVIEW_CLOSEOUT.md` | Independent compost-model candidate review and formal lease release. |
+| `KAIOS/life/candidates/forest-agriculture-v1/CURSOR_INSECT_CANDIDATES_WORK_ORDER.md` | Bounded insect candidate-package work order and allowed-path contract. |
+| `KGEN-KAIOS/governance/autopilot/company_status/COMPANY_STATUS_2026-08-02_COMPOST_RELEASED_INSECT_CANDIDATES_DISPATCHED.md` | Company status for the atomic compost-to-insect queue transition. |
 
 ## AI Company Order And Project Runtime V1 Specification
 
