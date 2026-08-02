@@ -99,13 +99,23 @@ Values are `microkilogram_proxy`. Each row closes at `100000000`. A zero contami
 
 Every stage requires a declared location, storage state, owner event references, validated labor shift, equipment reference and inspection, energy accounting and nonzero elapsed time. Batch assembly also reserves water. The values are simulation fixtures with no authorized conversion to a real process schedule, staffing plan, equipment demand or operating formula.
 
-## Microbial Boundary
+## Foreign Reference Closure
+
+The normal accounting fixture now carries the exact 19-field set required by the process contract. The set includes the Ecology batch, decomposition pool and habitat; compost-area location and project-completion event; storage location; source and Supply Chain custody; Rights decisions; labor shifts; equipment IDs and inspection events; water and energy events; previous and next state hashes; and the Stage 6 finished-output transfer, Supply Chain custody-acceptance and final hash-link events.
+
+Ten unique equipment capabilities declared across the six stages each bind to one carried fixture equipment ID. The Stage 6 acceptance record points to a carried Supply Chain custody ID and the closed output-transfer ledger. Its final hash-link record reproduces two lowercase SHA-256 fixture hashes derived from declared UTF-8 test inputs. These hashes are deterministic test evidence only and are not foreign-owner state.
+
+`TEST-041-MANDATORY-FOREIGN-REFERENCE-CLOSURE` removes each required field from a copied reference map one at a time. Every one of the 19 omission cases must return `REJECTED_MISSING_MANDATORY_FOREIGN_REFERENCE`, disallow closed status and prevent owner state change.
+
+## Microbial And Carbon Boundaries
 
 The only allowed activity label is:
 
 `ABSTRACT_MICROBIAL_DECOMPOSITION_PROXY / NOT_FULL_LIFE_RUNTIME`
 
 It gates deterministic accounting transfers only. It creates no life, organism, population, species, reproduction, evolution, biological identity or physiology. The aeration signal is a dimensionless failure gate and is not an oxygen concentration, airflow target, ventilation rule or safety specification.
+
+Carbon status is explicitly `NOT_MODELED` under `CARBON_SIMULATION_PROXY_NOT_MODELED`. No carbon pool, carbon ledger, carbon fraction, gas-species mapping, CO2-equivalent value or empirical chemistry is created. Total physical mass and gases or emissions proxy custody must not be interpreted as carbon accounting. The microbial activity label remains `ABSTRACT_MICROBIAL_DECOMPOSITION_PROXY` and does not imply a carbon model.
 
 ## Accounting Oracle
 
@@ -114,7 +124,7 @@ The normal fixture combines `100000000 microkilogram_proxy` of feedstock with `2
 | Ledger | Initial custody | Final named custody | Total |
 |---|---:|---|---:|
 | Total physical mass | 120,000,000 | finished 70,000,000; gases/emissions proxy 30,000,000; leachate 12,000,000; rejects 5,000,000; remaining feedstock 3,000,000; disposal 0 | 120,000,000 |
-| Water component | 64,000,000 | finished 32,000,000; atmosphere proxy 20,000,000; leachate 10,000,000; rejects 1,000,000; remaining 1,000,000; disposal 0 | 64,000,000 |
+| Water component | 60,000,000 | finished 28,000,000; atmosphere proxy 20,000,000; leachate 10,000,000; rejects 1,000,000; remaining 1,000,000; disposal 0 | 60,000,000 |
 | Nutrient component | 5,000,000 | finished 4,000,000; emissions proxy 0; leachate 500,000; rejects 300,000; remaining 200,000; disposal 0 | 5,000,000 |
 | Energy proxy | 50,000,000 | finished 10,000,000; gases 5,000,000; leachate 1,000,000; rejects 1,000,000; remaining 3,000,000; disposal 0; heat 30,000,000 | 50,000,000 |
 | Labor capacity | 480,000,000 | consumed 360,000,000; remaining 120,000,000 | 480,000,000 |
@@ -194,14 +204,15 @@ No external internet source, product label, commercial process, field trial, reg
 6. `GASES_EMISSIONS_PROXY_CUSTODY` and `LEACHATE_CUSTODY` are aggregate accounting destinations with no chemical, regulatory, environmental or safety semantics.
 7. Simulation ticks have no authorized real-time conversion. Worker minutes exercise capacity accounting and are not staffing, ergonomic or occupational-safety guidance.
 8. Energy values are finite abstract proxies and are not machinery, electricity, fuel or thermodynamic estimates.
-9. A finished candidate output may receive a later owner-created Economy lot only after review; it never becomes `FERTILIZER` or soil nutrient state automatically.
+9. Carbon is not modeled; mass, nutrient, energy and gases or emissions proxy values provide no carbon or chemistry inference.
+10. A finished candidate output may receive a later owner-created Economy lot only after review; it never becomes `FERTILIZER` or soil nutrient state automatically.
 
 ## Remaining Risks
 
 1. Current Ecology schema lacks dedicated `COMPOST_BATCH` and `ORGANIC_WASTE_BATCH` records even though the Forest and Agriculture specification assigns those truths to Ecology.
 2. Compost-area facility ownership and owner-native finished-output resource mapping remain `SOURCE_UNDERSPECIFIED`.
 3. Feedstock composition, process partitions, time, moisture, aeration, energy and labor values have no empirical calibration and cannot support real-world conclusions.
-4. Aggregate emissions, leachate, nutrient and contaminant proxies omit chemistry, pathogens, gas species, exposure, local regulation and environmental fate.
+4. Aggregate emissions, leachate, nutrient and contaminant proxies omit carbon accounting, chemistry, pathogens, gas species, exposure, local regulation and environmental fate.
 5. No fixture establishes maturity, stability, quality, safety, fertilizer value, soil benefit, crop response, yield, price or legal acceptance.
 
 ## Validation Record
@@ -211,7 +222,9 @@ The pre-commit validation suite produced these results:
 - Strict JSON: 5 files parsed, 0 duplicate keys, 0 trailing-data failures.
 - Candidate metadata: 5 of 5 JSON files matched status, review status, authority and source base.
 - Numeric contracts: 53 parameters checked, 0 invalid contracts, 0 invalid source labels, all `validation_required=true`.
-- Cross-references: 4 feedstocks, 6 stages, 8 scenarios and 40 test definitions checked with unique IDs.
+- Cross-references: 4 feedstocks, 6 stages, 8 scenarios and 42 test definitions checked with unique IDs.
+- Mandatory foreign references: 19 of 19 fields present, 10 of 10 equipment capabilities bound, and 19 one-field omission cases rejected closed status.
+- Carbon boundary: 2 contracts checked as `NOT_MODELED`, 0 carbon pools, 0 carbon ledgers and 0 empirical-chemistry claims.
 - Feedstock accounting: 4 component fixtures closed at 100,000,000 units each.
 - Process timing: 6 contiguous nonzero-time stages closed at 372 ticks.
 - Resource accounting: 48 accepted-state ledgers closed with nonnegative integers and zero tolerance.
@@ -226,6 +239,7 @@ The pre-commit validation suite produced these results:
 
 - `CURSOR_RESEARCH_CANDIDATE_ONLY / PENDING_CODEX_REVIEW / NO_PRODUCTION_AUTHORITY`
 - `ABSTRACT_MICROBIAL_DECOMPOSITION_PROXY / NOT_FULL_LIFE_RUNTIME`
+- `CARBON_SIMULATION_PROXY_NOT_MODELED / NOT_MODELED`
 - No living organism, species, population, reproduction or full Life Runtime.
 - No agronomic prescription, compost formula, product endorsement, price, yield promise, safety guarantee, environmental approval or legal certification.
 - No authoritative inventory, ledger, price, ownership, labor, Rights, Agriculture, Ecology, Supply Chain, Economy or soil state.

@@ -327,6 +327,20 @@
       "inputs": ["CURSOR_COMPOST_MODELS_REPORT.md", "VALIDATOR_OUTPUT"],
       "assertions": ["Report counts match validator counts", "Assumptions and remaining risks are explicit", "Final status remains pending Codex review", "No Canonical status is claimed"],
       "expected": {"failure_count":0}
+    },
+    {
+      "test_id": "TEST-041-MANDATORY-FOREIGN-REFERENCE-CLOSURE",
+      "class": "FOREIGN_REFERENCE_CLOSURE",
+      "inputs": ["compost-process-stage-proposals.json#required_foreign_references", "compost-process-stage-proposals.json#foreign_reference_validation_contract", "compost-resource-accounting-proposals.json#normal_process_fixture.foreign_reference_ids", "compost-resource-accounting-proposals.json#normal_process_fixture.mandatory_foreign_reference_validation", "compost-resource-accounting-proposals.json#normal_process_fixture.stage_6_closure_evidence"],
+      "assertions": ["foreign_reference_ids key set exactly equals required_foreign_references", "Every required scalar reference is a nonempty string", "Every required array reference is a nonempty unique string array", "Project completion, Supply Chain custody, equipment IDs, previous_state_hash and next_state_hash are present", "Every unique stage equipment capability has exactly one binding to a carried equipment_id", "Stage 6 finished-output transfer event matches the carried transfer-event reference", "Stage 6 custody acceptance event and accepted custody ID match carried references", "Stage 6 final hash-link event matches the carried event ID", "SHA-256 of each declared UTF-8 fixture input equals the corresponding carried state hash", "Stage 6 final hash-link previous and next hashes equal the carried state hashes", "For each required field, removing exactly that field produces exactly one missing field and REJECTED_MISSING_MANDATORY_FOREIGN_REFERENCE", "No one-field omission permits closed status or owner state change"],
+      "expected": {"required_reference_field_count":19,"present_reference_field_count":19,"equipment_capability_count":10,"equipment_binding_count":10,"omission_case_count":19,"closed_omission_acceptance_count":0,"failure_count":0}
+    },
+    {
+      "test_id": "TEST-042-CARBON-NOT-MODELED-BOUNDARY",
+      "class": "MODEL_BOUNDARY",
+      "inputs": ["compost-process-stage-proposals.json#carbon_simulation_proxy_contract", "compost-resource-accounting-proposals.json#carbon_accounting_boundary", "compost-process-stage-proposals.json#microbial_activity_model"],
+      "assertions": ["Both carbon contracts have status NOT_MODELED and label CARBON_SIMULATION_PROXY_NOT_MODELED", "Both carbon contracts carry microbial activity label ABSTRACT_MICROBIAL_DECOMPOSITION_PROXY", "Microbial activity model kind is SIMULATION_PROXY_ONLY and life runtime scope is NOT_FULL_LIFE_RUNTIME", "Tracked carbon pools are empty", "No carbon ledger, carbon fraction, gas species, CO2-equivalent mapping or empirical chemistry is created", "Physical mass and gases or emissions custody cannot be interpreted as carbon accounting"],
+      "expected": {"carbon_contract_count":2,"not_modeled_contract_count":2,"tracked_carbon_pool_count":0,"carbon_ledger_count":0,"empirical_chemistry_claim_count":0,"failure_count":0}
     }
   ],
   "required_risk_scenario_ids": [
@@ -375,6 +389,8 @@
     "NO_CANONICAL_PROMOTION",
     "NO_RIGHTS_OR_ECONOMY_AUTHORITY",
     "NO_WALLET_OR_REAL_KGEN",
+    "CARBON_SIMULATION_PROXY_NOT_MODELED",
+    "MICROBIAL_ACTIVITY_SIMULATION_PROXY_ONLY",
     "NO_DEPLOYMENT",
     "NO_MERGE"
   ]

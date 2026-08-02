@@ -15,12 +15,24 @@
   "process_boundary": "The stages are causal simulation gates and accounting fixtures. They are not compost instructions, formulas, maturity tests, environmental controls, worker-safety procedures or product specifications.",
   "microbial_activity_model": {
     "label": "ABSTRACT_MICROBIAL_DECOMPOSITION_PROXY",
+    "model_kind": "SIMULATION_PROXY_ONLY",
     "life_runtime_scope": "NOT_FULL_LIFE_RUNTIME",
     "creates_life": false,
     "creates_population": false,
     "creates_species": false,
     "biological_identity": "NONE",
     "rule": "The proxy may gate deterministic mass and energy transfers only; it cannot instantiate, reproduce, evolve, count or claim behavior for any living entity."
+  },
+  "carbon_simulation_proxy_contract": {
+    "status": "NOT_MODELED",
+    "label": "CARBON_SIMULATION_PROXY_NOT_MODELED",
+    "microbial_activity_label": "ABSTRACT_MICROBIAL_DECOMPOSITION_PROXY",
+    "tracked_carbon_pools": [],
+    "carbon_mass_ledger_created": false,
+    "carbon_fraction_inferred": false,
+    "gas_species_or_co2e_mapping_created": false,
+    "empirical_chemistry_created": false,
+    "rule": "Total mass and gases or emissions proxy custody do not imply carbon content, carbon conversion, gas species, CO2-equivalent values or chemistry. A future carbon model requires separately sourced parameters and owner review."
   },
   "numeric_parameter_contract": {
     "required_fields": [
@@ -74,8 +86,20 @@
     "water_source_and_custody_event_ids",
     "energy_reservation_event_ids",
     "previous_state_hash",
-    "next_state_hash"
+    "next_state_hash",
+    "stage_6_finished_candidate_output_transfer_event_id",
+    "stage_6_supply_chain_custody_acceptance_event_id",
+    "stage_6_final_hash_link_event_id"
   ],
+  "foreign_reference_validation_contract": {
+    "required_set_rule": "A closed normal fixture must have a foreign_reference_ids key set exactly equal to required_foreign_references.",
+    "scalar_reference_rule": "Every required scalar reference must be a nonempty string.",
+    "array_reference_rule": "Every required array reference must be a nonempty unique string array.",
+    "equipment_binding_rule": "Every unique required_equipment_capabilities value across all six stages must map to one equipment_id carried by the normal fixture.",
+    "state_hash_rule": "previous_state_hash and next_state_hash must be distinct lowercase 64-character SHA-256 fixture hashes and the Stage 6 final hash-link record must reproduce both values.",
+    "stage_6_custody_rule": "Stage 6 cannot close unless its finished-output transfer event is carried, its Supply Chain custody-acceptance event references a carried Supply Chain custody ID and its output-transfer ledger is closed.",
+    "omission_rule": "Removing any one required foreign-reference field from a closed fixture must produce REJECTED_MISSING_MANDATORY_FOREIGN_REFERENCE before any owner state change."
+  },
   "batch_states": [
     "FEEDSTOCK_REFERENCED",
     "QUALITY_HOLD",
@@ -199,6 +223,7 @@
       "required_equipment_capabilities": ["OUTPUT_TRANSFER_EQUIPMENT_REFERENCE"],
       "required_storage_state": "FINISHED_CANDIDATE_OUTPUT_CAPACITY_RESERVED",
       "required_events": ["FINISHED_CANDIDATE_OUTPUT_TRANSFER_EVENT", "SUPPLY_CHAIN_CUSTODY_ACCEPTANCE_EVENT", "ECONOMY_LOT_REFERENCE_EVENT_IF_OWNER_CREATES_ONE", "LABOR_SHIFT_VALIDATION_EVENT", "FINAL_HASH_LINK_EVENT"],
+      "required_reference_fields": ["batch_storage_location_id", "supply_chain_lot_or_custody_ids", "labor_shift_ids", "equipment_ids", "previous_state_hash", "next_state_hash", "stage_6_finished_candidate_output_transfer_event_id", "stage_6_supply_chain_custody_acceptance_event_id", "stage_6_final_hash_link_event_id"],
       "reject_conditions": ["OUTPUT_MASS_LEDGER_NOT_CLOSED", "DESTINATION_CUSTODY_NOT_ACCEPTED", "AUTOMATIC_FERTILIZER_INVENTORY_CREDIT", "AUTOMATIC_SOIL_NUTRIENT_CREDIT", "MISSING_FINAL_HASH_LINK"],
       "numeric_parameters": [
         {"parameter_name":"stage_elapsed_time","unit":"simulation_tick","minimum":1,"default":2,"maximum":48,"rationale":"Prevents instantaneous output transfer and records a distinct custody event.","source_type":"RESEARCH_PROPOSAL","confidence":"LOW","risk":"Not a real warehousing or transport schedule.","validation_required":true},
@@ -233,8 +258,11 @@
     "RESOURCE_SHORTAGE_BLOCKS_WITHOUT_UNEXPLAINED_DEBIT",
     "INCOMPLETE_PROCESSING_CANNOT_BECOME_FINISHED_OUTPUT",
     "ALL_OUTPUT_AND_BYPRODUCT_CUSTODIES_CLOSE_BEFORE_FINAL_TRANSFER",
+    "ALL_MANDATORY_FOREIGN_REFERENCES_ARE_PRESENT_AND_VALIDATED_BEFORE_CLOSED_STATUS",
+    "STAGE_6_OUTPUT_TRANSFER_SUPPLY_CHAIN_CUSTODY_ACCEPTANCE_AND_FINAL_HASH_LINK_ARE_MANDATORY",
     "FINISHED_CANDIDATE_OUTPUT_IS_NOT_FERTILIZER_INVENTORY_OR_SOIL_NUTRIENT_STATE",
-    "ABSTRACT_MICROBIAL_DECOMPOSITION_PROXY_CREATES_NO_LIFE"
+    "ABSTRACT_MICROBIAL_DECOMPOSITION_PROXY_CREATES_NO_LIFE",
+    "CARBON_SIMULATION_PROXY_IS_NOT_MODELED"
   ],
   "provenance": [
     {"source_type":"REPOSITORY_DERIVED","source_path":"KAIOS/life/forest-agriculture/KAIOS_FOREST_AGRICULTURE_RUNTIME_V1_SPEC.md","source_commit":"38901fddd3a513b5121b8828dce43898a7ed74b6","git_object":"9a2dd4ad05bb7b2e3d71b91b479359947ada8376","sha256":"4e1a23e97d09ec2dc4ad65440e6958e646f75ed418e5c703c5a5a1635c2809a1","usage":"Compost resource, time, labor, space and owner boundaries."},
@@ -250,6 +278,7 @@
     "SIMULATION_ONLY",
     "ABSTRACT_MICROBIAL_DECOMPOSITION_PROXY",
     "NOT_FULL_LIFE_RUNTIME",
+    "CARBON_SIMULATION_PROXY_NOT_MODELED",
     "NO_LIFE_OR_SPECIES_CREATION",
     "NO_COMPOST_FORMULA_OR_MATURITY_CLAIM",
     "NO_AGRONOMIC_PRESCRIPTION",

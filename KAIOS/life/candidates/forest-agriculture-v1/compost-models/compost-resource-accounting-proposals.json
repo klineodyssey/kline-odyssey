@@ -50,6 +50,17 @@
       {"parameter_name":"ledger_closure_tolerance","unit":"integer_micro_unit","minimum":0,"default":0,"maximum":0,"rationale":"Requires exact closure and fail-closed rejection of any mismatch.","source_type":"RESEARCH_PROPOSAL","confidence":"MEDIUM","risk":"Owner adapters with conversion rounding require separate review and cannot silently relax this fixture.","validation_required":true}
     ]
   },
+  "carbon_accounting_boundary": {
+    "status": "NOT_MODELED",
+    "label": "CARBON_SIMULATION_PROXY_NOT_MODELED",
+    "microbial_activity_label": "ABSTRACT_MICROBIAL_DECOMPOSITION_PROXY",
+    "tracked_carbon_pools": [],
+    "carbon_ledger_created": false,
+    "carbon_content_inferred_from_total_mass": false,
+    "carbon_content_inferred_from_gases_emissions_proxy": false,
+    "empirical_chemistry_created": false,
+    "rule": "The physical-mass, nutrient and gases or emissions proxy ledgers are not carbon ledgers. No carbon content, carbon transfer, gas species or CO2-equivalent value is inferred."
+  },
   "domain_contracts": [
     {
       "domain": "TOTAL_PHYSICAL_MASS",
@@ -112,14 +123,79 @@
       "ecology_decomposition_pool_id": "DECOMPOSITION_POOL",
       "ecology_habitat_id": "HABITAT-SOIL-V1",
       "compost_area_location_id": "FIXTURE-COMPOST-AREA-001",
+      "compost_area_project_completion_event_id": "FIXTURE-COMPOST-AREA-PROJECT-COMPLETE-001",
       "batch_storage_location_id": "FIXTURE-COMPOST-STORAGE-001",
-      "source_custody_event_id": "FIXTURE-SOURCE-CUSTODY-001",
-      "rights_decision_id": "FIXTURE-RIGHTS-ALLOW-001",
-      "labor_shift_id": "FIXTURE-LABOR-SHIFT-001",
-      "equipment_inspection_event_id": "FIXTURE-EQUIPMENT-PASS-001",
-      "water_custody_event_id": "FIXTURE-WATER-CUSTODY-001",
-      "energy_reservation_event_id": "FIXTURE-ENERGY-RESERVE-001",
-      "output_custody_event_id": "FIXTURE-OUTPUT-CUSTODY-001"
+      "source_feedstock_custody_event_ids": ["FIXTURE-SOURCE-CUSTODY-001"],
+      "supply_chain_lot_or_custody_ids": ["FIXTURE-SUPPLY-CUSTODY-INBOUND-001", "FIXTURE-SUPPLY-CUSTODY-STORAGE-001", "FIXTURE-SUPPLY-CUSTODY-FINISHED-001"],
+      "rights_decision_ids": ["FIXTURE-RIGHTS-ALLOW-001"],
+      "labor_shift_ids": ["FIXTURE-LABOR-SHIFT-STAGE-01", "FIXTURE-LABOR-SHIFT-STAGE-02", "FIXTURE-LABOR-SHIFT-STAGE-03", "FIXTURE-LABOR-SHIFT-STAGE-04", "FIXTURE-LABOR-SHIFT-STAGE-05", "FIXTURE-LABOR-SHIFT-STAGE-06"],
+      "equipment_ids": ["FIXTURE-EQUIPMENT-RECEIVING-WEIGHING-001", "FIXTURE-EQUIPMENT-SEGREGATION-CONTAINER-001", "FIXTURE-EQUIPMENT-MATERIAL-HANDLING-001", "FIXTURE-EQUIPMENT-WATER-METERING-001", "FIXTURE-EQUIPMENT-AERATION-PROXY-001", "FIXTURE-EQUIPMENT-MONITORING-001", "FIXTURE-EQUIPMENT-LEACHATE-CUSTODY-CONTAINER-001", "FIXTURE-EQUIPMENT-SCREENING-001", "FIXTURE-EQUIPMENT-CUSTODY-MEASUREMENT-001", "FIXTURE-EQUIPMENT-OUTPUT-TRANSFER-001"],
+      "equipment_inspection_event_ids": ["FIXTURE-EQUIPMENT-INSPECTION-STAGE-01", "FIXTURE-EQUIPMENT-INSPECTION-STAGE-02", "FIXTURE-EQUIPMENT-INSPECTION-STAGE-03", "FIXTURE-EQUIPMENT-INSPECTION-STAGE-04", "FIXTURE-EQUIPMENT-INSPECTION-STAGE-05", "FIXTURE-EQUIPMENT-INSPECTION-STAGE-06"],
+      "water_source_and_custody_event_ids": ["FIXTURE-WATER-SOURCE-001", "FIXTURE-WATER-CUSTODY-RESERVATION-001"],
+      "energy_reservation_event_ids": ["FIXTURE-ENERGY-RESERVE-001"],
+      "previous_state_hash": "5bdedb8b3e379e34d41a9ec27415d3b45c27947d99d335d1020f8c4eab30d974",
+      "next_state_hash": "c557f26eb3e855b4b4277251e5d9f8a0de6cb415b7f094637fe28ca62d39c589",
+      "stage_6_finished_candidate_output_transfer_event_id": "FIXTURE-FINISHED-OUTPUT-TRANSFER-001",
+      "stage_6_supply_chain_custody_acceptance_event_id": "FIXTURE-SUPPLY-CUSTODY-ACCEPT-001",
+      "stage_6_final_hash_link_event_id": "FIXTURE-FINAL-HASH-LINK-001"
+    },
+    "equipment_capability_bindings": [
+      {"capability":"RECEIVING_AND_WEIGHING_EQUIPMENT_REFERENCE","equipment_id":"FIXTURE-EQUIPMENT-RECEIVING-WEIGHING-001"},
+      {"capability":"SEGREGATION_CONTAINER_REFERENCE","equipment_id":"FIXTURE-EQUIPMENT-SEGREGATION-CONTAINER-001"},
+      {"capability":"MATERIAL_HANDLING_EQUIPMENT_REFERENCE","equipment_id":"FIXTURE-EQUIPMENT-MATERIAL-HANDLING-001"},
+      {"capability":"WATER_METERING_EQUIPMENT_REFERENCE","equipment_id":"FIXTURE-EQUIPMENT-WATER-METERING-001"},
+      {"capability":"AERATION_PROXY_EQUIPMENT_REFERENCE","equipment_id":"FIXTURE-EQUIPMENT-AERATION-PROXY-001"},
+      {"capability":"MONITORING_EQUIPMENT_REFERENCE","equipment_id":"FIXTURE-EQUIPMENT-MONITORING-001"},
+      {"capability":"LEACHATE_CUSTODY_CONTAINER_REFERENCE","equipment_id":"FIXTURE-EQUIPMENT-LEACHATE-CUSTODY-CONTAINER-001"},
+      {"capability":"SCREENING_EQUIPMENT_REFERENCE","equipment_id":"FIXTURE-EQUIPMENT-SCREENING-001"},
+      {"capability":"CUSTODY_MEASUREMENT_EQUIPMENT_REFERENCE","equipment_id":"FIXTURE-EQUIPMENT-CUSTODY-MEASUREMENT-001"},
+      {"capability":"OUTPUT_TRANSFER_EQUIPMENT_REFERENCE","equipment_id":"FIXTURE-EQUIPMENT-OUTPUT-TRANSFER-001"}
+    ],
+    "mandatory_foreign_reference_validation": {
+      "process_contract_dataset_id": "KAIOS-COMPOST-PROCESS-STAGE-PROPOSALS-V1",
+      "required_reference_fields": ["ecology_compost_batch_id", "ecology_decomposition_pool_id", "ecology_habitat_id", "compost_area_location_id", "compost_area_project_completion_event_id", "batch_storage_location_id", "source_feedstock_custody_event_ids", "supply_chain_lot_or_custody_ids", "rights_decision_ids", "labor_shift_ids", "equipment_ids", "equipment_inspection_event_ids", "water_source_and_custody_event_ids", "energy_reservation_event_ids", "previous_state_hash", "next_state_hash", "stage_6_finished_candidate_output_transfer_event_id", "stage_6_supply_chain_custody_acceptance_event_id", "stage_6_final_hash_link_event_id"],
+      "scalar_reference_fields": ["ecology_compost_batch_id", "ecology_decomposition_pool_id", "ecology_habitat_id", "compost_area_location_id", "compost_area_project_completion_event_id", "batch_storage_location_id", "previous_state_hash", "next_state_hash", "stage_6_finished_candidate_output_transfer_event_id", "stage_6_supply_chain_custody_acceptance_event_id", "stage_6_final_hash_link_event_id"],
+      "array_reference_fields": ["source_feedstock_custody_event_ids", "supply_chain_lot_or_custody_ids", "rights_decision_ids", "labor_shift_ids", "equipment_ids", "equipment_inspection_event_ids", "water_source_and_custody_event_ids", "energy_reservation_event_ids"],
+      "missing_reference_fields": [],
+      "required_key_set_matches_process_contract": true,
+      "all_scalar_references_nonempty": true,
+      "all_array_references_nonempty_and_unique": true,
+      "all_required_equipment_capabilities_bound": true,
+      "state_hashes_validated": true,
+      "stage_6_custody_acceptance_validated": true,
+      "stage_6_final_hash_link_validated": true,
+      "closed_status_allowed": true,
+      "omission_oracle": {
+        "mutation_order": "PROCESS_CONTRACT_REQUIRED_FOREIGN_REFERENCES_ORDER",
+        "mutation": "REMOVE_EXACTLY_ONE_REQUIRED_FIELD_FROM_A_COPY_OF_FOREIGN_REFERENCE_IDS",
+        "expected_missing_reference_fields": "EXACTLY_THE_REMOVED_FIELD",
+        "expected_status": "REJECTED_MISSING_MANDATORY_FOREIGN_REFERENCE",
+        "closed_status_allowed": false,
+        "owner_state_change_allowed": false
+      }
+    },
+    "stage_6_closure_evidence": {
+      "stage_id": "COMPOST-STAGE-06-OUTPUT-CUSTODY-CLOSE-V1",
+      "project_completion_event_id": "FIXTURE-COMPOST-AREA-PROJECT-COMPLETE-001",
+      "finished_candidate_output_transfer_event_id": "FIXTURE-FINISHED-OUTPUT-TRANSFER-001",
+      "supply_chain_custody_acceptance": {
+        "event_id": "FIXTURE-SUPPLY-CUSTODY-ACCEPT-001",
+        "owner_contract": "KAIOS_SUPPLY_CHAIN_SCHEMA",
+        "accepted_custody_id": "FIXTURE-SUPPLY-CUSTODY-FINISHED-001",
+        "accepted_output_ledger_path": "normal_process_fixture.output_custody_transfer_mass_ledger_microkilogram_proxy",
+        "accepted": true
+      },
+      "final_hash_link": {
+        "event_id": "FIXTURE-FINAL-HASH-LINK-001",
+        "hash_scope": "DETERMINISTIC_FIXTURE_ONLY_NOT_OWNER_STATE",
+        "algorithm": "SHA-256",
+        "encoding": "UTF-8",
+        "previous_hash_fixture_input": "FIXTURE-COMPOST-NORMAL-CLOSED-ACCOUNTING-V1|STATE|PRE-STAGE-06",
+        "next_hash_fixture_input": "FIXTURE-COMPOST-NORMAL-CLOSED-ACCOUNTING-V1|STATE|POST-STAGE-06",
+        "previous_state_hash": "5bdedb8b3e379e34d41a9ec27415d3b45c27947d99d335d1020f8c4eab30d974",
+        "next_state_hash": "c557f26eb3e855b4b4277251e5d9f8a0de6cb415b7f094637fe28ca62d39c589",
+        "linked": true
+      }
     },
     "total_physical_mass_ledger_microkilogram_proxy": {
       "initial_feedstock_custody": 100000000,
@@ -277,6 +353,10 @@
     "NO_POOL_IS_NEGATIVE",
     "NO_INSTANT_CONVERSION",
     "FINISHED_OUTPUT_CUSTODY_TRANSFER_CLOSES",
+    "ALL_MANDATORY_FOREIGN_REFERENCES_MATCH_THE_PROCESS_CONTRACT",
+    "MISSING_MANDATORY_FOREIGN_REFERENCE_REJECTS_CLOSED_STATUS",
+    "PROJECT_COMPLETION_SUPPLY_CHAIN_CUSTODY_EQUIPMENT_STATE_HASH_AND_STAGE_6_REFERENCES_VALIDATE",
+    "CARBON_SIMULATION_PROXY_IS_NOT_MODELED",
     "FERTILIZER_INVENTORY_SOIL_NUTRIENT_ECONOMY_BALANCE_AND_RIGHTS_REMAIN_UNCHANGED"
   ],
   "provenance": [
@@ -293,6 +373,7 @@
     "CANDIDATE_ONLY",
     "SIMULATION_ONLY",
     "EXACT_ACCOUNTING_ORACLE_NOT_PROCESS_FORMULA",
+    "CARBON_SIMULATION_PROXY_NOT_MODELED",
     "NO_EMISSIONS_OR_LEACHATE_ESTIMATE",
     "NO_AGRONOMIC_PRESCRIPTION",
     "NO_PRODUCT_ENDORSEMENT",
