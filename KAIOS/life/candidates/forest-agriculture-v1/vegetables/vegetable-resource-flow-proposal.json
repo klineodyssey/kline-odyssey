@@ -1,0 +1,739 @@
+{
+  "dataset_id": "KAIOS-VEGETABLE-RESOURCE-FLOW-PROPOSAL-V1",
+  "schema_version": "1.0.0-candidate",
+  "status": "CURSOR_RESEARCH_CANDIDATE_ONLY",
+  "review_status": "PENDING_CODEX_REVIEW",
+  "task_id": "KAIOS-CURSOR-VEGETABLE-PACKAGES-001",
+  "worker_id": "cursor-01",
+  "branch": "cursor-handoff/KAIOS-CURSOR-VEGETABLE-PACKAGES-001",
+  "source_base_commit": "9b5246918b4e912557c9a6cd402ac9ab9fb6f83f",
+  "source_hash_basis": "SHA256_OF_GIT_BLOB_CONTENT_AT_SOURCE_BASE_COMMIT",
+  "mode": "SIMULATION_APPROXIMATION",
+  "species_reference": null,
+  "taxonomy": null,
+  "owner_bindings": {
+    "plot_growth_harvest_and_basic_warehouse": "AGRICULTURE_ALPHA",
+    "water_soil_nutrients_biomass_and_decomposition": "KAIOS_REPRODUCTION_ECOLOGY_RUNTIME_V1",
+    "inventory_and_ledger": "CIVILIZATION_ECONOMY_ALPHA",
+    "labor": "KAIOS_PHYSICAL_LABOR_SCHEMA"
+  },
+  "pool_separation_rule": "Water, structural biomass, nutrient proxy, energy proxy, labor capacity, propagation-input custody and owner warehouse inventory are distinct named domains. Nutrients never count as structural biomass, and owner warehouse units never convert to physical mass.",
+  "fixed_point_contract": {
+    "contract_id": "KAIOS_FIXED_POINT_INTEGER_ORACLE_V1",
+    "transition_arithmetic": "SIGNED_INTEGER_ADDITION_ONLY",
+    "binary_floating_point_state_addition": "FORBIDDEN",
+    "rounding_mode_on_ingestion": "ROUND_HALF_TO_EVEN",
+    "negative_zero_serialization": "0",
+    "numeric_parameters": [
+      {
+        "parameter_name": "fixed_point_scale",
+        "unit": "micro_unit_per_base_unit",
+        "minimum": 1000000,
+        "default": 1000000,
+        "maximum": 1000000,
+        "rationale": "Six-place integer arithmetic provides deterministic replay for every explicitly named base unit.",
+        "source_type": "RESEARCH_PROPOSAL",
+        "confidence": "HIGH",
+        "risk": "Changing the scale invalidates the fixture and its SHA-256.",
+        "validation_required": false
+      },
+      {
+        "parameter_name": "fixed_point_decimal_places",
+        "unit": "decimal_place",
+        "minimum": 6,
+        "default": 6,
+        "maximum": 6,
+        "rationale": "The fixed-point scale carries exactly six decimal places.",
+        "source_type": "RESEARCH_PROPOSAL",
+        "confidence": "HIGH",
+        "risk": "Adapters must reject excess precision rather than silently changing a transition.",
+        "validation_required": false
+      },
+      {
+        "parameter_name": "conservation_tolerance",
+        "unit": "micro_unit",
+        "minimum": 0,
+        "default": 0,
+        "maximum": 0,
+        "rationale": "Every event-domain delta must sum to exactly zero under signed integer arithmetic.",
+        "source_type": "RESEARCH_PROPOSAL",
+        "confidence": "HIGH",
+        "risk": "Any nonzero domain sum is a failed fixture, not an acceptable rounding difference.",
+        "validation_required": false
+      },
+      {
+        "parameter_name": "hour_to_minute_factor",
+        "unit": "minute_per_hour",
+        "minimum": 60,
+        "default": 60,
+        "maximum": 60,
+        "rationale": "Exact reversible time conversion used for the owner clock and Physical Labor minutes.",
+        "source_type": "SOURCE_DERIVED",
+        "confidence": "HIGH",
+        "risk": "The inverse conversion must be integral when an owner-hour total is asserted.",
+        "validation_required": false
+      },
+      {
+        "parameter_name": "vegetable_owner_growth_cycle_micro_minutes",
+        "unit": "micro_minute",
+        "minimum": 720000000,
+        "default": 720000000,
+        "maximum": 720000000,
+        "rationale": "Exact conversion of the 12-hour Agriculture Alpha VEGETABLE growth clock at the declared fixed-point scale.",
+        "source_type": "SOURCE_DERIVED",
+        "confidence": "HIGH",
+        "risk": "Planting, harvest, warehouse intake and compost time must remain outside this owner growth-clock total.",
+        "validation_required": false
+      }
+    ]
+  },
+  "reversible_unit_conversions": [
+    {
+      "domain": "water",
+      "owner_base_unit": "liter",
+      "oracle_unit": "micro_liter",
+      "forward": "micro_liter = liter * fixed_point_scale",
+      "inverse": "liter = micro_liter / fixed_point_scale",
+      "exact_for_fixture": true
+    },
+    {
+      "domain": "structural_biomass",
+      "owner_base_unit": "kilogram_biomass",
+      "oracle_unit": "micro_kilogram_biomass",
+      "forward": "micro_kilogram_biomass = kilogram_biomass * fixed_point_scale",
+      "inverse": "kilogram_biomass = micro_kilogram_biomass / fixed_point_scale",
+      "exact_for_fixture": true
+    },
+    {
+      "domain": "nutrients",
+      "owner_base_unit": "kilogram_nutrient_proxy",
+      "oracle_unit": "micro_kilogram_nutrient_proxy",
+      "forward": "micro_kilogram_nutrient_proxy = kilogram_nutrient_proxy * fixed_point_scale",
+      "inverse": "kilogram_nutrient_proxy = micro_kilogram_nutrient_proxy / fixed_point_scale",
+      "exact_for_fixture": true
+    },
+    {
+      "domain": "energy",
+      "owner_base_unit": "energy_proxy",
+      "oracle_unit": "micro_energy_proxy",
+      "forward": "micro_energy_proxy = energy_proxy * fixed_point_scale",
+      "inverse": "energy_proxy = micro_energy_proxy / fixed_point_scale",
+      "exact_for_fixture": true
+    },
+    {
+      "domain": "labor",
+      "owner_base_unit": "worker_minute",
+      "oracle_unit": "micro_worker_minute",
+      "forward": "micro_worker_minute = worker_minute * fixed_point_scale",
+      "inverse": "worker_minute = micro_worker_minute / fixed_point_scale",
+      "exact_for_fixture": true
+    },
+    {
+      "domain": "propagation_input_custody",
+      "owner_base_unit": "owner_seed_unit",
+      "oracle_unit": "micro_owner_seed_unit",
+      "forward": "micro_owner_seed_unit = owner_seed_unit * fixed_point_scale",
+      "inverse": "owner_seed_unit = micro_owner_seed_unit / fixed_point_scale",
+      "exact_for_fixture": true
+    },
+    {
+      "domain": "owner_inventory_custody",
+      "owner_base_unit": "vegetable_warehouse_unit",
+      "oracle_unit": "micro_vegetable_warehouse_unit",
+      "forward": "micro_vegetable_warehouse_unit = vegetable_warehouse_unit * fixed_point_scale",
+      "inverse": "vegetable_warehouse_unit = micro_vegetable_warehouse_unit / fixed_point_scale",
+      "exact_for_fixture": true
+    }
+  ],
+  "nonconversion_contracts": [
+    "AGRICULTURE_ALPHA_WATER_UNIT_HAS_NO_CONVERSION_TO_LITER",
+    "AGRICULTURE_ALPHA_ENERGY_UNIT_HAS_NO_CONVERSION_TO_ENERGY_PROXY_OR_JOULE",
+    "AGRICULTURE_ALPHA_FERTILIZER_RESOURCE_UNIT_HAS_NO_CONVERSION_TO_KILOGRAM_NUTRIENT_PROXY",
+    "VEGETABLE_WAREHOUSE_UNIT_HAS_NO_CONVERSION_TO_KILOGRAM_BIOMASS",
+    "VEGETABLE_FARM_CAPACITY_UNIT_HAS_NO_CONVERSION_TO_AREA_PLANT_COUNT_VOLUME_OR_MASS"
+  ],
+  "flow_rules": [
+    "EVERY_TRANSFER_HAS_EQUAL_DEBIT_AND_CREDIT_WITHIN_ONE_NAMED_DOMAIN",
+    "PROPAGATION_INPUT_PRECEDES_PLANTING",
+    "SOIL_WATER_NUTRIENTS_SUNLIGHT_TEMPERATURE_LABOR_AND_TIME_GATE_GROWTH",
+    "OWNER_GROWTH_CLOCK_REACHES_EXACTLY_12_HOURS_BEFORE_HARVEST",
+    "HARVEST_REQUIRES_READY_STATE_LABOR_TOOLS_CONTAINERS_TIME_AND_RESERVED_CAPACITY",
+    "HARVEST_CREATES_HARVEST_BATCH_CUSTODY_NOT_INSTANT_WAREHOUSE_INVENTORY",
+    "WAREHOUSE_INTAKE_IS_A_SEPARATE_NONZERO_TIME_EVENT",
+    "MARKETABLE_PRODUCT_REJECTED_BIOMASS_AND_RESIDUE_ENTER_DISTINCT_POOLS",
+    "DEAD_REJECTED_AND_RESIDUE_BIOMASS_REQUIRE_RECORDED_COMPOST_DECOMPOSITION_OR_REMOVAL_CUSTODY",
+    "NO_LEDGER_REVENUE_RIGHTS_DECISION_OR_FOOD_SAFETY_APPROVAL_IS_CREATED"
+  ],
+  "numerical_oracle": {
+    "oracle_id": "VEGETABLE-PLOT-NUMERICAL-ORACLE-001",
+    "fixture_status": "OBJECTIVE_TEST_FIXTURE_NOT_RUNTIME_PARAMETER",
+    "species_reference": null,
+    "taxonomy": null,
+    "owner_references": [
+      "AGRICULTURE_ALPHA.CROP_CATALOG.VEGETABLE",
+      "KAIOS_REPRODUCTION_ECOLOGY_RUNTIME_V1",
+      "CIVILIZATION_ECONOMY_ALPHA",
+      "KAIOS_PHYSICAL_LABOR_SCHEMA"
+    ],
+    "integer_scale": 1000000,
+    "integer_contract": "All state values and deltas are signed base-10 safe integers in the micro-unit named by each pool; floating-point state addition is forbidden.",
+    "inventory_projection_contract": "locked_yield_projection is a non-consumable audit token, not harvested inventory. It may move first to harvest-batch custody after readiness and then to warehouse custody in a later event; it never converts to physical biomass.",
+    "environment_fixture_not_parameter": {
+      "propagation_input_present": true,
+      "compatible_soil": true,
+      "water_available": true,
+      "nutrients_available": true,
+      "sunlight_available": true,
+      "temperature_compatible": true,
+      "physical_labor_available": true,
+      "elapsed_time_required": true,
+      "owner_growth_clock_required_micro_minute": 720000000,
+      "tools_available_at_harvest": true,
+      "containers_available_at_harvest": true,
+      "warehouse_capacity_reserved": true,
+      "food_safety_approval": false
+    },
+    "initial_state": {
+      "oracle_id": "VEGETABLE-PLOT-NUMERICAL-ORACLE-001",
+      "simulation_elapsed_micro_minute": 0,
+      "owner_growth_elapsed_micro_minute": 0,
+      "crop_stage": "PLANNED",
+      "propagation_input_custody": "AVAILABLE",
+      "residue_status": "NONE",
+      "food_safety_status": "SOURCE_UNDERSPECIFIED_NOT_AUTHORIZED",
+      "water_pools_micro_liter": {
+        "atmospheric_water_proxy": 40000000,
+        "compost_water": 0,
+        "crop_water": 0,
+        "harvest_batch_marketable_water": 0,
+        "irrigation_reservoir": 800000000,
+        "propagation_material_water": 10000000,
+        "rejected_biomass_water": 0,
+        "residue_water": 0,
+        "soil_water": 150000000,
+        "warehouse_harvested_water": 0
+      },
+      "structural_biomass_pools_micro_kilogram_biomass": {
+        "atmospheric_carbon_material_proxy": 800000000,
+        "compost_feedstock_structural_mass": 0,
+        "crop_structural_mass": 0,
+        "harvest_batch_marketable_structural_mass": 0,
+        "propagation_material_structural_mass": 10000000,
+        "rejected_biomass_structural_mass": 0,
+        "residue_structural_mass": 0,
+        "soil_organic_matter_structural_mass": 190000000,
+        "warehouse_harvested_structural_mass": 0
+      },
+      "nutrient_pools_micro_kilogram_nutrient_proxy": {
+        "compost_nutrient_store": 0,
+        "crop_nutrient_store": 0,
+        "fertilizer_reserve": 50000000,
+        "harvest_batch_marketable_nutrient_store": 0,
+        "propagation_material_nutrient_store": 20000000,
+        "rejected_biomass_nutrient_store": 0,
+        "residue_nutrient_store": 0,
+        "soil_nutrient_pool": 130000000,
+        "warehouse_harvested_nutrient_store": 0
+      },
+      "energy_pools_micro_energy_proxy": {
+        "compost_embedded_energy_store": 0,
+        "crop_embedded_energy_store": 0,
+        "environmental_heat_dissipation_proxy": 0,
+        "harvest_batch_marketable_embedded_energy_store": 0,
+        "labor_energy_reserve": 100000000,
+        "rejected_biomass_embedded_energy_store": 0,
+        "residue_embedded_energy_store": 0,
+        "sunlight_energy_source_proxy": 400000000,
+        "warehouse_harvested_embedded_energy_store": 0
+      },
+      "labor_pools_micro_worker_minute": {
+        "available_labor_capacity": 360000000,
+        "completed_labor_capacity": 0
+      },
+      "propagation_input_pools_micro_owner_seed_unit": {
+        "available_propagation_inputs": 1000000,
+        "consumed_propagation_records": 0
+      },
+      "owner_inventory_pools_micro_vegetable_warehouse_unit": {
+        "harvest_batch_vegetable_inventory": 0,
+        "locked_yield_projection": 6000000,
+        "warehouse_vegetable_inventory": 0
+      }
+    },
+    "ordered_events": [
+      {
+        "sequence": "001",
+        "event_type": "PROPAGATION_INPUT_AND_PLANTING_EVENT",
+        "elapsed_micro_minute_delta": 60000000,
+        "owner_growth_micro_minute_delta": 0,
+        "preconditions": [
+          "PROPAGATION_INPUT_PRESENT",
+          "COMPATIBLE_SOIL",
+          "WATER_AVAILABLE",
+          "NUTRIENTS_AVAILABLE",
+          "SUNLIGHT_AVAILABLE",
+          "TEMPERATURE_COMPATIBLE",
+          "PHYSICAL_LABOR_AVAILABLE",
+          "TOOLS_AVAILABLE"
+        ],
+        "state_changes": {
+          "crop_stage": {
+            "from": "PLANNED",
+            "to": "PLANTED"
+          },
+          "propagation_input_custody": {
+            "from": "AVAILABLE",
+            "to": "CONSUMED_RECORDED"
+          }
+        },
+        "deltas": {
+          "water_pools_micro_liter": {
+            "crop_water": 10000000,
+            "propagation_material_water": -10000000
+          },
+          "structural_biomass_pools_micro_kilogram_biomass": {
+            "crop_structural_mass": 10000000,
+            "propagation_material_structural_mass": -10000000
+          },
+          "nutrient_pools_micro_kilogram_nutrient_proxy": {
+            "crop_nutrient_store": 20000000,
+            "propagation_material_nutrient_store": -20000000
+          },
+          "energy_pools_micro_energy_proxy": {
+            "environmental_heat_dissipation_proxy": 10000000,
+            "labor_energy_reserve": -10000000
+          },
+          "labor_pools_micro_worker_minute": {
+            "available_labor_capacity": -60000000,
+            "completed_labor_capacity": 60000000
+          },
+          "propagation_input_pools_micro_owner_seed_unit": {
+            "available_propagation_inputs": -1000000,
+            "consumed_propagation_records": 1000000
+          }
+        }
+      },
+      {
+        "sequence": "002",
+        "event_type": "NONINSTANT_GERMINATION_AND_IRRIGATION_EVENT",
+        "elapsed_micro_minute_delta": 120000000,
+        "owner_growth_micro_minute_delta": 120000000,
+        "preconditions": [
+          "CROP_STAGE_PLANTED",
+          "PROPAGATION_INPUT_CUSTODY_CONSUMED_RECORDED",
+          "SOIL_WATER_NUTRIENTS_SUNLIGHT_TEMPERATURE_AND_LABOR_GATES_TRUE"
+        ],
+        "state_changes": {
+          "crop_stage": {
+            "from": "PLANTED",
+            "to": "GERMINATING"
+          }
+        },
+        "deltas": {
+          "water_pools_micro_liter": {
+            "irrigation_reservoir": -200000000,
+            "soil_water": 200000000
+          },
+          "nutrient_pools_micro_kilogram_nutrient_proxy": {
+            "fertilizer_reserve": -30000000,
+            "soil_nutrient_pool": 30000000
+          },
+          "energy_pools_micro_energy_proxy": {
+            "crop_embedded_energy_store": 15000000,
+            "environmental_heat_dissipation_proxy": 5000000,
+            "sunlight_energy_source_proxy": -20000000
+          },
+          "labor_pools_micro_worker_minute": {
+            "available_labor_capacity": -30000000,
+            "completed_labor_capacity": 30000000
+          }
+        }
+      },
+      {
+        "sequence": "003",
+        "event_type": "NONINSTANT_VEGETATIVE_GROWTH_EVENT",
+        "elapsed_micro_minute_delta": 480000000,
+        "owner_growth_micro_minute_delta": 480000000,
+        "preconditions": [
+          "CROP_STAGE_GERMINATING",
+          "SOIL_WATER_NUTRIENTS_SUNLIGHT_TEMPERATURE_AND_LABOR_GATES_TRUE"
+        ],
+        "state_changes": {
+          "crop_stage": {
+            "from": "GERMINATING",
+            "to": "GROWING"
+          }
+        },
+        "deltas": {
+          "water_pools_micro_liter": {
+            "atmospheric_water_proxy": 40000000,
+            "crop_water": 80000000,
+            "soil_water": -120000000
+          },
+          "structural_biomass_pools_micro_kilogram_biomass": {
+            "atmospheric_carbon_material_proxy": -200000000,
+            "crop_structural_mass": 200000000
+          },
+          "nutrient_pools_micro_kilogram_nutrient_proxy": {
+            "crop_nutrient_store": 30000000,
+            "soil_nutrient_pool": -30000000
+          },
+          "energy_pools_micro_energy_proxy": {
+            "crop_embedded_energy_store": 70000000,
+            "environmental_heat_dissipation_proxy": 30000000,
+            "sunlight_energy_source_proxy": -100000000
+          },
+          "labor_pools_micro_worker_minute": {
+            "available_labor_capacity": -120000000,
+            "completed_labor_capacity": 120000000
+          }
+        }
+      },
+      {
+        "sequence": "004",
+        "event_type": "NONINSTANT_HARVEST_READINESS_ASSESSMENT_EVENT",
+        "elapsed_micro_minute_delta": 120000000,
+        "owner_growth_micro_minute_delta": 120000000,
+        "preconditions": [
+          "CROP_STAGE_GROWING",
+          "OWNER_GROWTH_ELAPSED_BEFORE_EVENT_EQUALS_600000000_MICRO_MINUTE",
+          "SOIL_WATER_NUTRIENTS_SUNLIGHT_TEMPERATURE_AND_LABOR_GATES_TRUE"
+        ],
+        "state_changes": {
+          "crop_stage": {
+            "from": "GROWING",
+            "to": "HARVEST_READY"
+          }
+        },
+        "deltas": {
+          "water_pools_micro_liter": {
+            "atmospheric_water_proxy": 20000000,
+            "crop_water": 40000000,
+            "soil_water": -60000000
+          },
+          "structural_biomass_pools_micro_kilogram_biomass": {
+            "atmospheric_carbon_material_proxy": -50000000,
+            "crop_structural_mass": 50000000
+          },
+          "nutrient_pools_micro_kilogram_nutrient_proxy": {
+            "crop_nutrient_store": 20000000,
+            "soil_nutrient_pool": -20000000
+          },
+          "energy_pools_micro_energy_proxy": {
+            "crop_embedded_energy_store": 35000000,
+            "environmental_heat_dissipation_proxy": 15000000,
+            "sunlight_energy_source_proxy": -50000000
+          },
+          "labor_pools_micro_worker_minute": {
+            "available_labor_capacity": -30000000,
+            "completed_labor_capacity": 30000000
+          }
+        }
+      },
+      {
+        "sequence": "005",
+        "event_type": "HARVEST_GRADING_AND_BATCH_CUSTODY_EVENT",
+        "elapsed_micro_minute_delta": 90000000,
+        "owner_growth_micro_minute_delta": 0,
+        "preconditions": [
+          "CROP_STAGE_HARVEST_READY",
+          "OWNER_GROWTH_ELAPSED_EQUALS_720000000_MICRO_MINUTE",
+          "HARVEST_LABOR_TOOLS_CONTAINERS_AND_RESERVED_CAPACITY_PRESENT",
+          "WAREHOUSE_CREDIT_MUST_NOT_OCCUR_IN_THIS_EVENT"
+        ],
+        "state_changes": {
+          "crop_stage": {
+            "from": "HARVEST_READY",
+            "to": "HARVESTED"
+          },
+          "residue_status": {
+            "from": "NONE",
+            "to": "SEGREGATED_PENDING_CUSTODY"
+          }
+        },
+        "deltas": {
+          "water_pools_micro_liter": {
+            "crop_water": -130000000,
+            "harvest_batch_marketable_water": 90000000,
+            "rejected_biomass_water": 10000000,
+            "residue_water": 30000000
+          },
+          "structural_biomass_pools_micro_kilogram_biomass": {
+            "crop_structural_mass": -260000000,
+            "harvest_batch_marketable_structural_mass": 180000000,
+            "rejected_biomass_structural_mass": 20000000,
+            "residue_structural_mass": 60000000
+          },
+          "nutrient_pools_micro_kilogram_nutrient_proxy": {
+            "crop_nutrient_store": -70000000,
+            "harvest_batch_marketable_nutrient_store": 50000000,
+            "rejected_biomass_nutrient_store": 5000000,
+            "residue_nutrient_store": 15000000
+          },
+          "energy_pools_micro_energy_proxy": {
+            "crop_embedded_energy_store": -120000000,
+            "harvest_batch_marketable_embedded_energy_store": 80000000,
+            "rejected_biomass_embedded_energy_store": 10000000,
+            "residue_embedded_energy_store": 30000000
+          },
+          "labor_pools_micro_worker_minute": {
+            "available_labor_capacity": -90000000,
+            "completed_labor_capacity": 90000000
+          },
+          "owner_inventory_pools_micro_vegetable_warehouse_unit": {
+            "harvest_batch_vegetable_inventory": 6000000,
+            "locked_yield_projection": -6000000
+          }
+        }
+      },
+      {
+        "sequence": "006",
+        "event_type": "WAREHOUSE_INTAKE_AND_RESIDUE_CUSTODY_EVENT",
+        "elapsed_micro_minute_delta": 30000000,
+        "owner_growth_micro_minute_delta": 0,
+        "preconditions": [
+          "CROP_STAGE_HARVESTED",
+          "HARVEST_BATCH_CUSTODY_PRESENT",
+          "WAREHOUSE_CAPACITY_RESERVED",
+          "RESIDUE_DESTINATION_IS_COMPOST_CUSTODY",
+          "WAREHOUSE_OPERATOR_LABOR_AVAILABLE"
+        ],
+        "state_changes": {
+          "residue_status": {
+            "from": "SEGREGATED_PENDING_CUSTODY",
+            "to": "COMPOST_CUSTODY"
+          }
+        },
+        "deltas": {
+          "water_pools_micro_liter": {
+            "compost_water": 40000000,
+            "harvest_batch_marketable_water": -90000000,
+            "rejected_biomass_water": -10000000,
+            "residue_water": -30000000,
+            "warehouse_harvested_water": 90000000
+          },
+          "structural_biomass_pools_micro_kilogram_biomass": {
+            "compost_feedstock_structural_mass": 80000000,
+            "harvest_batch_marketable_structural_mass": -180000000,
+            "rejected_biomass_structural_mass": -20000000,
+            "residue_structural_mass": -60000000,
+            "warehouse_harvested_structural_mass": 180000000
+          },
+          "nutrient_pools_micro_kilogram_nutrient_proxy": {
+            "compost_nutrient_store": 20000000,
+            "harvest_batch_marketable_nutrient_store": -50000000,
+            "rejected_biomass_nutrient_store": -5000000,
+            "residue_nutrient_store": -15000000,
+            "warehouse_harvested_nutrient_store": 50000000
+          },
+          "energy_pools_micro_energy_proxy": {
+            "compost_embedded_energy_store": 40000000,
+            "harvest_batch_marketable_embedded_energy_store": -80000000,
+            "rejected_biomass_embedded_energy_store": -10000000,
+            "residue_embedded_energy_store": -30000000,
+            "warehouse_harvested_embedded_energy_store": 80000000
+          },
+          "labor_pools_micro_worker_minute": {
+            "available_labor_capacity": -30000000,
+            "completed_labor_capacity": 30000000
+          },
+          "owner_inventory_pools_micro_vegetable_warehouse_unit": {
+            "harvest_batch_vegetable_inventory": -6000000,
+            "warehouse_vegetable_inventory": 6000000
+          }
+        }
+      },
+      {
+        "sequence": "007",
+        "event_type": "NONINSTANT_COMPOST_DECOMPOSITION_AND_NUTRIENT_RETURN_EVENT",
+        "elapsed_micro_minute_delta": 1440000000,
+        "owner_growth_micro_minute_delta": 0,
+        "preconditions": [
+          "RESIDUE_STATUS_COMPOST_CUSTODY",
+          "COMPOST_POOLS_PRESENT",
+          "ELAPSED_TIME_AT_LEAST_1440000000_MICRO_MINUTE"
+        ],
+        "state_changes": {
+          "residue_status": {
+            "from": "COMPOST_CUSTODY",
+            "to": "NUTRIENT_RETURN_RECORDED"
+          }
+        },
+        "deltas": {
+          "water_pools_micro_liter": {
+            "atmospheric_water_proxy": 10000000,
+            "compost_water": -40000000,
+            "soil_water": 30000000
+          },
+          "structural_biomass_pools_micro_kilogram_biomass": {
+            "atmospheric_carbon_material_proxy": 16000000,
+            "compost_feedstock_structural_mass": -80000000,
+            "soil_organic_matter_structural_mass": 64000000
+          },
+          "nutrient_pools_micro_kilogram_nutrient_proxy": {
+            "compost_nutrient_store": -20000000,
+            "soil_nutrient_pool": 20000000
+          },
+          "energy_pools_micro_energy_proxy": {
+            "compost_embedded_energy_store": -40000000,
+            "environmental_heat_dissipation_proxy": 40000000
+          }
+        }
+      }
+    ],
+    "expected_final_state": {
+      "oracle_id": "VEGETABLE-PLOT-NUMERICAL-ORACLE-001",
+      "simulation_elapsed_micro_minute": 2340000000,
+      "owner_growth_elapsed_micro_minute": 720000000,
+      "crop_stage": "HARVESTED",
+      "propagation_input_custody": "CONSUMED_RECORDED",
+      "residue_status": "NUTRIENT_RETURN_RECORDED",
+      "food_safety_status": "SOURCE_UNDERSPECIFIED_NOT_AUTHORIZED",
+      "water_pools_micro_liter": {
+        "atmospheric_water_proxy": 110000000,
+        "compost_water": 0,
+        "crop_water": 0,
+        "harvest_batch_marketable_water": 0,
+        "irrigation_reservoir": 600000000,
+        "propagation_material_water": 0,
+        "rejected_biomass_water": 0,
+        "residue_water": 0,
+        "soil_water": 200000000,
+        "warehouse_harvested_water": 90000000
+      },
+      "structural_biomass_pools_micro_kilogram_biomass": {
+        "atmospheric_carbon_material_proxy": 566000000,
+        "compost_feedstock_structural_mass": 0,
+        "crop_structural_mass": 0,
+        "harvest_batch_marketable_structural_mass": 0,
+        "propagation_material_structural_mass": 0,
+        "rejected_biomass_structural_mass": 0,
+        "residue_structural_mass": 0,
+        "soil_organic_matter_structural_mass": 254000000,
+        "warehouse_harvested_structural_mass": 180000000
+      },
+      "nutrient_pools_micro_kilogram_nutrient_proxy": {
+        "compost_nutrient_store": 0,
+        "crop_nutrient_store": 0,
+        "fertilizer_reserve": 20000000,
+        "harvest_batch_marketable_nutrient_store": 0,
+        "propagation_material_nutrient_store": 0,
+        "rejected_biomass_nutrient_store": 0,
+        "residue_nutrient_store": 0,
+        "soil_nutrient_pool": 130000000,
+        "warehouse_harvested_nutrient_store": 50000000
+      },
+      "energy_pools_micro_energy_proxy": {
+        "compost_embedded_energy_store": 0,
+        "crop_embedded_energy_store": 0,
+        "environmental_heat_dissipation_proxy": 100000000,
+        "harvest_batch_marketable_embedded_energy_store": 0,
+        "labor_energy_reserve": 90000000,
+        "rejected_biomass_embedded_energy_store": 0,
+        "residue_embedded_energy_store": 0,
+        "sunlight_energy_source_proxy": 230000000,
+        "warehouse_harvested_embedded_energy_store": 80000000
+      },
+      "labor_pools_micro_worker_minute": {
+        "available_labor_capacity": 0,
+        "completed_labor_capacity": 360000000
+      },
+      "propagation_input_pools_micro_owner_seed_unit": {
+        "available_propagation_inputs": 0,
+        "consumed_propagation_records": 1000000
+      },
+      "owner_inventory_pools_micro_vegetable_warehouse_unit": {
+        "harvest_batch_vegetable_inventory": 0,
+        "locked_yield_projection": 0,
+        "warehouse_vegetable_inventory": 6000000
+      }
+    },
+    "conserved_totals": {
+      "water_micro_liter": 1000000000,
+      "structural_biomass_micro_kilogram_biomass": 1000000000,
+      "nutrient_micro_kilogram_nutrient_proxy": 200000000,
+      "energy_micro_energy_proxy": 500000000,
+      "labor_micro_worker_minute": 360000000,
+      "propagation_input_micro_owner_seed_unit": 1000000,
+      "owner_inventory_micro_vegetable_warehouse_unit": 6000000
+    },
+    "canonical_serialization": {
+      "algorithm_id": "KAIOS_CANONICAL_JSON_INTEGER_V1",
+      "hash_payload": "numerical_oracle.expected_final_state",
+      "object_keys": "ascending Unicode code-point order; all current keys are ASCII",
+      "array_order": "preserved",
+      "number_format": "base-10 safe integer without exponent",
+      "string_format": "JSON.stringify escaping",
+      "whitespace": "none",
+      "encoding": "UTF-8 without BOM or trailing newline",
+      "hash": "SHA-256 lowercase hexadecimal"
+    },
+    "expected_final_sha256": "a61419594453485c63a55bce589555839990e0b9e20fb0e9b130d2b2ba793136",
+    "objective_assertions": [
+      "APPLY_EVENTS_IN_SEQUENCE_ORDER",
+      "ADD_SIMULATION_AND_OWNER_GROWTH_MICRO_MINUTES_EXACTLY",
+      "USE_SIGNED_INTEGER_MICRO_UNITS_ONLY",
+      "REJECT_NEGATIVE_POOL_AFTER_EACH_EVENT",
+      "EACH_EVENT_DELTA_SUM_EQUALS_ZERO_PER_TOUCHED_DOMAIN",
+      "PROPAGATION_INPUT_IS_RECORDED_BEFORE_OWNER_GROWTH_CLOCK_STARTS",
+      "OWNER_GROWTH_CLOCK_EQUALS_EXACTLY_720000000_MICRO_MINUTE_BEFORE_HARVEST",
+      "HARVEST_BATCH_CUSTODY_PRECEDES_WAREHOUSE_INVENTORY",
+      "REJECTED_AND_RESIDUE_BIOMASS_ENTER_COMPOST_CUSTODY_BEFORE_NUTRIENT_RETURN",
+      "FINAL_STATE_EQUALS_EXPECTED_FINAL_STATE",
+      "ALL_SEVEN_TOTALS_EQUAL_INITIAL_TOTALS",
+      "CANONICAL_SHA256_EQUALS_EXPECTED_FINAL_SHA256",
+      "SECOND_REPLAY_PRODUCES_IDENTICAL_SHA256"
+    ]
+  },
+  "provenance": [
+    {
+      "source_type": "REPOSITORY_DERIVED",
+      "source_path": "KGEN-KAIOS/world-viewer/agriculture/agriculture-runtime.js",
+      "source_commit": "9b5246918b4e912557c9a6cd402ac9ab9fb6f83f",
+      "git_object": "f09478806a47c10825258385ee855faa74f51a79",
+      "sha256": "4557d6b449ce3979f2bf4ca10cc48f271ead2ddb34cc127e60b264ce26b577c2",
+      "purpose": "VEGETABLE propagation input, 12-hour owner clock, six-unit yield, harvest state and basic warehouse owner."
+    },
+    {
+      "source_type": "REPOSITORY_DERIVED",
+      "source_path": "KGEN-KAIOS/world-viewer/ecosystem/ecosystem-runtime.js",
+      "source_commit": "9b5246918b4e912557c9a6cd402ac9ab9fb6f83f",
+      "git_object": "2bab509140ab4b93c7e4975286c826693965cf26",
+      "sha256": "9b2cd9d4501727d3134ea332e1a30cd77d5d7d647300820f51d9c264784ef537",
+      "purpose": "Owner-native liter, biomass kilogram, nutrient kilogram, energy_proxy and decomposition boundaries."
+    },
+    {
+      "source_type": "REPOSITORY_DERIVED",
+      "source_path": "KGEN-KAIOS/world-viewer/economy/economy-runtime.js",
+      "source_commit": "9b5246918b4e912557c9a6cd402ac9ab9fb6f83f",
+      "git_object": "2b1a37dba8cf3863eb4b30d4547995f281a6bc62",
+      "sha256": "8b5879091b212ea3e0ead296719e872b9353209fd8982f01567f2bbb78991f27",
+      "purpose": "Inventory and balanced-ledger owner boundary; no balances or entries are copied."
+    },
+    {
+      "source_type": "REPOSITORY_DERIVED",
+      "source_path": "KAIOS_PHYSICAL_LABOR_SCHEMA.json",
+      "source_commit": "9b5246918b4e912557c9a6cd402ac9ab9fb6f83f",
+      "git_object": "357b00093f4a912e616e9d39edf04753aacf94f7",
+      "sha256": "21060f7bdf64f0a3af827f1fcd7d95d3170affef54c01bbeb449b9361fdd2f43",
+      "purpose": "Worker-minute capacity, location and non-overlap owner boundary."
+    },
+    {
+      "source_type": "REPOSITORY_DERIVED",
+      "source_path": "KAIOS/life/forest-agriculture/KAIOS_FOREST_AGRICULTURE_RUNTIME_V1_SPEC.md",
+      "source_commit": "9b5246918b4e912557c9a6cd402ac9ab9fb6f83f",
+      "git_object": "9a2dd4ad05bb7b2e3d71b91b479359947ada8376",
+      "sha256": "4e1a23e97d09ec2dc4ad65440e6958e646f75ed418e5c703c5a5a1635c2809a1",
+      "purpose": "Paired pools, causal growth, harvest, warehouse, rejected-product and residue custody requirements."
+    }
+  ],
+  "boundaries": {
+    "runtime_engine": false,
+    "authoritative_inventory": false,
+    "authoritative_ledger": false,
+    "rights_grant": false,
+    "canonical_promotion": false,
+    "food_safety_authority": false,
+    "production_authority": false
+  }
+}
