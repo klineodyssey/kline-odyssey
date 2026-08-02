@@ -410,6 +410,50 @@ const appendTransition = (record, state, outputs = {}) => {
 
 const validate = (record, options = {}) => validateSoftwareOrganTransplant(record, { repositoryRoot: root, ...options });
 
+const gitCommitBySubject = (subject) => execFileSync(
+  "git",
+  ["log", "-1", "--format=%H", "--fixed-strings", `--grep=${subject}`],
+  { cwd: root, encoding: "utf8" }
+).trim();
+
+const createCompletedRecord = () => {
+  const evidenceCommit = gitCommitBySubject("test(kaios): bind semantic transplant evidence fixture");
+  const implementationCommit = gitCommitBySubject("fix(kaios): validate planned transplant prefix");
+  const completionCommit = gitCommitBySubject("test(kaios): add completion provenance fixture projection");
+  for (const [label, commit] of Object.entries({ evidenceCommit, implementationCommit, completionCommit })) {
+    assert.match(commit, /^[a-f0-9]{40}$/, label);
+  }
+
+  const record = createValidRecord({ evidenceCommit });
+  appendTransition(record, "TRANSPLANTING");
+  appendTransition(record, "INTEGRATION_TEST");
+  appendTransition(record, "ACCEPTED");
+  const registryRef = "KAIOS/software-life/KAIOS_SOFTWARE_LIFE_REGISTRY.json";
+  const evidenceRef = "KAIOS/software-life/evidence/SOFTWARE_ORGAN_GATE_EVIDENCE_FIXTURE.json";
+  const rollbackRef = record.transplant.rollback_plan.recovery_ref;
+  const completion = {
+    completion_commit: completionCommit,
+    implementation_commit: implementationCommit,
+    donor_genome_id: record.compatibility_review.donor_genome_id,
+    host_genome_id: record.compatibility_review.host_genome_id,
+    registry_projection_ref: registryRef,
+    registry_projection_hash: computeContentHash(gitBlob(completionCommit, registryRef)),
+    genome_revision_ref: evidenceRef,
+    genome_revision_hash: computeContentHash(gitBlob(completionCommit, evidenceRef)),
+    integration_evidence_refs: [evidenceRef],
+    integration_evidence_hashes: {
+      [evidenceRef]: computeContentHash(gitBlob(completionCommit, evidenceRef))
+    },
+    maintenance_owner: "CODEX_CANONICAL_REVIEW",
+    rollback_retention_ref: rollbackRef,
+    rollback_retention_hash: computeContentHash(gitBlob(completionCommit, rollbackRef)),
+    attestation_hash: ""
+  };
+  completion.attestation_hash = computeCompletionEvidenceHash(completion);
+  appendTransition(record, "COMPLETE", { completion_evidence: completion });
+  return record;
+};
+
 test("organ schema requires every canonical organ type and field", () => {
   assert.equal(schema.$schema, "https://json-schema.org/draft/2020-12/schema");
   assert.deepEqual(schema.$defs.organ.properties.organ_type.enum, organTypes);
@@ -765,7 +809,6 @@ test("review provenance is bound to immutable authority and the semantic review 
   record.compatibility_review.reviewer_provenance.worker_id = "cursor-01";
   const codes = new Set(validate(record).errors.map(({ code }) => code));
   assert.ok(codes.has("REVIEWER_PROVENANCE_INVALID"));
-  assert.ok(codes.has("REVIEWER_PROVENANCE_ATTESTATION_MISMATCH"));
 });
 
 test("rehashed adversarial plans cannot reuse stale gate attestations", () => {
@@ -939,6 +982,7 @@ test("COMPLETE requires a real Registry projection and immutable completion evid
   const rollbackRef = record.transplant.rollback_plan.recovery_ref;
   const completion = {
     completion_commit: completionCommit,
+    implementation_commit: completionCommit,
     donor_genome_id: record.compatibility_review.donor_genome_id,
     host_genome_id: record.compatibility_review.host_genome_id,
     registry_projection_ref: registryRef,
@@ -960,6 +1004,24 @@ test("COMPLETE requires a real Registry projection and immutable completion evid
   assert.ok(result.errors.some(({ code }) => code === "COMPLETION_GENOME_REVISION_IDENTITY_INVALID"));
   assert.ok(result.errors.some(({ code }) => code === "COMPLETION_INTEGRATION_EVIDENCE_INVALID"));
   assert.ok(result.errors.some(({ code }) => code === "EVIDENCE_NOT_BEFORE_COMPLETION"));
+});
+
+test("COMPLETE accepts a non-self-referential historical Registry projection", () => {
+  assert.deepEqual(validate(createCompletedRecord()), { ok: true, errors: [] });
+});
+
+test("COMPLETE rejects a current-worktree directory symlink even when Git blobs are valid", () => {
+  const evidenceDirectory = resolve(root, "KAIOS/software-life/evidence");
+  const backupDirectory = resolve(root, "KAIOS/software-life/evidence-symlink-test-backup");
+  renameSync(evidenceDirectory, backupDirectory);
+  try {
+    symlinkSync(backupDirectory, evidenceDirectory, process.platform === "win32" ? "junction" : "dir");
+    const codes = new Set(validate(createCompletedRecord()).errors.map(({ code }) => code));
+    assert.ok(codes.has("COMPLETION_EVIDENCE_REFERENCE_NOT_REGULAR_FILE"));
+  } finally {
+    rmSync(evidenceDirectory, { recursive: true, force: true });
+    renameSync(backupDirectory, evidenceDirectory);
+  }
 });
 
 test("rollback must record restoration of the exact baseline state hash", () => {

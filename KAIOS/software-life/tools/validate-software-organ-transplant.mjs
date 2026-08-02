@@ -1416,8 +1416,10 @@ export const validateSoftwareOrganTransplant = (record, options = {}) => {
     priorTime = currentTime;
   }
 
-  if (migrationPlan.steps?.length !== migrationStepIndex) {
-    push(errors, "MIGRATION_PLAN_EXECUTION_LENGTH_MISMATCH", "transplant.migration_plan.steps", "migration plan steps must map one-to-one to non-rollback execution events");
+  const migrationPlanLength = migrationPlan.steps?.length ?? 0;
+  if (migrationStepIndex > migrationPlanLength
+    || (transplant.state === "COMPLETE" && migrationPlanLength !== migrationStepIndex)) {
+    push(errors, "MIGRATION_PLAN_EXECUTION_LENGTH_MISMATCH", "transplant.migration_plan.steps", "executed non-rollback events must be an exact prefix of the reviewed plan, and COMPLETE must consume the full plan");
   }
 
   if ((resourceTotals[resourceUnit] ?? 0) > (migrationPlan.resource_budget?.value ?? -1)) {
