@@ -4,17 +4,15 @@ Task ID: `KAIOS-CURSOR-MICROBIAL-RESEARCH-001`
 
 Worker: `cursor-01`
 
-Branch: `cursor-handoff/KAIOS-CURSOR-MICROBIAL-RESEARCH-001`
+Planned branch: `cursor-handoff/KAIOS-CURSOR-MICROBIAL-RESEARCH-001`
 
-Status: `CLAIMED / CURSOR_RESEARCH_PROPOSAL_ONLY`
+Status: `PREPARATION_ONLY / CURSOR_RESEARCH_PROPOSAL_ONLY`
 
-Claim state: `MANUAL_DISPATCH_NON_ATOMIC / ACTIVE_STATIC_CLAIM`
-
-Claim ID: `CLAIM-KAIOS-CURSOR-MICROBIAL-RESEARCH-001-001`
+Claim state: `NOT_CLAIMED / NOT_DISPATCHED`
 
 Task envelope: `TASK-ENVELOPE-KAIOS-CURSOR-MICROBIAL-RESEARCH-001-V1`
 
-Source base commit: `7008e4f9449f6df050171cf47ec6ec56419925e9`
+Preparation source commit: `7008e4f9449f6df050171cf47ec6ec56419925e9`
 
 ## Objective
 
@@ -24,29 +22,47 @@ Runtime extension. Reuse current Canonical Life, Ecology V1, soil, nutrient,
 decomposition-pool and Fungi candidate terminology by reference. Do not create
 a microbial Life identity, executable Runtime or Ecology admission claim.
 
-## Claimed Task Envelope
+## Prepared Task Envelope
 
-This work order carries one reviewed pre-cutover manual claim for `cursor-01`.
-It is recorded as `MANUAL_DISPATCH_NON_ATOMIC` because the selected dedicated
-transactional claim authority remains unimplemented. This Git-backed record is
-auditable but is not represented as an atomic distributed lock.
+This work order records non-authoritative intent only. It does not assign the
+task to `cursor-01`, dispatch work, create a Session, create a branch or
+worktree, bind an execution base, or grant execution authority.
 
 - Reviewer: `codex-gm-01`
-- Source base: `7008e4f9449f6df050171cf47ec6ec56419925e9`
-- Execution branch base: the merged claim-record commit, which must descend
-  from the source base; worker execution cannot begin from this Draft branch.
+- Preparation source commit:
+  `7008e4f9449f6df050171cf47ec6ec56419925e9`
+- Execution base: `null / NOT_BOUND`
+- Planned branch: `cursor-handoff/KAIOS-CURSOR-MICROBIAL-RESEARCH-001`
+- Branch state: `NOT_CREATED`
+- Isolated worktree state: `NOT_CREATED`
 - Authorized path: `KAIOS/life/candidates/forest-agriculture-v1/microbial-research/`
-- Dispatch mode: `MANUAL_DISPATCH_NON_ATOMIC`
-- Claim issued: `2026-08-02T13:53:00Z`
-- Lease expiry: `2026-08-03T01:53:00Z`
-- Fencing token: `1`
-- Record version: `1`
+- Dispatch state: `NOT_DISPATCHED`
+- Active claims: `0`
 - Prior Worker Registry Git object / SHA-256:
   `93342ab913d0adab57c29a85017b9907b05b026e` /
   `af348f1ad3967ffc7aca13387a3d0a45827bc84fe2aa99804570435a67df34b2`
 - Prior canonical queue Git object / SHA-256:
   `c0596410cc1b32190f4b8369c98b23b9539351b4` /
   `b2e044cf29ef031f2f47a04442001f4a0376cb14819e9834ede3dd200d75544b`
+
+## Two-Stage Activation Gate
+
+After this preparation PR is merged, Codex must:
+
+1. Record the exact preparation merge SHA.
+2. Create `cursor-handoff/KAIOS-CURSOR-MICROBIAL-RESEARCH-001` at exactly that
+   SHA.
+3. Create and verify an isolated Cursor worktree at exactly that SHA.
+4. Open a separate activation PR that binds the exact execution base, branch
+   and worktree evidence.
+5. Define fail-closed effective expiry and revalidation semantics in that
+   activation record.
+6. Record `CLAIMED` only after the activation PR is independently reviewed and
+   merged.
+
+No ancestor check, descendant wildcard, moving branch tip or symbolic main ref
+authorizes execution. The exact preparation merge SHA must be recorded and
+equal to the branch/worktree base used by the future Cursor task.
 
 ### Expected Files
 
@@ -61,9 +77,10 @@ Exactly these eight files are authorized:
 - `microbial-test-scenarios.json`
 - `CURSOR_MICROBIAL_RESEARCH_IMPROVEMENT_PROPOSAL.md`
 
-### Authorized Actions
+### Actions After Activation Only
 
-- Read repository context from the source base.
+- Read repository context from the exact execution base bound by the later
+  activation PR.
 - Write only the eight expected files under the authorized path.
 - Run bounded local tests.
 - Record Git object and SHA-256 provenance.
@@ -122,7 +139,8 @@ Ecology admission, no real microbiology, cultivation, food-safety, medical or
 environmental guidance, no uncontrolled replication, and no Runtime, CURRENT,
 Wallet, KGEN, Rights authority, Economy authority, deployment or merge changes.
 
-Cursor stops after committing exactly the eight allowed files. Codex owns all
-PR, review, release and next-dispatch decisions. The claim is valid only for
-this bounded envelope and lease. No automatic, transactional or Production
-dispatch authority is implied.
+Cursor has no authority to perform these actions from this preparation PR.
+After a separately reviewed activation, Cursor stops after committing exactly
+the eight allowed files. Codex owns all PR, review, release and next-dispatch
+decisions. No claim, lease, Session, automatic dispatch, transactional
+authority or Production authority is implied by this preparation record.

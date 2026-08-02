@@ -49,18 +49,19 @@ authority, Economy authority, Wallet, KGEN, Production authority, deployment
 or external autonomy was changed. The Fungi claim is formally `CLOSED`, then
 `RELEASED`. The ordered append-only events are `CLAIM_CLOSED` (sequence 1)
 followed by `CLAIM_RELEASED` (sequence 2). There are zero active claims after
-release. The Microbial task is only `READY_FOR_ATOMIC_CLAIM`; it is prepared
-but not claimed, and `cursor-01` has no current task or branch.
+release. The Microbial task is `PREPARATION_ONLY`; it is not claimed or
+dispatched, and `cursor-01` has no current task or branch.
 
-The prepared Microbial envelope binds reviewer `codex-gm-01`, source base
-`beb982fda885fa7acc4dc35407df611d1019a544`, and exactly the eight files under
+The Microbial intent is `PREPARATION_ONLY / NOT_CLAIMED / NOT_DISPATCHED`.
+It records reviewer `codex-gm-01`, preparation source
+`7008e4f9449f6df050171cf47ec6ec56419925e9`, and exactly the eight files under
 `KAIOS/life/candidates/forest-agriculture-v1/microbial-research/` listed in its
 work order. Its Registry, canonical queue and public projection all preserve
 `CURSOR_RESEARCH_PROPOSAL_ONLY`. It does not authorize any path outside that
 envelope.
 
-Final independent review repaired one P1 scheduler ambiguity and one P2
-projection omission. The scheduler now stops after preparation and requires a
-separate reviewed claim transition before execution. Because the transactional
-claim authority remains unimplemented, any later dispatch must be reported as
-`MANUAL_DISPATCH_NON_ATOMIC`, never as an automatic atomic claim.
+After the preparation PR merges, Codex must create and verify the exact planned
+branch and isolated worktree at the preparation merge SHA. A separate
+activation PR must bind that exact base and define fail-closed effective expiry
+and revalidation semantics before any claim can be recorded. Descendant
+wildcard ancestry is not execution authority.

@@ -6,87 +6,25 @@
   "reviewer": "codex-gm-01",
   "branch_template": "cursor-handoff/<Task-ID>",
   "one_task_at_a_time": true,
-  "continuous_dispatch_mode": "CODEX_CONTROLLED_MANUAL_DISPATCH_NON_ATOMIC",
+  "continuous_dispatch_mode": "CODEX_CONTROLLED_PREPARATION_ONLY",
   "automatic_unreviewed_dispatch": false,
-  "active_claims": [
-    {
-      "claim_id": "CLAIM-KAIOS-CURSOR-MICROBIAL-RESEARCH-001-001",
-      "task_id": "KAIOS-CURSOR-MICROBIAL-RESEARCH-001",
-      "worker_id": "cursor-01",
-      "session_id": "CURSOR-SESSION-KAIOS-MICROBIAL-RESEARCH-001",
-      "review_owner_id": "codex-gm-01",
-      "envelope_id": "TASK-ENVELOPE-KAIOS-CURSOR-MICROBIAL-RESEARCH-001-V1",
-      "branch": "cursor-handoff/KAIOS-CURSOR-MICROBIAL-RESEARCH-001",
-      "source_base": "7008e4f9449f6df050171cf47ec6ec56419925e9",
-      "execution_base_rule": "CLAIM_RECORD_MERGE_COMMIT_DESCENDANT_OF_SOURCE_BASE",
-      "dispatch_mode": "MANUAL_DISPATCH_NON_ATOMIC",
-      "status": "DISPATCHED",
-      "fencing_token": 1,
-      "record_version": 1,
-      "fencing_enforced": false,
-      "lease_enforced_by_transactional_service": false,
-      "session_kind": "LOGICAL_MANUAL_DISPATCH_SESSION",
-      "issued_at": "2026-08-02T13:53:00Z",
-      "lease_expiry": "2026-08-03T01:53:00Z",
-      "prior_worker_registry": {
-        "git_object": "93342ab913d0adab57c29a85017b9907b05b026e",
-        "sha256": "af348f1ad3967ffc7aca13387a3d0a45827bc84fe2aa99804570435a67df34b2"
-      },
-      "prior_queue": {
-        "git_object": "c0596410cc1b32190f4b8369c98b23b9539351b4",
-        "sha256": "b2e044cf29ef031f2f47a04442001f4a0376cb14819e9834ede3dd200d75544b"
-      },
-      "authorized_paths": [
-        "KAIOS/life/candidates/forest-agriculture-v1/microbial-research/"
-      ],
-      "expected_files": [
-        "CURSOR_MICROBIAL_DECOMPOSER_RESEARCH_REPORT.md",
-        "microbial-decomposer-process-proposals.json",
-        "microbial-environment-threshold-proposals.json",
-        "microbial-resource-accounting-scenarios.json",
-        "microbial-competition-and-succession-proposals.json",
-        "microbial-safety-boundaries.json",
-        "microbial-test-scenarios.json",
-        "CURSOR_MICROBIAL_RESEARCH_IMPROVEMENT_PROPOSAL.md"
-      ],
-      "actions": [
-        "READ_REPOSITORY_CONTEXT",
-        "WRITE_ONLY_EXPECTED_FILES_UNDER_AUTHORIZED_PATH",
-        "RUN_BOUNDED_LOCAL_TESTS",
-        "RECORD_GIT_OBJECT_AND_SHA256_PROVENANCE",
-        "COMMIT_EXACTLY_EXPECTED_FILES",
-        "STOP_AT_PENDING_CODEX_REVIEW"
-      ],
-      "forbidden_paths": [
-        "KGEN-KAIOS/**",
-        "KGEN/**",
-        "KAIOS/**/Runtime/**",
-        "KAIOS/**/Wallet/**",
-        "**/*CURRENT*",
-        "api/**",
-        "docs/**",
-        "README.md",
-        "PRIMEFORGE_GENESIS_BOOT_SEQUENCE_V1_4.md"
-      ],
-      "output_status": "CURSOR_RESEARCH_PROPOSAL_ONLY",
-      "automatic": false,
-      "external_autonomy": false,
-      "merge_allowed": false,
-      "deploy_allowed": false
-    }
-  ],
+  "active_claims": [],
   "worker_state": {
     "worker_id": "cursor-01",
-    "current_task": "KAIOS-CURSOR-MICROBIAL-RESEARCH-001",
-    "current_branch": "cursor-handoff/KAIOS-CURSOR-MICROBIAL-RESEARCH-001",
-    "status": "CLAIMED"
+    "current_task": null,
+    "current_branch": null,
+    "status": "IDLE"
   },
   "next_dispatch_requires": [
     "PREVIOUS_TASK_CODEX_REVIEWED",
     "PREVIOUS_TASK_CLOSED",
-    "PREVIOUS_LEASE_RELEASED",
-    "EXPLICIT_TASK_ENVELOPE",
-    "REVIEWED_MANUAL_CLAIM_RECORDED"
+    "PREVIOUS_CLAIM_RELEASED",
+    "PREPARATION_PR_MERGED",
+    "EXACT_PREPARATION_MERGE_SHA_RECORDED",
+    "PLANNED_BRANCH_CREATED_AT_EXACT_PREPARATION_MERGE_SHA",
+    "ISOLATED_WORKTREE_VERIFIED_AT_EXACT_PREPARATION_MERGE_SHA",
+    "SEPARATE_ACTIVATION_PR_REVIEWED_AND_MERGED",
+    "FAIL_CLOSED_EXPIRY_AND_REVALIDATION_DEFINED"
   ],
   "output_authority": "CANDIDATE_ONLY_OR_RESEARCH_PROPOSAL_ONLY",
   "queue": [
@@ -101,7 +39,7 @@
     { "priority": 9, "task_id": "KAIOS-CURSOR-POLLINATOR-RESEARCH-001", "work": "POLLINATOR_RESEARCH", "status": "RELEASED" },
     { "priority": 10, "task_id": "KAIOS-CURSOR-EARTHWORM-CANDIDATE-001", "work": "EARTHWORM_CANDIDATE_PACKAGE", "status": "RELEASED" },
     { "priority": 11, "task_id": "KAIOS-CURSOR-FUNGI-CANDIDATE-001", "work": "FUNGI_CANDIDATE_PACKAGE", "status": "RELEASED" },
-    { "priority": 12, "task_id": "KAIOS-CURSOR-MICROBIAL-RESEARCH-001", "work": "MICROBIAL_RESEARCH", "status": "DISPATCHED" },
+    { "priority": 12, "task_id": "KAIOS-CURSOR-MICROBIAL-RESEARCH-001", "work": "MICROBIAL_RESEARCH", "status": "PREPARATION_ONLY" },
     { "priority": 13, "task_id": "KAIOS-CURSOR-WEATHER-DATASET-001", "work": "WEATHER_DATASET", "status": "QUEUED" },
     { "priority": 14, "task_id": "KAIOS-CURSOR-SEASON-DATASET-001", "work": "SEASON_DATASET", "status": "QUEUED" },
     { "priority": 15, "task_id": "KAIOS-CURSOR-RAINFALL-DATASET-001", "work": "RAINFALL_DATASET", "status": "QUEUED" },
@@ -111,7 +49,76 @@
     { "priority": 19, "task_id": "KAIOS-CURSOR-FOREST-AG-API-CANDIDATES-001", "work": "CANDIDATE_API_PROJECTION", "status": "QUEUED" },
     { "priority": 20, "task_id": "KAIOS-CURSOR-FOREST-AG-REGRESSION-001", "work": "CANDIDATE_REGRESSION_TEST", "status": "QUEUED" }
   ],
-  "prepared_task": null,
+  "prepared_task": {
+    "envelope_id": "TASK-ENVELOPE-KAIOS-CURSOR-MICROBIAL-RESEARCH-001-V1",
+    "task_id": "KAIOS-CURSOR-MICROBIAL-RESEARCH-001",
+    "worker_id": "cursor-01",
+    "reviewer": "codex-gm-01",
+    "status": "PREPARATION_ONLY",
+    "claim_state": "NOT_CLAIMED",
+    "dispatch_state": "NOT_DISPATCHED",
+    "preparation_source_commit": "7008e4f9449f6df050171cf47ec6ec56419925e9",
+    "execution_base": null,
+    "execution_base_binding": "SEPARATE_ACTIVATION_PR_MUST_BIND_EXACT_PREPARATION_MERGE_SHA",
+    "descendant_wildcard_allowed": false,
+    "planned_branch": "cursor-handoff/KAIOS-CURSOR-MICROBIAL-RESEARCH-001",
+    "branch_state": "NOT_CREATED",
+    "isolated_worktree_state": "NOT_CREATED",
+    "activation_steps": [
+      "MERGE_PREPARATION_PR",
+      "RECORD_EXACT_PREPARATION_MERGE_SHA",
+      "CREATE_PLANNED_BRANCH_AT_EXACT_PREPARATION_MERGE_SHA",
+      "VERIFY_ISOLATED_WORKTREE_AT_EXACT_PREPARATION_MERGE_SHA",
+      "OPEN_SEPARATE_ACTIVATION_PR_BINDING_EXACT_BASE",
+      "DEFINE_FAIL_CLOSED_EXPIRY_AND_REVALIDATION",
+      "RECORD_CLAIMED_ONLY_AFTER_ACTIVATION_PR_MERGES"
+    ],
+    "prior_worker_registry": {
+      "git_object": "93342ab913d0adab57c29a85017b9907b05b026e",
+      "sha256": "af348f1ad3967ffc7aca13387a3d0a45827bc84fe2aa99804570435a67df34b2"
+    },
+    "prior_queue": {
+      "git_object": "c0596410cc1b32190f4b8369c98b23b9539351b4",
+      "sha256": "b2e044cf29ef031f2f47a04442001f4a0376cb14819e9834ede3dd200d75544b"
+    },
+    "output_status": "CURSOR_RESEARCH_PROPOSAL_ONLY",
+    "authorized_paths": [
+      "KAIOS/life/candidates/forest-agriculture-v1/microbial-research/"
+    ],
+    "expected_files": [
+      "CURSOR_MICROBIAL_DECOMPOSER_RESEARCH_REPORT.md",
+      "microbial-decomposer-process-proposals.json",
+      "microbial-environment-threshold-proposals.json",
+      "microbial-resource-accounting-scenarios.json",
+      "microbial-competition-and-succession-proposals.json",
+      "microbial-safety-boundaries.json",
+      "microbial-test-scenarios.json",
+      "CURSOR_MICROBIAL_RESEARCH_IMPROVEMENT_PROPOSAL.md"
+    ],
+    "actions_after_activation_only": [
+      "READ_REPOSITORY_CONTEXT",
+      "WRITE_ONLY_EXPECTED_FILES_UNDER_AUTHORIZED_PATH",
+      "RUN_BOUNDED_LOCAL_TESTS",
+      "RECORD_GIT_OBJECT_AND_SHA256_PROVENANCE",
+      "COMMIT_EXACTLY_EXPECTED_FILES",
+      "STOP_AT_PENDING_CODEX_REVIEW"
+    ],
+    "forbidden_paths": [
+      "KGEN-KAIOS/**",
+      "KGEN/**",
+      "KAIOS/**/Runtime/**",
+      "KAIOS/**/Wallet/**",
+      "**/*CURRENT*",
+      "api/**",
+      "docs/**",
+      "README.md",
+      "PRIMEFORGE_GENESIS_BOOT_SEQUENCE_V1_4.md"
+    ],
+    "automatic": false,
+    "external_autonomy": false,
+    "merge_allowed": false,
+    "deploy_allowed": false
+  },
   "forbidden": [
     "CURRENT",
     "WALLET",

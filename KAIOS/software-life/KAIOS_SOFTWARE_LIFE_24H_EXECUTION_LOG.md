@@ -25,8 +25,8 @@ execution.
 | 2026-08-02T10:09Z | 2026-08-02T10:54Z | Earthworm candidate | PR `#110` | candidate-only scope; independent review P0/P1/P2=0 | merged `eb17536ff6affb34f93bce6c5622d7bab018d230` | release and Fungi dispatch |
 | 2026-08-02T11:04Z | 2026-08-02T11:20Z | Earthworm release and Fungi dispatch | PR `#111` | sequential claim transition and governance tests PASS | merged `5e20186c5a644171e658f95a26c0bbe1a4741287` | Fungi candidate |
 | 2026-08-02T11:58Z | 2026-08-02T12:11Z | Fungi candidate | PR `#113` | candidate-only scope; independent review P0/P1/P2=0 | merged `beb982fda885fa7acc4dc35407df611d1019a544` | release and prepare Microbial |
-| 2026-08-02T12:20Z | 2026-08-02T13:51Z | Fungi release and Microbial envelope preparation | PR `#114` | 14 Worker Registry tests; 9 public integration tests; two Product QA runs PASS; final P0/P1/P2=0 | merged `7008e4f9449f6df050171cf47ec6ec56419925e9` | reviewed manual claim |
-| 2026-08-02T13:53Z | 2026-08-02T13:53Z | Microbial research manual claim record | `codex/kaios-cursor-microbial-manual-claim` | exact prior Git object/SHA-256 evidence; `MANUAL_DISPATCH_NON_ATOMIC`; local review pending | `IN_PROGRESS` | Draft claim PR |
+| 2026-08-02T12:20Z | 2026-08-02T13:51Z | Fungi release and Microbial envelope preparation | PR `#114` | 14 Worker Registry tests; 9 public integration tests; two Product QA runs PASS; final P0/P1/P2=0 | merged `7008e4f9449f6df050171cf47ec6ec56419925e9` | preparation-only PR |
+| 2026-08-02T13:53Z | 2026-08-02T13:53Z | Microbial research preparation record | PR `#115` | exact prior Git object/SHA-256 evidence; zero active claims; independent review repair in progress | `PREPARATION_ONLY` | merge preparation before separate activation |
 
 ## Cursor Assignment
 
@@ -37,9 +37,12 @@ and local branch were removed only after PR #106 merged and PR #107 released
 the claim.
 
 At `2026-08-02T13:53Z`, after PR #114 had closed and released the Fungi claim,
-Codex recorded the sole Microbial research assignment as
-`MANUAL_DISPATCH_NON_ATOMIC`. The dedicated transactional claim service remains
-unimplemented; no automatic or Production authority is claimed.
+Codex began a Microbial preparation record. Independent review required it to
+remain `PREPARATION_ONLY / NOT_CLAIMED / NOT_DISPATCHED`. No Cursor Session,
+branch, worktree, execution base or lease is active. After this PR merges,
+Codex must create and verify the planned branch and isolated worktree at the
+exact preparation merge SHA; a separate activation PR must bind that exact base
+before any claim can exist.
 
 ## Recorded Pauses
 
