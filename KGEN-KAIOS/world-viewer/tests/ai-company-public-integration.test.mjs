@@ -91,36 +91,50 @@ test("public Cursor queue projection matches the canonical governance queue", as
   }
 });
 
-test("public Cursor queue exposes a claim-free prepared Microbial envelope", async () => {
+test("public Cursor queue exposes Microbial preparation without a claim", async () => {
   const canonical = JSON.parse(await read(
     "KAIOS/life/forest-agriculture/KAIOS_CURSOR_CONTINUOUS_WORK_QUEUE.json"
   ));
   const registry = JSON.parse(await read("KGEN-KAIOS/worker_registry.json"));
-  const registryPreparedTask = registry.prepared_tasks.find(
-    ({ task_id }) => task_id === "KAIOS-CURSOR-MICROBIAL-RESEARCH-001"
-  );
   const projection = JSON.parse(await read("api/kaios/ai-company/v1/cursor-queue.json"));
   assert.deepEqual(projection.active_claims, []);
+  assert.deepEqual(projection.active_claims, canonical.active_claims);
+  assert.deepEqual(projection.active_claims, registry.active_claims);
   assert.deepEqual(projection.worker_state, {
     worker_id: "cursor-01",
     current_task: null,
     current_branch: null,
     status: "IDLE"
   });
+  assert.equal(registry.prepared_tasks.length, 1);
   assert.deepEqual(projection.prepared_task, canonical.prepared_task);
-  assert.equal(projection.prepared_task.status, "READY_FOR_ATOMIC_CLAIM");
-  assert.equal(projection.prepared_task.claim_state, "UNCLAIMED");
-  assert.equal(projection.prepared_task.claim_required, "ATOMIC_CLAIM_BEFORE_WORK");
-  assert.equal(projection.prepared_task.output_status, "CURSOR_RESEARCH_PROPOSAL_ONLY");
-  assert.equal(projection.prepared_task.output_status, registryPreparedTask.output_status);
-  assert.deepEqual(projection.prepared_task.authorized_paths, [
+  assert.deepEqual(projection.prepared_task, registry.prepared_tasks[0]);
+  const prepared = projection.prepared_task;
+  assert.equal(prepared.task_id, "KAIOS-CURSOR-MICROBIAL-RESEARCH-001");
+  assert.equal(prepared.status, "PREPARATION_ONLY");
+  assert.equal(prepared.claim_state, "NOT_CLAIMED");
+  assert.equal(prepared.dispatch_state, "NOT_DISPATCHED");
+  assert.equal(prepared.execution_base, null);
+  assert.equal(prepared.descendant_wildcard_allowed, false);
+  assert.equal(prepared.branch_state, "NOT_CREATED");
+  assert.equal(prepared.isolated_worktree_state, "NOT_CREATED");
+  assert.equal(prepared.output_status, "CURSOR_RESEARCH_PROPOSAL_ONLY");
+  assert.equal(prepared.preparation_source_commit,
+    "7008e4f9449f6df050171cf47ec6ec56419925e9");
+  assert.equal(prepared.automatic, false);
+  assert.equal(prepared.external_autonomy, false);
+  assert.equal(prepared.merge_allowed, false);
+  assert.equal(prepared.deploy_allowed, false);
+  for (const forbiddenField of [
+    "claim_id", "session_id", "branch", "source_base", "execution_base_rule",
+    "dispatch_mode", "fencing_token", "record_version", "issued_at", "lease_expiry"
+  ]) assert.equal(forbiddenField in prepared, false);
+  assert.deepEqual(prepared.authorized_paths, [
     "KAIOS/life/candidates/forest-agriculture-v1/microbial-research/"
   ]);
-  assert.equal(projection.prepared_task.expected_files.length, 8);
-  assert.equal(projection.prepared_task.reviewer, "codex-gm-01");
-  assert.equal(projection.prepared_task.source_base,
-    "beb982fda885fa7acc4dc35407df611d1019a544");
-  assert.deepEqual(projection.prepared_task.actions, [
+  assert.equal(prepared.expected_files.length, 8);
+  assert.equal(prepared.reviewer, "codex-gm-01");
+  assert.deepEqual(prepared.actions_after_activation_only, [
     "READ_REPOSITORY_CONTEXT",
     "WRITE_ONLY_EXPECTED_FILES_UNDER_AUTHORIZED_PATH",
     "RUN_BOUNDED_LOCAL_TESTS",
@@ -128,7 +142,7 @@ test("public Cursor queue exposes a claim-free prepared Microbial envelope", asy
     "COMMIT_EXACTLY_EXPECTED_FILES",
     "STOP_AT_PENDING_CODEX_REVIEW"
   ]);
-  assert.deepEqual(projection.prepared_task.forbidden_paths, [
+  assert.deepEqual(prepared.forbidden_paths, [
     "KGEN-KAIOS/**",
     "KGEN/**",
     "KAIOS/**/Runtime/**",

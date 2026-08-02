@@ -54,32 +54,40 @@ The vegetable assignment was allowed to complete before its lease was released.
   `CURSOR_RESEARCH_CANDIDATE_ONLY` in
   `beb982fda885fa7acc4dc35407df611d1019a544`.
 
-## Current Assignment
+## Current Preparation State
 
 - Worker: `cursor-01`
 - Current task: `null`
 - Current branch: `null`
-- Status: `IDLE / ZERO_ACTIVE_CLAIMS`
+- Worker status: `IDLE`
+- Active claims: `0`
 - Prepared task: `KAIOS-CURSOR-MICROBIAL-RESEARCH-001`
-- Prepared status: `READY_FOR_ATOMIC_CLAIM`
+- Prepared status: `PREPARATION_ONLY / NOT_CLAIMED / NOT_DISPATCHED`
 - Output authority: `CURSOR_RESEARCH_PROPOSAL_ONLY / PENDING_CODEX_REVIEW`
 - Reviewer: `codex-gm-01`
-- Source base: `beb982fda885fa7acc4dc35407df611d1019a544`
+- Preparation source: `7008e4f9449f6df050171cf47ec6ec56419925e9`
+- Execution base: `null / NOT_BOUND`
+- Planned branch: `cursor-handoff/KAIOS-CURSOR-MICROBIAL-RESEARCH-001`
+- Planned branch/worktree state: `NOT_CREATED / NOT_CREATED`
 - Authorized path: `KAIOS/life/candidates/forest-agriculture-v1/microbial-research/`
 - Expected files: exactly `8`, as listed in the Microbial work order.
 
-The Microbial task is prepared but is not dispatched or claimed. It may be
-atomically claimed only after the exact envelope is revalidated. The next
-queue item remains the weather-dataset proposal after the Microbial task has
-completed its future review and release cycle.
+This PR records preparation intent only. After it is merged, Codex must record
+the exact preparation merge SHA, create the planned branch and isolated
+worktree at exactly that SHA, and verify both. A separate activation PR must
+then bind that exact execution base and define fail-closed effective expiry and
+revalidation semantics. Only after that PR is independently reviewed and
+merged may any projection record `CLAIMED`. Descendant wildcard ancestry does
+not authorize execution.
 
 ## Boundaries
 
 Cursor cannot modify Runtime authority, CURRENT, Canonical schemas, Universe
 Law, Rights authority, Economy authority, Wallet, KGEN, deployment or merge
 state. Cursor output never becomes Canonical without Codex review. The Fungi
-claim event order is append-only: `CLAIM_CLOSED`, then `CLAIM_RELEASED`; after
-release, the active claim set is empty.
+claim event order remains append-only: `CLAIM_CLOSED`, then `CLAIM_RELEASED`.
+No Microbial acquisition event exists and every projection has zero active
+claims.
 
 The read-only AI Company API and Viewer expose the queue without granting the
 Runtime any dispatch, merge or deployment mutation endpoint.

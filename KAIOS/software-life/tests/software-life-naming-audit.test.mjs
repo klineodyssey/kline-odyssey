@@ -146,7 +146,17 @@ test("24 hour queue is bounded and Cursor remains one task at a time", async () 
   assert.equal(queue.codex_queue.length, 24);
   assert.equal(queue.metadata.literal_uninterrupted_computation_claimed, false);
   assert.equal(queue.cursor.one_task_at_a_time, true);
-  assert.equal(queue.cursor.current_task, "KAIOS-CURSOR-EARTHWORM-CANDIDATE-001");
+  assert.deepEqual(queue.active_claims, []);
+  assert.equal(queue.cursor.current_task, null);
+  assert.equal(queue.cursor.current_branch, null);
+  assert.equal(queue.cursor.current_status, "IDLE_NO_CURRENT_TASK");
+  assert.equal(queue.cursor.prepared_task, "KAIOS-CURSOR-MICROBIAL-RESEARCH-001");
+  assert.equal(queue.cursor.prepared_task_status, "PREPARATION_ONLY");
+  assert.equal(queue.cursor.execution_base, null);
+  assert.equal(queue.cursor.descendant_wildcard_allowed, false);
+  assert.equal(queue.cursor.planned_branch_state, "NOT_CREATED");
+  assert.equal(queue.cursor.isolated_worktree_state, "NOT_CREATED");
+  assert.equal(queue.cursor.activation_pr_required, true);
   assert.equal(queue.cursor.can_merge, false);
   assert.equal(queue.cursor.can_deploy, false);
   assert.equal(queue.cursor.can_promote_canonical, false);

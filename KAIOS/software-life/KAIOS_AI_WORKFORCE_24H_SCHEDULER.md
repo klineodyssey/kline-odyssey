@@ -41,12 +41,13 @@ continuations while the platform supports it. No elapsed time is fabricated.
 Cursor receives exactly one registered task. When its current task completes,
 Codex reviews every artifact, closes or merges it under candidate authority,
 and releases the claim. Release may prepare the next approved item, but must
-stop before dispatch. Worker execution may start only after a separate reviewed
-claim transition succeeds and the active claim is recorded consistently across
-the Worker Registry and canonical queue. Until the transactional claim authority
-is implemented, dispatch remains `MANUAL_DISPATCH_NON_ATOMIC`; preparation is
-not a claim. Cursor cannot rename authoritative software, change Canonical
-schemas, merge, deploy, or approve itself.
+stop before dispatch. A preparation record is not a claim. After a preparation
+PR merges, Codex must create and verify the planned branch and isolated
+worktree at the exact preparation merge SHA. A separate activation PR must bind
+that exact base and define fail-closed effective expiry and revalidation
+semantics before any claim may be recorded. Descendant wildcard ancestry does
+not authorize execution. Cursor cannot rename authoritative software, change
+Canonical schemas, merge, deploy, or approve itself.
 
 Current Cursor state:
 
@@ -54,19 +55,22 @@ Current Cursor state:
 - current branch: `null`
 - status: `IDLE / ZERO_ACTIVE_CLAIMS`
 - prepared task: `KAIOS-CURSOR-MICROBIAL-RESEARCH-001`
-- prepared status: `READY_FOR_ATOMIC_CLAIM`
+- prepared status: `PREPARATION_ONLY / NOT_CLAIMED / NOT_DISPATCHED`
 - output `RESEARCH_PROPOSAL_ONLY / PENDING_CODEX_REVIEW`
 - reviewer: `codex-gm-01`
-- source base: `beb982fda885fa7acc4dc35407df611d1019a544`
+- preparation source: `7008e4f9449f6df050171cf47ec6ec56419925e9`
+- execution base: `null / NOT_BOUND`
+- planned branch/worktree: `NOT_CREATED / NOT_CREATED`
 - authorized path: `KAIOS/life/candidates/forest-agriculture-v1/microbial-research/`
 - expected files: exactly eight, bound by the prepared work-order envelope
 
 Earthworm and fungi candidate packages completed independent Codex review. The
-Fungi claim was explicitly closed and then released; no active claim remains.
-The microbial decomposer research task is prepared for a future atomic claim,
-not dispatched. The weather dataset proposal is next after that task completes
-its future review and release cycle. The software-life manifest candidate task
-remains queued behind the pre-existing forest/agriculture queue.
+Fungi claim was explicitly closed and then released. Microbial decomposer
+research is prepared but is not claimed or dispatched. The Microbial task
+remains the next existing queue item; the weather dataset proposal follows only
+after a future activation, execution, review and release cycle. The
+software-life manifest candidate task remains queued behind the pre-existing
+queue.
 
 ## Mandatory Stops
 

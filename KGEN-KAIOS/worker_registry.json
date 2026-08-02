@@ -5,9 +5,9 @@
     "updated": "2026-08-02",
     "updated_by": "Codex",
     "reviewed_by": "Codex",
-    "source_commit": "beb982fda885fa7acc4dc35407df611d1019a544",
-    "task_id": "KAIOS-CURSOR-FUNGI-CANDIDATE-001-RELEASE-PREPARE-MICROBIAL",
-    "change_reason": "Close and release the independently reviewed fungi claim, then prepare (without claiming) the bounded microbial decomposer research envelope.",
+    "source_commit": "7008e4f9449f6df050171cf47ec6ec56419925e9",
+    "task_id": "KAIOS-CURSOR-MICROBIAL-RESEARCH-001-PREPARATION-ONLY",
+    "change_reason": "Prepare the bounded microbial decomposer research intent without claiming, dispatching, leasing, or binding an execution branch before a separate post-merge activation review.",
     "source_of_truth": true
   },
   "claim_events": [
@@ -198,11 +198,33 @@
       "task_id": "KAIOS-CURSOR-MICROBIAL-RESEARCH-001",
       "worker_id": "cursor-01",
       "reviewer": "codex-gm-01",
-      "source_base": "beb982fda885fa7acc4dc35407df611d1019a544",
-      "branch": "cursor-handoff/KAIOS-CURSOR-MICROBIAL-RESEARCH-001",
-      "status": "READY_FOR_ATOMIC_CLAIM",
-      "claim_state": "UNCLAIMED",
-      "claim_required": "ATOMIC_CLAIM_BEFORE_WORK",
+      "status": "PREPARATION_ONLY",
+      "claim_state": "NOT_CLAIMED",
+      "dispatch_state": "NOT_DISPATCHED",
+      "preparation_source_commit": "7008e4f9449f6df050171cf47ec6ec56419925e9",
+      "execution_base": null,
+      "execution_base_binding": "SEPARATE_ACTIVATION_PR_MUST_BIND_EXACT_PREPARATION_MERGE_SHA",
+      "descendant_wildcard_allowed": false,
+      "planned_branch": "cursor-handoff/KAIOS-CURSOR-MICROBIAL-RESEARCH-001",
+      "branch_state": "NOT_CREATED",
+      "isolated_worktree_state": "NOT_CREATED",
+      "activation_steps": [
+        "MERGE_PREPARATION_PR",
+        "RECORD_EXACT_PREPARATION_MERGE_SHA",
+        "CREATE_PLANNED_BRANCH_AT_EXACT_PREPARATION_MERGE_SHA",
+        "VERIFY_ISOLATED_WORKTREE_AT_EXACT_PREPARATION_MERGE_SHA",
+        "OPEN_SEPARATE_ACTIVATION_PR_BINDING_EXACT_BASE",
+        "DEFINE_FAIL_CLOSED_EXPIRY_AND_REVALIDATION",
+        "RECORD_CLAIMED_ONLY_AFTER_ACTIVATION_PR_MERGES"
+      ],
+      "prior_worker_registry": {
+        "git_object": "93342ab913d0adab57c29a85017b9907b05b026e",
+        "sha256": "af348f1ad3967ffc7aca13387a3d0a45827bc84fe2aa99804570435a67df34b2"
+      },
+      "prior_queue": {
+        "git_object": "c0596410cc1b32190f4b8369c98b23b9539351b4",
+        "sha256": "b2e044cf29ef031f2f47a04442001f4a0376cb14819e9834ede3dd200d75544b"
+      },
       "output_status": "CURSOR_RESEARCH_PROPOSAL_ONLY",
       "authorized_paths": [
         "KAIOS/life/candidates/forest-agriculture-v1/microbial-research/"
@@ -217,7 +239,7 @@
         "microbial-test-scenarios.json",
         "CURSOR_MICROBIAL_RESEARCH_IMPROVEMENT_PROPOSAL.md"
       ],
-      "actions": [
+      "actions_after_activation_only": [
         "READ_REPOSITORY_CONTEXT",
         "WRITE_ONLY_EXPECTED_FILES_UNDER_AUTHORIZED_PATH",
         "RUN_BOUNDED_LOCAL_TESTS",
@@ -235,7 +257,11 @@
         "docs/**",
         "README.md",
         "PRIMEFORGE_GENESIS_BOOT_SEQUENCE_V1_4.md"
-      ]
+      ],
+      "automatic": false,
+      "external_autonomy": false,
+      "merge_allowed": false,
+      "deploy_allowed": false
     }
   ],
   "workers": [
@@ -278,7 +304,7 @@
       "status": "IDLE",
       "employee_status": "ACTIVE",
       "trust_level": "T2",
-      "heartbeat": "2026-08-02T12:12:00Z",
+      "heartbeat": null,
       "last_report": "KAIOS/life/forest-agriculture/KAIOS_CURSOR_FUNGI_CANDIDATE_REVIEW_CLOSEOUT.md",
       "allowed_branch_pattern": "cursor-handoff/<Task-ID>",
       "branch_input_aliases": [
