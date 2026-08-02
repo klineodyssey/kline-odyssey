@@ -784,6 +784,14 @@ Task: `KAIOS-FOREST-AGRICULTURE-RUNTIME-V1-001`
 | `KAIOS/life/forest-agriculture/KAIOS_CURSOR_POLLINATOR_RESEARCH_REVIEW_CLOSEOUT.md` | Codex review and formal release of bounded pollinator research. |
 | `KAIOS/life/candidates/forest-agriculture-v1/CURSOR_EARTHWORM_CANDIDATE_WORK_ORDER.md` | Bounded earthworm candidate work order and allowed-path contract. |
 | `KGEN-KAIOS/governance/autopilot/company_status/COMPANY_STATUS_2026-08-02_POLLINATOR_RELEASED_EARTHWORM_DISPATCHED.md` | Company status for the atomic pollinator-to-earthworm queue transition. |
+| `KAIOS/software-life/README.md` | Software Life canonicalization documentation center and authority boundary. |
+| `KAIOS/software-life/KAIOS_SOFTWARE_LIFE_NAMING_AUDIT.json` | Full tracked-file and JSON identity naming audit. |
+| `KAIOS/software-life/KAIOS_SOFTWARE_LIFE_NAMING_AUDIT_REPORT.md` | Human-readable naming audit result and batch policy. |
+| `KAIOS/software-life/KAIOS_SOFTWARE_LIFE_IDENTITY_STANDARD.md` | Stable identity, version metadata and lifecycle standard. |
+| `KAIOS/software-life/KAIOS_SOFTWARE_LIFE_TAXONOMY_CROSSWALK.json` | Exact compatibility binding to the existing taxonomy owners. |
+| `KAIOS/software-life/KAIOS_SOFTWARE_LIFE_RENAME_PLAN.json` | Reversible controlled migration plan; no rename is executed by the plan. |
+| `KAIOS/software-life/KAIOS_AI_WORKFORCE_24H_QUEUE.json` | Dependency-ordered Codex queue and sole Cursor assignment. |
+| `KAIOS/software-life/KAIOS_SOFTWARE_LIFE_24H_EXECUTION_LOG.md` | Honest command, PR, wait and continuation record. |
 
 ## AI Company Order And Project Runtime V1 Specification
 
