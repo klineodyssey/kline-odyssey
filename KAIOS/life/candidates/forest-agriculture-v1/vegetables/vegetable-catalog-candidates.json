@@ -1,0 +1,283 @@
+{
+  "dataset_id": "KAIOS-VEGETABLE-CATALOG-CANDIDATES-V1",
+  "schema_version": "1.0.0-candidate",
+  "status": "CURSOR_RESEARCH_CANDIDATE_ONLY",
+  "review_status": "PENDING_CODEX_REVIEW",
+  "task_id": "KAIOS-CURSOR-VEGETABLE-PACKAGES-001",
+  "worker_id": "cursor-01",
+  "branch": "cursor-handoff/KAIOS-CURSOR-VEGETABLE-PACKAGES-001",
+  "dispatch_envelope_declared_base_commit": "e218dde35683285795714e821389806427948efe",
+  "source_base_commit": "9b5246918b4e912557c9a6cd402ac9ab9fb6f83f",
+  "source_hash_basis": "SHA256_OF_GIT_BLOB_CONTENT_AT_SOURCE_BASE_COMMIT",
+  "mode": "SIMULATION_ONLY",
+  "authority": "NONE",
+  "canonical_promotion": false,
+  "species_creation": false,
+  "aggregate_class_finding": "VEGETABLE and VEGETABLE_FARM are repository-defined aggregate resource and facility records. No validated VEGETABLE_ALPHA taxonomy record exists in taxonomy-standard.js, so this package does not identify, validate or invent a vegetable species.",
+  "owners": {
+    "plot_growth_harvest_and_basic_warehouse": "AGRICULTURE_ALPHA",
+    "aggregate_crop_reference": "AGRICULTURE_ALPHA.CROP_CATALOG.VEGETABLE",
+    "aggregate_facility_reference": "AGRICULTURE_ALPHA.facilities.vegetable-farm-001",
+    "habitat_water_soil_nutrient_and_decomposition": "KAIOS_REPRODUCTION_ECOLOGY_RUNTIME_V1",
+    "inventory_and_ledger": "CIVILIZATION_ECONOMY_ALPHA",
+    "worker_timeline": "KAIOS_PHYSICAL_LABOR_SCHEMA",
+    "canonical_life_contract": "KAIOS_CANONICAL_LIFE_SCHEMA_V1"
+  },
+  "identity_boundary": {
+    "agriculture_crop_id": "VEGETABLE",
+    "agriculture_type": "CROP",
+    "facility_id": "vegetable-farm-001",
+    "facility_type": "VEGETABLE_FARM",
+    "resource_id": "VEGETABLE",
+    "unresolved_repository_token": "VEGETABLE_ALPHA",
+    "unresolved_token_evidence": "Referenced only as a food_sources token in synthetic-world.json at the source base commit; no matching taxonomy-standard.js registry entry exists.",
+    "species_reference_status": "SOURCE_UNDERSPECIFIED",
+    "validated_species_reference": null,
+    "taxonomy": null,
+    "canonical_life_id": null,
+    "canonical_life_instance": null,
+    "canonical_life_compatibility": "NOT_ASSIGNABLE_UNTIL_AN_APPROVED_SPECIES_OWNER_AND_CANONICAL_RECORD_EXIST",
+    "plant_extension_compatibility": "REFERENCE_ONLY_NO_INSTANCE_OR_PROMOTION",
+    "cultivar": null,
+    "cultivar_source_type": "SOURCE_UNDERSPECIFIED"
+  },
+  "candidate_packages": [
+    {
+      "candidate_package_id": "CANDIDATE-VEGETABLE-AGGREGATE-PLOT-V1",
+      "package_kind": "AGGREGATE_RESOURCE_AND_PLOT_CLASS_CANDIDATE",
+      "owner_reference": "AGRICULTURE_ALPHA.CROP_CATALOG.VEGETABLE",
+      "propagation_source": "AGRICULTURE_ALPHA.seeds.VEGETABLE",
+      "species_reference": null,
+      "taxonomy": null,
+      "species_reference_status": "SOURCE_UNDERSPECIFIED",
+      "required_gates": [
+        "PROPAGATION_INPUT",
+        "COMPATIBLE_SOIL",
+        "WATER",
+        "NUTRIENTS",
+        "SUNLIGHT",
+        "COMPATIBLE_TEMPERATURE",
+        "PHYSICAL_LABOR",
+        "ELAPSED_TIME",
+        "HARVEST_READY",
+        "TOOLS",
+        "CONTAINERS",
+        "WAREHOUSE_CAPACITY",
+        "PRODUCT_AND_RESIDUE_CUSTODY"
+      ],
+      "numeric_parameters": [
+        {
+          "parameter_name": "agriculture_alpha_vegetable_growth_hours",
+          "unit": "hour_per_plot_growth_cycle",
+          "minimum": 12,
+          "default": 12,
+          "maximum": 12,
+          "rationale": "Exact Agriculture Alpha VEGETABLE owner value. It is a synthetic plot growth clock and not a real biological schedule.",
+          "source_type": "REPOSITORY_DERIVED",
+          "confidence": "HIGH",
+          "risk": "Treating the aggregate clock as species agronomy would create an unsupported biological claim.",
+          "validation_required": false
+        },
+        {
+          "parameter_name": "agriculture_alpha_vegetable_yield",
+          "unit": "vegetable_warehouse_unit_per_plot_cycle",
+          "minimum": 6,
+          "default": 6,
+          "maximum": 6,
+          "rationale": "Exact Agriculture Alpha owner output credited to its basic warehouse after harvest.",
+          "source_type": "REPOSITORY_DERIVED",
+          "confidence": "HIGH",
+          "risk": "The warehouse unit has no authorized conversion to kilograms, grades or edible portions.",
+          "validation_required": true
+        },
+        {
+          "parameter_name": "agriculture_alpha_vegetable_water_rate",
+          "unit": "agriculture_alpha_water_unit_per_hour",
+          "minimum": 0.9,
+          "default": 0.9,
+          "maximum": 0.9,
+          "rationale": "Exact Agriculture Alpha owner-native synthetic water rate.",
+          "source_type": "REPOSITORY_DERIVED",
+          "confidence": "HIGH",
+          "risk": "No reversible conversion to Ecology liters is authorized.",
+          "validation_required": true
+        },
+        {
+          "parameter_name": "agriculture_alpha_vegetable_energy_rate",
+          "unit": "agriculture_alpha_energy_unit_per_hour",
+          "minimum": 0.45,
+          "default": 0.45,
+          "maximum": 0.45,
+          "rationale": "Exact Agriculture Alpha owner-native synthetic energy rate.",
+          "source_type": "REPOSITORY_DERIVED",
+          "confidence": "HIGH",
+          "risk": "No conversion to joules or Ecology energy_proxy is authorized.",
+          "validation_required": true
+        },
+        {
+          "parameter_name": "agriculture_alpha_initial_vegetable_seed_units",
+          "unit": "owner_seed_unit",
+          "minimum": 4,
+          "default": 4,
+          "maximum": 4,
+          "rationale": "Exact Agriculture Alpha initial VEGETABLE seed-pool value at the source base commit.",
+          "source_type": "REPOSITORY_DERIVED",
+          "confidence": "HIGH",
+          "risk": "A seed unit is a synthetic propagation input and does not identify seed mass, cultivar or species.",
+          "validation_required": true
+        },
+        {
+          "parameter_name": "agriculture_alpha_total_warehouse_capacity",
+          "unit": "agriculture_alpha_warehouse_unit",
+          "minimum": 300,
+          "default": 300,
+          "maximum": 300,
+          "rationale": "Exact shared Agriculture Alpha warehouse capacity used as a harvest intake gate.",
+          "source_type": "REPOSITORY_DERIVED",
+          "confidence": "HIGH",
+          "risk": "Capacity is shared across resources and is not a physical volume or mass.",
+          "validation_required": true
+        }
+      ]
+    },
+    {
+      "candidate_package_id": "CANDIDATE-VEGETABLE-AGGREGATE-FACILITY-V1",
+      "package_kind": "AGGREGATE_FACILITY_PROFILE_CANDIDATE",
+      "owner_reference": "AGRICULTURE_ALPHA.facilities.vegetable-farm-001",
+      "facility_profile_is_species": false,
+      "species_os_id_is_taxonomy_authority": false,
+      "life_os_profile_id_is_canonical_life_authority": false,
+      "required_gates": [
+        "OWNER_FACILITY_REFERENCE",
+        "WATER_RESOURCE_AVAILABLE",
+        "FERTILIZER_RESOURCE_AVAILABLE",
+        "ELAPSED_TIME",
+        "FACILITY_READY",
+        "WAREHOUSE_CAPACITY",
+        "COLLECTION_CUSTODY"
+      ],
+      "numeric_parameters": [
+        {
+          "parameter_name": "vegetable_farm_cycle_hours",
+          "unit": "hour_per_facility_cycle",
+          "minimum": 16,
+          "default": 16,
+          "maximum": 16,
+          "rationale": "Exact synthetic-world vegetable-farm-001 cycle value.",
+          "source_type": "REPOSITORY_DERIVED",
+          "confidence": "HIGH",
+          "risk": "The facility clock is independent of the 12-hour plot clock and is not a species growth duration.",
+          "validation_required": false
+        },
+        {
+          "parameter_name": "vegetable_farm_capacity",
+          "unit": "synthetic_world_facility_capacity_unit",
+          "minimum": 16,
+          "default": 16,
+          "maximum": 16,
+          "rationale": "Exact untyped owner capacity value retained in a named synthetic unit without physical conversion.",
+          "source_type": "REPOSITORY_DERIVED",
+          "confidence": "HIGH",
+          "risk": "The source does not define a physical area, plant count or mass for this value.",
+          "validation_required": true
+        },
+        {
+          "parameter_name": "vegetable_farm_output_quantity",
+          "unit": "vegetable_warehouse_unit_per_facility_cycle",
+          "minimum": 8,
+          "default": 8,
+          "maximum": 8,
+          "rationale": "Exact vegetable-farm-001 output quantity credited through Agriculture Alpha collection.",
+          "source_type": "REPOSITORY_DERIVED",
+          "confidence": "HIGH",
+          "risk": "Facility output units must not be averaged with or substituted for the plot yield of six units.",
+          "validation_required": true
+        },
+        {
+          "parameter_name": "vegetable_farm_water_rate",
+          "unit": "agriculture_alpha_resource_unit_per_hour",
+          "minimum": 0.24,
+          "default": 0.24,
+          "maximum": 0.24,
+          "rationale": "Exact WATER input rate from vegetable-farm-001.",
+          "source_type": "REPOSITORY_DERIVED",
+          "confidence": "HIGH",
+          "risk": "The facility resource unit has no authorized conversion to liters or to the plot water unit.",
+          "validation_required": true
+        },
+        {
+          "parameter_name": "vegetable_farm_fertilizer_rate",
+          "unit": "agriculture_alpha_resource_unit_per_hour",
+          "minimum": 0.04,
+          "default": 0.04,
+          "maximum": 0.04,
+          "rationale": "Exact FERTILIZER input rate from vegetable-farm-001.",
+          "source_type": "REPOSITORY_DERIVED",
+          "confidence": "HIGH",
+          "risk": "The facility resource unit has no authorized conversion to Ecology nutrient kilograms.",
+          "validation_required": true
+        }
+      ]
+    }
+  ],
+  "owner_record_separation": [
+    "THE_12_HOUR_PLOT_PROFILE_AND_16_HOUR_FACILITY_PROFILE_ARE_DISTINCT_OWNER_RECORDS",
+    "THE_6_UNIT_PLOT_YIELD_AND_8_UNIT_FACILITY_OUTPUT_MUST_NOT_BE_AVERAGED_OR_SUBSTITUTED",
+    "SYNTHETIC_WATER_ENERGY_FERTILIZER_CAPACITY_AND_WAREHOUSE_UNITS_HAVE_NO_PHYSICAL_CONVERSION",
+    "SPECIES_OS_AND_LIFE_OS_FACILITY_LABELS_DO_NOT_CREATE_TAXONOMY_OR_CANONICAL_LIFE"
+  ],
+  "provenance": [
+    {
+      "source_type": "REPOSITORY_DERIVED",
+      "source_path": "KGEN-KAIOS/world-viewer/agriculture/agriculture-runtime.js",
+      "source_commit": "9b5246918b4e912557c9a6cd402ac9ab9fb6f83f",
+      "git_object": "f09478806a47c10825258385ee855faa74f51a79",
+      "sha256": "4557d6b449ce3979f2bf4ca10cc48f271ead2ddb34cc127e60b264ce26b577c2",
+      "purpose": "VEGETABLE crop ID, plot cycle, yield, water, energy, seed pool, warehouse capacity and Agriculture owner."
+    },
+    {
+      "source_type": "REPOSITORY_DERIVED",
+      "source_path": "KGEN-KAIOS/world-viewer/data/synthetic-world.json",
+      "source_commit": "9b5246918b4e912557c9a6cd402ac9ab9fb6f83f",
+      "git_object": "76ddff32f74c2b41ca7d9d9309b7b39a2a2618c8",
+      "sha256": "4be4c1b83420bb24604742fb722a8aedba8b3d2c163f7f18ccd871628ee7f34f",
+      "purpose": "vegetable-farm-001 owner profile and unresolved VEGETABLE_ALPHA token evidence."
+    },
+    {
+      "source_type": "REPOSITORY_DERIVED",
+      "source_path": "KGEN-KAIOS/world-viewer/biology/taxonomy-standard.js",
+      "source_commit": "9b5246918b4e912557c9a6cd402ac9ab9fb6f83f",
+      "git_object": "f4cc78d30bccf375bb3e55f5e3cb2df63d0a4683",
+      "sha256": "2c7eb6d439ac320176751c4985d1f510b68a5656ef4b4ef041dc46b4f55dcc28",
+      "purpose": "Evidence that no VEGETABLE_ALPHA taxonomy registry record exists at the source base commit."
+    },
+    {
+      "source_type": "REPOSITORY_DERIVED",
+      "source_path": "KAIOS_CANONICAL_LIFE_SCHEMA_V1.json",
+      "source_commit": "9b5246918b4e912557c9a6cd402ac9ab9fb6f83f",
+      "git_object": "3bfcea2e0fc3854a6ff674a93ef32edc2ee0aab5",
+      "sha256": "d1ced898d043e4890142df40a9033145762d4ceb28fd0e49eae39dc43bf224c5",
+      "purpose": "Canonical Life identity and taxonomy boundary; no candidate instance is created."
+    },
+    {
+      "source_type": "REPOSITORY_DERIVED",
+      "source_path": "KAIOS_CANONICAL_LIFE_TYPE_EXTENSIONS_V1.json",
+      "source_commit": "9b5246918b4e912557c9a6cd402ac9ab9fb6f83f",
+      "git_object": "8f3a30d1cba18b7156c64439bfce5d9bafc6926e",
+      "sha256": "72ab55fe394b1038cb2b8ab8bac616f378521b89fde36aa6cf5ab3cbebea58fa",
+      "purpose": "PLANT_EXTENSION compatibility fields without species or instance assignment."
+    }
+  ],
+  "boundaries": {
+    "runtime_code": false,
+    "canonical_species_creation": false,
+    "canonical_life_instance_assignment": false,
+    "rights_authority": false,
+    "economy_authority": false,
+    "wallet": false,
+    "kgen": false,
+    "deployment": false,
+    "merge": false,
+    "production_authority": false
+  }
+}
