@@ -1,0 +1,737 @@
+{
+  "dataset_id": "KAIOS-SOIL-PHYSICAL-PROPERTY-PROPOSALS-V1",
+  "schema_version": "1.0.0-candidate",
+  "status": "CURSOR_RESEARCH_CANDIDATE_ONLY",
+  "review_status": "PENDING_CODEX_REVIEW",
+  "task_id": "KAIOS-CURSOR-SOIL-TYPES-001",
+  "worker_id": "cursor-01",
+  "branch": "cursor-handoff/KAIOS-CURSOR-SOIL-TYPES-001",
+  "source_base_commit": "614b4e02edb8f705848ad7cb49132ae37e8f5b7e",
+  "source_hash_basis": "SHA256_OF_GIT_BLOB_CONTENT_AT_SOURCE_BASE_COMMIT",
+  "mode": "SIMULATION_ONLY_PROPERTY_PROPOSALS",
+  "authority": "NO_PRODUCTION_AUTHORITY",
+  "canonical_promotion": false,
+  "scope": "Candidate texture and physical-behavior envelopes for deterministic compatibility screening. Values are not laboratory results, field classifications, engineering design values or agronomic guidance.",
+  "property_partition": {
+    "type_defining_here": [
+      "sand_fraction",
+      "silt_fraction",
+      "clay_fraction"
+    ],
+    "physical_behavior_proposed_here": [
+      "bulk_density",
+      "total_porosity",
+      "saturated_hydraulic_conductivity",
+      "aggregate_stability"
+    ],
+    "tracked_elsewhere_as_independent_state": [
+      "moisture",
+      "fertility",
+      "organic_matter",
+      "compaction",
+      "erosion",
+      "contamination",
+      "crop_support",
+      "foundation_support"
+    ]
+  },
+  "unit_contracts": [
+    {
+      "source_unit": "percent_of_dry_mineral_texture_mass",
+      "target_unit": "fraction_of_dry_mineral_texture_mass",
+      "conversion": "target = source / 100",
+      "inverse": "source = target * 100",
+      "reversible": true,
+      "status": "PROPOSED_EXPLICIT_CONVERSION"
+    },
+    {
+      "source_unit": "kilogram_per_cubic_meter",
+      "target_unit": null,
+      "conversion": "UNASSIGNED",
+      "inverse": "UNASSIGNED",
+      "reversible": false,
+      "status": "OWNER_OR_LAB_ADAPTER_REQUIRED"
+    },
+    {
+      "source_unit": "millimeter_per_hour",
+      "target_unit": "ecology_water_liter",
+      "conversion": "UNASSIGNED_WITHOUT_AREA_AND_DURATION",
+      "inverse": "UNASSIGNED",
+      "reversible": false,
+      "status": "CAUSAL_GEOMETRY_REQUIRED"
+    }
+  ],
+  "profiles": [
+    {
+      "profile_id": "SOIL-PHYSICAL-SANDY-V1",
+      "soil_type_id": "SOIL-SANDY-ANALOG-V1",
+      "numeric_parameters": [
+        {
+          "parameter_name": "sand_fraction",
+          "unit": "percent_of_dry_mineral_texture_mass",
+          "minimum": 70,
+          "default": 85,
+          "maximum": 95,
+          "rationale": "Defines a coarse-textured sandy simulation analog while retaining uncertainty.",
+          "source_type": "RESEARCH_PROPOSAL",
+          "confidence": "LOW",
+          "risk": "A candidate fraction cannot replace a particle-size laboratory analysis.",
+          "validation_required": true
+        },
+        {
+          "parameter_name": "silt_fraction",
+          "unit": "percent_of_dry_mineral_texture_mass",
+          "minimum": 0,
+          "default": 10,
+          "maximum": 20,
+          "rationale": "Completes the proposed sandy mineral texture partition.",
+          "source_type": "RESEARCH_PROPOSAL",
+          "confidence": "LOW",
+          "risk": "Field texture may differ materially from this bounded analog.",
+          "validation_required": true
+        },
+        {
+          "parameter_name": "clay_fraction",
+          "unit": "percent_of_dry_mineral_texture_mass",
+          "minimum": 0,
+          "default": 5,
+          "maximum": 15,
+          "rationale": "Completes the proposed sandy mineral texture partition.",
+          "source_type": "RESEARCH_PROPOSAL",
+          "confidence": "LOW",
+          "risk": "Small clay changes can alter retention and loading behavior.",
+          "validation_required": true
+        },
+        {
+          "parameter_name": "bulk_density",
+          "unit": "kilogram_per_cubic_meter",
+          "minimum": 1300,
+          "default": 1450,
+          "maximum": 1750,
+          "rationale": "Proposes a screening envelope for a mineral sandy analog independent of compaction state.",
+          "source_type": "MODEL_INFERENCE",
+          "confidence": "LOW",
+          "risk": "Bulk density is site and management dependent and requires measurement.",
+          "validation_required": true
+        },
+        {
+          "parameter_name": "total_porosity",
+          "unit": "fraction_of_bulk_volume",
+          "minimum": 0.32,
+          "default": 0.42,
+          "maximum": 0.5,
+          "rationale": "Proposes a coarse-texture porosity envelope for simulation screening.",
+          "source_type": "MODEL_INFERENCE",
+          "confidence": "LOW",
+          "risk": "Porosity cannot be inferred from texture alone.",
+          "validation_required": true
+        },
+        {
+          "parameter_name": "saturated_hydraulic_conductivity",
+          "unit": "millimeter_per_hour",
+          "minimum": 30,
+          "default": 120,
+          "maximum": 300,
+          "rationale": "Represents a rapid-drainage simulation envelope for deterministic water routing.",
+          "source_type": "RESEARCH_PROPOSAL",
+          "confidence": "LOW",
+          "risk": "Preferential flow, layering and compaction can invalidate this range.",
+          "validation_required": true
+        },
+        {
+          "parameter_name": "aggregate_stability_index",
+          "unit": "candidate_fraction_0_to_1",
+          "minimum": 0.1,
+          "default": 0.3,
+          "maximum": 0.5,
+          "rationale": "Provides a bounded erosion-sensitivity input without changing soil mass directly.",
+          "source_type": "RESEARCH_PROPOSAL",
+          "confidence": "LOW",
+          "risk": "The index is not a laboratory aggregate-stability result.",
+          "validation_required": true
+        }
+      ]
+    },
+    {
+      "profile_id": "SOIL-PHYSICAL-SANDY-LOAM-V1",
+      "soil_type_id": "SOIL-SANDY-LOAM-ANALOG-V1",
+      "numeric_parameters": [
+        {
+          "parameter_name": "sand_fraction",
+          "unit": "percent_of_dry_mineral_texture_mass",
+          "minimum": 50,
+          "default": 65,
+          "maximum": 80,
+          "rationale": "Defines the coarse component of the sandy-loam simulation analog.",
+          "source_type": "RESEARCH_PROPOSAL",
+          "confidence": "LOW",
+          "risk": "A proposed texture envelope is not a field classification.",
+          "validation_required": true
+        },
+        {
+          "parameter_name": "silt_fraction",
+          "unit": "percent_of_dry_mineral_texture_mass",
+          "minimum": 10,
+          "default": 25,
+          "maximum": 40,
+          "rationale": "Completes the sandy-loam texture partition with a moderate fine fraction.",
+          "source_type": "RESEARCH_PROPOSAL",
+          "confidence": "LOW",
+          "risk": "The candidate class may overlap other real texture systems.",
+          "validation_required": true
+        },
+        {
+          "parameter_name": "clay_fraction",
+          "unit": "percent_of_dry_mineral_texture_mass",
+          "minimum": 5,
+          "default": 10,
+          "maximum": 20,
+          "rationale": "Completes the sandy-loam texture partition.",
+          "source_type": "RESEARCH_PROPOSAL",
+          "confidence": "LOW",
+          "risk": "Clay mineralogy is not represented by a fraction alone.",
+          "validation_required": true
+        },
+        {
+          "parameter_name": "bulk_density",
+          "unit": "kilogram_per_cubic_meter",
+          "minimum": 1250,
+          "default": 1400,
+          "maximum": 1650,
+          "rationale": "Proposes a mineral sandy-loam screening envelope independent of loading history.",
+          "source_type": "MODEL_INFERENCE",
+          "confidence": "LOW",
+          "risk": "Compaction and organic matter can move the measured value outside this range.",
+          "validation_required": true
+        },
+        {
+          "parameter_name": "total_porosity",
+          "unit": "fraction_of_bulk_volume",
+          "minimum": 0.36,
+          "default": 0.46,
+          "maximum": 0.54,
+          "rationale": "Proposes a bounded sandy-loam pore-space input.",
+          "source_type": "MODEL_INFERENCE",
+          "confidence": "LOW",
+          "risk": "Texture does not uniquely determine pore connectivity.",
+          "validation_required": true
+        },
+        {
+          "parameter_name": "saturated_hydraulic_conductivity",
+          "unit": "millimeter_per_hour",
+          "minimum": 15,
+          "default": 40,
+          "maximum": 120,
+          "rationale": "Represents a moderately rapid candidate drainage envelope.",
+          "source_type": "RESEARCH_PROPOSAL",
+          "confidence": "LOW",
+          "risk": "Layering, crusting and compaction require separate state inputs.",
+          "validation_required": true
+        },
+        {
+          "parameter_name": "aggregate_stability_index",
+          "unit": "candidate_fraction_0_to_1",
+          "minimum": 0.2,
+          "default": 0.45,
+          "maximum": 0.65,
+          "rationale": "Provides a candidate structural-stability input for erosion flow tests.",
+          "source_type": "RESEARCH_PROPOSAL",
+          "confidence": "LOW",
+          "risk": "The index must not be treated as a measured erosion-control rating.",
+          "validation_required": true
+        }
+      ]
+    },
+    {
+      "profile_id": "SOIL-PHYSICAL-LOAM-V1",
+      "soil_type_id": "SOIL-LOAM-ANALOG-V1",
+      "numeric_parameters": [
+        {
+          "parameter_name": "sand_fraction",
+          "unit": "percent_of_dry_mineral_texture_mass",
+          "minimum": 25,
+          "default": 40,
+          "maximum": 55,
+          "rationale": "Defines the coarse component of a balanced loam analog.",
+          "source_type": "RESEARCH_PROPOSAL",
+          "confidence": "LOW",
+          "risk": "The envelope is a simulation convenience rather than a survey classification.",
+          "validation_required": true
+        },
+        {
+          "parameter_name": "silt_fraction",
+          "unit": "percent_of_dry_mineral_texture_mass",
+          "minimum": 25,
+          "default": 40,
+          "maximum": 55,
+          "rationale": "Defines the medium-size component of a balanced loam analog.",
+          "source_type": "RESEARCH_PROPOSAL",
+          "confidence": "LOW",
+          "risk": "Particle-size boundaries are not established by this package.",
+          "validation_required": true
+        },
+        {
+          "parameter_name": "clay_fraction",
+          "unit": "percent_of_dry_mineral_texture_mass",
+          "minimum": 10,
+          "default": 20,
+          "maximum": 30,
+          "rationale": "Completes the balanced loam texture partition.",
+          "source_type": "RESEARCH_PROPOSAL",
+          "confidence": "LOW",
+          "risk": "Clay activity and shrink-swell behavior remain unmodeled.",
+          "validation_required": true
+        },
+        {
+          "parameter_name": "bulk_density",
+          "unit": "kilogram_per_cubic_meter",
+          "minimum": 1100,
+          "default": 1300,
+          "maximum": 1550,
+          "rationale": "Proposes a loam screening envelope separate from the current compaction state.",
+          "source_type": "MODEL_INFERENCE",
+          "confidence": "LOW",
+          "risk": "Management and horizon differences can dominate the type-level estimate.",
+          "validation_required": true
+        },
+        {
+          "parameter_name": "total_porosity",
+          "unit": "fraction_of_bulk_volume",
+          "minimum": 0.4,
+          "default": 0.5,
+          "maximum": 0.6,
+          "rationale": "Proposes a balanced pore-space envelope for simulation.",
+          "source_type": "MODEL_INFERENCE",
+          "confidence": "LOW",
+          "risk": "Porosity and effective porosity are not interchangeable.",
+          "validation_required": true
+        },
+        {
+          "parameter_name": "saturated_hydraulic_conductivity",
+          "unit": "millimeter_per_hour",
+          "minimum": 5,
+          "default": 15,
+          "maximum": 50,
+          "rationale": "Represents a moderate candidate drainage envelope.",
+          "source_type": "RESEARCH_PROPOSAL",
+          "confidence": "LOW",
+          "risk": "Preferential flow can produce behavior outside the range.",
+          "validation_required": true
+        },
+        {
+          "parameter_name": "aggregate_stability_index",
+          "unit": "candidate_fraction_0_to_1",
+          "minimum": 0.35,
+          "default": 0.6,
+          "maximum": 0.8,
+          "rationale": "Provides a bounded structure input for erosion and restoration scenarios.",
+          "source_type": "RESEARCH_PROPOSAL",
+          "confidence": "LOW",
+          "risk": "The index is not a measured soil-health score.",
+          "validation_required": true
+        }
+      ]
+    },
+    {
+      "profile_id": "SOIL-PHYSICAL-SILT-LOAM-V1",
+      "soil_type_id": "SOIL-SILT-LOAM-ANALOG-V1",
+      "numeric_parameters": [
+        {
+          "parameter_name": "sand_fraction",
+          "unit": "percent_of_dry_mineral_texture_mass",
+          "minimum": 5,
+          "default": 20,
+          "maximum": 35,
+          "rationale": "Defines the coarse component of a silt-dominant analog.",
+          "source_type": "RESEARCH_PROPOSAL",
+          "confidence": "LOW",
+          "risk": "A candidate texture does not identify depositional history.",
+          "validation_required": true
+        },
+        {
+          "parameter_name": "silt_fraction",
+          "unit": "percent_of_dry_mineral_texture_mass",
+          "minimum": 50,
+          "default": 65,
+          "maximum": 80,
+          "rationale": "Defines the dominant component of the silt-loam analog.",
+          "source_type": "RESEARCH_PROPOSAL",
+          "confidence": "LOW",
+          "risk": "Silt-rich surfaces may crust or erode independently of this fraction.",
+          "validation_required": true
+        },
+        {
+          "parameter_name": "clay_fraction",
+          "unit": "percent_of_dry_mineral_texture_mass",
+          "minimum": 5,
+          "default": 15,
+          "maximum": 25,
+          "rationale": "Completes the silt-loam mineral texture partition.",
+          "source_type": "RESEARCH_PROPOSAL",
+          "confidence": "LOW",
+          "risk": "Clay mineralogy and structure remain unresolved.",
+          "validation_required": true
+        },
+        {
+          "parameter_name": "bulk_density",
+          "unit": "kilogram_per_cubic_meter",
+          "minimum": 1050,
+          "default": 1250,
+          "maximum": 1500,
+          "rationale": "Proposes a silt-loam density screening envelope independent of compaction.",
+          "source_type": "MODEL_INFERENCE",
+          "confidence": "LOW",
+          "risk": "Wetness and traffic can substantially change measured density.",
+          "validation_required": true
+        },
+        {
+          "parameter_name": "total_porosity",
+          "unit": "fraction_of_bulk_volume",
+          "minimum": 0.42,
+          "default": 0.52,
+          "maximum": 0.62,
+          "rationale": "Proposes a silt-loam pore-space envelope for screening.",
+          "source_type": "MODEL_INFERENCE",
+          "confidence": "LOW",
+          "risk": "Pore connectivity and surface sealing remain separate variables.",
+          "validation_required": true
+        },
+        {
+          "parameter_name": "saturated_hydraulic_conductivity",
+          "unit": "millimeter_per_hour",
+          "minimum": 3,
+          "default": 10,
+          "maximum": 35,
+          "rationale": "Represents a moderate-to-slow candidate drainage envelope.",
+          "source_type": "RESEARCH_PROPOSAL",
+          "confidence": "LOW",
+          "risk": "Surface crusting can lower infiltration below the proposed range.",
+          "validation_required": true
+        },
+        {
+          "parameter_name": "aggregate_stability_index",
+          "unit": "candidate_fraction_0_to_1",
+          "minimum": 0.25,
+          "default": 0.5,
+          "maximum": 0.75,
+          "rationale": "Supports deterministic erosion sensitivity without modifying composition.",
+          "source_type": "RESEARCH_PROPOSAL",
+          "confidence": "LOW",
+          "risk": "The index is not an erosion permit or soil-health certification.",
+          "validation_required": true
+        }
+      ]
+    },
+    {
+      "profile_id": "SOIL-PHYSICAL-CLAY-LOAM-V1",
+      "soil_type_id": "SOIL-CLAY-LOAM-ANALOG-V1",
+      "numeric_parameters": [
+        {
+          "parameter_name": "sand_fraction",
+          "unit": "percent_of_dry_mineral_texture_mass",
+          "minimum": 20,
+          "default": 32,
+          "maximum": 45,
+          "rationale": "Defines the coarse component of a clay-loam analog.",
+          "source_type": "RESEARCH_PROPOSAL",
+          "confidence": "LOW",
+          "risk": "Texture alone cannot identify structural behavior.",
+          "validation_required": true
+        },
+        {
+          "parameter_name": "silt_fraction",
+          "unit": "percent_of_dry_mineral_texture_mass",
+          "minimum": 20,
+          "default": 33,
+          "maximum": 45,
+          "rationale": "Defines the medium-size component of a clay-loam analog.",
+          "source_type": "RESEARCH_PROPOSAL",
+          "confidence": "LOW",
+          "risk": "Real horizon mixtures may not match the proposed partition.",
+          "validation_required": true
+        },
+        {
+          "parameter_name": "clay_fraction",
+          "unit": "percent_of_dry_mineral_texture_mass",
+          "minimum": 25,
+          "default": 35,
+          "maximum": 45,
+          "rationale": "Defines the fine component of a clay-loam analog.",
+          "source_type": "RESEARCH_PROPOSAL",
+          "confidence": "LOW",
+          "risk": "Clay activity and shrink-swell behavior require separate validation.",
+          "validation_required": true
+        },
+        {
+          "parameter_name": "bulk_density",
+          "unit": "kilogram_per_cubic_meter",
+          "minimum": 1050,
+          "default": 1250,
+          "maximum": 1500,
+          "rationale": "Proposes a clay-loam density envelope separate from compaction history.",
+          "source_type": "MODEL_INFERENCE",
+          "confidence": "LOW",
+          "risk": "Loading, drainage and structure can dominate measured density.",
+          "validation_required": true
+        },
+        {
+          "parameter_name": "total_porosity",
+          "unit": "fraction_of_bulk_volume",
+          "minimum": 0.44,
+          "default": 0.54,
+          "maximum": 0.64,
+          "rationale": "Proposes a fine-texture pore-space envelope for screening.",
+          "source_type": "MODEL_INFERENCE",
+          "confidence": "LOW",
+          "risk": "High total porosity does not imply rapid drainage.",
+          "validation_required": true
+        },
+        {
+          "parameter_name": "saturated_hydraulic_conductivity",
+          "unit": "millimeter_per_hour",
+          "minimum": 1,
+          "default": 5,
+          "maximum": 20,
+          "rationale": "Represents a slow candidate drainage envelope for clay loam.",
+          "source_type": "RESEARCH_PROPOSAL",
+          "confidence": "LOW",
+          "risk": "Cracks and macropores can create bypass flow outside this range.",
+          "validation_required": true
+        },
+        {
+          "parameter_name": "aggregate_stability_index",
+          "unit": "candidate_fraction_0_to_1",
+          "minimum": 0.35,
+          "default": 0.6,
+          "maximum": 0.85,
+          "rationale": "Provides a bounded structure input while erosion remains a separate mass flow.",
+          "source_type": "RESEARCH_PROPOSAL",
+          "confidence": "LOW",
+          "risk": "The index cannot establish erosion safety or trafficability.",
+          "validation_required": true
+        }
+      ]
+    },
+    {
+      "profile_id": "SOIL-PHYSICAL-CLAY-V1",
+      "soil_type_id": "SOIL-CLAY-ANALOG-V1",
+      "numeric_parameters": [
+        {
+          "parameter_name": "sand_fraction",
+          "unit": "percent_of_dry_mineral_texture_mass",
+          "minimum": 0,
+          "default": 15,
+          "maximum": 30,
+          "rationale": "Defines the coarse component of a clay-dominant analog.",
+          "source_type": "RESEARCH_PROPOSAL",
+          "confidence": "LOW",
+          "risk": "The proposed fraction is not a site classification.",
+          "validation_required": true
+        },
+        {
+          "parameter_name": "silt_fraction",
+          "unit": "percent_of_dry_mineral_texture_mass",
+          "minimum": 10,
+          "default": 25,
+          "maximum": 40,
+          "rationale": "Completes the non-clay portion of the clay analog.",
+          "source_type": "RESEARCH_PROPOSAL",
+          "confidence": "LOW",
+          "risk": "Silt and clay boundaries require laboratory methods not supplied here.",
+          "validation_required": true
+        },
+        {
+          "parameter_name": "clay_fraction",
+          "unit": "percent_of_dry_mineral_texture_mass",
+          "minimum": 45,
+          "default": 60,
+          "maximum": 80,
+          "rationale": "Defines the dominant fine component of the clay analog.",
+          "source_type": "RESEARCH_PROPOSAL",
+          "confidence": "LOW",
+          "risk": "Mineralogy, cracking and shrink-swell potential remain unresolved.",
+          "validation_required": true
+        },
+        {
+          "parameter_name": "bulk_density",
+          "unit": "kilogram_per_cubic_meter",
+          "minimum": 950,
+          "default": 1200,
+          "maximum": 1500,
+          "rationale": "Proposes a clay density screening envelope independent of moisture and loading.",
+          "source_type": "MODEL_INFERENCE",
+          "confidence": "LOW",
+          "risk": "Moisture and compaction can strongly alter in-place behavior.",
+          "validation_required": true
+        },
+        {
+          "parameter_name": "total_porosity",
+          "unit": "fraction_of_bulk_volume",
+          "minimum": 0.46,
+          "default": 0.56,
+          "maximum": 0.68,
+          "rationale": "Proposes a clay pore-space envelope while keeping permeability separate.",
+          "source_type": "MODEL_INFERENCE",
+          "confidence": "LOW",
+          "risk": "Total porosity does not establish usable water or foundation performance.",
+          "validation_required": true
+        },
+        {
+          "parameter_name": "saturated_hydraulic_conductivity",
+          "unit": "millimeter_per_hour",
+          "minimum": 0.1,
+          "default": 1,
+          "maximum": 8,
+          "rationale": "Represents a very slow matrix-flow candidate envelope.",
+          "source_type": "RESEARCH_PROPOSAL",
+          "confidence": "LOW",
+          "risk": "Desiccation cracks may create rapid preferential flow not captured here.",
+          "validation_required": true
+        },
+        {
+          "parameter_name": "aggregate_stability_index",
+          "unit": "candidate_fraction_0_to_1",
+          "minimum": 0.3,
+          "default": 0.55,
+          "maximum": 0.85,
+          "rationale": "Provides a bounded structure input distinct from shrink-swell and erosion states.",
+          "source_type": "RESEARCH_PROPOSAL",
+          "confidence": "LOW",
+          "risk": "The index does not certify stability under wetting or loading.",
+          "validation_required": true
+        }
+      ]
+    },
+    {
+      "profile_id": "SOIL-PHYSICAL-ORGANIC-RICH-MINERAL-V1",
+      "soil_type_id": "SOIL-ORGANIC-RICH-MINERAL-ANALOG-V1",
+      "numeric_parameters": [
+        {
+          "parameter_name": "sand_fraction",
+          "unit": "percent_of_dry_mineral_texture_mass",
+          "minimum": 20,
+          "default": 35,
+          "maximum": 50,
+          "rationale": "Defines only the mineral fraction of the organic-rich mineral analog.",
+          "source_type": "RESEARCH_PROPOSAL",
+          "confidence": "LOW",
+          "risk": "Organic material is deliberately excluded from this mineral partition.",
+          "validation_required": true
+        },
+        {
+          "parameter_name": "silt_fraction",
+          "unit": "percent_of_dry_mineral_texture_mass",
+          "minimum": 25,
+          "default": 40,
+          "maximum": 55,
+          "rationale": "Defines the medium-size mineral component separately from organic matter.",
+          "source_type": "RESEARCH_PROPOSAL",
+          "confidence": "LOW",
+          "risk": "The analog is not a peat or organic-soil classification.",
+          "validation_required": true
+        },
+        {
+          "parameter_name": "clay_fraction",
+          "unit": "percent_of_dry_mineral_texture_mass",
+          "minimum": 10,
+          "default": 25,
+          "maximum": 40,
+          "rationale": "Completes the mineral texture partition while organic matter remains a separate pool.",
+          "source_type": "RESEARCH_PROPOSAL",
+          "confidence": "LOW",
+          "risk": "Mineral texture cannot establish organic horizon behavior.",
+          "validation_required": true
+        },
+        {
+          "parameter_name": "bulk_density",
+          "unit": "kilogram_per_cubic_meter",
+          "minimum": 500,
+          "default": 900,
+          "maximum": 1250,
+          "rationale": "Proposes a low-density screening envelope associated with a separately sourced organic pool.",
+          "source_type": "MODEL_INFERENCE",
+          "confidence": "LOW",
+          "risk": "Decomposition, saturation and compaction can alter density substantially.",
+          "validation_required": true
+        },
+        {
+          "parameter_name": "total_porosity",
+          "unit": "fraction_of_bulk_volume",
+          "minimum": 0.5,
+          "default": 0.65,
+          "maximum": 0.8,
+          "rationale": "Proposes a high-porosity screening envelope for an organic-rich mineral analog.",
+          "source_type": "MODEL_INFERENCE",
+          "confidence": "LOW",
+          "risk": "High porosity may accompany high compressibility and does not imply foundation support.",
+          "validation_required": true
+        },
+        {
+          "parameter_name": "saturated_hydraulic_conductivity",
+          "unit": "millimeter_per_hour",
+          "minimum": 2,
+          "default": 12,
+          "maximum": 60,
+          "rationale": "Represents a broad variable-flow envelope for deterministic screening.",
+          "source_type": "RESEARCH_PROPOSAL",
+          "confidence": "LOW",
+          "risk": "Decomposition, layering and saturation can reverse expected drainage behavior.",
+          "validation_required": true
+        },
+        {
+          "parameter_name": "aggregate_stability_index",
+          "unit": "candidate_fraction_0_to_1",
+          "minimum": 0.35,
+          "default": 0.7,
+          "maximum": 0.9,
+          "rationale": "Provides a candidate surface-structure input while organic mass is conserved separately.",
+          "source_type": "RESEARCH_PROPOSAL",
+          "confidence": "LOW",
+          "risk": "Organic aggregation does not establish long-term structural or loading stability.",
+          "validation_required": true
+        }
+      ]
+    }
+  ],
+  "composition_validation_rules": [
+    "FOR_EACH_PROFILE_DEFAULT_SAND_PLUS_SILT_PLUS_CLAY_EQUALS_100_PERCENT",
+    "ORGANIC_MATTER_IS_NOT_INCLUDED_IN_MINERAL_TEXTURE_SUM",
+    "MOISTURE_DOES_NOT_CHANGE_TEXTURE_FRACTIONS",
+    "COMPACTION_DOES_NOT_CREATE_OR_DESTROY_SOIL_MASS",
+    "EROSION_MOVES_SOIL_MASS_TO_NAMED_SEDIMENT_OR_EXPORT_CUSTODY",
+    "CONTAMINATION_USES_A_SEPARATE_CONTAMINANT_MASS_DOMAIN"
+  ],
+  "provenance": [
+    {
+      "source_path": "KAIOS/life/candidates/soil/life.manifest.json",
+      "source_commit": "614b4e02edb8f705848ad7cb49132ae37e8f5b7e",
+      "git_object": "c3b86866e9a3f35b784f33e168cc80c8cb686fae",
+      "sha256": "afc569084c467e92ed967559e0a99ce8c1877dea1a43c3f0c7efc8183b61aeb9",
+      "usage": "Existing 0.40 sand, 0.35 silt, 0.20 clay and 0.05 organic candidate composition is a reference only; this dataset does not replace it."
+    },
+    {
+      "source_path": "KAIOS/life/runtime/foundational-life-runtime.js",
+      "source_commit": "614b4e02edb8f705848ad7cb49132ae37e8f5b7e",
+      "git_object": "9187c14774b34c25e9ae23cf21749fbb5dbb891d",
+      "sha256": "4d72be28bbad06ff65d1dddb44043e6f3e2086a095a8bf105e2f08cbed648779",
+      "usage": "Soil state owner and normalized change semantics"
+    },
+    {
+      "source_path": "KAIOS/life/forest-agriculture/KAIOS_FOREST_AGRICULTURE_RUNTIME_V1_SPEC.md",
+      "source_commit": "614b4e02edb8f705848ad7cb49132ae37e8f5b7e",
+      "git_object": "9a2dd4ad05bb7b2e3d71b91b479359947ada8376",
+      "sha256": "4e1a23e97d09ec2dc4ad65440e6958e646f75ed418e5c703c5a5a1635c2809a1",
+      "usage": "Distinct soil-property and causal-flow requirements"
+    }
+  ],
+  "boundaries": [
+    "CANDIDATE_ONLY",
+    "SIMULATION_ONLY",
+    "NO_FIELD_CLASSIFICATION",
+    "NO_LAB_RESULT",
+    "NO_ENGINEERING_DESIGN_VALUE",
+    "NO_AGRONOMIC_RECOMMENDATION",
+    "NO_CANONICAL_PROMOTION",
+    "NO_RUNTIME_CHANGE"
+  ]
+}
