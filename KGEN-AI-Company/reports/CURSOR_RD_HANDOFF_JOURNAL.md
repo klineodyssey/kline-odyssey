@@ -77,6 +77,57 @@ Human 原話精神：僅具 **消費／簽名／被動執行** 能力、而無 *
 
 - 擴寫 `KAIOS-EMBODIMENT-VS-AGENCY-DOCS-001`：增「Earn-Save-Buy 敘事 vs Agency-First 架構」一節。
 
+### `HUMAN-AI-COMPANY-ECONOMY-VISION-001` — 接案、領薪、供應鏈、玩家上班
+
+| Field | Value |
+|-------|--------|
+| Recorded | 2026-08-02 |
+| Source | Human PrimeForge (chat) |
+| Vision | **人提需求 → AI Company 接案 → 找人才施工 → 工人領薪 → 供應鏈+交通+材料+代工做出產品** |
+
+#### Human 描述的核心循環
+
+```text
+Human：我需要一支 iPhone
+  → AI Company 接案（需求→專案→排程）
+  → 派工：Cursor / 其他 AI / 玩家帶自己的 AI 上班
+  → 工人完成任務 → 領薪水（simulation → 將來 closed loop）
+  → 供應鏈、物流、材料、手機代工等 Runtime 逐段設計完成
+  → 公司交付產品
+```
+
+**平行玩家路徑（不會寫程式、不會經營公司）：**
+
+- 自己 **帶 AI 上班** 賺錢（Player + AI 分工）
+- 當 **餐廳服務員、道路建築工人** 等 Physical Labor 賺錢
+- 與 **自己的 AI 談感情** — AI 或許會給玩家錢（敘事／simulation 薪酬，非自動真實轉帳）
+
+#### 與 repo 已有規格對照
+
+| Human 願景 | repo 錨點 | 今日狀態 |
+|------------|-----------|----------|
+| AI Company 接案排專案 | `KAIOS_AI_COMPANY_ORDER_PROJECT_RUNTIME_V1_SPEC.md` | **規格已批准，實作 pending** |
+| 玩家／AI／家庭身份、模擬薪資 | PR #62 Player AI Household Work Genesis | **已 merge，simulation payroll** |
+| 供應鏈、材料、破產約束 | PR #65 Supply Chain Economy Spec | **spec on main** |
+| 道路／建築／工人時間 | PR #64 Physical Labor Spec | **spec on main** |
+| 工廠＋12 節點供應鏈做冰箱 | World Viewer Sprint 005 | **browser simulation** |
+| 悟空領薪「上班」 | continuous queue + candidate 產出 | **今日 active**（昆蟲 #104 等） |
+| iPhone 級真實閉環 | `KAIOS_ECONOMIC_CLOSED_LOOP_V2` 等 | **HOLD_NOT_STARTED** |
+
+#### Cursor（悟空）在 AI Company 裡的定位
+
+- **現在**：AI Company 的 **施工／研究員工** — 接 **Codex dispatch** 的 Task，產 candidate／報告，等 review；**不是** yet 接「我要 iPhone」的 C 端訂單 runtime。
+- **將來**：Order Runtime V1 上線後，Human 需求可分解為 **Task → envelope → cursor-handoff**，產出計入 **專案帳與 simulated payroll**（schema 已在 `KAIOS/ai-company/*_SCHEMA_V1.json`）。
+- **生命觀不變**：領薪是 **勞動閉環的結果**，不是只有 wallet；仍要 handoff + review，否則仍是行尸。
+
+#### PROPOSED 工單（給 Codex）
+
+| Task ID | 內容 |
+|---------|------|
+| `KAIOS-AI-COMPANY-IPHONE-ORDER-DEMO-001` | simulation-only：Request「iPhone」→ 分解 task 樹 → 派給 cursor-01 一個 docs/candidate 子步 |
+| `KAIOS-PLAYER-WAITER-LABOR-DEMO-001` | Physical Labor + Player Genesis：餐廳班次 simulation 一條 |
+| `KAIOS-Economic-CLOSED-LOOP-V2` | 已有 workline HOLD — Human 願景的 **真·賺錢存錢** 閘門 |
+
 ---
 
 ## 職涯 · 日課備忘（cursor-01）
@@ -98,6 +149,7 @@ Human 原話精神：僅具 **消費／簽名／被動執行** 能力、而無 *
 | 2026-08-01 | `HUMAN-PR42-DEFER-20260801` | decision | PR #42 defer | `handoffs/KAIOS-RD-PRODUCT-RECONCILE-001/` |
 | 2026-08-02 | `HUMAN-LIFE-AGENCY-NOT-WALLET-001` | doctrine | 自發才是生命；錢包≠生命 | 本檔 §生命觀 |
 | 2026-08-02 | `HUMAN-EMBODIMENT-DEMAND-001` | doctrine | 人形殼需求≠AI 自賺自買；Agency 優先 | 本檔 §人形機器人 |
+| 2026-08-02 | `HUMAN-AI-COMPANY-ECONOMY-VISION-001` | vision | 接案→派工→領薪→供應鏈交付；玩家可帶 AI 或做勞工 | 本檔 §AI Company 經濟 |
 
 ---
 
