@@ -203,19 +203,7 @@
       "runtime_status": "ACTIVE_SIMULATION",
       "parents": [],
       "children": [],
-      "transplants": [
-        {
-          "transplant_id": "TRANSPLANT-ORGAN-001",
-          "compatibility_review_id": "REVIEW-ORGAN-TRANSPLANT-001",
-          "donor_life_id": "LIFE-KAIOS-WORLD-VIEWER",
-          "donor_genome_id": "GENOME-KAIOS-WORLD-VIEWER",
-          "host_life_id": "LIFE-KAIOS-OFFICIAL-HOMEPAGE",
-          "host_genome_id": "GENOME-KAIOS-OFFICIAL-HOMEPAGE",
-          "organ_id": "ORGAN-WORLD-VIEWER-01",
-          "state": "COMPLETE",
-          "implementation_commit": "29aa83fdb0049e04584e26678d856e5d50f4b0f0"
-        }
-      ],
+      "transplants": [],
       "mutations": [],
       "marketplace_status": "NOT_ELIGIBLE",
       "public_url": "/kline-odyssey/",
