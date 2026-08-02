@@ -28,10 +28,14 @@ authority.
 3. Regenerate the Registry from the recorded source commit and timestamp if a
    partial artifact exists.
 4. Run the Registry, naming and organ-standard tests, including all semantic
-   valid and negative transplant fixtures.
+   and Draft 2020-12 structural valid/negative transplant fixtures.
 5. Confirm every `transplants` array is empty and all automatic flags are
    false.
-6. Confirm protected-path hashes and the working tree.
+6. Confirm the canonical Registry, compatibility schema and Worker Registry
+   are fixed-path tracked Git blobs and reject caller overrides.
+7. Confirm evidence commits/blobs and migration/rollback baseline commits,
+   host references and hashes reproduce exactly.
+8. Confirm protected-path hashes and the working tree.
 
 No data migration or active transplant requires reversal because this package
 executes none.

@@ -1,7 +1,7 @@
 ---
 title: KAIOS Software Organ and Transplant Standards Closeout
 task_id: KAIOS-SOFTWARE-LIFE-CANONICALIZATION-24H-001
-status: READY_AFTER_INDEPENDENT_REVIEW
+status: FINAL_INDEPENDENT_REVIEW_PENDING
 authority: SIMULATION_ONLY
 ---
 
@@ -43,7 +43,8 @@ Constitution source modification: `FALSE`
 
 ## Independent Review
 
-Two review rounds found five P1 and five P2 issues in total. Repairs added:
+Three attack-review rounds found nine P1 and five P2 issues in total. Repairs
+added:
 
 - evidence-derived approval and simulated Rights enforcement;
 - donor/host Genome, Life type, organ membership/type/hash, dependency and
@@ -55,8 +56,17 @@ Two review rounds found five P1 and five P2 issues in total. Repairs added:
 - unconditional `TESTS_PASS` aggregation;
 - synchronized twenty-value compact/full organ vocabularies;
 - transplant-only policy vocabulary and resolvable evidence references.
+- executed Draft 2020-12 structural validation before semantic approval;
+- fixed-path loading and metadata validation for the canonical Registry,
+  Schema and Worker Registry, with caller overrides rejected;
+- Worker Registry authorization for reviewers, gate reviewers, plan owners and
+  approval actors, plus Registry-bound Rights principals;
+- evidence commits and per-reference SHA-256 verification over regular Git
+  blobs;
+- existing baseline commit and registered host canonical-state blob
+  verification for migration and rollback.
 
-Semantic valid and negative fixtures: `21/21 PASS`.
+Semantic and structural valid/negative fixtures: `25/25 PASS`.
 
 P0: `0`
 

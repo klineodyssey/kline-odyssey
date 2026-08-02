@@ -19,6 +19,8 @@
     "every gate_evidence result equals the corresponding compatibility_review.gates value",
     "transplant.compatibility_review_id equals compatibility_review.review_id",
     "owner and dependency IDs resolve in KAIOS_SOFTWARE_LIFE_REGISTRY.json or its approved organ projection",
+    "gate evidence binds immutable Git blobs through an existing evidence commit and content hashes",
+    "migration and rollback bind an existing Git commit and the registered host canonical state blob",
     "event hashes form one deterministic chain",
     "canonical executable and organ paths contain no version token"
   ],
@@ -252,10 +254,16 @@
     },
     "gateEvidence": {
       "type": "object",
-      "required": ["result", "evidence_refs", "evidence_hash", "reviewer", "reason", "reviewed_at"],
+      "required": ["result", "evidence_refs", "evidence_commit", "evidence_content_hashes", "evidence_hash", "reviewer", "reason", "reviewed_at"],
       "properties": {
         "result": { "$ref": "#/$defs/gateResult" },
         "evidence_refs": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "$ref": "#/$defs/evidenceReference" } },
+        "evidence_commit": { "$ref": "#/$defs/repositoryCommit" },
+        "evidence_content_hashes": {
+          "type": "object",
+          "minProperties": 1,
+          "additionalProperties": { "$ref": "#/$defs/sha256" }
+        },
         "evidence_hash": { "$ref": "#/$defs/sha256" },
         "reviewer": { "type": "string", "minLength": 1 },
         "reason": { "type": "string", "minLength": 1 },
@@ -387,11 +395,12 @@
     },
     "plan": {
       "type": "object",
-      "required": ["plan_id", "owner", "baseline_commit", "baseline_state_hash", "artifact_hash", "affected_paths", "steps", "resource_budget", "energy_budget", "maximum_downtime_seconds", "verification_commands", "recovery_ref"],
+      "required": ["plan_id", "owner", "baseline_commit", "baseline_state_ref", "baseline_state_hash", "artifact_hash", "affected_paths", "steps", "resource_budget", "energy_budget", "maximum_downtime_seconds", "verification_commands", "recovery_ref"],
       "properties": {
         "plan_id": { "$ref": "#/$defs/stableId" },
         "owner": { "type": "string", "minLength": 1 },
         "baseline_commit": { "$ref": "#/$defs/repositoryCommit" },
+        "baseline_state_ref": { "$ref": "#/$defs/repositoryPath" },
         "baseline_state_hash": { "$ref": "#/$defs/sha256" },
         "artifact_hash": { "$ref": "#/$defs/sha256" },
         "affected_paths": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "$ref": "#/$defs/repositoryPath" } },

@@ -70,14 +70,20 @@ gate is `FAIL` or `NOT_EVALUATED`, even before approval is requested.
 grant Production authority.
 
 Each gate has a same-named evidence record containing its result, evidence
-references, evidence hash, reviewer, reason and review time. The evidence result
-must equal the gate result. Aggregate gate values are derived from these
-evidence results by the semantic validator; they are not an independent source
-of approval. The evidence hash is SHA-256 over the canonical key-sorted gate,
-result, evidence references, reviewer, reason and review time. Every evidence
-reference must resolve to a repository artifact or an event in the same
-record. A bare boolean, unresolved reference, tampered hash or unevidenced
-`PASS` is invalid.
+references, an existing Git evidence commit, per-reference content hashes,
+evidence hash, reviewer, reason and review time. The evidence result must equal
+the gate result. Aggregate gate values are derived from these evidence results
+by the semantic validator; they are not an independent source of approval. The
+evidence hash is SHA-256 over the canonical key-sorted gate, result, references,
+commit, content hashes, reviewer, reason and review time.
+
+Every gate requires at least one repository artifact. A repository reference
+must be a regular file in the current worktree and a Git `blob` at the recorded
+commit. Its content hash is computed from that immutable blob, not from a path
+name or caller-provided metadata. Event references are supplementary and bind
+the canonical event envelope hash. A directory, untracked path, missing commit,
+bare boolean, unresolved reference, tampered content hash or unevidenced `PASS`
+is invalid.
 
 An approved state also requires `transplant_right` and
 `license_or_usage_right` to equal `APPROVED_SIMULATION`. Schema conditionals
@@ -145,10 +151,16 @@ required host capability must be present. Donor ownership, donor Genome,
 review, host and organ identities are resolved across the complete record by
 `tools/validate-software-organ-transplant.mjs`.
 
-The validator requires the authoritative Software Life Registry and verifies
-donor and host Genome IDs, host Life type, donor organ membership and type,
-artifact content hash, `transplantable: true` and all Life or Organ
-dependencies. An in-memory self-declaration is never sufficient evidence.
+The validator loads the authoritative Software Life Registry, compatibility
+schema and Worker Registry only from their fixed repository paths. Caller-
+provided Registry or Schema objects are rejected. Each governance file must
+match its committed `HEAD` blob. It verifies Registry source metadata and
+policy, donor organ provenance against the Registry source commit, donor and
+host Genome IDs, host Life type, donor organ
+membership and type, artifact content hash, `transplantable: true` and all Life
+or Organ dependencies. Reviewers, plan owners and approval actors resolve to
+active Worker Registry identities. Rights principals resolve to donor and host
+Registry records. An in-memory self-declaration is never sufficient evidence.
 
 An adapter is itself an identified organ or implementation artifact. An
 unrecorded adapter cannot be used to declare compatibility.
@@ -158,7 +170,7 @@ unrecorded adapter cannot be used to declare compatibility.
 The migration plan records:
 
 1. exact donor artifact and content hash;
-2. host baseline commit and state hash;
+2. host baseline commit, canonical state reference and state hash;
 3. canonical destination path with no version token;
 4. imports, routes, schemas and data requiring change;
 5. legacy aliases and compatibility period;
@@ -167,22 +179,27 @@ The migration plan records:
 8. validation commands and acceptance criteria;
 9. event and provenance updates.
 
-Both migration and rollback plans bind the repository commit, baseline state
-hash, artifact hash, affected paths, bounded resource and energy budgets,
-maximum downtime, verification commands and recovery record.
+Both migration and rollback plans bind the repository commit, registered host
+canonical state reference, baseline state hash, artifact hash, affected paths,
+bounded resource and energy budgets, maximum downtime, verification commands
+and recovery record. The commit must exist. The canonical state reference must
+resolve to a Git blob at that commit, and its computed SHA-256 must equal the
+recorded baseline hash.
 
 No authoritative source is overwritten without a recoverable history. A
 versioned legacy path may survive only as a thin alias to the canonical organ.
 
 ## 7. Rollback Plan
 
-Rollback must name the pre-transplant commit, host state hash, files, data
-projection, verification commands and owner. It must preserve donor and failed
-integration evidence. Rollback never deletes immutable event history.
+Rollback must name the pre-transplant commit, host canonical state reference,
+host state hash, files, data projection, verification commands and an
+authorized owner. It must preserve donor and failed integration evidence.
+Rollback never deletes immutable event history.
 
-The rollback plan and migration plan must bind the same pre-transplant commit
-and state hash. A rollback event records both `restored_commit` and
-`restored_state_hash`, each equal to that migration baseline.
+The rollback plan and migration plan must bind the same pre-transplant commit,
+state reference and state hash. A rollback event records `restored_commit`,
+`restored_state_ref` and `restored_state_hash`, each equal to that migration
+baseline.
 
 If rollback cannot restore the host deterministically, the proposal cannot
 pass `ROLLBACK_PLAN_READY`.
@@ -191,6 +208,9 @@ pass `ROLLBACK_PLAN_READY`.
 
 Required tests cover:
 
+- execution of the canonical Draft 2020-12 JSON Schema before semantic
+  approval;
+- rejection of caller-supplied Registry or Schema authority;
 - identity and content-hash resolution;
 - schema and interface compatibility;
 - dependency availability and cycle classification;
@@ -200,6 +220,8 @@ Required tests cover:
 - integration behavior and host regressions;
 - alias single-implementation proof;
 - rollback restoration and event-chain integrity;
+- existing Git commits, immutable evidence blobs and reproducible host
+  baselines;
 - absence of Wallet, real KGEN, on-chain, external autonomy and Production
   authority.
 

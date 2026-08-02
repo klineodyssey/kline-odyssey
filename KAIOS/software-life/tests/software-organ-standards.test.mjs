@@ -1,11 +1,14 @@
 import assert from "node:assert/strict";
+import { execFileSync } from "node:child_process";
 import { readFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import test from "node:test";
 import {
+  computeContentHash,
   computeGateEvidenceHash,
   computeTransplantEventHash,
+  validateJsonSchema202012,
   validateSoftwareOrganTransplant
 } from "../tools/validate-software-organ-transplant.mjs";
 
@@ -54,11 +57,21 @@ const transplantStates = [
 
 const hash = (character) => character.repeat(64);
 const quantity = (value, unit) => ({ value, unit, bounded: true });
+const gitBlob = (commit, path) => execFileSync("git", ["show", `${commit}:${path}`], {
+  cwd: root,
+  encoding: null,
+  maxBuffer: 32 * 1024 * 1024
+});
 
 const createValidRecord = () => {
   const donor = registry.software_lives.find(({ life_id }) => life_id === "LIFE-KAIOS-WORLD-VIEWER");
   const host = registry.software_lives.find(({ life_id }) => life_id === "LIFE-KAIOS-OFFICIAL-HOMEPAGE");
   const organ = donor.organs[0];
+  const baselineCommit = registry.metadata.source_commit;
+  const baselineStateRef = host.location.canonical_path;
+  const baselineStateHash = computeContentHash(gitBlob(baselineCommit, baselineStateRef));
+  const evidenceRef = "KAIOS/software-life/KAIOS_SOFTWARE_LIFE_REGISTRY.json";
+  const evidenceContentHash = computeContentHash(gitBlob(baselineCommit, evidenceRef));
   const reviewId = "REVIEW-ORGAN-TRANSPLANT-001";
   const transplantId = "TRANSPLANT-ORGAN-001";
   const path = [
@@ -101,7 +114,9 @@ const createValidRecord = () => {
   const evidence = Object.fromEntries(gates.map((gate) => {
     const item = {
       result: "PASS",
-      evidence_refs: ["KAIOS/software-life/KAIOS_SOFTWARE_ORGAN_STANDARD.md"],
+      evidence_refs: [evidenceRef],
+      evidence_commit: baselineCommit,
+      evidence_content_hashes: { [evidenceRef]: evidenceContentHash },
       reviewer: "CODEX_CANONICAL_REVIEW",
       reason: `${gate} fixture evidence`,
       reviewed_at: "2026-08-02T11:00:00.000Z"
@@ -110,11 +125,12 @@ const createValidRecord = () => {
     return [gate, item];
   }));
 
-  const plan = (id, baselineMarker, artifactMarker) => ({
+  const plan = (id, artifactMarker) => ({
     plan_id: id,
     owner: "CODEX_CANONICAL_REVIEW",
-    baseline_commit: baselineMarker.repeat(40),
-    baseline_state_hash: hash(baselineMarker),
+    baseline_commit: baselineCommit,
+    baseline_state_ref: baselineStateRef,
+    baseline_state_hash: baselineStateHash,
     artifact_hash: hash(artifactMarker),
     affected_paths: ["KAIOS/software-life/KAIOS_SOFTWARE_ORGAN_STANDARD.md"],
     steps: ["Apply deterministic fixture step"],
@@ -224,8 +240,8 @@ const createValidRecord = () => {
       organ_id: organ.organ_id,
       state: "COMPLETE",
       automatic: false,
-      migration_plan: plan("PLAN-MIGRATION-001", "c", "d"),
-      rollback_plan: plan("PLAN-ROLLBACK-001", "c", "e"),
+      migration_plan: plan("PLAN-MIGRATION-001", "d"),
+      rollback_plan: plan("PLAN-ROLLBACK-001", "e"),
       events
     },
     security_boundary: {
@@ -243,11 +259,7 @@ const createValidRecord = () => {
   };
 };
 
-const validate = (record, options = {}) => validateSoftwareOrganTransplant(record, {
-  registry,
-  repositoryRoot: root,
-  ...options
-});
+const validate = (record, options = {}) => validateSoftwareOrganTransplant(record, { repositoryRoot: root, ...options });
 
 test("organ schema requires every canonical organ type and field", () => {
   assert.equal(schema.$schema, "https://json-schema.org/draft/2020-12/schema");
@@ -303,7 +315,7 @@ test("migration, rollback and deterministic history are mandatory", () => {
   }
   assert.equal(schema.$defs.transplantEvent.properties.next_state_hash.$ref, "#/$defs/sha256");
   assert.equal(schema.$defs.plan.properties.baseline_commit.$ref, "#/$defs/repositoryCommit");
-  for (const field of ["baseline_state_hash", "artifact_hash", "affected_paths", "resource_budget", "energy_budget", "maximum_downtime_seconds"]) {
+  for (const field of ["baseline_state_ref", "baseline_state_hash", "artifact_hash", "affected_paths", "resource_budget", "energy_budget", "maximum_downtime_seconds"]) {
     assert.ok(schema.$defs.plan.required.includes(field), field);
   }
   for (const field of ["gate_evidence", "rights_record"]) {
@@ -384,6 +396,18 @@ test("compact Manifest and full organ contracts use the same organ vocabulary", 
   assert.equal(schema.$defs.evidenceReference.anyOf.length, 2);
 });
 
+test("Draft 2020-12 structure is executed before semantic approval", () => {
+  const record = createValidRecord();
+  record.metadata.undeclared_field = true;
+  delete record.organ.health;
+  const direct = validateJsonSchema202012(record, schema);
+  assert.equal(direct.ok, false);
+  assert.ok(direct.errors.some(({ keyword }) => keyword === "additionalProperties"));
+  assert.ok(direct.errors.some(({ keyword }) => keyword === "required"));
+  const result = validate(record);
+  assert.ok(result.errors.some(({ code }) => code === "SCHEMA_VALIDATION_FAILED"));
+});
+
 test("semantic validator accepts one identity-bound deterministic transplant", () => {
   const result = validate(createValidRecord());
   assert.deepEqual(result, { ok: true, errors: [] });
@@ -414,9 +438,9 @@ test("semantic validator rejects cross-record identity and host capability drift
   assert.ok(codes.has("EVENT_IDENTITY_MISMATCH"));
 });
 
-test("semantic validator requires authoritative Registry Genome and organ evidence", () => {
-  const noRegistry = validate(createValidRecord(), { registry: undefined });
-  assert.ok(noRegistry.errors.some(({ code }) => code === "AUTHORITATIVE_REGISTRY_REQUIRED"));
+test("semantic validator rejects caller Registry injection and requires canonical Genome evidence", () => {
+  const injected = validate(createValidRecord(), { registry: { software_lives: registry.software_lives } });
+  assert.ok(injected.errors.some(({ code }) => code === "CALLER_REGISTRY_FORBIDDEN"));
 
   const record = createValidRecord();
   record.compatibility_review.donor_genome_id = "GENOME-UNREGISTERED-DONOR";
@@ -435,11 +459,52 @@ test("semantic validator rejects unresolved dependencies and evidence", () => {
   record.organ.dependency_list = ["LIFE-UNREGISTERED-DEPENDENCY"];
   const evidence = record.compatibility_review.gate_evidence.TESTS_PASS;
   evidence.evidence_refs = ["KAIOS/software-life/evidence/does-not-exist.json"];
+  evidence.evidence_content_hashes = { "KAIOS/software-life/evidence/does-not-exist.json": hash("0") };
   evidence.evidence_hash = computeGateEvidenceHash("TESTS_PASS", evidence);
   const result = validate(record);
   const codes = new Set(result.errors.map(({ code }) => code));
   assert.ok(codes.has("DEPENDENCY_NOT_REGISTERED"));
-  assert.ok(codes.has("EVIDENCE_REFERENCE_UNRESOLVED"));
+  assert.ok(codes.has("EVIDENCE_REFERENCE_NOT_REGULAR_FILE"));
+  assert.ok(codes.has("EVIDENCE_GIT_BLOB_NOT_FOUND"));
+});
+
+test("review, gate and approval actors resolve through canonical Worker Registry", () => {
+  const record = createValidRecord();
+  record.compatibility_review.reviewer = "UNREGISTERED_REVIEWER";
+  for (const gate of gates) {
+    const evidence = record.compatibility_review.gate_evidence[gate];
+    evidence.reviewer = "UNREGISTERED_REVIEWER";
+    evidence.evidence_hash = computeGateEvidenceHash(gate, evidence);
+  }
+  record.transplant.events[4].actor = "UNREGISTERED_REVIEWER";
+  record.transplant.events[4].next_state_hash = computeTransplantEventHash(record.transplant.events[4]);
+  for (let index = 5; index < record.transplant.events.length; index += 1) {
+    record.transplant.events[index].previous_state_hash = record.transplant.events[index - 1].next_state_hash;
+    record.transplant.events[index].next_state_hash = computeTransplantEventHash(record.transplant.events[index]);
+  }
+  const codes = new Set(validate(record).errors.map(({ code }) => code));
+  assert.ok(codes.has("SCHEMA_VALIDATION_FAILED"));
+  assert.ok(codes.has("CANONICAL_REVIEWER_NOT_AUTHORIZED"));
+  assert.ok(codes.has("GATE_REVIEWER_NOT_AUTHORIZED"));
+  assert.ok(codes.has("APPROVAL_ACTOR_NOT_AUTHORIZED"));
+  assert.ok(codes.has("RIGHTS_DECISION_ACTOR_NOT_AUTHORIZED"));
+});
+
+test("repository evidence requires a regular tracked blob and matching content hash", () => {
+  const directoryRecord = createValidRecord();
+  const directoryEvidence = directoryRecord.compatibility_review.gate_evidence.TESTS_PASS;
+  directoryEvidence.evidence_refs = ["KAIOS/software-life"];
+  directoryEvidence.evidence_content_hashes = { "KAIOS/software-life": hash("0") };
+  directoryEvidence.evidence_hash = computeGateEvidenceHash("TESTS_PASS", directoryEvidence);
+  const directoryCodes = new Set(validate(directoryRecord).errors.map(({ code }) => code));
+  assert.ok(directoryCodes.has("EVIDENCE_REFERENCE_NOT_REGULAR_FILE"));
+  assert.ok(directoryCodes.has("EVIDENCE_GIT_BLOB_NOT_FOUND"));
+
+  const hashRecord = createValidRecord();
+  const hashEvidence = hashRecord.compatibility_review.gate_evidence.TESTS_PASS;
+  hashEvidence.evidence_content_hashes[hashEvidence.evidence_refs[0]] = hash("0");
+  hashEvidence.evidence_hash = computeGateEvidenceHash("TESTS_PASS", hashEvidence);
+  assert.ok(validate(hashRecord).errors.some(({ code }) => code === "EVIDENCE_CONTENT_HASH_INVALID"));
 });
 
 test("historical execution cannot erase its original approval requirements", () => {
@@ -450,7 +515,8 @@ test("historical execution cannot erase its original approval requirements", () 
   final.action = "ROLLBACK-RESTORE";
   final.outputs = {
     restored_state_hash: record.transplant.migration_plan.baseline_state_hash,
-    restored_commit: record.transplant.migration_plan.baseline_commit
+    restored_commit: record.transplant.migration_plan.baseline_commit,
+    restored_state_ref: record.transplant.migration_plan.baseline_state_ref
   };
   final.next_state_hash = computeTransplantEventHash(final);
   record.compatibility_review.decision = "NOT_EVALUATED";
@@ -496,6 +562,17 @@ test("rollback plan must bind the migration pre-transplant baseline", () => {
   assert.ok(codes.has("ROLLBACK_BASELINE_STATE_MISMATCH"));
 });
 
+test("matching fabricated baseline values cannot bypass Git snapshot verification", () => {
+  const record = createValidRecord();
+  for (const plan of [record.transplant.migration_plan, record.transplant.rollback_plan]) {
+    plan.baseline_commit = "f".repeat(40);
+    plan.baseline_state_hash = hash("f");
+  }
+  const codes = new Set(validate(record).errors.map(({ code }) => code));
+  assert.ok(codes.has("BASELINE_COMMIT_NOT_FOUND"));
+  assert.ok(codes.has("BASELINE_STATE_NOT_REPRODUCIBLE"));
+});
+
 test("semantic validator rejects automatic execution and authority escalation", () => {
   const record = createValidRecord();
   record.transplant.automatic = true;
@@ -530,7 +607,8 @@ test("rollback must record restoration of the exact baseline state hash", () => 
   final.action = "ROLLBACK-RESTORE";
   final.outputs = {
     restored_state_hash: record.transplant.migration_plan.baseline_state_hash,
-    restored_commit: record.transplant.migration_plan.baseline_commit
+    restored_commit: record.transplant.migration_plan.baseline_commit,
+    restored_state_ref: record.transplant.migration_plan.baseline_state_ref
   };
   final.next_state_hash = computeTransplantEventHash(final);
   assert.equal(validate(record).ok, true);
