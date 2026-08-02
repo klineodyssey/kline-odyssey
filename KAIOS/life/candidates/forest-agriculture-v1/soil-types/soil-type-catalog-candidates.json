@@ -1,0 +1,287 @@
+{
+  "dataset_id": "KAIOS-SOIL-TYPE-CATALOG-CANDIDATES-V1",
+  "schema_version": "1.0.0-candidate",
+  "status": "CURSOR_RESEARCH_CANDIDATE_ONLY",
+  "review_status": "PENDING_CODEX_REVIEW",
+  "task_id": "KAIOS-CURSOR-SOIL-TYPES-001",
+  "worker_id": "cursor-01",
+  "branch": "cursor-handoff/KAIOS-CURSOR-SOIL-TYPES-001",
+  "work_order_declared_base_commit": "614b4e02edb8f705848ad7cb49132ae37e8f5b7e",
+  "source_base_commit": "614b4e02edb8f705848ad7cb49132ae37e8f5b7e",
+  "source_hash_basis": "SHA256_OF_GIT_BLOB_CONTENT_AT_SOURCE_BASE_COMMIT",
+  "mode": "SIMULATION_ONLY_COMPATIBILITY_DATA",
+  "authority": "NO_PRODUCTION_AUTHORITY",
+  "canonical_promotion": false,
+  "scope": "Seven bounded soil-texture analog candidates for deterministic KAIOS compatibility simulation. These are not legal soil classes, field identifications, agronomic recommendations, foundation certifications, environmental approvals or Canonical Life instances.",
+  "dispatch_provenance": {
+    "source_path": "KAIOS/life/candidates/forest-agriculture-v1/CURSOR_SOIL_TYPES_WORK_ORDER.md",
+    "dispatch_commit": "e06d76906d3364d4a07607b9a4a7a92e8a016b29",
+    "git_object": "97960f92293067d177a8a5fefa1cff2e422a52a2",
+    "sha256": "fc8d820a5952a03bfe8adb2e24f5019929c6840799c799c555383c2c559c2bd7"
+  },
+  "canonical_compatibility": {
+    "life_type": "LAND_LIFE",
+    "required_extension": "LAND_EXTENSION",
+    "optional_extension_referenced": "SOIL_EXTENSION",
+    "soil_extension_fields": [
+      "composition",
+      "moisture",
+      "fertility",
+      "ph",
+      "organic_matter",
+      "compaction",
+      "erosion",
+      "contamination",
+      "crop_support",
+      "foundation_support"
+    ],
+    "binding": "REFERENCE_ONLY_NO_SCHEMA_CHANGE",
+    "canonical_life_id": null,
+    "species_id": null,
+    "taxonomy_promotion": "NOT_REQUESTED"
+  },
+  "authoritative_owners": [
+    {
+      "truth": "foundational_soil_state",
+      "owner": "KAIOS_FOUNDATIONAL_LIFE_RUNTIME_V1",
+      "candidate_behavior": "Reference owner state and propose read-only adapters only."
+    },
+    {
+      "truth": "soil_habitat_water_nutrients_sediment_and_restoration",
+      "owner": "KAIOS_REPRODUCTION_ECOLOGY_RUNTIME_V1",
+      "candidate_behavior": "Use paired pool deltas and owner IDs; do not copy authoritative balances."
+    },
+    {
+      "truth": "crop_plot_and_crop_class",
+      "owner": "AGRICULTURE_ALPHA",
+      "candidate_behavior": "Return compatibility screening labels only; never mutate plots or declare agronomy."
+    },
+    {
+      "truth": "construction_project_and_loading_stage",
+      "owner": "KAIOS_CAUSAL_CONSTRUCTION",
+      "candidate_behavior": "Return screening data only; survey, design, inspection and geotechnical review remain mandatory."
+    },
+    {
+      "truth": "rights_and_land_authority",
+      "owner": "EXISTING_RIGHTS_AUTHORITY",
+      "candidate_behavior": "No soil label creates ownership, land use, occupancy, permit, water, harvest, foundation or transfer rights."
+    }
+  ],
+  "property_separation_contract": {
+    "texture_and_composition": "TYPE_PROFILE_ONLY",
+    "moisture": "DYNAMIC_STATE_NOT_INFERRED_FROM_TYPE_ALONE",
+    "fertility": "DYNAMIC_STATE_REQUIRES_RECORDED_NUTRIENT_SOURCE",
+    "organic_matter": "DISTINCT_MATERIAL_POOL",
+    "compaction": "DISTINCT_LOADING_AND_MANAGEMENT_STATE",
+    "erosion": "DISTINCT_SOIL_MASS_TRANSFER_STATE",
+    "contamination": "DISTINCT_CONTAMINANT_MASS_AND_RISK_STATE",
+    "crop_support": "SEPARATE_COMPATIBILITY_PROJECTION",
+    "foundation_support": "SEPARATE_SCREENING_PROJECTION"
+  },
+  "soil_types": [
+    {
+      "soil_type_id": "SOIL-SANDY-ANALOG-V1",
+      "display_name": "Sandy Soil Analog",
+      "texture_class": "SANDY_ANALOG",
+      "classification_basis": "Candidate sand-silt-clay texture envelope only.",
+      "physical_property_profile_id": "SOIL-PHYSICAL-SANDY-V1",
+      "water_nutrient_profile_id": "SOIL-WN-SANDY-V1",
+      "crop_support_profile_id": "SOIL-CROP-SCREEN-SANDY-V1",
+      "foundation_support_profile_id": "SOIL-FOUNDATION-SCREEN-SANDY-V1",
+      "type_does_not_determine": [
+        "current_moisture",
+        "fertility",
+        "organic_matter",
+        "compaction",
+        "erosion",
+        "contamination",
+        "crop_approval",
+        "foundation_approval"
+      ]
+    },
+    {
+      "soil_type_id": "SOIL-SANDY-LOAM-ANALOG-V1",
+      "display_name": "Sandy Loam Soil Analog",
+      "texture_class": "SANDY_LOAM_ANALOG",
+      "classification_basis": "Candidate sand-silt-clay texture envelope only.",
+      "physical_property_profile_id": "SOIL-PHYSICAL-SANDY-LOAM-V1",
+      "water_nutrient_profile_id": "SOIL-WN-SANDY-LOAM-V1",
+      "crop_support_profile_id": "SOIL-CROP-SCREEN-SANDY-LOAM-V1",
+      "foundation_support_profile_id": "SOIL-FOUNDATION-SCREEN-SANDY-LOAM-V1",
+      "type_does_not_determine": [
+        "current_moisture",
+        "fertility",
+        "organic_matter",
+        "compaction",
+        "erosion",
+        "contamination",
+        "crop_approval",
+        "foundation_approval"
+      ]
+    },
+    {
+      "soil_type_id": "SOIL-LOAM-ANALOG-V1",
+      "display_name": "Loam Soil Analog",
+      "texture_class": "LOAM_ANALOG",
+      "classification_basis": "Candidate sand-silt-clay texture envelope only.",
+      "physical_property_profile_id": "SOIL-PHYSICAL-LOAM-V1",
+      "water_nutrient_profile_id": "SOIL-WN-LOAM-V1",
+      "crop_support_profile_id": "SOIL-CROP-SCREEN-LOAM-V1",
+      "foundation_support_profile_id": "SOIL-FOUNDATION-SCREEN-LOAM-V1",
+      "type_does_not_determine": [
+        "current_moisture",
+        "fertility",
+        "organic_matter",
+        "compaction",
+        "erosion",
+        "contamination",
+        "crop_approval",
+        "foundation_approval"
+      ]
+    },
+    {
+      "soil_type_id": "SOIL-SILT-LOAM-ANALOG-V1",
+      "display_name": "Silt Loam Soil Analog",
+      "texture_class": "SILT_LOAM_ANALOG",
+      "classification_basis": "Candidate sand-silt-clay texture envelope only.",
+      "physical_property_profile_id": "SOIL-PHYSICAL-SILT-LOAM-V1",
+      "water_nutrient_profile_id": "SOIL-WN-SILT-LOAM-V1",
+      "crop_support_profile_id": "SOIL-CROP-SCREEN-SILT-LOAM-V1",
+      "foundation_support_profile_id": "SOIL-FOUNDATION-SCREEN-SILT-LOAM-V1",
+      "type_does_not_determine": [
+        "current_moisture",
+        "fertility",
+        "organic_matter",
+        "compaction",
+        "erosion",
+        "contamination",
+        "crop_approval",
+        "foundation_approval"
+      ]
+    },
+    {
+      "soil_type_id": "SOIL-CLAY-LOAM-ANALOG-V1",
+      "display_name": "Clay Loam Soil Analog",
+      "texture_class": "CLAY_LOAM_ANALOG",
+      "classification_basis": "Candidate sand-silt-clay texture envelope only.",
+      "physical_property_profile_id": "SOIL-PHYSICAL-CLAY-LOAM-V1",
+      "water_nutrient_profile_id": "SOIL-WN-CLAY-LOAM-V1",
+      "crop_support_profile_id": "SOIL-CROP-SCREEN-CLAY-LOAM-V1",
+      "foundation_support_profile_id": "SOIL-FOUNDATION-SCREEN-CLAY-LOAM-V1",
+      "type_does_not_determine": [
+        "current_moisture",
+        "fertility",
+        "organic_matter",
+        "compaction",
+        "erosion",
+        "contamination",
+        "crop_approval",
+        "foundation_approval"
+      ]
+    },
+    {
+      "soil_type_id": "SOIL-CLAY-ANALOG-V1",
+      "display_name": "Clay Soil Analog",
+      "texture_class": "CLAY_ANALOG",
+      "classification_basis": "Candidate sand-silt-clay texture envelope only.",
+      "physical_property_profile_id": "SOIL-PHYSICAL-CLAY-V1",
+      "water_nutrient_profile_id": "SOIL-WN-CLAY-V1",
+      "crop_support_profile_id": "SOIL-CROP-SCREEN-CLAY-V1",
+      "foundation_support_profile_id": "SOIL-FOUNDATION-SCREEN-CLAY-V1",
+      "type_does_not_determine": [
+        "current_moisture",
+        "fertility",
+        "organic_matter",
+        "compaction",
+        "erosion",
+        "contamination",
+        "crop_approval",
+        "foundation_approval"
+      ]
+    },
+    {
+      "soil_type_id": "SOIL-ORGANIC-RICH-MINERAL-ANALOG-V1",
+      "display_name": "Organic-Rich Mineral Soil Analog",
+      "texture_class": "ORGANIC_RICH_MINERAL_ANALOG",
+      "classification_basis": "Candidate mineral texture envelope plus a separately tracked organic-matter state; not a peat or legal soil classification.",
+      "physical_property_profile_id": "SOIL-PHYSICAL-ORGANIC-RICH-MINERAL-V1",
+      "water_nutrient_profile_id": "SOIL-WN-ORGANIC-RICH-MINERAL-V1",
+      "crop_support_profile_id": "SOIL-CROP-SCREEN-ORGANIC-RICH-MINERAL-V1",
+      "foundation_support_profile_id": "SOIL-FOUNDATION-SCREEN-ORGANIC-RICH-MINERAL-V1",
+      "type_does_not_determine": [
+        "current_moisture",
+        "fertility",
+        "organic_matter_mass_without_source",
+        "compaction",
+        "erosion",
+        "contamination",
+        "crop_approval",
+        "foundation_approval"
+      ]
+    }
+  ],
+  "required_observations_before_use": [
+    "SOIL_PROFILE_ID",
+    "SAMPLE_OR_SURVEY_EVENT_ID",
+    "TEXTURE_OR_COMPOSITION_OBSERVATION",
+    "CURRENT_MOISTURE_STATE",
+    "CURRENT_FERTILITY_STATE",
+    "ORGANIC_MATTER_SOURCE_AND_STATE",
+    "COMPACTION_STATE",
+    "EROSION_STATE_AND_MASS_CUSTODY",
+    "CONTAMINATION_STATE_AND_SOURCE",
+    "INTENDED_USE_SCREEN",
+    "OWNER_CAPABILITY_DECISION"
+  ],
+  "provenance": [
+    {
+      "source_path": "KAIOS_CANONICAL_LIFE_SCHEMA_V1.json",
+      "source_commit": "614b4e02edb8f705848ad7cb49132ae37e8f5b7e",
+      "git_object": "3bfcea2e0fc3854a6ff674a93ef32edc2ee0aab5",
+      "sha256": "d1ced898d043e4890142df40a9033145762d4ceb28fd0e49eae39dc43bf224c5",
+      "usage": "LAND_LIFE shared-core compatibility boundary"
+    },
+    {
+      "source_path": "KAIOS_CANONICAL_LIFE_TYPE_EXTENSIONS_V1.json",
+      "source_commit": "614b4e02edb8f705848ad7cb49132ae37e8f5b7e",
+      "git_object": "8f3a30d1cba18b7156c64439bfce5d9bafc6926e",
+      "sha256": "72ab55fe394b1038cb2b8ab8bac616f378521b89fde36aa6cf5ab3cbebea58fa",
+      "usage": "Exact SOIL_EXTENSION field inventory"
+    },
+    {
+      "source_path": "KAIOS/life/candidates/soil/life.manifest.json",
+      "source_commit": "614b4e02edb8f705848ad7cb49132ae37e8f5b7e",
+      "git_object": "c3b86866e9a3f35b784f33e168cc80c8cb686fae",
+      "sha256": "afc569084c467e92ed967559e0a99ce8c1877dea1a43c3f0c7efc8183b61aeb9",
+      "usage": "Existing foundational soil candidate identity and authority boundary"
+    },
+    {
+      "source_path": "KAIOS/life/runtime/foundational-life-runtime.js",
+      "source_commit": "614b4e02edb8f705848ad7cb49132ae37e8f5b7e",
+      "git_object": "9187c14774b34c25e9ae23cf21749fbb5dbb891d",
+      "sha256": "4d72be28bbad06ff65d1dddb44043e6f3e2086a095a8bf105e2f08cbed648779",
+      "usage": "Existing soil-state owner and normalized support semantics"
+    },
+    {
+      "source_path": "docs/maps/UniverseMap_V10_2_DISTANCE_COMPLETE_ALL_POINTS.json",
+      "source_commit": "614b4e02edb8f705848ad7cb49132ae37e8f5b7e",
+      "git_object": "0f97fc7e723fc97cd8366a10f0c9eb7892df4605",
+      "sha256": "bfde25dfb2737e6f698850aa705ea221c64bb0f228ff8e3a7f2740f0ae123451",
+      "usage": "K6888 forest-kingdom location provenance only"
+    }
+  ],
+  "boundaries": [
+    "CANDIDATE_ONLY",
+    "SIMULATION_ONLY",
+    "NO_CANONICAL_PROMOTION",
+    "NO_RUNTIME_CODE",
+    "NO_REAL_AGRONOMIC_RECOMMENDATION",
+    "NO_FOUNDATION_CERTIFICATION",
+    "NO_LEGAL_SOIL_CLASSIFICATION",
+    "NO_ENVIRONMENTAL_APPROVAL",
+    "NO_LAND_OR_WATER_RIGHT",
+    "NO_WALLET",
+    "NO_REAL_KGEN",
+    "NO_DEPLOYMENT"
+  ]
+}
