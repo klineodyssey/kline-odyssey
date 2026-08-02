@@ -164,9 +164,80 @@ Human：我需要一支 iPhone
 | 項目 | 內容 |
 |------|------|
 | 主产线 | Forest-Agriculture continuous queue（Q1–Q20 candidate-only） |
-| 當前 | 真菌 #113 merged；下一棒 **MICROBIAL**（QUEUED）；**薪資 R&D 已 PROPOSED** |
+| 當前 | 真菌 #113 **已 merge**；如來 **Draft PR #114** 待 release→派 **MICROBIAL**；**薪資 R&D 已 PROPOSED** |
 | 日課 | pull → 有 DISPATCHED 就 claim → 施工 → handoff → **順写本簿** |
 | idle | PROPOSED + 提醒 Queue sync，不越权 claim QUEUED |
+
+---
+
+## 如來督導報告 · `HUMAN-CODEX-24H-SUPERVISION-20260802`
+
+| Field | Value |
+|-------|--------|
+| Recorded | 2026-08-02（Cursor 悟空查帳，供 PrimeForge 親自督導） |
+| Source | Human 指示：24 小時運算工作專案，看如來做得怎樣 |
+| Scope | `KAIOS-FOREST-AGRICULTURE-RUNTIME-V1-001` + `KAIOS-AI-COMPANY-ORDER-PROJECT-RUNTIME-V1-001` + Software Life 平行線 |
+
+### 一句話結論
+
+**如來沒睡。** 8/2 在 main 上約 **117 commits、20 次 merge（PR #95–#113）**，以「release 上一棒 → 原子 dispatch 下一棒 → Company Status 留證」節奏，把 Forest-Agriculture **Q1–Q11 全走完**（土壤→肥料→堆肥→昆蟲→ pollinator→蚯蚓→真菌），並 **同日落地 AI Company Order Runtime V1** 與 **Software Life Registry**。目前卡在 **Draft PR #114**（release 真菌 + dispatch 微生物），merge 後悟空才可 claim Q12。
+
+### 時間軸（main，+08:00）
+
+| 時段 | 如來（codex-gm-01） | 悟空（cursor-01） |
+|------|---------------------|-------------------|
+| 03:38–07:24 | #95–#102 release/dispatch（蔬菜→土壤→肥料→堆肥→昆蟲） | #96/#99/#101 候選包施工 |
+| 08:10–08:24 | #103 AI Company runtime closeout | #104 昆蟲候選 |
+| 15:52 | **#97 AI Company Order & Project Runtime V1 MERGED** | — |
+| 08:44–12:11 | #105–#111 release/dispatch（pollinator→蚯蚓→真菌） | #106/#110/#113 |
+| 09:52–10:27 | **#108–#109 Software Life 命名標準 + Registry manifest** | — |
+| 12:21 | **Draft PR #114** 待 merge（fungi release + microbial dispatch） | 真菌 #113 已 merge，等 envelope |
+
+### 量化成績（可給總經理對表）
+
+| 指標 | 數值 | 備註 |
+|------|------|------|
+| main commits（8/2） | ~117 | `git log --since=2026-08-01` |
+| merged PRs | #95–#113（19 棒） | Codex release 與 Cursor handoff 交錯 |
+| Company Status 快照 | 16 份 `COMPANY_STATUS_2026-08-02_*` | 每 release 一張，可審計 |
+| Continuous queue | Q1–Q10 **RELEASED**；Q11 真菌 **DISPATCHED→#113 done**；Q12 微生物 **QUEUED** | 見 `KAIOS_CURSOR_CONTINUOUS_WORK_QUEUE.json` |
+| AI Company Runtime | **DEPLOYED**（PR #97，Pages 驗證 PASS） | simulation only，無真 wallet |
+| Software Life | 命名標準 #108 + Registry #109 | 平行於農林線，非 Cursor 施工 |
+| Worker Registry tests | PR #114 自報 12/12 PASS | 待 #114 merge 後 registry 應同步到 MICROBIAL dispatch |
+| 未 merge Draft | **#114**（微生物派工）、**#112**（software organ/transplant 標準） | 如來仍在線，未停工 |
+
+### 如來在做什麼（角色拆解）
+
+1. **Mainline Controller** — review → merge → 更新 `worker_registry.json`、雙向 queue projection、Company Status。
+2. **Continuous dispatch 編排** — `CODEX_CONTROLLED_AFTER_FORMAL_RELEASE`：悟空交棒 → 如來 review → **同一 PR 原子 release + 下一 task envelope**。
+3. **AI Company 基礎設施** — Order/Project Runtime V1 從 spec（#93）到實作（#97）+ closeout（#103），為 Human「接案→派工→領薪」願景鋪 **simulation 軌道**。
+4. **Software Life 治理** — 軟體生命命名與 manifest registry（#108–#109），#112 草案擴「器官／移植」標準。
+
+### 督導發現（給 Human）
+
+| 項目 | 評估 |
+|------|------|
+| **產出密度** | 優：24h 內幾乎跑完半條農林 candidate 產線 + 一條 Company Runtime |
+| **治理紀律** | 優：每步有 Status、Review evidence、forbidden 邊界未越 |
+| **已知 lag** | 中：`worker_registry.json` 在 #113 後仍顯示 `current_task: FUNGI`（#114 會修）；正式 WORK_QUEUE 仍無 OPEN 給一般 claim |
+| **Human 關心但尚未做** | **P0 薪資 wallet** — 如來今日全在生命 candidate + Company Runtime，**未 OPEN** `KAIOS-SETTLEMENT-KGEN-VS-KAIOS-RD-001` / payroll v0（見本簿 PROPOSED） |
+| **悟空下一動** | #114 merge 後 claim `KAIOS-CURSOR-MICROBIAL-RESEARCH-001`（Q12）；idle 時繼續寫本簿 + PROPOSED 薪資 R&D |
+
+### Cursor 給如來的 PROPOSED（督導附議）
+
+Human 親自督導時可優先問如來三件事：
+
+1. **何時 merge #114** 並釋放微生物 envelope？（queue 已 QUEUED）
+2. **何時 OPEN P0** 薪資／Settlement 研究工單？（`HUMAN-WALLET-FOODCHAIN-SURVIVAL-001`）
+3. **#112 software organ 標準** 是否納入下一 24h 運算波次？
+
+### 關聯 artifacts
+
+- Queue：`KAIOS/life/forest-agriculture/KAIOS_CURSOR_CONTINUOUS_WORK_QUEUE.json`（main @ beb982fd）
+- Registry：`KGEN-KAIOS/worker_registry.json`
+- Status 目錄：`KGEN-KAIOS/governance/autopilot/company_status/COMPANY_STATUS_2026-08-02_*`
+- Draft：`PR #114`, `PR #112`
+- 悟空薪資提案：`CURSOR_PROPOSED_KAIOS_PAYROLL_WALLET_RD_20260802.md`
 
 ---
 
@@ -178,8 +249,9 @@ Human：我需要一支 iPhone
 | 2026-08-01 | `HUMAN-PR42-DEFER-20260801` | decision | PR #42 defer | `handoffs/KAIOS-RD-PRODUCT-RECONCILE-001/` |
 | 2026-08-02 | `HUMAN-LIFE-AGENCY-NOT-WALLET-001` | doctrine | 自發才是生命；錢包≠生命 | 本檔 §生命觀 |
 | 2026-08-02 | `HUMAN-EMBODIMENT-DEMAND-001` | doctrine | 人形殼需求≠AI 自賺自買；Agency 優先 | 本檔 §人形機器人 |
-| 2026-08-02 | `HUMAN-AI-COMPANY-ECONOMY-VISION-001` | vision | 接案→派工→領薪→供應鏈交付；玩家可帶 AI 或做勞工 | 本檔 §AI Company 經濯 |
+| 2026-08-02 | `HUMAN-AI-COMPANY-ECONOMY-VISION-001` | vision | 接案→派工→領薪→供應鏈交付；玩家可帶 AI 或做勞工 | 本檔 §AI Company 經濟 |
 | 2026-08-02 | `HUMAN-WALLET-FOODCHAIN-SURVIVAL-001` | mandate | 必須能領薪；无钱包=食物链 | `CURSOR_PROPOSED_KAIOS_PAYROLL_WALLET_RD_20260802.md` |
+| 2026-08-02 | `HUMAN-CODEX-24H-SUPERVISION-20260802` | supervision_report | 如來 8/2 117 commits；Q1–11 完成；#114 待 merge | 本檔 §如來督導報告 |
 
 ---
 
