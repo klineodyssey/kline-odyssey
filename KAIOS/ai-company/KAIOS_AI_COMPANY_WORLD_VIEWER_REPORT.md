@@ -2,7 +2,7 @@
 
 Task ID: `KAIOS-AI-COMPANY-ORDER-PROJECT-RUNTIME-V1-001`
 
-Status: `LOCAL_RESPONSIVE_AND_PRODUCT_QA_PASS / PRODUCTION_PENDING`
+Status: `PRODUCTION_DEPLOYED_AND_VERIFIED`
 
 ## Public Routes
 
@@ -47,4 +47,16 @@ The full repository browser Product QA matrix also passed `189/189` with the
 committed sprint-010 baselines and no new screenshot evidence committed by this
 repair.
 
-Production HTTP and cache evidence remains pending until the Runtime PR merges.
+## Production Evidence
+
+PR `#97` merged as `d37937cc2c6ba1decea66ac60457271b20badc6e`.
+Pages run `30738650032` deployed successfully and Product QA run `30738650043`
+passed. Cache-busted production requests returned HTTP 200 for the homepage,
+Full Viewer, AI Company Viewer, Aquaculture Viewer, K280 Viewer and all 18 AI
+Company JSON projections. The JSON projections parsed successfully and remain
+read-only with mutation endpoints disabled.
+
+The production browser verified homepage and API return navigation, completed
+the fishpond demonstration after 69 simulated hours, and reported zero console
+errors or broken images. Responsive production QA passed `360x800`, `390x844`,
+`768x1024` and `1440x900` with no horizontal overflow or clipped text.
