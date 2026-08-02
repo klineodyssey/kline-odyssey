@@ -29,6 +29,9 @@ Public interfaces:
 - [Vegetable candidate Codex review closeout](life/forest-agriculture/KAIOS_CURSOR_VEGETABLE_PACKAGE_REVIEW_CLOSEOUT.md)
 - [Soil type candidate Cursor work order](life/candidates/forest-agriculture-v1/CURSOR_SOIL_TYPES_WORK_ORDER.md)
 - [Vegetable release and soil types dispatch Company Status](../KGEN-KAIOS/governance/autopilot/company_status/COMPANY_STATUS_2026-08-02_VEGETABLE_RELEASED_SOIL_TYPES_DISPATCHED.md)
+- [Soil type candidate Codex review closeout](life/forest-agriculture/KAIOS_CURSOR_SOIL_TYPES_REVIEW_CLOSEOUT.md)
+- [Fertilizer model Cursor work order](life/candidates/forest-agriculture-v1/CURSOR_FERTILIZER_MODELS_WORK_ORDER.md)
+- [Soil release and fertilizer dispatch Company Status](../KGEN-KAIOS/governance/autopilot/company_status/COMPANY_STATUS_2026-08-02_SOIL_TYPES_RELEASED_FERTILIZER_MODELS_DISPATCHED.md)
 
 ## AI Company Order And Project Runtime V1
 

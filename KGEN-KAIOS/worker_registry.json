@@ -109,6 +109,14 @@
       "branch": "cursor-handoff/KAIOS-CURSOR-SOIL-TYPES-001",
       "output_status": "CURSOR_RESEARCH_CANDIDATE_ONLY",
       "reviewer": "codex-gm-01",
+      "status": "RELEASED"
+    },
+    {
+      "task_id": "KAIOS-CURSOR-FERTILIZER-MODELS-001",
+      "worker_id": "cursor-01",
+      "branch": "cursor-handoff/KAIOS-CURSOR-FERTILIZER-MODELS-001",
+      "output_status": "CURSOR_RESEARCH_CANDIDATE_ONLY",
+      "reviewer": "codex-gm-01",
       "status": "DISPATCHED"
     }
   ],
@@ -147,13 +155,13 @@
         "LIFE_RESEARCH_ANALYST"
       ],
       "workspace": "cursor-worker-workspace",
-      "current_task": "KAIOS-CURSOR-SOIL-TYPES-001",
-      "current_branch": "cursor-handoff/KAIOS-CURSOR-SOIL-TYPES-001",
+      "current_task": "KAIOS-CURSOR-FERTILIZER-MODELS-001",
+      "current_branch": "cursor-handoff/KAIOS-CURSOR-FERTILIZER-MODELS-001",
       "status": "ACTIVE",
       "employee_status": "ACTIVE",
       "trust_level": "T2",
-      "heartbeat": "2026-08-02T03:36:00Z",
-      "last_report": "KAIOS/life/candidates/forest-agriculture-v1/vegetables/CURSOR_VEGETABLE_PACKAGES_REPORT.md",
+      "heartbeat": "2026-08-02T04:39:00Z",
+      "last_report": "KAIOS/life/candidates/forest-agriculture-v1/soil-types/CURSOR_SOIL_TYPES_REPORT.md",
       "allowed_branch_pattern": "cursor-handoff/<Task-ID>",
       "branch_input_aliases": [
         "cursor/<feature-name>"

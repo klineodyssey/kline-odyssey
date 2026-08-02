@@ -54,6 +54,9 @@ Rights, Economy, Wallet or KGEN authority.
 | `KAIOS/life/forest-agriculture/KAIOS_CURSOR_VEGETABLE_PACKAGE_REVIEW_CLOSEOUT.md` | Codex review, validation and formal release record for the vegetable candidate task. |
 | `KAIOS/life/candidates/forest-agriculture-v1/CURSOR_SOIL_TYPES_WORK_ORDER.md` | Explicit candidate-only task envelope for the sole active soil-type dataset claim. |
 | `KGEN-KAIOS/governance/autopilot/company_status/COMPANY_STATUS_2026-08-02_VEGETABLE_RELEASED_SOIL_TYPES_DISPATCHED.md` | Company status projection for vegetable release and soil-types dispatch. |
+| `KAIOS/life/forest-agriculture/KAIOS_CURSOR_SOIL_TYPES_REVIEW_CLOSEOUT.md` | Independent soil candidate review and formal lease release evidence. |
+| `KAIOS/life/candidates/forest-agriculture-v1/CURSOR_FERTILIZER_MODELS_WORK_ORDER.md` | Explicit research-only envelope for the sole active fertilizer-model claim. |
+| `KGEN-KAIOS/governance/autopilot/company_status/COMPANY_STATUS_2026-08-02_SOIL_TYPES_RELEASED_FERTILIZER_MODELS_DISPATCHED.md` | Company status projection for soil release and fertilizer-model dispatch. |
 
 ## AI Company Order And Project Specification Registration
 
