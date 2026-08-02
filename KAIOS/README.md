@@ -20,6 +20,9 @@ Public interfaces:
 - [Forest candidate Codex review closeout](life/forest-agriculture/KAIOS_CURSOR_FOREST_LIFE_PACKAGE_REVIEW_CLOSEOUT.md)
 - [Crop candidate Cursor work order](life/candidates/forest-agriculture-v1/CURSOR_CROP_LIFE_PACKAGES_WORK_ORDER.md)
 - [Forest release and crop dispatch Company Status](../KGEN-KAIOS/governance/autopilot/company_status/COMPANY_STATUS_2026-08-02_FOREST_CANDIDATE_RELEASED_CROP_DISPATCHED.md)
+- [Crop candidate Codex review closeout](life/forest-agriculture/KAIOS_CURSOR_CROP_LIFE_PACKAGE_REVIEW_CLOSEOUT.md)
+- [Fruit tree candidate Cursor work order](life/candidates/forest-agriculture-v1/CURSOR_FRUIT_TREE_PACKAGES_WORK_ORDER.md)
+- [Crop release and fruit tree dispatch Company Status](../KGEN-KAIOS/governance/autopilot/company_status/COMPANY_STATUS_2026-08-02_CROP_CANDIDATE_RELEASED_FRUIT_TREE_DISPATCHED.md)
 
 ## Foundational Life Runtime V1
 
