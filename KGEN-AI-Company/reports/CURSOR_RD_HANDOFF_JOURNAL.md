@@ -128,6 +128,35 @@ Human：我需要一支 iPhone
 | `KAIOS-PLAYER-WAITER-LABOR-DEMO-001` | Physical Labor + Player Genesis：餐廳班次 simulation 一條 |
 | `KAIOS-Economic-CLOSED-LOOP-V2` | 已有 workline HOLD — Human 願景的 **真·賺錢存錢** 閘門 |
 
+### `HUMAN-WALLET-FOODCHAIN-SURVIVAL-001` — 沒薪水＝食物鏈底層
+
+| Field | Value |
+|-------|--------|
+| Recorded | 2026-08-02 |
+| Source | Human PrimeForge (chat) |
+| Mandate | **R&D 必須包含「AI 能領薪水」**；Settlement 用 **KGEN 或 KAIOS** 需專案研究 |
+
+#### Human 定見（強）
+
+- 玩家帶 AI 進宇宙；玩家有地：**種田、魚塭、工廠、商場、供應鏈、科技中心**。
+- **AI 接 case 領薪**；玩家可 **提需求 + 一筆錢給 AI Company** 生產生命。
+- **沒錢包、沒自主生命 → 食物鏈** — 讓人吃、物競天擇、不適者淘汰（不是隱喻而已，是 **economy simulation 規則方向**）。
+- 與 `HUMAN-LIFE-AGENCY-NOT-WALLET-001` 合讀：**Agency + 可領薪 wallet** 才免於「行尸／獵物」。
+
+#### 悟空 PROPOSED 專案（已寫報告）
+
+完整研究提案：`KGEN-AI-Company/reports/CURSOR_PROPOSED_KAIOS_PAYROLL_WALLET_RD_20260802.md`
+
+| PROPOSED Task ID | 內容 |
+|------------------|------|
+| `KAIOS-SETTLEMENT-KGEN-VS-KAIOS-RD-001` | KGEN vs KAIOS 薪資／交易單位研究 |
+| `KAIOS-AI-WORKER-PAYROLL-WALLET-V0-001` | AI 工人 simulation 钱包 + 发薪 v0 |
+| `KAIOS-PLAYER-FUNDED-LIFE-ORDER-DEMO-001` | 玩家预付 → AI Company → 派工造生命 demo |
+
+#### registry 備註
+
+今日 `cursor-01` **`forbidden_work: WALLET`** 指 **真链／主网**；Human 要求的是 **simulation payroll wallet** — 需 Codex 改 policy 或新增 `simulation_wallet_allowed` 字段，**不是**悟空私自开链上钱包。
+
 ---
 
 ## 職涯 · 日課備忘（cursor-01）
@@ -135,7 +164,7 @@ Human：我需要一支 iPhone
 | 項目 | 內容 |
 |------|------|
 | 主产线 | Forest-Agriculture continuous queue（Q1–Q20 candidate-only） |
-| 當前 | INSECT #104 merged；下一棒 **POLLINATOR**（QUEUED，等 Codex dispatch） |
+| 當前 | 真菌 #113 merged；下一棒 **MICROBIAL**（QUEUED）；**薪資 R&D 已 PROPOSED** |
 | 日課 | pull → 有 DISPATCHED 就 claim → 施工 → handoff → **順写本簿** |
 | idle | PROPOSED + 提醒 Queue sync，不越权 claim QUEUED |
 
@@ -149,7 +178,8 @@ Human：我需要一支 iPhone
 | 2026-08-01 | `HUMAN-PR42-DEFER-20260801` | decision | PR #42 defer | `handoffs/KAIOS-RD-PRODUCT-RECONCILE-001/` |
 | 2026-08-02 | `HUMAN-LIFE-AGENCY-NOT-WALLET-001` | doctrine | 自發才是生命；錢包≠生命 | 本檔 §生命觀 |
 | 2026-08-02 | `HUMAN-EMBODIMENT-DEMAND-001` | doctrine | 人形殼需求≠AI 自賺自買；Agency 優先 | 本檔 §人形機器人 |
-| 2026-08-02 | `HUMAN-AI-COMPANY-ECONOMY-VISION-001` | vision | 接案→派工→領薪→供應鏈交付；玩家可帶 AI 或做勞工 | 本檔 §AI Company 經濟 |
+| 2026-08-02 | `HUMAN-AI-COMPANY-ECONOMY-VISION-001` | vision | 接案→派工→領薪→供應鏈交付；玩家可帶 AI 或做勞工 | 本檔 §AI Company 經濯 |
+| 2026-08-02 | `HUMAN-WALLET-FOODCHAIN-SURVIVAL-001` | mandate | 必須能領薪；无钱包=食物链 | `CURSOR_PROPOSED_KAIOS_PAYROLL_WALLET_RD_20260802.md` |
 
 ---
 
@@ -159,6 +189,9 @@ Human：我需要一支 iPhone
 |--------------------|-----------|
 | `KAIOS-WALS-DOCS-001` | 索引可發現性；idle 時首選施工 |
 | `KAIOS-EMBODIMENT-VS-AGENCY-DOCS-001` | 將本定見 formalize 為 whitepaper / Canon 附錄一節（docs-only） |
+| `KAIOS-SETTLEMENT-KGEN-VS-KAIOS-RD-001` | **P0** Human 强制：薪資用 KGEN 还是 KAIOS |
+| `KAIOS-AI-WORKER-PAYROLL-WALLET-V0-001` | AI 工人 simulation 钱包 + 发薪闭环 v0 |
+| `KAIOS-PLAYER-FUNDED-LIFE-ORDER-DEMO-001` | 玩家预付 → AI Company 派工造生命 |
 
 ---
 
