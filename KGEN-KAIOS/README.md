@@ -260,6 +260,9 @@ Can Claude, Gemini, OpenHands, GitHub Copilot, ChatGPT, Deep Research, Cursor, C
 | `../KAIOS/software-life/KAIOS_SOFTWARE_LIFE_NAMING_AUDIT.json` | Complete naming and JSON identity audit at the recorded source commit. |
 | `../KAIOS/software-life/KAIOS_SOFTWARE_LIFE_IDENTITY_STANDARD.md` | Stable software-life identity and version-placement standard. |
 | `../KAIOS/software-life/KAIOS_SOFTWARE_LIFE_TAXONOMY_CROSSWALK.json` | Existing twelve-level and 19-layer taxonomy compatibility binding. |
+| `../KAIOS/software-life/KAIOS_SOFTWARE_LIFE_MANIFEST_SCHEMA.json` | Software Life compatibility manifest without replacing existing Canonical owners. |
+| `../KAIOS/software-life/KAIOS_SOFTWARE_LIFE_REGISTRY.json` | Deterministic Life, Genome, organ, interface and public-API ownership Registry. |
+| `../KAIOS/software-life/KAIOS_SOFTWARE_LIFE_REGISTRY_REPORT.md` | Registry coverage, migration state and authority review. |
 
 ## R&D Provenance And Biological Evolution Governance
 

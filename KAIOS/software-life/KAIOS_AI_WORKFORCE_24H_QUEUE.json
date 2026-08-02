@@ -24,17 +24,17 @@
     "external_autonomy": false
   },
   "codex_queue": [
-    { "priority": 1, "work": "REPOSITORY_NAMING_AUDIT", "status": "IN_REVIEW", "depends_on": [] },
-    { "priority": 2, "work": "IDENTITY_STANDARD", "status": "IN_REVIEW", "depends_on": ["REPOSITORY_NAMING_AUDIT"] },
-    { "priority": 3, "work": "MANIFEST_SCHEMA", "status": "QUEUED", "depends_on": ["IDENTITY_STANDARD"] },
-    { "priority": 4, "work": "TAXONOMY_CROSSWALK", "status": "IN_REVIEW", "depends_on": ["IDENTITY_STANDARD"] },
+    { "priority": 1, "work": "REPOSITORY_NAMING_AUDIT", "status": "MERGED_PR_108", "depends_on": [] },
+    { "priority": 2, "work": "IDENTITY_STANDARD", "status": "MERGED_PR_108", "depends_on": ["REPOSITORY_NAMING_AUDIT"] },
+    { "priority": 3, "work": "MANIFEST_SCHEMA", "status": "IN_REVIEW", "depends_on": ["IDENTITY_STANDARD"] },
+    { "priority": 4, "work": "TAXONOMY_CROSSWALK", "status": "MERGED_PR_108", "depends_on": ["IDENTITY_STANDARD"] },
     { "priority": 5, "work": "ORGAN_STANDARD", "status": "QUEUED", "depends_on": ["MANIFEST_SCHEMA"] },
     { "priority": 6, "work": "ORGAN_COMPATIBILITY_SCHEMA", "status": "QUEUED", "depends_on": ["ORGAN_STANDARD"] },
     { "priority": 7, "work": "TRANSPLANT_STANDARD", "status": "QUEUED", "depends_on": ["ORGAN_COMPATIBILITY_SCHEMA"] },
     { "priority": 8, "work": "REPRODUCTION_STANDARD", "status": "QUEUED", "depends_on": ["MANIFEST_SCHEMA"] },
     { "priority": 9, "work": "REPRODUCTION_SCHEMA", "status": "QUEUED", "depends_on": ["REPRODUCTION_STANDARD"] },
     { "priority": 10, "work": "GENOME_STANDARD", "status": "QUEUED", "depends_on": ["MANIFEST_SCHEMA", "REPRODUCTION_STANDARD"] },
-    { "priority": 11, "work": "RENAME_PLAN", "status": "IN_REVIEW", "depends_on": ["REPOSITORY_NAMING_AUDIT"] },
+    { "priority": 11, "work": "RENAME_PLAN", "status": "MERGED_PR_108", "depends_on": ["REPOSITORY_NAMING_AUDIT"] },
     { "priority": 12, "work": "BATCH_A_MIGRATION", "status": "QUEUED", "depends_on": ["RENAME_PLAN", "MANIFEST_SCHEMA"] },
     { "priority": 13, "work": "BATCH_B_MIGRATION", "status": "QUEUED", "depends_on": ["BATCH_A_MIGRATION"] },
     { "priority": 14, "work": "BATCH_C_MIGRATION", "status": "QUEUED", "depends_on": ["BATCH_B_MIGRATION"] },
@@ -51,8 +51,9 @@
   ],
   "implicit_registry_dependency": {
     "work": "SOFTWARE_LIFE_REGISTRY",
-    "status": "QUEUED",
-    "depends_on": ["MANIFEST_SCHEMA", "TAXONOMY_CROSSWALK", "ORGAN_STANDARD", "GENOME_STANDARD"]
+    "status": "IN_REVIEW",
+    "depends_on": ["MANIFEST_SCHEMA", "TAXONOMY_CROSSWALK"],
+    "future_detail_extensions": ["ORGAN_STANDARD", "GENOME_STANDARD"]
   },
   "cursor": {
     "worker_id": "cursor-01",

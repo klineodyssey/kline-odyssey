@@ -19,6 +19,20 @@ Organism Manifest, taxonomy, Physics, Rights and Genome authorities.
   twelve-level and 19-layer taxonomy owners.
 - `tools/audit-software-life-names.mjs`: version-free reproducible audit tool.
 
+## Manifest and Registry
+
+- `KAIOS_SOFTWARE_LIFE_MANIFEST_SCHEMA.json`: compatibility manifest that
+  requires stable Life, Species and Genome IDs, taxonomy, organs, interfaces,
+  rights, lifecycle, provenance, hashes and denied production authorities.
+- `KAIOS_SOFTWARE_LIFE_REGISTRY.json`: generated registry of authoritative
+  applications, Runtimes, viewers, schemas, workers and read-only APIs.
+- `KAIOS_SOFTWARE_LIFE_REGISTRY_REPORT.md`: coverage, migration and authority
+  review for the generated Registry.
+- `tools/generate-software-life-registry.mjs`: deterministic Git-lineage and
+  artifact-hash generator.
+- `tests/software-life-registry.test.mjs`: identity, taxonomy, ownership,
+  dependency, hash, replay and security validation.
+
 ## Operations
 
 - `KAIOS_AI_WORKFORCE_24H_SCHEDULER.md`: bounded execution and stop policy.
@@ -27,6 +41,6 @@ Organism Manifest, taxonomy, Physics, Rights and Genome authorities.
 - `tests/software-life-naming-audit.test.mjs`: audit, taxonomy and boundary
   validation.
 
-This first package performs no rename and creates no public route. Runtime,
+The naming and Registry packages perform no rename and create no public route. Runtime,
 CURRENT, Wallet, KGEN, contracts, Constitution sources and Production
 authority are outside its write scope.

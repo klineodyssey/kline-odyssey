@@ -1,0 +1,341 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "KAIOS/software-life/KAIOS_SOFTWARE_LIFE_MANIFEST_SCHEMA.json",
+  "title": "KAIOS Software Life Manifest",
+  "description": "Compatibility manifest for broad software life. It composes Canonical Life, Organism Manifest and the existing taxonomy owners without replacing them.",
+  "x-kaios-life": {
+    "life_id": "LIFE-KAIOS-SOFTWARE-LIFE-MANIFEST-SCHEMA",
+    "species_id": "SPECIES-KAIOS-SOFTWARE-SCHEMA",
+    "genome_id": "GENOME-KAIOS-SOFTWARE-LIFE-MANIFEST-SCHEMA",
+    "genome_version": "1.0.0",
+    "generation": 1,
+    "canonical_filename": "KAIOS_SOFTWARE_LIFE_MANIFEST_SCHEMA.json",
+    "lifecycle_state": "ACTIVE",
+    "authority": "SIMULATION_ONLY"
+  },
+  "type": "object",
+  "required": [
+    "life_id",
+    "species_id",
+    "genome_id",
+    "organism_name",
+    "canonical_name",
+    "display_name",
+    "life_type",
+    "taxonomy",
+    "generation",
+    "genome_version",
+    "runtime_revision",
+    "birth_commit",
+    "birth_time",
+    "creator",
+    "maintainer",
+    "location",
+    "embodiment",
+    "energy_profile",
+    "resource_profile",
+    "rights",
+    "dependencies",
+    "organs",
+    "interfaces",
+    "compatibility",
+    "reproduction_policy",
+    "mutation_policy",
+    "transplant_policy",
+    "marketplace_policy",
+    "lifecycle_state",
+    "health_state",
+    "event_history",
+    "provenance",
+    "security_boundary",
+    "authority_level"
+  ],
+  "properties": {
+    "life_id": { "$ref": "#/$defs/stableId" },
+    "species_id": { "$ref": "#/$defs/stableId" },
+    "genome_id": { "$ref": "#/$defs/stableId" },
+    "organism_name": { "$ref": "#/$defs/versionFreeName" },
+    "canonical_name": { "$ref": "#/$defs/versionFreeName" },
+    "display_name": { "type": "string", "minLength": 1 },
+    "life_type": {
+      "enum": ["APPLICATION", "RUNTIME", "API", "SCHEMA", "VIEWER", "WORKER"]
+    },
+    "taxonomy": { "$ref": "#/$defs/taxonomyBinding" },
+    "generation": { "type": "integer", "minimum": 1 },
+    "genome_version": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+(?:[-+][A-Za-z0-9.-]+)?$" },
+    "runtime_revision": { "type": "string", "minLength": 1 },
+    "birth_commit": { "type": "string", "pattern": "^[a-f0-9]{40}$" },
+    "birth_time": { "type": "string", "format": "date-time" },
+    "creator": { "type": "string", "minLength": 1 },
+    "maintainer": { "type": "string", "minLength": 1 },
+    "location": { "$ref": "#/$defs/location" },
+    "embodiment": { "$ref": "#/$defs/embodiment" },
+    "energy_profile": { "$ref": "#/$defs/energyProfile" },
+    "resource_profile": { "$ref": "#/$defs/resourceProfile" },
+    "rights": { "$ref": "#/$defs/rights" },
+    "dependencies": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/stableId" },
+      "uniqueItems": true
+    },
+    "organs": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/organReference" }
+    },
+    "interfaces": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/interfaceReference" }
+    },
+    "compatibility": { "$ref": "#/$defs/compatibility" },
+    "reproduction_policy": { "$ref": "#/$defs/governedPolicy" },
+    "mutation_policy": { "$ref": "#/$defs/governedPolicy" },
+    "transplant_policy": { "$ref": "#/$defs/governedPolicy" },
+    "marketplace_policy": { "$ref": "#/$defs/marketplacePolicy" },
+    "lifecycle_state": {
+      "enum": [
+        "CONCEIVED",
+        "SPECIFIED",
+        "BORN",
+        "ACTIVE",
+        "STRESSED",
+        "DEGRADED",
+        "HEALING",
+        "MUTATING",
+        "REPRODUCTION_REVIEW",
+        "TRANSPLANT_REVIEW",
+        "RETIRED",
+        "ARCHIVED",
+        "DEAD"
+      ]
+    },
+    "health_state": { "enum": ["HEALTHY", "AT_RISK", "DEGRADED", "FAILED", "NOT_EXECUTABLE"] },
+    "event_history": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/event" }
+    },
+    "provenance": { "$ref": "#/$defs/provenance" },
+    "security_boundary": { "$ref": "#/$defs/securityBoundary" },
+    "authority_level": { "const": "SIMULATION_ONLY" },
+    "organism_status": { "enum": ["AUTHORITATIVE", "CANDIDATE_ONLY", "SPECIFICATION_ONLY", "LEGACY_ALIAS"] },
+    "runtime_status": { "enum": ["ACTIVE_SIMULATION", "READ_ONLY_PROJECTION", "SCHEMA_ONLY", "SPECIFICATION_ONLY", "NOT_EXECUTABLE"] },
+    "parents": { "type": "array", "items": { "$ref": "#/$defs/stableId" }, "uniqueItems": true },
+    "children": { "type": "array", "items": { "$ref": "#/$defs/stableId" }, "uniqueItems": true },
+    "transplants": { "type": "array", "items": { "type": "string" } },
+    "mutations": { "type": "array", "items": { "type": "string" } },
+    "marketplace_status": { "enum": ["NOT_ELIGIBLE", "CANDIDATE_ONLY", "UNDER_REVIEW", "APPROVED_SIMULATION", "LISTED_SIMULATION", "SUSPENDED", "DELISTED", "RETIRED"] },
+    "public_url": { "type": ["string", "null"] },
+    "api_url": { "type": ["string", "null"] },
+    "code_hash": { "$ref": "#/$defs/sha256" },
+    "artifact_hash": { "$ref": "#/$defs/sha256" },
+    "legacy_aliases": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/legacyAlias" }
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "stableId": {
+      "type": "string",
+      "pattern": "^[A-Z][A-Z0-9]*(?:-[A-Z0-9]+)+$"
+    },
+    "versionFreeName": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^(?!.*(?:^|[-_.])(?:v[0-9]+(?:[-_.][0-9]+)*|final|latest|new|copy|backup|rev(?:ision)?(?:[-_.]?[0-9]+)?)($|[-_.])).+$"
+    },
+    "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "repositoryPath": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^(?![A-Za-z]:[\\\\/])(?!/)(?!.*(?:^|/)\\.\\.(?:/|$)).+$"
+    },
+    "taxonomyBinding": {
+      "type": "object",
+      "required": ["owner_12", "owner_19", "levels_12", "levels_19"],
+      "properties": {
+        "owner_12": { "const": "KGEN-KAIOS/organism/taxonomy_registry.json" },
+        "owner_19": { "const": "KGEN-KAIOS/civilization/BIOLOGY_TAXONOMY_STANDARD.md" },
+        "levels_12": {
+          "type": "object",
+          "required": ["domain", "kingdom", "phylum", "class", "order", "family", "genus", "species", "cell", "organ", "runtime", "civilization"],
+          "additionalProperties": { "type": "string", "minLength": 1 }
+        },
+        "levels_19": {
+          "type": "object",
+          "required": ["Domain", "Kingdom", "Phylum", "Class", "Order", "Family", "Genus", "Species", "Individual", "OrganSystem", "Organ", "Tissue", "Cell", "Organelle", "Genome", "DNA", "RNA", "Gene", "Expression"],
+          "additionalProperties": { "type": "string", "minLength": 1 }
+        }
+      },
+      "additionalProperties": false
+    },
+    "location": {
+      "type": "object",
+      "required": ["repository", "canonical_path", "current_path", "path_status"],
+      "properties": {
+        "repository": { "const": "klineodyssey/kline-odyssey" },
+        "canonical_path": { "$ref": "#/$defs/repositoryPath" },
+        "current_path": { "$ref": "#/$defs/repositoryPath" },
+        "path_status": { "enum": ["CANONICAL_ACTIVE", "MIGRATION_PENDING", "DOCUMENT_VERSION_ALLOWED"] }
+      },
+      "additionalProperties": false
+    },
+    "embodiment": {
+      "type": "object",
+      "required": ["mode", "entrypoint", "artifact_paths", "legacy_alias_only"],
+      "properties": {
+        "mode": { "enum": ["STATIC_WEB", "LOCAL_DETERMINISTIC_SIMULATION", "READ_ONLY_DATA", "SPECIFICATION_ONLY"] },
+        "entrypoint": { "$ref": "#/$defs/repositoryPath" },
+        "artifact_paths": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/repositoryPath" }, "uniqueItems": true },
+        "legacy_alias_only": { "type": "boolean" }
+      },
+      "additionalProperties": false
+    },
+    "energyProfile": {
+      "type": "object",
+      "required": ["energy_type", "metering", "bounded"],
+      "properties": {
+        "energy_type": { "enum": ["COMPUTE_ELECTRICITY_SIMULATION", "STATIC_STORAGE_SIMULATION", "HUMAN_REVIEW_SIMULATION"] },
+        "metering": { "enum": ["NOT_METERED_STATIC_ARTIFACT", "LOCAL_EVENT_ACCOUNTING", "SPECIFICATION_ONLY"] },
+        "bounded": { "const": true }
+      },
+      "additionalProperties": false
+    },
+    "resourceProfile": {
+      "type": "object",
+      "required": ["compute", "memory", "storage", "network", "external_side_effects"],
+      "properties": {
+        "compute": { "type": "string", "minLength": 1 },
+        "memory": { "type": "string", "minLength": 1 },
+        "storage": { "type": "string", "minLength": 1 },
+        "network": { "type": "string", "minLength": 1 },
+        "external_side_effects": { "const": false }
+      },
+      "additionalProperties": false
+    },
+    "rights": {
+      "type": "object",
+      "required": ["owner", "custodian", "operator", "maintainer", "use_right", "mutation_right", "reproduction_right", "transplant_right", "transfer_right", "real_legal_effect"],
+      "properties": {
+        "owner": { "const": "KLINE_ODYSSEY_REPOSITORY_SIMULATION" },
+        "custodian": { "const": "CODEX_CANONICAL_REVIEW" },
+        "operator": { "const": "LOCAL_USER_SIMULATION" },
+        "maintainer": { "const": "CODEX_CONTROLLED" },
+        "use_right": { "const": "SIMULATED_USE_ONLY" },
+        "mutation_right": { "const": "CODEX_REVIEW_REQUIRED" },
+        "reproduction_right": { "const": "CODEX_REVIEW_REQUIRED" },
+        "transplant_right": { "const": "CODEX_REVIEW_REQUIRED" },
+        "transfer_right": { "const": "SIMULATION_ONLY" },
+        "real_legal_effect": { "const": false }
+      },
+      "additionalProperties": false
+    },
+    "organReference": {
+      "type": "object",
+      "required": ["organ_id", "organ_type", "path", "content_hash"],
+      "properties": {
+        "organ_id": { "$ref": "#/$defs/stableId" },
+        "organ_type": { "enum": ["INPUT_ORGAN", "OUTPUT_ORGAN", "MEMORY_ORGAN", "IDENTITY_ORGAN", "TIME_ORGAN", "RIGHTS_ORGAN", "SECURITY_ORGAN", "COMMUNICATION_ORGAN", "PROCESSING_ORGAN", "STORAGE_ORGAN", "VIEWER_ORGAN", "API_ORGAN", "AUDIT_ORGAN"] },
+        "path": { "$ref": "#/$defs/repositoryPath" },
+        "content_hash": { "$ref": "#/$defs/sha256" }
+      },
+      "additionalProperties": false
+    },
+    "interfaceReference": {
+      "type": "object",
+      "required": ["interface_id", "direction", "protocol", "read_only"],
+      "properties": {
+        "interface_id": { "$ref": "#/$defs/stableId" },
+        "direction": { "enum": ["INPUT", "OUTPUT", "BIDIRECTIONAL"] },
+        "protocol": { "enum": ["STATIC_HTML", "ECMASCRIPT_MODULE", "JSON_DOCUMENT", "LOCAL_STORAGE", "PYTHON_MODULE", "MARKDOWN_CONTRACT"] },
+        "read_only": { "type": "boolean" }
+      },
+      "additionalProperties": false
+    },
+    "compatibility": {
+      "type": "object",
+      "required": ["epoch", "hosts", "legacy_alias_supported", "production_authorized"],
+      "properties": {
+        "epoch": { "const": "KAIOS-GENESIS" },
+        "hosts": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 }, "uniqueItems": true },
+        "legacy_alias_supported": { "type": "boolean" },
+        "production_authorized": { "const": false }
+      },
+      "additionalProperties": false
+    },
+    "governedPolicy": {
+      "type": "object",
+      "required": ["mode", "automatic", "codex_review_required"],
+      "properties": {
+        "mode": { "enum": ["PROHIBITED_UNTIL_STANDARD", "BOUNDED_REVIEW_ONLY", "SPECIFICATION_ONLY"] },
+        "automatic": { "const": false },
+        "codex_review_required": { "const": true }
+      },
+      "additionalProperties": false
+    },
+    "marketplacePolicy": {
+      "type": "object",
+      "required": ["status", "simulated_only", "real_kgen", "onchain_transfer"],
+      "properties": {
+        "status": { "enum": ["NOT_ELIGIBLE", "CANDIDATE_ONLY", "UNDER_REVIEW"] },
+        "simulated_only": { "const": true },
+        "real_kgen": { "const": false },
+        "onchain_transfer": { "const": false }
+      },
+      "additionalProperties": false
+    },
+    "event": {
+      "type": "object",
+      "required": ["event_id", "event_type", "simulation_time", "actor", "status", "reason", "previous_state_hash", "next_state_hash"],
+      "properties": {
+        "event_id": { "$ref": "#/$defs/stableId" },
+        "event_type": { "type": "string", "minLength": 1 },
+        "simulation_time": { "type": "string", "format": "date-time" },
+        "actor": { "type": "string", "minLength": 1 },
+        "status": { "type": "string", "minLength": 1 },
+        "reason": { "type": "string", "minLength": 1 },
+        "previous_state_hash": { "type": ["string", "null"], "pattern": "^[a-f0-9]{64}$" },
+        "next_state_hash": { "$ref": "#/$defs/sha256" }
+      },
+      "additionalProperties": false
+    },
+    "provenance": {
+      "type": "object",
+      "required": ["source_commit", "source_paths", "generator", "review_authority"],
+      "properties": {
+        "source_commit": { "type": "string", "pattern": "^[a-f0-9]{40}$" },
+        "source_paths": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/repositoryPath" }, "uniqueItems": true },
+        "generator": { "$ref": "#/$defs/repositoryPath" },
+        "review_authority": { "const": "CODEX_CANONICAL_REVIEW" }
+      },
+      "additionalProperties": false
+    },
+    "securityBoundary": {
+      "type": "object",
+      "required": ["simulation_only", "real_wallet", "real_kgen", "onchain_transfer", "external_autonomy", "production_authority", "current_modification", "constitution_source_modification"],
+      "properties": {
+        "simulation_only": { "const": true },
+        "real_wallet": { "const": false },
+        "real_kgen": { "const": false },
+        "onchain_transfer": { "const": false },
+        "external_autonomy": { "const": false },
+        "production_authority": { "const": false },
+        "current_modification": { "const": false },
+        "constitution_source_modification": { "const": false }
+      },
+      "additionalProperties": false
+    },
+    "legacyAlias": {
+      "type": "object",
+      "required": ["path", "status", "independent_implementation"],
+      "properties": {
+        "path": { "$ref": "#/$defs/repositoryPath" },
+        "status": { "const": "LEGACY_ALIAS_NOT_CANONICAL_DEPRECATION_PENDING" },
+        "independent_implementation": { "const": false }
+      },
+      "additionalProperties": false
+    }
+  }
+}
