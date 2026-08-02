@@ -43,13 +43,13 @@
       "priority": 4,
       "task_id": "KAIOS-CURSOR-VEGETABLE-PACKAGES-001",
       "work": "VEGETABLE_PACKAGE",
-      "status": "DISPATCHED"
+      "status": "RELEASED"
     },
     {
       "priority": 5,
       "task_id": "KAIOS-CURSOR-SOIL-TYPES-001",
       "work": "SOIL_TYPE_DATASET",
-      "status": "QUEUED"
+      "status": "DISPATCHED"
     },
     {
       "priority": 6,
