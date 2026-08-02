@@ -769,6 +769,9 @@ Task: `KAIOS-FOREST-AGRICULTURE-RUNTIME-V1-001`
 | `KAIOS/life/forest-agriculture/KAIOS_CURSOR_VEGETABLE_PACKAGE_REVIEW_CLOSEOUT.md` | Vegetable candidate independent review, validation and formal release evidence. |
 | `KAIOS/life/candidates/forest-agriculture-v1/CURSOR_SOIL_TYPES_WORK_ORDER.md` | Bounded soil-type candidate data work order and allowed-path contract. |
 | `KGEN-KAIOS/governance/autopilot/company_status/COMPANY_STATUS_2026-08-02_VEGETABLE_RELEASED_SOIL_TYPES_DISPATCHED.md` | Company status for the atomic vegetable-to-soil-types queue transition. |
+| `KAIOS/life/forest-agriculture/KAIOS_CURSOR_SOIL_TYPES_REVIEW_CLOSEOUT.md` | Independent soil candidate review and formal lease release. |
+| `KAIOS/life/candidates/forest-agriculture-v1/CURSOR_FERTILIZER_MODELS_WORK_ORDER.md` | Bounded fertilizer model research work order and allowed-path contract. |
+| `KGEN-KAIOS/governance/autopilot/company_status/COMPANY_STATUS_2026-08-02_SOIL_TYPES_RELEASED_FERTILIZER_MODELS_DISPATCHED.md` | Company status for the atomic soil-to-fertilizer queue transition. |
 
 ## AI Company Order And Project Runtime V1 Specification
 

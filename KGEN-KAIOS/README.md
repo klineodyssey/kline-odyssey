@@ -241,6 +241,9 @@ Can Claude, Gemini, OpenHands, GitHub Copilot, ChatGPT, Deep Research, Cursor, C
 | `../KAIOS/life/forest-agriculture/KAIOS_CURSOR_VEGETABLE_PACKAGE_REVIEW_CLOSEOUT.md` | Codex review and formal release record for the vegetable candidate task. |
 | `../KAIOS/life/candidates/forest-agriculture-v1/CURSOR_SOIL_TYPES_WORK_ORDER.md` | Candidate-only soil-type task envelope for `cursor-01`. |
 | `governance/autopilot/company_status/COMPANY_STATUS_2026-08-02_VEGETABLE_RELEASED_SOIL_TYPES_DISPATCHED.md` | Company status for the controlled vegetable-to-soil-types transition. |
+| `../KAIOS/life/forest-agriculture/KAIOS_CURSOR_SOIL_TYPES_REVIEW_CLOSEOUT.md` | Independent soil candidate review and lease release. |
+| `../KAIOS/life/candidates/forest-agriculture-v1/CURSOR_FERTILIZER_MODELS_WORK_ORDER.md` | Research-only fertilizer model task envelope for `cursor-01`. |
+| `governance/autopilot/company_status/COMPANY_STATUS_2026-08-02_SOIL_TYPES_RELEASED_FERTILIZER_MODELS_DISPATCHED.md` | Company status for the controlled soil-to-fertilizer transition. |
 
 ## R&D Provenance And Biological Evolution Governance
 

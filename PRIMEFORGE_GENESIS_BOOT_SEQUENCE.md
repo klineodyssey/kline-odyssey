@@ -22,13 +22,13 @@ permalink: /PRIMEFORGE_GENESIS_BOOT_SEQUENCE/
 
 STATUS: ACTIVE  
 VERSION: CURRENT  
-REVISION: 2026-08-02.AI_COMPANY_SPEC_AND_SOIL_TYPES_DISPATCH_INDEX
+REVISION: 2026-08-02.AI_COMPANY_SPEC_SOIL_RELEASE_FERTILIZER_DISPATCH_INDEX
 LAST_UPDATED: 2026-08-02
 UPDATED_BY: Codex
 REVIEWED_BY: Codex
-SOURCE_COMMIT: 9b5246918b4e912557c9a6cd402ac9ab9fb6f83f
-TASK_ID: KAIOS-AI-COMPANY-ORDER-PROJECT-RUNTIME-V1-001
-CHANGE_REASON: Register the cumulative AI Company order/project specification after the reviewed fruit-tree release and bounded vegetable dispatch, without activating Runtime or production authority.
+SOURCE_COMMIT: 1650191f35567d43016473420cfd2cba22b00aea
+TASK_ID: KAIOS-CURSOR-SOIL-TYPES-001-RELEASE
+CHANGE_REASON: Preserve the cumulative AI Company specification index, register the independently reviewed soil release, and dispatch bounded fertilizer-model research without activating Runtime or production authority.
 SOURCE_OF_TRUTH: TRUE  
 FORMAL_ENTRY: PRIMEFORGE_GENESIS_BOOT_SEQUENCE.md  
 ANCESTOR: PRIMEFORGE_GENESIS_BOOT_SEQUENCE_V1_4.md  
@@ -54,6 +54,9 @@ Rights, Economy, Wallet or KGEN authority.
 | `KAIOS/life/forest-agriculture/KAIOS_CURSOR_VEGETABLE_PACKAGE_REVIEW_CLOSEOUT.md` | Codex review, validation and formal release record for the vegetable candidate task. |
 | `KAIOS/life/candidates/forest-agriculture-v1/CURSOR_SOIL_TYPES_WORK_ORDER.md` | Explicit candidate-only task envelope for the sole active soil-type dataset claim. |
 | `KGEN-KAIOS/governance/autopilot/company_status/COMPANY_STATUS_2026-08-02_VEGETABLE_RELEASED_SOIL_TYPES_DISPATCHED.md` | Company status projection for vegetable release and soil-types dispatch. |
+| `KAIOS/life/forest-agriculture/KAIOS_CURSOR_SOIL_TYPES_REVIEW_CLOSEOUT.md` | Independent soil candidate review and formal lease release evidence. |
+| `KAIOS/life/candidates/forest-agriculture-v1/CURSOR_FERTILIZER_MODELS_WORK_ORDER.md` | Explicit research-only envelope for the sole active fertilizer-model claim. |
+| `KGEN-KAIOS/governance/autopilot/company_status/COMPANY_STATUS_2026-08-02_SOIL_TYPES_RELEASED_FERTILIZER_MODELS_DISPATCHED.md` | Company status projection for soil release and fertilizer-model dispatch. |
 
 ## AI Company Order And Project Specification Registration
 
