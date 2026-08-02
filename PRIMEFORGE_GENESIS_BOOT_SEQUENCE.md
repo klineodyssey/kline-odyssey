@@ -22,13 +22,13 @@ permalink: /PRIMEFORGE_GENESIS_BOOT_SEQUENCE/
 
 STATUS: ACTIVE  
 VERSION: CURRENT  
-REVISION: 2026-08-02.FOREST_CROP_DISPATCH_INDEX
+REVISION: 2026-08-02.CROP_FRUIT_TREE_DISPATCH_INDEX
 LAST_UPDATED: 2026-08-02
 UPDATED_BY: Codex
 REVIEWED_BY: Codex
-SOURCE_COMMIT: 176e8b96e40894a542da5823c436e9d49f663f0e
-TASK_ID: KAIOS-FOREST-AGRICULTURE-RUNTIME-V1-001
-CHANGE_REASON: Register the reviewed forest candidate closeout, bounded crop candidate task envelope, and Company Status without changing Runtime or production authority.
+SOURCE_COMMIT: 9329560df73a6668f74a5eb05910d951fa079a38
+TASK_ID: KAIOS-CURSOR-CROP-LIFE-PACKAGES-001-RELEASE
+CHANGE_REASON: Register the reviewed crop candidate closeout, bounded fruit-tree candidate task envelope, and Company Status without changing Runtime or production authority.
 SOURCE_OF_TRUTH: TRUE  
 FORMAL_ENTRY: PRIMEFORGE_GENESIS_BOOT_SEQUENCE.md  
 ANCESTOR: PRIMEFORGE_GENESIS_BOOT_SEQUENCE_V1_4.md  
@@ -45,6 +45,9 @@ Rights, Economy, Wallet or KGEN authority.
 | `KAIOS/life/forest-agriculture/KAIOS_CURSOR_FOREST_LIFE_PACKAGE_REVIEW_CLOSEOUT.md` | Codex review, provenance, validation and formal release record for the forest candidate task. |
 | `KAIOS/life/candidates/forest-agriculture-v1/CURSOR_CROP_LIFE_PACKAGES_WORK_ORDER.md` | Explicit candidate-only task envelope for the sole active crop package claim. |
 | `KGEN-KAIOS/governance/autopilot/company_status/COMPANY_STATUS_2026-08-02_FOREST_CANDIDATE_RELEASED_CROP_DISPATCHED.md` | Company status projection for forest release and crop dispatch. |
+| `KAIOS/life/forest-agriculture/KAIOS_CURSOR_CROP_LIFE_PACKAGE_REVIEW_CLOSEOUT.md` | Codex review, repair evidence, validation and formal release record for the crop candidate task. |
+| `KAIOS/life/candidates/forest-agriculture-v1/CURSOR_FRUIT_TREE_PACKAGES_WORK_ORDER.md` | Explicit candidate-only task envelope for the sole active fruit-tree package claim. |
+| `KGEN-KAIOS/governance/autopilot/company_status/COMPANY_STATUS_2026-08-02_CROP_CANDIDATE_RELEASED_FRUIT_TREE_DISPATCHED.md` | Company status projection for crop release and fruit-tree dispatch. |
 PUBLIC_ENTRY: https://klineodyssey.github.io/kline-odyssey/boot/  
 RAW_ENTRY: https://klineodyssey.github.io/kline-odyssey/PRIMEFORGE_GENESIS_BOOT_SEQUENCE.md  
 
