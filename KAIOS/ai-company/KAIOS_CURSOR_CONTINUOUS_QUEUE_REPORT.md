@@ -25,16 +25,22 @@ The vegetable assignment was allowed to complete before its lease was released.
 - Soil release and fertilizer dispatch governance: PR `#98`, independently
   reviewed at `P0=0 / P1=0 / P2=0` and merged in
   `1e38b59a6fde788f4eee214b8ed503553d4a007b`.
+- Fertilizer-model research candidates: PR `#99`, independently reviewed at
+  `P0=0 / P1=0 / P2=0`, merged as `CANDIDATE_ONLY` in
+  `976f91ac59ecf43a5e28b0afa5df0a9f948d9c76`.
+- Fertilizer release and compost dispatch governance: PR `#100`, independently
+  reviewed at `P0=0 / P1=0 / P2=0` and merged in
+  `38901fddd3a513b5121b8828dce43898a7ed74b6`.
 
 ## Current Assignment
 
-- Task: `KAIOS-CURSOR-FERTILIZER-MODELS-001`
-- Branch: `cursor-handoff/KAIOS-CURSOR-FERTILIZER-MODELS-001`
+- Task: `KAIOS-CURSOR-COMPOST-MODELS-001`
+- Branch: `cursor-handoff/KAIOS-CURSOR-COMPOST-MODELS-001`
 - Status: `ACTIVE / ONE_TASK_AT_A_TIME`
 - Output authority: `CANDIDATE_ONLY_OR_RESEARCH_PROPOSAL_ONLY`
 
-The next safe queue item is compost-model research. It may be dispatched only
-after Codex independently reviews and formally releases the fertilizer claim.
+The next safe queue item is insect candidate research. It may be dispatched
+only after Codex independently reviews and formally releases the compost claim.
 
 ## Boundaries
 
