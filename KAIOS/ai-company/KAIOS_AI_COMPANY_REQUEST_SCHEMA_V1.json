@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://klineodyssey.github.io/kline-odyssey/KAIOS/ai-company/KAIOS_AI_COMPANY_REQUEST_SCHEMA_V1.json",
+  "title": "KAIOS AI Company Customer Request V1",
+  "type": "object",
+  "required": ["request_id", "customer_life_id", "customer_type", "request_text", "requested_object", "requested_location", "requested_quantity", "requested_quality", "requested_deadline", "requested_budget", "intended_use", "civilization_context", "rights_context", "risk_level", "priority", "created_at", "status", "structured_requirements", "assumptions"],
+  "properties": {
+    "request_id": { "type": "string", "minLength": 1, "maxLength": 128 },
+    "customer_life_id": { "type": "string", "minLength": 1, "maxLength": 128 },
+    "customer_type": { "enum": ["PLAYER", "AI_LIFE_SIMULATION", "HOUSEHOLD_SIMULATION", "COMPANY_SIMULATION", "CITY_SIMULATION", "PUBLIC_SIMULATION"] },
+    "request_text": { "type": "string", "minLength": 1, "maxLength": 2000 },
+    "requested_object": { "type": "string", "minLength": 1, "maxLength": 128 },
+    "requested_location": { "type": ["string", "null"] },
+    "requested_quantity": { "type": "number", "exclusiveMinimum": 0, "maximum": 10000 },
+    "requested_quality": { "type": "string" },
+    "requested_deadline": { "type": ["integer", "null"], "minimum": 0 },
+    "requested_budget": { "type": "number", "minimum": 0 },
+    "intended_use": { "type": "string" },
+    "civilization_context": { "type": "string" },
+    "rights_context": { "type": "array", "items": { "type": "string" } },
+    "risk_level": { "enum": ["LOW", "MEDIUM", "HIGH", "PROHIBITED"] },
+    "priority": { "enum": ["LOW", "NORMAL", "HIGH", "URGENT"] },
+    "created_at": { "type": "integer", "minimum": 0 },
+    "status": { "enum": ["SUBMITTED", "NEEDS_CLARIFICATION", "ANALYZING", "FEASIBILITY_REVIEW", "REJECTED", "PROPOSAL_READY", "CUSTOMER_REVIEW", "APPROVED_SIMULATION", "PROJECT_CREATED", "CANCELLED", "COMPLETED"] },
+    "structured_requirements": {
+      "type": "object",
+      "required": ["functional", "physical", "location", "resource", "worker", "technology", "rights", "civilization", "safety", "economic", "quality", "delivery", "maintenance"],
+      "properties": {
+        "functional": { "$ref": "#/$defs/list" }, "physical": { "$ref": "#/$defs/list" }, "location": { "$ref": "#/$defs/list" }, "resource": { "$ref": "#/$defs/list" }, "worker": { "$ref": "#/$defs/list" }, "technology": { "$ref": "#/$defs/list" }, "rights": { "$ref": "#/$defs/list" }, "civilization": { "$ref": "#/$defs/list" }, "safety": { "$ref": "#/$defs/list" }, "economic": { "$ref": "#/$defs/list" }, "quality": { "$ref": "#/$defs/list" }, "delivery": { "$ref": "#/$defs/list" }, "maintenance": { "$ref": "#/$defs/list" }
+      }, "additionalProperties": false
+    },
+    "assumptions": { "type": "array", "maxItems": 100, "items": { "$ref": "#/$defs/assumption" } }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "list": { "type": "array", "maxItems": 100, "items": { "type": "string" } },
+    "assumption": {
+      "type": "object", "required": ["assumption_id", "description", "reason", "risk", "customer_visibility", "approval_status", "label"],
+      "properties": { "assumption_id": { "type": "string" }, "description": { "type": "string" }, "reason": { "type": "string" }, "risk": { "enum": ["LOW", "MEDIUM", "HIGH"] }, "customer_visibility": { "const": true }, "approval_status": { "enum": ["PENDING", "APPROVED", "REJECTED"] }, "label": { "const": "SIMULATION_ASSUMPTION" } },
+      "additionalProperties": false
+    }
+  }
+}

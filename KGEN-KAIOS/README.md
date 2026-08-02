@@ -628,6 +628,18 @@ Human approved `KAIOS World Asset & Life Specification V1.0` as an architecture-
 
 Status is `HUMAN_APPROVED_ARCHITECTURE`; runtime implementation remains forbidden and CURRENT sources remain unchanged.
 
+## AI Company Order And Project Runtime V1 Specification
+
+| File | Purpose |
+|---|---|
+| `../KAIOS/ai-company/KAIOS_AI_COMPANY_SOURCE_CROSSWALK.md` | Program Registry and current owner evidence. |
+| `../KAIOS/ai-company/KAIOS_AI_COMPANY_ORDER_PROJECT_RUNTIME_V1_SPEC.md` | Cumulative simulation-only specification. |
+| `../KAIOS/ai-company/KAIOS_AI_COMPANY_SCHEMA_V1.json` | Aggregate state and authority boundary schema. |
+| `../KAIOS/ai-company/KAIOS_AI_COMPANY_RUNTIME_V1_TEST_PLAN.md` | Specification and Runtime test gates. |
+| `world-viewer/tests/ai-company-spec.test.mjs` | Executable specification tests. |
+| `governance/autopilot/recovery_points/RECOVERY-KAIOS-AI-COMPANY-SPEC-V1.md` | Specification rollback anchor. |
+| `governance/autopilot/company_status/COMPANY_STATUS_2026-08-02_AI_COMPANY_SPEC.md` | Specification and worker status. |
+
 ## Protected Systems
 
 KAIOS V10 does not modify:

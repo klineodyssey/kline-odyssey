@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://klineodyssey.github.io/kline-odyssey/KAIOS/ai-company/KAIOS_AI_COMPANY_RESOURCE_PLAN_SCHEMA_V1.json",
+  "title": "KAIOS AI Company Resource Plan V1",
+  "type": "object",
+  "required": ["resource_plan_id", "project_id", "bill_of_materials", "workforce", "equipment", "supply_chain", "energy_budget", "warehouse_capacity", "status"],
+  "properties": {
+    "resource_plan_id": { "type": "string" }, "project_id": { "type": "string" },
+    "bill_of_materials": { "type": "array", "maxItems": 5000, "items": { "$ref": "#/$defs/bom" } },
+    "workforce": { "type": "array", "maxItems": 1000, "items": { "$ref": "#/$defs/worker" } },
+    "equipment": { "type": "array", "maxItems": 1000, "items": { "$ref": "#/$defs/equipment" } },
+    "supply_chain": { "type": "array", "maxItems": 5000, "items": { "$ref": "#/$defs/transport" } },
+    "energy_budget": { "type": "number", "minimum": 0 }, "warehouse_capacity": { "type": "number", "minimum": 0 },
+    "status": { "enum": ["PLANNING", "BLOCKED", "PARTIALLY_AVAILABLE", "READY", "RESERVED", "CONSUMING", "COMPLETE"] }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "bom": {
+      "type": "object", "required": ["bom_id", "project_id", "material_id", "description", "quantity", "unit", "unit_mass", "total_mass", "required_quality", "supplier", "availability", "lead_time", "unit_cost", "total_cost", "storage_requirement", "transport_requirement", "waste_factor", "recyclable", "status"],
+      "properties": { "bom_id": { "type": "string" }, "project_id": { "type": "string" }, "material_id": { "type": "string" }, "description": { "type": "string" }, "quantity": { "type": "number", "minimum": 0 }, "unit": { "type": "string" }, "unit_mass": { "type": "number", "minimum": 0 }, "total_mass": { "type": "number", "minimum": 0 }, "required_quality": { "type": "string" }, "supplier": { "type": ["string", "null"] }, "availability": { "type": "number", "minimum": 0 }, "lead_time": { "type": "number", "minimum": 0 }, "unit_cost": { "type": "number", "minimum": 0 }, "total_cost": { "type": "number", "minimum": 0 }, "storage_requirement": { "type": "string" }, "transport_requirement": { "type": "string" }, "waste_factor": { "type": "number", "minimum": 0, "maximum": 1 }, "recyclable": { "type": "boolean" }, "status": { "enum": ["PLANNED", "UNAVAILABLE", "ORDERED", "IN_TRANSIT", "RECEIVED", "INSPECTED", "RESERVED", "CONSUMED"] } }, "additionalProperties": false
+    },
+    "worker": {
+      "type": "object", "required": ["worker_id", "life_id", "role", "skill", "location", "shift", "cost", "availability", "travel_time", "assigned_tasks", "safety_qualification", "equipment_qualification", "status"],
+      "properties": { "worker_id": { "type": "string" }, "life_id": { "type": "string" }, "role": { "type": "string" }, "skill": { "type": "string" }, "location": { "type": "string" }, "shift": { "type": "object" }, "cost": { "type": "number", "minimum": 0 }, "availability": { "type": "boolean" }, "travel_time": { "type": "number", "minimum": 0 }, "assigned_tasks": { "type": "array", "items": { "type": "string" } }, "safety_qualification": { "type": "boolean" }, "equipment_qualification": { "type": "boolean" }, "status": { "enum": ["AVAILABLE", "COMMUTING", "ASSIGNED", "WORKING", "RESTING", "UNAVAILABLE", "CONFLICT"] } }, "additionalProperties": false
+    },
+    "equipment": {
+      "type": "object", "required": ["equipment_id", "type", "owner", "operator_requirement", "location", "availability", "capacity", "energy_type", "fuel_or_charge", "maintenance_state", "wear", "transport_requirement", "reservation_start", "reservation_end", "cost", "status"],
+      "properties": { "equipment_id": { "type": "string" }, "type": { "type": "string" }, "owner": { "type": "string" }, "operator_requirement": { "type": "string" }, "location": { "type": "string" }, "availability": { "type": "boolean" }, "capacity": { "type": "number", "minimum": 0 }, "energy_type": { "type": "string" }, "fuel_or_charge": { "type": "number", "minimum": 0 }, "maintenance_state": { "enum": ["READY", "MAINTENANCE_DUE", "MAINTENANCE_REQUIRED", "BROKEN", "RETIRED"] }, "wear": { "type": "number", "minimum": 0, "maximum": 1 }, "transport_requirement": { "type": "string" }, "reservation_start": { "type": "integer", "minimum": 0 }, "reservation_end": { "type": "integer", "minimum": 0 }, "cost": { "type": "number", "minimum": 0 }, "status": { "enum": ["AVAILABLE", "RESERVED", "IN_USE", "BLOCKED", "MAINTENANCE", "BROKEN"] } }, "additionalProperties": false
+    },
+    "transport": {
+      "type": "object", "required": ["transport_id", "origin", "destination", "route", "quantity", "mass", "vehicle", "fuel", "loading_time", "travel_time", "unloading_time", "cost", "risk", "status"],
+      "properties": { "transport_id": { "type": "string" }, "origin": { "type": "string" }, "destination": { "type": "string" }, "route": { "type": ["string", "null"] }, "quantity": { "type": "number", "minimum": 0 }, "mass": { "type": "number", "minimum": 0 }, "vehicle": { "type": ["string", "null"] }, "fuel": { "type": "number", "minimum": 0 }, "loading_time": { "type": "number", "minimum": 0 }, "travel_time": { "type": "number", "minimum": 0 }, "unloading_time": { "type": "number", "minimum": 0 }, "cost": { "type": "number", "minimum": 0 }, "risk": { "type": "number", "minimum": 0, "maximum": 1 }, "status": { "enum": ["PLANNED", "NO_ROUTE", "NO_VEHICLE", "NO_FUEL", "LOADING", "IN_TRANSIT", "UNLOADING", "DELIVERED", "FAILED"] } }, "additionalProperties": false
+    }
+  }
+}
