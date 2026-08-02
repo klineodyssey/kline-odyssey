@@ -1,0 +1,260 @@
+{
+  "dataset_id": "KAIOS-CROP-ENVIRONMENT-THRESHOLDS-V1",
+  "schema_version": "1.0.0-candidate",
+  "status": "CURSOR_RESEARCH_CANDIDATE_ONLY",
+  "review_status": "PENDING_CODEX_REVIEW",
+  "task_id": "KAIOS-CURSOR-CROP-LIFE-PACKAGES-001",
+  "worker_id": "cursor-01",
+  "branch": "cursor-handoff/KAIOS-CURSOR-CROP-LIFE-PACKAGES-001",
+  "dispatch_envelope_base_commit": "176e8b96e40894a542da5823c436e9d49f663f0e",
+  "source_base_commit": "05f471228af592e5c43071bc998e063101d82ef5",
+  "source_hash_basis": "SHA256_OF_GIT_BLOB_CONTENT_AT_SOURCE_BASE_COMMIT",
+  "mode": "SIMULATION_APPROXIMATION",
+  "owner_bindings": {
+    "crop_progress": "AGRICULTURE_ALPHA",
+    "environment_and_resource_pools": "KAIOS_REPRODUCTION_ECOLOGY_RUNTIME_V1",
+    "life_contract": "KAIOS_CANONICAL_LIFE_SCHEMA_V1"
+  },
+  "evaluation_contract": {
+    "order": [
+      "PROPAGATION_SOURCE",
+      "SOIL_COMPATIBILITY",
+      "WATER_AVAILABILITY",
+      "NUTRIENT_AVAILABILITY",
+      "SUNLIGHT_AVAILABILITY",
+      "TEMPERATURE_COMPATIBILITY",
+      "LABOR_AVAILABILITY",
+      "ELAPSED_TIME"
+    ],
+    "failed_gate_result": "GROWTH_BLOCKED_RESOURCE_OR_ENVIRONMENT",
+    "no_partial_debit_on_failed_gate": true,
+    "no_instant_growth": true
+  },
+  "threshold_profiles": [
+    {
+      "profile_id": "CROP-ENV-RICE-CLASS-CANDIDATE-V1",
+      "crop_id": "RICE",
+      "species_reference": "RICE_ALPHA",
+      "compatible_habitat_references": ["SOIL_HABITAT"],
+      "parameters": [
+        {
+          "parameter_name": "temperature_compatibility",
+          "unit": "degree_celsius",
+          "minimum": 18,
+          "default": 27,
+          "maximum": 35,
+          "rationale": "Broad deterministic class envelope for candidate scenario gating; not agronomic advice.",
+          "source_type": "RESEARCH_PROPOSAL",
+          "confidence": "LOW",
+          "risk": "A class-wide envelope may not represent a specific cultivar.",
+          "validation_required": true
+        },
+        {
+          "parameter_name": "soil_moisture_fraction",
+          "unit": "fraction",
+          "minimum": 0.55,
+          "default": 0.75,
+          "maximum": 0.95,
+          "rationale": "Candidate moisture gate used to test bounded water dependency.",
+          "source_type": "MODEL_INFERENCE",
+          "confidence": "LOW",
+          "risk": "Simplified fraction omits soil texture and drainage interactions.",
+          "validation_required": true
+        },
+        {
+          "parameter_name": "sunlight_per_simulation_day",
+          "unit": "hour_per_day",
+          "minimum": 4,
+          "default": 8,
+          "maximum": 14,
+          "rationale": "Bounded sunlight gate for deterministic growth scenarios.",
+          "source_type": "RESEARCH_PROPOSAL",
+          "confidence": "LOW",
+          "risk": "No irradiance or canopy model is represented.",
+          "validation_required": true
+        },
+        {
+          "parameter_name": "soil_fertility_proxy",
+          "unit": "fraction_0_to_1",
+          "minimum": 0.45,
+          "default": 0.75,
+          "maximum": 1,
+          "rationale": "Candidate threshold expressed directly in the Ecology Runtime soil_fertility contract without an implicit scale conversion.",
+          "source_type": "MODEL_INFERENCE",
+          "confidence": "LOW",
+          "risk": "The proxy is not a laboratory soil measurement.",
+          "validation_required": true
+        },
+        {
+          "parameter_name": "soil_ph_proxy",
+          "unit": "ph_proxy",
+          "minimum": 5,
+          "default": 6.5,
+          "maximum": 8,
+          "rationale": "Broad compatibility proposal for class-level testing only.",
+          "source_type": "RESEARCH_PROPOSAL",
+          "confidence": "LOW",
+          "risk": "Specific varieties and soils require separate validation.",
+          "validation_required": true
+        }
+      ],
+      "blocking_reasons": ["NO_SEED_OR_PROPAGATION_SOURCE", "SOIL_NOT_COMPATIBLE", "INSUFFICIENT_WATER", "INSUFFICIENT_NUTRIENTS", "INSUFFICIENT_SUNLIGHT", "TEMPERATURE_OUT_OF_RANGE", "INSUFFICIENT_LABOR", "ELAPSED_TIME_REQUIRED"]
+    },
+    {
+      "profile_id": "CROP-ENV-VEGETABLE-CLASS-CANDIDATE-V1",
+      "crop_id": "VEGETABLE",
+      "species_reference": null,
+      "species_reference_status": "SOURCE_UNDERSPECIFIED",
+      "compatible_habitat_references": ["SOIL_HABITAT"],
+      "parameters": [
+        {
+          "parameter_name": "temperature_compatibility",
+          "unit": "degree_celsius",
+          "minimum": 10,
+          "default": 22,
+          "maximum": 32,
+          "rationale": "Intentionally broad aggregate envelope pending future vegetable species packages.",
+          "source_type": "SOURCE_UNDERSPECIFIED",
+          "confidence": "LOW",
+          "risk": "VEGETABLE is a resource class, not one biological species.",
+          "validation_required": true
+        },
+        {
+          "parameter_name": "soil_moisture_fraction",
+          "unit": "fraction",
+          "minimum": 0.35,
+          "default": 0.65,
+          "maximum": 0.9,
+          "rationale": "Candidate aggregate moisture gate for deterministic negative tests.",
+          "source_type": "MODEL_INFERENCE",
+          "confidence": "LOW",
+          "risk": "Wide class range can hide species-specific requirements.",
+          "validation_required": true
+        },
+        {
+          "parameter_name": "sunlight_per_simulation_day",
+          "unit": "hour_per_day",
+          "minimum": 4,
+          "default": 8,
+          "maximum": 14,
+          "rationale": "Bounded light gate pending a resolved crop species.",
+          "source_type": "RESEARCH_PROPOSAL",
+          "confidence": "LOW",
+          "risk": "No irradiance, shading or cultivar model is present.",
+          "validation_required": true
+        },
+        {
+          "parameter_name": "soil_fertility_proxy",
+          "unit": "fraction_0_to_1",
+          "minimum": 0.35,
+          "default": 0.7,
+          "maximum": 1,
+          "rationale": "Candidate Ecology soil-fertility gate using the owner Runtime's native 0..1 fraction for the aggregate VEGETABLE class.",
+          "source_type": "MODEL_INFERENCE",
+          "confidence": "LOW",
+          "risk": "Proxy cannot replace species-specific nutrient requirements.",
+          "validation_required": true
+        },
+        {
+          "parameter_name": "soil_ph_proxy",
+          "unit": "ph_proxy",
+          "minimum": 5.5,
+          "default": 6.5,
+          "maximum": 7.5,
+          "rationale": "Candidate class envelope, deliberately not a universal biological fact.",
+          "source_type": "RESEARCH_PROPOSAL",
+          "confidence": "LOW",
+          "risk": "A future species package may supersede this range.",
+          "validation_required": true
+        }
+      ],
+      "blocking_reasons": ["NO_SEED_OR_PROPAGATION_SOURCE", "SPECIES_REFERENCE_UNRESOLVED", "SOIL_NOT_COMPATIBLE", "INSUFFICIENT_WATER", "INSUFFICIENT_NUTRIENTS", "INSUFFICIENT_SUNLIGHT", "TEMPERATURE_OUT_OF_RANGE", "INSUFFICIENT_LABOR", "ELAPSED_TIME_REQUIRED"]
+    },
+    {
+      "profile_id": "CROP-ENV-FRUIT-CLASS-CANDIDATE-V1",
+      "crop_id": "FRUIT",
+      "species_reference": "FRUIT_ALPHA",
+      "compatible_habitat_references": ["SOIL_HABITAT"],
+      "parameters": [
+        {
+          "parameter_name": "temperature_compatibility",
+          "unit": "degree_celsius",
+          "minimum": 8,
+          "default": 24,
+          "maximum": 36,
+          "rationale": "Broad aggregate scenario envelope until the queued fruit-tree packages resolve species-specific behavior.",
+          "source_type": "SOURCE_UNDERSPECIFIED",
+          "confidence": "LOW",
+          "risk": "FRUIT_ALPHA is synthetic and cannot represent every fruit tree.",
+          "validation_required": true
+        },
+        {
+          "parameter_name": "soil_moisture_fraction",
+          "unit": "fraction",
+          "minimum": 0.3,
+          "default": 0.6,
+          "maximum": 0.85,
+          "rationale": "Candidate moisture gate for the existing aggregate FRUIT cycle.",
+          "source_type": "MODEL_INFERENCE",
+          "confidence": "LOW",
+          "risk": "Root depth, age and soil type are not modeled by this aggregate.",
+          "validation_required": true
+        },
+        {
+          "parameter_name": "sunlight_per_simulation_day",
+          "unit": "hour_per_day",
+          "minimum": 4,
+          "default": 8,
+          "maximum": 14,
+          "rationale": "Deterministic light gate for a candidate synthetic production cycle.",
+          "source_type": "RESEARCH_PROPOSAL",
+          "confidence": "LOW",
+          "risk": "No canopy or orchard geometry is represented.",
+          "validation_required": true
+        },
+        {
+          "parameter_name": "soil_fertility_proxy",
+          "unit": "fraction_0_to_1",
+          "minimum": 0.4,
+          "default": 0.75,
+          "maximum": 1,
+          "rationale": "Candidate Ecology soil-fertility gate for FRUIT class tests in the owner Runtime's native 0..1 fraction.",
+          "source_type": "MODEL_INFERENCE",
+          "confidence": "LOW",
+          "risk": "Not calibrated to any real orchard or species.",
+          "validation_required": true
+        },
+        {
+          "parameter_name": "soil_ph_proxy",
+          "unit": "ph_proxy",
+          "minimum": 5,
+          "default": 6.5,
+          "maximum": 8,
+          "rationale": "Broad proposal retained only for candidate simulation gating.",
+          "source_type": "RESEARCH_PROPOSAL",
+          "confidence": "LOW",
+          "risk": "Future fruit-tree candidates must replace the aggregate range.",
+          "validation_required": true
+        }
+      ],
+      "blocking_reasons": ["NO_SEED_OR_PROPAGATION_SOURCE", "FRUIT_TREE_PACKAGE_NOT_VALIDATED", "SOIL_NOT_COMPATIBLE", "INSUFFICIENT_WATER", "INSUFFICIENT_NUTRIENTS", "INSUFFICIENT_SUNLIGHT", "TEMPERATURE_OUT_OF_RANGE", "INSUFFICIENT_LABOR", "ELAPSED_TIME_REQUIRED"]
+    }
+  ],
+  "provenance": [
+    { "source_type": "REPOSITORY_DERIVED", "source_path": "KGEN-KAIOS/world-viewer/agriculture/agriculture-runtime.js", "source_commit": "05f471228af592e5c43071bc998e063101d82ef5", "git_object": "f09478806a47c10825258385ee855faa74f51a79", "sha256": "4557d6b449ce3979f2bf4ca10cc48f271ead2ddb34cc127e60b264ce26b577c2", "purpose": "Crop catalog owner and synthetic input rates." },
+    { "source_type": "REPOSITORY_DERIVED", "source_path": "KGEN-KAIOS/world-viewer/ecosystem/ecosystem-runtime.js", "source_commit": "05f471228af592e5c43071bc998e063101d82ef5", "git_object": "2bab509140ab4b93c7e4975286c826693965cf26", "sha256": "9b2cd9d4501727d3134ea332e1a30cd77d5d7d647300820f51d9c264784ef537", "purpose": "Habitat and environment owner." },
+    { "source_type": "REPOSITORY_DERIVED", "source_path": "KGEN-KAIOS/world-viewer/economy/economy-runtime.js", "source_commit": "05f471228af592e5c43071bc998e063101d82ef5", "git_object": "2b1a37dba8cf3863eb4b30d4547995f281a6bc62", "sha256": "8b5879091b212ea3e0ead296719e872b9353209fd8982f01567f2bbb78991f27", "purpose": "Inventory and food-resource references." },
+    { "source_type": "REPOSITORY_DERIVED", "source_path": "KGEN-KAIOS/world-viewer/biology/taxonomy-standard.js", "source_commit": "05f471228af592e5c43071bc998e063101d82ef5", "git_object": "f4cc78d30bccf375bb3e55f5e3cb2df63d0a4683", "sha256": "2c7eb6d439ac320176751c4985d1f510b68a5656ef4b4ef041dc46b4f55dcc28", "purpose": "Synthetic crop taxonomy references and identified VEGETABLE gap." },
+    { "source_type": "REPOSITORY_DERIVED", "source_path": "KGEN-KAIOS/world-viewer/data/synthetic-world.json", "source_commit": "05f471228af592e5c43071bc998e063101d82ef5", "git_object": "76ddff32f74c2b41ca7d9d9309b7b39a2a2618c8", "sha256": "4be4c1b83420bb24604742fb722a8aedba8b3d2c163f7f18ccd871628ee7f34f", "purpose": "Synthetic habitat and unresolved VEGETABLE_ALPHA reference evidence." },
+    { "source_type": "REPOSITORY_DERIVED", "source_path": "KAIOS_CANONICAL_LIFE_SCHEMA_V1.json", "source_commit": "05f471228af592e5c43071bc998e063101d82ef5", "git_object": "3bfcea2e0fc3854a6ff674a93ef32edc2ee0aab5", "sha256": "d1ced898d043e4890142df40a9033145762d4ceb28fd0e49eae39dc43bf224c5", "purpose": "PLANT_LIFE environment dependency boundary." },
+    { "source_type": "REPOSITORY_DERIVED", "source_path": "KAIOS_CANONICAL_LIFE_TYPE_EXTENSIONS_V1.json", "source_commit": "05f471228af592e5c43071bc998e063101d82ef5", "git_object": "8f3a30d1cba18b7156c64439bfce5d9bafc6926e", "sha256": "72ab55fe394b1038cb2b8ab8bac616f378521b89fde36aa6cf5ab3cbebea58fa", "purpose": "PLANT_EXTENSION resource requirements." },
+    { "source_type": "REPOSITORY_DERIVED", "source_path": "KAIOS_PHYSICAL_LABOR_SCHEMA.json", "source_commit": "05f471228af592e5c43071bc998e063101d82ef5", "git_object": "357b00093f4a912e616e9d39edf04753aacf94f7", "sha256": "21060f7bdf64f0a3af827f1fcd7d95d3170affef54c01bbeb449b9361fdd2f43", "purpose": "Labor availability and time gate." },
+    { "source_type": "REPOSITORY_DERIVED", "source_path": "KAIOS/life/forest-agriculture/KAIOS_FOREST_AGRICULTURE_RUNTIME_V1_SPEC.md", "source_commit": "05f471228af592e5c43071bc998e063101d82ef5", "git_object": "9a2dd4ad05bb7b2e3d71b91b479359947ada8376", "sha256": "4e1a23e97d09ec2dc4ad65440e6958e646f75ed418e5c703c5a5a1635c2809a1", "purpose": "Causal environment gate specification." }
+  ],
+  "boundaries": {
+    "real_agronomic_guidance": false,
+    "runtime_code": false,
+    "canonical_promotion": false,
+    "production_authority": false
+  }
+}

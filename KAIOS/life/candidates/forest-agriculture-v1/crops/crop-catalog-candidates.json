@@ -1,0 +1,305 @@
+{
+  "dataset_id": "KAIOS-CROP-CATALOG-CANDIDATES-V1",
+  "schema_version": "1.0.0-candidate",
+  "status": "CURSOR_RESEARCH_CANDIDATE_ONLY",
+  "review_status": "PENDING_CODEX_REVIEW",
+  "task_id": "KAIOS-CURSOR-CROP-LIFE-PACKAGES-001",
+  "worker_id": "cursor-01",
+  "branch": "cursor-handoff/KAIOS-CURSOR-CROP-LIFE-PACKAGES-001",
+  "dispatch_envelope_base_commit": "176e8b96e40894a542da5823c436e9d49f663f0e",
+  "source_base_commit": "05f471228af592e5c43071bc998e063101d82ef5",
+  "source_hash_basis": "SHA256_OF_GIT_BLOB_CONTENT_AT_SOURCE_BASE_COMMIT",
+  "mode": "SIMULATION_ONLY",
+  "authority": "NONE",
+  "canonical_promotion": false,
+  "owners": {
+    "crop_plot_growth_and_basic_warehouse": "AGRICULTURE_ALPHA",
+    "habitat_water_soil_nutrient_and_decomposition": "KAIOS_REPRODUCTION_ECOLOGY_RUNTIME_V1",
+    "inventory_and_ledger": "CIVILIZATION_ECONOMY_ALPHA",
+    "worker_timeline": "KAIOS_PHYSICAL_LABOR_SCHEMA",
+    "canonical_life_contract": "KAIOS_CANONICAL_LIFE_SCHEMA_V1"
+  },
+  "crop_classes": [
+    {
+      "candidate_package_id": "CANDIDATE-CROP-CLASS-RICE-V1",
+      "crop_id": "RICE",
+      "agriculture_type": "CROP",
+      "life_type": "PLANT_LIFE",
+      "extension_id": "PLANT_EXTENSION",
+      "species_reference": "RICE_ALPHA",
+      "species_reference_status": "REPOSITORY_DEFINED_SYNTHETIC_ALPHA",
+      "owner_taxonomy_record": {
+        "domain": "EUKARYOTA",
+        "kingdom": "PLANTAE",
+        "phylum": "TRACHEOPHYTA",
+        "class": "LILIOPSIDA",
+        "order": "POALES",
+        "family": "POACEAE",
+        "genus": "ORYZA",
+        "species": "ORYZA_SATIVA",
+        "subspecies": "SYNTHETIC_ALPHA",
+        "category": "PLANT"
+      },
+      "canonical_taxonomy_crosswalk": {
+        "domain_through_species": "DIRECT_RANK_MATCH",
+        "owner_subspecies": "SYNTHETIC_ALPHA",
+        "life_instance": null,
+        "life_instance_status": "ASSIGNED_ONLY_WHEN_AN_INDIVIDUAL_LIFE_INSTANCE_IS_CREATED",
+        "owner_category": "PLANT"
+      },
+      "propagation_source": "AGRICULTURE_ALPHA_SEEDS.RICE",
+      "economy_seed_reference": "SEED_RICE",
+      "required_gates": [
+        "SEED_OR_PROPAGATION_SOURCE",
+        "COMPATIBLE_SOIL",
+        "WATER",
+        "NUTRIENTS",
+        "SUNLIGHT",
+        "TEMPERATURE",
+        "LABOR",
+        "ELAPSED_TIME",
+        "WAREHOUSE_CAPACITY"
+      ],
+      "numeric_parameters": [
+        {
+          "parameter_name": "agriculture_alpha_growth_hours",
+          "unit": "hour",
+          "minimum": 24,
+          "default": 24,
+          "maximum": 24,
+          "rationale": "Exact projection of the existing Agriculture Alpha RICE catalog value at the source base commit.",
+          "source_type": "REPOSITORY_DERIVED",
+          "confidence": "HIGH",
+          "risk": "Runtime behavior changes if the owner value changes.",
+          "validation_required": false
+        },
+        {
+          "parameter_name": "agriculture_alpha_yield_units",
+          "unit": "warehouse_unit_per_plot_cycle",
+          "minimum": 8,
+          "default": 8,
+          "maximum": 8,
+          "rationale": "Exact projection of the existing Agriculture Alpha RICE yield value, not a real agronomic yield claim.",
+          "source_type": "REPOSITORY_DERIVED",
+          "confidence": "HIGH",
+          "risk": "Unit is synthetic and must not be interpreted as kilogram.",
+          "validation_required": false
+        },
+        {
+          "parameter_name": "agriculture_alpha_water_per_hour",
+          "unit": "synthetic_water_unit_per_hour",
+          "minimum": 1.1,
+          "default": 1.1,
+          "maximum": 1.1,
+          "rationale": "Exact projection of the current owner constant; conversion to liters requires a future approved adapter.",
+          "source_type": "REPOSITORY_DERIVED",
+          "confidence": "HIGH",
+          "risk": "Synthetic unit has no authorized physical conversion.",
+          "validation_required": true
+        },
+        {
+          "parameter_name": "agriculture_alpha_energy_per_hour",
+          "unit": "synthetic_energy_unit_per_hour",
+          "minimum": 0.6,
+          "default": 0.6,
+          "maximum": 0.6,
+          "rationale": "Exact projection of the current owner constant; it is not an engineering energy measurement.",
+          "source_type": "REPOSITORY_DERIVED",
+          "confidence": "HIGH",
+          "risk": "Synthetic unit must not be mixed with joules without an approved conversion.",
+          "validation_required": true
+        }
+      ]
+    },
+    {
+      "candidate_package_id": "CANDIDATE-CROP-CLASS-VEGETABLE-V1",
+      "crop_id": "VEGETABLE",
+      "agriculture_type": "CROP",
+      "life_type": "PLANT_LIFE",
+      "extension_id": "PLANT_EXTENSION",
+      "species_reference": null,
+      "species_reference_status": "SOURCE_UNDERSPECIFIED",
+      "taxonomy": null,
+      "taxonomy_gap": "VEGETABLE_ALPHA is referenced by synthetic-world data but is not defined in taxonomy-standard.js. This class candidate does not invent or promote a species.",
+      "propagation_source": "AGRICULTURE_ALPHA_SEEDS.VEGETABLE",
+      "economy_seed_reference": null,
+      "required_gates": [
+        "SEED_OR_PROPAGATION_SOURCE",
+        "COMPATIBLE_SOIL",
+        "WATER",
+        "NUTRIENTS",
+        "SUNLIGHT",
+        "TEMPERATURE",
+        "LABOR",
+        "ELAPSED_TIME",
+        "WAREHOUSE_CAPACITY",
+        "FUTURE_SPECIES_RESOLUTION"
+      ],
+      "numeric_parameters": [
+        {
+          "parameter_name": "agriculture_alpha_growth_hours",
+          "unit": "hour",
+          "minimum": 12,
+          "default": 12,
+          "maximum": 12,
+          "rationale": "Exact projection of the existing Agriculture Alpha VEGETABLE class value.",
+          "source_type": "REPOSITORY_DERIVED",
+          "confidence": "HIGH",
+          "risk": "The aggregate class is not a resolved species package.",
+          "validation_required": false
+        },
+        {
+          "parameter_name": "agriculture_alpha_yield_units",
+          "unit": "warehouse_unit_per_plot_cycle",
+          "minimum": 6,
+          "default": 6,
+          "maximum": 6,
+          "rationale": "Exact projection of the existing synthetic VEGETABLE yield value.",
+          "source_type": "REPOSITORY_DERIVED",
+          "confidence": "HIGH",
+          "risk": "Aggregate output cannot be interpreted as one biological species or kilogram.",
+          "validation_required": false
+        },
+        {
+          "parameter_name": "agriculture_alpha_water_per_hour",
+          "unit": "synthetic_water_unit_per_hour",
+          "minimum": 0.9,
+          "default": 0.9,
+          "maximum": 0.9,
+          "rationale": "Exact projection of the current Agriculture Alpha owner constant.",
+          "source_type": "REPOSITORY_DERIVED",
+          "confidence": "HIGH",
+          "risk": "No physical-liter conversion is currently authorized.",
+          "validation_required": true
+        },
+        {
+          "parameter_name": "agriculture_alpha_energy_per_hour",
+          "unit": "synthetic_energy_unit_per_hour",
+          "minimum": 0.45,
+          "default": 0.45,
+          "maximum": 0.45,
+          "rationale": "Exact projection of the current Agriculture Alpha owner constant.",
+          "source_type": "REPOSITORY_DERIVED",
+          "confidence": "HIGH",
+          "risk": "No joule conversion is currently authorized.",
+          "validation_required": true
+        }
+      ]
+    },
+    {
+      "candidate_package_id": "CANDIDATE-CROP-CLASS-FRUIT-V1",
+      "crop_id": "FRUIT",
+      "agriculture_type": "TREE",
+      "life_type": "PLANT_LIFE",
+      "extension_id": "PLANT_EXTENSION",
+      "species_reference": "FRUIT_ALPHA",
+      "species_reference_status": "REPOSITORY_DEFINED_SYNTHETIC_ALPHA",
+      "owner_taxonomy_record": {
+        "domain": "EUKARYOTA",
+        "kingdom": "PLANTAE",
+        "phylum": "TRACHEOPHYTA",
+        "class": "MAGNOLIOPSIDA",
+        "order": "ROSALES",
+        "family": "ROSACEAE",
+        "genus": "KAIOS_POMUM",
+        "species": "KAIOS_POMUM_ALPHA",
+        "subspecies": "SYNTHETIC_ALPHA",
+        "category": "PLANT"
+      },
+      "canonical_taxonomy_crosswalk": {
+        "domain_through_species": "DIRECT_RANK_MATCH",
+        "owner_subspecies": "SYNTHETIC_ALPHA",
+        "life_instance": null,
+        "life_instance_status": "ASSIGNED_ONLY_WHEN_AN_INDIVIDUAL_LIFE_INSTANCE_IS_CREATED",
+        "owner_category": "PLANT"
+      },
+      "propagation_source": "AGRICULTURE_ALPHA_SEEDS.FRUIT",
+      "economy_seed_reference": null,
+      "scope_note": "This is the existing aggregate FRUIT crop class. It does not replace the queued fruit-tree species package workline.",
+      "required_gates": [
+        "SEED_OR_PROPAGATION_SOURCE",
+        "COMPATIBLE_SOIL",
+        "WATER",
+        "NUTRIENTS",
+        "SUNLIGHT",
+        "TEMPERATURE",
+        "LABOR",
+        "ELAPSED_TIME",
+        "WAREHOUSE_CAPACITY",
+        "FRUIT_TREE_PACKAGE_REVIEW"
+      ],
+      "numeric_parameters": [
+        {
+          "parameter_name": "agriculture_alpha_growth_hours",
+          "unit": "hour",
+          "minimum": 48,
+          "default": 48,
+          "maximum": 48,
+          "rationale": "Exact projection of the Agriculture Alpha FRUIT cycle, not a real tree maturation duration.",
+          "source_type": "REPOSITORY_DERIVED",
+          "confidence": "HIGH",
+          "risk": "Synthetic cycle must not be represented as real orchard biology.",
+          "validation_required": false
+        },
+        {
+          "parameter_name": "agriculture_alpha_yield_units",
+          "unit": "warehouse_unit_per_plot_cycle",
+          "minimum": 10,
+          "default": 10,
+          "maximum": 10,
+          "rationale": "Exact projection of the existing synthetic FRUIT output value.",
+          "source_type": "REPOSITORY_DERIVED",
+          "confidence": "HIGH",
+          "risk": "Aggregate warehouse units are not mass or a food-quality claim.",
+          "validation_required": false
+        },
+        {
+          "parameter_name": "agriculture_alpha_water_per_hour",
+          "unit": "synthetic_water_unit_per_hour",
+          "minimum": 0.75,
+          "default": 0.75,
+          "maximum": 0.75,
+          "rationale": "Exact projection of the current Agriculture Alpha owner constant.",
+          "source_type": "REPOSITORY_DERIVED",
+          "confidence": "HIGH",
+          "risk": "No physical-liter conversion is currently authorized.",
+          "validation_required": true
+        },
+        {
+          "parameter_name": "agriculture_alpha_energy_per_hour",
+          "unit": "synthetic_energy_unit_per_hour",
+          "minimum": 0.35,
+          "default": 0.35,
+          "maximum": 0.35,
+          "rationale": "Exact projection of the current Agriculture Alpha owner constant.",
+          "source_type": "REPOSITORY_DERIVED",
+          "confidence": "HIGH",
+          "risk": "No engineering-energy conversion is currently authorized.",
+          "validation_required": true
+        }
+      ]
+    }
+  ],
+  "provenance": [
+    { "source_type": "REPOSITORY_DERIVED", "source_path": "KGEN-KAIOS/world-viewer/agriculture/agriculture-runtime.js", "source_commit": "05f471228af592e5c43071bc998e063101d82ef5", "git_object": "f09478806a47c10825258385ee855faa74f51a79", "sha256": "4557d6b449ce3979f2bf4ca10cc48f271ead2ddb34cc127e60b264ce26b577c2", "purpose": "Crop IDs, types, synthetic cycle constants and Agriculture owner." },
+    { "source_type": "REPOSITORY_DERIVED", "source_path": "KGEN-KAIOS/world-viewer/ecosystem/ecosystem-runtime.js", "source_commit": "05f471228af592e5c43071bc998e063101d82ef5", "git_object": "2bab509140ab4b93c7e4975286c826693965cf26", "sha256": "9b2cd9d4501727d3134ea332e1a30cd77d5d7d647300820f51d9c264784ef537", "purpose": "Ecology owner and resource-pool boundaries." },
+    { "source_type": "REPOSITORY_DERIVED", "source_path": "KGEN-KAIOS/world-viewer/economy/economy-runtime.js", "source_commit": "05f471228af592e5c43071bc998e063101d82ef5", "git_object": "2b1a37dba8cf3863eb4b30d4547995f281a6bc62", "sha256": "8b5879091b212ea3e0ead296719e872b9353209fd8982f01567f2bbb78991f27", "purpose": "Food, seed, inventory and ledger reference ownership." },
+    { "source_type": "REPOSITORY_DERIVED", "source_path": "KGEN-KAIOS/world-viewer/biology/taxonomy-standard.js", "source_commit": "05f471228af592e5c43071bc998e063101d82ef5", "git_object": "f4cc78d30bccf375bb3e55f5e3cb2df63d0a4683", "sha256": "2c7eb6d439ac320176751c4985d1f510b68a5656ef4b4ef041dc46b4f55dcc28", "purpose": "Existing RICE_ALPHA and FRUIT_ALPHA taxonomy records and the absence of VEGETABLE_ALPHA." },
+    { "source_type": "REPOSITORY_DERIVED", "source_path": "KGEN-KAIOS/world-viewer/data/synthetic-world.json", "source_commit": "05f471228af592e5c43071bc998e063101d82ef5", "git_object": "76ddff32f74c2b41ca7d9d9309b7b39a2a2618c8", "sha256": "4be4c1b83420bb24604742fb722a8aedba8b3d2c163f7f18ccd871628ee7f34f", "purpose": "Evidence that VEGETABLE_ALPHA is referenced without a taxonomy definition." },
+    { "source_type": "REPOSITORY_DERIVED", "source_path": "KAIOS_CANONICAL_LIFE_SCHEMA_V1.json", "source_commit": "05f471228af592e5c43071bc998e063101d82ef5", "git_object": "3bfcea2e0fc3854a6ff674a93ef32edc2ee0aab5", "sha256": "d1ced898d043e4890142df40a9033145762d4ceb28fd0e49eae39dc43bf224c5", "purpose": "PLANT_LIFE shared-core compatibility boundary." },
+    { "source_type": "REPOSITORY_DERIVED", "source_path": "KAIOS_CANONICAL_LIFE_TYPE_EXTENSIONS_V1.json", "source_commit": "05f471228af592e5c43071bc998e063101d82ef5", "git_object": "8f3a30d1cba18b7156c64439bfce5d9bafc6926e", "sha256": "72ab55fe394b1038cb2b8ab8bac616f378521b89fde36aa6cf5ab3cbebea58fa", "purpose": "PLANT_EXTENSION fields and applicability." },
+    { "source_type": "REPOSITORY_DERIVED", "source_path": "KAIOS_PHYSICAL_LABOR_SCHEMA.json", "source_commit": "05f471228af592e5c43071bc998e063101d82ef5", "git_object": "357b00093f4a912e616e9d39edf04753aacf94f7", "sha256": "21060f7bdf64f0a3af827f1fcd7d95d3170affef54c01bbeb449b9361fdd2f43", "purpose": "Labor availability, location and time accounting boundary." },
+    { "source_type": "REPOSITORY_DERIVED", "source_path": "KAIOS/life/forest-agriculture/KAIOS_FOREST_AGRICULTURE_RUNTIME_V1_SPEC.md", "source_commit": "05f471228af592e5c43071bc998e063101d82ef5", "git_object": "9a2dd4ad05bb7b2e3d71b91b479359947ada8376", "sha256": "4e1a23e97d09ec2dc4ad65440e6958e646f75ed418e5c703c5a5a1635c2809a1", "purpose": "Candidate scope, owner boundaries and causal gates." }
+  ],
+  "boundaries": {
+    "runtime_code": false,
+    "canonical_species_creation": false,
+    "rights_authority": false,
+    "economy_authority": false,
+    "wallet": false,
+    "kgen": false,
+    "deployment": false,
+    "merge": false,
+    "production_authority": false
+  }
+}
