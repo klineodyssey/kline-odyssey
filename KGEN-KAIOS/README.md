@@ -250,6 +250,9 @@ Can Claude, Gemini, OpenHands, GitHub Copilot, ChatGPT, Deep Research, Cursor, C
 | `../KAIOS/life/forest-agriculture/KAIOS_CURSOR_COMPOST_MODELS_REVIEW_CLOSEOUT.md` | Independent compost-model candidate review and formal lease release. |
 | `../KAIOS/life/candidates/forest-agriculture-v1/CURSOR_INSECT_CANDIDATES_WORK_ORDER.md` | Candidate-only insect package task envelope for `cursor-01`. |
 | `governance/autopilot/company_status/COMPANY_STATUS_2026-08-02_COMPOST_RELEASED_INSECT_CANDIDATES_DISPATCHED.md` | Company status for the controlled compost-to-insect transition. |
+| `../KAIOS/life/forest-agriculture/KAIOS_CURSOR_INSECT_CANDIDATES_REVIEW_CLOSEOUT.md` | Independent insect-candidate review and formal lease release. |
+| `../KAIOS/life/candidates/forest-agriculture-v1/CURSOR_POLLINATOR_RESEARCH_WORK_ORDER.md` | Research-only pollinator task envelope for `cursor-01`. |
+| `governance/autopilot/company_status/COMPANY_STATUS_2026-08-02_INSECT_RELEASED_POLLINATOR_RESEARCH_DISPATCHED.md` | Company status for the controlled insect-to-pollinator transition. |
 
 ## R&D Provenance And Biological Evolution Governance
 

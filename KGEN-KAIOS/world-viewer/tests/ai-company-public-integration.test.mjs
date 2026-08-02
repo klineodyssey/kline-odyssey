@@ -74,6 +74,21 @@ test("all eighteen public API projections are valid read-only JSON", async () =>
   }
 });
 
+test("public Cursor queue projection matches the canonical governance queue", async () => {
+  const canonical = JSON.parse(await read(
+    "KAIOS/life/forest-agriculture/KAIOS_CURSOR_CONTINUOUS_WORK_QUEUE.json"
+  ));
+  const projection = JSON.parse(await read("api/kaios/ai-company/v1/cursor-queue.json"));
+  const projectedFields = [
+    "task_id", "status", "worker_id", "reviewer", "branch_template",
+    "one_task_at_a_time", "continuous_dispatch_mode", "output_authority",
+    "queue", "forbidden"
+  ];
+  for (const field of projectedFields) {
+    assert.deepEqual(projection[field], canonical[field], `${field} projection drifted`);
+  }
+});
+
 test("API directory links only to declared static projections", async () => {
   const html = await read("api/kaios/ai-company/v1/index.html");
   for (const filename of API_FILES) {

@@ -5,9 +5,9 @@
     "updated": "2026-08-02",
     "updated_by": "Codex",
     "reviewed_by": "Codex",
-    "source_commit": "56d3b8f20a63c4a8a5d19251ed72f7f9fe4e78c9",
-    "task_id": "KAIOS-CURSOR-COMPOST-MODELS-001-RELEASE",
-    "change_reason": "Release the independently reviewed compost-model candidate claim and atomically dispatch cursor-01 to the next bounded insect-candidate package task.",
+    "source_commit": "c91d736c9812781d309bfda422b8ed42cd12eb49",
+    "task_id": "KAIOS-CURSOR-INSECT-CANDIDATES-001-RELEASE",
+    "change_reason": "Release the independently reviewed insect-candidate claim and atomically dispatch cursor-01 to the next bounded pollinator research task.",
     "source_of_truth": true
   },
   "formal_employee_requirements": [
@@ -133,6 +133,14 @@
       "branch": "cursor-handoff/KAIOS-CURSOR-INSECT-CANDIDATES-001",
       "output_status": "CURSOR_RESEARCH_CANDIDATE_ONLY",
       "reviewer": "codex-gm-01",
+      "status": "RELEASED"
+    },
+    {
+      "task_id": "KAIOS-CURSOR-POLLINATOR-RESEARCH-001",
+      "worker_id": "cursor-01",
+      "branch": "cursor-handoff/KAIOS-CURSOR-POLLINATOR-RESEARCH-001",
+      "output_status": "CURSOR_RESEARCH_PROPOSAL_ONLY",
+      "reviewer": "codex-gm-01",
       "status": "DISPATCHED"
     }
   ],
@@ -171,13 +179,13 @@
         "LIFE_RESEARCH_ANALYST"
       ],
       "workspace": "cursor-worker-workspace",
-      "current_task": "KAIOS-CURSOR-INSECT-CANDIDATES-001",
-      "current_branch": "cursor-handoff/KAIOS-CURSOR-INSECT-CANDIDATES-001",
+      "current_task": "KAIOS-CURSOR-POLLINATOR-RESEARCH-001",
+      "current_branch": "cursor-handoff/KAIOS-CURSOR-POLLINATOR-RESEARCH-001",
       "status": "ACTIVE",
       "employee_status": "ACTIVE",
       "trust_level": "T2",
-      "heartbeat": "2026-08-02T07:18:56Z",
-      "last_report": "KAIOS/life/candidates/forest-agriculture-v1/compost-models/CURSOR_COMPOST_MODELS_REPORT.md",
+      "heartbeat": "2026-08-02T08:28:14Z",
+      "last_report": "KAIOS/life/candidates/forest-agriculture-v1/insect-candidates/CURSOR_INSECT_CANDIDATES_REPORT.md",
       "allowed_branch_pattern": "cursor-handoff/<Task-ID>",
       "branch_input_aliases": [
         "cursor/<feature-name>"

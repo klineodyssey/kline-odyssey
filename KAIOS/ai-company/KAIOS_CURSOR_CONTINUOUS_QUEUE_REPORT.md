@@ -31,16 +31,27 @@ The vegetable assignment was allowed to complete before its lease was released.
 - Fertilizer release and compost dispatch governance: PR `#100`, independently
   reviewed at `P0=0 / P1=0 / P2=0` and merged in
   `38901fddd3a513b5121b8828dce43898a7ed74b6`.
+- Compost-model research candidates: PR `#101`, independently reviewed after
+  bounded repairs and merged as `CURSOR_RESEARCH_CANDIDATE_ONLY` in
+  `56d3b8f20a63c4a8a5d19251ed72f7f9fe4e78c9`.
+- Compost release and insect dispatch governance: PR `#102`, independently
+  reviewed at `P0=0 / P1=0 / P2=0` and merged in
+  `88dce5e0532567a1f1113abf9bfee907efea65bc`.
+- Insect candidate research: PR `#104`, independently reviewed at
+  `P0=0 / P1=0 / P2=0` and merged as
+  `CURSOR_RESEARCH_CANDIDATE_ONLY` in
+  `c91d736c9812781d309bfda422b8ed42cd12eb49`.
 
 ## Current Assignment
 
-- Task: `KAIOS-CURSOR-COMPOST-MODELS-001`
-- Branch: `cursor-handoff/KAIOS-CURSOR-COMPOST-MODELS-001`
+- Task: `KAIOS-CURSOR-POLLINATOR-RESEARCH-001`
+- Branch: `cursor-handoff/KAIOS-CURSOR-POLLINATOR-RESEARCH-001`
 - Status: `ACTIVE / ONE_TASK_AT_A_TIME`
-- Output authority: `CANDIDATE_ONLY_OR_RESEARCH_PROPOSAL_ONLY`
+- Output authority: `RESEARCH_PROPOSAL_ONLY / PENDING_CODEX_REVIEW`
 
-The next safe queue item is insect candidate research. It may be dispatched
-only after Codex independently reviews and formally releases the compost claim.
+The next safe queue item is the earthworm candidate package. It may be
+dispatched only after Codex independently reviews and formally releases the
+pollinator research claim.
 
 ## Boundaries
 
