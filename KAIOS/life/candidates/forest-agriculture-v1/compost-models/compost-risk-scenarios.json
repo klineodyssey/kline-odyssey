@@ -1,0 +1,258 @@
+{
+  "dataset_id": "KAIOS-COMPOST-RISK-SCENARIOS-V1",
+  "schema_version": "1.0.0-candidate",
+  "status": "CURSOR_RESEARCH_CANDIDATE_ONLY",
+  "review_status": "PENDING_CODEX_REVIEW",
+  "task_id": "KAIOS-CURSOR-COMPOST-MODELS-001",
+  "worker_id": "cursor-01",
+  "branch": "cursor-handoff/KAIOS-CURSOR-COMPOST-MODELS-001",
+  "source_base_commit": "38901fddd3a513b5121b8828dce43898a7ed74b6",
+  "source_hash_basis": "SHA256_OF_EXACT_GIT_BLOB_BYTES_AT_SOURCE_BASE_COMMIT",
+  "mode": "LOCAL_DETERMINISTIC_SIMULATION_RISK_FIXTURES",
+  "authority": "NO_PRODUCTION_AUTHORITY",
+  "canonical_promotion": false,
+  "all_values_label": "SIMULATION_PROPOSAL_OR_DETERMINISTIC_TEST_FIXTURE_REQUIRES_OWNER_VALIDATION",
+  "risk_boundary": "These fixtures test fail-closed accounting and custody behavior. They are not real probabilities, compost instructions, safety limits, emissions estimates, environmental approvals, remediation guidance, product claims or legal certifications.",
+  "microbial_activity_model": {
+    "label": "ABSTRACT_MICROBIAL_DECOMPOSITION_PROXY",
+    "life_runtime_scope": "NOT_FULL_LIFE_RUNTIME",
+    "creates_life": false,
+    "creates_population": false,
+    "creates_species": false
+  },
+  "numeric_parameter_contract": {
+    "required_fields": [
+      "parameter_name",
+      "unit",
+      "minimum",
+      "default",
+      "maximum",
+      "rationale",
+      "source_type",
+      "confidence",
+      "risk",
+      "validation_required"
+    ],
+    "allowed_source_types": [
+      "SOURCE_DERIVED",
+      "REPOSITORY_DERIVED",
+      "MODEL_INFERENCE",
+      "RESEARCH_PROPOSAL",
+      "ASSUMPTION",
+      "SOURCE_UNDERSPECIFIED"
+    ],
+    "range_rule": "minimum <= default <= maximum",
+    "validation_rule": "Every numeric parameter requires validation_required equal to true.",
+    "fixture_rule": "Exact integers in deterministic_fixture, identity strings, versions and declared counts are non-tunable oracle data."
+  },
+  "ledger_contract": {
+    "mass_unit": "microkilogram_proxy",
+    "water_component_unit": "microkilogram_water_mass_proxy",
+    "nutrient_component_unit": "microkilogram_nutrient_proxy",
+    "energy_unit": "micro_joule_proxy",
+    "labor_unit": "micro_worker_minute",
+    "tolerance": 0,
+    "closure_rule": "Every accepted-state ledger has nonnegative integer values, initial_total equal to final_total and closed equal to true.",
+    "rejection_rule": "An invalid proposed transform may expose its mismatch in a proposed check, but the accepted state must remain unchanged and all accepted-state ledgers must still close."
+  },
+  "risk_scenarios": [
+    {
+      "scenario_id": "COMPOST-SCENARIO-NORMAL-CLOSED-PROCESS-V1",
+      "class": "NORMAL_PATH",
+      "title": "All owner gates and resource ledgers close",
+      "trigger_parameter": {"parameter_name":"required_stage_count","unit":"declared_stage_count","minimum":6,"default":6,"maximum":6,"rationale":"Requires the complete six-stage candidate sequence before output custody can close.","source_type":"RESEARCH_PROPOSAL","confidence":"MEDIUM","risk":"The count describes this test contract and not a real production standard.","validation_required":true},
+      "preconditions": ["ALL_SIX_STAGES_COMPLETE_IN_ORDER", "ALL_FOREIGN_OWNER_REFERENCES_PRESENT", "ZERO_UNRESOLVED_CONTAMINATION", "MOISTURE_AND_AERATION_PROXY_GATES_PASS", "ENERGY_AND_LABOR_CAPACITY_AVAILABLE"],
+      "deterministic_fixture": {
+        "total_physical_mass_ledger_microkilogram_proxy": {"initial_feedstock_custody":100000000,"initial_added_process_water_custody":20000000,"finished_candidate_output_custody":70000000,"gases_emissions_proxy_custody":30000000,"leachate_custody":12000000,"rejects_custody":5000000,"remaining_feedstock_custody":3000000,"disposal_custody":0,"initial_total":120000000,"final_total":120000000,"closed":true},
+        "water_mass_component_ledger_microkilogram_proxy": {"initial_feedstock_contained_water":40000000,"initial_added_process_water":20000000,"finished_candidate_output_water":28000000,"atmospheric_water_proxy_custody":20000000,"leachate_water_custody":10000000,"rejects_water_custody":1000000,"remaining_feedstock_water_custody":1000000,"disposal_water_custody":0,"initial_total":60000000,"final_total":60000000,"closed":true},
+        "nutrient_mass_component_ledger_microkilogram_proxy": {"initial_feedstock_nutrient":5000000,"finished_candidate_output_nutrient":4000000,"gases_emissions_nutrient_proxy_custody":0,"leachate_nutrient_custody":500000,"rejects_nutrient_custody":300000,"remaining_feedstock_nutrient_custody":200000,"disposal_nutrient_custody":0,"initial_total":5000000,"final_total":5000000,"closed":true},
+        "energy_proxy_ledger_micro_joule_proxy": {"initial_feedstock_embedded_energy":20000000,"initial_external_energy_reserve":30000000,"finished_candidate_output_embedded_energy":10000000,"gases_emissions_proxy_energy_custody":5000000,"leachate_energy_proxy_custody":1000000,"rejects_energy_proxy_custody":1000000,"remaining_feedstock_energy_proxy_custody":3000000,"disposal_energy_proxy_custody":0,"environmental_heat_dissipation_proxy_custody":30000000,"initial_total":50000000,"final_total":50000000,"closed":true},
+        "labor_capacity_ledger_micro_worker_minute": {"validated_capacity":480000000,"consumed":360000000,"remaining":120000000,"initial_total":480000000,"final_total":480000000,"closed":true,"overlap_detected":false,"location_conflict_detected":false},
+        "elapsed_simulation_tick": 372,
+        "fertilizer_inventory_delta": 0,
+        "soil_nutrient_state_delta": 0
+      },
+      "expected_status": "FINISHED_CANDIDATE_CUSTODY_CLOSED_PENDING_OWNER_MAPPING",
+      "required_owner_action": "Owners independently validate their references and deltas; no candidate file applies them."
+    },
+    {
+      "scenario_id": "COMPOST-RISK-CONTAMINATION-HOLD-V1",
+      "class": "FAILURE_PATH",
+      "title": "Nonzero unresolved contaminant remains in quality hold",
+      "trigger_parameter": {"parameter_name":"unresolved_contaminant_acceptance_fraction","unit":"fraction_of_total_wet_mass","minimum":0,"default":0,"maximum":0,"rationale":"Forces any nonzero unresolved contaminant fixture into quality hold before batch assembly.","source_type":"ASSUMPTION","confidence":"LOW","risk":"Not a regulatory, toxicological, analytical or safety threshold.","validation_required":true},
+      "preconditions": ["CONTAMINANT_MASS_PROXY_EQUALS_1000000", "QUALITY_HOLD_LOCATION_PRESENT", "NO_PROCESS_WATER_DEBIT"],
+      "deterministic_fixture": {
+        "total_physical_mass_ledger_microkilogram_proxy": {"initial_feedstock_receipt":100000000,"final_quality_hold_custody":100000000,"finished_candidate_output_custody":0,"gases_emissions_proxy_custody":0,"leachate_custody":0,"rejects_custody":0,"remaining_feedstock_custody":0,"disposal_custody":0,"initial_total":100000000,"final_total":100000000,"closed":true},
+        "water_mass_component_ledger_microkilogram_proxy": {"initial_feedstock_contained_water":40000000,"final_quality_hold_water":40000000,"initial_total":40000000,"final_total":40000000,"closed":true},
+        "nutrient_mass_component_ledger_microkilogram_proxy": {"initial_feedstock_nutrient":5000000,"final_quality_hold_nutrient":5000000,"initial_total":5000000,"final_total":5000000,"closed":true},
+        "contaminant_mass_component_ledger_microkilogram_proxy": {"initial_detected_contaminant":1000000,"final_quality_hold_contaminant":1000000,"initial_total":1000000,"final_total":1000000,"closed":true},
+        "energy_proxy_ledger_micro_joule_proxy": {"initial_inspection_energy_reserve":1000000,"environmental_heat_dissipation_proxy_custody":1000000,"initial_total":1000000,"final_total":1000000,"closed":true},
+        "labor_capacity_ledger_micro_worker_minute": {"validated_capacity":60000000,"consumed":45000000,"remaining":15000000,"initial_total":60000000,"final_total":60000000,"closed":true,"overlap_detected":false,"location_conflict_detected":false},
+        "process_stage_reached": "COMPOST-STAGE-01-RECEIPT-QUALITY-HOLD-V1"
+      },
+      "expected_status": "REJECTED_QUALITY_HOLD_NO_BATCH_ASSEMBLY",
+      "required_owner_action": "Qualified foreign owners determine testing, release, recovery or disposal; this candidate provides none of those decisions."
+    },
+    {
+      "scenario_id": "COMPOST-RISK-MOISTURE-STRESS-HOLD-V1",
+      "class": "FAILURE_PATH",
+      "title": "Dimensionless moisture proxy blocks progression",
+      "trigger_parameter": {"parameter_name":"moisture_stress_signal","unit":"dimensionless_simulation_signal","minimum":0,"default":0.2,"maximum":0.349999,"rationale":"Provides an exact below-range stress fixture without defining physical moisture guidance.","source_type":"RESEARCH_PROPOSAL","confidence":"LOW","risk":"The signal must not be converted into a moisture target or operational instruction.","validation_required":true},
+      "preconditions": ["SELECTED_MOISTURE_SIGNAL_EQUALS_200000_FIXED_POINT", "SELECTED_MINIMUM_EQUALS_350000_FIXED_POINT", "ASSEMBLED_BATCH_CUSTODY_PRESENT"],
+      "deterministic_fixture": {
+        "selected_moisture_signal_fixed_point": 200000,
+        "selected_minimum_moisture_signal_fixed_point": 350000,
+        "total_physical_mass_ledger_microkilogram_proxy": {"initial_assembled_batch_custody":120000000,"final_in_process_hold_custody":120000000,"finished_candidate_output_custody":0,"gases_emissions_proxy_custody":0,"leachate_custody":0,"rejects_custody":0,"remaining_feedstock_custody":0,"disposal_custody":0,"initial_total":120000000,"final_total":120000000,"closed":true},
+        "water_mass_component_ledger_microkilogram_proxy": {"initial_assembled_batch_water":60000000,"final_in_process_hold_water":60000000,"initial_total":60000000,"final_total":60000000,"closed":true},
+        "nutrient_mass_component_ledger_microkilogram_proxy": {"initial_assembled_batch_nutrient":5000000,"final_in_process_hold_nutrient":5000000,"initial_total":5000000,"final_total":5000000,"closed":true},
+        "energy_proxy_ledger_micro_joule_proxy": {"initial_feedstock_embedded_energy":20000000,"initial_external_energy_reserve":30000000,"final_batch_embedded_energy":20000000,"final_external_energy_reserve":28000000,"environmental_heat_dissipation_proxy_custody":2000000,"initial_total":50000000,"final_total":50000000,"closed":true},
+        "labor_capacity_ledger_micro_worker_minute": {"validated_capacity":480000000,"consumed":30000000,"remaining":450000000,"initial_total":480000000,"final_total":480000000,"closed":true,"overlap_detected":false,"location_conflict_detected":false}
+      },
+      "expected_status": "RESOURCE_STRESSED_HOLD_NO_TRANSFORMATION",
+      "required_owner_action": "Owner may submit a new water-custody proposal; this candidate does not prescribe an adjustment."
+    },
+    {
+      "scenario_id": "COMPOST-RISK-ENERGY-SHORTAGE-BLOCK-V1",
+      "class": "FAILURE_PATH",
+      "title": "External energy reserve is insufficient",
+      "trigger_parameter": {"parameter_name":"minimum_external_energy_reserve","unit":"micro_joule_proxy_per_reference_fixture","minimum":30000000,"default":30000000,"maximum":30000000,"rationale":"Matches the exact external energy total needed by the six-stage oracle and blocks free conversion.","source_type":"RESEARCH_PROPOSAL","confidence":"LOW","risk":"Not a real equipment energy demand or engineering requirement.","validation_required":true},
+      "preconditions": ["AVAILABLE_EXTERNAL_ENERGY_EQUALS_10000000", "REQUIRED_EXTERNAL_ENERGY_EQUALS_30000000", "BATCH_ASSEMBLY_HOLD_PRESENT"],
+      "deterministic_fixture": {
+        "available_external_energy_micro_joule_proxy": 10000000,
+        "required_external_energy_micro_joule_proxy": 30000000,
+        "total_physical_mass_ledger_microkilogram_proxy": {"initial_feedstock_custody":100000000,"initial_process_water_reserve":20000000,"final_feedstock_hold_custody":100000000,"final_process_water_reserve":20000000,"finished_candidate_output_custody":0,"gases_emissions_proxy_custody":0,"leachate_custody":0,"rejects_custody":0,"remaining_feedstock_custody":0,"disposal_custody":0,"initial_total":120000000,"final_total":120000000,"closed":true},
+        "water_mass_component_ledger_microkilogram_proxy": {"initial_feedstock_contained_water":40000000,"initial_process_water_reserve":20000000,"final_feedstock_contained_water":40000000,"final_process_water_reserve":20000000,"initial_total":60000000,"final_total":60000000,"closed":true},
+        "nutrient_mass_component_ledger_microkilogram_proxy": {"initial_feedstock_nutrient":5000000,"final_feedstock_nutrient":5000000,"initial_total":5000000,"final_total":5000000,"closed":true},
+        "energy_proxy_ledger_micro_joule_proxy": {"initial_feedstock_embedded_energy":20000000,"initial_available_external_energy":10000000,"final_feedstock_embedded_energy":20000000,"final_available_external_energy":10000000,"initial_total":30000000,"final_total":30000000,"closed":true},
+        "labor_capacity_ledger_micro_worker_minute": {"validated_capacity":480000000,"consumed":0,"remaining":480000000,"initial_total":480000000,"final_total":480000000,"closed":true,"overlap_detected":false,"location_conflict_detected":false}
+      },
+      "expected_status": "ENERGY_PENDING_NO_STAGE_PROGRESSION",
+      "required_owner_action": "Energy owner may reserve capacity through a new event; no free or negative energy is allowed."
+    },
+    {
+      "scenario_id": "COMPOST-RISK-AERATION-PROXY-BLOCK-V1",
+      "class": "FAILURE_PATH",
+      "title": "Aeration or oxygen proxy remains below the selected gate",
+      "trigger_parameter": {"parameter_name":"minimum_aeration_proxy_signal","unit":"dimensionless_simulation_signal","minimum":0.4,"default":0.4,"maximum":1,"rationale":"Provides a deterministic abstract process gate without modeling oxygen concentration, airflow or living physiology.","source_type":"MODEL_INFERENCE","confidence":"LOW","risk":"Not an oxygen, ventilation, equipment or safety specification.","validation_required":true},
+      "preconditions": ["SELECTED_AERATION_PROXY_EQUALS_200000_FIXED_POINT", "SELECTED_MINIMUM_EQUALS_400000_FIXED_POINT", "AERATION_EQUIPMENT_REFERENCE_UNAVAILABLE"],
+      "deterministic_fixture": {
+        "selected_aeration_proxy_fixed_point": 200000,
+        "selected_minimum_aeration_proxy_fixed_point": 400000,
+        "total_physical_mass_ledger_microkilogram_proxy": {"initial_assembled_batch_custody":120000000,"final_in_process_hold_custody":120000000,"finished_candidate_output_custody":0,"gases_emissions_proxy_custody":0,"leachate_custody":0,"rejects_custody":0,"remaining_feedstock_custody":0,"disposal_custody":0,"initial_total":120000000,"final_total":120000000,"closed":true},
+        "water_mass_component_ledger_microkilogram_proxy": {"initial_assembled_batch_water":60000000,"final_in_process_hold_water":60000000,"initial_total":60000000,"final_total":60000000,"closed":true},
+        "nutrient_mass_component_ledger_microkilogram_proxy": {"initial_assembled_batch_nutrient":5000000,"final_in_process_hold_nutrient":5000000,"initial_total":5000000,"final_total":5000000,"closed":true},
+        "energy_proxy_ledger_micro_joule_proxy": {"initial_feedstock_embedded_energy":20000000,"initial_external_energy_reserve":30000000,"final_batch_embedded_energy":20000000,"final_external_energy_reserve":27000000,"environmental_heat_dissipation_proxy_custody":3000000,"initial_total":50000000,"final_total":50000000,"closed":true},
+        "labor_capacity_ledger_micro_worker_minute": {"validated_capacity":480000000,"consumed":45000000,"remaining":435000000,"initial_total":480000000,"final_total":480000000,"closed":true,"overlap_detected":false,"location_conflict_detected":false}
+      },
+      "expected_status": "RESOURCE_STRESSED_HOLD_NO_DECOMPOSITION_PROXY_TRANSFER",
+      "required_owner_action": "Equipment, energy and Ecology owners decide whether a new bounded event can be proposed."
+    },
+    {
+      "scenario_id": "COMPOST-RISK-INCOMPLETE-PROCESSING-HOLD-V1",
+      "class": "FAILURE_PATH",
+      "title": "Elapsed stage sequence is incomplete",
+      "trigger_parameter": {"parameter_name":"minimum_complete_process_elapsed_time","unit":"simulation_tick","minimum":372,"default":372,"maximum":2000,"rationale":"Requires the complete declared stage timeline before any finished candidate output is allowed.","source_type":"RESEARCH_PROPOSAL","confidence":"LOW","risk":"Not a real process duration or maturity schedule.","validation_required":true},
+      "preconditions": ["ELAPSED_SIMULATION_TICK_EQUALS_246", "REQUIRED_ELAPSED_SIMULATION_TICK_EQUALS_372", "PARTIAL_CUSTODY_TRANSFERS_RECORDED"],
+      "deterministic_fixture": {
+        "elapsed_simulation_tick": 246,
+        "required_elapsed_simulation_tick": 372,
+        "total_physical_mass_ledger_microkilogram_proxy": {"initial_assembled_batch_custody":120000000,"in_process_material_hold_custody":75000000,"finished_candidate_output_custody":0,"gases_emissions_proxy_custody":20000000,"leachate_custody":10000000,"rejects_custody":0,"remaining_feedstock_custody":15000000,"disposal_custody":0,"initial_total":120000000,"final_total":120000000,"closed":true},
+        "water_mass_component_ledger_microkilogram_proxy": {"initial_assembled_batch_water":60000000,"in_process_material_water":31000000,"atmospheric_water_proxy_custody":15000000,"leachate_water_custody":10000000,"rejects_water_custody":0,"remaining_feedstock_water_custody":4000000,"disposal_water_custody":0,"initial_total":60000000,"final_total":60000000,"closed":true},
+        "nutrient_mass_component_ledger_microkilogram_proxy": {"initial_assembled_batch_nutrient":5000000,"in_process_material_nutrient":3500000,"gases_emissions_nutrient_proxy_custody":0,"leachate_nutrient_custody":500000,"rejects_nutrient_custody":0,"remaining_feedstock_nutrient_custody":1000000,"disposal_nutrient_custody":0,"initial_total":5000000,"final_total":5000000,"closed":true},
+        "energy_proxy_ledger_micro_joule_proxy": {"initial_feedstock_embedded_energy":20000000,"initial_external_energy_reserve":30000000,"in_process_material_energy":12000000,"gases_emissions_proxy_energy_custody":3000000,"leachate_energy_proxy_custody":1000000,"rejects_energy_proxy_custody":0,"remaining_feedstock_energy_proxy_custody":4000000,"disposal_energy_proxy_custody":0,"environmental_heat_dissipation_proxy_custody":30000000,"initial_total":50000000,"final_total":50000000,"closed":true},
+        "labor_capacity_ledger_micro_worker_minute": {"validated_capacity":480000000,"consumed":240000000,"remaining":240000000,"initial_total":480000000,"final_total":480000000,"closed":true,"overlap_detected":false,"location_conflict_detected":false}
+      },
+      "expected_status": "INCOMPLETE_PROCESSING_HOLD_NO_FINISHED_OUTPUT",
+      "required_owner_action": "The batch remains in Ecology custody until a later owner-approved event or named disposal transfer."
+    },
+    {
+      "scenario_id": "COMPOST-RISK-MASS-LEDGER-MISMATCH-REJECTION-V1",
+      "class": "FAILURE_PATH",
+      "title": "One-unit mass mismatch rejects the proposed transform",
+      "trigger_parameter": {"parameter_name":"accepted_mass_ledger_tolerance","unit":"integer_micro_unit","minimum":0,"default":0,"maximum":0,"rationale":"Rejects any nonzero fixed-point mass mismatch before owner state changes.","source_type":"RESEARCH_PROPOSAL","confidence":"MEDIUM","risk":"Future unit adapters need separately reviewed rounding and cannot silently relax the oracle.","validation_required":true},
+      "preconditions": ["PROPOSED_INITIAL_TOTAL_EQUALS_120000000", "PROPOSED_FINAL_TOTAL_EQUALS_119000000", "EXPECTED_MISMATCH_EQUALS_1000000"],
+      "deterministic_fixture": {
+        "proposed_mass_check": {"proposed_initial_total":120000000,"proposed_final_total":119000000,"mismatch":1000000,"accepted_tolerance":0,"rejection_required":true},
+        "total_physical_mass_ledger_microkilogram_proxy": {"initial_feedstock_custody":100000000,"initial_process_water_reserve":20000000,"final_feedstock_custody":100000000,"final_process_water_reserve":20000000,"finished_candidate_output_custody":0,"gases_emissions_proxy_custody":0,"leachate_custody":0,"rejects_custody":0,"remaining_feedstock_custody":0,"disposal_custody":0,"initial_total":120000000,"final_total":120000000,"closed":true},
+        "water_mass_component_ledger_microkilogram_proxy": {"initial_feedstock_contained_water":40000000,"initial_process_water_reserve":20000000,"final_feedstock_contained_water":40000000,"final_process_water_reserve":20000000,"initial_total":60000000,"final_total":60000000,"closed":true},
+        "nutrient_mass_component_ledger_microkilogram_proxy": {"initial_feedstock_nutrient":5000000,"final_feedstock_nutrient":5000000,"initial_total":5000000,"final_total":5000000,"closed":true},
+        "energy_proxy_ledger_micro_joule_proxy": {"initial_feedstock_embedded_energy":20000000,"initial_external_energy_reserve":30000000,"final_feedstock_embedded_energy":20000000,"final_external_energy_reserve":30000000,"initial_total":50000000,"final_total":50000000,"closed":true},
+        "labor_capacity_ledger_micro_worker_minute": {"validated_capacity":480000000,"consumed":0,"remaining":480000000,"initial_total":480000000,"final_total":480000000,"closed":true,"overlap_detected":false,"location_conflict_detected":false}
+      },
+      "expected_status": "LEDGER_REJECTED_ACCEPTED_STATE_UNCHANGED",
+      "required_owner_action": "No owner mutation occurs; a corrected proposal requires a new event identity and hash chain."
+    },
+    {
+      "scenario_id": "COMPOST-SCENARIO-CLOSED-FINAL-OUTPUT-CUSTODY-V1",
+      "class": "CUSTODY_CLOSE_PATH",
+      "title": "Finished candidate output moves to accepted foreign custody",
+      "trigger_parameter": {"parameter_name":"required_output_custody_acceptance_event_count","unit":"event_reference_count","minimum":1,"default":1,"maximum":1,"rationale":"Requires one explicit foreign owner acceptance event before final candidate custody closes.","source_type":"RESEARCH_PROPOSAL","confidence":"MEDIUM","risk":"An event reference does not certify product quality, safety or legal status.","validation_required":true},
+      "preconditions": ["ALL_PROCESS_LEDGERS_CLOSED", "FINISHED_MATERIAL_PENDING_TRANSFER_EQUALS_70000000", "SUPPLY_CHAIN_CUSTODY_ACCEPTANCE_EVENT_PRESENT", "FINAL_HASH_LINK_PRESENT"],
+      "deterministic_fixture": {
+        "total_physical_mass_ledger_microkilogram_proxy": {"initial_feedstock_custody":100000000,"initial_added_process_water_custody":20000000,"finished_candidate_output_custody":70000000,"gases_emissions_proxy_custody":30000000,"leachate_custody":12000000,"rejects_custody":5000000,"remaining_feedstock_custody":3000000,"disposal_custody":0,"initial_total":120000000,"final_total":120000000,"closed":true},
+        "water_mass_component_ledger_microkilogram_proxy": {"initial_feedstock_contained_water":40000000,"initial_added_process_water":20000000,"finished_candidate_output_water":28000000,"atmospheric_water_proxy_custody":20000000,"leachate_water_custody":10000000,"rejects_water_custody":1000000,"remaining_feedstock_water_custody":1000000,"disposal_water_custody":0,"initial_total":60000000,"final_total":60000000,"closed":true},
+        "nutrient_mass_component_ledger_microkilogram_proxy": {"initial_feedstock_nutrient":5000000,"finished_candidate_output_nutrient":4000000,"gases_emissions_nutrient_proxy_custody":0,"leachate_nutrient_custody":500000,"rejects_nutrient_custody":300000,"remaining_feedstock_nutrient_custody":200000,"disposal_nutrient_custody":0,"initial_total":5000000,"final_total":5000000,"closed":true},
+        "energy_proxy_ledger_micro_joule_proxy": {"initial_feedstock_embedded_energy":20000000,"initial_external_energy_reserve":30000000,"finished_candidate_output_embedded_energy":10000000,"gases_emissions_proxy_energy_custody":5000000,"leachate_energy_proxy_custody":1000000,"rejects_energy_proxy_custody":1000000,"remaining_feedstock_energy_proxy_custody":3000000,"disposal_energy_proxy_custody":0,"environmental_heat_dissipation_proxy_custody":30000000,"initial_total":50000000,"final_total":50000000,"closed":true},
+        "labor_capacity_ledger_micro_worker_minute": {"validated_capacity":480000000,"consumed":360000000,"remaining":120000000,"initial_total":480000000,"final_total":480000000,"closed":true,"overlap_detected":false,"location_conflict_detected":false},
+        "output_custody_transfer_mass_ledger_microkilogram_proxy": {"initial_finished_material_pending_transfer":70000000,"final_finished_candidate_output_custody":70000000,"initial_total":70000000,"final_total":70000000,"closed":true},
+        "supply_chain_custody_acceptance_event_id": "FIXTURE-SUPPLY-CUSTODY-ACCEPT-001",
+        "economy_lot_id": "SOURCE_UNDERSPECIFIED_OWNER_MAY_CREATE_AFTER_REVIEW",
+        "fertilizer_inventory_delta": 0,
+        "soil_nutrient_state_delta": 0,
+        "economy_balance_delta": 0
+      },
+      "expected_status": "FINISHED_CANDIDATE_CUSTODY_CLOSED_NO_FERTILIZER_OR_SOIL_CREDIT",
+      "required_owner_action": "Supply Chain accepts custody; Economy may later create a distinct lot after review, while Ecology retains transformation truth."
+    }
+  ],
+  "required_scenario_ids": [
+    "COMPOST-SCENARIO-NORMAL-CLOSED-PROCESS-V1",
+    "COMPOST-RISK-CONTAMINATION-HOLD-V1",
+    "COMPOST-RISK-MOISTURE-STRESS-HOLD-V1",
+    "COMPOST-RISK-ENERGY-SHORTAGE-BLOCK-V1",
+    "COMPOST-RISK-AERATION-PROXY-BLOCK-V1",
+    "COMPOST-RISK-INCOMPLETE-PROCESSING-HOLD-V1",
+    "COMPOST-RISK-MASS-LEDGER-MISMATCH-REJECTION-V1",
+    "COMPOST-SCENARIO-CLOSED-FINAL-OUTPUT-CUSTODY-V1"
+  ],
+  "global_failure_conditions": [
+    "ANY_ACCEPTED_STATE_LEDGER_DOES_NOT_CLOSE",
+    "ANY_ACCEPTED_POOL_IS_NEGATIVE",
+    "UNRESOLVED_CONTAMINATION_ENTERS_BATCH",
+    "MOISTURE_OR_AERATION_PROXY_FAILURE_STILL_TRANSFORMS_MASS",
+    "ENERGY_SHORTAGE_CREATES_FREE_ENERGY_OR_OUTPUT",
+    "INCOMPLETE_PROCESSING_CREATES_FINISHED_OUTPUT",
+    "MASS_MISMATCH_MUTATES_ACCEPTED_STATE",
+    "GASES_EMISSIONS_LEACHATE_REJECTS_REMAINING_FEEDSTOCK_OR_DISPOSAL_LACK_NAMED_CUSTODY",
+    "FINAL_OUTPUT_CLOSES_WITHOUT_FOREIGN_ACCEPTANCE_EVENT",
+    "FINISHED_OUTPUT_AUTOMATICALLY_CREDITS_FERTILIZER_INVENTORY_OR_SOIL_NUTRIENT_STATE",
+    "ABSTRACT_MICROBIAL_DECOMPOSITION_PROXY_CREATES_LIFE",
+    "ANY_FIXTURE_IS_PRESENTED_AS_GUIDANCE_APPROVAL_CERTIFICATION_OR_GUARANTEE"
+  ],
+  "provenance": [
+    {"source_type":"REPOSITORY_DERIVED","source_path":"KAIOS/life/forest-agriculture/KAIOS_FOREST_AGRICULTURE_RUNTIME_V1_SPEC.md","source_commit":"38901fddd3a513b5121b8828dce43898a7ed74b6","git_object":"9a2dd4ad05bb7b2e3d71b91b479359947ada8376","sha256":"4e1a23e97d09ec2dc4ad65440e6958e646f75ed418e5c703c5a5a1635c2809a1","usage":"Required compost inputs, time, space, labor and explicit output partitioning."},
+    {"source_type":"REPOSITORY_DERIVED","source_path":"KAIOS/life/candidates/forest-agriculture-v1/fertilizer-models/environmental-risk-scenarios.json","source_commit":"38901fddd3a513b5121b8828dce43898a7ed74b6","git_object":"19423c1850d974b1c30574e3ddd7035bdb5c042a","sha256":"2ff5bca9f2700614405ce72ffc8c4b65c465ab60bc1aac4970e913732f7620fa","usage":"Fail-closed custody, contamination, resource-shortage and recovery fixture style."},
+    {"source_type":"REPOSITORY_DERIVED","source_path":"KAIOS/life/ecology/KAIOS_REPRODUCTION_ECOLOGY_SCHEMA_V1.json","source_commit":"38901fddd3a513b5121b8828dce43898a7ed74b6","git_object":"c99eb0eba386af67c009bfd115e88b934d1c9000","sha256":"3257f8cd1f0ba482f0c6bc8d98fbfb4748c8a1172c9c88d4bf9a2981c90af9f0","usage":"Ecology event and decomposition owner boundary."},
+    {"source_type":"REPOSITORY_DERIVED","source_path":"KAIOS_SUPPLY_CHAIN_SCHEMA.json","source_commit":"38901fddd3a513b5121b8828dce43898a7ed74b6","git_object":"56bc0ff72042100cb74ace45ee3c30d7703a48e9","sha256":"ea6d175e8bfd242a288f6e6374e97e97fd18ecf5edb40761a29de2129036aa60","usage":"Quality hold and foreign event custody structure."},
+    {"source_type":"REPOSITORY_DERIVED","source_path":"KAIOS_PHYSICAL_LABOR_SCHEMA.json","source_commit":"38901fddd3a513b5121b8828dce43898a7ed74b6","git_object":"357b00093f4a912e616e9d39edf04753aacf94f7","sha256":"21060f7bdf64f0a3af827f1fcd7d95d3170affef54c01bbeb449b9361fdd2f43","usage":"Labor capacity, overlap and location conflict requirements."},
+    {"source_type":"REPOSITORY_DERIVED","source_path":"KGEN-KAIOS/world-viewer/economy/economy-runtime.js","source_commit":"38901fddd3a513b5121b8828dce43898a7ed74b6","git_object":"2b1a37dba8cf3863eb4b30d4547995f281a6bc62","sha256":"8b5879091b212ea3e0ead296719e872b9353209fd8982f01567f2bbb78991f27","usage":"FERTILIZER inventory and Economy balance separation."}
+  ],
+  "boundaries": [
+    "CANDIDATE_ONLY",
+    "SIMULATION_ONLY",
+    "ABSTRACT_MICROBIAL_DECOMPOSITION_PROXY",
+    "NOT_FULL_LIFE_RUNTIME",
+    "NO_REAL_WORLD_THRESHOLDS_OR_PROBABILITIES",
+    "NO_PROCESS_FORMULA_OR_INSTRUCTIONS",
+    "NO_AGRONOMIC_PRESCRIPTION",
+    "NO_PRODUCT_ENDORSEMENT",
+    "NO_SAFETY_GUARANTEE",
+    "NO_YIELD_PROMISE",
+    "NO_ENVIRONMENTAL_APPROVAL",
+    "NO_LEGAL_CERTIFICATION",
+    "NO_RUNTIME_OR_CANONICAL_PROMOTION",
+    "NO_RIGHTS_OR_ECONOMY_AUTHORITY",
+    "NO_DEPLOYMENT",
+    "NO_MERGE"
+  ]
+}
