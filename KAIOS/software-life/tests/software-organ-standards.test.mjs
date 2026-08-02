@@ -408,6 +408,14 @@ test("Draft 2020-12 structure is executed before semantic approval", () => {
   assert.ok(result.errors.some(({ code }) => code === "SCHEMA_VALIDATION_FAILED"));
 });
 
+test("Draft date-time validation rejects syntactically shaped impossible dates", () => {
+  const record = createValidRecord();
+  record.compatibility_review.reviewed_at = "2026-99-99T11:00:00.000Z";
+  const result = validateJsonSchema202012(record, schema);
+  assert.equal(result.ok, false);
+  assert.ok(result.errors.some(({ keyword, path }) => keyword === "format" && path.endsWith("compatibility_review.reviewed_at")));
+});
+
 test("semantic validator accepts one identity-bound deterministic transplant", () => {
   const result = validate(createValidRecord());
   assert.deepEqual(result, { ok: true, errors: [] });

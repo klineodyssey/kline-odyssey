@@ -66,7 +66,7 @@ added:
 - existing baseline commit and registered host canonical-state blob
   verification for migration and rollback.
 
-Semantic and structural valid/negative fixtures: `25/25 PASS`.
+Semantic and structural valid/negative fixtures: `26/26 PASS`.
 
 P0: `0`
 

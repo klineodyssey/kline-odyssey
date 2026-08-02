@@ -175,7 +175,10 @@ const schemaErrors = (value, schema, rootSchema, path) => {
   if (typeof value === "string") {
     if (schema.minLength !== undefined && value.length < schema.minLength) add("minLength", `minimum length is ${schema.minLength}`);
     if (schema.pattern && !(new RegExp(schema.pattern, "u")).test(value)) add("pattern", `value does not match ${schema.pattern}`);
-    if (schema.format === "date-time" && !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})$/.test(value)) {
+    if (schema.format === "date-time" && (
+      !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})$/.test(value)
+      || !Number.isFinite(Date.parse(value))
+    )) {
       add("format", "value must be an RFC 3339 date-time");
     }
   }
@@ -293,8 +296,9 @@ const readCanonicalJson = (repositoryRoot, path, errors) => {
   try {
     const workingBytes = readFileSync(target);
     const value = JSON.parse(workingBytes.toString("utf8"));
-    const committedValue = JSON.parse(headBlob.toString("utf8"));
-    if (canonicalJson(value) !== canonicalJson(committedValue)) {
+    const workingObjectId = git(repositoryRoot, ["hash-object", `--path=${path}`, "--", path]).trim();
+    const committedObjectId = git(repositoryRoot, ["rev-parse", `HEAD:${path}`]).trim();
+    if (workingObjectId !== committedObjectId) {
       push(errors, "CANONICAL_GOVERNANCE_WORKTREE_DRIFT", path, `${path} must match its committed HEAD blob`);
       return null;
     }
