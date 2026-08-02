@@ -438,6 +438,50 @@
     "transplantState": {
       "enum": ["PROPOSED", "DONOR_REVIEW", "HOST_REVIEW", "COMPATIBILITY_TEST", "REJECTED", "APPROVED_SIMULATION", "TRANSPLANTING", "INTEGRATION_TEST", "ACCEPTED", "REWORK_REQUIRED", "ROLLED_BACK", "COMPLETE"]
     },
+    "deltaMap": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": { "type": "number", "minimum": 0 }
+    },
+    "completionEvidence": {
+      "type": "object",
+      "required": ["completion_commit", "registry_projection_ref", "registry_projection_hash", "genome_revision_ref", "genome_revision_hash", "integration_evidence_refs", "integration_evidence_hashes", "maintenance_owner", "rollback_retention_ref", "rollback_retention_hash", "attestation_hash"],
+      "properties": {
+        "completion_commit": { "$ref": "#/$defs/repositoryCommit" },
+        "registry_projection_ref": { "$ref": "#/$defs/repositoryPath" },
+        "registry_projection_hash": { "$ref": "#/$defs/sha256" },
+        "genome_revision_ref": { "$ref": "#/$defs/repositoryPath" },
+        "genome_revision_hash": { "$ref": "#/$defs/sha256" },
+        "integration_evidence_refs": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/repositoryPath" }
+        },
+        "integration_evidence_hashes": {
+          "type": "object",
+          "minProperties": 1,
+          "additionalProperties": { "$ref": "#/$defs/sha256" }
+        },
+        "maintenance_owner": { "type": "string", "minLength": 1 },
+        "rollback_retention_ref": { "$ref": "#/$defs/repositoryPath" },
+        "rollback_retention_hash": { "$ref": "#/$defs/sha256" },
+        "attestation_hash": { "$ref": "#/$defs/sha256" }
+      },
+      "additionalProperties": false
+    },
+    "eventOutputs": {
+      "type": "object",
+      "required": ["replay_state_hash"],
+      "properties": {
+        "replay_state_hash": { "$ref": "#/$defs/sha256" },
+        "restored_state_hash": { "$ref": "#/$defs/sha256" },
+        "restored_commit": { "$ref": "#/$defs/repositoryCommit" },
+        "restored_state_ref": { "$ref": "#/$defs/repositoryPath" },
+        "completion_evidence": { "$ref": "#/$defs/completionEvidence" }
+      },
+      "additionalProperties": false
+    },
     "transplantEvent": {
       "type": "object",
       "required": ["event_id", "transplant_id", "donor_life_id", "host_life_id", "organ_id", "simulation_time", "actor", "action", "inputs", "outputs", "resource_delta", "energy_delta", "rights_decision", "seed", "status", "reason", "previous_transplant_state", "next_transplant_state", "previous_state_hash", "next_state_hash"],
@@ -451,9 +495,9 @@
         "actor": { "type": "string", "minLength": 1 },
         "action": { "type": "string", "minLength": 1 },
         "inputs": { "type": "object" },
-        "outputs": { "type": "object" },
-        "resource_delta": { "type": "object" },
-        "energy_delta": { "type": "object" },
+        "outputs": { "$ref": "#/$defs/eventOutputs" },
+        "resource_delta": { "$ref": "#/$defs/deltaMap" },
+        "energy_delta": { "$ref": "#/$defs/deltaMap" },
         "rights_decision": { "type": ["string", "null"] },
         "seed": { "type": "integer", "minimum": 0 },
         "status": { "enum": ["RECORDED", "PASS", "FAIL", "BLOCKED", "REJECTED", "COMPLETE"] },
@@ -463,6 +507,43 @@
         "previous_state_hash": { "anyOf": [{ "$ref": "#/$defs/sha256" }, { "type": "null" }] },
         "next_state_hash": { "$ref": "#/$defs/sha256" }
       },
+      "allOf": [
+        {
+          "if": {
+            "properties": { "next_transplant_state": { "const": "COMPLETE" } },
+            "required": ["next_transplant_state"]
+          },
+          "then": {
+            "properties": {
+              "action": { "const": "COMPLETE-TRANSPLANT" },
+              "status": { "const": "COMPLETE" },
+              "outputs": {
+                "allOf": [
+                  { "$ref": "#/$defs/eventOutputs" },
+                  { "type": "object", "required": ["completion_evidence"] }
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": { "next_transplant_state": { "const": "ROLLED_BACK" } },
+            "required": ["next_transplant_state"]
+          },
+          "then": {
+            "properties": {
+              "action": { "const": "ROLLBACK-RESTORE" },
+              "outputs": {
+                "allOf": [
+                  { "$ref": "#/$defs/eventOutputs" },
+                  { "type": "object", "required": ["restored_state_hash", "restored_commit", "restored_state_ref"] }
+                ]
+              }
+            }
+          }
+        }
+      ],
       "additionalProperties": false
     },
     "transplant": {

@@ -151,10 +151,12 @@ required host capability must be present. Donor ownership, donor Genome,
 review, host and organ identities are resolved across the complete record by
 `tools/validate-software-organ-transplant.mjs`.
 
-The validator loads the authoritative Software Life Registry, compatibility
-schema and Worker Registry only from their fixed repository paths. Caller-
-provided Registry or Schema objects are rejected. Each governance file must
-match its committed `HEAD` blob. It verifies Registry source metadata and
+The validator derives the repository root from its own canonical module path
+and rejects a caller-selected Git repository. The canonical origin and reviewed
+Software Life lineage anchor must resolve before it loads the authoritative
+Software Life Registry, compatibility schema and Worker Registry from fixed
+paths. Caller-provided roots, Registry or Schema objects are rejected. Each
+governance file must match its committed `HEAD` blob. It verifies Registry source metadata and
 policy, donor organ provenance against the Registry source commit, donor and
 host Genome IDs, host Life type, donor organ
 membership and type, artifact content hash, `transplantable: true` and all Life
@@ -182,7 +184,9 @@ The migration plan records:
 Both migration and rollback plans bind the repository commit, registered host
 canonical state reference, baseline state hash, artifact hash, affected paths,
 bounded resource and energy budgets, maximum downtime, verification commands
-and recovery record. The commit must exist. The canonical state reference must
+and recovery record. The semantic validator recomputes each plan artifact
+hash. The commit must exist and be reachable from canonical `HEAD`; dangling
+local objects are not authority. The canonical state reference must
 resolve to a Git blob at that commit, and its computed SHA-256 must equal the
 recorded baseline hash.
 
@@ -260,7 +264,11 @@ Every event repeats the transplant, donor, host and organ identities. Event IDs
 are unique, times are nondecreasing, state transitions follow the state
 machine, and each `previous_state_hash` equals the preceding
 `next_state_hash`. The next hash is SHA-256 over the canonical key-sorted event
-envelope with `next_state_hash` omitted. A rollback event must record
+envelope with `next_state_hash` omitted. The validator also executes the
+canonical transition interpreter, accumulates only planned resource and energy
+units, enforces the migration budgets and recomputes each
+`outputs.replay_state_hash`. Rehashing a fabricated envelope without the same
+replayed state is rejected. A rollback event must record
 `restored_commit` and `restored_state_hash` equal to the migration plan's
 pre-transplant baseline. The event chain is deterministic, serializable,
 replayable and auditable.
@@ -273,7 +281,11 @@ The Rights record's `decision_event_id` must resolve to the event that enters
 
 `ACCEPTED` means the host integration tests passed in simulation. `COMPLETE`
 means evidence, Registry projection, Genome revision, maintenance ownership and
-rollback retention are recorded. Neither state transfers real ownership.
+rollback retention are recorded as reachable Git blobs with matching SHA-256
+values. The host Registry projection must contain the transplant identity; an
+empty or caller-asserted completion envelope fails closed. Canonical review,
+rework, rejection, acceptance, rollback and completion events must be emitted
+by the registered Codex reviewer. Neither state transfers real ownership.
 
 Donor authorship and provenance cannot be erased. A host may reference or
 embed a licensed organ while the donor remains a separate historical source.

@@ -190,7 +190,9 @@ their dedicated review record explicitly approves the simulated action.
 
 `compatibility_signature` is a SHA-256 digest over canonicalized identity,
 Genome contract, interfaces, dependencies, required capabilities and security
-boundary. A changed signed field requires a new signature and event.
+boundary. The semantic validator recomputes this digest; a caller-provided
+64-character value is not evidence. A changed signed field requires a new
+signature and event.
 
 Every dependency must resolve to an existing Life or Organ ID, an explicitly
 declared repository authority, or an approved external read-only dependency.
