@@ -14,17 +14,17 @@ Production verification: `PENDING`
 
 ## Required Gates
 
-- Independent Runtime review: final re-review in progress after all initial
-  P1/P2 repairs.
-- Runtime tests: `18/18 PASS`.
+- Independent Runtime review: `P0=0 / P1=0 / P2=0 /
+  APPROVED_FOR_READY_AND_MERGE` after three adversarial review rounds.
+- Runtime tests: `26/26 PASS`.
 - Public integration tests: `7/7 PASS`.
 - Responsive browser QA: `4/4 PASS` across the required viewports.
 - Product QA: `189/189 PASS`.
-- Repository Node tests: `275/275 PASS`.
+- Repository Node tests: `283/283 PASS`.
 - Company Boot `74/74`, Identity `86/86`, Worker Registry `12/12`, K280
   package `10/10` and Organism `47/47` all pass.
 - The API generator produces 18 read-only deterministic projections.
-- Repository JSON `848` files, Markdown links, UTF-8, BOM, corruption, secrets,
+- Repository JSON `855` files, Markdown links, UTF-8, BOM, corruption, secrets,
   protected paths and `git diff --check` pass locally.
 - Protected paths, Wallet, KGEN, CURRENT and Constitution changes: must remain zero.
 - GitHub Pages and production HTTP verification: pending.

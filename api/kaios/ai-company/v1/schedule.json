@@ -16,8 +16,8 @@
     {
       "project_id": "AI-COMPANY-PROJECT-00001",
       "planned_start": 13,
-      "planned_end": 56,
-      "estimated_duration": 43,
+      "planned_end": 69,
+      "estimated_duration": 56,
       "critical_path": [
         "AI-COMPANY-PROJECT-00001-TASK-001",
         "AI-COMPANY-PROJECT-00001-TASK-002",
@@ -63,7 +63,7 @@
       "execution_pause_delay": 0,
       "transport_delay": 0,
       "actual_start": 13,
-      "actual_end": 56,
+      "actual_end": 69,
       "status": "COMPLETE"
     }
   ],
@@ -79,23 +79,23 @@
       "location": "LAND-SIM-FISHPOND-001"
     },
     "AI-COMPANY-PROJECT-00001-TASK-003": {
-      "start": 23,
-      "end": 35,
+      "start": 31,
+      "end": 43,
       "location": "LAND-SIM-FISHPOND-001"
     },
     "AI-COMPANY-PROJECT-00001-TASK-004": {
-      "start": 35,
-      "end": 45,
+      "start": 48,
+      "end": 58,
       "location": "LAND-SIM-FISHPOND-001"
     },
     "AI-COMPANY-PROJECT-00001-TASK-005": {
-      "start": 45,
-      "end": 53,
+      "start": 58,
+      "end": 66,
       "location": "LAND-SIM-FISHPOND-001"
     },
     "AI-COMPANY-PROJECT-00001-TASK-006": {
-      "start": 53,
-      "end": 56,
+      "start": 66,
+      "end": 69,
       "location": "LAND-SIM-FISHPOND-001"
     }
   }

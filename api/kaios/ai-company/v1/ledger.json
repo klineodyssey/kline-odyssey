@@ -364,7 +364,7 @@
     },
     {
       "entry_id": "AI-COMPANY-LEDGER-000012",
-      "simulation_time": 23,
+      "simulation_time": 31,
       "project_id": "AI-COMPANY-PROJECT-00001",
       "event_type": "TASK_LABOR_EQUIPMENT_ENERGY_COST",
       "debit_account": "PROJECT_WORK_IN_PROGRESS",
@@ -394,7 +394,7 @@
     },
     {
       "entry_id": "AI-COMPANY-LEDGER-000013",
-      "simulation_time": 23,
+      "simulation_time": 31,
       "project_id": "AI-COMPANY-PROJECT-00001",
       "event_type": "MATERIAL_CONSUMPTION",
       "debit_account": "PROJECT_WORK_IN_PROGRESS",
@@ -424,7 +424,7 @@
     },
     {
       "entry_id": "AI-COMPANY-LEDGER-000014",
-      "simulation_time": 35,
+      "simulation_time": 48,
       "project_id": "AI-COMPANY-PROJECT-00001",
       "event_type": "TASK_LABOR_EQUIPMENT_ENERGY_COST",
       "debit_account": "PROJECT_WORK_IN_PROGRESS",
@@ -454,7 +454,7 @@
     },
     {
       "entry_id": "AI-COMPANY-LEDGER-000015",
-      "simulation_time": 35,
+      "simulation_time": 48,
       "project_id": "AI-COMPANY-PROJECT-00001",
       "event_type": "MATERIAL_CONSUMPTION",
       "debit_account": "PROJECT_WORK_IN_PROGRESS",
@@ -484,7 +484,7 @@
     },
     {
       "entry_id": "AI-COMPANY-LEDGER-000016",
-      "simulation_time": 35,
+      "simulation_time": 48,
       "project_id": "AI-COMPANY-PROJECT-00001",
       "event_type": "MATERIAL_CONSUMPTION",
       "debit_account": "PROJECT_WORK_IN_PROGRESS",
@@ -514,7 +514,7 @@
     },
     {
       "entry_id": "AI-COMPANY-LEDGER-000017",
-      "simulation_time": 45,
+      "simulation_time": 58,
       "project_id": "AI-COMPANY-PROJECT-00001",
       "event_type": "TASK_LABOR_EQUIPMENT_ENERGY_COST",
       "debit_account": "PROJECT_WORK_IN_PROGRESS",
@@ -544,7 +544,7 @@
     },
     {
       "entry_id": "AI-COMPANY-LEDGER-000018",
-      "simulation_time": 45,
+      "simulation_time": 58,
       "project_id": "AI-COMPANY-PROJECT-00001",
       "event_type": "MATERIAL_CONSUMPTION",
       "debit_account": "PROJECT_WORK_IN_PROGRESS",
@@ -574,7 +574,7 @@
     },
     {
       "entry_id": "AI-COMPANY-LEDGER-000019",
-      "simulation_time": 53,
+      "simulation_time": 66,
       "project_id": "AI-COMPANY-PROJECT-00001",
       "event_type": "TASK_LABOR_EQUIPMENT_ENERGY_COST",
       "debit_account": "PROJECT_WORK_IN_PROGRESS",
@@ -604,7 +604,7 @@
     },
     {
       "entry_id": "AI-COMPANY-LEDGER-000020",
-      "simulation_time": 56,
+      "simulation_time": 69,
       "project_id": "AI-COMPANY-PROJECT-00001",
       "event_type": "CUSTOMER_DEPOSIT_RECOGNIZED",
       "debit_account": "CUSTOMER_DEPOSITS",
@@ -634,7 +634,7 @@
     },
     {
       "entry_id": "AI-COMPANY-LEDGER-000021",
-      "simulation_time": 56,
+      "simulation_time": 69,
       "project_id": "AI-COMPANY-PROJECT-00001",
       "event_type": "PROJECT_REVENUE_RECOGNIZED",
       "debit_account": "ACCOUNTS_RECEIVABLE",
@@ -664,7 +664,7 @@
     },
     {
       "entry_id": "AI-COMPANY-LEDGER-000022",
-      "simulation_time": 56,
+      "simulation_time": 69,
       "project_id": "AI-COMPANY-PROJECT-00001",
       "event_type": "PROJECT_WORK_IN_PROGRESS_CLOSEOUT",
       "debit_account": "PROJECT_COST",

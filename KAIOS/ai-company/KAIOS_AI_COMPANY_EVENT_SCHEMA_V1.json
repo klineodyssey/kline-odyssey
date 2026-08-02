@@ -3,13 +3,15 @@
   "$id": "https://klineodyssey.github.io/kline-odyssey/KAIOS/ai-company/KAIOS_AI_COMPANY_EVENT_SCHEMA_V1.json",
   "title": "KAIOS AI Company Deterministic Event V1",
   "type": "object",
-  "required": ["event_id", "company_id", "request_id", "project_id", "work_package_id", "task_id", "actor_life_id", "division_id", "simulation_time", "location", "event_type", "inputs", "outputs", "material_delta", "energy_delta", "labor_delta", "equipment_delta", "inventory_delta", "cash_delta", "progress_delta", "risk_delta", "previous_state_hash", "next_state_hash", "seed", "status", "reason"],
+  "required": ["event_id", "company_id", "request_id", "project_id", "work_package_id", "task_id", "actor_life_id", "division_id", "simulation_time", "location", "event_type", "action_id", "action_arguments_hash", "inputs", "outputs", "material_delta", "energy_delta", "labor_delta", "equipment_delta", "inventory_delta", "cash_delta", "progress_delta", "risk_delta", "previous_state_hash", "event_payload_hash", "next_state_hash", "seed", "status", "reason"],
   "properties": {
     "event_id": { "type": "string", "pattern": "^AI-COMPANY-EVT-[0-9]{6}$" }, "company_id": { "const": "KAIOS_AI_COMPANY_V1" },
     "request_id": { "type": ["string", "null"] }, "project_id": { "type": ["string", "null"] }, "work_package_id": { "type": ["string", "null"] }, "task_id": { "type": ["string", "null"] }, "actor_life_id": { "type": ["string", "null"] }, "division_id": { "type": "string" },
-    "simulation_time": { "type": "integer", "minimum": 0 }, "location": { "type": ["string", "null"] }, "event_type": { "type": "string" }, "inputs": { "type": "object" }, "outputs": { "type": "object" },
+    "simulation_time": { "type": "number", "minimum": 0 }, "location": { "type": ["string", "null"] }, "event_type": { "type": "string" },
+    "action_id": { "type": "string", "pattern": "^AI-COMPANY-ACTION-[0-9]{6}$" }, "action_arguments_hash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "inputs": { "type": "object" }, "outputs": { "type": "object" },
     "material_delta": { "type": "number" }, "energy_delta": { "type": "number" }, "labor_delta": { "type": "number" }, "equipment_delta": { "type": "number" }, "inventory_delta": { "type": "number" }, "cash_delta": { "type": "number" }, "progress_delta": { "type": "number" }, "risk_delta": { "type": "number" },
-    "previous_state_hash": { "type": ["string", "null"], "pattern": "^[a-f0-9]{64}$" }, "next_state_hash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }, "seed": { "type": "string" },
+    "previous_state_hash": { "type": ["string", "null"], "pattern": "^[a-f0-9]{64}$" }, "event_payload_hash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }, "next_state_hash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }, "seed": { "type": "string" },
     "status": { "enum": ["ACCEPTED", "BLOCKED", "COMPLETED", "FAILED"] }, "reason": { "type": ["string", "null"] }
   },
   "additionalProperties": false

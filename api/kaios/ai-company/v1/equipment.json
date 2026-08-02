@@ -129,8 +129,8 @@
       "project_id": "AI-COMPANY-PROJECT-00001",
       "task_id": "AI-COMPANY-PROJECT-00001-TASK-003",
       "equipment_id": "AI-COMPANY-EQUIPMENT-002",
-      "start": 23,
-      "end": 35,
+      "start": 31,
+      "end": 43,
       "status": "RELEASED"
     },
     {
@@ -138,8 +138,8 @@
       "project_id": "AI-COMPANY-PROJECT-00001",
       "task_id": "AI-COMPANY-PROJECT-00001-TASK-004",
       "equipment_id": "AI-COMPANY-EQUIPMENT-003",
-      "start": 35,
-      "end": 45,
+      "start": 48,
+      "end": 58,
       "status": "RELEASED"
     },
     {
@@ -147,8 +147,8 @@
       "project_id": "AI-COMPANY-PROJECT-00001",
       "task_id": "AI-COMPANY-PROJECT-00001-TASK-004",
       "equipment_id": "AI-COMPANY-EQUIPMENT-004",
-      "start": 35,
-      "end": 45,
+      "start": 48,
+      "end": 58,
       "status": "RELEASED"
     },
     {
@@ -156,8 +156,8 @@
       "project_id": "AI-COMPANY-PROJECT-00001",
       "task_id": "AI-COMPANY-PROJECT-00001-TASK-005",
       "equipment_id": "AI-COMPANY-EQUIPMENT-005",
-      "start": 45,
-      "end": 53,
+      "start": 58,
+      "end": 66,
       "status": "RELEASED"
     }
   ]

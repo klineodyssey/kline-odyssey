@@ -25,7 +25,9 @@
       "shift": {
         "start": 0,
         "end": 24,
-        "maximum_hours": 12
+        "maximum_hours": 12,
+        "minimum_rest_hours": 8,
+        "cycle_hours": 24
       },
       "cost": 30,
       "availability": true,
@@ -49,7 +51,9 @@
       "shift": {
         "start": 0,
         "end": 24,
-        "maximum_hours": 16
+        "maximum_hours": 16,
+        "minimum_rest_hours": 0,
+        "cycle_hours": 24
       },
       "cost": 42,
       "availability": true,
@@ -73,7 +77,9 @@
       "shift": {
         "start": 0,
         "end": 24,
-        "maximum_hours": 12
+        "maximum_hours": 12,
+        "minimum_rest_hours": 8,
+        "cycle_hours": 24
       },
       "cost": 30,
       "availability": true,
@@ -98,7 +104,9 @@
       "shift": {
         "start": 0,
         "end": 24,
-        "maximum_hours": 12
+        "maximum_hours": 12,
+        "minimum_rest_hours": 8,
+        "cycle_hours": 24
       },
       "cost": 30,
       "availability": true,
@@ -122,7 +130,9 @@
       "shift": {
         "start": 0,
         "end": 24,
-        "maximum_hours": 12
+        "maximum_hours": 12,
+        "minimum_rest_hours": 8,
+        "cycle_hours": 24
       },
       "cost": 30,
       "availability": true,
@@ -146,7 +156,9 @@
       "shift": {
         "start": 0,
         "end": 24,
-        "maximum_hours": 12
+        "maximum_hours": 12,
+        "minimum_rest_hours": 8,
+        "cycle_hours": 24
       },
       "cost": 30,
       "availability": true,
@@ -170,7 +182,9 @@
       "shift": {
         "start": 0,
         "end": 24,
-        "maximum_hours": 12
+        "maximum_hours": 12,
+        "minimum_rest_hours": 8,
+        "cycle_hours": 24
       },
       "cost": 30,
       "availability": true,
@@ -194,7 +208,9 @@
       "shift": {
         "start": 0,
         "end": 24,
-        "maximum_hours": 12
+        "maximum_hours": 12,
+        "minimum_rest_hours": 8,
+        "cycle_hours": 24
       },
       "cost": 30,
       "availability": true,
@@ -218,7 +234,9 @@
       "shift": {
         "start": 0,
         "end": 24,
-        "maximum_hours": 12
+        "maximum_hours": 12,
+        "minimum_rest_hours": 8,
+        "cycle_hours": 24
       },
       "cost": 30,
       "availability": true,
@@ -240,6 +258,12 @@
       "life_id": "LIFE-AI-COMPANY-WORKER-001",
       "body_type": "PHYSICAL",
       "location": "LAND-SIM-FISHPOND-001",
+      "travel_time": 1,
+      "shift_start": 0,
+      "shift_end": 24,
+      "shift_cycle_hours": 24,
+      "maximum_hours": 12,
+      "minimum_rest_hours": 8,
       "start": 13,
       "end": 17,
       "status": "RELEASED"
@@ -252,6 +276,12 @@
       "life_id": "LIFE-AI-COMPANY-WORKER-002",
       "body_type": "DIGITAL",
       "location": "LAND-SIM-FISHPOND-001",
+      "travel_time": 0,
+      "shift_start": 0,
+      "shift_end": 24,
+      "shift_cycle_hours": 24,
+      "maximum_hours": 16,
+      "minimum_rest_hours": 0,
       "start": 17,
       "end": 23,
       "status": "RELEASED"
@@ -264,6 +294,12 @@
       "life_id": "LIFE-AI-COMPANY-WORKER-003",
       "body_type": "PHYSICAL",
       "location": "LAND-SIM-FISHPOND-001",
+      "travel_time": 1,
+      "shift_start": 0,
+      "shift_end": 24,
+      "shift_cycle_hours": 24,
+      "maximum_hours": 12,
+      "minimum_rest_hours": 8,
       "start": 17,
       "end": 23,
       "status": "RELEASED"
@@ -276,8 +312,14 @@
       "life_id": "LIFE-AI-COMPANY-WORKER-005",
       "body_type": "PHYSICAL",
       "location": "LAND-SIM-FISHPOND-001",
-      "start": 23,
-      "end": 35,
+      "travel_time": 1,
+      "shift_start": 0,
+      "shift_end": 24,
+      "shift_cycle_hours": 24,
+      "maximum_hours": 12,
+      "minimum_rest_hours": 8,
+      "start": 31,
+      "end": 43,
       "status": "RELEASED"
     },
     {
@@ -288,8 +330,14 @@
       "life_id": "LIFE-AI-COMPANY-WORKER-003",
       "body_type": "PHYSICAL",
       "location": "LAND-SIM-FISHPOND-001",
-      "start": 23,
-      "end": 35,
+      "travel_time": 1,
+      "shift_start": 0,
+      "shift_end": 24,
+      "shift_cycle_hours": 24,
+      "maximum_hours": 12,
+      "minimum_rest_hours": 8,
+      "start": 31,
+      "end": 43,
       "status": "RELEASED"
     },
     {
@@ -300,8 +348,14 @@
       "life_id": "LIFE-AI-COMPANY-WORKER-004",
       "body_type": "PHYSICAL",
       "location": "LAND-SIM-FISHPOND-001",
-      "start": 35,
-      "end": 45,
+      "travel_time": 1,
+      "shift_start": 0,
+      "shift_end": 24,
+      "shift_cycle_hours": 24,
+      "maximum_hours": 12,
+      "minimum_rest_hours": 8,
+      "start": 48,
+      "end": 58,
       "status": "RELEASED"
     },
     {
@@ -312,8 +366,14 @@
       "life_id": "LIFE-AI-COMPANY-WORKER-006",
       "body_type": "PHYSICAL",
       "location": "LAND-SIM-FISHPOND-001",
-      "start": 35,
-      "end": 45,
+      "travel_time": 1,
+      "shift_start": 0,
+      "shift_end": 24,
+      "shift_cycle_hours": 24,
+      "maximum_hours": 12,
+      "minimum_rest_hours": 8,
+      "start": 48,
+      "end": 58,
       "status": "RELEASED"
     },
     {
@@ -324,8 +384,14 @@
       "life_id": "LIFE-AI-COMPANY-WORKER-008",
       "body_type": "PHYSICAL",
       "location": "LAND-SIM-FISHPOND-001",
-      "start": 45,
-      "end": 53,
+      "travel_time": 1,
+      "shift_start": 0,
+      "shift_end": 24,
+      "shift_cycle_hours": 24,
+      "maximum_hours": 12,
+      "minimum_rest_hours": 8,
+      "start": 58,
+      "end": 66,
       "status": "RELEASED"
     },
     {
@@ -336,8 +402,14 @@
       "life_id": "LIFE-AI-COMPANY-WORKER-009",
       "body_type": "PHYSICAL",
       "location": "LAND-SIM-FISHPOND-001",
-      "start": 45,
-      "end": 53,
+      "travel_time": 1,
+      "shift_start": 0,
+      "shift_end": 24,
+      "shift_cycle_hours": 24,
+      "maximum_hours": 12,
+      "minimum_rest_hours": 8,
+      "start": 58,
+      "end": 66,
       "status": "RELEASED"
     },
     {
@@ -348,8 +420,14 @@
       "life_id": "LIFE-AI-COMPANY-WORKER-010",
       "body_type": "PHYSICAL",
       "location": "LAND-SIM-FISHPOND-001",
-      "start": 53,
-      "end": 56,
+      "travel_time": 1,
+      "shift_start": 0,
+      "shift_end": 24,
+      "shift_cycle_hours": 24,
+      "maximum_hours": 12,
+      "minimum_rest_hours": 8,
+      "start": 66,
+      "end": 69,
       "status": "RELEASED"
     }
   ]

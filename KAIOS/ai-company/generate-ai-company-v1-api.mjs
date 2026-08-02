@@ -52,7 +52,16 @@ const files = {
     demonstrations
   },
   "requests.json": { ...envelope, requests: state.requests, clarifications: state.clarifications, analyses: state.analyses, feasibility_reviews: state.feasibility_reviews, proposals: state.proposals },
-  "projects.json": { ...envelope, projects: state.projects, contracts: state.contracts, change_orders: state.change_orders, maintenance_plans: state.maintenance_plans },
+  "projects.json": {
+    ...envelope,
+    projects: state.projects.map((project) => ({
+      ...project,
+      tasks: project.tasks.map((task) => ({ project_id: project.project_id, ...task }))
+    })),
+    contracts: state.contracts,
+    change_orders: state.change_orders,
+    maintenance_plans: state.maintenance_plans
+  },
   "tasks.json": { ...envelope, tasks: state.projects.flatMap(({ project_id, tasks }) => tasks.map((task) => ({ project_id, ...task }))) },
   "dependencies.json": { ...envelope, dependencies: state.projects.flatMap(({ project_id, dependencies }) => dependencies.map((dependency) => ({ project_id, ...dependency }))) },
   "materials.json": { ...envelope, bill_of_materials: plans.flatMap(({ resource_plan_id, project_id, bill_of_materials }) => bill_of_materials.map((item) => ({ resource_plan_id, project_id, ...item }))), material_inventory: state.material_inventory },

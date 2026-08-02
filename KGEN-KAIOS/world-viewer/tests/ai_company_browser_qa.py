@@ -37,30 +37,51 @@ def main() -> int:
                 context = browser.new_context(
                     viewport={"width": viewport.width, "height": viewport.height}
                 )
-                page = context.new_page()
+                homepage = context.new_page()
                 console_errors: list[str] = []
-                page.on(
-                    "console",
-                    lambda message: console_errors.append(
-                        f"{page.url} {message.location.get('url', '')}:"
-                        f"{message.location.get('lineNumber', '')} {message.text}"
-                    )
-                    if message.type == "error"
-                    and message.location.get("url", "").startswith(args.base_url)
-                    else None,
-                )
-                page.on("pageerror", lambda error: console_errors.append(str(error)))
+                homepage_errors: list[str] = []
                 try:
-                    page.goto(f"{args.base_url}/", wait_until="domcontentloaded", timeout=20000)
-                    page.wait_for_selector("#ai-company-runtime", state="visible", timeout=10000)
-                    if page.get_by_text("KAIOS AI 公司創造中心", exact=True).count() < 1:
+                    homepage.on(
+                        "console",
+                        lambda message, page=homepage: homepage_errors.append(
+                            f"{page.url} {message.location.get('url', '')}:"
+                            f"{message.location.get('lineNumber', '')} {message.text}"
+                        )
+                        if message.type == "error"
+                        and message.location.get("url", "").startswith(args.base_url)
+                        else None,
+                    )
+                    homepage.on("pageerror", lambda error: homepage_errors.append(str(error)))
+                    homepage.goto(f"{args.base_url}/", wait_until="domcontentloaded", timeout=20000)
+                    homepage.wait_for_function(
+                        "document.querySelector('#ai-company-runtime') !== null", timeout=10000
+                    )
+                    if not homepage.locator("#ai-company-runtime").is_visible():
+                        failures.append(f"{label}: homepage AI Company section hidden")
+                    if homepage.get_by_text("KAIOS AI 公司創造中心", exact=True).count() < 1:
                         failures.append(f"{label}: homepage marker missing")
-                    if page.locator('a[href="./world-viewer/ai-company-v1/"]').count() < 2:
+                    if homepage.locator('a[href="./world-viewer/ai-company-v1/"]').count() < 2:
                         failures.append(f"{label}: homepage navigation/card links missing")
-                    if page.evaluate(
+                    if homepage.evaluate(
                         "document.documentElement.scrollWidth > document.documentElement.clientWidth + 1"
                     ):
                         failures.append(f"{label}: homepage horizontal overflow")
+                    if homepage_errors:
+                        failures.append(f"{label}: homepage console errors: {' | '.join(homepage_errors)}")
+                    homepage.close()
+
+                    page = context.new_page()
+                    page.on(
+                        "console",
+                        lambda message, page=page: console_errors.append(
+                            f"{page.url} {message.location.get('url', '')}:"
+                            f"{message.location.get('lineNumber', '')} {message.text}"
+                        )
+                        if message.type == "error"
+                        and message.location.get("url", "").startswith(args.base_url)
+                        else None,
+                    )
+                    page.on("pageerror", lambda error: console_errors.append(str(error)))
 
                     page.goto(
                         f"{args.base_url}/world-viewer/ai-company-v1/",

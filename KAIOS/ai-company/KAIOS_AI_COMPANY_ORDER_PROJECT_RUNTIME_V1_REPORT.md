@@ -2,7 +2,7 @@
 
 Task ID: `KAIOS-AI-COMPANY-ORDER-PROJECT-RUNTIME-V1-001`
 
-Status: `LOCAL_VALIDATION_PASS / FINAL_EXECUTIVE_REVIEW_IN_PROGRESS`
+Status: `LOCAL_VALIDATION_PASS / EXECUTIVE_REVIEW_APPROVED / PR_97_DRAFT`
 
 ## Objective
 
@@ -44,9 +44,9 @@ authority.
 
 ## Local Verification
 
-- Runtime contract, failure gates, execution, finance and replay: `18/18 PASS`.
+- Runtime contract, adversarial gates, execution, finance and replay: `26/26 PASS`.
 - Official-site and public API integration: `7/7 PASS`.
-- Repository Node regression: `275/275 PASS`.
+- Repository Node regression: `283/283 PASS`.
 - Company Boot: `74/74 PASS`; Identity: `86/86 PASS`; Worker Registry:
   `12/12 PASS`; K280 package: `10/10 PASS`; Organism: `47/47 PASS`.
 - Browser Product QA: `189/189 PASS` against the repository sprint-010
@@ -56,6 +56,15 @@ authority.
   views, completes the fishpond demonstration and verifies the farm dependency
   block without a console-breaking error or horizontal overflow.
 - Public projection generator emits 18 deterministic, read-only JSON files.
+- Executive-review repairs cover action-argument replay binding, global
+  worker/equipment reservation conflicts, terminal-company mutation freezes,
+  executable physical task durations, deterministic supplier selection,
+  commitment release on rejected materials, exact warehouse classification,
+  terminal-project change-order blocking, cumulative physical shift/rest
+  accounting, terminal failed procurement, strict task projection schemas,
+  and isolated homepage/Viewer console monitoring.
+- Independent executive review: `P0=0 / P1=0 / P2=0 /
+  APPROVED_FOR_READY_AND_MERGE`.
 
 The final independent review and production evidence are recorded in
 `KAIOS_AI_COMPANY_RUNTIME_V1_CLOSEOUT.md` after PR `#97` completes.

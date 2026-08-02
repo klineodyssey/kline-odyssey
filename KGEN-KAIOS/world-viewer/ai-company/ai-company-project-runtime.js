@@ -20,6 +20,8 @@ const MAX_TASKS = 5000;
 const MAX_EVENTS = 10000;
 const MAX_ACTIONS = 20000;
 const EPSILON = 0.001;
+const PHYSICAL_SHIFT_CYCLE_HOURS = 24;
+const PHYSICAL_MINIMUM_REST_HOURS = 8;
 
 const PHYSICAL_TEMPLATES = new Set([
   "FISHPOND_PROJECT", "BASIC_HOUSE_PROJECT", "WAREHOUSE_PROJECT", "BASIC_ROAD_PROJECT",
@@ -145,22 +147,22 @@ export const PROJECT_TEMPLATES = deepFreeze({
   },
   WAREHOUSE_PROJECT: {
     kind: "PHYSICAL", domain_binding: "GENERIC_CAUSAL_PROJECT", rough_cost: 72000,
-    tasks: [task("SURVEY", 4, ["SURVEYOR"], {}, ["SURVEY_TOOL"], 2, 500), task("DESIGN", 6, ["ARCHITECT"], {}, [], 3, 1000), task("FOUNDATION", 12, ["GENERAL_LABORER"], { CONCRETE: 40, STEEL: 12 }, ["CONCRETE_MIXER"], 30, 4300), task("STRUCTURE", 14, ["GENERAL_LABORER", "SITE_SUPERVISOR"], { STEEL: 30 }, ["CRANE"], 35, 5200), task("FINAL_ACCEPTANCE", 3, ["QA_INSPECTOR"], {}, [], 2, 700)],
+    tasks: [task("SURVEY", 4, ["SURVEYOR"], {}, ["SURVEY_TOOL"], 2, 500), task("DESIGN", 6, ["ARCHITECT"], {}, [], 3, 1000), task("FOUNDATION", 12, ["GENERAL_LABORER"], { CONCRETE: 40, STEEL: 12 }, ["CONCRETE_MIXER"], 30, 4300), task("STRUCTURE_FRAME", 8, ["GENERAL_LABORER", "SITE_SUPERVISOR"], { STEEL: 18 }, ["CRANE"], 20, 3000), task("STRUCTURE_ENCLOSURE", 6, ["GENERAL_LABORER", "SITE_SUPERVISOR"], { STEEL: 12 }, ["CRANE"], 15, 2200), task("FINAL_ACCEPTANCE", 3, ["QA_INSPECTOR"], {}, [], 2, 700)],
     deliverable: "SIMULATED_WAREHOUSE"
   },
   BASIC_ROAD_PROJECT: {
     kind: "PHYSICAL", domain_binding: "GENERIC_CAUSAL_PROJECT", rough_cost: 90000,
-    tasks: [task("ROUTE_SURVEY", 6, ["SURVEYOR"], {}, ["SURVEY_TOOL"], 3, 800), task("ROADBED", 18, ["EXCAVATOR_OPERATOR", "GENERAL_LABORER"], { GRAVEL: 60 }, ["EXCAVATOR"], 45, 6500), task("SURFACE", 16, ["GENERAL_LABORER", "SITE_SUPERVISOR"], { CONCRETE: 50 }, ["CONCRETE_MIXER"], 38, 6200), task("FINAL_ACCEPTANCE", 4, ["QA_INSPECTOR"], {}, [], 2, 800)],
+    tasks: [task("ROUTE_SURVEY", 6, ["SURVEYOR"], {}, ["SURVEY_TOOL"], 3, 800), task("ROADBED_EARTHWORK", 9, ["EXCAVATOR_OPERATOR", "GENERAL_LABORER"], { GRAVEL: 30 }, ["EXCAVATOR"], 23, 3300), task("ROADBED_COMPACTION", 9, ["EXCAVATOR_OPERATOR", "GENERAL_LABORER"], { GRAVEL: 30 }, ["EXCAVATOR"], 22, 3200), task("SURFACE_BASE", 8, ["GENERAL_LABORER", "SITE_SUPERVISOR"], { CONCRETE: 25 }, ["CONCRETE_MIXER"], 19, 3100), task("SURFACE_FINISH", 8, ["GENERAL_LABORER", "SITE_SUPERVISOR"], { CONCRETE: 25 }, ["CONCRETE_MIXER"], 19, 3100), task("FINAL_ACCEPTANCE", 4, ["QA_INSPECTOR"], {}, [], 2, 800)],
     deliverable: "SIMULATED_BASIC_ROAD"
   },
   SMALL_BRIDGE_PROJECT: {
     kind: "PHYSICAL", domain_binding: "GENERIC_CAUSAL_PROJECT", rough_cost: 140000,
-    tasks: [task("BRIDGE_SURVEY", 8, ["SURVEYOR", "SITE_SUPERVISOR"], {}, ["SURVEY_TOOL"], 4, 1200), task("FOUNDATION", 20, ["GENERAL_LABORER", "EXCAVATOR_OPERATOR"], { CONCRETE: 70, STEEL: 25 }, ["EXCAVATOR", "CONCRETE_MIXER"], 60, 9000), task("SPAN", 20, ["GENERAL_LABORER", "SITE_SUPERVISOR"], { STEEL: 60 }, ["CRANE"], 70, 11000), task("LOAD_TEST", 6, ["QA_INSPECTOR"], {}, [], 4, 1300)],
+    tasks: [task("BRIDGE_SURVEY", 8, ["SURVEYOR", "SITE_SUPERVISOR"], {}, ["SURVEY_TOOL"], 4, 1200), task("FOUNDATION_EXCAVATION", 8, ["GENERAL_LABORER", "EXCAVATOR_OPERATOR"], { CONCRETE: 20, STEEL: 5 }, ["EXCAVATOR"], 24, 3400), task("FOUNDATION_PLACEMENT", 12, ["GENERAL_LABORER", "EXCAVATOR_OPERATOR"], { CONCRETE: 50, STEEL: 20 }, ["EXCAVATOR", "CONCRETE_MIXER"], 36, 5600), task("SPAN_SUPPORTS", 10, ["GENERAL_LABORER", "SITE_SUPERVISOR"], { STEEL: 30 }, ["CRANE"], 35, 5500), task("SPAN_PLACEMENT", 10, ["GENERAL_LABORER", "SITE_SUPERVISOR"], { STEEL: 30 }, ["CRANE"], 35, 5500), task("LOAD_TEST", 6, ["QA_INSPECTOR"], {}, [], 4, 1300)],
     deliverable: "SIMULATED_SMALL_BRIDGE"
   },
   WORKSHOP_PROJECT: {
     kind: "PHYSICAL", domain_binding: "GENERIC_CAUSAL_PROJECT", rough_cost: 78000,
-    tasks: [task("SURVEY", 4, ["SURVEYOR"], {}, ["SURVEY_TOOL"], 2, 500), task("DESIGN", 6, ["ARCHITECT"], {}, [], 3, 1000), task("FOUNDATION", 12, ["GENERAL_LABORER"], { CONCRETE: 35, STEEL: 10 }, ["CONCRETE_MIXER"], 30, 4300), task("WORKSHOP_BUILD", 16, ["GENERAL_LABORER", "ELECTRICIAN"], { STEEL: 25, WIRE: 18 }, ["HAND_TOOL", "CRANE"], 40, 6200), task("FINAL_ACCEPTANCE", 3, ["QA_INSPECTOR"], {}, [], 2, 700)],
+    tasks: [task("SURVEY", 4, ["SURVEYOR"], {}, ["SURVEY_TOOL"], 2, 500), task("DESIGN", 6, ["ARCHITECT"], {}, [], 3, 1000), task("FOUNDATION", 12, ["GENERAL_LABORER"], { CONCRETE: 35, STEEL: 10 }, ["CONCRETE_MIXER"], 30, 4300), task("WORKSHOP_ENVELOPE", 8, ["GENERAL_LABORER", "ELECTRICIAN", "SITE_SUPERVISOR"], { STEEL: 15, WIRE: 6 }, ["HAND_TOOL", "CRANE"], 20, 3100), task("WORKSHOP_SERVICES", 8, ["GENERAL_LABORER", "ELECTRICIAN", "SITE_SUPERVISOR"], { STEEL: 10, WIRE: 12 }, ["HAND_TOOL", "CRANE"], 20, 3100), task("FINAL_ACCEPTANCE", 3, ["QA_INSPECTOR"], {}, [], 2, 700)],
     deliverable: "SIMULATED_WORKSHOP"
   },
   LIFE_PACKAGE_PROJECT: {
@@ -285,9 +287,9 @@ function eventPayloadHash(event) {
 function projectTemplateFor(value) {
   const text = String(value ?? "").toUpperCase();
   if (text.includes("FISHPOND") || text.includes("FISH POND")) return "FISHPOND_PROJECT";
+  if (text.includes("WAREHOUSE")) return "WAREHOUSE_PROJECT";
   if (text.includes("HOUSE") || text.includes("HOME")) return "BASIC_HOUSE_PROJECT";
   if (text.includes("FARM")) return "SMALL_FARM_PROJECT";
-  if (text.includes("WAREHOUSE")) return "WAREHOUSE_PROJECT";
   if (text.includes("BRIDGE")) return "SMALL_BRIDGE_PROJECT";
   if (text.includes("ROAD")) return "BASIC_ROAD_PROJECT";
   if (text.includes("WORKSHOP") || text.includes("FACTORY")) return "WORKSHOP_PROJECT";
@@ -320,7 +322,13 @@ function workerRecord(skill, bodyType, index) {
     skill,
     body_type: bodyType,
     location: bodyType === "PHYSICAL" ? "KAIOS-SIMULATION-YARD" : "LOCAL_SIMULATION_WORKSPACE",
-    shift: { start: 0, end: 24, maximum_hours: bodyType === "PHYSICAL" ? 12 : 16 },
+    shift: {
+      start: 0,
+      end: 24,
+      maximum_hours: bodyType === "PHYSICAL" ? 12 : 16,
+      minimum_rest_hours: bodyType === "PHYSICAL" ? PHYSICAL_MINIMUM_REST_HOURS : 0,
+      cycle_hours: PHYSICAL_SHIFT_CYCLE_HOURS
+    },
     cost: bodyType === "PHYSICAL" ? 30 : 42,
     availability: true,
     travel_time: bodyType === "PHYSICAL" ? 1 : 0,
@@ -564,6 +572,136 @@ function intervalsOverlap(left, right) {
   return Math.max(left.start, right.start) < Math.min(left.end, right.end);
 }
 
+function physicalShiftConflict(reservation, reservations, ignoredIds = new Set()) {
+  if (reservation.body_type !== "PHYSICAL") return null;
+  const cycleHours = reservation.shift_cycle_hours ?? PHYSICAL_SHIFT_CYCLE_HOURS;
+  const shiftStart = reservation.shift_start ?? 0;
+  const shiftEnd = reservation.shift_end ?? cycleHours;
+  const maximumHours = reservation.maximum_hours ?? 12;
+  const minimumRest = reservation.minimum_rest_hours ?? PHYSICAL_MINIMUM_REST_HOURS;
+  const relevant = [reservation, ...reservations]
+    .filter((item, index, values) => item.life_id === reservation.life_id
+      && item.body_type === "PHYSICAL"
+      && item.status !== "CANCELLED"
+      && !ignoredIds.has(item.reservation_id)
+      && values.findIndex(({ reservation_id }) => reservation_id === item.reservation_id) === index)
+    .sort((left, right) => left.start - right.start || left.end - right.end);
+  const hoursByCycle = new Map();
+  for (const item of relevant) {
+    const cycle = Math.floor(item.start / cycleHours);
+    const cycleOpen = cycle * cycleHours + shiftStart;
+    const cycleClose = cycle * cycleHours + shiftEnd;
+    const duration = item.end - item.start;
+    if (item.start + EPSILON < cycleOpen || item.end > cycleClose + EPSILON || duration > maximumHours + EPSILON) return "REST_REQUIREMENT_CONFLICT";
+    hoursByCycle.set(cycle, (hoursByCycle.get(cycle) ?? 0) + duration);
+    if (hoursByCycle.get(cycle) > maximumHours + EPSILON) return "REST_REQUIREMENT_CONFLICT";
+  }
+  for (let index = 1; index < relevant.length; index += 1) {
+    const previous = relevant[index - 1];
+    const current = relevant[index];
+    if (Math.floor(previous.start / cycleHours) !== Math.floor(current.start / cycleHours)
+      && current.start - previous.end + EPSILON < minimumRest) return "REST_REQUIREMENT_CONFLICT";
+  }
+  return null;
+}
+
+function nextPhysicalShiftStart(desiredStart, duration, history, shift) {
+  const cycleHours = shift.cycle_hours ?? PHYSICAL_SHIFT_CYCLE_HOURS;
+  const maximumHours = shift.maximum_hours ?? 12;
+  const minimumRest = shift.minimum_rest_hours ?? PHYSICAL_MINIMUM_REST_HOURS;
+  let start = desiredStart;
+  for (let attempt = 0; attempt < 1000; attempt += 1) {
+    const cycle = Math.floor(start / cycleHours);
+    const cycleOpen = cycle * cycleHours + (shift.start ?? 0);
+    const cycleClose = cycle * cycleHours + (shift.end ?? cycleHours);
+    if (start + EPSILON < cycleOpen) { start = cycleOpen; continue; }
+    if (start + duration > cycleClose + EPSILON) { start = (cycle + 1) * cycleHours + (shift.start ?? 0); continue; }
+    const sameCycle = history.filter((item) => Math.floor(item.start / cycleHours) === cycle);
+    const usedHours = sameCycle.reduce((sum, item) => sum + item.end - item.start, 0);
+    if (usedHours + duration > maximumHours + EPSILON) {
+      const lastEnd = sameCycle.reduce((latest, item) => Math.max(latest, item.end), start);
+      start = Math.max((cycle + 1) * cycleHours + (shift.start ?? 0), lastEnd + minimumRest);
+      continue;
+    }
+    const previous = history.filter((item) => item.end <= start + EPSILON).at(-1);
+    if (previous && Math.floor(previous.start / cycleHours) !== cycle && start - previous.end + EPSILON < minimumRest) {
+      start = previous.end + minimumRest;
+      continue;
+    }
+    return start;
+  }
+  throw new Error("PHYSICAL_SHIFT_SCHEDULE_UNRESOLVED");
+}
+
+function supplierSelectionFor(item, route) {
+  const baseSupplier = item.source_supplier ?? item.supplier;
+  const baseMaterialCost = money(item.total_cost);
+  const baseTransportCost = money(route?.cost ?? 0);
+  const candidates = [
+    {
+      supplier_id: `${baseSupplier}-QUALITY`, quality_score: 0.98,
+      delivery_hours: item.lead_time + 2, capacity: round(item.quantity * 2),
+      risk_score: 0.04, material_cost: money(baseMaterialCost * 1.04)
+    },
+    {
+      supplier_id: `${baseSupplier}-BALANCED`, quality_score: 0.93,
+      delivery_hours: item.lead_time, capacity: round(item.quantity * 1.5),
+      risk_score: 0.08, material_cost: baseMaterialCost
+    },
+    {
+      supplier_id: `${baseSupplier}-ECONOMY`, quality_score: 0.82,
+      delivery_hours: item.lead_time + 2, capacity: round(item.quantity * 1.1),
+      risk_score: 0.18, material_cost: money(baseMaterialCost * 0.94)
+    }
+  ].map((candidate) => {
+    const totalCost = money(candidate.material_cost + baseTransportCost);
+    const qualityPoints = candidate.quality_score * 25;
+    const deliveryPoints = Math.max(0, 1 - Math.max(0, candidate.delivery_hours - item.lead_time) / 4) * 20;
+    const capacityPoints = Math.min(2, candidate.capacity / Math.max(EPSILON, item.quantity)) / 2 * 15;
+    const riskPoints = (1 - candidate.risk_score) * 20;
+    const costPoints = Math.min(1, (baseMaterialCost + baseTransportCost) / Math.max(EPSILON, totalCost)) * 20;
+    return {
+      ...candidate,
+      transport_cost: baseTransportCost,
+      total_cost: totalCost,
+      eligible: candidate.quality_score >= 0.8 && candidate.capacity + EPSILON >= item.quantity,
+      score: round(qualityPoints + deliveryPoints + capacityPoints + riskPoints + costPoints, 4),
+      source: "DETERMINISTIC_SIMULATION_QUOTE"
+    };
+  });
+  const eligible = candidates.filter(({ eligible }) => eligible);
+  eligible.sort((left, right) => right.score - left.score || left.total_cost - right.total_cost || left.supplier_id.localeCompare(right.supplier_id));
+  return {
+    candidates,
+    selected: eligible[0] ?? null,
+    criteria: ["QUALITY", "DELIVERY", "CAPACITY", "RISK", "TOTAL_COST"],
+    method: "DETERMINISTIC_WEIGHTED_TOTAL_VALUE",
+    lowest_price_automatic: false
+  };
+}
+
+function workerReservationConflict(reservation, reservations, ignoredIds = new Set()) {
+  for (const other of reservations) {
+    if (ignoredIds.has(other.reservation_id) || other.reservation_id === reservation.reservation_id || other.life_id !== reservation.life_id) continue;
+    if (intervalsOverlap(reservation, other)) {
+      if (other.location !== reservation.location) return "LOCATION_CONFLICT";
+      return other.project_id === reservation.project_id ? "ROLE_TIME_CONFLICT" : "SHIFT_OVERLAP";
+    }
+    const physical = reservation.body_type === "PHYSICAL" || other.body_type === "PHYSICAL";
+    const gap = reservation.start >= other.end ? reservation.start - other.end : other.start - reservation.end;
+    const requiredTravel = Math.max(reservation.travel_time ?? 0, other.travel_time ?? 0);
+    if (physical && other.location !== reservation.location && gap + EPSILON < requiredTravel) return "TRAVEL_TIME_CONFLICT";
+  }
+  return physicalShiftConflict(reservation, reservations, ignoredIds);
+}
+
+function equipmentReservationConflict(reservation, reservations, ignoredIds = new Set()) {
+  return reservations.some((other) => !ignoredIds.has(other.reservation_id)
+    && other.reservation_id !== reservation.reservation_id
+    && other.equipment_id === reservation.equipment_id
+    && intervalsOverlap(reservation, other));
+}
+
 function unique(values) {
   return [...new Set(values)];
 }
@@ -582,7 +720,7 @@ function allNumbers(value) {
 }
 
 function isTerminalProject(project) {
-  return project.closed_at !== null || ["CANCELLED", "FAILED"].includes(project.status);
+  return project.closed_at !== null || ["COMPLETE", "CANCELLED", "FAILED"].includes(project.status);
 }
 
 function validateCapacityConfiguration(capacity) {
@@ -742,10 +880,14 @@ export function createKaiosAiCompanyRuntimeV1({
     state.revision += 1;
     updateCapacity();
     updateFinanceStatus();
+    const normalizedArgs = normalizeInput(args);
+    const actionId = `AI-COMPANY-ACTION-${String(state.action_log.length + 1).padStart(6, "0")}`;
+    const actionArgumentsHash = computeAiCompanyStateHash(normalizedArgs);
     state.action_log.push({
-      action_id: `AI-COMPANY-ACTION-${String(state.action_log.length + 1).padStart(6, "0")}`,
+      action_id: actionId,
       command,
-      args: normalizeInput(args),
+      args: normalizedArgs,
+      arguments_hash: actionArgumentsHash,
       result_status: result.status,
       result_reason: result.reason ?? null
     });
@@ -761,7 +903,9 @@ export function createKaiosAiCompanyRuntimeV1({
       simulation_time: state.simulation_time,
       location: result.location ?? context.location ?? null,
       event_type: command,
-      inputs: normalizeInput(args),
+      action_id: actionId,
+      action_arguments_hash: actionArgumentsHash,
+      inputs: normalizedArgs,
       outputs: clone(result.outputs ?? {}),
       material_delta: result.material_delta ?? 0,
       energy_delta: result.energy_delta ?? 0,
@@ -790,6 +934,10 @@ export function createKaiosAiCompanyRuntimeV1({
     usable();
     if (state.action_log.length >= MAX_ACTIONS) throw new Error("ACTION_LOG_LIMIT_REACHED");
     const previousStateHash = computeAiCompanyStateHash(stateProjection(state));
+    if (state.company.status === "DISSOLVED"
+      || (state.company.status === "LIQUIDATION_SIMULATION" && command !== "DISSOLVE_COMPANY_SIMULATION")) {
+      return record(command, args, context, { status: "BLOCKED", reason: "COMPANY_TERMINATED" }, previousStateHash);
+    }
     const before = clone(state);
     let result;
     try {
@@ -1124,6 +1272,7 @@ export function createKaiosAiCompanyRuntimeV1({
         status: index === 0 ? "READY" : "NOT_READY",
         progress_percent: 0,
         consumed: { labor_hours: 0, energy: 0, materials: Object.fromEntries(Object.keys(item.materials).map((key) => [key, 0])), equipment_wear: 0, cost: 0 },
+        work_segments: [],
         blocked_reason: null,
         actual_start: null,
         actual_end: null,
@@ -1185,7 +1334,9 @@ export function createKaiosAiCompanyRuntimeV1({
         return {
           bom_id: `${projectId}-BOM-${String(index + 1).padStart(3, "0")}`, project_id: projectId, material_id: materialId,
           description: materialId.replaceAll("_", " "), quantity, unit: "SIMULATION_UNIT", unit_mass: unitMass,
-          total_mass: round(quantity * unitMass), required_quality: "STANDARD_SIMULATION", supplier: unavailable.has(materialId) ? null : `SIMULATED-SUPPLIER-${materialId}`,
+          total_mass: round(quantity * unitMass), required_quality: "STANDARD_SIMULATION",
+          source_supplier: unavailable.has(materialId) ? null : `SIMULATED-SUPPLIER-${materialId}`,
+          supplier: unavailable.has(materialId) ? null : `SIMULATED-SUPPLIER-${materialId}`,
           availability: unavailable.has(materialId) ? 0 : quantity, lead_time: 2 + index, unit_cost: unitCost,
           total_cost: money(quantity * unitCost), storage_requirement: "SIMULATED_WAREHOUSE", transport_requirement: "CAUSAL_ROUTE",
           waste_factor: 0.05, recyclable: !materialId.includes("STOCK"), status: unavailable.has(materialId) ? "UNAVAILABLE" : "PLANNED"
@@ -1313,12 +1464,31 @@ export function createKaiosAiCompanyRuntimeV1({
       const graph = topologicalOrder(project);
       if (graph.cycle) return { status: "BLOCKED", reason: graph.reason, project_id: projectId };
       let cursor = Number(options.planned_start ?? state.simulation_time);
+      const workforce = findPlan(projectId)?.workforce ?? [];
+      const physicalHistory = new Map();
       for (const taskId of graph.order) {
         const currentTask = findTask(project, taskId);
         const delay = Number(options.task_delays?.[taskId] ?? 0);
-        const startTime = cursor + Math.max(0, delay);
+        let startTime = cursor + Math.max(0, delay);
+        const physicalWorkers = currentTask.skills
+          .map((skill) => workforce.find((worker) => worker.skill === skill) ?? state.workforce_pool.find((worker) => worker.skill === skill))
+          .filter((worker) => worker?.body_type === "PHYSICAL");
+        for (let attempt = 0; attempt < 1000; attempt += 1) {
+          const compatibleStart = physicalWorkers.reduce((latest, worker) => Math.max(
+            latest,
+            nextPhysicalShiftStart(latest, currentTask.duration_hours, physicalHistory.get(worker.life_id) ?? [], worker.shift)
+          ), startTime);
+          if (Math.abs(compatibleStart - startTime) <= EPSILON) break;
+          startTime = compatibleStart;
+          if (attempt === 999) throw new Error("PHYSICAL_SHIFT_SCHEDULE_UNRESOLVED");
+        }
         const endTime = startTime + currentTask.duration_hours;
         state.task_windows[taskId] = { start: startTime, end: endTime, location: currentTask.location };
+        for (const worker of physicalWorkers) {
+          const history = physicalHistory.get(worker.life_id) ?? [];
+          history.push({ start: startTime, end: endTime });
+          physicalHistory.set(worker.life_id, history);
+        }
         cursor = endTime;
       }
       const duration = cursor - Number(options.planned_start ?? state.simulation_time);
@@ -1389,6 +1559,7 @@ export function createKaiosAiCompanyRuntimeV1({
       const project = findProject(projectId);
       const plan = project && findPlan(projectId);
       const contract = project && findContract(projectId);
+      if (!project || isTerminalProject(project)) return { status: "BLOCKED", reason: "PROJECT_TERMINAL", project_id: projectId };
       if (!project || !plan || !contract || contract.status !== "ACTIVE_SIMULATION") return { status: "BLOCKED", reason: "ACTIVE_SIMULATED_CONTRACT_REQUIRED" };
       if (project.budget?.status !== "APPROVED") return { status: "BLOCKED", reason: "NO_BUDGET" };
       if (plan.bill_of_materials.some(({ status }) => status === "UNAVAILABLE")) return { status: "BLOCKED", reason: "NO_MATERIAL" };
@@ -1397,15 +1568,17 @@ export function createKaiosAiCompanyRuntimeV1({
       const pendingItems = plan.bill_of_materials.filter((item) => item.status !== "RECEIVED" && !existingBomIds.has(item.bom_id));
       const prospective = state.capacity.procurement_queue + pendingItems.length;
       if (prospective > state.capacity.max_procurement_queue) return { status: "BLOCKED", reason: "COMPANY_CAPACITY_EXCEEDED", outputs: { capacity_reason: "MAX_PROCUREMENT_QUEUE" } };
-      const commitment = money(pendingItems.reduce((sum, item) => {
+      const selections = pendingItems.map((item) => {
         const route = plan.supply_chain.find((candidate) => candidate.bom_id === item.bom_id);
-        return sum + item.total_cost + (route?.cost ?? 0);
-      }, 0));
+        return { item, route, selection: route ? supplierSelectionFor(item, route) : null };
+      });
+      if (selections.some(({ route, selection }) => !route || !selection?.selected)) return { status: "BLOCKED", reason: "NO_SUPPLIER" };
+      const commitment = money(selections.reduce((sum, { selection }) => sum + selection.selected.total_cost, 0));
       if (commitment > project.budget.remaining + EPSILON) return { status: "BLOCKED", reason: "NO_BUDGET" };
       project.budget.committed = money(project.budget.committed + commitment);
       project.budget.remaining = money(project.budget.approved_budget - project.budget.spent - project.budget.committed);
-      pendingItems.forEach((item) => {
-        const route = plan.supply_chain.find((candidate) => candidate.quantity === item.quantity && candidate.origin === item.supplier) ?? plan.supply_chain[plan.bill_of_materials.indexOf(item)];
+      selections.forEach(({ item, route, selection }) => {
+        const selected = selection.selected;
         const sequence = state.procurement_orders.filter((order) => order.project_id === projectId).length + 1;
         const rfqAt = state.simulation_time;
         const phaseTimes = {
@@ -1414,19 +1587,34 @@ export function createKaiosAiCompanyRuntimeV1({
           supplier_selected: rfqAt + 0.5,
           order_placed: rfqAt + 0.75,
           in_production: rfqAt + 1,
-          in_transit: rfqAt + item.lead_time,
-          received: rfqAt + item.lead_time + route.loading_time + route.travel_time + route.unloading_time
+          in_transit: rfqAt + selected.delivery_hours,
+          received: rfqAt + selected.delivery_hours + route.loading_time + route.travel_time + route.unloading_time
         };
+        item.supplier = selected.supplier_id;
+        item.lead_time = selected.delivery_hours;
+        item.unit_cost = money(selected.material_cost / item.quantity);
+        item.total_cost = selected.material_cost;
         item.status = "RFQ_CREATED";
+        route.origin = selected.supplier_id;
         route.status = "PLANNED";
+        if (project.schedule?.material_arrival) project.schedule.material_arrival[item.material_id] = rfqAt + selected.delivery_hours;
         const order = {
           order_id: `${projectId}-PROCUREMENT-${String(sequence).padStart(3, "0")}`,
           project_id: projectId, bom_id: item.bom_id, material_id: item.material_id,
-          quantity: item.quantity, material_cost: item.total_cost, transport_cost: route.cost,
+          quantity: item.quantity, material_cost: selected.material_cost, transport_cost: selected.transport_cost,
           ordered_at: state.simulation_time, arrival_time: phaseTimes.received,
-          supplier_candidates: [`${item.supplier}-QUALITY`, `${item.supplier}-CAPACITY`],
-          selection_basis: ["QUALITY", "DELIVERY", "CAPACITY", "RISK", "TOTAL_COST"],
-          selected_supplier: item.supplier,
+          supplier_candidates: clone(selection.candidates),
+          selection_basis: clone(selection.criteria),
+          supplier_selection: {
+            method: selection.method,
+            selected_supplier: selected.supplier_id,
+            selected_score: selected.score,
+            lowest_price_automatic: selection.lowest_price_automatic,
+            evaluated_candidate_count: selection.candidates.length
+          },
+          selected_supplier: selected.supplier_id,
+          committed_amount: selected.total_cost,
+          commitment_released: false,
           phase_times: phaseTimes,
           state_history: [{ status: "RFQ_CREATED", simulation_time: rfqAt }],
           inspection_outcome: (options.inspection_fail_materials ?? []).includes(item.material_id) ? "FAIL" : "PASS",
@@ -1449,21 +1637,35 @@ export function createKaiosAiCompanyRuntimeV1({
         ?? state.procurement_orders.findLast((candidate) => candidate.project_id === projectId && candidate.material_id === materialId);
       const item = plan?.bill_of_materials.find(({ bom_id }) => bom_id === order?.bom_id);
       if (!project || !item || !order) return { status: "BLOCKED", reason: "MATERIAL_ORDER_NOT_FOUND" };
+      if (isTerminalProject(project)) return { status: "BLOCKED", reason: "PROJECT_TERMINAL", project_id: projectId };
       if (order.status === "PAYMENT_APPROVED") return { status: "BLOCKED", reason: "MATERIAL_ALREADY_RECEIVED" };
+      if (order.status === "INSPECTION_FAILED") return { status: "BLOCKED", reason: "MATERIAL_INSPECTION_TERMINAL" };
+      if (order.status === "CANCELLED") return { status: "BLOCKED", reason: "MATERIAL_ORDER_CANCELLED" };
       if (state.simulation_time < order.arrival_time) return { status: "BLOCKED", reason: "TRANSPORT_TIME_REQUIRED", outputs: { arrival_time: order.arrival_time } };
       advanceProcurementOrders(state.simulation_time);
       appendProcurementState(order, "RECEIVED", state.simulation_time);
       if (order.inspection_outcome !== "PASS") {
         appendProcurementState(order, "INSPECTION_FAILED", state.simulation_time);
         item.status = "INSPECTION_FAILED";
+        const released = money(order.committed_amount ?? order.material_cost + order.transport_cost);
+        if (!order.commitment_released) {
+          project.budget.committed = money(Math.max(0, project.budget.committed - released));
+          project.budget.remaining = money(project.budget.approved_budget - project.budget.spent - project.budget.committed);
+          order.commitment_released = true;
+          order.released_commitment = released;
+        }
+        const failedRoute = plan.supply_chain.find(({ bom_id }) => bom_id === order.bom_id);
+        if (failedRoute) failedRoute.status = "INSPECTION_FAILED";
         updateCapacity();
-        return { status: "BLOCKED", reason: "MATERIAL_INSPECTION_FAILED", project_id: projectId, outputs: { order: clone(order) } };
+        return { status: "BLOCKED", reason: "MATERIAL_INSPECTION_FAILED", project_id: projectId, outputs: { order: clone(order), released_commitment: released } };
       }
       const massAfter = Object.values(state.material_inventory).reduce((sum, record) => sum + record.mass, 0) + item.total_mass;
       if (massAfter > plan.warehouse_capacity + EPSILON) return { status: "BLOCKED", reason: "NO_WAREHOUSE" };
       appendProcurementState(order, "ACCEPTED", state.simulation_time);
       const totalCost = money(order.material_cost + order.transport_cost);
       project.budget.committed = money(Math.max(0, project.budget.committed - totalCost));
+      order.commitment_released = true;
+      order.released_commitment = totalCost;
       const charge = chargeProject(project, "MATERIAL_AND_TRANSPORT_COST", totalCost);
       if (!charge.ok) { project.budget.committed = money(project.budget.committed + totalCost); return { status: "BLOCKED", reason: charge.reason }; }
       item.status = "RECEIVED";
@@ -1489,18 +1691,23 @@ export function createKaiosAiCompanyRuntimeV1({
       const currentTask = findTask(project, taskId);
       const worker = findPlan(projectId)?.workforce.find(({ worker_id }) => worker_id === workerId);
       if (!currentTask || !worker) return { status: "BLOCKED", reason: "WORKER_NOT_FOUND" };
+      if (isTerminalProject(project)) return { status: "BLOCKED", reason: "PROJECT_TERMINAL", project_id: projectId };
       if (!currentTask.skills.includes(worker.skill)) return { status: "BLOCKED", reason: "SKILL_NOT_AVAILABLE" };
       if (!worker.safety_qualification || !worker.equipment_qualification) return { status: "BLOCKED", reason: "CERTIFICATION_SIMULATION_MISSING" };
       const window = state.task_windows[taskId] ?? { start: state.simulation_time, end: state.simulation_time + currentTask.duration_hours, location: currentTask.location };
-      const reservation = { reservation_id: `AI-COMPANY-WORKER-RES-${String(state.worker_reservations.length + 1).padStart(5, "0")}`, project_id: projectId, task_id: taskId, worker_id: workerId, life_id: worker.life_id, body_type: worker.body_type, location: currentTask.location, start: Number(options.start ?? window.start), end: Number(options.end ?? window.end), status: "RESERVED" };
+      const reservation = {
+        reservation_id: `AI-COMPANY-WORKER-RES-${String(state.worker_reservations.length + 1).padStart(5, "0")}`,
+        project_id: projectId, task_id: taskId, worker_id: workerId, life_id: worker.life_id,
+        body_type: worker.body_type, location: currentTask.location, travel_time: worker.travel_time,
+        shift_start: worker.shift.start, shift_end: worker.shift.end,
+        shift_cycle_hours: worker.shift.cycle_hours, maximum_hours: worker.shift.maximum_hours,
+        minimum_rest_hours: worker.shift.minimum_rest_hours,
+        start: Number(options.start ?? window.start), end: Number(options.end ?? window.end), status: "RESERVED"
+      };
       if (!Number.isFinite(reservation.start) || !Number.isFinite(reservation.end) || reservation.end <= reservation.start) return { status: "BLOCKED", reason: "INVALID_SHIFT" };
       if (worker.body_type === "PHYSICAL" && reservation.end - reservation.start > worker.shift.maximum_hours) return { status: "BLOCKED", reason: "REST_REQUIREMENT_CONFLICT" };
-      const existing = state.worker_reservations.filter((candidate) => candidate.life_id === worker.life_id && !["RELEASED", "CANCELLED"].includes(candidate.status));
-      for (const other of existing) {
-        if (intervalsOverlap(reservation, other)) return { status: "BLOCKED", reason: other.location !== reservation.location ? "LOCATION_CONFLICT" : other.project_id === projectId ? "ROLE_TIME_CONFLICT" : "SHIFT_OVERLAP" };
-        const gap = reservation.start >= other.end ? reservation.start - other.end : other.start - reservation.end;
-        if (worker.body_type === "PHYSICAL" && other.location !== reservation.location && gap < worker.travel_time) return { status: "BLOCKED", reason: "TRAVEL_TIME_CONFLICT" };
-      }
+      const conflict = workerReservationConflict(reservation, state.worker_reservations);
+      if (conflict) return { status: "BLOCKED", reason: conflict };
       state.worker_reservations.push(reservation);
       worker.assigned_tasks.push(taskId);
       worker.status = "ASSIGNED";
@@ -1524,6 +1731,7 @@ export function createKaiosAiCompanyRuntimeV1({
       const currentTask = findTask(project, taskId);
       const equipment = findPlan(projectId)?.equipment.find(({ equipment_id }) => equipment_id === equipmentId);
       if (!currentTask || !equipment || !currentTask.equipment.includes(equipment.type)) return { status: "BLOCKED", reason: "NO_EQUIPMENT" };
+      if (isTerminalProject(project)) return { status: "BLOCKED", reason: "PROJECT_TERMINAL", project_id: projectId };
       if (!equipment.availability || equipment.maintenance_state !== "READY" || ["BROKEN", "RETIRED", "OUT_OF_SERVICE", "MAINTENANCE_REQUIRED"].includes(equipment.status)) return { status: "BLOCKED", reason: "EQUIPMENT_MAINTENANCE_REQUIRED" };
       if (equipment.energy_type !== "MANUAL" && equipment.fuel_or_charge <= 0) return { status: "BLOCKED", reason: "NO_ENERGY" };
       const assignedWorkers = currentTask.workers.map((workerId) => findPlan(projectId).workforce.find((worker) => worker.worker_id === workerId)).filter(Boolean);
@@ -1535,7 +1743,7 @@ export function createKaiosAiCompanyRuntimeV1({
       const window = state.task_windows[taskId] ?? { start: state.simulation_time, end: state.simulation_time + currentTask.duration_hours };
       const reservation = { reservation_id: `AI-COMPANY-EQUIPMENT-RES-${String(state.equipment_reservations.length + 1).padStart(5, "0")}`, project_id: projectId, task_id: taskId, equipment_id: equipmentId, start: Number(options.start ?? window.start), end: Number(options.end ?? window.end), status: "RESERVED" };
       if (!Number.isFinite(reservation.start) || !Number.isFinite(reservation.end) || reservation.end <= reservation.start) return { status: "BLOCKED", reason: "INVALID_EQUIPMENT_RESERVATION" };
-      if (state.equipment_reservations.some((candidate) => candidate.equipment_id === equipmentId && !["RELEASED", "CANCELLED"].includes(candidate.status) && intervalsOverlap(reservation, candidate))) return { status: "BLOCKED", reason: "EQUIPMENT_RESERVATION_CONFLICT" };
+      if (equipmentReservationConflict(reservation, state.equipment_reservations)) return { status: "BLOCKED", reason: "EQUIPMENT_RESERVATION_CONFLICT" };
       state.equipment_reservations.push(reservation);
       equipment.status = "RESERVED";
       return { status: "COMPLETED", project_id: projectId, task_id: taskId, equipment_delta: 1, outputs: { reservation } };
@@ -1577,7 +1785,7 @@ export function createKaiosAiCompanyRuntimeV1({
       if (!currentTask) return { status: "BLOCKED", reason: "TASK_NOT_FOUND" };
       if (state.runtime_status !== "RUNNING") return { status: "BLOCKED", reason: "RUNTIME_PAUSED" };
       if (currentTask.predecessors.some((id) => findTask(project, id)?.status !== "COMPLETE")) return { status: "BLOCKED", reason: "DEPENDENCY_NOT_COMPLETE", project_id: projectId, task_id: taskId };
-      if (!["READY", "PAUSED"].includes(currentTask.status)) return { status: "BLOCKED", reason: "TASK_NOT_READY" };
+      if (currentTask.status !== "READY") return { status: "BLOCKED", reason: currentTask.status === "PAUSED" ? "RESUME_TASK_REQUIRED" : "TASK_NOT_READY" };
       const reason = taskResourceBlock(project, currentTask);
       if (reason) { currentTask.blocked_reason = reason; return { status: "BLOCKED", reason, project_id: projectId, task_id: taskId }; }
       currentTask.status = "IN_PROGRESS";
@@ -1597,8 +1805,26 @@ export function createKaiosAiCompanyRuntimeV1({
 
   function pauseTask(projectId, taskId) {
     return execute("PAUSE_TASK", { projectId, taskId }, { division_id: "CONSTRUCTION_DIVISION", project_id: projectId, task_id: taskId }, () => {
-      const currentTask = findTask(findProject(projectId), taskId);
+      const project = findProject(projectId);
+      const currentTask = findTask(project, taskId);
       if (!currentTask || currentTask.status !== "IN_PROGRESS") return { status: "BLOCKED", reason: "TASK_NOT_IN_PROGRESS" };
+      const plan = findPlan(projectId);
+      const workerReservations = state.worker_reservations.filter((candidate) => candidate.project_id === projectId && candidate.task_id === taskId && candidate.status === "IN_USE");
+      const equipmentReservations = state.equipment_reservations.filter((candidate) => candidate.project_id === projectId && candidate.task_id === taskId && candidate.status === "IN_USE");
+      currentTask.paused_worker_ids = unique(workerReservations.map(({ worker_id }) => worker_id));
+      currentTask.paused_equipment_ids = unique(equipmentReservations.map(({ equipment_id }) => equipment_id));
+      for (const reservation of workerReservations) {
+        reservation.end = Math.max(reservation.start, state.simulation_time);
+        reservation.status = reservation.end > reservation.start + EPSILON ? "COMPLETE" : "CANCELLED";
+        const worker = plan?.workforce.find(({ worker_id }) => worker_id === reservation.worker_id);
+        if (worker) worker.status = state.worker_reservations.some((candidate) => candidate.worker_id === worker.worker_id && candidate.reservation_id !== reservation.reservation_id && candidate.status === "RESERVED") ? "ASSIGNED" : "AVAILABLE";
+      }
+      for (const reservation of equipmentReservations) {
+        reservation.end = Math.max(reservation.start, state.simulation_time);
+        reservation.status = "RELEASED";
+        const equipment = plan?.equipment.find(({ equipment_id }) => equipment_id === reservation.equipment_id);
+        if (equipment) equipment.status = state.equipment_reservations.some((candidate) => candidate.equipment_id === equipment.equipment_id && candidate.reservation_id !== reservation.reservation_id && candidate.status === "RESERVED") ? "RESERVED" : "AVAILABLE";
+      }
       currentTask.status = "PAUSED";
       currentTask.pause_started_at = state.simulation_time;
       return { status: "COMPLETED", project_id: projectId, task_id: taskId, outputs: { task_status: currentTask.status } };
@@ -1611,34 +1837,110 @@ export function createKaiosAiCompanyRuntimeV1({
       if (!currentTask || currentTask.status !== "PAUSED") return { status: "BLOCKED", reason: "TASK_NOT_PAUSED" };
       if (state.runtime_status !== "RUNNING") return { status: "BLOCKED", reason: "RUNTIME_PAUSED" };
       const project = findProject(projectId);
+      const plan = findPlan(projectId);
       const pauseDelay = Math.max(0, state.simulation_time - (currentTask.pause_started_at ?? state.simulation_time));
+      const pending = [...currentTask.successors];
+      const shiftedTaskIds = new Set();
+      while (pending.length) {
+        const successorId = pending.shift();
+        if (shiftedTaskIds.has(successorId)) continue;
+        shiftedTaskIds.add(successorId);
+        const successor = findTask(project, successorId);
+        if (successor) pending.push(...successor.successors);
+      }
+      const shiftedWorkerReservations = state.worker_reservations
+        .filter((candidate) => shiftedTaskIds.has(candidate.task_id) && candidate.status === "RESERVED")
+        .map((candidate) => ({ ...candidate, start: candidate.start + pauseDelay, end: candidate.end + pauseDelay }));
+      const shiftedEquipmentReservations = state.equipment_reservations
+        .filter((candidate) => shiftedTaskIds.has(candidate.task_id) && candidate.status === "RESERVED")
+        .map((candidate) => ({ ...candidate, start: candidate.start + pauseDelay, end: candidate.end + pauseDelay }));
+      const workerIds = unique(currentTask.paused_worker_ids ?? currentTask.workers);
+      const equipmentIds = unique(currentTask.paused_equipment_ids ?? []);
+      const resumedEnd = state.simulation_time + currentTask.remaining_hours;
+      const newWorkerReservations = workerIds.map((workerId, index) => {
+        const worker = plan?.workforce.find((candidate) => candidate.worker_id === workerId);
+        return worker ? {
+          reservation_id: `AI-COMPANY-WORKER-RES-${String(state.worker_reservations.length + index + 1).padStart(5, "0")}`,
+          project_id: projectId, task_id: taskId, worker_id: workerId, life_id: worker.life_id,
+          body_type: worker.body_type, location: currentTask.location, travel_time: worker.travel_time,
+          shift_start: worker.shift.start, shift_end: worker.shift.end,
+          shift_cycle_hours: worker.shift.cycle_hours, maximum_hours: worker.shift.maximum_hours,
+          minimum_rest_hours: worker.shift.minimum_rest_hours,
+          start: state.simulation_time, end: resumedEnd, status: "RESERVED"
+        } : null;
+      }).filter(Boolean);
+      if (newWorkerReservations.length !== workerIds.length) return { status: "BLOCKED", reason: "NO_WORKERS", project_id: projectId, task_id: taskId };
+      if (newWorkerReservations.some((reservation) => reservation.body_type === "PHYSICAL" && reservation.end - reservation.start > reservation.maximum_hours + EPSILON)) return { status: "BLOCKED", reason: "REST_REQUIREMENT_CONFLICT", project_id: projectId, task_id: taskId };
+      const newEquipmentReservations = equipmentIds.map((equipmentId, index) => {
+        const equipment = plan?.equipment.find((candidate) => candidate.equipment_id === equipmentId);
+        return equipment ? {
+          reservation_id: `AI-COMPANY-EQUIPMENT-RES-${String(state.equipment_reservations.length + index + 1).padStart(5, "0")}`,
+          project_id: projectId, task_id: taskId, equipment_id: equipmentId,
+          start: state.simulation_time, end: resumedEnd, status: "RESERVED"
+        } : null;
+      }).filter(Boolean);
+      if (newEquipmentReservations.length !== equipmentIds.length) return { status: "BLOCKED", reason: "NO_EQUIPMENT", project_id: projectId, task_id: taskId };
+      if (currentTask.skills.some((skill) => !newWorkerReservations.some((reservation) => plan.workforce.find(({ worker_id }) => worker_id === reservation.worker_id)?.skill === skill))) return { status: "BLOCKED", reason: "NO_WORKERS", project_id: projectId, task_id: taskId };
+      if (currentTask.equipment.some((type) => !newEquipmentReservations.some((reservation) => plan.equipment.find(({ equipment_id }) => equipment_id === reservation.equipment_id)?.type === type))) return { status: "BLOCKED", reason: "NO_EQUIPMENT", project_id: projectId, task_id: taskId };
+      if (newEquipmentReservations.some((reservation) => {
+        const equipment = plan.equipment.find(({ equipment_id }) => equipment_id === reservation.equipment_id);
+        return !equipment?.availability || equipment.maintenance_state !== "READY" || ["BROKEN", "RETIRED", "OUT_OF_SERVICE", "MAINTENANCE_REQUIRED"].includes(equipment.status);
+      })) return { status: "BLOCKED", reason: "EQUIPMENT_MAINTENANCE_REQUIRED", project_id: projectId, task_id: taskId };
+      if (!findContract(projectId) || findContract(projectId).status !== "ACTIVE_SIMULATION") return { status: "BLOCKED", reason: "ACTIVE_SIMULATED_CONTRACT_REQUIRED", project_id: projectId, task_id: taskId };
+      if (project.budget?.status !== "APPROVED") return { status: "BLOCKED", reason: "NO_BUDGET", project_id: projectId, task_id: taskId };
+      const currentWindow = state.task_windows[taskId];
+      if (!currentWindow || resumedEnd > currentWindow.end + pauseDelay + EPSILON) return { status: "BLOCKED", reason: "TASK_WINDOW_INSUFFICIENT", project_id: projectId, task_id: taskId };
+      for (const [materialId, quantity] of Object.entries(currentTask.materials)) {
+        const remaining = Math.max(0, quantity - (currentTask.consumed.materials[materialId] ?? 0));
+        if ((state.material_inventory[materialId]?.project_allocations?.[projectId] ?? 0) + EPSILON < remaining) return { status: "BLOCKED", reason: "NO_MATERIAL", project_id: projectId, task_id: taskId };
+      }
+      if ((plan.energy_budget ?? 0) + EPSILON < Math.max(0, currentTask.energy - currentTask.consumed.energy)) return { status: "BLOCKED", reason: "NO_ENERGY", project_id: projectId, task_id: taskId };
+      const ignoredWorkerIds = new Set(shiftedWorkerReservations.map(({ reservation_id }) => reservation_id));
+      const ignoredEquipmentIds = new Set(shiftedEquipmentReservations.map(({ reservation_id }) => reservation_id));
+      const baseWorkerReservations = state.worker_reservations.filter(({ reservation_id }) => !ignoredWorkerIds.has(reservation_id));
+      const baseEquipmentReservations = state.equipment_reservations.filter(({ reservation_id }) => !ignoredEquipmentIds.has(reservation_id));
+      const acceptedWorkers = [];
+      for (const reservation of [...shiftedWorkerReservations, ...newWorkerReservations]) {
+        const conflict = workerReservationConflict(reservation, [...baseWorkerReservations, ...acceptedWorkers]);
+        if (conflict) return { status: "BLOCKED", reason: conflict, project_id: projectId, task_id: taskId };
+        acceptedWorkers.push(reservation);
+      }
+      const acceptedEquipment = [];
+      for (const reservation of [...shiftedEquipmentReservations, ...newEquipmentReservations]) {
+        if (equipmentReservationConflict(reservation, [...baseEquipmentReservations, ...acceptedEquipment])) return { status: "BLOCKED", reason: "EQUIPMENT_RESERVATION_CONFLICT", project_id: projectId, task_id: taskId };
+        acceptedEquipment.push(reservation);
+      }
       if (pauseDelay > EPSILON) {
         const currentWindow = state.task_windows[taskId];
         if (currentWindow) currentWindow.end += pauseDelay;
-        for (const reservation of state.worker_reservations.filter((candidate) => candidate.project_id === projectId && candidate.task_id === taskId && !["RELEASED", "CANCELLED", "COMPLETE"].includes(candidate.status))) reservation.end += pauseDelay;
-        for (const reservation of state.equipment_reservations.filter((candidate) => candidate.project_id === projectId && candidate.task_id === taskId && !["RELEASED", "CANCELLED"].includes(candidate.status))) reservation.end += pauseDelay;
-        const pending = [...currentTask.successors];
-        const shifted = new Set();
-        while (pending.length) {
-          const successorId = pending.shift();
-          if (shifted.has(successorId)) continue;
-          shifted.add(successorId);
+        for (const successorId of shiftedTaskIds) {
           const successor = findTask(project, successorId);
           if (!successor) continue;
           const successorWindow = state.task_windows[successorId];
           if (successorWindow) { successorWindow.start += pauseDelay; successorWindow.end += pauseDelay; }
           for (const reservation of state.worker_reservations.filter((candidate) => candidate.project_id === projectId && candidate.task_id === successorId && candidate.status === "RESERVED")) { reservation.start += pauseDelay; reservation.end += pauseDelay; }
           for (const reservation of state.equipment_reservations.filter((candidate) => candidate.project_id === projectId && candidate.task_id === successorId && candidate.status === "RESERVED")) { reservation.start += pauseDelay; reservation.end += pauseDelay; }
-          pending.push(...successor.successors);
         }
         project.schedule.execution_pause_delay = round((project.schedule.execution_pause_delay ?? 0) + pauseDelay);
         project.schedule.planned_end += pauseDelay;
         project.schedule.estimated_duration += pauseDelay;
       }
-      const reason = taskResourceBlock(project, currentTask);
-      if (reason) return { status: "BLOCKED", reason, project_id: projectId, task_id: taskId };
+      state.worker_reservations.push(...newWorkerReservations);
+      state.equipment_reservations.push(...newEquipmentReservations);
+      for (const reservation of newWorkerReservations) {
+        const worker = plan.workforce.find(({ worker_id }) => worker_id === reservation.worker_id);
+        if (worker) worker.status = "WORKING";
+        reservation.status = "IN_USE";
+      }
+      for (const reservation of newEquipmentReservations) {
+        const equipment = plan.equipment.find(({ equipment_id }) => equipment_id === reservation.equipment_id);
+        if (equipment) equipment.status = "RESERVED";
+        reservation.status = "IN_USE";
+      }
       currentTask.status = "IN_PROGRESS";
       currentTask.pause_started_at = null;
+      currentTask.paused_worker_ids = [];
+      currentTask.paused_equipment_ids = [];
       return { status: "COMPLETED", project_id: projectId, task_id: taskId, outputs: { task_status: currentTask.status } };
     });
   }
@@ -1699,6 +2001,8 @@ export function createKaiosAiCompanyRuntimeV1({
         currentTask.consumed.energy = round(currentTask.consumed.energy + energyNeed);
         currentTask.consumed.labor_hours = round(currentTask.consumed.labor_hours + step * Math.max(1, currentTask.workers.length));
         currentTask.consumed.cost = money(currentTask.consumed.cost + requiredCost);
+        currentTask.work_segments ??= [];
+        currentTask.work_segments.push({ start: state.simulation_time, end: state.simulation_time + step, effective_hours: step });
         currentTask.remaining_hours = round(Math.max(0, currentTask.remaining_hours - step));
         const oldProgress = currentTask.progress_percent;
         currentTask.progress_percent = round((1 - currentTask.remaining_hours / currentTask.duration_hours) * 100);
@@ -1797,6 +2101,7 @@ export function createKaiosAiCompanyRuntimeV1({
         cost: money(options.cost ?? Math.max(100, original.cost * 0.2)), predecessors: [], successors: [taskId],
         quality_gate: "STAGE_INSPECTION", safety_gate: original.safety_gate, status: "READY", progress_percent: 0,
         consumed: { labor_hours: 0, energy: 0, materials: Object.fromEntries(Object.keys(options.materials ?? {}).map((key) => [key, 0])), equipment_wear: 0, cost: 0 },
+        work_segments: [],
         blocked_reason: null, actual_start: null, actual_end: null, rework_for_task_id: taskId
       };
       project.tasks.push(rework);
@@ -1875,6 +2180,7 @@ export function createKaiosAiCompanyRuntimeV1({
       const change = state.change_orders.find(({ change_order_id }) => change_order_id === changeOrderId);
       const project = change && findProject(change.project_id);
       if (!change || !project || change.status !== "CHANGE_REQUESTED") return { status: "BLOCKED", reason: "CHANGE_ORDER_NOT_REVIEWABLE" };
+      if (isTerminalProject(project) || findContract(project.project_id)?.status === "COMPLETED") return { status: "BLOCKED", reason: "PROJECT_NOT_CHANGEABLE", project_id: project.project_id };
       if (!change.rights_review || !change.safety_review) return { status: "BLOCKED", reason: "CHANGE_REVIEW_REQUIRED", project_id: project.project_id };
       const approvedDelta = money(options.approved_budget_delta ?? change.added_cost);
       if (!Number.isFinite(approvedDelta) || approvedDelta < change.added_cost) return { status: "BLOCKED", reason: "NO_BUDGET", project_id: project.project_id };
@@ -1919,7 +2225,8 @@ export function createKaiosAiCompanyRuntimeV1({
           description: `${materialId.replaceAll("_", " ")} / CHANGE ORDER`, quantity: round(quantity),
           unit: "SIMULATION_UNIT", unit_mass: profile.unit_mass,
           total_mass: round(quantity * profile.unit_mass), required_quality: "STANDARD_SIMULATION",
-          supplier: `SIMULATED-SUPPLIER-${materialId}`, availability: quantity, lead_time: 2 + index,
+           source_supplier: `SIMULATED-SUPPLIER-${materialId}`, supplier: `SIMULATED-SUPPLIER-${materialId}`,
+           availability: quantity, lead_time: 2 + index,
           unit_cost: profile.unit_cost, total_cost: money(quantity * profile.unit_cost),
           storage_requirement: "SIMULATED_WAREHOUSE", transport_requirement: "CAUSAL_ROUTE",
           waste_factor: 0.05, recyclable: !materialId.includes("STOCK"), status: "PLANNED",
@@ -1955,6 +2262,7 @@ export function createKaiosAiCompanyRuntimeV1({
           status: predecessors.every((id) => findTask(project, id)?.status === "COMPLETE") ? "READY" : "NOT_READY",
           progress_percent: 0,
           consumed: { labor_hours: 0, energy: 0, materials: Object.fromEntries(Object.keys(change.materials).map((key) => [key, 0])), equipment_wear: 0, cost: 0 },
+          work_segments: [],
           blocked_reason: null, actual_start: null, actual_end: null, rework_for_task_id: null,
           change_order_id: change.change_order_id
         };
@@ -2098,11 +2406,22 @@ export function createKaiosAiCompanyRuntimeV1({
   function liquidateCompany() {
     return execute("LIQUIDATE_COMPANY_SIMULATION", {}, { division_id: "FINANCE_DIVISION" }, () => {
       if (!["COURT_PROTECTION_SIMULATION", "INSOLVENT"].includes(state.company.status)) return { status: "BLOCKED", reason: "COURT_PROTECTION_OR_INSOLVENCY_REQUIRED" };
-      const assets = {
-        equipment: state.equipment_pool.map(({ equipment_id, type, owner, status }) => ({ equipment_id, type, owner, status, disposition: "PRESERVED_PENDING_SIMULATED_DISTRIBUTION" })),
-        material_inventory: clone(state.material_inventory),
-        projects: state.projects.map(({ project_id, status, accounting }) => ({ project_id, status, accounting: clone(accounting), disposition: "RECORDED" }))
-      };
+      for (const order of state.procurement_orders.filter(({ status }) => !PROCUREMENT_TERMINAL_STATUSES.has(status))) {
+        const project = findProject(order.project_id);
+        const plan = findPlan(order.project_id);
+        const released = money(order.committed_amount ?? order.material_cost + order.transport_cost);
+        if (project?.budget && !order.commitment_released) {
+          project.budget.committed = money(Math.max(0, project.budget.committed - released));
+          project.budget.remaining = money(project.budget.approved_budget - project.budget.spent - project.budget.committed);
+          order.commitment_released = true;
+          order.released_commitment = released;
+        }
+        appendProcurementState(order, "CANCELLED", state.simulation_time);
+        const item = plan?.bill_of_materials.find(({ bom_id }) => bom_id === order.bom_id);
+        if (item && item.status !== "RECEIVED") item.status = "CANCELLED";
+        const route = plan?.supply_chain.find(({ bom_id }) => bom_id === order.bom_id);
+        if (route && route.status !== "DELIVERED") route.status = "CANCELLED";
+      }
       for (const project of state.projects.filter((candidate) => !isTerminalProject(candidate))) {
         project.status = "CANCELLED";
         project.closed_at = state.simulation_time;
@@ -2112,14 +2431,22 @@ export function createKaiosAiCompanyRuntimeV1({
       for (const reservation of state.worker_reservations) if (!["COMPLETE", "RELEASED"].includes(reservation.status)) reservation.status = "RELEASED";
       for (const reservation of state.equipment_reservations) if (reservation.status !== "RELEASED") reservation.status = "RELEASED";
       for (const contract of state.contracts.filter(({ status }) => status !== "COMPLETED")) contract.status = "TERMINATED_SIMULATION";
+      state.runtime_status = "STOPPED";
+      updateCapacity();
+      const assets = {
+        equipment: state.equipment_pool.map(({ equipment_id, type, owner, status }) => ({ equipment_id, type, owner, status, disposition: "PRESERVED_PENDING_SIMULATED_DISTRIBUTION" })),
+        material_inventory: clone(state.material_inventory),
+        procurement_orders: state.procurement_orders.map(({ order_id, project_id, material_id, status, committed_amount, commitment_released }) => ({ order_id, project_id, material_id, status, committed_amount, commitment_released })),
+        projects: state.projects.map(({ project_id, status, accounting, closeout_status }) => ({ project_id, status, accounting: clone(accounting), closeout_status, disposition: "RECORDED" }))
+      };
       const record = {
         recovery_id: `AI-COMPANY-RECOVERY-${String(state.company_recovery.length + 1).padStart(4, "0")}`,
         recovery_type: "LIQUIDATION_SIMULATION", simulation_time: state.simulation_time,
-        assets, asset_records_preserved: true, real_legal_effect: false, status: "ACTIVE"
+        assets, asset_snapshot_hash: computeAiCompanyStateHash(assets),
+        asset_records_preserved: true, real_legal_effect: false, status: "ACTIVE"
       };
       state.company_recovery.push(record);
       state.company.status = "LIQUIDATION_SIMULATION";
-      updateCapacity();
       return { status: "COMPLETED", outputs: { company_status: state.company.status, recovery: record } };
     });
   }
@@ -2133,6 +2460,7 @@ export function createKaiosAiCompanyRuntimeV1({
         recovery_id: `AI-COMPANY-RECOVERY-${String(state.company_recovery.length + 1).padStart(4, "0")}`,
         recovery_type: "DISSOLUTION_SIMULATION", simulation_time: state.simulation_time,
         predecessor_recovery_id: liquidation.recovery_id, asset_records_preserved: true,
+        asset_snapshot_hash: liquidation.asset_snapshot_hash,
         real_legal_effect: false, status: "COMPLETE"
       });
       return { status: "COMPLETED", outputs: { company_status: state.company.status, asset_records_preserved: true } };
@@ -2182,18 +2510,25 @@ export function createKaiosAiCompanyRuntimeV1({
         if (currentTask.status !== "COMPLETE" || project.project_kind !== "PHYSICAL") continue;
         const window = candidate.task_windows?.[currentTask.task_id];
         if (!window || currentTask.actual_start === null || currentTask.actual_end === null || currentTask.actual_start + EPSILON < window.start || currentTask.actual_end > window.end + EPSILON) issues.push("PHYSICAL_TASK_WINDOW_VIOLATION");
+        const workSegments = currentTask.work_segments ?? [];
+        const effectiveHours = round(workSegments.reduce((sum, segment) => sum + (segment.effective_hours ?? segment.end - segment.start), 0));
+        if (!workSegments.length || Math.abs(effectiveHours - currentTask.duration_hours) > EPSILON || Math.abs(workSegments.at(-1).end - currentTask.actual_end) > EPSILON) issues.push("PHYSICAL_WORK_SEGMENT_RECONCILIATION");
         for (const skill of currentTask.skills ?? []) {
           const worker = currentTask.workers.map((workerId) => plan?.workforce?.find((candidateWorker) => candidateWorker.worker_id === workerId)).find((candidateWorker) => candidateWorker?.skill === skill);
-          const reservation = (candidate.worker_reservations ?? []).find((item) => item.project_id === project.project_id && item.task_id === currentTask.task_id && item.worker_id === worker?.worker_id);
-          if (!worker || !reservation || reservation.start > currentTask.actual_start + EPSILON || reservation.end + EPSILON < currentTask.actual_end) issues.push("PHYSICAL_WORKER_RESERVATION_VIOLATION");
+          if (!worker || workSegments.some((segment) => !(candidate.worker_reservations ?? []).some((item) => item.project_id === project.project_id && item.task_id === currentTask.task_id && item.worker_id === worker.worker_id && item.start <= segment.start + EPSILON && item.end + EPSILON >= segment.end))) issues.push("PHYSICAL_WORKER_RESERVATION_VIOLATION");
         }
         for (const type of currentTask.equipment ?? []) {
-          const reservation = (candidate.equipment_reservations ?? []).find((item) => item.project_id === project.project_id && item.task_id === currentTask.task_id && plan?.equipment?.find((equipment) => equipment.equipment_id === item.equipment_id)?.type === type);
-          if (!reservation || reservation.start > currentTask.actual_start + EPSILON || reservation.end + EPSILON < currentTask.actual_end) issues.push("PHYSICAL_EQUIPMENT_RESERVATION_VIOLATION");
+          if (workSegments.some((segment) => !(candidate.equipment_reservations ?? []).some((item) => item.project_id === project.project_id && item.task_id === currentTask.task_id && plan?.equipment?.find((equipment) => equipment.equipment_id === item.equipment_id)?.type === type && item.start <= segment.start + EPSILON && item.end + EPSILON >= segment.end))) issues.push("PHYSICAL_EQUIPMENT_RESERVATION_VIOLATION");
         }
       }
       if (project.budget && Math.abs(project.budget.remaining - (project.budget.approved_budget - project.budget.spent - project.budget.committed)) > EPSILON) issues.push("BUDGET_RECONCILIATION");
       if (project.budget && [project.budget.approved_budget, project.budget.spent, project.budget.committed, project.budget.remaining, project.budget.total_estimated_cost].some((value) => !Number.isFinite(value) || value < -EPSILON)) issues.push("BUDGET_CONTRACT");
+      if (project.budget) {
+        const expectedCommitment = money((candidate.procurement_orders ?? [])
+          .filter((order) => order.project_id === project.project_id && !order.commitment_released && !PROCUREMENT_TERMINAL_STATUSES.has(order.status))
+          .reduce((sum, order) => sum + (order.committed_amount ?? order.material_cost + order.transport_cost), 0));
+        if (Math.abs(project.budget.committed - expectedCommitment) > EPSILON) issues.push("PROCUREMENT_COMMITMENT_RECONCILIATION");
+      }
       if (["FISHPOND_PROJECT", "BASIC_HOUSE_PROJECT"].includes(project.template_id) && project.tasks.length && project.tasks.every(({ status }) => status === "COMPLETE")) {
         const execution = project.domain_execution;
         if (execution?.adapter !== "EXECUTED_CANONICAL_RUNTIME" || execution?.execution_status !== "COMPLETE" || execution?.integrity_verified !== true || execution?.simulation_only !== true) issues.push("CANONICAL_DOMAIN_EXECUTION_REQUIRED");
@@ -2209,13 +2544,17 @@ export function createKaiosAiCompanyRuntimeV1({
     for (const order of candidate.procurement_orders ?? []) {
       const history = order.state_history ?? [];
       if (!history.length || history[0].status !== "RFQ_CREATED" || history.at(-1).status !== order.status) issues.push("PROCUREMENT_HISTORY");
+      const selectedCandidate = (order.supplier_candidates ?? []).find(({ supplier_id }) => supplier_id === order.selected_supplier);
+      if ((order.supplier_candidates?.length ?? 0) < 2 || !selectedCandidate?.eligible || order.supplier_selection?.selected_supplier !== order.selected_supplier || order.supplier_selection?.lowest_price_automatic !== false || order.selection_basis?.join("|") !== "QUALITY|DELIVERY|CAPACITY|RISK|TOTAL_COST") issues.push("SUPPLIER_SELECTION_EVIDENCE");
       for (let index = 1; index < history.length; index += 1) {
         const previous = history[index - 1], current = history[index];
         const terminalFailure = current.status === "INSPECTION_FAILED" && previous.status === "RECEIVED";
-        if (!terminalFailure && (!Object.hasOwn(PROCUREMENT_RANK, previous.status) || !Object.hasOwn(PROCUREMENT_RANK, current.status) || PROCUREMENT_RANK[current.status] !== PROCUREMENT_RANK[previous.status] + 1)) issues.push("PROCUREMENT_SEQUENCE");
+        const terminalCancellation = current.status === "CANCELLED";
+        if (!terminalFailure && !terminalCancellation && (!Object.hasOwn(PROCUREMENT_RANK, previous.status) || !Object.hasOwn(PROCUREMENT_RANK, current.status) || PROCUREMENT_RANK[current.status] !== PROCUREMENT_RANK[previous.status] + 1)) issues.push("PROCUREMENT_SEQUENCE");
         if (current.simulation_time + EPSILON < previous.simulation_time) issues.push("PROCUREMENT_TIME_CAUSALITY");
       }
       if (PROCUREMENT_TERMINAL_STATUSES.has(order.status) && !["PAYMENT_APPROVED", "INSPECTION_FAILED", "CANCELLED"].includes(order.status)) issues.push("PROCUREMENT_STATUS");
+      if (["PAYMENT_APPROVED", "INSPECTION_FAILED", "CANCELLED"].includes(order.status) && order.commitment_released !== true) issues.push("PROCUREMENT_COMMITMENT_NOT_RELEASED");
     }
     const ledgerDebits = money((candidate.ledger ?? []).reduce((sum, entry) => sum + entry.debit_amount, 0));
     const ledgerCredits = money((candidate.ledger ?? []).reduce((sum, entry) => sum + entry.credit_amount, 0));
@@ -2236,15 +2575,81 @@ export function createKaiosAiCompanyRuntimeV1({
     const known = new Set(["START_RUNTIME", "PAUSE_RUNTIME", "RESUME_RUNTIME", "STOP_RUNTIME", "ADVANCE_TIME", "SUBMIT_REQUEST", "REQUEST_CLARIFICATION", "ANALYZE_REQUIREMENTS", "EVALUATE_FEASIBILITY", "CREATE_PROPOSAL", "APPROVE_PROPOSAL", "CREATE_PROJECT", "DECOMPOSE_PROJECT", "CALCULATE_DEPENDENCIES", "CREATE_BOM", "CREATE_WORKFORCE_PLAN", "CREATE_EQUIPMENT_PLAN", "CREATE_SUPPLY_CHAIN_PLAN", "CALCULATE_BUDGET", "CALCULATE_SCHEDULE", "CREATE_SIMULATED_CONTRACT", "START_PROCUREMENT", "ASSIGN_WORKER", "RESERVE_EQUIPMENT", "RECEIVE_MATERIAL", "START_TASK", "PAUSE_TASK", "RESUME_TASK", "BLOCK_TASK", "COMPLETE_TASK", "INSPECT_TASK", "REQUEST_REWORK", "SUBMIT_CHANGE_ORDER", "APPROVE_CHANGE_ORDER", "DELIVER_PROJECT", "ACCEPT_PROJECT", "SCHEDULE_MAINTENANCE", "CLOSE_PROJECT", "RESTRUCTURE_COMPANY", "ENTER_COURT_PROTECTION_SIMULATION", "LIQUIDATE_COMPANY_SIMULATION", "DISSOLVE_COMPANY_SIMULATION"]);
     if ((candidate.action_log ?? []).some(({ command }) => !known.has(command))) issues.push("UNKNOWN_ACTION_COMMAND");
     const pairedActions = (candidate.action_log ?? []).slice(-(candidate.events?.length ?? 0));
-    if (pairedActions.length !== (candidate.events?.length ?? 0) || (candidate.events ?? []).some((event, index) => event.event_type !== pairedActions[index]?.command || event.status !== eventStatus(pairedActions[index]?.result_status) || event.reason !== (pairedActions[index]?.result_reason ?? null))) issues.push("EVENT_ACTION_MISMATCH");
-    const physicalReservations = candidate.worker_reservations?.filter(({ body_type }) => body_type === "PHYSICAL") ?? [];
-    for (let left = 0; left < physicalReservations.length; left += 1) for (let right = left + 1; right < physicalReservations.length; right += 1) if (physicalReservations[left].life_id === physicalReservations[right].life_id && intervalsOverlap(physicalReservations[left], physicalReservations[right])) issues.push("PHYSICAL_WORKER_OVERLAP");
+    if (pairedActions.length !== (candidate.events?.length ?? 0) || (candidate.events ?? []).some((event, index) => {
+      const action = pairedActions[index];
+      const argumentsHash = computeAiCompanyStateHash(action?.args ?? null);
+      return event.event_type !== action?.command
+        || event.action_id !== action?.action_id
+        || action?.arguments_hash !== argumentsHash
+        || event.action_arguments_hash !== argumentsHash
+        || stableStringify(event.inputs) !== stableStringify(action?.args)
+        || event.status !== eventStatus(action?.result_status)
+        || event.reason !== (action?.result_reason ?? null);
+    })) issues.push("EVENT_ACTION_MISMATCH");
+    const workerReservations = candidate.worker_reservations ?? [];
+    for (let left = 0; left < workerReservations.length; left += 1) {
+      const reservation = workerReservations[left];
+      if (!Number.isFinite(reservation.start) || !Number.isFinite(reservation.end) || reservation.end + EPSILON < reservation.start) issues.push("WORKER_RESERVATION_TIME");
+      if (reservation.body_type === "PHYSICAL" && reservation.end - reservation.start > (reservation.maximum_hours ?? 12) + EPSILON) issues.push("REST_REQUIREMENT_CONFLICT");
+      for (let right = left + 1; right < workerReservations.length; right += 1) {
+        if (reservation.life_id === workerReservations[right].life_id && intervalsOverlap(reservation, workerReservations[right])) issues.push("WORKER_RESERVATION_OVERLAP");
+      }
+    }
+    for (const lifeId of unique(workerReservations.filter(({ body_type }) => body_type === "PHYSICAL").map(({ life_id }) => life_id))) {
+      const reservations = workerReservations.filter((reservation) => reservation.life_id === lifeId);
+      if (reservations.length && physicalShiftConflict(reservations[0], reservations.slice(1))) issues.push("REST_REQUIREMENT_CONFLICT");
+    }
+    const equipmentReservations = candidate.equipment_reservations ?? [];
+    for (let left = 0; left < equipmentReservations.length; left += 1) for (let right = left + 1; right < equipmentReservations.length; right += 1) if (equipmentReservations[left].equipment_id === equipmentReservations[right].equipment_id && intervalsOverlap(equipmentReservations[left], equipmentReservations[right])) issues.push("EQUIPMENT_RESERVATION_OVERLAP");
+    const liquidation = [...(candidate.company_recovery ?? [])].reverse().find(({ recovery_type }) => recovery_type === "LIQUIDATION_SIMULATION");
+    if (liquidation) {
+      if (liquidation.asset_snapshot_hash !== computeAiCompanyStateHash(liquidation.assets)) issues.push("LIQUIDATION_ASSET_SNAPSHOT_HASH");
+      const currentAssets = {
+        equipment: (candidate.equipment_pool ?? []).map(({ equipment_id, type, owner, status }) => ({ equipment_id, type, owner, status, disposition: "PRESERVED_PENDING_SIMULATED_DISTRIBUTION" })),
+        material_inventory: clone(candidate.material_inventory ?? {}),
+        procurement_orders: (candidate.procurement_orders ?? []).map(({ order_id, project_id, material_id, status, committed_amount, commitment_released }) => ({ order_id, project_id, material_id, status, committed_amount, commitment_released })),
+        projects: (candidate.projects ?? []).map(({ project_id, status, accounting, closeout_status }) => ({ project_id, status, accounting: clone(accounting), closeout_status, disposition: "RECORDED" }))
+      };
+      if (stableStringify(currentAssets) !== stableStringify(liquidation.assets)) issues.push("LIQUIDATION_ASSET_CONTINUITY");
+      if ((candidate.procurement_orders ?? []).some(({ status }) => !PROCUREMENT_TERMINAL_STATUSES.has(status)) || (candidate.projects ?? []).some((project) => !isTerminalProject(project))) issues.push("LIQUIDATION_ACTIVITY_REMAINS");
+    }
     return unique(issues);
   }
 
   function exportState() {
     usable();
     return { export_status: "NON_AUTHORITATIVE_SIMULATION", schema_version: AI_COMPANY_SCHEMA_VERSION, state: getState() };
+  }
+
+  function replayCandidate(candidate) {
+    const actions = clone(candidate.action_log);
+    const replay = createKaiosAiCompanyRuntimeV1({
+      seed: candidate.seed,
+      initialCash: candidate.finance.opening_cash,
+      capacity: Object.fromEntries(Object.keys(DEFAULT_CAPACITY).map((key) => [key, candidate.capacity[key]]))
+    });
+    const handlers = {
+      START_RUNTIME: () => replay.start(), PAUSE_RUNTIME: () => replay.pause(), RESUME_RUNTIME: () => replay.resume(), STOP_RUNTIME: () => replay.stop(), ADVANCE_TIME: (args) => replay.advanceTime(args.hours),
+      SUBMIT_REQUEST: (args) => replay.submitRequest(args.input), REQUEST_CLARIFICATION: (args) => replay.requestClarification(args.requestId, args.fields, args.responses), ANALYZE_REQUIREMENTS: (args) => replay.analyzeRequirements(args.requestId, args.options), EVALUATE_FEASIBILITY: (args) => replay.evaluateFeasibility(args.requestId, args.context),
+      CREATE_PROPOSAL: (args) => replay.createProposal(args.requestId), APPROVE_PROPOSAL: (args) => replay.approveProposal(args.proposalId), CREATE_PROJECT: (args) => replay.createProject(args.proposalId), DECOMPOSE_PROJECT: (args) => replay.decomposeProject(args.projectId), CALCULATE_DEPENDENCIES: (args) => replay.calculateDependencies(args.projectId),
+      CREATE_BOM: (args) => replay.createBOM(args.projectId, args.options), CREATE_WORKFORCE_PLAN: (args) => replay.createWorkforcePlan(args.projectId, args.options), CREATE_EQUIPMENT_PLAN: (args) => replay.createEquipmentPlan(args.projectId, args.options), CREATE_SUPPLY_CHAIN_PLAN: (args) => replay.createSupplyChainPlan(args.projectId, args.options), CALCULATE_BUDGET: (args) => replay.calculateBudget(args.projectId, args.options), CALCULATE_SCHEDULE: (args) => replay.calculateSchedule(args.projectId, args.options), CREATE_SIMULATED_CONTRACT: (args) => replay.createSimulatedContract(args.projectId, args.options), START_PROCUREMENT: (args) => replay.startProcurement(args.projectId, args.options), RECEIVE_MATERIAL: (args) => replay.receiveMaterial(args.projectId, args.materialId),
+      ASSIGN_WORKER: (args) => replay.assignWorker(args.projectId, args.taskId, args.workerId, args.options), RESERVE_EQUIPMENT: (args) => replay.reserveEquipment(args.projectId, args.taskId, args.equipmentId, args.options), START_TASK: (args) => replay.startTask(args.projectId, args.taskId), PAUSE_TASK: (args) => replay.pauseTask(args.projectId, args.taskId), RESUME_TASK: (args) => replay.resumeTask(args.projectId, args.taskId), BLOCK_TASK: (args) => replay.blockTask(args.projectId, args.taskId, args.reason), COMPLETE_TASK: (args) => replay.completeTask(args.projectId, args.taskId), INSPECT_TASK: (args) => replay.inspectTask(args.projectId, args.taskId, args.outcome, args.details), REQUEST_REWORK: (args) => replay.requestRework(args.projectId, args.taskId, args.options),
+      SUBMIT_CHANGE_ORDER: (args) => replay.submitChangeOrder(args.projectId, args.changes), APPROVE_CHANGE_ORDER: (args) => replay.approveChangeOrder(args.changeOrderId, args.options), DELIVER_PROJECT: (args) => replay.deliverProject(args.projectId), ACCEPT_PROJECT: (args) => replay.acceptProject(args.projectId, args.outcome), SCHEDULE_MAINTENANCE: (args) => replay.scheduleMaintenance(args.projectId, args.options), CLOSE_PROJECT: (args) => replay.closeProject(args.projectId),
+      RESTRUCTURE_COMPANY: (args) => replay.restructureCompany(args.options), ENTER_COURT_PROTECTION_SIMULATION: () => replay.enterCourtProtection(), LIQUIDATE_COMPANY_SIMULATION: () => replay.liquidateCompany(), DISSOLVE_COMPANY_SIMULATION: () => replay.dissolveCompany()
+    };
+    try {
+      for (const action of actions) {
+        const handler = handlers[action.command];
+        if (!handler) throw new Error(`REPLAY_UNSUPPORTED_ACTION:${action.command}`);
+        const result = handler(action.args);
+        if (result.status !== action.result_status || (result.reason ?? null) !== action.result_reason) throw new Error(`REPLAY_RESULT_MISMATCH:${action.action_id}`);
+      }
+      const replayState = replay.getState();
+      if (computeAiCompanyStateHash(stateProjection(replayState)) !== computeAiCompanyStateHash(stateProjection(candidate))) throw new Error("REPLAY_STATE_MISMATCH");
+      return replayState;
+    } finally {
+      replay.destroy();
+    }
   }
 
   function importState(payload) {
@@ -2255,6 +2660,8 @@ export function createKaiosAiCompanyRuntimeV1({
     const candidate = parsed?.state ?? parsed;
     const issues = validateState(candidate);
     if (issues.length) throw new Error(`IMPORT_REJECTED:${issues.join(",")}`);
+    try { replayCandidate(candidate); }
+    catch (error) { throw new Error(`IMPORT_REJECTED:${error.message}`); }
     state = clone(candidate);
     emit();
     return getState();
@@ -2269,26 +2676,7 @@ export function createKaiosAiCompanyRuntimeV1({
 
   function replayEvents() {
     usable();
-    const actions = clone(state.action_log);
-    const replay = createKaiosAiCompanyRuntimeV1({ seed: state.seed, initialCash: state.finance.opening_cash, capacity: Object.fromEntries(Object.keys(DEFAULT_CAPACITY).map((key) => [key, state.capacity[key]])) });
-    const handlers = {
-      START_RUNTIME: () => replay.start(), PAUSE_RUNTIME: () => replay.pause(), RESUME_RUNTIME: () => replay.resume(), STOP_RUNTIME: () => replay.stop(), ADVANCE_TIME: (args) => replay.advanceTime(args.hours),
-      SUBMIT_REQUEST: (args) => replay.submitRequest(args.input), REQUEST_CLARIFICATION: (args) => replay.requestClarification(args.requestId, args.fields, args.responses), ANALYZE_REQUIREMENTS: (args) => replay.analyzeRequirements(args.requestId, args.options), EVALUATE_FEASIBILITY: (args) => replay.evaluateFeasibility(args.requestId, args.context),
-      CREATE_PROPOSAL: (args) => replay.createProposal(args.requestId), APPROVE_PROPOSAL: (args) => replay.approveProposal(args.proposalId), CREATE_PROJECT: (args) => replay.createProject(args.proposalId), DECOMPOSE_PROJECT: (args) => replay.decomposeProject(args.projectId), CALCULATE_DEPENDENCIES: (args) => replay.calculateDependencies(args.projectId),
-      CREATE_BOM: (args) => replay.createBOM(args.projectId, args.options), CREATE_WORKFORCE_PLAN: (args) => replay.createWorkforcePlan(args.projectId, args.options), CREATE_EQUIPMENT_PLAN: (args) => replay.createEquipmentPlan(args.projectId, args.options), CREATE_SUPPLY_CHAIN_PLAN: (args) => replay.createSupplyChainPlan(args.projectId, args.options), CALCULATE_BUDGET: (args) => replay.calculateBudget(args.projectId, args.options), CALCULATE_SCHEDULE: (args) => replay.calculateSchedule(args.projectId, args.options), CREATE_SIMULATED_CONTRACT: (args) => replay.createSimulatedContract(args.projectId, args.options), START_PROCUREMENT: (args) => replay.startProcurement(args.projectId, args.options), RECEIVE_MATERIAL: (args) => replay.receiveMaterial(args.projectId, args.materialId),
-      ASSIGN_WORKER: (args) => replay.assignWorker(args.projectId, args.taskId, args.workerId, args.options), RESERVE_EQUIPMENT: (args) => replay.reserveEquipment(args.projectId, args.taskId, args.equipmentId, args.options), START_TASK: (args) => replay.startTask(args.projectId, args.taskId), PAUSE_TASK: (args) => replay.pauseTask(args.projectId, args.taskId), RESUME_TASK: (args) => replay.resumeTask(args.projectId, args.taskId), BLOCK_TASK: (args) => replay.blockTask(args.projectId, args.taskId, args.reason), COMPLETE_TASK: (args) => replay.completeTask(args.projectId, args.taskId), INSPECT_TASK: (args) => replay.inspectTask(args.projectId, args.taskId, args.outcome, args.details), REQUEST_REWORK: (args) => replay.requestRework(args.projectId, args.taskId, args.options),
-      SUBMIT_CHANGE_ORDER: (args) => replay.submitChangeOrder(args.projectId, args.changes), APPROVE_CHANGE_ORDER: (args) => replay.approveChangeOrder(args.changeOrderId, args.options), DELIVER_PROJECT: (args) => replay.deliverProject(args.projectId), ACCEPT_PROJECT: (args) => replay.acceptProject(args.projectId, args.outcome), SCHEDULE_MAINTENANCE: (args) => replay.scheduleMaintenance(args.projectId, args.options), CLOSE_PROJECT: (args) => replay.closeProject(args.projectId),
-      RESTRUCTURE_COMPANY: (args) => replay.restructureCompany(args.options), ENTER_COURT_PROTECTION_SIMULATION: () => replay.enterCourtProtection(), LIQUIDATE_COMPANY_SIMULATION: () => replay.liquidateCompany(), DISSOLVE_COMPANY_SIMULATION: () => replay.dissolveCompany()
-    };
-    for (const action of actions) {
-      const handler = handlers[action.command];
-      if (!handler) throw new Error(`REPLAY_UNSUPPORTED_ACTION:${action.command}`);
-      const result = handler(action.args);
-      if (result.status !== action.result_status || (result.reason ?? null) !== action.result_reason) throw new Error(`REPLAY_RESULT_MISMATCH:${action.action_id}`);
-    }
-    const replayState = replay.getState();
-    if (computeAiCompanyStateHash(stateProjection(replayState)) !== computeAiCompanyStateHash(stateProjection(state))) throw new Error("REPLAY_STATE_MISMATCH");
-    return replayState;
+    return replayCandidate(state);
   }
 
   function integrityReport() {
@@ -2397,6 +2785,9 @@ function prepareDemoProject(runtime, templateId) {
 function completeDemoProject(runtime, projectId) {
   let project = runtime.getState().projects.find(({ project_id }) => project_id === projectId);
   for (const currentTask of project.tasks) {
+    const state = runtime.getState();
+    const window = state.task_windows[currentTask.task_id];
+    if (window && state.simulation_time + EPSILON < window.start) runtime.advanceTime(window.start - state.simulation_time);
     runtime.startTask(projectId, currentTask.task_id);
     runtime.advanceTime(runtime.getState().projects.find(({ project_id }) => project_id === projectId).tasks.find(({ task_id }) => task_id === currentTask.task_id).remaining_hours);
     runtime.inspectTask(projectId, currentTask.task_id, "PASS");

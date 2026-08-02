@@ -3,9 +3,9 @@
   "$id": "https://klineodyssey.github.io/kline-odyssey/KAIOS/ai-company/KAIOS_AI_COMPANY_TASK_SCHEMA_V1.json",
   "title": "KAIOS AI Company Task V1",
   "type": "object",
-  "required": ["task_id", "work_package_id", "objective", "location", "start_condition", "end_condition", "duration_hours", "remaining_hours", "workers", "skills", "materials", "equipment", "energy", "transport", "cost", "predecessors", "successors", "quality_gate", "safety_gate", "status", "progress_percent", "consumed"],
+  "required": ["project_id", "task_id", "task_code", "work_package_id", "objective", "location", "start_condition", "end_condition", "duration_hours", "remaining_hours", "workers", "skills", "materials", "equipment", "energy", "transport", "cost", "predecessors", "successors", "quality_gate", "safety_gate", "status", "progress_percent", "consumed", "work_segments", "blocked_reason", "actual_start", "actual_end", "rework_for_task_id"],
   "properties": {
-    "task_id": { "type": "string" }, "work_package_id": { "type": "string" }, "objective": { "type": "string" }, "location": { "type": ["string", "null"] },
+    "project_id": { "type": "string" }, "task_id": { "type": "string" }, "task_code": { "type": "string" }, "work_package_id": { "type": "string" }, "objective": { "type": "string" }, "location": { "type": ["string", "null"] },
     "start_condition": { "type": "array", "items": { "type": "string" } }, "end_condition": { "type": "array", "items": { "type": "string" } },
     "duration_hours": { "type": "number", "exclusiveMinimum": 0 }, "remaining_hours": { "type": "number", "minimum": 0 },
     "workers": { "type": "array", "items": { "type": "string" } }, "skills": { "type": "array", "items": { "type": "string" } },
@@ -16,7 +16,9 @@
     "quality_gate": { "type": "string" }, "safety_gate": { "type": "string" },
     "status": { "enum": ["NOT_READY", "READY", "IN_PROGRESS", "PAUSED", "BLOCKED", "FAILED", "REWORK_REQUIRED", "INSPECTION_PENDING", "APPROVED", "COMPLETE", "CANCELLED"] },
     "progress_percent": { "type": "number", "minimum": 0, "maximum": 100 },
-    "consumed": { "type": "object", "required": ["labor_hours", "energy", "materials", "equipment_wear", "cost"], "properties": { "labor_hours": { "type": "number", "minimum": 0 }, "energy": { "type": "number", "minimum": 0 }, "materials": { "type": "object", "additionalProperties": { "type": "number", "minimum": 0 } }, "equipment_wear": { "type": "number", "minimum": 0 }, "cost": { "type": "number", "minimum": 0 } }, "additionalProperties": false }
+    "consumed": { "type": "object", "required": ["labor_hours", "energy", "materials", "equipment_wear", "cost"], "properties": { "labor_hours": { "type": "number", "minimum": 0 }, "energy": { "type": "number", "minimum": 0 }, "materials": { "type": "object", "additionalProperties": { "type": "number", "minimum": 0 } }, "equipment_wear": { "type": "number", "minimum": 0 }, "cost": { "type": "number", "minimum": 0 } }, "additionalProperties": false },
+    "work_segments": { "type": "array", "items": { "type": "object", "required": ["start", "end", "effective_hours"], "properties": { "start": { "type": "number", "minimum": 0 }, "end": { "type": "number", "minimum": 0 }, "effective_hours": { "type": "number", "exclusiveMinimum": 0 } }, "additionalProperties": false } },
+    "blocked_reason": { "type": ["string", "null"] }, "actual_start": { "type": ["number", "null"], "minimum": 0 }, "actual_end": { "type": ["number", "null"], "minimum": 0 }, "rework_for_task_id": { "type": ["string", "null"] }
   },
   "additionalProperties": false,
   "x-kaios-invariants": ["duration_hours > 0", "status IN_PROGRESS requires all mandatory predecessors complete", "progress consumes time and finite resources", "one physical life cannot hold overlapping physical assignments"]

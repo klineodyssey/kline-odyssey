@@ -718,7 +718,7 @@
     "wallet_access": false,
     "real_kgen": false,
     "production_authority": false,
-    "state_hash": "948f5b93a69c2cc2874c39109228886124a9645196270caf4fd871a122375626"
+    "state_hash": "d86c51d3997b24e26269f315b92275c0b19da45bdf17baf119b429f54a158935"
   },
   "deterministic": true,
   "serializable": true,
@@ -768,8 +768,8 @@
       },
       "approval_status": "RUNTIME_VALIDATED_SIMULATION",
       "external_deployment": false,
-      "event_count": 66,
-      "state_hash": "356936205d5e324fcefcc8358deaee2cb8ddf754bbbeb3aa79ebc619a6733b69"
+      "event_count": 68,
+      "state_hash": "16fa9912a4bf9a123ad8c82f76a8ce5e783737ff8d873cc678703fb7832169fd"
     },
     "basic_house": {
       "project_id": "AI-COMPANY-PROJECT-00001",
@@ -799,8 +799,8 @@
       },
       "approval_status": "RUNTIME_VALIDATED_SIMULATION",
       "external_deployment": false,
-      "event_count": 74,
-      "state_hash": "d291af77f69acd57b17d286304aff60b968d00465a63a385db196340e8f3b764"
+      "event_count": 77,
+      "state_hash": "0b82d2b17302910f7fc35db330385a9fe0136d114653f9278a39eefb22344974"
     },
     "blocked_small_farm": {
       "status": "BLOCKED_DEPENDENCY",
@@ -823,7 +823,7 @@
       "approval_status": "CANDIDATE_ONLY",
       "external_deployment": false,
       "event_count": 45,
-      "state_hash": "d8131add1f5966e1bd4154e3d2f651fd6c32f18160255140e6ea6157ea13c876"
+      "state_hash": "0f7e1f2be836747610b684bd106167b066ddca6bda57deb46737d1770718a853"
     },
     "software_module": {
       "project_id": "AI-COMPANY-PROJECT-00001",
@@ -840,7 +840,7 @@
       "approval_status": "RUNTIME_VALIDATED_SIMULATION",
       "external_deployment": false,
       "event_count": 46,
-      "state_hash": "366a217480f8973fa28fbaacb9d31541f138923bd8d207c7447d4db7952d845b"
+      "state_hash": "64b2fc7c3814bd7bd215bb27b225668e990127e8cf4adc440b2391f85c70d264"
     },
     "boundaries": {
       "simulation_only": true,

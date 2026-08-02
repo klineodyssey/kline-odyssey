@@ -58,6 +58,13 @@
         "equipment_wear": 0.02,
         "cost": 600
       },
+      "work_segments": [
+        {
+          "start": 13,
+          "end": 17,
+          "effective_hours": 4
+        }
+      ],
       "blocked_reason": null,
       "actual_start": 13,
       "actual_end": 17,
@@ -110,6 +117,13 @@
         "equipment_wear": 0,
         "cost": 1200
       },
+      "work_segments": [
+        {
+          "start": 17,
+          "end": 23,
+          "effective_hours": 6
+        }
+      ],
       "blocked_reason": null,
       "actual_start": 17,
       "actual_end": 23,
@@ -170,9 +184,16 @@
         "equipment_wear": 0.02,
         "cost": 4200
       },
+      "work_segments": [
+        {
+          "start": 31,
+          "end": 43,
+          "effective_hours": 12
+        }
+      ],
       "blocked_reason": null,
-      "actual_start": 23,
-      "actual_end": 35,
+      "actual_start": 31,
+      "actual_end": 43,
       "rework_for_task_id": null
     },
     {
@@ -234,9 +255,16 @@
         "equipment_wear": 0.04,
         "cost": 3600
       },
+      "work_segments": [
+        {
+          "start": 48,
+          "end": 58,
+          "effective_hours": 10
+        }
+      ],
       "blocked_reason": null,
-      "actual_start": 35,
-      "actual_end": 45,
+      "actual_start": 48,
+      "actual_end": 58,
       "rework_for_task_id": null
     },
     {
@@ -294,9 +322,16 @@
         "equipment_wear": 0.02,
         "cost": 2600
       },
+      "work_segments": [
+        {
+          "start": 58,
+          "end": 66,
+          "effective_hours": 8
+        }
+      ],
       "blocked_reason": null,
-      "actual_start": 45,
-      "actual_end": 53,
+      "actual_start": 58,
+      "actual_end": 66,
       "rework_for_task_id": null
     },
     {
@@ -342,9 +377,16 @@
         "equipment_wear": 0,
         "cost": 700
       },
+      "work_segments": [
+        {
+          "start": 66,
+          "end": 69,
+          "effective_hours": 3
+        }
+      ],
       "blocked_reason": null,
-      "actual_start": 53,
-      "actual_end": 56,
+      "actual_start": 66,
+      "actual_end": 69,
       "rework_for_task_id": null
     }
   ]

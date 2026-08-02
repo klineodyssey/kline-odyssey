@@ -25,6 +25,8 @@
       "simulation_time": 0,
       "location": null,
       "event_type": "SUBMIT_REQUEST",
+      "action_id": "AI-COMPANY-ACTION-000001",
+      "action_arguments_hash": "b5d389d6eaa399e64c7ab1561ee53560ce594efc259af4b0770344d21f088736",
       "inputs": {
         "input": {
           "customer_life_id": "LIFE-SIMULATED-DEMO-CUSTOMER",
@@ -93,9 +95,9 @@
       "cash_delta": 0,
       "progress_delta": 0,
       "risk_delta": 0,
-      "previous_state_hash": "60f60494e8860249e266f70bd7f318d9f3d618e83b5e99443a60834b60972b2f",
-      "event_payload_hash": "53fd3406067897c338eaddf497d7b65b4e53a32a1a24484b3c742fde755e2e14",
-      "next_state_hash": "58a7f6d32930b32815a592a05010c1cf594db5ad5deed8afb6e958c691df7ac1",
+      "previous_state_hash": "f391f69988d778bd32f157928effb7cd21c9e680aef0eb83cba0e7487df8f9bb",
+      "event_payload_hash": "e27160f81899bc5dee88c8909adb1cdfad5aa46696047063e97f67d5eadad9d7",
+      "next_state_hash": "b069b1ce15c0b862132647c9e6d9857d90f61a74eaaf887e3460a37edc70397f",
       "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
       "status": "COMPLETED",
       "reason": null
@@ -112,6 +114,8 @@
       "simulation_time": 0,
       "location": null,
       "event_type": "ANALYZE_REQUIREMENTS",
+      "action_id": "AI-COMPANY-ACTION-000002",
+      "action_arguments_hash": "a9121e28689507a4096cc94c601d8830bdc9bc896b35f4a9119570cdf9850f30",
       "inputs": {
         "requestId": "AI-COMPANY-REQ-00001",
         "options": {}
@@ -186,9 +190,9 @@
       "cash_delta": 0,
       "progress_delta": 0,
       "risk_delta": 0,
-      "previous_state_hash": "58a7f6d32930b32815a592a05010c1cf594db5ad5deed8afb6e958c691df7ac1",
-      "event_payload_hash": "cbf591a97bb0b320c749240a6d74268a984c7a1b9388dfe19e68a481a1fbd6ff",
-      "next_state_hash": "1b0b420e9cadb8168ea0ada96d499506c465b73ee05042bec43765d9a9cc4594",
+      "previous_state_hash": "b069b1ce15c0b862132647c9e6d9857d90f61a74eaaf887e3460a37edc70397f",
+      "event_payload_hash": "eb9b837a8559f79be04edafba3edd92f9a613c2c8cdd4364f7f756d39d3a9f41",
+      "next_state_hash": "dd24bbac2e13b27ca373342d43317d44b525c6decdcfcb3cb115d1c15cc1e683",
       "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
       "status": "COMPLETED",
       "reason": null
@@ -205,6 +209,8 @@
       "simulation_time": 0,
       "location": null,
       "event_type": "EVALUATE_FEASIBILITY",
+      "action_id": "AI-COMPANY-ACTION-000003",
+      "action_arguments_hash": "ed1983ad251bc588a6118b310b05a9747abe7a0709e0696488d74fc52b342041",
       "inputs": {
         "requestId": "AI-COMPANY-REQ-00001",
         "context": {}
@@ -325,9 +331,9 @@
       "cash_delta": 0,
       "progress_delta": 0,
       "risk_delta": 0,
-      "previous_state_hash": "1b0b420e9cadb8168ea0ada96d499506c465b73ee05042bec43765d9a9cc4594",
-      "event_payload_hash": "306dea88e2134434432977fd579cc6473aec27c06053cf5d415f9a423ebc84f1",
-      "next_state_hash": "c7960f832345c0d039a3b416eefb1707229dc50f62c7b067028486fab45c7c23",
+      "previous_state_hash": "dd24bbac2e13b27ca373342d43317d44b525c6decdcfcb3cb115d1c15cc1e683",
+      "event_payload_hash": "a019807216c6f7f8d70bc300d53337184f8176f9bc6de0258543733ecfc72440",
+      "next_state_hash": "fbf9226d60c8e0e5f829315010551ebe9ab92c7fcbc6df57a65194acdbb6e054",
       "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
       "status": "COMPLETED",
       "reason": null
@@ -344,6 +350,8 @@
       "simulation_time": 0,
       "location": null,
       "event_type": "CREATE_PROPOSAL",
+      "action_id": "AI-COMPANY-ACTION-000004",
+      "action_arguments_hash": "d92beb50638a5126db75a7a4163742930c98263846c0dd5c673eb03e55a18708",
       "inputs": {
         "requestId": "AI-COMPANY-REQ-00001"
       },
@@ -407,9 +415,9 @@
       "cash_delta": 0,
       "progress_delta": 0,
       "risk_delta": 0,
-      "previous_state_hash": "c7960f832345c0d039a3b416eefb1707229dc50f62c7b067028486fab45c7c23",
-      "event_payload_hash": "bd690eda2f7f565bbdd54a542f07bfda2b6472d1a52ed458803f656263934ebf",
-      "next_state_hash": "0a87bd85d81c5f4acb86f406e3c186ea41ad7783f83913388874a12303f761ab",
+      "previous_state_hash": "fbf9226d60c8e0e5f829315010551ebe9ab92c7fcbc6df57a65194acdbb6e054",
+      "event_payload_hash": "cd140559f84e6344f5cb47b4718f1cef182a766abb69a44b77cf9a3961366ccd",
+      "next_state_hash": "c0f4366de96f937f4667bbc07dc12930084d1064ccdd7018c5ce6aca677a5504",
       "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
       "status": "COMPLETED",
       "reason": null
@@ -426,6 +434,8 @@
       "simulation_time": 0,
       "location": null,
       "event_type": "APPROVE_PROPOSAL",
+      "action_id": "AI-COMPANY-ACTION-000005",
+      "action_arguments_hash": "4b56e90444b8277557778842ca0584f055d0f629c45db8616d5286c30d1a32fb",
       "inputs": {
         "proposalId": "AI-COMPANY-PROPOSAL-00001"
       },
@@ -441,9 +451,9 @@
       "cash_delta": 0,
       "progress_delta": 0,
       "risk_delta": 0,
-      "previous_state_hash": "0a87bd85d81c5f4acb86f406e3c186ea41ad7783f83913388874a12303f761ab",
-      "event_payload_hash": "5bcf73972f45e7e002470526486c72e595ff4513b500f6e6ce89d5c40f574ad0",
-      "next_state_hash": "fa8856c76f48525fd8dcb55f45a646d724d293fda0c4d53cc85c9da23d20b34e",
+      "previous_state_hash": "c0f4366de96f937f4667bbc07dc12930084d1064ccdd7018c5ce6aca677a5504",
+      "event_payload_hash": "1ed683c3acddbc1c72fcdd30a9f98b8bd2853933d0e268e7e80a2b7e3cc07d2b",
+      "next_state_hash": "68283d54432eebbf44e834134d33ef9204aedd77721817c52f1fd5adf33094b9",
       "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
       "status": "ACCEPTED",
       "reason": null
@@ -460,6 +470,8 @@
       "simulation_time": 0,
       "location": "LAND-SIM-FISHPOND-001",
       "event_type": "CREATE_PROJECT",
+      "action_id": "AI-COMPANY-ACTION-000006",
+      "action_arguments_hash": "4b56e90444b8277557778842ca0584f055d0f629c45db8616d5286c30d1a32fb",
       "inputs": {
         "proposalId": "AI-COMPANY-PROPOSAL-00001"
       },
@@ -554,9 +566,9 @@
       "cash_delta": 0,
       "progress_delta": 0,
       "risk_delta": 0,
-      "previous_state_hash": "fa8856c76f48525fd8dcb55f45a646d724d293fda0c4d53cc85c9da23d20b34e",
-      "event_payload_hash": "9cc248b9bae1cefae3b51c5b2c8ae8e5750911e6f3c7b85c6dd7cb3f80b61641",
-      "next_state_hash": "073f0a121e8c853e4752044be8538d0b775839f3bfc56d9226c3ab891b38510c",
+      "previous_state_hash": "68283d54432eebbf44e834134d33ef9204aedd77721817c52f1fd5adf33094b9",
+      "event_payload_hash": "eb75e772b5ec299734f3fb707546c2cc32ac6fa22e02fe6da423b5e62d84435d",
+      "next_state_hash": "9587888c7335d748e444c557515f139ce491acb5330d32e400ec2803aa044c62",
       "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
       "status": "COMPLETED",
       "reason": null
@@ -573,6 +585,8 @@
       "simulation_time": 0,
       "location": null,
       "event_type": "DECOMPOSE_PROJECT",
+      "action_id": "AI-COMPANY-ACTION-000007",
+      "action_arguments_hash": "fb4119a6bb4b33b3903ef07a2060d9f736f580f7dbff3ec3adb71ff972708bdb",
       "inputs": {
         "projectId": "AI-COMPANY-PROJECT-00001"
       },
@@ -620,6 +634,7 @@
               "equipment_wear": 0,
               "cost": 0
             },
+            "work_segments": [],
             "blocked_reason": null,
             "actual_start": null,
             "actual_end": null,
@@ -668,6 +683,7 @@
               "equipment_wear": 0,
               "cost": 0
             },
+            "work_segments": [],
             "blocked_reason": null,
             "actual_start": null,
             "actual_end": null,
@@ -724,6 +740,7 @@
               "equipment_wear": 0,
               "cost": 0
             },
+            "work_segments": [],
             "blocked_reason": null,
             "actual_start": null,
             "actual_end": null,
@@ -784,6 +801,7 @@
               "equipment_wear": 0,
               "cost": 0
             },
+            "work_segments": [],
             "blocked_reason": null,
             "actual_start": null,
             "actual_end": null,
@@ -840,6 +858,7 @@
               "equipment_wear": 0,
               "cost": 0
             },
+            "work_segments": [],
             "blocked_reason": null,
             "actual_start": null,
             "actual_end": null,
@@ -885,6 +904,7 @@
               "equipment_wear": 0,
               "cost": 0
             },
+            "work_segments": [],
             "blocked_reason": null,
             "actual_start": null,
             "actual_end": null,
@@ -945,9 +965,9 @@
       "cash_delta": 0,
       "progress_delta": 0,
       "risk_delta": 0,
-      "previous_state_hash": "073f0a121e8c853e4752044be8538d0b775839f3bfc56d9226c3ab891b38510c",
-      "event_payload_hash": "d1558d9d89558b598098d1674491f0148fde598d6296a9487cae8a759c9743e7",
-      "next_state_hash": "9cd787b26e2418e6378aa6715819202efb76fe655661ce2cdfb7928d7ca99c26",
+      "previous_state_hash": "9587888c7335d748e444c557515f139ce491acb5330d32e400ec2803aa044c62",
+      "event_payload_hash": "51c7410790395f1614f21a153971521b4aaee534ee2954990a88fab9a1000eea",
+      "next_state_hash": "9059a2a06d78bc7f5db4c9b3a2bd3327dff943f448f8c2ef163107e52fcd0a22",
       "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
       "status": "COMPLETED",
       "reason": null
@@ -964,6 +984,8 @@
       "simulation_time": 0,
       "location": null,
       "event_type": "CALCULATE_DEPENDENCIES",
+      "action_id": "AI-COMPANY-ACTION-000008",
+      "action_arguments_hash": "fb4119a6bb4b33b3903ef07a2060d9f736f580f7dbff3ec3adb71ff972708bdb",
       "inputs": {
         "projectId": "AI-COMPANY-PROJECT-00001"
       },
@@ -1022,9 +1044,9 @@
       "cash_delta": 0,
       "progress_delta": 0,
       "risk_delta": 0,
-      "previous_state_hash": "9cd787b26e2418e6378aa6715819202efb76fe655661ce2cdfb7928d7ca99c26",
-      "event_payload_hash": "bac457d4b9362ad6429cf7fa04e33dd83b149516340849559184a3aade86de39",
-      "next_state_hash": "16754c789d0515507ee67891fadcf0f04cf987752e6ea428da08918d9d768c0c",
+      "previous_state_hash": "9059a2a06d78bc7f5db4c9b3a2bd3327dff943f448f8c2ef163107e52fcd0a22",
+      "event_payload_hash": "829f9129ab2a10e713918ae78f37ede5581789f1780dc77f9936b376dca32e94",
+      "next_state_hash": "bd077534f13275dbf7f43e9f783c657946ed68539ba08a68b4c896b05dad5915",
       "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
       "status": "COMPLETED",
       "reason": null
@@ -1041,6 +1063,8 @@
       "simulation_time": 0,
       "location": null,
       "event_type": "CREATE_BOM",
+      "action_id": "AI-COMPANY-ACTION-000009",
+      "action_arguments_hash": "835ea8960f477549dd6eb4d2a860104d44c345a411deda519adc05878e6090cf",
       "inputs": {
         "projectId": "AI-COMPANY-PROJECT-00001",
         "options": {}
@@ -1057,6 +1081,7 @@
             "unit_mass": 10,
             "total_mass": 120,
             "required_quality": "STANDARD_SIMULATION",
+            "source_supplier": "SIMULATED-SUPPLIER-GRAVEL",
             "supplier": "SIMULATED-SUPPLIER-GRAVEL",
             "availability": 12,
             "lead_time": 2,
@@ -1078,6 +1103,7 @@
             "unit_mass": 2,
             "total_mass": 36,
             "required_quality": "STANDARD_SIMULATION",
+            "source_supplier": "SIMULATED-SUPPLIER-PIPE",
             "supplier": "SIMULATED-SUPPLIER-PIPE",
             "availability": 18,
             "lead_time": 3,
@@ -1099,6 +1125,7 @@
             "unit_mass": 4,
             "total_mass": 96,
             "required_quality": "STANDARD_SIMULATION",
+            "source_supplier": "SIMULATED-SUPPLIER-LINING",
             "supplier": "SIMULATED-SUPPLIER-LINING",
             "availability": 24,
             "lead_time": 4,
@@ -1120,6 +1147,7 @@
             "unit_mass": 0.1,
             "total_mass": 12,
             "required_quality": "STANDARD_SIMULATION",
+            "source_supplier": "SIMULATED-SUPPLIER-FISH_JUVENILE_STOCK",
             "supplier": "SIMULATED-SUPPLIER-FISH_JUVENILE_STOCK",
             "availability": 120,
             "lead_time": 5,
@@ -1142,9 +1170,9 @@
       "cash_delta": 0,
       "progress_delta": 0,
       "risk_delta": 0,
-      "previous_state_hash": "16754c789d0515507ee67891fadcf0f04cf987752e6ea428da08918d9d768c0c",
-      "event_payload_hash": "fe1cf421c70082d77688fedb67145e470b23f0750d3741d517657779760ab606",
-      "next_state_hash": "851496accdda71ab118d6468fba6d5d74945621d6418c9ee0a5a26fdea9449bd",
+      "previous_state_hash": "bd077534f13275dbf7f43e9f783c657946ed68539ba08a68b4c896b05dad5915",
+      "event_payload_hash": "e38327c36e40b27453e58f0bb8d8b3c95bea3c532eb9e0d2ca9004ef63f93346",
+      "next_state_hash": "ab7f33012f91d0b5dcda819a4bb379c9a528aa833c0a452017b3de88bf4a8705",
       "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
       "status": "COMPLETED",
       "reason": null
@@ -1161,6 +1189,8 @@
       "simulation_time": 0,
       "location": null,
       "event_type": "CREATE_WORKFORCE_PLAN",
+      "action_id": "AI-COMPANY-ACTION-000010",
+      "action_arguments_hash": "835ea8960f477549dd6eb4d2a860104d44c345a411deda519adc05878e6090cf",
       "inputs": {
         "projectId": "AI-COMPANY-PROJECT-00001",
         "options": {}
@@ -1177,7 +1207,9 @@
             "shift": {
               "start": 0,
               "end": 24,
-              "maximum_hours": 12
+              "maximum_hours": 12,
+              "minimum_rest_hours": 8,
+              "cycle_hours": 24
             },
             "cost": 30,
             "availability": true,
@@ -1197,7 +1229,9 @@
             "shift": {
               "start": 0,
               "end": 24,
-              "maximum_hours": 16
+              "maximum_hours": 16,
+              "minimum_rest_hours": 0,
+              "cycle_hours": 24
             },
             "cost": 42,
             "availability": true,
@@ -1217,7 +1251,9 @@
             "shift": {
               "start": 0,
               "end": 24,
-              "maximum_hours": 12
+              "maximum_hours": 12,
+              "minimum_rest_hours": 8,
+              "cycle_hours": 24
             },
             "cost": 30,
             "availability": true,
@@ -1237,7 +1273,9 @@
             "shift": {
               "start": 0,
               "end": 24,
-              "maximum_hours": 12
+              "maximum_hours": 12,
+              "minimum_rest_hours": 8,
+              "cycle_hours": 24
             },
             "cost": 30,
             "availability": true,
@@ -1257,7 +1295,9 @@
             "shift": {
               "start": 0,
               "end": 24,
-              "maximum_hours": 12
+              "maximum_hours": 12,
+              "minimum_rest_hours": 8,
+              "cycle_hours": 24
             },
             "cost": 30,
             "availability": true,
@@ -1277,7 +1317,9 @@
             "shift": {
               "start": 0,
               "end": 24,
-              "maximum_hours": 12
+              "maximum_hours": 12,
+              "minimum_rest_hours": 8,
+              "cycle_hours": 24
             },
             "cost": 30,
             "availability": true,
@@ -1297,7 +1339,9 @@
             "shift": {
               "start": 0,
               "end": 24,
-              "maximum_hours": 12
+              "maximum_hours": 12,
+              "minimum_rest_hours": 8,
+              "cycle_hours": 24
             },
             "cost": 30,
             "availability": true,
@@ -1317,7 +1361,9 @@
             "shift": {
               "start": 0,
               "end": 24,
-              "maximum_hours": 12
+              "maximum_hours": 12,
+              "minimum_rest_hours": 8,
+              "cycle_hours": 24
             },
             "cost": 30,
             "availability": true,
@@ -1337,7 +1383,9 @@
             "shift": {
               "start": 0,
               "end": 24,
-              "maximum_hours": 12
+              "maximum_hours": 12,
+              "minimum_rest_hours": 8,
+              "cycle_hours": 24
             },
             "cost": 30,
             "availability": true,
@@ -1358,9 +1406,9 @@
       "cash_delta": 0,
       "progress_delta": 0,
       "risk_delta": 0,
-      "previous_state_hash": "851496accdda71ab118d6468fba6d5d74945621d6418c9ee0a5a26fdea9449bd",
-      "event_payload_hash": "1dae0f17a9a3c498598e0f04a2d69ea47f6f5b5cec1d6a0b0eafbd82dd930ff2",
-      "next_state_hash": "275bcbbfe17b05927e00e8fa375496ffc37e2573d441e49220209eaa0c058b86",
+      "previous_state_hash": "ab7f33012f91d0b5dcda819a4bb379c9a528aa833c0a452017b3de88bf4a8705",
+      "event_payload_hash": "84d8ffe878ee1403364c25f6a9404f02eff78342adc47983c878c24ad9d8a626",
+      "next_state_hash": "52a5b02aad0be11721df5c41afa72143713d45a3d646b7d68230d8a4dfb74cc4",
       "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
       "status": "COMPLETED",
       "reason": null
@@ -1377,6 +1425,8 @@
       "simulation_time": 0,
       "location": null,
       "event_type": "CREATE_EQUIPMENT_PLAN",
+      "action_id": "AI-COMPANY-ACTION-000011",
+      "action_arguments_hash": "835ea8960f477549dd6eb4d2a860104d44c345a411deda519adc05878e6090cf",
       "inputs": {
         "projectId": "AI-COMPANY-PROJECT-00001",
         "options": {}
@@ -1484,9 +1534,9 @@
       "cash_delta": 0,
       "progress_delta": 0,
       "risk_delta": 0,
-      "previous_state_hash": "275bcbbfe17b05927e00e8fa375496ffc37e2573d441e49220209eaa0c058b86",
-      "event_payload_hash": "b576a9b03648b4873ada4c968b6cf5e451f70580fb617e3365d10cd5ab6e5421",
-      "next_state_hash": "148a44144c59cacca8a6d89dda77448e9813c4899cea7ed1ba135887d985078a",
+      "previous_state_hash": "52a5b02aad0be11721df5c41afa72143713d45a3d646b7d68230d8a4dfb74cc4",
+      "event_payload_hash": "6c103109ef1017f71f45861f09e1f0326ecf9e84733277c72a467b024396e271",
+      "next_state_hash": "4c64c4c92e06985e4da56e173b6cc460b1d8e185f4b96ead944931b58331b8c6",
       "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
       "status": "COMPLETED",
       "reason": null
@@ -1503,6 +1553,8 @@
       "simulation_time": 0,
       "location": null,
       "event_type": "CREATE_SUPPLY_CHAIN_PLAN",
+      "action_id": "AI-COMPANY-ACTION-000012",
+      "action_arguments_hash": "835ea8960f477549dd6eb4d2a860104d44c345a411deda519adc05878e6090cf",
       "inputs": {
         "projectId": "AI-COMPANY-PROJECT-00001",
         "options": {}
@@ -1587,9 +1639,9 @@
       "cash_delta": 0,
       "progress_delta": 0,
       "risk_delta": 0,
-      "previous_state_hash": "148a44144c59cacca8a6d89dda77448e9813c4899cea7ed1ba135887d985078a",
-      "event_payload_hash": "820ed1a647b4f1b309122321e366b0ccac19d9774b61ed948a81e8d4c747d502",
-      "next_state_hash": "c4d847e6ccb33fc39a5993bca3315c8a5b642d7d5f7ff9706758e5aa5dbabdb3",
+      "previous_state_hash": "4c64c4c92e06985e4da56e173b6cc460b1d8e185f4b96ead944931b58331b8c6",
+      "event_payload_hash": "e87043cca5b323a31c4ecb2e6c1ef53e7f692b420a2d0824d478a9e04be66005",
+      "next_state_hash": "7191fa8787f7d49719de15ae14853f669d066c5dbe44d81c9d1e16bcf59b6d71",
       "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
       "status": "COMPLETED",
       "reason": null
@@ -1606,6 +1658,8 @@
       "simulation_time": 0,
       "location": null,
       "event_type": "CALCULATE_BUDGET",
+      "action_id": "AI-COMPANY-ACTION-000013",
+      "action_arguments_hash": "835ea8960f477549dd6eb4d2a860104d44c345a411deda519adc05878e6090cf",
       "inputs": {
         "projectId": "AI-COMPANY-PROJECT-00001",
         "options": {}
@@ -1645,9 +1699,9 @@
       "cash_delta": 0,
       "progress_delta": 0,
       "risk_delta": 0,
-      "previous_state_hash": "c4d847e6ccb33fc39a5993bca3315c8a5b642d7d5f7ff9706758e5aa5dbabdb3",
-      "event_payload_hash": "1094021d9e4aa76f22de5df8659af59e7b16ad1f37f5f385d898eba1ac7e1e11",
-      "next_state_hash": "6590c7bf7c9dde50635d77356fd48a57f130964c16af244f072a7dd06162b781",
+      "previous_state_hash": "7191fa8787f7d49719de15ae14853f669d066c5dbe44d81c9d1e16bcf59b6d71",
+      "event_payload_hash": "774e241ed2055f8071bc04069787ebf0eff813a145ab1803bd538cf0427de779",
+      "next_state_hash": "121d00a22bad48b0cf8ef8826786ec3498af59a146e375b55ccd5044fb83c433",
       "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
       "status": "COMPLETED",
       "reason": null
@@ -1664,6 +1718,8 @@
       "simulation_time": 0,
       "location": null,
       "event_type": "CALCULATE_SCHEDULE",
+      "action_id": "AI-COMPANY-ACTION-000014",
+      "action_arguments_hash": "835ea8960f477549dd6eb4d2a860104d44c345a411deda519adc05878e6090cf",
       "inputs": {
         "projectId": "AI-COMPANY-PROJECT-00001",
         "options": {}
@@ -1671,8 +1727,8 @@
       "outputs": {
         "schedule": {
           "planned_start": 0,
-          "planned_end": 43,
-          "estimated_duration": 43,
+          "planned_end": 59,
+          "estimated_duration": 59,
           "critical_path": [
             "AI-COMPANY-PROJECT-00001-TASK-001",
             "AI-COMPANY-PROJECT-00001-TASK-002",
@@ -1733,23 +1789,23 @@
             "location": "LAND-SIM-FISHPOND-001"
           },
           "AI-COMPANY-PROJECT-00001-TASK-003": {
-            "start": 10,
-            "end": 22,
+            "start": 24,
+            "end": 36,
             "location": "LAND-SIM-FISHPOND-001"
           },
           "AI-COMPANY-PROJECT-00001-TASK-004": {
-            "start": 22,
-            "end": 32,
+            "start": 36,
+            "end": 46,
             "location": "LAND-SIM-FISHPOND-001"
           },
           "AI-COMPANY-PROJECT-00001-TASK-005": {
-            "start": 32,
-            "end": 40,
+            "start": 48,
+            "end": 56,
             "location": "LAND-SIM-FISHPOND-001"
           },
           "AI-COMPANY-PROJECT-00001-TASK-006": {
-            "start": 40,
-            "end": 43,
+            "start": 56,
+            "end": 59,
             "location": "LAND-SIM-FISHPOND-001"
           }
         }
@@ -1762,9 +1818,9 @@
       "cash_delta": 0,
       "progress_delta": 0,
       "risk_delta": 0,
-      "previous_state_hash": "6590c7bf7c9dde50635d77356fd48a57f130964c16af244f072a7dd06162b781",
-      "event_payload_hash": "426d34a745268fb104bc77be797670b8752c029ccbd45b8e2832371c09e12cf8",
-      "next_state_hash": "3c87d99938d8c59a388e514c710bcc5c43e96f928bcd7e72e0790b07aceed4b3",
+      "previous_state_hash": "121d00a22bad48b0cf8ef8826786ec3498af59a146e375b55ccd5044fb83c433",
+      "event_payload_hash": "82d795a999c4980882bf57272b3a3641a65b8c1c01e55cf0a11fe6dc06cf4755",
+      "next_state_hash": "d78fff4b6929c7e99f67e0cce15d6333400e91e95bd78604d7457d7abdb7cd70",
       "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
       "status": "COMPLETED",
       "reason": null
@@ -1781,6 +1837,8 @@
       "simulation_time": 0,
       "location": null,
       "event_type": "CREATE_SIMULATED_CONTRACT",
+      "action_id": "AI-COMPANY-ACTION-000015",
+      "action_arguments_hash": "835ea8960f477549dd6eb4d2a860104d44c345a411deda519adc05878e6090cf",
       "inputs": {
         "projectId": "AI-COMPANY-PROJECT-00001",
         "options": {}
@@ -1816,7 +1874,7 @@
           ],
           "timeline": {
             "start": 0,
-            "end": 43
+            "end": 59
           },
           "quality_standard": [
             "SIMULATED_INSPECTION_PASS"
@@ -1842,9 +1900,9 @@
       "cash_delta": 25000,
       "progress_delta": 0,
       "risk_delta": 0,
-      "previous_state_hash": "3c87d99938d8c59a388e514c710bcc5c43e96f928bcd7e72e0790b07aceed4b3",
-      "event_payload_hash": "d46c0a04e3dbc00614ce2f3bf6ca434b9a8094898ec9aeb3c72617e7cd7c751f",
-      "next_state_hash": "37533ffc9d96e425b5be2187b4700f2856fc0e93c878d54f46c51a0ff2cfbd42",
+      "previous_state_hash": "d78fff4b6929c7e99f67e0cce15d6333400e91e95bd78604d7457d7abdb7cd70",
+      "event_payload_hash": "ea68be494bf4db790665c01e3b3010cbedb65431ef1dd695f5f22ff489522fe5",
+      "next_state_hash": "0dbc08e477077d9fb24872b025b28fb629501ed74acb3039fec70fd3c332ebac",
       "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
       "status": "COMPLETED",
       "reason": null
@@ -1861,6 +1919,8 @@
       "simulation_time": 0,
       "location": null,
       "event_type": "START_PROCUREMENT",
+      "action_id": "AI-COMPANY-ACTION-000016",
+      "action_arguments_hash": "835ea8960f477549dd6eb4d2a860104d44c345a411deda519adc05878e6090cf",
       "inputs": {
         "projectId": "AI-COMPANY-PROJECT-00001",
         "options": {}
@@ -1878,8 +1938,45 @@
             "ordered_at": 0,
             "arrival_time": 7,
             "supplier_candidates": [
-              "SIMULATED-SUPPLIER-GRAVEL-QUALITY",
-              "SIMULATED-SUPPLIER-GRAVEL-CAPACITY"
+              {
+                "supplier_id": "SIMULATED-SUPPLIER-GRAVEL-QUALITY",
+                "quality_score": 0.98,
+                "delivery_hours": 4,
+                "capacity": 24,
+                "risk_score": 0.04,
+                "material_cost": 149.76,
+                "transport_cost": 46,
+                "total_cost": 195.76,
+                "eligible": true,
+                "score": 88.1115,
+                "source": "DETERMINISTIC_SIMULATION_QUOTE"
+              },
+              {
+                "supplier_id": "SIMULATED-SUPPLIER-GRAVEL-BALANCED",
+                "quality_score": 0.93,
+                "delivery_hours": 2,
+                "capacity": 18,
+                "risk_score": 0.08,
+                "material_cost": 144,
+                "transport_cost": 46,
+                "total_cost": 190,
+                "eligible": true,
+                "score": 92.9,
+                "source": "DETERMINISTIC_SIMULATION_QUOTE"
+              },
+              {
+                "supplier_id": "SIMULATED-SUPPLIER-GRAVEL-ECONOMY",
+                "quality_score": 0.82,
+                "delivery_hours": 4,
+                "capacity": 13.2,
+                "risk_score": 0.18,
+                "material_cost": 135.36,
+                "transport_cost": 46,
+                "total_cost": 181.36,
+                "eligible": true,
+                "score": 75.15,
+                "source": "DETERMINISTIC_SIMULATION_QUOTE"
+              }
             ],
             "selection_basis": [
               "QUALITY",
@@ -1888,7 +1985,16 @@
               "RISK",
               "TOTAL_COST"
             ],
-            "selected_supplier": "SIMULATED-SUPPLIER-GRAVEL",
+            "supplier_selection": {
+              "method": "DETERMINISTIC_WEIGHTED_TOTAL_VALUE",
+              "selected_supplier": "SIMULATED-SUPPLIER-GRAVEL-BALANCED",
+              "selected_score": 92.9,
+              "lowest_price_automatic": false,
+              "evaluated_candidate_count": 3
+            },
+            "selected_supplier": "SIMULATED-SUPPLIER-GRAVEL-BALANCED",
+            "committed_amount": 190,
+            "commitment_released": false,
             "phase_times": {
               "rfq_created": 0,
               "quotes_received": 0.25,
@@ -1919,8 +2025,45 @@
             "ordered_at": 0,
             "arrival_time": 9,
             "supplier_candidates": [
-              "SIMULATED-SUPPLIER-PIPE-QUALITY",
-              "SIMULATED-SUPPLIER-PIPE-CAPACITY"
+              {
+                "supplier_id": "SIMULATED-SUPPLIER-PIPE-QUALITY",
+                "quality_score": 0.98,
+                "delivery_hours": 5,
+                "capacity": 36,
+                "risk_score": 0.04,
+                "material_cost": 224.64,
+                "transport_cost": 41.8,
+                "total_cost": 266.44,
+                "eligible": true,
+                "score": 88.0514,
+                "source": "DETERMINISTIC_SIMULATION_QUOTE"
+              },
+              {
+                "supplier_id": "SIMULATED-SUPPLIER-PIPE-BALANCED",
+                "quality_score": 0.93,
+                "delivery_hours": 3,
+                "capacity": 27,
+                "risk_score": 0.08,
+                "material_cost": 216,
+                "transport_cost": 41.8,
+                "total_cost": 257.8,
+                "eligible": true,
+                "score": 92.9,
+                "source": "DETERMINISTIC_SIMULATION_QUOTE"
+              },
+              {
+                "supplier_id": "SIMULATED-SUPPLIER-PIPE-ECONOMY",
+                "quality_score": 0.82,
+                "delivery_hours": 5,
+                "capacity": 19.8,
+                "risk_score": 0.18,
+                "material_cost": 203.04,
+                "transport_cost": 41.8,
+                "total_cost": 244.84,
+                "eligible": true,
+                "score": 75.15,
+                "source": "DETERMINISTIC_SIMULATION_QUOTE"
+              }
             ],
             "selection_basis": [
               "QUALITY",
@@ -1929,7 +2072,16 @@
               "RISK",
               "TOTAL_COST"
             ],
-            "selected_supplier": "SIMULATED-SUPPLIER-PIPE",
+            "supplier_selection": {
+              "method": "DETERMINISTIC_WEIGHTED_TOTAL_VALUE",
+              "selected_supplier": "SIMULATED-SUPPLIER-PIPE-BALANCED",
+              "selected_score": 92.9,
+              "lowest_price_automatic": false,
+              "evaluated_candidate_count": 3
+            },
+            "selected_supplier": "SIMULATED-SUPPLIER-PIPE-BALANCED",
+            "committed_amount": 257.8,
+            "commitment_released": false,
             "phase_times": {
               "rfq_created": 0,
               "quotes_received": 0.25,
@@ -1960,8 +2112,45 @@
             "ordered_at": 0,
             "arrival_time": 11,
             "supplier_candidates": [
-              "SIMULATED-SUPPLIER-LINING-QUALITY",
-              "SIMULATED-SUPPLIER-LINING-CAPACITY"
+              {
+                "supplier_id": "SIMULATED-SUPPLIER-LINING-QUALITY",
+                "quality_score": 0.98,
+                "delivery_hours": 6,
+                "capacity": 48,
+                "risk_score": 0.04,
+                "material_cost": 299.52,
+                "transport_cost": 44.8,
+                "total_cost": 344.32,
+                "eligible": true,
+                "score": 88.0309,
+                "source": "DETERMINISTIC_SIMULATION_QUOTE"
+              },
+              {
+                "supplier_id": "SIMULATED-SUPPLIER-LINING-BALANCED",
+                "quality_score": 0.93,
+                "delivery_hours": 4,
+                "capacity": 36,
+                "risk_score": 0.08,
+                "material_cost": 288,
+                "transport_cost": 44.8,
+                "total_cost": 332.8,
+                "eligible": true,
+                "score": 92.9,
+                "source": "DETERMINISTIC_SIMULATION_QUOTE"
+              },
+              {
+                "supplier_id": "SIMULATED-SUPPLIER-LINING-ECONOMY",
+                "quality_score": 0.82,
+                "delivery_hours": 6,
+                "capacity": 26.4,
+                "risk_score": 0.18,
+                "material_cost": 270.72,
+                "transport_cost": 44.8,
+                "total_cost": 315.52,
+                "eligible": true,
+                "score": 75.15,
+                "source": "DETERMINISTIC_SIMULATION_QUOTE"
+              }
             ],
             "selection_basis": [
               "QUALITY",
@@ -1970,7 +2159,16 @@
               "RISK",
               "TOTAL_COST"
             ],
-            "selected_supplier": "SIMULATED-SUPPLIER-LINING",
+            "supplier_selection": {
+              "method": "DETERMINISTIC_WEIGHTED_TOTAL_VALUE",
+              "selected_supplier": "SIMULATED-SUPPLIER-LINING-BALANCED",
+              "selected_score": 92.9,
+              "lowest_price_automatic": false,
+              "evaluated_candidate_count": 3
+            },
+            "selected_supplier": "SIMULATED-SUPPLIER-LINING-BALANCED",
+            "committed_amount": 332.8,
+            "commitment_released": false,
             "phase_times": {
               "rfq_created": 0,
               "quotes_received": 0.25,
@@ -2001,8 +2199,45 @@
             "ordered_at": 0,
             "arrival_time": 13,
             "supplier_candidates": [
-              "SIMULATED-SUPPLIER-FISH_JUVENILE_STOCK-QUALITY",
-              "SIMULATED-SUPPLIER-FISH_JUVENILE_STOCK-CAPACITY"
+              {
+                "supplier_id": "SIMULATED-SUPPLIER-FISH_JUVENILE_STOCK-QUALITY",
+                "quality_score": 0.98,
+                "delivery_hours": 7,
+                "capacity": 240,
+                "risk_score": 0.04,
+                "material_cost": 374.4,
+                "transport_cost": 40.6,
+                "total_cost": 415,
+                "eligible": true,
+                "score": 88.006,
+                "source": "DETERMINISTIC_SIMULATION_QUOTE"
+              },
+              {
+                "supplier_id": "SIMULATED-SUPPLIER-FISH_JUVENILE_STOCK-BALANCED",
+                "quality_score": 0.93,
+                "delivery_hours": 5,
+                "capacity": 180,
+                "risk_score": 0.08,
+                "material_cost": 360,
+                "transport_cost": 40.6,
+                "total_cost": 400.6,
+                "eligible": true,
+                "score": 92.9,
+                "source": "DETERMINISTIC_SIMULATION_QUOTE"
+              },
+              {
+                "supplier_id": "SIMULATED-SUPPLIER-FISH_JUVENILE_STOCK-ECONOMY",
+                "quality_score": 0.82,
+                "delivery_hours": 7,
+                "capacity": 132,
+                "risk_score": 0.18,
+                "material_cost": 338.4,
+                "transport_cost": 40.6,
+                "total_cost": 379,
+                "eligible": true,
+                "score": 75.15,
+                "source": "DETERMINISTIC_SIMULATION_QUOTE"
+              }
             ],
             "selection_basis": [
               "QUALITY",
@@ -2011,7 +2246,16 @@
               "RISK",
               "TOTAL_COST"
             ],
-            "selected_supplier": "SIMULATED-SUPPLIER-FISH_JUVENILE_STOCK",
+            "supplier_selection": {
+              "method": "DETERMINISTIC_WEIGHTED_TOTAL_VALUE",
+              "selected_supplier": "SIMULATED-SUPPLIER-FISH_JUVENILE_STOCK-BALANCED",
+              "selected_score": 92.9,
+              "lowest_price_automatic": false,
+              "evaluated_candidate_count": 3
+            },
+            "selected_supplier": "SIMULATED-SUPPLIER-FISH_JUVENILE_STOCK-BALANCED",
+            "committed_amount": 400.6,
+            "commitment_released": false,
             "phase_times": {
               "rfq_created": 0,
               "quotes_received": 0.25,
@@ -2042,9 +2286,9 @@
       "cash_delta": 0,
       "progress_delta": 0,
       "risk_delta": 0,
-      "previous_state_hash": "37533ffc9d96e425b5be2187b4700f2856fc0e93c878d54f46c51a0ff2cfbd42",
-      "event_payload_hash": "c46e8e126530bcffc7d7e2c66fe1fa419461d36622342908e813ea72a5663221",
-      "next_state_hash": "fcf317237a667c176ea5e092bbbd1d2d2110e79d42af89b75574638bf5dd886e",
+      "previous_state_hash": "0dbc08e477077d9fb24872b025b28fb629501ed74acb3039fec70fd3c332ebac",
+      "event_payload_hash": "9b0f51daf275ea34cfbda096b9db93317ddddbac279e0cf7d11981b060104cab",
+      "next_state_hash": "74a6a5b3a1ac4aab7cd1fe98ea34ee0c1c18401b4fbd44dc8914cc83248f5740",
       "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
       "status": "COMPLETED",
       "reason": null
@@ -2061,6 +2305,8 @@
       "simulation_time": 0,
       "location": null,
       "event_type": "START_RUNTIME",
+      "action_id": "AI-COMPANY-ACTION-000017",
+      "action_arguments_hash": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
       "inputs": {},
       "outputs": {
         "runtime_status": "RUNNING"
@@ -2073,9 +2319,9 @@
       "cash_delta": 0,
       "progress_delta": 0,
       "risk_delta": 0,
-      "previous_state_hash": "fcf317237a667c176ea5e092bbbd1d2d2110e79d42af89b75574638bf5dd886e",
-      "event_payload_hash": "df6ef731131307c66a3ac97ac4500114b6f03e66d718cf54f1c8de63a23f4fe6",
-      "next_state_hash": "dbc328e4a156eab160d12a500c238f86141758f9fc48cfdd876bc4cde47e4dc8",
+      "previous_state_hash": "74a6a5b3a1ac4aab7cd1fe98ea34ee0c1c18401b4fbd44dc8914cc83248f5740",
+      "event_payload_hash": "415a1909c6dbc9cceffbd1c364ea86d51b836b0a57cd3f6a8ec9dfa62db00742",
+      "next_state_hash": "291207fd2a4e208e86cb803a4deb46ffc1abfab85c97a776cdb3e4ed463c376f",
       "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
       "status": "COMPLETED",
       "reason": null
@@ -2092,6 +2338,8 @@
       "simulation_time": 13,
       "location": null,
       "event_type": "ADVANCE_TIME",
+      "action_id": "AI-COMPANY-ACTION-000018",
+      "action_arguments_hash": "ce3f41420dac7aed6cfccaededce2c85f1090bed5dc2d24fd8f0074969038d57",
       "inputs": {
         "hours": 13
       },
@@ -2107,9 +2355,9 @@
       "cash_delta": 0,
       "progress_delta": 0,
       "risk_delta": 0,
-      "previous_state_hash": "dbc328e4a156eab160d12a500c238f86141758f9fc48cfdd876bc4cde47e4dc8",
-      "event_payload_hash": "ba1c695c22d92856f8f01e759765b92076ca6eee4b9a3ade7e25bf57d3edb2b2",
-      "next_state_hash": "7f808e5369ec8475b3dc3dc9d1ca5c855e37db01b792b4b89a24a07c8059a743",
+      "previous_state_hash": "291207fd2a4e208e86cb803a4deb46ffc1abfab85c97a776cdb3e4ed463c376f",
+      "event_payload_hash": "62de8de4857764b25ee18fb465d155cfaf80c8b320a496c642d2f1496ef02eec",
+      "next_state_hash": "11bfa74d2d16decc1fd4ccc11623d984e7543524593f6db9300597917c9ed19a",
       "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
       "status": "COMPLETED",
       "reason": null
@@ -2126,6 +2374,8 @@
       "simulation_time": 13,
       "location": null,
       "event_type": "RECEIVE_MATERIAL",
+      "action_id": "AI-COMPANY-ACTION-000019",
+      "action_arguments_hash": "0ea8394afced4f7232fb6f6c327ddad0f2c212b154668a0f33b9a9cb2f0e28ba",
       "inputs": {
         "projectId": "AI-COMPANY-PROJECT-00001",
         "materialId": "GRAVEL"
@@ -2148,9 +2398,9 @@
       "cash_delta": -190,
       "progress_delta": 0,
       "risk_delta": 0,
-      "previous_state_hash": "7f808e5369ec8475b3dc3dc9d1ca5c855e37db01b792b4b89a24a07c8059a743",
-      "event_payload_hash": "4b25fa14717f7df107531ce3289954fe00a2b36991f5a9fe156b8ddf7cc4e457",
-      "next_state_hash": "d6ff6b384e6f299e0b6d7b96d384a2b8bf87cd74d038348b6064ae26d99e4ec6",
+      "previous_state_hash": "11bfa74d2d16decc1fd4ccc11623d984e7543524593f6db9300597917c9ed19a",
+      "event_payload_hash": "aef7b4e30c6046f3bbd5ddcd23aa0fe4fd7bf2062ecd687bdf3409c405fa2784",
+      "next_state_hash": "4fd70e1f01f82041d547a62470505ec4d99a6c7eb698f395ed5ec68ebf2de284",
       "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
       "status": "COMPLETED",
       "reason": null
@@ -2167,6 +2417,8 @@
       "simulation_time": 13,
       "location": null,
       "event_type": "RECEIVE_MATERIAL",
+      "action_id": "AI-COMPANY-ACTION-000020",
+      "action_arguments_hash": "a2d30a0ad093105e96d63e6f996d47a99932a4e60984b1af819704ee95f9ed09",
       "inputs": {
         "projectId": "AI-COMPANY-PROJECT-00001",
         "materialId": "PIPE"
@@ -2189,9 +2441,9 @@
       "cash_delta": -257.8,
       "progress_delta": 0,
       "risk_delta": 0,
-      "previous_state_hash": "d6ff6b384e6f299e0b6d7b96d384a2b8bf87cd74d038348b6064ae26d99e4ec6",
-      "event_payload_hash": "a2418a40c862632d8ecbfd9e7ca27b4c6b86092900241f8b791a4d9dad40a574",
-      "next_state_hash": "a6bf4565e6078d3633d9a617494b59b02fae01d23e45a8be667238a90b1018f2",
+      "previous_state_hash": "4fd70e1f01f82041d547a62470505ec4d99a6c7eb698f395ed5ec68ebf2de284",
+      "event_payload_hash": "88f39c1855399b53331739a99a2e3b8af5c41b90ef6cb89447dcee5730674b8a",
+      "next_state_hash": "22b4ace8c1d1a710c2ae45d7e597727e7a6d57622d8baff3bbf95af7768b6ae0",
       "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
       "status": "COMPLETED",
       "reason": null
@@ -2208,6 +2460,8 @@
       "simulation_time": 13,
       "location": null,
       "event_type": "RECEIVE_MATERIAL",
+      "action_id": "AI-COMPANY-ACTION-000021",
+      "action_arguments_hash": "eaf02bd03b632b252af0d8e22c76ff561171fb6c0f8e6d220e9b9f7678514d40",
       "inputs": {
         "projectId": "AI-COMPANY-PROJECT-00001",
         "materialId": "LINING"
@@ -2230,9 +2484,9 @@
       "cash_delta": -332.8,
       "progress_delta": 0,
       "risk_delta": 0,
-      "previous_state_hash": "a6bf4565e6078d3633d9a617494b59b02fae01d23e45a8be667238a90b1018f2",
-      "event_payload_hash": "8797b8caa745629ec11f51a2fe5872ac09bc41cd1e77a46949cdf06d151625e8",
-      "next_state_hash": "dc9441cf6d97f68ae12289f4ecc1f046cfa462395baef59a90f0c1e7b087ab3e",
+      "previous_state_hash": "22b4ace8c1d1a710c2ae45d7e597727e7a6d57622d8baff3bbf95af7768b6ae0",
+      "event_payload_hash": "c3cfdf6c6aa8246c296e5655baa77d14c416b716180094aec421d8197af371ea",
+      "next_state_hash": "c87ba2f5c3f10f145709fd4e679f2269fbf6be4d6de861932886a2e9149ac1db",
       "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
       "status": "COMPLETED",
       "reason": null
@@ -2249,6 +2503,8 @@
       "simulation_time": 13,
       "location": null,
       "event_type": "RECEIVE_MATERIAL",
+      "action_id": "AI-COMPANY-ACTION-000022",
+      "action_arguments_hash": "cc02f1a7380d11cead057d7e7e836268c84b1cbc30bc7bc0edb9b41fa4155b39",
       "inputs": {
         "projectId": "AI-COMPANY-PROJECT-00001",
         "materialId": "FISH_JUVENILE_STOCK"
@@ -2271,9 +2527,9 @@
       "cash_delta": -400.6,
       "progress_delta": 0,
       "risk_delta": 0,
-      "previous_state_hash": "dc9441cf6d97f68ae12289f4ecc1f046cfa462395baef59a90f0c1e7b087ab3e",
-      "event_payload_hash": "9d32fa5ece377a276e3b61c7ced1be1aafb095b82ae9e565551b1347c07f863f",
-      "next_state_hash": "479ccb1b21390c68612a06e703786072db220ca55daafe216fea057572748910",
+      "previous_state_hash": "c87ba2f5c3f10f145709fd4e679f2269fbf6be4d6de861932886a2e9149ac1db",
+      "event_payload_hash": "61accef165e751d0f5315e266aefb58e62fa1a7c98214e47e428b88d2c2fdaf2",
+      "next_state_hash": "09f1c4f0c843b3e4d0e6c44ab8926e8630aee0ee2faded277c04ca29d30862dc",
       "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
       "status": "COMPLETED",
       "reason": null
@@ -2290,6 +2546,8 @@
       "simulation_time": 13,
       "location": null,
       "event_type": "CALCULATE_SCHEDULE",
+      "action_id": "AI-COMPANY-ACTION-000023",
+      "action_arguments_hash": "835ea8960f477549dd6eb4d2a860104d44c345a411deda519adc05878e6090cf",
       "inputs": {
         "projectId": "AI-COMPANY-PROJECT-00001",
         "options": {}
@@ -2297,8 +2555,8 @@
       "outputs": {
         "schedule": {
           "planned_start": 13,
-          "planned_end": 56,
-          "estimated_duration": 43,
+          "planned_end": 69,
+          "estimated_duration": 56,
           "critical_path": [
             "AI-COMPANY-PROJECT-00001-TASK-001",
             "AI-COMPANY-PROJECT-00001-TASK-002",
@@ -2359,23 +2617,23 @@
             "location": "LAND-SIM-FISHPOND-001"
           },
           "AI-COMPANY-PROJECT-00001-TASK-003": {
-            "start": 23,
-            "end": 35,
+            "start": 31,
+            "end": 43,
             "location": "LAND-SIM-FISHPOND-001"
           },
           "AI-COMPANY-PROJECT-00001-TASK-004": {
-            "start": 35,
-            "end": 45,
+            "start": 48,
+            "end": 58,
             "location": "LAND-SIM-FISHPOND-001"
           },
           "AI-COMPANY-PROJECT-00001-TASK-005": {
-            "start": 45,
-            "end": 53,
+            "start": 58,
+            "end": 66,
             "location": "LAND-SIM-FISHPOND-001"
           },
           "AI-COMPANY-PROJECT-00001-TASK-006": {
-            "start": 53,
-            "end": 56,
+            "start": 66,
+            "end": 69,
             "location": "LAND-SIM-FISHPOND-001"
           }
         }
@@ -2388,9 +2646,9 @@
       "cash_delta": 0,
       "progress_delta": 0,
       "risk_delta": 0,
-      "previous_state_hash": "479ccb1b21390c68612a06e703786072db220ca55daafe216fea057572748910",
-      "event_payload_hash": "2823a4e88553caf9516b6b09ab42bf643e827263ac0544af9342819ea3d25ccb",
-      "next_state_hash": "ef05594d7c0cbcbccb0eea6981692ad61e74a0217b1a6a0d113fc41c35cc028f",
+      "previous_state_hash": "09f1c4f0c843b3e4d0e6c44ab8926e8630aee0ee2faded277c04ca29d30862dc",
+      "event_payload_hash": "5ab9bc11fce60ce4b7f74abcfe30f5187557e73c0eea9e91f6bb9328395a03de",
+      "next_state_hash": "3252f39002866e5f357a170213e8511e9b224d2ddc401aaa57f43ccbb6aa37f4",
       "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
       "status": "COMPLETED",
       "reason": null
@@ -2407,6 +2665,8 @@
       "simulation_time": 13,
       "location": null,
       "event_type": "ASSIGN_WORKER",
+      "action_id": "AI-COMPANY-ACTION-000024",
+      "action_arguments_hash": "dc28ea0424363cdd4b0c2685b9a7d6abac043e1223f72d05a54970a6e529bd89",
       "inputs": {
         "projectId": "AI-COMPANY-PROJECT-00001",
         "taskId": "AI-COMPANY-PROJECT-00001-TASK-001",
@@ -2422,6 +2682,12 @@
           "life_id": "LIFE-AI-COMPANY-WORKER-001",
           "body_type": "PHYSICAL",
           "location": "LAND-SIM-FISHPOND-001",
+          "travel_time": 1,
+          "shift_start": 0,
+          "shift_end": 24,
+          "shift_cycle_hours": 24,
+          "maximum_hours": 12,
+          "minimum_rest_hours": 8,
           "start": 13,
           "end": 17,
           "status": "RESERVED"
@@ -2435,9 +2701,9 @@
       "cash_delta": 0,
       "progress_delta": 0,
       "risk_delta": 0,
-      "previous_state_hash": "ef05594d7c0cbcbccb0eea6981692ad61e74a0217b1a6a0d113fc41c35cc028f",
-      "event_payload_hash": "d84ba6d049cba6dfea2582a255d5c88c4df311a52b48d8ce1dbc5033f6c7fe3e",
-      "next_state_hash": "209b1c7220be3d6f2de086d86b388e7c3b0ad5f5ec7dd0301f584be1102b42c7",
+      "previous_state_hash": "3252f39002866e5f357a170213e8511e9b224d2ddc401aaa57f43ccbb6aa37f4",
+      "event_payload_hash": "1e729afbe3cd8f5b976fd54fb0e6114bf0619b846ef8dd4790d59fcba4557009",
+      "next_state_hash": "36fe881855cbfcb039ff3e8a9a96fe4d4f7b1c4f58513f0a70e6c6a2d745a81b",
       "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
       "status": "COMPLETED",
       "reason": null
@@ -2454,6 +2720,8 @@
       "simulation_time": 13,
       "location": null,
       "event_type": "RESERVE_EQUIPMENT",
+      "action_id": "AI-COMPANY-ACTION-000025",
+      "action_arguments_hash": "3e2ca86fa60c979058a8498fbf8d066c1272d1ef67d12575e751157d2f34be7f",
       "inputs": {
         "projectId": "AI-COMPANY-PROJECT-00001",
         "taskId": "AI-COMPANY-PROJECT-00001-TASK-001",
@@ -2479,9 +2747,9 @@
       "cash_delta": 0,
       "progress_delta": 0,
       "risk_delta": 0,
-      "previous_state_hash": "209b1c7220be3d6f2de086d86b388e7c3b0ad5f5ec7dd0301f584be1102b42c7",
-      "event_payload_hash": "e8ad8effad12a608002033343bd5315bfa18fe1eca0da0094a066ea207717c0c",
-      "next_state_hash": "518d8a39224ab127b65ab818709c7e4ca0b906c11d6d9ba2fb926bb76c808ec2",
+      "previous_state_hash": "36fe881855cbfcb039ff3e8a9a96fe4d4f7b1c4f58513f0a70e6c6a2d745a81b",
+      "event_payload_hash": "de86840585073b39e88d56c3dfd18901364ace3362b4b28b35680292689f2671",
+      "next_state_hash": "da211cf15d58d595bdbe380b2dee66f212f170cfcc1ffb79f55ece81acd0b36c",
       "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
       "status": "COMPLETED",
       "reason": null
@@ -2498,6 +2766,8 @@
       "simulation_time": 13,
       "location": null,
       "event_type": "ASSIGN_WORKER",
+      "action_id": "AI-COMPANY-ACTION-000026",
+      "action_arguments_hash": "b8b56cb4baf5eac80799a1176bb19572624d7038385dbd8ef0c621a7f9dd35ff",
       "inputs": {
         "projectId": "AI-COMPANY-PROJECT-00001",
         "taskId": "AI-COMPANY-PROJECT-00001-TASK-002",
@@ -2513,6 +2783,12 @@
           "life_id": "LIFE-AI-COMPANY-WORKER-002",
           "body_type": "DIGITAL",
           "location": "LAND-SIM-FISHPOND-001",
+          "travel_time": 0,
+          "shift_start": 0,
+          "shift_end": 24,
+          "shift_cycle_hours": 24,
+          "maximum_hours": 16,
+          "minimum_rest_hours": 0,
           "start": 17,
           "end": 23,
           "status": "RESERVED"
@@ -2526,9 +2802,9 @@
       "cash_delta": 0,
       "progress_delta": 0,
       "risk_delta": 0,
-      "previous_state_hash": "518d8a39224ab127b65ab818709c7e4ca0b906c11d6d9ba2fb926bb76c808ec2",
-      "event_payload_hash": "314d10f13c266da612e169052c3f1dfde3a3aad2cf8e9f255c68000ac8f32a6b",
-      "next_state_hash": "0699fadff629b5ec4ea76e80f721bb4ef0d14e2eeb56bbaf0f2a002dd22d8024",
+      "previous_state_hash": "da211cf15d58d595bdbe380b2dee66f212f170cfcc1ffb79f55ece81acd0b36c",
+      "event_payload_hash": "1de15488e1edf597bf8db175fb74ec502ab4663edbf250e6ccdf2e467859e4d1",
+      "next_state_hash": "a3f6e980039efcb4d26c0136598ac7bf8753542419d26f8a66d725a4d66152b8",
       "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
       "status": "COMPLETED",
       "reason": null
@@ -2545,6 +2821,8 @@
       "simulation_time": 13,
       "location": null,
       "event_type": "ASSIGN_WORKER",
+      "action_id": "AI-COMPANY-ACTION-000027",
+      "action_arguments_hash": "876208db18127f95c8146584de28e8354bd4638c10085a47e25776724b598adb",
       "inputs": {
         "projectId": "AI-COMPANY-PROJECT-00001",
         "taskId": "AI-COMPANY-PROJECT-00001-TASK-002",
@@ -2560,6 +2838,12 @@
           "life_id": "LIFE-AI-COMPANY-WORKER-003",
           "body_type": "PHYSICAL",
           "location": "LAND-SIM-FISHPOND-001",
+          "travel_time": 1,
+          "shift_start": 0,
+          "shift_end": 24,
+          "shift_cycle_hours": 24,
+          "maximum_hours": 12,
+          "minimum_rest_hours": 8,
           "start": 17,
           "end": 23,
           "status": "RESERVED"
@@ -2573,9 +2857,9 @@
       "cash_delta": 0,
       "progress_delta": 0,
       "risk_delta": 0,
-      "previous_state_hash": "0699fadff629b5ec4ea76e80f721bb4ef0d14e2eeb56bbaf0f2a002dd22d8024",
-      "event_payload_hash": "715810f1599ae4f9502e1d69e43bb86d25380a754b0eaea8c4660253db9048b0",
-      "next_state_hash": "52d531d0baf0dd9fd9c5270ae3e5d436cc6e7c61d0c22073645ee472c6c773fd",
+      "previous_state_hash": "a3f6e980039efcb4d26c0136598ac7bf8753542419d26f8a66d725a4d66152b8",
+      "event_payload_hash": "a16087c8f7d7cc5a242dcfd4e6545f490a3ac1a56cc83545503ac79e2fbda376",
+      "next_state_hash": "c2375ef5533e9b151f196dfc49b7665993522d3f259bed631c3ed7db4530ddbd",
       "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
       "status": "COMPLETED",
       "reason": null
@@ -2592,6 +2876,8 @@
       "simulation_time": 13,
       "location": null,
       "event_type": "ASSIGN_WORKER",
+      "action_id": "AI-COMPANY-ACTION-000028",
+      "action_arguments_hash": "a8f5696968cd31be31f613b5e5c0d579442ff42d638d5b0872e28d58c1879c6f",
       "inputs": {
         "projectId": "AI-COMPANY-PROJECT-00001",
         "taskId": "AI-COMPANY-PROJECT-00001-TASK-003",
@@ -2607,8 +2893,14 @@
           "life_id": "LIFE-AI-COMPANY-WORKER-005",
           "body_type": "PHYSICAL",
           "location": "LAND-SIM-FISHPOND-001",
-          "start": 23,
-          "end": 35,
+          "travel_time": 1,
+          "shift_start": 0,
+          "shift_end": 24,
+          "shift_cycle_hours": 24,
+          "maximum_hours": 12,
+          "minimum_rest_hours": 8,
+          "start": 31,
+          "end": 43,
           "status": "RESERVED"
         }
       },
@@ -2620,9 +2912,9 @@
       "cash_delta": 0,
       "progress_delta": 0,
       "risk_delta": 0,
-      "previous_state_hash": "52d531d0baf0dd9fd9c5270ae3e5d436cc6e7c61d0c22073645ee472c6c773fd",
-      "event_payload_hash": "ed8c61516117a4e889225c3b3748b65e7a0a3fc15c07b62509da889b522f1dbf",
-      "next_state_hash": "92b1bb9316a9e5eee68088fa1f8f0b8b3f23300a9c867e67e099e5e0efc88eb7",
+      "previous_state_hash": "c2375ef5533e9b151f196dfc49b7665993522d3f259bed631c3ed7db4530ddbd",
+      "event_payload_hash": "ecf384eee1b8fc05fbeb1ea6e7eb2b8bc94b0e17fceb078348053d06069aa401",
+      "next_state_hash": "6c4d57023deaebd4daa96673bc474ab835c9c302bccde08207dbb22509a1bc82",
       "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
       "status": "COMPLETED",
       "reason": null
@@ -2639,6 +2931,8 @@
       "simulation_time": 13,
       "location": null,
       "event_type": "ASSIGN_WORKER",
+      "action_id": "AI-COMPANY-ACTION-000029",
+      "action_arguments_hash": "c669f87ea879b209d1c0685e1ec131750e9dc7c9ebccb510e190b77d28e88620",
       "inputs": {
         "projectId": "AI-COMPANY-PROJECT-00001",
         "taskId": "AI-COMPANY-PROJECT-00001-TASK-003",
@@ -2654,8 +2948,14 @@
           "life_id": "LIFE-AI-COMPANY-WORKER-003",
           "body_type": "PHYSICAL",
           "location": "LAND-SIM-FISHPOND-001",
-          "start": 23,
-          "end": 35,
+          "travel_time": 1,
+          "shift_start": 0,
+          "shift_end": 24,
+          "shift_cycle_hours": 24,
+          "maximum_hours": 12,
+          "minimum_rest_hours": 8,
+          "start": 31,
+          "end": 43,
           "status": "RESERVED"
         }
       },
@@ -2667,9 +2967,9 @@
       "cash_delta": 0,
       "progress_delta": 0,
       "risk_delta": 0,
-      "previous_state_hash": "92b1bb9316a9e5eee68088fa1f8f0b8b3f23300a9c867e67e099e5e0efc88eb7",
-      "event_payload_hash": "5489ff997460a60376724844c39c2d0dc1cdabf73cb104067d1ddec679c31fe6",
-      "next_state_hash": "05b8d8aff59217f6d1554c4f7e1a7c12809461682df5da366f39329496234dd3",
+      "previous_state_hash": "6c4d57023deaebd4daa96673bc474ab835c9c302bccde08207dbb22509a1bc82",
+      "event_payload_hash": "0139966cee167a3836dc6b3a45b5f552b6f1b87b1ce13e08a0858dc9698cb488",
+      "next_state_hash": "d4e49d5188cfdc4b221405e93f5574b83334bdd2b5702cf41c2b766ee8d64e74",
       "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
       "status": "COMPLETED",
       "reason": null
@@ -2686,6 +2986,8 @@
       "simulation_time": 13,
       "location": null,
       "event_type": "RESERVE_EQUIPMENT",
+      "action_id": "AI-COMPANY-ACTION-000030",
+      "action_arguments_hash": "4e4a4c346a36ce824ddbe7833a2874b87af7a4df4d0e11bc286feba127b7db39",
       "inputs": {
         "projectId": "AI-COMPANY-PROJECT-00001",
         "taskId": "AI-COMPANY-PROJECT-00001-TASK-003",
@@ -2698,8 +3000,8 @@
           "project_id": "AI-COMPANY-PROJECT-00001",
           "task_id": "AI-COMPANY-PROJECT-00001-TASK-003",
           "equipment_id": "AI-COMPANY-EQUIPMENT-002",
-          "start": 23,
-          "end": 35,
+          "start": 31,
+          "end": 43,
           "status": "RESERVED"
         }
       },
@@ -2711,9 +3013,9 @@
       "cash_delta": 0,
       "progress_delta": 0,
       "risk_delta": 0,
-      "previous_state_hash": "05b8d8aff59217f6d1554c4f7e1a7c12809461682df5da366f39329496234dd3",
-      "event_payload_hash": "76742ef0722081dfaa0969eccf48dbfab3ad7dc38681b163bd891136e8fab86c",
-      "next_state_hash": "a35fcffac081fba45099f7ab50fb93152cd450b99def578bc2333dc172393575",
+      "previous_state_hash": "d4e49d5188cfdc4b221405e93f5574b83334bdd2b5702cf41c2b766ee8d64e74",
+      "event_payload_hash": "5237736d28689e749cc30e1c67c1f09f89870148bd6ed086501b9b1e225e99da",
+      "next_state_hash": "86c5287d50ab1277a7ab45750324534b7a1ec93c1b6fdd3f36dc32dc54113062",
       "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
       "status": "COMPLETED",
       "reason": null
@@ -2730,6 +3032,8 @@
       "simulation_time": 13,
       "location": null,
       "event_type": "ASSIGN_WORKER",
+      "action_id": "AI-COMPANY-ACTION-000031",
+      "action_arguments_hash": "7ee1d967e12c4ef25faff1b8079eb1cba26a72fbc0264fdd97eb0bfbb795eca9",
       "inputs": {
         "projectId": "AI-COMPANY-PROJECT-00001",
         "taskId": "AI-COMPANY-PROJECT-00001-TASK-004",
@@ -2745,8 +3049,14 @@
           "life_id": "LIFE-AI-COMPANY-WORKER-004",
           "body_type": "PHYSICAL",
           "location": "LAND-SIM-FISHPOND-001",
-          "start": 35,
-          "end": 45,
+          "travel_time": 1,
+          "shift_start": 0,
+          "shift_end": 24,
+          "shift_cycle_hours": 24,
+          "maximum_hours": 12,
+          "minimum_rest_hours": 8,
+          "start": 48,
+          "end": 58,
           "status": "RESERVED"
         }
       },
@@ -2758,9 +3068,9 @@
       "cash_delta": 0,
       "progress_delta": 0,
       "risk_delta": 0,
-      "previous_state_hash": "a35fcffac081fba45099f7ab50fb93152cd450b99def578bc2333dc172393575",
-      "event_payload_hash": "f556515b05b150530f7b31d058a14bb025a06598138f9f81b9c9093c267f40e5",
-      "next_state_hash": "54678881e83e9428cb135b9b7c4c5ec2ee788ad529c79122d01862c82823c7ee",
+      "previous_state_hash": "86c5287d50ab1277a7ab45750324534b7a1ec93c1b6fdd3f36dc32dc54113062",
+      "event_payload_hash": "2a44f34220738302bbc7a00c7743d6557175fbe8932446b27da726b326c9b7ac",
+      "next_state_hash": "d123300cb6f55c70849827b142656b8a5b1c0785041d87c7eb09de2e039518a0",
       "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
       "status": "COMPLETED",
       "reason": null
@@ -2777,6 +3087,8 @@
       "simulation_time": 13,
       "location": null,
       "event_type": "ASSIGN_WORKER",
+      "action_id": "AI-COMPANY-ACTION-000032",
+      "action_arguments_hash": "43058813045afa732098d4d2af9425a548dcf0f6b49c532a68a34f263626f91d",
       "inputs": {
         "projectId": "AI-COMPANY-PROJECT-00001",
         "taskId": "AI-COMPANY-PROJECT-00001-TASK-004",
@@ -2792,8 +3104,14 @@
           "life_id": "LIFE-AI-COMPANY-WORKER-006",
           "body_type": "PHYSICAL",
           "location": "LAND-SIM-FISHPOND-001",
-          "start": 35,
-          "end": 45,
+          "travel_time": 1,
+          "shift_start": 0,
+          "shift_end": 24,
+          "shift_cycle_hours": 24,
+          "maximum_hours": 12,
+          "minimum_rest_hours": 8,
+          "start": 48,
+          "end": 58,
           "status": "RESERVED"
         }
       },
@@ -2805,9 +3123,9 @@
       "cash_delta": 0,
       "progress_delta": 0,
       "risk_delta": 0,
-      "previous_state_hash": "54678881e83e9428cb135b9b7c4c5ec2ee788ad529c79122d01862c82823c7ee",
-      "event_payload_hash": "3b759bc31826de967a9a1d101a03d12016f412b40b010d5755a8820a40be18d1",
-      "next_state_hash": "be152ad454ec57b871425497ac838e3c283b96e672dc9c04be122b70294c960e",
+      "previous_state_hash": "d123300cb6f55c70849827b142656b8a5b1c0785041d87c7eb09de2e039518a0",
+      "event_payload_hash": "0c463b22aeb516e7d6d0fc08725e307754a1809872c9cae29236399da2fcc168",
+      "next_state_hash": "307953ae4e80b78d685cbf0880d1d7b29940e0c0daac1fe1a2a2e76389c178bd",
       "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
       "status": "COMPLETED",
       "reason": null
@@ -2824,6 +3142,8 @@
       "simulation_time": 13,
       "location": null,
       "event_type": "RESERVE_EQUIPMENT",
+      "action_id": "AI-COMPANY-ACTION-000033",
+      "action_arguments_hash": "2bd4d3a312d5a7c8ed276bfac7ea05835353c13a99c222c11f0cc43dfb560922",
       "inputs": {
         "projectId": "AI-COMPANY-PROJECT-00001",
         "taskId": "AI-COMPANY-PROJECT-00001-TASK-004",
@@ -2836,8 +3156,8 @@
           "project_id": "AI-COMPANY-PROJECT-00001",
           "task_id": "AI-COMPANY-PROJECT-00001-TASK-004",
           "equipment_id": "AI-COMPANY-EQUIPMENT-003",
-          "start": 35,
-          "end": 45,
+          "start": 48,
+          "end": 58,
           "status": "RESERVED"
         }
       },
@@ -2849,9 +3169,9 @@
       "cash_delta": 0,
       "progress_delta": 0,
       "risk_delta": 0,
-      "previous_state_hash": "be152ad454ec57b871425497ac838e3c283b96e672dc9c04be122b70294c960e",
-      "event_payload_hash": "7d102cd217f27e39193fa0db2bcdef71d14c871f67cfb9c9d577a6fb842e0a38",
-      "next_state_hash": "39dd584cda269e34bb7d22d504316b51f8285ca388fa193f76a8a0c8a050296e",
+      "previous_state_hash": "307953ae4e80b78d685cbf0880d1d7b29940e0c0daac1fe1a2a2e76389c178bd",
+      "event_payload_hash": "dd6a96c0db06cd836191abda717591e5bbd86dd561bdfdd764cb27dcfdd81afa",
+      "next_state_hash": "5e8df65829316da2a19ec748e1da3a09639219bd9345d68e027cf0e68f45d211",
       "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
       "status": "COMPLETED",
       "reason": null
@@ -2868,6 +3188,8 @@
       "simulation_time": 13,
       "location": null,
       "event_type": "RESERVE_EQUIPMENT",
+      "action_id": "AI-COMPANY-ACTION-000034",
+      "action_arguments_hash": "39b59fe682a0d1b30c23c396b1874814b0a575d56ed59af4c3ad0088d4c78e9e",
       "inputs": {
         "projectId": "AI-COMPANY-PROJECT-00001",
         "taskId": "AI-COMPANY-PROJECT-00001-TASK-004",
@@ -2880,8 +3202,8 @@
           "project_id": "AI-COMPANY-PROJECT-00001",
           "task_id": "AI-COMPANY-PROJECT-00001-TASK-004",
           "equipment_id": "AI-COMPANY-EQUIPMENT-004",
-          "start": 35,
-          "end": 45,
+          "start": 48,
+          "end": 58,
           "status": "RESERVED"
         }
       },
@@ -2893,9 +3215,9 @@
       "cash_delta": 0,
       "progress_delta": 0,
       "risk_delta": 0,
-      "previous_state_hash": "39dd584cda269e34bb7d22d504316b51f8285ca388fa193f76a8a0c8a050296e",
-      "event_payload_hash": "2b32f0436bec923d9b2133e098c4e757e1815d8610f08d6e642a2997cb26869e",
-      "next_state_hash": "b0ad1aaa8d1f0e3e75a51cff64df1d7f9363bdf9f27bb6e48c19595e49f191c9",
+      "previous_state_hash": "5e8df65829316da2a19ec748e1da3a09639219bd9345d68e027cf0e68f45d211",
+      "event_payload_hash": "a366a39237df74e09f4b2d918b9cce254222bf23c28b3ccae9bcef3a4f62fa27",
+      "next_state_hash": "7a2a7c0ac2aefe9c951cd289701f1f4e6c7a104cecf6382e01100702da4d02ca",
       "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
       "status": "COMPLETED",
       "reason": null
@@ -2912,6 +3234,8 @@
       "simulation_time": 13,
       "location": null,
       "event_type": "ASSIGN_WORKER",
+      "action_id": "AI-COMPANY-ACTION-000035",
+      "action_arguments_hash": "388c914a82de1428cd5bc51e4cefd3ed41783d724e851cefa75757c4ee528390",
       "inputs": {
         "projectId": "AI-COMPANY-PROJECT-00001",
         "taskId": "AI-COMPANY-PROJECT-00001-TASK-005",
@@ -2927,8 +3251,14 @@
           "life_id": "LIFE-AI-COMPANY-WORKER-008",
           "body_type": "PHYSICAL",
           "location": "LAND-SIM-FISHPOND-001",
-          "start": 45,
-          "end": 53,
+          "travel_time": 1,
+          "shift_start": 0,
+          "shift_end": 24,
+          "shift_cycle_hours": 24,
+          "maximum_hours": 12,
+          "minimum_rest_hours": 8,
+          "start": 58,
+          "end": 66,
           "status": "RESERVED"
         }
       },
@@ -2940,9 +3270,9 @@
       "cash_delta": 0,
       "progress_delta": 0,
       "risk_delta": 0,
-      "previous_state_hash": "b0ad1aaa8d1f0e3e75a51cff64df1d7f9363bdf9f27bb6e48c19595e49f191c9",
-      "event_payload_hash": "11ca07af440f203fef9d8385bfd9116cc4acfb401a1c205b748556194924dee0",
-      "next_state_hash": "8b4244c53f757c32050116de3ce6a47361bd77d356f2eda6b5ec678897073529",
+      "previous_state_hash": "7a2a7c0ac2aefe9c951cd289701f1f4e6c7a104cecf6382e01100702da4d02ca",
+      "event_payload_hash": "65f134991b65c715dcf51c54e8ed916ff69c0007d350f16b525fe0df2e8e3a80",
+      "next_state_hash": "e5ee90e3cbee43f71afaa47e8676e622fc30867c6e543d4c0c40ba029ffa8de1",
       "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
       "status": "COMPLETED",
       "reason": null
@@ -2959,6 +3289,8 @@
       "simulation_time": 13,
       "location": null,
       "event_type": "ASSIGN_WORKER",
+      "action_id": "AI-COMPANY-ACTION-000036",
+      "action_arguments_hash": "30d2f69edbb086bcb90042ae384cde1616b536a7a4f0b5ba37cf2524cab50a37",
       "inputs": {
         "projectId": "AI-COMPANY-PROJECT-00001",
         "taskId": "AI-COMPANY-PROJECT-00001-TASK-005",
@@ -2974,8 +3306,14 @@
           "life_id": "LIFE-AI-COMPANY-WORKER-009",
           "body_type": "PHYSICAL",
           "location": "LAND-SIM-FISHPOND-001",
-          "start": 45,
-          "end": 53,
+          "travel_time": 1,
+          "shift_start": 0,
+          "shift_end": 24,
+          "shift_cycle_hours": 24,
+          "maximum_hours": 12,
+          "minimum_rest_hours": 8,
+          "start": 58,
+          "end": 66,
           "status": "RESERVED"
         }
       },
@@ -2987,9 +3325,9 @@
       "cash_delta": 0,
       "progress_delta": 0,
       "risk_delta": 0,
-      "previous_state_hash": "8b4244c53f757c32050116de3ce6a47361bd77d356f2eda6b5ec678897073529",
-      "event_payload_hash": "7f8189179d47d08aac9df97410f48505177ac13b028cc80fae46d2ce187ddfb9",
-      "next_state_hash": "1d17a986cb2c4404c7c99b2e8cdefae1d40046ed5bfbd3acf16633bceb103d76",
+      "previous_state_hash": "e5ee90e3cbee43f71afaa47e8676e622fc30867c6e543d4c0c40ba029ffa8de1",
+      "event_payload_hash": "33926fdb89944135b565110b0c7aa8640fb8406d6086a860f0788acf98a2cca6",
+      "next_state_hash": "584ef2b031aeeb9d378cbeca3511c5bf2017266d58596ab873011567166ed7e4",
       "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
       "status": "COMPLETED",
       "reason": null
@@ -3006,6 +3344,8 @@
       "simulation_time": 13,
       "location": null,
       "event_type": "RESERVE_EQUIPMENT",
+      "action_id": "AI-COMPANY-ACTION-000037",
+      "action_arguments_hash": "3536c0425e527cc8ba081402b5dcbff58ab895c630ee1e90334520d1613459c9",
       "inputs": {
         "projectId": "AI-COMPANY-PROJECT-00001",
         "taskId": "AI-COMPANY-PROJECT-00001-TASK-005",
@@ -3018,8 +3358,8 @@
           "project_id": "AI-COMPANY-PROJECT-00001",
           "task_id": "AI-COMPANY-PROJECT-00001-TASK-005",
           "equipment_id": "AI-COMPANY-EQUIPMENT-005",
-          "start": 45,
-          "end": 53,
+          "start": 58,
+          "end": 66,
           "status": "RESERVED"
         }
       },
@@ -3031,9 +3371,9 @@
       "cash_delta": 0,
       "progress_delta": 0,
       "risk_delta": 0,
-      "previous_state_hash": "1d17a986cb2c4404c7c99b2e8cdefae1d40046ed5bfbd3acf16633bceb103d76",
-      "event_payload_hash": "1f5c5aaa9dbbd35652daaa70257c31b6758a8c5e1175ea65e56aa9c0f6010415",
-      "next_state_hash": "abd388f380dcc7034c233b901db8d6277ac382fd4e9c0d59b908dd8ade143c55",
+      "previous_state_hash": "584ef2b031aeeb9d378cbeca3511c5bf2017266d58596ab873011567166ed7e4",
+      "event_payload_hash": "d3e4d5a61a3a5f874826698a55e36fde91a847437cabe7c93eaf90f082df60ec",
+      "next_state_hash": "86060971220ec7ea9a7a976827bb47e35d5f932a44ccb24fab6b1059b6d00104",
       "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
       "status": "COMPLETED",
       "reason": null
@@ -3050,6 +3390,8 @@
       "simulation_time": 13,
       "location": null,
       "event_type": "ASSIGN_WORKER",
+      "action_id": "AI-COMPANY-ACTION-000038",
+      "action_arguments_hash": "6fe16c013d3f88c4ca80086cd741cb0a4946a847a480471e655d83cd92817737",
       "inputs": {
         "projectId": "AI-COMPANY-PROJECT-00001",
         "taskId": "AI-COMPANY-PROJECT-00001-TASK-006",
@@ -3065,8 +3407,14 @@
           "life_id": "LIFE-AI-COMPANY-WORKER-010",
           "body_type": "PHYSICAL",
           "location": "LAND-SIM-FISHPOND-001",
-          "start": 53,
-          "end": 56,
+          "travel_time": 1,
+          "shift_start": 0,
+          "shift_end": 24,
+          "shift_cycle_hours": 24,
+          "maximum_hours": 12,
+          "minimum_rest_hours": 8,
+          "start": 66,
+          "end": 69,
           "status": "RESERVED"
         }
       },
@@ -3078,9 +3426,9 @@
       "cash_delta": 0,
       "progress_delta": 0,
       "risk_delta": 0,
-      "previous_state_hash": "abd388f380dcc7034c233b901db8d6277ac382fd4e9c0d59b908dd8ade143c55",
-      "event_payload_hash": "747de5f7a4ed9d35e53ebccace1467d0a490dce0898bc0bd96764a76ae9ea5d4",
-      "next_state_hash": "933b2b1ff0d9ff3e7f83c7f9eece8789fae9953f315fe14426478e5f8dd00aac",
+      "previous_state_hash": "86060971220ec7ea9a7a976827bb47e35d5f932a44ccb24fab6b1059b6d00104",
+      "event_payload_hash": "14ece9e093ebde392d72d98aa449ca740fd13fe8bf3f3d331c952ddc04903443",
+      "next_state_hash": "2e8daf2f4cc0daa554bde1f4630bd4be64ee1ed4493e3755869125ac8db76136",
       "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
       "status": "COMPLETED",
       "reason": null
@@ -3097,6 +3445,8 @@
       "simulation_time": 13,
       "location": null,
       "event_type": "START_TASK",
+      "action_id": "AI-COMPANY-ACTION-000039",
+      "action_arguments_hash": "9387704e9b51bdd610aa238bfaec2fd7a886d397214a2a117451a969aca84afe",
       "inputs": {
         "projectId": "AI-COMPANY-PROJECT-00001",
         "taskId": "AI-COMPANY-PROJECT-00001-TASK-001"
@@ -3112,9 +3462,9 @@
       "cash_delta": 0,
       "progress_delta": 0,
       "risk_delta": 0,
-      "previous_state_hash": "933b2b1ff0d9ff3e7f83c7f9eece8789fae9953f315fe14426478e5f8dd00aac",
-      "event_payload_hash": "037a416fff3851111f883fc4a7931aa6162451f2c5b0ff96ef376347d8c8d1fc",
-      "next_state_hash": "637b87c972d982d8753944baf3e75d5ff67df6f5b8ec850a5d100c0bea9d99d8",
+      "previous_state_hash": "2e8daf2f4cc0daa554bde1f4630bd4be64ee1ed4493e3755869125ac8db76136",
+      "event_payload_hash": "b34f9e4118e5e2dc9086cb8d33f5f4b27f47faf2f837a586cb6e9c3be13324a0",
+      "next_state_hash": "057583464eb0a657ce0b551e456c2659d3b16e79fe6945771d13a0d9c1159027",
       "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
       "status": "COMPLETED",
       "reason": null
@@ -3131,6 +3481,8 @@
       "simulation_time": 17,
       "location": null,
       "event_type": "ADVANCE_TIME",
+      "action_id": "AI-COMPANY-ACTION-000040",
+      "action_arguments_hash": "5946911c60a1f75ba58ba5cd67c692d0aa2596fba567488b270eec92bb2c6d8c",
       "inputs": {
         "hours": 4
       },
@@ -3146,9 +3498,9 @@
       "cash_delta": -600,
       "progress_delta": 100,
       "risk_delta": 0,
-      "previous_state_hash": "637b87c972d982d8753944baf3e75d5ff67df6f5b8ec850a5d100c0bea9d99d8",
-      "event_payload_hash": "bccbd1275cbcca04f6e3305a01beeaf7df3b5b3ebfb711f415312d24736d623d",
-      "next_state_hash": "9c7febddcbc41d2e2f36f453c0a1cde5c59ce5cb249aab078afdf8395fb5e732",
+      "previous_state_hash": "057583464eb0a657ce0b551e456c2659d3b16e79fe6945771d13a0d9c1159027",
+      "event_payload_hash": "a9c1f401f6e896a8b74637d1836fe4d3ffb2892bbcb6a74957d69f0384368914",
+      "next_state_hash": "42b7cde3e27abb10022e776624b10d00ded9fc919a5bd35f396fe24a0cc97fde",
       "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
       "status": "COMPLETED",
       "reason": null
@@ -3165,6 +3517,8 @@
       "simulation_time": 17,
       "location": null,
       "event_type": "INSPECT_TASK",
+      "action_id": "AI-COMPANY-ACTION-000041",
+      "action_arguments_hash": "c18e87deed6c2cbdc987ca31ed85346d74575ca44149a3028c03a734c5f788e4",
       "inputs": {
         "projectId": "AI-COMPANY-PROJECT-00001",
         "taskId": "AI-COMPANY-PROJECT-00001-TASK-001",
@@ -3204,9 +3558,9 @@
       "cash_delta": 0,
       "progress_delta": 0,
       "risk_delta": 0,
-      "previous_state_hash": "9c7febddcbc41d2e2f36f453c0a1cde5c59ce5cb249aab078afdf8395fb5e732",
-      "event_payload_hash": "1fe52d0dbaca63d21b1477b0e2fdaf4095de072685825419c0b77359907f5c8d",
-      "next_state_hash": "cf3dee0923bd810f080898c7149d396d696a67b63b2b034cc1aee8c2694db119",
+      "previous_state_hash": "42b7cde3e27abb10022e776624b10d00ded9fc919a5bd35f396fe24a0cc97fde",
+      "event_payload_hash": "a538879ddbc7b74cd1d01d766e49e86f92fda003cb90cd0caf38573c97486ede",
+      "next_state_hash": "f8cdef425030401e2760b9f9c33d71bbc7d3b53e4d015914a03066fd2e2fa1e1",
       "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
       "status": "COMPLETED",
       "reason": null
@@ -3223,6 +3577,8 @@
       "simulation_time": 17,
       "location": null,
       "event_type": "COMPLETE_TASK",
+      "action_id": "AI-COMPANY-ACTION-000042",
+      "action_arguments_hash": "9387704e9b51bdd610aa238bfaec2fd7a886d397214a2a117451a969aca84afe",
       "inputs": {
         "projectId": "AI-COMPANY-PROJECT-00001",
         "taskId": "AI-COMPANY-PROJECT-00001-TASK-001"
@@ -3239,9 +3595,9 @@
       "cash_delta": 0,
       "progress_delta": 0,
       "risk_delta": 0,
-      "previous_state_hash": "cf3dee0923bd810f080898c7149d396d696a67b63b2b034cc1aee8c2694db119",
-      "event_payload_hash": "fc077a7ccf4bab373c8aa297a0535366d0a0d2b01b08c65a66c7c06b0fbf0670",
-      "next_state_hash": "7f8d73a5c4e99021e49186f82fef9f068767c38815f1cd504d51ed76af5e602e",
+      "previous_state_hash": "f8cdef425030401e2760b9f9c33d71bbc7d3b53e4d015914a03066fd2e2fa1e1",
+      "event_payload_hash": "78ffb13868cb4f6a54cc5cf28b581ecdd8ebbe3a8b58287a4bd26cda47af3b6f",
+      "next_state_hash": "4b309cf85be230dc53ba5c554c93128bfb7540cfbb3034f0b7403a86da43ab77",
       "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
       "status": "COMPLETED",
       "reason": null
@@ -3258,6 +3614,8 @@
       "simulation_time": 17,
       "location": null,
       "event_type": "START_TASK",
+      "action_id": "AI-COMPANY-ACTION-000043",
+      "action_arguments_hash": "098a3d7fa8a821d9cbb0596419607a16170421d68ad05155831d99734e71e90c",
       "inputs": {
         "projectId": "AI-COMPANY-PROJECT-00001",
         "taskId": "AI-COMPANY-PROJECT-00001-TASK-002"
@@ -3273,9 +3631,9 @@
       "cash_delta": 0,
       "progress_delta": 0,
       "risk_delta": 0,
-      "previous_state_hash": "7f8d73a5c4e99021e49186f82fef9f068767c38815f1cd504d51ed76af5e602e",
-      "event_payload_hash": "32dd5c26a4f286d7020e94a2fa79b64c107da1da6c26695a1a253880d5bcf8a8",
-      "next_state_hash": "eb13f702d7391c42a932494f0e73a377f1ac0e6d7544fd4e1b624316dd50df0a",
+      "previous_state_hash": "4b309cf85be230dc53ba5c554c93128bfb7540cfbb3034f0b7403a86da43ab77",
+      "event_payload_hash": "00106dfb4697fa87f4aa568d34a51414d5cc1cbfaec114d97f1d827915fa0eb2",
+      "next_state_hash": "95ec3500a9f951c3df3ea58b432d75ac4b015f5c8e9d95f789bbdec6037dd5ae",
       "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
       "status": "COMPLETED",
       "reason": null
@@ -3292,6 +3650,8 @@
       "simulation_time": 23,
       "location": null,
       "event_type": "ADVANCE_TIME",
+      "action_id": "AI-COMPANY-ACTION-000044",
+      "action_arguments_hash": "7b1ed9a036d1dbbbd3233d20d66abff73d73649ae1a2f18184ac830513241508",
       "inputs": {
         "hours": 6
       },
@@ -3307,9 +3667,9 @@
       "cash_delta": -1200,
       "progress_delta": 100,
       "risk_delta": 0,
-      "previous_state_hash": "eb13f702d7391c42a932494f0e73a377f1ac0e6d7544fd4e1b624316dd50df0a",
-      "event_payload_hash": "152fe98be6f5624afb8f8df66fae98e81713dfe049d06138a2e7278ed0636e95",
-      "next_state_hash": "14a125ad1d5b8d0adfdb5c71e3f3f4fd0cf109de73d2dac901583620e9a147fd",
+      "previous_state_hash": "95ec3500a9f951c3df3ea58b432d75ac4b015f5c8e9d95f789bbdec6037dd5ae",
+      "event_payload_hash": "43cc6285f0db8a044dcdb0b28998713f5adf6370874cda71871ca49d30fc5340",
+      "next_state_hash": "3a5ab0bf3c06c751af4b2fd84665ec357563cbbdb8c4808fd7d7b5d8c2c2ce24",
       "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
       "status": "COMPLETED",
       "reason": null
@@ -3326,6 +3686,8 @@
       "simulation_time": 23,
       "location": null,
       "event_type": "INSPECT_TASK",
+      "action_id": "AI-COMPANY-ACTION-000045",
+      "action_arguments_hash": "f4cfb770e4171e9ffc0bbec77b916fa8d09bf194d8d74c9ffa754358b55f1f86",
       "inputs": {
         "projectId": "AI-COMPANY-PROJECT-00001",
         "taskId": "AI-COMPANY-PROJECT-00001-TASK-002",
@@ -3365,9 +3727,9 @@
       "cash_delta": 0,
       "progress_delta": 0,
       "risk_delta": 0,
-      "previous_state_hash": "14a125ad1d5b8d0adfdb5c71e3f3f4fd0cf109de73d2dac901583620e9a147fd",
-      "event_payload_hash": "7db5a023783d682dc34e1d275faf4cb497a34af9ccae21bc5696747329a248dc",
-      "next_state_hash": "ab44e830c0341d157e2b0cb70e1566e59b5f13cb7873c74ff565e67c8d03fc81",
+      "previous_state_hash": "3a5ab0bf3c06c751af4b2fd84665ec357563cbbdb8c4808fd7d7b5d8c2c2ce24",
+      "event_payload_hash": "8368f45bc8307e4a486901db4d56c6ee54837123d1466bba29a2f8acdf0144e8",
+      "next_state_hash": "687c03ab68b61d595c772d517cc1f0967bff8e38788268709df80beedba3546d",
       "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
       "status": "COMPLETED",
       "reason": null
@@ -3384,6 +3746,8 @@
       "simulation_time": 23,
       "location": null,
       "event_type": "COMPLETE_TASK",
+      "action_id": "AI-COMPANY-ACTION-000046",
+      "action_arguments_hash": "098a3d7fa8a821d9cbb0596419607a16170421d68ad05155831d99734e71e90c",
       "inputs": {
         "projectId": "AI-COMPANY-PROJECT-00001",
         "taskId": "AI-COMPANY-PROJECT-00001-TASK-002"
@@ -3400,9 +3764,9 @@
       "cash_delta": 0,
       "progress_delta": 0,
       "risk_delta": 0,
-      "previous_state_hash": "ab44e830c0341d157e2b0cb70e1566e59b5f13cb7873c74ff565e67c8d03fc81",
-      "event_payload_hash": "b90abc0eba98084dc5079c481aedc254ce55886bd8ca7a99b960fa3802704c13",
-      "next_state_hash": "2a5641b28154239b6e53b4900cd520526b89f823be2a3c7531c20b73a7e45ed8",
+      "previous_state_hash": "687c03ab68b61d595c772d517cc1f0967bff8e38788268709df80beedba3546d",
+      "event_payload_hash": "f000fb85cb1b1ba8a67bfe97ac62156a3b86e47eb87d1dc0ffbf71a03bbc8220",
+      "next_state_hash": "fbc10309fc40aae946e25dfb79eddcfb5abd3ba0d296f2315c608772dc75f0d6",
       "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
       "status": "COMPLETED",
       "reason": null
@@ -3411,14 +3775,52 @@
       "event_id": "AI-COMPANY-EVT-000047",
       "company_id": "KAIOS_AI_COMPANY_V1",
       "request_id": null,
+      "project_id": null,
+      "work_package_id": null,
+      "task_id": null,
+      "actor_life_id": "KAIOS-SIMULATED-COMPANY-OPERATOR",
+      "division_id": "CONSTRUCTION_DIVISION",
+      "simulation_time": 31,
+      "location": null,
+      "event_type": "ADVANCE_TIME",
+      "action_id": "AI-COMPANY-ACTION-000047",
+      "action_arguments_hash": "d145b21faadd289b163aebf0cdce6f86acad7e8881e3c58beb24cdf65d20dabf",
+      "inputs": {
+        "hours": 8
+      },
+      "outputs": {
+        "advanced_hours": 8,
+        "active_tasks": 0
+      },
+      "material_delta": 0,
+      "energy_delta": 0,
+      "labor_delta": 0,
+      "equipment_delta": 0,
+      "inventory_delta": 0,
+      "cash_delta": 0,
+      "progress_delta": 0,
+      "risk_delta": 0,
+      "previous_state_hash": "fbc10309fc40aae946e25dfb79eddcfb5abd3ba0d296f2315c608772dc75f0d6",
+      "event_payload_hash": "afb8da87cb14c8eedd540c8341f2ad16916d606a22a3a076c68d0c4fce1d59d6",
+      "next_state_hash": "c478b2f1aff8ac07141d060ac8e8c3644c79a5e78df395e8acb2aa7178989555",
+      "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
+      "status": "COMPLETED",
+      "reason": null
+    },
+    {
+      "event_id": "AI-COMPANY-EVT-000048",
+      "company_id": "KAIOS_AI_COMPANY_V1",
+      "request_id": null,
       "project_id": "AI-COMPANY-PROJECT-00001",
       "work_package_id": null,
       "task_id": "AI-COMPANY-PROJECT-00001-TASK-003",
       "actor_life_id": "KAIOS-SIMULATED-COMPANY-OPERATOR",
       "division_id": "CONSTRUCTION_DIVISION",
-      "simulation_time": 23,
+      "simulation_time": 31,
       "location": null,
       "event_type": "START_TASK",
+      "action_id": "AI-COMPANY-ACTION-000048",
+      "action_arguments_hash": "bf7448ed0b5711ae0c08b2852fdabca509e7ccf4696f7b5bea4ed10e04e668dd",
       "inputs": {
         "projectId": "AI-COMPANY-PROJECT-00001",
         "taskId": "AI-COMPANY-PROJECT-00001-TASK-003"
@@ -3434,15 +3836,15 @@
       "cash_delta": 0,
       "progress_delta": 0,
       "risk_delta": 0,
-      "previous_state_hash": "2a5641b28154239b6e53b4900cd520526b89f823be2a3c7531c20b73a7e45ed8",
-      "event_payload_hash": "ca70e5b05245d289afafbf20d98407ce84721d7b9be77d2f015b0380125c0355",
-      "next_state_hash": "ed536f578abe682a031b332ff51e1a146c0200d9319d29fd825f514bd4e3735a",
+      "previous_state_hash": "c478b2f1aff8ac07141d060ac8e8c3644c79a5e78df395e8acb2aa7178989555",
+      "event_payload_hash": "5a3899da741d5801b686a186479f0a1f397082be49659397b56cff8a28b15c80",
+      "next_state_hash": "a22cfcc84aa1d49a1d3f9f49e48e669e9921d0482c0aa9760565b9834d7ba0ed",
       "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
       "status": "COMPLETED",
       "reason": null
     },
     {
-      "event_id": "AI-COMPANY-EVT-000048",
+      "event_id": "AI-COMPANY-EVT-000049",
       "company_id": "KAIOS_AI_COMPANY_V1",
       "request_id": null,
       "project_id": null,
@@ -3450,9 +3852,11 @@
       "task_id": null,
       "actor_life_id": "KAIOS-SIMULATED-COMPANY-OPERATOR",
       "division_id": "CONSTRUCTION_DIVISION",
-      "simulation_time": 35,
+      "simulation_time": 43,
       "location": null,
       "event_type": "ADVANCE_TIME",
+      "action_id": "AI-COMPANY-ACTION-000049",
+      "action_arguments_hash": "ca42cb981dddee9cf12f5b21f744adadbf7fbaec77faca25b6fe4caa811b7d89",
       "inputs": {
         "hours": 12
       },
@@ -3468,15 +3872,15 @@
       "cash_delta": -4200,
       "progress_delta": 100,
       "risk_delta": 0,
-      "previous_state_hash": "ed536f578abe682a031b332ff51e1a146c0200d9319d29fd825f514bd4e3735a",
-      "event_payload_hash": "99cc67155c96ecdc18252486b6ae4d4aecfb33d38b752ecb53f4107e6263a996",
-      "next_state_hash": "218ce0aa79886283f61e445f2c589895fd01bc943458597bd6caef119f9cd97e",
+      "previous_state_hash": "a22cfcc84aa1d49a1d3f9f49e48e669e9921d0482c0aa9760565b9834d7ba0ed",
+      "event_payload_hash": "b59ebff40904de0889e19d4425d0a50dbc79f513ea910435999a547511969165",
+      "next_state_hash": "fcdfa64f7826b80a717ab739737439c70cd6f63a1ddd5ce78e56731ee80bf2f5",
       "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
       "status": "COMPLETED",
       "reason": null
     },
     {
-      "event_id": "AI-COMPANY-EVT-000049",
+      "event_id": "AI-COMPANY-EVT-000050",
       "company_id": "KAIOS_AI_COMPANY_V1",
       "request_id": null,
       "project_id": "AI-COMPANY-PROJECT-00001",
@@ -3484,9 +3888,11 @@
       "task_id": "AI-COMPANY-PROJECT-00001-TASK-003",
       "actor_life_id": "KAIOS-SIMULATED-COMPANY-OPERATOR",
       "division_id": "QA_INSPECTION_DIVISION",
-      "simulation_time": 35,
+      "simulation_time": 43,
       "location": null,
       "event_type": "INSPECT_TASK",
+      "action_id": "AI-COMPANY-ACTION-000050",
+      "action_arguments_hash": "5a4c361d13c1b143263ff9f9afd2c78f337b2e369b529cb3ca3f1bf487e57121",
       "inputs": {
         "projectId": "AI-COMPANY-PROJECT-00001",
         "taskId": "AI-COMPANY-PROJECT-00001-TASK-003",
@@ -3526,15 +3932,15 @@
       "cash_delta": 0,
       "progress_delta": 0,
       "risk_delta": 0,
-      "previous_state_hash": "218ce0aa79886283f61e445f2c589895fd01bc943458597bd6caef119f9cd97e",
-      "event_payload_hash": "e3adabd9cc9c69fb2e554b23345dcdea34f41e3a77d024c93357568556c121e1",
-      "next_state_hash": "65afb57a3e7df64beadaf2486ccb894f8af42089b0cb6f9a7ce6181647e7d0e8",
+      "previous_state_hash": "fcdfa64f7826b80a717ab739737439c70cd6f63a1ddd5ce78e56731ee80bf2f5",
+      "event_payload_hash": "a65c06b250fb137a16ca7fe13d098833c4a0f927549c048ed45b05e732ffbcc1",
+      "next_state_hash": "afa6cc9a54bfe1cdde392ad42021f6204b341213c26f8a9eeb130be58ede7d7b",
       "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
       "status": "COMPLETED",
       "reason": null
     },
     {
-      "event_id": "AI-COMPANY-EVT-000050",
+      "event_id": "AI-COMPANY-EVT-000051",
       "company_id": "KAIOS_AI_COMPANY_V1",
       "request_id": null,
       "project_id": "AI-COMPANY-PROJECT-00001",
@@ -3542,9 +3948,11 @@
       "task_id": "AI-COMPANY-PROJECT-00001-TASK-003",
       "actor_life_id": "KAIOS-SIMULATED-COMPANY-OPERATOR",
       "division_id": "QA_INSPECTION_DIVISION",
-      "simulation_time": 35,
+      "simulation_time": 43,
       "location": null,
       "event_type": "COMPLETE_TASK",
+      "action_id": "AI-COMPANY-ACTION-000051",
+      "action_arguments_hash": "bf7448ed0b5711ae0c08b2852fdabca509e7ccf4696f7b5bea4ed10e04e668dd",
       "inputs": {
         "projectId": "AI-COMPANY-PROJECT-00001",
         "taskId": "AI-COMPANY-PROJECT-00001-TASK-003"
@@ -3561,15 +3969,51 @@
       "cash_delta": 0,
       "progress_delta": 0,
       "risk_delta": 0,
-      "previous_state_hash": "65afb57a3e7df64beadaf2486ccb894f8af42089b0cb6f9a7ce6181647e7d0e8",
-      "event_payload_hash": "5315c133fe60342943a95057bcefb92bf4e18b722540418e09ee78567a6a5a42",
-      "next_state_hash": "1748d8f43ed6c67f5f2d9da8fac1e258d973c5c9f9048daaa4db2739ef2ed460",
+      "previous_state_hash": "afa6cc9a54bfe1cdde392ad42021f6204b341213c26f8a9eeb130be58ede7d7b",
+      "event_payload_hash": "78dca98e84deb5bd5defc10f385c78b0064535b4318e1a03386a3d7756fbb992",
+      "next_state_hash": "b051d899afddc4bb230a719d58e429aa681d447f22703e335aae8daf77be172e",
       "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
       "status": "COMPLETED",
       "reason": null
     },
     {
-      "event_id": "AI-COMPANY-EVT-000051",
+      "event_id": "AI-COMPANY-EVT-000052",
+      "company_id": "KAIOS_AI_COMPANY_V1",
+      "request_id": null,
+      "project_id": null,
+      "work_package_id": null,
+      "task_id": null,
+      "actor_life_id": "KAIOS-SIMULATED-COMPANY-OPERATOR",
+      "division_id": "CONSTRUCTION_DIVISION",
+      "simulation_time": 48,
+      "location": null,
+      "event_type": "ADVANCE_TIME",
+      "action_id": "AI-COMPANY-ACTION-000052",
+      "action_arguments_hash": "aaaf4f2d38df461f9e3b2dafeea5e400b5837a35e233d49d23e8f6c8227e5758",
+      "inputs": {
+        "hours": 5
+      },
+      "outputs": {
+        "advanced_hours": 5,
+        "active_tasks": 0
+      },
+      "material_delta": 0,
+      "energy_delta": 0,
+      "labor_delta": 0,
+      "equipment_delta": 0,
+      "inventory_delta": 0,
+      "cash_delta": 0,
+      "progress_delta": 0,
+      "risk_delta": 0,
+      "previous_state_hash": "b051d899afddc4bb230a719d58e429aa681d447f22703e335aae8daf77be172e",
+      "event_payload_hash": "f0b43b0e49539766f02e3ab533cb1780559f35779b563c5c77374e5142d5ac8a",
+      "next_state_hash": "30f4138696b57747023647fc2c06a6a4fb4f1d5a51ce3fc445021926b05b9660",
+      "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
+      "status": "COMPLETED",
+      "reason": null
+    },
+    {
+      "event_id": "AI-COMPANY-EVT-000053",
       "company_id": "KAIOS_AI_COMPANY_V1",
       "request_id": null,
       "project_id": "AI-COMPANY-PROJECT-00001",
@@ -3577,9 +4021,11 @@
       "task_id": "AI-COMPANY-PROJECT-00001-TASK-004",
       "actor_life_id": "KAIOS-SIMULATED-COMPANY-OPERATOR",
       "division_id": "CONSTRUCTION_DIVISION",
-      "simulation_time": 35,
+      "simulation_time": 48,
       "location": null,
       "event_type": "START_TASK",
+      "action_id": "AI-COMPANY-ACTION-000053",
+      "action_arguments_hash": "9cc41f3cad90f6ddeebbf058628142208999ca0c323ed9dea2414080bb680bcb",
       "inputs": {
         "projectId": "AI-COMPANY-PROJECT-00001",
         "taskId": "AI-COMPANY-PROJECT-00001-TASK-004"
@@ -3595,15 +4041,15 @@
       "cash_delta": 0,
       "progress_delta": 0,
       "risk_delta": 0,
-      "previous_state_hash": "1748d8f43ed6c67f5f2d9da8fac1e258d973c5c9f9048daaa4db2739ef2ed460",
-      "event_payload_hash": "a8a3f157a0de8092a6129173a5a75d7f24df3e58ac62970eccef978cddf5d203",
-      "next_state_hash": "b1e54e450ad7d6e0d6e0b372092b23c04d4639cf4cb1e1c67de47a97279f1fd3",
+      "previous_state_hash": "30f4138696b57747023647fc2c06a6a4fb4f1d5a51ce3fc445021926b05b9660",
+      "event_payload_hash": "3295b8083c7ce3a16067cdcf077e30fe569f97620672ebdac2d4ea80605b8827",
+      "next_state_hash": "83dd7e386a5671f2d25c47fc703c65547bb8b5e45f7a2732d77f464eb0b6bc68",
       "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
       "status": "COMPLETED",
       "reason": null
     },
     {
-      "event_id": "AI-COMPANY-EVT-000052",
+      "event_id": "AI-COMPANY-EVT-000054",
       "company_id": "KAIOS_AI_COMPANY_V1",
       "request_id": null,
       "project_id": null,
@@ -3611,9 +4057,11 @@
       "task_id": null,
       "actor_life_id": "KAIOS-SIMULATED-COMPANY-OPERATOR",
       "division_id": "CONSTRUCTION_DIVISION",
-      "simulation_time": 45,
+      "simulation_time": 58,
       "location": null,
       "event_type": "ADVANCE_TIME",
+      "action_id": "AI-COMPANY-ACTION-000054",
+      "action_arguments_hash": "8f4c5cb600a0b74408a6f2cd5b54865c5b3bf329685b0f81e3cfd1a6f9b9850a",
       "inputs": {
         "hours": 10
       },
@@ -3629,15 +4077,15 @@
       "cash_delta": -3600,
       "progress_delta": 100,
       "risk_delta": 0,
-      "previous_state_hash": "b1e54e450ad7d6e0d6e0b372092b23c04d4639cf4cb1e1c67de47a97279f1fd3",
-      "event_payload_hash": "cfa310117fe1a8c0132a08ce6cf3023055206e30c4a8265a2bf7cc44fb77d870",
-      "next_state_hash": "cfde980c7f421b33f41c7372e2533e503e366041c6db5d261ba54c4f7d5363c0",
+      "previous_state_hash": "83dd7e386a5671f2d25c47fc703c65547bb8b5e45f7a2732d77f464eb0b6bc68",
+      "event_payload_hash": "c1215025b1d96d008a1fd5522d0a1ead8c35a465c57dbcf8c3564dcd10e83638",
+      "next_state_hash": "8e5935f8d6183a06476933d5909680a18f2da4e7f748f3931683b480c98efff8",
       "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
       "status": "COMPLETED",
       "reason": null
     },
     {
-      "event_id": "AI-COMPANY-EVT-000053",
+      "event_id": "AI-COMPANY-EVT-000055",
       "company_id": "KAIOS_AI_COMPANY_V1",
       "request_id": null,
       "project_id": "AI-COMPANY-PROJECT-00001",
@@ -3645,9 +4093,11 @@
       "task_id": "AI-COMPANY-PROJECT-00001-TASK-004",
       "actor_life_id": "KAIOS-SIMULATED-COMPANY-OPERATOR",
       "division_id": "QA_INSPECTION_DIVISION",
-      "simulation_time": 45,
+      "simulation_time": 58,
       "location": null,
       "event_type": "INSPECT_TASK",
+      "action_id": "AI-COMPANY-ACTION-000055",
+      "action_arguments_hash": "98558701b7dd7bc5af9c3792b46e792bf815ff4d63d942051720483cad90ecaf",
       "inputs": {
         "projectId": "AI-COMPANY-PROJECT-00001",
         "taskId": "AI-COMPANY-PROJECT-00001-TASK-004",
@@ -3687,15 +4137,15 @@
       "cash_delta": 0,
       "progress_delta": 0,
       "risk_delta": 0,
-      "previous_state_hash": "cfde980c7f421b33f41c7372e2533e503e366041c6db5d261ba54c4f7d5363c0",
-      "event_payload_hash": "c04c6809271fb508d4888e803909181a1a79683d4d25a7ad6f6ba13ce9ce24ef",
-      "next_state_hash": "4c61f197aa962d1f1355d9cd430a72fc0a287c51b5b279d1a5f6b344a8cdcab1",
+      "previous_state_hash": "8e5935f8d6183a06476933d5909680a18f2da4e7f748f3931683b480c98efff8",
+      "event_payload_hash": "3929185901a98cf3c87b46092fa20f48e4e6629e8ee0fd289a3cf43a00d7f238",
+      "next_state_hash": "69d931c7fb159db253cd79fc6c7c513953861ce87040579231175074e363abed",
       "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
       "status": "COMPLETED",
       "reason": null
     },
     {
-      "event_id": "AI-COMPANY-EVT-000054",
+      "event_id": "AI-COMPANY-EVT-000056",
       "company_id": "KAIOS_AI_COMPANY_V1",
       "request_id": null,
       "project_id": "AI-COMPANY-PROJECT-00001",
@@ -3703,9 +4153,11 @@
       "task_id": "AI-COMPANY-PROJECT-00001-TASK-004",
       "actor_life_id": "KAIOS-SIMULATED-COMPANY-OPERATOR",
       "division_id": "QA_INSPECTION_DIVISION",
-      "simulation_time": 45,
+      "simulation_time": 58,
       "location": null,
       "event_type": "COMPLETE_TASK",
+      "action_id": "AI-COMPANY-ACTION-000056",
+      "action_arguments_hash": "9cc41f3cad90f6ddeebbf058628142208999ca0c323ed9dea2414080bb680bcb",
       "inputs": {
         "projectId": "AI-COMPANY-PROJECT-00001",
         "taskId": "AI-COMPANY-PROJECT-00001-TASK-004"
@@ -3722,15 +4174,15 @@
       "cash_delta": 0,
       "progress_delta": 0,
       "risk_delta": 0,
-      "previous_state_hash": "4c61f197aa962d1f1355d9cd430a72fc0a287c51b5b279d1a5f6b344a8cdcab1",
-      "event_payload_hash": "59be665ff3a235e6c39e6bdba4f44aeabbf2e39ba27d38fd06839ee9852690e5",
-      "next_state_hash": "96bb53f395120969ccbf4899a2e88221d778b24756427a27843922e50f204446",
+      "previous_state_hash": "69d931c7fb159db253cd79fc6c7c513953861ce87040579231175074e363abed",
+      "event_payload_hash": "4173e84072d73d7bd33719642cfd3fda0dd246136cf4b3b7cf90646ab1f46412",
+      "next_state_hash": "b868e033c3cbe4f99e9d90f4991f37ac1ceef46a4d355e0999769219abe061f2",
       "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
       "status": "COMPLETED",
       "reason": null
     },
     {
-      "event_id": "AI-COMPANY-EVT-000055",
+      "event_id": "AI-COMPANY-EVT-000057",
       "company_id": "KAIOS_AI_COMPANY_V1",
       "request_id": null,
       "project_id": "AI-COMPANY-PROJECT-00001",
@@ -3738,9 +4190,11 @@
       "task_id": "AI-COMPANY-PROJECT-00001-TASK-005",
       "actor_life_id": "KAIOS-SIMULATED-COMPANY-OPERATOR",
       "division_id": "CONSTRUCTION_DIVISION",
-      "simulation_time": 45,
+      "simulation_time": 58,
       "location": null,
       "event_type": "START_TASK",
+      "action_id": "AI-COMPANY-ACTION-000057",
+      "action_arguments_hash": "ec338a5c16201a5d2d47ab0771933d0af6c3df2a75606dc8125f6aacea28126f",
       "inputs": {
         "projectId": "AI-COMPANY-PROJECT-00001",
         "taskId": "AI-COMPANY-PROJECT-00001-TASK-005"
@@ -3756,15 +4210,15 @@
       "cash_delta": 0,
       "progress_delta": 0,
       "risk_delta": 0,
-      "previous_state_hash": "96bb53f395120969ccbf4899a2e88221d778b24756427a27843922e50f204446",
-      "event_payload_hash": "0c9666da5b7c8c7d4dba06a3c390d628a26907cf13bd3a6c7b1481c734c34909",
-      "next_state_hash": "8782215a5e3616861b837596db33040c91a4e88be87b6ff041b5643250611c2e",
+      "previous_state_hash": "b868e033c3cbe4f99e9d90f4991f37ac1ceef46a4d355e0999769219abe061f2",
+      "event_payload_hash": "138860ed62cc8646301727f510c1132ab5998cc6be83015846695ce03918b248",
+      "next_state_hash": "3526cec2286b628113d42713a2ea4d90628523bd1c2e27081bfec9f476015188",
       "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
       "status": "COMPLETED",
       "reason": null
     },
     {
-      "event_id": "AI-COMPANY-EVT-000056",
+      "event_id": "AI-COMPANY-EVT-000058",
       "company_id": "KAIOS_AI_COMPANY_V1",
       "request_id": null,
       "project_id": null,
@@ -3772,9 +4226,11 @@
       "task_id": null,
       "actor_life_id": "KAIOS-SIMULATED-COMPANY-OPERATOR",
       "division_id": "CONSTRUCTION_DIVISION",
-      "simulation_time": 53,
+      "simulation_time": 66,
       "location": null,
       "event_type": "ADVANCE_TIME",
+      "action_id": "AI-COMPANY-ACTION-000058",
+      "action_arguments_hash": "d145b21faadd289b163aebf0cdce6f86acad7e8881e3c58beb24cdf65d20dabf",
       "inputs": {
         "hours": 8
       },
@@ -3790,15 +4246,15 @@
       "cash_delta": -2600,
       "progress_delta": 100,
       "risk_delta": 0,
-      "previous_state_hash": "8782215a5e3616861b837596db33040c91a4e88be87b6ff041b5643250611c2e",
-      "event_payload_hash": "2c30ecf6e6b0b2dc7f8802efdac9f8d350fe079371503af095119d8c21e1ea0a",
-      "next_state_hash": "afd867ebeab24bb349c66c055c8f9683ee983de32d38bcc6bd4eae958affbe74",
+      "previous_state_hash": "3526cec2286b628113d42713a2ea4d90628523bd1c2e27081bfec9f476015188",
+      "event_payload_hash": "f63aaac4494ae72c13c3b7d9dff99a46a8e4b4b09ef93d3bcdcdf89ef85bc60f",
+      "next_state_hash": "b4e7a9c8eafa190dbec36985fc96efc8b8dfa3620eef1ce88d78d6d4547571ea",
       "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
       "status": "COMPLETED",
       "reason": null
     },
     {
-      "event_id": "AI-COMPANY-EVT-000057",
+      "event_id": "AI-COMPANY-EVT-000059",
       "company_id": "KAIOS_AI_COMPANY_V1",
       "request_id": null,
       "project_id": "AI-COMPANY-PROJECT-00001",
@@ -3806,9 +4262,11 @@
       "task_id": "AI-COMPANY-PROJECT-00001-TASK-005",
       "actor_life_id": "KAIOS-SIMULATED-COMPANY-OPERATOR",
       "division_id": "QA_INSPECTION_DIVISION",
-      "simulation_time": 53,
+      "simulation_time": 66,
       "location": null,
       "event_type": "INSPECT_TASK",
+      "action_id": "AI-COMPANY-ACTION-000059",
+      "action_arguments_hash": "93ae9f8f47fade6f74ccaad0bcd9c79f63e8940d6f949434cf8bb8b290de877b",
       "inputs": {
         "projectId": "AI-COMPANY-PROJECT-00001",
         "taskId": "AI-COMPANY-PROJECT-00001-TASK-005",
@@ -3848,15 +4306,15 @@
       "cash_delta": 0,
       "progress_delta": 0,
       "risk_delta": 0,
-      "previous_state_hash": "afd867ebeab24bb349c66c055c8f9683ee983de32d38bcc6bd4eae958affbe74",
-      "event_payload_hash": "9aa9b558d84ddfe8da332988a7204419cc0fe7f3e6e5be939642146fa995d4e5",
-      "next_state_hash": "c62e1c9b184ab97cb079d2f8675269966df35d8123608a80698939e51073e6bb",
+      "previous_state_hash": "b4e7a9c8eafa190dbec36985fc96efc8b8dfa3620eef1ce88d78d6d4547571ea",
+      "event_payload_hash": "5b2da8af8c16c77f4f2c43864ac244e2e04737c9d0a59d8989d7d5a0e5d10b1a",
+      "next_state_hash": "54da635f3724141a4ec1920e33d3b3ea065c525caf8176738b7219cde6e3a514",
       "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
       "status": "COMPLETED",
       "reason": null
     },
     {
-      "event_id": "AI-COMPANY-EVT-000058",
+      "event_id": "AI-COMPANY-EVT-000060",
       "company_id": "KAIOS_AI_COMPANY_V1",
       "request_id": null,
       "project_id": "AI-COMPANY-PROJECT-00001",
@@ -3864,9 +4322,11 @@
       "task_id": "AI-COMPANY-PROJECT-00001-TASK-005",
       "actor_life_id": "KAIOS-SIMULATED-COMPANY-OPERATOR",
       "division_id": "QA_INSPECTION_DIVISION",
-      "simulation_time": 53,
+      "simulation_time": 66,
       "location": null,
       "event_type": "COMPLETE_TASK",
+      "action_id": "AI-COMPANY-ACTION-000060",
+      "action_arguments_hash": "ec338a5c16201a5d2d47ab0771933d0af6c3df2a75606dc8125f6aacea28126f",
       "inputs": {
         "projectId": "AI-COMPANY-PROJECT-00001",
         "taskId": "AI-COMPANY-PROJECT-00001-TASK-005"
@@ -3883,15 +4343,15 @@
       "cash_delta": 0,
       "progress_delta": 0,
       "risk_delta": 0,
-      "previous_state_hash": "c62e1c9b184ab97cb079d2f8675269966df35d8123608a80698939e51073e6bb",
-      "event_payload_hash": "ddd4b6d492c76e2fef9cf68de18f2a40190931cacb373098c3e5cfe88a038d01",
-      "next_state_hash": "2034c3a62345474713dd4828517e88218b5ee618d630ffbafd94ca431b8fe904",
+      "previous_state_hash": "54da635f3724141a4ec1920e33d3b3ea065c525caf8176738b7219cde6e3a514",
+      "event_payload_hash": "7486147d96c72f8f46d127460b40d3d83c930a05bbd607502c2b8f56391fb1d6",
+      "next_state_hash": "0615735ec0ec3a69986bb9be64f4938241cc319b28e087910190250f4f68c7aa",
       "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
       "status": "COMPLETED",
       "reason": null
     },
     {
-      "event_id": "AI-COMPANY-EVT-000059",
+      "event_id": "AI-COMPANY-EVT-000061",
       "company_id": "KAIOS_AI_COMPANY_V1",
       "request_id": null,
       "project_id": "AI-COMPANY-PROJECT-00001",
@@ -3899,9 +4359,11 @@
       "task_id": "AI-COMPANY-PROJECT-00001-TASK-006",
       "actor_life_id": "KAIOS-SIMULATED-COMPANY-OPERATOR",
       "division_id": "CONSTRUCTION_DIVISION",
-      "simulation_time": 53,
+      "simulation_time": 66,
       "location": null,
       "event_type": "START_TASK",
+      "action_id": "AI-COMPANY-ACTION-000061",
+      "action_arguments_hash": "cd6765c24c0a9137991e9ee056abae5ecf4b4e8637e63f94e3e3ed7afe9a8e12",
       "inputs": {
         "projectId": "AI-COMPANY-PROJECT-00001",
         "taskId": "AI-COMPANY-PROJECT-00001-TASK-006"
@@ -3917,15 +4379,15 @@
       "cash_delta": 0,
       "progress_delta": 0,
       "risk_delta": 0,
-      "previous_state_hash": "2034c3a62345474713dd4828517e88218b5ee618d630ffbafd94ca431b8fe904",
-      "event_payload_hash": "8becfc1b11a27c1bf834c3cc896138fa729eb45be87b0e0f7685effb01ab65f9",
-      "next_state_hash": "3a1220847bc39f65cb66fa28b3bc0984f80009d49ea9591ed04ad274535e1d77",
+      "previous_state_hash": "0615735ec0ec3a69986bb9be64f4938241cc319b28e087910190250f4f68c7aa",
+      "event_payload_hash": "57a7dfda188a9bcb67e42d6a517a20641608b33bd79b1a188e9eca1877e667ec",
+      "next_state_hash": "25009eef4f6968a016f0af5105fed5eb08856e3c6288a07b231bbc10bbfda031",
       "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
       "status": "COMPLETED",
       "reason": null
     },
     {
-      "event_id": "AI-COMPANY-EVT-000060",
+      "event_id": "AI-COMPANY-EVT-000062",
       "company_id": "KAIOS_AI_COMPANY_V1",
       "request_id": null,
       "project_id": null,
@@ -3933,9 +4395,11 @@
       "task_id": null,
       "actor_life_id": "KAIOS-SIMULATED-COMPANY-OPERATOR",
       "division_id": "CONSTRUCTION_DIVISION",
-      "simulation_time": 56,
+      "simulation_time": 69,
       "location": null,
       "event_type": "ADVANCE_TIME",
+      "action_id": "AI-COMPANY-ACTION-000062",
+      "action_arguments_hash": "27bce866cfcd88e326d2bac179469fb7abf9a311c58773ed7831a9606a6e6549",
       "inputs": {
         "hours": 3
       },
@@ -3951,15 +4415,15 @@
       "cash_delta": -700,
       "progress_delta": 100,
       "risk_delta": 0,
-      "previous_state_hash": "3a1220847bc39f65cb66fa28b3bc0984f80009d49ea9591ed04ad274535e1d77",
-      "event_payload_hash": "3d0f1d4f106ffe22c95dd8bb6284b1c96fbbad866efcb044fbd80d1edb5f0208",
-      "next_state_hash": "cce5e62ff423855718cf5a5e06d039ca0784771d34e9553d26c1e0c013b59612",
+      "previous_state_hash": "25009eef4f6968a016f0af5105fed5eb08856e3c6288a07b231bbc10bbfda031",
+      "event_payload_hash": "25165073b1e3b3644890c8090d6f06f6ac138ba6c64019d20cb693fe0996f9df",
+      "next_state_hash": "010b5bf59b3de5af989d8f4954ec5ef69a47fb6ccb3b98a466efc0002c5a923e",
       "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
       "status": "COMPLETED",
       "reason": null
     },
     {
-      "event_id": "AI-COMPANY-EVT-000061",
+      "event_id": "AI-COMPANY-EVT-000063",
       "company_id": "KAIOS_AI_COMPANY_V1",
       "request_id": null,
       "project_id": "AI-COMPANY-PROJECT-00001",
@@ -3967,9 +4431,11 @@
       "task_id": "AI-COMPANY-PROJECT-00001-TASK-006",
       "actor_life_id": "KAIOS-SIMULATED-COMPANY-OPERATOR",
       "division_id": "QA_INSPECTION_DIVISION",
-      "simulation_time": 56,
+      "simulation_time": 69,
       "location": null,
       "event_type": "INSPECT_TASK",
+      "action_id": "AI-COMPANY-ACTION-000063",
+      "action_arguments_hash": "8c431417b092ef830d5b6b740e640caa6b35c1390e42ecd2146fd68cf86da072",
       "inputs": {
         "projectId": "AI-COMPANY-PROJECT-00001",
         "taskId": "AI-COMPANY-PROJECT-00001-TASK-006",
@@ -4009,15 +4475,15 @@
       "cash_delta": 0,
       "progress_delta": 0,
       "risk_delta": 0,
-      "previous_state_hash": "cce5e62ff423855718cf5a5e06d039ca0784771d34e9553d26c1e0c013b59612",
-      "event_payload_hash": "e8c4db2268c5763ff104b28c210542a6d69f9ef40d777e2e64424c83b417dbad",
-      "next_state_hash": "523a3cfd0e37f632be53003eea2a3125ed729b92cd39f4be482ab7e7c21d7bad",
+      "previous_state_hash": "010b5bf59b3de5af989d8f4954ec5ef69a47fb6ccb3b98a466efc0002c5a923e",
+      "event_payload_hash": "e3de34aa9b4b965a79912402bc93beff73d1b2ac1586564cc5e635e4a41ee3a5",
+      "next_state_hash": "ce1940c0a35ae825bc838a2b58a770bd14b28fd1af4629442a410fbf1aa7d620",
       "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
       "status": "COMPLETED",
       "reason": null
     },
     {
-      "event_id": "AI-COMPANY-EVT-000062",
+      "event_id": "AI-COMPANY-EVT-000064",
       "company_id": "KAIOS_AI_COMPANY_V1",
       "request_id": null,
       "project_id": "AI-COMPANY-PROJECT-00001",
@@ -4025,9 +4491,11 @@
       "task_id": "AI-COMPANY-PROJECT-00001-TASK-006",
       "actor_life_id": "KAIOS-SIMULATED-COMPANY-OPERATOR",
       "division_id": "QA_INSPECTION_DIVISION",
-      "simulation_time": 56,
+      "simulation_time": 69,
       "location": null,
       "event_type": "COMPLETE_TASK",
+      "action_id": "AI-COMPANY-ACTION-000064",
+      "action_arguments_hash": "cd6765c24c0a9137991e9ee056abae5ecf4b4e8637e63f94e3e3ed7afe9a8e12",
       "inputs": {
         "projectId": "AI-COMPANY-PROJECT-00001",
         "taskId": "AI-COMPANY-PROJECT-00001-TASK-006"
@@ -4044,15 +4512,15 @@
       "cash_delta": 0,
       "progress_delta": 0,
       "risk_delta": 0,
-      "previous_state_hash": "523a3cfd0e37f632be53003eea2a3125ed729b92cd39f4be482ab7e7c21d7bad",
-      "event_payload_hash": "1afc6a434634a3ea7d12d33958141f32c6556b789a58e25fcabe5b0e9bff927a",
-      "next_state_hash": "418882bbc66a1acbf3d12f763f80db2c624ea3d343d3ac8e52350de1a2ca5f76",
+      "previous_state_hash": "ce1940c0a35ae825bc838a2b58a770bd14b28fd1af4629442a410fbf1aa7d620",
+      "event_payload_hash": "1b8b38f5afddcfa7ad5d97be6bf7a82e7f6ee52886a4d8bf7bbf58878c4d3b87",
+      "next_state_hash": "7db9b57121a6df64208e5ff43cfccc572a17a631afb79a6b77355a36a2c1ddf0",
       "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
       "status": "COMPLETED",
       "reason": null
     },
     {
-      "event_id": "AI-COMPANY-EVT-000063",
+      "event_id": "AI-COMPANY-EVT-000065",
       "company_id": "KAIOS_AI_COMPANY_V1",
       "request_id": null,
       "project_id": "AI-COMPANY-PROJECT-00001",
@@ -4060,9 +4528,11 @@
       "task_id": null,
       "actor_life_id": "KAIOS-SIMULATED-COMPANY-OPERATOR",
       "division_id": "MAINTENANCE_DIVISION",
-      "simulation_time": 56,
+      "simulation_time": 69,
       "location": null,
       "event_type": "SCHEDULE_MAINTENANCE",
+      "action_id": "AI-COMPANY-ACTION-000065",
+      "action_arguments_hash": "835ea8960f477549dd6eb4d2a860104d44c345a411deda519adc05878e6090cf",
       "inputs": {
         "projectId": "AI-COMPANY-PROJECT-00001",
         "options": {}
@@ -4092,15 +4562,15 @@
       "cash_delta": 0,
       "progress_delta": 0,
       "risk_delta": 0,
-      "previous_state_hash": "418882bbc66a1acbf3d12f763f80db2c624ea3d343d3ac8e52350de1a2ca5f76",
-      "event_payload_hash": "5de1f4c0b8f949ade07c5ae962366a6de1ccb21583d2e13ee48cf90c618b5aae",
-      "next_state_hash": "e595422f8c9ae492ae9c95ea7dd7a3754c111feacb67cad8bf4e127e3917dc51",
+      "previous_state_hash": "7db9b57121a6df64208e5ff43cfccc572a17a631afb79a6b77355a36a2c1ddf0",
+      "event_payload_hash": "866f75a3f4ec76874dd040ed5f5bc357fde010a3e770d29ab63f99fea3bdb83e",
+      "next_state_hash": "eab45d6c8e14e0794441d004ec7b798c07298e99990e13617f5baff15abaae05",
       "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
       "status": "COMPLETED",
       "reason": null
     },
     {
-      "event_id": "AI-COMPANY-EVT-000064",
+      "event_id": "AI-COMPANY-EVT-000066",
       "company_id": "KAIOS_AI_COMPANY_V1",
       "request_id": null,
       "project_id": "AI-COMPANY-PROJECT-00001",
@@ -4108,9 +4578,11 @@
       "task_id": null,
       "actor_life_id": "KAIOS-SIMULATED-COMPANY-OPERATOR",
       "division_id": "DELIVERY_DIVISION",
-      "simulation_time": 56,
+      "simulation_time": 69,
       "location": null,
       "event_type": "DELIVER_PROJECT",
+      "action_id": "AI-COMPANY-ACTION-000066",
+      "action_arguments_hash": "fb4119a6bb4b33b3903ef07a2060d9f736f580f7dbff3ec3adb71ff972708bdb",
       "inputs": {
         "projectId": "AI-COMPANY-PROJECT-00001"
       },
@@ -4138,15 +4610,15 @@
       "cash_delta": 0,
       "progress_delta": 0,
       "risk_delta": 0,
-      "previous_state_hash": "e595422f8c9ae492ae9c95ea7dd7a3754c111feacb67cad8bf4e127e3917dc51",
-      "event_payload_hash": "e024912a24b2c128793062fa1730c8e8b66689ddb9ee1504a6e3a93ba46fe180",
-      "next_state_hash": "f650d58d6af7b17a5ec0eb09903ffbaa952a6d4139d510a3933a3c6e570ca589",
+      "previous_state_hash": "eab45d6c8e14e0794441d004ec7b798c07298e99990e13617f5baff15abaae05",
+      "event_payload_hash": "a2c933ebba3897ce4f6a8214f17bca4ce99a41ec9b5f0879d3801764a7427efe",
+      "next_state_hash": "ece40ffda3c1d82fb549b7d2eb87a8ec82b24dda418437325dbc671136848f6b",
       "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
       "status": "COMPLETED",
       "reason": null
     },
     {
-      "event_id": "AI-COMPANY-EVT-000065",
+      "event_id": "AI-COMPANY-EVT-000067",
       "company_id": "KAIOS_AI_COMPANY_V1",
       "request_id": null,
       "project_id": "AI-COMPANY-PROJECT-00001",
@@ -4154,9 +4626,11 @@
       "task_id": null,
       "actor_life_id": "KAIOS-SIMULATED-COMPANY-OPERATOR",
       "division_id": "DELIVERY_DIVISION",
-      "simulation_time": 56,
+      "simulation_time": 69,
       "location": null,
       "event_type": "ACCEPT_PROJECT",
+      "action_id": "AI-COMPANY-ACTION-000067",
+      "action_arguments_hash": "36f08b4d09aa9a7dd2d77709a16477a71dba0101e2356f488bab618f1265d0bb",
       "inputs": {
         "projectId": "AI-COMPANY-PROJECT-00001",
         "outcome": "ACCEPTED"
@@ -4174,15 +4648,15 @@
       "cash_delta": 0,
       "progress_delta": 0,
       "risk_delta": 0,
-      "previous_state_hash": "f650d58d6af7b17a5ec0eb09903ffbaa952a6d4139d510a3933a3c6e570ca589",
-      "event_payload_hash": "3dca92a09181a8f2dc9153a4c8e3bcf40ad20ee0e38c9f8893460c1bff2e21b7",
-      "next_state_hash": "0e6f5d4863f9b9529e99167a0e2ce48eaedbc4cb5211179a0971b8f84510a264",
+      "previous_state_hash": "ece40ffda3c1d82fb549b7d2eb87a8ec82b24dda418437325dbc671136848f6b",
+      "event_payload_hash": "c5965f1b112ed2c9ab9030b6b2f01ecbd0e4c95052d1c50b0ca7dd240c0cd2f4",
+      "next_state_hash": "954cba199190c383b6af6e1accca93be0cd24fb2a1c43975b13fb508ebf178c4",
       "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
       "status": "ACCEPTED",
       "reason": null
     },
     {
-      "event_id": "AI-COMPANY-EVT-000066",
+      "event_id": "AI-COMPANY-EVT-000068",
       "company_id": "KAIOS_AI_COMPANY_V1",
       "request_id": null,
       "project_id": "AI-COMPANY-PROJECT-00001",
@@ -4190,9 +4664,11 @@
       "task_id": null,
       "actor_life_id": "KAIOS-SIMULATED-COMPANY-OPERATOR",
       "division_id": "FINANCE_DIVISION",
-      "simulation_time": 56,
+      "simulation_time": 69,
       "location": null,
       "event_type": "CLOSE_PROJECT",
+      "action_id": "AI-COMPANY-ACTION-000068",
+      "action_arguments_hash": "fb4119a6bb4b33b3903ef07a2060d9f736f580f7dbff3ec3adb71ff972708bdb",
       "inputs": {
         "projectId": "AI-COMPANY-PROJECT-00001"
       },
@@ -4208,13 +4684,13 @@
       "cash_delta": 0,
       "progress_delta": 0,
       "risk_delta": 0,
-      "previous_state_hash": "0e6f5d4863f9b9529e99167a0e2ce48eaedbc4cb5211179a0971b8f84510a264",
-      "event_payload_hash": "d677a26e87b3ad6a8a6c4da0f309e920257d4f67e04ca64964184448ff17fd72",
-      "next_state_hash": "948f5b93a69c2cc2874c39109228886124a9645196270caf4fd871a122375626",
+      "previous_state_hash": "954cba199190c383b6af6e1accca93be0cd24fb2a1c43975b13fb508ebf178c4",
+      "event_payload_hash": "c5f41777c2455c5f191c5ffb651a3baae25295c76402285562a1fa345c78fe4f",
+      "next_state_hash": "d86c51d3997b24e26269f315b92275c0b19da45bdf17baf119b429f54a158935",
       "seed": "KAIOS-AI-COMPANY-PUBLIC-001",
       "status": "COMPLETED",
       "reason": null
     }
   ],
-  "event_count": 66
+  "event_count": 68
 }

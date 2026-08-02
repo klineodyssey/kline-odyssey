@@ -7,17 +7,25 @@ import {
   PROJECT_TEMPLATES,
   REQUIRED_DIVISIONS,
   REQUIRED_TEMPLATES,
+  computeAiCompanyStateHash,
   createAiCompanyDemonstrationFlows,
   createKaiosAiCompanyRuntimeV1
 } from "../ai-company/ai-company-project-runtime.js";
 
 const RUNTIME_SOURCE = new URL("../ai-company/ai-company-project-runtime.js", import.meta.url);
 const VIEWER_APP_SOURCE = new URL("../../../world-viewer/ai-company-v1/app.js", import.meta.url);
+const TASK_SCHEMA_SOURCE = new URL("../../../KAIOS/ai-company/KAIOS_AI_COMPANY_TASK_SCHEMA_V1.json", import.meta.url);
+const TASKS_API_SOURCE = new URL("../../../api/kaios/ai-company/v1/tasks.json", import.meta.url);
+const PROJECTS_API_SOURCE = new URL("../../../api/kaios/ai-company/v1/projects.json", import.meta.url);
 
 function requestFor(templateId, overrides = {}) {
   const catalog = {
     FISHPOND_PROJECT: ["I need a fishpond.", "FISHPOND", "LAND-FISHPOND-TEST-001", 250000],
     BASIC_HOUSE_PROJECT: ["I need a basic house.", "HOUSE", "LAND-HOUSE-TEST-001", 220000],
+    WAREHOUSE_PROJECT: ["I need a warehouse.", "WAREHOUSE", "LAND-WAREHOUSE-TEST-001", 240000],
+    BASIC_ROAD_PROJECT: ["I need a road.", "ROAD", "LAND-ROAD-TEST-001", 280000],
+    SMALL_BRIDGE_PROJECT: ["I need a bridge.", "BRIDGE", "LAND-BRIDGE-TEST-001", 360000],
+    WORKSHOP_PROJECT: ["I need a workshop.", "WORKSHOP", "LAND-WORKSHOP-TEST-001", 260000],
     SMALL_FARM_PROJECT: ["I need a small farm.", "FARM", "LAND-FARM-TEST-001", 180000],
     LIFE_PACKAGE_PROJECT: ["I need a crop candidate life package.", "CROP CANDIDATE LIFE PACKAGE", "LOCAL_SIMULATION_WORKSPACE", 80000],
     SOFTWARE_MODULE_PROJECT: ["I need a World Viewer software panel.", "SOFTWARE WORLD VIEWER PANEL", "LOCAL_SIMULATION_WORKSPACE", 90000]
@@ -88,11 +96,13 @@ function assignProject(runtime, projectId) {
   for (const currentTask of project.tasks) {
     for (const skill of currentTask.skills) {
       const worker = plan.workforce.find((candidate) => candidate.skill === skill);
-      assert.equal(runtime.assignWorker(projectId, currentTask.task_id, worker.worker_id).status, "COMPLETED");
+      const result = runtime.assignWorker(projectId, currentTask.task_id, worker.worker_id);
+      assert.equal(result.status, "COMPLETED", `${currentTask.task_code}:${skill}:${result.reason ?? "UNKNOWN"}`);
     }
     for (const type of currentTask.equipment) {
       const equipment = plan.equipment.find((candidate) => candidate.type === type);
-      assert.equal(runtime.reserveEquipment(projectId, currentTask.task_id, equipment.equipment_id).status, "COMPLETED");
+      const result = runtime.reserveEquipment(projectId, currentTask.task_id, equipment.equipment_id);
+      assert.equal(result.status, "COMPLETED", `${currentTask.task_code}:${type}:${result.reason ?? "UNKNOWN"}`);
     }
   }
 }
@@ -107,6 +117,9 @@ function readyProject(runtime, templateId = "BASIC_HOUSE_PROJECT", requestOverri
 }
 
 function executeTask(runtime, projectId, taskId, outcome = "PASS") {
+  const state = runtime.getState();
+  const window = state.task_windows[taskId];
+  if (window && state.simulation_time < window.start) runtime.advanceTime(window.start - state.simulation_time);
   assert.equal(runtime.startTask(projectId, taskId).status, "COMPLETED");
   const remaining = runtime.getState().projects.find(({ project_id }) => project_id === projectId).tasks.find(({ task_id }) => task_id === taskId).remaining_hours;
   assert.equal(runtime.advanceTime(remaining).status, "COMPLETED");
@@ -277,6 +290,31 @@ test("single-life assignment enforces skill, location, shift, travel, and rest c
   assert.equal(runtime.assignWorker(second.projectId, secondProject.tasks[0].task_id, surveyorTwo.worker_id, { start: 6, end: 19 }).reason, "REST_REQUIREMENT_CONFLICT");
 });
 
+test("physical workers obey cumulative shift hours, shift boundaries, and cross-cycle rest", () => {
+  const cumulative = createKaiosAiCompanyRuntimeV1({ seed: "CUMULATIVE-SHIFT" });
+  const { projectId } = approvedProject(cumulative, "BASIC_ROAD_PROJECT");
+  planProject(cumulative, projectId, { schedule: { planned_start: 0 } });
+  const state = cumulative.getState();
+  const project = state.projects.find((candidate) => candidate.project_id === projectId);
+  const plan = state.resource_plans.find((candidate) => candidate.project_id === projectId);
+  const operator = plan.workforce.find(({ skill }) => skill === "EXCAVATOR_OPERATOR");
+  assert.equal(cumulative.assignWorker(projectId, project.tasks[1].task_id, operator.worker_id, { start: 6, end: 15 }).status, "COMPLETED");
+  assert.equal(cumulative.assignWorker(projectId, project.tasks[2].task_id, operator.worker_id, { start: 15, end: 24 }).reason, "REST_REQUIREMENT_CONFLICT");
+  assert.equal(cumulative.assignWorker(projectId, project.tasks[2].task_id, operator.worker_id, { start: 20, end: 28 }).reason, "REST_REQUIREMENT_CONFLICT");
+
+  const rest = createKaiosAiCompanyRuntimeV1({ seed: "CROSS-CYCLE-REST" });
+  const prepared = approvedProject(rest, "BASIC_ROAD_PROJECT");
+  planProject(rest, prepared.projectId, { schedule: { planned_start: 0 } });
+  const restState = rest.getState();
+  const restProject = restState.projects.find(({ project_id }) => project_id === prepared.projectId);
+  const restPlan = restState.resource_plans.find(({ project_id }) => project_id === prepared.projectId);
+  const restOperator = restPlan.workforce.find(({ skill }) => skill === "EXCAVATOR_OPERATOR");
+  assert.equal(rest.assignWorker(prepared.projectId, restProject.tasks[1].task_id, restOperator.worker_id, { start: 8, end: 20 }).status, "COMPLETED");
+  assert.equal(rest.assignWorker(prepared.projectId, restProject.tasks[2].task_id, restOperator.worker_id, { start: 24, end: 30 }).reason, "REST_REQUIREMENT_CONFLICT");
+  assert.equal(rest.assignWorker(prepared.projectId, restProject.tasks[2].task_id, restOperator.worker_id, { start: 28, end: 34 }).status, "COMPLETED");
+  assert.equal(rest.integrityReport().ok, true);
+});
+
 test("equipment requires an assigned operator and ready simulated energy", () => {
   const runtime = createKaiosAiCompanyRuntimeV1({ seed: "EQUIPMENT-TEST" });
   const { projectId } = approvedProject(runtime, "BASIC_HOUSE_PROJECT");
@@ -345,6 +383,8 @@ test("execution consumes explicit time and supports runtime and task pause-resum
   assert.equal(runtime.getState().projects.find(({ project_id }) => project_id === projectId).tasks[0].status, "INSPECTION_PENDING");
   runtime.inspectTask(projectId, taskId, "PASS");
   runtime.completeTask(projectId, taskId);
+  assert.equal(runtime.integrityReport().ok, true);
+  assert.equal(runtime.getState().projects[0].tasks[0].work_segments.reduce((sum, segment) => sum + segment.effective_hours, 0), 4);
   const secondTaskId = runtime.getState().projects.find(({ project_id }) => project_id === projectId).tasks[1].task_id;
   assert.equal(runtime.blockTask(projectId, secondTaskId, "SIMULATED_WEATHER_DELAY").status, "COMPLETED");
   assert.equal(runtime.getState().projects.find(({ project_id }) => project_id === projectId).tasks[1].blocked_reason, "SIMULATED_WEATHER_DELAY");
@@ -451,8 +491,17 @@ test("company capacity blocks excess projects and simulated insolvency remains b
   assert.equal(liquidation.status, "COMPLETED");
   assert.equal(liquidation.outputs.recovery.asset_records_preserved, true);
   assert.ok(liquidation.outputs.recovery.assets.equipment.length > 0);
+  assert.ok(insolvencyRuntime.getState().procurement_orders.every(({ status }) => ["PAYMENT_APPROVED", "INSPECTION_FAILED", "CANCELLED"].includes(status)));
+  const frozenAssets = structuredClone(liquidation.outputs.recovery.assets);
+  const frozenFinance = structuredClone(insolvencyRuntime.getState().finance);
+  const pendingMaterial = insolvencyRuntime.getState().procurement_orders.find(({ status }) => status === "CANCELLED")?.material_id ?? firstOrder.material_id;
+  assert.equal(insolvencyRuntime.receiveMaterial(projectId, pendingMaterial).reason, "COMPANY_TERMINATED");
+  assert.equal(insolvencyRuntime.advanceTime(1).reason, "COMPANY_TERMINATED");
+  assert.deepEqual(insolvencyRuntime.getState().finance, frozenFinance);
+  assert.deepEqual(insolvencyRuntime.getState().company_recovery.find(({ recovery_type }) => recovery_type === "LIQUIDATION_SIMULATION").assets, frozenAssets);
   assert.equal(insolvencyRuntime.dissolveCompany().status, "COMPLETED");
   assert.equal(insolvencyRuntime.getState().company.status, "DISSOLVED");
+  assert.equal(insolvencyRuntime.receiveMaterial(projectId, pendingMaterial).reason, "COMPANY_TERMINATED");
   assert.deepEqual(insolvencyRuntime.replayEvents(), insolvencyRuntime.getState());
   assert.equal(insolvencyRuntime.integrityReport().ok, true);
   assert.equal(insolvencyRuntime.integrityReport().ledger_balanced, true);
@@ -521,6 +570,168 @@ test("imports reject authority and ledger tampering transactionally", () => {
   replaySource.state.action_log.at(-1).result_status = "FAILED";
   assert.throws(() => runtime.importState(replaySource), /STATE_HASH_MISMATCH|EVENT_ACTION_MISMATCH/);
   assert.deepEqual(runtime.getState(), before);
+});
+
+test("warehouse classification is exact and every physical template fits bounded shifts", () => {
+  for (const templateId of ["WAREHOUSE_PROJECT", "BASIC_ROAD_PROJECT", "SMALL_BRIDGE_PROJECT", "WORKSHOP_PROJECT"]) {
+    assert.ok(PROJECT_TEMPLATES[templateId].tasks.every(({ duration }) => duration <= 12), `${templateId} has an oversized shift`);
+    const runtime = createKaiosAiCompanyRuntimeV1({ seed: `PHYSICAL-TEMPLATE-${templateId}` });
+    const { projectId } = readyProject(runtime, templateId);
+    const project = runtime.getState().projects.find(({ project_id }) => project_id === projectId);
+    assert.equal(project.template_id, templateId);
+    for (const currentTask of project.tasks) executeTask(runtime, projectId, currentTask.task_id);
+    runtime.scheduleMaintenance(projectId);
+    assert.equal(runtime.deliverProject(projectId).status, "COMPLETED");
+    assert.equal(runtime.acceptProject(projectId, "ACCEPTED").status, "ACCEPTED");
+    assert.equal(runtime.closeProject(projectId).status, "COMPLETED");
+    assert.equal(runtime.integrityReport().ok, true);
+  }
+});
+
+test("supplier selection evaluates quality, delivery, capacity, risk, and total cost", () => {
+  const runtime = createKaiosAiCompanyRuntimeV1({ seed: "SUPPLIER-SELECTION" });
+  const { projectId } = approvedProject(runtime, "BASIC_HOUSE_PROJECT");
+  planProject(runtime, projectId);
+  assert.equal(runtime.startProcurement(projectId).status, "COMPLETED");
+  for (const order of runtime.getState().procurement_orders) {
+    assert.ok(order.supplier_candidates.length >= 3);
+    assert.equal(order.supplier_selection.method, "DETERMINISTIC_WEIGHTED_TOTAL_VALUE");
+    assert.equal(order.supplier_selection.lowest_price_automatic, false);
+    const selected = order.supplier_candidates.find(({ supplier_id }) => supplier_id === order.selected_supplier);
+    const highestScore = Math.max(...order.supplier_candidates.filter(({ eligible }) => eligible).map(({ score }) => score));
+    const cheapest = order.supplier_candidates.reduce((best, candidate) => candidate.total_cost < best.total_cost ? candidate : best);
+    assert.equal(selected.score, highestScore);
+    assert.notEqual(selected.supplier_id, cheapest.supplier_id);
+  }
+  assert.equal(runtime.integrityReport().ok, true);
+});
+
+test("failed material inspection releases commitment before deterministic retry", () => {
+  const runtime = createKaiosAiCompanyRuntimeV1({ seed: "PROCUREMENT-RETRY" });
+  const { projectId } = approvedProject(runtime, "BASIC_HOUSE_PROJECT");
+  planProject(runtime, projectId);
+  runtime.startProcurement(projectId, { inspection_fail_materials: ["CONCRETE"] });
+  runtime.start();
+  const failedOrder = runtime.getState().procurement_orders.find(({ material_id }) => material_id === "CONCRETE");
+  runtime.advanceTime(failedOrder.arrival_time);
+  const committedBeforeFailure = runtime.getState().projects[0].budget.committed;
+  assert.equal(runtime.receiveMaterial(projectId, "CONCRETE").reason, "MATERIAL_INSPECTION_FAILED");
+  const afterFailure = runtime.getState();
+  assert.equal(afterFailure.projects[0].budget.committed, committedBeforeFailure - failedOrder.committed_amount);
+  assert.equal(afterFailure.procurement_orders.find(({ order_id }) => order_id === failedOrder.order_id).commitment_released, true);
+  const terminalOrder = structuredClone(afterFailure.procurement_orders.find(({ order_id }) => order_id === failedOrder.order_id));
+  assert.equal(runtime.receiveMaterial(projectId, "CONCRETE").reason, "MATERIAL_INSPECTION_TERMINAL");
+  assert.deepEqual(runtime.getState().procurement_orders.find(({ order_id }) => order_id === failedOrder.order_id), terminalOrder);
+  assert.equal(runtime.startProcurement(projectId).status, "COMPLETED");
+  const afterRetry = runtime.getState();
+  const expectedCommitment = afterRetry.procurement_orders
+    .filter(({ status, commitment_released }) => !commitment_released && !["PAYMENT_APPROVED", "INSPECTION_FAILED", "CANCELLED"].includes(status))
+    .reduce((sum, order) => sum + order.committed_amount, 0);
+  assert.ok(Math.abs(afterRetry.projects[0].budget.committed - expectedCommitment) < 0.001);
+  assert.equal(afterRetry.procurement_orders.filter(({ material_id }) => material_id === "CONCRETE").length, 2);
+  assert.equal(runtime.integrityReport().ok, true);
+});
+
+test("published task schema covers every strict task projection field", async () => {
+  const schema = JSON.parse(await readFile(TASK_SCHEMA_SOURCE, "utf8"));
+  const standalone = JSON.parse(await readFile(TASKS_API_SOURCE, "utf8"));
+  const projects = JSON.parse(await readFile(PROJECTS_API_SOURCE, "utf8"));
+  const projections = [standalone.tasks, projects.projects.flatMap(({ tasks }) => tasks)];
+  assert.equal(schema.additionalProperties, false);
+  assert.ok(schema.required.includes("work_segments"));
+  for (const tasks of projections) {
+    for (const task of tasks) {
+      assert.deepEqual(Object.keys(task).filter((key) => !(key in schema.properties)), []);
+      assert.deepEqual(schema.required.filter((key) => !(key in task)), []);
+      for (const segment of task.work_segments) {
+        assert.ok(segment.end >= segment.start);
+        assert.ok(segment.effective_hours > 0);
+      }
+    }
+  }
+});
+
+test("pause-resume preflight blocks cross-project digital worker and equipment collisions", () => {
+  const workerRuntime = createKaiosAiCompanyRuntimeV1({ seed: "RESUME-WORKER-COLLISION" });
+  const first = approvedProject(workerRuntime, "LIFE_PACKAGE_PROJECT");
+  planProject(workerRuntime, first.projectId, { schedule: { planned_start: 0 } });
+  workerRuntime.startProcurement(first.projectId);
+  const second = approvedProject(workerRuntime, "LIFE_PACKAGE_PROJECT");
+  planProject(workerRuntime, second.projectId, { schedule: { planned_start: 17 } });
+  workerRuntime.startProcurement(second.projectId);
+  assignProject(workerRuntime, first.projectId);
+  assignProject(workerRuntime, second.projectId);
+  workerRuntime.start();
+  const firstTask = workerRuntime.getState().projects.find(({ project_id }) => project_id === first.projectId).tasks[0];
+  workerRuntime.startTask(first.projectId, firstTask.task_id);
+  workerRuntime.pauseTask(first.projectId, firstTask.task_id);
+  workerRuntime.advanceTime(10);
+  const reservationsBefore = structuredClone(workerRuntime.getState().worker_reservations);
+  const windowsBefore = structuredClone(workerRuntime.getState().task_windows);
+  assert.equal(workerRuntime.resumeTask(first.projectId, firstTask.task_id).reason, "SHIFT_OVERLAP");
+  assert.deepEqual(workerRuntime.getState().worker_reservations, reservationsBefore);
+  assert.deepEqual(workerRuntime.getState().task_windows, windowsBefore);
+
+  const equipmentRuntime = createKaiosAiCompanyRuntimeV1({ seed: "RESUME-EQUIPMENT-COLLISION" });
+  const softwareOne = approvedProject(equipmentRuntime, "SOFTWARE_MODULE_PROJECT");
+  planProject(equipmentRuntime, softwareOne.projectId, { schedule: { planned_start: 0 } });
+  equipmentRuntime.startProcurement(softwareOne.projectId);
+  const softwareTwo = approvedProject(equipmentRuntime, "SOFTWARE_MODULE_PROJECT");
+  planProject(equipmentRuntime, softwareTwo.projectId, { schedule: { planned_start: 21 } });
+  equipmentRuntime.startProcurement(softwareTwo.projectId);
+  assignProject(equipmentRuntime, softwareOne.projectId);
+  assignProject(equipmentRuntime, softwareTwo.projectId);
+  equipmentRuntime.start();
+  const softwareTask = equipmentRuntime.getState().projects.find(({ project_id }) => project_id === softwareOne.projectId).tasks[0];
+  equipmentRuntime.startTask(softwareOne.projectId, softwareTask.task_id);
+  equipmentRuntime.pauseTask(softwareOne.projectId, softwareTask.task_id);
+  equipmentRuntime.advanceTime(5);
+  assert.equal(equipmentRuntime.resumeTask(softwareOne.projectId, softwareTask.task_id).reason, "EQUIPMENT_RESERVATION_CONFLICT");
+});
+
+test("import performs deterministic replay even after hashes are recomputed", () => {
+  const source = createKaiosAiCompanyRuntimeV1({ seed: "REPLAY-INVALID-TAMPER" });
+  source.start();
+  source.advanceTime(1);
+  const tampered = source.exportState();
+  const action = tampered.state.action_log.at(-1);
+  const event = tampered.state.events.at(-1);
+  action.args.hours = 2;
+  action.arguments_hash = computeAiCompanyStateHash(action.args);
+  event.inputs.hours = 2;
+  event.action_arguments_hash = action.arguments_hash;
+  const eventPayload = structuredClone(event);
+  delete eventPayload.event_payload_hash;
+  delete eventPayload.next_state_hash;
+  event.event_payload_hash = computeAiCompanyStateHash(eventPayload);
+  const projectedState = structuredClone(tampered.state);
+  projectedState.events = projectedState.events.map((item) => {
+    const projectedEvent = { ...item };
+    delete projectedEvent.next_state_hash;
+    return projectedEvent;
+  });
+  event.next_state_hash = computeAiCompanyStateHash(projectedState);
+  assert.deepEqual(source.validateState(tampered.state), []);
+  const target = createKaiosAiCompanyRuntimeV1({ seed: "REPLAY-INVALID-TARGET" });
+  assert.throws(() => target.importState(tampered), /IMPORT_REJECTED:REPLAY_STATE_MISMATCH/);
+  assert.equal(target.getState().events.length, 0);
+});
+
+test("accepted projects reject new and previously submitted change orders", () => {
+  const runtime = createKaiosAiCompanyRuntimeV1({ seed: "TERMINAL-CHANGE-ORDER" });
+  const { projectId } = readyProject(runtime, "SOFTWARE_MODULE_PROJECT");
+  const pending = runtime.submitChangeOrder(projectId, { description: "Pre-acceptance option", added_cost: 200, added_duration: 1 }).outputs.change_order;
+  for (const currentTask of runtime.getState().projects[0].tasks) executeTask(runtime, projectId, currentTask.task_id);
+  runtime.scheduleMaintenance(projectId);
+  runtime.deliverProject(projectId);
+  runtime.acceptProject(projectId, "ACCEPTED");
+  const before = structuredClone(runtime.getState().projects[0]);
+  assert.equal(runtime.submitChangeOrder(projectId, { added_cost: 100, added_duration: 1 }).reason, "PROJECT_NOT_CHANGEABLE");
+  assert.equal(runtime.approveChangeOrder(pending.change_order_id).reason, "PROJECT_NOT_CHANGEABLE");
+  const after = runtime.getState().projects[0];
+  assert.deepEqual(after.budget, before.budget);
+  assert.deepEqual(after.schedule, before.schedule);
+  assert.deepEqual(after.accounting, before.accounting);
 });
 
 test("runtime source has no external execution, wallet connector, or transaction signer", async () => {

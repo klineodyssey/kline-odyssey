@@ -55,6 +55,7 @@
       ],
       "tasks": [
         {
+          "project_id": "AI-COMPANY-PROJECT-00001",
           "task_id": "AI-COMPANY-PROJECT-00001-TASK-001",
           "task_code": "SITE_SURVEY",
           "work_package_id": "AI-COMPANY-PROJECT-00001-WORK-PACKAGE-001",
@@ -98,12 +99,20 @@
             "equipment_wear": 0.02,
             "cost": 600
           },
+          "work_segments": [
+            {
+              "start": 13,
+              "end": 17,
+              "effective_hours": 4
+            }
+          ],
           "blocked_reason": null,
           "actual_start": 13,
           "actual_end": 17,
           "rework_for_task_id": null
         },
         {
+          "project_id": "AI-COMPANY-PROJECT-00001",
           "task_id": "AI-COMPANY-PROJECT-00001-TASK-002",
           "task_code": "POND_DESIGN",
           "work_package_id": "AI-COMPANY-PROJECT-00001-WORK-PACKAGE-001",
@@ -149,12 +158,20 @@
             "equipment_wear": 0,
             "cost": 1200
           },
+          "work_segments": [
+            {
+              "start": 17,
+              "end": 23,
+              "effective_hours": 6
+            }
+          ],
           "blocked_reason": null,
           "actual_start": 17,
           "actual_end": 23,
           "rework_for_task_id": null
         },
         {
+          "project_id": "AI-COMPANY-PROJECT-00001",
           "task_id": "AI-COMPANY-PROJECT-00001-TASK-003",
           "task_code": "EXCAVATION",
           "work_package_id": "AI-COMPANY-PROJECT-00001-WORK-PACKAGE-001",
@@ -208,12 +225,20 @@
             "equipment_wear": 0.02,
             "cost": 4200
           },
+          "work_segments": [
+            {
+              "start": 31,
+              "end": 43,
+              "effective_hours": 12
+            }
+          ],
           "blocked_reason": null,
-          "actual_start": 23,
-          "actual_end": 35,
+          "actual_start": 31,
+          "actual_end": 43,
           "rework_for_task_id": null
         },
         {
+          "project_id": "AI-COMPANY-PROJECT-00001",
           "task_id": "AI-COMPANY-PROJECT-00001-TASK-004",
           "task_code": "POND_INFRASTRUCTURE",
           "work_package_id": "AI-COMPANY-PROJECT-00001-WORK-PACKAGE-001",
@@ -271,12 +296,20 @@
             "equipment_wear": 0.04,
             "cost": 3600
           },
+          "work_segments": [
+            {
+              "start": 48,
+              "end": 58,
+              "effective_hours": 10
+            }
+          ],
           "blocked_reason": null,
-          "actual_start": 35,
-          "actual_end": 45,
+          "actual_start": 48,
+          "actual_end": 58,
           "rework_for_task_id": null
         },
         {
+          "project_id": "AI-COMPANY-PROJECT-00001",
           "task_id": "AI-COMPANY-PROJECT-00001-TASK-005",
           "task_code": "AQUACULTURE_RUNTIME_BINDING",
           "work_package_id": "AI-COMPANY-PROJECT-00001-WORK-PACKAGE-001",
@@ -330,12 +363,20 @@
             "equipment_wear": 0.02,
             "cost": 2600
           },
+          "work_segments": [
+            {
+              "start": 58,
+              "end": 66,
+              "effective_hours": 8
+            }
+          ],
           "blocked_reason": null,
-          "actual_start": 45,
-          "actual_end": 53,
+          "actual_start": 58,
+          "actual_end": 66,
           "rework_for_task_id": null
         },
         {
+          "project_id": "AI-COMPANY-PROJECT-00001",
           "task_id": "AI-COMPANY-PROJECT-00001-TASK-006",
           "task_code": "FINAL_ACCEPTANCE",
           "work_package_id": "AI-COMPANY-PROJECT-00001-WORK-PACKAGE-001",
@@ -377,9 +418,16 @@
             "equipment_wear": 0,
             "cost": 700
           },
+          "work_segments": [
+            {
+              "start": 66,
+              "end": 69,
+              "effective_hours": 3
+            }
+          ],
           "blocked_reason": null,
-          "actual_start": 53,
-          "actual_end": 56,
+          "actual_start": 66,
+          "actual_end": 69,
           "rework_for_task_id": null
         }
       ],
@@ -460,8 +508,8 @@
       },
       "schedule": {
         "planned_start": 13,
-        "planned_end": 56,
-        "estimated_duration": 43,
+        "planned_end": 69,
+        "estimated_duration": 56,
         "critical_path": [
           "AI-COMPANY-PROJECT-00001-TASK-001",
           "AI-COMPANY-PROJECT-00001-TASK-002",
@@ -507,7 +555,7 @@
         "execution_pause_delay": 0,
         "transport_delay": 0,
         "actual_start": 13,
-        "actual_end": 56,
+        "actual_end": 69,
         "status": "COMPLETE"
       },
       "contract_id": "AI-COMPANY-CONTRACT-00001",
@@ -596,7 +644,7 @@
       "approval_status": "RUNTIME_VALIDATED_SIMULATION",
       "external_deployment": false,
       "created_at": 0,
-      "closed_at": 56,
+      "closed_at": 69,
       "closeout_status": "CLOSED_BALANCED_SIMULATION",
       "domain_execution": {
         "ok": true,
@@ -664,7 +712,7 @@
       ],
       "timeline": {
         "start": 0,
-        "end": 43
+        "end": 59
       },
       "quality_standard": [
         "SIMULATED_INSPECTION_PASS"
