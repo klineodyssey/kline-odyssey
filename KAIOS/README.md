@@ -17,6 +17,9 @@ Public interfaces:
 - [Life Runtime V1 public data](../api/kaios/life-runtime-v1/)
 - [Forest and Agriculture Runtime V1 specification](life/forest-agriculture/KAIOS_FOREST_AGRICULTURE_RUNTIME_V1_SPEC.md)
 - [Forest and Agriculture Cursor queue](life/forest-agriculture/KAIOS_CURSOR_CONTINUOUS_WORK_QUEUE.json)
+- [Forest candidate Codex review closeout](life/forest-agriculture/KAIOS_CURSOR_FOREST_LIFE_PACKAGE_REVIEW_CLOSEOUT.md)
+- [Crop candidate Cursor work order](life/candidates/forest-agriculture-v1/CURSOR_CROP_LIFE_PACKAGES_WORK_ORDER.md)
+- [Forest release and crop dispatch Company Status](../KGEN-KAIOS/governance/autopilot/company_status/COMPANY_STATUS_2026-08-02_FOREST_CANDIDATE_RELEASED_CROP_DISPATCHED.md)
 
 ## Foundational Life Runtime V1
 

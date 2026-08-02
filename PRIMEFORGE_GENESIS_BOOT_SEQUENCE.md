@@ -22,17 +22,29 @@ permalink: /PRIMEFORGE_GENESIS_BOOT_SEQUENCE/
 
 STATUS: ACTIVE  
 VERSION: CURRENT  
-REVISION: 2026-07-16.COMPANY_DECISION_CENTER_INDEX
-LAST_UPDATED: 2026-07-16
+REVISION: 2026-08-02.FOREST_CROP_DISPATCH_INDEX
+LAST_UPDATED: 2026-08-02
 UPDATED_BY: Codex
 REVIEWED_BY: Codex
-SOURCE_COMMIT: d5d9b2cc5bafd67ec600fccb2701f638020d9741
-TASK_ID: HUMAN-MERGE-CONFLICT-001
-CHANGE_REASON: Add the complete Company Decision Center architecture package to the Boot governance index without activating cutover or dispatch.
+SOURCE_COMMIT: 176e8b96e40894a542da5823c436e9d49f663f0e
+TASK_ID: KAIOS-FOREST-AGRICULTURE-RUNTIME-V1-001
+CHANGE_REASON: Register the reviewed forest candidate closeout, bounded crop candidate task envelope, and Company Status without changing Runtime or production authority.
 SOURCE_OF_TRUTH: TRUE  
 FORMAL_ENTRY: PRIMEFORGE_GENESIS_BOOT_SEQUENCE.md  
 ANCESTOR: PRIMEFORGE_GENESIS_BOOT_SEQUENCE_V1_4.md  
 BOOT_POLICY: Fixed filename; update content cumulatively; never rename the formal entry.  
+
+## Forest And Agriculture Candidate Queue Registration
+
+These entries are governance and research records. They do not activate the
+Forest and Agriculture Runtime or grant Cursor Canonical, Runtime, deployment,
+Rights, Economy, Wallet or KGEN authority.
+
+| Repository path | Purpose |
+|---|---|
+| `KAIOS/life/forest-agriculture/KAIOS_CURSOR_FOREST_LIFE_PACKAGE_REVIEW_CLOSEOUT.md` | Codex review, provenance, validation and formal release record for the forest candidate task. |
+| `KAIOS/life/candidates/forest-agriculture-v1/CURSOR_CROP_LIFE_PACKAGES_WORK_ORDER.md` | Explicit candidate-only task envelope for the sole active crop package claim. |
+| `KGEN-KAIOS/governance/autopilot/company_status/COMPANY_STATUS_2026-08-02_FOREST_CANDIDATE_RELEASED_CROP_DISPATCHED.md` | Company status projection for forest release and crop dispatch. |
 PUBLIC_ENTRY: https://klineodyssey.github.io/kline-odyssey/boot/  
 RAW_ENTRY: https://klineodyssey.github.io/kline-odyssey/PRIMEFORGE_GENESIS_BOOT_SEQUENCE.md  
 
