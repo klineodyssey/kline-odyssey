@@ -1140,4 +1140,34 @@ supply-chain owners and does not activate Production authority.
 - [Crop Candidate Codex Review Closeout](KAIOS/life/forest-agriculture/KAIOS_CURSOR_CROP_LIFE_PACKAGE_REVIEW_CLOSEOUT.md)
 - [Fruit Tree Candidate Cursor Work Order](KAIOS/life/candidates/forest-agriculture-v1/CURSOR_FRUIT_TREE_PACKAGES_WORK_ORDER.md)
 - [Crop Release and Fruit Tree Dispatch Company Status](KGEN-KAIOS/governance/autopilot/company_status/COMPANY_STATUS_2026-08-02_CROP_CANDIDATE_RELEASED_FRUIT_TREE_DISPATCHED.md)
-- [AI Company Order and Project Specification](KGEN-KAIOS/V10/runtime/KAIOS_AI_COMPANY_ORDER_AND_PROJECT_RUNTIME_SPEC.md)
+- [AI Company Order and Project Specification](KAIOS/ai-company/KAIOS_AI_COMPANY_ORDER_PROJECT_RUNTIME_V1_SPEC.md)
+
+## KAIOS AI Company Order and Project Runtime V1 Specification
+
+The cumulative specification defines a deterministic, simulation-only company
+coordinator. It analyzes requests, enforces feasibility and dependency gates,
+plans finite resources, inspects work and delivers only accepted projects. It
+does not grant real legal, Wallet, KGEN, Production or external autonomy.
+
+| File | Purpose |
+|---|---|
+| [Source Crosswalk](KAIOS/ai-company/KAIOS_AI_COMPANY_SOURCE_CROSSWALK.md) | Reviewed Charter Program Registry and current-owner coverage. |
+| [Runtime Specification](KAIOS/ai-company/KAIOS_AI_COMPANY_ORDER_PROJECT_RUNTIME_V1_SPEC.md) | Full cumulative behavior, security and acceptance contract. |
+| [Aggregate Schema](KAIOS/ai-company/KAIOS_AI_COMPANY_SCHEMA_V1.json) | Complete deterministic state envelope. |
+| [Organization Schema](KAIOS/ai-company/KAIOS_AI_COMPANY_ORGANIZATION_SCHEMA_V1.json) | Twenty-one bounded divisions. |
+| [Request Schema](KAIOS/ai-company/KAIOS_AI_COMPANY_REQUEST_SCHEMA_V1.json) | Customer needs, requirements and assumptions. |
+| [Project Schema](KAIOS/ai-company/KAIOS_AI_COMPANY_PROJECT_SCHEMA_V1.json) | Projects, milestones, dependencies and deliverables. |
+| [Task Schema](KAIOS/ai-company/KAIOS_AI_COMPANY_TASK_SCHEMA_V1.json) | Time/resource task contract. |
+| [Resource Plan Schema](KAIOS/ai-company/KAIOS_AI_COMPANY_RESOURCE_PLAN_SCHEMA_V1.json) | BOM, workers, equipment and logistics. |
+| [Budget Schema](KAIOS/ai-company/KAIOS_AI_COMPANY_BUDGET_SCHEMA_V1.json) | Simulated project finance. |
+| [Schedule Schema](KAIOS/ai-company/KAIOS_AI_COMPANY_SCHEDULE_SCHEMA_V1.json) | Critical path and delay accounting. |
+| [Contract Schema](KAIOS/ai-company/KAIOS_AI_COMPANY_CONTRACT_SCHEMA_V1.json) | No-real-legal-effect contract. |
+| [Inspection Schema](KAIOS/ai-company/KAIOS_AI_COMPANY_INSPECTION_SCHEMA_V1.json) | Inspection, defects and rework. |
+| [Event Schema](KAIOS/ai-company/KAIOS_AI_COMPANY_EVENT_SCHEMA_V1.json) | Hash-chained deterministic events. |
+| [Capacity Schema](KAIOS/ai-company/KAIOS_AI_COMPANY_CAPACITY_SCHEMA_V1.json) | Finite company throughput and exposure. |
+| [Specification Validator](KAIOS/ai-company/ai-company-spec-validator.mjs) | Executable schema/policy completeness checks. |
+| [Test Plan](KAIOS/ai-company/KAIOS_AI_COMPANY_RUNTIME_V1_TEST_PLAN.md) | Specification through production gates. |
+| [Specification Closeout](KAIOS/ai-company/KAIOS_AI_COMPANY_SPEC_V1_CLOSEOUT.md) | Scope and authority record. |
+| [Specification Tests](KGEN-KAIOS/world-viewer/tests/ai-company-spec.test.mjs) | Node regression suite. |
+| [Recovery](KGEN-KAIOS/governance/autopilot/recovery_points/RECOVERY-KAIOS-AI-COMPANY-SPEC-V1.md) | Merge-preserving rollback instructions. |
+| [Company Status](KGEN-KAIOS/governance/autopilot/company_status/COMPANY_STATUS_2026-08-02_AI_COMPANY_SPEC.md) | Current workline and Cursor state. |

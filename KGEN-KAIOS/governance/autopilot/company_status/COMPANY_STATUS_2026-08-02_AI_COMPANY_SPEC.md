@@ -1,0 +1,19 @@
+# Company Status: AI Company Order and Project Runtime V1 Specification
+
+Date: `2026-08-02`
+
+Company Boot: `BOOT_PARTIAL_SAFE_TO_CONTINUE`
+
+Task: `KAIOS-AI-COMPANY-ORDER-PROJECT-RUNTIME-V1-001`
+
+AI Company Specification: `READY_FOR_INDEPENDENT_REVIEW`
+
+AI Company Runtime: `HOLD_UNTIL_SPECIFICATION_MERGED`
+
+Active Cursor task: `KAIOS-CURSOR-VEGETABLE-PACKAGES-001`
+
+Cursor queue: `ACTIVE / ONE_TASK_AT_A_TIME`
+
+Forest and Agriculture Runtime: `CONTINUE_CURRENT_SPECIFICATION`
+
+Security: `NO_REAL_WALLET / NO_REAL_KGEN / NO_PRODUCTION_AUTHORITY / NO_EXTERNAL_AUTONOMY`

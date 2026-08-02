@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://klineodyssey.github.io/kline-odyssey/KAIOS/ai-company/KAIOS_AI_COMPANY_CONTRACT_SCHEMA_V1.json",
+  "title": "KAIOS AI Company Simulated Contract V1",
+  "type": "object",
+  "required": ["contract_id", "project_id", "parties", "scope", "deliverables", "price", "payment_schedule", "timeline", "quality_standard", "change_policy", "cancellation_policy", "warranty_simulation", "maintenance_terms", "rights", "liability_simulation", "status", "warning", "real_legal_effect"],
+  "properties": {
+    "contract_id": { "type": "string" }, "project_id": { "type": "string" },
+    "parties": { "type": "array", "minItems": 2, "items": { "enum": ["CUSTOMER", "AI_COMPANY", "SUPPLIER", "CONTRACTOR", "WORKER", "INSPECTOR_SIMULATION", "TRANSPORT_OPERATOR"] } },
+    "scope": { "type": "string" }, "deliverables": { "type": "array", "items": { "type": "string" } }, "price": { "type": "number", "minimum": 0 },
+    "payment_schedule": { "type": "array", "items": { "type": "object" } }, "timeline": { "type": "object" }, "quality_standard": { "type": "array", "items": { "type": "string" } },
+    "change_policy": { "type": "string" }, "cancellation_policy": { "type": "string" }, "warranty_simulation": { "type": "string" }, "maintenance_terms": { "type": "string" },
+    "rights": { "type": "array", "items": { "type": "string" } }, "liability_simulation": { "type": "string" },
+    "status": { "enum": ["DRAFT", "CUSTOMER_REVIEW", "APPROVED_SIMULATION", "ACTIVE_SIMULATION", "SUSPENDED", "COMPLETED", "CANCELLED"] },
+    "warning": { "const": "SIMULATED_CONTRACT / NO_REAL_LEGAL_EFFECT" }, "real_legal_effect": { "const": false }
+  },
+  "additionalProperties": false
+}

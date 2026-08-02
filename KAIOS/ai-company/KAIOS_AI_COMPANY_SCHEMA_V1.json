@@ -1,0 +1,113 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://klineodyssey.github.io/kline-odyssey/KAIOS/ai-company/KAIOS_AI_COMPANY_SCHEMA_V1.json",
+  "title": "KAIOS AI Company Order and Project Runtime State V1",
+  "type": "object",
+  "required": ["schema_version", "runtime", "mode", "seed", "simulation_time", "status", "company", "requests", "proposals", "projects", "resource_plans", "contracts", "procurement", "inspections", "change_orders", "deliveries", "maintenance", "capacity", "ledger", "events", "action_log", "boundaries"],
+  "properties": {
+    "schema_version": { "const": "1.0.0" },
+    "runtime": { "const": "KAIOS_AI_COMPANY_ORDER_AND_PROJECT_RUNTIME_V1" },
+    "mode": { "const": "LOCAL_DETERMINISTIC_SIMULATION" },
+    "seed": { "type": "string", "minLength": 1, "maxLength": 128 },
+    "simulation_time": { "type": "integer", "minimum": 0, "maximum": 1000000000 },
+    "status": { "enum": ["PAUSED", "RUNNING", "STOPPED"] },
+    "company": { "$ref": "KAIOS_AI_COMPANY_ORGANIZATION_SCHEMA_V1.json" },
+    "requests": { "type": "array", "maxItems": 1000, "items": { "$ref": "KAIOS_AI_COMPANY_REQUEST_SCHEMA_V1.json" } },
+    "proposals": { "type": "array", "maxItems": 1000, "items": { "$ref": "#/$defs/proposal" } },
+    "projects": { "type": "array", "maxItems": 250, "items": { "$ref": "KAIOS_AI_COMPANY_PROJECT_SCHEMA_V1.json" } },
+    "resource_plans": { "type": "array", "maxItems": 250, "items": { "$ref": "KAIOS_AI_COMPANY_RESOURCE_PLAN_SCHEMA_V1.json" } },
+    "contracts": { "type": "array", "maxItems": 250, "items": { "$ref": "KAIOS_AI_COMPANY_CONTRACT_SCHEMA_V1.json" } },
+    "procurement": { "type": "array", "maxItems": 5000, "items": { "$ref": "#/$defs/procurement" } },
+    "inspections": { "type": "array", "maxItems": 5000, "items": { "$ref": "KAIOS_AI_COMPANY_INSPECTION_SCHEMA_V1.json" } },
+    "change_orders": { "type": "array", "maxItems": 1000, "items": { "$ref": "#/$defs/change_order" } },
+    "deliveries": { "type": "array", "maxItems": 1000, "items": { "$ref": "#/$defs/delivery" } },
+    "maintenance": { "type": "array", "maxItems": 2000, "items": { "$ref": "#/$defs/maintenance" } },
+    "capacity": { "$ref": "KAIOS_AI_COMPANY_CAPACITY_SCHEMA_V1.json" },
+    "ledger": { "$ref": "#/$defs/ledger" },
+    "events": { "type": "array", "maxItems": 10000, "items": { "$ref": "KAIOS_AI_COMPANY_EVENT_SCHEMA_V1.json" } },
+    "action_log": { "type": "array", "maxItems": 20000, "items": { "$ref": "#/$defs/action" } },
+    "boundaries": { "$ref": "#/$defs/boundaries" }
+  },
+  "additionalProperties": false,
+  "x-kaios-invariants": [
+    "requests do not create projects before proposal approval",
+    "tasks cannot start before mandatory predecessors are complete",
+    "physical tasks consume positive time and finite resources",
+    "every ledger entry is balanced",
+    "active projects remain within company capacity",
+    "all deployed public APIs are read-only"
+  ],
+  "$defs": {
+    "proposal": {
+      "type": "object",
+      "required": ["proposal_id", "request_id", "project_template", "assumptions", "feasibility", "estimated_budget", "estimated_duration_hours", "status"],
+      "properties": {
+        "proposal_id": { "type": "string", "minLength": 1 },
+        "request_id": { "type": "string", "minLength": 1 },
+        "project_template": { "type": "string" },
+        "assumptions": { "type": "array", "maxItems": 100, "items": { "type": "object" } },
+        "feasibility": { "type": "array", "minItems": 16, "maxItems": 16, "items": { "type": "object" } },
+        "estimated_budget": { "type": "number", "minimum": 0 },
+        "estimated_duration_hours": { "type": "number", "minimum": 0 },
+        "status": { "enum": ["DRAFT", "BLOCKED", "READY_FOR_CUSTOMER", "APPROVED_SIMULATION", "REJECTED", "EXPIRED"] }
+      },
+      "additionalProperties": false
+    },
+    "procurement": {
+      "type": "object",
+      "required": ["procurement_id", "project_id", "material_id", "quantity", "unit", "quotes", "selected_supplier", "status", "payment_eligible"],
+      "properties": {
+        "procurement_id": { "type": "string" }, "project_id": { "type": "string" }, "material_id": { "type": "string" },
+        "quantity": { "type": "number", "exclusiveMinimum": 0 }, "unit": { "type": "string" },
+        "quotes": { "type": "array", "maxItems": 20, "items": { "type": "object" } },
+        "selected_supplier": { "type": ["string", "null"] },
+        "status": { "enum": ["RFQ_CREATED", "QUOTES_RECEIVED", "SUPPLIER_SELECTED", "ORDER_PLACED", "IN_PRODUCTION", "IN_TRANSIT", "RECEIVED", "INSPECTION_FAILED", "ACCEPTED", "PAYMENT_APPROVED"] },
+        "payment_eligible": { "type": "boolean" }
+      },
+      "additionalProperties": false
+    },
+    "change_order": {
+      "type": "object",
+      "required": ["change_id", "project_id", "description", "budget_delta", "schedule_delta_hours", "dependency_changes", "status"],
+      "properties": {
+        "change_id": { "type": "string" }, "project_id": { "type": "string" }, "description": { "type": "string" },
+        "budget_delta": { "type": "number" }, "schedule_delta_hours": { "type": "number" },
+        "dependency_changes": { "type": "array", "items": { "type": "string" } },
+        "status": { "enum": ["CHANGE_REQUESTED", "IMPACT_ANALYSIS", "CUSTOMER_REVIEW", "APPROVED", "REJECTED", "IMPLEMENTING", "COMPLETE"] }
+      }, "additionalProperties": false
+    },
+    "delivery": {
+      "type": "object",
+      "required": ["delivery_id", "project_id", "mandatory_tasks_complete", "inspections_passed", "documentation_complete", "rights_package_complete", "maintenance_plan_complete", "final_accounting_complete", "customer_result", "status"],
+      "properties": {
+        "delivery_id": { "type": "string" }, "project_id": { "type": "string" },
+        "mandatory_tasks_complete": { "type": "boolean" }, "inspections_passed": { "type": "boolean" },
+        "documentation_complete": { "type": "boolean" }, "rights_package_complete": { "type": "boolean" },
+        "maintenance_plan_complete": { "type": "boolean" }, "final_accounting_complete": { "type": "boolean" },
+        "customer_result": { "enum": ["PENDING", "ACCEPTED", "ACCEPTED_WITH_CONDITIONS", "REJECTED", "REWORK_REQUIRED"] },
+        "status": { "enum": ["NOT_READY", "READY", "DELIVERED", "ACCEPTED", "REJECTED", "REWORK_REQUIRED"] }
+      }, "additionalProperties": false
+    },
+    "maintenance": {
+      "type": "object", "required": ["maintenance_id", "project_id", "asset_id", "schedule_hours", "wear_monitoring", "responsible_party", "status"],
+      "properties": { "maintenance_id": { "type": "string" }, "project_id": { "type": "string" }, "asset_id": { "type": "string" }, "schedule_hours": { "type": "number", "minimum": 0 }, "wear_monitoring": { "type": "boolean" }, "responsible_party": { "type": "string" }, "status": { "enum": ["OPERATIONAL", "MAINTENANCE_DUE", "REPAIR_REQUIRED", "DEGRADED", "UNSAFE", "OUT_OF_SERVICE", "RETIRED"] } },
+      "additionalProperties": false
+    },
+    "ledger": {
+      "type": "object", "required": ["currency", "cash", "receivables", "payables", "work_in_progress", "inventory", "equipment", "payroll", "customer_deposits", "project_revenue", "project_cost", "profit_or_loss", "debt", "entries"],
+      "properties": {
+        "currency": { "const": "SIMULATED_CREDIT" }, "cash": { "type": "number" }, "receivables": { "type": "number", "minimum": 0 }, "payables": { "type": "number", "minimum": 0 }, "work_in_progress": { "type": "number", "minimum": 0 }, "inventory": { "type": "number", "minimum": 0 }, "equipment": { "type": "number", "minimum": 0 }, "payroll": { "type": "number", "minimum": 0 }, "customer_deposits": { "type": "number", "minimum": 0 }, "project_revenue": { "type": "number", "minimum": 0 }, "project_cost": { "type": "number", "minimum": 0 }, "profit_or_loss": { "type": "number" }, "debt": { "type": "number", "minimum": 0 },
+        "entries": { "type": "array", "maxItems": 10000, "items": { "type": "object", "required": ["entry_id", "event_id", "debit_account", "credit_account", "amount"], "properties": { "entry_id": { "type": "string" }, "event_id": { "type": "string" }, "debit_account": { "type": "string" }, "credit_account": { "type": "string" }, "amount": { "type": "number", "minimum": 0 } }, "additionalProperties": false } }
+      }, "additionalProperties": false
+    },
+    "action": {
+      "type": "object", "required": ["action_id", "simulation_time", "command", "args", "status", "reason"],
+      "properties": { "action_id": { "type": "string" }, "simulation_time": { "type": "integer", "minimum": 0 }, "command": { "type": "string" }, "args": { "type": "object" }, "status": { "enum": ["ACCEPTED", "BLOCKED", "COMPLETED", "FAILED"] }, "reason": { "type": ["string", "null"] } }, "additionalProperties": false
+    },
+    "boundaries": {
+      "type": "object", "required": ["simulation_only", "wallet", "real_kgen", "onchain_transfer", "real_legal_effect", "production_authority", "external_autonomy", "unbounded_spending", "self_modifying_code", "mutation_endpoints"],
+      "properties": { "simulation_only": { "const": true }, "wallet": { "const": "SIMULATED_WALLET_ONLY" }, "real_kgen": { "const": false }, "onchain_transfer": { "const": false }, "real_legal_effect": { "const": false }, "production_authority": { "const": false }, "external_autonomy": { "const": false }, "unbounded_spending": { "const": false }, "self_modifying_code": { "const": false }, "mutation_endpoints": { "const": false } },
+      "additionalProperties": false
+    }
+  }
+}

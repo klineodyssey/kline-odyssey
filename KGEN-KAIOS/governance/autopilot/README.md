@@ -82,6 +82,8 @@ Codex reran Company Boot and `git fetch origin --prune` at `2026-07-15T17:29:48+
 | `company_status/COMPANY_STATUS_2026-08-01_REAL_CAUSAL_WORLD_RUNTIME.md` | PR #63 post-merge Company Status and held follow-up worklines |
 | `company_status/COMPANY_STATUS_2026-08-02_FOREST_CANDIDATE_RELEASED_CROP_DISPATCHED.md` | Forest candidate release and sole active crop candidate dispatch |
 | `company_status/COMPANY_STATUS_2026-08-02_CROP_CANDIDATE_RELEASED_FRUIT_TREE_DISPATCHED.md` | Crop candidate release and sole active fruit-tree candidate dispatch |
+| `recovery_points/RECOVERY-KAIOS-AI-COMPANY-SPEC-V1.md` | AI Company V1 specification rollback anchor |
+| `company_status/COMPANY_STATUS_2026-08-02_AI_COMPANY_SPEC.md` | AI Company specification and sequential Cursor queue status |
 | `COMPANY_INBOX.md` | Durable Human intake boundary that remains available during network failure |
 | `PRIORITY_SCHEDULER.md` | Review-first ordering and one-task scheduling contract |
 | `REPOSITORY_MAINTENANCE_RUNTIME.md` | Fetch, compare, retry, recovery and health architecture |

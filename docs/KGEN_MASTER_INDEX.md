@@ -763,3 +763,30 @@ Task: `KAIOS-FOREST-AGRICULTURE-RUNTIME-V1-001`
 | `KAIOS/life/forest-agriculture/KAIOS_CURSOR_CROP_LIFE_PACKAGE_REVIEW_CLOSEOUT.md` | Crop candidate Codex review, repair record, complete commit lineage and lease release evidence. |
 | `KAIOS/life/candidates/forest-agriculture-v1/CURSOR_FRUIT_TREE_PACKAGES_WORK_ORDER.md` | Bounded fruit-tree candidate work order and allowed-path contract. |
 | `KGEN-KAIOS/governance/autopilot/company_status/COMPANY_STATUS_2026-08-02_CROP_CANDIDATE_RELEASED_FRUIT_TREE_DISPATCHED.md` | Company status for the atomic crop-to-fruit-tree queue transition. |
+
+## AI Company Order And Project Runtime V1 Specification
+
+Task: `KAIOS-AI-COMPANY-ORDER-PROJECT-RUNTIME-V1-001`
+
+| Repository path | Purpose |
+|---|---|
+| `KAIOS/ai-company/KAIOS_AI_COMPANY_SOURCE_CROSSWALK.md` | Reviewed source requirements, current owner evidence and held gaps. |
+| `KAIOS/ai-company/KAIOS_AI_COMPANY_ORDER_PROJECT_RUNTIME_V1_SPEC.md` | Cumulative V1 coordinator specification. |
+| `KAIOS/ai-company/KAIOS_AI_COMPANY_SCHEMA_V1.json` | Aggregate Runtime-state schema. |
+| `KAIOS/ai-company/KAIOS_AI_COMPANY_ORGANIZATION_SCHEMA_V1.json` | Organization and division authority schema. |
+| `KAIOS/ai-company/KAIOS_AI_COMPANY_REQUEST_SCHEMA_V1.json` | Request, requirement and assumption schema. |
+| `KAIOS/ai-company/KAIOS_AI_COMPANY_PROJECT_SCHEMA_V1.json` | Project and dependency schema. |
+| `KAIOS/ai-company/KAIOS_AI_COMPANY_TASK_SCHEMA_V1.json` | Causal task schema. |
+| `KAIOS/ai-company/KAIOS_AI_COMPANY_RESOURCE_PLAN_SCHEMA_V1.json` | BOM, workforce, equipment and supply-chain schema. |
+| `KAIOS/ai-company/KAIOS_AI_COMPANY_BUDGET_SCHEMA_V1.json` | Project budget schema. |
+| `KAIOS/ai-company/KAIOS_AI_COMPANY_SCHEDULE_SCHEMA_V1.json` | Project schedule schema. |
+| `KAIOS/ai-company/KAIOS_AI_COMPANY_CONTRACT_SCHEMA_V1.json` | Simulation-only contract schema. |
+| `KAIOS/ai-company/KAIOS_AI_COMPANY_INSPECTION_SCHEMA_V1.json` | QA and rework schema. |
+| `KAIOS/ai-company/KAIOS_AI_COMPANY_EVENT_SCHEMA_V1.json` | Deterministic event schema. |
+| `KAIOS/ai-company/KAIOS_AI_COMPANY_CAPACITY_SCHEMA_V1.json` | Bounded company capacity schema. |
+| `KAIOS/ai-company/ai-company-spec-validator.mjs` | Executable cross-schema policy validator. |
+| `KAIOS/ai-company/KAIOS_AI_COMPANY_RUNTIME_V1_TEST_PLAN.md` | Test and security gate plan. |
+| `KAIOS/ai-company/KAIOS_AI_COMPANY_SPEC_V1_CLOSEOUT.md` | Specification closeout. |
+| `KGEN-KAIOS/world-viewer/tests/ai-company-spec.test.mjs` | Node specification tests. |
+| `KGEN-KAIOS/governance/autopilot/recovery_points/RECOVERY-KAIOS-AI-COMPANY-SPEC-V1.md` | Rollback anchor. |
+| `KGEN-KAIOS/governance/autopilot/company_status/COMPANY_STATUS_2026-08-02_AI_COMPANY_SPEC.md` | Workline status. |

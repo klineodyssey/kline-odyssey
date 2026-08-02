@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://klineodyssey.github.io/kline-odyssey/KAIOS/ai-company/KAIOS_AI_COMPANY_CAPACITY_SCHEMA_V1.json",
+  "title": "KAIOS AI Company Capacity V1",
+  "type": "object",
+  "required": ["max_active_projects", "max_active_physical_projects", "max_active_digital_projects", "max_compute_load", "max_review_queue", "max_procurement_queue", "max_worker_assignments", "max_financial_exposure", "active_projects", "active_physical_projects", "active_digital_projects", "compute_load", "review_queue", "procurement_queue", "worker_assignments", "financial_exposure", "status"],
+  "properties": {
+    "max_active_projects": { "type": "integer", "minimum": 1, "maximum": 100 }, "max_active_physical_projects": { "type": "integer", "minimum": 0, "maximum": 50 }, "max_active_digital_projects": { "type": "integer", "minimum": 0, "maximum": 100 }, "max_compute_load": { "type": "number", "minimum": 0, "maximum": 1 }, "max_review_queue": { "type": "integer", "minimum": 1, "maximum": 1000 }, "max_procurement_queue": { "type": "integer", "minimum": 1, "maximum": 1000 }, "max_worker_assignments": { "type": "integer", "minimum": 1, "maximum": 10000 }, "max_financial_exposure": { "type": "number", "minimum": 0 },
+    "active_projects": { "type": "integer", "minimum": 0 }, "active_physical_projects": { "type": "integer", "minimum": 0 }, "active_digital_projects": { "type": "integer", "minimum": 0 }, "compute_load": { "type": "number", "minimum": 0 }, "review_queue": { "type": "integer", "minimum": 0 }, "procurement_queue": { "type": "integer", "minimum": 0 }, "worker_assignments": { "type": "integer", "minimum": 0 }, "financial_exposure": { "type": "number", "minimum": 0 },
+    "status": { "enum": ["AVAILABLE", "NEAR_CAPACITY", "COMPANY_CAPACITY_EXCEEDED"] }
+  },
+  "additionalProperties": false,
+  "x-kaios-invariants": ["active counts do not exceed configured maxima", "financial exposure does not exceed max_financial_exposure", "excess requests are queued, rejected, or scheduled later"]
+}

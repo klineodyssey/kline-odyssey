@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://klineodyssey.github.io/kline-odyssey/KAIOS/ai-company/KAIOS_AI_COMPANY_INSPECTION_SCHEMA_V1.json",
+  "title": "KAIOS AI Company Inspection V1",
+  "type": "object",
+  "required": ["inspection_id", "project_id", "task_id", "inspection_type", "inspector", "criteria", "measurements", "evidence", "result", "defects", "rework", "status", "simulation_only"],
+  "properties": {
+    "inspection_id": { "type": "string" }, "project_id": { "type": "string" }, "task_id": { "type": "string" },
+    "inspection_type": { "enum": ["DESIGN_REVIEW", "MATERIAL_INSPECTION", "SITE_INSPECTION", "SAFETY_INSPECTION", "STAGE_INSPECTION", "FUNCTIONAL_TEST", "FINAL_ACCEPTANCE"] },
+    "inspector": { "type": "string" }, "criteria": { "type": "array", "items": { "type": "string" } }, "measurements": { "type": "object" }, "evidence": { "type": "array", "items": { "type": "string" } },
+    "result": { "enum": ["PASS", "PASS_WITH_CONDITIONS", "FAIL", "REWORK_REQUIRED", "NOT_READY"] },
+    "defects": { "type": "array", "items": { "type": "string" } }, "rework": { "type": "array", "items": { "type": "string" } },
+    "status": { "enum": ["PLANNED", "IN_PROGRESS", "COMPLETE", "REWORK_OPEN"] }, "simulation_only": { "const": true }
+  },
+  "additionalProperties": false
+}

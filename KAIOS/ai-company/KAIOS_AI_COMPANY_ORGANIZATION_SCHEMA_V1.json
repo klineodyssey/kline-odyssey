@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://klineodyssey.github.io/kline-odyssey/KAIOS/ai-company/KAIOS_AI_COMPANY_ORGANIZATION_SCHEMA_V1.json",
+  "title": "KAIOS AI Company Organization V1",
+  "type": "object",
+  "required": ["company_id", "company_type", "status", "divisions", "finance", "authority"],
+  "properties": {
+    "company_id": { "const": "KAIOS_AI_COMPANY_V1" },
+    "company_type": { "const": "SIMULATED_PROJECT_COORDINATOR" },
+    "status": { "enum": ["OPERATING", "OVER_CAPACITY", "CASH_FLOW_WARNING", "PAYMENT_DELAY", "DISTRESS", "INSOLVENT", "RESTRUCTURING_SIMULATION", "COURT_PROTECTION_SIMULATION", "LIQUIDATION_SIMULATION", "DISSOLVED"] },
+    "divisions": {
+      "type": "array", "minItems": 21, "maxItems": 21,
+      "items": {
+        "type": "object",
+        "required": ["division_id", "authority", "allowed_actions", "forbidden_actions", "required_inputs", "outputs", "review_gate", "responsible_agent", "event_history", "cost_center", "status"],
+        "properties": {
+          "division_id": { "enum": ["CUSTOMER_SERVICE_DIVISION", "REQUIREMENTS_DIVISION", "ARCHITECTURE_DIVISION", "LIFE_CREATION_DIVISION", "DESIGN_DIVISION", "PHYSICS_REVIEW_DIVISION", "ECONOMY_REVIEW_DIVISION", "RIGHTS_REVIEW_DIVISION", "CIVILIZATION_REVIEW_DIVISION", "PROCUREMENT_DIVISION", "SUPPLY_CHAIN_DIVISION", "LABOR_DIVISION", "CONSTRUCTION_DIVISION", "MANUFACTURING_DIVISION", "LOGISTICS_DIVISION", "QA_INSPECTION_DIVISION", "FINANCE_DIVISION", "RISK_DIVISION", "LEGAL_SIMULATION_DIVISION", "MAINTENANCE_DIVISION", "DELIVERY_DIVISION"] },
+          "authority": { "const": "SIMULATION_COORDINATION_ONLY" },
+          "allowed_actions": { "type": "array", "items": { "type": "string" } },
+          "forbidden_actions": { "type": "array", "items": { "type": "string" } },
+          "required_inputs": { "type": "array", "items": { "type": "string" } },
+          "outputs": { "type": "array", "items": { "type": "string" } },
+          "review_gate": { "type": "string" }, "responsible_agent": { "type": "string" },
+          "event_history": { "type": "array", "maxItems": 1000, "items": { "type": "string" } },
+          "cost_center": { "type": "string" }, "status": { "enum": ["READY", "BUSY", "BLOCKED", "PAUSED", "CLOSED"] }
+        }, "additionalProperties": false
+      }
+    },
+    "finance": { "type": "object", "required": ["currency", "cash", "financial_exposure"], "properties": { "currency": { "const": "SIMULATED_CREDIT" }, "cash": { "type": "number" }, "financial_exposure": { "type": "number", "minimum": 0 } }, "additionalProperties": false },
+    "authority": { "type": "object", "required": ["simulation_only", "external_execution", "real_legal_effect", "production_authority"], "properties": { "simulation_only": { "const": true }, "external_execution": { "const": false }, "real_legal_effect": { "const": false }, "production_authority": { "const": false } }, "additionalProperties": false }
+  },
+  "additionalProperties": false
+}

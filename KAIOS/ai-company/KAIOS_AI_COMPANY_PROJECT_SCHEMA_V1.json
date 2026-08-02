@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://klineodyssey.github.io/kline-odyssey/KAIOS/ai-company/KAIOS_AI_COMPANY_PROJECT_SCHEMA_V1.json",
+  "title": "KAIOS AI Company Project V1",
+  "type": "object",
+  "required": ["project_id", "request_id", "proposal_id", "template_id", "objective", "location", "status", "milestones", "work_packages", "tasks", "dependencies", "deliverables", "resource_plan_id", "budget", "schedule", "contract_id", "risks", "issues", "progress_percent", "domain_binding", "simulation_only"],
+  "properties": {
+    "project_id": { "type": "string", "minLength": 1 }, "request_id": { "type": "string" }, "proposal_id": { "type": "string" },
+    "template_id": { "enum": ["FISHPOND_PROJECT", "BASIC_HOUSE_PROJECT", "SMALL_FARM_PROJECT", "WAREHOUSE_PROJECT", "BASIC_ROAD_PROJECT", "SMALL_BRIDGE_PROJECT", "WORKSHOP_PROJECT", "LIFE_PACKAGE_PROJECT", "SOFTWARE_MODULE_PROJECT"] },
+    "objective": { "type": "string" }, "location": { "type": ["string", "null"] },
+    "status": { "enum": ["PLANNED", "BLOCKED_DEPENDENCY", "SPECIFICATION_ONLY", "PROCUREMENT", "READY", "IN_PROGRESS", "PAUSED", "BLOCKED", "INSPECTION_PENDING", "REWORK_REQUIRED", "DELIVERY_PENDING", "ACCEPTANCE_PENDING", "COMPLETE", "CANCELLED", "FAILED"] },
+    "milestones": { "type": "array", "maxItems": 100, "items": { "$ref": "#/$defs/milestone" } },
+    "work_packages": { "type": "array", "maxItems": 500, "items": { "$ref": "#/$defs/work_package" } },
+    "tasks": { "type": "array", "maxItems": 5000, "items": { "$ref": "KAIOS_AI_COMPANY_TASK_SCHEMA_V1.json" } },
+    "dependencies": { "type": "array", "maxItems": 10000, "items": { "$ref": "#/$defs/dependency" } },
+    "deliverables": { "type": "array", "maxItems": 500, "items": { "$ref": "#/$defs/deliverable" } },
+    "resource_plan_id": { "type": "string" }, "budget": { "$ref": "KAIOS_AI_COMPANY_BUDGET_SCHEMA_V1.json" }, "schedule": { "$ref": "KAIOS_AI_COMPANY_SCHEDULE_SCHEMA_V1.json" }, "contract_id": { "type": ["string", "null"] },
+    "risks": { "type": "array", "maxItems": 500, "items": { "$ref": "#/$defs/risk" } },
+    "issues": { "type": "array", "maxItems": 500, "items": { "$ref": "#/$defs/issue" } },
+    "progress_percent": { "type": "number", "minimum": 0, "maximum": 100 },
+    "domain_binding": { "enum": ["AQUACULTURE_RUNTIME_V1", "CAUSAL_WORLD_CONSTRUCTION", "FOREST_AGRICULTURE_SPECIFICATION_ONLY", "CANDIDATE_LIFE_WORKFLOW", "SOFTWARE_PROJECT_WORKFLOW", "GENERIC_CAUSAL_PROJECT"] },
+    "simulation_only": { "const": true }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "milestone": { "type": "object", "required": ["milestone_id", "name", "task_ids", "status"], "properties": { "milestone_id": { "type": "string" }, "name": { "type": "string" }, "task_ids": { "type": "array", "items": { "type": "string" } }, "status": { "enum": ["NOT_READY", "READY", "IN_PROGRESS", "BLOCKED", "COMPLETE"] } }, "additionalProperties": false },
+    "work_package": { "type": "object", "required": ["work_package_id", "milestone_id", "name", "task_ids", "status"], "properties": { "work_package_id": { "type": "string" }, "milestone_id": { "type": "string" }, "name": { "type": "string" }, "task_ids": { "type": "array", "items": { "type": "string" } }, "status": { "enum": ["NOT_READY", "READY", "IN_PROGRESS", "BLOCKED", "COMPLETE"] } }, "additionalProperties": false },
+    "dependency": { "type": "object", "required": ["dependency_id", "predecessor_task_id", "successor_task_id", "mandatory", "status"], "properties": { "dependency_id": { "type": "string" }, "predecessor_task_id": { "type": "string" }, "successor_task_id": { "type": "string" }, "mandatory": { "type": "boolean" }, "status": { "enum": ["UNSATISFIED", "SATISFIED", "BLOCKED"] } }, "additionalProperties": false },
+    "deliverable": { "type": "object", "required": ["deliverable_id", "name", "acceptance_criteria", "status"], "properties": { "deliverable_id": { "type": "string" }, "name": { "type": "string" }, "acceptance_criteria": { "type": "array", "items": { "type": "string" } }, "status": { "enum": ["PLANNED", "READY_FOR_INSPECTION", "ACCEPTED", "REJECTED", "REWORK_REQUIRED"] } }, "additionalProperties": false },
+    "risk": { "type": "object", "required": ["risk_id", "description", "probability", "impact", "mitigation", "status"], "properties": { "risk_id": { "type": "string" }, "description": { "type": "string" }, "probability": { "type": "number", "minimum": 0, "maximum": 1 }, "impact": { "type": "number", "minimum": 0, "maximum": 1 }, "mitigation": { "type": "string" }, "status": { "enum": ["OPEN", "MITIGATED", "REALIZED", "CLOSED"] } }, "additionalProperties": false },
+    "issue": { "type": "object", "required": ["issue_id", "description", "reason", "required_to_unblock", "status"], "properties": { "issue_id": { "type": "string" }, "description": { "type": "string" }, "reason": { "type": "string" }, "required_to_unblock": { "type": "array", "items": { "type": "string" } }, "status": { "enum": ["OPEN", "IN_REVIEW", "RESOLVED", "CLOSED"] } }, "additionalProperties": false }
+  }
+}

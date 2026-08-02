@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://klineodyssey.github.io/kline-odyssey/KAIOS/ai-company/KAIOS_AI_COMPANY_SCHEDULE_SCHEMA_V1.json",
+  "title": "KAIOS AI Company Project Schedule V1",
+  "type": "object",
+  "required": ["planned_start", "planned_end", "estimated_duration", "critical_path", "task_dependencies", "worker_availability", "equipment_availability", "material_arrival", "weather_delay", "inspection_delay", "rework_delay", "transport_delay", "actual_start", "actual_end", "status"],
+  "properties": {
+    "planned_start": { "type": "integer", "minimum": 0 }, "planned_end": { "type": "integer", "minimum": 0 }, "estimated_duration": { "type": "number", "minimum": 0 },
+    "critical_path": { "type": "array", "items": { "type": "string" } }, "task_dependencies": { "type": "array", "items": { "type": "string" } },
+    "worker_availability": { "type": "object", "additionalProperties": { "type": "boolean" } }, "equipment_availability": { "type": "object", "additionalProperties": { "type": "boolean" } }, "material_arrival": { "type": "object", "additionalProperties": { "type": "integer", "minimum": 0 } },
+    "weather_delay": { "type": "number", "minimum": 0 }, "inspection_delay": { "type": "number", "minimum": 0 }, "rework_delay": { "type": "number", "minimum": 0 }, "transport_delay": { "type": "number", "minimum": 0 },
+    "actual_start": { "type": ["integer", "null"], "minimum": 0 }, "actual_end": { "type": ["integer", "null"], "minimum": 0 },
+    "status": { "enum": ["ON_SCHEDULE", "AT_RISK", "DELAYED", "BLOCKED", "PAUSED", "RECOVERY_PLAN_REQUIRED", "COMPLETE"] }
+  },
+  "additionalProperties": false,
+  "x-kaios-invariants": ["planned_end >= planned_start", "actual_end is null until completion", "money cannot reduce elapsed physical task duration"]
+}

@@ -24,6 +24,17 @@ Public interfaces:
 - [Fruit tree candidate Cursor work order](life/candidates/forest-agriculture-v1/CURSOR_FRUIT_TREE_PACKAGES_WORK_ORDER.md)
 - [Crop release and fruit tree dispatch Company Status](../KGEN-KAIOS/governance/autopilot/company_status/COMPANY_STATUS_2026-08-02_CROP_CANDIDATE_RELEASED_FRUIT_TREE_DISPATCHED.md)
 
+## AI Company Order And Project Runtime V1
+
+- [Source crosswalk](ai-company/KAIOS_AI_COMPANY_SOURCE_CROSSWALK.md)
+- [Cumulative specification](ai-company/KAIOS_AI_COMPANY_ORDER_PROJECT_RUNTIME_V1_SPEC.md)
+- [Aggregate schema](ai-company/KAIOS_AI_COMPANY_SCHEMA_V1.json)
+- [Specification validator](ai-company/ai-company-spec-validator.mjs)
+- [Test plan](ai-company/KAIOS_AI_COMPANY_RUNTIME_V1_TEST_PLAN.md)
+- [Specification closeout](ai-company/KAIOS_AI_COMPANY_SPEC_V1_CLOSEOUT.md)
+- [Recovery](../KGEN-KAIOS/governance/autopilot/recovery_points/RECOVERY-KAIOS-AI-COMPANY-SPEC-V1.md)
+- [Company Status](../KGEN-KAIOS/governance/autopilot/company_status/COMPANY_STATUS_2026-08-02_AI_COMPANY_SPEC.md)
+
 ## Foundational Life Runtime V1
 
 `life/runtime/` executes the eight PR #69 foundational candidates in a
