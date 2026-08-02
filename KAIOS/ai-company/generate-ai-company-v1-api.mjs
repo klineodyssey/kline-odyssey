@@ -98,8 +98,13 @@ const files = {
     branch_template: cursorQueue.branch_template,
     one_task_at_a_time: cursorQueue.one_task_at_a_time,
     continuous_dispatch_mode: cursorQueue.continuous_dispatch_mode,
+    automatic_unreviewed_dispatch: cursorQueue.automatic_unreviewed_dispatch,
+    active_claims: cursorQueue.active_claims,
+    worker_state: cursorQueue.worker_state,
+    next_dispatch_requires: cursorQueue.next_dispatch_requires,
     output_authority: cursorQueue.output_authority,
     queue: cursorQueue.queue,
+    prepared_task: cursorQueue.prepared_task,
     forbidden: cursorQueue.forbidden
   }
 };

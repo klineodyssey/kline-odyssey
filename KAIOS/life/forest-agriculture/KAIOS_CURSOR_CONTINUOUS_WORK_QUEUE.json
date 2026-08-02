@@ -8,6 +8,13 @@
   "one_task_at_a_time": true,
   "continuous_dispatch_mode": "CODEX_CONTROLLED_AFTER_FORMAL_RELEASE",
   "automatic_unreviewed_dispatch": false,
+  "active_claims": [],
+  "worker_state": {
+    "worker_id": "cursor-01",
+    "current_task": null,
+    "current_branch": null,
+    "status": "IDLE"
+  },
   "next_dispatch_requires": [
     "PREVIOUS_TASK_CODEX_REVIEWED",
     "PREVIOUS_TASK_CLOSED",
@@ -27,8 +34,8 @@
     { "priority": 8, "task_id": "KAIOS-CURSOR-INSECT-CANDIDATES-001", "work": "INSECT_CANDIDATE_PACKAGE", "status": "RELEASED" },
     { "priority": 9, "task_id": "KAIOS-CURSOR-POLLINATOR-RESEARCH-001", "work": "POLLINATOR_RESEARCH", "status": "RELEASED" },
     { "priority": 10, "task_id": "KAIOS-CURSOR-EARTHWORM-CANDIDATE-001", "work": "EARTHWORM_CANDIDATE_PACKAGE", "status": "RELEASED" },
-    { "priority": 11, "task_id": "KAIOS-CURSOR-FUNGI-CANDIDATE-001", "work": "FUNGI_CANDIDATE_PACKAGE", "status": "DISPATCHED" },
-    { "priority": 12, "task_id": "KAIOS-CURSOR-MICROBIAL-RESEARCH-001", "work": "MICROBIAL_RESEARCH", "status": "QUEUED" },
+    { "priority": 11, "task_id": "KAIOS-CURSOR-FUNGI-CANDIDATE-001", "work": "FUNGI_CANDIDATE_PACKAGE", "status": "RELEASED" },
+    { "priority": 12, "task_id": "KAIOS-CURSOR-MICROBIAL-RESEARCH-001", "work": "MICROBIAL_RESEARCH", "status": "READY_FOR_ATOMIC_CLAIM" },
     { "priority": 13, "task_id": "KAIOS-CURSOR-WEATHER-DATASET-001", "work": "WEATHER_DATASET", "status": "QUEUED" },
     { "priority": 14, "task_id": "KAIOS-CURSOR-SEASON-DATASET-001", "work": "SEASON_DATASET", "status": "QUEUED" },
     { "priority": 15, "task_id": "KAIOS-CURSOR-RAINFALL-DATASET-001", "work": "RAINFALL_DATASET", "status": "QUEUED" },
@@ -38,6 +45,50 @@
     { "priority": 19, "task_id": "KAIOS-CURSOR-FOREST-AG-API-CANDIDATES-001", "work": "CANDIDATE_API_PROJECTION", "status": "QUEUED" },
     { "priority": 20, "task_id": "KAIOS-CURSOR-FOREST-AG-REGRESSION-001", "work": "CANDIDATE_REGRESSION_TEST", "status": "QUEUED" }
   ],
+  "prepared_task": {
+    "envelope_id": "TASK-ENVELOPE-KAIOS-CURSOR-MICROBIAL-RESEARCH-001-V1",
+    "task_id": "KAIOS-CURSOR-MICROBIAL-RESEARCH-001",
+    "worker_id": "cursor-01",
+    "reviewer": "codex-gm-01",
+    "source_base": "beb982fda885fa7acc4dc35407df611d1019a544",
+    "branch": "cursor-handoff/KAIOS-CURSOR-MICROBIAL-RESEARCH-001",
+    "status": "READY_FOR_ATOMIC_CLAIM",
+    "claim_state": "UNCLAIMED",
+    "claim_required": "ATOMIC_CLAIM_BEFORE_WORK",
+    "output_status": "CURSOR_RESEARCH_PROPOSAL_ONLY",
+    "authorized_paths": [
+      "KAIOS/life/candidates/forest-agriculture-v1/microbial-research/"
+    ],
+    "expected_files": [
+      "CURSOR_MICROBIAL_DECOMPOSER_RESEARCH_REPORT.md",
+      "microbial-decomposer-process-proposals.json",
+      "microbial-environment-threshold-proposals.json",
+      "microbial-resource-accounting-scenarios.json",
+      "microbial-competition-and-succession-proposals.json",
+      "microbial-safety-boundaries.json",
+      "microbial-test-scenarios.json",
+      "CURSOR_MICROBIAL_RESEARCH_IMPROVEMENT_PROPOSAL.md"
+    ],
+    "actions": [
+      "READ_REPOSITORY_CONTEXT",
+      "WRITE_ONLY_EXPECTED_FILES_UNDER_AUTHORIZED_PATH",
+      "RUN_BOUNDED_LOCAL_TESTS",
+      "RECORD_GIT_OBJECT_AND_SHA256_PROVENANCE",
+      "COMMIT_EXACTLY_EXPECTED_FILES",
+      "STOP_AT_PENDING_CODEX_REVIEW"
+    ],
+    "forbidden_paths": [
+      "KGEN-KAIOS/**",
+      "KGEN/**",
+      "KAIOS/**/Runtime/**",
+      "KAIOS/**/Wallet/**",
+      "**/*CURRENT*",
+      "api/**",
+      "docs/**",
+      "README.md",
+      "PRIMEFORGE_GENESIS_BOOT_SEQUENCE_V1_4.md"
+    ]
+  },
   "forbidden": [
     "CURRENT",
     "WALLET",

@@ -47,6 +47,9 @@ Public interfaces:
 - [Earthworm candidate Codex review closeout](life/forest-agriculture/KAIOS_CURSOR_EARTHWORM_CANDIDATE_REVIEW_CLOSEOUT.md)
 - [Fungi candidate Cursor work order](life/candidates/forest-agriculture-v1/CURSOR_FUNGI_CANDIDATE_WORK_ORDER.md)
 - [Earthworm release and fungi dispatch Company Status](../KGEN-KAIOS/governance/autopilot/company_status/COMPANY_STATUS_2026-08-02_EARTHWORM_RELEASED_FUNGI_DISPATCHED.md)
+- [Fungi candidate Codex review closeout](life/forest-agriculture/KAIOS_CURSOR_FUNGI_CANDIDATE_REVIEW_CLOSEOUT.md)
+- [Microbial research Cursor work order](life/candidates/forest-agriculture-v1/CURSOR_MICROBIAL_RESEARCH_WORK_ORDER.md)
+- [Fungi release and microbial research prepared-task Company Status](../KGEN-KAIOS/governance/autopilot/company_status/COMPANY_STATUS_2026-08-02_FUNGI_RELEASED_MICROBIAL_READY_FOR_ATOMIC_CLAIM.md)
 
 ## AI Company Order And Project Runtime V1
 
