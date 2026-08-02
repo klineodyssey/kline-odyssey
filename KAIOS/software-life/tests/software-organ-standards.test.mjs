@@ -170,7 +170,9 @@ export const createValidRecord = ({
       resource_budget: quantity(16, "compute_millisecond"),
       energy_budget: quantity(16, "compute_joule_proxy"),
       maximum_downtime_seconds: 0,
-      verification_commands: ["node --test KAIOS/software-life/tests/software-organ-standards.test.mjs"],
+      verification_commands: [
+        "node --test --test-name-pattern=\"current Worker Registry revocation overrides historical maximum authority|rehashed adversarial plans cannot reuse stale gate attestations\" KAIOS/software-life/tests/software-organ-standards.test.mjs"
+      ],
       recovery_ref: "KAIOS/software-life/RECOVERY-KAIOS-SOFTWARE-ORGAN-TRANSPLANT-STANDARDS.md"
     };
     value.artifact_hash = computePlanArtifactHash(value);
