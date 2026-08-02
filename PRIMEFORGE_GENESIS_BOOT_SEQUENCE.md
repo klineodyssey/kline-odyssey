@@ -22,13 +22,13 @@ permalink: /PRIMEFORGE_GENESIS_BOOT_SEQUENCE/
 
 STATUS: ACTIVE  
 VERSION: CURRENT  
-REVISION: 2026-08-02.AI_COMPANY_SPEC_AND_SOIL_TYPES_DISPATCH_INDEX
+REVISION: 2026-08-02.AI_COMPANY_SPEC_SOIL_RELEASE_FERTILIZER_DISPATCH_INDEX
 LAST_UPDATED: 2026-08-02
 UPDATED_BY: Codex
 REVIEWED_BY: Codex
-SOURCE_COMMIT: 9b5246918b4e912557c9a6cd402ac9ab9fb6f83f
-TASK_ID: KAIOS-AI-COMPANY-ORDER-PROJECT-RUNTIME-V1-001
-CHANGE_REASON: Register the cumulative AI Company order/project specification after the reviewed fruit-tree release and bounded vegetable dispatch, without activating Runtime or production authority.
+SOURCE_COMMIT: 1650191f35567d43016473420cfd2cba22b00aea
+TASK_ID: KAIOS-CURSOR-SOIL-TYPES-001-RELEASE
+CHANGE_REASON: Preserve the cumulative AI Company specification index, register the independently reviewed soil release, and dispatch bounded fertilizer-model research without activating Runtime or production authority.
 SOURCE_OF_TRUTH: TRUE  
 FORMAL_ENTRY: PRIMEFORGE_GENESIS_BOOT_SEQUENCE.md  
 ANCESTOR: PRIMEFORGE_GENESIS_BOOT_SEQUENCE_V1_4.md  

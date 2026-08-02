@@ -5,9 +5,9 @@
     "updated": "2026-08-02",
     "updated_by": "Codex",
     "reviewed_by": "Codex",
-    "source_commit": "614b4e02edb8f705848ad7cb49132ae37e8f5b7e",
-    "task_id": "KAIOS-CURSOR-VEGETABLE-PACKAGES-001-RELEASE",
-    "change_reason": "Release the Codex-reviewed vegetable candidate claim and atomically dispatch cursor-01 to the next bounded soil-type candidate task.",
+    "source_commit": "1650191f35567d43016473420cfd2cba22b00aea",
+    "task_id": "KAIOS-CURSOR-SOIL-TYPES-001-RELEASE",
+    "change_reason": "Release the independently reviewed soil-type candidate claim and atomically dispatch cursor-01 to the next bounded fertilizer-model research task.",
     "source_of_truth": true
   },
   "formal_employee_requirements": [

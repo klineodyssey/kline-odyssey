@@ -177,6 +177,16 @@ class CursorWorkerRegistryRepairTests(unittest.TestCase):
         )
 
     def test_fertilizer_model_dispatch_is_the_only_active_claim(self):
+        metadata = self.registry["metadata"]
+        self.assertEqual(
+            metadata["source_commit"],
+            "1650191f35567d43016473420cfd2cba22b00aea",
+        )
+        self.assertEqual(
+            metadata["task_id"], "KAIOS-CURSOR-SOIL-TYPES-001-RELEASE"
+        )
+        self.assertIn("fertilizer-model research task", metadata["change_reason"])
+
         locked = validate_one_task_lock(self.registry["dispatch_history"])
         self.assertEqual(len(locked), 1)
         dispatch = locked[0]
