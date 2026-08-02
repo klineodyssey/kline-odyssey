@@ -27,17 +27,17 @@ execution.
 | 2026-08-02T10:58Z | 2026-08-02T11:20Z | Earthworm release and fungi dispatch | PR `#111` | Worker 12/12; Boot 74/74; JSON 890/890; two CI runs; independent P0/P1/P2=0 | merged `5e20186c5a644171e658f95a26c0bbe1a4741287` | fungi candidate + organ standards |
 | 2026-08-02T10:38Z | 2026-08-02T11:32Z | Organ standards independent review and repairs | `codex/kaios-software-organ-transplant-standards` | two rounds; 5 P1 and 5 P2 repaired; semantic fixtures 21/21 | `READY_AFTER_REVIEW` | Draft standards PR |
 | 2026-08-02T11:33Z | 2026-08-02T12:03Z | Organ standards attack-review hardening | PR `#112` | third review found/repaired 4 P1: executed Schema, fixed governance paths, Git-blob evidence, authorized reviewers/Rights and real rollback baseline; 26/26 fixtures PASS | `FINAL_REVIEW_PENDING` | independent re-review |
+| 2026-08-02T12:04Z | 2026-08-02T12:51Z | Organ standards canonical replay hardening | PR `#112` | fourth review found/repaired 4 P1 and 2 P2: validator-owned repo, reachable commits, real replay, recomputed signatures, Codex terminal authority and Registry-backed completion; 32/32 PASS | `FINAL_REVIEW_PENDING` | independent re-review |
 
 ## Cursor Assignment
 
-At `2026-08-02T11:20Z`, `cursor-01` received
-`KAIOS-CURSOR-FUNGI-CANDIDATE-001` in the isolated worktree
-`C:\Desktop\kline-odyssey-fungi-candidate`. Earthworm PR #110 merged and PR
-#111 formally released its claim before the Fungi worktree was created.
 Cursor committed the exact sixteen-file Fungi candidate package as
-`a4fe488eecdf6652ea9fad257195f3ba8fe853aa`; it remains
-`CURSOR_RESEARCH_CANDIDATE_ONLY / PENDING_CODEX_REVIEW` while independent
-Codex review runs.
+`a4fe488eecdf6652ea9fad257195f3ba8fe853aa`. Independent review returned
+P0/P1/P2=0 and PR #113 merged as
+`beb982fda885fa7acc4dc35407df611d1019a544`; the package remains
+`CURSOR_RESEARCH_CANDIDATE_ONLY`. PR #114 is recording separate claim close and
+release evidence before the next Microbial Research claim is acquired. No
+unfenced dispatch is treated as active.
 
 ## Recorded Pauses
 

@@ -43,7 +43,7 @@ Constitution source modification: `FALSE`
 
 ## Independent Review
 
-Three attack-review rounds found nine P1 and five P2 issues in total. Repairs
+Four attack-review rounds found thirteen P1 and seven P2 issues in total. Repairs
 added:
 
 - evidence-derived approval and simulated Rights enforcement;
@@ -65,8 +65,17 @@ added:
   blobs;
 - existing baseline commit and registered host canonical-state blob
   verification for migration and rollback.
+- validator-owned repository root, canonical origin and Registry lineage
+  anchor enforcement;
+- canonical-HEAD reachability for every evidence, baseline and completion
+  commit;
+- recomputed organ compatibility signatures and plan artifact hashes;
+- an executed deterministic transition interpreter with cumulative resource
+  and energy budgets;
+- Codex-only decision, rework, acceptance, rollback and completion events;
+- immutable completion evidence plus an actual host Registry projection gate.
 
-Semantic and structural valid/negative fixtures: `26/26 PASS`.
+Semantic and structural valid/negative fixtures: `32/32 PASS`.
 
 P0: `0`
 
