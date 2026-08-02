@@ -46,12 +46,15 @@ or approve itself.
 
 Current Cursor task:
 
-- `KAIOS-CURSOR-EARTHWORM-CANDIDATE-001`
-- branch `cursor-handoff/KAIOS-CURSOR-EARTHWORM-CANDIDATE-001`
-- output `CURSOR_RESEARCH_CANDIDATE_ONLY / PENDING_CODEX_REVIEW`
+- `KAIOS-CURSOR-MICROBIAL-RESEARCH-001`
+- branch `cursor-handoff/KAIOS-CURSOR-MICROBIAL-RESEARCH-001`
+- output `RESEARCH_PROPOSAL_ONLY / PENDING_CODEX_REVIEW`
 
-The software-life manifest candidate task is queued behind the pre-existing
-forest/agriculture queue. It does not preempt an active claim.
+Earthworm and fungi candidate packages completed independent Codex review and
+were released from their worker claims. The microbial decomposer research task
+is the sole active claim; the weather dataset proposal is next. The software-life
+manifest candidate task remains queued behind the pre-existing
+forest/agriculture queue and does not preempt an active claim.
 
 ## Mandatory Stops
 

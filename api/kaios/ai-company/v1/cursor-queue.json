@@ -85,13 +85,13 @@
       "priority": 11,
       "task_id": "KAIOS-CURSOR-FUNGI-CANDIDATE-001",
       "work": "FUNGI_CANDIDATE_PACKAGE",
-      "status": "DISPATCHED"
+      "status": "RELEASED"
     },
     {
       "priority": 12,
       "task_id": "KAIOS-CURSOR-MICROBIAL-RESEARCH-001",
       "work": "MICROBIAL_RESEARCH",
-      "status": "QUEUED"
+      "status": "DISPATCHED"
     },
     {
       "priority": 13,

@@ -49,17 +49,21 @@ The vegetable assignment was allowed to complete before its lease was released.
   `P0=0 / P1=0 / P2=0` and merged as
   `CURSOR_RESEARCH_CANDIDATE_ONLY` in
   `eb17536ff6affb34f93bce6c5622d7bab018d230`.
+- Fungi candidate: PR `#113`, independently reviewed at
+  `P0=0 / P1=0 / P2=0` and merged as
+  `CURSOR_RESEARCH_CANDIDATE_ONLY` in
+  `beb982fda885fa7acc4dc35407df611d1019a544`.
 
 ## Current Assignment
 
-- Task: `KAIOS-CURSOR-FUNGI-CANDIDATE-001`
-- Branch: `cursor-handoff/KAIOS-CURSOR-FUNGI-CANDIDATE-001`
+- Task: `KAIOS-CURSOR-MICROBIAL-RESEARCH-001`
+- Branch: `cursor-handoff/KAIOS-CURSOR-MICROBIAL-RESEARCH-001`
 - Status: `ACTIVE / ONE_TASK_AT_A_TIME`
-- Output authority: `CURSOR_RESEARCH_CANDIDATE_ONLY / PENDING_CODEX_REVIEW`
+- Output authority: `CURSOR_RESEARCH_PROPOSAL_ONLY / PENDING_CODEX_REVIEW`
 
-The next safe queue item is microbial-decomposer research. It may be
-dispatched only after Codex independently reviews and formally releases the
-fungi candidate claim.
+The next safe queue item is the weather-dataset proposal. It may be dispatched
+only after Codex independently reviews and formally releases the microbial
+research claim.
 
 ## Boundaries
 

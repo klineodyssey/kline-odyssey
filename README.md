@@ -1165,6 +1165,9 @@ supply-chain owners and does not activate Production authority.
 - [Earthworm Candidate Codex Review Closeout](KAIOS/life/forest-agriculture/KAIOS_CURSOR_EARTHWORM_CANDIDATE_REVIEW_CLOSEOUT.md)
 - [Fungi Candidate Cursor Work Order](KAIOS/life/candidates/forest-agriculture-v1/CURSOR_FUNGI_CANDIDATE_WORK_ORDER.md)
 - [Earthworm Release and Fungi Candidate Dispatch Company Status](KGEN-KAIOS/governance/autopilot/company_status/COMPANY_STATUS_2026-08-02_EARTHWORM_RELEASED_FUNGI_DISPATCHED.md)
+- [Fungi Candidate Codex Review Closeout](KAIOS/life/forest-agriculture/KAIOS_CURSOR_FUNGI_CANDIDATE_REVIEW_CLOSEOUT.md)
+- [Microbial Research Cursor Work Order](KAIOS/life/candidates/forest-agriculture-v1/CURSOR_MICROBIAL_RESEARCH_WORK_ORDER.md)
+- [Fungi Release and Microbial Research Dispatch Company Status](KGEN-KAIOS/governance/autopilot/company_status/COMPANY_STATUS_2026-08-02_FUNGI_RELEASED_MICROBIAL_RESEARCH_DISPATCHED.md)
 
 ### KAIOS Software Life
 

@@ -5,9 +5,9 @@
     "updated": "2026-08-02",
     "updated_by": "Codex",
     "reviewed_by": "Codex",
-    "source_commit": "eb17536ff6affb34f93bce6c5622d7bab018d230",
-    "task_id": "KAIOS-CURSOR-EARTHWORM-CANDIDATE-001-RELEASE",
-    "change_reason": "Release the independently reviewed earthworm candidate claim and atomically dispatch cursor-01 to the next bounded fungi candidate task.",
+    "source_commit": "beb982fda885fa7acc4dc35407df611d1019a544",
+    "task_id": "KAIOS-CURSOR-FUNGI-CANDIDATE-001-RELEASE",
+    "change_reason": "Release the independently reviewed fungi candidate claim and atomically dispatch cursor-01 to bounded microbial decomposer research.",
     "source_of_truth": true
   },
   "formal_employee_requirements": [
@@ -157,6 +157,14 @@
       "branch": "cursor-handoff/KAIOS-CURSOR-FUNGI-CANDIDATE-001",
       "output_status": "CURSOR_RESEARCH_CANDIDATE_ONLY",
       "reviewer": "codex-gm-01",
+      "status": "RELEASED"
+    },
+    {
+      "task_id": "KAIOS-CURSOR-MICROBIAL-RESEARCH-001",
+      "worker_id": "cursor-01",
+      "branch": "cursor-handoff/KAIOS-CURSOR-MICROBIAL-RESEARCH-001",
+      "output_status": "CURSOR_RESEARCH_PROPOSAL_ONLY",
+      "reviewer": "codex-gm-01",
       "status": "DISPATCHED"
     }
   ],
@@ -195,13 +203,13 @@
         "LIFE_RESEARCH_ANALYST"
       ],
       "workspace": "cursor-worker-workspace",
-      "current_task": "KAIOS-CURSOR-FUNGI-CANDIDATE-001",
-      "current_branch": "cursor-handoff/KAIOS-CURSOR-FUNGI-CANDIDATE-001",
+      "current_task": "KAIOS-CURSOR-MICROBIAL-RESEARCH-001",
+      "current_branch": "cursor-handoff/KAIOS-CURSOR-MICROBIAL-RESEARCH-001",
       "status": "ACTIVE",
       "employee_status": "ACTIVE",
       "trust_level": "T2",
-      "heartbeat": "2026-08-02T10:58:30Z",
-      "last_report": "KAIOS/life/forest-agriculture/KAIOS_CURSOR_EARTHWORM_CANDIDATE_REVIEW_CLOSEOUT.md",
+      "heartbeat": "2026-08-02T12:12:00Z",
+      "last_report": "KAIOS/life/forest-agriculture/KAIOS_CURSOR_FUNGI_CANDIDATE_REVIEW_CLOSEOUT.md",
       "allowed_branch_pattern": "cursor-handoff/<Task-ID>",
       "branch_input_aliases": [
         "cursor/<feature-name>"

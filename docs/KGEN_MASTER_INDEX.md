@@ -787,6 +787,9 @@ Task: `KAIOS-FOREST-AGRICULTURE-RUNTIME-V1-001`
 | `KAIOS/life/forest-agriculture/KAIOS_CURSOR_EARTHWORM_CANDIDATE_REVIEW_CLOSEOUT.md` | Codex review and formal release of the bounded earthworm candidate. |
 | `KAIOS/life/candidates/forest-agriculture-v1/CURSOR_FUNGI_CANDIDATE_WORK_ORDER.md` | Bounded fungi candidate work order and allowed-path contract. |
 | `KGEN-KAIOS/governance/autopilot/company_status/COMPANY_STATUS_2026-08-02_EARTHWORM_RELEASED_FUNGI_DISPATCHED.md` | Company status for the atomic earthworm-to-fungi queue transition. |
+| `KAIOS/life/forest-agriculture/KAIOS_CURSOR_FUNGI_CANDIDATE_REVIEW_CLOSEOUT.md` | Codex review and formal release of the bounded fungi candidate. |
+| `KAIOS/life/candidates/forest-agriculture-v1/CURSOR_MICROBIAL_RESEARCH_WORK_ORDER.md` | Bounded microbial decomposer research work order and allowed-path contract. |
+| `KGEN-KAIOS/governance/autopilot/company_status/COMPANY_STATUS_2026-08-02_FUNGI_RELEASED_MICROBIAL_RESEARCH_DISPATCHED.md` | Company status for the atomic fungi-to-microbial-research queue transition. |
 | `KAIOS/software-life/README.md` | Software Life canonicalization documentation center and authority boundary. |
 | `KAIOS/software-life/KAIOS_SOFTWARE_LIFE_NAMING_AUDIT.json` | Full tracked-file and JSON identity naming audit. |
 | `KAIOS/software-life/KAIOS_SOFTWARE_LIFE_NAMING_AUDIT_REPORT.md` | Human-readable naming audit result and batch policy. |
