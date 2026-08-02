@@ -75,7 +75,7 @@ const createValidRecord = () => {
   const evidenceCommit = execFileSync("git", ["rev-parse", "HEAD"], { cwd: root, encoding: "utf8" }).trim();
   const baselineStateRef = host.location.canonical_path;
   const baselineStateHash = computeContentHash(gitBlob(baselineCommit, baselineStateRef));
-  const evidenceRef = "KAIOS/software-life/KAIOS_SOFTWARE_LIFE_REGISTRY.json";
+  const evidenceRef = "KAIOS/software-life/evidence/SOFTWARE_ORGAN_GATE_EVIDENCE_FIXTURE.json";
   const evidenceContentHash = computeContentHash(gitBlob(evidenceCommit, evidenceRef));
   const reviewId = "REVIEW-ORGAN-TRANSPLANT-001";
   const transplantId = "TRANSPLANT-ORGAN-001";
@@ -98,6 +98,7 @@ const createValidRecord = () => {
       actor: "CODEX_CANONICAL_REVIEW",
       action: `TRANSITION-${nextState}`,
       inputs: {
+        plan_id: "PLAN-MIGRATION-001",
         plan_step_index: index,
         plan_step_action: `TRANSITION-${nextState}`
       },
@@ -144,7 +145,7 @@ const createValidRecord = () => {
     return [gate, item];
   }));
 
-  const plan = (id) => {
+  const plan = (id, steps) => {
     const value = {
       plan_id: id,
       owner: "CODEX_CANONICAL_REVIEW",
@@ -153,7 +154,7 @@ const createValidRecord = () => {
       baseline_state_hash: baselineStateHash,
       artifact_hash: "",
       affected_paths: ["KAIOS/software-life/KAIOS_SOFTWARE_ORGAN_STANDARD.md"],
-      steps: path.map((state) => `TRANSITION-${state}`),
+      steps,
       resource_budget: quantity(16, "compute_millisecond"),
       energy_budget: quantity(16, "compute_joule_proxy"),
       maximum_downtime_seconds: 0,
@@ -263,8 +264,8 @@ const createValidRecord = () => {
       organ_id: organ.organ_id,
       state: "APPROVED_SIMULATION",
       automatic: false,
-      migration_plan: plan("PLAN-MIGRATION-001"),
-      rollback_plan: plan("PLAN-ROLLBACK-001"),
+      migration_plan: plan("PLAN-MIGRATION-001", path.map((state) => `TRANSITION-${state}`)),
+      rollback_plan: plan("PLAN-ROLLBACK-001", ["ROLLBACK-RESTORE"]),
       events
     },
     security_boundary: {
@@ -301,11 +302,19 @@ const rebuildEventChain = (record) => {
   let previousHash = null;
   const resourceTotals = {};
   const energyTotals = {};
+  let migrationStepIndex = 0;
   for (const [index, event] of record.transplant.events.entries()) {
     event.previous_transplant_state = previousState;
     event.previous_state_hash = previousHash;
     event.action = canonicalActionForState(event.next_transplant_state);
-    event.inputs = { plan_step_index: index, plan_step_action: event.action };
+    const isRollbackEvent = event.next_transplant_state === "ROLLED_BACK";
+    const plan = isRollbackEvent ? record.transplant.rollback_plan : record.transplant.migration_plan;
+    event.inputs = {
+      plan_id: plan.plan_id,
+      plan_step_index: isRollbackEvent ? 0 : migrationStepIndex,
+      plan_step_action: event.action
+    };
+    if (!isRollbackEvent) migrationStepIndex += 1;
     event.status = canonicalStatusForState(event.next_transplant_state);
     event.rights_decision = event.next_transplant_state === "APPROVED_SIMULATION" ? "APPROVED_SIMULATION" : null;
     for (const [unit, value] of Object.entries(event.resource_delta)) resourceTotals[unit] = (resourceTotals[unit] ?? 0) + value;
@@ -330,9 +339,9 @@ const rebuildEventChain = (record) => {
 const appendTransition = (record, state, outputs = {}) => {
   const index = record.transplant.events.length;
   const action = canonicalActionForState(state);
-  for (const plan of [record.transplant.migration_plan, record.transplant.rollback_plan]) {
-    plan.steps.push(action);
-    plan.artifact_hash = computePlanArtifactHash(plan);
+  if (state !== "ROLLED_BACK") {
+    record.transplant.migration_plan.steps.push(action);
+    record.transplant.migration_plan.artifact_hash = computePlanArtifactHash(record.transplant.migration_plan);
   }
   record.transplant.events.push({
     event_id: `EVENT-TRANSPLANT-${String(index + 1).padStart(3, "0")}`,
@@ -343,7 +352,11 @@ const appendTransition = (record, state, outputs = {}) => {
     simulation_time: new Date(Date.UTC(2026, 7, 2, 11, 0, index)).toISOString(),
     actor: "CODEX_CANONICAL_REVIEW",
     action,
-    inputs: { plan_step_index: index, plan_step_action: action },
+    inputs: {
+      plan_id: state === "ROLLED_BACK" ? record.transplant.rollback_plan.plan_id : record.transplant.migration_plan.plan_id,
+      plan_step_index: state === "ROLLED_BACK" ? 0 : record.transplant.migration_plan.steps.length - 1,
+      plan_step_action: action
+    },
     outputs: { replay_state_hash: hash("0"), ...outputs },
     resource_delta: { compute_millisecond: 1 },
     energy_delta: { compute_joule_proxy: 1 },
@@ -414,6 +427,7 @@ test("migration, rollback and deterministic history are mandatory", () => {
   for (const field of ["event_id", "transplant_id", "donor_life_id", "host_life_id", "organ_id", "simulation_time", "actor", "action", "inputs", "outputs", "resource_delta", "energy_delta", "rights_decision", "seed", "status", "reason", "previous_transplant_state", "next_transplant_state", "previous_state_hash", "next_state_hash"]) {
     assert.ok(schema.$defs.transplantEvent.required.includes(field), field);
   }
+  assert.ok(schema.$defs.transplantEventInputs.required.includes("plan_id"));
   assert.equal(schema.$defs.transplantEvent.properties.next_state_hash.$ref, "#/$defs/sha256");
   assert.equal(schema.$defs.plan.properties.baseline_commit.$ref, "#/$defs/repositoryCommit");
   for (const field of ["baseline_state_ref", "baseline_state_hash", "artifact_hash", "affected_paths", "resource_budget", "energy_budget", "maximum_downtime_seconds"]) {
@@ -704,6 +718,19 @@ test("repository evidence requires a regular tracked blob and matching content h
   assert.ok(validate(hashRecord).errors.some(({ code }) => code === "EVIDENCE_CONTENT_HASH_INVALID"));
 });
 
+test("gate PASS requires a typed identity-bound semantic attestation", () => {
+  const record = createValidRecord();
+  const evidence = record.compatibility_review.gate_evidence.TESTS_PASS;
+  const unrelatedRef = "KAIOS/software-life/KAIOS_SOFTWARE_LIFE_REGISTRY.json";
+  evidence.evidence_refs = [unrelatedRef];
+  evidence.evidence_content_hashes = {
+    [unrelatedRef]: computeContentHash(gitBlob(evidence.evidence_commit, unrelatedRef))
+  };
+  evidence.evidence_hash = computeGateEvidenceHash("TESTS_PASS", evidence);
+  const result = validate(record);
+  assert.ok(result.errors.some(({ code }) => code === "GATE_SEMANTIC_ATTESTATION_INVALID"));
+});
+
 test("historical execution cannot erase its original approval requirements", () => {
   const record = createValidRecord();
   appendTransition(record, "TRANSPLANTING");
@@ -852,6 +879,7 @@ test("COMPLETE requires a real Registry projection and immutable completion evid
   assert.ok(result.errors.some(({ code }) => code === "COMPLETION_REGISTRY_PROJECTION_MISSING"));
   assert.ok(result.errors.some(({ code }) => code === "COMPLETION_GENOME_REVISION_IDENTITY_INVALID"));
   assert.ok(result.errors.some(({ code }) => code === "COMPLETION_INTEGRATION_EVIDENCE_INVALID"));
+  assert.ok(result.errors.some(({ code }) => code === "EVIDENCE_NOT_BEFORE_COMPLETION"));
 });
 
 test("rollback must record restoration of the exact baseline state hash", () => {
@@ -870,4 +898,20 @@ test("rollback must record restoration of the exact baseline state hash", () => 
   const result = validate(record);
   assert.equal(result.ok, false);
   assert.ok(result.errors.some(({ code }) => code === "ROLLBACK_STATE_NOT_RESTORED"));
+});
+
+test("rollback execution must bind the reviewed rollback plan action", () => {
+  const record = createValidRecord();
+  appendTransition(record, "TRANSPLANTING");
+  appendTransition(record, "ROLLED_BACK", {
+    restored_state_hash: record.transplant.migration_plan.baseline_state_hash,
+    restored_commit: record.transplant.migration_plan.baseline_commit,
+    restored_state_ref: record.transplant.migration_plan.baseline_state_ref
+  });
+  record.transplant.rollback_plan.steps = ["UNEXECUTED-ROLLBACK-PLACEHOLDER"];
+  record.transplant.rollback_plan.artifact_hash = computePlanArtifactHash(record.transplant.rollback_plan);
+  rebuildEventChain(record);
+  const codes = new Set(validate(record).errors.map(({ code }) => code));
+  assert.ok(codes.has("ROLLBACK_PLAN_STEPS_INVALID"));
+  assert.ok(codes.has("EVENT_NOT_IN_ROLLBACK_PLAN"));
 });

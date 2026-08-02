@@ -86,6 +86,15 @@ the canonical event envelope hash. A directory, untracked path, missing commit,
 bare boolean, unresolved reference, tampered content hash or unevidenced `PASS`
 is invalid.
 
+Every gate also requires exactly one typed semantic attestation. The
+attestation binds its gate-specific evidence type and check to the review,
+transplant, donor Life and Genome, host Life and Genome, organ, reviewer,
+result and review time. An unrelated repository file cannot satisfy a gate
+merely because its bytes and commit are valid. Reviewer and Life identity
+authority is resolved from the immutable reviewed Registry epoch at commit
+`cc80135f2c6e6a74aad11f34e793c65ac0ee1938`; branch-local authority drift is
+rejected.
+
 An approved state also requires `transplant_right` and
 `license_or_usage_right` to equal `APPROVED_SIMULATION`. Schema conditionals
 and the semantic validator both fail closed when evidence or simulated rights
@@ -193,6 +202,11 @@ review evidence must be committed after that baseline. The canonical state
 reference must resolve to a non-symbolic regular Git file at that commit, and
 its computed SHA-256 must equal the recorded baseline hash.
 
+Every event names the owning plan ID, plan-step index and action. Ordinary
+execution maps one-to-one to ordered migration steps. A rollback event instead
+binds the rollback plan, whose deterministic V1 action is exactly
+`ROLLBACK-RESTORE`; a placeholder or unexecuted rollback step is invalid.
+
 No authoritative source is overwritten without a recoverable history. A
 versioned legacy path may survive only as a thin alias to the canonical organ.
 
@@ -296,6 +310,11 @@ same identities and completion commit; a bare string, arbitrary blob, empty or
 caller-asserted completion envelope fails closed. Canonical review,
 rework, rejection, acceptance, rollback and completion events must be emitted
 by the registered Codex reviewer. Neither state transfers real ownership.
+
+Gate evidence commits must strictly precede the completion commit. Completion
+references must remain non-symbolic regular files in the current worktree as
+well as regular Git blobs at the completion commit. Genome completion evidence
+also binds the compatibility review ID.
 
 Donor authorship and provenance cannot be erased. A host may reference or
 embed a licensed organ while the donor remains a separate historical source.

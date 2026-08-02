@@ -20,7 +20,9 @@
     "transplant.compatibility_review_id equals compatibility_review.review_id",
     "owner and dependency IDs resolve in KAIOS_SOFTWARE_LIFE_REGISTRY.json or its approved organ projection",
     "gate evidence binds immutable Git blobs through an existing evidence commit and content hashes",
+    "every gate resolves exactly one typed identity-bound semantic attestation",
     "migration and rollback bind an existing Git commit and the registered host canonical state blob",
+    "every event binds an explicit migration or rollback plan ID and step",
     "event hashes form one deterministic chain",
     "canonical executable and organ paths contain no version token"
   ],
@@ -512,8 +514,9 @@
     },
     "transplantEventInputs": {
       "type": "object",
-      "required": ["plan_step_index", "plan_step_action"],
+      "required": ["plan_id", "plan_step_index", "plan_step_action"],
       "properties": {
+        "plan_id": { "$ref": "#/$defs/stableId" },
         "plan_step_index": { "type": "integer", "minimum": 0 },
         "plan_step_action": { "type": "string", "minLength": 1 }
       },

@@ -26,6 +26,7 @@ const CANONICAL_REVIEWER_WORKER_ID = "codex-gm-01";
 const CANONICAL_REPOSITORY_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "../../..");
 const CANONICAL_REMOTE_URL = "https://github.com/klineodyssey/kline-odyssey.git";
 const CANONICAL_LINEAGE_ANCHOR = "cc80135f2c6e6a74aad11f34e793c65ac0ee1938";
+const TRUSTED_AUTHORITY_COMMIT = CANONICAL_LINEAGE_ANCHOR;
 const gitRootCache = new Map();
 const commitCache = new Map();
 const reachableCommitCache = new Map();
@@ -51,6 +52,23 @@ export const COMPATIBILITY_GATES = Object.freeze([
   "ROLLBACK_PLAN_READY",
   "TESTS_PASS"
 ]);
+
+const GATE_ATTESTATION_CONTRACTS = Object.freeze({
+  DONOR_IDENTITY_VALID: ["IDENTITY_ATTESTATION", "DONOR_LIFE_RESOLVES"],
+  HOST_IDENTITY_VALID: ["IDENTITY_ATTESTATION", "HOST_LIFE_RESOLVES"],
+  ORGAN_TYPE_COMPATIBLE: ["ORGAN_COMPATIBILITY_ATTESTATION", "ORGAN_TYPE_MATCHES"],
+  GENOME_CONTRACT_COMPATIBLE: ["GENOME_CONTRACT_ATTESTATION", "GENOME_CONTRACT_MATCHES"],
+  INTERFACE_COMPATIBLE: ["INTERFACE_ATTESTATION", "INTERFACES_COMPATIBLE"],
+  RIGHTS_APPROVED: ["RIGHTS_ATTESTATION", "SIMULATED_RIGHTS_APPROVED"],
+  SECURITY_APPROVED: ["SECURITY_ATTESTATION", "SECURITY_BOUNDARY_PASS"],
+  RESOURCE_CAPACITY_AVAILABLE: ["RESOURCE_CAPACITY_ATTESTATION", "RESOURCE_BUDGET_AVAILABLE"],
+  ENERGY_CAPACITY_AVAILABLE: ["ENERGY_CAPACITY_ATTESTATION", "ENERGY_BUDGET_AVAILABLE"],
+  DEPENDENCIES_AVAILABLE: ["DEPENDENCY_ATTESTATION", "DEPENDENCIES_RESOLVE"],
+  LICENSE_OR_USAGE_RIGHT_VALID_SIMULATION: ["LICENSE_RIGHTS_ATTESTATION", "SIMULATED_USAGE_RIGHT_VALID"],
+  MIGRATION_PLAN_READY: ["MIGRATION_PLAN_ATTESTATION", "MIGRATION_PLAN_VERIFIED"],
+  ROLLBACK_PLAN_READY: ["ROLLBACK_PLAN_ATTESTATION", "ROLLBACK_PLAN_VERIFIED"],
+  TESTS_PASS: ["TEST_EXECUTION_ATTESTATION", "TEST_COMMANDS_PASS"]
+});
 
 export const TRANSPLANT_STATES = Object.freeze([
   "PROPOSED",
@@ -287,12 +305,23 @@ const gitRoot = (repositoryRoot) => {
   }
 };
 
+const resolveCommit = (repositoryRoot, commit) => {
+  if (!repositoryRoot || !commit) return null;
+  try {
+    return git(repositoryRoot, ["rev-parse", `${commit}^{commit}`]).trim();
+  } catch {
+    return null;
+  }
+};
+
 const commitExists = (repositoryRoot, commit) => {
   if (!repositoryRoot || !commit) return false;
-  const key = `${resolve(repositoryRoot)}\0${commit}`;
+  const resolvedCommit = resolveCommit(repositoryRoot, commit);
+  if (!resolvedCommit) return false;
+  const key = `${resolve(repositoryRoot)}\0${resolvedCommit}`;
   if (commitCache.has(key)) return commitCache.get(key);
   try {
-    git(repositoryRoot, ["cat-file", "-e", `${commit}^{commit}`]);
+    git(repositoryRoot, ["cat-file", "-e", `${resolvedCommit}^{commit}`]);
     commitCache.set(key, true);
     return true;
   } catch {
@@ -302,11 +331,13 @@ const commitExists = (repositoryRoot, commit) => {
 };
 
 const commitReachableFromHead = (repositoryRoot, commit) => {
-  if (!commitExists(repositoryRoot, commit)) return false;
-  const key = `${resolve(repositoryRoot)}\0${commit}\0HEAD`;
+  const resolvedCommit = resolveCommit(repositoryRoot, commit);
+  const resolvedHead = resolveCommit(repositoryRoot, "HEAD");
+  if (!resolvedCommit || !resolvedHead) return false;
+  const key = `${resolve(repositoryRoot)}\0${resolvedCommit}\0${resolvedHead}`;
   if (reachableCommitCache.has(key)) return reachableCommitCache.get(key);
   try {
-    git(repositoryRoot, ["merge-base", "--is-ancestor", commit, "HEAD"]);
+    git(repositoryRoot, ["merge-base", "--is-ancestor", resolvedCommit, resolvedHead]);
     reachableCommitCache.set(key, true);
     return true;
   } catch {
@@ -316,12 +347,12 @@ const commitReachableFromHead = (repositoryRoot, commit) => {
 };
 
 const commitStrictAncestor = (repositoryRoot, ancestor, descendant = "HEAD") => {
-  if (!commitExists(repositoryRoot, ancestor) || !commitExists(repositoryRoot, descendant)) return false;
-  const key = `${resolve(repositoryRoot)}\0${ancestor}\0${descendant}`;
+  const resolvedAncestor = resolveCommit(repositoryRoot, ancestor);
+  const resolvedDescendant = resolveCommit(repositoryRoot, descendant);
+  if (!resolvedAncestor || !resolvedDescendant) return false;
+  const key = `${resolve(repositoryRoot)}\0${resolvedAncestor}\0${resolvedDescendant}`;
   if (strictAncestorCache.has(key)) return strictAncestorCache.get(key);
   try {
-    const resolvedAncestor = git(repositoryRoot, ["rev-parse", `${ancestor}^{commit}`]).trim();
-    const resolvedDescendant = git(repositoryRoot, ["rev-parse", `${descendant}^{commit}`]).trim();
     if (resolvedAncestor === resolvedDescendant) {
       strictAncestorCache.set(key, false);
       return false;
@@ -337,10 +368,12 @@ const commitStrictAncestor = (repositoryRoot, ancestor, descendant = "HEAD") => 
 
 const gitBlob = (repositoryRoot, commit, repositoryPath) => {
   if (!repositoryRoot || !commit || !repositoryPath) return null;
-  const key = `${resolve(repositoryRoot)}\0${commit}\0${repositoryPath}`;
+  const resolvedCommit = resolveCommit(repositoryRoot, commit);
+  if (!resolvedCommit) return null;
+  const key = `${resolve(repositoryRoot)}\0${resolvedCommit}\0${repositoryPath}`;
   if (blobCache.has(key)) return blobCache.get(key);
   try {
-    const object = `${commit}:${repositoryPath.replaceAll("\\", "/")}`;
+    const object = `${resolvedCommit}:${repositoryPath.replaceAll("\\", "/")}`;
     if (git(repositoryRoot, ["cat-file", "-t", object]).trim() !== "blob") {
       blobCache.set(key, null);
       return null;
@@ -356,14 +389,16 @@ const gitBlob = (repositoryRoot, commit, repositoryPath) => {
 
 const gitRegularFileBlob = (repositoryRoot, commit, repositoryPath) => {
   if (!repositoryRoot || !commit || !repositoryPath) return null;
+  const resolvedCommit = resolveCommit(repositoryRoot, commit);
+  if (!resolvedCommit) return null;
   const normalizedPath = repositoryPath.replaceAll("\\", "/");
-  const key = `${resolve(repositoryRoot)}\0${commit}\0${normalizedPath}`;
+  const key = `${resolve(repositoryRoot)}\0${resolvedCommit}\0${normalizedPath}`;
   if (regularBlobCache.has(key)) return regularBlobCache.get(key);
   try {
-    const entry = git(repositoryRoot, ["ls-tree", "-z", commit, "--", normalizedPath], null);
+    const entry = git(repositoryRoot, ["ls-tree", "-z", resolvedCommit, "--", normalizedPath], null);
     const header = entry.toString("utf8").split("\0", 1)[0] ?? "";
     const match = /^(100644|100755) blob [a-f0-9]+\t/.exec(header);
-    const value = match ? gitBlob(repositoryRoot, commit, normalizedPath) : null;
+    const value = match ? gitBlob(repositoryRoot, resolvedCommit, normalizedPath) : null;
     regularBlobCache.set(key, value);
     return value;
   } catch {
@@ -429,6 +464,20 @@ const readCanonicalJson = (repositoryRoot, path, errors) => {
   }
 };
 
+const readTrustedJson = (repositoryRoot, path, errors) => {
+  const blob = gitRegularFileBlob(repositoryRoot, TRUSTED_AUTHORITY_COMMIT, path);
+  if (!blob) {
+    push(errors, "TRUSTED_GOVERNANCE_BLOB_MISSING", path, `${path} must exist as a regular file at the immutable authority commit`);
+    return null;
+  }
+  try {
+    return JSON.parse(blob.toString("utf8"));
+  } catch {
+    push(errors, "TRUSTED_GOVERNANCE_BLOB_INVALID", path, `${path} must contain valid JSON at the immutable authority commit`);
+    return null;
+  }
+};
+
 const loadCanonicalGovernance = (repositoryRoot, errors) => {
   const loadErrorStart = errors.length;
   if (!repositoryRoot) {
@@ -465,14 +514,20 @@ const loadCanonicalGovernance = (repositoryRoot, errors) => {
     const target = repositoryFile(root, path);
     return target ? computeContentHash(readFileSync(target)) : `MISSING:${path}`;
   });
-  const snapshotKey = canonicalJson({ root, remoteUrl, headCommit, snapshotDigests });
+  const trustedDigests = [CANONICAL_REGISTRY_PATH, CANONICAL_WORKER_REGISTRY_PATH].map((path) => {
+    const blob = gitRegularFileBlob(root, TRUSTED_AUTHORITY_COMMIT, path);
+    return blob ? computeContentHash(blob) : `MISSING:${path}`;
+  });
+  const snapshotKey = canonicalJson({ root, remoteUrl, headCommit, snapshotDigests, trustedDigests, trustedCommit: TRUSTED_AUTHORITY_COMMIT });
   if (governanceSnapshotCache.has(snapshotKey)) return governanceSnapshotCache.get(snapshotKey);
   if (!commitReachableFromHead(root, CANONICAL_LINEAGE_ANCHOR)) {
     push(errors, "CANONICAL_REPOSITORY_LINEAGE_INVALID", "repositoryRoot", "HEAD must descend from the reviewed Software Life Registry lineage anchor");
   }
   const registry = readCanonicalJson(root, CANONICAL_REGISTRY_PATH, errors);
   const schema = readCanonicalJson(root, CANONICAL_SCHEMA_PATH, errors);
-  const workerRegistry = readCanonicalJson(root, CANONICAL_WORKER_REGISTRY_PATH, errors);
+  const currentWorkerRegistry = readCanonicalJson(root, CANONICAL_WORKER_REGISTRY_PATH, errors);
+  const trustedRegistry = readTrustedJson(root, CANONICAL_REGISTRY_PATH, errors);
+  const trustedWorkerRegistry = readTrustedJson(root, CANONICAL_WORKER_REGISTRY_PATH, errors);
   if (registry) {
     const metadata = registry.metadata ?? {};
     const policy = registry.policy ?? {};
@@ -496,15 +551,35 @@ const loadCanonicalGovernance = (repositoryRoot, errors) => {
     })) {
       if (policy[field] !== expected) push(errors, "CANONICAL_REGISTRY_POLICY_INVALID", `${CANONICAL_REGISTRY_PATH}#policy.${field}`, `${field} must equal ${expected}`);
     }
-    if (!commitReachableFromHead(root, metadata.source_commit)) {
-      push(errors, "CANONICAL_REGISTRY_SOURCE_COMMIT_INVALID", `${CANONICAL_REGISTRY_PATH}#metadata.source_commit`, "Registry source_commit must be reachable from canonical HEAD");
+    if (metadata.source_commit !== TRUSTED_AUTHORITY_COMMIT) {
+      push(errors, "CANONICAL_REGISTRY_SOURCE_COMMIT_INVALID", `${CANONICAL_REGISTRY_PATH}#metadata.source_commit`, "Registry source_commit must equal the immutable reviewed authority commit for this compatibility epoch");
     }
   }
-  if (workerRegistry && (workerRegistry.metadata?.source_of_truth !== true || workerRegistry.metadata?.status !== "ACTIVE")) {
+  if (currentWorkerRegistry && (currentWorkerRegistry.metadata?.source_of_truth !== true || currentWorkerRegistry.metadata?.status !== "ACTIVE")) {
     push(errors, "WORKER_REGISTRY_AUTHORITY_INVALID", CANONICAL_WORKER_REGISTRY_PATH, "Worker Registry must be the active source of truth");
   }
-  const governance = { root, registry, schema, workerRegistry };
-  if (errors.length === loadErrorStart && registry && schema && workerRegistry) {
+  const currentReviewer = registeredWorker(currentWorkerRegistry, CANONICAL_REVIEWER_ALIAS);
+  const trustedReviewer = registeredWorker(trustedWorkerRegistry, CANONICAL_REVIEWER_ALIAS);
+  const reviewerAuthorityFields = [
+    "worker_id", "worker_type", "role", "permission", "status", "employee_status",
+    "trust_level", "can_push_main", "boot_acknowledged", "canon_acknowledged",
+    "workspace_policy_acknowledged", "do_not_touch_acknowledged", "suspension"
+  ];
+  if (!currentReviewer || !trustedReviewer || reviewerAuthorityFields.some((field) => (
+    canonicalJson(currentReviewer?.[field]) !== canonicalJson(trustedReviewer?.[field])
+  ))) {
+    push(errors, "CANONICAL_REVIEWER_AUTHORITY_DRIFT", CANONICAL_WORKER_REGISTRY_PATH, "canonical reviewer authority must equal the immutable reviewed Worker Registry record");
+  }
+  const governance = {
+    root,
+    registry,
+    trustedRegistry,
+    schema,
+    currentWorkerRegistry,
+    workerRegistry: trustedWorkerRegistry,
+    authorityCommit: TRUSTED_AUTHORITY_COMMIT
+  };
+  if (errors.length === loadErrorStart && registry && trustedRegistry && schema && currentWorkerRegistry && trustedWorkerRegistry) {
     governanceSnapshotCache.set(snapshotKey, governance);
   }
   return governance;
@@ -546,6 +621,50 @@ const registryMaps = (registry) => {
   return { lives, lifeById, organById };
 };
 
+const lifeAuthorityProjection = (life) => life ? {
+  life_id: life.life_id,
+  species_id: life.species_id,
+  genome_id: life.genome_id,
+  life_type: life.life_type,
+  canonical_name: life.canonical_name,
+  canonical_path: life.location?.canonical_path,
+  rights: {
+    owner: life.rights?.owner,
+    custodian: life.rights?.custodian,
+    operator: life.rights?.operator,
+    use_right: life.rights?.use_right,
+    transplant_right: life.rights?.transplant_right
+  },
+  organs: (life.organs ?? []).map(({ organ_id, organ_type, path, content_hash }) => ({
+    organ_id, organ_type, path, content_hash
+  }))
+} : null;
+
+const matchingGateAttestations = (document, gate, evidence, review, transplant) => {
+  if (document?.artifact_type !== "SOFTWARE_ORGAN_GATE_EVIDENCE_BUNDLE"
+    || document.simulation_only !== true
+    || document.authority !== "SIMULATION_ONLY"
+    || !Array.isArray(document.gate_records)) return [];
+  const [evidenceType, requiredCheck] = GATE_ATTESTATION_CONTRACTS[gate] ?? [];
+  return document.gate_records.filter((attestation) => (
+    attestation?.gate === gate
+    && attestation.evidence_type === evidenceType
+    && attestation.result === evidence?.result
+    && attestation.compatibility_review_id === review.review_id
+    && attestation.transplant_id === transplant.transplant_id
+    && attestation.donor_life_id === review.donor_life_id
+    && attestation.donor_genome_id === review.donor_genome_id
+    && attestation.host_life_id === review.host_life_id
+    && attestation.host_genome_id === review.host_genome_id
+    && attestation.organ_id === review.organ_id
+    && attestation.reviewer === evidence?.reviewer
+    && attestation.reviewed_at === evidence?.reviewed_at
+    && attestation.simulation_only === true
+    && Array.isArray(attestation.checks)
+    && attestation.checks.includes(requiredCheck)
+  ));
+};
+
 const canonicalActionForState = (state) => {
   if (state === "ROLLED_BACK") return "ROLLBACK-RESTORE";
   if (state === "COMPLETE") return "COMPLETE-TRANSPLANT";
@@ -583,7 +702,7 @@ export const validateSoftwareOrganTransplant = (record, options = {}) => {
     push(errors, "CALLER_SCHEMA_FORBIDDEN", "options.schema", `Schema input must come only from ${CANONICAL_SCHEMA_PATH}`);
   }
   const governance = loadCanonicalGovernance(options.repositoryRoot, errors);
-  const { registry, schema, workerRegistry, root: repositoryRoot } = governance;
+  const { registry, trustedRegistry, schema, workerRegistry, root: repositoryRoot } = governance;
   if (schema) {
     const structural = validateJsonSchema202012(record, schema);
     for (const error of structural.errors) {
@@ -604,7 +723,8 @@ export const validateSoftwareOrganTransplant = (record, options = {}) => {
     push(errors, "ORGAN_COMPATIBILITY_SIGNATURE_INVALID", "organ.compatibility_signature", "compatibility signature must bind identity, Genome, interfaces, costs, dependencies, capabilities and security boundary");
   }
 
-  const registryIndex = registryMaps(registry);
+  const currentRegistryIndex = registryMaps(registry);
+  const registryIndex = registryMaps(trustedRegistry);
   if (registryIndex.lives.length === 0) {
     push(errors, "AUTHORITATIVE_REGISTRY_REQUIRED", "registry", "an authoritative Software Life Registry is required");
   }
@@ -654,6 +774,21 @@ export const validateSoftwareOrganTransplant = (record, options = {}) => {
 
   const donorLife = registryIndex.lifeById.get(review.donor_life_id);
   const hostLife = registryIndex.lifeById.get(review.host_life_id);
+  const currentDonorLife = currentRegistryIndex.lifeById.get(review.donor_life_id);
+  const currentHostLife = currentRegistryIndex.lifeById.get(review.host_life_id);
+  for (const [label, trustedLife, currentLife] of [
+    ["donor", donorLife, currentDonorLife],
+    ["host", hostLife, currentHostLife]
+  ]) {
+    if (!currentLife || canonicalJson(lifeAuthorityProjection(currentLife)) !== canonicalJson(lifeAuthorityProjection(trustedLife))) {
+      push(errors, "SOFTWARE_LIFE_AUTHORITY_DRIFT", `compatibility_review.${label}_life_id`, `${label} identity, Rights, organ and artifact authority must equal the immutable reviewed Registry snapshot`);
+    }
+    if (currentLife?.transplant_policy?.mode !== "CONTROLLED_REVIEW_ONLY"
+      || currentLife?.transplant_policy?.automatic !== false
+      || currentLife?.transplant_policy?.codex_review_required !== true) {
+      push(errors, "TRANSPLANT_POLICY_NOT_ACTIVE", `compatibility_review.${label}_life_id`, `${label} current Registry policy must enable controlled Codex review and prohibit automation`);
+    }
+  }
   if (!donorLife) {
     push(errors, "LIFE_ID_NOT_REGISTERED", "compatibility_review.donor_life_id", `${review.donor_life_id} is not registered`);
   } else {
@@ -670,7 +805,7 @@ export const validateSoftwareOrganTransplant = (record, options = {}) => {
       if (registeredOrgan.content_hash !== organ.genome_contract?.code_or_artifact_hash) {
         push(errors, "REGISTERED_ORGAN_HASH_MISMATCH", "organ.genome_contract.code_or_artifact_hash", "organ artifact hash must equal the authoritative Registry projection");
       }
-      const registeredBlob = gitRegularFileBlob(repositoryRoot, registry?.metadata?.source_commit, registeredOrgan.path);
+       const registeredBlob = gitRegularFileBlob(repositoryRoot, governance.authorityCommit, registeredOrgan.path);
       if (!registeredBlob) {
         push(errors, "REGISTERED_ORGAN_PROVENANCE_MISSING", "organ.genome_contract.code_or_artifact_hash", "registered organ path must resolve at the Registry source commit");
       } else if (registeredOrgan.content_hash !== computeContentHash(registeredBlob)) {
@@ -703,6 +838,9 @@ export const validateSoftwareOrganTransplant = (record, options = {}) => {
 
   const migrationPlan = transplant.migration_plan ?? {};
   const rollbackPlan = transplant.rollback_plan ?? {};
+  if (rollbackPlan.steps?.length !== 1 || rollbackPlan.steps[0] !== "ROLLBACK-RESTORE") {
+    push(errors, "ROLLBACK_PLAN_STEPS_INVALID", "transplant.rollback_plan.steps", "rollback plan must contain exactly the deterministic ROLLBACK-RESTORE action");
+  }
   for (const [name, plan] of [["migration_plan", migrationPlan], ["rollback_plan", rollbackPlan]]) {
     if (!isAuthorizedWorker(workerRegistry, plan.owner, true)) {
       push(errors, "PLAN_OWNER_NOT_AUTHORIZED", `transplant.${name}.owner`, "plan owner must resolve to the canonical reviewer in Worker Registry");
@@ -804,6 +942,7 @@ export const validateSoftwareOrganTransplant = (record, options = {}) => {
     }
     const referencedHashes = evidence?.evidence_content_hashes ?? {};
     const referencedKeys = new Set(evidence?.evidence_refs ?? []);
+    let semanticAttestationCount = 0;
     if (evidence && !(evidence.evidence_refs ?? []).some((reference) => reference.includes("/"))) {
       push(errors, "EVIDENCE_REPOSITORY_ARTIFACT_REQUIRED", `compatibility_review.gate_evidence.${gate}.evidence_refs`, "every gate requires at least one immutable repository artifact");
     }
@@ -825,6 +964,13 @@ export const validateSoftwareOrganTransplant = (record, options = {}) => {
           push(errors, "EVIDENCE_GIT_BLOB_NOT_FOUND", path, `${reference} must resolve to an immutable Git blob at evidence_commit`);
         } else {
           expectedHash = computeContentHash(blob);
+          try {
+            semanticAttestationCount += matchingGateAttestations(
+              JSON.parse(blob.toString("utf8")), gate, evidence, review, transplant
+            ).length;
+          } catch {
+            // Non-JSON repository artifacts may supplement, but never replace, typed gate evidence.
+          }
         }
       } else {
         const event = evidenceEvents.get(reference);
@@ -839,6 +985,9 @@ export const validateSoftwareOrganTransplant = (record, options = {}) => {
       } else if (expectedHash && referencedHashes[reference] !== expectedHash) {
         push(errors, "EVIDENCE_CONTENT_HASH_INVALID", `compatibility_review.gate_evidence.${gate}.evidence_content_hashes.${reference}`, "content hash must equal the referenced Git blob or event SHA-256");
       }
+    }
+    if (evidence && semanticAttestationCount !== 1) {
+      push(errors, "GATE_SEMANTIC_ATTESTATION_INVALID", `compatibility_review.gate_evidence.${gate}.evidence_refs`, "each gate requires exactly one typed, identity-bound semantic attestation with its gate-specific check");
     }
   }
 
@@ -894,6 +1043,7 @@ export const validateSoftwareOrganTransplant = (record, options = {}) => {
   const expectedEnergyUnit = organ.energy_cost?.per_operation?.unit;
   const expectedResourceValue = organ.resource_cost?.compute?.value;
   const expectedEnergyValue = organ.energy_cost?.per_operation?.value;
+  let migrationStepIndex = 0;
   if (resourceUnit !== expectedResourceUnit) {
     push(errors, "PLAN_RESOURCE_UNIT_MISMATCH", "transplant.migration_plan.resource_budget.unit", "migration resource budget unit must equal the organ compute-cost unit");
   }
@@ -935,12 +1085,18 @@ export const validateSoftwareOrganTransplant = (record, options = {}) => {
     if (event.status !== canonicalStatusForState(event.next_transplant_state)) {
       push(errors, "EVENT_STATUS_NOT_DETERMINISTIC", `${path}.status`, `status must equal ${canonicalStatusForState(event.next_transplant_state)}`);
     }
-    if (event.inputs?.plan_step_index !== index || event.inputs?.plan_step_action !== event.action) {
-      push(errors, "EVENT_PLAN_STEP_BINDING_INVALID", `${path}.inputs`, "event must bind its zero-based migration plan step index and canonical action");
+    const isRollbackEvent = event.next_transplant_state === "ROLLED_BACK";
+    const boundPlan = isRollbackEvent ? rollbackPlan : migrationPlan;
+    const expectedPlanStepIndex = isRollbackEvent ? 0 : migrationStepIndex;
+    if (event.inputs?.plan_id !== boundPlan.plan_id
+      || event.inputs?.plan_step_index !== expectedPlanStepIndex
+      || event.inputs?.plan_step_action !== event.action) {
+      push(errors, "EVENT_PLAN_STEP_BINDING_INVALID", `${path}.inputs`, "event must bind the owning plan ID, deterministic plan index and canonical action");
     }
-    if (migrationPlan.steps?.[index] !== event.action) {
-      push(errors, "EVENT_NOT_IN_MIGRATION_PLAN", `${path}.action`, "event action must equal the migration plan step at the same deterministic index");
+    if (boundPlan.steps?.[expectedPlanStepIndex] !== event.action) {
+      push(errors, isRollbackEvent ? "EVENT_NOT_IN_ROLLBACK_PLAN" : "EVENT_NOT_IN_MIGRATION_PLAN", `${path}.action`, "event action must equal its owning plan step at the deterministic index");
     }
+    if (!isRollbackEvent) migrationStepIndex += 1;
     const expectedRightsDecision = event.next_transplant_state === "APPROVED_SIMULATION" ? "APPROVED_SIMULATION" : null;
     if (event.rights_decision !== expectedRightsDecision) {
       push(errors, "EVENT_RIGHTS_DECISION_NOT_DETERMINISTIC", `${path}.rights_decision`, "rights decision must be emitted only by the approved-simulation transition");
@@ -989,6 +1145,10 @@ export const validateSoftwareOrganTransplant = (record, options = {}) => {
     priorTime = currentTime;
   }
 
+  if (migrationPlan.steps?.length !== migrationStepIndex) {
+    push(errors, "MIGRATION_PLAN_EXECUTION_LENGTH_MISMATCH", "transplant.migration_plan.steps", "migration plan steps must map one-to-one to non-rollback execution events");
+  }
+
   if ((resourceTotals[resourceUnit] ?? 0) > (migrationPlan.resource_budget?.value ?? -1)) {
     push(errors, "RESOURCE_BUDGET_EXCEEDED", "transplant.events", "replayed resource consumption exceeds the migration plan budget");
   }
@@ -1016,6 +1176,12 @@ export const validateSoftwareOrganTransplant = (record, options = {}) => {
       } else if (!commitStrictAncestor(repositoryRoot, migrationPlan.baseline_commit, completion.completion_commit)) {
         push(errors, "COMPLETION_COMMIT_NOT_AFTER_BASELINE", "transplant.events[-1].outputs.completion_evidence.completion_commit", "completion commit must descend strictly from the pre-transplant baseline");
       }
+      for (const gate of COMPATIBILITY_GATES) {
+        const evidenceCommit = review.gate_evidence?.[gate]?.evidence_commit;
+        if (evidenceCommit && !commitStrictAncestor(repositoryRoot, evidenceCommit, completion.completion_commit)) {
+          push(errors, "EVIDENCE_NOT_BEFORE_COMPLETION", `compatibility_review.gate_evidence.${gate}.evidence_commit`, "gate evidence must be committed before the immutable completion commit");
+        }
+      }
       if (completion.donor_genome_id !== review.donor_genome_id) {
         push(errors, "COMPLETION_DONOR_GENOME_MISMATCH", "transplant.events[-1].outputs.completion_evidence.donor_genome_id", "completion must bind the reviewed donor Genome identity");
       }
@@ -1032,6 +1198,10 @@ export const validateSoftwareOrganTransplant = (record, options = {}) => {
         push(errors, "COMPLETION_ROLLBACK_RETENTION_INVALID", "transplant.events[-1].outputs.completion_evidence.rollback_retention_ref", "completion must retain the reviewed rollback recovery artifact");
       }
       const verifyCompletionBlob = (reference, claimedHash, path) => {
+        const target = repositoryRoot ? repositoryFile(repositoryRoot, reference) : null;
+        if (!target) {
+          push(errors, "COMPLETION_EVIDENCE_REFERENCE_NOT_REGULAR_FILE", path, `${reference} must resolve to a non-symbolic regular file in the current repository worktree`);
+        }
         const blob = gitRegularFileBlob(repositoryRoot, completion.completion_commit, reference);
         if (!blob) {
           push(errors, "COMPLETION_EVIDENCE_BLOB_MISSING", path, `${reference} must resolve to a regular Git file at completion_commit`);
@@ -1099,6 +1269,7 @@ export const validateSoftwareOrganTransplant = (record, options = {}) => {
           const genomeRevision = JSON.parse(genomeBlob.toString("utf8"));
           const expected = {
             artifact_type: "SOFTWARE_GENOME_REVISION_EVIDENCE",
+            compatibility_review_id: transplant.compatibility_review_id,
             life_id: transplant.host_life_id,
             genome_id: review.host_genome_id,
             donor_life_id: transplant.donor_life_id,
