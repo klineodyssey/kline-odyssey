@@ -1,0 +1,108 @@
+{
+  "record_id": "KAIOS-FUNGI-MYCOFORM-CANDIDATE-PHYSICS-V1",
+  "schema_version": "1.0.0-candidate",
+  "status": "CURSOR_RESEARCH_CANDIDATE_ONLY",
+  "review_status": "PENDING_CODEX_REVIEW",
+  "authority": "NO_PRODUCTION_AUTHORITY",
+  "task_id": "KAIOS-CURSOR-FUNGI-CANDIDATE-001",
+  "physics_owner": "docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md",
+  "binding_mode": "SUBORDINATE_NONAUTHORITATIVE_PROPOSAL",
+  "numeric_parameter_contract": {
+    "required_fields": ["parameter_name", "unit", "minimum", "default", "maximum", "rationale", "source_type", "confidence", "risk", "validation_required"],
+    "range_rule": "minimum <= default <= maximum",
+    "allowed_source_types": ["SOURCE_DERIVED", "REPOSITORY_DERIVED", "MODEL_INFERENCE", "RESEARCH_PROPOSAL", "ASSUMPTION", "SOURCE_UNDERSPECIFIED"],
+    "validation_required_must_equal_true": true
+  },
+  "numeric_parameters": [
+    {
+      "parameter_name": "colony_unit_structural_mass_proxy",
+      "unit": "micro_gram_structural_proxy_per_colony_unit",
+      "minimum": 1000000,
+      "default": 2500000,
+      "maximum": 5000000,
+      "rationale": "Provides bounded integer structural-mass accounting for candidate colony units without asserting measured fungal biomass.",
+      "source_type": "RESEARCH_PROPOSAL",
+      "confidence": "LOW",
+      "risk": "The proxy must not be converted into a real mass, inoculum amount, or production quantity.",
+      "validation_required": true
+    },
+    {
+      "parameter_name": "colony_unit_volume_proxy",
+      "unit": "micro_volume_proxy_unit_per_colony_unit",
+      "minimum": 1000000,
+      "default": 2500000,
+      "maximum": 5000000,
+      "rationale": "Supports an exact candidate mass-volume consistency fixture without assigning physical dimensions.",
+      "source_type": "RESEARCH_PROPOSAL",
+      "confidence": "LOW",
+      "risk": "No conversion to cubic meters, colony area, or cultivation-space guidance is authorized.",
+      "validation_required": true
+    },
+    {
+      "parameter_name": "structural_density_proxy",
+      "unit": "structural_mass_proxy_per_volume_proxy_unit",
+      "minimum": 1,
+      "default": 1,
+      "maximum": 1,
+      "rationale": "A fixed ratio makes the candidate mass-volume identity deterministic.",
+      "source_type": "MODEL_INFERENCE",
+      "confidence": "MEDIUM",
+      "risk": "This is an accounting identity, not a biological or material density claim.",
+      "validation_required": true
+    },
+    {
+      "parameter_name": "bounded_dispersal_distance_proxy",
+      "unit": "micro_distance_proxy_unit_per_authorized_event",
+      "minimum": 0,
+      "default": 100000,
+      "maximum": 250000,
+      "rationale": "Bounds a sealed-compartment dispersal test and permits zero movement whenever any gate fails.",
+      "source_type": "RESEARCH_PROPOSAL",
+      "confidence": "LOW",
+      "risk": "The value is not a real dispersal distance, release radius, or cultivation instruction.",
+      "validation_required": true
+    }
+  ],
+  "default_proxy_consistency_fixture": {
+    "structural_mass_micro_gram_proxy": 2500000,
+    "volume_micro_volume_proxy_unit": 2500000,
+    "computed_density_proxy": 1,
+    "expected_density_proxy": 1,
+    "residual": 0,
+    "closed": true,
+    "fixture_values_are_non_tunable_oracle_data": true
+  },
+  "weight_boundary": {
+    "status": "NOT_MODELED_UNTIL_FOREIGN_LOCATION_AND_GRAVITY_BINDING",
+    "location_assigned": false,
+    "gravity_value_invented": false,
+    "weight_value_invented": false
+  },
+  "transport_boundary": {
+    "dispersal_requires": ["FOREIGN_LOCATION", "SEALED_CANDIDATE_COMPARTMENT", "COMPATIBLE_HABITAT", "EXPLICIT_AUTHORIZATION", "AVAILABLE_ENERGY_PROXY", "ELAPSED_TIME"],
+    "route_transport_mode": "NOT_MODELED",
+    "instant_position_change": false,
+    "real_release_or_spread_claim": false
+  },
+  "conservation_contract": {
+    "structural_mass": "Every substrate debit enters colony biomass, processed residual, inactive biomass, retained material, or named pending Ecology custody.",
+    "moisture_water": "Every moisture or water debit enters colony water, processed residual water, atmospheric proxy, inactive biomass water, retained custody, or named pending Ecology custody.",
+    "nutrient_proxy": "Every abstract nutrient debit enters colony stores, processed residual, inactive biomass, retained custody, or named pending Ecology custody; no chemistry or soil effect is inferred.",
+    "energy_proxy": "Every source debit enters colony stores, processed residual, inactive biomass, dissipation, or named pending Ecology custody.",
+    "negative_pool_rule": "REJECT_BEFORE_ANY_STATE_CHANGE",
+    "fixture_reference": "runtime.json#/deterministic_positive_fixture"
+  },
+  "model_boundaries": {
+    "microbial_activity": "BOUNDED_FUNGAL_ACTIVITY_PROXY / SIMULATION_APPROXIMATION",
+    "carbon_model": "NOT_MODELED",
+    "empirical_chemistry": "NOT_MODELED",
+    "real_biology": "NOT_CLAIMED"
+  },
+  "boundaries": [
+    "NO_PHYSICS_RUNTIME_CHANGE",
+    "NO_REAL_DIMENSION_MASS_OR_DISPERSAL_CLAIM",
+    "NO_ENGINEERING_OR_BIOLOGICAL_CERTIFICATION",
+    "NO_REAL_CULTIVATION_OR_RELEASE_GUIDANCE",
+    "NO_PRODUCTION_AUTHORITY"
+  ]
+}

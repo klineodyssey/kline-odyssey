@@ -1,0 +1,179 @@
+{
+  "record_id": "KAIOS-FUNGI-MYCOFORM-CANDIDATE-REPLICATION-V1",
+  "schema_version": "1.0.0-candidate",
+  "status": "CURSOR_RESEARCH_CANDIDATE_ONLY",
+  "review_status": "PENDING_CODEX_REVIEW",
+  "authority": "NO_PRODUCTION_AUTHORITY",
+  "task_id": "KAIOS-CURSOR-FUNGI-CANDIDATE-001",
+  "model": "BOUNDED_UNAUTHORIZED_COLONY_REPLICATION_PROPOSAL",
+  "assumption_classification": "SIMULATION_APPROXIMATION",
+  "numeric_parameter_contract": {
+    "required_fields": ["parameter_name", "unit", "minimum", "default", "maximum", "rationale", "source_type", "confidence", "risk", "validation_required"],
+    "range_rule": "minimum <= default <= maximum",
+    "allowed_source_types": ["SOURCE_DERIVED", "REPOSITORY_DERIVED", "MODEL_INFERENCE", "RESEARCH_PROPOSAL", "ASSUMPTION", "SOURCE_UNDERSPECIFIED"],
+    "validation_required_must_equal_true": true
+  },
+  "numeric_parameters": [
+    {
+      "parameter_name": "minimum_eligible_active_colony_units_proxy",
+      "unit": "colony_unit_count",
+      "minimum": 1,
+      "default": 2,
+      "maximum": 4,
+      "rationale": "Prevents replication without an explicit bounded eligible source cohort.",
+      "source_type": "MODEL_INFERENCE",
+      "confidence": "LOW",
+      "risk": "No real propagation, mating, cell-division, or culture requirement is implied.",
+      "validation_required": true
+    },
+    {
+      "parameter_name": "new_dispersal_units_per_replication_event_cap",
+      "unit": "colony_unit_count",
+      "minimum": 0,
+      "default": 3,
+      "maximum": 3,
+      "rationale": "Matches the bounded positive oracle and prevents an unbounded replication event.",
+      "source_type": "RESEARCH_PROPOSAL",
+      "confidence": "LOW",
+      "risk": "The cap is not a sporulation, fecundity, growth, or production claim.",
+      "validation_required": true
+    },
+    {
+      "parameter_name": "replication_cooldown_proxy",
+      "unit": "simulation_tick",
+      "minimum": 1,
+      "default": 2,
+      "maximum": 8,
+      "rationale": "Prevents repeated replication within one causal interval.",
+      "source_type": "RESEARCH_PROPOSAL",
+      "confidence": "LOW",
+      "risk": "The synthetic cooldown is not a real replication interval.",
+      "validation_required": true
+    },
+    {
+      "parameter_name": "candidate_colony_unit_cap",
+      "unit": "colony_unit_count",
+      "minimum": 1,
+      "default": 8,
+      "maximum": 8,
+      "rationale": "Keeps every candidate fixture finite and fail-closed.",
+      "source_type": "MODEL_INFERENCE",
+      "confidence": "LOW",
+      "risk": "The value is not carrying capacity, density, inoculum size, or release guidance.",
+      "validation_required": true
+    },
+    {
+      "parameter_name": "candidate_generation_cap",
+      "unit": "generation_index",
+      "minimum": 0,
+      "default": 1,
+      "maximum": 1,
+      "rationale": "Bounds recursive replication in deterministic candidate fixtures.",
+      "source_type": "MODEL_INFERENCE",
+      "confidence": "MEDIUM",
+      "risk": "Generation is only a simulation counter and carries no genetics claim.",
+      "validation_required": true
+    },
+    {
+      "parameter_name": "lifetime_replication_event_cap_proxy",
+      "unit": "event_count_per_candidate_colony_unit",
+      "minimum": 0,
+      "default": 1,
+      "maximum": 1,
+      "rationale": "Adds an independent recursion bound to the candidate proposal.",
+      "source_type": "RESEARCH_PROPOSAL",
+      "confidence": "LOW",
+      "risk": "The value is not a real lifetime replication count or cultivation target.",
+      "validation_required": true
+    },
+    {
+      "parameter_name": "dispersal_units_per_authorized_event_cap",
+      "unit": "colony_unit_count",
+      "minimum": 0,
+      "default": 2,
+      "maximum": 2,
+      "rationale": "Bounds the sealed-compartment dispersal fixture independently from the replication cap.",
+      "source_type": "RESEARCH_PROPOSAL",
+      "confidence": "LOW",
+      "risk": "The cap is not a real release, spread, or environmental persistence estimate.",
+      "validation_required": true
+    }
+  ],
+  "replication_contract": {
+    "mode": "BOUNDED_DISPERSAL_UNIT_PROXY",
+    "candidate_authorized": false,
+    "real_replication_authority": false,
+    "required_gate_order": [
+      "OWNER_SCHEMA_ADMISSION",
+      "EXISTING_RIGHTS_AUTHORITY_DECISION",
+      "FOREIGN_LOCATION",
+      "SEALED_CANDIDATE_COMPARTMENT",
+      "COMPATIBLE_HABITAT",
+      "ELIGIBLE_ACTIVE_COLONY_COHORT",
+      "MINIMUM_STAGE_AGE",
+      "INTEGRITY_PROXY",
+      "ENERGY_PROXY",
+      "SUBSTRATE",
+      "MOISTURE",
+      "NUTRIENT_PROXY",
+      "ENVIRONMENT_FIT",
+      "COOLDOWN",
+      "LIFETIME_EVENT_CAP",
+      "COLONY_UNIT_CAP",
+      "GENERATION_CAP",
+      "ELAPSED_TIME"
+    ],
+    "replication_allocation_requires": ["PARENT_STRUCTURAL_MASS_DEBIT", "DISPERSAL_UNIT_STRUCTURAL_MASS_CREDIT", "PARENT_MOISTURE_DEBIT", "DISPERSAL_UNIT_MOISTURE_CREDIT", "PARENT_NUTRIENT_DEBIT", "DISPERSAL_UNIT_NUTRIENT_CREDIT", "PARENT_ENERGY_DEBIT", "DISPERSAL_UNIT_ENERGY_AND_DISSIPATION_CREDIT"],
+    "instant_replication": false,
+    "uncontrolled_replication": false
+  },
+  "dispersal_contract": {
+    "mode": "SEALED_LOCAL_COMPARTMENT_PROXY_ONLY",
+    "real_spore_or_propagule_claim": false,
+    "release_authorized": false,
+    "cross_habitat_dispersal": false,
+    "requires_destination_custody": true,
+    "requires_event_hash": true,
+    "unbounded_spread": false
+  },
+  "population_accounting": {
+    "identity": "FINAL_COUNT = INITIAL_COUNT + BIRTHS - DEATHS - NET_MIGRATION",
+    "count_arithmetic": "INTEGER_ONLY",
+    "net_migration_in_fixture": 0,
+    "count_change_without_event": false,
+    "fixture_reference": "runtime.json#/deterministic_positive_fixture"
+  },
+  "inactivation_contract": {
+    "recorded_cause_required": true,
+    "count_decrement_required": true,
+    "generation_count_decrement_required": true,
+    "inactive_biomass_custody_required": true,
+    "moisture_nutrient_and_energy_custody_required": true,
+    "deletion_without_custody": false
+  },
+  "change_boundary": {
+    "mutation": "NOT_MODELED",
+    "genome_editing": false,
+    "trait_selection": "NOT_MODELED",
+    "automatic_new_species": false,
+    "unrestricted_lineage": false
+  },
+  "blocked_results": [
+    {"trigger": "CANDIDATE_REPLICATION_AUTHORITY_FALSE", "result": "REPLICATION_NOT_AUTHORIZED", "count_and_resource_delta": "ALL_ZERO"},
+    {"trigger": "OWNER_ADMISSION_MISSING", "result": "OWNER_SCHEMA_ADMISSION_REQUIRED", "count_and_resource_delta": "ALL_ZERO"},
+    {"trigger": "ELIGIBLE_SOURCE_MISSING", "result": "NO_PROPAGATION_SOURCE", "count_and_resource_delta": "ALL_ZERO"},
+    {"trigger": "COOLDOWN_NOT_ELAPSED", "result": "REPLICATION_COOLDOWN", "count_and_resource_delta": "ALL_ZERO"},
+    {"trigger": "COLONY_UNIT_CAP_REACHED", "result": "COLONY_UNIT_CAP_REACHED", "count_and_resource_delta": "ALL_ZERO"},
+    {"trigger": "GENERATION_CAP_REACHED", "result": "GENERATION_CAP_REACHED", "count_and_resource_delta": "ALL_ZERO"},
+    {"trigger": "LIFETIME_EVENT_CAP_REACHED", "result": "REPLICATION_EVENT_CAP_REACHED", "count_and_resource_delta": "ALL_ZERO"},
+    {"trigger": "UNSEALED_OR_UNAUTHORIZED_DISPERSAL", "result": "DISPERSAL_NOT_AUTHORIZED", "count_and_resource_delta": "ALL_ZERO"}
+  ],
+  "guidance_boundary": {
+    "real_replication_guidance": false,
+    "cultivation_guidance": false,
+    "release_guidance": false,
+    "population_prediction": false,
+    "sporulation_claim": false,
+    "lifespan_claim": false
+  }
+}

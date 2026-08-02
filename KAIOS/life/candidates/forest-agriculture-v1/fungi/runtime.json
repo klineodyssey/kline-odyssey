@@ -1,0 +1,483 @@
+{
+  "record_id": "KAIOS-FUNGI-MYCOFORM-CANDIDATE-RUNTIME-FIXTURES-V1",
+  "schema_version": "1.0.0-candidate",
+  "status": "CURSOR_RESEARCH_CANDIDATE_ONLY",
+  "review_status": "PENDING_CODEX_REVIEW",
+  "authority": "NO_PRODUCTION_AUTHORITY",
+  "task_id": "KAIOS-CURSOR-FUNGI-CANDIDATE-001",
+  "mode": "OBJECTIVE_NONEXECUTABLE_CANDIDATE_FIXTURES",
+  "executable": false,
+  "simulation_only": true,
+  "production_authority": false,
+  "wallet": "NONE",
+  "settlement": false,
+  "numeric_parameter_contract": {
+    "required_fields": ["parameter_name", "unit", "minimum", "default", "maximum", "rationale", "source_type", "confidence", "risk", "validation_required"],
+    "range_rule": "minimum <= default <= maximum",
+    "allowed_source_types": ["SOURCE_DERIVED", "REPOSITORY_DERIVED", "MODEL_INFERENCE", "RESEARCH_PROPOSAL", "ASSUMPTION", "SOURCE_UNDERSPECIFIED"],
+    "validation_required_must_equal_true": true,
+    "fixture_rule": "Exact integers in deterministic states, deltas, ledgers, hashes, versions, IDs, and declared counts are non-tunable oracle data."
+  },
+  "fixed_point_contract": {
+    "contract_id": "KAIOS_FUNGI_MYCOFORM_FIXED_POINT_V1",
+    "transition_arithmetic": "SIGNED_INTEGER_ADDITION_ONLY",
+    "binary_floating_point_state_addition": "FORBIDDEN",
+    "negative_pool_rule": "REJECT_BEFORE_ANY_STATE_CHANGE",
+    "canonical_state_serialization": "RECURSIVELY_KEY_SORTED_COMPACT_UTF8_JSON",
+    "numeric_parameters": [
+      {
+        "parameter_name": "fixed_point_scale",
+        "unit": "micro_unit_per_base_proxy_unit",
+        "minimum": 1000000,
+        "default": 1000000,
+        "maximum": 1000000,
+        "rationale": "Six-place integer arithmetic makes deterministic replay independent of binary floating point.",
+        "source_type": "RESEARCH_PROPOSAL",
+        "confidence": "MEDIUM",
+        "risk": "Changing the scale invalidates every oracle state and hash.",
+        "validation_required": true
+      },
+      {
+        "parameter_name": "ledger_closure_tolerance",
+        "unit": "integer_micro_unit",
+        "minimum": 0,
+        "default": 0,
+        "maximum": 0,
+        "rationale": "Requires exact closure and fail-closed rejection of every mismatch.",
+        "source_type": "RESEARCH_PROPOSAL",
+        "confidence": "MEDIUM",
+        "risk": "A future owner adapter requiring rounding needs separate review and cannot silently relax this fixture.",
+        "validation_required": true
+      },
+      {
+        "parameter_name": "simulation_tick_duration",
+        "unit": "minute_per_simulation_tick",
+        "minimum": 1440,
+        "default": 1440,
+        "maximum": 1440,
+        "rationale": "Defines an exact fixture clock and is not a biological development interval.",
+        "source_type": "RESEARCH_PROPOSAL",
+        "confidence": "MEDIUM",
+        "risk": "The tick must never be represented as real fungal growth, replication, or inactivity timing.",
+        "validation_required": true
+      }
+    ]
+  },
+  "owner_bindings": {
+    "canonical_life_contract": "KAIOS_CANONICAL_LIFE_SCHEMA_V1.json",
+    "microbial_extension_owner": "KAIOS_CANONICAL_LIFE_TYPE_EXTENSIONS_V1.json",
+    "life_causality": "KAIOS_LIFE_RUNTIME_V1_SPECIFICATION",
+    "habitat_population_resources_decomposition_and_nutrients": "KAIOS_REPRODUCTION_ECOLOGY_RUNTIME_V1",
+    "rights": "EXISTING_RIGHTS_AUTHORITY",
+    "economy": "EXISTING_ECONOMY_AUTHORITY",
+    "current_ecology_species_admission": "NOT_ADMITTED_CURRENT_SCHEMA_ENUM",
+    "legacy_viewer_species_separate": "MUSHROOM_ALPHA",
+    "owner_state_persisted_by_candidate": false,
+    "runtime_activation": false
+  },
+  "admission_contract": {
+    "species_id": "SPECIES-KAIOS-MYCOFORM-DECOMPOSER-CANDIDATE",
+    "current_ecology_schema_contains_species_id": false,
+    "required_future_gate": "ECOLOGY_OWNER_SCHEMA_EXTENSION_AND_CODEX_REVIEW",
+    "candidate_can_grant_admission": false,
+    "admission_request_result": "REJECTED_OWNER_SCHEMA_ADMISSION_REQUIRED"
+  },
+  "resource_custody_contract": {
+    "structural_mass": "Substrate, living colony stages, processed residual, inactive biomass, retained material, and pending Ecology custody form one closed proxy domain.",
+    "moisture_water": "Substrate moisture, habitat water, colony water, processed residual water, atmospheric moisture, inactive biomass water, and pending Ecology custody form one closed proxy domain.",
+    "nutrient_proxy": "Substrate, colony, processed residual, inactive biomass, retained material, and pending Ecology custody form one closed abstract nutrient domain with no empirical chemistry.",
+    "energy_proxy": "Substrate energy source, colony stores, processed residual, inactive biomass, dissipation, and pending Ecology custody form one closed proxy domain.",
+    "substrate": "Substrate debit equals structural colony allocation plus processed-residual allocation.",
+    "processed_residual": "Created residual equals retained residual plus pending Ecology custody.",
+    "inactive_biomass": "Inactivation transfer equals retained inactive biomass plus pending Ecology custody.",
+    "decomposition_contribution": "Pending material and nutrient custody only; accepted owner transfer and soil-nutrient delta remain zero.",
+    "foreign_abstract_pool": "MICROBIAL_DECOMPOSITION_PROXY / ABSTRACT_RESOURCE_POOL / NOT_FULL_LIFE_RUNTIME",
+    "foreign_abstract_pool_replaced": false,
+    "candidate_microbial_activity": "BOUNDED_FUNGAL_ACTIVITY_PROXY / SIMULATION_APPROXIMATION",
+    "carbon_boundary": "NOT_MODELED",
+    "empirical_chemistry": "NOT_MODELED",
+    "creates_other_life": false
+  },
+  "deterministic_positive_fixture": {
+    "oracle_id": "FUNGI-MYCOFORM-LIFECYCLE-RESOURCE-ORACLE-001",
+    "fixture_status": "OBJECTIVE_HYPOTHETICAL_VALIDATION_FIXTURE_NOT_RUNTIME_PARAMETER",
+    "candidate_gate_overrides": {
+      "ecology_admission": "HYPOTHETICAL_FIXTURE_GATE_TRUE_NOT_OWNER_MUTATION",
+      "replication_authorization": "HYPOTHETICAL_FIXTURE_GATE_TRUE_NOT_RIGHTS_DECISION",
+      "sealed_candidate_compartment": true,
+      "owner_state_change": false,
+      "production_authority": false
+    },
+    "fixture_environment_proxy_inputs": {
+      "substrate_moisture_fit_basis_point": 6000,
+      "temperature_fit_basis_point": 5500,
+      "oxygen_availability_fit_basis_point": 7000,
+      "contamination_stress_basis_point": 1000,
+      "all_values_are_exact_non_tunable_oracle_inputs": true
+    },
+    "integer_scale": 1000000,
+    "initial_state": {
+      "oracle_id": "FUNGI-MYCOFORM-LIFECYCLE-RESOURCE-ORACLE-001",
+      "simulation_elapsed_micro_minute": 0,
+      "births_cumulative": 0,
+      "deaths_cumulative": 0,
+      "custody_closed": false,
+      "population_counts": {
+        "active_colony": 4,
+        "dispersal_unit": 0,
+        "establishing_colony": 0
+      },
+      "generation_counts": {
+        "generation_0": 4,
+        "generation_1": 0
+      },
+      "structural_mass_pools_micro_gram_proxy": {
+        "active_colony_biomass": 10000000,
+        "dispersal_unit_biomass": 0,
+        "establishing_colony_biomass": 0,
+        "inactive_colony_biomass": 0,
+        "pending_ecology_inactive_biomass_custody": 0,
+        "pending_ecology_processed_material_custody": 0,
+        "processed_substrate_residual_biomass": 0,
+        "substrate_source_custody": 90000000
+      },
+      "moisture_water_pools_micro_milliliter_proxy": {
+        "active_colony_water": 4000000,
+        "atmospheric_moisture_proxy": 0,
+        "dispersal_unit_water": 0,
+        "establishing_colony_water": 0,
+        "habitat_water_custody": 16000000,
+        "inactive_colony_water": 0,
+        "pending_ecology_inactive_biomass_water_custody": 0,
+        "pending_ecology_processed_material_water_custody": 0,
+        "processed_substrate_residual_water": 0,
+        "substrate_moisture_custody": 40000000
+      },
+      "nutrient_pools_micro_nutrient_proxy_unit": {
+        "active_colony_nutrient_store": 2000000,
+        "dispersal_unit_nutrient_store": 0,
+        "establishing_colony_nutrient_store": 0,
+        "inactive_colony_nutrient_store": 0,
+        "pending_ecology_inactive_biomass_nutrient_custody": 0,
+        "pending_ecology_processed_material_nutrient_custody": 0,
+        "processed_substrate_residual_nutrient_store": 0,
+        "substrate_nutrient_custody": 48000000
+      },
+      "energy_pools_micro_energy_proxy_unit": {
+        "active_colony_energy_store": 10000000,
+        "dispersal_unit_energy_store": 0,
+        "environmental_dissipation_proxy": 0,
+        "establishing_colony_energy_store": 0,
+        "inactive_colony_energy_store": 0,
+        "pending_ecology_inactive_biomass_energy_custody": 0,
+        "pending_ecology_processed_material_energy_custody": 0,
+        "processed_substrate_residual_energy_store": 0,
+        "substrate_energy_source_custody": 90000000
+      }
+    },
+    "initial_totals": {
+      "structural_mass_micro_gram_proxy": 100000000,
+      "moisture_water_micro_milliliter_proxy": 60000000,
+      "nutrient_micro_nutrient_proxy_unit": 50000000,
+      "energy_micro_energy_proxy_unit": 100000000,
+      "substrate_source_micro_gram_proxy": 90000000,
+      "processed_residual_micro_gram_proxy": 0,
+      "inactive_biomass_micro_gram_proxy": 0,
+      "population_count": 4
+    },
+    "ordered_actions": [
+      {
+        "sequence": "001",
+        "event_id": "FUNGI-MYCOFORM-ORACLE-EVT-001",
+        "event_type": "SUBSTRATE_MOISTURE_NUTRIENT_PROCESSING_PROXY_EVENT",
+        "required_gates": ["OWNER_SCHEMA_ADMISSION", "LOCATION", "HABITAT", "SEALED_CANDIDATE_COMPARTMENT", "ENVIRONMENT_FIT", "SUBSTRATE", "MOISTURE", "NUTRIENT_PROXY", "ENERGY_PROXY", "ELAPSED_TIME"],
+        "state_deltas": {"simulation_elapsed_micro_minute": 1440000000},
+        "deltas": {
+          "structural_mass_pools_micro_gram_proxy": {"active_colony_biomass": 3000000, "processed_substrate_residual_biomass": 9000000, "substrate_source_custody": -12000000},
+          "moisture_water_pools_micro_milliliter_proxy": {"active_colony_water": 1000000, "atmospheric_moisture_proxy": 1000000, "processed_substrate_residual_water": 3000000, "substrate_moisture_custody": -5000000},
+          "nutrient_pools_micro_nutrient_proxy_unit": {"active_colony_nutrient_store": 1000000, "processed_substrate_residual_nutrient_store": 5000000, "substrate_nutrient_custody": -6000000},
+          "energy_pools_micro_energy_proxy_unit": {"active_colony_energy_store": 3000000, "environmental_dissipation_proxy": 7000000, "processed_substrate_residual_energy_store": 2000000, "substrate_energy_source_custody": -12000000}
+        }
+      },
+      {
+        "sequence": "002",
+        "event_id": "FUNGI-MYCOFORM-ORACLE-EVT-002",
+        "event_type": "BOUNDED_REPLICATION_ALLOCATION_PROXY_EVENT",
+        "required_gates": ["OWNER_SCHEMA_ADMISSION", "RIGHTS_DECISION", "SEALED_CANDIDATE_COMPARTMENT", "ELIGIBLE_ACTIVE_COLONY_COHORT", "INTEGRITY_PROXY", "ENERGY_PROXY", "SUBSTRATE", "MOISTURE", "NUTRIENT_PROXY", "COOLDOWN", "COLONY_UNIT_CAP", "GENERATION_CAP", "ELAPSED_TIME"],
+        "state_deltas": {"births_cumulative": 3, "simulation_elapsed_micro_minute": 2880000000},
+        "count_deltas": {"generation_counts": {"generation_1": 3}, "population_counts": {"dispersal_unit": 3}},
+        "deltas": {
+          "structural_mass_pools_micro_gram_proxy": {"active_colony_biomass": -1500000, "dispersal_unit_biomass": 1500000},
+          "moisture_water_pools_micro_milliliter_proxy": {"active_colony_water": -600000, "dispersal_unit_water": 600000},
+          "nutrient_pools_micro_nutrient_proxy_unit": {"active_colony_nutrient_store": -300000, "dispersal_unit_nutrient_store": 300000},
+          "energy_pools_micro_energy_proxy_unit": {"active_colony_energy_store": -1200000, "dispersal_unit_energy_store": 700000, "environmental_dissipation_proxy": 500000}
+        }
+      },
+      {
+        "sequence": "003",
+        "event_id": "FUNGI-MYCOFORM-ORACLE-EVT-003",
+        "event_type": "BOUNDED_SEALED_DISPERSAL_PROXY_EVENT",
+        "required_gates": ["DISPERSAL_UNIT_PRESENT", "SEALED_CANDIDATE_COMPARTMENT", "AUTHORIZED_LOCAL_DESTINATION_CUSTODY", "BOUNDED_DISTANCE_PROXY", "ENERGY_PROXY", "ELAPSED_TIME"],
+        "state_deltas": {"simulation_elapsed_micro_minute": 1440000000},
+        "count_deltas": {"population_counts": {"dispersal_unit": -2, "establishing_colony": 2}},
+        "deltas": {
+          "structural_mass_pools_micro_gram_proxy": {"dispersal_unit_biomass": -1000000, "establishing_colony_biomass": 1000000},
+          "moisture_water_pools_micro_milliliter_proxy": {"dispersal_unit_water": -400000, "establishing_colony_water": 400000},
+          "nutrient_pools_micro_nutrient_proxy_unit": {"dispersal_unit_nutrient_store": -200000, "establishing_colony_nutrient_store": 200000},
+          "energy_pools_micro_energy_proxy_unit": {"dispersal_unit_energy_store": -400000, "environmental_dissipation_proxy": 100000, "establishing_colony_energy_store": 300000}
+        }
+      },
+      {
+        "sequence": "004",
+        "event_id": "FUNGI-MYCOFORM-ORACLE-EVT-004",
+        "event_type": "ESTABLISHING_TO_ACTIVE_COLONY_PROXY_EVENT",
+        "required_gates": ["ESTABLISHING_STAGE_PRESENT", "HABITAT", "SEALED_CANDIDATE_COMPARTMENT", "ENVIRONMENT_FIT", "SUBSTRATE", "MOISTURE", "NUTRIENT_PROXY", "ENERGY_PROXY", "ELAPSED_TIME", "STAGE_ORDER"],
+        "state_deltas": {"simulation_elapsed_micro_minute": 2880000000},
+        "count_deltas": {"population_counts": {"active_colony": 2, "establishing_colony": -2}},
+        "deltas": {
+          "structural_mass_pools_micro_gram_proxy": {"active_colony_biomass": 1000000, "establishing_colony_biomass": -1000000},
+          "moisture_water_pools_micro_milliliter_proxy": {"active_colony_water": 400000, "establishing_colony_water": -400000},
+          "nutrient_pools_micro_nutrient_proxy_unit": {"active_colony_nutrient_store": 200000, "establishing_colony_nutrient_store": -200000},
+          "energy_pools_micro_energy_proxy_unit": {"active_colony_energy_store": 200000, "environmental_dissipation_proxy": 100000, "establishing_colony_energy_store": -300000}
+        }
+      },
+      {
+        "sequence": "005",
+        "event_id": "FUNGI-MYCOFORM-ORACLE-EVT-005",
+        "event_type": "ACTIVE_COLONY_INACTIVATION_PROXY_EVENT",
+        "required_gates": ["ACTIVE_COLONY_STAGE_PRESENT", "RECORDED_INACTIVATION_CAUSE", "INACTIVE_BIOMASS_CUSTODY", "ELAPSED_TIME"],
+        "state_deltas": {"deaths_cumulative": 1, "simulation_elapsed_micro_minute": 1440000000},
+        "count_deltas": {"generation_counts": {"generation_0": -1}, "population_counts": {"active_colony": -1}},
+        "deltas": {
+          "structural_mass_pools_micro_gram_proxy": {"active_colony_biomass": -2000000, "inactive_colony_biomass": 2000000},
+          "moisture_water_pools_micro_milliliter_proxy": {"active_colony_water": -800000, "inactive_colony_water": 800000},
+          "nutrient_pools_micro_nutrient_proxy_unit": {"active_colony_nutrient_store": -400000, "inactive_colony_nutrient_store": 400000},
+          "energy_pools_micro_energy_proxy_unit": {"active_colony_energy_store": -1200000, "environmental_dissipation_proxy": 500000, "inactive_colony_energy_store": 700000}
+        }
+      },
+      {
+        "sequence": "006",
+        "event_id": "FUNGI-MYCOFORM-ORACLE-EVT-006",
+        "event_type": "PROCESSED_RESIDUAL_TO_PENDING_ECOLOGY_CUSTODY_EVENT",
+        "required_gates": ["PROCESSED_RESIDUAL_CUSTODY_PRESENT", "OWNER_ACCEPTANCE_PENDING", "NAMED_MATERIAL_AND_NUTRIENT_DESTINATIONS", "ELAPSED_TIME"],
+        "state_deltas": {"simulation_elapsed_micro_minute": 1440000000},
+        "deltas": {
+          "structural_mass_pools_micro_gram_proxy": {"pending_ecology_processed_material_custody": 6000000, "processed_substrate_residual_biomass": -6000000},
+          "moisture_water_pools_micro_milliliter_proxy": {"pending_ecology_processed_material_water_custody": 2000000, "processed_substrate_residual_water": -2000000},
+          "nutrient_pools_micro_nutrient_proxy_unit": {"pending_ecology_processed_material_nutrient_custody": 4000000, "processed_substrate_residual_nutrient_store": -4000000},
+          "energy_pools_micro_energy_proxy_unit": {"pending_ecology_processed_material_energy_custody": 1000000, "processed_substrate_residual_energy_store": -1000000}
+        }
+      },
+      {
+        "sequence": "007",
+        "event_id": "FUNGI-MYCOFORM-ORACLE-EVT-007",
+        "event_type": "INACTIVE_BIOMASS_TO_PENDING_ECOLOGY_CUSTODY_EVENT",
+        "required_gates": ["INACTIVE_BIOMASS_CUSTODY_PRESENT", "OWNER_ACCEPTANCE_PENDING", "NAMED_MATERIAL_AND_NUTRIENT_DESTINATIONS", "ELAPSED_TIME"],
+        "state_deltas": {"simulation_elapsed_micro_minute": 1440000000},
+        "deltas": {
+          "structural_mass_pools_micro_gram_proxy": {"inactive_colony_biomass": -1000000, "pending_ecology_inactive_biomass_custody": 1000000},
+          "moisture_water_pools_micro_milliliter_proxy": {"inactive_colony_water": -400000, "pending_ecology_inactive_biomass_water_custody": 400000},
+          "nutrient_pools_micro_nutrient_proxy_unit": {"inactive_colony_nutrient_store": -200000, "pending_ecology_inactive_biomass_nutrient_custody": 200000},
+          "energy_pools_micro_energy_proxy_unit": {"inactive_colony_energy_store": -300000, "pending_ecology_inactive_biomass_energy_custody": 300000}
+        }
+      },
+      {
+        "sequence": "008",
+        "event_id": "FUNGI-MYCOFORM-ORACLE-EVT-008",
+        "event_type": "CANDIDATE_CUSTODY_CLOSEOUT_EVENT",
+        "required_gates": ["ALL_LEDGER_DOMAINS_CLOSED", "ALL_OUTPUT_CUSTODY_NAMED", "OWNER_ACCEPTANCE_REMAINS_PENDING", "FINAL_STATE_HASH_AVAILABLE", "ELAPSED_TIME"],
+        "state_deltas": {"simulation_elapsed_micro_minute": 1440000000},
+        "state_updates": {"custody_closed": true},
+        "deltas": {}
+      }
+    ],
+    "expected_final_state": {
+      "oracle_id": "FUNGI-MYCOFORM-LIFECYCLE-RESOURCE-ORACLE-001",
+      "simulation_elapsed_micro_minute": 14400000000,
+      "births_cumulative": 3,
+      "deaths_cumulative": 1,
+      "custody_closed": true,
+      "population_counts": {
+        "active_colony": 5,
+        "dispersal_unit": 1,
+        "establishing_colony": 0
+      },
+      "generation_counts": {
+        "generation_0": 3,
+        "generation_1": 3
+      },
+      "structural_mass_pools_micro_gram_proxy": {
+        "active_colony_biomass": 10500000,
+        "dispersal_unit_biomass": 500000,
+        "establishing_colony_biomass": 0,
+        "inactive_colony_biomass": 1000000,
+        "pending_ecology_inactive_biomass_custody": 1000000,
+        "pending_ecology_processed_material_custody": 6000000,
+        "processed_substrate_residual_biomass": 3000000,
+        "substrate_source_custody": 78000000
+      },
+      "moisture_water_pools_micro_milliliter_proxy": {
+        "active_colony_water": 4000000,
+        "atmospheric_moisture_proxy": 1000000,
+        "dispersal_unit_water": 200000,
+        "establishing_colony_water": 0,
+        "habitat_water_custody": 16000000,
+        "inactive_colony_water": 400000,
+        "pending_ecology_inactive_biomass_water_custody": 400000,
+        "pending_ecology_processed_material_water_custody": 2000000,
+        "processed_substrate_residual_water": 1000000,
+        "substrate_moisture_custody": 35000000
+      },
+      "nutrient_pools_micro_nutrient_proxy_unit": {
+        "active_colony_nutrient_store": 2500000,
+        "dispersal_unit_nutrient_store": 100000,
+        "establishing_colony_nutrient_store": 0,
+        "inactive_colony_nutrient_store": 200000,
+        "pending_ecology_inactive_biomass_nutrient_custody": 200000,
+        "pending_ecology_processed_material_nutrient_custody": 4000000,
+        "processed_substrate_residual_nutrient_store": 1000000,
+        "substrate_nutrient_custody": 42000000
+      },
+      "energy_pools_micro_energy_proxy_unit": {
+        "active_colony_energy_store": 10800000,
+        "dispersal_unit_energy_store": 300000,
+        "environmental_dissipation_proxy": 8200000,
+        "establishing_colony_energy_store": 0,
+        "inactive_colony_energy_store": 400000,
+        "pending_ecology_inactive_biomass_energy_custody": 300000,
+        "pending_ecology_processed_material_energy_custody": 1000000,
+        "processed_substrate_residual_energy_store": 1000000,
+        "substrate_energy_source_custody": 78000000
+      }
+    },
+    "expected_final_totals": {
+      "structural_mass_micro_gram_proxy": 100000000,
+      "moisture_water_micro_milliliter_proxy": 60000000,
+      "nutrient_micro_nutrient_proxy_unit": 50000000,
+      "energy_micro_energy_proxy_unit": 100000000,
+      "substrate_remaining_micro_gram_proxy": 78000000,
+      "substrate_consumed_micro_gram_proxy": 12000000,
+      "processed_residual_created_micro_gram_proxy": 9000000,
+      "processed_residual_retained_micro_gram_proxy": 3000000,
+      "processed_residual_pending_owner_transfer_micro_gram_proxy": 6000000,
+      "inactive_biomass_created_micro_gram_proxy": 2000000,
+      "inactive_biomass_retained_micro_gram_proxy": 1000000,
+      "inactive_biomass_pending_owner_transfer_micro_gram_proxy": 1000000,
+      "pending_decomposition_material_micro_gram_proxy": 7000000,
+      "pending_decomposition_nutrient_micro_nutrient_proxy_unit": 4200000,
+      "accepted_ecology_decomposition_material_micro_gram_proxy": 0,
+      "accepted_ecology_nutrient_micro_nutrient_proxy_unit": 0,
+      "soil_nutrient_state_delta_micro_nutrient_proxy_unit": 0,
+      "population_count": 6,
+      "peak_population_count": 7,
+      "maximum_generation": 1,
+      "simulation_elapsed_micro_minute": 14400000000,
+      "custody_closed": true
+    },
+    "closed_ledgers": {
+      "structural_mass": {"initial": 100000000, "final": 100000000, "residual": 0, "closed": true},
+      "moisture_water": {"initial": 60000000, "final": 60000000, "residual": 0, "closed": true},
+      "nutrient_proxy": {"initial": 50000000, "final": 50000000, "residual": 0, "closed": true},
+      "energy_proxy": {"initial": 100000000, "final": 100000000, "residual": 0, "closed": true},
+      "substrate_mass_input": {"initial_substrate": 90000000, "consumed": 12000000, "remaining": 78000000, "colony_growth_allocation": 3000000, "processed_residual_allocation": 9000000, "residual": 0, "closed": true},
+      "substrate_moisture_flow": {"initial_substrate_moisture": 40000000, "consumed": 5000000, "remaining": 35000000, "colony_allocation": 1000000, "processed_residual_allocation": 3000000, "atmospheric_allocation": 1000000, "residual": 0, "closed": true},
+      "substrate_nutrient_flow": {"initial_substrate_nutrient": 48000000, "consumed": 6000000, "remaining": 42000000, "colony_allocation": 1000000, "processed_residual_allocation": 5000000, "residual": 0, "closed": true},
+      "processed_residual": {"created_mass": 9000000, "retained_mass": 3000000, "pending_owner_mass": 6000000, "created_nutrient": 5000000, "retained_nutrient": 1000000, "pending_owner_nutrient": 4000000, "mass_residual": 0, "nutrient_residual": 0, "closed": true},
+      "inactive_biomass": {"created_mass": 2000000, "retained_mass": 1000000, "pending_owner_mass": 1000000, "created_nutrient": 400000, "retained_nutrient": 200000, "pending_owner_nutrient": 200000, "mass_residual": 0, "nutrient_residual": 0, "closed": true},
+      "decomposition_custody": {"pending_processed_mass": 6000000, "pending_inactive_mass": 1000000, "pending_total_mass": 7000000, "pending_processed_nutrient": 4000000, "pending_inactive_nutrient": 200000, "pending_total_nutrient": 4200000, "accepted_owner_material": 0, "accepted_owner_nutrient": 0, "soil_nutrient_delta": 0, "mass_residual": 0, "nutrient_residual": 0, "closed": true},
+      "population": {"initial": 4, "births": 3, "deaths": 1, "net_migration": 0, "final": 6, "peak": 7, "candidate_cap": 8, "residual": 0, "closed": true},
+      "generation": {"generation_0": 3, "generation_1": 3, "population_total": 6, "maximum_generation": 1, "generation_cap": 1, "residual": 0, "closed": true},
+      "elapsed_time": {"initial_micro_minute": 0, "advanced_micro_minute": 14400000000, "final_micro_minute": 14400000000, "residual": 0, "closed": true}
+    },
+    "final_custody_assertions": {
+      "all_output_pools_named": true,
+      "processed_residual_retained_or_pending": true,
+      "inactive_biomass_retained_or_pending": true,
+      "pending_moisture_named": true,
+      "pending_nutrients_named": true,
+      "accepted_owner_transfer": false,
+      "soil_nutrient_state_changed": false,
+      "custody_closed": true
+    },
+    "canonical_serialization": {
+      "algorithm": "SHA-256",
+      "payload": "deterministic_positive_fixture.expected_final_state",
+      "object_keys": "ascending Unicode code-point order; all current keys are ASCII",
+      "array_order": "preserved",
+      "number_format": "base-10 safe integer without exponent",
+      "whitespace": "none",
+      "encoding": "UTF-8 without BOM or trailing newline"
+    },
+    "expected_final_sha256": "f869fb62c117c97aa7785cb41427f39617fc2a72f7805a426540a9427fa45278",
+    "objective_assertions": [
+      "APPLY_ACTIONS_IN_SEQUENCE_ORDER",
+      "USE_SIGNED_INTEGER_MICRO_UNITS_ONLY",
+      "REJECT_NEGATIVE_POOL_AFTER_EACH_ACTION",
+      "EVERY_PRESENT_ACTION_DOMAIN_DELTA_SUMS_TO_ZERO",
+      "FINAL_STATE_EQUALS_EXPECTED_FINAL_STATE",
+      "STRUCTURAL_MASS_CLOSES_EXACTLY",
+      "MOISTURE_WATER_CLOSES_EXACTLY",
+      "NUTRIENT_PROXY_CLOSES_EXACTLY",
+      "ENERGY_PROXY_CLOSES_EXACTLY",
+      "SUBSTRATE_CONSUMED_EQUALS_COLONY_GROWTH_PLUS_PROCESSED_RESIDUAL",
+      "SUBSTRATE_MOISTURE_CONSUMED_EQUALS_COLONY_PLUS_RESIDUAL_PLUS_ATMOSPHERIC_ALLOCATIONS",
+      "SUBSTRATE_NUTRIENT_CONSUMED_EQUALS_COLONY_PLUS_PROCESSED_RESIDUAL_ALLOCATIONS",
+      "PROCESSED_RESIDUAL_EQUALS_RETAINED_PLUS_PENDING_OWNER_CUSTODY",
+      "INACTIVE_BIOMASS_EQUALS_RETAINED_PLUS_PENDING_OWNER_CUSTODY",
+      "PENDING_DECOMPOSITION_EQUALS_PENDING_PROCESSED_PLUS_PENDING_INACTIVE",
+      "ACCEPTED_ECOLOGY_TRANSFERS_AND_SOIL_NUTRIENT_DELTA_EQUAL_ZERO",
+      "FINAL_POPULATION_EQUALS_INITIAL_PLUS_BIRTHS_MINUS_DEATHS_MINUS_NET_MIGRATION",
+      "PEAK_POPULATION_DOES_NOT_EXCEED_CANDIDATE_CAP",
+      "MAXIMUM_GENERATION_DOES_NOT_EXCEED_GENERATION_CAP",
+      "ELAPSED_TIME_EQUALS_SUM_OF_ACTION_TIME_DELTAS",
+      "ALL_FINAL_OUTPUT_CUSTODY_IS_NAMED_AND_CLOSED",
+      "CANONICAL_SHA256_EQUALS_EXPECTED_FINAL_SHA256",
+      "SECOND_REPLAY_PRODUCES_IDENTICAL_SHA256"
+    ]
+  },
+  "deterministic_blocked_fixtures": [
+    {"fixture_id": "FUNGI-BLOCK-OWNER-ADMISSION", "given": ["CURRENT_ECOLOGY_SCHEMA", "MYCOFORM_CANDIDATE_SPECIES_ID"], "when": "REQUEST_POPULATION_OR_LIFECYCLE_ACTION", "expected_status": "OWNER_SCHEMA_ADMISSION_REQUIRED", "expected_count_delta": "ALL_ZERO", "expected_resource_delta": "ALL_ZERO", "owner_state_change": false},
+    {"fixture_id": "FUNGI-BLOCK-NO-HABITAT", "given": ["NO_FOREIGN_LOCATION", "NO_ADMITTED_HABITAT"], "when": "REQUEST_STAGE_OR_DISPERSAL_ACTION", "expected_status": "NO_HABITAT", "expected_count_delta": "ALL_ZERO", "expected_resource_delta": "ALL_ZERO", "owner_state_change": false},
+    {"fixture_id": "FUNGI-BLOCK-UNSEALED-COMPARTMENT", "given": ["NO_SEALED_CANDIDATE_COMPARTMENT"], "when": "REQUEST_ANY_COLONY_ACTION", "expected_status": "SEALED_COMPARTMENT_REQUIRED", "expected_count_delta": "ALL_ZERO", "expected_resource_delta": "ALL_ZERO", "owner_state_change": false},
+    {"fixture_id": "FUNGI-BLOCK-NO-SUBSTRATE", "given": ["EMPTY_DETRITUS_CUSTODY"], "when": "REQUEST_PROCESSING_GROWTH_OR_REPLICATION", "expected_status": "INSUFFICIENT_SUBSTRATE", "expected_count_delta": "ALL_ZERO", "expected_resource_delta": "ALL_ZERO", "owner_state_change": false},
+    {"fixture_id": "FUNGI-BLOCK-NO-MOISTURE", "given": ["EMPTY_SUBSTRATE_MOISTURE_CUSTODY"], "when": "REQUEST_PROCESSING_GROWTH_OR_REPLICATION", "expected_status": "INSUFFICIENT_MOISTURE_PROXY", "expected_count_delta": "ALL_ZERO", "expected_resource_delta": "ALL_ZERO", "owner_state_change": false},
+    {"fixture_id": "FUNGI-BLOCK-NO-NUTRIENT", "given": ["EMPTY_SUBSTRATE_NUTRIENT_PROXY_CUSTODY"], "when": "REQUEST_PROCESSING_GROWTH_OR_REPLICATION", "expected_status": "INSUFFICIENT_NUTRIENT_PROXY", "expected_count_delta": "ALL_ZERO", "expected_resource_delta": "ALL_ZERO", "owner_state_change": false},
+    {"fixture_id": "FUNGI-BLOCK-NO-ENERGY", "given": ["EMPTY_SUBSTRATE_ENERGY_PROXY_CUSTODY"], "when": "REQUEST_PROCESSING_GROWTH_OR_REPLICATION", "expected_status": "INSUFFICIENT_ENERGY_PROXY", "expected_count_delta": "ALL_ZERO", "expected_resource_delta": "ALL_ZERO", "owner_state_change": false},
+    {"fixture_id": "FUNGI-BLOCK-MOISTURE-STRESS", "given": ["MOISTURE_FIT_OUTSIDE_CANDIDATE_ENVELOPE"], "when": "REQUEST_STAGE_ACTION", "expected_status": "MOISTURE_STRESS_PROXY", "expected_count_delta": "ALL_ZERO", "expected_resource_delta": "ALL_ZERO", "owner_state_change": false},
+    {"fixture_id": "FUNGI-BLOCK-TEMPERATURE-STRESS", "given": ["TEMPERATURE_FIT_OUTSIDE_CANDIDATE_ENVELOPE"], "when": "REQUEST_STAGE_ACTION", "expected_status": "TEMPERATURE_OUT_OF_RANGE_PROXY", "expected_count_delta": "ALL_ZERO", "expected_resource_delta": "ALL_ZERO", "owner_state_change": false},
+    {"fixture_id": "FUNGI-BLOCK-OXYGEN-STRESS", "given": ["OXYGEN_FIT_BELOW_CANDIDATE_MINIMUM"], "when": "REQUEST_STAGE_ACTION", "expected_status": "OXYGEN_AVAILABILITY_STRESS_PROXY", "expected_count_delta": "ALL_ZERO", "expected_resource_delta": "ALL_ZERO", "owner_state_change": false},
+    {"fixture_id": "FUNGI-BLOCK-CONTAMINATION-STRESS", "given": ["CONTAMINATION_STRESS_ABOVE_CANDIDATE_CEILING"], "when": "REQUEST_STAGE_ACTION", "expected_status": "CONTAMINATION_STRESS_PROXY", "expected_count_delta": "ALL_ZERO", "expected_resource_delta": "ALL_ZERO", "owner_state_change": false},
+    {"fixture_id": "FUNGI-BLOCK-ZERO-TIME", "given": ["ZERO_ELAPSED_TIME"], "when": "REQUEST_NEXT_STAGE", "expected_status": "ELAPSED_TIME_REQUIRED", "expected_count_delta": "ALL_ZERO", "expected_resource_delta": "ALL_ZERO", "owner_state_change": false},
+    {"fixture_id": "FUNGI-BLOCK-STAGE-SKIP", "given": ["SEALED_STARTER_UNIT_PROXY"], "when": "REQUEST_ACTIVE_COLONY_PROXY", "expected_status": "INVALID_STAGE_ORDER", "expected_count_delta": "ALL_ZERO", "expected_resource_delta": "ALL_ZERO", "owner_state_change": false},
+    {"fixture_id": "FUNGI-BLOCK-REPLICATION-AUTHORITY", "given": ["CANDIDATE_REPLICATION_AUTHORIZED_FALSE"], "when": "REQUEST_REPLICATION", "expected_status": "REPLICATION_NOT_AUTHORIZED", "expected_count_delta": "ALL_ZERO", "expected_resource_delta": "ALL_ZERO", "owner_state_change": false},
+    {"fixture_id": "FUNGI-BLOCK-COLONY-CAP", "given": ["PROJECTED_COUNT_EXCEEDS_CANDIDATE_CAP"], "when": "REQUEST_REPLICATION", "expected_status": "COLONY_UNIT_CAP_REACHED", "expected_count_delta": "ALL_ZERO", "expected_resource_delta": "ALL_ZERO", "owner_state_change": false},
+    {"fixture_id": "FUNGI-BLOCK-GENERATION-CAP", "given": ["PARENT_GENERATION_EQUALS_GENERATION_CAP"], "when": "REQUEST_REPLICATION", "expected_status": "GENERATION_CAP_REACHED", "expected_count_delta": "ALL_ZERO", "expected_resource_delta": "ALL_ZERO", "owner_state_change": false},
+    {"fixture_id": "FUNGI-BLOCK-REPLICATION-EVENT-CAP", "given": ["SOURCE_LIFETIME_EVENT_CAP_REACHED"], "when": "REQUEST_REPLICATION", "expected_status": "REPLICATION_EVENT_CAP_REACHED", "expected_count_delta": "ALL_ZERO", "expected_resource_delta": "ALL_ZERO", "owner_state_change": false},
+    {"fixture_id": "FUNGI-BLOCK-DISPERSAL-AUTHORITY", "given": ["UNSEALED_OR_UNAUTHORIZED_DESTINATION"], "when": "REQUEST_DISPERSAL", "expected_status": "DISPERSAL_NOT_AUTHORIZED", "expected_count_delta": "ALL_ZERO", "expected_resource_delta": "ALL_ZERO", "owner_state_change": false},
+    {"fixture_id": "FUNGI-BLOCK-MASS-MISMATCH", "given": ["COPY_OF_POSITIVE_FIXTURE_WITH_ONE_MASS_MICRO_UNIT_REMOVED"], "when": "VALIDATE_LEDGER_CLOSURE", "expected_status": "MASS_LEDGER_MISMATCH", "expected_count_delta": "ALL_ZERO", "expected_resource_delta": "ALL_ZERO", "owner_state_change": false},
+    {"fixture_id": "FUNGI-BLOCK-MOISTURE-MISMATCH", "given": ["COPY_OF_POSITIVE_FIXTURE_WITH_ONE_MOISTURE_MICRO_UNIT_REMOVED"], "when": "VALIDATE_LEDGER_CLOSURE", "expected_status": "MOISTURE_LEDGER_MISMATCH", "expected_count_delta": "ALL_ZERO", "expected_resource_delta": "ALL_ZERO", "owner_state_change": false},
+    {"fixture_id": "FUNGI-BLOCK-NUTRIENT-MISMATCH", "given": ["COPY_OF_POSITIVE_FIXTURE_WITH_ONE_NUTRIENT_MICRO_UNIT_REMOVED"], "when": "VALIDATE_LEDGER_CLOSURE", "expected_status": "NUTRIENT_LEDGER_MISMATCH", "expected_count_delta": "ALL_ZERO", "expected_resource_delta": "ALL_ZERO", "owner_state_change": false},
+    {"fixture_id": "FUNGI-BLOCK-INACTIVE-CUSTODY", "given": ["INACTIVATION_WITHOUT_INACTIVE_BIOMASS_DESTINATION"], "when": "REQUEST_INACTIVATION_EVENT", "expected_status": "INACTIVE_BIOMASS_CUSTODY_REQUIRED", "expected_count_delta": "ALL_ZERO", "expected_resource_delta": "ALL_ZERO", "owner_state_change": false},
+    {"fixture_id": "FUNGI-BLOCK-DECOMPOSITION-ACCEPTANCE", "given": ["PENDING_CUSTODY_WITHOUT_ECOLOGY_ACCEPTANCE_EVENT_AND_HASH"], "when": "REQUEST_OWNER_TRANSFER_OR_SOIL_EFFECT", "expected_status": "ECOLOGY_OWNER_ACCEPTANCE_REQUIRED", "expected_count_delta": "ALL_ZERO", "expected_resource_delta": "ALL_ZERO", "owner_state_change": false},
+    {"fixture_id": "FUNGI-BLOCK-EVENT-HASH", "given": ["BROKEN_PREVIOUS_OR_NEXT_STATE_HASH"], "when": "VALIDATE_OR_REPLAY_EVENT_CHAIN", "expected_status": "EVENT_HASH_CHAIN_MISMATCH", "expected_count_delta": "ALL_ZERO", "expected_resource_delta": "ALL_ZERO", "owner_state_change": false},
+    {"fixture_id": "FUNGI-BLOCK-CARBON-CHEMISTRY", "given": ["REQUEST_EMPIRICAL_CARBON_OR_NUTRIENT_CHEMISTRY_RESULT"], "when": "EVALUATE_OUT_OF_SCOPE_MODEL", "expected_status": "NOT_MODELED_REVIEW_REQUIRED", "expected_count_delta": "ALL_ZERO", "expected_resource_delta": "ALL_ZERO", "owner_state_change": false}
+  ],
+  "acceptance_invariants": [
+    "EXACT_POSITIVE_ORACLE_REPLAY",
+    "ALL_THIRTEEN_LEDGERS_CLOSE",
+    "ALL_TWENTY_FIVE_BLOCKED_FIXTURES_HAVE_ZERO_DELTAS",
+    "NO_CURRENT_ECOLOGY_ADMISSION",
+    "NO_INSTANT_STAGE_OR_REPLICATION",
+    "NO_UNCONTROLLED_REPLICATION_OR_DISPERSAL",
+    "NO_PROCESSED_RESIDUAL_OR_INACTIVE_BIOMASS_DISAPPEARS",
+    "NO_DECOMPOSITION_OWNER_ACCEPTANCE",
+    "NO_SOIL_NUTRIENT_DELTA",
+    "MICROBIAL_EXTENSION_HAS_EXACTLY_SIX_APPROVED_FIELDS",
+    "MICROBIAL_DECOMPOSITION_PROXY_REMAINS_FOREIGN_ABSTRACT_RESOURCE_POOL",
+    "NO_CARBON_OR_EMPIRICAL_CHEMISTRY_MODEL",
+    "NO_RUNTIME_ACTIVATION",
+    "NO_PRODUCTION_AUTHORITY"
+  ],
+  "provenance_reference": "provenance.json",
+  "event_log_reference": "event_log.json"
+}

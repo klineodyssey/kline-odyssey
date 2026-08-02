@@ -1,0 +1,282 @@
+{
+  "record_id": "KAIOS-FUNGI-MYCOFORM-CANDIDATE-PROVENANCE-V1",
+  "schema_version": "1.0.0-candidate",
+  "status": "CURSOR_RESEARCH_CANDIDATE_ONLY",
+  "review_status": "PENDING_CODEX_REVIEW",
+  "authority": "NO_PRODUCTION_AUTHORITY",
+  "task_id": "KAIOS-CURSOR-FUNGI-CANDIDATE-001",
+  "worker_id": "cursor-01",
+  "branch": "cursor-handoff/KAIOS-CURSOR-FUNGI-CANDIDATE-001",
+  "source_base_commit": "eb17536ff6affb34f93bce6c5622d7bab018d230",
+  "dispatch_branch_base_commit": "5e20186c5a644171e658f95a26c0bbe1a4741287",
+  "source_hash_basis": "SHA256_OF_EXACT_GIT_BLOB_BYTES_AT_DECLARED_COMMIT",
+  "provenance_roles": {
+    "source_base_commit": "Immutable research and authority evidence fixed by the work order.",
+    "dispatch_branch_base_commit": "Assignment merge containing the exact work order and active workforce dispatch.",
+    "checkout_line_endings": "IGNORED_FOR_BLOB_HASH_VALIDATION"
+  },
+  "candidate_identity": {
+    "candidate_package_id": "CANDIDATE-FUNGI-MYCOFORM-DECOMPOSER-V1",
+    "life_id": "LIFE-KAIOS-MYCOFORM-CANDIDATE-001",
+    "species_id": "SPECIES-KAIOS-MYCOFORM-DECOMPOSER-CANDIDATE",
+    "genome_id": "GENOME-KAIOS-MYCOFORM-CANDIDATE-001"
+  },
+  "source_evidence": [
+    {
+      "source_type": "REPOSITORY_DERIVED",
+      "source_path": "PRIMEFORGE_GENESIS_BOOT_SEQUENCE_V1_4.md",
+      "source_commit": "eb17536ff6affb34f93bce6c5622d7bab018d230",
+      "git_object": "0f66a62de1018e35ca93198dc890fdddf70ab213",
+      "sha256": "1ef1f7f2f17cc55fa8afbca429ccdfb9e0ce2a1ac55108f194b1810c26331dbc",
+      "usage": "Mandatory boot authority and CURRENT gateway boundary."
+    },
+    {
+      "source_type": "REPOSITORY_DERIVED",
+      "source_path": "docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md",
+      "source_commit": "eb17536ff6affb34f93bce6c5622d7bab018d230",
+      "git_object": "f9748c99501ec1c1ea6ba5c39833909684c0ffbe",
+      "sha256": "6d71cd7946f0b4057a9b5289923d3c7b424e409140feb7404f5b433a309ab00b",
+      "usage": "Positive mass, separated energy, elapsed-time, and no-authority constraints."
+    },
+    {
+      "source_type": "REPOSITORY_DERIVED",
+      "source_path": "docs/maps/UniverseMap_V10_2_DISTANCE_COMPLETE_ALL_POINTS.json",
+      "source_commit": "eb17536ff6affb34f93bce6c5622d7bab018d230",
+      "git_object": "0f97fc7e723fc97cd8366a10f0c9eb7892df4605",
+      "sha256": "bfde25dfb2737e6f698850aa705ea221c64bb0f228ff8e3a7f2740f0ae123451",
+      "usage": "Mandatory map authority; no Universe location is assigned by this package."
+    },
+    {
+      "source_type": "REPOSITORY_DERIVED",
+      "source_path": "AGENTS.md",
+      "source_commit": "eb17536ff6affb34f93bce6c5622d7bab018d230",
+      "git_object": "06ad797cc0d87f9a468ccbd11ccf03f528029a7a",
+      "sha256": "c16c1ba1cfff166e68d2ec1a399afb9f9fa877631b574ebe3fdf03c5c514295b",
+      "usage": "Mandatory work-system, protected-path, workforce, and commit boundaries."
+    },
+    {
+      "source_type": "REPOSITORY_DERIVED",
+      "source_path": "KAIOS_CANONICAL_LIFE_SPEC_V1.md",
+      "source_commit": "eb17536ff6affb34f93bce6c5622d7bab018d230",
+      "git_object": "876aeca229edcf0ba21fb1500f487f4f0c4f4522",
+      "sha256": "ccd52d24c46f50181ee464e5cf55ec8bd5b9080c0f551608f34806650460ead0",
+      "usage": "SHARED_CORE plus approved extension composition and candidate adoption boundary."
+    },
+    {
+      "source_type": "REPOSITORY_DERIVED",
+      "source_path": "KAIOS_CANONICAL_LIFE_SCHEMA_V1.json",
+      "source_commit": "eb17536ff6affb34f93bce6c5622d7bab018d230",
+      "git_object": "3bfcea2e0fc3854a6ff674a93ef32edc2ee0aab5",
+      "sha256": "d1ced898d043e4890142df40a9033145762d4ceb28fd0e49eae39dc43bf224c5",
+      "usage": "Read-only Canonical Life shared-core manifest contract."
+    },
+    {
+      "source_type": "REPOSITORY_DERIVED",
+      "source_path": "KAIOS_CANONICAL_LIFE_TYPE_EXTENSIONS_V1.json",
+      "source_commit": "eb17536ff6affb34f93bce6c5622d7bab018d230",
+      "git_object": "8f3a30d1cba18b7156c64439bfce5d9bafc6926e",
+      "sha256": "72ab55fe394b1038cb2b8ab8bac616f378521b89fde36aa6cf5ab3cbebea58fa",
+      "usage": "Read-only MICROBIAL_EXTENSION six-field set and MICROBIAL_LIFE membership rule."
+    },
+    {
+      "source_type": "REPOSITORY_DERIVED",
+      "source_path": "KAIOS_CANONICAL_LIFE_TAXONOMY_V1.json",
+      "source_commit": "eb17536ff6affb34f93bce6c5622d7bab018d230",
+      "git_object": "708e90f6e5f460eee69b880426c89f01627999ba",
+      "sha256": "ec9b4e7c156467e9b217887f9de83fc698b5bc272c63df5fd8bed93036fc5765",
+      "usage": "Nine universal ranks and biological extension-19 crosswalk."
+    },
+    {
+      "source_type": "REPOSITORY_DERIVED",
+      "source_path": "KAIOS_CANONICAL_LIFE_PACKAGE_TEMPLATE_V1/life.manifest.json",
+      "source_commit": "eb17536ff6affb34f93bce6c5622d7bab018d230",
+      "git_object": "5d8fd7eceb0e7c9f380597f64e2ccd55a3e52982",
+      "sha256": "dca53d23855d00c3b926f5ce037e75203f87feaa063b11f6f13415d84635d251",
+      "usage": "Merged candidate package structure and non-executable bindings."
+    },
+    {
+      "source_type": "REPOSITORY_DERIVED",
+      "source_path": "KAIOS_CANONICAL_LIFE_PHYSICS_BINDING_V1.md",
+      "source_commit": "eb17536ff6affb34f93bce6c5622d7bab018d230",
+      "git_object": "45f8716c0857062bf095fdc610d86cc2e32029f4",
+      "sha256": "6e0cfbc8ea6433fd83a32fd53cb69db1f2a25934aef0644b36a2fe7de22df09f",
+      "usage": "Unit, conservation, time, damage, and transport invariants."
+    },
+    {
+      "source_type": "REPOSITORY_DERIVED",
+      "source_path": "KAIOS_CANONICAL_LIFE_RIGHTS_V1.md",
+      "source_commit": "eb17536ff6affb34f93bce6c5622d7bab018d230",
+      "git_object": "783ea5b17d82bf6579e4a9763bcbc3b18fb06ac2",
+      "sha256": "bec5f35a1906dbd9eb72764e935f4ad282a81398587b66de789130ae4a0428f4",
+      "usage": "Separated, ungranted rights and non-tradeability boundary."
+    },
+    {
+      "source_type": "REPOSITORY_DERIVED",
+      "source_path": "KAIOS_CANONICAL_LIFE_ECONOMY_BINDING_V1.md",
+      "source_commit": "eb17536ff6affb34f93bce6c5622d7bab018d230",
+      "git_object": "2c89e1539cdb39f76d6a70de9daf74b2f22ee753",
+      "sha256": "3ad36bb417ab753083a69fbc38a27e3beae07137a0bfab34840bee8347dba943",
+      "usage": "Null value projection, simulated K11520, and no wallet or settlement."
+    },
+    {
+      "source_type": "REPOSITORY_DERIVED",
+      "source_path": "KAIOS/life/KAIOS_LIFE_RUNTIME_V1_SPEC.md",
+      "source_commit": "eb17536ff6affb34f93bce6c5622d7bab018d230",
+      "git_object": "e1df7d486971684f9cd8020b9005a9fdcc389ce4",
+      "sha256": "bc69596af470812bdfcbaa1989cf4cb59887c35f46f1c97d52f6d3dba87eb655",
+      "usage": "Causal time, mass, water, energy, death, event, and hash requirements."
+    },
+    {
+      "source_type": "REPOSITORY_DERIVED",
+      "source_path": "KAIOS/life/ecology/KAIOS_REPRODUCTION_ECOLOGY_RUNTIME_V1_SPEC.md",
+      "source_commit": "eb17536ff6affb34f93bce6c5622d7bab018d230",
+      "git_object": "0f4399751f4e75727aeac45343a8b3a8900ec534",
+      "sha256": "7fb277af16f552b16db2f4cb511fd060e4e3a5217855198f30fcf59371b8eda1",
+      "usage": "Foreign habitat, population, resource, dead-biomass, decomposition, nutrient, and cap ownership."
+    },
+    {
+      "source_type": "REPOSITORY_DERIVED",
+      "source_path": "KAIOS/life/ecology/KAIOS_REPRODUCTION_ECOLOGY_SCHEMA_V1.json",
+      "source_commit": "eb17536ff6affb34f93bce6c5622d7bab018d230",
+      "git_object": "c99eb0eba386af67c009bfd115e88b934d1c9000",
+      "sha256": "3257f8cd1f0ba482f0c6bc8d98fbfb4748c8a1172c9c88d4bf9a2981c90af9f0",
+      "usage": "Current species admission enum, resource fields, counts, events, and owner boundaries."
+    },
+    {
+      "source_type": "REPOSITORY_DERIVED",
+      "source_path": "KAIOS/life/candidates/ecology-v1/habitat-compatibility.json",
+      "source_commit": "eb17536ff6affb34f93bce6c5622d7bab018d230",
+      "git_object": "365c7bbaffdf6754ebed3a6435cda73e45b191b5",
+      "sha256": "f1dc488b8795ca5ad5a2e320f0502696d01a66329253b9922754bfc48ef37050",
+      "usage": "Canonical candidate habitat IDs and evidence that no Mycoform Species is admitted."
+    },
+    {
+      "source_type": "REPOSITORY_DERIVED",
+      "source_path": "KAIOS/life/candidates/ecology-v1/food-relationships.json",
+      "source_commit": "eb17536ff6affb34f93bce6c5622d7bab018d230",
+      "git_object": "e8f5b84d16ce7e7ca6c0943e8fff252a9dea3000",
+      "sha256": "0b7a915e081d2256ed3b7b9159ee1437b2967eaaa54f2109099911e13d9ccf36",
+      "usage": "DETRITUS_POOL, DEAD_BIOMASS, and MICROBIAL_DECOMPOSITION_PROXY owner boundaries."
+    },
+    {
+      "source_type": "REPOSITORY_DERIVED",
+      "source_path": "KAIOS/life/forest-agriculture/KAIOS_FOREST_AGRICULTURE_RUNTIME_V1_SPEC.md",
+      "source_commit": "eb17536ff6affb34f93bce6c5622d7bab018d230",
+      "git_object": "9a2dd4ad05bb7b2e3d71b91b479359947ada8376",
+      "sha256": "4e1a23e97d09ec2dc4ad65440e6958e646f75ed418e5c703c5a5a1635c2809a1",
+      "usage": "Foreign-owner, soil, detritus, decomposition, nutrient, custody, time, and no-disappearing-mass rules."
+    },
+    {
+      "source_type": "REPOSITORY_DERIVED",
+      "source_path": "KAIOS/life/candidates/forest-agriculture-v1/compost-models/compost-resource-accounting-proposals.json",
+      "source_commit": "eb17536ff6affb34f93bce6c5622d7bab018d230",
+      "git_object": "812dae68f8380b18a6eb3193eb9a492b207deb6f",
+      "sha256": "d3760b8e040a3798da89502bd01c3cebea0cc55c633b5b81998cd606469ac1f5",
+      "usage": "Reviewed fixed-point custody closure and NOT_MODELED carbon and chemistry boundaries; no formula is copied."
+    },
+    {
+      "source_type": "REPOSITORY_DERIVED",
+      "source_path": "KGEN-KAIOS/world-viewer/data/synthetic-world.json",
+      "source_commit": "eb17536ff6affb34f93bce6c5622d7bab018d230",
+      "git_object": "76ddff32f74c2b41ca7d9d9309b7b39a2a2618c8",
+      "sha256": "4be4c1b83420bb24604742fb722a8aedba8b3d2c163f7f18ccd871628ee7f34f",
+      "usage": "Evidence that MUSHROOM_ALPHA already exists as a separate legacy viewer Species and is not reused."
+    },
+    {
+      "source_type": "REPOSITORY_DERIVED",
+      "source_path": "KGEN-KAIOS/world-viewer/biology/taxonomy-standard.js",
+      "source_commit": "eb17536ff6affb34f93bce6c5622d7bab018d230",
+      "git_object": "f4cc78d30bccf375bb3e55f5e3cb2df63d0a4683",
+      "sha256": "2c7eb6d439ac320176751c4985d1f510b68a5656ef4b4ef041dc46b4f55dcc28",
+      "usage": "Legacy MUSHROOM_ALPHA taxonomy identity boundary; no registry or viewer change is made."
+    },
+    {
+      "source_type": "REPOSITORY_DERIVED",
+      "source_path": "KAIOS/life/candidates/forest-agriculture-v1/earthworm/life.manifest.json",
+      "source_commit": "eb17536ff6affb34f93bce6c5622d7bab018d230",
+      "git_object": "715933990b69dd3e5deedb421ae3b25ca6638b7b",
+      "sha256": "b5bdf2d09b87fc693492e31ea0374a06ff1c204420512f98e3abfd93a671afb2",
+      "usage": "Structural precedent for Canonical shared-core composition only; no Earthworm biological values are copied."
+    },
+    {
+      "source_type": "REPOSITORY_DERIVED",
+      "source_path": "KAIOS/life/candidates/forest-agriculture-v1/earthworm/runtime.json",
+      "source_commit": "eb17536ff6affb34f93bce6c5622d7bab018d230",
+      "git_object": "39f04b869e2ce8248d21d6c6fca8f9ce7a0e4441",
+      "sha256": "7f44f1fd1157d0371995b2a8c60ebfce57b784fbe4ae01ad0e4b61ae2aee7e5d",
+      "usage": "Structural precedent for fixed-point replay, blocked fixtures, ledgers, and event hashes only."
+    },
+    {
+      "source_type": "REPOSITORY_DERIVED",
+      "source_path": "KAIOS/life/candidates/forest-agriculture-v1/earthworm/integrity.json",
+      "source_commit": "eb17536ff6affb34f93bce6c5622d7bab018d230",
+      "git_object": "4f9065114d8ecc2d6bbbdaf3eabaafb6d3b69800",
+      "sha256": "bf3df27deb377e7f41eeb16fdf764fb554ce6b7164c5c6ffe152bb6fad4bfa19",
+      "usage": "Structural precedent for reproducible package digest and objective test manifest only."
+    }
+  ],
+  "dispatch_controls": [
+    {
+      "source_type": "REPOSITORY_DERIVED",
+      "source_path": "KAIOS/life/candidates/forest-agriculture-v1/CURSOR_FUNGI_CANDIDATE_WORK_ORDER.md",
+      "source_commit": "5e20186c5a644171e658f95a26c0bbe1a4741287",
+      "git_object": "40c17dae19048f8b5a8e2e9c58a9191c7e3ca594",
+      "sha256": "ad239ddd47a32921a2c1119e9894c5580835110a4e61d38c4bd17476a8e3f23a",
+      "usage": "Exact sixteen-file scope, task boundaries, source base, extension binding, and stop condition."
+    },
+    {
+      "source_type": "REPOSITORY_DERIVED",
+      "source_path": "KGEN-KAIOS/worker_registry.json",
+      "source_commit": "5e20186c5a644171e658f95a26c0bbe1a4741287",
+      "git_object": "c5b3d4e8b638077289202d5bc03b6a56bf93a2ec",
+      "sha256": "8c0f6deea9315a3e9c293d5dcc47bbaca11b9f811de38002205f7e492d377642",
+      "usage": "Active T2 cursor-01 dispatch, exact branch, allowed fungi work, reviewer, and protected-work prohibitions."
+    }
+  ],
+  "derived_decisions": [
+    {
+      "decision": "Use MICROBIAL_LIFE with exactly one MICROBIAL_EXTENSION containing exactly the approved six fields.",
+      "source_type": "REPOSITORY_DERIVED",
+      "confidence": "HIGH",
+      "risk": "Any type or extension change belongs to the Canonical owner."
+    },
+    {
+      "decision": "Use a new synthetic KAIOS mycoform identity because MUSHROOM_ALPHA is a separate legacy viewer record and no matching Life, Species, or Genome ID exists at source base.",
+      "source_type": "MODEL_INFERENCE",
+      "confidence": "HIGH",
+      "risk": "Canonical identity review remains required and may rename or reject the proposal."
+    },
+    {
+      "decision": "Keep all environmental, colony, replication, dispersal, integrity, and lifecycle values as normalized or fixed-point simulation proxies.",
+      "source_type": "RESEARCH_PROPOSAL",
+      "confidence": "LOW",
+      "risk": "Proxy values must never be converted into real biology or cultivation guidance."
+    },
+    {
+      "decision": "Represent decomposition contribution as pending material and abstract nutrient custody with zero owner acceptance and zero soil-nutrient delta.",
+      "source_type": "MODEL_INFERENCE",
+      "confidence": "MEDIUM",
+      "risk": "A future Ecology adapter requires separate schema, event, chemistry-boundary, and conservation review."
+    },
+    {
+      "decision": "Keep carbon and empirical chemistry explicitly NOT_MODELED while conserving anonymous nutrient proxy units.",
+      "source_type": "RESEARCH_PROPOSAL",
+      "confidence": "MEDIUM",
+      "risk": "Nutrient proxy accounting must not be misrepresented as measured chemistry or a fertility outcome."
+    }
+  ],
+  "evidence_counts": {
+    "source_evidence": 24,
+    "dispatch_controls": 2,
+    "total_git_blob_records": 26
+  },
+  "validation_rule": "For every record, resolve source_commit:source_path to git_object, read exact blob bytes, and compare lowercase SHA-256. Any mismatch rejects the package.",
+  "boundaries": [
+    "NO_EXTERNAL_WEB_SOURCE",
+    "NO_EMPIRICAL_BIOLOGY_SOURCE",
+    "NO_CANONICAL_PROMOTION",
+    "NO_ECOLOGY_ADMISSION",
+    "NO_RUNTIME_AUTHORITY",
+    "NO_PRODUCTION_AUTHORITY"
+  ]
+}

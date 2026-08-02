@@ -1,0 +1,185 @@
+{
+  "record_id": "KAIOS-FUNGI-MYCOFORM-CANDIDATE-ENVIRONMENT-V1",
+  "schema_version": "1.0.0-candidate",
+  "status": "CURSOR_RESEARCH_CANDIDATE_ONLY",
+  "review_status": "PENDING_CODEX_REVIEW",
+  "authority": "NO_PRODUCTION_AUTHORITY",
+  "task_id": "KAIOS-CURSOR-FUNGI-CANDIDATE-001",
+  "environment_model": "NORMALIZED_COMPATIBILITY_PROXY_ONLY",
+  "assumption_classification": "SIMULATION_APPROXIMATION",
+  "numeric_parameter_contract": {
+    "required_fields": ["parameter_name", "unit", "minimum", "default", "maximum", "rationale", "source_type", "confidence", "risk", "validation_required"],
+    "range_rule": "minimum <= default <= maximum",
+    "allowed_source_types": ["SOURCE_DERIVED", "REPOSITORY_DERIVED", "MODEL_INFERENCE", "RESEARCH_PROPOSAL", "ASSUMPTION", "SOURCE_UNDERSPECIFIED"],
+    "validation_required_must_equal_true": true
+  },
+  "numeric_parameters": [
+    {
+      "parameter_name": "substrate_moisture_fit_proxy",
+      "unit": "compatibility_basis_point",
+      "minimum": 2500,
+      "default": 6000,
+      "maximum": 8500,
+      "rationale": "Creates a synthetic moisture-fit gate without prescribing water content or environmental conditions.",
+      "source_type": "RESEARCH_PROPOSAL",
+      "confidence": "LOW",
+      "risk": "The normalized score has no conversion to moisture percentage or cultivation guidance.",
+      "validation_required": true
+    },
+    {
+      "parameter_name": "temperature_fit_proxy",
+      "unit": "compatibility_basis_point",
+      "minimum": 2000,
+      "default": 5500,
+      "maximum": 8000,
+      "rationale": "Represents only a bounded owner-supplied temperature compatibility score.",
+      "source_type": "RESEARCH_PROPOSAL",
+      "confidence": "LOW",
+      "risk": "No mapping to Celsius, Fahrenheit, survival, or growth conditions exists.",
+      "validation_required": true
+    },
+    {
+      "parameter_name": "oxygen_availability_fit_proxy",
+      "unit": "compatibility_basis_point",
+      "minimum": 2500,
+      "default": 7000,
+      "maximum": 10000,
+      "rationale": "Supplies an abstract finite oxygen or aeration gate without gas chemistry.",
+      "source_type": "RESEARCH_PROPOSAL",
+      "confidence": "LOW",
+      "risk": "The score is not an oxygen concentration, aeration instruction, or safety threshold.",
+      "validation_required": true
+    },
+    {
+      "parameter_name": "soil_or_forest_habitat_compatibility_proxy",
+      "unit": "compatibility_basis_point",
+      "minimum": 6000,
+      "default": 8000,
+      "maximum": 10000,
+      "rationale": "Requires an explicit future Ecology compatibility decision before any candidate action.",
+      "source_type": "MODEL_INFERENCE",
+      "confidence": "LOW",
+      "risk": "The repository currently contains no candidate Species admission or carrying-capacity calibration.",
+      "validation_required": true
+    },
+    {
+      "parameter_name": "minimum_substrate_custody_for_processing_event",
+      "unit": "micro_gram_substrate_proxy",
+      "minimum": 1000000,
+      "default": 12000000,
+      "maximum": 20000000,
+      "rationale": "Bounds the objective substrate-custody debit used by the deterministic fixture.",
+      "source_type": "RESEARCH_PROPOSAL",
+      "confidence": "LOW",
+      "risk": "This is not a substrate formula, processing rate, or production recommendation.",
+      "validation_required": true
+    },
+    {
+      "parameter_name": "minimum_substrate_moisture_custody_for_processing_event",
+      "unit": "micro_milliliter_moisture_proxy",
+      "minimum": 1000000,
+      "default": 5000000,
+      "maximum": 10000000,
+      "rationale": "Bounds the fixture moisture transfer and forces insufficient-moisture rejection to be explicit.",
+      "source_type": "RESEARCH_PROPOSAL",
+      "confidence": "LOW",
+      "risk": "No conversion to real water requirements or environmental instructions is authorized.",
+      "validation_required": true
+    },
+    {
+      "parameter_name": "minimum_substrate_nutrient_proxy_for_processing_event",
+      "unit": "micro_nutrient_proxy_unit",
+      "minimum": 1000000,
+      "default": 6000000,
+      "maximum": 10000000,
+      "rationale": "Provides an abstract nutrient-custody gate for exact ledger closure without naming chemical species.",
+      "source_type": "RESEARCH_PROPOSAL",
+      "confidence": "LOW",
+      "risk": "The value is not nutrient composition, fertilizer content, or soil-fertility guidance.",
+      "validation_required": true
+    },
+    {
+      "parameter_name": "contamination_stress_proxy_ceiling",
+      "unit": "stress_basis_point",
+      "minimum": 0,
+      "default": 1000,
+      "maximum": 3000,
+      "rationale": "Provides a synthetic fail-closed contamination gate without naming chemicals or safety limits.",
+      "source_type": "RESEARCH_PROPOSAL",
+      "confidence": "LOW",
+      "risk": "The score is not a contaminant tolerance, remediation target, or environmental approval.",
+      "validation_required": true
+    }
+  ],
+  "candidate_habitat_references": [
+    {
+      "habitat_id": "HABITAT-SOIL-V1",
+      "habitat_type": "SOIL_HABITAT",
+      "compatibility_status": "NOT_LISTED_FOR_MYCOFORM_CANDIDATE_SPECIES",
+      "proposal_only": true
+    },
+    {
+      "habitat_id": "HABITAT-FOREST-V1",
+      "habitat_type": "FOREST",
+      "compatibility_status": "NOT_LISTED_FOR_MYCOFORM_CANDIDATE_SPECIES",
+      "proposal_only": true
+    }
+  ],
+  "resource_owner_references": {
+    "substrate": "DETRITUS_POOL",
+    "water": "KAIOS_REPRODUCTION_ECOLOGY_RUNTIME_V1.resources.water_l",
+    "soil": "SPECIES-KAIOS-FOUNDATIONAL-SOIL",
+    "nutrients": "KAIOS_REPRODUCTION_ECOLOGY_RUNTIME_V1.resources.nutrients_kg",
+    "dead_biomass": "DEAD_BIOMASS",
+    "decomposition": "MICROBIAL_DECOMPOSITION_PROXY",
+    "owner": "KAIOS_REPRODUCTION_ECOLOGY_RUNTIME_V1"
+  },
+  "gate_order": [
+    "OWNER_SCHEMA_ADMISSION",
+    "LOCATION",
+    "HABITAT",
+    "SEALED_CANDIDATE_COMPARTMENT",
+    "HABITAT_COMPATIBILITY_PROXY",
+    "MOISTURE_FIT_PROXY",
+    "TEMPERATURE_FIT_PROXY",
+    "OXYGEN_AVAILABILITY_PROXY",
+    "CONTAMINATION_STRESS_PROXY",
+    "SUBSTRATE_CUSTODY",
+    "MOISTURE_CUSTODY",
+    "NUTRIENT_PROXY_CUSTODY",
+    "ENERGY_PROXY",
+    "ELAPSED_TIME"
+  ],
+  "fail_closed_results": {
+    "missing_owner_admission": "OWNER_SCHEMA_ADMISSION_REQUIRED",
+    "missing_location_or_habitat": "NO_HABITAT",
+    "missing_sealed_candidate_compartment": "SEALED_COMPARTMENT_REQUIRED",
+    "insufficient_substrate": "INSUFFICIENT_SUBSTRATE",
+    "insufficient_moisture": "INSUFFICIENT_MOISTURE_PROXY",
+    "insufficient_nutrient_proxy": "INSUFFICIENT_NUTRIENT_PROXY",
+    "insufficient_energy_proxy": "INSUFFICIENT_ENERGY_PROXY",
+    "moisture_fit_outside_candidate_envelope": "MOISTURE_STRESS_PROXY",
+    "temperature_fit_outside_candidate_envelope": "TEMPERATURE_OUT_OF_RANGE_PROXY",
+    "oxygen_fit_below_candidate_minimum": "OXYGEN_AVAILABILITY_STRESS_PROXY",
+    "contamination_stress_above_candidate_ceiling": "CONTAMINATION_STRESS_PROXY",
+    "zero_elapsed_time": "ELAPSED_TIME_REQUIRED"
+  },
+  "guidance_boundary": {
+    "empirical_temperature": "NOT_MODELED",
+    "empirical_moisture": "NOT_MODELED",
+    "empirical_oxygen": "NOT_MODELED",
+    "empirical_nutrient_chemistry": "NOT_MODELED",
+    "substrate_recipe": "NOT_PROVIDED",
+    "cultivation_or_release_guidance": "NOT_PROVIDED",
+    "real_biology_guidance": false,
+    "microbial_activity": "BOUNDED_FUNGAL_ACTIVITY_PROXY / SIMULATION_APPROXIMATION"
+  },
+  "provenance_reference": "provenance.json",
+  "boundaries": [
+    "NO_ECOLOGY_ADMISSION",
+    "NO_REAL_HABITAT_CLAIM",
+    "NO_EMPIRICAL_ENVIRONMENT_THRESHOLD",
+    "NO_CULTIVATION_OR_RELEASE_GUIDANCE",
+    "NO_PRODUCTION_AUTHORITY"
+  ]
+}
