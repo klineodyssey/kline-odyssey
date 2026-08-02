@@ -82,3 +82,16 @@ Review and operations records:
 Canonical registry and policy sources remain under `KGEN-KAIOS`. Nothing in
 this directory activates Production Runtime, a wallet, real KGEN settlement,
 or real-world biological engineering.
+
+## Software Life Canonicalization
+
+`software-life/` contains the version-free software-life naming audit,
+identity and taxonomy compatibility standards, controlled rename plan and
+rolling execution evidence. The initial package is audit-only: no executable,
+Life ID or public route is renamed until its dedicated migration batch passes
+review and compatibility tests.
+
+- [Software Life center](software-life/README.md)
+- [Naming audit report](software-life/KAIOS_SOFTWARE_LIFE_NAMING_AUDIT_REPORT.md)
+- [Identity standard](software-life/KAIOS_SOFTWARE_LIFE_IDENTITY_STANDARD.md)
+- [Rename plan](software-life/KAIOS_SOFTWARE_LIFE_RENAME_PLAN.json)

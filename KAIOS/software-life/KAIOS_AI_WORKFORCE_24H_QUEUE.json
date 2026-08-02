@@ -1,0 +1,71 @@
+{
+  "metadata": {
+    "schema_version": "1.0.0",
+    "task_id": "KAIOS-SOFTWARE-LIFE-CANONICALIZATION-24H-001",
+    "status": "ACTIVE",
+    "authority": "CODEX_CONTROLLED",
+    "window_start": "2026-08-02T09:35:00Z",
+    "window_end_maximum": "2026-08-03T09:35:00Z",
+    "literal_uninterrupted_computation_claimed": false
+  },
+  "policy": {
+    "codex_one_migration_branch_at_a_time": true,
+    "cursor_one_task_at_a_time": true,
+    "merge_requires_independent_review": true,
+    "p0_required": 0,
+    "unresolved_p1_required": 0,
+    "unresolved_p2_required": 0,
+    "production_verification_required_for_public_changes": true,
+    "protected_current_changes": false,
+    "real_wallet": false,
+    "real_kgen": false,
+    "onchain_transfer": false,
+    "production_authority": false,
+    "external_autonomy": false
+  },
+  "codex_queue": [
+    { "priority": 1, "work": "REPOSITORY_NAMING_AUDIT", "status": "IN_REVIEW", "depends_on": [] },
+    { "priority": 2, "work": "IDENTITY_STANDARD", "status": "IN_REVIEW", "depends_on": ["REPOSITORY_NAMING_AUDIT"] },
+    { "priority": 3, "work": "MANIFEST_SCHEMA", "status": "QUEUED", "depends_on": ["IDENTITY_STANDARD"] },
+    { "priority": 4, "work": "TAXONOMY_CROSSWALK", "status": "IN_REVIEW", "depends_on": ["IDENTITY_STANDARD"] },
+    { "priority": 5, "work": "ORGAN_STANDARD", "status": "QUEUED", "depends_on": ["MANIFEST_SCHEMA"] },
+    { "priority": 6, "work": "ORGAN_COMPATIBILITY_SCHEMA", "status": "QUEUED", "depends_on": ["ORGAN_STANDARD"] },
+    { "priority": 7, "work": "TRANSPLANT_STANDARD", "status": "QUEUED", "depends_on": ["ORGAN_COMPATIBILITY_SCHEMA"] },
+    { "priority": 8, "work": "REPRODUCTION_STANDARD", "status": "QUEUED", "depends_on": ["MANIFEST_SCHEMA"] },
+    { "priority": 9, "work": "REPRODUCTION_SCHEMA", "status": "QUEUED", "depends_on": ["REPRODUCTION_STANDARD"] },
+    { "priority": 10, "work": "GENOME_STANDARD", "status": "QUEUED", "depends_on": ["MANIFEST_SCHEMA", "REPRODUCTION_STANDARD"] },
+    { "priority": 11, "work": "RENAME_PLAN", "status": "IN_REVIEW", "depends_on": ["REPOSITORY_NAMING_AUDIT"] },
+    { "priority": 12, "work": "BATCH_A_MIGRATION", "status": "QUEUED", "depends_on": ["RENAME_PLAN", "MANIFEST_SCHEMA"] },
+    { "priority": 13, "work": "BATCH_B_MIGRATION", "status": "QUEUED", "depends_on": ["BATCH_A_MIGRATION"] },
+    { "priority": 14, "work": "BATCH_C_MIGRATION", "status": "QUEUED", "depends_on": ["BATCH_B_MIGRATION"] },
+    { "priority": 15, "work": "BATCH_D_MIGRATION", "status": "QUEUED", "depends_on": ["BATCH_C_MIGRATION"] },
+    { "priority": 16, "work": "BATCH_E_MIGRATION", "status": "QUEUED", "depends_on": ["BATCH_D_MIGRATION"] },
+    { "priority": 17, "work": "K11520_LISTING_STANDARD", "status": "QUEUED", "depends_on": ["GENOME_STANDARD", "TRANSPLANT_STANDARD"] },
+    { "priority": 18, "work": "K11520_LISTING_SCHEMA", "status": "QUEUED", "depends_on": ["K11520_LISTING_STANDARD"] },
+    { "priority": 19, "work": "SOFTWARE_LIFE_VIEWER", "status": "QUEUED", "depends_on": ["SOFTWARE_LIFE_REGISTRY"] },
+    { "priority": 20, "work": "READ_ONLY_APIS", "status": "QUEUED", "depends_on": ["SOFTWARE_LIFE_REGISTRY"] },
+    { "priority": 21, "work": "AI_COMPANY_INTEGRATION", "status": "QUEUED", "depends_on": ["GENOME_STANDARD", "ORGAN_STANDARD"] },
+    { "priority": 22, "work": "REGRESSION_TESTS", "status": "QUEUED", "depends_on": ["BATCH_E_MIGRATION", "SOFTWARE_LIFE_VIEWER", "READ_ONLY_APIS"] },
+    { "priority": 23, "work": "DOCUMENTATION_CENTER", "status": "QUEUED", "depends_on": ["SOFTWARE_LIFE_VIEWER"] },
+    { "priority": 24, "work": "RECOVERY_AND_CLOSEOUT", "status": "QUEUED", "depends_on": ["REGRESSION_TESTS"] }
+  ],
+  "implicit_registry_dependency": {
+    "work": "SOFTWARE_LIFE_REGISTRY",
+    "status": "QUEUED",
+    "depends_on": ["MANIFEST_SCHEMA", "TAXONOMY_CROSSWALK", "ORGAN_STANDARD", "GENOME_STANDARD"]
+  },
+  "cursor": {
+    "worker_id": "cursor-01",
+    "one_task_at_a_time": true,
+    "current_task": "KAIOS-CURSOR-EARTHWORM-CANDIDATE-001",
+    "current_branch": "cursor-handoff/KAIOS-CURSOR-EARTHWORM-CANDIDATE-001",
+    "current_status": "DISPATCHED",
+    "next_existing_queue_task": "KAIOS-CURSOR-FUNGI-CANDIDATE-001",
+    "software_life_task": "KAIOS-CURSOR-SOFTWARE-LIFE-MANIFEST-CANDIDATES-001",
+    "software_life_task_status": "QUEUED_AFTER_EXISTING_APPROVED_TASKS",
+    "output_authority": "CANDIDATE_ONLY",
+    "can_merge": false,
+    "can_deploy": false,
+    "can_promote_canonical": false
+  }
+}

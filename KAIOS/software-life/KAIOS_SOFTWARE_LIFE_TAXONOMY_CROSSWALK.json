@@ -1,0 +1,177 @@
+{
+  "metadata": {
+    "schema_version": "1.0.0",
+    "task_id": "KAIOS-SOFTWARE-LIFE-CANONICALIZATION-24H-001",
+    "status": "REVIEWED_COMPATIBILITY_BINDING",
+    "authority": "SIMULATION_ONLY",
+    "production_authorized": false,
+    "creates_new_taxonomy": false
+  },
+  "owners": {
+    "canonical_twelve_level_registry": "KGEN-KAIOS/organism/taxonomy_registry.json",
+    "canonical_nineteen_layer_extension": "KGEN-KAIOS/civilization/BIOLOGY_TAXONOMY_STANDARD.md",
+    "universal_life_schema": "KAIOS_CANONICAL_LIFE_SCHEMA_V1.json",
+    "organism_manifest_schema": "KGEN-KAIOS/provenance/ORGANISM_MANIFEST_SCHEMA.json"
+  },
+  "canonical_levels_12": [
+    "domain",
+    "kingdom",
+    "phylum",
+    "class",
+    "order",
+    "family",
+    "genus",
+    "species",
+    "cell",
+    "organ",
+    "runtime",
+    "civilization"
+  ],
+  "extension_19": [
+    {
+      "layer": "Domain",
+      "software_binding": "KGEN_UNIVERSE",
+      "meaning": "Highest broad-life domain"
+    },
+    {
+      "layer": "Kingdom",
+      "software_binding": "SOFTWARE_LIFE",
+      "meaning": "Software-life kingdom"
+    },
+    {
+      "layer": "Phylum",
+      "software_binding": "PROGRAM_ORGANISM",
+      "meaning": "Program phylum"
+    },
+    {
+      "layer": "Class",
+      "software_binding": "APPLICATION_RUNTIME_SERVICE_SCHEMA_VIEWER_OR_WORKER",
+      "meaning": "Runtime or artifact class"
+    },
+    {
+      "layer": "Order",
+      "software_binding": "APPLICATION_ORDER",
+      "meaning": "Application order"
+    },
+    {
+      "layer": "Family",
+      "software_binding": "SERVICE_FAMILY",
+      "meaning": "Service family"
+    },
+    {
+      "layer": "Genus",
+      "software_binding": "MODULE_GENUS",
+      "meaning": "Module genus"
+    },
+    {
+      "layer": "Species",
+      "software_binding": "EXECUTABLE_SPECIES",
+      "meaning": "Stable executable species identity"
+    },
+    {
+      "layer": "Individual",
+      "software_binding": "IMPLEMENTATION_ORGANISM",
+      "meaning": "One software-life implementation"
+    },
+    {
+      "layer": "OrganSystem",
+      "software_binding": "SUBSYSTEM_GROUP",
+      "meaning": "Cooperating organ group"
+    },
+    {
+      "layer": "Organ",
+      "software_binding": "MODULE_OR_SERVICE_ORGAN",
+      "meaning": "Owned module or service organ"
+    },
+    {
+      "layer": "Tissue",
+      "software_binding": "INTERFACE_GROUP",
+      "meaning": "Related interface and data-flow group"
+    },
+    {
+      "layer": "Cell",
+      "software_binding": "FUNCTION_IDENTITY",
+      "meaning": "Bounded function or handler"
+    },
+    {
+      "layer": "Organelle",
+      "software_binding": "IMPLEMENTATION_UNIT",
+      "meaning": "Internal implementation primitive"
+    },
+    {
+      "layer": "Genome",
+      "software_binding": "GENOME_IDENTITY",
+      "meaning": "Versioned software genome"
+    },
+    {
+      "layer": "DNA",
+      "software_binding": "STATE_AND_SCHEMA_CONTRACTS",
+      "meaning": "Persistent structure contracts"
+    },
+    {
+      "layer": "RNA",
+      "software_binding": "COMMAND_EVENT_TRANSLATION",
+      "meaning": "Execution and message translation"
+    },
+    {
+      "layer": "Gene",
+      "software_binding": "FEATURE_BEHAVIOR",
+      "meaning": "One inherited or mutable feature contract"
+    },
+    {
+      "layer": "Expression",
+      "software_binding": "RUNTIME_STATE_AND_OUTPUT",
+      "meaning": "Observed state, behavior or projection"
+    }
+  ],
+  "application_bindings": [
+    {
+      "life_type": "APPLICATION",
+      "twelve_level_class": "APPLICATION_LIFE",
+      "default_organ_systems": ["INPUT_OUTPUT", "PROCESSING", "MEMORY", "SECURITY", "AUDIT"]
+    },
+    {
+      "life_type": "RUNTIME",
+      "twelve_level_class": "DETERMINISTIC_RUNTIME_LIFE",
+      "default_organ_systems": ["TIME", "STATE", "EVENT", "RESOURCE", "AUDIT"]
+    },
+    {
+      "life_type": "API",
+      "twelve_level_class": "COMMUNICATION_SERVICE_LIFE",
+      "default_organ_systems": ["COMMUNICATION", "PROJECTION", "SECURITY", "AUDIT"]
+    },
+    {
+      "life_type": "SCHEMA",
+      "twelve_level_class": "GENOME_CONTRACT_LIFE",
+      "default_organ_systems": ["IDENTITY", "VALIDATION", "COMPATIBILITY"]
+    },
+    {
+      "life_type": "VIEWER",
+      "twelve_level_class": "VIEWER_APPLICATION_LIFE",
+      "default_organ_systems": ["INPUT", "OUTPUT", "VIEWER", "ACCESSIBILITY"]
+    },
+    {
+      "life_type": "WORKER",
+      "twelve_level_class": "BOUNDED_WORKER_LIFE",
+      "default_organ_systems": ["IDENTITY", "TASK", "MEMORY", "SECURITY", "AUDIT"]
+    }
+  ],
+  "compatibility_rules": {
+    "exact_existing_layer_names_required": true,
+    "second_taxonomy_forbidden": true,
+    "animal_physiology_not_forced_on_software": true,
+    "permanent_species_identity_version_free": true,
+    "genome_version_stored_in_metadata": true,
+    "canonical_life_shared_core_reused": true,
+    "approved_type_extension_required": true,
+    "automatic_canonical_promotion": false
+  },
+  "boundaries": {
+    "simulation_only": true,
+    "real_wallet": false,
+    "real_kgen": false,
+    "onchain_transfer": false,
+    "production_authority": false,
+    "external_autonomy": false
+  }
+}
