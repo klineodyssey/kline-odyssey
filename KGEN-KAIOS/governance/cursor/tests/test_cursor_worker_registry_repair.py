@@ -176,39 +176,39 @@ class CursorWorkerRegistryRepairTests(unittest.TestCase):
             <= set(self.cursor["allowed_work"])
         )
 
-    def test_earthworm_candidate_dispatch_is_the_only_active_claim(self):
+    def test_fungi_candidate_dispatch_is_the_only_active_claim(self):
         metadata = self.registry["metadata"]
         self.assertEqual(
             metadata["source_commit"],
-            "745952dc389d62cf85545a86b18e279d8eca9c73",
+            "eb17536ff6affb34f93bce6c5622d7bab018d230",
         )
         self.assertEqual(
-            metadata["task_id"], "KAIOS-CURSOR-POLLINATOR-RESEARCH-001-RELEASE"
+            metadata["task_id"], "KAIOS-CURSOR-EARTHWORM-CANDIDATE-001-RELEASE"
         )
-        self.assertIn("earthworm candidate task", metadata["change_reason"])
+        self.assertIn("fungi candidate task", metadata["change_reason"])
 
         locked = validate_one_task_lock(self.registry["dispatch_history"])
         self.assertEqual(len(locked), 1)
         dispatch = locked[0]
         self.assertEqual(
-            dispatch["task_id"], "KAIOS-CURSOR-EARTHWORM-CANDIDATE-001"
+            dispatch["task_id"], "KAIOS-CURSOR-FUNGI-CANDIDATE-001"
         )
         self.assertEqual(dispatch["worker_id"], self.cursor["worker_id"])
         self.assertEqual(
             dispatch["branch"],
-            "cursor-handoff/KAIOS-CURSOR-EARTHWORM-CANDIDATE-001",
+            "cursor-handoff/KAIOS-CURSOR-FUNGI-CANDIDATE-001",
         )
         self.assertEqual(dispatch["output_status"], "CURSOR_RESEARCH_CANDIDATE_ONLY")
         self.assertEqual(self.cursor["current_task"], dispatch["task_id"])
         self.assertEqual(self.cursor["current_branch"], dispatch["branch"])
-        self.assertIn("EARTHWORM_CANDIDATE_PACKAGE", self.cursor["allowed_work"])
+        self.assertIn("FUNGI_CANDIDATE_PACKAGE", self.cursor["allowed_work"])
 
-        pollinator_dispatch = next(
+        earthworm_dispatch = next(
             item
             for item in self.registry["dispatch_history"]
-            if item["task_id"] == "KAIOS-CURSOR-POLLINATOR-RESEARCH-001"
+            if item["task_id"] == "KAIOS-CURSOR-EARTHWORM-CANDIDATE-001"
         )
-        self.assertEqual(pollinator_dispatch["status"], "RELEASED")
+        self.assertEqual(earthworm_dispatch["status"], "RELEASED")
 
     def test_continuous_queue_requires_formal_release_and_atomic_claim(self):
         queue = self.forest_queue
@@ -238,8 +238,9 @@ class CursorWorkerRegistryRepairTests(unittest.TestCase):
         self.assertEqual(by_priority[7]["status"], "RELEASED")
         self.assertEqual(by_priority[8]["status"], "RELEASED")
         self.assertEqual(by_priority[9]["status"], "RELEASED")
-        self.assertEqual(by_priority[10]["status"], "DISPATCHED")
-        self.assertEqual(by_priority[10]["task_id"], self.cursor["current_task"])
+        self.assertEqual(by_priority[10]["status"], "RELEASED")
+        self.assertEqual(by_priority[11]["status"], "DISPATCHED")
+        self.assertEqual(by_priority[11]["task_id"], self.cursor["current_task"])
 
     def test_approved_or_closed_claim_still_holds_lock_until_release(self):
         next_claim = {"task_id": "NEXT", "status": "DISPATCHED"}

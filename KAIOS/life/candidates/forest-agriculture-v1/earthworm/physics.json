@@ -1,0 +1,101 @@
+{
+  "record_id": "KAIOS-EARTHWORM-CANDIDATE-PHYSICS-V1",
+  "schema_version": "1.0.0-candidate",
+  "status": "CURSOR_RESEARCH_CANDIDATE_ONLY",
+  "review_status": "PENDING_CODEX_REVIEW",
+  "authority": "NO_PRODUCTION_AUTHORITY",
+  "task_id": "KAIOS-CURSOR-EARTHWORM-CANDIDATE-001",
+  "physics_owner": "docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md",
+  "binding_mode": "SUBORDINATE_NONAUTHORITATIVE_PROPOSAL",
+  "numeric_parameter_contract": {
+    "required_fields": ["parameter_name", "unit", "minimum", "default", "maximum", "rationale", "source_type", "confidence", "risk", "validation_required"],
+    "range_rule": "minimum <= default <= maximum",
+    "allowed_source_types": ["SOURCE_DERIVED", "REPOSITORY_DERIVED", "MODEL_INFERENCE", "RESEARCH_PROPOSAL", "ASSUMPTION", "SOURCE_UNDERSPECIFIED"],
+    "validation_required_must_equal_true": true
+  },
+  "numeric_parameters": [
+    {
+      "parameter_name": "individual_structural_mass_proxy",
+      "unit": "micro_gram_structural_proxy_per_individual",
+      "minimum": 1000000,
+      "default": 2000000,
+      "maximum": 4000000,
+      "rationale": "Provides a bounded integer mass-accounting proxy for candidate fixtures without asserting measured earthworm mass.",
+      "source_type": "RESEARCH_PROPOSAL",
+      "confidence": "LOW",
+      "risk": "Proxy values could be mistaken for empirical body mass if the unit suffix and candidate boundary are removed.",
+      "validation_required": true
+    },
+    {
+      "parameter_name": "individual_volume_proxy",
+      "unit": "micro_volume_proxy_unit_per_individual",
+      "minimum": 1000000,
+      "default": 2000000,
+      "maximum": 4000000,
+      "rationale": "Supports a dimensionless fixture density check and is not a physical volume estimate.",
+      "source_type": "RESEARCH_PROPOSAL",
+      "confidence": "LOW",
+      "risk": "No conversion to cubic meters or another real volume unit is authorized.",
+      "validation_required": true
+    },
+    {
+      "parameter_name": "structural_density_proxy",
+      "unit": "structural_mass_proxy_per_volume_proxy_unit",
+      "minimum": 1,
+      "default": 1,
+      "maximum": 1,
+      "rationale": "The fixed ratio makes the candidate mass-volume consistency oracle exact.",
+      "source_type": "MODEL_INFERENCE",
+      "confidence": "MEDIUM",
+      "risk": "This is an accounting identity and must not be described as biological density.",
+      "validation_required": true
+    },
+    {
+      "parameter_name": "movement_rate_proxy",
+      "unit": "micro_distance_proxy_unit_per_simulation_tick",
+      "minimum": 0,
+      "default": 100000,
+      "maximum": 500000,
+      "rationale": "Bounds hypothetical soil displacement while preserving zero movement when location, energy, or habitat gates fail.",
+      "source_type": "RESEARCH_PROPOSAL",
+      "confidence": "LOW",
+      "risk": "No conversion to a real movement speed, burrowing rate, or soil effect is authorized.",
+      "validation_required": true
+    }
+  ],
+  "default_proxy_consistency_fixture": {
+    "structural_mass_micro_gram_proxy": 2000000,
+    "volume_micro_volume_proxy_unit": 2000000,
+    "computed_density_proxy": 1,
+    "expected_density_proxy": 1,
+    "residual": 0,
+    "closed": true,
+    "fixture_values_are_non_tunable_oracle_data": true
+  },
+  "weight_boundary": {
+    "status": "NOT_MODELED_UNTIL_FOREIGN_LOCATION_AND_GRAVITY_BINDING",
+    "location_assigned": false,
+    "gravity_value_invented": false,
+    "weight_value_invented": false
+  },
+  "transport_boundary": {
+    "movement_requires": ["FOREIGN_LOCATION", "COMPATIBLE_HABITAT", "AVAILABLE_ENERGY_PROXY", "ELAPSED_TIME"],
+    "route_transport_mode": "NOT_MODELED",
+    "instant_position_change": false,
+    "real_soil_displacement_claim": false
+  },
+  "conservation_contract": {
+    "structural_mass": "Every debit enters organism biomass, waste, dead biomass, retained detritus, or named pending owner custody.",
+    "water": "Every habitat-water debit enters body water, waste water, atmospheric proxy, dead biomass water, or named pending owner custody.",
+    "energy_proxy": "Every source debit enters organism stores, waste, dead biomass, dissipation, or named pending owner custody.",
+    "negative_pool_rule": "REJECT_BEFORE_ANY_STATE_CHANGE",
+    "fixture_reference": "runtime.json#/deterministic_positive_fixture"
+  },
+  "boundaries": [
+    "NO_PHYSICS_RUNTIME_CHANGE",
+    "NO_REAL_DIMENSION_OR_MASS_CLAIM",
+    "NO_ENGINEERING_CERTIFICATION",
+    "NO_REAL_MOVEMENT_OR_SOIL_EFFECT_GUIDANCE",
+    "NO_PRODUCTION_AUTHORITY"
+  ]
+}

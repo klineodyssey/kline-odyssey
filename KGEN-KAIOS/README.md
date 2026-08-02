@@ -256,6 +256,9 @@ Can Claude, Gemini, OpenHands, GitHub Copilot, ChatGPT, Deep Research, Cursor, C
 | `../KAIOS/life/forest-agriculture/KAIOS_CURSOR_POLLINATOR_RESEARCH_REVIEW_CLOSEOUT.md` | Codex review and release record for pollinator research. |
 | `../KAIOS/life/candidates/forest-agriculture-v1/CURSOR_EARTHWORM_CANDIDATE_WORK_ORDER.md` | Candidate-only earthworm task envelope for `cursor-01`. |
 | `governance/autopilot/company_status/COMPANY_STATUS_2026-08-02_POLLINATOR_RELEASED_EARTHWORM_DISPATCHED.md` | Company status for the controlled pollinator-to-earthworm transition. |
+| `../KAIOS/life/forest-agriculture/KAIOS_CURSOR_EARTHWORM_CANDIDATE_REVIEW_CLOSEOUT.md` | Codex review and release record for the earthworm candidate. |
+| `../KAIOS/life/candidates/forest-agriculture-v1/CURSOR_FUNGI_CANDIDATE_WORK_ORDER.md` | Candidate-only fungi task envelope for `cursor-01`. |
+| `governance/autopilot/company_status/COMPANY_STATUS_2026-08-02_EARTHWORM_RELEASED_FUNGI_DISPATCHED.md` | Company status for the controlled earthworm-to-fungi transition. |
 | `../KAIOS/software-life/README.md` | Software Life audit, identity, taxonomy and controlled-migration center. |
 | `../KAIOS/software-life/KAIOS_SOFTWARE_LIFE_NAMING_AUDIT.json` | Complete naming and JSON identity audit at the recorded source commit. |
 | `../KAIOS/software-life/KAIOS_SOFTWARE_LIFE_IDENTITY_STANDARD.md` | Stable software-life identity and version-placement standard. |

@@ -1,0 +1,41 @@
+{
+  "record_id": "KAIOS-EARTHWORM-CANDIDATE-VIEWER-V1",
+  "schema_version": "1.0.0-candidate",
+  "status": "CURSOR_RESEARCH_CANDIDATE_ONLY",
+  "review_status": "PENDING_CODEX_REVIEW",
+  "authority": "NO_PRODUCTION_AUTHORITY",
+  "task_id": "KAIOS-CURSOR-EARTHWORM-CANDIDATE-001",
+  "mode": "READ_ONLY_CANDIDATE_PROJECTION",
+  "route": null,
+  "route_registered": false,
+  "viewer_runtime_modified": false,
+  "projection": {
+    "life_id": "LIFE-KAIOS-EARTHWORM-CANDIDATE-001",
+    "species_id": "SPECIES-KAIOS-EARTHWORM-CANDIDATE",
+    "genome_id": "GENOME-KAIOS-EARTHWORM-CANDIDATE-001",
+    "display_name": "Earthworm Analog Candidate",
+    "life_type": "ANIMAL_LIFE",
+    "extension_id": "ANIMAL_EXTENSION",
+    "candidate_status": "CURSOR_RESEARCH_CANDIDATE_ONLY",
+    "review_status": "PENDING_CODEX_REVIEW",
+    "ecology_admission": "NOT_ADMITTED",
+    "runtime_status": "NON_EXECUTABLE",
+    "habitat_references": ["HABITAT-SOIL-V1", "HABITAT-FOREST-V1", "HABITAT-GRASSLAND-V1"],
+    "lifecycle_stages": ["COCOON", "JUVENILE", "ADULT", "DEAD_BIOMASS_CUSTODY"],
+    "resource_references": ["DETRITUS_POOL", "DEAD_BIOMASS", "MICROBIAL_DECOMPOSITION_PROXY"],
+    "authority_badges": ["CANDIDATE_ONLY", "PENDING_CODEX_REVIEW", "NO_PRODUCTION_AUTHORITY"]
+  },
+  "available_controls": [],
+  "mutation_controls": false,
+  "reproduction_controls": false,
+  "release_controls": false,
+  "economy_controls": false,
+  "wallet_controls": false,
+  "projection_source_files": ["life.manifest.json", "runtime.json", "event_log.json"],
+  "boundaries": [
+    "NO_VIEWER_REGISTRATION",
+    "NO_RUNTIME_CONTROL",
+    "NO_PUBLIC_MUTATION",
+    "NO_PRODUCTION_AUTHORITY"
+  ]
+}

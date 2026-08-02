@@ -89,6 +89,7 @@ Codex reran Company Boot and `git fetch origin --prune` at `2026-07-15T17:29:48+
 | `company_status/COMPANY_STATUS_2026-08-02_COMPOST_RELEASED_INSECT_CANDIDATES_DISPATCHED.md` | Compost candidate release and sole active insect-candidate package dispatch |
 | `company_status/COMPANY_STATUS_2026-08-02_INSECT_RELEASED_POLLINATOR_RESEARCH_DISPATCHED.md` | Insect candidate release and sole active pollinator research dispatch |
 | `company_status/COMPANY_STATUS_2026-08-02_POLLINATOR_RELEASED_EARTHWORM_DISPATCHED.md` | Pollinator research release and sole active earthworm candidate dispatch |
+| `company_status/COMPANY_STATUS_2026-08-02_EARTHWORM_RELEASED_FUNGI_DISPATCHED.md` | Earthworm candidate release and sole active fungi candidate dispatch |
 | `company_status/COMPANY_STATUS_2026-08-02_SOFTWARE_LIFE_NAMING_STANDARDS.md` | Software Life naming audit and standards workline status |
 | `company_status/COMPANY_STATUS_2026-08-02_SOFTWARE_LIFE_REGISTRY.md` | Deterministic Software Life Manifest and Registry status |
 | `company_status/COMPANY_STATUS_2026-08-02_SOFTWARE_ORGAN_TRANSPLANT_STANDARDS.md` | Software Organ, interface and controlled transplant standards status |
