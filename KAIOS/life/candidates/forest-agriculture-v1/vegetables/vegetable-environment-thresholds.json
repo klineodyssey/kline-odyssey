@@ -1,0 +1,282 @@
+{
+  "dataset_id": "KAIOS-VEGETABLE-ENVIRONMENT-THRESHOLDS-V1",
+  "schema_version": "1.0.0-candidate",
+  "status": "CURSOR_RESEARCH_CANDIDATE_ONLY",
+  "review_status": "PENDING_CODEX_REVIEW",
+  "task_id": "KAIOS-CURSOR-VEGETABLE-PACKAGES-001",
+  "worker_id": "cursor-01",
+  "branch": "cursor-handoff/KAIOS-CURSOR-VEGETABLE-PACKAGES-001",
+  "source_base_commit": "9b5246918b4e912557c9a6cd402ac9ab9fb6f83f",
+  "source_hash_basis": "SHA256_OF_GIT_BLOB_CONTENT_AT_SOURCE_BASE_COMMIT",
+  "scope": "Aggregate VEGETABLE plot and VEGETABLE_FARM simulation compatibility only; no species-specific growing or food-safety guidance.",
+  "species_specific_values": "SOURCE_UNDERSPECIFIED",
+  "real_growing_conditions": [
+    {
+      "condition_name": "species_temperature_range",
+      "unit": "degree_celsius",
+      "value": null,
+      "source_type": "SOURCE_UNDERSPECIFIED",
+      "validation_required": true
+    },
+    {
+      "condition_name": "species_soil_type",
+      "unit": "owner_soil_class",
+      "value": null,
+      "source_type": "SOURCE_UNDERSPECIFIED",
+      "validation_required": true
+    },
+    {
+      "condition_name": "species_soil_ph_range",
+      "unit": "ph",
+      "value": null,
+      "source_type": "SOURCE_UNDERSPECIFIED",
+      "validation_required": true
+    },
+    {
+      "condition_name": "species_sunlight_or_photoperiod_range",
+      "unit": "hour_or_irradiance_owner_unit",
+      "value": null,
+      "source_type": "SOURCE_UNDERSPECIFIED",
+      "validation_required": true
+    },
+    {
+      "condition_name": "species_water_quality_and_irrigation_schedule",
+      "unit": "approved_owner_unit",
+      "value": null,
+      "source_type": "SOURCE_UNDERSPECIFIED",
+      "validation_required": true
+    },
+    {
+      "condition_name": "species_nutrient_formulation",
+      "unit": "approved_owner_unit",
+      "value": null,
+      "source_type": "SOURCE_UNDERSPECIFIED",
+      "validation_required": true
+    },
+    {
+      "condition_name": "cultivar_and_season",
+      "unit": "owner_identifier",
+      "value": null,
+      "source_type": "SOURCE_UNDERSPECIFIED",
+      "validation_required": true
+    },
+    {
+      "condition_name": "food_safety_preharvest_and_postharvest_limits",
+      "unit": "approved_food_safety_standard",
+      "value": null,
+      "source_type": "SOURCE_UNDERSPECIFIED",
+      "validation_required": true
+    }
+  ],
+  "boolean_gates": [
+    "PROPAGATION_INPUT_PRESENT",
+    "SOIL_COMPATIBILITY_CONFIRMED",
+    "WATER_SOURCE_COMPATIBLE",
+    "NUTRIENTS_AVAILABLE",
+    "SUNLIGHT_AVAILABLE",
+    "TEMPERATURE_COMPATIBILITY_CONFIRMED",
+    "PHYSICAL_LABOR_VALIDATED",
+    "ELAPSED_TIME_POSITIVE",
+    "CONTAMINATION_REVIEW_NOT_FAILED"
+  ],
+  "candidate_support_parameters": [
+    {
+      "parameter_name": "aggregate_soil_compatibility_score",
+      "unit": "candidate_fraction_0_to_1",
+      "minimum": 0.35,
+      "default": 0.7,
+      "maximum": 1,
+      "rationale": "Low-confidence aggregate simulation gate; it does not identify a soil type or species response.",
+      "source_type": "RESEARCH_PROPOSAL",
+      "confidence": "LOW",
+      "risk": "A normalized score cannot replace soil testing or a resolved species requirement.",
+      "validation_required": true
+    },
+    {
+      "parameter_name": "aggregate_water_availability_score",
+      "unit": "candidate_fraction_0_to_1",
+      "minimum": 0.35,
+      "default": 0.7,
+      "maximum": 1,
+      "rationale": "Low-confidence simulation gate requiring nonzero water support while physical quantity remains owner-controlled.",
+      "source_type": "RESEARCH_PROPOSAL",
+      "confidence": "LOW",
+      "risk": "The score has no conversion to liters, irrigation frequency or water quality.",
+      "validation_required": true
+    },
+    {
+      "parameter_name": "aggregate_nutrient_availability_score",
+      "unit": "candidate_fraction_0_to_1",
+      "minimum": 0.35,
+      "default": 0.7,
+      "maximum": 1,
+      "rationale": "Low-confidence simulation gate that does not prescribe a fertilizer or nutrient formulation.",
+      "source_type": "RESEARCH_PROPOSAL",
+      "confidence": "LOW",
+      "risk": "The score must stay separate from Ecology nutrient kilograms and facility fertilizer units.",
+      "validation_required": true
+    },
+    {
+      "parameter_name": "aggregate_sunlight_availability_score",
+      "unit": "candidate_fraction_0_to_1",
+      "minimum": 0.35,
+      "default": 0.7,
+      "maximum": 1,
+      "rationale": "Low-confidence simulation gate requiring sunlight without asserting photoperiod or irradiance.",
+      "source_type": "RESEARCH_PROPOSAL",
+      "confidence": "LOW",
+      "risk": "No species-specific light response is represented.",
+      "validation_required": true
+    },
+    {
+      "parameter_name": "ecology_soil_fertility_compatibility_fraction",
+      "unit": "ecology_fraction_0_to_1",
+      "minimum": 0.35,
+      "default": 0.7,
+      "maximum": 1,
+      "rationale": "Ecology V1 flags fertility below 0.35 as low; the default is a candidate compatibility value rather than a vegetable threshold.",
+      "source_type": "MODEL_INFERENCE",
+      "confidence": "MEDIUM",
+      "risk": "The Ecology habitat fraction does not validate a real vegetable species or soil prescription.",
+      "validation_required": true
+    },
+    {
+      "parameter_name": "candidate_environment_review_interval",
+      "unit": "elapsed_hour",
+      "minimum": 1,
+      "default": 1,
+      "maximum": 12,
+      "rationale": "A positive review interval prevents unchecked zero-time environment progress during the synthetic plot cycle.",
+      "source_type": "RESEARCH_PROPOSAL",
+      "confidence": "LOW",
+      "risk": "The interval is a test cadence, not crop-monitoring guidance.",
+      "validation_required": true
+    }
+  ],
+  "owner_native_rate_parameters": [
+    {
+      "parameter_name": "plot_profile_water_rate",
+      "unit": "agriculture_alpha_water_unit_per_hour",
+      "minimum": 0.9,
+      "default": 0.9,
+      "maximum": 0.9,
+      "rationale": "Exact VEGETABLE plot-profile owner rate retained without conversion.",
+      "source_type": "REPOSITORY_DERIVED",
+      "confidence": "HIGH",
+      "risk": "This unit is not Ecology liters and is not interchangeable with the facility WATER rate.",
+      "validation_required": true
+    },
+    {
+      "parameter_name": "plot_profile_energy_rate",
+      "unit": "agriculture_alpha_energy_unit_per_hour",
+      "minimum": 0.45,
+      "default": 0.45,
+      "maximum": 0.45,
+      "rationale": "Exact VEGETABLE plot-profile owner rate retained without conversion.",
+      "source_type": "REPOSITORY_DERIVED",
+      "confidence": "HIGH",
+      "risk": "This synthetic rate has no authorized conversion to joules or Ecology energy_proxy.",
+      "validation_required": true
+    },
+    {
+      "parameter_name": "facility_profile_water_rate",
+      "unit": "agriculture_alpha_resource_unit_per_hour",
+      "minimum": 0.24,
+      "default": 0.24,
+      "maximum": 0.24,
+      "rationale": "Exact vegetable-farm-001 WATER requirement retained in its facility resource unit.",
+      "source_type": "REPOSITORY_DERIVED",
+      "confidence": "HIGH",
+      "risk": "This rate cannot be substituted for the 0.9 plot rate or converted to liters.",
+      "validation_required": true
+    },
+    {
+      "parameter_name": "facility_profile_fertilizer_rate",
+      "unit": "agriculture_alpha_resource_unit_per_hour",
+      "minimum": 0.04,
+      "default": 0.04,
+      "maximum": 0.04,
+      "rationale": "Exact vegetable-farm-001 FERTILIZER requirement retained in its facility resource unit.",
+      "source_type": "REPOSITORY_DERIVED",
+      "confidence": "HIGH",
+      "risk": "This rate has no authorized conversion to Ecology nutrient kilograms or a real fertilizer schedule.",
+      "validation_required": true
+    }
+  ],
+  "unit_contracts": [
+    {
+      "source_unit": "candidate_fraction_0_to_1",
+      "target_unit": "ecology_fraction_0_to_1",
+      "conversion": "target = source",
+      "inverse": "source = target",
+      "reversible": true,
+      "scope": "Only explicit normalized compatibility fields; no physical quantity is inferred."
+    },
+    {
+      "source_unit": "agriculture_alpha_water_unit_per_hour",
+      "target_unit": null,
+      "conversion": "UNASSIGNED",
+      "inverse": "UNASSIGNED",
+      "reversible": false,
+      "scope": "No conversion to liter or facility resource units is authorized."
+    },
+    {
+      "source_unit": "agriculture_alpha_energy_unit_per_hour",
+      "target_unit": null,
+      "conversion": "UNASSIGNED",
+      "inverse": "UNASSIGNED",
+      "reversible": false,
+      "scope": "No conversion to joule or Ecology energy_proxy is authorized."
+    },
+    {
+      "source_unit": "agriculture_alpha_resource_unit_per_hour",
+      "target_unit": null,
+      "conversion": "UNASSIGNED",
+      "inverse": "UNASSIGNED",
+      "reversible": false,
+      "scope": "Facility WATER and FERTILIZER values remain owner-native and resource-ID qualified."
+    }
+  ],
+  "provenance": [
+    {
+      "source_type": "REPOSITORY_DERIVED",
+      "source_path": "KGEN-KAIOS/world-viewer/agriculture/agriculture-runtime.js",
+      "source_commit": "9b5246918b4e912557c9a6cd402ac9ab9fb6f83f",
+      "git_object": "f09478806a47c10825258385ee855faa74f51a79",
+      "sha256": "4557d6b449ce3979f2bf4ca10cc48f271ead2ddb34cc127e60b264ce26b577c2",
+      "purpose": "Owner-native VEGETABLE plot water and energy rates."
+    },
+    {
+      "source_type": "REPOSITORY_DERIVED",
+      "source_path": "KGEN-KAIOS/world-viewer/data/synthetic-world.json",
+      "source_commit": "9b5246918b4e912557c9a6cd402ac9ab9fb6f83f",
+      "git_object": "76ddff32f74c2b41ca7d9d9309b7b39a2a2618c8",
+      "sha256": "4be4c1b83420bb24604742fb722a8aedba8b3d2c163f7f18ccd871628ee7f34f",
+      "purpose": "Owner-native vegetable-farm-001 WATER and FERTILIZER rates."
+    },
+    {
+      "source_type": "REPOSITORY_DERIVED",
+      "source_path": "KGEN-KAIOS/world-viewer/ecosystem/ecosystem-runtime.js",
+      "source_commit": "9b5246918b4e912557c9a6cd402ac9ab9fb6f83f",
+      "git_object": "2bab509140ab4b93c7e4975286c826693965cf26",
+      "sha256": "9b2cd9d4501727d3134ea332e1a30cd77d5d7d647300820f51d9c264784ef537",
+      "purpose": "Ecology owner-native fertility fraction and physical resource units."
+    },
+    {
+      "source_type": "REPOSITORY_DERIVED",
+      "source_path": "KAIOS/life/forest-agriculture/KAIOS_FOREST_AGRICULTURE_RUNTIME_V1_SPEC.md",
+      "source_commit": "9b5246918b4e912557c9a6cd402ac9ab9fb6f83f",
+      "git_object": "9a2dd4ad05bb7b2e3d71b91b479359947ada8376",
+      "sha256": "4e1a23e97d09ec2dc4ad65440e6958e646f75ed418e5c703c5a5a1635c2809a1",
+      "purpose": "Required soil, water, nutrients, sunlight, temperature, labor and elapsed-time gates."
+    }
+  ],
+  "boundaries": {
+    "species_specific_guidance": false,
+    "real_growing_guidance": false,
+    "food_safety_guidance": false,
+    "runtime_change": false,
+    "canonical_promotion": false,
+    "production_authority": false
+  }
+}

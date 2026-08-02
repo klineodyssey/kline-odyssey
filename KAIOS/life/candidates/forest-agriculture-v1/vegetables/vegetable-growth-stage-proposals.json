@@ -1,0 +1,349 @@
+{
+  "dataset_id": "KAIOS-VEGETABLE-GROWTH-STAGE-PROPOSALS-V1",
+  "schema_version": "1.0.0-candidate",
+  "status": "CURSOR_RESEARCH_CANDIDATE_ONLY",
+  "review_status": "PENDING_CODEX_REVIEW",
+  "task_id": "KAIOS-CURSOR-VEGETABLE-PACKAGES-001",
+  "worker_id": "cursor-01",
+  "branch": "cursor-handoff/KAIOS-CURSOR-VEGETABLE-PACKAGES-001",
+  "source_base_commit": "9b5246918b4e912557c9a6cd402ac9ab9fb6f83f",
+  "source_hash_basis": "SHA256_OF_GIT_BLOB_CONTENT_AT_SOURCE_BASE_COMMIT",
+  "proposal_scope": "Aggregate VEGETABLE stage gates that preserve existing owner clocks while adding noninstant planting, harvest, custody and residue handling. No species-specific schedule is asserted.",
+  "species_reference": null,
+  "taxonomy": null,
+  "species_and_cultivar_status": "SOURCE_UNDERSPECIFIED",
+  "owner_cycle_parameters": [
+    {
+      "parameter_name": "agriculture_alpha_plot_growth_cycle",
+      "unit": "hour",
+      "minimum": 12,
+      "default": 12,
+      "maximum": 12,
+      "rationale": "Exact Agriculture Alpha VEGETABLE growth clock for the aggregate plot profile.",
+      "source_type": "REPOSITORY_DERIVED",
+      "confidence": "HIGH",
+      "risk": "The synthetic clock is not a real germination or maturity claim.",
+      "validation_required": false
+    },
+    {
+      "parameter_name": "vegetable_farm_facility_cycle",
+      "unit": "hour",
+      "minimum": 16,
+      "default": 16,
+      "maximum": 16,
+      "rationale": "Exact vegetable-farm-001 owner clock, retained separately from plot growth.",
+      "source_type": "REPOSITORY_DERIVED",
+      "confidence": "HIGH",
+      "risk": "The facility cycle is not a species lifecycle and must not replace the 12-hour plot clock.",
+      "validation_required": false
+    }
+  ],
+  "plot_cycle": {
+    "clock_contract": {
+      "owner_growth_clock_start": "AFTER_SOIL_PREPARATION_AND_PLANTING_COMPLETES",
+      "owner_growth_clock_end": "WHEN_HARVEST_READINESS_ASSESSMENT_COMPLETES",
+      "pre_cycle_and_post_cycle_time_excluded": true,
+      "default_growth_stage_duration_sum_hours": "12",
+      "required_owner_growth_total_hours": "12"
+    },
+    "pre_cycle_stages": [
+      {
+        "stage_id": "SOIL_PREPARATION_AND_PLANTING",
+        "entry_requirements": [
+          "PROPAGATION_INPUT_PRESENT",
+          "COMPATIBLE_SOIL",
+          "WATER_AVAILABLE",
+          "NUTRIENTS_AVAILABLE",
+          "SUNLIGHT_AVAILABLE",
+          "TEMPERATURE_COMPATIBLE",
+          "WORK_SHIFT_VALID",
+          "TOOLS_AVAILABLE"
+        ],
+        "exit_requirements": [
+          "PROPAGATION_INPUT_CUSTODY_RECORDED",
+          "PLANTING_EVENT_RECORDED",
+          "ELAPSED_TIME_SATISFIED",
+          "NO_NEGATIVE_RESOURCE_POOL"
+        ],
+        "duration": {
+          "parameter_name": "soil_preparation_and_planting_duration",
+          "unit": "elapsed_hour",
+          "minimum": 0.5,
+          "default": 1,
+          "maximum": 4,
+          "rationale": "Nonzero candidate setup interval outside the owner growth clock.",
+          "source_type": "RESEARCH_PROPOSAL",
+          "confidence": "LOW",
+          "risk": "Actual preparation depends on site, crop identity, tools and method.",
+          "validation_required": true
+        }
+      }
+    ],
+    "growth_clock_stages": [
+      {
+        "stage_id": "GERMINATING",
+        "entry_requirements": [
+          "PLANTING_EVENT_RECORDED",
+          "SOIL_COMPATIBLE",
+          "WATER_AVAILABLE",
+          "NUTRIENTS_AVAILABLE",
+          "SUNLIGHT_AVAILABLE",
+          "TEMPERATURE_COMPATIBLE",
+          "ELAPSED_TIME_POSITIVE"
+        ],
+        "exit_requirements": [
+          "GERMINATION_PROXY_REVIEW_RECORDED",
+          "RESOURCE_DEBITS_AND_CREDITS_BALANCED",
+          "ELAPSED_TIME_SATISFIED"
+        ],
+        "duration": {
+          "parameter_name": "aggregate_germinating_stage_duration",
+          "unit": "owner_growth_hour",
+          "minimum": 1,
+          "default": 2,
+          "maximum": 4,
+          "rationale": "Candidate subdivision of the 12-hour owner clock; repository evidence does not resolve a vegetable species duration.",
+          "source_type": "SOURCE_UNDERSPECIFIED",
+          "confidence": "LOW",
+          "risk": "The stage is a simulation proxy and must not be used as germination guidance.",
+          "validation_required": true
+        }
+      },
+      {
+        "stage_id": "GROWING",
+        "entry_requirements": [
+          "GERMINATION_PROXY_REVIEW_RECORDED",
+          "WATER_AVAILABLE",
+          "NUTRIENTS_AVAILABLE",
+          "SUNLIGHT_AVAILABLE",
+          "TEMPERATURE_COMPATIBLE",
+          "MAINTENANCE_LABOR_VALID",
+          "ELAPSED_TIME_POSITIVE"
+        ],
+        "exit_requirements": [
+          "STRUCTURAL_BIOMASS_ACCOUNTED",
+          "WATER_NUTRIENT_AND_ENERGY_POOLS_BALANCED",
+          "ELAPSED_TIME_SATISFIED"
+        ],
+        "duration": {
+          "parameter_name": "aggregate_growing_stage_duration",
+          "unit": "owner_growth_hour",
+          "minimum": 6,
+          "default": 8,
+          "maximum": 10,
+          "rationale": "Candidate subdivision of the existing synthetic owner clock with explicit resource and labor gates.",
+          "source_type": "SOURCE_UNDERSPECIFIED",
+          "confidence": "LOW",
+          "risk": "No real vegetable species, cultivar or growing system is represented.",
+          "validation_required": true
+        }
+      },
+      {
+        "stage_id": "HARVEST_READINESS_ASSESSMENT",
+        "entry_requirements": [
+          "GROWTH_RESOURCES_BALANCED",
+          "TEMPERATURE_COMPATIBILITY_NOT_FAILED",
+          "READINESS_REVIEW_LABOR_VALID",
+          "ELAPSED_TIME_POSITIVE"
+        ],
+        "exit_requirements": [
+          "OWNER_GROWTH_CLOCK_EQUALS_12_HOURS",
+          "HARVEST_READY_STATE_RECORDED",
+          "NO_AUTOMATIC_INVENTORY_CREDIT"
+        ],
+        "duration": {
+          "parameter_name": "aggregate_harvest_readiness_assessment_duration",
+          "unit": "owner_growth_hour",
+          "minimum": 1,
+          "default": 2,
+          "maximum": 4,
+          "rationale": "Nonzero candidate readiness gate completing the 12-hour owner clock before harvest is permitted.",
+          "source_type": "SOURCE_UNDERSPECIFIED",
+          "confidence": "LOW",
+          "risk": "Readiness criteria and food safety remain unresolved until species and owner review.",
+          "validation_required": true
+        }
+      }
+    ],
+    "post_cycle_stages": [
+      {
+        "stage_id": "HARVEST_AND_GRADING",
+        "entry_requirements": [
+          "HARVEST_READY",
+          "HARVEST_WORK_SHIFT_VALID",
+          "TOOLS_AVAILABLE",
+          "CONTAINERS_AVAILABLE",
+          "ELAPSED_TIME_POSITIVE",
+          "WAREHOUSE_CAPACITY_RESERVED"
+        ],
+        "exit_requirements": [
+          "HARVEST_BATCH_CUSTODY_RECORDED",
+          "MARKETABLE_REJECTED_AND_RESIDUE_POOLS_SEPARATED",
+          "NO_WAREHOUSE_CREDIT_BEFORE_INTAKE"
+        ],
+        "duration": {
+          "parameter_name": "harvest_and_grading_duration",
+          "unit": "elapsed_hour",
+          "minimum": 0.5,
+          "default": 1.5,
+          "maximum": 4,
+          "rationale": "Nonzero candidate harvest and grading interval outside the owner growth clock.",
+          "source_type": "RESEARCH_PROPOSAL",
+          "confidence": "LOW",
+          "risk": "Actual labor, grade and food-safety requirements are source underspecified.",
+          "validation_required": true
+        }
+      },
+      {
+        "stage_id": "WAREHOUSE_INTAKE_AND_RESIDUE_CUSTODY",
+        "entry_requirements": [
+          "HARVEST_BATCH_CUSTODY_RECORDED",
+          "WAREHOUSE_CAPACITY_RESERVED",
+          "WAREHOUSE_OPERATOR_SHIFT_VALID",
+          "RESIDUE_DESTINATION_RECORDED"
+        ],
+        "exit_requirements": [
+          "WAREHOUSE_LOT_REFERENCE_RECORDED",
+          "REJECTED_AND_RESIDUE_BIOMASS_IN_COMPOST_OR_REMOVAL_CUSTODY",
+          "ELAPSED_TIME_SATISFIED"
+        ],
+        "duration": {
+          "parameter_name": "warehouse_intake_and_residue_custody_duration",
+          "unit": "elapsed_hour",
+          "minimum": 0.25,
+          "default": 0.5,
+          "maximum": 2,
+          "rationale": "Separate nonzero custody interval prevents harvest from becoming instant warehouse inventory.",
+          "source_type": "RESEARCH_PROPOSAL",
+          "confidence": "LOW",
+          "risk": "Storage and food-safety controls require future owner validation.",
+          "validation_required": true
+        }
+      },
+      {
+        "stage_id": "RESIDUE_PROCESSING_AND_NUTRIENT_RETURN",
+        "entry_requirements": [
+          "COMPOST_OR_DECOMPOSITION_CUSTODY_RECORDED",
+          "WATER_AVAILABLE",
+          "SPACE_AVAILABLE",
+          "ELAPSED_TIME_POSITIVE"
+        ],
+        "exit_requirements": [
+          "DECOMPOSITION_EVENT_RECORDED",
+          "NUTRIENT_RETURN_EVENT_RECORDED",
+          "ALL_RESIDUE_AND_REJECTED_POOLS_ACCOUNTED"
+        ],
+        "duration": {
+          "parameter_name": "candidate_residue_processing_duration",
+          "unit": "elapsed_hour",
+          "minimum": 24,
+          "default": 24,
+          "maximum": 720,
+          "rationale": "Broad nonzero candidate envelope; the oracle uses the minimum solely as a deterministic fixture.",
+          "source_type": "SOURCE_UNDERSPECIFIED",
+          "confidence": "LOW",
+          "risk": "No compost method, microbial process, climate or real decomposition schedule is validated.",
+          "validation_required": true
+        }
+      }
+    ],
+    "transition_rules": [
+      "NO_STAGE_SKIP",
+      "SELECTED_GROWTH_CLOCK_STAGE_DURATIONS_MUST_SUM_TO_12_HOURS",
+      "PRE_CYCLE_AND_POST_CYCLE_TIME_MUST_NOT_COUNT_TOWARD_THE_12_HOUR_OWNER_GROWTH_CLOCK",
+      "NO_PROGRESS_WITHOUT_PROPAGATION_SOIL_WATER_NUTRIENTS_SUNLIGHT_TEMPERATURE_LABOR_AND_TIME",
+      "NO_HARVEST_BEFORE_HARVEST_READY",
+      "NO_WAREHOUSE_CREDIT_IN_THE_HARVEST_EVENT",
+      "NO_REJECTED_DEAD_OR_RESIDUE_BIOMASS_DISAPPEARANCE",
+      "FAILED_GATE_LEAVES_POOLS_AND_STATE_UNCHANGED"
+    ]
+  },
+  "labor_parameters": [
+    {
+      "parameter_name": "effective_labor_for_soil_preparation_and_planting",
+      "unit": "worker_minute",
+      "minimum": 30,
+      "default": 60,
+      "maximum": 240,
+      "rationale": "Candidate Physical Labor gate with explicit location and non-overlap requirements.",
+      "source_type": "RESEARCH_PROPOSAL",
+      "confidence": "LOW",
+      "risk": "Actual labor depends on area, crop identity, tools and worker capability.",
+      "validation_required": true
+    },
+    {
+      "parameter_name": "effective_labor_for_growth_and_readiness",
+      "unit": "worker_minute",
+      "minimum": 60,
+      "default": 180,
+      "maximum": 480,
+      "rationale": "Candidate total for irrigation, maintenance and readiness actions during the owner growth clock.",
+      "source_type": "RESEARCH_PROPOSAL",
+      "confidence": "LOW",
+      "risk": "It is an aggregate simulation workload and not a staffing standard.",
+      "validation_required": true
+    },
+    {
+      "parameter_name": "effective_labor_for_harvest_and_custody",
+      "unit": "worker_minute",
+      "minimum": 60,
+      "default": 120,
+      "maximum": 480,
+      "rationale": "Candidate total for separate harvest, grading, warehouse intake and residue custody actions.",
+      "source_type": "RESEARCH_PROPOSAL",
+      "confidence": "LOW",
+      "risk": "Species, area, yield, tools and food-safety controls remain unresolved.",
+      "validation_required": true
+    }
+  ],
+  "facility_cycle_boundary": {
+    "facility_cycle_hours": "16",
+    "plot_growth_cycle_hours": "12",
+    "relationship": "INDEPENDENT_OWNER_PROFILES",
+    "facility_collection_requires_elapsed_cycle": true,
+    "facility_collection_is_species_harvest": false,
+    "facility_collection_creates_taxonomy": false
+  },
+  "provenance": [
+    {
+      "source_type": "REPOSITORY_DERIVED",
+      "source_path": "KGEN-KAIOS/world-viewer/agriculture/agriculture-runtime.js",
+      "source_commit": "9b5246918b4e912557c9a6cd402ac9ab9fb6f83f",
+      "git_object": "f09478806a47c10825258385ee855faa74f51a79",
+      "sha256": "4557d6b449ce3979f2bf4ca10cc48f271ead2ddb34cc127e60b264ce26b577c2",
+      "purpose": "VEGETABLE 12-hour plot clock, states and harvest/warehouse owner behavior."
+    },
+    {
+      "source_type": "REPOSITORY_DERIVED",
+      "source_path": "KGEN-KAIOS/world-viewer/data/synthetic-world.json",
+      "source_commit": "9b5246918b4e912557c9a6cd402ac9ab9fb6f83f",
+      "git_object": "76ddff32f74c2b41ca7d9d9309b7b39a2a2618c8",
+      "sha256": "4be4c1b83420bb24604742fb722a8aedba8b3d2c163f7f18ccd871628ee7f34f",
+      "purpose": "vegetable-farm-001 16-hour facility clock."
+    },
+    {
+      "source_type": "REPOSITORY_DERIVED",
+      "source_path": "KAIOS_PHYSICAL_LABOR_SCHEMA.json",
+      "source_commit": "9b5246918b4e912557c9a6cd402ac9ab9fb6f83f",
+      "git_object": "357b00093f4a912e616e9d39edf04753aacf94f7",
+      "sha256": "21060f7bdf64f0a3af827f1fcd7d95d3170affef54c01bbeb449b9361fdd2f43",
+      "purpose": "Worker-minute, location, shift and non-overlap owner boundary."
+    },
+    {
+      "source_type": "REPOSITORY_DERIVED",
+      "source_path": "KAIOS/life/forest-agriculture/KAIOS_FOREST_AGRICULTURE_RUNTIME_V1_SPEC.md",
+      "source_commit": "9b5246918b4e912557c9a6cd402ac9ab9fb6f83f",
+      "git_object": "9a2dd4ad05bb7b2e3d71b91b479359947ada8376",
+      "sha256": "4e1a23e97d09ec2dc4ad65440e6958e646f75ed418e5c703c5a5a1635c2809a1",
+      "purpose": "Crop states, causal input gates, harvest requirements and residue custody requirements."
+    }
+  ],
+  "boundaries": {
+    "instant_growth": false,
+    "instant_harvest": false,
+    "instant_inventory": false,
+    "species_created": false,
+    "runtime_change": false,
+    "production_schedule": false
+  }
+}

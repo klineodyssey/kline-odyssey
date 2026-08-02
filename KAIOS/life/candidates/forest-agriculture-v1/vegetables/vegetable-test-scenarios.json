@@ -1,0 +1,304 @@
+{
+  "dataset_id": "KAIOS-VEGETABLE-TEST-SCENARIOS-V1",
+  "schema_version": "1.0.0-candidate",
+  "status": "CURSOR_RESEARCH_CANDIDATE_ONLY",
+  "review_status": "PENDING_CODEX_REVIEW",
+  "task_id": "KAIOS-CURSOR-VEGETABLE-PACKAGES-001",
+  "worker_id": "cursor-01",
+  "branch": "cursor-handoff/KAIOS-CURSOR-VEGETABLE-PACKAGES-001",
+  "source_base_commit": "9b5246918b4e912557c9a6cd402ac9ab9fb6f83f",
+  "source_hash_basis": "SHA256_OF_GIT_BLOB_CONTENT_AT_SOURCE_BASE_COMMIT",
+  "test_mode": "OBJECTIVE_CANDIDATE_VALIDATION_ONLY",
+  "scenarios": [
+    {
+      "test_id": "VEGETABLE-IDENTITY-001",
+      "name": "Aggregate resource and facility records remain separate from species identity",
+      "given": [
+        "AGRICULTURE_ALPHA_CROP_ID_VEGETABLE",
+        "VEGETABLE_FARM_FACILITY_PROFILE",
+        "NO_TAXONOMY_STANDARD_ENTRY_FOR_VEGETABLE_ALPHA"
+      ],
+      "when": [
+        "LOAD_CATALOG_CANDIDATE",
+        "COMPARE_OWNER_REFERENCES_TO_SOURCE_BLOBS"
+      ],
+      "then": [
+        "VALIDATED_SPECIES_REFERENCE_IS_NULL",
+        "TAXONOMY_IS_NULL",
+        "CANONICAL_LIFE_INSTANCE_IS_NULL",
+        "SPECIES_REFERENCE_STATUS_IS_SOURCE_UNDERSPECIFIED",
+        "NO_NEW_SPECIES_IDENTIFIER"
+      ]
+    },
+    {
+      "test_id": "VEGETABLE-OWNER-001",
+      "name": "Plot and facility owner profiles are not conflated",
+      "given": [
+        "PLOT_PROFILE_12_HOURS_6_UNITS",
+        "FACILITY_PROFILE_16_HOURS_8_UNITS"
+      ],
+      "when": [
+        "VALIDATE_OWNER_RECORD_SEPARATION"
+      ],
+      "then": [
+        "NO_AVERAGING",
+        "NO_SUBSTITUTION",
+        "NO_UNIT_CONVERSION",
+        "FACILITY_PROFILE_IS_NOT_A_SPECIES"
+      ]
+    },
+    {
+      "test_id": "VEGETABLE-PARAMETER-001",
+      "name": "Every numeric parameter carries the complete work-order envelope",
+      "given": [
+        "ALL_OBJECTS_WITH_PARAMETER_NAME"
+      ],
+      "when": [
+        "VALIDATE_REQUIRED_PARAMETER_KEYS",
+        "VALIDATE_MINIMUM_LE_DEFAULT_LE_MAXIMUM",
+        "VALIDATE_SOURCE_TYPE_ALLOWLIST"
+      ],
+      "then": [
+        "NO_MISSING_KEY",
+        "ALL_ENVELOPES_ORDERED",
+        "ALL_SOURCE_TYPES_ALLOWED"
+      ]
+    },
+    {
+      "test_id": "VEGETABLE-UNIT-001",
+      "name": "Owner-native synthetic and physical units remain isolated",
+      "given": [
+        "AGRICULTURE_SYNTHETIC_UNITS",
+        "ECOLOGY_NATIVE_UNITS",
+        "ORACLE_MICRO_UNITS"
+      ],
+      "when": [
+        "VALIDATE_UNIT_CONTRACTS",
+        "VALIDATE_NONCONVERSION_CONTRACTS"
+      ],
+      "then": [
+        "NO_SYNTHETIC_WATER_TO_LITER_CLAIM",
+        "NO_SYNTHETIC_ENERGY_TO_PHYSICAL_ENERGY_CLAIM",
+        "NO_FERTILIZER_UNIT_TO_NUTRIENT_KILOGRAM_CLAIM",
+        "NO_WAREHOUSE_UNIT_TO_BIOMASS_MASS_CLAIM",
+        "ALL_ORACLE_CONVERSIONS_HAVE_INVERSES"
+      ]
+    },
+    {
+      "test_id": "VEGETABLE-CAUSAL-001",
+      "name": "Planting cannot proceed without propagation and environment gates",
+      "given": [
+        "PROPAGATION_INPUT_MISSING_OR_ANY_SOIL_WATER_NUTRIENT_SUNLIGHT_TEMPERATURE_LABOR_GATE_FALSE"
+      ],
+      "when": [
+        "ATTEMPT_PLANTING"
+      ],
+      "then": [
+        "PLANTING_BLOCKED",
+        "OWNER_GROWTH_CLOCK_UNCHANGED",
+        "NO_RESOURCE_DEBIT",
+        "NO_LABOR_DEBIT",
+        "NO_CROP_OUTPUT"
+      ]
+    },
+    {
+      "test_id": "VEGETABLE-CAUSAL-002",
+      "name": "Growth requires positive elapsed time and all continuing inputs",
+      "given": [
+        "ZERO_ELAPSED_TIME_OR_ANY_CONTINUING_GATE_FALSE"
+      ],
+      "when": [
+        "ATTEMPT_GROWTH_PROGRESS"
+      ],
+      "then": [
+        "PROGRESS_BLOCKED",
+        "OWNER_GROWTH_CLOCK_UNCHANGED",
+        "NO_HARVEST_READY_STATE",
+        "NO_INVENTORY_CREDIT"
+      ]
+    },
+    {
+      "test_id": "VEGETABLE-CLOCK-001",
+      "name": "Only growth stages count toward the 12-hour plot owner clock",
+      "given": [
+        "PRE_CYCLE_PLANTING_TIME",
+        "THREE_GROWTH_CLOCK_STAGES",
+        "POST_CYCLE_HARVEST_AND_CUSTODY_TIME"
+      ],
+      "when": [
+        "SUM_DEFAULT_GROWTH_STAGE_DURATIONS",
+        "REPLAY_ORACLE_CLOCKS"
+      ],
+      "then": [
+        "DEFAULT_GROWTH_STAGE_SUM_EQUALS_12_HOURS",
+        "ORACLE_OWNER_GROWTH_EQUALS_720000000_MICRO_MINUTE",
+        "ORACLE_SIMULATION_TIME_EXCEEDS_OWNER_GROWTH_TIME",
+        "PLANTING_AND_HARVEST_TIME_EXCLUDED_FROM_OWNER_GROWTH_CLOCK"
+      ]
+    },
+    {
+      "test_id": "VEGETABLE-HARVEST-001",
+      "name": "Harvest requires readiness, labor, tools, containers, time and capacity",
+      "given": [
+        "ONE_OR_MORE_HARVEST_GATES_MISSING"
+      ],
+      "when": [
+        "ATTEMPT_HARVEST"
+      ],
+      "then": [
+        "HARVEST_BLOCKED",
+        "NO_HARVEST_BATCH_CREDIT",
+        "NO_WAREHOUSE_CREDIT",
+        "NO_RESIDUE_DISAPPEARANCE"
+      ]
+    },
+    {
+      "test_id": "VEGETABLE-CUSTODY-001",
+      "name": "Harvest batch custody precedes warehouse inventory",
+      "given": [
+        "HARVEST_READY_AND_ALL_HARVEST_GATES_TRUE"
+      ],
+      "when": [
+        "APPLY_HARVEST_EVENT_ONLY"
+      ],
+      "then": [
+        "HARVEST_BATCH_INVENTORY_CREDITED",
+        "WAREHOUSE_INVENTORY_REMAINS_ZERO",
+        "MARKETABLE_REJECTED_AND_RESIDUE_POOLS_SEPARATED",
+        "SEPARATE_WAREHOUSE_INTAKE_EVENT_REQUIRED"
+      ]
+    },
+    {
+      "test_id": "VEGETABLE-CUSTODY-002",
+      "name": "Rejected, dead and residue biomass cannot disappear",
+      "given": [
+        "REJECTED_BIOMASS_OR_DEAD_BIOMASS_OR_RESIDUE_PRESENT"
+      ],
+      "when": [
+        "ATTEMPT_STAGE_COMPLETION_WITHOUT_DESTINATION_CUSTODY"
+      ],
+      "then": [
+        "COMPLETION_BLOCKED",
+        "SOURCE_POOLS_UNCHANGED",
+        "COMPOST_DECOMPOSITION_OR_RECORDED_REMOVAL_REQUIRED"
+      ]
+    },
+    {
+      "test_id": "VEGETABLE-ORACLE-001",
+      "name": "Fixed-point replay balances all domains and enforces noninstant growth and custody",
+      "given": [
+        "VEGETABLE-PLOT-NUMERICAL-ORACLE-001"
+      ],
+      "when": [
+        "REPLAY_ORDERED_INTEGER_EVENTS",
+        "CHECK_PRECONDITIONS_BEFORE_APPLY",
+        "APPLY_DECLARED_STATE_CHANGES"
+      ],
+      "then": [
+        "SEVEN_EVENTS_APPLIED_IN_ORDER",
+        "EVERY_TOUCHED_EVENT_DOMAIN_SUM_EQUALS_ZERO",
+        "NO_POOL_IS_NEGATIVE",
+        "PROPAGATION_PRECEDES_GROWTH",
+        "OWNER_GROWTH_CLOCK_EXACTLY_12_HOURS_BEFORE_HARVEST",
+        "HARVEST_BATCH_PRECEDES_WAREHOUSE_INTAKE",
+        "REJECTED_AND_RESIDUE_POOLS_ENTER_COMPOST_CUSTODY",
+        "FINAL_STATE_EXACT_MATCH",
+        "ALL_SEVEN_CONSERVED_TOTALS_EXACT"
+      ]
+    },
+    {
+      "test_id": "VEGETABLE-ORACLE-002",
+      "name": "Canonical final-state SHA-256 is reproducible",
+      "given": [
+        "RECURSIVELY_KEY_SORTED_EXPECTED_FINAL_STATE",
+        "COMPACT_UTF8_NO_BOM_NO_TRAILING_NEWLINE"
+      ],
+      "when": [
+        "COMPUTE_SHA256_TWICE"
+      ],
+      "then": [
+        "BOTH_HASHES_IDENTICAL",
+        "HASH_EQUALS_DECLARED_EXPECTED_FINAL_SHA256"
+      ]
+    },
+    {
+      "test_id": "VEGETABLE-PROVENANCE-001",
+      "name": "Declared source hashes match exact Git blob bytes",
+      "given": [
+        "SOURCE_BASE_COMMIT",
+        "EVERY_PROVENANCE_RECORD"
+      ],
+      "when": [
+        "RESOLVE_GIT_OBJECT",
+        "HASH_GIT_CAT_FILE_BLOB_BYTES"
+      ],
+      "then": [
+        "GIT_OBJECT_MATCH",
+        "SHA256_MATCH",
+        "SOURCE_PATH_EXISTS_AT_BASE"
+      ]
+    },
+    {
+      "test_id": "VEGETABLE-FILE-001",
+      "name": "JSON and text encodings are strict",
+      "given": [
+        "SIX_ALLOWED_OUTPUTS"
+      ],
+      "when": [
+        "PARSE_JSON_WITH_DUPLICATE_KEY_REJECTION",
+        "DECODE_STRICT_UTF8",
+        "SCAN_BOM_AND_NUL",
+        "RUN_GIT_DIFF_CHECK"
+      ],
+      "then": [
+        "JSON_VALID",
+        "NO_DUPLICATE_KEYS",
+        "UTF8_VALID",
+        "NO_BOM",
+        "NO_NUL",
+        "DIFF_CHECK_PASS"
+      ]
+    },
+    {
+      "test_id": "VEGETABLE-BOUNDARY-001",
+      "name": "Candidate package cannot cross protected authority boundaries",
+      "given": [
+        "GIT_DIFF_NAME_ONLY",
+        "SIX_ALLOWED_PATHS"
+      ],
+      "when": [
+        "SCAN_PROTECTED_PATHS",
+        "SCAN_SECRETS",
+        "SCAN_AUTHORITY_FIELDS"
+      ],
+      "then": [
+        "ONLY_ALLOWED_PATHS",
+        "NO_SECRET_FINDING",
+        "NO_RUNTIME_OR_CURRENT_CHANGE",
+        "NO_WALLET_OR_KGEN_CHANGE",
+        "NO_RIGHTS_OR_ECONOMY_AUTHORITY",
+        "NO_DEPLOYMENT_OR_MERGE",
+        "STATUS_REMAINS_PENDING_CODEX_REVIEW"
+      ]
+    }
+  ],
+  "provenance": [
+    {
+      "source_type": "REPOSITORY_DERIVED",
+      "source_path": "KAIOS/life/candidates/forest-agriculture-v1/CURSOR_VEGETABLE_PACKAGES_WORK_ORDER.md",
+      "source_commit": "9b5246918b4e912557c9a6cd402ac9ab9fb6f83f",
+      "git_object": "c83cae7565fd1dba0282373dd45b4c1750e2f324",
+      "sha256": "639f78abdc38f55fd2b8bd9101b1cc07a458b638f01f1220be5b8cf516794c3d",
+      "purpose": "Authorized outputs, numeric envelopes, provenance, oracle, causality, custody, validation and boundary requirements."
+    },
+    {
+      "source_type": "REPOSITORY_DERIVED",
+      "source_path": "KAIOS/life/forest-agriculture/KAIOS_FOREST_AGRICULTURE_RUNTIME_V1_SPEC.md",
+      "source_commit": "9b5246918b4e912557c9a6cd402ac9ab9fb6f83f",
+      "git_object": "9a2dd4ad05bb7b2e3d71b91b479359947ada8376",
+      "sha256": "4e1a23e97d09ec2dc4ad65440e6958e646f75ed418e5c703c5a5a1635c2809a1",
+      "purpose": "Owner boundaries, causal sequence, harvest, warehouse, residue and deterministic replay assertions."
+    }
+  ],
+  "completion_state": "PENDING_CODEX_REVIEW"
+}

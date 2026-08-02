@@ -22,7 +22,7 @@ permalink: /PRIMEFORGE_GENESIS_BOOT_SEQUENCE/
 
 STATUS: ACTIVE  
 VERSION: CURRENT  
-REVISION: 2026-08-02.AI_COMPANY_SPEC_AND_VEGETABLE_DISPATCH_INDEX
+REVISION: 2026-08-02.AI_COMPANY_SPEC_AND_SOIL_TYPES_DISPATCH_INDEX
 LAST_UPDATED: 2026-08-02
 UPDATED_BY: Codex
 REVIEWED_BY: Codex
@@ -51,6 +51,9 @@ Rights, Economy, Wallet or KGEN authority.
 | `KAIOS/life/forest-agriculture/KAIOS_CURSOR_FRUIT_TREE_PACKAGE_REVIEW_CLOSEOUT.md` | Codex review, repair evidence, validation and formal release record for the fruit-tree candidate task. |
 | `KAIOS/life/candidates/forest-agriculture-v1/CURSOR_VEGETABLE_PACKAGES_WORK_ORDER.md` | Explicit candidate-only task envelope for the sole active vegetable package claim. |
 | `KGEN-KAIOS/governance/autopilot/company_status/COMPANY_STATUS_2026-08-02_FRUIT_TREE_RELEASED_VEGETABLE_DISPATCHED.md` | Company status projection for fruit-tree release and vegetable dispatch. |
+| `KAIOS/life/forest-agriculture/KAIOS_CURSOR_VEGETABLE_PACKAGE_REVIEW_CLOSEOUT.md` | Codex review, validation and formal release record for the vegetable candidate task. |
+| `KAIOS/life/candidates/forest-agriculture-v1/CURSOR_SOIL_TYPES_WORK_ORDER.md` | Explicit candidate-only task envelope for the sole active soil-type dataset claim. |
+| `KGEN-KAIOS/governance/autopilot/company_status/COMPANY_STATUS_2026-08-02_VEGETABLE_RELEASED_SOIL_TYPES_DISPATCHED.md` | Company status projection for vegetable release and soil-types dispatch. |
 
 ## AI Company Order And Project Specification Registration
 
