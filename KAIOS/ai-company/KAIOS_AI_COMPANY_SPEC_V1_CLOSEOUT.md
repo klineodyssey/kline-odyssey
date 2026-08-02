@@ -2,7 +2,7 @@
 
 Task ID: `KAIOS-AI-COMPANY-ORDER-PROJECT-RUNTIME-V1-001`
 
-Status: `REVIEW_REPAIRED_PENDING_FINAL_REVIEW`
+Status: `APPROVED_SPECIFICATION / READY_TO_MERGE`
 
 Branch: `codex/kaios-ai-company-order-project-spec-v1`
 
@@ -29,6 +29,9 @@ JSON keys. The repaired schema now requires every one of the 21 division IDs
 exactly once and restricts each responsible agent to a simulated ID. The strict
 JSON parser rejects duplicate keys, including Unicode-escaped aliases. The
 specialized suite now reports `6 / 6 PASS`.
+
+Final independent re-review: `P0=0 / P1=0 / P2=0` at repaired head
+`6530a4e4896c96c952f02bf9fc149bb5af40830c`.
 
 ## Gates
 
