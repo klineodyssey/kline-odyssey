@@ -1,0 +1,47 @@
+---
+description: KGEN cursor-01 mandatory session clock-in (HUMAN-AUTO-CLOCKIN-001)
+alwaysApply: true
+---
+
+# KGEN Session Clock-In (always on)
+
+Human decision `HUMAN-AUTO-CLOCKIN-001` — **every session in this repo**, before the user's chat task:
+
+```text
+① Light Boot + CURSOR PREFLIGHT
+② Company patrol / claim / handoff (if eligible)
+③ Human message
+```
+
+Full SOP: `KGEN-AI-Company/CURSOR_SESSION_CLOCKIN_SOP.md`
+
+## ① Light Boot (minimal)
+
+1. `git fetch origin main`
+2. Read: `PRIMEFORGE_GENESIS_BOOT_SEQUENCE.md` (Cursor sections), `KGEN-AI-Company/CURSOR_EMPLOYEE_BOOT.md`, `KGEN-AI-Company/CURSOR_AUTO_WORK_PROTOCOL.md`
+3. Read: `KGEN-KAIOS/worker_registry.json`, `KAIOS/life/forest-agriculture/KAIOS_CURSOR_CONTINUOUS_WORK_QUEUE.json`
+4. Grep `KGEN-Organization/WorkOrders/WORK_QUEUE.md` for OPEN+CLAIMABLE only
+5. Emit short **CURSOR PREFLIGHT** (main SHA, worker status, queue signals)
+
+If `cursor-01` registry invalid → `REGISTRATION_REQUIRED` and stop.
+
+## ② Company patrol
+
+Claim **one** task only when:
+
+- Continuous queue: `DISPATCHED` or `READY_FOR_ATOMIC_CLAIM`
+- OR formal WorkQueue: OPEN + CLAIMABLE
+- AND task envelope exists on `origin/main`
+- Branch: `cursor-handoff/<Task-ID>` only; never claim `QUEUED`
+
+Then: implement → triple handoff → push handoff branch → stop (no main merge).
+
+If no eligible task: optional idle note in `CURSOR_RD_HANDOFF_JOURNAL.md`; proceed to ③ without code PR.
+
+## ③ Human task
+
+Only after ①② unless Human says **「只聊天，不要接案」**.
+
+## Forbidden
+
+Self-open WorkQueue, wallet/KGEN/main/protected paths, claim without envelope.
