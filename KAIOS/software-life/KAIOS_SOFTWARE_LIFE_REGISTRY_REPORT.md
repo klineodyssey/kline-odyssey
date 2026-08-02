@@ -52,7 +52,7 @@ hash, dependency references, rights, security and event history.
 
 ## Migration State
 
-Eight lives have a planned version-free path and remain
+Nine lives have a planned version-free path and remain
 `MIGRATION_PENDING`. No compatibility alias is claimed before it exists. The
 later rename PRs must create the canonical embodiment first and preserve the
 old location as a generated `LEGACY_ALIAS / NOT_CANONICAL /

@@ -14,7 +14,7 @@
 import { execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import { writeFile } from "node:fs/promises";
-import { dirname, extname, resolve } from "node:path";
+import { dirname, extname, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "../../..");
@@ -24,6 +24,9 @@ const outputArg = process.argv.find((value) => value.startsWith("--output="));
 const outputPath = outputArg
   ? resolve(root, outputArg.slice("--output=".length))
   : resolve(root, "KAIOS/software-life/KAIOS_SOFTWARE_LIFE_REGISTRY.json");
+if (outputPath !== root && !outputPath.startsWith(`${root}${sep}`)) {
+  throw new Error("Registry output must remain inside the repository.");
+}
 const sourceCommit = execFileSync(
   "git",
   ["-C", root, "rev-parse", sourceArg?.slice("--source-commit=".length) || "HEAD"],
@@ -346,10 +349,10 @@ const catalog = [
     display: "KAIOS Canonical Life Schema",
     lifeType: "SCHEMA",
     entryPath: "KAIOS_CANONICAL_LIFE_SCHEMA_V1.json",
-    canonicalPath: "KAIOS_CANONICAL_LIFE_SCHEMA_V1.json",
+    canonicalPath: "KAIOS_CANONICAL_LIFE_SCHEMA.json",
     artifacts: ["KAIOS_CANONICAL_LIFE_SCHEMA_V1.json"],
     runtimeStatus: "SCHEMA_ONLY",
-    pathStatus: "DOCUMENT_VERSION_ALLOWED",
+    pathStatus: "MIGRATION_PENDING",
     dependencies: []
   },
   {
@@ -476,7 +479,7 @@ function artifactPaths(entry) {
 function birthRecord(path) {
   const output = execFileSync(
     "git",
-    ["-C", root, "log", sourceCommit, "--follow", "--format=%H%x09%cI%x09%an <%ae>", "--", path],
+    ["-C", root, "log", sourceCommit, "--follow", "--format=%H%x09%cI%x09%an", "--", path],
     { encoding: "utf8" }
   ).trim().split(/\r?\n/).filter(Boolean);
   if (!output.length) throw new Error(`No birth lineage for ${path}`);

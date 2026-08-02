@@ -15,7 +15,6 @@ import assert from "node:assert/strict";
 import { execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import { mkdtemp, readFile, rm } from "node:fs/promises";
-import { tmpdir } from "node:os";
 import { dirname, relative, resolve } from "node:path";
 import test from "node:test";
 import { fileURLToPath } from "node:url";
@@ -147,7 +146,7 @@ test("dependencies resolve without cycles and specification-only work is not pre
 
 test("migration-pending paths are planned identities, not fabricated aliases", () => {
   const pending = registry.software_lives.filter((life) => life.location.path_status === "MIGRATION_PENDING");
-  assert.ok(pending.length >= 6);
+  assert.equal(pending.length, 9);
   for (const life of pending) {
     assert.notEqual(life.location.current_path, life.location.canonical_path);
     assert.deepEqual(life.legacy_aliases, []);
@@ -170,7 +169,7 @@ test("all authority and marketplace boundaries remain disabled", () => {
 });
 
 test("registry generation replays byte-for-byte from source commit and timestamp", async () => {
-  const directory = await mkdtemp(resolve(tmpdir(), "kaios-software-life-"));
+  const directory = await mkdtemp(resolve(root, "KAIOS/software-life/.tmp-registry-"));
   const target = resolve(directory, "registry.json");
   const relativeTarget = relative(root, target).replaceAll("\\", "/");
   try {
@@ -183,5 +182,21 @@ test("registry generation replays byte-for-byte from source commit and timestamp
     assert.deepEqual(await readFile(target), await readFile(registryPath));
   } finally {
     await rm(directory, { recursive: true, force: true });
+  }
+});
+
+test("generator rejects output paths outside the repository", () => {
+  assert.throws(() => execFileSync("node", [
+    resolve(root, "KAIOS/software-life/tools/generate-software-life-registry.mjs"),
+    `--source-commit=${registry.metadata.source_commit}`,
+    `--generated-at=${registry.metadata.generated_at}`,
+    "--output=../outside-registry.json"
+  ], { cwd: root, stdio: "pipe" }));
+});
+
+test("creator attribution retains author names without duplicating email addresses", () => {
+  for (const life of registry.software_lives) {
+    assert.ok(!life.creator.includes("@"), `${life.life_id}:${life.creator}`);
+    assert.ok(!life.creator.includes("<"), `${life.life_id}:${life.creator}`);
   }
 });
