@@ -805,3 +805,20 @@ Task: `KAIOS-AI-COMPANY-ORDER-PROJECT-RUNTIME-V1-001`
 | `KGEN-KAIOS/world-viewer/tests/ai-company-spec.test.mjs` | Node specification tests. |
 | `KGEN-KAIOS/governance/autopilot/recovery_points/RECOVERY-KAIOS-AI-COMPANY-SPEC-V1.md` | Rollback anchor. |
 | `KGEN-KAIOS/governance/autopilot/company_status/COMPANY_STATUS_2026-08-02_AI_COMPANY_SPEC.md` | Workline status. |
+
+Runtime V1 implementation:
+
+| Repository path | Purpose |
+|---|---|
+| `KGEN-KAIOS/world-viewer/ai-company/ai-company-project-runtime.js` | Canonical deterministic AI Company coordinator. |
+| `world-viewer/ai-company-v1/` | Public AI Company simulation interface. |
+| `KAIOS/ai-company/generate-ai-company-v1-api.mjs` | Static read-only API generator. |
+| `api/kaios/ai-company/v1/` | Eighteen public read-only projections. |
+| `KGEN-KAIOS/world-viewer/tests/ai-company-runtime-v1.test.mjs` | Runtime behavioral and replay tests. |
+| `KGEN-KAIOS/world-viewer/tests/ai-company-public-integration.test.mjs` | Public route and API tests. |
+| `KGEN-KAIOS/world-viewer/tests/ai_company_browser_qa.py` | Responsive browser QA. |
+| `KAIOS/ai-company/KAIOS_AI_COMPANY_ORDER_PROJECT_RUNTIME_V1_REPORT.md` | Runtime report. |
+| `KAIOS/ai-company/KAIOS_AI_COMPANY_WORLD_VIEWER_REPORT.md` | World Viewer report. |
+| `KAIOS/ai-company/KAIOS_CURSOR_CONTINUOUS_QUEUE_REPORT.md` | Continuous Cursor queue record. |
+| `RECOVERY-KAIOS-AI-COMPANY-RUNTIME-V1.md` | Recovery point. |
+| `KAIOS_AI_COMPANY_RUNTIME_V1_CLOSEOUT.md` | Runtime closeout. |

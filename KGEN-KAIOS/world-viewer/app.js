@@ -57,6 +57,7 @@ let inspector = null;
 let lifeViewer = null;
 let civilizationView = null;
 let programCenterView = null;
+let programCenterLoadStarted = false;
 let genesisView = null;
 let contextMenu = null;
 
@@ -293,6 +294,10 @@ function renderInspector() {
     inspectorKind.textContent = "READ_ONLY PROGRAM REGISTRY";
     inspectorTitle.textContent = "KAIOS Genesis Charter Program Center";
     programCenterView.render();
+    if (!programCenterLoadStarted) {
+      programCenterLoadStarted = true;
+      void programCenterView.load();
+    }
   } else if (mode === "CIVILIZATION") {
     inspectorKind.textContent = "CIVILIZATION";
     inspectorTitle.textContent = "Hsinchu Living District";
@@ -997,7 +1002,6 @@ async function start() {
     )
   });
   programCenterView = createProgramCenterView(inspectorContent);
-  await programCenterView.load();
   inspector = createInspectorView({
     container: inspectorContent,
     onClose: () => shell.setInspectorOpen(false),

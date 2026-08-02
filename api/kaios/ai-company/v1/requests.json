@@ -1,0 +1,316 @@
+{
+  "schema_version": "1.0.0",
+  "runtime": "KAIOS_AI_COMPANY_ORDER_AND_PROJECT_RUNTIME_V1",
+  "mode": "STATIC_READ_ONLY_PROJECTION",
+  "generated_from_seed": "KAIOS-AI-COMPANY-PUBLIC-001",
+  "simulation_only": true,
+  "authority": "NO_PRODUCTION_AUTHORITY",
+  "read_only": true,
+  "mutation_endpoints": false,
+  "real_wallet": false,
+  "real_kgen": false,
+  "onchain_transfer": false,
+  "real_legal_effect": false,
+  "external_autonomy": false,
+  "requests": [
+    {
+      "request_id": "AI-COMPANY-REQ-00001",
+      "customer_life_id": "LIFE-SIMULATED-DEMO-CUSTOMER",
+      "customer_type": "PLAYER",
+      "request_text": "I need a fishpond.",
+      "requested_object": "FISHPOND",
+      "requested_location": "LAND-SIM-FISHPOND-001",
+      "requested_quantity": 1,
+      "requested_quality": "STANDARD_SIMULATION",
+      "requested_deadline": 1000,
+      "requested_budget": 250000,
+      "intended_use": "DETERMINISTIC_DEMONSTRATION",
+      "civilization_context": "INDUSTRIAL",
+      "rights_context": [
+        "SIMULATED_USAGE_RIGHT"
+      ],
+      "risk_level": "MEDIUM",
+      "priority": "NORMAL",
+      "created_at": 0,
+      "status": "COMPLETED",
+      "structured_requirements": {
+        "functional": [
+          "DELIVER_SIMULATED_CAUSAL_FISHPOND"
+        ],
+        "physical": [
+          "TIME_MATERIAL_ENERGY_LOCATION_CAUSALITY"
+        ],
+        "location": [
+          "LAND-SIM-FISHPOND-001"
+        ],
+        "resource": [
+          "GRAVEL",
+          "PIPE",
+          "LINING",
+          "FISH_JUVENILE_STOCK"
+        ],
+        "worker": [
+          "SURVEYOR",
+          "ARCHITECT",
+          "SITE_SUPERVISOR",
+          "EXCAVATOR_OPERATOR",
+          "GENERAL_LABORER",
+          "PIPE_INSTALLER",
+          "AQUACULTURE_WORKER",
+          "WATER_QUALITY_TECHNICIAN",
+          "QA_INSPECTOR"
+        ],
+        "technology": [
+          "AQUACULTURE_RUNTIME_V1"
+        ],
+        "rights": [
+          "SIMULATED_USAGE_RIGHT"
+        ],
+        "civilization": [
+          "INDUSTRIAL"
+        ],
+        "safety": [
+          "SIMULATION_SAFETY_GATE"
+        ],
+        "economic": [
+          "APPROVED_SIMULATED_FUNDING",
+          "BALANCED_LEDGER"
+        ],
+        "quality": [
+          "STANDARD_SIMULATION"
+        ],
+        "delivery": [
+          "INSPECTION_AND_CUSTOMER_ACCEPTANCE"
+        ],
+        "maintenance": [
+          "MAINTENANCE_PLAN_REQUIRED"
+        ]
+      },
+      "assumptions": [],
+      "template_id": "FISHPOND_PROJECT"
+    }
+  ],
+  "clarifications": [],
+  "analyses": [
+    {
+      "analysis_id": "AI-COMPANY-ANALYSIS-00001",
+      "request_id": "AI-COMPANY-REQ-00001",
+      "template_id": "FISHPOND_PROJECT",
+      "structured_requirements": {
+        "functional": [
+          "DELIVER_SIMULATED_CAUSAL_FISHPOND"
+        ],
+        "physical": [
+          "TIME_MATERIAL_ENERGY_LOCATION_CAUSALITY"
+        ],
+        "location": [
+          "LAND-SIM-FISHPOND-001"
+        ],
+        "resource": [
+          "GRAVEL",
+          "PIPE",
+          "LINING",
+          "FISH_JUVENILE_STOCK"
+        ],
+        "worker": [
+          "SURVEYOR",
+          "ARCHITECT",
+          "SITE_SUPERVISOR",
+          "EXCAVATOR_OPERATOR",
+          "GENERAL_LABORER",
+          "PIPE_INSTALLER",
+          "AQUACULTURE_WORKER",
+          "WATER_QUALITY_TECHNICIAN",
+          "QA_INSPECTOR"
+        ],
+        "technology": [
+          "AQUACULTURE_RUNTIME_V1"
+        ],
+        "rights": [
+          "SIMULATED_USAGE_RIGHT"
+        ],
+        "civilization": [
+          "INDUSTRIAL"
+        ],
+        "safety": [
+          "SIMULATION_SAFETY_GATE"
+        ],
+        "economic": [
+          "APPROVED_SIMULATED_FUNDING",
+          "BALANCED_LEDGER"
+        ],
+        "quality": [
+          "STANDARD_SIMULATION"
+        ],
+        "delivery": [
+          "INSPECTION_AND_CUSTOMER_ACCEPTANCE"
+        ],
+        "maintenance": [
+          "MAINTENANCE_PLAN_REQUIRED"
+        ]
+      },
+      "assumptions": [],
+      "status": "COMPLETE"
+    }
+  ],
+  "feasibility_reviews": [
+    {
+      "review_id": "AI-COMPANY-FEASIBILITY-00001",
+      "request_id": "AI-COMPANY-REQ-00001",
+      "template_id": "FISHPOND_PROJECT",
+      "gates": [
+        {
+          "gate_id": "PHYSICS_GATE",
+          "outcome": "PASS",
+          "reason": null,
+          "required_to_unblock": []
+        },
+        {
+          "gate_id": "TIME_GATE",
+          "outcome": "PASS",
+          "reason": null,
+          "required_to_unblock": []
+        },
+        {
+          "gate_id": "LOCATION_GATE",
+          "outcome": "PASS",
+          "reason": null,
+          "required_to_unblock": []
+        },
+        {
+          "gate_id": "LAND_GATE",
+          "outcome": "PASS",
+          "reason": null,
+          "required_to_unblock": []
+        },
+        {
+          "gate_id": "RIGHTS_GATE",
+          "outcome": "PASS",
+          "reason": null,
+          "required_to_unblock": []
+        },
+        {
+          "gate_id": "CIVILIZATION_GATE",
+          "outcome": "PASS",
+          "reason": null,
+          "required_to_unblock": []
+        },
+        {
+          "gate_id": "TECHNOLOGY_GATE",
+          "outcome": "PASS",
+          "reason": null,
+          "required_to_unblock": []
+        },
+        {
+          "gate_id": "ENERGY_GATE",
+          "outcome": "PASS",
+          "reason": null,
+          "required_to_unblock": []
+        },
+        {
+          "gate_id": "MATERIAL_GATE",
+          "outcome": "PASS",
+          "reason": null,
+          "required_to_unblock": []
+        },
+        {
+          "gate_id": "LABOR_GATE",
+          "outcome": "PASS",
+          "reason": null,
+          "required_to_unblock": []
+        },
+        {
+          "gate_id": "EQUIPMENT_GATE",
+          "outcome": "PASS",
+          "reason": null,
+          "required_to_unblock": []
+        },
+        {
+          "gate_id": "LOGISTICS_GATE",
+          "outcome": "PASS",
+          "reason": null,
+          "required_to_unblock": []
+        },
+        {
+          "gate_id": "ECONOMY_GATE",
+          "outcome": "PASS",
+          "reason": null,
+          "required_to_unblock": []
+        },
+        {
+          "gate_id": "SAFETY_GATE",
+          "outcome": "PASS",
+          "reason": null,
+          "required_to_unblock": []
+        },
+        {
+          "gate_id": "ENVIRONMENT_GATE",
+          "outcome": "PASS",
+          "reason": null,
+          "required_to_unblock": []
+        },
+        {
+          "gate_id": "QUALITY_GATE",
+          "outcome": "PASS",
+          "reason": null,
+          "required_to_unblock": []
+        }
+      ],
+      "status": "PASS",
+      "reason": null,
+      "dependency_status": "READY"
+    }
+  ],
+  "proposals": [
+    {
+      "proposal_id": "AI-COMPANY-PROPOSAL-00001",
+      "request_id": "AI-COMPANY-REQ-00001",
+      "template_id": "FISHPOND_PROJECT",
+      "objective": "Deliver SIMULATED_CAUSAL_FISHPOND",
+      "estimated_cost": 85000,
+      "estimated_duration": 43,
+      "feasibility_review_id": "AI-COMPANY-FEASIBILITY-00001",
+      "assumptions": [],
+      "risk_assessment": [
+        {
+          "risk_id": "FISHPOND_PROJECT-RISK-01",
+          "risk_type": "SCHEDULE_RISK",
+          "probability": 0.25,
+          "impact": "MEDIUM",
+          "mitigation": "DEPENDENCY_AND_TIME_BUFFER",
+          "status": "MONITORED",
+          "simulation_only": true
+        },
+        {
+          "risk_id": "FISHPOND_PROJECT-RISK-02",
+          "risk_type": "RESOURCE_AVAILABILITY_RISK",
+          "probability": 0.3,
+          "impact": "MEDIUM",
+          "mitigation": "EXPLICIT_PROCUREMENT_GATES",
+          "status": "MONITORED",
+          "simulation_only": true
+        },
+        {
+          "risk_id": "FISHPOND_PROJECT-RISK-03",
+          "risk_type": "FINANCIAL_EXPOSURE_RISK",
+          "probability": 0.2,
+          "impact": "LOW",
+          "mitigation": "BOUNDED_BUDGET_AND_CAPACITY",
+          "status": "MONITORED",
+          "simulation_only": true
+        },
+        {
+          "risk_id": "FISHPOND_PROJECT-RISK-04",
+          "risk_type": "SITE_SAFETY_RISK",
+          "probability": 0.2,
+          "impact": "LOW",
+          "mitigation": "STAGE_SAFETY_INSPECTIONS",
+          "status": "MONITORED",
+          "simulation_only": true
+        }
+      ],
+      "status": "APPROVED_SIMULATION",
+      "simulation_only": true
+    }
+  ]
+}

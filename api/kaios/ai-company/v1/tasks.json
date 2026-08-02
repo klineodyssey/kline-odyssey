@@ -1,0 +1,393 @@
+{
+  "schema_version": "1.0.0",
+  "runtime": "KAIOS_AI_COMPANY_ORDER_AND_PROJECT_RUNTIME_V1",
+  "mode": "STATIC_READ_ONLY_PROJECTION",
+  "generated_from_seed": "KAIOS-AI-COMPANY-PUBLIC-001",
+  "simulation_only": true,
+  "authority": "NO_PRODUCTION_AUTHORITY",
+  "read_only": true,
+  "mutation_endpoints": false,
+  "real_wallet": false,
+  "real_kgen": false,
+  "onchain_transfer": false,
+  "real_legal_effect": false,
+  "external_autonomy": false,
+  "tasks": [
+    {
+      "project_id": "AI-COMPANY-PROJECT-00001",
+      "task_id": "AI-COMPANY-PROJECT-00001-TASK-001",
+      "task_code": "SITE_SURVEY",
+      "work_package_id": "AI-COMPANY-PROJECT-00001-WORK-PACKAGE-001",
+      "objective": "SITE SURVEY",
+      "location": "LAND-SIM-FISHPOND-001",
+      "start_condition": [
+        "PROJECT_AUTHORIZED"
+      ],
+      "end_condition": [
+        "TIME_COMPLETE",
+        "RESOURCES_CONSUMED",
+        "INSPECTION_PASS"
+      ],
+      "duration_hours": 4,
+      "remaining_hours": 0,
+      "workers": [
+        "AI-COMPANY-WORKER-001"
+      ],
+      "skills": [
+        "SURVEYOR"
+      ],
+      "materials": {},
+      "equipment": [
+        "SURVEY_TOOL"
+      ],
+      "energy": 2,
+      "transport": [],
+      "cost": 600,
+      "predecessors": [],
+      "successors": [
+        "AI-COMPANY-PROJECT-00001-TASK-002"
+      ],
+      "quality_gate": "STAGE_INSPECTION",
+      "safety_gate": "SIMULATED_SITE_SAFETY",
+      "status": "COMPLETE",
+      "progress_percent": 100,
+      "consumed": {
+        "labor_hours": 4,
+        "energy": 2,
+        "materials": {},
+        "equipment_wear": 0.02,
+        "cost": 600
+      },
+      "work_segments": [
+        {
+          "start": 13,
+          "end": 17,
+          "effective_hours": 4
+        }
+      ],
+      "blocked_reason": null,
+      "actual_start": 13,
+      "actual_end": 17,
+      "rework_for_task_id": null
+    },
+    {
+      "project_id": "AI-COMPANY-PROJECT-00001",
+      "task_id": "AI-COMPANY-PROJECT-00001-TASK-002",
+      "task_code": "POND_DESIGN",
+      "work_package_id": "AI-COMPANY-PROJECT-00001-WORK-PACKAGE-001",
+      "objective": "POND DESIGN",
+      "location": "LAND-SIM-FISHPOND-001",
+      "start_condition": [
+        "PREDECESSOR_1_COMPLETE"
+      ],
+      "end_condition": [
+        "TIME_COMPLETE",
+        "RESOURCES_CONSUMED",
+        "INSPECTION_PASS"
+      ],
+      "duration_hours": 6,
+      "remaining_hours": 0,
+      "workers": [
+        "AI-COMPANY-WORKER-002",
+        "AI-COMPANY-WORKER-003"
+      ],
+      "skills": [
+        "ARCHITECT",
+        "SITE_SUPERVISOR"
+      ],
+      "materials": {},
+      "equipment": [],
+      "energy": 3,
+      "transport": [],
+      "cost": 1200,
+      "predecessors": [
+        "AI-COMPANY-PROJECT-00001-TASK-001"
+      ],
+      "successors": [
+        "AI-COMPANY-PROJECT-00001-TASK-003"
+      ],
+      "quality_gate": "STAGE_INSPECTION",
+      "safety_gate": "SIMULATED_SITE_SAFETY",
+      "status": "COMPLETE",
+      "progress_percent": 100,
+      "consumed": {
+        "labor_hours": 12,
+        "energy": 3,
+        "materials": {},
+        "equipment_wear": 0,
+        "cost": 1200
+      },
+      "work_segments": [
+        {
+          "start": 17,
+          "end": 23,
+          "effective_hours": 6
+        }
+      ],
+      "blocked_reason": null,
+      "actual_start": 17,
+      "actual_end": 23,
+      "rework_for_task_id": null
+    },
+    {
+      "project_id": "AI-COMPANY-PROJECT-00001",
+      "task_id": "AI-COMPANY-PROJECT-00001-TASK-003",
+      "task_code": "EXCAVATION",
+      "work_package_id": "AI-COMPANY-PROJECT-00001-WORK-PACKAGE-001",
+      "objective": "EXCAVATION",
+      "location": "LAND-SIM-FISHPOND-001",
+      "start_condition": [
+        "PREDECESSOR_2_COMPLETE"
+      ],
+      "end_condition": [
+        "TIME_COMPLETE",
+        "RESOURCES_CONSUMED",
+        "INSPECTION_PASS"
+      ],
+      "duration_hours": 12,
+      "remaining_hours": 0,
+      "workers": [
+        "AI-COMPANY-WORKER-005",
+        "AI-COMPANY-WORKER-003"
+      ],
+      "skills": [
+        "EXCAVATOR_OPERATOR",
+        "SITE_SUPERVISOR"
+      ],
+      "materials": {
+        "GRAVEL": 12
+      },
+      "equipment": [
+        "EXCAVATOR"
+      ],
+      "energy": 48,
+      "transport": [
+        "GRAVEL"
+      ],
+      "cost": 4200,
+      "predecessors": [
+        "AI-COMPANY-PROJECT-00001-TASK-002"
+      ],
+      "successors": [
+        "AI-COMPANY-PROJECT-00001-TASK-004"
+      ],
+      "quality_gate": "STAGE_INSPECTION",
+      "safety_gate": "SIMULATED_SITE_SAFETY",
+      "status": "COMPLETE",
+      "progress_percent": 100,
+      "consumed": {
+        "labor_hours": 24,
+        "energy": 48,
+        "materials": {
+          "GRAVEL": 12
+        },
+        "equipment_wear": 0.02,
+        "cost": 4200
+      },
+      "work_segments": [
+        {
+          "start": 31,
+          "end": 43,
+          "effective_hours": 12
+        }
+      ],
+      "blocked_reason": null,
+      "actual_start": 31,
+      "actual_end": 43,
+      "rework_for_task_id": null
+    },
+    {
+      "project_id": "AI-COMPANY-PROJECT-00001",
+      "task_id": "AI-COMPANY-PROJECT-00001-TASK-004",
+      "task_code": "POND_INFRASTRUCTURE",
+      "work_package_id": "AI-COMPANY-PROJECT-00001-WORK-PACKAGE-001",
+      "objective": "POND INFRASTRUCTURE",
+      "location": "LAND-SIM-FISHPOND-001",
+      "start_condition": [
+        "PREDECESSOR_3_COMPLETE"
+      ],
+      "end_condition": [
+        "TIME_COMPLETE",
+        "RESOURCES_CONSUMED",
+        "INSPECTION_PASS"
+      ],
+      "duration_hours": 10,
+      "remaining_hours": 0,
+      "workers": [
+        "AI-COMPANY-WORKER-004",
+        "AI-COMPANY-WORKER-006"
+      ],
+      "skills": [
+        "GENERAL_LABORER",
+        "PIPE_INSTALLER"
+      ],
+      "materials": {
+        "PIPE": 18,
+        "LINING": 24
+      },
+      "equipment": [
+        "HAND_TOOL",
+        "PUMP"
+      ],
+      "energy": 32,
+      "transport": [
+        "PIPE",
+        "LINING"
+      ],
+      "cost": 3600,
+      "predecessors": [
+        "AI-COMPANY-PROJECT-00001-TASK-003"
+      ],
+      "successors": [
+        "AI-COMPANY-PROJECT-00001-TASK-005"
+      ],
+      "quality_gate": "STAGE_INSPECTION",
+      "safety_gate": "SIMULATED_SITE_SAFETY",
+      "status": "COMPLETE",
+      "progress_percent": 100,
+      "consumed": {
+        "labor_hours": 20,
+        "energy": 32,
+        "materials": {
+          "PIPE": 18,
+          "LINING": 24
+        },
+        "equipment_wear": 0.04,
+        "cost": 3600
+      },
+      "work_segments": [
+        {
+          "start": 48,
+          "end": 58,
+          "effective_hours": 10
+        }
+      ],
+      "blocked_reason": null,
+      "actual_start": 48,
+      "actual_end": 58,
+      "rework_for_task_id": null
+    },
+    {
+      "project_id": "AI-COMPANY-PROJECT-00001",
+      "task_id": "AI-COMPANY-PROJECT-00001-TASK-005",
+      "task_code": "AQUACULTURE_RUNTIME_BINDING",
+      "work_package_id": "AI-COMPANY-PROJECT-00001-WORK-PACKAGE-001",
+      "objective": "AQUACULTURE RUNTIME BINDING",
+      "location": "LAND-SIM-FISHPOND-001",
+      "start_condition": [
+        "PREDECESSOR_4_COMPLETE"
+      ],
+      "end_condition": [
+        "TIME_COMPLETE",
+        "RESOURCES_CONSUMED",
+        "INSPECTION_PASS"
+      ],
+      "duration_hours": 8,
+      "remaining_hours": 0,
+      "workers": [
+        "AI-COMPANY-WORKER-008",
+        "AI-COMPANY-WORKER-009"
+      ],
+      "skills": [
+        "AQUACULTURE_WORKER",
+        "WATER_QUALITY_TECHNICIAN"
+      ],
+      "materials": {
+        "FISH_JUVENILE_STOCK": 120
+      },
+      "equipment": [
+        "AERATOR"
+      ],
+      "energy": 24,
+      "transport": [
+        "FISH_JUVENILE_STOCK"
+      ],
+      "cost": 2600,
+      "predecessors": [
+        "AI-COMPANY-PROJECT-00001-TASK-004"
+      ],
+      "successors": [
+        "AI-COMPANY-PROJECT-00001-TASK-006"
+      ],
+      "quality_gate": "STAGE_INSPECTION",
+      "safety_gate": "SIMULATED_SITE_SAFETY",
+      "status": "COMPLETE",
+      "progress_percent": 100,
+      "consumed": {
+        "labor_hours": 16,
+        "energy": 24,
+        "materials": {
+          "FISH_JUVENILE_STOCK": 120
+        },
+        "equipment_wear": 0.02,
+        "cost": 2600
+      },
+      "work_segments": [
+        {
+          "start": 58,
+          "end": 66,
+          "effective_hours": 8
+        }
+      ],
+      "blocked_reason": null,
+      "actual_start": 58,
+      "actual_end": 66,
+      "rework_for_task_id": null
+    },
+    {
+      "project_id": "AI-COMPANY-PROJECT-00001",
+      "task_id": "AI-COMPANY-PROJECT-00001-TASK-006",
+      "task_code": "FINAL_ACCEPTANCE",
+      "work_package_id": "AI-COMPANY-PROJECT-00001-WORK-PACKAGE-001",
+      "objective": "FINAL ACCEPTANCE",
+      "location": "LAND-SIM-FISHPOND-001",
+      "start_condition": [
+        "PREDECESSOR_5_COMPLETE"
+      ],
+      "end_condition": [
+        "TIME_COMPLETE",
+        "RESOURCES_CONSUMED",
+        "INSPECTION_PASS"
+      ],
+      "duration_hours": 3,
+      "remaining_hours": 0,
+      "workers": [
+        "AI-COMPANY-WORKER-010"
+      ],
+      "skills": [
+        "QA_INSPECTOR"
+      ],
+      "materials": {},
+      "equipment": [],
+      "energy": 2,
+      "transport": [],
+      "cost": 700,
+      "predecessors": [
+        "AI-COMPANY-PROJECT-00001-TASK-005"
+      ],
+      "successors": [],
+      "quality_gate": "FINAL_ACCEPTANCE",
+      "safety_gate": "SIMULATED_SITE_SAFETY",
+      "status": "COMPLETE",
+      "progress_percent": 100,
+      "consumed": {
+        "labor_hours": 3,
+        "energy": 2,
+        "materials": {},
+        "equipment_wear": 0,
+        "cost": 700
+      },
+      "work_segments": [
+        {
+          "start": 66,
+          "end": 69,
+          "effective_hours": 3
+        }
+      ],
+      "blocked_reason": null,
+      "actual_start": 66,
+      "actual_end": 69,
+      "rework_for_task_id": null
+    }
+  ]
+}

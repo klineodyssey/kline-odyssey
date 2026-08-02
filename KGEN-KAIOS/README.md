@@ -652,6 +652,20 @@ Status is `HUMAN_APPROVED_ARCHITECTURE`; runtime implementation remains forbidde
 | `governance/autopilot/recovery_points/RECOVERY-KAIOS-AI-COMPANY-SPEC-V1.md` | Specification rollback anchor. |
 | `governance/autopilot/company_status/COMPANY_STATUS_2026-08-02_AI_COMPANY_SPEC.md` | Specification and worker status. |
 
+Runtime implementation paths:
+
+| File | Purpose |
+|---|---|
+| `world-viewer/ai-company/ai-company-project-runtime.js` | Canonical deterministic order/project coordinator. |
+| `../world-viewer/ai-company-v1/` | Public local-simulation interface. |
+| `../api/kaios/ai-company/v1/` | Read-only static API projections. |
+| `world-viewer/tests/ai-company-runtime-v1.test.mjs` | Runtime causality, capacity, finance and replay tests. |
+| `world-viewer/tests/ai-company-public-integration.test.mjs` | Homepage, navigation, Viewer and API route tests. |
+| `world-viewer/tests/ai_company_browser_qa.py` | Four-viewport browser and console QA. |
+| `../KAIOS/ai-company/KAIOS_AI_COMPANY_ORDER_PROJECT_RUNTIME_V1_REPORT.md` | Implementation evidence. |
+| `../RECOVERY-KAIOS-AI-COMPANY-RUNTIME-V1.md` | Runtime rollback anchor. |
+| `../KAIOS_AI_COMPANY_RUNTIME_V1_CLOSEOUT.md` | Merge and deployment closeout. |
+
 ## Protected Systems
 
 KAIOS V10 does not modify:

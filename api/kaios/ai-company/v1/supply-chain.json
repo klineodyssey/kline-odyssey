@@ -1,0 +1,575 @@
+{
+  "schema_version": "1.0.0",
+  "runtime": "KAIOS_AI_COMPANY_ORDER_AND_PROJECT_RUNTIME_V1",
+  "mode": "STATIC_READ_ONLY_PROJECTION",
+  "generated_from_seed": "KAIOS-AI-COMPANY-PUBLIC-001",
+  "simulation_only": true,
+  "authority": "NO_PRODUCTION_AUTHORITY",
+  "read_only": true,
+  "mutation_endpoints": false,
+  "real_wallet": false,
+  "real_kgen": false,
+  "onchain_transfer": false,
+  "real_legal_effect": false,
+  "external_autonomy": false,
+  "supply_chain": [
+    {
+      "resource_plan_id": "AI-COMPANY-RESOURCE-PLAN-00001",
+      "project_id": "AI-COMPANY-PROJECT-00001",
+      "transport_id": "AI-COMPANY-PROJECT-00001-TRANSPORT-001",
+      "bom_id": "AI-COMPANY-PROJECT-00001-BOM-001",
+      "origin": "SIMULATED-SUPPLIER-GRAVEL-BALANCED",
+      "destination": "LAND-SIM-FISHPOND-001",
+      "route": "CAUSAL-ROUTE-001",
+      "quantity": 12,
+      "mass": 120,
+      "vehicle": "SIMULATED-TRUCK-001",
+      "fuel": 2.12,
+      "loading_time": 1,
+      "travel_time": 3,
+      "unloading_time": 1,
+      "cost": 46,
+      "risk": 0.1,
+      "status": "DELIVERED"
+    },
+    {
+      "resource_plan_id": "AI-COMPANY-RESOURCE-PLAN-00001",
+      "project_id": "AI-COMPANY-PROJECT-00001",
+      "transport_id": "AI-COMPANY-PROJECT-00001-TRANSPORT-002",
+      "bom_id": "AI-COMPANY-PROJECT-00001-BOM-002",
+      "origin": "SIMULATED-SUPPLIER-PIPE-BALANCED",
+      "destination": "LAND-SIM-FISHPOND-001",
+      "route": "CAUSAL-ROUTE-002",
+      "quantity": 18,
+      "mass": 36,
+      "vehicle": "SIMULATED-TRUCK-001",
+      "fuel": 2.036,
+      "loading_time": 1,
+      "travel_time": 4,
+      "unloading_time": 1,
+      "cost": 41.8,
+      "risk": 0.1,
+      "status": "DELIVERED"
+    },
+    {
+      "resource_plan_id": "AI-COMPANY-RESOURCE-PLAN-00001",
+      "project_id": "AI-COMPANY-PROJECT-00001",
+      "transport_id": "AI-COMPANY-PROJECT-00001-TRANSPORT-003",
+      "bom_id": "AI-COMPANY-PROJECT-00001-BOM-003",
+      "origin": "SIMULATED-SUPPLIER-LINING-BALANCED",
+      "destination": "LAND-SIM-FISHPOND-001",
+      "route": "CAUSAL-ROUTE-003",
+      "quantity": 24,
+      "mass": 96,
+      "vehicle": "SIMULATED-TRUCK-001",
+      "fuel": 2.096,
+      "loading_time": 1,
+      "travel_time": 5,
+      "unloading_time": 1,
+      "cost": 44.8,
+      "risk": 0.1,
+      "status": "DELIVERED"
+    },
+    {
+      "resource_plan_id": "AI-COMPANY-RESOURCE-PLAN-00001",
+      "project_id": "AI-COMPANY-PROJECT-00001",
+      "transport_id": "AI-COMPANY-PROJECT-00001-TRANSPORT-004",
+      "bom_id": "AI-COMPANY-PROJECT-00001-BOM-004",
+      "origin": "SIMULATED-SUPPLIER-FISH_JUVENILE_STOCK-BALANCED",
+      "destination": "LAND-SIM-FISHPOND-001",
+      "route": "CAUSAL-ROUTE-004",
+      "quantity": 120,
+      "mass": 12,
+      "vehicle": "SIMULATED-TRUCK-001",
+      "fuel": 2.012,
+      "loading_time": 1,
+      "travel_time": 6,
+      "unloading_time": 1,
+      "cost": 40.6,
+      "risk": 0.1,
+      "status": "DELIVERED"
+    }
+  ],
+  "procurement_orders": [
+    {
+      "order_id": "AI-COMPANY-PROJECT-00001-PROCUREMENT-001",
+      "project_id": "AI-COMPANY-PROJECT-00001",
+      "bom_id": "AI-COMPANY-PROJECT-00001-BOM-001",
+      "material_id": "GRAVEL",
+      "quantity": 12,
+      "material_cost": 144,
+      "transport_cost": 46,
+      "ordered_at": 0,
+      "arrival_time": 7,
+      "supplier_candidates": [
+        {
+          "supplier_id": "SIMULATED-SUPPLIER-GRAVEL-QUALITY",
+          "quality_score": 0.98,
+          "delivery_hours": 4,
+          "capacity": 24,
+          "risk_score": 0.04,
+          "material_cost": 149.76,
+          "transport_cost": 46,
+          "total_cost": 195.76,
+          "eligible": true,
+          "score": 88.1115,
+          "source": "DETERMINISTIC_SIMULATION_QUOTE"
+        },
+        {
+          "supplier_id": "SIMULATED-SUPPLIER-GRAVEL-BALANCED",
+          "quality_score": 0.93,
+          "delivery_hours": 2,
+          "capacity": 18,
+          "risk_score": 0.08,
+          "material_cost": 144,
+          "transport_cost": 46,
+          "total_cost": 190,
+          "eligible": true,
+          "score": 92.9,
+          "source": "DETERMINISTIC_SIMULATION_QUOTE"
+        },
+        {
+          "supplier_id": "SIMULATED-SUPPLIER-GRAVEL-ECONOMY",
+          "quality_score": 0.82,
+          "delivery_hours": 4,
+          "capacity": 13.2,
+          "risk_score": 0.18,
+          "material_cost": 135.36,
+          "transport_cost": 46,
+          "total_cost": 181.36,
+          "eligible": true,
+          "score": 75.15,
+          "source": "DETERMINISTIC_SIMULATION_QUOTE"
+        }
+      ],
+      "selection_basis": [
+        "QUALITY",
+        "DELIVERY",
+        "CAPACITY",
+        "RISK",
+        "TOTAL_COST"
+      ],
+      "supplier_selection": {
+        "method": "DETERMINISTIC_WEIGHTED_TOTAL_VALUE",
+        "selected_supplier": "SIMULATED-SUPPLIER-GRAVEL-BALANCED",
+        "selected_score": 92.9,
+        "lowest_price_automatic": false,
+        "evaluated_candidate_count": 3
+      },
+      "selected_supplier": "SIMULATED-SUPPLIER-GRAVEL-BALANCED",
+      "committed_amount": 190,
+      "commitment_released": true,
+      "phase_times": {
+        "rfq_created": 0,
+        "quotes_received": 0.25,
+        "supplier_selected": 0.5,
+        "order_placed": 0.75,
+        "in_production": 1,
+        "in_transit": 2,
+        "received": 7
+      },
+      "state_history": [
+        {
+          "status": "RFQ_CREATED",
+          "simulation_time": 0
+        },
+        {
+          "status": "QUOTES_RECEIVED",
+          "simulation_time": 0.25
+        },
+        {
+          "status": "SUPPLIER_SELECTED",
+          "simulation_time": 0.5
+        },
+        {
+          "status": "ORDER_PLACED",
+          "simulation_time": 0.75
+        },
+        {
+          "status": "IN_PRODUCTION",
+          "simulation_time": 1
+        },
+        {
+          "status": "IN_TRANSIT",
+          "simulation_time": 2
+        },
+        {
+          "status": "RECEIVED",
+          "simulation_time": 13
+        },
+        {
+          "status": "ACCEPTED",
+          "simulation_time": 13
+        },
+        {
+          "status": "PAYMENT_APPROVED",
+          "simulation_time": 13
+        }
+      ],
+      "inspection_outcome": "PASS",
+      "status": "PAYMENT_APPROVED",
+      "simulation_only": true,
+      "released_commitment": 190
+    },
+    {
+      "order_id": "AI-COMPANY-PROJECT-00001-PROCUREMENT-002",
+      "project_id": "AI-COMPANY-PROJECT-00001",
+      "bom_id": "AI-COMPANY-PROJECT-00001-BOM-002",
+      "material_id": "PIPE",
+      "quantity": 18,
+      "material_cost": 216,
+      "transport_cost": 41.8,
+      "ordered_at": 0,
+      "arrival_time": 9,
+      "supplier_candidates": [
+        {
+          "supplier_id": "SIMULATED-SUPPLIER-PIPE-QUALITY",
+          "quality_score": 0.98,
+          "delivery_hours": 5,
+          "capacity": 36,
+          "risk_score": 0.04,
+          "material_cost": 224.64,
+          "transport_cost": 41.8,
+          "total_cost": 266.44,
+          "eligible": true,
+          "score": 88.0514,
+          "source": "DETERMINISTIC_SIMULATION_QUOTE"
+        },
+        {
+          "supplier_id": "SIMULATED-SUPPLIER-PIPE-BALANCED",
+          "quality_score": 0.93,
+          "delivery_hours": 3,
+          "capacity": 27,
+          "risk_score": 0.08,
+          "material_cost": 216,
+          "transport_cost": 41.8,
+          "total_cost": 257.8,
+          "eligible": true,
+          "score": 92.9,
+          "source": "DETERMINISTIC_SIMULATION_QUOTE"
+        },
+        {
+          "supplier_id": "SIMULATED-SUPPLIER-PIPE-ECONOMY",
+          "quality_score": 0.82,
+          "delivery_hours": 5,
+          "capacity": 19.8,
+          "risk_score": 0.18,
+          "material_cost": 203.04,
+          "transport_cost": 41.8,
+          "total_cost": 244.84,
+          "eligible": true,
+          "score": 75.15,
+          "source": "DETERMINISTIC_SIMULATION_QUOTE"
+        }
+      ],
+      "selection_basis": [
+        "QUALITY",
+        "DELIVERY",
+        "CAPACITY",
+        "RISK",
+        "TOTAL_COST"
+      ],
+      "supplier_selection": {
+        "method": "DETERMINISTIC_WEIGHTED_TOTAL_VALUE",
+        "selected_supplier": "SIMULATED-SUPPLIER-PIPE-BALANCED",
+        "selected_score": 92.9,
+        "lowest_price_automatic": false,
+        "evaluated_candidate_count": 3
+      },
+      "selected_supplier": "SIMULATED-SUPPLIER-PIPE-BALANCED",
+      "committed_amount": 257.8,
+      "commitment_released": true,
+      "phase_times": {
+        "rfq_created": 0,
+        "quotes_received": 0.25,
+        "supplier_selected": 0.5,
+        "order_placed": 0.75,
+        "in_production": 1,
+        "in_transit": 3,
+        "received": 9
+      },
+      "state_history": [
+        {
+          "status": "RFQ_CREATED",
+          "simulation_time": 0
+        },
+        {
+          "status": "QUOTES_RECEIVED",
+          "simulation_time": 0.25
+        },
+        {
+          "status": "SUPPLIER_SELECTED",
+          "simulation_time": 0.5
+        },
+        {
+          "status": "ORDER_PLACED",
+          "simulation_time": 0.75
+        },
+        {
+          "status": "IN_PRODUCTION",
+          "simulation_time": 1
+        },
+        {
+          "status": "IN_TRANSIT",
+          "simulation_time": 3
+        },
+        {
+          "status": "RECEIVED",
+          "simulation_time": 13
+        },
+        {
+          "status": "ACCEPTED",
+          "simulation_time": 13
+        },
+        {
+          "status": "PAYMENT_APPROVED",
+          "simulation_time": 13
+        }
+      ],
+      "inspection_outcome": "PASS",
+      "status": "PAYMENT_APPROVED",
+      "simulation_only": true,
+      "released_commitment": 257.8
+    },
+    {
+      "order_id": "AI-COMPANY-PROJECT-00001-PROCUREMENT-003",
+      "project_id": "AI-COMPANY-PROJECT-00001",
+      "bom_id": "AI-COMPANY-PROJECT-00001-BOM-003",
+      "material_id": "LINING",
+      "quantity": 24,
+      "material_cost": 288,
+      "transport_cost": 44.8,
+      "ordered_at": 0,
+      "arrival_time": 11,
+      "supplier_candidates": [
+        {
+          "supplier_id": "SIMULATED-SUPPLIER-LINING-QUALITY",
+          "quality_score": 0.98,
+          "delivery_hours": 6,
+          "capacity": 48,
+          "risk_score": 0.04,
+          "material_cost": 299.52,
+          "transport_cost": 44.8,
+          "total_cost": 344.32,
+          "eligible": true,
+          "score": 88.0309,
+          "source": "DETERMINISTIC_SIMULATION_QUOTE"
+        },
+        {
+          "supplier_id": "SIMULATED-SUPPLIER-LINING-BALANCED",
+          "quality_score": 0.93,
+          "delivery_hours": 4,
+          "capacity": 36,
+          "risk_score": 0.08,
+          "material_cost": 288,
+          "transport_cost": 44.8,
+          "total_cost": 332.8,
+          "eligible": true,
+          "score": 92.9,
+          "source": "DETERMINISTIC_SIMULATION_QUOTE"
+        },
+        {
+          "supplier_id": "SIMULATED-SUPPLIER-LINING-ECONOMY",
+          "quality_score": 0.82,
+          "delivery_hours": 6,
+          "capacity": 26.4,
+          "risk_score": 0.18,
+          "material_cost": 270.72,
+          "transport_cost": 44.8,
+          "total_cost": 315.52,
+          "eligible": true,
+          "score": 75.15,
+          "source": "DETERMINISTIC_SIMULATION_QUOTE"
+        }
+      ],
+      "selection_basis": [
+        "QUALITY",
+        "DELIVERY",
+        "CAPACITY",
+        "RISK",
+        "TOTAL_COST"
+      ],
+      "supplier_selection": {
+        "method": "DETERMINISTIC_WEIGHTED_TOTAL_VALUE",
+        "selected_supplier": "SIMULATED-SUPPLIER-LINING-BALANCED",
+        "selected_score": 92.9,
+        "lowest_price_automatic": false,
+        "evaluated_candidate_count": 3
+      },
+      "selected_supplier": "SIMULATED-SUPPLIER-LINING-BALANCED",
+      "committed_amount": 332.8,
+      "commitment_released": true,
+      "phase_times": {
+        "rfq_created": 0,
+        "quotes_received": 0.25,
+        "supplier_selected": 0.5,
+        "order_placed": 0.75,
+        "in_production": 1,
+        "in_transit": 4,
+        "received": 11
+      },
+      "state_history": [
+        {
+          "status": "RFQ_CREATED",
+          "simulation_time": 0
+        },
+        {
+          "status": "QUOTES_RECEIVED",
+          "simulation_time": 0.25
+        },
+        {
+          "status": "SUPPLIER_SELECTED",
+          "simulation_time": 0.5
+        },
+        {
+          "status": "ORDER_PLACED",
+          "simulation_time": 0.75
+        },
+        {
+          "status": "IN_PRODUCTION",
+          "simulation_time": 1
+        },
+        {
+          "status": "IN_TRANSIT",
+          "simulation_time": 4
+        },
+        {
+          "status": "RECEIVED",
+          "simulation_time": 13
+        },
+        {
+          "status": "ACCEPTED",
+          "simulation_time": 13
+        },
+        {
+          "status": "PAYMENT_APPROVED",
+          "simulation_time": 13
+        }
+      ],
+      "inspection_outcome": "PASS",
+      "status": "PAYMENT_APPROVED",
+      "simulation_only": true,
+      "released_commitment": 332.8
+    },
+    {
+      "order_id": "AI-COMPANY-PROJECT-00001-PROCUREMENT-004",
+      "project_id": "AI-COMPANY-PROJECT-00001",
+      "bom_id": "AI-COMPANY-PROJECT-00001-BOM-004",
+      "material_id": "FISH_JUVENILE_STOCK",
+      "quantity": 120,
+      "material_cost": 360,
+      "transport_cost": 40.6,
+      "ordered_at": 0,
+      "arrival_time": 13,
+      "supplier_candidates": [
+        {
+          "supplier_id": "SIMULATED-SUPPLIER-FISH_JUVENILE_STOCK-QUALITY",
+          "quality_score": 0.98,
+          "delivery_hours": 7,
+          "capacity": 240,
+          "risk_score": 0.04,
+          "material_cost": 374.4,
+          "transport_cost": 40.6,
+          "total_cost": 415,
+          "eligible": true,
+          "score": 88.006,
+          "source": "DETERMINISTIC_SIMULATION_QUOTE"
+        },
+        {
+          "supplier_id": "SIMULATED-SUPPLIER-FISH_JUVENILE_STOCK-BALANCED",
+          "quality_score": 0.93,
+          "delivery_hours": 5,
+          "capacity": 180,
+          "risk_score": 0.08,
+          "material_cost": 360,
+          "transport_cost": 40.6,
+          "total_cost": 400.6,
+          "eligible": true,
+          "score": 92.9,
+          "source": "DETERMINISTIC_SIMULATION_QUOTE"
+        },
+        {
+          "supplier_id": "SIMULATED-SUPPLIER-FISH_JUVENILE_STOCK-ECONOMY",
+          "quality_score": 0.82,
+          "delivery_hours": 7,
+          "capacity": 132,
+          "risk_score": 0.18,
+          "material_cost": 338.4,
+          "transport_cost": 40.6,
+          "total_cost": 379,
+          "eligible": true,
+          "score": 75.15,
+          "source": "DETERMINISTIC_SIMULATION_QUOTE"
+        }
+      ],
+      "selection_basis": [
+        "QUALITY",
+        "DELIVERY",
+        "CAPACITY",
+        "RISK",
+        "TOTAL_COST"
+      ],
+      "supplier_selection": {
+        "method": "DETERMINISTIC_WEIGHTED_TOTAL_VALUE",
+        "selected_supplier": "SIMULATED-SUPPLIER-FISH_JUVENILE_STOCK-BALANCED",
+        "selected_score": 92.9,
+        "lowest_price_automatic": false,
+        "evaluated_candidate_count": 3
+      },
+      "selected_supplier": "SIMULATED-SUPPLIER-FISH_JUVENILE_STOCK-BALANCED",
+      "committed_amount": 400.6,
+      "commitment_released": true,
+      "phase_times": {
+        "rfq_created": 0,
+        "quotes_received": 0.25,
+        "supplier_selected": 0.5,
+        "order_placed": 0.75,
+        "in_production": 1,
+        "in_transit": 5,
+        "received": 13
+      },
+      "state_history": [
+        {
+          "status": "RFQ_CREATED",
+          "simulation_time": 0
+        },
+        {
+          "status": "QUOTES_RECEIVED",
+          "simulation_time": 0.25
+        },
+        {
+          "status": "SUPPLIER_SELECTED",
+          "simulation_time": 0.5
+        },
+        {
+          "status": "ORDER_PLACED",
+          "simulation_time": 0.75
+        },
+        {
+          "status": "IN_PRODUCTION",
+          "simulation_time": 1
+        },
+        {
+          "status": "IN_TRANSIT",
+          "simulation_time": 5
+        },
+        {
+          "status": "RECEIVED",
+          "simulation_time": 13
+        },
+        {
+          "status": "ACCEPTED",
+          "simulation_time": 13
+        },
+        {
+          "status": "PAYMENT_APPROVED",
+          "simulation_time": 13
+        }
+      ],
+      "inspection_outcome": "PASS",
+      "status": "PAYMENT_APPROVED",
+      "simulation_only": true,
+      "released_commitment": 400.6
+    }
+  ]
+}

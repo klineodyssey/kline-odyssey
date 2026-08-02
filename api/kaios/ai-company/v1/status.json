@@ -1,0 +1,868 @@
+{
+  "schema_version": "1.0.0",
+  "runtime": "KAIOS_AI_COMPANY_ORDER_AND_PROJECT_RUNTIME_V1",
+  "mode": "STATIC_READ_ONLY_PROJECTION",
+  "generated_from_seed": "KAIOS-AI-COMPANY-PUBLIC-001",
+  "simulation_only": true,
+  "authority": "NO_PRODUCTION_AUTHORITY",
+  "read_only": true,
+  "mutation_endpoints": false,
+  "real_wallet": false,
+  "real_kgen": false,
+  "onchain_transfer": false,
+  "real_legal_effect": false,
+  "external_autonomy": false,
+  "status": "RUNNING",
+  "company": {
+    "company_id": "KAIOS_AI_COMPANY_V1",
+    "company_type": "SIMULATED_PROJECT_COORDINATOR",
+    "status": "OPERATING",
+    "divisions": [
+      {
+        "division_id": "CUSTOMER_SERVICE_DIVISION",
+        "authority": "SIMULATION_COORDINATION_ONLY",
+        "allowed_actions": [
+          "READ_SIMULATION_STATE",
+          "PROPOSE_SIMULATION_ACTION",
+          "RECORD_REVIEW_RESULT"
+        ],
+        "forbidden_actions": [
+          "REAL_WALLET_ACCESS",
+          "REAL_KGEN_SETTLEMENT",
+          "ONCHAIN_TRANSFER",
+          "REAL_LEGAL_ENFORCEMENT",
+          "PRODUCTION_DEPLOYMENT",
+          "EXTERNAL_AUTONOMOUS_EXECUTION",
+          "SELF_MODIFYING_PRODUCTION_CODE",
+          "CANONICAL_PROMOTION",
+          "CURRENT_MODIFICATION",
+          "CONSTITUTION_SOURCE_MODIFICATION"
+        ],
+        "required_inputs": [
+          "APPROVED_UPSTREAM_OUTPUT"
+        ],
+        "outputs": [
+          "SIMULATION_ONLY_REVIEWED_OUTPUT"
+        ],
+        "review_gate": "CUSTOMER_SERVICE_GATE",
+        "responsible_agent": "KAIOS-SIMULATED-CUSTOMER_SERVICE",
+        "event_history": [],
+        "cost_center": "COST-CUSTOMER_SERVICE_DIVISION",
+        "status": "READY"
+      },
+      {
+        "division_id": "REQUIREMENTS_DIVISION",
+        "authority": "SIMULATION_COORDINATION_ONLY",
+        "allowed_actions": [
+          "READ_SIMULATION_STATE",
+          "PROPOSE_SIMULATION_ACTION",
+          "RECORD_REVIEW_RESULT"
+        ],
+        "forbidden_actions": [
+          "REAL_WALLET_ACCESS",
+          "REAL_KGEN_SETTLEMENT",
+          "ONCHAIN_TRANSFER",
+          "REAL_LEGAL_ENFORCEMENT",
+          "PRODUCTION_DEPLOYMENT",
+          "EXTERNAL_AUTONOMOUS_EXECUTION",
+          "SELF_MODIFYING_PRODUCTION_CODE",
+          "CANONICAL_PROMOTION",
+          "CURRENT_MODIFICATION",
+          "CONSTITUTION_SOURCE_MODIFICATION"
+        ],
+        "required_inputs": [
+          "APPROVED_UPSTREAM_OUTPUT"
+        ],
+        "outputs": [
+          "SIMULATION_ONLY_REVIEWED_OUTPUT"
+        ],
+        "review_gate": "REQUIREMENTS_GATE",
+        "responsible_agent": "KAIOS-SIMULATED-REQUIREMENTS",
+        "event_history": [],
+        "cost_center": "COST-REQUIREMENTS_DIVISION",
+        "status": "READY"
+      },
+      {
+        "division_id": "ARCHITECTURE_DIVISION",
+        "authority": "SIMULATION_COORDINATION_ONLY",
+        "allowed_actions": [
+          "READ_SIMULATION_STATE",
+          "PROPOSE_SIMULATION_ACTION",
+          "RECORD_REVIEW_RESULT"
+        ],
+        "forbidden_actions": [
+          "REAL_WALLET_ACCESS",
+          "REAL_KGEN_SETTLEMENT",
+          "ONCHAIN_TRANSFER",
+          "REAL_LEGAL_ENFORCEMENT",
+          "PRODUCTION_DEPLOYMENT",
+          "EXTERNAL_AUTONOMOUS_EXECUTION",
+          "SELF_MODIFYING_PRODUCTION_CODE",
+          "CANONICAL_PROMOTION",
+          "CURRENT_MODIFICATION",
+          "CONSTITUTION_SOURCE_MODIFICATION"
+        ],
+        "required_inputs": [
+          "APPROVED_UPSTREAM_OUTPUT"
+        ],
+        "outputs": [
+          "SIMULATION_ONLY_REVIEWED_OUTPUT"
+        ],
+        "review_gate": "ARCHITECTURE_GATE",
+        "responsible_agent": "KAIOS-SIMULATED-ARCHITECTURE",
+        "event_history": [],
+        "cost_center": "COST-ARCHITECTURE_DIVISION",
+        "status": "READY"
+      },
+      {
+        "division_id": "LIFE_CREATION_DIVISION",
+        "authority": "SIMULATION_COORDINATION_ONLY",
+        "allowed_actions": [
+          "READ_SIMULATION_STATE",
+          "PROPOSE_SIMULATION_ACTION",
+          "RECORD_REVIEW_RESULT"
+        ],
+        "forbidden_actions": [
+          "REAL_WALLET_ACCESS",
+          "REAL_KGEN_SETTLEMENT",
+          "ONCHAIN_TRANSFER",
+          "REAL_LEGAL_ENFORCEMENT",
+          "PRODUCTION_DEPLOYMENT",
+          "EXTERNAL_AUTONOMOUS_EXECUTION",
+          "SELF_MODIFYING_PRODUCTION_CODE",
+          "CANONICAL_PROMOTION",
+          "CURRENT_MODIFICATION",
+          "CONSTITUTION_SOURCE_MODIFICATION"
+        ],
+        "required_inputs": [
+          "APPROVED_UPSTREAM_OUTPUT"
+        ],
+        "outputs": [
+          "SIMULATION_ONLY_REVIEWED_OUTPUT"
+        ],
+        "review_gate": "LIFE_CREATION_GATE",
+        "responsible_agent": "KAIOS-SIMULATED-LIFE_CREATION",
+        "event_history": [],
+        "cost_center": "COST-LIFE_CREATION_DIVISION",
+        "status": "READY"
+      },
+      {
+        "division_id": "DESIGN_DIVISION",
+        "authority": "SIMULATION_COORDINATION_ONLY",
+        "allowed_actions": [
+          "READ_SIMULATION_STATE",
+          "PROPOSE_SIMULATION_ACTION",
+          "RECORD_REVIEW_RESULT"
+        ],
+        "forbidden_actions": [
+          "REAL_WALLET_ACCESS",
+          "REAL_KGEN_SETTLEMENT",
+          "ONCHAIN_TRANSFER",
+          "REAL_LEGAL_ENFORCEMENT",
+          "PRODUCTION_DEPLOYMENT",
+          "EXTERNAL_AUTONOMOUS_EXECUTION",
+          "SELF_MODIFYING_PRODUCTION_CODE",
+          "CANONICAL_PROMOTION",
+          "CURRENT_MODIFICATION",
+          "CONSTITUTION_SOURCE_MODIFICATION"
+        ],
+        "required_inputs": [
+          "APPROVED_UPSTREAM_OUTPUT"
+        ],
+        "outputs": [
+          "SIMULATION_ONLY_REVIEWED_OUTPUT"
+        ],
+        "review_gate": "DESIGN_GATE",
+        "responsible_agent": "KAIOS-SIMULATED-DESIGN",
+        "event_history": [],
+        "cost_center": "COST-DESIGN_DIVISION",
+        "status": "READY"
+      },
+      {
+        "division_id": "PHYSICS_REVIEW_DIVISION",
+        "authority": "SIMULATION_COORDINATION_ONLY",
+        "allowed_actions": [
+          "READ_SIMULATION_STATE",
+          "PROPOSE_SIMULATION_ACTION",
+          "RECORD_REVIEW_RESULT"
+        ],
+        "forbidden_actions": [
+          "REAL_WALLET_ACCESS",
+          "REAL_KGEN_SETTLEMENT",
+          "ONCHAIN_TRANSFER",
+          "REAL_LEGAL_ENFORCEMENT",
+          "PRODUCTION_DEPLOYMENT",
+          "EXTERNAL_AUTONOMOUS_EXECUTION",
+          "SELF_MODIFYING_PRODUCTION_CODE",
+          "CANONICAL_PROMOTION",
+          "CURRENT_MODIFICATION",
+          "CONSTITUTION_SOURCE_MODIFICATION"
+        ],
+        "required_inputs": [
+          "APPROVED_UPSTREAM_OUTPUT"
+        ],
+        "outputs": [
+          "SIMULATION_ONLY_REVIEWED_OUTPUT"
+        ],
+        "review_gate": "PHYSICS_REVIEW_GATE",
+        "responsible_agent": "KAIOS-SIMULATED-PHYSICS_REVIEW",
+        "event_history": [],
+        "cost_center": "COST-PHYSICS_REVIEW_DIVISION",
+        "status": "READY"
+      },
+      {
+        "division_id": "ECONOMY_REVIEW_DIVISION",
+        "authority": "SIMULATION_COORDINATION_ONLY",
+        "allowed_actions": [
+          "READ_SIMULATION_STATE",
+          "PROPOSE_SIMULATION_ACTION",
+          "RECORD_REVIEW_RESULT"
+        ],
+        "forbidden_actions": [
+          "REAL_WALLET_ACCESS",
+          "REAL_KGEN_SETTLEMENT",
+          "ONCHAIN_TRANSFER",
+          "REAL_LEGAL_ENFORCEMENT",
+          "PRODUCTION_DEPLOYMENT",
+          "EXTERNAL_AUTONOMOUS_EXECUTION",
+          "SELF_MODIFYING_PRODUCTION_CODE",
+          "CANONICAL_PROMOTION",
+          "CURRENT_MODIFICATION",
+          "CONSTITUTION_SOURCE_MODIFICATION"
+        ],
+        "required_inputs": [
+          "APPROVED_UPSTREAM_OUTPUT"
+        ],
+        "outputs": [
+          "SIMULATION_ONLY_REVIEWED_OUTPUT"
+        ],
+        "review_gate": "ECONOMY_REVIEW_GATE",
+        "responsible_agent": "KAIOS-SIMULATED-ECONOMY_REVIEW",
+        "event_history": [],
+        "cost_center": "COST-ECONOMY_REVIEW_DIVISION",
+        "status": "READY"
+      },
+      {
+        "division_id": "RIGHTS_REVIEW_DIVISION",
+        "authority": "SIMULATION_COORDINATION_ONLY",
+        "allowed_actions": [
+          "READ_SIMULATION_STATE",
+          "PROPOSE_SIMULATION_ACTION",
+          "RECORD_REVIEW_RESULT"
+        ],
+        "forbidden_actions": [
+          "REAL_WALLET_ACCESS",
+          "REAL_KGEN_SETTLEMENT",
+          "ONCHAIN_TRANSFER",
+          "REAL_LEGAL_ENFORCEMENT",
+          "PRODUCTION_DEPLOYMENT",
+          "EXTERNAL_AUTONOMOUS_EXECUTION",
+          "SELF_MODIFYING_PRODUCTION_CODE",
+          "CANONICAL_PROMOTION",
+          "CURRENT_MODIFICATION",
+          "CONSTITUTION_SOURCE_MODIFICATION"
+        ],
+        "required_inputs": [
+          "APPROVED_UPSTREAM_OUTPUT"
+        ],
+        "outputs": [
+          "SIMULATION_ONLY_REVIEWED_OUTPUT"
+        ],
+        "review_gate": "RIGHTS_REVIEW_GATE",
+        "responsible_agent": "KAIOS-SIMULATED-RIGHTS_REVIEW",
+        "event_history": [],
+        "cost_center": "COST-RIGHTS_REVIEW_DIVISION",
+        "status": "READY"
+      },
+      {
+        "division_id": "CIVILIZATION_REVIEW_DIVISION",
+        "authority": "SIMULATION_COORDINATION_ONLY",
+        "allowed_actions": [
+          "READ_SIMULATION_STATE",
+          "PROPOSE_SIMULATION_ACTION",
+          "RECORD_REVIEW_RESULT"
+        ],
+        "forbidden_actions": [
+          "REAL_WALLET_ACCESS",
+          "REAL_KGEN_SETTLEMENT",
+          "ONCHAIN_TRANSFER",
+          "REAL_LEGAL_ENFORCEMENT",
+          "PRODUCTION_DEPLOYMENT",
+          "EXTERNAL_AUTONOMOUS_EXECUTION",
+          "SELF_MODIFYING_PRODUCTION_CODE",
+          "CANONICAL_PROMOTION",
+          "CURRENT_MODIFICATION",
+          "CONSTITUTION_SOURCE_MODIFICATION"
+        ],
+        "required_inputs": [
+          "APPROVED_UPSTREAM_OUTPUT"
+        ],
+        "outputs": [
+          "SIMULATION_ONLY_REVIEWED_OUTPUT"
+        ],
+        "review_gate": "CIVILIZATION_REVIEW_GATE",
+        "responsible_agent": "KAIOS-SIMULATED-CIVILIZATION_REVIEW",
+        "event_history": [],
+        "cost_center": "COST-CIVILIZATION_REVIEW_DIVISION",
+        "status": "READY"
+      },
+      {
+        "division_id": "PROCUREMENT_DIVISION",
+        "authority": "SIMULATION_COORDINATION_ONLY",
+        "allowed_actions": [
+          "READ_SIMULATION_STATE",
+          "PROPOSE_SIMULATION_ACTION",
+          "RECORD_REVIEW_RESULT"
+        ],
+        "forbidden_actions": [
+          "REAL_WALLET_ACCESS",
+          "REAL_KGEN_SETTLEMENT",
+          "ONCHAIN_TRANSFER",
+          "REAL_LEGAL_ENFORCEMENT",
+          "PRODUCTION_DEPLOYMENT",
+          "EXTERNAL_AUTONOMOUS_EXECUTION",
+          "SELF_MODIFYING_PRODUCTION_CODE",
+          "CANONICAL_PROMOTION",
+          "CURRENT_MODIFICATION",
+          "CONSTITUTION_SOURCE_MODIFICATION"
+        ],
+        "required_inputs": [
+          "APPROVED_UPSTREAM_OUTPUT"
+        ],
+        "outputs": [
+          "SIMULATION_ONLY_REVIEWED_OUTPUT"
+        ],
+        "review_gate": "PROCUREMENT_GATE",
+        "responsible_agent": "KAIOS-SIMULATED-PROCUREMENT",
+        "event_history": [],
+        "cost_center": "COST-PROCUREMENT_DIVISION",
+        "status": "READY"
+      },
+      {
+        "division_id": "SUPPLY_CHAIN_DIVISION",
+        "authority": "SIMULATION_COORDINATION_ONLY",
+        "allowed_actions": [
+          "READ_SIMULATION_STATE",
+          "PROPOSE_SIMULATION_ACTION",
+          "RECORD_REVIEW_RESULT"
+        ],
+        "forbidden_actions": [
+          "REAL_WALLET_ACCESS",
+          "REAL_KGEN_SETTLEMENT",
+          "ONCHAIN_TRANSFER",
+          "REAL_LEGAL_ENFORCEMENT",
+          "PRODUCTION_DEPLOYMENT",
+          "EXTERNAL_AUTONOMOUS_EXECUTION",
+          "SELF_MODIFYING_PRODUCTION_CODE",
+          "CANONICAL_PROMOTION",
+          "CURRENT_MODIFICATION",
+          "CONSTITUTION_SOURCE_MODIFICATION"
+        ],
+        "required_inputs": [
+          "APPROVED_UPSTREAM_OUTPUT"
+        ],
+        "outputs": [
+          "SIMULATION_ONLY_REVIEWED_OUTPUT"
+        ],
+        "review_gate": "SUPPLY_CHAIN_GATE",
+        "responsible_agent": "KAIOS-SIMULATED-SUPPLY_CHAIN",
+        "event_history": [],
+        "cost_center": "COST-SUPPLY_CHAIN_DIVISION",
+        "status": "READY"
+      },
+      {
+        "division_id": "LABOR_DIVISION",
+        "authority": "SIMULATION_COORDINATION_ONLY",
+        "allowed_actions": [
+          "READ_SIMULATION_STATE",
+          "PROPOSE_SIMULATION_ACTION",
+          "RECORD_REVIEW_RESULT"
+        ],
+        "forbidden_actions": [
+          "REAL_WALLET_ACCESS",
+          "REAL_KGEN_SETTLEMENT",
+          "ONCHAIN_TRANSFER",
+          "REAL_LEGAL_ENFORCEMENT",
+          "PRODUCTION_DEPLOYMENT",
+          "EXTERNAL_AUTONOMOUS_EXECUTION",
+          "SELF_MODIFYING_PRODUCTION_CODE",
+          "CANONICAL_PROMOTION",
+          "CURRENT_MODIFICATION",
+          "CONSTITUTION_SOURCE_MODIFICATION"
+        ],
+        "required_inputs": [
+          "APPROVED_UPSTREAM_OUTPUT"
+        ],
+        "outputs": [
+          "SIMULATION_ONLY_REVIEWED_OUTPUT"
+        ],
+        "review_gate": "LABOR_GATE",
+        "responsible_agent": "KAIOS-SIMULATED-LABOR",
+        "event_history": [],
+        "cost_center": "COST-LABOR_DIVISION",
+        "status": "READY"
+      },
+      {
+        "division_id": "CONSTRUCTION_DIVISION",
+        "authority": "SIMULATION_COORDINATION_ONLY",
+        "allowed_actions": [
+          "READ_SIMULATION_STATE",
+          "PROPOSE_SIMULATION_ACTION",
+          "RECORD_REVIEW_RESULT"
+        ],
+        "forbidden_actions": [
+          "REAL_WALLET_ACCESS",
+          "REAL_KGEN_SETTLEMENT",
+          "ONCHAIN_TRANSFER",
+          "REAL_LEGAL_ENFORCEMENT",
+          "PRODUCTION_DEPLOYMENT",
+          "EXTERNAL_AUTONOMOUS_EXECUTION",
+          "SELF_MODIFYING_PRODUCTION_CODE",
+          "CANONICAL_PROMOTION",
+          "CURRENT_MODIFICATION",
+          "CONSTITUTION_SOURCE_MODIFICATION"
+        ],
+        "required_inputs": [
+          "APPROVED_UPSTREAM_OUTPUT"
+        ],
+        "outputs": [
+          "SIMULATION_ONLY_REVIEWED_OUTPUT"
+        ],
+        "review_gate": "CONSTRUCTION_GATE",
+        "responsible_agent": "KAIOS-SIMULATED-CONSTRUCTION",
+        "event_history": [],
+        "cost_center": "COST-CONSTRUCTION_DIVISION",
+        "status": "READY"
+      },
+      {
+        "division_id": "MANUFACTURING_DIVISION",
+        "authority": "SIMULATION_COORDINATION_ONLY",
+        "allowed_actions": [
+          "READ_SIMULATION_STATE",
+          "PROPOSE_SIMULATION_ACTION",
+          "RECORD_REVIEW_RESULT"
+        ],
+        "forbidden_actions": [
+          "REAL_WALLET_ACCESS",
+          "REAL_KGEN_SETTLEMENT",
+          "ONCHAIN_TRANSFER",
+          "REAL_LEGAL_ENFORCEMENT",
+          "PRODUCTION_DEPLOYMENT",
+          "EXTERNAL_AUTONOMOUS_EXECUTION",
+          "SELF_MODIFYING_PRODUCTION_CODE",
+          "CANONICAL_PROMOTION",
+          "CURRENT_MODIFICATION",
+          "CONSTITUTION_SOURCE_MODIFICATION"
+        ],
+        "required_inputs": [
+          "APPROVED_UPSTREAM_OUTPUT"
+        ],
+        "outputs": [
+          "SIMULATION_ONLY_REVIEWED_OUTPUT"
+        ],
+        "review_gate": "MANUFACTURING_GATE",
+        "responsible_agent": "KAIOS-SIMULATED-MANUFACTURING",
+        "event_history": [],
+        "cost_center": "COST-MANUFACTURING_DIVISION",
+        "status": "READY"
+      },
+      {
+        "division_id": "LOGISTICS_DIVISION",
+        "authority": "SIMULATION_COORDINATION_ONLY",
+        "allowed_actions": [
+          "READ_SIMULATION_STATE",
+          "PROPOSE_SIMULATION_ACTION",
+          "RECORD_REVIEW_RESULT"
+        ],
+        "forbidden_actions": [
+          "REAL_WALLET_ACCESS",
+          "REAL_KGEN_SETTLEMENT",
+          "ONCHAIN_TRANSFER",
+          "REAL_LEGAL_ENFORCEMENT",
+          "PRODUCTION_DEPLOYMENT",
+          "EXTERNAL_AUTONOMOUS_EXECUTION",
+          "SELF_MODIFYING_PRODUCTION_CODE",
+          "CANONICAL_PROMOTION",
+          "CURRENT_MODIFICATION",
+          "CONSTITUTION_SOURCE_MODIFICATION"
+        ],
+        "required_inputs": [
+          "APPROVED_UPSTREAM_OUTPUT"
+        ],
+        "outputs": [
+          "SIMULATION_ONLY_REVIEWED_OUTPUT"
+        ],
+        "review_gate": "LOGISTICS_GATE",
+        "responsible_agent": "KAIOS-SIMULATED-LOGISTICS",
+        "event_history": [],
+        "cost_center": "COST-LOGISTICS_DIVISION",
+        "status": "READY"
+      },
+      {
+        "division_id": "QA_INSPECTION_DIVISION",
+        "authority": "SIMULATION_COORDINATION_ONLY",
+        "allowed_actions": [
+          "READ_SIMULATION_STATE",
+          "PROPOSE_SIMULATION_ACTION",
+          "RECORD_REVIEW_RESULT"
+        ],
+        "forbidden_actions": [
+          "REAL_WALLET_ACCESS",
+          "REAL_KGEN_SETTLEMENT",
+          "ONCHAIN_TRANSFER",
+          "REAL_LEGAL_ENFORCEMENT",
+          "PRODUCTION_DEPLOYMENT",
+          "EXTERNAL_AUTONOMOUS_EXECUTION",
+          "SELF_MODIFYING_PRODUCTION_CODE",
+          "CANONICAL_PROMOTION",
+          "CURRENT_MODIFICATION",
+          "CONSTITUTION_SOURCE_MODIFICATION"
+        ],
+        "required_inputs": [
+          "APPROVED_UPSTREAM_OUTPUT"
+        ],
+        "outputs": [
+          "SIMULATION_ONLY_REVIEWED_OUTPUT"
+        ],
+        "review_gate": "QA_INSPECTION_GATE",
+        "responsible_agent": "KAIOS-SIMULATED-QA_INSPECTION",
+        "event_history": [],
+        "cost_center": "COST-QA_INSPECTION_DIVISION",
+        "status": "READY"
+      },
+      {
+        "division_id": "FINANCE_DIVISION",
+        "authority": "SIMULATION_COORDINATION_ONLY",
+        "allowed_actions": [
+          "READ_SIMULATION_STATE",
+          "PROPOSE_SIMULATION_ACTION",
+          "RECORD_REVIEW_RESULT"
+        ],
+        "forbidden_actions": [
+          "REAL_WALLET_ACCESS",
+          "REAL_KGEN_SETTLEMENT",
+          "ONCHAIN_TRANSFER",
+          "REAL_LEGAL_ENFORCEMENT",
+          "PRODUCTION_DEPLOYMENT",
+          "EXTERNAL_AUTONOMOUS_EXECUTION",
+          "SELF_MODIFYING_PRODUCTION_CODE",
+          "CANONICAL_PROMOTION",
+          "CURRENT_MODIFICATION",
+          "CONSTITUTION_SOURCE_MODIFICATION"
+        ],
+        "required_inputs": [
+          "APPROVED_UPSTREAM_OUTPUT"
+        ],
+        "outputs": [
+          "SIMULATION_ONLY_REVIEWED_OUTPUT"
+        ],
+        "review_gate": "FINANCE_GATE",
+        "responsible_agent": "KAIOS-SIMULATED-FINANCE",
+        "event_history": [],
+        "cost_center": "COST-FINANCE_DIVISION",
+        "status": "READY"
+      },
+      {
+        "division_id": "RISK_DIVISION",
+        "authority": "SIMULATION_COORDINATION_ONLY",
+        "allowed_actions": [
+          "READ_SIMULATION_STATE",
+          "PROPOSE_SIMULATION_ACTION",
+          "RECORD_REVIEW_RESULT"
+        ],
+        "forbidden_actions": [
+          "REAL_WALLET_ACCESS",
+          "REAL_KGEN_SETTLEMENT",
+          "ONCHAIN_TRANSFER",
+          "REAL_LEGAL_ENFORCEMENT",
+          "PRODUCTION_DEPLOYMENT",
+          "EXTERNAL_AUTONOMOUS_EXECUTION",
+          "SELF_MODIFYING_PRODUCTION_CODE",
+          "CANONICAL_PROMOTION",
+          "CURRENT_MODIFICATION",
+          "CONSTITUTION_SOURCE_MODIFICATION"
+        ],
+        "required_inputs": [
+          "APPROVED_UPSTREAM_OUTPUT"
+        ],
+        "outputs": [
+          "SIMULATION_ONLY_REVIEWED_OUTPUT"
+        ],
+        "review_gate": "RISK_GATE",
+        "responsible_agent": "KAIOS-SIMULATED-RISK",
+        "event_history": [],
+        "cost_center": "COST-RISK_DIVISION",
+        "status": "READY"
+      },
+      {
+        "division_id": "LEGAL_SIMULATION_DIVISION",
+        "authority": "SIMULATION_COORDINATION_ONLY",
+        "allowed_actions": [
+          "READ_SIMULATION_STATE",
+          "PROPOSE_SIMULATION_ACTION",
+          "RECORD_REVIEW_RESULT"
+        ],
+        "forbidden_actions": [
+          "REAL_WALLET_ACCESS",
+          "REAL_KGEN_SETTLEMENT",
+          "ONCHAIN_TRANSFER",
+          "REAL_LEGAL_ENFORCEMENT",
+          "PRODUCTION_DEPLOYMENT",
+          "EXTERNAL_AUTONOMOUS_EXECUTION",
+          "SELF_MODIFYING_PRODUCTION_CODE",
+          "CANONICAL_PROMOTION",
+          "CURRENT_MODIFICATION",
+          "CONSTITUTION_SOURCE_MODIFICATION"
+        ],
+        "required_inputs": [
+          "APPROVED_UPSTREAM_OUTPUT"
+        ],
+        "outputs": [
+          "SIMULATION_ONLY_REVIEWED_OUTPUT"
+        ],
+        "review_gate": "LEGAL_SIMULATION_GATE",
+        "responsible_agent": "KAIOS-SIMULATED-LEGAL_SIMULATION",
+        "event_history": [],
+        "cost_center": "COST-LEGAL_SIMULATION_DIVISION",
+        "status": "READY"
+      },
+      {
+        "division_id": "MAINTENANCE_DIVISION",
+        "authority": "SIMULATION_COORDINATION_ONLY",
+        "allowed_actions": [
+          "READ_SIMULATION_STATE",
+          "PROPOSE_SIMULATION_ACTION",
+          "RECORD_REVIEW_RESULT"
+        ],
+        "forbidden_actions": [
+          "REAL_WALLET_ACCESS",
+          "REAL_KGEN_SETTLEMENT",
+          "ONCHAIN_TRANSFER",
+          "REAL_LEGAL_ENFORCEMENT",
+          "PRODUCTION_DEPLOYMENT",
+          "EXTERNAL_AUTONOMOUS_EXECUTION",
+          "SELF_MODIFYING_PRODUCTION_CODE",
+          "CANONICAL_PROMOTION",
+          "CURRENT_MODIFICATION",
+          "CONSTITUTION_SOURCE_MODIFICATION"
+        ],
+        "required_inputs": [
+          "APPROVED_UPSTREAM_OUTPUT"
+        ],
+        "outputs": [
+          "SIMULATION_ONLY_REVIEWED_OUTPUT"
+        ],
+        "review_gate": "MAINTENANCE_GATE",
+        "responsible_agent": "KAIOS-SIMULATED-MAINTENANCE",
+        "event_history": [],
+        "cost_center": "COST-MAINTENANCE_DIVISION",
+        "status": "READY"
+      },
+      {
+        "division_id": "DELIVERY_DIVISION",
+        "authority": "SIMULATION_COORDINATION_ONLY",
+        "allowed_actions": [
+          "READ_SIMULATION_STATE",
+          "PROPOSE_SIMULATION_ACTION",
+          "RECORD_REVIEW_RESULT"
+        ],
+        "forbidden_actions": [
+          "REAL_WALLET_ACCESS",
+          "REAL_KGEN_SETTLEMENT",
+          "ONCHAIN_TRANSFER",
+          "REAL_LEGAL_ENFORCEMENT",
+          "PRODUCTION_DEPLOYMENT",
+          "EXTERNAL_AUTONOMOUS_EXECUTION",
+          "SELF_MODIFYING_PRODUCTION_CODE",
+          "CANONICAL_PROMOTION",
+          "CURRENT_MODIFICATION",
+          "CONSTITUTION_SOURCE_MODIFICATION"
+        ],
+        "required_inputs": [
+          "APPROVED_UPSTREAM_OUTPUT"
+        ],
+        "outputs": [
+          "SIMULATION_ONLY_REVIEWED_OUTPUT"
+        ],
+        "review_gate": "DELIVERY_GATE",
+        "responsible_agent": "KAIOS-SIMULATED-DELIVERY",
+        "event_history": [],
+        "cost_center": "COST-DELIVERY_DIVISION",
+        "status": "READY"
+      }
+    ],
+    "finance": {
+      "currency": "SIMULATED_CREDIT",
+      "cash": 510918.8,
+      "financial_exposure": 0
+    },
+    "authority": {
+      "simulation_only": true,
+      "external_execution": false,
+      "real_legal_effect": false,
+      "production_authority": false
+    }
+  },
+  "integrity": {
+    "ok": true,
+    "issues": [],
+    "deterministic": true,
+    "serializable": true,
+    "stoppable": true,
+    "resumable": true,
+    "replayable": true,
+    "auditable": true,
+    "ledger_balanced": true,
+    "mutation_endpoints": false,
+    "external_execution": false,
+    "wallet_access": false,
+    "real_kgen": false,
+    "production_authority": false,
+    "state_hash": "d86c51d3997b24e26269f315b92275c0b19da45bdf17baf119b429f54a158935"
+  },
+  "deterministic": true,
+  "serializable": true,
+  "stoppable": true,
+  "resumable": true,
+  "replayable": true,
+  "auditable": true,
+  "demonstrations": {
+    "seed": "KAIOS-AI-COMPANY-PUBLIC-DEMO-V1",
+    "fishpond": {
+      "project_id": "AI-COMPANY-PROJECT-00001",
+      "status": "COMPLETE",
+      "closeout_status": "CLOSED_BALANCED_SIMULATION",
+      "domain_binding": "AQUACULTURE_RUNTIME_V1",
+      "domain_evidence": {
+        "ok": true,
+        "reason": null,
+        "runtime": "KAIOS_FISHPOND_AQUACULTURE_RUNTIME_V1",
+        "adapter": "EXECUTED_CANONICAL_RUNTIME",
+        "execution_status": "COMPLETE",
+        "construction_stages": [
+          "SITE_SURVEY",
+          "DESIGN",
+          "PERMIT_SIMULATION",
+          "SITE_CLEARING",
+          "EXCAVATION",
+          "EMBANKMENT",
+          "LINING_OR_SOIL_COMPACTION",
+          "INLET_INSTALLATION",
+          "OUTLET_INSTALLATION",
+          "DRAINAGE_INSTALLATION",
+          "AERATION_INFRASTRUCTURE",
+          "ELECTRICAL_CONNECTION",
+          "WATER_FILLING",
+          "LEAK_TEST",
+          "WATER_STABILIZATION",
+          "INSPECTION",
+          "READY_FOR_STOCKING"
+        ],
+        "final_stage": "READY_FOR_STOCKING",
+        "pond_status": "OPERATING",
+        "population_count": 120,
+        "event_count": 22,
+        "integrity_verified": true,
+        "simulation_only": true,
+        "authority": "NO_PRODUCTION_AUTHORITY"
+      },
+      "approval_status": "RUNTIME_VALIDATED_SIMULATION",
+      "external_deployment": false,
+      "event_count": 68,
+      "state_hash": "16fa9912a4bf9a123ad8c82f76a8ce5e783737ff8d873cc678703fb7832169fd"
+    },
+    "basic_house": {
+      "project_id": "AI-COMPANY-PROJECT-00001",
+      "status": "COMPLETE",
+      "closeout_status": "CLOSED_BALANCED_SIMULATION",
+      "domain_binding": "CAUSAL_WORLD_CONSTRUCTION",
+      "domain_evidence": {
+        "ok": true,
+        "reason": null,
+        "runtime": "REAL_CAUSAL_WORLD_FOUNDATION",
+        "adapter": "EXECUTED_CANONICAL_RUNTIME",
+        "execution_status": "COMPLETE",
+        "construction_stages": [
+          "SURVEY",
+          "SITE_CLEARING",
+          "EXCAVATION",
+          "FOUNDATION",
+          "STRUCTURE",
+          "UTILITIES",
+          "INSPECTION"
+        ],
+        "final_stage": "COMPLETE",
+        "event_count": 9,
+        "integrity_verified": true,
+        "simulation_only": true,
+        "authority": "NO_PRODUCTION_AUTHORITY"
+      },
+      "approval_status": "RUNTIME_VALIDATED_SIMULATION",
+      "external_deployment": false,
+      "event_count": 77,
+      "state_hash": "0b82d2b17302910f7fc35db330385a9fe0136d114653f9278a39eefb22344974"
+    },
+    "blocked_small_farm": {
+      "status": "BLOCKED_DEPENDENCY",
+      "request_id": "AI-COMPANY-REQ-00001",
+      "required_dependency": "KAIOS_FOREST_AND_AGRICULTURE_RUNTIME_V1",
+      "automatic_completion": false
+    },
+    "candidate_life_package": {
+      "project_id": "AI-COMPANY-PROJECT-00001",
+      "status": "COMPLETE",
+      "closeout_status": "CLOSED_BALANCED_SIMULATION",
+      "domain_binding": "CANDIDATE_LIFE_WORKFLOW",
+      "domain_evidence": {
+        "runtime": "WORKER_REGISTRY_CANDIDATE_WORKFLOW",
+        "integrity_verified": true,
+        "simulation_only": true,
+        "authority": "CANDIDATE_ONLY",
+        "adapter": "EXISTING_GOVERNANCE_REFERENCE"
+      },
+      "approval_status": "CANDIDATE_ONLY",
+      "external_deployment": false,
+      "event_count": 45,
+      "state_hash": "0f7e1f2be836747610b684bd106167b066ddca6bda57deb46737d1770718a853"
+    },
+    "software_module": {
+      "project_id": "AI-COMPANY-PROJECT-00001",
+      "status": "COMPLETE",
+      "closeout_status": "CLOSED_BALANCED_SIMULATION",
+      "domain_binding": "SOFTWARE_PROJECT_WORKFLOW",
+      "domain_evidence": {
+        "runtime": "LOCAL_SOFTWARE_PROJECT_WORKFLOW",
+        "integrity_verified": true,
+        "simulation_only": true,
+        "authority": "NO_EXTERNAL_DEPLOYMENT",
+        "adapter": "LOCAL_SIMULATION_ONLY"
+      },
+      "approval_status": "RUNTIME_VALIDATED_SIMULATION",
+      "external_deployment": false,
+      "event_count": 46,
+      "state_hash": "64b2fc7c3814bd7bd215bb27b225668e990127e8cf4adc440b2391f85c70d264"
+    },
+    "boundaries": {
+      "simulation_only": true,
+      "wallet_access": false,
+      "real_kgen": false,
+      "production_authority": false,
+      "external_execution": false
+    }
+  },
+  "boundaries": {
+    "simulation_only": true,
+    "wallet_access": false,
+    "real_wallet": false,
+    "real_kgen": false,
+    "onchain_transfer": false,
+    "real_legal_effect": false,
+    "production_authority": false,
+    "external_autonomous_execution": false,
+    "unbounded_spending": false,
+    "self_modifying_production_code": false,
+    "constitution_source_modification": false,
+    "current_modification": false,
+    "mutation_endpoints": false
+  }
+}

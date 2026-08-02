@@ -6,6 +6,8 @@ on:
       - "KGEN-KAIOS/world-viewer/**"
       - "world-viewer/**"
       - "api/kaios/k280/**"
+      - "api/kaios/ai-company/**"
+      - "KAIOS/ai-company/**"
       - "index.html"
       - ".github/workflows/world-viewer-product-qa.yml"
   push:
@@ -13,6 +15,8 @@ on:
       - "KGEN-KAIOS/world-viewer/**"
       - "world-viewer/**"
       - "api/kaios/k280/**"
+      - "api/kaios/ai-company/**"
+      - "KAIOS/ai-company/**"
       - "index.html"
       - ".github/workflows/world-viewer-product-qa.yml"
 
@@ -57,10 +61,13 @@ jobs:
         run: |
           python -m py_compile \
             KGEN-KAIOS/world-viewer/tests/acceptance_static.py \
-            KGEN-KAIOS/world-viewer/tests/product_qa.py
+            KGEN-KAIOS/world-viewer/tests/product_qa.py \
+            KGEN-KAIOS/world-viewer/tests/ai_company_browser_qa.py
           while IFS= read -r -d '' module; do
             node --input-type=module --check < "$module"
           done < <(find KGEN-KAIOS/world-viewer -type f -name '*.js' -print0)
+          node --input-type=module --check < world-viewer/ai-company-v1/app.js
+          node --input-type=module --check < KAIOS/ai-company/generate-ai-company-v1-api.mjs
 
       - name: Resolve changed-file scope
         id: changed
@@ -107,6 +114,26 @@ jobs:
         continue-on-error: true
         shell: bash
         run: node --test KGEN-KAIOS/world-viewer/tests/full_world_official_route.test.mjs
+
+      - name: Run AI Company Runtime V1
+        id: ai-company-runtime
+        continue-on-error: true
+        shell: bash
+        run: node --test KGEN-KAIOS/world-viewer/tests/ai-company-runtime-v1.test.mjs
+
+      - name: Verify AI Company public API projections
+        id: ai-company-api
+        continue-on-error: true
+        shell: bash
+        run: |
+          node KAIOS/ai-company/generate-ai-company-v1-api.mjs
+          git diff --exit-code -- api/kaios/ai-company/v1
+
+      - name: Run AI Company public integration
+        id: ai-company-site
+        continue-on-error: true
+        shell: bash
+        run: node --test KGEN-KAIOS/world-viewer/tests/ai-company-public-integration.test.mjs
 
       - name: Run Civilization runtime integrity
         id: civilization
@@ -186,6 +213,14 @@ jobs:
             --max-diff-ratio 0.12 \
             --pixel-threshold 32
 
+      - name: Run AI Company responsive browser QA
+        id: ai-company-browser
+        continue-on-error: true
+        shell: bash
+        run: |
+          python KGEN-KAIOS/world-viewer/tests/ai_company_browser_qa.py \
+            --base-url http://127.0.0.1:8080
+
       - name: Collect server log
         if: always()
         shell: bash
@@ -229,16 +264,24 @@ jobs:
           RUNTIME_OUTCOME: ${{ steps.runtime.outcome }}
           K280_SITE_OUTCOME: ${{ steps.k280-site.outcome }}
           FULL_WORLD_SITE_OUTCOME: ${{ steps.full-world-site.outcome }}
+          AI_COMPANY_RUNTIME_OUTCOME: ${{ steps.ai-company-runtime.outcome }}
+          AI_COMPANY_API_OUTCOME: ${{ steps.ai-company-api.outcome }}
+          AI_COMPANY_SITE_OUTCOME: ${{ steps.ai-company-site.outcome }}
+          AI_COMPANY_BROWSER_OUTCOME: ${{ steps.ai-company-browser.outcome }}
           STATIC_OUTCOME: ${{ steps.static.outcome }}
           SYNTAX_OUTCOME: ${{ steps.syntax.outcome }}
         run: |
-          printf 'syntax=%s\nstatic=%s\nruntime=%s\nk280_site=%s\nfull_world_site=%s\ncivilization=%s\ngenesis=%s\nproduction=%s\nsettlement=%s\ngovernance=%s\nbiology=%s\nnation_timeline=%s\ncosmic_technology=%s\nproduct=%s\n' \
-            "$SYNTAX_OUTCOME" "$STATIC_OUTCOME" "$RUNTIME_OUTCOME" "$K280_SITE_OUTCOME" "$FULL_WORLD_SITE_OUTCOME" "$CIVILIZATION_OUTCOME" "$GENESIS_OUTCOME" "$PRODUCTION_OUTCOME" "$SETTLEMENT_OUTCOME" "$GOVERNANCE_OUTCOME" "$BIOLOGY_OUTCOME" "$NATION_TIMELINE_OUTCOME" "$COSMIC_TECHNOLOGY_OUTCOME" "$PRODUCT_OUTCOME"
+          printf 'syntax=%s\nstatic=%s\nruntime=%s\nk280_site=%s\nfull_world_site=%s\nai_company_runtime=%s\nai_company_api=%s\nai_company_site=%s\nai_company_browser=%s\ncivilization=%s\ngenesis=%s\nproduction=%s\nsettlement=%s\ngovernance=%s\nbiology=%s\nnation_timeline=%s\ncosmic_technology=%s\nproduct=%s\n' \
+            "$SYNTAX_OUTCOME" "$STATIC_OUTCOME" "$RUNTIME_OUTCOME" "$K280_SITE_OUTCOME" "$FULL_WORLD_SITE_OUTCOME" "$AI_COMPANY_RUNTIME_OUTCOME" "$AI_COMPANY_API_OUTCOME" "$AI_COMPANY_SITE_OUTCOME" "$AI_COMPANY_BROWSER_OUTCOME" "$CIVILIZATION_OUTCOME" "$GENESIS_OUTCOME" "$PRODUCTION_OUTCOME" "$SETTLEMENT_OUTCOME" "$GOVERNANCE_OUTCOME" "$BIOLOGY_OUTCOME" "$NATION_TIMELINE_OUTCOME" "$COSMIC_TECHNOLOGY_OUTCOME" "$PRODUCT_OUTCOME"
           [[ "$SYNTAX_OUTCOME" == "success" ]]
           [[ "$STATIC_OUTCOME" == "success" ]]
           [[ "$RUNTIME_OUTCOME" == "success" ]]
           [[ "$K280_SITE_OUTCOME" == "success" ]]
           [[ "$FULL_WORLD_SITE_OUTCOME" == "success" ]]
+          [[ "$AI_COMPANY_RUNTIME_OUTCOME" == "success" ]]
+          [[ "$AI_COMPANY_API_OUTCOME" == "success" ]]
+          [[ "$AI_COMPANY_SITE_OUTCOME" == "success" ]]
+          [[ "$AI_COMPANY_BROWSER_OUTCOME" == "success" ]]
           [[ "$CIVILIZATION_OUTCOME" == "success" ]]
           [[ "$GENESIS_OUTCOME" == "success" ]]
           [[ "$PRODUCTION_OUTCOME" == "success" ]]

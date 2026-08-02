@@ -44,6 +44,7 @@ Last optimized: 2026-06-11
 | KAIOS Player Genesis | [Player, AI Household and Work Simulation](https://klineodyssey.github.io/kline-odyssey/world-viewer/player-genesis/) |
 | KAIOS Real Causal World | [Terrain, Route, Transport and Construction Simulation](https://klineodyssey.github.io/kline-odyssey/world-viewer/causal-runtime/) |
 | KAIOS Fishpond Aquaculture Runtime V1 | [Causal fishpond industry simulation](https://klineodyssey.github.io/kline-odyssey/world-viewer/aquaculture-v1/) |
+| KAIOS AI Company Runtime V1 | [Order, project, inspection and delivery simulation](https://klineodyssey.github.io/kline-odyssey/world-viewer/ai-company-v1/) |
 | Causal World Specification | [Runtime rules and authority boundaries](KAIOS_REAL_CAUSAL_WORLD_RUNTIME_SPEC.md) |
 | Causal World Report | [Implementation and scenario evidence](KAIOS_REAL_CAUSAL_WORLD_RUNTIME_REPORT.md) |
 | Causal World Closeout | [PR #63 merge, deployment and recovery evidence](KAIOS_REAL_CAUSAL_WORLD_RUNTIME_CLOSEOUT.md) |
@@ -1181,6 +1182,17 @@ does not grant real legal, Wallet, KGEN, Production or external autonomy.
 | [Event Schema](KAIOS/ai-company/KAIOS_AI_COMPANY_EVENT_SCHEMA_V1.json) | Hash-chained deterministic events. |
 | [Capacity Schema](KAIOS/ai-company/KAIOS_AI_COMPANY_CAPACITY_SCHEMA_V1.json) | Finite company throughput and exposure. |
 | [Specification Validator](KAIOS/ai-company/ai-company-spec-validator.mjs) | Executable schema/policy completeness checks. |
+
+Runtime implementation records:
+
+- [Canonical Runtime](KGEN-KAIOS/world-viewer/ai-company/ai-company-project-runtime.js)
+- [AI Company Viewer](world-viewer/ai-company-v1/)
+- [Read-only Public APIs](api/kaios/ai-company/v1/)
+- [Runtime Report](KAIOS/ai-company/KAIOS_AI_COMPANY_ORDER_PROJECT_RUNTIME_V1_REPORT.md)
+- [World Viewer Report](KAIOS/ai-company/KAIOS_AI_COMPANY_WORLD_VIEWER_REPORT.md)
+- [Cursor Queue Report](KAIOS/ai-company/KAIOS_CURSOR_CONTINUOUS_QUEUE_REPORT.md)
+- [Runtime Recovery](RECOVERY-KAIOS-AI-COMPANY-RUNTIME-V1.md)
+- [Runtime Closeout](KAIOS_AI_COMPANY_RUNTIME_V1_CLOSEOUT.md)
 | [Test Plan](KAIOS/ai-company/KAIOS_AI_COMPANY_RUNTIME_V1_TEST_PLAN.md) | Specification through production gates. |
 | [Specification Closeout](KAIOS/ai-company/KAIOS_AI_COMPANY_SPEC_V1_CLOSEOUT.md) | Scope and authority record. |
 | [Specification Tests](KGEN-KAIOS/world-viewer/tests/ai-company-spec.test.mjs) | Node regression suite. |

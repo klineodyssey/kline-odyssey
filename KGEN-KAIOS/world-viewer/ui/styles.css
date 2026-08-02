@@ -639,8 +639,12 @@ button:focus-visible, canvas:focus-visible, [tabindex]:focus-visible {
 
 .visually-hidden { position: absolute !important; width: 1px !important; height: 1px !important; padding: 0 !important; margin: -1px !important; overflow: hidden !important; clip: rect(0 0 0 0) !important; white-space: nowrap !important; border: 0 !important; }
 
-@media (min-width: 901px) and (max-width: 1400px) {
+@media (min-width: 901px) and (max-width: 1440px) {
   .topbar { grid-template-columns: auto minmax(90px, 1fr) auto auto; gap: 8px; }
+  .official-route-nav {
+    min-width: 0; overflow-x: auto; overflow-y: hidden;
+    overscroll-behavior-inline: contain; scrollbar-width: thin;
+  }
   .official-route-nav a { min-width: 52px; padding: 5px 8px; }
   .route-nav-desktop { display: none; }
   .route-nav-mobile { display: inline; }
@@ -654,7 +658,10 @@ button:focus-visible, canvas:focus-visible, [tabindex]:focus-visible {
   .brand-block { min-width: 36px; }
   .brand-block > span:last-child { display: none; }
   .breadcrumbs { display: none; }
-  .official-route-nav { min-width: 0; justify-content: flex-start; overflow: hidden; }
+  .official-route-nav {
+    min-width: 0; justify-content: flex-start; overflow-x: auto; overflow-y: hidden;
+    overscroll-behavior-inline: contain; scrollbar-width: thin;
+  }
   .official-route-nav a { min-width: 52px; min-height: var(--touch); padding: 5px 8px; }
   .route-nav-desktop { display: none; }
   .route-nav-mobile { display: inline; }
@@ -665,7 +672,12 @@ button:focus-visible, canvas:focus-visible, [tabindex]:focus-visible {
   .login-button::after { content: "P"; color: var(--text); position: absolute; inset: 0; display: grid; place-items: center; font-weight: 800; }
   .login-button.is-authenticated::after { content: "X"; color: var(--accent-strong); }
   .workspace { grid-template-columns: 1fr; }
-  .mode-rail { position: absolute; z-index: 35; left: calc(8px + var(--safe-left)); top: calc(var(--topbar-height) + var(--safe-top) + 70px); flex-direction: row; padding: 4px; border: 1px solid var(--line); border-radius: 8px; box-shadow: var(--shadow); }
+  .mode-rail {
+    position: absolute; z-index: 35; left: calc(8px + var(--safe-left)); right: calc(8px + var(--safe-right));
+    top: calc(var(--topbar-height) + var(--safe-top) + 70px); flex-direction: row; padding: 4px;
+    border: 1px solid var(--line); border-radius: 8px; box-shadow: var(--shadow);
+    overflow-x: auto; overflow-y: hidden; overscroll-behavior-inline: contain;
+  }
   .mode-button { min-width: var(--touch); min-height: var(--touch); padding: 4px; }
   .mode-button span:last-child { display: none; }
   .building-catalog { grid-template-columns: 1fr; gap: 5px; padding: 5px 8px; }

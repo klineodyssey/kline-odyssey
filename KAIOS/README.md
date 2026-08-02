@@ -49,6 +49,14 @@ Public interfaces:
 - [Specification closeout](ai-company/KAIOS_AI_COMPANY_SPEC_V1_CLOSEOUT.md)
 - [Recovery](../KGEN-KAIOS/governance/autopilot/recovery_points/RECOVERY-KAIOS-AI-COMPANY-SPEC-V1.md)
 - [Company Status](../KGEN-KAIOS/governance/autopilot/company_status/COMPANY_STATUS_2026-08-02_AI_COMPANY_SPEC.md)
+- [Canonical Runtime](../KGEN-KAIOS/world-viewer/ai-company/ai-company-project-runtime.js)
+- [Runtime report](ai-company/KAIOS_AI_COMPANY_ORDER_PROJECT_RUNTIME_V1_REPORT.md)
+- [World Viewer report](ai-company/KAIOS_AI_COMPANY_WORLD_VIEWER_REPORT.md)
+- [Cursor continuous queue report](ai-company/KAIOS_CURSOR_CONTINUOUS_QUEUE_REPORT.md)
+- [Public Viewer](../world-viewer/ai-company-v1/)
+- [Read-only public APIs](../api/kaios/ai-company/v1/)
+- [Runtime recovery](../RECOVERY-KAIOS-AI-COMPANY-RUNTIME-V1.md)
+- [Runtime closeout](../KAIOS_AI_COMPANY_RUNTIME_V1_CLOSEOUT.md)
 
 ## Foundational Life Runtime V1
 
