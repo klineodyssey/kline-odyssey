@@ -453,9 +453,29 @@
       },
       "additionalProperties": false
     },
+    "reviewerProvenance": {
+      "type": "object",
+      "required": ["provenance_type", "reviewer_alias", "worker_id", "authority_commit", "worker_registry_ref", "worker_registry_hash", "evidence_bundle_ref", "evidence_bundle_commit", "evidence_bundle_hash", "review_subject_hash", "simulation_only", "cryptographic_user_authentication", "authentication_boundary"],
+      "properties": {
+        "provenance_type": { "const": "IMMUTABLE_REPOSITORY_REVIEW_ATTESTATION" },
+        "reviewer_alias": { "const": "CODEX_CANONICAL_REVIEW" },
+        "worker_id": { "const": "codex-gm-01" },
+        "authority_commit": { "$ref": "#/$defs/repositoryCommit" },
+        "worker_registry_ref": { "const": "KGEN-KAIOS/worker_registry.json" },
+        "worker_registry_hash": { "$ref": "#/$defs/sha256" },
+        "evidence_bundle_ref": { "$ref": "#/$defs/repositoryPath" },
+        "evidence_bundle_commit": { "$ref": "#/$defs/repositoryCommit" },
+        "evidence_bundle_hash": { "$ref": "#/$defs/sha256" },
+        "review_subject_hash": { "$ref": "#/$defs/sha256" },
+        "simulation_only": { "const": true },
+        "cryptographic_user_authentication": { "const": false },
+        "authentication_boundary": { "const": "REPOSITORY_MERGE_AUTHORITY_OUT_OF_BAND" }
+      },
+      "additionalProperties": false
+    },
     "compatibilityReview": {
       "type": "object",
-      "required": ["review_id", "donor_life_id", "donor_genome_id", "host_life_id", "host_genome_id", "host_life_type", "host_capabilities", "organ_id", "reviewer", "gates", "gate_evidence", "rights_record", "decision", "reason", "reviewed_at"],
+      "required": ["review_id", "donor_life_id", "donor_genome_id", "host_life_id", "host_genome_id", "host_life_type", "host_capabilities", "organ_id", "reviewer", "reviewer_provenance", "gates", "gate_evidence", "rights_record", "decision", "reason", "reviewed_at"],
       "properties": {
         "review_id": { "$ref": "#/$defs/stableId" },
         "donor_life_id": { "$ref": "#/$defs/stableId" },
@@ -466,6 +486,7 @@
         "host_capabilities": { "type": "array", "uniqueItems": true, "items": { "type": "string", "minLength": 1 } },
         "organ_id": { "$ref": "#/$defs/stableId" },
         "reviewer": { "const": "CODEX_CANONICAL_REVIEW" },
+        "reviewer_provenance": { "$ref": "#/$defs/reviewerProvenance" },
         "gates": { "$ref": "#/$defs/compatibilityGates" },
         "gate_evidence": { "$ref": "#/$defs/gateEvidenceSet" },
         "rights_record": { "$ref": "#/$defs/rightsRecord" },
@@ -485,9 +506,10 @@
     },
     "completionEvidence": {
       "type": "object",
-      "required": ["completion_commit", "donor_genome_id", "host_genome_id", "registry_projection_ref", "registry_projection_hash", "genome_revision_ref", "genome_revision_hash", "integration_evidence_refs", "integration_evidence_hashes", "maintenance_owner", "rollback_retention_ref", "rollback_retention_hash", "attestation_hash"],
+      "required": ["completion_commit", "implementation_commit", "donor_genome_id", "host_genome_id", "registry_projection_ref", "registry_projection_hash", "genome_revision_ref", "genome_revision_hash", "integration_evidence_refs", "integration_evidence_hashes", "maintenance_owner", "rollback_retention_ref", "rollback_retention_hash", "attestation_hash"],
       "properties": {
         "completion_commit": { "$ref": "#/$defs/repositoryCommit" },
+        "implementation_commit": { "$ref": "#/$defs/repositoryCommit" },
         "donor_genome_id": { "$ref": "#/$defs/stableId" },
         "host_genome_id": { "$ref": "#/$defs/stableId" },
         "registry_projection_ref": { "$ref": "#/$defs/repositoryPath" },

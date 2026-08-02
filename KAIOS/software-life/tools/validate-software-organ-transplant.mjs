@@ -144,6 +144,135 @@ export const computePlanArtifactHash = (plan) => {
   return computeContentHash(canonicalJson(payload));
 };
 
+const gateSubjectProjection = (gate, record) => {
+  const organ = record?.organ ?? {};
+  const review = record?.compatibility_review ?? {};
+  const transplant = record?.transplant ?? {};
+  const migrationPlan = transplant.migration_plan ?? {};
+  const rollbackPlan = transplant.rollback_plan ?? {};
+  const identity = {
+    compatibility_review_id: review.review_id,
+    transplant_id: transplant.transplant_id,
+    donor_life_id: review.donor_life_id,
+    donor_genome_id: review.donor_genome_id,
+    host_life_id: review.host_life_id,
+    host_genome_id: review.host_genome_id,
+    organ_id: organ.organ_id
+  };
+  const subjects = {
+    DONOR_IDENTITY_VALID: {
+      ...identity,
+      organ_owner_life_id: organ.owner_life_id,
+      organ_genome_id: organ.genome_contract?.genome_id,
+      transplant_donor_life_id: transplant.donor_life_id
+    },
+    HOST_IDENTITY_VALID: {
+      ...identity,
+      host_life_type: review.host_life_type,
+      transplant_host_life_id: transplant.host_life_id
+    },
+    ORGAN_TYPE_COMPATIBLE: {
+      ...identity,
+      organ_type: organ.organ_type,
+      host_life_type: review.host_life_type,
+      required_host_life_types: organ.genome_contract?.required_host_life_types,
+      forbidden_hosts: organ.forbidden_hosts
+    },
+    GENOME_CONTRACT_COMPATIBLE: {
+      ...identity,
+      genome_contract: organ.genome_contract
+    },
+    INTERFACE_COMPATIBLE: {
+      ...identity,
+      input_interface: organ.input_interface,
+      output_interface: organ.output_interface,
+      required_host_capabilities: organ.required_host_capabilities,
+      host_capabilities: review.host_capabilities
+    },
+    RIGHTS_APPROVED: {
+      ...identity,
+      rights_record: review.rights_record
+    },
+    SECURITY_APPROVED: {
+      ...identity,
+      security_boundary: record?.security_boundary
+    },
+    RESOURCE_CAPACITY_AVAILABLE: {
+      ...identity,
+      organ_resource_cost: organ.resource_cost,
+      migration_resource_budget: migrationPlan.resource_budget,
+      migration_plan_artifact_hash: migrationPlan.artifact_hash
+    },
+    ENERGY_CAPACITY_AVAILABLE: {
+      ...identity,
+      organ_energy_cost: organ.energy_cost,
+      migration_energy_budget: migrationPlan.energy_budget,
+      migration_plan_artifact_hash: migrationPlan.artifact_hash
+    },
+    DEPENDENCIES_AVAILABLE: {
+      ...identity,
+      dependency_list: organ.dependency_list
+    },
+    LICENSE_OR_USAGE_RIGHT_VALID_SIMULATION: {
+      ...identity,
+      donor_owner: review.rights_record?.donor_owner,
+      donor_custodian: review.rights_record?.donor_custodian,
+      host_owner: review.rights_record?.host_owner,
+      host_operator: review.rights_record?.host_operator,
+      transplant_right: review.rights_record?.transplant_right,
+      license_or_usage_right: review.rights_record?.license_or_usage_right,
+      real_legal_effect: review.rights_record?.real_legal_effect
+    },
+    MIGRATION_PLAN_READY: {
+      ...identity,
+      plan: migrationPlan
+    },
+    ROLLBACK_PLAN_READY: {
+      ...identity,
+      plan: rollbackPlan
+    },
+    TESTS_PASS: {
+      ...identity,
+      migration_plan_id: migrationPlan.plan_id,
+      migration_plan_artifact_hash: migrationPlan.artifact_hash,
+      rollback_plan_id: rollbackPlan.plan_id,
+      rollback_plan_artifact_hash: rollbackPlan.artifact_hash,
+      verification_commands: [...new Set([
+        ...(migrationPlan.verification_commands ?? []),
+        ...(rollbackPlan.verification_commands ?? [])
+      ])]
+    }
+  };
+  return subjects[gate] ?? { ...identity, unsupported_gate: gate };
+};
+
+export const computeGateAttestationSubjectHash = (gate, record) => (
+  computeContentHash(canonicalJson(gateSubjectProjection(gate, record)))
+);
+
+export const computeReviewerProvenanceSubjectHash = (record) => {
+  const review = record?.compatibility_review ?? {};
+  const transplant = record?.transplant ?? {};
+  return computeContentHash(canonicalJson({
+    review_id: review.review_id,
+    reviewer: review.reviewer,
+    reviewed_at: review.reviewed_at,
+    donor_life_id: review.donor_life_id,
+    donor_genome_id: review.donor_genome_id,
+    host_life_id: review.host_life_id,
+    host_genome_id: review.host_genome_id,
+    organ_id: review.organ_id,
+    organ_compatibility_signature: record?.organ?.compatibility_signature,
+    gates: review.gates,
+    rights_record: review.rights_record,
+    decision: review.decision,
+    transplant_id: transplant.transplant_id,
+    migration_plan_artifact_hash: transplant.migration_plan?.artifact_hash,
+    rollback_plan_artifact_hash: transplant.rollback_plan?.artifact_hash,
+    security_boundary: record?.security_boundary
+  }));
+};
+
 export const computeOrganCompatibilitySignature = (organ, securityBoundary) => computeContentHash(canonicalJson({
   organ_id: organ.organ_id,
   organ_type: organ.organ_type,
@@ -598,11 +727,12 @@ const registeredWorker = (workerRegistry, actor) => {
   return workerRegistry?.workers?.find(({ worker_id }) => worker_id === workerId) ?? null;
 };
 
-const isAuthorizedWorker = (workerRegistry, actor, canonicalReview = false) => {
+export const isAuthorizedWorker = (workerRegistry, actor, canonicalReview = false, currentWorkerRegistry = workerRegistry) => {
   if (canonicalReview && actor !== CANONICAL_REVIEWER_ALIAS) return false;
   const worker = registeredWorker(workerRegistry, actor);
+  const currentWorker = registeredWorker(currentWorkerRegistry, actor);
   const trust = Number.parseInt(String(worker?.trust_level ?? "T0").replace(/^T/, ""), 10);
-  return Boolean(worker
+  const immutableAuthorityValid = Boolean(worker
     && worker.status === "ACTIVE"
     && ["ACTIVE", "TRUSTED", "SENIOR_TRUSTED"].includes(worker.employee_status)
     && trust >= 2
@@ -617,6 +747,16 @@ const isAuthorizedWorker = (workerRegistry, actor, canonicalReview = false) => {
       && worker.can_push_main === true
       && worker.role.includes("Reviewer")
     )));
+  const currentStatusValid = Boolean(currentWorker
+    && currentWorker.worker_id === worker?.worker_id
+    && currentWorker.status === "ACTIVE"
+    && ["ACTIVE", "TRUSTED", "SENIOR_TRUSTED"].includes(currentWorker.employee_status)
+    && currentWorker.boot_acknowledged === true
+    && currentWorker.canon_acknowledged === true
+    && currentWorker.workspace_policy_acknowledged === true
+    && currentWorker.do_not_touch_acknowledged === true
+    && currentWorker.suspension === null);
+  return immutableAuthorityValid && currentStatusValid;
 };
 
 const registryMaps = (registry) => {
@@ -648,7 +788,9 @@ const lifeAuthorityProjection = (life) => life ? {
   }))
 } : null;
 
-const matchingGateAttestations = (document, gate, evidence, review, transplant) => {
+const matchingGateAttestations = (document, gate, evidence, record) => {
+  const review = record.compatibility_review;
+  const transplant = record.transplant;
   if (document?.artifact_type !== "SOFTWARE_ORGAN_GATE_EVIDENCE_BUNDLE"
     || document.simulation_only !== true
     || document.authority !== "SIMULATION_ONLY"
@@ -668,9 +810,65 @@ const matchingGateAttestations = (document, gate, evidence, review, transplant) 
     && attestation.reviewer === evidence?.reviewer
     && attestation.reviewed_at === evidence?.reviewed_at
     && attestation.simulation_only === true
+    && attestation.subject_hash === computeGateAttestationSubjectHash(gate, record)
     && Array.isArray(attestation.checks)
     && attestation.checks.includes(requiredCheck)
   ));
+};
+
+const validateGateAttestationSemantics = (attestation, gate, record, evidence, repositoryRoot, errors, path) => {
+  const migrationPlan = record.transplant?.migration_plan ?? {};
+  const rollbackPlan = record.transplant?.rollback_plan ?? {};
+  const quantityMatches = (actual, expected) => (
+    actual?.value === expected?.value
+    && actual?.unit === expected?.unit
+    && actual?.bounded === true
+  );
+  if (gate === "RESOURCE_CAPACITY_AVAILABLE" || gate === "ENERGY_CAPACITY_AVAILABLE") {
+    const expected = gate === "RESOURCE_CAPACITY_AVAILABLE"
+      ? migrationPlan.resource_budget
+      : migrationPlan.energy_budget;
+    const capacity = attestation.capacity ?? {};
+    if (!quantityMatches(capacity.required_budget, expected)
+      || capacity.available_budget?.unit !== expected?.unit
+      || capacity.available_budget?.bounded !== true
+      || !Number.isFinite(capacity.available_budget?.value)
+      || capacity.available_budget.value < expected?.value) {
+      push(errors, "GATE_CAPACITY_ATTESTATION_INVALID", `${path}.capacity`, `${gate} must bind the exact required budget and a finite available budget in the same unit`);
+    }
+  }
+  if (gate === "MIGRATION_PLAN_READY" || gate === "ROLLBACK_PLAN_READY") {
+    const plan = gate === "MIGRATION_PLAN_READY" ? migrationPlan : rollbackPlan;
+    const binding = attestation.plan_binding ?? {};
+    if (binding.plan_id !== plan.plan_id
+      || binding.plan_artifact_hash !== plan.artifact_hash
+      || binding.maximum_downtime_seconds !== plan.maximum_downtime_seconds
+      || canonicalJson(binding.verification_commands) !== canonicalJson(plan.verification_commands)) {
+      push(errors, "GATE_PLAN_ATTESTATION_INVALID", `${path}.plan_binding`, `${gate} must bind the exact plan ID, artifact hash, downtime and verification commands`);
+    }
+  }
+  if (gate === "TESTS_PASS") {
+    const execution = attestation.execution ?? {};
+    const expectedCommands = [...new Set([
+      ...(migrationPlan.verification_commands ?? []),
+      ...(rollbackPlan.verification_commands ?? [])
+    ])];
+    const testedCommitValid = commitExists(repositoryRoot, execution.tested_commit)
+      && commitReachableFromHead(repositoryRoot, execution.tested_commit, evidence.evidence_commit)
+      && (resolveCommit(repositoryRoot, execution.tested_commit) === resolveCommit(repositoryRoot, evidence.evidence_commit)
+        || commitStrictAncestor(repositoryRoot, execution.tested_commit, evidence.evidence_commit));
+    if (canonicalJson(execution.executed_commands) !== canonicalJson(expectedCommands)
+      || !Array.isArray(execution.exit_codes)
+      || execution.exit_codes.length !== expectedCommands.length
+      || execution.exit_codes.some((code) => code !== 0)
+      || execution.result_summary?.fail !== 0
+      || !(execution.result_summary?.pass > 0)
+      || !/^[a-f0-9]{64}$/u.test(execution.output_hash ?? "")
+      || execution.completed_at !== evidence.reviewed_at
+      || !testedCommitValid) {
+      push(errors, "GATE_TEST_EXECUTION_ATTESTATION_INVALID", `${path}.execution`, "TESTS_PASS must bind every planned verification command to zero exit status, a non-empty passing result, output hash, review time and reachable tested commit");
+    }
+  }
 };
 
 const canonicalActionForState = (state) => {
@@ -710,7 +908,7 @@ export const validateSoftwareOrganTransplant = (record, options = {}) => {
     push(errors, "CALLER_SCHEMA_FORBIDDEN", "options.schema", `Schema input must come only from ${CANONICAL_SCHEMA_PATH}`);
   }
   const governance = loadCanonicalGovernance(options.repositoryRoot, errors);
-  const { registry, trustedRegistry, schema, workerRegistry, root: repositoryRoot, headCommit } = governance;
+  const { registry, trustedRegistry, schema, currentWorkerRegistry, workerRegistry, root: repositoryRoot, headCommit } = governance;
   if (schema) {
     const structural = validateJsonSchema202012(record, schema);
     for (const error of structural.errors) {
@@ -737,8 +935,63 @@ export const validateSoftwareOrganTransplant = (record, options = {}) => {
     push(errors, "AUTHORITATIVE_REGISTRY_REQUIRED", "registry", "an authoritative Software Life Registry is required");
   }
 
-  if (!isAuthorizedWorker(workerRegistry, review.reviewer, true)) {
+  if (!isAuthorizedWorker(workerRegistry, review.reviewer, true, currentWorkerRegistry)) {
     push(errors, "CANONICAL_REVIEWER_NOT_AUTHORIZED", "compatibility_review.reviewer", "reviewer must resolve to the active canonical Codex reviewer in Worker Registry");
+  }
+
+  const reviewerProvenance = review.reviewer_provenance;
+  const workerRegistryBlob = gitRegularFileBlob(repositoryRoot, governance.authorityCommit, CANONICAL_WORKER_REGISTRY_PATH);
+  const evidenceBundleBlob = reviewerProvenance
+    ? gitRegularFileBlob(repositoryRoot, reviewerProvenance.evidence_bundle_commit, reviewerProvenance.evidence_bundle_ref)
+    : null;
+  const evidenceBundleTarget = reviewerProvenance
+    ? repositoryFile(repositoryRoot, reviewerProvenance.evidence_bundle_ref)
+    : null;
+  if (!reviewerProvenance
+    || reviewerProvenance.provenance_type !== "IMMUTABLE_REPOSITORY_REVIEW_ATTESTATION"
+    || reviewerProvenance.reviewer_alias !== CANONICAL_REVIEWER_ALIAS
+    || reviewerProvenance.worker_id !== CANONICAL_REVIEWER_WORKER_ID
+    || reviewerProvenance.authority_commit !== governance.authorityCommit
+    || reviewerProvenance.worker_registry_ref !== CANONICAL_WORKER_REGISTRY_PATH
+    || !workerRegistryBlob
+    || reviewerProvenance.worker_registry_hash !== computeContentHash(workerRegistryBlob)
+    || reviewerProvenance.review_subject_hash !== computeReviewerProvenanceSubjectHash(record)
+    || reviewerProvenance.simulation_only !== true
+    || reviewerProvenance.cryptographic_user_authentication !== false
+    || reviewerProvenance.authentication_boundary !== "REPOSITORY_MERGE_AUTHORITY_OUT_OF_BAND"
+    || !evidenceBundleTarget
+    || !evidenceBundleBlob
+    || reviewerProvenance.evidence_bundle_hash !== computeContentHash(evidenceBundleBlob)
+    || !commitReachableFromHead(repositoryRoot, reviewerProvenance.evidence_bundle_commit, headCommit)) {
+    push(errors, "REVIEWER_PROVENANCE_INVALID", "compatibility_review.reviewer_provenance", "review must bind the immutable Worker Registry authority, semantic review subject and regular Git evidence bundle while explicitly preserving the out-of-band authentication boundary");
+  } else {
+    try {
+      const bundleProvenance = JSON.parse(evidenceBundleBlob.toString("utf8")).reviewer_provenance;
+      const expected = {
+        provenance_type: reviewerProvenance.provenance_type,
+        reviewer_alias: reviewerProvenance.reviewer_alias,
+        worker_id: reviewerProvenance.worker_id,
+        authority_commit: reviewerProvenance.authority_commit,
+        worker_registry_ref: reviewerProvenance.worker_registry_ref,
+        worker_registry_hash: reviewerProvenance.worker_registry_hash,
+        review_subject_hash: reviewerProvenance.review_subject_hash,
+        simulation_only: true,
+        cryptographic_user_authentication: false,
+        authentication_boundary: "REPOSITORY_MERGE_AUTHORITY_OUT_OF_BAND"
+      };
+      if (Object.entries(expected).some(([field, value]) => bundleProvenance?.[field] !== value)) {
+        push(errors, "REVIEWER_PROVENANCE_ATTESTATION_MISMATCH", "compatibility_review.reviewer_provenance.evidence_bundle_ref", "evidence bundle reviewer provenance must equal the record-bound immutable authority projection");
+      }
+    } catch {
+      push(errors, "REVIEWER_PROVENANCE_ATTESTATION_INVALID", "compatibility_review.reviewer_provenance.evidence_bundle_ref", "reviewer provenance evidence must be structured JSON");
+    }
+  }
+  for (const gate of COMPATIBILITY_GATES) {
+    const evidence = review.gate_evidence?.[gate];
+    if (reviewerProvenance && (evidence?.evidence_commit !== reviewerProvenance.evidence_bundle_commit
+      || !(evidence?.evidence_refs ?? []).includes(reviewerProvenance.evidence_bundle_ref))) {
+      push(errors, "REVIEWER_PROVENANCE_GATE_EVIDENCE_MISMATCH", `compatibility_review.gate_evidence.${gate}`, "every gate must reference the exact reviewer-provenance evidence bundle and commit");
+    }
   }
 
   if (organ.organ_id !== review.organ_id || organ.organ_id !== transplant.organ_id) {
@@ -850,7 +1103,7 @@ export const validateSoftwareOrganTransplant = (record, options = {}) => {
     push(errors, "ROLLBACK_PLAN_STEPS_INVALID", "transplant.rollback_plan.steps", "rollback plan must contain exactly the deterministic ROLLBACK-RESTORE action");
   }
   for (const [name, plan] of [["migration_plan", migrationPlan], ["rollback_plan", rollbackPlan]]) {
-    if (!isAuthorizedWorker(workerRegistry, plan.owner, true)) {
+    if (!isAuthorizedWorker(workerRegistry, plan.owner, true, currentWorkerRegistry)) {
       push(errors, "PLAN_OWNER_NOT_AUTHORIZED", `transplant.${name}.owner`, "plan owner must resolve to the canonical reviewer in Worker Registry");
     }
     if (plan.artifact_hash !== computePlanArtifactHash(plan)) {
@@ -940,7 +1193,7 @@ export const validateSoftwareOrganTransplant = (record, options = {}) => {
     if (evidence && evidence.reviewer !== review.reviewer) {
       push(errors, "GATE_REVIEWER_MISMATCH", `compatibility_review.gate_evidence.${gate}.reviewer`, "gate reviewer must equal the compatibility review authority");
     }
-    if (evidence && !isAuthorizedWorker(workerRegistry, evidence.reviewer, true)) {
+    if (evidence && !isAuthorizedWorker(workerRegistry, evidence.reviewer, true, currentWorkerRegistry)) {
       push(errors, "GATE_REVIEWER_NOT_AUTHORIZED", `compatibility_review.gate_evidence.${gate}.reviewer`, "gate reviewer must resolve to the canonical reviewer in Worker Registry");
     }
     if (evidence && !commitReachableFromHead(repositoryRoot, evidence.evidence_commit, headCommit)) {
@@ -950,7 +1203,7 @@ export const validateSoftwareOrganTransplant = (record, options = {}) => {
     }
     const referencedHashes = evidence?.evidence_content_hashes ?? {};
     const referencedKeys = new Set(evidence?.evidence_refs ?? []);
-    let semanticAttestationCount = 0;
+    const semanticAttestations = [];
     if (evidence && !(evidence.evidence_refs ?? []).some((reference) => reference.includes("/"))) {
       push(errors, "EVIDENCE_REPOSITORY_ARTIFACT_REQUIRED", `compatibility_review.gate_evidence.${gate}.evidence_refs`, "every gate requires at least one immutable repository artifact");
     }
@@ -973,9 +1226,9 @@ export const validateSoftwareOrganTransplant = (record, options = {}) => {
         } else {
           expectedHash = computeContentHash(blob);
           try {
-            semanticAttestationCount += matchingGateAttestations(
-              JSON.parse(blob.toString("utf8")), gate, evidence, review, transplant
-            ).length;
+            semanticAttestations.push(...matchingGateAttestations(
+              JSON.parse(blob.toString("utf8")), gate, evidence, record
+            ));
           } catch {
             // Non-JSON repository artifacts may supplement, but never replace, typed gate evidence.
           }
@@ -994,8 +1247,18 @@ export const validateSoftwareOrganTransplant = (record, options = {}) => {
         push(errors, "EVIDENCE_CONTENT_HASH_INVALID", `compatibility_review.gate_evidence.${gate}.evidence_content_hashes.${reference}`, "content hash must equal the referenced Git blob or event SHA-256");
       }
     }
-    if (evidence && semanticAttestationCount !== 1) {
+    if (evidence && semanticAttestations.length !== 1) {
       push(errors, "GATE_SEMANTIC_ATTESTATION_INVALID", `compatibility_review.gate_evidence.${gate}.evidence_refs`, "each gate requires exactly one typed, identity-bound semantic attestation with its gate-specific check");
+    } else if (evidence) {
+      validateGateAttestationSemantics(
+        semanticAttestations[0],
+        gate,
+        record,
+        evidence,
+        repositoryRoot,
+        errors,
+        `compatibility_review.gate_evidence.${gate}`
+      );
     }
   }
 
@@ -1076,10 +1339,10 @@ export const validateSoftwareOrganTransplant = (record, options = {}) => {
     ]) {
       if (event[field] !== expected) push(errors, "EVENT_IDENTITY_MISMATCH", `${path}.${field}`, `${field} must bind the transplant identity`);
     }
-    if (!isAuthorizedWorker(workerRegistry, event.actor)) {
+    if (!isAuthorizedWorker(workerRegistry, event.actor, false, currentWorkerRegistry)) {
       push(errors, "EVENT_ACTOR_NOT_AUTHORIZED", `${path}.actor`, "event actor must resolve to an active Worker Registry identity");
     }
-    if (CANONICAL_DECISION_STATES.has(event.next_transplant_state) && !isAuthorizedWorker(workerRegistry, event.actor, true)) {
+    if (CANONICAL_DECISION_STATES.has(event.next_transplant_state) && !isAuthorizedWorker(workerRegistry, event.actor, true, currentWorkerRegistry)) {
       push(errors, "CANONICAL_EVENT_ACTOR_NOT_AUTHORIZED", `${path}.actor`, `${event.next_transplant_state} requires the canonical Codex reviewer`);
     }
     if (event.previous_state_hash !== priorHash) push(errors, "EVENT_HASH_CHAIN_BROKEN", `${path}.previous_state_hash`, "previous hash must equal the prior event next hash");
@@ -1184,6 +1447,11 @@ export const validateSoftwareOrganTransplant = (record, options = {}) => {
       } else if (!commitStrictAncestor(repositoryRoot, migrationPlan.baseline_commit, completion.completion_commit)) {
         push(errors, "COMPLETION_COMMIT_NOT_AFTER_BASELINE", "transplant.events[-1].outputs.completion_evidence.completion_commit", "completion commit must descend strictly from the pre-transplant baseline");
       }
+      if (!commitReachableFromHead(repositoryRoot, completion.implementation_commit, completion.completion_commit)
+        || !commitStrictAncestor(repositoryRoot, migrationPlan.baseline_commit, completion.implementation_commit)
+        || !commitStrictAncestor(repositoryRoot, completion.implementation_commit, completion.completion_commit)) {
+        push(errors, "COMPLETION_IMPLEMENTATION_COMMIT_INVALID", "transplant.events[-1].outputs.completion_evidence.implementation_commit", "implementation commit must be strictly after baseline and strictly before the non-self-referential completion projection commit");
+      }
       for (const gate of COMPATIBILITY_GATES) {
         const evidenceCommit = review.gate_evidence?.[gate]?.evidence_commit;
         if (evidenceCommit && !commitStrictAncestor(repositoryRoot, evidenceCommit, completion.completion_commit)) {
@@ -1196,7 +1464,7 @@ export const validateSoftwareOrganTransplant = (record, options = {}) => {
       if (completion.host_genome_id !== review.host_genome_id) {
         push(errors, "COMPLETION_HOST_GENOME_MISMATCH", "transplant.events[-1].outputs.completion_evidence.host_genome_id", "completion must bind the reviewed host Genome identity");
       }
-      if (!isAuthorizedWorker(workerRegistry, completion.maintenance_owner, true)) {
+      if (!isAuthorizedWorker(workerRegistry, completion.maintenance_owner, true, currentWorkerRegistry)) {
         push(errors, "COMPLETION_MAINTENANCE_OWNER_NOT_AUTHORIZED", "transplant.events[-1].outputs.completion_evidence.maintenance_owner", "maintenance ownership must be accepted by the canonical Codex authority");
       }
       if (completion.registry_projection_ref !== CANONICAL_REGISTRY_PATH) {
@@ -1250,7 +1518,8 @@ export const validateSoftwareOrganTransplant = (record, options = {}) => {
           );
           if (integrationBlob) {
             try {
-              const integration = JSON.parse(integrationBlob.toString("utf8"));
+              const integrationDocument = JSON.parse(integrationBlob.toString("utf8"));
+              const integration = integrationDocument.integration_completion_evidence ?? integrationDocument;
               const expected = {
                 artifact_type: "SOFTWARE_ORGAN_INTEGRATION_EVIDENCE",
                 transplant_id: transplant.transplant_id,
@@ -1274,7 +1543,8 @@ export const validateSoftwareOrganTransplant = (record, options = {}) => {
       }
       if (genomeBlob) {
         try {
-          const genomeRevision = JSON.parse(genomeBlob.toString("utf8"));
+          const genomeDocument = JSON.parse(genomeBlob.toString("utf8"));
+          const genomeRevision = genomeDocument.genome_revision_completion_evidence ?? genomeDocument;
           const expected = {
             artifact_type: "SOFTWARE_GENOME_REVISION_EVIDENCE",
             compatibility_review_id: transplant.compatibility_review_id,
@@ -1309,7 +1579,7 @@ export const validateSoftwareOrganTransplant = (record, options = {}) => {
               host_genome_id: review.host_genome_id,
               organ_id: transplant.organ_id,
               state: "COMPLETE",
-              completion_commit: completion.completion_commit
+              implementation_commit: completion.implementation_commit
             };
             if (Object.entries(expected).some(([field, value]) => projected[field] !== value)) {
               push(errors, "COMPLETION_REGISTRY_PROJECTION_IDENTITY_INVALID", "transplant.events[-1].outputs.completion_evidence.registry_projection_ref", "Registry projection must bind the completed review, donor, host, Genome, organ and completion commit identities");
@@ -1326,7 +1596,7 @@ export const validateSoftwareOrganTransplant = (record, options = {}) => {
     push(errors, "RIGHTS_EVENT_MISSING", "compatibility_review.rights_record.decision_event_id", "rights decision must resolve to a transplant event");
   } else if (approvalClaimed && (rightsEvent.next_transplant_state !== "APPROVED_SIMULATION" || rightsEvent.rights_decision !== "APPROVED_SIMULATION")) {
     push(errors, "RIGHTS_EVENT_NOT_APPROVAL", "compatibility_review.rights_record.decision_event_id", "rights decision event must be the recorded approved-simulation transition");
-  } else if (approvalClaimed && !isAuthorizedWorker(workerRegistry, rightsEvent.actor, true)) {
+  } else if (approvalClaimed && !isAuthorizedWorker(workerRegistry, rightsEvent.actor, true, currentWorkerRegistry)) {
     push(errors, "RIGHTS_DECISION_ACTOR_NOT_AUTHORIZED", "compatibility_review.rights_record.decision_event_id", "rights approval event must be issued by the canonical Codex reviewer");
   }
 

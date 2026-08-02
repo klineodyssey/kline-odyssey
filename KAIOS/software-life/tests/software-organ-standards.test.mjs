@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { execFileSync } from "node:child_process";
+import { renameSync, rmSync, symlinkSync } from "node:fs";
 import { readFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -7,11 +8,14 @@ import test from "node:test";
 import {
   computeContentHash,
   computeCompletionEvidenceHash,
+  computeGateAttestationSubjectHash,
   computeGateEvidenceHash,
   computeOrganCompatibilitySignature,
   computePlanArtifactHash,
+  computeReviewerProvenanceSubjectHash,
   computeReplayStateHash,
   computeTransplantEventHash,
+  isAuthorizedWorker,
   validateJsonSchema202012,
   validateSoftwareOrganTransplant
 } from "../tools/validate-software-organ-transplant.mjs";
@@ -66,20 +70,28 @@ const gitBlob = (commit, path) => execFileSync("git", ["show", `${commit}:${path
   encoding: null,
   maxBuffer: 32 * 1024 * 1024
 });
+const currentWorkerRegistry = await readJson("KGEN-KAIOS/worker_registry.json");
+const trustedWorkerRegistry = JSON.parse(
+  gitBlob(registry.metadata.source_commit, "KGEN-KAIOS/worker_registry.json").toString("utf8")
+);
 
-const createValidRecord = () => {
+export const createValidRecord = ({
+  evidenceCommit = execFileSync("git", ["rev-parse", "HEAD"], { cwd: root, encoding: "utf8" }).trim()
+} = {}) => {
   const donor = registry.software_lives.find(({ life_id }) => life_id === "LIFE-KAIOS-WORLD-VIEWER");
   const host = registry.software_lives.find(({ life_id }) => life_id === "LIFE-KAIOS-OFFICIAL-HOMEPAGE");
   const organ = donor.organs[0];
   const baselineCommit = registry.metadata.source_commit;
-  const evidenceCommit = execFileSync("git", ["rev-parse", "HEAD"], { cwd: root, encoding: "utf8" }).trim();
   const baselineStateRef = host.location.canonical_path;
   const baselineStateHash = computeContentHash(gitBlob(baselineCommit, baselineStateRef));
   const evidenceRef = "KAIOS/software-life/evidence/SOFTWARE_ORGAN_GATE_EVIDENCE_FIXTURE.json";
   const evidenceContentHash = computeContentHash(gitBlob(evidenceCommit, evidenceRef));
+  const workerRegistryRef = "KGEN-KAIOS/worker_registry.json";
+  const workerRegistryHash = computeContentHash(gitBlob(baselineCommit, workerRegistryRef));
   const reviewId = "REVIEW-ORGAN-TRANSPLANT-001";
   const transplantId = "TRANSPLANT-ORGAN-001";
   const path = ["PROPOSED", "DONOR_REVIEW", "HOST_REVIEW", "COMPATIBILITY_TEST", "APPROVED_SIMULATION"];
+  const plannedPath = [...path, "TRANSPLANTING", "INTEGRATION_TEST", "ACCEPTED", "COMPLETE"];
   const events = [];
   let previousState = null;
   let previousHash = null;
@@ -240,6 +252,21 @@ const createValidRecord = () => {
       host_capabilities: ["STATIC_RENDER"],
       organ_id: organ.organ_id,
       reviewer: "CODEX_CANONICAL_REVIEW",
+      reviewer_provenance: {
+        provenance_type: "IMMUTABLE_REPOSITORY_REVIEW_ATTESTATION",
+        reviewer_alias: "CODEX_CANONICAL_REVIEW",
+        worker_id: "codex-gm-01",
+        authority_commit: baselineCommit,
+        worker_registry_ref: workerRegistryRef,
+        worker_registry_hash: workerRegistryHash,
+        evidence_bundle_ref: evidenceRef,
+        evidence_bundle_commit: evidenceCommit,
+        evidence_bundle_hash: evidenceContentHash,
+        review_subject_hash: hash("0"),
+        simulation_only: true,
+        cryptographic_user_authentication: false,
+        authentication_boundary: "REPOSITORY_MERGE_AUTHORITY_OUT_OF_BAND"
+      },
       gates: Object.fromEntries(gates.map((gate) => [gate, "PASS"])),
       gate_evidence: evidence,
       rights_record: {
@@ -264,7 +291,9 @@ const createValidRecord = () => {
       organ_id: organ.organ_id,
       state: "APPROVED_SIMULATION",
       automatic: false,
-      migration_plan: plan("PLAN-MIGRATION-001", path.map((state) => `TRANSITION-${state}`)),
+      migration_plan: plan("PLAN-MIGRATION-001", plannedPath.map((state) => (
+        state === "COMPLETE" ? "COMPLETE-TRANSPLANT" : `TRANSITION-${state}`
+      ))),
       rollback_plan: plan("PLAN-ROLLBACK-001", ["ROLLBACK-RESTORE"]),
       events
     },
@@ -282,6 +311,7 @@ const createValidRecord = () => {
     }
   };
   record.organ.compatibility_signature = computeOrganCompatibilitySignature(record.organ, record.security_boundary);
+  record.compatibility_review.reviewer_provenance.review_subject_hash = computeReviewerProvenanceSubjectHash(record);
   return record;
 };
 
@@ -339,10 +369,13 @@ const rebuildEventChain = (record) => {
 const appendTransition = (record, state, outputs = {}) => {
   const index = record.transplant.events.length;
   const action = canonicalActionForState(state);
-  if (state !== "ROLLED_BACK") {
+  if (state !== "ROLLED_BACK" && !record.transplant.migration_plan.steps.includes(action)) {
     record.transplant.migration_plan.steps.push(action);
     record.transplant.migration_plan.artifact_hash = computePlanArtifactHash(record.transplant.migration_plan);
   }
+  const plannedStepIndex = state === "ROLLED_BACK"
+    ? 0
+    : record.transplant.migration_plan.steps.indexOf(action);
   record.transplant.events.push({
     event_id: `EVENT-TRANSPLANT-${String(index + 1).padStart(3, "0")}`,
     transplant_id: record.transplant.transplant_id,
@@ -354,7 +387,7 @@ const appendTransition = (record, state, outputs = {}) => {
     action,
     inputs: {
       plan_id: state === "ROLLED_BACK" ? record.transplant.rollback_plan.plan_id : record.transplant.migration_plan.plan_id,
-      plan_step_index: state === "ROLLED_BACK" ? 0 : record.transplant.migration_plan.steps.length - 1,
+      plan_step_index: plannedStepIndex,
       plan_step_action: action
     },
     outputs: { replay_state_hash: hash("0"), ...outputs },
@@ -436,6 +469,9 @@ test("migration, rollback and deterministic history are mandatory", () => {
   for (const field of ["gate_evidence", "rights_record"]) {
     assert.ok(schema.$defs.compatibilityReview.required.includes(field), field);
   }
+  assert.ok(schema.$defs.compatibilityReview.required.includes("reviewer_provenance"));
+  assert.ok(schema.$defs.completionEvidence.required.includes("implementation_commit"));
+  assert.equal(schema.$defs.compatibilityReview.properties.reviewer_provenance.$ref, "#/$defs/reviewerProvenance");
 });
 
 test("every local schema reference resolves and declared object requirements exist", () => {
@@ -699,6 +735,48 @@ test("review, gate and approval actors resolve through canonical Worker Registry
   assert.ok(codes.has("GATE_REVIEWER_NOT_AUTHORIZED"));
   assert.ok(codes.has("CANONICAL_EVENT_ACTOR_NOT_AUTHORIZED"));
   assert.ok(codes.has("RIGHTS_DECISION_ACTOR_NOT_AUTHORIZED"));
+});
+
+test("current Worker Registry revocation overrides historical maximum authority", () => {
+  assert.equal(isAuthorizedWorker(trustedWorkerRegistry, "cursor-01", false, currentWorkerRegistry), true);
+  assert.equal(isAuthorizedWorker(trustedWorkerRegistry, "CODEX_CANONICAL_REVIEW", true, currentWorkerRegistry), true);
+
+  const revokedCursorRegistry = structuredClone(currentWorkerRegistry);
+  revokedCursorRegistry.workers.find(({ worker_id }) => worker_id === "cursor-01").status = "OFFLINE";
+  assert.equal(isAuthorizedWorker(trustedWorkerRegistry, "cursor-01", false, revokedCursorRegistry), false);
+
+  const suspendedReviewerRegistry = structuredClone(currentWorkerRegistry);
+  suspendedReviewerRegistry.workers.find(({ worker_id }) => worker_id === "codex-gm-01").suspension = {
+    status: "SUSPENDED",
+    reason: "Deterministic revocation fixture"
+  };
+  assert.equal(isAuthorizedWorker(
+    trustedWorkerRegistry,
+    "CODEX_CANONICAL_REVIEW",
+    true,
+    suspendedReviewerRegistry
+  ), false);
+});
+
+test("review provenance is bound to immutable authority and the semantic review subject", () => {
+  const record = createValidRecord();
+  record.compatibility_review.reviewer_provenance.worker_id = "cursor-01";
+  const codes = new Set(validate(record).errors.map(({ code }) => code));
+  assert.ok(codes.has("REVIEWER_PROVENANCE_INVALID"));
+  assert.ok(codes.has("REVIEWER_PROVENANCE_ATTESTATION_MISMATCH"));
+});
+
+test("rehashed adversarial plans cannot reuse stale gate attestations", () => {
+  const record = createValidRecord();
+  record.transplant.migration_plan.maximum_downtime_seconds = 999999;
+  record.transplant.migration_plan.resource_budget = quantity(1e300, "compute_millisecond");
+  record.transplant.migration_plan.verification_commands = ["node -e \"process.exit(0)\""];
+  record.transplant.migration_plan.artifact_hash = computePlanArtifactHash(record.transplant.migration_plan);
+  record.compatibility_review.reviewer_provenance.review_subject_hash = computeReviewerProvenanceSubjectHash(record);
+
+  const codes = new Set(validate(record).errors.map(({ code }) => code));
+  assert.ok(codes.has("GATE_SEMANTIC_ATTESTATION_INVALID"));
+  assert.ok(codes.has("REVIEWER_PROVENANCE_ATTESTATION_MISMATCH"));
 });
 
 test("repository evidence requires a regular tracked blob and matching content hash", () => {
