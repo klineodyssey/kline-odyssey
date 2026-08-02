@@ -123,7 +123,15 @@
     "runtime_status": { "enum": ["ACTIVE_SIMULATION", "READ_ONLY_PROJECTION", "SCHEMA_ONLY", "SPECIFICATION_ONLY", "NOT_EXECUTABLE"] },
     "parents": { "type": "array", "items": { "$ref": "#/$defs/stableId" }, "uniqueItems": true },
     "children": { "type": "array", "items": { "$ref": "#/$defs/stableId" }, "uniqueItems": true },
-    "transplants": { "type": "array", "items": { "type": "string" } },
+    "transplants": {
+      "type": "array",
+      "items": {
+        "oneOf": [
+          { "$ref": "#/$defs/stableId" },
+          { "$ref": "#/$defs/completedTransplantProjection" }
+        ]
+      }
+    },
     "mutations": { "type": "array", "items": { "type": "string" } },
     "marketplace_status": { "enum": ["NOT_ELIGIBLE", "CANDIDATE_ONLY", "UNDER_REVIEW", "APPROVED_SIMULATION", "LISTED_SIMULATION", "SUSPENDED", "DELISTED", "RETIRED"] },
     "public_url": { "type": ["string", "null"] },
@@ -147,6 +155,33 @@
       "pattern": "^(?!.*(?:^|[-_.])(?:v[0-9]+(?:[-_.][0-9]+)*|final|latest|new|copy|backup|rev(?:ision)?(?:[-_.]?[0-9]+)?)($|[-_.])).+$"
     },
     "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "repositoryCommit": { "type": "string", "pattern": "^[a-f0-9]{40}$" },
+    "completedTransplantProjection": {
+      "type": "object",
+      "required": [
+        "transplant_id",
+        "compatibility_review_id",
+        "donor_life_id",
+        "donor_genome_id",
+        "host_life_id",
+        "host_genome_id",
+        "organ_id",
+        "state",
+        "implementation_commit"
+      ],
+      "properties": {
+        "transplant_id": { "$ref": "#/$defs/stableId" },
+        "compatibility_review_id": { "$ref": "#/$defs/stableId" },
+        "donor_life_id": { "$ref": "#/$defs/stableId" },
+        "donor_genome_id": { "$ref": "#/$defs/stableId" },
+        "host_life_id": { "$ref": "#/$defs/stableId" },
+        "host_genome_id": { "$ref": "#/$defs/stableId" },
+        "organ_id": { "$ref": "#/$defs/stableId" },
+        "state": { "const": "COMPLETE" },
+        "implementation_commit": { "$ref": "#/$defs/repositoryCommit" }
+      },
+      "additionalProperties": false
+    },
     "repositoryPath": {
       "type": "string",
       "minLength": 1,

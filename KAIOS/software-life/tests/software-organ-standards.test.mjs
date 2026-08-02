@@ -418,7 +418,7 @@ const gitCommitBySubject = (subject) => execFileSync(
 
 const createCompletedRecord = () => {
   const evidenceCommit = gitCommitBySubject("test(kaios): bind semantic transplant evidence fixture");
-  const implementationCommit = gitCommitBySubject("fix(kaios): validate planned transplant prefix");
+  const implementationCommit = gitCommitBySubject("fix(kaios): allow completed transplant projections");
   const completionCommit = gitCommitBySubject("test(kaios): add completion provenance fixture projection");
   for (const [label, commit] of Object.entries({ evidenceCommit, implementationCommit, completionCommit })) {
     assert.match(commit, /^[a-f0-9]{40}$/, label);
@@ -585,6 +585,9 @@ test("Manifest policy accepts controlled review while retaining denied automatio
   assert.equal(manifestSchema.properties.transplant_policy.$ref, "#/$defs/transplantPolicy");
   assert.equal(manifestSchema.$defs.transplantPolicy.properties.automatic.const, false);
   assert.equal(manifestSchema.$defs.transplantPolicy.properties.codex_review_required.const, true);
+  assert.equal(manifestSchema.properties.transplants.items.oneOf[1].$ref, "#/$defs/completedTransplantProjection");
+  assert.equal(manifestSchema.$defs.completedTransplantProjection.properties.state.const, "COMPLETE");
+  assert.equal(manifestSchema.$defs.completedTransplantProjection.additionalProperties, false);
 });
 
 test("compact Manifest and full organ contracts use the same organ vocabulary", () => {
