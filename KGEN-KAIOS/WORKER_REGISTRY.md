@@ -80,10 +80,10 @@ closed, and its lease is released. Codex must then issue an explicit task
 envelope and obtain a successful atomic claim. No unreviewed or overlapping
 automatic dispatch is permitted.
 
-Current bounded claim: `KAIOS-CURSOR-VEGETABLE-PACKAGES-001` on
-`cursor-handoff/KAIOS-CURSOR-VEGETABLE-PACKAGES-001`. The preceding forest,
-crop and fruit-tree claims are `RELEASED`; vegetable is the only lock-holding
-task.
+Current bounded claim: `KAIOS-CURSOR-SOIL-TYPES-001` on
+`cursor-handoff/KAIOS-CURSOR-SOIL-TYPES-001`. The preceding forest, crop,
+fruit-tree and vegetable claims are `RELEASED`; soil types is the only
+lock-holding task.
 
 ## Permission Model
 
