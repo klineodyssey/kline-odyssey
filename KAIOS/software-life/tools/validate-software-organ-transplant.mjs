@@ -292,12 +292,13 @@ const readCanonicalJson = (repositoryRoot, path, errors) => {
   const cacheKey = `${resolve(repositoryRoot)}\0${path}`;
   try {
     const workingBytes = readFileSync(target);
-    if (computeContentHash(workingBytes) !== computeContentHash(headBlob)) {
+    const value = JSON.parse(workingBytes.toString("utf8"));
+    const committedValue = JSON.parse(headBlob.toString("utf8"));
+    if (canonicalJson(value) !== canonicalJson(committedValue)) {
       push(errors, "CANONICAL_GOVERNANCE_WORKTREE_DRIFT", path, `${path} must match its committed HEAD blob`);
       return null;
     }
     if (canonicalJsonCache.has(cacheKey)) return canonicalJsonCache.get(cacheKey);
-    const value = JSON.parse(workingBytes.toString("utf8"));
     canonicalJsonCache.set(cacheKey, value);
     return value;
   } catch {
