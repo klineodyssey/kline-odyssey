@@ -1,0 +1,360 @@
+{
+  "dataset_id": "KAIOS-CROP-RESOURCE-FLOW-PROPOSAL-V1",
+  "schema_version": "1.0.0-candidate",
+  "status": "CURSOR_RESEARCH_CANDIDATE_ONLY",
+  "review_status": "PENDING_CODEX_REVIEW",
+  "task_id": "KAIOS-CURSOR-CROP-LIFE-PACKAGES-001",
+  "worker_id": "cursor-01",
+  "branch": "cursor-handoff/KAIOS-CURSOR-CROP-LIFE-PACKAGES-001",
+  "dispatch_envelope_base_commit": "176e8b96e40894a542da5823c436e9d49f663f0e",
+  "source_base_commit": "05f471228af592e5c43071bc998e063101d82ef5",
+  "source_hash_basis": "SHA256_OF_GIT_BLOB_CONTENT_AT_SOURCE_BASE_COMMIT",
+  "mode": "SIMULATION_APPROXIMATION",
+  "owner_bindings": {
+    "crop_and_basic_warehouse": "AGRICULTURE_ALPHA",
+    "water_soil_nutrients_and_decomposition": "KAIOS_REPRODUCTION_ECOLOGY_RUNTIME_V1",
+    "inventory_and_ledger": "CIVILIZATION_ECONOMY_ALPHA",
+    "labor": "KAIOS_PHYSICAL_LABOR_SCHEMA"
+  },
+  "fixed_point_contract": {
+    "contract_id": "KAIOS_FIXED_POINT_DECIMAL_V1",
+    "transition_arithmetic": "SIGNED_INTEGER_ADDITION_ONLY",
+    "binary_floating_point_state_addition": "FORBIDDEN",
+    "rounding_mode_on_ingestion": "ROUND_HALF_TO_EVEN",
+    "negative_zero_serialization": "0",
+    "fixed_point_scale": {
+      "parameter_name": "fixed_point_scale",
+      "unit": "micro_unit_per_base_unit",
+      "minimum": 1000000,
+      "default": 1000000,
+      "maximum": 1000000,
+      "rationale": "Six-place integer state arithmetic avoids platform-dependent binary floating-point drift.",
+      "source_type": "REPOSITORY_DERIVED",
+      "confidence": "HIGH",
+      "risk": "Every adapter must preserve the declared domain unit.",
+      "validation_required": false
+    },
+    "decimal_places": {
+      "parameter_name": "fixed_point_decimal_places",
+      "unit": "decimal_place",
+      "minimum": 6,
+      "default": 6,
+      "maximum": 6,
+      "rationale": "Matches the reviewed forest candidate deterministic arithmetic contract.",
+      "source_type": "REPOSITORY_DERIVED",
+      "confidence": "HIGH",
+      "risk": "Changing scale invalidates all fixture hashes.",
+      "validation_required": false
+    }
+  },
+  "pool_domains": {
+    "water": { "base_unit": "liter", "integer_unit": "micro_liter", "owner": "KAIOS_REPRODUCTION_ECOLOGY_RUNTIME_V1" },
+    "structural_mass": { "base_unit": "kilogram", "integer_unit": "micro_kilogram", "owner": "KAIOS_REPRODUCTION_ECOLOGY_RUNTIME_V1" },
+    "nutrient": { "base_unit": "kilogram_nutrient_proxy", "integer_unit": "micro_kilogram_nutrient_proxy", "owner": "KAIOS_REPRODUCTION_ECOLOGY_RUNTIME_V1" },
+    "energy": { "base_unit": "joule_proxy", "integer_unit": "micro_joule_proxy", "owner": "KAIOS_REPRODUCTION_ECOLOGY_RUNTIME_V1" },
+    "labor_capacity": { "base_unit": "worker_minute", "integer_unit": "micro_worker_minute", "owner": "KAIOS_PHYSICAL_LABOR_SCHEMA" }
+  },
+  "flow_contracts": [
+    { "flow_id": "CROP-SEED-TO-PLANT", "domain": "structural_mass_and_nutrient", "debit": "seed_inventory", "credits": ["plant_structural_biomass", "plant_nutrient_store"], "required_gates": ["SEED_SOURCE", "SOIL", "LABOR", "TIME"] },
+    { "flow_id": "CROP-IRRIGATION", "domain": "water", "debit": "irrigation_reservoir", "credits": ["field_surface_water", "soil_moisture", "drainage_return"], "required_gates": ["WATER_SOURCE", "WATER_USAGE_CAPABILITY", "IRRIGATION_PATH", "LABOR_OR_AUTHORIZED_AUTOMATION", "TIME"] },
+    { "flow_id": "CROP-GROWTH", "domain": "structural_mass_nutrient_energy_water", "debits": ["atmospheric_carbon_material_proxy", "soil_nutrient_pool", "soil_moisture", "solar_energy_source_proxy"], "credits": ["plant_structural_biomass", "plant_nutrient_store", "plant_water_store", "plant_embedded_energy_store_proxy", "environmental_heat_dissipation_proxy"], "required_gates": ["SUNLIGHT", "TEMPERATURE", "HEALTH", "LABOR", "ELAPSED_TIME"] },
+    { "flow_id": "CROP-HARVEST", "domain": "structural_mass_nutrient_water_energy_labor", "debits": ["plant_stores", "labor_available"], "credits": ["field_harvest_product", "crop_residue", "drainage_return", "labor_consumed"], "required_gates": ["HARVEST_READY", "HARVEST_LABOR", "TOOLS", "CONTAINERS", "WAREHOUSE_CAPACITY", "TIME"] },
+    { "flow_id": "CROP-WAREHOUSE-CUSTODY", "domain": "structural_mass_nutrient_water_energy", "debit": "field_harvest_product", "credit": "warehouse_product", "required_gates": ["WAREHOUSE_CAPACITY", "WAREHOUSE_OPERATOR", "TRANSPORT_OR_COLOCATED_TRANSFER", "TIME"] },
+    { "flow_id": "CROP-RESIDUE-TO-COMPOST", "domain": "structural_mass_nutrient_energy", "debit": "crop_residue", "credits": ["compost_feedstock", "environmental_heat_dissipation_proxy"], "required_gates": ["COMPOST_BATCH_REFERENCE", "LABOR", "WATER_IF_REQUIRED", "TIME"] },
+    { "flow_id": "CROP-NUTRIENT-RETURN", "domain": "structural_mass_nutrient_energy", "debit": "compost_feedstock", "credits": ["soil_organic_matter", "soil_nutrient_pool", "atmospheric_carbon_material_proxy", "environmental_heat_dissipation_proxy"], "required_gates": ["DECOMPOSITION_EVENT", "NUTRIENT_RETURN_EVENT", "TIME"] }
+  ],
+  "numeric_parameters": [
+    {
+      "parameter_name": "conservation_tolerance",
+      "unit": "integer_micro_unit",
+      "minimum": 0,
+      "default": 0,
+      "maximum": 0,
+      "rationale": "The integer oracle requires exact conservation in every modeled pool domain.",
+      "source_type": "RESEARCH_PROPOSAL",
+      "confidence": "HIGH",
+      "risk": "Future physical adapters may require an explicitly reviewed nonzero tolerance.",
+      "validation_required": false
+    },
+    {
+      "parameter_name": "oracle_simulation_duration",
+      "unit": "minute",
+      "minimum": 2880,
+      "default": 2880,
+      "maximum": 2880,
+      "rationale": "Two ordered 24-hour synthetic owner-cycle intervals make elapsed time explicit.",
+      "source_type": "RESEARCH_PROPOSAL",
+      "confidence": "HIGH",
+      "risk": "Fixture duration is not a real rice growth duration.",
+      "validation_required": false
+    }
+  ],
+  "numerical_oracle": {
+    "oracle_id": "CROP-RICE-NUMERICAL-ORACLE-001",
+    "crop_id": "RICE",
+    "fixture_status": "OBJECTIVE_TEST_FIXTURE_NOT_RUNTIME_PARAMETER",
+    "integer_scale": 1000000,
+    "integer_contract": "All initial values and deltas are signed integers in the micro-unit named by their containing pool. No floating-point arithmetic is permitted.",
+    "initial_state": {
+      "oracle_id": "CROP-RICE-NUMERICAL-ORACLE-001",
+      "simulation_elapsed_micro_minute": 0,
+      "water_pools_micro_liter": {
+        "atmospheric_water_proxy": 200000000,
+        "drainage_return": 0,
+        "field_harvest_product_water": 0,
+        "field_surface_water": 0,
+        "irrigation_reservoir": 1000000000,
+        "plant_water_store": 0,
+        "soil_moisture": 300000000,
+        "warehouse_product_water": 0
+      },
+      "structural_mass_pools_micro_kilogram": {
+        "atmospheric_carbon_material_proxy": 1000000000,
+        "compost_feedstock_structural_mass": 0,
+        "crop_residue_structural_mass": 0,
+        "field_harvest_product_structural_mass": 0,
+        "plant_structural_biomass": 0,
+        "recorded_material_dissipation_proxy": 0,
+        "seed_inventory_structural_mass": 10000000,
+        "soil_organic_matter_structural_mass": 200000000,
+        "warehouse_product_structural_mass": 0
+      },
+      "nutrient_pools_micro_kilogram_nutrient_proxy": {
+        "compost_nutrient_store": 0,
+        "crop_residue_nutrient_store": 0,
+        "field_harvest_product_nutrient_store": 0,
+        "plant_nutrient_store": 0,
+        "seed_inventory_nutrient_store": 1000000,
+        "soil_nutrient_pool": 100000000,
+        "warehouse_product_nutrient_store": 0
+      },
+      "energy_pools_micro_joule_proxy": {
+        "compost_embedded_energy_store": 0,
+        "crop_residue_embedded_energy_store": 0,
+        "environmental_heat_dissipation_proxy": 0,
+        "field_harvest_product_embedded_energy_store": 0,
+        "plant_embedded_energy_store": 0,
+        "solar_energy_source_proxy": 100000000000,
+        "warehouse_product_embedded_energy_store": 0
+      },
+      "labor_pools_micro_worker_minute": {
+        "labor_available": 600000000,
+        "labor_consumed": 0
+      }
+    },
+    "initial_totals": {
+      "water_micro_liter": 1500000000,
+      "structural_mass_micro_kilogram": 1210000000,
+      "nutrient_micro_kilogram_nutrient_proxy": 101000000,
+      "energy_micro_joule_proxy": 100000000000,
+      "labor_micro_worker_minute": 600000000
+    },
+    "ordered_actions": [
+      {
+        "sequence": "001",
+        "event_id": "CROP-ORACLE-EVT-001",
+        "event_type": "PLANTING_EVENT",
+        "deltas": {
+          "structural_mass_pools_micro_kilogram": { "plant_structural_biomass": 2000000, "seed_inventory_structural_mass": -2000000 },
+          "nutrient_pools_micro_kilogram_nutrient_proxy": { "plant_nutrient_store": 200000, "seed_inventory_nutrient_store": -200000 },
+          "labor_pools_micro_worker_minute": { "labor_available": -30000000, "labor_consumed": 30000000 }
+        }
+      },
+      {
+        "sequence": "002",
+        "event_id": "CROP-ORACLE-EVT-002",
+        "event_type": "IRRIGATION_WITHDRAWAL_EVENT",
+        "deltas": { "water_pools_micro_liter": { "field_surface_water": 200000000, "irrigation_reservoir": -200000000 } }
+      },
+      {
+        "sequence": "003",
+        "event_id": "CROP-ORACLE-EVT-003",
+        "event_type": "INFILTRATION_AND_DRAINAGE_EVENT",
+        "deltas": { "water_pools_micro_liter": { "drainage_return": 20000000, "field_surface_water": -200000000, "soil_moisture": 180000000 } }
+      },
+      {
+        "sequence": "004",
+        "event_id": "CROP-ORACLE-EVT-004",
+        "event_type": "PLANT_WATER_UPTAKE_EVENT",
+        "deltas": { "water_pools_micro_liter": { "plant_water_store": 100000000, "soil_moisture": -100000000 } }
+      },
+      {
+        "sequence": "005",
+        "event_id": "CROP-ORACLE-EVT-005",
+        "event_type": "CAUSAL_GROWTH_PHASE_ONE_EVENT",
+        "state_deltas": { "simulation_elapsed_micro_minute": 1440000000 },
+        "deltas": {
+          "structural_mass_pools_micro_kilogram": { "atmospheric_carbon_material_proxy": -20000000, "plant_structural_biomass": 20000000 },
+          "nutrient_pools_micro_kilogram_nutrient_proxy": { "plant_nutrient_store": 2000000, "soil_nutrient_pool": -2000000 },
+          "energy_pools_micro_joule_proxy": { "environmental_heat_dissipation_proxy": 7000000000, "plant_embedded_energy_store": 3000000000, "solar_energy_source_proxy": -10000000000 }
+        }
+      },
+      {
+        "sequence": "006",
+        "event_id": "CROP-ORACLE-EVT-006",
+        "event_type": "TRANSPIRATION_PROXY_EVENT",
+        "deltas": { "water_pools_micro_liter": { "atmospheric_water_proxy": 30000000, "plant_water_store": -30000000 } }
+      },
+      {
+        "sequence": "007",
+        "event_id": "CROP-ORACLE-EVT-007",
+        "event_type": "CROP_MAINTENANCE_LABOR_EVENT",
+        "deltas": { "labor_pools_micro_worker_minute": { "labor_available": -60000000, "labor_consumed": 60000000 } }
+      },
+      {
+        "sequence": "008",
+        "event_id": "CROP-ORACLE-EVT-008",
+        "event_type": "CAUSAL_GROWTH_PHASE_TWO_EVENT",
+        "state_deltas": { "simulation_elapsed_micro_minute": 1440000000 },
+        "deltas": {
+          "structural_mass_pools_micro_kilogram": { "atmospheric_carbon_material_proxy": -10000000, "plant_structural_biomass": 10000000 },
+          "nutrient_pools_micro_kilogram_nutrient_proxy": { "plant_nutrient_store": 1000000, "soil_nutrient_pool": -1000000 },
+          "energy_pools_micro_joule_proxy": { "environmental_heat_dissipation_proxy": 3500000000, "plant_embedded_energy_store": 1500000000, "solar_energy_source_proxy": -5000000000 }
+        }
+      },
+      {
+        "sequence": "009",
+        "event_id": "CROP-ORACLE-EVT-009",
+        "event_type": "HARVEST_EVENT",
+        "deltas": {
+          "water_pools_micro_liter": { "drainage_return": 10000000, "field_harvest_product_water": 40000000, "plant_water_store": -50000000 },
+          "structural_mass_pools_micro_kilogram": { "crop_residue_structural_mass": 6000000, "field_harvest_product_structural_mass": 18000000, "plant_structural_biomass": -24000000 },
+          "nutrient_pools_micro_kilogram_nutrient_proxy": { "crop_residue_nutrient_store": 600000, "field_harvest_product_nutrient_store": 1800000, "plant_nutrient_store": -2400000 },
+          "energy_pools_micro_joule_proxy": { "crop_residue_embedded_energy_store": 900000000, "field_harvest_product_embedded_energy_store": 2700000000, "plant_embedded_energy_store": -3600000000 },
+          "labor_pools_micro_worker_minute": { "labor_available": -120000000, "labor_consumed": 120000000 }
+        }
+      },
+      {
+        "sequence": "010",
+        "event_id": "CROP-ORACLE-EVT-010",
+        "event_type": "WAREHOUSE_CUSTODY_TRANSFER_EVENT",
+        "deltas": {
+          "water_pools_micro_liter": { "field_harvest_product_water": -40000000, "warehouse_product_water": 40000000 },
+          "structural_mass_pools_micro_kilogram": { "field_harvest_product_structural_mass": -18000000, "warehouse_product_structural_mass": 18000000 },
+          "nutrient_pools_micro_kilogram_nutrient_proxy": { "field_harvest_product_nutrient_store": -1800000, "warehouse_product_nutrient_store": 1800000 },
+          "energy_pools_micro_joule_proxy": { "field_harvest_product_embedded_energy_store": -2700000000, "warehouse_product_embedded_energy_store": 2700000000 }
+        }
+      },
+      {
+        "sequence": "011",
+        "event_id": "CROP-ORACLE-EVT-011",
+        "event_type": "RESIDUE_TO_COMPOST_EVENT",
+        "deltas": {
+          "structural_mass_pools_micro_kilogram": { "compost_feedstock_structural_mass": 4000000, "crop_residue_structural_mass": -4000000 },
+          "nutrient_pools_micro_kilogram_nutrient_proxy": { "compost_nutrient_store": 400000, "crop_residue_nutrient_store": -400000 },
+          "energy_pools_micro_joule_proxy": { "compost_embedded_energy_store": 100000000, "crop_residue_embedded_energy_store": -600000000, "environmental_heat_dissipation_proxy": 500000000 }
+        }
+      },
+      {
+        "sequence": "012",
+        "event_id": "CROP-ORACLE-EVT-012",
+        "event_type": "NUTRIENT_RETURN_EVENT",
+        "deltas": {
+          "structural_mass_pools_micro_kilogram": { "atmospheric_carbon_material_proxy": 200000, "compost_feedstock_structural_mass": -1000000, "soil_organic_matter_structural_mass": 800000 },
+          "nutrient_pools_micro_kilogram_nutrient_proxy": { "compost_nutrient_store": -100000, "soil_nutrient_pool": 100000 },
+          "energy_pools_micro_joule_proxy": { "compost_embedded_energy_store": -25000000, "environmental_heat_dissipation_proxy": 25000000 }
+        }
+      }
+    ],
+    "expected_final_state": {
+      "oracle_id": "CROP-RICE-NUMERICAL-ORACLE-001",
+      "simulation_elapsed_micro_minute": 2880000000,
+      "water_pools_micro_liter": {
+        "atmospheric_water_proxy": 230000000,
+        "drainage_return": 30000000,
+        "field_harvest_product_water": 0,
+        "field_surface_water": 0,
+        "irrigation_reservoir": 800000000,
+        "plant_water_store": 20000000,
+        "soil_moisture": 380000000,
+        "warehouse_product_water": 40000000
+      },
+      "structural_mass_pools_micro_kilogram": {
+        "atmospheric_carbon_material_proxy": 970200000,
+        "compost_feedstock_structural_mass": 3000000,
+        "crop_residue_structural_mass": 2000000,
+        "field_harvest_product_structural_mass": 0,
+        "plant_structural_biomass": 8000000,
+        "recorded_material_dissipation_proxy": 0,
+        "seed_inventory_structural_mass": 8000000,
+        "soil_organic_matter_structural_mass": 200800000,
+        "warehouse_product_structural_mass": 18000000
+      },
+      "nutrient_pools_micro_kilogram_nutrient_proxy": {
+        "compost_nutrient_store": 300000,
+        "crop_residue_nutrient_store": 200000,
+        "field_harvest_product_nutrient_store": 0,
+        "plant_nutrient_store": 800000,
+        "seed_inventory_nutrient_store": 800000,
+        "soil_nutrient_pool": 97100000,
+        "warehouse_product_nutrient_store": 1800000
+      },
+      "energy_pools_micro_joule_proxy": {
+        "compost_embedded_energy_store": 75000000,
+        "crop_residue_embedded_energy_store": 300000000,
+        "environmental_heat_dissipation_proxy": 11025000000,
+        "field_harvest_product_embedded_energy_store": 0,
+        "plant_embedded_energy_store": 900000000,
+        "solar_energy_source_proxy": 85000000000,
+        "warehouse_product_embedded_energy_store": 2700000000
+      },
+      "labor_pools_micro_worker_minute": {
+        "labor_available": 390000000,
+        "labor_consumed": 210000000
+      }
+    },
+    "expected_final_totals": {
+      "water_micro_liter": 1500000000,
+      "structural_mass_micro_kilogram": 1210000000,
+      "nutrient_micro_kilogram_nutrient_proxy": 101000000,
+      "energy_micro_joule_proxy": 100000000000,
+      "labor_micro_worker_minute": 600000000
+    },
+    "canonical_serialization": {
+      "algorithm_id": "KAIOS_CANONICAL_JSON_INTEGER_V1",
+      "hash_payload": "numerical_oracle.expected_final_state",
+      "object_keys": "ascending Unicode code-point order; all current keys are ASCII",
+      "array_order": "preserved",
+      "number_format": "base-10 safe integer without exponent",
+      "string_format": "JSON.stringify escaping",
+      "whitespace": "none",
+      "encoding": "UTF-8 without BOM or trailing newline",
+      "hash": "SHA-256 lowercase hexadecimal"
+    },
+    "expected_final_sha256": "62ad9997a125620630e52778870a9b3a242c6333998552b3767607efc42cbd24",
+    "objective_assertions": [
+      "APPLY_ACTIONS_IN_SEQUENCE_ORDER",
+      "USE_SIGNED_INTEGER_MICRO_UNITS_ONLY",
+      "REJECT_BINARY_FLOAT_STATE_ADDITION",
+      "REJECT_NEGATIVE_POOL_AFTER_EACH_ACTION",
+      "EACH_ACTION_DELTA_SUM_EQUALS_ZERO_PER_CONSERVED_DOMAIN",
+      "FINAL_STATE_EQUALS_EXPECTED_FINAL_STATE",
+      "WATER_TOTAL_EQUALS_INITIAL_TOTAL",
+      "STRUCTURAL_MASS_TOTAL_EQUALS_INITIAL_TOTAL",
+      "NUTRIENT_TOTAL_EQUALS_INITIAL_TOTAL",
+      "ENERGY_TOTAL_EQUALS_INITIAL_TOTAL",
+      "LABOR_CAPACITY_TOTAL_EQUALS_INITIAL_TOTAL",
+      "CANONICAL_SHA256_EQUALS_EXPECTED_FINAL_SHA256",
+      "SECOND_REPLAY_PRODUCES_IDENTICAL_SHA256"
+    ]
+  },
+  "provenance": [
+    { "source_type": "REPOSITORY_DERIVED", "source_path": "KGEN-KAIOS/world-viewer/agriculture/agriculture-runtime.js", "source_commit": "05f471228af592e5c43071bc998e063101d82ef5", "git_object": "f09478806a47c10825258385ee855faa74f51a79", "sha256": "4557d6b449ce3979f2bf4ca10cc48f271ead2ddb34cc127e60b264ce26b577c2", "purpose": "Crop and basic warehouse owner." },
+    { "source_type": "REPOSITORY_DERIVED", "source_path": "KGEN-KAIOS/world-viewer/ecosystem/ecosystem-runtime.js", "source_commit": "05f471228af592e5c43071bc998e063101d82ef5", "git_object": "2bab509140ab4b93c7e4975286c826693965cf26", "sha256": "9b2cd9d4501727d3134ea332e1a30cd77d5d7d647300820f51d9c264784ef537", "purpose": "Water, structural mass, nutrient, energy and decomposition owner." },
+    { "source_type": "REPOSITORY_DERIVED", "source_path": "KGEN-KAIOS/world-viewer/economy/economy-runtime.js", "source_commit": "05f471228af592e5c43071bc998e063101d82ef5", "git_object": "2b1a37dba8cf3863eb4b30d4547995f281a6bc62", "sha256": "8b5879091b212ea3e0ead296719e872b9353209fd8982f01567f2bbb78991f27", "purpose": "Inventory and ledger owner." },
+    { "source_type": "REPOSITORY_DERIVED", "source_path": "KGEN-KAIOS/world-viewer/biology/taxonomy-standard.js", "source_commit": "05f471228af592e5c43071bc998e063101d82ef5", "git_object": "f4cc78d30bccf375bb3e55f5e3cb2df63d0a4683", "sha256": "2c7eb6d439ac320176751c4985d1f510b68a5656ef4b4ef041dc46b4f55dcc28", "purpose": "RICE_ALPHA identity reference." },
+    { "source_type": "REPOSITORY_DERIVED", "source_path": "KGEN-KAIOS/world-viewer/data/synthetic-world.json", "source_commit": "05f471228af592e5c43071bc998e063101d82ef5", "git_object": "76ddff32f74c2b41ca7d9d9309b7b39a2a2618c8", "sha256": "4be4c1b83420bb24604742fb722a8aedba8b3d2c163f7f18ccd871628ee7f34f", "purpose": "Synthetic agriculture context." },
+    { "source_type": "REPOSITORY_DERIVED", "source_path": "KAIOS_CANONICAL_LIFE_SCHEMA_V1.json", "source_commit": "05f471228af592e5c43071bc998e063101d82ef5", "git_object": "3bfcea2e0fc3854a6ff674a93ef32edc2ee0aab5", "sha256": "d1ced898d043e4890142df40a9033145762d4ceb28fd0e49eae39dc43bf224c5", "purpose": "Plant physics and resource binding boundary." },
+    { "source_type": "REPOSITORY_DERIVED", "source_path": "KAIOS_CANONICAL_LIFE_TYPE_EXTENSIONS_V1.json", "source_commit": "05f471228af592e5c43071bc998e063101d82ef5", "git_object": "8f3a30d1cba18b7156c64439bfce5d9bafc6926e", "sha256": "72ab55fe394b1038cb2b8ab8bac616f378521b89fde36aa6cf5ab3cbebea58fa", "purpose": "PLANT_EXTENSION inputs and outputs." },
+    { "source_type": "REPOSITORY_DERIVED", "source_path": "KAIOS_PHYSICAL_LABOR_SCHEMA.json", "source_commit": "05f471228af592e5c43071bc998e063101d82ef5", "git_object": "357b00093f4a912e616e9d39edf04753aacf94f7", "sha256": "21060f7bdf64f0a3af827f1fcd7d95d3170affef54c01bbeb449b9361fdd2f43", "purpose": "Labor capacity accounting owner." },
+    { "source_type": "REPOSITORY_DERIVED", "source_path": "KAIOS/life/forest-agriculture/KAIOS_FOREST_AGRICULTURE_RUNTIME_V1_SPEC.md", "source_commit": "05f471228af592e5c43071bc998e063101d82ef5", "git_object": "9a2dd4ad05bb7b2e3d71b91b479359947ada8376", "sha256": "4e1a23e97d09ec2dc4ad65440e6958e646f75ed418e5c703c5a5a1635c2809a1", "purpose": "Paired-pool and causal crop-flow requirements." }
+  ],
+  "boundaries": {
+    "runtime_engine": false,
+    "authoritative_inventory": false,
+    "authoritative_ledger": false,
+    "rights_grant": false,
+    "canonical_promotion": false,
+    "production_authority": false
+  }
+}

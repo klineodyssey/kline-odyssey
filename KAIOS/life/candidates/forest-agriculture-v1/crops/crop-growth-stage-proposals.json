@@ -1,0 +1,169 @@
+{
+  "dataset_id": "KAIOS-CROP-GROWTH-STAGE-PROPOSALS-V1",
+  "schema_version": "1.0.0-candidate",
+  "status": "CURSOR_RESEARCH_CANDIDATE_ONLY",
+  "review_status": "PENDING_CODEX_REVIEW",
+  "task_id": "KAIOS-CURSOR-CROP-LIFE-PACKAGES-001",
+  "worker_id": "cursor-01",
+  "branch": "cursor-handoff/KAIOS-CURSOR-CROP-LIFE-PACKAGES-001",
+  "dispatch_envelope_base_commit": "176e8b96e40894a542da5823c436e9d49f663f0e",
+  "source_base_commit": "05f471228af592e5c43071bc998e063101d82ef5",
+  "source_hash_basis": "SHA256_OF_GIT_BLOB_CONTENT_AT_SOURCE_BASE_COMMIT",
+  "mode": "SIMULATION_APPROXIMATION",
+  "stage_machine_contract": {
+    "authoritative_owner": "AGRICULTURE_ALPHA",
+    "candidate_projection_only": true,
+    "allowed_crop_states": ["PLANNED", "SOIL_PREPARATION", "PLANTED", "GERMINATING", "GROWING", "FLOWERING_OR_FRUITING", "HARVEST_READY", "HARVESTED", "FAILED", "RESIDUE_PENDING"],
+    "transition_rule": "A stage begins only after the prior stage is complete and all listed resource, environment, labor and elapsed-time gates pass.",
+    "stage_skipping": false,
+    "instant_growth": false,
+    "failed_gate_behavior": "REMAIN_IN_CURRENT_STAGE_WITH_BLOCK_REASON_AND_NO_UNPAIRED_RESOURCE_DEBIT"
+  },
+  "crop_stage_proposals": [
+    {
+      "crop_id": "RICE",
+      "species_reference": "RICE_ALPHA",
+      "owner_cycle_hours": "24",
+      "default_duration_sum_contract": "Stage defaults sum exactly to the Agriculture Alpha cycle of 24 hours.",
+      "stages": [
+        {
+          "order": "001",
+          "stage_id": "SOIL_PREPARATION",
+          "required_inputs": ["COMPATIBLE_SOIL", "LABOR", "TOOLS", "WATER_PLAN"],
+          "duration": { "parameter_name": "rice_soil_preparation_duration", "unit": "hour", "minimum": 1, "default": 2, "maximum": 4, "rationale": "Candidate subdivision of the existing synthetic 24-hour cycle.", "source_type": "MODEL_INFERENCE", "confidence": "LOW", "risk": "Not a real field-work duration.", "validation_required": true }
+        },
+        {
+          "order": "002",
+          "stage_id": "GERMINATING",
+          "required_inputs": ["RICE_SEED_SOURCE", "SOIL_MOISTURE", "TEMPERATURE", "ELAPSED_TIME"],
+          "duration": { "parameter_name": "rice_germination_duration", "unit": "hour", "minimum": 1, "default": 4, "maximum": 8, "rationale": "Candidate deterministic germination stage within the owner cycle.", "source_type": "MODEL_INFERENCE", "confidence": "LOW", "risk": "Compressed synthetic time is not biological guidance.", "validation_required": true }
+        },
+        {
+          "order": "003",
+          "stage_id": "GROWING",
+          "required_inputs": ["WATER", "NUTRIENTS", "SUNLIGHT", "TEMPERATURE", "LABOR", "ELAPSED_TIME"],
+          "duration": { "parameter_name": "rice_vegetative_growth_duration", "unit": "hour", "minimum": 4, "default": 8, "maximum": 16, "rationale": "Candidate main growth interval that preserves the owner cycle default.", "source_type": "MODEL_INFERENCE", "confidence": "LOW", "risk": "No cultivar or real season is modeled.", "validation_required": true }
+        },
+        {
+          "order": "004",
+          "stage_id": "FLOWERING_OR_FRUITING",
+          "required_inputs": ["WATER", "NUTRIENTS", "SUNLIGHT", "TEMPERATURE", "ELAPSED_TIME"],
+          "duration": { "parameter_name": "rice_reproductive_stage_duration", "unit": "hour", "minimum": 1, "default": 4, "maximum": 8, "rationale": "Candidate reproductive-state marker without reproduction authority.", "source_type": "RESEARCH_PROPOSAL", "confidence": "LOW", "risk": "Does not model real flowering or controlled breeding.", "validation_required": true }
+        },
+        {
+          "order": "005",
+          "stage_id": "HARVEST_READY",
+          "required_inputs": ["PRIOR_STAGES_COMPLETE", "ELAPSED_TIME", "HARVEST_LABOR_PLAN", "WAREHOUSE_CAPACITY"],
+          "duration": { "parameter_name": "rice_maturation_duration", "unit": "hour", "minimum": 1, "default": 6, "maximum": 12, "rationale": "Final candidate interval makes stage defaults total 24 owner hours.", "source_type": "MODEL_INFERENCE", "confidence": "LOW", "risk": "Synthetic readiness cannot support food-safety or agronomic claims.", "validation_required": true }
+        }
+      ],
+      "harvest_parameters": [
+        { "parameter_name": "rice_candidate_harvest_window", "unit": "hour", "minimum": 1, "default": 4, "maximum": 12, "rationale": "Bounded test window after HARVEST_READY.", "source_type": "RESEARCH_PROPOSAL", "confidence": "LOW", "risk": "Not a real harvest recommendation.", "validation_required": true },
+        { "parameter_name": "rice_candidate_residue_fraction", "unit": "fraction_of_harvested_structural_mass", "minimum": 0.1, "default": 0.25, "maximum": 0.6, "rationale": "Creates explicit residue custody for mass-accounting tests.", "source_type": "MODEL_INFERENCE", "confidence": "LOW", "risk": "No cultivar-specific residue ratio is implied.", "validation_required": true }
+      ]
+    },
+    {
+      "crop_id": "VEGETABLE",
+      "species_reference": null,
+      "species_reference_status": "SOURCE_UNDERSPECIFIED",
+      "owner_cycle_hours": "12",
+      "default_duration_sum_contract": "Stage defaults sum exactly to the Agriculture Alpha cycle of 12 hours.",
+      "stages": [
+        {
+          "order": "001",
+          "stage_id": "SOIL_PREPARATION",
+          "required_inputs": ["COMPATIBLE_SOIL", "LABOR", "TOOLS", "WATER_PLAN"],
+          "duration": { "parameter_name": "vegetable_soil_preparation_duration", "unit": "hour", "minimum": 0.5, "default": 1, "maximum": 3, "rationale": "Candidate subdivision of the synthetic aggregate cycle.", "source_type": "MODEL_INFERENCE", "confidence": "LOW", "risk": "VEGETABLE is not a resolved species.", "validation_required": true }
+        },
+        {
+          "order": "002",
+          "stage_id": "GERMINATING",
+          "required_inputs": ["VEGETABLE_PROPAGATION_SOURCE", "SOIL_MOISTURE", "TEMPERATURE", "ELAPSED_TIME"],
+          "duration": { "parameter_name": "vegetable_germination_duration", "unit": "hour", "minimum": 0.5, "default": 2, "maximum": 5, "rationale": "Candidate deterministic stage for an unresolved aggregate class.", "source_type": "SOURCE_UNDERSPECIFIED", "confidence": "LOW", "risk": "Specific vegetables have materially different propagation behavior.", "validation_required": true }
+        },
+        {
+          "order": "003",
+          "stage_id": "GROWING",
+          "required_inputs": ["WATER", "NUTRIENTS", "SUNLIGHT", "TEMPERATURE", "LABOR", "ELAPSED_TIME"],
+          "duration": { "parameter_name": "vegetable_growth_duration", "unit": "hour", "minimum": 2, "default": 5, "maximum": 10, "rationale": "Candidate main growth interval preserving the owner default cycle.", "source_type": "MODEL_INFERENCE", "confidence": "LOW", "risk": "No species-specific morphology or season is modeled.", "validation_required": true }
+        },
+        {
+          "order": "004",
+          "stage_id": "FLOWERING_OR_FRUITING",
+          "required_inputs": ["WATER", "NUTRIENTS", "SUNLIGHT", "TEMPERATURE", "ELAPSED_TIME"],
+          "duration": { "parameter_name": "vegetable_productive_stage_duration", "unit": "hour", "minimum": 0.5, "default": 2, "maximum": 5, "rationale": "Generic productive stage retained only to exercise causal gates.", "source_type": "SOURCE_UNDERSPECIFIED", "confidence": "LOW", "risk": "Leaf, root and fruit vegetables do not share one productive stage.", "validation_required": true }
+        },
+        {
+          "order": "005",
+          "stage_id": "HARVEST_READY",
+          "required_inputs": ["PRIOR_STAGES_COMPLETE", "ELAPSED_TIME", "HARVEST_LABOR_PLAN", "WAREHOUSE_CAPACITY"],
+          "duration": { "parameter_name": "vegetable_maturation_duration", "unit": "hour", "minimum": 0.5, "default": 2, "maximum": 5, "rationale": "Candidate final interval that makes defaults total 12 owner hours.", "source_type": "MODEL_INFERENCE", "confidence": "LOW", "risk": "Not a real maturity specification.", "validation_required": true }
+        }
+      ],
+      "harvest_parameters": [
+        { "parameter_name": "vegetable_candidate_harvest_window", "unit": "hour", "minimum": 0.5, "default": 2, "maximum": 8, "rationale": "Bounded synthetic harvest window for tests.", "source_type": "RESEARCH_PROPOSAL", "confidence": "LOW", "risk": "Future species packages must replace it.", "validation_required": true },
+        { "parameter_name": "vegetable_candidate_residue_fraction", "unit": "fraction_of_harvested_structural_mass", "minimum": 0.05, "default": 0.2, "maximum": 0.6, "rationale": "Provides a named residue path for conservation checks.", "source_type": "MODEL_INFERENCE", "confidence": "LOW", "risk": "Aggregate ratio is not biological evidence.", "validation_required": true }
+      ]
+    },
+    {
+      "crop_id": "FRUIT",
+      "species_reference": "FRUIT_ALPHA",
+      "owner_cycle_hours": "48",
+      "default_duration_sum_contract": "Stage defaults sum exactly to the Agriculture Alpha cycle of 48 hours.",
+      "stages": [
+        {
+          "order": "001",
+          "stage_id": "SOIL_PREPARATION",
+          "required_inputs": ["COMPATIBLE_SOIL", "LABOR", "TOOLS", "WATER_PLAN"],
+          "duration": { "parameter_name": "fruit_soil_preparation_duration", "unit": "hour", "minimum": 2, "default": 6, "maximum": 12, "rationale": "Candidate setup interval for the existing synthetic FRUIT cycle.", "source_type": "MODEL_INFERENCE", "confidence": "LOW", "risk": "Does not describe real orchard establishment.", "validation_required": true }
+        },
+        {
+          "order": "002",
+          "stage_id": "GERMINATING",
+          "required_inputs": ["FRUIT_PROPAGATION_SOURCE", "SOIL_MOISTURE", "TEMPERATURE", "ELAPSED_TIME"],
+          "duration": { "parameter_name": "fruit_establishment_duration", "unit": "hour", "minimum": 2, "default": 8, "maximum": 16, "rationale": "Compressed candidate establishment stage within the owner cycle.", "source_type": "SOURCE_UNDERSPECIFIED", "confidence": "LOW", "risk": "No propagation method or tree age is resolved.", "validation_required": true }
+        },
+        {
+          "order": "003",
+          "stage_id": "GROWING",
+          "required_inputs": ["WATER", "NUTRIENTS", "SUNLIGHT", "TEMPERATURE", "LABOR", "ELAPSED_TIME"],
+          "duration": { "parameter_name": "fruit_growth_duration", "unit": "hour", "minimum": 4, "default": 14, "maximum": 28, "rationale": "Candidate vegetative interval for deterministic owner-cycle subdivision.", "source_type": "MODEL_INFERENCE", "confidence": "LOW", "risk": "Synthetic hours are not tree maturation time.", "validation_required": true }
+        },
+        {
+          "order": "004",
+          "stage_id": "FLOWERING_OR_FRUITING",
+          "required_inputs": ["WATER", "NUTRIENTS", "SUNLIGHT", "TEMPERATURE", "ELAPSED_TIME", "FUTURE_POLLINATION_REVIEW"],
+          "duration": { "parameter_name": "fruit_productive_stage_duration", "unit": "hour", "minimum": 4, "default": 12, "maximum": 24, "rationale": "Candidate aggregate fruiting stage; pollinators remain outside this work order.", "source_type": "SOURCE_UNDERSPECIFIED", "confidence": "LOW", "risk": "No pollination or species-specific fruit-set mechanism is active.", "validation_required": true }
+        },
+        {
+          "order": "005",
+          "stage_id": "HARVEST_READY",
+          "required_inputs": ["PRIOR_STAGES_COMPLETE", "ELAPSED_TIME", "HARVEST_LABOR_PLAN", "WAREHOUSE_CAPACITY"],
+          "duration": { "parameter_name": "fruit_maturation_duration", "unit": "hour", "minimum": 2, "default": 8, "maximum": 16, "rationale": "Final candidate interval makes defaults total 48 owner hours.", "source_type": "MODEL_INFERENCE", "confidence": "LOW", "risk": "Not a food-quality or ripeness certification.", "validation_required": true }
+        }
+      ],
+      "harvest_parameters": [
+        { "parameter_name": "fruit_candidate_harvest_window", "unit": "hour", "minimum": 1, "default": 6, "maximum": 18, "rationale": "Bounded test window after synthetic readiness.", "source_type": "RESEARCH_PROPOSAL", "confidence": "LOW", "risk": "Not a real harvest recommendation.", "validation_required": true },
+        { "parameter_name": "fruit_candidate_residue_fraction", "unit": "fraction_of_harvested_structural_mass", "minimum": 0.05, "default": 0.15, "maximum": 0.5, "rationale": "Creates explicit rejected/residue custody for conservation tests.", "source_type": "MODEL_INFERENCE", "confidence": "LOW", "risk": "No specific fruit or grading standard is represented.", "validation_required": true }
+      ]
+    }
+  ],
+  "provenance": [
+    { "source_type": "REPOSITORY_DERIVED", "source_path": "KGEN-KAIOS/world-viewer/agriculture/agriculture-runtime.js", "source_commit": "05f471228af592e5c43071bc998e063101d82ef5", "git_object": "f09478806a47c10825258385ee855faa74f51a79", "sha256": "4557d6b449ce3979f2bf4ca10cc48f271ead2ddb34cc127e60b264ce26b577c2", "purpose": "Owner cycle durations, crop states and harvest behavior." },
+    { "source_type": "REPOSITORY_DERIVED", "source_path": "KGEN-KAIOS/world-viewer/ecosystem/ecosystem-runtime.js", "source_commit": "05f471228af592e5c43071bc998e063101d82ef5", "git_object": "2bab509140ab4b93c7e4975286c826693965cf26", "sha256": "9b2cd9d4501727d3134ea332e1a30cd77d5d7d647300820f51d9c264784ef537", "purpose": "Environment and resource evaluation owner." },
+    { "source_type": "REPOSITORY_DERIVED", "source_path": "KGEN-KAIOS/world-viewer/economy/economy-runtime.js", "source_commit": "05f471228af592e5c43071bc998e063101d82ef5", "git_object": "2b1a37dba8cf3863eb4b30d4547995f281a6bc62", "sha256": "8b5879091b212ea3e0ead296719e872b9353209fd8982f01567f2bbb78991f27", "purpose": "Warehouse and inventory owner boundary." },
+    { "source_type": "REPOSITORY_DERIVED", "source_path": "KGEN-KAIOS/world-viewer/biology/taxonomy-standard.js", "source_commit": "05f471228af592e5c43071bc998e063101d82ef5", "git_object": "f4cc78d30bccf375bb3e55f5e3cb2df63d0a4683", "sha256": "2c7eb6d439ac320176751c4985d1f510b68a5656ef4b4ef041dc46b4f55dcc28", "purpose": "Crop species reference status." },
+    { "source_type": "REPOSITORY_DERIVED", "source_path": "KGEN-KAIOS/world-viewer/data/synthetic-world.json", "source_commit": "05f471228af592e5c43071bc998e063101d82ef5", "git_object": "76ddff32f74c2b41ca7d9d9309b7b39a2a2618c8", "sha256": "4be4c1b83420bb24604742fb722a8aedba8b3d2c163f7f18ccd871628ee7f34f", "purpose": "Synthetic crop and facility context." },
+    { "source_type": "REPOSITORY_DERIVED", "source_path": "KAIOS_CANONICAL_LIFE_SCHEMA_V1.json", "source_commit": "05f471228af592e5c43071bc998e063101d82ef5", "git_object": "3bfcea2e0fc3854a6ff674a93ef32edc2ee0aab5", "sha256": "d1ced898d043e4890142df40a9033145762d4ceb28fd0e49eae39dc43bf224c5", "purpose": "PLANT_LIFE growth and development contract." },
+    { "source_type": "REPOSITORY_DERIVED", "source_path": "KAIOS_CANONICAL_LIFE_TYPE_EXTENSIONS_V1.json", "source_commit": "05f471228af592e5c43071bc998e063101d82ef5", "git_object": "8f3a30d1cba18b7156c64439bfce5d9bafc6926e", "sha256": "72ab55fe394b1038cb2b8ab8bac616f378521b89fde36aa6cf5ab3cbebea58fa", "purpose": "Plant growth, seed and reproduction extension boundary." },
+    { "source_type": "REPOSITORY_DERIVED", "source_path": "KAIOS_PHYSICAL_LABOR_SCHEMA.json", "source_commit": "05f471228af592e5c43071bc998e063101d82ef5", "git_object": "357b00093f4a912e616e9d39edf04753aacf94f7", "sha256": "21060f7bdf64f0a3af827f1fcd7d95d3170affef54c01bbeb449b9361fdd2f43", "purpose": "Labor and elapsed-time gates." },
+    { "source_type": "REPOSITORY_DERIVED", "source_path": "KAIOS/life/forest-agriculture/KAIOS_FOREST_AGRICULTURE_RUNTIME_V1_SPEC.md", "source_commit": "05f471228af592e5c43071bc998e063101d82ef5", "git_object": "9a2dd4ad05bb7b2e3d71b91b479359947ada8376", "sha256": "4e1a23e97d09ec2dc4ad65440e6958e646f75ed418e5c703c5a5a1635c2809a1", "purpose": "Causal crop state ordering and required gates." }
+  ],
+  "boundaries": {
+    "runtime_state_machine": false,
+    "breeding_authority": false,
+    "food_safety_claim": false,
+    "canonical_promotion": false,
+    "production_authority": false
+  }
+}
