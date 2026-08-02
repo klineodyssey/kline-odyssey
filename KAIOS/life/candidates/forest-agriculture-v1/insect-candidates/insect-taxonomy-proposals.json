@@ -1,0 +1,165 @@
+{
+  "dataset_id": "KAIOS-INSECT-TAXONOMY-PROPOSALS-V1",
+  "schema_version": "1.0.0-candidate",
+  "status": "CURSOR_RESEARCH_CANDIDATE_ONLY",
+  "review_status": "PENDING_CODEX_REVIEW",
+  "authority": "NO_PRODUCTION_AUTHORITY",
+  "task_id": "KAIOS-CURSOR-INSECT-CANDIDATES-001",
+  "worker_id": "cursor-01",
+  "branch": "cursor-handoff/KAIOS-CURSOR-INSECT-CANDIDATES-001",
+  "dispatch_branch_base_commit": "88dce5e0532567a1f1113abf9bfee907efea65bc",
+  "source_base_commit": "56d3b8f20a63c4a8a5d19251ed72f7f9fe4e78c9",
+  "source_hash_basis": "SHA256_OF_GIT_BLOB_CONTENT_AT_SOURCE_BASE_COMMIT",
+  "mode": "NONCANONICAL_TAXONOMY_RESEARCH",
+  "taxonomy_contract": {
+    "owner_registry": "KGEN-KAIOS/world-viewer/biology/taxonomy-standard.js",
+    "canonical_life_contract": "KAIOS_CANONICAL_LIFE_SCHEMA_V1",
+    "required_owner_ranks": ["domain", "kingdom", "phylum", "class", "order", "family", "genus", "species", "subspecies", "category"],
+    "required_canonical_ranks": ["DOMAIN", "KINGDOM", "PHYLUM", "CLASS", "ORDER", "FAMILY", "GENUS", "SPECIES", "LIFE_INSTANCE"],
+    "proposal_ids_are_owner_registered": false,
+    "canonical_promotion": false,
+    "life_instance_semantics": "CANDIDATE_INSTANCE_ID_ONLY; SUBSPECIES_NEVER_MAPS_TO_LIFE_INSTANCE"
+  },
+  "existing_registry_boundary": {
+    "existing_insect_species_id": "BEE_ALPHA",
+    "existing_insect_taxonomy_status": "REPOSITORY_DEFINED_SYNTHETIC_ALPHA",
+    "candidate_claims_existing_id": false,
+    "candidate_mutates_existing_id": false,
+    "pollinator_workline_boundary": "BEE_ALPHA_AND_ALL_POLLINATION_BEHAVIOR_REMAIN_OUTSIDE_THIS_TASK"
+  },
+  "proposals": [
+    {
+      "taxonomy_proposal_id": "INSECT-TAXONOMY-HERBIVORE-V1",
+      "candidate_package_id": "CANDIDATE-INSECT-HERBIVORE-V1",
+      "species_id": "SPECIES-KAIOS-INSECT-HERBIVORE-CANDIDATE",
+      "proposal_status": "COMPLETE_NONCANONICAL_PROPOSAL",
+      "owner_registry_presence_at_source_base": false,
+      "owner_format_taxonomy": {
+        "domain": "EUKARYOTA",
+        "kingdom": "ANIMALIA",
+        "phylum": "ARTHROPODA",
+        "class": "INSECTA",
+        "order": "COLEOPTERA",
+        "family": "CHRYSOMELIDAE",
+        "genus": "KAIOS_CHRYSOMELA",
+        "species": "KAIOS_CHRYSOMELA_HERBIVORA_CANDIDATE",
+        "subspecies": "RESEARCH_CANDIDATE",
+        "category": "ANIMAL"
+      },
+      "canonical_life_crosswalk": {
+        "DOMAIN": "EUKARYOTA",
+        "KINGDOM": "ANIMALIA",
+        "PHYLUM": "ARTHROPODA",
+        "CLASS": "INSECTA",
+        "ORDER": "COLEOPTERA",
+        "FAMILY": "CHRYSOMELIDAE",
+        "GENUS": "KAIOS_CHRYSOMELA",
+        "SPECIES": "KAIOS_CHRYSOMELA_HERBIVORA_CANDIDATE",
+        "LIFE_INSTANCE": "LIFE-KAIOS-INSECT-HERBIVORE-CANDIDATE-001"
+      },
+      "role_proposal": "HERBIVORE",
+      "role_owner_vocabulary_status": "EXISTS_BUT_NOT_ACTIVATED",
+      "evidence_class": "RESEARCH_PROPOSAL",
+      "confidence": "LOW",
+      "risk": "Synthetic genus and species labels are identifiers for candidate simulation only and are not biological classifications."
+    },
+    {
+      "taxonomy_proposal_id": "INSECT-TAXONOMY-PREDATOR-V1",
+      "candidate_package_id": "CANDIDATE-INSECT-PREDATOR-V1",
+      "species_id": "SPECIES-KAIOS-INSECT-PREDATOR-CANDIDATE",
+      "proposal_status": "COMPLETE_NONCANONICAL_PROPOSAL",
+      "owner_registry_presence_at_source_base": false,
+      "owner_format_taxonomy": {
+        "domain": "EUKARYOTA",
+        "kingdom": "ANIMALIA",
+        "phylum": "ARTHROPODA",
+        "class": "INSECTA",
+        "order": "COLEOPTERA",
+        "family": "CARABIDAE",
+        "genus": "KAIOS_CARABUS",
+        "species": "KAIOS_CARABUS_PRAEDATOR_CANDIDATE",
+        "subspecies": "RESEARCH_CANDIDATE",
+        "category": "ANIMAL"
+      },
+      "canonical_life_crosswalk": {
+        "DOMAIN": "EUKARYOTA",
+        "KINGDOM": "ANIMALIA",
+        "PHYLUM": "ARTHROPODA",
+        "CLASS": "INSECTA",
+        "ORDER": "COLEOPTERA",
+        "FAMILY": "CARABIDAE",
+        "GENUS": "KAIOS_CARABUS",
+        "SPECIES": "KAIOS_CARABUS_PRAEDATOR_CANDIDATE",
+        "LIFE_INSTANCE": "LIFE-KAIOS-INSECT-PREDATOR-CANDIDATE-001"
+      },
+      "role_proposal": "PREDATOR",
+      "role_owner_vocabulary_status": "EXISTS_BUT_NOT_ACTIVATED",
+      "evidence_class": "RESEARCH_PROPOSAL",
+      "confidence": "LOW",
+      "risk": "The role does not establish a food-chain edge, prey identity or pest-control effect."
+    },
+    {
+      "taxonomy_proposal_id": "INSECT-TAXONOMY-DETRITIVORE-V1",
+      "candidate_package_id": "CANDIDATE-INSECT-DETRITIVORE-V1",
+      "species_id": "SPECIES-KAIOS-INSECT-DETRITIVORE-CANDIDATE",
+      "proposal_status": "COMPLETE_NONCANONICAL_PROPOSAL",
+      "owner_registry_presence_at_source_base": false,
+      "owner_format_taxonomy": {
+        "domain": "EUKARYOTA",
+        "kingdom": "ANIMALIA",
+        "phylum": "ARTHROPODA",
+        "class": "INSECTA",
+        "order": "COLEOPTERA",
+        "family": "TENEBRIONIDAE",
+        "genus": "KAIOS_TENEBRIO",
+        "species": "KAIOS_TENEBRIO_DETRITIVORA_CANDIDATE",
+        "subspecies": "RESEARCH_CANDIDATE",
+        "category": "ANIMAL"
+      },
+      "canonical_life_crosswalk": {
+        "DOMAIN": "EUKARYOTA",
+        "KINGDOM": "ANIMALIA",
+        "PHYLUM": "ARTHROPODA",
+        "CLASS": "INSECTA",
+        "ORDER": "COLEOPTERA",
+        "FAMILY": "TENEBRIONIDAE",
+        "GENUS": "KAIOS_TENEBRIO",
+        "SPECIES": "KAIOS_TENEBRIO_DETRITIVORA_CANDIDATE",
+        "LIFE_INSTANCE": "LIFE-KAIOS-INSECT-DETRITIVORE-CANDIDATE-001"
+      },
+      "role_proposal": "DETRITIVORE",
+      "role_owner_vocabulary_status": "SOURCE_UNDERSPECIFIED_NO_DIRECT_ENUM_VALUE",
+      "owner_vocabulary_projection": null,
+      "owner_vocabulary_gate": "CODEX_AND_ECOLOGY_OWNER_DECISION_REQUIRED",
+      "evidence_class": "RESEARCH_PROPOSAL",
+      "confidence": "LOW",
+      "risk": "Mapping detritivore to SCAVENGER or DECOMPOSER without owner review would change trophic semantics."
+    }
+  ],
+  "objective_taxonomy_assertions": [
+    "EXACTLY_THREE_PROPOSALS",
+    "ALL_REQUIRED_OWNER_RANKS_NONEMPTY",
+    "ALL_REQUIRED_CANONICAL_RANKS_NONEMPTY",
+    "ALL_CATEGORY_VALUES_EQUAL_ANIMAL",
+    "ALL_CANONICAL_LIFE_INSTANCE_VALUES_DIFFER_FROM_OWNER_SUBSPECIES",
+    "ALL_PROPOSAL_SPECIES_IDS_ABSENT_FROM_OWNER_REGISTRY_AT_SOURCE_BASE",
+    "BEE_ALPHA_REMAINS_UNCHANGED_AND_UNCLAIMED",
+    "NO_CANONICAL_PROMOTION",
+    "NO_POLLINATOR_BEHAVIOR"
+  ],
+  "provenance": [
+    {"source_type": "REPOSITORY_DERIVED", "source_path": "KAIOS_CANONICAL_LIFE_SCHEMA_V1.json", "source_commit": "56d3b8f20a63c4a8a5d19251ed72f7f9fe4e78c9", "git_object": "3bfcea2e0fc3854a6ff674a93ef32edc2ee0aab5", "sha256": "d1ced898d043e4890142df40a9033145762d4ceb28fd0e49eae39dc43bf224c5", "usage": "Canonical taxonomy rank and LIFE_INSTANCE boundary."},
+    {"source_type": "REPOSITORY_DERIVED", "source_path": "KAIOS_CANONICAL_LIFE_TYPE_EXTENSIONS_V1.json", "source_commit": "56d3b8f20a63c4a8a5d19251ed72f7f9fe4e78c9", "git_object": "8f3a30d1cba18b7156c64439bfce5d9bafc6926e", "sha256": "72ab55fe394b1038cb2b8ab8bac616f378521b89fde36aa6cf5ab3cbebea58fa", "usage": "ANIMAL_LIFE to ANIMAL_EXTENSION mapping."},
+    {"source_type": "REPOSITORY_DERIVED", "source_path": "KGEN-KAIOS/world-viewer/biology/taxonomy-standard.js", "source_commit": "56d3b8f20a63c4a8a5d19251ed72f7f9fe4e78c9", "git_object": "f4cc78d30bccf375bb3e55f5e3cb2df63d0a4683", "sha256": "2c7eb6d439ac320176751c4985d1f510b68a5656ef4b4ef041dc46b4f55dcc28", "usage": "Owner rank list, category list, trophic-role vocabulary, BEE_ALPHA record and proposal-ID absence."},
+    {"source_type": "REPOSITORY_DERIVED", "source_path": "KGEN-KAIOS/world-viewer/data/synthetic-world.json", "source_commit": "56d3b8f20a63c4a8a5d19251ed72f7f9fe4e78c9", "git_object": "76ddff32f74c2b41ca7d9d9309b7b39a2a2618c8", "sha256": "4be4c1b83420bb24604742fb722a8aedba8b3d2c163f7f18ccd871628ee7f34f", "usage": "Existing BEE_ALPHA synthetic insect evidence and owner-role boundary."}
+  ],
+  "boundaries": {
+    "canonical_registry_write": false,
+    "existing_taxonomy_mutation": false,
+    "pollination_behavior": "EXCLUDED_SEPARATE_QUEUE_TASK",
+    "active_food_chain_behavior": false,
+    "pest_control_claim": false,
+    "disease_claim": false,
+    "production_authority": false
+  }
+}

@@ -1,0 +1,408 @@
+{
+  "dataset_id": "KAIOS-INSECT-LIFECYCLE-RESOURCE-PROPOSALS-V1",
+  "schema_version": "1.0.0-candidate",
+  "status": "CURSOR_RESEARCH_CANDIDATE_ONLY",
+  "review_status": "PENDING_CODEX_REVIEW",
+  "authority": "NO_PRODUCTION_AUTHORITY",
+  "task_id": "KAIOS-CURSOR-INSECT-CANDIDATES-001",
+  "worker_id": "cursor-01",
+  "branch": "cursor-handoff/KAIOS-CURSOR-INSECT-CANDIDATES-001",
+  "dispatch_branch_base_commit": "88dce5e0532567a1f1113abf9bfee907efea65bc",
+  "source_base_commit": "56d3b8f20a63c4a8a5d19251ed72f7f9fe4e78c9",
+  "source_hash_basis": "SHA256_OF_GIT_BLOB_CONTENT_AT_SOURCE_BASE_COMMIT",
+  "mode": "OBJECTIVE_CANDIDATE_SIMULATION_FIXTURE",
+  "owner_bindings": {
+    "life_causality": "KAIOS_LIFE_RUNTIME_V1_SPECIFICATION",
+    "habitat_population_resources_and_decomposition": "KAIOS_REPRODUCTION_ECOLOGY_RUNTIME_V1",
+    "forest_agriculture_coordination": "KAIOS_FOREST_AGRICULTURE_RUNTIME_V1_SPECIFICATION",
+    "current_ecology_insect_admission": "NOT_AVAILABLE",
+    "runtime_activation": false
+  },
+  "fixed_point_contract": {
+    "contract_id": "KAIOS_FIXED_POINT_DECIMAL_V1",
+    "transition_arithmetic": "SIGNED_INTEGER_ADDITION_ONLY",
+    "binary_floating_point_state_addition": "FORBIDDEN",
+    "rounding_mode_on_ingestion": "ROUND_HALF_TO_EVEN",
+    "canonical_state_serialization": "KAIOS_CANONICAL_JSON_INTEGER_V1",
+    "parameters": [
+      {"parameter_name": "fixed_point_scale", "unit": "micro_unit_per_base_proxy_unit", "minimum": 1000000, "default": 1000000, "maximum": 1000000, "rationale": "Six-place integer arithmetic makes replay independent of binary floating-point behavior.", "source_type": "REPOSITORY_DERIVED", "confidence": "HIGH", "risk": "Changing the scale invalidates every state value and expected hash.", "validation_required": true},
+      {"parameter_name": "conservation_tolerance", "unit": "integer_micro_unit", "minimum": 0, "default": 0, "maximum": 0, "rationale": "The candidate oracle requires exact closure in every modeled domain.", "source_type": "RESEARCH_PROPOSAL", "confidence": "HIGH", "risk": "A future owner adapter may require separately reviewed rounding treatment.", "validation_required": true},
+      {"parameter_name": "simulation_tick_duration", "unit": "minute_per_simulation_tick", "minimum": 1440, "default": 1440, "maximum": 1440, "rationale": "Provides a deterministic fixture clock; it is not a biological lifecycle claim.", "source_type": "RESEARCH_PROPOSAL", "confidence": "HIGH", "risk": "Tick duration must never be presented as a real species development interval.", "validation_required": true}
+    ]
+  },
+  "population_contract": {
+    "count_arithmetic": "INTEGER_ONLY",
+    "birth_death_identity": "FINAL_COUNT = INITIAL_COUNT + BIRTHS - DEATHS - NET_MIGRATION",
+    "migration_in_oracle": "ZERO_NOT_MODELED",
+    "reproduction_gate_order": ["OWNER_SCHEMA_ADMISSION", "LOCATION", "HABITAT", "ELIGIBLE_PARENT_COHORT", "MINIMUM_STAGE_AGE", "HEALTH", "ENERGY_PROXY", "FOOD", "WATER", "TEMPERATURE", "COOLDOWN", "POPULATION_CAP", "GENERATION_CAP", "ELAPSED_TIME"],
+    "parameters": [
+      {"parameter_name": "ecology_owner_default_hard_population_cap", "unit": "individual_count", "minimum": 100, "default": 100, "maximum": 100, "rationale": "Exact projection of the Ecology V1 specification default hard population cap.", "source_type": "REPOSITORY_DERIVED", "confidence": "HIGH", "risk": "The current Ecology schema does not admit these insect species IDs.", "validation_required": true},
+      {"parameter_name": "ecology_owner_absolute_population_cap", "unit": "individual_count", "minimum": 500, "default": 500, "maximum": 500, "rationale": "Exact projection of the current Ecology V1 maximum total population boundary.", "source_type": "REPOSITORY_DERIVED", "confidence": "HIGH", "risk": "The value is an owner safety bound, not authorization for insect admission.", "validation_required": true},
+      {"parameter_name": "candidate_package_aggregate_population_cap", "unit": "individual_count", "minimum": 3, "default": 100, "maximum": 100, "rationale": "Keeps the three role proposals collectively within the Ecology default hard cap.", "source_type": "MODEL_INFERENCE", "confidence": "MEDIUM", "risk": "No carrying-capacity calibration exists for the proposed identities.", "validation_required": true},
+      {"parameter_name": "candidate_package_generation_cap", "unit": "generation_index", "minimum": 0, "default": 3, "maximum": 5, "rationale": "Bounds recursive lifecycle fixtures below the existing ecology candidate generation limit.", "source_type": "MODEL_INFERENCE", "confidence": "MEDIUM", "risk": "Generation is a simulation counter, not a genetics claim.", "validation_required": true}
+    ]
+  },
+  "lifecycle_profiles": [
+    {
+      "profile_id": "INSECT-LIFECYCLE-HERBIVORE-V1",
+      "candidate_package_id": "CANDIDATE-INSECT-HERBIVORE-V1",
+      "species_id": "SPECIES-KAIOS-INSECT-HERBIVORE-CANDIDATE",
+      "stage_order": ["EGG", "IMMATURE", "PUPA", "ADULT", "DEAD_BIOMASS_CUSTODY"],
+      "stage_skipping": false,
+      "instant_transition": false,
+      "stages": [
+        {"stage_id": "EGG", "duration": {"parameter_name": "herbivore_egg_stage_duration", "unit": "simulation_tick", "minimum": 1, "default": 4, "maximum": 12, "rationale": "Bounded synthetic stage interval for causal replay.", "source_type": "RESEARCH_PROPOSAL", "confidence": "LOW", "risk": "Not an empirical incubation period.", "validation_required": true}},
+        {"stage_id": "IMMATURE", "duration": {"parameter_name": "herbivore_immature_stage_duration", "unit": "simulation_tick", "minimum": 2, "default": 10, "maximum": 30, "rationale": "Bounded synthetic development interval requiring food, water and time.", "source_type": "RESEARCH_PROPOSAL", "confidence": "LOW", "risk": "Not an empirical development period.", "validation_required": true}},
+        {"stage_id": "PUPA", "duration": {"parameter_name": "herbivore_pupa_stage_duration", "unit": "simulation_tick", "minimum": 1, "default": 5, "maximum": 15, "rationale": "Bounded non-skippable candidate transition interval.", "source_type": "RESEARCH_PROPOSAL", "confidence": "LOW", "risk": "No real metamorphosis physiology is modeled.", "validation_required": true}},
+        {"stage_id": "ADULT", "duration": {"parameter_name": "herbivore_adult_stage_duration", "unit": "simulation_tick", "minimum": 2, "default": 20, "maximum": 60, "rationale": "Bounds candidate adult-stage aging and mortality tests.", "source_type": "RESEARCH_PROPOSAL", "confidence": "LOW", "risk": "Not an empirical lifespan.", "validation_required": true}}
+      ],
+      "reproduction_and_population_parameters": [
+        {"parameter_name": "herbivore_minimum_eligible_adult_count", "unit": "individual_count", "minimum": 2, "default": 4, "maximum": 20, "rationale": "Prevents reproduction without an explicit eligible parent cohort.", "source_type": "MODEL_INFERENCE", "confidence": "LOW", "risk": "No mating biology or sex-ratio formula is implied.", "validation_required": true},
+        {"parameter_name": "herbivore_reproduction_cooldown", "unit": "simulation_tick", "minimum": 1, "default": 6, "maximum": 30, "rationale": "Prevents repeated births in the same causal interval.", "source_type": "RESEARCH_PROPOSAL", "confidence": "LOW", "risk": "Synthetic cooldown is not a real breeding interval.", "validation_required": true},
+        {"parameter_name": "herbivore_offspring_per_event_cap", "unit": "individual_count", "minimum": 0, "default": 20, "maximum": 20, "rationale": "Matches the bounded normal oracle and prevents an unbounded birth event.", "source_type": "RESEARCH_PROPOSAL", "confidence": "LOW", "risk": "Not a fecundity claim.", "validation_required": true},
+        {"parameter_name": "herbivore_population_cap", "unit": "individual_count", "minimum": 1, "default": 40, "maximum": 40, "rationale": "Allocates a finite portion of the aggregate candidate cap to the herbivore role.", "source_type": "MODEL_INFERENCE", "confidence": "LOW", "risk": "Not a carrying-capacity or release recommendation.", "validation_required": true},
+        {"parameter_name": "herbivore_generation_cap", "unit": "generation_index", "minimum": 0, "default": 3, "maximum": 3, "rationale": "Bounds recursive reproduction for deterministic tests.", "source_type": "MODEL_INFERENCE", "confidence": "MEDIUM", "risk": "Generation is only a simulation counter.", "validation_required": true}
+      ]
+    },
+    {
+      "profile_id": "INSECT-LIFECYCLE-PREDATOR-V1",
+      "candidate_package_id": "CANDIDATE-INSECT-PREDATOR-V1",
+      "species_id": "SPECIES-KAIOS-INSECT-PREDATOR-CANDIDATE",
+      "stage_order": ["EGG", "IMMATURE", "PUPA", "ADULT", "DEAD_BIOMASS_CUSTODY"],
+      "stage_skipping": false,
+      "instant_transition": false,
+      "stages": [
+        {"stage_id": "EGG", "duration": {"parameter_name": "predator_egg_stage_duration", "unit": "simulation_tick", "minimum": 1, "default": 5, "maximum": 15, "rationale": "Bounded synthetic stage interval for causal replay.", "source_type": "RESEARCH_PROPOSAL", "confidence": "LOW", "risk": "Not an empirical incubation period.", "validation_required": true}},
+        {"stage_id": "IMMATURE", "duration": {"parameter_name": "predator_immature_stage_duration", "unit": "simulation_tick", "minimum": 2, "default": 12, "maximum": 36, "rationale": "Bounded synthetic development interval requiring an abstract food pool, water and time.", "source_type": "RESEARCH_PROPOSAL", "confidence": "LOW", "risk": "No prey interaction or development biology is activated.", "validation_required": true}},
+        {"stage_id": "PUPA", "duration": {"parameter_name": "predator_pupa_stage_duration", "unit": "simulation_tick", "minimum": 1, "default": 6, "maximum": 18, "rationale": "Bounded non-skippable candidate transition interval.", "source_type": "RESEARCH_PROPOSAL", "confidence": "LOW", "risk": "No real metamorphosis physiology is modeled.", "validation_required": true}},
+        {"stage_id": "ADULT", "duration": {"parameter_name": "predator_adult_stage_duration", "unit": "simulation_tick", "minimum": 2, "default": 24, "maximum": 72, "rationale": "Bounds candidate adult-stage aging and mortality tests.", "source_type": "RESEARCH_PROPOSAL", "confidence": "LOW", "risk": "Not an empirical lifespan or pest-control service duration.", "validation_required": true}}
+      ],
+      "reproduction_and_population_parameters": [
+        {"parameter_name": "predator_minimum_eligible_adult_count", "unit": "individual_count", "minimum": 2, "default": 4, "maximum": 15, "rationale": "Prevents reproduction without an explicit eligible parent cohort.", "source_type": "MODEL_INFERENCE", "confidence": "LOW", "risk": "No mating biology or sex-ratio formula is implied.", "validation_required": true},
+        {"parameter_name": "predator_reproduction_cooldown", "unit": "simulation_tick", "minimum": 1, "default": 8, "maximum": 40, "rationale": "Prevents repeated births in the same causal interval.", "source_type": "RESEARCH_PROPOSAL", "confidence": "LOW", "risk": "Synthetic cooldown is not a real breeding interval.", "validation_required": true},
+        {"parameter_name": "predator_offspring_per_event_cap", "unit": "individual_count", "minimum": 0, "default": 10, "maximum": 15, "rationale": "Prevents an unbounded candidate birth event.", "source_type": "RESEARCH_PROPOSAL", "confidence": "LOW", "risk": "Not a fecundity claim.", "validation_required": true},
+        {"parameter_name": "predator_population_cap", "unit": "individual_count", "minimum": 1, "default": 30, "maximum": 30, "rationale": "Allocates a finite portion of the aggregate candidate cap to the predator role.", "source_type": "MODEL_INFERENCE", "confidence": "LOW", "risk": "Not a carrying-capacity, release or pest-control recommendation.", "validation_required": true},
+        {"parameter_name": "predator_generation_cap", "unit": "generation_index", "minimum": 0, "default": 3, "maximum": 3, "rationale": "Bounds recursive reproduction for deterministic tests.", "source_type": "MODEL_INFERENCE", "confidence": "MEDIUM", "risk": "Generation is only a simulation counter.", "validation_required": true}
+      ]
+    },
+    {
+      "profile_id": "INSECT-LIFECYCLE-DETRITIVORE-V1",
+      "candidate_package_id": "CANDIDATE-INSECT-DETRITIVORE-V1",
+      "species_id": "SPECIES-KAIOS-INSECT-DETRITIVORE-CANDIDATE",
+      "stage_order": ["EGG", "IMMATURE", "PUPA", "ADULT", "DEAD_BIOMASS_CUSTODY"],
+      "stage_skipping": false,
+      "instant_transition": false,
+      "stages": [
+        {"stage_id": "EGG", "duration": {"parameter_name": "detritivore_egg_stage_duration", "unit": "simulation_tick", "minimum": 1, "default": 6, "maximum": 18, "rationale": "Bounded synthetic stage interval for causal replay.", "source_type": "RESEARCH_PROPOSAL", "confidence": "LOW", "risk": "Not an empirical incubation period.", "validation_required": true}},
+        {"stage_id": "IMMATURE", "duration": {"parameter_name": "detritivore_immature_stage_duration", "unit": "simulation_tick", "minimum": 2, "default": 15, "maximum": 45, "rationale": "Bounded synthetic development interval requiring detritus, water and time.", "source_type": "RESEARCH_PROPOSAL", "confidence": "LOW", "risk": "No decomposition performance or development biology is claimed.", "validation_required": true}},
+        {"stage_id": "PUPA", "duration": {"parameter_name": "detritivore_pupa_stage_duration", "unit": "simulation_tick", "minimum": 1, "default": 7, "maximum": 21, "rationale": "Bounded non-skippable candidate transition interval.", "source_type": "RESEARCH_PROPOSAL", "confidence": "LOW", "risk": "No real metamorphosis physiology is modeled.", "validation_required": true}},
+        {"stage_id": "ADULT", "duration": {"parameter_name": "detritivore_adult_stage_duration", "unit": "simulation_tick", "minimum": 2, "default": 30, "maximum": 90, "rationale": "Bounds candidate adult-stage aging and mortality tests.", "source_type": "RESEARCH_PROPOSAL", "confidence": "LOW", "risk": "Not an empirical lifespan or waste-processing service duration.", "validation_required": true}}
+      ],
+      "reproduction_and_population_parameters": [
+        {"parameter_name": "detritivore_minimum_eligible_adult_count", "unit": "individual_count", "minimum": 2, "default": 4, "maximum": 15, "rationale": "Prevents reproduction without an explicit eligible parent cohort.", "source_type": "MODEL_INFERENCE", "confidence": "LOW", "risk": "No mating biology or sex-ratio formula is implied.", "validation_required": true},
+        {"parameter_name": "detritivore_reproduction_cooldown", "unit": "simulation_tick", "minimum": 1, "default": 8, "maximum": 40, "rationale": "Prevents repeated births in the same causal interval.", "source_type": "RESEARCH_PROPOSAL", "confidence": "LOW", "risk": "Synthetic cooldown is not a real breeding interval.", "validation_required": true},
+        {"parameter_name": "detritivore_offspring_per_event_cap", "unit": "individual_count", "minimum": 0, "default": 10, "maximum": 15, "rationale": "Prevents an unbounded candidate birth event.", "source_type": "RESEARCH_PROPOSAL", "confidence": "LOW", "risk": "Not a fecundity claim.", "validation_required": true},
+        {"parameter_name": "detritivore_population_cap", "unit": "individual_count", "minimum": 1, "default": 30, "maximum": 30, "rationale": "Allocates a finite portion of the aggregate candidate cap to the detritivore role.", "source_type": "MODEL_INFERENCE", "confidence": "LOW", "risk": "Not a carrying-capacity, release or waste-processing recommendation.", "validation_required": true},
+        {"parameter_name": "detritivore_generation_cap", "unit": "generation_index", "minimum": 0, "default": 3, "maximum": 3, "rationale": "Bounds recursive reproduction for deterministic tests.", "source_type": "MODEL_INFERENCE", "confidence": "MEDIUM", "risk": "Generation is only a simulation counter.", "validation_required": true}
+      ]
+    }
+  ],
+  "resource_custody_contract": {
+    "structural_mass": "Food, stage biomass, waste, dead biomass and pending decomposition custody are one closed mass domain.",
+    "water": "Habitat, stage, waste, atmospheric and pending decomposition water are one closed water domain.",
+    "energy_proxy": "Food energy, stage energy, waste energy, dissipation and pending decomposition energy are one closed proxy domain.",
+    "food_input": "Food source debit equals growth allocation plus waste allocation.",
+    "waste": "Generated waste equals retained waste plus pending owner transfer.",
+    "dead_biomass": "Mortality transfer equals retained dead biomass plus pending owner transfer.",
+    "owner_transfer": "Pending transfer custody is not an Ecology mutation; an accepted owner event and hash link would be required later.",
+    "microbial_boundary": "MICROBIAL_DECOMPOSITION_PROXY / ABSTRACT_RESOURCE_POOL / NOT_FULL_LIFE_RUNTIME",
+    "creates_microbes_or_other_life": false
+  },
+  "deterministic_normal_oracle": {
+    "oracle_id": "INSECT-HERBIVORE-LIFECYCLE-RESOURCE-ORACLE-001",
+    "candidate_package_id": "CANDIDATE-INSECT-HERBIVORE-V1",
+    "fixture_status": "OBJECTIVE_TEST_FIXTURE_NOT_RUNTIME_PARAMETER",
+    "integer_scale": 1000000,
+    "initial_state": {
+      "oracle_id": "INSECT-HERBIVORE-LIFECYCLE-RESOURCE-ORACLE-001",
+      "simulation_elapsed_micro_minute": 0,
+      "births_cumulative": 0,
+      "deaths_cumulative": 0,
+      "population_counts": {"adult": 16, "egg": 0, "immature": 0},
+      "generation_counts": {"generation_0": 16, "generation_1": 0},
+      "structural_mass_pools_micro_gram_proxy": {
+        "adult_biomass": 20000000,
+        "dead_biomass": 0,
+        "egg_biomass": 0,
+        "food_source_custody": 100000000,
+        "immature_biomass": 0,
+        "pending_ecology_decomposition_from_dead_custody": 0,
+        "pending_ecology_decomposition_from_waste_custody": 0,
+        "waste_biomass": 0
+      },
+      "water_pools_micro_milliliter_proxy": {
+        "adult_body_water": 2000000,
+        "atmospheric_water_proxy": 0,
+        "dead_biomass_water": 0,
+        "egg_body_water": 0,
+        "habitat_water_custody": 20000000,
+        "immature_body_water": 0,
+        "pending_ecology_decomposition_from_dead_water_custody": 0,
+        "pending_ecology_decomposition_from_waste_water_custody": 0,
+        "waste_water": 0
+      },
+      "energy_pools_micro_energy_proxy_unit": {
+        "adult_energy_store": 20000000,
+        "dead_biomass_energy_store": 0,
+        "egg_energy_store": 0,
+        "environmental_dissipation_proxy": 0,
+        "food_energy_source_custody": 100000000,
+        "immature_energy_store": 0,
+        "pending_ecology_decomposition_from_dead_energy_custody": 0,
+        "pending_ecology_decomposition_from_waste_energy_custody": 0,
+        "waste_energy_store": 0
+      }
+    },
+    "initial_totals": {
+      "structural_mass_micro_gram_proxy": 120000000,
+      "water_micro_milliliter_proxy": 22000000,
+      "energy_micro_energy_proxy_unit": 120000000,
+      "food_source_micro_gram_proxy": 100000000,
+      "waste_micro_gram_proxy": 0,
+      "dead_biomass_micro_gram_proxy": 0,
+      "population_count": 16
+    },
+    "ordered_actions": [
+      {
+        "sequence": "001",
+        "event_id": "INSECT-ORACLE-EVT-001",
+        "event_type": "FEED_DRINK_AND_WASTE_EVENT",
+        "required_gates": ["LOCATION", "HABITAT", "TEMPERATURE", "WATER", "FOOD", "ENERGY_PROXY", "ELAPSED_TIME"],
+        "state_deltas": {"simulation_elapsed_micro_minute": 1440000000},
+        "deltas": {
+          "structural_mass_pools_micro_gram_proxy": {"adult_biomass": 5000000, "food_source_custody": -12000000, "waste_biomass": 7000000},
+          "water_pools_micro_milliliter_proxy": {"adult_body_water": 1000000, "atmospheric_water_proxy": 300000, "habitat_water_custody": -2000000, "waste_water": 700000},
+          "energy_pools_micro_energy_proxy_unit": {"adult_energy_store": 5000000, "environmental_dissipation_proxy": 4000000, "food_energy_source_custody": -12000000, "waste_energy_store": 3000000}
+        }
+      },
+      {
+        "sequence": "002",
+        "event_id": "INSECT-ORACLE-EVT-002",
+        "event_type": "BOUNDED_REPRODUCTION_ALLOCATION_EVENT",
+        "required_gates": ["ELIGIBLE_PARENT_COHORT", "MINIMUM_STAGE_AGE", "HEALTH", "ENERGY_PROXY", "FOOD", "WATER", "TEMPERATURE", "COOLDOWN", "POPULATION_CAP", "GENERATION_CAP", "ELAPSED_TIME"],
+        "state_deltas": {"simulation_elapsed_micro_minute": 5760000000, "births_cumulative": 20},
+        "count_deltas": {"population_counts": {"egg": 20}, "generation_counts": {"generation_1": 20}},
+        "deltas": {
+          "structural_mass_pools_micro_gram_proxy": {"adult_biomass": -3000000, "egg_biomass": 3000000},
+          "water_pools_micro_milliliter_proxy": {"adult_body_water": -300000, "egg_body_water": 300000},
+          "energy_pools_micro_energy_proxy_unit": {"adult_energy_store": -3000000, "egg_energy_store": 2000000, "environmental_dissipation_proxy": 1000000}
+        }
+      },
+      {
+        "sequence": "003",
+        "event_id": "INSECT-ORACLE-EVT-003",
+        "event_type": "EGG_TO_IMMATURE_STAGE_EVENT",
+        "required_gates": ["EGG_STAGE_PRESENT", "HABITAT", "TEMPERATURE", "WATER", "ELAPSED_TIME", "STAGE_ORDER"],
+        "state_deltas": {"simulation_elapsed_micro_minute": 10080000000},
+        "count_deltas": {"population_counts": {"egg": -16, "immature": 16}},
+        "deltas": {
+          "structural_mass_pools_micro_gram_proxy": {"egg_biomass": -2400000, "immature_biomass": 2400000},
+          "water_pools_micro_milliliter_proxy": {"egg_body_water": -240000, "immature_body_water": 240000},
+          "energy_pools_micro_energy_proxy_unit": {"egg_energy_store": -1600000, "environmental_dissipation_proxy": 400000, "immature_energy_store": 1200000}
+        }
+      },
+      {
+        "sequence": "004",
+        "event_id": "INSECT-ORACLE-EVT-004",
+        "event_type": "IMMATURE_MORTALITY_EVENT",
+        "required_gates": ["IMMATURE_STAGE_PRESENT", "RECORDED_MORTALITY_CAUSE", "DEAD_BIOMASS_CUSTODY", "ELAPSED_TIME"],
+        "state_deltas": {"simulation_elapsed_micro_minute": 1440000000, "deaths_cumulative": 2},
+        "count_deltas": {"population_counts": {"immature": -2}, "generation_counts": {"generation_1": -2}},
+        "deltas": {
+          "structural_mass_pools_micro_gram_proxy": {"dead_biomass": 400000, "immature_biomass": -400000},
+          "water_pools_micro_milliliter_proxy": {"dead_biomass_water": 40000, "immature_body_water": -40000},
+          "energy_pools_micro_energy_proxy_unit": {"dead_biomass_energy_store": 200000, "immature_energy_store": -200000}
+        }
+      },
+      {
+        "sequence": "005",
+        "event_id": "INSECT-ORACLE-EVT-005",
+        "event_type": "IMMATURE_TO_ADULT_STAGE_EVENT",
+        "required_gates": ["IMMATURE_STAGE_PRESENT", "HABITAT", "TEMPERATURE", "WATER", "FOOD", "ENERGY_PROXY", "ELAPSED_TIME", "STAGE_ORDER"],
+        "state_deltas": {"simulation_elapsed_micro_minute": 20160000000},
+        "count_deltas": {"population_counts": {"adult": 10, "immature": -10}},
+        "deltas": {
+          "structural_mass_pools_micro_gram_proxy": {"adult_biomass": 1500000, "immature_biomass": -1500000},
+          "water_pools_micro_milliliter_proxy": {"adult_body_water": 150000, "immature_body_water": -150000},
+          "energy_pools_micro_energy_proxy_unit": {"adult_energy_store": 600000, "environmental_dissipation_proxy": 200000, "immature_energy_store": -800000}
+        }
+      },
+      {
+        "sequence": "006",
+        "event_id": "INSECT-ORACLE-EVT-006",
+        "event_type": "ADULT_MORTALITY_EVENT",
+        "required_gates": ["ADULT_STAGE_PRESENT", "RECORDED_MORTALITY_CAUSE", "DEAD_BIOMASS_CUSTODY", "ELAPSED_TIME"],
+        "state_deltas": {"simulation_elapsed_micro_minute": 1440000000, "deaths_cumulative": 1},
+        "count_deltas": {"population_counts": {"adult": -1}, "generation_counts": {"generation_0": -1}},
+        "deltas": {
+          "structural_mass_pools_micro_gram_proxy": {"adult_biomass": -500000, "dead_biomass": 500000},
+          "water_pools_micro_milliliter_proxy": {"adult_body_water": -50000, "dead_biomass_water": 50000},
+          "energy_pools_micro_energy_proxy_unit": {"adult_energy_store": -300000, "dead_biomass_energy_store": 300000}
+        }
+      },
+      {
+        "sequence": "007",
+        "event_id": "INSECT-ORACLE-EVT-007",
+        "event_type": "WASTE_TO_PENDING_ECOLOGY_CUSTODY_EVENT",
+        "required_gates": ["WASTE_CUSTODY_PRESENT", "OWNER_ACCEPTANCE_PENDING", "ELAPSED_TIME"],
+        "state_deltas": {"simulation_elapsed_micro_minute": 1440000000},
+        "deltas": {
+          "structural_mass_pools_micro_gram_proxy": {"pending_ecology_decomposition_from_waste_custody": 4000000, "waste_biomass": -4000000},
+          "water_pools_micro_milliliter_proxy": {"pending_ecology_decomposition_from_waste_water_custody": 400000, "waste_water": -400000},
+          "energy_pools_micro_energy_proxy_unit": {"pending_ecology_decomposition_from_waste_energy_custody": 2000000, "waste_energy_store": -2000000}
+        }
+      },
+      {
+        "sequence": "008",
+        "event_id": "INSECT-ORACLE-EVT-008",
+        "event_type": "DEAD_BIOMASS_TO_PENDING_ECOLOGY_CUSTODY_EVENT",
+        "required_gates": ["DEAD_BIOMASS_CUSTODY_PRESENT", "OWNER_ACCEPTANCE_PENDING", "ELAPSED_TIME"],
+        "state_deltas": {"simulation_elapsed_micro_minute": 1440000000},
+        "deltas": {
+          "structural_mass_pools_micro_gram_proxy": {"dead_biomass": -600000, "pending_ecology_decomposition_from_dead_custody": 600000},
+          "water_pools_micro_milliliter_proxy": {"dead_biomass_water": -60000, "pending_ecology_decomposition_from_dead_water_custody": 60000},
+          "energy_pools_micro_energy_proxy_unit": {"dead_biomass_energy_store": -400000, "pending_ecology_decomposition_from_dead_energy_custody": 400000}
+        }
+      }
+    ],
+    "expected_final_state": {
+      "oracle_id": "INSECT-HERBIVORE-LIFECYCLE-RESOURCE-ORACLE-001",
+      "simulation_elapsed_micro_minute": 43200000000,
+      "births_cumulative": 20,
+      "deaths_cumulative": 3,
+      "population_counts": {"adult": 25, "egg": 4, "immature": 4},
+      "generation_counts": {"generation_0": 15, "generation_1": 18},
+      "structural_mass_pools_micro_gram_proxy": {
+        "adult_biomass": 23000000,
+        "dead_biomass": 300000,
+        "egg_biomass": 600000,
+        "food_source_custody": 88000000,
+        "immature_biomass": 500000,
+        "pending_ecology_decomposition_from_dead_custody": 600000,
+        "pending_ecology_decomposition_from_waste_custody": 4000000,
+        "waste_biomass": 3000000
+      },
+      "water_pools_micro_milliliter_proxy": {
+        "adult_body_water": 2800000,
+        "atmospheric_water_proxy": 300000,
+        "dead_biomass_water": 30000,
+        "egg_body_water": 60000,
+        "habitat_water_custody": 18000000,
+        "immature_body_water": 50000,
+        "pending_ecology_decomposition_from_dead_water_custody": 60000,
+        "pending_ecology_decomposition_from_waste_water_custody": 400000,
+        "waste_water": 300000
+      },
+      "energy_pools_micro_energy_proxy_unit": {
+        "adult_energy_store": 22300000,
+        "dead_biomass_energy_store": 100000,
+        "egg_energy_store": 400000,
+        "environmental_dissipation_proxy": 5600000,
+        "food_energy_source_custody": 88000000,
+        "immature_energy_store": 200000,
+        "pending_ecology_decomposition_from_dead_energy_custody": 400000,
+        "pending_ecology_decomposition_from_waste_energy_custody": 2000000,
+        "waste_energy_store": 1000000
+      }
+    },
+    "expected_final_totals": {
+      "structural_mass_micro_gram_proxy": 120000000,
+      "water_micro_milliliter_proxy": 22000000,
+      "energy_micro_energy_proxy_unit": 120000000,
+      "food_source_micro_gram_proxy": 88000000,
+      "food_consumed_micro_gram_proxy": 12000000,
+      "waste_created_micro_gram_proxy": 7000000,
+      "waste_retained_micro_gram_proxy": 3000000,
+      "waste_pending_owner_transfer_micro_gram_proxy": 4000000,
+      "dead_biomass_created_micro_gram_proxy": 900000,
+      "dead_biomass_retained_micro_gram_proxy": 300000,
+      "dead_biomass_pending_owner_transfer_micro_gram_proxy": 600000,
+      "population_count": 33,
+      "peak_population_count": 36,
+      "maximum_generation": 1
+    },
+    "closed_ledgers": {
+      "structural_mass": {"initial": 120000000, "final": 120000000, "residual": 0, "closed": true},
+      "water": {"initial": 22000000, "final": 22000000, "residual": 0, "closed": true},
+      "energy_proxy": {"initial": 120000000, "final": 120000000, "residual": 0, "closed": true},
+      "food_input": {"initial_food": 100000000, "consumed": 12000000, "remaining": 88000000, "growth_allocation": 5000000, "waste_allocation": 7000000, "residual": 0, "closed": true},
+      "waste": {"created": 7000000, "retained": 3000000, "pending_owner_transfer": 4000000, "residual": 0, "closed": true},
+      "dead_biomass": {"created": 900000, "retained": 300000, "pending_owner_transfer": 600000, "residual": 0, "closed": true},
+      "population": {"initial": 16, "births": 20, "deaths": 3, "net_migration": 0, "final": 33, "peak": 36, "candidate_cap": 40, "residual": 0, "closed": true},
+      "generation": {"generation_0": 15, "generation_1": 18, "population_total": 33, "maximum_generation": 1, "generation_cap": 3, "residual": 0, "closed": true}
+    },
+    "canonical_serialization": {
+      "algorithm_id": "KAIOS_CANONICAL_JSON_INTEGER_V1",
+      "hash_payload": "deterministic_normal_oracle.expected_final_state",
+      "object_keys": "ascending Unicode code-point order; all current keys are ASCII",
+      "array_order": "preserved",
+      "number_format": "base-10 safe integer without exponent",
+      "whitespace": "none",
+      "encoding": "UTF-8 without BOM or trailing newline",
+      "hash": "SHA-256 lowercase hexadecimal"
+    },
+    "expected_final_sha256": "0872776fca782d8cea32265e6f93a2b0f6da9c2f5961cb833adf318bc6361fc9",
+    "objective_assertions": [
+      "APPLY_ACTIONS_IN_SEQUENCE_ORDER",
+      "USE_SIGNED_INTEGER_MICRO_UNITS_ONLY",
+      "REJECT_NEGATIVE_POOL_AFTER_EACH_ACTION",
+      "REJECT_STAGE_SKIP_OR_ZERO_TIME_TRANSITION",
+      "EACH_ACTION_DELTA_SUM_EQUALS_ZERO_PER_PRESENT_CONSERVED_DOMAIN",
+      "FINAL_STATE_EQUALS_EXPECTED_FINAL_STATE",
+      "STRUCTURAL_MASS_TOTAL_EQUALS_INITIAL_TOTAL",
+      "WATER_TOTAL_EQUALS_INITIAL_TOTAL",
+      "ENERGY_PROXY_TOTAL_EQUALS_INITIAL_TOTAL",
+      "FOOD_INPUT_EQUALS_REMAINING_PLUS_CONSUMED",
+      "FOOD_CONSUMED_EQUALS_GROWTH_PLUS_WASTE",
+      "WASTE_CREATED_EQUALS_RETAINED_PLUS_PENDING_OWNER_TRANSFER",
+      "DEAD_BIOMASS_CREATED_EQUALS_RETAINED_PLUS_PENDING_OWNER_TRANSFER",
+      "FINAL_POPULATION_EQUALS_INITIAL_PLUS_BIRTHS_MINUS_DEATHS_MINUS_NET_MIGRATION",
+      "PEAK_POPULATION_DOES_NOT_EXCEED_ROLE_CAP",
+      "MAXIMUM_GENERATION_DOES_NOT_EXCEED_GENERATION_CAP",
+      "CANONICAL_SHA256_EQUALS_EXPECTED_FINAL_SHA256",
+      "SECOND_REPLAY_PRODUCES_IDENTICAL_SHA256"
+    ]
+  },
+  "failure_contracts": [
+    {"failure_id": "INSECT-FAIL-NO-HABITAT", "trigger": "NO_HABITAT", "result": "NO_STAGE_OR_RESOURCE_CHANGE"},
+    {"failure_id": "INSECT-FAIL-NO-FOOD", "trigger": "INSUFFICIENT_FOOD", "result": "NO_GROWTH_OR_REPRODUCTION_DEBIT"},
+    {"failure_id": "INSECT-FAIL-NO-WATER", "trigger": "INSUFFICIENT_WATER", "result": "NO_GROWTH_OR_REPRODUCTION_DEBIT"},
+    {"failure_id": "INSECT-FAIL-NO-CAUSE", "trigger": "ELAPSED_TIME_OR_PRIOR_STAGE_MISSING", "result": "STAGE_TRANSITION_REJECTED"},
+    {"failure_id": "INSECT-FAIL-CAP", "trigger": "POPULATION_CAP_REACHED", "result": "BIRTH_EVENT_REJECTED_WITH_ZERO_COUNT_AND_RESOURCE_DELTA"},
+    {"failure_id": "INSECT-FAIL-GENERATION", "trigger": "GENERATION_CAP_REACHED", "result": "REPRODUCTION_REJECTED"},
+    {"failure_id": "INSECT-FAIL-LEDGER", "trigger": "ANY_LEDGER_RESIDUAL_NONZERO", "result": "FIXTURE_REJECTED_NO_OWNER_CUSTODY_ACCEPTANCE"}
+  ],
+  "provenance": [
+    {"source_type": "REPOSITORY_DERIVED", "source_path": "KAIOS/life/KAIOS_LIFE_RUNTIME_V1_SPEC.md", "source_commit": "56d3b8f20a63c4a8a5d19251ed72f7f9fe4e78c9", "git_object": "e1df7d486971684f9cd8020b9005a9fdcc389ce4", "sha256": "bc69596af470812bdfcbaa1989cf4cb59887c35f46f1c97d52f6d3dba87eb655", "usage": "Causal time, mass, energy, water, death and event requirements."},
+    {"source_type": "REPOSITORY_DERIVED", "source_path": "KAIOS/life/ecology/KAIOS_REPRODUCTION_ECOLOGY_RUNTIME_V1_SPEC.md", "source_commit": "56d3b8f20a63c4a8a5d19251ed72f7f9fe4e78c9", "git_object": "0f4399751f4e75727aeac45343a8b3a8900ec534", "sha256": "7fb277af16f552b16db2f4cb511fd060e4e3a5217855198f30fcf59371b8eda1", "usage": "Population, reproduction, food, water, death, decomposition and hard-cap semantics."},
+    {"source_type": "REPOSITORY_DERIVED", "source_path": "KAIOS/life/ecology/KAIOS_REPRODUCTION_ECOLOGY_SCHEMA_V1.json", "source_commit": "56d3b8f20a63c4a8a5d19251ed72f7f9fe4e78c9", "git_object": "c99eb0eba386af67c009bfd115e88b934d1c9000", "sha256": "3257f8cd1f0ba482f0c6bc8d98fbfb4748c8a1172c9c88d4bf9a2981c90af9f0", "usage": "Finite count, generation, event, population and resource boundaries plus current species-ID gap."},
+    {"source_type": "REPOSITORY_DERIVED", "source_path": "KAIOS/life/candidates/ecology-v1/food-relationships.json", "source_commit": "56d3b8f20a63c4a8a5d19251ed72f7f9fe4e78c9", "git_object": "e8f5b84d16ce7e7ca6c0943e8fff252a9dea3000", "sha256": "0b7a915e081d2256ed3b7b9159ee1437b2967eaaa54f2109099911e13d9ccf36", "usage": "DETRITUS_POOL, dead-biomass flow and abstract decomposition proxy boundaries."},
+    {"source_type": "REPOSITORY_DERIVED", "source_path": "KAIOS/life/candidates/ecology-v1/population-scenarios.json", "source_commit": "56d3b8f20a63c4a8a5d19251ed72f7f9fe4e78c9", "git_object": "80d2c522ff439280a932bd96914dc8ee04815c5d", "sha256": "7d0a4ae68343ac672362750f1db87bcb9776df6f362e50857613a6bd6bb3beda", "usage": "Bounded generation, cooldown, population and deterministic scenario pattern."},
+    {"source_type": "REPOSITORY_DERIVED", "source_path": "KAIOS/life/forest-agriculture/KAIOS_FOREST_AGRICULTURE_RUNTIME_V1_SPEC.md", "source_commit": "56d3b8f20a63c4a8a5d19251ed72f7f9fe4e78c9", "git_object": "9a2dd4ad05bb7b2e3d71b91b479359947ada8376", "sha256": "4e1a23e97d09ec2dc4ad65440e6958e646f75ed418e5c703c5a5a1635c2809a1", "usage": "Foreign owner, explicit custody, elapsed-time and no-disappearing-mass rules."},
+    {"source_type": "REPOSITORY_DERIVED", "source_path": "KAIOS/life/candidates/forest-agriculture-v1/crops/crop-resource-flow-proposal.json", "source_commit": "56d3b8f20a63c4a8a5d19251ed72f7f9fe4e78c9", "git_object": "969a300fd867055de75359167225b1b98f97635b", "sha256": "b0e6bb9e1241ef0bf70a45f82156736bb17821e9c29624b62207e78215cf0849", "usage": "Reviewed integer fixed-point, paired-pool and deterministic-hash candidate pattern."}
+  ],
+  "boundaries": {
+    "pollination_behavior": "EXCLUDED_SEPARATE_QUEUE_TASK",
+    "active_predation": false,
+    "active_food_chain": false,
+    "pest_control": false,
+    "disease": false,
+    "pesticide": false,
+    "microbial_life_creation": false,
+    "unbounded_reproduction": false,
+    "automatic_species_creation": false,
+    "runtime_engine": false,
+    "canonical_promotion": false,
+    "production_authority": false
+  }
+}

@@ -1,0 +1,194 @@
+{
+  "dataset_id": "KAIOS-INSECT-RIGHTS-ECONOMY-PROPOSALS-V1",
+  "schema_version": "1.0.0-candidate",
+  "status": "CURSOR_RESEARCH_CANDIDATE_ONLY",
+  "review_status": "PENDING_CODEX_REVIEW",
+  "authority": "NO_PRODUCTION_AUTHORITY",
+  "task_id": "KAIOS-CURSOR-INSECT-CANDIDATES-001",
+  "worker_id": "cursor-01",
+  "branch": "cursor-handoff/KAIOS-CURSOR-INSECT-CANDIDATES-001",
+  "dispatch_branch_base_commit": "88dce5e0532567a1f1113abf9bfee907efea65bc",
+  "source_base_commit": "56d3b8f20a63c4a8a5d19251ed72f7f9fe4e78c9",
+  "source_hash_basis": "SHA256_OF_GIT_BLOB_CONTENT_AT_SOURCE_BASE_COMMIT",
+  "mode": "SEPARATED_AUTHORITY_PROPOSAL_ONLY",
+  "foreign_owners": {
+    "rights_and_capability_decisions": "EXISTING_RIGHTS_AUTHORITY",
+    "inventory_market_and_ledger": "CIVILIZATION_ECONOMY_ALPHA",
+    "physical_worker_timeline": "KAIOS_PHYSICAL_LABOR_SCHEMA",
+    "industrial_supply_chain_contract": "KAIOS_SUPPLY_CHAIN_SCHEMA",
+    "habitat_and_population": "KAIOS_REPRODUCTION_ECOLOGY_RUNTIME_V1"
+  },
+  "separation_rules": [
+    "OWNING_OR_USING_LAND_DOES_NOT_OWN_AN_INSECT_OCCUPANT",
+    "OWNING_A_CANDIDATE_JSON_PACKAGE_DOES_NOT_OWN_OR_CONTROL_A_LIFE_INSTANCE",
+    "CUSTODY_IS_NOT_OWNERSHIP",
+    "OBSERVATION_IS_NOT_OPERATION_OR_CONTROL",
+    "NO_RIGHT_IMPLIES_BREEDING_HARVEST_TRANSFER_OR_COMMERCIAL_AUTHORITY",
+    "NO_ECONOMY_LISTING_OR_LEDGER_ENTRY_IS_CREATED_BY_A_CANDIDATE_ROLE",
+    "NATURAL_LIFECYCLE_EVENTS_DO_NOT_CREATE_HUMAN_LABOR_CREDITS",
+    "ANY_HUMAN_INTERVENTION_REQUIRES_FOREIGN_RIGHTS_AND_LABOR_VALIDATION"
+  ],
+  "candidate_rights_profiles": [
+    {
+      "candidate_package_id": "CANDIDATE-INSECT-HERBIVORE-V1",
+      "species_id": "SPECIES-KAIOS-INSECT-HERBIVORE-CANDIDATE",
+      "rights": {
+        "OWNER": {"holder": "UNASSIGNED", "decision": "NO_OWNERSHIP_GRANTED"},
+        "CUSTODIAN": {"holder": "UNASSIGNED", "decision": "NO_LIFE_CUSTODY_GRANTED"},
+        "OPERATOR": {"holder": "UNASSIGNED", "decision": "NO_OPERATION_GRANTED"},
+        "OCCUPANT": {"holder": "UNASSIGNED", "decision": "NO_OCCUPANCY_CLAIM"},
+        "USAGE_RIGHTS": {"holder": "UNASSIGNED", "decision": "NO_USE_GRANTED"},
+        "HARVEST_RIGHTS": {"holder": "UNASSIGNED", "decision": "NO_HARVEST_GRANTED"},
+        "BREEDING_RIGHTS": {"holder": "UNASSIGNED", "decision": "NO_BREEDING_GRANTED"},
+        "COMMERCIAL_LICENSE": {"holder": "UNASSIGNED", "decision": "NO_LICENSE_GRANTED"},
+        "TRANSFER_RIGHTS": {"holder": "UNASSIGNED", "decision": "NO_TRANSFER_GRANTED"},
+        "HABITAT_RIGHTS": {"holder": "UNASSIGNED", "decision": "NO_HABITAT_CLAIM_GRANTED"},
+        "CONTROL_AUTHORITY": {"holder": "UNASSIGNED", "decision": "NO_CONTROL_GRANTED"},
+        "tradeability": "NOT_TRADEABLE"
+      },
+      "candidate_record_review_custody": {"holder": "codex-gm-01", "status": "PENDING_CODEX_REVIEW", "scope": "REVIEW_THE_JSON_PROPOSAL_ONLY"},
+      "economic_projection": {
+        "market_role": "NONE",
+        "resource_listing_id": null,
+        "inventory_lot_id": null,
+        "ledger_entry_id": null,
+        "price": null,
+        "yield": null,
+        "service_claim": null,
+        "revenue_recognition": false,
+        "settlement": false,
+        "wallet": "NONE"
+      }
+    },
+    {
+      "candidate_package_id": "CANDIDATE-INSECT-PREDATOR-V1",
+      "species_id": "SPECIES-KAIOS-INSECT-PREDATOR-CANDIDATE",
+      "rights": {
+        "OWNER": {"holder": "UNASSIGNED", "decision": "NO_OWNERSHIP_GRANTED"},
+        "CUSTODIAN": {"holder": "UNASSIGNED", "decision": "NO_LIFE_CUSTODY_GRANTED"},
+        "OPERATOR": {"holder": "UNASSIGNED", "decision": "NO_OPERATION_GRANTED"},
+        "OCCUPANT": {"holder": "UNASSIGNED", "decision": "NO_OCCUPANCY_CLAIM"},
+        "USAGE_RIGHTS": {"holder": "UNASSIGNED", "decision": "NO_USE_GRANTED"},
+        "HARVEST_RIGHTS": {"holder": "UNASSIGNED", "decision": "NO_HARVEST_GRANTED"},
+        "BREEDING_RIGHTS": {"holder": "UNASSIGNED", "decision": "NO_BREEDING_GRANTED"},
+        "COMMERCIAL_LICENSE": {"holder": "UNASSIGNED", "decision": "NO_LICENSE_GRANTED"},
+        "TRANSFER_RIGHTS": {"holder": "UNASSIGNED", "decision": "NO_TRANSFER_GRANTED"},
+        "HABITAT_RIGHTS": {"holder": "UNASSIGNED", "decision": "NO_HABITAT_CLAIM_GRANTED"},
+        "CONTROL_AUTHORITY": {"holder": "UNASSIGNED", "decision": "NO_CONTROL_GRANTED"},
+        "tradeability": "NOT_TRADEABLE"
+      },
+      "candidate_record_review_custody": {"holder": "codex-gm-01", "status": "PENDING_CODEX_REVIEW", "scope": "REVIEW_THE_JSON_PROPOSAL_ONLY"},
+      "economic_projection": {
+        "market_role": "NONE",
+        "resource_listing_id": null,
+        "inventory_lot_id": null,
+        "ledger_entry_id": null,
+        "price": null,
+        "yield": null,
+        "service_claim": "NO_PEST_CONTROL_SERVICE_OR_EFFECT",
+        "revenue_recognition": false,
+        "settlement": false,
+        "wallet": "NONE"
+      }
+    },
+    {
+      "candidate_package_id": "CANDIDATE-INSECT-DETRITIVORE-V1",
+      "species_id": "SPECIES-KAIOS-INSECT-DETRITIVORE-CANDIDATE",
+      "rights": {
+        "OWNER": {"holder": "UNASSIGNED", "decision": "NO_OWNERSHIP_GRANTED"},
+        "CUSTODIAN": {"holder": "UNASSIGNED", "decision": "NO_LIFE_CUSTODY_GRANTED"},
+        "OPERATOR": {"holder": "UNASSIGNED", "decision": "NO_OPERATION_GRANTED"},
+        "OCCUPANT": {"holder": "UNASSIGNED", "decision": "NO_OCCUPANCY_CLAIM"},
+        "USAGE_RIGHTS": {"holder": "UNASSIGNED", "decision": "NO_USE_GRANTED"},
+        "HARVEST_RIGHTS": {"holder": "UNASSIGNED", "decision": "NO_HARVEST_GRANTED"},
+        "BREEDING_RIGHTS": {"holder": "UNASSIGNED", "decision": "NO_BREEDING_GRANTED"},
+        "COMMERCIAL_LICENSE": {"holder": "UNASSIGNED", "decision": "NO_LICENSE_GRANTED"},
+        "TRANSFER_RIGHTS": {"holder": "UNASSIGNED", "decision": "NO_TRANSFER_GRANTED"},
+        "HABITAT_RIGHTS": {"holder": "UNASSIGNED", "decision": "NO_HABITAT_CLAIM_GRANTED"},
+        "CONTROL_AUTHORITY": {"holder": "UNASSIGNED", "decision": "NO_CONTROL_GRANTED"},
+        "tradeability": "NOT_TRADEABLE"
+      },
+      "candidate_record_review_custody": {"holder": "codex-gm-01", "status": "PENDING_CODEX_REVIEW", "scope": "REVIEW_THE_JSON_PROPOSAL_ONLY"},
+      "economic_projection": {
+        "market_role": "NONE",
+        "resource_listing_id": null,
+        "inventory_lot_id": null,
+        "ledger_entry_id": null,
+        "price": null,
+        "yield": null,
+        "service_claim": "NO_WASTE_PROCESSING_OR_DECOMPOSITION_SERVICE_EFFECT",
+        "revenue_recognition": false,
+        "settlement": false,
+        "wallet": "NONE"
+      }
+    }
+  ],
+  "candidate_resource_custody": {
+    "living_insect_biomass": {"owner": "FUTURE_VALIDATED_LIFE_AND_ECOLOGY_RECORD", "current_status": "CANDIDATE_FIXTURE_ONLY"},
+    "food_input": {"owner": "KAIOS_REPRODUCTION_ECOLOGY_RUNTIME_V1_OR_REFERENCED_FOREIGN_INVENTORY", "current_status": "ABSTRACT_CANDIDATE_POOL_ONLY"},
+    "waste_biomass": {"owner": "KAIOS_REPRODUCTION_ECOLOGY_RUNTIME_V1", "current_status": "PENDING_OWNER_ACCEPTANCE_CUSTODY"},
+    "dead_biomass": {"owner": "KAIOS_REPRODUCTION_ECOLOGY_RUNTIME_V1", "current_status": "PENDING_OWNER_ACCEPTANCE_CUSTODY"},
+    "inventory_and_market": {"owner": "CIVILIZATION_ECONOMY_ALPHA", "current_status": "NO_RECORD_CREATED"},
+    "financial_ledger": {"owner": "CIVILIZATION_ECONOMY_ALPHA", "current_status": "NO_ENTRY_CREATED"}
+  },
+  "human_intervention_gate": {
+    "natural_lifecycle_requires_human_labor": false,
+    "candidate_authorizes_intervention": false,
+    "required_foreign_references_if_future_intervention_is_requested": [
+      "RIGHTS_CAPABILITY_DECISION_ID",
+      "WORK_SHIFT_ID",
+      "LIFE_ID",
+      "BODY_INSTANCE_ID",
+      "LOCATION_ID",
+      "SCHEDULED_START",
+      "SCHEDULED_END",
+      "VALIDATED_TIME_LOG_ID",
+      "CUSTODY_EVENT_ID",
+      "PREVIOUS_STATE_HASH",
+      "NEXT_STATE_HASH"
+    ],
+    "missing_reference_result": "INTERVENTION_REJECTED_NO_STATE_OR_LEDGER_CHANGE",
+    "worker_conflicts_reused": ["ROLE_TIME_CONFLICT", "LOCATION_CONFLICT", "TRAVEL_TIME_CONFLICT", "BODY_INSTANCE_CONFLICT", "SHIFT_OVERLAP", "MISSING_REQUIRED_SKILL"]
+  },
+  "economy_and_supply_chain_boundary": {
+    "candidate_resource_ids_added_to_economy_catalog": [],
+    "candidate_marketplace_categories_added": [],
+    "candidate_listings": [],
+    "candidate_orders": [],
+    "candidate_inventory_lots": [],
+    "candidate_ledger_entries": [],
+    "candidate_products": [],
+    "price_or_value_model": "NOT_MODELED",
+    "supply_chain_product_model": "NOT_APPLICABLE",
+    "commercial_claim": false
+  },
+  "objective_assertions": [
+    "ALL_RIGHTS_KEYS_PRESENT_FOR_EACH_CANDIDATE",
+    "ALL_RIGHTS_HOLDERS_UNASSIGNED_EXCEPT_JSON_REVIEW_CUSTODY",
+    "ALL_TRADEABILITY_VALUES_EQUAL_NOT_TRADEABLE",
+    "NO_BREEDING_HARVEST_TRANSFER_COMMERCIAL_OR_CONTROL_AUTHORITY",
+    "LAND_RIGHTS_DO_NOT_IMPLY_OCCUPANT_OWNERSHIP",
+    "NO_ECONOMY_RESOURCE_LISTING_INVENTORY_LOT_ORDER_OR_LEDGER_ENTRY",
+    "NO_PRICE_YIELD_REVENUE_OR_SERVICE_EFFECT",
+    "ANY_FUTURE_HUMAN_INTERVENTION_REQUIRES_EVERY_FOREIGN_REFERENCE",
+    "MISSING_RIGHT_OR_LABOR_REFERENCE_REJECTS_INTERVENTION"
+  ],
+  "provenance": [
+    {"source_type": "REPOSITORY_DERIVED", "source_path": "KAIOS_CANONICAL_LIFE_RIGHTS_V1.md", "source_commit": "56d3b8f20a63c4a8a5d19251ed72f7f9fe4e78c9", "git_object": "783ea5b17d82bf6579e4a9763bcbc3b18fb06ac2", "sha256": "bec5f35a1906dbd9eb72764e935f4ad282a81398587b66de789130ae4a0428f4", "usage": "Separated rights, custody, ownership, operation and tradeability rules."},
+    {"source_type": "REPOSITORY_DERIVED", "source_path": "KAIOS_PHYSICAL_LABOR_SCHEMA.json", "source_commit": "56d3b8f20a63c4a8a5d19251ed72f7f9fe4e78c9", "git_object": "357b00093f4a912e616e9d39edf04753aacf94f7", "sha256": "21060f7bdf64f0a3af827f1fcd7d95d3170affef54c01bbeb449b9361fdd2f43", "usage": "Foreign work-shift, location, timeline and conflict references for any future intervention."},
+    {"source_type": "REPOSITORY_DERIVED", "source_path": "KGEN-KAIOS/world-viewer/economy/economy-runtime.js", "source_commit": "56d3b8f20a63c4a8a5d19251ed72f7f9fe4e78c9", "git_object": "2b1a37dba8cf3863eb4b30d4547995f281a6bc62", "sha256": "8b5879091b212ea3e0ead296719e872b9353209fd8982f01567f2bbb78991f27", "usage": "CIVILIZATION_ECONOMY_ALPHA catalog, inventory, market and balanced-ledger owner boundary."},
+    {"source_type": "REPOSITORY_DERIVED", "source_path": "KAIOS_SUPPLY_CHAIN_SCHEMA.json", "source_commit": "56d3b8f20a63c4a8a5d19251ed72f7f9fe4e78c9", "git_object": "56bc0ff72042100cb74ace45ee3c30d7703a48e9", "sha256": "ea6d175e8bfd242a288f6e6374e97e97fd18ecf5edb40761a29de2129036aa60", "usage": "Supply-chain product and dependency owner boundary; no insect product is proposed."},
+    {"source_type": "REPOSITORY_DERIVED", "source_path": "KAIOS/life/forest-agriculture/KAIOS_FOREST_AGRICULTURE_RUNTIME_V1_SPEC.md", "source_commit": "56d3b8f20a63c4a8a5d19251ed72f7f9fe4e78c9", "git_object": "9a2dd4ad05bb7b2e3d71b91b479359947ada8376", "sha256": "4e1a23e97d09ec2dc4ad65440e6958e646f75ed418e5c703c5a5a1635c2809a1", "usage": "Foreign owner, labor, inventory, ledger and Rights authority separation."}
+  ],
+  "boundaries": {
+    "pollination_behavior": "EXCLUDED_SEPARATE_QUEUE_TASK",
+    "pest_control_service": false,
+    "waste_processing_service": false,
+    "agricultural_advice": false,
+    "rights_grant": false,
+    "economy_authority": false,
+    "wallet": false,
+    "onchain_transfer": false,
+    "production_authority": false
+  }
+}

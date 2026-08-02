@@ -1,0 +1,123 @@
+{
+  "dataset_id": "KAIOS-INSECT-PHYSICS-ENVIRONMENT-PROPOSALS-V1",
+  "schema_version": "1.0.0-candidate",
+  "status": "CURSOR_RESEARCH_CANDIDATE_ONLY",
+  "review_status": "PENDING_CODEX_REVIEW",
+  "authority": "NO_PRODUCTION_AUTHORITY",
+  "task_id": "KAIOS-CURSOR-INSECT-CANDIDATES-001",
+  "worker_id": "cursor-01",
+  "branch": "cursor-handoff/KAIOS-CURSOR-INSECT-CANDIDATES-001",
+  "dispatch_branch_base_commit": "88dce5e0532567a1f1113abf9bfee907efea65bc",
+  "source_base_commit": "56d3b8f20a63c4a8a5d19251ed72f7f9fe4e78c9",
+  "source_hash_basis": "SHA256_OF_GIT_BLOB_CONTENT_AT_SOURCE_BASE_COMMIT",
+  "mode": "SIMULATION_APPROXIMATION",
+  "owner_bindings": {
+    "life_physics_contract": "KAIOS_CANONICAL_LIFE_SCHEMA_V1",
+    "habitat_and_resource_owner": "KAIOS_REPRODUCTION_ECOLOGY_RUNTIME_V1",
+    "forest_and_agriculture_coordinator": "KAIOS_FOREST_AGRICULTURE_RUNTIME_V1_SPECIFICATION",
+    "candidate_habitat_source": "KAIOS-ECOLOGY-V1-HABITAT-COMPATIBILITY-CANDIDATE"
+  },
+  "evaluation_contract": {
+    "order": ["LOCATION", "OWNER_SCHEMA_ADMISSION", "HABITAT", "TEMPERATURE", "HABITAT_MOISTURE", "WATER", "FOOD", "ENERGY_PROXY", "ELAPSED_TIME"],
+    "all_gates_required": true,
+    "failed_gate_result": "INSECT_CANDIDATE_ACTION_BLOCKED",
+    "failed_gate_has_no_unpaired_resource_debit": true,
+    "instant_location_change": false,
+    "instant_growth": false,
+    "active_runtime_behavior": false
+  },
+  "unit_contract": {
+    "mass_and_volume_values": "ACCOUNTING_PROXIES_NOT_EMPIRICAL_MEASUREMENTS",
+    "energy_values": "DIMENSIONLESS_ENERGY_PROXY_UNITS",
+    "temperature_values": "CANDIDATE_GATE_VALUES_NOT_HUSBANDRY_OR_AGRICULTURAL_GUIDANCE",
+    "direct_conversion_to_production_values": "FORBIDDEN"
+  },
+  "profiles": [
+    {
+      "profile_id": "INSECT-ENV-HERBIVORE-V1",
+      "candidate_package_id": "CANDIDATE-INSECT-HERBIVORE-V1",
+      "species_id": "SPECIES-KAIOS-INSECT-HERBIVORE-CANDIDATE",
+      "candidate_habitat_references": ["HABITAT-GRASSLAND-V1", "HABITAT-FOREST-V1"],
+      "habitat_reference_status": "PROPOSAL_ONLY_NOT_PRESENT_IN_OWNER_SPECIES_COMPATIBILITY_LIST",
+      "food_pool_reference": "DECLARED_PLANT_BIOMASS_PROXY",
+      "food_pool_status": "CANDIDATE_ABSTRACT_RESOURCE_POOL",
+      "parameters": [
+        {"parameter_name": "herbivore_individual_wet_mass_proxy", "unit": "gram_per_individual_proxy", "minimum": 0.1, "default": 1, "maximum": 10, "rationale": "Bounds fixture scaling without asserting the mass of a real species.", "source_type": "RESEARCH_PROPOSAL", "confidence": "LOW", "risk": "Synthetic candidate identity has no measured body mass.", "validation_required": true},
+        {"parameter_name": "herbivore_individual_volume_proxy", "unit": "cubic_centimeter_per_individual_proxy", "minimum": 0.1, "default": 1, "maximum": 10, "rationale": "Pairs with the mass proxy for bounded consistency checks.", "source_type": "MODEL_INFERENCE", "confidence": "LOW", "risk": "Body shape and displacement are not empirically modeled.", "validation_required": true},
+        {"parameter_name": "herbivore_density_proxy", "unit": "gram_per_cubic_centimeter_proxy", "minimum": 1, "default": 1, "maximum": 1, "rationale": "Keeps default mass and volume proxies arithmetically consistent without a biological density claim.", "source_type": "ASSUMPTION", "confidence": "LOW", "risk": "Fixed proxy density is not material-composition evidence.", "validation_required": true},
+        {"parameter_name": "herbivore_body_water_fraction_proxy", "unit": "fraction_of_wet_mass_proxy", "minimum": 0.4, "default": 0.65, "maximum": 0.85, "rationale": "Separates water custody from structural biomass in accounting fixtures.", "source_type": "MODEL_INFERENCE", "confidence": "LOW", "risk": "No species-specific composition is represented.", "validation_required": true},
+        {"parameter_name": "herbivore_temperature_compatibility_proxy", "unit": "degree_celsius", "minimum": 5, "default": 24, "maximum": 40, "rationale": "Provides a broad deterministic gate for failure tests only.", "source_type": "RESEARCH_PROPOSAL", "confidence": "LOW", "risk": "Not a rearing, release or field-management recommendation.", "validation_required": true},
+        {"parameter_name": "herbivore_habitat_moisture_proxy", "unit": "fraction_0_to_1", "minimum": 0.2, "default": 0.6, "maximum": 0.95, "rationale": "Bounds a generic habitat-moisture gate without claiming a field threshold.", "source_type": "MODEL_INFERENCE", "confidence": "LOW", "risk": "Soil, canopy and weather interactions are omitted.", "validation_required": true},
+        {"parameter_name": "herbivore_food_transfer_per_population_event", "unit": "gram_proxy", "minimum": 0.1, "default": 12, "maximum": 100, "rationale": "Supplies a finite food debit for the closed resource oracle.", "source_type": "RESEARCH_PROPOSAL", "confidence": "LOW", "risk": "Not an intake rate, crop-loss estimate or feeding formula.", "validation_required": true},
+        {"parameter_name": "herbivore_water_transfer_per_population_event", "unit": "milliliter_proxy", "minimum": 0.1, "default": 2, "maximum": 20, "rationale": "Supplies a finite water transfer for conservation tests.", "source_type": "RESEARCH_PROPOSAL", "confidence": "LOW", "risk": "Not a hydration or habitat-management prescription.", "validation_required": true},
+        {"parameter_name": "herbivore_energy_transfer_per_population_event", "unit": "energy_proxy_unit", "minimum": 1, "default": 12, "maximum": 100, "rationale": "Keeps energy input, storage, waste and dissipation finite in the oracle.", "source_type": "MODEL_INFERENCE", "confidence": "LOW", "risk": "Proxy units have no joule conversion.", "validation_required": true},
+        {"parameter_name": "herbivore_habitat_area_per_population_record", "unit": "square_meter_proxy", "minimum": 1, "default": 10, "maximum": 100, "rationale": "Requires finite spatial custody before a population record could be considered.", "source_type": "RESEARCH_PROPOSAL", "confidence": "LOW", "risk": "Not a stocking density or release recommendation.", "validation_required": true}
+      ],
+      "block_reasons": ["LOCATION_UNASSIGNED", "OWNER_SCHEMA_EXTENSION_REQUIRED", "NO_HABITAT", "TEMPERATURE_OUT_OF_RANGE", "HABITAT_MOISTURE_OUT_OF_RANGE", "INSUFFICIENT_WATER", "INSUFFICIENT_FOOD", "INSUFFICIENT_ENERGY_PROXY", "ELAPSED_TIME_REQUIRED"]
+    },
+    {
+      "profile_id": "INSECT-ENV-PREDATOR-V1",
+      "candidate_package_id": "CANDIDATE-INSECT-PREDATOR-V1",
+      "species_id": "SPECIES-KAIOS-INSECT-PREDATOR-CANDIDATE",
+      "candidate_habitat_references": ["HABITAT-GRASSLAND-V1", "HABITAT-FOREST-V1", "HABITAT-SOIL-V1"],
+      "habitat_reference_status": "PROPOSAL_ONLY_NOT_PRESENT_IN_OWNER_SPECIES_COMPATIBILITY_LIST",
+      "food_pool_reference": "ABSTRACT_PREY_BIOMASS_PROXY",
+      "food_pool_status": "CANDIDATE_ABSTRACT_RESOURCE_POOL_NOT_ACTIVE_PREDATION",
+      "parameters": [
+        {"parameter_name": "predator_individual_wet_mass_proxy", "unit": "gram_per_individual_proxy", "minimum": 0.1, "default": 2, "maximum": 20, "rationale": "Bounds fixture scaling without asserting the mass of a real species.", "source_type": "RESEARCH_PROPOSAL", "confidence": "LOW", "risk": "Synthetic candidate identity has no measured body mass.", "validation_required": true},
+        {"parameter_name": "predator_individual_volume_proxy", "unit": "cubic_centimeter_per_individual_proxy", "minimum": 0.1, "default": 2, "maximum": 20, "rationale": "Pairs with the mass proxy for bounded consistency checks.", "source_type": "MODEL_INFERENCE", "confidence": "LOW", "risk": "Body shape and displacement are not empirically modeled.", "validation_required": true},
+        {"parameter_name": "predator_density_proxy", "unit": "gram_per_cubic_centimeter_proxy", "minimum": 1, "default": 1, "maximum": 1, "rationale": "Keeps default mass and volume proxies arithmetically consistent without a biological density claim.", "source_type": "ASSUMPTION", "confidence": "LOW", "risk": "Fixed proxy density is not material-composition evidence.", "validation_required": true},
+        {"parameter_name": "predator_body_water_fraction_proxy", "unit": "fraction_of_wet_mass_proxy", "minimum": 0.4, "default": 0.65, "maximum": 0.85, "rationale": "Separates water custody from structural biomass in accounting fixtures.", "source_type": "MODEL_INFERENCE", "confidence": "LOW", "risk": "No species-specific composition is represented.", "validation_required": true},
+        {"parameter_name": "predator_temperature_compatibility_proxy", "unit": "degree_celsius", "minimum": 4, "default": 22, "maximum": 38, "rationale": "Provides a broad deterministic gate for failure tests only.", "source_type": "RESEARCH_PROPOSAL", "confidence": "LOW", "risk": "Not a rearing, release or field-management recommendation.", "validation_required": true},
+        {"parameter_name": "predator_habitat_moisture_proxy", "unit": "fraction_0_to_1", "minimum": 0.2, "default": 0.55, "maximum": 0.9, "rationale": "Bounds a generic habitat-moisture gate without claiming a field threshold.", "source_type": "MODEL_INFERENCE", "confidence": "LOW", "risk": "Soil, canopy and weather interactions are omitted.", "validation_required": true},
+        {"parameter_name": "predator_food_transfer_per_population_event", "unit": "gram_proxy", "minimum": 0.1, "default": 8, "maximum": 80, "rationale": "Provides a finite abstract food debit without activating prey interactions.", "source_type": "RESEARCH_PROPOSAL", "confidence": "LOW", "risk": "Not a predation rate, prey recommendation or pest-control claim.", "validation_required": true},
+        {"parameter_name": "predator_water_transfer_per_population_event", "unit": "milliliter_proxy", "minimum": 0.1, "default": 2, "maximum": 20, "rationale": "Supplies a finite water transfer for conservation tests.", "source_type": "RESEARCH_PROPOSAL", "confidence": "LOW", "risk": "Not a hydration or habitat-management prescription.", "validation_required": true},
+        {"parameter_name": "predator_energy_transfer_per_population_event", "unit": "energy_proxy_unit", "minimum": 1, "default": 10, "maximum": 100, "rationale": "Keeps candidate energy accounting finite and bounded.", "source_type": "MODEL_INFERENCE", "confidence": "LOW", "risk": "Proxy units have no joule conversion.", "validation_required": true},
+        {"parameter_name": "predator_habitat_area_per_population_record", "unit": "square_meter_proxy", "minimum": 1, "default": 20, "maximum": 200, "rationale": "Requires finite spatial custody before a population record could be considered.", "source_type": "RESEARCH_PROPOSAL", "confidence": "LOW", "risk": "Not a stocking density, release plan or pest-control deployment rule.", "validation_required": true}
+      ],
+      "block_reasons": ["LOCATION_UNASSIGNED", "OWNER_SCHEMA_EXTENSION_REQUIRED", "NO_HABITAT", "TEMPERATURE_OUT_OF_RANGE", "HABITAT_MOISTURE_OUT_OF_RANGE", "INSUFFICIENT_WATER", "INSUFFICIENT_ABSTRACT_FOOD", "INSUFFICIENT_ENERGY_PROXY", "ELAPSED_TIME_REQUIRED", "ACTIVE_PREDATION_NOT_AUTHORIZED"]
+    },
+    {
+      "profile_id": "INSECT-ENV-DETRITIVORE-V1",
+      "candidate_package_id": "CANDIDATE-INSECT-DETRITIVORE-V1",
+      "species_id": "SPECIES-KAIOS-INSECT-DETRITIVORE-CANDIDATE",
+      "candidate_habitat_references": ["HABITAT-FOREST-V1", "HABITAT-SOIL-V1"],
+      "habitat_reference_status": "PROPOSAL_ONLY_NOT_PRESENT_IN_OWNER_SPECIES_COMPATIBILITY_LIST",
+      "food_pool_reference": "DETRITUS_POOL",
+      "food_pool_status": "EXISTING_ABSTRACT_RESOURCE_POOL_NOT_FULL_LIFE_RUNTIME",
+      "parameters": [
+        {"parameter_name": "detritivore_individual_wet_mass_proxy", "unit": "gram_per_individual_proxy", "minimum": 0.1, "default": 3, "maximum": 30, "rationale": "Bounds fixture scaling without asserting the mass of a real species.", "source_type": "RESEARCH_PROPOSAL", "confidence": "LOW", "risk": "Synthetic candidate identity has no measured body mass.", "validation_required": true},
+        {"parameter_name": "detritivore_individual_volume_proxy", "unit": "cubic_centimeter_per_individual_proxy", "minimum": 0.1, "default": 3, "maximum": 30, "rationale": "Pairs with the mass proxy for bounded consistency checks.", "source_type": "MODEL_INFERENCE", "confidence": "LOW", "risk": "Body shape and displacement are not empirically modeled.", "validation_required": true},
+        {"parameter_name": "detritivore_density_proxy", "unit": "gram_per_cubic_centimeter_proxy", "minimum": 1, "default": 1, "maximum": 1, "rationale": "Keeps default mass and volume proxies arithmetically consistent without a biological density claim.", "source_type": "ASSUMPTION", "confidence": "LOW", "risk": "Fixed proxy density is not material-composition evidence.", "validation_required": true},
+        {"parameter_name": "detritivore_body_water_fraction_proxy", "unit": "fraction_of_wet_mass_proxy", "minimum": 0.4, "default": 0.65, "maximum": 0.85, "rationale": "Separates water custody from structural biomass in accounting fixtures.", "source_type": "MODEL_INFERENCE", "confidence": "LOW", "risk": "No species-specific composition is represented.", "validation_required": true},
+        {"parameter_name": "detritivore_temperature_compatibility_proxy", "unit": "degree_celsius", "minimum": 5, "default": 23, "maximum": 38, "rationale": "Provides a broad deterministic gate for failure tests only.", "source_type": "RESEARCH_PROPOSAL", "confidence": "LOW", "risk": "Not a rearing, release or waste-processing recommendation.", "validation_required": true},
+        {"parameter_name": "detritivore_habitat_moisture_proxy", "unit": "fraction_0_to_1", "minimum": 0.3, "default": 0.7, "maximum": 0.95, "rationale": "Bounds a generic habitat-moisture gate without claiming a field threshold.", "source_type": "MODEL_INFERENCE", "confidence": "LOW", "risk": "Litter, soil and weather interactions are omitted.", "validation_required": true},
+        {"parameter_name": "detritivore_food_transfer_per_population_event", "unit": "gram_proxy", "minimum": 0.1, "default": 10, "maximum": 100, "rationale": "Provides a finite detritus debit while preserving owner custody.", "source_type": "RESEARCH_PROPOSAL", "confidence": "LOW", "risk": "Not a decomposition rate, compost formula or waste-processing claim.", "validation_required": true},
+        {"parameter_name": "detritivore_water_transfer_per_population_event", "unit": "milliliter_proxy", "minimum": 0.1, "default": 2, "maximum": 20, "rationale": "Supplies a finite water transfer for conservation tests.", "source_type": "RESEARCH_PROPOSAL", "confidence": "LOW", "risk": "Not a hydration or habitat-management prescription.", "validation_required": true},
+        {"parameter_name": "detritivore_energy_transfer_per_population_event", "unit": "energy_proxy_unit", "minimum": 1, "default": 10, "maximum": 100, "rationale": "Keeps candidate energy accounting finite and bounded.", "source_type": "MODEL_INFERENCE", "confidence": "LOW", "risk": "Proxy units have no joule conversion.", "validation_required": true},
+        {"parameter_name": "detritivore_habitat_area_per_population_record", "unit": "square_meter_proxy", "minimum": 1, "default": 10, "maximum": 100, "rationale": "Requires finite spatial custody before a population record could be considered.", "source_type": "RESEARCH_PROPOSAL", "confidence": "LOW", "risk": "Not a stocking density, release plan or processing specification.", "validation_required": true}
+      ],
+      "block_reasons": ["LOCATION_UNASSIGNED", "OWNER_SCHEMA_EXTENSION_REQUIRED", "NO_HABITAT", "TEMPERATURE_OUT_OF_RANGE", "HABITAT_MOISTURE_OUT_OF_RANGE", "INSUFFICIENT_WATER", "INSUFFICIENT_DETRITUS", "INSUFFICIENT_ENERGY_PROXY", "ELAPSED_TIME_REQUIRED", "DECOMPOSITION_SERVICE_NOT_AUTHORIZED"]
+    }
+  ],
+  "provenance": [
+    {"source_type": "REPOSITORY_DERIVED", "source_path": "KAIOS_CANONICAL_LIFE_SCHEMA_V1.json", "source_commit": "56d3b8f20a63c4a8a5d19251ed72f7f9fe4e78c9", "git_object": "3bfcea2e0fc3854a6ff674a93ef32edc2ee0aab5", "sha256": "d1ced898d043e4890142df40a9033145762d4ceb28fd0e49eae39dc43bf224c5", "usage": "Mass, volume, density, energy, resource and environment SHARED_CORE fields."},
+    {"source_type": "REPOSITORY_DERIVED", "source_path": "KAIOS_CANONICAL_LIFE_TYPE_EXTENSIONS_V1.json", "source_commit": "56d3b8f20a63c4a8a5d19251ed72f7f9fe4e78c9", "git_object": "8f3a30d1cba18b7156c64439bfce5d9bafc6926e", "sha256": "72ab55fe394b1038cb2b8ab8bac616f378521b89fde36aa6cf5ab3cbebea58fa", "usage": "ANIMAL_EXTENSION metabolism, diet, movement and health boundary."},
+    {"source_type": "REPOSITORY_DERIVED", "source_path": "KAIOS/life/ecology/KAIOS_REPRODUCTION_ECOLOGY_RUNTIME_V1_SPEC.md", "source_commit": "56d3b8f20a63c4a8a5d19251ed72f7f9fe4e78c9", "git_object": "0f4399751f4e75727aeac45343a8b3a8900ec534", "sha256": "7fb277af16f552b16db2f4cb511fd060e4e3a5217855198f30fcf59371b8eda1", "usage": "Habitat, food, water, temperature, capacity and conservation gates."},
+    {"source_type": "REPOSITORY_DERIVED", "source_path": "KAIOS/life/ecology/KAIOS_REPRODUCTION_ECOLOGY_SCHEMA_V1.json", "source_commit": "56d3b8f20a63c4a8a5d19251ed72f7f9fe4e78c9", "git_object": "c99eb0eba386af67c009bfd115e88b934d1c9000", "sha256": "3257f8cd1f0ba482f0c6bc8d98fbfb4748c8a1172c9c88d4bf9a2981c90af9f0", "usage": "Current habitat vocabulary, finite bounds and insect species-admission gap."},
+    {"source_type": "REPOSITORY_DERIVED", "source_path": "KAIOS/life/candidates/ecology-v1/habitat-compatibility.json", "source_commit": "56d3b8f20a63c4a8a5d19251ed72f7f9fe4e78c9", "git_object": "365c7bbaffdf6754ebed3a6435cda73e45b191b5", "sha256": "f1dc488b8795ca5ad5a2e320f0502696d01a66329253b9922754bfc48ef37050", "usage": "Existing candidate habitat IDs and explicit absence of insect compatibility records."},
+    {"source_type": "REPOSITORY_DERIVED", "source_path": "KAIOS/life/forest-agriculture/KAIOS_FOREST_AGRICULTURE_RUNTIME_V1_SPEC.md", "source_commit": "56d3b8f20a63c4a8a5d19251ed72f7f9fe4e78c9", "git_object": "9a2dd4ad05bb7b2e3d71b91b479359947ada8376", "sha256": "4e1a23e97d09ec2dc4ad65440e6958e646f75ed418e5c703c5a5a1635c2809a1", "usage": "Foreign owner and causal location, time, water and resource boundaries."}
+  ],
+  "boundaries": {
+    "pollination_behavior": "EXCLUDED_SEPARATE_QUEUE_TASK",
+    "active_predation": false,
+    "pest_control": false,
+    "disease_model": false,
+    "pesticide_model": false,
+    "empirical_physiology": false,
+    "agricultural_advice": false,
+    "runtime_activation": false,
+    "canonical_promotion": false,
+    "production_authority": false
+  }
+}
