@@ -23,6 +23,9 @@ Public interfaces:
 - [Crop candidate Codex review closeout](life/forest-agriculture/KAIOS_CURSOR_CROP_LIFE_PACKAGE_REVIEW_CLOSEOUT.md)
 - [Fruit tree candidate Cursor work order](life/candidates/forest-agriculture-v1/CURSOR_FRUIT_TREE_PACKAGES_WORK_ORDER.md)
 - [Crop release and fruit tree dispatch Company Status](../KGEN-KAIOS/governance/autopilot/company_status/COMPANY_STATUS_2026-08-02_CROP_CANDIDATE_RELEASED_FRUIT_TREE_DISPATCHED.md)
+- [Fruit tree candidate Codex review closeout](life/forest-agriculture/KAIOS_CURSOR_FRUIT_TREE_PACKAGE_REVIEW_CLOSEOUT.md)
+- [Vegetable candidate Cursor work order](life/candidates/forest-agriculture-v1/CURSOR_VEGETABLE_PACKAGES_WORK_ORDER.md)
+- [Fruit tree release and vegetable dispatch Company Status](../KGEN-KAIOS/governance/autopilot/company_status/COMPANY_STATUS_2026-08-02_FRUIT_TREE_RELEASED_VEGETABLE_DISPATCHED.md)
 
 ## AI Company Order And Project Runtime V1
 

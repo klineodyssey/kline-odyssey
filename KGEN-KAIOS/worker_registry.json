@@ -5,9 +5,9 @@
     "updated": "2026-08-02",
     "updated_by": "Codex",
     "reviewed_by": "Codex",
-    "source_commit": "9329560df73a6668f74a5eb05910d951fa079a38",
-    "task_id": "KAIOS-CURSOR-CROP-LIFE-PACKAGES-001-RELEASE",
-    "change_reason": "Release the Codex-reviewed crop candidate claim and atomically dispatch cursor-01 to the next bounded fruit-tree candidate task.",
+    "source_commit": "e218dde35683285795714e821389806427948efe",
+    "task_id": "KAIOS-CURSOR-FRUIT-TREE-PACKAGES-001-RELEASE",
+    "change_reason": "Release the Codex-reviewed fruit-tree candidate claim and atomically dispatch cursor-01 to the next bounded vegetable candidate task.",
     "source_of_truth": true
   },
   "formal_employee_requirements": [
@@ -93,6 +93,14 @@
       "branch": "cursor-handoff/KAIOS-CURSOR-FRUIT-TREE-PACKAGES-001",
       "output_status": "CURSOR_RESEARCH_CANDIDATE_ONLY",
       "reviewer": "codex-gm-01",
+      "status": "RELEASED"
+    },
+    {
+      "task_id": "KAIOS-CURSOR-VEGETABLE-PACKAGES-001",
+      "worker_id": "cursor-01",
+      "branch": "cursor-handoff/KAIOS-CURSOR-VEGETABLE-PACKAGES-001",
+      "output_status": "CURSOR_RESEARCH_CANDIDATE_ONLY",
+      "reviewer": "codex-gm-01",
       "status": "DISPATCHED"
     }
   ],
@@ -131,13 +139,13 @@
         "LIFE_RESEARCH_ANALYST"
       ],
       "workspace": "cursor-worker-workspace",
-      "current_task": "KAIOS-CURSOR-FRUIT-TREE-PACKAGES-001",
-      "current_branch": "cursor-handoff/KAIOS-CURSOR-FRUIT-TREE-PACKAGES-001",
+      "current_task": "KAIOS-CURSOR-VEGETABLE-PACKAGES-001",
+      "current_branch": "cursor-handoff/KAIOS-CURSOR-VEGETABLE-PACKAGES-001",
       "status": "ACTIVE",
       "employee_status": "ACTIVE",
       "trust_level": "T2",
-      "heartbeat": "2026-08-02T01:47:00Z",
-      "last_report": "KAIOS/life/candidates/forest-agriculture-v1/crops/CURSOR_CROP_LIFE_PACKAGES_REPORT.md",
+      "heartbeat": "2026-08-02T02:41:42Z",
+      "last_report": "KAIOS/life/candidates/forest-agriculture-v1/fruit-trees/CURSOR_FRUIT_TREE_PACKAGES_REPORT.md",
       "allowed_branch_pattern": "cursor-handoff/<Task-ID>",
       "branch_input_aliases": [
         "cursor/<feature-name>"

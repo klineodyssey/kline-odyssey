@@ -1,0 +1,103 @@
+{
+  "dataset_id": "KAIOS-FRUIT-TREE-TEST-SCENARIOS-V1",
+  "schema_version": "1.0.0-candidate",
+  "status": "CURSOR_RESEARCH_CANDIDATE_ONLY",
+  "review_status": "PENDING_CODEX_REVIEW",
+  "task_id": "KAIOS-CURSOR-FRUIT-TREE-PACKAGES-001",
+  "worker_id": "cursor-01",
+  "branch": "cursor-handoff/KAIOS-CURSOR-FRUIT-TREE-PACKAGES-001",
+  "source_base_commit": "6b8654995cf04a5227b7980d74a113ffb83c3adc",
+  "source_hash_basis": "SHA256_OF_GIT_BLOB_CONTENT_AT_SOURCE_BASE_COMMIT",
+  "test_mode": "OBJECTIVE_CANDIDATE_VALIDATION_ONLY",
+  "scenarios": [
+    {
+      "test_id": "FRUIT-TREE-TAXONOMY-001",
+      "name": "Owner-native taxonomy and Canonical Life instance semantics remain separate",
+      "given": ["TREE_ALPHA", "FRUIT_ALPHA", "OWNER_NATIVE_TAXONOMY_RECORDS"],
+      "when": ["COMPARE_RECORDS_TO_SOURCE_BLOB", "VALIDATE_CANONICAL_CROSSWALKS"],
+      "then": ["DOMAIN_THROUGH_SPECIES_MATCH", "SUBSPECIES_PRESERVED", "CATEGORY_PRESERVED", "LIFE_INSTANCE_IS_NULL", "LIFE_INSTANCE_STATUS_IS_UNASSIGNED"]
+    },
+    {
+      "test_id": "FRUIT-TREE-NO-SPECIES-001",
+      "name": "Aggregate FRUIT_ALPHA never becomes a newly invented species",
+      "given": ["FRUIT_ALPHA_IS_SYNTHETIC_AGGREGATE", "VALIDATED_SPECIES_REFERENCE_IS_NULL"],
+      "when": ["LOAD_ALL_SIX_ARTIFACTS"],
+      "then": ["NO_NEW_SPECIES_IDENTIFIER", "SPECIES_SPECIFIC_VALUES_ARE_SOURCE_UNDERSPECIFIED", "NO_CANONICAL_PROMOTION"]
+    },
+    {
+      "test_id": "FRUIT-TREE-PARAMETER-001",
+      "name": "Every numeric parameter carries the complete work-order envelope",
+      "given": ["ALL_OBJECTS_WITH_PARAMETER_NAME"],
+      "when": ["VALIDATE_REQUIRED_PARAMETER_KEYS", "VALIDATE_MINIMUM_LE_DEFAULT_LE_MAXIMUM", "VALIDATE_SOURCE_TYPE_ALLOWLIST"],
+      "then": ["NO_MISSING_KEY", "ALL_ENVELOPES_ORDERED", "ALL_SOURCE_TYPES_ALLOWED"]
+    },
+    {
+      "test_id": "FRUIT-TREE-UNIT-001",
+      "name": "Owner-native units remain isolated or explicitly reversible",
+      "given": ["AGRICULTURE_SYNTHETIC_UNITS", "ECOLOGY_NATIVE_UNITS", "ORACLE_MICRO_UNITS"],
+      "when": ["VALIDATE_UNIT_CONTRACTS"],
+      "then": ["NO_SYNTHETIC_WATER_TO_LITER_CLAIM", "NO_SYNTHETIC_ENERGY_TO_PHYSICAL_ENERGY_CLAIM", "ALL_ORACLE_CONVERSIONS_HAVE_INVERSES"]
+    },
+    {
+      "test_id": "FRUIT-TREE-CAUSAL-001",
+      "name": "Tree establishment cannot skip required causal inputs",
+      "given": ["PROPAGATION_SOURCE_MISSING_OR_ANY_ENVIRONMENT_GATE_FALSE"],
+      "when": ["ATTEMPT_TREE_ESTABLISHMENT_PROGRESS"],
+      "then": ["PROGRESS_BLOCKED", "NO_TREE_CREATED", "NO_RESOURCE_DEBIT", "NO_LABOR_DEBIT"]
+    },
+    {
+      "test_id": "FRUIT-TREE-CAUSAL-002",
+      "name": "Fruit cycle requires an established tree and elapsed time",
+      "given": ["NO_ESTABLISHED_TREE_REFERENCE_OR_ZERO_ELAPSED_TIME"],
+      "when": ["ATTEMPT_FRUITING"],
+      "then": ["FRUITING_BLOCKED", "NO_FRUIT_OUTPUT", "NO_HARVEST_READY_STATE"]
+    },
+    {
+      "test_id": "FRUIT-TREE-HARVEST-001",
+      "name": "Harvest requires readiness, labor, tools, containers, time and capacity",
+      "given": ["ONE_OR_MORE_HARVEST_GATES_MISSING"],
+      "when": ["ATTEMPT_HARVEST"],
+      "then": ["HARVEST_BLOCKED", "NO_WAREHOUSE_CREDIT", "NO_RESIDUE_DISAPPEARANCE"]
+    },
+    {
+      "test_id": "FRUIT-TREE-ORACLE-001",
+      "name": "Fixed-point replay enforces establishment and balances all conserved domains",
+      "given": ["FRUIT-TREE-AGGREGATE-NUMERICAL-ORACLE-001"],
+      "when": ["REPLAY_ORDERED_INTEGER_EVENTS", "APPLY_DECLARED_STATE_CHANGES", "CHECK_EVENT_PRECONDITIONS_BEFORE_APPLY"],
+      "then": ["ESTABLISHMENT_DURATION_AT_LEAST_397_DAYS_BEFORE_FRUITING", "OWNER_ISSUED_ESTABLISHED_TREE_REFERENCE_PRESENT_BEFORE_FRUITING", "EVERY_EVENT_DOMAIN_DELTA_SUM_IS_ZERO", "NO_POOL_IS_NEGATIVE", "FINAL_STATE_EXACT_MATCH", "WATER_TOTAL_EXACT", "STRUCTURAL_MASS_TOTAL_EXACT", "NUTRIENT_TOTAL_EXACT", "ENERGY_TOTAL_EXACT", "LABOR_TOTAL_EXACT"]
+    },
+    {
+      "test_id": "FRUIT-TREE-ORACLE-002",
+      "name": "Canonical final-state SHA-256 is reproducible",
+      "given": ["RECURSIVELY_KEY_SORTED_EXPECTED_FINAL_STATE", "COMPACT_UTF8_NO_BOM_NO_TRAILING_NEWLINE"],
+      "when": ["COMPUTE_SHA256_TWICE"],
+      "then": ["BOTH_HASHES_IDENTICAL", "HASH_EQUALS_DECLARED_EXPECTED_FINAL_SHA256"]
+    },
+    {
+      "test_id": "FRUIT-TREE-PROVENANCE-001",
+      "name": "Declared source hashes match exact Git blob bytes",
+      "given": ["SOURCE_BASE_COMMIT", "EVERY_PROVENANCE_RECORD"],
+      "when": ["RESOLVE_GIT_OBJECT", "HASH_GIT_CAT_FILE_BLOB_BYTES"],
+      "then": ["GIT_OBJECT_MATCH", "SHA256_MATCH", "SOURCE_PATH_EXISTS_AT_BASE"]
+    },
+    {
+      "test_id": "FRUIT-TREE-FILE-001",
+      "name": "JSON and text encodings are strict",
+      "given": ["SIX_ALLOWED_OUTPUTS"],
+      "when": ["PARSE_JSON_WITH_DUPLICATE_KEY_REJECTION", "DECODE_STRICT_UTF8", "SCAN_BOM_AND_NUL", "RUN_GIT_DIFF_CHECK"],
+      "then": ["JSON_VALID", "NO_DUPLICATE_KEYS", "UTF8_VALID", "NO_BOM", "NO_NUL", "DIFF_CHECK_PASS"]
+    },
+    {
+      "test_id": "FRUIT-TREE-BOUNDARY-001",
+      "name": "Candidate package cannot cross protected authority boundaries",
+      "given": ["GIT_DIFF_NAME_ONLY", "SIX_ALLOWED_PATHS"],
+      "when": ["SCAN_PROTECTED_PATHS", "SCAN_SECRETS", "SCAN_AUTHORITY_FIELDS"],
+      "then": ["ONLY_ALLOWED_PATHS", "NO_SECRET_FINDING", "NO_RUNTIME_OR_CURRENT_CHANGE", "NO_WALLET_OR_KGEN_CHANGE", "NO_RIGHTS_OR_ECONOMY_AUTHORITY", "NO_DEPLOYMENT_OR_MERGE"]
+    }
+  ],
+  "provenance": [
+    { "source_type": "REPOSITORY_DERIVED", "source_path": "KAIOS/life/candidates/forest-agriculture-v1/CURSOR_FRUIT_TREE_PACKAGES_WORK_ORDER.md", "source_commit": "6b8654995cf04a5227b7980d74a113ffb83c3adc", "git_object": "10afc4ec879812717a46607643d3d00764c64ae3", "sha256": "8fb9a8cdc39ea7e6cf34500e911661a5e8e8088b2afc0fceb5f1d7fa2e3017fe", "purpose": "Authorized output, envelope, provenance, oracle, validation and boundary requirements." },
+    { "source_type": "REPOSITORY_DERIVED", "source_path": "KAIOS/life/forest-agriculture/KAIOS_FOREST_AGRICULTURE_RUNTIME_V1_SPEC.md", "source_commit": "6b8654995cf04a5227b7980d74a113ffb83c3adc", "git_object": "9a2dd4ad05bb7b2e3d71b91b479359947ada8376", "sha256": "4e1a23e97d09ec2dc4ad65440e6958e646f75ed418e5c703c5a5a1635c2809a1", "purpose": "Causal, conservation, harvest and owner-boundary assertions." }
+  ],
+  "completion_state": "PENDING_CODEX_REVIEW"
+}

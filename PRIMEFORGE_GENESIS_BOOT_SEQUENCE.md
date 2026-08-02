@@ -22,13 +22,13 @@ permalink: /PRIMEFORGE_GENESIS_BOOT_SEQUENCE/
 
 STATUS: ACTIVE  
 VERSION: CURRENT  
-REVISION: 2026-08-02.AI_COMPANY_SPEC_INDEX
+REVISION: 2026-08-02.AI_COMPANY_SPEC_AND_VEGETABLE_DISPATCH_INDEX
 LAST_UPDATED: 2026-08-02
 UPDATED_BY: Codex
 REVIEWED_BY: Codex
-SOURCE_COMMIT: 6b8654995cf04a5227b7980d74a113ffb83c3adc
+SOURCE_COMMIT: 9b5246918b4e912557c9a6cd402ac9ab9fb6f83f
 TASK_ID: KAIOS-AI-COMPANY-ORDER-PROJECT-RUNTIME-V1-001
-CHANGE_REASON: Register the cumulative AI Company order/project specification, schemas, validation, recovery and Company Status without activating Runtime or production authority.
+CHANGE_REASON: Register the cumulative AI Company order/project specification after the reviewed fruit-tree release and bounded vegetable dispatch, without activating Runtime or production authority.
 SOURCE_OF_TRUTH: TRUE  
 FORMAL_ENTRY: PRIMEFORGE_GENESIS_BOOT_SEQUENCE.md  
 ANCESTOR: PRIMEFORGE_GENESIS_BOOT_SEQUENCE_V1_4.md  
@@ -48,6 +48,9 @@ Rights, Economy, Wallet or KGEN authority.
 | `KAIOS/life/forest-agriculture/KAIOS_CURSOR_CROP_LIFE_PACKAGE_REVIEW_CLOSEOUT.md` | Codex review, repair evidence, validation and formal release record for the crop candidate task. |
 | `KAIOS/life/candidates/forest-agriculture-v1/CURSOR_FRUIT_TREE_PACKAGES_WORK_ORDER.md` | Explicit candidate-only task envelope for the sole active fruit-tree package claim. |
 | `KGEN-KAIOS/governance/autopilot/company_status/COMPANY_STATUS_2026-08-02_CROP_CANDIDATE_RELEASED_FRUIT_TREE_DISPATCHED.md` | Company status projection for crop release and fruit-tree dispatch. |
+| `KAIOS/life/forest-agriculture/KAIOS_CURSOR_FRUIT_TREE_PACKAGE_REVIEW_CLOSEOUT.md` | Codex review, repair evidence, validation and formal release record for the fruit-tree candidate task. |
+| `KAIOS/life/candidates/forest-agriculture-v1/CURSOR_VEGETABLE_PACKAGES_WORK_ORDER.md` | Explicit candidate-only task envelope for the sole active vegetable package claim. |
+| `KGEN-KAIOS/governance/autopilot/company_status/COMPANY_STATUS_2026-08-02_FRUIT_TREE_RELEASED_VEGETABLE_DISPATCHED.md` | Company status projection for fruit-tree release and vegetable dispatch. |
 
 ## AI Company Order And Project Specification Registration
 

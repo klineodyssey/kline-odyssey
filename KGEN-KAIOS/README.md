@@ -235,6 +235,9 @@ Can Claude, Gemini, OpenHands, GitHub Copilot, ChatGPT, Deep Research, Cursor, C
 | `../KAIOS/life/forest-agriculture/KAIOS_CURSOR_CROP_LIFE_PACKAGE_REVIEW_CLOSEOUT.md` | Reviewed crop candidate closeout and release evidence. |
 | `../KAIOS/life/candidates/forest-agriculture-v1/CURSOR_FRUIT_TREE_PACKAGES_WORK_ORDER.md` | Candidate-only fruit-tree task envelope for `cursor-01`. |
 | `governance/autopilot/company_status/COMPANY_STATUS_2026-08-02_CROP_CANDIDATE_RELEASED_FRUIT_TREE_DISPATCHED.md` | Company status for the controlled crop-to-fruit-tree transition. |
+| `../KAIOS/life/forest-agriculture/KAIOS_CURSOR_FRUIT_TREE_PACKAGE_REVIEW_CLOSEOUT.md` | Codex review and formal release record for the fruit-tree candidate task. |
+| `../KAIOS/life/candidates/forest-agriculture-v1/CURSOR_VEGETABLE_PACKAGES_WORK_ORDER.md` | Candidate-only vegetable task envelope for `cursor-01`. |
+| `governance/autopilot/company_status/COMPANY_STATUS_2026-08-02_FRUIT_TREE_RELEASED_VEGETABLE_DISPATCHED.md` | Company status for the controlled fruit-tree-to-vegetable transition. |
 
 ## R&D Provenance And Biological Evolution Governance
 

@@ -763,6 +763,9 @@ Task: `KAIOS-FOREST-AGRICULTURE-RUNTIME-V1-001`
 | `KAIOS/life/forest-agriculture/KAIOS_CURSOR_CROP_LIFE_PACKAGE_REVIEW_CLOSEOUT.md` | Crop candidate Codex review, repair record, complete commit lineage and lease release evidence. |
 | `KAIOS/life/candidates/forest-agriculture-v1/CURSOR_FRUIT_TREE_PACKAGES_WORK_ORDER.md` | Bounded fruit-tree candidate work order and allowed-path contract. |
 | `KGEN-KAIOS/governance/autopilot/company_status/COMPANY_STATUS_2026-08-02_CROP_CANDIDATE_RELEASED_FRUIT_TREE_DISPATCHED.md` | Company status for the atomic crop-to-fruit-tree queue transition. |
+| `KAIOS/life/forest-agriculture/KAIOS_CURSOR_FRUIT_TREE_PACKAGE_REVIEW_CLOSEOUT.md` | Fruit-tree candidate Codex review, repair record, complete commit lineage and lease release evidence. |
+| `KAIOS/life/candidates/forest-agriculture-v1/CURSOR_VEGETABLE_PACKAGES_WORK_ORDER.md` | Bounded vegetable candidate work order and allowed-path contract. |
+| `KGEN-KAIOS/governance/autopilot/company_status/COMPANY_STATUS_2026-08-02_FRUIT_TREE_RELEASED_VEGETABLE_DISPATCHED.md` | Company status for the atomic fruit-tree-to-vegetable queue transition. |
 
 ## AI Company Order And Project Runtime V1 Specification
 
