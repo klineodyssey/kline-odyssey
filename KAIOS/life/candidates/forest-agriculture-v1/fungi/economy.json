@@ -1,0 +1,68 @@
+{
+  "record_id": "KAIOS-FUNGI-MYCOFORM-CANDIDATE-ECONOMY-V1",
+  "schema_version": "1.0.0-candidate",
+  "status": "CURSOR_RESEARCH_CANDIDATE_ONLY",
+  "review_status": "PENDING_CODEX_REVIEW",
+  "authority": "NO_PRODUCTION_AUTHORITY",
+  "task_id": "KAIOS-CURSOR-FUNGI-CANDIDATE-001",
+  "economy_owner": "EXISTING_ECONOMY_AUTHORITY",
+  "binding_mode": "NULL_READ_ONLY_PROJECTION",
+  "economic_role": {
+    "economic_value": null,
+    "resource_value": null,
+    "labor_requirement": null,
+    "maintenance_cost": null,
+    "harvest_or_output": null,
+    "market_role": "NONE",
+    "supply_chain_inputs": [],
+    "supply_chain_outputs": [],
+    "civilization_requirement": null,
+    "technology_requirement": null,
+    "K11520_eligibility": "SIMULATED_K11520_ONLY",
+    "rights_package": {"status": "NO_RIGHTS_GRANTED"},
+    "value_basis": "No demand, use, sale, harvest, processing service, nutrient service, replacement cost, or production output has been validated."
+  },
+  "forbidden_economic_objects": {
+    "price": null,
+    "listing": null,
+    "order": null,
+    "inventory_lot": null,
+    "ledger_entry": null,
+    "revenue": null,
+    "yield": null,
+    "settlement": null,
+    "wallet": null,
+    "real_kgen": null
+  },
+  "resource_custody_boundary": {
+    "detritus_owner": "KAIOS_REPRODUCTION_ECOLOGY_RUNTIME_V1",
+    "dead_biomass_owner": "KAIOS_REPRODUCTION_ECOLOGY_RUNTIME_V1",
+    "decomposition_owner": "KAIOS_REPRODUCTION_ECOLOGY_RUNTIME_V1",
+    "soil_nutrient_owner": "KAIOS_REPRODUCTION_ECOLOGY_RUNTIME_V1",
+    "candidate_pending_custody_is_inventory": false,
+    "candidate_pending_custody_is_saleable_output": false,
+    "candidate_pending_custody_creates_revenue": false,
+    "foreign_owner_acceptance_required": true
+  },
+  "claims": {
+    "decomposition_service": false,
+    "soil_improvement_service": false,
+    "fertilizer_output": false,
+    "compost_output": false,
+    "food_or_feed_output": false,
+    "edible_or_medicinal_output": false,
+    "product_endorsement": false,
+    "yield_promise": false
+  },
+  "boundaries": [
+    "NO_ECONOMY_AUTHORITY",
+    "NO_PRICE",
+    "NO_MARKET_LISTING",
+    "NO_INVENTORY_OR_LEDGER_MUTATION",
+    "NO_REVENUE_OR_YIELD_CLAIM",
+    "NO_REAL_KGEN",
+    "NO_WALLET",
+    "NO_SETTLEMENT",
+    "NO_PRODUCTION_AUTHORITY"
+  ]
+}

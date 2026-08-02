@@ -1,5 +1,7 @@
+import hashlib
 import json
 from pathlib import Path
+import subprocess
 import unittest
 
 
@@ -13,6 +15,10 @@ FOREST_QUEUE_PATH = (
     / "forest-agriculture"
     / "KAIOS_CURSOR_CONTINUOUS_WORK_QUEUE.json"
 )
+SOFTWARE_QUEUE_PATH = (
+    ROOT / "KAIOS" / "software-life" / "KAIOS_AI_WORKFORCE_24H_QUEUE.json"
+)
+PUBLIC_QUEUE_PATH = ROOT / "api" / "kaios" / "ai-company" / "v1" / "cursor-queue.json"
 
 
 def load_json(path):
@@ -51,7 +57,10 @@ KNOWN_CLAIM_STATES = {
     "COMPLETED_CODEX_REVIEWED",
 }
 
-UNLOCKED_CLAIM_STATES = {"RELEASED", "COMPLETED_CODEX_REVIEWED"}
+UNLOCKED_CLAIM_STATES = {
+    "RELEASED",
+    "COMPLETED_CODEX_REVIEWED",
+}
 
 
 def lock_holding_claims(dispatch_history):
@@ -79,6 +88,8 @@ class CursorWorkerRegistryRepairTests(unittest.TestCase):
         cls.registry = load_json(REGISTRY_PATH)
         cls.schema = load_json(SCHEMA_PATH)
         cls.forest_queue = load_json(FOREST_QUEUE_PATH)
+        cls.software_queue = load_json(SOFTWARE_QUEUE_PATH)
+        cls.public_queue = load_json(PUBLIC_QUEUE_PATH)
         cls.cursor = next(
             worker
             for worker in cls.registry["workers"]
@@ -176,54 +187,215 @@ class CursorWorkerRegistryRepairTests(unittest.TestCase):
             <= set(self.cursor["allowed_work"])
         )
 
-    def test_fungi_candidate_dispatch_is_the_only_active_claim(self):
+    def test_fungi_release_leaves_zero_claims_and_prepares_microbial(self):
         metadata = self.registry["metadata"]
         self.assertEqual(
             metadata["source_commit"],
-            "eb17536ff6affb34f93bce6c5622d7bab018d230",
+            "7008e4f9449f6df050171cf47ec6ec56419925e9",
         )
         self.assertEqual(
-            metadata["task_id"], "KAIOS-CURSOR-EARTHWORM-CANDIDATE-001-RELEASE"
+            metadata["task_id"],
+            "KAIOS-CURSOR-MICROBIAL-RESEARCH-001-PREPARATION-ONLY",
         )
-        self.assertIn("fungi candidate task", metadata["change_reason"])
+        self.assertIn("without claiming", metadata["change_reason"])
 
         locked = validate_one_task_lock(self.registry["dispatch_history"])
-        self.assertEqual(len(locked), 1)
-        dispatch = locked[0]
-        self.assertEqual(
-            dispatch["task_id"], "KAIOS-CURSOR-FUNGI-CANDIDATE-001"
-        )
-        self.assertEqual(dispatch["worker_id"], self.cursor["worker_id"])
-        self.assertEqual(
-            dispatch["branch"],
-            "cursor-handoff/KAIOS-CURSOR-FUNGI-CANDIDATE-001",
-        )
-        self.assertEqual(dispatch["output_status"], "CURSOR_RESEARCH_CANDIDATE_ONLY")
-        self.assertEqual(self.cursor["current_task"], dispatch["task_id"])
-        self.assertEqual(self.cursor["current_branch"], dispatch["branch"])
-        self.assertIn("FUNGI_CANDIDATE_PACKAGE", self.cursor["allowed_work"])
+        self.assertEqual(locked, [])
+        self.assertEqual(self.registry["active_claims"], [])
 
-        earthworm_dispatch = next(
-            item
-            for item in self.registry["dispatch_history"]
-            if item["task_id"] == "KAIOS-CURSOR-EARTHWORM-CANDIDATE-001"
+        fungi_events = [
+            event
+            for event in self.registry["claim_events"]
+            if event["task_id"] == "KAIOS-CURSOR-FUNGI-CANDIDATE-001"
+        ]
+        self.assertEqual(
+            [event["event_type"] for event in fungi_events],
+            ["CLAIM_CLOSED", "CLAIM_RELEASED"],
         )
-        self.assertEqual(earthworm_dispatch["status"], "RELEASED")
+        self.assertEqual([event["sequence"] for event in fungi_events], [1, 2])
+        self.assertEqual(
+            fungi_events[1]["previous_event_id"], fungi_events[0]["event_id"]
+        )
+        self.assertNotIn(
+            "KAIOS-CURSOR-MICROBIAL-RESEARCH-001",
+            {event["task_id"] for event in self.registry["claim_events"]},
+        )
 
-    def test_continuous_queue_requires_formal_release_and_atomic_claim(self):
+    def test_dispatch_history_ends_with_released_fungi_and_excludes_microbial(self):
+        final_dispatch = self.registry["dispatch_history"][-1]
+        self.assertEqual(
+            final_dispatch["task_id"], "KAIOS-CURSOR-FUNGI-CANDIDATE-001"
+        )
+        self.assertEqual(final_dispatch["status"], "RELEASED")
+        self.assertNotIn(
+            "KAIOS-CURSOR-MICROBIAL-RESEARCH-001",
+            {item["task_id"] for item in self.registry["dispatch_history"]},
+        )
+
+    def test_microbial_research_is_bounded_preparation_only(self):
+        self.assertEqual(len(self.registry["prepared_tasks"]), 1)
+        prepared = self.registry["prepared_tasks"][0]
+        self.assertEqual(
+            prepared["task_id"], "KAIOS-CURSOR-MICROBIAL-RESEARCH-001"
+        )
+        self.assertEqual(prepared["worker_id"], self.cursor["worker_id"])
+        self.assertEqual(prepared["status"], "PREPARATION_ONLY")
+        self.assertEqual(prepared["claim_state"], "NOT_CLAIMED")
+        self.assertEqual(prepared["dispatch_state"], "NOT_DISPATCHED")
+        self.assertIsNone(prepared["execution_base"])
+        self.assertEqual(
+            prepared["execution_base_binding"],
+            "SEPARATE_ACTIVATION_PR_MUST_BIND_EXACT_PREPARATION_MERGE_SHA",
+        )
+        self.assertFalse(prepared["descendant_wildcard_allowed"])
+        self.assertEqual(
+            prepared["planned_branch"],
+            "cursor-handoff/KAIOS-CURSOR-MICROBIAL-RESEARCH-001",
+        )
+        self.assertEqual(prepared["branch_state"], "NOT_CREATED")
+        self.assertEqual(prepared["isolated_worktree_state"], "NOT_CREATED")
+        self.assertEqual(
+            prepared["output_status"], "CURSOR_RESEARCH_PROPOSAL_ONLY"
+        )
+        self.assertIsNone(self.cursor["current_task"])
+        self.assertIsNone(self.cursor["current_branch"])
+        self.assertEqual(self.cursor["status"], "IDLE")
+        self.assertIsNone(self.cursor["heartbeat"])
+        self.assertIn("MICROBIAL_RESEARCH", self.cursor["allowed_work"])
+
+        self.assertEqual(
+            prepared["preparation_source_commit"],
+            "7008e4f9449f6df050171cf47ec6ec56419925e9",
+        )
+        self.assertEqual(
+            prepared["activation_steps"],
+            [
+                "MERGE_PREPARATION_PR",
+                "RECORD_EXACT_PREPARATION_MERGE_SHA",
+                "CREATE_PLANNED_BRANCH_AT_EXACT_PREPARATION_MERGE_SHA",
+                "VERIFY_ISOLATED_WORKTREE_AT_EXACT_PREPARATION_MERGE_SHA",
+                "OPEN_SEPARATE_ACTIVATION_PR_BINDING_EXACT_BASE",
+                "DEFINE_FAIL_CLOSED_EXPIRY_AND_REVALIDATION",
+                "RECORD_CLAIMED_ONLY_AFTER_ACTIVATION_PR_MERGES",
+            ],
+        )
+        for forbidden_field in (
+            "claim_id",
+            "session_id",
+            "branch",
+            "source_base",
+            "execution_base_rule",
+            "dispatch_mode",
+            "fencing_token",
+            "record_version",
+            "issued_at",
+            "lease_expiry",
+        ):
+            self.assertNotIn(forbidden_field, prepared)
+        self.assertFalse(prepared["automatic"])
+        self.assertFalse(prepared["external_autonomy"])
+        self.assertFalse(prepared["merge_allowed"])
+        self.assertFalse(prepared["deploy_allowed"])
+        self.assertEqual(
+            prepared["authorized_paths"],
+            [
+                "KAIOS/life/candidates/forest-agriculture-v1/microbial-research/"
+            ],
+        )
+        self.assertEqual(
+            prepared["expected_files"],
+            [
+                "CURSOR_MICROBIAL_DECOMPOSER_RESEARCH_REPORT.md",
+                "microbial-decomposer-process-proposals.json",
+                "microbial-environment-threshold-proposals.json",
+                "microbial-resource-accounting-scenarios.json",
+                "microbial-competition-and-succession-proposals.json",
+                "microbial-safety-boundaries.json",
+                "microbial-test-scenarios.json",
+                "CURSOR_MICROBIAL_RESEARCH_IMPROVEMENT_PROPOSAL.md",
+            ],
+        )
+        self.assertEqual(
+            prepared["actions_after_activation_only"],
+            [
+                "READ_REPOSITORY_CONTEXT",
+                "WRITE_ONLY_EXPECTED_FILES_UNDER_AUTHORIZED_PATH",
+                "RUN_BOUNDED_LOCAL_TESTS",
+                "RECORD_GIT_OBJECT_AND_SHA256_PROVENANCE",
+                "COMMIT_EXACTLY_EXPECTED_FILES",
+                "STOP_AT_PENDING_CODEX_REVIEW",
+            ],
+        )
+        self.assertEqual(prepared["reviewer"], "codex-gm-01")
+        self.assertEqual(
+            prepared["forbidden_paths"],
+            [
+                "KGEN-KAIOS/**",
+                "KGEN/**",
+                "KAIOS/**/Runtime/**",
+                "KAIOS/**/Wallet/**",
+                "**/*CURRENT*",
+                "api/**",
+                "docs/**",
+                "README.md",
+                "PRIMEFORGE_GENESIS_BOOT_SEQUENCE_V1_4.md",
+            ],
+        )
+        self.assertEqual(
+            prepared["prior_worker_registry"],
+            {
+                "git_object": "93342ab913d0adab57c29a85017b9907b05b026e",
+                "sha256": "af348f1ad3967ffc7aca13387a3d0a45827bc84fe2aa99804570435a67df34b2",
+            },
+        )
+        self.assertEqual(
+            prepared["prior_queue"],
+            {
+                "git_object": "c0596410cc1b32190f4b8369c98b23b9539351b4",
+                "sha256": "b2e044cf29ef031f2f47a04442001f4a0376cb14819e9834ede3dd200d75544b",
+            },
+        )
+
+    def test_preparation_prior_evidence_matches_source_git_objects(self):
+        prepared = self.registry["prepared_tasks"][0]
+        evidence_by_path = {
+            "KGEN-KAIOS/worker_registry.json": prepared["prior_worker_registry"],
+            "KAIOS/life/forest-agriculture/KAIOS_CURSOR_CONTINUOUS_WORK_QUEUE.json": prepared["prior_queue"],
+        }
+        for path, evidence in evidence_by_path.items():
+            object_id = subprocess.check_output(
+                [
+                    "git",
+                    "rev-parse",
+                    f"{prepared['preparation_source_commit']}:{path}",
+                ],
+                cwd=ROOT,
+                text=True,
+            ).strip()
+            self.assertEqual(object_id, evidence["git_object"])
+            payload = subprocess.check_output(
+                ["git", "cat-file", "blob", object_id], cwd=ROOT
+            )
+            self.assertEqual(hashlib.sha256(payload).hexdigest(), evidence["sha256"])
+
+    def test_continuous_queue_projects_preparation_only(self):
         queue = self.forest_queue
         self.assertEqual(
             queue["continuous_dispatch_mode"],
-            "CODEX_CONTROLLED_AFTER_FORMAL_RELEASE",
+            "CODEX_CONTROLLED_PREPARATION_ONLY",
         )
         self.assertFalse(queue["automatic_unreviewed_dispatch"])
         self.assertTrue(
             {
                 "PREVIOUS_TASK_CODEX_REVIEWED",
                 "PREVIOUS_TASK_CLOSED",
-                "PREVIOUS_LEASE_RELEASED",
-                "EXPLICIT_TASK_ENVELOPE",
-                "ATOMIC_CLAIM_SUCCEEDED",
+                "PREVIOUS_CLAIM_RELEASED",
+                "PREPARATION_PR_MERGED",
+                "EXACT_PREPARATION_MERGE_SHA_RECORDED",
+                "PLANNED_BRANCH_CREATED_AT_EXACT_PREPARATION_MERGE_SHA",
+                "ISOLATED_WORKTREE_VERIFIED_AT_EXACT_PREPARATION_MERGE_SHA",
+                "SEPARATE_ACTIVATION_PR_REVIEWED_AND_MERGED",
+                "FAIL_CLOSED_EXPIRY_AND_REVALIDATION_DEFINED",
             }
             <= set(queue["next_dispatch_requires"])
         )
@@ -239,8 +411,46 @@ class CursorWorkerRegistryRepairTests(unittest.TestCase):
         self.assertEqual(by_priority[8]["status"], "RELEASED")
         self.assertEqual(by_priority[9]["status"], "RELEASED")
         self.assertEqual(by_priority[10]["status"], "RELEASED")
-        self.assertEqual(by_priority[11]["status"], "DISPATCHED")
-        self.assertEqual(by_priority[11]["task_id"], self.cursor["current_task"])
+        self.assertEqual(by_priority[11]["status"], "RELEASED")
+        self.assertEqual(by_priority[12]["status"], "PREPARATION_ONLY")
+        self.assertEqual(by_priority[12]["task_id"], "KAIOS-CURSOR-MICROBIAL-RESEARCH-001")
+        self.assertEqual(queue["active_claims"], [])
+        self.assertEqual(
+            queue["worker_state"],
+            {
+                "worker_id": "cursor-01",
+                "current_task": None,
+                "current_branch": None,
+                "status": "IDLE",
+            },
+        )
+        self.assertEqual(queue["prepared_task"], self.registry["prepared_tasks"][0])
+
+    def test_four_way_active_claims_are_equal_and_empty(self):
+        claim_sets = [
+            self.registry["active_claims"],
+            self.forest_queue["active_claims"],
+            self.software_queue["active_claims"],
+            self.public_queue["active_claims"],
+        ]
+        self.assertTrue(all(claims == [] for claims in claim_sets))
+        self.assertTrue(all(claims == claim_sets[0] for claims in claim_sets[1:]))
+        self.assertEqual(self.public_queue["worker_state"], self.forest_queue["worker_state"])
+        self.assertEqual(self.public_queue["prepared_task"], self.forest_queue["prepared_task"])
+        self.assertEqual(
+            self.software_queue["cursor"]["current_status"],
+            "IDLE_NO_CURRENT_TASK",
+        )
+        self.assertIsNone(self.software_queue["cursor"]["current_task"])
+        self.assertIsNone(self.software_queue["cursor"]["current_branch"])
+        self.assertEqual(
+            self.software_queue["cursor"]["prepared_task_status"],
+            "PREPARATION_ONLY",
+        )
+        self.assertIsNone(self.software_queue["cursor"]["execution_base"])
+        self.assertFalse(
+            self.software_queue["cursor"]["descendant_wildcard_allowed"]
+        )
 
     def test_approved_or_closed_claim_still_holds_lock_until_release(self):
         next_claim = {"task_id": "NEXT", "status": "DISPATCHED"}

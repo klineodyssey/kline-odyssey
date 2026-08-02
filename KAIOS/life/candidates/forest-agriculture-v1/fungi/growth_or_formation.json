@@ -1,0 +1,138 @@
+{
+  "record_id": "KAIOS-FUNGI-MYCOFORM-CANDIDATE-GROWTH-V1",
+  "schema_version": "1.0.0-candidate",
+  "status": "CURSOR_RESEARCH_CANDIDATE_ONLY",
+  "review_status": "PENDING_CODEX_REVIEW",
+  "authority": "NO_PRODUCTION_AUTHORITY",
+  "task_id": "KAIOS-CURSOR-FUNGI-CANDIDATE-001",
+  "model": "BOUNDED_COLONY_STAGE_AND_RESOURCE_PROXY",
+  "assumption_classification": "SIMULATION_APPROXIMATION",
+  "numeric_parameter_contract": {
+    "required_fields": ["parameter_name", "unit", "minimum", "default", "maximum", "rationale", "source_type", "confidence", "risk", "validation_required"],
+    "range_rule": "minimum <= default <= maximum",
+    "allowed_source_types": ["SOURCE_DERIVED", "REPOSITORY_DERIVED", "MODEL_INFERENCE", "RESEARCH_PROPOSAL", "ASSUMPTION", "SOURCE_UNDERSPECIFIED"],
+    "validation_required_must_equal_true": true
+  },
+  "numeric_parameters": [
+    {
+      "parameter_name": "sealed_starter_unit_stage_duration_proxy",
+      "unit": "simulation_tick",
+      "minimum": 1,
+      "default": 2,
+      "maximum": 6,
+      "rationale": "Creates a nonzero candidate interval before an establishing-colony stage.",
+      "source_type": "RESEARCH_PROPOSAL",
+      "confidence": "LOW",
+      "risk": "The value is not a germination, inoculation, or real lifecycle interval.",
+      "validation_required": true
+    },
+    {
+      "parameter_name": "establishing_colony_stage_duration_proxy",
+      "unit": "simulation_tick",
+      "minimum": 1,
+      "default": 2,
+      "maximum": 8,
+      "rationale": "Bounds causal establishment in objective fixtures without asserting biological development timing.",
+      "source_type": "RESEARCH_PROPOSAL",
+      "confidence": "LOW",
+      "risk": "The value must not be represented as real colony establishment guidance.",
+      "validation_required": true
+    },
+    {
+      "parameter_name": "active_colony_stage_duration_proxy",
+      "unit": "simulation_tick",
+      "minimum": 2,
+      "default": 10,
+      "maximum": 40,
+      "rationale": "Bounds candidate aging and inactivity tests without asserting lifespan or productivity.",
+      "source_type": "RESEARCH_PROPOSAL",
+      "confidence": "LOW",
+      "risk": "The value is not a fruiting, harvest, lifespan, or production cycle.",
+      "validation_required": true
+    },
+    {
+      "parameter_name": "maximum_structural_growth_allocation_per_processing_event",
+      "unit": "micro_gram_structural_proxy",
+      "minimum": 0,
+      "default": 3000000,
+      "maximum": 3000000,
+      "rationale": "Closes the deterministic substrate ledger by bounding the fixture allocation to colony structural mass.",
+      "source_type": "RESEARCH_PROPOSAL",
+      "confidence": "LOW",
+      "risk": "This accounting split is not a conversion efficiency, growth rate, or biomass-yield claim.",
+      "validation_required": true
+    },
+    {
+      "parameter_name": "maximum_processed_residual_allocation_per_processing_event",
+      "unit": "micro_gram_structural_proxy",
+      "minimum": 0,
+      "default": 9000000,
+      "maximum": 9000000,
+      "rationale": "Closes the deterministic substrate ledger by naming the non-colony output custody.",
+      "source_type": "RESEARCH_PROPOSAL",
+      "confidence": "LOW",
+      "risk": "The split is not decomposition performance, compost output, or a production formula.",
+      "validation_required": true
+    }
+  ],
+  "stage_contract": {
+    "stage_order": ["SEALED_STARTER_UNIT_PROXY", "ESTABLISHING_COLONY_PROXY", "ACTIVE_COLONY_PROXY", "INACTIVE_COLONY_BIOMASS_CUSTODY"],
+    "initial_instance_stage": "NOT_INSTANTIATED",
+    "instant_formation": false,
+    "instant_growth": false,
+    "stage_skipping": false,
+    "stage_transition_requires": [
+      "OWNER_SCHEMA_ADMISSION",
+      "PRIOR_STAGE_PRESENT",
+      "FOREIGN_LOCATION",
+      "SEALED_CANDIDATE_COMPARTMENT",
+      "COMPATIBLE_HABITAT",
+      "ENVIRONMENT_FIT",
+      "AVAILABLE_SUBSTRATE",
+      "AVAILABLE_MOISTURE",
+      "AVAILABLE_NUTRIENT_PROXY",
+      "AVAILABLE_ENERGY_PROXY",
+      "REQUIRED_ELAPSED_TIME"
+    ]
+  },
+  "growth_accounting": {
+    "substrate_source": "DETRITUS_POOL",
+    "substrate_debit_destinations": ["COLONY_STRUCTURAL_BIOMASS_PROXY", "PROCESSED_SUBSTRATE_RESIDUAL_PROXY"],
+    "moisture_debit_destinations": ["COLONY_WATER_PROXY", "PROCESSED_RESIDUAL_WATER_PROXY", "ATMOSPHERIC_MOISTURE_PROXY"],
+    "nutrient_proxy_debit_destinations": ["COLONY_NUTRIENT_STORE_PROXY", "PROCESSED_RESIDUAL_NUTRIENT_PROXY"],
+    "energy_debit_destinations": ["COLONY_ENERGY_STORE_PROXY", "PROCESSED_RESIDUAL_ENERGY_PROXY", "ENVIRONMENTAL_DISSIPATION_PROXY"],
+    "unexplained_mass_gain": false,
+    "unexplained_moisture_gain": false,
+    "unexplained_nutrient_gain": false,
+    "unexplained_energy_gain": false,
+    "fixture_reference": "runtime.json#/deterministic_positive_fixture"
+  },
+  "decomposition_contribution_boundary": {
+    "mode": "PENDING_MATERIAL_AND_NUTRIENT_CUSTODY_ONLY",
+    "candidate_activity_label": "BOUNDED_FUNGAL_ACTIVITY_PROXY / SIMULATION_APPROXIMATION",
+    "source_pools": ["PROCESSED_SUBSTRATE_RESIDUAL_PROXY", "INACTIVE_COLONY_BIOMASS_CUSTODY"],
+    "destinations": ["PENDING_ECOLOGY_DECOMPOSITION_MATERIAL_CUSTODY", "PENDING_ECOLOGY_NUTRIENT_PROXY_CUSTODY"],
+    "ecology_acceptance_in_fixture": false,
+    "accepted_owner_transfer": 0,
+    "soil_nutrient_delta": 0,
+    "foreign_abstract_pool": "MICROBIAL_DECOMPOSITION_PROXY / ABSTRACT_RESOURCE_POOL / NOT_FULL_LIFE_RUNTIME",
+    "foreign_abstract_pool_replaced": false,
+    "creates_other_life": false,
+    "carbon_model": "NOT_MODELED",
+    "empirical_chemistry": "NOT_MODELED"
+  },
+  "blocked_transitions": [
+    {"trigger": "ZERO_ELAPSED_TIME", "result": "ELAPSED_TIME_REQUIRED", "state_delta": "ALL_ZERO"},
+    {"trigger": "STAGE_SKIP", "result": "INVALID_STAGE_ORDER", "state_delta": "ALL_ZERO"},
+    {"trigger": "RESOURCE_GATE_FAILED", "result": "COLONY_GROWTH_BLOCKED", "state_delta": "ALL_ZERO"},
+    {"trigger": "OWNER_ADMISSION_MISSING", "result": "OWNER_SCHEMA_ADMISSION_REQUIRED", "state_delta": "ALL_ZERO"},
+    {"trigger": "UNSEALED_DISPERSAL_REQUEST", "result": "SEALED_COMPARTMENT_REQUIRED", "state_delta": "ALL_ZERO"}
+  ],
+  "guidance_boundary": {
+    "real_lifecycle_timing": "NOT_CLAIMED",
+    "growth_rate": "NOT_CLAIMED",
+    "substrate_conversion": "NOT_CLAIMED",
+    "decomposition_performance": "NOT_CLAIMED",
+    "cultivation_formula": "NOT_PROVIDED"
+  }
+}

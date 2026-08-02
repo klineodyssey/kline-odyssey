@@ -1,0 +1,106 @@
+{
+  "record_id": "KAIOS-FUNGI-MYCOFORM-CANDIDATE-TAXONOMY-V1",
+  "schema_version": "1.0.0-candidate",
+  "status": "CURSOR_RESEARCH_CANDIDATE_ONLY",
+  "review_status": "PENDING_CODEX_REVIEW",
+  "authority": "NO_PRODUCTION_AUTHORITY",
+  "task_id": "KAIOS-CURSOR-FUNGI-CANDIDATE-001",
+  "composition_contract": {
+    "rule": "SHARED_CORE + APPROVED_TYPE_EXTENSION",
+    "shared_core_schema": "KAIOS_CANONICAL_LIFE_SCHEMA_V1.json",
+    "taxonomy_owner": "KAIOS_CANONICAL_LIFE_TAXONOMY_V1.json",
+    "approved_extension_registry": "KAIOS_CANONICAL_LIFE_TYPE_EXTENSIONS_V1.json",
+    "life_type": "MICROBIAL_LIFE",
+    "extension_id": "MICROBIAL_EXTENSION",
+    "approved_extension_fields": [
+      "cell_structure",
+      "metabolism",
+      "substrate_need",
+      "replication",
+      "colony_model",
+      "environment_tolerance"
+    ],
+    "reference_mode": "READ_ONLY",
+    "owner_files_copied_or_modified": false
+  },
+  "candidate_identity": {
+    "candidate_package_id": "CANDIDATE-FUNGI-MYCOFORM-DECOMPOSER-V1",
+    "life_id": "LIFE-KAIOS-MYCOFORM-CANDIDATE-001",
+    "species_id": "SPECIES-KAIOS-MYCOFORM-DECOMPOSER-CANDIDATE",
+    "genome_id": "GENOME-KAIOS-MYCOFORM-CANDIDATE-001",
+    "identity_status": "NONCANONICAL_SYNTHETIC_PROPOSAL_ONLY",
+    "canonical_registration": false,
+    "organism_registration": false,
+    "ecology_admission": false
+  },
+  "taxonomy": {
+    "DOMAIN": "EUKARYOTA_ANALOG_CANDIDATE",
+    "KINGDOM": "FUNGI_ANALOG_CANDIDATE",
+    "PHYLUM": "KAIOS_MYCOFORM_CANDIDATE",
+    "CLASS": "KAIOS_DECOMPOSITOR_CLASS_CANDIDATE",
+    "ORDER": "KAIOS_SUBSTRATE_ORDER_CANDIDATE",
+    "FAMILY": "KAIOS_MYCOFORM_FAMILY_CANDIDATE",
+    "GENUS": "KAIOS_MYCOFORM",
+    "SPECIES": "KAIOS_MYCOFORM_DECOMPOSITOR_CANDIDATE",
+    "LIFE_INSTANCE": "LIFE-KAIOS-MYCOFORM-CANDIDATE-001"
+  },
+  "biological_extension_19": {
+    "Domain": "EUKARYOTA_ANALOG_CANDIDATE",
+    "Kingdom": "FUNGI_ANALOG_CANDIDATE",
+    "Phylum": "KAIOS_MYCOFORM_CANDIDATE",
+    "Class": "KAIOS_DECOMPOSITOR_CLASS_CANDIDATE",
+    "Order": "KAIOS_SUBSTRATE_ORDER_CANDIDATE",
+    "Family": "KAIOS_MYCOFORM_FAMILY_CANDIDATE",
+    "Genus": "KAIOS_MYCOFORM",
+    "Species": "KAIOS_MYCOFORM_DECOMPOSITOR_CANDIDATE",
+    "Individual": "LIFE-KAIOS-MYCOFORM-CANDIDATE-001",
+    "OrganSystem": "NOT_APPLICABLE_NO_ORGAN_SYSTEM_CLAIM",
+    "Organ": "NOT_APPLICABLE_NO_ORGAN_CLAIM",
+    "Tissue": "ABSTRACT_COLONY_STRUCTURE_PROXY",
+    "Cell": "ABSTRACT_MICROBIAL_CELL_PROXY",
+    "Organelle": "NOT_MODELED",
+    "Genome": "GENOME-KAIOS-MYCOFORM-CANDIDATE-001",
+    "DNA": "DNA-KAIOS-MYCOFORM-CANDIDATE-001",
+    "RNA": "RNA-KAIOS-MYCOFORM-CANDIDATE-001",
+    "Gene": "GENE-KAIOS-MYCOFORM-CANDIDATE-PROXY-001",
+    "Expression": "LOCAL_DETERMINISTIC_PROXY_ONLY"
+  },
+  "identity_validation": {
+    "source_base_commit": "eb17536ff6affb34f93bce6c5622d7bab018d230",
+    "repository_search_terms": [
+      "fungi",
+      "fungus",
+      "mushroom",
+      "mycoform",
+      "MICROBIAL_LIFE",
+      "MICROBIAL_EXTENSION"
+    ],
+    "known_separate_legacy_viewer_species_id": "MUSHROOM_ALPHA",
+    "legacy_identity_reused": false,
+    "preexisting_matching_life_id": false,
+    "preexisting_matching_species_id": false,
+    "preexisting_matching_genome_id": false,
+    "owner_taxonomy_match": false,
+    "result": "UNIQUE_NONCANONICAL_CANDIDATE_IDENTIFIERS",
+    "validation_required": true
+  },
+  "taxonomy_boundary": {
+    "real_species_claim": false,
+    "taxonomic_certification": false,
+    "empirical_biology_claim": false,
+    "automatic_species_creation": false,
+    "automatic_genome_creation": false,
+    "owner_review_required": true,
+    "assumption_classification": "SIMULATION_APPROXIMATION",
+    "note": "All KAIOS mycoform ranks and IDs are synthetic candidate labels. They do not identify a real fungal species or alter the separate MUSHROOM_ALPHA viewer record."
+  },
+  "provenance_reference": "provenance.json",
+  "boundaries": [
+    "CANDIDATE_ONLY",
+    "NO_CANONICAL_PROMOTION",
+    "NO_ORGANISM_SCHEMA_CHANGE",
+    "NO_ECOLOGY_ADMISSION",
+    "NO_REAL_BIOLOGY_OR_CULTIVATION_GUIDANCE",
+    "NO_PRODUCTION_AUTHORITY"
+  ]
+}

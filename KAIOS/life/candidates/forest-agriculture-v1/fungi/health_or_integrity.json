@@ -1,0 +1,99 @@
+{
+  "record_id": "KAIOS-FUNGI-MYCOFORM-CANDIDATE-INTEGRITY-STATE-V1",
+  "schema_version": "1.0.0-candidate",
+  "status": "CURSOR_RESEARCH_CANDIDATE_ONLY",
+  "review_status": "PENDING_CODEX_REVIEW",
+  "authority": "NO_PRODUCTION_AUTHORITY",
+  "task_id": "KAIOS-CURSOR-FUNGI-CANDIDATE-001",
+  "model": "ABSTRACT_RESOURCE_AND_ENVIRONMENT_INTEGRITY_PROXY",
+  "assumption_classification": "SIMULATION_APPROXIMATION",
+  "numeric_parameter_contract": {
+    "required_fields": ["parameter_name", "unit", "minimum", "default", "maximum", "rationale", "source_type", "confidence", "risk", "validation_required"],
+    "range_rule": "minimum <= default <= maximum",
+    "allowed_source_types": ["SOURCE_DERIVED", "REPOSITORY_DERIVED", "MODEL_INFERENCE", "RESEARCH_PROPOSAL", "ASSUMPTION", "SOURCE_UNDERSPECIFIED"],
+    "validation_required_must_equal_true": true
+  },
+  "numeric_parameters": [
+    {
+      "parameter_name": "initial_colony_integrity_proxy",
+      "unit": "integrity_basis_point",
+      "minimum": 0,
+      "default": 8000,
+      "maximum": 10000,
+      "rationale": "Provides a bounded synthetic initial state for deterministic stress tests.",
+      "source_type": "RESEARCH_PROPOSAL",
+      "confidence": "LOW",
+      "risk": "The score is not a diagnosis, viability measure, or biological health measurement.",
+      "validation_required": true
+    },
+    {
+      "parameter_name": "environment_stress_decrement_proxy",
+      "unit": "integrity_basis_point_per_failed_tick",
+      "minimum": 1,
+      "default": 1000,
+      "maximum": 5000,
+      "rationale": "Makes repeated failed environment gates visible in hypothetical validation fixtures.",
+      "source_type": "RESEARCH_PROPOSAL",
+      "confidence": "LOW",
+      "risk": "The decrement has no clinical, ecological, or biological interpretation.",
+      "validation_required": true
+    },
+    {
+      "parameter_name": "inactivation_gate_integrity_proxy",
+      "unit": "integrity_basis_point",
+      "minimum": 0,
+      "default": 1000,
+      "maximum": 3000,
+      "rationale": "Provides a bounded synthetic inactivation gate while retaining an explicit recorded-cause requirement.",
+      "source_type": "MODEL_INFERENCE",
+      "confidence": "LOW",
+      "risk": "The threshold is not a survival threshold or handling recommendation.",
+      "validation_required": true
+    },
+    {
+      "parameter_name": "integrity_recovery_proxy_per_tick",
+      "unit": "integrity_basis_point_per_simulation_tick",
+      "minimum": 0,
+      "default": 500,
+      "maximum": 2000,
+      "rationale": "Bounds an optional state-integrity recovery proxy when all resource and environment gates pass.",
+      "source_type": "RESEARCH_PROPOSAL",
+      "confidence": "LOW",
+      "risk": "No biological repair mechanism, treatment, intervention, or cultivation method is modeled.",
+      "validation_required": true
+    }
+  ],
+  "state_order": ["STABLE_PROXY", "RESOURCE_STRESSED_PROXY", "ENVIRONMENT_STRESSED_PROXY", "DECLINING_PROXY", "INACTIVATION_PENDING_CUSTODY", "INACTIVE_COLONY_BIOMASS_CUSTODY"],
+  "stress_inputs": [
+    "INSUFFICIENT_SUBSTRATE",
+    "INSUFFICIENT_MOISTURE_PROXY",
+    "INSUFFICIENT_NUTRIENT_PROXY",
+    "INSUFFICIENT_ENERGY_PROXY",
+    "MOISTURE_FIT_OUTSIDE_CANDIDATE_ENVELOPE",
+    "TEMPERATURE_FIT_OUTSIDE_CANDIDATE_ENVELOPE",
+    "OXYGEN_AVAILABILITY_FIT_BELOW_CANDIDATE_MINIMUM",
+    "CONTAMINATION_STRESS_ABOVE_CANDIDATE_CEILING",
+    "COLONY_CAPACITY_STRESS"
+  ],
+  "transition_contract": {
+    "integrity_improvement_requires": ["ALL_RESOURCE_GATES_PASS", "ALL_ENVIRONMENT_GATES_PASS", "ELAPSED_TIME", "AVAILABLE_ENERGY_PROXY"],
+    "inactivation_requires": ["RECORDED_CAUSE", "COUNT_DECREMENT", "INACTIVE_BIOMASS_MASS_TRANSFER", "MOISTURE_TRANSFER", "NUTRIENT_TRANSFER", "ENERGY_TRANSFER", "EVENT_HASH_LINK"],
+    "diagnosis": "NOT_MODELED",
+    "disease": "NOT_MODELED",
+    "treatment": "NOT_MODELED",
+    "chemical_response": "NOT_MODELED",
+    "microbial_activity": "BOUNDED_FUNGAL_ACTIVITY_PROXY / SIMULATION_APPROXIMATION"
+  },
+  "blocked_results": [
+    {"trigger": "RECOVERY_WITHOUT_RESOURCES_OR_TIME", "result": "RECOVERY_REJECTED", "state_delta": "ALL_ZERO"},
+    {"trigger": "INACTIVATION_WITHOUT_NAMED_BIOMASS_CUSTODY", "result": "INACTIVATION_EVENT_REJECTED", "state_delta": "ALL_ZERO"},
+    {"trigger": "DIAGNOSIS_TREATMENT_OR_CULTIVATION_REQUEST", "result": "OUT_OF_SCOPE_NOT_MODELED", "state_delta": "ALL_ZERO"}
+  ],
+  "guidance_boundary": {
+    "biological_health_guidance": false,
+    "diagnostic_claim": false,
+    "treatment_claim": false,
+    "cultivation_claim": false,
+    "survival_or_activity_guarantee": false
+  }
+}

@@ -49,23 +49,45 @@ The vegetable assignment was allowed to complete before its lease was released.
   `P0=0 / P1=0 / P2=0` and merged as
   `CURSOR_RESEARCH_CANDIDATE_ONLY` in
   `eb17536ff6affb34f93bce6c5622d7bab018d230`.
+- Fungi candidate: PR `#113`, independently reviewed at
+  `P0=0 / P1=0 / P2=0` and merged as
+  `CURSOR_RESEARCH_CANDIDATE_ONLY` in
+  `beb982fda885fa7acc4dc35407df611d1019a544`.
 
-## Current Assignment
+## Current Preparation State
 
-- Task: `KAIOS-CURSOR-FUNGI-CANDIDATE-001`
-- Branch: `cursor-handoff/KAIOS-CURSOR-FUNGI-CANDIDATE-001`
-- Status: `ACTIVE / ONE_TASK_AT_A_TIME`
-- Output authority: `CURSOR_RESEARCH_CANDIDATE_ONLY / PENDING_CODEX_REVIEW`
+- Worker: `cursor-01`
+- Current task: `null`
+- Current branch: `null`
+- Worker status: `IDLE`
+- Active claims: `0`
+- Prepared task: `KAIOS-CURSOR-MICROBIAL-RESEARCH-001`
+- Prepared status: `PREPARATION_ONLY / NOT_CLAIMED / NOT_DISPATCHED`
+- Output authority: `CURSOR_RESEARCH_PROPOSAL_ONLY / PENDING_CODEX_REVIEW`
+- Reviewer: `codex-gm-01`
+- Preparation source: `7008e4f9449f6df050171cf47ec6ec56419925e9`
+- Execution base: `null / NOT_BOUND`
+- Planned branch: `cursor-handoff/KAIOS-CURSOR-MICROBIAL-RESEARCH-001`
+- Planned branch/worktree state: `NOT_CREATED / NOT_CREATED`
+- Authorized path: `KAIOS/life/candidates/forest-agriculture-v1/microbial-research/`
+- Expected files: exactly `8`, as listed in the Microbial work order.
 
-The next safe queue item is microbial-decomposer research. It may be
-dispatched only after Codex independently reviews and formally releases the
-fungi candidate claim.
+This PR records preparation intent only. After it is merged, Codex must record
+the exact preparation merge SHA, create the planned branch and isolated
+worktree at exactly that SHA, and verify both. A separate activation PR must
+then bind that exact execution base and define fail-closed effective expiry and
+revalidation semantics. Only after that PR is independently reviewed and
+merged may any projection record `CLAIMED`. Descendant wildcard ancestry does
+not authorize execution.
 
 ## Boundaries
 
 Cursor cannot modify Runtime authority, CURRENT, Canonical schemas, Universe
 Law, Rights authority, Economy authority, Wallet, KGEN, deployment or merge
-state. Cursor output never becomes Canonical without Codex review.
+state. Cursor output never becomes Canonical without Codex review. The Fungi
+claim event order remains append-only: `CLAIM_CLOSED`, then `CLAIM_RELEASED`.
+No Microbial acquisition event exists and every projection has zero active
+claims.
 
 The read-only AI Company API and Viewer expose the queue without granting the
 Runtime any dispatch, merge or deployment mutation endpoint.

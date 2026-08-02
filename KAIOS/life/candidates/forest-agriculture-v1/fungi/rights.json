@@ -1,0 +1,56 @@
+{
+  "record_id": "KAIOS-FUNGI-MYCOFORM-CANDIDATE-RIGHTS-V1",
+  "schema_version": "1.0.0-candidate",
+  "status": "CURSOR_RESEARCH_CANDIDATE_ONLY",
+  "review_status": "PENDING_CODEX_REVIEW",
+  "authority": "NO_PRODUCTION_AUTHORITY",
+  "task_id": "KAIOS-CURSOR-FUNGI-CANDIDATE-001",
+  "rights_owner": "EXISTING_RIGHTS_AUTHORITY",
+  "binding_mode": "READ_ONLY_UNGRANTED_PROJECTION",
+  "rights_profile": {
+    "OWNER": {"holder": "UNASSIGNED", "scope": "PACKAGE_RECORD_ONLY_NOT_LEGAL_OWNERSHIP", "granted": false},
+    "CUSTODIAN": {"holder": "UNASSIGNED", "scope": "REVIEW_CUSTODY_PENDING_CODEX", "granted": false},
+    "OPERATOR": {"holder": "UNASSIGNED", "scope": "NO_OPERATION_AUTHORITY", "granted": false},
+    "OCCUPANT": {"holder": "UNASSIGNED", "scope": "NO_OCCUPANT_CLAIM", "granted": false},
+    "USAGE_RIGHTS": {"holder": "UNASSIGNED", "scope": "NO_REAL_USE_AUTHORITY", "granted": false},
+    "HARVEST_RIGHTS": {"holder": "UNASSIGNED", "scope": "NO_REAL_HARVEST_AUTHORITY", "granted": false},
+    "BREEDING_RIGHTS": {"holder": "UNASSIGNED", "scope": "NO_REAL_REPLICATION_AUTHORITY", "granted": false},
+    "COMMERCIAL_LICENSE": {"holder": "UNASSIGNED", "scope": "NONE", "granted": false},
+    "TRANSFER_RIGHTS": {"holder": "UNASSIGNED", "scope": "NO_TRANSFER", "granted": false},
+    "HABITAT_RIGHTS": {"holder": "UNASSIGNED", "scope": "NO_REAL_HABITAT_CLAIM", "granted": false},
+    "CONTROL_AUTHORITY": {"holder": "UNASSIGNED", "scope": "NO_RUNTIME_CONTROL", "granted": false},
+    "tradeability": "NOT_TRADEABLE"
+  },
+  "separation_invariants": [
+    "OWNERSHIP_DOES_NOT_GRANT_CUSTODY",
+    "CUSTODY_DOES_NOT_GRANT_OPERATION",
+    "OPERATION_DOES_NOT_GRANT_CONTROL",
+    "LAND_RIGHTS_DO_NOT_OWN_OCCUPANTS",
+    "PACKAGE_OWNERSHIP_DOES_NOT_GRANT_REPLICATION",
+    "HABITAT_REFERENCE_DOES_NOT_GRANT_HABITAT_RIGHTS",
+    "ECOLOGY_ADMISSION_DOES_NOT_GRANT_RIGHTS",
+    "NO_RIGHT_IMPLIES_ANOTHER_RIGHT"
+  ],
+  "authority_checks": {
+    "legal_personhood": false,
+    "real_title": false,
+    "real_habitat_claim": false,
+    "real_replication_authority": false,
+    "real_harvest_authority": false,
+    "real_commercial_license": false,
+    "onchain_transfer": false,
+    "runtime_control": false,
+    "self_approval": false
+  },
+  "request_rule": "Any future ownership, custody, operation, use, replication, dispersal, transfer, habitat, or control decision must be issued by the existing Rights authority and referenced by immutable decision ID.",
+  "boundaries": [
+    "NO_RIGHTS_AUTHORITY",
+    "NO_LEGAL_PERSONHOOD",
+    "NO_REAL_TITLE",
+    "NO_REPLICATION_OR_RELEASE_RIGHT",
+    "NO_TRANSFER_RIGHT",
+    "NO_HABITAT_RIGHT",
+    "NO_CONTROL_AUTHORITY",
+    "NO_PRODUCTION_AUTHORITY"
+  ]
+}

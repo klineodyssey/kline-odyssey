@@ -6,6 +6,22 @@ Guidance for AI agents working in the KLINE Odyssey repository.
 
 KLINE Odyssey is a static Web3 × finance narrative site (GitHub Pages) with Python market-data pipelines and optional on-chain KGEN contracts. There is no `package.json`, Docker, or database.
 
+## Cursor session clock-in (方案 2 — Human `HUMAN-AUTO-CLOCKIN-001`)
+
+Every Cursor session in this repo: **Light Boot → company patrol/work → then Human message**.
+
+Full SOP: [`KGEN-AI-Company/CURSOR_SESSION_CLOCKIN_SOP.md`](KGEN-AI-Company/CURSOR_SESSION_CLOCKIN_SOP.md)
+
+**Light boot (minimal tokens):** fetch `origin/main` → `PRIMEFORGE_GENESIS_BOOT_SEQUENCE.md` (Cursor sections) → `CURSOR_EMPLOYEE_BOOT.md` → `CURSOR_AUTO_WORK_PROTOCOL.md` → `KGEN-KAIOS/worker_registry.json` → `KAIOS/life/forest-agriculture/KAIOS_CURSOR_CONTINUOUS_WORK_QUEUE.json` → grep `WORK_QUEUE.md` for OPEN+CLAIMABLE only.
+
+**Patrol:** claim only if continuous queue is `DISPATCHED` / `READY_FOR_ATOMIC_CLAIM` (or formal WorkQueue CLAIMABLE) **and** task envelope exists on main. Never claim `QUEUED`. One task, handoff branch, stop.
+
+**Human override:** 「只聊天，不要接案」skips claim (still verify registry).
+
+**Automation (webhook):** Configure at [cursor.com/automations](https://cursor.com/automations) — GitHub **PR merged** to `main` (filter `codex/*` or forest-agriculture paths). Paste prompt from §「Automation prompt」in `CURSOR_SESSION_CLOCKIN_SOP.md`. No hourly cron on the same automation.
+
+**Cost (rough):** dialogue boot ~$0.02–0.08/start; each dispatch merge wake ~$0.03–0.15 patrol (+ task if claimed). Expect ~$5–20/mo at 2–4 Codex dispatches/day.
+
 ## Cursor Cloud specific instructions
 
 ### Services to run locally

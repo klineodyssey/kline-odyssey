@@ -81,12 +81,78 @@ test("public Cursor queue projection matches the canonical governance queue", as
   const projection = JSON.parse(await read("api/kaios/ai-company/v1/cursor-queue.json"));
   const projectedFields = [
     "task_id", "status", "worker_id", "reviewer", "branch_template",
-    "one_task_at_a_time", "continuous_dispatch_mode", "output_authority",
-    "queue", "forbidden"
+    "one_task_at_a_time", "continuous_dispatch_mode",
+    "automatic_unreviewed_dispatch", "active_claims", "worker_state",
+    "next_dispatch_requires", "output_authority", "queue", "prepared_task",
+    "forbidden"
   ];
   for (const field of projectedFields) {
     assert.deepEqual(projection[field], canonical[field], `${field} projection drifted`);
   }
+});
+
+test("public Cursor queue exposes Microbial preparation without a claim", async () => {
+  const canonical = JSON.parse(await read(
+    "KAIOS/life/forest-agriculture/KAIOS_CURSOR_CONTINUOUS_WORK_QUEUE.json"
+  ));
+  const registry = JSON.parse(await read("KGEN-KAIOS/worker_registry.json"));
+  const projection = JSON.parse(await read("api/kaios/ai-company/v1/cursor-queue.json"));
+  assert.deepEqual(projection.active_claims, []);
+  assert.deepEqual(projection.active_claims, canonical.active_claims);
+  assert.deepEqual(projection.active_claims, registry.active_claims);
+  assert.deepEqual(projection.worker_state, {
+    worker_id: "cursor-01",
+    current_task: null,
+    current_branch: null,
+    status: "IDLE"
+  });
+  assert.equal(registry.prepared_tasks.length, 1);
+  assert.deepEqual(projection.prepared_task, canonical.prepared_task);
+  assert.deepEqual(projection.prepared_task, registry.prepared_tasks[0]);
+  const prepared = projection.prepared_task;
+  assert.equal(prepared.task_id, "KAIOS-CURSOR-MICROBIAL-RESEARCH-001");
+  assert.equal(prepared.status, "PREPARATION_ONLY");
+  assert.equal(prepared.claim_state, "NOT_CLAIMED");
+  assert.equal(prepared.dispatch_state, "NOT_DISPATCHED");
+  assert.equal(prepared.execution_base, null);
+  assert.equal(prepared.descendant_wildcard_allowed, false);
+  assert.equal(prepared.branch_state, "NOT_CREATED");
+  assert.equal(prepared.isolated_worktree_state, "NOT_CREATED");
+  assert.equal(prepared.output_status, "CURSOR_RESEARCH_PROPOSAL_ONLY");
+  assert.equal(prepared.preparation_source_commit,
+    "7008e4f9449f6df050171cf47ec6ec56419925e9");
+  assert.equal(prepared.automatic, false);
+  assert.equal(prepared.external_autonomy, false);
+  assert.equal(prepared.merge_allowed, false);
+  assert.equal(prepared.deploy_allowed, false);
+  for (const forbiddenField of [
+    "claim_id", "session_id", "branch", "source_base", "execution_base_rule",
+    "dispatch_mode", "fencing_token", "record_version", "issued_at", "lease_expiry"
+  ]) assert.equal(forbiddenField in prepared, false);
+  assert.deepEqual(prepared.authorized_paths, [
+    "KAIOS/life/candidates/forest-agriculture-v1/microbial-research/"
+  ]);
+  assert.equal(prepared.expected_files.length, 8);
+  assert.equal(prepared.reviewer, "codex-gm-01");
+  assert.deepEqual(prepared.actions_after_activation_only, [
+    "READ_REPOSITORY_CONTEXT",
+    "WRITE_ONLY_EXPECTED_FILES_UNDER_AUTHORIZED_PATH",
+    "RUN_BOUNDED_LOCAL_TESTS",
+    "RECORD_GIT_OBJECT_AND_SHA256_PROVENANCE",
+    "COMMIT_EXACTLY_EXPECTED_FILES",
+    "STOP_AT_PENDING_CODEX_REVIEW"
+  ]);
+  assert.deepEqual(prepared.forbidden_paths, [
+    "KGEN-KAIOS/**",
+    "KGEN/**",
+    "KAIOS/**/Runtime/**",
+    "KAIOS/**/Wallet/**",
+    "**/*CURRENT*",
+    "api/**",
+    "docs/**",
+    "README.md",
+    "PRIMEFORGE_GENESIS_BOOT_SEQUENCE_V1_4.md"
+  ]);
 });
 
 test("API directory links only to declared static projections", async () => {

@@ -1,0 +1,153 @@
+{
+  "record_id": "KAIOS-FUNGI-MYCOFORM-CANDIDATE-EVENT-LOG-V1",
+  "schema_version": "1.0.0-candidate",
+  "status": "CURSOR_RESEARCH_CANDIDATE_ONLY",
+  "review_status": "PENDING_CODEX_REVIEW",
+  "authority": "NO_PRODUCTION_AUTHORITY",
+  "task_id": "KAIOS-CURSOR-FUNGI-CANDIDATE-001",
+  "deterministic_seed": "KAIOS-FUNGI-MYCOFORM-CANDIDATE-SEED-001",
+  "package_event_hash_contract": {
+    "algorithm": "SHA-256",
+    "encoding": "UTF-8",
+    "payload": "deterministic_seed|life_id|CREATED_CANDIDATE",
+    "life_id": "LIFE-KAIOS-MYCOFORM-CANDIDATE-001"
+  },
+  "package_events": [
+    {
+      "event_id": "EVT-LIFE-KAIOS-MYCOFORM-CANDIDATE-001-0001",
+      "timestamp": "2026-08-02T00:00:00Z",
+      "type": "CANDIDATE_PACKAGE_CREATED",
+      "status": "PENDING_CODEX_REVIEW",
+      "previous_state_hash": null,
+      "next_state_hash": "cbc01e7857ea66b4b05d35db657cbeaf70eb8f031ec7881b66819343d1b2f32b",
+      "owner_state_change": false,
+      "canonical_promotion": false,
+      "ecology_admission": false
+    }
+  ],
+  "fixture_state_hash_contract": {
+    "oracle_reference": "runtime.json#/deterministic_positive_fixture",
+    "algorithm": "SHA-256",
+    "payload": "FULL_ORACLE_STATE_AFTER_THE_REFERENCED_ACTION",
+    "canonicalization": "RECURSIVELY_KEY_SORTED_COMPACT_UTF8_JSON",
+    "number_format": "BASE_10_SAFE_INTEGER_NO_EXPONENT",
+    "encoding": "UTF-8_WITHOUT_BOM_OR_TRAILING_NEWLINE",
+    "initial_state_hash": "a84a3dda851614e91077cf801b279340ac825211cc4c23e1df13de9580d630cb",
+    "expected_chain_length": 8
+  },
+  "fixture_events": [
+    {
+      "event_id": "FUNGI-MYCOFORM-ORACLE-EVT-001",
+      "sequence": "001",
+      "simulation_time_micro_minute": 1440000000,
+      "type": "SUBSTRATE_MOISTURE_NUTRIENT_PROCESSING_PROXY_EVENT",
+      "status": "OBJECTIVE_FIXTURE_APPLIED",
+      "previous_state_hash": "a84a3dda851614e91077cf801b279340ac825211cc4c23e1df13de9580d630cb",
+      "next_state_hash": "98df03cbeef95c6bf7b310b03b076903bdd6a866f598577d2513c9dd92760bb3",
+      "action_reference": "runtime.json#/deterministic_positive_fixture/ordered_actions/0",
+      "owner_state_change": false
+    },
+    {
+      "event_id": "FUNGI-MYCOFORM-ORACLE-EVT-002",
+      "sequence": "002",
+      "simulation_time_micro_minute": 4320000000,
+      "type": "BOUNDED_REPLICATION_ALLOCATION_PROXY_EVENT",
+      "status": "OBJECTIVE_FIXTURE_APPLIED",
+      "previous_state_hash": "98df03cbeef95c6bf7b310b03b076903bdd6a866f598577d2513c9dd92760bb3",
+      "next_state_hash": "58947a3e3c50356f68053c5cbab43327779832d442746478183b5ffda08e43f9",
+      "action_reference": "runtime.json#/deterministic_positive_fixture/ordered_actions/1",
+      "owner_state_change": false
+    },
+    {
+      "event_id": "FUNGI-MYCOFORM-ORACLE-EVT-003",
+      "sequence": "003",
+      "simulation_time_micro_minute": 5760000000,
+      "type": "BOUNDED_SEALED_DISPERSAL_PROXY_EVENT",
+      "status": "OBJECTIVE_FIXTURE_APPLIED",
+      "previous_state_hash": "58947a3e3c50356f68053c5cbab43327779832d442746478183b5ffda08e43f9",
+      "next_state_hash": "3e8fa4a2b1a2fb697feba56d228bb1193d743bf61d426a23c544b15e4788a4e4",
+      "action_reference": "runtime.json#/deterministic_positive_fixture/ordered_actions/2",
+      "owner_state_change": false
+    },
+    {
+      "event_id": "FUNGI-MYCOFORM-ORACLE-EVT-004",
+      "sequence": "004",
+      "simulation_time_micro_minute": 8640000000,
+      "type": "ESTABLISHING_TO_ACTIVE_COLONY_PROXY_EVENT",
+      "status": "OBJECTIVE_FIXTURE_APPLIED",
+      "previous_state_hash": "3e8fa4a2b1a2fb697feba56d228bb1193d743bf61d426a23c544b15e4788a4e4",
+      "next_state_hash": "bc971b094775f8227ec5d1105f017f78aabff9f7a865e17649b0d981c74a05d4",
+      "action_reference": "runtime.json#/deterministic_positive_fixture/ordered_actions/3",
+      "owner_state_change": false
+    },
+    {
+      "event_id": "FUNGI-MYCOFORM-ORACLE-EVT-005",
+      "sequence": "005",
+      "simulation_time_micro_minute": 10080000000,
+      "type": "ACTIVE_COLONY_INACTIVATION_PROXY_EVENT",
+      "status": "OBJECTIVE_FIXTURE_APPLIED",
+      "previous_state_hash": "bc971b094775f8227ec5d1105f017f78aabff9f7a865e17649b0d981c74a05d4",
+      "next_state_hash": "14b47edbde75c10bb4bfa3b51826a858164a7f56a68ef0b30f299ec9826c0295",
+      "action_reference": "runtime.json#/deterministic_positive_fixture/ordered_actions/4",
+      "owner_state_change": false
+    },
+    {
+      "event_id": "FUNGI-MYCOFORM-ORACLE-EVT-006",
+      "sequence": "006",
+      "simulation_time_micro_minute": 11520000000,
+      "type": "PROCESSED_RESIDUAL_TO_PENDING_ECOLOGY_CUSTODY_EVENT",
+      "status": "OBJECTIVE_FIXTURE_APPLIED_PENDING_OWNER_ACCEPTANCE",
+      "previous_state_hash": "14b47edbde75c10bb4bfa3b51826a858164a7f56a68ef0b30f299ec9826c0295",
+      "next_state_hash": "fecde6eb079862117fabc5c3bdaa62d5d94f95ec914eb801d22e157cab2a17f3",
+      "action_reference": "runtime.json#/deterministic_positive_fixture/ordered_actions/5",
+      "owner_state_change": false
+    },
+    {
+      "event_id": "FUNGI-MYCOFORM-ORACLE-EVT-007",
+      "sequence": "007",
+      "simulation_time_micro_minute": 12960000000,
+      "type": "INACTIVE_BIOMASS_TO_PENDING_ECOLOGY_CUSTODY_EVENT",
+      "status": "OBJECTIVE_FIXTURE_APPLIED_PENDING_OWNER_ACCEPTANCE",
+      "previous_state_hash": "fecde6eb079862117fabc5c3bdaa62d5d94f95ec914eb801d22e157cab2a17f3",
+      "next_state_hash": "6886a76bf7102f7e4362a7300fb39aa42fd4110f98f09f1ad62d7bd0b79c6dd1",
+      "action_reference": "runtime.json#/deterministic_positive_fixture/ordered_actions/6",
+      "owner_state_change": false
+    },
+    {
+      "event_id": "FUNGI-MYCOFORM-ORACLE-EVT-008",
+      "sequence": "008",
+      "simulation_time_micro_minute": 14400000000,
+      "type": "CANDIDATE_CUSTODY_CLOSEOUT_EVENT",
+      "status": "OBJECTIVE_FIXTURE_CLOSED_PENDING_OWNER_ACCEPTANCE",
+      "previous_state_hash": "6886a76bf7102f7e4362a7300fb39aa42fd4110f98f09f1ad62d7bd0b79c6dd1",
+      "next_state_hash": "f869fb62c117c97aa7785cb41427f39617fc2a72f7805a426540a9427fa45278",
+      "action_reference": "runtime.json#/deterministic_positive_fixture/ordered_actions/7",
+      "owner_state_change": false
+    }
+  ],
+  "final_state_hash": "f869fb62c117c97aa7785cb41427f39617fc2a72f7805a426540a9427fa45278",
+  "chain_assertions": [
+    "PACKAGE_EVENT_MATCHES_LIFE_MANIFEST_EVENT",
+    "FIXTURE_INITIAL_HASH_MATCHES_CANONICAL_INITIAL_STATE",
+    "EACH_EVENT_PREVIOUS_HASH_EQUALS_PRIOR_STATE_HASH",
+    "EACH_EVENT_NEXT_HASH_EQUALS_CANONICAL_POST_ACTION_STATE_HASH",
+    "EVENT_ORDER_MATCHES_ORDERED_ACTIONS",
+    "LAST_EVENT_NEXT_HASH_EQUALS_RUNTIME_EXPECTED_FINAL_SHA256",
+    "FINAL_EVENT_PROVES_ALL_OUTPUT_CUSTODY_NAMED_AND_CLOSED",
+    "SECOND_REPLAY_PRODUCES_IDENTICAL_CHAIN",
+    "NO_EVENT_MUTATES_A_FOREIGN_OWNER"
+  ],
+  "retention_boundary": {
+    "append_only_candidate_record": true,
+    "production_event_log": false,
+    "ecology_event_log": false,
+    "rights_event_log": false,
+    "economy_event_log": false
+  },
+  "model_boundaries": {
+    "microbial_activity": "BOUNDED_FUNGAL_ACTIVITY_PROXY / SIMULATION_APPROXIMATION",
+    "carbon_model": "NOT_MODELED",
+    "empirical_chemistry": "NOT_MODELED"
+  },
+  "provenance_reference": "provenance.json"
+}
