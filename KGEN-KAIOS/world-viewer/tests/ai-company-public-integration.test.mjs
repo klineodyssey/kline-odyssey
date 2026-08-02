@@ -95,6 +95,10 @@ test("public Cursor queue exposes a claim-free prepared Microbial envelope", asy
   const canonical = JSON.parse(await read(
     "KAIOS/life/forest-agriculture/KAIOS_CURSOR_CONTINUOUS_WORK_QUEUE.json"
   ));
+  const registry = JSON.parse(await read("KGEN-KAIOS/worker_registry.json"));
+  const registryPreparedTask = registry.prepared_tasks.find(
+    ({ task_id }) => task_id === "KAIOS-CURSOR-MICROBIAL-RESEARCH-001"
+  );
   const projection = JSON.parse(await read("api/kaios/ai-company/v1/cursor-queue.json"));
   assert.deepEqual(projection.active_claims, []);
   assert.deepEqual(projection.worker_state, {
@@ -107,6 +111,8 @@ test("public Cursor queue exposes a claim-free prepared Microbial envelope", asy
   assert.equal(projection.prepared_task.status, "READY_FOR_ATOMIC_CLAIM");
   assert.equal(projection.prepared_task.claim_state, "UNCLAIMED");
   assert.equal(projection.prepared_task.claim_required, "ATOMIC_CLAIM_BEFORE_WORK");
+  assert.equal(projection.prepared_task.output_status, "CURSOR_RESEARCH_PROPOSAL_ONLY");
+  assert.equal(projection.prepared_task.output_status, registryPreparedTask.output_status);
   assert.deepEqual(projection.prepared_task.authorized_paths, [
     "KAIOS/life/candidates/forest-agriculture-v1/microbial-research/"
   ]);

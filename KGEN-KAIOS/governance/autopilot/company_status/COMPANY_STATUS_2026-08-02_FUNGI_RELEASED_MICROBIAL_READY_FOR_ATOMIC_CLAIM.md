@@ -30,6 +30,7 @@ Queue mode: `ACTIVE / ONE_TASK_AT_A_TIME`
 - Reviewer: `codex-gm-01`
 - Source base: `beb982fda885fa7acc4dc35407df611d1019a544`
 - Envelope: `TASK-ENVELOPE-KAIOS-CURSOR-MICROBIAL-RESEARCH-001-V1`
+- Output authority: `CURSOR_RESEARCH_PROPOSAL_ONLY`
 - Authorized path:
   `KAIOS/life/candidates/forest-agriculture-v1/microbial-research/`
 
@@ -47,7 +48,9 @@ Exactly these eight files are authorized:
 Authorized actions are limited to reading repository context, writing only
 those eight files under the authorized path, running bounded local tests,
 recording Git/SHA-256 provenance, committing exactly those eight files, and
-stopping at pending Codex review. An atomic claim is required before work.
+stopping at pending Codex review. A separate reviewed claim transition is
+required before work. The transactional claim authority remains unimplemented,
+so any later dispatch must be recorded as `MANUAL_DISPATCH_NON_ATOMIC`.
 
 Forbidden paths include `KGEN-KAIOS/**`, `KGEN/**`, `KAIOS/**/Runtime/**`,
 `KAIOS/**/Wallet/**`, `**/*CURRENT*`, `api/**`, `docs/**`, `README.md`, and

@@ -40,9 +40,13 @@ continuations while the platform supports it. No elapsed time is fabricated.
 
 Cursor receives exactly one registered task. When its current task completes,
 Codex reviews every artifact, closes or merges it under candidate authority,
-releases the claim and atomically dispatches the next approved item. Cursor
-cannot rename authoritative software, change Canonical schemas, merge, deploy,
-or approve itself.
+and releases the claim. Release may prepare the next approved item, but must
+stop before dispatch. Worker execution may start only after a separate reviewed
+claim transition succeeds and the active claim is recorded consistently across
+the Worker Registry and canonical queue. Until the transactional claim authority
+is implemented, dispatch remains `MANUAL_DISPATCH_NON_ATOMIC`; preparation is
+not a claim. Cursor cannot rename authoritative software, change Canonical
+schemas, merge, deploy, or approve itself.
 
 Current Cursor state:
 

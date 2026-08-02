@@ -55,4 +55,12 @@ but not claimed, and `cursor-01` has no current task or branch.
 The prepared Microbial envelope binds reviewer `codex-gm-01`, source base
 `beb982fda885fa7acc4dc35407df611d1019a544`, and exactly the eight files under
 `KAIOS/life/candidates/forest-agriculture-v1/microbial-research/` listed in its
-work order. It does not authorize any path outside that envelope.
+work order. Its Registry, canonical queue and public projection all preserve
+`CURSOR_RESEARCH_PROPOSAL_ONLY`. It does not authorize any path outside that
+envelope.
+
+Final independent review repaired one P1 scheduler ambiguity and one P2
+projection omission. The scheduler now stops after preparation and requires a
+separate reviewed claim transition before execution. Because the transactional
+claim authority remains unimplemented, any later dispatch must be reported as
+`MANUAL_DISPATCH_NON_ATOMIC`, never as an automatic atomic claim.

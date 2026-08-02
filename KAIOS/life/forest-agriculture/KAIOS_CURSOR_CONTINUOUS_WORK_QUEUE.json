@@ -55,6 +55,7 @@
     "status": "READY_FOR_ATOMIC_CLAIM",
     "claim_state": "UNCLAIMED",
     "claim_required": "ATOMIC_CLAIM_BEFORE_WORK",
+    "output_status": "CURSOR_RESEARCH_PROPOSAL_ONLY",
     "authorized_paths": [
       "KAIOS/life/candidates/forest-agriculture-v1/microbial-research/"
     ],
