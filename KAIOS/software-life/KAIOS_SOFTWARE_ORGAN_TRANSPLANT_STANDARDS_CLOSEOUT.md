@@ -43,7 +43,7 @@ Constitution source modification: `FALSE`
 
 ## Independent Review
 
-Four attack-review rounds found thirteen P1 and seven P2 issues in total. Repairs
+Five attack-review rounds found seventeen P1 and eight P2 issues in total. Repairs
 added:
 
 - evidence-derived approval and simulated Rights enforcement;
@@ -74,8 +74,20 @@ added:
   and energy budgets;
 - Codex-only decision, rework, acceptance, rollback and completion events;
 - immutable completion evidence plus an actual host Registry projection gate.
+- coupled metadata and transplant `COMPLETE` claims so neither can bypass the
+  completion gate;
+- structured Genome, integration and Registry completion attestations bound to
+  review, donor, host, both Genome IDs, organ, transplant and completion commit;
+- exact plan-step binding plus independently derived positive resource and
+  energy costs for every replayed event;
+- strict pre-transplant baselines whose Registry does not yet contain the
+  transplant, with review evidence committed afterward;
+- rejection of worktree symlinks and non-regular Git modes for authority and
+  completion evidence;
+- content-keyed immutable governance snapshot caches that preserve drift
+  detection while reducing the complete focused suite from 133 seconds to 14.
 
-Semantic and structural valid/negative fixtures: `32/32 PASS`.
+Semantic and structural valid/negative fixtures: `36/36 PASS`.
 
 P0: `0`
 
