@@ -1,0 +1,381 @@
+{
+  "suite_id": "KAIOS-COMPOST-MODEL-CANDIDATE-TEST-SCENARIOS-V1",
+  "schema_version": "1.0.0-candidate",
+  "status": "CURSOR_RESEARCH_CANDIDATE_ONLY",
+  "review_status": "PENDING_CODEX_REVIEW",
+  "task_id": "KAIOS-CURSOR-COMPOST-MODELS-001",
+  "worker_id": "cursor-01",
+  "branch": "cursor-handoff/KAIOS-CURSOR-COMPOST-MODELS-001",
+  "source_base_commit": "38901fddd3a513b5121b8828dce43898a7ed74b6",
+  "source_hash_basis": "SHA256_OF_EXACT_GIT_BLOB_BYTES_AT_SOURCE_BASE_COMMIT",
+  "mode": "DETERMINISTIC_DATA_CONTRACT_TEST_MANIFEST",
+  "authority": "NO_PRODUCTION_AUTHORITY",
+  "canonical_promotion": false,
+  "all_values_label": "SIMULATION_PROPOSAL_OR_DETERMINISTIC_TEST_FIXTURE_REQUIRES_OWNER_VALIDATION",
+  "fixture_contract": {
+    "fixed_point_scale": 1000000,
+    "arithmetic": "INTEGER_ONLY_FOR_FIXTURE_LEDGERS",
+    "ordering": "LEXICOGRAPHIC_BY_TEST_ID_WHEN_A_RUNNER_NEEDS_STABLE_ORDER",
+    "tolerance": 0,
+    "numeric_classification": "Numbers in expected values, counts, fixture paths and ledger assertions are exact non-tunable oracle constants. This file defines no tunable model parameter.",
+    "external_effects": "NONE",
+    "clock": "NO_WALL_CLOCK_ACCESS",
+    "randomness": "NONE",
+    "network": "NONE"
+  },
+  "numeric_parameter_contract": {
+    "required_fields": ["parameter_name", "unit", "minimum", "default", "maximum", "rationale", "source_type", "confidence", "risk", "validation_required"],
+    "allowed_source_types": ["SOURCE_DERIVED", "REPOSITORY_DERIVED", "MODEL_INFERENCE", "RESEARCH_PROPOSAL", "ASSUMPTION", "SOURCE_UNDERSPECIFIED"],
+    "applies_to": "Every recursively discovered object containing parameter_name in the four proposal and risk datasets; this manifest contains only exact oracle values.",
+    "range_rule": "minimum <= default <= maximum",
+    "validation_rule": "validation_required is true"
+  },
+  "input_files": [
+    "compost-feedstock-catalog-proposals.json",
+    "compost-process-stage-proposals.json",
+    "compost-resource-accounting-proposals.json",
+    "compost-risk-scenarios.json",
+    "compost-test-scenarios.json"
+  ],
+  "allowed_output_files": [
+    "CURSOR_COMPOST_MODELS_REPORT.md",
+    "compost-feedstock-catalog-proposals.json",
+    "compost-process-stage-proposals.json",
+    "compost-resource-accounting-proposals.json",
+    "compost-risk-scenarios.json",
+    "compost-test-scenarios.json"
+  ],
+  "allowed_output_directory": "KAIOS/life/candidates/forest-agriculture-v1/compost-models/",
+  "protected_path_scan_rule": "Every changed path relative to the task start commit must be one of the six exact allowed output paths; any other changed path is a protected-scope failure.",
+  "test_scenarios": [
+    {
+      "test_id": "TEST-001-STRICT-JSON-DUPLICATE-KEYS",
+      "class": "SYNTAX",
+      "inputs": ["ALL_JSON_OUTPUT_FILES"],
+      "assertions": ["STRICT_UTF8_DECODE_SUCCEEDS", "DUPLICATE_KEY_DETECTOR_REPORTS_ZERO", "JSON_PARSE_SUCCEEDS", "ROOT_IS_OBJECT", "NO_TRAILING_NON_WHITESPACE"],
+      "expected": {"parsed_json_file_count":5,"duplicate_key_count":0,"failure_count":0}
+    },
+    {
+      "test_id": "TEST-002-CANDIDATE-METADATA",
+      "class": "BOUNDARY",
+      "inputs": ["ALL_JSON_OUTPUT_FILES"],
+      "assertions": ["status == CURSOR_RESEARCH_CANDIDATE_ONLY", "review_status == PENDING_CODEX_REVIEW", "authority == NO_PRODUCTION_AUTHORITY", "canonical_promotion == false", "source_base_commit == 38901fddd3a513b5121b8828dce43898a7ed74b6"],
+      "expected": {"matching_json_file_count":5}
+    },
+    {
+      "test_id": "TEST-003-NUMERIC-PARAMETER-CONTRACT",
+      "class": "SCHEMA",
+      "inputs": ["compost-feedstock-catalog-proposals.json", "compost-process-stage-proposals.json", "compost-resource-accounting-proposals.json", "compost-risk-scenarios.json"],
+      "assertions": ["Every recursively discovered parameter_name object has exactly the ten required fields", "minimum <= default <= maximum", "source_type is in the six-value allowlist", "validation_required == true", "unit, rationale, confidence and risk are nonempty strings"],
+      "expected": {"parameter_count":53,"invalid_parameter_count":0}
+    },
+    {
+      "test_id": "TEST-004-SOURCE-TYPE-ALLOWLIST",
+      "class": "SCHEMA",
+      "inputs": ["ALL_JSON_OUTPUT_FILES"],
+      "assertions": ["Every object field named source_type uses one of the six allowed labels"],
+      "expected": {"invalid_source_type_count":0}
+    },
+    {
+      "test_id": "TEST-005-FEEDSTOCK-CATALOG-IDENTITY",
+      "class": "CROSS_REFERENCE",
+      "inputs": ["compost-feedstock-catalog-proposals.json"],
+      "assertions": ["Exactly four unique feedstock_proposal_id values exist", "RICE, VEGETABLE and FRUIT references remain Agriculture-owned", "HABITAT-FOREST-V1 remains Ecology-owned", "ORGANIC_WASTE_BATCH is marked specification-defined and schema-underspecified"],
+      "expected": {"feedstock_proposal_count":4,"duplicate_feedstock_id_count":0}
+    },
+    {
+      "test_id": "TEST-006-FEEDSTOCK-COMPONENT-CLOSURE",
+      "class": "MASS_ACCOUNTING",
+      "inputs": ["compost-feedstock-catalog-proposals.json"],
+      "assertions": ["Each proposal has exactly four component-fraction parameters", "Each proposal default component fractions sum exactly to 1", "Each deterministic component map sums exactly to 100000000", "Every component mass is a nonnegative integer"],
+      "expected": {"fixture_count":4,"fixture_total_mass_each":100000000,"failed_fixture_count":0}
+    },
+    {
+      "test_id": "TEST-007-CONTAMINATION-AND-LIVING-BIOMASS-BOUNDARIES",
+      "class": "BOUNDARY",
+      "inputs": ["compost-feedstock-catalog-proposals.json"],
+      "assertions": ["Every unresolved contaminant default and maximum equal zero", "Any nonzero contaminant requires quality hold", "Living or standing forest biomass is ineligible without a separate owner-approved event"],
+      "expected": {"failure_count":0}
+    },
+    {
+      "test_id": "TEST-008-OWNER-BINDINGS",
+      "class": "OWNERSHIP",
+      "inputs": ["compost-feedstock-catalog-proposals.json", "compost-process-stage-proposals.json"],
+      "assertions": ["Owner IDs include AGRICULTURE_ALPHA, KAIOS_REPRODUCTION_ECOLOGY_RUNTIME_V1, KAIOS_FOUNDATIONAL_LIFE_RUNTIME_V1, KAIOS_SUPPLY_CHAIN_SCHEMA, CIVILIZATION_ECONOMY_ALPHA, KAIOS_PHYSICAL_LABOR_SCHEMA and EXISTING_RIGHTS_AUTHORITY", "No candidate owner claims foreign truth"],
+      "expected": {"required_owner_count":7,"missing_owner_count":0}
+    },
+    {
+      "test_id": "TEST-009-PROCESS-STAGE-SEQUENCE",
+      "class": "PROCESS_CONTRACT",
+      "inputs": ["compost-process-stage-proposals.json"],
+      "assertions": ["Exactly six unique stages exist", "Sequence values are 001 through 006", "Every success state matches the next stage input state", "The final state is FINISHED_CANDIDATE_CUSTODY_CLOSED"],
+      "expected": {"stage_count":6,"duplicate_stage_id_count":0,"transition_failure_count":0}
+    },
+    {
+      "test_id": "TEST-010-NONZERO-TIME-ORACLE",
+      "class": "TIME",
+      "inputs": ["compost-process-stage-proposals.json"],
+      "assertions": ["Every stage default elapsed time is greater than zero", "Checkpoint start and end ticks are contiguous", "Each checkpoint elapsed tick equals end minus start", "Final elapsed tick equals 372", "instant_conversion_permitted == false"],
+      "expected": {"stage_count":6,"total_elapsed_tick":372,"instant_conversion_permitted":false}
+    },
+    {
+      "test_id": "TEST-011-STAGE-RESOURCE-TOTALS",
+      "class": "RESOURCE_ACCOUNTING",
+      "inputs": ["compost-process-stage-proposals.json"],
+      "assertions": ["Default stage labor capacities sum to 360000000 micro_worker_minute", "Default external stage energy reservations sum to 30000000 micro_joule_proxy", "Process-water reservation equals 20000000 microkilogram_proxy in the oracle"],
+      "expected": {"labor_total":360000000,"external_energy_total":30000000,"process_water_total":20000000}
+    },
+    {
+      "test_id": "TEST-012-STAGE-CAUSAL-GATES",
+      "class": "PROCESS_CONTRACT",
+      "inputs": ["compost-process-stage-proposals.json"],
+      "assertions": ["Every stage names location, labor roles, equipment capabilities, storage state and owner events", "Batch assembly requires water and energy reservations", "Screening rejects any unclosed ledger", "Final custody rejects automatic fertilizer and soil nutrient credits"],
+      "expected": {"failed_stage_count":0}
+    },
+    {
+      "test_id": "TEST-013-MICROBIAL-BOUNDARY",
+      "class": "LIFE_BOUNDARY",
+      "inputs": ["compost-process-stage-proposals.json", "compost-risk-scenarios.json"],
+      "assertions": ["label == ABSTRACT_MICROBIAL_DECOMPOSITION_PROXY", "life_runtime_scope == NOT_FULL_LIFE_RUNTIME", "creates_life == false", "creates_population == false", "creates_species == false", "No life entity, species ID or population is defined"],
+      "expected": {"matching_boundary_record_count":2,"life_creation_count":0}
+    },
+    {
+      "test_id": "TEST-014-NORMAL-TOTAL-MASS-CLOSURE",
+      "class": "MASS_ACCOUNTING",
+      "inputs": ["compost-resource-accounting-proposals.json#normal_process_fixture"],
+      "assertions": ["Initial total equals 120000000", "Finished 70000000 plus gases 30000000 plus leachate 12000000 plus rejects 5000000 plus remaining 3000000 plus disposal 0 equals 120000000", "closed == true"],
+      "expected": {"expected_initial_total":120000000,"expected_final_total":120000000,"tolerance":0}
+    },
+    {
+      "test_id": "TEST-015-NORMAL-WATER-CLOSURE",
+      "class": "WATER_ACCOUNTING",
+      "inputs": ["compost-resource-accounting-proposals.json#normal_process_fixture"],
+      "assertions": ["Feedstock water 40000000 plus added water 20000000 equals 60000000", "All named final water custodians sum to 60000000", "closed == true"],
+      "expected": {"expected_initial_total":60000000,"expected_final_total":60000000,"tolerance":0}
+    },
+    {
+      "test_id": "TEST-016-NORMAL-NUTRIENT-CLOSURE",
+      "class": "NUTRIENT_ACCOUNTING",
+      "inputs": ["compost-resource-accounting-proposals.json#normal_process_fixture"],
+      "assertions": ["Initial nutrient total equals 5000000", "Finished, emissions proxy, leachate, rejects, remaining and disposal nutrient custodians sum to 5000000", "Soil nutrient state delta equals zero", "closed == true"],
+      "expected": {"expected_initial_total":5000000,"expected_final_total":5000000,"soil_nutrient_state_delta":0}
+    },
+    {
+      "test_id": "TEST-017-NORMAL-ENERGY-CLOSURE",
+      "class": "ENERGY_ACCOUNTING",
+      "inputs": ["compost-resource-accounting-proposals.json#normal_process_fixture"],
+      "assertions": ["Embedded 20000000 plus external 30000000 equals 50000000", "All named output and heat custodians sum to 50000000", "closed == true"],
+      "expected": {"expected_initial_total":50000000,"expected_final_total":50000000,"tolerance":0}
+    },
+    {
+      "test_id": "TEST-018-NORMAL-LABOR-CLOSURE",
+      "class": "LABOR_ACCOUNTING",
+      "inputs": ["compost-resource-accounting-proposals.json#normal_process_fixture"],
+      "assertions": ["Consumed 360000000 plus remaining 120000000 equals validated 480000000", "overlap_detected == false", "location_conflict_detected == false", "closed == true"],
+      "expected": {"expected_initial_total":480000000,"expected_final_total":480000000,"tolerance":0}
+    },
+    {
+      "test_id": "TEST-019-NORMAL-OUTPUT-CUSTODY-CLOSE",
+      "class": "CUSTODY",
+      "inputs": ["compost-resource-accounting-proposals.json#normal_process_fixture"],
+      "assertions": ["Pending finished material 70000000 transfers to finished candidate output custody 70000000", "FERTILIZER inventory delta equals zero", "Soil nutrient state delta equals zero", "Economy balance delta equals zero", "No right is granted"],
+      "expected": {"output_mass":70000000,"fertilizer_inventory_delta":0,"soil_nutrient_state_delta":0,"economy_balance_delta":0}
+    },
+    {
+      "test_id": "TEST-020-CHECKPOINT-ORACLES",
+      "class": "DETERMINISM",
+      "inputs": ["compost-resource-accounting-proposals.json"],
+      "assertions": ["Six mass checkpoints each equal 120000000", "Six water checkpoints each equal 60000000", "Stage IDs align with process-stage order", "Final checkpoints use finished candidate output custody"],
+      "expected": {"mass_checkpoint_count":6,"water_checkpoint_count":6,"failed_checkpoint_count":0}
+    },
+    {
+      "test_id": "TEST-021-STATE-SEPARATION",
+      "class": "OWNERSHIP",
+      "inputs": ["ALL_MODEL_JSON_FILES"],
+      "assertions": ["Compost feedstock, in-process batch and finished candidate output are distinct records", "FERTILIZER is a separate Economy inventory resource", "Soil nutrient state is separate Ecology truth", "AMENDMENT-PROPOSAL-ORGANIC-CARRIER-V1 is not an automatic mapping"],
+      "expected": {"failure_count":0}
+    },
+    {
+      "test_id": "TEST-022-REQUIRED-RISK-COVERAGE",
+      "class": "COVERAGE",
+      "inputs": ["compost-risk-scenarios.json"],
+      "assertions": ["Required IDs cover normal, contamination, moisture stress, energy shortage, aeration proxy, incomplete processing, mass mismatch and closed final output custody", "Scenario IDs are unique"],
+      "expected": {"scenario_count":8,"duplicate_scenario_id_count":0}
+    },
+    {
+      "test_id": "TEST-023-ALL-ACCEPTED-STATE-LEDGERS-CLOSE",
+      "class": "RESOURCE_ACCOUNTING",
+      "inputs": ["compost-resource-accounting-proposals.json", "compost-risk-scenarios.json"],
+      "assertions": ["Every recursively discovered object containing initial_total and final_total has equal totals", "Every such object has closed == true", "Every ledger number is a nonnegative integer", "Tolerance is zero"],
+      "expected": {"closed_ledger_count":48,"failed_ledger_count":0,"tolerance":0}
+    },
+    {
+      "test_id": "TEST-024-CONTAMINATION-HOLD-ORACLE",
+      "class": "NEGATIVE_PATH",
+      "inputs": ["compost-risk-scenarios.json#COMPOST-RISK-CONTAMINATION-HOLD-V1"],
+      "assertions": ["Contaminant 1000000 remains in quality hold", "Total material 100000000 remains in quality hold", "Process water is not debited", "No finished output or batch assembly occurs"],
+      "expected": {"status":"REJECTED_QUALITY_HOLD_NO_BATCH_ASSEMBLY"}
+    },
+    {
+      "test_id": "TEST-025-MOISTURE-STRESS-ORACLE",
+      "class": "NEGATIVE_PATH",
+      "inputs": ["compost-risk-scenarios.json#COMPOST-RISK-MOISTURE-STRESS-HOLD-V1"],
+      "assertions": ["Selected signal 200000 is below minimum 350000", "Assembled mass 120000000 remains in hold", "All five conserved domains close", "No transformation occurs"],
+      "expected": {"status":"RESOURCE_STRESSED_HOLD_NO_TRANSFORMATION"}
+    },
+    {
+      "test_id": "TEST-026-ENERGY-SHORTAGE-ORACLE",
+      "class": "NEGATIVE_PATH",
+      "inputs": ["compost-risk-scenarios.json#COMPOST-RISK-ENERGY-SHORTAGE-BLOCK-V1"],
+      "assertions": ["Available external energy 10000000 is below required 30000000", "Mass, water and nutrient custody remains unchanged", "Energy is neither negative nor created", "Labor remains unused"],
+      "expected": {"status":"ENERGY_PENDING_NO_STAGE_PROGRESSION"}
+    },
+    {
+      "test_id": "TEST-027-AERATION-PROXY-ORACLE",
+      "class": "NEGATIVE_PATH",
+      "inputs": ["compost-risk-scenarios.json#COMPOST-RISK-AERATION-PROXY-BLOCK-V1"],
+      "assertions": ["Selected aeration proxy 200000 is below minimum 400000", "No decomposition-proxy mass transfer occurs", "No oxygen concentration or life physiology is modeled", "All accepted-state ledgers close"],
+      "expected": {"status":"RESOURCE_STRESSED_HOLD_NO_DECOMPOSITION_PROXY_TRANSFER"}
+    },
+    {
+      "test_id": "TEST-028-INCOMPLETE-PROCESSING-ORACLE",
+      "class": "NEGATIVE_PATH",
+      "inputs": ["compost-risk-scenarios.json#COMPOST-RISK-INCOMPLETE-PROCESSING-HOLD-V1"],
+      "assertions": ["Elapsed 246 is below required 372", "Finished candidate output equals zero", "In-process, emissions proxy, leachate and remaining-feedstock custodians close mass", "All five domains close"],
+      "expected": {"status":"INCOMPLETE_PROCESSING_HOLD_NO_FINISHED_OUTPUT"}
+    },
+    {
+      "test_id": "TEST-029-MASS-MISMATCH-REJECTION-ORACLE",
+      "class": "NEGATIVE_PATH",
+      "inputs": ["compost-risk-scenarios.json#COMPOST-RISK-MASS-LEDGER-MISMATCH-REJECTION-V1"],
+      "assertions": ["Proposed initial 120000000 minus proposed final 119000000 equals mismatch 1000000", "Mismatch exceeds zero tolerance", "Accepted state remains unchanged", "All accepted-state ledgers close"],
+      "expected": {"status":"LEDGER_REJECTED_ACCEPTED_STATE_UNCHANGED","proposed_mismatch":1000000}
+    },
+    {
+      "test_id": "TEST-030-CLOSED-FINAL-OUTPUT-ORACLE",
+      "class": "CUSTODY",
+      "inputs": ["compost-risk-scenarios.json#COMPOST-SCENARIO-CLOSED-FINAL-OUTPUT-CUSTODY-V1"],
+      "assertions": ["Foreign Supply Chain acceptance event is present", "Output transfer ledger closes at 70000000", "Economy lot remains source-underspecified", "Fertilizer, soil nutrient and Economy balance deltas remain zero"],
+      "expected": {"status":"FINISHED_CANDIDATE_CUSTODY_CLOSED_NO_FERTILIZER_OR_SOIL_CREDIT"}
+    },
+    {
+      "test_id": "TEST-031-DETERMINISTIC-REPLAY",
+      "class": "DETERMINISM",
+      "inputs": ["ALL_DETERMINISTIC_FIXTURES"],
+      "assertions": ["Stable stage and scenario ordering is used", "Integer-only calculations reproduce every expected total", "A second replay produces byte-identical normalized oracle values", "No wall clock, randomness, network, wallet, RPC or live market input is used"],
+      "expected": {"replay_mismatch_count":0}
+    },
+    {
+      "test_id": "TEST-032-PROVENANCE-GIT-OBJECTS-AND-SHA256",
+      "class": "PROVENANCE",
+      "inputs": ["ALL_JSON_OUTPUT_FILES", "SOURCE_BASE_GIT_TREE"],
+      "assertions": ["Every provenance source_commit equals the declared source base", "Every git_object equals git rev-parse source_commit:path", "Every sha256 equals SHA-256 of exact bytes from git cat-file blob git_object", "Every provenance source_type equals REPOSITORY_DERIVED"],
+      "expected": {"embedded_provenance_record_count":61,"mismatch_count":0}
+    },
+    {
+      "test_id": "TEST-033-EXPECTED-SOURCE-HASH-SET",
+      "class": "PROVENANCE",
+      "inputs": ["expected_source_provenance", "SOURCE_BASE_GIT_TREE"],
+      "assertions": ["Exactly 27 unique source paths are listed", "Mandatory read-order files, work order, closeout, specification, candidate datasets and owner schemas are represented", "Every object and SHA-256 is reproducible from the declared base"],
+      "expected": {"source_path_count":27,"duplicate_source_path_count":0,"mismatch_count":0}
+    },
+    {
+      "test_id": "TEST-034-BOUNDARY-MARKERS",
+      "class": "BOUNDARY",
+      "inputs": ["ALL_SIX_OUTPUT_FILES"],
+      "assertions": ["Artifacts state CURSOR_RESEARCH_CANDIDATE_ONLY, PENDING_CODEX_REVIEW and NO_PRODUCTION_AUTHORITY", "Artifacts disclaim prescription, endorsement, guarantee, approval and certification", "Artifacts grant no Runtime, Canonical, Rights, Economy, Wallet, KGEN or deployment authority"],
+      "expected": {"failure_count":0}
+    },
+    {
+      "test_id": "TEST-035-EXACT-FILE-SCOPE",
+      "class": "REPOSITORY_SCOPE",
+      "inputs": ["GIT_DIFF_NAME_ONLY_FROM_38901F_BASE"],
+      "assertions": ["Exactly six paths differ", "Every path is under the exact allowed output directory", "Basenames exactly equal allowed_output_files", "No other untracked or modified file exists"],
+      "expected": {"changed_path_count":6,"outside_scope_count":0}
+    },
+    {
+      "test_id": "TEST-036-UTF8-NO-BOM-NUL",
+      "class": "ENCODING",
+      "inputs": ["ALL_SIX_OUTPUT_FILES"],
+      "assertions": ["Each file decodes as strict UTF-8", "No file begins with EF BB BF", "No NUL byte exists"],
+      "expected": {"valid_file_count":6,"bom_file_count":0,"nul_file_count":0}
+    },
+    {
+      "test_id": "TEST-037-SECRET-SCAN",
+      "class": "SECURITY",
+      "inputs": ["ALL_SIX_OUTPUT_FILES"],
+      "assertions": ["No private key block", "No seed phrase label", "No credential-bearing URL", "No common API token or cloud secret pattern", "No wallet secret"],
+      "expected": {"finding_count":0}
+    },
+    {
+      "test_id": "TEST-038-PROTECTED-PATH-SCAN",
+      "class": "REPOSITORY_SCOPE",
+      "inputs": ["GIT_DIFF_NAME_ONLY_FROM_38901F_BASE"],
+      "assertions": ["Every changed path is one of the six exact allowed output paths", "No Runtime, Canonical Schema, CURRENT, Universe Law, Rights, Economy, Wallet, KGEN, deployment, CI, registry or index path changed"],
+      "expected": {"protected_path_finding_count":0}
+    },
+    {
+      "test_id": "TEST-039-GIT-DIFF-CHECK",
+      "class": "REPOSITORY_QUALITY",
+      "inputs": ["GIT_DIFF_FROM_38901F_BASE"],
+      "assertions": ["git diff --check exits zero"],
+      "expected": {"exit_code":0}
+    },
+    {
+      "test_id": "TEST-040-REPORT-VALIDATION-COUNTS",
+      "class": "HANDOFF",
+      "inputs": ["CURSOR_COMPOST_MODELS_REPORT.md", "VALIDATOR_OUTPUT"],
+      "assertions": ["Report counts match validator counts", "Assumptions and remaining risks are explicit", "Final status remains pending Codex review", "No Canonical status is claimed"],
+      "expected": {"failure_count":0}
+    }
+  ],
+  "required_risk_scenario_ids": [
+    "COMPOST-SCENARIO-NORMAL-CLOSED-PROCESS-V1",
+    "COMPOST-RISK-CONTAMINATION-HOLD-V1",
+    "COMPOST-RISK-MOISTURE-STRESS-HOLD-V1",
+    "COMPOST-RISK-ENERGY-SHORTAGE-BLOCK-V1",
+    "COMPOST-RISK-AERATION-PROXY-BLOCK-V1",
+    "COMPOST-RISK-INCOMPLETE-PROCESSING-HOLD-V1",
+    "COMPOST-RISK-MASS-LEDGER-MISMATCH-REJECTION-V1",
+    "COMPOST-SCENARIO-CLOSED-FINAL-OUTPUT-CUSTODY-V1"
+  ],
+  "expected_source_provenance": [
+    {"source_type":"REPOSITORY_DERIVED","source_path":"PRIMEFORGE_GENESIS_BOOT_SEQUENCE_V1_4.md","source_commit":"38901fddd3a513b5121b8828dce43898a7ed74b6","git_object":"0f66a62de1018e35ca93198dc890fdddf70ab213","sha256":"1ef1f7f2f17cc55fa8afbca429ccdfb9e0ce2a1ac55108f194b1810c26331dbc"},
+    {"source_type":"REPOSITORY_DERIVED","source_path":"docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md","source_commit":"38901fddd3a513b5121b8828dce43898a7ed74b6","git_object":"f9748c99501ec1c1ea6ba5c39833909684c0ffbe","sha256":"6d71cd7946f0b4057a9b5289923d3c7b424e409140feb7404f5b433a309ab00b"},
+    {"source_type":"REPOSITORY_DERIVED","source_path":"docs/maps/UniverseMap_V10_2_DISTANCE_COMPLETE_ALL_POINTS.json","source_commit":"38901fddd3a513b5121b8828dce43898a7ed74b6","git_object":"0f97fc7e723fc97cd8366a10f0c9eb7892df4605","sha256":"bfde25dfb2737e6f698850aa705ea221c64bb0f228ff8e3a7f2740f0ae123451"},
+    {"source_type":"REPOSITORY_DERIVED","source_path":"AGENTS.md","source_commit":"38901fddd3a513b5121b8828dce43898a7ed74b6","git_object":"06ad797cc0d87f9a468ccbd11ccf03f528029a7a","sha256":"c16c1ba1cfff166e68d2ec1a399afb9f9fa877631b574ebe3fdf03c5c514295b"},
+    {"source_type":"REPOSITORY_DERIVED","source_path":"KAIOS/life/candidates/forest-agriculture-v1/CURSOR_COMPOST_MODELS_WORK_ORDER.md","source_commit":"38901fddd3a513b5121b8828dce43898a7ed74b6","git_object":"240e68052467a77939a84207b9e3299a632accef","sha256":"13a6c6d823bd4ce833efad1935e15cf964d9c96d3d71c5143c95e507c00f38f1"},
+    {"source_type":"REPOSITORY_DERIVED","source_path":"KAIOS/life/forest-agriculture/KAIOS_CURSOR_FERTILIZER_MODELS_REVIEW_CLOSEOUT.md","source_commit":"38901fddd3a513b5121b8828dce43898a7ed74b6","git_object":"ab55b1b70781e6eff84876371513d0c113a9fcf0","sha256":"e5a3d002411b40dc394b40251a23a591f105ffcc3b009582248aaa36cff2b95e"},
+    {"source_type":"REPOSITORY_DERIVED","source_path":"KAIOS/life/forest-agriculture/KAIOS_FOREST_AGRICULTURE_RUNTIME_V1_SPEC.md","source_commit":"38901fddd3a513b5121b8828dce43898a7ed74b6","git_object":"9a2dd4ad05bb7b2e3d71b91b479359947ada8376","sha256":"4e1a23e97d09ec2dc4ad65440e6958e646f75ed418e5c703c5a5a1635c2809a1"},
+    {"source_type":"REPOSITORY_DERIVED","source_path":"KAIOS/life/candidates/forest-agriculture-v1/crops/crop-catalog-candidates.json","source_commit":"38901fddd3a513b5121b8828dce43898a7ed74b6","git_object":"1d4a445a1548ad61ee96810411135e7d88d9e30a","sha256":"f824773458c31a4725eced0f83102a8eefefdcabf27dd71b4e59806684244a57"},
+    {"source_type":"REPOSITORY_DERIVED","source_path":"KAIOS/life/candidates/forest-agriculture-v1/crops/crop-resource-flow-proposal.json","source_commit":"38901fddd3a513b5121b8828dce43898a7ed74b6","git_object":"969a300fd867055de75359167225b1b98f97635b","sha256":"b0e6bb9e1241ef0bf70a45f82156736bb17821e9c29624b62207e78215cf0849"},
+    {"source_type":"REPOSITORY_DERIVED","source_path":"KAIOS/life/candidates/forest-agriculture-v1/vegetables/vegetable-catalog-candidates.json","source_commit":"38901fddd3a513b5121b8828dce43898a7ed74b6","git_object":"5f33d11528d7ea14eb26417224a85cece1392144","sha256":"77cc5dd2e4b6264d5fe8d015881858a2c76f5a522d567a185061b919bbad8cd6"},
+    {"source_type":"REPOSITORY_DERIVED","source_path":"KAIOS/life/candidates/forest-agriculture-v1/vegetables/vegetable-resource-flow-proposal.json","source_commit":"38901fddd3a513b5121b8828dce43898a7ed74b6","git_object":"a318188622731c0f9a52c47a41f4ef784aa86113","sha256":"444b9b1a843c74ba3eddf51819cb3507be058275de8271f34e367f231856aab3"},
+    {"source_type":"REPOSITORY_DERIVED","source_path":"KAIOS/life/candidates/forest-agriculture-v1/forest/forest-composition-candidates.json","source_commit":"38901fddd3a513b5121b8828dce43898a7ed74b6","git_object":"e4e63adb992337dc333c4de78152903234d8a46d","sha256":"007323cb9cad66726b0b1cfe86f05eeda01dbce5d783832e730828299f287e8d"},
+    {"source_type":"REPOSITORY_DERIVED","source_path":"KAIOS/life/candidates/forest-agriculture-v1/forest/forest-resource-flow-proposal.json","source_commit":"38901fddd3a513b5121b8828dce43898a7ed74b6","git_object":"4bf0ea0ee3ad5b1612a76debdef9efdf7ed1a90d","sha256":"444da4c272fe05a176ae9771251e581143b2288a3956323cce32b6638f90f0ea"},
+    {"source_type":"REPOSITORY_DERIVED","source_path":"KAIOS/life/candidates/forest-agriculture-v1/soil-types/soil-type-catalog-candidates.json","source_commit":"38901fddd3a513b5121b8828dce43898a7ed74b6","git_object":"aeae3970108c6f41ad461c22e6cf5d7e2d1a774b","sha256":"a5fdf6e363f4e5cecd0d50b981bf32d5cb06f35747eb7327b37d4784a14e1d64"},
+    {"source_type":"REPOSITORY_DERIVED","source_path":"KAIOS/life/candidates/forest-agriculture-v1/soil-types/soil-water-nutrient-thresholds.json","source_commit":"38901fddd3a513b5121b8828dce43898a7ed74b6","git_object":"f5c829459159e5de8acefbd6e11667c2090b9391","sha256":"0cad3742773b1fcad1d5d2a86d1b50e95eae4a0a7d242d4dcd71fb26f6c8902c"},
+    {"source_type":"REPOSITORY_DERIVED","source_path":"KAIOS/life/candidates/forest-agriculture-v1/fertilizer-models/fertilizer-catalog-proposals.json","source_commit":"38901fddd3a513b5121b8828dce43898a7ed74b6","git_object":"dff6ac3e1b468f49383b4caf12c157cbb4ba4d10","sha256":"812aa257221818990f00474669d0ee1a732a40ec0cf1ee9c57b51659a8286da8"},
+    {"source_type":"REPOSITORY_DERIVED","source_path":"KAIOS/life/candidates/forest-agriculture-v1/fertilizer-models/nutrient-composition-proposals.json","source_commit":"38901fddd3a513b5121b8828dce43898a7ed74b6","git_object":"3897ab6042e3ea7ed5e5265c21ff44438c8eb9ed","sha256":"b6360a22783b7144f1f707a8df70cdb4ce46a12bebbad707385794d25f8f502a"},
+    {"source_type":"REPOSITORY_DERIVED","source_path":"KAIOS/life/candidates/forest-agriculture-v1/fertilizer-models/application-response-model-proposals.json","source_commit":"38901fddd3a513b5121b8828dce43898a7ed74b6","git_object":"8f8d481d2182db4320131b17f9dffda176962b02","sha256":"6ad4367d085dae369099597d996fed5aab774ead487f5cbd4143595d69f8c533"},
+    {"source_type":"REPOSITORY_DERIVED","source_path":"KAIOS/life/candidates/forest-agriculture-v1/fertilizer-models/environmental-risk-scenarios.json","source_commit":"38901fddd3a513b5121b8828dce43898a7ed74b6","git_object":"19423c1850d974b1c30574e3ddd7035bdb5c042a","sha256":"2ff5bca9f2700614405ce72ffc8c4b65c465ab60bc1aac4970e913732f7620fa"},
+    {"source_type":"REPOSITORY_DERIVED","source_path":"KAIOS/life/candidates/forest-agriculture-v1/fertilizer-models/fertilizer-test-scenarios.json","source_commit":"38901fddd3a513b5121b8828dce43898a7ed74b6","git_object":"7a753dda9c8c44216b427df5961460785ca4faab","sha256":"d45afe7a06fbbc3c3d47b28c437b2030e8da90df61745e5fef9429bc50c0a0af"},
+    {"source_type":"REPOSITORY_DERIVED","source_path":"KAIOS/life/ecology/KAIOS_REPRODUCTION_ECOLOGY_SCHEMA_V1.json","source_commit":"38901fddd3a513b5121b8828dce43898a7ed74b6","git_object":"c99eb0eba386af67c009bfd115e88b934d1c9000","sha256":"3257f8cd1f0ba482f0c6bc8d98fbfb4748c8a1172c9c88d4bf9a2981c90af9f0"},
+    {"source_type":"REPOSITORY_DERIVED","source_path":"KAIOS_SUPPLY_CHAIN_SCHEMA.json","source_commit":"38901fddd3a513b5121b8828dce43898a7ed74b6","git_object":"56bc0ff72042100cb74ace45ee3c30d7703a48e9","sha256":"ea6d175e8bfd242a288f6e6374e97e97fd18ecf5edb40761a29de2129036aa60"},
+    {"source_type":"REPOSITORY_DERIVED","source_path":"KAIOS_PHYSICAL_LABOR_SCHEMA.json","source_commit":"38901fddd3a513b5121b8828dce43898a7ed74b6","git_object":"357b00093f4a912e616e9d39edf04753aacf94f7","sha256":"21060f7bdf64f0a3af827f1fcd7d95d3170affef54c01bbeb449b9361fdd2f43"},
+    {"source_type":"REPOSITORY_DERIVED","source_path":"KAIOS_INDUSTRIAL_SUPPLY_CHAIN_SPEC.md","source_commit":"38901fddd3a513b5121b8828dce43898a7ed74b6","git_object":"02ab662fad21d8365bca68d00e7eccec3a884889","sha256":"431db8dba33f5fdaa4de04c90830eaeb054c057a708455c48265631ca4e0433c"},
+    {"source_type":"REPOSITORY_DERIVED","source_path":"KGEN-KAIOS/world-viewer/ecosystem/ecosystem-runtime.js","source_commit":"38901fddd3a513b5121b8828dce43898a7ed74b6","git_object":"2bab509140ab4b93c7e4975286c826693965cf26","sha256":"9b2cd9d4501727d3134ea332e1a30cd77d5d7d647300820f51d9c264784ef537"},
+    {"source_type":"REPOSITORY_DERIVED","source_path":"KGEN-KAIOS/world-viewer/agriculture/agriculture-runtime.js","source_commit":"38901fddd3a513b5121b8828dce43898a7ed74b6","git_object":"f09478806a47c10825258385ee855faa74f51a79","sha256":"4557d6b449ce3979f2bf4ca10cc48f271ead2ddb34cc127e60b264ce26b577c2"},
+    {"source_type":"REPOSITORY_DERIVED","source_path":"KGEN-KAIOS/world-viewer/economy/economy-runtime.js","source_commit":"38901fddd3a513b5121b8828dce43898a7ed74b6","git_object":"2b1a37dba8cf3863eb4b30d4547995f281a6bc62","sha256":"8b5879091b212ea3e0ead296719e872b9353209fd8982f01567f2bbb78991f27"}
+  ],
+  "suite_boundaries": [
+    "TEST_DATA_ONLY",
+    "NO_RUNTIME_EXECUTION",
+    "NO_NETWORK_OR_EXTERNAL_STATE",
+    "NO_CANONICAL_PROMOTION",
+    "NO_RIGHTS_OR_ECONOMY_AUTHORITY",
+    "NO_WALLET_OR_REAL_KGEN",
+    "NO_DEPLOYMENT",
+    "NO_MERGE"
+  ]
+}

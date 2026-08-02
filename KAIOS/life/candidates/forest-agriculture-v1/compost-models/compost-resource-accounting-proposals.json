@@ -1,0 +1,309 @@
+{
+  "dataset_id": "KAIOS-COMPOST-RESOURCE-ACCOUNTING-PROPOSALS-V1",
+  "schema_version": "1.0.0-candidate",
+  "status": "CURSOR_RESEARCH_CANDIDATE_ONLY",
+  "review_status": "PENDING_CODEX_REVIEW",
+  "task_id": "KAIOS-CURSOR-COMPOST-MODELS-001",
+  "worker_id": "cursor-01",
+  "branch": "cursor-handoff/KAIOS-CURSOR-COMPOST-MODELS-001",
+  "source_base_commit": "38901fddd3a513b5121b8828dce43898a7ed74b6",
+  "source_hash_basis": "SHA256_OF_EXACT_GIT_BLOB_BYTES_AT_SOURCE_BASE_COMMIT",
+  "mode": "LOCAL_DETERMINISTIC_FIXED_POINT_SIMULATION_PROPOSAL",
+  "authority": "NO_PRODUCTION_AUTHORITY",
+  "canonical_promotion": false,
+  "all_values_label": "SIMULATION_PROPOSAL_OR_DETERMINISTIC_TEST_FIXTURE_REQUIRES_OWNER_VALIDATION",
+  "accounting_boundary": "This dataset is an exact conservation oracle, not a compost formula, expected conversion rate, emissions estimate, nutrient analysis, worker plan, equipment specification or output-quality claim.",
+  "numeric_parameter_contract": {
+    "required_fields": [
+      "parameter_name",
+      "unit",
+      "minimum",
+      "default",
+      "maximum",
+      "rationale",
+      "source_type",
+      "confidence",
+      "risk",
+      "validation_required"
+    ],
+    "allowed_source_types": [
+      "SOURCE_DERIVED",
+      "REPOSITORY_DERIVED",
+      "MODEL_INFERENCE",
+      "RESEARCH_PROPOSAL",
+      "ASSUMPTION",
+      "SOURCE_UNDERSPECIFIED"
+    ],
+    "range_rule": "minimum <= default <= maximum",
+    "validation_rule": "Every numeric parameter requires validation_required equal to true.",
+    "fixture_rule": "Exact integers in deterministic fixtures, checkpoint oracles, identity strings, versions and declared counts are non-tunable oracle data."
+  },
+  "fixed_point_contract": {
+    "arithmetic": "SIGNED_INTEGER_ADDITION_ONLY",
+    "binary_floating_point_state_addition": "FORBIDDEN",
+    "negative_pool_rule": "REJECT_BEFORE_OWNER_STATE_CHANGE",
+    "component_audit_rule": "Water and nutrient ledgers are component subledgers of total physical mass. They close independently and are never added again to total mass.",
+    "energy_rule": "Embedded and externally supplied energy proxies share one conserved fixture ledger but remain separately identified at input.",
+    "labor_rule": "Validated capacity equals consumed plus remaining capacity and does not create a worker or shift.",
+    "numeric_parameters": [
+      {"parameter_name":"fixed_point_scale","unit":"micro_unit_per_base_unit","minimum":1000000,"default":1000000,"maximum":1000000,"rationale":"Supports exact integer replay for all declared fixture domains.","source_type":"RESEARCH_PROPOSAL","confidence":"MEDIUM","risk":"Changing the scale invalidates every deterministic oracle value.","validation_required":true},
+      {"parameter_name":"ledger_closure_tolerance","unit":"integer_micro_unit","minimum":0,"default":0,"maximum":0,"rationale":"Requires exact closure and fail-closed rejection of any mismatch.","source_type":"RESEARCH_PROPOSAL","confidence":"MEDIUM","risk":"Owner adapters with conversion rounding require separate review and cannot silently relax this fixture.","validation_required":true}
+    ]
+  },
+  "domain_contracts": [
+    {
+      "domain": "TOTAL_PHYSICAL_MASS",
+      "unit": "microkilogram_proxy",
+      "owner": "KAIOS_REPRODUCTION_ECOLOGY_RUNTIME_V1",
+      "rule": "Feedstock mass plus added process-water mass equals finished candidate material plus gases or emissions proxy, leachate, rejects, remaining feedstock and disposal custody."
+    },
+    {
+      "domain": "WATER_MASS_COMPONENT",
+      "unit": "microkilogram_water_mass_proxy",
+      "owner": "KAIOS_REPRODUCTION_ECOLOGY_RUNTIME_V1",
+      "rule": "Contained feedstock water plus added process water equals water held in finished material, atmosphere proxy, leachate, rejects, remaining feedstock and disposal."
+    },
+    {
+      "domain": "NUTRIENT_MASS_COMPONENT",
+      "unit": "microkilogram_nutrient_proxy",
+      "owner": "KAIOS_REPRODUCTION_ECOLOGY_RUNTIME_V1",
+      "rule": "Feedstock nutrient mass remains in named material, leachate, rejects, remaining feedstock, emissions or disposal custody; no nutrient becomes soil state automatically."
+    },
+    {
+      "domain": "ENERGY_PROXY",
+      "unit": "micro_joule_proxy",
+      "owner": "KAIOS_REPRODUCTION_ECOLOGY_RUNTIME_V1",
+      "rule": "Embedded and supplied energy equals energy retained in material or byproduct custody plus heat or dissipation custody."
+    },
+    {
+      "domain": "LABOR_CAPACITY",
+      "unit": "micro_worker_minute",
+      "owner": "KAIOS_PHYSICAL_LABOR_SCHEMA",
+      "rule": "Owner-validated shift capacity equals consumed plus remaining capacity, with location and overlap checks performed by the owner."
+    }
+  ],
+  "custody_pool_contract": {
+    "required_total_mass_destinations": [
+      "FINISHED_CANDIDATE_OUTPUT_CUSTODY",
+      "GASES_EMISSIONS_PROXY_CUSTODY",
+      "LEACHATE_CUSTODY",
+      "REJECTS_CUSTODY",
+      "REMAINING_FEEDSTOCK_CUSTODY",
+      "DISPOSAL_CUSTODY"
+    ],
+    "gases_boundary": "GASES_EMISSIONS_PROXY_CUSTODY is an aggregate accounting destination, not a chemical identity, measured emission, permit result or environmental approval.",
+    "leachate_boundary": "LEACHATE_CUSTODY is a named material and water destination, not a composition, treatment or disposal instruction.",
+    "disposal_boundary": "DISPOSAL_CUSTODY must exist even when its fixture amount is zero; any nonzero transfer requires a foreign owner decision and event.",
+    "finished_output_boundary": "FINISHED_CANDIDATE_OUTPUT_CUSTODY is candidate material only and carries no fertilizer, maturity, quality, safety or soil-effect semantics."
+  },
+  "state_separation_contract": {
+    "compost_feedstock_record": "SOURCE_OWNER_REFERENCE_ONLY",
+    "in_process_batch_record": "ECOLOGY_OWNED_COMPOST_BATCH_PROJECTED_THROUGH_DECOMPOSITION_POOL",
+    "finished_candidate_output_record": "CANDIDATE_OUTPUT_WITH_CLOSED_CUSTODY_PENDING_OWNER_MAPPING",
+    "fertilizer_inventory_record": "CIVILIZATION_ECONOMY_ALPHA_FERTILIZER_SEPARATE_NO_AUTOMATIC_DELTA",
+    "soil_nutrient_state_record": "KAIOS_REPRODUCTION_ECOLOGY_RUNTIME_V1_NUTRIENTS_SEPARATE_NO_AUTOMATIC_DELTA"
+  },
+  "normal_process_fixture": {
+    "fixture_id": "FIXTURE-COMPOST-NORMAL-CLOSED-ACCOUNTING-V1",
+    "fixture_status": "EXACT_ORACLE_NOT_OPERATIONAL_GUIDANCE",
+    "selected_feedstock_proposal_id": "COMPOST-FEEDSTOCK-CROP-RESIDUE-PROXY-V1",
+    "foreign_reference_ids": {
+      "ecology_compost_batch_id": "FIXTURE-ECOLOGY-COMPOST-BATCH-001",
+      "ecology_decomposition_pool_id": "DECOMPOSITION_POOL",
+      "ecology_habitat_id": "HABITAT-SOIL-V1",
+      "compost_area_location_id": "FIXTURE-COMPOST-AREA-001",
+      "batch_storage_location_id": "FIXTURE-COMPOST-STORAGE-001",
+      "source_custody_event_id": "FIXTURE-SOURCE-CUSTODY-001",
+      "rights_decision_id": "FIXTURE-RIGHTS-ALLOW-001",
+      "labor_shift_id": "FIXTURE-LABOR-SHIFT-001",
+      "equipment_inspection_event_id": "FIXTURE-EQUIPMENT-PASS-001",
+      "water_custody_event_id": "FIXTURE-WATER-CUSTODY-001",
+      "energy_reservation_event_id": "FIXTURE-ENERGY-RESERVE-001",
+      "output_custody_event_id": "FIXTURE-OUTPUT-CUSTODY-001"
+    },
+    "total_physical_mass_ledger_microkilogram_proxy": {
+      "initial_feedstock_custody": 100000000,
+      "initial_added_process_water_custody": 20000000,
+      "finished_candidate_output_custody": 70000000,
+      "gases_emissions_proxy_custody": 30000000,
+      "leachate_custody": 12000000,
+      "rejects_custody": 5000000,
+      "remaining_feedstock_custody": 3000000,
+      "disposal_custody": 0,
+      "initial_total": 120000000,
+      "final_total": 120000000,
+      "closed": true
+    },
+    "water_mass_component_ledger_microkilogram_proxy": {
+      "initial_feedstock_contained_water": 40000000,
+      "initial_added_process_water": 20000000,
+      "finished_candidate_output_water": 28000000,
+      "atmospheric_water_proxy_custody": 20000000,
+      "leachate_water_custody": 10000000,
+      "rejects_water_custody": 1000000,
+      "remaining_feedstock_water_custody": 1000000,
+      "disposal_water_custody": 0,
+      "initial_total": 60000000,
+      "final_total": 60000000,
+      "closed": true
+    },
+    "nutrient_mass_component_ledger_microkilogram_proxy": {
+      "initial_feedstock_nutrient": 5000000,
+      "finished_candidate_output_nutrient": 4000000,
+      "gases_emissions_nutrient_proxy_custody": 0,
+      "leachate_nutrient_custody": 500000,
+      "rejects_nutrient_custody": 300000,
+      "remaining_feedstock_nutrient_custody": 200000,
+      "disposal_nutrient_custody": 0,
+      "initial_total": 5000000,
+      "final_total": 5000000,
+      "closed": true
+    },
+    "energy_proxy_ledger_micro_joule_proxy": {
+      "initial_feedstock_embedded_energy": 20000000,
+      "initial_external_energy_reserve": 30000000,
+      "finished_candidate_output_embedded_energy": 10000000,
+      "gases_emissions_proxy_energy_custody": 5000000,
+      "leachate_energy_proxy_custody": 1000000,
+      "rejects_energy_proxy_custody": 1000000,
+      "remaining_feedstock_energy_proxy_custody": 3000000,
+      "disposal_energy_proxy_custody": 0,
+      "environmental_heat_dissipation_proxy_custody": 30000000,
+      "initial_total": 50000000,
+      "final_total": 50000000,
+      "closed": true
+    },
+    "labor_capacity_ledger_micro_worker_minute": {
+      "validated_capacity": 480000000,
+      "consumed": 360000000,
+      "remaining": 120000000,
+      "initial_total": 480000000,
+      "final_total": 480000000,
+      "closed": true,
+      "overlap_detected": false,
+      "location_conflict_detected": false
+    },
+    "output_custody_transfer_mass_ledger_microkilogram_proxy": {
+      "initial_finished_material_pending_transfer": 70000000,
+      "final_finished_candidate_output_custody": 70000000,
+      "initial_total": 70000000,
+      "final_total": 70000000,
+      "closed": true
+    },
+    "foreign_owner_deltas": {
+      "fertilizer_inventory_resource_id": "FERTILIZER",
+      "fertilizer_inventory_delta": 0,
+      "soil_nutrient_state_delta": 0,
+      "economy_balance_delta": 0,
+      "rights_granted": false
+    },
+    "expected_status": "FINISHED_CANDIDATE_CUSTODY_CLOSED_PENDING_OWNER_MAPPING"
+  },
+  "mass_checkpoint_oracle": {
+    "oracle_id": "FIXTURE-COMPOST-MASS-CHECKPOINTS-V1",
+    "unit": "microkilogram_proxy",
+    "ordering": "STAGE_SEQUENCE_ASCENDING",
+    "checkpoints": [
+      {
+        "stage_id": "COMPOST-STAGE-01-RECEIPT-QUALITY-HOLD-V1",
+        "feedstock_receipt_custody": 100000000,
+        "process_water_reserve_custody": 20000000,
+        "checkpoint_total": 120000000
+      },
+      {
+        "stage_id": "COMPOST-STAGE-02-BATCH-ASSEMBLY-RESOURCE-RESERVATION-V1",
+        "in_process_batch_custody": 120000000,
+        "checkpoint_total": 120000000
+      },
+      {
+        "stage_id": "COMPOST-STAGE-03-ABSTRACT-DECOMPOSITION-PROXY-V1",
+        "in_process_batch_custody": 90000000,
+        "gases_emissions_proxy_custody": 30000000,
+        "checkpoint_total": 120000000
+      },
+      {
+        "stage_id": "COMPOST-STAGE-04-CONDITIONING-INCOMPLETE-HOLD-V1",
+        "in_process_batch_custody": 78000000,
+        "gases_emissions_proxy_custody": 30000000,
+        "leachate_custody": 12000000,
+        "checkpoint_total": 120000000
+      },
+      {
+        "stage_id": "COMPOST-STAGE-05-SCREENING-LEDGER-CLOSURE-V1",
+        "finished_material_pending_transfer": 70000000,
+        "gases_emissions_proxy_custody": 30000000,
+        "leachate_custody": 12000000,
+        "rejects_custody": 5000000,
+        "remaining_feedstock_custody": 3000000,
+        "disposal_custody": 0,
+        "checkpoint_total": 120000000
+      },
+      {
+        "stage_id": "COMPOST-STAGE-06-OUTPUT-CUSTODY-CLOSE-V1",
+        "finished_candidate_output_custody": 70000000,
+        "gases_emissions_proxy_custody": 30000000,
+        "leachate_custody": 12000000,
+        "rejects_custody": 5000000,
+        "remaining_feedstock_custody": 3000000,
+        "disposal_custody": 0,
+        "checkpoint_total": 120000000
+      }
+    ],
+    "expected_checkpoint_total": 120000000,
+    "every_checkpoint_closed": true
+  },
+  "water_checkpoint_oracle": {
+    "oracle_id": "FIXTURE-COMPOST-WATER-CHECKPOINTS-V1",
+    "unit": "microkilogram_water_mass_proxy",
+    "checkpoints": [
+      {"stage_id":"COMPOST-STAGE-01-RECEIPT-QUALITY-HOLD-V1","feedstock_contained_water":40000000,"process_water_reserve":20000000,"checkpoint_total":60000000},
+      {"stage_id":"COMPOST-STAGE-02-BATCH-ASSEMBLY-RESOURCE-RESERVATION-V1","in_process_batch_water":60000000,"checkpoint_total":60000000},
+      {"stage_id":"COMPOST-STAGE-03-ABSTRACT-DECOMPOSITION-PROXY-V1","in_process_batch_water":40000000,"atmospheric_water_proxy_custody":20000000,"checkpoint_total":60000000},
+      {"stage_id":"COMPOST-STAGE-04-CONDITIONING-INCOMPLETE-HOLD-V1","in_process_batch_water":30000000,"atmospheric_water_proxy_custody":20000000,"leachate_water_custody":10000000,"checkpoint_total":60000000},
+      {"stage_id":"COMPOST-STAGE-05-SCREENING-LEDGER-CLOSURE-V1","finished_material_water_pending_transfer":28000000,"atmospheric_water_proxy_custody":20000000,"leachate_water_custody":10000000,"rejects_water_custody":1000000,"remaining_feedstock_water_custody":1000000,"disposal_water_custody":0,"checkpoint_total":60000000},
+      {"stage_id":"COMPOST-STAGE-06-OUTPUT-CUSTODY-CLOSE-V1","finished_candidate_output_water":28000000,"atmospheric_water_proxy_custody":20000000,"leachate_water_custody":10000000,"rejects_water_custody":1000000,"remaining_feedstock_water_custody":1000000,"disposal_water_custody":0,"checkpoint_total":60000000}
+    ],
+    "expected_checkpoint_total": 60000000,
+    "every_checkpoint_closed": true
+  },
+  "acceptance_invariants": [
+    "TOTAL_PHYSICAL_MASS_CLOSES_EXACTLY",
+    "WATER_MASS_COMPONENT_CLOSES_EXACTLY",
+    "NUTRIENT_MASS_COMPONENT_CLOSES_EXACTLY",
+    "ENERGY_PROXY_CLOSES_EXACTLY",
+    "LABOR_CAPACITY_CLOSES_EXACTLY",
+    "EVERY_MASS_AND_WATER_CHECKPOINT_CLOSES_EXACTLY",
+    "GASES_EMISSIONS_LEACHATE_REJECTS_REMAINING_FEEDSTOCK_FINISHED_OUTPUT_AND_DISPOSAL_HAVE_EXPLICIT_CUSTODY",
+    "NO_POOL_IS_NEGATIVE",
+    "NO_INSTANT_CONVERSION",
+    "FINISHED_OUTPUT_CUSTODY_TRANSFER_CLOSES",
+    "FERTILIZER_INVENTORY_SOIL_NUTRIENT_ECONOMY_BALANCE_AND_RIGHTS_REMAIN_UNCHANGED"
+  ],
+  "provenance": [
+    {"source_type":"REPOSITORY_DERIVED","source_path":"docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md","source_commit":"38901fddd3a513b5121b8828dce43898a7ed74b6","git_object":"f9748c99501ec1c1ea6ba5c39833909684c0ffbe","sha256":"6d71cd7946f0b4057a9b5289923d3c7b424e409140feb7404f5b433a309ab00b","usage":"Positive mass and separated energy-accounting constraints."},
+    {"source_type":"REPOSITORY_DERIVED","source_path":"KAIOS/life/forest-agriculture/KAIOS_FOREST_AGRICULTURE_RUNTIME_V1_SPEC.md","source_commit":"38901fddd3a513b5121b8828dce43898a7ed74b6","git_object":"9a2dd4ad05bb7b2e3d71b91b479359947ada8376","sha256":"4e1a23e97d09ec2dc4ad65440e6958e646f75ed418e5c703c5a5a1635c2809a1","usage":"Compost mass, emissions, moisture loss, residue, time and owner requirements."},
+    {"source_type":"REPOSITORY_DERIVED","source_path":"KAIOS/life/candidates/forest-agriculture-v1/crops/crop-resource-flow-proposal.json","source_commit":"38901fddd3a513b5121b8828dce43898a7ed74b6","git_object":"969a300fd867055de75359167225b1b98f97635b","sha256":"b0e6bb9e1241ef0bf70a45f82156736bb17821e9c29624b62207e78215cf0849","usage":"Fixed-point water, mass, nutrient, energy and labor pool style."},
+    {"source_type":"REPOSITORY_DERIVED","source_path":"KAIOS/life/candidates/forest-agriculture-v1/vegetables/vegetable-resource-flow-proposal.json","source_commit":"38901fddd3a513b5121b8828dce43898a7ed74b6","git_object":"a318188622731c0f9a52c47a41f4ef784aa86113","sha256":"444b9b1a843c74ba3eddf51819cb3507be058275de8271f34e367f231856aab3","usage":"Residue, rejected biomass, water, nutrient and energy custody separation."},
+    {"source_type":"REPOSITORY_DERIVED","source_path":"KAIOS/life/candidates/forest-agriculture-v1/forest/forest-resource-flow-proposal.json","source_commit":"38901fddd3a513b5121b8828dce43898a7ed74b6","git_object":"4bf0ea0ee3ad5b1612a76debdef9efdf7ed1a90d","sha256":"444da4c272fe05a176ae9771251e581143b2288a3956323cce32b6638f90f0ea","usage":"Decomposition, atmosphere, organic matter and dissipation pool boundaries."},
+    {"source_type":"REPOSITORY_DERIVED","source_path":"KAIOS/life/candidates/forest-agriculture-v1/fertilizer-models/nutrient-composition-proposals.json","source_commit":"38901fddd3a513b5121b8828dce43898a7ed74b6","git_object":"3897ab6042e3ea7ed5e5265c21ff44438c8eb9ed","sha256":"b6360a22783b7144f1f707a8df70cdb4ce46a12bebbad707385794d25f8f502a","usage":"Separate nutrient, structural carrier, batch-water and contaminant accounting style."},
+    {"source_type":"REPOSITORY_DERIVED","source_path":"KAIOS/life/candidates/forest-agriculture-v1/fertilizer-models/application-response-model-proposals.json","source_commit":"38901fddd3a513b5121b8828dce43898a7ed74b6","git_object":"8f8d481d2182db4320131b17f9dffda176962b02","sha256":"6ad4367d085dae369099597d996fed5aab774ead487f5cbd4143595d69f8c533","usage":"Owner-gated fixed-point response and custody separation."},
+    {"source_type":"REPOSITORY_DERIVED","source_path":"KAIOS_PHYSICAL_LABOR_SCHEMA.json","source_commit":"38901fddd3a513b5121b8828dce43898a7ed74b6","git_object":"357b00093f4a912e616e9d39edf04753aacf94f7","sha256":"21060f7bdf64f0a3af827f1fcd7d95d3170affef54c01bbeb449b9361fdd2f43","usage":"Labor capacity, location and shift non-overlap boundary."}
+  ],
+  "boundaries": [
+    "CANDIDATE_ONLY",
+    "SIMULATION_ONLY",
+    "EXACT_ACCOUNTING_ORACLE_NOT_PROCESS_FORMULA",
+    "NO_EMISSIONS_OR_LEACHATE_ESTIMATE",
+    "NO_AGRONOMIC_PRESCRIPTION",
+    "NO_PRODUCT_ENDORSEMENT",
+    "NO_SAFETY_GUARANTEE",
+    "NO_YIELD_PROMISE",
+    "NO_ENVIRONMENTAL_APPROVAL",
+    "NO_LEGAL_CERTIFICATION",
+    "NO_FERTILIZER_OR_SOIL_STATE_CREATION",
+    "NO_RUNTIME_OR_CANONICAL_PROMOTION",
+    "NO_RIGHTS_OR_ECONOMY_AUTHORITY",
+    "NO_DEPLOYMENT",
+    "NO_MERGE"
+  ]
+}
