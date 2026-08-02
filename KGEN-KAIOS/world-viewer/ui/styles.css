@@ -641,6 +641,10 @@ button:focus-visible, canvas:focus-visible, [tabindex]:focus-visible {
 
 @media (min-width: 901px) and (max-width: 1440px) {
   .topbar { grid-template-columns: auto minmax(90px, 1fr) auto auto; gap: 8px; }
+  .official-route-nav {
+    min-width: 0; overflow-x: auto; overflow-y: hidden;
+    overscroll-behavior-inline: contain; scrollbar-width: thin;
+  }
   .official-route-nav a { min-width: 52px; padding: 5px 8px; }
   .route-nav-desktop { display: none; }
   .route-nav-mobile { display: inline; }
