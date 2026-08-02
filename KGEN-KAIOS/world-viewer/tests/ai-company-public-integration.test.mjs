@@ -81,8 +81,10 @@ test("public Cursor queue projection matches the canonical governance queue", as
   const projection = JSON.parse(await read("api/kaios/ai-company/v1/cursor-queue.json"));
   const projectedFields = [
     "task_id", "status", "worker_id", "reviewer", "branch_template",
-    "one_task_at_a_time", "continuous_dispatch_mode", "output_authority",
-    "queue", "forbidden"
+    "one_task_at_a_time", "continuous_dispatch_mode",
+    "automatic_unreviewed_dispatch", "active_claims", "worker_state",
+    "next_dispatch_requires", "output_authority", "queue", "prepared_task",
+    "forbidden"
   ];
   for (const field of projectedFields) {
     assert.deepEqual(projection[field], canonical[field], `${field} projection drifted`);

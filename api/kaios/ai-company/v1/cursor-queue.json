@@ -19,7 +19,7 @@
   "branch_template": "cursor-handoff/<Task-ID>",
   "one_task_at_a_time": true,
   "continuous_dispatch_mode": "CODEX_CONTROLLED_AFTER_FORMAL_RELEASE",
-  "output_authority": "CANDIDATE_ONLY_OR_RESEARCH_PROPOSAL_ONLY",
+  "automatic_unreviewed_dispatch": false,
   "active_claims": [],
   "worker_state": {
     "worker_id": "cursor-01",
@@ -27,6 +27,14 @@
     "current_branch": null,
     "status": "IDLE"
   },
+  "next_dispatch_requires": [
+    "PREVIOUS_TASK_CODEX_REVIEWED",
+    "PREVIOUS_TASK_CLOSED",
+    "PREVIOUS_LEASE_RELEASED",
+    "EXPLICIT_TASK_ENVELOPE",
+    "ATOMIC_CLAIM_SUCCEEDED"
+  ],
+  "output_authority": "CANDIDATE_ONLY_OR_RESEARCH_PROPOSAL_ONLY",
   "queue": [
     {
       "priority": 1,
