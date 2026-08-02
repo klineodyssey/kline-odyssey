@@ -28,9 +28,12 @@ const CANONICAL_REMOTE_URL = "https://github.com/klineodyssey/kline-odyssey.git"
 const CANONICAL_LINEAGE_ANCHOR = "cc80135f2c6e6a74aad11f34e793c65ac0ee1938";
 const gitRootCache = new Map();
 const commitCache = new Map();
+const reachableCommitCache = new Map();
+const strictAncestorCache = new Map();
 const blobCache = new Map();
 const regularBlobCache = new Map();
 const canonicalJsonCache = new Map();
+const governanceSnapshotCache = new Map();
 
 export const COMPATIBILITY_GATES = Object.freeze([
   "DONOR_IDENTITY_VALID",
@@ -300,23 +303,34 @@ const commitExists = (repositoryRoot, commit) => {
 
 const commitReachableFromHead = (repositoryRoot, commit) => {
   if (!commitExists(repositoryRoot, commit)) return false;
+  const key = `${resolve(repositoryRoot)}\0${commit}\0HEAD`;
+  if (reachableCommitCache.has(key)) return reachableCommitCache.get(key);
   try {
     git(repositoryRoot, ["merge-base", "--is-ancestor", commit, "HEAD"]);
+    reachableCommitCache.set(key, true);
     return true;
   } catch {
+    reachableCommitCache.set(key, false);
     return false;
   }
 };
 
 const commitStrictAncestor = (repositoryRoot, ancestor, descendant = "HEAD") => {
   if (!commitExists(repositoryRoot, ancestor) || !commitExists(repositoryRoot, descendant)) return false;
+  const key = `${resolve(repositoryRoot)}\0${ancestor}\0${descendant}`;
+  if (strictAncestorCache.has(key)) return strictAncestorCache.get(key);
   try {
     const resolvedAncestor = git(repositoryRoot, ["rev-parse", `${ancestor}^{commit}`]).trim();
     const resolvedDescendant = git(repositoryRoot, ["rev-parse", `${descendant}^{commit}`]).trim();
-    if (resolvedAncestor === resolvedDescendant) return false;
+    if (resolvedAncestor === resolvedDescendant) {
+      strictAncestorCache.set(key, false);
+      return false;
+    }
     git(repositoryRoot, ["merge-base", "--is-ancestor", resolvedAncestor, resolvedDescendant]);
+    strictAncestorCache.set(key, true);
     return true;
   } catch {
+    strictAncestorCache.set(key, false);
     return false;
   }
 };
@@ -416,6 +430,7 @@ const readCanonicalJson = (repositoryRoot, path, errors) => {
 };
 
 const loadCanonicalGovernance = (repositoryRoot, errors) => {
+  const loadErrorStart = errors.length;
   if (!repositoryRoot) {
     push(errors, "REPOSITORY_ROOT_REQUIRED", "repositoryRoot", "the canonical Git repository root is required");
     return {};
@@ -430,13 +445,28 @@ const loadCanonicalGovernance = (repositoryRoot, errors) => {
     push(errors, "CANONICAL_REPOSITORY_ROOT_REQUIRED", "repositoryRoot", "repositoryRoot must equal the Git top-level directory");
     return { root };
   }
+  let remoteUrl = null;
   try {
-    if (git(root, ["remote", "get-url", "origin"]).trim() !== CANONICAL_REMOTE_URL) {
+    remoteUrl = git(root, ["remote", "get-url", "origin"]).trim();
+    if (remoteUrl !== CANONICAL_REMOTE_URL) {
       push(errors, "CANONICAL_REPOSITORY_REMOTE_INVALID", "repositoryRoot", "origin must be the KLINE Odyssey canonical repository");
     }
   } catch {
     push(errors, "CANONICAL_REPOSITORY_REMOTE_INVALID", "repositoryRoot", "canonical origin remote is required");
   }
+  let headCommit = null;
+  try {
+    headCommit = git(root, ["rev-parse", "HEAD^{commit}"]).trim();
+  } catch {
+    push(errors, "CANONICAL_REPOSITORY_HEAD_INVALID", "repositoryRoot", "canonical HEAD commit is required");
+  }
+  const governancePaths = [CANONICAL_REGISTRY_PATH, CANONICAL_SCHEMA_PATH, CANONICAL_WORKER_REGISTRY_PATH];
+  const snapshotDigests = governancePaths.map((path) => {
+    const target = repositoryFile(root, path);
+    return target ? computeContentHash(readFileSync(target)) : `MISSING:${path}`;
+  });
+  const snapshotKey = canonicalJson({ root, remoteUrl, headCommit, snapshotDigests });
+  if (governanceSnapshotCache.has(snapshotKey)) return governanceSnapshotCache.get(snapshotKey);
   if (!commitReachableFromHead(root, CANONICAL_LINEAGE_ANCHOR)) {
     push(errors, "CANONICAL_REPOSITORY_LINEAGE_INVALID", "repositoryRoot", "HEAD must descend from the reviewed Software Life Registry lineage anchor");
   }
@@ -473,7 +503,11 @@ const loadCanonicalGovernance = (repositoryRoot, errors) => {
   if (workerRegistry && (workerRegistry.metadata?.source_of_truth !== true || workerRegistry.metadata?.status !== "ACTIVE")) {
     push(errors, "WORKER_REGISTRY_AUTHORITY_INVALID", CANONICAL_WORKER_REGISTRY_PATH, "Worker Registry must be the active source of truth");
   }
-  return { root, registry, schema, workerRegistry };
+  const governance = { root, registry, schema, workerRegistry };
+  if (errors.length === loadErrorStart && registry && schema && workerRegistry) {
+    governanceSnapshotCache.set(snapshotKey, governance);
+  }
+  return governance;
 };
 
 const registeredWorker = (workerRegistry, actor) => {
