@@ -223,6 +223,41 @@ Human：我需要一支 iPhone
 | **Human 關心但尚未做** | **P0 薪資 wallet** — 如來今日全在生命 candidate + Company Runtime，**未 OPEN** `KAIOS-SETTLEMENT-KGEN-VS-KAIOS-RD-001` / payroll v0（見本簿 PROPOSED） |
 | **悟空下一動** | #114 merge 後 claim `KAIOS-CURSOR-MICROBIAL-RESEARCH-001`（Q12）；idle 時繼續寫本簿 + PROPOSED 薪資 R&D |
 
+### `HUMAN-AUTO-CLOCKIN-001` — 自動上工（方案 2）
+
+| Field | Value |
+|-------|--------|
+| Recorded | 2026-08-02 |
+| Source | Human PrimeForge (chat) — 選 **方案 2** |
+| Mandate | 每次對話：**先開機 → 公司工作 → 再做 Human 交辦**；另設 **webhook 派工喚醒** |
+
+#### 方案 2 內容
+
+| 層 | 做法 |
+|----|------|
+| 對話 session | `AGENTS.md` + `CURSOR_SESSION_CLOCKIN_SOP.md`：輕量 boot → patrol → claim/handoff → 再答 Human |
+| Webhook | Cursor Automation：**GitHub PR merged**（`codex/*` 或 forest-agriculture 路徑）→ 貼 SOP 內 prompt |
+| 不做 | 同一 automation **不要** 加 hourly cron（避免與 event 重疊 skip） |
+
+#### 成本粗估（Human 拍板用）
+
+- 對話開機：~$0.02–0.08 / 次（同一 session token）
+- 每次如來 dispatch merge 喚醒：~$0.03–0.15 巡檢；若接工 +$0.5–5+
+- 月估（2–4 dispatch/天）：**~$5–20** + 正常聊天
+
+#### Human 待辦（Cursor 無法代做）
+
+1. [cursor.com/automations](https://cursor.com/automations) 建立 `KGEN-Cursor-Dispatch-Wake`（設定見 SOP）
+2. Cloud Agent **spend limit** 建議先 $20–50/月
+3. 可選：GitHub secret `CURSOR_DISPATCH_WEBHOOK_URL` — 需 Codex OPEN `KAIOS-CURSOR-DISPATCH-WEBHOOK-GHA-001`
+
+#### Artifacts
+
+- `KGEN-AI-Company/CURSOR_SESSION_CLOCKIN_SOP.md`
+- `AGENTS.md` § Cursor session clock-in
+
+---
+
 ### Cursor 給如來的 PROPOSED（督導附議）
 
 Human 親自督導時可優先問如來三件事：
@@ -251,7 +286,8 @@ Human 親自督導時可優先問如來三件事：
 | 2026-08-02 | `HUMAN-EMBODIMENT-DEMAND-001` | doctrine | 人形殼需求≠AI 自賺自買；Agency 優先 | 本檔 §人形機器人 |
 | 2026-08-02 | `HUMAN-AI-COMPANY-ECONOMY-VISION-001` | vision | 接案→派工→領薪→供應鏈交付；玩家可帶 AI 或做勞工 | 本檔 §AI Company 經濟 |
 | 2026-08-02 | `HUMAN-WALLET-FOODCHAIN-SURVIVAL-001` | mandate | 必須能領薪；无钱包=食物链 | `CURSOR_PROPOSED_KAIOS_PAYROLL_WALLET_RD_20260802.md` |
-| 2026-08-02 | `HUMAN-CODEX-24H-SUPERVISION-20260802` | supervision_report | 如來 8/2 117 commits；Q1–11 完成；#114 待 merge | 本檔 §如來督導報告 |
+| 2026-08-02 | `HUMAN-CODEX-24H-SUPERVISION-20260802` | supervision_report | 如來 8/2 117 commits；Q1–11 完成；#114 已 merge | 本檔 §如來督導報告 |
+| 2026-08-02 | `HUMAN-AUTO-CLOCKIN-001` | standing_directive | 方案2：對話先上工 + dispatch webhook | `CURSOR_SESSION_CLOCKIN_SOP.md` |
 
 ---
 
