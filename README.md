@@ -1168,6 +1168,7 @@ supply-chain owners and does not activate Production authority.
 - [Fungi Candidate Codex Review Closeout](KAIOS/life/forest-agriculture/KAIOS_CURSOR_FUNGI_CANDIDATE_REVIEW_CLOSEOUT.md)
 - [Microbial Research Cursor Work Order](KAIOS/life/candidates/forest-agriculture-v1/CURSOR_MICROBIAL_RESEARCH_WORK_ORDER.md)
 - [Fungi Release and Microbial Research Prepared-Task Company Status](KGEN-KAIOS/governance/autopilot/company_status/COMPANY_STATUS_2026-08-02_FUNGI_RELEASED_MICROBIAL_READY_FOR_ATOMIC_CLAIM.md)
+- [Microbial Research Manual Claim Company Status](KGEN-KAIOS/governance/autopilot/company_status/COMPANY_STATUS_2026-08-02_MICROBIAL_RESEARCH_MANUAL_CLAIM.md)
 
 ### KAIOS Software Life
 

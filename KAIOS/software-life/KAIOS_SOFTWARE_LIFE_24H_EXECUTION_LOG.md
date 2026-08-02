@@ -21,6 +21,12 @@ execution.
 | 2026-08-02T09:59Z | 2026-08-02T10:10Z | Manifest Schema and generated Registry | `codex/kaios-software-life-registry-manifest` | 33 lives; 109 organs; 52/52 API projections; acyclic dependencies; deterministic replay 9/9 | `READY_FOR_REVIEW` | Registry PR |
 | 2026-08-02T10:11Z | 2026-08-02T10:15Z | Registry product regression | local QA on port `8097` | initial occupied-port timeout isolated; fresh server HTTP 200; Product QA 181 PASS / 0 FAIL / 8 SKIP | `PASS` | repository gates |
 | 2026-08-02T10:16Z | 2026-08-02T10:20Z | Registry independent Draft review | PR `#109` | one output-boundary P1 and two privacy/classification P2 findings repaired; Registry 11/11 | `READY_AFTER_REVIEW` | Ready and merge |
+| 2026-08-02T10:22Z | 2026-08-02T10:27Z | Manifest and Registry finalization | PR `#109` | independent findings repaired; required gates PASS | merged `cc80135f2c6e6a74aad11f34e793c65ac0ee1938` | Earthworm review |
+| 2026-08-02T10:09Z | 2026-08-02T10:54Z | Earthworm candidate | PR `#110` | candidate-only scope; independent review P0/P1/P2=0 | merged `eb17536ff6affb34f93bce6c5622d7bab018d230` | release and Fungi dispatch |
+| 2026-08-02T11:04Z | 2026-08-02T11:20Z | Earthworm release and Fungi dispatch | PR `#111` | sequential claim transition and governance tests PASS | merged `5e20186c5a644171e658f95a26c0bbe1a4741287` | Fungi candidate |
+| 2026-08-02T11:58Z | 2026-08-02T12:11Z | Fungi candidate | PR `#113` | candidate-only scope; independent review P0/P1/P2=0 | merged `beb982fda885fa7acc4dc35407df611d1019a544` | release and prepare Microbial |
+| 2026-08-02T12:20Z | 2026-08-02T13:51Z | Fungi release and Microbial envelope preparation | PR `#114` | 14 Worker Registry tests; 9 public integration tests; two Product QA runs PASS; final P0/P1/P2=0 | merged `7008e4f9449f6df050171cf47ec6ec56419925e9` | reviewed manual claim |
+| 2026-08-02T13:53Z | 2026-08-02T13:53Z | Microbial research manual claim record | `codex/kaios-cursor-microbial-manual-claim` | exact prior Git object/SHA-256 evidence; `MANUAL_DISPATCH_NON_ATOMIC`; local review pending | `IN_PROGRESS` | Draft claim PR |
 
 ## Cursor Assignment
 
@@ -29,6 +35,11 @@ At `2026-08-02T09:34Z`, `cursor-01` received
 `C:\Desktop\kline-odyssey-earthworm-candidate`. The prior pollinator worktree
 and local branch were removed only after PR #106 merged and PR #107 released
 the claim.
+
+At `2026-08-02T13:53Z`, after PR #114 had closed and released the Fungi claim,
+Codex recorded the sole Microbial research assignment as
+`MANUAL_DISPATCH_NON_ATOMIC`. The dedicated transactional claim service remains
+unimplemented; no automatic or Production authority is claimed.
 
 ## Recorded Pauses
 

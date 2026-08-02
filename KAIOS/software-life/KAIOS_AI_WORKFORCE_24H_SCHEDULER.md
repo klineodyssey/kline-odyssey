@@ -50,23 +50,24 @@ schemas, merge, deploy, or approve itself.
 
 Current Cursor state:
 
-- current task: `null`
-- current branch: `null`
-- status: `IDLE / ZERO_ACTIVE_CLAIMS`
-- prepared task: `KAIOS-CURSOR-MICROBIAL-RESEARCH-001`
-- prepared status: `READY_FOR_ATOMIC_CLAIM`
+- current task: `KAIOS-CURSOR-MICROBIAL-RESEARCH-001`
+- current branch: `cursor-handoff/KAIOS-CURSOR-MICROBIAL-RESEARCH-001`
+- status: `CLAIMED / MANUAL_DISPATCH_NON_ATOMIC`
+- active claim: `CLAIM-KAIOS-CURSOR-MICROBIAL-RESEARCH-001-001`
+- claim lease: `2026-08-02T13:53:00Z` through `2026-08-03T01:53:00Z`
 - output `RESEARCH_PROPOSAL_ONLY / PENDING_CODEX_REVIEW`
 - reviewer: `codex-gm-01`
-- source base: `beb982fda885fa7acc4dc35407df611d1019a544`
+- source base: `7008e4f9449f6df050171cf47ec6ec56419925e9`
 - authorized path: `KAIOS/life/candidates/forest-agriculture-v1/microbial-research/`
 - expected files: exactly eight, bound by the prepared work-order envelope
 
 Earthworm and fungi candidate packages completed independent Codex review. The
-Fungi claim was explicitly closed and then released; no active claim remains.
-The microbial decomposer research task is prepared for a future atomic claim,
-not dispatched. The weather dataset proposal is next after that task completes
-its future review and release cycle. The software-life manifest candidate task
-remains queued behind the pre-existing forest/agriculture queue.
+Fungi claim was explicitly closed and then released before this claim was
+recorded. Microbial decomposer research is now the sole claimed worker task.
+The claim is a reviewed static Git record under the pre-cutover manual rule,
+not a claim that transactional atomic dispatch exists. The weather dataset
+proposal is next after Microbial completes review and release. The software-life
+manifest candidate task remains queued behind the pre-existing queue.
 
 ## Mandatory Stops
 

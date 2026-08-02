@@ -6,13 +6,15 @@ Worker: `cursor-01`
 
 Branch: `cursor-handoff/KAIOS-CURSOR-MICROBIAL-RESEARCH-001`
 
-Status: `READY_FOR_ATOMIC_CLAIM / CURSOR_RESEARCH_PROPOSAL_ONLY`
+Status: `CLAIMED / CURSOR_RESEARCH_PROPOSAL_ONLY`
 
-Claim state: `UNCLAIMED / NO_ACTIVE_WORKER_CLAIM`
+Claim state: `MANUAL_DISPATCH_NON_ATOMIC / ACTIVE_STATIC_CLAIM`
+
+Claim ID: `CLAIM-KAIOS-CURSOR-MICROBIAL-RESEARCH-001-001`
 
 Task envelope: `TASK-ENVELOPE-KAIOS-CURSOR-MICROBIAL-RESEARCH-001-V1`
 
-Source base commit: `beb982fda885fa7acc4dc35407df611d1019a544`
+Source base commit: `7008e4f9449f6df050171cf47ec6ec56419925e9`
 
 ## Objective
 
@@ -22,16 +24,29 @@ Runtime extension. Reuse current Canonical Life, Ecology V1, soil, nutrient,
 decomposition-pool and Fungi candidate terminology by reference. Do not create
 a microbial Life identity, executable Runtime or Ecology admission claim.
 
-## Prepared Task Envelope
+## Claimed Task Envelope
 
-This work order is prepared for a future atomic claim. Preparation does not
-assign the task to `cursor-01`; the worker has no current task or branch until
-the claim succeeds.
+This work order carries one reviewed pre-cutover manual claim for `cursor-01`.
+It is recorded as `MANUAL_DISPATCH_NON_ATOMIC` because the selected dedicated
+transactional claim authority remains unimplemented. This Git-backed record is
+auditable but is not represented as an atomic distributed lock.
 
 - Reviewer: `codex-gm-01`
-- Source base: `beb982fda885fa7acc4dc35407df611d1019a544`
+- Source base: `7008e4f9449f6df050171cf47ec6ec56419925e9`
+- Execution branch base: the merged claim-record commit, which must descend
+  from the source base; worker execution cannot begin from this Draft branch.
 - Authorized path: `KAIOS/life/candidates/forest-agriculture-v1/microbial-research/`
-- Claim gate: `ATOMIC_CLAIM_BEFORE_WORK`
+- Dispatch mode: `MANUAL_DISPATCH_NON_ATOMIC`
+- Claim issued: `2026-08-02T13:53:00Z`
+- Lease expiry: `2026-08-03T01:53:00Z`
+- Fencing token: `1`
+- Record version: `1`
+- Prior Worker Registry Git object / SHA-256:
+  `93342ab913d0adab57c29a85017b9907b05b026e` /
+  `af348f1ad3967ffc7aca13387a3d0a45827bc84fe2aa99804570435a67df34b2`
+- Prior canonical queue Git object / SHA-256:
+  `c0596410cc1b32190f4b8369c98b23b9539351b4` /
+  `b2e044cf29ef031f2f47a04442001f4a0376cb14819e9834ede3dd200d75544b`
 
 ### Expected Files
 
@@ -108,5 +123,6 @@ environmental guidance, no uncontrolled replication, and no Runtime, CURRENT,
 Wallet, KGEN, Rights authority, Economy authority, deployment or merge changes.
 
 Cursor stops after committing exactly the eight allowed files. Codex owns all
-PR, review, release and next-dispatch decisions. This task remains
-`READY_FOR_ATOMIC_CLAIM` until an explicit atomic claim is recorded.
+PR, review, release and next-dispatch decisions. The claim is valid only for
+this bounded envelope and lease. No automatic, transactional or Production
+dispatch authority is implied.

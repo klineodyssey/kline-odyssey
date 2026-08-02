@@ -57,29 +57,31 @@ The vegetable assignment was allowed to complete before its lease was released.
 ## Current Assignment
 
 - Worker: `cursor-01`
-- Current task: `null`
-- Current branch: `null`
-- Status: `IDLE / ZERO_ACTIVE_CLAIMS`
-- Prepared task: `KAIOS-CURSOR-MICROBIAL-RESEARCH-001`
-- Prepared status: `READY_FOR_ATOMIC_CLAIM`
+- Current task: `KAIOS-CURSOR-MICROBIAL-RESEARCH-001`
+- Current branch: `cursor-handoff/KAIOS-CURSOR-MICROBIAL-RESEARCH-001`
+- Status: `CLAIMED / MANUAL_DISPATCH_NON_ATOMIC`
+- Active claim: `CLAIM-KAIOS-CURSOR-MICROBIAL-RESEARCH-001-001`
+- Lease: `2026-08-02T13:53:00Z` through `2026-08-03T01:53:00Z`
 - Output authority: `CURSOR_RESEARCH_PROPOSAL_ONLY / PENDING_CODEX_REVIEW`
 - Reviewer: `codex-gm-01`
-- Source base: `beb982fda885fa7acc4dc35407df611d1019a544`
+- Source base: `7008e4f9449f6df050171cf47ec6ec56419925e9`
 - Authorized path: `KAIOS/life/candidates/forest-agriculture-v1/microbial-research/`
 - Expected files: exactly `8`, as listed in the Microbial work order.
 
-The Microbial task is prepared but is not dispatched or claimed. It may be
-atomically claimed only after the exact envelope is revalidated. The next
-queue item remains the weather-dataset proposal after the Microbial task has
-completed its future review and release cycle.
+The Microbial task is the sole claimed assignment. Its static claim was
+reviewed against the exact envelope and prior Registry/queue Git objects. It is
+explicitly `MANUAL_DISPATCH_NON_ATOMIC`; the transactional Atomic Claim
+Authority remains unimplemented. The next queue item remains the weather
+dataset proposal after Microbial completes review and release.
 
 ## Boundaries
 
 Cursor cannot modify Runtime authority, CURRENT, Canonical schemas, Universe
 Law, Rights authority, Economy authority, Wallet, KGEN, deployment or merge
 state. Cursor output never becomes Canonical without Codex review. The Fungi
-claim event order is append-only: `CLAIM_CLOSED`, then `CLAIM_RELEASED`; after
-release, the active claim set is empty.
+claim event order is append-only: `CLAIM_CLOSED`, then `CLAIM_RELEASED`, then
+the separate Microbial `CLAIM_ACQUIRED` manual record. Exactly one active
+worker claim is projected.
 
 The read-only AI Company API and Viewer expose the queue without granting the
 Runtime any dispatch, merge or deployment mutation endpoint.
