@@ -1,0 +1,196 @@
+{
+  "dataset_id": "KAIOS-NUTRIENT-COMPOSITION-PROPOSALS-V1",
+  "schema_version": "1.0.0-candidate",
+  "status": "CURSOR_RESEARCH_CANDIDATE_ONLY",
+  "review_status": "PENDING_CODEX_REVIEW",
+  "task_id": "KAIOS-CURSOR-FERTILIZER-MODELS-001",
+  "source_base_commit": "1650191f35567d43016473420cfd2cba22b00aea",
+  "source_hash_basis": "SHA256_OF_EXACT_GIT_BLOB_BYTES_AT_SOURCE_BASE_COMMIT",
+  "mode": "LOCAL_DETERMINISTIC_SIMULATION_PROPOSAL",
+  "authority": "NO_PRODUCTION_AUTHORITY",
+  "canonical_promotion": false,
+  "all_values_label": "SIMULATION_PROPOSAL_OR_DETERMINISTIC_TEST_FIXTURE_REQUIRES_OWNER_VALIDATION",
+  "composition_basis": {
+    "reference_batch_mass_kilogram": 100,
+    "fixed_point_scale": 1000000,
+    "fixed_point_mass_unit": "microkilogram_proxy",
+    "conversion_rule": "component_mass_microkilogram_proxy = component_fraction * reference_batch_mass_kilogram * fixed_point_scale",
+    "closure_rule": "Every accepted profile must have component fractions summing exactly to 1.0 and fixture component masses summing exactly to 100000000 microkilogram_proxy.",
+    "non_tunable_fixture_rule": "Numbers in deterministic_fixture are exact oracle constants, not tunable parameters or real formulations. All tunable values appear in numeric_parameters with the complete parameter contract."
+  },
+  "component_custody": [
+    {
+      "component_id": "NUTRIENT_N_PROXY",
+      "category": "NUTRIENT_INPUT",
+      "destination_owner": "KAIOS_REPRODUCTION_ECOLOGY_RUNTIME_V1",
+      "boundary": "Abstract nutrient mass only; no chemical identity, release curve, agronomic claim or safety claim."
+    },
+    {
+      "component_id": "NUTRIENT_P_PROXY",
+      "category": "NUTRIENT_INPUT",
+      "destination_owner": "KAIOS_REPRODUCTION_ECOLOGY_RUNTIME_V1",
+      "boundary": "Abstract nutrient mass only; no chemical identity, release curve, agronomic claim or safety claim."
+    },
+    {
+      "component_id": "NUTRIENT_K_PROXY",
+      "category": "NUTRIENT_INPUT",
+      "destination_owner": "KAIOS_REPRODUCTION_ECOLOGY_RUNTIME_V1",
+      "boundary": "Abstract nutrient mass only; no chemical identity, release curve, agronomic claim or safety claim."
+    },
+    {
+      "component_id": "SECONDARY_NUTRIENT_PROXY",
+      "category": "NUTRIENT_INPUT",
+      "destination_owner": "KAIOS_REPRODUCTION_ECOLOGY_RUNTIME_V1",
+      "boundary": "Aggregate simulation pool; no element-specific or biological effect is asserted."
+    },
+    {
+      "component_id": "STRUCTURAL_CARRIER_PROXY",
+      "category": "SOIL_AMENDMENT_OR_INERT_CARRIER",
+      "destination_owner": "KAIOS_REPRODUCTION_ECOLOGY_RUNTIME_V1",
+      "boundary": "Tracked separately from nutrients; no compost, decomposition or soil-quality outcome is inferred."
+    },
+    {
+      "component_id": "BATCH_WATER_PROXY",
+      "category": "WATER",
+      "destination_owner": "KAIOS_REPRODUCTION_ECOLOGY_RUNTIME_V1",
+      "boundary": "Batch water is mass custody and is not irrigation entitlement or a water-quality determination."
+    },
+    {
+      "component_id": "CONTAMINANT_PROXY",
+      "category": "CONTAMINATION",
+      "destination_owner": "KAIOS_REPRODUCTION_ECOLOGY_RUNTIME_V1",
+      "boundary": "Any nonzero fixture value requires quality hold and owner review; absence in a fixture is not a purity guarantee."
+    }
+  ],
+  "numeric_parameter_contract": {
+    "required_fields": ["parameter_name", "unit", "minimum", "default", "maximum", "rationale", "source_type", "confidence", "risk", "validation_required"],
+    "allowed_source_types": ["SOURCE_DERIVED", "REPOSITORY_DERIVED", "MODEL_INFERENCE", "RESEARCH_PROPOSAL", "ASSUMPTION", "SOURCE_UNDERSPECIFIED"],
+    "range_rule": "minimum <= default <= maximum",
+    "validation_rule": "Every numeric parameter is a simulation proposal and validation_required is true."
+  },
+  "composition_profiles": [
+    {
+      "composition_profile_id": "COMPOSITION-DRY-NUTRIENT-BLEND-V1",
+      "catalog_proposal_id": "FERT-PROPOSAL-DRY-NUTRIENT-BLEND-V1",
+      "profile_label": "ABSTRACT_DRY_BLEND_NOT_A_FORMULATION",
+      "numeric_parameters": [
+        {"parameter_name":"nitrogen_proxy_fraction","unit":"fraction_of_total_batch_mass","minimum":0.05,"default":0.1,"maximum":0.15,"rationale":"Defines one low-resolution nutrient-proxy share for deterministic mass partitioning.","source_type":"RESEARCH_PROPOSAL","confidence":"LOW","risk":"Could be mistaken for a nutrient grade or field recommendation.","validation_required":true},
+        {"parameter_name":"phosphorus_proxy_fraction","unit":"fraction_of_total_batch_mass","minimum":0.02,"default":0.05,"maximum":0.08,"rationale":"Defines one abstract phosphorus-proxy mass share for closed fixtures.","source_type":"RESEARCH_PROPOSAL","confidence":"LOW","risk":"No chemical form, availability or application suitability is represented.","validation_required":true},
+        {"parameter_name":"potassium_proxy_fraction","unit":"fraction_of_total_batch_mass","minimum":0.03,"default":0.08,"maximum":0.12,"rationale":"Defines one abstract potassium-proxy mass share for closed fixtures.","source_type":"RESEARCH_PROPOSAL","confidence":"LOW","risk":"No chemical form, availability or application suitability is represented.","validation_required":true},
+        {"parameter_name":"secondary_nutrient_proxy_fraction","unit":"fraction_of_total_batch_mass","minimum":0,"default":0.02,"maximum":0.05,"rationale":"Keeps secondary nutrient mass explicit instead of folding it into carrier mass.","source_type":"MODEL_INFERENCE","confidence":"LOW","risk":"Aggregation hides element-specific behavior and requires owner validation.","validation_required":true},
+        {"parameter_name":"structural_carrier_proxy_fraction","unit":"fraction_of_total_batch_mass","minimum":0.6,"default":0.75,"maximum":0.9,"rationale":"Closes batch mass while separating carrier from nutrient and water pools.","source_type":"MODEL_INFERENCE","confidence":"LOW","risk":"Carrier identity and environmental behavior are intentionally unspecified.","validation_required":true},
+        {"parameter_name":"batch_water_proxy_fraction","unit":"fraction_of_total_batch_mass","minimum":0,"default":0,"maximum":0.05,"rationale":"Tracks any batch water separately from dry matter.","source_type":"ASSUMPTION","confidence":"LOW","risk":"A zero default is a fixture convention and not a moisture guarantee.","validation_required":true},
+        {"parameter_name":"contaminant_proxy_fraction","unit":"fraction_of_total_batch_mass","minimum":0,"default":0,"maximum":0.001,"rationale":"Makes contamination an explicit reject-or-hold pool instead of silently treating it as carrier.","source_type":"ASSUMPTION","confidence":"LOW","risk":"Zero default does not establish purity; testing and owner validation remain mandatory.","validation_required":true}
+      ],
+      "default_fraction_sum": 1,
+      "deterministic_fixture": {
+        "fixture_id": "FIXTURE-COMPOSITION-DRY-100KG-V1",
+        "total_mass_microkilogram_proxy": 100000000,
+        "component_mass_microkilogram_proxy": {
+          "NUTRIENT_N_PROXY": 10000000,
+          "NUTRIENT_P_PROXY": 5000000,
+          "NUTRIENT_K_PROXY": 8000000,
+          "SECONDARY_NUTRIENT_PROXY": 2000000,
+          "STRUCTURAL_CARRIER_PROXY": 75000000,
+          "BATCH_WATER_PROXY": 0,
+          "CONTAMINANT_PROXY": 0
+        },
+        "nutrient_mass_microkilogram_proxy": 25000000,
+        "non_nutrient_mass_microkilogram_proxy": 75000000,
+        "closure_expected": true
+      }
+    },
+    {
+      "composition_profile_id": "COMPOSITION-LIQUID-NUTRIENT-SOLUTION-V1",
+      "catalog_proposal_id": "FERT-PROPOSAL-LIQUID-NUTRIENT-SOLUTION-V1",
+      "profile_label": "ABSTRACT_LIQUID_SOLUTION_NOT_A_FORMULATION",
+      "numeric_parameters": [
+        {"parameter_name":"nitrogen_proxy_fraction","unit":"fraction_of_total_batch_mass","minimum":0.01,"default":0.04,"maximum":0.08,"rationale":"Defines an abstract nutrient-proxy share for the liquid fixture.","source_type":"RESEARCH_PROPOSAL","confidence":"LOW","risk":"Could be mistaken for concentration or mixing guidance.","validation_required":true},
+        {"parameter_name":"phosphorus_proxy_fraction","unit":"fraction_of_total_batch_mass","minimum":0,"default":0.02,"maximum":0.05,"rationale":"Keeps phosphorus-proxy mass explicit in the liquid fixture.","source_type":"RESEARCH_PROPOSAL","confidence":"LOW","risk":"No chemical availability or compatibility is represented.","validation_required":true},
+        {"parameter_name":"potassium_proxy_fraction","unit":"fraction_of_total_batch_mass","minimum":0,"default":0.03,"maximum":0.06,"rationale":"Keeps potassium-proxy mass explicit in the liquid fixture.","source_type":"RESEARCH_PROPOSAL","confidence":"LOW","risk":"No chemical availability or compatibility is represented.","validation_required":true},
+        {"parameter_name":"secondary_nutrient_proxy_fraction","unit":"fraction_of_total_batch_mass","minimum":0,"default":0.01,"maximum":0.03,"rationale":"Separates aggregate secondary nutrient mass from carrier and water.","source_type":"MODEL_INFERENCE","confidence":"LOW","risk":"Element-specific behavior is outside this model.","validation_required":true},
+        {"parameter_name":"structural_carrier_proxy_fraction","unit":"fraction_of_total_batch_mass","minimum":0.02,"default":0.1,"maximum":0.2,"rationale":"Represents non-water non-nutrient solution mass in a named pool.","source_type":"MODEL_INFERENCE","confidence":"LOW","risk":"No carrier identity, compatibility or environmental behavior is asserted.","validation_required":true},
+        {"parameter_name":"batch_water_proxy_fraction","unit":"fraction_of_total_batch_mass","minimum":0.65,"default":0.8,"maximum":0.95,"rationale":"Closes the liquid batch water mass independently from nutrient mass.","source_type":"RESEARCH_PROPOSAL","confidence":"LOW","risk":"The fraction is a deterministic simulation fixture, not mixing guidance.","validation_required":true},
+        {"parameter_name":"contaminant_proxy_fraction","unit":"fraction_of_total_batch_mass","minimum":0,"default":0,"maximum":0.001,"rationale":"Creates an explicit quality-hold path for nonzero contamination.","source_type":"ASSUMPTION","confidence":"LOW","risk":"Zero default is not evidence of purity or safe use.","validation_required":true}
+      ],
+      "default_fraction_sum": 1,
+      "deterministic_fixture": {
+        "fixture_id": "FIXTURE-COMPOSITION-LIQUID-100KG-V1",
+        "total_mass_microkilogram_proxy": 100000000,
+        "component_mass_microkilogram_proxy": {
+          "NUTRIENT_N_PROXY": 4000000,
+          "NUTRIENT_P_PROXY": 2000000,
+          "NUTRIENT_K_PROXY": 3000000,
+          "SECONDARY_NUTRIENT_PROXY": 1000000,
+          "STRUCTURAL_CARRIER_PROXY": 10000000,
+          "BATCH_WATER_PROXY": 80000000,
+          "CONTAMINANT_PROXY": 0
+        },
+        "nutrient_mass_microkilogram_proxy": 10000000,
+        "non_nutrient_mass_microkilogram_proxy": 90000000,
+        "closure_expected": true
+      }
+    },
+    {
+      "composition_profile_id": "COMPOSITION-ORGANIC-CARRIER-AMENDMENT-V1",
+      "catalog_proposal_id": "AMENDMENT-PROPOSAL-ORGANIC-CARRIER-V1",
+      "profile_label": "RECEIVED_ORGANIC_CARRIER_NOT_COMPOST_MODEL",
+      "numeric_parameters": [
+        {"parameter_name":"nitrogen_proxy_fraction","unit":"fraction_of_total_batch_mass","minimum":0,"default":0.02,"maximum":0.05,"rationale":"Prevents incidental nutrient mass in an amendment from being hidden in structural carrier mass.","source_type":"RESEARCH_PROPOSAL","confidence":"LOW","risk":"No nutrient availability or amendment efficacy is established.","validation_required":true},
+        {"parameter_name":"phosphorus_proxy_fraction","unit":"fraction_of_total_batch_mass","minimum":0,"default":0.01,"maximum":0.03,"rationale":"Tracks one incidental nutrient-proxy pool separately.","source_type":"RESEARCH_PROPOSAL","confidence":"LOW","risk":"No nutrient availability or amendment efficacy is established.","validation_required":true},
+        {"parameter_name":"potassium_proxy_fraction","unit":"fraction_of_total_batch_mass","minimum":0,"default":0.01,"maximum":0.03,"rationale":"Tracks one incidental nutrient-proxy pool separately.","source_type":"RESEARCH_PROPOSAL","confidence":"LOW","risk":"No nutrient availability or amendment efficacy is established.","validation_required":true},
+        {"parameter_name":"secondary_nutrient_proxy_fraction","unit":"fraction_of_total_batch_mass","minimum":0,"default":0.01,"maximum":0.03,"rationale":"Keeps all proposed nutrient mass visible in conservation checks.","source_type":"MODEL_INFERENCE","confidence":"LOW","risk":"The aggregate pool cannot support element-specific conclusions.","validation_required":true},
+        {"parameter_name":"structural_carrier_proxy_fraction","unit":"fraction_of_total_batch_mass","minimum":0.5,"default":0.65,"maximum":0.85,"rationale":"Represents received amendment structure without modeling compost creation or decomposition.","source_type":"RESEARCH_PROPOSAL","confidence":"LOW","risk":"No soil improvement, maturity or biological quality is guaranteed.","validation_required":true},
+        {"parameter_name":"batch_water_proxy_fraction","unit":"fraction_of_total_batch_mass","minimum":0.1,"default":0.3,"maximum":0.45,"rationale":"Tracks received moisture as mass and water custody.","source_type":"RESEARCH_PROPOSAL","confidence":"LOW","risk":"The value is not a moisture specification or handling recommendation.","validation_required":true},
+        {"parameter_name":"contaminant_proxy_fraction","unit":"fraction_of_total_batch_mass","minimum":0,"default":0,"maximum":0.001,"rationale":"Requires nonzero contamination to remain visible and trigger quality hold.","source_type":"ASSUMPTION","confidence":"LOW","risk":"Zero default does not establish material cleanliness or safety.","validation_required":true}
+      ],
+      "default_fraction_sum": 1,
+      "deterministic_fixture": {
+        "fixture_id": "FIXTURE-COMPOSITION-ORGANIC-CARRIER-100KG-V1",
+        "total_mass_microkilogram_proxy": 100000000,
+        "component_mass_microkilogram_proxy": {
+          "NUTRIENT_N_PROXY": 2000000,
+          "NUTRIENT_P_PROXY": 1000000,
+          "NUTRIENT_K_PROXY": 1000000,
+          "SECONDARY_NUTRIENT_PROXY": 1000000,
+          "STRUCTURAL_CARRIER_PROXY": 65000000,
+          "BATCH_WATER_PROXY": 30000000,
+          "CONTAMINANT_PROXY": 0
+        },
+        "nutrient_mass_microkilogram_proxy": 5000000,
+        "non_nutrient_mass_microkilogram_proxy": 95000000,
+        "closure_expected": true,
+        "compost_process_modeled": false
+      }
+    }
+  ],
+  "acceptance_invariants": [
+    "PROFILE_COMPONENT_DEFAULT_FRACTIONS_SUM_EXACTLY_TO_ONE",
+    "FIXTURE_COMPONENT_MASSES_SUM_EXACTLY_TO_TOTAL_BATCH_MASS",
+    "NUTRIENT_MASS_EQUALS_N_PLUS_P_PLUS_K_PLUS_SECONDARY",
+    "WATER_MASS_NEVER_COUNTS_AS_NUTRIENT_OR_STRUCTURAL_CARRIER",
+    "CONTAMINANT_MASS_NEVER_COUNTS_AS_NUTRIENT_OR_STRUCTURAL_CARRIER",
+    "NONZERO_CONTAMINANT_REQUIRES_QUALITY_HOLD",
+    "NO_COMPONENT_APPEARS_WITHOUT_A_PAIRED_SOURCE_CUSTODY_DEBIT",
+    "NO_COMPONENT_DISAPPEARS_WITHOUT_A_NAMED_DESTINATION_CUSTODY_CREDIT"
+  ],
+  "provenance": [
+    {"source_type":"REPOSITORY_DERIVED","source_path":"KAIOS/life/forest-agriculture/KAIOS_FOREST_AGRICULTURE_RUNTIME_V1_SPEC.md","source_commit":"1650191f35567d43016473420cfd2cba22b00aea","git_object":"9a2dd4ad05bb7b2e3d71b91b479359947ada8376","sha256":"4e1a23e97d09ec2dc4ad65440e6958e646f75ed418e5c703c5a5a1635c2809a1","usage":"Fertilizer input boundary and Agriculture/Ecology owner separation."},
+    {"source_type":"REPOSITORY_DERIVED","source_path":"KAIOS/life/candidates/forest-agriculture-v1/soil-types/soil-water-nutrient-thresholds.json","source_commit":"1650191f35567d43016473420cfd2cba22b00aea","git_object":"f5c829459159e5de8acefbd6e11667c2090b9391","sha256":"0cad3742773b1fcad1d5d2a86d1b50e95eae4a0a7d242d4dcd71fb26f6c8902c","usage":"Candidate soil water/nutrient vocabulary only; no canonical promotion."},
+    {"source_type":"REPOSITORY_DERIVED","source_path":"KAIOS_INDUSTRIAL_SUPPLY_CHAIN_SPEC.md","source_commit":"1650191f35567d43016473420cfd2cba22b00aea","git_object":"02ab662fad21d8365bca68d00e7eccec3a884889","sha256":"431db8dba33f5fdaa4de04c90830eaeb054c057a708455c48265631ca4e0433c","usage":"Lot, storage and transport custody constraints."},
+    {"source_type":"REPOSITORY_DERIVED","source_path":"docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md","source_commit":"1650191f35567d43016473420cfd2cba22b00aea","git_object":"f9748c99501ec1c1ea6ba5c39833909684c0ffbe","sha256":"6d71cd7946f0b4057a9b5289923d3c7b424e409140feb7404f5b433a309ab00b","usage":"Positive mass and separation of mass, water-state and energy accounting."}
+  ],
+  "boundaries": [
+    "CANDIDATE_ONLY",
+    "SIMULATION_ONLY",
+    "ABSTRACT_COMPOSITION_NOT_PRODUCT_FORMULATION",
+    "NO_MIXING_OR_APPLICATION_GUIDANCE",
+    "NO_PURITY_OR_SAFETY_DETERMINATION",
+    "NO_COMPOST_PRODUCTION_OR_DECOMPOSITION_MODEL",
+    "NO_CANONICAL_PROMOTION",
+    "NO_RUNTIME_CODE",
+    "NO_RIGHTS_OR_ECONOMY_AUTHORITY",
+    "NO_DEPLOYMENT",
+    "NO_MERGE"
+  ]
+}

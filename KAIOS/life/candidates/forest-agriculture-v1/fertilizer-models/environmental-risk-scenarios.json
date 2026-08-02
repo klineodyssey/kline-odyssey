@@ -1,0 +1,257 @@
+{
+  "dataset_id": "KAIOS-FERTILIZER-ENVIRONMENTAL-RISK-SCENARIOS-V1",
+  "schema_version": "1.0.0-candidate",
+  "status": "CURSOR_RESEARCH_CANDIDATE_ONLY",
+  "review_status": "PENDING_CODEX_REVIEW",
+  "task_id": "KAIOS-CURSOR-FERTILIZER-MODELS-001",
+  "source_base_commit": "1650191f35567d43016473420cfd2cba22b00aea",
+  "source_hash_basis": "SHA256_OF_EXACT_GIT_BLOB_BYTES_AT_SOURCE_BASE_COMMIT",
+  "mode": "LOCAL_DETERMINISTIC_SIMULATION_RISK_FIXTURES",
+  "authority": "NO_PRODUCTION_AUTHORITY",
+  "canonical_promotion": false,
+  "all_values_label": "SIMULATION_PROPOSAL_OR_DETERMINISTIC_TEST_FIXTURE_REQUIRES_OWNER_VALIDATION",
+  "risk_boundary": "These fixtures exercise accounting and rejection behavior. They are not measured probabilities, forecasts, thresholds for field use, environmental permits, remediation instructions or safety determinations.",
+  "fixed_point_contract": {
+    "scale": 1000000,
+    "mass_unit": "microkilogram_proxy",
+    "water_unit": "microliter_proxy_unless_batch_water_mass_is_explicitly_named",
+    "energy_unit": "micro_joule_proxy",
+    "labor_unit": "micro_worker_minute",
+    "fixture_value_rule": "Every number inside deterministic_fixture is an exact non-tunable oracle value for validation only.",
+    "closure_rule": "Each initial_total equals its final_total independently for nutrient mass, amendment/carrier mass, contaminant mass, batch-water mass, event-water volume, energy and labor capacity when that ledger is present."
+  },
+  "numeric_parameter_contract": {
+    "required_fields": ["parameter_name", "unit", "minimum", "default", "maximum", "rationale", "source_type", "confidence", "risk", "validation_required"],
+    "allowed_source_types": ["SOURCE_DERIVED", "REPOSITORY_DERIVED", "MODEL_INFERENCE", "RESEARCH_PROPOSAL", "ASSUMPTION", "SOURCE_UNDERSPECIFIED"],
+    "range_rule": "minimum <= default <= maximum",
+    "validation_rule": "Every risk parameter is a simulation proposal and validation_required is true."
+  },
+  "separated_risk_domains": [
+    {"domain":"SOIL_AMENDMENT","rule":"Structural carrier and its batch water remain separate from nutrient mass; received amendment is not a compost process."},
+    {"domain":"NUTRIENT_INPUT","rule":"N, P, K and secondary proxies may aggregate only into a named nutrient ledger; they never merge into carrier, water or contamination."},
+    {"domain":"APPLICATION","rule":"An application is an owner-gated event, not an inventory decrement inferred from a crop or facility scalar."},
+    {"domain":"STORAGE","rule":"Storage loss transfers material to recovery, containment, atmosphere or disposal custody; it never deletes mass."},
+    {"domain":"TRANSPORT","rule":"Transport uses source and destination custody events and preserves every component."},
+    {"domain":"RUNOFF","rule":"Surface-water and nutrient runoff are separate named destination pools."},
+    {"domain":"LEACHING","rule":"Drainage water and leached nutrient are separate from surface runoff."},
+    {"domain":"VOLATILIZATION","rule":"Atmosphere-bound nutrient is explicit and is not relabeled as plant availability or generic loss."},
+    {"domain":"CONTAMINATION","rule":"Contaminant mass is isolated, triggers quality hold at any nonzero fixture value and never enters a response partition."},
+    {"domain":"RECOVERY","rule":"Recovered material remains in recovery custody until an owner accepts inventory restoration or disposal."}
+  ],
+  "risk_scenarios": [
+    {
+      "scenario_id": "RISK-NUTRIENT-DEFICIENCY-V1",
+      "domain": "NUTRIENT_INPUT",
+      "title": "Deficiency signal without material creation",
+      "trigger_parameter": {"parameter_name":"deficiency_alert_threshold","unit":"dimensionless_owner_supplied_deficiency_index","minimum":0,"default":0.35,"maximum":1,"rationale":"Provides a bounded simulation alert while leaving diagnosis with the owner.","source_type":"RESEARCH_PROPOSAL","confidence":"LOW","risk":"Not a diagnostic or application threshold.","validation_required":true},
+      "preconditions": ["OWNER_SOIL_OBSERVATION_PRESENT", "NO_VALIDATED_APPLICATION_EVENT"],
+      "deterministic_fixture": {
+        "owner_supplied_deficiency_index_fixed_point": 800000,
+        "nutrient_mass_ledger_microkilogram_proxy": {"initial_soil_mobile":1000000,"final_soil_mobile":1000000,"initial_total":1000000,"final_total":1000000,"closed":true},
+        "water_ledger_microliter_proxy": {"initial_soil_custody":5000000,"final_soil_custody":5000000,"initial_total":5000000,"final_total":5000000,"closed":true},
+        "energy_ledger_micro_joule_proxy": {"initial_reserve":1000000,"final_reserve":1000000,"initial_total":1000000,"final_total":1000000,"closed":true},
+        "labor_ledger_micro_worker_minute": {"validated_capacity":0,"consumed":0,"remaining":0,"initial_total":0,"final_total":0,"closed":true}
+      },
+      "expected_status": "ALERT_ONLY_NO_APPLICATION_NO_MATERIAL_CREATION",
+      "required_owner_action": "Owner may request observation review; this candidate does not diagnose or prescribe."
+    },
+    {
+      "scenario_id": "RISK-BOUNDED-APPLICATION-V1",
+      "domain": "APPLICATION",
+      "title": "Owner-gated bounded application",
+      "trigger_parameter": {"parameter_name":"bounded_application_fraction","unit":"fraction_of_owner_validated_available_lot_mass","minimum":0.01,"default":0.2,"maximum":0.5,"rationale":"Exercises an accepted transfer below the candidate cap.","source_type":"RESEARCH_PROPOSAL","confidence":"LOW","risk":"Not a field application rate.","validation_required":true},
+      "preconditions": ["ALL_REQUIRED_OWNER_EVENTS_PRESENT", "ZERO_UNRESOLVED_CONTAMINATION", "NON_OVERLAPPING_LABOR_SHIFT", "PASSED_EQUIPMENT_INSPECTION"],
+      "deterministic_fixture": {
+        "nutrient_mass_ledger_microkilogram_proxy": {"initial_inventory":25000000,"final_inventory":20000000,"plant_available":1500000,"soil_retained":1250000,"soil_mobile":750000,"runoff_custody":500000,"drainage_custody":500000,"atmosphere_custody":400000,"equipment_residue_custody":100000,"initial_total":25000000,"final_total":25000000,"closed":true},
+        "carrier_mass_ledger_microkilogram_proxy": {"initial_inventory":75000000,"final_inventory":60000000,"soil_custody":14700000,"equipment_residue_custody":300000,"initial_total":75000000,"final_total":75000000,"closed":true},
+        "water_ledger_microliter_proxy": {"source_debit":10000000,"soil_custody":7000000,"runoff_custody":2000000,"atmosphere_custody":1000000,"initial_total":10000000,"final_total":10000000,"closed":true},
+        "energy_ledger_micro_joule_proxy": {"source_debit":3000000,"heat_dissipation_custody":3000000,"initial_total":3000000,"final_total":3000000,"closed":true},
+        "labor_ledger_micro_worker_minute": {"validated_capacity":60000000,"consumed":45000000,"remaining":15000000,"initial_total":60000000,"final_total":60000000,"closed":true}
+      },
+      "expected_status": "PROPOSAL_ACCEPTABLE_FOR_OWNER_REVIEW_NOT_APPLIED",
+      "required_owner_action": "Agriculture, Ecology, Economy, Supply Chain, Labor and Rights owners independently validate their proposed deltas or references."
+    },
+    {
+      "scenario_id": "RISK-OVER-APPLICATION-V1",
+      "domain": "APPLICATION",
+      "title": "Application proposal above bounded candidate cap",
+      "trigger_parameter": {"parameter_name":"over_application_reject_fraction","unit":"fraction_of_owner_validated_available_lot_mass","minimum":0.500001,"default":0.6,"maximum":1,"rationale":"Defines a deterministic reject region immediately above the candidate maximum.","source_type":"RESEARCH_PROPOSAL","confidence":"LOW","risk":"Not an agronomic toxicity or legal threshold.","validation_required":true},
+      "preconditions": ["PROPOSED_APPLICATION_FRACTION_EQUALS_0_6", "CANDIDATE_MAXIMUM_EQUALS_0_5"],
+      "deterministic_fixture": {
+        "proposed_application_fraction_fixed_point": 600000,
+        "nutrient_mass_ledger_microkilogram_proxy": {"initial_inventory":25000000,"final_inventory":25000000,"initial_total":25000000,"final_total":25000000,"closed":true},
+        "carrier_mass_ledger_microkilogram_proxy": {"initial_inventory":75000000,"final_inventory":75000000,"initial_total":75000000,"final_total":75000000,"closed":true},
+        "water_ledger_microliter_proxy": {"initial_source":0,"final_source":0,"initial_total":0,"final_total":0,"closed":true},
+        "energy_ledger_micro_joule_proxy": {"initial_reserve":3000000,"final_reserve":3000000,"initial_total":3000000,"final_total":3000000,"closed":true},
+        "labor_ledger_micro_worker_minute": {"validated_capacity":60000000,"consumed":0,"remaining":60000000,"initial_total":60000000,"final_total":60000000,"closed":true}
+      },
+      "expected_status": "REJECTED_NO_TRANSFER",
+      "required_owner_action": "No owner mutation; a new bounded proposal would require a fresh decision and event identity."
+    },
+    {
+      "scenario_id": "RISK-RUNOFF-TRANSFER-V1",
+      "domain": "RUNOFF",
+      "title": "High surface-runoff custody share",
+      "trigger_parameter": {"parameter_name":"runoff_review_fraction","unit":"fraction_of_applied_nutrient_mass","minimum":0,"default":0.4,"maximum":1,"rationale":"Exercises explicit runoff custody and owner review.","source_type":"RESEARCH_PROPOSAL","confidence":"LOW","risk":"Not a hydrology forecast or environmental limit.","validation_required":true},
+      "preconditions": ["SIMULATED_RUNOFF_SHARE_EQUALS_0_5", "RUNOFF_DESTINATION_CUSTODY_PRESENT"],
+      "deterministic_fixture": {
+        "nutrient_mass_ledger_microkilogram_proxy": {"initial_inventory":10000000,"soil_retained":2000000,"soil_mobile":1000000,"plant_available":1000000,"runoff_custody":5000000,"equipment_residue_custody":1000000,"initial_total":10000000,"final_total":10000000,"closed":true},
+        "carrier_mass_ledger_microkilogram_proxy": {"initial_inventory":30000000,"soil_custody":29000000,"equipment_residue_custody":1000000,"initial_total":30000000,"final_total":30000000,"closed":true},
+        "water_ledger_microliter_proxy": {"source_debit":20000000,"runoff_custody":14000000,"soil_custody":5000000,"atmosphere_custody":1000000,"initial_total":20000000,"final_total":20000000,"closed":true},
+        "energy_ledger_micro_joule_proxy": {"source_debit":4000000,"heat_dissipation_custody":4000000,"initial_total":4000000,"final_total":4000000,"closed":true},
+        "labor_ledger_micro_worker_minute": {"validated_capacity":50000000,"consumed":40000000,"remaining":10000000,"initial_total":50000000,"final_total":50000000,"closed":true}
+      },
+      "expected_status": "ENVIRONMENTAL_REVIEW_REQUIRED_RUNOFF_NOT_GENERIC_LOSS",
+      "required_owner_action": "Ecology owns any accepted runoff and water-state consequences."
+    },
+    {
+      "scenario_id": "RISK-LEACHING-TRANSFER-V1",
+      "domain": "LEACHING",
+      "title": "High drainage/leaching custody share",
+      "trigger_parameter": {"parameter_name":"leaching_review_fraction","unit":"fraction_of_applied_nutrient_mass","minimum":0,"default":0.4,"maximum":1,"rationale":"Exercises explicit drainage custody and owner review.","source_type":"RESEARCH_PROPOSAL","confidence":"LOW","risk":"Not a groundwater forecast or environmental limit.","validation_required":true},
+      "preconditions": ["SIMULATED_LEACHING_SHARE_EQUALS_0_6", "DRAINAGE_DESTINATION_CUSTODY_PRESENT"],
+      "deterministic_fixture": {
+        "nutrient_mass_ledger_microkilogram_proxy": {"initial_inventory":10000000,"soil_retained":2000000,"soil_mobile":1000000,"drainage_custody":6000000,"equipment_residue_custody":1000000,"initial_total":10000000,"final_total":10000000,"closed":true},
+        "carrier_mass_ledger_microkilogram_proxy": {"initial_inventory":20000000,"soil_custody":19500000,"equipment_residue_custody":500000,"initial_total":20000000,"final_total":20000000,"closed":true},
+        "water_ledger_microliter_proxy": {"source_debit":20000000,"drainage_custody":14000000,"soil_custody":5000000,"atmosphere_custody":1000000,"initial_total":20000000,"final_total":20000000,"closed":true},
+        "energy_ledger_micro_joule_proxy": {"source_debit":4000000,"heat_dissipation_custody":4000000,"initial_total":4000000,"final_total":4000000,"closed":true},
+        "labor_ledger_micro_worker_minute": {"validated_capacity":50000000,"consumed":40000000,"remaining":10000000,"initial_total":50000000,"final_total":50000000,"closed":true}
+      },
+      "expected_status": "ENVIRONMENTAL_REVIEW_REQUIRED_LEACHING_NOT_RUNOFF",
+      "required_owner_action": "Ecology owns any accepted drainage and soil nutrient consequences."
+    },
+    {
+      "scenario_id": "RISK-STORAGE-LOSS-V1",
+      "domain": "STORAGE",
+      "title": "Storage discrepancy with recovery and containment custody",
+      "trigger_parameter": {"parameter_name":"storage_loss_review_fraction","unit":"fraction_of_stored_batch_mass","minimum":0,"default":0.05,"maximum":0.25,"rationale":"Exercises closed storage-loss custody without deleting material.","source_type":"MODEL_INFERENCE","confidence":"LOW","risk":"Not a storage loss rate, packaging specification or safety threshold.","validation_required":true},
+      "preconditions": ["WAREHOUSE_INSPECTION_EVENT_PRESENT", "RECOVERY_AND_CONTAINMENT_LOCATIONS_PRESENT"],
+      "deterministic_fixture": {
+        "selected_storage_loss_fraction_fixed_point": 50000,
+        "nutrient_mass_ledger_microkilogram_proxy": {"initial_storage":25000000,"available_storage":23750000,"recovery_custody":750000,"containment_custody":500000,"initial_total":25000000,"final_total":25000000,"closed":true},
+        "carrier_mass_ledger_microkilogram_proxy": {"initial_storage":75000000,"available_storage":71250000,"recovery_custody":2250000,"containment_custody":1500000,"initial_total":75000000,"final_total":75000000,"closed":true},
+        "water_ledger_microliter_proxy": {"initial_total":0,"final_total":0,"closed":true},
+        "energy_ledger_micro_joule_proxy": {"source_debit":2000000,"heat_dissipation_custody":2000000,"initial_total":2000000,"final_total":2000000,"closed":true},
+        "labor_ledger_micro_worker_minute": {"validated_capacity":30000000,"consumed":20000000,"remaining":10000000,"initial_total":30000000,"final_total":30000000,"closed":true}
+      },
+      "expected_status": "QUALITY_HOLD_PENDING_SUPPLY_CHAIN_AND_ECONOMY_RECONCILIATION",
+      "required_owner_action": "Supply Chain validates custody; Economy validates any inventory and ledger effects."
+    },
+    {
+      "scenario_id": "RISK-TRANSPORT-LOSS-V1",
+      "domain": "TRANSPORT",
+      "title": "Transport discrepancy with destination, recovery and containment custody",
+      "trigger_parameter": {"parameter_name":"transport_loss_review_fraction","unit":"fraction_of_transported_batch_mass","minimum":0,"default":0.02,"maximum":0.2,"rationale":"Exercises paired source/destination custody for a transport discrepancy.","source_type":"MODEL_INFERENCE","confidence":"LOW","risk":"Not a logistics loss rate or transport safety determination.","validation_required":true},
+      "preconditions": ["TRANSPORT_DEPARTURE_EVENT_PRESENT", "TRANSPORT_ARRIVAL_EVENT_PRESENT", "RECOVERY_CUSTODY_PRESENT"],
+      "deterministic_fixture": {
+        "selected_transport_loss_fraction_fixed_point": 20000,
+        "nutrient_mass_ledger_microkilogram_proxy": {"source_departure":25000000,"destination_arrival":24500000,"recovery_custody":250000,"containment_custody":250000,"initial_total":25000000,"final_total":25000000,"closed":true},
+        "carrier_mass_ledger_microkilogram_proxy": {"source_departure":75000000,"destination_arrival":73500000,"recovery_custody":750000,"containment_custody":750000,"initial_total":75000000,"final_total":75000000,"closed":true},
+        "water_ledger_microliter_proxy": {"initial_total":0,"final_total":0,"closed":true},
+        "energy_ledger_micro_joule_proxy": {"source_debit":3000000,"heat_dissipation_custody":3000000,"initial_total":3000000,"final_total":3000000,"closed":true},
+        "labor_ledger_micro_worker_minute": {"validated_capacity":40000000,"consumed":30000000,"remaining":10000000,"initial_total":40000000,"final_total":40000000,"closed":true}
+      },
+      "expected_status": "TRANSPORT_RECONCILIATION_REQUIRED_NO_UNNAMED_LOSS",
+      "required_owner_action": "Supply Chain resolves custody before Economy or Agriculture may accept the destination lot."
+    },
+    {
+      "scenario_id": "RISK-VOLATILIZATION-TRANSFER-V1",
+      "domain": "VOLATILIZATION",
+      "title": "High atmosphere-bound nutrient custody share",
+      "trigger_parameter": {"parameter_name":"volatilization_review_fraction","unit":"fraction_of_applied_nutrient_mass","minimum":0,"default":0.4,"maximum":1,"rationale":"Exercises an explicit atmosphere destination instead of generic loss.","source_type":"RESEARCH_PROPOSAL","confidence":"LOW","risk":"Not an emission estimate, chemistry model or air-quality determination.","validation_required":true},
+      "preconditions": ["SIMULATED_VOLATILIZATION_SHARE_EQUALS_0_6", "ATMOSPHERE_DESTINATION_CUSTODY_PRESENT"],
+      "deterministic_fixture": {
+        "nutrient_mass_ledger_microkilogram_proxy": {"initial_inventory":10000000,"atmosphere_custody":6000000,"soil_retained":2000000,"plant_available":1000000,"equipment_residue_custody":1000000,"initial_total":10000000,"final_total":10000000,"closed":true},
+        "carrier_mass_ledger_microkilogram_proxy": {"initial_inventory":20000000,"soil_custody":19500000,"equipment_residue_custody":500000,"initial_total":20000000,"final_total":20000000,"closed":true},
+        "water_ledger_microliter_proxy": {"source_debit":10000000,"soil_custody":7000000,"atmosphere_custody":2000000,"runoff_custody":1000000,"initial_total":10000000,"final_total":10000000,"closed":true},
+        "energy_ledger_micro_joule_proxy": {"source_debit":3000000,"heat_dissipation_custody":3000000,"initial_total":3000000,"final_total":3000000,"closed":true},
+        "labor_ledger_micro_worker_minute": {"validated_capacity":40000000,"consumed":30000000,"remaining":10000000,"initial_total":40000000,"final_total":40000000,"closed":true}
+      },
+      "expected_status": "ENVIRONMENTAL_REVIEW_REQUIRED_VOLATILIZATION_EXPLICIT",
+      "required_owner_action": "Ecology reviews atmosphere and soil deltas; no air-quality claim is made."
+    },
+    {
+      "scenario_id": "RISK-CONTAMINATION-HOLD-V1",
+      "domain": "CONTAMINATION",
+      "title": "Nonzero contaminant proxy triggers quality hold",
+      "trigger_parameter": {"parameter_name":"unresolved_contamination_acceptance_threshold","unit":"microkilogram_proxy","minimum":0,"default":0,"maximum":0,"rationale":"Forces any nonzero unresolved contaminant fixture into quality hold.","source_type":"ASSUMPTION","confidence":"LOW","risk":"Not a regulatory, toxicological or analytical detection threshold.","validation_required":true},
+      "preconditions": ["CONTAMINANT_PROXY_MASS_EQUALS_1000000", "QUALITY_HOLD_LOCATION_PRESENT"],
+      "deterministic_fixture": {
+        "nutrient_mass_ledger_microkilogram_proxy": {"initial_quality_hold":25000000,"final_quality_hold":25000000,"initial_total":25000000,"final_total":25000000,"closed":true},
+        "carrier_mass_ledger_microkilogram_proxy": {"initial_quality_hold":75000000,"final_quality_hold":75000000,"initial_total":75000000,"final_total":75000000,"closed":true},
+        "contaminant_mass_ledger_microkilogram_proxy": {"detected_sample_or_source":1000000,"quality_hold_custody":1000000,"initial_total":1000000,"final_total":1000000,"closed":true},
+        "water_ledger_microliter_proxy": {"initial_total":0,"final_total":0,"closed":true},
+        "energy_ledger_micro_joule_proxy": {"source_debit":1000000,"heat_dissipation_custody":1000000,"initial_total":1000000,"final_total":1000000,"closed":true},
+        "labor_ledger_micro_worker_minute": {"validated_capacity":15000000,"consumed":10000000,"remaining":5000000,"initial_total":15000000,"final_total":15000000,"closed":true}
+      },
+      "expected_status": "REJECTED_QUALITY_HOLD_NO_APPLICATION",
+      "required_owner_action": "Qualified owner review is required; this model supplies no remediation or safety decision."
+    },
+    {
+      "scenario_id": "RISK-RECOVERY-CUSTODY-V1",
+      "domain": "RECOVERY",
+      "title": "Recovery material restored or disposed through named custody",
+      "trigger_parameter": {"parameter_name":"candidate_recovery_fraction","unit":"fraction_of_recovery_custody_mass","minimum":0,"default":0.8,"maximum":1,"rationale":"Exercises a bounded split between owner-accepted restoration and approved disposal custody.","source_type":"RESEARCH_PROPOSAL","confidence":"LOW","risk":"Not a cleanup efficiency or remediation guarantee.","validation_required":true},
+      "preconditions": ["RECOVERY_CUSTODY_EVENT_PRESENT", "OWNER_ACCEPTANCE_OR_DISPOSAL_EVENT_PRESENT"],
+      "deterministic_fixture": {
+        "selected_recovery_fraction_fixed_point": 800000,
+        "nutrient_mass_ledger_microkilogram_proxy": {"initial_recovery_custody":4000000,"restored_inventory_custody":3200000,"approved_disposal_custody":800000,"initial_total":4000000,"final_total":4000000,"closed":true},
+        "carrier_mass_ledger_microkilogram_proxy": {"initial_recovery_custody":8000000,"restored_inventory_custody":6400000,"approved_disposal_custody":1600000,"initial_total":8000000,"final_total":8000000,"closed":true},
+        "water_ledger_microliter_proxy": {"initial_recovery_custody":2000000,"reusable_water_custody":1600000,"wastewater_custody":400000,"initial_total":2000000,"final_total":2000000,"closed":true},
+        "energy_ledger_micro_joule_proxy": {"source_debit":2000000,"heat_dissipation_custody":2000000,"initial_total":2000000,"final_total":2000000,"closed":true},
+        "labor_ledger_micro_worker_minute": {"validated_capacity":30000000,"consumed":25000000,"remaining":5000000,"initial_total":30000000,"final_total":30000000,"closed":true}
+      },
+      "expected_status": "OWNER_RECONCILIATION_REQUIRED_BEFORE_REUSE",
+      "required_owner_action": "Supply Chain and Economy validate restored inventory; environmental and disposal owners validate remaining custody."
+    },
+    {
+      "scenario_id": "RISK-AMENDMENT-RECEIPT-BOUNDARY-V1",
+      "domain": "SOIL_AMENDMENT",
+      "title": "Received amendment held without compost inference",
+      "trigger_parameter": {"parameter_name":"amendment_receipt_inspection_fraction","unit":"fraction_of_received_lot_mass_inspected_in_fixture","minimum":0,"default":1,"maximum":1,"rationale":"Requires the entire abstract received lot to remain in inspection custody for the fixture.","source_type":"RESEARCH_PROPOSAL","confidence":"LOW","risk":"Not a sampling plan, compost standard or material acceptance criterion.","validation_required":true},
+      "preconditions": ["EXTERNAL_LOT_MAPPING_PENDING", "NO_COMPOST_PROCESS_EVENT", "NO_APPLICATION_EVENT"],
+      "deterministic_fixture": {
+        "nutrient_mass_ledger_microkilogram_proxy": {"initial_receipt_custody":5000000,"final_inspection_custody":5000000,"initial_total":5000000,"final_total":5000000,"closed":true},
+        "carrier_mass_ledger_microkilogram_proxy": {"initial_receipt_custody":65000000,"final_inspection_custody":65000000,"initial_total":65000000,"final_total":65000000,"closed":true},
+        "batch_water_mass_ledger_microkilogram_proxy": {"initial_receipt_custody":30000000,"final_inspection_custody":30000000,"initial_total":30000000,"final_total":30000000,"closed":true},
+        "energy_ledger_micro_joule_proxy": {"source_debit":2000000,"heat_dissipation_custody":2000000,"initial_total":2000000,"final_total":2000000,"closed":true},
+        "labor_ledger_micro_worker_minute": {"validated_capacity":30000000,"consumed":20000000,"remaining":10000000,"initial_total":30000000,"final_total":30000000,"closed":true}
+      },
+      "expected_status": "INSPECTION_HOLD_NO_COMPOST_OR_APPLICATION_STATE",
+      "required_owner_action": "Supply Chain and Economy must accept any resource mapping before Ecology or Agriculture review."
+    }
+  ],
+  "global_failure_conditions": [
+    "ANY_LEDGER_DOES_NOT_CLOSE",
+    "ANY_POOL_IS_NEGATIVE",
+    "RUNOFF_AND_LEACHING_ARE_COMBINED",
+    "VOLATILIZATION_IS_RELABELED_AS_GENERIC_LOSS",
+    "CONTAMINATION_ENTERS_NUTRIENT_OR_CARRIER_RESPONSE",
+    "STORAGE_OR_TRANSPORT_MASS_DISAPPEARS",
+    "RECOVERY_RESTORES_INVENTORY_WITHOUT_OWNER_ACCEPTANCE",
+    "AMENDMENT_RECEIPT_CREATES_COMPOST_STATE",
+    "A_REJECTED_EVENT_DEBITS_INVENTORY_ENERGY_OR_LABOR",
+    "ANY_FIXTURE_IS_PRESENTED_AS_REAL_WORLD_GUIDANCE_OR_GUARANTEE"
+  ],
+  "provenance": [
+    {"source_type":"REPOSITORY_DERIVED","source_path":"KAIOS/life/forest-agriculture/KAIOS_FOREST_AGRICULTURE_RUNTIME_V1_SPEC.md","source_commit":"1650191f35567d43016473420cfd2cba22b00aea","git_object":"9a2dd4ad05bb7b2e3d71b91b479359947ada8376","sha256":"4e1a23e97d09ec2dc4ad65440e6958e646f75ed418e5c703c5a5a1635c2809a1","usage":"Owner, fertilizer batch and environmental interaction boundaries."},
+    {"source_type":"REPOSITORY_DERIVED","source_path":"KAIOS_INDUSTRIAL_SUPPLY_CHAIN_SPEC.md","source_commit":"1650191f35567d43016473420cfd2cba22b00aea","git_object":"02ab662fad21d8365bca68d00e7eccec3a884889","sha256":"431db8dba33f5fdaa4de04c90830eaeb054c057a708455c48265631ca4e0433c","usage":"Storage, transport, lot and recovery custody."},
+    {"source_type":"REPOSITORY_DERIVED","source_path":"KAIOS_SUPPLY_CHAIN_SCHEMA.json","source_commit":"1650191f35567d43016473420cfd2cba22b00aea","git_object":"56bc0ff72042100cb74ace45ee3c30d7703a48e9","sha256":"ea6d175e8bfd242a288f6e6374e97e97fd18ecf5edb40761a29de2129036aa60","usage":"Foreign Supply Chain record structure."},
+    {"source_type":"REPOSITORY_DERIVED","source_path":"KGEN-KAIOS/world-viewer/ecosystem/ecosystem-runtime.js","source_commit":"1650191f35567d43016473420cfd2cba22b00aea","git_object":"2bab509140ab4b93c7e4975286c826693965cf26","sha256":"9b2cd9d4501727d3134ea332e1a30cd77d5d7d647300820f51d9c264784ef537","usage":"Ecology owner and soil habitat boundary."},
+    {"source_type":"REPOSITORY_DERIVED","source_path":"docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md","source_commit":"1650191f35567d43016473420cfd2cba22b00aea","git_object":"f9748c99501ec1c1ea6ba5c39833909684c0ffbe","sha256":"6d71cd7946f0b4057a9b5289923d3c7b424e409140feb7404f5b433a309ab00b","usage":"Positive mass and explicit energy accounting constraints."}
+  ],
+  "boundaries": [
+    "CANDIDATE_ONLY",
+    "SIMULATION_ONLY",
+    "NO_REAL_WORLD_PROBABILITIES",
+    "NO_FIELD_THRESHOLDS_OR_PRESCRIPTIONS",
+    "NO_ENVIRONMENTAL_APPROVAL_OR_REMEDIATION_GUIDANCE",
+    "NO_SAFETY_OR_YIELD_GUARANTEE",
+    "NO_COMPOST_RUNTIME",
+    "NO_CANONICAL_OR_CURRENT_CHANGE",
+    "NO_RUNTIME_CODE",
+    "NO_RIGHTS_OR_ECONOMY_AUTHORITY",
+    "NO_DEPLOYMENT",
+    "NO_MERGE"
+  ]
+}
