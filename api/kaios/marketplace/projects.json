@@ -1,0 +1,176 @@
+{
+  "projects": [
+    {
+      "project_id": "MARKET-PROJECT-001",
+      "request_id": "MARKET-REQUEST-001",
+      "kind": "TREE_LIFE_PACKAGE",
+      "status": "ACCEPTED",
+      "escrow": {
+        "customer_budget": 120,
+        "escrow_balance": 120,
+        "reserved_payroll": 42,
+        "reserved_materials": 30,
+        "reserved_transport": 9.6,
+        "reserved_energy": 6,
+        "reserved_compute": 6,
+        "reserved_review": 8.4,
+        "reserved_contingency": 18,
+        "spent": 90,
+        "refunded": 30,
+        "remaining": 0,
+        "account_id": "MARKET-PROJECT-001-ESCROW"
+      },
+      "task_ids": [
+        "MARKET-PROJECT-001-TASK-01",
+        "MARKET-PROJECT-001-TASK-02",
+        "MARKET-PROJECT-001-TASK-03",
+        "MARKET-PROJECT-001-TASK-04",
+        "MARKET-PROJECT-001-TASK-05",
+        "MARKET-PROJECT-001-TASK-06"
+      ],
+      "dependencies": [
+        {
+          "predecessor_task_id": "MARKET-PROJECT-001-TASK-01",
+          "successor_task_id": "MARKET-PROJECT-001-TASK-02"
+        },
+        {
+          "predecessor_task_id": "MARKET-PROJECT-001-TASK-02",
+          "successor_task_id": "MARKET-PROJECT-001-TASK-03"
+        },
+        {
+          "predecessor_task_id": "MARKET-PROJECT-001-TASK-03",
+          "successor_task_id": "MARKET-PROJECT-001-TASK-04"
+        },
+        {
+          "predecessor_task_id": "MARKET-PROJECT-001-TASK-04",
+          "successor_task_id": "MARKET-PROJECT-001-TASK-05"
+        },
+        {
+          "predecessor_task_id": "MARKET-PROJECT-001-TASK-05",
+          "successor_task_id": "MARKET-PROJECT-001-TASK-06"
+        }
+      ],
+      "listing_id": "LISTING-001",
+      "ai_company_binding": null,
+      "simulation_only": true,
+      "settlement": {
+        "status": "SETTLED",
+        "supplier_payment": 20,
+        "company_revenue": 25,
+        "maintenance_reserve": 5,
+        "unused_escrow_refund": 30,
+        "simulation_time": 15
+      }
+    },
+    {
+      "project_id": "MARKET-PROJECT-001",
+      "request_id": "MARKET-REQUEST-001",
+      "kind": "BASIC_SHELTER",
+      "status": "ACCEPTED",
+      "escrow": {
+        "customer_budget": 180,
+        "escrow_balance": 180,
+        "reserved_payroll": 63,
+        "reserved_materials": 45,
+        "reserved_transport": 14.4,
+        "reserved_energy": 9,
+        "reserved_compute": 9,
+        "reserved_review": 12.6,
+        "reserved_contingency": 27,
+        "spent": 0,
+        "refunded": 0,
+        "remaining": 180,
+        "account_id": "MARKET-PROJECT-001-ESCROW"
+      },
+      "task_ids": [
+        "MARKET-PROJECT-001-TASK-01",
+        "MARKET-PROJECT-001-TASK-02",
+        "MARKET-PROJECT-001-TASK-03",
+        "MARKET-PROJECT-001-TASK-04",
+        "MARKET-PROJECT-001-TASK-05",
+        "MARKET-PROJECT-001-TASK-06"
+      ],
+      "dependencies": [
+        {
+          "predecessor_task_id": "MARKET-PROJECT-001-TASK-01",
+          "successor_task_id": "MARKET-PROJECT-001-TASK-02"
+        },
+        {
+          "predecessor_task_id": "MARKET-PROJECT-001-TASK-02",
+          "successor_task_id": "MARKET-PROJECT-001-TASK-03"
+        },
+        {
+          "predecessor_task_id": "MARKET-PROJECT-001-TASK-03",
+          "successor_task_id": "MARKET-PROJECT-001-TASK-04"
+        },
+        {
+          "predecessor_task_id": "MARKET-PROJECT-001-TASK-04",
+          "successor_task_id": "MARKET-PROJECT-001-TASK-05"
+        },
+        {
+          "predecessor_task_id": "MARKET-PROJECT-001-TASK-05",
+          "successor_task_id": "MARKET-PROJECT-001-TASK-06"
+        }
+      ],
+      "listing_id": null,
+      "ai_company_binding": {
+        "project_id": "AI-COMPANY-PROJECT-00001",
+        "status": "COMPLETE",
+        "closeout_status": "CLOSED_BALANCED_SIMULATION",
+        "domain_binding": "CAUSAL_WORLD_CONSTRUCTION",
+        "domain_evidence": {
+          "ok": true,
+          "reason": null,
+          "runtime": "REAL_CAUSAL_WORLD_FOUNDATION",
+          "adapter": "EXECUTED_CANONICAL_RUNTIME",
+          "execution_status": "COMPLETE",
+          "construction_stages": [
+            "SURVEY",
+            "SITE_CLEARING",
+            "EXCAVATION",
+            "FOUNDATION",
+            "STRUCTURE",
+            "UTILITIES",
+            "INSPECTION"
+          ],
+          "final_stage": "COMPLETE",
+          "event_count": 9,
+          "integrity_verified": true,
+          "simulation_only": true,
+          "authority": "NO_PRODUCTION_AUTHORITY"
+        },
+        "approval_status": "RUNTIME_VALIDATED_SIMULATION",
+        "external_deployment": false,
+        "event_count": 77,
+        "state_hash": "7a5a94eb835fb57a20be185fc81d85e5ddd15d96f988619340742c1f0e5e721f"
+      },
+      "simulation_only": true
+    },
+    {
+      "project_id": "FAILED-PROJECT-001",
+      "request_id": "MARKET-REQUEST-001",
+      "kind": "ADVANCED_UNAVAILABLE",
+      "status": "REJECTED",
+      "escrow": {
+        "customer_budget": 100,
+        "escrow_balance": 100,
+        "reserved_payroll": 0,
+        "reserved_materials": 0,
+        "reserved_transport": 0,
+        "reserved_energy": 0,
+        "reserved_compute": 0,
+        "reserved_review": 0,
+        "reserved_contingency": 100,
+        "spent": 0,
+        "refunded": 100,
+        "remaining": 0,
+        "account_id": "MARKET-REQUEST-001-PROVISIONAL-ESCROW"
+      },
+      "task_ids": [],
+      "dependencies": [],
+      "simulation_only": true
+    }
+  ],
+  "no_instant_completion": true,
+  "route_status": "CANONICAL_UNVERSIONED_ROUTE"
+}
