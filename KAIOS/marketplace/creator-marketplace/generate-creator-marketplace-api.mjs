@@ -89,4 +89,3 @@ for (const [name, value] of Object.entries(projections)) {
 }
 
 console.log(JSON.stringify({ status: "PASS", canonical_files: files.length + 2, compatibility_files: files.length + 2, mutation_endpoints: false }, null, 2));
-

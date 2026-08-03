@@ -21,4 +21,3 @@ Credit may allocate or purchase access. It cannot create food, water, oxygen, el
 ## Escrow
 
 Escrow reserves payroll, materials, transport, energy, compute, review and contingency. Accepted work releases approved portions. Rework holds relevant portions. Rejection refunds only the eligible unspent balance after valid costs.
-

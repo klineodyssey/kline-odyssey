@@ -12,4 +12,3 @@
 - Runtime implementation: `NOT_IN_THIS_PR`
 
 Review gate: implementation may start only after this specification PR is reviewed and merged.
-

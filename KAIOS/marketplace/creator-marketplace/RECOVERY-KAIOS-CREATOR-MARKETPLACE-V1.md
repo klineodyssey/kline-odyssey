@@ -8,4 +8,3 @@ Rollback is additive and non-destructive:
 4. Rerun the complete World Viewer regression suite.
 
 No Player Genesis state migration, real wallet, KGEN, on-chain state, CURRENT authority or Constitution source is involved.
-

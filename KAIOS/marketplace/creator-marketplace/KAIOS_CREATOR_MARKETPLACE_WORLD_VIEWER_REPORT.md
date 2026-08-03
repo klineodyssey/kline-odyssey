@@ -9,4 +9,3 @@
 - Import limit: `2,000,000 bytes`
 - Responsive layouts: desktop, tablet, mobile and narrow mobile.
 - Accessibility: semantic landmarks, labels, live regions, keyboard focus and reduced-motion support.
-

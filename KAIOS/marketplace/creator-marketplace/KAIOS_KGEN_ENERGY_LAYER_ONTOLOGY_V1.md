@@ -1,7 +1,7 @@
 # KAIOS / KGEN Energy Layer Ontology V1
 
-Status: `SIMULATION_ONTOLOGY`  
-Conversion status: `NOT_A_PHYSICAL_CURRENCY_CONVERSION`  
+Status: `SIMULATION_ONTOLOGY`
+Conversion status: `NOT_A_PHYSICAL_CURRENCY_CONVERSION`
 Settlement: `NO_REAL_KGEN_SETTLEMENT`
 
 ## KAIOS Operational Layer
@@ -27,4 +27,3 @@ This layer is ontology and future research only. It does not activate the KGEN t
 - No `KAIOS_GAME_CREDIT <-> KGEN` exchange.
 
 Future workline `KAIOS_KGEN_ENERGY_CONVERSION_RESEARCH` remains `HOLD_NOT_STARTED`.
-

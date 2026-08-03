@@ -40,4 +40,3 @@ if (!combined.includes("NOT_A_PHYSICAL_CURRENCY_CONVERSION")) issues.push("ENERG
 
 console.log(JSON.stringify({ status: issues.length ? "FAIL" : "PASS", required_files: required.length, issues }, null, 2));
 if (issues.length) process.exitCode = 1;
-

@@ -31,4 +31,3 @@ The initial Game Credit grant is finite and posted from the fixed starter-alloca
 ## Needs
 
 Biological players require food, water, shelter, clothing, rest, health, energy and safety. Digital AI companions require electricity, compute, storage, cooling, network and maintenance. Robotic bodies require charging or fuel, parts, lubrication, sensors and repair.
-

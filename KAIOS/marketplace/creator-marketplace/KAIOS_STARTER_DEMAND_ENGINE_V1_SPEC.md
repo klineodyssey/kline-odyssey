@@ -17,4 +17,3 @@ The engine is deterministic and demand-driven. Inputs are household members, bod
 - A purchase decreases buyer credit and seller inventory while increasing household inventory.
 
 Outputs include demand ID, category, quantity, unit, urgency, cause, location, earliest service time and fulfillment status.
-

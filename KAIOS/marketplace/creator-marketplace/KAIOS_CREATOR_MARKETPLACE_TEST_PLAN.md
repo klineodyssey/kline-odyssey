@@ -23,4 +23,3 @@ Verify shelter construction cannot skip land, resources, labor, tools, transport
 ## Repository Gates
 
 Run JSON, links, UTF-8, BOM, corruption, secret, protected-path and `git diff --check` checks plus all World Viewer regressions. Required unresolved findings: `P0=0`, `P1=0`, `P2=0`.
-
