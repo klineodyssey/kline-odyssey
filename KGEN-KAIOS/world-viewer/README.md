@@ -39,6 +39,13 @@ blockchain settlement, server authority or Production Runtime.
 
 **Public URL:** https://klineodyssey.github.io/kline-odyssey/world-viewer/player-genesis/
 
+## Life Energy and Payroll
+
+`world-viewer/life-energy-payroll/` adds review-gated AI payroll escrow and
+colony resource ledgers without allowing credit to replace physical resources.
+Its canonical static API is `api/kaios/economy/`; the required `v0` path is a
+read-only compatibility projection generated from the same runtime owner.
+
 ## Real Causal World
 
 `causal-runtime/` extends the synthetic Viewer with deterministic terrain,

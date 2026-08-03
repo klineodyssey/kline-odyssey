@@ -51,6 +51,11 @@
             lifeRuntimeLink.setAttribute("aria-label", "Open KAIOS Life Runtime V1");
             lifeRuntimeLink.innerHTML = '<span class="route-nav-desktop">Life Runtime V1</span><span class="route-nav-mobile">Life V1</span>';
             routeNav.append(lifeRuntimeLink);
+            const lifeEnergyLink = document.createElement("a");
+            lifeEnergyLink.href = "./life-energy-payroll/";
+            lifeEnergyLink.setAttribute("aria-label", "Open KAIOS Life Energy and Payroll");
+            lifeEnergyLink.innerHTML = '<span class="route-nav-desktop">Life Energy &amp; Payroll</span><span class="route-nav-mobile">Payroll</span>';
+            routeNav.append(lifeEnergyLink);
           }
           const stylesheet = document.createElement("link");
           stylesheet.rel = "stylesheet";

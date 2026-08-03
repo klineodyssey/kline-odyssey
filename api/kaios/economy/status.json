@@ -1,0 +1,23 @@
+{
+  "runtime": "KAIOS_LIFE_ENERGY_ECONOMY_PAYROLL",
+  "runtime_revision": "0.1.0",
+  "status": "RUNTIME_VALIDATED_SIMULATION",
+  "boundaries": {
+    "simulation_only": true,
+    "currency": "KAIOS_CREDIT",
+    "real_wallet": false,
+    "real_kgen": false,
+    "on_chain_transfer": false,
+    "issuance_enabled": false,
+    "mutation_endpoints": false,
+    "production_authority": false
+  },
+  "deterministic": true,
+  "serializable": true,
+  "stoppable": true,
+  "resumable": true,
+  "replayable": true,
+  "auditable": true,
+  "mutation_endpoints": false,
+  "route_status": "CANONICAL_UNVERSIONED_ROUTE"
+}

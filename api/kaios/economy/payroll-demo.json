@@ -1,0 +1,181 @@
+{
+  "project": {
+    "project_id": "PROJECT-PLANT-001",
+    "task_id": "TASK-CANDIDATE-001",
+    "status": "COMPLETED",
+    "worker_life_id": "LIFE-AI-WORKER-001",
+    "deliverable": "CANDIDATE_PLANT_LIFE_PACKAGE",
+    "approval_id": "APPROVAL-CODEX-001",
+    "acceptance": "ACCEPTED_SIMULATION"
+  },
+  "worker": {
+    "life_id": "LIFE-AI-WORKER-001",
+    "active": true,
+    "wallet_id": "AI-WORKER-WALLET-001",
+    "current_task_id": null,
+    "time_conflict": false,
+    "life_exists": true
+  },
+  "accounts": {
+    "PROJECT-BUDGET-001": {
+      "type": "PROJECT_BUDGET",
+      "balance": 880
+    },
+    "PROJECT-ESCROW-001": {
+      "type": "PROJECT_ESCROW",
+      "balance": 0
+    },
+    "AI-WORKER-WALLET-001": {
+      "type": "AI_WORKER_WALLET",
+      "balance": 80
+    },
+    "HOUSEHOLD-LEDGER-001": {
+      "type": "HOUSEHOLD",
+      "balance": 10
+    },
+    "ENERGY-COST-POOL": {
+      "type": "ENERGY_COST",
+      "balance": 10
+    },
+    "COMPUTE-COST-POOL": {
+      "type": "COMPUTE_COST",
+      "balance": 8
+    },
+    "MAINTENANCE-RESERVE": {
+      "type": "MAINTENANCE_RESERVE",
+      "balance": 7
+    },
+    "PLATFORM-FEE-POOL": {
+      "type": "PLATFORM_FEE",
+      "balance": 5
+    }
+  },
+  "payroll_events": [
+    {
+      "payroll_event_id": "PAYROLL-EVENT-001",
+      "project_id": "PROJECT-PLANT-001",
+      "task_id": "TASK-CANDIDATE-001",
+      "worker_life_id": "LIFE-AI-WORKER-001",
+      "wallet_id": "AI-WORKER-WALLET-001",
+      "gross_pay": 120,
+      "energy_cost": 10,
+      "compute_cost": 8,
+      "maintenance_cost": 7,
+      "platform_fee": 5,
+      "household_transfer": 10,
+      "tax_simulation": 0,
+      "net_pay": 80,
+      "approval_id": "APPROVAL-CODEX-001",
+      "reviewer": "codex-gm-01",
+      "timestamp": "1970-01-01T00:00:00.000Z",
+      "simulation_time": 0,
+      "currency": "KAIOS_CREDIT",
+      "simulation_only": true,
+      "previous_state_hash": "fnv1a-c6aa790d",
+      "next_state_hash": "fnv1a-80cf0b76",
+      "status": "PAYROLL_RELEASED"
+    }
+  ],
+  "ledger": [
+    {
+      "entry_id": "CREDIT-ENTRY-0001",
+      "debit_account": "PROJECT-BUDGET-001",
+      "credit_account": "PROJECT-ESCROW-001",
+      "amount": 120,
+      "currency": "KAIOS_CREDIT",
+      "balanced": true,
+      "reason": "RESERVED_PAYROLL",
+      "claim_key": "PROJECT-PLANT-001/TASK-CANDIDATE-001/LIFE-AI-WORKER-001/APPROVAL-CODEX-001",
+      "simulation_time": 0
+    },
+    {
+      "entry_id": "CREDIT-ENTRY-0002",
+      "debit_account": "PROJECT-ESCROW-001",
+      "credit_account": "AI-WORKER-WALLET-001",
+      "amount": 120,
+      "currency": "KAIOS_CREDIT",
+      "balanced": true,
+      "reason": "GROSS_PAYROLL_RELEASE",
+      "claim_key": "PROJECT-PLANT-001/TASK-CANDIDATE-001/LIFE-AI-WORKER-001/APPROVAL-CODEX-001",
+      "simulation_time": 0
+    },
+    {
+      "entry_id": "CREDIT-ENTRY-0003",
+      "debit_account": "AI-WORKER-WALLET-001",
+      "credit_account": "ENERGY-COST-POOL",
+      "amount": 10,
+      "currency": "KAIOS_CREDIT",
+      "balanced": true,
+      "reason": "ENERGY_COST",
+      "claim_key": "PROJECT-PLANT-001/TASK-CANDIDATE-001/LIFE-AI-WORKER-001/APPROVAL-CODEX-001",
+      "simulation_time": 0
+    },
+    {
+      "entry_id": "CREDIT-ENTRY-0004",
+      "debit_account": "AI-WORKER-WALLET-001",
+      "credit_account": "COMPUTE-COST-POOL",
+      "amount": 8,
+      "currency": "KAIOS_CREDIT",
+      "balanced": true,
+      "reason": "COMPUTE_COST",
+      "claim_key": "PROJECT-PLANT-001/TASK-CANDIDATE-001/LIFE-AI-WORKER-001/APPROVAL-CODEX-001",
+      "simulation_time": 0
+    },
+    {
+      "entry_id": "CREDIT-ENTRY-0005",
+      "debit_account": "AI-WORKER-WALLET-001",
+      "credit_account": "MAINTENANCE-RESERVE",
+      "amount": 7,
+      "currency": "KAIOS_CREDIT",
+      "balanced": true,
+      "reason": "MAINTENANCE_RESERVE",
+      "claim_key": "PROJECT-PLANT-001/TASK-CANDIDATE-001/LIFE-AI-WORKER-001/APPROVAL-CODEX-001",
+      "simulation_time": 0
+    },
+    {
+      "entry_id": "CREDIT-ENTRY-0006",
+      "debit_account": "AI-WORKER-WALLET-001",
+      "credit_account": "PLATFORM-FEE-POOL",
+      "amount": 5,
+      "currency": "KAIOS_CREDIT",
+      "balanced": true,
+      "reason": "PLATFORM_FEE",
+      "claim_key": "PROJECT-PLANT-001/TASK-CANDIDATE-001/LIFE-AI-WORKER-001/APPROVAL-CODEX-001",
+      "simulation_time": 0
+    },
+    {
+      "entry_id": "CREDIT-ENTRY-0007",
+      "debit_account": "AI-WORKER-WALLET-001",
+      "credit_account": "HOUSEHOLD-LEDGER-001",
+      "amount": 10,
+      "currency": "KAIOS_CREDIT",
+      "balanced": true,
+      "reason": "HOUSEHOLD_CONTRACT",
+      "claim_key": "PROJECT-PLANT-001/TASK-CANDIDATE-001/LIFE-AI-WORKER-001/APPROVAL-CODEX-001",
+      "simulation_time": 0
+    }
+  ],
+  "physical_resources": {
+    "electricity_units": 92,
+    "electricity_consumed": 8,
+    "compute_units": 88,
+    "compute_consumed": 12,
+    "external_ant_food_mass": 100,
+    "ant_food_mass": 0,
+    "ant_consumed_mass": 0,
+    "meadow_nectar_mass": 80,
+    "meadow_pollen_mass": 30,
+    "hive_nectar_mass": 0,
+    "hive_pollen_mass": 0,
+    "hive_honey_mass": 0,
+    "hive_processing_byproduct_mass": 0,
+    "hive_consumed_mass": 0
+  },
+  "integrity": {
+    "ok": true,
+    "issues": [],
+    "credit_supply": 1000,
+    "state_hash": "fnv1a-80cf0b76"
+  },
+  "route_status": "CANONICAL_UNVERSIONED_ROUTE"
+}
