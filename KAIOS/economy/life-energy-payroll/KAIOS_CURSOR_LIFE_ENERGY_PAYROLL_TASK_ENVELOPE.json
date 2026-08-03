@@ -1,0 +1,36 @@
+{
+  "task_id": "KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-CANDIDATES-001",
+  "worker_id": "cursor-01",
+  "branch": "cursor-handoff/KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-CANDIDATES-001",
+  "status": "PREPARED_NOT_DISPATCHED",
+  "queue_policy": "ONE_TASK_AT_A_TIME",
+  "claim_created": false,
+  "human_response_file_received": false,
+  "output_classification": ["CANDIDATE_ONLY", "PENDING_CODEX_REVIEW"],
+  "allowed_work": [
+    "candidate colony resource datasets",
+    "candidate payroll fixtures",
+    "candidate UI cards",
+    "candidate test scenarios",
+    "documentation cross-reference",
+    "schema conformance tests"
+  ],
+  "allowed_paths": [
+    "KAIOS/economy/candidates/life-energy-payroll/"
+  ],
+  "forbidden_work": [
+    "real wallet",
+    "KGEN",
+    "contract code",
+    "main merge",
+    "deployment",
+    "canonical schema changes",
+    "runtime authority",
+    "minting",
+    "unrestricted currency issuance",
+    "CURRENT"
+  ],
+  "dispatch_condition": "Human-provided separate Cursor response file is present and the canonical atomic worker claim is available.",
+  "reviewer": "codex-gm-01",
+  "notes": "Preparation is not a worker assignment, session, branch, commit or completed output."
+}

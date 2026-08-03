@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://klineodyssey.github.io/kline-odyssey/schemas/kaios-life-economic-capability-v1.json",
+  "title": "KAIOS Life Economic Capability V1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "life_id", "life_exists", "agency_level", "economic_capability", "simulation_only", "event_history"],
+  "properties": {
+    "schema_version": {"const": "1.0.0"},
+    "life_id": {"type": "string", "minLength": 1},
+    "life_exists": {"const": true},
+    "agency_level": {"enum": ["NO_AGENCY", "REACTIVE", "TASK_BOUND", "SEMI_AUTONOMOUS", "AUTONOMOUS_GOVERNED"]},
+    "economic_capability": {"enum": ["NO_ACCOUNT", "DEPENDENT_ACCOUNT", "CUSTODIAL_ACCOUNT", "COLONY_RESOURCE_LEDGER", "SIMULATED_WALLET", "INDEPENDENT_ECONOMIC_ENTITY"]},
+    "account_id": {"type": ["string", "null"]},
+    "wallet_mode": {"enum": ["NOT_APPLICABLE", "SIMULATED_WALLET", "NO_ACCOUNT"]},
+    "currency": {"enum": ["KAIOS_CREDIT", "NOT_APPLICABLE"]},
+    "chain": {"const": "NO_CHAIN"},
+    "private_key": {"const": "NOT_PRESENT"},
+    "simulation_only": {"const": true},
+    "event_history": {"type": "array", "items": {"type": "string"}}
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"economic_capability": {"const": "NO_ACCOUNT"}}},
+      "then": {"properties": {"account_id": {"type": "null"}, "wallet_mode": {"enum": ["NO_ACCOUNT", "NOT_APPLICABLE"]}, "currency": {"const": "NOT_APPLICABLE"}}}
+    },
+    {
+      "if": {"properties": {"economic_capability": {"const": "SIMULATED_WALLET"}}},
+      "then": {"required": ["account_id", "wallet_mode", "currency", "chain", "private_key"], "properties": {"account_id": {"type": "string", "minLength": 1}, "wallet_mode": {"const": "SIMULATED_WALLET"}, "currency": {"const": "KAIOS_CREDIT"}}}
+    }
+  ]
+}

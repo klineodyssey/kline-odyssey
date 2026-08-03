@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://klineodyssey.github.io/kline-odyssey/schemas/kaios-payroll-event-v1.json",
+  "title": "KAIOS Payroll Event V1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["payroll_event_id", "project_id", "task_id", "worker_life_id", "wallet_id", "gross_pay", "energy_cost", "compute_cost", "maintenance_cost", "platform_fee", "household_transfer", "tax_simulation", "net_pay", "approval_id", "reviewer", "timestamp", "simulation_time", "currency", "simulation_only", "previous_state_hash", "next_state_hash", "status"],
+  "properties": {
+    "payroll_event_id": {"type": "string", "minLength": 1},
+    "project_id": {"type": "string", "minLength": 1},
+    "task_id": {"type": "string", "minLength": 1},
+    "worker_life_id": {"type": "string", "minLength": 1},
+    "wallet_id": {"type": "string", "minLength": 1},
+    "gross_pay": {"type": "number", "minimum": 0},
+    "energy_cost": {"type": "number", "minimum": 0},
+    "compute_cost": {"type": "number", "minimum": 0},
+    "maintenance_cost": {"type": "number", "minimum": 0},
+    "platform_fee": {"type": "number", "minimum": 0},
+    "household_transfer": {"type": "number", "minimum": 0},
+    "tax_simulation": {"type": "number", "minimum": 0},
+    "net_pay": {"type": "number", "minimum": 0},
+    "approval_id": {"type": "string", "minLength": 1},
+    "reviewer": {"const": "codex-gm-01"},
+    "timestamp": {"type": "string", "format": "date-time"},
+    "contract_type": {"enum": ["NONE", "EMPLOYMENT_CONTRACT", "HOUSEHOLD_CONTRACT", "AGENCY_CONTRACT", "REVENUE_SHARE_CONTRACT", "MAINTENANCE_CONTRACT", "INHERITANCE_CONTRACT", "VOLUNTARY_TRANSFER"]},
+    "simulation_time": {"type": "integer", "minimum": 0},
+    "currency": {"const": "KAIOS_CREDIT"},
+    "simulation_only": {"const": true},
+    "previous_state_hash": {"type": "string", "minLength": 1},
+    "next_state_hash": {"type": "string", "minLength": 1},
+    "status": {"enum": ["APPROVED", "REWORK_REQUIRED", "REJECTED", "PAYROLL_RELEASED", "REFUNDED", "CANCELLED", "PAYROLL_BLOCKED_MISSING_WALLET", "PAYROLL_BLOCKED_DUPLICATE", "PAYROLL_BLOCKED_TIME_CONFLICT", "PAYROLL_BLOCKED_INSUFFICIENT_ESCROW", "PAYROLL_BLOCKED_LEDGER_IMBALANCE"]}
+  }
+}
