@@ -34,3 +34,6 @@ The Canonical Software Life Registry remains unchanged because its Organ Transpl
 - Full World Viewer regression: `290 PASS / 0 FAIL`.
 - Deterministic replay: all four required demonstrations pass.
 - Repository JSON, UTF-8, BOM, secret, protected-path and `git diff --check` gates: pass before PR review.
+- PR `#124` merged at `d50e6b5c74a3a477f19e6467883d61d87e0867ea`; Pages run `30823887381` passed.
+- Homepage, World Viewer, Marketplace, Player Genesis, Payroll, K280 and all nine requested V1 APIs return HTTP 200.
+- Production Marketplace HTML, application JavaScript and Runtime JavaScript match the merged Git blobs byte-for-byte.
