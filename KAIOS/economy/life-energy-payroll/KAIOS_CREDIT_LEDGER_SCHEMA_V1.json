@@ -1,0 +1,51 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://klineodyssey.github.io/kline-odyssey/schemas/kaios-credit-ledger-v1.json",
+  "title": "KAIOS Credit Ledger V1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "ledger_id", "currency", "simulation_only", "issuance_enabled", "accounts", "entries", "state", "previous_state_hash", "next_state_hash"],
+  "properties": {
+    "schema_version": {"const": "1.0.0"},
+    "ledger_id": {"type": "string", "minLength": 1},
+    "currency": {"const": "KAIOS_CREDIT"},
+    "simulation_only": {"const": true},
+    "issuance_enabled": {"const": false},
+    "accounts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["account_id", "account_type", "balance"],
+        "properties": {
+          "account_id": {"type": "string", "minLength": 1},
+          "account_type": {"enum": ["PROJECT_BUDGET", "PROJECT_ESCROW", "AI_WORKER_WALLET", "HOUSEHOLD", "ENERGY_COST", "COMPUTE_COST", "MAINTENANCE_RESERVE", "PLATFORM_FEE", "REFUND", "AUDIT_CONTROL"]},
+          "balance": {"type": "number", "minimum": 0}
+        }
+      }
+    },
+    "entries": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["entry_id", "event_id", "debit_account", "credit_account", "amount", "currency", "balanced", "reason", "simulation_time"],
+        "properties": {
+          "entry_id": {"type": "string", "minLength": 1},
+          "event_id": {"type": "string", "minLength": 1},
+          "debit_account": {"type": "string", "minLength": 1},
+          "credit_account": {"type": "string", "minLength": 1},
+          "amount": {"type": "number", "exclusiveMinimum": 0},
+          "currency": {"const": "KAIOS_CREDIT"},
+          "balanced": {"const": true},
+          "reason": {"type": "string", "minLength": 1},
+          "simulation_time": {"type": "integer", "minimum": 0},
+          "claim_key": {"type": ["string", "null"]}
+        }
+      }
+    },
+    "state": {"enum": ["BUDGET_RESERVED", "WORK_IN_PROGRESS", "SUBMITTED", "REVIEW_PENDING", "APPROVED", "REWORK_REQUIRED", "REJECTED", "PAYROLL_RELEASED", "REFUNDED", "CANCELLED"]},
+    "previous_state_hash": {"type": "string", "minLength": 1},
+    "next_state_hash": {"type": "string", "minLength": 1}
+  }
+}
