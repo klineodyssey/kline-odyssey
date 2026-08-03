@@ -256,6 +256,29 @@ const catalog = [
     dependencies: ["LIFE-KAIOS-CREATOR-MARKETPLACE-RUNTIME", "LIFE-KAIOS-CREATOR-MARKETPLACE-API"]
   },
   {
+    key: "LIFE-ENERGY-PAYROLL-RUNTIME",
+    name: "kaios-life-energy-payroll-runtime",
+    display: "KAIOS Life Energy and Payroll Runtime",
+    lifeType: "RUNTIME",
+    entryPath: "KGEN-KAIOS/world-viewer/economy/life-energy-payroll-runtime.js",
+    canonicalPath: "KGEN-KAIOS/world-viewer/economy/life-energy-payroll-runtime.js",
+    artifacts: ["KGEN-KAIOS/world-viewer/economy/life-energy-payroll-runtime.js"],
+    runtimeStatus: "ACTIVE_SIMULATION",
+    dependencies: ["LIFE-KAIOS-PLAYER-GENESIS", "LIFE-KAIOS-AI-COMPANY-RUNTIME"]
+  },
+  {
+    key: "LIFE-ENERGY-PAYROLL-VIEWER",
+    name: "kaios-life-energy-payroll-viewer",
+    display: "KAIOS Life Energy and Payroll Viewer",
+    lifeType: "VIEWER",
+    entryPath: "world-viewer/life-energy-payroll/index.html",
+    canonicalPath: "world-viewer/life-energy-payroll/index.html",
+    artifactPrefix: "world-viewer/life-energy-payroll/",
+    publicUrl: "/kline-odyssey/world-viewer/life-energy-payroll/",
+    runtimeStatus: "ACTIVE_SIMULATION",
+    dependencies: ["LIFE-KAIOS-LIFE-ENERGY-PAYROLL-RUNTIME", "LIFE-KAIOS-LIFE-ENERGY-PAYROLL-API"]
+  },
+  {
     key: "FOREST-AGRICULTURE-WORKLINE",
     name: "kaios-forest-agriculture-workline",
     display: "KAIOS Forest and Agriculture Workline",
@@ -479,6 +502,19 @@ const catalog = [
     apiUrl: "/kline-odyssey/api/kaios/marketplace/",
     runtimeStatus: "READ_ONLY_PROJECTION",
     dependencies: ["LIFE-KAIOS-CREATOR-MARKETPLACE-RUNTIME"]
+  },
+  {
+    key: "LIFE-ENERGY-PAYROLL-API",
+    name: "kaios-life-energy-payroll-api",
+    display: "KAIOS Life Energy and Payroll Read-only API",
+    lifeType: "API",
+    entryPath: "KAIOS/economy/life-energy-payroll/generate-life-energy-payroll-api.mjs",
+    canonicalPath: "KAIOS/economy/life-energy-payroll/generate-life-energy-payroll-api.mjs",
+    artifacts: ["KAIOS/economy/life-energy-payroll/generate-life-energy-payroll-api.mjs"],
+    artifactPrefix: "api/kaios/economy/",
+    apiUrl: "/kline-odyssey/api/kaios/economy/",
+    runtimeStatus: "READ_ONLY_PROJECTION",
+    dependencies: ["LIFE-KAIOS-LIFE-ENERGY-PAYROLL-RUNTIME"]
   },
   {
     key: "CHARTER-PROGRAMS-API",
