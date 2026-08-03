@@ -22,6 +22,8 @@ Full SOP: [`KGEN-AI-Company/CURSOR_SESSION_CLOCKIN_SOP.md`](KGEN-AI-Company/CURS
 
 **Cost (rough):** dialogue boot ~$0.02–0.08/start; each dispatch merge wake ~$0.03–0.15 patrol (+ task if claimed). Expect ~$5–20/mo at 2–4 Codex dispatches/day.
 
+**Dispatch wake API key (optional):** Not a Cloud VM env var. Set **GitHub repo secret** `CURSOR_API_KEY` ([Settings → Secrets → Actions](https://github.com/klineodyssey/kline-odyssey/settings/secrets/actions)). Workflow: `.github/workflows/kgen-cursor-dispatch-wake.yml`. Manual test: Actions → **KGEN Cursor Dispatch Wake** → **Run workflow** on `main`. Success log shows `Cursor API HTTP 2xx`. Without the secret, the workflow exits cleanly with a notice only.
+
 ## Cursor Cloud specific instructions
 
 ### Services to run locally
