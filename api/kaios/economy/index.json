@@ -1,0 +1,15 @@
+{
+  "runtime": "KAIOS_LIFE_ENERGY_ECONOMY_PAYROLL",
+  "canonical_route": "/api/kaios/economy/",
+  "compatibility_route": "/api/kaios/economy/v0/",
+  "read_only": true,
+  "mutation_endpoints": false,
+  "files": [
+    "status.json",
+    "life-model.json",
+    "payroll-demo.json",
+    "colony-ant.json",
+    "colony-bee.json",
+    "events.json"
+  ]
+}

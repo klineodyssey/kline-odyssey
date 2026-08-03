@@ -1,0 +1,27 @@
+{
+  "model": "LIFE_EXISTENCE_AGENCY_ECONOMY_THREE_AXIS",
+  "life_model": [
+    {
+      "life_id": "LIFE-GRASS-DEMO",
+      "life_exists": true,
+      "agency_level": "NO_AGENCY",
+      "economic_capability": "NO_ACCOUNT"
+    },
+    {
+      "life_id": "LIFE-FISH-DEMO",
+      "life_exists": true,
+      "agency_level": "REACTIVE",
+      "economic_capability": "NO_ACCOUNT"
+    },
+    {
+      "life_id": "LIFE-AI-WORKER-001",
+      "life_exists": true,
+      "agency_level": "TASK_BOUND",
+      "economic_capability": "SIMULATED_WALLET"
+    }
+  ],
+  "rule": "NO_ACCOUNT_DOES_NOT_INVALIDATE_LIFE",
+  "route_status": "LEGACY_ALIAS",
+  "canonical_route": "/api/kaios/economy/life-model.json",
+  "deprecation_status": "DEPRECATION_PENDING"
+}
