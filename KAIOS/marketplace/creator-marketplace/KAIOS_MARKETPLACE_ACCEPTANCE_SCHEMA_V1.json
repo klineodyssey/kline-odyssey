@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://klineodyssey.github.io/kline-odyssey/schema/kaios/marketplace-acceptance-v1.json",
+  "title": "KAIOS Marketplace Acceptance",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["acceptance_id", "deliverable_id", "customer_id", "outcome", "approved_fraction", "reason", "payroll_release", "escrow_refund", "simulation_time"],
+  "properties": {
+    "acceptance_id": {"type": "string"}, "deliverable_id": {"type": "string"}, "customer_id": {"type": "string"},
+    "outcome": {"enum": ["ACCEPTED", "PARTIAL_ACCEPTANCE", "REWORK_REQUIRED", "REJECTED"]},
+    "approved_fraction": {"type": "number", "minimum": 0, "maximum": 1},
+    "reason": {"type": "string"}, "payroll_release": {"type": "number", "minimum": 0},
+    "escrow_refund": {"type": "number", "minimum": 0}, "simulation_time": {"type": "number", "minimum": 0}
+  }
+}

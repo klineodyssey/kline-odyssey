@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://klineodyssey.github.io/kline-odyssey/schema/kaios/marketplace-delivery-v1.json",
+  "title": "KAIOS Marketplace Delivery",
+  "type": "object",
+  "required": ["deliverable_id", "project_id", "task_outputs", "files", "version", "provenance", "integrity", "tests", "known_limitations", "rights", "maintenance_plan", "acceptance_record"],
+  "properties": {
+    "deliverable_id": {"type": "string"}, "project_id": {"type": "string"},
+    "task_outputs": {"type": "array"}, "files": {"type": "array", "items": {"type": "string"}},
+    "version": {"type": "string"}, "provenance": {"type": "object"}, "integrity": {"type": "object"},
+    "tests": {"type": "array"}, "known_limitations": {"type": "array", "items": {"type": "string"}},
+    "rights": {"type": "array", "items": {"type": "string"}}, "maintenance_plan": {"type": "object"},
+    "acceptance_record": {"type": ["object", "null"]}
+  }
+}

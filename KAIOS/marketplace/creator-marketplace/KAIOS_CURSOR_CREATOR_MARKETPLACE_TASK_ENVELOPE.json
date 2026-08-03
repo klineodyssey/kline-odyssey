@@ -1,0 +1,14 @@
+{
+  "task_id": "KAIOS-CURSOR-CREATOR-MARKETPLACE-CANDIDATES-001",
+  "worker_id": "cursor-01",
+  "worker_class": "LIFE_CREATION_AND_RESEARCH_DIVISION",
+  "branch": "cursor-handoff/KAIOS-CURSOR-CREATOR-MARKETPLACE-CANDIDATES-001",
+  "dispatch_status": "HELD_ONE_TASK_AT_A_TIME",
+  "blocked_by_task_id": "KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-CANDIDATES-001",
+  "output_status": ["CANDIDATE_ONLY", "PENDING_CODEX_REVIEW"],
+  "allowed_work": ["candidate_listings", "life_order_fixtures", "ui_cards", "test_scenarios", "documentation_cross_reference", "generic_tree_candidate", "starter_food_resource_fixtures"],
+  "forbidden": ["CURRENT", "Genesis", "Universe Law", "canonical schema changes", "wallet secrets", "real KGEN", "mint", "merge", "deploy", "Runtime authority", "self_approval", "external_autonomy"],
+  "claim_created": false,
+  "external_wake": false,
+  "reason": "cursor-01 already holds an atomic claim; repository policy permits one task at a time"
+}

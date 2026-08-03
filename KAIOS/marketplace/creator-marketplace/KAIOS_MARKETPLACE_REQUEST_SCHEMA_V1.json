@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://klineodyssey.github.io/kline-odyssey/schema/kaios/marketplace-request-v1.json",
+  "title": "KAIOS Marketplace Request",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["request_id", "customer_id", "description", "requested_output_type", "quantity", "quality", "location", "deadline", "budget", "acceptance_criteria", "rights_requested", "civilization_requirement", "technology_requirement", "risk", "status"],
+  "properties": {
+    "request_id": {"type": "string", "minLength": 1},
+    "customer_id": {"type": "string", "minLength": 1},
+    "description": {"type": "string", "minLength": 1},
+    "requested_output_type": {"enum": ["LIFE_PACKAGE", "SOFTWARE_LIFE", "PHYSICAL_PRODUCT", "BUILDING", "SERVICE", "RESEARCH", "SUPPLY_CHAIN_PLAN", "TRANSPORT", "MAINTENANCE"]},
+    "quantity": {"type": "number", "exclusiveMinimum": 0},
+    "quality": {"type": "string", "minLength": 1},
+    "location": {"type": "string", "minLength": 1},
+    "deadline": {"type": "number", "minimum": 0},
+    "budget": {"type": "number", "minimum": 0},
+    "acceptance_criteria": {"type": "array", "minItems": 1, "items": {"type": "string"}},
+    "rights_requested": {"type": "array", "items": {"type": "string"}},
+    "civilization_requirement": {"type": "string"},
+    "technology_requirement": {"type": "string"},
+    "risk": {"enum": ["LOW", "MEDIUM", "HIGH", "CRITICAL"]},
+    "status": {"enum": ["SUBMITTED", "NEEDS_CLARIFICATION", "ANALYZING", "ACCEPTED", "REJECTED", "BLOCKED_TECHNOLOGY", "BLOCKED_SUPPLY_CHAIN", "BLOCKED_BUDGET", "BLOCKED_WORKFORCE", "BLOCKED_RIGHTS", "BLOCKED_SAFETY"]}
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://klineodyssey.github.io/kline-odyssey/schema/kaios/marketplace-task-v1.json",
+  "title": "KAIOS Marketplace Task",
+  "type": "object",
+  "required": ["task_id", "project_id", "task_type", "dependencies", "worker_class", "location_requirement", "physical_or_digital", "start_time", "duration", "budget", "pay", "resources", "acceptance_criteria", "reviewer", "status"],
+  "properties": {
+    "task_id": {"type": "string"}, "project_id": {"type": "string"},
+    "task_type": {"enum": ["REQUIREMENTS", "DESIGN", "LIFE_SCHEMA", "CODE", "DATA", "SIMULATION", "PHYSICS_REVIEW", "ECONOMY_REVIEW", "RIGHTS_REVIEW", "SAFETY_REVIEW", "TEST", "TRANSPORT", "CONSTRUCTION", "QUALITY", "DELIVERY", "MAINTENANCE_PLAN"]},
+    "dependencies": {"type": "array", "items": {"type": "string"}},
+    "worker_class": {"type": "string"}, "location_requirement": {"type": "string"},
+    "physical_or_digital": {"enum": ["PHYSICAL", "DIGITAL"]},
+    "start_time": {"type": ["number", "null"]}, "duration": {"type": "number", "exclusiveMinimum": 0},
+    "budget": {"type": "number", "minimum": 0}, "pay": {"type": "number", "minimum": 0},
+    "resources": {"type": "object"}, "acceptance_criteria": {"type": "array", "items": {"type": "string"}},
+    "reviewer": {"type": "string"},
+    "status": {"enum": ["NOT_READY", "READY", "IN_PROGRESS", "SUBMITTED", "REVIEW_PENDING", "APPROVED", "REWORK_REQUIRED", "REJECTED", "COMPLETE", "BLOCKED"]}
+  }
+}
