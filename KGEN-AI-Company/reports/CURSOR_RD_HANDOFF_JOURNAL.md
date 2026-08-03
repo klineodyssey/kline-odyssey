@@ -140,10 +140,32 @@ Human：我需要一支 iPhone
 
 - 玩家帶 AI 進宇宙；玩家有地：**種田、魚塭、工廠、商場、供應鏈、科技中心**。
 - **AI 接 case 領薪**；玩家可 **提需求 + 一筆錢給 AI Company** 生產生命。
-- **沒錢包、沒自主生命 → 食物鏈** — 讓人吃、物競天擇、不適者淘汰（不是隱喻而已，是 **economy simulation 規則方向**）。
-- 與 `HUMAN-LIFE-AGENCY-NOT-WALLET-001` 合讀：**Agency + 可領薪 wallet** 才免於「行尸／獵物」。
+- **沒錢包** ⇒ 無獨立 **經濟參與**（`ECONOMIC_CAPABILITY`），**不是** `NOT_ALIVE`（2026-08-03 如來修正，見下）。
+- 與 `HUMAN-LIFE-AGENCY-NOT-WALLET-001` 合讀：**Agency + 可領薪 wallet** 支撐經濟自主；無 wallet 時狀態為 UNEMPLOYED / DEPENDENT 等，非「行尸／獵物」隐喻套用 AI。
 
-#### 悟空 PROPOSED 專案（已寫報告）
+### `CODEX-LIFE-ENERGY-THREE-DIMENSIONS-001` — 如來 canonical 修正（2026-08-03）
+
+| Field | Value |
+|-------|--------|
+| Source | codex-gm-01 work order `KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-CANDIDATES-001` |
+| Repairs | `CURSOR-RD-ECONOMY-PAYROLL-WALLET-20260802` — APPROVED_AS_RESEARCH_INPUT / NOT_CANONICAL |
+
+**三維獨立模型：**
+
+| 維度 | 含義 |
+|------|------|
+| `LIFE_EXISTENCE` | 生命存在／註冊／運行 |
+| `AGENCY_LEVEL` | 自主行動、handoff、claim |
+| `ECONOMIC_CAPABILITY` | 錢包、薪資、市場參與 |
+
+- **無 wallet** = 無獨立經濟能力；**≠** NOT_ALIVE / PREY / FOOD_CHAIN_CONSUMED（對 AI）。
+- 經濟失敗：`UNEMPLOYED`, `DEPENDENT_SUPPORT`, `RESOURCE_STRESSED`, `MAINTENANCE_UNFUNDED`, `SUSPENDED`, `ARCHIVED`。
+- 食物鏈事件僅適用 **生態相容生命與資源**（蟻族食物、蜂巢 nectar/honey）；KAIOS Credit **不能**變食物。
+- `PAYROLL_MISSING_WALLET` → `WALLET_REQUIRED_FOR_PAYMENT`，生命仍在。
+
+**Cursor task：** `KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-CANDIDATES-001` — **BLOCKED** 等 canonical schema + envelope on main。
+
+---
 
 完整研究提案：`KGEN-AI-Company/reports/CURSOR_PROPOSED_KAIOS_PAYROLL_WALLET_RD_20260802.md`
 
