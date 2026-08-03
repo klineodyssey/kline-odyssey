@@ -2,7 +2,7 @@
 
 Task ID: `KAIOS-24H-LIFE-ENERGY-ECONOMY-PAYROLL-001`
 
-Status: `RUNTIME_DEPLOYED / CURSOR_HANDOFF_GATE_HELD`
+Status: `RUNTIME_DEPLOYED / CURSOR_HANDOFF_READY_FOR_MANUAL_EXECUTION`
 
 ## Completed Slices
 
@@ -28,11 +28,16 @@ Status: `RUNTIME_DEPLOYED / CURSOR_HANDOFF_GATE_HELD`
 
 Review result: `P0=0 / P1=0 unresolved / P2=0 unresolved`.
 
-## Held Slices
+## Supplemental Handoff Recovery
 
-- Cursor execution is held pending the Human-provided separate Cursor response
-  file and an available atomic worker claim. The bounded envelope is prepared,
-  but no Cursor assignment, branch, commit, PR or output is claimed.
+- Cursor response evidence was received in Cursor-authored commit
+  `f07ebe7cebe90d26540fc50df03f34a6a985551c` and Draft PR `#118`.
+- A single fenced claim now binds `cursor-01`, the canonical handoff branch,
+  four allowed path roots and seven exact candidate files.
+- Execution is manual-only. External wake, `CURSOR_API_KEY`, external autonomy,
+  merge and deployment are not authorized.
+- Candidate fixtures and Codex review remain pending; no candidate result is
+  claimed before Cursor actually updates PR `#118`.
 
 No elapsed 24-hour operation is claimed. The completed slices were executed in
 one bounded session ending `2026-08-03T19:41+08:00`; service waits and tests are
@@ -41,9 +46,9 @@ recorded by their actual GitHub run and local test durations.
 Local review: `P0=0 / P1=0 unresolved / P2=0 unresolved` after five repaired P1
 findings across specification and UI review.
 
-The runtime deployment is complete. Overall work-order acceptance remains held
-only at the Cursor-response gate; reporting a Cursor candidate result would be
-fabricated.
+The runtime deployment is complete and the prior Cursor-response/claim gate is
+recovered. Final candidate acceptance remains pending manual Cursor execution
+and Codex review.
 
 ## Next Worklines
 

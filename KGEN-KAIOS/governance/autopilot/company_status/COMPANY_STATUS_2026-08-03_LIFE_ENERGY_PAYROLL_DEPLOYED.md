@@ -6,7 +6,7 @@ Task: `KAIOS-24H-LIFE-ENERGY-ECONOMY-PAYROLL-001`
 
 Runtime status: `DEPLOYED_SIMULATION`
 
-Overall gate: `CURSOR_RESPONSE_FILE_NOT_PRESENT`
+Overall gate: `CURSOR_HANDOFF_READY_FOR_MANUAL_EXECUTION`
 
 ## Slice Checkpoints
 
@@ -18,7 +18,7 @@ Overall gate: `CURSOR_RESPONSE_FILE_NOT_PRESENT`
 | 4 Colony ledger | PASS | merged PR `#119` |
 | 5 Payroll wallet | PASS | merged PR `#119` |
 | 6 Schemas/tests | PASS | four schemas; spec validator |
-| 7 Cursor handoff | HELD | preparation-only envelope; Human response file absent; zero active claims |
+| 7 Cursor handoff | READY | Cursor response commit `f07ebe7`; Draft PR `#118`; one fenced manual claim |
 | 8 Specification merge | PASS | `70d079de60636b641721222ede9ab71703ffb8ba` |
 | 9 Simulation implementation | PASS | focused tests `22/22` |
 | 10 Viewer/APIs | PASS | four Playwright viewports; 16 static files from one generator |
@@ -34,6 +34,6 @@ Overall gate: `CURSOR_RESPONSE_FILE_NOT_PRESENT`
 - Real wallet/KGEN/on-chain/issuance/Production authority: `false`
 - P0/P1/P2 unresolved: `0/0/0`
 
-Runtime deployment is complete. Final work-order acceptance is not claimed for
-the Cursor candidate slice because the required separate Cursor response file
-was not supplied and the repository has no safe atomic claim to dispatch.
+Runtime deployment is complete. The Cursor handoff evidence gate is recovered
+without external autonomy. Candidate delivery remains pending manual execution
+and Codex review of all seven expected outputs in Draft PR `#118`.

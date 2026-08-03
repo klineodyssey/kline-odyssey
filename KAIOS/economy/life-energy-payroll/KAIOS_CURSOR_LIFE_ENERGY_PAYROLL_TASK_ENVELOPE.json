@@ -1,12 +1,30 @@
 {
+  "schema_version": "1.0.0",
+  "envelope_id": "TASK-ENVELOPE-KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-CANDIDATES-001-V1",
   "task_id": "KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-CANDIDATES-001",
   "worker_id": "cursor-01",
+  "reviewer": "codex-gm-01",
   "branch": "cursor-handoff/KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-CANDIDATES-001",
-  "status": "PREPARED_NOT_DISPATCHED",
+  "status": "DISPATCHED",
+  "dispatch_mode": "MANUAL_HUMAN_INITIATION_ONLY",
   "queue_policy": "ONE_TASK_AT_A_TIME",
-  "claim_created": false,
-  "human_response_file_received": false,
-  "output_classification": ["CANDIDATE_ONLY", "PENDING_CODEX_REVIEW"],
+  "claim_created": true,
+  "claim_id": "CLAIM-KAIOS-LIFE-ENERGY-PAYROLL-001-cursor-01",
+  "fencing_token": "FENCE-KAIOS-LIFE-ENERGY-PAYROLL-001-R1",
+  "record_version": 1,
+  "claim_effective_when": "THIS_ENVELOPE_AND_MATCHING_REGISTRY_CLAIM_EXIST_ON_ORIGIN_MAIN",
+  "claimed_at": "2026-08-03T12:45:00Z",
+  "lease_expires_at": "2026-08-05T12:45:00Z",
+  "expiry_action": "FAIL_CLOSED_REQUIRE_CODEX_REVALIDATION",
+  "execution_base": "9f481900eb46ae38dd670d6a1bf8a6b784533f77",
+  "cursor_response_commit": "f07ebe7cebe90d26540fc50df03f34a6a985551c",
+  "cursor_draft_pr": 118,
+  "human_response_file_received": true,
+  "human_response_file": "KGEN-AI-Company/reports/CURSOR_LIFE_ENERGY_PAYROLL_RESPONSE_20260803.md",
+  "output_classification": [
+    "CANDIDATE_ONLY",
+    "PENDING_CODEX_REVIEW"
+  ],
   "allowed_work": [
     "candidate colony resource datasets",
     "candidate payroll fixtures",
@@ -16,21 +34,40 @@
     "schema conformance tests"
   ],
   "allowed_paths": [
-    "KAIOS/economy/candidates/life-energy-payroll/"
+    "KAIOS/economy/candidates/payroll-v0/",
+    "KAIOS/economy/candidates/colony-ledger-v0/",
+    "KAIOS/world-viewer/candidates/life-energy-payroll/",
+    "KGEN-AI-Company/reports/"
+  ],
+  "expected_files": [
+    "KAIOS/economy/candidates/payroll-v0/CURSOR_AI_WORKER_PAYROLL_FIXTURES_V0.json",
+    "KAIOS/economy/candidates/payroll-v0/CURSOR_PROJECT_ESCROW_FIXTURES_V0.json",
+    "KAIOS/economy/candidates/colony-ledger-v0/CURSOR_ANT_COLONY_RESOURCE_LEDGER_V0.json",
+    "KAIOS/economy/candidates/colony-ledger-v0/CURSOR_BEE_HIVE_RESOURCE_LEDGER_V0.json",
+    "KAIOS/world-viewer/candidates/life-energy-payroll/CURSOR_LIFE_ENERGY_PAYROLL_VIEWER_CARDS_V0.json",
+    "KAIOS/world-viewer/candidates/life-energy-payroll/CURSOR_LIFE_ENERGY_PAYROLL_TEST_SCENARIOS_V0.json",
+    "KGEN-AI-Company/reports/CURSOR_LIFE_ENERGY_PAYROLL_CANDIDATE_REPORT.md"
   ],
   "forbidden_work": [
     "real wallet",
     "KGEN",
+    "on-chain transfer",
+    "minting",
     "contract code",
     "main merge",
     "deployment",
     "canonical schema changes",
     "runtime authority",
-    "minting",
     "unrestricted currency issuance",
+    "external autonomy",
     "CURRENT"
   ],
-  "dispatch_condition": "Human-provided separate Cursor response file is present and the canonical atomic worker claim is available.",
-  "reviewer": "codex-gm-01",
-  "notes": "Preparation is not a worker assignment, session, branch, commit or completed output."
+  "automatic": false,
+  "external_autonomy": false,
+  "cursor_api_key_required": false,
+  "external_wake_workflow_allowed": false,
+  "merge_allowed": false,
+  "deploy_allowed": false,
+  "completion_rule": "UPDATE_DRAFT_PR_118_AND_STOP_AT_PENDING_CODEX_REVIEW",
+  "notes": "The Human/Cursor response is proven on the existing Cursor-authored branch. This claim authorizes only the seven expected candidate files. Cursor execution may be initiated manually by Human and must not use an external autonomous wake workflow."
 }
