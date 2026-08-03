@@ -10,6 +10,7 @@
 - Tests: `290 PASS / 0 FAIL`
 - Review: `P0=0 / P1=0 / P2=0`
 - Project settlement: `BALANCED / DUPLICATE_BLOCKED / UNUSED_ESCROW_REFUNDED`
+- Software Life Registry: `UNCHANGED / IMMUTABLE LINEAGE ANCHOR PRESERVED`
 - Cursor: `HELD_ONE_TASK_AT_A_TIME / NO NEW CLAIM`
 - Real wallet: `FALSE`
 - Real KGEN: `FALSE`

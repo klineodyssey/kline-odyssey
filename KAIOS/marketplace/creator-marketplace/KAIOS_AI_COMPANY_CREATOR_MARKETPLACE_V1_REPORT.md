@@ -26,6 +26,8 @@ The Marketplace candidate envelope is `HELD_ONE_TASK_AT_A_TIME` because `cursor-
 
 `SIMULATION_ONLY`, `KAIOS_GAME_CREDIT_ONLY`, `NO_REAL_KGEN`, `NO_REAL_WALLET`, `NO_ONCHAIN_TRANSFER`, `NO_PRODUCTION_AUTHORITY`, `NO_EXTERNAL_AUTONOMY`, `NO_UNCONTROLLED_MINT`.
 
+The Canonical Software Life Registry remains unchanged because its Organ Transplant authority is pinned to immutable lineage anchor `cc80135f2c6e6a74aad11f34e793c65ac0ee1938`. Runtime, Viewer and API life headers are present; registry promotion requires a separate lineage-authority review.
+
 ## Validation
 
 - Marketplace focused tests: `18 PASS / 0 FAIL`.

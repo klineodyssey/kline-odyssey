@@ -233,29 +233,6 @@ const catalog = [
     dependencies: ["LIFE-KAIOS-AI-COMPANY-RUNTIME", "LIFE-KAIOS-AI-COMPANY-API"]
   },
   {
-    key: "CREATOR-MARKETPLACE-RUNTIME",
-    name: "kaios-creator-marketplace-runtime",
-    display: "KAIOS AI Company Creator Marketplace Runtime",
-    lifeType: "RUNTIME",
-    entryPath: "KGEN-KAIOS/world-viewer/marketplace/creator-marketplace-runtime.js",
-    canonicalPath: "KGEN-KAIOS/world-viewer/marketplace/creator-marketplace-runtime.js",
-    artifacts: ["KGEN-KAIOS/world-viewer/marketplace/creator-marketplace-runtime.js"],
-    runtimeStatus: "ACTIVE_SIMULATION",
-    dependencies: ["LIFE-KAIOS-PLAYER-GENESIS", "LIFE-KAIOS-AI-COMPANY-RUNTIME"]
-  },
-  {
-    key: "CREATOR-MARKETPLACE-VIEWER",
-    name: "kaios-creator-marketplace-viewer",
-    display: "KAIOS AI Company Creator Marketplace Viewer",
-    lifeType: "VIEWER",
-    entryPath: "world-viewer/creator-marketplace/index.html",
-    canonicalPath: "world-viewer/creator-marketplace/index.html",
-    artifactPrefix: "world-viewer/creator-marketplace/",
-    publicUrl: "/kline-odyssey/world-viewer/creator-marketplace/",
-    runtimeStatus: "ACTIVE_SIMULATION",
-    dependencies: ["LIFE-KAIOS-CREATOR-MARKETPLACE-RUNTIME", "LIFE-KAIOS-CREATOR-MARKETPLACE-API"]
-  },
-  {
     key: "FOREST-AGRICULTURE-WORKLINE",
     name: "kaios-forest-agriculture-workline",
     display: "KAIOS Forest and Agriculture Workline",
@@ -466,19 +443,6 @@ const catalog = [
     runtimeStatus: "READ_ONLY_PROJECTION",
     pathStatus: "MIGRATION_PENDING",
     dependencies: ["LIFE-KAIOS-AI-COMPANY-RUNTIME"]
-  },
-  {
-    key: "CREATOR-MARKETPLACE-API",
-    name: "kaios-creator-marketplace-api",
-    display: "KAIOS Creator Marketplace Read-only API",
-    lifeType: "API",
-    entryPath: "KAIOS/marketplace/creator-marketplace/generate-creator-marketplace-api.mjs",
-    canonicalPath: "KAIOS/marketplace/creator-marketplace/generate-creator-marketplace-api.mjs",
-    artifacts: ["KAIOS/marketplace/creator-marketplace/generate-creator-marketplace-api.mjs"],
-    artifactPrefix: "api/kaios/marketplace/",
-    apiUrl: "/kline-odyssey/api/kaios/marketplace/",
-    runtimeStatus: "READ_ONLY_PROJECTION",
-    dependencies: ["LIFE-KAIOS-CREATOR-MARKETPLACE-RUNTIME"]
   },
   {
     key: "CHARTER-PROGRAMS-API",
