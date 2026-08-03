@@ -1,0 +1,36 @@
+{
+  "schema_version": "1.0.0",
+  "handoff_type": "CURSOR_TO_CODEX",
+  "task_id": "KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-CANDIDATES-001",
+  "worker_id": "cursor-01",
+  "reviewer": "codex-gm-01",
+  "branch": "cursor-handoff/KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-CANDIDATES-001",
+  "base_main_sha": "57573a6b",
+  "output_authority": "CANDIDATE_ONLY",
+  "final_status": "CURSOR_LIFE_ENERGY_PAYROLL_CANDIDATES_BLOCKED",
+  "stop_code": "AWAITING_CODEX_CANONICAL_SCHEMA_AND_ENVELOPE",
+  "preflight": {
+    "worker_registry": "PASS",
+    "task_envelope_on_main": false,
+    "canonical_schema_on_main": false,
+    "work_queue_claimable": false
+  },
+  "codex_review_input": {
+    "prior_report": "CURSOR-RD-ECONOMY-PAYROLL-WALLET-20260802",
+    "classification": "APPROVED_AS_RESEARCH_INPUT_NOT_CANONICAL_REQUIRES_CONCEPTUAL_REPAIR",
+    "conceptual_repair_accepted": true,
+    "dimensions": ["LIFE_EXISTENCE", "AGENCY_LEVEL", "ECONOMIC_CAPABILITY"]
+  },
+  "deliverables_deferred": [
+    "KAIOS/economy/candidates/payroll-v0/CURSOR_AI_WORKER_PAYROLL_FIXTURES_V0.json",
+    "KAIOS/economy/candidates/payroll-v0/CURSOR_PROJECT_ESCROW_FIXTURES_V0.json",
+    "KAIOS/economy/candidates/colony-ledger-v0/CURSOR_ANT_COLONY_RESOURCE_LEDGER_V0.json",
+    "KAIOS/economy/candidates/colony-ledger-v0/CURSOR_BEE_HIVE_RESOURCE_LEDGER_V0.json",
+    "KAIOS/world-viewer/candidates/life-energy-payroll/CURSOR_LIFE_ENERGY_PAYROLL_VIEWER_CARDS_V0.json",
+    "KAIOS/economy/candidates/payroll-v0/CURSOR_LIFE_ENERGY_PAYROLL_TEST_SCENARIOS_V0.json"
+  ],
+  "protected_paths_modified": false,
+  "wallet_access": false,
+  "kgen_access": false,
+  "real_settlement": false
+}
