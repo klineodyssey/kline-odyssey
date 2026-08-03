@@ -33,6 +33,7 @@ execution.
 | 2026-08-02T13:39Z | 2026-08-02T13:50Z | Organ standards typed-evidence hardening | PR `#112` | sixth review repairs completed | `FINAL_REVIEW_PENDING` | independent attack review |
 | 2026-08-02T13:50Z | 2026-08-02T14:39Z | Organ standards gate/provenance hardening | PR `#112` | seventh review hardened semantic gates and provenance; 43/43 PASS | `FINAL_REVIEW_PENDING` | final independent re-review |
 | 2026-08-02T13:53Z | 2026-08-02T13:53Z | Microbial research preparation record | PR `#115` | exact prior Git object/SHA-256 evidence; zero active claims | `PREPARATION_ONLY` | bind to isolated activation PR |
+| 2026-08-03T10:10Z | 2026-08-03T10:13Z | Organ standards final review, merge and deployment | PR `#112` | merged-main worker-state regression and Windows Git-blob newline replay repaired; naming 6/6, Registry 11/11, organ/transplant 43/43, AI Company integration 9/9; P0/P1/P2=0 | merged `83e01e56890a10ff058016864cf51f288df41cb4`; Pages run `30804663931` PASS | reproduction and Genome standards |
 
 ## Cursor Assignment
 
@@ -42,8 +43,8 @@ Cursor had the exact sixteen-file Fungi candidate package committed as
 
 At this point, queue semantics are bounded and explicit:
 
-- `KAIOS-CURSOR-FUNGI-CANDIDATE-001` remains the currently active/reviewed
-  claim artifact (`cursor.current_active_tasks.fungi_task`).
+- `KAIOS-CURSOR-FUNGI-CANDIDATE-001` is merged and released; its provenance
+  remains in history while `cursor.current_active_tasks` is empty.
 - `KAIOS-CURSOR-MICROBIAL-RESEARCH-001` is prepared as
   `PREPARATION_ONLY` and must bind from an exact deterministic activation
   branch before dispatch.
@@ -69,8 +70,9 @@ and `queue.prepared_task` fields.
 - Unresolved P2: `0`
 - PR #109 independent review: P1 found/repaired `1/1`; P2 found/repaired
   `2/2`; unresolved P1/P2 `0/0`.
-- Organ standards attack reviews: P1 found/repaired `24/24`; P2
-  found/repaired `11/11`; final independent re-review pending.
+- Organ standards attack reviews: P1 found/repaired `26/26`; P2
+  found/repaired `13/13`; final independent re-review, merge and deployment
+  complete in PR `#112`.
 - Baseline test debt observed: the foundational-candidate validator does not yet
   recognize `aquaculture-v1` and `forest-agriculture-v1` aggregate candidate
   directories. This is queued for scoped regression repair.
