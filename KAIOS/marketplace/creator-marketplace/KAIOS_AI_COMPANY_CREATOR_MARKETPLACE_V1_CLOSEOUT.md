@@ -3,6 +3,7 @@
 - Task: `KAIOS-AI-COMPANY-CREATOR-MARKETPLACE-V1-001`
 - Specification PR: `#123 / MERGED`
 - Specification merge: `4a943cfe70971fcee89536dd20e0cdb03517e7db`
+- Runtime PR: `#124 / DRAFT / GITHUB GATES PASS`
 - Runtime: `KGEN-KAIOS/world-viewer/marketplace/creator-marketplace-runtime.js`
 - Viewer: `world-viewer/creator-marketplace/`
 - Canonical API: `api/kaios/marketplace/`
