@@ -2,13 +2,13 @@
   "metadata": {
     "schema_version": "1.0.0",
     "task_id": "KAIOS-SOFTWARE-LIFE-CANONICALIZATION-24H-001",
-    "generated_at": "2026-08-03T14:11:53Z",
-    "source_commit": "5bded5613c5fe2ec86236130d6d738eeef9cfc3c",
+    "generated_at": "2026-08-03T14:28:44Z",
+    "source_commit": "7e0301bc370e1d40dd28e5701e578bbeccd9d1a3",
     "status": "CODEX_REVIEWED_REGISTRY",
     "authority": "SIMULATION_ONLY",
     "manifest_schema": "KAIOS/software-life/KAIOS_SOFTWARE_LIFE_MANIFEST_SCHEMA.json",
     "taxonomy_crosswalk": "KAIOS/software-life/KAIOS_SOFTWARE_LIFE_TAXONOMY_CROSSWALK.json",
-    "registry_entries": 36,
+    "registry_entries": 39,
     "public_json_projections_owned": 86,
     "automatic_canonical_promotion": false
   },
@@ -172,7 +172,7 @@
         {
           "event_id": "EVENT-OFFICIAL-HOMEPAGE-REGISTRY-BINDING",
           "event_type": "SOFTWARE_LIFE_REGISTRY_BOUND",
-          "simulation_time": "2026-08-03T14:11:53Z",
+          "simulation_time": "2026-08-03T14:28:44Z",
           "actor": "CODEX_CANONICAL_REVIEW",
           "status": "RECORDED",
           "reason": "Existing repository organism registered without changing Runtime authority.",
@@ -181,7 +181,7 @@
         }
       ],
       "provenance": {
-        "source_commit": "5bded5613c5fe2ec86236130d6d738eeef9cfc3c",
+        "source_commit": "7e0301bc370e1d40dd28e5701e578bbeccd9d1a3",
         "source_paths": [
           "index.html"
         ],
@@ -391,7 +391,7 @@
         {
           "event_id": "EVENT-WORLD-VIEWER-REGISTRY-BINDING",
           "event_type": "SOFTWARE_LIFE_REGISTRY_BOUND",
-          "simulation_time": "2026-08-03T14:11:53Z",
+          "simulation_time": "2026-08-03T14:28:44Z",
           "actor": "CODEX_CANONICAL_REVIEW",
           "status": "RECORDED",
           "reason": "Existing repository organism registered without changing Runtime authority.",
@@ -400,7 +400,7 @@
         }
       ],
       "provenance": {
-        "source_commit": "5bded5613c5fe2ec86236130d6d738eeef9cfc3c",
+        "source_commit": "7e0301bc370e1d40dd28e5701e578bbeccd9d1a3",
         "source_paths": [
           "KGEN-KAIOS/world-viewer/app.js",
           "KGEN-KAIOS/world-viewer/data/world-store.js",
@@ -582,7 +582,7 @@
         {
           "event_id": "EVENT-K280-RUNTIME-REGISTRY-BINDING",
           "event_type": "SOFTWARE_LIFE_REGISTRY_BOUND",
-          "simulation_time": "2026-08-03T14:11:53Z",
+          "simulation_time": "2026-08-03T14:28:44Z",
           "actor": "CODEX_CANONICAL_REVIEW",
           "status": "RECORDED",
           "reason": "Existing repository organism registered without changing Runtime authority.",
@@ -591,7 +591,7 @@
         }
       ],
       "provenance": {
-        "source_commit": "5bded5613c5fe2ec86236130d6d738eeef9cfc3c",
+        "source_commit": "7e0301bc370e1d40dd28e5701e578bbeccd9d1a3",
         "source_paths": [
           "KAIOS/K280/runtime/k280-runtime.js"
         ],
@@ -769,7 +769,7 @@
         {
           "event_id": "EVENT-K280-WORLD-VIEWER-REGISTRY-BINDING",
           "event_type": "SOFTWARE_LIFE_REGISTRY_BOUND",
-          "simulation_time": "2026-08-03T14:11:53Z",
+          "simulation_time": "2026-08-03T14:28:44Z",
           "actor": "CODEX_CANONICAL_REVIEW",
           "status": "RECORDED",
           "reason": "Existing repository organism registered without changing Runtime authority.",
@@ -778,7 +778,7 @@
         }
       ],
       "provenance": {
-        "source_commit": "5bded5613c5fe2ec86236130d6d738eeef9cfc3c",
+        "source_commit": "7e0301bc370e1d40dd28e5701e578bbeccd9d1a3",
         "source_paths": [
           "world-viewer/k280/index.html"
         ],
@@ -955,7 +955,7 @@
         {
           "event_id": "EVENT-PLAYER-GENESIS-REGISTRY-BINDING",
           "event_type": "SOFTWARE_LIFE_REGISTRY_BOUND",
-          "simulation_time": "2026-08-03T14:11:53Z",
+          "simulation_time": "2026-08-03T14:28:44Z",
           "actor": "CODEX_CANONICAL_REVIEW",
           "status": "RECORDED",
           "reason": "Existing repository organism registered without changing Runtime authority.",
@@ -964,7 +964,7 @@
         }
       ],
       "provenance": {
-        "source_commit": "5bded5613c5fe2ec86236130d6d738eeef9cfc3c",
+        "source_commit": "7e0301bc370e1d40dd28e5701e578bbeccd9d1a3",
         "source_paths": [
           "world-viewer/player-genesis/index.html"
         ],
@@ -1155,7 +1155,7 @@
         {
           "event_id": "EVENT-CAUSAL-WORLD-RUNTIME-REGISTRY-BINDING",
           "event_type": "SOFTWARE_LIFE_REGISTRY_BOUND",
-          "simulation_time": "2026-08-03T14:11:53Z",
+          "simulation_time": "2026-08-03T14:28:44Z",
           "actor": "CODEX_CANONICAL_REVIEW",
           "status": "RECORDED",
           "reason": "Existing repository organism registered without changing Runtime authority.",
@@ -1164,7 +1164,7 @@
         }
       ],
       "provenance": {
-        "source_commit": "5bded5613c5fe2ec86236130d6d738eeef9cfc3c",
+        "source_commit": "7e0301bc370e1d40dd28e5701e578bbeccd9d1a3",
         "source_paths": [
           "KGEN-KAIOS/world-viewer/causal-runtime/app.js",
           "KGEN-KAIOS/world-viewer/causal-runtime/causal-world-runtime.js",
@@ -1343,7 +1343,7 @@
         {
           "event_id": "EVENT-CAUSAL-WORLD-VIEWER-REGISTRY-BINDING",
           "event_type": "SOFTWARE_LIFE_REGISTRY_BOUND",
-          "simulation_time": "2026-08-03T14:11:53Z",
+          "simulation_time": "2026-08-03T14:28:44Z",
           "actor": "CODEX_CANONICAL_REVIEW",
           "status": "RECORDED",
           "reason": "Existing repository organism registered without changing Runtime authority.",
@@ -1352,7 +1352,7 @@
         }
       ],
       "provenance": {
-        "source_commit": "5bded5613c5fe2ec86236130d6d738eeef9cfc3c",
+        "source_commit": "7e0301bc370e1d40dd28e5701e578bbeccd9d1a3",
         "source_paths": [
           "world-viewer/causal-runtime/index.html"
         ],
@@ -1536,7 +1536,7 @@
         {
           "event_id": "EVENT-LIFE-RUNTIME-REGISTRY-BINDING",
           "event_type": "SOFTWARE_LIFE_REGISTRY_BOUND",
-          "simulation_time": "2026-08-03T14:11:53Z",
+          "simulation_time": "2026-08-03T14:28:44Z",
           "actor": "CODEX_CANONICAL_REVIEW",
           "status": "RECORDED",
           "reason": "Existing repository organism registered without changing Runtime authority.",
@@ -1545,7 +1545,7 @@
         }
       ],
       "provenance": {
-        "source_commit": "5bded5613c5fe2ec86236130d6d738eeef9cfc3c",
+        "source_commit": "7e0301bc370e1d40dd28e5701e578bbeccd9d1a3",
         "source_paths": [
           "KAIOS/life/runtime/foundational-life-loader.js",
           "KAIOS/life/runtime/foundational-life-runtime.js"
@@ -1738,7 +1738,7 @@
         {
           "event_id": "EVENT-LIFE-RUNTIME-VIEWER-REGISTRY-BINDING",
           "event_type": "SOFTWARE_LIFE_REGISTRY_BOUND",
-          "simulation_time": "2026-08-03T14:11:53Z",
+          "simulation_time": "2026-08-03T14:28:44Z",
           "actor": "CODEX_CANONICAL_REVIEW",
           "status": "RECORDED",
           "reason": "Existing repository organism registered without changing Runtime authority.",
@@ -1747,7 +1747,7 @@
         }
       ],
       "provenance": {
-        "source_commit": "5bded5613c5fe2ec86236130d6d738eeef9cfc3c",
+        "source_commit": "7e0301bc370e1d40dd28e5701e578bbeccd9d1a3",
         "source_paths": [
           "world-viewer/life-runtime/app.js",
           "world-viewer/life-runtime/index.html",
@@ -1926,7 +1926,7 @@
         {
           "event_id": "EVENT-ECOSYSTEM-RUNTIME-REGISTRY-BINDING",
           "event_type": "SOFTWARE_LIFE_REGISTRY_BOUND",
-          "simulation_time": "2026-08-03T14:11:53Z",
+          "simulation_time": "2026-08-03T14:28:44Z",
           "actor": "CODEX_CANONICAL_REVIEW",
           "status": "RECORDED",
           "reason": "Existing repository organism registered without changing Runtime authority.",
@@ -1935,7 +1935,7 @@
         }
       ],
       "provenance": {
-        "source_commit": "5bded5613c5fe2ec86236130d6d738eeef9cfc3c",
+        "source_commit": "7e0301bc370e1d40dd28e5701e578bbeccd9d1a3",
         "source_paths": [
           "KGEN-KAIOS/world-viewer/ecosystem/ecosystem-runtime.js"
         ],
@@ -2127,7 +2127,7 @@
         {
           "event_id": "EVENT-ECOSYSTEM-VIEWER-REGISTRY-BINDING",
           "event_type": "SOFTWARE_LIFE_REGISTRY_BOUND",
-          "simulation_time": "2026-08-03T14:11:53Z",
+          "simulation_time": "2026-08-03T14:28:44Z",
           "actor": "CODEX_CANONICAL_REVIEW",
           "status": "RECORDED",
           "reason": "Existing repository organism registered without changing Runtime authority.",
@@ -2136,7 +2136,7 @@
         }
       ],
       "provenance": {
-        "source_commit": "5bded5613c5fe2ec86236130d6d738eeef9cfc3c",
+        "source_commit": "7e0301bc370e1d40dd28e5701e578bbeccd9d1a3",
         "source_paths": [
           "world-viewer/ecosystem-v1/app.js",
           "world-viewer/ecosystem-v1/index.html",
@@ -2316,7 +2316,7 @@
         {
           "event_id": "EVENT-AQUACULTURE-RUNTIME-REGISTRY-BINDING",
           "event_type": "SOFTWARE_LIFE_REGISTRY_BOUND",
-          "simulation_time": "2026-08-03T14:11:53Z",
+          "simulation_time": "2026-08-03T14:28:44Z",
           "actor": "CODEX_CANONICAL_REVIEW",
           "status": "RECORDED",
           "reason": "Existing repository organism registered without changing Runtime authority.",
@@ -2325,7 +2325,7 @@
         }
       ],
       "provenance": {
-        "source_commit": "5bded5613c5fe2ec86236130d6d738eeef9cfc3c",
+        "source_commit": "7e0301bc370e1d40dd28e5701e578bbeccd9d1a3",
         "source_paths": [
           "KGEN-KAIOS/world-viewer/aquaculture/aquaculture-runtime.js"
         ],
@@ -2517,7 +2517,7 @@
         {
           "event_id": "EVENT-AQUACULTURE-VIEWER-REGISTRY-BINDING",
           "event_type": "SOFTWARE_LIFE_REGISTRY_BOUND",
-          "simulation_time": "2026-08-03T14:11:53Z",
+          "simulation_time": "2026-08-03T14:28:44Z",
           "actor": "CODEX_CANONICAL_REVIEW",
           "status": "RECORDED",
           "reason": "Existing repository organism registered without changing Runtime authority.",
@@ -2526,7 +2526,7 @@
         }
       ],
       "provenance": {
-        "source_commit": "5bded5613c5fe2ec86236130d6d738eeef9cfc3c",
+        "source_commit": "7e0301bc370e1d40dd28e5701e578bbeccd9d1a3",
         "source_paths": [
           "world-viewer/aquaculture-v1/app.js",
           "world-viewer/aquaculture-v1/index.html",
@@ -2706,7 +2706,7 @@
         {
           "event_id": "EVENT-AI-COMPANY-RUNTIME-REGISTRY-BINDING",
           "event_type": "SOFTWARE_LIFE_REGISTRY_BOUND",
-          "simulation_time": "2026-08-03T14:11:53Z",
+          "simulation_time": "2026-08-03T14:28:44Z",
           "actor": "CODEX_CANONICAL_REVIEW",
           "status": "RECORDED",
           "reason": "Existing repository organism registered without changing Runtime authority.",
@@ -2715,7 +2715,7 @@
         }
       ],
       "provenance": {
-        "source_commit": "5bded5613c5fe2ec86236130d6d738eeef9cfc3c",
+        "source_commit": "7e0301bc370e1d40dd28e5701e578bbeccd9d1a3",
         "source_paths": [
           "KGEN-KAIOS/world-viewer/ai-company/ai-company-project-runtime.js"
         ],
@@ -2907,7 +2907,7 @@
         {
           "event_id": "EVENT-AI-COMPANY-VIEWER-REGISTRY-BINDING",
           "event_type": "SOFTWARE_LIFE_REGISTRY_BOUND",
-          "simulation_time": "2026-08-03T14:11:53Z",
+          "simulation_time": "2026-08-03T14:28:44Z",
           "actor": "CODEX_CANONICAL_REVIEW",
           "status": "RECORDED",
           "reason": "Existing repository organism registered without changing Runtime authority.",
@@ -2916,7 +2916,7 @@
         }
       ],
       "provenance": {
-        "source_commit": "5bded5613c5fe2ec86236130d6d738eeef9cfc3c",
+        "source_commit": "7e0301bc370e1d40dd28e5701e578bbeccd9d1a3",
         "source_paths": [
           "world-viewer/ai-company-v1/app.js",
           "world-viewer/ai-company-v1/index.html",
@@ -3096,7 +3096,7 @@
         {
           "event_id": "EVENT-CREATOR-MARKETPLACE-RUNTIME-REGISTRY-BINDING",
           "event_type": "SOFTWARE_LIFE_REGISTRY_BOUND",
-          "simulation_time": "2026-08-03T14:11:53Z",
+          "simulation_time": "2026-08-03T14:28:44Z",
           "actor": "CODEX_CANONICAL_REVIEW",
           "status": "RECORDED",
           "reason": "Existing repository organism registered without changing Runtime authority.",
@@ -3105,7 +3105,7 @@
         }
       ],
       "provenance": {
-        "source_commit": "5bded5613c5fe2ec86236130d6d738eeef9cfc3c",
+        "source_commit": "7e0301bc370e1d40dd28e5701e578bbeccd9d1a3",
         "source_paths": [
           "KGEN-KAIOS/world-viewer/marketplace/creator-marketplace-runtime.js"
         ],
@@ -3297,7 +3297,7 @@
         {
           "event_id": "EVENT-CREATOR-MARKETPLACE-VIEWER-REGISTRY-BINDING",
           "event_type": "SOFTWARE_LIFE_REGISTRY_BOUND",
-          "simulation_time": "2026-08-03T14:11:53Z",
+          "simulation_time": "2026-08-03T14:28:44Z",
           "actor": "CODEX_CANONICAL_REVIEW",
           "status": "RECORDED",
           "reason": "Existing repository organism registered without changing Runtime authority.",
@@ -3306,7 +3306,7 @@
         }
       ],
       "provenance": {
-        "source_commit": "5bded5613c5fe2ec86236130d6d738eeef9cfc3c",
+        "source_commit": "7e0301bc370e1d40dd28e5701e578bbeccd9d1a3",
         "source_paths": [
           "world-viewer/creator-marketplace/app.js",
           "world-viewer/creator-marketplace/index.html",
@@ -3337,6 +3337,396 @@
       "api_url": null,
       "code_hash": "18ad2c20f2e7bf4a7bbb7e6ae2b96bdf5b06ea8209dd9f00bb41372f2c4dd66b",
       "artifact_hash": "ed0666bb4cd8aa58331de05ecf5586b00a5a09d97fcd5b59d28fabd87eaf4e45",
+      "legacy_aliases": []
+    },
+    {
+      "life_id": "LIFE-KAIOS-LIFE-ENERGY-PAYROLL-RUNTIME",
+      "species_id": "SPECIES-KAIOS-LIFE-ENERGY-PAYROLL-RUNTIME",
+      "genome_id": "GENOME-KAIOS-LIFE-ENERGY-PAYROLL-RUNTIME",
+      "organism_name": "kaios-life-energy-payroll-runtime",
+      "canonical_name": "kaios-life-energy-payroll-runtime",
+      "display_name": "KAIOS Life Energy and Payroll Runtime",
+      "life_type": "RUNTIME",
+      "taxonomy": {
+        "owner_12": "KGEN-KAIOS/organism/taxonomy_registry.json",
+        "owner_19": "KGEN-KAIOS/civilization/BIOLOGY_TAXONOMY_STANDARD.md",
+        "levels_12": {
+          "domain": "KGEN_UNIVERSE",
+          "kingdom": "SOFTWARE_LIFE",
+          "phylum": "PROGRAM_ORGANISM",
+          "class": "DETERMINISTIC_RUNTIME_LIFE",
+          "order": "KAIOS_SOFTWARE_ORDER",
+          "family": "LIFE-ENERGY-PAYROLL-RUNTIME-FAMILY",
+          "genus": "LIFE-ENERGY-PAYROLL-RUNTIME-GENUS",
+          "species": "SPECIES-KAIOS-LIFE-ENERGY-PAYROLL-RUNTIME",
+          "cell": "FUNCTION_CELL",
+          "organ": "PROCESSING_ORGAN",
+          "runtime": "ACTIVE_SIMULATION",
+          "civilization": "KAIOS_SIMULATION"
+        },
+        "levels_19": {
+          "Domain": "KGEN_UNIVERSE",
+          "Kingdom": "SOFTWARE_LIFE",
+          "Phylum": "PROGRAM_ORGANISM",
+          "Class": "DETERMINISTIC_RUNTIME_LIFE",
+          "Order": "KAIOS_SOFTWARE_ORDER",
+          "Family": "LIFE-ENERGY-PAYROLL-RUNTIME-FAMILY",
+          "Genus": "LIFE-ENERGY-PAYROLL-RUNTIME-GENUS",
+          "Species": "SPECIES-KAIOS-LIFE-ENERGY-PAYROLL-RUNTIME",
+          "Individual": "LIFE-KAIOS-LIFE-ENERGY-PAYROLL-RUNTIME",
+          "OrganSystem": "LIFE-ENERGY-PAYROLL-RUNTIME-ORGAN-SYSTEM",
+          "Organ": "PROCESSING_ORGAN",
+          "Tissue": "LIFE-ENERGY-PAYROLL-RUNTIME-INTERFACE-GROUP",
+          "Cell": "FUNCTION_CELL",
+          "Organelle": "IMPLEMENTATION_UNIT",
+          "Genome": "GENOME-KAIOS-LIFE-ENERGY-PAYROLL-RUNTIME",
+          "DNA": "STATE_AND_SCHEMA_CONTRACTS",
+          "RNA": "COMMAND_EVENT_TRANSLATION",
+          "Gene": "LIFE-ENERGY-PAYROLL-RUNTIME-FEATURE-SET",
+          "Expression": "ACTIVE_SIMULATION"
+        }
+      },
+      "generation": 1,
+      "genome_version": "1.0.0",
+      "runtime_revision": "2026.08.02",
+      "birth_commit": "a9466da62e3ab38075528785ca6f4702b56b41c7",
+      "birth_time": "2026-08-03T19:31:49+08:00",
+      "creator": "KLINE Odyssey",
+      "maintainer": "CODEX_CONTROLLED",
+      "location": {
+        "repository": "klineodyssey/kline-odyssey",
+        "canonical_path": "KGEN-KAIOS/world-viewer/economy/life-energy-payroll-runtime.js",
+        "current_path": "KGEN-KAIOS/world-viewer/economy/life-energy-payroll-runtime.js",
+        "path_status": "CANONICAL_ACTIVE"
+      },
+      "embodiment": {
+        "mode": "LOCAL_DETERMINISTIC_SIMULATION",
+        "entrypoint": "KGEN-KAIOS/world-viewer/economy/life-energy-payroll-runtime.js",
+        "artifact_paths": [
+          "KGEN-KAIOS/world-viewer/economy/life-energy-payroll-runtime.js"
+        ],
+        "legacy_alias_only": false
+      },
+      "energy_profile": {
+        "energy_type": "COMPUTE_ELECTRICITY_SIMULATION",
+        "metering": "LOCAL_EVENT_ACCOUNTING",
+        "bounded": true
+      },
+      "resource_profile": {
+        "compute": "BOUNDED_CLIENT_OR_LOCAL_EXECUTION",
+        "memory": "BOUNDED_BY_HOST_RUNTIME",
+        "storage": "REPOSITORY_AND_LOCAL_SIMULATION_ONLY",
+        "network": "NO_EXTERNAL_AUTONOMY",
+        "external_side_effects": false
+      },
+      "rights": {
+        "owner": "KLINE_ODYSSEY_REPOSITORY_SIMULATION",
+        "custodian": "CODEX_CANONICAL_REVIEW",
+        "operator": "LOCAL_USER_SIMULATION",
+        "maintainer": "CODEX_CONTROLLED",
+        "use_right": "SIMULATED_USE_ONLY",
+        "mutation_right": "CODEX_REVIEW_REQUIRED",
+        "reproduction_right": "CODEX_REVIEW_REQUIRED",
+        "transplant_right": "CODEX_REVIEW_REQUIRED",
+        "transfer_right": "SIMULATION_ONLY",
+        "real_legal_effect": false
+      },
+      "dependencies": [
+        "LIFE-KAIOS-PLAYER-GENESIS",
+        "LIFE-KAIOS-AI-COMPANY-RUNTIME"
+      ],
+      "organs": [
+        {
+          "organ_id": "ORGAN-LIFE-ENERGY-PAYROLL-RUNTIME-01",
+          "organ_type": "PROCESSING_ORGAN",
+          "path": "KGEN-KAIOS/world-viewer/economy/life-energy-payroll-runtime.js",
+          "content_hash": "99a9f7f47cfdb45046d294f63270baf5719182bc289bd037fbcaabdb231d2780"
+        }
+      ],
+      "interfaces": [
+        {
+          "interface_id": "INTERFACE-LIFE-ENERGY-PAYROLL-RUNTIME-PRIMARY",
+          "direction": "BIDIRECTIONAL",
+          "protocol": "ECMASCRIPT_MODULE",
+          "read_only": false
+        }
+      ],
+      "compatibility": {
+        "epoch": "KAIOS-GENESIS",
+        "hosts": [
+          "LOCAL_NODE_OR_BROWSER"
+        ],
+        "legacy_alias_supported": false,
+        "production_authorized": false
+      },
+      "reproduction_policy": {
+        "mode": "PROHIBITED_UNTIL_STANDARD",
+        "automatic": false,
+        "codex_review_required": true
+      },
+      "mutation_policy": {
+        "mode": "BOUNDED_REVIEW_ONLY",
+        "automatic": false,
+        "codex_review_required": true
+      },
+      "transplant_policy": {
+        "mode": "CONTROLLED_REVIEW_ONLY",
+        "automatic": false,
+        "codex_review_required": true
+      },
+      "marketplace_policy": {
+        "status": "NOT_ELIGIBLE",
+        "simulated_only": true,
+        "real_kgen": false,
+        "onchain_transfer": false
+      },
+      "lifecycle_state": "ACTIVE",
+      "health_state": "HEALTHY",
+      "event_history": [
+        {
+          "event_id": "EVENT-LIFE-ENERGY-PAYROLL-RUNTIME-REGISTRY-BINDING",
+          "event_type": "SOFTWARE_LIFE_REGISTRY_BOUND",
+          "simulation_time": "2026-08-03T14:28:44Z",
+          "actor": "CODEX_CANONICAL_REVIEW",
+          "status": "RECORDED",
+          "reason": "Existing repository organism registered without changing Runtime authority.",
+          "previous_state_hash": null,
+          "next_state_hash": "0fd7e84bed9b8262bfcc3e2fa9737685ff8e56e4d4b8abbf80e0cd2cd847344d"
+        }
+      ],
+      "provenance": {
+        "source_commit": "7e0301bc370e1d40dd28e5701e578bbeccd9d1a3",
+        "source_paths": [
+          "KGEN-KAIOS/world-viewer/economy/life-energy-payroll-runtime.js"
+        ],
+        "generator": "KAIOS/software-life/tools/generate-software-life-registry.mjs",
+        "review_authority": "CODEX_CANONICAL_REVIEW"
+      },
+      "security_boundary": {
+        "simulation_only": true,
+        "real_wallet": false,
+        "real_kgen": false,
+        "onchain_transfer": false,
+        "external_autonomy": false,
+        "production_authority": false,
+        "current_modification": false,
+        "constitution_source_modification": false
+      },
+      "authority_level": "SIMULATION_ONLY",
+      "organism_status": "AUTHORITATIVE",
+      "runtime_status": "ACTIVE_SIMULATION",
+      "parents": [],
+      "children": [],
+      "transplants": [],
+      "mutations": [],
+      "marketplace_status": "NOT_ELIGIBLE",
+      "public_url": null,
+      "api_url": null,
+      "code_hash": "99a9f7f47cfdb45046d294f63270baf5719182bc289bd037fbcaabdb231d2780",
+      "artifact_hash": "0fd7e84bed9b8262bfcc3e2fa9737685ff8e56e4d4b8abbf80e0cd2cd847344d",
+      "legacy_aliases": []
+    },
+    {
+      "life_id": "LIFE-KAIOS-LIFE-ENERGY-PAYROLL-VIEWER",
+      "species_id": "SPECIES-KAIOS-LIFE-ENERGY-PAYROLL-VIEWER",
+      "genome_id": "GENOME-KAIOS-LIFE-ENERGY-PAYROLL-VIEWER",
+      "organism_name": "kaios-life-energy-payroll-viewer",
+      "canonical_name": "kaios-life-energy-payroll-viewer",
+      "display_name": "KAIOS Life Energy and Payroll Viewer",
+      "life_type": "VIEWER",
+      "taxonomy": {
+        "owner_12": "KGEN-KAIOS/organism/taxonomy_registry.json",
+        "owner_19": "KGEN-KAIOS/civilization/BIOLOGY_TAXONOMY_STANDARD.md",
+        "levels_12": {
+          "domain": "KGEN_UNIVERSE",
+          "kingdom": "SOFTWARE_LIFE",
+          "phylum": "PROGRAM_ORGANISM",
+          "class": "VIEWER_APPLICATION_LIFE",
+          "order": "KAIOS_SOFTWARE_ORDER",
+          "family": "LIFE-ENERGY-PAYROLL-VIEWER-FAMILY",
+          "genus": "LIFE-ENERGY-PAYROLL-VIEWER-GENUS",
+          "species": "SPECIES-KAIOS-LIFE-ENERGY-PAYROLL-VIEWER",
+          "cell": "FUNCTION_CELL",
+          "organ": "VIEWER_ORGAN",
+          "runtime": "ACTIVE_SIMULATION",
+          "civilization": "KAIOS_SIMULATION"
+        },
+        "levels_19": {
+          "Domain": "KGEN_UNIVERSE",
+          "Kingdom": "SOFTWARE_LIFE",
+          "Phylum": "PROGRAM_ORGANISM",
+          "Class": "VIEWER_APPLICATION_LIFE",
+          "Order": "KAIOS_SOFTWARE_ORDER",
+          "Family": "LIFE-ENERGY-PAYROLL-VIEWER-FAMILY",
+          "Genus": "LIFE-ENERGY-PAYROLL-VIEWER-GENUS",
+          "Species": "SPECIES-KAIOS-LIFE-ENERGY-PAYROLL-VIEWER",
+          "Individual": "LIFE-KAIOS-LIFE-ENERGY-PAYROLL-VIEWER",
+          "OrganSystem": "LIFE-ENERGY-PAYROLL-VIEWER-ORGAN-SYSTEM",
+          "Organ": "VIEWER_ORGAN",
+          "Tissue": "LIFE-ENERGY-PAYROLL-VIEWER-INTERFACE-GROUP",
+          "Cell": "FUNCTION_CELL",
+          "Organelle": "IMPLEMENTATION_UNIT",
+          "Genome": "GENOME-KAIOS-LIFE-ENERGY-PAYROLL-VIEWER",
+          "DNA": "STATE_AND_SCHEMA_CONTRACTS",
+          "RNA": "COMMAND_EVENT_TRANSLATION",
+          "Gene": "LIFE-ENERGY-PAYROLL-VIEWER-FEATURE-SET",
+          "Expression": "ACTIVE_SIMULATION"
+        }
+      },
+      "generation": 1,
+      "genome_version": "1.0.0",
+      "runtime_revision": "2026.08.02",
+      "birth_commit": "a9466da62e3ab38075528785ca6f4702b56b41c7",
+      "birth_time": "2026-08-03T19:31:49+08:00",
+      "creator": "KLINE Odyssey",
+      "maintainer": "CODEX_CONTROLLED",
+      "location": {
+        "repository": "klineodyssey/kline-odyssey",
+        "canonical_path": "world-viewer/life-energy-payroll/index.html",
+        "current_path": "world-viewer/life-energy-payroll/index.html",
+        "path_status": "CANONICAL_ACTIVE"
+      },
+      "embodiment": {
+        "mode": "STATIC_WEB",
+        "entrypoint": "world-viewer/life-energy-payroll/index.html",
+        "artifact_paths": [
+          "world-viewer/life-energy-payroll/app.js",
+          "world-viewer/life-energy-payroll/index.html",
+          "world-viewer/life-energy-payroll/styles.css"
+        ],
+        "legacy_alias_only": false
+      },
+      "energy_profile": {
+        "energy_type": "COMPUTE_ELECTRICITY_SIMULATION",
+        "metering": "NOT_METERED_STATIC_ARTIFACT",
+        "bounded": true
+      },
+      "resource_profile": {
+        "compute": "BOUNDED_CLIENT_OR_LOCAL_EXECUTION",
+        "memory": "BOUNDED_BY_HOST_RUNTIME",
+        "storage": "REPOSITORY_AND_LOCAL_SIMULATION_ONLY",
+        "network": "NO_EXTERNAL_AUTONOMY",
+        "external_side_effects": false
+      },
+      "rights": {
+        "owner": "KLINE_ODYSSEY_REPOSITORY_SIMULATION",
+        "custodian": "CODEX_CANONICAL_REVIEW",
+        "operator": "LOCAL_USER_SIMULATION",
+        "maintainer": "CODEX_CONTROLLED",
+        "use_right": "SIMULATED_USE_ONLY",
+        "mutation_right": "CODEX_REVIEW_REQUIRED",
+        "reproduction_right": "CODEX_REVIEW_REQUIRED",
+        "transplant_right": "CODEX_REVIEW_REQUIRED",
+        "transfer_right": "SIMULATION_ONLY",
+        "real_legal_effect": false
+      },
+      "dependencies": [
+        "LIFE-KAIOS-LIFE-ENERGY-PAYROLL-RUNTIME",
+        "LIFE-KAIOS-LIFE-ENERGY-PAYROLL-API"
+      ],
+      "organs": [
+        {
+          "organ_id": "ORGAN-LIFE-ENERGY-PAYROLL-VIEWER-01",
+          "organ_type": "PROCESSING_ORGAN",
+          "path": "world-viewer/life-energy-payroll/app.js",
+          "content_hash": "00eb03df75cc28aef52c0a3c374182118196170eb1e81f0f0508f2a397e64996"
+        },
+        {
+          "organ_id": "ORGAN-LIFE-ENERGY-PAYROLL-VIEWER-02",
+          "organ_type": "VIEWER_ORGAN",
+          "path": "world-viewer/life-energy-payroll/index.html",
+          "content_hash": "4ac7958ecdb653a13e0f37aeb94bc52febfc37924c0551c8116b0602daf0dd83"
+        },
+        {
+          "organ_id": "ORGAN-LIFE-ENERGY-PAYROLL-VIEWER-03",
+          "organ_type": "OUTPUT_ORGAN",
+          "path": "world-viewer/life-energy-payroll/styles.css",
+          "content_hash": "6466e6b9c8e06d51be71a1ec43245ae83d18568885fc00728fb32ec23167d0e9"
+        }
+      ],
+      "interfaces": [
+        {
+          "interface_id": "INTERFACE-LIFE-ENERGY-PAYROLL-VIEWER-PRIMARY",
+          "direction": "BIDIRECTIONAL",
+          "protocol": "STATIC_HTML",
+          "read_only": false
+        }
+      ],
+      "compatibility": {
+        "epoch": "KAIOS-GENESIS",
+        "hosts": [
+          "STATIC_GITHUB_PAGES_OR_LOCAL_HTTP"
+        ],
+        "legacy_alias_supported": false,
+        "production_authorized": false
+      },
+      "reproduction_policy": {
+        "mode": "PROHIBITED_UNTIL_STANDARD",
+        "automatic": false,
+        "codex_review_required": true
+      },
+      "mutation_policy": {
+        "mode": "BOUNDED_REVIEW_ONLY",
+        "automatic": false,
+        "codex_review_required": true
+      },
+      "transplant_policy": {
+        "mode": "CONTROLLED_REVIEW_ONLY",
+        "automatic": false,
+        "codex_review_required": true
+      },
+      "marketplace_policy": {
+        "status": "NOT_ELIGIBLE",
+        "simulated_only": true,
+        "real_kgen": false,
+        "onchain_transfer": false
+      },
+      "lifecycle_state": "ACTIVE",
+      "health_state": "HEALTHY",
+      "event_history": [
+        {
+          "event_id": "EVENT-LIFE-ENERGY-PAYROLL-VIEWER-REGISTRY-BINDING",
+          "event_type": "SOFTWARE_LIFE_REGISTRY_BOUND",
+          "simulation_time": "2026-08-03T14:28:44Z",
+          "actor": "CODEX_CANONICAL_REVIEW",
+          "status": "RECORDED",
+          "reason": "Existing repository organism registered without changing Runtime authority.",
+          "previous_state_hash": null,
+          "next_state_hash": "2f5b714d02b7e6235c878c88feda23fc1ef652d1707ff4d0147dd80380a96e5c"
+        }
+      ],
+      "provenance": {
+        "source_commit": "7e0301bc370e1d40dd28e5701e578bbeccd9d1a3",
+        "source_paths": [
+          "world-viewer/life-energy-payroll/app.js",
+          "world-viewer/life-energy-payroll/index.html",
+          "world-viewer/life-energy-payroll/styles.css"
+        ],
+        "generator": "KAIOS/software-life/tools/generate-software-life-registry.mjs",
+        "review_authority": "CODEX_CANONICAL_REVIEW"
+      },
+      "security_boundary": {
+        "simulation_only": true,
+        "real_wallet": false,
+        "real_kgen": false,
+        "onchain_transfer": false,
+        "external_autonomy": false,
+        "production_authority": false,
+        "current_modification": false,
+        "constitution_source_modification": false
+      },
+      "authority_level": "SIMULATION_ONLY",
+      "organism_status": "AUTHORITATIVE",
+      "runtime_status": "ACTIVE_SIMULATION",
+      "parents": [],
+      "children": [],
+      "transplants": [],
+      "mutations": [],
+      "marketplace_status": "NOT_ELIGIBLE",
+      "public_url": "/kline-odyssey/world-viewer/life-energy-payroll/",
+      "api_url": null,
+      "code_hash": "4ac7958ecdb653a13e0f37aeb94bc52febfc37924c0551c8116b0602daf0dd83",
+      "artifact_hash": "2f5b714d02b7e6235c878c88feda23fc1ef652d1707ff4d0147dd80380a96e5c",
       "legacy_aliases": []
     },
     {
@@ -3485,7 +3875,7 @@
         {
           "event_id": "EVENT-FOREST-AGRICULTURE-WORKLINE-REGISTRY-BINDING",
           "event_type": "SOFTWARE_LIFE_REGISTRY_BOUND",
-          "simulation_time": "2026-08-03T14:11:53Z",
+          "simulation_time": "2026-08-03T14:28:44Z",
           "actor": "CODEX_CANONICAL_REVIEW",
           "status": "RECORDED",
           "reason": "Existing repository organism registered without changing Runtime authority.",
@@ -3494,7 +3884,7 @@
         }
       ],
       "provenance": {
-        "source_commit": "5bded5613c5fe2ec86236130d6d738eeef9cfc3c",
+        "source_commit": "7e0301bc370e1d40dd28e5701e578bbeccd9d1a3",
         "source_paths": [
           "KAIOS/life/forest-agriculture/KAIOS_FOREST_AGRICULTURE_RUNTIME_V1_SPEC.md"
         ],
@@ -3672,7 +4062,7 @@
         {
           "event_id": "EVENT-CHARTER-PROGRAM-CENTER-REGISTRY-BINDING",
           "event_type": "SOFTWARE_LIFE_REGISTRY_BOUND",
-          "simulation_time": "2026-08-03T14:11:53Z",
+          "simulation_time": "2026-08-03T14:28:44Z",
           "actor": "CODEX_CANONICAL_REVIEW",
           "status": "RECORDED",
           "reason": "Existing repository organism registered without changing Runtime authority.",
@@ -3681,7 +4071,7 @@
         }
       ],
       "provenance": {
-        "source_commit": "5bded5613c5fe2ec86236130d6d738eeef9cfc3c",
+        "source_commit": "7e0301bc370e1d40dd28e5701e578bbeccd9d1a3",
         "source_paths": [
           "KGEN-KAIOS/world-viewer/program-center/program-center-view.js"
         ],
@@ -3863,7 +4253,7 @@
         {
           "event_id": "EVENT-WORKER-REGISTRY-REGISTRY-BINDING",
           "event_type": "SOFTWARE_LIFE_REGISTRY_BOUND",
-          "simulation_time": "2026-08-03T14:11:53Z",
+          "simulation_time": "2026-08-03T14:28:44Z",
           "actor": "CODEX_CANONICAL_REVIEW",
           "status": "RECORDED",
           "reason": "Existing repository organism registered without changing Runtime authority.",
@@ -3872,7 +4262,7 @@
         }
       ],
       "provenance": {
-        "source_commit": "5bded5613c5fe2ec86236130d6d738eeef9cfc3c",
+        "source_commit": "7e0301bc370e1d40dd28e5701e578bbeccd9d1a3",
         "source_paths": [
           "KGEN-KAIOS/WORKER_REGISTRY.md",
           "KGEN-KAIOS/worker_registry.json"
@@ -4050,7 +4440,7 @@
         {
           "event_id": "EVENT-CURSOR-QUEUE-REGISTRY-BINDING",
           "event_type": "SOFTWARE_LIFE_REGISTRY_BOUND",
-          "simulation_time": "2026-08-03T14:11:53Z",
+          "simulation_time": "2026-08-03T14:28:44Z",
           "actor": "CODEX_CANONICAL_REVIEW",
           "status": "RECORDED",
           "reason": "Existing repository organism registered without changing Runtime authority.",
@@ -4059,7 +4449,7 @@
         }
       ],
       "provenance": {
-        "source_commit": "5bded5613c5fe2ec86236130d6d738eeef9cfc3c",
+        "source_commit": "7e0301bc370e1d40dd28e5701e578bbeccd9d1a3",
         "source_paths": [
           "KAIOS/life/forest-agriculture/KAIOS_CURSOR_CONTINUOUS_WORK_QUEUE.json"
         ],
@@ -4241,7 +4631,7 @@
         {
           "event_id": "EVENT-IDENTITY-AUTHORITY-REGISTRY-BINDING",
           "event_type": "SOFTWARE_LIFE_REGISTRY_BOUND",
-          "simulation_time": "2026-08-03T14:11:53Z",
+          "simulation_time": "2026-08-03T14:28:44Z",
           "actor": "CODEX_CANONICAL_REVIEW",
           "status": "RECORDED",
           "reason": "Existing repository organism registered without changing Runtime authority.",
@@ -4250,7 +4640,7 @@
         }
       ],
       "provenance": {
-        "source_commit": "5bded5613c5fe2ec86236130d6d738eeef9cfc3c",
+        "source_commit": "7e0301bc370e1d40dd28e5701e578bbeccd9d1a3",
         "source_paths": [
           "KGEN-KAIOS/governance/agents/unique-life-identity-v0.1/KAIOS_UNIQUE_LIFE_IDENTITY_AND_EMBODIMENT_ARCHITECTURE_V0_1.md",
           "KGEN-KAIOS/governance/agents/unique-life-identity-v0.1/KAIOS_UNIQUE_LIFE_IDENTITY_REGISTRY_SCHEMA_V0_1.json"
@@ -4426,7 +4816,7 @@
         {
           "event_id": "EVENT-RIGHTS-AUTHORITY-REGISTRY-BINDING",
           "event_type": "SOFTWARE_LIFE_REGISTRY_BOUND",
-          "simulation_time": "2026-08-03T14:11:53Z",
+          "simulation_time": "2026-08-03T14:28:44Z",
           "actor": "CODEX_CANONICAL_REVIEW",
           "status": "RECORDED",
           "reason": "Existing repository organism registered without changing Runtime authority.",
@@ -4435,7 +4825,7 @@
         }
       ],
       "provenance": {
-        "source_commit": "5bded5613c5fe2ec86236130d6d738eeef9cfc3c",
+        "source_commit": "7e0301bc370e1d40dd28e5701e578bbeccd9d1a3",
         "source_paths": [
           "KAIOS_CANONICAL_LIFE_RIGHTS_V1.md"
         ],
@@ -4617,7 +5007,7 @@
         {
           "event_id": "EVENT-SUPPLY-CHAIN-SPECIFICATION-REGISTRY-BINDING",
           "event_type": "SOFTWARE_LIFE_REGISTRY_BOUND",
-          "simulation_time": "2026-08-03T14:11:53Z",
+          "simulation_time": "2026-08-03T14:28:44Z",
           "actor": "CODEX_CANONICAL_REVIEW",
           "status": "RECORDED",
           "reason": "Existing repository organism registered without changing Runtime authority.",
@@ -4626,7 +5016,7 @@
         }
       ],
       "provenance": {
-        "source_commit": "5bded5613c5fe2ec86236130d6d738eeef9cfc3c",
+        "source_commit": "7e0301bc370e1d40dd28e5701e578bbeccd9d1a3",
         "source_paths": [
           "KAIOS_INDUSTRIAL_SUPPLY_CHAIN_SPEC.md",
           "KAIOS_SUPPLY_CHAIN_SCHEMA.json"
@@ -4809,7 +5199,7 @@
         {
           "event_id": "EVENT-PHYSICAL-LABOR-SPECIFICATION-REGISTRY-BINDING",
           "event_type": "SOFTWARE_LIFE_REGISTRY_BOUND",
-          "simulation_time": "2026-08-03T14:11:53Z",
+          "simulation_time": "2026-08-03T14:28:44Z",
           "actor": "CODEX_CANONICAL_REVIEW",
           "status": "RECORDED",
           "reason": "Existing repository organism registered without changing Runtime authority.",
@@ -4818,7 +5208,7 @@
         }
       ],
       "provenance": {
-        "source_commit": "5bded5613c5fe2ec86236130d6d738eeef9cfc3c",
+        "source_commit": "7e0301bc370e1d40dd28e5701e578bbeccd9d1a3",
         "source_paths": [
           "KAIOS_PHYSICAL_LABOR_ACCOUNTING_SPEC.md",
           "KAIOS_PHYSICAL_LABOR_SCHEMA.json"
@@ -4994,7 +5384,7 @@
         {
           "event_id": "EVENT-CHARTER-FOUNDATION-RUNTIME-REGISTRY-BINDING",
           "event_type": "SOFTWARE_LIFE_REGISTRY_BOUND",
-          "simulation_time": "2026-08-03T14:11:53Z",
+          "simulation_time": "2026-08-03T14:28:44Z",
           "actor": "CODEX_CANONICAL_REVIEW",
           "status": "RECORDED",
           "reason": "Existing repository organism registered without changing Runtime authority.",
@@ -5003,7 +5393,7 @@
         }
       ],
       "provenance": {
-        "source_commit": "5bded5613c5fe2ec86236130d6d738eeef9cfc3c",
+        "source_commit": "7e0301bc370e1d40dd28e5701e578bbeccd9d1a3",
         "source_paths": [
           "KGEN-KAIOS/world-viewer/foundation/charter-foundation-runtime.js"
         ],
@@ -5178,7 +5568,7 @@
         {
           "event_id": "EVENT-CANONICAL-LIFE-SCHEMA-REGISTRY-BINDING",
           "event_type": "SOFTWARE_LIFE_REGISTRY_BOUND",
-          "simulation_time": "2026-08-03T14:11:53Z",
+          "simulation_time": "2026-08-03T14:28:44Z",
           "actor": "CODEX_CANONICAL_REVIEW",
           "status": "RECORDED",
           "reason": "Existing repository organism registered without changing Runtime authority.",
@@ -5187,7 +5577,7 @@
         }
       ],
       "provenance": {
-        "source_commit": "5bded5613c5fe2ec86236130d6d738eeef9cfc3c",
+        "source_commit": "7e0301bc370e1d40dd28e5701e578bbeccd9d1a3",
         "source_paths": [
           "KAIOS_CANONICAL_LIFE_SCHEMA_V1.json"
         ],
@@ -5371,7 +5761,7 @@
         {
           "event_id": "EVENT-ORGANISM-MANIFEST-SCHEMA-REGISTRY-BINDING",
           "event_type": "SOFTWARE_LIFE_REGISTRY_BOUND",
-          "simulation_time": "2026-08-03T14:11:53Z",
+          "simulation_time": "2026-08-03T14:28:44Z",
           "actor": "CODEX_CANONICAL_REVIEW",
           "status": "RECORDED",
           "reason": "Existing repository organism registered without changing Runtime authority.",
@@ -5380,7 +5770,7 @@
         }
       ],
       "provenance": {
-        "source_commit": "5bded5613c5fe2ec86236130d6d738eeef9cfc3c",
+        "source_commit": "7e0301bc370e1d40dd28e5701e578bbeccd9d1a3",
         "source_paths": [
           "KGEN-KAIOS/ORGANISM_MANIFEST_STANDARD.md",
           "KGEN-KAIOS/provenance/ORGANISM_MANIFEST_SCHEMA.json"
@@ -5563,7 +5953,7 @@
         {
           "event_id": "EVENT-TAXONOMY-REGISTRY-REGISTRY-BINDING",
           "event_type": "SOFTWARE_LIFE_REGISTRY_BOUND",
-          "simulation_time": "2026-08-03T14:11:53Z",
+          "simulation_time": "2026-08-03T14:28:44Z",
           "actor": "CODEX_CANONICAL_REVIEW",
           "status": "RECORDED",
           "reason": "Existing repository organism registered without changing Runtime authority.",
@@ -5572,7 +5962,7 @@
         }
       ],
       "provenance": {
-        "source_commit": "5bded5613c5fe2ec86236130d6d738eeef9cfc3c",
+        "source_commit": "7e0301bc370e1d40dd28e5701e578bbeccd9d1a3",
         "source_paths": [
           "KGEN-KAIOS/civilization/BIOLOGY_TAXONOMY_STANDARD.md",
           "KGEN-KAIOS/organism/taxonomy_registry.json"
@@ -5806,7 +6196,7 @@
         {
           "event_id": "EVENT-K280-API-REGISTRY-BINDING",
           "event_type": "SOFTWARE_LIFE_REGISTRY_BOUND",
-          "simulation_time": "2026-08-03T14:11:53Z",
+          "simulation_time": "2026-08-03T14:28:44Z",
           "actor": "CODEX_CANONICAL_REVIEW",
           "status": "RECORDED",
           "reason": "Existing repository organism registered without changing Runtime authority.",
@@ -5815,7 +6205,7 @@
         }
       ],
       "provenance": {
-        "source_commit": "5bded5613c5fe2ec86236130d6d738eeef9cfc3c",
+        "source_commit": "7e0301bc370e1d40dd28e5701e578bbeccd9d1a3",
         "source_paths": [
           "api/kaios/k280/civilization.json",
           "api/kaios/k280/events.json",
@@ -6014,7 +6404,7 @@
         {
           "event_id": "EVENT-LIFE-RUNTIME-API-REGISTRY-BINDING",
           "event_type": "SOFTWARE_LIFE_REGISTRY_BOUND",
-          "simulation_time": "2026-08-03T14:11:53Z",
+          "simulation_time": "2026-08-03T14:28:44Z",
           "actor": "CODEX_CANONICAL_REVIEW",
           "status": "RECORDED",
           "reason": "Existing repository organism registered without changing Runtime authority.",
@@ -6023,7 +6413,7 @@
         }
       ],
       "provenance": {
-        "source_commit": "5bded5613c5fe2ec86236130d6d738eeef9cfc3c",
+        "source_commit": "7e0301bc370e1d40dd28e5701e578bbeccd9d1a3",
         "source_paths": [
           "api/kaios/life-runtime-v1/catalog.json",
           "api/kaios/life-runtime-v1/index.html",
@@ -6265,7 +6655,7 @@
         {
           "event_id": "EVENT-ECOSYSTEM-API-REGISTRY-BINDING",
           "event_type": "SOFTWARE_LIFE_REGISTRY_BOUND",
-          "simulation_time": "2026-08-03T14:11:53Z",
+          "simulation_time": "2026-08-03T14:28:44Z",
           "actor": "CODEX_CANONICAL_REVIEW",
           "status": "RECORDED",
           "reason": "Existing repository organism registered without changing Runtime authority.",
@@ -6274,7 +6664,7 @@
         }
       ],
       "provenance": {
-        "source_commit": "5bded5613c5fe2ec86236130d6d738eeef9cfc3c",
+        "source_commit": "7e0301bc370e1d40dd28e5701e578bbeccd9d1a3",
         "source_paths": [
           "KAIOS/life/ecology/generate-ecosystem-v1-api.mjs",
           "api/kaios/ecosystem/v1/events.json",
@@ -6544,7 +6934,7 @@
         {
           "event_id": "EVENT-AQUACULTURE-API-REGISTRY-BINDING",
           "event_type": "SOFTWARE_LIFE_REGISTRY_BOUND",
-          "simulation_time": "2026-08-03T14:11:53Z",
+          "simulation_time": "2026-08-03T14:28:44Z",
           "actor": "CODEX_CANONICAL_REVIEW",
           "status": "RECORDED",
           "reason": "Existing repository organism registered without changing Runtime authority.",
@@ -6553,7 +6943,7 @@
         }
       ],
       "provenance": {
-        "source_commit": "5bded5613c5fe2ec86236130d6d738eeef9cfc3c",
+        "source_commit": "7e0301bc370e1d40dd28e5701e578bbeccd9d1a3",
         "source_paths": [
           "KAIOS/life/aquaculture/generate-aquaculture-v1-api.mjs",
           "api/kaios/aquaculture/v1/events.json",
@@ -6875,7 +7265,7 @@
         {
           "event_id": "EVENT-AI-COMPANY-API-REGISTRY-BINDING",
           "event_type": "SOFTWARE_LIFE_REGISTRY_BOUND",
-          "simulation_time": "2026-08-03T14:11:53Z",
+          "simulation_time": "2026-08-03T14:28:44Z",
           "actor": "CODEX_CANONICAL_REVIEW",
           "status": "RECORDED",
           "reason": "Existing repository organism registered without changing Runtime authority.",
@@ -6884,7 +7274,7 @@
         }
       ],
       "provenance": {
-        "source_commit": "5bded5613c5fe2ec86236130d6d738eeef9cfc3c",
+        "source_commit": "7e0301bc370e1d40dd28e5701e578bbeccd9d1a3",
         "source_paths": [
           "KAIOS/ai-company/generate-ai-company-v1-api.mjs",
           "api/kaios/ai-company/v1/budget.json",
@@ -7234,7 +7624,7 @@
         {
           "event_id": "EVENT-CREATOR-MARKETPLACE-API-REGISTRY-BINDING",
           "event_type": "SOFTWARE_LIFE_REGISTRY_BOUND",
-          "simulation_time": "2026-08-03T14:11:53Z",
+          "simulation_time": "2026-08-03T14:28:44Z",
           "actor": "CODEX_CANONICAL_REVIEW",
           "status": "RECORDED",
           "reason": "Existing repository organism registered without changing Runtime authority.",
@@ -7243,7 +7633,7 @@
         }
       ],
       "provenance": {
-        "source_commit": "5bded5613c5fe2ec86236130d6d738eeef9cfc3c",
+        "source_commit": "7e0301bc370e1d40dd28e5701e578bbeccd9d1a3",
         "source_paths": [
           "KAIOS/marketplace/creator-marketplace/generate-creator-marketplace-api.mjs",
           "api/kaios/marketplace/energy-ontology.json",
@@ -7294,6 +7684,320 @@
       "api_url": "/kline-odyssey/api/kaios/marketplace/",
       "code_hash": "9920a4eb97b296ccb26b4d68286a9043dc107f5253313b4a7da8275efe0e8dd6",
       "artifact_hash": "f88029e84fb094b2aa9c7e9489459bcf4d5f2909356ba15ac9cd0761025df3ed",
+      "legacy_aliases": []
+    },
+    {
+      "life_id": "LIFE-KAIOS-LIFE-ENERGY-PAYROLL-API",
+      "species_id": "SPECIES-KAIOS-LIFE-ENERGY-PAYROLL-API",
+      "genome_id": "GENOME-KAIOS-LIFE-ENERGY-PAYROLL-API",
+      "organism_name": "kaios-life-energy-payroll-api",
+      "canonical_name": "kaios-life-energy-payroll-api",
+      "display_name": "KAIOS Life Energy and Payroll Read-only API",
+      "life_type": "API",
+      "taxonomy": {
+        "owner_12": "KGEN-KAIOS/organism/taxonomy_registry.json",
+        "owner_19": "KGEN-KAIOS/civilization/BIOLOGY_TAXONOMY_STANDARD.md",
+        "levels_12": {
+          "domain": "KGEN_UNIVERSE",
+          "kingdom": "SOFTWARE_LIFE",
+          "phylum": "PROGRAM_ORGANISM",
+          "class": "COMMUNICATION_SERVICE_LIFE",
+          "order": "KAIOS_SOFTWARE_ORDER",
+          "family": "LIFE-ENERGY-PAYROLL-API-FAMILY",
+          "genus": "LIFE-ENERGY-PAYROLL-API-GENUS",
+          "species": "SPECIES-KAIOS-LIFE-ENERGY-PAYROLL-API",
+          "cell": "FUNCTION_CELL",
+          "organ": "API_ORGAN",
+          "runtime": "READ_ONLY_PROJECTION",
+          "civilization": "KAIOS_SIMULATION"
+        },
+        "levels_19": {
+          "Domain": "KGEN_UNIVERSE",
+          "Kingdom": "SOFTWARE_LIFE",
+          "Phylum": "PROGRAM_ORGANISM",
+          "Class": "COMMUNICATION_SERVICE_LIFE",
+          "Order": "KAIOS_SOFTWARE_ORDER",
+          "Family": "LIFE-ENERGY-PAYROLL-API-FAMILY",
+          "Genus": "LIFE-ENERGY-PAYROLL-API-GENUS",
+          "Species": "SPECIES-KAIOS-LIFE-ENERGY-PAYROLL-API",
+          "Individual": "LIFE-KAIOS-LIFE-ENERGY-PAYROLL-API",
+          "OrganSystem": "LIFE-ENERGY-PAYROLL-API-ORGAN-SYSTEM",
+          "Organ": "API_ORGAN",
+          "Tissue": "LIFE-ENERGY-PAYROLL-API-INTERFACE-GROUP",
+          "Cell": "FUNCTION_CELL",
+          "Organelle": "IMPLEMENTATION_UNIT",
+          "Genome": "GENOME-KAIOS-LIFE-ENERGY-PAYROLL-API",
+          "DNA": "STATE_AND_SCHEMA_CONTRACTS",
+          "RNA": "COMMAND_EVENT_TRANSLATION",
+          "Gene": "LIFE-ENERGY-PAYROLL-API-FEATURE-SET",
+          "Expression": "READ_ONLY_PROJECTION"
+        }
+      },
+      "generation": 1,
+      "genome_version": "1.0.0",
+      "runtime_revision": "2026.08.02",
+      "birth_commit": "a9466da62e3ab38075528785ca6f4702b56b41c7",
+      "birth_time": "2026-08-03T19:31:49+08:00",
+      "creator": "KLINE Odyssey",
+      "maintainer": "CODEX_CONTROLLED",
+      "location": {
+        "repository": "klineodyssey/kline-odyssey",
+        "canonical_path": "KAIOS/economy/life-energy-payroll/generate-life-energy-payroll-api.mjs",
+        "current_path": "KAIOS/economy/life-energy-payroll/generate-life-energy-payroll-api.mjs",
+        "path_status": "CANONICAL_ACTIVE"
+      },
+      "embodiment": {
+        "mode": "READ_ONLY_DATA",
+        "entrypoint": "KAIOS/economy/life-energy-payroll/generate-life-energy-payroll-api.mjs",
+        "artifact_paths": [
+          "KAIOS/economy/life-energy-payroll/generate-life-energy-payroll-api.mjs",
+          "api/kaios/economy/colony-ant.json",
+          "api/kaios/economy/colony-bee.json",
+          "api/kaios/economy/events.json",
+          "api/kaios/economy/index.html",
+          "api/kaios/economy/index.json",
+          "api/kaios/economy/life-model.json",
+          "api/kaios/economy/payroll-demo.json",
+          "api/kaios/economy/status.json",
+          "api/kaios/economy/v0/colony-ant.json",
+          "api/kaios/economy/v0/colony-bee.json",
+          "api/kaios/economy/v0/events.json",
+          "api/kaios/economy/v0/index.html",
+          "api/kaios/economy/v0/index.json",
+          "api/kaios/economy/v0/life-model.json",
+          "api/kaios/economy/v0/payroll-demo.json",
+          "api/kaios/economy/v0/status.json"
+        ],
+        "legacy_alias_only": false
+      },
+      "energy_profile": {
+        "energy_type": "STATIC_STORAGE_SIMULATION",
+        "metering": "NOT_METERED_STATIC_ARTIFACT",
+        "bounded": true
+      },
+      "resource_profile": {
+        "compute": "BOUNDED_CLIENT_OR_LOCAL_EXECUTION",
+        "memory": "BOUNDED_BY_HOST_RUNTIME",
+        "storage": "REPOSITORY_AND_LOCAL_SIMULATION_ONLY",
+        "network": "READ_ONLY_GITHUB_PAGES",
+        "external_side_effects": false
+      },
+      "rights": {
+        "owner": "KLINE_ODYSSEY_REPOSITORY_SIMULATION",
+        "custodian": "CODEX_CANONICAL_REVIEW",
+        "operator": "LOCAL_USER_SIMULATION",
+        "maintainer": "CODEX_CONTROLLED",
+        "use_right": "SIMULATED_USE_ONLY",
+        "mutation_right": "CODEX_REVIEW_REQUIRED",
+        "reproduction_right": "CODEX_REVIEW_REQUIRED",
+        "transplant_right": "CODEX_REVIEW_REQUIRED",
+        "transfer_right": "SIMULATION_ONLY",
+        "real_legal_effect": false
+      },
+      "dependencies": [
+        "LIFE-KAIOS-LIFE-ENERGY-PAYROLL-RUNTIME"
+      ],
+      "organs": [
+        {
+          "organ_id": "ORGAN-LIFE-ENERGY-PAYROLL-API-01",
+          "organ_type": "API_ORGAN",
+          "path": "KAIOS/economy/life-energy-payroll/generate-life-energy-payroll-api.mjs",
+          "content_hash": "3d4895ecf1960bac0a79835be7d7b791c00d3935fff84293981555c302a6fbf1"
+        },
+        {
+          "organ_id": "ORGAN-LIFE-ENERGY-PAYROLL-API-02",
+          "organ_type": "API_ORGAN",
+          "path": "api/kaios/economy/colony-ant.json",
+          "content_hash": "3fb2e805a5f0586a3d0bc2d6078734e76621b871b54a43df7e9031af6eadbbdc"
+        },
+        {
+          "organ_id": "ORGAN-LIFE-ENERGY-PAYROLL-API-03",
+          "organ_type": "API_ORGAN",
+          "path": "api/kaios/economy/colony-bee.json",
+          "content_hash": "c251d0b37f69585ff3d31812adcce83842f916719b31807ca16107760e06f129"
+        },
+        {
+          "organ_id": "ORGAN-LIFE-ENERGY-PAYROLL-API-04",
+          "organ_type": "API_ORGAN",
+          "path": "api/kaios/economy/events.json",
+          "content_hash": "b9579b6349616f608aa60ed824fd4013c02ad6a1405cef8ed6b01dfebe206b7a"
+        },
+        {
+          "organ_id": "ORGAN-LIFE-ENERGY-PAYROLL-API-05",
+          "organ_type": "API_ORGAN",
+          "path": "api/kaios/economy/index.html",
+          "content_hash": "986a9465814c93a4fa5e35f4d21115a02c191494fceccb6e376681a23d9fa5d1"
+        },
+        {
+          "organ_id": "ORGAN-LIFE-ENERGY-PAYROLL-API-06",
+          "organ_type": "API_ORGAN",
+          "path": "api/kaios/economy/index.json",
+          "content_hash": "5e0425c321d7c8ffdbac8e1c9dee811b8a0c87348554876b7b7db017fbf78a79"
+        },
+        {
+          "organ_id": "ORGAN-LIFE-ENERGY-PAYROLL-API-07",
+          "organ_type": "API_ORGAN",
+          "path": "api/kaios/economy/life-model.json",
+          "content_hash": "31646930cfc4c852e2b47776d8d4ae88cd6213a3b14ee5c81e7f78d9390aa146"
+        },
+        {
+          "organ_id": "ORGAN-LIFE-ENERGY-PAYROLL-API-08",
+          "organ_type": "API_ORGAN",
+          "path": "api/kaios/economy/payroll-demo.json",
+          "content_hash": "19811cdf13c677ccd4090e906418b62c100a78db7aec3e9fd9b5577101c728c4"
+        },
+        {
+          "organ_id": "ORGAN-LIFE-ENERGY-PAYROLL-API-09",
+          "organ_type": "API_ORGAN",
+          "path": "api/kaios/economy/status.json",
+          "content_hash": "cbbb544acc9e8021fe6f001ac5b7dcb1c105824edba8f12309ff9d7bb239dd41"
+        },
+        {
+          "organ_id": "ORGAN-LIFE-ENERGY-PAYROLL-API-10",
+          "organ_type": "API_ORGAN",
+          "path": "api/kaios/economy/v0/colony-ant.json",
+          "content_hash": "ec60b4723f64fd3b32504728d44abe49b3abd9d970e4b939f022933e9849e25d"
+        },
+        {
+          "organ_id": "ORGAN-LIFE-ENERGY-PAYROLL-API-11",
+          "organ_type": "API_ORGAN",
+          "path": "api/kaios/economy/v0/colony-bee.json",
+          "content_hash": "e394293710a38c37e420618459acd868de63ee2f70e4bca831d0fefe4eeed461"
+        },
+        {
+          "organ_id": "ORGAN-LIFE-ENERGY-PAYROLL-API-12",
+          "organ_type": "API_ORGAN",
+          "path": "api/kaios/economy/v0/events.json",
+          "content_hash": "89103b92929aca7eae5be642028ed4cd739736718b56a6d49b3105f7dde167bd"
+        },
+        {
+          "organ_id": "ORGAN-LIFE-ENERGY-PAYROLL-API-13",
+          "organ_type": "API_ORGAN",
+          "path": "api/kaios/economy/v0/index.html",
+          "content_hash": "9f8d60281feaf050bdf731cd19ea35db92cf719aae304cd585c6e11df74979d6"
+        },
+        {
+          "organ_id": "ORGAN-LIFE-ENERGY-PAYROLL-API-14",
+          "organ_type": "API_ORGAN",
+          "path": "api/kaios/economy/v0/index.json",
+          "content_hash": "6f4118805d5510369728d5bdc4e0aa2f3863531afda4dc7d0ed150d39d31cda9"
+        },
+        {
+          "organ_id": "ORGAN-LIFE-ENERGY-PAYROLL-API-15",
+          "organ_type": "API_ORGAN",
+          "path": "api/kaios/economy/v0/life-model.json",
+          "content_hash": "c07ecd7c708307a0dbbb8e2f97918aff02aa4d58597ecec43764f3ce22843651"
+        },
+        {
+          "organ_id": "ORGAN-LIFE-ENERGY-PAYROLL-API-16",
+          "organ_type": "API_ORGAN",
+          "path": "api/kaios/economy/v0/payroll-demo.json",
+          "content_hash": "5d3f5934aa8926f8153f250b8c6ec62539bfa62f3e923957fe07a01f87d62505"
+        },
+        {
+          "organ_id": "ORGAN-LIFE-ENERGY-PAYROLL-API-17",
+          "organ_type": "API_ORGAN",
+          "path": "api/kaios/economy/v0/status.json",
+          "content_hash": "b35f03295ccd134dec925419183f0f4cf6597ab54cfc3913e002d102188d292c"
+        }
+      ],
+      "interfaces": [
+        {
+          "interface_id": "INTERFACE-LIFE-ENERGY-PAYROLL-API-PRIMARY",
+          "direction": "OUTPUT",
+          "protocol": "JSON_DOCUMENT",
+          "read_only": true
+        }
+      ],
+      "compatibility": {
+        "epoch": "KAIOS-GENESIS",
+        "hosts": [
+          "STATIC_GITHUB_PAGES_OR_LOCAL_HTTP"
+        ],
+        "legacy_alias_supported": false,
+        "production_authorized": false
+      },
+      "reproduction_policy": {
+        "mode": "PROHIBITED_UNTIL_STANDARD",
+        "automatic": false,
+        "codex_review_required": true
+      },
+      "mutation_policy": {
+        "mode": "BOUNDED_REVIEW_ONLY",
+        "automatic": false,
+        "codex_review_required": true
+      },
+      "transplant_policy": {
+        "mode": "CONTROLLED_REVIEW_ONLY",
+        "automatic": false,
+        "codex_review_required": true
+      },
+      "marketplace_policy": {
+        "status": "NOT_ELIGIBLE",
+        "simulated_only": true,
+        "real_kgen": false,
+        "onchain_transfer": false
+      },
+      "lifecycle_state": "ACTIVE",
+      "health_state": "HEALTHY",
+      "event_history": [
+        {
+          "event_id": "EVENT-LIFE-ENERGY-PAYROLL-API-REGISTRY-BINDING",
+          "event_type": "SOFTWARE_LIFE_REGISTRY_BOUND",
+          "simulation_time": "2026-08-03T14:28:44Z",
+          "actor": "CODEX_CANONICAL_REVIEW",
+          "status": "RECORDED",
+          "reason": "Existing repository organism registered without changing Runtime authority.",
+          "previous_state_hash": null,
+          "next_state_hash": "c899b1cfa2e14feaa01b823507e419a49342bd5eefc1f6f959a437b2b30deeb0"
+        }
+      ],
+      "provenance": {
+        "source_commit": "7e0301bc370e1d40dd28e5701e578bbeccd9d1a3",
+        "source_paths": [
+          "KAIOS/economy/life-energy-payroll/generate-life-energy-payroll-api.mjs",
+          "api/kaios/economy/colony-ant.json",
+          "api/kaios/economy/colony-bee.json",
+          "api/kaios/economy/events.json",
+          "api/kaios/economy/index.html",
+          "api/kaios/economy/index.json",
+          "api/kaios/economy/life-model.json",
+          "api/kaios/economy/payroll-demo.json",
+          "api/kaios/economy/status.json",
+          "api/kaios/economy/v0/colony-ant.json",
+          "api/kaios/economy/v0/colony-bee.json",
+          "api/kaios/economy/v0/events.json",
+          "api/kaios/economy/v0/index.html",
+          "api/kaios/economy/v0/index.json",
+          "api/kaios/economy/v0/life-model.json",
+          "api/kaios/economy/v0/payroll-demo.json",
+          "api/kaios/economy/v0/status.json"
+        ],
+        "generator": "KAIOS/software-life/tools/generate-software-life-registry.mjs",
+        "review_authority": "CODEX_CANONICAL_REVIEW"
+      },
+      "security_boundary": {
+        "simulation_only": true,
+        "real_wallet": false,
+        "real_kgen": false,
+        "onchain_transfer": false,
+        "external_autonomy": false,
+        "production_authority": false,
+        "current_modification": false,
+        "constitution_source_modification": false
+      },
+      "authority_level": "SIMULATION_ONLY",
+      "organism_status": "AUTHORITATIVE",
+      "runtime_status": "READ_ONLY_PROJECTION",
+      "parents": [],
+      "children": [],
+      "transplants": [],
+      "mutations": [],
+      "marketplace_status": "NOT_ELIGIBLE",
+      "public_url": null,
+      "api_url": "/kline-odyssey/api/kaios/economy/",
+      "code_hash": "3d4895ecf1960bac0a79835be7d7b791c00d3935fff84293981555c302a6fbf1",
+      "artifact_hash": "c899b1cfa2e14feaa01b823507e419a49342bd5eefc1f6f959a437b2b30deeb0",
       "legacy_aliases": []
     },
     {
@@ -7470,7 +8174,7 @@
         {
           "event_id": "EVENT-CHARTER-PROGRAMS-API-REGISTRY-BINDING",
           "event_type": "SOFTWARE_LIFE_REGISTRY_BOUND",
-          "simulation_time": "2026-08-03T14:11:53Z",
+          "simulation_time": "2026-08-03T14:28:44Z",
           "actor": "CODEX_CANONICAL_REVIEW",
           "status": "RECORDED",
           "reason": "Existing repository organism registered without changing Runtime authority.",
@@ -7479,7 +8183,7 @@
         }
       ],
       "provenance": {
-        "source_commit": "5bded5613c5fe2ec86236130d6d738eeef9cfc3c",
+        "source_commit": "7e0301bc370e1d40dd28e5701e578bbeccd9d1a3",
         "source_paths": [
           "api/kaios/charter/programs/conflicts.json",
           "api/kaios/charter/programs/coverage.json",
