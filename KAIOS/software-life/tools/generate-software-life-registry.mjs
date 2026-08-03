@@ -658,7 +658,7 @@ for (const entry of catalog) {
     },
     reproduction_policy: { mode: "PROHIBITED_UNTIL_STANDARD", automatic: false, codex_review_required: true },
     mutation_policy: { mode: "BOUNDED_REVIEW_ONLY", automatic: false, codex_review_required: true },
-    transplant_policy: { mode: "PROHIBITED_UNTIL_STANDARD", automatic: false, codex_review_required: true },
+    transplant_policy: { mode: "CONTROLLED_REVIEW_ONLY", automatic: false, codex_review_required: true },
     marketplace_policy: { status: "NOT_ELIGIBLE", simulated_only: true, real_kgen: false, onchain_transfer: false },
     lifecycle_state: isSpecification ? "SPECIFIED" : "ACTIVE",
     health_state: isSpecification ? "NOT_EXECUTABLE" : "HEALTHY",

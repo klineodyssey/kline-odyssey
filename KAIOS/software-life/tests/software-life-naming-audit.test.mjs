@@ -135,10 +135,11 @@ test("identity standard declares all fields, lifecycle states and denied authori
     "HEALING", "MUTATING", "REPRODUCTION_REVIEW", "TRANSPLANT_REVIEW",
     "RETIRED", "ARCHIVED", "DEAD"
   ]) assert.match(standard, new RegExp(`\\b${state}\\b`));
+  const report = await read("KAIOS/software-life/KAIOS_SOFTWARE_LIFE_NAMING_AUDIT_REPORT.md");
   for (const boundary of [
     "NO_REAL_WALLET", "NO_REAL_KGEN", "NO_ONCHAIN_TRANSFER",
     "NO_PRODUCTION_AUTHORITY"
-  ]) assert.match(await read("KAIOS/software-life/KAIOS_SOFTWARE_LIFE_NAMING_AUDIT_REPORT.md"), new RegExp(boundary));
+  ]) assert.match(report, new RegExp(boundary));
 });
 
 test("24 hour queue is bounded and Cursor remains one task at a time", async () => {
@@ -157,6 +158,7 @@ test("24 hour queue is bounded and Cursor remains one task at a time", async () 
   assert.equal(queue.cursor.planned_branch_state, "NOT_CREATED");
   assert.equal(queue.cursor.isolated_worktree_state, "NOT_CREATED");
   assert.equal(queue.cursor.activation_pr_required, true);
+  assert.equal(queue.cursor.next_existing_queue_task, "KAIOS-CURSOR-MICROBIAL-RESEARCH-001");
   assert.equal(queue.cursor.can_merge, false);
   assert.equal(queue.cursor.can_deploy, false);
   assert.equal(queue.cursor.can_promote_canonical, false);

@@ -269,6 +269,10 @@ Can Claude, Gemini, OpenHands, GitHub Copilot, ChatGPT, Deep Research, Cursor, C
 | `../KAIOS/software-life/KAIOS_SOFTWARE_LIFE_MANIFEST_SCHEMA.json` | Software Life compatibility manifest without replacing existing Canonical owners. |
 | `../KAIOS/software-life/KAIOS_SOFTWARE_LIFE_REGISTRY.json` | Deterministic Life, Genome, organ, interface and public-API ownership Registry. |
 | `../KAIOS/software-life/KAIOS_SOFTWARE_LIFE_REGISTRY_REPORT.md` | Registry coverage, migration state and authority review. |
+| `../KAIOS/software-life/KAIOS_SOFTWARE_ORGAN_STANDARD.md` | Software Organ identity, interface, resource and lifecycle standard. |
+| `../KAIOS/software-life/KAIOS_SOFTWARE_ORGAN_TRANSPLANT_STANDARD.md` | Fail-closed simulation-only organ transplant governance. |
+| `../KAIOS/software-life/KAIOS_SOFTWARE_ORGAN_COMPATIBILITY_SCHEMA.json` | Organ Manifest, compatibility-gate and transplant-event schema. |
+| `../KAIOS/software-life/tools/validate-software-organ-transplant.mjs` | Cross-record transplant identity, evidence, event and rollback validator. |
 
 ## R&D Provenance And Biological Evolution Governance
 

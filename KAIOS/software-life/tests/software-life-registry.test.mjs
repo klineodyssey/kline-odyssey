@@ -179,7 +179,8 @@ test("registry generation replays byte-for-byte from source commit and timestamp
       `--generated-at=${registry.metadata.generated_at}`,
       `--output=${relativeTarget}`
     ], { cwd: root, stdio: "pipe" });
-    assert.deepEqual(await readFile(target), await readFile(registryPath));
+    const canonicalRegistryPath = relative(root, registryPath).replaceAll("\\", "/");
+    assert.deepEqual(await readFile(target), blob("HEAD", canonicalRegistryPath));
   } finally {
     await rm(directory, { recursive: true, force: true });
   }

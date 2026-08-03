@@ -64,7 +64,6 @@
     "current_status": "IDLE_NO_CURRENT_TASK",
     "prepared_task": "KAIOS-CURSOR-MICROBIAL-RESEARCH-001",
     "prepared_task_status": "PREPARATION_ONLY",
-    "next_existing_queue_task": "KAIOS-CURSOR-MICROBIAL-RESEARCH-001",
     "prepared_task_envelope_id": "TASK-ENVELOPE-KAIOS-CURSOR-MICROBIAL-RESEARCH-001-V1",
     "preparation_source_commit": "7008e4f9449f6df050171cf47ec6ec56419925e9",
     "execution_base": null,
@@ -78,7 +77,18 @@
     "prepared_task_expected_file_count": 8,
     "software_life_task": "KAIOS-CURSOR-SOFTWARE-LIFE-MANIFEST-CANDIDATES-001",
     "software_life_task_status": "QUEUED_AFTER_EXISTING_APPROVED_TASKS",
-    "output_authority": "RESEARCH_PROPOSAL_ONLY / PENDING_CODEX_REVIEW",
+    "output_authority": "CANDIDATE_ONLY",
+    "next_existing_queue_task": "KAIOS-CURSOR-MICROBIAL-RESEARCH-001",
+    "next_existing_queue_task_priority": 1,
+    "current_active_tasks": {
+      "fungi_task": {
+        "task": "KAIOS-CURSOR-FUNGI-CANDIDATE-001",
+        "branch": "cursor-handoff/KAIOS-CURSOR-FUNGI-CANDIDATE-001",
+        "status": "DISPATCHED",
+        "authority": "CURSOR_RESEARCH_CANDIDATE_ONLY",
+        "release_record": "a4fe488eecdf6652ea9fad257195f3ba8fe853aa"
+      }
+    },
     "can_merge": false,
     "can_deploy": false,
     "can_promote_canonical": false

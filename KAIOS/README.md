@@ -93,9 +93,10 @@ or real-world biological engineering.
 
 `software-life/` contains the version-free software-life naming audit,
 identity and taxonomy compatibility standards, deterministic Manifest and
-Registry, controlled rename plan and rolling execution evidence. The current
-packages are audit and registry only: no executable or public route is renamed
-until its dedicated migration batch passes review and compatibility tests.
+Registry, organ and transplant governance, controlled rename plan and rolling
+execution evidence. The current packages are non-executing governance: no
+executable or public route is renamed and no transplant occurs until its
+dedicated migration or integration batch passes review and compatibility tests.
 
 - [Software Life center](software-life/README.md)
 - [Naming audit report](software-life/KAIOS_SOFTWARE_LIFE_NAMING_AUDIT_REPORT.md)
@@ -103,4 +104,9 @@ until its dedicated migration batch passes review and compatibility tests.
 - [Manifest schema](software-life/KAIOS_SOFTWARE_LIFE_MANIFEST_SCHEMA.json)
 - [Software Life Registry](software-life/KAIOS_SOFTWARE_LIFE_REGISTRY.json)
 - [Registry report](software-life/KAIOS_SOFTWARE_LIFE_REGISTRY_REPORT.md)
+- [Software Organ standard](software-life/KAIOS_SOFTWARE_ORGAN_STANDARD.md)
+- [Organ transplant standard](software-life/KAIOS_SOFTWARE_ORGAN_TRANSPLANT_STANDARD.md)
+- [Organ compatibility schema](software-life/KAIOS_SOFTWARE_ORGAN_COMPATIBILITY_SCHEMA.json)
+- [Typed gate evidence fixture](software-life/evidence/SOFTWARE_ORGAN_GATE_EVIDENCE_FIXTURE.json)
+- [Organ transplant semantic validator](software-life/tools/validate-software-organ-transplant.mjs)
 - [Rename plan](software-life/KAIOS_SOFTWARE_LIFE_RENAME_PLAN.json)

@@ -2,8 +2,8 @@
   "metadata": {
     "schema_version": "1.0.0",
     "task_id": "KAIOS-SOFTWARE-LIFE-CANONICALIZATION-24H-001",
-    "generated_at": "2026-08-02T10:10:00Z",
-    "source_commit": "3d5ec469e0aa3cbc94a563d2b24f47dbad117830",
+    "generated_at": "2026-08-02T10:40:00Z",
+    "source_commit": "cc80135f2c6e6a74aad11f34e793c65ac0ee1938",
     "status": "CODEX_REVIEWED_REGISTRY",
     "authority": "SIMULATION_ONLY",
     "manifest_schema": "KAIOS/software-life/KAIOS_SOFTWARE_LIFE_MANIFEST_SCHEMA.json",
@@ -156,7 +156,7 @@
         "codex_review_required": true
       },
       "transplant_policy": {
-        "mode": "PROHIBITED_UNTIL_STANDARD",
+        "mode": "CONTROLLED_REVIEW_ONLY",
         "automatic": false,
         "codex_review_required": true
       },
@@ -172,7 +172,7 @@
         {
           "event_id": "EVENT-OFFICIAL-HOMEPAGE-REGISTRY-BINDING",
           "event_type": "SOFTWARE_LIFE_REGISTRY_BOUND",
-          "simulation_time": "2026-08-02T10:10:00Z",
+          "simulation_time": "2026-08-02T10:40:00Z",
           "actor": "CODEX_CANONICAL_REVIEW",
           "status": "RECORDED",
           "reason": "Existing repository organism registered without changing Runtime authority.",
@@ -181,7 +181,7 @@
         }
       ],
       "provenance": {
-        "source_commit": "3d5ec469e0aa3cbc94a563d2b24f47dbad117830",
+        "source_commit": "cc80135f2c6e6a74aad11f34e793c65ac0ee1938",
         "source_paths": [
           "index.html"
         ],
@@ -375,7 +375,7 @@
         "codex_review_required": true
       },
       "transplant_policy": {
-        "mode": "PROHIBITED_UNTIL_STANDARD",
+        "mode": "CONTROLLED_REVIEW_ONLY",
         "automatic": false,
         "codex_review_required": true
       },
@@ -391,7 +391,7 @@
         {
           "event_id": "EVENT-WORLD-VIEWER-REGISTRY-BINDING",
           "event_type": "SOFTWARE_LIFE_REGISTRY_BOUND",
-          "simulation_time": "2026-08-02T10:10:00Z",
+          "simulation_time": "2026-08-02T10:40:00Z",
           "actor": "CODEX_CANONICAL_REVIEW",
           "status": "RECORDED",
           "reason": "Existing repository organism registered without changing Runtime authority.",
@@ -400,7 +400,7 @@
         }
       ],
       "provenance": {
-        "source_commit": "3d5ec469e0aa3cbc94a563d2b24f47dbad117830",
+        "source_commit": "cc80135f2c6e6a74aad11f34e793c65ac0ee1938",
         "source_paths": [
           "KGEN-KAIOS/world-viewer/app.js",
           "KGEN-KAIOS/world-viewer/data/world-store.js",
@@ -566,7 +566,7 @@
         "codex_review_required": true
       },
       "transplant_policy": {
-        "mode": "PROHIBITED_UNTIL_STANDARD",
+        "mode": "CONTROLLED_REVIEW_ONLY",
         "automatic": false,
         "codex_review_required": true
       },
@@ -582,7 +582,7 @@
         {
           "event_id": "EVENT-K280-RUNTIME-REGISTRY-BINDING",
           "event_type": "SOFTWARE_LIFE_REGISTRY_BOUND",
-          "simulation_time": "2026-08-02T10:10:00Z",
+          "simulation_time": "2026-08-02T10:40:00Z",
           "actor": "CODEX_CANONICAL_REVIEW",
           "status": "RECORDED",
           "reason": "Existing repository organism registered without changing Runtime authority.",
@@ -591,7 +591,7 @@
         }
       ],
       "provenance": {
-        "source_commit": "3d5ec469e0aa3cbc94a563d2b24f47dbad117830",
+        "source_commit": "cc80135f2c6e6a74aad11f34e793c65ac0ee1938",
         "source_paths": [
           "KAIOS/K280/runtime/k280-runtime.js"
         ],
@@ -753,7 +753,7 @@
         "codex_review_required": true
       },
       "transplant_policy": {
-        "mode": "PROHIBITED_UNTIL_STANDARD",
+        "mode": "CONTROLLED_REVIEW_ONLY",
         "automatic": false,
         "codex_review_required": true
       },
@@ -769,7 +769,7 @@
         {
           "event_id": "EVENT-K280-WORLD-VIEWER-REGISTRY-BINDING",
           "event_type": "SOFTWARE_LIFE_REGISTRY_BOUND",
-          "simulation_time": "2026-08-02T10:10:00Z",
+          "simulation_time": "2026-08-02T10:40:00Z",
           "actor": "CODEX_CANONICAL_REVIEW",
           "status": "RECORDED",
           "reason": "Existing repository organism registered without changing Runtime authority.",
@@ -778,7 +778,7 @@
         }
       ],
       "provenance": {
-        "source_commit": "3d5ec469e0aa3cbc94a563d2b24f47dbad117830",
+        "source_commit": "cc80135f2c6e6a74aad11f34e793c65ac0ee1938",
         "source_paths": [
           "world-viewer/k280/index.html"
         ],
@@ -939,7 +939,7 @@
         "codex_review_required": true
       },
       "transplant_policy": {
-        "mode": "PROHIBITED_UNTIL_STANDARD",
+        "mode": "CONTROLLED_REVIEW_ONLY",
         "automatic": false,
         "codex_review_required": true
       },
@@ -955,7 +955,7 @@
         {
           "event_id": "EVENT-PLAYER-GENESIS-REGISTRY-BINDING",
           "event_type": "SOFTWARE_LIFE_REGISTRY_BOUND",
-          "simulation_time": "2026-08-02T10:10:00Z",
+          "simulation_time": "2026-08-02T10:40:00Z",
           "actor": "CODEX_CANONICAL_REVIEW",
           "status": "RECORDED",
           "reason": "Existing repository organism registered without changing Runtime authority.",
@@ -964,7 +964,7 @@
         }
       ],
       "provenance": {
-        "source_commit": "3d5ec469e0aa3cbc94a563d2b24f47dbad117830",
+        "source_commit": "cc80135f2c6e6a74aad11f34e793c65ac0ee1938",
         "source_paths": [
           "world-viewer/player-genesis/index.html"
         ],
@@ -1139,7 +1139,7 @@
         "codex_review_required": true
       },
       "transplant_policy": {
-        "mode": "PROHIBITED_UNTIL_STANDARD",
+        "mode": "CONTROLLED_REVIEW_ONLY",
         "automatic": false,
         "codex_review_required": true
       },
@@ -1155,7 +1155,7 @@
         {
           "event_id": "EVENT-CAUSAL-WORLD-RUNTIME-REGISTRY-BINDING",
           "event_type": "SOFTWARE_LIFE_REGISTRY_BOUND",
-          "simulation_time": "2026-08-02T10:10:00Z",
+          "simulation_time": "2026-08-02T10:40:00Z",
           "actor": "CODEX_CANONICAL_REVIEW",
           "status": "RECORDED",
           "reason": "Existing repository organism registered without changing Runtime authority.",
@@ -1164,7 +1164,7 @@
         }
       ],
       "provenance": {
-        "source_commit": "3d5ec469e0aa3cbc94a563d2b24f47dbad117830",
+        "source_commit": "cc80135f2c6e6a74aad11f34e793c65ac0ee1938",
         "source_paths": [
           "KGEN-KAIOS/world-viewer/causal-runtime/app.js",
           "KGEN-KAIOS/world-viewer/causal-runtime/causal-world-runtime.js",
@@ -1327,7 +1327,7 @@
         "codex_review_required": true
       },
       "transplant_policy": {
-        "mode": "PROHIBITED_UNTIL_STANDARD",
+        "mode": "CONTROLLED_REVIEW_ONLY",
         "automatic": false,
         "codex_review_required": true
       },
@@ -1343,7 +1343,7 @@
         {
           "event_id": "EVENT-CAUSAL-WORLD-VIEWER-REGISTRY-BINDING",
           "event_type": "SOFTWARE_LIFE_REGISTRY_BOUND",
-          "simulation_time": "2026-08-02T10:10:00Z",
+          "simulation_time": "2026-08-02T10:40:00Z",
           "actor": "CODEX_CANONICAL_REVIEW",
           "status": "RECORDED",
           "reason": "Existing repository organism registered without changing Runtime authority.",
@@ -1352,7 +1352,7 @@
         }
       ],
       "provenance": {
-        "source_commit": "3d5ec469e0aa3cbc94a563d2b24f47dbad117830",
+        "source_commit": "cc80135f2c6e6a74aad11f34e793c65ac0ee1938",
         "source_paths": [
           "world-viewer/causal-runtime/index.html"
         ],
@@ -1520,7 +1520,7 @@
         "codex_review_required": true
       },
       "transplant_policy": {
-        "mode": "PROHIBITED_UNTIL_STANDARD",
+        "mode": "CONTROLLED_REVIEW_ONLY",
         "automatic": false,
         "codex_review_required": true
       },
@@ -1536,7 +1536,7 @@
         {
           "event_id": "EVENT-LIFE-RUNTIME-REGISTRY-BINDING",
           "event_type": "SOFTWARE_LIFE_REGISTRY_BOUND",
-          "simulation_time": "2026-08-02T10:10:00Z",
+          "simulation_time": "2026-08-02T10:40:00Z",
           "actor": "CODEX_CANONICAL_REVIEW",
           "status": "RECORDED",
           "reason": "Existing repository organism registered without changing Runtime authority.",
@@ -1545,7 +1545,7 @@
         }
       ],
       "provenance": {
-        "source_commit": "3d5ec469e0aa3cbc94a563d2b24f47dbad117830",
+        "source_commit": "cc80135f2c6e6a74aad11f34e793c65ac0ee1938",
         "source_paths": [
           "KAIOS/life/runtime/foundational-life-loader.js",
           "KAIOS/life/runtime/foundational-life-runtime.js"
@@ -1722,7 +1722,7 @@
         "codex_review_required": true
       },
       "transplant_policy": {
-        "mode": "PROHIBITED_UNTIL_STANDARD",
+        "mode": "CONTROLLED_REVIEW_ONLY",
         "automatic": false,
         "codex_review_required": true
       },
@@ -1738,7 +1738,7 @@
         {
           "event_id": "EVENT-LIFE-RUNTIME-VIEWER-REGISTRY-BINDING",
           "event_type": "SOFTWARE_LIFE_REGISTRY_BOUND",
-          "simulation_time": "2026-08-02T10:10:00Z",
+          "simulation_time": "2026-08-02T10:40:00Z",
           "actor": "CODEX_CANONICAL_REVIEW",
           "status": "RECORDED",
           "reason": "Existing repository organism registered without changing Runtime authority.",
@@ -1747,7 +1747,7 @@
         }
       ],
       "provenance": {
-        "source_commit": "3d5ec469e0aa3cbc94a563d2b24f47dbad117830",
+        "source_commit": "cc80135f2c6e6a74aad11f34e793c65ac0ee1938",
         "source_paths": [
           "world-viewer/life-runtime/app.js",
           "world-viewer/life-runtime/index.html",
@@ -1910,7 +1910,7 @@
         "codex_review_required": true
       },
       "transplant_policy": {
-        "mode": "PROHIBITED_UNTIL_STANDARD",
+        "mode": "CONTROLLED_REVIEW_ONLY",
         "automatic": false,
         "codex_review_required": true
       },
@@ -1926,7 +1926,7 @@
         {
           "event_id": "EVENT-ECOSYSTEM-RUNTIME-REGISTRY-BINDING",
           "event_type": "SOFTWARE_LIFE_REGISTRY_BOUND",
-          "simulation_time": "2026-08-02T10:10:00Z",
+          "simulation_time": "2026-08-02T10:40:00Z",
           "actor": "CODEX_CANONICAL_REVIEW",
           "status": "RECORDED",
           "reason": "Existing repository organism registered without changing Runtime authority.",
@@ -1935,7 +1935,7 @@
         }
       ],
       "provenance": {
-        "source_commit": "3d5ec469e0aa3cbc94a563d2b24f47dbad117830",
+        "source_commit": "cc80135f2c6e6a74aad11f34e793c65ac0ee1938",
         "source_paths": [
           "KGEN-KAIOS/world-viewer/ecosystem/ecosystem-runtime.js"
         ],
@@ -2111,7 +2111,7 @@
         "codex_review_required": true
       },
       "transplant_policy": {
-        "mode": "PROHIBITED_UNTIL_STANDARD",
+        "mode": "CONTROLLED_REVIEW_ONLY",
         "automatic": false,
         "codex_review_required": true
       },
@@ -2127,7 +2127,7 @@
         {
           "event_id": "EVENT-ECOSYSTEM-VIEWER-REGISTRY-BINDING",
           "event_type": "SOFTWARE_LIFE_REGISTRY_BOUND",
-          "simulation_time": "2026-08-02T10:10:00Z",
+          "simulation_time": "2026-08-02T10:40:00Z",
           "actor": "CODEX_CANONICAL_REVIEW",
           "status": "RECORDED",
           "reason": "Existing repository organism registered without changing Runtime authority.",
@@ -2136,7 +2136,7 @@
         }
       ],
       "provenance": {
-        "source_commit": "3d5ec469e0aa3cbc94a563d2b24f47dbad117830",
+        "source_commit": "cc80135f2c6e6a74aad11f34e793c65ac0ee1938",
         "source_paths": [
           "world-viewer/ecosystem-v1/app.js",
           "world-viewer/ecosystem-v1/index.html",
@@ -2300,7 +2300,7 @@
         "codex_review_required": true
       },
       "transplant_policy": {
-        "mode": "PROHIBITED_UNTIL_STANDARD",
+        "mode": "CONTROLLED_REVIEW_ONLY",
         "automatic": false,
         "codex_review_required": true
       },
@@ -2316,7 +2316,7 @@
         {
           "event_id": "EVENT-AQUACULTURE-RUNTIME-REGISTRY-BINDING",
           "event_type": "SOFTWARE_LIFE_REGISTRY_BOUND",
-          "simulation_time": "2026-08-02T10:10:00Z",
+          "simulation_time": "2026-08-02T10:40:00Z",
           "actor": "CODEX_CANONICAL_REVIEW",
           "status": "RECORDED",
           "reason": "Existing repository organism registered without changing Runtime authority.",
@@ -2325,7 +2325,7 @@
         }
       ],
       "provenance": {
-        "source_commit": "3d5ec469e0aa3cbc94a563d2b24f47dbad117830",
+        "source_commit": "cc80135f2c6e6a74aad11f34e793c65ac0ee1938",
         "source_paths": [
           "KGEN-KAIOS/world-viewer/aquaculture/aquaculture-runtime.js"
         ],
@@ -2501,7 +2501,7 @@
         "codex_review_required": true
       },
       "transplant_policy": {
-        "mode": "PROHIBITED_UNTIL_STANDARD",
+        "mode": "CONTROLLED_REVIEW_ONLY",
         "automatic": false,
         "codex_review_required": true
       },
@@ -2517,7 +2517,7 @@
         {
           "event_id": "EVENT-AQUACULTURE-VIEWER-REGISTRY-BINDING",
           "event_type": "SOFTWARE_LIFE_REGISTRY_BOUND",
-          "simulation_time": "2026-08-02T10:10:00Z",
+          "simulation_time": "2026-08-02T10:40:00Z",
           "actor": "CODEX_CANONICAL_REVIEW",
           "status": "RECORDED",
           "reason": "Existing repository organism registered without changing Runtime authority.",
@@ -2526,7 +2526,7 @@
         }
       ],
       "provenance": {
-        "source_commit": "3d5ec469e0aa3cbc94a563d2b24f47dbad117830",
+        "source_commit": "cc80135f2c6e6a74aad11f34e793c65ac0ee1938",
         "source_paths": [
           "world-viewer/aquaculture-v1/app.js",
           "world-viewer/aquaculture-v1/index.html",
@@ -2690,7 +2690,7 @@
         "codex_review_required": true
       },
       "transplant_policy": {
-        "mode": "PROHIBITED_UNTIL_STANDARD",
+        "mode": "CONTROLLED_REVIEW_ONLY",
         "automatic": false,
         "codex_review_required": true
       },
@@ -2706,7 +2706,7 @@
         {
           "event_id": "EVENT-AI-COMPANY-RUNTIME-REGISTRY-BINDING",
           "event_type": "SOFTWARE_LIFE_REGISTRY_BOUND",
-          "simulation_time": "2026-08-02T10:10:00Z",
+          "simulation_time": "2026-08-02T10:40:00Z",
           "actor": "CODEX_CANONICAL_REVIEW",
           "status": "RECORDED",
           "reason": "Existing repository organism registered without changing Runtime authority.",
@@ -2715,7 +2715,7 @@
         }
       ],
       "provenance": {
-        "source_commit": "3d5ec469e0aa3cbc94a563d2b24f47dbad117830",
+        "source_commit": "cc80135f2c6e6a74aad11f34e793c65ac0ee1938",
         "source_paths": [
           "KGEN-KAIOS/world-viewer/ai-company/ai-company-project-runtime.js"
         ],
@@ -2891,7 +2891,7 @@
         "codex_review_required": true
       },
       "transplant_policy": {
-        "mode": "PROHIBITED_UNTIL_STANDARD",
+        "mode": "CONTROLLED_REVIEW_ONLY",
         "automatic": false,
         "codex_review_required": true
       },
@@ -2907,7 +2907,7 @@
         {
           "event_id": "EVENT-AI-COMPANY-VIEWER-REGISTRY-BINDING",
           "event_type": "SOFTWARE_LIFE_REGISTRY_BOUND",
-          "simulation_time": "2026-08-02T10:10:00Z",
+          "simulation_time": "2026-08-02T10:40:00Z",
           "actor": "CODEX_CANONICAL_REVIEW",
           "status": "RECORDED",
           "reason": "Existing repository organism registered without changing Runtime authority.",
@@ -2916,7 +2916,7 @@
         }
       ],
       "provenance": {
-        "source_commit": "3d5ec469e0aa3cbc94a563d2b24f47dbad117830",
+        "source_commit": "cc80135f2c6e6a74aad11f34e793c65ac0ee1938",
         "source_paths": [
           "world-viewer/ai-company-v1/app.js",
           "world-viewer/ai-company-v1/index.html",
@@ -3079,7 +3079,7 @@
         "codex_review_required": true
       },
       "transplant_policy": {
-        "mode": "PROHIBITED_UNTIL_STANDARD",
+        "mode": "CONTROLLED_REVIEW_ONLY",
         "automatic": false,
         "codex_review_required": true
       },
@@ -3095,7 +3095,7 @@
         {
           "event_id": "EVENT-FOREST-AGRICULTURE-WORKLINE-REGISTRY-BINDING",
           "event_type": "SOFTWARE_LIFE_REGISTRY_BOUND",
-          "simulation_time": "2026-08-02T10:10:00Z",
+          "simulation_time": "2026-08-02T10:40:00Z",
           "actor": "CODEX_CANONICAL_REVIEW",
           "status": "RECORDED",
           "reason": "Existing repository organism registered without changing Runtime authority.",
@@ -3104,7 +3104,7 @@
         }
       ],
       "provenance": {
-        "source_commit": "3d5ec469e0aa3cbc94a563d2b24f47dbad117830",
+        "source_commit": "cc80135f2c6e6a74aad11f34e793c65ac0ee1938",
         "source_paths": [
           "KAIOS/life/forest-agriculture/KAIOS_FOREST_AGRICULTURE_RUNTIME_V1_SPEC.md"
         ],
@@ -3266,7 +3266,7 @@
         "codex_review_required": true
       },
       "transplant_policy": {
-        "mode": "PROHIBITED_UNTIL_STANDARD",
+        "mode": "CONTROLLED_REVIEW_ONLY",
         "automatic": false,
         "codex_review_required": true
       },
@@ -3282,7 +3282,7 @@
         {
           "event_id": "EVENT-CHARTER-PROGRAM-CENTER-REGISTRY-BINDING",
           "event_type": "SOFTWARE_LIFE_REGISTRY_BOUND",
-          "simulation_time": "2026-08-02T10:10:00Z",
+          "simulation_time": "2026-08-02T10:40:00Z",
           "actor": "CODEX_CANONICAL_REVIEW",
           "status": "RECORDED",
           "reason": "Existing repository organism registered without changing Runtime authority.",
@@ -3291,7 +3291,7 @@
         }
       ],
       "provenance": {
-        "source_commit": "3d5ec469e0aa3cbc94a563d2b24f47dbad117830",
+        "source_commit": "cc80135f2c6e6a74aad11f34e793c65ac0ee1938",
         "source_paths": [
           "KGEN-KAIOS/world-viewer/program-center/program-center-view.js"
         ],
@@ -3457,7 +3457,7 @@
         "codex_review_required": true
       },
       "transplant_policy": {
-        "mode": "PROHIBITED_UNTIL_STANDARD",
+        "mode": "CONTROLLED_REVIEW_ONLY",
         "automatic": false,
         "codex_review_required": true
       },
@@ -3473,7 +3473,7 @@
         {
           "event_id": "EVENT-WORKER-REGISTRY-REGISTRY-BINDING",
           "event_type": "SOFTWARE_LIFE_REGISTRY_BOUND",
-          "simulation_time": "2026-08-02T10:10:00Z",
+          "simulation_time": "2026-08-02T10:40:00Z",
           "actor": "CODEX_CANONICAL_REVIEW",
           "status": "RECORDED",
           "reason": "Existing repository organism registered without changing Runtime authority.",
@@ -3482,7 +3482,7 @@
         }
       ],
       "provenance": {
-        "source_commit": "3d5ec469e0aa3cbc94a563d2b24f47dbad117830",
+        "source_commit": "cc80135f2c6e6a74aad11f34e793c65ac0ee1938",
         "source_paths": [
           "KGEN-KAIOS/WORKER_REGISTRY.md",
           "KGEN-KAIOS/worker_registry.json"
@@ -3644,7 +3644,7 @@
         "codex_review_required": true
       },
       "transplant_policy": {
-        "mode": "PROHIBITED_UNTIL_STANDARD",
+        "mode": "CONTROLLED_REVIEW_ONLY",
         "automatic": false,
         "codex_review_required": true
       },
@@ -3660,7 +3660,7 @@
         {
           "event_id": "EVENT-CURSOR-QUEUE-REGISTRY-BINDING",
           "event_type": "SOFTWARE_LIFE_REGISTRY_BOUND",
-          "simulation_time": "2026-08-02T10:10:00Z",
+          "simulation_time": "2026-08-02T10:40:00Z",
           "actor": "CODEX_CANONICAL_REVIEW",
           "status": "RECORDED",
           "reason": "Existing repository organism registered without changing Runtime authority.",
@@ -3669,7 +3669,7 @@
         }
       ],
       "provenance": {
-        "source_commit": "3d5ec469e0aa3cbc94a563d2b24f47dbad117830",
+        "source_commit": "cc80135f2c6e6a74aad11f34e793c65ac0ee1938",
         "source_paths": [
           "KAIOS/life/forest-agriculture/KAIOS_CURSOR_CONTINUOUS_WORK_QUEUE.json"
         ],
@@ -3835,7 +3835,7 @@
         "codex_review_required": true
       },
       "transplant_policy": {
-        "mode": "PROHIBITED_UNTIL_STANDARD",
+        "mode": "CONTROLLED_REVIEW_ONLY",
         "automatic": false,
         "codex_review_required": true
       },
@@ -3851,7 +3851,7 @@
         {
           "event_id": "EVENT-IDENTITY-AUTHORITY-REGISTRY-BINDING",
           "event_type": "SOFTWARE_LIFE_REGISTRY_BOUND",
-          "simulation_time": "2026-08-02T10:10:00Z",
+          "simulation_time": "2026-08-02T10:40:00Z",
           "actor": "CODEX_CANONICAL_REVIEW",
           "status": "RECORDED",
           "reason": "Existing repository organism registered without changing Runtime authority.",
@@ -3860,7 +3860,7 @@
         }
       ],
       "provenance": {
-        "source_commit": "3d5ec469e0aa3cbc94a563d2b24f47dbad117830",
+        "source_commit": "cc80135f2c6e6a74aad11f34e793c65ac0ee1938",
         "source_paths": [
           "KGEN-KAIOS/governance/agents/unique-life-identity-v0.1/KAIOS_UNIQUE_LIFE_IDENTITY_AND_EMBODIMENT_ARCHITECTURE_V0_1.md",
           "KGEN-KAIOS/governance/agents/unique-life-identity-v0.1/KAIOS_UNIQUE_LIFE_IDENTITY_REGISTRY_SCHEMA_V0_1.json"
@@ -4020,7 +4020,7 @@
         "codex_review_required": true
       },
       "transplant_policy": {
-        "mode": "PROHIBITED_UNTIL_STANDARD",
+        "mode": "CONTROLLED_REVIEW_ONLY",
         "automatic": false,
         "codex_review_required": true
       },
@@ -4036,7 +4036,7 @@
         {
           "event_id": "EVENT-RIGHTS-AUTHORITY-REGISTRY-BINDING",
           "event_type": "SOFTWARE_LIFE_REGISTRY_BOUND",
-          "simulation_time": "2026-08-02T10:10:00Z",
+          "simulation_time": "2026-08-02T10:40:00Z",
           "actor": "CODEX_CANONICAL_REVIEW",
           "status": "RECORDED",
           "reason": "Existing repository organism registered without changing Runtime authority.",
@@ -4045,7 +4045,7 @@
         }
       ],
       "provenance": {
-        "source_commit": "3d5ec469e0aa3cbc94a563d2b24f47dbad117830",
+        "source_commit": "cc80135f2c6e6a74aad11f34e793c65ac0ee1938",
         "source_paths": [
           "KAIOS_CANONICAL_LIFE_RIGHTS_V1.md"
         ],
@@ -4211,7 +4211,7 @@
         "codex_review_required": true
       },
       "transplant_policy": {
-        "mode": "PROHIBITED_UNTIL_STANDARD",
+        "mode": "CONTROLLED_REVIEW_ONLY",
         "automatic": false,
         "codex_review_required": true
       },
@@ -4227,7 +4227,7 @@
         {
           "event_id": "EVENT-SUPPLY-CHAIN-SPECIFICATION-REGISTRY-BINDING",
           "event_type": "SOFTWARE_LIFE_REGISTRY_BOUND",
-          "simulation_time": "2026-08-02T10:10:00Z",
+          "simulation_time": "2026-08-02T10:40:00Z",
           "actor": "CODEX_CANONICAL_REVIEW",
           "status": "RECORDED",
           "reason": "Existing repository organism registered without changing Runtime authority.",
@@ -4236,7 +4236,7 @@
         }
       ],
       "provenance": {
-        "source_commit": "3d5ec469e0aa3cbc94a563d2b24f47dbad117830",
+        "source_commit": "cc80135f2c6e6a74aad11f34e793c65ac0ee1938",
         "source_paths": [
           "KAIOS_INDUSTRIAL_SUPPLY_CHAIN_SPEC.md",
           "KAIOS_SUPPLY_CHAIN_SCHEMA.json"
@@ -4403,7 +4403,7 @@
         "codex_review_required": true
       },
       "transplant_policy": {
-        "mode": "PROHIBITED_UNTIL_STANDARD",
+        "mode": "CONTROLLED_REVIEW_ONLY",
         "automatic": false,
         "codex_review_required": true
       },
@@ -4419,7 +4419,7 @@
         {
           "event_id": "EVENT-PHYSICAL-LABOR-SPECIFICATION-REGISTRY-BINDING",
           "event_type": "SOFTWARE_LIFE_REGISTRY_BOUND",
-          "simulation_time": "2026-08-02T10:10:00Z",
+          "simulation_time": "2026-08-02T10:40:00Z",
           "actor": "CODEX_CANONICAL_REVIEW",
           "status": "RECORDED",
           "reason": "Existing repository organism registered without changing Runtime authority.",
@@ -4428,7 +4428,7 @@
         }
       ],
       "provenance": {
-        "source_commit": "3d5ec469e0aa3cbc94a563d2b24f47dbad117830",
+        "source_commit": "cc80135f2c6e6a74aad11f34e793c65ac0ee1938",
         "source_paths": [
           "KAIOS_PHYSICAL_LABOR_ACCOUNTING_SPEC.md",
           "KAIOS_PHYSICAL_LABOR_SCHEMA.json"
@@ -4588,7 +4588,7 @@
         "codex_review_required": true
       },
       "transplant_policy": {
-        "mode": "PROHIBITED_UNTIL_STANDARD",
+        "mode": "CONTROLLED_REVIEW_ONLY",
         "automatic": false,
         "codex_review_required": true
       },
@@ -4604,7 +4604,7 @@
         {
           "event_id": "EVENT-CHARTER-FOUNDATION-RUNTIME-REGISTRY-BINDING",
           "event_type": "SOFTWARE_LIFE_REGISTRY_BOUND",
-          "simulation_time": "2026-08-02T10:10:00Z",
+          "simulation_time": "2026-08-02T10:40:00Z",
           "actor": "CODEX_CANONICAL_REVIEW",
           "status": "RECORDED",
           "reason": "Existing repository organism registered without changing Runtime authority.",
@@ -4613,7 +4613,7 @@
         }
       ],
       "provenance": {
-        "source_commit": "3d5ec469e0aa3cbc94a563d2b24f47dbad117830",
+        "source_commit": "cc80135f2c6e6a74aad11f34e793c65ac0ee1938",
         "source_paths": [
           "KGEN-KAIOS/world-viewer/foundation/charter-foundation-runtime.js"
         ],
@@ -4772,7 +4772,7 @@
         "codex_review_required": true
       },
       "transplant_policy": {
-        "mode": "PROHIBITED_UNTIL_STANDARD",
+        "mode": "CONTROLLED_REVIEW_ONLY",
         "automatic": false,
         "codex_review_required": true
       },
@@ -4788,7 +4788,7 @@
         {
           "event_id": "EVENT-CANONICAL-LIFE-SCHEMA-REGISTRY-BINDING",
           "event_type": "SOFTWARE_LIFE_REGISTRY_BOUND",
-          "simulation_time": "2026-08-02T10:10:00Z",
+          "simulation_time": "2026-08-02T10:40:00Z",
           "actor": "CODEX_CANONICAL_REVIEW",
           "status": "RECORDED",
           "reason": "Existing repository organism registered without changing Runtime authority.",
@@ -4797,7 +4797,7 @@
         }
       ],
       "provenance": {
-        "source_commit": "3d5ec469e0aa3cbc94a563d2b24f47dbad117830",
+        "source_commit": "cc80135f2c6e6a74aad11f34e793c65ac0ee1938",
         "source_paths": [
           "KAIOS_CANONICAL_LIFE_SCHEMA_V1.json"
         ],
@@ -4965,7 +4965,7 @@
         "codex_review_required": true
       },
       "transplant_policy": {
-        "mode": "PROHIBITED_UNTIL_STANDARD",
+        "mode": "CONTROLLED_REVIEW_ONLY",
         "automatic": false,
         "codex_review_required": true
       },
@@ -4981,7 +4981,7 @@
         {
           "event_id": "EVENT-ORGANISM-MANIFEST-SCHEMA-REGISTRY-BINDING",
           "event_type": "SOFTWARE_LIFE_REGISTRY_BOUND",
-          "simulation_time": "2026-08-02T10:10:00Z",
+          "simulation_time": "2026-08-02T10:40:00Z",
           "actor": "CODEX_CANONICAL_REVIEW",
           "status": "RECORDED",
           "reason": "Existing repository organism registered without changing Runtime authority.",
@@ -4990,7 +4990,7 @@
         }
       ],
       "provenance": {
-        "source_commit": "3d5ec469e0aa3cbc94a563d2b24f47dbad117830",
+        "source_commit": "cc80135f2c6e6a74aad11f34e793c65ac0ee1938",
         "source_paths": [
           "KGEN-KAIOS/ORGANISM_MANIFEST_STANDARD.md",
           "KGEN-KAIOS/provenance/ORGANISM_MANIFEST_SCHEMA.json"
@@ -5157,7 +5157,7 @@
         "codex_review_required": true
       },
       "transplant_policy": {
-        "mode": "PROHIBITED_UNTIL_STANDARD",
+        "mode": "CONTROLLED_REVIEW_ONLY",
         "automatic": false,
         "codex_review_required": true
       },
@@ -5173,7 +5173,7 @@
         {
           "event_id": "EVENT-TAXONOMY-REGISTRY-REGISTRY-BINDING",
           "event_type": "SOFTWARE_LIFE_REGISTRY_BOUND",
-          "simulation_time": "2026-08-02T10:10:00Z",
+          "simulation_time": "2026-08-02T10:40:00Z",
           "actor": "CODEX_CANONICAL_REVIEW",
           "status": "RECORDED",
           "reason": "Existing repository organism registered without changing Runtime authority.",
@@ -5182,7 +5182,7 @@
         }
       ],
       "provenance": {
-        "source_commit": "3d5ec469e0aa3cbc94a563d2b24f47dbad117830",
+        "source_commit": "cc80135f2c6e6a74aad11f34e793c65ac0ee1938",
         "source_paths": [
           "KGEN-KAIOS/civilization/BIOLOGY_TAXONOMY_STANDARD.md",
           "KGEN-KAIOS/organism/taxonomy_registry.json"
@@ -5400,7 +5400,7 @@
         "codex_review_required": true
       },
       "transplant_policy": {
-        "mode": "PROHIBITED_UNTIL_STANDARD",
+        "mode": "CONTROLLED_REVIEW_ONLY",
         "automatic": false,
         "codex_review_required": true
       },
@@ -5416,7 +5416,7 @@
         {
           "event_id": "EVENT-K280-API-REGISTRY-BINDING",
           "event_type": "SOFTWARE_LIFE_REGISTRY_BOUND",
-          "simulation_time": "2026-08-02T10:10:00Z",
+          "simulation_time": "2026-08-02T10:40:00Z",
           "actor": "CODEX_CANONICAL_REVIEW",
           "status": "RECORDED",
           "reason": "Existing repository organism registered without changing Runtime authority.",
@@ -5425,7 +5425,7 @@
         }
       ],
       "provenance": {
-        "source_commit": "3d5ec469e0aa3cbc94a563d2b24f47dbad117830",
+        "source_commit": "cc80135f2c6e6a74aad11f34e793c65ac0ee1938",
         "source_paths": [
           "api/kaios/k280/civilization.json",
           "api/kaios/k280/events.json",
@@ -5608,7 +5608,7 @@
         "codex_review_required": true
       },
       "transplant_policy": {
-        "mode": "PROHIBITED_UNTIL_STANDARD",
+        "mode": "CONTROLLED_REVIEW_ONLY",
         "automatic": false,
         "codex_review_required": true
       },
@@ -5624,7 +5624,7 @@
         {
           "event_id": "EVENT-LIFE-RUNTIME-API-REGISTRY-BINDING",
           "event_type": "SOFTWARE_LIFE_REGISTRY_BOUND",
-          "simulation_time": "2026-08-02T10:10:00Z",
+          "simulation_time": "2026-08-02T10:40:00Z",
           "actor": "CODEX_CANONICAL_REVIEW",
           "status": "RECORDED",
           "reason": "Existing repository organism registered without changing Runtime authority.",
@@ -5633,7 +5633,7 @@
         }
       ],
       "provenance": {
-        "source_commit": "3d5ec469e0aa3cbc94a563d2b24f47dbad117830",
+        "source_commit": "cc80135f2c6e6a74aad11f34e793c65ac0ee1938",
         "source_paths": [
           "api/kaios/life-runtime-v1/catalog.json",
           "api/kaios/life-runtime-v1/index.html",
@@ -5859,7 +5859,7 @@
         "codex_review_required": true
       },
       "transplant_policy": {
-        "mode": "PROHIBITED_UNTIL_STANDARD",
+        "mode": "CONTROLLED_REVIEW_ONLY",
         "automatic": false,
         "codex_review_required": true
       },
@@ -5875,7 +5875,7 @@
         {
           "event_id": "EVENT-ECOSYSTEM-API-REGISTRY-BINDING",
           "event_type": "SOFTWARE_LIFE_REGISTRY_BOUND",
-          "simulation_time": "2026-08-02T10:10:00Z",
+          "simulation_time": "2026-08-02T10:40:00Z",
           "actor": "CODEX_CANONICAL_REVIEW",
           "status": "RECORDED",
           "reason": "Existing repository organism registered without changing Runtime authority.",
@@ -5884,7 +5884,7 @@
         }
       ],
       "provenance": {
-        "source_commit": "3d5ec469e0aa3cbc94a563d2b24f47dbad117830",
+        "source_commit": "cc80135f2c6e6a74aad11f34e793c65ac0ee1938",
         "source_paths": [
           "KAIOS/life/ecology/generate-ecosystem-v1-api.mjs",
           "api/kaios/ecosystem/v1/events.json",
@@ -6138,7 +6138,7 @@
         "codex_review_required": true
       },
       "transplant_policy": {
-        "mode": "PROHIBITED_UNTIL_STANDARD",
+        "mode": "CONTROLLED_REVIEW_ONLY",
         "automatic": false,
         "codex_review_required": true
       },
@@ -6154,7 +6154,7 @@
         {
           "event_id": "EVENT-AQUACULTURE-API-REGISTRY-BINDING",
           "event_type": "SOFTWARE_LIFE_REGISTRY_BOUND",
-          "simulation_time": "2026-08-02T10:10:00Z",
+          "simulation_time": "2026-08-02T10:40:00Z",
           "actor": "CODEX_CANONICAL_REVIEW",
           "status": "RECORDED",
           "reason": "Existing repository organism registered without changing Runtime authority.",
@@ -6163,7 +6163,7 @@
         }
       ],
       "provenance": {
-        "source_commit": "3d5ec469e0aa3cbc94a563d2b24f47dbad117830",
+        "source_commit": "cc80135f2c6e6a74aad11f34e793c65ac0ee1938",
         "source_paths": [
           "KAIOS/life/aquaculture/generate-aquaculture-v1-api.mjs",
           "api/kaios/aquaculture/v1/events.json",
@@ -6469,7 +6469,7 @@
         "codex_review_required": true
       },
       "transplant_policy": {
-        "mode": "PROHIBITED_UNTIL_STANDARD",
+        "mode": "CONTROLLED_REVIEW_ONLY",
         "automatic": false,
         "codex_review_required": true
       },
@@ -6485,7 +6485,7 @@
         {
           "event_id": "EVENT-AI-COMPANY-API-REGISTRY-BINDING",
           "event_type": "SOFTWARE_LIFE_REGISTRY_BOUND",
-          "simulation_time": "2026-08-02T10:10:00Z",
+          "simulation_time": "2026-08-02T10:40:00Z",
           "actor": "CODEX_CANONICAL_REVIEW",
           "status": "RECORDED",
           "reason": "Existing repository organism registered without changing Runtime authority.",
@@ -6494,7 +6494,7 @@
         }
       ],
       "provenance": {
-        "source_commit": "3d5ec469e0aa3cbc94a563d2b24f47dbad117830",
+        "source_commit": "cc80135f2c6e6a74aad11f34e793c65ac0ee1938",
         "source_paths": [
           "KAIOS/ai-company/generate-ai-company-v1-api.mjs",
           "api/kaios/ai-company/v1/budget.json",
@@ -6702,7 +6702,7 @@
         "codex_review_required": true
       },
       "transplant_policy": {
-        "mode": "PROHIBITED_UNTIL_STANDARD",
+        "mode": "CONTROLLED_REVIEW_ONLY",
         "automatic": false,
         "codex_review_required": true
       },
@@ -6718,7 +6718,7 @@
         {
           "event_id": "EVENT-CHARTER-PROGRAMS-API-REGISTRY-BINDING",
           "event_type": "SOFTWARE_LIFE_REGISTRY_BOUND",
-          "simulation_time": "2026-08-02T10:10:00Z",
+          "simulation_time": "2026-08-02T10:40:00Z",
           "actor": "CODEX_CANONICAL_REVIEW",
           "status": "RECORDED",
           "reason": "Existing repository organism registered without changing Runtime authority.",
@@ -6727,7 +6727,7 @@
         }
       ],
       "provenance": {
-        "source_commit": "3d5ec469e0aa3cbc94a563d2b24f47dbad117830",
+        "source_commit": "cc80135f2c6e6a74aad11f34e793c65ac0ee1938",
         "source_paths": [
           "api/kaios/charter/programs/conflicts.json",
           "api/kaios/charter/programs/coverage.json",
