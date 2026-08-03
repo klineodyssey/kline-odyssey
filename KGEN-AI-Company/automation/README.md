@@ -24,7 +24,9 @@ Workflow: `.github/workflows/kgen-cursor-dispatch-wake.yml`
 
 After the secret is set, every Codex dispatch merge automatically POSTs to `https://api.cursor.com/v1/agents` with prompt in `cursor-dispatch-wake-prompt.txt`.
 
-If the secret is missing, the workflow logs a notice and does **not** fail the merge.
+**Manual test:** GitHub → Actions → **KGEN Cursor Dispatch Wake** → **Run workflow** (uses `workflow_dispatch`).
+
+If the secret is missing, the workflow logs a notice and exits successfully (does not fail the merge).
 
 ## Optional: Cursor Automations UI (native GitHub trigger)
 
