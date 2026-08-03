@@ -49,7 +49,7 @@ test("manifest schema composes existing owners and requires the complete softwar
 
 test("registry has unique stable identities and exactly one authoritative entry per catalog life", () => {
   assert.equal(registry.metadata.registry_entries, registry.software_lives.length);
-  assert.equal(registry.software_lives.length, 33);
+  assert.equal(registry.software_lives.length, 36);
   for (const field of ["life_id", "species_id", "genome_id", "canonical_name"]) {
     const values = registry.software_lives.map((life) => life[field]);
     assert.equal(new Set(values).size, values.length, field);
