@@ -56,6 +56,11 @@
             lifeEnergyLink.setAttribute("aria-label", "Open KAIOS Life Energy and Payroll");
             lifeEnergyLink.innerHTML = '<span class="route-nav-desktop">Life Energy &amp; Payroll</span><span class="route-nav-mobile">Payroll</span>';
             routeNav.append(lifeEnergyLink);
+            const marketplaceLink = document.createElement("a");
+            marketplaceLink.href = "./creator-marketplace/";
+            marketplaceLink.setAttribute("aria-label", "Open KAIOS Creator Marketplace");
+            marketplaceLink.innerHTML = '<span class="route-nav-desktop">Creator Marketplace</span><span class="route-nav-mobile">Market</span>';
+            routeNav.append(marketplaceLink);
           }
           const stylesheet = document.createElement("link");
           stylesheet.rel = "stylesheet";

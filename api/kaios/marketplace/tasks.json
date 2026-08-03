@@ -1,0 +1,297 @@
+{
+  "tasks": [
+    {
+      "task_id": "MARKET-PROJECT-001-TASK-01",
+      "project_id": "MARKET-PROJECT-001",
+      "task_type": "REQUIREMENTS",
+      "dependencies": [],
+      "worker_class": "CANDIDATE_CREATOR",
+      "location_requirement": "LOCAL_DIGITAL_WORKSPACE",
+      "physical_or_digital": "DIGITAL",
+      "start_time": 0,
+      "duration": 2,
+      "elapsed": 2,
+      "budget": 5,
+      "pay": 5,
+      "resources": {},
+      "acceptance_criteria": [
+        "DEPENDENCIES_PASS",
+        "REQUIRED_RESOURCES_PRESENT",
+        "TIME_ADVANCED"
+      ],
+      "reviewer": "codex-gm-01",
+      "status": "COMPLETE"
+    },
+    {
+      "task_id": "MARKET-PROJECT-001-TASK-02",
+      "project_id": "MARKET-PROJECT-001",
+      "task_type": "LIFE_SCHEMA",
+      "dependencies": [
+        "MARKET-PROJECT-001-TASK-01"
+      ],
+      "worker_class": "CANDIDATE_CREATOR",
+      "location_requirement": "LOCAL_DIGITAL_WORKSPACE",
+      "physical_or_digital": "DIGITAL",
+      "start_time": 2,
+      "duration": 4,
+      "elapsed": 4,
+      "budget": 12,
+      "pay": 12,
+      "resources": {},
+      "acceptance_criteria": [
+        "DEPENDENCIES_PASS",
+        "REQUIRED_RESOURCES_PRESENT",
+        "TIME_ADVANCED"
+      ],
+      "reviewer": "codex-gm-01",
+      "status": "COMPLETE"
+    },
+    {
+      "task_id": "MARKET-PROJECT-001-TASK-03",
+      "project_id": "MARKET-PROJECT-001",
+      "task_type": "DATA",
+      "dependencies": [
+        "MARKET-PROJECT-001-TASK-02"
+      ],
+      "worker_class": "CANDIDATE_CREATOR",
+      "location_requirement": "LOCAL_DIGITAL_WORKSPACE",
+      "physical_or_digital": "DIGITAL",
+      "start_time": 6,
+      "duration": 3,
+      "elapsed": 3,
+      "budget": 8,
+      "pay": 8,
+      "resources": {},
+      "acceptance_criteria": [
+        "DEPENDENCIES_PASS",
+        "REQUIRED_RESOURCES_PRESENT",
+        "TIME_ADVANCED"
+      ],
+      "reviewer": "codex-gm-01",
+      "status": "COMPLETE"
+    },
+    {
+      "task_id": "MARKET-PROJECT-001-TASK-04",
+      "project_id": "MARKET-PROJECT-001",
+      "task_type": "TEST",
+      "dependencies": [
+        "MARKET-PROJECT-001-TASK-03"
+      ],
+      "worker_class": "CANDIDATE_CREATOR",
+      "location_requirement": "LOCAL_DIGITAL_WORKSPACE",
+      "physical_or_digital": "DIGITAL",
+      "start_time": 9,
+      "duration": 3,
+      "elapsed": 3,
+      "budget": 8,
+      "pay": 8,
+      "resources": {},
+      "acceptance_criteria": [
+        "DEPENDENCIES_PASS",
+        "REQUIRED_RESOURCES_PRESENT",
+        "TIME_ADVANCED"
+      ],
+      "reviewer": "codex-gm-01",
+      "status": "COMPLETE"
+    },
+    {
+      "task_id": "MARKET-PROJECT-001-TASK-05",
+      "project_id": "MARKET-PROJECT-001",
+      "task_type": "QUALITY",
+      "dependencies": [
+        "MARKET-PROJECT-001-TASK-04"
+      ],
+      "worker_class": "CODEX_REVIEWER",
+      "location_requirement": "LOCAL_DIGITAL_WORKSPACE",
+      "physical_or_digital": "DIGITAL",
+      "start_time": 12,
+      "duration": 2,
+      "elapsed": 2,
+      "budget": 7,
+      "pay": 7,
+      "resources": {},
+      "acceptance_criteria": [
+        "DEPENDENCIES_PASS",
+        "REQUIRED_RESOURCES_PRESENT",
+        "TIME_ADVANCED"
+      ],
+      "reviewer": "codex-gm-01",
+      "status": "COMPLETE"
+    },
+    {
+      "task_id": "MARKET-PROJECT-001-TASK-06",
+      "project_id": "MARKET-PROJECT-001",
+      "task_type": "DELIVERY",
+      "dependencies": [
+        "MARKET-PROJECT-001-TASK-05"
+      ],
+      "worker_class": "CANDIDATE_CREATOR",
+      "location_requirement": "LOCAL_DIGITAL_WORKSPACE",
+      "physical_or_digital": "DIGITAL",
+      "start_time": 14,
+      "duration": 1,
+      "elapsed": 1,
+      "budget": 0,
+      "pay": 0,
+      "resources": {},
+      "acceptance_criteria": [
+        "DEPENDENCIES_PASS",
+        "REQUIRED_RESOURCES_PRESENT",
+        "TIME_ADVANCED"
+      ],
+      "reviewer": "codex-gm-01",
+      "status": "COMPLETE"
+    },
+    {
+      "task_id": "MARKET-PROJECT-001-TASK-01",
+      "project_id": "MARKET-PROJECT-001",
+      "task_type": "REQUIREMENTS",
+      "dependencies": [],
+      "worker_class": "CANDIDATE_CREATOR",
+      "location_requirement": "LOCAL_DIGITAL_WORKSPACE",
+      "physical_or_digital": "DIGITAL",
+      "start_time": 0,
+      "duration": 2,
+      "elapsed": 2,
+      "budget": 4,
+      "pay": 4,
+      "resources": {},
+      "acceptance_criteria": [
+        "DEPENDENCIES_PASS",
+        "REQUIRED_RESOURCES_PRESENT",
+        "TIME_ADVANCED"
+      ],
+      "reviewer": "codex-gm-01",
+      "status": "COMPLETE"
+    },
+    {
+      "task_id": "MARKET-PROJECT-001-TASK-02",
+      "project_id": "MARKET-PROJECT-001",
+      "task_type": "DESIGN",
+      "dependencies": [
+        "MARKET-PROJECT-001-TASK-01"
+      ],
+      "worker_class": "CANDIDATE_CREATOR",
+      "location_requirement": "LOCAL_DIGITAL_WORKSPACE",
+      "physical_or_digital": "DIGITAL",
+      "start_time": 2,
+      "duration": 3,
+      "elapsed": 3,
+      "budget": 7,
+      "pay": 7,
+      "resources": {},
+      "acceptance_criteria": [
+        "DEPENDENCIES_PASS",
+        "REQUIRED_RESOURCES_PRESENT",
+        "TIME_ADVANCED"
+      ],
+      "reviewer": "codex-gm-01",
+      "status": "COMPLETE"
+    },
+    {
+      "task_id": "MARKET-PROJECT-001-TASK-03",
+      "project_id": "MARKET-PROJECT-001",
+      "task_type": "TRANSPORT",
+      "dependencies": [
+        "MARKET-PROJECT-001-TASK-02"
+      ],
+      "worker_class": "CAUSAL_PHYSICAL_WORKER",
+      "location_requirement": "STARTER_LAND",
+      "physical_or_digital": "PHYSICAL",
+      "start_time": 5,
+      "duration": 4,
+      "elapsed": 4,
+      "budget": 6,
+      "pay": 6,
+      "resources": {
+        "wood": 40,
+        "stone": 60
+      },
+      "acceptance_criteria": [
+        "DEPENDENCIES_PASS",
+        "REQUIRED_RESOURCES_PRESENT",
+        "TIME_ADVANCED"
+      ],
+      "reviewer": "codex-gm-01",
+      "status": "COMPLETE"
+    },
+    {
+      "task_id": "MARKET-PROJECT-001-TASK-04",
+      "project_id": "MARKET-PROJECT-001",
+      "task_type": "CONSTRUCTION",
+      "dependencies": [
+        "MARKET-PROJECT-001-TASK-03"
+      ],
+      "worker_class": "CAUSAL_PHYSICAL_WORKER",
+      "location_requirement": "STARTER_LAND",
+      "physical_or_digital": "PHYSICAL",
+      "start_time": 9,
+      "duration": 12,
+      "elapsed": 12,
+      "budget": 20,
+      "pay": 20,
+      "resources": {
+        "wood": 40,
+        "stone": 60,
+        "basic_hand_tools": 1
+      },
+      "acceptance_criteria": [
+        "DEPENDENCIES_PASS",
+        "REQUIRED_RESOURCES_PRESENT",
+        "TIME_ADVANCED"
+      ],
+      "reviewer": "codex-gm-01",
+      "status": "COMPLETE"
+    },
+    {
+      "task_id": "MARKET-PROJECT-001-TASK-05",
+      "project_id": "MARKET-PROJECT-001",
+      "task_type": "QUALITY",
+      "dependencies": [
+        "MARKET-PROJECT-001-TASK-04"
+      ],
+      "worker_class": "CODEX_REVIEWER",
+      "location_requirement": "LOCAL_DIGITAL_WORKSPACE",
+      "physical_or_digital": "DIGITAL",
+      "start_time": 21,
+      "duration": 2,
+      "elapsed": 2,
+      "budget": 7,
+      "pay": 7,
+      "resources": {},
+      "acceptance_criteria": [
+        "DEPENDENCIES_PASS",
+        "REQUIRED_RESOURCES_PRESENT",
+        "TIME_ADVANCED"
+      ],
+      "reviewer": "codex-gm-01",
+      "status": "COMPLETE"
+    },
+    {
+      "task_id": "MARKET-PROJECT-001-TASK-06",
+      "project_id": "MARKET-PROJECT-001",
+      "task_type": "DELIVERY",
+      "dependencies": [
+        "MARKET-PROJECT-001-TASK-05"
+      ],
+      "worker_class": "CANDIDATE_CREATOR",
+      "location_requirement": "LOCAL_DIGITAL_WORKSPACE",
+      "physical_or_digital": "DIGITAL",
+      "start_time": 23,
+      "duration": 1,
+      "elapsed": 1,
+      "budget": 0,
+      "pay": 0,
+      "resources": {},
+      "acceptance_criteria": [
+        "DEPENDENCIES_PASS",
+        "REQUIRED_RESOURCES_PRESENT",
+        "TIME_ADVANCED"
+      ],
+      "reviewer": "codex-gm-01",
+      "status": "COMPLETE"
+    }
+  ],
+  "dependency_enforcement": true,
+  "route_status": "CANONICAL_UNVERSIONED_ROUTE"
+}

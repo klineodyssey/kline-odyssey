@@ -1,0 +1,27 @@
+{
+  "payroll_events": [
+    {
+      "payroll_event_id": "PAYROLL-001",
+      "project_id": "MARKET-PROJECT-001",
+      "worker_life_id": "AI-LIFE-151F0030",
+      "wallet_id": "SIM-WALLET-AI-FFB1222C",
+      "gross_pay": 40,
+      "household_transfer": 0,
+      "status": "PAYROLL_RELEASED",
+      "duplicate_claim": false,
+      "simulation_time": 15
+    }
+  ],
+  "worker_wallet": {
+    "account_id": "SIM-WALLET-AI-FFB1222C",
+    "type": "AI_SIMULATED_WALLET",
+    "owner_id": "AI-LIFE-151F0030",
+    "currency": "KAIOS_GAME_CREDIT",
+    "balance": 40,
+    "simulation_only": true
+  },
+  "duplicate_prevention": true,
+  "route_status": "LEGACY_ALIAS",
+  "canonical_route": "/api/kaios/marketplace/payroll.json",
+  "deprecation_status": "DEPRECATION_PENDING"
+}

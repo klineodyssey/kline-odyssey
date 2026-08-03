@@ -70,6 +70,17 @@ Public interfaces:
 - [Runtime recovery](../RECOVERY-KAIOS-AI-COMPANY-RUNTIME-V1.md)
 - [Runtime closeout](../KAIOS_AI_COMPANY_RUNTIME_V1_CLOSEOUT.md)
 
+## AI Company Creator Marketplace
+
+- [Cumulative specification](marketplace/creator-marketplace/KAIOS_AI_COMPANY_CREATOR_MARKETPLACE_V1_SPEC.md)
+- [Player starter package](marketplace/creator-marketplace/KAIOS_PLAYER_STARTER_PACKAGE_V1_SPEC.md)
+- [Demand engine](marketplace/creator-marketplace/KAIOS_STARTER_DEMAND_ENGINE_V1_SPEC.md)
+- [Game Credit specification](marketplace/creator-marketplace/KAIOS_GAME_CREDIT_MARKETPLACE_V1_SPEC.md)
+- [KAIOS/KGEN energy ontology](marketplace/creator-marketplace/KAIOS_KGEN_ENERGY_LAYER_ONTOLOGY_V1.md)
+- [Runtime](../KGEN-KAIOS/world-viewer/marketplace/creator-marketplace-runtime.js)
+- [World Viewer](../world-viewer/creator-marketplace/)
+- [Read-only API](../api/kaios/marketplace/)
+
 ## Foundational Life Runtime V1
 
 `life/runtime/` executes the eight PR #69 foundational candidates in a

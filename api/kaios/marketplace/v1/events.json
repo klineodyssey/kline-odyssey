@@ -1,0 +1,2009 @@
+{
+  "events": [
+    {
+      "event_id": "MARKET-EVENT-0001",
+      "simulation_time": 0,
+      "actor_id": "PLAYER-LIFE-F942F8CE",
+      "request_id": null,
+      "project_id": null,
+      "task_id": null,
+      "action": "GRANT_STARTER_PACKAGE",
+      "inputs": {},
+      "outputs": {
+        "starter_grant_id": "STARTER-GRANT-0a0bb5e2",
+        "player_genesis_id": "GENESIS-PLAYER-LIFE-F942F8CE",
+        "land_id": "STARTER-LAND-9729BEA9",
+        "credit": 400,
+        "resources": {
+          "drinking_water": 48,
+          "basic_food": 24,
+          "basic_clothing": 2,
+          "primitive_shelter": 1,
+          "wood": 80,
+          "stone": 120,
+          "soil": 200,
+          "basic_hand_tools": 3,
+          "emergency_reserve": 8
+        },
+        "simulation_time": 0,
+        "status": "GRANTED_ONCE"
+      },
+      "credit_delta": {
+        "SIM-WALLET-PLAYER-F942F8CE": 400
+      },
+      "resource_delta": {
+        "drinking_water": 48,
+        "basic_food": 24,
+        "basic_clothing": 2,
+        "primitive_shelter": 1,
+        "wood": 80,
+        "stone": 120,
+        "soil": 200,
+        "basic_hand_tools": 3,
+        "emergency_reserve": 8
+      },
+      "previous_state_hash": "fnv1a-04f2f2bf",
+      "next_state_hash": "fnv1a-aedbd3d1",
+      "status": "COMPLETED",
+      "reason": "NONE"
+    },
+    {
+      "event_id": "MARKET-EVENT-0002",
+      "simulation_time": 0,
+      "actor_id": "KAIOS-MARKETPLACE-RUNTIME",
+      "request_id": null,
+      "project_id": null,
+      "task_id": null,
+      "action": "GENERATE_DEMAND",
+      "inputs": {},
+      "outputs": {
+        "demands": [
+          {
+            "demand_id": "DEMAND-001",
+            "category": "FOOD",
+            "resource": "basic_food",
+            "quantity": 0,
+            "unit": "unit",
+            "urgency": "NORMAL",
+            "cause": "BIOLOGICAL_METABOLISM",
+            "location": "STARTER-LAND-9729BEA9",
+            "climate": "TEMPERATE",
+            "season": "NORMAL",
+            "health": "HEALTHY",
+            "fulfillment_status": "COVERED"
+          },
+          {
+            "demand_id": "DEMAND-002",
+            "category": "WATER",
+            "resource": "drinking_water",
+            "quantity": 0,
+            "unit": "liter",
+            "urgency": "NORMAL",
+            "cause": "BIOLOGICAL_HYDRATION",
+            "location": "STARTER-LAND-9729BEA9",
+            "climate": "TEMPERATE",
+            "season": "NORMAL",
+            "health": "HEALTHY",
+            "fulfillment_status": "COVERED"
+          },
+          {
+            "demand_id": "DEMAND-003",
+            "category": "SHELTER",
+            "resource": "primitive_shelter",
+            "quantity": 0,
+            "unit": "unit",
+            "urgency": "NORMAL",
+            "cause": "SAFETY_AND_REST",
+            "location": "STARTER-LAND-9729BEA9",
+            "climate": "TEMPERATE",
+            "season": "NORMAL",
+            "health": "HEALTHY",
+            "fulfillment_status": "COVERED"
+          },
+          {
+            "demand_id": "DEMAND-004",
+            "category": "CLOTHING",
+            "resource": "basic_clothing",
+            "quantity": 0,
+            "unit": "unit",
+            "urgency": "NORMAL",
+            "cause": "CLIMATE_PROTECTION",
+            "location": "STARTER-LAND-9729BEA9",
+            "climate": "TEMPERATE",
+            "season": "NORMAL",
+            "health": "HEALTHY",
+            "fulfillment_status": "COVERED"
+          },
+          {
+            "demand_id": "DEMAND-005",
+            "category": "ENERGY",
+            "resource": "electricity",
+            "quantity": 12,
+            "unit": "unit",
+            "urgency": "HIGH",
+            "cause": "DIGITAL_AI_OPERATION",
+            "location": "STARTER-LAND-9729BEA9",
+            "climate": "TEMPERATE",
+            "season": "NORMAL",
+            "health": "HEALTHY",
+            "fulfillment_status": "OPEN"
+          },
+          {
+            "demand_id": "DEMAND-006",
+            "category": "MAINTENANCE",
+            "resource": "compute_maintenance",
+            "quantity": 4,
+            "unit": "unit",
+            "urgency": "HIGH",
+            "cause": "DIGITAL_AI_HEALTH",
+            "location": "STARTER-LAND-9729BEA9",
+            "climate": "TEMPERATE",
+            "season": "NORMAL",
+            "health": "HEALTHY",
+            "fulfillment_status": "OPEN"
+          }
+        ]
+      },
+      "credit_delta": {},
+      "resource_delta": {},
+      "previous_state_hash": "fnv1a-aedbd3d1",
+      "next_state_hash": "fnv1a-a977d8af",
+      "status": "COMPLETED",
+      "reason": "NONE"
+    },
+    {
+      "event_id": "MARKET-EVENT-0003",
+      "simulation_time": 0,
+      "actor_id": "PLAYER-LIFE-F942F8CE",
+      "request_id": null,
+      "project_id": null,
+      "task_id": null,
+      "action": "BUY_ESSENTIAL_ITEM",
+      "inputs": {
+        "resource": "basic_food",
+        "quantity": 2,
+        "unit_price": 2
+      },
+      "outputs": {
+        "household_quantity": 26,
+        "market_quantity": 298
+      },
+      "credit_delta": {
+        "SIM-WALLET-PLAYER-F942F8CE": -4,
+        "MARKETPLACE-OPERATING": 4
+      },
+      "resource_delta": {
+        "basic_food": 2
+      },
+      "previous_state_hash": "fnv1a-27b1cf95",
+      "next_state_hash": "fnv1a-3fe666c9",
+      "status": "COMPLETED",
+      "reason": "NONE"
+    },
+    {
+      "event_id": "MARKET-EVENT-0004",
+      "simulation_time": 0,
+      "actor_id": "PLAYER-LIFE-F942F8CE",
+      "request_id": null,
+      "project_id": null,
+      "task_id": null,
+      "action": "BUY_ESSENTIAL_ITEM",
+      "inputs": {
+        "resource": "drinking_water",
+        "quantity": 4,
+        "unit_price": 0.5
+      },
+      "outputs": {
+        "household_quantity": 52,
+        "market_quantity": 596
+      },
+      "credit_delta": {
+        "SIM-WALLET-PLAYER-F942F8CE": -2,
+        "MARKETPLACE-OPERATING": 2
+      },
+      "resource_delta": {
+        "drinking_water": 4
+      },
+      "previous_state_hash": "fnv1a-ae8a4808",
+      "next_state_hash": "fnv1a-3294f64b",
+      "status": "COMPLETED",
+      "reason": "NONE"
+    },
+    {
+      "event_id": "MARKET-EVENT-0001",
+      "simulation_time": 0,
+      "actor_id": "PLAYER-LIFE-FFB1222C",
+      "request_id": null,
+      "project_id": null,
+      "task_id": null,
+      "action": "GRANT_STARTER_PACKAGE",
+      "inputs": {},
+      "outputs": {
+        "starter_grant_id": "STARTER-GRANT-316dab83",
+        "player_genesis_id": "GENESIS-PLAYER-LIFE-FFB1222C",
+        "land_id": "STARTER-LAND-B9F5C5CB",
+        "credit": 400,
+        "resources": {
+          "drinking_water": 48,
+          "basic_food": 24,
+          "basic_clothing": 2,
+          "primitive_shelter": 1,
+          "wood": 80,
+          "stone": 120,
+          "soil": 200,
+          "basic_hand_tools": 3,
+          "emergency_reserve": 8
+        },
+        "simulation_time": 0,
+        "status": "GRANTED_ONCE"
+      },
+      "credit_delta": {
+        "SIM-WALLET-PLAYER-FFB1222C": 400
+      },
+      "resource_delta": {
+        "drinking_water": 48,
+        "basic_food": 24,
+        "basic_clothing": 2,
+        "primitive_shelter": 1,
+        "wood": 80,
+        "stone": 120,
+        "soil": 200,
+        "basic_hand_tools": 3,
+        "emergency_reserve": 8
+      },
+      "previous_state_hash": "fnv1a-69ac40ad",
+      "next_state_hash": "fnv1a-d17e59dd",
+      "status": "COMPLETED",
+      "reason": "NONE"
+    },
+    {
+      "event_id": "MARKET-EVENT-0002",
+      "simulation_time": 0,
+      "actor_id": "KAIOS-MARKETPLACE-RUNTIME",
+      "request_id": null,
+      "project_id": null,
+      "task_id": null,
+      "action": "START",
+      "inputs": {},
+      "outputs": {
+        "runtime_status": "RUNNING"
+      },
+      "credit_delta": {},
+      "resource_delta": {},
+      "previous_state_hash": "fnv1a-d17e59dd",
+      "next_state_hash": "fnv1a-6380bc3b",
+      "status": "COMPLETED",
+      "reason": "NONE"
+    },
+    {
+      "event_id": "MARKET-EVENT-0003",
+      "simulation_time": 0,
+      "actor_id": "PLAYER-LIFE-FFB1222C",
+      "request_id": "MARKET-REQUEST-001",
+      "project_id": null,
+      "task_id": null,
+      "action": "SUBMIT_REQUEST",
+      "inputs": {
+        "description": "Create a generic tree candidate life package",
+        "requested_output_type": "LIFE_PACKAGE",
+        "budget": 120
+      },
+      "outputs": {
+        "request": {
+          "request_id": "MARKET-REQUEST-001",
+          "customer_id": "PLAYER-LIFE-FFB1222C",
+          "description": "Create a generic tree candidate life package",
+          "requested_output_type": "LIFE_PACKAGE",
+          "quantity": 1,
+          "quality": "STANDARD_SIMULATION",
+          "location": "STARTER-LAND-B9F5C5CB",
+          "deadline": 240,
+          "budget": 120,
+          "acceptance_criteria": [
+            "CODEX_REVIEW_PASS",
+            "CUSTOMER_ACCEPTANCE"
+          ],
+          "rights_requested": [
+            "SIMULATED_USE_RIGHT"
+          ],
+          "civilization_requirement": "PRIMITIVE_FORAGING",
+          "technology_requirement": "BASIC",
+          "risk": "LOW",
+          "kind": "TREE_LIFE_PACKAGE",
+          "status": "SUBMITTED",
+          "decision_reason": null
+        }
+      },
+      "credit_delta": {},
+      "resource_delta": {},
+      "previous_state_hash": "fnv1a-6380bc3b",
+      "next_state_hash": "fnv1a-d6163d86",
+      "status": "COMPLETED",
+      "reason": "NONE"
+    },
+    {
+      "event_id": "MARKET-EVENT-0004",
+      "simulation_time": 0,
+      "actor_id": "KAIOS-MARKETPLACE-RUNTIME",
+      "request_id": "MARKET-REQUEST-001",
+      "project_id": null,
+      "task_id": null,
+      "action": "EVALUATE_REQUEST",
+      "inputs": {},
+      "outputs": {
+        "status": "ACCEPTED"
+      },
+      "credit_delta": {},
+      "resource_delta": {},
+      "previous_state_hash": "fnv1a-d6163d86",
+      "next_state_hash": "fnv1a-6477ba4d",
+      "status": "COMPLETED",
+      "reason": "ALL_SIMULATION_GATES_PASS"
+    },
+    {
+      "event_id": "MARKET-EVENT-0005",
+      "simulation_time": 0,
+      "actor_id": "KAIOS-MARKETPLACE-RUNTIME",
+      "request_id": "MARKET-REQUEST-001",
+      "project_id": "MARKET-PROJECT-001",
+      "task_id": null,
+      "action": "FUND_PROJECT",
+      "inputs": {},
+      "outputs": {
+        "project": {
+          "project_id": "MARKET-PROJECT-001",
+          "request_id": "MARKET-REQUEST-001",
+          "kind": "TREE_LIFE_PACKAGE",
+          "status": "ESCROW_RESERVED",
+          "escrow": {
+            "customer_budget": 120,
+            "escrow_balance": 120,
+            "reserved_payroll": 42,
+            "reserved_materials": 30,
+            "reserved_transport": 9.6,
+            "reserved_energy": 6,
+            "reserved_compute": 6,
+            "reserved_review": 8.4,
+            "reserved_contingency": 18,
+            "spent": 0,
+            "refunded": 0,
+            "remaining": 120,
+            "account_id": "MARKET-PROJECT-001-ESCROW"
+          },
+          "task_ids": [],
+          "dependencies": [],
+          "listing_id": null,
+          "ai_company_binding": null,
+          "simulation_only": true
+        }
+      },
+      "credit_delta": {
+        "SIM-WALLET-PLAYER-FFB1222C": -120,
+        "MARKET-PROJECT-001-ESCROW": 120
+      },
+      "resource_delta": {},
+      "previous_state_hash": "fnv1a-7ed386c2",
+      "next_state_hash": "fnv1a-5a574255",
+      "status": "COMPLETED",
+      "reason": "NONE"
+    },
+    {
+      "event_id": "MARKET-EVENT-0006",
+      "simulation_time": 0,
+      "actor_id": "KAIOS-MARKETPLACE-RUNTIME",
+      "request_id": null,
+      "project_id": "MARKET-PROJECT-001",
+      "task_id": null,
+      "action": "CREATE_TASKS",
+      "inputs": {},
+      "outputs": {
+        "tasks": [
+          {
+            "task_id": "MARKET-PROJECT-001-TASK-01",
+            "project_id": "MARKET-PROJECT-001",
+            "task_type": "REQUIREMENTS",
+            "dependencies": [],
+            "worker_class": "CANDIDATE_CREATOR",
+            "location_requirement": "LOCAL_DIGITAL_WORKSPACE",
+            "physical_or_digital": "DIGITAL",
+            "start_time": null,
+            "duration": 2,
+            "elapsed": 0,
+            "budget": 5,
+            "pay": 5,
+            "resources": {},
+            "acceptance_criteria": [
+              "DEPENDENCIES_PASS",
+              "REQUIRED_RESOURCES_PRESENT",
+              "TIME_ADVANCED"
+            ],
+            "reviewer": "codex-gm-01",
+            "status": "READY"
+          },
+          {
+            "task_id": "MARKET-PROJECT-001-TASK-02",
+            "project_id": "MARKET-PROJECT-001",
+            "task_type": "LIFE_SCHEMA",
+            "dependencies": [
+              "MARKET-PROJECT-001-TASK-01"
+            ],
+            "worker_class": "CANDIDATE_CREATOR",
+            "location_requirement": "LOCAL_DIGITAL_WORKSPACE",
+            "physical_or_digital": "DIGITAL",
+            "start_time": null,
+            "duration": 4,
+            "elapsed": 0,
+            "budget": 12,
+            "pay": 12,
+            "resources": {},
+            "acceptance_criteria": [
+              "DEPENDENCIES_PASS",
+              "REQUIRED_RESOURCES_PRESENT",
+              "TIME_ADVANCED"
+            ],
+            "reviewer": "codex-gm-01",
+            "status": "NOT_READY"
+          },
+          {
+            "task_id": "MARKET-PROJECT-001-TASK-03",
+            "project_id": "MARKET-PROJECT-001",
+            "task_type": "DATA",
+            "dependencies": [
+              "MARKET-PROJECT-001-TASK-02"
+            ],
+            "worker_class": "CANDIDATE_CREATOR",
+            "location_requirement": "LOCAL_DIGITAL_WORKSPACE",
+            "physical_or_digital": "DIGITAL",
+            "start_time": null,
+            "duration": 3,
+            "elapsed": 0,
+            "budget": 8,
+            "pay": 8,
+            "resources": {},
+            "acceptance_criteria": [
+              "DEPENDENCIES_PASS",
+              "REQUIRED_RESOURCES_PRESENT",
+              "TIME_ADVANCED"
+            ],
+            "reviewer": "codex-gm-01",
+            "status": "NOT_READY"
+          },
+          {
+            "task_id": "MARKET-PROJECT-001-TASK-04",
+            "project_id": "MARKET-PROJECT-001",
+            "task_type": "TEST",
+            "dependencies": [
+              "MARKET-PROJECT-001-TASK-03"
+            ],
+            "worker_class": "CANDIDATE_CREATOR",
+            "location_requirement": "LOCAL_DIGITAL_WORKSPACE",
+            "physical_or_digital": "DIGITAL",
+            "start_time": null,
+            "duration": 3,
+            "elapsed": 0,
+            "budget": 8,
+            "pay": 8,
+            "resources": {},
+            "acceptance_criteria": [
+              "DEPENDENCIES_PASS",
+              "REQUIRED_RESOURCES_PRESENT",
+              "TIME_ADVANCED"
+            ],
+            "reviewer": "codex-gm-01",
+            "status": "NOT_READY"
+          },
+          {
+            "task_id": "MARKET-PROJECT-001-TASK-05",
+            "project_id": "MARKET-PROJECT-001",
+            "task_type": "QUALITY",
+            "dependencies": [
+              "MARKET-PROJECT-001-TASK-04"
+            ],
+            "worker_class": "CODEX_REVIEWER",
+            "location_requirement": "LOCAL_DIGITAL_WORKSPACE",
+            "physical_or_digital": "DIGITAL",
+            "start_time": null,
+            "duration": 2,
+            "elapsed": 0,
+            "budget": 7,
+            "pay": 7,
+            "resources": {},
+            "acceptance_criteria": [
+              "DEPENDENCIES_PASS",
+              "REQUIRED_RESOURCES_PRESENT",
+              "TIME_ADVANCED"
+            ],
+            "reviewer": "codex-gm-01",
+            "status": "NOT_READY"
+          },
+          {
+            "task_id": "MARKET-PROJECT-001-TASK-06",
+            "project_id": "MARKET-PROJECT-001",
+            "task_type": "DELIVERY",
+            "dependencies": [
+              "MARKET-PROJECT-001-TASK-05"
+            ],
+            "worker_class": "CANDIDATE_CREATOR",
+            "location_requirement": "LOCAL_DIGITAL_WORKSPACE",
+            "physical_or_digital": "DIGITAL",
+            "start_time": null,
+            "duration": 1,
+            "elapsed": 0,
+            "budget": 0,
+            "pay": 0,
+            "resources": {},
+            "acceptance_criteria": [
+              "DEPENDENCIES_PASS",
+              "REQUIRED_RESOURCES_PRESENT",
+              "TIME_ADVANCED"
+            ],
+            "reviewer": "codex-gm-01",
+            "status": "NOT_READY"
+          }
+        ],
+        "dependencies": [
+          {
+            "predecessor_task_id": "MARKET-PROJECT-001-TASK-01",
+            "successor_task_id": "MARKET-PROJECT-001-TASK-02"
+          },
+          {
+            "predecessor_task_id": "MARKET-PROJECT-001-TASK-02",
+            "successor_task_id": "MARKET-PROJECT-001-TASK-03"
+          },
+          {
+            "predecessor_task_id": "MARKET-PROJECT-001-TASK-03",
+            "successor_task_id": "MARKET-PROJECT-001-TASK-04"
+          },
+          {
+            "predecessor_task_id": "MARKET-PROJECT-001-TASK-04",
+            "successor_task_id": "MARKET-PROJECT-001-TASK-05"
+          },
+          {
+            "predecessor_task_id": "MARKET-PROJECT-001-TASK-05",
+            "successor_task_id": "MARKET-PROJECT-001-TASK-06"
+          }
+        ]
+      },
+      "credit_delta": {},
+      "resource_delta": {},
+      "previous_state_hash": "fnv1a-5a574255",
+      "next_state_hash": "fnv1a-8005e04a",
+      "status": "COMPLETED",
+      "reason": "NONE"
+    },
+    {
+      "event_id": "MARKET-EVENT-0007",
+      "simulation_time": 0,
+      "actor_id": "KAIOS-MARKETPLACE-RUNTIME",
+      "request_id": null,
+      "project_id": "MARKET-PROJECT-001",
+      "task_id": "MARKET-PROJECT-001-TASK-01",
+      "action": "START_PROJECT",
+      "inputs": {},
+      "outputs": {
+        "project_status": "IN_PROGRESS"
+      },
+      "credit_delta": {},
+      "resource_delta": {},
+      "previous_state_hash": "fnv1a-8005e04a",
+      "next_state_hash": "fnv1a-35b0a124",
+      "status": "COMPLETED",
+      "reason": "NONE"
+    },
+    {
+      "event_id": "MARKET-EVENT-0008",
+      "simulation_time": 2,
+      "actor_id": "KAIOS-MARKETPLACE-RUNTIME",
+      "request_id": null,
+      "project_id": null,
+      "task_id": null,
+      "action": "ADVANCE_TIME",
+      "inputs": {
+        "hours": 2
+      },
+      "outputs": {
+        "simulation_time": 2
+      },
+      "credit_delta": {},
+      "resource_delta": {},
+      "previous_state_hash": "fnv1a-35b0a124",
+      "next_state_hash": "fnv1a-718658e6",
+      "status": "COMPLETED",
+      "reason": "NONE"
+    },
+    {
+      "event_id": "MARKET-EVENT-0009",
+      "simulation_time": 2,
+      "actor_id": "codex-gm-01",
+      "request_id": null,
+      "project_id": "MARKET-PROJECT-001",
+      "task_id": "MARKET-PROJECT-001-TASK-01",
+      "action": "APPROVE_SUBMITTED_TASK",
+      "inputs": {},
+      "outputs": {
+        "task_status": "COMPLETE",
+        "next_task_id": "MARKET-PROJECT-001-TASK-02"
+      },
+      "credit_delta": {},
+      "resource_delta": {},
+      "previous_state_hash": "fnv1a-718658e6",
+      "next_state_hash": "fnv1a-1b8fcec9",
+      "status": "COMPLETED",
+      "reason": "NONE"
+    },
+    {
+      "event_id": "MARKET-EVENT-0010",
+      "simulation_time": 6,
+      "actor_id": "KAIOS-MARKETPLACE-RUNTIME",
+      "request_id": null,
+      "project_id": null,
+      "task_id": null,
+      "action": "ADVANCE_TIME",
+      "inputs": {
+        "hours": 4
+      },
+      "outputs": {
+        "simulation_time": 6
+      },
+      "credit_delta": {},
+      "resource_delta": {},
+      "previous_state_hash": "fnv1a-1b8fcec9",
+      "next_state_hash": "fnv1a-407e94fb",
+      "status": "COMPLETED",
+      "reason": "NONE"
+    },
+    {
+      "event_id": "MARKET-EVENT-0011",
+      "simulation_time": 6,
+      "actor_id": "codex-gm-01",
+      "request_id": null,
+      "project_id": "MARKET-PROJECT-001",
+      "task_id": "MARKET-PROJECT-001-TASK-02",
+      "action": "APPROVE_SUBMITTED_TASK",
+      "inputs": {},
+      "outputs": {
+        "task_status": "COMPLETE",
+        "next_task_id": "MARKET-PROJECT-001-TASK-03"
+      },
+      "credit_delta": {},
+      "resource_delta": {},
+      "previous_state_hash": "fnv1a-407e94fb",
+      "next_state_hash": "fnv1a-d3e00124",
+      "status": "COMPLETED",
+      "reason": "NONE"
+    },
+    {
+      "event_id": "MARKET-EVENT-0012",
+      "simulation_time": 9,
+      "actor_id": "KAIOS-MARKETPLACE-RUNTIME",
+      "request_id": null,
+      "project_id": null,
+      "task_id": null,
+      "action": "ADVANCE_TIME",
+      "inputs": {
+        "hours": 3
+      },
+      "outputs": {
+        "simulation_time": 9
+      },
+      "credit_delta": {},
+      "resource_delta": {},
+      "previous_state_hash": "fnv1a-d3e00124",
+      "next_state_hash": "fnv1a-2fce033c",
+      "status": "COMPLETED",
+      "reason": "NONE"
+    },
+    {
+      "event_id": "MARKET-EVENT-0013",
+      "simulation_time": 9,
+      "actor_id": "codex-gm-01",
+      "request_id": null,
+      "project_id": "MARKET-PROJECT-001",
+      "task_id": "MARKET-PROJECT-001-TASK-03",
+      "action": "APPROVE_SUBMITTED_TASK",
+      "inputs": {},
+      "outputs": {
+        "task_status": "COMPLETE",
+        "next_task_id": "MARKET-PROJECT-001-TASK-04"
+      },
+      "credit_delta": {},
+      "resource_delta": {},
+      "previous_state_hash": "fnv1a-2fce033c",
+      "next_state_hash": "fnv1a-fde4ba5c",
+      "status": "COMPLETED",
+      "reason": "NONE"
+    },
+    {
+      "event_id": "MARKET-EVENT-0014",
+      "simulation_time": 12,
+      "actor_id": "KAIOS-MARKETPLACE-RUNTIME",
+      "request_id": null,
+      "project_id": null,
+      "task_id": null,
+      "action": "ADVANCE_TIME",
+      "inputs": {
+        "hours": 3
+      },
+      "outputs": {
+        "simulation_time": 12
+      },
+      "credit_delta": {},
+      "resource_delta": {},
+      "previous_state_hash": "fnv1a-fde4ba5c",
+      "next_state_hash": "fnv1a-3dafe371",
+      "status": "COMPLETED",
+      "reason": "NONE"
+    },
+    {
+      "event_id": "MARKET-EVENT-0015",
+      "simulation_time": 12,
+      "actor_id": "codex-gm-01",
+      "request_id": null,
+      "project_id": "MARKET-PROJECT-001",
+      "task_id": "MARKET-PROJECT-001-TASK-04",
+      "action": "APPROVE_SUBMITTED_TASK",
+      "inputs": {},
+      "outputs": {
+        "task_status": "COMPLETE",
+        "next_task_id": "MARKET-PROJECT-001-TASK-05"
+      },
+      "credit_delta": {},
+      "resource_delta": {},
+      "previous_state_hash": "fnv1a-3dafe371",
+      "next_state_hash": "fnv1a-21f5b0a5",
+      "status": "COMPLETED",
+      "reason": "NONE"
+    },
+    {
+      "event_id": "MARKET-EVENT-0016",
+      "simulation_time": 14,
+      "actor_id": "KAIOS-MARKETPLACE-RUNTIME",
+      "request_id": null,
+      "project_id": null,
+      "task_id": null,
+      "action": "ADVANCE_TIME",
+      "inputs": {
+        "hours": 2
+      },
+      "outputs": {
+        "simulation_time": 14
+      },
+      "credit_delta": {},
+      "resource_delta": {},
+      "previous_state_hash": "fnv1a-21f5b0a5",
+      "next_state_hash": "fnv1a-454eff8b",
+      "status": "COMPLETED",
+      "reason": "NONE"
+    },
+    {
+      "event_id": "MARKET-EVENT-0017",
+      "simulation_time": 14,
+      "actor_id": "codex-gm-01",
+      "request_id": null,
+      "project_id": "MARKET-PROJECT-001",
+      "task_id": "MARKET-PROJECT-001-TASK-05",
+      "action": "APPROVE_SUBMITTED_TASK",
+      "inputs": {},
+      "outputs": {
+        "task_status": "COMPLETE",
+        "next_task_id": "MARKET-PROJECT-001-TASK-06"
+      },
+      "credit_delta": {},
+      "resource_delta": {},
+      "previous_state_hash": "fnv1a-454eff8b",
+      "next_state_hash": "fnv1a-9981e4c7",
+      "status": "COMPLETED",
+      "reason": "NONE"
+    },
+    {
+      "event_id": "MARKET-EVENT-0018",
+      "simulation_time": 15,
+      "actor_id": "KAIOS-MARKETPLACE-RUNTIME",
+      "request_id": null,
+      "project_id": null,
+      "task_id": null,
+      "action": "ADVANCE_TIME",
+      "inputs": {
+        "hours": 1
+      },
+      "outputs": {
+        "simulation_time": 15
+      },
+      "credit_delta": {},
+      "resource_delta": {},
+      "previous_state_hash": "fnv1a-9981e4c7",
+      "next_state_hash": "fnv1a-455a8a0d",
+      "status": "COMPLETED",
+      "reason": "NONE"
+    },
+    {
+      "event_id": "MARKET-EVENT-0019",
+      "simulation_time": 15,
+      "actor_id": "codex-gm-01",
+      "request_id": null,
+      "project_id": "MARKET-PROJECT-001",
+      "task_id": "MARKET-PROJECT-001-TASK-06",
+      "action": "APPROVE_SUBMITTED_TASK",
+      "inputs": {},
+      "outputs": {
+        "task_status": "COMPLETE",
+        "next_task_id": null
+      },
+      "credit_delta": {},
+      "resource_delta": {},
+      "previous_state_hash": "fnv1a-455a8a0d",
+      "next_state_hash": "fnv1a-12e798ec",
+      "status": "COMPLETED",
+      "reason": "NONE"
+    },
+    {
+      "event_id": "MARKET-EVENT-0020",
+      "simulation_time": 15,
+      "actor_id": "KAIOS-MARKETPLACE-RUNTIME",
+      "request_id": null,
+      "project_id": "MARKET-PROJECT-001",
+      "task_id": null,
+      "action": "SUBMIT_DELIVERABLE",
+      "inputs": {},
+      "outputs": {
+        "deliverable": {
+          "deliverable_id": "DELIVERABLE-001",
+          "project_id": "MARKET-PROJECT-001",
+          "task_outputs": [
+            {
+              "task_id": "MARKET-PROJECT-001-TASK-01",
+              "task_type": "REQUIREMENTS",
+              "status": "COMPLETE"
+            },
+            {
+              "task_id": "MARKET-PROJECT-001-TASK-02",
+              "task_type": "LIFE_SCHEMA",
+              "status": "COMPLETE"
+            },
+            {
+              "task_id": "MARKET-PROJECT-001-TASK-03",
+              "task_type": "DATA",
+              "status": "COMPLETE"
+            },
+            {
+              "task_id": "MARKET-PROJECT-001-TASK-04",
+              "task_type": "TEST",
+              "status": "COMPLETE"
+            },
+            {
+              "task_id": "MARKET-PROJECT-001-TASK-05",
+              "task_type": "QUALITY",
+              "status": "COMPLETE"
+            },
+            {
+              "task_id": "MARKET-PROJECT-001-TASK-06",
+              "task_type": "DELIVERY",
+              "status": "COMPLETE"
+            }
+          ],
+          "files": [
+            "tree/life.manifest.json",
+            "tree/taxonomy.json"
+          ],
+          "version": "1.0.0",
+          "provenance": {
+            "creator": "cursor-01-style-candidate",
+            "authority": "CANDIDATE_ONLY"
+          },
+          "integrity": {
+            "state_hash": "fnv1a-12e798ec",
+            "verified": true
+          },
+          "tests": [
+            "SCHEMA_PASS",
+            "CAUSALITY_PASS"
+          ],
+          "known_limitations": [
+            "SIMULATION_ONLY"
+          ],
+          "rights": [
+            "SIMULATED_USE_RIGHT"
+          ],
+          "maintenance_plan": {
+            "status": "DECLARED",
+            "interval": "SIMULATION_DEFINED"
+          },
+          "acceptance_record": null,
+          "review_status": "PENDING_CODEX_REVIEW"
+        }
+      },
+      "credit_delta": {},
+      "resource_delta": {},
+      "previous_state_hash": "fnv1a-12e798ec",
+      "next_state_hash": "fnv1a-d5869a9d",
+      "status": "COMPLETED",
+      "reason": "NONE"
+    },
+    {
+      "event_id": "MARKET-EVENT-0021",
+      "simulation_time": 15,
+      "actor_id": "codex-gm-01",
+      "request_id": null,
+      "project_id": "MARKET-PROJECT-001",
+      "task_id": null,
+      "action": "REVIEW_DELIVERABLE",
+      "inputs": {},
+      "outputs": {
+        "review_status": "APPROVED"
+      },
+      "credit_delta": {},
+      "resource_delta": {},
+      "previous_state_hash": "fnv1a-d5869a9d",
+      "next_state_hash": "fnv1a-2095e3e8",
+      "status": "COMPLETED",
+      "reason": "APPROVED"
+    },
+    {
+      "event_id": "MARKET-EVENT-0022",
+      "simulation_time": 15,
+      "actor_id": "PLAYER-LIFE-FFB1222C",
+      "request_id": null,
+      "project_id": "MARKET-PROJECT-001",
+      "task_id": null,
+      "action": "ACCEPT_DELIVERY",
+      "inputs": {},
+      "outputs": {
+        "acceptance": {
+          "acceptance_id": "ACCEPTANCE-001",
+          "deliverable_id": "DELIVERABLE-001",
+          "customer_id": "PLAYER-LIFE-FFB1222C",
+          "outcome": "ACCEPTED",
+          "approved_fraction": 1,
+          "reason": "ACCEPTED",
+          "payroll_release": 42,
+          "escrow_refund": 0,
+          "simulation_time": 15
+        }
+      },
+      "credit_delta": {},
+      "resource_delta": {},
+      "previous_state_hash": "fnv1a-2095e3e8",
+      "next_state_hash": "fnv1a-d9e88714",
+      "status": "COMPLETED",
+      "reason": "NONE"
+    },
+    {
+      "event_id": "MARKET-EVENT-0023",
+      "simulation_time": 15,
+      "actor_id": "codex-gm-01",
+      "request_id": null,
+      "project_id": "MARKET-PROJECT-001",
+      "task_id": null,
+      "action": "RELEASE_PAYROLL",
+      "inputs": {},
+      "outputs": {
+        "payroll": {
+          "payroll_event_id": "PAYROLL-001",
+          "project_id": "MARKET-PROJECT-001",
+          "worker_life_id": "AI-LIFE-151F0030",
+          "wallet_id": "SIM-WALLET-AI-FFB1222C",
+          "gross_pay": 40,
+          "household_transfer": 0,
+          "status": "PAYROLL_RELEASED",
+          "duplicate_claim": false,
+          "simulation_time": 15
+        }
+      },
+      "credit_delta": {
+        "MARKET-PROJECT-001-ESCROW": -40,
+        "SIM-WALLET-AI-FFB1222C": 40
+      },
+      "resource_delta": {},
+      "previous_state_hash": "fnv1a-7b7acbf2",
+      "next_state_hash": "fnv1a-52f41023",
+      "status": "COMPLETED",
+      "reason": "NONE"
+    },
+    {
+      "event_id": "MARKET-EVENT-0024",
+      "simulation_time": 15,
+      "actor_id": "KAIOS_AI_COMPANY",
+      "request_id": null,
+      "project_id": "MARKET-PROJECT-001",
+      "task_id": null,
+      "action": "SETTLE_PROJECT",
+      "inputs": {},
+      "outputs": {
+        "settlement": {
+          "status": "SETTLED",
+          "supplier_payment": 20,
+          "company_revenue": 25,
+          "maintenance_reserve": 5,
+          "unused_escrow_refund": 30,
+          "simulation_time": 15
+        }
+      },
+      "credit_delta": {
+        "MARKET-PROJECT-001-ESCROW": -80,
+        "SUPPLIER-OPERATING": 20,
+        "AI-COMPANY-OPERATING": 25,
+        "MAINTENANCE-RESERVE": 5,
+        "SIM-WALLET-PLAYER-FFB1222C": 30
+      },
+      "resource_delta": {},
+      "previous_state_hash": "fnv1a-52f41023",
+      "next_state_hash": "fnv1a-eb77b299",
+      "status": "COMPLETED",
+      "reason": "NONE"
+    },
+    {
+      "event_id": "MARKET-EVENT-0001",
+      "simulation_time": 0,
+      "actor_id": "PLAYER-LIFE-A30AAEF5",
+      "request_id": null,
+      "project_id": null,
+      "task_id": null,
+      "action": "GRANT_STARTER_PACKAGE",
+      "inputs": {},
+      "outputs": {
+        "starter_grant_id": "STARTER-GRANT-c3691495",
+        "player_genesis_id": "GENESIS-PLAYER-LIFE-A30AAEF5",
+        "land_id": "STARTER-LAND-15954BB4",
+        "credit": 400,
+        "resources": {
+          "drinking_water": 48,
+          "basic_food": 24,
+          "basic_clothing": 2,
+          "primitive_shelter": 1,
+          "wood": 80,
+          "stone": 120,
+          "soil": 200,
+          "basic_hand_tools": 3,
+          "emergency_reserve": 8
+        },
+        "simulation_time": 0,
+        "status": "GRANTED_ONCE"
+      },
+      "credit_delta": {
+        "SIM-WALLET-PLAYER-A30AAEF5": 400
+      },
+      "resource_delta": {
+        "drinking_water": 48,
+        "basic_food": 24,
+        "basic_clothing": 2,
+        "primitive_shelter": 1,
+        "wood": 80,
+        "stone": 120,
+        "soil": 200,
+        "basic_hand_tools": 3,
+        "emergency_reserve": 8
+      },
+      "previous_state_hash": "fnv1a-97a6dfb5",
+      "next_state_hash": "fnv1a-74b3d5b9",
+      "status": "COMPLETED",
+      "reason": "NONE"
+    },
+    {
+      "event_id": "MARKET-EVENT-0002",
+      "simulation_time": 0,
+      "actor_id": "KAIOS-MARKETPLACE-RUNTIME",
+      "request_id": null,
+      "project_id": null,
+      "task_id": null,
+      "action": "START",
+      "inputs": {},
+      "outputs": {
+        "runtime_status": "RUNNING"
+      },
+      "credit_delta": {},
+      "resource_delta": {},
+      "previous_state_hash": "fnv1a-74b3d5b9",
+      "next_state_hash": "fnv1a-ccb52c93",
+      "status": "COMPLETED",
+      "reason": "NONE"
+    },
+    {
+      "event_id": "MARKET-EVENT-0003",
+      "simulation_time": 0,
+      "actor_id": "PLAYER-LIFE-A30AAEF5",
+      "request_id": "MARKET-REQUEST-001",
+      "project_id": null,
+      "task_id": null,
+      "action": "SUBMIT_REQUEST",
+      "inputs": {
+        "description": "Build a basic shelter",
+        "requested_output_type": "BUILDING",
+        "budget": 180
+      },
+      "outputs": {
+        "request": {
+          "request_id": "MARKET-REQUEST-001",
+          "customer_id": "PLAYER-LIFE-A30AAEF5",
+          "description": "Build a basic shelter",
+          "requested_output_type": "BUILDING",
+          "quantity": 1,
+          "quality": "STANDARD_SIMULATION",
+          "location": "STARTER-LAND-15954BB4",
+          "deadline": 240,
+          "budget": 180,
+          "acceptance_criteria": [
+            "CODEX_REVIEW_PASS",
+            "CUSTOMER_ACCEPTANCE"
+          ],
+          "rights_requested": [
+            "SIMULATED_USE_RIGHT"
+          ],
+          "civilization_requirement": "PRIMITIVE_FORAGING",
+          "technology_requirement": "BASIC",
+          "risk": "LOW",
+          "kind": "BASIC_SHELTER",
+          "status": "SUBMITTED",
+          "decision_reason": null
+        }
+      },
+      "credit_delta": {},
+      "resource_delta": {},
+      "previous_state_hash": "fnv1a-ccb52c93",
+      "next_state_hash": "fnv1a-63c187bb",
+      "status": "COMPLETED",
+      "reason": "NONE"
+    },
+    {
+      "event_id": "MARKET-EVENT-0004",
+      "simulation_time": 0,
+      "actor_id": "KAIOS-MARKETPLACE-RUNTIME",
+      "request_id": "MARKET-REQUEST-001",
+      "project_id": null,
+      "task_id": null,
+      "action": "EVALUATE_REQUEST",
+      "inputs": {},
+      "outputs": {
+        "status": "ACCEPTED"
+      },
+      "credit_delta": {},
+      "resource_delta": {},
+      "previous_state_hash": "fnv1a-63c187bb",
+      "next_state_hash": "fnv1a-e62443a8",
+      "status": "COMPLETED",
+      "reason": "ALL_SIMULATION_GATES_PASS"
+    },
+    {
+      "event_id": "MARKET-EVENT-0005",
+      "simulation_time": 0,
+      "actor_id": "KAIOS-MARKETPLACE-RUNTIME",
+      "request_id": "MARKET-REQUEST-001",
+      "project_id": "MARKET-PROJECT-001",
+      "task_id": null,
+      "action": "FUND_PROJECT",
+      "inputs": {},
+      "outputs": {
+        "project": {
+          "project_id": "MARKET-PROJECT-001",
+          "request_id": "MARKET-REQUEST-001",
+          "kind": "BASIC_SHELTER",
+          "status": "ESCROW_RESERVED",
+          "escrow": {
+            "customer_budget": 180,
+            "escrow_balance": 180,
+            "reserved_payroll": 63,
+            "reserved_materials": 45,
+            "reserved_transport": 14.4,
+            "reserved_energy": 9,
+            "reserved_compute": 9,
+            "reserved_review": 12.6,
+            "reserved_contingency": 27,
+            "spent": 0,
+            "refunded": 0,
+            "remaining": 180,
+            "account_id": "MARKET-PROJECT-001-ESCROW"
+          },
+          "task_ids": [],
+          "dependencies": [],
+          "listing_id": null,
+          "ai_company_binding": null,
+          "simulation_only": true
+        }
+      },
+      "credit_delta": {
+        "SIM-WALLET-PLAYER-A30AAEF5": -180,
+        "MARKET-PROJECT-001-ESCROW": 180
+      },
+      "resource_delta": {},
+      "previous_state_hash": "fnv1a-90f3b581",
+      "next_state_hash": "fnv1a-9d7e438e",
+      "status": "COMPLETED",
+      "reason": "NONE"
+    },
+    {
+      "event_id": "MARKET-EVENT-0006",
+      "simulation_time": 0,
+      "actor_id": "KAIOS-MARKETPLACE-RUNTIME",
+      "request_id": null,
+      "project_id": "MARKET-PROJECT-001",
+      "task_id": null,
+      "action": "CREATE_TASKS",
+      "inputs": {},
+      "outputs": {
+        "tasks": [
+          {
+            "task_id": "MARKET-PROJECT-001-TASK-01",
+            "project_id": "MARKET-PROJECT-001",
+            "task_type": "REQUIREMENTS",
+            "dependencies": [],
+            "worker_class": "CANDIDATE_CREATOR",
+            "location_requirement": "LOCAL_DIGITAL_WORKSPACE",
+            "physical_or_digital": "DIGITAL",
+            "start_time": null,
+            "duration": 2,
+            "elapsed": 0,
+            "budget": 4,
+            "pay": 4,
+            "resources": {},
+            "acceptance_criteria": [
+              "DEPENDENCIES_PASS",
+              "REQUIRED_RESOURCES_PRESENT",
+              "TIME_ADVANCED"
+            ],
+            "reviewer": "codex-gm-01",
+            "status": "READY"
+          },
+          {
+            "task_id": "MARKET-PROJECT-001-TASK-02",
+            "project_id": "MARKET-PROJECT-001",
+            "task_type": "DESIGN",
+            "dependencies": [
+              "MARKET-PROJECT-001-TASK-01"
+            ],
+            "worker_class": "CANDIDATE_CREATOR",
+            "location_requirement": "LOCAL_DIGITAL_WORKSPACE",
+            "physical_or_digital": "DIGITAL",
+            "start_time": null,
+            "duration": 3,
+            "elapsed": 0,
+            "budget": 7,
+            "pay": 7,
+            "resources": {},
+            "acceptance_criteria": [
+              "DEPENDENCIES_PASS",
+              "REQUIRED_RESOURCES_PRESENT",
+              "TIME_ADVANCED"
+            ],
+            "reviewer": "codex-gm-01",
+            "status": "NOT_READY"
+          },
+          {
+            "task_id": "MARKET-PROJECT-001-TASK-03",
+            "project_id": "MARKET-PROJECT-001",
+            "task_type": "TRANSPORT",
+            "dependencies": [
+              "MARKET-PROJECT-001-TASK-02"
+            ],
+            "worker_class": "CAUSAL_PHYSICAL_WORKER",
+            "location_requirement": "STARTER_LAND",
+            "physical_or_digital": "PHYSICAL",
+            "start_time": null,
+            "duration": 4,
+            "elapsed": 0,
+            "budget": 6,
+            "pay": 6,
+            "resources": {
+              "wood": 40,
+              "stone": 60
+            },
+            "acceptance_criteria": [
+              "DEPENDENCIES_PASS",
+              "REQUIRED_RESOURCES_PRESENT",
+              "TIME_ADVANCED"
+            ],
+            "reviewer": "codex-gm-01",
+            "status": "NOT_READY"
+          },
+          {
+            "task_id": "MARKET-PROJECT-001-TASK-04",
+            "project_id": "MARKET-PROJECT-001",
+            "task_type": "CONSTRUCTION",
+            "dependencies": [
+              "MARKET-PROJECT-001-TASK-03"
+            ],
+            "worker_class": "CAUSAL_PHYSICAL_WORKER",
+            "location_requirement": "STARTER_LAND",
+            "physical_or_digital": "PHYSICAL",
+            "start_time": null,
+            "duration": 12,
+            "elapsed": 0,
+            "budget": 20,
+            "pay": 20,
+            "resources": {
+              "wood": 40,
+              "stone": 60,
+              "basic_hand_tools": 1
+            },
+            "acceptance_criteria": [
+              "DEPENDENCIES_PASS",
+              "REQUIRED_RESOURCES_PRESENT",
+              "TIME_ADVANCED"
+            ],
+            "reviewer": "codex-gm-01",
+            "status": "NOT_READY"
+          },
+          {
+            "task_id": "MARKET-PROJECT-001-TASK-05",
+            "project_id": "MARKET-PROJECT-001",
+            "task_type": "QUALITY",
+            "dependencies": [
+              "MARKET-PROJECT-001-TASK-04"
+            ],
+            "worker_class": "CODEX_REVIEWER",
+            "location_requirement": "LOCAL_DIGITAL_WORKSPACE",
+            "physical_or_digital": "DIGITAL",
+            "start_time": null,
+            "duration": 2,
+            "elapsed": 0,
+            "budget": 7,
+            "pay": 7,
+            "resources": {},
+            "acceptance_criteria": [
+              "DEPENDENCIES_PASS",
+              "REQUIRED_RESOURCES_PRESENT",
+              "TIME_ADVANCED"
+            ],
+            "reviewer": "codex-gm-01",
+            "status": "NOT_READY"
+          },
+          {
+            "task_id": "MARKET-PROJECT-001-TASK-06",
+            "project_id": "MARKET-PROJECT-001",
+            "task_type": "DELIVERY",
+            "dependencies": [
+              "MARKET-PROJECT-001-TASK-05"
+            ],
+            "worker_class": "CANDIDATE_CREATOR",
+            "location_requirement": "LOCAL_DIGITAL_WORKSPACE",
+            "physical_or_digital": "DIGITAL",
+            "start_time": null,
+            "duration": 1,
+            "elapsed": 0,
+            "budget": 0,
+            "pay": 0,
+            "resources": {},
+            "acceptance_criteria": [
+              "DEPENDENCIES_PASS",
+              "REQUIRED_RESOURCES_PRESENT",
+              "TIME_ADVANCED"
+            ],
+            "reviewer": "codex-gm-01",
+            "status": "NOT_READY"
+          }
+        ],
+        "dependencies": [
+          {
+            "predecessor_task_id": "MARKET-PROJECT-001-TASK-01",
+            "successor_task_id": "MARKET-PROJECT-001-TASK-02"
+          },
+          {
+            "predecessor_task_id": "MARKET-PROJECT-001-TASK-02",
+            "successor_task_id": "MARKET-PROJECT-001-TASK-03"
+          },
+          {
+            "predecessor_task_id": "MARKET-PROJECT-001-TASK-03",
+            "successor_task_id": "MARKET-PROJECT-001-TASK-04"
+          },
+          {
+            "predecessor_task_id": "MARKET-PROJECT-001-TASK-04",
+            "successor_task_id": "MARKET-PROJECT-001-TASK-05"
+          },
+          {
+            "predecessor_task_id": "MARKET-PROJECT-001-TASK-05",
+            "successor_task_id": "MARKET-PROJECT-001-TASK-06"
+          }
+        ]
+      },
+      "credit_delta": {},
+      "resource_delta": {},
+      "previous_state_hash": "fnv1a-9d7e438e",
+      "next_state_hash": "fnv1a-086711a0",
+      "status": "COMPLETED",
+      "reason": "NONE"
+    },
+    {
+      "event_id": "MARKET-EVENT-0007",
+      "simulation_time": 0,
+      "actor_id": "KAIOS-MARKETPLACE-RUNTIME",
+      "request_id": null,
+      "project_id": "MARKET-PROJECT-001",
+      "task_id": "MARKET-PROJECT-001-TASK-01",
+      "action": "START_PROJECT",
+      "inputs": {},
+      "outputs": {
+        "project_status": "IN_PROGRESS"
+      },
+      "credit_delta": {},
+      "resource_delta": {},
+      "previous_state_hash": "fnv1a-086711a0",
+      "next_state_hash": "fnv1a-ab3755ae",
+      "status": "COMPLETED",
+      "reason": "NONE"
+    },
+    {
+      "event_id": "MARKET-EVENT-0008",
+      "simulation_time": 2,
+      "actor_id": "KAIOS-MARKETPLACE-RUNTIME",
+      "request_id": null,
+      "project_id": null,
+      "task_id": null,
+      "action": "ADVANCE_TIME",
+      "inputs": {
+        "hours": 2
+      },
+      "outputs": {
+        "simulation_time": 2
+      },
+      "credit_delta": {},
+      "resource_delta": {},
+      "previous_state_hash": "fnv1a-ab3755ae",
+      "next_state_hash": "fnv1a-7f4ac5d8",
+      "status": "COMPLETED",
+      "reason": "NONE"
+    },
+    {
+      "event_id": "MARKET-EVENT-0009",
+      "simulation_time": 2,
+      "actor_id": "codex-gm-01",
+      "request_id": null,
+      "project_id": "MARKET-PROJECT-001",
+      "task_id": "MARKET-PROJECT-001-TASK-01",
+      "action": "APPROVE_SUBMITTED_TASK",
+      "inputs": {},
+      "outputs": {
+        "task_status": "COMPLETE",
+        "next_task_id": "MARKET-PROJECT-001-TASK-02"
+      },
+      "credit_delta": {},
+      "resource_delta": {},
+      "previous_state_hash": "fnv1a-7f4ac5d8",
+      "next_state_hash": "fnv1a-5827a94d",
+      "status": "COMPLETED",
+      "reason": "NONE"
+    },
+    {
+      "event_id": "MARKET-EVENT-0010",
+      "simulation_time": 5,
+      "actor_id": "KAIOS-MARKETPLACE-RUNTIME",
+      "request_id": null,
+      "project_id": null,
+      "task_id": null,
+      "action": "ADVANCE_TIME",
+      "inputs": {
+        "hours": 3
+      },
+      "outputs": {
+        "simulation_time": 5
+      },
+      "credit_delta": {},
+      "resource_delta": {},
+      "previous_state_hash": "fnv1a-5827a94d",
+      "next_state_hash": "fnv1a-cd1ac9b3",
+      "status": "COMPLETED",
+      "reason": "NONE"
+    },
+    {
+      "event_id": "MARKET-EVENT-0011",
+      "simulation_time": 5,
+      "actor_id": "codex-gm-01",
+      "request_id": null,
+      "project_id": "MARKET-PROJECT-001",
+      "task_id": "MARKET-PROJECT-001-TASK-02",
+      "action": "APPROVE_SUBMITTED_TASK",
+      "inputs": {},
+      "outputs": {
+        "task_status": "COMPLETE",
+        "next_task_id": "MARKET-PROJECT-001-TASK-03"
+      },
+      "credit_delta": {},
+      "resource_delta": {},
+      "previous_state_hash": "fnv1a-cd1ac9b3",
+      "next_state_hash": "fnv1a-10eb66dd",
+      "status": "COMPLETED",
+      "reason": "NONE"
+    },
+    {
+      "event_id": "MARKET-EVENT-0012",
+      "simulation_time": 9,
+      "actor_id": "KAIOS-MARKETPLACE-RUNTIME",
+      "request_id": null,
+      "project_id": null,
+      "task_id": null,
+      "action": "ADVANCE_TIME",
+      "inputs": {
+        "hours": 4
+      },
+      "outputs": {
+        "simulation_time": 9
+      },
+      "credit_delta": {},
+      "resource_delta": {},
+      "previous_state_hash": "fnv1a-10eb66dd",
+      "next_state_hash": "fnv1a-a20cf59b",
+      "status": "COMPLETED",
+      "reason": "NONE"
+    },
+    {
+      "event_id": "MARKET-EVENT-0013",
+      "simulation_time": 9,
+      "actor_id": "codex-gm-01",
+      "request_id": null,
+      "project_id": "MARKET-PROJECT-001",
+      "task_id": "MARKET-PROJECT-001-TASK-03",
+      "action": "APPROVE_SUBMITTED_TASK",
+      "inputs": {},
+      "outputs": {
+        "task_status": "COMPLETE",
+        "next_task_id": "MARKET-PROJECT-001-TASK-04"
+      },
+      "credit_delta": {},
+      "resource_delta": {},
+      "previous_state_hash": "fnv1a-a20cf59b",
+      "next_state_hash": "fnv1a-8942eb7f",
+      "status": "COMPLETED",
+      "reason": "NONE"
+    },
+    {
+      "event_id": "MARKET-EVENT-0014",
+      "simulation_time": 21,
+      "actor_id": "KAIOS-MARKETPLACE-RUNTIME",
+      "request_id": null,
+      "project_id": null,
+      "task_id": null,
+      "action": "ADVANCE_TIME",
+      "inputs": {
+        "hours": 12
+      },
+      "outputs": {
+        "simulation_time": 21
+      },
+      "credit_delta": {},
+      "resource_delta": {},
+      "previous_state_hash": "fnv1a-8942eb7f",
+      "next_state_hash": "fnv1a-5f507292",
+      "status": "COMPLETED",
+      "reason": "NONE"
+    },
+    {
+      "event_id": "MARKET-EVENT-0015",
+      "simulation_time": 21,
+      "actor_id": "codex-gm-01",
+      "request_id": null,
+      "project_id": "MARKET-PROJECT-001",
+      "task_id": "MARKET-PROJECT-001-TASK-04",
+      "action": "APPROVE_SUBMITTED_TASK",
+      "inputs": {},
+      "outputs": {
+        "task_status": "COMPLETE",
+        "next_task_id": "MARKET-PROJECT-001-TASK-05"
+      },
+      "credit_delta": {},
+      "resource_delta": {},
+      "previous_state_hash": "fnv1a-5f507292",
+      "next_state_hash": "fnv1a-8b166548",
+      "status": "COMPLETED",
+      "reason": "NONE"
+    },
+    {
+      "event_id": "MARKET-EVENT-0016",
+      "simulation_time": 23,
+      "actor_id": "KAIOS-MARKETPLACE-RUNTIME",
+      "request_id": null,
+      "project_id": null,
+      "task_id": null,
+      "action": "ADVANCE_TIME",
+      "inputs": {
+        "hours": 2
+      },
+      "outputs": {
+        "simulation_time": 23
+      },
+      "credit_delta": {},
+      "resource_delta": {},
+      "previous_state_hash": "fnv1a-8b166548",
+      "next_state_hash": "fnv1a-2d28709a",
+      "status": "COMPLETED",
+      "reason": "NONE"
+    },
+    {
+      "event_id": "MARKET-EVENT-0017",
+      "simulation_time": 23,
+      "actor_id": "codex-gm-01",
+      "request_id": null,
+      "project_id": "MARKET-PROJECT-001",
+      "task_id": "MARKET-PROJECT-001-TASK-05",
+      "action": "APPROVE_SUBMITTED_TASK",
+      "inputs": {},
+      "outputs": {
+        "task_status": "COMPLETE",
+        "next_task_id": "MARKET-PROJECT-001-TASK-06"
+      },
+      "credit_delta": {},
+      "resource_delta": {},
+      "previous_state_hash": "fnv1a-2d28709a",
+      "next_state_hash": "fnv1a-3058764a",
+      "status": "COMPLETED",
+      "reason": "NONE"
+    },
+    {
+      "event_id": "MARKET-EVENT-0018",
+      "simulation_time": 24,
+      "actor_id": "KAIOS-MARKETPLACE-RUNTIME",
+      "request_id": null,
+      "project_id": null,
+      "task_id": null,
+      "action": "ADVANCE_TIME",
+      "inputs": {
+        "hours": 1
+      },
+      "outputs": {
+        "simulation_time": 24
+      },
+      "credit_delta": {},
+      "resource_delta": {},
+      "previous_state_hash": "fnv1a-3058764a",
+      "next_state_hash": "fnv1a-2532cbe8",
+      "status": "COMPLETED",
+      "reason": "NONE"
+    },
+    {
+      "event_id": "MARKET-EVENT-0019",
+      "simulation_time": 24,
+      "actor_id": "codex-gm-01",
+      "request_id": null,
+      "project_id": "MARKET-PROJECT-001",
+      "task_id": "MARKET-PROJECT-001-TASK-06",
+      "action": "APPROVE_SUBMITTED_TASK",
+      "inputs": {},
+      "outputs": {
+        "task_status": "COMPLETE",
+        "next_task_id": null
+      },
+      "credit_delta": {},
+      "resource_delta": {},
+      "previous_state_hash": "fnv1a-2532cbe8",
+      "next_state_hash": "fnv1a-be846bc1",
+      "status": "COMPLETED",
+      "reason": "NONE"
+    },
+    {
+      "event_id": "MARKET-EVENT-0020",
+      "simulation_time": 24,
+      "actor_id": "KAIOS-MARKETPLACE-RUNTIME",
+      "request_id": null,
+      "project_id": "MARKET-PROJECT-001",
+      "task_id": null,
+      "action": "BIND_SHELTER_DOMAIN",
+      "inputs": {},
+      "outputs": {
+        "binding": {
+          "project_id": "AI-COMPANY-PROJECT-00001",
+          "status": "COMPLETE",
+          "closeout_status": "CLOSED_BALANCED_SIMULATION",
+          "domain_binding": "CAUSAL_WORLD_CONSTRUCTION",
+          "domain_evidence": {
+            "ok": true,
+            "reason": null,
+            "runtime": "REAL_CAUSAL_WORLD_FOUNDATION",
+            "adapter": "EXECUTED_CANONICAL_RUNTIME",
+            "execution_status": "COMPLETE",
+            "construction_stages": [
+              "SURVEY",
+              "SITE_CLEARING",
+              "EXCAVATION",
+              "FOUNDATION",
+              "STRUCTURE",
+              "UTILITIES",
+              "INSPECTION"
+            ],
+            "final_stage": "COMPLETE",
+            "event_count": 9,
+            "integrity_verified": true,
+            "simulation_only": true,
+            "authority": "NO_PRODUCTION_AUTHORITY"
+          },
+          "approval_status": "RUNTIME_VALIDATED_SIMULATION",
+          "external_deployment": false,
+          "event_count": 77,
+          "state_hash": "7a5a94eb835fb57a20be185fc81d85e5ddd15d96f988619340742c1f0e5e721f"
+        }
+      },
+      "credit_delta": {},
+      "resource_delta": {},
+      "previous_state_hash": "fnv1a-be846bc1",
+      "next_state_hash": "fnv1a-24e060ba",
+      "status": "COMPLETED",
+      "reason": "NONE"
+    },
+    {
+      "event_id": "MARKET-EVENT-0021",
+      "simulation_time": 24,
+      "actor_id": "KAIOS-MARKETPLACE-RUNTIME",
+      "request_id": null,
+      "project_id": "MARKET-PROJECT-001",
+      "task_id": null,
+      "action": "SUBMIT_DELIVERABLE",
+      "inputs": {},
+      "outputs": {
+        "deliverable": {
+          "deliverable_id": "DELIVERABLE-001",
+          "project_id": "MARKET-PROJECT-001",
+          "task_outputs": [
+            {
+              "task_id": "MARKET-PROJECT-001-TASK-01",
+              "task_type": "REQUIREMENTS",
+              "status": "COMPLETE"
+            },
+            {
+              "task_id": "MARKET-PROJECT-001-TASK-02",
+              "task_type": "DESIGN",
+              "status": "COMPLETE"
+            },
+            {
+              "task_id": "MARKET-PROJECT-001-TASK-03",
+              "task_type": "TRANSPORT",
+              "status": "COMPLETE"
+            },
+            {
+              "task_id": "MARKET-PROJECT-001-TASK-04",
+              "task_type": "CONSTRUCTION",
+              "status": "COMPLETE"
+            },
+            {
+              "task_id": "MARKET-PROJECT-001-TASK-05",
+              "task_type": "QUALITY",
+              "status": "COMPLETE"
+            },
+            {
+              "task_id": "MARKET-PROJECT-001-TASK-06",
+              "task_type": "DELIVERY",
+              "status": "COMPLETE"
+            }
+          ],
+          "files": [],
+          "version": "1.0.0",
+          "provenance": {
+            "creator": "KAIOS_CAUSAL_BUILDER",
+            "authority": "CANDIDATE_ONLY"
+          },
+          "integrity": {
+            "state_hash": "fnv1a-24e060ba",
+            "verified": true
+          },
+          "tests": [
+            "LAND_PASS",
+            "MATERIAL_PASS",
+            "TIME_PASS",
+            "INSPECTION_PASS"
+          ],
+          "known_limitations": [
+            "SIMULATION_ONLY"
+          ],
+          "rights": [
+            "SIMULATED_USE_RIGHT"
+          ],
+          "maintenance_plan": {
+            "status": "DECLARED",
+            "interval": "SIMULATION_DEFINED"
+          },
+          "acceptance_record": null,
+          "review_status": "PENDING_CODEX_REVIEW"
+        }
+      },
+      "credit_delta": {},
+      "resource_delta": {},
+      "previous_state_hash": "fnv1a-24e060ba",
+      "next_state_hash": "fnv1a-164c5bb7",
+      "status": "COMPLETED",
+      "reason": "NONE"
+    },
+    {
+      "event_id": "MARKET-EVENT-0022",
+      "simulation_time": 24,
+      "actor_id": "codex-gm-01",
+      "request_id": null,
+      "project_id": "MARKET-PROJECT-001",
+      "task_id": null,
+      "action": "REVIEW_DELIVERABLE",
+      "inputs": {},
+      "outputs": {
+        "review_status": "APPROVED"
+      },
+      "credit_delta": {},
+      "resource_delta": {},
+      "previous_state_hash": "fnv1a-164c5bb7",
+      "next_state_hash": "fnv1a-4d4f8990",
+      "status": "COMPLETED",
+      "reason": "APPROVED"
+    },
+    {
+      "event_id": "MARKET-EVENT-0023",
+      "simulation_time": 24,
+      "actor_id": "PLAYER-LIFE-A30AAEF5",
+      "request_id": null,
+      "project_id": "MARKET-PROJECT-001",
+      "task_id": null,
+      "action": "ACCEPT_DELIVERY",
+      "inputs": {},
+      "outputs": {
+        "acceptance": {
+          "acceptance_id": "ACCEPTANCE-001",
+          "deliverable_id": "DELIVERABLE-001",
+          "customer_id": "PLAYER-LIFE-A30AAEF5",
+          "outcome": "ACCEPTED",
+          "approved_fraction": 1,
+          "reason": "ACCEPTED",
+          "payroll_release": 63,
+          "escrow_refund": 0,
+          "simulation_time": 24
+        }
+      },
+      "credit_delta": {},
+      "resource_delta": {},
+      "previous_state_hash": "fnv1a-4d4f8990",
+      "next_state_hash": "fnv1a-45de8b6c",
+      "status": "COMPLETED",
+      "reason": "NONE"
+    },
+    {
+      "event_id": "MARKET-EVENT-0001",
+      "simulation_time": 0,
+      "actor_id": "PLAYER-LIFE-898212EB",
+      "request_id": null,
+      "project_id": null,
+      "task_id": null,
+      "action": "GRANT_STARTER_PACKAGE",
+      "inputs": {},
+      "outputs": {
+        "starter_grant_id": "STARTER-GRANT-5ed54ca6",
+        "player_genesis_id": "GENESIS-PLAYER-LIFE-898212EB",
+        "land_id": "STARTER-LAND-B2E0565E",
+        "credit": 400,
+        "resources": {
+          "drinking_water": 48,
+          "basic_food": 24,
+          "basic_clothing": 2,
+          "primitive_shelter": 1,
+          "wood": 80,
+          "stone": 120,
+          "soil": 200,
+          "basic_hand_tools": 3,
+          "emergency_reserve": 8
+        },
+        "simulation_time": 0,
+        "status": "GRANTED_ONCE"
+      },
+      "credit_delta": {
+        "SIM-WALLET-PLAYER-898212EB": 400
+      },
+      "resource_delta": {
+        "drinking_water": 48,
+        "basic_food": 24,
+        "basic_clothing": 2,
+        "primitive_shelter": 1,
+        "wood": 80,
+        "stone": 120,
+        "soil": 200,
+        "basic_hand_tools": 3,
+        "emergency_reserve": 8
+      },
+      "previous_state_hash": "fnv1a-06748457",
+      "next_state_hash": "fnv1a-f173fe31",
+      "status": "COMPLETED",
+      "reason": "NONE"
+    },
+    {
+      "event_id": "MARKET-EVENT-0002",
+      "simulation_time": 0,
+      "actor_id": "PLAYER-LIFE-898212EB",
+      "request_id": "MARKET-REQUEST-001",
+      "project_id": null,
+      "task_id": null,
+      "action": "SUBMIT_REQUEST",
+      "inputs": {
+        "description": "Build an advanced semiconductor factory",
+        "requested_output_type": "BUILDING",
+        "budget": 100,
+        "technology_requirement": "ADVANCED_SEMICONDUCTOR"
+      },
+      "outputs": {
+        "request": {
+          "request_id": "MARKET-REQUEST-001",
+          "customer_id": "PLAYER-LIFE-898212EB",
+          "description": "Build an advanced semiconductor factory",
+          "requested_output_type": "BUILDING",
+          "quantity": 1,
+          "quality": "STANDARD_SIMULATION",
+          "location": "STARTER-LAND-B2E0565E",
+          "deadline": 240,
+          "budget": 100,
+          "acceptance_criteria": [
+            "CODEX_REVIEW_PASS",
+            "CUSTOMER_ACCEPTANCE"
+          ],
+          "rights_requested": [
+            "SIMULATED_USE_RIGHT"
+          ],
+          "civilization_requirement": "PRIMITIVE_FORAGING",
+          "technology_requirement": "ADVANCED_SEMICONDUCTOR",
+          "risk": "LOW",
+          "kind": "ADVANCED_UNAVAILABLE",
+          "status": "SUBMITTED",
+          "decision_reason": null
+        }
+      },
+      "credit_delta": {},
+      "resource_delta": {},
+      "previous_state_hash": "fnv1a-f173fe31",
+      "next_state_hash": "fnv1a-6bde8dc9",
+      "status": "COMPLETED",
+      "reason": "NONE"
+    },
+    {
+      "event_id": "MARKET-EVENT-0003",
+      "simulation_time": 0,
+      "actor_id": "KAIOS-MARKETPLACE-RUNTIME",
+      "request_id": "MARKET-REQUEST-001",
+      "project_id": "FAILED-PROJECT-001",
+      "task_id": null,
+      "action": "PROVISIONAL_ESCROW",
+      "inputs": {},
+      "outputs": {
+        "escrow_id": "MARKET-REQUEST-001-PROVISIONAL-ESCROW"
+      },
+      "credit_delta": {
+        "SIM-WALLET-PLAYER-898212EB": -100,
+        "MARKET-REQUEST-001-PROVISIONAL-ESCROW": 100
+      },
+      "resource_delta": {},
+      "previous_state_hash": "fnv1a-40f87ba7",
+      "next_state_hash": "fnv1a-1d464c21",
+      "status": "COMPLETED",
+      "reason": "NONE"
+    },
+    {
+      "event_id": "MARKET-EVENT-0004",
+      "simulation_time": 0,
+      "actor_id": "KAIOS-MARKETPLACE-RUNTIME",
+      "request_id": "MARKET-REQUEST-001",
+      "project_id": null,
+      "task_id": null,
+      "action": "EVALUATE_REQUEST",
+      "inputs": {},
+      "outputs": {
+        "status": "BLOCKED_TECHNOLOGY"
+      },
+      "credit_delta": {},
+      "resource_delta": {},
+      "previous_state_hash": "fnv1a-1d464c21",
+      "next_state_hash": "fnv1a-329508b3",
+      "status": "BLOCKED",
+      "reason": "CIVILIZATION_TOO_LOW"
+    },
+    {
+      "event_id": "MARKET-EVENT-0005",
+      "simulation_time": 0,
+      "actor_id": "KAIOS-MARKETPLACE-RUNTIME",
+      "request_id": null,
+      "project_id": "FAILED-PROJECT-001",
+      "task_id": null,
+      "action": "REFUND_PROJECT",
+      "inputs": {},
+      "outputs": {
+        "refunded": 100
+      },
+      "credit_delta": {
+        "MARKET-REQUEST-001-PROVISIONAL-ESCROW": -100,
+        "SIM-WALLET-PLAYER-898212EB": 100
+      },
+      "resource_delta": {},
+      "previous_state_hash": "fnv1a-329508b3",
+      "next_state_hash": "fnv1a-d0442b4c",
+      "status": "COMPLETED",
+      "reason": "NONE"
+    }
+  ],
+  "hash_chain": true,
+  "route_status": "LEGACY_ALIAS",
+  "canonical_route": "/api/kaios/marketplace/events.json",
+  "deprecation_status": "DEPRECATION_PENDING"
+}

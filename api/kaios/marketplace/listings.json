@@ -1,0 +1,38 @@
+{
+  "listings": [
+    {
+      "listing_id": "LISTING-001",
+      "creator": "cursor-01-style-candidate",
+      "category": "PLANT_LIFE",
+      "review_status": "DELIVERABLE",
+      "canonical_status": "NOT_CANONICAL",
+      "version": "1.0.0",
+      "price_in_KAIOS_GAME_CREDIT": 120,
+      "delivery_time": 15,
+      "dependencies": [
+        "CANONICAL_LIFE_SCHEMA",
+        "CODEX_REVIEW"
+      ],
+      "required_civilization": "PRIMITIVE_FORAGING",
+      "rights_package": [
+        "SIMULATED_USE_RIGHT"
+      ],
+      "maintenance": "SPECIES_PACKAGE_REVIEW",
+      "known_limitations": [
+        "GENERIC_TREE_CANDIDATE",
+        "NOT_PRODUCTION_AUTHORIZED"
+      ],
+      "provenance": {
+        "creator": "cursor-01-style-candidate",
+        "authority": "CANDIDATE_ONLY"
+      },
+      "integrity": {
+        "state_hash": "fnv1a-12e798ec",
+        "verified": true
+      },
+      "simulation_only": true
+    }
+  ],
+  "unreviewed_is_not_canonical": true,
+  "route_status": "CANONICAL_UNVERSIONED_ROUTE"
+}

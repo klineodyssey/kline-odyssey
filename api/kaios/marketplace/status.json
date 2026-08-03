@@ -1,0 +1,22 @@
+{
+  "runtime": "KAIOS_AI_COMPANY_CREATOR_MARKETPLACE",
+  "runtime_revision": "1.0.0",
+  "status": "RUNTIME_VALIDATED_SIMULATION",
+  "boundaries": {
+    "simulation_only": true,
+    "real_wallet": false,
+    "real_kgen": false,
+    "onchain_transfer": false,
+    "production_authority": false,
+    "uncontrolled_mint": false,
+    "external_autonomy": false,
+    "direct_currency_energy_conversion": false,
+    "mutation_endpoints": false
+  },
+  "deterministic": true,
+  "serializable": true,
+  "replayable": true,
+  "auditable": true,
+  "mutation_endpoints": false,
+  "route_status": "CANONICAL_UNVERSIONED_ROUTE"
+}

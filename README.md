@@ -1245,3 +1245,13 @@ creates food, water, energy, materials or time.
 - Runtime owner: `KGEN-KAIOS/world-viewer/economy/life-energy-payroll-runtime.js`
 - Specification owner: `KAIOS/economy/life-energy-payroll/`
 - Safety: simulation only; no real wallet, KGEN, chain transfer or issuance.
+
+## KAIOS AI Company Creator Marketplace
+
+The deterministic simulation at `world-viewer/creator-marketplace/` connects one-time Player Genesis starter resources, finite `KAIOS_GAME_CREDIT`, AI Company orders, project escrow, candidate creation, Codex review, customer acceptance, delivery and worker-owned payroll.
+
+- Canonical read-only API: `api/kaios/marketplace/`
+- Required V1 compatibility projection: `api/kaios/marketplace/v1/`
+- Runtime owner: `KGEN-KAIOS/world-viewer/marketplace/creator-marketplace-runtime.js`
+- Specification owner: `KAIOS/marketplace/creator-marketplace/`
+- Safety: simulation only; no real wallet, KGEN, on-chain transfer, silent mint or external autonomy.

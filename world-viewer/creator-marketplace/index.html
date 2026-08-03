@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#101412">
+  <title>KAIOS AI Company 創造市場</title>
+  <meta name="description" content="KAIOS AI Company Creator Marketplace deterministic simulation">
+  <meta name="kaios-life-id" content="LIFE-KAIOS-CREATOR-MARKETPLACE-VIEWER">
+  <meta name="kaios-genome-id" content="GENOME-KAIOS-CREATOR-MARKETPLACE-VIEWER">
+  <meta name="kaios-genome-version" content="1.0.0">
+  <meta name="kaios-authority" content="SIMULATION_ONLY">
+  <link rel="canonical" href="https://klineodyssey.github.io/kline-odyssey/world-viewer/creator-marketplace/">
+  <link rel="stylesheet" href="styles.css">
+  <style>[hidden]{display:none!important}</style>
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="../../"><img src="../../assets/kgen/kgen-logo-256.png" alt="KGEN KAIOS"><span><b>KAIOS AI COMPANY</b><strong>創造市場</strong></span></a>
+    <nav aria-label="相關系統"><a href="../player-genesis/">Player Genesis</a><a href="../ai-company-v1/">AI Company</a><a href="../life-energy-payroll/">Payroll</a><a href="../../api/kaios/marketplace/">API</a></nav>
+  </header>
+
+  <main>
+    <section class="intro" aria-labelledby="page-title">
+      <div><p class="eyebrow">PLAYER START · ORDER · CREATION · DELIVERY</p><h1 id="page-title">KAIOS AI Company 創造市場</h1><p>登入後取得一塊初始土地、基本生活物資與有限 KAIOS 遊戲幣，再向 AI Company 提出需求、派工、創造生命與產品。</p></div>
+      <div class="warnings" role="note"><strong>SIMULATION ONLY</strong><span>KAIOS GAME CREDIT</span><span>NO REAL KGEN</span><span>NO REAL WALLET</span><span>CREDIT DOES NOT REPLACE PHYSICAL RESOURCES</span><span>KAIOS/KGEN ENERGY LAYERS ARE SIMULATION ONTOLOGY</span></div>
+    </section>
+
+    <section class="metrics" aria-label="Runtime 摘要">
+      <div><span>Runtime</span><strong id="runtime-status">STOPPED</strong></div>
+      <div><span>Time</span><strong id="simulation-time">0 h</strong></div>
+      <div><span>Player Credit</span><strong id="player-credit">0</strong></div>
+      <div><span>Projects</span><strong id="project-count">0</strong></div>
+      <div><span>Deliveries</span><strong id="delivery-count">0</strong></div>
+      <div><span>Integrity</span><strong id="integrity">PASS</strong></div>
+    </section>
+
+    <section class="scenario-strip" aria-label="Deterministic demonstrations">
+      <button class="primary" data-scenario="starter" type="button">Starter Household</button>
+      <button data-scenario="tree" type="button">Tree Life Package</button>
+      <button data-scenario="shelter" type="button">Basic Shelter</button>
+      <button data-scenario="failed" type="button">Failed Order</button>
+    </section>
+
+    <section class="toolbar" aria-label="Marketplace controls">
+      <button id="create-request" type="button">Create Request</button><button id="fund-project" type="button">Fund Project</button><button id="inspect-supply" type="button">Inspect Supply Chain</button><button id="accept-quote" type="button">Accept Quote</button><button id="start-project" type="button">Start Project</button><button id="inspect-task" type="button">Inspect Task</button><button id="submit-deliverable" type="button">Submit Deliverable</button><button id="review" type="button">Review</button><button id="accept" type="button">Accept</button><button id="rework" type="button">Request Rework</button><button id="reject" type="button">Reject</button><button id="release-payroll" type="button">Release Payroll</button><button id="buy-essential" type="button">Buy Essential Item</button>
+      <span class="divider" aria-hidden="true"></span>
+      <button id="pause" type="button">Pause</button><button id="resume" type="button">Resume</button><button id="advance" type="button">+1 h</button><button id="replay" type="button">Replay</button><button id="export" type="button">Export</button><label class="file">Import<input id="import" type="file" accept="application/json"></label><button id="reset" type="button">Reset</button>
+    </section>
+
+    <section class="workspace">
+      <nav class="tabs" aria-label="Marketplace views">
+        <button class="active" data-view="starter">Player Starter Package</button><button data-view="land">Starter Land</button><button data-view="needs">Essential Needs</button><button data-view="credit">KAIOS Game Credit</button><button data-view="requests">Customer Requests</button><button data-view="accepted">Accepted Orders</button><button data-view="blocked">Blocked Orders</button><button data-view="projects">Projects</button><button data-view="tasks">Tasks</button><button data-view="workers">Workers</button><button data-view="creators">Creators</button><button data-view="life-listings">Life Listings</button><button data-view="product-listings">Product Listings</button><button data-view="escrow">Escrow</button><button data-view="payroll">Payroll</button><button data-view="deliveries">Deliveries</button><button data-view="consumption">Household Consumption</button><button data-view="profit">Company Profit/Loss</button><button data-view="timeline">Audit Timeline</button>
+      </nav>
+      <section class="panel" aria-live="polite">
+        <div id="loading" class="state">Loading marketplace simulation...</div>
+        <div id="error" class="state error" hidden><strong>Simulation error</strong><span id="error-detail"></span><button id="retry" type="button">Retry</button></div>
+        <div id="notice" class="notice" role="status" hidden></div>
+        <div id="empty" class="state" hidden>No records in this view.</div>
+        <div id="content"></div>
+      </section>
+    </section>
+  </main>
+  <script type="module" src="app.js"></script>
+</body>
+</html>
