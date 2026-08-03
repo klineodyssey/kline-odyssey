@@ -9,6 +9,7 @@ on:
   pull_request:
     types: [closed]
     branches: [main]
+  workflow_dispatch:
 
 concurrency:
   group: kgen-cursor-dispatch-wake
@@ -17,8 +18,9 @@ concurrency:
 jobs:
   wake-cursor-01:
     if: >-
-      github.event.pull_request.merged == true &&
-      startsWith(github.event.pull_request.head.ref, 'codex/')
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.pull_request.merged == true &&
+       startsWith(github.event.pull_request.head.ref, 'codex/'))
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -27,11 +29,18 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Launch Cursor Cloud Agent
-        if: ${{ secrets.CURSOR_API_KEY != '' }}
         env:
           CURSOR_API_KEY: ${{ secrets.CURSOR_API_KEY }}
         run: |
           set -euo pipefail
+          if [ -z "${CURSOR_API_KEY:-}" ]; then
+            echo "::notice::CURSOR_API_KEY not set. Add it in GitHub repo Settings → Secrets → Actions."
+            if [ "${{ github.event_name }}" = "pull_request" ]; then
+              echo "Merged PR: #${{ github.event.pull_request.number }} (${{ github.event.pull_request.head.ref }})"
+            fi
+            echo "See KGEN-AI-Company/automation/README.md"
+            exit 0
+          fi
           BODY=$(python3 <<'PY'
           import json, pathlib
           prompt = pathlib.Path("KGEN-AI-Company/automation/cursor-dispatch-wake-prompt.txt").read_text()
@@ -54,10 +63,3 @@ jobs:
           echo "Cursor API HTTP ${HTTP}"
           cat /tmp/cursor-agent.json
           test "$HTTP" -ge 200 -a "$HTTP" -lt 300
-
-      - name: Secret missing — log only
-        if: ${{ secrets.CURSOR_API_KEY == '' }}
-        run: |
-          echo "::notice::CURSOR_API_KEY not set. Add it in GitHub repo secrets to auto-wake cursor-01 on Codex dispatch merges."
-          echo "Merged PR: #${{ github.event.pull_request.number }} (${{ github.event.pull_request.head.ref }})"
-          echo "See KGEN-AI-Company/automation/README.md"

@@ -1,0 +1,275 @@
+{
+  "events": [
+    {
+      "event_id": "LIFE-ECON-EVENT-0001",
+      "simulation_time": 0,
+      "timestamp": "1970-01-01T00:00:00.000Z",
+      "actor": "KAIOS-RUNTIME",
+      "action": "START_RUNTIME",
+      "inputs": {},
+      "outputs": {
+        "runtime_status": "RUNNING"
+      },
+      "cost": 0,
+      "status": "COMPLETED",
+      "reason": "NONE",
+      "previous_state_hash": "fnv1a-861ae6d3",
+      "next_state_hash": "fnv1a-19cb8ff1"
+    },
+    {
+      "event_id": "LIFE-ECON-EVENT-0002",
+      "simulation_time": 0,
+      "timestamp": "1970-01-01T00:00:00.000Z",
+      "actor": "PLAYER-LIFE-001",
+      "action": "CREATE_CANDIDATE_LIFE_ORDER",
+      "inputs": {
+        "requested_object": "APPROVED_CANDIDATE_PLANT_LIFE_PACKAGE"
+      },
+      "outputs": {
+        "project_id": "PROJECT-PLANT-001",
+        "status": "WORK_IN_PROGRESS"
+      },
+      "cost": 0,
+      "status": "COMPLETED",
+      "reason": "NONE",
+      "previous_state_hash": "fnv1a-19cb8ff1",
+      "next_state_hash": "fnv1a-52b07e7e"
+    },
+    {
+      "event_id": "LIFE-ECON-EVENT-0003",
+      "simulation_time": 0,
+      "timestamp": "1970-01-01T00:00:00.000Z",
+      "actor": "KAIOS-RUNTIME",
+      "action": "BALANCED_CREDIT_TRANSFER",
+      "inputs": {
+        "from": "PROJECT-BUDGET-001",
+        "to": "PROJECT-ESCROW-001",
+        "amount": 120,
+        "currency": "KAIOS_CREDIT",
+        "claim_key": "PROJECT-PLANT-001/TASK-CANDIDATE-001/LIFE-AI-WORKER-001/APPROVAL-CODEX-001"
+      },
+      "outputs": {
+        "entry_id": "CREDIT-ENTRY-0001",
+        "balanced": true
+      },
+      "cost": 0,
+      "status": "COMPLETED",
+      "reason": "NONE",
+      "previous_state_hash": "fnv1a-52b07e7e",
+      "next_state_hash": "fnv1a-48f680a1"
+    },
+    {
+      "event_id": "LIFE-ECON-EVENT-0004",
+      "simulation_time": 0,
+      "timestamp": "1970-01-01T00:00:00.000Z",
+      "actor": "LIFE-AI-WORKER-001",
+      "action": "DELIVER_CANDIDATE_PACKAGE",
+      "inputs": {},
+      "outputs": {
+        "handoff": "CANDIDATE_ONLY",
+        "electricity_consumed": 8,
+        "compute_consumed": 12
+      },
+      "cost": 0,
+      "status": "COMPLETED",
+      "reason": "NONE",
+      "previous_state_hash": "fnv1a-48f680a1",
+      "next_state_hash": "fnv1a-fef9a732"
+    },
+    {
+      "event_id": "LIFE-ECON-EVENT-0005",
+      "simulation_time": 0,
+      "timestamp": "1970-01-01T00:00:00.000Z",
+      "actor": "codex-gm-01",
+      "action": "CODEX_REVIEW",
+      "inputs": {},
+      "outputs": {
+        "approval_id": "APPROVAL-CODEX-001",
+        "acceptance": "ACCEPTED_SIMULATION"
+      },
+      "cost": 0,
+      "status": "COMPLETED",
+      "reason": "NONE",
+      "previous_state_hash": "fnv1a-fef9a732",
+      "next_state_hash": "fnv1a-62e401db"
+    },
+    {
+      "event_id": "LIFE-ECON-EVENT-0006",
+      "simulation_time": 0,
+      "timestamp": "1970-01-01T00:00:00.000Z",
+      "actor": "KAIOS-RUNTIME",
+      "action": "BALANCED_CREDIT_TRANSFER",
+      "inputs": {
+        "from": "PROJECT-ESCROW-001",
+        "to": "AI-WORKER-WALLET-001",
+        "amount": 120,
+        "currency": "KAIOS_CREDIT",
+        "claim_key": "PROJECT-PLANT-001/TASK-CANDIDATE-001/LIFE-AI-WORKER-001/APPROVAL-CODEX-001"
+      },
+      "outputs": {
+        "entry_id": "CREDIT-ENTRY-0002",
+        "balanced": true
+      },
+      "cost": 0,
+      "status": "COMPLETED",
+      "reason": "NONE",
+      "previous_state_hash": "fnv1a-62e401db",
+      "next_state_hash": "fnv1a-e47effbd"
+    },
+    {
+      "event_id": "LIFE-ECON-EVENT-0007",
+      "simulation_time": 0,
+      "timestamp": "1970-01-01T00:00:00.000Z",
+      "actor": "KAIOS-RUNTIME",
+      "action": "BALANCED_CREDIT_TRANSFER",
+      "inputs": {
+        "from": "AI-WORKER-WALLET-001",
+        "to": "ENERGY-COST-POOL",
+        "amount": 10,
+        "currency": "KAIOS_CREDIT",
+        "claim_key": "PROJECT-PLANT-001/TASK-CANDIDATE-001/LIFE-AI-WORKER-001/APPROVAL-CODEX-001"
+      },
+      "outputs": {
+        "entry_id": "CREDIT-ENTRY-0003",
+        "balanced": true
+      },
+      "cost": 0,
+      "status": "COMPLETED",
+      "reason": "NONE",
+      "previous_state_hash": "fnv1a-e47effbd",
+      "next_state_hash": "fnv1a-3f50c080"
+    },
+    {
+      "event_id": "LIFE-ECON-EVENT-0008",
+      "simulation_time": 0,
+      "timestamp": "1970-01-01T00:00:00.000Z",
+      "actor": "KAIOS-RUNTIME",
+      "action": "BALANCED_CREDIT_TRANSFER",
+      "inputs": {
+        "from": "AI-WORKER-WALLET-001",
+        "to": "COMPUTE-COST-POOL",
+        "amount": 8,
+        "currency": "KAIOS_CREDIT",
+        "claim_key": "PROJECT-PLANT-001/TASK-CANDIDATE-001/LIFE-AI-WORKER-001/APPROVAL-CODEX-001"
+      },
+      "outputs": {
+        "entry_id": "CREDIT-ENTRY-0004",
+        "balanced": true
+      },
+      "cost": 0,
+      "status": "COMPLETED",
+      "reason": "NONE",
+      "previous_state_hash": "fnv1a-3f50c080",
+      "next_state_hash": "fnv1a-fda0c9fa"
+    },
+    {
+      "event_id": "LIFE-ECON-EVENT-0009",
+      "simulation_time": 0,
+      "timestamp": "1970-01-01T00:00:00.000Z",
+      "actor": "KAIOS-RUNTIME",
+      "action": "BALANCED_CREDIT_TRANSFER",
+      "inputs": {
+        "from": "AI-WORKER-WALLET-001",
+        "to": "MAINTENANCE-RESERVE",
+        "amount": 7,
+        "currency": "KAIOS_CREDIT",
+        "claim_key": "PROJECT-PLANT-001/TASK-CANDIDATE-001/LIFE-AI-WORKER-001/APPROVAL-CODEX-001"
+      },
+      "outputs": {
+        "entry_id": "CREDIT-ENTRY-0005",
+        "balanced": true
+      },
+      "cost": 0,
+      "status": "COMPLETED",
+      "reason": "NONE",
+      "previous_state_hash": "fnv1a-fda0c9fa",
+      "next_state_hash": "fnv1a-c59bd970"
+    },
+    {
+      "event_id": "LIFE-ECON-EVENT-0010",
+      "simulation_time": 0,
+      "timestamp": "1970-01-01T00:00:00.000Z",
+      "actor": "KAIOS-RUNTIME",
+      "action": "BALANCED_CREDIT_TRANSFER",
+      "inputs": {
+        "from": "AI-WORKER-WALLET-001",
+        "to": "PLATFORM-FEE-POOL",
+        "amount": 5,
+        "currency": "KAIOS_CREDIT",
+        "claim_key": "PROJECT-PLANT-001/TASK-CANDIDATE-001/LIFE-AI-WORKER-001/APPROVAL-CODEX-001"
+      },
+      "outputs": {
+        "entry_id": "CREDIT-ENTRY-0006",
+        "balanced": true
+      },
+      "cost": 0,
+      "status": "COMPLETED",
+      "reason": "NONE",
+      "previous_state_hash": "fnv1a-c59bd970",
+      "next_state_hash": "fnv1a-80c18918"
+    },
+    {
+      "event_id": "LIFE-ECON-EVENT-0011",
+      "simulation_time": 0,
+      "timestamp": "1970-01-01T00:00:00.000Z",
+      "actor": "KAIOS-RUNTIME",
+      "action": "BALANCED_CREDIT_TRANSFER",
+      "inputs": {
+        "from": "AI-WORKER-WALLET-001",
+        "to": "HOUSEHOLD-LEDGER-001",
+        "amount": 10,
+        "currency": "KAIOS_CREDIT",
+        "claim_key": "PROJECT-PLANT-001/TASK-CANDIDATE-001/LIFE-AI-WORKER-001/APPROVAL-CODEX-001"
+      },
+      "outputs": {
+        "entry_id": "CREDIT-ENTRY-0007",
+        "balanced": true
+      },
+      "cost": 0,
+      "status": "COMPLETED",
+      "reason": "NONE",
+      "previous_state_hash": "fnv1a-80c18918",
+      "next_state_hash": "fnv1a-c6aa790d"
+    },
+    {
+      "event_id": "LIFE-ECON-EVENT-0012",
+      "simulation_time": 0,
+      "timestamp": "1970-01-01T00:00:00.000Z",
+      "actor": "codex-gm-01",
+      "action": "PAYROLL_RELEASED",
+      "inputs": {},
+      "outputs": {
+        "payroll_event_id": "PAYROLL-EVENT-001",
+        "project_id": "PROJECT-PLANT-001",
+        "task_id": "TASK-CANDIDATE-001",
+        "worker_life_id": "LIFE-AI-WORKER-001",
+        "wallet_id": "AI-WORKER-WALLET-001",
+        "gross_pay": 120,
+        "energy_cost": 10,
+        "compute_cost": 8,
+        "maintenance_cost": 7,
+        "platform_fee": 5,
+        "household_transfer": 10,
+        "tax_simulation": 0,
+        "net_pay": 80,
+        "approval_id": "APPROVAL-CODEX-001",
+        "reviewer": "codex-gm-01",
+        "timestamp": "1970-01-01T00:00:00.000Z",
+        "simulation_time": 0,
+        "currency": "KAIOS_CREDIT",
+        "simulation_only": true,
+        "previous_state_hash": "fnv1a-c6aa790d",
+        "next_state_hash": "fnv1a-80cf0b76",
+        "status": "PAYROLL_RELEASED"
+      },
+      "cost": 120,
+      "status": "COMPLETED",
+      "reason": "NONE",
+      "previous_state_hash": "fnv1a-c6aa790d",
+      "next_state_hash": "fnv1a-80cf0b76"
+    }
+  ],
+  "previous_next_hash_chain": true,
+  "event_count": 12,
+  "route_status": "CANONICAL_UNVERSIONED_ROUTE"
+}

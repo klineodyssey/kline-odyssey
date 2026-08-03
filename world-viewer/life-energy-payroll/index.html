@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#101412">
+  <title>KAIOS 生命能源與薪資</title>
+  <meta name="description" content="KAIOS 生命存在、代理能力、模擬信用、AI 薪資與群體資源帳本。">
+  <link rel="canonical" href="https://klineodyssey.github.io/kline-odyssey/world-viewer/life-energy-payroll/">
+  <link rel="stylesheet" href="styles.css">
+  <style>[hidden]{display:none!important}</style>
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="../../"><img src="../../assets/kgen/kgen-logo-256.png" alt="KGEN KAIOS"><span><b>KAIOS</b><strong>生命能源與薪資</strong></span></a>
+    <nav aria-label="主要導覽"><a href="../">World Viewer</a><a href="../ai-company-v1/">AI Company</a><a href="../../api/kaios/economy/">公開資料</a></nav>
+  </header>
+
+  <main>
+    <section class="intro" aria-labelledby="page-title">
+      <div><p class="eyebrow">DETERMINISTIC · AUDITABLE · SIMULATION ONLY</p><h1 id="page-title">KAIOS 生命能源與薪資</h1><p>生命存在、代理能力與經濟能力彼此獨立。信用負責記帳與配置，不能取代食物、能量、材料或時間。</p></div>
+      <div class="warnings" role="note"><strong>SIMULATION ONLY</strong><span>NO REAL KGEN</span><span>NO REAL WALLET</span><span>CREDIT DOES NOT REPLACE FOOD OR ENERGY</span></div>
+    </section>
+
+    <section class="metrics" aria-label="模擬狀態">
+      <div><span>Runtime</span><strong id="runtime-status">STOPPED</strong></div>
+      <div><span>Simulation Time</span><strong id="simulation-time">0 h</strong></div>
+      <div><span>Credit Supply</span><strong id="credit-supply">0</strong></div>
+      <div><span>Ledger</span><strong id="ledger-count">0</strong></div>
+      <div><span>Events</span><strong id="event-count">0</strong></div>
+      <div><span>Integrity</span><strong id="integrity">PASS</strong></div>
+    </section>
+
+    <section class="toolbar" aria-label="模擬控制">
+      <button id="start" type="button">開始</button><button id="pause" type="button">暫停</button><button id="resume" type="button">繼續</button><button id="advance" type="button">+1 小時</button>
+      <span class="divider" aria-hidden="true"></span>
+      <button class="primary" id="payroll" type="button">執行薪資示範</button><button id="rejected" type="button">任務駁回</button><button id="duplicate" type="button">重複付款</button><button id="ant" type="button">螞蟻群體</button><button id="bee" type="button">蜂巢群體</button>
+      <span class="divider" aria-hidden="true"></span>
+      <button id="replay" type="button">重播</button><button id="export" type="button">匯出</button><label class="file">匯入<input id="import" type="file" accept="application/json"></label><button id="reset" type="button">重設</button>
+    </section>
+
+    <section class="workspace">
+      <nav class="tabs" aria-label="資料檢視">
+        <button class="active" data-view="life">Life Existence</button><button data-view="agency">Agency Level</button><button data-view="economy">Economic Capability</button><button data-view="credit">KAIOS Credit</button><button data-view="resources">Physical Resources</button><button data-view="wallet">AI Worker Wallet</button><button data-view="escrow">Project Escrow</button><button data-view="payroll-events">Payroll Events</button><button data-view="transfers">Household Transfers</button><button data-view="ant-ledger">Ant Colony Ledger</button><button data-view="bee-ledger">Bee Hive Ledger</button><button data-view="timeline">Audit Timeline</button>
+      </nav>
+      <section class="panel" aria-live="polite">
+        <div id="loading" class="state">載入模擬資料中…</div>
+        <div id="error" class="state error" hidden><strong>模擬載入失敗</strong><span id="error-detail"></span><button id="retry" type="button">重試</button></div>
+        <div id="empty" class="state" hidden>目前沒有資料。請執行一個示範情境。</div>
+        <div id="notice" class="notice" role="status" hidden></div>
+        <div id="content"></div>
+      </section>
+    </section>
+  </main>
+  <script type="module" src="app.js"></script>
+</body>
+</html>

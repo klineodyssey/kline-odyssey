@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://klineodyssey.github.io/kline-odyssey/schemas/kaios-colony-resource-ledger-v1.json",
+  "title": "KAIOS Colony Resource Ledger V1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["ledger_id", "group_id", "group_type", "resource_inventory", "member_contributions", "ration_priorities", "care_obligations", "maintenance_reserve", "winter_or_emergency_reserve", "birth_or_larval_support", "work_credits", "distribution_events", "shortage_events", "history", "authority", "simulation_only"],
+  "properties": {
+    "ledger_id": {"type": "string", "minLength": 1},
+    "group_id": {"type": "string", "minLength": 1},
+    "group_type": {"enum": ["ANT_COLONY", "BEE_HIVE", "FISH_SCHOOL", "SHRIMP_POND", "AI_WORK_TEAM", "HOUSEHOLD", "COMPANY"]},
+    "resource_inventory": {"type": "object", "additionalProperties": {"type": "number", "minimum": 0}},
+    "member_contributions": {"type": "array", "items": {"$ref": "#/$defs/contribution"}},
+    "ration_priorities": {"type": "array", "items": {"type": "string"}},
+    "care_obligations": {"type": "array", "items": {"type": "string"}},
+    "maintenance_reserve": {"type": "object", "additionalProperties": {"type": "number", "minimum": 0}},
+    "winter_or_emergency_reserve": {"type": "object", "additionalProperties": {"type": "number", "minimum": 0}},
+    "birth_or_larval_support": {"type": "object", "additionalProperties": {"type": "number", "minimum": 0}},
+    "work_credits": {"type": "object", "additionalProperties": {"type": "number", "minimum": 0}},
+    "distribution_events": {"type": "array", "items": {"$ref": "#/$defs/distribution"}},
+    "shortage_events": {"type": "array", "items": {"type": "string"}},
+    "history": {"type": "array", "items": {"type": "string"}},
+    "authority": {"const": "INTERNAL_ALLOCATION_SIMULATION_ONLY"},
+    "simulation_only": {"const": true}
+  },
+  "$defs": {
+    "contribution": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["member_id", "credit_type", "amount", "source_event_id"],
+      "properties": {
+        "member_id": {"type": "string", "minLength": 1},
+        "credit_type": {"enum": ["ANT_WORK_CREDIT", "POLLINATION_CREDIT", "GROUP_WORK_CREDIT"]},
+        "amount": {"type": "number", "minimum": 0},
+        "source_event_id": {"type": "string", "minLength": 1}
+      }
+    },
+    "distribution": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["event_id", "resource_id", "quantity", "unit", "from_inventory", "to_member_or_pool", "simulation_time"],
+      "properties": {
+        "event_id": {"type": "string", "minLength": 1},
+        "resource_id": {"type": "string", "minLength": 1},
+        "quantity": {"type": "number", "exclusiveMinimum": 0},
+        "unit": {"type": "string", "minLength": 1},
+        "from_inventory": {"type": "string", "minLength": 1},
+        "to_member_or_pool": {"type": "string", "minLength": 1},
+        "simulation_time": {"type": "integer", "minimum": 0}
+      }
+    }
+  }
+}

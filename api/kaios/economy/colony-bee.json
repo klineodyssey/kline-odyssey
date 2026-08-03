@@ -1,0 +1,35 @@
+{
+  "colony": {
+    "ledger_id": "COLONY-LEDGER-BEE-001",
+    "group_id": "BEE-HIVE-001",
+    "group_type": "BEE_HIVE",
+    "work_credits": {
+      "BEE-WORKER-GROUP": 28
+    },
+    "honey_shares": {
+      "queen": 0,
+      "larvae": 0,
+      "workers": 0
+    },
+    "shortage_risk": true,
+    "history": [
+      "POLLINATION_CREDIT:28",
+      "HIVE_HONEY_SHARE:5",
+      "HIVE_HONEY_SHARE:5"
+    ]
+  },
+  "physical_resources": {
+    "meadow_nectar_mass": 60,
+    "hive_nectar_mass": 0,
+    "honey_mass": 2,
+    "byproduct_mass": 8,
+    "consumed_mass": 10
+  },
+  "integrity": {
+    "ok": true,
+    "issues": [],
+    "credit_supply": 1000,
+    "state_hash": "fnv1a-1f616ccc"
+  },
+  "route_status": "CANONICAL_UNVERSIONED_ROUTE"
+}

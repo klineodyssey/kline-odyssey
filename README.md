@@ -1207,6 +1207,7 @@ does not grant real legal, Wallet, KGEN, Production or external autonomy.
 | [Project Schema](KAIOS/ai-company/KAIOS_AI_COMPANY_PROJECT_SCHEMA_V1.json) | Projects, milestones, dependencies and deliverables. |
 | [Task Schema](KAIOS/ai-company/KAIOS_AI_COMPANY_TASK_SCHEMA_V1.json) | Time/resource task contract. |
 | [Resource Plan Schema](KAIOS/ai-company/KAIOS_AI_COMPANY_RESOURCE_PLAN_SCHEMA_V1.json) | BOM, workers, equipment and logistics. |
+
 | [Budget Schema](KAIOS/ai-company/KAIOS_AI_COMPANY_BUDGET_SCHEMA_V1.json) | Simulated project finance. |
 | [Schedule Schema](KAIOS/ai-company/KAIOS_AI_COMPANY_SCHEDULE_SCHEMA_V1.json) | Critical path and delay accounting. |
 | [Contract Schema](KAIOS/ai-company/KAIOS_AI_COMPANY_CONTRACT_SCHEMA_V1.json) | No-real-legal-effect contract. |
@@ -1230,3 +1231,17 @@ Runtime implementation records:
 | [Specification Tests](KGEN-KAIOS/world-viewer/tests/ai-company-spec.test.mjs) | Node regression suite. |
 | [Recovery](KGEN-KAIOS/governance/autopilot/recovery_points/RECOVERY-KAIOS-AI-COMPANY-SPEC-V1.md) | Merge-preserving rollback instructions. |
 | [Company Status](KGEN-KAIOS/governance/autopilot/company_status/COMPANY_STATUS_2026-08-02_AI_COMPANY_SPEC.md) | Current workline and Cursor state. |
+
+## KAIOS Life Energy, Economy and Payroll
+
+The simulation at `world-viewer/life-energy-payroll/` separates life existence,
+agency and economic capability. It uses the existing `KAIOS_CREDIT` synthetic
+accounting unit, balanced project escrow, a distinct AI worker wallet and finite
+physical-resource ledgers for ant and bee colony demonstrations. Credit never
+creates food, water, energy, materials or time.
+
+- Canonical read-only API: `api/kaios/economy/`
+- Required V0 compatibility projection: `api/kaios/economy/v0/`
+- Runtime owner: `KGEN-KAIOS/world-viewer/economy/life-energy-payroll-runtime.js`
+- Specification owner: `KAIOS/economy/life-energy-payroll/`
+- Safety: simulation only; no real wallet, KGEN, chain transfer or issuance.

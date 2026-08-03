@@ -1,0 +1,32 @@
+{
+  "colony": {
+    "ledger_id": "COLONY-LEDGER-ANT-001",
+    "group_id": "ANT-COLONY-001",
+    "group_type": "ANT_COLONY",
+    "work_credits": {
+      "ANT-WORKER-GROUP": 20
+    },
+    "ration_allocations": {
+      "queen": 0,
+      "larvae": 0,
+      "workers": 0
+    },
+    "starvation_risk": true,
+    "history": [
+      "ANT_WORK_CREDIT:20",
+      "ANT_COLONY_RATION:12"
+    ]
+  },
+  "physical_resources": {
+    "external_food_mass": 80,
+    "colony_food_mass": 8,
+    "consumed_mass": 12
+  },
+  "integrity": {
+    "ok": true,
+    "issues": [],
+    "credit_supply": 1000,
+    "state_hash": "fnv1a-3c185566"
+  },
+  "route_status": "CANONICAL_UNVERSIONED_ROUTE"
+}
