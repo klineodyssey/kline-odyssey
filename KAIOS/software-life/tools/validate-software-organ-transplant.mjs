@@ -27,6 +27,13 @@ const CANONICAL_REPOSITORY_ROOT = resolve(dirname(fileURLToPath(import.meta.url)
 const CANONICAL_REMOTE_URL = "https://github.com/klineodyssey/kline-odyssey.git";
 const CANONICAL_LINEAGE_ANCHOR = "cc80135f2c6e6a74aad11f34e793c65ac0ee1938";
 const TRUSTED_AUTHORITY_COMMIT = CANONICAL_LINEAGE_ANCHOR;
+const CURRENT_AUTHORIZED_WORKER_STATUSES = new Set([
+  "ACTIVE",
+  "IDLE",
+  "CLAIMED",
+  "IN_PROGRESS",
+  "REVIEW"
+]);
 const gitRootCache = new Map();
 const resolvedCommitCache = new Map();
 const commitCache = new Map();
@@ -749,7 +756,7 @@ export const isAuthorizedWorker = (workerRegistry, actor, canonicalReview = fals
     )));
   const currentStatusValid = Boolean(currentWorker
     && currentWorker.worker_id === worker?.worker_id
-    && currentWorker.status === "ACTIVE"
+    && CURRENT_AUTHORIZED_WORKER_STATUSES.has(currentWorker.status)
     && ["ACTIVE", "TRUSTED", "SENIOR_TRUSTED"].includes(currentWorker.employee_status)
     && currentWorker.boot_acknowledged === true
     && currentWorker.canon_acknowledged === true

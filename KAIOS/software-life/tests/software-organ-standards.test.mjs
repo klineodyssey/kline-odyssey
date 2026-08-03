@@ -794,6 +794,10 @@ test("current Worker Registry revocation overrides historical maximum authority"
   revokedCursorRegistry.workers.find(({ worker_id }) => worker_id === "cursor-01").status = "OFFLINE";
   assert.equal(isAuthorizedWorker(trustedWorkerRegistry, "cursor-01", false, revokedCursorRegistry), false);
 
+  const blockedCursorRegistry = structuredClone(currentWorkerRegistry);
+  blockedCursorRegistry.workers.find(({ worker_id }) => worker_id === "cursor-01").status = "BLOCKED";
+  assert.equal(isAuthorizedWorker(trustedWorkerRegistry, "cursor-01", false, blockedCursorRegistry), false);
+
   const suspendedReviewerRegistry = structuredClone(currentWorkerRegistry);
   suspendedReviewerRegistry.workers.find(({ worker_id }) => worker_id === "codex-gm-01").suspension = {
     status: "SUSPENDED",
