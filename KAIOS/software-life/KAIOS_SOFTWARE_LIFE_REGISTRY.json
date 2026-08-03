@@ -2,14 +2,14 @@
   "metadata": {
     "schema_version": "1.0.0",
     "task_id": "KAIOS-SOFTWARE-LIFE-CANONICALIZATION-24H-001",
-    "generated_at": "2026-08-03T14:11:53Z",
-    "source_commit": "5bded5613c5fe2ec86236130d6d738eeef9cfc3c",
+    "generated_at": "2026-08-02T10:40:00Z",
+    "source_commit": "cc80135f2c6e6a74aad11f34e793c65ac0ee1938",
     "status": "CODEX_REVIEWED_REGISTRY",
     "authority": "SIMULATION_ONLY",
     "manifest_schema": "KAIOS/software-life/KAIOS_SOFTWARE_LIFE_MANIFEST_SCHEMA.json",
     "taxonomy_crosswalk": "KAIOS/software-life/KAIOS_SOFTWARE_LIFE_TAXONOMY_CROSSWALK.json",
-    "registry_entries": 36,
-    "public_json_projections_owned": 86,
+    "registry_entries": 33,
+    "public_json_projections_owned": 52,
     "automatic_canonical_promotion": false
   },
   "policy": {
@@ -126,7 +126,7 @@
           "organ_id": "ORGAN-OFFICIAL-HOMEPAGE-01",
           "organ_type": "VIEWER_ORGAN",
           "path": "index.html",
-          "content_hash": "4e29301b7a81422c6f9a71541233480ac30e51927edbac142736c6c37d7d16f2"
+          "content_hash": "ebf023d0737a5cd42c367a67c17a7856e754b8063c79e5069b4d15252c1d04ec"
         }
       ],
       "interfaces": [
@@ -172,16 +172,16 @@
         {
           "event_id": "EVENT-OFFICIAL-HOMEPAGE-REGISTRY-BINDING",
           "event_type": "SOFTWARE_LIFE_REGISTRY_BOUND",
-          "simulation_time": "2026-08-03T14:11:53Z",
+          "simulation_time": "2026-08-02T10:40:00Z",
           "actor": "CODEX_CANONICAL_REVIEW",
           "status": "RECORDED",
           "reason": "Existing repository organism registered without changing Runtime authority.",
           "previous_state_hash": null,
-          "next_state_hash": "5aac7c5617aa9962bf0aa6a39f175bf7b3e79a7492c538319f0e10b973050b87"
+          "next_state_hash": "949207cd470875960e196dac585eb7aaa1664d954598ebdc5dd7cfe149353592"
         }
       ],
       "provenance": {
-        "source_commit": "5bded5613c5fe2ec86236130d6d738eeef9cfc3c",
+        "source_commit": "cc80135f2c6e6a74aad11f34e793c65ac0ee1938",
         "source_paths": [
           "index.html"
         ],
@@ -208,8 +208,8 @@
       "marketplace_status": "NOT_ELIGIBLE",
       "public_url": "/kline-odyssey/",
       "api_url": null,
-      "code_hash": "4e29301b7a81422c6f9a71541233480ac30e51927edbac142736c6c37d7d16f2",
-      "artifact_hash": "5aac7c5617aa9962bf0aa6a39f175bf7b3e79a7492c538319f0e10b973050b87",
+      "code_hash": "ebf023d0737a5cd42c367a67c17a7856e754b8063c79e5069b4d15252c1d04ec",
+      "artifact_hash": "949207cd470875960e196dac585eb7aaa1664d954598ebdc5dd7cfe149353592",
       "legacy_aliases": []
     },
     {
@@ -327,7 +327,7 @@
           "organ_id": "ORGAN-WORLD-VIEWER-03",
           "organ_type": "VIEWER_ORGAN",
           "path": "KGEN-KAIOS/world-viewer/index.html",
-          "content_hash": "1cbb946e3882949e1253919259debb0cc39ce2d5e9a68489b8c63d46b7c26d2e"
+          "content_hash": "c17cdf60a3d16ec42299f142e4378c45c78c0e41ad279b97d64a3dae1e521867"
         },
         {
           "organ_id": "ORGAN-WORLD-VIEWER-04",
@@ -345,7 +345,7 @@
           "organ_id": "ORGAN-WORLD-VIEWER-06",
           "organ_type": "VIEWER_ORGAN",
           "path": "world-viewer/index.html",
-          "content_hash": "9c33b9e516b7e50679cfe5cd24842b8e92c3598b9b7387124433e1f421bb5189"
+          "content_hash": "f678171c1b3ac3dcaefeb005e0e4ae4e16a489041248b55c0b99c5dd2f8bead2"
         }
       ],
       "interfaces": [
@@ -391,16 +391,16 @@
         {
           "event_id": "EVENT-WORLD-VIEWER-REGISTRY-BINDING",
           "event_type": "SOFTWARE_LIFE_REGISTRY_BOUND",
-          "simulation_time": "2026-08-03T14:11:53Z",
+          "simulation_time": "2026-08-02T10:40:00Z",
           "actor": "CODEX_CANONICAL_REVIEW",
           "status": "RECORDED",
           "reason": "Existing repository organism registered without changing Runtime authority.",
           "previous_state_hash": null,
-          "next_state_hash": "59886d6d4106e4956b1679dbf01142a0625c212cabbce37ce44121c6dd1be74a"
+          "next_state_hash": "538f0824b1e4bc8c9533a3a67c97462114ea98e0f4cc373f89ba412bcb892ab4"
         }
       ],
       "provenance": {
-        "source_commit": "5bded5613c5fe2ec86236130d6d738eeef9cfc3c",
+        "source_commit": "cc80135f2c6e6a74aad11f34e793c65ac0ee1938",
         "source_paths": [
           "KGEN-KAIOS/world-viewer/app.js",
           "KGEN-KAIOS/world-viewer/data/world-store.js",
@@ -432,8 +432,8 @@
       "marketplace_status": "NOT_ELIGIBLE",
       "public_url": "/kline-odyssey/world-viewer/",
       "api_url": null,
-      "code_hash": "9c33b9e516b7e50679cfe5cd24842b8e92c3598b9b7387124433e1f421bb5189",
-      "artifact_hash": "59886d6d4106e4956b1679dbf01142a0625c212cabbce37ce44121c6dd1be74a",
+      "code_hash": "f678171c1b3ac3dcaefeb005e0e4ae4e16a489041248b55c0b99c5dd2f8bead2",
+      "artifact_hash": "538f0824b1e4bc8c9533a3a67c97462114ea98e0f4cc373f89ba412bcb892ab4",
       "legacy_aliases": []
     },
     {
@@ -582,7 +582,7 @@
         {
           "event_id": "EVENT-K280-RUNTIME-REGISTRY-BINDING",
           "event_type": "SOFTWARE_LIFE_REGISTRY_BOUND",
-          "simulation_time": "2026-08-03T14:11:53Z",
+          "simulation_time": "2026-08-02T10:40:00Z",
           "actor": "CODEX_CANONICAL_REVIEW",
           "status": "RECORDED",
           "reason": "Existing repository organism registered without changing Runtime authority.",
@@ -591,7 +591,7 @@
         }
       ],
       "provenance": {
-        "source_commit": "5bded5613c5fe2ec86236130d6d738eeef9cfc3c",
+        "source_commit": "cc80135f2c6e6a74aad11f34e793c65ac0ee1938",
         "source_paths": [
           "KAIOS/K280/runtime/k280-runtime.js"
         ],
@@ -769,7 +769,7 @@
         {
           "event_id": "EVENT-K280-WORLD-VIEWER-REGISTRY-BINDING",
           "event_type": "SOFTWARE_LIFE_REGISTRY_BOUND",
-          "simulation_time": "2026-08-03T14:11:53Z",
+          "simulation_time": "2026-08-02T10:40:00Z",
           "actor": "CODEX_CANONICAL_REVIEW",
           "status": "RECORDED",
           "reason": "Existing repository organism registered without changing Runtime authority.",
@@ -778,7 +778,7 @@
         }
       ],
       "provenance": {
-        "source_commit": "5bded5613c5fe2ec86236130d6d738eeef9cfc3c",
+        "source_commit": "cc80135f2c6e6a74aad11f34e793c65ac0ee1938",
         "source_paths": [
           "world-viewer/k280/index.html"
         ],
@@ -955,7 +955,7 @@
         {
           "event_id": "EVENT-PLAYER-GENESIS-REGISTRY-BINDING",
           "event_type": "SOFTWARE_LIFE_REGISTRY_BOUND",
-          "simulation_time": "2026-08-03T14:11:53Z",
+          "simulation_time": "2026-08-02T10:40:00Z",
           "actor": "CODEX_CANONICAL_REVIEW",
           "status": "RECORDED",
           "reason": "Existing repository organism registered without changing Runtime authority.",
@@ -964,7 +964,7 @@
         }
       ],
       "provenance": {
-        "source_commit": "5bded5613c5fe2ec86236130d6d738eeef9cfc3c",
+        "source_commit": "cc80135f2c6e6a74aad11f34e793c65ac0ee1938",
         "source_paths": [
           "world-viewer/player-genesis/index.html"
         ],
@@ -1155,7 +1155,7 @@
         {
           "event_id": "EVENT-CAUSAL-WORLD-RUNTIME-REGISTRY-BINDING",
           "event_type": "SOFTWARE_LIFE_REGISTRY_BOUND",
-          "simulation_time": "2026-08-03T14:11:53Z",
+          "simulation_time": "2026-08-02T10:40:00Z",
           "actor": "CODEX_CANONICAL_REVIEW",
           "status": "RECORDED",
           "reason": "Existing repository organism registered without changing Runtime authority.",
@@ -1164,7 +1164,7 @@
         }
       ],
       "provenance": {
-        "source_commit": "5bded5613c5fe2ec86236130d6d738eeef9cfc3c",
+        "source_commit": "cc80135f2c6e6a74aad11f34e793c65ac0ee1938",
         "source_paths": [
           "KGEN-KAIOS/world-viewer/causal-runtime/app.js",
           "KGEN-KAIOS/world-viewer/causal-runtime/causal-world-runtime.js",
@@ -1343,7 +1343,7 @@
         {
           "event_id": "EVENT-CAUSAL-WORLD-VIEWER-REGISTRY-BINDING",
           "event_type": "SOFTWARE_LIFE_REGISTRY_BOUND",
-          "simulation_time": "2026-08-03T14:11:53Z",
+          "simulation_time": "2026-08-02T10:40:00Z",
           "actor": "CODEX_CANONICAL_REVIEW",
           "status": "RECORDED",
           "reason": "Existing repository organism registered without changing Runtime authority.",
@@ -1352,7 +1352,7 @@
         }
       ],
       "provenance": {
-        "source_commit": "5bded5613c5fe2ec86236130d6d738eeef9cfc3c",
+        "source_commit": "cc80135f2c6e6a74aad11f34e793c65ac0ee1938",
         "source_paths": [
           "world-viewer/causal-runtime/index.html"
         ],
@@ -1536,7 +1536,7 @@
         {
           "event_id": "EVENT-LIFE-RUNTIME-REGISTRY-BINDING",
           "event_type": "SOFTWARE_LIFE_REGISTRY_BOUND",
-          "simulation_time": "2026-08-03T14:11:53Z",
+          "simulation_time": "2026-08-02T10:40:00Z",
           "actor": "CODEX_CANONICAL_REVIEW",
           "status": "RECORDED",
           "reason": "Existing repository organism registered without changing Runtime authority.",
@@ -1545,7 +1545,7 @@
         }
       ],
       "provenance": {
-        "source_commit": "5bded5613c5fe2ec86236130d6d738eeef9cfc3c",
+        "source_commit": "cc80135f2c6e6a74aad11f34e793c65ac0ee1938",
         "source_paths": [
           "KAIOS/life/runtime/foundational-life-loader.js",
           "KAIOS/life/runtime/foundational-life-runtime.js"
@@ -1738,7 +1738,7 @@
         {
           "event_id": "EVENT-LIFE-RUNTIME-VIEWER-REGISTRY-BINDING",
           "event_type": "SOFTWARE_LIFE_REGISTRY_BOUND",
-          "simulation_time": "2026-08-03T14:11:53Z",
+          "simulation_time": "2026-08-02T10:40:00Z",
           "actor": "CODEX_CANONICAL_REVIEW",
           "status": "RECORDED",
           "reason": "Existing repository organism registered without changing Runtime authority.",
@@ -1747,7 +1747,7 @@
         }
       ],
       "provenance": {
-        "source_commit": "5bded5613c5fe2ec86236130d6d738eeef9cfc3c",
+        "source_commit": "cc80135f2c6e6a74aad11f34e793c65ac0ee1938",
         "source_paths": [
           "world-viewer/life-runtime/app.js",
           "world-viewer/life-runtime/index.html",
@@ -1926,7 +1926,7 @@
         {
           "event_id": "EVENT-ECOSYSTEM-RUNTIME-REGISTRY-BINDING",
           "event_type": "SOFTWARE_LIFE_REGISTRY_BOUND",
-          "simulation_time": "2026-08-03T14:11:53Z",
+          "simulation_time": "2026-08-02T10:40:00Z",
           "actor": "CODEX_CANONICAL_REVIEW",
           "status": "RECORDED",
           "reason": "Existing repository organism registered without changing Runtime authority.",
@@ -1935,7 +1935,7 @@
         }
       ],
       "provenance": {
-        "source_commit": "5bded5613c5fe2ec86236130d6d738eeef9cfc3c",
+        "source_commit": "cc80135f2c6e6a74aad11f34e793c65ac0ee1938",
         "source_paths": [
           "KGEN-KAIOS/world-viewer/ecosystem/ecosystem-runtime.js"
         ],
@@ -2127,7 +2127,7 @@
         {
           "event_id": "EVENT-ECOSYSTEM-VIEWER-REGISTRY-BINDING",
           "event_type": "SOFTWARE_LIFE_REGISTRY_BOUND",
-          "simulation_time": "2026-08-03T14:11:53Z",
+          "simulation_time": "2026-08-02T10:40:00Z",
           "actor": "CODEX_CANONICAL_REVIEW",
           "status": "RECORDED",
           "reason": "Existing repository organism registered without changing Runtime authority.",
@@ -2136,7 +2136,7 @@
         }
       ],
       "provenance": {
-        "source_commit": "5bded5613c5fe2ec86236130d6d738eeef9cfc3c",
+        "source_commit": "cc80135f2c6e6a74aad11f34e793c65ac0ee1938",
         "source_paths": [
           "world-viewer/ecosystem-v1/app.js",
           "world-viewer/ecosystem-v1/index.html",
@@ -2316,7 +2316,7 @@
         {
           "event_id": "EVENT-AQUACULTURE-RUNTIME-REGISTRY-BINDING",
           "event_type": "SOFTWARE_LIFE_REGISTRY_BOUND",
-          "simulation_time": "2026-08-03T14:11:53Z",
+          "simulation_time": "2026-08-02T10:40:00Z",
           "actor": "CODEX_CANONICAL_REVIEW",
           "status": "RECORDED",
           "reason": "Existing repository organism registered without changing Runtime authority.",
@@ -2325,7 +2325,7 @@
         }
       ],
       "provenance": {
-        "source_commit": "5bded5613c5fe2ec86236130d6d738eeef9cfc3c",
+        "source_commit": "cc80135f2c6e6a74aad11f34e793c65ac0ee1938",
         "source_paths": [
           "KGEN-KAIOS/world-viewer/aquaculture/aquaculture-runtime.js"
         ],
@@ -2517,7 +2517,7 @@
         {
           "event_id": "EVENT-AQUACULTURE-VIEWER-REGISTRY-BINDING",
           "event_type": "SOFTWARE_LIFE_REGISTRY_BOUND",
-          "simulation_time": "2026-08-03T14:11:53Z",
+          "simulation_time": "2026-08-02T10:40:00Z",
           "actor": "CODEX_CANONICAL_REVIEW",
           "status": "RECORDED",
           "reason": "Existing repository organism registered without changing Runtime authority.",
@@ -2526,7 +2526,7 @@
         }
       ],
       "provenance": {
-        "source_commit": "5bded5613c5fe2ec86236130d6d738eeef9cfc3c",
+        "source_commit": "cc80135f2c6e6a74aad11f34e793c65ac0ee1938",
         "source_paths": [
           "world-viewer/aquaculture-v1/app.js",
           "world-viewer/aquaculture-v1/index.html",
@@ -2706,7 +2706,7 @@
         {
           "event_id": "EVENT-AI-COMPANY-RUNTIME-REGISTRY-BINDING",
           "event_type": "SOFTWARE_LIFE_REGISTRY_BOUND",
-          "simulation_time": "2026-08-03T14:11:53Z",
+          "simulation_time": "2026-08-02T10:40:00Z",
           "actor": "CODEX_CANONICAL_REVIEW",
           "status": "RECORDED",
           "reason": "Existing repository organism registered without changing Runtime authority.",
@@ -2715,7 +2715,7 @@
         }
       ],
       "provenance": {
-        "source_commit": "5bded5613c5fe2ec86236130d6d738eeef9cfc3c",
+        "source_commit": "cc80135f2c6e6a74aad11f34e793c65ac0ee1938",
         "source_paths": [
           "KGEN-KAIOS/world-viewer/ai-company/ai-company-project-runtime.js"
         ],
@@ -2907,7 +2907,7 @@
         {
           "event_id": "EVENT-AI-COMPANY-VIEWER-REGISTRY-BINDING",
           "event_type": "SOFTWARE_LIFE_REGISTRY_BOUND",
-          "simulation_time": "2026-08-03T14:11:53Z",
+          "simulation_time": "2026-08-02T10:40:00Z",
           "actor": "CODEX_CANONICAL_REVIEW",
           "status": "RECORDED",
           "reason": "Existing repository organism registered without changing Runtime authority.",
@@ -2916,7 +2916,7 @@
         }
       ],
       "provenance": {
-        "source_commit": "5bded5613c5fe2ec86236130d6d738eeef9cfc3c",
+        "source_commit": "cc80135f2c6e6a74aad11f34e793c65ac0ee1938",
         "source_paths": [
           "world-viewer/ai-company-v1/app.js",
           "world-viewer/ai-company-v1/index.html",
@@ -2947,396 +2947,6 @@
       "api_url": null,
       "code_hash": "ada885c407f2684926055e61127b8066ba079832d21e74bca3b2085733653dea",
       "artifact_hash": "c02a08efa59767b088a432d03e526a0386deb967ef1774f3f2f9ca1fb9bca67c",
-      "legacy_aliases": []
-    },
-    {
-      "life_id": "LIFE-KAIOS-CREATOR-MARKETPLACE-RUNTIME",
-      "species_id": "SPECIES-KAIOS-CREATOR-MARKETPLACE-RUNTIME",
-      "genome_id": "GENOME-KAIOS-CREATOR-MARKETPLACE-RUNTIME",
-      "organism_name": "kaios-creator-marketplace-runtime",
-      "canonical_name": "kaios-creator-marketplace-runtime",
-      "display_name": "KAIOS AI Company Creator Marketplace Runtime",
-      "life_type": "RUNTIME",
-      "taxonomy": {
-        "owner_12": "KGEN-KAIOS/organism/taxonomy_registry.json",
-        "owner_19": "KGEN-KAIOS/civilization/BIOLOGY_TAXONOMY_STANDARD.md",
-        "levels_12": {
-          "domain": "KGEN_UNIVERSE",
-          "kingdom": "SOFTWARE_LIFE",
-          "phylum": "PROGRAM_ORGANISM",
-          "class": "DETERMINISTIC_RUNTIME_LIFE",
-          "order": "KAIOS_SOFTWARE_ORDER",
-          "family": "CREATOR-MARKETPLACE-RUNTIME-FAMILY",
-          "genus": "CREATOR-MARKETPLACE-RUNTIME-GENUS",
-          "species": "SPECIES-KAIOS-CREATOR-MARKETPLACE-RUNTIME",
-          "cell": "FUNCTION_CELL",
-          "organ": "PROCESSING_ORGAN",
-          "runtime": "ACTIVE_SIMULATION",
-          "civilization": "KAIOS_SIMULATION"
-        },
-        "levels_19": {
-          "Domain": "KGEN_UNIVERSE",
-          "Kingdom": "SOFTWARE_LIFE",
-          "Phylum": "PROGRAM_ORGANISM",
-          "Class": "DETERMINISTIC_RUNTIME_LIFE",
-          "Order": "KAIOS_SOFTWARE_ORDER",
-          "Family": "CREATOR-MARKETPLACE-RUNTIME-FAMILY",
-          "Genus": "CREATOR-MARKETPLACE-RUNTIME-GENUS",
-          "Species": "SPECIES-KAIOS-CREATOR-MARKETPLACE-RUNTIME",
-          "Individual": "LIFE-KAIOS-CREATOR-MARKETPLACE-RUNTIME",
-          "OrganSystem": "CREATOR-MARKETPLACE-RUNTIME-ORGAN-SYSTEM",
-          "Organ": "PROCESSING_ORGAN",
-          "Tissue": "CREATOR-MARKETPLACE-RUNTIME-INTERFACE-GROUP",
-          "Cell": "FUNCTION_CELL",
-          "Organelle": "IMPLEMENTATION_UNIT",
-          "Genome": "GENOME-KAIOS-CREATOR-MARKETPLACE-RUNTIME",
-          "DNA": "STATE_AND_SCHEMA_CONTRACTS",
-          "RNA": "COMMAND_EVENT_TRANSLATION",
-          "Gene": "CREATOR-MARKETPLACE-RUNTIME-FEATURE-SET",
-          "Expression": "ACTIVE_SIMULATION"
-        }
-      },
-      "generation": 1,
-      "genome_version": "1.0.0",
-      "runtime_revision": "2026.08.02",
-      "birth_commit": "5bded5613c5fe2ec86236130d6d738eeef9cfc3c",
-      "birth_time": "2026-08-03T22:11:40+08:00",
-      "creator": "KLINE Odyssey",
-      "maintainer": "CODEX_CONTROLLED",
-      "location": {
-        "repository": "klineodyssey/kline-odyssey",
-        "canonical_path": "KGEN-KAIOS/world-viewer/marketplace/creator-marketplace-runtime.js",
-        "current_path": "KGEN-KAIOS/world-viewer/marketplace/creator-marketplace-runtime.js",
-        "path_status": "CANONICAL_ACTIVE"
-      },
-      "embodiment": {
-        "mode": "LOCAL_DETERMINISTIC_SIMULATION",
-        "entrypoint": "KGEN-KAIOS/world-viewer/marketplace/creator-marketplace-runtime.js",
-        "artifact_paths": [
-          "KGEN-KAIOS/world-viewer/marketplace/creator-marketplace-runtime.js"
-        ],
-        "legacy_alias_only": false
-      },
-      "energy_profile": {
-        "energy_type": "COMPUTE_ELECTRICITY_SIMULATION",
-        "metering": "LOCAL_EVENT_ACCOUNTING",
-        "bounded": true
-      },
-      "resource_profile": {
-        "compute": "BOUNDED_CLIENT_OR_LOCAL_EXECUTION",
-        "memory": "BOUNDED_BY_HOST_RUNTIME",
-        "storage": "REPOSITORY_AND_LOCAL_SIMULATION_ONLY",
-        "network": "NO_EXTERNAL_AUTONOMY",
-        "external_side_effects": false
-      },
-      "rights": {
-        "owner": "KLINE_ODYSSEY_REPOSITORY_SIMULATION",
-        "custodian": "CODEX_CANONICAL_REVIEW",
-        "operator": "LOCAL_USER_SIMULATION",
-        "maintainer": "CODEX_CONTROLLED",
-        "use_right": "SIMULATED_USE_ONLY",
-        "mutation_right": "CODEX_REVIEW_REQUIRED",
-        "reproduction_right": "CODEX_REVIEW_REQUIRED",
-        "transplant_right": "CODEX_REVIEW_REQUIRED",
-        "transfer_right": "SIMULATION_ONLY",
-        "real_legal_effect": false
-      },
-      "dependencies": [
-        "LIFE-KAIOS-PLAYER-GENESIS",
-        "LIFE-KAIOS-AI-COMPANY-RUNTIME"
-      ],
-      "organs": [
-        {
-          "organ_id": "ORGAN-CREATOR-MARKETPLACE-RUNTIME-01",
-          "organ_type": "PROCESSING_ORGAN",
-          "path": "KGEN-KAIOS/world-viewer/marketplace/creator-marketplace-runtime.js",
-          "content_hash": "63ddd3e7bb4efc80dff097372cf0c2cb2734533039f2bb7873d642d2316d77e6"
-        }
-      ],
-      "interfaces": [
-        {
-          "interface_id": "INTERFACE-CREATOR-MARKETPLACE-RUNTIME-PRIMARY",
-          "direction": "BIDIRECTIONAL",
-          "protocol": "ECMASCRIPT_MODULE",
-          "read_only": false
-        }
-      ],
-      "compatibility": {
-        "epoch": "KAIOS-GENESIS",
-        "hosts": [
-          "LOCAL_NODE_OR_BROWSER"
-        ],
-        "legacy_alias_supported": false,
-        "production_authorized": false
-      },
-      "reproduction_policy": {
-        "mode": "PROHIBITED_UNTIL_STANDARD",
-        "automatic": false,
-        "codex_review_required": true
-      },
-      "mutation_policy": {
-        "mode": "BOUNDED_REVIEW_ONLY",
-        "automatic": false,
-        "codex_review_required": true
-      },
-      "transplant_policy": {
-        "mode": "CONTROLLED_REVIEW_ONLY",
-        "automatic": false,
-        "codex_review_required": true
-      },
-      "marketplace_policy": {
-        "status": "NOT_ELIGIBLE",
-        "simulated_only": true,
-        "real_kgen": false,
-        "onchain_transfer": false
-      },
-      "lifecycle_state": "ACTIVE",
-      "health_state": "HEALTHY",
-      "event_history": [
-        {
-          "event_id": "EVENT-CREATOR-MARKETPLACE-RUNTIME-REGISTRY-BINDING",
-          "event_type": "SOFTWARE_LIFE_REGISTRY_BOUND",
-          "simulation_time": "2026-08-03T14:11:53Z",
-          "actor": "CODEX_CANONICAL_REVIEW",
-          "status": "RECORDED",
-          "reason": "Existing repository organism registered without changing Runtime authority.",
-          "previous_state_hash": null,
-          "next_state_hash": "68ecd664af74a9da8e0f8ec0a0e0b6ce5d3cedf473d86ba463143bf0e0856aaf"
-        }
-      ],
-      "provenance": {
-        "source_commit": "5bded5613c5fe2ec86236130d6d738eeef9cfc3c",
-        "source_paths": [
-          "KGEN-KAIOS/world-viewer/marketplace/creator-marketplace-runtime.js"
-        ],
-        "generator": "KAIOS/software-life/tools/generate-software-life-registry.mjs",
-        "review_authority": "CODEX_CANONICAL_REVIEW"
-      },
-      "security_boundary": {
-        "simulation_only": true,
-        "real_wallet": false,
-        "real_kgen": false,
-        "onchain_transfer": false,
-        "external_autonomy": false,
-        "production_authority": false,
-        "current_modification": false,
-        "constitution_source_modification": false
-      },
-      "authority_level": "SIMULATION_ONLY",
-      "organism_status": "AUTHORITATIVE",
-      "runtime_status": "ACTIVE_SIMULATION",
-      "parents": [],
-      "children": [],
-      "transplants": [],
-      "mutations": [],
-      "marketplace_status": "NOT_ELIGIBLE",
-      "public_url": null,
-      "api_url": null,
-      "code_hash": "63ddd3e7bb4efc80dff097372cf0c2cb2734533039f2bb7873d642d2316d77e6",
-      "artifact_hash": "68ecd664af74a9da8e0f8ec0a0e0b6ce5d3cedf473d86ba463143bf0e0856aaf",
-      "legacy_aliases": []
-    },
-    {
-      "life_id": "LIFE-KAIOS-CREATOR-MARKETPLACE-VIEWER",
-      "species_id": "SPECIES-KAIOS-CREATOR-MARKETPLACE-VIEWER",
-      "genome_id": "GENOME-KAIOS-CREATOR-MARKETPLACE-VIEWER",
-      "organism_name": "kaios-creator-marketplace-viewer",
-      "canonical_name": "kaios-creator-marketplace-viewer",
-      "display_name": "KAIOS AI Company Creator Marketplace Viewer",
-      "life_type": "VIEWER",
-      "taxonomy": {
-        "owner_12": "KGEN-KAIOS/organism/taxonomy_registry.json",
-        "owner_19": "KGEN-KAIOS/civilization/BIOLOGY_TAXONOMY_STANDARD.md",
-        "levels_12": {
-          "domain": "KGEN_UNIVERSE",
-          "kingdom": "SOFTWARE_LIFE",
-          "phylum": "PROGRAM_ORGANISM",
-          "class": "VIEWER_APPLICATION_LIFE",
-          "order": "KAIOS_SOFTWARE_ORDER",
-          "family": "CREATOR-MARKETPLACE-VIEWER-FAMILY",
-          "genus": "CREATOR-MARKETPLACE-VIEWER-GENUS",
-          "species": "SPECIES-KAIOS-CREATOR-MARKETPLACE-VIEWER",
-          "cell": "FUNCTION_CELL",
-          "organ": "VIEWER_ORGAN",
-          "runtime": "ACTIVE_SIMULATION",
-          "civilization": "KAIOS_SIMULATION"
-        },
-        "levels_19": {
-          "Domain": "KGEN_UNIVERSE",
-          "Kingdom": "SOFTWARE_LIFE",
-          "Phylum": "PROGRAM_ORGANISM",
-          "Class": "VIEWER_APPLICATION_LIFE",
-          "Order": "KAIOS_SOFTWARE_ORDER",
-          "Family": "CREATOR-MARKETPLACE-VIEWER-FAMILY",
-          "Genus": "CREATOR-MARKETPLACE-VIEWER-GENUS",
-          "Species": "SPECIES-KAIOS-CREATOR-MARKETPLACE-VIEWER",
-          "Individual": "LIFE-KAIOS-CREATOR-MARKETPLACE-VIEWER",
-          "OrganSystem": "CREATOR-MARKETPLACE-VIEWER-ORGAN-SYSTEM",
-          "Organ": "VIEWER_ORGAN",
-          "Tissue": "CREATOR-MARKETPLACE-VIEWER-INTERFACE-GROUP",
-          "Cell": "FUNCTION_CELL",
-          "Organelle": "IMPLEMENTATION_UNIT",
-          "Genome": "GENOME-KAIOS-CREATOR-MARKETPLACE-VIEWER",
-          "DNA": "STATE_AND_SCHEMA_CONTRACTS",
-          "RNA": "COMMAND_EVENT_TRANSLATION",
-          "Gene": "CREATOR-MARKETPLACE-VIEWER-FEATURE-SET",
-          "Expression": "ACTIVE_SIMULATION"
-        }
-      },
-      "generation": 1,
-      "genome_version": "1.0.0",
-      "runtime_revision": "2026.08.02",
-      "birth_commit": "5bded5613c5fe2ec86236130d6d738eeef9cfc3c",
-      "birth_time": "2026-08-03T22:11:40+08:00",
-      "creator": "KLINE Odyssey",
-      "maintainer": "CODEX_CONTROLLED",
-      "location": {
-        "repository": "klineodyssey/kline-odyssey",
-        "canonical_path": "world-viewer/creator-marketplace/index.html",
-        "current_path": "world-viewer/creator-marketplace/index.html",
-        "path_status": "CANONICAL_ACTIVE"
-      },
-      "embodiment": {
-        "mode": "STATIC_WEB",
-        "entrypoint": "world-viewer/creator-marketplace/index.html",
-        "artifact_paths": [
-          "world-viewer/creator-marketplace/app.js",
-          "world-viewer/creator-marketplace/index.html",
-          "world-viewer/creator-marketplace/styles.css"
-        ],
-        "legacy_alias_only": false
-      },
-      "energy_profile": {
-        "energy_type": "COMPUTE_ELECTRICITY_SIMULATION",
-        "metering": "NOT_METERED_STATIC_ARTIFACT",
-        "bounded": true
-      },
-      "resource_profile": {
-        "compute": "BOUNDED_CLIENT_OR_LOCAL_EXECUTION",
-        "memory": "BOUNDED_BY_HOST_RUNTIME",
-        "storage": "REPOSITORY_AND_LOCAL_SIMULATION_ONLY",
-        "network": "NO_EXTERNAL_AUTONOMY",
-        "external_side_effects": false
-      },
-      "rights": {
-        "owner": "KLINE_ODYSSEY_REPOSITORY_SIMULATION",
-        "custodian": "CODEX_CANONICAL_REVIEW",
-        "operator": "LOCAL_USER_SIMULATION",
-        "maintainer": "CODEX_CONTROLLED",
-        "use_right": "SIMULATED_USE_ONLY",
-        "mutation_right": "CODEX_REVIEW_REQUIRED",
-        "reproduction_right": "CODEX_REVIEW_REQUIRED",
-        "transplant_right": "CODEX_REVIEW_REQUIRED",
-        "transfer_right": "SIMULATION_ONLY",
-        "real_legal_effect": false
-      },
-      "dependencies": [
-        "LIFE-KAIOS-CREATOR-MARKETPLACE-RUNTIME",
-        "LIFE-KAIOS-CREATOR-MARKETPLACE-API"
-      ],
-      "organs": [
-        {
-          "organ_id": "ORGAN-CREATOR-MARKETPLACE-VIEWER-01",
-          "organ_type": "PROCESSING_ORGAN",
-          "path": "world-viewer/creator-marketplace/app.js",
-          "content_hash": "bb2c3a2c40f6157a9b97420da5c7226204026be9cdbfe0b1d9d94cdf75b221e0"
-        },
-        {
-          "organ_id": "ORGAN-CREATOR-MARKETPLACE-VIEWER-02",
-          "organ_type": "VIEWER_ORGAN",
-          "path": "world-viewer/creator-marketplace/index.html",
-          "content_hash": "18ad2c20f2e7bf4a7bbb7e6ae2b96bdf5b06ea8209dd9f00bb41372f2c4dd66b"
-        },
-        {
-          "organ_id": "ORGAN-CREATOR-MARKETPLACE-VIEWER-03",
-          "organ_type": "OUTPUT_ORGAN",
-          "path": "world-viewer/creator-marketplace/styles.css",
-          "content_hash": "4a10b38d095206f6db8afbae951e0b5ef2d5203b307fba8eaf42123fac5b07cd"
-        }
-      ],
-      "interfaces": [
-        {
-          "interface_id": "INTERFACE-CREATOR-MARKETPLACE-VIEWER-PRIMARY",
-          "direction": "BIDIRECTIONAL",
-          "protocol": "STATIC_HTML",
-          "read_only": false
-        }
-      ],
-      "compatibility": {
-        "epoch": "KAIOS-GENESIS",
-        "hosts": [
-          "STATIC_GITHUB_PAGES_OR_LOCAL_HTTP"
-        ],
-        "legacy_alias_supported": false,
-        "production_authorized": false
-      },
-      "reproduction_policy": {
-        "mode": "PROHIBITED_UNTIL_STANDARD",
-        "automatic": false,
-        "codex_review_required": true
-      },
-      "mutation_policy": {
-        "mode": "BOUNDED_REVIEW_ONLY",
-        "automatic": false,
-        "codex_review_required": true
-      },
-      "transplant_policy": {
-        "mode": "CONTROLLED_REVIEW_ONLY",
-        "automatic": false,
-        "codex_review_required": true
-      },
-      "marketplace_policy": {
-        "status": "NOT_ELIGIBLE",
-        "simulated_only": true,
-        "real_kgen": false,
-        "onchain_transfer": false
-      },
-      "lifecycle_state": "ACTIVE",
-      "health_state": "HEALTHY",
-      "event_history": [
-        {
-          "event_id": "EVENT-CREATOR-MARKETPLACE-VIEWER-REGISTRY-BINDING",
-          "event_type": "SOFTWARE_LIFE_REGISTRY_BOUND",
-          "simulation_time": "2026-08-03T14:11:53Z",
-          "actor": "CODEX_CANONICAL_REVIEW",
-          "status": "RECORDED",
-          "reason": "Existing repository organism registered without changing Runtime authority.",
-          "previous_state_hash": null,
-          "next_state_hash": "ed0666bb4cd8aa58331de05ecf5586b00a5a09d97fcd5b59d28fabd87eaf4e45"
-        }
-      ],
-      "provenance": {
-        "source_commit": "5bded5613c5fe2ec86236130d6d738eeef9cfc3c",
-        "source_paths": [
-          "world-viewer/creator-marketplace/app.js",
-          "world-viewer/creator-marketplace/index.html",
-          "world-viewer/creator-marketplace/styles.css"
-        ],
-        "generator": "KAIOS/software-life/tools/generate-software-life-registry.mjs",
-        "review_authority": "CODEX_CANONICAL_REVIEW"
-      },
-      "security_boundary": {
-        "simulation_only": true,
-        "real_wallet": false,
-        "real_kgen": false,
-        "onchain_transfer": false,
-        "external_autonomy": false,
-        "production_authority": false,
-        "current_modification": false,
-        "constitution_source_modification": false
-      },
-      "authority_level": "SIMULATION_ONLY",
-      "organism_status": "AUTHORITATIVE",
-      "runtime_status": "ACTIVE_SIMULATION",
-      "parents": [],
-      "children": [],
-      "transplants": [],
-      "mutations": [],
-      "marketplace_status": "NOT_ELIGIBLE",
-      "public_url": "/kline-odyssey/world-viewer/creator-marketplace/",
-      "api_url": null,
-      "code_hash": "18ad2c20f2e7bf4a7bbb7e6ae2b96bdf5b06ea8209dd9f00bb41372f2c4dd66b",
-      "artifact_hash": "ed0666bb4cd8aa58331de05ecf5586b00a5a09d97fcd5b59d28fabd87eaf4e45",
       "legacy_aliases": []
     },
     {
@@ -3485,7 +3095,7 @@
         {
           "event_id": "EVENT-FOREST-AGRICULTURE-WORKLINE-REGISTRY-BINDING",
           "event_type": "SOFTWARE_LIFE_REGISTRY_BOUND",
-          "simulation_time": "2026-08-03T14:11:53Z",
+          "simulation_time": "2026-08-02T10:40:00Z",
           "actor": "CODEX_CANONICAL_REVIEW",
           "status": "RECORDED",
           "reason": "Existing repository organism registered without changing Runtime authority.",
@@ -3494,7 +3104,7 @@
         }
       ],
       "provenance": {
-        "source_commit": "5bded5613c5fe2ec86236130d6d738eeef9cfc3c",
+        "source_commit": "cc80135f2c6e6a74aad11f34e793c65ac0ee1938",
         "source_paths": [
           "KAIOS/life/forest-agriculture/KAIOS_FOREST_AGRICULTURE_RUNTIME_V1_SPEC.md"
         ],
@@ -3672,7 +3282,7 @@
         {
           "event_id": "EVENT-CHARTER-PROGRAM-CENTER-REGISTRY-BINDING",
           "event_type": "SOFTWARE_LIFE_REGISTRY_BOUND",
-          "simulation_time": "2026-08-03T14:11:53Z",
+          "simulation_time": "2026-08-02T10:40:00Z",
           "actor": "CODEX_CANONICAL_REVIEW",
           "status": "RECORDED",
           "reason": "Existing repository organism registered without changing Runtime authority.",
@@ -3681,7 +3291,7 @@
         }
       ],
       "provenance": {
-        "source_commit": "5bded5613c5fe2ec86236130d6d738eeef9cfc3c",
+        "source_commit": "cc80135f2c6e6a74aad11f34e793c65ac0ee1938",
         "source_paths": [
           "KGEN-KAIOS/world-viewer/program-center/program-center-view.js"
         ],
@@ -3817,7 +3427,7 @@
           "organ_id": "ORGAN-WORKER-REGISTRY-02",
           "organ_type": "STORAGE_ORGAN",
           "path": "KGEN-KAIOS/worker_registry.json",
-          "content_hash": "e84a867fc92f16b3f5b2cdc2d841ef13002fa79acd8a6ca1b4a96807f268e8fd"
+          "content_hash": "2a55de3084e531fb5a009ab146c9ce96031f6a83130b049e39343496e380e72f"
         }
       ],
       "interfaces": [
@@ -3863,16 +3473,16 @@
         {
           "event_id": "EVENT-WORKER-REGISTRY-REGISTRY-BINDING",
           "event_type": "SOFTWARE_LIFE_REGISTRY_BOUND",
-          "simulation_time": "2026-08-03T14:11:53Z",
+          "simulation_time": "2026-08-02T10:40:00Z",
           "actor": "CODEX_CANONICAL_REVIEW",
           "status": "RECORDED",
           "reason": "Existing repository organism registered without changing Runtime authority.",
           "previous_state_hash": null,
-          "next_state_hash": "2c3456f1984955d42ed1c0712fc71afb02324572c813a37e01d023d0617d5c01"
+          "next_state_hash": "9fa16c38a517fa6a21b4b8ab61c1b136decdccd219601d6bea05d055e91c9b74"
         }
       ],
       "provenance": {
-        "source_commit": "5bded5613c5fe2ec86236130d6d738eeef9cfc3c",
+        "source_commit": "cc80135f2c6e6a74aad11f34e793c65ac0ee1938",
         "source_paths": [
           "KGEN-KAIOS/WORKER_REGISTRY.md",
           "KGEN-KAIOS/worker_registry.json"
@@ -3900,8 +3510,8 @@
       "marketplace_status": "NOT_ELIGIBLE",
       "public_url": null,
       "api_url": null,
-      "code_hash": "e84a867fc92f16b3f5b2cdc2d841ef13002fa79acd8a6ca1b4a96807f268e8fd",
-      "artifact_hash": "2c3456f1984955d42ed1c0712fc71afb02324572c813a37e01d023d0617d5c01",
+      "code_hash": "2a55de3084e531fb5a009ab146c9ce96031f6a83130b049e39343496e380e72f",
+      "artifact_hash": "9fa16c38a517fa6a21b4b8ab61c1b136decdccd219601d6bea05d055e91c9b74",
       "legacy_aliases": []
     },
     {
@@ -4004,7 +3614,7 @@
           "organ_id": "ORGAN-CURSOR-QUEUE-01",
           "organ_type": "MEMORY_ORGAN",
           "path": "KAIOS/life/forest-agriculture/KAIOS_CURSOR_CONTINUOUS_WORK_QUEUE.json",
-          "content_hash": "c259bb6e3c83c7aea86bca5ca882984f2e9657f3fe5cc50e965aedb28862fa27"
+          "content_hash": "4ab647ed99a877cf4ecd1aeea115c6a1685052743a1007f1a88ddaff9bca7122"
         }
       ],
       "interfaces": [
@@ -4050,16 +3660,16 @@
         {
           "event_id": "EVENT-CURSOR-QUEUE-REGISTRY-BINDING",
           "event_type": "SOFTWARE_LIFE_REGISTRY_BOUND",
-          "simulation_time": "2026-08-03T14:11:53Z",
+          "simulation_time": "2026-08-02T10:40:00Z",
           "actor": "CODEX_CANONICAL_REVIEW",
           "status": "RECORDED",
           "reason": "Existing repository organism registered without changing Runtime authority.",
           "previous_state_hash": null,
-          "next_state_hash": "062882207c8068e80aa82afb701d0a86ff8b95de964a3da2ff5ca5599b7a1f90"
+          "next_state_hash": "64018e8dbddc66320011de12e469af8b98f59c5aa0ecec7b62bb430c3b922129"
         }
       ],
       "provenance": {
-        "source_commit": "5bded5613c5fe2ec86236130d6d738eeef9cfc3c",
+        "source_commit": "cc80135f2c6e6a74aad11f34e793c65ac0ee1938",
         "source_paths": [
           "KAIOS/life/forest-agriculture/KAIOS_CURSOR_CONTINUOUS_WORK_QUEUE.json"
         ],
@@ -4086,8 +3696,8 @@
       "marketplace_status": "NOT_ELIGIBLE",
       "public_url": null,
       "api_url": null,
-      "code_hash": "c259bb6e3c83c7aea86bca5ca882984f2e9657f3fe5cc50e965aedb28862fa27",
-      "artifact_hash": "062882207c8068e80aa82afb701d0a86ff8b95de964a3da2ff5ca5599b7a1f90",
+      "code_hash": "4ab647ed99a877cf4ecd1aeea115c6a1685052743a1007f1a88ddaff9bca7122",
+      "artifact_hash": "64018e8dbddc66320011de12e469af8b98f59c5aa0ecec7b62bb430c3b922129",
       "legacy_aliases": []
     },
     {
@@ -4241,7 +3851,7 @@
         {
           "event_id": "EVENT-IDENTITY-AUTHORITY-REGISTRY-BINDING",
           "event_type": "SOFTWARE_LIFE_REGISTRY_BOUND",
-          "simulation_time": "2026-08-03T14:11:53Z",
+          "simulation_time": "2026-08-02T10:40:00Z",
           "actor": "CODEX_CANONICAL_REVIEW",
           "status": "RECORDED",
           "reason": "Existing repository organism registered without changing Runtime authority.",
@@ -4250,7 +3860,7 @@
         }
       ],
       "provenance": {
-        "source_commit": "5bded5613c5fe2ec86236130d6d738eeef9cfc3c",
+        "source_commit": "cc80135f2c6e6a74aad11f34e793c65ac0ee1938",
         "source_paths": [
           "KGEN-KAIOS/governance/agents/unique-life-identity-v0.1/KAIOS_UNIQUE_LIFE_IDENTITY_AND_EMBODIMENT_ARCHITECTURE_V0_1.md",
           "KGEN-KAIOS/governance/agents/unique-life-identity-v0.1/KAIOS_UNIQUE_LIFE_IDENTITY_REGISTRY_SCHEMA_V0_1.json"
@@ -4426,7 +4036,7 @@
         {
           "event_id": "EVENT-RIGHTS-AUTHORITY-REGISTRY-BINDING",
           "event_type": "SOFTWARE_LIFE_REGISTRY_BOUND",
-          "simulation_time": "2026-08-03T14:11:53Z",
+          "simulation_time": "2026-08-02T10:40:00Z",
           "actor": "CODEX_CANONICAL_REVIEW",
           "status": "RECORDED",
           "reason": "Existing repository organism registered without changing Runtime authority.",
@@ -4435,7 +4045,7 @@
         }
       ],
       "provenance": {
-        "source_commit": "5bded5613c5fe2ec86236130d6d738eeef9cfc3c",
+        "source_commit": "cc80135f2c6e6a74aad11f34e793c65ac0ee1938",
         "source_paths": [
           "KAIOS_CANONICAL_LIFE_RIGHTS_V1.md"
         ],
@@ -4617,7 +4227,7 @@
         {
           "event_id": "EVENT-SUPPLY-CHAIN-SPECIFICATION-REGISTRY-BINDING",
           "event_type": "SOFTWARE_LIFE_REGISTRY_BOUND",
-          "simulation_time": "2026-08-03T14:11:53Z",
+          "simulation_time": "2026-08-02T10:40:00Z",
           "actor": "CODEX_CANONICAL_REVIEW",
           "status": "RECORDED",
           "reason": "Existing repository organism registered without changing Runtime authority.",
@@ -4626,7 +4236,7 @@
         }
       ],
       "provenance": {
-        "source_commit": "5bded5613c5fe2ec86236130d6d738eeef9cfc3c",
+        "source_commit": "cc80135f2c6e6a74aad11f34e793c65ac0ee1938",
         "source_paths": [
           "KAIOS_INDUSTRIAL_SUPPLY_CHAIN_SPEC.md",
           "KAIOS_SUPPLY_CHAIN_SCHEMA.json"
@@ -4809,7 +4419,7 @@
         {
           "event_id": "EVENT-PHYSICAL-LABOR-SPECIFICATION-REGISTRY-BINDING",
           "event_type": "SOFTWARE_LIFE_REGISTRY_BOUND",
-          "simulation_time": "2026-08-03T14:11:53Z",
+          "simulation_time": "2026-08-02T10:40:00Z",
           "actor": "CODEX_CANONICAL_REVIEW",
           "status": "RECORDED",
           "reason": "Existing repository organism registered without changing Runtime authority.",
@@ -4818,7 +4428,7 @@
         }
       ],
       "provenance": {
-        "source_commit": "5bded5613c5fe2ec86236130d6d738eeef9cfc3c",
+        "source_commit": "cc80135f2c6e6a74aad11f34e793c65ac0ee1938",
         "source_paths": [
           "KAIOS_PHYSICAL_LABOR_ACCOUNTING_SPEC.md",
           "KAIOS_PHYSICAL_LABOR_SCHEMA.json"
@@ -4994,7 +4604,7 @@
         {
           "event_id": "EVENT-CHARTER-FOUNDATION-RUNTIME-REGISTRY-BINDING",
           "event_type": "SOFTWARE_LIFE_REGISTRY_BOUND",
-          "simulation_time": "2026-08-03T14:11:53Z",
+          "simulation_time": "2026-08-02T10:40:00Z",
           "actor": "CODEX_CANONICAL_REVIEW",
           "status": "RECORDED",
           "reason": "Existing repository organism registered without changing Runtime authority.",
@@ -5003,7 +4613,7 @@
         }
       ],
       "provenance": {
-        "source_commit": "5bded5613c5fe2ec86236130d6d738eeef9cfc3c",
+        "source_commit": "cc80135f2c6e6a74aad11f34e793c65ac0ee1938",
         "source_paths": [
           "KGEN-KAIOS/world-viewer/foundation/charter-foundation-runtime.js"
         ],
@@ -5178,7 +4788,7 @@
         {
           "event_id": "EVENT-CANONICAL-LIFE-SCHEMA-REGISTRY-BINDING",
           "event_type": "SOFTWARE_LIFE_REGISTRY_BOUND",
-          "simulation_time": "2026-08-03T14:11:53Z",
+          "simulation_time": "2026-08-02T10:40:00Z",
           "actor": "CODEX_CANONICAL_REVIEW",
           "status": "RECORDED",
           "reason": "Existing repository organism registered without changing Runtime authority.",
@@ -5187,7 +4797,7 @@
         }
       ],
       "provenance": {
-        "source_commit": "5bded5613c5fe2ec86236130d6d738eeef9cfc3c",
+        "source_commit": "cc80135f2c6e6a74aad11f34e793c65ac0ee1938",
         "source_paths": [
           "KAIOS_CANONICAL_LIFE_SCHEMA_V1.json"
         ],
@@ -5371,7 +4981,7 @@
         {
           "event_id": "EVENT-ORGANISM-MANIFEST-SCHEMA-REGISTRY-BINDING",
           "event_type": "SOFTWARE_LIFE_REGISTRY_BOUND",
-          "simulation_time": "2026-08-03T14:11:53Z",
+          "simulation_time": "2026-08-02T10:40:00Z",
           "actor": "CODEX_CANONICAL_REVIEW",
           "status": "RECORDED",
           "reason": "Existing repository organism registered without changing Runtime authority.",
@@ -5380,7 +4990,7 @@
         }
       ],
       "provenance": {
-        "source_commit": "5bded5613c5fe2ec86236130d6d738eeef9cfc3c",
+        "source_commit": "cc80135f2c6e6a74aad11f34e793c65ac0ee1938",
         "source_paths": [
           "KGEN-KAIOS/ORGANISM_MANIFEST_STANDARD.md",
           "KGEN-KAIOS/provenance/ORGANISM_MANIFEST_SCHEMA.json"
@@ -5563,7 +5173,7 @@
         {
           "event_id": "EVENT-TAXONOMY-REGISTRY-REGISTRY-BINDING",
           "event_type": "SOFTWARE_LIFE_REGISTRY_BOUND",
-          "simulation_time": "2026-08-03T14:11:53Z",
+          "simulation_time": "2026-08-02T10:40:00Z",
           "actor": "CODEX_CANONICAL_REVIEW",
           "status": "RECORDED",
           "reason": "Existing repository organism registered without changing Runtime authority.",
@@ -5572,7 +5182,7 @@
         }
       ],
       "provenance": {
-        "source_commit": "5bded5613c5fe2ec86236130d6d738eeef9cfc3c",
+        "source_commit": "cc80135f2c6e6a74aad11f34e793c65ac0ee1938",
         "source_paths": [
           "KGEN-KAIOS/civilization/BIOLOGY_TAXONOMY_STANDARD.md",
           "KGEN-KAIOS/organism/taxonomy_registry.json"
@@ -5806,7 +5416,7 @@
         {
           "event_id": "EVENT-K280-API-REGISTRY-BINDING",
           "event_type": "SOFTWARE_LIFE_REGISTRY_BOUND",
-          "simulation_time": "2026-08-03T14:11:53Z",
+          "simulation_time": "2026-08-02T10:40:00Z",
           "actor": "CODEX_CANONICAL_REVIEW",
           "status": "RECORDED",
           "reason": "Existing repository organism registered without changing Runtime authority.",
@@ -5815,7 +5425,7 @@
         }
       ],
       "provenance": {
-        "source_commit": "5bded5613c5fe2ec86236130d6d738eeef9cfc3c",
+        "source_commit": "cc80135f2c6e6a74aad11f34e793c65ac0ee1938",
         "source_paths": [
           "api/kaios/k280/civilization.json",
           "api/kaios/k280/events.json",
@@ -6014,7 +5624,7 @@
         {
           "event_id": "EVENT-LIFE-RUNTIME-API-REGISTRY-BINDING",
           "event_type": "SOFTWARE_LIFE_REGISTRY_BOUND",
-          "simulation_time": "2026-08-03T14:11:53Z",
+          "simulation_time": "2026-08-02T10:40:00Z",
           "actor": "CODEX_CANONICAL_REVIEW",
           "status": "RECORDED",
           "reason": "Existing repository organism registered without changing Runtime authority.",
@@ -6023,7 +5633,7 @@
         }
       ],
       "provenance": {
-        "source_commit": "5bded5613c5fe2ec86236130d6d738eeef9cfc3c",
+        "source_commit": "cc80135f2c6e6a74aad11f34e793c65ac0ee1938",
         "source_paths": [
           "api/kaios/life-runtime-v1/catalog.json",
           "api/kaios/life-runtime-v1/index.html",
@@ -6265,7 +5875,7 @@
         {
           "event_id": "EVENT-ECOSYSTEM-API-REGISTRY-BINDING",
           "event_type": "SOFTWARE_LIFE_REGISTRY_BOUND",
-          "simulation_time": "2026-08-03T14:11:53Z",
+          "simulation_time": "2026-08-02T10:40:00Z",
           "actor": "CODEX_CANONICAL_REVIEW",
           "status": "RECORDED",
           "reason": "Existing repository organism registered without changing Runtime authority.",
@@ -6274,7 +5884,7 @@
         }
       ],
       "provenance": {
-        "source_commit": "5bded5613c5fe2ec86236130d6d738eeef9cfc3c",
+        "source_commit": "cc80135f2c6e6a74aad11f34e793c65ac0ee1938",
         "source_paths": [
           "KAIOS/life/ecology/generate-ecosystem-v1-api.mjs",
           "api/kaios/ecosystem/v1/events.json",
@@ -6544,7 +6154,7 @@
         {
           "event_id": "EVENT-AQUACULTURE-API-REGISTRY-BINDING",
           "event_type": "SOFTWARE_LIFE_REGISTRY_BOUND",
-          "simulation_time": "2026-08-03T14:11:53Z",
+          "simulation_time": "2026-08-02T10:40:00Z",
           "actor": "CODEX_CANONICAL_REVIEW",
           "status": "RECORDED",
           "reason": "Existing repository organism registered without changing Runtime authority.",
@@ -6553,7 +6163,7 @@
         }
       ],
       "provenance": {
-        "source_commit": "5bded5613c5fe2ec86236130d6d738eeef9cfc3c",
+        "source_commit": "cc80135f2c6e6a74aad11f34e793c65ac0ee1938",
         "source_paths": [
           "KAIOS/life/aquaculture/generate-aquaculture-v1-api.mjs",
           "api/kaios/aquaculture/v1/events.json",
@@ -6715,7 +6325,7 @@
           "organ_id": "ORGAN-AI-COMPANY-API-01",
           "organ_type": "API_ORGAN",
           "path": "KAIOS/ai-company/generate-ai-company-v1-api.mjs",
-          "content_hash": "dedc99466d447b3882c941e42b88ddc18fd3df1383b10bf1fa26288ea1065c8e"
+          "content_hash": "04e04b2b21eff0890d2402a3b9306db67df20ff28f61aaec3737b23aa5b55f53"
         },
         {
           "organ_id": "ORGAN-AI-COMPANY-API-02",
@@ -6733,7 +6343,7 @@
           "organ_id": "ORGAN-AI-COMPANY-API-04",
           "organ_type": "API_ORGAN",
           "path": "api/kaios/ai-company/v1/cursor-queue.json",
-          "content_hash": "9efd328f131a60a6ae39ecf522fb768348e89efcaba6ba34a38e4b0876fbea66"
+          "content_hash": "158cbcb9625fe9b598d9f5d7f3ac9727a0b3b518321fa6d73ae1ef99d4f21a75"
         },
         {
           "organ_id": "ORGAN-AI-COMPANY-API-05",
@@ -6875,16 +6485,16 @@
         {
           "event_id": "EVENT-AI-COMPANY-API-REGISTRY-BINDING",
           "event_type": "SOFTWARE_LIFE_REGISTRY_BOUND",
-          "simulation_time": "2026-08-03T14:11:53Z",
+          "simulation_time": "2026-08-02T10:40:00Z",
           "actor": "CODEX_CANONICAL_REVIEW",
           "status": "RECORDED",
           "reason": "Existing repository organism registered without changing Runtime authority.",
           "previous_state_hash": null,
-          "next_state_hash": "cb17d9cb6580ccdca72c0fc5bfb1a2c189e84c2d96ec101426e438aca843612a"
+          "next_state_hash": "c70cb27f0b127d10cbd9b2f0ada5af1ff80d0ff79831e622c366a3a6d5d26608"
         }
       ],
       "provenance": {
-        "source_commit": "5bded5613c5fe2ec86236130d6d738eeef9cfc3c",
+        "source_commit": "cc80135f2c6e6a74aad11f34e793c65ac0ee1938",
         "source_paths": [
           "KAIOS/ai-company/generate-ai-company-v1-api.mjs",
           "api/kaios/ai-company/v1/budget.json",
@@ -6930,370 +6540,8 @@
       "marketplace_status": "NOT_ELIGIBLE",
       "public_url": null,
       "api_url": "/kline-odyssey/api/kaios/ai-company/",
-      "code_hash": "dedc99466d447b3882c941e42b88ddc18fd3df1383b10bf1fa26288ea1065c8e",
-      "artifact_hash": "cb17d9cb6580ccdca72c0fc5bfb1a2c189e84c2d96ec101426e438aca843612a",
-      "legacy_aliases": []
-    },
-    {
-      "life_id": "LIFE-KAIOS-CREATOR-MARKETPLACE-API",
-      "species_id": "SPECIES-KAIOS-CREATOR-MARKETPLACE-API",
-      "genome_id": "GENOME-KAIOS-CREATOR-MARKETPLACE-API",
-      "organism_name": "kaios-creator-marketplace-api",
-      "canonical_name": "kaios-creator-marketplace-api",
-      "display_name": "KAIOS Creator Marketplace Read-only API",
-      "life_type": "API",
-      "taxonomy": {
-        "owner_12": "KGEN-KAIOS/organism/taxonomy_registry.json",
-        "owner_19": "KGEN-KAIOS/civilization/BIOLOGY_TAXONOMY_STANDARD.md",
-        "levels_12": {
-          "domain": "KGEN_UNIVERSE",
-          "kingdom": "SOFTWARE_LIFE",
-          "phylum": "PROGRAM_ORGANISM",
-          "class": "COMMUNICATION_SERVICE_LIFE",
-          "order": "KAIOS_SOFTWARE_ORDER",
-          "family": "CREATOR-MARKETPLACE-API-FAMILY",
-          "genus": "CREATOR-MARKETPLACE-API-GENUS",
-          "species": "SPECIES-KAIOS-CREATOR-MARKETPLACE-API",
-          "cell": "FUNCTION_CELL",
-          "organ": "API_ORGAN",
-          "runtime": "READ_ONLY_PROJECTION",
-          "civilization": "KAIOS_SIMULATION"
-        },
-        "levels_19": {
-          "Domain": "KGEN_UNIVERSE",
-          "Kingdom": "SOFTWARE_LIFE",
-          "Phylum": "PROGRAM_ORGANISM",
-          "Class": "COMMUNICATION_SERVICE_LIFE",
-          "Order": "KAIOS_SOFTWARE_ORDER",
-          "Family": "CREATOR-MARKETPLACE-API-FAMILY",
-          "Genus": "CREATOR-MARKETPLACE-API-GENUS",
-          "Species": "SPECIES-KAIOS-CREATOR-MARKETPLACE-API",
-          "Individual": "LIFE-KAIOS-CREATOR-MARKETPLACE-API",
-          "OrganSystem": "CREATOR-MARKETPLACE-API-ORGAN-SYSTEM",
-          "Organ": "API_ORGAN",
-          "Tissue": "CREATOR-MARKETPLACE-API-INTERFACE-GROUP",
-          "Cell": "FUNCTION_CELL",
-          "Organelle": "IMPLEMENTATION_UNIT",
-          "Genome": "GENOME-KAIOS-CREATOR-MARKETPLACE-API",
-          "DNA": "STATE_AND_SCHEMA_CONTRACTS",
-          "RNA": "COMMAND_EVENT_TRANSLATION",
-          "Gene": "CREATOR-MARKETPLACE-API-FEATURE-SET",
-          "Expression": "READ_ONLY_PROJECTION"
-        }
-      },
-      "generation": 1,
-      "genome_version": "1.0.0",
-      "runtime_revision": "2026.08.02",
-      "birth_commit": "5bded5613c5fe2ec86236130d6d738eeef9cfc3c",
-      "birth_time": "2026-08-03T22:11:40+08:00",
-      "creator": "KLINE Odyssey",
-      "maintainer": "CODEX_CONTROLLED",
-      "location": {
-        "repository": "klineodyssey/kline-odyssey",
-        "canonical_path": "KAIOS/marketplace/creator-marketplace/generate-creator-marketplace-api.mjs",
-        "current_path": "KAIOS/marketplace/creator-marketplace/generate-creator-marketplace-api.mjs",
-        "path_status": "CANONICAL_ACTIVE"
-      },
-      "embodiment": {
-        "mode": "READ_ONLY_DATA",
-        "entrypoint": "KAIOS/marketplace/creator-marketplace/generate-creator-marketplace-api.mjs",
-        "artifact_paths": [
-          "KAIOS/marketplace/creator-marketplace/generate-creator-marketplace-api.mjs",
-          "api/kaios/marketplace/energy-ontology.json",
-          "api/kaios/marketplace/events.json",
-          "api/kaios/marketplace/index.html",
-          "api/kaios/marketplace/index.json",
-          "api/kaios/marketplace/listings.json",
-          "api/kaios/marketplace/payroll.json",
-          "api/kaios/marketplace/projects.json",
-          "api/kaios/marketplace/requests.json",
-          "api/kaios/marketplace/starter-package.json",
-          "api/kaios/marketplace/status.json",
-          "api/kaios/marketplace/tasks.json",
-          "api/kaios/marketplace/v1/energy-ontology.json",
-          "api/kaios/marketplace/v1/events.json",
-          "api/kaios/marketplace/v1/index.html",
-          "api/kaios/marketplace/v1/index.json",
-          "api/kaios/marketplace/v1/listings.json",
-          "api/kaios/marketplace/v1/payroll.json",
-          "api/kaios/marketplace/v1/projects.json",
-          "api/kaios/marketplace/v1/requests.json",
-          "api/kaios/marketplace/v1/starter-package.json",
-          "api/kaios/marketplace/v1/status.json",
-          "api/kaios/marketplace/v1/tasks.json"
-        ],
-        "legacy_alias_only": false
-      },
-      "energy_profile": {
-        "energy_type": "STATIC_STORAGE_SIMULATION",
-        "metering": "NOT_METERED_STATIC_ARTIFACT",
-        "bounded": true
-      },
-      "resource_profile": {
-        "compute": "BOUNDED_CLIENT_OR_LOCAL_EXECUTION",
-        "memory": "BOUNDED_BY_HOST_RUNTIME",
-        "storage": "REPOSITORY_AND_LOCAL_SIMULATION_ONLY",
-        "network": "READ_ONLY_GITHUB_PAGES",
-        "external_side_effects": false
-      },
-      "rights": {
-        "owner": "KLINE_ODYSSEY_REPOSITORY_SIMULATION",
-        "custodian": "CODEX_CANONICAL_REVIEW",
-        "operator": "LOCAL_USER_SIMULATION",
-        "maintainer": "CODEX_CONTROLLED",
-        "use_right": "SIMULATED_USE_ONLY",
-        "mutation_right": "CODEX_REVIEW_REQUIRED",
-        "reproduction_right": "CODEX_REVIEW_REQUIRED",
-        "transplant_right": "CODEX_REVIEW_REQUIRED",
-        "transfer_right": "SIMULATION_ONLY",
-        "real_legal_effect": false
-      },
-      "dependencies": [
-        "LIFE-KAIOS-CREATOR-MARKETPLACE-RUNTIME"
-      ],
-      "organs": [
-        {
-          "organ_id": "ORGAN-CREATOR-MARKETPLACE-API-01",
-          "organ_type": "API_ORGAN",
-          "path": "KAIOS/marketplace/creator-marketplace/generate-creator-marketplace-api.mjs",
-          "content_hash": "9920a4eb97b296ccb26b4d68286a9043dc107f5253313b4a7da8275efe0e8dd6"
-        },
-        {
-          "organ_id": "ORGAN-CREATOR-MARKETPLACE-API-02",
-          "organ_type": "API_ORGAN",
-          "path": "api/kaios/marketplace/energy-ontology.json",
-          "content_hash": "18432573246899ee7202caab7270cd8e4e20671efc6cdc0c0cd5797ce0e2af95"
-        },
-        {
-          "organ_id": "ORGAN-CREATOR-MARKETPLACE-API-03",
-          "organ_type": "API_ORGAN",
-          "path": "api/kaios/marketplace/events.json",
-          "content_hash": "396d69e0c865c3a39b4eb1db17c0736619cd07b73533bc37f87c761ffa5ad893"
-        },
-        {
-          "organ_id": "ORGAN-CREATOR-MARKETPLACE-API-04",
-          "organ_type": "API_ORGAN",
-          "path": "api/kaios/marketplace/index.html",
-          "content_hash": "82286ca444a46b1a7c5069f683639893de8f4d693b3c2ed49a7cbcd042ed140e"
-        },
-        {
-          "organ_id": "ORGAN-CREATOR-MARKETPLACE-API-05",
-          "organ_type": "API_ORGAN",
-          "path": "api/kaios/marketplace/index.json",
-          "content_hash": "06be91ee09b8c924132f15f3d2ad901542666f1866f1f794a30b55bfcd8889af"
-        },
-        {
-          "organ_id": "ORGAN-CREATOR-MARKETPLACE-API-06",
-          "organ_type": "API_ORGAN",
-          "path": "api/kaios/marketplace/listings.json",
-          "content_hash": "f3f8c0b2ea957a2bd717981df12dd1f429840dd7ca92d2306b091cad9417136d"
-        },
-        {
-          "organ_id": "ORGAN-CREATOR-MARKETPLACE-API-07",
-          "organ_type": "API_ORGAN",
-          "path": "api/kaios/marketplace/payroll.json",
-          "content_hash": "fdab113346c0ed99ab93ceedf51f674b6ac54b6a642b2ed63bccc9235490f3e1"
-        },
-        {
-          "organ_id": "ORGAN-CREATOR-MARKETPLACE-API-08",
-          "organ_type": "API_ORGAN",
-          "path": "api/kaios/marketplace/projects.json",
-          "content_hash": "4e384d2e10a9b71c1991624d67218f7c8a7c2288b338875d9224cde604088750"
-        },
-        {
-          "organ_id": "ORGAN-CREATOR-MARKETPLACE-API-09",
-          "organ_type": "API_ORGAN",
-          "path": "api/kaios/marketplace/requests.json",
-          "content_hash": "e32ff4eee34dcfe59760c6cf42bc92fb508cb149a3e8c85fcc8bdfa3197f081a"
-        },
-        {
-          "organ_id": "ORGAN-CREATOR-MARKETPLACE-API-10",
-          "organ_type": "API_ORGAN",
-          "path": "api/kaios/marketplace/starter-package.json",
-          "content_hash": "d7ad9bc675a6add9fe48ba6c2e3d178c715e83fd1117dd816e780de8e50703b4"
-        },
-        {
-          "organ_id": "ORGAN-CREATOR-MARKETPLACE-API-11",
-          "organ_type": "API_ORGAN",
-          "path": "api/kaios/marketplace/status.json",
-          "content_hash": "341816909bfda9a8457e0ea4dad21bf44dadceb3798711903800f1b77e21eb9c"
-        },
-        {
-          "organ_id": "ORGAN-CREATOR-MARKETPLACE-API-12",
-          "organ_type": "API_ORGAN",
-          "path": "api/kaios/marketplace/tasks.json",
-          "content_hash": "d435864bc47ce6ab95b150a7f79d3780d599fea38e0ea7babbdb52accf0a17d3"
-        },
-        {
-          "organ_id": "ORGAN-CREATOR-MARKETPLACE-API-13",
-          "organ_type": "API_ORGAN",
-          "path": "api/kaios/marketplace/v1/energy-ontology.json",
-          "content_hash": "64c452bd028dca3487d43281745b915ba563463976fa67c9e3aef241365922fd"
-        },
-        {
-          "organ_id": "ORGAN-CREATOR-MARKETPLACE-API-14",
-          "organ_type": "API_ORGAN",
-          "path": "api/kaios/marketplace/v1/events.json",
-          "content_hash": "7dfbcd76f5db669f52cb1c0ab52c22c90915b0b8e625cf1f38b98b0c2c9bf2b6"
-        },
-        {
-          "organ_id": "ORGAN-CREATOR-MARKETPLACE-API-15",
-          "organ_type": "API_ORGAN",
-          "path": "api/kaios/marketplace/v1/index.html",
-          "content_hash": "7ecfb8203d6aa2f85b9329dd361981bf62aeebedf97d5e7710e22bc1521748d9"
-        },
-        {
-          "organ_id": "ORGAN-CREATOR-MARKETPLACE-API-16",
-          "organ_type": "API_ORGAN",
-          "path": "api/kaios/marketplace/v1/index.json",
-          "content_hash": "aab9136431193d2523ef67a1d04997a12e33093f42754622be79e1fb1f6cabe2"
-        },
-        {
-          "organ_id": "ORGAN-CREATOR-MARKETPLACE-API-17",
-          "organ_type": "API_ORGAN",
-          "path": "api/kaios/marketplace/v1/listings.json",
-          "content_hash": "879d09d635f0ef88e06191a3a5ff66b5875694e216df44c2eb82044a3a394bcb"
-        },
-        {
-          "organ_id": "ORGAN-CREATOR-MARKETPLACE-API-18",
-          "organ_type": "API_ORGAN",
-          "path": "api/kaios/marketplace/v1/payroll.json",
-          "content_hash": "432404092bdc9a988b8114d14aeaa3f979465c424bc184bdb5be7f5eb976a270"
-        },
-        {
-          "organ_id": "ORGAN-CREATOR-MARKETPLACE-API-19",
-          "organ_type": "API_ORGAN",
-          "path": "api/kaios/marketplace/v1/projects.json",
-          "content_hash": "3a070b1598b1a7a6c736115a7da81d2ae3f5ffbfbd916dd3009f0a241d24f70c"
-        },
-        {
-          "organ_id": "ORGAN-CREATOR-MARKETPLACE-API-20",
-          "organ_type": "API_ORGAN",
-          "path": "api/kaios/marketplace/v1/requests.json",
-          "content_hash": "3751ff7d8069ea9e6a67578a7bc21141b295e2d1504bef22b5c4904b39f48817"
-        },
-        {
-          "organ_id": "ORGAN-CREATOR-MARKETPLACE-API-21",
-          "organ_type": "API_ORGAN",
-          "path": "api/kaios/marketplace/v1/starter-package.json",
-          "content_hash": "4aaa25c3dbc7712bc3608318766ad972d60df8bf31a6b80737d40778c1f2dbf5"
-        },
-        {
-          "organ_id": "ORGAN-CREATOR-MARKETPLACE-API-22",
-          "organ_type": "API_ORGAN",
-          "path": "api/kaios/marketplace/v1/status.json",
-          "content_hash": "ad538594c7e94f8b78b6c46ebe45da1c37efa94406842401907f220756ad1678"
-        },
-        {
-          "organ_id": "ORGAN-CREATOR-MARKETPLACE-API-23",
-          "organ_type": "API_ORGAN",
-          "path": "api/kaios/marketplace/v1/tasks.json",
-          "content_hash": "07913d5af4df27324b79350082cc16a48b7421fc9af4d7264ccc0d0b1670da5b"
-        }
-      ],
-      "interfaces": [
-        {
-          "interface_id": "INTERFACE-CREATOR-MARKETPLACE-API-PRIMARY",
-          "direction": "OUTPUT",
-          "protocol": "JSON_DOCUMENT",
-          "read_only": true
-        }
-      ],
-      "compatibility": {
-        "epoch": "KAIOS-GENESIS",
-        "hosts": [
-          "STATIC_GITHUB_PAGES_OR_LOCAL_HTTP"
-        ],
-        "legacy_alias_supported": false,
-        "production_authorized": false
-      },
-      "reproduction_policy": {
-        "mode": "PROHIBITED_UNTIL_STANDARD",
-        "automatic": false,
-        "codex_review_required": true
-      },
-      "mutation_policy": {
-        "mode": "BOUNDED_REVIEW_ONLY",
-        "automatic": false,
-        "codex_review_required": true
-      },
-      "transplant_policy": {
-        "mode": "CONTROLLED_REVIEW_ONLY",
-        "automatic": false,
-        "codex_review_required": true
-      },
-      "marketplace_policy": {
-        "status": "NOT_ELIGIBLE",
-        "simulated_only": true,
-        "real_kgen": false,
-        "onchain_transfer": false
-      },
-      "lifecycle_state": "ACTIVE",
-      "health_state": "HEALTHY",
-      "event_history": [
-        {
-          "event_id": "EVENT-CREATOR-MARKETPLACE-API-REGISTRY-BINDING",
-          "event_type": "SOFTWARE_LIFE_REGISTRY_BOUND",
-          "simulation_time": "2026-08-03T14:11:53Z",
-          "actor": "CODEX_CANONICAL_REVIEW",
-          "status": "RECORDED",
-          "reason": "Existing repository organism registered without changing Runtime authority.",
-          "previous_state_hash": null,
-          "next_state_hash": "f88029e84fb094b2aa9c7e9489459bcf4d5f2909356ba15ac9cd0761025df3ed"
-        }
-      ],
-      "provenance": {
-        "source_commit": "5bded5613c5fe2ec86236130d6d738eeef9cfc3c",
-        "source_paths": [
-          "KAIOS/marketplace/creator-marketplace/generate-creator-marketplace-api.mjs",
-          "api/kaios/marketplace/energy-ontology.json",
-          "api/kaios/marketplace/events.json",
-          "api/kaios/marketplace/index.html",
-          "api/kaios/marketplace/index.json",
-          "api/kaios/marketplace/listings.json",
-          "api/kaios/marketplace/payroll.json",
-          "api/kaios/marketplace/projects.json",
-          "api/kaios/marketplace/requests.json",
-          "api/kaios/marketplace/starter-package.json",
-          "api/kaios/marketplace/status.json",
-          "api/kaios/marketplace/tasks.json",
-          "api/kaios/marketplace/v1/energy-ontology.json",
-          "api/kaios/marketplace/v1/events.json",
-          "api/kaios/marketplace/v1/index.html",
-          "api/kaios/marketplace/v1/index.json",
-          "api/kaios/marketplace/v1/listings.json",
-          "api/kaios/marketplace/v1/payroll.json",
-          "api/kaios/marketplace/v1/projects.json",
-          "api/kaios/marketplace/v1/requests.json",
-          "api/kaios/marketplace/v1/starter-package.json",
-          "api/kaios/marketplace/v1/status.json",
-          "api/kaios/marketplace/v1/tasks.json"
-        ],
-        "generator": "KAIOS/software-life/tools/generate-software-life-registry.mjs",
-        "review_authority": "CODEX_CANONICAL_REVIEW"
-      },
-      "security_boundary": {
-        "simulation_only": true,
-        "real_wallet": false,
-        "real_kgen": false,
-        "onchain_transfer": false,
-        "external_autonomy": false,
-        "production_authority": false,
-        "current_modification": false,
-        "constitution_source_modification": false
-      },
-      "authority_level": "SIMULATION_ONLY",
-      "organism_status": "AUTHORITATIVE",
-      "runtime_status": "READ_ONLY_PROJECTION",
-      "parents": [],
-      "children": [],
-      "transplants": [],
-      "mutations": [],
-      "marketplace_status": "NOT_ELIGIBLE",
-      "public_url": null,
-      "api_url": "/kline-odyssey/api/kaios/marketplace/",
-      "code_hash": "9920a4eb97b296ccb26b4d68286a9043dc107f5253313b4a7da8275efe0e8dd6",
-      "artifact_hash": "f88029e84fb094b2aa9c7e9489459bcf4d5f2909356ba15ac9cd0761025df3ed",
+      "code_hash": "04e04b2b21eff0890d2402a3b9306db67df20ff28f61aaec3737b23aa5b55f53",
+      "artifact_hash": "c70cb27f0b127d10cbd9b2f0ada5af1ff80d0ff79831e622c366a3a6d5d26608",
       "legacy_aliases": []
     },
     {
@@ -7470,7 +6718,7 @@
         {
           "event_id": "EVENT-CHARTER-PROGRAMS-API-REGISTRY-BINDING",
           "event_type": "SOFTWARE_LIFE_REGISTRY_BOUND",
-          "simulation_time": "2026-08-03T14:11:53Z",
+          "simulation_time": "2026-08-02T10:40:00Z",
           "actor": "CODEX_CANONICAL_REVIEW",
           "status": "RECORDED",
           "reason": "Existing repository organism registered without changing Runtime authority.",
@@ -7479,7 +6727,7 @@
         }
       ],
       "provenance": {
-        "source_commit": "5bded5613c5fe2ec86236130d6d738eeef9cfc3c",
+        "source_commit": "cc80135f2c6e6a74aad11f34e793c65ac0ee1938",
         "source_paths": [
           "api/kaios/charter/programs/conflicts.json",
           "api/kaios/charter/programs/coverage.json",
