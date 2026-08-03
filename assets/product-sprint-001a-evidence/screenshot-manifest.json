@@ -1,0 +1,22 @@
+[
+  {
+    "viewport": "desktop-1440",
+    "pass": true
+  },
+  {
+    "viewport": "tablet-834-portrait",
+    "pass": true
+  },
+  {
+    "viewport": "mobile-390-portrait",
+    "pass": true
+  },
+  {
+    "viewport": "mobile-844-landscape",
+    "pass": true
+  },
+  {
+    "viewport": "mobile-safe-area-simulated",
+    "pass": true
+  }
+]
