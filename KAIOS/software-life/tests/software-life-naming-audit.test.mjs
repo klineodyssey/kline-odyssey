@@ -153,6 +153,7 @@ test("24 hour queue is bounded and Cursor remains one task at a time", async () 
   assert.equal(queue.cursor.current_status, "IDLE_NO_CURRENT_TASK");
   assert.equal(queue.cursor.prepared_task, "KAIOS-CURSOR-MICROBIAL-RESEARCH-001");
   assert.equal(queue.cursor.prepared_task_status, "PREPARATION_ONLY");
+  assert.deepEqual(queue.cursor.current_active_tasks, {});
   assert.equal(queue.cursor.execution_base, null);
   assert.equal(queue.cursor.descendant_wildcard_allowed, false);
   assert.equal(queue.cursor.planned_branch_state, "NOT_CREATED");

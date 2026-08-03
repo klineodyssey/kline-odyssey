@@ -29,9 +29,9 @@
     { "priority": 2, "work": "IDENTITY_STANDARD", "status": "MERGED_PR_108", "depends_on": ["REPOSITORY_NAMING_AUDIT"] },
     { "priority": 3, "work": "MANIFEST_SCHEMA", "status": "MERGED_PR_109", "depends_on": ["IDENTITY_STANDARD"] },
     { "priority": 4, "work": "TAXONOMY_CROSSWALK", "status": "MERGED_PR_108", "depends_on": ["IDENTITY_STANDARD"] },
-    { "priority": 5, "work": "ORGAN_STANDARD", "status": "DRAFT_PR_112_FINAL_REVIEW", "depends_on": ["MANIFEST_SCHEMA"] },
-    { "priority": 6, "work": "ORGAN_COMPATIBILITY_SCHEMA", "status": "DRAFT_PR_112_FINAL_REVIEW", "depends_on": ["ORGAN_STANDARD"] },
-    { "priority": 7, "work": "TRANSPLANT_STANDARD", "status": "DRAFT_PR_112_FINAL_REVIEW", "depends_on": ["ORGAN_COMPATIBILITY_SCHEMA"] },
+    { "priority": 5, "work": "ORGAN_STANDARD", "status": "MERGED_PR_112", "depends_on": ["MANIFEST_SCHEMA"] },
+    { "priority": 6, "work": "ORGAN_COMPATIBILITY_SCHEMA", "status": "MERGED_PR_112", "depends_on": ["ORGAN_STANDARD"] },
+    { "priority": 7, "work": "TRANSPLANT_STANDARD", "status": "MERGED_PR_112", "depends_on": ["ORGAN_COMPATIBILITY_SCHEMA"] },
     { "priority": 8, "work": "REPRODUCTION_STANDARD", "status": "QUEUED", "depends_on": ["MANIFEST_SCHEMA"] },
     { "priority": 9, "work": "REPRODUCTION_SCHEMA", "status": "QUEUED", "depends_on": ["REPRODUCTION_STANDARD"] },
     { "priority": 10, "work": "GENOME_STANDARD", "status": "QUEUED", "depends_on": ["MANIFEST_SCHEMA", "REPRODUCTION_STANDARD"] },
@@ -80,15 +80,7 @@
     "output_authority": "CANDIDATE_ONLY",
     "next_existing_queue_task": "KAIOS-CURSOR-MICROBIAL-RESEARCH-001",
     "next_existing_queue_task_priority": 1,
-    "current_active_tasks": {
-      "fungi_task": {
-        "task": "KAIOS-CURSOR-FUNGI-CANDIDATE-001",
-        "branch": "cursor-handoff/KAIOS-CURSOR-FUNGI-CANDIDATE-001",
-        "status": "DISPATCHED",
-        "authority": "CURSOR_RESEARCH_CANDIDATE_ONLY",
-        "release_record": "a4fe488eecdf6652ea9fad257195f3ba8fe853aa"
-      }
-    },
+    "current_active_tasks": {},
     "can_merge": false,
     "can_deploy": false,
     "can_promote_canonical": false
