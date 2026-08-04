@@ -1,0 +1,54 @@
+{
+  "version": "KLINE_UNIVERSE_MAP_V10_3_COMPLETE_ALL_POINTS",
+  "status": "ACTIVE",
+  "map_mode": "INHERITED_COMPLETE_MAP",
+  "base_map": "/docs/maps/UniverseMap_V10_2_DISTANCE_COMPLETE_ALL_POINTS.json",
+  "base_version": "KLINE_UNIVERSE_MAP_V10_2_DISTANCE_COMPLETE_ALL_POINTS",
+  "total_points": 123,
+  "point_policy": "繼承 V10.2 全部 123 點；所有點位保留，不以相同數值去重，並套用本版 canonical_overrides。",
+  "source_excel": "西遊記_宇宙地圖_V5.0_宇宙分類版.xlsx",
+  "canonical_overrides": [
+    {
+      "target_id": "P_6888p0_松樹國_R26",
+      "coord": 6888,
+      "name": "松樹國",
+      "type": "forest_kingdom",
+      "role": "孫悟空炫技變松樹、自立為國，不將菩提祖師看在眼裡，最終被逐出師門之地",
+      "note": "孫悟空炫技變松樹、自立為國，輕視菩提祖師後被掃地出門的正式地圖事件點。",
+      "source": {
+        "description": "孫悟空在斜月三星洞學藝期間炫技變松樹、自立為國，因輕視菩提祖師而被逐出師門",
+        "original_info": "松樹國6888",
+        "system_category": "西遊記主線 / 悟空修行轉折 / 開放世界",
+        "energy_attribute": "炫技 / 傲氣 / 自立 / 逐出師門",
+        "universe_level": "修行轉折層",
+        "classification_note": "正式劇情錨點：悟空學得變化後當眾炫技，化作松樹並自立為國，不將菩提祖師看在眼裡，祖師因此將他掃地出門。"
+      },
+      "story": {
+        "chapter": "斜月三星洞學藝・逐出師門",
+        "event_type": "character_turning_point",
+        "summary": "孫悟空在斜月三星洞學藝期間，為炫耀所學而變作松樹，並自立為國，不將菩提祖師看在眼裡；菩提祖師震怒，將悟空掃地出門。",
+        "cause": "悟空炫技、自立為國並輕視師尊",
+        "consequence": "被菩提祖師逐出師門，返回花果山，進入下一階段命運主線",
+        "characters": ["孫悟空", "菩提祖師"],
+        "tags": ["斜月三星洞", "松樹國", "炫技", "自立為國", "輕視師尊", "掃地出門", "逐出師門", "悟空命運轉折"]
+      }
+    }
+  ],
+  "runtime_resolution": {
+    "load_order": [
+      "/docs/maps/UniverseMap_V10_2_DISTANCE_COMPLETE_ALL_POINTS.json",
+      "/docs/maps/UniverseMap_V10_3_COMPLETE_ALL_POINTS.json#canonical_overrides"
+    ],
+    "merge_key": "id",
+    "override_policy": "V10.3 canonical_overrides wins",
+    "resolved_total_points": 123,
+    "shared_axis_rule": "XYZ / K-Sphere",
+    "profit_axis": "Z-KZ",
+    "explore_axes": ["X-KX", "Y-KY"]
+  },
+  "governance": {
+    "do_not_copy_to_temple_folders": true,
+    "shared_map_root": "/docs/maps",
+    "previous_version_preserved": true
+  }
+}
