@@ -1,0 +1,112 @@
+{
+  "version": "PRIMEFORGE_SYSTEM_MANIFEST_V1_0",
+  "status": "ACTIVE",
+  "purpose": "Canonical PrimeForge system registry and deduplication manifest",
+  "life_definition": {
+    "program": "life",
+    "document": "life_shell",
+    "runtime": "organ",
+    "repository": "nervous_system",
+    "KGEN": "civilization_mass"
+  },
+  "canonical_files": [
+    {
+      "family": "genesis_boot",
+      "path": "/PRIMEFORGE_GENESIS_BOOT_SEQUENCE_V1_4.md",
+      "status": "ACTIVE",
+      "source_of_truth": true
+    },
+    {
+      "family": "runtime_sop",
+      "path": "/SOP/PRIMEFORGE_GENESIS_RUNTIME_SOP_V1_0.md",
+      "status": "ACTIVE",
+      "source_of_truth": true
+    },
+    {
+      "family": "runtime_constitution",
+      "path": "/docs/primeforge/PrimeForge_Runtime_Constitution_V1_0.md",
+      "status": "ACTIVE",
+      "source_of_truth": true,
+      "drive_source_title": "PrimeForge_Runtime_Constitution_V1_0.md"
+    },
+    {
+      "family": "multiverse_whitepaper",
+      "path": "/docs/Whitepaper/PRIMEFORGE_MULTIVERSE_WHITEPAPER_V2_0_GENESIS.md",
+      "status": "ACTIVE",
+      "source_of_truth": true,
+      "drive_duplicate_policy": "Multiple same-name Drive copies collapse to this one canonical GitHub file"
+    },
+    {
+      "family": "physics_gateway",
+      "path": "/docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md",
+      "status": "ACTIVE",
+      "source_of_truth": true
+    },
+    {
+      "family": "runtime_boot",
+      "path": "/docs/runtime/KGEN_Runtime_Boot_Sequence_V1_0.md",
+      "status": "ACTIVE",
+      "source_of_truth": true
+    },
+    {
+      "family": "ufo_runtime",
+      "path": "/docs/runtime/KGEN_UFO_Runtime_Control_System_V3_0.md",
+      "status": "ACTIVE",
+      "source_of_truth": true
+    },
+    {
+      "family": "runtime_specification",
+      "path": "/docs/spec/KGEN_Runtime_Specification_V1_0.md",
+      "status": "ACTIVE",
+      "source_of_truth": true
+    },
+    {
+      "family": "civilization_biology",
+      "path": "/docs/biology/KGEN_Civilization_Biology_Runtime_V1_0.md",
+      "status": "ACTIVE",
+      "source_of_truth": true
+    },
+    {
+      "family": "neural_system",
+      "path": "/docs/neural/KGEN_Universe_Neural_System_V1_0.md",
+      "status": "ACTIVE",
+      "source_of_truth": true
+    },
+    {
+      "family": "mother_runtime_growth_12345",
+      "path": "/K線西遊記/temples/12345/docs/KGEN_12345_V10_44_0_PRIMEFORGE_MOTHER_RUNTIME_GROWTH.md",
+      "status": "ACTIVE_TEMPLE_HISTORY",
+      "source_of_truth": true
+    }
+  ],
+  "ancestor_files": [
+    "/archive/PRIMEFORGE_GENESIS_BOOT_SEQUENCE_V1_3.md",
+    "/archive/PRIMEFORGE_GENESIS_BOOT_SEQUENCE_V1_2.md"
+  ],
+  "drive_review": {
+    "query": "PrimeForge",
+    "result_limit_observed": 100,
+    "exact_unique_total_confirmed": false,
+    "reason": "Drive search reached provider result limit and included content matches, filename matches and duplicate copies",
+    "known_duplicate_family": "PRIMEFORGE_MULTIVERSE_WHITEPAPER_V2_0_GENESIS.md",
+    "policy": "Do not upload duplicate copies; retain one canonical GitHub file and record source lineage"
+  },
+  "deduplication_rules": [
+    "One function has one active canonical file",
+    "Same filename and same content keeps one canonical copy",
+    "Same filename with different content requires lineage review",
+    "Older versions are ancestors and cannot be active runtime entries",
+    "Shared system files must not be copied into temple folders",
+    "Complete new versions must load independently and must not depend on archaeological merging"
+  ],
+  "taxonomy": {
+    "domain": "KGENVERSE",
+    "kingdom": "CivilizationLifeform",
+    "phylum": "DocumentShell",
+    "class": "CoreRuntimeScripture",
+    "order": "PrimeForgeMotherMachine",
+    "family": "PrimeForgeLife",
+    "genus": "KGEN",
+    "species": "PrimeForgeSystemManifestV1_0"
+  }
+}
