@@ -1025,8 +1025,8 @@ Where the Market Becomes the Myth.
 
 ## 🔥 Latest Video｜最新發布
 
-▶ #KAIOS #KGEN #K線西遊記 #花果山台灣【KAIOS 人生起點】KAIOS 正逐步從 Web Simulation 邁向真實世界。  
-👉 https://www.youtube.com/shorts/gzWyF-jB8mc
+▶ 如果有一天，你的 AI 比你更會賺錢，你會怎麼做？在 KAIOS，AI 擁有自己的 Life ID、工作、薪資與錢包。玩家不是控制 AI，而是與 AI 一起生活。文明，不是從價格開始，而是從生命開始。  
+👉 https://www.youtube.com/shorts/RDGcyaF3lpo
 
 （本區由 GitHub Actions 自動更新；首頁 iframe 保持固定世界觀主軸影片）
 <!-- LATEST_VIDEO_END -->
