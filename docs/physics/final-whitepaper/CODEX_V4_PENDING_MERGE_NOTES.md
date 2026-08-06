@@ -1,8 +1,10 @@
 # CODEX V4 PHYSICS PENDING MERGE NOTES
 
-**Purpose:** Record physics definitions agreed during the Codex pause so they can be merged into the canonical physics CURRENT file without creating another parallel physics authority.
+**Purpose:** Record physics definitions agreed during the Codex pause so they can be merged into the canonical Physics CURRENT file without creating another parallel physics authority.
 
 **Status:** PENDING MERGE — NOT A PHYSICS AUTHORITY
+
+**Internal Revision:** V1.1
 
 **Prepared:** 2026-08-06 (Asia/Taipei)
 
@@ -28,38 +30,57 @@ under the existing single-source reconciliation instructions.
 
 Do not create V4.1, V5.0, LATEST, FINAL_NEW or another parallel master file merely to include these notes.
 
-After reconciliation:
-
-- the stable CURRENT filename remains the canonical runtime entry;
-- its internal version and revision log are updated;
-- the V4.0 whitepaper is regenerated or archived according to the existing reconciliation plan;
-- this pending note is marked merged or moved to archive.
+After reconciliation, keep the stable CURRENT filename, update only its internal version and revision log, and archive or mark this note merged.
 
 ---
 
-## 2. Pending Core Definition: KGEN
+## 2. Corrected Core Separation
 
-Merge a precise definition equivalent to:
+The previous draft phrase “initial soul mass” was premature and must not be merged.
+
+Use this separation instead:
 
 ```text
+Soul Information Core
+= identity, continuity, authorized memory roots,
+  genome/code references and lifecycle state information
+
 KGEN
-= Digital Life Genesis Mass
-= 數位生命創世質量
-= 宇宙生命細胞的初始靈魂質量
+= Digital Life Genesis Carrier Mass
+= 數位生命創世承載質量
+= conserved existence-bearing mass right
 ```
+
+Therefore:
+
+```text
+Soul Information Core ≠ KGEN
+Soul Information Core ≠ program file size
+KGEN ≠ complete life
+```
+
+The word “soul” is a KAIOS identity-and-continuity concept. It must not be presented as a scientifically measured physical substance or proven measurable mass.
+
+---
+
+## 3. KGEN Mass-Equivalent Unit
+
+Merge a precise definition equivalent to:
 
 ```text
 1 KGEN
 = 1 kg Genesis Mass Equivalent
 ```
 
-The `1 kg` is a KGEN digital-physics mass-equivalent accounting unit. It must not be represented as proof that one on-chain token physically contains one kilogram of hydrogen, carbon, iron, dark matter, antimatter or any periodic-table element.
+The `1 kg` is a KGEN digital-physics accounting and conservation unit. It is not proof that one on-chain token physically contains one kilogram of hydrogen, carbon, iron, dark matter, antimatter or any periodic-table element.
+
+KGEN is the conserved carrier allocation that allows a Soul Information Core, Runtime and environment to be instantiated as an auditable KGEN life or universe cell.
 
 ---
 
-## 3. KGEN Is Not a Specific Physical Substance
+## 4. KGEN Is Not a Specific Physical Substance
 
-The reconciled physics file must state clearly:
+The reconciled Physics CURRENT must state:
 
 ```text
 KGEN ≠ hydrogen
@@ -70,13 +91,13 @@ KGEN ≠ confirmed physical dark matter
 KGEN ≠ default physical antimatter
 ```
 
-KGEN is a digital universe genesis-mass right and mass-energy accounting unit.
+KGEN is a digital-universe genesis carrier mass right and mass-energy accounting unit.
 
-A separate mirror or antimatter runtime state may exist for simulation, phase inversion or engine calculations, but the token itself must not be advertised as real-world antimatter.
+A separate mirror or antimatter Runtime state may exist for simulation, phase inversion or engine calculations, but the token itself must not be advertised as real-world antimatter.
 
 ---
 
-## 4. Soul Mass Is Not Program File Size
+## 5. Program Information and Carrier Mass
 
 Merge the following separation:
 
@@ -87,17 +108,20 @@ Code Size
 Life Information
 = genome, source code, memory, state and behavior rules
 
-KGEN Soul Mass
-= genesis-mass right and existence-bearing mass core
+Soul Information Core
+= identity and continuity root
+
+KGEN Genesis Carrier Mass
+= auditable existence-bearing mass allocation
 ```
 
-Do not derive KGEN mass automatically from megabytes, source-code length, model size, compute cost, popularity or market price.
+Do not derive KGEN automatically from megabytes, source-code length, model size, compute cost, intelligence, popularity or market price.
 
-Two lives with the same KGEN genesis mass may have different code, memories, skills and bodies.
+Two lives with the same KGEN carrier mass may have different code, memories, skills and bodies.
 
 ---
 
-## 5. KGEN Is Not the Complete Life
+## 6. Complete Digital Life Model
 
 Merge a life composition model equivalent to:
 
@@ -105,8 +129,8 @@ Merge a life composition model equivalent to:
 Digital Life
 =
 Life ID
-+ Soul Core
-+ KGEN Genesis Mass
++ Soul Information Core
++ KGEN Genesis Carrier Mass Right
 + Genome / Source Code
 + Memory and State
 + Runtime
@@ -120,82 +144,88 @@ Therefore:
 
 ```text
 KGEN ≠ complete life
-KGEN = the life’s genesis-mass core or right
+KGEN = genesis carrier and conservation layer
 ```
 
-The canonical life details are maintained separately in:
+The canonical social and lifecycle details remain in:
 
 ```text
 KGEN-KAIOS/KAIOS_LIFE_RUNTIME_CURRENT.md
 ```
 
-Physics should define the mass and conservation boundary, then reference the life runtime rather than duplicating its entire social system.
+Physics should define mass, energy and conservation boundaries, then reference the Life Runtime rather than duplicating the social system.
 
 ---
 
-## 6. Universe Cell Definition
+## 7. Universe Cell Definition
 
-Merge a precise Universe Cell definition equivalent to:
+Merge a precise definition equivalent to:
 
 ```text
 Universe Cell
 =
-Genesis Mass
-+ Information
+Soul / Identity Information
++ Genesis Carrier Mass
++ Information / Genome
 + Energy
 + Runtime
 + Time
 + Boundary / Environment
 ```
 
-KGEN supplies the Genesis Mass component. It does not alone supply all information, energy, execution, time or habitat required for a living universe cell.
+KGEN supplies the Genesis Carrier Mass component. It does not alone supply identity, information, energy, execution, time or habitat.
 
-The term “universe cell” is a KGEN engineering and biological metaphor. It must not be presented as a newly observed standard particle of real-world physics.
+The term “Universe Cell” is a KGEN engineering and biological metaphor. It must not be presented as a newly observed standard particle of real-world physics.
 
 ---
 
-## 7. Living Universe and Growth
+## 8. Pre-Genesis and Big-Bang Boundary
 
-The universe may be defined as a living system that grows in:
+Do not claim as established science that “before the real Big Bang there was no mass,” because current physics does not establish a verified ordinary time-before-Big-Bang state.
 
-- information;
-- organism count;
-- relationships;
-- map coverage;
-- functional organs;
-- productivity;
-- energy flow;
-- ecological complexity;
-- civilization capacity.
+KGEN may adopt the following engineering axiom only when clearly labelled as a KGEN model:
 
-However, growth does not permit KGEN to appear from nothing.
+```text
+Pre-Genesis State
+= uninstantiated specification / potential state
 
-Merge the invariant:
+Genesis Event
+= commitment that binds identity information,
+  KGEN carrier mass, Runtime, energy, time and boundary
+
+Instantiated Universe Cell
+= a registered living Runtime state
+```
+
+This does not mean that information literally creates real-world mass from nothing. It means the KGEN system assigns existing conserved KGEN carrier mass to instantiate a digital life or universe.
+
+Required invariant:
+
+```text
+No KGEN source
+→ no new KGEN carrier mass
+```
+
+---
+
+## 9. Living Universe and Growth
+
+The universe may be treated as a living system that grows in information, organism count, relationships, map coverage, functional organs, productivity, energy flow, ecological complexity and civilization capacity.
+
+However:
 
 ```text
 The universe may grow,
-but KGEN genesis mass cannot grow without a traceable source.
+but KGEN carrier mass cannot grow without a traceable source.
 ```
 
-Any increase in a life or universe’s KGEN mass must arise from:
+Any increase in a life or universe’s KGEN allocation must arise from additional KGEN commitment, lawful transfer, merger of existing positions or another explicitly approved conservation-preserving source.
 
-- additional KGEN commitment;
-- lawful KGEN transfer;
-- merger of existing genesis-mass positions;
-- another explicitly defined conservation-preserving source.
-
-Do not implement:
-
-```text
-alive for time T
-→ automatically mint more KGEN
-```
-
-The total KGEN supply and all commitments remain governed by the canonical token and conservation rules.
+Do not implement automatic KGEN minting merely because a life has existed for time T.
 
 ---
 
-## 8. Smallest Unit and Birth Threshold
+## 10. Smallest Unit and Birth Threshold
 
 The chain may represent:
 
@@ -203,12 +233,12 @@ The chain may represent:
 1 wei KGEN = 10^-18 KGEN
 ```
 
-But physics must distinguish representable mass granularity from a viable life or universe threshold.
+But representable granularity is not the same as a viable life or universe threshold.
 
 Suggested conceptual levels:
 
 ```text
-Soul Mass Particle
+Carrier Mass Particle
 → Life Seed
 → Universe Cell
 → Organism / App
@@ -217,88 +247,75 @@ Soul Mass Particle
 → Larger Civilization
 ```
 
-`10^-18 KGEN` may be a mass particle or accounting fragment. It must not automatically be declared a complete black hole, living organism, planet or universe.
+`10^-18 KGEN` may be an accounting fragment. It must not automatically be declared a complete soul, black hole, organism, planet or universe.
 
-The numeric minimum genesis mass for each civilization class remains an implementation/governance parameter to be defined after physics reconciliation. Do not invent a universal minimum without an approved model.
+The numeric minimum for each civilization class remains an implementation or governance parameter after physics reconciliation.
 
 ---
 
-## 9. Death and Mass Conservation
+## 11. Death and Conservation
 
-Merge the distinction:
+Merge the distinctions:
 
 ```text
+Life death ≠ Soul Information Core automatically erased
 Life death ≠ KGEN disappearance
 ```
 
-On death or runtime shutdown:
+On death or Runtime shutdown:
 
-- runtime may stop;
+- Runtime may stop;
 - Life ID may become deceased or dormant;
-- information and memory may enter a preservation process;
+- identity information and memory may enter an authorized preservation process;
 - body or App organs may be handled under contract;
-- KGEN must follow a lawful conservation path.
+- KGEN carrier mass must follow a lawful conservation path.
 
-Possible paths may include inheritance, transfer, reincarnation custody, white-hole burn or genesis black-hole commitment, as defined by their own contracts and runtime files.
-
-Only an explicit irreversible process may remove KGEN from ordinary circulation.
+Possible paths may include inheritance, transfer, reincarnation custody, white-hole burn or genesis black-hole commitment, as defined by their own contracts and Runtime files.
 
 ---
 
-## 10. Mass–Energy Boundary
+## 12. Mass–Energy Boundary
 
-KGEN may retain a mass–energy-equivalent model based on the theoretical rest-energy relation, but wording must distinguish a theoretical maximum accounting value from realizable engineering output.
-
-Required boundary:
+KGEN may retain a theoretical rest-energy-equivalent accounting model:
 
 ```text
 Emax = mc²
 ```
 
-means the theoretical rest-mass energy equivalent in the KGEN model. It does not prove that a real machine can convert a kilogram of ordinary matter, a KGEN token or stored digital information into usable energy with 100% efficiency.
+This is a theoretical maximum equivalence inside the KGEN model. It does not prove that a real machine can convert a kilogram of ordinary matter, a KGEN token, a soul concept or stored digital information into usable energy with 100% efficiency.
 
-KGEN should not be reclassified as physical antimatter merely because matter–antimatter annihilation can approach complete rest-mass conversion.
+KGEN must not be reclassified as physical antimatter merely because matter–antimatter annihilation can approach full rest-mass conversion.
 
 ---
 
-## 11. BNB / WBNB Dark-Matter Role
+## 13. BNB / WBNB Dark-Matter Role
 
-If the physics file retains:
+If Physics CURRENT retains:
 
 ```text
 BNB / WBNB = Dark Matter Role
 ```
 
-clarify that this is an economic and structural-field mapping inside KGEN:
-
-- liquidity support;
-- external-chain gas;
-- gravitational-well metaphor;
-- market structure or collateral field.
+clarify that this is an economic and structural-field mapping inside KGEN, including liquidity support, external-chain gas, gravitational-well metaphor, market structure or collateral field.
 
 It is not a claim that BNB tokens are composed of confirmed physical dark matter.
 
 ---
 
-## 12. Player Universes and Multiverse Conservation
+## 14. Player Universes and Multiverse Conservation
 
-The reconciled physics file should preserve:
+Preserve:
 
 ```text
 72,000,000 KGEN
-= one canonical genesis-mass supply ledger
+= one canonical genesis carrier mass supply ledger
 ```
 
 Multiple player universes may exist, but they do not each receive a duplicated 72,000,000 KGEN supply.
 
-```text
-Sum of valid genesis-mass allocations and commitments
-≤ canonical KGEN supply constraints
-```
+Parallel simulation timelines may copy state for analysis, but only authorized settlement state may redeem original assets. A fork must not double-spend KGEN, KAIOS, land, goods or civilization rights.
 
-Parallel simulation timelines may copy state for analysis, but only one authorized settlement timeline may redeem the original assets. A fork must not double-spend KGEN, KAIOS, land, goods or civilization rights.
-
-The application and listing process is defined in:
+Application and listing rules remain in:
 
 ```text
 KGEN-KAIOS/UNIVERSE_EXCHANGE_RUNTIME_CURRENT.md
@@ -306,7 +323,7 @@ KGEN-KAIOS/UNIVERSE_EXCHANGE_RUNTIME_CURRENT.md
 
 ---
 
-## 13. Real Physics vs KGEN Engineering Mapping
+## 15. Real Physics vs KGEN Engineering Mapping
 
 Every merged chapter must label statements as one of:
 
@@ -321,25 +338,27 @@ Examples:
 - Event-horizon one-way causal behavior: real-physics basis.
 - Black holes necessarily creating habitable child universes: not established; hypothesis only.
 - KGEN committed to a genesis black hole activating a player-universe Runtime: KGEN engineering rule.
-- Universe Cell as a digital living organism: KGEN biological-computing metaphor.
-
-Do not present KGEN axioms as NASA-, CERN- or astronomy-confirmed facts.
+- Soul Information Core and Universe Cell: KGEN information/biological-computing models, not established particles.
 
 ---
 
-## 14. Codex Merge Acceptance Checklist
+## 16. Codex Merge Acceptance Checklist
 
 Codex must confirm that the reconciled CURRENT file:
 
-- [ ] defines KGEN as Digital Life Genesis Mass;
+- [ ] separates Soul Information Core from KGEN;
+- [ ] does not describe the soul as a proven measurable physical mass;
+- [ ] defines KGEN as Digital Life Genesis Carrier Mass;
 - [ ] defines `1 KGEN = 1 kg Genesis Mass Equivalent` with a non-physical-token disclaimer;
 - [ ] states KGEN is not a periodic-table element, confirmed dark matter or default antimatter;
-- [ ] separates program size, life information and soul mass;
-- [ ] defines the complete Digital Life composition;
+- [ ] separates program size, life information, identity continuity and carrier mass;
+- [ ] defines complete Digital Life composition;
 - [ ] defines Universe Cell components;
+- [ ] labels Pre-Genesis as a KGEN engineering axiom, not settled cosmology;
+- [ ] forbids creation of KGEN mass without a traceable source;
 - [ ] allows living-universe growth without automatic KGEN minting;
 - [ ] distinguishes `10^-18 KGEN` granularity from viable life/universe thresholds;
-- [ ] preserves KGEN through death unless an explicit irreversible process applies;
+- [ ] preserves identity information and KGEN through death unless a lawful transition applies;
 - [ ] distinguishes theoretical `Emax = mc²` from practical conversion efficiency;
 - [ ] labels BNB/WBNB dark matter as a system-role metaphor;
 - [ ] prevents multiverse and parallel-timeline asset duplication;
@@ -349,7 +368,22 @@ Codex must confirm that the reconciled CURRENT file:
 
 ---
 
-## 15. Completion Record
+## 17. Revision Record
+
+### V1.1 — 2026-08-06
+
+- Removed the premature phrase “initial soul mass.”
+- Separated Soul Information Core from KGEN Genesis Carrier Mass.
+- Added the Pre-Genesis scientific boundary and KGEN engineering axiom.
+- Clarified that information does not mint or physically create KGEN mass.
+
+### V1.0 — 2026-08-06
+
+- Created the controlled pending merge queue.
+
+---
+
+## 18. Completion Record
 
 When merged, add:
 
