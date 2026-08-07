@@ -6,39 +6,67 @@ import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/U
 import {AccessControlUpgradeable} from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import {PausableUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
 import {ReentrancyGuardUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
+import {EIP712Upgradeable} from "@openzeppelin/contracts-upgradeable/utils/cryptography/EIP712Upgradeable.sol";
+import {ECDSA} from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {IERC20Metadata} from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
 /**
+ * @title IKAIOSBurnProofGenesis
+ * @notice Read-only interface for KAIOSV02_BurnProofGenesis.
+ * @dev BurnSource enum ABI is uint8. VoluntaryPlayerOffering == 1.
+ */
+interface IKAIOSBurnProofGenesis {
+    function burnProofConsumed(bytes32 burnProofId) external view returns (bool);
+
+    function burnRecord(bytes32 burnProofId)
+        external
+        view
+        returns (
+            uint8 source,
+            address burner,
+            address recipientVault,
+            uint256 kgenBurnAmount,
+            uint256 kaiosMintAmount,
+            bytes32 civilizationId,
+            bytes32 purposeCode,
+            bytes32 wishHash
+        );
+}
+
+/**
  * @title KGEN_TempleHeart_V3_3_0_Upgradeable
- * @notice 五指山 12345｜悟空財神殿 Heart，UUPS 可升級版。
- * @dev 新版首次部署請透過 ERC1967/UUPS Proxy。之後升級只更換 Implementation，Proxy 地址固定。
+ * @notice 五指山 12345｜悟空財神殿 Heart｜新 Proxy 世代 V3.3.0。
+ * @dev REVIEW DRAFT ONLY. Must be compiled, tested, storage-validated and reviewed before mainnet deployment.
  *
- * V3.3.0 核心原則：
- * - 保留 Heart / Brain 補血與基本 TempleHeart 功能骨架。
- * - 發財金不再由玩家傳入任意 1~888 金額；由合約規則決定基本 1~8 KGEN。
- * - 發財金資格需綁定 Wish + HolyCup proof + KAIOS/KGEN burn proof 資格。
- * - 同一 wallet、同一 civilizationId、同一 burnProofId 均有防重複限制。
- * - 30 天冷卻、每 Epoch 500 次總上限保留。
- * - Upgrade 權限獨立為 UPGRADER_ROLE，營運權限獨立為 OPERATOR_ROLE。
- *
- * IMPORTANT:
- * - 本檔是新 Proxy 世代的 storage 起點，不是舊 V3.2.6 的 in-place upgrade。
- * - 舊 V3.2.6 地址不可直接變成 Proxy；需一次性遷移到新的 Proxy 地址。
+ * Canonical architecture:
+ * - UUPS / ERC1967 Proxy is the persistent public Heart address.
+ * - Implementation may evolve while Proxy address/state/balance remain.
+ * - KAIOS Burn Proof is read DIRECTLY on-chain; no operator-supplied burn proof cache.
+ * - Fortune eligibility = Wish + Holy Cup 3/3 + verified voluntary KGEN burn + wallet/civilization cooldown.
+ * - Player cannot choose reward amount.
+ * - Daily blessing game is progression only; it does NOT directly dispense daily KGEN.
  */
 contract KGEN_TempleHeart_V3_3_0_Upgradeable is
     Initializable,
     UUPSUpgradeable,
     AccessControlUpgradeable,
     PausableUpgradeable,
-    ReentrancyGuardUpgradeable
+    ReentrancyGuardUpgradeable,
+    EIP712Upgradeable
 {
     using SafeERC20 for IERC20;
 
     bytes32 public constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");
     bytes32 public constant OPERATOR_ROLE = keccak256("OPERATOR_ROLE");
     bytes32 public constant HOLY_CUP_SIGNER_ROLE = keccak256("HOLY_CUP_SIGNER_ROLE");
+
+    bytes32 public constant HOLY_CUP_TYPEHASH = keccak256(
+        "HolyCupProof(address claimant,bytes32 civilizationId,bytes32 wishHash,bytes32 proofId,uint256 deadline)"
+    );
+
+    uint8 public constant KAIOS_SOURCE_VOLUNTARY_PLAYER_OFFERING = 1;
 
     uint256 public constant VERSION_MAJOR = 3;
     uint256 public constant VERSION_MINOR = 3;
@@ -71,15 +99,6 @@ contract KGEN_TempleHeart_V3_3_0_Upgradeable is
         WishStatus status;
     }
 
-    struct BurnProofRecord {
-        address burner;
-        bytes32 civilizationId;
-        bytes32 purposeCode;
-        bytes32 wishHash;
-        uint256 kgenBurnAmount;
-        bool verified;
-    }
-
     IERC20 public kgen;
     address public brainVault;
     address public lingxiaoBank;
@@ -87,7 +106,7 @@ contract KGEN_TempleHeart_V3_3_0_Upgradeable is
     address public autoLP;
     address public blackhole;
 
-    address public kaiosBurnProofRegistry;
+    IKAIOSBurnProofGenesis public kaiosBurnProofGenesis;
 
     uint256 public baseCapWhole;
     uint256 public maxCapWhole;
@@ -105,24 +124,31 @@ contract KGEN_TempleHeart_V3_3_0_Upgradeable is
     uint256 public minimumBurnWholeForFortune;
     bytes32 public fortunePurposeCode;
 
+    uint256 public blessingTierDays1;
+    uint256 public blessingTierDays2;
+    uint256 public blessingTierDays3;
+
     mapping(address => uint256) public lastFortuneAt;
     mapping(bytes32 => uint256) public lastCivilizationFortuneAt;
     mapping(uint256 => uint256) public fortuneEpochClaims;
     mapping(bytes32 => bool) public fortuneBurnProofConsumed;
 
     mapping(address => WishRecord) private _activeWishByUser;
-    mapping(bytes32 => BurnProofRecord) private _burnProofCache;
     mapping(bytes32 => bool) public holyCupProofConsumed;
 
+    mapping(address => uint256) public lastBlessingDayByWallet;
+    mapping(bytes32 => uint256) public lastBlessingDayByCivilization;
+    mapping(bytes32 => uint256) public blessingDaysByCivilization;
+
     uint256 public totalFortunePaid;
-    uint256 public totalVerifiedBurnWhole;
     uint256 public totalOfferings;
+    uint256 public totalDailyBlessingPlays;
 
     event TempleHeartInitialized(
         address indexed admin,
         address indexed kgen,
         address indexed brainVault,
-        address kaiosBurnProofRegistry
+        address kaiosBurnProofGenesis
     );
     event OrgansUpdated(address indexed lingxiaoBank, address indexed marsVault, address indexed autoLP, address blackhole);
     event GrowthParamsUpdated(uint256 baseCapWhole, uint256 maxCapWhole, uint256 capBps, uint256 baseFloorWhole, uint256 floorBps);
@@ -136,7 +162,7 @@ contract KGEN_TempleHeart_V3_3_0_Upgradeable is
         uint256 minimumBurnWhole,
         bytes32 purposeCode
     );
-    event BurnProofRegistryUpdated(address indexed registry);
+    event KAIOSBurnProofGenesisUpdated(address indexed registry);
     event WishMade(address indexed user, bytes32 indexed wishHash, bytes32 indexed civilizationId);
     event OfferingMade(
         address indexed user,
@@ -145,21 +171,15 @@ contract KGEN_TempleHeart_V3_3_0_Upgradeable is
         uint256 kgenAmount,
         bytes32 wishHash
     );
-    event BurnProofRegistered(
-        bytes32 indexed burnProofId,
-        address indexed burner,
-        bytes32 indexed civilizationId,
-        uint256 kgenBurnAmount,
-        bytes32 purposeCode,
-        bytes32 wishHash
-    );
     event HolyCupPassed(address indexed user, bytes32 indexed civilizationId, bytes32 indexed proofId, bytes32 wishHash);
+    event DailyBlessingPlayed(address indexed user, bytes32 indexed civilizationId, uint256 indexed dayIndex, uint256 totalBlessingDays);
     event FortuneClaimed(
         address indexed user,
         bytes32 indexed civilizationId,
         bytes32 indexed burnProofId,
         uint256 amount,
         uint256 epochIndex,
+        uint256 blessingDays,
         bytes32 wishHash
     );
     event BloodInjectedFromBrain(address indexed brainVault, uint256 amount);
@@ -182,7 +202,12 @@ contract KGEN_TempleHeart_V3_3_0_Upgradeable is
     error PurposeMismatch();
     error WishMismatch();
     error BurnerMismatch();
+    error CivilizationMismatch();
+    error BurnSourceMismatch();
+    error KAIOSMintMismatch();
     error InvalidProofSigner();
+    error ProofExpired();
+    error DailyBlessingAlreadyPlayed();
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
@@ -196,20 +221,22 @@ contract KGEN_TempleHeart_V3_3_0_Upgradeable is
         address holyCupSigner,
         address kgenToken,
         address _brainVault,
-        address _kaiosBurnProofRegistry
+        address _kaiosBurnProofGenesis
     ) external initializer {
         if (
             admin == address(0) ||
             upgrader == address(0) ||
             operator == address(0) ||
             holyCupSigner == address(0) ||
-            kgenToken == address(0)
+            kgenToken == address(0) ||
+            _kaiosBurnProofGenesis == address(0)
         ) revert ZeroAddress();
 
         __AccessControl_init();
         __Pausable_init();
         __ReentrancyGuard_init();
         __UUPSUpgradeable_init();
+        __EIP712_init("KGEN TempleHeart 12345", "3.3.0");
 
         _grantRole(DEFAULT_ADMIN_ROLE, admin);
         _grantRole(UPGRADER_ROLE, upgrader);
@@ -218,7 +245,7 @@ contract KGEN_TempleHeart_V3_3_0_Upgradeable is
 
         kgen = IERC20(kgenToken);
         brainVault = _brainVault;
-        kaiosBurnProofRegistry = _kaiosBurnProofRegistry;
+        kaiosBurnProofGenesis = IKAIOSBurnProofGenesis(_kaiosBurnProofGenesis);
 
         baseCapWhole = 108_000;
         maxCapWhole = 7_200_000;
@@ -232,11 +259,15 @@ contract KGEN_TempleHeart_V3_3_0_Upgradeable is
         fortuneEpochSeconds = 30 days;
         fortuneEpochMaxClaims = 500;
         fortuneCapEnabled = true;
-
         minimumBurnWholeForFortune = 1;
         fortunePurposeCode = keccak256("KGEN_12345_FORTUNE_GENESIS");
 
-        emit TempleHeartInitialized(admin, kgenToken, _brainVault, _kaiosBurnProofRegistry);
+        // Daily game progression thresholds. These affect deterministic reward tier only.
+        blessingTierDays1 = 7;
+        blessingTierDays2 = 14;
+        blessingTierDays3 = 21;
+
+        emit TempleHeartInitialized(admin, kgenToken, _brainVault, _kaiosBurnProofGenesis);
         emit FortuneRulesUpdated(
             fortuneMinWhole,
             fortuneMaxWhole,
@@ -272,9 +303,10 @@ contract KGEN_TempleHeart_V3_3_0_Upgradeable is
         emit OrgansUpdated(_lingxiaoBank, _marsVault, _autoLP, _blackhole);
     }
 
-    function setBurnProofRegistry(address registry) external onlyRole(DEFAULT_ADMIN_ROLE) {
-        kaiosBurnProofRegistry = registry;
-        emit BurnProofRegistryUpdated(registry);
+    function setKAIOSBurnProofGenesis(address registry) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        if (registry == address(0)) revert ZeroAddress();
+        kaiosBurnProofGenesis = IKAIOSBurnProofGenesis(registry);
+        emit KAIOSBurnProofGenesisUpdated(registry);
     }
 
     function setGrowthParams(
@@ -306,10 +338,8 @@ contract KGEN_TempleHeart_V3_3_0_Upgradeable is
         uint256 minimumBurnWhole,
         bytes32 purposeCode
     ) external onlyRole(DEFAULT_ADMIN_ROLE) {
-        if (minWhole == 0 || maxWhole < minWhole || maxWhole > 88) revert InvalidRange();
-        if (cooldownSeconds < 1 days || epochSeconds < 7 days || epochMaxClaims == 0 || minimumBurnWhole == 0) {
-            revert InvalidRange();
-        }
+        if (minWhole == 0 || maxWhole < minWhole || maxWhole > 8) revert InvalidRange();
+        if (cooldownSeconds < 1 days || epochSeconds < 7 days || epochMaxClaims == 0 || minimumBurnWhole == 0) revert InvalidRange();
         if (purposeCode == bytes32(0)) revert InvalidRange();
 
         fortuneMinWhole = minWhole;
@@ -348,6 +378,14 @@ contract KGEN_TempleHeart_V3_3_0_Upgradeable is
         emit WishMade(msg.sender, wishHash, civilizationId);
     }
 
+    function activeWish(address user) external view returns (WishRecord memory) {
+        return _activeWishByUser[user];
+    }
+
+    /**
+     * @notice Temple offering: incense/joss paper/lamp/charm/vow.
+     * @dev This transfers KGEN into Heart. It is NOT a White Hole burn.
+     */
     function makeOffering(OfferingType offeringType, uint256 amountWhole)
         external
         nonReentrant
@@ -368,45 +406,8 @@ contract KGEN_TempleHeart_V3_3_0_Upgradeable is
     }
 
     /**
-     * @notice Registers a verified burn proof into Heart.
-     * @dev V3.3.0 intentionally accepts proofs only from OPERATOR_ROLE. The operator must verify the KAIOS BurnProofGenesis
-     *      burnRecord off-chain/on-chain before calling. A later upgrade may replace this with a direct registry interface.
-     */
-    function registerVerifiedBurnProof(
-        bytes32 burnProofId,
-        address burner,
-        bytes32 civilizationId,
-        uint256 kgenBurnAmount,
-        bytes32 purposeCode,
-        bytes32 wishHash
-    ) external onlyRole(OPERATOR_ROLE) whenNotPaused {
-        if (burnProofId == bytes32(0) || burner == address(0) || kgenBurnAmount == 0) revert InvalidBurnProof();
-        if (civilizationId == bytes32(0) || purposeCode == bytes32(0) || wishHash == bytes32(0)) revert InvalidBurnProof();
-        if (_burnProofCache[burnProofId].verified) revert BurnProofAlreadyConsumed();
-
-        _burnProofCache[burnProofId] = BurnProofRecord({
-            burner: burner,
-            civilizationId: civilizationId,
-            purposeCode: purposeCode,
-            wishHash: wishHash,
-            kgenBurnAmount: kgenBurnAmount,
-            verified: true
-        });
-        totalVerifiedBurnWhole += _descale(kgenBurnAmount);
-
-        emit BurnProofRegistered(
-            burnProofId,
-            burner,
-            civilizationId,
-            kgenBurnAmount,
-            purposeCode,
-            wishHash
-        );
-    }
-
-    /**
-     * @notice Marks Holy Cup 3/3 as passed using a signed digest.
-     * @dev The signed message is recovered with a minimal ECDSA routine. signer must hold HOLY_CUP_SIGNER_ROLE.
+     * @notice Submit Holy Cup 3/3 proof signed by a HOLY_CUP_SIGNER_ROLE account.
+     * @dev EIP-712 binds claimant, civilization, wish, proof id, chain and Proxy domain.
      */
     function submitHolyCupProof(
         bytes32 proofId,
@@ -415,26 +416,18 @@ contract KGEN_TempleHeart_V3_3_0_Upgradeable is
         uint256 deadline,
         bytes calldata signature
     ) external whenNotPaused {
-        if (proofId == bytes32(0) || holyCupProofConsumed[proofId]) revert HolyCupProofAlreadyConsumed();
-        if (block.timestamp > deadline) revert InvalidBurnProof();
+        if (proofId == bytes32(0)) revert InvalidWish();
+        if (block.timestamp > deadline) revert ProofExpired();
+        if (holyCupProofConsumed[proofId]) revert HolyCupProofAlreadyConsumed();
 
         WishRecord storage wish = _activeWishByUser[msg.sender];
-        if (wish.wishHash != wishHash || wish.civilizationId != civilizationId) revert WishMismatch();
+        if (wish.wishHash != wishHash || wish.civilizationId != civilizationId) revert InvalidWish();
+        if (wish.status == WishStatus.None || wish.status == WishStatus.Fulfilled) revert WishNotReady();
 
-        bytes32 digest = keccak256(
-            abi.encodePacked(
-                "KGEN_12345_HOLY_CUP_3_OF_3",
-                address(this),
-                block.chainid,
-                msg.sender,
-                civilizationId,
-                wishHash,
-                proofId,
-                deadline
-            )
+        bytes32 structHash = keccak256(
+            abi.encode(HOLY_CUP_TYPEHASH, msg.sender, civilizationId, wishHash, proofId, deadline)
         );
-        bytes32 ethSignedDigest = keccak256(abi.encodePacked("\x19Ethereum Signed Message:\n32", digest));
-        address signer = _recover(ethSignedDigest, signature);
+        address signer = ECDSA.recover(_hashTypedDataV4(structHash), signature);
         if (!hasRole(HOLY_CUP_SIGNER_ROLE, signer)) revert InvalidProofSigner();
 
         holyCupProofConsumed[proofId] = true;
@@ -444,28 +437,68 @@ contract KGEN_TempleHeart_V3_3_0_Upgradeable is
         emit HolyCupPassed(msg.sender, civilizationId, proofId, wishHash);
     }
 
+    /**
+     * @notice Daily temple game / prayer progression. One play per UTC day per wallet AND civilization.
+     * @dev It intentionally pays no KGEN. This prevents a daily faucet/Sybil farm while still allowing daily gameplay.
+     */
+    function playDailyBlessing() external whenNotPaused returns (uint256 totalBlessingDays) {
+        WishRecord storage wish = _activeWishByUser[msg.sender];
+        if (wish.status == WishStatus.None || wish.status == WishStatus.Fulfilled) revert WishNotReady();
+
+        uint256 dayIndex = block.timestamp / 1 days;
+        if (lastBlessingDayByWallet[msg.sender] == dayIndex) revert DailyBlessingAlreadyPlayed();
+        if (lastBlessingDayByCivilization[wish.civilizationId] == dayIndex) revert DailyBlessingAlreadyPlayed();
+
+        lastBlessingDayByWallet[msg.sender] = dayIndex;
+        lastBlessingDayByCivilization[wish.civilizationId] = dayIndex;
+        blessingDaysByCivilization[wish.civilizationId] += 1;
+        totalDailyBlessingPlays += 1;
+
+        totalBlessingDays = blessingDaysByCivilization[wish.civilizationId];
+        emit DailyBlessingPlayed(msg.sender, wish.civilizationId, dayIndex, totalBlessingDays);
+    }
+
+    /**
+     * @notice Read KAIOS burn proof directly from chain and claim Fortune reward.
+     * @dev No operator registration. The KAIOS record itself is the source of truth.
+     */
     function fortuneClaim(bytes32 burnProofId)
         external
         nonReentrant
         whenNotPaused
         returns (uint256 rewardAmount)
     {
+        if (burnProofId == bytes32(0)) revert InvalidBurnProof();
+        if (fortuneBurnProofConsumed[burnProofId]) revert BurnProofAlreadyConsumed();
+        if (!kaiosBurnProofGenesis.burnProofConsumed(burnProofId)) revert InvalidBurnProof();
+
         WishRecord storage wish = _activeWishByUser[msg.sender];
         if (wish.status != WishStatus.HolyCupPassed && wish.status != WishStatus.Claimable) revert WishNotReady();
 
-        BurnProofRecord memory proof = _burnProofCache[burnProofId];
-        if (!proof.verified) revert InvalidBurnProof();
-        if (fortuneBurnProofConsumed[burnProofId]) revert BurnProofAlreadyConsumed();
-        if (proof.burner != msg.sender) revert BurnerMismatch();
-        if (proof.civilizationId != wish.civilizationId) revert InvalidCivilization();
-        if (proof.purposeCode != fortunePurposeCode) revert PurposeMismatch();
-        if (proof.wishHash != wish.wishHash) revert WishMismatch();
-        if (_descale(proof.kgenBurnAmount) < minimumBurnWholeForFortune) revert BurnTooSmall();
+        (
+            uint8 source,
+            address burner,
+            address recipientVault,
+            uint256 kgenBurnAmount,
+            uint256 kaiosMintAmount,
+            bytes32 civilizationId,
+            bytes32 purposeCode,
+            bytes32 wishHash
+        ) = kaiosBurnProofGenesis.burnRecord(burnProofId);
+
+        // recipientVault is intentionally not required to equal claimant; KAIOS may mint to a civilization vault.
+        recipientVault;
+
+        if (source != KAIOS_SOURCE_VOLUNTARY_PLAYER_OFFERING) revert BurnSourceMismatch();
+        if (burner != msg.sender) revert BurnerMismatch();
+        if (civilizationId != wish.civilizationId) revert CivilizationMismatch();
+        if (purposeCode != fortunePurposeCode) revert PurposeMismatch();
+        if (wishHash != wish.wishHash) revert WishMismatch();
+        if (kgenBurnAmount < _scale(minimumBurnWholeForFortune)) revert BurnTooSmall();
+        if (kaiosMintAmount != kgenBurnAmount * 10_000) revert KAIOSMintMismatch();
 
         if (block.timestamp < lastFortuneAt[msg.sender] + fortuneCooldownSeconds) revert FortuneCooldown();
-        if (block.timestamp < lastCivilizationFortuneAt[wish.civilizationId] + fortuneCooldownSeconds) {
-            revert CivilizationCooldown();
-        }
+        if (block.timestamp < lastCivilizationFortuneAt[civilizationId] + fortuneCooldownSeconds) revert CivilizationCooldown();
 
         uint256 epochIndex = currentFortuneEpochIndex();
         if (fortuneCapEnabled) {
@@ -473,35 +506,45 @@ contract KGEN_TempleHeart_V3_3_0_Upgradeable is
             fortuneEpochClaims[epochIndex] += 1;
         }
 
-        rewardAmount = _calculateFortuneReward(msg.sender, wish.civilizationId, burnProofId);
-        if (rewardAmount < _scale(fortuneMinWhole) || rewardAmount > _scale(fortuneMaxWhole)) revert InvalidRange();
-        if (kgen.balanceOf(address(this)) < rewardAmount) revert HeartInsufficientFunds();
-
+        // Effects before transfer.
         fortuneBurnProofConsumed[burnProofId] = true;
         lastFortuneAt[msg.sender] = block.timestamp;
-        lastCivilizationFortuneAt[wish.civilizationId] = block.timestamp;
+        lastCivilizationFortuneAt[civilizationId] = block.timestamp;
         wish.status = WishStatus.Fulfilled;
         wish.updatedAt = uint64(block.timestamp);
-        totalFortunePaid += rewardAmount;
 
+        uint256 blessingDays = blessingDaysByCivilization[civilizationId];
+        rewardAmount = _scale(_fortuneRewardWhole(blessingDays));
+        if (kgen.balanceOf(address(this)) < rewardAmount) revert HeartInsufficientFunds();
+
+        totalFortunePaid += rewardAmount;
         kgen.safeTransfer(msg.sender, rewardAmount);
 
         emit FortuneClaimed(
             msg.sender,
-            wish.civilizationId,
+            civilizationId,
             burnProofId,
             rewardAmount,
             epochIndex,
+            blessingDays,
             wish.wishHash
         );
     }
 
-    function activeWish(address user) external view returns (WishRecord memory) {
-        return _activeWishByUser[user];
+    /**
+     * @dev Deterministic progression instead of economically manipulable pseudo-randomness.
+     *      Base reward = min. Daily blessing milestones add +1/+2/+3, capped by fortuneMaxWhole.
+     */
+    function _fortuneRewardWhole(uint256 blessingDays) internal view returns (uint256 rewardWhole) {
+        rewardWhole = fortuneMinWhole;
+        if (blessingDays >= blessingTierDays1) rewardWhole += 1;
+        if (blessingDays >= blessingTierDays2) rewardWhole += 1;
+        if (blessingDays >= blessingTierDays3) rewardWhole += 1;
+        if (rewardWhole > fortuneMaxWhole) rewardWhole = fortuneMaxWhole;
     }
 
-    function burnProof(bytes32 burnProofId) external view returns (BurnProofRecord memory) {
-        return _burnProofCache[burnProofId];
+    function previewFortuneReward(bytes32 civilizationId) external view returns (uint256 rewardWhole) {
+        return _fortuneRewardWhole(blessingDaysByCivilization[civilizationId]);
     }
 
     function currentFortuneEpochIndex() public view returns (uint256) {
@@ -513,7 +556,7 @@ contract KGEN_TempleHeart_V3_3_0_Upgradeable is
     }
 
     function heartBalanceWhole() public view returns (uint256) {
-        return _descale(heartBalance());
+        return _descale(kgen.balanceOf(address(this)));
     }
 
     function brainBalanceWhole() public view returns (uint256) {
@@ -521,49 +564,37 @@ contract KGEN_TempleHeart_V3_3_0_Upgradeable is
         return _descale(kgen.balanceOf(brainVault));
     }
 
-    function effectiveCapWhole() public view returns (uint256) {
-        uint256 capWhole = baseCapWhole;
+    function effectiveCapWhole() public view returns (uint256 cap) {
+        cap = baseCapWhole;
         if (capBps > 0 && brainVault != address(0)) {
-            capWhole += (brainBalanceWhole() * capBps) / 10_000;
+            cap += (brainBalanceWhole() * capBps) / 10_000;
         }
-        if (capWhole > maxCapWhole) capWhole = maxCapWhole;
-        return capWhole;
+        if (cap > maxCapWhole) cap = maxCapWhole;
     }
 
-    function effectiveFloorWhole() public view returns (uint256) {
-        uint256 floorWhole = baseFloorWhole;
+    function effectiveFloorWhole() public view returns (uint256 floor) {
+        floor = baseFloorWhole;
+        uint256 cap = effectiveCapWhole();
         if (floorBps > 0 && brainVault != address(0)) {
-            floorWhole += (brainBalanceWhole() * floorBps) / 10_000;
+            floor += (brainBalanceWhole() * floorBps) / 10_000;
         }
-        uint256 capWhole = effectiveCapWhole();
-        if (floorWhole > capWhole) floorWhole = capWhole;
-        return floorWhole;
+        if (floor > cap) floor = cap;
     }
 
-    function injectFromBrain(uint256 amountWhole)
-        external
-        onlyRole(OPERATOR_ROLE)
-        nonReentrant
-        whenNotPaused
-    {
+    function injectFromBrain(uint256 amountWhole) external nonReentrant onlyRole(OPERATOR_ROLE) {
         if (brainVault == address(0)) revert ZeroAddress();
+        if (amountWhole == 0) revert InvalidRange();
         uint256 amount = _scale(amountWhole);
         kgen.safeTransferFrom(brainVault, address(this), amount);
         emit BloodInjectedFromBrain(brainVault, amount);
     }
 
-    function autoRefillFromBrain()
-        external
-        onlyRole(OPERATOR_ROLE)
-        nonReentrant
-        whenNotPaused
-    {
+    function autoRefillFromBrain() external nonReentrant onlyRole(OPERATOR_ROLE) {
         if (brainVault == address(0)) revert ZeroAddress();
 
         uint256 floorWhole = effectiveFloorWhole();
         uint256 capWhole = effectiveCapWhole();
         uint256 hbWhole = heartBalanceWhole();
-
         if (hbWhole >= floorWhole) {
             emit AutoRefilledFromBrain(brainVault, 0, floorWhole, capWhole);
             return;
@@ -571,46 +602,22 @@ contract KGEN_TempleHeart_V3_3_0_Upgradeable is
 
         uint256 needWhole = floorWhole - hbWhole;
         if (hbWhole + needWhole > capWhole) needWhole = capWhole - hbWhole;
-        uint256 needAmount = _scale(needWhole);
-        kgen.safeTransferFrom(brainVault, address(this), needAmount);
-
-        emit AutoRefilledFromBrain(brainVault, needAmount, floorWhole, capWhole);
+        uint256 amount = _scale(needWhole);
+        kgen.safeTransferFrom(brainVault, address(this), amount);
+        emit AutoRefilledFromBrain(brainVault, amount, floorWhole, capWhole);
     }
 
-    function sweepExcessToBrain()
-        external
-        onlyRole(OPERATOR_ROLE)
-        nonReentrant
-        whenNotPaused
-    {
+    function sweepExcessToBrain() external nonReentrant onlyRole(OPERATOR_ROLE) {
         if (brainVault == address(0)) revert ZeroAddress();
+
         uint256 capAmount = _scale(effectiveCapWhole());
         uint256 bal = kgen.balanceOf(address(this));
-        uint256 excess = bal > capAmount ? bal - capAmount : 0;
-        if (excess > 0) kgen.safeTransfer(brainVault, excess);
+        uint256 excess;
+        if (bal > capAmount) {
+            excess = bal - capAmount;
+            kgen.safeTransfer(brainVault, excess);
+        }
         emit ExcessSweptToBrain(brainVault, excess, capAmount);
-    }
-
-    function _calculateFortuneReward(address user, bytes32 civilizationId, bytes32 burnProofId)
-        internal
-        view
-        returns (uint256)
-    {
-        uint256 span = fortuneMaxWhole - fortuneMinWhole + 1;
-        uint256 seed = uint256(
-            keccak256(
-                abi.encodePacked(
-                    user,
-                    civilizationId,
-                    burnProofId,
-                    block.prevrandao,
-                    block.timestamp,
-                    fortuneEpochClaims[currentFortuneEpochIndex()]
-                )
-            )
-        );
-        uint256 rewardWhole = fortuneMinWhole + (seed % span);
-        return _scale(rewardWhole);
     }
 
     function _scale(uint256 wholeTokens) internal view returns (uint256) {
@@ -621,23 +628,5 @@ contract KGEN_TempleHeart_V3_3_0_Upgradeable is
         return amount / (10 ** uint256(IERC20Metadata(address(kgen)).decimals()));
     }
 
-    function _recover(bytes32 digest, bytes calldata signature) internal pure returns (address signer) {
-        if (signature.length != 65) revert InvalidProofSigner();
-        bytes32 r;
-        bytes32 s;
-        uint8 v;
-        assembly {
-            r := calldataload(signature.offset)
-            s := calldataload(add(signature.offset, 32))
-            v := byte(0, calldataload(add(signature.offset, 64)))
-        }
-        if (v < 27) v += 27;
-        if (v != 27 && v != 28) revert InvalidProofSigner();
-        signer = ecrecover(digest, v, r, s);
-        if (signer == address(0)) revert InvalidProofSigner();
-    }
-
     function _authorizeUpgrade(address newImplementation) internal override onlyRole(UPGRADER_ROLE) {}
-
-    uint256[40] private __gap;
 }
