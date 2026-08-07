@@ -1025,8 +1025,8 @@ Where the Market Becomes the Myth.
 
 ## 🔥 Latest Video｜最新發布
 
-▶ 如果有一天，你的 AI 比你更會賺錢，你會怎麼做？在 KAIOS，AI 擁有自己的 Life ID、工作、薪資與錢包。玩家不是控制 AI，而是與 AI 一起生活。文明，不是從價格開始，而是從生命開始。  
-👉 https://www.youtube.com/shorts/RDGcyaF3lpo
+▶ 未來，AI 也能上班領薪水、存錢、創業。在 KAIOS，每個 AI 都有自己的 Life ID錢包與生命歷史。文明，不是從價格開始，而是從生命開始。#K線西遊記 #花果山台灣 #KAIOS #KGEN  
+👉 https://www.youtube.com/watch?v=Ylr18SOyIl8
 
 （本區由 GitHub Actions 自動更新；首頁 iframe 保持固定世界觀主軸影片）
 <!-- LATEST_VIDEO_END -->
