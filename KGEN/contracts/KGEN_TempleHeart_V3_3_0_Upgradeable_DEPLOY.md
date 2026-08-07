@@ -1,40 +1,41 @@
 # KGEN TempleHeart V3.3.0 Upgradeable — Codex Deploy Handoff
 
-Status: REVIEW DRAFT ONLY. Not audited. Do not deploy to mainnet until tests and review pass.
+Status: REVIEW DRAFT ONLY. Not audited. Do not deploy to mainnet until compile/tests/review pass and human approval is explicit.
 
 ## 1. Purpose
 
-This release starts a new canonical Proxy generation for 五指山 12345 / 悟空財神殿 Heart.
+This release starts the new canonical Proxy generation for 五指山 12345 / 悟空財神殿 Heart.
 
-Old deployed Heart V3.2.6 remains immutable at its historical address. It is NOT upgradeable and cannot be converted in place into a Proxy.
+Legacy `KGEN_TempleHeart_V3_2_6.sol` remains immutable at its historical address. It is NOT upgradeable and cannot be converted in-place into a Proxy.
 
-V3.3.0 introduces a new UUPS / ERC1967 Proxy. After the one-time migration, the Proxy address becomes the canonical 12345 Heart address. Future V3.3.x / V3.4.x / V4.x upgrades should replace only the implementation while keeping the Proxy address and Proxy-held state/balances unchanged.
+V3.3.0 uses OpenZeppelin UUPS / ERC1967 Proxy. After the one-time migration, the Proxy address becomes the canonical 12345 Heart address. Future implementation upgrades should preserve that Proxy address, Proxy-held KGEN balance, roles and storage.
 
 ## 2. Source
 
 - Legacy reference: `KGEN/contracts/KGEN_TempleHeart_V3_2_6.sol`
 - New implementation: `KGEN/contracts/KGEN_TempleHeart_V3_3_0_Upgradeable.sol`
+- KAIOS source of truth: `KGEN-KAIOS/contracts/KAIOSV02_BurnProofGenesis.sol`
 
 ## 3. OpenZeppelin dependencies
 
 Use OpenZeppelin Upgradeable packages compatible with Solidity `^0.8.24`.
 
-Required imports:
+Required imports include:
 
-- `@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol`
-- `@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol`
-- `@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol`
-- `@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol`
-- `@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol`
-- `@openzeppelin/contracts/token/ERC20/IERC20.sol`
-- `@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol`
-- `@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol`
+- `Initializable`
+- `UUPSUpgradeable`
+- `AccessControlUpgradeable`
+- `PausableUpgradeable`
+- `ReentrancyGuardUpgradeable`
+- `EIP712Upgradeable`
+- `ECDSA`
+- `IERC20`, `IERC20Metadata`, `SafeERC20`
 
-Use OpenZeppelin Hardhat Upgrades or Foundry Upgrades tooling. Do not hand-roll a custom proxy.
+Use OpenZeppelin Hardhat Upgrades or Foundry Upgrades tooling. Do not hand-roll a proxy.
 
 ## 4. Deployment model
 
-Deploy the implementation behind an ERC1967/UUPS Proxy and call `initialize(...)` atomically.
+Deploy implementation behind an ERC1967/UUPS Proxy and call `initialize(...)` atomically.
 
 Initializer arguments:
 
@@ -44,190 +45,294 @@ Initializer arguments:
 4. `holyCupSigner`
 5. `kgenToken`
 6. `brainVault`
-7. `kaiosBurnProofRegistry`
+7. `kaiosBurnProofGenesis`
 
-Do not use the implementation address as the public 12345 address. Frontend/Registry must point to the Proxy address.
+Frontend and Registry must point to the Proxy address, never the implementation address.
 
 ## 5. Role separation
 
-Recommended production ownership:
+Production recommendation:
 
-- `DEFAULT_ADMIN_ROLE`: multisig / governance admin
-- `UPGRADER_ROLE`: multisig or timelock-controlled upgrader; do not use an ordinary hot wallet
-- `OPERATOR_ROLE`: operational signer/backend for validated burn proofs and Heart maintenance
-- `HOLY_CUP_SIGNER_ROLE`: signer used to authorize completed 3/3 Holy Cup proofs
+- `DEFAULT_ADMIN_ROLE`: multisig/governance admin
+- `UPGRADER_ROLE`: multisig/timelock-controlled upgrader
+- `OPERATOR_ROLE`: pause + Heart/Brain maintenance only
+- `HOLY_CUP_SIGNER_ROLE`: signer that attests completion of the 3/3 Holy Cup task
 
-For initial test deployment these may temporarily share a test wallet, but production should separate them.
+IMPORTANT: `OPERATOR_ROLE` does NOT register or approve KAIOS burn proofs. Burn proof eligibility is read directly on-chain.
 
-## 6. V3.3.0 fortune rules
+## 6. Canonical fortune rules
 
-Default rules initialized on-chain:
+Defaults:
 
-- Fortune range: 1 to 8 KGEN
+- Fortune reward configured range: 1 to 8 KGEN
+- Player cannot supply reward amount
 - Wallet cooldown: 30 days
 - Civilization ID cooldown: 30 days
-- Epoch duration: 30 days
-- Epoch cap: 500 successful claims
-- Minimum verified voluntary KGEN burn: 1 KGEN
-- Purpose code: `keccak256("KGEN_12345_FORTUNE_GENESIS")`
+- Epoch: 30 days
+- Epoch maximum successful claims: 500
+- Minimum voluntary KGEN burn: 1 KGEN
+- Required KAIOS burn source: `VoluntaryPlayerOffering`
+- Required purpose code: `keccak256("KGEN_12345_FORTUNE_GENESIS")`
+- One KAIOS burn proof can unlock Fortune only once
 
-The player no longer supplies an arbitrary reward amount. `fortuneClaim(bytes32 burnProofId)` computes the reward under contract rules.
+## 7. KAIOS integration — DIRECT ON-CHAIN ONLY
 
-## 7. Claim state machine
+This is now mandatory, not optional.
+
+TempleHeart calls the deployed `KAIOSV02_BurnProofGenesis` contract directly:
+
+- `burnProofConsumed(burnProofId)` must be true
+- `burnRecord(burnProofId)` is decoded on-chain
+- `source` must equal `VoluntaryPlayerOffering`
+- `burner` must equal `msg.sender`
+- `civilizationId` must match active Wish
+- `purposeCode` must match `KGEN_12345_FORTUNE_GENESIS`
+- `wishHash` must match active Wish
+- `kgenBurnAmount` must satisfy the minimum burn threshold
+- `kaiosMintAmount` must equal `kgenBurnAmount * 10_000`
+
+There is no `registerVerifiedBurnProof(...)` operator path in the canonical V3.3.0 design.
+
+KAIOS remains responsible for minting. TempleHeart never mints KAIOS.
+
+Economic invariant remains:
+
+`1 KGEN verified burn -> 10,000 KAIOS`
+
+## 8. Wish / Holy Cup / Fortune state flow
 
 Target flow:
 
 1. Player connects wallet.
-2. `makeWish(wishHash, civilizationId)`.
-3. Optional temple offering via `makeOffering(...)`.
-4. KGEN is voluntarily burned through the White Hole / KAIOS BurnProof system.
-5. Authorized operator verifies the KAIOS/KGEN burn proof and calls `registerVerifiedBurnProof(...)`.
-6. Player completes Holy Cup 3/3 off-chain/UI task.
-7. Authorized Holy Cup signer signs the proof payload.
-8. Player calls `submitHolyCupProof(...)`.
+2. Player creates a Wish: `makeWish(wishHash, civilizationId)`.
+3. Optional temple offering: `makeOffering(...)`.
+4. Player performs the White Hole KGEN burn through KAIOS BurnProofGenesis using matching `civilizationId`, `purposeCode`, and `wishHash`.
+5. Player completes Holy Cup 3/3 task.
+6. Authorized signer issues an EIP-712 Holy Cup proof.
+7. Player submits `submitHolyCupProof(...)` on-chain.
+8. Player may play daily blessing progression once per UTC day.
 9. Player calls `fortuneClaim(burnProofId)`.
-10. Heart checks wallet cooldown + civilization cooldown + burn proof uniqueness + purpose + wish + epoch cap.
+10. Heart reads KAIOS Burn Proof directly and enforces wallet/civilization/proof/epoch rules.
 
-## 8. KAIOS integration
+## 9. Holy Cup proof
 
-KAIOS minting remains outside TempleHeart.
+V3.3.0 uses OpenZeppelin EIP-712 + ECDSA.
 
-Canonical economic rule remains:
+Typed payload:
 
-`1 KGEN verified burn -> 10,000 KAIOS`
+`HolyCupProof(address claimant,bytes32 civilizationId,bytes32 wishHash,bytes32 proofId,uint256 deadline)`
 
-TempleHeart must not mint KAIOS.
+The EIP-712 domain binds signature validity to the chain and Proxy contract domain. `proofId` is one-time and `deadline` is mandatory.
 
-V3.3.0 currently caches validated burn proof data via an authorized operator. Before mainnet, Codex should inspect the actual deployed KAIOS BurnProofGenesis interface and decide whether to replace this operator registration with direct on-chain `burnRecord(burnProofId)` validation. Direct verification is preferred if the deployed KAIOS interface is stable and available.
+Codex tests must include:
 
-## 9. Holy Cup proof format
+- expired proof
+- replayed proof
+- wrong wallet
+- wrong civilization
+- wrong wish
+- wrong signer
+- wrong chain/domain
 
-Current V3.3.0 signed digest contains:
+## 10. Daily game design — playable every day, NOT a daily KGEN faucet
 
-- literal `KGEN_12345_HOLY_CUP_3_OF_3`
-- Proxy address (`address(this)` under delegatecall)
-- `block.chainid`
-- claimant wallet
-- `civilizationId`
-- `wishHash`
-- unique `proofId`
-- expiry `deadline`
+The canonical daily game is `playDailyBlessing()`.
 
-A proof ID may only be consumed once.
+Rules:
 
-Before mainnet, Codex should consider replacing the manual ECDSA helper with OpenZeppelin ECDSA / MessageHashUtils or EIP-712 typed data. EIP-712 is recommended for production signer clarity and replay safety.
+- once per UTC day per wallet
+- once per UTC day per `civilizationId`
+- requires an active unfulfilled Wish
+- records `blessingDaysByCivilization`
+- pays no KGEN directly
+- creates daily engagement and quest progression without recreating a Sybil faucet
 
-## 10. Offering model
+Default deterministic reward progression:
 
-V3.3.0 defines offering types:
+- base Fortune reward: 1 KGEN
+- 7 blessing days: +1
+- 14 blessing days: +1
+- 21 blessing days: +1
+- hard cap: configured `fortuneMaxWhole`, default 8 KGEN
 
-- Incense
-- JossPaper
-- BlessingLamp
-- FortuneCharm
-- VowOffering
+This is intentionally deterministic. Do NOT use `block.timestamp`, `block.prevrandao`, block hash or miner/validator-influenced values as monetary randomness.
 
-Current `makeOffering` transfers KGEN into Heart and records the offering; it does NOT burn that KGEN.
+If a future version wants a true chance-based prize, use verifiable randomness and conduct a separate legal/economic review before enabling any wager-like mechanism.
 
-Do not describe every offering as a burn. White Hole burning and Heart offerings are different accounting events.
+## 11. Game design terminology
 
-Future upgrades may route a configurable portion of an offering to White Hole burn and/or Bank, but that behavior is not enabled in this release.
+Frontend may present the daily interaction as temple gameplay such as:
 
-## 11. Reward randomness warning
+- 上香
+- 擲聖盃
+- 祈福任務
+- 每日參拜
+- 累積福氣/祈福日
 
-The current 1-8 reward calculation uses `block.prevrandao`, timestamp, and claim state as a lightweight bounded selection mechanism. It is NOT suitable for high-value or adversarial randomness.
+But the canonical V3.3.0 economic model is NOT "pay KGEN to gamble for more KGEN".
 
-For production where randomness materially affects value, replace with a commit-reveal flow or a verifiable randomness source. If 1-8 KGEN remains low-value and deterministic tiers are preferred, remove pseudo-randomness entirely and calculate reward from Blessing/Civilization tiers.
+Do not market or implement a guaranteed positive-return loop such as:
 
-## 12. Migration from V3.2.6
+- burn 1 KGEN -> guaranteed 8 KGEN
+- buy incense for X KGEN -> guaranteed Y>X KGEN
 
-Historical Heart address remains on-chain and should be retained in documentation as legacy.
+Temple offerings and White Hole burns are separate accounting events.
+
+## 12. Offering model
+
+Offering types:
+
+- `Incense`
+- `JossPaper`
+- `BlessingLamp`
+- `FortuneCharm`
+- `VowOffering`
+
+Current `makeOffering(...)` transfers KGEN into Heart and records the offering. It does NOT burn KGEN and does not directly increase reward in V3.3.0.
+
+Reason: first establish a safe accounting boundary.
+
+Future upgrades may add configurable offering utility such as cosmetics, quest access, Blessing Power, temple rank, or a separately reviewed burn routing module. Do not couple "amount paid" directly to guaranteed KGEN profit.
+
+## 13. Heart / Brain behavior
+
+V3.3.0 retains the core Heart liquidity skeleton:
+
+- `injectFromBrain`
+- `autoRefillFromBrain`
+- `sweepExcessToBrain`
+- cap/floor calculations
+
+Codex must confirm the production Brain allowance model for the NEW Proxy address. Any allowance granted to the legacy V3.2.6 address does not automatically transfer to the Proxy.
+
+## 14. Migration from V3.2.6
 
 Migration checklist:
 
-- Pause/disable new frontend claims against V3.2.6.
-- Stop automatic refills to old Heart.
-- Deploy V3.3.0 implementation + Proxy.
-- Initialize Proxy with production roles and addresses.
-- Verify implementation and Proxy on BscScan.
-- Transfer/fund required KGEN from old Heart only using valid legacy owner/admin functions and only after confirming permissions.
-- Update root/shared Registry to the new Proxy address.
-- Update `/K線西遊記/temples/12345/` frontend ABI and canonical Heart address.
-- Keep V3.2.6 address visible as `LEGACY_HEART_V3_2_6` for history/audit.
+- disable frontend fortune claims against legacy V3.2.6
+- stop refills to old Heart
+- compile/test V3.3.0
+- deploy implementation + UUPS Proxy
+- initialize roles/addresses atomically
+- verify implementation and Proxy on BscScan
+- configure Brain allowance for the Proxy
+- transfer/fund KGEN only through valid legacy admin paths after review
+- update shared/root Registry to new Proxy address
+- update `/K線西遊記/temples/12345/` ABI and Heart address
+- retain old address as `LEGACY_HEART_V3_2_6`
 
-Do not overwrite historical transaction records.
+Historical records must never be overwritten.
 
-## 13. Storage upgrade law
+## 15. Storage upgrade law
 
-From V3.3.0 onward:
+From this Proxy generation onward:
 
-- Never reorder existing storage variables.
-- Never change the type of an existing storage variable.
-- Never delete an existing storage variable.
-- Append new state only in later versions.
-- Run OpenZeppelin storage-layout validation before every upgrade.
-- Preserve inherited upgradeable base contract ordering.
+- never reorder existing storage variables
+- never change existing storage variable types
+- never delete existing storage variables
+- append state only in later versions
+- preserve inherited upgradeable base ordering
+- run OpenZeppelin storage-layout validation before every upgrade
 
-The `__gap` is reserved for future storage evolution; Codex must still run layout validation.
+The V3.3.0 layout is the genesis storage law for this Proxy generation.
 
-## 14. Mainnet blockers / tests required
+## 16. Required automated tests before any mainnet deployment
 
-Before deployment to BSC mainnet, Codex must add automated tests for at least:
+Codex must implement at least:
 
-- initialize cannot be called twice
-- implementation initializer is disabled
-- unauthorized upgrade fails
-- authorized UUPS upgrade preserves Proxy address and state
-- pause blocks claims
-- fortune reward stays in configured range
-- wallet 30-day cooldown
-- civilization 30-day cooldown
-- 500 claim epoch cap
-- same burn proof cannot be reused
-- wrong burner fails
-- wrong civilizationId fails
-- wrong purposeCode fails
-- wrong wishHash fails
-- burn amount below threshold fails
-- expired Holy Cup signature fails
-- replayed Holy Cup proof fails
-- wrong-chain/wrong-Proxy signed proof fails
-- insufficient Heart balance fails
-- Brain refill and excess sweep behavior
-- upgrade V3.3.0 -> mock V3.3.1 storage preservation
+### Proxy / access
+- initialize cannot run twice
+- implementation initializer disabled
+- unauthorized UUPS upgrade fails
+- authorized upgrade preserves Proxy address and state
+- role boundaries are enforced
+- pause/unpause works
 
-## 15. Security review items
+### KAIOS direct proof
+- registry zero address rejected
+- nonexistent proof rejected
+- unconsumed KAIOS proof rejected
+- non-voluntary/SystemAmmTax source rejected
+- wrong burner rejected
+- wrong civilization rejected
+- wrong purpose rejected
+- wrong wish rejected
+- burn below minimum rejected
+- KAIOS mint amount mismatch rejected
+- same proof cannot unlock Fortune twice
 
-Before mainnet:
+### Holy Cup
+- valid EIP-712 proof passes
+- expired proof rejected
+- replay rejected
+- wrong signer rejected
+- wrong wallet/civilization/wish rejected
 
-1. Replace or review custom `_recover` with OpenZeppelin ECDSA/EIP-712.
-2. Decide direct KAIOS burn-record validation vs OPERATOR_ROLE proof caching.
-3. Review reward selection strategy.
-4. Confirm KGEN token decimals and fee behavior when Heart sends/transfers KGEN.
-5. Confirm old Brain allowances and new Proxy allowance requirements.
-6. Use multisig/timelock for upgrade authority.
-7. Confirm emergency pause operational process.
-8. Verify no role is accidentally granted to zero address.
-9. Run static analysis, compilation, unit tests, and upgrade-storage validation.
+### Fortune
+- player cannot choose arbitrary amount
+- reward remains within 1..8 configured range
+- wallet cooldown enforced
+- civilization cooldown enforced
+- 500-claim epoch cap enforced
+- insufficient Heart balance rejected
+- successful claim marks Wish fulfilled
 
-## 16. Codex deployment instruction
+### Daily blessing
+- one play per wallet per UTC day
+- one play per civilization per UTC day
+- second wallet cannot farm same civilization same day
+- blessing day progression persists
+- reward preview follows deterministic milestone rules
+- daily play transfers zero KGEN
 
-Codex should treat this branch as a review/deployment preparation branch, not as authorization to deploy mainnet automatically.
+### Heart / Brain
+- refill calculations
+- cap/floor behavior
+- sweep excess
+- permissions
 
-Tasks:
+### Upgrade regression
+- V3.3.0 -> mock V3.3.1 storage compatibility
+- Wish, cooldown, blessing progress, proof-consumed state and KGEN balance survive upgrade
 
-1. Compile the new implementation using the repository's existing Solidity toolchain.
-2. Add missing OpenZeppelin upgrade dependencies/config if necessary.
-3. Add UUPS deployment script.
-4. Add upgrade script template.
-5. Add unit and storage-layout tests listed above.
-6. Inspect the actual KAIOS BurnProofGenesis contract/interface in this repository and wire direct proof verification if practical.
-7. Inspect the 12345 frontend/Registry and prepare the ABI/address migration to the Proxy.
-8. Open a PR with compile/test output and exact BSC deployment parameters still left as placeholders.
-9. Do NOT deploy to BSC mainnet until human approval provides final admin/upgrader/operator/signer addresses and explicit deployment authorization.
+## 17. Codex implementation tasks — do all before requesting deployment approval
 
-## 17. Canonical rule after migration
+1. Compile `KGEN_TempleHeart_V3_3_0_Upgradeable.sol` against the repository toolchain.
+2. Pin compatible OpenZeppelin package versions.
+3. Add UUPS deploy script.
+4. Add UUPS upgrade script template.
+5. Add full automated tests from section 16.
+6. Add storage-layout validation.
+7. Confirm `KAIOSV02_BurnProofGenesis.sol` ABI exactly matches the interface in TempleHeart.
+8. Add integration test deploying both KAIOS BurnProofGenesis and TempleHeart Proxy locally.
+9. Verify the `1 KGEN -> 10,000 KAIOS` unit/decimals invariant using real token decimals.
+10. Inspect root/shared Registry and prepare the new canonical Proxy entry.
+11. Inspect 12345 frontend and replace the old `fortuneClaim(amountWhole)` flow.
+12. Frontend must implement Wish -> Burn -> HolyCup -> Daily Blessing -> Fortune state display.
+13. Frontend must never expose manual reward amount input.
+14. Prepare BscScan verification commands.
+15. Produce exact deployment parameter checklist with addresses left blank until human approval.
+16. Do NOT deploy mainnet automatically.
 
-`12345 TempleHeart identity = Proxy address`
+## 18. Mainnet deployment blockers
 
-Implementation addresses are versioned organs and may change. The Proxy address is the persistent public Heart identity unless emergency migration is required.
+No mainnet deployment until all are true:
+
+- compile clean
+- unit/integration tests clean
+- storage validation clean
+- KAIOS ABI confirmed
+- Proxy + implementation verified on local/test environment
+- admin/upgrader/operator/holyCupSigner production addresses approved
+- KGEN token address confirmed
+- Brain address/allowance confirmed
+- KAIOS BurnProofGenesis deployed address confirmed
+- migration amount from legacy Heart approved
+- frontend/Registry migration reviewed
+- explicit human authorization to deploy BSC mainnet
+
+## 19. Canonical identity after migration
+
+`12345 TempleHeart identity = UUPS Proxy address`
+
+Implementation addresses are replaceable versions. Proxy address is the persistent public Heart identity unless an emergency migration is required.
