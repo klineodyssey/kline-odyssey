@@ -21,6 +21,11 @@
 
 Status: `READY_FOR_HUMAN_FINAL_REVIEW`
 
+- Integration PR: `https://github.com/klineodyssey/kline-odyssey/pull/129`
+- Implementation commit: `0a1a69972a1fd77d6226266bd128e3daef8e1cb5`
+- Merge status: `NOT_MERGED`
+- Mainnet deployment status: `BLOCKED`
+
 Deployment remains blocked by independent security audit, production address
 verification, governance/timelock ownership review, deployment rehearsal and
 explicit Human Mainnet authorization.

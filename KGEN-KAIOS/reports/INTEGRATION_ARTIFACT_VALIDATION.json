@@ -12,11 +12,11 @@
   },
   "protectedChanges": {
     "currentFiles": [
-      "docs/physics/KGEN_KAIOS_SCALE_AND_PLANCK_RUNTIME_CURRENT.md",
       "KGEN-KAIOS/KAIOS_WHITE_HOLE_ATOMIC_CONVERSION_AND_LIQUIDITY_RUNTIME_CURRENT.md",
       "KGEN-KAIOS/UNIVERSE_EXCHANGE_RUNTIME_CURRENT.md",
-      "docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md",
-      "KGEN-KAIOS/reports/CURRENT_LINEAGE_RECONCILIATION.json"
+      "KGEN-KAIOS/reports/CURRENT_LINEAGE_RECONCILIATION.json",
+      "docs/physics/KGEN_KAIOS_SCALE_AND_PLANCK_RUNTIME_CURRENT.md",
+      "docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md"
     ],
     "constitutionFiles": [
       "docs/constitution/01_KGEN_Universe_Constitution.md",

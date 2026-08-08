@@ -23,6 +23,9 @@ Its two commits were integrated into the formal replacement branch for review.
 | PR #128 | `https://github.com/klineodyssey/kline-odyssey/pull/128` |
 | PR #128 head | `75a1f768f46e558278651d9105b1249b099169ce` |
 | Integration base | `5c1d06fed031dc12b65100c05fd5eb99387644bc` |
+| Replacement integration PR | `https://github.com/klineodyssey/kline-odyssey/pull/129` |
+| Implementation commit | `0a1a69972a1fd77d6226266bd128e3daef8e1cb5` |
+| Merge/deployment status | NOT MERGED / NO MAINNET DEPLOYMENT |
 
 ## Canonical Integration
 
