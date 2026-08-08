@@ -21,13 +21,11 @@ PRIMEFORGE_LIFE_HEADER_V1:
     PRODUCT_ID: KGEN-12345-HEART-UI
     LIFE_LAYER: LIFEFORM
     LIFE_TYPE: Bridge HyperMembrane Lifeform
-    VERSION: 12345-TEMPLE-V10.48.0-LIFE-STANDARD-REGENERATION
-    BUILD: 20260525-V10.48.0-LIFE-STANDARD-REGENERATION
+    VERSION: 12345-TEMPLE-V10.50.0-KAIOS-LINEAGE-TEMPLEHEART-V3.3.2-READY
+    BUILD: 20260809-V10.50.0
     BIRTH: 2026-05-25
-    BASE_FROM: KGEN_12345_V10_47_1_LAYOUT_REAL_FIX_FULL_GITHUB_READY.zip
-    UPGRADE_FROM: 12345-TEMPLE-V10.47.1-LAYOUT-REAL-FIX
     DEATH: ACTIVE
-    GROWTH_STAGE: IMMORTAL_REGENERATION_STANDARDIZATION
+    GROWTH_STAGE: KAIOS_LINEAGE_TEMPLEHEART_V3_3_2_READY
   TAXONOMY:
     DOMAIN: KGENVERSE
     KINGDOM: FinancialLifeform
@@ -37,7 +35,7 @@ PRIMEFORGE_LIFE_HEADER_V1:
     FAMILY: PrimeForgeLife
     GENUS: KGEN
     SPECIES: 12345.html
-    CELL: Bridge Cell
+    LIFEID: KGEN-12345-ROOT-BRIDGE
     ORGAN: Entry Shell
     DNA: HTML-BRIDGE-DNA
   IMMUNE_SYSTEM:
@@ -47,31 +45,22 @@ PRIMEFORGE_LIFE_HEADER_V1:
     PATCH_DRIFT_BLOCK: TRUE
     VERSION_FILENAME_BLOCK: TRUE
     SELF_HEALING: ENABLED
-  REGENERATION:
-    EMBRYO_MODE: GZIP_BASE64
-    CAN_REBUILD_FROM_EMBRYO: TRUE
-    REJUVENATION: ENABLED
-    IMMORTALITY_CLASS: WUKONG_LONGEVITY
-  SECURITY_FINGERPRINT:
-    FINAL_SHA256: FILLED_IN_SHA256SUMS
-
 -->
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <title>KGEN 12345 Bridge｜V2.3.1</title>
+  <title>KGEN 12345 悟空財神殿｜V10.50.0</title>
   <!--
   PRODUCT_ID: KGEN-12345-ROOT-BRIDGE
-  VERSION: V2.3.1 / BRIDGE RESTORE
-  BUILD: 20260525-V10.42.0-2D-ANTIGRAVITY-DECORATION
-  BASE_FROM: KGEN_12345_V10_49_2_FRONTEND_RITUAL_FIX_FULL.zip
+  VERSION: V10.50.0 / KAIOS LINEAGE + TEMPLEHEART V3.3.2 READY
+  BUILD: 20260809-V10.50.0
+  BASE_FROM: V10.49.2 restored frontend logic + merged PR #129
   RULE: 12345.html is root bridge only. Canonical app path is K線西遊記/temples/12345/index.html.
   -->
   <style>
     body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;background:#05070b;color:#ffe28a;font-family:system-ui,-apple-system,BlinkMacSystemFont,'Noto Sans TC',sans-serif}
-    .card{width:min(560px,92vw);border:1px solid rgba(255,215,120,.6);border-radius:20px;background:rgba(10,12,20,.96);padding:20px;box-shadow:0 0 32px rgba(255,215,120,.18)}
+    .card{width:min(620px,92vw);border:1px solid rgba(255,215,120,.6);border-radius:20px;background:rgba(10,12,20,.96);padding:20px;box-shadow:0 0 32px rgba(255,215,120,.18)}
     a,button{display:block;width:100%;box-sizing:border-box;text-align:center;margin-top:10px;padding:13px;border-radius:14px;border:1px solid rgba(255,215,120,.5);background:#ffe28a;color:#111;font-weight:900;text-decoration:none}
-    .sub{background:rgba(255,255,255,.06);color:#fff}
-    code{color:#8ff}
+    .sub{background:rgba(255,255,255,.06);color:#fff}.status{padding:10px;border-radius:12px;background:rgba(255,255,255,.05);font-size:14px;line-height:1.7;color:#fff}.ok{color:#8ff}.warn{color:#ffd48a}code{color:#8ff}
   </style>
   <script>
     const TARGET='K線西遊記/temples/12345/index.html';
@@ -89,7 +78,7 @@ PRIMEFORGE_LIFE_HEADER_V1:
     }
     function go(){ location.href=TARGET+carryQuery(); }
     window.addEventListener('DOMContentLoaded',function(){
-      setTimeout(go,80);
+      setTimeout(go,120);
       const a=document.getElementById('go-temple');
       if(a) a.href=TARGET+carryQuery();
     });
@@ -97,9 +86,13 @@ PRIMEFORGE_LIFE_HEADER_V1:
 </head>
 <body>
   <div class="card">
-    <h1>KGEN 12345 悟空財神殿橋接入口</h1>
-    <p>VERSION：<code>V2.3.1 / BRIDGE RESTORE</code></p>
-    <p>英文入口：<code>12345.html</code> → 神殿（保留 autoconnect 參數）</p>
+    <h1>KGEN 12345 五指山悟空財神殿</h1>
+    <div class="status">
+      <div class="ok">前端版本：V10.50.0</div>
+      <div>正式天條：KGEN → KAIOS → KUFO → KSHIP 已整合進 main</div>
+      <div>TempleHeart 程式目標：V3.3.2 UUPS</div>
+      <div class="warn">鏈上代理升級需另外由正式 BSC 簽署交易完成；網頁上線不等於鏈上代理已升級。</div>
+    </div>
     <a id="go-temple" href="K線西遊記/temples/12345/index.html">立即進入神殿</a>
     <button onclick="location.href=ABS+carryQuery()">啟動 GitHub Pages 正式入口</button>
     <button class="sub" onclick="navigator.clipboard&&navigator.clipboard.writeText(ABS+carryQuery());this.textContent='已複製正式入口網址';">複製正式入口網址</button>
