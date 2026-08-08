@@ -1,4 +1,6 @@
 # 《KAIOS 多文明 × 宗教中立 × 生命出生遷移 Runtime》
+> **SUPERSEDED HISTORICAL SNAPSHOT:** The 1:10,000 monetary scale in this edition is superseded by the 2026-08-09 CURRENT lineage. Retained for history only.
+
 ## KAIOS Multicivilization, Religious Neutrality and Life Migration Runtime
 ### V1.0 Global Civilization Edition
 

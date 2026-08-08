@@ -1,4 +1,6 @@
 # 《18888 靈霄寶殿神明銀行白皮書》
+> **SUPERSEDED HISTORICAL SNAPSHOT:** The 1 kg / 1:10,000 monetary scale in this edition is superseded by the 2026-08-09 CURRENT lineage. Retained for history only.
+
 ## Celestial Autonomous Bank 18888 Whitepaper
 ### V1.0 Genesis Edition｜創世版
 

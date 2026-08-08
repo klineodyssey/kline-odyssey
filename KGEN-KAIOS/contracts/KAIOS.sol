@@ -3,6 +3,7 @@ pragma solidity 0.8.24;
 
 import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import {ERC20Capped} from "@openzeppelin/contracts/token/ERC20/extensions/ERC20Capped.sol";
+import {IKAIOSOrganRegistry} from "./interfaces/IKAIOSOrganRegistry.sol";
 
 interface IKGENSupply {
     function totalSupply() external view returns (uint256);
@@ -30,7 +31,7 @@ interface IKGENSupply {
  *
  * ALCHEMY — POINT 18911
  * KAIOS may be voluntarily burned for future KUFO conversion only through the
- * immutable official 18911 Alchemy Furnace address. The holder must first give
+ * current registered 18911 Alchemy Furnace organ. The holder must first give
  * ERC-20 allowance to that furnace. The furnace cannot burn more than the
  * holder explicitly approved.
  *
@@ -40,6 +41,7 @@ interface IKGENSupply {
  * / Qitian Dasheng Palace protocol.
  */
 contract KAIOS is ERC20, ERC20Capped {
+    bytes32 public constant ORGAN_FURNACE_18911 = keccak256("KAIOS.ORGAN.FURNACE.18911");
     uint256 public constant KGEN_GENESIS_SUPPLY = 72_000_000 ether;
     uint256 public constant KAIOS_PER_KGEN = 1_000;
     uint256 public constant KUFO_PER_KAIOS = 1_000;
@@ -64,7 +66,7 @@ contract KAIOS is ERC20, ERC20Capped {
 
     address public immutable KGEN;
     address public immutable LINGXIAO_TREASURY_18888;
-    address public immutable ALCHEMY_FURNACE_18911;
+    IKAIOSOrganRegistry public immutable ORGAN_REGISTRY;
 
     uint256 public settledKgenBurned;
     uint256 public totalKaiosMintedFromKgen;
@@ -121,7 +123,7 @@ contract KAIOS is ERC20, ERC20Capped {
     constructor(
         address canonicalKgen,
         address treasury18888,
-        address alchemyFurnace18911
+        address organRegistry
     )
         ERC20("KAIOS Civilization Credit", "KAIOS")
         ERC20Capped(MAX_SUPPLY)
@@ -129,15 +131,15 @@ contract KAIOS is ERC20, ERC20Capped {
         if (
             canonicalKgen == address(0) ||
             treasury18888 == address(0) ||
-            alchemyFurnace18911 == address(0)
+            organRegistry == address(0)
         ) revert ZeroAddress();
 
         if (canonicalKgen.code.length == 0) revert NotAContract(canonicalKgen);
-        if (alchemyFurnace18911.code.length == 0) revert NotAContract(alchemyFurnace18911);
+        if (organRegistry.code.length == 0) revert NotAContract(organRegistry);
 
         KGEN = canonicalKgen;
         LINGXIAO_TREASURY_18888 = treasury18888;
-        ALCHEMY_FURNACE_18911 = alchemyFurnace18911;
+        ORGAN_REGISTRY = IKAIOSOrganRegistry(organRegistry);
 
         uint256 supply = IKGENSupply(canonicalKgen).totalSupply();
         if (supply > KGEN_GENESIS_SUPPLY) {
@@ -197,7 +199,8 @@ contract KAIOS is ERC20, ERC20Capped {
         external
         returns (bytes32 alchemyProofId, uint256 expectedKufo)
     {
-        if (msg.sender != ALCHEMY_FURNACE_18911) {
+        address currentFurnace = ORGAN_REGISTRY.organ(ORGAN_FURNACE_18911);
+        if (msg.sender != currentFurnace || currentFurnace == address(0)) {
             revert OnlyOfficialAlchemyFurnace(msg.sender);
         }
         if (owner == address(0) || beneficiary == address(0)) revert ZeroAddress();

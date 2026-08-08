@@ -34,6 +34,8 @@ Last optimized: 2026-06-11
 | Workforce Governance | https://klineodyssey.github.io/kline-odyssey/workforce/ |
 | Official Video Library | https://klineodyssey.github.io/kline-odyssey/video/ |
 | KAIOS Constitution | [KGEN-KAIOS/constitution/KAIOS_CONSTITUTION.md](KGEN-KAIOS/constitution/KAIOS_CONSTITUTION.md) |
+| KAIOS 2026-08-09 Mass and Planck CURRENT | [docs/physics/KGEN_KAIOS_SCALE_AND_PLANCK_RUNTIME_CURRENT.md](docs/physics/KGEN_KAIOS_SCALE_AND_PLANCK_RUNTIME_CURRENT.md) |
+| KAIOS Token Lineage Integration Review | [KGEN-KAIOS/reports/KAIOS_TOKEN_LINEAGE_INTEGRATION_REVIEW_2026-08-09.md](KGEN-KAIOS/reports/KAIOS_TOKEN_LINEAGE_INTEGRATION_REVIEW_2026-08-09.md) |
 | KAIOS Kernel V1 Design | [KGEN-KAIOS/kernel/KERNEL_V1.md](KGEN-KAIOS/kernel/KERNEL_V1.md) |
 | Architecture Governance Board | [KGEN-KAIOS/governance/ARCHITECTURE_GOVERNANCE_BOARD.md](KGEN-KAIOS/governance/ARCHITECTURE_GOVERNANCE_BOARD.md) |
 | KAIOS V11.0 Architecture Baseline | [KGEN-KAIOS/V11/ARCHITECTURE_BASELINE.md](KGEN-KAIOS/V11/ARCHITECTURE_BASELINE.md) |

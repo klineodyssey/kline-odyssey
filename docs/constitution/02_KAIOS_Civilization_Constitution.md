@@ -78,14 +78,14 @@ KAIOS 負責：
 ## 1.3 創世比例
 
 ```text
-1 KGEN = 1 kg
-1 KGEN = 10,000 KAIOS
+1 KGEN = 1 metric ton = 1,000 kg
+1 KGEN = 1,000 KAIOS
 ```
 
 其中：
 
-- `1 KGEN = 1 kg` 是 KGEN 宇宙質量本體論中的質量單位設定。
-- `1 KGEN = 10,000 KAIOS` 是 KGEN 與 KAIOS 之間的創世治理比例。
+- `1 KGEN = 1 metric ton = 1,000 kg` 是 KGEN 宇宙質量本體論中的質量單位設定。
+- `1 KGEN = 1,000 KAIOS` 是 KGEN 與 KAIOS 之間的質量守恆比例。
 
 這不代表：
 
@@ -181,7 +181,7 @@ Symbol: KAIOS
 Decimals: 18
 Minimum Unit: 10^-18 KAIOS
 Maximum Supply: 720,000,000,000 KAIOS
-Reference Ratio: 1 KGEN = 10,000 KAIOS
+Reference Ratio: 1 KGEN = 1,000 KAIOS
 ```
 
 ## 3.2 創世發行

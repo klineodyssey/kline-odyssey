@@ -1,0 +1,596 @@
+{
+  "taskId": "KAIOS-TOKEN-LINEAGE-INTEGRATION-20260809",
+  "auditedAt": "2026-08-09T00:00:00+08:00",
+  "scope": "repository working tree plus PR #127 conflict evidence",
+  "reconciledActiveFiles": [
+    "docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md",
+    "KGEN-KAIOS/KAIOS_WHITE_HOLE_ATOMIC_CONVERSION_AND_LIQUIDITY_RUNTIME_CURRENT.md",
+    "KGEN-KAIOS/UNIVERSE_EXCHANGE_RUNTIME_CURRENT.md",
+    "docs/constitution/01_KGEN_Universe_Constitution.md",
+    "docs/constitution/02_KAIOS_Civilization_Constitution.md",
+    "docs/constitution/03_Celestial_Bank_18888.md",
+    "K線西遊記/data/kgen-5d-world-map.json"
+  ],
+  "patterns": [
+    "1 KGEN = 1 kg",
+    "10,000 KAIOS",
+    "KAIOS_PER_KGEN = 10_000",
+    "BurnProofGenesis",
+    "Species → Cell → Organ"
+  ],
+  "counts": {
+    "CURRENT-CONFLICT": 2,
+    "HISTORICAL-ARCHIVE": 44,
+    "TEST-FIXTURE": 1,
+    "SAFE": 34
+  },
+  "findings": [
+    {
+      "path": "docs/physics/final-whitepaper/CODEX_KAIOS_WHITE_HOLE_GENESIS_IMPLEMENTATION_INSTRUCTIONS.md",
+      "line": 43,
+      "pattern": "10,000 KAIOS",
+      "classification": "SAFE",
+      "action": "Reference is an explicit supersession, audit instruction, or conflict example."
+    },
+    {
+      "path": "docs/physics/final-whitepaper/CODEX_KAIOS_WHITE_HOLE_GENESIS_IMPLEMENTATION_INSTRUCTIONS.md",
+      "line": 253,
+      "pattern": "10,000 KAIOS",
+      "classification": "SAFE",
+      "action": "Reference is an explicit supersession, audit instruction, or conflict example."
+    },
+    {
+      "path": "docs/physics/final-whitepaper/CODEX_V4_PENDING_MERGE_NOTES.md",
+      "line": 354,
+      "pattern": "1 KGEN = 1 kg",
+      "classification": "SAFE",
+      "action": "Reference is an explicit supersession, audit instruction, or conflict example."
+    },
+    {
+      "path": "docs/physics/final-whitepaper/KGEN_Universe_Physics_PreSpacetime_WhiteHole_AngularMomentum.md",
+      "line": 42,
+      "pattern": "1 KGEN = 1 kg",
+      "classification": "SAFE",
+      "action": "Reference is an explicit supersession, audit instruction, or conflict example."
+    },
+    {
+      "path": "docs/physics/final-whitepaper/KGEN_Universe_Physics_PreSpacetime_WhiteHole_AngularMomentum.md",
+      "line": 42,
+      "pattern": "10,000 KAIOS",
+      "classification": "SAFE",
+      "action": "Reference is an explicit supersession, audit instruction, or conflict example."
+    },
+    {
+      "path": "docs/physics/final-whitepaper/KGEN_Universe_Physics_PreSpacetime_WhiteHole_AngularMomentum.md",
+      "line": 382,
+      "pattern": "1 KGEN = 1 kg",
+      "classification": "SAFE",
+      "action": "Reference is an explicit supersession, audit instruction, or conflict example."
+    },
+    {
+      "path": "docs/physics/final-whitepaper/KGEN_Universe_Physics_PreSpacetime_WhiteHole_AngularMomentum.md",
+      "line": 383,
+      "pattern": "10,000 KAIOS",
+      "classification": "SAFE",
+      "action": "Reference is an explicit supersession, audit instruction, or conflict example."
+    },
+    {
+      "path": "docs/physics/KGEN_KAIOS_SCALE_AND_PLANCK_RUNTIME_CURRENT.md",
+      "line": 202,
+      "pattern": "10,000 KAIOS",
+      "classification": "SAFE",
+      "action": "Reference is an explicit supersession, audit instruction, or conflict example."
+    },
+    {
+      "path": "docs/physics/KGEN_KAIOS_SCALE_AND_PLANCK_RUNTIME_CURRENT.md",
+      "line": 203,
+      "pattern": "BurnProofGenesis",
+      "classification": "SAFE",
+      "action": "Reference is an explicit supersession, audit instruction, or conflict example."
+    },
+    {
+      "path": "docs/physics/KGEN_Universe_Physics_Runtime_V1_6.md",
+      "line": 2661,
+      "pattern": "1 KGEN = 1 kg",
+      "classification": "HISTORICAL-ARCHIVE",
+      "action": "Retain historical bytes; mark superseded by 2026-08-09 lineage law."
+    },
+    {
+      "path": "docs/physics/KGEN_Universe_Physics_Runtime_V1_7.md",
+      "line": 2760,
+      "pattern": "1 KGEN = 1 kg",
+      "classification": "HISTORICAL-ARCHIVE",
+      "action": "Retain historical bytes; mark superseded by 2026-08-09 lineage law."
+    },
+    {
+      "path": "docs/physics/KGEN_Universe_Physics_Runtime_V1_7.md",
+      "line": 3215,
+      "pattern": "1 KGEN = 1 kg",
+      "classification": "HISTORICAL-ARCHIVE",
+      "action": "Retain historical bytes; mark superseded by 2026-08-09 lineage law."
+    },
+    {
+      "path": "docs/physics/KGEN_Universe_Physics_Runtime_V3_1_Territory_Unified.md",
+      "line": 92,
+      "pattern": "1 KGEN = 1 kg",
+      "classification": "HISTORICAL-ARCHIVE",
+      "action": "Retain historical bytes; mark superseded by 2026-08-09 lineage law."
+    },
+    {
+      "path": "docs/physics/KGEN_Universe_Physics_Runtime_V3_1_Territory_Unified.md",
+      "line": 2004,
+      "pattern": "1 KGEN = 1 kg",
+      "classification": "HISTORICAL-ARCHIVE",
+      "action": "Retain historical bytes; mark superseded by 2026-08-09 lineage law."
+    },
+    {
+      "path": "docs/physics/KGEN_Universe_Physics_Runtime_V3_1_Territory_Unified.md",
+      "line": 2228,
+      "pattern": "1 KGEN = 1 kg",
+      "classification": "HISTORICAL-ARCHIVE",
+      "action": "Retain historical bytes; mark superseded by 2026-08-09 lineage law."
+    },
+    {
+      "path": "docs/physics/KGEN_Universe_Physics_Runtime_V3_1_Territory_Unified.md",
+      "line": 2472,
+      "pattern": "1 KGEN = 1 kg",
+      "classification": "HISTORICAL-ARCHIVE",
+      "action": "Retain historical bytes; mark superseded by 2026-08-09 lineage law."
+    },
+    {
+      "path": "docs/physics/KGEN_Universe_Physics_Runtime_V3_1_Territory_Unified.md",
+      "line": 2651,
+      "pattern": "1 KGEN = 1 kg",
+      "classification": "HISTORICAL-ARCHIVE",
+      "action": "Retain historical bytes; mark superseded by 2026-08-09 lineage law."
+    },
+    {
+      "path": "docs/physics/KGEN_Universe_Physics_Runtime_V3_3_EARTH_LIFE_CERTIFICATION.md",
+      "line": 94,
+      "pattern": "1 KGEN = 1 kg",
+      "classification": "HISTORICAL-ARCHIVE",
+      "action": "Retain historical bytes; mark superseded by 2026-08-09 lineage law."
+    },
+    {
+      "path": "docs/physics/KGEN_Universe_Physics_Runtime_V3_3_EARTH_LIFE_CERTIFICATION.md",
+      "line": 2006,
+      "pattern": "1 KGEN = 1 kg",
+      "classification": "HISTORICAL-ARCHIVE",
+      "action": "Retain historical bytes; mark superseded by 2026-08-09 lineage law."
+    },
+    {
+      "path": "docs/physics/KGEN_Universe_Physics_Runtime_V3_3_EARTH_LIFE_CERTIFICATION.md",
+      "line": 2230,
+      "pattern": "1 KGEN = 1 kg",
+      "classification": "HISTORICAL-ARCHIVE",
+      "action": "Retain historical bytes; mark superseded by 2026-08-09 lineage law."
+    },
+    {
+      "path": "docs/physics/KGEN_Universe_Physics_Runtime_V3_3_EARTH_LIFE_CERTIFICATION.md",
+      "line": 2474,
+      "pattern": "1 KGEN = 1 kg",
+      "classification": "HISTORICAL-ARCHIVE",
+      "action": "Retain historical bytes; mark superseded by 2026-08-09 lineage law."
+    },
+    {
+      "path": "docs/physics/KGEN_Universe_Physics_Runtime_V3_3_EARTH_LIFE_CERTIFICATION.md",
+      "line": 2653,
+      "pattern": "1 KGEN = 1 kg",
+      "classification": "HISTORICAL-ARCHIVE",
+      "action": "Retain historical bytes; mark superseded by 2026-08-09 lineage law."
+    },
+    {
+      "path": "docs/physics/KGEN_Universe_Physics_Runtime_V3_7.md",
+      "line": 96,
+      "pattern": "1 KGEN = 1 kg",
+      "classification": "HISTORICAL-ARCHIVE",
+      "action": "Retain historical bytes; mark superseded by 2026-08-09 lineage law."
+    },
+    {
+      "path": "docs/physics/KGEN_Universe_Physics_Runtime_V3_7.md",
+      "line": 2008,
+      "pattern": "1 KGEN = 1 kg",
+      "classification": "HISTORICAL-ARCHIVE",
+      "action": "Retain historical bytes; mark superseded by 2026-08-09 lineage law."
+    },
+    {
+      "path": "docs/physics/KGEN_Universe_Physics_Runtime_V3_7.md",
+      "line": 2232,
+      "pattern": "1 KGEN = 1 kg",
+      "classification": "HISTORICAL-ARCHIVE",
+      "action": "Retain historical bytes; mark superseded by 2026-08-09 lineage law."
+    },
+    {
+      "path": "docs/physics/KGEN_Universe_Physics_Runtime_V3_7.md",
+      "line": 2476,
+      "pattern": "1 KGEN = 1 kg",
+      "classification": "HISTORICAL-ARCHIVE",
+      "action": "Retain historical bytes; mark superseded by 2026-08-09 lineage law."
+    },
+    {
+      "path": "docs/physics/KGEN_Universe_Physics_Runtime_V3_7.md",
+      "line": 2655,
+      "pattern": "1 KGEN = 1 kg",
+      "classification": "HISTORICAL-ARCHIVE",
+      "action": "Retain historical bytes; mark superseded by 2026-08-09 lineage law."
+    },
+    {
+      "path": "docs/Whitepaper/18888_Celestial_Autonomous_Bank_Whitepaper_V1.0_Genesis_Edition.md",
+      "line": 139,
+      "pattern": "1 KGEN = 1 kg",
+      "classification": "HISTORICAL-ARCHIVE",
+      "action": "Retain historical bytes; mark superseded by 2026-08-09 lineage law."
+    },
+    {
+      "path": "docs/Whitepaper/18888_Celestial_Autonomous_Bank_Whitepaper_V1.0_Genesis_Edition.md",
+      "line": 140,
+      "pattern": "10,000 KAIOS",
+      "classification": "HISTORICAL-ARCHIVE",
+      "action": "Retain historical bytes; mark superseded by 2026-08-09 lineage law."
+    },
+    {
+      "path": "docs/Whitepaper/18888_Celestial_Autonomous_Bank_Whitepaper_V1.0_Genesis_Edition.md",
+      "line": 264,
+      "pattern": "10,000 KAIOS",
+      "classification": "HISTORICAL-ARCHIVE",
+      "action": "Retain historical bytes; mark superseded by 2026-08-09 lineage law."
+    },
+    {
+      "path": "docs/Whitepaper/18888_Celestial_Autonomous_Bank_Whitepaper_V1.0_Genesis_Edition.md",
+      "line": 266,
+      "pattern": "10,000 KAIOS",
+      "classification": "HISTORICAL-ARCHIVE",
+      "action": "Retain historical bytes; mark superseded by 2026-08-09 lineage law."
+    },
+    {
+      "path": "docs/Whitepaper/18888_Celestial_Autonomous_Bank_Whitepaper_V1.0_Genesis_Edition.md",
+      "line": 976,
+      "pattern": "10,000 KAIOS",
+      "classification": "HISTORICAL-ARCHIVE",
+      "action": "Retain historical bytes; mark superseded by 2026-08-09 lineage law."
+    },
+    {
+      "path": "KGEN-KAIOS/archive/KAIOSV01_BurnProofGenesis_DRAFT_ARCHIVE.md",
+      "line": 4,
+      "pattern": "BurnProofGenesis",
+      "classification": "HISTORICAL-ARCHIVE",
+      "action": "Retain historical bytes; mark superseded by 2026-08-09 lineage law."
+    },
+    {
+      "path": "KGEN-KAIOS/archive/KAIOSV01_BurnProofGenesis_DRAFT_ARCHIVE.md",
+      "line": 5,
+      "pattern": "BurnProofGenesis",
+      "classification": "HISTORICAL-ARCHIVE",
+      "action": "Retain historical bytes; mark superseded by 2026-08-09 lineage law."
+    },
+    {
+      "path": "KGEN-KAIOS/archive/KAIOSV01_BurnProofGenesis_DRAFT_ARCHIVE.md",
+      "line": 12,
+      "pattern": "10,000 KAIOS",
+      "classification": "HISTORICAL-ARCHIVE",
+      "action": "Retain historical bytes; mark superseded by 2026-08-09 lineage law."
+    },
+    {
+      "path": "KGEN-KAIOS/archive/KAIOS_CELESTIAL_BANK_CONSERVATION_WHITEPAPER_V1.2_ARCHIVE.md",
+      "line": 15,
+      "pattern": "10,000 KAIOS",
+      "classification": "HISTORICAL-ARCHIVE",
+      "action": "Retain historical bytes; mark superseded by 2026-08-09 lineage law."
+    },
+    {
+      "path": "KGEN-KAIOS/archive/KAIOS_CELESTIAL_BANK_CONSERVATION_WHITEPAPER_V1.3_ARCHIVE.md",
+      "line": 19,
+      "pattern": "10,000 KAIOS",
+      "classification": "HISTORICAL-ARCHIVE",
+      "action": "Retain historical bytes; mark superseded by 2026-08-09 lineage law."
+    },
+    {
+      "path": "KGEN-KAIOS/CODEX_HANDOFF_2026-08-09.md",
+      "line": 7,
+      "pattern": "KAIOS_PER_KGEN = 10_000",
+      "classification": "SAFE",
+      "action": "Reference is an explicit supersession, audit instruction, or conflict example."
+    },
+    {
+      "path": "KGEN-KAIOS/CODEX_HANDOFF_2026-08-09.md",
+      "line": 7,
+      "pattern": "BurnProofGenesis",
+      "classification": "SAFE",
+      "action": "Reference is an explicit supersession, audit instruction, or conflict example."
+    },
+    {
+      "path": "KGEN-KAIOS/CODEX_HANDOFF_2026-08-09.md",
+      "line": 59,
+      "pattern": "BurnProofGenesis",
+      "classification": "SAFE",
+      "action": "Reference is an explicit supersession, audit instruction, or conflict example."
+    },
+    {
+      "path": "KGEN-KAIOS/CODEX_HANDOFF_2026-08-09.md",
+      "line": 70,
+      "pattern": "KAIOS_PER_KGEN = 10_000",
+      "classification": "SAFE",
+      "action": "Reference is an explicit supersession, audit instruction, or conflict example."
+    },
+    {
+      "path": "KGEN-KAIOS/CODEX_HANDOFF_2026-08-09.md",
+      "line": 71,
+      "pattern": "BurnProofGenesis",
+      "classification": "SAFE",
+      "action": "Reference is an explicit supersession, audit instruction, or conflict example."
+    },
+    {
+      "path": "KGEN-KAIOS/CODEX_HANDOFF_2026-08-09.md",
+      "line": 78,
+      "pattern": "1 KGEN = 1 kg",
+      "classification": "SAFE",
+      "action": "Reference is an explicit supersession, audit instruction, or conflict example."
+    },
+    {
+      "path": "KGEN-KAIOS/CODEX_HANDOFF_2026-08-09.md",
+      "line": 82,
+      "pattern": "10,000 KAIOS",
+      "classification": "SAFE",
+      "action": "Reference is an explicit supersession, audit instruction, or conflict example."
+    },
+    {
+      "path": "KGEN-KAIOS/CODEX_HANDOFF_2026-08-09.md",
+      "line": 83,
+      "pattern": "KAIOS_PER_KGEN = 10_000",
+      "classification": "SAFE",
+      "action": "Reference is an explicit supersession, audit instruction, or conflict example."
+    },
+    {
+      "path": "KGEN-KAIOS/CODEX_HANDOFF_2026-08-09.md",
+      "line": 84,
+      "pattern": "1 KGEN = 1 kg",
+      "classification": "SAFE",
+      "action": "Reference is an explicit supersession, audit instruction, or conflict example."
+    },
+    {
+      "path": "KGEN-KAIOS/CODEX_HANDOFF_2026-08-09.md",
+      "line": 85,
+      "pattern": "BurnProofGenesis",
+      "classification": "SAFE",
+      "action": "Reference is an explicit supersession, audit instruction, or conflict example."
+    },
+    {
+      "path": "KGEN-KAIOS/CODEX_HANDOFF_2026-08-09.md",
+      "line": 86,
+      "pattern": "Species → Cell → Organ",
+      "classification": "SAFE",
+      "action": "Reference is an explicit supersession, audit instruction, or conflict example."
+    },
+    {
+      "path": "KGEN-KAIOS/KAIOS.md",
+      "line": 23,
+      "pattern": "10,000 KAIOS",
+      "classification": "SAFE",
+      "action": "Reference is an explicit supersession, audit instruction, or conflict example."
+    },
+    {
+      "path": "KGEN-KAIOS/KAIOS_CELESTIAL_BANK_CONSERVATION_WHITEPAPER_V1.6.md",
+      "line": 54,
+      "pattern": "10,000 KAIOS",
+      "classification": "HISTORICAL-ARCHIVE",
+      "action": "Retain historical bytes; mark superseded by 2026-08-09 lineage law."
+    },
+    {
+      "path": "KGEN-KAIOS/KAIOS_MULTICIVILIZATION_RELIGIOUS_NEUTRALITY_LIFE_MIGRATION_RUNTIME_V1.0.md",
+      "line": 241,
+      "pattern": "10,000 KAIOS",
+      "classification": "HISTORICAL-ARCHIVE",
+      "action": "Retain historical bytes; mark superseded by 2026-08-09 lineage law."
+    },
+    {
+      "path": "KGEN-KAIOS/KAIOS_MULTICIVILIZATION_RELIGIOUS_NEUTRALITY_LIFE_MIGRATION_RUNTIME_V1.0.md",
+      "line": 245,
+      "pattern": "10,000 KAIOS",
+      "classification": "HISTORICAL-ARCHIVE",
+      "action": "Retain historical bytes; mark superseded by 2026-08-09 lineage law."
+    },
+    {
+      "path": "KGEN-KAIOS/KAIOS_YUNZHAN_CAVE_8895_SHADOW_BANK_REAL_ECONOMY_SPEC_V1.0.md",
+      "line": 65,
+      "pattern": "10,000 KAIOS",
+      "classification": "HISTORICAL-ARCHIVE",
+      "action": "Retain historical bytes; mark superseded by 2026-08-09 lineage law."
+    },
+    {
+      "path": "KGEN-KAIOS/KAIOS_YUNZHAN_CAVE_8895_SHADOW_BANK_REAL_ECONOMY_SPEC_V1.0.md",
+      "line": 87,
+      "pattern": "10,000 KAIOS",
+      "classification": "HISTORICAL-ARCHIVE",
+      "action": "Retain historical bytes; mark superseded by 2026-08-09 lineage law."
+    },
+    {
+      "path": "KGEN-KAIOS/KAIOS_YUNZHAN_CAVE_8895_SHADOW_BANK_REAL_ECONOMY_SPEC_V1.0.md",
+      "line": 90,
+      "pattern": "10,000 KAIOS",
+      "classification": "HISTORICAL-ARCHIVE",
+      "action": "Retain historical bytes; mark superseded by 2026-08-09 lineage law."
+    },
+    {
+      "path": "KGEN-KAIOS/KAIOS_YUNZHAN_CAVE_8895_SHADOW_BANK_REAL_ECONOMY_SPEC_V1.0.md",
+      "line": 110,
+      "pattern": "10,000 KAIOS",
+      "classification": "HISTORICAL-ARCHIVE",
+      "action": "Retain historical bytes; mark superseded by 2026-08-09 lineage law."
+    },
+    {
+      "path": "KGEN-KAIOS/KAIOS_YUNZHAN_CAVE_8895_SHADOW_BANK_REAL_ECONOMY_SPEC_V1.0.md",
+      "line": 119,
+      "pattern": "10,000 KAIOS",
+      "classification": "HISTORICAL-ARCHIVE",
+      "action": "Retain historical bytes; mark superseded by 2026-08-09 lineage law."
+    },
+    {
+      "path": "KGEN-KAIOS/KAIOS_YUNZHAN_CAVE_8895_SHADOW_BANK_REAL_ECONOMY_SPEC_V1.0.md",
+      "line": 168,
+      "pattern": "10,000 KAIOS",
+      "classification": "HISTORICAL-ARCHIVE",
+      "action": "Retain historical bytes; mark superseded by 2026-08-09 lineage law."
+    },
+    {
+      "path": "KGEN-KAIOS/KAIOS_YUNZHAN_CAVE_8895_SHADOW_BANK_REAL_ECONOMY_SPEC_V1.0.md",
+      "line": 201,
+      "pattern": "10,000 KAIOS",
+      "classification": "HISTORICAL-ARCHIVE",
+      "action": "Retain historical bytes; mark superseded by 2026-08-09 lineage law."
+    },
+    {
+      "path": "KGEN-KAIOS/KAIOS_YUNZHAN_CAVE_8895_SHADOW_BANK_REAL_ECONOMY_SPEC_V1.0.md",
+      "line": 369,
+      "pattern": "10,000 KAIOS",
+      "classification": "HISTORICAL-ARCHIVE",
+      "action": "Retain historical bytes; mark superseded by 2026-08-09 lineage law."
+    },
+    {
+      "path": "KGEN-KAIOS/KAIOS_YUNZHAN_CAVE_8895_SHADOW_BANK_REAL_ECONOMY_SPEC_V1.0.md",
+      "line": 461,
+      "pattern": "10,000 KAIOS",
+      "classification": "HISTORICAL-ARCHIVE",
+      "action": "Retain historical bytes; mark superseded by 2026-08-09 lineage law."
+    },
+    {
+      "path": "KGEN-KAIOS/KAIOS_YUNZHAN_CAVE_8895_SHADOW_BANK_REAL_ECONOMY_SPEC_V1.0.md",
+      "line": 612,
+      "pattern": "10,000 KAIOS",
+      "classification": "HISTORICAL-ARCHIVE",
+      "action": "Retain historical bytes; mark superseded by 2026-08-09 lineage law."
+    },
+    {
+      "path": "KGEN-KAIOS/KAIOS_YUNZHAN_CAVE_8895_SHADOW_BANK_REAL_ECONOMY_SPEC_V1.0.md",
+      "line": 645,
+      "pattern": "10,000 KAIOS",
+      "classification": "HISTORICAL-ARCHIVE",
+      "action": "Retain historical bytes; mark superseded by 2026-08-09 lineage law."
+    },
+    {
+      "path": "KGEN-KAIOS/tests/fixtures/templeheart-v3.3.1-storage-layout.json",
+      "line": 13,
+      "pattern": "BurnProofGenesis",
+      "classification": "TEST-FIXTURE",
+      "action": "Retain as explicit regression fixture."
+    },
+    {
+      "path": "KGEN-KAIOS/tools/generate-stale-reference-audit.mjs",
+      "line": 9,
+      "pattern": "1 KGEN = 1 kg",
+      "classification": "SAFE",
+      "action": "Audit tooling contains the literal search pattern by design."
+    },
+    {
+      "path": "KGEN-KAIOS/tools/generate-stale-reference-audit.mjs",
+      "line": 10,
+      "pattern": "10,000 KAIOS",
+      "classification": "SAFE",
+      "action": "Audit tooling contains the literal search pattern by design."
+    },
+    {
+      "path": "KGEN-KAIOS/tools/generate-stale-reference-audit.mjs",
+      "line": 11,
+      "pattern": "KAIOS_PER_KGEN = 10_000",
+      "classification": "SAFE",
+      "action": "Audit tooling contains the literal search pattern by design."
+    },
+    {
+      "path": "KGEN-KAIOS/tools/generate-stale-reference-audit.mjs",
+      "line": 12,
+      "pattern": "BurnProofGenesis",
+      "classification": "SAFE",
+      "action": "Audit tooling contains the literal search pattern by design."
+    },
+    {
+      "path": "KGEN-KAIOS/tools/generate-stale-reference-audit.mjs",
+      "line": 13,
+      "pattern": "Species → Cell → Organ",
+      "classification": "SAFE",
+      "action": "Audit tooling contains the literal search pattern by design."
+    },
+    {
+      "path": "KGEN-KAIOS/tools/generate-stale-reference-audit.mjs",
+      "line": 76,
+      "pattern": "KAIOS_PER_KGEN = 10_000",
+      "classification": "SAFE",
+      "action": "Audit tooling contains the literal search pattern by design."
+    },
+    {
+      "path": "KGEN-KAIOS/tools/generate-stale-reference-audit.mjs",
+      "line": 83,
+      "pattern": "BurnProofGenesis",
+      "classification": "SAFE",
+      "action": "Audit tooling contains the literal search pattern by design."
+    },
+    {
+      "path": "KGEN-KAIOS/tools/validate-templeheart-storage.mjs",
+      "line": 61,
+      "pattern": "BurnProofGenesis",
+      "classification": "SAFE",
+      "action": "Audit tooling contains the literal search pattern by design."
+    },
+    {
+      "path": "KGEN-KAIOS/tools/verify-current-lineage.mjs",
+      "line": 20,
+      "pattern": "1 KGEN = 1 kg",
+      "classification": "SAFE",
+      "action": "Audit tooling contains the literal search pattern by design."
+    },
+    {
+      "path": "KGEN-KAIOS/tools/verify-current-lineage.mjs",
+      "line": 21,
+      "pattern": "10,000 KAIOS",
+      "classification": "SAFE",
+      "action": "Audit tooling contains the literal search pattern by design."
+    },
+    {
+      "path": "KGEN-KAIOS/tools/verify-current-lineage.mjs",
+      "line": 22,
+      "pattern": "KAIOS_PER_KGEN = 10_000",
+      "classification": "SAFE",
+      "action": "Audit tooling contains the literal search pattern by design."
+    },
+    {
+      "path": "KGEN-KAIOS/tools/verify-current-lineage.mjs",
+      "line": 23,
+      "pattern": "BurnProofGenesis",
+      "classification": "SAFE",
+      "action": "Audit tooling contains the literal search pattern by design."
+    },
+    {
+      "path": "KGEN-KAIOS/tools/verify-current-lineage.mjs",
+      "line": 24,
+      "pattern": "Species → Cell → Organ",
+      "classification": "SAFE",
+      "action": "Audit tooling contains the literal search pattern by design."
+    },
+    {
+      "path": "K線西遊記/temples/12345/KGEN_Universe_Physics_Runtime_V1_6.md",
+      "line": 2661,
+      "pattern": "1 KGEN = 1 kg",
+      "classification": "HISTORICAL-ARCHIVE",
+      "action": "Retain historical bytes; mark superseded by 2026-08-09 lineage law."
+    },
+    {
+      "path": "whitepaper/KGEN_Universe_Physics_Runtime_V1_6.md",
+      "line": 2661,
+      "pattern": "1 KGEN = 1 kg",
+      "classification": "HISTORICAL-ARCHIVE",
+      "action": "Retain historical bytes; mark superseded by 2026-08-09 lineage law."
+    },
+    {
+      "path": "PR#127:KGEN/contracts/KGEN_TempleHeart_V3_3_0_Upgradeable.sol",
+      "line": null,
+      "pattern": "KAIOS_PER_KGEN = 10_000",
+      "classification": "CURRENT-CONFLICT",
+      "action": "Do not merge PR #127; supersede with the version-free integration contract."
+    },
+    {
+      "path": "PR#127:KGEN/contracts/KGEN_TempleHeart_V3_3_1_Upgradeable.sol",
+      "line": null,
+      "pattern": "BurnProofGenesis",
+      "classification": "CURRENT-CONFLICT",
+      "action": "Remove verifier/admin proof authority and consume KAIOS Alchemy records instead."
+    }
+  ]
+}
