@@ -1,0 +1,11 @@
+{
+  "release": "V10.50.0",
+  "date": "2026-08-09T06:40:00+08:00",
+  "status": "GITHUB_PAGES_FRONTEND_READY",
+  "mainlineMerge": "66088f3a09e3a68df3027a877e122514ab829d52",
+  "templeHeartTarget": "V3.3.2",
+  "liveProxy": "0xB016D4d8f1aED1339101b30722cad6dbA9B8C972",
+  "chainUpgradePerformed": false,
+  "transactionCompatibility": "V3.2.6_COMPATIBLE_UNTIL_SIGNED_UUPS_UPGRADE",
+  "assets": ["bull-front.png", "bear-rear.png", "heart.png", "warp-core.png"]
+}
