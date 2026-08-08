@@ -1,4 +1,6 @@
-# KGEN Universe Physics Runtime CURRENT
+> **SUPERSEDED HISTORICAL SNAPSHOT:** Despite its old title, this versioned snapshot is not CURRENT. Monetary scale statements are superseded by `KGEN_KAIOS_SCALE_AND_PLANCK_RUNTIME_CURRENT.md` (2026-08-09).
+
+# KGEN Universe Physics Runtime V3.7 (Historical)
 # KGEN_Universe_Physics_Runtime_CURRENT.md
 
 STATUS: ACTIVE  

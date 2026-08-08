@@ -83,7 +83,7 @@ KGEN
 創世本體論：
 
 ```text
-1 KGEN = 1 kg
+1 KGEN = 1 metric ton = 1,000 kg
 ```
 
 此為宇宙質量單位設定，不等同現實世界法定資產兌付。
@@ -99,7 +99,7 @@ KAIOS
 創世比例：
 
 ```text
-1 KGEN = 10,000 KAIOS
+1 KGEN = 1,000 KAIOS
 ```
 
 此比例為治理與儲備參考，不代表 KAIOS、KGEN 與焦耳、公斤或法幣可直接互換。
@@ -335,9 +335,9 @@ NO_REAL_KAIOS_TOKEN
 
 ```text
 1 KGEN 鎖入 18888
-→ 對應最多 10,000 KAIOS 可兌換額度
+→ 對應最多 1,000 KAIOS 可結算額度
 
-10,000 KAIOS 回收或 Burn
+1,000 KAIOS 回收或 Burn
 → 釋放最多 1 KGEN
 ```
 

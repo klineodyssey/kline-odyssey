@@ -6,6 +6,24 @@
 **Manager:** Codex
 **Scope:** AI work operating system for KGEN.
 
+## 2026-08-09 Token Lineage Integration Review
+
+The review-only KGEN -> KAIOS -> KUFO -> KSHIP implementation is under
+`contracts/`, with a pinned Solidity 0.8.24 test harness in this directory.
+No deployment script or Mainnet address is included.
+
+| Entry | Purpose |
+|---|---|
+| `contracts/KAIOS.sol` | Friction Mirror monetary core; 1 destroyed KGEN -> 1,000 KAIOS to 18888 |
+| `contracts/KAIOSOrganRegistry.sol` | Bootstrap-sealed and timelocked 18911/511111/KSHIP/Pair organ registry |
+| `contracts/KAIOSAlchemyFurnace.sol` | Holder-authorized KAIOS burn and 49-epoch maturity proof |
+| `contracts/KUFO.sol` | Proof-bound, zero-genesis KUFO core |
+| `contracts/KUFOClaimWormhole.sol` | 511111 single-claim organ with fixed beneficiary |
+| `contracts/KSHIP.sol` | Proof-bound, zero-genesis KSHIP core |
+| `contracts/KSHIPConverter.sol` | Holder-authorized KUFO-to-KSHIP conversion organ |
+| `contracts/KAIOSPairRegistry.sol` | External pair metadata without Token Core authority |
+| `reports/KAIOS_TOKEN_LINEAGE_INTEGRATION_REVIEW_2026-08-09.md` | Executive review and evidence index |
+
 ## Purpose
 
 KAIOS is the KGEN AI Operating System. It is not another document library and it is not a mass document expansion. It is the architecture layer that coordinates AI workers, tasks, claims, reports, reviews, recovery, dashboard state, and security policy.

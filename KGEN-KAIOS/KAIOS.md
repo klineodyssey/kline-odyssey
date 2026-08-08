@@ -139,7 +139,25 @@ no direct child-token mint
 
 ## Deployment dependency note
 
-`KAIOS.sol` requires the official 18911 furnace address in its constructor and checks that it is a contract. If 18911 itself needs the final KAIOS address, deploy a stable 18911 proxy first, deploy KAIOS pointing at that proxy, and then initialize the furnace implementation with the KAIOS address. Review this deployment order before production.
+`KAIOS.sol` permanently binds the canonical KGEN token, the first-generation
+18888 settlement treasury and one `KAIOSOrganRegistry`. It does not permanently
+bind a Furnace implementation. The registry bootstrap is configured once and
+irreversibly sealed; later organ changes require the registry governance delay.
+
+The implemented review-only organ chain is:
+
+```text
+KAIOSOrganRegistry
+-> current KAIOSAlchemyFurnace (18911)
+-> current KUFOClaimWormhole (511111)
+-> current KSHIPConverter
+-> current KAIOSPairRegistry
+```
+
+KUFO validates each claim against the immutable KAIOS burn record and the
+originating Furnace proof. KSHIP validates each claim against the immutable
+KUFO carrier burn record. Replacing an organ therefore cannot create token mass
+without a real upstream holder-authorized burn.
 
 ## Required pre-deployment tests
 

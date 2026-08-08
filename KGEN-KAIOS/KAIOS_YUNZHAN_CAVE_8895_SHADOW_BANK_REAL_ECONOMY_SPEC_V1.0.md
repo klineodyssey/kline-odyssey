@@ -1,4 +1,6 @@
 # 《8895 雲棧洞八戒地下錢莊 × 凡界土地實業金融規格》
+> **SUPERSEDED HISTORICAL SNAPSHOT:** The 1:10,000 monetary scale in this edition is superseded by the 2026-08-09 CURRENT lineage. Retained for history only.
+
 ## KAIOS Yunzhang Cave 8895 Shadow Bank × Mortal Realm Real-Economy Finance Specification
 ### V1.0 天蓬實業承擔版｜Tianpeng Real-Economy Underwriting Edition
 

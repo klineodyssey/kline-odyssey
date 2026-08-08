@@ -1,5 +1,7 @@
 # CODEX V4 PHYSICS PENDING MERGE NOTES
 
+> **SUPERSEDED PENDING NOTES:** The 1 kg KGEN checklist item is closed by the 2026-08-09 SI-aligned CURRENT lineage.
+
 **Purpose:** Record physics definitions agreed during the Codex pause so they can be merged into the canonical Physics CURRENT file without creating another parallel physics authority.
 
 **Status:** PENDING MERGE — NOT A PHYSICS AUTHORITY

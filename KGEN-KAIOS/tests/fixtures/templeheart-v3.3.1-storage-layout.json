@@ -1,0 +1,391 @@
+{
+  "sourceRef": "origin/codex/templeheart-v3.3.0-uups",
+  "sourcePath": "KGEN/contracts/KGEN_TempleHeart_V3_3_1_Upgradeable.sol",
+  "entries": [
+    {
+      "label": "kgen",
+      "slot": "0",
+      "offset": 0,
+      "encoding": "inplace",
+      "bytes": "20"
+    },
+    {
+      "label": "kaiosBurnProofGenesis",
+      "slot": "1",
+      "offset": 0,
+      "encoding": "inplace",
+      "bytes": "20"
+    },
+    {
+      "label": "brainVault",
+      "slot": "2",
+      "offset": 0,
+      "encoding": "inplace",
+      "bytes": "20"
+    },
+    {
+      "label": "lingxiaoBank",
+      "slot": "3",
+      "offset": 0,
+      "encoding": "inplace",
+      "bytes": "20"
+    },
+    {
+      "label": "marsVault",
+      "slot": "4",
+      "offset": 0,
+      "encoding": "inplace",
+      "bytes": "20"
+    },
+    {
+      "label": "autoLP",
+      "slot": "5",
+      "offset": 0,
+      "encoding": "inplace",
+      "bytes": "20"
+    },
+    {
+      "label": "blackhole",
+      "slot": "6",
+      "offset": 0,
+      "encoding": "inplace",
+      "bytes": "20"
+    },
+    {
+      "label": "fortuneGame",
+      "slot": "7",
+      "offset": 0,
+      "encoding": "inplace",
+      "bytes": "20"
+    },
+    {
+      "label": "baseCapWhole",
+      "slot": "8",
+      "offset": 0,
+      "encoding": "inplace",
+      "bytes": "32"
+    },
+    {
+      "label": "maxCapWhole",
+      "slot": "9",
+      "offset": 0,
+      "encoding": "inplace",
+      "bytes": "32"
+    },
+    {
+      "label": "capBps",
+      "slot": "10",
+      "offset": 0,
+      "encoding": "inplace",
+      "bytes": "32"
+    },
+    {
+      "label": "baseFloorWhole",
+      "slot": "11",
+      "offset": 0,
+      "encoding": "inplace",
+      "bytes": "32"
+    },
+    {
+      "label": "floorBps",
+      "slot": "12",
+      "offset": 0,
+      "encoding": "inplace",
+      "bytes": "32"
+    },
+    {
+      "label": "fortuneMinWhole",
+      "slot": "13",
+      "offset": 0,
+      "encoding": "inplace",
+      "bytes": "32"
+    },
+    {
+      "label": "fortuneMaxWhole",
+      "slot": "14",
+      "offset": 0,
+      "encoding": "inplace",
+      "bytes": "32"
+    },
+    {
+      "label": "fortuneCooldownSeconds",
+      "slot": "15",
+      "offset": 0,
+      "encoding": "inplace",
+      "bytes": "32"
+    },
+    {
+      "label": "fortuneEpochSeconds",
+      "slot": "16",
+      "offset": 0,
+      "encoding": "inplace",
+      "bytes": "32"
+    },
+    {
+      "label": "fortuneEpochMaxClaims",
+      "slot": "17",
+      "offset": 0,
+      "encoding": "inplace",
+      "bytes": "32"
+    },
+    {
+      "label": "fortuneCapEnabled",
+      "slot": "18",
+      "offset": 0,
+      "encoding": "inplace",
+      "bytes": "1"
+    },
+    {
+      "label": "minimumBurnWholeForFortune",
+      "slot": "19",
+      "offset": 0,
+      "encoding": "inplace",
+      "bytes": "32"
+    },
+    {
+      "label": "fortunePurposeCode",
+      "slot": "20",
+      "offset": 0,
+      "encoding": "inplace",
+      "bytes": "32"
+    },
+    {
+      "label": "heartbeatCooldownSeconds",
+      "slot": "21",
+      "offset": 0,
+      "encoding": "inplace",
+      "bytes": "32"
+    },
+    {
+      "label": "heartbeatBlessingPower",
+      "slot": "22",
+      "offset": 0,
+      "encoding": "inplace",
+      "bytes": "32"
+    },
+    {
+      "label": "breathBlessingPower",
+      "slot": "23",
+      "offset": 0,
+      "encoding": "inplace",
+      "bytes": "32"
+    },
+    {
+      "label": "offeringPurposeCode",
+      "slot": "24",
+      "offset": 0,
+      "encoding": "mapping",
+      "bytes": "32"
+    },
+    {
+      "label": "offeringPowerPerWholeKgen",
+      "slot": "25",
+      "offset": 0,
+      "encoding": "mapping",
+      "bytes": "32"
+    },
+    {
+      "label": "_activeWishByUser",
+      "slot": "26",
+      "offset": 0,
+      "encoding": "mapping",
+      "bytes": "32"
+    },
+    {
+      "label": "holyCupProofConsumed",
+      "slot": "27",
+      "offset": 0,
+      "encoding": "mapping",
+      "bytes": "32"
+    },
+    {
+      "label": "isPilgrim",
+      "slot": "28",
+      "offset": 0,
+      "encoding": "mapping",
+      "bytes": "32"
+    },
+    {
+      "label": "pilgrimCivilizationByWallet",
+      "slot": "29",
+      "offset": 0,
+      "encoding": "mapping",
+      "bytes": "32"
+    },
+    {
+      "label": "dailyNewPilgrims",
+      "slot": "30",
+      "offset": 0,
+      "encoding": "mapping",
+      "bytes": "32"
+    },
+    {
+      "label": "dailyActivePilgrims",
+      "slot": "31",
+      "offset": 0,
+      "encoding": "mapping",
+      "bytes": "32"
+    },
+    {
+      "label": "_activePilgrimSeenOnDay",
+      "slot": "32",
+      "offset": 0,
+      "encoding": "mapping",
+      "bytes": "32"
+    },
+    {
+      "label": "totalPilgrims",
+      "slot": "33",
+      "offset": 0,
+      "encoding": "inplace",
+      "bytes": "32"
+    },
+    {
+      "label": "totalWishers",
+      "slot": "34",
+      "offset": 0,
+      "encoding": "inplace",
+      "bytes": "32"
+    },
+    {
+      "label": "totalHolyCupPassed",
+      "slot": "35",
+      "offset": 0,
+      "encoding": "inplace",
+      "bytes": "32"
+    },
+    {
+      "label": "totalFortuneClaimants",
+      "slot": "36",
+      "offset": 0,
+      "encoding": "inplace",
+      "bytes": "32"
+    },
+    {
+      "label": "lastHeartbeatAt",
+      "slot": "37",
+      "offset": 0,
+      "encoding": "mapping",
+      "bytes": "32"
+    },
+    {
+      "label": "lastCivilizationHeartbeatAt",
+      "slot": "38",
+      "offset": 0,
+      "encoding": "mapping",
+      "bytes": "32"
+    },
+    {
+      "label": "lastBreathDay",
+      "slot": "39",
+      "offset": 0,
+      "encoding": "mapping",
+      "bytes": "32"
+    },
+    {
+      "label": "lastCivilizationBreathDay",
+      "slot": "40",
+      "offset": 0,
+      "encoding": "mapping",
+      "bytes": "32"
+    },
+    {
+      "label": "blessingPowerByCivilization",
+      "slot": "41",
+      "offset": 0,
+      "encoding": "mapping",
+      "bytes": "32"
+    },
+    {
+      "label": "heartbeatCountByCivilization",
+      "slot": "42",
+      "offset": 0,
+      "encoding": "mapping",
+      "bytes": "32"
+    },
+    {
+      "label": "breathCountByCivilization",
+      "slot": "43",
+      "offset": 0,
+      "encoding": "mapping",
+      "bytes": "32"
+    },
+    {
+      "label": "totalHeartbeats",
+      "slot": "44",
+      "offset": 0,
+      "encoding": "inplace",
+      "bytes": "32"
+    },
+    {
+      "label": "totalBreaths",
+      "slot": "45",
+      "offset": 0,
+      "encoding": "inplace",
+      "bytes": "32"
+    },
+    {
+      "label": "offeringBurnProofConsumed",
+      "slot": "46",
+      "offset": 0,
+      "encoding": "mapping",
+      "bytes": "32"
+    },
+    {
+      "label": "totalOfferingBurnedByType",
+      "slot": "47",
+      "offset": 0,
+      "encoding": "mapping",
+      "bytes": "32"
+    },
+    {
+      "label": "totalOfferingCountByType",
+      "slot": "48",
+      "offset": 0,
+      "encoding": "mapping",
+      "bytes": "32"
+    },
+    {
+      "label": "totalOfferingKgenBurned",
+      "slot": "49",
+      "offset": 0,
+      "encoding": "inplace",
+      "bytes": "32"
+    },
+    {
+      "label": "lastFortuneAt",
+      "slot": "50",
+      "offset": 0,
+      "encoding": "mapping",
+      "bytes": "32"
+    },
+    {
+      "label": "lastCivilizationFortuneAt",
+      "slot": "51",
+      "offset": 0,
+      "encoding": "mapping",
+      "bytes": "32"
+    },
+    {
+      "label": "fortuneEpochClaims",
+      "slot": "52",
+      "offset": 0,
+      "encoding": "mapping",
+      "bytes": "32"
+    },
+    {
+      "label": "fortuneBurnProofConsumed",
+      "slot": "53",
+      "offset": 0,
+      "encoding": "mapping",
+      "bytes": "32"
+    },
+    {
+      "label": "totalFortunePaid",
+      "slot": "54",
+      "offset": 0,
+      "encoding": "inplace",
+      "bytes": "32"
+    }
+  ]
+}

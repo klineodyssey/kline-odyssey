@@ -276,8 +276,8 @@ This is an initial market quote, not a permanent guarantee, reserve promise or o
 The white-hole rule:
 
 ```text
-1 KGEN permanently burned
-→ 10,000 KAIOS minted
+1 KGEN actually destroyed and observed by Friction Mirror
+→ 1,000 KAIOS settled to 18888
 ```
 
 is a one-way genesis conversion ratio, not a guaranteed two-way market price.

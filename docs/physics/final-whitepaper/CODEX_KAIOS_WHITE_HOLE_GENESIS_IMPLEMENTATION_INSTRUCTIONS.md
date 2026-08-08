@@ -1,5 +1,7 @@
 # CODEX — KAIOS White Hole Genesis Implementation Instructions
 
+> **SUPERSEDED IMPLEMENTATION INSTRUCTIONS:** Do not execute the 1:10,000 or verifier-reported burn model. Use the 2026-08-09 Friction Mirror CURRENT lineage.
+
 **STATUS:** WAITING FOR CODEX IMPLEMENTATION  
 **TARGET:** BNB Chain / Solidity  
 **SOURCE OF TRUTH:** `KGEN-KAIOS/KAIOS_WHITE_HOLE_ATOMIC_CONVERSION_AND_LIQUIDITY_RUNTIME_CURRENT.md`  

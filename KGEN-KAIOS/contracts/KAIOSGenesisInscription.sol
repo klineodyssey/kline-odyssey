@@ -26,13 +26,14 @@ contract KAIOSGenesisInscription {
     address public immutable kaiosToken;
     address public immutable kgenToken;
     address public immutable lingxiaoTreasury18888;
-    address public immutable alchemyFurnace18911;
+    address public immutable organRegistry;
 
     uint256 public immutable inscriptionBlock;
     uint256 public immutable inscriptionTimestamp;
 
     error EmptyHash();
     error ZeroAddress();
+    error NotAContract(address account);
 
     constructor(
         bytes32 fullInscriptionHash_,
@@ -40,7 +41,7 @@ contract KAIOSGenesisInscription {
         address kaiosToken_,
         address kgenToken_,
         address lingxiaoTreasury18888_,
-        address alchemyFurnace18911_
+        address organRegistry_
     ) {
         if (fullInscriptionHash_ == bytes32(0) || kaiosReadmeHash_ == bytes32(0)) {
             revert EmptyHash();
@@ -49,15 +50,18 @@ contract KAIOSGenesisInscription {
             kaiosToken_ == address(0) ||
             kgenToken_ == address(0) ||
             lingxiaoTreasury18888_ == address(0) ||
-            alchemyFurnace18911_ == address(0)
+            organRegistry_ == address(0)
         ) revert ZeroAddress();
+        if (kaiosToken_.code.length == 0) revert NotAContract(kaiosToken_);
+        if (kgenToken_.code.length == 0) revert NotAContract(kgenToken_);
+        if (organRegistry_.code.length == 0) revert NotAContract(organRegistry_);
 
         fullInscriptionHash = fullInscriptionHash_;
         kaiosReadmeHash = kaiosReadmeHash_;
         kaiosToken = kaiosToken_;
         kgenToken = kgenToken_;
         lingxiaoTreasury18888 = lingxiaoTreasury18888_;
-        alchemyFurnace18911 = alchemyFurnace18911_;
+        organRegistry = organRegistry_;
         inscriptionBlock = block.number;
         inscriptionTimestamp = block.timestamp;
     }

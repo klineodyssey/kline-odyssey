@@ -91,13 +91,13 @@ V2.0 FINAL 是 KGEN 宇宙憲法，不是補丁。
 ## 1. KGEN 質量公理
 
 ```text
-1 KGEN = 1 kg = 1 公斤 = 1 元 = 1 指數點 = 1 口 = 1 斤
+1 KGEN = 1 metric ton = 1,000 kg
 ```
 
 此為 KGEN Cosmic Unit System。
 
 ```text
-KGEN_MASS_CONSTANT = 1
+KGEN_MASS_CONSTANT_KG = 1,000
 ```
 
 KGEN 是質量單位，不是 K 球膜層。
@@ -2003,16 +2003,16 @@ TOTAL_SUPPLY = 72,000,000 KGEN
 沿用 V2.1 最高公理：
 
 ```text
-1 KGEN = 1 kg
+1 KGEN = 1 metric ton = 1,000 kg
 ```
 
 因此：
 
 ```text
-KGEN Universe Visible Mass = 72,000,000 kg
+KGEN Universe Visible Mass = 72,000,000,000 kg
 ```
 
-此處的 72,000,000 kg 代表 KGEN 宇宙可見物質 / 可轉換能量物質，不代表傳統地球質量，也不代表整個真實宇宙質量。
+此處的 72,000,000,000 kg 代表 KGEN 宇宙可見物質 / 可轉換能量物質，不代表傳統地球質量，也不代表整個真實宇宙質量。
 
 ---
 
@@ -2227,13 +2227,13 @@ E = mc²
 沿用：
 
 ```text
-1 KGEN = 1 kg
+1 KGEN = 1 metric ton = 1,000 kg
 ```
 
 因此：
 
 ```text
-1 KGEN ≈ 8.98755179 × 10^16 J
+1 KGEN ≈ 8.98755179 × 10^19 J
 ```
 
 KGEN 是可完全轉換為能量的 Visible Matter。
@@ -2260,7 +2260,7 @@ Earth Civilization Power ≈ 1.97 × 10^13 J/s
 ## 84. ECS 與 KGEN 換算
 
 ```text
-1 ECS / 1 KGEN = 1.97 × 10^13 / 8.98755179 × 10^16
+1 ECS / 1 KGEN = 1.97 × 10^13 / 8.98755179 × 10^19
 ```
 
 因此：
@@ -2272,7 +2272,7 @@ Earth Civilization Power ≈ 1.97 × 10^13 J/s
 約定簡式：
 
 ```text
-1 ECS ≈ 0.00022 KGEN
+1 ECS ≈ 0.00000022 KGEN
 ```
 
 反向換算：
@@ -2292,7 +2292,7 @@ Earth Civilization Power ≈ 1.97 × 10^13 J/s
 ## 85. 72,000,000 KGEN 總能量
 
 ```text
-TotalEnergy = 72,000,000 × 8.98755179 × 10^16 J
+TotalEnergy = 72,000,000 × 8.98755179 × 10^19 J
 ```
 
 ```text
@@ -2304,13 +2304,13 @@ TotalEnergy ≈ 6.47 × 10^24 J
 ```text
 6.47 × 10^24 J / 1.97 × 10^13 J/s
 ≈ 3.29 × 10^11 s
-≈ 10,400 years
+≈ 10,400,000 years
 ```
 
 因此：
 
 ```text
-72,000,000 KGEN ≈ 地球文明約 10,400 年能量
+72,000,000 KGEN ≈ 地球文明約 10,400,000 年能量
 ```
 
 ---
@@ -2471,12 +2471,12 @@ STATUS: DRAFT / UNVERIFIED / NEEDS_RUNTIME_TEST
 K0 是宇宙大爆炸原點。
 Deploy 是 Big Bang Runtime。
 72,000,000 KGEN 是 KGEN Universe 可見物質總量。
-1 KGEN = 1 kg。
+1 KGEN = 1 metric ton = 1,000 kg。
 KGEN 以 E=mc² 完全質能轉換。
-1 KGEN ≈ 8.99 × 10^16 J。
+1 KGEN ≈ 8.99 × 10^19 J。
 Earth Civilization Power ≈ 1.97 × 10^13 J/s。
-1 ECS ≈ 0.00022 KGEN。
-72,000,000 KGEN ≈ 地球文明 10,400 年能量。
+1 ECS ≈ 0.00000022 KGEN。
+72,000,000 KGEN ≈ 地球文明 10,400,000 年能量。
 KGEN 是 Visible Matter。
 BNB 是 Dark Matter。
 Planet = KGEN + BNB + Space + Time。
@@ -2650,7 +2650,7 @@ Kstart ~ Kend
 KGEN 是可完全質能轉換的宇宙胚胎質量。
 
 ```text
-1 KGEN = 1 kg
+1 KGEN = 1 metric ton = 1,000 kg
 E = mc²
 ```
 

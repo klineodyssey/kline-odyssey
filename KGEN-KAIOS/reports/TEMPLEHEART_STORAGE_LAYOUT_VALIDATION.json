@@ -1,0 +1,30 @@
+{
+  "status": "PASS",
+  "baseline": {
+    "ref": "origin/codex/templeheart-v3.3.0-uups",
+    "path": "KGEN/contracts/KGEN_TempleHeart_V3_3_1_Upgradeable.sol",
+    "slots": 55
+  },
+  "candidate": {
+    "path": "KGEN/contracts/KGEN_TempleHeart_Upgradeable.sol",
+    "slots": 58,
+    "appendedSlots": [
+      {
+        "label": "kaiosAlchemyProofSource",
+        "slot": "55"
+      },
+      {
+        "label": "offeringPowerPerWholeKaios",
+        "slot": "56"
+      },
+      {
+        "label": "totalOfferingKaiosBurned",
+        "slot": "57"
+      }
+    ]
+  },
+  "approvedRenames": {
+    "kaiosBurnProofGenesis": "deprecatedProofSource"
+  },
+  "failures": []
+}
