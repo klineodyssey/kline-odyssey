@@ -46,7 +46,13 @@ const input = {
     metadata: { bytecodeHash: "none" },
     outputSelection: {
       "*": {
-        "*": ["abi", "evm.bytecode.object", "evm.deployedBytecode.object", "storageLayout"],
+        "*": [
+          "abi",
+          "evm.bytecode.object",
+          "evm.deployedBytecode.object",
+          "evm.deployedBytecode.immutableReferences",
+          "storageLayout",
+        ],
       },
     },
   },
@@ -89,6 +95,7 @@ for (const [sourceName, sourceContracts] of Object.entries(output.contracts ?? {
         abi: artifact.abi,
         bytecode: `0x${artifact.evm.bytecode.object}`,
         deployedBytecode: `0x${artifact.evm.deployedBytecode.object}`,
+        immutableReferences: artifact.evm.deployedBytecode.immutableReferences ?? {},
         storageLayout: artifact.storageLayout,
       }, null, 2)}\n`,
     );

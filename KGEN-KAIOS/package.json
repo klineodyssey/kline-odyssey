@@ -6,6 +6,8 @@
   "scripts": {
     "compile": "node tools/compile-contracts.mjs",
     "storage:validate": "node tools/validate-templeheart-storage.mjs",
+    "testnet:templeheart:preflight": "node tools/validate-templeheart-storage.mjs --testnet-preflight",
+    "testnet:templeheart:rehearse": "node tools/validate-templeheart-storage.mjs --testnet-rehearsal",
     "lineage:verify": "node tools/verify-current-lineage.mjs",
     "integrity:validate": "node tools/validate-integration-artifacts.mjs",
     "test": "node --test --test-concurrency=1 --test-reporter=spec tests/*.test.mjs",
