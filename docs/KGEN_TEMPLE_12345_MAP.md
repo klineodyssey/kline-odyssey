@@ -14,8 +14,11 @@ The 12345 contract-side UP/DOWN game is implemented outside the protected Temple
 | `KGEN/contracts/KGEN_TempleHeart_Upgradeable.sol` | Final `gamePayout` vault and independent 1888 KGEN survival gate | Existing V3.4 interface; unchanged |
 | `KGEN/docs/KGEN_FORTUNE_GAME_SPEC.md` | Formal V1 behavior and TIME_ARROW_IMMUTABILITY boundary | Active implementation spec |
 | `KGEN/docs/KGEN_FORTUNE_GAME_SECURITY_REVIEW.md` | Security assumptions, tests and deployment gates | Internal review |
+| `KGEN/abi/KGEN_FortuneGame_Upgradeable.json` | Compiler-generated frontend ABI | Testnet handoff |
+| `KGEN/docs/KGEN_FORTUNE_GAME_FRONTEND_HANDOFF.md` | Proxy, TEST_ONLY_ORACLE, enums, views and transaction signatures | Testnet ready; Human review required |
+| `KGEN-KAIOS/reports/BSC_TESTNET_FORTUNE_GAME_V1_REHEARSAL.md` | Sanitized real BSC Testnet transaction evidence | PASS; no mainnet authority |
 
-No 12345 frontend module is activated by this contract PR. The legacy frontend pseudo-random text remains historical/stub evidence and is not FortuneGame Canon.
+No 12345 frontend module is activated by this contract PR. The handoff enables a separate reviewed frontend change to connect to Testnet. The legacy frontend pseudo-random text remains historical/stub evidence and is not FortuneGame Canon.
 
 ## Actual Loaded Dependency Graph From index.html
 ```mermaid

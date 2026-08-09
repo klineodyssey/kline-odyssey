@@ -166,7 +166,10 @@ All rewards follow on-chain records, Epoch rules, and irreversible logs.
 - Contract: `contracts/KGEN_FortuneGame_Upgradeable.sol`
 - Specification: `docs/KGEN_FORTUNE_GAME_SPEC.md`
 - Security review: `docs/KGEN_FORTUNE_GAME_SECURITY_REVIEW.md`
+- Compiler-generated ABI: `abi/KGEN_FortuneGame_Upgradeable.json`
+- BSC Testnet frontend handoff: `docs/KGEN_FORTUNE_GAME_FRONTEND_HANDOFF.md`
+- Sanitized real-chain evidence: `../KGEN-KAIOS/reports/BSC_TESTNET_FORTUNE_GAME_V1_REHEARSAL.md` and `.json`
 - Mode: `CREDIT_ONLY`; FortuneGame does not escrow KGEN.
 - Result: deterministic Chainlink-compatible BTC/USD Oracle proof; no pseudo-random outcome.
 - Reward boundary: finalized winners may request only the formula-derived payout through TempleHeart `gamePayout`.
-- Deployment: no mainnet deployment and no mainnet `setFortuneGame` authorization.
+- Deployment: BSC Testnet rehearsal only; no mainnet deployment and no mainnet `setFortuneGame` authorization.

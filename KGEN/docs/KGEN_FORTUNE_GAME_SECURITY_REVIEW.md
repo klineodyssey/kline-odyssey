@@ -78,6 +78,17 @@ npm test
 9. Mainnet payout, min/max credits, reward cap, timing, Oracle address and economic mode are all `HUMAN_DECISION_REQUIRED`.
 10. Independent audit, BSC Testnet rehearsal and Human review are required before any mainnet consideration.
 
+## BSC Testnet real-chain rehearsal
+
+The chainId-97 rehearsal passed with a deterministic `TEST_ONLY_ORACLE`, a new ERC1967/UUPS proxy and the existing TempleHeart V3.4 rehearsal proxy. Normal winning claims used `REAL_TEMPLEHEART_TESTNET`. Because safely draining that Heart to its 1888 floor would damage the shared fixture, the failure/refill/retry sequence used a separately deployed `TEST_MOCK_HEART` and is labeled as such in every evidence file.
+
+Sanitized receipts, block timestamps, gas, Round IDs and immutable losing-position snapshots are recorded in:
+
+- `KGEN-KAIOS/reports/BSC_TESTNET_FORTUNE_GAME_V1_REHEARSAL.json`
+- `KGEN-KAIOS/reports/BSC_TESTNET_FORTUNE_GAME_V1_REHEARSAL.md`
+
+This evidence grants no Mainnet deployment authority. `MAINNET_DEPLOY = BLOCKED` remains in force.
+
 ## Explicit prohibited actions
 
 - No mainnet FortuneGame deployment.

@@ -10,8 +10,8 @@
   "evmVersion": "paris",
   "openzeppelinContracts": "5.0.2",
   "openzeppelinContractsUpgradeable": "5.0.2",
-  "sourceCount": 19,
-  "contractCount": 30,
+  "sourceCount": 20,
+  "contractCount": 31,
   "eip170MaximumDeployedBytecodeBytes": 24576,
   "oversizedContracts": [],
   "warnings": 0,
@@ -195,6 +195,12 @@
       "sourceName": "tests/contracts/TestERC1967Proxy.sol",
       "bytecodeBytes": 660,
       "deployedBytecodeBytes": 92
+    },
+    {
+      "contractName": "TestnetMockTempleHeart1888",
+      "sourceName": "tests/contracts/TestnetMockTempleHeart1888.sol",
+      "bytecodeBytes": 1036,
+      "deployedBytecodeBytes": 880
     }
   ]
 }

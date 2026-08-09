@@ -41,6 +41,8 @@ Last optimized: 2026-06-11
 | KGEN 12345 FortuneGame V1 Contract | [KGEN/contracts/KGEN_FortuneGame_Upgradeable.sol](KGEN/contracts/KGEN_FortuneGame_Upgradeable.sol) — CREDIT_ONLY local/Testnet candidate; no mainnet deploy |
 | FortuneGame V1 Specification | [KGEN/docs/KGEN_FORTUNE_GAME_SPEC.md](KGEN/docs/KGEN_FORTUNE_GAME_SPEC.md) |
 | FortuneGame V1 Security Review | [KGEN/docs/KGEN_FORTUNE_GAME_SECURITY_REVIEW.md](KGEN/docs/KGEN_FORTUNE_GAME_SECURITY_REVIEW.md) |
+| FortuneGame V1 BSC Testnet Rehearsal | [KGEN-KAIOS/reports/BSC_TESTNET_FORTUNE_GAME_V1_REHEARSAL.md](KGEN-KAIOS/reports/BSC_TESTNET_FORTUNE_GAME_V1_REHEARSAL.md) — TESTNET_REHEARSAL_ONLY; no mainnet authority |
+| FortuneGame V1 Frontend Handoff | [KGEN/docs/KGEN_FORTUNE_GAME_FRONTEND_HANDOFF.md](KGEN/docs/KGEN_FORTUNE_GAME_FRONTEND_HANDOFF.md) |
 | KAIOS Kernel V1 Design | [KGEN-KAIOS/kernel/KERNEL_V1.md](KGEN-KAIOS/kernel/KERNEL_V1.md) |
 | Architecture Governance Board | [KGEN-KAIOS/governance/ARCHITECTURE_GOVERNANCE_BOARD.md](KGEN-KAIOS/governance/ARCHITECTURE_GOVERNANCE_BOARD.md) |
 | KAIOS V11.0 Architecture Baseline | [KGEN-KAIOS/V11/ARCHITECTURE_BASELINE.md](KGEN-KAIOS/V11/ARCHITECTURE_BASELINE.md) |

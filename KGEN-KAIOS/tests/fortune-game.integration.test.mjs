@@ -111,7 +111,9 @@ test("Heart payout rejection and reentrancy both roll back claimed state", async
   assert.equal(await context.heart.paid(await player.getAddress()), 0n);
 
   await (await context.heart.setReentry(false, roundId)).wait();
-  await (await context.game.connect(player).claim(roundId)).wait();
+  // Bypass Ganache's stale estimate cache after the two intentional reverts;
+  // the mined transaction still exercises the complete successful claim path.
+  await (await context.game.connect(player).claim(roundId, { gasLimit: 700_000 })).wait();
   assert.equal((await context.game.betInfo(roundId, await player.getAddress())).claimed, true);
   assert.equal(await context.heart.paid(await player.getAddress()), 200n);
 });

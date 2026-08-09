@@ -15,6 +15,11 @@ flowchart LR
   Game --> Security["KGEN_FORTUNE_GAME_SECURITY_REVIEW.md"]
   Tests["KGEN-KAIOS/tests/fortune-game*.test.mjs"] --> Game
   Mocks["MockAggregatorV3 / MockTempleHeartGame"] --> Tests
+  Rehearsal["BSC Testnet rehearsal script"] --> TestOracle["TEST_ONLY_ORACLE"]
+  Rehearsal --> Game
+  Rehearsal --> Heart
+  Rehearsal --> Evidence["BSC_TESTNET_FORTUNE_GAME_V1_REHEARSAL"]
+  ABI["Compiler-generated FortuneGame ABI"] --> UI
 ```
 
 TempleHeart is only the payout vault; it does not resolve market direction. FortuneGame has no arbitrary Heart transfer authority. The legacy 16888 pseudo-random contract is a superseded historical comparison and is not a dependency.

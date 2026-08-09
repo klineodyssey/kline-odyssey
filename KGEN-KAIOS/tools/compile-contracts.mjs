@@ -12,6 +12,7 @@ const externalSources = [
 ];
 const artifactsDir = path.join(root, "artifacts");
 const reportsDir = path.join(root, "reports");
+const publicAbiDir = path.resolve(root, "..", "KGEN", "abi");
 const templeHeartV332Ref = "7344d231837d40b504622c8c8b4376ed25110e20";
 const templeHeartPath = "KGEN/contracts/KGEN_TempleHeart_Upgradeable.sol";
 
@@ -83,6 +84,7 @@ if (diagnostics.some((diagnostic) => diagnostic.severity === "error")) process.e
 fs.rmSync(artifactsDir, { recursive: true, force: true });
 fs.mkdirSync(artifactsDir, { recursive: true });
 fs.mkdirSync(reportsDir, { recursive: true });
+fs.mkdirSync(publicAbiDir, { recursive: true });
 
 const contracts = [];
 for (const [sourceName, sourceContracts] of Object.entries(output.contracts ?? {})) {
@@ -102,6 +104,17 @@ for (const [sourceName, sourceContracts] of Object.entries(output.contracts ?? {
         storageLayout: artifact.storageLayout,
       }, null, 2)}\n`,
     );
+    if (contractName === "KGEN_FortuneGame_Upgradeable") {
+      fs.writeFileSync(
+        path.join(publicAbiDir, `${contractName}.json`),
+        `${JSON.stringify({
+          contractName,
+          sourceName,
+          compiler: solc.version(),
+          abi: artifact.abi,
+        }, null, 2)}\n`,
+      );
+    }
     contracts.push({
       contractName,
       sourceName,
