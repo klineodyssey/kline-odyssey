@@ -18,7 +18,7 @@ Human instruction: this directory is a temporary intake area for Codex to reconc
 
 1. Decode the six `.b64.partXX` files in lexical order into `KAIOS_PROJECT_DATA_CURRENT_2026-08-09.zip`.
 2. Verify SHA-256 of the decoded ZIP equals:
-   `ac78ad055a9ec5c5776878e3584c14fd728d4fb9b7790022fb2b260cd25c21c8`
+   `5a827710396575c8ea3130590d2563ff1fd9d69965352427e0e5fb904e32c9a4`
 3. Inspect every file in the package and compare it with current repository files.
 4. Put each corrected/current file in the appropriate canonical repository location; Codex decides placement based on existing repo architecture.
 5. Delete active/current obsolete files that conflict with the final canon, especially active 1:10,000 KGEN->KAIOS rules, 720,000,000,000 KAIOS active ceilings, and the old TEN THOUSAND Genesis inscription.
