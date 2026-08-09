@@ -23,6 +23,8 @@ This addendum does not regenerate the historical inventory below.
 | `KGEN-KAIOS/contracts/KSHIPConverter.sol` | Contract | KUFO-to-KSHIP conversion organ | Review only |
 | `KGEN/contracts/KGEN_TempleHeart_Upgradeable.sol` | Contract | Version-free TempleHeart UUPS integration candidate | Review only |
 | `KGEN-KAIOS/reports/KAIOS_TOKEN_LINEAGE_INTEGRATION_REVIEW_2026-08-09.md` | Audit | PR #127/#128 reconciliation and test evidence | Ready for Human review |
+| `KGEN-KAIOS/reports/BSC_TESTNET_TEMPLEHEART_V3_4_REHEARSAL.md` | Testnet Evidence | Human-readable TempleHeart V3.3.2 to V3.4.0 UUPS rehearsal | PASS on BSC Testnet chainId 97 |
+| `KGEN-KAIOS/reports/BSC_TESTNET_TEMPLEHEART_V3_4_REHEARSAL.json` | Testnet Evidence | Machine-readable addresses, receipts, storage and security results | PASS on BSC Testnet chainId 97 |
 
 ## Summary
 | Category | Files |

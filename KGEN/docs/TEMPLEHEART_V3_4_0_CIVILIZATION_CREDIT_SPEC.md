@@ -135,9 +135,9 @@ No mainnet deployment is authorized.
 
 ## 9. BSC Testnet rehearsal runbook
 
-Status: PREPARED — NOT EXECUTED
+Status: EXECUTED — PASS ON BSC TESTNET CHAINID 97
 
-This runbook governs BSC Testnet chainId 97 only. PR #131 remains Draft and Mainnet deployment remains blocked until a real run returns `TEMPLEHEART_V3_4_TESTNET_REHEARSAL_PASS` and its transaction evidence is reviewed.
+This runbook governs BSC Testnet chainId 97 only. The real rehearsal returned `TEMPLEHEART_V3_4_TESTNET_REHEARSAL_PASS`; sanitized evidence is stored in `KGEN-KAIOS/reports/BSC_TESTNET_TEMPLEHEART_V3_4_REHEARSAL.md` and `.json`. Mainnet deployment remains blocked.
 
 The fresh-proxy executable path has passed an isolated local Ganache chainId 97 harness. That result validates the tool flow only and is not BSC Testnet evidence.
 
@@ -231,7 +231,7 @@ Record the proxy, baseline implementation, candidate implementation, transaction
 Until that evidence exists:
 
 ```text
-PR_131 = DRAFT
-TEMPLEHEART_V3_4_TESTNET_REHEARSAL = NOT_RUN
+PR_131 = READY_FOR_REVIEW_AFTER_RELEASE_GATES
+TEMPLEHEART_V3_4_TESTNET_REHEARSAL = PASS
 MAINNET_DEPLOY = BLOCKED
 ```
