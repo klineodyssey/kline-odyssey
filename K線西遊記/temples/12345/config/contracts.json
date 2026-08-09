@@ -1,0 +1,69 @@
+{
+  "schemaVersion": 1,
+  "status": "ACTIVE_FRONTEND_CONFIG",
+  "updatedAt": "2026-08-09",
+  "allowedTempleHeartVersions": [
+    "3.4.x"
+  ],
+  "walletConnect": {
+    "projectId": "ed256d3118a9c971d550ed5ee522b4d9"
+  },
+  "networks": {
+    "56": {
+      "chainId": 56,
+      "chainIdHex": "0x38",
+      "name": "BSC Mainnet",
+      "nativeCurrency": { "name": "BNB", "symbol": "BNB", "decimals": 18 },
+      "rpcUrls": [
+        "https://bsc-dataseed.binance.org/"
+      ],
+      "legacyHeart": {
+        "address": "0xB016D4d8f1aED1339101b30722cad6dbA9B8C972",
+        "status": "LEGACY_TEMPLEHEART_V3_2_6_DIRECT_DEPLOYMENT",
+        "mode": "READ_ONLY"
+      },
+      "currentHeart": {
+        "address": null,
+        "status": "PENDING"
+      },
+      "fortuneGame": {
+        "address": null,
+        "status": "PENDING",
+        "abi": null
+      },
+      "kgen": {
+        "address": "0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be",
+        "status": "CURRENT_MAINNET_TOKEN"
+      },
+      "explorer": "https://bscscan.com"
+    },
+    "97": {
+      "chainId": 97,
+      "chainIdHex": "0x61",
+      "name": "BSC Testnet",
+      "nativeCurrency": { "name": "tBNB", "symbol": "tBNB", "decimals": 18 },
+      "rpcUrls": [
+        "https://data-seed-prebsc-1-s1.bnbchain.org:8545/"
+      ],
+      "legacyHeart": {
+        "address": null,
+        "status": "NOT_CONFIGURED",
+        "mode": "READ_ONLY"
+      },
+      "currentHeart": {
+        "address": "0xa74F84942ADe7F668009BC4cB9E73C05ed5A3296",
+        "status": "TESTNET_REHEARSAL_ONLY"
+      },
+      "fortuneGame": {
+        "address": null,
+        "status": "PENDING",
+        "abi": null
+      },
+      "kgen": {
+        "address": "0x79b65388e6fd7e0b171147914384A0455c7A16E6",
+        "status": "TESTNET_REHEARSAL_ONLY"
+      },
+      "explorer": "https://testnet.bscscan.com"
+    }
+  }
+}

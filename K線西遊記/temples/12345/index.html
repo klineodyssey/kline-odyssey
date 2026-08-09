@@ -282,18 +282,15 @@ PRIMEFORGE_LIFE_HEADER_V1:
 <meta content="no-store, no-cache, must-revalidate, max-age=0" http-equiv="Cache-Control"/>
 <meta content="no-cache" http-equiv="Pragma"/>
 <meta content="0" http-equiv="Expires"/>
-<title>KGEN-12345-HEART-UI-V2.3.2</title>
+<title>KGEN 12345 TempleHeart V3.4 Frontend</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&amp;family=Noto+Sans+TC:wght@900&amp;display=swap" rel="stylesheet"/>
 
-<script src="https://unpkg.com/@walletconnect/ethereum-provider@2.12.2/dist/index.umd.js"></script>
-
-
-
 <link href="modules/kgen-12345-core.css" rel="stylesheet"/>
 <link href="modules/kgen-12345-divine-regeneration.css" rel="stylesheet"/>
 <link href="modules/runtime-main.css?v=V2.3.3-trust-voice-ui" rel="stylesheet"/>
+<link href="modules/temple-heart.css?v=3.4.0" rel="stylesheet"/>
 
 <script id="kgen-civilization-brain-rollcall-v10-49-1">
 (function(){
@@ -425,12 +422,12 @@ PRIMEFORGE_LIFE_HEADER_V1:
 <div aria-label="宇宙K線圖" id="kline-chart-panel">
 <div class="kc-head">
 <span>悟空心臟圖譜</span>
-<span id="kc-predict">預測：--</span>
+<span id="kc-predict">最新 K 棒：--</span>
 </div>
 <canvas height="92" id="kline-canvas" width="280"></canvas>
 <div class="kc-foot">
-<span id="kc-dir">方向盤 → --方K</span>
-<span id="kc-hit">命中率：--</span>
+<span id="kc-dir">視覺方位：多方／心臟前鏡</span>
+<span id="kc-hit">前端不預測勝負</span>
 </div>
 <div id="moon-match">
 <div id="moon-match-title">五指山名額紀錄</div>
@@ -441,7 +438,7 @@ PRIMEFORGE_LIFE_HEADER_V1:
 <div id="core-anchor">
 <div id="core-window">
 <div id="wish-label">悟空心臟，財氣覺醒</div>
-<img crossorigin="anonymous" id="fairy-img" src="./assets/wukong_heart_core.jpg" alt="12345 五指山悟空財神殿"/>
+<img crossorigin="anonymous" id="fairy-img" src="./assets/heart-front.png" alt="12345 五指山悟空財神殿"/>
 <video autoplay="" id="cam-view" muted="" playsinline=""></video>
 <div id="mini-thumb"></div>
 </div>
@@ -1861,12 +1858,17 @@ KGEN 12345 V9.2.0｜LAYOUT FINAL POLISH
 
 <script src="../../modules/kgen-land-engine.js"></script>
 <script src="modules/kgen-12345-app-shell.js"></script>
-<script src="modules/kgen-12345-web3-shell.js"></script>
 <script src="modules/kgen-12345-runtime.js"></script>
 <script src="modules/kgen-12345-mother-runtime.js"></script>
 <script src="modules/kgen-12345-divine-regeneration.js"></script>
 <script src="modules/kgen-12345-ai-service.js?v=V3.0-ui-overlay"></script>
 <script src="modules/runtime-main.js?v=V2.3.3-trust-voice-ui"></script>
+<script src="modules/contract-resolver.js?v=3.4.0"></script>
+<script src="modules/transaction-state.js?v=3.4.0"></script>
+<script src="modules/fortune-game-adapter.js?v=3.4.0"></script>
+<script src="modules/fortune-game-ui.js?v=3.4.0"></script>
+<script src="modules/temple-heart-runtime.js?v=3.4.0"></script>
+<script src="backend/firebase/public/visitor-tracker.js?v=3.4.0"></script>
 <link href="modules/kgen-12345-ui.css?v=159c4bc" rel="stylesheet"/>
 <script src="modules/runtime-bootstrap.js"></script>
 <script src="modules/kgen-12345-ui.js?v=159c4bc"></script>

@@ -9,7 +9,7 @@ PURPOSE: 12345 Temple UI V3.0 — overlays, leaderboard, quota, guide, ritual
 
   const VERSION = "3.0";
   const INTRO_SPEECH = "歡迎來到 KGEN 12345 五指山悟空財神殿。請先連結錢包，完成三次聖盃，再領發財金。心跳、轉日呼吸、還願、點燈與許願都在悟空控制台。";
-  const TEMPLE_IMAGE_SRC = "./assets/wukong_heart_core.jpg";
+  const TEMPLE_IMAGE_SRC = "./assets/heart-front.png";
 
   const DEMO_RANKS = {
     player: [
@@ -640,11 +640,13 @@ PURPOSE: 12345 Temple UI V3.0 — overlays, leaderboard, quota, guide, ritual
   function patchTempleImages(){
     const main = $("fairy-img");
     if(main){
-      if(!main.getAttribute("src") || main.getAttribute("src") !== TEMPLE_IMAGE_SRC) main.src = TEMPLE_IMAGE_SRC;
+      const mainExpected = main.dataset.assetCanon === "ASSET_CANON_PENDING_HEART_FRONT" ? "./assets/heart.png" : TEMPLE_IMAGE_SRC;
+      if(!main.getAttribute("src") || main.getAttribute("src") !== mainExpected) main.src = mainExpected;
       main.alt = "12345 五指山悟空財神殿";
     }
     document.querySelectorAll(".kgen-ai-avatar").forEach(function(img){
-      if(!img.getAttribute("src") || img.getAttribute("src") !== TEMPLE_IMAGE_SRC) img.src = TEMPLE_IMAGE_SRC;
+      const expected = img.dataset.assetCanon === "ASSET_CANON_PENDING_HEART_FRONT" ? "./assets/heart.png" : TEMPLE_IMAGE_SRC;
+      if(!img.getAttribute("src") || img.getAttribute("src") !== expected) img.src = expected;
       img.alt = "12345 五指山悟空客服";
     });
   }

@@ -1,0 +1,3463 @@
+{
+    "schemaVersion":  1,
+    "status":  "CANONICAL_FRONTEND_ABI",
+    "contractName":  "KGEN_TempleHeart_Upgradeable",
+    "source":  "../KGEN/contracts/KGEN_TempleHeart_Upgradeable.sol",
+    "compiler":  "0.8.24+commit.e11b9ed9.Emscripten.clang",
+    "optimizer":  {
+                      "enabled":  true,
+                      "runs":  1
+                  },
+    "viaIR":  true,
+    "evmVersion":  "paris",
+    "openzeppelin":  {
+                         "contracts":  "5.0.2",
+                         "contractsUpgradeable":  "5.0.2"
+                     },
+    "generatedFromCommit":  "c7e8c533c5bbc598fac3192e0576bacb55fb6a31",
+    "generatedAt":  "2026-08-09",
+    "abi":  [
+                {
+                    "inputs":  [
+
+                               ],
+                    "stateMutability":  "nonpayable",
+                    "type":  "constructor"
+                },
+                {
+                    "inputs":  [
+
+                               ],
+                    "name":  "AccessControlBadConfirmation",
+                    "type":  "error"
+                },
+                {
+                    "inputs":  [
+                                   {
+                                       "internalType":  "address",
+                                       "name":  "account",
+                                       "type":  "address"
+                                   },
+                                   {
+                                       "internalType":  "bytes32",
+                                       "name":  "neededRole",
+                                       "type":  "bytes32"
+                                   }
+                               ],
+                    "name":  "AccessControlUnauthorizedAccount",
+                    "type":  "error"
+                },
+                {
+                    "inputs":  [
+                                   {
+                                       "internalType":  "address",
+                                       "name":  "target",
+                                       "type":  "address"
+                                   }
+                               ],
+                    "name":  "AddressEmptyCode",
+                    "type":  "error"
+                },
+                {
+                    "inputs":  [
+                                   {
+                                       "internalType":  "address",
+                                       "name":  "account",
+                                       "type":  "address"
+                                   }
+                               ],
+                    "name":  "AddressInsufficientBalance",
+                    "type":  "error"
+                },
+                {
+                    "inputs":  [
+
+                               ],
+                    "name":  "BeneficiaryMismatch",
+                    "type":  "error"
+                },
+                {
+                    "inputs":  [
+
+                               ],
+                    "name":  "BreathAlreadyTaken",
+                    "type":  "error"
+                },
+                {
+                    "inputs":  [
+
+                               ],
+                    "name":  "BurnTooSmall",
+                    "type":  "error"
+                },
+                {
+                    "inputs":  [
+
+                               ],
+                    "name":  "BurnerMismatch",
+                    "type":  "error"
+                },
+                {
+                    "inputs":  [
+
+                               ],
+                    "name":  "CanonicalTreasuryNotSet",
+                    "type":  "error"
+                },
+                {
+                    "inputs":  [
+
+                               ],
+                    "name":  "CivilizationCooldown",
+                    "type":  "error"
+                },
+                {
+                    "inputs":  [
+
+                               ],
+                    "name":  "CivilizationMismatch",
+                    "type":  "error"
+                },
+                {
+                    "inputs":  [
+
+                               ],
+                    "name":  "ECDSAInvalidSignature",
+                    "type":  "error"
+                },
+                {
+                    "inputs":  [
+                                   {
+                                       "internalType":  "uint256",
+                                       "name":  "length",
+                                       "type":  "uint256"
+                                   }
+                               ],
+                    "name":  "ECDSAInvalidSignatureLength",
+                    "type":  "error"
+                },
+                {
+                    "inputs":  [
+                                   {
+                                       "internalType":  "bytes32",
+                                       "name":  "s",
+                                       "type":  "bytes32"
+                                   }
+                               ],
+                    "name":  "ECDSAInvalidSignatureS",
+                    "type":  "error"
+                },
+                {
+                    "inputs":  [
+                                   {
+                                       "internalType":  "address",
+                                       "name":  "implementation",
+                                       "type":  "address"
+                                   }
+                               ],
+                    "name":  "ERC1967InvalidImplementation",
+                    "type":  "error"
+                },
+                {
+                    "inputs":  [
+
+                               ],
+                    "name":  "ERC1967NonPayable",
+                    "type":  "error"
+                },
+                {
+                    "inputs":  [
+
+                               ],
+                    "name":  "EnforcedPause",
+                    "type":  "error"
+                },
+                {
+                    "inputs":  [
+
+                               ],
+                    "name":  "ExpectedPause",
+                    "type":  "error"
+                },
+                {
+                    "inputs":  [
+
+                               ],
+                    "name":  "FailedInnerCall",
+                    "type":  "error"
+                },
+                {
+                    "inputs":  [
+
+                               ],
+                    "name":  "FortuneCooldown",
+                    "type":  "error"
+                },
+                {
+                    "inputs":  [
+
+                               ],
+                    "name":  "FortuneEpochFull",
+                    "type":  "error"
+                },
+                {
+                    "inputs":  [
+
+                               ],
+                    "name":  "GameSurvivalGateClosed",
+                    "type":  "error"
+                },
+                {
+                    "inputs":  [
+
+                               ],
+                    "name":  "HeartInsufficientFunds",
+                    "type":  "error"
+                },
+                {
+                    "inputs":  [
+
+                               ],
+                    "name":  "HeartbeatCooldown",
+                    "type":  "error"
+                },
+                {
+                    "inputs":  [
+
+                               ],
+                    "name":  "HeartbeatHourFull",
+                    "type":  "error"
+                },
+                {
+                    "inputs":  [
+
+                               ],
+                    "name":  "HolyCupProofAlreadyConsumed",
+                    "type":  "error"
+                },
+                {
+                    "inputs":  [
+
+                               ],
+                    "name":  "IgniteDayFull",
+                    "type":  "error"
+                },
+                {
+                    "inputs":  [
+
+                               ],
+                    "name":  "IgniteWindowClosed",
+                    "type":  "error"
+                },
+                {
+                    "inputs":  [
+
+                               ],
+                    "name":  "InvalidAlchemyProof",
+                    "type":  "error"
+                },
+                {
+                    "inputs":  [
+
+                               ],
+                    "name":  "InvalidCivilization",
+                    "type":  "error"
+                },
+                {
+                    "inputs":  [
+
+                               ],
+                    "name":  "InvalidInitialization",
+                    "type":  "error"
+                },
+                {
+                    "inputs":  [
+
+                               ],
+                    "name":  "InvalidOfferingType",
+                    "type":  "error"
+                },
+                {
+                    "inputs":  [
+
+                               ],
+                    "name":  "InvalidProofSigner",
+                    "type":  "error"
+                },
+                {
+                    "inputs":  [
+
+                               ],
+                    "name":  "InvalidRange",
+                    "type":  "error"
+                },
+                {
+                    "inputs":  [
+
+                               ],
+                    "name":  "InvalidWish",
+                    "type":  "error"
+                },
+                {
+                    "inputs":  [
+
+                               ],
+                    "name":  "KUFOAmountMismatch",
+                    "type":  "error"
+                },
+                {
+                    "inputs":  [
+                                   {
+                                       "internalType":  "address",
+                                       "name":  "account",
+                                       "type":  "address"
+                                   }
+                               ],
+                    "name":  "NotAContract",
+                    "type":  "error"
+                },
+                {
+                    "inputs":  [
+
+                               ],
+                    "name":  "NotInitializing",
+                    "type":  "error"
+                },
+                {
+                    "inputs":  [
+
+                               ],
+                    "name":  "OrganRegistryNotSet",
+                    "type":  "error"
+                },
+                {
+                    "inputs":  [
+
+                               ],
+                    "name":  "ProofAlreadyConsumed",
+                    "type":  "error"
+                },
+                {
+                    "inputs":  [
+
+                               ],
+                    "name":  "ProofExpired",
+                    "type":  "error"
+                },
+                {
+                    "inputs":  [
+
+                               ],
+                    "name":  "ProofSourceAlreadyBound",
+                    "type":  "error"
+                },
+                {
+                    "inputs":  [
+
+                               ],
+                    "name":  "PurposeMismatch",
+                    "type":  "error"
+                },
+                {
+                    "inputs":  [
+
+                               ],
+                    "name":  "ReentrancyGuardReentrantCall",
+                    "type":  "error"
+                },
+                {
+                    "inputs":  [
+
+                               ],
+                    "name":  "RepaymentRequired",
+                    "type":  "error"
+                },
+                {
+                    "inputs":  [
+                                   {
+                                       "internalType":  "address",
+                                       "name":  "token",
+                                       "type":  "address"
+                                   }
+                               ],
+                    "name":  "SafeERC20FailedOperation",
+                    "type":  "error"
+                },
+                {
+                    "inputs":  [
+
+                               ],
+                    "name":  "UUPSUnauthorizedCallContext",
+                    "type":  "error"
+                },
+                {
+                    "inputs":  [
+                                   {
+                                       "internalType":  "bytes32",
+                                       "name":  "slot",
+                                       "type":  "bytes32"
+                                   }
+                               ],
+                    "name":  "UUPSUnsupportedProxiableUUID",
+                    "type":  "error"
+                },
+                {
+                    "inputs":  [
+
+                               ],
+                    "name":  "UnauthorizedGame",
+                    "type":  "error"
+                },
+                {
+                    "inputs":  [
+
+                               ],
+                    "name":  "WishNotReady",
+                    "type":  "error"
+                },
+                {
+                    "inputs":  [
+
+                               ],
+                    "name":  "ZeroAddress",
+                    "type":  "error"
+                },
+                {
+                    "anonymous":  false,
+                    "inputs":  [
+                                   {
+                                       "indexed":  true,
+                                       "internalType":  "address",
+                                       "name":  "brainVault",
+                                       "type":  "address"
+                                   },
+                                   {
+                                       "indexed":  false,
+                                       "internalType":  "uint256",
+                                       "name":  "amount",
+                                       "type":  "uint256"
+                                   }
+                               ],
+                    "name":  "BloodInjectedFromBrain",
+                    "type":  "event"
+                },
+                {
+                    "anonymous":  false,
+                    "inputs":  [
+                                   {
+                                       "indexed":  true,
+                                       "internalType":  "address",
+                                       "name":  "user",
+                                       "type":  "address"
+                                   },
+                                   {
+                                       "indexed":  true,
+                                       "internalType":  "bytes32",
+                                       "name":  "civilizationId",
+                                       "type":  "bytes32"
+                                   },
+                                   {
+                                       "indexed":  true,
+                                       "internalType":  "enum KGEN_TempleHeart_Upgradeable.CivilizationActivity",
+                                       "name":  "activity",
+                                       "type":  "uint8"
+                                   },
+                                   {
+                                       "indexed":  false,
+                                       "internalType":  "uint256",
+                                       "name":  "measure",
+                                       "type":  "uint256"
+                                   },
+                                   {
+                                       "indexed":  false,
+                                       "internalType":  "uint256",
+                                       "name":  "blessingPowerTotal",
+                                       "type":  "uint256"
+                                   }
+                               ],
+                    "name":  "CivilizationContribution",
+                    "type":  "event"
+                },
+                {
+                    "anonymous":  false,
+                    "inputs":  [
+                                   {
+                                       "indexed":  true,
+                                       "internalType":  "address",
+                                       "name":  "user",
+                                       "type":  "address"
+                                   },
+                                   {
+                                       "indexed":  true,
+                                       "internalType":  "bytes32",
+                                       "name":  "civilizationId",
+                                       "type":  "bytes32"
+                                   },
+                                   {
+                                       "indexed":  true,
+                                       "internalType":  "uint256",
+                                       "name":  "dayIndex",
+                                       "type":  "uint256"
+                                   },
+                                   {
+                                       "indexed":  false,
+                                       "internalType":  "uint256",
+                                       "name":  "blessingPowerTotal",
+                                       "type":  "uint256"
+                                   }
+                               ],
+                    "name":  "CrossDayBreath",
+                    "type":  "event"
+                },
+                {
+                    "anonymous":  false,
+                    "inputs":  [
+                                   {
+                                       "indexed":  true,
+                                       "internalType":  "address",
+                                       "name":  "user",
+                                       "type":  "address"
+                                   },
+                                   {
+                                       "indexed":  true,
+                                       "internalType":  "uint256",
+                                       "name":  "dayIndex",
+                                       "type":  "uint256"
+                                   }
+                               ],
+                    "name":  "CustomerWalletActive",
+                    "type":  "event"
+                },
+                {
+                    "anonymous":  false,
+                    "inputs":  [
+                                   {
+                                       "indexed":  true,
+                                       "internalType":  "address",
+                                       "name":  "user",
+                                       "type":  "address"
+                                   },
+                                   {
+                                       "indexed":  true,
+                                       "internalType":  "uint256",
+                                       "name":  "dayIndex",
+                                       "type":  "uint256"
+                                   },
+                                   {
+                                       "indexed":  false,
+                                       "internalType":  "uint256",
+                                       "name":  "totalCustomerWallets",
+                                       "type":  "uint256"
+                                   }
+                               ],
+                    "name":  "CustomerWalletRegistered",
+                    "type":  "event"
+                },
+                {
+                    "anonymous":  false,
+                    "inputs":  [
+
+                               ],
+                    "name":  "EIP712DomainChanged",
+                    "type":  "event"
+                },
+                {
+                    "anonymous":  false,
+                    "inputs":  [
+                                   {
+                                       "indexed":  true,
+                                       "internalType":  "address",
+                                       "name":  "brainVault",
+                                       "type":  "address"
+                                   },
+                                   {
+                                       "indexed":  false,
+                                       "internalType":  "uint256",
+                                       "name":  "excess",
+                                       "type":  "uint256"
+                                   },
+                                   {
+                                       "indexed":  false,
+                                       "internalType":  "uint256",
+                                       "name":  "capAmount",
+                                       "type":  "uint256"
+                                   }
+                               ],
+                    "name":  "ExcessSweptToBrain",
+                    "type":  "event"
+                },
+                {
+                    "anonymous":  false,
+                    "inputs":  [
+                                   {
+                                       "indexed":  true,
+                                       "internalType":  "address",
+                                       "name":  "user",
+                                       "type":  "address"
+                                   },
+                                   {
+                                       "indexed":  true,
+                                       "internalType":  "bytes32",
+                                       "name":  "civilizationId",
+                                       "type":  "bytes32"
+                                   },
+                                   {
+                                       "indexed":  true,
+                                       "internalType":  "bytes32",
+                                       "name":  "proofId",
+                                       "type":  "bytes32"
+                                   },
+                                   {
+                                       "indexed":  false,
+                                       "internalType":  "uint256",
+                                       "name":  "amount",
+                                       "type":  "uint256"
+                                   },
+                                   {
+                                       "indexed":  false,
+                                       "internalType":  "uint256",
+                                       "name":  "epochIndex",
+                                       "type":  "uint256"
+                                   },
+                                   {
+                                       "indexed":  false,
+                                       "internalType":  "uint256",
+                                       "name":  "blessingPower",
+                                       "type":  "uint256"
+                                   },
+                                   {
+                                       "indexed":  false,
+                                       "internalType":  "bytes32",
+                                       "name":  "wishHash",
+                                       "type":  "bytes32"
+                                   }
+                               ],
+                    "name":  "FortuneClaimed",
+                    "type":  "event"
+                },
+                {
+                    "anonymous":  false,
+                    "inputs":  [
+                                   {
+                                       "indexed":  true,
+                                       "internalType":  "address",
+                                       "name":  "fortuneGame",
+                                       "type":  "address"
+                                   }
+                               ],
+                    "name":  "FortuneGameUpdated",
+                    "type":  "event"
+                },
+                {
+                    "anonymous":  false,
+                    "inputs":  [
+                                   {
+                                       "indexed":  true,
+                                       "internalType":  "address",
+                                       "name":  "user",
+                                       "type":  "address"
+                                   },
+                                   {
+                                       "indexed":  true,
+                                       "internalType":  "bytes32",
+                                       "name":  "civilizationId",
+                                       "type":  "bytes32"
+                                   },
+                                   {
+                                       "indexed":  false,
+                                       "internalType":  "uint256",
+                                       "name":  "amount",
+                                       "type":  "uint256"
+                                   },
+                                   {
+                                       "indexed":  false,
+                                       "internalType":  "uint256",
+                                       "name":  "totalVoluntaryRepaid",
+                                       "type":  "uint256"
+                                   },
+                                   {
+                                       "indexed":  false,
+                                       "internalType":  "bool",
+                                       "name":  "repaidAfterLastClaim",
+                                       "type":  "bool"
+                                   }
+                               ],
+                    "name":  "FortuneVoluntarilyRepaid",
+                    "type":  "event"
+                },
+                {
+                    "anonymous":  false,
+                    "inputs":  [
+                                   {
+                                       "indexed":  true,
+                                       "internalType":  "address",
+                                       "name":  "game",
+                                       "type":  "address"
+                                   },
+                                   {
+                                       "indexed":  true,
+                                       "internalType":  "address",
+                                       "name":  "player",
+                                       "type":  "address"
+                                   },
+                                   {
+                                       "indexed":  false,
+                                       "internalType":  "uint256",
+                                       "name":  "amount",
+                                       "type":  "uint256"
+                                   },
+                                   {
+                                       "indexed":  false,
+                                       "internalType":  "uint256",
+                                       "name":  "remainingHeartBalance",
+                                       "type":  "uint256"
+                                   }
+                               ],
+                    "name":  "GamePayout",
+                    "type":  "event"
+                },
+                {
+                    "anonymous":  false,
+                    "inputs":  [
+                                   {
+                                       "indexed":  true,
+                                       "internalType":  "address",
+                                       "name":  "caller",
+                                       "type":  "address"
+                                   },
+                                   {
+                                       "indexed":  true,
+                                       "internalType":  "address",
+                                       "name":  "treasury11520",
+                                       "type":  "address"
+                                   },
+                                   {
+                                       "indexed":  false,
+                                       "internalType":  "uint256",
+                                       "name":  "excess",
+                                       "type":  "uint256"
+                                   },
+                                   {
+                                       "indexed":  false,
+                                       "internalType":  "uint256",
+                                       "name":  "capAmount",
+                                       "type":  "uint256"
+                                   }
+                               ],
+                    "name":  "HeartNormalized",
+                    "type":  "event"
+                },
+                {
+                    "anonymous":  false,
+                    "inputs":  [
+                                   {
+                                       "indexed":  true,
+                                       "internalType":  "address",
+                                       "name":  "user",
+                                       "type":  "address"
+                                   },
+                                   {
+                                       "indexed":  true,
+                                       "internalType":  "bytes32",
+                                       "name":  "civilizationId",
+                                       "type":  "bytes32"
+                                   },
+                                   {
+                                       "indexed":  true,
+                                       "internalType":  "uint256",
+                                       "name":  "heartbeatIndex",
+                                       "type":  "uint256"
+                                   },
+                                   {
+                                       "indexed":  false,
+                                       "internalType":  "uint256",
+                                       "name":  "blessingPowerTotal",
+                                       "type":  "uint256"
+                                   }
+                               ],
+                    "name":  "Heartbeat",
+                    "type":  "event"
+                },
+                {
+                    "anonymous":  false,
+                    "inputs":  [
+                                   {
+                                       "indexed":  true,
+                                       "internalType":  "address",
+                                       "name":  "user",
+                                       "type":  "address"
+                                   },
+                                   {
+                                       "indexed":  true,
+                                       "internalType":  "bytes32",
+                                       "name":  "civilizationId",
+                                       "type":  "bytes32"
+                                   },
+                                   {
+                                       "indexed":  true,
+                                       "internalType":  "uint256",
+                                       "name":  "hourIndex",
+                                       "type":  "uint256"
+                                   },
+                                   {
+                                       "indexed":  false,
+                                       "internalType":  "uint256",
+                                       "name":  "amount",
+                                       "type":  "uint256"
+                                   },
+                                   {
+                                       "indexed":  false,
+                                       "internalType":  "uint256",
+                                       "name":  "hourClaims",
+                                       "type":  "uint256"
+                                   }
+                               ],
+                    "name":  "HeartbeatClaimed",
+                    "type":  "event"
+                },
+                {
+                    "anonymous":  false,
+                    "inputs":  [
+                                   {
+                                       "indexed":  true,
+                                       "internalType":  "address",
+                                       "name":  "user",
+                                       "type":  "address"
+                                   },
+                                   {
+                                       "indexed":  true,
+                                       "internalType":  "bytes32",
+                                       "name":  "civilizationId",
+                                       "type":  "bytes32"
+                                   },
+                                   {
+                                       "indexed":  true,
+                                       "internalType":  "bytes32",
+                                       "name":  "proofId",
+                                       "type":  "bytes32"
+                                   },
+                                   {
+                                       "indexed":  false,
+                                       "internalType":  "bytes32",
+                                       "name":  "wishHash",
+                                       "type":  "bytes32"
+                                   }
+                               ],
+                    "name":  "HolyCupPassed",
+                    "type":  "event"
+                },
+                {
+                    "anonymous":  false,
+                    "inputs":  [
+                                   {
+                                       "indexed":  true,
+                                       "internalType":  "address",
+                                       "name":  "user",
+                                       "type":  "address"
+                                   },
+                                   {
+                                       "indexed":  true,
+                                       "internalType":  "bytes32",
+                                       "name":  "civilizationId",
+                                       "type":  "bytes32"
+                                   },
+                                   {
+                                       "indexed":  true,
+                                       "internalType":  "uint256",
+                                       "name":  "dayIndex",
+                                       "type":  "uint256"
+                                   },
+                                   {
+                                       "indexed":  false,
+                                       "internalType":  "uint256",
+                                       "name":  "amount",
+                                       "type":  "uint256"
+                                   },
+                                   {
+                                       "indexed":  false,
+                                       "internalType":  "uint256",
+                                       "name":  "dayClaims",
+                                       "type":  "uint256"
+                                   }
+                               ],
+                    "name":  "IgniteClaimed",
+                    "type":  "event"
+                },
+                {
+                    "anonymous":  false,
+                    "inputs":  [
+                                   {
+                                       "indexed":  false,
+                                       "internalType":  "uint64",
+                                       "name":  "version",
+                                       "type":  "uint64"
+                                   }
+                               ],
+                    "name":  "Initialized",
+                    "type":  "event"
+                },
+                {
+                    "anonymous":  false,
+                    "inputs":  [
+                                   {
+                                       "indexed":  true,
+                                       "internalType":  "address",
+                                       "name":  "user",
+                                       "type":  "address"
+                                   },
+                                   {
+                                       "indexed":  true,
+                                       "internalType":  "bytes32",
+                                       "name":  "civilizationId",
+                                       "type":  "bytes32"
+                                   },
+                                   {
+                                       "indexed":  true,
+                                       "internalType":  "bytes32",
+                                       "name":  "proofId",
+                                       "type":  "bytes32"
+                                   },
+                                   {
+                                       "indexed":  false,
+                                       "internalType":  "enum KGEN_TempleHeart_Upgradeable.BurnOfferingType",
+                                       "name":  "offeringType",
+                                       "type":  "uint8"
+                                   },
+                                   {
+                                       "indexed":  false,
+                                       "internalType":  "uint256",
+                                       "name":  "kaiosBurned",
+                                       "type":  "uint256"
+                                   },
+                                   {
+                                       "indexed":  false,
+                                       "internalType":  "uint256",
+                                       "name":  "expectedKufo",
+                                       "type":  "uint256"
+                                   },
+                                   {
+                                       "indexed":  false,
+                                       "internalType":  "uint256",
+                                       "name":  "blessingPowerAdded",
+                                       "type":  "uint256"
+                                   },
+                                   {
+                                       "indexed":  false,
+                                       "internalType":  "bytes32",
+                                       "name":  "wishHash",
+                                       "type":  "bytes32"
+                                   }
+                               ],
+                    "name":  "KAIOSAlchemyOfferingRecorded",
+                    "type":  "event"
+                },
+                {
+                    "anonymous":  false,
+                    "inputs":  [
+                                   {
+                                       "indexed":  true,
+                                       "internalType":  "address",
+                                       "name":  "proofSource",
+                                       "type":  "address"
+                                   }
+                               ],
+                    "name":  "KAIOSAlchemyProofSourceBound",
+                    "type":  "event"
+                },
+                {
+                    "anonymous":  false,
+                    "inputs":  [
+                                   {
+                                       "indexed":  true,
+                                       "internalType":  "address",
+                                       "name":  "organRegistry",
+                                       "type":  "address"
+                                   }
+                               ],
+                    "name":  "OrganRegistryUpdated",
+                    "type":  "event"
+                },
+                {
+                    "anonymous":  false,
+                    "inputs":  [
+                                   {
+                                       "indexed":  true,
+                                       "internalType":  "address",
+                                       "name":  "lingxiaoBank",
+                                       "type":  "address"
+                                   },
+                                   {
+                                       "indexed":  true,
+                                       "internalType":  "address",
+                                       "name":  "marsVault",
+                                       "type":  "address"
+                                   },
+                                   {
+                                       "indexed":  true,
+                                       "internalType":  "address",
+                                       "name":  "autoLP",
+                                       "type":  "address"
+                                   },
+                                   {
+                                       "indexed":  false,
+                                       "internalType":  "address",
+                                       "name":  "blackhole",
+                                       "type":  "address"
+                                   }
+                               ],
+                    "name":  "OrgansUpdated",
+                    "type":  "event"
+                },
+                {
+                    "anonymous":  false,
+                    "inputs":  [
+                                   {
+                                       "indexed":  false,
+                                       "internalType":  "address",
+                                       "name":  "account",
+                                       "type":  "address"
+                                   }
+                               ],
+                    "name":  "Paused",
+                    "type":  "event"
+                },
+                {
+                    "anonymous":  false,
+                    "inputs":  [
+                                   {
+                                       "indexed":  true,
+                                       "internalType":  "address",
+                                       "name":  "user",
+                                       "type":  "address"
+                                   },
+                                   {
+                                       "indexed":  true,
+                                       "internalType":  "bytes32",
+                                       "name":  "civilizationId",
+                                       "type":  "bytes32"
+                                   },
+                                   {
+                                       "indexed":  true,
+                                       "internalType":  "uint256",
+                                       "name":  "dayIndex",
+                                       "type":  "uint256"
+                                   }
+                               ],
+                    "name":  "PilgrimActive",
+                    "type":  "event"
+                },
+                {
+                    "anonymous":  false,
+                    "inputs":  [
+                                   {
+                                       "indexed":  true,
+                                       "internalType":  "address",
+                                       "name":  "user",
+                                       "type":  "address"
+                                   },
+                                   {
+                                       "indexed":  true,
+                                       "internalType":  "bytes32",
+                                       "name":  "civilizationId",
+                                       "type":  "bytes32"
+                                   },
+                                   {
+                                       "indexed":  true,
+                                       "internalType":  "uint256",
+                                       "name":  "dayIndex",
+                                       "type":  "uint256"
+                                   },
+                                   {
+                                       "indexed":  false,
+                                       "internalType":  "uint256",
+                                       "name":  "totalPilgrims",
+                                       "type":  "uint256"
+                                   }
+                               ],
+                    "name":  "PilgrimRegistered",
+                    "type":  "event"
+                },
+                {
+                    "anonymous":  false,
+                    "inputs":  [
+                                   {
+                                       "indexed":  true,
+                                       "internalType":  "bytes32",
+                                       "name":  "role",
+                                       "type":  "bytes32"
+                                   },
+                                   {
+                                       "indexed":  true,
+                                       "internalType":  "bytes32",
+                                       "name":  "previousAdminRole",
+                                       "type":  "bytes32"
+                                   },
+                                   {
+                                       "indexed":  true,
+                                       "internalType":  "bytes32",
+                                       "name":  "newAdminRole",
+                                       "type":  "bytes32"
+                                   }
+                               ],
+                    "name":  "RoleAdminChanged",
+                    "type":  "event"
+                },
+                {
+                    "anonymous":  false,
+                    "inputs":  [
+                                   {
+                                       "indexed":  true,
+                                       "internalType":  "bytes32",
+                                       "name":  "role",
+                                       "type":  "bytes32"
+                                   },
+                                   {
+                                       "indexed":  true,
+                                       "internalType":  "address",
+                                       "name":  "account",
+                                       "type":  "address"
+                                   },
+                                   {
+                                       "indexed":  true,
+                                       "internalType":  "address",
+                                       "name":  "sender",
+                                       "type":  "address"
+                                   }
+                               ],
+                    "name":  "RoleGranted",
+                    "type":  "event"
+                },
+                {
+                    "anonymous":  false,
+                    "inputs":  [
+                                   {
+                                       "indexed":  true,
+                                       "internalType":  "bytes32",
+                                       "name":  "role",
+                                       "type":  "bytes32"
+                                   },
+                                   {
+                                       "indexed":  true,
+                                       "internalType":  "address",
+                                       "name":  "account",
+                                       "type":  "address"
+                                   },
+                                   {
+                                       "indexed":  true,
+                                       "internalType":  "address",
+                                       "name":  "sender",
+                                       "type":  "address"
+                                   }
+                               ],
+                    "name":  "RoleRevoked",
+                    "type":  "event"
+                },
+                {
+                    "anonymous":  false,
+                    "inputs":  [
+                                   {
+                                       "indexed":  true,
+                                       "internalType":  "address",
+                                       "name":  "admin",
+                                       "type":  "address"
+                                   },
+                                   {
+                                       "indexed":  true,
+                                       "internalType":  "address",
+                                       "name":  "kgen",
+                                       "type":  "address"
+                                   },
+                                   {
+                                       "indexed":  true,
+                                       "internalType":  "address",
+                                       "name":  "brainVault",
+                                       "type":  "address"
+                                   },
+                                   {
+                                       "indexed":  false,
+                                       "internalType":  "address",
+                                       "name":  "kaiosAlchemyProofSource",
+                                       "type":  "address"
+                                   }
+                               ],
+                    "name":  "TempleHeartInitialized",
+                    "type":  "event"
+                },
+                {
+                    "anonymous":  false,
+                    "inputs":  [
+                                   {
+                                       "indexed":  false,
+                                       "internalType":  "address",
+                                       "name":  "account",
+                                       "type":  "address"
+                                   }
+                               ],
+                    "name":  "Unpaused",
+                    "type":  "event"
+                },
+                {
+                    "anonymous":  false,
+                    "inputs":  [
+                                   {
+                                       "indexed":  true,
+                                       "internalType":  "address",
+                                       "name":  "implementation",
+                                       "type":  "address"
+                                   }
+                               ],
+                    "name":  "Upgraded",
+                    "type":  "event"
+                },
+                {
+                    "anonymous":  false,
+                    "inputs":  [
+                                   {
+                                       "indexed":  true,
+                                       "internalType":  "address",
+                                       "name":  "user",
+                                       "type":  "address"
+                                   },
+                                   {
+                                       "indexed":  true,
+                                       "internalType":  "bytes32",
+                                       "name":  "wishHash",
+                                       "type":  "bytes32"
+                                   },
+                                   {
+                                       "indexed":  true,
+                                       "internalType":  "bytes32",
+                                       "name":  "civilizationId",
+                                       "type":  "bytes32"
+                                   }
+                               ],
+                    "name":  "WishMade",
+                    "type":  "event"
+                },
+                {
+                    "inputs":  [
+
+                               ],
+                    "name":  "DEFAULT_ADMIN_ROLE",
+                    "outputs":  [
+                                    {
+                                        "internalType":  "bytes32",
+                                        "name":  "",
+                                        "type":  "bytes32"
+                                    }
+                                ],
+                    "stateMutability":  "view",
+                    "type":  "function"
+                },
+                {
+                    "inputs":  [
+
+                               ],
+                    "name":  "HEARTBEAT_REWARD_WHOLE",
+                    "outputs":  [
+                                    {
+                                        "internalType":  "uint256",
+                                        "name":  "",
+                                        "type":  "uint256"
+                                    }
+                                ],
+                    "stateMutability":  "view",
+                    "type":  "function"
+                },
+                {
+                    "inputs":  [
+
+                               ],
+                    "name":  "HOLY_CUP_SIGNER_ROLE",
+                    "outputs":  [
+                                    {
+                                        "internalType":  "bytes32",
+                                        "name":  "",
+                                        "type":  "bytes32"
+                                    }
+                                ],
+                    "stateMutability":  "view",
+                    "type":  "function"
+                },
+                {
+                    "inputs":  [
+
+                               ],
+                    "name":  "HOLY_CUP_TYPEHASH",
+                    "outputs":  [
+                                    {
+                                        "internalType":  "bytes32",
+                                        "name":  "",
+                                        "type":  "bytes32"
+                                    }
+                                ],
+                    "stateMutability":  "view",
+                    "type":  "function"
+                },
+                {
+                    "inputs":  [
+
+                               ],
+                    "name":  "IGNITE_REWARD_WHOLE",
+                    "outputs":  [
+                                    {
+                                        "internalType":  "uint256",
+                                        "name":  "",
+                                        "type":  "uint256"
+                                    }
+                                ],
+                    "stateMutability":  "view",
+                    "type":  "function"
+                },
+                {
+                    "inputs":  [
+
+                               ],
+                    "name":  "IGNITE_WINDOW_SECONDS",
+                    "outputs":  [
+                                    {
+                                        "internalType":  "uint256",
+                                        "name":  "",
+                                        "type":  "uint256"
+                                    }
+                                ],
+                    "stateMutability":  "view",
+                    "type":  "function"
+                },
+                {
+                    "inputs":  [
+
+                               ],
+                    "name":  "KUFO_PER_KAIOS",
+                    "outputs":  [
+                                    {
+                                        "internalType":  "uint256",
+                                        "name":  "",
+                                        "type":  "uint256"
+                                    }
+                                ],
+                    "stateMutability":  "view",
+                    "type":  "function"
+                },
+                {
+                    "inputs":  [
+
+                               ],
+                    "name":  "OPERATOR_ROLE",
+                    "outputs":  [
+                                    {
+                                        "internalType":  "bytes32",
+                                        "name":  "",
+                                        "type":  "bytes32"
+                                    }
+                                ],
+                    "stateMutability":  "view",
+                    "type":  "function"
+                },
+                {
+                    "inputs":  [
+
+                               ],
+                    "name":  "ORGAN_EXCHANGE_TREASURY_11520",
+                    "outputs":  [
+                                    {
+                                        "internalType":  "bytes32",
+                                        "name":  "",
+                                        "type":  "bytes32"
+                                    }
+                                ],
+                    "stateMutability":  "view",
+                    "type":  "function"
+                },
+                {
+                    "inputs":  [
+
+                               ],
+                    "name":  "UPGRADER_ROLE",
+                    "outputs":  [
+                                    {
+                                        "internalType":  "bytes32",
+                                        "name":  "",
+                                        "type":  "bytes32"
+                                    }
+                                ],
+                    "stateMutability":  "view",
+                    "type":  "function"
+                },
+                {
+                    "inputs":  [
+
+                               ],
+                    "name":  "UPGRADE_INTERFACE_VERSION",
+                    "outputs":  [
+                                    {
+                                        "internalType":  "string",
+                                        "name":  "",
+                                        "type":  "string"
+                                    }
+                                ],
+                    "stateMutability":  "view",
+                    "type":  "function"
+                },
+                {
+                    "inputs":  [
+
+                               ],
+                    "name":  "VERSION_MAJOR",
+                    "outputs":  [
+                                    {
+                                        "internalType":  "uint256",
+                                        "name":  "",
+                                        "type":  "uint256"
+                                    }
+                                ],
+                    "stateMutability":  "view",
+                    "type":  "function"
+                },
+                {
+                    "inputs":  [
+
+                               ],
+                    "name":  "VERSION_MINOR",
+                    "outputs":  [
+                                    {
+                                        "internalType":  "uint256",
+                                        "name":  "",
+                                        "type":  "uint256"
+                                    }
+                                ],
+                    "stateMutability":  "view",
+                    "type":  "function"
+                },
+                {
+                    "inputs":  [
+
+                               ],
+                    "name":  "VERSION_PATCH",
+                    "outputs":  [
+                                    {
+                                        "internalType":  "uint256",
+                                        "name":  "",
+                                        "type":  "uint256"
+                                    }
+                                ],
+                    "stateMutability":  "view",
+                    "type":  "function"
+                },
+                {
+                    "inputs":  [
+                                   {
+                                       "internalType":  "address",
+                                       "name":  "user",
+                                       "type":  "address"
+                                   }
+                               ],
+                    "name":  "activeWish",
+                    "outputs":  [
+                                    {
+                                        "components":  [
+                                                           {
+                                                               "internalType":  "bytes32",
+                                                               "name":  "wishHash",
+                                                               "type":  "bytes32"
+                                                           },
+                                                           {
+                                                               "internalType":  "bytes32",
+                                                               "name":  "civilizationId",
+                                                               "type":  "bytes32"
+                                                           },
+                                                           {
+                                                               "internalType":  "uint64",
+                                                               "name":  "createdAt",
+                                                               "type":  "uint64"
+                                                           },
+                                                           {
+                                                               "internalType":  "uint64",
+                                                               "name":  "updatedAt",
+                                                               "type":  "uint64"
+                                                           },
+                                                           {
+                                                               "internalType":  "enum KGEN_TempleHeart_Upgradeable.WishStatus",
+                                                               "name":  "status",
+                                                               "type":  "uint8"
+                                                           }
+                                                       ],
+                                        "internalType":  "struct KGEN_TempleHeart_Upgradeable.WishRecord",
+                                        "name":  "",
+                                        "type":  "tuple"
+                                    }
+                                ],
+                    "stateMutability":  "view",
+                    "type":  "function"
+                },
+                {
+                    "inputs":  [
+                                   {
+                                       "internalType":  "bytes32",
+                                       "name":  "purposeCode",
+                                       "type":  "bytes32"
+                                   },
+                                   {
+                                       "internalType":  "bytes32",
+                                       "name":  "wishHash",
+                                       "type":  "bytes32"
+                                   }
+                               ],
+                    "name":  "alchemyDestinationCode",
+                    "outputs":  [
+                                    {
+                                        "internalType":  "bytes32",
+                                        "name":  "",
+                                        "type":  "bytes32"
+                                    }
+                                ],
+                    "stateMutability":  "pure",
+                    "type":  "function"
+                },
+                {
+                    "inputs":  [
+
+                               ],
+                    "name":  "autoLP",
+                    "outputs":  [
+                                    {
+                                        "internalType":  "address",
+                                        "name":  "",
+                                        "type":  "address"
+                                    }
+                                ],
+                    "stateMutability":  "view",
+                    "type":  "function"
+                },
+                {
+                    "inputs":  [
+
+                               ],
+                    "name":  "baseCapWhole",
+                    "outputs":  [
+                                    {
+                                        "internalType":  "uint256",
+                                        "name":  "",
+                                        "type":  "uint256"
+                                    }
+                                ],
+                    "stateMutability":  "view",
+                    "type":  "function"
+                },
+                {
+                    "inputs":  [
+
+                               ],
+                    "name":  "baseFloorWhole",
+                    "outputs":  [
+                                    {
+                                        "internalType":  "uint256",
+                                        "name":  "",
+                                        "type":  "uint256"
+                                    }
+                                ],
+                    "stateMutability":  "view",
+                    "type":  "function"
+                },
+                {
+                    "inputs":  [
+
+                               ],
+                    "name":  "blackhole",
+                    "outputs":  [
+                                    {
+                                        "internalType":  "address",
+                                        "name":  "",
+                                        "type":  "address"
+                                    }
+                                ],
+                    "stateMutability":  "view",
+                    "type":  "function"
+                },
+                {
+                    "inputs":  [
+                                   {
+                                       "internalType":  "bytes32",
+                                       "name":  "",
+                                       "type":  "bytes32"
+                                   }
+                               ],
+                    "name":  "blessingPowerByCivilization",
+                    "outputs":  [
+                                    {
+                                        "internalType":  "uint256",
+                                        "name":  "",
+                                        "type":  "uint256"
+                                    }
+                                ],
+                    "stateMutability":  "view",
+                    "type":  "function"
+                },
+                {
+                    "inputs":  [
+
+                               ],
+                    "name":  "brainVault",
+                    "outputs":  [
+                                    {
+                                        "internalType":  "address",
+                                        "name":  "",
+                                        "type":  "address"
+                                    }
+                                ],
+                    "stateMutability":  "view",
+                    "type":  "function"
+                },
+                {
+                    "inputs":  [
+
+                               ],
+                    "name":  "breathBlessingPower",
+                    "outputs":  [
+                                    {
+                                        "internalType":  "uint256",
+                                        "name":  "",
+                                        "type":  "uint256"
+                                    }
+                                ],
+                    "stateMutability":  "view",
+                    "type":  "function"
+                },
+                {
+                    "inputs":  [
+                                   {
+                                       "internalType":  "bytes32",
+                                       "name":  "",
+                                       "type":  "bytes32"
+                                   }
+                               ],
+                    "name":  "breathCountByCivilization",
+                    "outputs":  [
+                                    {
+                                        "internalType":  "uint256",
+                                        "name":  "",
+                                        "type":  "uint256"
+                                    }
+                                ],
+                    "stateMutability":  "view",
+                    "type":  "function"
+                },
+                {
+                    "inputs":  [
+
+                               ],
+                    "name":  "capBps",
+                    "outputs":  [
+                                    {
+                                        "internalType":  "uint256",
+                                        "name":  "",
+                                        "type":  "uint256"
+                                    }
+                                ],
+                    "stateMutability":  "view",
+                    "type":  "function"
+                },
+                {
+                    "inputs":  [
+
+                               ],
+                    "name":  "crossDayBreath",
+                    "outputs":  [
+                                    {
+                                        "internalType":  "uint256",
+                                        "name":  "blessingPowerTotal",
+                                        "type":  "uint256"
+                                    }
+                                ],
+                    "stateMutability":  "nonpayable",
+                    "type":  "function"
+                },
+                {
+                    "inputs":  [
+
+                               ],
+                    "name":  "current11520Treasury",
+                    "outputs":  [
+                                    {
+                                        "internalType":  "address",
+                                        "name":  "treasury11520",
+                                        "type":  "address"
+                                    }
+                                ],
+                    "stateMutability":  "view",
+                    "type":  "function"
+                },
+                {
+                    "inputs":  [
+                                   {
+                                       "internalType":  "uint256",
+                                       "name":  "",
+                                       "type":  "uint256"
+                                   }
+                               ],
+                    "name":  "dailyActiveCustomerWallets",
+                    "outputs":  [
+                                    {
+                                        "internalType":  "uint256",
+                                        "name":  "",
+                                        "type":  "uint256"
+                                    }
+                                ],
+                    "stateMutability":  "view",
+                    "type":  "function"
+                },
+                {
+                    "inputs":  [
+                                   {
+                                       "internalType":  "uint256",
+                                       "name":  "",
+                                       "type":  "uint256"
+                                   }
+                               ],
+                    "name":  "dailyActivePilgrims",
+                    "outputs":  [
+                                    {
+                                        "internalType":  "uint256",
+                                        "name":  "",
+                                        "type":  "uint256"
+                                    }
+                                ],
+                    "stateMutability":  "view",
+                    "type":  "function"
+                },
+                {
+                    "inputs":  [
+                                   {
+                                       "internalType":  "uint256",
+                                       "name":  "",
+                                       "type":  "uint256"
+                                   }
+                               ],
+                    "name":  "dailyNewCustomerWallets",
+                    "outputs":  [
+                                    {
+                                        "internalType":  "uint256",
+                                        "name":  "",
+                                        "type":  "uint256"
+                                    }
+                                ],
+                    "stateMutability":  "view",
+                    "type":  "function"
+                },
+                {
+                    "inputs":  [
+                                   {
+                                       "internalType":  "uint256",
+                                       "name":  "",
+                                       "type":  "uint256"
+                                   }
+                               ],
+                    "name":  "dailyNewPilgrims",
+                    "outputs":  [
+                                    {
+                                        "internalType":  "uint256",
+                                        "name":  "",
+                                        "type":  "uint256"
+                                    }
+                                ],
+                    "stateMutability":  "view",
+                    "type":  "function"
+                },
+                {
+                    "inputs":  [
+
+                               ],
+                    "name":  "deprecatedProofSource",
+                    "outputs":  [
+                                    {
+                                        "internalType":  "address",
+                                        "name":  "",
+                                        "type":  "address"
+                                    }
+                                ],
+                    "stateMutability":  "view",
+                    "type":  "function"
+                },
+                {
+                    "inputs":  [
+
+                               ],
+                    "name":  "eip712Domain",
+                    "outputs":  [
+                                    {
+                                        "internalType":  "bytes1",
+                                        "name":  "fields",
+                                        "type":  "bytes1"
+                                    },
+                                    {
+                                        "internalType":  "string",
+                                        "name":  "name",
+                                        "type":  "string"
+                                    },
+                                    {
+                                        "internalType":  "string",
+                                        "name":  "version",
+                                        "type":  "string"
+                                    },
+                                    {
+                                        "internalType":  "uint256",
+                                        "name":  "chainId",
+                                        "type":  "uint256"
+                                    },
+                                    {
+                                        "internalType":  "address",
+                                        "name":  "verifyingContract",
+                                        "type":  "address"
+                                    },
+                                    {
+                                        "internalType":  "bytes32",
+                                        "name":  "salt",
+                                        "type":  "bytes32"
+                                    },
+                                    {
+                                        "internalType":  "uint256[]",
+                                        "name":  "extensions",
+                                        "type":  "uint256[]"
+                                    }
+                                ],
+                    "stateMutability":  "view",
+                    "type":  "function"
+                },
+                {
+                    "inputs":  [
+
+                               ],
+                    "name":  "floorBps",
+                    "outputs":  [
+                                    {
+                                        "internalType":  "uint256",
+                                        "name":  "",
+                                        "type":  "uint256"
+                                    }
+                                ],
+                    "stateMutability":  "view",
+                    "type":  "function"
+                },
+                {
+                    "inputs":  [
+                                   {
+                                       "internalType":  "bytes32",
+                                       "name":  "",
+                                       "type":  "bytes32"
+                                   }
+                               ],
+                    "name":  "fortuneBurnProofConsumed",
+                    "outputs":  [
+                                    {
+                                        "internalType":  "bool",
+                                        "name":  "",
+                                        "type":  "bool"
+                                    }
+                                ],
+                    "stateMutability":  "view",
+                    "type":  "function"
+                },
+                {
+                    "inputs":  [
+
+                               ],
+                    "name":  "fortuneCapEnabled",
+                    "outputs":  [
+                                    {
+                                        "internalType":  "bool",
+                                        "name":  "",
+                                        "type":  "bool"
+                                    }
+                                ],
+                    "stateMutability":  "view",
+                    "type":  "function"
+                },
+                {
+                    "inputs":  [
+                                   {
+                                       "internalType":  "bytes32",
+                                       "name":  "proofId",
+                                       "type":  "bytes32"
+                                   }
+                               ],
+                    "name":  "fortuneClaim",
+                    "outputs":  [
+                                    {
+                                        "internalType":  "uint256",
+                                        "name":  "rewardAmount",
+                                        "type":  "uint256"
+                                    }
+                                ],
+                    "stateMutability":  "nonpayable",
+                    "type":  "function"
+                },
+                {
+                    "inputs":  [
+
+                               ],
+                    "name":  "fortuneCooldownSeconds",
+                    "outputs":  [
+                                    {
+                                        "internalType":  "uint256",
+                                        "name":  "",
+                                        "type":  "uint256"
+                                    }
+                                ],
+                    "stateMutability":  "view",
+                    "type":  "function"
+                },
+                {
+                    "inputs":  [
+                                   {
+                                       "internalType":  "uint256",
+                                       "name":  "",
+                                       "type":  "uint256"
+                                   }
+                               ],
+                    "name":  "fortuneEpochClaims",
+                    "outputs":  [
+                                    {
+                                        "internalType":  "uint256",
+                                        "name":  "",
+                                        "type":  "uint256"
+                                    }
+                                ],
+                    "stateMutability":  "view",
+                    "type":  "function"
+                },
+                {
+                    "inputs":  [
+
+                               ],
+                    "name":  "fortuneEpochMaxClaims",
+                    "outputs":  [
+                                    {
+                                        "internalType":  "uint256",
+                                        "name":  "",
+                                        "type":  "uint256"
+                                    }
+                                ],
+                    "stateMutability":  "view",
+                    "type":  "function"
+                },
+                {
+                    "inputs":  [
+
+                               ],
+                    "name":  "fortuneEpochSeconds",
+                    "outputs":  [
+                                    {
+                                        "internalType":  "uint256",
+                                        "name":  "",
+                                        "type":  "uint256"
+                                    }
+                                ],
+                    "stateMutability":  "view",
+                    "type":  "function"
+                },
+                {
+                    "inputs":  [
+
+                               ],
+                    "name":  "fortuneGame",
+                    "outputs":  [
+                                    {
+                                        "internalType":  "address",
+                                        "name":  "",
+                                        "type":  "address"
+                                    }
+                                ],
+                    "stateMutability":  "view",
+                    "type":  "function"
+                },
+                {
+                    "inputs":  [
+                                   {
+                                       "internalType":  "address",
+                                       "name":  "user",
+                                       "type":  "address"
+                                   }
+                               ],
+                    "name":  "fortuneLedger",
+                    "outputs":  [
+                                    {
+                                        "components":  [
+                                                           {
+                                                               "internalType":  "uint256",
+                                                               "name":  "totalClaimed",
+                                                               "type":  "uint256"
+                                                           },
+                                                           {
+                                                               "internalType":  "uint256",
+                                                               "name":  "totalVoluntaryRepaid",
+                                                               "type":  "uint256"
+                                                           },
+                                                           {
+                                                               "internalType":  "uint256",
+                                                               "name":  "lastClaimAmount",
+                                                               "type":  "uint256"
+                                                           },
+                                                           {
+                                                               "internalType":  "uint256",
+                                                               "name":  "lastClaimAt",
+                                                               "type":  "uint256"
+                                                           },
+                                                           {
+                                                               "internalType":  "uint256",
+                                                               "name":  "lastVoluntaryRepaymentAmount",
+                                                               "type":  "uint256"
+                                                           },
+                                                           {
+                                                               "internalType":  "uint256",
+                                                               "name":  "lastVoluntaryRepaymentAt",
+                                                               "type":  "uint256"
+                                                           },
+                                                           {
+                                                               "internalType":  "uint64",
+                                                               "name":  "claimCount",
+                                                               "type":  "uint64"
+                                                           },
+                                                           {
+                                                               "internalType":  "uint64",
+                                                               "name":  "repaymentCount",
+                                                               "type":  "uint64"
+                                                           },
+                                                           {
+                                                               "internalType":  "bool",
+                                                               "name":  "repaidAfterLastClaim",
+                                                               "type":  "bool"
+                                                           }
+                                                       ],
+                                        "internalType":  "struct KGEN_TempleHeart_Upgradeable.FortuneLedger",
+                                        "name":  "",
+                                        "type":  "tuple"
+                                    }
+                                ],
+                    "stateMutability":  "view",
+                    "type":  "function"
+                },
+                {
+                    "inputs":  [
+
+                               ],
+                    "name":  "fortuneMaxWhole",
+                    "outputs":  [
+                                    {
+                                        "internalType":  "uint256",
+                                        "name":  "",
+                                        "type":  "uint256"
+                                    }
+                                ],
+                    "stateMutability":  "view",
+                    "type":  "function"
+                },
+                {
+                    "inputs":  [
+
+                               ],
+                    "name":  "fortuneMinWhole",
+                    "outputs":  [
+                                    {
+                                        "internalType":  "uint256",
+                                        "name":  "",
+                                        "type":  "uint256"
+                                    }
+                                ],
+                    "stateMutability":  "view",
+                    "type":  "function"
+                },
+                {
+                    "inputs":  [
+
+                               ],
+                    "name":  "fortunePurposeCode",
+                    "outputs":  [
+                                    {
+                                        "internalType":  "bytes32",
+                                        "name":  "",
+                                        "type":  "bytes32"
+                                    }
+                                ],
+                    "stateMutability":  "view",
+                    "type":  "function"
+                },
+                {
+                    "inputs":  [
+                                   {
+                                       "internalType":  "address",
+                                       "name":  "player",
+                                       "type":  "address"
+                                   },
+                                   {
+                                       "internalType":  "uint256",
+                                       "name":  "amount",
+                                       "type":  "uint256"
+                                   }
+                               ],
+                    "name":  "gamePayout",
+                    "outputs":  [
+
+                                ],
+                    "stateMutability":  "nonpayable",
+                    "type":  "function"
+                },
+                {
+                    "inputs":  [
+
+                               ],
+                    "name":  "gameSurvivalGateWhole",
+                    "outputs":  [
+                                    {
+                                        "internalType":  "uint256",
+                                        "name":  "",
+                                        "type":  "uint256"
+                                    }
+                                ],
+                    "stateMutability":  "view",
+                    "type":  "function"
+                },
+                {
+                    "inputs":  [
+                                   {
+                                       "internalType":  "bytes32",
+                                       "name":  "role",
+                                       "type":  "bytes32"
+                                   }
+                               ],
+                    "name":  "getRoleAdmin",
+                    "outputs":  [
+                                    {
+                                        "internalType":  "bytes32",
+                                        "name":  "",
+                                        "type":  "bytes32"
+                                    }
+                                ],
+                    "stateMutability":  "view",
+                    "type":  "function"
+                },
+                {
+                    "inputs":  [
+                                   {
+                                       "internalType":  "bytes32",
+                                       "name":  "role",
+                                       "type":  "bytes32"
+                                   },
+                                   {
+                                       "internalType":  "address",
+                                       "name":  "account",
+                                       "type":  "address"
+                                   }
+                               ],
+                    "name":  "grantRole",
+                    "outputs":  [
+
+                                ],
+                    "stateMutability":  "nonpayable",
+                    "type":  "function"
+                },
+                {
+                    "inputs":  [
+                                   {
+                                       "internalType":  "bytes32",
+                                       "name":  "role",
+                                       "type":  "bytes32"
+                                   },
+                                   {
+                                       "internalType":  "address",
+                                       "name":  "account",
+                                       "type":  "address"
+                                   }
+                               ],
+                    "name":  "hasRole",
+                    "outputs":  [
+                                    {
+                                        "internalType":  "bool",
+                                        "name":  "",
+                                        "type":  "bool"
+                                    }
+                                ],
+                    "stateMutability":  "view",
+                    "type":  "function"
+                },
+                {
+                    "inputs":  [
+
+                               ],
+                    "name":  "heartbeat",
+                    "outputs":  [
+                                    {
+                                        "internalType":  "uint256",
+                                        "name":  "blessingPowerTotal",
+                                        "type":  "uint256"
+                                    }
+                                ],
+                    "stateMutability":  "nonpayable",
+                    "type":  "function"
+                },
+                {
+                    "inputs":  [
+
+                               ],
+                    "name":  "heartbeatBlessingPower",
+                    "outputs":  [
+                                    {
+                                        "internalType":  "uint256",
+                                        "name":  "",
+                                        "type":  "uint256"
+                                    }
+                                ],
+                    "stateMutability":  "view",
+                    "type":  "function"
+                },
+                {
+                    "inputs":  [
+
+                               ],
+                    "name":  "heartbeatClaim",
+                    "outputs":  [
+                                    {
+                                        "internalType":  "uint256",
+                                        "name":  "blessingPowerTotal",
+                                        "type":  "uint256"
+                                    }
+                                ],
+                    "stateMutability":  "nonpayable",
+                    "type":  "function"
+                },
+                {
+                    "inputs":  [
+
+                               ],
+                    "name":  "heartbeatCooldownSeconds",
+                    "outputs":  [
+                                    {
+                                        "internalType":  "uint256",
+                                        "name":  "",
+                                        "type":  "uint256"
+                                    }
+                                ],
+                    "stateMutability":  "view",
+                    "type":  "function"
+                },
+                {
+                    "inputs":  [
+                                   {
+                                       "internalType":  "bytes32",
+                                       "name":  "",
+                                       "type":  "bytes32"
+                                   }
+                               ],
+                    "name":  "heartbeatCountByCivilization",
+                    "outputs":  [
+                                    {
+                                        "internalType":  "uint256",
+                                        "name":  "",
+                                        "type":  "uint256"
+                                    }
+                                ],
+                    "stateMutability":  "view",
+                    "type":  "function"
+                },
+                {
+                    "inputs":  [
+                                   {
+                                       "internalType":  "uint256",
+                                       "name":  "",
+                                       "type":  "uint256"
+                                   }
+                               ],
+                    "name":  "heartbeatHourClaims",
+                    "outputs":  [
+                                    {
+                                        "internalType":  "uint256",
+                                        "name":  "",
+                                        "type":  "uint256"
+                                    }
+                                ],
+                    "stateMutability":  "view",
+                    "type":  "function"
+                },
+                {
+                    "inputs":  [
+
+                               ],
+                    "name":  "heartbeatMaxClaimsPerHour",
+                    "outputs":  [
+                                    {
+                                        "internalType":  "uint256",
+                                        "name":  "",
+                                        "type":  "uint256"
+                                    }
+                                ],
+                    "stateMutability":  "view",
+                    "type":  "function"
+                },
+                {
+                    "inputs":  [
+                                   {
+                                       "internalType":  "bytes32",
+                                       "name":  "",
+                                       "type":  "bytes32"
+                                   }
+                               ],
+                    "name":  "holyCupProofConsumed",
+                    "outputs":  [
+                                    {
+                                        "internalType":  "bool",
+                                        "name":  "",
+                                        "type":  "bool"
+                                    }
+                                ],
+                    "stateMutability":  "view",
+                    "type":  "function"
+                },
+                {
+                    "inputs":  [
+
+                               ],
+                    "name":  "igniteAndClaim",
+                    "outputs":  [
+                                    {
+                                        "internalType":  "uint256",
+                                        "name":  "blessingPowerTotal",
+                                        "type":  "uint256"
+                                    }
+                                ],
+                    "stateMutability":  "nonpayable",
+                    "type":  "function"
+                },
+                {
+                    "inputs":  [
+                                   {
+                                       "internalType":  "uint256",
+                                       "name":  "",
+                                       "type":  "uint256"
+                                   }
+                               ],
+                    "name":  "igniteDayClaims",
+                    "outputs":  [
+                                    {
+                                        "internalType":  "uint256",
+                                        "name":  "",
+                                        "type":  "uint256"
+                                    }
+                                ],
+                    "stateMutability":  "view",
+                    "type":  "function"
+                },
+                {
+                    "inputs":  [
+
+                               ],
+                    "name":  "igniteMaxClaimsPerDay",
+                    "outputs":  [
+                                    {
+                                        "internalType":  "uint256",
+                                        "name":  "",
+                                        "type":  "uint256"
+                                    }
+                                ],
+                    "stateMutability":  "view",
+                    "type":  "function"
+                },
+                {
+                    "inputs":  [
+                                   {
+                                       "internalType":  "address",
+                                       "name":  "admin",
+                                       "type":  "address"
+                                   },
+                                   {
+                                       "internalType":  "address",
+                                       "name":  "upgrader",
+                                       "type":  "address"
+                                   },
+                                   {
+                                       "internalType":  "address",
+                                       "name":  "operator",
+                                       "type":  "address"
+                                   },
+                                   {
+                                       "internalType":  "address",
+                                       "name":  "holyCupSigner",
+                                       "type":  "address"
+                                   },
+                                   {
+                                       "internalType":  "address",
+                                       "name":  "kgenToken",
+                                       "type":  "address"
+                                   },
+                                   {
+                                       "internalType":  "address",
+                                       "name":  "_brainVault",
+                                       "type":  "address"
+                                   },
+                                   {
+                                       "internalType":  "address",
+                                       "name":  "alchemyProofSource",
+                                       "type":  "address"
+                                   }
+                               ],
+                    "name":  "initialize",
+                    "outputs":  [
+
+                                ],
+                    "stateMutability":  "nonpayable",
+                    "type":  "function"
+                },
+                {
+                    "inputs":  [
+                                   {
+                                       "internalType":  "address",
+                                       "name":  "alchemyProofSource",
+                                       "type":  "address"
+                                   }
+                               ],
+                    "name":  "initializeAlchemyIntegration",
+                    "outputs":  [
+
+                                ],
+                    "stateMutability":  "nonpayable",
+                    "type":  "function"
+                },
+                {
+                    "inputs":  [
+                                   {
+                                       "internalType":  "address",
+                                       "name":  "registry",
+                                       "type":  "address"
+                                   }
+                               ],
+                    "name":  "initializeV340",
+                    "outputs":  [
+
+                                ],
+                    "stateMutability":  "nonpayable",
+                    "type":  "function"
+                },
+                {
+                    "inputs":  [
+                                   {
+                                       "internalType":  "uint256",
+                                       "name":  "amountWhole",
+                                       "type":  "uint256"
+                                   }
+                               ],
+                    "name":  "injectFromBrain",
+                    "outputs":  [
+
+                                ],
+                    "stateMutability":  "nonpayable",
+                    "type":  "function"
+                },
+                {
+                    "inputs":  [
+                                   {
+                                       "internalType":  "address",
+                                       "name":  "user",
+                                       "type":  "address"
+                                   }
+                               ],
+                    "name":  "isCustomerWallet",
+                    "outputs":  [
+                                    {
+                                        "internalType":  "bool",
+                                        "name":  "",
+                                        "type":  "bool"
+                                    }
+                                ],
+                    "stateMutability":  "view",
+                    "type":  "function"
+                },
+                {
+                    "inputs":  [
+
+                               ],
+                    "name":  "isHeartGameOperational",
+                    "outputs":  [
+                                    {
+                                        "internalType":  "bool",
+                                        "name":  "",
+                                        "type":  "bool"
+                                    }
+                                ],
+                    "stateMutability":  "view",
+                    "type":  "function"
+                },
+                {
+                    "inputs":  [
+                                   {
+                                       "internalType":  "bytes32",
+                                       "name":  "",
+                                       "type":  "bytes32"
+                                   }
+                               ],
+                    "name":  "isPilgrim",
+                    "outputs":  [
+                                    {
+                                        "internalType":  "bool",
+                                        "name":  "",
+                                        "type":  "bool"
+                                    }
+                                ],
+                    "stateMutability":  "view",
+                    "type":  "function"
+                },
+                {
+                    "inputs":  [
+
+                               ],
+                    "name":  "kaiosAlchemyProofSource",
+                    "outputs":  [
+                                    {
+                                        "internalType":  "contract IKAIOSAlchemyProofSource",
+                                        "name":  "",
+                                        "type":  "address"
+                                    }
+                                ],
+                    "stateMutability":  "view",
+                    "type":  "function"
+                },
+                {
+                    "inputs":  [
+
+                               ],
+                    "name":  "kgen",
+                    "outputs":  [
+                                    {
+                                        "internalType":  "contract IERC20",
+                                        "name":  "",
+                                        "type":  "address"
+                                    }
+                                ],
+                    "stateMutability":  "view",
+                    "type":  "function"
+                },
+                {
+                    "inputs":  [
+                                   {
+                                       "internalType":  "address",
+                                       "name":  "",
+                                       "type":  "address"
+                                   }
+                               ],
+                    "name":  "lastBreathDay",
+                    "outputs":  [
+                                    {
+                                        "internalType":  "uint256",
+                                        "name":  "",
+                                        "type":  "uint256"
+                                    }
+                                ],
+                    "stateMutability":  "view",
+                    "type":  "function"
+                },
+                {
+                    "inputs":  [
+                                   {
+                                       "internalType":  "bytes32",
+                                       "name":  "",
+                                       "type":  "bytes32"
+                                   }
+                               ],
+                    "name":  "lastCivilizationBreathDay",
+                    "outputs":  [
+                                    {
+                                        "internalType":  "uint256",
+                                        "name":  "",
+                                        "type":  "uint256"
+                                    }
+                                ],
+                    "stateMutability":  "view",
+                    "type":  "function"
+                },
+                {
+                    "inputs":  [
+                                   {
+                                       "internalType":  "bytes32",
+                                       "name":  "",
+                                       "type":  "bytes32"
+                                   }
+                               ],
+                    "name":  "lastCivilizationFortuneAt",
+                    "outputs":  [
+                                    {
+                                        "internalType":  "uint256",
+                                        "name":  "",
+                                        "type":  "uint256"
+                                    }
+                                ],
+                    "stateMutability":  "view",
+                    "type":  "function"
+                },
+                {
+                    "inputs":  [
+                                   {
+                                       "internalType":  "bytes32",
+                                       "name":  "",
+                                       "type":  "bytes32"
+                                   }
+                               ],
+                    "name":  "lastCivilizationHeartbeatAt",
+                    "outputs":  [
+                                    {
+                                        "internalType":  "uint256",
+                                        "name":  "",
+                                        "type":  "uint256"
+                                    }
+                                ],
+                    "stateMutability":  "view",
+                    "type":  "function"
+                },
+                {
+                    "inputs":  [
+                                   {
+                                       "internalType":  "address",
+                                       "name":  "",
+                                       "type":  "address"
+                                   }
+                               ],
+                    "name":  "lastFortuneAt",
+                    "outputs":  [
+                                    {
+                                        "internalType":  "uint256",
+                                        "name":  "",
+                                        "type":  "uint256"
+                                    }
+                                ],
+                    "stateMutability":  "view",
+                    "type":  "function"
+                },
+                {
+                    "inputs":  [
+                                   {
+                                       "internalType":  "address",
+                                       "name":  "",
+                                       "type":  "address"
+                                   }
+                               ],
+                    "name":  "lastHeartbeatAt",
+                    "outputs":  [
+                                    {
+                                        "internalType":  "uint256",
+                                        "name":  "",
+                                        "type":  "uint256"
+                                    }
+                                ],
+                    "stateMutability":  "view",
+                    "type":  "function"
+                },
+                {
+                    "inputs":  [
+
+                               ],
+                    "name":  "lingxiaoBank",
+                    "outputs":  [
+                                    {
+                                        "internalType":  "address",
+                                        "name":  "",
+                                        "type":  "address"
+                                    }
+                                ],
+                    "stateMutability":  "view",
+                    "type":  "function"
+                },
+                {
+                    "inputs":  [
+                                   {
+                                       "internalType":  "bytes32",
+                                       "name":  "wishHash",
+                                       "type":  "bytes32"
+                                   },
+                                   {
+                                       "internalType":  "bytes32",
+                                       "name":  "civilizationId",
+                                       "type":  "bytes32"
+                                   }
+                               ],
+                    "name":  "makeWish",
+                    "outputs":  [
+
+                                ],
+                    "stateMutability":  "nonpayable",
+                    "type":  "function"
+                },
+                {
+                    "inputs":  [
+
+                               ],
+                    "name":  "marsVault",
+                    "outputs":  [
+                                    {
+                                        "internalType":  "address",
+                                        "name":  "",
+                                        "type":  "address"
+                                    }
+                                ],
+                    "stateMutability":  "view",
+                    "type":  "function"
+                },
+                {
+                    "inputs":  [
+
+                               ],
+                    "name":  "maxCapWhole",
+                    "outputs":  [
+                                    {
+                                        "internalType":  "uint256",
+                                        "name":  "",
+                                        "type":  "uint256"
+                                    }
+                                ],
+                    "stateMutability":  "view",
+                    "type":  "function"
+                },
+                {
+                    "inputs":  [
+
+                               ],
+                    "name":  "minimumBurnWholeForFortune",
+                    "outputs":  [
+                                    {
+                                        "internalType":  "uint256",
+                                        "name":  "",
+                                        "type":  "uint256"
+                                    }
+                                ],
+                    "stateMutability":  "view",
+                    "type":  "function"
+                },
+                {
+                    "inputs":  [
+                                   {
+                                       "internalType":  "address",
+                                       "name":  "user",
+                                       "type":  "address"
+                                   }
+                               ],
+                    "name":  "nextFortuneEligibility",
+                    "outputs":  [
+                                    {
+                                        "internalType":  "bool",
+                                        "name":  "eligible",
+                                        "type":  "bool"
+                                    },
+                                    {
+                                        "internalType":  "bool",
+                                        "name":  "repaymentSatisfied",
+                                        "type":  "bool"
+                                    },
+                                    {
+                                        "internalType":  "uint256",
+                                        "name":  "cooldownEndsAt",
+                                        "type":  "uint256"
+                                    }
+                                ],
+                    "stateMutability":  "view",
+                    "type":  "function"
+                },
+                {
+                    "inputs":  [
+
+                               ],
+                    "name":  "normalizeHeartBalance",
+                    "outputs":  [
+                                    {
+                                        "internalType":  "address",
+                                        "name":  "treasury11520",
+                                        "type":  "address"
+                                    },
+                                    {
+                                        "internalType":  "uint256",
+                                        "name":  "excess",
+                                        "type":  "uint256"
+                                    },
+                                    {
+                                        "internalType":  "uint256",
+                                        "name":  "capAmount",
+                                        "type":  "uint256"
+                                    }
+                                ],
+                    "stateMutability":  "nonpayable",
+                    "type":  "function"
+                },
+                {
+                    "inputs":  [
+                                   {
+                                       "internalType":  "bytes32",
+                                       "name":  "",
+                                       "type":  "bytes32"
+                                   }
+                               ],
+                    "name":  "offeringBurnProofConsumed",
+                    "outputs":  [
+                                    {
+                                        "internalType":  "bool",
+                                        "name":  "",
+                                        "type":  "bool"
+                                    }
+                                ],
+                    "stateMutability":  "view",
+                    "type":  "function"
+                },
+                {
+                    "inputs":  [
+                                   {
+                                       "internalType":  "uint8",
+                                       "name":  "",
+                                       "type":  "uint8"
+                                   }
+                               ],
+                    "name":  "offeringPowerPerWholeKaios",
+                    "outputs":  [
+                                    {
+                                        "internalType":  "uint256",
+                                        "name":  "",
+                                        "type":  "uint256"
+                                    }
+                                ],
+                    "stateMutability":  "view",
+                    "type":  "function"
+                },
+                {
+                    "inputs":  [
+                                   {
+                                       "internalType":  "uint8",
+                                       "name":  "",
+                                       "type":  "uint8"
+                                   }
+                               ],
+                    "name":  "offeringPowerPerWholeKgen",
+                    "outputs":  [
+                                    {
+                                        "internalType":  "uint256",
+                                        "name":  "",
+                                        "type":  "uint256"
+                                    }
+                                ],
+                    "stateMutability":  "view",
+                    "type":  "function"
+                },
+                {
+                    "inputs":  [
+                                   {
+                                       "internalType":  "uint8",
+                                       "name":  "",
+                                       "type":  "uint8"
+                                   }
+                               ],
+                    "name":  "offeringPurposeCode",
+                    "outputs":  [
+                                    {
+                                        "internalType":  "bytes32",
+                                        "name":  "",
+                                        "type":  "bytes32"
+                                    }
+                                ],
+                    "stateMutability":  "view",
+                    "type":  "function"
+                },
+                {
+                    "inputs":  [
+
+                               ],
+                    "name":  "organRegistry",
+                    "outputs":  [
+                                    {
+                                        "internalType":  "contract IKAIOSOrganRegistryForTempleHeart",
+                                        "name":  "",
+                                        "type":  "address"
+                                    }
+                                ],
+                    "stateMutability":  "view",
+                    "type":  "function"
+                },
+                {
+                    "inputs":  [
+
+                               ],
+                    "name":  "pause",
+                    "outputs":  [
+
+                                ],
+                    "stateMutability":  "nonpayable",
+                    "type":  "function"
+                },
+                {
+                    "inputs":  [
+
+                               ],
+                    "name":  "paused",
+                    "outputs":  [
+                                    {
+                                        "internalType":  "bool",
+                                        "name":  "",
+                                        "type":  "bool"
+                                    }
+                                ],
+                    "stateMutability":  "view",
+                    "type":  "function"
+                },
+                {
+                    "inputs":  [
+                                   {
+                                       "internalType":  "address",
+                                       "name":  "",
+                                       "type":  "address"
+                                   }
+                               ],
+                    "name":  "pilgrimCivilizationByWallet",
+                    "outputs":  [
+                                    {
+                                        "internalType":  "bytes32",
+                                        "name":  "",
+                                        "type":  "bytes32"
+                                    }
+                                ],
+                    "stateMutability":  "view",
+                    "type":  "function"
+                },
+                {
+                    "inputs":  [
+                                   {
+                                       "internalType":  "bytes32",
+                                       "name":  "civilizationId",
+                                       "type":  "bytes32"
+                                   }
+                               ],
+                    "name":  "previewFortuneReward",
+                    "outputs":  [
+                                    {
+                                        "internalType":  "uint256",
+                                        "name":  "",
+                                        "type":  "uint256"
+                                    }
+                                ],
+                    "stateMutability":  "view",
+                    "type":  "function"
+                },
+                {
+                    "inputs":  [
+
+                               ],
+                    "name":  "proxiableUUID",
+                    "outputs":  [
+                                    {
+                                        "internalType":  "bytes32",
+                                        "name":  "",
+                                        "type":  "bytes32"
+                                    }
+                                ],
+                    "stateMutability":  "view",
+                    "type":  "function"
+                },
+                {
+                    "inputs":  [
+                                   {
+                                       "internalType":  "bytes32",
+                                       "name":  "proofId",
+                                       "type":  "bytes32"
+                                   },
+                                   {
+                                       "internalType":  "enum KGEN_TempleHeart_Upgradeable.BurnOfferingType",
+                                       "name":  "offeringType",
+                                       "type":  "uint8"
+                                   }
+                               ],
+                    "name":  "recordBurnOffering",
+                    "outputs":  [
+                                    {
+                                        "internalType":  "uint256",
+                                        "name":  "blessingPowerAdded",
+                                        "type":  "uint256"
+                                    }
+                                ],
+                    "stateMutability":  "nonpayable",
+                    "type":  "function"
+                },
+                {
+                    "inputs":  [
+                                   {
+                                       "internalType":  "bytes32",
+                                       "name":  "role",
+                                       "type":  "bytes32"
+                                   },
+                                   {
+                                       "internalType":  "address",
+                                       "name":  "callerConfirmation",
+                                       "type":  "address"
+                                   }
+                               ],
+                    "name":  "renounceRole",
+                    "outputs":  [
+
+                                ],
+                    "stateMutability":  "nonpayable",
+                    "type":  "function"
+                },
+                {
+                    "inputs":  [
+                                   {
+                                       "internalType":  "bytes32",
+                                       "name":  "role",
+                                       "type":  "bytes32"
+                                   },
+                                   {
+                                       "internalType":  "address",
+                                       "name":  "account",
+                                       "type":  "address"
+                                   }
+                               ],
+                    "name":  "revokeRole",
+                    "outputs":  [
+
+                                ],
+                    "stateMutability":  "nonpayable",
+                    "type":  "function"
+                },
+                {
+                    "inputs":  [
+                                   {
+                                       "internalType":  "address",
+                                       "name":  "game",
+                                       "type":  "address"
+                                   }
+                               ],
+                    "name":  "setFortuneGame",
+                    "outputs":  [
+
+                                ],
+                    "stateMutability":  "nonpayable",
+                    "type":  "function"
+                },
+                {
+                    "inputs":  [
+                                   {
+                                       "internalType":  "enum KGEN_TempleHeart_Upgradeable.BurnOfferingType",
+                                       "name":  "offeringType",
+                                       "type":  "uint8"
+                                   },
+                                   {
+                                       "internalType":  "bytes32",
+                                       "name":  "purposeCode",
+                                       "type":  "bytes32"
+                                   },
+                                   {
+                                       "internalType":  "uint256",
+                                       "name":  "powerPerWholeKaios",
+                                       "type":  "uint256"
+                                   }
+                               ],
+                    "name":  "setOfferingRule",
+                    "outputs":  [
+
+                                ],
+                    "stateMutability":  "nonpayable",
+                    "type":  "function"
+                },
+                {
+                    "inputs":  [
+                                   {
+                                       "internalType":  "address",
+                                       "name":  "registry",
+                                       "type":  "address"
+                                   }
+                               ],
+                    "name":  "setOrganRegistry",
+                    "outputs":  [
+
+                                ],
+                    "stateMutability":  "nonpayable",
+                    "type":  "function"
+                },
+                {
+                    "inputs":  [
+                                   {
+                                       "internalType":  "address",
+                                       "name":  "bank",
+                                       "type":  "address"
+                                   },
+                                   {
+                                       "internalType":  "address",
+                                       "name":  "mars",
+                                       "type":  "address"
+                                   },
+                                   {
+                                       "internalType":  "address",
+                                       "name":  "lp",
+                                       "type":  "address"
+                                   },
+                                   {
+                                       "internalType":  "address",
+                                       "name":  "hole",
+                                       "type":  "address"
+                                   }
+                               ],
+                    "name":  "setOrgans",
+                    "outputs":  [
+
+                                ],
+                    "stateMutability":  "nonpayable",
+                    "type":  "function"
+                },
+                {
+                    "inputs":  [
+                                   {
+                                       "internalType":  "bytes32",
+                                       "name":  "proofId",
+                                       "type":  "bytes32"
+                                   },
+                                   {
+                                       "internalType":  "bytes32",
+                                       "name":  "civilizationId",
+                                       "type":  "bytes32"
+                                   },
+                                   {
+                                       "internalType":  "bytes32",
+                                       "name":  "wishHash",
+                                       "type":  "bytes32"
+                                   },
+                                   {
+                                       "internalType":  "uint256",
+                                       "name":  "deadline",
+                                       "type":  "uint256"
+                                   },
+                                   {
+                                       "internalType":  "bytes",
+                                       "name":  "signature",
+                                       "type":  "bytes"
+                                   }
+                               ],
+                    "name":  "submitHolyCupProof",
+                    "outputs":  [
+
+                                ],
+                    "stateMutability":  "nonpayable",
+                    "type":  "function"
+                },
+                {
+                    "inputs":  [
+                                   {
+                                       "internalType":  "bytes4",
+                                       "name":  "interfaceId",
+                                       "type":  "bytes4"
+                                   }
+                               ],
+                    "name":  "supportsInterface",
+                    "outputs":  [
+                                    {
+                                        "internalType":  "bool",
+                                        "name":  "",
+                                        "type":  "bool"
+                                    }
+                                ],
+                    "stateMutability":  "view",
+                    "type":  "function"
+                },
+                {
+                    "inputs":  [
+
+                               ],
+                    "name":  "sweepExcessToBrain",
+                    "outputs":  [
+
+                                ],
+                    "stateMutability":  "nonpayable",
+                    "type":  "function"
+                },
+                {
+                    "inputs":  [
+
+                               ],
+                    "name":  "totalBreaths",
+                    "outputs":  [
+                                    {
+                                        "internalType":  "uint256",
+                                        "name":  "",
+                                        "type":  "uint256"
+                                    }
+                                ],
+                    "stateMutability":  "view",
+                    "type":  "function"
+                },
+                {
+                    "inputs":  [
+
+                               ],
+                    "name":  "totalCustomerWallets",
+                    "outputs":  [
+                                    {
+                                        "internalType":  "uint256",
+                                        "name":  "",
+                                        "type":  "uint256"
+                                    }
+                                ],
+                    "stateMutability":  "view",
+                    "type":  "function"
+                },
+                {
+                    "inputs":  [
+
+                               ],
+                    "name":  "totalFortuneClaimants",
+                    "outputs":  [
+                                    {
+                                        "internalType":  "uint256",
+                                        "name":  "",
+                                        "type":  "uint256"
+                                    }
+                                ],
+                    "stateMutability":  "view",
+                    "type":  "function"
+                },
+                {
+                    "inputs":  [
+
+                               ],
+                    "name":  "totalFortunePaid",
+                    "outputs":  [
+                                    {
+                                        "internalType":  "uint256",
+                                        "name":  "",
+                                        "type":  "uint256"
+                                    }
+                                ],
+                    "stateMutability":  "view",
+                    "type":  "function"
+                },
+                {
+                    "inputs":  [
+
+                               ],
+                    "name":  "totalHeartbeatPaid",
+                    "outputs":  [
+                                    {
+                                        "internalType":  "uint256",
+                                        "name":  "",
+                                        "type":  "uint256"
+                                    }
+                                ],
+                    "stateMutability":  "view",
+                    "type":  "function"
+                },
+                {
+                    "inputs":  [
+
+                               ],
+                    "name":  "totalHeartbeats",
+                    "outputs":  [
+                                    {
+                                        "internalType":  "uint256",
+                                        "name":  "",
+                                        "type":  "uint256"
+                                    }
+                                ],
+                    "stateMutability":  "view",
+                    "type":  "function"
+                },
+                {
+                    "inputs":  [
+
+                               ],
+                    "name":  "totalHolyCupPassed",
+                    "outputs":  [
+                                    {
+                                        "internalType":  "uint256",
+                                        "name":  "",
+                                        "type":  "uint256"
+                                    }
+                                ],
+                    "stateMutability":  "view",
+                    "type":  "function"
+                },
+                {
+                    "inputs":  [
+
+                               ],
+                    "name":  "totalIgnitePaid",
+                    "outputs":  [
+                                    {
+                                        "internalType":  "uint256",
+                                        "name":  "",
+                                        "type":  "uint256"
+                                    }
+                                ],
+                    "stateMutability":  "view",
+                    "type":  "function"
+                },
+                {
+                    "inputs":  [
+
+                               ],
+                    "name":  "totalIgnites",
+                    "outputs":  [
+                                    {
+                                        "internalType":  "uint256",
+                                        "name":  "",
+                                        "type":  "uint256"
+                                    }
+                                ],
+                    "stateMutability":  "view",
+                    "type":  "function"
+                },
+                {
+                    "inputs":  [
+                                   {
+                                       "internalType":  "uint8",
+                                       "name":  "",
+                                       "type":  "uint8"
+                                   }
+                               ],
+                    "name":  "totalOfferingBurnedByType",
+                    "outputs":  [
+                                    {
+                                        "internalType":  "uint256",
+                                        "name":  "",
+                                        "type":  "uint256"
+                                    }
+                                ],
+                    "stateMutability":  "view",
+                    "type":  "function"
+                },
+                {
+                    "inputs":  [
+                                   {
+                                       "internalType":  "uint8",
+                                       "name":  "",
+                                       "type":  "uint8"
+                                   }
+                               ],
+                    "name":  "totalOfferingCountByType",
+                    "outputs":  [
+                                    {
+                                        "internalType":  "uint256",
+                                        "name":  "",
+                                        "type":  "uint256"
+                                    }
+                                ],
+                    "stateMutability":  "view",
+                    "type":  "function"
+                },
+                {
+                    "inputs":  [
+
+                               ],
+                    "name":  "totalOfferingKaiosBurned",
+                    "outputs":  [
+                                    {
+                                        "internalType":  "uint256",
+                                        "name":  "",
+                                        "type":  "uint256"
+                                    }
+                                ],
+                    "stateMutability":  "view",
+                    "type":  "function"
+                },
+                {
+                    "inputs":  [
+
+                               ],
+                    "name":  "totalOfferingKgenBurned",
+                    "outputs":  [
+                                    {
+                                        "internalType":  "uint256",
+                                        "name":  "",
+                                        "type":  "uint256"
+                                    }
+                                ],
+                    "stateMutability":  "view",
+                    "type":  "function"
+                },
+                {
+                    "inputs":  [
+
+                               ],
+                    "name":  "totalPilgrims",
+                    "outputs":  [
+                                    {
+                                        "internalType":  "uint256",
+                                        "name":  "",
+                                        "type":  "uint256"
+                                    }
+                                ],
+                    "stateMutability":  "view",
+                    "type":  "function"
+                },
+                {
+                    "inputs":  [
+
+                               ],
+                    "name":  "totalWishers",
+                    "outputs":  [
+                                    {
+                                        "internalType":  "uint256",
+                                        "name":  "",
+                                        "type":  "uint256"
+                                    }
+                                ],
+                    "stateMutability":  "view",
+                    "type":  "function"
+                },
+                {
+                    "inputs":  [
+
+                               ],
+                    "name":  "unpause",
+                    "outputs":  [
+
+                                ],
+                    "stateMutability":  "nonpayable",
+                    "type":  "function"
+                },
+                {
+                    "inputs":  [
+                                   {
+                                       "internalType":  "address",
+                                       "name":  "newImplementation",
+                                       "type":  "address"
+                                   },
+                                   {
+                                       "internalType":  "bytes",
+                                       "name":  "data",
+                                       "type":  "bytes"
+                                   }
+                               ],
+                    "name":  "upgradeToAndCall",
+                    "outputs":  [
+
+                                ],
+                    "stateMutability":  "payable",
+                    "type":  "function"
+                },
+                {
+                    "inputs":  [
+
+                               ],
+                    "name":  "version",
+                    "outputs":  [
+                                    {
+                                        "internalType":  "string",
+                                        "name":  "",
+                                        "type":  "string"
+                                    }
+                                ],
+                    "stateMutability":  "pure",
+                    "type":  "function"
+                },
+                {
+                    "inputs":  [
+                                   {
+                                       "internalType":  "uint256",
+                                       "name":  "amount",
+                                       "type":  "uint256"
+                                   }
+                               ],
+                    "name":  "voluntaryRepayFortune",
+                    "outputs":  [
+
+                                ],
+                    "stateMutability":  "nonpayable",
+                    "type":  "function"
+                }
+            ]
+}

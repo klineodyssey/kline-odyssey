@@ -421,3 +421,27 @@ Site root: C:\Desktop\kline-odyssey\K線西遊記
 | `C:\Desktop\kline-odyssey\K線西遊記\index.html` | 16 local portal targets under temples/game | PASS: 16/16 targets exist. |
 | `C:\Desktop\kline-odyssey\K線西遊記\game\kline-5d\index.html` | `C:\Desktop\kline-odyssey\K線西遊記\modules\kgen-game-core.css`, `C:\Desktop\kline-odyssey\K線西遊記\modules\kgen-game-core.js`, `C:\Desktop\kline-odyssey\K線西遊記\modules\universe-runtime\organ-economy.js`, `C:\Desktop\kline-odyssey\K線西遊記\modules\universe-runtime\temple-hub.js`, `C:\Desktop\kline-odyssey\K線西遊記\modules\universe-runtime\kline-5d-engine.js` | PASS: all local targets exist. |
 | V0.2 temple pages | Shared core CSS/JS and V0.2 universe-runtime modules | PASS: registered in temple map and dependency index. |
+
+
+---
+
+## Temple 12345 Frontend V3.4 registration — 2026-08-09
+
+Status: FRONTEND_READY_CONTRACTS_PENDING. Mainnet legacy Heart 0xB016D4d8f1aED1339101b30722cad6dbA9B8C972 is direct-deployed V3.2.6 and read-only. Mainnet currentHeart and fortuneGame remain PENDING; no frontend switch or contract deployment is recorded here.
+
+| Path | Purpose |
+|---|---|
+| K線西遊記/temples/12345/config/contracts.json | Canonical chain 56/97 contract configuration with explicit legacy/current separation. |
+| K線西遊記/temples/12345/abi/temple-heart.json | Canonical TempleHeart V3.4 ABI generated from the Solidity compile artifact. |
+| K線西遊記/temples/12345/modules/contract-resolver.js | Chain/address/code/version resolver; never falls back from current to legacy. |
+| K線西遊記/temples/12345/modules/transaction-state.js | Shared READY to WALLET_CONFIRM to PENDING to CONFIRMED or REVERTED controller. |
+| K線西遊記/temples/12345/modules/temple-heart-runtime.js | V3.4 dashboard, wallet binding, Wish/Heartbeat/Ignite/Fortune/Repay/Normalize UI. |
+| K線西遊記/temples/12345/modules/temple-heart.css | Desktop/tablet/mobile responsive panels and single-drawer mobile behavior. |
+| K線西遊記/temples/12345/modules/fortune-game-adapter.js | ABI-neutral FortuneGame readiness gate. |
+| K線西遊記/temples/12345/modules/fortune-game-ui.js | Pending-state game shell; contains no bet or winner logic. |
+| K線西遊記/temples/12345/tests/frontend-v34.test.mjs | ABI/config/resolver/transaction/mobile/FortuneGame regression tests. |
+| K線西遊記/temples/12345/evidence/desktop-1440x900.png | Desktop responsive evidence. |
+| K線西遊記/temples/12345/evidence/tablet-768x1024.png | Tablet responsive evidence. |
+| K線西遊記/temples/12345/evidence/android-412x915.png | Android responsive evidence. |
+
+Canonical asset paths remain bull-front.png, bear-rear.png, heart-front.png, and warp-universe.png. Because heart-front.png is not yet present, runtime fallback to heart.png is explicitly marked ASSET_CANON_PENDING_HEART_FRONT; the Canon filename is unchanged.
