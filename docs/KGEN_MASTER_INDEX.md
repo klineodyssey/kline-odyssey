@@ -25,6 +25,7 @@ This addendum does not regenerate the historical inventory below.
 | `KGEN-KAIOS/reports/KAIOS_TOKEN_LINEAGE_INTEGRATION_REVIEW_2026-08-09.md` | Audit | PR #127/#128 reconciliation and test evidence | Ready for Human review |
 | `KGEN-KAIOS/reports/BSC_TESTNET_TEMPLEHEART_V3_4_REHEARSAL.md` | Testnet Evidence | Human-readable TempleHeart V3.3.2 to V3.4.0 UUPS rehearsal | PASS on BSC Testnet chainId 97 |
 | `KGEN-KAIOS/reports/BSC_TESTNET_TEMPLEHEART_V3_4_REHEARSAL.json` | Testnet Evidence | Machine-readable addresses, receipts, storage and security results | PASS on BSC Testnet chainId 97 |
+| `KGEN/docs/TEMPLEHEART_MAINNET_LINEAGE.md` | Mainnet Plan | Separates immutable V3.2.6 Legacy Heart from the new V3.4 UUPS proxy life; audits 18888 candidates and defines the minimal KAIOS settlement architecture, Registry, governance, deployment, gas and emergency gates | 18888 architecture ready for Human review; Mainnet transaction not authorized |
 
 ## Summary
 | Category | Files |
