@@ -101,11 +101,13 @@ test("49 Alchemy Epoch maturity boundary is enforced by Furnace Runtime", async 
   const proofId = eventArgs(receipt, context.furnace, "AlchemyProofCreated").proofId;
   const proof = await context.furnace.proof(proofId);
 
-  const currentEpoch = await context.furnace.currentEpoch();
-  const secondsUntilPreviousEpoch = Number(proof.maturityEpoch - currentEpoch - 1n) * 20;
+  const latestBlock = await context.provider.getBlock("latest");
+  const oneSecondBeforeMaturity = Number(proof.maturityEpoch) * 20 - 1;
+  const secondsUntilPreviousEpoch = oneSecondBeforeMaturity - Number(latestBlock.timestamp);
   if (secondsUntilPreviousEpoch > 0) await advanceTime(context.provider, secondsUntilPreviousEpoch);
+  assert.equal(await context.furnace.currentEpoch(), proof.maturityEpoch - 1n);
   await assert.rejects(context.wormhole.claim(proofId));
-  await advanceTime(context.provider, 20);
+  await advanceTime(context.provider, 1);
   await (await context.wormhole.claim(proofId, { gasLimit: 1_000_000 })).wait();
   assert.equal((await context.furnace.proof(proofId)).consumed, true);
 });
