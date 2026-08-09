@@ -474,7 +474,7 @@ AI 自動演化
 12345 = Universe Core
 16888 = UFO Cockpit
 11520 = Universe Brain
-18888 = Divine Treasury
+18888 = Lingxiao Celestial Bank / KAIOS settlement and lawful civilization banking
 ```
 
 ---
@@ -586,6 +586,16 @@ Where the Market Becomes the Myth.
 /KGEN-KAIOS/KAIOS_500_CELESTIAL_AND_MARS_SEATS_RUNTIME_CURRENT.md
 /KGEN-KAIOS/KAIOS_YUNZHAN_CAVE_8895_SHADOW_BANK_REAL_ECONOMY_SPEC_V1.2.md
 /KGEN-KAIOS/KAIOS_GENESIS_INSCRIPTION.md
+/KGEN-KAIOS/contracts/LingxiaoCelestialBank18888_Upgradeable.sol
+/KGEN-KAIOS/contracts/CelestialSeat500_Upgradeable.sol
+/KGEN-KAIOS/contracts/CivilizationAllocation_Upgradeable.sol
+/KGEN-KAIOS/contracts/EconomicRouter8888_Upgradeable.sol
+/KGEN-KAIOS/contracts/ExchangeSettlement11520_Upgradeable.sol
+/KGEN-KAIOS/contracts/BankRiskController_Upgradeable.sol
+/KGEN-KAIOS/contracts/BankGovernance_Upgradeable.sol
+/KGEN-KAIOS/contracts/BankMigration_Upgradeable.sol
+/KGEN-KAIOS/operations/LINGXIAO_18888_FULL_BANK_RUNBOOK.md
+/KGEN-KAIOS/reports/LINGXIAO_18888_FULL_BANK_SECURITY_REPORT.md
 /docs/spec/KGEN_Runtime_Specification_V1_0.md
 /docs/biology/KGEN_Civilization_Biology_Runtime_V1_0.md
 /docs/neural/KGEN_Universe_Neural_System_V1_0.md

@@ -28,6 +28,25 @@ No deployment script or Mainnet address is included.
 | `contracts/KSHIP.sol` | Proof-bound, zero-genesis KSHIP core |
 | `contracts/KSHIPConverter.sol` | Holder-authorized KUFO-to-KSHIP conversion organ |
 | `contracts/KAIOSPairRegistry.sol` | External pair metadata without Token Core authority |
+| `contracts/LingxiaoCelestialBank18888_Upgradeable.sol` | Stable 18888 UUPS Bank Core: settlement binding, accounting, reserve, module caps, pause, health and governance finalization |
+| `contracts/CelestialSeat500_Upgradeable.sol` | Fixed-beneficiary, permissionlessly triggered payroll for at most 500 Celestial seats |
+| `contracts/CivilizationAllocation_Upgradeable.sol` | Purpose-bound and replay-safe civilization/public-infrastructure allocation |
+| `contracts/EconomicRouter8888_Upgradeable.sol` | Fixed formal route from central civilization capital to the separate 8888 economy |
+| `contracts/ExchangeSettlement11520_Upgradeable.sol` | Fixed formal settlement interface to the 11520 Universal Civilization Exchange |
+| `contracts/BankRiskController_Upgradeable.sol` | Reserve floor, alert threshold and public bank-risk state |
+| `contracts/BankGovernance_Upgradeable.sol` | One-hour minimum delayed, distinct-proposer/approver governance executor |
+| `contracts/BankMigration_Upgradeable.sol` | Successor/chain/state evidence framework with no asset-transfer path |
+| `abi/` | Compiler-generated public ABIs for KAIOS, Bank Core and seven modules |
+| `config/lingxiao-18888-bank-system.json` | Secret-free canonical public deployment inputs and unresolved-address gates |
+| `config/lingxiao-18888-module-registry.json` | Reviewed module IDs, contracts and versions |
+| `scripts/prepare-lingxiao-18888-deployment.mjs` | Predicted-address and unsigned creation-calldata generator; never sends a transaction |
+| `scripts/prepare-lingxiao-18888-upgrade.mjs` | Unsigned UUPS upgrade-calldata/hash generator; never sends a transaction |
+| `tools/generate-lingxiao-bank-api.mjs` | Read-only chain-state status generator with no secret persistence |
+| `frontend-adapter/lingxiao18888BankAdapter.mjs` | Read-only bank/seat adapter and deterministic action calldata encoder |
+| `indexer/lingxiao-18888-events.schema.json` | Reorg-aware event-index evidence schema |
+| `dashboard/lingxiao-18888-bank-status.schema.json` | Public bank-status API/dashboard schema |
+| `operations/LINGXIAO_18888_FULL_BANK_RUNBOOK.md` | Deployment, upgrade, post-state and emergency stop gates |
+| `reports/LINGXIAO_18888_FULL_BANK_SECURITY_REPORT.md` | Trust boundaries, enforced gates and residual UUPS governance risk |
 | `tools/validate-integration-artifacts.mjs --generate-kaios-genesis-record` | Post-settlement chain-derived Mainnet record/inscription generator; accepts no amount input |
 | `reports/KAIOS_TOKEN_LINEAGE_INTEGRATION_REVIEW_2026-08-09.md` | Executive review and evidence index |
 

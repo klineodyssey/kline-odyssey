@@ -20,7 +20,7 @@ const patterns = [
   { id: "MAX_SUPPLY", regex: /MAX_SUPPLY/gu, legacyScale: false },
 ];
 
-const contractCritical = /(?:^|\/)(?:KAIOS(?:GenesisInscription|AlchemyFurnace|PairRegistry)?|LingxiaoCelestialBank18888_Upgradeable|KUFO(?:ClaimWormhole)?|KSHIP(?:Converter)?|KGEN_TempleHeart_Upgradeable|EventHorizonVault)\.sol$/u;
+const contractCritical = /(?:^|\/)(?:KAIOS(?:GenesisInscription|AlchemyFurnace|PairRegistry)?|Lingxiao(?:CelestialBank18888|BankModuleBase)Upgradeable|CelestialSeat500_Upgradeable|CivilizationAllocation_Upgradeable|EconomicRouter8888_Upgradeable|ExchangeSettlement11520_Upgradeable|Bank(?:RiskController|Governance|Migration)_Upgradeable|KUFO(?:ClaimWormhole)?|KSHIP(?:Converter)?|KGEN_TempleHeart_Upgradeable|EventHorizonVault)\.sol$/u;
 const generatedReports = new Set([
   "KGEN-KAIOS/reports/KAIOS_LINEAGE_STALE_REFERENCE_AUDIT_2026-08-09.json",
   "KGEN-KAIOS/reports/KAIOS_LINEAGE_STALE_REFERENCE_AUDIT_2026-08-09.md",

@@ -2,10 +2,10 @@
 
 **Status:** PASS
 
-- Scanned files: 3799
-- Repository tracked files: 3655
-- Human package files: 144
-- Legacy 1:10,000 / 720B reference hits: 47
+- Scanned files: 3687
+- Repository tracked files: 3687
+- Human package files: 0
+- Legacy 1:10,000 / 720B reference hits: 46
 - ACTIVE_CONFLICT: 0
 - CONTRACT_CRITICAL: 0
 
@@ -87,6 +87,8 @@ The Human-reported `KAIOS_GENESIS_INSCRIPTION_V1.0.md` is superseded by the stag
 | SUPERSEDED_HISTORY | `KGEN-KAIOS/KAIOS_MULTICIVILIZATION_RELIGIOUS_NEUTRALITY_LIFE_MIGRATION_RUNTIME_V1.0.md:241` | 10_000_KAIOS | Historical bytes are retained behind an explicit SUPERSEDED marker. |
 | SUPERSEDED_HISTORY | `KGEN-KAIOS/KAIOS_MULTICIVILIZATION_RELIGIOUS_NEUTRALITY_LIFE_MIGRATION_RUNTIME_V1.0.md:245` | 10_000_KAIOS | Historical bytes are retained behind an explicit SUPERSEDED marker. |
 | COMMENT_ONLY | `KGEN-KAIOS/KAIOS_WHITE_HOLE_ATOMIC_CONVERSION_AND_LIQUIDITY_RUNTIME_CURRENT.md:8` | 1_TO_10_000 | Audit, supersession, or negative-reference text; not an executable monetary definition. |
+| CURRENT_CORRECT | `KGEN-KAIOS/abi/KAIOS.json:459` | KAIOS_PER_KGEN | Identifier occurrence; numeric value audited independently. |
+| CURRENT_CORRECT | `KGEN-KAIOS/abi/KAIOS.json:563` | MAX_SUPPLY | Identifier occurrence; numeric value audited independently. |
 | SUPERSEDED_HISTORY | `KGEN-KAIOS/archive/KAIOSV01_BurnProofGenesis_DRAFT_ARCHIVE.md:11` | 720_BILLION_FORMATTED | Historical bytes are retained behind an explicit SUPERSEDED marker. |
 | SUPERSEDED_HISTORY | `KGEN-KAIOS/archive/KAIOSV01_BurnProofGenesis_DRAFT_ARCHIVE.md:12` | 10_000_KAIOS | Historical bytes are retained behind an explicit SUPERSEDED marker. |
 | SUPERSEDED_HISTORY | `KGEN-KAIOS/archive/KAIOS_CELESTIAL_BANK_CONSERVATION_WHITEPAPER_V1.2_ARCHIVE.md:15` | 10_000_KAIOS | Historical bytes are retained behind an explicit SUPERSEDED marker. |
@@ -106,7 +108,7 @@ The Human-reported `KAIOS_GENESIS_INSCRIPTION_V1.0.md` is superseded by the stag
 | SUPERSEDED_HISTORY | `KGEN-KAIOS/reports/KAIOS_TOKEN_LINEAGE_INTEGRATION_CLOSEOUT_20260809.md:7` | 1_TO_10_000 | Historical bytes are retained behind an explicit SUPERSEDED marker. |
 | COMMENT_ONLY | `KGEN-KAIOS/reports/KAIOS_TOKEN_LINEAGE_INTEGRATION_REVIEW_2026-08-09.md:8` | KAIOS_PER_KGEN | Audit, supersession, or negative-reference text; not an executable monetary definition. |
 | COMMENT_ONLY | `KGEN-KAIOS/reports/RECOVERY-KAIOS-TOKEN-LINEAGE-INTEGRATION-20260809.md:14` | 1_TO_10_000 | Audit, supersession, or negative-reference text; not an executable monetary definition. |
-| TEST_FIXTURE | `KGEN-KAIOS/tests/token-surface.security.test.mjs:115` | TEN_THOUSAND_KAIOS | Negative regression fixture; it must assert rejection of the legacy inscription or scale. |
+| TEST_FIXTURE | `KGEN-KAIOS/tests/token-surface.security.test.mjs:172` | TEN_THOUSAND_KAIOS | Negative regression fixture; it must assert rejection of the legacy inscription or scale. |
 | COMMENT_ONLY | `KGEN-KAIOS/tools/generate-stale-reference-audit.mjs:17` | 720_BILLION_RAW | Audit, supersession, or negative-reference text; not an executable monetary definition. |
 | COMMENT_ONLY | `KGEN-KAIOS/tools/generate-stale-reference-audit.mjs:18` | 720_BILLION_FORMATTED | Audit, supersession, or negative-reference text; not an executable monetary definition. |
 | CURRENT_CORRECT | `KGEN-KAIOS/tools/generate-stale-reference-audit.mjs:19` | KAIOS_PER_KGEN | Identifier occurrence; numeric value audited independently. |
@@ -118,10 +120,9 @@ The Human-reported `KAIOS_GENESIS_INSCRIPTION_V1.0.md` is superseded by the stag
 | CURRENT_CORRECT | `KGEN-KAIOS/tools/generate-stale-reference-audit.mjs:343` | MAX_SUPPLY | Identifier occurrence; numeric value audited independently. |
 | CURRENT_CORRECT | `KGEN-KAIOS/tools/validate-integration-artifacts.mjs:42` | KAIOS_PER_KGEN | Identifier occurrence; numeric value audited independently. |
 | CURRENT_CORRECT | `KGEN-KAIOS/tools/validate-integration-artifacts.mjs:91` | KAIOS_PER_KGEN | Identifier occurrence; numeric value audited independently. |
-| CURRENT_CORRECT | `KGEN-KAIOS/tools/verify-current-lineage.mjs:41` | KAIOS_PER_KGEN | Identifier occurrence; numeric value audited independently. |
-| CURRENT_CORRECT | `KGEN-KAIOS/tools/verify-current-lineage.mjs:42` | MAX_SUPPLY | Identifier occurrence; numeric value audited independently. |
+| CURRENT_CORRECT | `KGEN-KAIOS/tools/verify-current-lineage.mjs:42` | KAIOS_PER_KGEN | Identifier occurrence; numeric value audited independently. |
+| CURRENT_CORRECT | `KGEN-KAIOS/tools/verify-current-lineage.mjs:43` | MAX_SUPPLY | Identifier occurrence; numeric value audited independently. |
 | COMMENT_ONLY | `KGEN-KAIOS/tools/verify-current-lineage.mjs:54` | TEN_THOUSAND_KAIOS | Audit, supersession, or negative-reference text; not an executable monetary definition. |
-| COMMENT_ONLY | `KGEN-KAIOS/tools/verify-current-lineage.mjs:55` | TEN_THOUSAND_KAIOS | Audit, supersession, or negative-reference text; not an executable monetary definition. |
 | CURRENT_CORRECT | `KGEN/registry/CoinMarketCap/test_kgen_cmc_listing_package.py:18` | MAX_SUPPLY | Identifier occurrence; numeric value audited independently. |
 | CURRENT_CORRECT | `KGEN/registry/CoinMarketCap/test_kgen_cmc_listing_package.py:69` | MAX_SUPPLY | Identifier occurrence; numeric value audited independently. |
 | CURRENT_CORRECT | `KGEN/registry/CoinMarketCap/test_kgen_cmc_listing_package.py:71` | MAX_SUPPLY | Identifier occurrence; numeric value audited independently. |

@@ -33,7 +33,16 @@ This addendum does not regenerate the historical inventory below.
 | `KGEN-KAIOS/reports/BSC_TESTNET_TEMPLEHEART_V3_4_REHEARSAL.md` | Testnet Evidence | Human-readable TempleHeart V3.3.2 to V3.4.0 UUPS rehearsal | PASS on BSC Testnet chainId 97 |
 | `KGEN-KAIOS/reports/BSC_TESTNET_TEMPLEHEART_V3_4_REHEARSAL.json` | Testnet Evidence | Machine-readable addresses, receipts, storage and security results | PASS on BSC Testnet chainId 97 |
 | `KGEN/docs/TEMPLEHEART_MAINNET_LINEAGE.md` | Mainnet Plan | Separates immutable V3.2.6 Legacy Heart from the new V3.4 UUPS proxy life; preserves the three-generation 18888 Bank lineage and defines the V2 KAIOS settlement runtime, Registry, governance, deployment, gas and emergency gates | 18888 implementation package complete; Mainnet transaction not authorized |
-| `KGEN-KAIOS/contracts/LingxiaoCelestialBank18888_Upgradeable.sol` | Contract | Current 18888 Lingxiao Celestial Bank identity with two-party, delayed, beneficiary-claimed lawful disbursements and no owner withdrawal path | Reconciliation candidate; Mainnet transaction not authorized |
+| `KGEN-KAIOS/contracts/LingxiaoCelestialBank18888_Upgradeable.sol` | Contract | Current 18888 modular Bank Core with KAIOS binding, Genesis/accounting, reserve, capped modules, pause, health and governance finalization; no owner withdrawal | Implementation candidate; Mainnet transaction not authorized |
+| `KGEN-KAIOS/contracts/CelestialSeat500_Upgradeable.sol` | Contract module | 500 fixed-beneficiary Celestial salary seats with permissionless claim triggering and retry-safe checkpoints | Implementation candidate |
+| `KGEN-KAIOS/contracts/CivilizationAllocation_Upgradeable.sol` | Contract module | Replay-safe civilization and public-infrastructure allocations | Implementation candidate |
+| `KGEN-KAIOS/contracts/EconomicRouter8888_Upgradeable.sol` | Contract module | Fixed 18888 to formal 8888 economic-capital route | Implementation candidate |
+| `KGEN-KAIOS/contracts/ExchangeSettlement11520_Upgradeable.sol` | Contract module | Fixed 18888 to formal 11520 Universal Exchange settlement route | Implementation candidate |
+| `KGEN-KAIOS/contracts/BankRiskController_Upgradeable.sol` | Contract module | Reserve and public risk controls | Implementation candidate |
+| `KGEN-KAIOS/contracts/BankGovernance_Upgradeable.sol` | Contract module | Minimum one-hour delayed, two-party proposal/execution architecture | Implementation candidate |
+| `KGEN-KAIOS/contracts/BankMigration_Upgradeable.sol` | Contract module | Successor/chain/state evidence without an asset-migration transfer path | Implementation candidate |
+| `KGEN-KAIOS/operations/LINGXIAO_18888_FULL_BANK_RUNBOOK.md` | Runbook | Stop conditions, ordered deployment, upgrade and emergency procedures | Mainnet transaction not authorized |
+| `KGEN-KAIOS/reports/LINGXIAO_18888_FULL_BANK_SECURITY_REPORT.md` | Security report | Trust boundaries, enforced gates and residual UUPS governance risk | Review package |
 
 ## Summary
 | Category | Files |

@@ -1,0 +1,389 @@
+{
+  "status": "PASS",
+  "evidenceClass": "LOCAL_GENESIS_CHAIN_REACTION_SIMULATION",
+  "mainnetTransactionAuthorized": false,
+  "chainId": 31337,
+  "conversion": "1_KGEN_PERMANENT_BURN_TO_1000_KAIOS",
+  "contracts": {
+    "kgen": "0xe78A0F7E598Cc8b0Bb87894B0F60dD2a88d6a8Ab",
+    "kaios": "0xb09bCc172050fBd4562da8b229Cf3E45Dc3045A6",
+    "bankProxy": "0x254dffcd3277C0b1660F6d42EFbB754edaBAbC2B",
+    "bankImplementation": "0xCfEB869F69431e42cdB54A4F4f105C19C080A601",
+    "economic8888": "0xC89Ce4735882C9F0f0FE26686c53074E09B0D550",
+    "universalExchange11520": "0xD833215cBcc3f914bD1C9ece3EE7BF8B14f841bb",
+    "modules": {
+      "CelestialSeat500_Upgradeable": "0xe982E462b094850F12AF94d21D470e21bE9D0E9C",
+      "CivilizationAllocation_Upgradeable": "0x0290FB167208Af455bB137780163b7B7a9a10C16",
+      "EconomicRouter8888_Upgradeable": "0x67B5656d60a809915323Bf2C40A8bEF15A152e3e",
+      "ExchangeSettlement11520_Upgradeable": "0xA57B8a5584442B467b4689F1144D269d096A3daF",
+      "BankRiskController_Upgradeable": "0x630589690929E9cdEFDeF0734717a9eF3Ec7Fcfe",
+      "BankGovernance_Upgradeable": "0xDb56f2e9369E0D7bD191099125a3f6C370F8ed15",
+      "BankMigration_Upgradeable": "0x6eD79Aa1c71FD7BdBC515EfdA3Bd4e26394435cC"
+    }
+  },
+  "transactions": {
+    "burn": {
+      "transactionHash": "0xc5c9eabc0884d83c3933a9b9aa7c321f867efcf6026807cfe03ef84c44306371",
+      "blockNumber": 31,
+      "gasUsed": "33567",
+      "status": "PASS"
+    },
+    "settleWhiteHoleMass": {
+      "transactionHash": "0x7e0d79eb0c72c022fce1335f0521227ad82334d20d6c3cd85e4b3e00e51e7196",
+      "blockNumber": 32,
+      "gasUsed": "143435",
+      "status": "PASS"
+    },
+    "startGenesisEpoch": {
+      "transactionHash": "0x59906aa72a8a20509c611a02e61751141867c81d400eec5893bd3f64626e6980",
+      "blockNumber": 33,
+      "gasUsed": "112999",
+      "status": "PASS"
+    },
+    "seatConfigured": {
+      "transactionHash": "0xee2dcdf1b33d597cc01b6537c62b4ce988050f857c0a2aac72b49eb1756aa35d",
+      "blockNumber": 34,
+      "gasUsed": "169518",
+      "status": "PASS"
+    },
+    "salary": {
+      "transactionHash": "0xdb7e156dfee9df184187df54a35129423cee0110fb946d44162857d3369e3bb6",
+      "blockNumber": 36,
+      "gasUsed": "245318",
+      "status": "PASS"
+    },
+    "allocationCreated": {
+      "transactionHash": "0xf2bb1d56635af83d840769169f93c11d7bfa4b74430f40af99ddf54e940a2a8e",
+      "blockNumber": 37,
+      "gasUsed": "124562",
+      "status": "PASS"
+    },
+    "allocationExecuted": {
+      "transactionHash": "0x036d55bbe2afe135be2d69241d2787de6f2e4d7135ab3f124f4edb47e6d2d582",
+      "blockNumber": 38,
+      "gasUsed": "188831",
+      "status": "PASS"
+    },
+    "route8888": {
+      "transactionHash": "0xd1e62d48009860bb9e27972f5ba4ae6d74b58968eee7eafd4110e46928992f95",
+      "blockNumber": 39,
+      "gasUsed": "204679",
+      "status": "PASS"
+    },
+    "settlement11520": {
+      "transactionHash": "0x68a4d1c4c6089e783c3e35c1e9ce0ae5fc7395babb08a3011b26989dd6b3e1b8",
+      "blockNumber": 40,
+      "gasUsed": "204757",
+      "status": "PASS"
+    },
+    "risk": {
+      "transactionHash": "0x98875728422b28034e913cf409cb533bec144b026b24ce5677adf45986cd3619",
+      "blockNumber": 41,
+      "gasUsed": "110222",
+      "status": "PASS"
+    },
+    "moduleGovernanceFinalized": {
+      "CelestialSeat500_Upgradeable": {
+        "transactionHash": "0xb714db0218169b9024680190628a0290f6ed434d4997c1144a4d1f3f796a262d",
+        "blockNumber": 42,
+        "gasUsed": "109757",
+        "status": "PASS"
+      },
+      "CivilizationAllocation_Upgradeable": {
+        "transactionHash": "0xc55297626f1afe8e4247dc8c36d634833f4855a08bb9c2a057f1147099ca8faa",
+        "blockNumber": 43,
+        "gasUsed": "109815",
+        "status": "PASS"
+      },
+      "EconomicRouter8888_Upgradeable": {
+        "transactionHash": "0x2479aa947eb1841f1cf2ada85ef70f939eb83b59d6647ee4d7bea24300b26bfd",
+        "blockNumber": 44,
+        "gasUsed": "109837",
+        "status": "PASS"
+      },
+      "ExchangeSettlement11520_Upgradeable": {
+        "transactionHash": "0x0d681cc382fd5e9d41e5e756e890b94ed15b2a5a082f7b7a07d8a8a668e6726c",
+        "blockNumber": 45,
+        "gasUsed": "109815",
+        "status": "PASS"
+      },
+      "BankRiskController_Upgradeable": {
+        "transactionHash": "0x1eab2f0a8b88d1a107474531c5f306b4d946a0bf05cb2816cdd23ee64f5eba91",
+        "blockNumber": 46,
+        "gasUsed": "109815",
+        "status": "PASS"
+      },
+      "BankGovernance_Upgradeable": {
+        "transactionHash": "0x97c55c39c0b1816cc1e60f66fe2fa9d786c87a910bcb16ad9edf5f1d4ca8a5dd",
+        "blockNumber": 47,
+        "gasUsed": "107254",
+        "status": "PASS"
+      },
+      "BankMigration_Upgradeable": {
+        "transactionHash": "0x3e1275aa1f89c666b7711c93467d800d60ffc8a029f2cbc0a59b575d77110d17",
+        "blockNumber": 48,
+        "gasUsed": "109815",
+        "status": "PASS"
+      }
+    },
+    "bankGovernanceFinalized": {
+      "transactionHash": "0x235e0aebc36f21078df4c69f4e778d5f3a3d219cf51a854fd82c0fcb20b0adff",
+      "blockNumber": 49,
+      "gasUsed": "132887",
+      "status": "PASS"
+    }
+  },
+  "state": {
+    "kaiosTotalSupply": "20000000000000000000000",
+    "bankGenesisOpeningBalance": "20000000000000000000000",
+    "bankBalance": "19000000000000000000000",
+    "beneficiaryBalance": "300000000000000000000",
+    "economic8888Balance": "300000000000000000000",
+    "universalExchange11520Balance": "400000000000000000000",
+    "reserveRequirement": "10000000000000000000000",
+    "totalDisbursed": "1000000000000000000000",
+    "governanceFinalized": true
+  },
+  "storageValidation": {
+    "status": "PASS",
+    "strategy": "V2 modular bank preserves slots 0-3, appends module/accounting/risk state in slots 4-13, and consumes ten reserved gap slots while retaining a 50-slot namespace",
+    "expected": [
+      {
+        "label": "kgen",
+        "slot": "0",
+        "offset": 0,
+        "type": "t_address"
+      },
+      {
+        "label": "kaios",
+        "slot": "1",
+        "offset": 0,
+        "type": "t_address"
+      },
+      {
+        "label": "kaiosBound",
+        "slot": "1",
+        "offset": 20,
+        "type": "t_bool"
+      },
+      {
+        "label": "totalKaiosDisbursed",
+        "slot": "2",
+        "offset": 0,
+        "type": "t_uint256"
+      },
+      {
+        "label": "_disbursements",
+        "slot": "3",
+        "offset": 0,
+        "type": "t_mapping(t_bytes32,t_struct(Disbursement)_storage)"
+      },
+      {
+        "label": "_modules",
+        "slot": "4",
+        "offset": 0,
+        "type": "t_mapping(t_bytes32,t_struct(ModuleConfig)_storage)"
+      },
+      {
+        "label": "_moduleIds",
+        "slot": "5",
+        "offset": 0,
+        "type": "t_mapping(t_address,t_bytes32)"
+      },
+      {
+        "label": "_modulePayments",
+        "slot": "6",
+        "offset": 0,
+        "type": "t_mapping(t_bytes32,t_bool)"
+      },
+      {
+        "label": "totalKaiosAccountedInflow",
+        "slot": "7",
+        "offset": 0,
+        "type": "t_uint256"
+      },
+      {
+        "label": "totalKaiosModuleDisbursed",
+        "slot": "8",
+        "offset": 0,
+        "type": "t_uint256"
+      },
+      {
+        "label": "reserveRequirement",
+        "slot": "9",
+        "offset": 0,
+        "type": "t_uint256"
+      },
+      {
+        "label": "lastAccountedGrossAssets",
+        "slot": "10",
+        "offset": 0,
+        "type": "t_uint256"
+      },
+      {
+        "label": "genesisStartedAt",
+        "slot": "11",
+        "offset": 0,
+        "type": "t_uint64"
+      },
+      {
+        "label": "genesisStarted",
+        "slot": "11",
+        "offset": 8,
+        "type": "t_bool"
+      },
+      {
+        "label": "riskController",
+        "slot": "11",
+        "offset": 9,
+        "type": "t_address"
+      },
+      {
+        "label": "genesisOpeningBalance",
+        "slot": "12",
+        "offset": 0,
+        "type": "t_uint256"
+      },
+      {
+        "label": "paused",
+        "slot": "13",
+        "offset": 0,
+        "type": "t_bool"
+      },
+      {
+        "label": "governanceFinalized",
+        "slot": "13",
+        "offset": 1,
+        "type": "t_bool"
+      },
+      {
+        "label": "__gap",
+        "slot": "14",
+        "offset": 0,
+        "type": "t_array(t_uint256)36_storage"
+      }
+    ],
+    "actual": [
+      {
+        "label": "kgen",
+        "slot": "0",
+        "offset": 0,
+        "type": "t_address"
+      },
+      {
+        "label": "kaios",
+        "slot": "1",
+        "offset": 0,
+        "type": "t_address"
+      },
+      {
+        "label": "kaiosBound",
+        "slot": "1",
+        "offset": 20,
+        "type": "t_bool"
+      },
+      {
+        "label": "totalKaiosDisbursed",
+        "slot": "2",
+        "offset": 0,
+        "type": "t_uint256"
+      },
+      {
+        "label": "_disbursements",
+        "slot": "3",
+        "offset": 0,
+        "type": "t_mapping(t_bytes32,t_struct(Disbursement)_storage)"
+      },
+      {
+        "label": "_modules",
+        "slot": "4",
+        "offset": 0,
+        "type": "t_mapping(t_bytes32,t_struct(ModuleConfig)_storage)"
+      },
+      {
+        "label": "_moduleIds",
+        "slot": "5",
+        "offset": 0,
+        "type": "t_mapping(t_address,t_bytes32)"
+      },
+      {
+        "label": "_modulePayments",
+        "slot": "6",
+        "offset": 0,
+        "type": "t_mapping(t_bytes32,t_bool)"
+      },
+      {
+        "label": "totalKaiosAccountedInflow",
+        "slot": "7",
+        "offset": 0,
+        "type": "t_uint256"
+      },
+      {
+        "label": "totalKaiosModuleDisbursed",
+        "slot": "8",
+        "offset": 0,
+        "type": "t_uint256"
+      },
+      {
+        "label": "reserveRequirement",
+        "slot": "9",
+        "offset": 0,
+        "type": "t_uint256"
+      },
+      {
+        "label": "lastAccountedGrossAssets",
+        "slot": "10",
+        "offset": 0,
+        "type": "t_uint256"
+      },
+      {
+        "label": "genesisStartedAt",
+        "slot": "11",
+        "offset": 0,
+        "type": "t_uint64"
+      },
+      {
+        "label": "genesisStarted",
+        "slot": "11",
+        "offset": 8,
+        "type": "t_bool"
+      },
+      {
+        "label": "riskController",
+        "slot": "11",
+        "offset": 9,
+        "type": "t_address"
+      },
+      {
+        "label": "genesisOpeningBalance",
+        "slot": "12",
+        "offset": 0,
+        "type": "t_uint256"
+      },
+      {
+        "label": "paused",
+        "slot": "13",
+        "offset": 0,
+        "type": "t_bool"
+      },
+      {
+        "label": "governanceFinalized",
+        "slot": "13",
+        "offset": 1,
+        "type": "t_bool"
+      },
+      {
+        "label": "__gap",
+        "slot": "14",
+        "offset": 0,
+        "type": "t_array(t_uint256)36_storage"
+      }
+    ]
+  },
+  "gates": {
+    "arbitraryOwnerWithdraw": "BLOCKED",
+    "unauthorizedUpgrade": "PASS_BY_INTEGRATION_TEST",
+    "moduleExposure": "PASS_BY_INTEGRATION_TEST",
+    "genesisChainReaction": "PASS"
+  }
+}

@@ -3,20 +3,20 @@
   "auditedAt": "2026-08-09T00:00:00+08:00",
   "status": "PASS",
   "scope": {
-    "repositoryTrackedFiles": 3655,
-    "repositoryReadableTextFiles": 3653,
+    "repositoryTrackedFiles": 3687,
+    "repositoryReadableTextFiles": 3685,
     "repositoryPdfFiles": 33,
     "repositoryPdfPages": 222,
     "externalPackage": {
       "label": "HUMAN_PACKAGE/KAIOS Genesis Charter V2.0",
-      "provided": true,
-      "totalFiles": 144,
-      "textFiles": 143,
-      "pdfFiles": 1,
-      "pdfPages": 3,
-      "pdfExtraction": "PYPDF_TEXT_EXTRACTED"
+      "provided": false,
+      "totalFiles": 0,
+      "textFiles": 0,
+      "pdfFiles": 0,
+      "pdfPages": 0,
+      "pdfExtraction": "NOT_REQUESTED"
     },
-    "scannedFilesTotal": 3799
+    "scannedFilesTotal": 3687
   },
   "finalCanon": {
     "18888": "LINGXIAO_CELESTIAL_BANK",
@@ -33,7 +33,7 @@
     ]
   },
   "singleSourceOfTruth": "KGEN-KAIOS/KAIOS_FrictionMirror_Multiverse_README.md",
-  "legacyScaleReferenceCount": 47,
+  "legacyScaleReferenceCount": 46,
   "legacyScaleFiles": [
     "KGEN-KAIOS/CODEX_HANDOFF_2026-08-09.md",
     "KGEN-KAIOS/KAIOS_CELESTIAL_BANK_CONSERVATION_WHITEPAPER_V1.8.md",
@@ -140,10 +140,10 @@
     }
   ],
   "classifications": {
-    "CURRENT_CORRECT": 22,
+    "CURRENT_CORRECT": 24,
     "SUPERSEDED_HISTORY": 20,
     "ACTIVE_CONFLICT": 0,
-    "COMMENT_ONLY": 26,
+    "COMMENT_ONLY": 25,
     "TEST_FIXTURE": 1,
     "CONTRACT_CRITICAL": 0
   },
@@ -304,6 +304,26 @@
       "sourceKind": "REPOSITORY_TRACKED",
       "excerpt": "**Mass-ratio reconciliation (2026-08-09):** `1 KGEN = 1,000 KAIOS`; earlier `1:10,000` is superseded.",
       "rationale": "Audit, supersession, or negative-reference text; not an executable monetary definition."
+    },
+    {
+      "path": "KGEN-KAIOS/abi/KAIOS.json",
+      "line": 459,
+      "pattern": "KAIOS_PER_KGEN",
+      "legacyScale": false,
+      "classification": "CURRENT_CORRECT",
+      "sourceKind": "REPOSITORY_TRACKED",
+      "excerpt": "\"name\": \"KAIOS_PER_KGEN\",",
+      "rationale": "Identifier occurrence; numeric value audited independently."
+    },
+    {
+      "path": "KGEN-KAIOS/abi/KAIOS.json",
+      "line": 563,
+      "pattern": "MAX_SUPPLY",
+      "legacyScale": false,
+      "classification": "CURRENT_CORRECT",
+      "sourceKind": "REPOSITORY_TRACKED",
+      "excerpt": "\"name\": \"MAX_SUPPLY\",",
+      "rationale": "Identifier occurrence; numeric value audited independently."
     },
     {
       "path": "KGEN-KAIOS/archive/KAIOSV01_BurnProofGenesis_DRAFT_ARCHIVE.md",
@@ -497,7 +517,7 @@
     },
     {
       "path": "KGEN-KAIOS/tests/token-surface.security.test.mjs",
-      "line": 115,
+      "line": 172,
       "pattern": "TEN_THOUSAND_KAIOS",
       "legacyScale": true,
       "classification": "TEST_FIXTURE",
@@ -617,7 +637,7 @@
     },
     {
       "path": "KGEN-KAIOS/tools/verify-current-lineage.mjs",
-      "line": 41,
+      "line": 42,
       "pattern": "KAIOS_PER_KGEN",
       "legacyScale": false,
       "classification": "CURRENT_CORRECT",
@@ -627,7 +647,7 @@
     },
     {
       "path": "KGEN-KAIOS/tools/verify-current-lineage.mjs",
-      "line": 42,
+      "line": 43,
       "pattern": "MAX_SUPPLY",
       "legacyScale": false,
       "classification": "CURRENT_CORRECT",
@@ -642,17 +662,7 @@
       "legacyScale": true,
       "classification": "COMMENT_ONLY",
       "sourceKind": "REPOSITORY_TRACKED",
-      "excerpt": "&& !markdownInscription.includes(\"TEN THOUSAND KAIOS\"),",
-      "rationale": "Audit, supersession, or negative-reference text; not an executable monetary definition."
-    },
-    {
-      "path": "KGEN-KAIOS/tools/verify-current-lineage.mjs",
-      "line": 55,
-      "pattern": "TEN_THOUSAND_KAIOS",
-      "legacyScale": true,
-      "classification": "COMMENT_ONLY",
-      "sourceKind": "REPOSITORY_TRACKED",
-      "excerpt": "noTenThousandInscription: !inscription.includes(\"TEN THOUSAND KAIOS\"),",
+      "excerpt": "].every((line) => markdownInscription.includes(line)) && !markdownInscription.includes(\"TEN THOUSAND KAIOS\"),",
       "rationale": "Audit, supersession, or negative-reference text; not an executable monetary definition."
     },
     {

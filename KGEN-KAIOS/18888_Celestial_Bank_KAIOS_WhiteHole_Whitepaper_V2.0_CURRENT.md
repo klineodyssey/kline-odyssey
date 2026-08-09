@@ -1,61 +1,83 @@
-# 《18888 靈霄寶殿神明銀行 × KAIOS 白洞文明銀行白皮書》
-## Lingxiao Celestial Bank 18888 × KAIOS White-Hole Civilization Bank
-### V2.0 CURRENT — Circulating Celestial Payroll Edition
+# 18888 靈霄寶殿銀行 — KAIOS White-Hole Civilization Bank
 
-**狀態：** CURRENT ARCHITECTURE / IMPLEMENTATION BASIS
-**日期：** 2026-08-09
+## V2.0 CURRENT — Modular Civilization Banking Runtime
 
-## 1. Fixed Physics
+Status: CURRENT ARCHITECTURE / IMPLEMENTATION BASIS
+Human Canon date: 2026-08-10
+
+## Fixed monetary physics
+
+- 1 KGEN = 1 metric ton = 1,000 kg.
+- 1 KAIOS = 1 kg.
+- 1 permanently destroyed KGEN creates exactly 1,000 KAIOS.
+- KGEN Genesis supply is 72,000,000 KGEN.
+- First-generation KAIOS maximum is 72,000,000,000 KAIOS.
+- 33333 is Gold & Silver Island, the KAIOS token deployment point. It is not an EVM address.
+- 36000 is the White Hole that recognizes real KGEN total-supply reduction.
+- 18888 is Lingxiao Celestial Bank, the only first-generation KAIOS settlement bank.
+
+`KAIOS.sol` is the monetary core. It reads formal KGEN `totalSupply()`, calculates the unsettled permanent reduction with integer arithmetic, and mints only to the fixed 18888 proxy. There is no owner mint, manual amount, arbitrary recipient, blacklist or seizure path.
+
+## Bank identity and lineage
+
+The lineage is preserved:
+
+1. `GalacticBank_V7_5_2` — historical Genesis Galactic Bank.
+2. `LingxiaoDeityBank_V1_0_1` — Generation 1 design for the historical KGEN Bank 0.10% rail.
+3. `LingxiaoCelestialBank18888_Upgradeable` — current KAIOS white-hole settlement and civilization bank.
+
+The current bank is one stable ERC1967/UUPS proxy. KAIOS binds the proxy, never an implementation address. Future reviewed implementations may evolve the bank without changing public 18888 identity. The V1 KGEN 0.10% purpose remains future-governance evolution and is not activated in this release.
+
+## Modular system
+
+The Bank Core owns KAIOS custody, settlement binding, Genesis Epoch, accounting, reserve, module registry, pause state, public health and UUPS authorization. It has no arbitrary owner withdrawal.
+
+Reviewed modules are separate UUPS organs:
+
+- `CelestialSeat500_Upgradeable`: at most 500 formal salary seats; fixed beneficiary; permissionless claim trigger.
+- `CivilizationAllocation_Upgradeable`: replay-safe, purpose-bound public-infrastructure allocation.
+- `EconomicRouter8888_Upgradeable`: fixed route to the formal 8888 commercial/economic bank.
+- `ExchangeSettlement11520_Upgradeable`: fixed route to the formal 11520 Universal Civilization Exchange.
+- `BankRiskController_Upgradeable`: reserve floor, alert threshold and public assessments.
+- `BankGovernance_Upgradeable`: one-hour minimum delay, distinct proposer/approver and public execution evidence.
+- `BankMigration_Upgradeable`: successor/chain/state-root evidence only; it cannot move bank assets.
+
+The Bank Core pays only when the caller is an active registered module and the payment is unique, under both per-transaction and daily module limits, and leaves the required reserve intact. The caller never supplies a replacement beneficiary through a public claim path.
+
+## Money must flow lawfully
+
+18888 is not a receive-only vault. KAIOS may flow through reviewed rails to 500 Celestial salaries, Civilization Allocation, formal 8888 capital and formal 11520 exchange settlement. The rule is 防偷、不防花；防亂花、不防合法流動.
+
+The following remain prohibited: unrestricted owner withdrawal, sweep, rescue-to-owner, player `transferFrom`, clawback, freeze, blacklist, loan, dividend, AMM, swap and LP logic inside Bank Core.
+
+## Governance finalization
+
+Deployment uses a temporary bootstrap admin solely to bind KAIOS, register reviewed modules and set the Risk Controller. Every module executes `finalizeModuleGovernance()` and Bank Core executes `finalizeGovernance()`: Bank and module Admin/Governance roles transfer to the delayed governance contract and are revoked from bootstrap governance. The explicitly assigned `UPGRADER_ROLE` cannot pay KAIOS, configure modules or alter beneficiaries. A pause role can stop flows but cannot unpause or spend.
+
+Every module change emits `ModuleConfigured`; every implementation change emits the ERC1967 `Upgraded` event. Module address, version hash, limits, Bank implementation, Bank version and health are public views.
+
+## Civilization boundaries
+
+- 18888: celestial salaries and central civilization capital.
+- 8888: general salary, commerce, AI companies, player/AI accounts, deposits and supply-chain economy. Its monthly day-5 payroll belongs to the 8888 runtime.
+- 11520: Universal Civilization Exchange and formal price discovery for listed Life/Asset formats. PancakeSwap pairs are optional external DeFi channels, not prerequisites.
+- 8895: independent shadow-bank/real-economy role; never a KAIOS minter.
+
+## Genesis chain reaction
 
 ```text
-1 KGEN = 1 metric ton = 1,000 kg
-1 KAIOS = 1 kg
-1 permanently destroyed KGEN = 1,000 KAIOS
-KGEN genesis supply = 72,000,000 KGEN
-first-generation KAIOS ceiling = 72,000,000,000 KAIOS
-33333 = Gold & Silver Island / KAIOS token deployment point
-36000 = White Hole
-18888 = Lingxiao Celestial Bank / first-generation settlement destination
+KGEN permanent supply destruction
+→ 36000 White Hole
+→ 33333 KAIOS Token Core
+→ settleWhiteHoleMass()
+→ 18888 Bank Proxy receives KAIOS
+→ Genesis Epoch starts
+→ 500 Seats and bank accounting become active
+→ 8888 / 11520 / civilization modules become available
 ```
 
-33333 是宇宙座標與 KAIOS Token deployment point，不是 EVM wallet、Treasury 或銀行。KAIOS 部署後另有正式 `0x...` Token contract address。
+Every step must retain transaction hash, block, event, address, version and post-state evidence. The Mainnet Genesis amount is derived from chain state after settlement; it is never copied from chat or entered as a floating-point/manual mint amount.
 
-## 2. White-Hole Settlement
+## Release gate
 
-KAIOS 第一代生成只認正式 KGEN `totalSupply()` 的永久減少。任何人可觸發 `settleWhiteHoleMass()`，但不能輸入 burn amount、mint amount 或 recipient。首次 settlement 必須一次認列從 72,000,000 KGEN 創世供應到實際 settlement block 的全部尚未認列永久燃燒；後續只認新增 delta。所有第一代 KAIOS 直接 mint 到正式 18888 Proxy。
-
-## 3. Bank Identity
-
-18888 是天庭中央神明銀行，不是只進不出的保險箱，也不是 Owner 可以任意提款的普通 Vault。其核心原則：
-
-> MONEY MUST CIRCULATE. 防偷，不防合法花錢；防亂花，不防流通。
-
-## 4. 500 Celestial Salary Seats
-
-18888 固定最多 500 個神職／公共功能薪俸席。每席分離 `seatId / lifeId / templeId / beneficiary / salaryRule or weight / status / checkpoints / totalClaimed`。角色名稱可包含如來、南極仙翁、廣寒宮、高老莊、火焰山、白骨洞、閻王殿、奈何橋等，但角色名稱屬 Registry 資料，不 hardcode 在銀行核心。
-
-薪俸按 Epoch / checkpoint 形成 entitlement。合法薪俸可由 beneficiary 自領，也可由任何 keeper / AI permissionlessly 觸發，但資金只能到正式 beneficiary。銀行餘額不足時 entitlement 必須保留，待新 KAIOS settlement 進入後重試。歷史薪俸不可因未來改 rate 而追溯重寫。
-
-## 5. Civilization Allocation Ledger
-
-除薪俸外，18888 可依治理建立用途受限、一次性或分期的文明撥款帳本。用途至少可涵蓋 Temple operation、celestial project、life genesis、public infrastructure、economic capital to 8888。合法 allocation 的 beneficiary、amount、purpose、timing 一旦成立不得由執行者改寫，且不得 replay。
-
-## 6. 8888 Boundary
-
-8888 高老莊是商業大本營：公司、一般工作薪資、買賣、供應鏈、生產、消費與日常商業循環。18888 是天庭神職薪俸與文明資本層，可向正式 8888 器官配置流動資本，但不應把所有商業邏輯塞進 18888。
-
-## 7. Governance and Safety
-
-18888 應採 NEW ERC1967/UUPS Proxy lineage。治理可升級制度、管理 Seat、設定未來 rate / reserve / allocation policy、pause 緊急入口；但 V2 不得提供 `withdrawToken(anyToken, anyTo, anyAmount)`、`withdrawAll()` 或任意 KAIOS sweep 之 unrestricted owner withdrawal。正式出金必須經 Salary Ledger、Allocation Ledger 或未來 Human Canon 明確新增的受限模組。
-
-## 8. Genesis Record
-
-正式 KAIOS Genesis 數量禁止手填。部署/settlement script 必須在實際 block 讀 KGEN supply、計算歷史 burned delta、呼叫 settlement，並從 receipt/state 自動產生 KAIOS Genesis record/inscription；碑文數量必須與實際 KAIOS mint、18888 balance delta、KAIOS totalSupply delta 完全一致。
-
-## 9. Separate Alchemy Line
-
-KGEN→KAIOS 固定為 1:1,000。KAIOS→KUFO 是另一條獨立鍊丹尺度：目前定義為 `1 KAIOS burn → expected 1,000 KUFO`。兩者不得混淆。
-
-## 10. Mainnet Gate
-
-本文件本身不授權 Mainnet transaction。正式部署前仍須 compile、unit/integration/fuzz/invariant、UUPS、role、ledger、double-claim/replay、beneficiary redirect、insufficient-funds retry、KAIOS genesis exact-accounting 等測試全部通過。
+No Mainnet transaction is authorized by this document. Compile, storage diff, unit/integration/fuzz/invariant tests, malicious-upgrade rehearsal, fork rehearsal, role verification, deployment-address verification and Human `MAINNET_DEPLOY_APPROVED` are mandatory before signing.

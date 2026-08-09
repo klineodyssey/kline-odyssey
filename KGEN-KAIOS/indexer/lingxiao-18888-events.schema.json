@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Lingxiao 18888 Event Index",
+  "type": "object",
+  "required": ["chainId", "bankProxy", "events"],
+  "properties": {
+    "chainId": { "const": 56 },
+    "bankProxy": { "type": "string", "pattern": "^0x[0-9a-fA-F]{40}$" },
+    "events": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["contract", "event", "transactionHash", "blockNumber", "logIndex", "removed"],
+        "properties": {
+          "contract": { "type": "string" },
+          "event": { "enum": ["KAIOSBound", "GenesisEpochStarted", "ModuleConfigured", "ModulePaymentExecuted", "SalaryClaimed", "AllocationExecuted", "EconomicCapitalRouted", "ExchangeSettlementExecuted", "RiskParametersApplied", "GovernanceProposalExecuted", "MigrationProposed", "Upgraded"] },
+          "transactionHash": { "type": "string", "pattern": "^0x[0-9a-fA-F]{64}$" },
+          "blockNumber": { "type": "integer", "minimum": 0 },
+          "logIndex": { "type": "integer", "minimum": 0 },
+          "removed": { "type": "boolean" },
+          "args": { "type": "object" }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

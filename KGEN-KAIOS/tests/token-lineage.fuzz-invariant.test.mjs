@@ -1,11 +1,13 @@
 import assert from "node:assert/strict";
 import test, { afterEach } from "node:test";
+import { id } from "ethers";
 import {
   ETHER,
   cleanupProviders,
   deploy,
   mintKaiosByBurningKgen,
   setupLingxiaoBank,
+  setupLingxiaoFullBankSystem,
   setupLineage,
 } from "./helpers.mjs";
 
@@ -34,6 +36,34 @@ test("fuzz: incremental Friction Mirror settlement conserves KGEN-to-KAIOS mass"
     assert.equal(await context.kaios.conservationInvariantHolds(), true);
   }
   assert.equal(cumulativeBurn < 72_000_000n * ETHER, true);
+});
+
+test("fuzz/invariant: module circulation accounts every outflow and never crosses reserve", async () => {
+  const context = await setupLingxiaoFullBankSystem();
+  const router = context.modules.EconomicRouter8888_Upgradeable.contract;
+  await (await context.kgen.connect(context.deployer).burn(10n * ETHER)).wait();
+  await (await context.kaios.settleWhiteHoleMass()).wait();
+  await (
+    await context.modules.BankRiskController_Upgradeable.contract.applyRiskParameters(
+      1_000n * ETHER,
+      2_000n * ETHER,
+    )
+  ).wait();
+  let routed = 0n;
+  let index = 0;
+  for (const wholeTokens of deterministicValues(0x18888_500n, 20, 200n)) {
+    const amount = wholeTokens * ETHER;
+    await (await router.routeCapital(id(`FUZZ-ROUTE-${index}`), amount, id("FUZZ-CIVILIZATION-CAPITAL"))).wait();
+    routed += amount;
+    index += 1;
+    assert.equal(await context.kaios.balanceOf(await context.economic8888.getAddress()), routed);
+    assert.equal(await context.bank.totalKaiosModuleDisbursed(), routed);
+    assert.equal(await context.bank.totalKaiosDisbursed(), routed);
+    assert.equal((await context.bank.bankHealth()).healthy, true);
+  }
+  const balance = await context.bank.kaiosBalance();
+  assert.equal(balance, 10_000n * ETHER - routed);
+  await assert.rejects(router.routeCapital(id("FUZZ-RESERVE-BREACH"), balance, id("BREACH")));
 });
 
 test("invariant: arbitrary zero-tax KAIOS transfers preserve supply and settlement identity", async () => {

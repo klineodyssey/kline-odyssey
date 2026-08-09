@@ -9,6 +9,7 @@ const root = path.resolve(import.meta.dirname, "..");
 const sourceRoots = [path.join(root, "contracts"), path.join(root, "tests", "contracts")];
 const externalSources = [path.resolve(root, "..", "KGEN", "contracts", "KGEN_TempleHeart_Upgradeable.sol")];
 const artifactsDir = path.join(root, "artifacts");
+const abiDir = path.join(root, "abi");
 const reportsDir = path.join(root, "reports");
 const templeHeartV332Ref = "7344d231837d40b504622c8c8b4376ed25110e20";
 const templeHeartPath = "KGEN/contracts/KGEN_TempleHeart_Upgradeable.sol";
@@ -79,7 +80,9 @@ for (const diagnostic of diagnostics) {
 if (diagnostics.some((diagnostic) => diagnostic.severity === "error")) process.exit(1);
 
 fs.rmSync(artifactsDir, { recursive: true, force: true });
+fs.rmSync(abiDir, { recursive: true, force: true });
 fs.mkdirSync(artifactsDir, { recursive: true });
+fs.mkdirSync(abiDir, { recursive: true });
 fs.mkdirSync(reportsDir, { recursive: true });
 
 const contracts = [];
@@ -108,6 +111,24 @@ for (const [sourceName, sourceContracts] of Object.entries(output.contracts ?? {
       deployedBytecodeBytes: artifact.evm.deployedBytecode.object.length / 2,
       deployedBytecodeHash: keccak256(`0x${artifact.evm.deployedBytecode.object}`),
     });
+    if (
+      [
+        "LingxiaoCelestialBank18888_Upgradeable",
+        "CelestialSeat500_Upgradeable",
+        "CivilizationAllocation_Upgradeable",
+        "EconomicRouter8888_Upgradeable",
+        "ExchangeSettlement11520_Upgradeable",
+        "BankRiskController_Upgradeable",
+        "BankGovernance_Upgradeable",
+        "BankMigration_Upgradeable",
+        "KAIOS",
+      ].includes(contractName)
+    ) {
+      fs.writeFileSync(
+        path.join(abiDir, `${contractName}.json`),
+        `${JSON.stringify(artifact.abi, null, 2)}\n`,
+      );
+    }
   }
 }
 
@@ -120,16 +141,63 @@ const expectedLingxiaoStorage = [
   { label: "kaios", slot: "1", offset: 0, type: "t_address" },
   { label: "kaiosBound", slot: "1", offset: 20, type: "t_bool" },
   { label: "totalKaiosDisbursed", slot: "2", offset: 0, type: "t_uint256" },
-  { label: "_disbursements", slot: "3", offset: 0, type: "t_mapping(t_bytes32,t_struct(Disbursement)6805_storage)" },
-  { label: "__gap", slot: "4", offset: 0, type: "t_array(t_uint256)46_storage" },
+  { label: "_disbursements", slot: "3", offset: 0, type: "t_mapping(t_bytes32,t_struct(Disbursement)_storage)" },
+  { label: "_modules", slot: "4", offset: 0, type: "t_mapping(t_bytes32,t_struct(ModuleConfig)_storage)" },
+  { label: "_moduleIds", slot: "5", offset: 0, type: "t_mapping(t_address,t_bytes32)" },
+  { label: "_modulePayments", slot: "6", offset: 0, type: "t_mapping(t_bytes32,t_bool)" },
+  { label: "totalKaiosAccountedInflow", slot: "7", offset: 0, type: "t_uint256" },
+  { label: "totalKaiosModuleDisbursed", slot: "8", offset: 0, type: "t_uint256" },
+  { label: "reserveRequirement", slot: "9", offset: 0, type: "t_uint256" },
+  { label: "lastAccountedGrossAssets", slot: "10", offset: 0, type: "t_uint256" },
+  { label: "genesisStartedAt", slot: "11", offset: 0, type: "t_uint64" },
+  { label: "genesisStarted", slot: "11", offset: 8, type: "t_bool" },
+  { label: "riskController", slot: "11", offset: 9, type: "t_address" },
+  { label: "genesisOpeningBalance", slot: "12", offset: 0, type: "t_uint256" },
+  { label: "paused", slot: "13", offset: 0, type: "t_bool" },
+  { label: "governanceFinalized", slot: "13", offset: 1, type: "t_bool" },
+  { label: "__gap", slot: "14", offset: 0, type: "t_array(t_uint256)36_storage" },
 ];
 const actualLingxiaoStorage = (lingxiaoArtifact?.storageLayout?.storage ?? []).map(
-  ({ label, slot, offset, type }) => ({ label, slot, offset, type }),
+  ({ label, slot, offset, type }) => ({
+    label,
+    slot,
+    offset,
+    type: type.replace(/t_struct\(([^)]+)\)\d+_storage/g, "t_struct($1)_storage"),
+  }),
 );
 const lingxiaoStorageMatches =
   JSON.stringify(actualLingxiaoStorage) === JSON.stringify(expectedLingxiaoStorage);
+const upgradeableModuleNames = [
+  "CelestialSeat500_Upgradeable",
+  "CivilizationAllocation_Upgradeable",
+  "EconomicRouter8888_Upgradeable",
+  "ExchangeSettlement11520_Upgradeable",
+  "BankRiskController_Upgradeable",
+  "BankGovernance_Upgradeable",
+  "BankMigration_Upgradeable",
+];
+const upgradeableModuleStorage = upgradeableModuleNames.map((contractName) => {
+  const artifact = Object.values(output.contracts ?? {})
+    .flatMap((sourceContracts) => Object.entries(sourceContracts))
+    .find(([name]) => name === contractName)?.[1];
+  const layout = artifact?.storageLayout;
+  const storage = layout?.storage ?? [];
+  const namespaceSlots = storage.reduce((maximum, entry) => {
+    const bytes = Number(layout.types[entry.type]?.numberOfBytes ?? 32);
+    return Math.max(maximum, Number(entry.slot) + Math.ceil(bytes / 32));
+  }, 0);
+  const basePrefixPreserved = storage[0]?.label === "bank" && storage[0]?.slot === "0"
+    && storage[1]?.label === "moduleId" && storage[1]?.slot === "1";
+  return {
+    contractName,
+    status: namespaceSlots === 100 && basePrefixPreserved ? "PASS" : "FAIL",
+    namespaceSlots,
+    basePrefixPreserved,
+  };
+});
+const upgradeableModuleStorageMatches = upgradeableModuleStorage.every((item) => item.status === "PASS");
 const evidence = {
-  status: oversizedContracts.length === 0 && lingxiaoStorageMatches ? "PASS" : "FAIL",
+  status: oversizedContracts.length === 0 && lingxiaoStorageMatches && upgradeableModuleStorageMatches ? "PASS" : "FAIL",
   compiler: solc.version(),
   requestedCompiler: "0.8.24",
   optimizer: { enabled: true, runs: 1 },
@@ -143,9 +211,14 @@ const evidence = {
   oversizedContracts,
   lingxiaoCelestialBank18888StorageValidation: {
     status: lingxiaoStorageMatches ? "PASS" : "FAIL",
-    strategy: "Initial V2 UUPS layout locks KGEN/KAIOS lineage plus policy-gated disbursement accounting inside a 50-slot namespace",
+    strategy: "V2 modular bank preserves slots 0-3, appends module/accounting/risk state in slots 4-13, and consumes ten reserved gap slots while retaining a 50-slot namespace",
     expected: expectedLingxiaoStorage,
     actual: actualLingxiaoStorage,
+  },
+  upgradeableModuleStorageValidation: {
+    status: upgradeableModuleStorageMatches ? "PASS" : "FAIL",
+    strategy: "Every module preserves the shared slots 0-1 prefix and reserves a deterministic 100-slot custom namespace",
+    modules: upgradeableModuleStorage,
   },
   warnings: diagnostics.filter((diagnostic) => diagnostic.severity === "warning").length,
   contracts,

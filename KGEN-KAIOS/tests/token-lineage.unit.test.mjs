@@ -102,12 +102,12 @@ test("49 Alchemy Epoch maturity boundary is enforced by Furnace Runtime", async 
   const proof = await context.furnace.proof(proofId);
 
   const latestBlock = await context.provider.getBlock("latest");
-  const oneSecondBeforeMaturity = Number(proof.maturityEpoch) * 20 - 1;
-  const secondsUntilPreviousEpoch = oneSecondBeforeMaturity - Number(latestBlock.timestamp);
+  const threeSecondsBeforeMaturity = Number(proof.maturityEpoch) * 20 - 3;
+  const secondsUntilPreviousEpoch = threeSecondsBeforeMaturity - Number(latestBlock.timestamp);
   if (secondsUntilPreviousEpoch > 0) await advanceTime(context.provider, secondsUntilPreviousEpoch);
   assert.equal(await context.furnace.currentEpoch(), proof.maturityEpoch - 1n);
   await assert.rejects(context.wormhole.claim(proofId));
-  await advanceTime(context.provider, 1);
+  await advanceTime(context.provider, 3);
   await (await context.wormhole.claim(proofId, { gasLimit: 1_000_000 })).wait();
   assert.equal((await context.furnace.proof(proofId)).consumed, true);
 });
@@ -248,7 +248,7 @@ test("18888 fresh initialization is atomic, role-bound, replay-safe, and impleme
   const deployerAddress = await context.deployer.getAddress();
 
   assert.equal(await context.bank.version(), "2.0.0");
-  assert.equal(await context.bank.runtimeMode(), "POLICY_GATED_SETTLEMENT_BANK");
+  assert.equal(await context.bank.runtimeMode(), "MODULAR_POLICY_GATED_CIVILIZATION_BANK");
   assert.equal(await context.bank.kgen(), await context.kgen.getAddress());
   assert.equal(await context.bank.kaios(), "0x0000000000000000000000000000000000000000");
   assert.equal(await context.bank.kaiosBound(), false);
@@ -449,5 +449,5 @@ test("18888 UUPS upgrades require UPGRADER_ROLE and preserve locked settlement s
   const stored = await context.provider.getStorage(await context.bank.getAddress(), implementationSlot);
   assert.equal(`0x${stored.slice(-40)}`.toLowerCase(), (await replacement.getAddress()).toLowerCase());
   assert.equal(await context.bank.kgen(), await context.kgen.getAddress());
-  assert.equal(await context.bank.runtimeMode(), "POLICY_GATED_SETTLEMENT_BANK");
+  assert.equal(await context.bank.runtimeMode(), "MODULAR_POLICY_GATED_CIVILIZATION_BANK");
 });

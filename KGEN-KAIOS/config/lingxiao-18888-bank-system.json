@@ -1,0 +1,24 @@
+{
+  "status": "DEPLOYMENT_PACKAGE_ONLY",
+  "mainnetTransactionAuthorized": false,
+  "chainId": 56,
+  "pointId": 18888,
+  "identity": "LINGXIAO_CELESTIAL_BANK",
+  "proxyStandard": "ERC1967_UUPS",
+  "kgen": "0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be",
+  "kaios": null,
+  "bankProxy": null,
+  "bootstrapAdmin": "0xCd60BF474e691F2484950a0276Eaf507616Ca4b9",
+  "upgrader": "0xCd60BF474e691F2484950a0276Eaf507616Ca4b9",
+  "deploymentSignerCandidate": "0xb3C54ca96De0dED4Ca0151F629ff9781506ba261",
+  "technicalMinimumGovernanceDelaySeconds": 3600,
+  "economicBank8888": null,
+  "universalExchange11520": "0xd0605F4EF10e5C1438F11AF9edc36926769239d6",
+  "rules": {
+    "arbitraryOwnerWithdrawal": false,
+    "upgradeRoleImpliesPaymentAuthority": false,
+    "moduleReplacementRequiresFinalizedGovernance": true,
+    "modulePolicyRequiresFinalizedGovernance": true,
+    "productionAddressesMustNotBeGuessed": true
+  }
+}
