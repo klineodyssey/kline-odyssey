@@ -1,6 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
-import { BrowserProvider, ContractFactory, id } from "ethers";
+import { BrowserProvider, Contract, ContractFactory, id } from "ethers";
 import ganache from "ganache";
 
 const root = path.resolve(import.meta.dirname, "..");
@@ -11,6 +11,8 @@ export const ORGAN_FURNACE_18911 = id("KAIOS.ORGAN.FURNACE.18911");
 export const ORGAN_WORMHOLE_511111 = id("KAIOS.ORGAN.WORMHOLE.511111");
 export const ORGAN_KSHIP_CONVERTER = id("KAIOS.ORGAN.KSHIP.CONVERTER");
 export const ORGAN_PAIR_REGISTRY = id("KAIOS.ORGAN.PAIR.REGISTRY");
+export const ORGAN_KAIOS = id("KAIOS.ORGAN.KAIOS");
+export const ORGAN_LINGXIAO_BANK_18888 = id("KAIOS.ORGAN.LINGXIAO_BANK.18888");
 export const ORGAN_EXCHANGE_TREASURY_11520 = id("KAIOS.ORGAN.EXCHANGE_TREASURY.11520");
 
 export function artifact(name) {
@@ -90,6 +92,48 @@ export async function setupLineage({ delay = 3600, epochSeconds = 100, totalAcco
     pairRegistry,
     exchangeTreasury11520,
     epochSeconds,
+  };
+}
+
+export async function setupLingxiaoBank({ chainId = 31337, totalAccounts = 10 } = {}) {
+  const eip1193 = ganache.provider({
+    chain: { chainId, hardfork: "shanghai" },
+    logging: { quiet: true },
+    wallet: { deterministic: true, totalAccounts },
+  });
+  activeProviders.add(eip1193);
+  const provider = new BrowserProvider(eip1193);
+  provider.pollingInterval = 25;
+  const signers = await Promise.all(Array.from({ length: totalAccounts }, (_, index) => provider.getSigner(index)));
+  const [deployer, admin, upgrader] = signers;
+
+  const kgen = await deploy("MockKGEN", deployer, [await deployer.getAddress()]);
+  const registry = await deploy("KAIOSOrganRegistry", deployer, [await admin.getAddress(), 3600]);
+  const implementation = await deploy("LingxiaoCelestialBank18888_Upgradeable", deployer);
+  const compiled = artifact("LingxiaoCelestialBank18888_Upgradeable");
+  const initializeData = implementation.interface.encodeFunctionData("initialize", [
+    await admin.getAddress(),
+    await upgrader.getAddress(),
+    await kgen.getAddress(),
+  ]);
+  const proxy = await deploy("TestERC1967Proxy", deployer, [
+    await implementation.getAddress(),
+    initializeData,
+  ]);
+  const bank = new Contract(await proxy.getAddress(), compiled.abi, admin);
+
+  return {
+    eip1193,
+    provider,
+    signers,
+    deployer,
+    admin,
+    upgrader,
+    kgen,
+    registry,
+    implementation,
+    proxy,
+    bank,
   };
 }
 

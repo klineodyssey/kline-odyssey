@@ -35,6 +35,26 @@ No administrator, verifier, signer or external proof registry may report a
 different burn quantity. Settlement is permissionless, monotonic and replay
 safe. First-generation settlement mints only to the fixed 18888 treasury.
 
+The current formal recipient identity is the evolving **18888 Lingxiao
+Celestial Bank**, implemented from V2 onward through the stable proxy lineage of
+`LingxiaoCelestialBank18888_Upgradeable`. Its V2 runtime is
+`RECEIVE_ONLY_LOCKED`: KAIOS may mint or transfer into the Bank, while the V2
+implementation exposes no withdrawal, sweep, rescue, arbitrary transfer,
+approval or player `transferFrom` path. ERC-20 settlement requires no payable
+`receive()` or fallback.
+
+This preserves rather than replaces prior Bank lives:
+
+- `KGEN_GalacticBank_V7_5_2` is the historical `GENESIS_GALACTIC_BANK` organ;
+- `KGEN_LingxiaoDeityBank_V1_0_1` is Lingxiao Bank Generation 1 and preserves
+  its original KGEN Bank 0.10% design purpose, but its implementation is
+  superseded for current deployment;
+- the current UUPS Bank is the KAIOS white-hole settlement evolution.
+
+Future reactivation of KGEN Bank 0.10% or other banking capabilities requires a
+separate Human-governed implementation. It is neither activated nor permanently
+cancelled by V2.
+
 ## 3. Alchemy Lineage
 
 ```text

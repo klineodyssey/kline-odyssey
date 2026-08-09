@@ -1,6 +1,13 @@
 import assert from "node:assert/strict";
 import test, { afterEach } from "node:test";
-import { ETHER, cleanupProviders, mintKaiosByBurningKgen, setupLineage } from "./helpers.mjs";
+import {
+  ETHER,
+  cleanupProviders,
+  deploy,
+  mintKaiosByBurningKgen,
+  setupLingxiaoBank,
+  setupLineage,
+} from "./helpers.mjs";
 
 afterEach(cleanupProviders);
 
@@ -48,5 +55,23 @@ test("invariant: arbitrary zero-tax KAIOS transfers preserve supply and settleme
     iteration += 1;
     assert.equal(await context.kaios.totalSupply(), initialSupply);
     assert.equal(await context.kaios.conservationInvariantHolds(), true);
+  }
+});
+
+test("invariant: receive-only 18888 balance is monotonic across fuzzed direct KAIOS mints", async () => {
+  const context = await setupLingxiaoBank();
+  const mockKaios = await deploy("MockKAIOSForTreasury", context.deployer, [
+    await context.kgen.getAddress(),
+    await context.bank.getAddress(),
+  ]);
+  await (await context.bank.bindKAIOS(await mockKaios.getAddress())).wait();
+
+  let expected = 0n;
+  for (const wholeTokens of deterministicValues(0x18888_20000n, 64, 10_000n)) {
+    const amount = wholeTokens * ETHER;
+    expected += amount;
+    await (await mockKaios.mintToTreasury(amount)).wait();
+    assert.equal(await context.bank.kaiosBalance(), expected);
+    assert.equal(await mockKaios.balanceOf(await context.bank.getAddress()), expected);
   }
 });

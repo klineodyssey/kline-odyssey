@@ -4,13 +4,16 @@ import { id } from "ethers";
 import {
   ETHER,
   ORGAN_FURNACE_18911,
+  ORGAN_KAIOS,
   ORGAN_KSHIP_CONVERTER,
+  ORGAN_LINGXIAO_BANK_18888,
   ORGAN_WORMHOLE_511111,
   advanceTime,
   cleanupProviders,
   deploy,
   eventArgs,
   mintKaiosByBurningKgen,
+  setupLingxiaoBank,
   setupLineage,
 } from "./helpers.mjs";
 
@@ -222,4 +225,160 @@ test("migrated organs cannot mint KUFO or KSHIP without an immutable Token Core 
   );
   assert.equal(await context.kufo.totalSupply(), 0n);
   assert.equal(await context.kship.totalSupply(), 0n);
+});
+
+test("18888 fresh initialization is atomic, role-bound, replay-safe, and implementation-locked", async () => {
+  const context = await setupLingxiaoBank();
+  const adminAddress = await context.admin.getAddress();
+  const upgraderAddress = await context.upgrader.getAddress();
+  const deployerAddress = await context.deployer.getAddress();
+
+  assert.equal(await context.bank.version(), "2.0.0");
+  assert.equal(await context.bank.runtimeMode(), "RECEIVE_ONLY_LOCKED");
+  assert.equal(await context.bank.kgen(), await context.kgen.getAddress());
+  assert.equal(await context.bank.kaios(), "0x0000000000000000000000000000000000000000");
+  assert.equal(await context.bank.kaiosBound(), false);
+  assert.equal(await context.bank.kaiosBalance(), 0n);
+  assert.equal(await context.bank.hasRole(await context.bank.DEFAULT_ADMIN_ROLE(), adminAddress), true);
+  assert.equal(await context.bank.hasRole(await context.bank.UPGRADER_ROLE(), upgraderAddress), true);
+  assert.equal(await context.bank.hasRole(await context.bank.DEFAULT_ADMIN_ROLE(), deployerAddress), false);
+  assert.equal(await context.bank.hasRole(await context.bank.UPGRADER_ROLE(), deployerAddress), false);
+
+  await assert.rejects(
+    context.bank.initialize(adminAddress, upgraderAddress, await context.kgen.getAddress()),
+  );
+  await assert.rejects(
+    context.implementation.initialize(adminAddress, upgraderAddress, await context.kgen.getAddress()),
+  );
+
+  const sharedGovernanceData = context.implementation.interface.encodeFunctionData("initialize", [
+    adminAddress,
+    adminAddress,
+    await context.kgen.getAddress(),
+  ]);
+  const sharedGovernanceProxy = await deploy("TestERC1967Proxy", context.deployer, [
+    await context.implementation.getAddress(),
+    sharedGovernanceData,
+  ]);
+  const sharedGovernanceBank = context.implementation
+    .attach(await sharedGovernanceProxy.getAddress())
+    .connect(context.admin);
+  assert.equal(
+    await sharedGovernanceBank.hasRole(await sharedGovernanceBank.DEFAULT_ADMIN_ROLE(), adminAddress),
+    true,
+  );
+  assert.equal(
+    await sharedGovernanceBank.hasRole(await sharedGovernanceBank.UPGRADER_ROLE(), adminAddress),
+    true,
+  );
+  assert.equal(
+    await sharedGovernanceBank.hasRole(await sharedGovernanceBank.DEFAULT_ADMIN_ROLE(), deployerAddress),
+    false,
+  );
+});
+
+test("18888 initializer rejects zero governance, zero KGEN, and non-contract KGEN", async () => {
+  const context = await setupLingxiaoBank();
+  const zero = "0x0000000000000000000000000000000000000000";
+  const adminAddress = await context.admin.getAddress();
+  const upgraderAddress = await context.upgrader.getAddress();
+  const eoaAddress = await context.signers[5].getAddress();
+
+  for (const args of [
+    [zero, upgraderAddress, await context.kgen.getAddress()],
+    [adminAddress, zero, await context.kgen.getAddress()],
+    [adminAddress, upgraderAddress, zero],
+    [adminAddress, upgraderAddress, eoaAddress],
+  ]) {
+    const data = context.implementation.interface.encodeFunctionData("initialize", args);
+    await assert.rejects(
+      deploy("TestERC1967Proxy", context.deployer, [await context.implementation.getAddress(), data]),
+    );
+  }
+});
+
+test("18888 binds one lineage-correct KAIOS and receives direct ERC20 mint without callback", async () => {
+  const context = await setupLingxiaoBank();
+  const zero = "0x0000000000000000000000000000000000000000";
+  const eoaAddress = await context.signers[5].getAddress();
+
+  await assert.rejects(context.bank.connect(context.deployer).bindKAIOS(zero));
+  await assert.rejects(context.bank.bindKAIOS(zero));
+  await assert.rejects(context.bank.bindKAIOS(eoaAddress));
+
+  const wrongKgen = await deploy("MockKGEN", context.deployer, [await context.deployer.getAddress()]);
+  const wrongKgenKaios = await deploy("MockKAIOSForTreasury", context.deployer, [
+    await wrongKgen.getAddress(),
+    await context.bank.getAddress(),
+  ]);
+  await assert.rejects(context.bank.bindKAIOS(await wrongKgenKaios.getAddress()));
+
+  const wrongTreasuryKaios = await deploy("MockKAIOSForTreasury", context.deployer, [
+    await context.kgen.getAddress(),
+    eoaAddress,
+  ]);
+  await assert.rejects(context.bank.bindKAIOS(await wrongTreasuryKaios.getAddress()));
+
+  const mockKaios = await deploy("MockKAIOSForTreasury", context.deployer, [
+    await context.kgen.getAddress(),
+    await context.bank.getAddress(),
+  ]);
+  await (await context.bank.bindKAIOS(await mockKaios.getAddress())).wait();
+  assert.equal(await context.bank.kaios(), await mockKaios.getAddress());
+  assert.equal(await context.bank.kaiosBound(), true);
+
+  const amount = 1_888n * ETHER;
+  await (await mockKaios.mintToTreasury(amount)).wait();
+  assert.equal(await mockKaios.balanceOf(await context.bank.getAddress()), amount);
+  assert.equal(await context.bank.kaiosBalance(), amount);
+  await assert.rejects(context.bank.bindKAIOS(await mockKaios.getAddress()));
+  await assert.rejects(context.admin.sendTransaction({ to: await context.bank.getAddress(), value: 1n }));
+});
+
+test("formal KAIOS Friction Mirror settles only into the bound 18888 proxy", async () => {
+  const context = await setupLingxiaoBank();
+  const kaios = await deploy("KAIOS", context.deployer, [
+    await context.kgen.getAddress(),
+    await context.bank.getAddress(),
+    await context.registry.getAddress(),
+  ]);
+
+  await (await context.bank.bindKAIOS(await kaios.getAddress())).wait();
+  await (await context.registry.connect(context.admin).bootstrapOrgan(ORGAN_LINGXIAO_BANK_18888, await context.bank.getAddress())).wait();
+  await (await context.registry.connect(context.admin).bootstrapOrgan(ORGAN_KAIOS, await kaios.getAddress())).wait();
+
+  assert.equal(await context.registry.ORGAN_LINGXIAO_BANK_18888(), ORGAN_LINGXIAO_BANK_18888);
+  assert.equal(await context.registry.ORGAN_KAIOS(), ORGAN_KAIOS);
+  assert.equal(await context.registry.organ(ORGAN_LINGXIAO_BANK_18888), await context.bank.getAddress());
+  assert.equal(await context.registry.organ(ORGAN_KAIOS), await kaios.getAddress());
+  assert.equal(await kaios.LINGXIAO_TREASURY_18888(), await context.bank.getAddress());
+
+  const burned = 8n * ETHER;
+  await (await context.kgen.connect(context.deployer).burn(burned)).wait();
+  await (await kaios.connect(context.signers[6]).settleWhiteHoleMass()).wait();
+  const expected = burned * 1_000n;
+  assert.equal(await kaios.balanceOf(await context.bank.getAddress()), expected);
+  assert.equal(await context.bank.kaiosBalance(), expected);
+});
+
+test("18888 UUPS upgrades require UPGRADER_ROLE and preserve locked settlement state", async () => {
+  const context = await setupLingxiaoBank();
+  const replacement = await deploy("LingxiaoCelestialBank18888_Upgradeable", context.deployer);
+
+  await assert.rejects(
+    context.bank.connect(context.deployer).upgradeToAndCall(await replacement.getAddress(), "0x"),
+  );
+  await assert.rejects(
+    context.bank.connect(context.admin).upgradeToAndCall(await replacement.getAddress(), "0x"),
+  );
+  await (
+    await context.bank.connect(context.upgrader).upgradeToAndCall(await replacement.getAddress(), "0x")
+  ).wait();
+
+  const implementationSlot =
+    "0x360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc";
+  const stored = await context.provider.getStorage(await context.bank.getAddress(), implementationSlot);
+  assert.equal(`0x${stored.slice(-40)}`.toLowerCase(), (await replacement.getAddress()).toLowerCase());
+  assert.equal(await context.bank.kgen(), await context.kgen.getAddress());
+  assert.equal(await context.bank.runtimeMode(), "RECEIVE_ONLY_LOCKED");
 });

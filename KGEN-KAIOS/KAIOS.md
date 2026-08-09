@@ -144,10 +144,42 @@ no direct child-token mint
 bind a Furnace implementation. The registry bootstrap is configured once and
 irreversibly sealed; later organ changes require the registry governance delay.
 
+The formal 18888 Bank lineage is cumulative:
+
+```text
+KGEN_GalacticBank_V7_5_2
+= GENESIS_GALACTIC_BANK / historical BigBang Galactic Bank organ
+        |
+        v
+KGEN_LingxiaoDeityBank_V1_0_1
+= 18888 Lingxiao Bank Generation 1 / KGEN Bank 0.10% design
+        |
+        v
+LingxiaoCelestialBank18888_Upgradeable
+= current 18888 Bank / KAIOS white-hole settlement runtime
+```
+
+The Genesis Galactic Bank remains a valid historical life even though it was
+not operated as the current 18888 organ and no current control path is assumed.
+The Generation 1 Lingxiao source preserves the original KGEN Bank 0.10% economic
+purpose but is superseded for present compile/runtime/architecture requirements.
+Neither legacy life is reused as the current KAIOS settlement address.
+
+The current contract identity remains the **18888 Lingxiao Celestial Bank**.
+Its V2 implementation is intentionally `RECEIVE_ONLY_LOCKED`: it accepts KAIOS
+settlement as an ERC-20 balance but exposes no withdrawal, sweep, rescue,
+approval, arbitrary transfer or player `transferFrom` path. It has no payable
+`receive()` or fallback because ERC-20 minting requires neither. The UUPS proxy
+preserves the Bank address for future Human-governed evolution; a later version
+may define banking expenditure or reconsider the KGEN Bank 0.10% role, but V2
+does not activate either capability.
+
 The implemented review-only organ chain is:
 
 ```text
 KAIOSOrganRegistry
+-> current LingxiaoCelestialBank18888 (18888)
+-> canonical KAIOS token
 -> current KAIOSAlchemyFurnace (18911)
 -> current KUFOClaimWormhole (511111)
 -> current KSHIPConverter

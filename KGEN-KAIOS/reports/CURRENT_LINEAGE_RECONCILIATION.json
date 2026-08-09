@@ -10,6 +10,8 @@
     "docs/constitution/03_Celestial_Bank_18888.md",
     "K線西遊記/data/kgen-5d-world-map.json",
     "KGEN-KAIOS/contracts/KAIOS.sol",
+    "KGEN-KAIOS/contracts/LingxiaoCelestialBank18888_Upgradeable.sol",
+    "KGEN-KAIOS/KAIOS.md",
     "KGEN/contracts/KGEN_TempleHeart_Upgradeable.sol"
   ],
   "forbidden": [
@@ -24,6 +26,10 @@
     "kaiosRatio": true,
     "frictionMirror": true,
     "organRegistry": true,
+    "galacticBankLineagePreserved": true,
+    "lingxiaoV1LineagePreserved": true,
+    "current18888BankIdentityPreserved": true,
+    "current18888RuntimeReceiveOnly": true,
     "noMainnetDeployment": true,
     "staleCurrentFindingsLimitedToPr127": true
   },

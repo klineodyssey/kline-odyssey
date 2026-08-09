@@ -14,6 +14,8 @@ const activeFiles = [
   "docs/constitution/03_Celestial_Bank_18888.md",
   "K線西遊記/data/kgen-5d-world-map.json",
   "KGEN-KAIOS/contracts/KAIOS.sol",
+  "KGEN-KAIOS/contracts/LingxiaoCelestialBank18888_Upgradeable.sol",
+  "KGEN-KAIOS/KAIOS.md",
   "KGEN/contracts/KGEN_TempleHeart_Upgradeable.sol",
 ];
 const forbidden = [
@@ -25,6 +27,7 @@ const forbidden = [
 ];
 const safeConflictReferenceFiles = new Set([
   "docs/physics/KGEN_KAIOS_SCALE_AND_PLANCK_RUNTIME_CURRENT.md",
+  "KGEN-KAIOS/KAIOS.md",
 ]);
 const failures = [];
 
@@ -60,6 +63,16 @@ const assertions = {
   kaiosRatio: fs.readFileSync(path.join(repo, "KGEN-KAIOS/contracts/KAIOS.sol"), "utf8").includes("KAIOS_PER_KGEN = 1_000"),
   frictionMirror: fs.readFileSync(path.join(repo, "KGEN-KAIOS/contracts/KAIOS.sol"), "utf8").includes("IKGENSupply(KGEN).totalSupply()"),
   organRegistry: fs.readFileSync(path.join(repo, "KGEN-KAIOS/contracts/KAIOS.sol"), "utf8").includes("ORGAN_REGISTRY.organ"),
+  galacticBankLineagePreserved: fs.readFileSync(path.join(repo, "KGEN-KAIOS/KAIOS.md"), "utf8").includes("GENESIS_GALACTIC_BANK"),
+  lingxiaoV1LineagePreserved: fs.readFileSync(path.join(repo, "KGEN-KAIOS/KAIOS.md"), "utf8").includes("KGEN Bank 0.10% design"),
+  current18888BankIdentityPreserved: fs.readFileSync(
+    path.join(repo, "KGEN-KAIOS/contracts/LingxiaoCelestialBank18888_Upgradeable.sol"),
+    "utf8",
+  ).includes("contract LingxiaoCelestialBank18888_Upgradeable"),
+  current18888RuntimeReceiveOnly: fs.readFileSync(
+    path.join(repo, "KGEN-KAIOS/contracts/LingxiaoCelestialBank18888_Upgradeable.sol"),
+    "utf8",
+  ).includes('return "RECEIVE_ONLY_LOCKED"'),
   noMainnetDeployment: !fs.existsSync(path.join(repo, "KGEN-KAIOS", "deployments", "mainnet.json")),
   staleCurrentFindingsLimitedToPr127:
     audit.findings.filter((item) => item.classification === "CURRENT-CONFLICT").every((item) => item.path.startsWith("PR#127:")),

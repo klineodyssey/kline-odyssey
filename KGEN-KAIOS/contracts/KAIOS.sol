@@ -26,8 +26,8 @@ interface IKGENSupply {
  * FIRST-GENERATION WHITE HOLE — POINT 36000
  * KAIOS observes the canonical KGEN totalSupply() directly. Only the newly
  * observed permanent reduction from the 72,000,000 KGEN genesis supply is
- * mirrored into KAIOS. Every settlement mints only to the immutable 18888
- * Lingxiao Treasury address.
+ * mirrored into KAIOS. Every settlement mints only to the immutable current
+ * 18888 Lingxiao Celestial Bank settlement address.
  *
  * ALCHEMY — POINT 18911
  * KAIOS may be voluntarily burned for future KUFO conversion only through the

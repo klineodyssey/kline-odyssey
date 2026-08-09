@@ -39,6 +39,7 @@ Last optimized: 2026-06-11
 | TempleHeart V3.4 BSC Testnet Rehearsal | [KGEN-KAIOS/reports/BSC_TESTNET_TEMPLEHEART_V3_4_REHEARSAL.md](KGEN-KAIOS/reports/BSC_TESTNET_TEMPLEHEART_V3_4_REHEARSAL.md) |
 | TempleHeart V3.4 BSC Testnet Machine Evidence | [KGEN-KAIOS/reports/BSC_TESTNET_TEMPLEHEART_V3_4_REHEARSAL.json](KGEN-KAIOS/reports/BSC_TESTNET_TEMPLEHEART_V3_4_REHEARSAL.json) |
 | TempleHeart Mainnet Lineage, 18888 Architecture, and New-Proxy Plan | [KGEN/docs/TEMPLEHEART_MAINNET_LINEAGE.md](KGEN/docs/TEMPLEHEART_MAINNET_LINEAGE.md) |
+| 18888 Lingxiao Celestial Bank V2 UUPS Runtime | [KGEN-KAIOS/contracts/LingxiaoCelestialBank18888_Upgradeable.sol](KGEN-KAIOS/contracts/LingxiaoCelestialBank18888_Upgradeable.sol) |
 | KAIOS Kernel V1 Design | [KGEN-KAIOS/kernel/KERNEL_V1.md](KGEN-KAIOS/kernel/KERNEL_V1.md) |
 | Architecture Governance Board | [KGEN-KAIOS/governance/ARCHITECTURE_GOVERNANCE_BOARD.md](KGEN-KAIOS/governance/ARCHITECTURE_GOVERNANCE_BOARD.md) |
 | KAIOS V11.0 Architecture Baseline | [KGEN-KAIOS/V11/ARCHITECTURE_BASELINE.md](KGEN-KAIOS/V11/ARCHITECTURE_BASELINE.md) |

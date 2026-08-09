@@ -1,6 +1,6 @@
 # TempleHeart Mainnet Lineage and V3.4 New-Proxy Deployment Plan
 
-Status: `KAIOS_18888_SETTLEMENT_ARCHITECTURE_READY`
+Status: `KAIOS_18888_SETTLEMENT_IMPLEMENTATION_COMPLETE`
 
 Source baseline: main merge commit `c7e8c533c5bbc598fac3192e0576bacb55fb6a31`.
 
@@ -95,22 +95,23 @@ The deployment signer is approved only for nonce, address, gas and calldata simu
 
 Read-only package snapshot at BSC Mainnet block `114926410`: the deployment-signer candidate is an EOA (`code.length == 0`) with nonce `34` and balance `0.00556736894145793 BNB`. This proves neither current Human control nor future funding sufficiency. Nonce, balance, gas price and all CREATE address predictions must be refreshed immediately before signing; no predicted address from this snapshot is canonical.
 
-## 2.3 Formal 18888 settlement architecture review
+## 2.3 Formal 18888 Bank lineage and settlement architecture
 
 ### Repository and chain evidence
 
-The repository contains 18888 constitutional and whitepaper designs, but it does not contain a deployable contract that safely implements the current KAIOS settlement-recipient role.
+Human canon preserves three generations of banking life. The first two are historical lineage, not mistakes and not the current KAIOS settlement organ. The current evolution is implemented as one new version-free UUPS contract whose V2 runtime is deliberately minimal.
 
 | Candidate | Evidence | Result |
 |---|---|---|
-| `KGEN_LingxiaoDeityBank_V1_0_1.sol` | Historical civilization indices describe it as source-only 18888; it implements KGEN staking, monthly reward accounting, early-withdrawal penalties and three-way routing | `REJECTED_FOR_KAIOS_SETTLEMENT`: different product semantics, no KAIOS lineage binding, no upgradeable stable address, no tests, and current Solidity 0.8.24 compilation fails at `_utcDate()` because the ternary mixes `uint8` and `int8` |
-| `KGEN_GalacticBank_V7_5_2.sol` | Generic owner-controlled native/ERC20 bank; compiles with Solidity 0.8.24 | `REJECTED_FOR_FORMAL_18888`: permits the owner to withdraw any token/native balance, has no KAIOS lineage binding, no settlement accounting and no stable proxy |
-| Mainnet `0xfc522243e988a837700CaD600D6f030f5932681F` | ChainId 56 code exists, `owner()` is `0xCd60...a4b9`, and runtime contains GalacticBank deposit/withdraw selectors; it does not contain `settleWhiteHoleMass()` or KAIOS/18888 getters | `NOT_FORMAL_18888`: historical portal label is insufficient deployment lineage; current repo build is not an exact runtime match and no KAIOS settlement designation was recovered |
+| `KGEN_GalacticBank_V7_5_2.sol` | KGEN Universe BigBang/Genesis Galactic Bank, produced and deployed during the Genesis system | `GENESIS_GALACTIC_BANK / HISTORICAL_LEGACY_ORGAN`: preserve its formal Genesis life and chain history; it was not operated as the current 18888 organ, no current management path is assumed, and it must not be hard-wired into the KAIOS white-hole system |
+| Mainnet `0xfc522243e988a837700CaD600D6f030f5932681F` | Historical deployed Galactic Bank evidence; chainId 56 code exists and `owner()` reports the historical governance address | `HISTORICAL_ONLY`: not deleted or denied, but insufficient Canon/control/interface evidence to designate it as current formal 18888 |
+| `KGEN_LingxiaoDeityBank_V1_0_1.sol` | First-generation 18888 Lingxiao Bank design whose original economic organ purpose included receiving the KGEN Bank 0.10% flow | `LINGXIAO_BANK_GENERATION_1 / SUPERSEDED_IMPLEMENTATION`: preserve lineage and future-policy context; do not deploy its old bytecode because current Solidity 0.8.24 compilation fails and its runtime/architecture does not satisfy current requirements |
+| `LingxiaoCelestialBank18888_Upgradeable.sol` | Current Bank evolution for KAIOS white-hole energy settlement, with one stable ERC1967/UUPS proxy lineage | `CURRENT_18888_BANK / V2_RECEIVE_ONLY_RUNTIME`: implemented, compiled and tested; Mainnet not deployed |
 | `KAIOSEventHorizonVaultV01.sol` | Review-only KAIOS sink with deliberately no withdrawal, release, rescue or upgrade path | `REJECTED`: irreversible event-horizon experiment, not a governed settlement reserve |
 | `KGEN_8888_Treasury_V1_0_0.sol` | KGEN-only owner withdrawal vault for species 8888 | `REJECTED`: wrong species, token and purpose |
 | `CelestialReserveBank18888` / `CelestialTaxVault18888` | Names occur only in constitutional/whitepaper future-package sections | `NOT_IMPLEMENTED` |
 
-Historical Git inspection found no deleted or superseded Solidity file that implements a KAIOS-specific 18888 settlement treasury. The earlier civilization index explicitly classified 18888 as `GRAPH_ONLY_WITH_SOURCE_CONTRACT` and the Lingxiao contract as `SOURCE_ONLY`.
+The lineage is therefore `Genesis Galactic Bank -> Lingxiao Bank Generation 1 -> current 18888 UUPS Bank`. The new implementation does not cancel the possible future return of the KGEN Bank 0.10% role; that remains `FUTURE_GOVERNANCE_EVOLUTION` and is not activated in V2.
 
 ### Exact requirement imposed by `KAIOS.sol`
 
@@ -118,33 +119,31 @@ Historical Git inspection found no deleted or superseded Solidity file that impl
 
 Therefore KAIOS requires only a stable recipient address. It does not call a receiver callback, treasury accounting interface, approval hook, deposit function, bank API or withdrawal API. The Treasury needs no callback for settlement to succeed. This technical minimum must not be mistaken for permission to use an EOA.
 
-### Recommended minimal V1 architecture
-
-Create new Solidity only after Human approves this architecture:
+### Implemented minimal V2 architecture
 
 ```text
-KAIOSSettlementTreasury18888 implementation
-                  -> ERC1967/UUPS proxy = FORMAL_18888_SETTLEMENT_TREASURY
+LingxiaoCelestialBank18888_Upgradeable implementation
+                  -> ERC1967/UUPS proxy = FORMAL_18888_LINGXIAO_BANK
                                                ^
                                                |
 KAIOS.LINGXIAO_TREASURY_18888 -----------------+
 ```
 
-The first implementation should be a receive-only settlement reserve, not the full future Celestial Bank:
+The current Bank identity and its first UUPS runtime are intentionally distinct: identity is the evolving 18888 Lingxiao Celestial Bank; V2 runtime only receives and locks KAIOS settlement.
 
 - stable ERC1967/UUPS proxy address because KAIOS permanently stores the 18888 address;
-- initializer with nonzero admin/upgrader and formal KGEN lineage;
+- initializer with nonzero admin/upgrader and formal KGEN contract lineage;
 - one-time post-KAIOS `bindKAIOS(address)` that requires contract code and verifies KAIOS `KGEN()` equals formal KGEN and `LINGXIAO_TREASURY_18888()` equals the proxy;
 - read-only canonical token and balance getters plus explicit lineage events;
 - UUPS authorization restricted to `UPGRADER_ROLE`;
 - no user deposit function, no `transferFrom`, no allowance, no blacklist, no freeze, no clawback and no operation over player wallets;
-- no KAIOS withdrawal, release, sweep, rescue, bridge, lending, dividend, credit or tax-routing function in V1;
+- no KAIOS withdrawal, release, sweep, rescue, bridge, lending, dividend, credit or tax-routing function in V2;
 - reject native BNB and omit arbitrary fallback execution;
 - direct ERC20 transfers and KAIOS `_mint` still credit the proxy balance without a receiver callback.
 
-This receive-only boundary avoids inventing an unauthorized reserve-distribution policy. A future cumulative, audited implementation may add a narrowly governed release policy through the stable proxy only after Human defines beneficiaries, approvals, limits, delay and emergency rules. Until then, settled KAIOS is visible but immobile.
+This receive-only boundary avoids inventing an unauthorized reserve-distribution policy. A future cumulative, audited implementation may evolve through the stable proxy only after Human defines and approves its bank policy. UUPS means governance could technically authorize a future implementation with new behavior; the precise guarantee is `V2_RUNTIME = RECEIVE_ONLY`, not a claim that all future implementations can never move assets.
 
-Recommended initial Treasury authority is the approved governance address `0xCd60...a4b9` for both admin and upgrader, with no operator role because V1 has no operational transfer. This is a recommendation requiring explicit approval for the new 18888 contract; the deployment signer `0xb3C54...a261` should receive no Treasury role merely by deploying it.
+Initial Bank authority is the approved governance address `0xCd60...a4b9` for both admin and upgrader, with no operator role because V2 has no operational transfer. The deployment signer `0xb3C54...a261` receives no Bank role merely by deploying it.
 
 ### Address and deployment dependencies
 
@@ -152,26 +151,79 @@ The address relationship can be fixed only after the new Treasury bytecode is im
 
 | Relationship | Required value |
 |---|---|
-| Treasury formal KGEN | `0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be` |
-| Treasury admin/upgrader | Human-approved governance; recommended `0xCd60...a4b9` |
-| KAIOS `LINGXIAO_TREASURY_18888` | New Treasury proxy |
-| Treasury canonical KAIOS | New formal KAIOS, bound once after KAIOS deployment |
+| Bank formal KGEN lineage | `0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be` |
+| Bank admin/upgrader | `0xCd60...a4b9` |
+| KAIOS `LINGXIAO_TREASURY_18888` | New 18888 Bank proxy |
+| Bank canonical KAIOS | New formal KAIOS, bound once after KAIOS deployment |
 | Heart proof source | New formal KAIOS, never the Treasury or 18911 Furnace |
 
-The requested semantic order remains 18888 before KAIOS. One constructor dependency requires a technical adjustment: `KAIOS.sol` rejects an `organRegistry` address without code, so the Registry contract must exist before KAIOS can be deployed. It can remain bootstrap-open and unwired until KAIOS and 18911 exist. The executable order is therefore:
+`KAIOS.sol` rejects an `organRegistry` address without code. The Registry must therefore exist first and may remain bootstrap-open while the Bank, KAIOS and 18911 are deployed. The executable order is:
 
-1. implement, audit and test the minimal 18888 implementation/proxy package;
-2. deploy the formal 18888 implementation and proxy;
-3. deploy `KAIOSOrganRegistry(owner = 0xCd60...a4b9, minimumDelay = 3600)` and bootstrap formal 11520;
-4. deploy formal KAIOS with formal KGEN, the new 18888 proxy and the Registry;
+1. deploy `KAIOSOrganRegistry(owner = 0xCd60...a4b9, minimumDelay = 3600)` with bootstrap open;
+2. deploy `LingxiaoCelestialBank18888_Upgradeable` implementation;
+3. deploy its ERC1967 proxy with atomic `initialize(admin, upgrader, formalKgen)`;
+4. deploy formal KAIOS with formal KGEN, the new 18888 Bank proxy and the Registry;
 5. verify `alchemyBurnRecord(bytes32)`, KGEN, 18888 and Registry immutable bindings;
-6. bind formal KAIOS once in the 18888 proxy;
-7. deploy formal 18911 Furnace and wire 18911/KAIOS organ IDs;
-8. wire only actually deployed 511111, KSHIP Converter and Pair Registry organs; leave absent organs unset;
-9. seal Registry bootstrap and verify owner/delay/organ reads;
+6. call Bank `bindKAIOS(formalKaios)` once from formal admin;
+7. deploy formal 18911 Furnace;
+8. bootstrap formal 11520, 18888 Bank, KAIOS and 18911; wire only other organs that have verified Mainnet deployments;
+9. leave absent 511111, KSHIP Converter and Pair Registry organs unset, then seal Registry bootstrap;
 10. only then continue to the new TempleHeart implementation and proxy package.
 
-No address prediction is final until exact Treasury bytecode, proxy creation calldata and the deployment signer's immediately-before-signing nonce are fixed. No Mainnet transaction is authorized by this architecture review.
+No address prediction is final until the implementation is deployed, proxy creation calldata is complete and the deployment signer's immediately-before-signing nonce is refreshed. No Mainnet transaction is authorized by this package.
+
+### 18888 V2 compiler and deployment package
+
+| Field | Locked package value |
+|---|---|
+| Source | `KGEN-KAIOS/contracts/LingxiaoCelestialBank18888_Upgradeable.sol` |
+| Contract identity | `LingxiaoCelestialBank18888_Upgradeable` |
+| Runtime version/mode | `2.0.0` / `RECEIVE_ONLY_LOCKED` |
+| Compiler/dependencies | Solidity `0.8.24`; OpenZeppelin `5.0.2` |
+| Settings | optimizer enabled, runs 1; viaIR; Paris EVM; metadata bytecode hash disabled |
+| Creation bytecode | 4,452 bytes; `0x362d6f6638093f550b56d93b8c8222ca2e587bc5ce599f798580065bf6f47626` |
+| Runtime bytecode | 4,242 bytes; `0x26afde543338037947511a737f624591fe1d1f0505cba08fd948ec732c6d78c8` |
+| EIP-170 | `4,242 / 24,576` bytes, PASS |
+| Own storage | slot 0 `kgen`; slot 1 `kaios` + `kaiosBound`; slots 2-49 reserved by `uint256[48] __gap` |
+| Initial admin/upgrader | `0xCd60BF474e691F2484950a0276Eaf507616Ca4b9` / same |
+| Formal KGEN | `0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be` |
+
+Mainnet initializer calldata is fully determined by Human canon:
+
+```text
+0xc0c53b8b000000000000000000000000cd60bf474e691f2484950a0276eaf507616ca4b9000000000000000000000000cd60bf474e691f2484950a0276eaf507616ca4b9000000000000000000000000ba3d3810e58735cb6813bc1cdc5458c0d71432be
+```
+
+Initializer calldata hash: `0xfb9b33fb9a85428eb89019afcd710994f1e9ec901ef3a5a36ba99628fb2bcc5b`.
+
+The proxy constructor calldata remains intentionally incomplete until the implementation address exists. `bindKAIOS` calldata remains incomplete until formal KAIOS is deployed. Neither simulation address may be copied into a Mainnet command.
+
+Local chainId 56 simulation used exact compiled bytecode and produced:
+
+| Operation | Simulated gas |
+|---|---:|
+| Deploy Registry | 653,603 |
+| Deploy 18888 implementation | 995,731 |
+| Deploy 18888 proxy + atomic initialize | 211,662 |
+| Deploy KAIOS | 1,394,116 |
+| Bind KAIOS once | 60,360 |
+| Bootstrap 11520 | 55,195 |
+| Bootstrap 18888 | 55,183 |
+| Bootstrap KAIOS | 55,183 |
+| Deploy 18911 Furnace | 506,642 |
+| Bootstrap 18911 | 55,195 |
+| Seal Registry bootstrap | 24,817 |
+| Known sequence total | 4,067,687 |
+| 25% buffer | 5,084,609 |
+
+Registry organ IDs locked by current source are:
+
+- `KAIOS.ORGAN.EXCHANGE_TREASURY.11520` -> `0xb6239b4afc2d679ad5bde98a6ce58d89562381b4d0d2eb1d1fc7f89ebbe72c07`;
+- `KAIOS.ORGAN.LINGXIAO_BANK.18888` -> `0x4e55e89e8a8411020097db80f3cbc24f56323a098f681b9a5aa679c092218ea6`;
+- `KAIOS.ORGAN.KAIOS` -> `0x8192dabb5532a53075d9609e0974c572bdd26e84e22c8b6c5ae34666d715fd00`;
+- `KAIOS.ORGAN.FURNACE.18911` -> `0xc7dc58355a278d2d7c66791b96331912455bb79b53dbf7c740701ddbf33de567`.
+
+`511111`, KSHIP Converter and Pair Registry remain unset when no verified Mainnet deployment exists. V2 exposes no pause because it has no operational outflow to pause, and no payable `receive()`/fallback because neither is needed for ERC-20 settlement.
 
 ## 3. Fresh initializer audit
 
@@ -207,7 +259,7 @@ No Mainnet Organ Registry address is assumed. Before deploying the Heart:
 3. Require `minimumDelay() == 3600`. This is the Human-approved first-version `TECHNICAL_MINIMUM_DELAY`; no 48-hour or 72-hour policy is inferred.
 4. Call `bootstrapOrgan(ORGAN_EXCHANGE_TREASURY_11520, 0xd060...39d6)`.
 5. Read `organ(ORGAN_EXCHANGE_TREASURY_11520)` and require the exact formal 11520 address.
-6. Before sealing, bootstrap every production organ that actually exists at genesis. At minimum this includes 11520, formal KAIOS and, after its deployment and verification, the 18911 Furnace. The Registry accepts arbitrary `bytes32` IDs even though the current source does not declare an `ORGAN_KAIOS` convenience constant; the package must use and record canonical `keccak256("KAIOS.ORGAN.KAIOS") = 0x8192dabb5532a53075d9609e0974c572bdd26e84e22c8b6c5ae34666d715fd00`. Do not seal with an invented 511111, KSHIP Converter or Pair Registry address; absent organs remain unset.
+6. Before sealing, bootstrap every production organ that actually exists: formal 11520, the new 18888 Bank proxy, formal KAIOS and formal 18911. Current Registry source declares canonical `ORGAN_LINGXIAO_BANK_18888` and `ORGAN_KAIOS` IDs. Do not seal with an invented 511111, KSHIP Converter or Pair Registry address; absent organs remain unset.
 7. Call `sealBootstrap()`; require `bootstrapOpen() == false`.
 8. Because the constructor owner is the formal governance address, no deployer-to-governance ownership transfer is required.
 9. Require `owner() == 0xCd60...a4b9` and `pendingOwner() == address(0)`.
@@ -270,20 +322,21 @@ Compiler package:
 
 Deployment order:
 
-1. Obtain Human approval of the minimal 18888 architecture, then implement, compile, test, audit and simulate its implementation/proxy package.
-2. Deploy and verify the new 18888 implementation and stable ERC1967/UUPS proxy.
-3. Deploy and verify `KAIOSOrganRegistry(0xCd60...a4b9, 3600)`; bootstrap formal 11520 while bootstrap is open.
-4. Deploy and verify `KAIOS.sol` against formal KGEN, the new 18888 proxy and the Registry. This deployed KAIOS address becomes the formal Heart proof source.
-5. Verify `alchemyBurnRecord(bytes32)` and all immutable lineage getters, then bind KAIOS once in the 18888 proxy.
-6. Deploy and verify `KAIOSAlchemyFurnace` (18911) against that KAIOS and Registry; wire formal KAIOS and 18911; leave undeployed organs unset; then seal bootstrap.
-7. Rebuild Heart artifacts from merge commit `c7e8c533...` and reproduce the hashes above.
-8. Deploy one new `KGEN_TempleHeart_Upgradeable` implementation.
-9. Verify the implementation bytecode and confirm direct `initialize()` rejects.
-10. Encode `initialize(0xCd60...a4b9, 0xCd60...a4b9, 0xCd60...a4b9, 0xCd60...a4b9, KGEN, formal11520, formalKaiosProofSource)` where `formalKaiosProofSource` is the deployed KAIOS token, not the Furnace.
-11. Deploy one new `ERC1967Proxy(implementation, initializeCalldata)`.
-12. Read the proxy EIP-1967 implementation slot and require the new implementation.
-13. From `DEFAULT_ADMIN_ROLE`, call `initializeV340(formalOrganRegistry)` once. Selector: `0xbc918f71`.
-14. Verify the complete state below before any frontend or funding action.
+1. Deploy and verify `KAIOSOrganRegistry(0xCd60...a4b9, 3600)` with bootstrap open.
+2. Deploy and verify `LingxiaoCelestialBank18888_Upgradeable` implementation.
+3. Deploy its stable ERC1967/UUPS proxy with the locked initializer calldata above.
+4. Deploy and verify `KAIOS.sol` against formal KGEN, the new 18888 Bank proxy and the Registry. This deployed KAIOS address becomes the formal Heart proof source.
+5. Verify `alchemyBurnRecord(bytes32)` and all immutable lineage getters, then bind KAIOS once in the 18888 Bank proxy.
+6. Deploy and verify `KAIOSAlchemyFurnace` (18911) against that KAIOS and Registry.
+7. Bootstrap formal 11520, 18888, KAIOS and 18911; leave undeployed 511111/KSHIP Converter/Pair Registry organs unset; then seal bootstrap.
+8. Rebuild Heart artifacts from merge commit `c7e8c533...` and reproduce the hashes above.
+9. Deploy one new `KGEN_TempleHeart_Upgradeable` implementation.
+10. Verify the implementation bytecode and confirm direct `initialize()` rejects.
+11. Encode `initialize(0xCd60...a4b9, 0xCd60...a4b9, 0xCd60...a4b9, 0xCd60...a4b9, KGEN, formal11520, formalKaiosProofSource)` where `formalKaiosProofSource` is the deployed KAIOS token, not the Furnace.
+12. Deploy one new `ERC1967Proxy(implementation, initializeCalldata)`.
+13. Read the proxy EIP-1967 implementation slot and require the new implementation.
+14. From `DEFAULT_ADMIN_ROLE`, call `initializeV340(formalOrganRegistry)` once. Selector: `0xbc918f71`.
+15. Verify the complete state below before any frontend or funding action.
 
 The four initial Heart roles are fixed by Human canon. Exact KAIOS, Registry, 18888, Heart implementation and proxy addresses/calldata remain unavailable until the preceding deployments exist. Simulation-only addresses must never enter a Mainnet command.
 
@@ -318,19 +371,24 @@ Local chainId 56 simulation used the exact compiled bytecode and distinct simula
 
 | Operation | Simulated gas |
 |---|---:|
-| Deploy Organ Registry | 623,580 |
-| Bootstrap 11520 | 55,173 |
+| Deploy Organ Registry | 653,603 |
+| Deploy 18888 implementation | 995,731 |
+| Deploy 18888 proxy + atomic initialize | 211,662 |
 | Deploy KAIOS proof-source token core | 1,394,116 |
+| Bind KAIOS once | 60,360 |
+| Bootstrap 11520 | 55,195 |
+| Bootstrap 18888 | 55,183 |
+| Bootstrap KAIOS | 55,183 |
 | Deploy KAIOSAlchemyFurnace (18911) | 506,642 |
-| Bootstrap 18911 | 55,173 |
-| Seal bootstrap | 24,801 |
+| Bootstrap 18911 | 55,195 |
+| Seal bootstrap | 24,817 |
 | Deploy V3.4 implementation | 5,167,455 |
 | Deploy ERC1967 Proxy + atomic `initialize()` | 983,137 |
 | `initializeV340()` | 80,064 |
-| Known subtotal excluding new 18888 implementation/proxy | 8,890,141 |
-| 25% operational buffer on known subtotal | 11,112,677 |
+| Known full sequence total | 10,298,343 |
+| 25% operational buffer | 12,872,929 |
 
-At 0.05 gwei, the buffered known subtotal is approximately 0.0005556339 BNB. This is not the final package estimate: the new 18888 implementation/proxy deployment and binding transaction cannot be measured until its approved source exists. Gas price, deployment-signer balance and all estimates must be refreshed immediately before signing. Contract verification and any extra initial organs remain excluded.
+At 0.05 gwei, the buffered known sequence is approximately 0.0006436465 BNB. Gas price, deployment-signer balance, nonce and every estimate must be refreshed immediately before signing. Contract verification and any extra initial organs remain excluded.
 
 ## 9. Emergency and rollback plan
 
@@ -357,9 +415,7 @@ All new interactions use the V3.4 proxy. Legacy information is historical and re
 
 ## 11. Remaining Human decisions before Mainnet signing
 
-- Approve or revise the receive-only UUPS architecture for the new formal 18888 settlement treasury and confirm its initial admin/upgrader. No Solidity has been created before this review.
-- Define and approve any future KAIOS reserve-release policy separately; V1 deliberately contains no asset release path.
-- Authorize implementation, audit and test work for the minimal 18888 contract package.
+- Define and approve any future KAIOS reserve-release or KGEN Bank 0.10% policy separately; V2 deliberately contains neither path.
 - Before signing, reconfirm that deployment signer candidate `0xb3C54...a261` is still Human-controlled and adequately funded.
 - Authorize the staged Mainnet deployment transactions only after final bytecode, nonce-derived addresses, calldata, gas and manifests are reviewed; the required approval phrase remains `MAINNET_DEPLOY_APPROVED`.
 - Provide a dedicated Holy Cup backend signer later; until it is verified, keep the frontend on-chain write path disabled and retain the temporary governance signer label.

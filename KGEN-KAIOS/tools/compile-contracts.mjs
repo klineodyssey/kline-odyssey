@@ -3,6 +3,7 @@ import path from "node:path";
 import process from "node:process";
 import { execFileSync } from "node:child_process";
 import solc from "solc";
+import { keccak256 } from "ethers";
 
 const root = path.resolve(import.meta.dirname, "..");
 const sourceRoots = [path.join(root, "contracts"), path.join(root, "tests", "contracts")];
@@ -103,14 +104,30 @@ for (const [sourceName, sourceContracts] of Object.entries(output.contracts ?? {
       contractName,
       sourceName,
       bytecodeBytes: artifact.evm.bytecode.object.length / 2,
+      bytecodeHash: keccak256(`0x${artifact.evm.bytecode.object}`),
       deployedBytecodeBytes: artifact.evm.deployedBytecode.object.length / 2,
+      deployedBytecodeHash: keccak256(`0x${artifact.evm.deployedBytecode.object}`),
     });
   }
 }
 
 const oversizedContracts = contracts.filter((contract) => contract.deployedBytecodeBytes > 24_576);
+const lingxiaoArtifact = Object.values(output.contracts ?? {})
+  .flatMap((sourceContracts) => Object.entries(sourceContracts))
+  .find(([contractName]) => contractName === "LingxiaoCelestialBank18888_Upgradeable")?.[1];
+const expectedLingxiaoStorage = [
+  { label: "kgen", slot: "0", offset: 0, type: "t_address" },
+  { label: "kaios", slot: "1", offset: 0, type: "t_address" },
+  { label: "kaiosBound", slot: "1", offset: 20, type: "t_bool" },
+  { label: "__gap", slot: "2", offset: 0, type: "t_array(t_uint256)48_storage" },
+];
+const actualLingxiaoStorage = (lingxiaoArtifact?.storageLayout?.storage ?? []).map(
+  ({ label, slot, offset, type }) => ({ label, slot, offset, type }),
+);
+const lingxiaoStorageMatches =
+  JSON.stringify(actualLingxiaoStorage) === JSON.stringify(expectedLingxiaoStorage);
 const evidence = {
-  status: oversizedContracts.length === 0 ? "PASS" : "FAIL",
+  status: oversizedContracts.length === 0 && lingxiaoStorageMatches ? "PASS" : "FAIL",
   compiler: solc.version(),
   requestedCompiler: "0.8.24",
   optimizer: { enabled: true, runs: 1 },
@@ -122,6 +139,12 @@ const evidence = {
   contractCount: contracts.length,
   eip170MaximumDeployedBytecodeBytes: 24_576,
   oversizedContracts,
+  lingxiaoCelestialBank18888StorageValidation: {
+    status: lingxiaoStorageMatches ? "PASS" : "FAIL",
+    strategy: "Initial V2 UUPS layout locked to two data slots plus a 48-slot reserve gap",
+    expected: expectedLingxiaoStorage,
+    actual: actualLingxiaoStorage,
+  },
   warnings: diagnostics.filter((diagnostic) => diagnostic.severity === "warning").length,
   contracts,
 };
@@ -130,4 +153,4 @@ fs.writeFileSync(
   `${JSON.stringify(evidence, null, 2)}\n`,
 );
 console.log(`Compiled ${contracts.length} contracts with ${solc.version()}`);
-if (evidence.oversizedContracts.length) process.exit(1);
+if (evidence.status !== "PASS") process.exit(1);

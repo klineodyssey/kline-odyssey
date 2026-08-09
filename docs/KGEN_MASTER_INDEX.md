@@ -25,7 +25,8 @@ This addendum does not regenerate the historical inventory below.
 | `KGEN-KAIOS/reports/KAIOS_TOKEN_LINEAGE_INTEGRATION_REVIEW_2026-08-09.md` | Audit | PR #127/#128 reconciliation and test evidence | Ready for Human review |
 | `KGEN-KAIOS/reports/BSC_TESTNET_TEMPLEHEART_V3_4_REHEARSAL.md` | Testnet Evidence | Human-readable TempleHeart V3.3.2 to V3.4.0 UUPS rehearsal | PASS on BSC Testnet chainId 97 |
 | `KGEN-KAIOS/reports/BSC_TESTNET_TEMPLEHEART_V3_4_REHEARSAL.json` | Testnet Evidence | Machine-readable addresses, receipts, storage and security results | PASS on BSC Testnet chainId 97 |
-| `KGEN/docs/TEMPLEHEART_MAINNET_LINEAGE.md` | Mainnet Plan | Separates immutable V3.2.6 Legacy Heart from the new V3.4 UUPS proxy life; audits 18888 candidates and defines the minimal KAIOS settlement architecture, Registry, governance, deployment, gas and emergency gates | 18888 architecture ready for Human review; Mainnet transaction not authorized |
+| `KGEN/docs/TEMPLEHEART_MAINNET_LINEAGE.md` | Mainnet Plan | Separates immutable V3.2.6 Legacy Heart from the new V3.4 UUPS proxy life; preserves the three-generation 18888 Bank lineage and defines the V2 KAIOS settlement runtime, Registry, governance, deployment, gas and emergency gates | 18888 implementation package complete; Mainnet transaction not authorized |
+| `KGEN-KAIOS/contracts/LingxiaoCelestialBank18888_Upgradeable.sol` | Contract | Current 18888 Lingxiao Celestial Bank identity with V2 receive-only KAIOS white-hole settlement runtime and UUPS proxy lineage | Implementation complete; Mainnet transaction not authorized |
 
 ## Summary
 | Category | Files |
