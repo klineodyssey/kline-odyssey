@@ -52,7 +52,7 @@ The following remain prohibited: unrestricted owner withdrawal, sweep, rescue-to
 
 ## Governance finalization
 
-Deployment uses a temporary bootstrap admin solely to bind KAIOS, register reviewed modules and set the Risk Controller. Every module executes `finalizeModuleGovernance()` and Bank Core executes `finalizeGovernance()`: Bank and module Admin/Governance roles transfer to the delayed governance contract and are revoked from bootstrap governance. The explicitly assigned `UPGRADER_ROLE` cannot pay KAIOS, configure modules or alter beneficiaries. A pause role can stop flows but cannot unpause or spend.
+Deployment uses temporary bootstrap governance solely to bind KAIOS, register reviewed modules and set the Risk Controller. Every module executes `finalizeModuleGovernance()` and Bank Core executes `finalizeGovernance()`: Bank/module Admin, Governance and Upgrader roles transfer to the delayed governance contract and are revoked from bootstrap accounts. After finalization an implementation change is itself a delayed, two-party governance proposal. `UPGRADER_ROLE` never grants payment, module-policy or beneficiary authority. A pause role can stop flows but cannot unpause or spend.
 
 Every module change emits `ModuleConfigured`; every implementation change emits the ERC1967 `Upgraded` event. Module address, version hash, limits, Bank implementation, Bank version and health are public views.
 

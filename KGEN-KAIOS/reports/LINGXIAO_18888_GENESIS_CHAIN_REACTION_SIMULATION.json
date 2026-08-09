@@ -23,113 +23,113 @@
   },
   "transactions": {
     "burn": {
-      "transactionHash": "0xc5c9eabc0884d83c3933a9b9aa7c321f867efcf6026807cfe03ef84c44306371",
+      "transactionHash": "0x09973f73e56680a115febfbd9676fe8a2f603ea1ffec6b83e8f3c565c28610d6",
       "blockNumber": 31,
       "gasUsed": "33567",
       "status": "PASS"
     },
     "settleWhiteHoleMass": {
-      "transactionHash": "0x7e0d79eb0c72c022fce1335f0521227ad82334d20d6c3cd85e4b3e00e51e7196",
+      "transactionHash": "0xd0f35e3dd318ec3dc0514d5506d677615a90b6a6123c13ec267db7968efdb3e1",
       "blockNumber": 32,
       "gasUsed": "143435",
       "status": "PASS"
     },
     "startGenesisEpoch": {
-      "transactionHash": "0x59906aa72a8a20509c611a02e61751141867c81d400eec5893bd3f64626e6980",
+      "transactionHash": "0xc8492219561770776e2a3596ae84f1beb1efdd272b9483924fa4a13c17b52ccc",
       "blockNumber": 33,
       "gasUsed": "112999",
       "status": "PASS"
     },
     "seatConfigured": {
-      "transactionHash": "0xee2dcdf1b33d597cc01b6537c62b4ce988050f857c0a2aac72b49eb1756aa35d",
+      "transactionHash": "0x67f62e7df6e22cd52c5287593e6ea1fdf0dc19f76ec132a5003b2a282394e7c9",
       "blockNumber": 34,
       "gasUsed": "169518",
       "status": "PASS"
     },
     "salary": {
-      "transactionHash": "0xdb7e156dfee9df184187df54a35129423cee0110fb946d44162857d3369e3bb6",
+      "transactionHash": "0x0f2eb1744d16438d54fdc776b198aaf94d98824f273c6573c9a7383bf107297c",
       "blockNumber": 36,
-      "gasUsed": "245318",
+      "gasUsed": "245340",
       "status": "PASS"
     },
     "allocationCreated": {
-      "transactionHash": "0xf2bb1d56635af83d840769169f93c11d7bfa4b74430f40af99ddf54e940a2a8e",
+      "transactionHash": "0xa7a4c56579c1c4c623711bfcd8bd12d0f85e382e2a834a56b27ac97e907c0f93",
       "blockNumber": 37,
-      "gasUsed": "124562",
+      "gasUsed": "124596",
       "status": "PASS"
     },
     "allocationExecuted": {
-      "transactionHash": "0x036d55bbe2afe135be2d69241d2787de6f2e4d7135ab3f124f4edb47e6d2d582",
+      "transactionHash": "0xce120c0c196ad1b87ead4c7e61490454df0250303a8f8c4722e4ddbde0351991",
       "blockNumber": 38,
-      "gasUsed": "188831",
+      "gasUsed": "188853",
       "status": "PASS"
     },
     "route8888": {
-      "transactionHash": "0xd1e62d48009860bb9e27972f5ba4ae6d74b58968eee7eafd4110e46928992f95",
+      "transactionHash": "0x2da01b2a14ff656e8727a2134c5fb56bbc7a27d0fdb8e3fa4966fbb511e3072b",
       "blockNumber": 39,
-      "gasUsed": "204679",
+      "gasUsed": "204723",
       "status": "PASS"
     },
     "settlement11520": {
-      "transactionHash": "0x68a4d1c4c6089e783c3e35c1e9ce0ae5fc7395babb08a3011b26989dd6b3e1b8",
+      "transactionHash": "0xf5e77fa4d180896828439d056bdfa8cd208bb9466f5b7b832b1401b205f650ef",
       "blockNumber": 40,
-      "gasUsed": "204757",
+      "gasUsed": "204801",
       "status": "PASS"
     },
     "risk": {
-      "transactionHash": "0x98875728422b28034e913cf409cb533bec144b026b24ce5677adf45986cd3619",
+      "transactionHash": "0x219d2f2b7c763ddddc946e3c014a0294b3b0cdb2bbc268e5cc73b3f5d0f7681f",
       "blockNumber": 41,
       "gasUsed": "110222",
       "status": "PASS"
     },
     "moduleGovernanceFinalized": {
       "CelestialSeat500_Upgradeable": {
-        "transactionHash": "0xb714db0218169b9024680190628a0290f6ed434d4997c1144a4d1f3f796a262d",
+        "transactionHash": "0x18c31b5071644153384efb7a5715000fc1eefb1f9abf4f5f67cac0621f307a95",
         "blockNumber": 42,
-        "gasUsed": "109757",
+        "gasUsed": "119938",
         "status": "PASS"
       },
       "CivilizationAllocation_Upgradeable": {
-        "transactionHash": "0xc55297626f1afe8e4247dc8c36d634833f4855a08bb9c2a057f1147099ca8faa",
+        "transactionHash": "0xe7c7c8236b3924eaf8db47b8a36c224e19901094d17686ee88c739160c5260cd",
         "blockNumber": 43,
-        "gasUsed": "109815",
+        "gasUsed": "119987",
         "status": "PASS"
       },
       "EconomicRouter8888_Upgradeable": {
-        "transactionHash": "0x2479aa947eb1841f1cf2ada85ef70f939eb83b59d6647ee4d7bea24300b26bfd",
+        "transactionHash": "0xa15bbfed604e3732f9a0af7ea5006f635744aab3499f5b4bc2e132a1227d5629",
         "blockNumber": 44,
-        "gasUsed": "109837",
+        "gasUsed": "120009",
         "status": "PASS"
       },
       "ExchangeSettlement11520_Upgradeable": {
-        "transactionHash": "0x0d681cc382fd5e9d41e5e756e890b94ed15b2a5a082f7b7a07d8a8a668e6726c",
+        "transactionHash": "0x8329f6899526e7661aed2a1da7c830aa1a2894435a9737e710886a91a9930d44",
         "blockNumber": 45,
-        "gasUsed": "109815",
+        "gasUsed": "119987",
         "status": "PASS"
       },
       "BankRiskController_Upgradeable": {
-        "transactionHash": "0x1eab2f0a8b88d1a107474531c5f306b4d946a0bf05cb2816cdd23ee64f5eba91",
+        "transactionHash": "0xc4ef2bccc643241d4004ef02fc0523e70e17881001d058dc642e839b133396b9",
         "blockNumber": 46,
-        "gasUsed": "109815",
+        "gasUsed": "119987",
         "status": "PASS"
       },
       "BankGovernance_Upgradeable": {
-        "transactionHash": "0x97c55c39c0b1816cc1e60f66fe2fa9d786c87a910bcb16ad9edf5f1d4ca8a5dd",
+        "transactionHash": "0x9fd86bb77c87dcd1b5439b13050a581f79dede29fd2b5e375b84cb6ae34018c3",
         "blockNumber": 47,
-        "gasUsed": "107254",
+        "gasUsed": "117432",
         "status": "PASS"
       },
       "BankMigration_Upgradeable": {
-        "transactionHash": "0x3e1275aa1f89c666b7711c93467d800d60ffc8a029f2cbc0a59b575d77110d17",
+        "transactionHash": "0x209319b69ab710a432176a07317b97246fafa26db89df538f55cefefed3a84a8",
         "blockNumber": 48,
-        "gasUsed": "109815",
+        "gasUsed": "119987",
         "status": "PASS"
       }
     },
     "bankGovernanceFinalized": {
-      "transactionHash": "0x235e0aebc36f21078df4c69f4e778d5f3a3d219cf51a854fd82c0fcb20b0adff",
+      "transactionHash": "0xd9edf413dff6835d4a7b56542ad2e66dcbb7fd510b2464c14c1a2fdbbc69b6bd",
       "blockNumber": 49,
-      "gasUsed": "132887",
+      "gasUsed": "143087",
       "status": "PASS"
     }
   },
@@ -257,6 +257,12 @@
         "type": "t_bool"
       },
       {
+        "label": "bootstrapUpgrader",
+        "slot": "13",
+        "offset": 2,
+        "type": "t_address"
+      },
+      {
         "label": "__gap",
         "slot": "14",
         "offset": 0,
@@ -371,6 +377,12 @@
         "slot": "13",
         "offset": 1,
         "type": "t_bool"
+      },
+      {
+        "label": "bootstrapUpgrader",
+        "slot": "13",
+        "offset": 2,
+        "type": "t_address"
       },
       {
         "label": "__gap",

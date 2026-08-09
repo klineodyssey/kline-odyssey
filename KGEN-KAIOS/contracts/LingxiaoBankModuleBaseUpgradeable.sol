@@ -19,6 +19,7 @@ abstract contract LingxiaoBankModuleBaseUpgradeable is
     ILingxiaoCelestialBank18888 public bank;
     bytes32 public moduleId;
     bool public governanceFinalized;
+    address public bootstrapUpgrader;
 
     error ZeroAddress();
     error NotAContract(address account);
@@ -57,6 +58,7 @@ abstract contract LingxiaoBankModuleBaseUpgradeable is
         __UUPSUpgradeable_init();
         bank = ILingxiaoCelestialBank18888(bankAddress);
         moduleId = canonicalModuleId;
+        bootstrapUpgrader = upgrader;
         _grantRole(DEFAULT_ADMIN_ROLE, governance);
         _grantRole(GOVERNANCE_ROLE, governance);
         _grantRole(UPGRADER_ROLE, upgrader);
@@ -77,8 +79,10 @@ abstract contract LingxiaoBankModuleBaseUpgradeable is
         governanceFinalized = true;
         _grantRole(DEFAULT_ADMIN_ROLE, governanceContract);
         _grantRole(GOVERNANCE_ROLE, governanceContract);
+        _grantRole(UPGRADER_ROLE, governanceContract);
         _revokeRole(GOVERNANCE_ROLE, msg.sender);
         _revokeRole(DEFAULT_ADMIN_ROLE, msg.sender);
+        _revokeRole(UPGRADER_ROLE, bootstrapUpgrader);
         emit ModuleGovernanceFinalized(moduleId, governanceContract, msg.sender);
     }
 

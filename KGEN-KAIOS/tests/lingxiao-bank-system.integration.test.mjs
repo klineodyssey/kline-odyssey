@@ -216,10 +216,38 @@ test("governance is delayed and two-party, migration is evidence-only, and UUPS 
     context.bank.connect(outsider).upgradeToAndCall(await replacement.getAddress(), "0x"),
   );
   await assert.rejects(
-    context.bank.connect(context.upgrader).upgradeToAndCall(await nonUups.getAddress(), "0x"),
+    context.bank.connect(context.upgrader).upgradeToAndCall(await replacement.getAddress(), "0x"),
   );
+  const maliciousUpgradeData = context.bank.interface.encodeFunctionData("upgradeToAndCall", [
+    await nonUups.getAddress(),
+    "0x",
+  ]);
+  const maliciousUpgradeId = id("DELAYED-MALICIOUS-NON-UUPS-UPGRADE");
   await (
-    await context.bank.connect(context.upgrader).upgradeToAndCall(await replacement.getAddress(), "0x")
+    await governanceModule.propose(maliciousUpgradeId, await context.bank.getAddress(), 0, maliciousUpgradeData)
+  ).wait();
+  await (await governanceModule.connect(approver).approve(maliciousUpgradeId)).wait();
+  await advanceTime(context.provider, 3601);
+  await assert.rejects(async () => (
+    await governanceModule.connect(outsider).execute(
+      maliciousUpgradeId,
+      maliciousUpgradeData,
+      { gasLimit: 1_000_000 },
+    )
+  ).wait());
+
+  const validUpgradeData = context.bank.interface.encodeFunctionData("upgradeToAndCall", [
+    await replacement.getAddress(),
+    "0x",
+  ]);
+  const validUpgradeId = id("DELAYED-VALID-BANK-UPGRADE");
+  await (
+    await governanceModule.propose(validUpgradeId, await context.bank.getAddress(), 0, validUpgradeData)
+  ).wait();
+  await (await governanceModule.connect(approver).approve(validUpgradeId)).wait();
+  await advanceTime(context.provider, 3601);
+  await (
+    await governanceModule.connect(outsider).execute(validUpgradeId, validUpgradeData, { gasLimit: 1_000_000 })
   ).wait();
   assert.equal(await context.bank.kgen(), kgenBefore);
   assert.equal(await context.bank.paused(), true);
@@ -228,8 +256,21 @@ test("governance is delayed and two-party, migration is evidence-only, and UUPS 
   await assert.rejects(
     seat.contract.connect(outsider).upgradeToAndCall(await seatReplacement.getAddress(), "0x"),
   );
+  await assert.rejects(
+    seat.contract.connect(context.moduleUpgrader).upgradeToAndCall(await seatReplacement.getAddress(), "0x"),
+  );
+  const seatUpgradeData = seat.contract.interface.encodeFunctionData("upgradeToAndCall", [
+    await seatReplacement.getAddress(),
+    "0x",
+  ]);
+  const seatUpgradeId = id("DELAYED-VALID-SEAT-UPGRADE");
   await (
-    await seat.contract.connect(context.moduleUpgrader).upgradeToAndCall(await seatReplacement.getAddress(), "0x")
+    await governanceModule.propose(seatUpgradeId, await seat.contract.getAddress(), 0, seatUpgradeData)
+  ).wait();
+  await (await governanceModule.connect(approver).approve(seatUpgradeId)).wait();
+  await advanceTime(context.provider, 3601);
+  await (
+    await governanceModule.connect(outsider).execute(seatUpgradeId, seatUpgradeData, { gasLimit: 1_000_000 })
   ).wait();
   assert.equal(await seat.contract.MAX_SEATS(), 500n);
   assert.equal((await seat.contract.seat(1)).beneficiary, preservedBeneficiary);

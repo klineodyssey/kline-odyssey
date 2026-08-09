@@ -127,6 +127,12 @@
         "type": "t_bool"
       },
       {
+        "label": "bootstrapUpgrader",
+        "slot": "13",
+        "offset": 2,
+        "type": "t_address"
+      },
+      {
         "label": "__gap",
         "slot": "14",
         "offset": 0,
@@ -241,6 +247,12 @@
         "slot": "13",
         "offset": 1,
         "type": "t_bool"
+      },
+      {
+        "label": "bootstrapUpgrader",
+        "slot": "13",
+        "offset": 2,
+        "type": "t_address"
       },
       {
         "label": "__gap",
@@ -391,58 +403,58 @@
     {
       "contractName": "BankGovernance_Upgradeable",
       "sourceName": "contracts/BankGovernance_Upgradeable.sol",
-      "bytecodeBytes": 7218,
-      "bytecodeHash": "0x4cc1322c9fe8fd233dc2aacb8ce6d0d983966dc785098f16a3469a778f0721d7",
-      "deployedBytecodeBytes": 7008,
-      "deployedBytecodeHash": "0x5d04c9d0b42028d1c2f0cbb810fa31ef31794a05f18fa0dcfb42bbc19bcf72cc"
+      "bytecodeBytes": 7465,
+      "bytecodeHash": "0x9ba451cfe621128f3b6937f8830a9cf8d8361909c23a0515360dae6f378e9bef",
+      "deployedBytecodeBytes": 7255,
+      "deployedBytecodeHash": "0x7721a69e34acf8ee148b8d75091cf71f61c409bc832d3132f540a22ed4b5c391"
     },
     {
       "contractName": "BankMigration_Upgradeable",
       "sourceName": "contracts/BankMigration_Upgradeable.sol",
-      "bytecodeBytes": 5807,
-      "bytecodeHash": "0xfd0f8b2fa152f0fdef881380e14f4d3324bcc4f6d21f96fde0b12e881f4a4cd7",
-      "deployedBytecodeBytes": 5597,
-      "deployedBytecodeHash": "0x2744938f85fd05dfa14b20f9ac6a414356a5bd3bc14eb5a62b855e2b5ceba068"
+      "bytecodeBytes": 6074,
+      "bytecodeHash": "0xec6bc23243b64a1d84d94f6cc47955d77cc3e03ae53276c04ebc0044b55451eb",
+      "deployedBytecodeBytes": 5864,
+      "deployedBytecodeHash": "0x96fe6d7635bea507eea9a2bb126909fedfa8d831d9244dbf2df439217c5dd368"
     },
     {
       "contractName": "BankRiskController_Upgradeable",
       "sourceName": "contracts/BankRiskController_Upgradeable.sol",
-      "bytecodeBytes": 5827,
-      "bytecodeHash": "0x1a311211182262b903cac42e83c95ffecd1a36f8ea0906871284a452f39d62d1",
-      "deployedBytecodeBytes": 5617,
-      "deployedBytecodeHash": "0x4d791f5bb57d0edb1bb1cad255be6b1c698738266344ec648209efbae8a3d6ec"
+      "bytecodeBytes": 6088,
+      "bytecodeHash": "0x39e4cacd17fe3279a13d04b1dd82779179fcae9d36ed304d9c7029cfea8e81c5",
+      "deployedBytecodeBytes": 5878,
+      "deployedBytecodeHash": "0x038eab42a1d601e0553609f4ead0e955f7edb964ab38baca1b1fc1bd94e4a958"
     },
     {
       "contractName": "CelestialSeat500_Upgradeable",
       "sourceName": "contracts/CelestialSeat500_Upgradeable.sol",
-      "bytecodeBytes": 6761,
-      "bytecodeHash": "0x9b5e4faa1daff7b98bf5906367dab09c03a25cab25d4f8683a4f2ca54b2f1b7a",
-      "deployedBytecodeBytes": 6551,
-      "deployedBytecodeHash": "0x4863117bad447a07afafd7e87900f9a5b6338aee589bf87c056bbb043e5a9be6"
+      "bytecodeBytes": 6999,
+      "bytecodeHash": "0x71bc3ce91225c46855c1a3511381eb4d5a7ebfcf5c9ba989bb28c79957ea2ade",
+      "deployedBytecodeBytes": 6789,
+      "deployedBytecodeHash": "0xf47010497e86fd36c567e99b537c7d6cb75da9262cd8edefad588a13a2275e5c"
     },
     {
       "contractName": "CivilizationAllocation_Upgradeable",
       "sourceName": "contracts/CivilizationAllocation_Upgradeable.sol",
-      "bytecodeBytes": 6062,
-      "bytecodeHash": "0x0def293fc3c86a0694695f7719747fb8c3de3f927788a71aa5924125379416d0",
-      "deployedBytecodeBytes": 5852,
-      "deployedBytecodeHash": "0x14192d0d36fc7e5731224e2440ef93b668b2837fe56d8bb3b8ac106f34ceeda3"
+      "bytecodeBytes": 6323,
+      "bytecodeHash": "0xe2b0b571024f8976282a12b28fa31a9be0a13e5ad1dd31c5efc0906ad09cf078",
+      "deployedBytecodeBytes": 6113,
+      "deployedBytecodeHash": "0x34d62bc57d6cb588d7471128d469202a0cd5278a8b7ace44785c148a61c4236e"
     },
     {
       "contractName": "EconomicRouter8888_Upgradeable",
       "sourceName": "contracts/EconomicRouter8888_Upgradeable.sol",
-      "bytecodeBytes": 5423,
-      "bytecodeHash": "0xd5a218d6b11d73a211c2390ffca3d36ee997037301f217262d21bb22fef38eeb",
-      "deployedBytecodeBytes": 5213,
-      "deployedBytecodeHash": "0x6cfa1cc062d3bbc1f60ab782cbf6a662c2969493866872850121a6f70e59d845"
+      "bytecodeBytes": 5684,
+      "bytecodeHash": "0xf781eced5b1af2d10829c9dc5feaed821731a593b3d5d7010293164180d2d965",
+      "deployedBytecodeBytes": 5474,
+      "deployedBytecodeHash": "0x51d28d692c74bb656e8ecd05433d99606766891a4e3f9392e096a01a988dc97b"
     },
     {
       "contractName": "ExchangeSettlement11520_Upgradeable",
       "sourceName": "contracts/ExchangeSettlement11520_Upgradeable.sol",
-      "bytecodeBytes": 5423,
-      "bytecodeHash": "0x1c72f305614469df1970b3409358c49c023b162a5973e285272a96dda2a1f8d4",
-      "deployedBytecodeBytes": 5213,
-      "deployedBytecodeHash": "0x4814264ef73f85d2504299c8bb1800423a6067716be822a539b4725aa79f31eb"
+      "bytecodeBytes": 5684,
+      "bytecodeHash": "0xe64258f11dd7ff85e272d8dbb5ac961a55cf9a560fbf73ab5aaa96df95256e9f",
+      "deployedBytecodeBytes": 5474,
+      "deployedBytecodeHash": "0x505cefc01f6df515406bdf28dec432056fd4e5f7f37c808248d0fe63530378d0"
     },
     {
       "contractName": "KAIOS",
@@ -527,10 +539,10 @@
     {
       "contractName": "LingxiaoCelestialBank18888_Upgradeable",
       "sourceName": "contracts/LingxiaoCelestialBank18888_Upgradeable.sol",
-      "bytecodeBytes": 12219,
-      "bytecodeHash": "0x17e83e1797b2d44ded486dc79d6b080f4b8502ef93636958380e0900250c9094",
-      "deployedBytecodeBytes": 12008,
-      "deployedBytecodeHash": "0xd2ed161b850c2107f53b8bc59bf9988bed4fe90ac14e9d7c7fd135b09be18877"
+      "bytecodeBytes": 12504,
+      "bytecodeHash": "0xff5594efa2cd283aed2cab9f27634c06a4da3d2737c645addfdc54f53757d43b",
+      "deployedBytecodeBytes": 12293,
+      "deployedBytecodeHash": "0xcfe00d93cf874129e6d01003f2fb265128d469dd350e5a5cab79beafb518f00c"
     },
     {
       "contractName": "KGEN_TempleHeart_V3_3_2_Baseline",

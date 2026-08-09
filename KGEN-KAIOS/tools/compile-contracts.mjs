@@ -155,6 +155,7 @@ const expectedLingxiaoStorage = [
   { label: "genesisOpeningBalance", slot: "12", offset: 0, type: "t_uint256" },
   { label: "paused", slot: "13", offset: 0, type: "t_bool" },
   { label: "governanceFinalized", slot: "13", offset: 1, type: "t_bool" },
+  { label: "bootstrapUpgrader", slot: "13", offset: 2, type: "t_address" },
   { label: "__gap", slot: "14", offset: 0, type: "t_array(t_uint256)36_storage" },
 ];
 const actualLingxiaoStorage = (lingxiaoArtifact?.storageLayout?.storage ?? []).map(

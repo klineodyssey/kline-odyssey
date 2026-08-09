@@ -85,6 +85,7 @@ contract LingxiaoCelestialBank18888_Upgradeable is
     uint256 public genesisOpeningBalance;
     bool public paused;
     bool public governanceFinalized;
+    address public bootstrapUpgrader;
 
     uint256[36] private __gap;
 
@@ -177,6 +178,7 @@ contract LingxiaoCelestialBank18888_Upgradeable is
         __UUPSUpgradeable_init();
 
         kgen = canonicalKgen;
+        bootstrapUpgrader = upgrader;
         _grantRole(DEFAULT_ADMIN_ROLE, admin);
         _grantRole(UPGRADER_ROLE, upgrader);
         _grantRole(MODULE_ADMIN_ROLE, admin);
@@ -386,8 +388,10 @@ contract LingxiaoCelestialBank18888_Upgradeable is
         _grantRole(DEFAULT_ADMIN_ROLE, governanceContract);
         _grantRole(MODULE_ADMIN_ROLE, governanceContract);
         _grantRole(PAUSER_ROLE, governanceContract);
+        _grantRole(UPGRADER_ROLE, governanceContract);
         _revokeRole(MODULE_ADMIN_ROLE, msg.sender);
         _revokeRole(DEFAULT_ADMIN_ROLE, msg.sender);
+        _revokeRole(UPGRADER_ROLE, bootstrapUpgrader);
         emit GovernanceFinalized(governanceContract, msg.sender);
     }
 

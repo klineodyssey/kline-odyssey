@@ -11,7 +11,7 @@ KAIOS Token Core and Bank Runtime are separate. Token monetary physics cannot be
 | Gate | Enforcement |
 |---|---|
 | Arbitrary owner withdrawal | No Bank/Core/module ABI selector; all KAIOS transfers occur in fixed module payments or the legacy two-party beneficiary claim rail |
-| Upgrade privilege becomes payment privilege | `UPGRADER_ROLE` is checked only by `_authorizeUpgrade` |
+| Upgrade privilege becomes payment privilege | `UPGRADER_ROLE` is checked only by `_authorizeUpgrade`; finalization transfers it to delayed governance and revokes bootstrap upgraders |
 | Hidden module/policy replacement | Public config/view/event plus mandatory Bank `finalizeGovernance()` and seven-module `finalizeModuleGovernance()` handoff to delayed governance |
 | Beneficiary redirect | Each module stores or binds the beneficiary before the permissionless execution call |
 | Replay | Bank-wide payment IDs plus module-local execution state |
@@ -23,7 +23,7 @@ KAIOS Token Core and Bank Runtime are separate. Token monetary physics cannot be
 
 ## Residual governance risk
 
-UUPS governance can authorize future code with new powers. V2 runtime is not claimed to be eternally immutable. Mitigation is public implementation/version state, `Upgraded` events, delayed proposal/approval, storage validation, fork rehearsal and Human release approval. Production must not stop before Bank Core and every module report `governanceFinalized() == true`.
+UUPS governance can authorize future code with new powers. V2 runtime is not claimed to be eternally immutable. Mitigation is public implementation/version state, `Upgraded` events, delayed proposal/approval (including upgrades), storage validation, fork rehearsal and Human release approval. Production must not stop before Bank Core and every module report `governanceFinalized() == true` and bootstrap upgraders have lost `UPGRADER_ROLE`.
 
 Module caps and reserve values are policy inputs. The package intentionally does not invent Mainnet values. They require an explicit governance decision before deployment calldata can be signed.
 

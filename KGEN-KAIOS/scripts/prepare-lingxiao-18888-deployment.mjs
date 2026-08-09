@@ -16,7 +16,7 @@ const registry = getAddress(required("FORMAL_KAIOS_ORGAN_REGISTRY"));
 const economic8888 = getAddress(required("FORMAL_ECONOMIC_BANK_8888"));
 const exchange11520 = getAddress(required("FORMAL_UNIVERSAL_EXCHANGE_11520"));
 const admin = getAddress(process.env.FORMAL_BANK_ADMIN ?? "0xCd60BF474e691F2484950a0276Eaf507616Ca4b9");
-const upgrader = getAddress(process.env.FORMAL_BANK_UPGRADER ?? admin);
+const bootstrapUpgrader = getAddress(process.env.BOOTSTRAP_BANK_UPGRADER ?? admin);
 const kgen = "0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be";
 const addressAt = (offset) => getCreateAddress({ from: deployer, nonce: startNonce + BigInt(offset) });
 const proxyArtifact = readArtifact("ERC1967Proxy");
@@ -37,14 +37,14 @@ async function appendUpgradeable(name, initializeArgs) {
   return { implementation, proxy };
 }
 
-const bank = await appendUpgradeable("LingxiaoCelestialBank18888_Upgradeable", [admin, upgrader, kgen]);
-const seat = await appendUpgradeable("CelestialSeat500_Upgradeable", [bank.proxy, admin, upgrader, 2_592_000]);
-const allocation = await appendUpgradeable("CivilizationAllocation_Upgradeable", [bank.proxy, admin, upgrader]);
-const router8888 = await appendUpgradeable("EconomicRouter8888_Upgradeable", [bank.proxy, admin, upgrader, economic8888]);
-const settlement11520 = await appendUpgradeable("ExchangeSettlement11520_Upgradeable", [bank.proxy, admin, upgrader, exchange11520]);
-const risk = await appendUpgradeable("BankRiskController_Upgradeable", [bank.proxy, admin, upgrader]);
-const governance = await appendUpgradeable("BankGovernance_Upgradeable", [bank.proxy, admin, upgrader, 3600]);
-const migration = await appendUpgradeable("BankMigration_Upgradeable", [bank.proxy, admin, upgrader]);
+const bank = await appendUpgradeable("LingxiaoCelestialBank18888_Upgradeable", [admin, bootstrapUpgrader, kgen]);
+const seat = await appendUpgradeable("CelestialSeat500_Upgradeable", [bank.proxy, admin, bootstrapUpgrader, 2_592_000]);
+const allocation = await appendUpgradeable("CivilizationAllocation_Upgradeable", [bank.proxy, admin, bootstrapUpgrader]);
+const router8888 = await appendUpgradeable("EconomicRouter8888_Upgradeable", [bank.proxy, admin, bootstrapUpgrader, economic8888]);
+const settlement11520 = await appendUpgradeable("ExchangeSettlement11520_Upgradeable", [bank.proxy, admin, bootstrapUpgrader, exchange11520]);
+const risk = await appendUpgradeable("BankRiskController_Upgradeable", [bank.proxy, admin, bootstrapUpgrader]);
+const governance = await appendUpgradeable("BankGovernance_Upgradeable", [bank.proxy, admin, bootstrapUpgrader, 3600]);
+const migration = await appendUpgradeable("BankMigration_Upgradeable", [bank.proxy, admin, bootstrapUpgrader]);
 const kaiosAddress = addressAt(actions.length);
 actions.push({ kind: "DEPLOY_KAIOS_TOKEN_CORE", contract: "KAIOS", expectedAddress: kaiosAddress, data: await deploymentData("KAIOS", [kgen, bank.proxy, registry]) });
 
@@ -54,7 +54,7 @@ const plan = {
   chainId: 56,
   deployer,
   startNonce: startNonce.toString(),
-  canon: { kgen, registry, economic8888, exchange11520, admin, upgrader },
+  canon: { kgen, registry, economic8888, exchange11520, admin, bootstrapUpgrader, finalUpgrader: governance.proxy },
   predicted: { bank, seat, allocation, router8888, settlement11520, risk, governance, migration, kaios: kaiosAddress },
   actions,
   postDeployCalls: {
