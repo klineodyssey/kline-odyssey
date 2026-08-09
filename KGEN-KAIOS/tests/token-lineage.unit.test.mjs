@@ -54,6 +54,7 @@ test("18911 burn is holder-allowance-bound and 511111 cannot redirect beneficiar
       await beneficiary.getAddress(),
       lifeId,
       destination,
+      { gasLimit: 1_000_000 },
     )
   ).wait();
   const created = eventArgs(receipt, context.furnace, "AlchemyProofCreated");

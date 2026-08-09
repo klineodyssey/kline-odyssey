@@ -11,6 +11,7 @@ export const ORGAN_FURNACE_18911 = id("KAIOS.ORGAN.FURNACE.18911");
 export const ORGAN_WORMHOLE_511111 = id("KAIOS.ORGAN.WORMHOLE.511111");
 export const ORGAN_KSHIP_CONVERTER = id("KAIOS.ORGAN.KSHIP.CONVERTER");
 export const ORGAN_PAIR_REGISTRY = id("KAIOS.ORGAN.PAIR.REGISTRY");
+export const ORGAN_EXCHANGE_TREASURY_11520 = id("KAIOS.ORGAN.EXCHANGE_TREASURY.11520");
 
 export function artifact(name) {
   return JSON.parse(fs.readFileSync(path.join(root, "artifacts", `${name}.json`), "utf8"));
@@ -24,16 +25,16 @@ export async function deploy(name, signer, args = []) {
   return contract;
 }
 
-export async function setupLineage({ delay = 3600, epochSeconds = 100 } = {}) {
+export async function setupLineage({ delay = 3600, epochSeconds = 100, totalAccounts = 10 } = {}) {
   const eip1193 = ganache.provider({
     chain: { chainId: 31337, hardfork: "shanghai" },
     logging: { quiet: true },
-    wallet: { deterministic: true, totalAccounts: 10 },
+    wallet: { deterministic: true, totalAccounts },
   });
   activeProviders.add(eip1193);
   const provider = new BrowserProvider(eip1193);
   provider.pollingInterval = 25;
-  const signers = await Promise.all(Array.from({ length: 8 }, (_, index) => provider.getSigner(index)));
+  const signers = await Promise.all(Array.from({ length: totalAccounts }, (_, index) => provider.getSigner(index)));
   const [owner, treasury] = signers;
 
   const registry = await deploy("KAIOSOrganRegistry", owner, [await owner.getAddress(), delay]);
@@ -59,12 +60,14 @@ export async function setupLineage({ delay = 3600, epochSeconds = 100 } = {}) {
     await kship.getAddress(),
   ]);
   const pairRegistry = await deploy("KAIOSPairRegistry", owner, [await owner.getAddress()]);
+  const exchangeTreasury11520 = await deploy("MockOrgan", owner);
 
   for (const [organId, contract] of [
     [ORGAN_FURNACE_18911, furnace],
     [ORGAN_WORMHOLE_511111, wormhole],
     [ORGAN_KSHIP_CONVERTER, converter],
     [ORGAN_PAIR_REGISTRY, pairRegistry],
+    [ORGAN_EXCHANGE_TREASURY_11520, exchangeTreasury11520],
   ]) {
     await (await registry.bootstrapOrgan(organId, await contract.getAddress())).wait();
   }
@@ -85,6 +88,7 @@ export async function setupLineage({ delay = 3600, epochSeconds = 100 } = {}) {
     wormhole,
     converter,
     pairRegistry,
+    exchangeTreasury11520,
     epochSeconds,
   };
 }
