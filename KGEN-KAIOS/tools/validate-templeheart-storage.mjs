@@ -16,6 +16,13 @@ import {
   parseUnits,
 } from "ethers";
 import solc from "solc";
+import {
+  ORGAN_EXCHANGE_TREASURY_11520,
+  ORGAN_FURNACE_18911,
+  bootstrapTestnetFixtures,
+  createEvidenceWriter,
+  renderMarkdown,
+} from "./templeheart-testnet-support.mjs";
 
 const root = path.resolve(import.meta.dirname, "..");
 const artifactPath = path.join(root, "artifacts", "KGEN_TempleHeart_Upgradeable.json");
@@ -110,10 +117,11 @@ if (failures.length) process.exit(1);
 const TESTNET_CHAIN_ID = 97n;
 const TESTNET_EXECUTION_ACK = "BSC_TESTNET_REHEARSAL_ONLY";
 const NEW_PROXY_SENTINEL = "NEW";
+const evidenceJsonPath = path.join(root, "reports", "BSC_TESTNET_TEMPLEHEART_V3_4_REHEARSAL.json");
+const evidenceMdPath = path.join(root, "reports", "BSC_TESTNET_TEMPLEHEART_V3_4_REHEARSAL.md");
+let evidenceSession = createEvidenceWriter(evidenceJsonPath, evidenceMdPath);
 const IMPLEMENTATION_SLOT =
   "0x360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc";
-const ORGAN_EXCHANGE_TREASURY_11520 = id("KAIOS.ORGAN.EXCHANGE_TREASURY.11520");
-const ORGAN_FURNACE_18911 = id("KAIOS.ORGAN.FURNACE.18911");
 const REQUIRED_SIGNER_ROLES = [
   ["DEFAULT_ADMIN_ROLE", `0x${"00".repeat(32)}`],
   ["UPGRADER_ROLE", id("UPGRADER_ROLE")],
@@ -154,6 +162,20 @@ function configuredAddress(name) {
   }
 }
 
+function configuredAddressOrNew(name) {
+  const value = env(name);
+  if (value.toUpperCase() === NEW_PROXY_SENTINEL) return { mode: "new", address: null };
+  return { mode: "existing", address: configuredAddress(name) };
+}
+
+function writeEvidenceFiles(status, extra = {}) {
+  const evidence = evidenceSession.finalize(status, extra);
+  fs.mkdirSync(path.dirname(evidenceJsonPath), { recursive: true });
+  fs.writeFileSync(evidenceJsonPath, `${JSON.stringify(evidence, null, 2)}\n`);
+  fs.writeFileSync(evidenceMdPath, renderMarkdown(evidence));
+  console.log(`Evidence written: ${evidenceJsonPath}`);
+}
+
 function artifact(name) {
   const candidate = path.join(root, "artifacts", `${name}.json`);
   if (!fs.existsSync(candidate)) {
@@ -174,6 +196,7 @@ async function waitFor(label, transactionPromise, confirmations) {
   const receipt = await transaction.wait(confirmations);
   if (receipt.status !== 1) throw new Error(`${label} reverted: ${transaction.hash}`);
   console.log(`${label}: confirmed in block ${receipt.blockNumber}`);
+  evidenceSession.recordTransaction(label, receipt);
   return receipt;
 }
 
@@ -239,15 +262,27 @@ async function assertTestnetConfiguration({ requireExecution }) {
   }
 
   const signerAddress = configuredAddress("BSC_TESTNET_SIGNER_ADDRESS");
+  evidenceSession.evidence.signerAddress = signerAddress;
   const signerRole = env("BSC_TESTNET_SIGNER_ROLE");
   const proxyInput = env("BSC_TESTNET_PROXY_ADDRESS");
   const mode = proxyInput.toUpperCase() === NEW_PROXY_SENTINEL ? "fresh" : "existing";
   const proxyAddress = mode === "existing" ? getAddress(proxyInput) : null;
-  const kgenAddress = configuredAddress("BSC_TESTNET_KGEN_ADDRESS");
-  const treasury11520Address = configuredAddress("BSC_TESTNET_TREASURY_11520_ADDRESS");
-  const proofSourceAddress = configuredAddress("BSC_TESTNET_ALCHEMY_PROOF_SOURCE_ADDRESS");
-  const registryAddress = configuredAddress("BSC_TESTNET_ORGAN_REGISTRY_ADDRESS");
-  const fortuneGameAddress = configuredAddress("BSC_TESTNET_FORTUNE_GAME_ADDRESS");
+  const kgenTarget = configuredAddressOrNew("BSC_TESTNET_KGEN_ADDRESS");
+  const treasuryTarget = configuredAddressOrNew("BSC_TESTNET_TREASURY_11520_ADDRESS");
+  const proofTarget = configuredAddressOrNew("BSC_TESTNET_ALCHEMY_PROOF_SOURCE_ADDRESS");
+  const registryTarget = configuredAddressOrNew("BSC_TESTNET_ORGAN_REGISTRY_ADDRESS");
+  const fortuneTarget = configuredAddressOrNew("BSC_TESTNET_FORTUNE_GAME_ADDRESS");
+  const kgenAddress = kgenTarget.address;
+  const treasury11520Address = treasuryTarget.address;
+  const proofSourceAddress = proofTarget.address;
+  const registryAddress = registryTarget.address;
+  const fortuneGameAddress = fortuneTarget.address;
+  const bootstrapFixtures =
+    kgenTarget.mode === "new" ||
+    treasuryTarget.mode === "new" ||
+    proofTarget.mode === "new" ||
+    registryTarget.mode === "new" ||
+    fortuneTarget.mode === "new";
   const unauthorizedAddress = configuredAddress("BSC_TESTNET_UNAUTHORIZED_ADDRESS");
   if (unauthorizedAddress === signerAddress) {
     throw new Error("BSC_TESTNET_UNAUTHORIZED_ADDRESS must differ from the authorized signer");
@@ -258,32 +293,39 @@ async function assertTestnetConfiguration({ requireExecution }) {
     [treasury11520Address, "11520 treasury"],
     [proofSourceAddress, "KAIOS Alchemy proof source"],
     [registryAddress, "Organ Registry"],
+    [fortuneGameAddress, "Fortune Game stub"],
   ]) {
-    await requireContract(provider, address, label);
+    if (address) await requireContract(provider, address, label);
   }
   if (proxyAddress) await requireContract(provider, proxyAddress, "TempleHeart proxy");
 
-  const registry = new Contract(registryAddress, REGISTRY_ABI, provider);
-  const wiredTreasury = getAddress(await registry.organ(ORGAN_EXCHANGE_TREASURY_11520));
-  if (wiredTreasury !== treasury11520Address) {
-    throw new Error(
-      `Organ Registry 11520 mismatch: registry=${wiredTreasury}, confirmed=${treasury11520Address}`,
-    );
-  }
-  const furnaceAddress = getAddress(await registry.organ(ORGAN_FURNACE_18911));
-  await requireContract(provider, furnaceAddress, "KAIOS Alchemy Furnace 18911");
-  const furnace = new Contract(furnaceAddress, FURNACE_ABI, provider);
-  const furnaceKaios = getAddress(await furnace.kaios());
-  if (furnaceKaios !== proofSourceAddress) {
-    throw new Error(
-      `Furnace KAIOS/proof-source mismatch: furnace=${furnaceKaios}, confirmed=${proofSourceAddress}`,
-    );
+  let furnaceAddress = null;
+  if (!bootstrapFixtures) {
+    const registry = new Contract(registryAddress, REGISTRY_ABI, provider);
+    const wiredTreasury = getAddress(await registry.organ(ORGAN_EXCHANGE_TREASURY_11520));
+    if (wiredTreasury !== treasury11520Address) {
+      throw new Error(
+        `Organ Registry 11520 mismatch: registry=${wiredTreasury}, confirmed=${treasury11520Address}`,
+      );
+    }
+    furnaceAddress = getAddress(await registry.organ(ORGAN_FURNACE_18911));
+    await requireContract(provider, furnaceAddress, "KAIOS Alchemy Furnace 18911");
+    const furnace = new Contract(furnaceAddress, FURNACE_ABI, provider);
+    const furnaceKaios = getAddress(await furnace.kaios());
+    if (furnaceKaios !== proofSourceAddress) {
+      throw new Error(
+        `Furnace KAIOS/proof-source mismatch: furnace=${furnaceKaios}, confirmed=${proofSourceAddress}`,
+      );
+    }
   }
 
-  const kgen = new Contract(kgenAddress, BASIC_ERC20_ABI, provider);
-  const kaios = new Contract(proofSourceAddress, BASIC_ERC20_ABI, provider);
-  if ((await kgen.decimals()) !== 18n || (await kaios.decimals()) !== 18n) {
-    throw new Error("TempleHeart rehearsal requires 18-decimal KGEN and KAIOS contracts");
+  if (kgenAddress) {
+    const kgen = new Contract(kgenAddress, BASIC_ERC20_ABI, provider);
+    if ((await kgen.decimals()) !== 18n) throw new Error("TempleHeart rehearsal requires 18-decimal KGEN");
+  }
+  if (proofSourceAddress) {
+    const kaios = new Contract(proofSourceAddress, BASIC_ERC20_ABI, provider);
+    if ((await kaios.decimals()) !== 18n) throw new Error("TempleHeart rehearsal requires 18-decimal KAIOS");
   }
 
   const confirmations = Number(process.env.BSC_TESTNET_CONFIRMATIONS ?? "3");
@@ -303,19 +345,23 @@ async function assertTestnetConfiguration({ requireExecution }) {
   const utcSecondOfDay = BigInt(latestBlock.timestamp) % 86_400n;
   const balances = {
     nativeWei: await provider.getBalance(signerAddress),
-    kgenWei: await kgen.balanceOf(signerAddress),
-    kaiosWei: await kaios.balanceOf(signerAddress),
+    kgenWei: kgenAddress ? await new Contract(kgenAddress, BASIC_ERC20_ABI, provider).balanceOf(signerAddress) : 0n,
+    kaiosWei: proofSourceAddress
+      ? await new Contract(proofSourceAddress, BASIC_ERC20_ABI, provider).balanceOf(signerAddress)
+      : 0n,
   };
   const requiredBalances = {
     kgenWei: parseUnits(heartFundWhole.toString(), 18),
     kaiosWei: parseUnits(fortuneKaiosWhole.toString(), 18),
   };
   if (balances.nativeWei === 0n) throw new Error("Confirmed signer has no testnet BNB for gas");
-  if (balances.kgenWei < requiredBalances.kgenWei) {
-    throw new Error("Confirmed signer lacks the acknowledged testnet KGEN rehearsal funding");
-  }
-  if (balances.kaiosWei < requiredBalances.kaiosWei) {
-    throw new Error("Confirmed signer lacks the acknowledged KAIOS needed for two proof cases");
+  if (!bootstrapFixtures) {
+    if (balances.kgenWei < requiredBalances.kgenWei) {
+      throw new Error("Confirmed signer lacks the acknowledged testnet KGEN rehearsal funding");
+    }
+    if (balances.kaiosWei < requiredBalances.kaiosWei) {
+      throw new Error("Confirmed signer lacks the acknowledged KAIOS needed for two proof cases");
+    }
   }
 
   if (requireExecution) {
@@ -371,6 +417,7 @@ async function assertTestnetConfiguration({ requireExecution }) {
     confirmations,
     heartFundWhole,
     fortuneKaiosWhole,
+    bootstrapFixtures,
   };
 }
 
@@ -430,6 +477,7 @@ async function createAlchemyProof({ heart, furnace, kaios, signer, civilizationI
 }
 
 async function runTestnetRehearsal() {
+  try {
   const config = await assertTestnetConfiguration({ requireExecution: true });
   const privateKey = env("BSC_TESTNET_PRIVATE_KEY", { allowSecret: true });
   const wallet = new Wallet(privateKey, config.provider);
@@ -437,6 +485,24 @@ async function runTestnetRehearsal() {
     throw new Error("BSC_TESTNET_PRIVATE_KEY does not match BSC_TESTNET_SIGNER_ADDRESS");
   }
   const signer = new NonceManager(wallet);
+  if (config.bootstrapFixtures) {
+    const fixtures = await bootstrapTestnetFixtures({
+      signer,
+      confirmations: config.confirmations,
+      deployArtifact,
+      waitFor,
+      artifact,
+    });
+    Object.assign(config, fixtures);
+    evidenceSession.evidence.contracts = {
+      testKgen: fixtures.kgenAddress,
+      test11520Treasury: fixtures.treasury11520Address,
+      testKaiosAlchemyProofSource: fixtures.proofSourceAddress,
+      testOrganRegistry: fixtures.registryAddress,
+      testFortuneGameStub: fixtures.fortuneGameAddress,
+      testFurnace18911: fixtures.furnaceAddress,
+    };
+  }
   const network = await config.provider.getNetwork();
   const candidateArtifact = artifact("KGEN_TempleHeart_Upgradeable");
   const baselineArtifact = artifact("KGEN_TempleHeart_V3_3_2_Baseline");
@@ -580,7 +646,17 @@ async function runTestnetRehearsal() {
   const heartbeatPaidBefore = await heart.totalHeartbeatPaid();
   const ignitePaidBefore = await heart.totalIgnitePaid();
   await waitFor("heartbeatClaim smoke", heart.heartbeatClaim(), config.confirmations);
+  await expectCallRevert(
+    config.provider,
+    { to: proxyAddress, from: config.signerAddress, data: candidateInterface.encodeFunctionData("heartbeatClaim", []) },
+    "Double heartbeat",
+  );
   await waitFor("igniteAndClaim UTC smoke", heart.igniteAndClaim(), config.confirmations);
+  await expectCallRevert(
+    config.provider,
+    { to: proxyAddress, from: config.signerAddress, data: candidateInterface.encodeFunctionData("igniteAndClaim", []) },
+    "Double ignite",
+  );
   if ((await heart.totalHeartbeatPaid()) !== heartbeatPaidBefore + parseUnits("1", 18)) {
     throw new Error("Heartbeat paid-total mismatch");
   }
@@ -591,6 +667,13 @@ async function runTestnetRehearsal() {
   const heartBalance = await kgen.balanceOf(proxyAddress);
   const gateAmount = parseUnits("1888", 18);
   const safePayout = heartBalance - gateAmount;
+  if (config.fortuneGameContract) {
+    await waitFor(
+      "1888 game payout accepted",
+      config.fortuneGameContract.payout(proxyAddress, config.signerAddress, safePayout),
+      config.confirmations,
+    );
+  }
   const safeGameCall = candidateInterface.encodeFunctionData("gamePayout", [config.signerAddress, safePayout]);
   await config.provider.call({ to: proxyAddress, from: config.fortuneGameAddress, data: safeGameCall });
   const blockedGameCall = candidateInterface.encodeFunctionData("gamePayout", [
@@ -675,27 +758,50 @@ async function runTestnetRehearsal() {
     "Fortune beneficiary redirect",
   );
 
-  console.log(JSON.stringify({
-    status: "TEMPLEHEART_V3_4_TESTNET_REHEARSAL_PASS",
-    chainId: network.chainId.toString(),
-    proxyAddress,
-    baselineImplementationAddress,
-    candidateImplementationAddress: candidateAddress,
-    preservedLegacySlots: 58,
-    appendedSlots: appendedSlots.map((value, offset) => ({ slot: 58 + offset, value })),
-    heartbeat: "PASS",
-    igniteUtcWindow: "PASS",
-    fortune: "PASS",
-    gameSurvivalGate: "PASS",
-    normalizationTo11520: "PASS",
-    unauthorizedUpgrade: "PASS",
-    rollbackAndRestore: "PASS",
-  }, null, 2));
+  writeEvidenceFiles("TEMPLEHEART_V3_4_TESTNET_REHEARSAL_PASS", {
+    contracts: {
+      ...evidenceSession.evidence.contracts,
+      templeHeartV332Implementation: baselineImplementationAddress,
+      templeHeartProxy: proxyAddress,
+      templeHeartV340Implementation: candidateAddress,
+    },
+    storagePreservation: "58 legacy slots preserved; 15 append-only slots read",
+    attackTests: {
+      unauthorizedUpgrade: "PASS",
+      doubleHeartbeat: "PASS",
+      doubleIgnite: "PASS",
+      fortuneProofReplay: "PASS",
+      fortuneBeneficiaryRedirect: "PASS",
+    },
+    runtimeTests: {
+      heartbeatClaim: "PASS",
+      igniteAndClaim: "PASS",
+      fortuneClaim: "PASS",
+      voluntaryRepayment: "PASS",
+      gameSurvivalGate1888: "PASS",
+      normalization108000: "PASS",
+      rollbackAndRestore: "PASS",
+    },
+  });
+  console.log(JSON.stringify({ status: "TEMPLEHEART_V3_4_TESTNET_REHEARSAL_PASS" }, null, 2));
+  } catch (error) {
+    writeEvidenceFiles("TEMPLEHEART_V3_4_TESTNET_REHEARSAL_FAIL", {
+      failure: error instanceof Error ? error.message : String(error),
+    });
+    throw error;
+  }
 }
 
 if (process.argv.includes("--testnet-preflight")) {
-  const config = await assertTestnetConfiguration({ requireExecution: false });
-  await config.provider.destroy();
+  try {
+    const config = await assertTestnetConfiguration({ requireExecution: false });
+    await config.provider.destroy();
+  } catch (error) {
+    writeEvidenceFiles("TEMPLEHEART_V3_4_TESTNET_REHEARSAL_FAIL", {
+      failure: error instanceof Error ? error.message : String(error),
+    });
+    throw error;
+  }
 }
 
 if (process.argv.includes("--testnet-rehearsal")) {

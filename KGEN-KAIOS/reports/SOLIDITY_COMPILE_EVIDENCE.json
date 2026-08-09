@@ -10,8 +10,8 @@
   "evmVersion": "paris",
   "openzeppelinContracts": "5.0.2",
   "openzeppelinContractsUpgradeable": "5.0.2",
-  "sourceCount": 16,
-  "contractCount": 26,
+  "sourceCount": 17,
+  "contractCount": 27,
   "eip170MaximumDeployedBytecodeBytes": 24576,
   "oversizedContracts": [],
   "warnings": 0,
@@ -171,6 +171,12 @@
       "sourceName": "tests/contracts/TestERC1967Proxy.sol",
       "bytecodeBytes": 660,
       "deployedBytecodeBytes": 92
+    },
+    {
+      "contractName": "TestFortuneGameStub",
+      "sourceName": "tests/contracts/TestFortuneGameStub.sol",
+      "bytecodeBytes": 237,
+      "deployedBytecodeBytes": 210
     }
   ]
 }
