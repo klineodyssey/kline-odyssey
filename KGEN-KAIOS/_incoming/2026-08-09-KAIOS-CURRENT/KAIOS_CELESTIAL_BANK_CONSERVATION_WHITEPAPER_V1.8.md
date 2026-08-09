@@ -29,7 +29,7 @@ GENESIS_BLACK_HOLE_KGEN
 → approved PlayerUniverse Runtime
 ```
 
-同一筆 KGEN 不得同時作為白洞 Burn Proof 與黑洞 GenesisMassProof。
+同一份已永久減少並由白洞 Friction Mirror 認列的 KGEN 質量，不得再被重複計入黑洞 GenesisMassProof。
 
 # 2. 三種貨幣角色
 
@@ -43,19 +43,11 @@ PLAYER LOCAL TOKEN = internal wages, food, rent and local accounting
 
 # 3. 8895 雲棧洞合法取得 KAIOS
 
-玩家可選擇白洞轉換契約：
+8895 雲棧洞不得自行宣告「燒 1 KGEN 就直接 Mint KAIOS 給玩家」。第一代 KAIOS 的唯一生成路徑仍是 Friction Mirror：正式 KGEN `totalSupply()` 永久減少後，由 KAIOS `settleWhiteHoleMass()` 只把新增 KAIOS Mint 到固定 18888。
 
-```text
-contracted KGEN
-→ official white-hole controller
-→ verified permanent burn
-→ 1,000 KAIOS per KGEN
-→ player principal escrow / contract account
-```
+8895 若要讓玩家取得 KAIOS，只能走已存在 KAIOS 的合法經濟路徑，例如市場交換、正式 18888 文明撥款、商業收入或經治理核准的 8888/8895 經濟模組。不得把 8895 當成第二個 KAIOS Minter，也不得讓同一份 KGEN Burn 被重複生成 KAIOS。
 
-白洞生成的 KAIOS 是玩家本金轉換，不是八戒利潤。額外利息或分潤只能來自實業收入、服務費、合法投資收益或事先鎖定的獎勵準備；禁止新玩家本金支付舊玩家收益。
-
-可逆 KGEN 鎖倉與不可逆白洞轉換必須是不同商品。
+可逆 KGEN 鎖倉與不可逆 KGEN 真實 Burn 必須是不同商品；任何利息或分潤只能來自實業收入、服務費、合法投資收益或事先鎖定的獎勵準備，禁止新玩家本金支付舊玩家收益。
 
 # 4. KAIOS 公共文明邊界
 
