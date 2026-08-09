@@ -1,25 +1,74 @@
 {
   "status": "PASS",
   "baseline": {
-    "ref": "origin/codex/templeheart-v3.3.0-uups",
-    "path": "KGEN/contracts/KGEN_TempleHeart_V3_3_1_Upgradeable.sol",
-    "slots": 55
+    "version": "3.3.2",
+    "ref": "7344d231837d40b504622c8c8b4376ed25110e20",
+    "path": "KGEN/contracts/KGEN_TempleHeart_Upgradeable.sol",
+    "slots": 58
   },
   "candidate": {
     "path": "KGEN/contracts/KGEN_TempleHeart_Upgradeable.sol",
-    "slots": 58,
+    "slots": 73,
     "appendedSlots": [
       {
-        "label": "kaiosAlchemyProofSource",
-        "slot": "55"
+        "label": "organRegistry",
+        "slot": "58"
       },
       {
-        "label": "offeringPowerPerWholeKaios",
-        "slot": "56"
+        "label": "gameSurvivalGateWhole",
+        "slot": "59"
       },
       {
-        "label": "totalOfferingKaiosBurned",
-        "slot": "57"
+        "label": "heartbeatHourClaims",
+        "slot": "60"
+      },
+      {
+        "label": "heartbeatMaxClaimsPerHour",
+        "slot": "61"
+      },
+      {
+        "label": "totalHeartbeatPaid",
+        "slot": "62"
+      },
+      {
+        "label": "igniteDayClaims",
+        "slot": "63"
+      },
+      {
+        "label": "igniteMaxClaimsPerDay",
+        "slot": "64"
+      },
+      {
+        "label": "totalIgnites",
+        "slot": "65"
+      },
+      {
+        "label": "totalIgnitePaid",
+        "slot": "66"
+      },
+      {
+        "label": "_fortuneLedgerByWallet",
+        "slot": "67"
+      },
+      {
+        "label": "_customerWallet",
+        "slot": "68"
+      },
+      {
+        "label": "totalCustomerWallets",
+        "slot": "69"
+      },
+      {
+        "label": "dailyNewCustomerWallets",
+        "slot": "70"
+      },
+      {
+        "label": "dailyActiveCustomerWallets",
+        "slot": "71"
+      },
+      {
+        "label": "_activeCustomerSeenOnDay",
+        "slot": "72"
       }
     ]
   },

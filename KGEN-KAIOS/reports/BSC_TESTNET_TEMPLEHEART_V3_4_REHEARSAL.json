@@ -1,0 +1,471 @@
+{
+  "schemaVersion": "1.0.0",
+  "status": "TEMPLEHEART_V3_4_TESTNET_REHEARSAL_PASS",
+  "executionClass": "REAL_BSC_TESTNET",
+  "timeBoundaryClass": "LOCAL_TIME_SIMULATION",
+  "network": {
+    "name": "BSC Testnet",
+    "chainId": "97",
+    "explorer": "https://testnet.bscscan.com",
+    "startingBlock": 124035483,
+    "endingBlock": 124035890
+  },
+  "signer": {
+    "publicAddress": "0x3a909988E4d5c9C2326A7a0596714482AB25eE0A",
+    "startingBalanceTBNB": "0.29958203084",
+    "estimatedRequiredTBNB": "0.003",
+    "finalBalanceTBNB": "0.29786283124"
+  },
+  "contracts": {
+    "testKgen": "0x79b65388e6fd7e0b171147914384A0455c7A16E6",
+    "testKaiosProofSource": "0x74f7A95B40bB9a1Aa2ebCc680166e9A45494C225",
+    "testAlchemyFurnace18911": "0xB4075952F1FD17C482488FB457e2A63C6B7f53a3",
+    "testTreasury11520": "0x6AEd9782963003DA8401DdB91d811d6Eb3989bBf",
+    "testOrganRegistry": "0x577eb07d3d24aC26f3393771F0E48608C4871DeA",
+    "testFortuneGame": "0xfd9eF63776C8467E329B17e32a46E1a04463af04",
+    "templeHeartV332Implementation": "0xf99B61f90bA7d12c9DcF990B6cc0941246D1F21d",
+    "templeHeartProxy": "0xa74F84942ADe7F668009BC4cB9E73C05ed5A3296",
+    "templeHeartV340Implementation": "0x52FFbEDAdD60c94a7FFc5B2EA36D57Cf666ab3f2"
+  },
+  "transactions": [
+    {
+      "label": "Deploy KAIOSOrganRegistry",
+      "hash": "0x833fcb04aa7b82eec939ee6722b495faf3bd9bf3459a3fd71af46962e8ba27c2",
+      "blockNumber": 124035486,
+      "gasUsed": "623580",
+      "gasPriceWei": "100000000",
+      "contractAddress": "0x577eb07d3d24aC26f3393771F0E48608C4871DeA"
+    },
+    {
+      "label": "Deploy MockKGEN",
+      "hash": "0x8103eb0a77adb68dd0ea6ee0a0a1126e7ab77c5804e79726239f73800a81bec7",
+      "blockNumber": 124035497,
+      "gasUsed": "552904",
+      "gasPriceWei": "100000000",
+      "contractAddress": "0x79b65388e6fd7e0b171147914384A0455c7A16E6"
+    },
+    {
+      "label": "Deploy KAIOS",
+      "hash": "0xe2272c14fecfc51a2978415c482c57f96b7f0c014370d73d854b151c99afe809",
+      "blockNumber": 124035508,
+      "gasUsed": "1394116",
+      "gasPriceWei": "100000000",
+      "contractAddress": "0x74f7A95B40bB9a1Aa2ebCc680166e9A45494C225"
+    },
+    {
+      "label": "Deploy KAIOSAlchemyFurnace",
+      "hash": "0x1e7dc915d2d6ee988d7eda08a68fa009640450bc563b2c656ea171af91238ba4",
+      "blockNumber": 124035518,
+      "gasUsed": "506642",
+      "gasPriceWei": "100000000",
+      "contractAddress": "0xB4075952F1FD17C482488FB457e2A63C6B7f53a3"
+    },
+    {
+      "label": "Deploy MockOrgan",
+      "hash": "0xaf59fec0622a794b443cbc35af3b62cec389a2067d9a4d48281ac014c7589db8",
+      "blockNumber": 124035529,
+      "gasUsed": "57091",
+      "gasPriceWei": "100000000",
+      "contractAddress": "0x6AEd9782963003DA8401DdB91d811d6Eb3989bBf"
+    },
+    {
+      "label": "Deploy TestFortuneGame",
+      "hash": "0x798e772b6c38a42b3b60a6081b93d6b601749f03fa88ceb427a91d9fcf0dfa7a",
+      "blockNumber": 124035539,
+      "gasUsed": "113879",
+      "gasPriceWei": "100000000",
+      "contractAddress": "0xfd9eF63776C8467E329B17e32a46E1a04463af04"
+    },
+    {
+      "label": "Register Test Furnace 18911",
+      "hash": "0xc9baac10a63d0d26239799eda4de1e3409fcf1cd6b470851659a69d474688fb7",
+      "blockNumber": 124035552,
+      "gasUsed": "55173",
+      "gasPriceWei": "100000000",
+      "contractAddress": null
+    },
+    {
+      "label": "Register Test Treasury 11520",
+      "hash": "0x87c0aa9f6059e8334909d100ddc27bb60bbb471605bf661e36d9bca0f090d88b",
+      "blockNumber": 124035561,
+      "gasUsed": "55173",
+      "gasPriceWei": "100000000",
+      "contractAddress": null
+    },
+    {
+      "label": "Seal Test Organ Registry bootstrap",
+      "hash": "0xeef0b66b2e02b4e48912d440d8a4134b68c0d5ce55b739e753bda6e932b08556",
+      "blockNumber": 124035572,
+      "gasUsed": "24801",
+      "gasPriceWei": "100000000",
+      "contractAddress": null
+    },
+    {
+      "label": "Burn Test KGEN for Test KAIOS",
+      "hash": "0xb914fa994216c412ac90c68025ba4efd76d54ba7bf225996ad73f22d47b48e8a",
+      "blockNumber": 124035583,
+      "gasUsed": "33555",
+      "gasPriceWei": "100000000",
+      "contractAddress": null
+    },
+    {
+      "label": "Settle Test KAIOS supply",
+      "hash": "0x70c3c953ec0e29afc6dafd98af2386f1ae705864628b335bfd86d131324a5b99",
+      "blockNumber": 124035593,
+      "gasUsed": "143435",
+      "gasPriceWei": "100000000",
+      "contractAddress": null
+    },
+    {
+      "label": "Deploy KGEN_TempleHeart_V3_3_2_Baseline",
+      "hash": "0xb9cc8be395dbafe3b164e9f3a68b9bea9cd199448beb6c51438d5e6226ae62f7",
+      "blockNumber": 124035607,
+      "gasUsed": "4031376",
+      "gasPriceWei": "100000000",
+      "contractAddress": "0xf99B61f90bA7d12c9DcF990B6cc0941246D1F21d"
+    },
+    {
+      "label": "Deploy ERC1967Proxy",
+      "hash": "0xcf73e7f7e7b945991b36e8b1185967e6fd58e080005f54b57f8d5a2484018fce",
+      "blockNumber": 124035624,
+      "gasUsed": "916709",
+      "gasPriceWei": "100000000",
+      "contractAddress": "0xa74F84942ADe7F668009BC4cB9E73C05ed5A3296"
+    },
+    {
+      "label": "Bind Fortune Game",
+      "hash": "0x4dfc2fee580796b1090a5c1e16fdbecf08e92a51a7ec3410b791e01bebe99408",
+      "blockNumber": 124035630,
+      "gasUsed": "53060",
+      "gasPriceWei": "100000000",
+      "contractAddress": null
+    },
+    {
+      "label": "Create pre-upgrade wish state",
+      "hash": "0xbb98be84e8c88e432807a1efde95f9d70587ead3e9f4c42064a6712e912a3b3d",
+      "blockNumber": 124035640,
+      "gasUsed": "259684",
+      "gasPriceWei": "100000000",
+      "contractAddress": null
+    },
+    {
+      "label": "Create representative organ state",
+      "hash": "0x1a4329cc4d3566738b40926390def615e2aec167edbf2d382b593a869cb7b389",
+      "blockNumber": 124035650,
+      "gasUsed": "121322",
+      "gasPriceWei": "100000000",
+      "contractAddress": null
+    },
+    {
+      "label": "Create baseline heartbeat state",
+      "hash": "0x839bc38f6c4261b8ffb2ee91633fca7a5221ef880acfca95595b89e2f9fcde23",
+      "blockNumber": 124035661,
+      "gasUsed": "153542",
+      "gasPriceWei": "100000000",
+      "contractAddress": null
+    },
+    {
+      "label": "Create baseline cross-day state",
+      "hash": "0xa1679615c2d341759b7b437e91ecd25239a3b1fe1f27961cd30f77e414d4b024",
+      "blockNumber": 124035672,
+      "gasUsed": "134477",
+      "gasPriceWei": "100000000",
+      "contractAddress": null
+    },
+    {
+      "label": "Deploy KGEN_TempleHeart_Upgradeable",
+      "hash": "0x065c173e70549174cc6aa77c41b6c2b5aaa458b9e17c98d3e139810359a93c99",
+      "blockNumber": 124035685,
+      "gasUsed": "5167455",
+      "gasPriceWei": "100000000",
+      "contractAddress": "0x52FFbEDAdD60c94a7FFc5B2EA36D57Cf666ab3f2"
+    },
+    {
+      "label": "Upgrade V3.3.2 -> V3.4.0",
+      "hash": "0x8692f2874e6a4bf82dbcb84d5e12c9f9583e8e87bc3cdcba95860b121853fe94",
+      "blockNumber": 124035697,
+      "gasUsed": "156305",
+      "gasPriceWei": "100000000",
+      "contractAddress": null
+    },
+    {
+      "label": "Rollback V3.4.0 -> V3.3.2",
+      "hash": "0xc6be3517a1042c4307c6d88385826f9710110588f9f10e12e68a57bce75e68e8",
+      "blockNumber": 124035711,
+      "gasUsed": "39002",
+      "gasPriceWei": "100000000",
+      "contractAddress": null
+    },
+    {
+      "label": "Restore V3.4.0 after rollback",
+      "hash": "0x3d5761fe4907c1af08ed4dfb04c0aa457ba001f409b3c57558ef6fe5353b79c3",
+      "blockNumber": 124035721,
+      "gasUsed": "39046",
+      "gasPriceWei": "100000000",
+      "contractAddress": null
+    },
+    {
+      "label": "Fund rehearsal Heart",
+      "hash": "0x9b0749bfd3f9a70b93da6f054c3279f58971d4660d5cc1e632876d8ab80bc825",
+      "blockNumber": 124035732,
+      "gasUsed": "51366",
+      "gasPriceWei": "100000000",
+      "contractAddress": null
+    },
+    {
+      "label": "Normalize Heart to 108000",
+      "hash": "0xb1b80fbae2bdaaa90470ffce290f785daaa2f2d68d73eedd7aaeed160d7be7a2",
+      "blockNumber": 124035742,
+      "gasUsed": "80823",
+      "gasPriceWei": "100000000",
+      "contractAddress": null
+    },
+    {
+      "label": "Test Fortune Game real 1 KGEN payout",
+      "hash": "0x888c6cd17cc948b819a1218fa0a002af684f2d2a7ec2a5eea12051309e3b10a8",
+      "blockNumber": 124035754,
+      "gasUsed": "67580",
+      "gasPriceWei": "100000000",
+      "contractAddress": null
+    },
+    {
+      "label": "Holy Cup VALID",
+      "hash": "0xe9e9d125f8142544da230011553a63f59e7398584a9d3c4393f31a9942437943",
+      "blockNumber": 124035768,
+      "gasUsed": "111670",
+      "gasPriceWei": "100000000",
+      "contractAddress": null
+    },
+    {
+      "label": "Approve KAIOS VALID",
+      "hash": "0x5459ba26a6972c37ef84b588afcd52fdb1997df5e14ea657dce38522b55acd04",
+      "blockNumber": 124035775,
+      "gasUsed": "46008",
+      "gasPriceWei": "100000000",
+      "contractAddress": null
+    },
+    {
+      "label": "Create Alchemy proof VALID",
+      "hash": "0x94051b4268cf49dbfd0ded4ab50f74dc03c5a92fe0f39d67507bbb4d5964f846",
+      "blockNumber": 124035786,
+      "gasUsed": "451665",
+      "gasPriceWei": "100000000",
+      "contractAddress": null
+    },
+    {
+      "label": "fortuneClaim smoke",
+      "hash": "0x2c5d4cb34b65491bc3210031d83f3dd2bdb15c3bbbf2a5e4e2c15755c3a83807",
+      "blockNumber": 124035797,
+      "gasUsed": "342690",
+      "gasPriceWei": "100000000",
+      "contractAddress": null
+    },
+    {
+      "label": "Approve voluntary Fortune repayment",
+      "hash": "0x491b433279e20c8799c5a6d9c21f0c8f674f31bc91a0350bee85f7f9d0b0baa1",
+      "blockNumber": 124035808,
+      "gasUsed": "45981",
+      "gasPriceWei": "100000000",
+      "contractAddress": null
+    },
+    {
+      "label": "Voluntary Fortune repayment",
+      "hash": "0x13fa893fa1ff62dab076ed41bd56f311ad79e7b0824a719ba11d2a7c660a5ef0",
+      "blockNumber": 124035818,
+      "gasUsed": "160588",
+      "gasPriceWei": "100000000",
+      "contractAddress": null
+    },
+    {
+      "label": "Create redirect-rejection wish",
+      "hash": "0xc5e7aa22660167ad5686eed590e9d95f2f10e18180a03cc0d37a1f64f504cecd",
+      "blockNumber": 124035829,
+      "gasUsed": "177529",
+      "gasPriceWei": "100000000",
+      "contractAddress": null
+    },
+    {
+      "label": "Holy Cup REDIRECT",
+      "hash": "0x8e448255291683167304b21c71c82bcb3d5fc5ff41d01ac2d55c75b25c1a0f68",
+      "blockNumber": 124035840,
+      "gasUsed": "96811",
+      "gasPriceWei": "100000000",
+      "contractAddress": null
+    },
+    {
+      "label": "Approve KAIOS REDIRECT",
+      "hash": "0xb4a0337774deb664c0563277f8e5fcad616323437e4311dd703672ae9f8974c4",
+      "blockNumber": 124035849,
+      "gasUsed": "46008",
+      "gasPriceWei": "100000000",
+      "contractAddress": null
+    },
+    {
+      "label": "Create Alchemy proof REDIRECT",
+      "hash": "0x35d4cf7286f7a775bef6d73e979b2bf04993fadab3438de210a2a1e2ec49a134",
+      "blockNumber": 124035861,
+      "gasUsed": "417465",
+      "gasPriceWei": "100000000",
+      "contractAddress": null
+    },
+    {
+      "label": "Approve KAIOS WRONG_CIVILIZATION",
+      "hash": "0xcb798dd4f477a8e1a36cbc60a22c1f1e5f1758cd12506e63049008eb66c93e62",
+      "blockNumber": 124035871,
+      "gasUsed": "46008",
+      "gasPriceWei": "100000000",
+      "contractAddress": null
+    },
+    {
+      "label": "Create Alchemy proof WRONG_CIVILIZATION",
+      "hash": "0x8138fba063d73f99489655b72d2039b53a4dd89c9d0a2228ae57ed3e494a0c90",
+      "blockNumber": 124035882,
+      "gasUsed": "417477",
+      "gasPriceWei": "100000000",
+      "contractAddress": null
+    }
+  ],
+  "storage": {
+    "status": "PASS",
+    "baselineSlots": 58,
+    "candidateSlots": 73,
+    "appendOnlySlots": 15,
+    "preservedLegacySlots": true,
+    "appendedSlots": [
+      {
+        "slot": 58,
+        "value": "0x000000000000000000000000577eb07d3d24ac26f3393771f0e48608c4871dea"
+      },
+      {
+        "slot": 59,
+        "value": "0x0000000000000000000000000000000000000000000000000000000000000760"
+      },
+      {
+        "slot": 60,
+        "value": "0x0000000000000000000000000000000000000000000000000000000000000000"
+      },
+      {
+        "slot": 61,
+        "value": "0x0000000000000000000000000000000000000000000000000000000000000058"
+      },
+      {
+        "slot": 62,
+        "value": "0x0000000000000000000000000000000000000000000000000000000000000000"
+      },
+      {
+        "slot": 63,
+        "value": "0x0000000000000000000000000000000000000000000000000000000000000000"
+      },
+      {
+        "slot": 64,
+        "value": "0x0000000000000000000000000000000000000000000000000000000000000058"
+      },
+      {
+        "slot": 65,
+        "value": "0x0000000000000000000000000000000000000000000000000000000000000000"
+      },
+      {
+        "slot": 66,
+        "value": "0x0000000000000000000000000000000000000000000000000000000000000000"
+      },
+      {
+        "slot": 67,
+        "value": "0x0000000000000000000000000000000000000000000000000000000000000000"
+      },
+      {
+        "slot": 68,
+        "value": "0x0000000000000000000000000000000000000000000000000000000000000000"
+      },
+      {
+        "slot": 69,
+        "value": "0x0000000000000000000000000000000000000000000000000000000000000000"
+      },
+      {
+        "slot": 70,
+        "value": "0x0000000000000000000000000000000000000000000000000000000000000000"
+      },
+      {
+        "slot": 71,
+        "value": "0x0000000000000000000000000000000000000000000000000000000000000000"
+      },
+      {
+        "slot": 72,
+        "value": "0x0000000000000000000000000000000000000000000000000000000000000000"
+      }
+    ]
+  },
+  "runtime": {
+    "normalizationTo11520": "PASS",
+    "testFortuneGamePayout": "PASS",
+    "gameSurvivalGate1888": "PASS",
+    "fortuneClaimOwnership": "PASS",
+    "voluntaryRepaymentQualification": "PASS",
+    "heartbeat": "LOCAL_TIME_SIMULATION_AND_REAL_COOLDOWN_REJECTION",
+    "ignite": "LOCAL_TIME_SIMULATION"
+  },
+  "security": {
+    "roles": {
+      "DEFAULT_ADMIN_ROLE": "PASS",
+      "UPGRADER_ROLE": "PASS",
+      "OPERATOR_ROLE": "PASS",
+      "HOLY_CUP_SIGNER_ROLE": "PASS"
+    },
+    "unauthorizedUpgrade": "PASS",
+    "unauthorizedOperatorOperation": "PASS",
+    "proofReplayRejection": "PASS",
+    "beneficiaryRedirectRejection": "PASS",
+    "wrongCivilizationRejection": "PASS",
+    "adminClawbackSeizureFunctionsAbsent": "PASS",
+    "rollbackAndRestore": "PASS"
+  },
+  "localDeterministicTests": {
+    "executionClass": "LOCAL_TIME_SIMULATION",
+    "fullSuite": "30/30 PASS",
+    "heartbeatOneHour": "PASS",
+    "heartbeatHourCap88": "PASS",
+    "igniteUtcBoundary": "PASS",
+    "igniteDayCap88": "PASS",
+    "fortuneCooldown30Day": "PASS",
+    "fortuneEpochCap500": "PASS"
+  },
+  "beforeUpgradeState": {
+    "wishHash": "0x90e9cacf13a648b3dba1e7f90d594fe94f8b0752aa4f83c0d40a724fa7d22343",
+    "civilizationId": "0x8cff5815495a33c2667dc7c4717d5c008b399ab3e5de4c6cedac0d37421928c3",
+    "wishStatus": "1",
+    "lastHeartbeatAt": "1786262360",
+    "lastCivilizationHeartbeatAt": "1786262360",
+    "heartbeatCount": "1",
+    "totalHeartbeats": "1",
+    "lastBreathDay": "20674",
+    "breathCount": "1",
+    "totalBreaths": "1",
+    "blessingPower": "9",
+    "fortuneEpochClaims": "0",
+    "lingxiaoBank": "0x6AEd9782963003DA8401DdB91d811d6Eb3989bBf",
+    "marsVault": "0x577eb07d3d24aC26f3393771F0E48608C4871DeA",
+    "autoLP": "0xB4075952F1FD17C482488FB457e2A63C6B7f53a3",
+    "blackhole": "0xfd9eF63776C8467E329B17e32a46E1a04463af04",
+    "fortuneGame": "0xfd9eF63776C8467E329B17e32a46E1a04463af04"
+  },
+  "afterUpgradeState": {
+    "wishHash": "0x90e9cacf13a648b3dba1e7f90d594fe94f8b0752aa4f83c0d40a724fa7d22343",
+    "civilizationId": "0x8cff5815495a33c2667dc7c4717d5c008b399ab3e5de4c6cedac0d37421928c3",
+    "wishStatus": "1",
+    "lastHeartbeatAt": "1786262360",
+    "lastCivilizationHeartbeatAt": "1786262360",
+    "heartbeatCount": "1",
+    "totalHeartbeats": "1",
+    "lastBreathDay": "20674",
+    "breathCount": "1",
+    "totalBreaths": "1",
+    "blessingPower": "9",
+    "fortuneEpochClaims": "0",
+    "lingxiaoBank": "0x6AEd9782963003DA8401DdB91d811d6Eb3989bBf",
+    "marsVault": "0x577eb07d3d24aC26f3393771F0E48608C4871DeA",
+    "autoLP": "0xB4075952F1FD17C482488FB457e2A63C6B7f53a3",
+    "blackhole": "0xfd9eF63776C8467E329B17e32a46E1a04463af04",
+    "fortuneGame": "0xfd9eF63776C8467E329B17e32a46E1a04463af04"
+  },
+  "upgradeTransactionHash": "0x8692f2874e6a4bf82dbcb84d5e12c9f9583e8e87bc3cdcba95860b121853fe94",
+  "totalGasUsed": "17191996"
+}

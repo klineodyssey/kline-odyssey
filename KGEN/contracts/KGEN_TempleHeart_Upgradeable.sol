@@ -28,6 +28,10 @@ interface IKAIOSAlchemyProofSource {
     function alchemyBurnRecord(bytes32 proofId) external view returns (AlchemyBurnRecord memory);
 }
 
+interface IKAIOSOrganRegistryForTempleHeart {
+    function organ(bytes32 organId) external view returns (address);
+}
+
 /**
  * @title KGEN_TempleHeart_Upgradeable
  * @notice Point 12345 TempleHeart UUPS review candidate aligned to the KAIOS Alchemy lineage.
@@ -50,14 +54,20 @@ contract KGEN_TempleHeart_Upgradeable is
     bytes32 public constant HOLY_CUP_TYPEHASH = keccak256(
         "HolyCupProof(address claimant,bytes32 civilizationId,bytes32 wishHash,bytes32 proofId,uint256 deadline)"
     );
+    bytes32 public constant ORGAN_EXCHANGE_TREASURY_11520 =
+        keccak256("KAIOS.ORGAN.EXCHANGE_TREASURY.11520");
 
     uint256 public constant KUFO_PER_KAIOS = 1_000;
     uint256 public constant VERSION_MAJOR = 3;
-    uint256 public constant VERSION_MINOR = 3;
-    uint256 public constant VERSION_PATCH = 2;
+    uint256 public constant VERSION_MINOR = 4;
+    uint256 public constant VERSION_PATCH = 0;
+    uint256 public constant HEARTBEAT_REWARD_WHOLE = 1;
+    uint256 public constant IGNITE_REWARD_WHOLE = 8;
+    uint256 public constant IGNITE_WINDOW_SECONDS = 10 minutes;
 
     enum WishStatus { None, Created, HolyCupPassed, Claimable, Fulfilled, Expired }
     enum BurnOfferingType { None, Incense, JossPaper, BlessingLamp, FortuneCharm, VowOffering }
+    enum CivilizationActivity { Wish, HolyCup, Heartbeat, Ignite, KAIOSOffering, FortuneRepayment }
 
     struct WishRecord {
         bytes32 wishHash;
@@ -65,6 +75,18 @@ contract KGEN_TempleHeart_Upgradeable is
         uint64 createdAt;
         uint64 updatedAt;
         WishStatus status;
+    }
+
+    struct FortuneLedger {
+        uint256 totalClaimed;
+        uint256 totalVoluntaryRepaid;
+        uint256 lastClaimAmount;
+        uint256 lastClaimAt;
+        uint256 lastVoluntaryRepaymentAmount;
+        uint256 lastVoluntaryRepaymentAt;
+        uint64 claimCount;
+        uint64 repaymentCount;
+        bool repaidAfterLastClaim;
     }
 
     // V3.3.1-compatible custom storage region. Do not reorder or change widths.
@@ -139,6 +161,23 @@ contract KGEN_TempleHeart_Upgradeable is
     mapping(uint8 => uint256) public offeringPowerPerWholeKaios;
     uint256 public totalOfferingKaiosBurned;
 
+    // V3.4.0 append-only storage. The legacy brainVault slot above is retained but is no longer authoritative.
+    IKAIOSOrganRegistryForTempleHeart public organRegistry;
+    uint256 public gameSurvivalGateWhole;
+    mapping(uint256 => uint256) public heartbeatHourClaims;
+    uint256 public heartbeatMaxClaimsPerHour;
+    uint256 public totalHeartbeatPaid;
+    mapping(uint256 => uint256) public igniteDayClaims;
+    uint256 public igniteMaxClaimsPerDay;
+    uint256 public totalIgnites;
+    uint256 public totalIgnitePaid;
+    mapping(address => FortuneLedger) private _fortuneLedgerByWallet;
+    mapping(address => bool) private _customerWallet;
+    uint256 public totalCustomerWallets;
+    mapping(uint256 => uint256) public dailyNewCustomerWallets;
+    mapping(uint256 => uint256) public dailyActiveCustomerWallets;
+    mapping(uint256 => mapping(address => bool)) private _activeCustomerSeenOnDay;
+
     event TempleHeartInitialized(
         address indexed admin,
         address indexed kgen,
@@ -167,6 +206,39 @@ contract KGEN_TempleHeart_Upgradeable is
     event FortuneClaimed(address indexed user, bytes32 indexed civilizationId, bytes32 indexed proofId, uint256 amount, uint256 epochIndex, uint256 blessingPower, bytes32 wishHash);
     event BloodInjectedFromBrain(address indexed brainVault, uint256 amount);
     event ExcessSweptToBrain(address indexed brainVault, uint256 excess, uint256 capAmount);
+    event OrganRegistryUpdated(address indexed organRegistry);
+    event HeartNormalized(address indexed caller, address indexed treasury11520, uint256 excess, uint256 capAmount);
+    event HeartbeatClaimed(
+        address indexed user,
+        bytes32 indexed civilizationId,
+        uint256 indexed hourIndex,
+        uint256 amount,
+        uint256 hourClaims
+    );
+    event IgniteClaimed(
+        address indexed user,
+        bytes32 indexed civilizationId,
+        uint256 indexed dayIndex,
+        uint256 amount,
+        uint256 dayClaims
+    );
+    event FortuneVoluntarilyRepaid(
+        address indexed user,
+        bytes32 indexed civilizationId,
+        uint256 amount,
+        uint256 totalVoluntaryRepaid,
+        bool repaidAfterLastClaim
+    );
+    event CustomerWalletRegistered(address indexed user, uint256 indexed dayIndex, uint256 totalCustomerWallets);
+    event CustomerWalletActive(address indexed user, uint256 indexed dayIndex);
+    event GamePayout(address indexed game, address indexed player, uint256 amount, uint256 remainingHeartBalance);
+    event CivilizationContribution(
+        address indexed user,
+        bytes32 indexed civilizationId,
+        CivilizationActivity indexed activity,
+        uint256 measure,
+        uint256 blessingPowerTotal
+    );
 
     error ZeroAddress();
     error NotAContract(address account);
@@ -193,6 +265,14 @@ contract KGEN_TempleHeart_Upgradeable is
     error HeartbeatCooldown();
     error BreathAlreadyTaken();
     error InvalidOfferingType();
+    error OrganRegistryNotSet();
+    error CanonicalTreasuryNotSet();
+    error HeartbeatHourFull();
+    error IgniteWindowClosed();
+    error IgniteDayFull();
+    error RepaymentRequired();
+    error UnauthorizedGame();
+    error GameSurvivalGateClosed();
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
@@ -219,7 +299,7 @@ contract KGEN_TempleHeart_Upgradeable is
         __Pausable_init();
         __ReentrancyGuard_init();
         __UUPSUpgradeable_init();
-        __EIP712_init("KGEN TempleHeart 12345", "3.3.2");
+        __EIP712_init("KGEN TempleHeart 12345", "3.4.0");
 
         _grantRole(DEFAULT_ADMIN_ROLE, admin);
         _grantRole(UPGRADER_ROLE, upgrader);
@@ -244,6 +324,9 @@ contract KGEN_TempleHeart_Upgradeable is
         heartbeatCooldownSeconds = 1 hours;
         heartbeatBlessingPower = 1;
         breathBlessingPower = 8;
+        gameSurvivalGateWhole = 1_888;
+        heartbeatMaxClaimsPerHour = 88;
+        igniteMaxClaimsPerDay = 88;
 
         _setDefaultOfferingRules();
         emit TempleHeartInitialized(admin, kgenToken, _brainVault, alchemyProofSource);
@@ -263,8 +346,20 @@ contract KGEN_TempleHeart_Upgradeable is
         emit KAIOSAlchemyProofSourceBound(alchemyProofSource);
     }
 
+    function initializeV340(address registry)
+        external
+        reinitializer(3)
+        onlyRole(DEFAULT_ADMIN_ROLE)
+    {
+        _setOrganRegistry(registry);
+        __EIP712_init("KGEN TempleHeart 12345", "3.4.0");
+        gameSurvivalGateWhole = 1_888;
+        heartbeatMaxClaimsPerHour = 88;
+        igniteMaxClaimsPerDay = 88;
+    }
+
     function version() external pure returns (string memory) {
-        return "3.3.2";
+        return "3.4.0";
     }
 
     function pause() external onlyRole(OPERATOR_ROLE) { _pause(); }
@@ -283,6 +378,10 @@ contract KGEN_TempleHeart_Upgradeable is
         emit FortuneGameUpdated(game);
     }
 
+    function setOrganRegistry(address registry) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        _setOrganRegistry(registry);
+    }
+
     function setOfferingRule(BurnOfferingType offeringType, bytes32 purposeCode, uint256 powerPerWholeKaios)
         external
         onlyRole(DEFAULT_ADMIN_ROLE)
@@ -297,6 +396,7 @@ contract KGEN_TempleHeart_Upgradeable is
         if (wishHash == bytes32(0)) revert InvalidWish();
         if (civilizationId == bytes32(0)) revert InvalidCivilization();
         _registerPilgrim(msg.sender, civilizationId);
+        _registerCustomerWallet(msg.sender);
         _activeWishByUser[msg.sender] = WishRecord(
             wishHash,
             civilizationId,
@@ -306,6 +406,13 @@ contract KGEN_TempleHeart_Upgradeable is
         );
         totalWishers += 1;
         emit WishMade(msg.sender, wishHash, civilizationId);
+        emit CivilizationContribution(
+            msg.sender,
+            civilizationId,
+            CivilizationActivity.Wish,
+            1,
+            blessingPowerByCivilization[civilizationId]
+        );
     }
 
     function activeWish(address user) external view returns (WishRecord memory) {
@@ -338,7 +445,15 @@ contract KGEN_TempleHeart_Upgradeable is
         wish.updatedAt = uint64(block.timestamp);
         totalHolyCupPassed += 1;
         _touchPilgrim(msg.sender, civilizationId);
+        _touchCustomerWallet(msg.sender);
         emit HolyCupPassed(msg.sender, civilizationId, proofId, wishHash);
+        emit CivilizationContribution(
+            msg.sender,
+            civilizationId,
+            CivilizationActivity.HolyCup,
+            1,
+            blessingPowerByCivilization[civilizationId]
+        );
     }
 
     function recordBurnOffering(bytes32 proofId, BurnOfferingType offeringType)
@@ -368,6 +483,7 @@ contract KGEN_TempleHeart_Upgradeable is
         totalOfferingBurnedByType[uint8(offeringType)] += record.kaiosBurned;
         totalOfferingCountByType[uint8(offeringType)] += 1;
         _touchPilgrim(msg.sender, wish.civilizationId);
+        _touchCustomerWallet(msg.sender);
 
         emit KAIOSAlchemyOfferingRecorded(
             msg.sender,
@@ -379,9 +495,25 @@ contract KGEN_TempleHeart_Upgradeable is
             blessingPowerAdded,
             wish.wishHash
         );
+        emit CivilizationContribution(
+            msg.sender,
+            wish.civilizationId,
+            CivilizationActivity.KAIOSOffering,
+            record.kaiosBurned,
+            blessingPowerByCivilization[wish.civilizationId]
+        );
     }
 
-    function heartbeat() external whenNotPaused returns (uint256 blessingPowerTotal) {
+    function heartbeatClaim() external nonReentrant whenNotPaused returns (uint256 blessingPowerTotal) {
+        return _heartbeatClaim();
+    }
+
+    // Backward-compatible selector; it executes the same capped paid claim and cannot bypass policy.
+    function heartbeat() external nonReentrant whenNotPaused returns (uint256 blessingPowerTotal) {
+        return _heartbeatClaim();
+    }
+
+    function _heartbeatClaim() private returns (uint256 blessingPowerTotal) {
         WishRecord storage wish = _activeWishByUser[msg.sender];
         if (wish.status == WishStatus.None || wish.status == WishStatus.Fulfilled) revert WishNotReady();
         bytes32 civilizationId = wish.civilizationId;
@@ -389,31 +521,87 @@ contract KGEN_TempleHeart_Upgradeable is
         if (block.timestamp < lastCivilizationHeartbeatAt[civilizationId] + heartbeatCooldownSeconds) {
             revert HeartbeatCooldown();
         }
+        uint256 hourIndex = block.timestamp / 1 hours;
+        if (heartbeatHourClaims[hourIndex] >= heartbeatMaxClaimsPerHour) revert HeartbeatHourFull();
+        uint256 rewardAmount = _scale(HEARTBEAT_REWARD_WHOLE);
+        _requireOperationalReservePayout(rewardAmount);
+
         lastHeartbeatAt[msg.sender] = block.timestamp;
         lastCivilizationHeartbeatAt[civilizationId] = block.timestamp;
+        heartbeatHourClaims[hourIndex] += 1;
         heartbeatCountByCivilization[civilizationId] += 1;
         totalHeartbeats += 1;
+        totalHeartbeatPaid += rewardAmount;
         blessingPowerByCivilization[civilizationId] += heartbeatBlessingPower;
         blessingPowerTotal = blessingPowerByCivilization[civilizationId];
+        kgen.safeTransfer(msg.sender, rewardAmount);
         _touchPilgrim(msg.sender, civilizationId);
+        _touchCustomerWallet(msg.sender);
         emit Heartbeat(msg.sender, civilizationId, heartbeatCountByCivilization[civilizationId], blessingPowerTotal);
+        emit HeartbeatClaimed(
+            msg.sender,
+            civilizationId,
+            hourIndex,
+            rewardAmount,
+            heartbeatHourClaims[hourIndex]
+        );
+        emit CivilizationContribution(
+            msg.sender,
+            civilizationId,
+            CivilizationActivity.Heartbeat,
+            1,
+            blessingPowerTotal
+        );
     }
 
-    function crossDayBreath() external whenNotPaused returns (uint256 blessingPowerTotal) {
+    function igniteAndClaim() external nonReentrant whenNotPaused returns (uint256 blessingPowerTotal) {
+        return _igniteAndClaim();
+    }
+
+    // Backward-compatible selector; it executes the same UTC-windowed capped paid claim.
+    function crossDayBreath() external nonReentrant whenNotPaused returns (uint256 blessingPowerTotal) {
+        return _igniteAndClaim();
+    }
+
+    function _igniteAndClaim() private returns (uint256 blessingPowerTotal) {
         WishRecord storage wish = _activeWishByUser[msg.sender];
         if (wish.status == WishStatus.None || wish.status == WishStatus.Fulfilled) revert WishNotReady();
         bytes32 civilizationId = wish.civilizationId;
         uint256 dayIndex = block.timestamp / 1 days;
+        if (block.timestamp % 1 days >= IGNITE_WINDOW_SECONDS) revert IgniteWindowClosed();
         if (lastBreathDay[msg.sender] == dayIndex) revert BreathAlreadyTaken();
         if (lastCivilizationBreathDay[civilizationId] == dayIndex) revert BreathAlreadyTaken();
+        if (igniteDayClaims[dayIndex] >= igniteMaxClaimsPerDay) revert IgniteDayFull();
+        uint256 rewardAmount = _scale(IGNITE_REWARD_WHOLE);
+        _requireOperationalReservePayout(rewardAmount);
+
         lastBreathDay[msg.sender] = dayIndex;
         lastCivilizationBreathDay[civilizationId] = dayIndex;
+        igniteDayClaims[dayIndex] += 1;
         breathCountByCivilization[civilizationId] += 1;
         totalBreaths += 1;
+        totalIgnites += 1;
+        totalIgnitePaid += rewardAmount;
         blessingPowerByCivilization[civilizationId] += breathBlessingPower;
         blessingPowerTotal = blessingPowerByCivilization[civilizationId];
+        kgen.safeTransfer(msg.sender, rewardAmount);
         _touchPilgrim(msg.sender, civilizationId);
+        _touchCustomerWallet(msg.sender);
         emit CrossDayBreath(msg.sender, civilizationId, dayIndex, blessingPowerTotal);
+        emit IgniteClaimed(
+            msg.sender,
+            civilizationId,
+            dayIndex,
+            rewardAmount,
+            igniteDayClaims[dayIndex]
+        );
+        emit CivilizationContribution(
+            msg.sender,
+            civilizationId,
+            CivilizationActivity.Ignite,
+            1,
+            blessingPowerTotal
+        );
     }
 
     function fortuneClaim(bytes32 proofId) external nonReentrant whenNotPaused returns (uint256 rewardAmount) {
@@ -421,6 +609,8 @@ contract KGEN_TempleHeart_Upgradeable is
         if (fortuneBurnProofConsumed[proofId]) revert ProofAlreadyConsumed();
 
         WishRecord storage wish = _activeWishByUser[msg.sender];
+        FortuneLedger storage ledger = _fortuneLedgerByWallet[msg.sender];
+        if (ledger.claimCount > 0 && !ledger.repaidAfterLastClaim) revert RepaymentRequired();
         if (wish.status != WishStatus.HolyCupPassed && wish.status != WishStatus.Claimable) revert WishNotReady();
         IKAIOSAlchemyProofSource.AlchemyBurnRecord memory record = _validatedProof(
             proofId,
@@ -448,11 +638,17 @@ contract KGEN_TempleHeart_Upgradeable is
 
         uint256 power = blessingPowerByCivilization[wish.civilizationId];
         rewardAmount = _scale(_fortuneRewardWhole(power));
-        if (kgen.balanceOf(address(this)) < rewardAmount) revert HeartInsufficientFunds();
+        _requireOperationalReservePayout(rewardAmount);
         totalFortunePaid += rewardAmount;
         totalFortuneClaimants += 1;
+        ledger.totalClaimed += rewardAmount;
+        ledger.lastClaimAmount = rewardAmount;
+        ledger.lastClaimAt = block.timestamp;
+        ledger.claimCount += 1;
+        ledger.repaidAfterLastClaim = false;
         kgen.safeTransfer(msg.sender, rewardAmount);
         _touchPilgrim(msg.sender, wish.civilizationId);
+        _touchCustomerWallet(msg.sender);
         emit FortuneClaimed(
             msg.sender,
             wish.civilizationId,
@@ -464,6 +660,59 @@ contract KGEN_TempleHeart_Upgradeable is
         );
     }
 
+    function voluntaryRepayFortune(uint256 amount) external nonReentrant whenNotPaused {
+        if (amount == 0) revert InvalidRange();
+        WishRecord storage wish = _activeWishByUser[msg.sender];
+        if (wish.status == WishStatus.None) revert WishNotReady();
+        FortuneLedger storage ledger = _fortuneLedgerByWallet[msg.sender];
+
+        kgen.safeTransferFrom(msg.sender, address(this), amount);
+        ledger.totalVoluntaryRepaid += amount;
+        ledger.lastVoluntaryRepaymentAmount = amount;
+        ledger.lastVoluntaryRepaymentAt = block.timestamp;
+        ledger.repaymentCount += 1;
+        if (ledger.claimCount > 0 && block.timestamp >= ledger.lastClaimAt) {
+            ledger.repaidAfterLastClaim = true;
+        }
+
+        uint256 wholeRepaid = _descale(amount);
+        if (wholeRepaid > 0) {
+            blessingPowerByCivilization[wish.civilizationId] += wholeRepaid;
+        }
+        _touchPilgrim(msg.sender, wish.civilizationId);
+        _touchCustomerWallet(msg.sender);
+        emit FortuneVoluntarilyRepaid(
+            msg.sender,
+            wish.civilizationId,
+            amount,
+            ledger.totalVoluntaryRepaid,
+            ledger.repaidAfterLastClaim
+        );
+        emit CivilizationContribution(
+            msg.sender,
+            wish.civilizationId,
+            CivilizationActivity.FortuneRepayment,
+            amount,
+            blessingPowerByCivilization[wish.civilizationId]
+        );
+        _normalizeHeartBalance();
+    }
+
+    function fortuneLedger(address user) external view returns (FortuneLedger memory) {
+        return _fortuneLedgerByWallet[user];
+    }
+
+    function nextFortuneEligibility(address user)
+        external
+        view
+        returns (bool eligible, bool repaymentSatisfied, uint256 cooldownEndsAt)
+    {
+        FortuneLedger storage ledger = _fortuneLedgerByWallet[user];
+        repaymentSatisfied = ledger.claimCount == 0 || ledger.repaidAfterLastClaim;
+        cooldownEndsAt = lastFortuneAt[user] + fortuneCooldownSeconds;
+        eligible = repaymentSatisfied && block.timestamp >= cooldownEndsAt;
+    }
+
     function previewFortuneReward(bytes32 civilizationId) external view returns (uint256) {
         return _fortuneRewardWhole(blessingPowerByCivilization[civilizationId]);
     }
@@ -473,23 +722,58 @@ contract KGEN_TempleHeart_Upgradeable is
     }
 
     function injectFromBrain(uint256 amountWhole) external nonReentrant onlyRole(OPERATOR_ROLE) {
-        if (brainVault == address(0)) revert ZeroAddress();
         if (amountWhole == 0) revert InvalidRange();
         uint256 amount = _scale(amountWhole);
-        kgen.safeTransferFrom(brainVault, address(this), amount);
-        emit BloodInjectedFromBrain(brainVault, amount);
+        address treasury11520 = current11520Treasury();
+        kgen.safeTransferFrom(treasury11520, address(this), amount);
+        emit BloodInjectedFromBrain(treasury11520, amount);
+        _normalizeHeartBalance();
     }
 
     function sweepExcessToBrain() external nonReentrant onlyRole(OPERATOR_ROLE) {
-        if (brainVault == address(0)) revert ZeroAddress();
-        uint256 capAmount = _scale(baseCapWhole);
+        (address treasury11520, uint256 excess, uint256 capAmount) = _normalizeHeartBalance();
+        emit ExcessSweptToBrain(treasury11520, excess, capAmount);
+    }
+
+    function normalizeHeartBalance()
+        external
+        nonReentrant
+        returns (address treasury11520, uint256 excess, uint256 capAmount)
+    {
+        return _normalizeHeartBalance();
+    }
+
+    function current11520Treasury() public view returns (address treasury11520) {
+        if (address(organRegistry) == address(0)) revert OrganRegistryNotSet();
+        treasury11520 = organRegistry.organ(ORGAN_EXCHANGE_TREASURY_11520);
+        if (treasury11520 == address(0)) revert CanonicalTreasuryNotSet();
+        if (treasury11520.code.length == 0) revert NotAContract(treasury11520);
+    }
+
+    function isHeartGameOperational() public view returns (bool) {
+        if (address(kgen) == address(0)) return false;
+        return kgen.balanceOf(address(this)) >= _scale(gameSurvivalGateWhole);
+    }
+
+    function gamePayout(address player, uint256 amount)
+        external
+        nonReentrant
+        whenNotPaused
+    {
+        if (msg.sender != fortuneGame) revert UnauthorizedGame();
+        if (player == address(0) || amount == 0) revert InvalidRange();
         uint256 balance = kgen.balanceOf(address(this));
-        uint256 excess;
-        if (balance > capAmount) {
-            excess = balance - capAmount;
-            kgen.safeTransfer(brainVault, excess);
+        uint256 gateAmount = _scale(gameSurvivalGateWhole);
+        if (balance < gateAmount || balance < amount || balance - amount < gateAmount) {
+            revert GameSurvivalGateClosed();
         }
-        emit ExcessSweptToBrain(brainVault, excess, capAmount);
+        kgen.safeTransfer(player, amount);
+        _touchCustomerWallet(player);
+        emit GamePayout(msg.sender, player, amount, balance - amount);
+    }
+
+    function isCustomerWallet(address user) external view returns (bool) {
+        return _customerWallet[user];
     }
 
     function _validatedProof(
@@ -544,6 +828,27 @@ contract KGEN_TempleHeart_Upgradeable is
         _touchPilgrim(user, civilizationId);
     }
 
+    function _registerCustomerWallet(address user) private {
+        uint256 dayIndex = block.timestamp / 1 days;
+        if (!_customerWallet[user]) {
+            _customerWallet[user] = true;
+            totalCustomerWallets += 1;
+            dailyNewCustomerWallets[dayIndex] += 1;
+            emit CustomerWalletRegistered(user, dayIndex, totalCustomerWallets);
+        }
+        _touchCustomerWallet(user);
+    }
+
+    function _touchCustomerWallet(address user) private {
+        if (!_customerWallet[user]) return;
+        uint256 dayIndex = block.timestamp / 1 days;
+        if (!_activeCustomerSeenOnDay[dayIndex][user]) {
+            _activeCustomerSeenOnDay[dayIndex][user] = true;
+            dailyActiveCustomerWallets[dayIndex] += 1;
+            emit CustomerWalletActive(user, dayIndex);
+        }
+    }
+
     function _touchPilgrim(address user, bytes32 civilizationId) private {
         uint256 dayIndex = block.timestamp / 1 days;
         if (!_activePilgrimSeenOnDay[dayIndex][civilizationId]) {
@@ -551,6 +856,36 @@ contract KGEN_TempleHeart_Upgradeable is
             dailyActivePilgrims[dayIndex] += 1;
             emit PilgrimActive(user, civilizationId, dayIndex);
         }
+    }
+
+    function _requireOperationalReservePayout(uint256 amount) private view {
+        uint256 balance = kgen.balanceOf(address(this));
+        if (balance < amount) revert HeartInsufficientFunds();
+        uint256 reserveAmount = _scale(baseFloorWhole);
+        if (balance - amount < reserveAmount) revert HeartInsufficientFunds();
+    }
+
+    function _normalizeHeartBalance()
+        private
+        returns (address treasury11520, uint256 excess, uint256 capAmount)
+    {
+        capAmount = _scale(baseCapWhole);
+        uint256 balance = kgen.balanceOf(address(this));
+        if (balance > capAmount) {
+            treasury11520 = current11520Treasury();
+            excess = balance - capAmount;
+            kgen.safeTransfer(treasury11520, excess);
+        } else if (address(organRegistry) != address(0)) {
+            treasury11520 = organRegistry.organ(ORGAN_EXCHANGE_TREASURY_11520);
+        }
+        emit HeartNormalized(msg.sender, treasury11520, excess, capAmount);
+    }
+
+    function _setOrganRegistry(address registry) private {
+        if (registry == address(0)) revert ZeroAddress();
+        if (registry.code.length == 0) revert NotAContract(registry);
+        organRegistry = IKAIOSOrganRegistryForTempleHeart(registry);
+        emit OrganRegistryUpdated(registry);
     }
 
     function _scale(uint256 wholeTokens) private view returns (uint256) {

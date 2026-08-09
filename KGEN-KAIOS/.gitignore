@@ -1,3 +1,9 @@
 node_modules/
 artifacts/
 coverage/
+.env
+.env.*
+*.pem
+*.key
+secrets/
+private-key*

@@ -1,28 +1,18 @@
 {
   "status": "PASS",
   "checks": {
-    "files": 64,
-    "json": 8,
-    "markdown": 28,
-    "utf8": 62,
+    "files": 26,
+    "json": 5,
+    "markdown": 5,
+    "utf8": 24,
     "bom": 0,
     "corruption": 0,
     "secretHits": 0,
     "brokenLinks": 0
   },
   "protectedChanges": {
-    "currentFiles": [
-      "KGEN-KAIOS/KAIOS_WHITE_HOLE_ATOMIC_CONVERSION_AND_LIQUIDITY_RUNTIME_CURRENT.md",
-      "KGEN-KAIOS/UNIVERSE_EXCHANGE_RUNTIME_CURRENT.md",
-      "KGEN-KAIOS/reports/CURRENT_LINEAGE_RECONCILIATION.json",
-      "docs/physics/KGEN_KAIOS_SCALE_AND_PLANCK_RUNTIME_CURRENT.md",
-      "docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md"
-    ],
-    "constitutionFiles": [
-      "docs/constitution/01_KGEN_Universe_Constitution.md",
-      "docs/constitution/02_KAIOS_Civilization_Constitution.md",
-      "docs/constitution/03_Celestial_Bank_18888.md"
-    ],
+    "currentFiles": [],
+    "constitutionFiles": [],
     "bootSequenceChanged": false,
     "walletOrPrivateKeyFiles": [],
     "deploymentFiles": []

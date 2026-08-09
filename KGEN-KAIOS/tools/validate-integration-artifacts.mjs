@@ -12,7 +12,7 @@ function gitLines(args) {
 }
 
 const files = [...new Set([
-  ...gitLines(["diff", "--name-only", "main..."]),
+  ...gitLines(["diff", "--name-only", process.env.INTEGRATION_BASE_RANGE ?? "origin/main...HEAD"]),
   ...gitLines(["diff", "--name-only"]),
   ...gitLines(["ls-files", "--others", "--exclude-standard"]),
 ])].filter((relativePath) => !relativePath.includes("node_modules/") && !relativePath.includes("artifacts/"));

@@ -4,13 +4,14 @@
   "requestedCompiler": "0.8.24",
   "optimizer": {
     "enabled": true,
-    "runs": 200
+    "runs": 1
   },
+  "viaIR": true,
   "evmVersion": "paris",
   "openzeppelinContracts": "5.0.2",
   "openzeppelinContractsUpgradeable": "5.0.2",
   "sourceCount": 16,
-  "contractCount": 25,
+  "contractCount": 27,
   "eip170MaximumDeployedBytecodeBytes": 24576,
   "oversizedContracts": [],
   "warnings": 0,
@@ -18,152 +19,164 @@
     {
       "contractName": "KGEN_TempleHeart_Upgradeable",
       "sourceName": "../KGEN/contracts/KGEN_TempleHeart_Upgradeable.sol",
-      "bytecodeBytes": 19906,
-      "deployedBytecodeBytes": 19646
+      "bytecodeBytes": 23768,
+      "deployedBytecodeBytes": 23553
     },
     {
       "contractName": "ERC1967Proxy",
       "sourceName": "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol",
-      "bytecodeBytes": 993,
-      "deployedBytecodeBytes": 129
+      "bytecodeBytes": 682,
+      "deployedBytecodeBytes": 92
     },
     {
       "contractName": "ERC1967Utils",
       "sourceName": "@openzeppelin/contracts/proxy/ERC1967/ERC1967Utils.sol",
-      "bytecodeBytes": 100,
-      "deployedBytecodeBytes": 45
+      "bytecodeBytes": 46,
+      "deployedBytecodeBytes": 17
     },
     {
       "contractName": "SafeERC20",
       "sourceName": "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol",
-      "bytecodeBytes": 100,
-      "deployedBytecodeBytes": 45
+      "bytecodeBytes": 46,
+      "deployedBytecodeBytes": 17
     },
     {
       "contractName": "Address",
       "sourceName": "@openzeppelin/contracts/utils/Address.sol",
-      "bytecodeBytes": 100,
-      "deployedBytecodeBytes": 45
+      "bytecodeBytes": 46,
+      "deployedBytecodeBytes": 17
     },
     {
       "contractName": "StorageSlot",
       "sourceName": "@openzeppelin/contracts/utils/StorageSlot.sol",
-      "bytecodeBytes": 100,
-      "deployedBytecodeBytes": 45
+      "bytecodeBytes": 46,
+      "deployedBytecodeBytes": 17
     },
     {
       "contractName": "Strings",
       "sourceName": "@openzeppelin/contracts/utils/Strings.sol",
-      "bytecodeBytes": 100,
-      "deployedBytecodeBytes": 45
+      "bytecodeBytes": 46,
+      "deployedBytecodeBytes": 17
     },
     {
       "contractName": "ECDSA",
       "sourceName": "@openzeppelin/contracts/utils/cryptography/ECDSA.sol",
-      "bytecodeBytes": 100,
-      "deployedBytecodeBytes": 45
+      "bytecodeBytes": 46,
+      "deployedBytecodeBytes": 17
     },
     {
       "contractName": "MessageHashUtils",
       "sourceName": "@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol",
-      "bytecodeBytes": 100,
-      "deployedBytecodeBytes": 45
+      "bytecodeBytes": 46,
+      "deployedBytecodeBytes": 17
     },
     {
       "contractName": "Math",
       "sourceName": "@openzeppelin/contracts/utils/math/Math.sol",
-      "bytecodeBytes": 100,
-      "deployedBytecodeBytes": 45
+      "bytecodeBytes": 46,
+      "deployedBytecodeBytes": 17
     },
     {
       "contractName": "SignedMath",
       "sourceName": "@openzeppelin/contracts/utils/math/SignedMath.sol",
-      "bytecodeBytes": 100,
-      "deployedBytecodeBytes": 45
+      "bytecodeBytes": 46,
+      "deployedBytecodeBytes": 17
     },
     {
       "contractName": "KAIOS",
       "sourceName": "contracts/KAIOS.sol",
-      "bytecodeBytes": 7080,
-      "deployedBytecodeBytes": 5844
+      "bytecodeBytes": 7228,
+      "deployedBytecodeBytes": 5873
     },
     {
       "contractName": "KAIOSAlchemyFurnace",
       "sourceName": "contracts/KAIOSAlchemyFurnace.sol",
-      "bytecodeBytes": 2859,
-      "deployedBytecodeBytes": 2495
+      "bytecodeBytes": 2381,
+      "deployedBytecodeBytes": 2084
     },
     {
       "contractName": "KAIOSEventHorizonVaultV01",
       "sourceName": "contracts/KAIOSEventHorizonVaultV01.sol",
-      "bytecodeBytes": 2202,
-      "deployedBytecodeBytes": 2005
+      "bytecodeBytes": 1867,
+      "deployedBytecodeBytes": 1689
     },
     {
       "contractName": "KAIOSGenesisInscription",
       "sourceName": "contracts/KAIOSGenesisInscription.sol",
-      "bytecodeBytes": 2035,
-      "deployedBytecodeBytes": 1381
+      "bytecodeBytes": 2159,
+      "deployedBytecodeBytes": 1641
     },
     {
       "contractName": "KAIOSOrganRegistry",
       "sourceName": "contracts/KAIOSOrganRegistry.sol",
-      "bytecodeBytes": 3016,
-      "deployedBytecodeBytes": 2548
+      "bytecodeBytes": 2718,
+      "deployedBytecodeBytes": 2404
     },
     {
       "contractName": "KAIOSPairRegistry",
       "sourceName": "contracts/KAIOSPairRegistry.sol",
-      "bytecodeBytes": 2112,
-      "deployedBytecodeBytes": 1792
+      "bytecodeBytes": 1756,
+      "deployedBytecodeBytes": 1535
     },
     {
       "contractName": "KSHIP",
       "sourceName": "contracts/KSHIP.sol",
-      "bytecodeBytes": 4185,
-      "deployedBytecodeBytes": 3355
+      "bytecodeBytes": 4153,
+      "deployedBytecodeBytes": 3118
     },
     {
       "contractName": "KSHIPConverter",
       "sourceName": "contracts/KSHIPConverter.sol",
-      "bytecodeBytes": 1341,
-      "deployedBytecodeBytes": 1048
+      "bytecodeBytes": 1221,
+      "deployedBytecodeBytes": 950
     },
     {
       "contractName": "KUFO",
       "sourceName": "contracts/KUFO.sol",
-      "bytecodeBytes": 6115,
-      "deployedBytecodeBytes": 5281
+      "bytecodeBytes": 6051,
+      "deployedBytecodeBytes": 4992
     },
     {
       "contractName": "KUFOClaimWormhole",
       "sourceName": "contracts/KUFOClaimWormhole.sol",
-      "bytecodeBytes": 1095,
-      "deployedBytecodeBytes": 802
+      "bytecodeBytes": 1035,
+      "deployedBytecodeBytes": 765
+    },
+    {
+      "contractName": "KGEN_TempleHeart_V3_3_2_Baseline",
+      "sourceName": "tests/baseline/KGEN_TempleHeart_V3_3_2_Baseline.sol",
+      "bytecodeBytes": 18513,
+      "deployedBytecodeBytes": 18298
     },
     {
       "contractName": "MockKGEN",
       "sourceName": "tests/contracts/MockKGEN.sol",
-      "bytecodeBytes": 2978,
-      "deployedBytecodeBytes": 1941
+      "bytecodeBytes": 2829,
+      "deployedBytecodeBytes": 1819
     },
     {
       "contractName": "MockMintOrgan",
       "sourceName": "tests/contracts/MockMintOrgan.sol",
-      "bytecodeBytes": 416,
-      "deployedBytecodeBytes": 384
+      "bytecodeBytes": 430,
+      "deployedBytecodeBytes": 402
     },
     {
       "contractName": "MockOrgan",
       "sourceName": "tests/contracts/MockOrgan.sol",
-      "bytecodeBytes": 51,
-      "deployedBytecodeBytes": 22
+      "bytecodeBytes": 42,
+      "deployedBytecodeBytes": 17
+    },
+    {
+      "contractName": "TestFortuneGame",
+      "sourceName": "tests/contracts/MockOrgan.sol",
+      "bytecodeBytes": 308,
+      "deployedBytecodeBytes": 280
     },
     {
       "contractName": "TestERC1967Proxy",
       "sourceName": "tests/contracts/TestERC1967Proxy.sol",
-      "bytecodeBytes": 1010,
-      "deployedBytecodeBytes": 129
+      "bytecodeBytes": 660,
+      "deployedBytecodeBytes": 92
     }
   ]
 }

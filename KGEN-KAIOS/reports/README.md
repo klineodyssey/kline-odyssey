@@ -9,6 +9,13 @@
 |---|---|---|---|---|
 | KAIOS-DRYRUN-001 | `KGEN-KAIOS/reports/KAIOS-DRYRUN-001_REPORT.md` | Cursor | Codex | DONE |
 
+## TempleHeart BSC Testnet Evidence
+
+| Evidence | Path | Network | Status |
+|---|---|---|---|
+| Human-readable rehearsal report | `KGEN-KAIOS/reports/BSC_TESTNET_TEMPLEHEART_V3_4_REHEARSAL.md` | BSC Testnet chainId 97 | PASS |
+| Machine-readable rehearsal evidence | `KGEN-KAIOS/reports/BSC_TESTNET_TEMPLEHEART_V3_4_REHEARSAL.json` | BSC Testnet chainId 97 | PASS |
+
 ## Report Rules
 
 - Cursor writes the task report here only after claiming the dry run WorkOrder.
