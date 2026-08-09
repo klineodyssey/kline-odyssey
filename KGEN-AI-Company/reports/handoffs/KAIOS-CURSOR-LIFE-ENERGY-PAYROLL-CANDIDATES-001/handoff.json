@@ -6,7 +6,7 @@
   "reviewer": "codex-gm-01",
   "branch": "cursor-handoff/KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-CANDIDATES-001",
   "base_sha": "7344d231837d40b504622c8c8b4376ed25110e20",
-  "head_sha": "8d1c4b9c",
+  "head_sha": "fb446d03",
   "pr_number": null,
   "state_progress": {"REVIEW": "PENDING_CODEX"},
   "result": "HANDOFF_SUBMITTED",
