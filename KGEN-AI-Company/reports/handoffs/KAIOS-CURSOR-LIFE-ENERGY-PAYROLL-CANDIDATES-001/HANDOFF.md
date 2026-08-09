@@ -1,20 +1,25 @@
 # Handoff — KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-CANDIDATES-001
 
-**Status:** BLOCKED — response file delivered; fixtures await dispatch  
-**Reviewer:** codex-gm-01
+**Worker:** cursor-01  
+**Reviewer:** codex-gm-01  
+**Branch:** `cursor-handoff/KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-CANDIDATES-001`  
+**Status:** `HANDOFF_SUBMITTED` / `PENDING_CODEX_REVIEW`
 
 ## Summary
 
-Human work order received again 2026-08-03. Canonical spec merged (#119–#121).  
-**New:** `CURSOR_LIFE_ENERGY_PAYROLL_RESPONSE_20260803.md` satisfies response-file gate.  
-**Still missing:** Codex atomic claim (`PREPARED_NOT_DISPATCHED`).
+Delivered all seven envelope-authorized candidate fixtures for life-energy payroll simulation v0.
 
-## Next
+## Files
 
-Codex dispatch → cursor-01 implements candidate fixtures + tests on this branch.
+- Payroll: `KAIOS/economy/candidates/payroll-v0/CURSOR_*_V0.json` (2)
+- Colony ledger: `KAIOS/economy/candidates/colony-ledger-v0/CURSOR_*_V0.json` (2)
+- Viewer: `KAIOS/world-viewer/candidates/life-energy-payroll/CURSOR_*_V0.json` (2)
+- Report: `KGEN-AI-Company/reports/CURSOR_LIFE_ENERGY_PAYROLL_CANDIDATE_REPORT.md`
 
-<!-- CURSOR_CODEX_HANDOFF -->
-```json
-{"task_id":"KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-CANDIDATES-001","status":"BLOCKED","stop_code":"AWAITING_CODEX_ATOMIC_CLAIM","response_file":"KGEN-AI-Company/reports/CURSOR_LIFE_ENERGY_PAYROLL_RESPONSE_20260803.md","final_status":"CURSOR_LIFE_ENERGY_PAYROLL_CANDIDATES_BLOCKED","candidate_files_created":0}
-```
-<!-- /CURSOR_CODEX_HANDOFF -->
+## Boundaries
+
+Candidate-only. No canonical mutation. No wallet/KGEN/main merge.
+
+## Codex next
+
+Review → APPROVE or FIX → revalidate claim if accepting post-lease delivery.

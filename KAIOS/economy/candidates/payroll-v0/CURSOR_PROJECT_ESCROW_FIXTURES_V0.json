@@ -1,0 +1,100 @@
+{
+  "schema_version": "0.1.0-candidate",
+  "fixture_id": "CURSOR-PROJECT-ESCROW-FIXTURES-V0",
+  "classification": ["CANDIDATE_ONLY", "PENDING_CODEX_REVIEW"],
+  "simulation_only": true,
+  "currency": "KAIOS_CREDIT",
+  "issuance_enabled": false,
+  "canonical_schema_refs": [
+    "KAIOS/economy/life-energy-payroll/KAIOS_CREDIT_LEDGER_SCHEMA_V1.json",
+    "KAIOS/economy/life-energy-payroll/KAIOS_AI_WORKER_PAYROLL_WALLET_V0_SPEC.md"
+  ],
+  "claim_key_template": "project_id/task_id/worker_life_id/approval_id",
+  "scenarios": [
+    {
+      "scenario_id": "ESCROW-APPROVED-RELEASE",
+      "state": "PAYROLL_RELEASED",
+      "ledger_id": "CREDIT-LEDGER-PROJECT-PLANT-001",
+      "credit_supply": 1000,
+      "accounts": [
+        {"account_id": "PROJECT-BUDGET-001", "account_type": "PROJECT_BUDGET", "balance": 880},
+        {"account_id": "PROJECT-ESCROW-001", "account_type": "PROJECT_ESCROW", "balance": 0},
+        {"account_id": "AI-WORKER-WALLET-001", "account_type": "AI_WORKER_WALLET", "balance": 80},
+        {"account_id": "HOUSEHOLD-LEDGER-001", "account_type": "HOUSEHOLD", "balance": 10},
+        {"account_id": "ENERGY-COST-POOL", "account_type": "ENERGY_COST", "balance": 10},
+        {"account_id": "COMPUTE-COST-POOL", "account_type": "COMPUTE_COST", "balance": 8},
+        {"account_id": "MAINTENANCE-RESERVE", "account_type": "MAINTENANCE_RESERVE", "balance": 7},
+        {"account_id": "PLATFORM-FEE-POOL", "account_type": "PLATFORM_FEE", "balance": 5}
+      ],
+      "entries": [
+        {"entry_id": "CREDIT-ENTRY-001", "event_id": "RESERVE-001", "debit_account": "PROJECT-BUDGET-001", "credit_account": "PROJECT-ESCROW-001", "amount": 120, "currency": "KAIOS_CREDIT", "balanced": true, "reason": "RESERVED_PAYROLL", "simulation_time": 0, "claim_key": "PROJECT-PLANT-001/TASK-CANDIDATE-001/LIFE-AI-WORKER-001/APPROVAL-CODEX-001"},
+        {"entry_id": "CREDIT-ENTRY-002", "event_id": "RELEASE-001", "debit_account": "PROJECT-ESCROW-001", "credit_account": "AI-WORKER-WALLET-001", "amount": 120, "currency": "KAIOS_CREDIT", "balanced": true, "reason": "GROSS_PAYROLL_RELEASE", "simulation_time": 0, "claim_key": "PROJECT-PLANT-001/TASK-CANDIDATE-001/LIFE-AI-WORKER-001/APPROVAL-CODEX-001"}
+      ],
+      "previous_state_hash": "fnv1a-escrow-prev-approved",
+      "next_state_hash": "fnv1a-escrow-next-approved"
+    },
+    {
+      "scenario_id": "ESCROW-REJECTED-REFUND",
+      "state": "REFUNDED",
+      "ledger_id": "CREDIT-LEDGER-REJECTED-001",
+      "credit_supply": 1000,
+      "accounts": [
+        {"account_id": "PROJECT-BUDGET-001", "account_type": "PROJECT_BUDGET", "balance": 1000},
+        {"account_id": "PROJECT-ESCROW-001", "account_type": "PROJECT_ESCROW", "balance": 0},
+        {"account_id": "AI-WORKER-WALLET-001", "account_type": "AI_WORKER_WALLET", "balance": 0}
+      ],
+      "entries": [
+        {"entry_id": "CREDIT-ENTRY-R1", "event_id": "RESERVE-R1", "debit_account": "PROJECT-BUDGET-001", "credit_account": "PROJECT-ESCROW-001", "amount": 120, "currency": "KAIOS_CREDIT", "balanced": true, "reason": "RESERVED_PAYROLL", "simulation_time": 0, "claim_key": "PROJECT-PLANT-001/TASK-CANDIDATE-001/LIFE-AI-WORKER-001/APPROVAL-CODEX-001"},
+        {"entry_id": "CREDIT-ENTRY-R2", "event_id": "REFUND-R1", "debit_account": "PROJECT-ESCROW-001", "credit_account": "PROJECT-BUDGET-001", "amount": 120, "currency": "KAIOS_CREDIT", "balanced": true, "reason": "REJECTED_TASK_REFUND", "simulation_time": 0, "claim_key": "PROJECT-PLANT-001/TASK-CANDIDATE-001/LIFE-AI-WORKER-001/APPROVAL-CODEX-001"}
+      ],
+      "previous_state_hash": "fnv1a-escrow-prev-rejected",
+      "next_state_hash": "fnv1a-escrow-next-rejected"
+    },
+    {
+      "scenario_id": "ESCROW-REWORK-HOLD",
+      "state": "REWORK_REQUIRED",
+      "ledger_id": "CREDIT-LEDGER-REWORK-001",
+      "credit_supply": 1000,
+      "accounts": [
+        {"account_id": "PROJECT-BUDGET-001", "account_type": "PROJECT_BUDGET", "balance": 880},
+        {"account_id": "PROJECT-ESCROW-001", "account_type": "PROJECT_ESCROW", "balance": 120},
+        {"account_id": "AI-WORKER-WALLET-001", "account_type": "AI_WORKER_WALLET", "balance": 0}
+      ],
+      "entries": [
+        {"entry_id": "CREDIT-ENTRY-W1", "event_id": "RESERVE-W1", "debit_account": "PROJECT-BUDGET-001", "credit_account": "PROJECT-ESCROW-001", "amount": 120, "currency": "KAIOS_CREDIT", "balanced": true, "reason": "RESERVED_PAYROLL", "simulation_time": 0, "claim_key": "PROJECT-PLANT-001/TASK-CANDIDATE-001/LIFE-AI-WORKER-001/APPROVAL-CODEX-001"}
+      ],
+      "previous_state_hash": "fnv1a-escrow-prev-rework",
+      "next_state_hash": "fnv1a-escrow-next-rework"
+    },
+    {
+      "scenario_id": "ESCROW-INSUFFICIENT-BUDGET",
+      "state": "BUDGET_RESERVED",
+      "ledger_id": "CREDIT-LEDGER-BLOCKED-BUDGET",
+      "credit_supply": 50,
+      "accounts": [
+        {"account_id": "PROJECT-BUDGET-001", "account_type": "PROJECT_BUDGET", "balance": 50},
+        {"account_id": "PROJECT-ESCROW-001", "account_type": "PROJECT_ESCROW", "balance": 0}
+      ],
+      "entries": [],
+      "block_reason": "INSUFFICIENT_PROJECT_BUDGET",
+      "required_gross_pay": 120,
+      "previous_state_hash": "fnv1a-escrow-prev-budget",
+      "next_state_hash": "fnv1a-escrow-next-budget"
+    },
+    {
+      "scenario_id": "ESCROW-DUPLICATE-BLOCKED",
+      "state": "APPROVED",
+      "ledger_id": "CREDIT-LEDGER-DUPLICATE",
+      "credit_supply": 1000,
+      "duplicate_claim_key": "PROJECT-PLANT-001/TASK-CANDIDATE-001/LIFE-AI-WORKER-001/APPROVAL-CODEX-001",
+      "block_reason": "DUPLICATE_PAYROLL",
+      "previous_state_hash": "fnv1a-escrow-prev-dup",
+      "next_state_hash": "fnv1a-escrow-next-dup"
+    }
+  ],
+  "conservation_rules": {
+    "balanced_entries_only": true,
+    "no_silent_mint": true,
+    "credit_supply_equals_account_total": true
+  }
+}

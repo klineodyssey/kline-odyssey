@@ -1,0 +1,87 @@
+{
+  "ledger_id": "COLONY-LEDGER-BEE-001",
+  "group_id": "BEE-HIVE-001",
+  "group_type": "BEE_HIVE",
+  "resource_inventory": {
+    "meadow_nectar_mass": 60,
+    "meadow_pollen_mass": 22,
+    "hive_nectar_mass": 10,
+    "hive_pollen_mass": 8,
+    "hive_honey_mass": 1,
+    "hive_processing_byproduct_mass": 4,
+    "hive_consumed_mass": 5
+  },
+  "member_contributions": [
+    {
+      "member_id": "BEE-WORKER-GROUP",
+      "credit_type": "POLLINATION_CREDIT",
+      "amount": 28,
+      "source_event_id": "BEE-COLLECTION-001"
+    }
+  ],
+  "ration_priorities": ["queen", "larvae", "workers"],
+  "care_obligations": ["queen_feeding", "brood_nectar", "worker_honey_share"],
+  "maintenance_reserve": {
+    "wax_comb_mass": 3
+  },
+  "winter_or_emergency_reserve": {
+    "emergency_honey_mass": 2
+  },
+  "birth_or_larval_support": {
+    "brood_nectar_mass": 2
+  },
+  "work_credits": {
+    "BEE-WORKER-GROUP": 28
+  },
+  "distribution_events": [
+    {
+      "event_id": "BEE-DIST-001",
+      "resource_id": "hive_honey_mass",
+      "quantity": 5,
+      "unit": "mass_units",
+      "from_inventory": "hive_honey_mass",
+      "to_member_or_pool": "queen:1,larvae:2,workers:2",
+      "simulation_time": 5
+    },
+    {
+      "event_id": "BEE-PROC-001",
+      "resource_id": "hive_nectar_mass",
+      "quantity": 10,
+      "unit": "mass_units",
+      "from_inventory": "hive_nectar_mass",
+      "to_member_or_pool": "honey_processing:6honey+4byproduct",
+      "simulation_time": 4
+    }
+  ],
+  "shortage_events": [
+    "NECTAR_AND_HONEY_SHORTAGE:T4:shortage_risk=true:credits_unchanged=28"
+  ],
+  "history": [
+    "POLLINATION_CREDIT:28",
+    "HONEY_PROCESSING:10->6+4",
+    "HIVE_HONEY_SHARE:5",
+    "NECTAR_AND_HONEY_SHORTAGE:blocked_share"
+  ],
+  "authority": "INTERNAL_ALLOCATION_SIMULATION_ONLY",
+  "simulation_only": true,
+  "candidate_metadata": {
+    "schema_version": "0.1.0-candidate",
+    "classification": "CANDIDATE_ONLY",
+    "canonical_schema_ref": "KAIOS/economy/life-energy-payroll/KAIOS_COLONY_RESOURCE_LEDGER_SCHEMA_V1.json",
+    "invariant": "POLLINATION_CREDIT cannot replace meadow_nectar_mass or hive_honey_mass",
+    "mass_conservation": {
+      "meadow_nectar_mass": 60,
+      "hive_nectar_mass": 10,
+      "hive_honey_mass": 1,
+      "hive_processing_byproduct_mass": 4,
+      "hive_consumed_mass": 5,
+      "total_nectar_chain": 80
+    },
+    "honey_shares_after_shortage": {
+      "queen": 0,
+      "larvae": 0,
+      "workers": 0
+    },
+    "shortage_risk": true
+  }
+}

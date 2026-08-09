@@ -1,0 +1,128 @@
+{
+  "schema_version": "0.1.0-candidate",
+  "fixture_id": "CURSOR-LIFE-ENERGY-PAYROLL-TEST-SCENARIOS-V0",
+  "classification": ["CANDIDATE_ONLY", "PENDING_CODEX_REVIEW"],
+  "simulation_only": true,
+  "runtime_seed": "TEST-LIFE-ENERGY-001",
+  "canonical_test_plan_ref": "KAIOS/economy/life-energy-payroll/KAIOS_LIFE_ENERGY_ECONOMY_PAYROLL_V0_TEST_PLAN.md",
+  "runtime_test_ref": "KGEN-KAIOS/world-viewer/tests/life-energy-payroll-runtime.test.mjs",
+  "scenarios": [
+    {
+      "scenario_id": "S01-PAYROLL-APPROVED-RELEASE",
+      "name": "Approved candidate-life work releases payroll to AI wallet first",
+      "actions": [{"method": "runPayrollDemo", "args": {}}],
+      "expected": {
+        "project_status": "COMPLETED",
+        "ai_wallet_balance": 80,
+        "household_balance": 10,
+        "gross_pay": 120,
+        "net_pay": 80,
+        "payroll_status": "PAYROLL_RELEASED",
+        "integrity_ok": true
+      }
+    },
+    {
+      "scenario_id": "S02-PHYSICAL-RESOURCE-CONSUMPTION",
+      "name": "Physical electricity and compute are consumed by candidate work",
+      "actions": [{"method": "runPayrollDemo", "args": {}}],
+      "expected": {
+        "electricity_consumed": 8,
+        "compute_consumed": 12,
+        "electricity_conservation": 100,
+        "compute_conservation": 100
+      }
+    },
+    {
+      "scenario_id": "S03-DUPLICATE-PAYROLL-BLOCKED",
+      "name": "Duplicate payroll is blocked without a second transfer",
+      "actions": [
+        {"method": "runPayrollDemo", "args": {}},
+        {"method": "runPayrollDemo", "args": {}}
+      ],
+      "expected": {
+        "second_result_status": "BLOCKED",
+        "second_result_reason": "DUPLICATE_PAYROLL",
+        "ledger_length_unchanged": true
+      }
+    },
+    {
+      "scenario_id": "S04-INSUFFICIENT-BUDGET",
+      "name": "Insufficient budget blocks escrow reservation",
+      "actions": [{"method": "runPayrollDemo", "args": {"projectBudget": 50}}],
+      "expected": {
+        "reason": "INSUFFICIENT_PROJECT_BUDGET",
+        "project_null": true,
+        "integrity_ok": true
+      }
+    },
+    {
+      "scenario_id": "S05-REJECTED-NO-PAY",
+      "name": "Rejected task receives no pay and refunds escrow",
+      "actions": [{"method": "runPayrollDemo", "args": {"outcome": "REJECTED"}}],
+      "expected": {
+        "project_status": "REJECTED",
+        "project_budget_balance": 1000,
+        "escrow_balance": 0,
+        "ai_wallet_balance": 0
+      }
+    },
+    {
+      "scenario_id": "S06-REWORK-ESCROW-HOLD",
+      "name": "Rework holds reserved payroll in escrow",
+      "actions": [{"method": "runPayrollDemo", "args": {"outcome": "REWORK_REQUIRED"}}],
+      "expected": {
+        "project_status": "REWORK_REQUIRED",
+        "escrow_balance": 120,
+        "ai_wallet_balance": 0
+      }
+    },
+    {
+      "scenario_id": "S07-MISSING-WALLET-LIFE-PRESERVED",
+      "name": "Missing wallet blocks pay without invalidating worker life",
+      "actions": [{"method": "runPayrollDemo", "args": {"walletExists": false}}],
+      "expected": {
+        "reason": "PAYROLL_BLOCKED_MISSING_WALLET",
+        "worker_life_exists": true,
+        "economic_capability": "NO_ACCOUNT",
+        "escrow_balance": 120
+      }
+    },
+    {
+      "scenario_id": "S08-WORKER-GATES",
+      "name": "Inactive worker and time conflict block work",
+      "actions": [
+        {"method": "runPayrollDemo", "args": {"workerActive": false}},
+        {"method": "runPayrollDemo", "args": {"timeConflict": true}}
+      ],
+      "expected": {
+        "inactive_reason": "WORKER_INACTIVE",
+        "conflict_reason": "ROLE_TIME_CONFLICT"
+      }
+    },
+    {
+      "scenario_id": "S09-COLONY-RESOURCE-SEPARATION",
+      "name": "Ant and bee credits cannot substitute biological resources",
+      "actions": [
+        {"method": "runAntColonyScenario", "args": {"foodAvailable": true}},
+        {"method": "runAntColonyScenario", "args": {"foodAvailable": false}},
+        {"method": "runBeeHiveScenario", "args": {"nectarAvailable": true}},
+        {"method": "runBeeHiveScenario", "args": {"nectarAvailable": false}},
+        {"method": "runBeeHiveScenario", "args": {"nectarAvailable": false}}
+      ],
+      "expected": {
+        "ant_work_credits": 20,
+        "ant_starvation_risk": true,
+        "ant_mass_total": 100,
+        "bee_work_credits": 28,
+        "bee_shortage_risk": true,
+        "bee_nectar_chain_total": 80,
+        "integrity_ok": true
+      }
+    }
+  ],
+  "three_axis_assertions": {
+    "life_without_wallet_is_valid": true,
+    "agency_without_payroll_is_valid": true,
+    "kaios_credit_does_not_create_food_or_honey": true
+  }
+}

@@ -1,65 +1,67 @@
-# CURSOR Life Energy Payroll — Candidate Report
+# Cursor Life Energy Payroll Candidate Report
 
-**Work Package ID:** `KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-CANDIDATES-001`  
+**Task ID:** `KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-CANDIDATES-001`  
 **Worker:** cursor-01  
 **Reviewer:** codex-gm-01  
 **Branch:** `cursor-handoff/KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-CANDIDATES-001`  
-**Base main SHA:** `9f481900` (post #119–#121, #122)  
-**Final Status:** `CURSOR_LIFE_ENERGY_PAYROLL_CANDIDATES_BLOCKED`
+**Classification:** `CANDIDATE_ONLY` / `PENDING_CODEX_REVIEW`  
+**Date:** 2026-08-09
 
 ---
 
-## Summary
+## 1. Claim execution
 
-Second work-order receipt (2026-08-03). Canonical life-energy payroll **is merged and deployed**. Cursor response file **now present**. Fixture implementation **still blocked** — envelope `PREPARED_NOT_DISPATCHED`, no atomic claim.
-
----
-
-## CURSOR PREFLIGHT
-
-| Check | Result |
-|-------|--------|
-| Worker registry | PASS |
-| Canonical schemas V1 on main | PASS |
-| Cursor response file | PASS — `CURSOR_LIFE_ENERGY_PAYROLL_RESPONSE_20260803.md` |
-| Task envelope dispatch | **FAIL** — `claim_created: false` |
-| Allowed paths (envelope) | `KAIOS/economy/candidates/life-energy-payroll/` |
-
-**Stop code:** `AWAITING_CODEX_ATOMIC_CLAIM`
-
----
-
-## Conceptual repair — accepted
-
-See response file §1. Prior R&D food-chain ↔ NOT_ALIVE conflation **withdrawn**.
-
----
-
-## Deliverables
-
-| Item | Status |
+| Gate | Status |
 |------|--------|
-| Response file | **DONE** |
-| 6 candidate JSON + tests | **NOT_STARTED** (await dispatch) |
-| Report | this file |
-| Handoff | updated |
+| Envelope on main | **PASS** — `DISPATCHED`, claim `CLAIM-KAIOS-LIFE-ENERGY-PAYROLL-001-cursor-01` |
+| Worker registry | **PASS** — cursor-01 CLAIMED |
+| Allowed paths only | **PASS** |
+| Lease expiry | **NOTE** — lease expired 2026-08-05; delivery submitted for Codex revalidation per `FAIL_CLOSED_REQUIRE_CODEX_REVALIDATION` |
 
 ---
 
-## Unblock for Codex
+## 2. Deliverables (7 expected files)
 
-1. Set envelope `status` → `DISPATCHED`, `claim_created` → true  
-2. Update `worker_registry.json` → `current_task: KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-CANDIDATES-001`  
-3. cursor-01 resumes branch for fixture + test commit  
+| File | Status |
+|------|--------|
+| `KAIOS/economy/candidates/payroll-v0/CURSOR_AI_WORKER_PAYROLL_FIXTURES_V0.json` | **DELIVERED** |
+| `KAIOS/economy/candidates/payroll-v0/CURSOR_PROJECT_ESCROW_FIXTURES_V0.json` | **DELIVERED** |
+| `KAIOS/economy/candidates/colony-ledger-v0/CURSOR_ANT_COLONY_RESOURCE_LEDGER_V0.json` | **DELIVERED** |
+| `KAIOS/economy/candidates/colony-ledger-v0/CURSOR_BEE_HIVE_RESOURCE_LEDGER_V0.json` | **DELIVERED** |
+| `KAIOS/world-viewer/candidates/life-energy-payroll/CURSOR_LIFE_ENERGY_PAYROLL_VIEWER_CARDS_V0.json` | **DELIVERED** |
+| `KAIOS/world-viewer/candidates/life-energy-payroll/CURSOR_LIFE_ENERGY_PAYROLL_TEST_SCENARIOS_V0.json` | **DELIVERED** |
+| `KGEN-AI-Company/reports/CURSOR_LIFE_ENERGY_PAYROLL_CANDIDATE_REPORT.md` | **DELIVERED** (this file) |
 
 ---
 
-## Delivery checklist
+## 3. Canonical alignment
 
-| Field | Value |
-|-------|--------|
-| Canonical Schema Version | V1 (`KAIOS/economy/life-energy-payroll/*_SCHEMA_V1.json`) |
-| Files Created | response + report + handoff (no fixtures) |
-| Tests Added | 0 |
-| Protected Files Modified | None |
-| Wallet / KGEN / Real Settlement | None |
+Fixtures align to read-only V1 schemas under `KAIOS/economy/life-energy-payroll/`:
+
+- `KAIOS_LIFE_ECONOMIC_CAPABILITY_SCHEMA_V1.json`
+- `KAIOS_PAYROLL_EVENT_SCHEMA_V1.json`
+- `KAIOS_CREDIT_LEDGER_SCHEMA_V1.json`
+- `KAIOS_COLONY_RESOURCE_LEDGER_SCHEMA_V1.json`
+
+Three-axis model preserved: `LIFE_EXISTENCE` / `AGENCY_LEVEL` / `ECONOMIC_CAPABILITY` are independent.
+
+Nine test scenarios map to deployed runtime tests in `life-energy-payroll-runtime.test.mjs`.
+
+---
+
+## 4. Boundaries
+
+- No canonical schema mutation
+- No wallet, KGEN, minting, deployment, or main merge
+- Colony ledgers: credits record work; biological mass is conserved separately
+- KAIOS Credit does not substitute ant food or bee nectar/honey
+
+---
+
+## 5. Codex actions required
+
+1. Review all seven candidate files
+2. Revalidate expired claim if accepting delivery
+3. Merge handoff branch or open follow-up FIX envelope if gaps found
+
+**Result:** `HANDOFF_SUBMITTED` — stop at `PENDING_CODEX_REVIEW`.

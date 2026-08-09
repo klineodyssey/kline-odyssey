@@ -1,0 +1,128 @@
+{
+  "schema_version": "0.1.0-candidate",
+  "fixture_id": "CURSOR-AI-WORKER-PAYROLL-FIXTURES-V0",
+  "classification": ["CANDIDATE_ONLY", "PENDING_CODEX_REVIEW"],
+  "simulation_only": true,
+  "currency": "KAIOS_CREDIT",
+  "canonical_schema_refs": [
+    "KAIOS/economy/life-energy-payroll/KAIOS_LIFE_ECONOMIC_CAPABILITY_SCHEMA_V1.json",
+    "KAIOS/economy/life-energy-payroll/KAIOS_PAYROLL_EVENT_SCHEMA_V1.json",
+    "KAIOS/economy/life-energy-payroll/KAIOS_AI_WORKER_PAYROLL_WALLET_V0_SPEC.md"
+  ],
+  "three_axis_model": {
+    "life_existence_independent_of_wallet": true,
+    "agency_independent_of_payroll": true,
+    "economic_capability_modes": ["NO_ACCOUNT", "COLONY_RESOURCE_LEDGER", "SIMULATED_WALLET"]
+  },
+  "life_records": [
+    {
+      "schema_version": "1.0.0",
+      "life_id": "LIFE-GRASS-DEMO",
+      "life_exists": true,
+      "agency_level": "NO_AGENCY",
+      "economic_capability": "NO_ACCOUNT",
+      "account_id": null,
+      "wallet_mode": "NO_ACCOUNT",
+      "currency": "NOT_APPLICABLE",
+      "chain": "NO_CHAIN",
+      "private_key": "NOT_PRESENT",
+      "simulation_only": true,
+      "event_history": ["LIFE_EXISTS_WITHOUT_WALLET"]
+    },
+    {
+      "schema_version": "1.0.0",
+      "life_id": "LIFE-FISH-DEMO",
+      "life_exists": true,
+      "agency_level": "REACTIVE",
+      "economic_capability": "NO_ACCOUNT",
+      "account_id": null,
+      "wallet_mode": "NO_ACCOUNT",
+      "currency": "NOT_APPLICABLE",
+      "chain": "NO_CHAIN",
+      "private_key": "NOT_PRESENT",
+      "simulation_only": true,
+      "event_history": ["REACTIVE_LIFE_NO_PAYROLL_ACCOUNT"]
+    },
+    {
+      "schema_version": "1.0.0",
+      "life_id": "LIFE-AI-WORKER-001",
+      "life_exists": true,
+      "agency_level": "TASK_BOUND",
+      "economic_capability": "SIMULATED_WALLET",
+      "account_id": "AI-WORKER-WALLET-001",
+      "wallet_mode": "SIMULATED_WALLET",
+      "currency": "KAIOS_CREDIT",
+      "chain": "NO_CHAIN",
+      "private_key": "NOT_PRESENT",
+      "simulation_only": true,
+      "event_history": ["SIMULATED_WALLET_BOUND", "PAYROLL_ELIGIBLE_WHEN_APPROVED"]
+    }
+  ],
+  "worker_wallets": [
+    {
+      "wallet_id": "AI-WORKER-WALLET-001",
+      "account_type": "AI_WORKER_WALLET",
+      "life_id": "LIFE-AI-WORKER-001",
+      "initial_balance": 0,
+      "post_payroll_balance": 80,
+      "simulation_only": true
+    }
+  ],
+  "payroll_events": [
+    {
+      "payroll_event_id": "PAYROLL-EVENT-001",
+      "project_id": "PROJECT-PLANT-001",
+      "task_id": "TASK-CANDIDATE-001",
+      "worker_life_id": "LIFE-AI-WORKER-001",
+      "wallet_id": "AI-WORKER-WALLET-001",
+      "gross_pay": 120,
+      "energy_cost": 10,
+      "compute_cost": 8,
+      "maintenance_cost": 7,
+      "platform_fee": 5,
+      "household_transfer": 10,
+      "tax_simulation": 0,
+      "net_pay": 80,
+      "approval_id": "APPROVAL-CODEX-001",
+      "reviewer": "codex-gm-01",
+      "timestamp": "1970-01-01T00:00:00.000Z",
+      "contract_type": "HOUSEHOLD_CONTRACT",
+      "simulation_time": 0,
+      "currency": "KAIOS_CREDIT",
+      "simulation_only": true,
+      "previous_state_hash": "fnv1a-candidate-prev-001",
+      "next_state_hash": "fnv1a-candidate-next-001",
+      "status": "PAYROLL_RELEASED"
+    },
+    {
+      "payroll_event_id": "PAYROLL-EVENT-BLOCKED-WALLET",
+      "project_id": "PROJECT-PLANT-001",
+      "task_id": "TASK-CANDIDATE-001",
+      "worker_life_id": "LIFE-AI-WORKER-001",
+      "wallet_id": "MISSING",
+      "gross_pay": 120,
+      "energy_cost": 0,
+      "compute_cost": 0,
+      "maintenance_cost": 0,
+      "platform_fee": 0,
+      "household_transfer": 0,
+      "tax_simulation": 0,
+      "net_pay": 0,
+      "approval_id": "APPROVAL-CODEX-001",
+      "reviewer": "codex-gm-01",
+      "timestamp": "1970-01-01T00:00:00.000Z",
+      "simulation_time": 0,
+      "currency": "KAIOS_CREDIT",
+      "simulation_only": true,
+      "previous_state_hash": "fnv1a-candidate-prev-wallet-block",
+      "next_state_hash": "fnv1a-candidate-next-wallet-block",
+      "status": "PAYROLL_BLOCKED_MISSING_WALLET"
+    }
+  ],
+  "physical_resource_consumption": {
+    "electricity_units_consumed": 8,
+    "compute_units_consumed": 12,
+    "credit_does_not_substitute_resources": true
+  },
+  "forbidden": ["real_wallet", "KGEN", "on_chain_transfer", "minting", "issuance"]
+}

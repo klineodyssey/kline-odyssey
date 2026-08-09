@@ -1,0 +1,100 @@
+{
+  "schema_version": "0.1.0-candidate",
+  "fixture_id": "CURSOR-LIFE-ENERGY-PAYROLL-VIEWER-CARDS-V0",
+  "classification": ["CANDIDATE_ONLY", "PENDING_CODEX_REVIEW"],
+  "simulation_only": true,
+  "runtime_ref": "KGEN-KAIOS/world-viewer/economy/life-energy-payroll-runtime.js",
+  "viewer_ref": "world-viewer/life-energy-payroll/app.js",
+  "cards": [
+    {
+      "card_id": "VIEW-LIFE-MODEL",
+      "view_key": "life",
+      "title": "Life Existence Model",
+      "fields": ["life_id", "life_exists", "agency_level", "economic_capability"],
+      "warning": "Life exists independently of wallet"
+    },
+    {
+      "card_id": "VIEW-AGENCY",
+      "view_key": "agency",
+      "title": "Agency Level",
+      "fields": ["agency_level", "wallet_required_for_life", "external_autonomy"],
+      "static_values": {"wallet_required_for_life": "NO", "external_autonomy": "DISABLED"}
+    },
+    {
+      "card_id": "VIEW-ECONOMY",
+      "view_key": "economy",
+      "title": "Economic Capability",
+      "fields": ["economic_capability", "life_exists", "currency"],
+      "currency_rule": "SIMULATED_WALLET -> KAIOS_CREDIT else NOT_APPLICABLE"
+    },
+    {
+      "card_id": "VIEW-CREDIT-LEDGER",
+      "view_key": "credit",
+      "title": "Balanced Credit Entries",
+      "fields": ["entry_id", "debit_account", "credit_account", "amount", "reason", "balanced"]
+    },
+    {
+      "card_id": "VIEW-PHYSICAL-RESOURCES",
+      "view_key": "resources",
+      "title": "Physical Resources",
+      "fields": ["resource_name", "quantity"],
+      "warning": "Credit does not substitute biological resources"
+    },
+    {
+      "card_id": "VIEW-WORKER-WALLET",
+      "view_key": "wallet",
+      "title": "AI Worker Simulated Wallet",
+      "fields": ["wallet_id", "life_id", "life_exists", "active", "balance"],
+      "blocked_label": "PAYROLL BLOCKED"
+    },
+    {
+      "card_id": "VIEW-PROJECT-ESCROW",
+      "view_key": "escrow",
+      "title": "Project Budget and Escrow",
+      "fields": ["project_budget_balance", "escrow_balance", "project_id", "project_status"]
+    },
+    {
+      "card_id": "VIEW-PAYROLL-EVENTS",
+      "view_key": "payroll-events",
+      "title": "Payroll Events",
+      "fields": ["payroll_event_id", "worker_life_id", "gross_pay", "net_pay", "energy_cost", "compute_cost", "status"]
+    },
+    {
+      "card_id": "VIEW-HOUSEHOLD-TRANSFERS",
+      "view_key": "transfers",
+      "title": "Contracted Transfers",
+      "fields": ["entry_id", "debit_account", "credit_account", "amount", "contract_type"],
+      "filter_reason": "HOUSEHOLD_CONTRACT"
+    },
+    {
+      "card_id": "VIEW-ANT-LEDGER",
+      "view_key": "ant-ledger",
+      "title": "Ant Colony Resource Ledger",
+      "fields": ["work_credits", "ration_allocations", "ant_food_mass", "ant_consumed_mass", "starvation_risk"]
+    },
+    {
+      "card_id": "VIEW-BEE-LEDGER",
+      "view_key": "bee-ledger",
+      "title": "Bee Hive Resource Ledger",
+      "fields": ["pollination_credits", "honey_shares", "hive_nectar_mass", "hive_honey_mass", "shortage_risk"]
+    },
+    {
+      "card_id": "VIEW-TIMELINE",
+      "view_key": "timeline",
+      "title": "Causal Event Timeline",
+      "fields": ["simulation_time", "action", "status", "reason", "next_state_hash"]
+    }
+  ],
+  "integrity_banner": {
+    "label": "Ledger Integrity",
+    "pass_text": "PASS",
+    "fail_text": "FAIL"
+  },
+  "scenario_buttons": [
+    {"id": "payroll", "label": "Approved Payroll Demo"},
+    {"id": "rejected", "label": "Rejected Task Refund"},
+    {"id": "duplicate", "label": "Duplicate Payroll Block"},
+    {"id": "ant", "label": "Ant Colony Food vs Credits"},
+    {"id": "bee", "label": "Bee Nectar/Honey vs Credits"}
+  ]
+}

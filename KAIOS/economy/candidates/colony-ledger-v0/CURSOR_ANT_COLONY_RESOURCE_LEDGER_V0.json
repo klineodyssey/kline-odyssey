@@ -1,0 +1,80 @@
+{
+  "ledger_id": "COLONY-LEDGER-ANT-001",
+  "group_id": "ANT-COLONY-001",
+  "group_type": "ANT_COLONY",
+  "resource_inventory": {
+    "ant_food_mass": 8,
+    "external_ant_food_mass": 80,
+    "ant_consumed_mass": 12
+  },
+  "member_contributions": [
+    {
+      "member_id": "ANT-WORKER-GROUP",
+      "credit_type": "ANT_WORK_CREDIT",
+      "amount": 20,
+      "source_event_id": "ANT-Food-COLLECTION-001"
+    }
+  ],
+  "ration_priorities": ["queen", "larvae", "workers"],
+  "care_obligations": ["queen_maintenance", "larval_feeding", "worker_ration"],
+  "maintenance_reserve": {
+    "nest_repair_mass": 2
+  },
+  "winter_or_emergency_reserve": {
+    "emergency_food_mass": 5
+  },
+  "birth_or_larval_support": {
+    "larval_feed_mass": 4
+  },
+  "work_credits": {
+    "ANT-WORKER-GROUP": 20
+  },
+  "distribution_events": [
+    {
+      "event_id": "ANT-DIST-001",
+      "resource_id": "ant_food_mass",
+      "quantity": 12,
+      "unit": "mass_units",
+      "from_inventory": "ant_food_mass",
+      "to_member_or_pool": "colony_ration_pool",
+      "simulation_time": 1
+    },
+    {
+      "event_id": "ANT-DIST-002",
+      "resource_id": "ant_food_mass",
+      "quantity": 12,
+      "unit": "mass_units",
+      "from_inventory": "ant_food_mass",
+      "to_member_or_pool": "queen:3,larvae:4,workers:5",
+      "simulation_time": 2
+    }
+  ],
+  "shortage_events": [
+    "BIOLOGICAL_FOOD_SHORTAGE:T2:starvation_risk=true:credits_unchanged=20"
+  ],
+  "history": [
+    "ANT_WORK_CREDIT:20",
+    "ANT_COLONY_RATION:12",
+    "BIOLOGICAL_FOOD_SHORTAGE:blocked_ration"
+  ],
+  "authority": "INTERNAL_ALLOCATION_SIMULATION_ONLY",
+  "simulation_only": true,
+  "candidate_metadata": {
+    "schema_version": "0.1.0-candidate",
+    "classification": "CANDIDATE_ONLY",
+    "canonical_schema_ref": "KAIOS/economy/life-energy-payroll/KAIOS_COLONY_RESOURCE_LEDGER_SCHEMA_V1.json",
+    "invariant": "ANT_WORK_CREDIT cannot create ant_food_mass; positive credits with empty inventory still yields starvation_risk",
+    "mass_conservation": {
+      "external_ant_food_mass": 80,
+      "ant_food_mass": 8,
+      "ant_consumed_mass": 12,
+      "total": 100
+    },
+    "ration_allocations_after_shortage": {
+      "queen": 0,
+      "larvae": 0,
+      "workers": 0
+    },
+    "starvation_risk": true
+  }
+}

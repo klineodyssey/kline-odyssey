@@ -5,27 +5,32 @@
   "worker_id": "cursor-01",
   "reviewer": "codex-gm-01",
   "branch": "cursor-handoff/KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-CANDIDATES-001",
-  "base_main_sha": "9f481900",
+  "base_sha": "7344d231837d40b504622c8c8b4376ed25110e20",
+  "head_sha": "8d1c4b9c",
+  "pr_number": null,
+  "state_progress": {"REVIEW": "PENDING_CODEX"},
+  "result": "HANDOFF_SUBMITTED",
+  "stop_code": "NONE",
   "output_authority": "CANDIDATE_ONLY",
-  "final_status": "CURSOR_LIFE_ENERGY_PAYROLL_CANDIDATES_BLOCKED",
-  "stop_code": "AWAITING_CODEX_ATOMIC_CLAIM",
-  "preflight": {
-    "canonical_schema_on_main": true,
-    "canonical_prs": ["#119", "#120", "#121"],
-    "cursor_response_file": "KGEN-AI-Company/reports/CURSOR_LIFE_ENERGY_PAYROLL_RESPONSE_20260803.md",
-    "task_envelope_status": "PREPARED_NOT_DISPATCHED",
-    "claim_created": false
-  },
-  "conceptual_repair_accepted": true,
-  "deliverables_deferred": [
-    "KAIOS/economy/candidates/life-energy-payroll/CURSOR_AI_WORKER_PAYROLL_FIXTURES_V0.json",
-    "KAIOS/economy/candidates/life-energy-payroll/CURSOR_PROJECT_ESCROW_FIXTURES_V0.json",
-    "KAIOS/economy/candidates/life-energy-payroll/CURSOR_ANT_COLONY_RESOURCE_LEDGER_V0.json",
-    "KAIOS/economy/candidates/life-energy-payroll/CURSOR_BEE_HIVE_RESOURCE_LEDGER_V0.json",
-    "KAIOS/economy/candidates/life-energy-payroll/CURSOR_LIFE_ENERGY_PAYROLL_VIEWER_CARDS_V0.json",
-    "KAIOS/economy/candidates/life-energy-payroll/CURSOR_LIFE_ENERGY_PAYROLL_TEST_SCENARIOS_V0.json"
+  "claim_id": "CLAIM-KAIOS-LIFE-ENERGY-PAYROLL-001-cursor-01",
+  "fencing_token": "FENCE-KAIOS-LIFE-ENERGY-PAYROLL-001-R1",
+  "lease_note": "Claim lease expired 2026-08-05; delivery submitted for Codex revalidation",
+  "deliverables": [
+    "KAIOS/economy/candidates/payroll-v0/CURSOR_AI_WORKER_PAYROLL_FIXTURES_V0.json",
+    "KAIOS/economy/candidates/payroll-v0/CURSOR_PROJECT_ESCROW_FIXTURES_V0.json",
+    "KAIOS/economy/candidates/colony-ledger-v0/CURSOR_ANT_COLONY_RESOURCE_LEDGER_V0.json",
+    "KAIOS/economy/candidates/colony-ledger-v0/CURSOR_BEE_HIVE_RESOURCE_LEDGER_V0.json",
+    "KAIOS/world-viewer/candidates/life-energy-payroll/CURSOR_LIFE_ENERGY_PAYROLL_VIEWER_CARDS_V0.json",
+    "KAIOS/world-viewer/candidates/life-energy-payroll/CURSOR_LIFE_ENERGY_PAYROLL_TEST_SCENARIOS_V0.json",
+    "KGEN-AI-Company/reports/CURSOR_LIFE_ENERGY_PAYROLL_CANDIDATE_REPORT.md"
   ],
   "protected_paths_modified": false,
   "wallet_access": false,
-  "kgen_access": false
+  "kgen_access": false,
+  "codex_actions_required": {
+    "review_candidate_files": true,
+    "revalidate_expired_claim": true
+  },
+  "blockers": [],
+  "human_action_required": false
 }

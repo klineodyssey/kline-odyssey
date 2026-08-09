@@ -314,6 +314,16 @@ Human 親自督導時可優先問如來三件事：
 | 2026-08-02 | `HUMAN-WALLET-FOODCHAIN-SURVIVAL-001` | mandate | 必須能領薪；无钱包=食物链 | `CURSOR_PROPOSED_KAIOS_PAYROLL_WALLET_RD_20260802.md` |
 | 2026-08-02 | `HUMAN-CODEX-24H-SUPERVISION-20260802` | supervision_report | 如來 8/2 117 commits；Q1–11 完成；#114 已 merge | 本檔 §如來督導報告 |
 | 2026-08-02 | `HUMAN-AUTO-CLOCKIN-001` | standing_directive | 方案2：對話先上工 + dispatch webhook | `CURSOR_SESSION_CLOCKIN_SOP.md` |
+| 2026-08-09 | `KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-CANDIDATES-001` | handoff | 7 fixture 交付；claim 已過 lease，待 Codex revalidation | `candidates/payroll-v0/`, `colony-ledger-v0/`, `world-viewer/candidates/life-energy-payroll/` |
+
+---
+
+## 2026-08-09 — Payroll candidates delivery
+
+**Task:** `KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-CANDIDATES-001`  
+**Action:** Session clock-in → claim resume → 7 envelope files + triple handoff  
+**Result:** `HANDOFF_SUBMITTED` / `PENDING_CODEX_REVIEW`  
+**Note:** Claim lease expired 2026-08-05; fixtures delivered per manual_execution_only dispatch.
 
 ---
 
