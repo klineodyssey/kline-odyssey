@@ -1,0 +1,179 @@
+{
+  "player_genesis": {
+    "player_genesis_id": "GENESIS-PLAYER-LIFE-F942F8CE",
+    "player_life_id": "PLAYER-LIFE-F942F8CE",
+    "ai_companion_life_id": "AI-LIFE-0B8A466A",
+    "household_id": "HOUSEHOLD-41011F6D",
+    "starter_land_id": "STARTER-LAND-9729BEA9",
+    "civilization": "PRIMITIVE_FORAGING",
+    "source_runtime": "PLAYER_AI_HOUSEHOLD_WORK_GENESIS"
+  },
+  "starter_grants": [
+    {
+      "starter_grant_id": "STARTER-GRANT-0a0bb5e2",
+      "player_genesis_id": "GENESIS-PLAYER-LIFE-F942F8CE",
+      "land_id": "STARTER-LAND-9729BEA9",
+      "credit": 400,
+      "resources": {
+        "drinking_water": 48,
+        "basic_food": 24,
+        "basic_clothing": 2,
+        "primitive_shelter": 1,
+        "wood": 80,
+        "stone": 120,
+        "soil": 200,
+        "basic_hand_tools": 3,
+        "emergency_reserve": 8
+      },
+      "simulation_time": 0,
+      "status": "GRANTED_ONCE"
+    }
+  ],
+  "starter_land": {
+    "land_id": "STARTER-LAND-9729BEA9",
+    "parcels": 1,
+    "right": "SIMULATION_USE_AND_OCCUPANCY_RIGHT",
+    "real_legal_title": false,
+    "blockchain_ownership": false,
+    "civilization": "PRIMITIVE_FORAGING",
+    "advanced_assets": []
+  },
+  "household_inventory": {
+    "drinking_water": 52,
+    "basic_food": 26,
+    "basic_clothing": 2,
+    "primitive_shelter": 1,
+    "wood": 80,
+    "stone": 120,
+    "soil": 200,
+    "basic_hand_tools": 3,
+    "emergency_reserve": 8
+  },
+  "needs": [
+    {
+      "demand_id": "DEMAND-001",
+      "category": "FOOD",
+      "resource": "basic_food",
+      "quantity": 0,
+      "unit": "unit",
+      "urgency": "NORMAL",
+      "cause": "BIOLOGICAL_METABOLISM",
+      "location": "STARTER-LAND-9729BEA9",
+      "climate": "TEMPERATE",
+      "season": "NORMAL",
+      "health": "HEALTHY",
+      "fulfillment_status": "COVERED"
+    },
+    {
+      "demand_id": "DEMAND-002",
+      "category": "WATER",
+      "resource": "drinking_water",
+      "quantity": 0,
+      "unit": "liter",
+      "urgency": "NORMAL",
+      "cause": "BIOLOGICAL_HYDRATION",
+      "location": "STARTER-LAND-9729BEA9",
+      "climate": "TEMPERATE",
+      "season": "NORMAL",
+      "health": "HEALTHY",
+      "fulfillment_status": "COVERED"
+    },
+    {
+      "demand_id": "DEMAND-003",
+      "category": "SHELTER",
+      "resource": "primitive_shelter",
+      "quantity": 0,
+      "unit": "unit",
+      "urgency": "NORMAL",
+      "cause": "SAFETY_AND_REST",
+      "location": "STARTER-LAND-9729BEA9",
+      "climate": "TEMPERATE",
+      "season": "NORMAL",
+      "health": "HEALTHY",
+      "fulfillment_status": "COVERED"
+    },
+    {
+      "demand_id": "DEMAND-004",
+      "category": "CLOTHING",
+      "resource": "basic_clothing",
+      "quantity": 0,
+      "unit": "unit",
+      "urgency": "NORMAL",
+      "cause": "CLIMATE_PROTECTION",
+      "location": "STARTER-LAND-9729BEA9",
+      "climate": "TEMPERATE",
+      "season": "NORMAL",
+      "health": "HEALTHY",
+      "fulfillment_status": "COVERED"
+    },
+    {
+      "demand_id": "DEMAND-005",
+      "category": "ENERGY",
+      "resource": "electricity",
+      "quantity": 12,
+      "unit": "unit",
+      "urgency": "HIGH",
+      "cause": "DIGITAL_AI_OPERATION",
+      "location": "STARTER-LAND-9729BEA9",
+      "climate": "TEMPERATE",
+      "season": "NORMAL",
+      "health": "HEALTHY",
+      "fulfillment_status": "OPEN"
+    },
+    {
+      "demand_id": "DEMAND-006",
+      "category": "MAINTENANCE",
+      "resource": "compute_maintenance",
+      "quantity": 4,
+      "unit": "unit",
+      "urgency": "HIGH",
+      "cause": "DIGITAL_AI_HEALTH",
+      "location": "STARTER-LAND-9729BEA9",
+      "climate": "TEMPERATE",
+      "season": "NORMAL",
+      "health": "HEALTHY",
+      "fulfillment_status": "OPEN"
+    }
+  ],
+  "accounts": [
+    {
+      "account_id": "SIM-WALLET-PLAYER-F942F8CE",
+      "type": "PLAYER_SIMULATED_WALLET",
+      "owner_id": "PLAYER-LIFE-F942F8CE",
+      "currency": "KAIOS_GAME_CREDIT",
+      "balance": 394,
+      "simulation_only": true
+    },
+    {
+      "account_id": "SIM-WALLET-AI-F942F8CE",
+      "type": "AI_SIMULATED_WALLET",
+      "owner_id": "AI-LIFE-0B8A466A",
+      "currency": "KAIOS_GAME_CREDIT",
+      "balance": 0,
+      "simulation_only": true
+    },
+    {
+      "account_id": "SIM-WALLET-HOUSEHOLD-F942F8CE",
+      "type": "HOUSEHOLD_SHARED_ACCOUNT",
+      "owner_id": "HOUSEHOLD-41011F6D",
+      "currency": "KAIOS_GAME_CREDIT",
+      "balance": 0,
+      "simulation_only": true
+    }
+  ],
+  "result": {
+    "status": "COMPLETED",
+    "wallet_decreased": true,
+    "market_food_decreased": true,
+    "market_water_decreased": true,
+    "state_hash": "fnv1a-3294f64b"
+  },
+  "integrity": {
+    "ok": true,
+    "issues": [],
+    "credit_supply": 5000,
+    "state_hash": "fnv1a-3294f64b",
+    "mutation_endpoints": false
+  },
+  "route_status": "CANONICAL_UNVERSIONED_ROUTE"
+}

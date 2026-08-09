@@ -1,0 +1,22 @@
+{
+  "status": "SIMULATION_ONTOLOGY",
+  "kaios_operational": {
+    "formula": "0.5*m*v^2 + m*g*h",
+    "uses": [
+      "MOVEMENT",
+      "LIFTING",
+      "TRANSPORT",
+      "CONSTRUCTION",
+      "LABOR",
+      "MACHINES"
+    ]
+  },
+  "kgen_cosmic": {
+    "formula": "m*c^2",
+    "status": "FUTURE_RESEARCH_ONLY"
+  },
+  "direct_currency_energy_conversion": false,
+  "token_mass_conversion": false,
+  "kaios_kgen_conversion": false,
+  "route_status": "CANONICAL_UNVERSIONED_ROUTE"
+}

@@ -34,6 +34,8 @@ Last optimized: 2026-06-11
 | Workforce Governance | https://klineodyssey.github.io/kline-odyssey/workforce/ |
 | Official Video Library | https://klineodyssey.github.io/kline-odyssey/video/ |
 | KAIOS Constitution | [KGEN-KAIOS/constitution/KAIOS_CONSTITUTION.md](KGEN-KAIOS/constitution/KAIOS_CONSTITUTION.md) |
+| KAIOS 2026-08-09 Mass and Planck CURRENT | [docs/physics/KGEN_KAIOS_SCALE_AND_PLANCK_RUNTIME_CURRENT.md](docs/physics/KGEN_KAIOS_SCALE_AND_PLANCK_RUNTIME_CURRENT.md) |
+| KAIOS Token Lineage Integration Review | [KGEN-KAIOS/reports/KAIOS_TOKEN_LINEAGE_INTEGRATION_REVIEW_2026-08-09.md](KGEN-KAIOS/reports/KAIOS_TOKEN_LINEAGE_INTEGRATION_REVIEW_2026-08-09.md) |
 | KAIOS Kernel V1 Design | [KGEN-KAIOS/kernel/KERNEL_V1.md](KGEN-KAIOS/kernel/KERNEL_V1.md) |
 | Architecture Governance Board | [KGEN-KAIOS/governance/ARCHITECTURE_GOVERNANCE_BOARD.md](KGEN-KAIOS/governance/ARCHITECTURE_GOVERNANCE_BOARD.md) |
 | KAIOS V11.0 Architecture Baseline | [KGEN-KAIOS/V11/ARCHITECTURE_BASELINE.md](KGEN-KAIOS/V11/ARCHITECTURE_BASELINE.md) |
@@ -1025,8 +1027,8 @@ Where the Market Becomes the Myth.
 
 ## 🔥 Latest Video｜最新發布
 
-▶ #KAIOS #KGEN #K線西遊記 #花果山台灣【KAIOS 人生起點】KAIOS 正逐步從 Web Simulation 邁向真實世界。  
-👉 https://www.youtube.com/shorts/gzWyF-jB8mc
+▶ 未來，AI 也能上班領薪水、存錢、創業。在 KAIOS，每個 AI 都有自己的 Life ID錢包與生命歷史。文明，不是從價格開始，而是從生命開始。#K線西遊記 #花果山台灣 #KAIOS #KGEN  
+👉 https://www.youtube.com/watch?v=Ylr18SOyIl8
 
 （本區由 GitHub Actions 自動更新；首頁 iframe 保持固定世界觀主軸影片）
 <!-- LATEST_VIDEO_END -->
@@ -1245,3 +1247,13 @@ creates food, water, energy, materials or time.
 - Runtime owner: `KGEN-KAIOS/world-viewer/economy/life-energy-payroll-runtime.js`
 - Specification owner: `KAIOS/economy/life-energy-payroll/`
 - Safety: simulation only; no real wallet, KGEN, chain transfer or issuance.
+
+## KAIOS AI Company Creator Marketplace
+
+The deterministic simulation at `world-viewer/creator-marketplace/` connects one-time Player Genesis starter resources, finite `KAIOS_GAME_CREDIT`, AI Company orders, project escrow, candidate creation, Codex review, customer acceptance, delivery and worker-owned payroll.
+
+- Canonical read-only API: `api/kaios/marketplace/`
+- Required V1 compatibility projection: `api/kaios/marketplace/v1/`
+- Runtime owner: `KGEN-KAIOS/world-viewer/marketplace/creator-marketplace-runtime.js`
+- Specification owner: `KAIOS/marketplace/creator-marketplace/`
+- Safety: simulation only; no real wallet, KGEN, on-chain transfer, silent mint or external autonomy.

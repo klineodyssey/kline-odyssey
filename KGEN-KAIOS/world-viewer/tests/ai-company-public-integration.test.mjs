@@ -91,20 +91,28 @@ test("public Cursor queue projection matches the canonical governance queue", as
   }
 });
 
-test("public Cursor queue exposes Microbial preparation without a claim", async () => {
+test("public Cursor queue exposes one manual claim while Microbial stays preparation-only", async () => {
   const canonical = JSON.parse(await read(
     "KAIOS/life/forest-agriculture/KAIOS_CURSOR_CONTINUOUS_WORK_QUEUE.json"
   ));
   const registry = JSON.parse(await read("KGEN-KAIOS/worker_registry.json"));
   const projection = JSON.parse(await read("api/kaios/ai-company/v1/cursor-queue.json"));
-  assert.deepEqual(projection.active_claims, []);
   assert.deepEqual(projection.active_claims, canonical.active_claims);
   assert.deepEqual(projection.active_claims, registry.active_claims);
+  assert.equal(projection.active_claims.length, 1);
+  const activeClaim = projection.active_claims[0];
+  assert.equal(
+    activeClaim.task_id,
+    "KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-CANDIDATES-001"
+  );
+  assert.equal(activeClaim.status, "CLAIMED");
+  assert.equal(activeClaim.manual_execution_only, true);
+  assert.equal(activeClaim.external_autonomy, false);
   assert.deepEqual(projection.worker_state, {
     worker_id: "cursor-01",
-    current_task: null,
-    current_branch: null,
-    status: "IDLE"
+    current_task: "KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-CANDIDATES-001",
+    current_branch: "cursor-handoff/KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-CANDIDATES-001",
+    status: "CLAIMED"
   });
   assert.equal(registry.prepared_tasks.length, 1);
   assert.deepEqual(projection.prepared_task, canonical.prepared_task);

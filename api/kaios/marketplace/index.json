@@ -1,0 +1,18 @@
+{
+  "runtime": "KAIOS_AI_COMPANY_CREATOR_MARKETPLACE",
+  "canonical_route": "/api/kaios/marketplace/",
+  "compatibility_route": "/api/kaios/marketplace/v1/",
+  "read_only": true,
+  "mutation_endpoints": false,
+  "files": [
+    "status.json",
+    "starter-package.json",
+    "requests.json",
+    "projects.json",
+    "tasks.json",
+    "listings.json",
+    "payroll.json",
+    "events.json",
+    "energy-ontology.json"
+  ]
+}

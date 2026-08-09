@@ -1,3 +1,5 @@
+> **SUPERSEDED HISTORICAL SNAPSHOT:** Monetary scale statements in this version are superseded by `KGEN_KAIOS_SCALE_AND_PLANCK_RUNTIME_CURRENT.md` (2026-08-09). Retained for history only.
+
 # KGEN Universe Physics Runtime V3.3 EARTH LIFE CERTIFICATION
 # KGEN_Universe_Physics_Runtime_V3_3_EARTH_LIFE_CERTIFICATION.md
 

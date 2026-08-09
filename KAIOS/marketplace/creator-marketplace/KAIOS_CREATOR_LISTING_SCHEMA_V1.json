@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://klineodyssey.github.io/kline-odyssey/schema/kaios/creator-listing-v1.json",
+  "title": "KAIOS Creator Listing",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["listing_id", "creator", "category", "review_status", "canonical_status", "version", "price_in_KAIOS_GAME_CREDIT", "delivery_time", "dependencies", "required_civilization", "rights_package", "maintenance", "known_limitations", "provenance", "integrity", "simulation_only"],
+  "properties": {
+    "listing_id": {"type": "string", "minLength": 1},
+    "creator": {"type": "string", "minLength": 1},
+    "category": {"enum": ["FOUNDATIONAL_LIFE", "PLANT_LIFE", "ANIMAL_LIFE", "MARINE_LIFE", "MICROBIAL_LIFE", "SOFTWARE_LIFE", "ROBOTIC_LIFE", "TERRAIN_LIFE", "WATER_BODY_LIFE", "BUILDING_LIFE", "INFRASTRUCTURE_LIFE", "COMPANY_LIFE", "SERVICE", "RESEARCH", "SUPPLY_CHAIN", "TRANSPORT", "MAINTENANCE"]},
+    "review_status": {"enum": ["CANDIDATE", "PENDING_CODEX_REVIEW", "APPROVED", "REWORK_REQUIRED", "REJECTED", "DELIVERABLE", "ARCHIVED"]},
+    "canonical_status": {"enum": ["NOT_CANONICAL", "CANONICAL_SCHEMA_COMPATIBLE", "CANONICAL_APPROVED"]},
+    "version": {"type": "string", "minLength": 1},
+    "price_in_KAIOS_GAME_CREDIT": {"type": "number", "minimum": 0},
+    "delivery_time": {"type": "number", "minimum": 0},
+    "dependencies": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
+    "required_civilization": {"type": "string", "minLength": 1},
+    "rights_package": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
+    "maintenance": {"type": "string", "minLength": 1},
+    "known_limitations": {"type": "array", "items": {"type": "string"}},
+    "provenance": {"type": "object"},
+    "integrity": {"type": "object"},
+    "simulation_only": {"const": true}
+  }
+}

@@ -1,0 +1,104 @@
+name: TAIFEX Build 台指近全
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "K線西遊記/kline-taifex/raw/*.csv"
+      - "K線西遊記/kline-taifex/scripts/tx_full_day_pipeline_v882_UTF8BOM.py"
+      - ".github/workflows/taifex_master_build.yml"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: taifex-master-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build-taifex-master:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout main branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}
+          fetch-depth: 0
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+
+      - name: Install dependencies
+        run: |
+          set -euo pipefail
+          python -m pip install --upgrade pip
+          pip install pandas openpyxl numpy
+
+      - name: Build 台指近全 from all TAIFEX raw CSV files
+        run: |
+          set -euo pipefail
+          RAW_DIR="K線西遊記/kline-taifex/raw"
+          PIPELINE="K線西遊記/kline-taifex/scripts/tx_full_day_pipeline_v882_UTF8BOM.py"
+          MASTER="K線西遊記/kline-taifex/master/台指近全.xlsx"
+
+          test -f "$PIPELINE"
+          mkdir -p "$(dirname "$MASTER")"
+
+          mapfile -d '' CSV_FILES < <(find "$RAW_DIR" -maxdepth 1 -type f -name '*.csv' -print0 | sort -z)
+          if [ "${#CSV_FILES[@]}" -eq 0 ]; then
+            echo "No TAIFEX CSV files found in $RAW_DIR"
+            exit 1
+          fi
+
+          python "$PIPELINE" "${CSV_FILES[@]}" --master "$MASTER"
+          test -s "$MASTER"
+
+      - name: Validate generated workbook
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+          import pandas as pd
+
+          path = Path("K線西遊記/kline-taifex/master/台指近全.xlsx")
+          required = [
+              "交易日期","契約","到期月份(週別)","開盤價","最高價","最低價","收盤價",
+              "漲跌價","漲跌%","成交量","結算價","未沖銷契約數","最後最佳買價","最後最佳賣價",
+              "歷史最高價","歷史最低價","是否因訊息面暫停交易","交易時段","價差對單式委託成交量"
+          ]
+          df = pd.read_excel(path)
+          if list(df.columns) != required:
+              raise SystemExit(f"19欄結構錯誤: {list(df.columns)}")
+          if df.empty:
+              raise SystemExit("台指近全.xlsx 沒有資料")
+          if df["交易日期"].duplicated().any():
+              raise SystemExit("交易日期重複")
+          for c in ["開盤價","最高價","最低價","收盤價"]:
+              df[c] = pd.to_numeric(df[c], errors="coerce")
+          bad = (
+              (df["最高價"] < df[["開盤價","收盤價","最低價"]].max(axis=1)) |
+              (df["最低價"] > df[["開盤價","收盤價","最高價"]].min(axis=1))
+          )
+          if bad.fillna(False).any():
+              raise SystemExit("OHLC 邏輯驗證失敗")
+          print("validated rows=", len(df), "last_date=", df["交易日期"].iloc[-1])
+          PY
+
+      - name: Commit generated TAIFEX master files
+        run: |
+          set -euo pipefail
+          git config user.name "kline-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add "K線西遊記/kline-taifex/master/台指近全.xlsx"
+          git add "K線西遊記/kline-taifex/master/台指近全"*.xlsx || true
+
+          if git diff --cached --quiet; then
+            echo "No master changes to commit."
+            exit 0
+          fi
+
+          git commit -m "taifex: rebuild 台指近全 from raw CSV"
+          git pull --rebase origin "${GITHUB_REF_NAME}"
+          git push origin "HEAD:${GITHUB_REF_NAME}"

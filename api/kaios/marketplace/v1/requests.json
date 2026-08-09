@@ -1,0 +1,80 @@
+{
+  "requests": [
+    {
+      "request_id": "MARKET-REQUEST-001",
+      "customer_id": "PLAYER-LIFE-FFB1222C",
+      "description": "Create a generic tree candidate life package",
+      "requested_output_type": "LIFE_PACKAGE",
+      "quantity": 1,
+      "quality": "STANDARD_SIMULATION",
+      "location": "STARTER-LAND-B9F5C5CB",
+      "deadline": 240,
+      "budget": 120,
+      "acceptance_criteria": [
+        "CODEX_REVIEW_PASS",
+        "CUSTOMER_ACCEPTANCE"
+      ],
+      "rights_requested": [
+        "SIMULATED_USE_RIGHT"
+      ],
+      "civilization_requirement": "PRIMITIVE_FORAGING",
+      "technology_requirement": "BASIC",
+      "risk": "LOW",
+      "kind": "TREE_LIFE_PACKAGE",
+      "status": "ACCEPTED",
+      "decision_reason": "ALL_SIMULATION_GATES_PASS"
+    },
+    {
+      "request_id": "MARKET-REQUEST-001",
+      "customer_id": "PLAYER-LIFE-A30AAEF5",
+      "description": "Build a basic shelter",
+      "requested_output_type": "BUILDING",
+      "quantity": 1,
+      "quality": "STANDARD_SIMULATION",
+      "location": "STARTER-LAND-15954BB4",
+      "deadline": 240,
+      "budget": 180,
+      "acceptance_criteria": [
+        "CODEX_REVIEW_PASS",
+        "CUSTOMER_ACCEPTANCE"
+      ],
+      "rights_requested": [
+        "SIMULATED_USE_RIGHT"
+      ],
+      "civilization_requirement": "PRIMITIVE_FORAGING",
+      "technology_requirement": "BASIC",
+      "risk": "LOW",
+      "kind": "BASIC_SHELTER",
+      "status": "ACCEPTED",
+      "decision_reason": "ALL_SIMULATION_GATES_PASS"
+    },
+    {
+      "request_id": "MARKET-REQUEST-001",
+      "customer_id": "PLAYER-LIFE-898212EB",
+      "description": "Build an advanced semiconductor factory",
+      "requested_output_type": "BUILDING",
+      "quantity": 1,
+      "quality": "STANDARD_SIMULATION",
+      "location": "STARTER-LAND-B2E0565E",
+      "deadline": 240,
+      "budget": 100,
+      "acceptance_criteria": [
+        "CODEX_REVIEW_PASS",
+        "CUSTOMER_ACCEPTANCE"
+      ],
+      "rights_requested": [
+        "SIMULATED_USE_RIGHT"
+      ],
+      "civilization_requirement": "PRIMITIVE_FORAGING",
+      "technology_requirement": "ADVANCED_SEMICONDUCTOR",
+      "risk": "LOW",
+      "kind": "ADVANCED_UNAVAILABLE",
+      "status": "BLOCKED_TECHNOLOGY",
+      "decision_reason": "CIVILIZATION_TOO_LOW"
+    }
+  ],
+  "decisions_are_simulation_only": true,
+  "route_status": "LEGACY_ALIAS",
+  "canonical_route": "/api/kaios/marketplace/requests.json",
+  "deprecation_status": "DEPRECATION_PENDING"
+}

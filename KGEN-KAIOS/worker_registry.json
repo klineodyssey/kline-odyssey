@@ -2,12 +2,12 @@
   "metadata": {
     "version": "KAIOS_WORKER_REGISTRY_WITH_TRUST_V1_1",
     "status": "ACTIVE",
-    "updated": "2026-08-02",
+    "updated": "2026-08-03",
     "updated_by": "Codex",
     "reviewed_by": "Codex",
-    "source_commit": "7008e4f9449f6df050171cf47ec6ec56419925e9",
-    "task_id": "KAIOS-CURSOR-MICROBIAL-RESEARCH-001-PREPARATION-ONLY",
-    "change_reason": "Prepare the bounded microbial decomposer research intent without claiming, dispatching, leasing, or binding an execution branch before a separate post-merge activation review.",
+    "source_commit": "9f481900eb46ae38dd670d6a1bf8a6b784533f77",
+    "task_id": "KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-CANDIDATES-001",
+    "change_reason": "Register one fenced manual-only Cursor claim after verifying the Human response, an idle T2 worker, zero prior active claims, the existing Cursor branch, and Draft PR 118. Preserve the microbial task as preparation-only.",
     "source_of_truth": true
   },
   "claim_events": [
@@ -35,9 +35,37 @@
       "previous_event_id": "CLAIM-EVENT-KAIOS-CURSOR-FUNGI-CANDIDATE-001-001",
       "recorded_by": "codex-gm-01",
       "reason": "Lease released only after the claim was explicitly closed."
+    },
+    {
+      "event_id": "CLAIM-EVENT-KAIOS-LIFE-ENERGY-PAYROLL-001-001",
+      "event_type": "CLAIM_REGISTERED",
+      "sequence": 1,
+      "task_id": "KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-CANDIDATES-001",
+      "worker_id": "cursor-01",
+      "branch": "cursor-handoff/KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-CANDIDATES-001",
+      "reviewer": "codex-gm-01",
+      "source_commit": "9f481900eb46ae38dd670d6a1bf8a6b784533f77",
+      "recorded_by": "codex-gm-01",
+      "reason": "Human-authorized recovery transitioned zero active claims to one fenced, manual-only candidate claim."
     }
   ],
-  "active_claims": [],
+  "active_claims": [
+    {
+      "claim_id": "CLAIM-KAIOS-LIFE-ENERGY-PAYROLL-001-cursor-01",
+      "task_id": "KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-CANDIDATES-001",
+      "worker_id": "cursor-01",
+      "status": "CLAIMED",
+      "branch": "cursor-handoff/KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-CANDIDATES-001",
+      "base_commit": "9f481900eb46ae38dd670d6a1bf8a6b784533f77",
+      "claimed_at": "2026-08-03T12:45:00Z",
+      "lease_expires_at": "2026-08-05T12:45:00Z",
+      "record_version": 1,
+      "fencing_token": "FENCE-KAIOS-LIFE-ENERGY-PAYROLL-001-R1",
+      "output_status": "CANDIDATE_ONLY",
+      "manual_execution_only": true,
+      "external_autonomy": false
+    }
+  ],
   "formal_employee_requirements": [
     "worker_id exists",
     "employee_status is ACTIVE, TRUSTED, or SENIOR_TRUSTED",
@@ -190,6 +218,18 @@
         "CLAIM-EVENT-KAIOS-CURSOR-FUNGI-CANDIDATE-001-001",
         "CLAIM-EVENT-KAIOS-CURSOR-FUNGI-CANDIDATE-001-002"
       ]
+    },
+    {
+      "task_id": "KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-CANDIDATES-001",
+      "worker_id": "cursor-01",
+      "branch": "cursor-handoff/KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-CANDIDATES-001",
+      "output_status": "CANDIDATE_ONLY",
+      "reviewer": "codex-gm-01",
+      "status": "CLAIMED",
+      "claim_id": "CLAIM-KAIOS-LIFE-ENERGY-PAYROLL-001-cursor-01",
+      "claim_event_ids": [
+        "CLAIM-EVENT-KAIOS-LIFE-ENERGY-PAYROLL-001-001"
+      ]
     }
   ],
   "prepared_tasks": [
@@ -299,13 +339,13 @@
         "LIFE_RESEARCH_ANALYST"
       ],
       "workspace": "cursor-worker-workspace",
-      "current_task": null,
-      "current_branch": null,
-      "status": "IDLE",
+      "current_task": "KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-CANDIDATES-001",
+      "current_branch": "cursor-handoff/KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-CANDIDATES-001",
+      "status": "CLAIMED",
       "employee_status": "ACTIVE",
       "trust_level": "T2",
-      "heartbeat": null,
-      "last_report": "KAIOS/life/forest-agriculture/KAIOS_CURSOR_FUNGI_CANDIDATE_REVIEW_CLOSEOUT.md",
+      "heartbeat": "2026-08-03T12:45:00Z",
+      "last_report": "KGEN-AI-Company/reports/CURSOR_LIFE_ENERGY_PAYROLL_RESPONSE_20260803.md",
       "allowed_branch_pattern": "cursor-handoff/<Task-ID>",
       "branch_input_aliases": [
         "cursor/<feature-name>"
@@ -361,7 +401,12 @@
         "AGRICULTURE_UI_PROPOSAL",
         "WORLD_VIEWER_CARD_CANDIDATE",
         "CANDIDATE_API_PROJECTION",
-        "CANDIDATE_REGRESSION_TEST"
+        "CANDIDATE_REGRESSION_TEST",
+        "AI_WORKER_PAYROLL_FIXTURE",
+        "PROJECT_ESCROW_FIXTURE",
+        "COLONY_RESOURCE_LEDGER_FIXTURE",
+        "LIFE_ENERGY_PAYROLL_VIEWER_CARD",
+        "LIFE_ENERGY_PAYROLL_TEST_SCENARIO"
       ],
       "forbidden_work": [
         "WALLET",

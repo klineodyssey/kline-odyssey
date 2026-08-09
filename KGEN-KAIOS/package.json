@@ -1,0 +1,21 @@
+{
+  "name": "@kaios/token-lineage",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Review-only KGEN to KAIOS to KUFO to KSHIP lineage contracts",
+  "scripts": {
+    "compile": "node tools/compile-contracts.mjs",
+    "storage:validate": "node tools/validate-templeheart-storage.mjs",
+    "lineage:verify": "node tools/verify-current-lineage.mjs",
+    "integrity:validate": "node tools/validate-integration-artifacts.mjs",
+    "test": "node --test --test-concurrency=1 --test-reporter=spec tests/*.test.mjs",
+    "test:all": "npm run compile && npm run storage:validate && npm run lineage:verify && npm run integrity:validate && npm test"
+  },
+  "devDependencies": {
+    "@openzeppelin/contracts": "5.0.2",
+    "@openzeppelin/contracts-upgradeable": "5.0.2",
+    "ethers": "6.13.4",
+    "ganache": "7.9.2",
+    "solc": "0.8.24"
+  }
+}

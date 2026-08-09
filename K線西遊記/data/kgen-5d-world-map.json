@@ -16,7 +16,7 @@
   },
 
   "kPhysics": {
-    "unit": "1 KGEN = 1 kg = 1 指數點 = 1 斤",
+    "unit": "1 KGEN = 1 metric ton = 1000 kg",
     "taxBpsTotal": 30,
     "taxBpsBurn": 10,
     "taxBpsBank": 10,

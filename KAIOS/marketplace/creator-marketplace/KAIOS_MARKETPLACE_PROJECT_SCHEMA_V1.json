@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://klineodyssey.github.io/kline-odyssey/schema/kaios/marketplace-project-v1.json",
+  "title": "KAIOS Marketplace Project",
+  "type": "object",
+  "required": ["project_id", "request_id", "status", "escrow", "task_ids", "dependencies", "simulation_only"],
+  "properties": {
+    "project_id": {"type": "string", "minLength": 1},
+    "request_id": {"type": "string", "minLength": 1},
+    "status": {"enum": ["PROPOSED", "ESCROW_RESERVED", "TASKS_READY", "IN_PROGRESS", "REVIEW", "DELIVERY_READY", "ACCEPTED", "REWORK_REQUIRED", "REJECTED", "CLOSED", "BLOCKED"]},
+    "escrow": {
+      "type": "object",
+      "required": ["customer_budget", "escrow_balance", "reserved_payroll", "reserved_materials", "reserved_transport", "reserved_energy", "reserved_compute", "reserved_review", "reserved_contingency", "spent", "refunded", "remaining"],
+      "properties": {
+        "customer_budget": {"type": "number", "minimum": 0}, "escrow_balance": {"type": "number", "minimum": 0}, "reserved_payroll": {"type": "number", "minimum": 0}, "reserved_materials": {"type": "number", "minimum": 0}, "reserved_transport": {"type": "number", "minimum": 0}, "reserved_energy": {"type": "number", "minimum": 0}, "reserved_compute": {"type": "number", "minimum": 0}, "reserved_review": {"type": "number", "minimum": 0}, "reserved_contingency": {"type": "number", "minimum": 0}, "spent": {"type": "number", "minimum": 0}, "refunded": {"type": "number", "minimum": 0}, "remaining": {"type": "number", "minimum": 0}
+      }
+    },
+    "task_ids": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
+    "dependencies": {"type": "array", "items": {"type": "object"}},
+    "simulation_only": {"const": true}
+  }
+}

@@ -1,0 +1,53 @@
+{
+  "schema_version": "1.0.0",
+  "claim_id": "CLAIM-KAIOS-LIFE-ENERGY-PAYROLL-001-cursor-01",
+  "task_id": "KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-CANDIDATES-001",
+  "worker_id": "cursor-01",
+  "worker_type": "Cursor",
+  "status": "CLAIMED",
+  "branch": "cursor-handoff/KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-CANDIDATES-001",
+  "base_commit": "9f481900eb46ae38dd670d6a1bf8a6b784533f77",
+  "branch_tip_at_claim": "f07ebe7cebe90d26540fc50df03f34a6a985551c",
+  "cursor_draft_pr": 118,
+  "claimed_at": "2026-08-03T12:45:00Z",
+  "lease_expires_at": "2026-08-05T12:45:00Z",
+  "heartbeat": "2026-08-03T12:45:00Z",
+  "record_version": 1,
+  "fencing_token": "FENCE-KAIOS-LIFE-ENERGY-PAYROLL-001-R1",
+  "claim_effective_when": "THIS_RECORD_AND_MATCHING_REGISTRY_STATE_EXIST_ON_ORIGIN_MAIN",
+  "activation_delivery": "CODEX_FAST_FORWARD_MAIN_COMPARE_AND_SET_NO_CURSOR_WAKE",
+  "compare_and_set": {
+    "prior_main": "9f481900eb46ae38dd670d6a1bf8a6b784533f77",
+    "prior_worker_registry_git_object": "01a20451984f07ac91a40ad07f68bb200d4f93e0",
+    "prior_worker_registry_sha256": "8e311f73cefb72da11837bd36593d0b3e49ad17e0fc9aa8969061e0468c9231f",
+    "expected_active_claim_count": 0,
+    "expected_worker_task": null,
+    "expected_worker_status": "IDLE"
+  },
+  "output_status": "CANDIDATE_ONLY",
+  "allowed_paths": [
+    "KAIOS/economy/candidates/payroll-v0/",
+    "KAIOS/economy/candidates/colony-ledger-v0/",
+    "KAIOS/world-viewer/candidates/life-energy-payroll/",
+    "KGEN-AI-Company/reports/"
+  ],
+  "expected_files": [
+    "KAIOS/economy/candidates/payroll-v0/CURSOR_AI_WORKER_PAYROLL_FIXTURES_V0.json",
+    "KAIOS/economy/candidates/payroll-v0/CURSOR_PROJECT_ESCROW_FIXTURES_V0.json",
+    "KAIOS/economy/candidates/colony-ledger-v0/CURSOR_ANT_COLONY_RESOURCE_LEDGER_V0.json",
+    "KAIOS/economy/candidates/colony-ledger-v0/CURSOR_BEE_HIVE_RESOURCE_LEDGER_V0.json",
+    "KAIOS/world-viewer/candidates/life-energy-payroll/CURSOR_LIFE_ENERGY_PAYROLL_VIEWER_CARDS_V0.json",
+    "KAIOS/world-viewer/candidates/life-energy-payroll/CURSOR_LIFE_ENERGY_PAYROLL_TEST_SCENARIOS_V0.json",
+    "KGEN-AI-Company/reports/CURSOR_LIFE_ENERGY_PAYROLL_CANDIDATE_REPORT.md"
+  ],
+  "manual_execution_only": true,
+  "external_autonomy": false,
+  "cursor_api_key_required": false,
+  "external_wake_workflow_allowed": false,
+  "can_push_main": false,
+  "merge_allowed": false,
+  "deploy_allowed": false,
+  "reviewer": "codex-gm-01",
+  "expiry_action": "FAIL_CLOSED_REQUIRE_CODEX_REVALIDATION",
+  "notes": "Atomicity is provided by one mainline compare-and-set transition from zero active claims to this single fenced claim. The activation uses a direct Codex fast-forward main update so the codex-branch merge wake filter is not invoked. Branch and Draft PR pre-existed and are recorded as Cursor evidence, not fabricated by Codex."
+}
