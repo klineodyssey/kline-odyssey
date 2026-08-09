@@ -1,3 +1,4 @@
 {
-  "install": "pip install --quiet pandas openpyxl numpy requests matplotlib"
+  "install": "python3 -m pip install -U pip\npip install -r K線西遊記/kline-engine-public/requirements.txt\npip install matplotlib feedparser",
+  "start": ""
 }
