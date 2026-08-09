@@ -11,6 +11,14 @@ This is the root cross-library index for the stable PrimeForge Boot entry, Opera
 
 This file is the **unique library-level Master Index** (ORG-P2-003 D7). Other `*MASTER_INDEX*` files are scoped sub-indexes or inventories; they must not be treated as competing library masters.
 
+## 2026-08-09 FortuneGame V1 registration
+
+| Organ | Canonical path | Purpose | Authority state |
+|---|---|---|---|
+| KGEN 12345 FortuneGame V1 | `KGEN/contracts/KGEN_FortuneGame_Upgradeable.sol` | Independent UUPS UP/DOWN Round, immutable credit bet, deterministic Oracle result and TempleHeart claim organ | Local/Testnet candidate; no mainnet deploy |
+| FortuneGame specification | `KGEN/docs/KGEN_FORTUNE_GAME_SPEC.md` | TIME_ARROW_IMMUTABILITY, Round, Oracle, CREDIT_ONLY and Heart boundary | Human-approved implementation specification |
+| FortuneGame security review | `KGEN/docs/KGEN_FORTUNE_GAME_SECURITY_REVIEW.md` | Threat model, controls, test scope and remaining Human gates | Internal review; external audit still required |
+
 ## Index Hierarchy (D7)
 
 | Role | Path | Scope |

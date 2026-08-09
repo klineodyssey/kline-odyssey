@@ -22,6 +22,9 @@ This addendum does not regenerate the historical inventory below.
 | `KGEN-KAIOS/contracts/KSHIP.sol` | Contract | KSHIP milligram-scale Token Core | Review only |
 | `KGEN-KAIOS/contracts/KSHIPConverter.sol` | Contract | KUFO-to-KSHIP conversion organ | Review only |
 | `KGEN/contracts/KGEN_TempleHeart_Upgradeable.sol` | Contract | Version-free TempleHeart UUPS integration candidate | Review only |
+| `KGEN/contracts/KGEN_FortuneGame_Upgradeable.sol` | Contract | Independent 12345 CREDIT_ONLY UP/DOWN game with immutable positions and deterministic Oracle settlement | Local/Testnet implementation candidate; no mainnet deploy |
+| `KGEN/docs/KGEN_FORTUNE_GAME_SPEC.md` | Specification | FortuneGame V1 TIME_ARROW_IMMUTABILITY, Oracle and Heart interface Canon | Human-approved V1 implementation spec |
+| `KGEN/docs/KGEN_FORTUNE_GAME_SECURITY_REVIEW.md` | Audit | FortuneGame V1 threat model, controls, tests and deployment gates | Internal review; no mainnet authority |
 | `KGEN-KAIOS/reports/KAIOS_TOKEN_LINEAGE_INTEGRATION_REVIEW_2026-08-09.md` | Audit | PR #127/#128 reconciliation and test evidence | Ready for Human review |
 | `KGEN-KAIOS/reports/BSC_TESTNET_TEMPLEHEART_V3_4_REHEARSAL.md` | Testnet Evidence | Human-readable TempleHeart V3.3.2 to V3.4.0 UUPS rehearsal | PASS on BSC Testnet chainId 97 |
 | `KGEN-KAIOS/reports/BSC_TESTNET_TEMPLEHEART_V3_4_REHEARSAL.json` | Testnet Evidence | Machine-readable addresses, receipts, storage and security results | PASS on BSC Testnet chainId 97 |

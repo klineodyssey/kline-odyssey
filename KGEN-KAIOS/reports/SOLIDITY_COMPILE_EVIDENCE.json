@@ -10,12 +10,18 @@
   "evmVersion": "paris",
   "openzeppelinContracts": "5.0.2",
   "openzeppelinContractsUpgradeable": "5.0.2",
-  "sourceCount": 16,
-  "contractCount": 27,
+  "sourceCount": 19,
+  "contractCount": 30,
   "eip170MaximumDeployedBytecodeBytes": 24576,
   "oversizedContracts": [],
   "warnings": 0,
   "contracts": [
+    {
+      "contractName": "KGEN_FortuneGame_Upgradeable",
+      "sourceName": "../KGEN/contracts/KGEN_FortuneGame_Upgradeable.sol",
+      "bytecodeBytes": 17435,
+      "deployedBytecodeBytes": 17220
+    },
     {
       "contractName": "KGEN_TempleHeart_Upgradeable",
       "sourceName": "../KGEN/contracts/KGEN_TempleHeart_Upgradeable.sol",
@@ -149,6 +155,12 @@
       "deployedBytecodeBytes": 18298
     },
     {
+      "contractName": "MockAggregatorV3",
+      "sourceName": "tests/contracts/MockAggregatorV3.sol",
+      "bytecodeBytes": 1944,
+      "deployedBytecodeBytes": 1370
+    },
+    {
       "contractName": "MockKGEN",
       "sourceName": "tests/contracts/MockKGEN.sol",
       "bytecodeBytes": 2829,
@@ -171,6 +183,12 @@
       "sourceName": "tests/contracts/MockOrgan.sol",
       "bytecodeBytes": 308,
       "deployedBytecodeBytes": 280
+    },
+    {
+      "contractName": "MockTempleHeartGame",
+      "sourceName": "tests/contracts/MockTempleHeartGame.sol",
+      "bytecodeBytes": 957,
+      "deployedBytecodeBytes": 916
     },
     {
       "contractName": "TestERC1967Proxy",

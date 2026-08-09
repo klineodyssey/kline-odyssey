@@ -160,3 +160,13 @@ If conditions are not met, settlement is recorded with **zero distribution**.
 ### Important Notice
 Holding KGEN grants **eligibility**, not income guarantees.
 All rewards follow on-chain records, Epoch rules, and irreversible logs.
+
+## 12345 FortuneGame V1 (local/Testnet candidate)
+
+- Contract: `contracts/KGEN_FortuneGame_Upgradeable.sol`
+- Specification: `docs/KGEN_FORTUNE_GAME_SPEC.md`
+- Security review: `docs/KGEN_FORTUNE_GAME_SECURITY_REVIEW.md`
+- Mode: `CREDIT_ONLY`; FortuneGame does not escrow KGEN.
+- Result: deterministic Chainlink-compatible BTC/USD Oracle proof; no pseudo-random outcome.
+- Reward boundary: finalized winners may request only the formula-derived payout through TempleHeart `gamePayout`.
+- Deployment: no mainnet deployment and no mainnet `setFortuneGame` authorization.

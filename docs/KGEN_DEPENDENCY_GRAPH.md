@@ -2,6 +2,23 @@
 
 Generated: 2026-07-05
 
+## 2026-08-09 FortuneGame V1 reviewed addendum
+
+This bounded addendum registers the new contract organ without regenerating the historical graph below.
+
+```mermaid
+flowchart LR
+  UI["12345 future game UI"] --> Game["KGEN_FortuneGame_Upgradeable.sol"]
+  Oracle["Chainlink-compatible BTC/USD Oracle"] --> Game
+  Game -->|"isHeartGameOperational / gamePayout"| Heart["KGEN_TempleHeart_Upgradeable.sol V3.4"]
+  Game --> Spec["KGEN_FORTUNE_GAME_SPEC.md"]
+  Game --> Security["KGEN_FORTUNE_GAME_SECURITY_REVIEW.md"]
+  Tests["KGEN-KAIOS/tests/fortune-game*.test.mjs"] --> Game
+  Mocks["MockAggregatorV3 / MockTempleHeartGame"] --> Tests
+```
+
+TempleHeart is only the payout vault; it does not resolve market direction. FortuneGame has no arbitrary Heart transfer authority. The legacy 16888 pseudo-random contract is a superseded historical comparison and is not a dependency.
+
 | Metric | Count |
 | --- | --- |
 | files | 562 |
