@@ -1,6 +1,14 @@
 # TempleHeart Mainnet Lineage and V3.4 New-Proxy Deployment Plan
 
-Status: `KAIOS_18888_SETTLEMENT_IMPLEMENTATION_COMPLETE`
+Status: `MAINNET_DEPLOYMENT_PREPARATION_STOPPED / KAIOS_CANON_RECONCILIATION`
+
+> **DEPLOYMENT PACKAGE SUSPENDED:** Human Final Canon 2026-08-09 supersedes the
+> receive-only 18888 runtime and every pre-reconciliation bytecode hash, gas
+> estimate, calldata package, and deployment-ready conclusion in this document.
+> Current monetary and point identity law is
+> `KGEN-KAIOS/KAIOS_FrictionMirror_Multiverse_README.md`. No section below
+> authorizes or prepares a Mainnet transaction until the reconciliation report,
+> compile, tests, and a later Human approval reopen deployment work.
 
 Source baseline: main merge commit `c7e8c533c5bbc598fac3192e0576bacb55fb6a31`.
 
@@ -106,7 +114,7 @@ Human canon preserves three generations of banking life. The first two are histo
 | `KGEN_GalacticBank_V7_5_2.sol` | KGEN Universe BigBang/Genesis Galactic Bank, produced and deployed during the Genesis system | `GENESIS_GALACTIC_BANK / HISTORICAL_LEGACY_ORGAN`: preserve its formal Genesis life and chain history; it was not operated as the current 18888 organ, no current management path is assumed, and it must not be hard-wired into the KAIOS white-hole system |
 | Mainnet `0xfc522243e988a837700CaD600D6f030f5932681F` | Historical deployed Galactic Bank evidence; chainId 56 code exists and `owner()` reports the historical governance address | `HISTORICAL_ONLY`: not deleted or denied, but insufficient Canon/control/interface evidence to designate it as current formal 18888 |
 | `KGEN_LingxiaoDeityBank_V1_0_1.sol` | First-generation 18888 Lingxiao Bank design whose original economic organ purpose included receiving the KGEN Bank 0.10% flow | `LINGXIAO_BANK_GENERATION_1 / SUPERSEDED_IMPLEMENTATION`: preserve lineage and future-policy context; do not deploy its old bytecode because current Solidity 0.8.24 compilation fails and its runtime/architecture does not satisfy current requirements |
-| `LingxiaoCelestialBank18888_Upgradeable.sol` | Current Bank evolution for KAIOS white-hole energy settlement, with one stable ERC1967/UUPS proxy lineage | `CURRENT_18888_BANK / V2_RECEIVE_ONLY_RUNTIME`: implemented, compiled and tested; Mainnet not deployed |
+| `LingxiaoCelestialBank18888_Upgradeable.sol` | Current Bank evolution for KAIOS white-hole energy settlement, with one stable ERC1967/UUPS proxy lineage | `CURRENT_18888_BANK / V2_POLICY_GATED_RUNTIME`: lawful outflow requires distinct proposal/approval, technical delay and beneficiary claim; Mainnet not deployed |
 | `KAIOSEventHorizonVaultV01.sol` | Review-only KAIOS sink with deliberately no withdrawal, release, rescue or upgrade path | `REJECTED`: irreversible event-horizon experiment, not a governed settlement reserve |
 | `KGEN_8888_Treasury_V1_0_0.sol` | KGEN-only owner withdrawal vault for species 8888 | `REJECTED`: wrong species, token and purpose |
 | `CelestialReserveBank18888` / `CelestialTaxVault18888` | Names occur only in constitutional/whitepaper future-package sections | `NOT_IMPLEMENTED` |
@@ -129,7 +137,7 @@ LingxiaoCelestialBank18888_Upgradeable implementation
 KAIOS.LINGXIAO_TREASURY_18888 -----------------+
 ```
 
-The current Bank identity and its first UUPS runtime are intentionally distinct: identity is the evolving 18888 Lingxiao Celestial Bank; V2 runtime only receives and locks KAIOS settlement.
+The current Bank identity and its first UUPS runtime are intentionally distinct: identity is the evolving 18888 Lingxiao Celestial Bank; V2 receives settlement and supports only reviewed, delayed, beneficiary-claimed lawful payments.
 
 - stable ERC1967/UUPS proxy address because KAIOS permanently stores the 18888 address;
 - initializer with nonzero admin/upgrader and formal KGEN contract lineage;
@@ -137,11 +145,12 @@ The current Bank identity and its first UUPS runtime are intentionally distinct:
 - read-only canonical token and balance getters plus explicit lineage events;
 - UUPS authorization restricted to `UPGRADER_ROLE`;
 - no user deposit function, no `transferFrom`, no allowance, no blacklist, no freeze, no clawback and no operation over player wallets;
-- no KAIOS withdrawal, release, sweep, rescue, bridge, lending, dividend, credit or tax-routing function in V2;
+- no owner withdrawal, sweep, rescue, bridge, lending, arbitrary dividend, credit or tax-routing function in V2;
+- lawful salary/civilization outflow requires `PAYMENT_PROPOSER_ROLE`, a different `PAYMENT_APPROVER_ROLE`, a one-hour delay, fixed beneficiary/amount/purpose hash, and beneficiary claim;
 - reject native BNB and omit arbitrary fallback execution;
 - direct ERC20 transfers and KAIOS `_mint` still credit the proxy balance without a receiver callback.
 
-This receive-only boundary avoids inventing an unauthorized reserve-distribution policy. A future cumulative, audited implementation may evolve through the stable proxy only after Human defines and approves its bank policy. UUPS means governance could technically authorize a future implementation with new behavior; the precise guarantee is `V2_RUNTIME = RECEIVE_ONLY`, not a claim that all future implementations can never move assets.
+This policy-gated boundary keeps payment calculation and 500-seat identity outside the Bank while preventing a direct Admin withdrawal path. A future cumulative, audited implementation may evolve through the stable proxy only after Human defines and approves further bank policy. UUPS means governance can technically authorize later behavior; the precise V2 guarantee is two-party authorization plus beneficiary claim, not permanent immobility.
 
 Initial Bank authority is the approved governance address `0xCd60...a4b9` for both admin and upgrader, with no operator role because V2 has no operational transfer. The deployment signer `0xb3C54...a261` receives no Bank role merely by deploying it.
 
@@ -178,13 +187,13 @@ No address prediction is final until the implementation is deployed, proxy creat
 |---|---|
 | Source | `KGEN-KAIOS/contracts/LingxiaoCelestialBank18888_Upgradeable.sol` |
 | Contract identity | `LingxiaoCelestialBank18888_Upgradeable` |
-| Runtime version/mode | `2.0.0` / `RECEIVE_ONLY_LOCKED` |
+| Runtime version/mode | `2.0.0` / `POLICY_GATED_SETTLEMENT_BANK` |
 | Compiler/dependencies | Solidity `0.8.24`; OpenZeppelin `5.0.2` |
 | Settings | optimizer enabled, runs 1; viaIR; Paris EVM; metadata bytecode hash disabled |
-| Creation bytecode | 4,452 bytes; `0x362d6f6638093f550b56d93b8c8222ca2e587bc5ce599f798580065bf6f47626` |
-| Runtime bytecode | 4,242 bytes; `0x26afde543338037947511a737f624591fe1d1f0505cba08fd948ec732c6d78c8` |
-| EIP-170 | `4,242 / 24,576` bytes, PASS |
-| Own storage | slot 0 `kgen`; slot 1 `kaios` + `kaiosBound`; slots 2-49 reserved by `uint256[48] __gap` |
+| Creation bytecode | 6,999 bytes; `0x2ff206ffe9d9889fe44a37694152ec440c0d4683f3096e82a140c760620e6578` |
+| Runtime bytecode | 6,789 bytes; `0x0ae549222566ce1948a680ddf896c147078a1b83ee6479040b3c72138f11e6a3` |
+| EIP-170 | `6,789 / 24,576` bytes, PASS |
+| Own storage | slot 0 `kgen`; slot 1 `kaios` + `kaiosBound`; slot 2 disbursed total; slot 3 payment ledger; slots 4-49 reserved by `uint256[46] __gap` |
 | Initial admin/upgrader | `0xCd60BF474e691F2484950a0276Eaf507616Ca4b9` / same |
 | Formal KGEN | `0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be` |
 
@@ -223,7 +232,7 @@ Registry organ IDs locked by current source are:
 - `KAIOS.ORGAN.KAIOS` -> `0x8192dabb5532a53075d9609e0974c572bdd26e84e22c8b6c5ae34666d715fd00`;
 - `KAIOS.ORGAN.FURNACE.18911` -> `0xc7dc58355a278d2d7c66791b96331912455bb79b53dbf7c740701ddbf33de567`.
 
-`511111`, KSHIP Converter and Pair Registry remain unset when no verified Mainnet deployment exists. V2 exposes no pause because it has no operational outflow to pause, and no payable `receive()`/fallback because neither is needed for ERC-20 settlement.
+`511111`, KSHIP Converter and Pair Registry remain unset when no verified Mainnet deployment exists. V2 has no payable `receive()`/fallback because neither is needed for ERC-20 settlement. Payment roles remain unset until formal, distinct governance operators are approved.
 
 ## 3. Fresh initializer audit
 
@@ -415,7 +424,7 @@ All new interactions use the V3.4 proxy. Legacy information is historical and re
 
 ## 11. Remaining Human decisions before Mainnet signing
 
-- Define and approve any future KAIOS reserve-release or KGEN Bank 0.10% policy separately; V2 deliberately contains neither path.
+- Define and approve the formal payment proposer/approver addresses before any 18888 disbursement; the KGEN Bank 0.10% role remains future governance evolution and is not activated in V2.
 - Before signing, reconfirm that deployment signer candidate `0xb3C54...a261` is still Human-controlled and adequately funded.
 - Authorize the staged Mainnet deployment transactions only after final bytecode, nonce-derived addresses, calldata, gas and manifests are reviewed; the required approval phrase remains `MAINNET_DEPLOY_APPROVED`.
 - Provide a dedicated Holy Cup backend signer later; until it is verified, keep the frontend on-chain write path disabled and retain the temporary governance signer label.

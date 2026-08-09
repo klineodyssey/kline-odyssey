@@ -119,7 +119,9 @@ const expectedLingxiaoStorage = [
   { label: "kgen", slot: "0", offset: 0, type: "t_address" },
   { label: "kaios", slot: "1", offset: 0, type: "t_address" },
   { label: "kaiosBound", slot: "1", offset: 20, type: "t_bool" },
-  { label: "__gap", slot: "2", offset: 0, type: "t_array(t_uint256)48_storage" },
+  { label: "totalKaiosDisbursed", slot: "2", offset: 0, type: "t_uint256" },
+  { label: "_disbursements", slot: "3", offset: 0, type: "t_mapping(t_bytes32,t_struct(Disbursement)6805_storage)" },
+  { label: "__gap", slot: "4", offset: 0, type: "t_array(t_uint256)46_storage" },
 ];
 const actualLingxiaoStorage = (lingxiaoArtifact?.storageLayout?.storage ?? []).map(
   ({ label, slot, offset, type }) => ({ label, slot, offset, type }),
@@ -141,7 +143,7 @@ const evidence = {
   oversizedContracts,
   lingxiaoCelestialBank18888StorageValidation: {
     status: lingxiaoStorageMatches ? "PASS" : "FAIL",
-    strategy: "Initial V2 UUPS layout locked to two data slots plus a 48-slot reserve gap",
+    strategy: "Initial V2 UUPS layout locks KGEN/KAIOS lineage plus policy-gated disbursement accounting inside a 50-slot namespace",
     expected: expectedLingxiaoStorage,
     actual: actualLingxiaoStorage,
   },

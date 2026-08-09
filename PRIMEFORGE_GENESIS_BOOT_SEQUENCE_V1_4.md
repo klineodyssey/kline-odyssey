@@ -580,6 +580,12 @@ Where the Market Becomes the Myth.
 /docs/runtime/KGEN_Runtime_Boot_Sequence_V1_0.md
 /docs/runtime/KGEN_UFO_Runtime_Control_System_V3_0.md
 /docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md
+/KGEN-KAIOS/KAIOS_FrictionMirror_Multiverse_README.md
+/KGEN-KAIOS/18888_Celestial_Bank_KAIOS_WhiteHole_Whitepaper_V2.0_CURRENT.md
+/KGEN-KAIOS/KAIOS_CELESTIAL_BANK_CONSERVATION_WHITEPAPER_V1.8.md
+/KGEN-KAIOS/KAIOS_500_CELESTIAL_AND_MARS_SEATS_RUNTIME_CURRENT.md
+/KGEN-KAIOS/KAIOS_YUNZHAN_CAVE_8895_SHADOW_BANK_REAL_ECONOMY_SPEC_V1.2.md
+/KGEN-KAIOS/KAIOS_GENESIS_INSCRIPTION.md
 /docs/spec/KGEN_Runtime_Specification_V1_0.md
 /docs/biology/KGEN_Civilization_Biology_Runtime_V1_0.md
 /docs/neural/KGEN_Universe_Neural_System_V1_0.md

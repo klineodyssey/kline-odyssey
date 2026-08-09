@@ -14,6 +14,12 @@ No deployment script or Mainnet address is included.
 
 | Entry | Purpose |
 |---|---|
+| `KAIOS_FrictionMirror_Multiverse_README.md` | Human Final Canon single source of truth for KGEN -> KAIOS, 33333/36000/18888, and KAIOS -> KUFO |
+| `18888_Celestial_Bank_KAIOS_WhiteHole_Whitepaper_V2.0_CURRENT.md` | Current 18888 Lingxiao Celestial Bank identity, settlement, payroll, allocation, and 8888 boundary |
+| `KAIOS_CELESTIAL_BANK_CONSERVATION_WHITEPAPER_V1.8.md` | Current cumulative civilization-mass conservation and lawful bank-circulation model |
+| `KAIOS_500_CELESTIAL_AND_MARS_SEATS_RUNTIME_CURRENT.md` | Current 500 Celestial salary/public-function seat and Mars habitat-seat boundaries |
+| `KAIOS_YUNZHAN_CAVE_8895_SHADOW_BANK_REAL_ECONOMY_SPEC_V1.2.md` | Current 8895 own-capital, real-economy, risk and non-minting boundary |
+| `KAIOS_GENESIS_INSCRIPTION.md` | Single canonical Genesis inscription; the staged V1.2 correction is integrated here without a parallel versioned active file |
 | `contracts/KAIOS.sol` | Friction Mirror monetary core; 1 destroyed KGEN -> 1,000 KAIOS to 18888 |
 | `contracts/KAIOSOrganRegistry.sol` | Bootstrap-sealed and timelocked 18911/511111/KSHIP/Pair organ registry |
 | `contracts/KAIOSAlchemyFurnace.sol` | Holder-authorized KAIOS burn and 49-epoch maturity proof |
@@ -22,6 +28,7 @@ No deployment script or Mainnet address is included.
 | `contracts/KSHIP.sol` | Proof-bound, zero-genesis KSHIP core |
 | `contracts/KSHIPConverter.sol` | Holder-authorized KUFO-to-KSHIP conversion organ |
 | `contracts/KAIOSPairRegistry.sol` | External pair metadata without Token Core authority |
+| `tools/validate-integration-artifacts.mjs --generate-kaios-genesis-record` | Post-settlement chain-derived Mainnet record/inscription generator; accepts no amount input |
 | `reports/KAIOS_TOKEN_LINEAGE_INTEGRATION_REVIEW_2026-08-09.md` | Executive review and evidence index |
 
 ## Purpose

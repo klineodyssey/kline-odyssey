@@ -58,7 +58,7 @@ test("invariant: arbitrary zero-tax KAIOS transfers preserve supply and settleme
   }
 });
 
-test("invariant: receive-only 18888 balance is monotonic across fuzzed direct KAIOS mints", async () => {
+test("invariant: 18888 settlement balance tracks fuzzed direct KAIOS mints before any approved claim", async () => {
   const context = await setupLingxiaoBank();
   const mockKaios = await deploy("MockKAIOSForTreasury", context.deployer, [
     await context.kgen.getAddress(),

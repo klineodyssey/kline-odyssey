@@ -32,6 +32,17 @@ test("Friction Mirror reads actual KGEN supply loss and settles only to 18888", 
   await assert.rejects(context.kaios.settleWhiteHoleMass());
 });
 
+test("fractional Friction Mirror settlement converts 0.5 KGEN to exactly 500 KAIOS", async () => {
+  const context = await setupLineage();
+  const burned = ETHER / 2n;
+  const minted = await mintKaiosByBurningKgen(context, burned);
+
+  assert.equal(minted, 500n * ETHER);
+  assert.equal(await context.kaios.totalSupply(), 500n * ETHER);
+  assert.equal(await context.kaios.settledKgenBurned(), burned);
+  await assert.rejects(context.kaios.settleWhiteHoleMass());
+});
+
 test("18911 burn is holder-allowance-bound and 511111 cannot redirect beneficiary", async () => {
   const context = await setupLineage({ epochSeconds: 10 });
   await mintKaiosByBurningKgen(context, 2n * ETHER);
@@ -151,6 +162,7 @@ test("full KGEN supply loss reaches but cannot exceed the KAIOS cap", async () =
   const fullSupply = await context.kgen.totalSupply();
   await mintKaiosByBurningKgen(context, fullSupply);
   assert.equal(await context.kaios.totalSupply(), await context.kaios.cap());
+  assert.equal(await context.kaios.totalSupply(), 72_000_000_000n * ETHER);
   assert.equal(await context.kaios.remainingMintableSupply(), 0n);
   await assert.rejects(context.kaios.settleWhiteHoleMass());
 });
@@ -234,7 +246,7 @@ test("18888 fresh initialization is atomic, role-bound, replay-safe, and impleme
   const deployerAddress = await context.deployer.getAddress();
 
   assert.equal(await context.bank.version(), "2.0.0");
-  assert.equal(await context.bank.runtimeMode(), "RECEIVE_ONLY_LOCKED");
+  assert.equal(await context.bank.runtimeMode(), "POLICY_GATED_SETTLEMENT_BANK");
   assert.equal(await context.bank.kgen(), await context.kgen.getAddress());
   assert.equal(await context.bank.kaios(), "0x0000000000000000000000000000000000000000");
   assert.equal(await context.bank.kaiosBound(), false);
@@ -243,6 +255,8 @@ test("18888 fresh initialization is atomic, role-bound, replay-safe, and impleme
   assert.equal(await context.bank.hasRole(await context.bank.UPGRADER_ROLE(), upgraderAddress), true);
   assert.equal(await context.bank.hasRole(await context.bank.DEFAULT_ADMIN_ROLE(), deployerAddress), false);
   assert.equal(await context.bank.hasRole(await context.bank.UPGRADER_ROLE(), deployerAddress), false);
+  assert.equal(await context.bank.hasRole(await context.bank.PAYMENT_PROPOSER_ROLE(), adminAddress), false);
+  assert.equal(await context.bank.hasRole(await context.bank.PAYMENT_APPROVER_ROLE(), adminAddress), false);
 
   await assert.rejects(
     context.bank.initialize(adminAddress, upgraderAddress, await context.kgen.getAddress()),
@@ -361,6 +375,59 @@ test("formal KAIOS Friction Mirror settles only into the bound 18888 proxy", asy
   assert.equal(await context.bank.kaiosBalance(), expected);
 });
 
+test("18888 lawful outflow requires distinct proposal, approval, delay, and beneficiary claim", async () => {
+  const context = await setupLingxiaoBank();
+  const proposer = context.signers[3];
+  const approver = context.signers[4];
+  const beneficiary = context.signers[5];
+  const attacker = context.signers[6];
+  const mockKaios = await deploy("MockKAIOSForTreasury", context.deployer, [
+    await context.kgen.getAddress(),
+    await context.bank.getAddress(),
+  ]);
+  await (await context.bank.bindKAIOS(await mockKaios.getAddress())).wait();
+  await (await mockKaios.mintToTreasury(2_000n * ETHER)).wait();
+
+  await (
+    await context.bank.grantRole(await context.bank.PAYMENT_PROPOSER_ROLE(), await proposer.getAddress())
+  ).wait();
+  await (
+    await context.bank.grantRole(await context.bank.PAYMENT_APPROVER_ROLE(), await approver.getAddress())
+  ).wait();
+  await (
+    await context.bank.grantRole(await context.bank.PAYMENT_APPROVER_ROLE(), await proposer.getAddress())
+  ).wait();
+
+  const disbursementId = id("18888-CELESTIAL-SALARY-EPOCH-1-SEAT-1");
+  const purposeHash = id("500-seat salary resolution #1");
+  const latest = await context.provider.getBlock("latest");
+  const executableAt = BigInt(latest.timestamp) + 3_601n;
+  await (
+    await context.bank.connect(proposer).proposeDisbursement(
+      disbursementId,
+      await beneficiary.getAddress(),
+      500n * ETHER,
+      purposeHash,
+      executableAt,
+    )
+  ).wait();
+
+  await assert.rejects(context.bank.connect(proposer).approveDisbursement(disbursementId));
+  await assert.rejects(context.bank.connect(attacker).approveDisbursement(disbursementId));
+  await (await context.bank.connect(approver).approveDisbursement(disbursementId)).wait();
+  await assert.rejects(context.bank.connect(attacker).claimDisbursement(disbursementId));
+  await assert.rejects(context.bank.connect(beneficiary).claimDisbursement(disbursementId));
+  await advanceTime(context.provider, 3_601);
+  await (
+    await context.bank.connect(beneficiary).claimDisbursement(disbursementId, { gasLimit: 500_000 })
+  ).wait();
+
+  assert.equal(await mockKaios.balanceOf(await beneficiary.getAddress()), 500n * ETHER);
+  assert.equal(await context.bank.totalKaiosDisbursed(), 500n * ETHER);
+  assert.equal((await context.bank.disbursement(disbursementId)).executed, true);
+  await assert.rejects(context.bank.connect(beneficiary).claimDisbursement(disbursementId));
+});
+
 test("18888 UUPS upgrades require UPGRADER_ROLE and preserve locked settlement state", async () => {
   const context = await setupLingxiaoBank();
   const replacement = await deploy("LingxiaoCelestialBank18888_Upgradeable", context.deployer);
@@ -380,5 +447,5 @@ test("18888 UUPS upgrades require UPGRADER_ROLE and preserve locked settlement s
   const stored = await context.provider.getStorage(await context.bank.getAddress(), implementationSlot);
   assert.equal(`0x${stored.slice(-40)}`.toLowerCase(), (await replacement.getAddress()).toLowerCase());
   assert.equal(await context.bank.kgen(), await context.kgen.getAddress());
-  assert.equal(await context.bank.runtimeMode(), "RECEIVE_ONLY_LOCKED");
+  assert.equal(await context.bank.runtimeMode(), "POLICY_GATED_SETTLEMENT_BANK");
 });

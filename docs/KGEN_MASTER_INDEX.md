@@ -14,7 +14,14 @@ This addendum does not regenerate the historical inventory below.
 | Path | Category | Purpose | Status |
 |---|---|---|---|
 | `docs/physics/KGEN_KAIOS_SCALE_AND_PLANCK_RUNTIME_CURRENT.md` | Physics | SI mass, wave/photon, taxonomy/composition and Planck boundary reconciliation | CURRENT review candidate |
+| `KGEN-KAIOS/KAIOS_FrictionMirror_Multiverse_README.md` | CURRENT Canon | Single source of truth for KGEN -> KAIOS and point identities | Human Final Canon 2026-08-09 |
+| `KGEN-KAIOS/18888_Celestial_Bank_KAIOS_WhiteHole_Whitepaper_V2.0_CURRENT.md` | CURRENT Canon | 18888 settlement, payroll, allocation and 8888 boundary | Human corrected intake integrated |
+| `KGEN-KAIOS/KAIOS_CELESTIAL_BANK_CONSERVATION_WHITEPAPER_V1.8.md` | CURRENT Canon | Cumulative mass-conservation and lawful circulation rules | Supersedes active V1.6 |
+| `KGEN-KAIOS/KAIOS_500_CELESTIAL_AND_MARS_SEATS_RUNTIME_CURRENT.md` | Runtime | 500 Celestial salary/public-function seats and Mars habitat-seat boundary | CURRENT |
+| `KGEN-KAIOS/KAIOS_YUNZHAN_CAVE_8895_SHADOW_BANK_REAL_ECONOMY_SPEC_V1.2.md` | Current specification | 8895 own-capital real-economy and non-minting boundary | Supersedes active V1.0 |
+| `KGEN-KAIOS/KAIOS_GENESIS_INSCRIPTION.md` | Canon inscription | Exact four-line KAIOS Genesis inscription | Staged V1.2 integrated without parallel active file |
 | `KGEN-KAIOS/contracts/KAIOS.sol` | Contract | Friction Mirror KAIOS monetary core | Review only |
+| `KGEN-KAIOS/tools/validate-integration-artifacts.mjs` | Validation / evidence tool | Sanitized integration checks and post-settlement chain-derived Genesis record mode | Mainnet transaction not authorized |
 | `KGEN-KAIOS/contracts/KAIOSOrganRegistry.sol` | Contract | Governed runtime organ resolution | Review only |
 | `KGEN-KAIOS/contracts/KAIOSAlchemyFurnace.sol` | Contract | 18911 Alchemy proof runtime | Review only |
 | `KGEN-KAIOS/contracts/KUFO.sol` | Contract | KUFO gram-scale Token Core | Review only |
@@ -26,7 +33,7 @@ This addendum does not regenerate the historical inventory below.
 | `KGEN-KAIOS/reports/BSC_TESTNET_TEMPLEHEART_V3_4_REHEARSAL.md` | Testnet Evidence | Human-readable TempleHeart V3.3.2 to V3.4.0 UUPS rehearsal | PASS on BSC Testnet chainId 97 |
 | `KGEN-KAIOS/reports/BSC_TESTNET_TEMPLEHEART_V3_4_REHEARSAL.json` | Testnet Evidence | Machine-readable addresses, receipts, storage and security results | PASS on BSC Testnet chainId 97 |
 | `KGEN/docs/TEMPLEHEART_MAINNET_LINEAGE.md` | Mainnet Plan | Separates immutable V3.2.6 Legacy Heart from the new V3.4 UUPS proxy life; preserves the three-generation 18888 Bank lineage and defines the V2 KAIOS settlement runtime, Registry, governance, deployment, gas and emergency gates | 18888 implementation package complete; Mainnet transaction not authorized |
-| `KGEN-KAIOS/contracts/LingxiaoCelestialBank18888_Upgradeable.sol` | Contract | Current 18888 Lingxiao Celestial Bank identity with V2 receive-only KAIOS white-hole settlement runtime and UUPS proxy lineage | Implementation complete; Mainnet transaction not authorized |
+| `KGEN-KAIOS/contracts/LingxiaoCelestialBank18888_Upgradeable.sol` | Contract | Current 18888 Lingxiao Celestial Bank identity with two-party, delayed, beneficiary-claimed lawful disbursements and no owner withdrawal path | Reconciliation candidate; Mainnet transaction not authorized |
 
 ## Summary
 | Category | Files |

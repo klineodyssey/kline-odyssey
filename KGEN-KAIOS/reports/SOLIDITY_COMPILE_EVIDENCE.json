@@ -16,7 +16,7 @@
   "oversizedContracts": [],
   "lingxiaoCelestialBank18888StorageValidation": {
     "status": "PASS",
-    "strategy": "Initial V2 UUPS layout locked to two data slots plus a 48-slot reserve gap",
+    "strategy": "Initial V2 UUPS layout locks KGEN/KAIOS lineage plus policy-gated disbursement accounting inside a 50-slot namespace",
     "expected": [
       {
         "label": "kgen",
@@ -37,10 +37,22 @@
         "type": "t_bool"
       },
       {
-        "label": "__gap",
+        "label": "totalKaiosDisbursed",
         "slot": "2",
         "offset": 0,
-        "type": "t_array(t_uint256)48_storage"
+        "type": "t_uint256"
+      },
+      {
+        "label": "_disbursements",
+        "slot": "3",
+        "offset": 0,
+        "type": "t_mapping(t_bytes32,t_struct(Disbursement)6805_storage)"
+      },
+      {
+        "label": "__gap",
+        "slot": "4",
+        "offset": 0,
+        "type": "t_array(t_uint256)46_storage"
       }
     ],
     "actual": [
@@ -63,10 +75,22 @@
         "type": "t_bool"
       },
       {
-        "label": "__gap",
+        "label": "totalKaiosDisbursed",
         "slot": "2",
         "offset": 0,
-        "type": "t_array(t_uint256)48_storage"
+        "type": "t_uint256"
+      },
+      {
+        "label": "_disbursements",
+        "slot": "3",
+        "offset": 0,
+        "type": "t_mapping(t_bytes32,t_struct(Disbursement)6805_storage)"
+      },
+      {
+        "label": "__gap",
+        "slot": "4",
+        "offset": 0,
+        "type": "t_array(t_uint256)46_storage"
       }
     ]
   },
@@ -163,10 +187,10 @@
     {
       "contractName": "KAIOS",
       "sourceName": "contracts/KAIOS.sol",
-      "bytecodeBytes": 7228,
-      "bytecodeHash": "0x514fe497b01aa3d927b183ca5919561d66f427b6c3023872befa38e2f761b187",
-      "deployedBytecodeBytes": 5873,
-      "deployedBytecodeHash": "0xe06622fadb7e6b0cf847601bd5bbf06acbda5e1223eb07134c72cc1c7cca26f9"
+      "bytecodeBytes": 7131,
+      "bytecodeHash": "0x54b4e49d01d4a7f1dcd615e66a90ee639320c9ac19fa208b3444bd0f74d16811",
+      "deployedBytecodeBytes": 5776,
+      "deployedBytecodeHash": "0x4add4038124198d1879aa2c22894712809c50acbba32e5e83cbc5176a5241d57"
     },
     {
       "contractName": "KAIOSAlchemyFurnace",
@@ -187,10 +211,10 @@
     {
       "contractName": "KAIOSGenesisInscription",
       "sourceName": "contracts/KAIOSGenesisInscription.sol",
-      "bytecodeBytes": 2159,
-      "bytecodeHash": "0x04f33dbed76e9874cda17ac0013de9ab6124e96e8d75b253c67897edb697dae3",
-      "deployedBytecodeBytes": 1641,
-      "deployedBytecodeHash": "0xe9b48ff6c11f7757145678217ad44a29339246ebca9f7bad198019d21685aa89"
+      "bytecodeBytes": 2062,
+      "bytecodeHash": "0x41773053edc5bfe6b7f0a2a49d372ca812c7245a2e15275bc28345aad94fe5d9",
+      "deployedBytecodeBytes": 1544,
+      "deployedBytecodeHash": "0x65206f757fa970d3aff917f59841b1a562e42e58f0f9c88ff7b853a54fbdf00e"
     },
     {
       "contractName": "KAIOSOrganRegistry",
@@ -243,10 +267,10 @@
     {
       "contractName": "LingxiaoCelestialBank18888_Upgradeable",
       "sourceName": "contracts/LingxiaoCelestialBank18888_Upgradeable.sol",
-      "bytecodeBytes": 4452,
-      "bytecodeHash": "0x362d6f6638093f550b56d93b8c8222ca2e587bc5ce599f798580065bf6f47626",
-      "deployedBytecodeBytes": 4242,
-      "deployedBytecodeHash": "0x26afde543338037947511a737f624591fe1d1f0505cba08fd948ec732c6d78c8"
+      "bytecodeBytes": 6999,
+      "bytecodeHash": "0x2ff206ffe9d9889fe44a37694152ec440c0d4683f3096e82a140c760620e6578",
+      "deployedBytecodeBytes": 6789,
+      "deployedBytecodeHash": "0x0ae549222566ce1948a680ddf896c147078a1b83ee6479040b3c72138f11e6a3"
     },
     {
       "contractName": "KGEN_TempleHeart_V3_3_2_Baseline",

@@ -11,6 +11,7 @@
     "testnet:templeheart:bootstrap-rehearse": "node tools/validate-templeheart-storage.mjs --testnet-bootstrap-rehearsal",
     "lineage:verify": "node tools/verify-current-lineage.mjs",
     "integrity:validate": "node tools/validate-integration-artifacts.mjs",
+    "mainnet:genesis-record": "node tools/validate-integration-artifacts.mjs --generate-kaios-genesis-record",
     "test": "node --test --test-concurrency=1 --test-reporter=spec tests/*.test.mjs",
     "test:all": "npm run compile && npm run storage:validate && npm run lineage:verify && npm run integrity:validate && npm test"
   },

@@ -1,10 +1,10 @@
 {
   "status": "PASS",
   "checks": {
-    "files": 20,
-    "json": 3,
-    "markdown": 6,
-    "utf8": 20,
+    "files": 45,
+    "json": 5,
+    "markdown": 25,
+    "utf8": 44,
     "bom": 0,
     "corruption": 0,
     "secretHits": 0,
@@ -12,11 +12,22 @@
   },
   "protectedChanges": {
     "currentFiles": [
+      "KGEN-KAIOS/18888_Celestial_Bank_KAIOS_WhiteHole_Whitepaper_V2.0_CURRENT.md",
+      "KGEN-KAIOS/KAIOS_500_CELESTIAL_AND_MARS_SEATS_RUNTIME_CURRENT.md",
       "KGEN-KAIOS/KAIOS_WHITE_HOLE_ATOMIC_CONVERSION_AND_LIQUIDITY_RUNTIME_CURRENT.md",
       "KGEN-KAIOS/reports/CURRENT_LINEAGE_RECONCILIATION.json"
     ],
-    "constitutionFiles": [],
-    "bootSequenceChanged": false,
+    "constitutionFiles": [
+      "docs/constitution/00_PrimeForge_Creation_Declaration.md",
+      "docs/constitution/01_KGEN_Universe_Constitution.md",
+      "docs/constitution/02_KAIOS_Civilization_Constitution.md",
+      "docs/constitution/03_Celestial_Bank_18888.md",
+      "docs/constitution/04_People_Bank_8888.md",
+      "docs/constitution/05_Gold_Island_33333.md",
+      "docs/constitution/06_Huaguo_Exchange_11520.md",
+      "docs/constitution/08_AI_Company.md"
+    ],
+    "bootSequenceChanged": true,
     "walletOrPrivateKeyFiles": [],
     "deploymentFiles": []
   },

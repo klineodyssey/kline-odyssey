@@ -180,7 +180,7 @@ Name: KAIOS Civilization Credit
 Symbol: KAIOS
 Decimals: 18
 Minimum Unit: 10^-18 KAIOS
-Maximum Supply: 720,000,000,000 KAIOS
+Maximum Supply: 72,000,000,000 KAIOS
 Reference Ratio: 1 KGEN = 1,000 KAIOS
 ```
 
@@ -189,21 +189,21 @@ Reference Ratio: 1 KGEN = 1,000 KAIOS
 推薦：
 
 ```text
-Genesis Mint:
-720,000,000,000 KAIOS
+Genesis Settlement Mint:
+(72,000,000 KGEN - KGEN.totalSupply at settlement) * 1,000
 
 Genesis Receiver:
 18888 Celestial Genesis Reserve
 
-Post-Genesis Mint:
-DISABLED
+Later Friction-Mirror Settlement:
+only newly destroyed and previously unsettled KGEN * 1,000
 ```
 
 創世後：
 
-- 不再增發。
+- 不得任意增發；只有 KGEN 真實供應毀滅的未結算差額可生成 KAIOS。
 - 總量只能維持或因 Burn 下降。
-- 18888 只從儲備釋放，不再 Mint。
+- 18888 接收 Friction Mirror 結算，並依銀行規則支付合法薪俸與文明資金；18888 本身沒有 Mint 權限。
 
 ## 3.3 玩家餘額可歸零
 
@@ -645,8 +645,8 @@ K線戰爭包括：
 8888 高老莊
 = 人民銀行
 
-33333 金銀島
-= Proof of Civilization 文明貢獻中心
+33333 金銀島 / Gold & Silver Island
+= KAIOS Token 部署點與宇宙 Point ID；不是 wallet、treasury 或 EVM address
 
 11520 花果山悟空交易所
 = 生命、商品、土地、公司與文明市場
