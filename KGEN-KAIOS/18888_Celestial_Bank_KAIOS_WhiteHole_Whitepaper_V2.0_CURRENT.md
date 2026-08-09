@@ -2,7 +2,7 @@
 ## Lingxiao Celestial Bank 18888 × KAIOS White-Hole Civilization Bank
 ### V2.0 CURRENT — Circulating Celestial Payroll Edition
 
-**狀態：** CURRENT ARCHITECTURE / IMPLEMENTATION BASIS  
+**狀態：** CURRENT ARCHITECTURE / IMPLEMENTATION BASIS
 **日期：** 2026-08-09
 
 ## 1. Fixed Physics
