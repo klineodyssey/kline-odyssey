@@ -16,17 +16,18 @@ Human instruction: this directory is a temporary intake area for Codex to reconc
 
 ## Required Codex action
 
-1. Decode the six `.b64.partXX` files in lexical order into `KAIOS_PROJECT_DATA_CURRENT_2026-08-09.zip`.
-2. Verify SHA-256 of the decoded ZIP equals:
-   `5a827710396575c8ea3130590d2563ff1fd9d69965352427e0e5fb904e32c9a4`
-3. Inspect every file in the package and compare it with current repository files.
-4. Put each corrected/current file in the appropriate canonical repository location; Codex decides placement based on existing repo architecture.
-5. Delete active/current obsolete files that conflict with the final canon, especially active 1:10,000 KGEN->KAIOS rules, 720,000,000,000 KAIOS active ceilings, and the old TEN THOUSAND Genesis inscription.
-6. Historical files may remain only when they are clearly marked SUPERSEDED/HISTORICAL and cannot be mistaken for CURRENT.
-7. Do not bulk-replace the separate correct KAIOS->KUFO rule of 1:1,000.
-8. Re-run compile/tests/lineage/integrity checks after reconciliation.
-9. Update PR #135 only; do not open another PR and do not deploy Mainnet.
-10. After integration, delete this temporary `_incoming/2026-08-09-KAIOS-CURRENT/` staging directory (including the base64 parts) so the repo retains only canonical files.
+1. Inspect every staged corrected file and compare it with current repository files.
+2. Put each corrected/current file in the appropriate canonical repository location; Codex decides placement based on existing repo architecture.
+3. Delete active/current obsolete files that conflict with the final canon, especially active 1:10,000 KGEN->KAIOS rules, 720,000,000,000 KAIOS active ceilings, old TEN THOUSAND Genesis inscriptions, and older CURRENT files explicitly superseded by the staged versions.
+4. Historical files may remain only when they are clearly marked SUPERSEDED/HISTORICAL and cannot be mistaken for CURRENT.
+5. Do not bulk-replace the separate correct KAIOS->KUFO rule of 1:1,000.
+6. Re-run compile/tests/lineage/integrity checks after reconciliation.
+7. Update PR #135 only; do not open another PR and do not deploy Mainnet.
+8. After integration, delete this temporary `_incoming/2026-08-09-KAIOS-CURRENT/` staging directory so the repo retains only canonical files.
+
+## Staging artifact cleanup
+
+`KAIOS_PROJECT_DATA_CURRENT_2026-08-09.zip.b64.part00` is an incomplete abandoned transfer artifact from the upload process. It is NOT source material. Delete it during reconciliation; do not decode or use it.
 
 ## Important banking canon
 
