@@ -100,6 +100,8 @@ function scanText(relativePath, content, sourceKind) {
         path: relativePath,
         line: index + 1,
         pattern: pattern.id,
+        legacyScale: pattern.legacyScale
+          || (pattern.id === "KAIOS_PER_KGEN" && /10_000|10000/u.test(line)),
         classification,
         sourceKind,
         excerpt: line.trim().slice(0, 240),
@@ -192,9 +194,7 @@ const classifications = [
 const counts = Object.fromEntries(
   classifications.map((name) => [name, findings.filter((item) => item.classification === name).length]),
 );
-const legacyFindings = findings.filter((item) =>
-  patterns.find((pattern) => pattern.id === item.pattern)?.legacyScale,
-);
+const legacyFindings = findings.filter((item) => item.legacyScale);
 const errorFiles = [...new Set(legacyFindings.map((item) => item.path))].sort();
 const supersededHistoryFiles = [...new Set(
   findings.filter((item) => item.classification === "SUPERSEDED_HISTORY").map((item) => item.path),

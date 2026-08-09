@@ -5,7 +5,7 @@
 - Scanned files: 3799
 - Repository tracked files: 3655
 - Human package files: 144
-- Legacy 1:10,000 / 720B reference hits: 41
+- Legacy 1:10,000 / 720B reference hits: 47
 - ACTIVE_CONFLICT: 0
 - CONTRACT_CRITICAL: 0
 
@@ -75,12 +75,12 @@ The Human-reported `KAIOS_GENESIS_INSCRIPTION_V1.0.md` is superseded by the stag
 
 | Classification | Location | Pattern | Rationale |
 |---|---|---|---|
-| COMMENT_ONLY | `KGEN-KAIOS/KAIOS_CELESTIAL_BANK_CONSERVATION_WHITEPAPER_V1.8.md:156` | 1_TO_10_000 | Audit, supersession, or negative-reference text; not an executable monetary definition. |
 | COMMENT_ONLY | `KGEN-KAIOS/CODEX_HANDOFF_2026-08-09.md:7` | KAIOS_PER_KGEN | Audit, supersession, or negative-reference text; not an executable monetary definition. |
 | COMMENT_ONLY | `KGEN-KAIOS/CODEX_HANDOFF_2026-08-09.md:70` | KAIOS_PER_KGEN | Audit, supersession, or negative-reference text; not an executable monetary definition. |
 | COMMENT_ONLY | `KGEN-KAIOS/CODEX_HANDOFF_2026-08-09.md:82` | 10_000_KAIOS | Audit, supersession, or negative-reference text; not an executable monetary definition. |
 | COMMENT_ONLY | `KGEN-KAIOS/CODEX_HANDOFF_2026-08-09.md:83` | KAIOS_PER_KGEN | Audit, supersession, or negative-reference text; not an executable monetary definition. |
 | COMMENT_ONLY | `KGEN-KAIOS/CODEX_HANDOFF_2026-08-09.md:98` | 1_TO_10000 | Audit, supersession, or negative-reference text; not an executable monetary definition. |
+| COMMENT_ONLY | `KGEN-KAIOS/KAIOS_CELESTIAL_BANK_CONSERVATION_WHITEPAPER_V1.8.md:156` | 1_TO_10_000 | Audit, supersession, or negative-reference text; not an executable monetary definition. |
 | COMMENT_ONLY | `KGEN-KAIOS/KAIOS_FrictionMirror_Multiverse_README.md:20` | 1_TO_10_000 | Audit, supersession, or negative-reference text; not an executable monetary definition. |
 | COMMENT_ONLY | `KGEN-KAIOS/KAIOS_FrictionMirror_Multiverse_README.md:20` | 720_BILLION_FORMATTED | Audit, supersession, or negative-reference text; not an executable monetary definition. |
 | SUPERSEDED_HISTORY | `KGEN-KAIOS/KAIOS_MULTICIVILIZATION_RELIGIOUS_NEUTRALITY_LIFE_MIGRATION_RUNTIME_V1.0.md:2` | 1_TO_10_000 | Historical bytes are retained behind an explicit SUPERSEDED marker. |
@@ -112,6 +112,7 @@ The Human-reported `KAIOS_GENESIS_INSCRIPTION_V1.0.md` is superseded by the stag
 | CURRENT_CORRECT | `KGEN-KAIOS/tools/generate-stale-reference-audit.mjs:19` | KAIOS_PER_KGEN | Identifier occurrence; numeric value audited independently. |
 | CURRENT_CORRECT | `KGEN-KAIOS/tools/generate-stale-reference-audit.mjs:20` | MAX_SUPPLY | Identifier occurrence; numeric value audited independently. |
 | COMMENT_ONLY | `KGEN-KAIOS/tools/generate-stale-reference-audit.mjs:66` | KAIOS_PER_KGEN | Audit, supersession, or negative-reference text; not an executable monetary definition. |
+| COMMENT_ONLY | `KGEN-KAIOS/tools/generate-stale-reference-audit.mjs:104` | KAIOS_PER_KGEN | Audit, supersession, or negative-reference text; not an executable monetary definition. |
 | CURRENT_CORRECT | `KGEN-KAIOS/tools/generate-stale-reference-audit.mjs:289` | MAX_SUPPLY | Identifier occurrence; numeric value audited independently. |
 | COMMENT_ONLY | `KGEN-KAIOS/tools/generate-stale-reference-audit.mjs:336` | 1_TO_10_000 | Audit, supersession, or negative-reference text; not an executable monetary definition. |
 | CURRENT_CORRECT | `KGEN-KAIOS/tools/generate-stale-reference-audit.mjs:343` | MAX_SUPPLY | Identifier occurrence; numeric value audited independently. |
