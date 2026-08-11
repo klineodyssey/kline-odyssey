@@ -3,8 +3,8 @@
   "auditedAt": "2026-08-09T00:00:00+08:00",
   "status": "PASS",
   "scope": {
-    "repositoryTrackedFiles": 3687,
-    "repositoryReadableTextFiles": 3685,
+    "repositoryTrackedFiles": 3694,
+    "repositoryReadableTextFiles": 3692,
     "repositoryPdfFiles": 33,
     "repositoryPdfPages": 222,
     "externalPackage": {
@@ -16,7 +16,7 @@
       "pdfPages": 0,
       "pdfExtraction": "NOT_REQUESTED"
     },
-    "scannedFilesTotal": 3687
+    "scannedFilesTotal": 3694
   },
   "finalCanon": {
     "18888": "LINGXIAO_CELESTIAL_BANK",
@@ -140,7 +140,7 @@
     }
   ],
   "classifications": {
-    "CURRENT_CORRECT": 24,
+    "CURRENT_CORRECT": 27,
     "SUPERSEDED_HISTORY": 20,
     "ACTIVE_CONFLICT": 0,
     "COMMENT_ONLY": 25,
@@ -185,6 +185,36 @@
     "activeConflictsAfterHumanFinalCanonOverride": 0
   },
   "findings": [
+    {
+      "path": "KGEN-KAIOS/tools/rehearse-lingxiao-mainnet-fork.mjs",
+      "line": 31,
+      "pattern": "KAIOS_PER_KGEN",
+      "legacyScale": false,
+      "classification": "CURRENT_CORRECT",
+      "sourceKind": "REPOSITORY_TRACKED",
+      "excerpt": "const KAIOS_PER_KGEN = 1_000n;",
+      "rationale": "Identifier occurrence; numeric value audited independently."
+    },
+    {
+      "path": "KGEN-KAIOS/tools/rehearse-lingxiao-mainnet-fork.mjs",
+      "line": 273,
+      "pattern": "KAIOS_PER_KGEN",
+      "legacyScale": false,
+      "classification": "CURRENT_CORRECT",
+      "sourceKind": "REPOSITORY_TRACKED",
+      "excerpt": "const expectedGenesisKaios = historicalBurn * KAIOS_PER_KGEN;",
+      "rationale": "Identifier occurrence; numeric value audited independently."
+    },
+    {
+      "path": "KGEN-KAIOS/tools/rehearse-lingxiao-mainnet-fork.mjs",
+      "line": 570,
+      "pattern": "KAIOS_PER_KGEN",
+      "legacyScale": false,
+      "classification": "CURRENT_CORRECT",
+      "sourceKind": "REPOSITORY_TRACKED",
+      "excerpt": "accountingInvariant: historicalBurn * KAIOS_PER_KGEN === actualGenesisKaios && actualGenesisKaios === bankBalanceAfterGenesis - bankBalanceBeforeGenesis,",
+      "rationale": "Identifier occurrence; numeric value audited independently."
+    },
     {
       "path": "KGEN-KAIOS/CODEX_HANDOFF_2026-08-09.md",
       "line": 7,

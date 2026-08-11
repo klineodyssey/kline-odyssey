@@ -2,8 +2,8 @@
 
 **Status:** PASS
 
-- Scanned files: 3687
-- Repository tracked files: 3687
+- Scanned files: 3694
+- Repository tracked files: 3694
 - Human package files: 0
 - Legacy 1:10,000 / 720B reference hits: 46
 - ACTIVE_CONFLICT: 0
@@ -75,6 +75,9 @@ The Human-reported `KAIOS_GENESIS_INSCRIPTION_V1.0.md` is superseded by the stag
 
 | Classification | Location | Pattern | Rationale |
 |---|---|---|---|
+| CURRENT_CORRECT | `KGEN-KAIOS/tools/rehearse-lingxiao-mainnet-fork.mjs:31` | KAIOS_PER_KGEN | Identifier occurrence; numeric value audited independently. |
+| CURRENT_CORRECT | `KGEN-KAIOS/tools/rehearse-lingxiao-mainnet-fork.mjs:273` | KAIOS_PER_KGEN | Identifier occurrence; numeric value audited independently. |
+| CURRENT_CORRECT | `KGEN-KAIOS/tools/rehearse-lingxiao-mainnet-fork.mjs:570` | KAIOS_PER_KGEN | Identifier occurrence; numeric value audited independently. |
 | COMMENT_ONLY | `KGEN-KAIOS/CODEX_HANDOFF_2026-08-09.md:7` | KAIOS_PER_KGEN | Audit, supersession, or negative-reference text; not an executable monetary definition. |
 | COMMENT_ONLY | `KGEN-KAIOS/CODEX_HANDOFF_2026-08-09.md:70` | KAIOS_PER_KGEN | Audit, supersession, or negative-reference text; not an executable monetary definition. |
 | COMMENT_ONLY | `KGEN-KAIOS/CODEX_HANDOFF_2026-08-09.md:82` | 10_000_KAIOS | Audit, supersession, or negative-reference text; not an executable monetary definition. |

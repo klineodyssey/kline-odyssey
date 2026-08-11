@@ -43,7 +43,7 @@ test("compiler and OpenZeppelin dependencies are exactly pinned", () => {
   assert.equal(packageLock.packages["node_modules/@openzeppelin/contracts-upgradeable"].version, "5.0.2");
 });
 
-test("review package contains no Mainnet deployment script or deployed address manifest", () => {
+test("pre-sign package contains no executable Mainnet transaction script or formal deployed-address manifest", () => {
   assert.equal(fs.existsSync(path.join(root, "deployments", "mainnet.json")), false);
   assert.equal(fs.existsSync(path.join(root, "scripts", "deploy-mainnet.mjs")), false);
 });

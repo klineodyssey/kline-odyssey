@@ -1,10 +1,10 @@
 {
   "status": "PASS",
   "checks": {
-    "files": 77,
-    "json": 19,
-    "markdown": 27,
-    "utf8": 76,
+    "files": 84,
+    "json": 22,
+    "markdown": 30,
+    "utf8": 83,
     "bom": 0,
     "corruption": 0,
     "secretHits": 0,
@@ -30,7 +30,9 @@
     "bootSequenceChanged": true,
     "walletOrPrivateKeyFiles": [],
     "deploymentFiles": [
-      "KGEN-KAIOS/scripts/prepare-lingxiao-18888-deployment.mjs"
+      "KGEN-KAIOS/scripts/prepare-lingxiao-18888-deployment.mjs",
+      "KGEN-KAIOS/config/LINGXIAO_18888_MAINNET_DEPLOYMENT_MANIFEST.json",
+      "KGEN-KAIOS/config/LINGXIAO_18888_MAINNET_DEPLOYMENT_MANIFEST.md"
     ]
   },
   "failures": []

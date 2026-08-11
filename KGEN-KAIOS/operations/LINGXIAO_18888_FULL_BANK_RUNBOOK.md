@@ -8,10 +8,12 @@ Stop if chain ID is not 56, any formal address lacks expected code/lineage, pred
 
 1. Rebuild ABIs and evidence with `npm run test:all`.
 2. Run `npm run bank:simulate` and review the sanitized local Genesis report.
-3. Verify formal Registry, 8888 and 11520 addresses by read-only Mainnet calls.
-4. Generate unsigned predicted-address package with `npm run bank:deployment-plan` using only public address/nonce environment variables.
-5. Confirm deployment signer nonce, BNB estimate and Human-approved module per-transaction/daily limits.
-6. Perform a chain-56 fork rehearsal of the exact ordered calldata.
+3. Run `npm run bank:mainnet-fork-rehearse`. It must fork chainId 56, match the frozen Bank codehashes and regenerate the manifest/evidence without a Mainnet transaction.
+4. Verify formal 8888 and 11520 addresses by read-only Mainnet calls. A no-code EOA is not a valid Router/Exchange target.
+5. Obtain explicit Human values for every field listed `HUMAN_CONFIRM_REQUIRED` in the manifest. Fork-only values are never production defaults.
+6. Generate the unsigned package with `npm run bank:deployment-plan`. The command deliberately fails unless every public economic parameter, formal address, module state and nonce is supplied.
+7. Confirm signer control, current nonce, BNB balance, predicted addresses and every creation/runtime codehash immediately before signature.
+8. Repeat the chainId 56 fork rehearsal from the final candidate and preserve its fixed fork block.
 
 ## Ordered deployment
 
@@ -35,4 +37,4 @@ Generate unsigned calldata with `npm run bank:upgrade-plan`. Before execution re
 
 The pause role may stop Bank Core payments. It cannot transfer KAIOS or unpause. Governance diagnoses and executes the reviewed recovery. A failed module may be disabled through delayed governance; its historical payment IDs and events remain. Migration module records successor/state evidence but does not move assets.
 
-No runbook step authorizes Mainnet by itself.
+The 2026-08-11 pre-sign rehearsal passed Genesis accounting, lawful circulation, insufficient-balance retry, delayed UUPS upgrade and rollback. Signature remains blocked until a formal code-bearing 8888 Bank address and every Human-governed parameter in the manifest are confirmed. No runbook step authorizes Mainnet by itself.

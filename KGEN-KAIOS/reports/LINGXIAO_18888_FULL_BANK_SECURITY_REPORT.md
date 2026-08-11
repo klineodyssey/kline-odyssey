@@ -32,4 +32,5 @@ Module caps and reserve values are policy inputs. The package intentionally does
 - Solidity 0.8.24 and OpenZeppelin 5.0.2 are pinned.
 - All current contracts remain below EIP-170.
 - Deterministic integration covers Genesis, salary, retry, replay, redirect, allocation, 8888, 11520, reserve, pause, governance, migration and upgrades.
-- Mainnet fork rehearsal remains a pre-signature gate because no Mainnet transaction is authorized in this package.
+- ChainId 56 Mainnet fork rehearsal now passes Genesis accounting, salary/allocation/8888/11520 circulation, insufficient-balance retry after a legal one-KGEN fork burn and settlement, final-governance UUPS upgrade, and delayed rollback with representative state preserved.
+- Signature remains blocked: no formal code-bearing 8888 Bank address is established, production economic parameters and initial module states require Human confirmation, and `MAINNET_DEPLOY_APPROVED` has not been issued.

@@ -14,6 +14,7 @@
     "integrity:validate": "node tools/validate-integration-artifacts.mjs",
     "mainnet:genesis-record": "node tools/validate-integration-artifacts.mjs --generate-kaios-genesis-record",
     "bank:simulate": "node tools/simulate-lingxiao-genesis-chain-reaction.mjs",
+    "bank:mainnet-fork-rehearse": "node tools/rehearse-lingxiao-mainnet-fork.mjs",
     "bank:api": "node tools/generate-lingxiao-bank-api.mjs",
     "bank:deployment-plan": "node scripts/prepare-lingxiao-18888-deployment.mjs",
     "bank:upgrade-plan": "node scripts/prepare-lingxiao-18888-upgrade.mjs",

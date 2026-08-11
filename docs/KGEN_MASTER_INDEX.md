@@ -43,6 +43,10 @@ This addendum does not regenerate the historical inventory below.
 | `KGEN-KAIOS/contracts/BankMigration_Upgradeable.sol` | Contract module | Successor/chain/state evidence without an asset-migration transfer path | Implementation candidate |
 | `KGEN-KAIOS/operations/LINGXIAO_18888_FULL_BANK_RUNBOOK.md` | Runbook | Stop conditions, ordered deployment, upgrade and emergency procedures | Mainnet transaction not authorized |
 | `KGEN-KAIOS/reports/LINGXIAO_18888_FULL_BANK_SECURITY_REPORT.md` | Security report | Trust boundaries, enforced gates and residual UUPS governance risk | Review package |
+| `KGEN-KAIOS/tools/rehearse-lingxiao-mainnet-fork.mjs` | Mainnet pre-sign validation | ChainId 56 fork deployment, Genesis, lawful circulation, refill retry, governance upgrade and rollback with no Mainnet transaction | Pre-sign evidence tool |
+| `KGEN-KAIOS/config/LINGXIAO_18888_MAINNET_DEPLOYMENT_MANIFEST.json` | Deployment manifest | Frozen hashes, exact nonce-sensitive deployment order, receipt backfill rules, roles, modules, parameters and blockers | Mainnet transaction not authorized |
+| `KGEN-KAIOS/reports/mainnet-pre-sign/LINGXIAO_18888_MAINNET_FORK_REHEARSAL.json` | Fork evidence | Sanitized full Mainnet-fork receipts, state, gas and gates | PASS with formal 8888/policy blockers |
+| `KGEN-KAIOS/reports/mainnet-pre-sign/KAIOS_GENESIS_MAINNET_RECORD.json` | Genesis preview | BigInt chain-derived fork preview; never a formal Mainnet amount | PREVIEW_NOT_FINAL |
 
 ## Summary
 | Category | Files |

@@ -1,0 +1,702 @@
+{
+  "status": "MAINNET_PRE_SIGN_FREEZE_REVIEW_COMPLETE_WITH_BLOCKERS",
+  "mainnetTransactionAuthorized": false,
+  "readyForHumanMainnetAuthorization": false,
+  "chainId": 56,
+  "fork": {
+    "blockNumber": 115288219,
+    "blockHash": "0x82033734db327b4490e89c1ef4fd7c08be6a4d5d50b6867e02ac3d8595c804b1",
+    "timestamp": 1786440279,
+    "timestampIso": "2026-08-11T09:24:39.000Z",
+    "network": "BSC Mainnet chainId 56 public read-only fork"
+  },
+  "canon": {
+    "formalKgen": "0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be",
+    "formal11520": "0xd0605F4EF10e5C1438F11AF9edc36926769239d6",
+    "legacyHeart": {
+      "address": "0xB016D4d8f1aED1339101b30722cad6dbA9B8C972",
+      "status": "DO_NOT_TOUCH"
+    },
+    "formalGovernance": "0xCd60BF474e691F2484950a0276Eaf507616Ca4b9",
+    "deploymentSignerCandidate": "0xb3C54ca96De0dED4Ca0151F629ff9781506ba261",
+    "formalEconomicBank8888": {
+      "address": null,
+      "status": "HUMAN_CONFIRM_REQUIRED",
+      "evidence": "No formal code-bearing 8888 Bank address is established. The live 16888 treasury8888 getter points to 0x2caE692310b5A89C44c4E09Ba9F26385359d1Aa9, which has no runtime code and cannot initialize the frozen Router.",
+      "forkFixture": "0x528a518BC3Ad3C19FDCF8122f0E702a97BDd1BFF"
+    }
+  },
+  "frozenCodehash": {
+    "bankCoreCreation": "0xff5594efa2cd283aed2cab9f27634c06a4da3d2737c645addfdc54f53757d43b",
+    "bankCoreRuntime": "0xcfe00d93cf874129e6d01003f2fb265128d469dd350e5a5cab79beafb518f00c"
+  },
+  "deploymentOrder": [
+    {
+      "order": 1,
+      "identity": "KAIOS_ORGAN_REGISTRY",
+      "contract": "KAIOSOrganRegistry",
+      "nonce": 34,
+      "predictedAddress": "0xA9e7CbF161E39E556f4B5b8E41397Ac4B87a932D",
+      "forkAddress": "0xA9e7CbF161E39E556f4B5b8E41397Ac4B87a932D",
+      "actualMainnetAddress": null,
+      "autoBackfill": "SET_FROM_SUCCESSFUL_MAINNET_DEPLOYMENT_RECEIPT_CONTRACT_ADDRESS",
+      "transactionHash": "0x0c7a3585944b744aa309a662e1a562bebb9134b049cedd861a0b50d9a5b5fd9b",
+      "blockNumber": 115288223,
+      "gasUsed": "653603",
+      "status": "PASS"
+    },
+    {
+      "order": 2,
+      "identity": "LINGXIAO_18888_BANK_IMPLEMENTATION",
+      "contract": "LingxiaoCelestialBank18888_Upgradeable",
+      "nonce": 35,
+      "predictedAddress": "0x8125045039Fe969490d57185233B7d64A494A829",
+      "forkAddress": "0x8125045039Fe969490d57185233B7d64A494A829",
+      "actualMainnetAddress": null,
+      "autoBackfill": "SET_FROM_SUCCESSFUL_MAINNET_DEPLOYMENT_RECEIPT_CONTRACT_ADDRESS",
+      "transactionHash": "0xd4998408162e7bb83b130d9b83a9128401b8b46f61fc605be93038c5807e25d8",
+      "blockNumber": 115288224,
+      "gasUsed": "2734493",
+      "status": "PASS"
+    },
+    {
+      "order": 3,
+      "identity": "LINGXIAO_18888_BANK_PROXY",
+      "contract": "ERC1967Proxy",
+      "nonce": 36,
+      "predictedAddress": "0x11d34c0F723aCd334B8F95076f73F07f06202aab",
+      "forkAddress": "0x11d34c0F723aCd334B8F95076f73F07f06202aab",
+      "actualMainnetAddress": null,
+      "autoBackfill": "SET_FROM_SUCCESSFUL_MAINNET_DEPLOYMENT_RECEIPT_CONTRACT_ADDRESS",
+      "transactionHash": "0xdc5261d62e8f76a0344e462bbf881136fe830fc6f1db7e152e2dc2ad535cc59e",
+      "blockNumber": 115288225,
+      "gasUsed": "306384",
+      "status": "PASS"
+    },
+    {
+      "order": 4,
+      "identity": "CELESTIALSEAT500_IMPLEMENTATION",
+      "contract": "CelestialSeat500_Upgradeable",
+      "nonce": 37,
+      "predictedAddress": "0x94341fB340cF8Bd0069cD1Fcaf5bA0866B15c923",
+      "forkAddress": "0x94341fB340cF8Bd0069cD1Fcaf5bA0866B15c923",
+      "actualMainnetAddress": null,
+      "autoBackfill": "SET_FROM_SUCCESSFUL_MAINNET_DEPLOYMENT_RECEIPT_CONTRACT_ADDRESS",
+      "transactionHash": "0xeb061c78c960d892823e2f0354444e2d9861d143a6c8e909cc48f9b7f6c4d5da",
+      "blockNumber": 115288226,
+      "gasUsed": "1545100",
+      "status": "PASS"
+    },
+    {
+      "order": 5,
+      "identity": "CELESTIALSEAT500_PROXY",
+      "contract": "ERC1967Proxy",
+      "nonce": 38,
+      "predictedAddress": "0x9EcAe137b3A307971EB77B4CDB3ba13aeeF5297C",
+      "forkAddress": "0x9EcAe137b3A307971EB77B4CDB3ba13aeeF5297C",
+      "actualMainnetAddress": null,
+      "autoBackfill": "SET_FROM_SUCCESSFUL_MAINNET_DEPLOYMENT_RECEIPT_CONTRACT_ADDRESS",
+      "transactionHash": "0x98511f41ee82954860763ced914da7df8e4ca1a3fb20b79b4b403c48f3f98903",
+      "blockNumber": 115288227,
+      "gasUsed": "326154",
+      "status": "PASS"
+    },
+    {
+      "order": 6,
+      "identity": "CIVILIZATIONALLOCATION_IMPLEMENTATION",
+      "contract": "CivilizationAllocation_Upgradeable",
+      "nonce": 39,
+      "predictedAddress": "0x8E48643030826c9121Cd2E086B811b9083E9f862",
+      "forkAddress": "0x8E48643030826c9121Cd2E086B811b9083E9f862",
+      "actualMainnetAddress": null,
+      "autoBackfill": "SET_FROM_SUCCESSFUL_MAINNET_DEPLOYMENT_RECEIPT_CONTRACT_ADDRESS",
+      "transactionHash": "0x959567309e7a409eccec09b44327a121ab6d96f1f443e137ced6e887a1d563fc",
+      "blockNumber": 115288228,
+      "gasUsed": "1399667",
+      "status": "PASS"
+    },
+    {
+      "order": 7,
+      "identity": "CIVILIZATIONALLOCATION_PROXY",
+      "contract": "ERC1967Proxy",
+      "nonce": 40,
+      "predictedAddress": "0xA447853985Ef6e6AbFcb14FCfDeFdced10Be0BDe",
+      "forkAddress": "0xA447853985Ef6e6AbFcb14FCfDeFdced10Be0BDe",
+      "actualMainnetAddress": null,
+      "autoBackfill": "SET_FROM_SUCCESSFUL_MAINNET_DEPLOYMENT_RECEIPT_CONTRACT_ADDRESS",
+      "transactionHash": "0xd7bad3557a93b58e27eb6310692283dfdae37dad561f9e1ff1d4041df44af284",
+      "blockNumber": 115288229,
+      "gasUsed": "303999",
+      "status": "PASS"
+    },
+    {
+      "order": 8,
+      "identity": "ECONOMICROUTER8888_IMPLEMENTATION",
+      "contract": "EconomicRouter8888_Upgradeable",
+      "nonce": 41,
+      "predictedAddress": "0x216d69a413354CBab7ddDdC4fCfe2B3E0468197d",
+      "forkAddress": "0x216d69a413354CBab7ddDdC4fCfe2B3E0468197d",
+      "actualMainnetAddress": null,
+      "autoBackfill": "SET_FROM_SUCCESSFUL_MAINNET_DEPLOYMENT_RECEIPT_CONTRACT_ADDRESS",
+      "transactionHash": "0x283f5f3afffe5dfb10011d2d9b8958bb07d8dd0b54234247c2d355b37f2768f4",
+      "blockNumber": 115288230,
+      "gasUsed": "1261793",
+      "status": "PASS"
+    },
+    {
+      "order": 9,
+      "identity": "ECONOMICROUTER8888_PROXY",
+      "contract": "ERC1967Proxy",
+      "nonce": 42,
+      "predictedAddress": "0x75A55Af6967932C4A1c896dB81Dd6F31e531c299",
+      "forkAddress": "0x75A55Af6967932C4A1c896dB81Dd6F31e531c299",
+      "actualMainnetAddress": null,
+      "autoBackfill": "SET_FROM_SUCCESSFUL_MAINNET_DEPLOYMENT_RECEIPT_CONTRACT_ADDRESS",
+      "transactionHash": "0x23b11a8371bdfb9b5fba2e5a152a4885477b3b316a2deddcea18f9c26b183e66",
+      "blockNumber": 115288231,
+      "gasUsed": "330557",
+      "status": "PASS"
+    },
+    {
+      "order": 10,
+      "identity": "EXCHANGESETTLEMENT11520_IMPLEMENTATION",
+      "contract": "ExchangeSettlement11520_Upgradeable",
+      "nonce": 43,
+      "predictedAddress": "0x3ebc0A39F7981AAB3995AC828dc79A8B0753A05b",
+      "forkAddress": "0x3ebc0A39F7981AAB3995AC828dc79A8B0753A05b",
+      "actualMainnetAddress": null,
+      "autoBackfill": "SET_FROM_SUCCESSFUL_MAINNET_DEPLOYMENT_RECEIPT_CONTRACT_ADDRESS",
+      "transactionHash": "0xbdf79cc0371ec2176ae0957932d7c8fa6361424a95d9e5ae9c0f5fde5da5acb5",
+      "blockNumber": 115288232,
+      "gasUsed": "1261805",
+      "status": "PASS"
+    },
+    {
+      "order": 11,
+      "identity": "EXCHANGESETTLEMENT11520_PROXY",
+      "contract": "ERC1967Proxy",
+      "nonce": 44,
+      "predictedAddress": "0xC49f989c6ff0d22824df8D993Ce82207165C1428",
+      "forkAddress": "0xC49f989c6ff0d22824df8D993Ce82207165C1428",
+      "actualMainnetAddress": null,
+      "autoBackfill": "SET_FROM_SUCCESSFUL_MAINNET_DEPLOYMENT_RECEIPT_CONTRACT_ADDRESS",
+      "transactionHash": "0x8dcf360486d608062bde53a69c210eac3c8d84856d35e7eaeb044ca7c2f4800a",
+      "blockNumber": 115288233,
+      "gasUsed": "330557",
+      "status": "PASS"
+    },
+    {
+      "order": 12,
+      "identity": "BANKRISKCONTROLLER_IMPLEMENTATION",
+      "contract": "BankRiskController_Upgradeable",
+      "nonce": 45,
+      "predictedAddress": "0xA08A9CEcfa18b2FDb9ca8De0063A5029B9Ffc363",
+      "forkAddress": "0xA08A9CEcfa18b2FDb9ca8De0063A5029B9Ffc363",
+      "actualMainnetAddress": null,
+      "autoBackfill": "SET_FROM_SUCCESSFUL_MAINNET_DEPLOYMENT_RECEIPT_CONTRACT_ADDRESS",
+      "transactionHash": "0x98e331220acf5363dea4efdafd96f4f54ffc7f7c47a4757145d25ea82f2cbf13",
+      "blockNumber": 115288234,
+      "gasUsed": "1349091",
+      "status": "PASS"
+    },
+    {
+      "order": 13,
+      "identity": "BANKRISKCONTROLLER_PROXY",
+      "contract": "ERC1967Proxy",
+      "nonce": 46,
+      "predictedAddress": "0x17587F49dFDE4e400D03Ae81364AC2af8E1629Df",
+      "forkAddress": "0x17587F49dFDE4e400D03Ae81364AC2af8E1629Df",
+      "actualMainnetAddress": null,
+      "autoBackfill": "SET_FROM_SUCCESSFUL_MAINNET_DEPLOYMENT_RECEIPT_CONTRACT_ADDRESS",
+      "transactionHash": "0x0a006e869ebcb557b3e9c39836a9e07a5947622b2947a227b3d23ced75958581",
+      "blockNumber": 115288235,
+      "gasUsed": "304010",
+      "status": "PASS"
+    },
+    {
+      "order": 14,
+      "identity": "BANKGOVERNANCE_IMPLEMENTATION",
+      "contract": "BankGovernance_Upgradeable",
+      "nonce": 47,
+      "predictedAddress": "0x8D231C82513cdfa978A7C157618Ff198b0a5d3E9",
+      "forkAddress": "0x8D231C82513cdfa978A7C157618Ff198b0a5d3E9",
+      "actualMainnetAddress": null,
+      "autoBackfill": "SET_FROM_SUCCESSFUL_MAINNET_DEPLOYMENT_RECEIPT_CONTRACT_ADDRESS",
+      "transactionHash": "0x1907637223f0178aa0c7902b1996fe6e37965f6096a83a342f9023cf9303be5c",
+      "blockNumber": 115288236,
+      "gasUsed": "1646003",
+      "status": "PASS"
+    },
+    {
+      "order": 15,
+      "identity": "BANKGOVERNANCE_PROXY",
+      "contract": "ERC1967Proxy",
+      "nonce": 48,
+      "predictedAddress": "0x61573a93a88c58DAa5066A0aA319f88cE34d88FC",
+      "forkAddress": "0x61573a93a88c58DAa5066A0aA319f88cE34d88FC",
+      "actualMainnetAddress": null,
+      "autoBackfill": "SET_FROM_SUCCESSFUL_MAINNET_DEPLOYMENT_RECEIPT_CONTRACT_ADDRESS",
+      "transactionHash": "0xc44d72d77a501a4e286a1546a04f177bb99b779c913b955600281374bcaf3c60",
+      "blockNumber": 115288237,
+      "gasUsed": "375214",
+      "status": "PASS"
+    },
+    {
+      "order": 16,
+      "identity": "BANKMIGRATION_IMPLEMENTATION",
+      "contract": "BankMigration_Upgradeable",
+      "nonce": 49,
+      "predictedAddress": "0x9d919E66AE2746D41D978e3d51DF594B2E5F5582",
+      "forkAddress": "0x9d919E66AE2746D41D978e3d51DF594B2E5F5582",
+      "actualMainnetAddress": null,
+      "autoBackfill": "SET_FROM_SUCCESSFUL_MAINNET_DEPLOYMENT_RECEIPT_CONTRACT_ADDRESS",
+      "transactionHash": "0x0f0ceca52fd2d29afd49639b4f54d98c5e55f0408d7a817840487b0a46dac187",
+      "blockNumber": 115288238,
+      "gasUsed": "1346137",
+      "status": "PASS"
+    },
+    {
+      "order": 17,
+      "identity": "BANKMIGRATION_PROXY",
+      "contract": "ERC1967Proxy",
+      "nonce": 50,
+      "predictedAddress": "0xa2792fBDCc8A8AaC364053431D44E0a8D335E166",
+      "forkAddress": "0xa2792fBDCc8A8AaC364053431D44E0a8D335E166",
+      "actualMainnetAddress": null,
+      "autoBackfill": "SET_FROM_SUCCESSFUL_MAINNET_DEPLOYMENT_RECEIPT_CONTRACT_ADDRESS",
+      "transactionHash": "0x2c051681bb76129b0822cc7414eb88da97b69291ff637e7176e7eabe22bfe280",
+      "blockNumber": 115288239,
+      "gasUsed": "303989",
+      "status": "PASS"
+    },
+    {
+      "order": 18,
+      "identity": "KAIOS_TOKEN_CORE",
+      "contract": "KAIOS",
+      "nonce": 51,
+      "predictedAddress": "0xff281a821dBbA44EEc7b57475E3c28A916fcDAE7",
+      "forkAddress": "0xff281a821dBbA44EEc7b57475E3c28A916fcDAE7",
+      "actualMainnetAddress": null,
+      "autoBackfill": "SET_FROM_SUCCESSFUL_MAINNET_DEPLOYMENT_RECEIPT_CONTRACT_ADDRESS",
+      "transactionHash": "0x704c8a62a790bc2a45d0d34c1e22edd2f2c73255404a7d312901dda3c3d7c365",
+      "blockNumber": 115288240,
+      "gasUsed": "1373218",
+      "status": "PASS"
+    },
+    {
+      "order": 19,
+      "identity": "ALCHEMY_FURNACE_18911",
+      "contract": "KAIOSAlchemyFurnace",
+      "nonce": 52,
+      "predictedAddress": "0x72c14f5D2fa748C1579295A7E34c16453a3a17aB",
+      "forkAddress": "0x72c14f5D2fa748C1579295A7E34c16453a3a17aB",
+      "actualMainnetAddress": null,
+      "autoBackfill": "SET_FROM_SUCCESSFUL_MAINNET_DEPLOYMENT_RECEIPT_CONTRACT_ADDRESS",
+      "transactionHash": "0x2b924503a144a41d6c6001f319616128322618933287167df0c93f63cd6c0f7e",
+      "blockNumber": 115288241,
+      "gasUsed": "506666",
+      "status": "PASS"
+    }
+  ],
+  "organRegistryWiring": [
+    {
+      "organId": "0xb6239b4afc2d679ad5bde98a6ce58d89562381b4d0d2eb1d1fc7f89ebbe72c07",
+      "label": "EXCHANGE_TREASURY_11520",
+      "forkAddress": "0xd0605F4EF10e5C1438F11AF9edc36926769239d6",
+      "mainnetAddress": "0xd0605F4EF10e5C1438F11AF9edc36926769239d6",
+      "autoBackfillRequired": false
+    },
+    {
+      "organId": "0x4e55e89e8a8411020097db80f3cbc24f56323a098f681b9a5aa679c092218ea6",
+      "label": "LINGXIAO_BANK_18888",
+      "forkAddress": "0x11d34c0F723aCd334B8F95076f73F07f06202aab",
+      "mainnetAddress": null,
+      "autoBackfillRequired": true
+    },
+    {
+      "organId": "0x8192dabb5532a53075d9609e0974c572bdd26e84e22c8b6c5ae34666d715fd00",
+      "label": "KAIOS",
+      "forkAddress": "0xff281a821dBbA44EEc7b57475E3c28A916fcDAE7",
+      "mainnetAddress": null,
+      "autoBackfillRequired": true
+    },
+    {
+      "organId": "0xc7dc58355a278d2d7c66791b96331912455bb79b53dbf7c740701ddbf33de567",
+      "label": "ALCHEMY_FURNACE_18911",
+      "forkAddress": "0x72c14f5D2fa748C1579295A7E34c16453a3a17aB",
+      "mainnetAddress": null,
+      "autoBackfillRequired": true
+    }
+  ],
+  "roleMatrix": {
+    "bank": {
+      "finalGovernance": {
+        "address": "0x61573a93a88c58DAa5066A0aA319f88cE34d88FC",
+        "defaultAdmin": true,
+        "moduleAdmin": true,
+        "upgrader": true,
+        "pauser": true
+      },
+      "bootstrapGovernance": {
+        "address": "0xCd60BF474e691F2484950a0276Eaf507616Ca4b9",
+        "defaultAdmin": false,
+        "moduleAdmin": false,
+        "upgrader": false,
+        "pauser": true
+      },
+      "deploymentSigner": {
+        "address": "0xb3C54ca96De0dED4Ca0151F629ff9781506ba261",
+        "defaultAdmin": false,
+        "moduleAdmin": false,
+        "upgrader": false,
+        "pauser": false
+      }
+    },
+    "modules": {
+      "CelestialSeat500_Upgradeable": {
+        "proxy": "0x9EcAe137b3A307971EB77B4CDB3ba13aeeF5297C",
+        "finalGovernance": {
+          "defaultAdmin": true,
+          "governance": true,
+          "upgrader": true
+        },
+        "bootstrapGovernance": {
+          "defaultAdmin": false,
+          "governance": false,
+          "upgrader": false
+        }
+      },
+      "CivilizationAllocation_Upgradeable": {
+        "proxy": "0xA447853985Ef6e6AbFcb14FCfDeFdced10Be0BDe",
+        "finalGovernance": {
+          "defaultAdmin": true,
+          "governance": true,
+          "upgrader": true
+        },
+        "bootstrapGovernance": {
+          "defaultAdmin": false,
+          "governance": false,
+          "upgrader": false
+        }
+      },
+      "EconomicRouter8888_Upgradeable": {
+        "proxy": "0x75A55Af6967932C4A1c896dB81Dd6F31e531c299",
+        "finalGovernance": {
+          "defaultAdmin": true,
+          "governance": true,
+          "upgrader": true
+        },
+        "bootstrapGovernance": {
+          "defaultAdmin": false,
+          "governance": false,
+          "upgrader": false
+        }
+      },
+      "ExchangeSettlement11520_Upgradeable": {
+        "proxy": "0xC49f989c6ff0d22824df8D993Ce82207165C1428",
+        "finalGovernance": {
+          "defaultAdmin": true,
+          "governance": true,
+          "upgrader": true
+        },
+        "bootstrapGovernance": {
+          "defaultAdmin": false,
+          "governance": false,
+          "upgrader": false
+        }
+      },
+      "BankRiskController_Upgradeable": {
+        "proxy": "0x17587F49dFDE4e400D03Ae81364AC2af8E1629Df",
+        "finalGovernance": {
+          "defaultAdmin": true,
+          "governance": true,
+          "upgrader": true
+        },
+        "bootstrapGovernance": {
+          "defaultAdmin": false,
+          "governance": false,
+          "upgrader": false
+        }
+      },
+      "BankGovernance_Upgradeable": {
+        "proxy": "0x61573a93a88c58DAa5066A0aA319f88cE34d88FC",
+        "finalGovernance": {
+          "defaultAdmin": true,
+          "governance": true,
+          "upgrader": true
+        },
+        "bootstrapGovernance": {
+          "defaultAdmin": false,
+          "governance": false,
+          "upgrader": false
+        }
+      },
+      "BankMigration_Upgradeable": {
+        "proxy": "0xa2792fBDCc8A8AaC364053431D44E0a8D335E166",
+        "finalGovernance": {
+          "defaultAdmin": true,
+          "governance": true,
+          "upgrader": true
+        },
+        "bootstrapGovernance": {
+          "defaultAdmin": false,
+          "governance": false,
+          "upgrader": false
+        }
+      }
+    },
+    "governance": {
+      "contract": "0x61573a93a88c58DAa5066A0aA319f88cE34d88FC",
+      "delaySeconds": 3600,
+      "proposer": "0xCd60BF474e691F2484950a0276Eaf507616Ca4b9",
+      "distinctApprover": "0xFFcf8FDEE72ac11b5c542428B35EEF5769C409f0"
+    },
+    "registry": {
+      "owner": "0xCd60BF474e691F2484950a0276Eaf507616Ca4b9",
+      "minimumDelaySeconds": 3600,
+      "bootstrapOpen": false
+    }
+  },
+  "moduleMatrix": {
+    "CelestialSeat500_Upgradeable": {
+      "moduleId": "0xd18d09a1aa7fd65a8c81eb77bee03453a5363c5cb82c1b24c3be23d4001fa4c5",
+      "implementation": "0x94341fB340cF8Bd0069cD1Fcaf5bA0866B15c923",
+      "proxy": "0x9EcAe137b3A307971EB77B4CDB3ba13aeeF5297C",
+      "version": "1.0.0",
+      "activeInFork": true,
+      "perTransactionLimitForkOnly": "10000000000000000000000",
+      "dailyEpochLimitForkOnly": "100000000000000000000000",
+      "mainnetActive": null,
+      "mainnetLimits": null,
+      "mainnetStatus": "HUMAN_CONFIRM_REQUIRED"
+    },
+    "CivilizationAllocation_Upgradeable": {
+      "moduleId": "0x98cb067844ea2b60572a9eb95ae1e64a6bf8f03bcf8c9e11ae16130de56bca63",
+      "implementation": "0x8E48643030826c9121Cd2E086B811b9083E9f862",
+      "proxy": "0xA447853985Ef6e6AbFcb14FCfDeFdced10Be0BDe",
+      "version": "1.0.0",
+      "activeInFork": true,
+      "perTransactionLimitForkOnly": "10000000000000000000000",
+      "dailyEpochLimitForkOnly": "100000000000000000000000",
+      "mainnetActive": null,
+      "mainnetLimits": null,
+      "mainnetStatus": "HUMAN_CONFIRM_REQUIRED"
+    },
+    "EconomicRouter8888_Upgradeable": {
+      "moduleId": "0xb13d0845c93752f8c48622f9d8f06b2b5b503a2b264f614b59130b81156e5e54",
+      "implementation": "0x216d69a413354CBab7ddDdC4fCfe2B3E0468197d",
+      "proxy": "0x75A55Af6967932C4A1c896dB81Dd6F31e531c299",
+      "version": "1.0.0",
+      "activeInFork": true,
+      "perTransactionLimitForkOnly": "10000000000000000000000",
+      "dailyEpochLimitForkOnly": "100000000000000000000000",
+      "mainnetActive": null,
+      "mainnetLimits": null,
+      "mainnetStatus": "HUMAN_CONFIRM_REQUIRED"
+    },
+    "ExchangeSettlement11520_Upgradeable": {
+      "moduleId": "0x24b8150af34ecded6c75de16b22b3a7fa6477e94cb23ea338a9453af3ed8961b",
+      "implementation": "0x3ebc0A39F7981AAB3995AC828dc79A8B0753A05b",
+      "proxy": "0xC49f989c6ff0d22824df8D993Ce82207165C1428",
+      "version": "1.0.0",
+      "activeInFork": true,
+      "perTransactionLimitForkOnly": "10000000000000000000000",
+      "dailyEpochLimitForkOnly": "100000000000000000000000",
+      "mainnetActive": null,
+      "mainnetLimits": null,
+      "mainnetStatus": "HUMAN_CONFIRM_REQUIRED"
+    },
+    "BankRiskController_Upgradeable": {
+      "moduleId": "0xbcba21ba5cfe25784fa28567a77ab492bb1265a40a221a37df6a976728cd105d",
+      "implementation": "0xA08A9CEcfa18b2FDb9ca8De0063A5029B9Ffc363",
+      "proxy": "0x17587F49dFDE4e400D03Ae81364AC2af8E1629Df",
+      "version": "1.0.0",
+      "activeInFork": true,
+      "perTransactionLimitForkOnly": "0",
+      "dailyEpochLimitForkOnly": "0",
+      "mainnetActive": null,
+      "mainnetLimits": null,
+      "mainnetStatus": "HUMAN_CONFIRM_REQUIRED"
+    },
+    "BankGovernance_Upgradeable": {
+      "moduleId": "0x408269e9739994f2f410704684700c1f0c29b98f7210d29834da2c315b4dd2ce",
+      "implementation": "0x8D231C82513cdfa978A7C157618Ff198b0a5d3E9",
+      "proxy": "0x61573a93a88c58DAa5066A0aA319f88cE34d88FC",
+      "version": "1.0.0",
+      "activeInFork": true,
+      "perTransactionLimitForkOnly": "0",
+      "dailyEpochLimitForkOnly": "0",
+      "mainnetActive": null,
+      "mainnetLimits": null,
+      "mainnetStatus": "HUMAN_CONFIRM_REQUIRED"
+    },
+    "BankMigration_Upgradeable": {
+      "moduleId": "0xbc0740979a57ecb6aedf2d22cb378fe98c7a380d156a63372e04e276797310f8",
+      "implementation": "0x9d919E66AE2746D41D978e3d51DF594B2E5F5582",
+      "proxy": "0xa2792fBDCc8A8AaC364053431D44E0a8D335E166",
+      "version": "1.0.0",
+      "activeInFork": true,
+      "perTransactionLimitForkOnly": "0",
+      "dailyEpochLimitForkOnly": "0",
+      "mainnetActive": null,
+      "mainnetLimits": null,
+      "mainnetStatus": "HUMAN_CONFIRM_REQUIRED"
+    }
+  },
+  "economicParameters": [
+    {
+      "parameter": "500 Seat salary base/rate",
+      "value": null,
+      "status": "HUMAN_CONFIRM_REQUIRED",
+      "forkOnlyValue": "10/100 KAIOS per 60-second test epoch"
+    },
+    {
+      "parameter": "500 Seat epoch definition",
+      "value": null,
+      "status": "HUMAN_CONFIRM_REQUIRED",
+      "forkOnlyValue": "60 seconds"
+    },
+    {
+      "parameter": "18911 Alchemy epoch definition",
+      "value": null,
+      "status": "HUMAN_CONFIRM_REQUIRED",
+      "forkOnlyValue": "86400 seconds"
+    },
+    {
+      "parameter": "Reserve minimum",
+      "value": null,
+      "status": "HUMAN_CONFIRM_REQUIRED",
+      "forkOnlyValue": "dynamic balance lock for retry test only"
+    },
+    {
+      "parameter": "Salary exposure cap",
+      "value": null,
+      "status": "HUMAN_CONFIRM_REQUIRED",
+      "forkOnlyValue": "10000.0 per transaction / 100000.0 per UTC day"
+    },
+    {
+      "parameter": "Allocation exposure cap",
+      "value": null,
+      "status": "HUMAN_CONFIRM_REQUIRED",
+      "forkOnlyValue": "10000.0 per transaction / 100000.0 per UTC day"
+    },
+    {
+      "parameter": "8888 route cap",
+      "value": null,
+      "status": "HUMAN_CONFIRM_REQUIRED",
+      "forkOnlyValue": "10000.0 per transaction / 100000.0 per UTC day"
+    },
+    {
+      "parameter": "11520 settlement cap",
+      "value": null,
+      "status": "HUMAN_CONFIRM_REQUIRED",
+      "forkOnlyValue": "10000.0 per transaction / 100000.0 per UTC day"
+    },
+    {
+      "parameter": "Governance delay",
+      "value": "3600 seconds",
+      "status": "HUMAN_FINAL_CANON_TECHNICAL_MINIMUM",
+      "forkOnlyValue": "3600 seconds"
+    },
+    {
+      "parameter": "Distinct BankGovernance approver",
+      "value": null,
+      "status": "HUMAN_CONFIRM_REQUIRED",
+      "forkOnlyValue": "0xFFcf8FDEE72ac11b5c542428B35EEF5769C409f0"
+    },
+    {
+      "parameter": "Pause authority",
+      "value": null,
+      "status": "HUMAN_CONFIRM_REQUIRED",
+      "implementationBehavior": "Final BankGovernance and bootstrap governance PAUSER remain; pause cannot spend or unpause"
+    },
+    {
+      "parameter": "Initial module enable/disable state",
+      "value": null,
+      "status": "HUMAN_CONFIRM_REQUIRED",
+      "forkOnlyValue": "all seven enabled for rail rehearsal"
+    }
+  ],
+  "genesisPreview": {
+    "transactionHash": "0xe041e87ca4cba08c029de9ee0e9e7d979cc0016a65691ecc03226c08f6727df5",
+    "blockNumber": 115288257,
+    "timestamp": 1786440295,
+    "timestampIso": "2026-08-11T09:24:55.000Z",
+    "kgenGenesisSupply": {
+      "raw": "72000000000000000000000000",
+      "decimal18": "72000000.0"
+    },
+    "kgenSupplyAtSettlementBlock": {
+      "raw": "71977906887000601442227077",
+      "decimal18": "71977906.887000601442227077"
+    },
+    "historicalKgenBurn": {
+      "raw": "22093112999398557772923",
+      "decimal18": "22093.112999398557772923"
+    },
+    "actualGenesisKaiosMinted": {
+      "raw": "22093112999398557772923000",
+      "decimal18": "22093112.999398557772923"
+    },
+    "kaiosTotalSupply": {
+      "raw": "22093112999398557772923000",
+      "decimal18": "22093112.999398557772923"
+    },
+    "bankBalanceBefore": {
+      "raw": "0",
+      "decimal18": "0.0"
+    },
+    "bankBalanceAfter": {
+      "raw": "22093112999398557772923000",
+      "decimal18": "22093112.999398557772923"
+    },
+    "bankBalanceDelta": {
+      "raw": "22093112999398557772923000",
+      "decimal18": "22093112.999398557772923"
+    }
+  },
+  "deploymentSignerFunding": {
+    "address": "0xb3C54ca96De0dED4Ca0151F629ff9781506ba261",
+    "balanceAtReviewWei": "5567368941457930",
+    "balanceAtReviewBNB": "0.00556736894145793",
+    "gasPriceWei": "50000000",
+    "rehearsalGasUsed": "22907262",
+    "bufferedGasUnits": "27488714",
+    "estimatedRequiredWei": "1374435700000000",
+    "estimatedRequiredBNB": "0.0013744357",
+    "estimatedShortfallWei": "0",
+    "sufficientAtReview": true,
+    "status": "PASS"
+  },
+  "gates": {
+    "postFinalizationUpgradePath": "PASS",
+    "genesisAccountingExact": "PASS",
+    "realMoneyFlowPaths": "PASS",
+    "celestialSalary500": "PASS",
+    "routing8888": "PASS_WITH_FORK_ONLY_FIXTURE_MAINNET_ADDRESS_UNRESOLVED",
+    "settlement11520": "PASS",
+    "arbitraryDrain": "BLOCKED",
+    "entitlementRetryAfterRefill": "PASS",
+    "storageRollbackRestore": "PASS",
+    "frozenBankCreationCodehash": "PASS",
+    "frozenBankRuntimeCodehash": "PASS",
+    "legacyHeartUntouched": "PASS"
+  },
+  "blockers": [
+    "FORMAL_ECONOMIC_BANK_8888_ADDRESS_HUMAN_CONFIRM_REQUIRED",
+    "DEPLOYMENT_SIGNER_CONTROL_RECONFIRMATION_REQUIRED",
+    "HUMAN_CONFIRM_REQUIRED:500 Seat salary base/rate",
+    "HUMAN_CONFIRM_REQUIRED:500 Seat epoch definition",
+    "HUMAN_CONFIRM_REQUIRED:18911 Alchemy epoch definition",
+    "HUMAN_CONFIRM_REQUIRED:Reserve minimum",
+    "HUMAN_CONFIRM_REQUIRED:Salary exposure cap",
+    "HUMAN_CONFIRM_REQUIRED:Allocation exposure cap",
+    "HUMAN_CONFIRM_REQUIRED:8888 route cap",
+    "HUMAN_CONFIRM_REQUIRED:11520 settlement cap",
+    "HUMAN_CONFIRM_REQUIRED:Distinct BankGovernance approver",
+    "HUMAN_CONFIRM_REQUIRED:Pause authority",
+    "HUMAN_CONFIRM_REQUIRED:Initial module enable/disable state",
+    "MAINNET_DEPLOY_APPROVED_NOT_RECEIVED"
+  ],
+  "autoBackfillRule": "Each actual Mainnet deployment address must be written from its successful receipt and then codehash-verified; predicted addresses alone never become formal."
+}
