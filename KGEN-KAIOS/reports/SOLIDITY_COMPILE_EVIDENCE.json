@@ -10,8 +10,8 @@
   "evmVersion": "paris",
   "openzeppelinContracts": "5.0.2",
   "openzeppelinContractsUpgradeable": "5.0.2",
-  "sourceCount": 28,
-  "contractCount": 38,
+  "sourceCount": 29,
+  "contractCount": 39,
   "eip170MaximumDeployedBytecodeBytes": 24576,
   "oversizedContracts": [],
   "lingxiaoCelestialBank18888StorageValidation": {
@@ -310,6 +310,100 @@
       }
     ]
   },
+  "celestialSeat500StorageValidation": {
+    "status": "PASS",
+    "strategy": "Calendar V2 preserves the complete duration-candidate prefix and Seat struct, appends three slots at 54-56, and shrinks only the trailing reserve from 46 to 43 slots",
+    "prefixPreserved": true,
+    "seatStructPreserved": true,
+    "appendOnly": true,
+    "legacyPrefixThroughSlot": 53,
+    "appendedSlots": [
+      54,
+      55,
+      56
+    ],
+    "namespaceSlots": 100,
+    "layout": [
+      {
+        "label": "bank",
+        "slot": "0",
+        "offset": 0,
+        "type": "t_contract(ILingxiaoCelestialBank18888)"
+      },
+      {
+        "label": "moduleId",
+        "slot": "1",
+        "offset": 0,
+        "type": "t_bytes32"
+      },
+      {
+        "label": "governanceFinalized",
+        "slot": "2",
+        "offset": 0,
+        "type": "t_bool"
+      },
+      {
+        "label": "bootstrapUpgrader",
+        "slot": "2",
+        "offset": 1,
+        "type": "t_address"
+      },
+      {
+        "label": "__gap",
+        "slot": "3",
+        "offset": 0,
+        "type": "t_array(t_uint256)47_storage"
+      },
+      {
+        "label": "salaryEpochSeconds",
+        "slot": "50",
+        "offset": 0,
+        "type": "t_uint64"
+      },
+      {
+        "label": "seatCount",
+        "slot": "51",
+        "offset": 0,
+        "type": "t_uint256"
+      },
+      {
+        "label": "totalSalaryClaimed",
+        "slot": "52",
+        "offset": 0,
+        "type": "t_uint256"
+      },
+      {
+        "label": "_seats",
+        "slot": "53",
+        "offset": 0,
+        "type": "t_mapping(t_uint256,t_struct(Seat)_storage)"
+      },
+      {
+        "label": "_salaryBaseCheckpoints",
+        "slot": "54",
+        "offset": 0,
+        "type": "t_array(t_struct(SalaryBaseCheckpoint)_storage)dyn_storage"
+      },
+      {
+        "label": "_calendarSeats",
+        "slot": "55",
+        "offset": 0,
+        "type": "t_mapping(t_uint256,t_struct(CalendarSeatState)_storage)"
+      },
+      {
+        "label": "_seatTermsCheckpoints",
+        "slot": "56",
+        "offset": 0,
+        "type": "t_mapping(t_uint256,t_array(t_struct(SeatTermsCheckpoint)_storage)dyn_storage)"
+      },
+      {
+        "label": "__gap",
+        "slot": "57",
+        "offset": 0,
+        "type": "t_array(t_uint256)43_storage"
+      }
+    ]
+  },
   "gaolaozhuangCommercialBank8888StorageValidation": {
     "status": "PASS",
     "strategy": "V1 fixes a deterministic 50-slot append-only namespace; future implementations may only consume the trailing gap",
@@ -451,25 +545,25 @@
         "label": "_accounts",
         "slot": "19",
         "offset": 0,
-        "type": "t_mapping(t_bytes32,t_struct(CommercialAccount)5602_storage)"
+        "type": "t_mapping(t_bytes32,t_struct(CommercialAccount)7372_storage)"
       },
       {
         "label": "_payroll",
         "slot": "20",
         "offset": 0,
-        "type": "t_mapping(t_bytes32,t_struct(PayrollEntry)5620_storage)"
+        "type": "t_mapping(t_bytes32,t_struct(PayrollEntry)7390_storage)"
       },
       {
         "label": "_payments",
         "slot": "21",
         "offset": 0,
-        "type": "t_mapping(t_bytes32,t_struct(BusinessPayment)5640_storage)"
+        "type": "t_mapping(t_bytes32,t_struct(BusinessPayment)7410_storage)"
       },
       {
         "label": "_interestRates",
         "slot": "22",
         "offset": 0,
-        "type": "t_array(t_struct(InterestRateCheckpoint)5645_storage)dyn_storage"
+        "type": "t_array(t_struct(InterestRateCheckpoint)7415_storage)dyn_storage"
       },
       {
         "label": "__gap",
@@ -596,10 +690,10 @@
     {
       "contractName": "CelestialSeat500_Upgradeable",
       "sourceName": "contracts/CelestialSeat500_Upgradeable.sol",
-      "bytecodeBytes": 6999,
-      "bytecodeHash": "0x71bc3ce91225c46855c1a3511381eb4d5a7ebfcf5c9ba989bb28c79957ea2ade",
-      "deployedBytecodeBytes": 6789,
-      "deployedBytecodeHash": "0xf47010497e86fd36c567e99b537c7d6cb75da9262cd8edefad588a13a2275e5c"
+      "bytecodeBytes": 13263,
+      "bytecodeHash": "0x9a63317a1f2841e7fb03099b8824d3b429f27c42a41c22edfc46c336f031c3f3",
+      "deployedBytecodeBytes": 13052,
+      "deployedBytecodeHash": "0xe71750e3ced670995db7f66cc044855c450e7b991ebe3d94cae18e5f440940ff"
     },
     {
       "contractName": "CivilizationAllocation_Upgradeable",
@@ -728,6 +822,14 @@
       "bytecodeHash": "0x55a38999912f4c8d5b67f120a18097ad48e8f7399ce58842fcb241db16383d2d",
       "deployedBytecodeBytes": 18298,
       "deployedBytecodeHash": "0xfa67e109d9aea0acdf0b54f64214ab071f73b24514c9a72dd91fcbe3ab863d27"
+    },
+    {
+      "contractName": "CelestialSeat500_DurationEpochV1Fixture",
+      "sourceName": "tests/contracts/CelestialSeat500_DurationEpochV1Fixture.sol",
+      "bytecodeBytes": 5755,
+      "bytecodeHash": "0xd64d2241e2670562ae78c1ed1a807b8fcb27273f4ab2fe6b4d75373c7c070cbb",
+      "deployedBytecodeBytes": 5545,
+      "deployedBytecodeHash": "0x9171fd8034d3ff5d26ac8b2c8ef4d4939be6d063193169a95d452a082bc2a266"
     },
     {
       "contractName": "MockKAIOSForTreasury",

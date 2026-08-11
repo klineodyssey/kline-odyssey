@@ -2,7 +2,7 @@
 
 Status: pre-sign freeze review complete; Mainnet transaction is not authorized.
 
-- Fork block: 115300367
+- Fork block: 115314782
 - Formal KGEN: `0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be`
 - Formal 11520: `0xd0605F4EF10e5C1438F11AF9edc36926769239d6`
 - Legacy Heart: `0xB016D4d8f1aED1339101b30722cad6dbA9B8C972` — DO NOT TOUCH
@@ -45,8 +45,8 @@ Predictions use the deployment signer nonce at the frozen fork block. Every addr
 
 | Parameter | Mainnet value | Status | Fork-only value / behavior |
 |---|---|---|---|
-| 500 Seat salary base/rate | unset | HUMAN_CONFIRM_REQUIRED | 10/100 KAIOS per 60-second test epoch |
-| 500 Seat epoch definition | MONTHLY_DAY_5_00_00_UTC_PLUS_8 | FROZEN_IMPLEMENTATION_MISMATCH_BLOCKER | 60 seconds (duration-only frozen module) |
+| 500 Seat salary base/rate | unset | HUMAN_CONFIRM_REQUIRED | 10 KAIOS monthly base with 1.0x/10.0x test weights |
+| 500 Seat epoch definition | MONTHLY_DAY_5_00_00_UTC_PLUS_8 | HUMAN_FINAL_CANON_IMPLEMENTED | deterministic Gregorian YYYYMM maturity enforced on-chain |
 | 18911 Alchemy epoch definition | unset | HUMAN_CONFIRM_REQUIRED | 86400 seconds |
 | Reserve minimum | unset | HUMAN_CONFIRM_REQUIRED | dynamic balance lock for retry test only |
 | Salary exposure cap | unset | HUMAN_CONFIRM_REQUIRED | 10000.0 per transaction / 100000.0 per UTC day |
@@ -61,7 +61,6 @@ Predictions use the deployment signer nonce at the frozen fork block. Every addr
 
 ## Blocking conditions
 
-- FROZEN_CELESTIAL_SEAT_500_CALENDAR_MONTH_MISMATCH_REQUIRES_HUMAN_FREEZE_DECISION
 - DEPLOYMENT_SIGNER_CONTROL_RECONFIRMATION_REQUIRED
 - HUMAN_CONFIRM_REQUIRED:500 Seat salary base/rate
 - HUMAN_CONFIRM_REQUIRED:18911 Alchemy epoch definition

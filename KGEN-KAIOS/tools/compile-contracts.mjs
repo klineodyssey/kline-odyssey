@@ -198,6 +198,55 @@ const upgradeableModuleStorage = upgradeableModuleNames.map((contractName) => {
   };
 });
 const upgradeableModuleStorageMatches = upgradeableModuleStorage.every((item) => item.status === "PASS");
+const celestialSeatArtifact = Object.values(output.contracts ?? {})
+  .flatMap((sourceContracts) => Object.entries(sourceContracts))
+  .find(([contractName]) => contractName === "CelestialSeat500_Upgradeable")?.[1];
+const celestialSeatStorage = celestialSeatArtifact?.storageLayout?.storage ?? [];
+const normalizedCelestialSeatStorage = celestialSeatStorage.map(({ label, slot, offset, type }) => ({
+  label,
+  slot,
+  offset,
+  type: type
+    .replace(/t_struct\(([^)]+)\)\d+_storage/g, "t_struct($1)_storage")
+    .replace(/t_contract\(([^)]+)\)\d+/g, "t_contract($1)"),
+}));
+const expectedCelestialSeatPrefix = [
+  { label: "bank", slot: "0", offset: 0 },
+  { label: "moduleId", slot: "1", offset: 0 },
+  { label: "governanceFinalized", slot: "2", offset: 0 },
+  { label: "bootstrapUpgrader", slot: "2", offset: 1 },
+  { label: "__gap", slot: "3", offset: 0 },
+  { label: "salaryEpochSeconds", slot: "50", offset: 0 },
+  { label: "seatCount", slot: "51", offset: 0 },
+  { label: "totalSalaryClaimed", slot: "52", offset: 0 },
+  { label: "_seats", slot: "53", offset: 0 },
+];
+const celestialSeatPrefixPreserved = expectedCelestialSeatPrefix.every((expected, index) => {
+  const actual = normalizedCelestialSeatStorage[index];
+  return actual?.label === expected.label && actual?.slot === expected.slot && actual?.offset === expected.offset;
+});
+const celestialSeatAppendOnly = normalizedCelestialSeatStorage[9]?.label === "_salaryBaseCheckpoints"
+  && normalizedCelestialSeatStorage[9]?.slot === "54"
+  && normalizedCelestialSeatStorage[10]?.label === "_calendarSeats"
+  && normalizedCelestialSeatStorage[10]?.slot === "55"
+  && normalizedCelestialSeatStorage[11]?.label === "_seatTermsCheckpoints"
+  && normalizedCelestialSeatStorage[11]?.slot === "56"
+  && normalizedCelestialSeatStorage[12]?.label === "__gap"
+  && normalizedCelestialSeatStorage[12]?.slot === "57"
+  && celestialSeatArtifact?.storageLayout?.types[celestialSeatStorage[12]?.type]?.numberOfBytes === "1376";
+const celestialSeatStructType = celestialSeatArtifact?.storageLayout?.types[celestialSeatStorage[8]?.type]?.value;
+const celestialSeatStruct = celestialSeatArtifact?.storageLayout?.types[celestialSeatStructType];
+const expectedSeatMembers = [
+  ["lifeId", "0", 0], ["templeId", "1", 0], ["beneficiary", "2", 0],
+  ["salaryPerEpoch", "3", 0], ["activatedAt", "3", 16], ["salaryCheckpoint", "3", 24],
+  ["claimedAmount", "4", 0], ["status", "5", 0],
+];
+const celestialSeatStructPreserved = expectedSeatMembers.every(([label, slot, offset], index) => {
+  const actual = celestialSeatStruct?.members[index];
+  return actual?.label === label && actual?.slot === slot && actual?.offset === offset;
+});
+const celestialSeatStorageMatches = celestialSeatPrefixPreserved && celestialSeatAppendOnly
+  && celestialSeatStructPreserved;
 const gaolaoArtifact = Object.values(output.contracts ?? {})
   .flatMap((sourceContracts) => Object.entries(sourceContracts))
   .find(([contractName]) => contractName === "GaolaozhuangCommercialBank8888_Upgradeable")?.[1];
@@ -241,6 +290,17 @@ const evidence = {
     status: upgradeableModuleStorageMatches ? "PASS" : "FAIL",
     strategy: "Every module preserves the shared slots 0-1 prefix and reserves a deterministic 100-slot custom namespace",
     modules: upgradeableModuleStorage,
+  },
+  celestialSeat500StorageValidation: {
+    status: celestialSeatStorageMatches ? "PASS" : "FAIL",
+    strategy: "Calendar V2 preserves the complete duration-candidate prefix and Seat struct, appends three slots at 54-56, and shrinks only the trailing reserve from 46 to 43 slots",
+    prefixPreserved: celestialSeatPrefixPreserved,
+    seatStructPreserved: celestialSeatStructPreserved,
+    appendOnly: celestialSeatAppendOnly,
+    legacyPrefixThroughSlot: 53,
+    appendedSlots: [54, 55, 56],
+    namespaceSlots: 100,
+    layout: normalizedCelestialSeatStorage,
   },
   gaolaozhuangCommercialBank8888StorageValidation: {
     status: gaolaoStorageMatches ? "PASS" : "FAIL",

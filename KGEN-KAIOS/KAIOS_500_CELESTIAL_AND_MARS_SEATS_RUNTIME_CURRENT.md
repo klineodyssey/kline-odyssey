@@ -1,6 +1,14 @@
 # 《KAIOS 500 神明席 × 火星齊天豪宅席位 Runtime》
 ## KAIOS 500 Celestial Seats and Mars Qitian Habitat Seats Runtime
 
+## Human Final Calendar Payroll Canon (2026-08-11 cumulative update)
+
+The formal 18888 Celestial salary epoch is a deterministic Gregorian calendar month identified as `YYYYMM`. A month's salary matures exactly at day 5, 00:00:00 in UTC+8 / Asia-Taipei civilization time. February may contain 28 or 29 days; other months contain 30 or 31 days; December-to-January changes the year. A fixed 30-day or 365-day approximation is prohibited, and no administrator or keeper advances the month.
+
+An activated seat begins from its checkpointed first salary month. Every matured but unclaimed month remains an entitlement. Claims are all-or-nothing at transaction scope: if 18888 is paused, underfunded, or its risk reserve blocks payment, `lastClaimedMonth` and claimed amount remain unchanged so anyone may retry after a lawful refill. The caller never supplies a beneficiary or amount.
+
+Salary-base, salary-weight and beneficiary changes must use a future `YYYYMM` checkpoint. They cannot rewrite a current or past month. Mainnet salary base and weight rules remain deployment configuration values marked `HUMAN_CONFIRM_REQUIRED`; calendar correctness is fixed contract behavior, not an economic parameter.
+
 **文件狀態：** CURRENT DESIGN / CODEX IMPLEMENTATION BASIS  
 **版本：** V1.1 Celestial Payroll Reconciliation
 **日期：** 2026-08-09

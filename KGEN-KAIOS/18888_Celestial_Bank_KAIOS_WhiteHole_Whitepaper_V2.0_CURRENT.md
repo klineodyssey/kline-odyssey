@@ -34,7 +34,7 @@ The Bank Core owns KAIOS custody, settlement binding, Genesis Epoch, accounting,
 
 Reviewed modules are separate UUPS organs:
 
-- `CelestialSeat500_Upgradeable`: at most 500 formal salary seats; fixed beneficiary; permissionless claim trigger.
+- `CelestialSeat500_Upgradeable`: at most 500 formal salary seats; deterministic Gregorian `YYYYMM`; exact day-5 00:00 UTC+8 maturity; accumulated entitlement; future-only salary-base, weight and beneficiary checkpoints; permissionless claim trigger to the checkpointed beneficiary.
 - `CivilizationAllocation_Upgradeable`: replay-safe, purpose-bound public-infrastructure allocation.
 - `EconomicRouter8888_Upgradeable`: fixed route to the formal 8888 commercial/economic bank.
 - `ExchangeSettlement11520_Upgradeable`: fixed route to the formal 11520 Universal Civilization Exchange.
@@ -88,4 +88,4 @@ No Mainnet transaction is authorized by this document. Compile, storage diff, un
 
 The new 8888 Bank applies Asia/Taipei civilization time deterministically. Each calendar month is a payroll epoch and salary becomes claimable at day 5, 00:00 UTC+8. Unclaimed entries remain liabilities. Claims can pay the fixed beneficiary wallet or credit a beneficiary-owned 8888 account. Deposits and separately funded interest checkpoints never convert customer principal into Bank equity. Registered commerce is replay-safe, purpose-labelled and controller-authorized; its beneficiary is fixed before permissionless execution.
 
-This wiring does not move 8895 lending, OTC exchange or high-risk finance into 8888. It also does not authorize Mainnet deployment. The frozen CelestialSeat500 V1 remains duration-epoch based and cannot express the newly confirmed calendar-month day-5 rule without a separately approved future implementation change; deployment evidence must keep that mismatch visible.
+This wiring does not move 8895 lending, OTC exchange or high-risk finance into 8888. It also does not authorize Mainnet deployment. Under the Human-authorized limited frozen exception, CelestialSeat500 Calendar V2 now enforces each calendar month's maturity at day 5 00:00 UTC+8 on-chain. It does not use 30-day or 365-day approximation, does not require monthly admin advancement, preserves unclaimed months, and applies salary-base, weight and beneficiary changes only from a future `YYYYMM` checkpoint.

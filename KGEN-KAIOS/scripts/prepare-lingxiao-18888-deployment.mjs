@@ -26,9 +26,12 @@ const kgen = getAddress("0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be");
 const exchange11520 = getAddress("0xd0605F4EF10e5C1438F11AF9edc36926769239d6");
 const legacyTreasury8888 = getAddress("0x2caE692310b5A89C44c4E09Ba9F26385359d1Aa9");
 const governanceDelay = 3_600n;
-const salaryEpochSeconds = requiredUint("CELESTIAL_SALARY_EPOCH_SECONDS");
+const celestialSalaryBase = requiredUint("CELESTIAL_SALARY_BASE_WEI");
 const furnaceEpochSeconds = requiredUint("ALCHEMY_FURNACE_EPOCH_SECONDS");
-if (salaryEpochSeconds === 0n || furnaceEpochSeconds === 0n) throw new Error("Epoch durations must be nonzero");
+if (celestialSalaryBase === 0n || celestialSalaryBase > (1n << 128n) - 1n) {
+  throw new Error("CELESTIAL_SALARY_BASE_WEI must be a nonzero uint128");
+}
+if (furnaceEpochSeconds === 0n) throw new Error("ALCHEMY_FURNACE_EPOCH_SECONDS must be nonzero");
 
 const modulePolicies = {
   CelestialSeat500_Upgradeable: {
@@ -111,7 +114,7 @@ const economic8888 = await appendUpgradeable(
 );
 const seat = await appendUpgradeable(
   "CelestialSeat500_Upgradeable",
-  [bank.proxy, admin, bootstrapUpgrader, salaryEpochSeconds],
+  [bank.proxy, admin, bootstrapUpgrader, celestialSalaryBase],
   "CELESTIAL_SEAT_500",
 );
 const allocation = await appendUpgradeable(
@@ -202,7 +205,7 @@ for (const [name, deployed] of Object.entries(deployedModules)) {
     bankInterface.encodeFunctionData("configureModule", [
       moduleIds[name],
       deployed.proxy,
-      id(`${name}:1.0.0`),
+      id(`${name}:${name === "CelestialSeat500_Upgradeable" ? "2.0.0" : "1.0.0"}`),
       policy.perTransactionLimit,
       policy.epochLimit,
       policy.active,
@@ -264,7 +267,8 @@ const plan = {
     formalPauser,
   },
   humanApprovedParameters: {
-    salaryEpochSeconds: salaryEpochSeconds.toString(),
+    celestialSalaryBaseWei: celestialSalaryBase.toString(),
+    celestialSalaryCalendar: "MONTHLY_DAY_5_00_00_UTC_PLUS_8",
     furnaceEpochSeconds: furnaceEpochSeconds.toString(),
     reserveMinimumWei: reserveMinimum.toString(),
     riskAlertThresholdWei: riskAlertThreshold.toString(),

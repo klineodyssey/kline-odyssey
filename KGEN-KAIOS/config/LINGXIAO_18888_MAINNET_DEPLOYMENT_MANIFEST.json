@@ -1,13 +1,13 @@
 {
-  "status": "MAINNET_PRE_SIGN_FREEZE_REVIEW_COMPLETE_WITH_BLOCKERS",
+  "status": "MAINNET_PRE_SIGN_CALENDAR_REHEARSAL_COMPLETE_WITH_POLICY_BLOCKERS",
   "mainnetTransactionAuthorized": false,
   "readyForHumanMainnetAuthorization": false,
   "chainId": 56,
   "fork": {
-    "blockNumber": 115300367,
-    "blockHash": "0x8377d309b0e5515f17cc6abebf2b33b4b47f544655025abf072753578db6d7b6",
-    "timestamp": 1786445745,
-    "timestampIso": "2026-08-11T10:55:45.000Z",
+    "blockNumber": 115314782,
+    "blockHash": "0xe5c1787b959af6be35295b4c5721be6c088e26a7dba8f3f455d0809439da1cc9",
+    "timestamp": 1786452235,
+    "timestampIso": "2026-08-11T12:43:55.000Z",
     "network": "BSC Mainnet chainId 56 public read-only fork"
   },
   "canon": {
@@ -48,7 +48,7 @@
       "actualMainnetAddress": null,
       "autoBackfill": "SET_FROM_SUCCESSFUL_MAINNET_DEPLOYMENT_RECEIPT_CONTRACT_ADDRESS",
       "transactionHash": "0x0c7a3585944b744aa309a662e1a562bebb9134b049cedd861a0b50d9a5b5fd9b",
-      "blockNumber": 115300371,
+      "blockNumber": 115314786,
       "gasUsed": "653603",
       "status": "PASS"
     },
@@ -62,7 +62,7 @@
       "actualMainnetAddress": null,
       "autoBackfill": "SET_FROM_SUCCESSFUL_MAINNET_DEPLOYMENT_RECEIPT_CONTRACT_ADDRESS",
       "transactionHash": "0xd4998408162e7bb83b130d9b83a9128401b8b46f61fc605be93038c5807e25d8",
-      "blockNumber": 115300372,
+      "blockNumber": 115314787,
       "gasUsed": "2734493",
       "status": "PASS"
     },
@@ -76,7 +76,7 @@
       "actualMainnetAddress": null,
       "autoBackfill": "SET_FROM_SUCCESSFUL_MAINNET_DEPLOYMENT_RECEIPT_CONTRACT_ADDRESS",
       "transactionHash": "0xdc5261d62e8f76a0344e462bbf881136fe830fc6f1db7e152e2dc2ad535cc59e",
-      "blockNumber": 115300373,
+      "blockNumber": 115314788,
       "gasUsed": "306384",
       "status": "PASS"
     },
@@ -90,7 +90,7 @@
       "actualMainnetAddress": null,
       "autoBackfill": "SET_FROM_SUCCESSFUL_MAINNET_DEPLOYMENT_RECEIPT_CONTRACT_ADDRESS",
       "transactionHash": "0x765aad07d107e09f6f8ab0a5392d6a2b1b9553debbb6248611558b0287eaf76f",
-      "blockNumber": 115300374,
+      "blockNumber": 115314789,
       "gasUsed": "4016007",
       "status": "PASS"
     },
@@ -104,7 +104,7 @@
       "actualMainnetAddress": null,
       "autoBackfill": "SET_FROM_SUCCESSFUL_MAINNET_DEPLOYMENT_RECEIPT_CONTRACT_ADDRESS",
       "transactionHash": "0x0efc03f785c3c4c651c9695a5361f4f0b6111b83d3861dedd963f27ce3413942",
-      "blockNumber": 115300375,
+      "blockNumber": 115314790,
       "gasUsed": "425322",
       "status": "PASS"
     },
@@ -117,9 +117,9 @@
       "forkAddress": "0x8E48643030826c9121Cd2E086B811b9083E9f862",
       "actualMainnetAddress": null,
       "autoBackfill": "SET_FROM_SUCCESSFUL_MAINNET_DEPLOYMENT_RECEIPT_CONTRACT_ADDRESS",
-      "transactionHash": "0xd89956f44b86678f40af1e18740d5e76c0d1348a6494e9e017b92d1bc8bf3fd4",
-      "blockNumber": 115300376,
-      "gasUsed": "1545100",
+      "transactionHash": "0x078b9aa60a269d36950cfa9bd18890bdb4afe1c7bb0196d984735b29fefe0af4",
+      "blockNumber": 115314791,
+      "gasUsed": "2899103",
       "status": "PASS"
     },
     {
@@ -131,9 +131,9 @@
       "forkAddress": "0xA447853985Ef6e6AbFcb14FCfDeFdced10Be0BDe",
       "actualMainnetAddress": null,
       "autoBackfill": "SET_FROM_SUCCESSFUL_MAINNET_DEPLOYMENT_RECEIPT_CONTRACT_ADDRESS",
-      "transactionHash": "0x13c6906651b7aa0ab115fdbfc117c3378e3b3e2629f2c9774883d15c5e6efff8",
-      "blockNumber": 115300377,
-      "gasUsed": "326154",
+      "transactionHash": "0x876e69aee32c18bd096c2dacb79a2a67491a9af61c0007548e6f207fe177acd0",
+      "blockNumber": 115314792,
+      "gasUsed": "354723",
       "status": "PASS"
     },
     {
@@ -146,7 +146,7 @@
       "actualMainnetAddress": null,
       "autoBackfill": "SET_FROM_SUCCESSFUL_MAINNET_DEPLOYMENT_RECEIPT_CONTRACT_ADDRESS",
       "transactionHash": "0xe4c62de04d871761686b6937b1ba1e1a5dba72a1256aa32c9e6993ef1c5a9ed1",
-      "blockNumber": 115300378,
+      "blockNumber": 115314793,
       "gasUsed": "1399667",
       "status": "PASS"
     },
@@ -160,7 +160,7 @@
       "actualMainnetAddress": null,
       "autoBackfill": "SET_FROM_SUCCESSFUL_MAINNET_DEPLOYMENT_RECEIPT_CONTRACT_ADDRESS",
       "transactionHash": "0x2619893d2aea9888be9a2219888ff8587e45d77480fe5b26e53d3ba946eb6a21",
-      "blockNumber": 115300379,
+      "blockNumber": 115314794,
       "gasUsed": "303999",
       "status": "PASS"
     },
@@ -174,7 +174,7 @@
       "actualMainnetAddress": null,
       "autoBackfill": "SET_FROM_SUCCESSFUL_MAINNET_DEPLOYMENT_RECEIPT_CONTRACT_ADDRESS",
       "transactionHash": "0x90454baff7d7865712a78cdbcffbcfb8005de70e0f59a1e11ff1b006b9acf52d",
-      "blockNumber": 115300380,
+      "blockNumber": 115314795,
       "gasUsed": "1261793",
       "status": "PASS"
     },
@@ -188,7 +188,7 @@
       "actualMainnetAddress": null,
       "autoBackfill": "SET_FROM_SUCCESSFUL_MAINNET_DEPLOYMENT_RECEIPT_CONTRACT_ADDRESS",
       "transactionHash": "0x2aca1d815704e17b6d9f43de2436fe1161d4c75c403f66e25189fee6771836bf",
-      "blockNumber": 115300381,
+      "blockNumber": 115314796,
       "gasUsed": "330557",
       "status": "PASS"
     },
@@ -202,7 +202,7 @@
       "actualMainnetAddress": null,
       "autoBackfill": "SET_FROM_SUCCESSFUL_MAINNET_DEPLOYMENT_RECEIPT_CONTRACT_ADDRESS",
       "transactionHash": "0x8dfc394fa2408d515b66b4e5fcdc5dc121521717522cfc4f940487adf4d1ff98",
-      "blockNumber": 115300382,
+      "blockNumber": 115314797,
       "gasUsed": "1261805",
       "status": "PASS"
     },
@@ -216,7 +216,7 @@
       "actualMainnetAddress": null,
       "autoBackfill": "SET_FROM_SUCCESSFUL_MAINNET_DEPLOYMENT_RECEIPT_CONTRACT_ADDRESS",
       "transactionHash": "0xea0c7302be24e8a6b034ca73034556f4ebd719a26f4c77c322e017c67dacb6ed",
-      "blockNumber": 115300383,
+      "blockNumber": 115314798,
       "gasUsed": "330557",
       "status": "PASS"
     },
@@ -230,7 +230,7 @@
       "actualMainnetAddress": null,
       "autoBackfill": "SET_FROM_SUCCESSFUL_MAINNET_DEPLOYMENT_RECEIPT_CONTRACT_ADDRESS",
       "transactionHash": "0xf1811ae684c3dd59cfbef6d456f82cae4b05d35b17d23ac63c37dd67e66cc4d0",
-      "blockNumber": 115300384,
+      "blockNumber": 115314799,
       "gasUsed": "1349091",
       "status": "PASS"
     },
@@ -244,7 +244,7 @@
       "actualMainnetAddress": null,
       "autoBackfill": "SET_FROM_SUCCESSFUL_MAINNET_DEPLOYMENT_RECEIPT_CONTRACT_ADDRESS",
       "transactionHash": "0xc658797ed350a50715c3be3949d8b32a4f60393956718b9e4c96413305c217e0",
-      "blockNumber": 115300385,
+      "blockNumber": 115314800,
       "gasUsed": "304010",
       "status": "PASS"
     },
@@ -258,7 +258,7 @@
       "actualMainnetAddress": null,
       "autoBackfill": "SET_FROM_SUCCESSFUL_MAINNET_DEPLOYMENT_RECEIPT_CONTRACT_ADDRESS",
       "transactionHash": "0x19f4ca8eb9a0a94c34518748e3bd9495f44dadda8fd0536cc2c2bd8462bd3c9a",
-      "blockNumber": 115300386,
+      "blockNumber": 115314801,
       "gasUsed": "1646003",
       "status": "PASS"
     },
@@ -272,7 +272,7 @@
       "actualMainnetAddress": null,
       "autoBackfill": "SET_FROM_SUCCESSFUL_MAINNET_DEPLOYMENT_RECEIPT_CONTRACT_ADDRESS",
       "transactionHash": "0x6775c8cd789390aa8522df88b34454e76062a7ee11413ce936094e1d0c91d00d",
-      "blockNumber": 115300387,
+      "blockNumber": 115314802,
       "gasUsed": "375214",
       "status": "PASS"
     },
@@ -286,7 +286,7 @@
       "actualMainnetAddress": null,
       "autoBackfill": "SET_FROM_SUCCESSFUL_MAINNET_DEPLOYMENT_RECEIPT_CONTRACT_ADDRESS",
       "transactionHash": "0x15fe5d63192038219ce207b75721c3d4318102d4f87b983f8ea89497e0906e05",
-      "blockNumber": 115300388,
+      "blockNumber": 115314803,
       "gasUsed": "1346137",
       "status": "PASS"
     },
@@ -300,7 +300,7 @@
       "actualMainnetAddress": null,
       "autoBackfill": "SET_FROM_SUCCESSFUL_MAINNET_DEPLOYMENT_RECEIPT_CONTRACT_ADDRESS",
       "transactionHash": "0xd0f48b825224d7eeebdf3a69099cf9e0cb15fe51015fb6bab2105e1e1143b0ce",
-      "blockNumber": 115300389,
+      "blockNumber": 115314804,
       "gasUsed": "303989",
       "status": "PASS"
     },
@@ -314,7 +314,7 @@
       "actualMainnetAddress": null,
       "autoBackfill": "SET_FROM_SUCCESSFUL_MAINNET_DEPLOYMENT_RECEIPT_CONTRACT_ADDRESS",
       "transactionHash": "0xf39fe8bdeb8bae1e29d7adeb3d10ba0240113bb8140ac99e6d2b7110be311c27",
-      "blockNumber": 115300390,
+      "blockNumber": 115314805,
       "gasUsed": "1373218",
       "status": "PASS"
     },
@@ -328,7 +328,7 @@
       "actualMainnetAddress": null,
       "autoBackfill": "SET_FROM_SUCCESSFUL_MAINNET_DEPLOYMENT_RECEIPT_CONTRACT_ADDRESS",
       "transactionHash": "0xf6d177902136f1a019c63e23693ea0bc8b2168bfa499d1d24244cee02491802a",
-      "blockNumber": 115300391,
+      "blockNumber": 115314806,
       "gasUsed": "506666",
       "status": "PASS"
     }
@@ -520,7 +520,7 @@
       "moduleId": "0xd18d09a1aa7fd65a8c81eb77bee03453a5363c5cb82c1b24c3be23d4001fa4c5",
       "implementation": "0x8E48643030826c9121Cd2E086B811b9083E9f862",
       "proxy": "0xA447853985Ef6e6AbFcb14FCfDeFdced10Be0BDe",
-      "version": "1.0.0",
+      "version": "2.0.0",
       "activeInFork": true,
       "perTransactionLimitForkOnly": "10000000000000000000000",
       "dailyEpochLimitForkOnly": "100000000000000000000000",
@@ -606,13 +606,13 @@
       "parameter": "500 Seat salary base/rate",
       "value": null,
       "status": "HUMAN_CONFIRM_REQUIRED",
-      "forkOnlyValue": "10/100 KAIOS per 60-second test epoch"
+      "forkOnlyValue": "10 KAIOS monthly base with 1.0x/10.0x test weights"
     },
     {
       "parameter": "500 Seat epoch definition",
       "value": "MONTHLY_DAY_5_00_00_UTC_PLUS_8",
-      "status": "FROZEN_IMPLEMENTATION_MISMATCH_BLOCKER",
-      "forkOnlyValue": "60 seconds (duration-only frozen module)"
+      "status": "HUMAN_FINAL_CANON_IMPLEMENTED",
+      "forkOnlyValue": "deterministic Gregorian YYYYMM maturity enforced on-chain"
     },
     {
       "parameter": "18911 Alchemy epoch definition",
@@ -683,9 +683,9 @@
   ],
   "genesisPreview": {
     "transactionHash": "0x98afe7b42e9c31a81fc66d45a9d865d240a2d5088d43bcf4e85f0bf9fdc5be13",
-    "blockNumber": 115300408,
-    "timestamp": 1786445763,
-    "timestampIso": "2026-08-11T10:56:03.000Z",
+    "blockNumber": 115314823,
+    "timestamp": 1786452253,
+    "timestampIso": "2026-08-11T12:44:13.000Z",
     "kgenGenesisSupply": {
       "raw": "72000000000000000000000000",
       "decimal18": "72000000.0"
@@ -724,10 +724,10 @@
     "balanceAtReviewWei": "5567368941457930",
     "balanceAtReviewBNB": "0.00556736894145793",
     "gasPriceWei": "50000000",
-    "rehearsalGasUsed": "28965068",
-    "bufferedGasUnits": "34758081",
-    "estimatedRequiredWei": "1737904050000000",
-    "estimatedRequiredBNB": "0.00173790405",
+    "rehearsalGasUsed": "30541924",
+    "bufferedGasUnits": "36650308",
+    "estimatedRequiredWei": "1832515400000000",
+    "estimatedRequiredBNB": "0.0018325154",
     "estimatedShortfallWei": "0",
     "sufficientAtReview": true,
     "status": "PASS"
@@ -736,7 +736,9 @@
     "postFinalizationUpgradePath": "PASS",
     "genesisAccountingExact": "PASS",
     "realMoneyFlowPaths": "PASS",
-    "celestialSalary500": "FAIL_FROZEN_DURATION_EPOCH_CANNOT_ENFORCE_CALENDAR_MONTH_DAY_5_UTC_PLUS_8",
+    "celestialSalary500": "PASS",
+    "celestialMonthlyDay5Utc8": "PASS",
+    "noThirtyDayApproximation": "PASS",
     "routing8888": "PASS",
     "monthlyPayroll8888": "PASS",
     "savingsAccount8888": "PASS",
@@ -750,7 +752,6 @@
     "legacyHeartUntouched": "PASS"
   },
   "blockers": [
-    "FROZEN_CELESTIAL_SEAT_500_CALENDAR_MONTH_MISMATCH_REQUIRES_HUMAN_FREEZE_DECISION",
     "DEPLOYMENT_SIGNER_CONTROL_RECONFIRMATION_REQUIRED",
     "HUMAN_CONFIRM_REQUIRED:500 Seat salary base/rate",
     "HUMAN_CONFIRM_REQUIRED:18911 Alchemy epoch definition",

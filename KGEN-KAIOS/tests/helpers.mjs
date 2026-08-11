@@ -182,7 +182,7 @@ export async function setupLingxiaoFullBankSystem({ chainId = 31337, totalAccoun
   const exchange11520 = await deploy("MockOrgan", deployer);
 
   const definitions = [
-    ["CelestialSeat500_Upgradeable", [bankAddress, governanceAddress, moduleUpgraderAddress, 100]],
+    ["CelestialSeat500_Upgradeable", [bankAddress, governanceAddress, moduleUpgraderAddress, 1_000n * ETHER]],
     ["CivilizationAllocation_Upgradeable", [bankAddress, governanceAddress, moduleUpgraderAddress]],
     ["EconomicRouter8888_Upgradeable", [bankAddress, governanceAddress, moduleUpgraderAddress, await economic8888.getAddress()]],
     ["ExchangeSettlement11520_Upgradeable", [bankAddress, governanceAddress, moduleUpgraderAddress, await exchange11520.getAddress()]],

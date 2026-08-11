@@ -7,7 +7,7 @@
 > NO DISCRETIONARY MINTING.
 > CIVILIZATION MASS SHALL BE CONSERVED.
 
-- Fork block: 115300367
+- Fork block: 115314782
 - 33333 Point ID: KAIOS Gold & Silver Island Token Point
 - Fork-predicted KAIOS Token: `0xD4E67B3a69e41524c424150E6b6e921b01D036db`
 - 36000 Point ID: White Hole

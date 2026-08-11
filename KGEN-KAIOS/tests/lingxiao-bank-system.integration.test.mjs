@@ -43,35 +43,39 @@ test("500 Celestial Seats accrue retry-safe salary and never redirect the fixed 
   await settle(context, 3);
 
   await (
-    await seats.configureSeat(500, id("LIFE-500"), id("TEMPLE-12345"), beneficiaryAddress, 1_000n * ETHER, 1)
+    await seats.configureSeat(500, id("LIFE-500"), id("TEMPLE-12345"), beneficiaryAddress, 1_000_000, 1)
   ).wait();
   await assert.rejects(
-    seats.configureSeat(501, id("LIFE-501"), id("TEMPLE-12345"), beneficiaryAddress, ETHER, 1),
+    seats.configureSeat(501, id("LIFE-501"), id("TEMPLE-12345"), beneficiaryAddress, 1_000_000, 1),
   );
-  const firstCheckpoint = (await seats.seat(500)).salaryCheckpoint;
-  await advanceTime(context.provider, 100);
+  const firstCheckpoint = (await seats.calendarSeatState(500)).lastClaimedMonth;
+  const firstMonth = (await seats.calendarSeatState(500)).firstSalaryMonth;
+  const firstMaturity = await seats.salaryMonthMaturityAt(firstMonth);
+  const latestBeforeFirst = await context.provider.getBlock("latest");
+  await advanceTime(context.provider, Number(firstMaturity) - Number(latestBeforeFirst.timestamp));
   const firstReceipt = await (await seats.connect(attacker).claimCelestialSalary(500)).wait();
   const firstSalaryEvent = eventArgs(firstReceipt, seats, "SalaryClaimed");
-  assert.equal(firstSalaryEvent.fromEpoch, firstCheckpoint);
-  assert.equal(
-    firstSalaryEvent.amount,
-    (firstSalaryEvent.toEpoch - firstSalaryEvent.fromEpoch) * 1_000n * ETHER,
-  );
+  assert.equal(firstSalaryEvent.fromMonth, firstMonth);
+  assert.equal(firstSalaryEvent.throughMonth, firstMonth);
+  assert.equal(firstSalaryEvent.amount, 1_000n * ETHER);
   assert.equal(await context.kaios.balanceOf(beneficiaryAddress), firstSalaryEvent.amount);
   assert.equal(await context.kaios.balanceOf(await attacker.getAddress()), 0n);
   await assert.rejects(seats.connect(attacker).claimCelestialSalary(500));
 
   await (
-    await seats.configureSeat(1, id("LIFE-1"), id("TEMPLE-18888"), beneficiaryAddress, 5_000n * ETHER, 1)
+    await seats.configureSeat(1, id("LIFE-1"), id("TEMPLE-18888"), beneficiaryAddress, 5_000_000, 1)
   ).wait();
-  const checkpoint = (await seats.seat(1)).salaryCheckpoint;
-  await advanceTime(context.provider, 100);
+  const checkpoint = (await seats.calendarSeatState(1)).lastClaimedMonth;
+  const retryMonth = (await seats.calendarSeatState(1)).firstSalaryMonth;
+  const retryMaturity = await seats.salaryMonthMaturityAt(retryMonth);
+  const latestBeforeRetry = await context.provider.getBlock("latest");
+  await advanceTime(context.provider, Number(retryMaturity) - Number(latestBeforeRetry.timestamp));
   await assert.rejects(seats.connect(attacker).claimCelestialSalary(1));
-  assert.equal((await seats.seat(1)).salaryCheckpoint, checkpoint);
+  assert.equal((await seats.calendarSeatState(1)).lastClaimedMonth, checkpoint);
   await settle(context, 20);
   const retryReceipt = await (await seats.connect(attacker).claimCelestialSalary(1)).wait();
   const salaryEvent = eventArgs(retryReceipt, seats, "SalaryClaimed");
-  assert.equal(salaryEvent.amount, (salaryEvent.toEpoch - salaryEvent.fromEpoch) * 5_000n * ETHER);
+  assert.equal(salaryEvent.amount, 5_000n * ETHER);
   assert.equal((await seats.seat(1)).claimedAmount, salaryEvent.amount);
 });
 
@@ -168,7 +172,7 @@ test("governance is delayed and two-party, migration is evidence-only, and UUPS 
       id("UPGRADE-PRESERVED-LIFE"),
       id("UPGRADE-PRESERVED-TEMPLE"),
       preservedBeneficiary,
-      88n * ETHER,
+      88_000,
       1,
     )
   ).wait();
@@ -189,7 +193,7 @@ test("governance is delayed and two-party, migration is evidence-only, and UUPS 
     ),
   );
   await assert.rejects(
-    seat.contract.configureSeat(2, id("BYPASS-LIFE"), id("BYPASS-TEMPLE"), preservedBeneficiary, ETHER, 1),
+    seat.contract.configureSeat(2, id("BYPASS-LIFE"), id("BYPASS-TEMPLE"), preservedBeneficiary, 1_000_000, 1),
   );
   await assert.rejects(
     migration.proposeMigration(id("BYPASS-MIGRATION"), 2048, await outsider.getAddress(), id("STATE-2"), id("MANIFEST-2")),

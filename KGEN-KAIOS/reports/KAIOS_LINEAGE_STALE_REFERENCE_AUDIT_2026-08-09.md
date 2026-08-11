@@ -2,8 +2,8 @@
 
 **Status:** PASS
 
-- Scanned files: 3698
-- Repository tracked files: 3698
+- Scanned files: 3700
+- Repository tracked files: 3700
 - Human package files: 0
 - Legacy 1:10,000 / 720B reference hits: 46
 - ACTIVE_CONFLICT: 0
@@ -119,8 +119,8 @@ The Human-reported `KAIOS_GENESIS_INSCRIPTION_V1.0.md` is superseded by the stag
 | COMMENT_ONLY | `KGEN-KAIOS/tools/generate-stale-reference-audit.mjs:336` | 1_TO_10_000 | Audit, supersession, or negative-reference text; not an executable monetary definition. |
 | CURRENT_CORRECT | `KGEN-KAIOS/tools/generate-stale-reference-audit.mjs:343` | MAX_SUPPLY | Identifier occurrence; numeric value audited independently. |
 | CURRENT_CORRECT | `KGEN-KAIOS/tools/rehearse-lingxiao-mainnet-fork.mjs:33` | KAIOS_PER_KGEN | Identifier occurrence; numeric value audited independently. |
-| CURRENT_CORRECT | `KGEN-KAIOS/tools/rehearse-lingxiao-mainnet-fork.mjs:286` | KAIOS_PER_KGEN | Identifier occurrence; numeric value audited independently. |
-| CURRENT_CORRECT | `KGEN-KAIOS/tools/rehearse-lingxiao-mainnet-fork.mjs:739` | KAIOS_PER_KGEN | Identifier occurrence; numeric value audited independently. |
+| CURRENT_CORRECT | `KGEN-KAIOS/tools/rehearse-lingxiao-mainnet-fork.mjs:291` | KAIOS_PER_KGEN | Identifier occurrence; numeric value audited independently. |
+| CURRENT_CORRECT | `KGEN-KAIOS/tools/rehearse-lingxiao-mainnet-fork.mjs:757` | KAIOS_PER_KGEN | Identifier occurrence; numeric value audited independently. |
 | CURRENT_CORRECT | `KGEN-KAIOS/tools/validate-integration-artifacts.mjs:42` | KAIOS_PER_KGEN | Identifier occurrence; numeric value audited independently. |
 | CURRENT_CORRECT | `KGEN-KAIOS/tools/validate-integration-artifacts.mjs:91` | KAIOS_PER_KGEN | Identifier occurrence; numeric value audited independently. |
 | CURRENT_CORRECT | `KGEN-KAIOS/tools/verify-current-lineage.mjs:42` | KAIOS_PER_KGEN | Identifier occurrence; numeric value audited independently. |

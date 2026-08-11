@@ -16,7 +16,9 @@ KAIOS Token Core and Bank Runtime are separate. Token monetary physics cannot be
 | Beneficiary redirect | Each module stores or binds the beneficiary before the permissionless execution call |
 | Replay | Bank-wide payment IDs plus module-local execution state |
 | Module drain | Per-transaction limit, daily limit and reserve floor checked in Bank Core |
-| Insufficient salary loss | Seat checkpoint advances only after Bank payment succeeds |
+| Insufficient salary loss | Calendar `lastClaimedMonth` advances only after every segment payment succeeds; a revert preserves the entire entitlement |
+| Calendar drift | On-chain Gregorian conversion, UTC+8 offset and `YYYYMM` identity; no fixed 30-day/365-day approximation or admin month advancement |
+| Historical salary rewrite | Base, weight and beneficiary checkpoints must be strictly future calendar months; matured history remains immutable |
 | Storage corruption | Slots 0–3 preserved; new state appended in slots 4–13; gap reduced from 46 to 36; total namespace remains 50 slots |
 | Initializer takeover | Every implementation constructor calls `_disableInitializers()`; proxies initialize atomically |
 | Malicious/non-UUPS implementation | ERC1822 compatibility check plus role gate; covered by local rehearsal |
@@ -31,8 +33,9 @@ Module caps and reserve values are policy inputs. The package intentionally does
 
 - Solidity 0.8.24 and OpenZeppelin 5.0.2 are pinned.
 - All current contracts remain below EIP-170.
-- Deterministic integration covers Genesis, salary, retry, replay, redirect, allocation, 8888, 11520, reserve, pause, governance, migration and upgrades.
+- Deterministic integration covers Genesis, Gregorian day-5 salary, 28/29/30/31-day months, year transition, accumulation, future-only checkpoints, retry, replay, redirect, allocation, 8888, 11520, reserve, pause, governance, migration and upgrades.
 - ChainId 56 Mainnet fork rehearsal now passes Genesis accounting, salary/allocation/8888/11520 circulation, insufficient-balance retry after a legal one-KGEN fork burn and settlement, final-governance UUPS upgrade, and delayed rollback with representative state preserved.
 - A formal code-bearing 8888 candidate now exists as `GaolaozhuangCommercialBank8888_Upgradeable`; its proxy is the fixed Router target and the no-code legacy EOA is lineage-only.
 - 8888 liability accounting, monthly day-5 UTC+8 payroll, savings credit, registered commerce, separately funded future-only interest checkpoints, delayed-governance upgrade and rollback pass local and chainId 56 fork rehearsal.
-- Signature remains blocked by Human economic values, distinct approver/pauser confirmation, the frozen CelestialSeat500 duration-epoch versus calendar-month rule mismatch, and the absence of `MAINNET_DEPLOY_APPROVED`.
+- CelestialSeat500 Calendar V2 consumes only former reserved slots 54-56, leaves 43 gap slots, and preserves the duration candidate's complete prefix and `Seat` struct for upgrade discipline.
+- Signature remains blocked by Human economic values, distinct approver/pauser confirmation, and the absence of `MAINNET_DEPLOY_APPROVED`; calendar correctness is no longer a parameter blocker.

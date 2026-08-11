@@ -24,9 +24,12 @@ try {
   const seats = context.modules.CelestialSeat500_Upgradeable.contract;
   const beneficiary = await context.beneficiary.getAddress();
   const seatConfigured = await (
-    await seats.configureSeat(1, id("LIFE-GENESIS-SEAT-1"), id("TEMPLE-12345"), beneficiary, 100n * ETHER, 1)
+    await seats.configureSeat(1, id("LIFE-GENESIS-SEAT-1"), id("TEMPLE-12345"), beneficiary, 100_000, 1)
   ).wait();
-  await advanceTime(context.provider, 100);
+  const firstSalaryMonth = (await seats.calendarSeatState(1)).firstSalaryMonth;
+  const firstMaturity = await seats.salaryMonthMaturityAt(firstSalaryMonth);
+  const beforeMaturity = await context.provider.getBlock("latest");
+  await advanceTime(context.provider, Number(firstMaturity) - Number(beforeMaturity.timestamp));
   const salary = await (await seats.claimCelestialSalary(1)).wait();
   const allocation = context.modules.CivilizationAllocation_Upgradeable.contract;
   const allocationId = id("GENESIS-CIVILIZATION-ALLOCATION");
@@ -103,6 +106,7 @@ try {
       arbitraryOwnerWithdraw: "BLOCKED",
       unauthorizedUpgrade: "PASS_BY_INTEGRATION_TEST",
       moduleExposure: "PASS_BY_INTEGRATION_TEST",
+      celestialMonthlyDay5Utc8: "PASS",
       genesisChainReaction: "PASS",
     },
   };

@@ -31,7 +31,8 @@ const DEPLOYMENT_SIGNER = getAddress("0xb3C54ca96De0dED4Ca0151F629ff9781506ba261
 const TECHNICAL_MINIMUM_DELAY = 3_600;
 const KGEN_GENESIS_SUPPLY = 72_000_000n * 10n ** 18n;
 const KAIOS_PER_KGEN = 1_000n;
-const FORK_SALARY_EPOCH_SECONDS = 60;
+const FORK_CELESTIAL_SALARY_BASE = 10n * 10n ** 18n;
+const FORK_SALARY_WEIGHT_SCALE = 1_000_000n;
 const FORK_MODULE_PER_TRANSACTION_LIMIT = 10_000n * 10n ** 18n;
 const FORK_MODULE_DAILY_LIMIT = 100_000n * 10n ** 18n;
 const EXPECTED_BANK_CREATION_HASH = "0xff5594efa2cd283aed2cab9f27634c06a4da3d2737c645addfdc54f53757d43b";
@@ -193,7 +194,7 @@ async function main() {
     );
     const economic8888Address = getAddress(await economic8888.contract.getAddress());
     const moduleDefinitions = [
-      ["CelestialSeat500_Upgradeable", [bankAddress, FORMAL_GOVERNANCE, FORMAL_GOVERNANCE, FORK_SALARY_EPOCH_SECONDS], "CELESTIAL_SEAT_500"],
+      ["CelestialSeat500_Upgradeable", [bankAddress, FORMAL_GOVERNANCE, FORMAL_GOVERNANCE, FORK_CELESTIAL_SALARY_BASE], "CELESTIAL_SEAT_500"],
       ["CivilizationAllocation_Upgradeable", [bankAddress, FORMAL_GOVERNANCE, FORMAL_GOVERNANCE], "CIVILIZATION_ALLOCATION"],
       ["EconomicRouter8888_Upgradeable", [bankAddress, FORMAL_GOVERNANCE, FORMAL_GOVERNANCE, economic8888Address], "ECONOMIC_ROUTER_8888"],
       ["ExchangeSettlement11520_Upgradeable", [bankAddress, FORMAL_GOVERNANCE, FORMAL_GOVERNANCE, FORMAL_11520], "EXCHANGE_SETTLEMENT_11520"],
@@ -220,6 +221,10 @@ async function main() {
       transactions[label] = receiptEvidence(receipt);
       return receipt;
     }
+    async function advanceForkTo(timestamp) {
+      await eip1193.request({ method: "evm_setTime", params: [Number(timestamp) * 1_000] });
+      await eip1193.request({ method: "evm_mine", params: [] });
+    }
 
     await transact("bankBindKAIOS", bank.contract.bindKAIOS(await kaios.getAddress()));
     await transact("bank8888BindKAIOS", economic8888.contract.bindKAIOS(await kaios.getAddress()));
@@ -244,7 +249,7 @@ async function main() {
         bank.contract.configureModule(
           moduleIds[name],
           await item.contract.getAddress(),
-          id(`${name}:1.0.0`),
+          id(`${name}:${name === "CelestialSeat500_Upgradeable" ? "2.0.0" : "1.0.0"}`),
           isPaymentModule ? FORK_MODULE_PER_TRANSACTION_LIMIT : 0n,
           isPaymentModule ? FORK_MODULE_DAILY_LIMIT : 0n,
           name !== "BankMigration_Upgradeable",
@@ -300,14 +305,21 @@ async function main() {
     const seats = modules.CelestialSeat500_Upgradeable.contract;
     await transact(
       "configureCelestialSeat1",
-      seats.configureSeat(1, id("FORK-LIFE-SEAT-1"), id("FORK-TEMPLE-18888"), beneficiaryAddress, 10n * 10n ** 18n, 1),
+      seats.configureSeat(1, id("FORK-LIFE-SEAT-1"), id("FORK-TEMPLE-18888"), beneficiaryAddress, FORK_SALARY_WEIGHT_SCALE, 1),
     );
-    await provider.send("evm_increaseTime", [61]);
-    await provider.send("evm_mine", []);
+    const firstSalaryMonth = (await seats.calendarSeatState(1)).firstSalaryMonth;
+    const firstSalaryMaturity = await seats.salaryMonthMaturityAt(firstSalaryMonth);
+    await advanceForkTo(firstSalaryMaturity - 1n);
+    expect(await seats.salaryMonthMatured(firstSalaryMonth) === false, "CELESTIAL_SALARY_MATURED_EARLY");
+    await advanceForkTo(firstSalaryMaturity);
+    expect(await seats.salaryMonthMatured(firstSalaryMonth) === true, "CELESTIAL_SALARY_NOT_MATURE_AT_BOUNDARY");
     const beneficiaryBeforeSalary = await kaios.balanceOf(beneficiaryAddress);
     await transact("claimCelestialSalary", seats.connect(outsider).claimCelestialSalary(1));
     const beneficiaryAfterSalary = await kaios.balanceOf(beneficiaryAddress);
-    expect(beneficiaryAfterSalary > beneficiaryBeforeSalary, "CELESTIAL_SALARY_DID_NOT_FLOW");
+    expect(
+      beneficiaryAfterSalary - beneficiaryBeforeSalary === FORK_CELESTIAL_SALARY_BASE,
+      "CELESTIAL_SALARY_DID_NOT_FLOW_EXACTLY",
+    );
 
     const allocation = modules.CivilizationAllocation_Upgradeable.contract;
     const allocationId = id("FORK-CIVILIZATION-ALLOCATION");
@@ -424,11 +436,11 @@ async function main() {
 
     await transact(
       "configureCelestialSeat2ForRetry",
-      seats.configureSeat(2, id("FORK-LIFE-SEAT-2"), id("FORK-TEMPLE-18888"), beneficiaryAddress, 100n * 10n ** 18n, 1),
+      seats.configureSeat(2, id("FORK-LIFE-SEAT-2"), id("FORK-TEMPLE-18888"), beneficiaryAddress, 10n * FORK_SALARY_WEIGHT_SCALE, 1),
     );
-    await provider.send("evm_increaseTime", [61]);
-    await provider.send("evm_mine", []);
-    const retryCheckpointBefore = (await seats.seat(2)).salaryCheckpoint;
+    const retrySalaryMonth = (await seats.calendarSeatState(2)).firstSalaryMonth;
+    await advanceForkTo(await seats.salaryMonthMaturityAt(retrySalaryMonth));
+    const retryCheckpointBefore = (await seats.calendarSeatState(2)).lastClaimedMonth;
     const risk = modules.BankRiskController_Upgradeable.contract;
     const balanceBeforeInsufficientClaim = await kaios.balanceOf(bankAddress);
     await transact(
@@ -440,7 +452,10 @@ async function main() {
       "INSUFFICIENT_SALARY",
     );
     const retryStateAfterFailure = await seats.seat(2);
-    expect(retryStateAfterFailure.salaryCheckpoint === retryCheckpointBefore, "FAILED_SALARY_ADVANCED_CHECKPOINT");
+    expect(
+      (await seats.calendarSeatState(2)).lastClaimedMonth === retryCheckpointBefore,
+      "FAILED_SALARY_ADVANCED_CHECKPOINT",
+    );
     expect(retryStateAfterFailure.claimedAmount === 0n, "FAILED_SALARY_CHANGED_CLAIMED_AMOUNT");
 
     const governanceWasExempt = await kgen.isTaxExempt(FORMAL_GOVERNANCE);
@@ -461,7 +476,10 @@ async function main() {
     expect(balanceAfterRefill - balanceBeforeRefill === 1_000n * 10n ** 18n, "LEGAL_REFILL_DID_NOT_MINT_1000_KAIOS");
     await transact("retryCelestialSalaryAfterRefill", seats.connect(outsider).claimCelestialSalary(2));
     const retryStateAfterSuccess = await seats.seat(2);
-    expect(retryStateAfterSuccess.salaryCheckpoint > retryCheckpointBefore, "RETRY_DID_NOT_ADVANCE_CHECKPOINT");
+    expect(
+      (await seats.calendarSeatState(2)).lastClaimedMonth === retrySalaryMonth,
+      "RETRY_DID_NOT_ADVANCE_CHECKPOINT",
+    );
     expect(retryStateAfterSuccess.claimedAmount > 0n, "RETRY_DID_NOT_RECORD_CLAIM");
 
     const governanceAddress = getAddress(await governanceModule.getAddress());
@@ -751,8 +769,8 @@ async function main() {
     const bufferedGas = totalGasUsed * 120n / 100n;
     const estimatedRequiredWei = bufferedGas * liveGasPrice;
     const parameterTable = [
-      { parameter: "500 Seat salary base/rate", value: null, status: "HUMAN_CONFIRM_REQUIRED", forkOnlyValue: "10/100 KAIOS per 60-second test epoch" },
-      { parameter: "500 Seat epoch definition", value: "MONTHLY_DAY_5_00_00_UTC_PLUS_8", status: "FROZEN_IMPLEMENTATION_MISMATCH_BLOCKER", forkOnlyValue: `${FORK_SALARY_EPOCH_SECONDS} seconds (duration-only frozen module)` },
+      { parameter: "500 Seat salary base/rate", value: null, status: "HUMAN_CONFIRM_REQUIRED", forkOnlyValue: "10 KAIOS monthly base with 1.0x/10.0x test weights" },
+      { parameter: "500 Seat epoch definition", value: "MONTHLY_DAY_5_00_00_UTC_PLUS_8", status: "HUMAN_FINAL_CANON_IMPLEMENTED", forkOnlyValue: "deterministic Gregorian YYYYMM maturity enforced on-chain" },
       { parameter: "18911 Alchemy epoch definition", value: null, status: "HUMAN_CONFIRM_REQUIRED", forkOnlyValue: "86400 seconds" },
       { parameter: "Reserve minimum", value: null, status: "HUMAN_CONFIRM_REQUIRED", forkOnlyValue: "dynamic balance lock for retry test only" },
       { parameter: "Salary exposure cap", value: null, status: "HUMAN_CONFIRM_REQUIRED", forkOnlyValue: `${formatEther(FORK_MODULE_PER_TRANSACTION_LIMIT)} per transaction / ${formatEther(FORK_MODULE_DAILY_LIMIT)} per UTC day` },
@@ -805,7 +823,9 @@ async function main() {
       postFinalizationUpgradePath: "PASS",
       genesisAccountingExact: genesisRecord.accountingInvariant ? "PASS" : "FAIL",
       realMoneyFlowPaths: "PASS",
-      celestialSalary500: "FAIL_FROZEN_DURATION_EPOCH_CANNOT_ENFORCE_CALENDAR_MONTH_DAY_5_UTC_PLUS_8",
+      celestialSalary500: "PASS",
+      celestialMonthlyDay5Utc8: "PASS",
+      noThirtyDayApproximation: "PASS",
       routing8888: "PASS",
       monthlyPayroll8888: "PASS",
       savingsAccount8888: "PASS",
@@ -819,14 +839,13 @@ async function main() {
       legacyHeartUntouched: "PASS",
     };
     const readinessBlockers = [
-      "FROZEN_CELESTIAL_SEAT_500_CALENDAR_MONTH_MISMATCH_REQUIRES_HUMAN_FREEZE_DECISION",
       "DEPLOYMENT_SIGNER_CONTROL_RECONFIRMATION_REQUIRED",
       ...parameterTable.filter((item) => item.status === "HUMAN_CONFIRM_REQUIRED").map((item) => `HUMAN_CONFIRM_REQUIRED:${item.parameter}`),
       ...(deploymentSignerFunding.sufficientAtReview ? [] : ["DEPLOYMENT_SIGNER_BNB_FUNDING_REQUIRED"]),
       "MAINNET_DEPLOY_APPROVED_NOT_RECEIVED",
     ];
     const manifest = {
-      status: "MAINNET_PRE_SIGN_FREEZE_REVIEW_COMPLETE_WITH_BLOCKERS",
+      status: "MAINNET_PRE_SIGN_CALENDAR_REHEARSAL_COMPLETE_WITH_POLICY_BLOCKERS",
       mainnetTransactionAuthorized: false,
       readyForHumanMainnetAuthorization: false,
       chainId: 56,
@@ -867,7 +886,7 @@ async function main() {
       autoBackfillRule: "Each actual Mainnet deployment address must be written from its successful receipt and then codehash-verified; predicted addresses alone never become formal.",
     };
     const rehearsal = {
-      status: "PASS_WITH_MAINNET_WIRING_AND_POLICY_BLOCKERS",
+      status: "PASS_WITH_HUMAN_ECONOMIC_AND_GOVERNANCE_POLICY_BLOCKERS",
       evidenceClass: "CHAIN_ID_56_MAINNET_FORK_FULL_REHEARSAL",
       mainnetTransactionAuthorized: false,
       fork: manifest.fork,
@@ -970,7 +989,7 @@ async function main() {
       ...Object.entries(gates).map(([gate, result]) => `- ${gate}: ${result}`),
       "",
       "The 8888 rail passed through the new code-bearing Gaolaozhuang Commercial Bank proxy, including UTC+8 monthly day-5 payroll, savings credit, commercial payment and delayed UUPS rollback.",
-      "The frozen CelestialSeat500 module remains duration-based and cannot enforce the newly confirmed calendar-month day-5 rule; this blocker is not hidden or approximated.",
+      "CelestialSeat500 enforces Gregorian YYYYMM salary maturity exactly at day 5 00:00 UTC+8; no 30-day approximation or monthly admin advancement exists.",
       "",
       `KGEN totalSupply preview: ${formatUnits(supplyAtGenesisSettlement, 18)} KGEN.`,
       `Historical burn preview: ${formatUnits(historicalBurn, 18)} KGEN.`,

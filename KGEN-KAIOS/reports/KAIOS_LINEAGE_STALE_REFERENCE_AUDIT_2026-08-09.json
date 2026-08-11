@@ -3,8 +3,8 @@
   "auditedAt": "2026-08-09T00:00:00+08:00",
   "status": "PASS",
   "scope": {
-    "repositoryTrackedFiles": 3698,
-    "repositoryReadableTextFiles": 3696,
+    "repositoryTrackedFiles": 3700,
+    "repositoryReadableTextFiles": 3698,
     "repositoryPdfFiles": 33,
     "repositoryPdfPages": 222,
     "externalPackage": {
@@ -16,7 +16,7 @@
       "pdfPages": 0,
       "pdfExtraction": "NOT_REQUESTED"
     },
-    "scannedFilesTotal": 3698
+    "scannedFilesTotal": 3700
   },
   "finalCanon": {
     "18888": "LINGXIAO_CELESTIAL_BANK",
@@ -627,7 +627,7 @@
     },
     {
       "path": "KGEN-KAIOS/tools/rehearse-lingxiao-mainnet-fork.mjs",
-      "line": 286,
+      "line": 291,
       "pattern": "KAIOS_PER_KGEN",
       "legacyScale": false,
       "classification": "CURRENT_CORRECT",
@@ -637,7 +637,7 @@
     },
     {
       "path": "KGEN-KAIOS/tools/rehearse-lingxiao-mainnet-fork.mjs",
-      "line": 739,
+      "line": 757,
       "pattern": "KAIOS_PER_KGEN",
       "legacyScale": false,
       "classification": "CURRENT_CORRECT",

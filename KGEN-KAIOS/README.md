@@ -30,7 +30,7 @@ executable Mainnet transaction script or formal deployed address.
 | `contracts/KSHIPConverter.sol` | Holder-authorized KUFO-to-KSHIP conversion organ |
 | `contracts/KAIOSPairRegistry.sol` | External pair metadata without Token Core authority |
 | `contracts/LingxiaoCelestialBank18888_Upgradeable.sol` | Stable 18888 UUPS Bank Core: settlement binding, accounting, reserve, module caps, pause, health and governance finalization |
-| `contracts/CelestialSeat500_Upgradeable.sol` | Fixed-beneficiary, permissionlessly triggered payroll for at most 500 Celestial seats |
+| `contracts/CelestialSeat500_Upgradeable.sol` | Gregorian YYYYMM payroll for at most 500 Celestial seats; salary matures exactly on day 5 00:00 UTC+8, accumulates, and follows future-only base/weight/beneficiary checkpoints |
 | `contracts/CivilizationAllocation_Upgradeable.sol` | Purpose-bound and replay-safe civilization/public-infrastructure allocation |
 | `contracts/EconomicRouter8888_Upgradeable.sol` | Fixed formal route from central civilization capital to the separate 8888 economy |
 | `contracts/GaolaozhuangCommercialBank8888_Upgradeable.sol` | Canonical code-bearing 8888 UUPS commercial Bank: monthly day-5 UTC+8 payroll, savings, accounts, funded interest checkpoints and replay-safe commerce |
