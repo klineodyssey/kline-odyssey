@@ -186,36 +186,6 @@
   },
   "findings": [
     {
-      "path": "KGEN-KAIOS/tools/rehearse-lingxiao-mainnet-fork.mjs",
-      "line": 31,
-      "pattern": "KAIOS_PER_KGEN",
-      "legacyScale": false,
-      "classification": "CURRENT_CORRECT",
-      "sourceKind": "REPOSITORY_TRACKED",
-      "excerpt": "const KAIOS_PER_KGEN = 1_000n;",
-      "rationale": "Identifier occurrence; numeric value audited independently."
-    },
-    {
-      "path": "KGEN-KAIOS/tools/rehearse-lingxiao-mainnet-fork.mjs",
-      "line": 273,
-      "pattern": "KAIOS_PER_KGEN",
-      "legacyScale": false,
-      "classification": "CURRENT_CORRECT",
-      "sourceKind": "REPOSITORY_TRACKED",
-      "excerpt": "const expectedGenesisKaios = historicalBurn * KAIOS_PER_KGEN;",
-      "rationale": "Identifier occurrence; numeric value audited independently."
-    },
-    {
-      "path": "KGEN-KAIOS/tools/rehearse-lingxiao-mainnet-fork.mjs",
-      "line": 570,
-      "pattern": "KAIOS_PER_KGEN",
-      "legacyScale": false,
-      "classification": "CURRENT_CORRECT",
-      "sourceKind": "REPOSITORY_TRACKED",
-      "excerpt": "accountingInvariant: historicalBurn * KAIOS_PER_KGEN === actualGenesisKaios && actualGenesisKaios === bankBalanceAfterGenesis - bankBalanceBeforeGenesis,",
-      "rationale": "Identifier occurrence; numeric value audited independently."
-    },
-    {
       "path": "KGEN-KAIOS/CODEX_HANDOFF_2026-08-09.md",
       "line": 7,
       "pattern": "KAIOS_PER_KGEN",
@@ -643,6 +613,36 @@
       "classification": "CURRENT_CORRECT",
       "sourceKind": "REPOSITORY_TRACKED",
       "excerpt": "\"- `KAIOS_MAX_SUPPLY = 72_000_000_000`\",",
+      "rationale": "Identifier occurrence; numeric value audited independently."
+    },
+    {
+      "path": "KGEN-KAIOS/tools/rehearse-lingxiao-mainnet-fork.mjs",
+      "line": 31,
+      "pattern": "KAIOS_PER_KGEN",
+      "legacyScale": false,
+      "classification": "CURRENT_CORRECT",
+      "sourceKind": "REPOSITORY_TRACKED",
+      "excerpt": "const KAIOS_PER_KGEN = 1_000n;",
+      "rationale": "Identifier occurrence; numeric value audited independently."
+    },
+    {
+      "path": "KGEN-KAIOS/tools/rehearse-lingxiao-mainnet-fork.mjs",
+      "line": 273,
+      "pattern": "KAIOS_PER_KGEN",
+      "legacyScale": false,
+      "classification": "CURRENT_CORRECT",
+      "sourceKind": "REPOSITORY_TRACKED",
+      "excerpt": "const expectedGenesisKaios = historicalBurn * KAIOS_PER_KGEN;",
+      "rationale": "Identifier occurrence; numeric value audited independently."
+    },
+    {
+      "path": "KGEN-KAIOS/tools/rehearse-lingxiao-mainnet-fork.mjs",
+      "line": 570,
+      "pattern": "KAIOS_PER_KGEN",
+      "legacyScale": false,
+      "classification": "CURRENT_CORRECT",
+      "sourceKind": "REPOSITORY_TRACKED",
+      "excerpt": "accountingInvariant: historicalBurn * KAIOS_PER_KGEN === actualGenesisKaios && actualGenesisKaios === bankBalanceAfterGenesis - bankBalanceBeforeGenesis,",
       "rationale": "Identifier occurrence; numeric value audited independently."
     },
     {

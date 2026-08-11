@@ -181,17 +181,17 @@ async function main() {
     );
     const bankAddress = getAddress(await bank.contract.getAddress());
     const moduleDefinitions = [
-      ["CelestialSeat500_Upgradeable", [bankAddress, FORMAL_GOVERNANCE, FORMAL_GOVERNANCE, FORK_SALARY_EPOCH_SECONDS]],
-      ["CivilizationAllocation_Upgradeable", [bankAddress, FORMAL_GOVERNANCE, FORMAL_GOVERNANCE]],
-      ["EconomicRouter8888_Upgradeable", [bankAddress, FORMAL_GOVERNANCE, FORMAL_GOVERNANCE, await forkOnly8888.getAddress()]],
-      ["ExchangeSettlement11520_Upgradeable", [bankAddress, FORMAL_GOVERNANCE, FORMAL_GOVERNANCE, FORMAL_11520]],
-      ["BankRiskController_Upgradeable", [bankAddress, FORMAL_GOVERNANCE, FORMAL_GOVERNANCE]],
-      ["BankGovernance_Upgradeable", [bankAddress, FORMAL_GOVERNANCE, FORMAL_GOVERNANCE, TECHNICAL_MINIMUM_DELAY]],
-      ["BankMigration_Upgradeable", [bankAddress, FORMAL_GOVERNANCE, FORMAL_GOVERNANCE]],
+      ["CelestialSeat500_Upgradeable", [bankAddress, FORMAL_GOVERNANCE, FORMAL_GOVERNANCE, FORK_SALARY_EPOCH_SECONDS], "CELESTIAL_SEAT_500"],
+      ["CivilizationAllocation_Upgradeable", [bankAddress, FORMAL_GOVERNANCE, FORMAL_GOVERNANCE], "CIVILIZATION_ALLOCATION"],
+      ["EconomicRouter8888_Upgradeable", [bankAddress, FORMAL_GOVERNANCE, FORMAL_GOVERNANCE, await forkOnly8888.getAddress()], "ECONOMIC_ROUTER_8888"],
+      ["ExchangeSettlement11520_Upgradeable", [bankAddress, FORMAL_GOVERNANCE, FORMAL_GOVERNANCE, FORMAL_11520], "EXCHANGE_SETTLEMENT_11520"],
+      ["BankRiskController_Upgradeable", [bankAddress, FORMAL_GOVERNANCE, FORMAL_GOVERNANCE], "BANK_RISK_CONTROLLER"],
+      ["BankGovernance_Upgradeable", [bankAddress, FORMAL_GOVERNANCE, FORMAL_GOVERNANCE, TECHNICAL_MINIMUM_DELAY], "BANK_GOVERNANCE"],
+      ["BankMigration_Upgradeable", [bankAddress, FORMAL_GOVERNANCE, FORMAL_GOVERNANCE], "BANK_MIGRATION"],
     ];
     const modules = {};
-    for (const [name, args] of moduleDefinitions) {
-      modules[name] = await deployProxyCandidate(name, args, name.replace("_Upgradeable", "").toUpperCase());
+    for (const [name, args, identity] of moduleDefinitions) {
+      modules[name] = await deployProxyCandidate(name, args, identity);
     }
     const kaios = await deployCandidate("KAIOS", [FORMAL_KGEN, bankAddress, await registry.getAddress()], "KAIOS_TOKEN_CORE");
     const furnace = await deployCandidate(

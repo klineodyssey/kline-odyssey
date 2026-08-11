@@ -30,9 +30,9 @@
     "bootSequenceChanged": true,
     "walletOrPrivateKeyFiles": [],
     "deploymentFiles": [
-      "KGEN-KAIOS/scripts/prepare-lingxiao-18888-deployment.mjs",
       "KGEN-KAIOS/config/LINGXIAO_18888_MAINNET_DEPLOYMENT_MANIFEST.json",
-      "KGEN-KAIOS/config/LINGXIAO_18888_MAINNET_DEPLOYMENT_MANIFEST.md"
+      "KGEN-KAIOS/config/LINGXIAO_18888_MAINNET_DEPLOYMENT_MANIFEST.md",
+      "KGEN-KAIOS/scripts/prepare-lingxiao-18888-deployment.mjs"
     ]
   },
   "failures": []
