@@ -1,0 +1,187 @@
+{
+  "status": "HUMAN_REVIEW_REQUIRED",
+  "mainnetTransactionAuthorized": false,
+  "readyForHumanMainnetAuthorization": false,
+  "chainId": 56,
+  "units": "18-decimal KAIOS wei unless explicitly stated",
+  "solidityImplementationFreeze": "ACTIVE",
+  "solidityBlockers": 0,
+  "economicParameterBlockers": 8,
+  "governanceIdentityBlockers": 2,
+  "confirmedCanon": {
+    "kgenToKaios": "1 permanently burned KGEN = 1000 KAIOS",
+    "kaiosMaximumWhole": "72000000000",
+    "bank18888": "LINGXIAO_CELESTIAL_BANK",
+    "bank8888": "GAOLAOZHUANG_COMMERCIAL_BANK",
+    "exchange11520": "UNIVERSAL_CIVILIZATION_EXCHANGE",
+    "celestialSalaryCalendar": "MONTHLY_DAY_5_00_00_UTC_PLUS_8",
+    "governanceDelaySeconds": 3600
+  },
+  "initialModuleState": {
+    "CelestialSeat500": "ACTIVE",
+    "CivilizationAllocation": "ACTIVE",
+    "EconomicRouter8888": "ACTIVE",
+    "ExchangeSettlement11520": "ACTIVE",
+    "BankRiskController": "ACTIVE",
+    "BankGovernance": "ACTIVE",
+    "BankMigration": "REGISTERED_BUT_INACTIVE"
+  },
+  "humanConfirmRequired": {
+    "celestialSalaryBase": null,
+    "salaryWeightRules": null,
+    "minimumReserve": null,
+    "salaryExposureCap": null,
+    "allocationExposureCap": null,
+    "router8888Cap": null,
+    "settlement11520Cap": null,
+    "depositInterestRate": null,
+    "distinctGovernanceApprover": null,
+    "finalPauser": null
+  },
+  "humanReviewTable": [
+    {
+      "parameter": "celestialSalaryBase",
+      "currentValue": null,
+      "allowedEffect": "Sets the monthly base KAIOS salary for each active Celestial seat before its weight is applied.",
+      "securityConsequence": "Directly creates recurring 18888 salary liability.",
+      "humanDecision": "VALUE_REQUIRED"
+    },
+    {
+      "parameter": "salaryWeightRules",
+      "currentValue": null,
+      "allowedEffect": "Defines the permitted salary-weight schedule used for future calendar months.",
+      "securityConsequence": "Controls relative salary liability and must not rewrite matured months.",
+      "humanDecision": "VALUE_REQUIRED"
+    },
+    {
+      "parameter": "minimumReserve",
+      "currentValue": null,
+      "allowedEffect": "Keeps the configured KAIOS reserve unavailable to ordinary module spending.",
+      "securityConsequence": "Too low weakens resilience; too high can block lawful payments.",
+      "humanDecision": "VALUE_REQUIRED"
+    },
+    {
+      "parameter": "salaryExposureCap",
+      "currentValue": null,
+      "allowedEffect": "Limits Celestial salary-module outflow exposure.",
+      "securityConsequence": "Bounds loss or operational error in the salary rail.",
+      "humanDecision": "VALUE_REQUIRED"
+    },
+    {
+      "parameter": "allocationExposureCap",
+      "currentValue": null,
+      "allowedEffect": "Limits Civilization Allocation outflow exposure.",
+      "securityConsequence": "Bounds allocation replay, configuration, or destination risk.",
+      "humanDecision": "VALUE_REQUIRED"
+    },
+    {
+      "parameter": "router8888Cap",
+      "currentValue": null,
+      "allowedEffect": "Limits economic-capital routing from 18888 to the formal 8888 bank.",
+      "securityConsequence": "Bounds 8888 routing exposure without creating an owner withdrawal path.",
+      "humanDecision": "VALUE_REQUIRED"
+    },
+    {
+      "parameter": "settlement11520Cap",
+      "currentValue": null,
+      "allowedEffect": "Limits settlement flow from 18888 to the formal 11520 interface.",
+      "securityConsequence": "Bounds exchange-settlement exposure.",
+      "humanDecision": "VALUE_REQUIRED"
+    },
+    {
+      "parameter": "depositInterestRate",
+      "currentValue": null,
+      "allowedEffect": "Sets the 8888 deposit-interest rate for future monthly periods only.",
+      "securityConsequence": "Creates funded commercial-bank liability; historical periods remain immutable.",
+      "humanDecision": "VALUE_REQUIRED"
+    },
+    {
+      "parameter": "distinctGovernanceApprover",
+      "currentValue": null,
+      "allowedEffect": "Approves delayed governance proposals independently from the proposer.",
+      "securityConsequence": "Must be distinct to prevent a single identity from bypassing two-party governance.",
+      "humanDecision": "PUBLIC_ADDRESS_REQUIRED"
+    },
+    {
+      "parameter": "finalPauser",
+      "currentValue": null,
+      "allowedEffect": "May pause the configured bank or module paths but cannot spend funds through that role.",
+      "securityConsequence": "Compromise can halt operations, so the identity must be deliberately governed.",
+      "humanDecision": "PUBLIC_ADDRESS_REQUIRED"
+    }
+  ],
+  "readOnlyMainnetSnapshot": {
+    "status": "PREVIEW_NOT_FINAL",
+    "observedAt": "2026-08-11T15:41:37.409Z",
+    "blockNumber": 115338456,
+    "blockHash": "0xc9feb04ec409730d5cb96e60167e97650082d4b189ff1da0258560c6fcdd598f",
+    "blockTimestamp": 1786462895,
+    "blockTimestampIso": "2026-08-11T15:41:35.000Z",
+    "deploymentSigner": "0xb3C54ca96De0dED4Ca0151F629ff9781506ba261",
+    "pendingNonce": 34,
+    "latestNonce": 34,
+    "kgenTotalSupply": {
+      "raw": "71977906887000601442227077",
+      "decimal18": "71977906.887000601442227077"
+    },
+    "historicalBurnedKgen": {
+      "raw": "22093112999398557772923",
+      "decimal18": "22093.112999398557772923"
+    },
+    "genesisKaiosPreview": {
+      "raw": "22093112999398557772923000",
+      "decimal18": "22093112.999398557772923"
+    },
+    "genesisRule": "Final values must be recomputed from KGEN.totalSupply() at the actual Mainnet settlement block."
+  },
+  "gasEstimate": {
+    "status": "PREVIEW_NOT_FINAL",
+    "gasPriceWei": "50000000",
+    "rehearsalGasUsed": "30541924",
+    "bufferedGasUnits": "36650308",
+    "estimatedRequiredWei": "1832515400000000",
+    "estimatedRequiredBNB": "0.0018325154",
+    "deploymentSignerBalanceWei": "5567368941457930",
+    "deploymentSignerBalanceBNB": "0.00556736894145793",
+    "fundingSufficientAtReview": true,
+    "recheckRequiredBeforeSignature": true
+  },
+  "predictedDeploymentAddresses": [
+    { "order": 1, "identity": "KAIOS_ORGAN_REGISTRY", "nonce": 34, "predictedAddress": "0xA9e7CbF161E39E556f4B5b8E41397Ac4B87a932D" },
+    { "order": 2, "identity": "LINGXIAO_18888_BANK_IMPLEMENTATION", "nonce": 35, "predictedAddress": "0x8125045039Fe969490d57185233B7d64A494A829" },
+    { "order": 3, "identity": "LINGXIAO_18888_BANK_PROXY", "nonce": 36, "predictedAddress": "0x11d34c0F723aCd334B8F95076f73F07f06202aab" },
+    { "order": 4, "identity": "GAOLAOZHUANG_8888_COMMERCIAL_BANK_IMPLEMENTATION", "nonce": 37, "predictedAddress": "0x94341fB340cF8Bd0069cD1Fcaf5bA0866B15c923" },
+    { "order": 5, "identity": "GAOLAOZHUANG_8888_COMMERCIAL_BANK_PROXY", "nonce": 38, "predictedAddress": "0x9EcAe137b3A307971EB77B4CDB3ba13aeeF5297C" },
+    { "order": 6, "identity": "CELESTIAL_SEAT_500_IMPLEMENTATION", "nonce": 39, "predictedAddress": "0x8E48643030826c9121Cd2E086B811b9083E9f862" },
+    { "order": 7, "identity": "CELESTIAL_SEAT_500_PROXY", "nonce": 40, "predictedAddress": "0xA447853985Ef6e6AbFcb14FCfDeFdced10Be0BDe" },
+    { "order": 8, "identity": "CIVILIZATION_ALLOCATION_IMPLEMENTATION", "nonce": 41, "predictedAddress": "0x216d69a413354CBab7ddDdC4fCfe2B3E0468197d" },
+    { "order": 9, "identity": "CIVILIZATION_ALLOCATION_PROXY", "nonce": 42, "predictedAddress": "0x75A55Af6967932C4A1c896dB81Dd6F31e531c299" },
+    { "order": 10, "identity": "ECONOMIC_ROUTER_8888_IMPLEMENTATION", "nonce": 43, "predictedAddress": "0x3ebc0A39F7981AAB3995AC828dc79A8B0753A05b" },
+    { "order": 11, "identity": "ECONOMIC_ROUTER_8888_PROXY", "nonce": 44, "predictedAddress": "0xC49f989c6ff0d22824df8D993Ce82207165C1428" },
+    { "order": 12, "identity": "EXCHANGE_SETTLEMENT_11520_IMPLEMENTATION", "nonce": 45, "predictedAddress": "0xA08A9CEcfa18b2FDb9ca8De0063A5029B9Ffc363" },
+    { "order": 13, "identity": "EXCHANGE_SETTLEMENT_11520_PROXY", "nonce": 46, "predictedAddress": "0x17587F49dFDE4e400D03Ae81364AC2af8E1629Df" },
+    { "order": 14, "identity": "BANK_RISK_CONTROLLER_IMPLEMENTATION", "nonce": 47, "predictedAddress": "0x8D231C82513cdfa978A7C157618Ff198b0a5d3E9" },
+    { "order": 15, "identity": "BANK_RISK_CONTROLLER_PROXY", "nonce": 48, "predictedAddress": "0x61573a93a88c58DAa5066A0aA319f88cE34d88FC" },
+    { "order": 16, "identity": "BANK_GOVERNANCE_IMPLEMENTATION", "nonce": 49, "predictedAddress": "0x9d919E66AE2746D41D978e3d51DF594B2E5F5582" },
+    { "order": 17, "identity": "BANK_GOVERNANCE_PROXY", "nonce": 50, "predictedAddress": "0xa2792fBDCc8A8AaC364053431D44E0a8D335E166" },
+    { "order": 18, "identity": "BANK_MIGRATION_IMPLEMENTATION", "nonce": 51, "predictedAddress": "0xff281a821dBbA44EEc7b57475E3c28A916fcDAE7" },
+    { "order": 19, "identity": "BANK_MIGRATION_PROXY", "nonce": 52, "predictedAddress": "0x72c14f5D2fa748C1579295A7E34c16453a3a17aB" },
+    { "order": 20, "identity": "KAIOS_TOKEN_CORE", "nonce": 53, "predictedAddress": "0xD4E67B3a69e41524c424150E6b6e921b01D036db" },
+    { "order": 21, "identity": "ALCHEMY_FURNACE_18911", "nonce": 54, "predictedAddress": "0x44c2CA9B9eba19d8F79F6E1786fd9D25e73738e1" }
+  ],
+  "predictionPolicy": {
+    "status": "NONCE_SENSITIVE_PREDICTIONS_NOT_DEPLOYED_NOT_FORMAL",
+    "observedNonce": 34,
+    "recalculateIfSignerNonceChanges": true,
+    "formalAddressRequiresSuccessfulReceiptAndCodeVerification": true
+  },
+  "constraints": {
+    "unknownValuesMustRemainNull": true,
+    "noSolidityChange": true,
+    "noMainnetTransactionWithoutExplicitApproval": true,
+    "noMerge": true,
+    "interestRateChangesApplyToFutureEpochsOnly": true,
+    "deploymentSignerGetsNoAutomaticGovernanceRole": true,
+    "genesisAmountMustNotBeHardcoded": true
+  }
+}
