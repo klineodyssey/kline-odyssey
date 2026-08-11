@@ -1,7 +1,14 @@
 {
-  "status": "MAINNET_PRE_SIGN_CALENDAR_REHEARSAL_COMPLETE_WITH_POLICY_BLOCKERS",
+  "status": "MAINNET_ECONOMIC_PARAMETERS_FROZEN_GOVERNANCE_IDENTITIES_REQUIRED",
   "mainnetTransactionAuthorized": false,
   "readyForHumanMainnetAuthorization": false,
+  "economicConfig": {
+    "path": "KGEN-KAIOS/config/mainnet-economic-config.final-review.json",
+    "sha256": "16988c0e1861a8b718bbdf238e3826cef1d4947daf34f716b687d5b2d61bfc37",
+    "solidityBlockers": 0,
+    "economicParameterBlockers": 0,
+    "governanceIdentityBlockers": 2
+  },
   "chainId": 56,
   "fork": {
     "blockNumber": 115314782,
@@ -525,8 +532,11 @@
       "perTransactionLimitForkOnly": "10000000000000000000000",
       "dailyEpochLimitForkOnly": "100000000000000000000000",
       "mainnetActive": true,
-      "mainnetLimits": null,
-      "mainnetStatus": "HUMAN_FINAL_INITIAL_STATE_LIMITS_PENDING"
+      "mainnetLimits": {
+        "perTransactionLimitWei": "3005464480874316939890",
+        "dailyEpochLimitWei": "3005464480874316939890"
+      },
+      "mainnetStatus": "HUMAN_FINAL_ECONOMIC_POLICY_ENCODED"
     },
     "CivilizationAllocation_Upgradeable": {
       "moduleId": "0x98cb067844ea2b60572a9eb95ae1e64a6bf8f03bcf8c9e11ae16130de56bca63",
@@ -537,8 +547,11 @@
       "perTransactionLimitForkOnly": "10000000000000000000000",
       "dailyEpochLimitForkOnly": "100000000000000000000000",
       "mainnetActive": true,
-      "mainnetLimits": null,
-      "mainnetStatus": "HUMAN_FINAL_INITIAL_STATE_LIMITS_PENDING"
+      "mainnetLimits": {
+        "perTransactionLimitWei": "6010928961748633879781",
+        "dailyEpochLimitWei": "6010928961748633879781"
+      },
+      "mainnetStatus": "HUMAN_FINAL_ECONOMIC_POLICY_ENCODED"
     },
     "EconomicRouter8888_Upgradeable": {
       "moduleId": "0xb13d0845c93752f8c48622f9d8f06b2b5b503a2b264f614b59130b81156e5e54",
@@ -549,8 +562,11 @@
       "perTransactionLimitForkOnly": "10000000000000000000000",
       "dailyEpochLimitForkOnly": "100000000000000000000000",
       "mainnetActive": true,
-      "mainnetLimits": null,
-      "mainnetStatus": "HUMAN_FINAL_INITIAL_STATE_LIMITS_PENDING"
+      "mainnetLimits": {
+        "perTransactionLimitWei": "12021857923497267759562",
+        "dailyEpochLimitWei": "12021857923497267759562"
+      },
+      "mainnetStatus": "HUMAN_FINAL_ECONOMIC_POLICY_ENCODED"
     },
     "ExchangeSettlement11520_Upgradeable": {
       "moduleId": "0x24b8150af34ecded6c75de16b22b3a7fa6477e94cb23ea338a9453af3ed8961b",
@@ -561,8 +577,11 @@
       "perTransactionLimitForkOnly": "10000000000000000000000",
       "dailyEpochLimitForkOnly": "100000000000000000000000",
       "mainnetActive": true,
-      "mainnetLimits": null,
-      "mainnetStatus": "HUMAN_FINAL_INITIAL_STATE_LIMITS_PENDING"
+      "mainnetLimits": {
+        "perTransactionLimitWei": "6010928961748633879781",
+        "dailyEpochLimitWei": "6010928961748633879781"
+      },
+      "mainnetStatus": "HUMAN_FINAL_ECONOMIC_POLICY_ENCODED"
     },
     "BankRiskController_Upgradeable": {
       "moduleId": "0xbcba21ba5cfe25784fa28567a77ab492bb1265a40a221a37df6a976728cd105d",
@@ -573,8 +592,11 @@
       "perTransactionLimitForkOnly": "0",
       "dailyEpochLimitForkOnly": "0",
       "mainnetActive": true,
-      "mainnetLimits": null,
-      "mainnetStatus": "HUMAN_FINAL_INITIAL_STATE_LIMITS_PENDING"
+      "mainnetLimits": {
+        "perTransactionLimitWei": "0",
+        "dailyEpochLimitWei": "0"
+      },
+      "mainnetStatus": "HUMAN_FINAL_INITIAL_STATE_ACTIVE"
     },
     "BankGovernance_Upgradeable": {
       "moduleId": "0x408269e9739994f2f410704684700c1f0c29b98f7210d29834da2c315b4dd2ce",
@@ -585,8 +607,11 @@
       "perTransactionLimitForkOnly": "0",
       "dailyEpochLimitForkOnly": "0",
       "mainnetActive": true,
-      "mainnetLimits": null,
-      "mainnetStatus": "HUMAN_FINAL_INITIAL_STATE_LIMITS_PENDING"
+      "mainnetLimits": {
+        "perTransactionLimitWei": "0",
+        "dailyEpochLimitWei": "0"
+      },
+      "mainnetStatus": "HUMAN_FINAL_INITIAL_STATE_ACTIVE"
     },
     "BankMigration_Upgradeable": {
       "moduleId": "0xbc0740979a57ecb6aedf2d22cb378fe98c7a380d156a63372e04e276797310f8",
@@ -597,16 +622,19 @@
       "perTransactionLimitForkOnly": "0",
       "dailyEpochLimitForkOnly": "0",
       "mainnetActive": false,
-      "mainnetLimits": null,
-      "mainnetStatus": "HUMAN_FINAL_INITIAL_STATE_LIMITS_PENDING"
+      "mainnetLimits": {
+        "perTransactionLimitWei": "0",
+        "dailyEpochLimitWei": "0"
+      },
+      "mainnetStatus": "HUMAN_FINAL_REGISTERED_BUT_INACTIVE"
     }
   },
   "economicParameters": [
     {
       "parameter": "500 Seat salary base/rate",
-      "value": null,
-      "status": "HUMAN_CONFIRM_REQUIRED",
-      "forkOnlyValue": "10 KAIOS monthly base with 1.0x/10.0x test weights"
+      "value": "88 KAIOS per active seat per Gregorian month; 88000000000000000000 wei",
+      "status": "HUMAN_FINAL_ECONOMIC_POLICY_ENCODED",
+      "policy": "default 1x (1000000 ppm); governance policy range 1x-5x; inactive seats accrue no salary"
     },
     {
       "parameter": "500 Seat epoch definition",
@@ -616,45 +644,44 @@
     },
     {
       "parameter": "18911 Alchemy epoch definition",
-      "value": null,
-      "status": "HUMAN_CONFIRM_REQUIRED",
+      "value": "86400 seconds",
+      "status": "FROZEN_DEPLOYMENT_CONFIGURATION_NOT_ECONOMIC_POLICY",
       "forkOnlyValue": "86400 seconds"
     },
     {
       "parameter": "Reserve minimum",
-      "value": null,
-      "status": "HUMAN_CONFIRM_REQUIRED",
-      "forkOnlyValue": "dynamic balance lock for retry test only"
+      "value": "11000000 KAIOS; 11000000000000000000000000 wei",
+      "status": "HUMAN_FINAL_ECONOMIC_POLICY_ENCODED"
     },
     {
       "parameter": "Salary exposure cap",
-      "value": null,
-      "status": "HUMAN_CONFIRM_REQUIRED",
-      "forkOnlyValue": "10000.0 per transaction / 100000.0 per UTC day"
+      "value": "3005464480874316939890 wei per transaction and per UTC day",
+      "status": "HUMAN_FINAL_ECONOMIC_POLICY_ENCODED",
+      "annualPolicy": "1099999.999999999999999740 KAIOS across 366 capped UTC days"
     },
     {
       "parameter": "Allocation exposure cap",
-      "value": null,
-      "status": "HUMAN_CONFIRM_REQUIRED",
-      "forkOnlyValue": "10000.0 per transaction / 100000.0 per UTC day"
+      "value": "6010928961748633879781 wei per transaction and per UTC day",
+      "status": "HUMAN_FINAL_ECONOMIC_POLICY_ENCODED",
+      "annualPolicy": "2199999.999999999999999846 KAIOS across 366 capped UTC days"
     },
     {
       "parameter": "8888 route cap",
-      "value": null,
-      "status": "HUMAN_CONFIRM_REQUIRED",
-      "forkOnlyValue": "10000.0 per transaction / 100000.0 per UTC day"
+      "value": "12021857923497267759562 wei per transaction and per UTC day",
+      "status": "HUMAN_FINAL_ECONOMIC_POLICY_ENCODED",
+      "annualPolicy": "4399999.999999999999999692 KAIOS across 366 capped UTC days"
     },
     {
       "parameter": "11520 settlement cap",
-      "value": null,
-      "status": "HUMAN_CONFIRM_REQUIRED",
-      "forkOnlyValue": "10000.0 per transaction / 100000.0 per UTC day"
+      "value": "6010928961748633879781 wei per transaction and per UTC day",
+      "status": "HUMAN_FINAL_ECONOMIC_POLICY_ENCODED",
+      "annualPolicy": "2199999.999999999999999846 KAIOS across 366 capped UTC days"
     },
     {
       "parameter": "8888 deposit interest rate",
-      "value": null,
-      "status": "HUMAN_CONFIRM_REQUIRED",
-      "forkOnlyValue": "unset; future-only checkpoint architecture tested locally"
+      "value": "833 ppm per Gregorian monthly epoch",
+      "status": "HUMAN_FINAL_ECONOMIC_POLICY_ENCODED",
+      "annualPolicy": "0.9996% nominal; interest must be legitimately funded"
     },
     {
       "parameter": "Governance delay",
@@ -665,13 +692,13 @@
     {
       "parameter": "Distinct BankGovernance approver",
       "value": null,
-      "status": "HUMAN_CONFIRM_REQUIRED",
+      "status": "HUMAN_PUBLIC_ADDRESS_REQUIRED",
       "forkOnlyValue": "0xFFcf8FDEE72ac11b5c542428B35EEF5769C409f0"
     },
     {
       "parameter": "Pause authority",
       "value": null,
-      "status": "HUMAN_CONFIRM_REQUIRED",
+      "status": "HUMAN_PUBLIC_ADDRESS_REQUIRED",
       "implementationBehavior": "Final BankGovernance and bootstrap governance PAUSER remain; pause cannot spend or unpause"
     },
     {
@@ -752,18 +779,9 @@
     "legacyHeartUntouched": "PASS"
   },
   "blockers": [
-    "DEPLOYMENT_SIGNER_CONTROL_RECONFIRMATION_REQUIRED",
-    "HUMAN_CONFIRM_REQUIRED:500 Seat salary base/rate",
-    "HUMAN_CONFIRM_REQUIRED:18911 Alchemy epoch definition",
-    "HUMAN_CONFIRM_REQUIRED:Reserve minimum",
-    "HUMAN_CONFIRM_REQUIRED:Salary exposure cap",
-    "HUMAN_CONFIRM_REQUIRED:Allocation exposure cap",
-    "HUMAN_CONFIRM_REQUIRED:8888 route cap",
-    "HUMAN_CONFIRM_REQUIRED:11520 settlement cap",
-    "HUMAN_CONFIRM_REQUIRED:8888 deposit interest rate",
-    "HUMAN_CONFIRM_REQUIRED:Distinct BankGovernance approver",
-    "HUMAN_CONFIRM_REQUIRED:Pause authority",
-    "MAINNET_DEPLOY_APPROVED_NOT_RECEIVED"
+    "HUMAN_PUBLIC_ADDRESS_REQUIRED:distinctGovernanceApprover",
+    "HUMAN_PUBLIC_ADDRESS_REQUIRED:finalPauser"
   ],
+  "authorizationGate": "MAINNET_DEPLOY_APPROVED_NOT_RECEIVED",
   "autoBackfillRule": "Each actual Mainnet deployment address must be written from its successful receipt and then codehash-verified; predicted addresses alone never become formal."
 }

@@ -47,8 +47,8 @@ This addendum does not regenerate the historical inventory below.
 | `KGEN-KAIOS/tools/rehearse-lingxiao-mainnet-fork.mjs` | Mainnet pre-sign validation | ChainId 56 fork deployment, Genesis, lawful circulation, refill retry, governance upgrade and rollback with no Mainnet transaction | Pre-sign evidence tool |
 | `KGEN-KAIOS/config/LINGXIAO_18888_MAINNET_DEPLOYMENT_MANIFEST.json` | Deployment manifest | Frozen hashes, exact nonce-sensitive deployment order, receipt backfill rules, roles, modules, parameters and blockers | Mainnet transaction not authorized |
 | `KGEN-KAIOS/config/mainnet-economic-config.template.json` | Deployment configuration | Human economic values and governance addresses; unknown values remain null | Human confirmation required |
-| `KGEN-KAIOS/config/mainnet-economic-config.final-review.json` | Mainnet parameter review | Frozen Canon/module states, concise Human decision table, current read-only supply/nonce/gas previews and nonce-sensitive predicted addresses | Human confirmation required; Mainnet transaction not authorized |
-| `KGEN-KAIOS/reports/mainnet-pre-sign/LINGXIAO_18888_MAINNET_FORK_REHEARSAL.json` | Fork evidence | Sanitized full Mainnet-fork receipts, state, gas and gates | 8888 and Celestial day-5 calendar wiring PASS; Human economic/governance parameters remain blockers |
+| `KGEN-KAIOS/config/mainnet-economic-config.final-review.json` | Mainnet economic freeze | Human-approved exact economic encodings, module states, simulations and read-only previews | Economic blockers zero; two governance public identities required; Mainnet transaction not authorized |
+| `KGEN-KAIOS/reports/mainnet-pre-sign/LINGXIAO_18888_MAINNET_FORK_REHEARSAL.json` | Fork evidence | Sanitized full Mainnet-fork receipts, state, gas and gates | 8888 and Celestial day-5 calendar wiring PASS; superseded fork-only economic fixtures are not Mainnet policy |
 | `KGEN-KAIOS/reports/mainnet-pre-sign/KAIOS_GENESIS_MAINNET_RECORD.json` | Genesis preview | BigInt chain-derived fork preview; never a formal Mainnet amount | PREVIEW_NOT_FINAL |
 
 ## Summary

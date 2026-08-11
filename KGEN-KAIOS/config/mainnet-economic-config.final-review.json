@@ -1,12 +1,13 @@
 {
-  "status": "HUMAN_REVIEW_REQUIRED",
+  "status": "ECONOMIC_PARAMETERS_ENCODED_GOVERNANCE_IDENTITIES_REQUIRED",
   "mainnetTransactionAuthorized": false,
   "readyForHumanMainnetAuthorization": false,
   "chainId": 56,
   "units": "18-decimal KAIOS wei unless explicitly stated",
   "solidityImplementationFreeze": "ACTIVE",
+  "solidityChangeRequired": false,
   "solidityBlockers": 0,
-  "economicParameterBlockers": 8,
+  "economicParameterBlockers": 0,
   "governanceIdentityBlockers": 2,
   "confirmedCanon": {
     "kgenToKaios": "1 permanently burned KGEN = 1000 KAIOS",
@@ -26,100 +27,264 @@
     "BankGovernance": "ACTIVE",
     "BankMigration": "REGISTERED_BUT_INACTIVE"
   },
-  "humanConfirmRequired": {
-    "celestialSalaryBase": null,
-    "salaryWeightRules": null,
-    "minimumReserve": null,
-    "salaryExposureCap": null,
-    "allocationExposureCap": null,
-    "router8888Cap": null,
-    "settlement11520Cap": null,
-    "depositInterestRate": null,
-    "distinctGovernanceApprover": null,
-    "finalPauser": null
+  "encodedEconomicParameters": {
+    "celestialSalaryBase": {
+      "contractParameter": "CelestialSeat500_Upgradeable.initialize.initialSalaryBase",
+      "solidityType": "uint128",
+      "actualUnit": "KAIOS wei per active seat per Gregorian calendar month before salaryWeightPpm",
+      "wholeKaios": "88",
+      "encodedWei": "88000000000000000000"
+    },
+    "salaryWeightRules": {
+      "contractParameter": "configureSeat.salaryWeightPpm / scheduleSeatTerms.salaryWeightPpm",
+      "solidityType": "uint64",
+      "scale": "1000000 ppm = 1x",
+      "minimumPpm": "1000000",
+      "defaultPpm": "1000000",
+      "maximumPolicyPpm": "5000000",
+      "allowedMultipliers": "1x through 5x",
+      "onChainHardMaximumEnforced": false,
+      "enforcement": "GOVERNANCE_POLICY_AND_DEPLOYMENT_CONFIGURATION",
+      "note": "Frozen Solidity rejects zero but does not hard-code the 5x policy ceiling."
+    },
+    "minimumReserve": {
+      "contractParameter": "BankRiskController.applyRiskParameters.newReserveFloor -> LingxiaoCelestialBank18888_Upgradeable.reserveRequirement",
+      "solidityType": "uint256",
+      "actualUnit": "KAIOS wei",
+      "wholeKaios": "11000000",
+      "encodedWei": "11000000000000000000000000",
+      "riskAlertThresholdEncodedWei": "11000000000000000000000000",
+      "riskAlertThresholdRule": "DERIVED_TECHNICAL_MINIMUM_EQUAL_TO_RESERVE; no additional alert margin invented"
+    },
+    "salaryExposureCap": {
+      "humanAnnualWholeKaios": "1100000",
+      "conversionDivisorUtcDays": 366,
+      "perTransactionLimitWei": "3005464480874316939890",
+      "dailyEpochLimitWei": "3005464480874316939890",
+      "dailyWholeKaios": "3005.464480874316939890",
+      "encoded366DayEquivalentWei": "1099999999999999999999740",
+      "encoded366DayEquivalentWholeKaios": "1099999.999999999999999740",
+      "roundingRemainderWei": "260"
+    },
+    "allocationExposureCap": {
+      "humanAnnualWholeKaios": "2200000",
+      "conversionDivisorUtcDays": 366,
+      "perTransactionLimitWei": "6010928961748633879781",
+      "dailyEpochLimitWei": "6010928961748633879781",
+      "dailyWholeKaios": "6010.928961748633879781",
+      "encoded366DayEquivalentWei": "2199999999999999999999846",
+      "encoded366DayEquivalentWholeKaios": "2199999.999999999999999846",
+      "roundingRemainderWei": "154"
+    },
+    "router8888Cap": {
+      "humanAnnualWholeKaios": "4400000",
+      "conversionDivisorUtcDays": 366,
+      "perTransactionLimitWei": "12021857923497267759562",
+      "dailyEpochLimitWei": "12021857923497267759562",
+      "dailyWholeKaios": "12021.857923497267759562",
+      "encoded366DayEquivalentWei": "4399999999999999999999692",
+      "encoded366DayEquivalentWholeKaios": "4399999.999999999999999692",
+      "roundingRemainderWei": "308"
+    },
+    "settlement11520Cap": {
+      "humanAnnualWholeKaios": "2200000",
+      "conversionDivisorUtcDays": 366,
+      "perTransactionLimitWei": "6010928961748633879781",
+      "dailyEpochLimitWei": "6010928961748633879781",
+      "dailyWholeKaios": "6010.928961748633879781",
+      "encoded366DayEquivalentWei": "2199999999999999999999846",
+      "encoded366DayEquivalentWholeKaios": "2199999.999999999999999846",
+      "roundingRemainderWei": "154"
+    },
+    "depositInterestRate": {
+      "contractParameter": "GaolaozhuangCommercialBank8888_Upgradeable.scheduleInterestRate.ratePpmPerEpoch",
+      "solidityType": "uint64",
+      "actualUnit": "parts per million per matured Gregorian monthly banking epoch",
+      "encodedPpmPerMonthlyEpoch": "833",
+      "monthlyRatePercent": "0.0833",
+      "nominalTwelveEpochAnnualizedPercent": "0.9996",
+      "monthlyCheckpointCompoundedAnnualizedPercent": "1.0041924074749662335242",
+      "effectiveEpoch": "DERIVE_AT_DEPLOYMENT_AS_currentBankingEpoch_PLUS_1",
+      "fundingRule": "Interest must be pre-funded through fundInterest(); no KAIOS mint or customer-principal substitution."
+    }
   },
-  "humanReviewTable": [
+  "contractParameterEnvironment": {
+    "CELESTIAL_SALARY_BASE_WEI": "88000000000000000000",
+    "BANK_RESERVE_MINIMUM_WEI": "11000000000000000000000000",
+    "BANK_RISK_ALERT_THRESHOLD_WEI": "11000000000000000000000000",
+    "SEAT500_PER_TRANSACTION_LIMIT_WEI": "3005464480874316939890",
+    "SEAT500_DAILY_LIMIT_WEI": "3005464480874316939890",
+    "CIVILIZATION_ALLOCATION_PER_TRANSACTION_LIMIT_WEI": "6010928961748633879781",
+    "CIVILIZATION_ALLOCATION_DAILY_LIMIT_WEI": "6010928961748633879781",
+    "ECONOMIC_8888_PER_TRANSACTION_LIMIT_WEI": "12021857923497267759562",
+    "ECONOMIC_8888_DAILY_LIMIT_WEI": "12021857923497267759562",
+    "EXCHANGE_11520_PER_TRANSACTION_LIMIT_WEI": "6010928961748633879781",
+    "EXCHANGE_11520_DAILY_LIMIT_WEI": "6010928961748633879781",
+    "DEPOSIT_INTEREST_RATE_PPM_PER_MONTHLY_EPOCH": "833"
+  },
+  "parameterEncodingTable": [
     {
-      "parameter": "celestialSalaryBase",
-      "currentValue": null,
-      "allowedEffect": "Sets the monthly base KAIOS salary for each active Celestial seat before its weight is applied.",
-      "securityConsequence": "Directly creates recurring 18888 salary liability.",
-      "humanDecision": "VALUE_REQUIRED"
+      "humanPolicy": "88 KAIOS per active seat per calendar month",
+      "contractParameter": "initialSalaryBase",
+      "actualUnit": "KAIOS wei per active seat per Gregorian month",
+      "exactEncodedValue": "88000000000000000000",
+      "annualizedEquivalent": "1056 KAIOS per 1x active seat",
+      "genesisPreviewPercentage": "0.004779770% per 1x active seat per year",
+      "solidityChangeRequired": false
     },
     {
-      "parameter": "salaryWeightRules",
-      "currentValue": null,
-      "allowedEffect": "Defines the permitted salary-weight schedule used for future calendar months.",
-      "securityConsequence": "Controls relative salary liability and must not rewrite matured months.",
-      "humanDecision": "VALUE_REQUIRED"
+      "humanPolicy": "salary weights 1x-5x; default 1x",
+      "contractParameter": "salaryWeightPpm",
+      "actualUnit": "ppm where 1000000 = 1x",
+      "exactEncodedValue": "min/default 1000000; policy max 5000000",
+      "annualizedEquivalent": "1056-5280 KAIOS per active seat",
+      "genesisPreviewPercentage": "0.004779770%-0.023898851% per active seat per year",
+      "solidityChangeRequired": false
     },
     {
-      "parameter": "minimumReserve",
-      "currentValue": null,
-      "allowedEffect": "Keeps the configured KAIOS reserve unavailable to ordinary module spending.",
-      "securityConsequence": "Too low weakens resilience; too high can block lawful payments.",
-      "humanDecision": "VALUE_REQUIRED"
+      "humanPolicy": "approximately 11000000 KAIOS minimum reserve",
+      "contractParameter": "reserveRequirement",
+      "actualUnit": "KAIOS wei",
+      "exactEncodedValue": "11000000000000000000000000",
+      "annualizedEquivalent": "not spending; persistent balance floor",
+      "genesisPreviewPercentage": "49.789271436%",
+      "solidityChangeRequired": false
     },
     {
-      "parameter": "salaryExposureCap",
-      "currentValue": null,
-      "allowedEffect": "Limits Celestial salary-module outflow exposure.",
-      "securityConsequence": "Bounds loss or operational error in the salary rail.",
-      "humanDecision": "VALUE_REQUIRED"
+      "humanPolicy": "approximately 1100000 KAIOS salary exposure per year",
+      "contractParameter": "CelestialSeat500 perTransactionLimit / epochLimit",
+      "actualUnit": "KAIOS wei per payment and per UTC day",
+      "exactEncodedValue": "3005464480874316939890 / 3005464480874316939890",
+      "annualizedEquivalent": "1099999.999999999999999740 KAIOS across 366 capped UTC days",
+      "genesisPreviewPercentage": "4.978927143%",
+      "solidityChangeRequired": false
     },
     {
-      "parameter": "allocationExposureCap",
-      "currentValue": null,
-      "allowedEffect": "Limits Civilization Allocation outflow exposure.",
-      "securityConsequence": "Bounds allocation replay, configuration, or destination risk.",
-      "humanDecision": "VALUE_REQUIRED"
+      "humanPolicy": "approximately 2200000 KAIOS allocation exposure per year",
+      "contractParameter": "CivilizationAllocation perTransactionLimit / epochLimit",
+      "actualUnit": "KAIOS wei per payment and per UTC day",
+      "exactEncodedValue": "6010928961748633879781 / 6010928961748633879781",
+      "annualizedEquivalent": "2199999.999999999999999846 KAIOS across 366 capped UTC days",
+      "genesisPreviewPercentage": "9.957854287%",
+      "solidityChangeRequired": false
     },
     {
-      "parameter": "router8888Cap",
-      "currentValue": null,
-      "allowedEffect": "Limits economic-capital routing from 18888 to the formal 8888 bank.",
-      "securityConsequence": "Bounds 8888 routing exposure without creating an owner withdrawal path.",
-      "humanDecision": "VALUE_REQUIRED"
+      "humanPolicy": "approximately 4400000 KAIOS routed to 8888 per year",
+      "contractParameter": "EconomicRouter8888 perTransactionLimit / epochLimit",
+      "actualUnit": "KAIOS wei per payment and per UTC day",
+      "exactEncodedValue": "12021857923497267759562 / 12021857923497267759562",
+      "annualizedEquivalent": "4399999.999999999999999692 KAIOS across 366 capped UTC days",
+      "genesisPreviewPercentage": "19.915708574%",
+      "solidityChangeRequired": false
     },
     {
-      "parameter": "settlement11520Cap",
-      "currentValue": null,
-      "allowedEffect": "Limits settlement flow from 18888 to the formal 11520 interface.",
-      "securityConsequence": "Bounds exchange-settlement exposure.",
-      "humanDecision": "VALUE_REQUIRED"
+      "humanPolicy": "approximately 2200000 KAIOS settled to 11520 per year",
+      "contractParameter": "ExchangeSettlement11520 perTransactionLimit / epochLimit",
+      "actualUnit": "KAIOS wei per payment and per UTC day",
+      "exactEncodedValue": "6010928961748633879781 / 6010928961748633879781",
+      "annualizedEquivalent": "2199999.999999999999999846 KAIOS across 366 capped UTC days",
+      "genesisPreviewPercentage": "9.957854287%",
+      "solidityChangeRequired": false
     },
     {
-      "parameter": "depositInterestRate",
-      "currentValue": null,
-      "allowedEffect": "Sets the 8888 deposit-interest rate for future monthly periods only.",
-      "securityConsequence": "Creates funded commercial-bank liability; historical periods remain immutable.",
-      "humanDecision": "VALUE_REQUIRED"
-    },
-    {
-      "parameter": "distinctGovernanceApprover",
-      "currentValue": null,
-      "allowedEffect": "Approves delayed governance proposals independently from the proposer.",
-      "securityConsequence": "Must be distinct to prevent a single identity from bypassing two-party governance.",
-      "humanDecision": "PUBLIC_ADDRESS_REQUIRED"
-    },
-    {
-      "parameter": "finalPauser",
-      "currentValue": null,
-      "allowedEffect": "May pause the configured bank or module paths but cannot spend funds through that role.",
-      "securityConsequence": "Compromise can halt operations, so the identity must be deliberately governed.",
-      "humanDecision": "PUBLIC_ADDRESS_REQUIRED"
+      "humanPolicy": "1% annualized initial 8888 deposit-interest policy",
+      "contractParameter": "ratePpmPerEpoch",
+      "actualUnit": "ppm per Gregorian monthly banking epoch",
+      "exactEncodedValue": "833",
+      "annualizedEquivalent": "0.9996% nominal; 1.004192407474966% if fully funded and checkpointed monthly",
+      "genesisPreviewPercentage": "0.199077422% nominal annual liability on the full 4400000 KAIOS route cap",
+      "solidityChangeRequired": false
     }
   ],
+  "capConversionPolicy": {
+    "humanIntent": "APPROXIMATE_ANNUAL_MAXIMUM_NOT_MANDATORY_SPENDING",
+    "contractReality": "MODULE_LIMITS_RESET_EACH_UTC_DAY_AND_DO_NOT_TRACK_A_ROLLING_OR_CALENDAR_YEAR",
+    "encoding": "FLOOR(HUMAN_ANNUAL_CAP_WEI / 366) for both per-transaction and UTC-day epoch limit",
+    "why366": "Conservative leap-year divisor prevents 366 fully capped UTC days from exceeding the Human annual target.",
+    "strictRollingYearEnforcement": false,
+    "unusedCapacityDisposition": "REMAINS_IN_18888",
+    "solidityChangeRequiredForApprovedApproximatePolicy": false,
+    "solidityChangeWouldBeRequiredForStrictRollingYearAccumulator": true
+  },
+  "seatActivationPolicy": {
+    "unconfiguredSeatStatus": "NONE",
+    "unconfiguredSeatLiability": "ZERO",
+    "firstSalaryMonth": "NEXT_GREGORIAN_MONTH_AFTER_FORMAL_CONFIGURATION",
+    "claimRequirement": "CURRENT_SEAT_STATUS_ACTIVE",
+    "lifeIdRequired": true,
+    "templeIdRequired": true,
+    "beneficiaryRequired": true,
+    "seatPurchasePath": "NONE"
+  },
+  "salaryScenario500Seats": [
+    {
+      "weight": "1x",
+      "weightPpm": "1000000",
+      "monthlyPerSeatKaios": "88",
+      "annualPerSeatKaios": "1056",
+      "annual500SeatLiabilityKaios": "528000",
+      "genesisPreviewPercentage": "2.389885%",
+      "within1100000AnnualSalaryIntent": true,
+      "annualHeadroomKaios": "572000",
+      "maximumActiveSeatsWithinIntent": 500,
+      "maximumMonthlyClaimsPerEncodedUtcDay": 34,
+      "maximumCatchupMonthsForOneSeatWithoutCapReconfiguration": 34
+    },
+    {
+      "weight": "2x",
+      "weightPpm": "2000000",
+      "monthlyPerSeatKaios": "176",
+      "annualPerSeatKaios": "2112",
+      "annual500SeatLiabilityKaios": "1056000",
+      "genesisPreviewPercentage": "4.779770%",
+      "within1100000AnnualSalaryIntent": true,
+      "annualHeadroomKaios": "44000",
+      "maximumActiveSeatsWithinIntent": 500,
+      "maximumMonthlyClaimsPerEncodedUtcDay": 17,
+      "maximumCatchupMonthsForOneSeatWithoutCapReconfiguration": 17
+    },
+    {
+      "weight": "3x",
+      "weightPpm": "3000000",
+      "monthlyPerSeatKaios": "264",
+      "annualPerSeatKaios": "3168",
+      "annual500SeatLiabilityKaios": "1584000",
+      "genesisPreviewPercentage": "7.169655%",
+      "within1100000AnnualSalaryIntent": false,
+      "annualExcessKaios": "484000",
+      "maximumActiveSeatsWithinIntent": 347,
+      "maximumMonthlyClaimsPerEncodedUtcDay": 11,
+      "maximumCatchupMonthsForOneSeatWithoutCapReconfiguration": 11
+    },
+    {
+      "weight": "5x",
+      "weightPpm": "5000000",
+      "monthlyPerSeatKaios": "440",
+      "annualPerSeatKaios": "5280",
+      "annual500SeatLiabilityKaios": "2640000",
+      "genesisPreviewPercentage": "11.949425%",
+      "within1100000AnnualSalaryIntent": false,
+      "annualExcessKaios": "1540000",
+      "maximumActiveSeatsWithinIntent": 208,
+      "maximumMonthlyClaimsPerEncodedUtcDay": 6,
+      "maximumCatchupMonthsForOneSeatWithoutCapReconfiguration": 6
+    }
+  ],
+  "salaryPolicyConstraint": {
+    "all500At1x": "PASS",
+    "all500At2x": "PASS",
+    "all500At3x": "EXCEEDS_ANNUAL_SALARY_INTENT",
+    "all500At5x": "EXCEEDS_ANNUAL_SALARY_INTENT",
+    "maximumAverageWeightAcross500ActiveSeats": "2.083333333333333333x",
+    "governanceRequirement": "Active-seat count and weighted monthly liability must be budgeted before configuring or changing seat terms.",
+    "accumulationNote": "The daily module cap preserves entitlement but can require governance cap reconfiguration for a single all-or-nothing catch-up claim beyond the listed month threshold."
+  },
   "readOnlyMainnetSnapshot": {
     "status": "PREVIEW_NOT_FINAL",
-    "observedAt": "2026-08-11T15:41:37.409Z",
-    "blockNumber": 115338456,
-    "blockHash": "0xc9feb04ec409730d5cb96e60167e97650082d4b189ff1da0258560c6fcdd598f",
-    "blockTimestamp": 1786462895,
-    "blockTimestampIso": "2026-08-11T15:41:35.000Z",
-    "deploymentSigner": "0xb3C54ca96De0dED4Ca0151F629ff9781506ba261",
-    "pendingNonce": 34,
-    "latestNonce": 34,
+    "observedAtBlock": 115345954,
+    "blockHash": "0x8f884a215119c845228e2cddbb97e09d277ab1444b7c739ab33a5c61bc0cb36e",
+    "blockTimestamp": 1786466270,
+    "blockTimestampIso": "2026-08-11T16:37:50.000Z",
     "kgenTotalSupply": {
       "raw": "71977906887000601442227077",
       "decimal18": "71977906.887000601442227077"
@@ -134,53 +299,107 @@
     },
     "genesisRule": "Final values must be recomputed from KGEN.totalSupply() at the actual Mainnet settlement block."
   },
-  "gasEstimate": {
-    "status": "PREVIEW_NOT_FINAL",
-    "gasPriceWei": "50000000",
-    "rehearsalGasUsed": "30541924",
-    "bufferedGasUnits": "36650308",
-    "estimatedRequiredWei": "1832515400000000",
-    "estimatedRequiredBNB": "0.0018325154",
-    "deploymentSignerBalanceWei": "5567368941457930",
-    "deploymentSignerBalanceBNB": "0.00556736894145793",
-    "fundingSufficientAtReview": true,
-    "recheckRequiredBeforeSignature": true
+  "observedKgenBurnRate": {
+    "status": "HISTORICAL_AVERAGE_NOT_FORECAST",
+    "firstCodeBlock": 73423108,
+    "firstCodeBlockHash": "0x6a99b400d5a951e82e463f742e4bd39141c91953e8d7f2a955028584f52cc6d5",
+    "firstCodeBlockTimestamp": 1767069529,
+    "firstCodeBlockTimestampIso": "2025-12-30T04:38:49.000Z",
+    "codeBytesBefore": 0,
+    "codeBytesAtFirstBlock": 3905,
+    "initialSupplyAtFirstCodeBlockRaw": "72000000000000000000000000",
+    "elapsedSeconds": "19396741",
+    "elapsedDays": "224.49931712962962",
+    "annualizationYearSeconds": "31557600",
+    "observedAverageAnnualBurnKgenRaw": "35944472465236295456788",
+    "observedAverageAnnualBurnKgen": "35944.472465236295456788",
+    "observedAverageAnnualKaiosSettlementRaw": "35944472465236295456788000",
+    "observedAverageAnnualKaiosSettlement": "35944472.465236295456788",
+    "method": "(72000000 KGEN - live totalSupply) / exact elapsed seconds since first code block * 365.25 days"
   },
-  "predictedDeploymentAddresses": [
-    { "order": 1, "identity": "KAIOS_ORGAN_REGISTRY", "nonce": 34, "predictedAddress": "0xA9e7CbF161E39E556f4B5b8E41397Ac4B87a932D" },
-    { "order": 2, "identity": "LINGXIAO_18888_BANK_IMPLEMENTATION", "nonce": 35, "predictedAddress": "0x8125045039Fe969490d57185233B7d64A494A829" },
-    { "order": 3, "identity": "LINGXIAO_18888_BANK_PROXY", "nonce": 36, "predictedAddress": "0x11d34c0F723aCd334B8F95076f73F07f06202aab" },
-    { "order": 4, "identity": "GAOLAOZHUANG_8888_COMMERCIAL_BANK_IMPLEMENTATION", "nonce": 37, "predictedAddress": "0x94341fB340cF8Bd0069cD1Fcaf5bA0866B15c923" },
-    { "order": 5, "identity": "GAOLAOZHUANG_8888_COMMERCIAL_BANK_PROXY", "nonce": 38, "predictedAddress": "0x9EcAe137b3A307971EB77B4CDB3ba13aeeF5297C" },
-    { "order": 6, "identity": "CELESTIAL_SEAT_500_IMPLEMENTATION", "nonce": 39, "predictedAddress": "0x8E48643030826c9121Cd2E086B811b9083E9f862" },
-    { "order": 7, "identity": "CELESTIAL_SEAT_500_PROXY", "nonce": 40, "predictedAddress": "0xA447853985Ef6e6AbFcb14FCfDeFdced10Be0BDe" },
-    { "order": 8, "identity": "CIVILIZATION_ALLOCATION_IMPLEMENTATION", "nonce": 41, "predictedAddress": "0x216d69a413354CBab7ddDdC4fCfe2B3E0468197d" },
-    { "order": 9, "identity": "CIVILIZATION_ALLOCATION_PROXY", "nonce": 42, "predictedAddress": "0x75A55Af6967932C4A1c896dB81Dd6F31e531c299" },
-    { "order": 10, "identity": "ECONOMIC_ROUTER_8888_IMPLEMENTATION", "nonce": 43, "predictedAddress": "0x3ebc0A39F7981AAB3995AC828dc79A8B0753A05b" },
-    { "order": 11, "identity": "ECONOMIC_ROUTER_8888_PROXY", "nonce": 44, "predictedAddress": "0xC49f989c6ff0d22824df8D993Ce82207165C1428" },
-    { "order": 12, "identity": "EXCHANGE_SETTLEMENT_11520_IMPLEMENTATION", "nonce": 45, "predictedAddress": "0xA08A9CEcfa18b2FDb9ca8De0063A5029B9Ffc363" },
-    { "order": 13, "identity": "EXCHANGE_SETTLEMENT_11520_PROXY", "nonce": 46, "predictedAddress": "0x17587F49dFDE4e400D03Ae81364AC2af8E1629Df" },
-    { "order": 14, "identity": "BANK_RISK_CONTROLLER_IMPLEMENTATION", "nonce": 47, "predictedAddress": "0x8D231C82513cdfa978A7C157618Ff198b0a5d3E9" },
-    { "order": 15, "identity": "BANK_RISK_CONTROLLER_PROXY", "nonce": 48, "predictedAddress": "0x61573a93a88c58DAa5066A0aA319f88cE34d88FC" },
-    { "order": 16, "identity": "BANK_GOVERNANCE_IMPLEMENTATION", "nonce": 49, "predictedAddress": "0x9d919E66AE2746D41D978e3d51DF594B2E5F5582" },
-    { "order": 17, "identity": "BANK_GOVERNANCE_PROXY", "nonce": 50, "predictedAddress": "0xa2792fBDCc8A8AaC364053431D44E0a8D335E166" },
-    { "order": 18, "identity": "BANK_MIGRATION_IMPLEMENTATION", "nonce": 51, "predictedAddress": "0xff281a821dBbA44EEc7b57475E3c28A916fcDAE7" },
-    { "order": 19, "identity": "BANK_MIGRATION_PROXY", "nonce": 52, "predictedAddress": "0x72c14f5D2fa748C1579295A7E34c16453a3a17aB" },
-    { "order": 20, "identity": "KAIOS_TOKEN_CORE", "nonce": 53, "predictedAddress": "0xD4E67B3a69e41524c424150E6b6e921b01D036db" },
-    { "order": 21, "identity": "ALCHEMY_FURNACE_18911", "nonce": 54, "predictedAddress": "0x44c2CA9B9eba19d8F79F6E1786fd9D25e73738e1" }
-  ],
-  "predictionPolicy": {
+  "reserveSurvivalSimulation": {
+    "assumptions": [
+      "All four encoded annual capacities are treated as maximum attempted outflow, not mandatory spending.",
+      "Reserve invariant blocks any outflow that would reduce 18888 below 11000000 KAIOS.",
+      "8888 interest funding is not silently taken from customer principal and is modeled separately."
+    ],
+    "totalEncodedMaximumAnnualOutflowKaios": "9899999.999999999999999124",
+    "totalEncodedMaximumAnnualOutflowGenesisPercentage": "44.810344%",
+    "zeroAdditionalKgenBurnFiveYear": [
+      { "year": 1, "openingKaios": "22093112.999398557772923", "newSettlementKaios": "0", "maximumLawfulOutflowKaios": "9899999.999999999999999124", "endingKaios": "12193112.999398557772923876", "reservePreserved": true },
+      { "year": 2, "openingKaios": "12193112.999398557772923876", "newSettlementKaios": "0", "maximumLawfulOutflowKaios": "1193112.999398557772923876", "unspentCapacityKaios": "8706887.000601442227075248", "endingKaios": "11000000", "reservePreserved": true },
+      { "year": 3, "openingKaios": "11000000", "newSettlementKaios": "0", "maximumLawfulOutflowKaios": "0", "endingKaios": "11000000", "reservePreserved": true },
+      { "year": 4, "openingKaios": "11000000", "newSettlementKaios": "0", "maximumLawfulOutflowKaios": "0", "endingKaios": "11000000", "reservePreserved": true },
+      { "year": 5, "openingKaios": "11000000", "newSettlementKaios": "0", "maximumLawfulOutflowKaios": "0", "endingKaios": "11000000", "reservePreserved": true }
+    ],
+    "observedBurnRateFiveYear": [
+      { "year": 1, "openingKaios": "22093112.999398557772923", "newSettlementKaios": "35944472.465236295456788", "maximumOutflowKaios": "9899999.999999999999999124", "endingKaios": "48137585.464634853229711876", "reservePreserved": true },
+      { "year": 2, "openingKaios": "48137585.464634853229711876", "newSettlementKaios": "35944472.465236295456788", "maximumOutflowKaios": "9899999.999999999999999124", "endingKaios": "74182057.929871148686500752", "reservePreserved": true },
+      { "year": 3, "openingKaios": "74182057.929871148686500752", "newSettlementKaios": "35944472.465236295456788", "maximumOutflowKaios": "9899999.999999999999999124", "endingKaios": "100226530.395107444143289628", "reservePreserved": true },
+      { "year": 4, "openingKaios": "100226530.395107444143289628", "newSettlementKaios": "35944472.465236295456788", "maximumOutflowKaios": "9899999.999999999999999124", "endingKaios": "126271002.860343739600078504", "reservePreserved": true },
+      { "year": 5, "openingKaios": "126271002.860343739600078504", "newSettlementKaios": "35944472.465236295456788", "maximumOutflowKaios": "9899999.999999999999999124", "endingKaios": "152315475.325580035056867380", "reservePreserved": true }
+    ]
+  },
+  "interestLiabilitySimulation": {
+    "encodedRatePpmPerMonthlyEpoch": "833",
+    "fundingAssumption": "Interest reserve is fully and legitimately funded; monthly checkpoint shows the maximum compounding case compared with delayed checkpointing.",
+    "per1000000KaiosPrincipal": {
+      "monthlyInterestOnOpeningBalanceKaios": "833",
+      "twelveEpochSimpleInterestKaios": "9996",
+      "monthlyCheckpointCompoundedInterestKaios": "10041.924074749662335242"
+    },
+    "full4400000AnnualRouteCapAsInterestBearingPrincipal": {
+      "monthlyInterestOnOpeningBalanceKaios": "3665.2",
+      "twelveEpochSimpleInterestKaios": "43982.4",
+      "monthlyCheckpointCompoundedInterestKaios": "44184.465928898514275078"
+    },
+    "fullGenesisPreviewAsInterestBearingPrincipal": {
+      "twelveEpochSimpleInterestKaios": "220842.757541987983498128",
+      "monthlyCheckpointCompoundedInterestKaios": "221857.363314825099504769"
+    },
+    "maxRouterDepositAddedAtStartOfEachYear": [
+      { "year": 1, "openingAfterNewRouteKaios": "4400000", "interestLiabilityKaios": "44184.465928898514275078", "endingInterestBearingBalanceKaios": "4444184.465928898514275078" },
+      { "year": 2, "openingAfterNewRouteKaios": "8844184.465928898514275078", "interestLiabilityKaios": "88812.628909938390742869", "endingInterestBearingBalanceKaios": "8932997.094838836905017947" },
+      { "year": 3, "openingAfterNewRouteKaios": "13332997.094838836905017947", "interestLiabilityKaios": "133888.944515229423204597", "endingInterestBearingBalanceKaios": "13466886.039354066328222544" },
+      { "year": 4, "openingAfterNewRouteKaios": "17866886.039354066328222544", "interestLiabilityKaios": "179417.913059398241582996", "endingInterestBearingBalanceKaios": "18046303.952413464569805540" },
+      { "year": 5, "openingAfterNewRouteKaios": "22446303.952413464569805540", "interestLiabilityKaios": "225404.080048889268903874", "endingInterestBearingBalanceKaios": "22671708.032462353838709414" }
+    ],
+    "fiveYearTotalInterestLiabilityKaios": "671708.032462353838709414",
+    "automaticFundingOrMinting": false
+  },
+  "governanceIdentities": {
+    "distinctGovernanceApprover": null,
+    "distinctGovernanceApproverStatus": "HUMAN_PUBLIC_ADDRESS_REQUIRED",
+    "finalPauser": null,
+    "finalPauserStatus": "HUMAN_PUBLIC_ADDRESS_REQUIRED",
+    "inaccessibleHistoricalAddressInferenceAllowed": false
+  },
+  "deploymentPredictionReference": {
+    "source": "config/LINGXIAO_18888_MAINNET_DEPLOYMENT_MANIFEST.json",
+    "lastObservedDeploymentSignerNonce": 34,
     "status": "NONCE_SENSITIVE_PREDICTIONS_NOT_DEPLOYED_NOT_FORMAL",
-    "observedNonce": 34,
-    "recalculateIfSignerNonceChanges": true,
-    "formalAddressRequiresSuccessfulReceiptAndCodeVerification": true
+    "recalculateBeforeSignature": true
   },
+  "gasEstimateReference": {
+    "bufferedGasUnits": "36650308",
+    "lastObservedGasPriceWei": "50000000",
+    "lastEstimatedRequiredBNB": "0.0018325154",
+    "recheckBeforeSignature": true
+  },
+  "blockers": [
+    "HUMAN_PUBLIC_ADDRESS_REQUIRED:distinctGovernanceApprover",
+    "HUMAN_PUBLIC_ADDRESS_REQUIRED:finalPauser"
+  ],
   "constraints": {
-    "unknownValuesMustRemainNull": true,
     "noSolidityChange": true,
     "noMainnetTransactionWithoutExplicitApproval": true,
     "noMerge": true,
+    "calendarSalaryUsesGregorianMonthNotThirtyDays": true,
+    "capsAreCapacityNotMandatorySpending": true,
+    "unusedCapacityRemainsIn18888": true,
     "interestRateChangesApplyToFutureEpochsOnly": true,
+    "interestMustBeLegitimatelyFunded": true,
+    "noInterestMint": true,
     "deploymentSignerGetsNoAutomaticGovernanceRole": true,
     "genesisAmountMustNotBeHardcoded": true
   }

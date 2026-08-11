@@ -54,7 +54,7 @@ executable Mainnet transaction script or formal deployed address.
 | `config/LINGXIAO_18888_MAINNET_DEPLOYMENT_MANIFEST.json` | Machine-readable frozen-codehash manifest, nonce-sensitive predicted deployment order, role/module matrices, Human parameter gates and receipt auto-backfill rules |
 | `config/LINGXIAO_18888_MAINNET_DEPLOYMENT_MANIFEST.md` | Human-readable Mainnet pre-sign manifest and unresolved-signature blockers |
 | `config/mainnet-economic-config.template.json` | Secret-free Human decision surface; unknown Mainnet economic parameters remain null |
-| `config/mainnet-economic-config.final-review.json` | Mainnet economic-parameter freeze sheet with confirmed module states, null Human-decision fields, live read-only previews, nonce-sensitive address predictions and gas estimate |
+| `config/mainnet-economic-config.final-review.json` | Human-approved Mainnet economic encodings, module states, simulations and evidence; only the distinct governance approver and final pauser public addresses remain unresolved |
 | `reports/mainnet-pre-sign/LINGXIAO_18888_MAINNET_FORK_REHEARSAL.json` | Complete sanitized chainId 56 fork transaction, storage, governance and money-flow evidence |
 | `reports/mainnet-pre-sign/KAIOS_GENESIS_MAINNET_RECORD.json` | Automatically generated fork preview; explicitly not the final Mainnet Genesis record |
 | `reports/KAIOS_TOKEN_LINEAGE_INTEGRATION_REVIEW_2026-08-09.md` | Executive review and evidence index |

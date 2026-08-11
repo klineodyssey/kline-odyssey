@@ -1,6 +1,6 @@
 # Lingxiao 18888 Mainnet Deployment Manifest
 
-Status: pre-sign freeze review complete; Mainnet transaction is not authorized.
+Status: economic parameters frozen; two governance public identities remain required; Mainnet transaction is not authorized.
 
 - Fork block: 115314782
 - Formal KGEN: `0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be`
@@ -8,6 +8,8 @@ Status: pre-sign freeze review complete; Mainnet transaction is not authorized.
 - Legacy Heart: `0xB016D4d8f1aED1339101b30722cad6dbA9B8C972` — DO NOT TOUCH
 - Formal governance: `0xCd60BF474e691F2484950a0276Eaf507616Ca4b9`
 - Deployment signer candidate: `0xb3C54ca96De0dED4Ca0151F629ff9781506ba261`
+- Economic config: `KGEN-KAIOS/config/mainnet-economic-config.final-review.json`
+- Economic config SHA-256: `16988c0e1861a8b718bbdf238e3826cef1d4947daf34f716b687d5b2d61bfc37`
 - Bank creation codehash: `0xff5594efa2cd283aed2cab9f27634c06a4da3d2737c645addfdc54f53757d43b`
 - Bank runtime codehash: `0xcfe00d93cf874129e6d01003f2fb265128d469dd350e5a5cab79beafb518f00c`
 - 8888 creation codehash: `0x6db0a450065b47d3b12ea695afbc8db6f1a02e98f94e97a78518b4c17f2387e9`
@@ -45,33 +47,25 @@ Predictions use the deployment signer nonce at the frozen fork block. Every addr
 
 | Parameter | Mainnet value | Status | Fork-only value / behavior |
 |---|---|---|---|
-| 500 Seat salary base/rate | unset | HUMAN_CONFIRM_REQUIRED | 10 KAIOS monthly base with 1.0x/10.0x test weights |
+| 500 Seat salary base/rate | 88 KAIOS per active seat per Gregorian month (`88000000000000000000` wei) | HUMAN_FINAL_ECONOMIC_POLICY_ENCODED | default 1x (`1000000` ppm); governance policy range 1x-5x; inactive seats accrue no salary |
 | 500 Seat epoch definition | MONTHLY_DAY_5_00_00_UTC_PLUS_8 | HUMAN_FINAL_CANON_IMPLEMENTED | deterministic Gregorian YYYYMM maturity enforced on-chain |
-| 18911 Alchemy epoch definition | unset | HUMAN_CONFIRM_REQUIRED | 86400 seconds |
-| Reserve minimum | unset | HUMAN_CONFIRM_REQUIRED | dynamic balance lock for retry test only |
-| Salary exposure cap | unset | HUMAN_CONFIRM_REQUIRED | 10000.0 per transaction / 100000.0 per UTC day |
-| Allocation exposure cap | unset | HUMAN_CONFIRM_REQUIRED | 10000.0 per transaction / 100000.0 per UTC day |
-| 8888 route cap | unset | HUMAN_CONFIRM_REQUIRED | 10000.0 per transaction / 100000.0 per UTC day |
-| 11520 settlement cap | unset | HUMAN_CONFIRM_REQUIRED | 10000.0 per transaction / 100000.0 per UTC day |
-| 8888 deposit interest rate | unset | HUMAN_CONFIRM_REQUIRED | unset; future-only checkpoint architecture tested locally |
+| 18911 Alchemy epoch definition | 86400 seconds | FROZEN_DEPLOYMENT_CONFIGURATION_NOT_ECONOMIC_POLICY | unchanged candidate configuration |
+| Reserve minimum | 11,000,000 KAIOS (`11000000000000000000000000` wei) | HUMAN_FINAL_ECONOMIC_POLICY_ENCODED | persistent balance floor; not mandatory spending |
+| Salary exposure cap | `3005464480874316939890` wei per transaction and UTC day | HUMAN_FINAL_ECONOMIC_POLICY_ENCODED | 1,099,999.999999999999999740 KAIOS across 366 capped UTC days |
+| Allocation exposure cap | `6010928961748633879781` wei per transaction and UTC day | HUMAN_FINAL_ECONOMIC_POLICY_ENCODED | 2,199,999.999999999999999846 KAIOS across 366 capped UTC days |
+| 8888 route cap | `12021857923497267759562` wei per transaction and UTC day | HUMAN_FINAL_ECONOMIC_POLICY_ENCODED | 4,399,999.999999999999999692 KAIOS across 366 capped UTC days |
+| 11520 settlement cap | `6010928961748633879781` wei per transaction and UTC day | HUMAN_FINAL_ECONOMIC_POLICY_ENCODED | 2,199,999.999999999999999846 KAIOS across 366 capped UTC days |
+| 8888 deposit interest rate | 833 ppm per Gregorian monthly epoch | HUMAN_FINAL_ECONOMIC_POLICY_ENCODED | 0.9996% nominal annual policy; liability must be legitimately funded |
 | Governance delay | 3600 seconds | HUMAN_FINAL_CANON_TECHNICAL_MINIMUM | 3600 seconds |
-| Distinct BankGovernance approver | unset | HUMAN_CONFIRM_REQUIRED | 0xFFcf8FDEE72ac11b5c542428B35EEF5769C409f0 |
-| Pause authority | unset | HUMAN_CONFIRM_REQUIRED | Final BankGovernance and bootstrap governance PAUSER remain; pause cannot spend or unpause |
+| Distinct BankGovernance approver | unset | HUMAN_PUBLIC_ADDRESS_REQUIRED | fork fixture address is not a Mainnet identity |
+| Pause authority | unset | HUMAN_PUBLIC_ADDRESS_REQUIRED | final pauser cannot be inferred from historical addresses |
 | Initial module enable/disable state | six active; BankMigration registered but inactive | HUMAN_FINAL_CANON | matches Mainnet candidate |
 
 ## Blocking conditions
 
-- DEPLOYMENT_SIGNER_CONTROL_RECONFIRMATION_REQUIRED
-- HUMAN_CONFIRM_REQUIRED:500 Seat salary base/rate
-- HUMAN_CONFIRM_REQUIRED:18911 Alchemy epoch definition
-- HUMAN_CONFIRM_REQUIRED:Reserve minimum
-- HUMAN_CONFIRM_REQUIRED:Salary exposure cap
-- HUMAN_CONFIRM_REQUIRED:Allocation exposure cap
-- HUMAN_CONFIRM_REQUIRED:8888 route cap
-- HUMAN_CONFIRM_REQUIRED:11520 settlement cap
-- HUMAN_CONFIRM_REQUIRED:8888 deposit interest rate
-- HUMAN_CONFIRM_REQUIRED:Distinct BankGovernance approver
-- HUMAN_CONFIRM_REQUIRED:Pause authority
-- MAINNET_DEPLOY_APPROVED_NOT_RECEIVED
+- HUMAN_PUBLIC_ADDRESS_REQUIRED:distinctGovernanceApprover
+- HUMAN_PUBLIC_ADDRESS_REQUIRED:finalPauser
+
+Mainnet deployment approval remains a separate authorization gate and is not counted as an economic or governance-identity blocker.
 
 No line in this manifest authorizes a transaction.
