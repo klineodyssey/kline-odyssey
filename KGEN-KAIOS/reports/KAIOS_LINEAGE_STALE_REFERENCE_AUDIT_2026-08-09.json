@@ -3,8 +3,8 @@
   "auditedAt": "2026-08-09T00:00:00+08:00",
   "status": "PASS",
   "scope": {
-    "repositoryTrackedFiles": 3694,
-    "repositoryReadableTextFiles": 3692,
+    "repositoryTrackedFiles": 3698,
+    "repositoryReadableTextFiles": 3696,
     "repositoryPdfFiles": 33,
     "repositoryPdfPages": 222,
     "externalPackage": {
@@ -16,7 +16,7 @@
       "pdfPages": 0,
       "pdfExtraction": "NOT_REQUESTED"
     },
-    "scannedFilesTotal": 3694
+    "scannedFilesTotal": 3698
   },
   "finalCanon": {
     "18888": "LINGXIAO_CELESTIAL_BANK",
@@ -517,7 +517,7 @@
     },
     {
       "path": "KGEN-KAIOS/tests/token-surface.security.test.mjs",
-      "line": 173,
+      "line": 190,
       "pattern": "TEN_THOUSAND_KAIOS",
       "legacyScale": true,
       "classification": "TEST_FIXTURE",
@@ -617,7 +617,7 @@
     },
     {
       "path": "KGEN-KAIOS/tools/rehearse-lingxiao-mainnet-fork.mjs",
-      "line": 31,
+      "line": 33,
       "pattern": "KAIOS_PER_KGEN",
       "legacyScale": false,
       "classification": "CURRENT_CORRECT",
@@ -627,7 +627,7 @@
     },
     {
       "path": "KGEN-KAIOS/tools/rehearse-lingxiao-mainnet-fork.mjs",
-      "line": 273,
+      "line": 286,
       "pattern": "KAIOS_PER_KGEN",
       "legacyScale": false,
       "classification": "CURRENT_CORRECT",
@@ -637,7 +637,7 @@
     },
     {
       "path": "KGEN-KAIOS/tools/rehearse-lingxiao-mainnet-fork.mjs",
-      "line": 570,
+      "line": 739,
       "pattern": "KAIOS_PER_KGEN",
       "legacyScale": false,
       "classification": "CURRENT_CORRECT",

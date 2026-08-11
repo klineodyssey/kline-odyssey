@@ -166,7 +166,19 @@ export async function setupLingxiaoFullBankSystem({ chainId = 31337, totalAccoun
   const governanceAddress = await governance.getAddress();
   const moduleUpgraderAddress = await moduleUpgrader.getAddress();
   const bankAddress = await context.bank.getAddress();
-  const economic8888 = await deploy("MockOrgan", deployer);
+  const legacy8888 = await context.signers[11].getAddress();
+  const economic8888Deployment = await deployUpgradeable(
+    "GaolaozhuangCommercialBank8888_Upgradeable",
+    deployer,
+    [
+      await admin.getAddress(),
+      await upgrader.getAddress(),
+      await context.kgen.getAddress(),
+      bankAddress,
+      legacy8888,
+    ],
+  );
+  const economic8888 = economic8888Deployment.contract.connect(admin);
   const exchange11520 = await deploy("MockOrgan", deployer);
 
   const definitions = [
@@ -192,6 +204,7 @@ export async function setupLingxiaoFullBankSystem({ chainId = 31337, totalAccoun
     await registry.getAddress(),
   ]);
   await (await context.bank.connect(admin).bindKAIOS(await kaios.getAddress())).wait();
+  await (await economic8888.bindKAIOS(await kaios.getAddress())).wait();
 
   const configurations = [
     [MODULE_CELESTIAL_SEAT_500, "CelestialSeat500_Upgradeable", 50_000n * ETHER, 500_000n * ETHER],
@@ -227,6 +240,8 @@ export async function setupLingxiaoFullBankSystem({ chainId = 31337, totalAccoun
     moduleUpgrader,
     beneficiary,
     economic8888,
+    economic8888Deployment,
+    legacy8888,
     exchange11520,
     kaios,
     modules,

@@ -10,8 +10,8 @@
   "evmVersion": "paris",
   "openzeppelinContracts": "5.0.2",
   "openzeppelinContractsUpgradeable": "5.0.2",
-  "sourceCount": 27,
-  "contractCount": 37,
+  "sourceCount": 28,
+  "contractCount": 38,
   "eip170MaximumDeployedBytecodeBytes": 24576,
   "oversizedContracts": [],
   "lingxiaoCelestialBank18888StorageValidation": {
@@ -310,6 +310,175 @@
       }
     ]
   },
+  "gaolaozhuangCommercialBank8888StorageValidation": {
+    "status": "PASS",
+    "strategy": "V1 fixes a deterministic 50-slot append-only namespace; future implementations may only consume the trailing gap",
+    "namespaceSlots": 50,
+    "labels": [
+      {
+        "label": "kgen",
+        "slot": "0",
+        "offset": 0,
+        "type": "t_address"
+      },
+      {
+        "label": "kaios",
+        "slot": "1",
+        "offset": 0,
+        "type": "t_address"
+      },
+      {
+        "label": "celestialBank18888",
+        "slot": "2",
+        "offset": 0,
+        "type": "t_address"
+      },
+      {
+        "label": "legacyTreasury",
+        "slot": "3",
+        "offset": 0,
+        "type": "t_address"
+      },
+      {
+        "label": "bootstrapAdmin",
+        "slot": "4",
+        "offset": 0,
+        "type": "t_address"
+      },
+      {
+        "label": "bootstrapUpgrader",
+        "slot": "5",
+        "offset": 0,
+        "type": "t_address"
+      },
+      {
+        "label": "kaiosBound",
+        "slot": "5",
+        "offset": 20,
+        "type": "t_bool"
+      },
+      {
+        "label": "paused",
+        "slot": "5",
+        "offset": 21,
+        "type": "t_bool"
+      },
+      {
+        "label": "governanceFinalized",
+        "slot": "5",
+        "offset": 22,
+        "type": "t_bool"
+      },
+      {
+        "label": "minimumReserve",
+        "slot": "6",
+        "offset": 0,
+        "type": "t_uint256"
+      },
+      {
+        "label": "totalAccountLiability",
+        "slot": "7",
+        "offset": 0,
+        "type": "t_uint256"
+      },
+      {
+        "label": "totalPayrollLiability",
+        "slot": "8",
+        "offset": 0,
+        "type": "t_uint256"
+      },
+      {
+        "label": "totalPaymentLiability",
+        "slot": "9",
+        "offset": 0,
+        "type": "t_uint256"
+      },
+      {
+        "label": "interestFundingReserve",
+        "slot": "10",
+        "offset": 0,
+        "type": "t_uint256"
+      },
+      {
+        "label": "totalSalaryPaidToWallet",
+        "slot": "11",
+        "offset": 0,
+        "type": "t_uint256"
+      },
+      {
+        "label": "totalSalaryCreditedToAccounts",
+        "slot": "12",
+        "offset": 0,
+        "type": "t_uint256"
+      },
+      {
+        "label": "totalCommercialSettlement",
+        "slot": "13",
+        "offset": 0,
+        "type": "t_uint256"
+      },
+      {
+        "label": "totalInterestCredited",
+        "slot": "14",
+        "offset": 0,
+        "type": "t_uint256"
+      },
+      {
+        "label": "totalPendingInterest",
+        "slot": "15",
+        "offset": 0,
+        "type": "t_uint256"
+      },
+      {
+        "label": "accountCount",
+        "slot": "16",
+        "offset": 0,
+        "type": "t_uint256"
+      },
+      {
+        "label": "payrollCount",
+        "slot": "17",
+        "offset": 0,
+        "type": "t_uint256"
+      },
+      {
+        "label": "paymentCount",
+        "slot": "18",
+        "offset": 0,
+        "type": "t_uint256"
+      },
+      {
+        "label": "_accounts",
+        "slot": "19",
+        "offset": 0,
+        "type": "t_mapping(t_bytes32,t_struct(CommercialAccount)5602_storage)"
+      },
+      {
+        "label": "_payroll",
+        "slot": "20",
+        "offset": 0,
+        "type": "t_mapping(t_bytes32,t_struct(PayrollEntry)5620_storage)"
+      },
+      {
+        "label": "_payments",
+        "slot": "21",
+        "offset": 0,
+        "type": "t_mapping(t_bytes32,t_struct(BusinessPayment)5640_storage)"
+      },
+      {
+        "label": "_interestRates",
+        "slot": "22",
+        "offset": 0,
+        "type": "t_array(t_struct(InterestRateCheckpoint)5645_storage)dyn_storage"
+      },
+      {
+        "label": "__gap",
+        "slot": "23",
+        "offset": 0,
+        "type": "t_array(t_uint256)27_storage"
+      }
+    ]
+  },
   "warnings": 0,
   "contracts": [
     {
@@ -455,6 +624,14 @@
       "bytecodeHash": "0xe64258f11dd7ff85e272d8dbb5ac961a55cf9a560fbf73ab5aaa96df95256e9f",
       "deployedBytecodeBytes": 5474,
       "deployedBytecodeHash": "0x505cefc01f6df515406bdf28dec432056fd4e5f7f37c808248d0fe63530378d0"
+    },
+    {
+      "contractName": "GaolaozhuangCommercialBank8888_Upgradeable",
+      "sourceName": "contracts/GaolaozhuangCommercialBank8888_Upgradeable.sol",
+      "bytecodeBytes": 18436,
+      "bytecodeHash": "0x6db0a450065b47d3b12ea695afbc8db6f1a02e98f94e97a78518b4c17f2387e9",
+      "deployedBytecodeBytes": 18221,
+      "deployedBytecodeHash": "0x63a418103df4396a8d6cb944c4d0c1ce46d8a942f4e6d3d03f6c88686e0998f9"
     },
     {
       "contractName": "KAIOS",

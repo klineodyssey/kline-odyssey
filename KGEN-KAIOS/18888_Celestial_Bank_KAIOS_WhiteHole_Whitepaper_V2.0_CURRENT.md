@@ -81,3 +81,11 @@ Every step must retain transaction hash, block, event, address, version and post
 ## Release gate
 
 No Mainnet transaction is authorized by this document. Compile, storage diff, unit/integration/fuzz/invariant tests, malicious-upgrade rehearsal, fork rehearsal, role verification, deployment-address verification and Human `MAINNET_DEPLOY_APPROVED` are mandatory before signing.
+
+## Formal 8888 code-bearing Bank wiring
+
+`GaolaozhuangCommercialBank8888_Upgradeable` is the new normal-civilization commercial Bank. Its ERC1967 proxy, not the historical EOA, is the only valid `EconomicRouter8888_Upgradeable` target. The legacy address `0x2caE692310b5A89C44c4E09Ba9F26385359d1Aa9` remains `8888_LEGACY_TREASURY_ADDRESS`: preserved lineage and asset identity, no code, no authority over the new proxy and no unrestricted withdrawal rail.
+
+The new 8888 Bank applies Asia/Taipei civilization time deterministically. Each calendar month is a payroll epoch and salary becomes claimable at day 5, 00:00 UTC+8. Unclaimed entries remain liabilities. Claims can pay the fixed beneficiary wallet or credit a beneficiary-owned 8888 account. Deposits and separately funded interest checkpoints never convert customer principal into Bank equity. Registered commerce is replay-safe, purpose-labelled and controller-authorized; its beneficiary is fixed before permissionless execution.
+
+This wiring does not move 8895 lending, OTC exchange or high-risk finance into 8888. It also does not authorize Mainnet deployment. The frozen CelestialSeat500 V1 remains duration-epoch based and cannot express the newly confirmed calendar-month day-5 rule without a separately approved future implementation change; deployment evidence must keep that mismatch visible.

@@ -1,12 +1,12 @@
 {
   "status": "REVIEWED_MODULE_SET",
   "modules": [
-    { "moduleId": "0xd18d09a1aa7fd65a8c81eb77bee03453a5363c5cb82c1b24c3be23d4001fa4c5", "contract": "CelestialSeat500_Upgradeable", "version": "1.0.0" },
-    { "moduleId": "0x98cb067844ea2b60572a9eb95ae1e64a6bf8f03bcf8c9e11ae16130de56bca63", "contract": "CivilizationAllocation_Upgradeable", "version": "1.0.0" },
-    { "moduleId": "0xb13d0845c93752f8c48622f9d8f06b2b5b503a2b264f614b59130b81156e5e54", "contract": "EconomicRouter8888_Upgradeable", "version": "1.0.0" },
-    { "moduleId": "0x24b8150af34ecded6c75de16b22b3a7fa6477e94cb23ea338a9453af3ed8961b", "contract": "ExchangeSettlement11520_Upgradeable", "version": "1.0.0" },
-    { "moduleId": "0xbcba21ba5cfe25784fa28567a77ab492bb1265a40a221a37df6a976728cd105d", "contract": "BankRiskController_Upgradeable", "version": "1.0.0" },
-    { "moduleId": "0x408269e9739994f2f410704684700c1f0c29b98f7210d29834da2c315b4dd2ce", "contract": "BankGovernance_Upgradeable", "version": "1.0.0" },
-    { "moduleId": "0xbc0740979a57ecb6aedf2d22cb378fe98c7a380d156a63372e04e276797310f8", "contract": "BankMigration_Upgradeable", "version": "1.0.0" }
+    { "moduleId": "0xd18d09a1aa7fd65a8c81eb77bee03453a5363c5cb82c1b24c3be23d4001fa4c5", "contract": "CelestialSeat500_Upgradeable", "version": "1.0.0", "initialState": "ACTIVE" },
+    { "moduleId": "0x98cb067844ea2b60572a9eb95ae1e64a6bf8f03bcf8c9e11ae16130de56bca63", "contract": "CivilizationAllocation_Upgradeable", "version": "1.0.0", "initialState": "ACTIVE" },
+    { "moduleId": "0xb13d0845c93752f8c48622f9d8f06b2b5b503a2b264f614b59130b81156e5e54", "contract": "EconomicRouter8888_Upgradeable", "version": "1.0.0", "initialState": "ACTIVE_AFTER_FORMAL_8888_BINDING" },
+    { "moduleId": "0x24b8150af34ecded6c75de16b22b3a7fa6477e94cb23ea338a9453af3ed8961b", "contract": "ExchangeSettlement11520_Upgradeable", "version": "1.0.0", "initialState": "ACTIVE" },
+    { "moduleId": "0xbcba21ba5cfe25784fa28567a77ab492bb1265a40a221a37df6a976728cd105d", "contract": "BankRiskController_Upgradeable", "version": "1.0.0", "initialState": "ACTIVE" },
+    { "moduleId": "0x408269e9739994f2f410704684700c1f0c29b98f7210d29834da2c315b4dd2ce", "contract": "BankGovernance_Upgradeable", "version": "1.0.0", "initialState": "ACTIVE" },
+    { "moduleId": "0xbc0740979a57ecb6aedf2d22cb378fe98c7a380d156a63372e04e276797310f8", "contract": "BankMigration_Upgradeable", "version": "1.0.0", "initialState": "REGISTERED_BUT_INACTIVE" }
   ]
 }

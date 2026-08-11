@@ -33,6 +33,7 @@ executable Mainnet transaction script or formal deployed address.
 | `contracts/CelestialSeat500_Upgradeable.sol` | Fixed-beneficiary, permissionlessly triggered payroll for at most 500 Celestial seats |
 | `contracts/CivilizationAllocation_Upgradeable.sol` | Purpose-bound and replay-safe civilization/public-infrastructure allocation |
 | `contracts/EconomicRouter8888_Upgradeable.sol` | Fixed formal route from central civilization capital to the separate 8888 economy |
+| `contracts/GaolaozhuangCommercialBank8888_Upgradeable.sol` | Canonical code-bearing 8888 UUPS commercial Bank: monthly day-5 UTC+8 payroll, savings, accounts, funded interest checkpoints and replay-safe commerce |
 | `contracts/ExchangeSettlement11520_Upgradeable.sol` | Fixed formal settlement interface to the 11520 Universal Civilization Exchange |
 | `contracts/BankRiskController_Upgradeable.sol` | Reserve floor, alert threshold and public bank-risk state |
 | `contracts/BankGovernance_Upgradeable.sol` | One-hour minimum delayed, distinct-proposer/approver governance executor |
@@ -43,7 +44,7 @@ executable Mainnet transaction script or formal deployed address.
 | `scripts/prepare-lingxiao-18888-deployment.mjs` | Predicted-address and unsigned creation-calldata generator; never sends a transaction |
 | `scripts/prepare-lingxiao-18888-upgrade.mjs` | Unsigned UUPS upgrade-calldata/hash generator; never sends a transaction |
 | `tools/generate-lingxiao-bank-api.mjs` | Read-only chain-state status generator with no secret persistence |
-| `frontend-adapter/lingxiao18888BankAdapter.mjs` | Read-only bank/seat adapter and deterministic action calldata encoder |
+| `frontend-adapter/lingxiao18888BankAdapter.mjs` | Read-only 18888/500-seat/8888 status adapter and deterministic action calldata encoder |
 | `indexer/lingxiao-18888-events.schema.json` | Reorg-aware event-index evidence schema |
 | `dashboard/lingxiao-18888-bank-status.schema.json` | Public bank-status API/dashboard schema |
 | `operations/LINGXIAO_18888_FULL_BANK_RUNBOOK.md` | Deployment, upgrade, post-state and emergency stop gates |
@@ -52,6 +53,7 @@ executable Mainnet transaction script or formal deployed address.
 | `tools/rehearse-lingxiao-mainnet-fork.mjs` | ChainId 56 fork pre-sign rehearsal; verifies Genesis accounting, lawful rails, retry after legal refill, final governance upgrade/rollback, predicted addresses and sanitized evidence without a Mainnet transaction |
 | `config/LINGXIAO_18888_MAINNET_DEPLOYMENT_MANIFEST.json` | Machine-readable frozen-codehash manifest, nonce-sensitive predicted deployment order, role/module matrices, Human parameter gates and receipt auto-backfill rules |
 | `config/LINGXIAO_18888_MAINNET_DEPLOYMENT_MANIFEST.md` | Human-readable Mainnet pre-sign manifest and unresolved-signature blockers |
+| `config/mainnet-economic-config.template.json` | Secret-free Human decision surface; unknown Mainnet economic parameters remain null |
 | `reports/mainnet-pre-sign/LINGXIAO_18888_MAINNET_FORK_REHEARSAL.json` | Complete sanitized chainId 56 fork transaction, storage, governance and money-flow evidence |
 | `reports/mainnet-pre-sign/KAIOS_GENESIS_MAINNET_RECORD.json` | Automatically generated fork preview; explicitly not the final Mainnet Genesis record |
 | `reports/KAIOS_TOKEN_LINEAGE_INTEGRATION_REVIEW_2026-08-09.md` | Executive review and evidence index |

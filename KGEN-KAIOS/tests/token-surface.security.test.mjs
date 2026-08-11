@@ -167,6 +167,23 @@ test("all seven UUPS modules reserve a deterministic 100-slot custom namespace",
   }
 });
 
+test("8888 exposes only account-owned and fixed-beneficiary money rails with a 50-slot UUPS namespace", () => {
+  const names = functionNames("GaolaozhuangCommercialBank8888_Upgradeable");
+  for (const name of [
+    "withdraw", "withdrawAll", "sweep", "rescue", "transfer", "transferToken",
+    "adminTransfer", "arbitraryTransfer", "clawback", "freeze", "blacklist", "loan",
+  ]) assert.equal(names.has(name), false, `8888.${name}`);
+  for (const name of [
+    "withdrawAccount", "claimSalary", "createBusinessPayment", "executeBusinessPayment",
+    "depositToAccount", "scheduleInterestRate", "checkpointInterest", "upgradeToAndCall",
+  ]) assert.equal(names.has(name), true, `8888.${name}`);
+  const evidence = JSON.parse(
+    fs.readFileSync(path.join(root, "reports", "SOLIDITY_COMPILE_EVIDENCE.json"), "utf8"),
+  );
+  assert.equal(evidence.gaolaozhuangCommercialBank8888StorageValidation.status, "PASS");
+  assert.equal(evidence.gaolaozhuangCommercialBank8888StorageValidation.namespaceSlots, 50);
+});
+
 test("Genesis inscription says ONE THOUSAND and never TEN THOUSAND", () => {
   const source = fs.readFileSync(path.join(root, "contracts", "KAIOSGenesisInscription.sol"), "utf8");
   assert.equal(source.includes("ONE BURNED KGEN CREATES ONE THOUSAND KAIOS."), true);

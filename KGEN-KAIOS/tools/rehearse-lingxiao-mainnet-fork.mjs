@@ -8,6 +8,7 @@ import {
   ContractFactory,
   Interface,
   JsonRpcProvider,
+  ZeroHash,
   formatEther,
   formatUnits,
   getAddress,
@@ -24,6 +25,7 @@ const publicRpc = process.env.BSC_MAINNET_RPC_URL ?? "https://bsc-dataseed1.bnbc
 const FORMAL_KGEN = getAddress("0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be");
 const FORMAL_11520 = getAddress("0xd0605F4EF10e5C1438F11AF9edc36926769239d6");
 const LEGACY_HEART = getAddress("0xB016D4d8f1aED1339101b30722cad6dbA9B8C972");
+const LEGACY_TREASURY_8888 = getAddress("0x2caE692310b5A89C44c4E09Ba9F26385359d1Aa9");
 const FORMAL_GOVERNANCE = getAddress("0xCd60BF474e691F2484950a0276Eaf507616Ca4b9");
 const DEPLOYMENT_SIGNER = getAddress("0xb3C54ca96De0dED4Ca0151F629ff9781506ba261");
 const TECHNICAL_MINIMUM_DELAY = 3_600;
@@ -67,8 +69,12 @@ async function expectRevert(action, label) {
 async function main() {
   const compileEvidence = JSON.parse(fs.readFileSync(path.join(root, "reports", "SOLIDITY_COMPILE_EVIDENCE.json"), "utf8"));
   const bankCompile = compileEvidence.contracts.find((item) => item.contractName === "LingxiaoCelestialBank18888_Upgradeable");
+  const economic8888Compile = compileEvidence.contracts.find(
+    (item) => item.contractName === "GaolaozhuangCommercialBank8888_Upgradeable",
+  );
   expect(bankCompile?.bytecodeHash === EXPECTED_BANK_CREATION_HASH, "BANK_CREATION_CODEHASH_MISMATCH");
   expect(bankCompile?.deployedBytecodeHash === EXPECTED_BANK_RUNTIME_HASH, "BANK_RUNTIME_CODEHASH_MISMATCH");
+  expect(economic8888Compile?.deployedBytecodeBytes <= 24_576, "BANK_8888_EIP170_EXCEEDED");
 
   const live = new JsonRpcProvider(publicRpc);
   const liveNetwork = await live.getNetwork();
@@ -121,13 +127,13 @@ async function main() {
     const outsiderAddress = await outsider.getAddress();
     const distinctApproverAddress = await distinctApprover.getAddress();
 
-    const forkOnly8888 = await new ContractFactory(
+    const forkOnlyBurnPair = await new ContractFactory(
       artifact("MockOrgan").abi,
       artifact("MockOrgan").bytecode,
       fixtureDeployer,
     ).deploy();
-    await forkOnly8888.waitForDeployment();
-    const forkOnly8888Receipt = await forkOnly8888.deploymentTransaction().wait();
+    await forkOnlyBurnPair.waitForDeployment();
+    const forkOnlyBurnPairReceipt = await forkOnlyBurnPair.deploymentTransaction().wait();
 
     const deploymentActions = [];
     let deploymentGasUsed = 0n;
@@ -180,10 +186,16 @@ async function main() {
       "LINGXIAO_18888_BANK",
     );
     const bankAddress = getAddress(await bank.contract.getAddress());
+    const economic8888 = await deployProxyCandidate(
+      "GaolaozhuangCommercialBank8888_Upgradeable",
+      [FORMAL_GOVERNANCE, FORMAL_GOVERNANCE, FORMAL_KGEN, bankAddress, LEGACY_TREASURY_8888],
+      "GAOLAOZHUANG_8888_COMMERCIAL_BANK",
+    );
+    const economic8888Address = getAddress(await economic8888.contract.getAddress());
     const moduleDefinitions = [
       ["CelestialSeat500_Upgradeable", [bankAddress, FORMAL_GOVERNANCE, FORMAL_GOVERNANCE, FORK_SALARY_EPOCH_SECONDS], "CELESTIAL_SEAT_500"],
       ["CivilizationAllocation_Upgradeable", [bankAddress, FORMAL_GOVERNANCE, FORMAL_GOVERNANCE], "CIVILIZATION_ALLOCATION"],
-      ["EconomicRouter8888_Upgradeable", [bankAddress, FORMAL_GOVERNANCE, FORMAL_GOVERNANCE, await forkOnly8888.getAddress()], "ECONOMIC_ROUTER_8888"],
+      ["EconomicRouter8888_Upgradeable", [bankAddress, FORMAL_GOVERNANCE, FORMAL_GOVERNANCE, economic8888Address], "ECONOMIC_ROUTER_8888"],
       ["ExchangeSettlement11520_Upgradeable", [bankAddress, FORMAL_GOVERNANCE, FORMAL_GOVERNANCE, FORMAL_11520], "EXCHANGE_SETTLEMENT_11520"],
       ["BankRiskController_Upgradeable", [bankAddress, FORMAL_GOVERNANCE, FORMAL_GOVERNANCE], "BANK_RISK_CONTROLLER"],
       ["BankGovernance_Upgradeable", [bankAddress, FORMAL_GOVERNANCE, FORMAL_GOVERNANCE, TECHNICAL_MINIMUM_DELAY], "BANK_GOVERNANCE"],
@@ -200,7 +212,7 @@ async function main() {
       "ALCHEMY_FURNACE_18911",
     );
 
-    const transactions = { deployments: deploymentActions, forkOnlyFixtures: [receiptEvidence(forkOnly8888Receipt)] };
+    const transactions = { deployments: deploymentActions, forkOnlyFixtures: [receiptEvidence(forkOnlyBurnPairReceipt)] };
     let runtimeGasUsed = 0n;
     async function transact(label, promise) {
       const receipt = await (await promise).wait();
@@ -210,6 +222,7 @@ async function main() {
     }
 
     await transact("bankBindKAIOS", bank.contract.bindKAIOS(await kaios.getAddress()));
+    await transact("bank8888BindKAIOS", economic8888.contract.bindKAIOS(await kaios.getAddress()));
     const moduleIds = {
       CelestialSeat500_Upgradeable: id("KAIOS.BANK.MODULE.CELESTIAL_SEAT_500"),
       CivilizationAllocation_Upgradeable: id("KAIOS.BANK.MODULE.CIVILIZATION_ALLOCATION"),
@@ -234,7 +247,7 @@ async function main() {
           id(`${name}:1.0.0`),
           isPaymentModule ? FORK_MODULE_PER_TRANSACTION_LIMIT : 0n,
           isPaymentModule ? FORK_MODULE_DAILY_LIMIT : 0n,
-          true,
+          name !== "BankMigration_Upgradeable",
         ),
       );
     }
@@ -317,7 +330,69 @@ async function main() {
       "routeEconomicCapital8888",
       router8888.routeCapital(id("FORK-8888-ROUTE"), 30n * 10n ** 18n, id("FORK-8888-CAPITAL")),
     );
-    expect(await kaios.balanceOf(await forkOnly8888.getAddress()) === 30n * 10n ** 18n, "8888_ROUTE_DID_NOT_FLOW");
+    expect(await kaios.balanceOf(economic8888Address) === 30n * 10n ** 18n, "8888_ROUTE_DID_NOT_FLOW");
+    const payrollAccountId = id("FORK-8888-LIFE-ACCOUNT");
+    await transact(
+      "bank8888CreateLifeAccount",
+      economic8888.contract.createAccount(
+        payrollAccountId,
+        id("FORK-8888-IDENTITY"),
+        id("FORK-8888-LIFE"),
+        ZeroHash,
+        beneficiaryAddress,
+        beneficiaryAddress,
+        1,
+      ),
+    );
+    const payrollEpoch = (await economic8888.contract.currentCalendarEpoch()) + 1n;
+    const payrollId = id("FORK-8888-MONTHLY-PAYROLL");
+    await transact(
+      "bank8888ScheduleMonthlyPayroll",
+      economic8888.contract.schedulePayroll(
+        payrollId,
+        id("FORK-8888-LIFE"),
+        beneficiaryAddress,
+        10n * 10n ** 18n,
+        payrollEpoch,
+      ),
+    );
+    const payrollClaimableAt = await economic8888.contract.epochClaimableAt(payrollEpoch);
+    const beforePayrollBlock = await provider.getBlock("latest");
+    await provider.send("evm_increaseTime", [Number(payrollClaimableAt) - beforePayrollBlock.timestamp - 1]);
+    await provider.send("evm_mine", []);
+    transactions.bank8888SalaryBeforeFifthRejected = await expectRevert(
+      () => economic8888.contract.connect(outsider).claimSalary(payrollId, 2, payrollAccountId, { gasLimit: 1_000_000 }),
+      "8888_SALARY_BEFORE_MONTHLY_FIFTH",
+    );
+    await provider.send("evm_increaseTime", [1]);
+    await provider.send("evm_mine", []);
+    await transact(
+      "bank8888ClaimMonthlySalaryToSavings",
+      economic8888.contract.connect(outsider).claimSalary(payrollId, 2, payrollAccountId),
+    );
+    expect((await economic8888.contract.account(payrollAccountId)).balance === 10n * 10n ** 18n, "8888_SAVINGS_CREDIT_FAILED");
+    const commercePaymentId = id("FORK-8888-COMMERCE-PAYMENT");
+    await transact(
+      "bank8888CreateCommercialPayment",
+      economic8888.contract.connect(beneficiary).createBusinessPayment(
+        commercePaymentId,
+        payrollAccountId,
+        civilizationDestinationAddress,
+        ZeroHash,
+        5n * 10n ** 18n,
+        3,
+        1,
+      ),
+    );
+    await transact(
+      "bank8888ExecuteCommercialPayment",
+      economic8888.contract.connect(outsider).executeBusinessPayment(commercePaymentId),
+    );
+    expect(await kaios.balanceOf(civilizationDestinationAddress) === 25n * 10n ** 18n, "8888_COMMERCE_DID_NOT_FLOW");
+    transactions.bank8888PaymentReplayRejected = await expectRevert(
+      () => economic8888.contract.connect(outsider).executeBusinessPayment(commercePaymentId, { gasLimit: 1_000_000 }),
+      "8888_PAYMENT_REPLAY",
+    );
     const settlement11520 = modules.ExchangeSettlement11520_Upgradeable.contract;
     const formal11520Before = await kaios.balanceOf(FORMAL_11520);
     await transact(
@@ -372,11 +447,11 @@ async function main() {
     if (governanceWasExempt) {
       await transact("forkOnlyRemoveGovernanceKgenTaxExemption", kgen.connect(deployer).setTaxExempt(FORMAL_GOVERNANCE, false));
     }
-    await transact("forkOnlyMark8888FixtureAsKgenPair", kgen.connect(deployer).setMarketMakerPair(await forkOnly8888.getAddress(), true));
+    await transact("forkOnlyMarkBurnFixtureAsKgenPair", kgen.connect(deployer).setMarketMakerPair(await forkOnlyBurnPair.getAddress(), true));
     const supplyBeforeRefillBurn = await kgen.totalSupply();
     await transact(
       "forkOnlyKgenTaxableTransferForOneKgenBurn",
-      kgen.connect(governance).transfer(await forkOnly8888.getAddress(), 1_000n * 10n ** 18n),
+      kgen.connect(governance).transfer(await forkOnlyBurnPair.getAddress(), 1_000n * 10n ** 18n),
     );
     const supplyAfterRefillBurn = await kgen.totalSupply();
     expect(supplyBeforeRefillBurn - supplyAfterRefillBurn === 10n ** 18n, "FORK_REFILL_DID_NOT_BURN_EXACTLY_ONE_KGEN");
@@ -394,6 +469,10 @@ async function main() {
       await transact(`finalizeModuleGovernance_${name}`, item.contract.finalizeModuleGovernance(governanceAddress));
     }
     await transact("finalizeBankGovernance", bank.contract.finalizeGovernance(governanceAddress));
+    await transact(
+      "finalizeBank8888Governance",
+      economic8888.contract.finalizeGovernance(governanceAddress, outsiderAddress),
+    );
 
     const bankReplacement = await new ContractFactory(
       artifact("LingxiaoCelestialBank18888_Upgradeable").abi,
@@ -414,6 +493,11 @@ async function main() {
     const moduleDefaultAdminRole = await seats.DEFAULT_ADMIN_ROLE();
     const moduleGovernanceRole = await seats.GOVERNANCE_ROLE();
     const moduleUpgraderRole = await seats.UPGRADER_ROLE();
+    const economic8888DefaultAdminRole = await economic8888.contract.DEFAULT_ADMIN_ROLE();
+    const economic8888UpgraderRole = await economic8888.contract.UPGRADER_ROLE();
+    const economic8888AccountAdminRole = await economic8888.contract.ACCOUNT_ADMIN_ROLE();
+    const economic8888PayrollAdminRole = await economic8888.contract.PAYROLL_ADMIN_ROLE();
+    const economic8888PauserRole = await economic8888.contract.PAUSER_ROLE();
     const roleMatrix = {
       bank: {
         finalGovernance: {
@@ -436,6 +520,29 @@ async function main() {
           moduleAdmin: await bank.contract.hasRole(moduleAdminRole, DEPLOYMENT_SIGNER),
           upgrader: await bank.contract.hasRole(bankUpgraderRole, DEPLOYMENT_SIGNER),
           pauser: await bank.contract.hasRole(pauserRole, DEPLOYMENT_SIGNER),
+        },
+      },
+      economic8888: {
+        proxy: economic8888Address,
+        legacyTreasury: LEGACY_TREASURY_8888,
+        finalGovernance: {
+          address: governanceAddress,
+          defaultAdmin: await economic8888.contract.hasRole(economic8888DefaultAdminRole, governanceAddress),
+          accountAdmin: await economic8888.contract.hasRole(economic8888AccountAdminRole, governanceAddress),
+          payrollAdmin: await economic8888.contract.hasRole(economic8888PayrollAdminRole, governanceAddress),
+          upgrader: await economic8888.contract.hasRole(economic8888UpgraderRole, governanceAddress),
+        },
+        bootstrapGovernance: {
+          address: FORMAL_GOVERNANCE,
+          defaultAdmin: await economic8888.contract.hasRole(economic8888DefaultAdminRole, FORMAL_GOVERNANCE),
+          accountAdmin: await economic8888.contract.hasRole(economic8888AccountAdminRole, FORMAL_GOVERNANCE),
+          payrollAdmin: await economic8888.contract.hasRole(economic8888PayrollAdminRole, FORMAL_GOVERNANCE),
+          upgrader: await economic8888.contract.hasRole(economic8888UpgraderRole, FORMAL_GOVERNANCE),
+        },
+        pauser: {
+          address: outsiderAddress,
+          hasRole: await economic8888.contract.hasRole(economic8888PauserRole, outsiderAddress),
+          status: "FORK_ONLY_HUMAN_CONFIRM_REQUIRED_FOR_MAINNET",
         },
       },
       modules: {},
@@ -468,6 +575,8 @@ async function main() {
     }
     expect(roleMatrix.bank.finalGovernance.defaultAdmin && roleMatrix.bank.finalGovernance.moduleAdmin && roleMatrix.bank.finalGovernance.upgrader, "FINAL_GOVERNANCE_BANK_ROLES_MISSING");
     expect(!roleMatrix.bank.bootstrapGovernance.defaultAdmin && !roleMatrix.bank.bootstrapGovernance.moduleAdmin && !roleMatrix.bank.bootstrapGovernance.upgrader, "BOOTSTRAP_BANK_ROLES_NOT_REVOKED");
+    expect(roleMatrix.economic8888.finalGovernance.defaultAdmin && roleMatrix.economic8888.finalGovernance.accountAdmin && roleMatrix.economic8888.finalGovernance.payrollAdmin && roleMatrix.economic8888.finalGovernance.upgrader, "FINAL_GOVERNANCE_8888_ROLES_MISSING");
+    expect(!roleMatrix.economic8888.bootstrapGovernance.defaultAdmin && !roleMatrix.economic8888.bootstrapGovernance.accountAdmin && !roleMatrix.economic8888.bootstrapGovernance.payrollAdmin && !roleMatrix.economic8888.bootstrapGovernance.upgrader, "BOOTSTRAP_8888_ROLES_NOT_REVOKED");
     expect(Object.values(roleMatrix.modules).every((item) => item.finalGovernance.defaultAdmin && item.finalGovernance.governance && item.finalGovernance.upgrader), "FINAL_GOVERNANCE_MODULE_ROLES_MISSING");
     expect(Object.values(roleMatrix.modules).every((item) => !item.bootstrapGovernance.defaultAdmin && !item.bootstrapGovernance.governance && !item.bootstrapGovernance.upgrader), "BOOTSTRAP_MODULE_ROLES_NOT_REVOKED");
 
@@ -534,6 +643,66 @@ async function main() {
     const normalizedState = (value) => asJson(value).replaceAll(stateBeforeUpgrade.implementation, "IMPLEMENTATION").replaceAll(stateAfterRollback.implementation, "IMPLEMENTATION");
     expect(normalizedState(stateBeforeUpgrade) === normalizedState(stateAfterRollback), "ROLLBACK_STATE_PRESERVATION_FAILED");
 
+    const economic8888Replacement = await new ContractFactory(
+      artifact("GaolaozhuangCommercialBank8888_Upgradeable").abi,
+      artifact("GaolaozhuangCommercialBank8888_Upgradeable").bytecode,
+      fixtureDeployer,
+    ).deploy();
+    await economic8888Replacement.waitForDeployment();
+    transactions.forkOnlyBank8888ReplacementDeployment = receiptEvidence(
+      await economic8888Replacement.deploymentTransaction().wait(),
+    );
+    const economic8888ReplacementAddress = await economic8888Replacement.getAddress();
+    const economic8888OriginalImplementation = getAddress(await economic8888.contract.implementationAddress());
+    const economic8888StateBefore = {
+      implementation: economic8888OriginalImplementation,
+      legacyTreasury: await economic8888.contract.legacyTreasury(),
+      kaios: await economic8888.contract.kaios(),
+      account: await economic8888.contract.account(payrollAccountId),
+      totalCustomerLiability: await economic8888.contract.totalCustomerLiability(),
+      totalCommercialSettlement: await economic8888.contract.totalCommercialSettlement(),
+    };
+    transactions.unauthorizedBank8888UpgradeRejected = await expectRevert(
+      () => economic8888.contract.connect(governance).upgradeToAndCall(
+        economic8888ReplacementAddress,
+        "0x",
+        { gasLimit: 1_000_000 },
+      ),
+      "UNAUTHORIZED_8888_POST_FINALIZATION_UPGRADE",
+    );
+    const economic8888UpgradeData = economic8888.contract.interface.encodeFunctionData("upgradeToAndCall", [
+      economic8888ReplacementAddress,
+      "0x",
+    ]);
+    const economic8888UpgradeId = id("FORK-VALID-8888-UPGRADE");
+    await transact("proposeBank8888Upgrade", governanceModule.propose(economic8888UpgradeId, economic8888Address, 0, economic8888UpgradeData));
+    await transact("approveBank8888Upgrade", governanceModule.connect(distinctApprover).approve(economic8888UpgradeId));
+    await provider.send("evm_increaseTime", [TECHNICAL_MINIMUM_DELAY + 1]);
+    await provider.send("evm_mine", []);
+    await transact("executeBank8888Upgrade", governanceModule.connect(outsider).execute(economic8888UpgradeId, economic8888UpgradeData, { gasLimit: 2_000_000 }));
+    const economic8888RollbackData = economic8888.contract.interface.encodeFunctionData("upgradeToAndCall", [
+      economic8888OriginalImplementation,
+      "0x",
+    ]);
+    const economic8888RollbackId = id("FORK-ROLLBACK-8888-UPGRADE");
+    await transact("proposeBank8888Rollback", governanceModule.propose(economic8888RollbackId, economic8888Address, 0, economic8888RollbackData));
+    await transact("approveBank8888Rollback", governanceModule.connect(distinctApprover).approve(economic8888RollbackId));
+    await provider.send("evm_increaseTime", [TECHNICAL_MINIMUM_DELAY + 1]);
+    await provider.send("evm_mine", []);
+    await transact("executeBank8888Rollback", governanceModule.connect(outsider).execute(economic8888RollbackId, economic8888RollbackData, { gasLimit: 2_000_000 }));
+    const economic8888StateAfter = {
+      implementation: await economic8888.contract.implementationAddress(),
+      legacyTreasury: await economic8888.contract.legacyTreasury(),
+      kaios: await economic8888.contract.kaios(),
+      account: await economic8888.contract.account(payrollAccountId),
+      totalCustomerLiability: await economic8888.contract.totalCustomerLiability(),
+      totalCommercialSettlement: await economic8888.contract.totalCommercialSettlement(),
+    };
+    const normalize8888 = (value) => asJson(value)
+      .replaceAll(economic8888StateBefore.implementation, "IMPLEMENTATION")
+      .replaceAll(economic8888StateAfter.implementation, "IMPLEMENTATION");
+    expect(normalize8888(economic8888StateBefore) === normalize8888(economic8888StateAfter), "8888_ROLLBACK_STATE_PRESERVATION_FAILED");
+
     const genesisBlock = await provider.getBlock(genesisSettlementReceipt.blockNumber);
     const genesisRecord = {
       status: "MAINNET_FORK_REHEARSAL_PREVIEW_NOT_FINAL",
@@ -583,24 +752,26 @@ async function main() {
     const estimatedRequiredWei = bufferedGas * liveGasPrice;
     const parameterTable = [
       { parameter: "500 Seat salary base/rate", value: null, status: "HUMAN_CONFIRM_REQUIRED", forkOnlyValue: "10/100 KAIOS per 60-second test epoch" },
-      { parameter: "500 Seat epoch definition", value: null, status: "HUMAN_CONFIRM_REQUIRED", forkOnlyValue: `${FORK_SALARY_EPOCH_SECONDS} seconds` },
+      { parameter: "500 Seat epoch definition", value: "MONTHLY_DAY_5_00_00_UTC_PLUS_8", status: "FROZEN_IMPLEMENTATION_MISMATCH_BLOCKER", forkOnlyValue: `${FORK_SALARY_EPOCH_SECONDS} seconds (duration-only frozen module)` },
       { parameter: "18911 Alchemy epoch definition", value: null, status: "HUMAN_CONFIRM_REQUIRED", forkOnlyValue: "86400 seconds" },
       { parameter: "Reserve minimum", value: null, status: "HUMAN_CONFIRM_REQUIRED", forkOnlyValue: "dynamic balance lock for retry test only" },
       { parameter: "Salary exposure cap", value: null, status: "HUMAN_CONFIRM_REQUIRED", forkOnlyValue: `${formatEther(FORK_MODULE_PER_TRANSACTION_LIMIT)} per transaction / ${formatEther(FORK_MODULE_DAILY_LIMIT)} per UTC day` },
       { parameter: "Allocation exposure cap", value: null, status: "HUMAN_CONFIRM_REQUIRED", forkOnlyValue: `${formatEther(FORK_MODULE_PER_TRANSACTION_LIMIT)} per transaction / ${formatEther(FORK_MODULE_DAILY_LIMIT)} per UTC day` },
       { parameter: "8888 route cap", value: null, status: "HUMAN_CONFIRM_REQUIRED", forkOnlyValue: `${formatEther(FORK_MODULE_PER_TRANSACTION_LIMIT)} per transaction / ${formatEther(FORK_MODULE_DAILY_LIMIT)} per UTC day` },
       { parameter: "11520 settlement cap", value: null, status: "HUMAN_CONFIRM_REQUIRED", forkOnlyValue: `${formatEther(FORK_MODULE_PER_TRANSACTION_LIMIT)} per transaction / ${formatEther(FORK_MODULE_DAILY_LIMIT)} per UTC day` },
+      { parameter: "8888 deposit interest rate", value: null, status: "HUMAN_CONFIRM_REQUIRED", forkOnlyValue: "unset; future-only checkpoint architecture tested locally" },
       { parameter: "Governance delay", value: "3600 seconds", status: "HUMAN_FINAL_CANON_TECHNICAL_MINIMUM", forkOnlyValue: "3600 seconds" },
       { parameter: "Distinct BankGovernance approver", value: null, status: "HUMAN_CONFIRM_REQUIRED", forkOnlyValue: distinctApproverAddress },
       { parameter: "Pause authority", value: null, status: "HUMAN_CONFIRM_REQUIRED", implementationBehavior: "Final BankGovernance and bootstrap governance PAUSER remain; pause cannot spend or unpause" },
-      { parameter: "Initial module enable/disable state", value: null, status: "HUMAN_CONFIRM_REQUIRED", forkOnlyValue: "all seven enabled for rail rehearsal" },
+      { parameter: "Initial module enable/disable state", value: "six active; BankMigration registered but inactive", status: "HUMAN_FINAL_CANON", forkOnlyValue: "matches Mainnet candidate" },
     ];
     const unresolvedParameters = parameterTable.filter((item) => item.status === "HUMAN_CONFIRM_REQUIRED").length;
     const economic8888Mainnet = {
-      address: null,
-      status: "HUMAN_CONFIRM_REQUIRED",
-      evidence: "No formal code-bearing 8888 Bank address is established. The live 16888 treasury8888 getter points to 0x2caE692310b5A89C44c4E09Ba9F26385359d1Aa9, which has no runtime code and cannot initialize the frozen Router.",
-      forkFixture: await forkOnly8888.getAddress(),
+      predictedProxy: economic8888Address,
+      implementation: await economic8888.implementation.getAddress(),
+      status: "NEW_CODE_BEARING_ERC1967_UUPS_PROXY_PREDICTION",
+      legacyTreasury: LEGACY_TREASURY_8888,
+      evidence: "Fork-deployed GaolaozhuangCommercialBank8888_Upgradeable code-bearing proxy; EconomicRouter8888 is initialized directly to this proxy.",
     };
     const deploymentSignerFunding = {
       address: DEPLOYMENT_SIGNER,
@@ -625,27 +796,30 @@ async function main() {
         activeInFork: config.active,
         perTransactionLimitForkOnly: config.perTransactionLimit.toString(),
         dailyEpochLimitForkOnly: config.epochLimit.toString(),
-        mainnetActive: null,
+        mainnetActive: name !== "BankMigration_Upgradeable",
         mainnetLimits: null,
-        mainnetStatus: "HUMAN_CONFIRM_REQUIRED",
+        mainnetStatus: "HUMAN_FINAL_INITIAL_STATE_LIMITS_PENDING",
       }];
     })));
     const gates = {
       postFinalizationUpgradePath: "PASS",
       genesisAccountingExact: genesisRecord.accountingInvariant ? "PASS" : "FAIL",
       realMoneyFlowPaths: "PASS",
-      celestialSalary500: "PASS",
-      routing8888: "PASS_WITH_FORK_ONLY_FIXTURE_MAINNET_ADDRESS_UNRESOLVED",
+      celestialSalary500: "FAIL_FROZEN_DURATION_EPOCH_CANNOT_ENFORCE_CALENDAR_MONTH_DAY_5_UTC_PLUS_8",
+      routing8888: "PASS",
+      monthlyPayroll8888: "PASS",
+      savingsAccount8888: "PASS",
       settlement11520: "PASS",
       arbitraryDrain: "BLOCKED",
       entitlementRetryAfterRefill: "PASS",
       storageRollbackRestore: "PASS",
+      storage8888RollbackRestore: "PASS",
       frozenBankCreationCodehash: "PASS",
       frozenBankRuntimeCodehash: "PASS",
       legacyHeartUntouched: "PASS",
     };
     const readinessBlockers = [
-      "FORMAL_ECONOMIC_BANK_8888_ADDRESS_HUMAN_CONFIRM_REQUIRED",
+      "FROZEN_CELESTIAL_SEAT_500_CALENDAR_MONTH_MISMATCH_REQUIRES_HUMAN_FREEZE_DECISION",
       "DEPLOYMENT_SIGNER_CONTROL_RECONFIRMATION_REQUIRED",
       ...parameterTable.filter((item) => item.status === "HUMAN_CONFIRM_REQUIRED").map((item) => `HUMAN_CONFIRM_REQUIRED:${item.parameter}`),
       ...(deploymentSignerFunding.sufficientAtReview ? [] : ["DEPLOYMENT_SIGNER_BNB_FUNDING_REQUIRED"]),
@@ -675,6 +849,12 @@ async function main() {
         bankCoreCreation: bankCompile.bytecodeHash,
         bankCoreRuntime: bankCompile.deployedBytecodeHash,
       },
+      economic8888CandidateCodehash: {
+        creation: economic8888Compile.bytecodeHash,
+        runtime: economic8888Compile.deployedBytecodeHash,
+        creationBytes: economic8888Compile.bytecodeBytes,
+        runtimeBytes: economic8888Compile.deployedBytecodeBytes,
+      },
       deploymentOrder: deploymentActions,
       organRegistryWiring: organWiring.map(([organId, address, label]) => ({ organId, label, forkAddress: address, mainnetAddress: label === "EXCHANGE_TREASURY_11520" ? address : null, autoBackfillRequired: label !== "EXCHANGE_TREASURY_11520" })),
       roleMatrix,
@@ -700,7 +880,9 @@ async function main() {
         bankProxy: bankAddress,
         kaios: await kaios.getAddress(),
         furnace18911: await furnace.getAddress(),
-        forkOnlyEconomic8888Fixture: await forkOnly8888.getAddress(),
+        economic8888Implementation: await economic8888.implementation.getAddress(),
+        economic8888Proxy: economic8888Address,
+        legacyTreasury8888: LEGACY_TREASURY_8888,
         modules: moduleMatrix,
       },
       transactions,
@@ -754,6 +936,8 @@ async function main() {
       `- Deployment signer candidate: \`${DEPLOYMENT_SIGNER}\``,
       `- Bank creation codehash: \`${bankCompile.bytecodeHash}\``,
       `- Bank runtime codehash: \`${bankCompile.deployedBytecodeHash}\``,
+      `- 8888 creation codehash: \`${economic8888Compile.bytecodeHash}\``,
+      `- 8888 runtime codehash: \`${economic8888Compile.deployedBytecodeHash}\``,
       "",
       "## Deployment order and predicted addresses",
       "",
@@ -785,7 +969,8 @@ async function main() {
       "",
       ...Object.entries(gates).map(([gate, result]) => `- ${gate}: ${result}`),
       "",
-      "The 8888 rail passed against an explicitly labeled fork-only contract fixture. No formal code-bearing Mainnet 8888 Bank address is currently established, so this is not a wiring PASS for signature.",
+      "The 8888 rail passed through the new code-bearing Gaolaozhuang Commercial Bank proxy, including UTC+8 monthly day-5 payroll, savings credit, commercial payment and delayed UUPS rollback.",
+      "The frozen CelestialSeat500 module remains duration-based and cannot enforce the newly confirmed calendar-month day-5 rule; this blocker is not hidden or approximated.",
       "",
       `KGEN totalSupply preview: ${formatUnits(supplyAtGenesisSettlement, 18)} KGEN.`,
       `Historical burn preview: ${formatUnits(historicalBurn, 18)} KGEN.`,

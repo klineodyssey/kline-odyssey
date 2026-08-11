@@ -15,21 +15,16 @@ const requiredUint = (name) => {
   if (value < 0n) throw new Error(`${name} must be unsigned`);
   return value;
 };
-const requiredBool = (name) => {
-  const value = required(name).toLowerCase();
-  if (value !== "true" && value !== "false") throw new Error(`${name} must be true or false`);
-  return value === "true";
-};
-
 const deployer = getAddress(required("MAINNET_DEPLOYMENT_SIGNER_ADDRESS"));
 const startNonce = requiredUint("MAINNET_DEPLOYMENT_SIGNER_NONCE");
-const economic8888 = getAddress(required("FORMAL_ECONOMIC_BANK_8888"));
 const admin = getAddress(process.env.FORMAL_BANK_ADMIN ?? "0xCd60BF474e691F2484950a0276Eaf507616Ca4b9");
 const bootstrapUpgrader = getAddress(process.env.BOOTSTRAP_BANK_UPGRADER ?? admin);
 const distinctGovernanceApprover = getAddress(required("FORMAL_BANK_GOVERNANCE_APPROVER"));
+const formalPauser = getAddress(required("FORMAL_BANK_PAUSER"));
 if (distinctGovernanceApprover === admin) throw new Error("FORMAL_BANK_GOVERNANCE_APPROVER must be distinct from the bootstrap proposer");
 const kgen = getAddress("0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be");
 const exchange11520 = getAddress("0xd0605F4EF10e5C1438F11AF9edc36926769239d6");
+const legacyTreasury8888 = getAddress("0x2caE692310b5A89C44c4E09Ba9F26385359d1Aa9");
 const governanceDelay = 3_600n;
 const salaryEpochSeconds = requiredUint("CELESTIAL_SALARY_EPOCH_SECONDS");
 const furnaceEpochSeconds = requiredUint("ALCHEMY_FURNACE_EPOCH_SECONDS");
@@ -39,37 +34,37 @@ const modulePolicies = {
   CelestialSeat500_Upgradeable: {
     perTransactionLimit: requiredUint("SEAT500_PER_TRANSACTION_LIMIT_WEI"),
     epochLimit: requiredUint("SEAT500_DAILY_LIMIT_WEI"),
-    active: requiredBool("SEAT500_ACTIVE"),
+    active: true,
   },
   CivilizationAllocation_Upgradeable: {
     perTransactionLimit: requiredUint("CIVILIZATION_ALLOCATION_PER_TRANSACTION_LIMIT_WEI"),
     epochLimit: requiredUint("CIVILIZATION_ALLOCATION_DAILY_LIMIT_WEI"),
-    active: requiredBool("CIVILIZATION_ALLOCATION_ACTIVE"),
+    active: true,
   },
   EconomicRouter8888_Upgradeable: {
     perTransactionLimit: requiredUint("ECONOMIC_8888_PER_TRANSACTION_LIMIT_WEI"),
     epochLimit: requiredUint("ECONOMIC_8888_DAILY_LIMIT_WEI"),
-    active: requiredBool("ECONOMIC_8888_ACTIVE"),
+    active: true,
   },
   ExchangeSettlement11520_Upgradeable: {
     perTransactionLimit: requiredUint("EXCHANGE_11520_PER_TRANSACTION_LIMIT_WEI"),
     epochLimit: requiredUint("EXCHANGE_11520_DAILY_LIMIT_WEI"),
-    active: requiredBool("EXCHANGE_11520_ACTIVE"),
+    active: true,
   },
   BankRiskController_Upgradeable: {
     perTransactionLimit: 0n,
     epochLimit: 0n,
-    active: requiredBool("BANK_RISK_CONTROLLER_ACTIVE"),
+    active: true,
   },
   BankGovernance_Upgradeable: {
     perTransactionLimit: 0n,
     epochLimit: 0n,
-    active: requiredBool("BANK_GOVERNANCE_ACTIVE"),
+    active: true,
   },
   BankMigration_Upgradeable: {
     perTransactionLimit: 0n,
     epochLimit: 0n,
-    active: requiredBool("BANK_MIGRATION_ACTIVE"),
+    active: false,
   },
 };
 const reserveMinimum = requiredUint("BANK_RESERVE_MINIMUM_WEI");
@@ -109,6 +104,11 @@ const bank = await appendUpgradeable(
   [admin, bootstrapUpgrader, kgen],
   "LINGXIAO_18888_BANK",
 );
+const economic8888 = await appendUpgradeable(
+  "GaolaozhuangCommercialBank8888_Upgradeable",
+  [admin, bootstrapUpgrader, kgen, bank.proxy, legacyTreasury8888],
+  "GAOLAOZHUANG_8888_COMMERCIAL_BANK",
+);
 const seat = await appendUpgradeable(
   "CelestialSeat500_Upgradeable",
   [bank.proxy, admin, bootstrapUpgrader, salaryEpochSeconds],
@@ -121,7 +121,7 @@ const allocation = await appendUpgradeable(
 );
 const router8888 = await appendUpgradeable(
   "EconomicRouter8888_Upgradeable",
-  [bank.proxy, admin, bootstrapUpgrader, economic8888],
+  [bank.proxy, admin, bootstrapUpgrader, economic8888.proxy],
   "ECONOMIC_ROUTER_8888",
 );
 const settlement11520 = await appendUpgradeable(
@@ -173,6 +173,7 @@ const bankInterface = new Interface(readArtifact("LingxiaoCelestialBank18888_Upg
 const registryInterface = new Interface(readArtifact("KAIOSOrganRegistry").abi);
 const riskInterface = new Interface(readArtifact("BankRiskController_Upgradeable").abi);
 const governanceInterface = new Interface(readArtifact("BankGovernance_Upgradeable").abi);
+const economic8888Interface = new Interface(readArtifact("GaolaozhuangCommercialBank8888_Upgradeable").abi);
 const postDeployCalls = [];
 const appendCall = (identity, target, signer, data) => postDeployCalls.push({
   order: postDeployCalls.length + 1,
@@ -185,6 +186,7 @@ const appendCall = (identity, target, signer, data) => postDeployCalls.push({
 });
 
 appendCall("BANK_BIND_KAIOS", bank.proxy, admin, bankInterface.encodeFunctionData("bindKAIOS", [kaios]));
+appendCall("BANK_8888_BIND_KAIOS", economic8888.proxy, admin, economic8888Interface.encodeFunctionData("bindKAIOS", [kaios]));
 appendCall(
   "GRANT_DISTINCT_GOVERNANCE_APPROVER",
   governance.proxy,
@@ -232,6 +234,12 @@ for (const [name, deployed] of Object.entries(deployedModules)) {
   );
 }
 appendCall("FINALIZE_BANK_GOVERNANCE", bank.proxy, admin, bankInterface.encodeFunctionData("finalizeGovernance", [governance.proxy]));
+appendCall(
+  "FINALIZE_BANK_8888_GOVERNANCE",
+  economic8888.proxy,
+  admin,
+  economic8888Interface.encodeFunctionData("finalizeGovernance", [governance.proxy, formalPauser]),
+);
 
 const plan = {
   status: "UNSIGNED_MAINNET_DEPLOYMENT_PACKAGE_ONLY",
@@ -242,7 +250,8 @@ const plan = {
   canon: {
     kgen,
     exchange11520,
-    economic8888,
+    economic8888Proxy: economic8888.proxy,
+    legacyTreasury8888,
     admin,
     bootstrapUpgrader,
     registry,
@@ -252,6 +261,7 @@ const plan = {
     finalUpgrader: governance.proxy,
     governanceDelaySeconds: governanceDelay.toString(),
     distinctGovernanceApprover,
+    formalPauser,
   },
   humanApprovedParameters: {
     salaryEpochSeconds: salaryEpochSeconds.toString(),
@@ -260,7 +270,7 @@ const plan = {
     riskAlertThresholdWei: riskAlertThreshold.toString(),
     modulePolicies,
   },
-  predicted: { registry, bank, ...deployedModules, kaios, furnace18911 },
+  predicted: { registry, bank, economic8888, ...deployedModules, kaios, furnace18911 },
   deploymentActions: actions,
   postDeployCalls,
   genesis: {

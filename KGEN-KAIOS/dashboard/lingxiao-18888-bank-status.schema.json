@@ -2,14 +2,15 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "Lingxiao 18888 Bank Status",
   "type": "object",
-  "required": ["chainId", "bank", "genesis", "risk", "modules", "governance"],
+  "required": ["chainId", "bank", "genesis", "risk", "modules", "governance", "economic8888"],
   "properties": {
     "chainId": { "type": "integer" },
     "bank": { "type": "object" },
     "genesis": { "type": "object" },
     "risk": { "type": "object" },
     "modules": { "type": "array" },
-    "governance": { "type": "object" }
+    "governance": { "type": "object" },
+    "economic8888": { "type": "object" }
   },
   "additionalProperties": false
 }

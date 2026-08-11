@@ -2,8 +2,8 @@
 
 **Status:** PASS
 
-- Scanned files: 3694
-- Repository tracked files: 3694
+- Scanned files: 3698
+- Repository tracked files: 3698
 - Human package files: 0
 - Legacy 1:10,000 / 720B reference hits: 46
 - ACTIVE_CONFLICT: 0
@@ -108,7 +108,7 @@ The Human-reported `KAIOS_GENESIS_INSCRIPTION_V1.0.md` is superseded by the stag
 | SUPERSEDED_HISTORY | `KGEN-KAIOS/reports/KAIOS_TOKEN_LINEAGE_INTEGRATION_CLOSEOUT_20260809.md:7` | 1_TO_10_000 | Historical bytes are retained behind an explicit SUPERSEDED marker. |
 | COMMENT_ONLY | `KGEN-KAIOS/reports/KAIOS_TOKEN_LINEAGE_INTEGRATION_REVIEW_2026-08-09.md:8` | KAIOS_PER_KGEN | Audit, supersession, or negative-reference text; not an executable monetary definition. |
 | COMMENT_ONLY | `KGEN-KAIOS/reports/RECOVERY-KAIOS-TOKEN-LINEAGE-INTEGRATION-20260809.md:14` | 1_TO_10_000 | Audit, supersession, or negative-reference text; not an executable monetary definition. |
-| TEST_FIXTURE | `KGEN-KAIOS/tests/token-surface.security.test.mjs:173` | TEN_THOUSAND_KAIOS | Negative regression fixture; it must assert rejection of the legacy inscription or scale. |
+| TEST_FIXTURE | `KGEN-KAIOS/tests/token-surface.security.test.mjs:190` | TEN_THOUSAND_KAIOS | Negative regression fixture; it must assert rejection of the legacy inscription or scale. |
 | COMMENT_ONLY | `KGEN-KAIOS/tools/generate-stale-reference-audit.mjs:17` | 720_BILLION_RAW | Audit, supersession, or negative-reference text; not an executable monetary definition. |
 | COMMENT_ONLY | `KGEN-KAIOS/tools/generate-stale-reference-audit.mjs:18` | 720_BILLION_FORMATTED | Audit, supersession, or negative-reference text; not an executable monetary definition. |
 | CURRENT_CORRECT | `KGEN-KAIOS/tools/generate-stale-reference-audit.mjs:19` | KAIOS_PER_KGEN | Identifier occurrence; numeric value audited independently. |
@@ -118,9 +118,9 @@ The Human-reported `KAIOS_GENESIS_INSCRIPTION_V1.0.md` is superseded by the stag
 | CURRENT_CORRECT | `KGEN-KAIOS/tools/generate-stale-reference-audit.mjs:289` | MAX_SUPPLY | Identifier occurrence; numeric value audited independently. |
 | COMMENT_ONLY | `KGEN-KAIOS/tools/generate-stale-reference-audit.mjs:336` | 1_TO_10_000 | Audit, supersession, or negative-reference text; not an executable monetary definition. |
 | CURRENT_CORRECT | `KGEN-KAIOS/tools/generate-stale-reference-audit.mjs:343` | MAX_SUPPLY | Identifier occurrence; numeric value audited independently. |
-| CURRENT_CORRECT | `KGEN-KAIOS/tools/rehearse-lingxiao-mainnet-fork.mjs:31` | KAIOS_PER_KGEN | Identifier occurrence; numeric value audited independently. |
-| CURRENT_CORRECT | `KGEN-KAIOS/tools/rehearse-lingxiao-mainnet-fork.mjs:273` | KAIOS_PER_KGEN | Identifier occurrence; numeric value audited independently. |
-| CURRENT_CORRECT | `KGEN-KAIOS/tools/rehearse-lingxiao-mainnet-fork.mjs:570` | KAIOS_PER_KGEN | Identifier occurrence; numeric value audited independently. |
+| CURRENT_CORRECT | `KGEN-KAIOS/tools/rehearse-lingxiao-mainnet-fork.mjs:33` | KAIOS_PER_KGEN | Identifier occurrence; numeric value audited independently. |
+| CURRENT_CORRECT | `KGEN-KAIOS/tools/rehearse-lingxiao-mainnet-fork.mjs:286` | KAIOS_PER_KGEN | Identifier occurrence; numeric value audited independently. |
+| CURRENT_CORRECT | `KGEN-KAIOS/tools/rehearse-lingxiao-mainnet-fork.mjs:739` | KAIOS_PER_KGEN | Identifier occurrence; numeric value audited independently. |
 | CURRENT_CORRECT | `KGEN-KAIOS/tools/validate-integration-artifacts.mjs:42` | KAIOS_PER_KGEN | Identifier occurrence; numeric value audited independently. |
 | CURRENT_CORRECT | `KGEN-KAIOS/tools/validate-integration-artifacts.mjs:91` | KAIOS_PER_KGEN | Identifier occurrence; numeric value audited independently. |
 | CURRENT_CORRECT | `KGEN-KAIOS/tools/verify-current-lineage.mjs:42` | KAIOS_PER_KGEN | Identifier occurrence; numeric value audited independently. |

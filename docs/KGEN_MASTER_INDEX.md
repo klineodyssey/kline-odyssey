@@ -37,6 +37,7 @@ This addendum does not regenerate the historical inventory below.
 | `KGEN-KAIOS/contracts/CelestialSeat500_Upgradeable.sol` | Contract module | 500 fixed-beneficiary Celestial salary seats with permissionless claim triggering and retry-safe checkpoints | Implementation candidate |
 | `KGEN-KAIOS/contracts/CivilizationAllocation_Upgradeable.sol` | Contract module | Replay-safe civilization and public-infrastructure allocations | Implementation candidate |
 | `KGEN-KAIOS/contracts/EconomicRouter8888_Upgradeable.sol` | Contract module | Fixed 18888 to formal 8888 economic-capital route | Implementation candidate |
+| `KGEN-KAIOS/contracts/GaolaozhuangCommercialBank8888_Upgradeable.sol` | Contract | New code-bearing 8888 ERC1967/UUPS commercial Bank for monthly day-5 UTC+8 payroll, savings, funded interest checkpoints and registered commerce; legacy EOA remains lineage-only | Implementation candidate; Mainnet transaction not authorized |
 | `KGEN-KAIOS/contracts/ExchangeSettlement11520_Upgradeable.sol` | Contract module | Fixed 18888 to formal 11520 Universal Exchange settlement route | Implementation candidate |
 | `KGEN-KAIOS/contracts/BankRiskController_Upgradeable.sol` | Contract module | Reserve and public risk controls | Implementation candidate |
 | `KGEN-KAIOS/contracts/BankGovernance_Upgradeable.sol` | Contract module | Minimum one-hour delayed, two-party proposal/execution architecture | Implementation candidate |
@@ -45,7 +46,8 @@ This addendum does not regenerate the historical inventory below.
 | `KGEN-KAIOS/reports/LINGXIAO_18888_FULL_BANK_SECURITY_REPORT.md` | Security report | Trust boundaries, enforced gates and residual UUPS governance risk | Review package |
 | `KGEN-KAIOS/tools/rehearse-lingxiao-mainnet-fork.mjs` | Mainnet pre-sign validation | ChainId 56 fork deployment, Genesis, lawful circulation, refill retry, governance upgrade and rollback with no Mainnet transaction | Pre-sign evidence tool |
 | `KGEN-KAIOS/config/LINGXIAO_18888_MAINNET_DEPLOYMENT_MANIFEST.json` | Deployment manifest | Frozen hashes, exact nonce-sensitive deployment order, receipt backfill rules, roles, modules, parameters and blockers | Mainnet transaction not authorized |
-| `KGEN-KAIOS/reports/mainnet-pre-sign/LINGXIAO_18888_MAINNET_FORK_REHEARSAL.json` | Fork evidence | Sanitized full Mainnet-fork receipts, state, gas and gates | PASS with formal 8888/policy blockers |
+| `KGEN-KAIOS/config/mainnet-economic-config.template.json` | Deployment configuration | Human economic values and governance addresses; unknown values remain null | Human confirmation required |
+| `KGEN-KAIOS/reports/mainnet-pre-sign/LINGXIAO_18888_MAINNET_FORK_REHEARSAL.json` | Fork evidence | Sanitized full Mainnet-fork receipts, state, gas and gates | 8888 wiring PASS; frozen CelestialSeat500 calendar mismatch and policy decisions remain blockers |
 | `KGEN-KAIOS/reports/mainnet-pre-sign/KAIOS_GENESIS_MAINNET_RECORD.json` | Genesis preview | BigInt chain-derived fork preview; never a formal Mainnet amount | PREVIEW_NOT_FINAL |
 
 ## Summary
@@ -677,7 +679,7 @@ These files are frontend/game runtime modules. They do not replace the formal Un
 | 18888 - Divine Bank V0.2 integration shell | `C:\Desktop\kline-odyssey\K線西遊記\temples\18888\index.html` | PASS: local target exists |
 | 18921 - Auto LP / ZhanyaoTaxSplitter V0.2 integration shell | `C:\Desktop\kline-odyssey\K線西遊記\temples\18921\index.html` | PASS: local target exists |
 | 108000 - MarsSeats V0.2 integration shell | `C:\Desktop\kline-odyssey\K線西遊記\temples\108000\index.html` | PASS: local target exists |
-| 8888 - Underground Bank V0.2 | `C:\Desktop\kline-odyssey\K線西遊記\temples\8888\index.html` | PASS: local target exists |
+| 8888 - Gaolaozhuang Commercial Bank legacy frontend | `C:\Desktop\kline-odyssey\K線西遊記\temples\8888\index.html` | PASS: local target exists; not 8895 underground-bank identity |
 | 8895 - Cloud Inn V0.2 | `C:\Desktop\kline-odyssey\K線西遊記\temples\8895\index.html` | PASS: local target exists |
 | 20888 - Risk Arena V0.2 | `C:\Desktop\kline-odyssey\K線西遊記\temples\20888\index.html` | PASS: local target exists |
 | 21319 - Leiyin level node V0.2 | `C:\Desktop\kline-odyssey\K線西遊記\temples\21319\index.html` | PASS: local target exists |

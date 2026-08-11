@@ -3,7 +3,7 @@
   "evidenceClass": "CHAIN_ID_56_MAINNET_FORK",
   "mainnetTransactionAuthorized": false,
   "chainId": "56",
-  "forkBlock": 115291417,
+  "forkBlock": 115300367,
   "pointIds": {
     "kaiosGoldAndSilverIslandTokenPoint": "33333",
     "whiteHole": "36000",
@@ -11,16 +11,16 @@
   },
   "addresses": {
     "kgenToken": "0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be",
-    "kaiosTokenForkPredicted": "0xff281a821dBbA44EEc7b57475E3c28A916fcDAE7",
+    "kaiosTokenForkPredicted": "0xD4E67B3a69e41524c424150E6b6e921b01D036db",
     "lingxiaoBankProxyForkPredicted": "0x11d34c0F723aCd334B8F95076f73F07f06202aab",
     "formal11520": "0xd0605F4EF10e5C1438F11AF9edc36926769239d6",
     "legacyHeart": "0xB016D4d8f1aED1339101b30722cad6dbA9B8C972"
   },
   "settlement": {
-    "transactionHash": "0xe041e87ca4cba08c029de9ee0e9e7d979cc0016a65691ecc03226c08f6727df5",
-    "blockNumber": 115291455,
-    "timestamp": 1786441737,
-    "timestampIso": "2026-08-11T09:48:57.000Z",
+    "transactionHash": "0x98afe7b42e9c31a81fc66d45a9d865d240a2d5088d43bcf4e85f0bf9fdc5be13",
+    "blockNumber": 115300408,
+    "timestamp": 1786445763,
+    "timestampIso": "2026-08-11T10:56:03.000Z",
     "kgenGenesisSupply": {
       "raw": "72000000000000000000000000",
       "decimal18": "72000000.0"

@@ -13,7 +13,7 @@
         "required": ["contract", "event", "transactionHash", "blockNumber", "logIndex", "removed"],
         "properties": {
           "contract": { "type": "string" },
-          "event": { "enum": ["KAIOSBound", "GenesisEpochStarted", "ModuleConfigured", "ModulePaymentExecuted", "SalaryClaimed", "AllocationExecuted", "EconomicCapitalRouted", "ExchangeSettlementExecuted", "RiskParametersApplied", "GovernanceProposalExecuted", "MigrationProposed", "Upgraded"] },
+          "event": { "enum": ["KAIOSBound", "GenesisEpochStarted", "ModuleConfigured", "ModulePaymentExecuted", "SalaryClaimed", "AllocationExecuted", "EconomicCapitalRouted", "ExchangeSettlementExecuted", "RiskParametersApplied", "GovernanceProposalExecuted", "MigrationProposed", "AccountCreated", "Deposited", "AccountWithdrawal", "PayrollScheduled", "BusinessPaymentCreated", "BusinessPaymentExecuted", "InterestRateScheduled", "InterestFunded", "InterestCheckpointed", "GovernanceFinalized", "Upgraded"] },
           "transactionHash": { "type": "string", "pattern": "^0x[0-9a-fA-F]{64}$" },
           "blockNumber": { "type": "integer", "minimum": 0 },
           "logIndex": { "type": "integer", "minimum": 0 },

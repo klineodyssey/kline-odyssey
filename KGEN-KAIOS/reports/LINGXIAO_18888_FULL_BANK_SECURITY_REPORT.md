@@ -33,4 +33,6 @@ Module caps and reserve values are policy inputs. The package intentionally does
 - All current contracts remain below EIP-170.
 - Deterministic integration covers Genesis, salary, retry, replay, redirect, allocation, 8888, 11520, reserve, pause, governance, migration and upgrades.
 - ChainId 56 Mainnet fork rehearsal now passes Genesis accounting, salary/allocation/8888/11520 circulation, insufficient-balance retry after a legal one-KGEN fork burn and settlement, final-governance UUPS upgrade, and delayed rollback with representative state preserved.
-- Signature remains blocked: no formal code-bearing 8888 Bank address is established, production economic parameters and initial module states require Human confirmation, and `MAINNET_DEPLOY_APPROVED` has not been issued.
+- A formal code-bearing 8888 candidate now exists as `GaolaozhuangCommercialBank8888_Upgradeable`; its proxy is the fixed Router target and the no-code legacy EOA is lineage-only.
+- 8888 liability accounting, monthly day-5 UTC+8 payroll, savings credit, registered commerce, separately funded future-only interest checkpoints, delayed-governance upgrade and rollback pass local and chainId 56 fork rehearsal.
+- Signature remains blocked by Human economic values, distinct approver/pauser confirmation, the frozen CelestialSeat500 duration-epoch versus calendar-month rule mismatch, and the absence of `MAINNET_DEPLOY_APPROVED`.

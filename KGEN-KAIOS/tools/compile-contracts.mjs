@@ -121,6 +121,7 @@ for (const [sourceName, sourceContracts] of Object.entries(output.contracts ?? {
         "BankRiskController_Upgradeable",
         "BankGovernance_Upgradeable",
         "BankMigration_Upgradeable",
+        "GaolaozhuangCommercialBank8888_Upgradeable",
         "KAIOS",
       ].includes(contractName)
     ) {
@@ -197,8 +198,28 @@ const upgradeableModuleStorage = upgradeableModuleNames.map((contractName) => {
   };
 });
 const upgradeableModuleStorageMatches = upgradeableModuleStorage.every((item) => item.status === "PASS");
+const gaolaoArtifact = Object.values(output.contracts ?? {})
+  .flatMap((sourceContracts) => Object.entries(sourceContracts))
+  .find(([contractName]) => contractName === "GaolaozhuangCommercialBank8888_Upgradeable")?.[1];
+const gaolaoStorage = gaolaoArtifact?.storageLayout?.storage ?? [];
+const gaolaoNamespaceSlots = gaolaoStorage.reduce((maximum, entry) => {
+  const bytes = Number(gaolaoArtifact.storageLayout.types[entry.type]?.numberOfBytes ?? 32);
+  return Math.max(maximum, Number(entry.slot) + Math.ceil(bytes / 32));
+}, 0);
+const expectedGaolaoLabels = [
+  "kgen", "kaios", "celestialBank18888", "legacyTreasury", "bootstrapAdmin", "bootstrapUpgrader",
+  "kaiosBound", "paused", "governanceFinalized", "minimumReserve", "totalAccountLiability",
+  "totalPayrollLiability", "totalPaymentLiability", "interestFundingReserve", "totalSalaryPaidToWallet",
+  "totalSalaryCreditedToAccounts", "totalCommercialSettlement", "totalInterestCredited",
+  "totalPendingInterest", "accountCount", "payrollCount", "paymentCount", "_accounts", "_payroll",
+  "_payments", "_interestRates", "__gap",
+];
+const gaolaoStorageMatches = gaolaoNamespaceSlots === 50
+  && JSON.stringify(gaolaoStorage.map((entry) => entry.label)) === JSON.stringify(expectedGaolaoLabels)
+  && gaolaoStorage.at(-1)?.label === "__gap"
+  && gaolaoStorage.at(-1)?.slot === "23";
 const evidence = {
-  status: oversizedContracts.length === 0 && lingxiaoStorageMatches && upgradeableModuleStorageMatches ? "PASS" : "FAIL",
+  status: oversizedContracts.length === 0 && lingxiaoStorageMatches && upgradeableModuleStorageMatches && gaolaoStorageMatches ? "PASS" : "FAIL",
   compiler: solc.version(),
   requestedCompiler: "0.8.24",
   optimizer: { enabled: true, runs: 1 },
@@ -220,6 +241,12 @@ const evidence = {
     status: upgradeableModuleStorageMatches ? "PASS" : "FAIL",
     strategy: "Every module preserves the shared slots 0-1 prefix and reserves a deterministic 100-slot custom namespace",
     modules: upgradeableModuleStorage,
+  },
+  gaolaozhuangCommercialBank8888StorageValidation: {
+    status: gaolaoStorageMatches ? "PASS" : "FAIL",
+    strategy: "V1 fixes a deterministic 50-slot append-only namespace; future implementations may only consume the trailing gap",
+    namespaceSlots: gaolaoNamespaceSlots,
+    labels: gaolaoStorage.map(({ label, slot, offset, type }) => ({ label, slot, offset, type })),
   },
   warnings: diagnostics.filter((diagnostic) => diagnostic.severity === "warning").length,
   contracts,

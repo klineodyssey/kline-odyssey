@@ -7,9 +7,9 @@
 > NO DISCRETIONARY MINTING.
 > CIVILIZATION MASS SHALL BE CONSERVED.
 
-- Fork block: 115291417
+- Fork block: 115300367
 - 33333 Point ID: KAIOS Gold & Silver Island Token Point
-- Fork-predicted KAIOS Token: `0xff281a821dBbA44EEc7b57475E3c28A916fcDAE7`
+- Fork-predicted KAIOS Token: `0xD4E67B3a69e41524c424150E6b6e921b01D036db`
 - 36000 Point ID: White Hole
 - Fork-predicted 18888 Bank Proxy: `0x11d34c0F723aCd334B8F95076f73F07f06202aab`
 - Formal KGEN: `0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be`
@@ -18,6 +18,6 @@
 - Historical KGEN Burn Preview: 22093.112999398557772923 KGEN
 - Genesis KAIOS Preview: 22093112.999398557772923 KAIOS
 - 18888 balance delta: 22093112.999398557772923 KAIOS
-- Fork transaction: `0xe041e87ca4cba08c029de9ee0e9e7d979cc0016a65691ecc03226c08f6727df5`
+- Fork transaction: `0x98afe7b42e9c31a81fc66d45a9d865d240a2d5088d43bcf4e85f0bf9fdc5be13`
 
 Generated automatically from fork receipt/state with BigInt. Regenerate from the actual authorized Mainnet settlement block; never copy this preview amount into a transaction.
