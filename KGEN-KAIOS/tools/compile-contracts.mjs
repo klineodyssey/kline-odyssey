@@ -123,6 +123,7 @@ for (const [sourceName, sourceContracts] of Object.entries(output.contracts ?? {
         "BankMigration_Upgradeable",
         "GaolaozhuangCommercialBank8888_Upgradeable",
         "KAIOS",
+        "KAIOSGenesisInscription",
       ].includes(contractName)
     ) {
       fs.writeFileSync(

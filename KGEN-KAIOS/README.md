@@ -49,7 +49,7 @@ executable Mainnet transaction script or formal deployed address.
 | `dashboard/lingxiao-18888-bank-status.schema.json` | Public bank-status API/dashboard schema |
 | `operations/LINGXIAO_18888_FULL_BANK_RUNBOOK.md` | Deployment, upgrade, post-state and emergency stop gates |
 | `reports/LINGXIAO_18888_FULL_BANK_SECURITY_REPORT.md` | Trust boundaries, enforced gates and residual UUPS governance risk |
-| `tools/validate-integration-artifacts.mjs --generate-kaios-genesis-record` | Post-settlement chain-derived Mainnet record/inscription generator; accepts no amount input |
+| `tools/validate-integration-artifacts.mjs --generate-kaios-genesis-record` | Post-settlement chain-derived Mainnet record plus unsigned immutable-inscription deployment generator; accepts no amount input, preserves deployments 1-21 and enforces the action-22 nonce gate |
 | `tools/rehearse-lingxiao-mainnet-fork.mjs` | ChainId 56 fork pre-sign rehearsal; verifies Genesis accounting, lawful rails, retry after legal refill, final governance upgrade/rollback, predicted addresses and sanitized evidence without a Mainnet transaction |
 | `config/LINGXIAO_18888_MAINNET_DEPLOYMENT_MANIFEST.json` | Machine-readable frozen-codehash manifest, nonce-sensitive predicted deployment order, role/module matrices, Human parameter gates and receipt auto-backfill rules |
 | `config/LINGXIAO_18888_MAINNET_DEPLOYMENT_MANIFEST.md` | Human-readable Mainnet pre-sign manifest and unresolved-signature blockers |

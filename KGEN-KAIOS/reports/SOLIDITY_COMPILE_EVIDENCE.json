@@ -754,10 +754,10 @@
     {
       "contractName": "KAIOSGenesisInscription",
       "sourceName": "contracts/KAIOSGenesisInscription.sol",
-      "bytecodeBytes": 2062,
-      "bytecodeHash": "0x41773053edc5bfe6b7f0a2a49d372ca812c7245a2e15275bc28345aad94fe5d9",
-      "deployedBytecodeBytes": 1544,
-      "deployedBytecodeHash": "0x65206f757fa970d3aff917f59841b1a562e42e58f0f9c88ff7b853a54fbdf00e"
+      "bytecodeBytes": 3764,
+      "bytecodeHash": "0x85df6e81055ceedc008c4c94e844c59bfa061df4f50806034da66c702a16c61e",
+      "deployedBytecodeBytes": 2002,
+      "deployedBytecodeHash": "0x2e0ea12c380b60bbc6bd05125102a33ba7339b330ec62cd852a1c7d637d78894"
     },
     {
       "contractName": "KAIOSOrganRegistry",

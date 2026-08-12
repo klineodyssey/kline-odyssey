@@ -20,6 +20,21 @@
     "blockers": 0,
     "authorizationGate": "MAINNET_DEPLOY_APPROVED_NOT_RECEIVED"
   },
+  "postGenesisInscription": {
+    "status": "DEPLOY_READY_SEPARATE_AUTHORIZATION_REQUIRED",
+    "sequence": "FROZEN_DEPLOYMENTS_1_TO_21_THEN_GENESIS_SETTLEMENT_THEN_EVIDENCE_VALIDATION_THEN_INSCRIPTION_DEPLOYMENT_22",
+    "frozenDeploymentActions": 21,
+    "inscriptionDeploymentNonceIfDeployerNonceRemainsUnchanged": 55,
+    "predictedInscriptionAddress": "0xb02CBc7698646653D541F494F510Fe18638AC7ae",
+    "predictionStatus": "PREDICTED_ONLY_NOT_DEPLOYED",
+    "first21AddressImpact": "NONE",
+    "fullInscriptionKeccak256": "0xbc89db0915e1fd0e978ae0cfe194f4b46db22534febab35563de2802935b3704",
+    "fullInscriptionSha256": "add44b79083a20a6d9f240a99c5fd47658f191ce8b3fa81da6f60c97e8b4470f",
+    "generator": "KGEN-KAIOS/tools/validate-integration-artifacts.mjs --generate-kaios-genesis-record",
+    "amountInput": "FORBIDDEN_DERIVED_FROM_SUCCESSFUL_SETTLEMENT_RECEIPT_AND_CHAIN_STATE",
+    "nonceGate": "DEPLOYMENT_SIGNER_PENDING_NONCE_MUST_STILL_BE_55_AFTER_SETTLEMENT_EVIDENCE_VALIDATION",
+    "transactionAuthorized": false
+  },
   "fork": {
     "blockNumber": 115460801,
     "blockHash": "0x1ee34253f5049e91e5fa96c16e3e628f1219fd14860dee449cd6897139b921cd",

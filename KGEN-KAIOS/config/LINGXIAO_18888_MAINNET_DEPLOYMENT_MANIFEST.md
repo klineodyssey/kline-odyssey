@@ -48,6 +48,19 @@ Predictions use the deployment signer nonce at the frozen fork block. Every addr
 | 20 | KAIOS_TOKEN_CORE | 53 | `0xD4E67B3a69e41524c424150E6b6e921b01D036db` | pending |
 | 21 | ALCHEMY_FURNACE_18911 | 54 | `0x44c2CA9B9eba19d8F79F6E1786fd9D25e73738e1` | pending |
 
+## Post-Genesis immutable inscription
+
+The existing 21 deployments remain frozen and unchanged. After a successful Genesis settlement and exact receipt/chain-state validation, the evidence generator prepares an unsigned `KAIOSGenesisInscription` deployment as deployment action 22.
+
+- Sequence: frozen deployments 1-21 -> Genesis settlement -> evidence validation -> inscription deployment 22
+- Full inscription Keccak-256: `0xbc89db0915e1fd0e978ae0cfe194f4b46db22534febab35563de2802935b3704`
+- Full inscription SHA-256: `add44b79083a20a6d9f240a99c5fd47658f191ce8b3fa81da6f60c97e8b4470f`
+- Expected deployment-signer nonce: 55, provided the settlement transaction does not consume that signer's nonce
+- Predicted inscription address at nonce 55: `0xb02CBc7698646653D541F494F510Fe18638AC7ae` (`PREDICTED_ONLY_NOT_DEPLOYED`)
+- First 21 predicted-address impact: NONE
+- Stop if the deployment signer's pending nonce is not 55; never shift or insert the inscription into actions 1-21
+- Amount parameters are forbidden. The generator derives the KGEN supply, recognized burn, actual KAIOS mint, settlement hash and settlement block from one successful Genesis receipt and verified chain state.
+
 ## Human-governed economic parameters
 
 | Parameter | Mainnet value | Status | Fork-only value / behavior |

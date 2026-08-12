@@ -3,8 +3,8 @@
   "auditedAt": "2026-08-09T00:00:00+08:00",
   "status": "PASS",
   "scope": {
-    "repositoryTrackedFiles": 3701,
-    "repositoryReadableTextFiles": 3699,
+    "repositoryTrackedFiles": 3702,
+    "repositoryReadableTextFiles": 3700,
     "repositoryPdfFiles": 33,
     "repositoryPdfPages": 222,
     "externalPackage": {
@@ -16,7 +16,7 @@
       "pdfPages": 0,
       "pdfExtraction": "NOT_REQUESTED"
     },
-    "scannedFilesTotal": 3701
+    "scannedFilesTotal": 3702
   },
   "finalCanon": {
     "18888": "LINGXIAO_CELESTIAL_BANK",
@@ -140,7 +140,7 @@
     }
   ],
   "classifications": {
-    "CURRENT_CORRECT": 27,
+    "CURRENT_CORRECT": 29,
     "SUPERSEDED_HISTORY": 20,
     "ACTIVE_CONFLICT": 0,
     "COMMENT_ONLY": 25,
@@ -446,6 +446,26 @@
       "rationale": "Identifier occurrence; numeric value audited independently."
     },
     {
+      "path": "KGEN-KAIOS/contracts/KAIOSGenesisInscription.sol",
+      "line": 8,
+      "pattern": "KAIOS_PER_KGEN",
+      "legacyScale": false,
+      "classification": "CURRENT_CORRECT",
+      "sourceKind": "REPOSITORY_TRACKED",
+      "excerpt": "function KAIOS_PER_KGEN() external view returns (uint256);",
+      "rationale": "Identifier occurrence; numeric value audited independently."
+    },
+    {
+      "path": "KGEN-KAIOS/contracts/KAIOSGenesisInscription.sol",
+      "line": 100,
+      "pattern": "KAIOS_PER_KGEN",
+      "legacyScale": false,
+      "classification": "CURRENT_CORRECT",
+      "sourceKind": "REPOSITORY_TRACKED",
+      "excerpt": "uint256 kaiosPerKgen = kaios.KAIOS_PER_KGEN();",
+      "rationale": "Identifier occurrence; numeric value audited independently."
+    },
+    {
       "path": "KGEN-KAIOS/contracts/KSHIP.sol",
       "line": 26,
       "pattern": "MAX_SUPPLY",
@@ -517,7 +537,7 @@
     },
     {
       "path": "KGEN-KAIOS/tests/token-surface.security.test.mjs",
-      "line": 190,
+      "line": 199,
       "pattern": "TEN_THOUSAND_KAIOS",
       "legacyScale": true,
       "classification": "TEST_FIXTURE",
@@ -647,7 +667,7 @@
     },
     {
       "path": "KGEN-KAIOS/tools/validate-integration-artifacts.mjs",
-      "line": 42,
+      "line": 70,
       "pattern": "KAIOS_PER_KGEN",
       "legacyScale": false,
       "classification": "CURRENT_CORRECT",
@@ -657,7 +677,7 @@
     },
     {
       "path": "KGEN-KAIOS/tools/validate-integration-artifacts.mjs",
-      "line": 91,
+      "line": 119,
       "pattern": "KAIOS_PER_KGEN",
       "legacyScale": false,
       "classification": "CURRENT_CORRECT",

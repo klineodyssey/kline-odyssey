@@ -2,7 +2,15 @@ import fs from "node:fs";
 import path from "node:path";
 import { execFileSync } from "node:child_process";
 import { TextDecoder } from "node:util";
-import { Contract, Interface, JsonRpcProvider, formatUnits, getAddress } from "ethers";
+import {
+  Contract,
+  ContractFactory,
+  Interface,
+  JsonRpcProvider,
+  formatUnits,
+  getAddress,
+  getCreateAddress,
+} from "ethers";
 
 const repo = path.resolve(import.meta.dirname, "..", "..");
 const reportPath = path.join(repo, "KGEN-KAIOS", "reports", "INTEGRATION_ARTIFACT_VALIDATION.json");
@@ -18,8 +26,16 @@ async function generateKaiosGenesisRecord() {
   const expectedKaios = cliArg("--kaios");
   const expectedKgen = cliArg("--kgen");
   const expectedBank = cliArg("--bank");
-  if (!rpcUrl || !txHash || !expectedKaios || !expectedKgen || !expectedBank) {
-    throw new Error("Required: BSC_MAINNET_RPC_URL plus --tx, --kaios, --kgen and --bank. No amount argument is accepted.");
+  const expectedFurnace = cliArg("--furnace");
+  const expectedRegistry = cliArg("--registry");
+  const expectedDeployer = cliArg("--deployer");
+  if (
+    !rpcUrl || !txHash || !expectedKaios || !expectedKgen || !expectedBank ||
+    !expectedFurnace || !expectedRegistry || !expectedDeployer
+  ) {
+    throw new Error(
+      "Required: BSC_MAINNET_RPC_URL plus --tx, --kaios, --kgen, --bank, --furnace, --registry and --deployer. No amount argument is accepted.",
+    );
   }
 
   const provider = new JsonRpcProvider(rpcUrl);
@@ -29,10 +45,22 @@ async function generateKaiosGenesisRecord() {
   const kaiosAddress = getAddress(expectedKaios);
   const kgenAddress = getAddress(expectedKgen);
   const bankAddress = getAddress(expectedBank);
+  const furnaceAddress = getAddress(expectedFurnace);
+  const registryAddress = getAddress(expectedRegistry);
+  const deployerAddress = getAddress(expectedDeployer);
   const receipt = await provider.getTransactionReceipt(txHash);
   const transaction = await provider.getTransaction(txHash);
   if (!receipt || receipt.status !== 1 || !transaction) throw new Error("SETTLEMENT_TRANSACTION_NOT_SUCCESSFUL");
   if (getAddress(transaction.to) !== kaiosAddress) throw new Error("SETTLEMENT_TARGET_NOT_KAIOS");
+  for (const [label, address] of [
+    ["KAIOS", kaiosAddress],
+    ["KGEN", kgenAddress],
+    ["18888", bankAddress],
+    ["18911", furnaceAddress],
+    ["REGISTRY", registryAddress],
+  ]) {
+    if (await provider.getCode(address) === "0x") throw new Error(`${label}_ADDRESS_HAS_NO_CODE`);
+  }
 
   const kaiosAbi = [
     "event WhiteHoleMassSettled(uint256 indexed settlementNumber,uint256 kgenSupplyObserved,uint256 cumulativeKgenBurned,uint256 newlySettledKgenBurned,uint256 kaiosMinted,address indexed treasury,address indexed caller)",
@@ -126,7 +154,13 @@ async function generateKaiosGenesisRecord() {
     status: "REAL_BSC_MAINNET_GENESIS_SETTLEMENT_VERIFIED",
     chainId: "56",
     pointIds: { kaiosGoldAndSilverIsland: "33333", whiteHole: "36000", lingxiaoCelestialBank: "18888" },
-    addresses: { kaiosToken: kaiosAddress, kgenToken: kgenAddress, lingxiaoBankProxy: bankAddress },
+    addresses: {
+      kaiosToken: kaiosAddress,
+      kgenToken: kgenAddress,
+      lingxiaoBankProxy: bankAddress,
+      alchemyFurnace18911: furnaceAddress,
+      organRegistry: registryAddress,
+    },
     settlement: {
       transactionHash: receipt.hash,
       blockNumber: receipt.blockNumber,
@@ -163,6 +197,8 @@ async function generateKaiosGenesisRecord() {
     `- KAIOS Token: \`${kaiosAddress}\``,
     `- 36000 Point ID: White Hole`,
     `- 18888 Bank Proxy: \`${bankAddress}\``,
+    `- 18911 Furnace: \`${furnaceAddress}\``,
+    `- Organ Registry: \`${registryAddress}\``,
     `- KGEN Genesis Supply: ${record.settlement.kgenGenesisSupply.decimal18} KGEN`,
     `- KGEN Supply at settlement block: ${record.settlement.kgenSupplyAtSettlementBlock.decimal18} KGEN`,
     `- Historical KGEN Burn: ${record.settlement.historicalKgenBurn.decimal18} KGEN`,
@@ -176,7 +212,70 @@ async function generateKaiosGenesisRecord() {
     "Generated automatically from verified chain state. No formal amount was copied from chat or entered manually.",
     "",
   ].join("\n"));
+
+  const manifestPath = path.join(repo, "KGEN-KAIOS", "config", "LINGXIAO_18888_MAINNET_DEPLOYMENT_MANIFEST.json");
+  const manifest = JSON.parse(fs.readFileSync(manifestPath, "utf8"));
+  if (manifest.deploymentOrder.length !== 21) throw new Error("FROZEN_DEPLOYMENT_SEQUENCE_IS_NOT_21_ACTIONS");
+  for (const action of manifest.deploymentOrder) {
+    const expectedAddress = getAddress(action.predictedAddress);
+    const recomputed = getCreateAddress({ from: deployerAddress, nonce: BigInt(action.nonce) });
+    if (recomputed !== expectedAddress) throw new Error(`FROZEN_ADDRESS_MISMATCH:${action.identity}`);
+    if (await provider.getCode(expectedAddress) === "0x") {
+      throw new Error(`FROZEN_DEPLOYMENT_HAS_NO_CODE:${action.identity}`);
+    }
+  }
+  const inscriptionNonce = await provider.getTransactionCount(deployerAddress, "pending");
+  const expectedInscriptionNonce = Number(manifest.deploymentOrder.at(-1).nonce) + 1;
+  if (inscriptionNonce !== expectedInscriptionNonce) {
+    throw new Error(`INSCRIPTION_NONCE_MISMATCH:${inscriptionNonce}:${expectedInscriptionNonce}`);
+  }
+  const inscriptionAddress = getCreateAddress({ from: deployerAddress, nonce: inscriptionNonce });
+  if (await provider.getCode(inscriptionAddress) !== "0x") throw new Error("INSCRIPTION_PREDICTED_ADDRESS_ALREADY_HAS_CODE");
+  const inscriptionArtifact = JSON.parse(
+    fs.readFileSync(path.join(repo, "KGEN-KAIOS", "artifacts", "KAIOSGenesisInscription.json"), "utf8"),
+  );
+  const inscriptionArgs = [
+    kaiosAddress,
+    kgenAddress,
+    bankAddress,
+    furnaceAddress,
+    registryAddress,
+    kgenSupply,
+    historicalBurn,
+    event.kaiosMinted,
+    receipt.hash,
+    BigInt(receipt.blockNumber),
+  ];
+  const unsignedDeployment = await new ContractFactory(
+    inscriptionArtifact.abi,
+    inscriptionArtifact.bytecode,
+  ).getDeployTransaction(...inscriptionArgs);
+  const unsignedPackage = {
+    status: "READY_FOR_SEPARATE_HUMAN_MAINNET_AUTHORIZATION",
+    transactionAuthorized: false,
+    chainId: "56",
+    order: "FROZEN_DEPLOYMENTS_1_TO_21_THEN_GENESIS_SETTLEMENT_THEN_EVIDENCE_VALIDATION_THEN_INSCRIPTION_DEPLOYMENT_22",
+    first21AddressImpact: "NONE",
+    deployer: deployerAddress,
+    nonce: inscriptionNonce,
+    predictedInscriptionAddress: inscriptionAddress,
+    constructorArguments: inscriptionArgs.map((value) => typeof value === "bigint" ? value.toString() : value),
+    data: unsignedDeployment.data,
+    value: "0",
+    fullInscriptionKeccak256: "0xbc89db0915e1fd0e978ae0cfe194f4b46db22534febab35563de2802935b3704",
+    fullInscriptionSha256: "add44b79083a20a6d9f240a99c5fd47658f191ce8b3fa81da6f60c97e8b4470f",
+    amountSource: "VERIFIED_SUCCESSFUL_SETTLEMENT_RECEIPT_AND_CHAIN_STATE_NO_AMOUNT_ARGUMENT",
+  };
+  const unsignedPath = path.join(
+    repo,
+    "KGEN-KAIOS",
+    "reports",
+    "mainnet-pre-sign",
+    "KAIOS_GENESIS_INSCRIPTION_UNSIGNED_DEPLOYMENT.json",
+  );
+  fs.writeFileSync(unsignedPath, `${JSON.stringify(unsignedPackage, null, 2)}\n`);
   console.log(`KAIOS Genesis record generated for block ${receipt.blockNumber}`);
+  console.log(`Unsigned Genesis inscription deployment prepared for nonce ${inscriptionNonce}`);
 }
 
 if (process.argv.includes("--generate-kaios-genesis-record")) {
