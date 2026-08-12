@@ -15,12 +15,18 @@ const requiredUint = (name) => {
   if (value < 0n) throw new Error(`${name} must be unsigned`);
   return value;
 };
+const canonicalAddress = (name, canonical) => {
+  const expected = getAddress(canonical);
+  const supplied = process.env[name];
+  if (supplied && getAddress(supplied) !== expected) throw new Error(`${name} conflicts with Human Final Governance Canon`);
+  return expected;
+};
 const deployer = getAddress(required("MAINNET_DEPLOYMENT_SIGNER_ADDRESS"));
 const startNonce = requiredUint("MAINNET_DEPLOYMENT_SIGNER_NONCE");
-const admin = getAddress(process.env.FORMAL_BANK_ADMIN ?? "0xCd60BF474e691F2484950a0276Eaf507616Ca4b9");
+const admin = canonicalAddress("FORMAL_BANK_ADMIN", "0xCd60BF474e691F2484950a0276Eaf507616Ca4b9");
 const bootstrapUpgrader = getAddress(process.env.BOOTSTRAP_BANK_UPGRADER ?? admin);
-const distinctGovernanceApprover = getAddress(required("FORMAL_BANK_GOVERNANCE_APPROVER"));
-const formalPauser = getAddress(required("FORMAL_BANK_PAUSER"));
+const distinctGovernanceApprover = canonicalAddress("FORMAL_BANK_GOVERNANCE_APPROVER", "0xc15e08834fca9f2d3462a3f8f0bc30524d6dd756");
+const formalPauser = canonicalAddress("FORMAL_BANK_PAUSER", "0xebeeac6d09d2d28db8010b0923442c9eb2b702fe");
 if (distinctGovernanceApprover === admin) throw new Error("FORMAL_BANK_GOVERNANCE_APPROVER must be distinct from the bootstrap proposer");
 const kgen = getAddress("0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be");
 const exchange11520 = getAddress("0xd0605F4EF10e5C1438F11AF9edc36926769239d6");
@@ -72,7 +78,9 @@ const modulePolicies = {
 };
 const reserveMinimum = requiredUint("BANK_RESERVE_MINIMUM_WEI");
 const riskAlertThreshold = requiredUint("BANK_RISK_ALERT_THRESHOLD_WEI");
+const depositInterestRatePpm = requiredUint("DEPOSIT_INTEREST_RATE_PPM_PER_MONTHLY_EPOCH");
 if (riskAlertThreshold < reserveMinimum) throw new Error("BANK_RISK_ALERT_THRESHOLD_WEI must be >= BANK_RESERVE_MINIMUM_WEI");
+if (depositInterestRatePpm > (1n << 64n) - 1n) throw new Error("DEPOSIT_INTEREST_RATE_PPM_PER_MONTHLY_EPOCH must fit uint64");
 
 const addressAt = (offset) => getCreateAddress({ from: deployer, nonce: startNonce + BigInt(offset) });
 const actions = [];
@@ -196,6 +204,24 @@ appendCall(
   admin,
   governanceInterface.encodeFunctionData("grantRole", [id("APPROVER_ROLE"), distinctGovernanceApprover]),
 );
+appendCall(
+  "REVOKE_MOTHER_APPROVER_ROLE",
+  governance.proxy,
+  admin,
+  governanceInterface.encodeFunctionData("revokeRole", [id("APPROVER_ROLE"), admin]),
+);
+appendCall(
+  "GRANT_GUANYIN_FINAL_BANK_PAUSER",
+  bank.proxy,
+  admin,
+  bankInterface.encodeFunctionData("grantRole", [id("PAUSER_ROLE"), formalPauser]),
+);
+appendCall(
+  "REVOKE_MOTHER_DIRECT_BANK_PAUSER",
+  bank.proxy,
+  admin,
+  bankInterface.encodeFunctionData("revokeRole", [id("PAUSER_ROLE"), admin]),
+);
 for (const [name, deployed] of Object.entries(deployedModules)) {
   const policy = modulePolicies[name];
   appendCall(
@@ -243,6 +269,21 @@ appendCall(
   admin,
   economic8888Interface.encodeFunctionData("finalizeGovernance", [governance.proxy, formalPauser]),
 );
+const revokeGovernancePauserData = bankInterface.encodeFunctionData("revokeRole", [id("PAUSER_ROLE"), governance.proxy]);
+const revokeGovernancePauserProposalId = id("MAINNET-CANON-REVOKE-GOVERNANCE-CONTRACT-PAUSER");
+const delayedGovernanceFinalization = {
+  identity: "REVOKE_GOVERNANCE_CONTRACT_DIRECT_PAUSER",
+  proposalId: revokeGovernancePauserProposalId,
+  target: bank.proxy,
+  data: revokeGovernancePauserData,
+  proposer: admin,
+  approver: distinctGovernanceApprover,
+  delaySeconds: governanceDelay.toString(),
+  proposeCalldata: governanceInterface.encodeFunctionData("propose", [revokeGovernancePauserProposalId, bank.proxy, 0, revokeGovernancePauserData]),
+  approveCalldata: governanceInterface.encodeFunctionData("approve", [revokeGovernancePauserProposalId]),
+  executeCalldata: governanceInterface.encodeFunctionData("execute", [revokeGovernancePauserProposalId, revokeGovernancePauserData]),
+  executionRule: "MOTHER_PROPOSES_THEN_JADE_EMPEROR_APPROVES_THEN_WAIT_AT_LEAST_3600_SECONDS_THEN_EXECUTE",
+};
 
 const plan = {
   status: "UNSIGNED_MAINNET_DEPLOYMENT_PACKAGE_ONLY",
@@ -272,19 +313,26 @@ const plan = {
     furnaceEpochSeconds: furnaceEpochSeconds.toString(),
     reserveMinimumWei: reserveMinimum.toString(),
     riskAlertThresholdWei: riskAlertThreshold.toString(),
+    depositInterestRatePpmPerGregorianMonthlyEpoch: depositInterestRatePpm.toString(),
+    depositInterestEffectiveEpochRule: "QUERY_8888_CURRENT_BANKING_EPOCH_THEN_SCHEDULE_FOR_CURRENT_PLUS_ONE",
     modulePolicies,
   },
   predicted: { registry, bank, economic8888, ...deployedModules, kaios, furnace18911 },
   deploymentActions: actions,
   postDeployCalls,
+  delayedGovernanceFinalization,
   genesis: {
     amountInputAccepted: false,
     instruction: "Re-read formal KGEN totalSupply at execution block, call KAIOS.settleWhiteHoleMass(), verify receipt, then start Genesis Epoch and auto-generate inscription.",
   },
-  blockers: [
-    "RECONFIRM_SIGNER_CONTROL_BALANCE_NONCE_AND_ALL_CODEHASHES",
-    "DISTINCT_GOVERNANCE_APPROVER_MUST_BE_GRANTED_AND_VERIFIED_BEFORE_FINALIZATION",
-    "MAINNET_DEPLOY_APPROVED_NOT_RECEIVED",
+  governanceIdentityBlockers: 0,
+  blockers: [],
+  authorizationGate: "MAINNET_DEPLOY_APPROVED_NOT_RECEIVED",
+  preSignatureChecks: [
+    "RECONFIRM_DEPLOYMENT_SIGNER_CONTROL_BALANCE_NONCE_AND_ALL_CODEHASHES",
+    "VERIFY_MOTHER_PROPOSER_ONLY_AND_JADE_EMPEROR_APPROVER_ONLY",
+    "VERIFY_GUANYIN_PAUSE_ONLY",
+    "VERIFY_DEPLOYMENT_SIGNER_HAS_NO_PERMANENT_GOVERNANCE_ROLE",
   ],
 };
 process.stdout.write(`${JSON.stringify(plan, (_, value) => typeof value === "bigint" ? value.toString() : value, 2)}\n`);

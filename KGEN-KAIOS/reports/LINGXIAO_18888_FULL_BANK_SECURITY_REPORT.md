@@ -27,7 +27,7 @@ KAIOS Token Core and Bank Runtime are separate. Token monetary physics cannot be
 
 UUPS governance can authorize future code with new powers. V2 runtime is not claimed to be eternally immutable. Mitigation is public implementation/version state, `Upgraded` events, delayed proposal/approval (including upgrades), storage validation, fork rehearsal and Human release approval. Production must not stop before Bank Core and every module report `governanceFinalized() == true` and bootstrap upgraders have lost `UPGRADER_ROLE`.
 
-Module caps and reserve values are policy inputs. The package intentionally does not invent Mainnet values. They require an explicit governance decision before deployment calldata can be signed.
+Module caps, reserve and interest values are Human-approved policy inputs encoded in `config/mainnet-economic-config.final-review.json`. No value is invented by deployment tooling, and unused capacity remains in 18888.
 
 ## Current result
 
@@ -38,4 +38,5 @@ Module caps and reserve values are policy inputs. The package intentionally does
 - A formal code-bearing 8888 candidate now exists as `GaolaozhuangCommercialBank8888_Upgradeable`; its proxy is the fixed Router target and the no-code legacy EOA is lineage-only.
 - 8888 liability accounting, monthly day-5 UTC+8 payroll, savings credit, registered commerce, separately funded future-only interest checkpoints, delayed-governance upgrade and rollback pass local and chainId 56 fork rehearsal.
 - CelestialSeat500 Calendar V2 consumes only former reserved slots 54-56, leaves 43 gap slots, and preserves the duration candidate's complete prefix and `Seat` struct for upgrade discipline.
-- Signature remains blocked by Human economic values, distinct approver/pauser confirmation, and the absence of `MAINNET_DEPLOY_APPROVED`; calendar correctness is no longer a parameter blocker.
+- Mother `0xCd60BF474e691F2484950a0276Eaf507616Ca4b9` is proposer-only after finalization; Jade Emperor `0xc15e08834fca9f2d3462a3f8f0bc30524d6dd756` is distinct approver-only; Guanyin `0xebeeac6d09d2d28db8010b0923442c9eb2b702fe` is pause-only. The fork passed delayed upgrade/rollback, role isolation, and Guanyin withdraw/mint/upgrade rejection.
+- Economic and governance identity blockers are zero. The absence of explicit `MAINNET_DEPLOY_APPROVED` remains the sole transaction authorization gate.

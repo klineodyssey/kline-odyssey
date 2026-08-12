@@ -7,7 +7,7 @@ The formal 18888 Celestial salary epoch is a deterministic Gregorian calendar mo
 
 An activated seat begins from its checkpointed first salary month. Every matured but unclaimed month remains an entitlement. Claims are all-or-nothing at transaction scope: if 18888 is paused, underfunded, or its risk reserve blocks payment, `lastClaimedMonth` and claimed amount remain unchanged so anyone may retry after a lawful refill. The caller never supplies a beneficiary or amount.
 
-Salary-base, salary-weight and beneficiary changes must use a future `YYYYMM` checkpoint. They cannot rewrite a current or past month. Mainnet salary base and weight rules remain deployment configuration values marked `HUMAN_CONFIRM_REQUIRED`; calendar correctness is fixed contract behavior, not an economic parameter.
+Salary-base, salary-weight and beneficiary changes must use a future `YYYYMM` checkpoint. They cannot rewrite a current or past month. Mainnet starts at 88 KAIOS per active seat per Gregorian month, default weight 1x, with a governance policy range of 1x-5x. These are deployment/governance policy values; calendar correctness remains fixed contract behavior, and inactive seats accrue no salary liability.
 
 **文件狀態：** CURRENT DESIGN / CODEX IMPLEMENTATION BASIS  
 **版本：** V1.1 Celestial Payroll Reconciliation

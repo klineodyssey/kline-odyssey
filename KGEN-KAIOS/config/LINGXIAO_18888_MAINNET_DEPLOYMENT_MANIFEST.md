@@ -1,15 +1,20 @@
 # Lingxiao 18888 Mainnet Deployment Manifest
 
-Status: economic parameters frozen; two governance public identities remain required; Mainnet transaction is not authorized.
+Status: MAINNET_PRE_SIGN_READY_FOR_HUMAN_AUTHORIZATION; Mainnet transaction is not authorized.
 
-- Fork block: 115314782
+- Fork block: 115460801
 - Formal KGEN: `0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be`
 - Formal 11520: `0xd0605F4EF10e5C1438F11AF9edc36926769239d6`
 - Legacy Heart: `0xB016D4d8f1aED1339101b30722cad6dbA9B8C972` — DO NOT TOUCH
 - Formal governance: `0xCd60BF474e691F2484950a0276Eaf507616Ca4b9`
+- Distinct governance approver (Jade Emperor): `0xc15E08834fCA9F2d3462a3f8f0BC30524D6dd756`
+- Final emergency pauser (Guanyin): `0xEBEeAC6d09D2d28Db8010b0923442C9Eb2b702FE`
 - Deployment signer candidate: `0xb3C54ca96De0dED4Ca0151F629ff9781506ba261`
-- Economic config: `KGEN-KAIOS/config/mainnet-economic-config.final-review.json`
-- Economic config SHA-256: `16988c0e1861a8b718bbdf238e3826cef1d4947daf34f716b687d5b2d61bfc37`
+- Economic config SHA-256: `5e2fc57df2bae4778d5e405dfa07f8e3e78fe72a7de3dd9889aad4e6d86b8bd4`
+- Deployment signer nonce: 34
+- Deployment signer balance: 0.00556736894145793 BNB
+- Buffered gas estimate: 37401808 gas at 50000000 wei = 0.0018700904 BNB
+- Unsigned Genesis deployment package: PASS (21 deployments, 29 post-deploy calls, zero configuration blockers)
 - Bank creation codehash: `0xff5594efa2cd283aed2cab9f27634c06a4da3d2737c645addfdc54f53757d43b`
 - Bank runtime codehash: `0xcfe00d93cf874129e6d01003f2fb265128d469dd350e5a5cab79beafb518f00c`
 - 8888 creation codehash: `0x6db0a450065b47d3b12ea695afbc8db6f1a02e98f94e97a78518b4c17f2387e9`
@@ -47,25 +52,32 @@ Predictions use the deployment signer nonce at the frozen fork block. Every addr
 
 | Parameter | Mainnet value | Status | Fork-only value / behavior |
 |---|---|---|---|
-| 500 Seat salary base/rate | 88 KAIOS per active seat per Gregorian month (`88000000000000000000` wei) | HUMAN_FINAL_ECONOMIC_POLICY_ENCODED | default 1x (`1000000` ppm); governance policy range 1x-5x; inactive seats accrue no salary |
+| 500 Seat salary base/rate | 88 KAIOS monthly base; 1x default; governance policy 1x-5x | HUMAN_FINAL_ECONOMIC_POLICY_ENCODED | matches Mainnet candidate |
 | 500 Seat epoch definition | MONTHLY_DAY_5_00_00_UTC_PLUS_8 | HUMAN_FINAL_CANON_IMPLEMENTED | deterministic Gregorian YYYYMM maturity enforced on-chain |
-| 18911 Alchemy epoch definition | 86400 seconds | FROZEN_DEPLOYMENT_CONFIGURATION_NOT_ECONOMIC_POLICY | unchanged candidate configuration |
-| Reserve minimum | 11,000,000 KAIOS (`11000000000000000000000000` wei) | HUMAN_FINAL_ECONOMIC_POLICY_ENCODED | persistent balance floor; not mandatory spending |
-| Salary exposure cap | `3005464480874316939890` wei per transaction and UTC day | HUMAN_FINAL_ECONOMIC_POLICY_ENCODED | 1,099,999.999999999999999740 KAIOS across 366 capped UTC days |
-| Allocation exposure cap | `6010928961748633879781` wei per transaction and UTC day | HUMAN_FINAL_ECONOMIC_POLICY_ENCODED | 2,199,999.999999999999999846 KAIOS across 366 capped UTC days |
-| 8888 route cap | `12021857923497267759562` wei per transaction and UTC day | HUMAN_FINAL_ECONOMIC_POLICY_ENCODED | 4,399,999.999999999999999692 KAIOS across 366 capped UTC days |
-| 11520 settlement cap | `6010928961748633879781` wei per transaction and UTC day | HUMAN_FINAL_ECONOMIC_POLICY_ENCODED | 2,199,999.999999999999999846 KAIOS across 366 capped UTC days |
-| 8888 deposit interest rate | 833 ppm per Gregorian monthly epoch | HUMAN_FINAL_ECONOMIC_POLICY_ENCODED | 0.9996% nominal annual policy; liability must be legitimately funded |
+| 18911 Alchemy epoch definition | 86400 seconds | FROZEN_DEPLOYMENT_CONFIGURATION_NOT_ECONOMIC_POLICY | matches Mainnet candidate |
+| Reserve minimum | 11000000.0 KAIOS | HUMAN_FINAL_ECONOMIC_POLICY_ENCODED | matches Mainnet candidate |
+| Salary exposure cap | 3005464480874316939890 wei per transaction / 3005464480874316939890 wei per UTC day | HUMAN_FINAL_ECONOMIC_POLICY_ENCODED | matches Mainnet candidate |
+| Allocation exposure cap | 6010928961748633879781 wei per transaction / 6010928961748633879781 wei per UTC day | HUMAN_FINAL_ECONOMIC_POLICY_ENCODED | matches Mainnet candidate |
+| 8888 route cap | 12021857923497267759562 wei per transaction / 12021857923497267759562 wei per UTC day | HUMAN_FINAL_ECONOMIC_POLICY_ENCODED | matches Mainnet candidate |
+| 11520 settlement cap | 6010928961748633879781 wei per transaction / 6010928961748633879781 wei per UTC day | HUMAN_FINAL_ECONOMIC_POLICY_ENCODED | matches Mainnet candidate |
+| 8888 deposit interest rate | 833 ppm per Gregorian monthly epoch | HUMAN_FINAL_ECONOMIC_POLICY_ENCODED | matches Mainnet candidate |
 | Governance delay | 3600 seconds | HUMAN_FINAL_CANON_TECHNICAL_MINIMUM | 3600 seconds |
-| Distinct BankGovernance approver | unset | HUMAN_PUBLIC_ADDRESS_REQUIRED | fork fixture address is not a Mainnet identity |
-| Pause authority | unset | HUMAN_PUBLIC_ADDRESS_REQUIRED | final pauser cannot be inferred from historical addresses |
+| Distinct BankGovernance approver | 0xc15E08834fCA9F2d3462a3f8f0BC30524D6dd756 | HUMAN_FINAL_JADE_EMPEROR | formal public identity used in fork |
+| Pause authority | 0xEBEeAC6d09D2d28Db8010b0923442C9Eb2b702FE | HUMAN_FINAL_GUANYIN | pause only; cannot unpause, spend, mint, upgrade, allocate or redirect |
 | Initial module enable/disable state | six active; BankMigration registered but inactive | HUMAN_FINAL_CANON | matches Mainnet candidate |
+
+## Final governance role matrix
+
+- Mother `0xCd60BF474e691F2484950a0276Eaf507616Ca4b9`: PROPOSER only; no direct Bank/module Admin, Upgrader or Pauser role after finalization.
+- Jade Emperor `0xc15E08834fCA9F2d3462a3f8f0BC30524D6dd756`: APPROVER only; no direct Bank/module Admin, Upgrader, Pauser, payment or beneficiary authority.
+- Guanyin `0xEBEeAC6d09D2d28Db8010b0923442C9Eb2b702FE`: PAUSER only on 18888/8888; withdraw, mint, upgrade, allocation and salary redirect are blocked.
+- Deployment signer `0xb3C54ca96De0dED4Ca0151F629ff9781506ba261`: no permanent Bank/module governance role.
+- Governance flow: Mother proposal -> Jade Emperor approval -> wait at least 3600 seconds -> permissionless execution.
 
 ## Blocking conditions
 
-- HUMAN_PUBLIC_ADDRESS_REQUIRED:distinctGovernanceApprover
-- HUMAN_PUBLIC_ADDRESS_REQUIRED:finalPauser
+- NONE
 
-Mainnet deployment approval remains a separate authorization gate and is not counted as an economic or governance-identity blocker.
+Authorization gate: MAINNET_DEPLOY_APPROVED_NOT_RECEIVED.
 
 No line in this manifest authorizes a transaction.

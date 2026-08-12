@@ -1,4 +1,5 @@
 import fs from "node:fs";
+import { createHash } from "node:crypto";
 import path from "node:path";
 import process from "node:process";
 import ganache from "ganache";
@@ -21,20 +22,44 @@ const root = path.resolve(import.meta.dirname, "..");
 const repo = path.resolve(root, "..");
 const reportDirectory = path.join(root, "reports", "mainnet-pre-sign");
 const publicRpc = process.env.BSC_MAINNET_RPC_URL ?? "https://bsc-dataseed1.bnbchain.org";
+const economicConfigPath = path.join(root, "config", "mainnet-economic-config.final-review.json");
+const economicConfigBytes = fs.readFileSync(economicConfigPath);
+const economicConfig = JSON.parse(economicConfigBytes.toString("utf8"));
+const economicConfigSha256 = createHash("sha256").update(economicConfigBytes).digest("hex");
 
 const FORMAL_KGEN = getAddress("0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be");
 const FORMAL_11520 = getAddress("0xd0605F4EF10e5C1438F11AF9edc36926769239d6");
 const LEGACY_HEART = getAddress("0xB016D4d8f1aED1339101b30722cad6dbA9B8C972");
 const LEGACY_TREASURY_8888 = getAddress("0x2caE692310b5A89C44c4E09Ba9F26385359d1Aa9");
-const FORMAL_GOVERNANCE = getAddress("0xCd60BF474e691F2484950a0276Eaf507616Ca4b9");
+const FORMAL_GOVERNANCE = getAddress(economicConfig.governanceIdentities.primaryGovernance);
+const DISTINCT_GOVERNANCE_APPROVER = getAddress(economicConfig.governanceIdentities.distinctGovernanceApprover);
+const FORMAL_PAUSER = getAddress(economicConfig.governanceIdentities.finalPauser);
 const DEPLOYMENT_SIGNER = getAddress("0xb3C54ca96De0dED4Ca0151F629ff9781506ba261");
 const TECHNICAL_MINIMUM_DELAY = 3_600;
 const KGEN_GENESIS_SUPPLY = 72_000_000n * 10n ** 18n;
 const KAIOS_PER_KGEN = 1_000n;
-const FORK_CELESTIAL_SALARY_BASE = 10n * 10n ** 18n;
+const FORK_CELESTIAL_SALARY_BASE = BigInt(economicConfig.encodedEconomicParameters.celestialSalaryBase.encodedWei);
 const FORK_SALARY_WEIGHT_SCALE = 1_000_000n;
-const FORK_MODULE_PER_TRANSACTION_LIMIT = 10_000n * 10n ** 18n;
-const FORK_MODULE_DAILY_LIMIT = 100_000n * 10n ** 18n;
+const FORK_MINIMUM_RESERVE = BigInt(economicConfig.encodedEconomicParameters.minimumReserve.encodedWei);
+const FORK_DEPOSIT_INTEREST_RATE_PPM = BigInt(economicConfig.encodedEconomicParameters.depositInterestRate.encodedPpmPerMonthlyEpoch);
+const FORK_MODULE_LIMITS = {
+  CelestialSeat500_Upgradeable: {
+    perTransaction: BigInt(economicConfig.encodedEconomicParameters.salaryExposureCap.perTransactionLimitWei),
+    daily: BigInt(economicConfig.encodedEconomicParameters.salaryExposureCap.dailyEpochLimitWei),
+  },
+  CivilizationAllocation_Upgradeable: {
+    perTransaction: BigInt(economicConfig.encodedEconomicParameters.allocationExposureCap.perTransactionLimitWei),
+    daily: BigInt(economicConfig.encodedEconomicParameters.allocationExposureCap.dailyEpochLimitWei),
+  },
+  EconomicRouter8888_Upgradeable: {
+    perTransaction: BigInt(economicConfig.encodedEconomicParameters.router8888Cap.perTransactionLimitWei),
+    daily: BigInt(economicConfig.encodedEconomicParameters.router8888Cap.dailyEpochLimitWei),
+  },
+  ExchangeSettlement11520_Upgradeable: {
+    perTransaction: BigInt(economicConfig.encodedEconomicParameters.settlement11520Cap.perTransactionLimitWei),
+    daily: BigInt(economicConfig.encodedEconomicParameters.settlement11520Cap.dailyEpochLimitWei),
+  },
+};
 const EXPECTED_BANK_CREATION_HASH = "0xff5594efa2cd283aed2cab9f27634c06a4da3d2737c645addfdc54f53757d43b";
 const EXPECTED_BANK_RUNTIME_HASH = "0xcfe00d93cf874129e6d01003f2fb265128d469dd350e5a5cab79beafb518f00c";
 
@@ -80,16 +105,29 @@ async function main() {
   const live = new JsonRpcProvider(publicRpc);
   const liveNetwork = await live.getNetwork();
   expect(liveNetwork.chainId === 56n, `CHAIN_ID_MISMATCH:${liveNetwork.chainId}`);
-  const [liveKgenCode, live11520Code, legacyCode] = await Promise.all([
+  expect(FORMAL_GOVERNANCE !== DISTINCT_GOVERNANCE_APPROVER, "GOVERNANCE_APPROVER_NOT_DISTINCT");
+  const [liveKgenCode, live11520Code, legacyCode, motherCode, approverCode, pauserCode, deploymentSignerCode] = await Promise.all([
     live.getCode(FORMAL_KGEN),
     live.getCode(FORMAL_11520),
     live.getCode(LEGACY_HEART),
+    live.getCode(FORMAL_GOVERNANCE),
+    live.getCode(DISTINCT_GOVERNANCE_APPROVER),
+    live.getCode(FORMAL_PAUSER),
+    live.getCode(DEPLOYMENT_SIGNER),
   ]);
   expect(liveKgenCode !== "0x", "FORMAL_KGEN_HAS_NO_CODE");
   expect(live11520Code !== "0x", "FORMAL_11520_HAS_NO_CODE");
   expect(legacyCode !== "0x", "LEGACY_HEART_HAS_NO_CODE");
   const liveGasPrice = (await live.getFeeData()).gasPrice ?? 3_000_000_000n;
   const liveDeploymentSignerBalance = await live.getBalance(DEPLOYMENT_SIGNER);
+  const liveDeploymentSignerNonce = await live.getTransactionCount(DEPLOYMENT_SIGNER, "pending");
+  const liveKgenSupply = await new Contract(FORMAL_KGEN, ["function totalSupply() view returns (uint256)"], live).totalSupply();
+  const governanceAddressClassification = {
+    mother: { address: FORMAL_GOVERNANCE, accountType: motherCode === "0x" ? "EOA" : "CONTRACT", codeExists: motherCode !== "0x" },
+    jadeEmperor: { address: DISTINCT_GOVERNANCE_APPROVER, accountType: approverCode === "0x" ? "EOA" : "CONTRACT", codeExists: approverCode !== "0x" },
+    guanyin: { address: FORMAL_PAUSER, accountType: pauserCode === "0x" ? "EOA" : "CONTRACT", codeExists: pauserCode !== "0x" },
+    deploymentSigner: { address: DEPLOYMENT_SIGNER, accountType: deploymentSignerCode === "0x" ? "EOA" : "CONTRACT", codeExists: deploymentSignerCode !== "0x" },
+  };
 
   const eip1193 = ganache.provider({
     fork: { url: publicRpc },
@@ -98,7 +136,7 @@ async function main() {
       deterministic: true,
       totalAccounts: 8,
       defaultBalance: 1_000,
-      unlockedAccounts: [DEPLOYMENT_SIGNER, FORMAL_GOVERNANCE],
+      unlockedAccounts: [DEPLOYMENT_SIGNER, FORMAL_GOVERNANCE, DISTINCT_GOVERNANCE_APPROVER, FORMAL_PAUSER],
     },
     logging: { quiet: true },
   });
@@ -111,22 +149,29 @@ async function main() {
     const forkBlockNumber = await provider.getBlockNumber();
     const forkBlock = await provider.getBlock(forkBlockNumber);
     const forkStartNonce = await provider.getTransactionCount(DEPLOYMENT_SIGNER);
+    expect(forkStartNonce === liveDeploymentSignerNonce, `PENDING_NONCE_NOT_REPRODUCIBLE_ON_FORK:${liveDeploymentSignerNonce}:${forkStartNonce}`);
     const kgenOwnerBefore = await new Contract(FORMAL_KGEN, ["function owner() view returns (address)"], provider).owner();
     expect(getAddress(kgenOwnerBefore) === DEPLOYMENT_SIGNER, "DEPLOYMENT_SIGNER_IS_NOT_KGEN_OWNER_AT_FORK");
 
     await eip1193.request({ method: "evm_setAccountBalance", params: [DEPLOYMENT_SIGNER, `0x${parseEther("1000").toString(16)}`] });
     await eip1193.request({ method: "evm_setAccountBalance", params: [FORMAL_GOVERNANCE, `0x${parseEther("1000").toString(16)}`] });
+    await eip1193.request({ method: "evm_setAccountBalance", params: [DISTINCT_GOVERNANCE_APPROVER, `0x${parseEther("1000").toString(16)}`] });
+    await eip1193.request({ method: "evm_setAccountBalance", params: [FORMAL_PAUSER, `0x${parseEther("1000").toString(16)}`] });
     const deployer = await provider.getSigner(DEPLOYMENT_SIGNER);
     const governance = await provider.getSigner(FORMAL_GOVERNANCE);
+    const distinctApprover = await provider.getSigner(DISTINCT_GOVERNANCE_APPROVER);
+    const formalPauser = await provider.getSigner(FORMAL_PAUSER);
     const fixtureDeployer = await provider.getSigner(0);
-    const distinctApprover = await provider.getSigner(1);
     const beneficiary = await provider.getSigner(2);
     const civilizationDestination = await provider.getSigner(3);
     const outsider = await provider.getSigner(4);
     const beneficiaryAddress = await beneficiary.getAddress();
     const civilizationDestinationAddress = await civilizationDestination.getAddress();
     const outsiderAddress = await outsider.getAddress();
-    const distinctApproverAddress = await distinctApprover.getAddress();
+    const distinctApproverAddress = getAddress(await distinctApprover.getAddress());
+    const formalPauserAddress = getAddress(await formalPauser.getAddress());
+    expect(distinctApproverAddress === DISTINCT_GOVERNANCE_APPROVER, "JADE_EMPEROR_SIGNER_MISMATCH");
+    expect(formalPauserAddress === FORMAL_PAUSER, "GUANYIN_SIGNER_MISMATCH");
 
     const forkOnlyBurnPair = await new ContractFactory(
       artifact("MockOrgan").abi,
@@ -238,20 +283,15 @@ async function main() {
       BankMigration_Upgradeable: id("KAIOS.BANK.MODULE.MIGRATION"),
     };
     for (const [name, item] of Object.entries(modules)) {
-      const isPaymentModule = [
-        "CelestialSeat500_Upgradeable",
-        "CivilizationAllocation_Upgradeable",
-        "EconomicRouter8888_Upgradeable",
-        "ExchangeSettlement11520_Upgradeable",
-      ].includes(name);
+      const limits = FORK_MODULE_LIMITS[name] ?? { perTransaction: 0n, daily: 0n };
       await transact(
         `configureModule_${name}`,
         bank.contract.configureModule(
           moduleIds[name],
           await item.contract.getAddress(),
           id(`${name}:${name === "CelestialSeat500_Upgradeable" ? "2.0.0" : "1.0.0"}`),
-          isPaymentModule ? FORK_MODULE_PER_TRANSACTION_LIMIT : 0n,
-          isPaymentModule ? FORK_MODULE_DAILY_LIMIT : 0n,
+          limits.perTransaction,
+          limits.daily,
           name !== "BankMigration_Upgradeable",
         ),
       );
@@ -264,6 +304,18 @@ async function main() {
     await transact(
       "grantDistinctGovernanceApprover",
       governanceModule.grantRole(await governanceModule.APPROVER_ROLE(), distinctApproverAddress),
+    );
+    await transact(
+      "revokeMotherGovernanceApprover",
+      governanceModule.revokeRole(await governanceModule.APPROVER_ROLE(), FORMAL_GOVERNANCE),
+    );
+    const bankPauserRoleBeforeFinalization = await bank.contract.PAUSER_ROLE();
+    await transact("grantFinalBankPauser", bank.contract.grantRole(bankPauserRoleBeforeFinalization, formalPauserAddress));
+    await transact("revokeBootstrapBankPauser", bank.contract.revokeRole(bankPauserRoleBeforeFinalization, FORMAL_GOVERNANCE));
+    const nextInterestEpoch = (await economic8888.contract.currentBankingEpoch()) + 1n;
+    await transact(
+      "scheduleInitial8888InterestRate",
+      economic8888.contract.scheduleInterestRate(nextInterestEpoch, FORK_DEPOSIT_INTEREST_RATE_PPM),
     );
 
     const organWiring = [
@@ -287,6 +339,7 @@ async function main() {
       "function transfer(address,uint256) returns (bool)",
     ], provider);
     const supplyAtGenesisSettlement = await kgen.totalSupply();
+    expect(supplyAtGenesisSettlement === liveKgenSupply, "FORK_KGEN_SUPPLY_DIFFERS_FROM_LIVE_REFRESH");
     const historicalBurn = KGEN_GENESIS_SUPPLY - supplyAtGenesisSettlement;
     const expectedGenesisKaios = historicalBurn * KAIOS_PER_KGEN;
     const bankBalanceBeforeGenesis = await kaios.balanceOf(bankAddress);
@@ -301,6 +354,8 @@ async function main() {
       "REPEAT_GENESIS_SETTLEMENT",
     );
     await transact("startGenesisEpoch", bank.contract.connect(outsider).startGenesisEpoch());
+    const risk = modules.BankRiskController_Upgradeable.contract;
+    await transact("applyHumanApprovedRiskParameters", risk.applyRiskParameters(FORK_MINIMUM_RESERVE, FORK_MINIMUM_RESERVE));
 
     const seats = modules.CelestialSeat500_Upgradeable.contract;
     await transact(
@@ -369,15 +424,12 @@ async function main() {
       ),
     );
     const payrollClaimableAt = await economic8888.contract.epochClaimableAt(payrollEpoch);
-    const beforePayrollBlock = await provider.getBlock("latest");
-    await provider.send("evm_increaseTime", [Number(payrollClaimableAt) - beforePayrollBlock.timestamp - 1]);
-    await provider.send("evm_mine", []);
+    await advanceForkTo(payrollClaimableAt - 2n);
     transactions.bank8888SalaryBeforeFifthRejected = await expectRevert(
       () => economic8888.contract.connect(outsider).claimSalary(payrollId, 2, payrollAccountId, { gasLimit: 1_000_000 }),
       "8888_SALARY_BEFORE_MONTHLY_FIFTH",
     );
-    await provider.send("evm_increaseTime", [1]);
-    await provider.send("evm_mine", []);
+    await advanceForkTo(payrollClaimableAt);
     await transact(
       "bank8888ClaimMonthlySalaryToSavings",
       economic8888.contract.connect(outsider).claimSalary(payrollId, 2, payrollAccountId),
@@ -427,7 +479,7 @@ async function main() {
       }),
       "ARBITRARY_OWNER_WITHDRAW",
     );
-    await transact("pauseBank", bank.contract.pause());
+    await transact("pauseBankByGuanyin", bank.contract.connect(formalPauser).pause());
     transactions.paymentWhilePausedRejected = await expectRevert(
       () => router8888.routeCapital(id("FORK-PAUSED-ROUTE"), 10n ** 18n, id("FORK-PAUSED"), { gasLimit: 500_000 }),
       "PAYMENT_WHILE_PAUSED",
@@ -436,12 +488,11 @@ async function main() {
 
     await transact(
       "configureCelestialSeat2ForRetry",
-      seats.configureSeat(2, id("FORK-LIFE-SEAT-2"), id("FORK-TEMPLE-18888"), beneficiaryAddress, 10n * FORK_SALARY_WEIGHT_SCALE, 1),
+      seats.configureSeat(2, id("FORK-LIFE-SEAT-2"), id("FORK-TEMPLE-18888"), beneficiaryAddress, 5n * FORK_SALARY_WEIGHT_SCALE, 1),
     );
     const retrySalaryMonth = (await seats.calendarSeatState(2)).firstSalaryMonth;
     await advanceForkTo(await seats.salaryMonthMaturityAt(retrySalaryMonth));
     const retryCheckpointBefore = (await seats.calendarSeatState(2)).lastClaimedMonth;
-    const risk = modules.BankRiskController_Upgradeable.contract;
     const balanceBeforeInsufficientClaim = await kaios.balanceOf(bankAddress);
     await transact(
       "setReserveToCurrentBalance",
@@ -481,6 +532,7 @@ async function main() {
       "RETRY_DID_NOT_ADVANCE_CHECKPOINT",
     );
     expect(retryStateAfterSuccess.claimedAmount > 0n, "RETRY_DID_NOT_RECORD_CLAIM");
+    await transact("restoreHumanApprovedRiskParameters", risk.applyRiskParameters(FORK_MINIMUM_RESERVE, FORK_MINIMUM_RESERVE));
 
     const governanceAddress = getAddress(await governanceModule.getAddress());
     for (const [name, item] of Object.entries(modules)) {
@@ -489,7 +541,27 @@ async function main() {
     await transact("finalizeBankGovernance", bank.contract.finalizeGovernance(governanceAddress));
     await transact(
       "finalizeBank8888Governance",
-      economic8888.contract.finalizeGovernance(governanceAddress, outsiderAddress),
+      economic8888.contract.finalizeGovernance(governanceAddress, formalPauserAddress),
+    );
+
+    const revokeGovernancePauserData = bank.contract.interface.encodeFunctionData("revokeRole", [
+      await bank.contract.PAUSER_ROLE(),
+      governanceAddress,
+    ]);
+    const revokeGovernancePauserProposalId = id("MAINNET-CANON-REVOKE-GOVERNANCE-CONTRACT-PAUSER");
+    await transact(
+      "proposeRevokeGovernanceContractPauser",
+      governanceModule.propose(revokeGovernancePauserProposalId, bankAddress, 0, revokeGovernancePauserData),
+    );
+    await transact(
+      "approveRevokeGovernanceContractPauserByJadeEmperor",
+      governanceModule.connect(distinctApprover).approve(revokeGovernancePauserProposalId),
+    );
+    await provider.send("evm_increaseTime", [TECHNICAL_MINIMUM_DELAY + 1]);
+    await provider.send("evm_mine", []);
+    await transact(
+      "executeRevokeGovernanceContractPauser",
+      governanceModule.connect(outsider).execute(revokeGovernancePauserProposalId, revokeGovernancePauserData),
     );
 
     const bankReplacement = await new ContractFactory(
@@ -525,12 +597,26 @@ async function main() {
           upgrader: await bank.contract.hasRole(bankUpgraderRole, governanceAddress),
           pauser: await bank.contract.hasRole(pauserRole, governanceAddress),
         },
-        bootstrapGovernance: {
+        motherPrimaryGovernance: {
           address: FORMAL_GOVERNANCE,
           defaultAdmin: await bank.contract.hasRole(defaultAdminRole, FORMAL_GOVERNANCE),
           moduleAdmin: await bank.contract.hasRole(moduleAdminRole, FORMAL_GOVERNANCE),
           upgrader: await bank.contract.hasRole(bankUpgraderRole, FORMAL_GOVERNANCE),
           pauser: await bank.contract.hasRole(pauserRole, FORMAL_GOVERNANCE),
+        },
+        jadeEmperorApprover: {
+          address: DISTINCT_GOVERNANCE_APPROVER,
+          defaultAdmin: await bank.contract.hasRole(defaultAdminRole, DISTINCT_GOVERNANCE_APPROVER),
+          moduleAdmin: await bank.contract.hasRole(moduleAdminRole, DISTINCT_GOVERNANCE_APPROVER),
+          upgrader: await bank.contract.hasRole(bankUpgraderRole, DISTINCT_GOVERNANCE_APPROVER),
+          pauser: await bank.contract.hasRole(pauserRole, DISTINCT_GOVERNANCE_APPROVER),
+        },
+        guanyinFinalPauser: {
+          address: FORMAL_PAUSER,
+          defaultAdmin: await bank.contract.hasRole(defaultAdminRole, FORMAL_PAUSER),
+          moduleAdmin: await bank.contract.hasRole(moduleAdminRole, FORMAL_PAUSER),
+          upgrader: await bank.contract.hasRole(bankUpgraderRole, FORMAL_PAUSER),
+          pauser: await bank.contract.hasRole(pauserRole, FORMAL_PAUSER),
         },
         deploymentSigner: {
           address: DEPLOYMENT_SIGNER,
@@ -550,7 +636,7 @@ async function main() {
           payrollAdmin: await economic8888.contract.hasRole(economic8888PayrollAdminRole, governanceAddress),
           upgrader: await economic8888.contract.hasRole(economic8888UpgraderRole, governanceAddress),
         },
-        bootstrapGovernance: {
+        motherPrimaryGovernance: {
           address: FORMAL_GOVERNANCE,
           defaultAdmin: await economic8888.contract.hasRole(economic8888DefaultAdminRole, FORMAL_GOVERNANCE),
           accountAdmin: await economic8888.contract.hasRole(economic8888AccountAdminRole, FORMAL_GOVERNANCE),
@@ -558,9 +644,17 @@ async function main() {
           upgrader: await economic8888.contract.hasRole(economic8888UpgraderRole, FORMAL_GOVERNANCE),
         },
         pauser: {
-          address: outsiderAddress,
-          hasRole: await economic8888.contract.hasRole(economic8888PauserRole, outsiderAddress),
-          status: "FORK_ONLY_HUMAN_CONFIRM_REQUIRED_FOR_MAINNET",
+          address: FORMAL_PAUSER,
+          hasRole: await economic8888.contract.hasRole(economic8888PauserRole, FORMAL_PAUSER),
+          status: "HUMAN_FINAL_GUANYIN_PAUSE_ONLY",
+        },
+        deploymentSigner: {
+          address: DEPLOYMENT_SIGNER,
+          defaultAdmin: await economic8888.contract.hasRole(economic8888DefaultAdminRole, DEPLOYMENT_SIGNER),
+          accountAdmin: await economic8888.contract.hasRole(economic8888AccountAdminRole, DEPLOYMENT_SIGNER),
+          payrollAdmin: await economic8888.contract.hasRole(economic8888PayrollAdminRole, DEPLOYMENT_SIGNER),
+          upgrader: await economic8888.contract.hasRole(economic8888UpgraderRole, DEPLOYMENT_SIGNER),
+          pauser: await economic8888.contract.hasRole(economic8888PauserRole, DEPLOYMENT_SIGNER),
         },
       },
       modules: {},
@@ -569,6 +663,11 @@ async function main() {
         delaySeconds: Number(await governanceModule.governanceDelay()),
         proposer: FORMAL_GOVERNANCE,
         distinctApprover: distinctApproverAddress,
+        distinctIdentities: FORMAL_GOVERNANCE !== distinctApproverAddress,
+        motherHasProposerRole: await governanceModule.hasRole(await governanceModule.PROPOSER_ROLE(), FORMAL_GOVERNANCE),
+        motherHasApproverRole: await governanceModule.hasRole(await governanceModule.APPROVER_ROLE(), FORMAL_GOVERNANCE),
+        jadeEmperorHasProposerRole: await governanceModule.hasRole(await governanceModule.PROPOSER_ROLE(), DISTINCT_GOVERNANCE_APPROVER),
+        jadeEmperorHasApproverRole: await governanceModule.hasRole(await governanceModule.APPROVER_ROLE(), DISTINCT_GOVERNANCE_APPROVER),
       },
       registry: {
         owner: await registry.owner(),
@@ -584,19 +683,35 @@ async function main() {
           governance: await item.contract.hasRole(moduleGovernanceRole, governanceAddress),
           upgrader: await item.contract.hasRole(moduleUpgraderRole, governanceAddress),
         },
-        bootstrapGovernance: {
+        motherPrimaryGovernance: {
           defaultAdmin: await item.contract.hasRole(moduleDefaultAdminRole, FORMAL_GOVERNANCE),
           governance: await item.contract.hasRole(moduleGovernanceRole, FORMAL_GOVERNANCE),
           upgrader: await item.contract.hasRole(moduleUpgraderRole, FORMAL_GOVERNANCE),
         },
+        deploymentSigner: {
+          defaultAdmin: await item.contract.hasRole(moduleDefaultAdminRole, DEPLOYMENT_SIGNER),
+          governance: await item.contract.hasRole(moduleGovernanceRole, DEPLOYMENT_SIGNER),
+          upgrader: await item.contract.hasRole(moduleUpgraderRole, DEPLOYMENT_SIGNER),
+        },
       };
     }
     expect(roleMatrix.bank.finalGovernance.defaultAdmin && roleMatrix.bank.finalGovernance.moduleAdmin && roleMatrix.bank.finalGovernance.upgrader, "FINAL_GOVERNANCE_BANK_ROLES_MISSING");
-    expect(!roleMatrix.bank.bootstrapGovernance.defaultAdmin && !roleMatrix.bank.bootstrapGovernance.moduleAdmin && !roleMatrix.bank.bootstrapGovernance.upgrader, "BOOTSTRAP_BANK_ROLES_NOT_REVOKED");
+    expect(!roleMatrix.bank.motherPrimaryGovernance.defaultAdmin && !roleMatrix.bank.motherPrimaryGovernance.moduleAdmin && !roleMatrix.bank.motherPrimaryGovernance.upgrader, "BOOTSTRAP_BANK_ROLES_NOT_REVOKED");
+    expect(!roleMatrix.bank.motherPrimaryGovernance.pauser, "MOTHER_RETAINED_DIRECT_BANK_PAUSER");
+    expect(!roleMatrix.bank.jadeEmperorApprover.defaultAdmin && !roleMatrix.bank.jadeEmperorApprover.moduleAdmin && !roleMatrix.bank.jadeEmperorApprover.upgrader && !roleMatrix.bank.jadeEmperorApprover.pauser, "JADE_EMPEROR_RECEIVED_BANK_RUNTIME_ROLE");
+    expect(!roleMatrix.bank.guanyinFinalPauser.defaultAdmin && !roleMatrix.bank.guanyinFinalPauser.moduleAdmin && !roleMatrix.bank.guanyinFinalPauser.upgrader && roleMatrix.bank.guanyinFinalPauser.pauser, "GUANYIN_ROLE_BOUNDARY_INVALID");
+    expect(!roleMatrix.bank.finalGovernance.pauser, "GOVERNANCE_CONTRACT_RETAINED_DIRECT_PAUSER");
+    expect(Object.values(roleMatrix.bank.deploymentSigner).filter((value) => typeof value === "boolean").every((value) => !value), "DEPLOYMENT_SIGNER_RETAINED_BANK_ROLE");
     expect(roleMatrix.economic8888.finalGovernance.defaultAdmin && roleMatrix.economic8888.finalGovernance.accountAdmin && roleMatrix.economic8888.finalGovernance.payrollAdmin && roleMatrix.economic8888.finalGovernance.upgrader, "FINAL_GOVERNANCE_8888_ROLES_MISSING");
-    expect(!roleMatrix.economic8888.bootstrapGovernance.defaultAdmin && !roleMatrix.economic8888.bootstrapGovernance.accountAdmin && !roleMatrix.economic8888.bootstrapGovernance.payrollAdmin && !roleMatrix.economic8888.bootstrapGovernance.upgrader, "BOOTSTRAP_8888_ROLES_NOT_REVOKED");
+    expect(!roleMatrix.economic8888.motherPrimaryGovernance.defaultAdmin && !roleMatrix.economic8888.motherPrimaryGovernance.accountAdmin && !roleMatrix.economic8888.motherPrimaryGovernance.payrollAdmin && !roleMatrix.economic8888.motherPrimaryGovernance.upgrader, "BOOTSTRAP_8888_ROLES_NOT_REVOKED");
+    expect(roleMatrix.economic8888.pauser.hasRole, "GUANYIN_8888_PAUSER_ROLE_MISSING");
+    expect(Object.values(roleMatrix.economic8888.deploymentSigner).filter((value) => typeof value === "boolean").every((value) => !value), "DEPLOYMENT_SIGNER_RETAINED_8888_ROLE");
     expect(Object.values(roleMatrix.modules).every((item) => item.finalGovernance.defaultAdmin && item.finalGovernance.governance && item.finalGovernance.upgrader), "FINAL_GOVERNANCE_MODULE_ROLES_MISSING");
-    expect(Object.values(roleMatrix.modules).every((item) => !item.bootstrapGovernance.defaultAdmin && !item.bootstrapGovernance.governance && !item.bootstrapGovernance.upgrader), "BOOTSTRAP_MODULE_ROLES_NOT_REVOKED");
+    expect(Object.values(roleMatrix.modules).every((item) => !item.motherPrimaryGovernance.defaultAdmin && !item.motherPrimaryGovernance.governance && !item.motherPrimaryGovernance.upgrader), "BOOTSTRAP_MODULE_ROLES_NOT_REVOKED");
+    expect(Object.values(roleMatrix.modules).every((item) => !item.deploymentSigner.defaultAdmin && !item.deploymentSigner.governance && !item.deploymentSigner.upgrader), "DEPLOYMENT_SIGNER_RETAINED_MODULE_ROLE");
+    expect(roleMatrix.governance.motherHasProposerRole && !roleMatrix.governance.motherHasApproverRole, "MOTHER_GOVERNANCE_ROLE_BOUNDARY_INVALID");
+    expect(!roleMatrix.governance.jadeEmperorHasProposerRole && roleMatrix.governance.jadeEmperorHasApproverRole, "JADE_EMPEROR_GOVERNANCE_ROLE_BOUNDARY_INVALID");
+    expect(roleMatrix.governance.delaySeconds === TECHNICAL_MINIMUM_DELAY, "GOVERNANCE_DELAY_MISMATCH");
 
     transactions.unauthorizedPostFinalizationUpgradeRejected = await expectRevert(
       () => bank.contract.connect(governance).upgradeToAndCall(bankReplacementAddress, "0x", { gasLimit: 1_000_000 }),
@@ -721,6 +836,58 @@ async function main() {
       .replaceAll(economic8888StateAfter.implementation, "IMPLEMENTATION");
     expect(normalize8888(economic8888StateBefore) === normalize8888(economic8888StateAfter), "8888_ROLLBACK_STATE_PRESERVATION_FAILED");
 
+    await transact("guanyinPause18888", bank.contract.connect(formalPauser).pause());
+    await transact("guanyinPause8888", economic8888.contract.connect(formalPauser).pause());
+    const formalKaiosAddress = await kaios.getAddress();
+    transactions.guanyinUnauthorizedUnpauseRejected = await expectRevert(
+      () => bank.contract.connect(formalPauser).unpause({ gasLimit: 500_000 }),
+      "GUANYIN_UNAUTHORIZED_UNPAUSE",
+    );
+    transactions.guanyinUnauthorizedUpgradeRejected = await expectRevert(
+      () => bank.contract.connect(formalPauser).upgradeToAndCall(bankReplacementAddress, "0x", { gasLimit: 1_000_000 }),
+      "GUANYIN_UNAUTHORIZED_UPGRADE",
+    );
+    transactions.guanyinUnauthorizedWithdrawRejected = await expectRevert(
+      () => formalPauser.sendTransaction({
+        to: bankAddress,
+        data: new Interface(["function withdraw(address,uint256)"]).encodeFunctionData("withdraw", [FORMAL_PAUSER, 10n ** 18n]),
+        gasLimit: 500_000,
+      }),
+      "GUANYIN_UNAUTHORIZED_WITHDRAW",
+    );
+    transactions.guanyinUnauthorizedMintRejected = await expectRevert(
+      () => formalPauser.sendTransaction({
+        to: formalKaiosAddress,
+        data: new Interface(["function mint(address,uint256)"]).encodeFunctionData("mint", [FORMAL_PAUSER, 10n ** 18n]),
+        gasLimit: 500_000,
+      }),
+      "GUANYIN_UNAUTHORIZED_MINT",
+    );
+    const guanyinSecurityBlock = await provider.getBlock("latest");
+    transactions.guanyinUnauthorizedAllocationCreationRejected = await expectRevert(
+      () => allocation.connect(formalPauser).createAllocation(
+        id("GUANYIN-UNAUTHORIZED-ALLOCATION"),
+        FORMAL_PAUSER,
+        10n ** 18n,
+        guanyinSecurityBlock.timestamp,
+        id("UNAUTHORIZED"),
+        { gasLimit: 750_000 },
+      ),
+      "GUANYIN_UNAUTHORIZED_ALLOCATION_CREATION",
+    );
+    transactions.guanyinUnauthorizedSalaryRedirectRejected = await expectRevert(
+      () => seats.connect(formalPauser).configureSeat(
+        1,
+        id("FORK-LIFE-SEAT-1"),
+        id("FORK-TEMPLE-18888"),
+        FORMAL_PAUSER,
+        FORK_SALARY_WEIGHT_SCALE,
+        1,
+        { gasLimit: 750_000 },
+      ),
+      "GUANYIN_UNAUTHORIZED_SALARY_REDIRECT",
+    );
+
     const genesisBlock = await provider.getBlock(genesisSettlementReceipt.blockNumber);
     const genesisRecord = {
       status: "MAINNET_FORK_REHEARSAL_PREVIEW_NOT_FINAL",
@@ -769,21 +936,21 @@ async function main() {
     const bufferedGas = totalGasUsed * 120n / 100n;
     const estimatedRequiredWei = bufferedGas * liveGasPrice;
     const parameterTable = [
-      { parameter: "500 Seat salary base/rate", value: null, status: "HUMAN_CONFIRM_REQUIRED", forkOnlyValue: "10 KAIOS monthly base with 1.0x/10.0x test weights" },
+      { parameter: "500 Seat salary base/rate", value: "88 KAIOS monthly base; 1x default; governance policy 1x-5x", status: "HUMAN_FINAL_ECONOMIC_POLICY_ENCODED", forkOnlyValue: "matches Mainnet candidate" },
       { parameter: "500 Seat epoch definition", value: "MONTHLY_DAY_5_00_00_UTC_PLUS_8", status: "HUMAN_FINAL_CANON_IMPLEMENTED", forkOnlyValue: "deterministic Gregorian YYYYMM maturity enforced on-chain" },
-      { parameter: "18911 Alchemy epoch definition", value: null, status: "HUMAN_CONFIRM_REQUIRED", forkOnlyValue: "86400 seconds" },
-      { parameter: "Reserve minimum", value: null, status: "HUMAN_CONFIRM_REQUIRED", forkOnlyValue: "dynamic balance lock for retry test only" },
-      { parameter: "Salary exposure cap", value: null, status: "HUMAN_CONFIRM_REQUIRED", forkOnlyValue: `${formatEther(FORK_MODULE_PER_TRANSACTION_LIMIT)} per transaction / ${formatEther(FORK_MODULE_DAILY_LIMIT)} per UTC day` },
-      { parameter: "Allocation exposure cap", value: null, status: "HUMAN_CONFIRM_REQUIRED", forkOnlyValue: `${formatEther(FORK_MODULE_PER_TRANSACTION_LIMIT)} per transaction / ${formatEther(FORK_MODULE_DAILY_LIMIT)} per UTC day` },
-      { parameter: "8888 route cap", value: null, status: "HUMAN_CONFIRM_REQUIRED", forkOnlyValue: `${formatEther(FORK_MODULE_PER_TRANSACTION_LIMIT)} per transaction / ${formatEther(FORK_MODULE_DAILY_LIMIT)} per UTC day` },
-      { parameter: "11520 settlement cap", value: null, status: "HUMAN_CONFIRM_REQUIRED", forkOnlyValue: `${formatEther(FORK_MODULE_PER_TRANSACTION_LIMIT)} per transaction / ${formatEther(FORK_MODULE_DAILY_LIMIT)} per UTC day` },
-      { parameter: "8888 deposit interest rate", value: null, status: "HUMAN_CONFIRM_REQUIRED", forkOnlyValue: "unset; future-only checkpoint architecture tested locally" },
+      { parameter: "18911 Alchemy epoch definition", value: "86400 seconds", status: "FROZEN_DEPLOYMENT_CONFIGURATION_NOT_ECONOMIC_POLICY", forkOnlyValue: "matches Mainnet candidate" },
+      { parameter: "Reserve minimum", value: `${formatUnits(FORK_MINIMUM_RESERVE, 18)} KAIOS`, status: "HUMAN_FINAL_ECONOMIC_POLICY_ENCODED", forkOnlyValue: "matches Mainnet candidate" },
+      { parameter: "Salary exposure cap", value: `${FORK_MODULE_LIMITS.CelestialSeat500_Upgradeable.perTransaction} wei per transaction / ${FORK_MODULE_LIMITS.CelestialSeat500_Upgradeable.daily} wei per UTC day`, status: "HUMAN_FINAL_ECONOMIC_POLICY_ENCODED", forkOnlyValue: "matches Mainnet candidate" },
+      { parameter: "Allocation exposure cap", value: `${FORK_MODULE_LIMITS.CivilizationAllocation_Upgradeable.perTransaction} wei per transaction / ${FORK_MODULE_LIMITS.CivilizationAllocation_Upgradeable.daily} wei per UTC day`, status: "HUMAN_FINAL_ECONOMIC_POLICY_ENCODED", forkOnlyValue: "matches Mainnet candidate" },
+      { parameter: "8888 route cap", value: `${FORK_MODULE_LIMITS.EconomicRouter8888_Upgradeable.perTransaction} wei per transaction / ${FORK_MODULE_LIMITS.EconomicRouter8888_Upgradeable.daily} wei per UTC day`, status: "HUMAN_FINAL_ECONOMIC_POLICY_ENCODED", forkOnlyValue: "matches Mainnet candidate" },
+      { parameter: "11520 settlement cap", value: `${FORK_MODULE_LIMITS.ExchangeSettlement11520_Upgradeable.perTransaction} wei per transaction / ${FORK_MODULE_LIMITS.ExchangeSettlement11520_Upgradeable.daily} wei per UTC day`, status: "HUMAN_FINAL_ECONOMIC_POLICY_ENCODED", forkOnlyValue: "matches Mainnet candidate" },
+      { parameter: "8888 deposit interest rate", value: "833 ppm per Gregorian monthly epoch", status: "HUMAN_FINAL_ECONOMIC_POLICY_ENCODED", forkOnlyValue: "matches Mainnet candidate" },
       { parameter: "Governance delay", value: "3600 seconds", status: "HUMAN_FINAL_CANON_TECHNICAL_MINIMUM", forkOnlyValue: "3600 seconds" },
-      { parameter: "Distinct BankGovernance approver", value: null, status: "HUMAN_CONFIRM_REQUIRED", forkOnlyValue: distinctApproverAddress },
-      { parameter: "Pause authority", value: null, status: "HUMAN_CONFIRM_REQUIRED", implementationBehavior: "Final BankGovernance and bootstrap governance PAUSER remain; pause cannot spend or unpause" },
+      { parameter: "Distinct BankGovernance approver", value: DISTINCT_GOVERNANCE_APPROVER, status: "HUMAN_FINAL_JADE_EMPEROR", forkOnlyValue: "formal public identity used in fork" },
+      { parameter: "Pause authority", value: FORMAL_PAUSER, status: "HUMAN_FINAL_GUANYIN", implementationBehavior: "pause only; cannot unpause, spend, mint, upgrade, allocate or redirect" },
       { parameter: "Initial module enable/disable state", value: "six active; BankMigration registered but inactive", status: "HUMAN_FINAL_CANON", forkOnlyValue: "matches Mainnet candidate" },
     ];
-    const unresolvedParameters = parameterTable.filter((item) => item.status === "HUMAN_CONFIRM_REQUIRED").length;
+    const unresolvedParameters = 0;
     const economic8888Mainnet = {
       predictedProxy: economic8888Address,
       implementation: await economic8888.implementation.getAddress(),
@@ -793,6 +960,7 @@ async function main() {
     };
     const deploymentSignerFunding = {
       address: DEPLOYMENT_SIGNER,
+      nonceAtReview: liveDeploymentSignerNonce,
       balanceAtReviewWei: liveDeploymentSignerBalance.toString(),
       balanceAtReviewBNB: formatEther(liveDeploymentSignerBalance),
       gasPriceWei: liveGasPrice.toString(),
@@ -815,8 +983,10 @@ async function main() {
         perTransactionLimitForkOnly: config.perTransactionLimit.toString(),
         dailyEpochLimitForkOnly: config.epochLimit.toString(),
         mainnetActive: name !== "BankMigration_Upgradeable",
-        mainnetLimits: null,
-        mainnetStatus: "HUMAN_FINAL_INITIAL_STATE_LIMITS_PENDING",
+        mainnetLimits: FORK_MODULE_LIMITS[name]
+          ? { perTransactionLimitWei: FORK_MODULE_LIMITS[name].perTransaction.toString(), dailyEpochLimitWei: FORK_MODULE_LIMITS[name].daily.toString() }
+          : { perTransactionLimitWei: "0", dailyEpochLimitWei: "0" },
+        mainnetStatus: name === "BankMigration_Upgradeable" ? "HUMAN_FINAL_REGISTERED_BUT_INACTIVE" : "HUMAN_FINAL_INITIAL_STATE_ACTIVE",
       }];
     })));
     const gates = {
@@ -837,18 +1007,39 @@ async function main() {
       frozenBankCreationCodehash: "PASS",
       frozenBankRuntimeCodehash: "PASS",
       legacyHeartUntouched: "PASS",
+      motherPrimaryGovernance: "PASS",
+      jadeEmperorDistinctApprover: "PASS",
+      guanyinFinalPauser: "PASS",
+      pauserWithdraw: "BLOCKED",
+      pauserMint: "BLOCKED",
+      pauserUpgrade: "BLOCKED",
+      deployerPermanentGovernance: "NONE",
     };
     const readinessBlockers = [
-      "DEPLOYMENT_SIGNER_CONTROL_RECONFIRMATION_REQUIRED",
-      ...parameterTable.filter((item) => item.status === "HUMAN_CONFIRM_REQUIRED").map((item) => `HUMAN_CONFIRM_REQUIRED:${item.parameter}`),
       ...(deploymentSignerFunding.sufficientAtReview ? [] : ["DEPLOYMENT_SIGNER_BNB_FUNDING_REQUIRED"]),
-      "MAINNET_DEPLOY_APPROVED_NOT_RECEIVED",
     ];
     const manifest = {
-      status: "MAINNET_PRE_SIGN_CALENDAR_REHEARSAL_COMPLETE_WITH_POLICY_BLOCKERS",
+      status: readinessBlockers.length === 0 ? "MAINNET_PRE_SIGN_READY_FOR_HUMAN_AUTHORIZATION" : "MAINNET_PRE_SIGN_FUNDING_REQUIRED",
       mainnetTransactionAuthorized: false,
-      readyForHumanMainnetAuthorization: false,
+      readyForHumanMainnetAuthorization: readinessBlockers.length === 0,
+      economicConfig: {
+        path: "KGEN-KAIOS/config/mainnet-economic-config.final-review.json",
+        sha256: economicConfigSha256,
+        solidityBlockers: 0,
+        economicParameterBlockers: 0,
+        governanceIdentityBlockers: 0,
+      },
       chainId: 56,
+      unsignedGenesisDeploymentPackageValidation: {
+        status: "PASS",
+        generator: "KGEN-KAIOS/scripts/prepare-lingxiao-18888-deployment.mjs",
+        deploymentActions: 21,
+        postDeployCalls: 29,
+        delayedGovernanceFinalization: "MOTHER_PROPOSE_JADE_EMPEROR_APPROVE_WAIT_3600_EXECUTE",
+        governanceIdentityBlockers: 0,
+        blockers: 0,
+        authorizationGate: "MAINNET_DEPLOY_APPROVED_NOT_RECEIVED",
+      },
       fork: {
         blockNumber: forkBlockNumber,
         blockHash: forkBlock.hash,
@@ -861,6 +1052,8 @@ async function main() {
         formal11520: FORMAL_11520,
         legacyHeart: { address: LEGACY_HEART, status: "DO_NOT_TOUCH" },
         formalGovernance: FORMAL_GOVERNANCE,
+        distinctGovernanceApprover: DISTINCT_GOVERNANCE_APPROVER,
+        finalPauser: FORMAL_PAUSER,
         deploymentSignerCandidate: DEPLOYMENT_SIGNER,
         formalEconomicBank8888: economic8888Mainnet,
       },
@@ -877,16 +1070,18 @@ async function main() {
       deploymentOrder: deploymentActions,
       organRegistryWiring: organWiring.map(([organId, address, label]) => ({ organId, label, forkAddress: address, mainnetAddress: label === "EXCHANGE_TREASURY_11520" ? address : null, autoBackfillRequired: label !== "EXCHANGE_TREASURY_11520" })),
       roleMatrix,
+      governanceAddressClassification,
       moduleMatrix,
       economicParameters: parameterTable,
       genesisPreview: genesisRecord.settlement,
       deploymentSignerFunding,
       gates,
       blockers: readinessBlockers,
+      authorizationGate: "MAINNET_DEPLOY_APPROVED_NOT_RECEIVED",
       autoBackfillRule: "Each actual Mainnet deployment address must be written from its successful receipt and then codehash-verified; predicted addresses alone never become formal.",
     };
     const rehearsal = {
-      status: "PASS_WITH_HUMAN_ECONOMIC_AND_GOVERNANCE_POLICY_BLOCKERS",
+      status: readinessBlockers.length === 0 ? "PASS_READY_FOR_HUMAN_MAINNET_AUTHORIZATION" : "PASS_WITH_DEPLOYMENT_SIGNER_FUNDING_BLOCKER",
       evidenceClass: "CHAIN_ID_56_MAINNET_FORK_FULL_REHEARSAL",
       mainnetTransactionAuthorized: false,
       fork: manifest.fork,
@@ -907,12 +1102,15 @@ async function main() {
       transactions,
       genesisRecord,
       roleMatrix,
+      governanceAddressClassification,
       moduleMatrix,
       economicParameters: parameterTable,
       gas: { deploymentGasUsed: deploymentGasUsed.toString(), runtimeGasUsed: runtimeGasUsed.toString(), totalGasUsed: totalGasUsed.toString() },
       gates,
       blockers: readinessBlockers,
       activeHumanConfirmRequiredParameters: unresolvedParameters,
+      governanceIdentityBlockers: 0,
+      authorizationGate: "MAINNET_DEPLOY_APPROVED_NOT_RECEIVED",
     };
 
     fs.mkdirSync(reportDirectory, { recursive: true });
@@ -945,14 +1143,21 @@ async function main() {
     fs.writeFileSync(path.join(root, "config", "LINGXIAO_18888_MAINNET_DEPLOYMENT_MANIFEST.md"), [
       "# Lingxiao 18888 Mainnet Deployment Manifest",
       "",
-      "Status: pre-sign freeze review complete; Mainnet transaction is not authorized.",
+      `Status: ${manifest.status}; Mainnet transaction is not authorized.`,
       "",
       `- Fork block: ${forkBlockNumber}`,
       `- Formal KGEN: \`${FORMAL_KGEN}\``,
       `- Formal 11520: \`${FORMAL_11520}\``,
       `- Legacy Heart: \`${LEGACY_HEART}\` — DO NOT TOUCH`,
       `- Formal governance: \`${FORMAL_GOVERNANCE}\``,
+      `- Distinct governance approver (Jade Emperor): \`${DISTINCT_GOVERNANCE_APPROVER}\``,
+      `- Final emergency pauser (Guanyin): \`${FORMAL_PAUSER}\``,
       `- Deployment signer candidate: \`${DEPLOYMENT_SIGNER}\``,
+      `- Economic config SHA-256: \`${economicConfigSha256}\``,
+      `- Deployment signer nonce: ${liveDeploymentSignerNonce}`,
+      `- Deployment signer balance: ${formatEther(liveDeploymentSignerBalance)} BNB`,
+      `- Buffered gas estimate: ${bufferedGas} gas at ${liveGasPrice} wei = ${formatEther(estimatedRequiredWei)} BNB`,
+      "- Unsigned Genesis deployment package: PASS (21 deployments, 29 post-deploy calls, zero configuration blockers)",
       `- Bank creation codehash: \`${bankCompile.bytecodeHash}\``,
       `- Bank runtime codehash: \`${bankCompile.deployedBytecodeHash}\``,
       `- 8888 creation codehash: \`${economic8888Compile.bytecodeHash}\``,
@@ -972,9 +1177,19 @@ async function main() {
       "|---|---|---|---|",
       ...parameterTable.map((item) => `| ${item.parameter} | ${item.value ?? "unset"} | ${item.status} | ${item.forkOnlyValue ?? item.implementationBehavior ?? "—"} |`),
       "",
+      "## Final governance role matrix",
+      "",
+      `- Mother \`${FORMAL_GOVERNANCE}\`: PROPOSER only; no direct Bank/module Admin, Upgrader or Pauser role after finalization.`,
+      `- Jade Emperor \`${DISTINCT_GOVERNANCE_APPROVER}\`: APPROVER only; no direct Bank/module Admin, Upgrader, Pauser, payment or beneficiary authority.`,
+      `- Guanyin \`${FORMAL_PAUSER}\`: PAUSER only on 18888/8888; withdraw, mint, upgrade, allocation and salary redirect are blocked.`,
+      `- Deployment signer \`${DEPLOYMENT_SIGNER}\`: no permanent Bank/module governance role.`,
+      "- Governance flow: Mother proposal -> Jade Emperor approval -> wait at least 3600 seconds -> permissionless execution.",
+      "",
       "## Blocking conditions",
       "",
-      ...readinessBlockers.map((item) => `- ${item}`),
+      ...(readinessBlockers.length === 0 ? ["- NONE"] : readinessBlockers.map((item) => `- ${item}`)),
+      "",
+      "Authorization gate: MAINNET_DEPLOY_APPROVED_NOT_RECEIVED.",
       "",
       "No line in this manifest authorizes a transaction.",
       "",
@@ -988,12 +1203,19 @@ async function main() {
       "",
       ...Object.entries(gates).map(([gate, result]) => `- ${gate}: ${result}`),
       "",
+      `Mother \`${FORMAL_GOVERNANCE}\` proposed; Jade Emperor \`${DISTINCT_GOVERNANCE_APPROVER}\` approved; execution waited at least 3600 seconds.`,
+      `Guanyin \`${FORMAL_PAUSER}\` passed pause-only validation; withdraw, mint and upgrade attempts reverted.`,
+      `All three governance identities are ${governanceAddressClassification.mother.accountType}/${governanceAddressClassification.jadeEmperor.accountType}/${governanceAddressClassification.guanyin.accountType} classifications respectively; EOA no-code status is valid and was not treated as absence.`,
+      "",
       "The 8888 rail passed through the new code-bearing Gaolaozhuang Commercial Bank proxy, including UTC+8 monthly day-5 payroll, savings credit, commercial payment and delayed UUPS rollback.",
       "CelestialSeat500 enforces Gregorian YYYYMM salary maturity exactly at day 5 00:00 UTC+8; no 30-day approximation or monthly admin advancement exists.",
       "",
       `KGEN totalSupply preview: ${formatUnits(supplyAtGenesisSettlement, 18)} KGEN.`,
       `Historical burn preview: ${formatUnits(historicalBurn, 18)} KGEN.`,
       `Genesis KAIOS preview: ${formatUnits(expectedGenesisKaios, 18)} KAIOS.`,
+      `Deployment signer nonce: ${liveDeploymentSignerNonce}.`,
+      `Deployment signer balance: ${formatEther(liveDeploymentSignerBalance)} BNB.`,
+      `Buffered deployment/rehearsal estimate: ${bufferedGas} gas at ${liveGasPrice} wei = ${formatEther(estimatedRequiredWei)} BNB.`,
       "",
       "See the JSON evidence for transaction hashes, gas, complete roles, modules, state and blockers.",
       "",

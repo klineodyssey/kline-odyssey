@@ -3,7 +3,7 @@
   "evidenceClass": "CHAIN_ID_56_MAINNET_FORK",
   "mainnetTransactionAuthorized": false,
   "chainId": "56",
-  "forkBlock": 115314782,
+  "forkBlock": 115460801,
   "pointIds": {
     "kaiosGoldAndSilverIslandTokenPoint": "33333",
     "whiteHole": "36000",
@@ -18,40 +18,40 @@
   },
   "settlement": {
     "transactionHash": "0x98afe7b42e9c31a81fc66d45a9d865d240a2d5088d43bcf4e85f0bf9fdc5be13",
-    "blockNumber": 115314823,
-    "timestamp": 1786452253,
-    "timestampIso": "2026-08-11T12:44:13.000Z",
+    "blockNumber": 115460848,
+    "timestamp": 1786517990,
+    "timestampIso": "2026-08-12T06:59:50.000Z",
     "kgenGenesisSupply": {
       "raw": "72000000000000000000000000",
       "decimal18": "72000000.0"
     },
     "kgenSupplyAtSettlementBlock": {
-      "raw": "71977906887000601442227077",
-      "decimal18": "71977906.887000601442227077"
+      "raw": "71977798091069583125268765",
+      "decimal18": "71977798.091069583125268765"
     },
     "historicalKgenBurn": {
-      "raw": "22093112999398557772923",
-      "decimal18": "22093.112999398557772923"
+      "raw": "22201908930416874731235",
+      "decimal18": "22201.908930416874731235"
     },
     "actualGenesisKaiosMinted": {
-      "raw": "22093112999398557772923000",
-      "decimal18": "22093112.999398557772923"
+      "raw": "22201908930416874731235000",
+      "decimal18": "22201908.930416874731235"
     },
     "kaiosTotalSupply": {
-      "raw": "22093112999398557772923000",
-      "decimal18": "22093112.999398557772923"
+      "raw": "22201908930416874731235000",
+      "decimal18": "22201908.930416874731235"
     },
     "bankBalanceBefore": {
       "raw": "0",
       "decimal18": "0.0"
     },
     "bankBalanceAfter": {
-      "raw": "22093112999398557772923000",
-      "decimal18": "22093112.999398557772923"
+      "raw": "22201908930416874731235000",
+      "decimal18": "22201908.930416874731235"
     },
     "bankBalanceDelta": {
-      "raw": "22093112999398557772923000",
-      "decimal18": "22093112.999398557772923"
+      "raw": "22201908930416874731235000",
+      "decimal18": "22201908.930416874731235"
     }
   },
   "accountingInvariant": true,

@@ -1,12 +1,12 @@
 {
-  "status": "PASS_WITH_HUMAN_ECONOMIC_AND_GOVERNANCE_POLICY_BLOCKERS",
+  "status": "PASS_READY_FOR_HUMAN_MAINNET_AUTHORIZATION",
   "evidenceClass": "CHAIN_ID_56_MAINNET_FORK_FULL_REHEARSAL",
   "mainnetTransactionAuthorized": false,
   "fork": {
-    "blockNumber": 115314782,
-    "blockHash": "0xe5c1787b959af6be35295b4c5721be6c088e26a7dba8f3f455d0809439da1cc9",
-    "timestamp": 1786452235,
-    "timestampIso": "2026-08-11T12:43:55.000Z",
+    "blockNumber": 115460801,
+    "blockHash": "0x1ee34253f5049e91e5fa96c16e3e628f1219fd14860dee449cd6897139b921cd",
+    "timestamp": 1786517969,
+    "timestampIso": "2026-08-12T06:59:29.000Z",
     "network": "BSC Mainnet chainId 56 public read-only fork"
   },
   "contracts": {
@@ -28,11 +28,14 @@
         "proxy": "0xA447853985Ef6e6AbFcb14FCfDeFdced10Be0BDe",
         "version": "2.0.0",
         "activeInFork": true,
-        "perTransactionLimitForkOnly": "10000000000000000000000",
-        "dailyEpochLimitForkOnly": "100000000000000000000000",
+        "perTransactionLimitForkOnly": "3005464480874316939890",
+        "dailyEpochLimitForkOnly": "3005464480874316939890",
         "mainnetActive": true,
-        "mainnetLimits": null,
-        "mainnetStatus": "HUMAN_FINAL_INITIAL_STATE_LIMITS_PENDING"
+        "mainnetLimits": {
+          "perTransactionLimitWei": "3005464480874316939890",
+          "dailyEpochLimitWei": "3005464480874316939890"
+        },
+        "mainnetStatus": "HUMAN_FINAL_INITIAL_STATE_ACTIVE"
       },
       "CivilizationAllocation_Upgradeable": {
         "moduleId": "0x98cb067844ea2b60572a9eb95ae1e64a6bf8f03bcf8c9e11ae16130de56bca63",
@@ -40,11 +43,14 @@
         "proxy": "0x75A55Af6967932C4A1c896dB81Dd6F31e531c299",
         "version": "1.0.0",
         "activeInFork": true,
-        "perTransactionLimitForkOnly": "10000000000000000000000",
-        "dailyEpochLimitForkOnly": "100000000000000000000000",
+        "perTransactionLimitForkOnly": "6010928961748633879781",
+        "dailyEpochLimitForkOnly": "6010928961748633879781",
         "mainnetActive": true,
-        "mainnetLimits": null,
-        "mainnetStatus": "HUMAN_FINAL_INITIAL_STATE_LIMITS_PENDING"
+        "mainnetLimits": {
+          "perTransactionLimitWei": "6010928961748633879781",
+          "dailyEpochLimitWei": "6010928961748633879781"
+        },
+        "mainnetStatus": "HUMAN_FINAL_INITIAL_STATE_ACTIVE"
       },
       "EconomicRouter8888_Upgradeable": {
         "moduleId": "0xb13d0845c93752f8c48622f9d8f06b2b5b503a2b264f614b59130b81156e5e54",
@@ -52,11 +58,14 @@
         "proxy": "0xC49f989c6ff0d22824df8D993Ce82207165C1428",
         "version": "1.0.0",
         "activeInFork": true,
-        "perTransactionLimitForkOnly": "10000000000000000000000",
-        "dailyEpochLimitForkOnly": "100000000000000000000000",
+        "perTransactionLimitForkOnly": "12021857923497267759562",
+        "dailyEpochLimitForkOnly": "12021857923497267759562",
         "mainnetActive": true,
-        "mainnetLimits": null,
-        "mainnetStatus": "HUMAN_FINAL_INITIAL_STATE_LIMITS_PENDING"
+        "mainnetLimits": {
+          "perTransactionLimitWei": "12021857923497267759562",
+          "dailyEpochLimitWei": "12021857923497267759562"
+        },
+        "mainnetStatus": "HUMAN_FINAL_INITIAL_STATE_ACTIVE"
       },
       "ExchangeSettlement11520_Upgradeable": {
         "moduleId": "0x24b8150af34ecded6c75de16b22b3a7fa6477e94cb23ea338a9453af3ed8961b",
@@ -64,11 +73,14 @@
         "proxy": "0x17587F49dFDE4e400D03Ae81364AC2af8E1629Df",
         "version": "1.0.0",
         "activeInFork": true,
-        "perTransactionLimitForkOnly": "10000000000000000000000",
-        "dailyEpochLimitForkOnly": "100000000000000000000000",
+        "perTransactionLimitForkOnly": "6010928961748633879781",
+        "dailyEpochLimitForkOnly": "6010928961748633879781",
         "mainnetActive": true,
-        "mainnetLimits": null,
-        "mainnetStatus": "HUMAN_FINAL_INITIAL_STATE_LIMITS_PENDING"
+        "mainnetLimits": {
+          "perTransactionLimitWei": "6010928961748633879781",
+          "dailyEpochLimitWei": "6010928961748633879781"
+        },
+        "mainnetStatus": "HUMAN_FINAL_INITIAL_STATE_ACTIVE"
       },
       "BankRiskController_Upgradeable": {
         "moduleId": "0xbcba21ba5cfe25784fa28567a77ab492bb1265a40a221a37df6a976728cd105d",
@@ -79,8 +91,11 @@
         "perTransactionLimitForkOnly": "0",
         "dailyEpochLimitForkOnly": "0",
         "mainnetActive": true,
-        "mainnetLimits": null,
-        "mainnetStatus": "HUMAN_FINAL_INITIAL_STATE_LIMITS_PENDING"
+        "mainnetLimits": {
+          "perTransactionLimitWei": "0",
+          "dailyEpochLimitWei": "0"
+        },
+        "mainnetStatus": "HUMAN_FINAL_INITIAL_STATE_ACTIVE"
       },
       "BankGovernance_Upgradeable": {
         "moduleId": "0x408269e9739994f2f410704684700c1f0c29b98f7210d29834da2c315b4dd2ce",
@@ -91,8 +106,11 @@
         "perTransactionLimitForkOnly": "0",
         "dailyEpochLimitForkOnly": "0",
         "mainnetActive": true,
-        "mainnetLimits": null,
-        "mainnetStatus": "HUMAN_FINAL_INITIAL_STATE_LIMITS_PENDING"
+        "mainnetLimits": {
+          "perTransactionLimitWei": "0",
+          "dailyEpochLimitWei": "0"
+        },
+        "mainnetStatus": "HUMAN_FINAL_INITIAL_STATE_ACTIVE"
       },
       "BankMigration_Upgradeable": {
         "moduleId": "0xbc0740979a57ecb6aedf2d22cb378fe98c7a380d156a63372e04e276797310f8",
@@ -103,8 +121,11 @@
         "perTransactionLimitForkOnly": "0",
         "dailyEpochLimitForkOnly": "0",
         "mainnetActive": false,
-        "mainnetLimits": null,
-        "mainnetStatus": "HUMAN_FINAL_INITIAL_STATE_LIMITS_PENDING"
+        "mainnetLimits": {
+          "perTransactionLimitWei": "0",
+          "dailyEpochLimitWei": "0"
+        },
+        "mainnetStatus": "HUMAN_FINAL_REGISTERED_BUT_INACTIVE"
       }
     }
   },
@@ -120,7 +141,7 @@
         "actualMainnetAddress": null,
         "autoBackfill": "SET_FROM_SUCCESSFUL_MAINNET_DEPLOYMENT_RECEIPT_CONTRACT_ADDRESS",
         "transactionHash": "0x0c7a3585944b744aa309a662e1a562bebb9134b049cedd861a0b50d9a5b5fd9b",
-        "blockNumber": 115314786,
+        "blockNumber": 115460807,
         "gasUsed": "653603",
         "status": "PASS"
       },
@@ -134,7 +155,7 @@
         "actualMainnetAddress": null,
         "autoBackfill": "SET_FROM_SUCCESSFUL_MAINNET_DEPLOYMENT_RECEIPT_CONTRACT_ADDRESS",
         "transactionHash": "0xd4998408162e7bb83b130d9b83a9128401b8b46f61fc605be93038c5807e25d8",
-        "blockNumber": 115314787,
+        "blockNumber": 115460808,
         "gasUsed": "2734493",
         "status": "PASS"
       },
@@ -148,7 +169,7 @@
         "actualMainnetAddress": null,
         "autoBackfill": "SET_FROM_SUCCESSFUL_MAINNET_DEPLOYMENT_RECEIPT_CONTRACT_ADDRESS",
         "transactionHash": "0xdc5261d62e8f76a0344e462bbf881136fe830fc6f1db7e152e2dc2ad535cc59e",
-        "blockNumber": 115314788,
+        "blockNumber": 115460809,
         "gasUsed": "306384",
         "status": "PASS"
       },
@@ -162,7 +183,7 @@
         "actualMainnetAddress": null,
         "autoBackfill": "SET_FROM_SUCCESSFUL_MAINNET_DEPLOYMENT_RECEIPT_CONTRACT_ADDRESS",
         "transactionHash": "0x765aad07d107e09f6f8ab0a5392d6a2b1b9553debbb6248611558b0287eaf76f",
-        "blockNumber": 115314789,
+        "blockNumber": 115460810,
         "gasUsed": "4016007",
         "status": "PASS"
       },
@@ -176,7 +197,7 @@
         "actualMainnetAddress": null,
         "autoBackfill": "SET_FROM_SUCCESSFUL_MAINNET_DEPLOYMENT_RECEIPT_CONTRACT_ADDRESS",
         "transactionHash": "0x0efc03f785c3c4c651c9695a5361f4f0b6111b83d3861dedd963f27ce3413942",
-        "blockNumber": 115314790,
+        "blockNumber": 115460811,
         "gasUsed": "425322",
         "status": "PASS"
       },
@@ -190,7 +211,7 @@
         "actualMainnetAddress": null,
         "autoBackfill": "SET_FROM_SUCCESSFUL_MAINNET_DEPLOYMENT_RECEIPT_CONTRACT_ADDRESS",
         "transactionHash": "0x078b9aa60a269d36950cfa9bd18890bdb4afe1c7bb0196d984735b29fefe0af4",
-        "blockNumber": 115314791,
+        "blockNumber": 115460812,
         "gasUsed": "2899103",
         "status": "PASS"
       },
@@ -203,9 +224,9 @@
         "forkAddress": "0xA447853985Ef6e6AbFcb14FCfDeFdced10Be0BDe",
         "actualMainnetAddress": null,
         "autoBackfill": "SET_FROM_SUCCESSFUL_MAINNET_DEPLOYMENT_RECEIPT_CONTRACT_ADDRESS",
-        "transactionHash": "0x876e69aee32c18bd096c2dacb79a2a67491a9af61c0007548e6f207fe177acd0",
-        "blockNumber": 115314792,
-        "gasUsed": "354723",
+        "transactionHash": "0x8c1e8400e957fc3404f327ba27a519e4bc2ff708bcaead930351a77dc8741cae",
+        "blockNumber": 115460813,
+        "gasUsed": "354735",
         "status": "PASS"
       },
       {
@@ -218,7 +239,7 @@
         "actualMainnetAddress": null,
         "autoBackfill": "SET_FROM_SUCCESSFUL_MAINNET_DEPLOYMENT_RECEIPT_CONTRACT_ADDRESS",
         "transactionHash": "0xe4c62de04d871761686b6937b1ba1e1a5dba72a1256aa32c9e6993ef1c5a9ed1",
-        "blockNumber": 115314793,
+        "blockNumber": 115460814,
         "gasUsed": "1399667",
         "status": "PASS"
       },
@@ -232,7 +253,7 @@
         "actualMainnetAddress": null,
         "autoBackfill": "SET_FROM_SUCCESSFUL_MAINNET_DEPLOYMENT_RECEIPT_CONTRACT_ADDRESS",
         "transactionHash": "0x2619893d2aea9888be9a2219888ff8587e45d77480fe5b26e53d3ba946eb6a21",
-        "blockNumber": 115314794,
+        "blockNumber": 115460815,
         "gasUsed": "303999",
         "status": "PASS"
       },
@@ -246,7 +267,7 @@
         "actualMainnetAddress": null,
         "autoBackfill": "SET_FROM_SUCCESSFUL_MAINNET_DEPLOYMENT_RECEIPT_CONTRACT_ADDRESS",
         "transactionHash": "0x90454baff7d7865712a78cdbcffbcfb8005de70e0f59a1e11ff1b006b9acf52d",
-        "blockNumber": 115314795,
+        "blockNumber": 115460816,
         "gasUsed": "1261793",
         "status": "PASS"
       },
@@ -260,7 +281,7 @@
         "actualMainnetAddress": null,
         "autoBackfill": "SET_FROM_SUCCESSFUL_MAINNET_DEPLOYMENT_RECEIPT_CONTRACT_ADDRESS",
         "transactionHash": "0x2aca1d815704e17b6d9f43de2436fe1161d4c75c403f66e25189fee6771836bf",
-        "blockNumber": 115314796,
+        "blockNumber": 115460817,
         "gasUsed": "330557",
         "status": "PASS"
       },
@@ -274,7 +295,7 @@
         "actualMainnetAddress": null,
         "autoBackfill": "SET_FROM_SUCCESSFUL_MAINNET_DEPLOYMENT_RECEIPT_CONTRACT_ADDRESS",
         "transactionHash": "0x8dfc394fa2408d515b66b4e5fcdc5dc121521717522cfc4f940487adf4d1ff98",
-        "blockNumber": 115314797,
+        "blockNumber": 115460818,
         "gasUsed": "1261805",
         "status": "PASS"
       },
@@ -288,7 +309,7 @@
         "actualMainnetAddress": null,
         "autoBackfill": "SET_FROM_SUCCESSFUL_MAINNET_DEPLOYMENT_RECEIPT_CONTRACT_ADDRESS",
         "transactionHash": "0xea0c7302be24e8a6b034ca73034556f4ebd719a26f4c77c322e017c67dacb6ed",
-        "blockNumber": 115314798,
+        "blockNumber": 115460819,
         "gasUsed": "330557",
         "status": "PASS"
       },
@@ -302,7 +323,7 @@
         "actualMainnetAddress": null,
         "autoBackfill": "SET_FROM_SUCCESSFUL_MAINNET_DEPLOYMENT_RECEIPT_CONTRACT_ADDRESS",
         "transactionHash": "0xf1811ae684c3dd59cfbef6d456f82cae4b05d35b17d23ac63c37dd67e66cc4d0",
-        "blockNumber": 115314799,
+        "blockNumber": 115460820,
         "gasUsed": "1349091",
         "status": "PASS"
       },
@@ -316,7 +337,7 @@
         "actualMainnetAddress": null,
         "autoBackfill": "SET_FROM_SUCCESSFUL_MAINNET_DEPLOYMENT_RECEIPT_CONTRACT_ADDRESS",
         "transactionHash": "0xc658797ed350a50715c3be3949d8b32a4f60393956718b9e4c96413305c217e0",
-        "blockNumber": 115314800,
+        "blockNumber": 115460821,
         "gasUsed": "304010",
         "status": "PASS"
       },
@@ -330,7 +351,7 @@
         "actualMainnetAddress": null,
         "autoBackfill": "SET_FROM_SUCCESSFUL_MAINNET_DEPLOYMENT_RECEIPT_CONTRACT_ADDRESS",
         "transactionHash": "0x19f4ca8eb9a0a94c34518748e3bd9495f44dadda8fd0536cc2c2bd8462bd3c9a",
-        "blockNumber": 115314801,
+        "blockNumber": 115460822,
         "gasUsed": "1646003",
         "status": "PASS"
       },
@@ -344,7 +365,7 @@
         "actualMainnetAddress": null,
         "autoBackfill": "SET_FROM_SUCCESSFUL_MAINNET_DEPLOYMENT_RECEIPT_CONTRACT_ADDRESS",
         "transactionHash": "0x6775c8cd789390aa8522df88b34454e76062a7ee11413ce936094e1d0c91d00d",
-        "blockNumber": 115314802,
+        "blockNumber": 115460823,
         "gasUsed": "375214",
         "status": "PASS"
       },
@@ -358,7 +379,7 @@
         "actualMainnetAddress": null,
         "autoBackfill": "SET_FROM_SUCCESSFUL_MAINNET_DEPLOYMENT_RECEIPT_CONTRACT_ADDRESS",
         "transactionHash": "0x15fe5d63192038219ce207b75721c3d4318102d4f87b983f8ea89497e0906e05",
-        "blockNumber": 115314803,
+        "blockNumber": 115460824,
         "gasUsed": "1346137",
         "status": "PASS"
       },
@@ -372,7 +393,7 @@
         "actualMainnetAddress": null,
         "autoBackfill": "SET_FROM_SUCCESSFUL_MAINNET_DEPLOYMENT_RECEIPT_CONTRACT_ADDRESS",
         "transactionHash": "0xd0f48b825224d7eeebdf3a69099cf9e0cb15fe51015fb6bab2105e1e1143b0ce",
-        "blockNumber": 115314804,
+        "blockNumber": 115460825,
         "gasUsed": "303989",
         "status": "PASS"
       },
@@ -386,7 +407,7 @@
         "actualMainnetAddress": null,
         "autoBackfill": "SET_FROM_SUCCESSFUL_MAINNET_DEPLOYMENT_RECEIPT_CONTRACT_ADDRESS",
         "transactionHash": "0xf39fe8bdeb8bae1e29d7adeb3d10ba0240113bb8140ac99e6d2b7110be311c27",
-        "blockNumber": 115314805,
+        "blockNumber": 115460826,
         "gasUsed": "1373218",
         "status": "PASS"
       },
@@ -400,7 +421,7 @@
         "actualMainnetAddress": null,
         "autoBackfill": "SET_FROM_SUCCESSFUL_MAINNET_DEPLOYMENT_RECEIPT_CONTRACT_ADDRESS",
         "transactionHash": "0xf6d177902136f1a019c63e23693ea0bc8b2168bfa499d1d24244cee02491802a",
-        "blockNumber": 115314806,
+        "blockNumber": 115460827,
         "gasUsed": "506666",
         "status": "PASS"
       }
@@ -408,471 +429,579 @@
     "forkOnlyFixtures": [
       {
         "transactionHash": "0xfa839246f4e0418b65f691f7561012bfb391f8984d6990fe678f0ac36f7075af",
-        "blockNumber": 115314785,
+        "blockNumber": 115460806,
         "gasUsed": "57091",
         "status": "PASS"
       }
     ],
     "bankBindKAIOS": {
       "transactionHash": "0xa633e79b7c743d536f6a000f5c4f30e5d3342256a3a888a98e0ff2f8c0ffa632",
-      "blockNumber": 115314807,
+      "blockNumber": 115460828,
       "gasUsed": "60405",
       "status": "PASS"
     },
     "bank8888BindKAIOS": {
       "transactionHash": "0xfedeca57500162c1c04eb83334ff4798ad34c26a3c0fe98aa5ee21d905599a80",
-      "blockNumber": 115314808,
+      "blockNumber": 115460829,
       "gasUsed": "67604",
       "status": "PASS"
     },
     "configureModule_CelestialSeat500_Upgradeable": {
-      "transactionHash": "0x5726a677dd76201b73b7c8fa3571cebc820f3d09376971f3f76ff16881dc6ec7",
-      "blockNumber": 115314809,
-      "gasUsed": "171950",
+      "transactionHash": "0xf0bb96f37366cf2bfa73ad3665ba44b359523dea582b800e79d696521ead8727",
+      "blockNumber": 115460830,
+      "gasUsed": "171974",
       "status": "PASS"
     },
     "configureModule_CivilizationAllocation_Upgradeable": {
-      "transactionHash": "0xbad2f455dbef2c3564cf4738b31cb722a9724305e5e5f57d3e314b0591322af5",
-      "blockNumber": 115314810,
-      "gasUsed": "171962",
+      "transactionHash": "0x17a93af11b6e66cc47d7c0efe64a00c0034f52d65f4a0fde68cdf561127e0453",
+      "blockNumber": 115460831,
+      "gasUsed": "172010",
       "status": "PASS"
     },
     "configureModule_EconomicRouter8888_Upgradeable": {
-      "transactionHash": "0x5046cd1000c0aa2edbd252eca1e030ed6db56b98fc6185d8fdb4de47b25a378a",
-      "blockNumber": 115314811,
-      "gasUsed": "171962",
+      "transactionHash": "0x8a50b5fe87526fca413618917322388eb4e853415c11621585b119bf5e423829",
+      "blockNumber": 115460832,
+      "gasUsed": "172010",
       "status": "PASS"
     },
     "configureModule_ExchangeSettlement11520_Upgradeable": {
-      "transactionHash": "0xe908c679a82721925247d695d00c73bf543c05db2ba2c4bfcb8da9ddd1072611",
-      "blockNumber": 115314812,
-      "gasUsed": "171950",
+      "transactionHash": "0xde7bb0090897ec17bdee034d8ced56f4354503beb38e10a490e21cb9a716aab1",
+      "blockNumber": 115460833,
+      "gasUsed": "171998",
       "status": "PASS"
     },
     "configureModule_BankRiskController_Upgradeable": {
       "transactionHash": "0xb95388dab96fff24c64df116e6f7ab686b1c5c9dd80b5bb4cef1ff27515fdaee",
-      "blockNumber": 115314813,
+      "blockNumber": 115460834,
       "gasUsed": "131970",
       "status": "PASS"
     },
     "configureModule_BankGovernance_Upgradeable": {
       "transactionHash": "0xe529ff33012b67256bed5e3fab4c7c77884b6a0ec8214be78c2dde6646fd9f35",
-      "blockNumber": 115314814,
+      "blockNumber": 115460835,
       "gasUsed": "131970",
       "status": "PASS"
     },
     "configureModule_BankMigration_Upgradeable": {
       "transactionHash": "0x164563346d8342e25a426b1d438f294b1528fa0c27c3b8c2168ffd4010f76523",
-      "blockNumber": 115314815,
+      "blockNumber": 115460836,
       "gasUsed": "131958",
       "status": "PASS"
     },
     "setRiskController": {
       "transactionHash": "0xa1e81f8e7eb02648295671cab36832171787832359d7f60d25cad26821ad5e77",
-      "blockNumber": 115314816,
+      "blockNumber": 115460837,
       "gasUsed": "56212",
       "status": "PASS"
     },
     "grantDistinctGovernanceApprover": {
-      "transactionHash": "0xd92e1c029c608d9a5b7311dc4019524e4fb870af0c16c69956f2bd44b6c0939a",
-      "blockNumber": 115314817,
+      "transactionHash": "0x923a8a5f5cf2146f3c6b631dc1e7da8b440fca38ee9d55bba49ca58e417d49d2",
+      "blockNumber": 115460838,
       "gasUsed": "56100",
       "status": "PASS"
     },
+    "revokeMotherGovernanceApprover": {
+      "transactionHash": "0x464df120f9ebdc9c614f426d405ac3fb98951176cacda6a27a4487dc02a355f5",
+      "blockNumber": 115460839,
+      "gasUsed": "34609",
+      "status": "PASS"
+    },
+    "grantFinalBankPauser": {
+      "transactionHash": "0x474e978f167d7e4f8ae795a9b5f923f97a1731703dd67f38598b9b0cc043b49c",
+      "blockNumber": 115460840,
+      "gasUsed": "56210",
+      "status": "PASS"
+    },
+    "revokeBootstrapBankPauser": {
+      "transactionHash": "0x0a4096f47dfef00e3528cfba74eb91d2653a94909c9ca78119e345cf62e1040e",
+      "blockNumber": 115460841,
+      "gasUsed": "35093",
+      "status": "PASS"
+    },
+    "scheduleInitial8888InterestRate": {
+      "transactionHash": "0x3965fbf329237b22a2117806cd47bcdd2b48430b81606302be1c8a0ee798a2d4",
+      "blockNumber": 115460842,
+      "gasUsed": "79493",
+      "status": "PASS"
+    },
     "registryBootstrap_EXCHANGE_TREASURY_11520": {
-      "transactionHash": "0x0f10d13c3fdca9682a1e1b681a778554bc9c955543f624258e0f34cfb54b7cc1",
-      "blockNumber": 115314818,
+      "transactionHash": "0xafa784518a1f5e37bb87e9ea923f6a3a6455967d92b81e06152189dc437fa2e8",
+      "blockNumber": 115460843,
       "gasUsed": "55195",
       "status": "PASS"
     },
     "registryBootstrap_LINGXIAO_BANK_18888": {
-      "transactionHash": "0x1f513faae92145e0747c3919e83f095aa18da9003b859f927f4bf0437bb0241f",
-      "blockNumber": 115314819,
+      "transactionHash": "0x5c99e358bb4c1070ba52dc13f61c1481eec11e06a97bc9f59e03ffe0ab73c98c",
+      "blockNumber": 115460844,
       "gasUsed": "55183",
       "status": "PASS"
     },
     "registryBootstrap_KAIOS": {
-      "transactionHash": "0xe916b8c5ca34471f5cba4cdd7d5e6e632fed5f72c882e9677a06ac7fecaea134",
-      "blockNumber": 115314820,
+      "transactionHash": "0x98a6216bc6c76f8ffb58de4606da5cb968d0e6497898e1e9125d48d74a28fc6c",
+      "blockNumber": 115460845,
       "gasUsed": "55183",
       "status": "PASS"
     },
     "registryBootstrap_ALCHEMY_FURNACE_18911": {
-      "transactionHash": "0x9861b8f8bf813b19e27e9e01cd8183714f2b73df091158252d01e63678665978",
-      "blockNumber": 115314821,
+      "transactionHash": "0xd25e89d65568c60ddd29771c9e1afeaa8a84535b02c9a7dd1c00df8905017495",
+      "blockNumber": 115460846,
       "gasUsed": "55195",
       "status": "PASS"
     },
     "registrySealBootstrap": {
-      "transactionHash": "0x5a0e6520a518440c733e4be0aca779d08ff255780e2ac321b28848ff2ec85066",
-      "blockNumber": 115314822,
+      "transactionHash": "0x289832e15f023db527f048b07a28a295b7c55b1710a44b21f70df791fe336bdb",
+      "blockNumber": 115460847,
       "gasUsed": "24817",
       "status": "PASS"
     },
     "settleWhiteHoleMassGenesis": {
       "transactionHash": "0x98afe7b42e9c31a81fc66d45a9d865d240a2d5088d43bcf4e85f0bf9fdc5be13",
-      "blockNumber": 115314823,
+      "blockNumber": 115460848,
       "gasUsed": "143504",
       "status": "PASS"
     },
     "repeatGenesisSettlementRejected": {
       "status": "PASS",
       "transactionHash": "0x92f244701a32bfa352c3c6a55dc3b4d96c0a29db92d29027450dde26c5f5d214",
-      "blockNumber": 115314824,
+      "blockNumber": 115460849,
       "gasUsed": "29731",
       "reason": "REVERTED_AS_REQUIRED"
     },
     "startGenesisEpoch": {
       "transactionHash": "0x7bf77becc1691734eb33f0626a8df684a5e398c6d02d3cad2521db2a4dc8f658",
-      "blockNumber": 115314825,
+      "blockNumber": 115460850,
       "gasUsed": "112999",
       "status": "PASS"
     },
+    "applyHumanApprovedRiskParameters": {
+      "transactionHash": "0x829253b78e7e2dd5d5e9fa1261ea774b64452604f36d9a443b2e7e3e1faae2b4",
+      "blockNumber": 115460851,
+      "gasUsed": "110222",
+      "status": "PASS"
+    },
     "configureCelestialSeat1": {
-      "transactionHash": "0x3a9a93bf191d83b5956736339bb72b290d0c27a8bf72304dc977fd62bf284001",
-      "blockNumber": 115314826,
+      "transactionHash": "0xd10f05336901c5935049cb66271127f2c4cebddf6cde07da02ab5e6dbb0f656b",
+      "blockNumber": 115460852,
       "gasUsed": "246164",
       "status": "PASS"
     },
     "claimCelestialSalary": {
       "transactionHash": "0xe51376397db16ee1b12cc38470d5f3789a67a56379d9a9e2d172bf40e4361b6e",
-      "blockNumber": 115314829,
+      "blockNumber": 115460855,
       "gasUsed": "264262",
       "status": "PASS"
     },
     "createCivilizationAllocation": {
-      "transactionHash": "0x6fb5e0e02e863507ef8c599e17f64ddc89e79d3e91fbb743e082626e95ea9521",
-      "blockNumber": 115314830,
+      "transactionHash": "0x85bf3beb907b177987daf4ff15d3bae26a4a3cc6d9ffd38c19ab976e7b08748b",
+      "blockNumber": 115460856,
       "gasUsed": "124584",
       "status": "PASS"
     },
     "executeCivilizationAllocation": {
       "transactionHash": "0xceed40023e46b3d5fb579135ff50c8901c7dcc6b1c39087a61d339931087db76",
-      "blockNumber": 115314831,
+      "blockNumber": 115460857,
       "gasUsed": "209113",
       "status": "PASS"
     },
     "routeEconomicCapital8888": {
-      "transactionHash": "0xd56cb039d27b969c3d84ffd23f5bb4a07776f15c804c24e5326fdce22d67a7fd",
-      "blockNumber": 115314832,
+      "transactionHash": "0xb5081c19c2fed3c73015ad1fabac80acb7c75f25cfaac8d7b78058af83037354",
+      "blockNumber": 115460858,
       "gasUsed": "207895",
       "status": "PASS"
     },
     "bank8888CreateLifeAccount": {
-      "transactionHash": "0xa1be6ee721f5d613886644181dd12174b3045552479c44485677ad8f63c816fd",
-      "blockNumber": 115314833,
+      "transactionHash": "0x7b568bc7455b7626d9318dae075c83f0e835575e68a8e09c5c91cdacfcd3e163",
+      "blockNumber": 115460859,
       "gasUsed": "181615",
       "status": "PASS"
     },
     "bank8888ScheduleMonthlyPayroll": {
-      "transactionHash": "0x16f23e95cece9f82f72a0c3cf52c09c218104fe047f3e4dedccc7a457a7fc138",
-      "blockNumber": 115314834,
+      "transactionHash": "0x5aebff1e5000e4fb8a3659e32de23bf717a155855c4d13b69f259855d743fc88",
+      "blockNumber": 115460860,
       "gasUsed": "195877",
       "status": "PASS"
     },
     "bank8888SalaryBeforeFifthRejected": {
       "status": "PASS",
       "transactionHash": "0xdbf8ae6098ba3f03a12c7d414de98aec62365211b4029a430affd78f4cda7e70",
-      "blockNumber": 115314836,
+      "blockNumber": 115460862,
       "gasUsed": "40886",
       "reason": "REVERTED_AS_REQUIRED"
     },
     "bank8888ClaimMonthlySalaryToSavings": {
-      "transactionHash": "0xb051829fb16abf0eebcd07e14c58f977ae529268be7449440f7e37d3224df657",
-      "blockNumber": 115314838,
-      "gasUsed": "170874",
+      "transactionHash": "0x0a37f4efe3806f8eff99ca0913a950797c596dc07f65991e227cbfdf0552e2f2",
+      "blockNumber": 115460864,
+      "gasUsed": "173767",
       "status": "PASS"
     },
     "bank8888CreateCommercialPayment": {
       "transactionHash": "0xea4d3b75a7ed8dfc15739cf94568d594f8a2ea30f26c2f16b6cb435c0a27f128",
-      "blockNumber": 115314839,
+      "blockNumber": 115460865,
       "gasUsed": "198074",
       "status": "PASS"
     },
     "bank8888ExecuteCommercialPayment": {
       "transactionHash": "0x61082072b0676f696885548e033681ad0da60c3786557c143a09112d2b9422f5",
-      "blockNumber": 115314840,
+      "blockNumber": 115460866,
       "gasUsed": "100851",
       "status": "PASS"
     },
     "bank8888PaymentReplayRejected": {
       "status": "PASS",
       "transactionHash": "0x96d9ea8e92fc53fa1b130947f43b048ce1f62b7e88acf12f3735d47d4c41beb9",
-      "blockNumber": 115314841,
+      "blockNumber": 115460867,
       "gasUsed": "37197",
       "reason": "REVERTED_AS_REQUIRED"
     },
     "exchangeSettlement11520": {
-      "transactionHash": "0xa26c735d1b73df86aed70d614640f6d8d6d0016f16f90369d247a1d8dbbe512c",
-      "blockNumber": 115314842,
+      "transactionHash": "0x3942327366cba5e93672643c5de3db7f591daffbeb089f54dbb38c4f1ca8e991",
+      "blockNumber": 115460868,
       "gasUsed": "207925",
       "status": "PASS"
     },
     "unauthorizedModulePaymentRejected": {
       "status": "PASS",
       "transactionHash": "0x78552e879f61ab396d95126a2c74370439eeeb4015514d9cef0c0d434fa9eaf7",
-      "blockNumber": 115314843,
+      "blockNumber": 115460869,
       "gasUsed": "39771",
       "reason": "REVERTED_AS_REQUIRED"
     },
     "arbitraryOwnerWithdrawRejected": {
       "status": "PASS",
-      "transactionHash": "0x75b75be4413acdf57fb156f17104c1a63f36547951137a8b6bab436364c5568f",
-      "blockNumber": 115314844,
+      "transactionHash": "0xb47aba54ad7cd589085423c8dc08ca8d6f82d97567084905986133e1d8cd1515",
+      "blockNumber": 115460870,
       "gasUsed": "27750",
       "reason": "REVERTED_AS_REQUIRED"
     },
-    "pauseBank": {
-      "transactionHash": "0x84a86b0a5dcc56f11551ba4afeeee7cd2956481d1c83d8db3e845d66a0100ea7",
-      "blockNumber": 115314845,
+    "pauseBankByGuanyin": {
+      "transactionHash": "0x04fe9dd87e9990d3e697c25644378a923bf5fce228e2719ce410afa59a5073c8",
+      "blockNumber": 115460871,
       "gasUsed": "35090",
       "status": "PASS"
     },
     "paymentWhilePausedRejected": {
       "status": "PASS",
-      "transactionHash": "0x4ca2005903ab3a45b6ba240437e31bf068b8bc80263b8bac272c73f66b15f522",
-      "blockNumber": 115314846,
+      "transactionHash": "0x9cf64061afed5fd004f3a076b298e342f95afcad1252da2764b3acb45ae800a8",
+      "blockNumber": 115460872,
       "gasUsed": "78048",
       "reason": "REVERTED_AS_REQUIRED"
     },
     "unpauseBank": {
-      "transactionHash": "0x676a5b1cbc2a60959cc02dc50373216682390186c04cccf0594f3161b5084beb",
-      "blockNumber": 115314847,
+      "transactionHash": "0x11ad98843d200ae6a2c75f784262d0f3eed0ee8c74e2de3fb71e8c85299354f7",
+      "blockNumber": 115460873,
       "gasUsed": "34741",
       "status": "PASS"
     },
     "configureCelestialSeat2ForRetry": {
-      "transactionHash": "0xfc7a214c421c51b05235f0442bec76675d99e2e3074a024ac892adea5a118b32",
-      "blockNumber": 115314848,
+      "transactionHash": "0xf2386873b03c7249e44842d842a39004381715638b684706b51961716c8f50f3",
+      "blockNumber": 115460874,
       "gasUsed": "229064",
       "status": "PASS"
     },
     "setReserveToCurrentBalance": {
-      "transactionHash": "0x6d57b79d2002dc0f0bfc8baf7ee893e67154c7957f696e4f34ff2b10b647355b",
-      "blockNumber": 115314850,
-      "gasUsed": "110294",
+      "transactionHash": "0xe306c3b506f4bb10fd42e9733165fbfc27e17be8332ca81c536ddf905d38c845",
+      "blockNumber": 115460876,
+      "gasUsed": "58994",
       "status": "PASS"
     },
     "insufficientSalaryRejected": {
       "status": "PASS",
       "transactionHash": "0x67f73c77a857f6bdc010ca7cb64f7f28f5ed77919bf5b254b3a7ef34751e3f83",
-      "blockNumber": 115314851,
+      "blockNumber": 115460877,
       "gasUsed": "105350",
       "reason": "REVERTED_AS_REQUIRED"
     },
     "forkOnlyRemoveGovernanceKgenTaxExemption": {
       "transactionHash": "0xa1d53e1085fb78173c2f8438d4b49c56aa56e07625ad47539797adc9e56ab0bc",
-      "blockNumber": 115314852,
+      "blockNumber": 115460878,
       "gasUsed": "26025",
       "status": "PASS"
     },
     "forkOnlyMarkBurnFixtureAsKgenPair": {
       "transactionHash": "0xbbf07ec1b66ed17e3932d7efca8fbb295b271d45e2804f29b6229f1a738e0251",
-      "blockNumber": 115314853,
+      "blockNumber": 115460879,
       "gasUsed": "47892",
       "status": "PASS"
     },
     "forkOnlyKgenTaxableTransferForOneKgenBurn": {
-      "transactionHash": "0x53d994d79ee5ff21ad5fa3fd0f3fbf2c6c4655a64eaf1d887842cb2597b2dd3d",
-      "blockNumber": 115314854,
+      "transactionHash": "0xd1484296ecba45f668b8baff3975a63ae01c1977f8f61550d016d02197649c0d",
+      "blockNumber": 115460880,
       "gasUsed": "97999",
       "status": "PASS"
     },
     "settleWhiteHoleMassRefill": {
       "transactionHash": "0xa07eeb0f94f41bfb66ea30026fdc7da2e759395c0ff8dc28cf5ec3d5e9ea5865",
-      "blockNumber": 115314855,
+      "blockNumber": 115460881,
       "gasUsed": "58004",
       "status": "PASS"
     },
     "retryCelestialSalaryAfterRefill": {
       "transactionHash": "0x50c88b14447af7dc7d3e6bf25c52233561c61287d7e94a295795246a93cfe746",
-      "blockNumber": 115314856,
+      "blockNumber": 115460882,
       "gasUsed": "178762",
       "status": "PASS"
     },
+    "restoreHumanApprovedRiskParameters": {
+      "transactionHash": "0x8d8134877e71df818f335e67597220893979518df81fd3abe1b56f810e9975d5",
+      "blockNumber": 115460883,
+      "gasUsed": "58922",
+      "status": "PASS"
+    },
     "finalizeModuleGovernance_CelestialSeat500_Upgradeable": {
-      "transactionHash": "0x64115f08965043a12e1986a111ca9902822e9bb580cc47b304287417f382b596",
-      "blockNumber": 115314857,
+      "transactionHash": "0xc5039817d74f3133ada1232396752f4e54b8ae1b1965faafa0d0d8c72267409e",
+      "blockNumber": 115460884,
       "gasUsed": "119950",
       "status": "PASS"
     },
     "finalizeModuleGovernance_CivilizationAllocation_Upgradeable": {
-      "transactionHash": "0x1d8c34e39e5f40b3791caf85426b9252ced925adf4c1e0bf6bc85a9a50b79fbd",
-      "blockNumber": 115314858,
+      "transactionHash": "0xee45e44cc918aa914f993e08b2e93939c0511f3b744ea5dc26b852fe0cbf8382",
+      "blockNumber": 115460885,
       "gasUsed": "119987",
       "status": "PASS"
     },
     "finalizeModuleGovernance_EconomicRouter8888_Upgradeable": {
-      "transactionHash": "0xfea5dfc37628b7e8b85ef84f6eb54568258683372f2c439276d8814e00ec46c3",
-      "blockNumber": 115314859,
+      "transactionHash": "0x66f3ff7ee76958889018b672cbf3c7f47de312e1261bba1055769d943cdcc466",
+      "blockNumber": 115460886,
       "gasUsed": "120009",
       "status": "PASS"
     },
     "finalizeModuleGovernance_ExchangeSettlement11520_Upgradeable": {
-      "transactionHash": "0x15d3fd56b3a2e39a744df8733444956ab12415159113fba6520cba1b723bdf61",
-      "blockNumber": 115314860,
+      "transactionHash": "0x6f546a244952d93800fb823a6199f17490c4027501d5f852191d96f8df5b9c36",
+      "blockNumber": 115460887,
       "gasUsed": "119987",
       "status": "PASS"
     },
     "finalizeModuleGovernance_BankRiskController_Upgradeable": {
-      "transactionHash": "0xa3f82aaef4363c424d207c0104fb7ccb98f0efac19e2a3a79fe8145962057917",
-      "blockNumber": 115314861,
+      "transactionHash": "0xf0ef4e387f098a8b3d2ba4d6c2d876b13ee894da44e56f97896ace865f7627df",
+      "blockNumber": 115460888,
       "gasUsed": "119987",
       "status": "PASS"
     },
     "finalizeModuleGovernance_BankGovernance_Upgradeable": {
-      "transactionHash": "0x256564c8f6e66f4336209ac7d732c89191aa287eb03e289fc4c2da11335a4a11",
-      "blockNumber": 115314862,
+      "transactionHash": "0x1ca4aad386c70916c2930dac77d257a17e9e3ff5093d0035db7d7e123c1df62c",
+      "blockNumber": 115460889,
       "gasUsed": "117432",
       "status": "PASS"
     },
     "finalizeModuleGovernance_BankMigration_Upgradeable": {
-      "transactionHash": "0xe8f61b93a9c79363888cf9ee751636fa2f953a15b177352a634ea523c3ce0f75",
-      "blockNumber": 115314863,
+      "transactionHash": "0xc2762b7729f1e09c91b444259b381ff56e6d9a5e167656975886e74ff9fc54ad",
+      "blockNumber": 115460890,
       "gasUsed": "119987",
       "status": "PASS"
     },
     "finalizeBankGovernance": {
-      "transactionHash": "0x885b93cc0ff42c9c90762ba3c82b2ee2f5a20a7d5bc4d96ec7c68dda7afc24c3",
-      "blockNumber": 115314864,
+      "transactionHash": "0x0e8245caf12d7ca0e42755145953f60cc0be0f321e4f9279ac3ae0c1c693b23c",
+      "blockNumber": 115460891,
       "gasUsed": "143087",
       "status": "PASS"
     },
     "finalizeBank8888Governance": {
-      "transactionHash": "0x497c6718632dfb5504f12baa35aecda784675904393cf4b117a3257d45a2b7a1",
-      "blockNumber": 115314865,
+      "transactionHash": "0xc4338a207e8d947afc56587b4682ce50f1f1befb03dc4ce5515981d72d1ae76f",
+      "blockNumber": 115460892,
       "gasUsed": "230256",
+      "status": "PASS"
+    },
+    "proposeRevokeGovernanceContractPauser": {
+      "transactionHash": "0x1348fad762bb0496a096a9382a76567d02bc7d15e46481d167dd9e782207ce1f",
+      "blockNumber": 115460893,
+      "gasUsed": "110400",
+      "status": "PASS"
+    },
+    "approveRevokeGovernanceContractPauserByJadeEmperor": {
+      "transactionHash": "0xe29cddd4ecb35464cc4262c6cbbf9d353b6527251fc118e8648ea695686da9f5",
+      "blockNumber": 115460894,
+      "gasUsed": "57643",
+      "status": "PASS"
+    },
+    "executeRevokeGovernanceContractPauser": {
+      "transactionHash": "0xc640036f29a74468d732160f61a47e27bf89500b17915c71450aca4bb26c8096",
+      "blockNumber": 115460896,
+      "gasUsed": "61492",
       "status": "PASS"
     },
     "forkOnlyBankReplacementDeployment": {
       "transactionHash": "0xac4d596c042936d1f68bb4b997f51ea27b1e8a29da5caf445ef53f5c60b9ccdc",
-      "blockNumber": 115314866,
+      "blockNumber": 115460897,
       "gasUsed": "2734493",
       "status": "PASS"
     },
     "forkOnlyNonUupsDeployment": {
       "transactionHash": "0x7c29a9c5d7ded64a5f9a764e08186cfa0c301806f0f29be5c6810690f6f5b292",
-      "blockNumber": 115314867,
+      "blockNumber": 115460898,
       "gasUsed": "100107",
       "status": "PASS"
     },
     "unauthorizedPostFinalizationUpgradeRejected": {
       "status": "PASS",
-      "transactionHash": "0x63ace91f15b5ccd0aa3ba497bf39d59f37015808eb4ccb20a3002e741c2a8de4",
-      "blockNumber": 115314868,
+      "transactionHash": "0x22e4842b2e95530d96d1db4b9b1ab01414d04086b25b782b76dbda4bc7c92799",
+      "blockNumber": 115460899,
       "gasUsed": "30164",
       "reason": "REVERTED_AS_REQUIRED"
     },
     "proposeMaliciousUpgrade": {
-      "transactionHash": "0xd3ab22817a7786a46398069b71b8f227a6345a60164f1f060bfb58bd621a1a89",
-      "blockNumber": 115314869,
+      "transactionHash": "0xad4d42849a96c55f7cbb41479f4e1da2a2f68a8584a633bd39487b41c0b11c02",
+      "blockNumber": 115460900,
       "gasUsed": "110198",
       "status": "PASS"
     },
     "approveMaliciousUpgrade": {
-      "transactionHash": "0xc55716d7db5dcbc1cf6e98f576015deba16e86d0cfa7358705a9cd617e0d201f",
-      "blockNumber": 115314870,
+      "transactionHash": "0xf5fd8fc1065cfc37c46cb19932d87b4786270a0ef8203f6acdada9e079842817",
+      "blockNumber": 115460901,
       "gasUsed": "57667",
       "status": "PASS"
     },
     "maliciousImplementationUpgradeRejected": {
       "status": "PASS",
-      "transactionHash": "0x85e0454812018b62bc1e3b4afab22cd91464450133cd2b88bcd79b785747a377",
-      "blockNumber": 115314872,
+      "transactionHash": "0xa3bdcb98811b20769ed152c55f1fb25e720a841f58446f02f3351455ba8fba41",
+      "blockNumber": 115460903,
       "gasUsed": "60373",
       "reason": "REVERTED_AS_REQUIRED"
     },
     "proposeValidUpgrade": {
-      "transactionHash": "0xbdfbf622d40d5cb56cca33362ff3c48b2721f7233729dab9b80f5c555c1e5c35",
-      "blockNumber": 115314873,
+      "transactionHash": "0x551d02f886768add0a55997567c8731266e6cd266094e99ed03d3a5ff4a531cb",
+      "blockNumber": 115460904,
       "gasUsed": "110198",
       "status": "PASS"
     },
     "approveValidUpgrade": {
-      "transactionHash": "0x508e2442f922a163aa6b027ee913110bd2de5d31af5e45e518ef8ec7dbe215a8",
-      "blockNumber": 115314874,
+      "transactionHash": "0x5652856a2ead9db5ef297f041e0ee299b6b1346827624f3fb2915f2adad78cec",
+      "blockNumber": 115460905,
       "gasUsed": "57667",
       "status": "PASS"
     },
     "upgradeBeforeDelayRejected": {
       "status": "PASS",
-      "transactionHash": "0x2ff27f44e43e3992e31a76635afab7aef5957482b8bbd707dce28dfe1f7fb402",
-      "blockNumber": 115314875,
+      "transactionHash": "0x5904fd5c5ca8282ce940811b297df6de886fc5021a176ca594dddf88389c8a85",
+      "blockNumber": 115460906,
       "gasUsed": "40365",
       "reason": "REVERTED_AS_REQUIRED"
     },
     "executeValidUpgrade": {
-      "transactionHash": "0x5904fd5c5ca8282ce940811b297df6de886fc5021a176ca594dddf88389c8a85",
-      "blockNumber": 115314877,
+      "transactionHash": "0x2b989705aca9ef35537b2e0d6b204bc0e181c7a176a337bb0f0fd097483fbef2",
+      "blockNumber": 115460908,
       "gasUsed": "64520",
       "status": "PASS"
     },
     "proposeRollback": {
-      "transactionHash": "0x1fdf0239647fa7d3c28623246bc9eadf51fbb8a58eefa9de5e301da9e81d763b",
-      "blockNumber": 115314878,
+      "transactionHash": "0xd8d0005d4b60237a9211074d000a1351cd24877667a1e4b2ba45e5c8bb0da7ae",
+      "blockNumber": 115460909,
       "gasUsed": "110198",
       "status": "PASS"
     },
     "approveRollback": {
-      "transactionHash": "0x4d90141dc0e8f98bdc8cbf83ca2d8937372750da5218521e5e89e24f41e07768",
-      "blockNumber": 115314879,
+      "transactionHash": "0xbdec792d34d358c4279ac416dc681c934b2486924a6cd380b3a447cc2021c9c5",
+      "blockNumber": 115460910,
       "gasUsed": "57667",
       "status": "PASS"
     },
     "executeRollback": {
-      "transactionHash": "0x6dd9e19bf171684c6162393e64088478e97c31d0862ceac939eca78443536e4e",
-      "blockNumber": 115314881,
+      "transactionHash": "0x4bc06a7ac240dfa19c114821d51d29ccd302fe8c230907841c43d6d0a822093a",
+      "blockNumber": 115460912,
       "gasUsed": "64520",
       "status": "PASS"
     },
     "forkOnlyBank8888ReplacementDeployment": {
       "transactionHash": "0x6bbf3c3586b4d102aad370e48c83e0770bc456c827d835315024b99f12c4dd85",
-      "blockNumber": 115314882,
+      "blockNumber": 115460913,
       "gasUsed": "4016007",
       "status": "PASS"
     },
     "unauthorizedBank8888UpgradeRejected": {
       "status": "PASS",
-      "transactionHash": "0x11af8ed08aff1501232d99b976fcc85f7f0bd42ba870447cd1ce2bcaf44a0a50",
-      "blockNumber": 115314883,
+      "transactionHash": "0xc7aac4fb892e9eb86d2f7bac32bdc94e17a8cb99bd97ffe63c933c1c745acfff",
+      "blockNumber": 115460914,
       "gasUsed": "30230",
       "reason": "REVERTED_AS_REQUIRED"
     },
     "proposeBank8888Upgrade": {
-      "transactionHash": "0xd74a401dd32aeb34ec12af42d860290e44ae356abf91046e9ecd21cdd3c85a85",
-      "blockNumber": 115314884,
+      "transactionHash": "0xbbbd1d6b320131559fba6fef31aab417628f2fcea55d00b8badce70673033bff",
+      "blockNumber": 115460915,
       "gasUsed": "110186",
       "status": "PASS"
     },
     "approveBank8888Upgrade": {
-      "transactionHash": "0x1d58c868ab7cd56939311b31d4e2c3471f23de45934c43d04b7dc730fe72bd51",
-      "blockNumber": 115314885,
+      "transactionHash": "0xba2eb8a0c7abd66e105bd3663ec839c3038853b292c71b41825b83aed88074bb",
+      "blockNumber": 115460916,
       "gasUsed": "57655",
       "status": "PASS"
     },
     "executeBank8888Upgrade": {
-      "transactionHash": "0x9c1f12e9f4d2d02ffc6f12dffb23e75bd7a3413f932512a2830a44e6d932cee5",
-      "blockNumber": 115314887,
+      "transactionHash": "0x011a90c31d6c09e3bbc0d982669417dd1855a509a1f122a54602b24cc737247b",
+      "blockNumber": 115460918,
       "gasUsed": "64662",
       "status": "PASS"
     },
     "proposeBank8888Rollback": {
-      "transactionHash": "0xda4cc9e9797b7a8e1e48dad47638edf0809ca4c11518ec224a0a82d061b13c61",
-      "blockNumber": 115314888,
+      "transactionHash": "0x4325d7dce3554638ee132fa3b3ae6c8b7650c0b55c306d50327bcf45ee47d221",
+      "blockNumber": 115460919,
       "gasUsed": "110198",
       "status": "PASS"
     },
     "approveBank8888Rollback": {
-      "transactionHash": "0xd13bdd89bc9b15a067d86ea0e7c21eb43e358b8a9fefbbbd78f1f9002b4d47b7",
-      "blockNumber": 115314889,
+      "transactionHash": "0x4e18f3f1040d34b64eb3b43a26a072d694cc23cadde8aee8d53d79edf154894c",
+      "blockNumber": 115460920,
       "gasUsed": "57667",
       "status": "PASS"
     },
     "executeBank8888Rollback": {
-      "transactionHash": "0xce040a27bf3f2f514839fa0b30f668faf21e53bc278cd0cc74ba2ec1a1c3d673",
-      "blockNumber": 115314891,
+      "transactionHash": "0xb89d52c29e832a1e92b37b035ef3edccb1191c0dee803a4dc2565c634fcdaf63",
+      "blockNumber": 115460922,
       "gasUsed": "64674",
       "status": "PASS"
+    },
+    "guanyinPause18888": {
+      "transactionHash": "0xae05823b69a578642da1985eeb134686117fab711830671bce696ab9fe60b9dd",
+      "blockNumber": 115460923,
+      "gasUsed": "35090",
+      "status": "PASS"
+    },
+    "guanyinPause8888": {
+      "transactionHash": "0xe6b18d5cbd2eca0773d9a829875db53c8136c6496b8e1a644060d1c4f987dd6d",
+      "blockNumber": 115460924,
+      "gasUsed": "35303",
+      "status": "PASS"
+    },
+    "guanyinUnauthorizedUnpauseRejected": {
+      "status": "PASS",
+      "transactionHash": "0x8d461db492d2747ccebf93afd7af5127459f22b1c8a582d912b5fefcc0f02537",
+      "blockNumber": 115460925,
+      "gasUsed": "28658",
+      "reason": "REVERTED_AS_REQUIRED"
+    },
+    "guanyinUnauthorizedUpgradeRejected": {
+      "status": "PASS",
+      "transactionHash": "0xd1e2d51f2c1e4b8f16ff03497da61f86b35b9745214fb943cb40205143ba36fe",
+      "blockNumber": 115460926,
+      "gasUsed": "30164",
+      "reason": "REVERTED_AS_REQUIRED"
+    },
+    "guanyinUnauthorizedWithdrawRejected": {
+      "status": "PASS",
+      "transactionHash": "0x07657fb6d5baf4161b8458eaabeebfae39e282bb8d1b9442201c279348b2c85f",
+      "blockNumber": 115460927,
+      "gasUsed": "27750",
+      "reason": "REVERTED_AS_REQUIRED"
+    },
+    "guanyinUnauthorizedMintRejected": {
+      "status": "PASS",
+      "transactionHash": "0x6b1770d126fd4c7607c8947aa13fc74ac0805499635b2c297d5a73220f5699cd",
+      "blockNumber": 115460928,
+      "gasUsed": "22688",
+      "reason": "REVERTED_AS_REQUIRED"
+    },
+    "guanyinUnauthorizedAllocationCreationRejected": {
+      "status": "PASS",
+      "transactionHash": "0xd51f577673138e737eea4bcac07e922e176d3157e15f97f436e44df3cf922af2",
+      "blockNumber": 115460929,
+      "gasUsed": "30758",
+      "reason": "REVERTED_AS_REQUIRED"
+    },
+    "guanyinUnauthorizedSalaryRedirectRejected": {
+      "status": "PASS",
+      "transactionHash": "0xf31420f9aac71256387f0611b47f556791103084f43b7682b939424d4d5a4fd7",
+      "blockNumber": 115460930,
+      "gasUsed": "31272",
+      "reason": "REVERTED_AS_REQUIRED"
     }
   },
   "genesisRecord": {
@@ -880,7 +1009,7 @@
     "evidenceClass": "CHAIN_ID_56_MAINNET_FORK",
     "mainnetTransactionAuthorized": false,
     "chainId": "56",
-    "forkBlock": 115314782,
+    "forkBlock": 115460801,
     "pointIds": {
       "kaiosGoldAndSilverIslandTokenPoint": "33333",
       "whiteHole": "36000",
@@ -895,40 +1024,40 @@
     },
     "settlement": {
       "transactionHash": "0x98afe7b42e9c31a81fc66d45a9d865d240a2d5088d43bcf4e85f0bf9fdc5be13",
-      "blockNumber": 115314823,
-      "timestamp": 1786452253,
-      "timestampIso": "2026-08-11T12:44:13.000Z",
+      "blockNumber": 115460848,
+      "timestamp": 1786517990,
+      "timestampIso": "2026-08-12T06:59:50.000Z",
       "kgenGenesisSupply": {
         "raw": "72000000000000000000000000",
         "decimal18": "72000000.0"
       },
       "kgenSupplyAtSettlementBlock": {
-        "raw": "71977906887000601442227077",
-        "decimal18": "71977906.887000601442227077"
+        "raw": "71977798091069583125268765",
+        "decimal18": "71977798.091069583125268765"
       },
       "historicalKgenBurn": {
-        "raw": "22093112999398557772923",
-        "decimal18": "22093.112999398557772923"
+        "raw": "22201908930416874731235",
+        "decimal18": "22201.908930416874731235"
       },
       "actualGenesisKaiosMinted": {
-        "raw": "22093112999398557772923000",
-        "decimal18": "22093112.999398557772923"
+        "raw": "22201908930416874731235000",
+        "decimal18": "22201908.930416874731235"
       },
       "kaiosTotalSupply": {
-        "raw": "22093112999398557772923000",
-        "decimal18": "22093112.999398557772923"
+        "raw": "22201908930416874731235000",
+        "decimal18": "22201908.930416874731235"
       },
       "bankBalanceBefore": {
         "raw": "0",
         "decimal18": "0.0"
       },
       "bankBalanceAfter": {
-        "raw": "22093112999398557772923000",
-        "decimal18": "22093112.999398557772923"
+        "raw": "22201908930416874731235000",
+        "decimal18": "22201908.930416874731235"
       },
       "bankBalanceDelta": {
-        "raw": "22093112999398557772923000",
-        "decimal18": "22093112.999398557772923"
+        "raw": "22201908930416874731235000",
+        "decimal18": "22201908.930416874731235"
       }
     },
     "accountingInvariant": true,
@@ -948,10 +1077,24 @@
         "defaultAdmin": true,
         "moduleAdmin": true,
         "upgrader": true,
-        "pauser": true
+        "pauser": false
       },
-      "bootstrapGovernance": {
+      "motherPrimaryGovernance": {
         "address": "0xCd60BF474e691F2484950a0276Eaf507616Ca4b9",
+        "defaultAdmin": false,
+        "moduleAdmin": false,
+        "upgrader": false,
+        "pauser": false
+      },
+      "jadeEmperorApprover": {
+        "address": "0xc15E08834fCA9F2d3462a3f8f0BC30524D6dd756",
+        "defaultAdmin": false,
+        "moduleAdmin": false,
+        "upgrader": false,
+        "pauser": false
+      },
+      "guanyinFinalPauser": {
+        "address": "0xEBEeAC6d09D2d28Db8010b0923442C9Eb2b702FE",
         "defaultAdmin": false,
         "moduleAdmin": false,
         "upgrader": false,
@@ -975,7 +1118,7 @@
         "payrollAdmin": true,
         "upgrader": true
       },
-      "bootstrapGovernance": {
+      "motherPrimaryGovernance": {
         "address": "0xCd60BF474e691F2484950a0276Eaf507616Ca4b9",
         "defaultAdmin": false,
         "accountAdmin": false,
@@ -983,9 +1126,17 @@
         "upgrader": false
       },
       "pauser": {
-        "address": "0xd03ea8624C8C5987235048901fB614fDcA89b117",
+        "address": "0xEBEeAC6d09D2d28Db8010b0923442C9Eb2b702FE",
         "hasRole": true,
-        "status": "FORK_ONLY_HUMAN_CONFIRM_REQUIRED_FOR_MAINNET"
+        "status": "HUMAN_FINAL_GUANYIN_PAUSE_ONLY"
+      },
+      "deploymentSigner": {
+        "address": "0xb3C54ca96De0dED4Ca0151F629ff9781506ba261",
+        "defaultAdmin": false,
+        "accountAdmin": false,
+        "payrollAdmin": false,
+        "upgrader": false,
+        "pauser": false
       }
     },
     "modules": {
@@ -996,7 +1147,12 @@
           "governance": true,
           "upgrader": true
         },
-        "bootstrapGovernance": {
+        "motherPrimaryGovernance": {
+          "defaultAdmin": false,
+          "governance": false,
+          "upgrader": false
+        },
+        "deploymentSigner": {
           "defaultAdmin": false,
           "governance": false,
           "upgrader": false
@@ -1009,7 +1165,12 @@
           "governance": true,
           "upgrader": true
         },
-        "bootstrapGovernance": {
+        "motherPrimaryGovernance": {
+          "defaultAdmin": false,
+          "governance": false,
+          "upgrader": false
+        },
+        "deploymentSigner": {
           "defaultAdmin": false,
           "governance": false,
           "upgrader": false
@@ -1022,7 +1183,12 @@
           "governance": true,
           "upgrader": true
         },
-        "bootstrapGovernance": {
+        "motherPrimaryGovernance": {
+          "defaultAdmin": false,
+          "governance": false,
+          "upgrader": false
+        },
+        "deploymentSigner": {
           "defaultAdmin": false,
           "governance": false,
           "upgrader": false
@@ -1035,7 +1201,12 @@
           "governance": true,
           "upgrader": true
         },
-        "bootstrapGovernance": {
+        "motherPrimaryGovernance": {
+          "defaultAdmin": false,
+          "governance": false,
+          "upgrader": false
+        },
+        "deploymentSigner": {
           "defaultAdmin": false,
           "governance": false,
           "upgrader": false
@@ -1048,7 +1219,12 @@
           "governance": true,
           "upgrader": true
         },
-        "bootstrapGovernance": {
+        "motherPrimaryGovernance": {
+          "defaultAdmin": false,
+          "governance": false,
+          "upgrader": false
+        },
+        "deploymentSigner": {
           "defaultAdmin": false,
           "governance": false,
           "upgrader": false
@@ -1061,7 +1237,12 @@
           "governance": true,
           "upgrader": true
         },
-        "bootstrapGovernance": {
+        "motherPrimaryGovernance": {
+          "defaultAdmin": false,
+          "governance": false,
+          "upgrader": false
+        },
+        "deploymentSigner": {
           "defaultAdmin": false,
           "governance": false,
           "upgrader": false
@@ -1074,7 +1255,12 @@
           "governance": true,
           "upgrader": true
         },
-        "bootstrapGovernance": {
+        "motherPrimaryGovernance": {
+          "defaultAdmin": false,
+          "governance": false,
+          "upgrader": false
+        },
+        "deploymentSigner": {
           "defaultAdmin": false,
           "governance": false,
           "upgrader": false
@@ -1085,12 +1271,39 @@
       "contract": "0xa2792fBDCc8A8AaC364053431D44E0a8D335E166",
       "delaySeconds": 3600,
       "proposer": "0xCd60BF474e691F2484950a0276Eaf507616Ca4b9",
-      "distinctApprover": "0xFFcf8FDEE72ac11b5c542428B35EEF5769C409f0"
+      "distinctApprover": "0xc15E08834fCA9F2d3462a3f8f0BC30524D6dd756",
+      "distinctIdentities": true,
+      "motherHasProposerRole": true,
+      "motherHasApproverRole": false,
+      "jadeEmperorHasProposerRole": false,
+      "jadeEmperorHasApproverRole": true
     },
     "registry": {
       "owner": "0xCd60BF474e691F2484950a0276Eaf507616Ca4b9",
       "minimumDelaySeconds": 3600,
       "bootstrapOpen": false
+    }
+  },
+  "governanceAddressClassification": {
+    "mother": {
+      "address": "0xCd60BF474e691F2484950a0276Eaf507616Ca4b9",
+      "accountType": "EOA",
+      "codeExists": false
+    },
+    "jadeEmperor": {
+      "address": "0xc15E08834fCA9F2d3462a3f8f0BC30524D6dd756",
+      "accountType": "EOA",
+      "codeExists": false
+    },
+    "guanyin": {
+      "address": "0xEBEeAC6d09D2d28Db8010b0923442C9Eb2b702FE",
+      "accountType": "EOA",
+      "codeExists": false
+    },
+    "deploymentSigner": {
+      "address": "0xb3C54ca96De0dED4Ca0151F629ff9781506ba261",
+      "accountType": "EOA",
+      "codeExists": false
     }
   },
   "moduleMatrix": {
@@ -1100,11 +1313,14 @@
       "proxy": "0xA447853985Ef6e6AbFcb14FCfDeFdced10Be0BDe",
       "version": "2.0.0",
       "activeInFork": true,
-      "perTransactionLimitForkOnly": "10000000000000000000000",
-      "dailyEpochLimitForkOnly": "100000000000000000000000",
+      "perTransactionLimitForkOnly": "3005464480874316939890",
+      "dailyEpochLimitForkOnly": "3005464480874316939890",
       "mainnetActive": true,
-      "mainnetLimits": null,
-      "mainnetStatus": "HUMAN_FINAL_INITIAL_STATE_LIMITS_PENDING"
+      "mainnetLimits": {
+        "perTransactionLimitWei": "3005464480874316939890",
+        "dailyEpochLimitWei": "3005464480874316939890"
+      },
+      "mainnetStatus": "HUMAN_FINAL_INITIAL_STATE_ACTIVE"
     },
     "CivilizationAllocation_Upgradeable": {
       "moduleId": "0x98cb067844ea2b60572a9eb95ae1e64a6bf8f03bcf8c9e11ae16130de56bca63",
@@ -1112,11 +1328,14 @@
       "proxy": "0x75A55Af6967932C4A1c896dB81Dd6F31e531c299",
       "version": "1.0.0",
       "activeInFork": true,
-      "perTransactionLimitForkOnly": "10000000000000000000000",
-      "dailyEpochLimitForkOnly": "100000000000000000000000",
+      "perTransactionLimitForkOnly": "6010928961748633879781",
+      "dailyEpochLimitForkOnly": "6010928961748633879781",
       "mainnetActive": true,
-      "mainnetLimits": null,
-      "mainnetStatus": "HUMAN_FINAL_INITIAL_STATE_LIMITS_PENDING"
+      "mainnetLimits": {
+        "perTransactionLimitWei": "6010928961748633879781",
+        "dailyEpochLimitWei": "6010928961748633879781"
+      },
+      "mainnetStatus": "HUMAN_FINAL_INITIAL_STATE_ACTIVE"
     },
     "EconomicRouter8888_Upgradeable": {
       "moduleId": "0xb13d0845c93752f8c48622f9d8f06b2b5b503a2b264f614b59130b81156e5e54",
@@ -1124,11 +1343,14 @@
       "proxy": "0xC49f989c6ff0d22824df8D993Ce82207165C1428",
       "version": "1.0.0",
       "activeInFork": true,
-      "perTransactionLimitForkOnly": "10000000000000000000000",
-      "dailyEpochLimitForkOnly": "100000000000000000000000",
+      "perTransactionLimitForkOnly": "12021857923497267759562",
+      "dailyEpochLimitForkOnly": "12021857923497267759562",
       "mainnetActive": true,
-      "mainnetLimits": null,
-      "mainnetStatus": "HUMAN_FINAL_INITIAL_STATE_LIMITS_PENDING"
+      "mainnetLimits": {
+        "perTransactionLimitWei": "12021857923497267759562",
+        "dailyEpochLimitWei": "12021857923497267759562"
+      },
+      "mainnetStatus": "HUMAN_FINAL_INITIAL_STATE_ACTIVE"
     },
     "ExchangeSettlement11520_Upgradeable": {
       "moduleId": "0x24b8150af34ecded6c75de16b22b3a7fa6477e94cb23ea338a9453af3ed8961b",
@@ -1136,11 +1358,14 @@
       "proxy": "0x17587F49dFDE4e400D03Ae81364AC2af8E1629Df",
       "version": "1.0.0",
       "activeInFork": true,
-      "perTransactionLimitForkOnly": "10000000000000000000000",
-      "dailyEpochLimitForkOnly": "100000000000000000000000",
+      "perTransactionLimitForkOnly": "6010928961748633879781",
+      "dailyEpochLimitForkOnly": "6010928961748633879781",
       "mainnetActive": true,
-      "mainnetLimits": null,
-      "mainnetStatus": "HUMAN_FINAL_INITIAL_STATE_LIMITS_PENDING"
+      "mainnetLimits": {
+        "perTransactionLimitWei": "6010928961748633879781",
+        "dailyEpochLimitWei": "6010928961748633879781"
+      },
+      "mainnetStatus": "HUMAN_FINAL_INITIAL_STATE_ACTIVE"
     },
     "BankRiskController_Upgradeable": {
       "moduleId": "0xbcba21ba5cfe25784fa28567a77ab492bb1265a40a221a37df6a976728cd105d",
@@ -1151,8 +1376,11 @@
       "perTransactionLimitForkOnly": "0",
       "dailyEpochLimitForkOnly": "0",
       "mainnetActive": true,
-      "mainnetLimits": null,
-      "mainnetStatus": "HUMAN_FINAL_INITIAL_STATE_LIMITS_PENDING"
+      "mainnetLimits": {
+        "perTransactionLimitWei": "0",
+        "dailyEpochLimitWei": "0"
+      },
+      "mainnetStatus": "HUMAN_FINAL_INITIAL_STATE_ACTIVE"
     },
     "BankGovernance_Upgradeable": {
       "moduleId": "0x408269e9739994f2f410704684700c1f0c29b98f7210d29834da2c315b4dd2ce",
@@ -1163,8 +1391,11 @@
       "perTransactionLimitForkOnly": "0",
       "dailyEpochLimitForkOnly": "0",
       "mainnetActive": true,
-      "mainnetLimits": null,
-      "mainnetStatus": "HUMAN_FINAL_INITIAL_STATE_LIMITS_PENDING"
+      "mainnetLimits": {
+        "perTransactionLimitWei": "0",
+        "dailyEpochLimitWei": "0"
+      },
+      "mainnetStatus": "HUMAN_FINAL_INITIAL_STATE_ACTIVE"
     },
     "BankMigration_Upgradeable": {
       "moduleId": "0xbc0740979a57ecb6aedf2d22cb378fe98c7a380d156a63372e04e276797310f8",
@@ -1175,16 +1406,19 @@
       "perTransactionLimitForkOnly": "0",
       "dailyEpochLimitForkOnly": "0",
       "mainnetActive": false,
-      "mainnetLimits": null,
-      "mainnetStatus": "HUMAN_FINAL_INITIAL_STATE_LIMITS_PENDING"
+      "mainnetLimits": {
+        "perTransactionLimitWei": "0",
+        "dailyEpochLimitWei": "0"
+      },
+      "mainnetStatus": "HUMAN_FINAL_REGISTERED_BUT_INACTIVE"
     }
   },
   "economicParameters": [
     {
       "parameter": "500 Seat salary base/rate",
-      "value": null,
-      "status": "HUMAN_CONFIRM_REQUIRED",
-      "forkOnlyValue": "10 KAIOS monthly base with 1.0x/10.0x test weights"
+      "value": "88 KAIOS monthly base; 1x default; governance policy 1x-5x",
+      "status": "HUMAN_FINAL_ECONOMIC_POLICY_ENCODED",
+      "forkOnlyValue": "matches Mainnet candidate"
     },
     {
       "parameter": "500 Seat epoch definition",
@@ -1194,45 +1428,45 @@
     },
     {
       "parameter": "18911 Alchemy epoch definition",
-      "value": null,
-      "status": "HUMAN_CONFIRM_REQUIRED",
-      "forkOnlyValue": "86400 seconds"
+      "value": "86400 seconds",
+      "status": "FROZEN_DEPLOYMENT_CONFIGURATION_NOT_ECONOMIC_POLICY",
+      "forkOnlyValue": "matches Mainnet candidate"
     },
     {
       "parameter": "Reserve minimum",
-      "value": null,
-      "status": "HUMAN_CONFIRM_REQUIRED",
-      "forkOnlyValue": "dynamic balance lock for retry test only"
+      "value": "11000000.0 KAIOS",
+      "status": "HUMAN_FINAL_ECONOMIC_POLICY_ENCODED",
+      "forkOnlyValue": "matches Mainnet candidate"
     },
     {
       "parameter": "Salary exposure cap",
-      "value": null,
-      "status": "HUMAN_CONFIRM_REQUIRED",
-      "forkOnlyValue": "10000.0 per transaction / 100000.0 per UTC day"
+      "value": "3005464480874316939890 wei per transaction / 3005464480874316939890 wei per UTC day",
+      "status": "HUMAN_FINAL_ECONOMIC_POLICY_ENCODED",
+      "forkOnlyValue": "matches Mainnet candidate"
     },
     {
       "parameter": "Allocation exposure cap",
-      "value": null,
-      "status": "HUMAN_CONFIRM_REQUIRED",
-      "forkOnlyValue": "10000.0 per transaction / 100000.0 per UTC day"
+      "value": "6010928961748633879781 wei per transaction / 6010928961748633879781 wei per UTC day",
+      "status": "HUMAN_FINAL_ECONOMIC_POLICY_ENCODED",
+      "forkOnlyValue": "matches Mainnet candidate"
     },
     {
       "parameter": "8888 route cap",
-      "value": null,
-      "status": "HUMAN_CONFIRM_REQUIRED",
-      "forkOnlyValue": "10000.0 per transaction / 100000.0 per UTC day"
+      "value": "12021857923497267759562 wei per transaction / 12021857923497267759562 wei per UTC day",
+      "status": "HUMAN_FINAL_ECONOMIC_POLICY_ENCODED",
+      "forkOnlyValue": "matches Mainnet candidate"
     },
     {
       "parameter": "11520 settlement cap",
-      "value": null,
-      "status": "HUMAN_CONFIRM_REQUIRED",
-      "forkOnlyValue": "10000.0 per transaction / 100000.0 per UTC day"
+      "value": "6010928961748633879781 wei per transaction / 6010928961748633879781 wei per UTC day",
+      "status": "HUMAN_FINAL_ECONOMIC_POLICY_ENCODED",
+      "forkOnlyValue": "matches Mainnet candidate"
     },
     {
       "parameter": "8888 deposit interest rate",
-      "value": null,
-      "status": "HUMAN_CONFIRM_REQUIRED",
-      "forkOnlyValue": "unset; future-only checkpoint architecture tested locally"
+      "value": "833 ppm per Gregorian monthly epoch",
+      "status": "HUMAN_FINAL_ECONOMIC_POLICY_ENCODED",
+      "forkOnlyValue": "matches Mainnet candidate"
     },
     {
       "parameter": "Governance delay",
@@ -1242,15 +1476,15 @@
     },
     {
       "parameter": "Distinct BankGovernance approver",
-      "value": null,
-      "status": "HUMAN_CONFIRM_REQUIRED",
-      "forkOnlyValue": "0xFFcf8FDEE72ac11b5c542428B35EEF5769C409f0"
+      "value": "0xc15E08834fCA9F2d3462a3f8f0BC30524D6dd756",
+      "status": "HUMAN_FINAL_JADE_EMPEROR",
+      "forkOnlyValue": "formal public identity used in fork"
     },
     {
       "parameter": "Pause authority",
-      "value": null,
-      "status": "HUMAN_CONFIRM_REQUIRED",
-      "implementationBehavior": "Final BankGovernance and bootstrap governance PAUSER remain; pause cannot spend or unpause"
+      "value": "0xEBEeAC6d09D2d28Db8010b0923442C9Eb2b702FE",
+      "status": "HUMAN_FINAL_GUANYIN",
+      "implementationBehavior": "pause only; cannot unpause, spend, mint, upgrade, allocate or redirect"
     },
     {
       "parameter": "Initial module enable/disable state",
@@ -1260,9 +1494,9 @@
     }
   ],
   "gas": {
-    "deploymentGasUsed": "23482341",
-    "runtimeGasUsed": "7059583",
-    "totalGasUsed": "30541924"
+    "deploymentGasUsed": "23482353",
+    "runtimeGasUsed": "7685821",
+    "totalGasUsed": "31168174"
   },
   "gates": {
     "postFinalizationUpgradePath": "PASS",
@@ -1281,21 +1515,17 @@
     "storage8888RollbackRestore": "PASS",
     "frozenBankCreationCodehash": "PASS",
     "frozenBankRuntimeCodehash": "PASS",
-    "legacyHeartUntouched": "PASS"
+    "legacyHeartUntouched": "PASS",
+    "motherPrimaryGovernance": "PASS",
+    "jadeEmperorDistinctApprover": "PASS",
+    "guanyinFinalPauser": "PASS",
+    "pauserWithdraw": "BLOCKED",
+    "pauserMint": "BLOCKED",
+    "pauserUpgrade": "BLOCKED",
+    "deployerPermanentGovernance": "NONE"
   },
-  "blockers": [
-    "DEPLOYMENT_SIGNER_CONTROL_RECONFIRMATION_REQUIRED",
-    "HUMAN_CONFIRM_REQUIRED:500 Seat salary base/rate",
-    "HUMAN_CONFIRM_REQUIRED:18911 Alchemy epoch definition",
-    "HUMAN_CONFIRM_REQUIRED:Reserve minimum",
-    "HUMAN_CONFIRM_REQUIRED:Salary exposure cap",
-    "HUMAN_CONFIRM_REQUIRED:Allocation exposure cap",
-    "HUMAN_CONFIRM_REQUIRED:8888 route cap",
-    "HUMAN_CONFIRM_REQUIRED:11520 settlement cap",
-    "HUMAN_CONFIRM_REQUIRED:8888 deposit interest rate",
-    "HUMAN_CONFIRM_REQUIRED:Distinct BankGovernance approver",
-    "HUMAN_CONFIRM_REQUIRED:Pause authority",
-    "MAINNET_DEPLOY_APPROVED_NOT_RECEIVED"
-  ],
-  "activeHumanConfirmRequiredParameters": 10
+  "blockers": [],
+  "activeHumanConfirmRequiredParameters": 0,
+  "governanceIdentityBlockers": 0,
+  "authorizationGate": "MAINNET_DEPLOY_APPROVED_NOT_RECEIVED"
 }

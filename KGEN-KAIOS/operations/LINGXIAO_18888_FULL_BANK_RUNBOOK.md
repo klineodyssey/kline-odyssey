@@ -10,9 +10,9 @@ Stop if chain ID is not 56, any formal address lacks expected code/lineage, pred
 2. Run `npm run bank:simulate` and review the sanitized local Genesis report.
 3. Run `npm run bank:mainnet-fork-rehearse`. It must fork chainId 56, match the frozen Bank codehashes and regenerate the manifest/evidence without a Mainnet transaction.
 4. Verify the predicted new 8888 proxy and formal 11520 address by codehash/lineage checks. The legacy no-code 8888 EOA is never a valid Router target.
-5. Obtain explicit Human values for every field listed `HUMAN_CONFIRM_REQUIRED` in the manifest. Fork-only values are never production defaults.
+5. Verify `mainnet-economic-config.final-review.json`: economic and governance identity blockers must both be zero. Mother is `0xCd60BF474e691F2484950a0276Eaf507616Ca4b9`, Jade Emperor is `0xc15e08834fca9f2d3462a3f8f0bc30524d6dd756`, and Guanyin is `0xebeeac6d09d2d28db8010b0923442c9eb2b702fe`.
 6. Generate the unsigned package with `npm run bank:deployment-plan`. The command deliberately fails unless every public economic parameter, formal address, module state and nonce is supplied.
-7. Confirm signer control, current nonce, BNB balance, predicted addresses and every creation/runtime codehash immediately before signature.
+7. Confirm signer control, current nonce, BNB balance, predicted addresses and every creation/runtime codehash immediately before signature. If nonce is not the manifest nonce, discard every prediction and regenerate the package.
 8. Repeat the chainId 56 fork rehearsal from the final candidate and preserve its fixed fork block.
 
 ## Ordered deployment
@@ -25,17 +25,17 @@ Stop if chain ID is not 56, any formal address lacks expected code/lineage, pred
 6. Bind KAIOS once in both 18888 and 8888.
 7. Register all reviewed modules and limits; set Risk Controller. Six modules are active; BankMigration is registered but inactive.
 8. Deploy/register 18911 and remaining verified organs according to the broader KAIOS runbook.
-9. Execute `finalizeModuleGovernance(BankGovernanceProxy)` on all seven module proxies, 18888 `finalizeGovernance(BankGovernanceProxy)`, and 8888 `finalizeGovernance(BankGovernanceProxy, HumanPauser)`. Verify bootstrap accounts lost every Bank/module Admin, Governance and Upgrader role.
+9. Grant Jade Emperor only `APPROVER_ROLE`, revoke Mother's `APPROVER_ROLE`, grant Guanyin only the required Pauser roles, and execute `finalizeModuleGovernance(BankGovernanceProxy)` on all seven module proxies, 18888 `finalizeGovernance(BankGovernanceProxy)`, and 8888 `finalizeGovernance(BankGovernanceProxy, Guanyin)`. Through Mother proposal → Jade Emperor approval → 3600-second delay → execution, revoke the Governance proxy's transient direct 18888 Pauser role. Verify bootstrap and deployment accounts lost every direct Bank/module Admin, Governance, Upgrader and Pauser role.
 10. Verify all bytecode hashes, roles, versions, proxy implementations and address bindings.
 11. Only after the real KGEN burn state is confirmed, call KAIOS `settleWhiteHoleMass()` and then Bank `startGenesisEpoch()`.
 12. Generate the chain-derived Genesis record and inscription. Never type the mint amount manually.
 
 ## Upgrade
 
-Generate unsigned calldata with `npm run bank:upgrade-plan`. Before execution require compile, append-only storage diff, fuzz/invariant, malicious-implementation rejection, fork rehearsal and governance approval. After execution verify `Upgraded`, implementation, version, all roles, module configs, reserve, accounting and representative historical records.
+Generate unsigned calldata with `npm run bank:upgrade-plan`. Mother alone proposes, Jade Emperor alone approves, at least 3600 seconds elapse, then anyone may execute. Before execution require compile, append-only storage diff, fuzz/invariant, malicious-implementation rejection, fork rehearsal and governance approval. After execution verify `Upgraded`, implementation, version, all roles, module configs, reserve, accounting and representative historical records.
 
 ## Emergency
 
-The pause role may stop Bank Core payments. It cannot transfer KAIOS or unpause. Governance diagnoses and executes the reviewed recovery. A failed module may be disabled through delayed governance; its historical payment IDs and events remain. Migration module records successor/state evidence but does not move assets.
+Guanyin's pause role may stop Bank Core and 8888 payments. It cannot transfer KAIOS, mint, unpause, upgrade, create allocations or redirect salary/beneficiaries. Governance diagnoses and executes the reviewed recovery. A failed module may be disabled through delayed governance; its historical payment IDs and events remain. Migration module records successor/state evidence but does not move assets.
 
-The 2026-08-11 calendar pre-sign rehearsal passed Genesis accounting, lawful circulation, the code-bearing 8888 route/payroll/savings/commerce rails, Celestial Gregorian `YYYYMM` maturity at day 5 00:00 UTC+8, insufficient-balance retry, delayed UUPS upgrades and rollbacks. Calendar correctness is no longer a Human-parameter blocker. Signature remains blocked until the listed Human economic values, distinct approver and pauser are confirmed and `MAINNET_DEPLOY_APPROVED` is received. No runbook step authorizes Mainnet by itself.
+The 2026-08-12 governance-final fork rehearsal passed Genesis accounting, lawful circulation, the code-bearing 8888 route/payroll/savings/commerce rails, Celestial Gregorian `YYYYMM` maturity at day 5 00:00 UTC+8, insufficient-balance retry, Mother/Jade Emperor delayed UUPS upgrades and rollbacks, and Guanyin pause-only security checks. Economic and governance identity blockers are zero. `MAINNET_DEPLOY_APPROVED` remains the sole authorization gate; no runbook step authorizes Mainnet by itself.
