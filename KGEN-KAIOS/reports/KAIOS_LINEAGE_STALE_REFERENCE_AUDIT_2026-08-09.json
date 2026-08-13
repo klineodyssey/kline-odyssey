@@ -3,8 +3,8 @@
   "auditedAt": "2026-08-09T00:00:00+08:00",
   "status": "PASS",
   "scope": {
-    "repositoryTrackedFiles": 3705,
-    "repositoryReadableTextFiles": 3703,
+    "repositoryTrackedFiles": 3728,
+    "repositoryReadableTextFiles": 3726,
     "repositoryPdfFiles": 33,
     "repositoryPdfPages": 222,
     "externalPackage": {
@@ -16,7 +16,7 @@
       "pdfPages": 0,
       "pdfExtraction": "NOT_REQUESTED"
     },
-    "scannedFilesTotal": 3705
+    "scannedFilesTotal": 3728
   },
   "finalCanon": {
     "18888": "LINGXIAO_CELESTIAL_BANK",
@@ -140,7 +140,7 @@
     }
   ],
   "classifications": {
-    "CURRENT_CORRECT": 29,
+    "CURRENT_CORRECT": 32,
     "SUPERSEDED_HISTORY": 20,
     "ACTIVE_CONFLICT": 0,
     "COMMENT_ONLY": 25,
@@ -326,6 +326,16 @@
       "rationale": "Identifier occurrence; numeric value audited independently."
     },
     {
+      "path": "KGEN-KAIOS/abi/KGENReserveRedemption_Upgradeable.json",
+      "line": 619,
+      "pattern": "KAIOS_PER_KGEN",
+      "legacyScale": false,
+      "classification": "CURRENT_CORRECT",
+      "sourceKind": "REPOSITORY_TRACKED",
+      "excerpt": "\"name\": \"KAIOS_PER_KGEN_REFERENCE\",",
+      "rationale": "Identifier occurrence; numeric value audited independently."
+    },
+    {
       "path": "KGEN-KAIOS/archive/KAIOSV01_BurnProofGenesis_DRAFT_ARCHIVE.md",
       "line": 11,
       "pattern": "720_BILLION_FORMATTED",
@@ -463,6 +473,26 @@
       "classification": "CURRENT_CORRECT",
       "sourceKind": "REPOSITORY_TRACKED",
       "excerpt": "uint256 kaiosPerKgen = kaios.KAIOS_PER_KGEN();",
+      "rationale": "Identifier occurrence; numeric value audited independently."
+    },
+    {
+      "path": "KGEN-KAIOS/contracts/KGENReserveRedemption_Upgradeable.sol",
+      "line": 22,
+      "pattern": "KAIOS_PER_KGEN",
+      "legacyScale": false,
+      "classification": "CURRENT_CORRECT",
+      "sourceKind": "REPOSITORY_TRACKED",
+      "excerpt": "uint256 public constant KAIOS_PER_KGEN_REFERENCE = 1_000;",
+      "rationale": "Identifier occurrence; numeric value audited independently."
+    },
+    {
+      "path": "KGEN-KAIOS/contracts/KGENReserveRedemption_Upgradeable.sol",
+      "line": 165,
+      "pattern": "KAIOS_PER_KGEN",
+      "legacyScale": false,
+      "classification": "CURRENT_CORRECT",
+      "sourceKind": "REPOSITORY_TRACKED",
+      "excerpt": "return kaiosIn / KAIOS_PER_KGEN_REFERENCE;",
       "rationale": "Identifier occurrence; numeric value audited independently."
     },
     {

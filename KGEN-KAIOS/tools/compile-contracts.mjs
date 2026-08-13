@@ -7,7 +7,10 @@ import { keccak256 } from "ethers";
 
 const root = path.resolve(import.meta.dirname, "..");
 const sourceRoots = [path.join(root, "contracts"), path.join(root, "tests", "contracts")];
-const externalSources = [path.resolve(root, "..", "KGEN", "contracts", "KGEN_TempleHeart_Upgradeable.sol")];
+const externalSources = [
+  path.resolve(root, "..", "KGEN", "contracts", "KGEN_TempleHeart_Upgradeable.sol"),
+  path.resolve(root, "..", "KGEN", "contracts", "KGEN_Token_V7_5_2.sol"),
+];
 const artifactsDir = path.join(root, "artifacts");
 const abiDir = path.join(root, "abi");
 const reportsDir = path.join(root, "reports");
@@ -122,6 +125,9 @@ for (const [sourceName, sourceContracts] of Object.entries(output.contracts ?? {
         "BankGovernance_Upgradeable",
         "BankMigration_Upgradeable",
         "GaolaozhuangCommercialBank8888_Upgradeable",
+        "KGENReserveRedemption_Upgradeable",
+        "CelestialEligibility_Upgradeable",
+        "CelestialCapitalCommitment_Upgradeable",
         "KAIOS",
         "KAIOSGenesisInscription",
       ].includes(contractName)
@@ -178,6 +184,9 @@ const upgradeableModuleNames = [
   "BankRiskController_Upgradeable",
   "BankGovernance_Upgradeable",
   "BankMigration_Upgradeable",
+  "KGENReserveRedemption_Upgradeable",
+  "CelestialEligibility_Upgradeable",
+  "CelestialCapitalCommitment_Upgradeable",
 ];
 const upgradeableModuleStorage = upgradeableModuleNames.map((contractName) => {
   const artifact = Object.values(output.contracts ?? {})

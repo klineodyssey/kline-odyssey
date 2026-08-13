@@ -2,8 +2,8 @@
 
 **Status:** PASS
 
-- Scanned files: 3705
-- Repository tracked files: 3705
+- Scanned files: 3728
+- Repository tracked files: 3728
 - Human package files: 0
 - Legacy 1:10,000 / 720B reference hits: 46
 - ACTIVE_CONFLICT: 0
@@ -89,6 +89,7 @@ The Human-reported `KAIOS_GENESIS_INSCRIPTION_V1.0.md` is superseded by the stag
 | COMMENT_ONLY | `KGEN-KAIOS/KAIOS_WHITE_HOLE_ATOMIC_CONVERSION_AND_LIQUIDITY_RUNTIME_CURRENT.md:8` | 1_TO_10_000 | Audit, supersession, or negative-reference text; not an executable monetary definition. |
 | CURRENT_CORRECT | `KGEN-KAIOS/abi/KAIOS.json:459` | KAIOS_PER_KGEN | Identifier occurrence; numeric value audited independently. |
 | CURRENT_CORRECT | `KGEN-KAIOS/abi/KAIOS.json:563` | MAX_SUPPLY | Identifier occurrence; numeric value audited independently. |
+| CURRENT_CORRECT | `KGEN-KAIOS/abi/KGENReserveRedemption_Upgradeable.json:619` | KAIOS_PER_KGEN | Identifier occurrence; numeric value audited independently. |
 | SUPERSEDED_HISTORY | `KGEN-KAIOS/archive/KAIOSV01_BurnProofGenesis_DRAFT_ARCHIVE.md:11` | 720_BILLION_FORMATTED | Historical bytes are retained behind an explicit SUPERSEDED marker. |
 | SUPERSEDED_HISTORY | `KGEN-KAIOS/archive/KAIOSV01_BurnProofGenesis_DRAFT_ARCHIVE.md:12` | 10_000_KAIOS | Historical bytes are retained behind an explicit SUPERSEDED marker. |
 | SUPERSEDED_HISTORY | `KGEN-KAIOS/archive/KAIOS_CELESTIAL_BANK_CONSERVATION_WHITEPAPER_V1.2_ARCHIVE.md:15` | 10_000_KAIOS | Historical bytes are retained behind an explicit SUPERSEDED marker. |
@@ -103,6 +104,8 @@ The Human-reported `KAIOS_GENESIS_INSCRIPTION_V1.0.md` is superseded by the stag
 | CURRENT_CORRECT | `KGEN-KAIOS/contracts/KAIOS.sol:302` | KAIOS_PER_KGEN | Identifier occurrence; numeric value audited independently. |
 | CURRENT_CORRECT | `KGEN-KAIOS/contracts/KAIOSGenesisInscription.sol:8` | KAIOS_PER_KGEN | Identifier occurrence; numeric value audited independently. |
 | CURRENT_CORRECT | `KGEN-KAIOS/contracts/KAIOSGenesisInscription.sol:100` | KAIOS_PER_KGEN | Identifier occurrence; numeric value audited independently. |
+| CURRENT_CORRECT | `KGEN-KAIOS/contracts/KGENReserveRedemption_Upgradeable.sol:22` | KAIOS_PER_KGEN | Identifier occurrence; numeric value audited independently. |
+| CURRENT_CORRECT | `KGEN-KAIOS/contracts/KGENReserveRedemption_Upgradeable.sol:165` | KAIOS_PER_KGEN | Identifier occurrence; numeric value audited independently. |
 | CURRENT_CORRECT | `KGEN-KAIOS/contracts/KSHIP.sol:26` | MAX_SUPPLY | Identifier occurrence; numeric value audited independently. |
 | CURRENT_CORRECT | `KGEN-KAIOS/contracts/KSHIP.sol:43` | MAX_SUPPLY | Identifier occurrence; numeric value audited independently. |
 | CURRENT_CORRECT | `KGEN-KAIOS/contracts/KUFO.sol:49` | MAX_SUPPLY | Identifier occurrence; numeric value audited independently. |

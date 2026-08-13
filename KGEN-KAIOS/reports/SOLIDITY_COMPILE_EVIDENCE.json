@@ -10,8 +10,8 @@
   "evmVersion": "paris",
   "openzeppelinContracts": "5.0.2",
   "openzeppelinContractsUpgradeable": "5.0.2",
-  "sourceCount": 29,
-  "contractCount": 39,
+  "sourceCount": 36,
+  "contractCount": 49,
   "eip170MaximumDeployedBytecodeBytes": 24576,
   "oversizedContracts": [],
   "lingxiaoCelestialBank18888StorageValidation": {
@@ -307,6 +307,24 @@
         "status": "PASS",
         "namespaceSlots": 100,
         "basePrefixPreserved": true
+      },
+      {
+        "contractName": "KGENReserveRedemption_Upgradeable",
+        "status": "PASS",
+        "namespaceSlots": 100,
+        "basePrefixPreserved": true
+      },
+      {
+        "contractName": "CelestialEligibility_Upgradeable",
+        "status": "PASS",
+        "namespaceSlots": 100,
+        "basePrefixPreserved": true
+      },
+      {
+        "contractName": "CelestialCapitalCommitment_Upgradeable",
+        "status": "PASS",
+        "namespaceSlots": 100,
+        "basePrefixPreserved": true
       }
     ]
   },
@@ -545,25 +563,25 @@
         "label": "_accounts",
         "slot": "19",
         "offset": 0,
-        "type": "t_mapping(t_bytes32,t_struct(CommercialAccount)7372_storage)"
+        "type": "t_mapping(t_bytes32,t_struct(CommercialAccount)10297_storage)"
       },
       {
         "label": "_payroll",
         "slot": "20",
         "offset": 0,
-        "type": "t_mapping(t_bytes32,t_struct(PayrollEntry)7390_storage)"
+        "type": "t_mapping(t_bytes32,t_struct(PayrollEntry)10315_storage)"
       },
       {
         "label": "_payments",
         "slot": "21",
         "offset": 0,
-        "type": "t_mapping(t_bytes32,t_struct(BusinessPayment)7410_storage)"
+        "type": "t_mapping(t_bytes32,t_struct(BusinessPayment)10335_storage)"
       },
       {
         "label": "_interestRates",
         "slot": "22",
         "offset": 0,
-        "type": "t_array(t_struct(InterestRateCheckpoint)7415_storage)dyn_storage"
+        "type": "t_array(t_struct(InterestRateCheckpoint)10340_storage)dyn_storage"
       },
       {
         "label": "__gap",
@@ -582,6 +600,14 @@
       "bytecodeHash": "0x7f88247184c95831dcca55945d447f7c23bbcb3028fd4920f39f2e1b58fda354",
       "deployedBytecodeBytes": 23553,
       "deployedBytecodeHash": "0x75d59141359a17e59ce8316ac4ae729a1e57336bb0b0b7db2d2feb576dd9d3a7"
+    },
+    {
+      "contractName": "KGEN_Token_V7_5_2",
+      "sourceName": "../KGEN/contracts/KGEN_Token_V7_5_2.sol",
+      "bytecodeBytes": 5290,
+      "bytecodeHash": "0xffba129402f6570bbd6ece310d44b4caa7e0aeeb1beec83b117d00caa80838b4",
+      "deployedBytecodeBytes": 3807,
+      "deployedBytecodeHash": "0x1530b1615d6bd7b1d5540b1f6afef05e341598e67ae589c5222f7c04e3dde9ef"
     },
     {
       "contractName": "ERC1967Proxy",
@@ -688,6 +714,22 @@
       "deployedBytecodeHash": "0x038eab42a1d601e0553609f4ead0e955f7edb964ab38baca1b1fc1bd94e4a958"
     },
     {
+      "contractName": "CelestialCapitalCommitment_Upgradeable",
+      "sourceName": "contracts/CelestialCapitalCommitment_Upgradeable.sol",
+      "bytecodeBytes": 10113,
+      "bytecodeHash": "0x310917fd5df05d8424f3c659e6f567195d78b7c9252faecff609d8ee1f2a4094",
+      "deployedBytecodeBytes": 9903,
+      "deployedBytecodeHash": "0x45368261e90f5ce32838432863cef7fa94749ce8937876776741dad65b28da72"
+    },
+    {
+      "contractName": "CelestialEligibility_Upgradeable",
+      "sourceName": "contracts/CelestialEligibility_Upgradeable.sol",
+      "bytecodeBytes": 12996,
+      "bytecodeHash": "0x0727e6f3efd2577019884cf15f90d0e82c6bbafcad6efe4469eeb77e41058a72",
+      "deployedBytecodeBytes": 12785,
+      "deployedBytecodeHash": "0xae98738d325dec42889d794de951c018ec50bebf16379bc530bab0e250b455c7"
+    },
+    {
       "contractName": "CelestialSeat500_Upgradeable",
       "sourceName": "contracts/CelestialSeat500_Upgradeable.sol",
       "bytecodeBytes": 13263,
@@ -774,6 +816,14 @@
       "bytecodeHash": "0xe95387c1ea4596b919c4913a2dea1465cd6e8f428afe8f75e21181b951b2703a",
       "deployedBytecodeBytes": 1535,
       "deployedBytecodeHash": "0xc00173a34acc6e680264341c743d54d1f253e5618d9a59e60dd114cf256446f3"
+    },
+    {
+      "contractName": "KGENReserveRedemption_Upgradeable",
+      "sourceName": "contracts/KGENReserveRedemption_Upgradeable.sol",
+      "bytecodeBytes": 11066,
+      "bytecodeHash": "0xeb78ae880347dbfb1099888f7e64489d7cbd7794044ab4743d0eaa78727c5b48",
+      "deployedBytecodeBytes": 10856,
+      "deployedBytecodeHash": "0x27b2706a325eb8bac27510853cc89f80bb16cb070bf998667ad1e3471b2e5160"
     },
     {
       "contractName": "KSHIP",
@@ -878,6 +928,54 @@
       "bytecodeHash": "0x1295c1ad8d214975c5dd14e471ddc2a04941f0a0bbfed33bafb4bc8ef9d823b9",
       "deployedBytecodeBytes": 280,
       "deployedBytecodeHash": "0x84330106494fb7596fa3dffd94098aa5c53369ae61575eb36b82446662210ee8"
+    },
+    {
+      "contractName": "MockEligibilitySource",
+      "sourceName": "tests/contracts/Phase2Mocks.sol",
+      "bytecodeBytes": 550,
+      "bytecodeHash": "0x37cb71a3617cfd9207f20c52d237565c953f1cfa960b9b5d35ba1e651a0c3582",
+      "deployedBytecodeBytes": 522,
+      "deployedBytecodeHash": "0x63ff010c3aa3b8b7c5b4c54cf2c25850772fd2a21423be364cf01c78dc0b5409"
+    },
+    {
+      "contractName": "MockFailingKGEN",
+      "sourceName": "tests/contracts/Phase2Mocks.sol",
+      "bytecodeBytes": 2507,
+      "bytecodeHash": "0x6c8d083451df7d5f9223da6fd3a9f237f27c931ad47259f8a709b6d315513935",
+      "deployedBytecodeBytes": 1714,
+      "deployedBytecodeHash": "0x30366f6c7d453555c5d5671bcc3b147b625667516b70648c6ec905e304ed724c"
+    },
+    {
+      "contractName": "MockFeeKAIOS",
+      "sourceName": "tests/contracts/Phase2Mocks.sol",
+      "bytecodeBytes": 2851,
+      "bytecodeHash": "0xa512802a3975d4d66eaf1f23e76d8520b80adf8dafa987333e83b878f74ba4e5",
+      "deployedBytecodeBytes": 2060,
+      "deployedBytecodeHash": "0xeeda3b9a45183b662595c0b84010443fc0cb2c5ffe51d7251673e56677ba1290"
+    },
+    {
+      "contractName": "MockPhase2Bank",
+      "sourceName": "tests/contracts/Phase2Mocks.sol",
+      "bytecodeBytes": 779,
+      "bytecodeHash": "0x769e21060d4c4285793fa110f59808adf2fe74f1f8d098fe007b5eb2895aa37f",
+      "deployedBytecodeBytes": 590,
+      "deployedBytecodeHash": "0xd1b6a692246e411cb429d3dec31043fe0e431a438a7b1e12e937722a49964be8"
+    },
+    {
+      "contractName": "MockPhase2Token",
+      "sourceName": "tests/contracts/Phase2Mocks.sol",
+      "bytecodeBytes": 2727,
+      "bytecodeHash": "0xb4c8c2ff6eab07668c79b23c680e3a5e54785288e6d494bfb39c7c8b1248c501",
+      "deployedBytecodeBytes": 1772,
+      "deployedBytecodeHash": "0x28645309dfea4a223e14c57833120247211f2f211e641eaddcfff23264b8b3b7"
+    },
+    {
+      "contractName": "MockReentrantKAIOS",
+      "sourceName": "tests/contracts/Phase2Mocks.sol",
+      "bytecodeBytes": 3732,
+      "bytecodeHash": "0xd1735753db523470271e16b116a4f69218e77d9e28037fa5a7f250712b7238a5",
+      "deployedBytecodeBytes": 2935,
+      "deployedBytecodeHash": "0xbd609bd0a576c4e7950125fed398474d94bac40643243edd5cb27879033ec702"
     },
     {
       "contractName": "TestERC1967Proxy",

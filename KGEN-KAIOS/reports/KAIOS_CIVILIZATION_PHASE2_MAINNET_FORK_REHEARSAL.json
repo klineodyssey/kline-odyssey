@@ -1,0 +1,357 @@
+{
+  "status": "PASS",
+  "environment": "BSC_MAINNET_FORK_ONLY",
+  "mainnetTransactionSent": false,
+  "chainId": 56,
+  "forkBlock": 115715792,
+  "formalAddresses": {
+    "KGEN": "0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be",
+    "KAIOS": "0xD4E67B3a69e41524c424150E6b6e921b01D036db",
+    "BANK": "0x11d34c0F723aCd334B8F95076f73F07f06202aab",
+    "FURNACE": "0x44c2CA9B9eba19d8F79F6E1786fd9D25e73738e1",
+    "SEAT500": "0xA447853985Ef6e6AbFcb14FCfDeFdced10Be0BDe",
+    "ALLOCATION": "0x75A55Af6967932C4A1c896dB81Dd6F31e531c299",
+    "GOVERNANCE_MODULE": "0xa2792fBDCc8A8AaC364053431D44E0a8D335E166",
+    "MOTHER": "0xCd60BF474e691F2484950a0276Eaf507616Ca4b9",
+    "JADE": "0xc15E08834fCA9F2d3462a3f8f0BC30524D6dd756",
+    "GUANYIN": "0xEBEeAC6d09D2d28Db8010b0923442C9Eb2b702FE",
+    "PAIR": "0xF36640d7327b53BA3d7FcC1D98Dfc1b85574b6C2"
+  },
+  "liveKgenTaxBeforeForkMutation": {
+    "owner": "0xb3C54ca96De0dED4Ca0151F629ff9781506ba261",
+    "bankWallet": "0xFA4d34c46e86058e672936fa03cfd79F4C7A4b3c",
+    "rewardWallet": "0x0Fd21cf643211d067A18A416DA219827dA26E288",
+    "autoLPWallet": "0xE87F6975Fa3d4F3D56Dce49fc978884285A3eD85",
+    "pairEnabled": true
+  },
+  "forkDeployments": {
+    "eligibility": {
+      "implementation": "0x528a518BC3Ad3C19FDCF8122f0E702a97BDd1BFF",
+      "proxy": "0x932d43b55eB677f11DEE231cc81415AF90fDe2DE",
+      "receipts": {
+        "implementation": {
+          "hash": "0x60442ec313002d943932b614d82efe24a19a68808556b2a1c55901c1192705ed",
+          "blockNumber": 115715798,
+          "gasUsed": "2840550",
+          "status": "PASS"
+        },
+        "proxy": {
+          "hash": "0x780cea508ac474b1e13559895e70e928fdee5d6c5a5a1a588b170e818a349360",
+          "blockNumber": 115715799,
+          "gasUsed": "387946",
+          "status": "PASS"
+        }
+      }
+    },
+    "reserve": {
+      "implementation": "0x90197dcA2FB6128f3fAca1dCfD2dFEd518fF8f8E",
+      "proxy": "0x7784a94040B977E7B812989ddb155364dE6A7cB7",
+      "receipts": {
+        "implementation": {
+          "hash": "0xe001b4cd2078d8f0b2326a897145b5a1865f2a8d9694d4f382b273a0c8465430",
+          "blockNumber": 115715800,
+          "gasUsed": "2424248",
+          "status": "PASS"
+        },
+        "proxy": {
+          "hash": "0x45222ec1187a82fece9d94024af656392ede9338be46f40dccf170c9b5fefa52",
+          "blockNumber": 115715801,
+          "gasUsed": "556910",
+          "status": "PASS"
+        }
+      }
+    },
+    "capital": {
+      "implementation": "0xF7Df5BE8562793efCDEb3F88A447c285348a30d6",
+      "proxy": "0x1Bef7868DC1B99896b527EE94618Ef5213e4E1f4",
+      "receipts": {
+        "implementation": {
+          "hash": "0x09149b664d1bb0399ac3350fddeee67549505c41e732063e44d9bbd565d50a10",
+          "blockNumber": 115715802,
+          "gasUsed": "2218099",
+          "status": "PASS"
+        },
+        "proxy": {
+          "hash": "0xd1c6c6ca208a56ec686ffed4134bc6ccdf803726ef38752ec03157ccf9d596bb",
+          "blockNumber": 115715803,
+          "gasUsed": "391313",
+          "status": "PASS"
+        }
+      }
+    }
+  },
+  "transactions": {
+    "bindLife": {
+      "hash": "0xc636ff695c0578d41b533089187f59a0844fa1dd947cba4a6b47538007cc6098",
+      "blockNumber": 115715804,
+      "gasUsed": "56515",
+      "status": "PASS"
+    },
+    "enableLifeReserveRedemption": {
+      "hash": "0x059635fe23f5893f6c7aa836c34e80292bb194ee42e891ef23de988af7edc809",
+      "blockNumber": 115715805,
+      "gasUsed": "38581",
+      "status": "PASS"
+    },
+    "grantMotherContributionVerifier": {
+      "hash": "0x58322499a247a88bc1646f79d5b4a044ce50697c228feaf1f81288784b33f8b6",
+      "blockNumber": 115715806,
+      "gasUsed": "55999",
+      "status": "PASS"
+    },
+    "recordConstitution": {
+      "hash": "0x4470f13b1e36cf77aaeaca4c2c7ec3c6e99c1315469ce314e1404aebad3bf478",
+      "blockNumber": 115715807,
+      "gasUsed": "82094",
+      "status": "PASS"
+    },
+    "recordContribution": {
+      "hash": "0xd9be54c2c9dc5e58fb0e5fc01960d443670e033a72084ea8626bfc1e9f997383",
+      "blockNumber": 115715808,
+      "gasUsed": "171858",
+      "status": "PASS"
+    },
+    "registerEligibility_propose": {
+      "hash": "0x8ddd9b566073d00fd9f14b3e428a2661a1ac7f7c86977dd0b98808dcdcfc37fc",
+      "blockNumber": 115715809,
+      "gasUsed": "111404",
+      "status": "PASS"
+    },
+    "registerEligibility_approve": {
+      "hash": "0xd318b3716537e2b8cf4e63e7b3221a27aa83e62630a0a1fd94538bfb6bff35b1",
+      "blockNumber": 115715810,
+      "gasUsed": "57667",
+      "status": "PASS"
+    },
+    "registerReserve_propose": {
+      "hash": "0x29779f2397693ab16572dd8be9a9871d8417c2d8c78bf597fcdb132b2fcd2fe8",
+      "blockNumber": 115715811,
+      "gasUsed": "111392",
+      "status": "PASS"
+    },
+    "registerReserve_approve": {
+      "hash": "0x6ca6a51f9d77f1c89729790229a2e4b53d67f806b2b4c39117a11f047da00b55",
+      "blockNumber": 115715812,
+      "gasUsed": "57655",
+      "status": "PASS"
+    },
+    "registerCapital_propose": {
+      "hash": "0x9f22cec1424ff705a51a0806b535f1d50bfb15490d6481ca2ddfc4ee1f1b36ee",
+      "blockNumber": 115715813,
+      "gasUsed": "111380",
+      "status": "PASS"
+    },
+    "registerCapital_approve": {
+      "hash": "0x836cd8d51746e2a0e64af7e73962c7e882ca49f3d760b84e6d157a321bd1d782",
+      "blockNumber": 115715814,
+      "gasUsed": "57643",
+      "status": "PASS"
+    },
+    "raiseForkAllocationCap_propose": {
+      "hash": "0xbea6f4f76e8c876481205889dfd40487bc941c206db4ccd93a50b201d721547e",
+      "blockNumber": 115715815,
+      "gasUsed": "111596",
+      "status": "PASS"
+    },
+    "raiseForkAllocationCap_approve": {
+      "hash": "0xf6c1f591cf9d91c8d49d1cce20e90ee1bfc3711ce02f3ed87e92c8d4242f394f",
+      "blockNumber": 115715816,
+      "gasUsed": "57667",
+      "status": "PASS"
+    },
+    "createForkAllocation_propose": {
+      "hash": "0xefdaaaab43d5c270607915c3b9560c47f798a40453d640b9448f24f184596687",
+      "blockNumber": 115715817,
+      "gasUsed": "111402",
+      "status": "PASS"
+    },
+    "createForkAllocation_approve": {
+      "hash": "0x927df911219b72e53d3fbf990691e165974fc4b86e760c50ae7809c257534547",
+      "blockNumber": 115715818,
+      "gasUsed": "57667",
+      "status": "PASS"
+    },
+    "registerEligibility_execute": {
+      "hash": "0x00ffbc4295e4c72d89d822493663acd5495b08a3a60141d9b7cc2f42c1b61d46",
+      "blockNumber": 115715820,
+      "gasUsed": "158489",
+      "status": "PASS"
+    },
+    "registerReserve_execute": {
+      "hash": "0x9abf10b74e6b920ecc5cf4d374248c7493233ae28d3ddc389f733b436b4b9b49",
+      "blockNumber": 115715821,
+      "gasUsed": "158477",
+      "status": "PASS"
+    },
+    "registerCapital_execute": {
+      "hash": "0x381525ccdee400bbfe669711c012b55a577172d82436497b071e421b751f80ef",
+      "blockNumber": 115715822,
+      "gasUsed": "158465",
+      "status": "PASS"
+    },
+    "raiseForkAllocationCap_execute": {
+      "hash": "0x40f7d74ad0d78eb89899addb2dfe8c5fcfe9eaa1d8b5113013fd4b3503d32a56",
+      "blockNumber": 115715823,
+      "gasUsed": "84736",
+      "status": "PASS"
+    },
+    "createForkAllocation_execute": {
+      "hash": "0x9fd91e1276aae2aa4eb86743d4c0fcdab78e5067ad2e86f7a21c00731c72e3be",
+      "blockNumber": 115715824,
+      "gasUsed": "151115",
+      "status": "PASS"
+    },
+    "executeForkAllocation": {
+      "hash": "0x8016b16aecc30c25e44b7d4341e6765564b2af7a2fcc3b1477c2c03699acbe42",
+      "blockNumber": 115715825,
+      "gasUsed": "240153",
+      "status": "PASS"
+    },
+    "forkOnlySetTaxWallets": {
+      "hash": "0x86ff433df28b178994d4fb8d53bcc8e4158d8a661e657bafae40f00ed928e569",
+      "blockNumber": 115715826,
+      "gasUsed": "67663",
+      "status": "PASS"
+    },
+    "forkOnlyTaxablePairTransfer": {
+      "hash": "0xd2bab1f04a6ec510890f0d779aa270c04ab9004143c6441fe0a9237bfdd74d6f",
+      "blockNumber": 115715827,
+      "gasUsed": "112901",
+      "status": "PASS"
+    },
+    "approveReserveKaios": {
+      "hash": "0x4930d6fe982b2e0197de721adc2062d7aa69797e150e3c59a5fbc36e28c158de",
+      "blockNumber": 115715828,
+      "gasUsed": "46020",
+      "status": "PASS"
+    },
+    "redeem1000Kaios": {
+      "hash": "0x07b558e891d232d524254f1fb0ed6429cdccc110b08d0987d4d74506e84a1127",
+      "blockNumber": 115715829,
+      "gasUsed": "410557",
+      "status": "PASS"
+    },
+    "approveFurnaceKaios": {
+      "hash": "0xcb5417ca7b6fdb2bdf0505c6a00c85e303ad72048cbf2e281725ae33cd211f1c",
+      "blockNumber": 115715830,
+      "gasUsed": "46020",
+      "status": "PASS"
+    },
+    "burnSingle5mKaios": {
+      "hash": "0x97986fdb78f297baec2d0184c14f60b514414cbeaf0f36f038a3fde104519fce",
+      "blockNumber": 115715831,
+      "gasUsed": "451705",
+      "status": "PASS"
+    },
+    "submitSingle5mProof": {
+      "hash": "0x033a07fe2ffcaa58a2b56ab6704e0490e85adcd3d31d042c072a9b0b9435ab1c",
+      "blockNumber": 115715832,
+      "gasUsed": "284928",
+      "status": "PASS"
+    },
+    "beginMassCandidateReview": {
+      "hash": "0xc6ae44d40b634285e09066a3b3d417174b88993d1560da5482c10241996bace8",
+      "blockNumber": 115715833,
+      "gasUsed": "66094",
+      "status": "PASS"
+    },
+    "markMassCandidateEligible": {
+      "hash": "0xf636678d4064c8ba4064f07f74a090d347084e33557b0ff7a83a6fd68bde0df7",
+      "blockNumber": 115715834,
+      "gasUsed": "55405",
+      "status": "PASS"
+    },
+    "approveCapitalKaios": {
+      "hash": "0xd058f58441123ef7268a1857edc0f31eaebfc1c6b6b1d7c4d7dd1e51f6af4d28",
+      "blockNumber": 115715835,
+      "gasUsed": "46020",
+      "status": "PASS"
+    },
+    "commit5mKaiosCapital": {
+      "hash": "0x06cf0383165c96973c57997f608527546966595f29707184ae1b6af267c76ca6",
+      "blockNumber": 115715836,
+      "gasUsed": "259901",
+      "status": "PASS"
+    },
+    "submitCapitalReview": {
+      "hash": "0x1e27a11339251095702d2dc70128c647b5fde312b2c92f317502198f99ff9e6b",
+      "blockNumber": 115715837,
+      "gasUsed": "78865",
+      "status": "PASS"
+    },
+    "finalizeEligibilityGovernance": {
+      "hash": "0x66bfaecf95911bb898ad60c25dba108b84eee3305faf3584d197a8999c4ee387",
+      "blockNumber": 115715838,
+      "gasUsed": "119994",
+      "status": "PASS"
+    },
+    "finalizeReserveGovernance": {
+      "hash": "0x1b52bcd016bfdebb28a5f66c0b1242cb55cf8a2bca22b541445a3a7e6760994a",
+      "blockNumber": 115715839,
+      "gasUsed": "119972",
+      "status": "PASS"
+    },
+    "finalizeCapitalGovernance": {
+      "hash": "0x53e1f1564175c155857605d09b7c9a8b7a0a977d35253e437db14351d74f1728",
+      "blockNumber": 115715840,
+      "gasUsed": "119950",
+      "status": "PASS"
+    },
+    "guanyinPauseReserve": {
+      "hash": "0x18de6a206b1ed265f76190fa27d5d50f94e65954e7fdd7f2a018bf8954a34ced",
+      "blockNumber": 115715841,
+      "gasUsed": "34914",
+      "status": "PASS"
+    }
+  },
+  "gasUsed": "13341930",
+  "simulatedFutureTaxFlowFor2000Kgen": {
+    "trueBurn": "2.0",
+    "reserve": "2.0",
+    "reward": "1.0",
+    "autoLP": "1.0",
+    "recipient": "1994.0"
+  },
+  "reserveRedemption": {
+    "kaiosIn": "1000.0",
+    "maximumExistingKgenOut": "1.0",
+    "kgenSupplyUnchanged": true,
+    "kaiosSupplyUnchangedByRedemption": true,
+    "finalReserveKgen": "1.0",
+    "formal18888KaiosReceipt": "PASS"
+  },
+  "alchemyEligibility": {
+    "proofId": "0x987ff259a64775b5c93611adcf3cb3fe2572f7b2c33820da8aef128fb098b783",
+    "singleBurnKaios": "5000000.0",
+    "thresholdPassed": true,
+    "multipleProofAggregation": "BLOCKED_BY_DESIGN",
+    "seatIssued": false
+  },
+  "capitalCommitment": {
+    "commitmentId": "0xace4146d14b101d7ed8d48e1223218eb0988da645a16b01b579ab838af8d5602",
+    "committedKaios": "5000000.0",
+    "burned": false,
+    "liabilityAccounted": true,
+    "seatIssued": false
+  },
+  "security": {
+    "formalKgenModified": false,
+    "formalKaiosModified": false,
+    "formal18911Modified": false,
+    "live18888Modified": false,
+    "forkOnlyKgenConfigurationMutation": true,
+    "mainnetSetTaxWalletsExecuted": false,
+    "noArbitrarySweep": true,
+    "noBeneficiaryRedirect": true,
+    "moneyAloneGrantsSeat": false,
+    "governanceDelaySeconds": 3600,
+    "distinctApprover": true,
+    "guanyinPauseOnlyTest": "PASS"
+  },
+  "future": {
+    "wormhole511111": "FUTURE",
+    "kufo": "FUTURE",
+    "pairRegistry": "FUTURE",
+    "market8895": "FUTURE"
+  }
+}

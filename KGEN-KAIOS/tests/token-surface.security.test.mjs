@@ -163,12 +163,12 @@ test("18888 modules expose no owner withdrawal, sweep, arbitrary token transfer,
   }
 });
 
-test("all seven UUPS modules reserve a deterministic 100-slot custom namespace", () => {
+test("all ten UUPS modules reserve a deterministic 100-slot custom namespace", () => {
   const evidence = JSON.parse(
     fs.readFileSync(path.join(root, "reports", "SOLIDITY_COMPILE_EVIDENCE.json"), "utf8"),
   );
   assert.equal(evidence.upgradeableModuleStorageValidation.status, "PASS");
-  assert.equal(evidence.upgradeableModuleStorageValidation.modules.length, 7);
+  assert.equal(evidence.upgradeableModuleStorageValidation.modules.length, 10);
   for (const module of evidence.upgradeableModuleStorageValidation.modules) {
     assert.equal(module.status, "PASS", module.contractName);
     assert.equal(module.namespaceSlots, 100, module.contractName);

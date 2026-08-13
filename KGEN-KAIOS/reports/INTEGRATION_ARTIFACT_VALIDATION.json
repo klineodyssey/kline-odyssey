@@ -1,10 +1,10 @@
 {
   "status": "PASS",
   "checks": {
-    "files": 96,
+    "files": 97,
     "json": 28,
     "markdown": 32,
-    "utf8": 95,
+    "utf8": 96,
     "bom": 0,
     "corruption": 0,
     "secretHits": 0,
@@ -32,8 +32,8 @@
     "deploymentFiles": [
       "KGEN-KAIOS/config/LINGXIAO_18888_MAINNET_DEPLOYMENT_MANIFEST.json",
       "KGEN-KAIOS/config/LINGXIAO_18888_MAINNET_DEPLOYMENT_MANIFEST.md",
-      "KGEN-KAIOS/scripts/prepare-lingxiao-18888-deployment.mjs",
-      "KGEN-KAIOS/reports/mainnet-pre-sign/KAIOS_GENESIS_INSCRIPTION_UNSIGNED_DEPLOYMENT.json"
+      "KGEN-KAIOS/reports/mainnet-pre-sign/KAIOS_GENESIS_INSCRIPTION_UNSIGNED_DEPLOYMENT.json",
+      "KGEN-KAIOS/scripts/prepare-lingxiao-18888-deployment.mjs"
     ]
   },
   "failures": []

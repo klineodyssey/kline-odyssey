@@ -40,6 +40,9 @@ executable Mainnet transaction script or formal deployed address.
 | `contracts/BankRiskController_Upgradeable.sol` | Reserve floor, alert threshold and public bank-risk state |
 | `contracts/BankGovernance_Upgradeable.sol` | One-hour minimum delayed, distinct-proposer/approver governance executor |
 | `contracts/BankMigration_Upgradeable.sol` | Successor/chain/state evidence framework with no asset-transfer path |
+| `contracts/KGENReserveRedemption_Upgradeable.sol` | Phase 2 existing-reserve KGEN redemption rail; KAIOS enters formal 18888 accounting, no KGEN mint and no KAIOS burn |
+| `contracts/CelestialEligibility_Upgradeable.sol` | Phase 2 species-neutral Life/contribution ledger and formal 18911 single-proof 5M mass-threshold review; no seat authority |
+| `contracts/CelestialCapitalCommitment_Upgradeable.sol` | Phase 2 non-burning 5M KAIOS principal-liability commitment for Wormhole-seat review; no forfeiture or automatic seat |
 | `abi/` | Compiler-generated public ABIs for KAIOS, Bank Core and seven modules |
 | `config/lingxiao-18888-bank-system.json` | Secret-free canonical public deployment inputs and unresolved-address gates |
 | `config/lingxiao-18888-module-registry.json` | Reviewed module IDs, contracts and versions |
@@ -61,6 +64,16 @@ executable Mainnet transaction script or formal deployed address.
 | `reports/mainnet-pre-sign/KAIOS_GENESIS_MAINNET_RECORD.json` | Automatically generated fork preview; explicitly not the final Mainnet Genesis record |
 | `reports/mainnet-pre-sign/KAIOS_GENESIS_INSCRIPTION_UNSIGNED_DEPLOYMENT.json` | Frozen nonce-55 inscription package plus the actual successful deployment receipt; contains no signer secret |
 | `reports/KAIOS_TOKEN_LINEAGE_INTEGRATION_REVIEW_2026-08-09.md` | Executive review and evidence index |
+| `KAIOS_CIVILIZATION_PHASE2_CANON.md` | Current Phase 2 separation of White Hole physics, reserve redemption, market price, alchemy, capital and eligibility |
+| `config/kaios-civilization-phase2-deployment.template.json` | Secret-free Phase 2 Human input gates; every unresolved economic value remains null |
+| `scripts/prepare-kaios-civilization-phase2-deployment.mjs` | Six-CREATE predicted-address and unsigned calldata planner; no RPC or private-key input |
+| `tools/rehearse-kaios-civilization-phase2-mainnet-fork.mjs` | ChainId 56 fork-only module deployment, delayed registration, tax redirect, redemption, 5M burn and 5M capital rehearsal |
+| `frontend-adapter/kaiosCivilizationPhase2Adapter.mjs` | Read-only status adapter and deterministic user-action calldata encoders with non-guaranteed-rate wording |
+| `indexer/kaios-civilization-phase2-events.schema.json` | Reorg-aware Phase 2 event evidence schema |
+| `dashboard/kaios-civilization-phase2-status.schema.json` | Read-only reserve/eligibility/capital API and dashboard schema |
+| `operations/KAIOS_CIVILIZATION_PHASE2_RUNBOOK.md` | Deployment, registration, separate future KGEN redirect and stop-condition runbook |
+| `reports/KAIOS_CIVILIZATION_PHASE2_SECURITY_REPORT.md` | Phase 2 trust boundaries, enforced gates and residual UUPS governance risk |
+| `reports/KAIOS_CIVILIZATION_PHASE2_MAINNET_FORK_REHEARSAL.json` | Sanitized fork-only receipts, temporary addresses, exact flows and security gates |
 
 ## Purpose
 

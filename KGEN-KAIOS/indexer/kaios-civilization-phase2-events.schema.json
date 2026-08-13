@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "KAIOS Civilization Phase 2 Reorg-aware Event Index",
+  "type": "object",
+  "required": ["chainId", "events"],
+  "properties": {
+    "chainId": { "const": 56 },
+    "events": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["contract", "event", "transactionHash", "blockNumber", "blockHash", "logIndex", "removed"],
+        "properties": {
+          "contract": { "enum": ["KGENReserveRedemption_Upgradeable", "CelestialEligibility_Upgradeable", "CelestialCapitalCommitment_Upgradeable"] },
+          "event": { "enum": ["RedemptionInitialized", "RedemptionCompleted", "RedemptionRiskConfigured", "RedemptionAvailabilityChanged", "RedemptionPaused", "RedemptionUnpaused", "EligibilityInitialized", "LifeBound", "ReserveRedemptionEligibilitySet", "ConstitutionHistoryRecorded", "ContributionRecorded", "ContributionStatusChanged", "AlchemyMassThresholdPassed", "CandidateStatusChanged", "CapitalCommitmentInitialized", "CapitalCommitted", "CapitalReviewStatusChanged", "CapitalReleased", "CapitalCommitmentPaused", "CapitalCommitmentUnpaused", "GovernanceFinalized", "Upgraded"] },
+          "transactionHash": { "type": "string", "pattern": "^0x[0-9a-fA-F]{64}$" },
+          "blockNumber": { "type": "integer", "minimum": 0 },
+          "blockHash": { "type": "string", "pattern": "^0x[0-9a-fA-F]{64}$" },
+          "logIndex": { "type": "integer", "minimum": 0 },
+          "removed": { "type": "boolean" },
+          "args": { "type": "object" }
+        },
+        "additionalProperties": false
+      }
+    }
+  }
+}

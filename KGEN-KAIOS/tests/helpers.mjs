@@ -21,6 +21,10 @@ export const MODULE_EXCHANGE_SETTLEMENT_11520 = id("KAIOS.BANK.MODULE.EXCHANGE_S
 export const MODULE_RISK_CONTROLLER = id("KAIOS.BANK.MODULE.RISK_CONTROLLER");
 export const MODULE_GOVERNANCE = id("KAIOS.BANK.MODULE.GOVERNANCE");
 export const MODULE_MIGRATION = id("KAIOS.BANK.MODULE.MIGRATION");
+export const MODULE_KGEN_RESERVE_REDEMPTION = id("KAIOS.BANK.MODULE.KGEN_RESERVE_REDEMPTION");
+export const MODULE_CELESTIAL_ELIGIBILITY = id("KAIOS.BANK.MODULE.CELESTIAL_ELIGIBILITY");
+export const MODULE_CELESTIAL_CAPITAL_COMMITMENT = id("KAIOS.BANK.MODULE.CELESTIAL_CAPITAL_COMMITMENT");
+export const SPECIAL_ALCHEMY_DESTINATION = id("KAIOS.ELIGIBILITY.SPECIAL.CELESTIAL.MASS");
 
 export function artifact(name) {
   return JSON.parse(fs.readFileSync(path.join(root, "artifacts", `${name}.json`), "utf8"));
@@ -246,6 +250,139 @@ export async function setupLingxiaoFullBankSystem({ chainId = 31337, totalAccoun
     kaios,
     modules,
   };
+}
+
+export async function setupPhase2System({ chainId = 31337, totalAccounts = 14 } = {}) {
+  const context = await setupLingxiaoFullBankSystem({ chainId, totalAccounts });
+  const pauser = context.signers[7];
+  const life = context.signers[8];
+  const verifier = context.signers[9];
+  const outsider = context.signers[10];
+  const approver = context.signers[11];
+  const bankAddress = await context.bank.getAddress();
+  const governanceAddress = await context.governance.getAddress();
+  const upgraderAddress = await context.moduleUpgrader.getAddress();
+
+  const furnace = await deploy("KAIOSAlchemyFurnace", context.deployer, [
+    await context.kaios.getAddress(),
+    await context.registry.getAddress(),
+    86_400,
+  ]);
+  await (
+    await context.registry.connect(context.admin).bootstrapOrgan(
+      ORGAN_FURNACE_18911,
+      await furnace.getAddress(),
+    )
+  ).wait();
+
+  const eligibilityDeployment = await deployUpgradeable(
+    "CelestialEligibility_Upgradeable",
+    context.deployer,
+    [
+      bankAddress,
+      governanceAddress,
+      upgraderAddress,
+      await pauser.getAddress(),
+      await furnace.getAddress(),
+      SPECIAL_ALCHEMY_DESTINATION,
+    ],
+  );
+  eligibilityDeployment.contract = eligibilityDeployment.contract.connect(context.governance);
+
+  const redemptionDeployment = await deployUpgradeable(
+    "KGENReserveRedemption_Upgradeable",
+    context.deployer,
+    [
+      bankAddress,
+      governanceAddress,
+      upgraderAddress,
+      await pauser.getAddress(),
+      await context.kgen.getAddress(),
+      await context.kaios.getAddress(),
+      await eligibilityDeployment.contract.getAddress(),
+      1n * ETHER,
+      10n * ETHER,
+      20n * ETHER,
+      10_000n * ETHER,
+      20_000n * ETHER,
+      true,
+    ],
+  );
+  redemptionDeployment.contract = redemptionDeployment.contract.connect(context.governance);
+
+  const capitalDeployment = await deployUpgradeable(
+    "CelestialCapitalCommitment_Upgradeable",
+    context.deployer,
+    [
+      bankAddress,
+      governanceAddress,
+      upgraderAddress,
+      await pauser.getAddress(),
+      await context.kaios.getAddress(),
+      await eligibilityDeployment.contract.getAddress(),
+      30 * 86_400,
+    ],
+  );
+  capitalDeployment.contract = capitalDeployment.contract.connect(context.governance);
+
+  for (const [moduleId, deployment, name] of [
+    [MODULE_KGEN_RESERVE_REDEMPTION, redemptionDeployment, "KGENReserveRedemption_Upgradeable"],
+    [MODULE_CELESTIAL_ELIGIBILITY, eligibilityDeployment, "CelestialEligibility_Upgradeable"],
+    [MODULE_CELESTIAL_CAPITAL_COMMITMENT, capitalDeployment, "CelestialCapitalCommitment_Upgradeable"],
+  ]) {
+    await (
+      await context.bank.connect(context.admin).configureModule(
+        moduleId,
+        await deployment.contract.getAddress(),
+        id(`${name}:1.0.0`),
+        0,
+        0,
+        true,
+      )
+    ).wait();
+  }
+
+  return {
+    ...context,
+    pauser,
+    life,
+    verifier,
+    outsider,
+    approver,
+    furnace,
+    phase2: {
+      eligibility: eligibilityDeployment,
+      redemption: redemptionDeployment,
+      capital: capitalDeployment,
+    },
+  };
+}
+
+export async function allocateKaios(context, beneficiary, amount, suffix = "PHASE2") {
+  const allocation = context.modules.CivilizationAllocation_Upgradeable.contract;
+  const allocationId = id(`ALLOCATION:${suffix}`);
+  await (
+    await context.bank.connect(context.admin).configureModule(
+      MODULE_CIVILIZATION_ALLOCATION,
+      await allocation.getAddress(),
+      id("CivilizationAllocation_Upgradeable:PHASE2-TEST"),
+      amount,
+      amount,
+      true,
+    )
+  ).wait();
+  const latest = await context.provider.getBlock("latest");
+  await (
+    await allocation.createAllocation(
+      allocationId,
+      await beneficiary.getAddress(),
+      amount,
+      latest.timestamp,
+      id("PHASE2-TEST-FUNDING"),
+    )
+  ).wait();
+  await (await allocation.executeAllocation(allocationId)).wait();
+  return allocationId;
 }
 
 export function cleanupProviders() {

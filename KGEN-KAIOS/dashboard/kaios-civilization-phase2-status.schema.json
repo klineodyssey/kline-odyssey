@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "KAIOS Civilization Phase 2 Read-only Status",
+  "type": "object",
+  "required": ["chainId", "addresses", "reserveRedemption", "eligibility", "capitalCommitment"],
+  "properties": {
+    "chainId": { "const": 56 },
+    "addresses": { "type": "object" },
+    "reserveRedemption": {
+      "type": "object",
+      "required": ["reference", "reserveKgen", "totalKaiosDeposited", "minimumKgenReserve", "paused", "enabled"],
+      "properties": {
+        "reference": { "const": "1000 KAIOS -> up to 1 existing KGEN" },
+        "reserveKgen": { "type": "string", "pattern": "^[0-9]+$" },
+        "totalKaiosDeposited": { "type": "string", "pattern": "^[0-9]+$" },
+        "minimumKgenReserve": { "type": "string", "pattern": "^[0-9]+$" },
+        "paused": { "type": "boolean" },
+        "enabled": { "type": "boolean" }
+      }
+    },
+    "eligibility": {
+      "type": "object",
+      "required": ["lifeId", "beneficiary", "singleBurnKaios", "massThresholdPassed", "constitutionHistoryVerified", "activeContributionCount", "reviewStatus", "automaticSeat"],
+      "properties": {
+        "lifeId": { "type": "string" },
+        "beneficiary": { "type": "string" },
+        "singleBurnKaios": { "type": "string", "pattern": "^[0-9]+$" },
+        "massThresholdPassed": { "type": "boolean" },
+        "constitutionHistoryVerified": { "type": "boolean" },
+        "activeContributionCount": { "type": "string", "pattern": "^[0-9]+$" },
+        "reviewStatus": { "type": "string" },
+        "automaticSeat": { "const": false }
+      }
+    },
+    "capitalCommitment": {
+      "type": "object",
+      "required": ["committedPrincipal", "totalLiability", "moduleBalance", "liabilityInvariantHolds", "burned", "automaticSeat"],
+      "properties": {
+        "committedPrincipal": { "type": "string", "pattern": "^[0-9]+$" },
+        "totalLiability": { "type": "string", "pattern": "^[0-9]+$" },
+        "moduleBalance": { "type": "string", "pattern": "^[0-9]+$" },
+        "liabilityInvariantHolds": { "type": "boolean" },
+        "burned": { "const": false },
+        "automaticSeat": { "const": false }
+      }
+    }
+  }
+}
