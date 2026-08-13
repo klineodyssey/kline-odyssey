@@ -3,8 +3,8 @@
   "auditedAt": "2026-08-09T00:00:00+08:00",
   "status": "PASS",
   "scope": {
-    "repositoryTrackedFiles": 3702,
-    "repositoryReadableTextFiles": 3700,
+    "repositoryTrackedFiles": 3705,
+    "repositoryReadableTextFiles": 3703,
     "repositoryPdfFiles": 33,
     "repositoryPdfPages": 222,
     "externalPackage": {
@@ -16,7 +16,7 @@
       "pdfPages": 0,
       "pdfExtraction": "NOT_REQUESTED"
     },
-    "scannedFilesTotal": 3702
+    "scannedFilesTotal": 3705
   },
   "finalCanon": {
     "18888": "LINGXIAO_CELESTIAL_BANK",

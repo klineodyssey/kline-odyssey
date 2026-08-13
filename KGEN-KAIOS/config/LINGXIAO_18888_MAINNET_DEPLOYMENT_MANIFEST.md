@@ -1,4 +1,4 @@
-# Lingxiao 18888 Mainnet Deployment Manifest
+# Lingxiao 18888 Mainnet Deployment Manifest — LIVE
 
 Status: MAINNET_PRE_SIGN_READY_FOR_HUMAN_AUTHORIZATION; Mainnet transaction is not authorized.
 
@@ -94,3 +94,18 @@ The existing 21 deployments remain frozen and unchanged. After a successful Gene
 Authorization gate: MAINNET_DEPLOY_APPROVED_NOT_RECEIVED.
 
 No line in this manifest authorizes a transaction.
+
+## Actual Mainnet execution
+
+- Status: **KAIOS_MAINNET_GENESIS_COMPLETE**
+- Genesis block: 115637581
+- Genesis timestamp: 2026-08-13T05:05:37.000Z
+- Settlement tx: `0xc9fab344cc0055cab2e8dad1105f0a913fa94c15b39c76a241d3f190eb18767a`
+- Inscription: `0xb02CBc7698646653D541F494F510Fe18638AC7ae`
+- Inscription tx: `0xb2ff08d1779229cc72904818ee5b342b2134ae247253c16156dd899f6bece336`
+- Successful transactions: 57
+- Total gas used: 27604633
+- Total BNB spent: 0.00138023165
+- Legacy Heart touched: **NO**
+
+The JSON manifest contains the complete public transaction, block, gas, governance, role, and address evidence.

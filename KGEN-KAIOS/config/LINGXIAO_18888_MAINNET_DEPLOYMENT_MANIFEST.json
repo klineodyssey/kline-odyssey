@@ -1,7 +1,7 @@
 {
-  "status": "MAINNET_PRE_SIGN_READY_FOR_HUMAN_AUTHORIZATION",
-  "mainnetTransactionAuthorized": false,
-  "readyForHumanMainnetAuthorization": true,
+  "status": "KAIOS_MAINNET_GENESIS_COMPLETE",
+  "mainnetTransactionAuthorized": true,
+  "readyForHumanMainnetAuthorization": false,
   "economicConfig": {
     "path": "KGEN-KAIOS/config/mainnet-economic-config.final-review.json",
     "sha256": "5e2fc57df2bae4778d5e405dfa07f8e3e78fe72a7de3dd9889aad4e6d86b8bd4",
@@ -18,22 +18,26 @@
     "delayedGovernanceFinalization": "MOTHER_PROPOSE_JADE_EMPEROR_APPROVE_WAIT_3600_EXECUTE",
     "governanceIdentityBlockers": 0,
     "blockers": 0,
-    "authorizationGate": "MAINNET_DEPLOY_APPROVED_NOT_RECEIVED"
+    "authorizationGate": "MAINNET_DEPLOY_APPROVED_AND_EXECUTED"
   },
   "postGenesisInscription": {
-    "status": "DEPLOY_READY_SEPARATE_AUTHORIZATION_REQUIRED",
+    "status": "DEPLOYED_AND_VALIDATED",
     "sequence": "FROZEN_DEPLOYMENTS_1_TO_21_THEN_GENESIS_SETTLEMENT_THEN_EVIDENCE_VALIDATION_THEN_INSCRIPTION_DEPLOYMENT_22",
     "frozenDeploymentActions": 21,
     "inscriptionDeploymentNonceIfDeployerNonceRemainsUnchanged": 55,
     "predictedInscriptionAddress": "0xb02CBc7698646653D541F494F510Fe18638AC7ae",
-    "predictionStatus": "PREDICTED_ONLY_NOT_DEPLOYED",
+    "predictionStatus": "ACTUAL_MAINNET_ADDRESS_MATCHED_PREDICTION",
     "first21AddressImpact": "NONE",
     "fullInscriptionKeccak256": "0xbc89db0915e1fd0e978ae0cfe194f4b46db22534febab35563de2802935b3704",
     "fullInscriptionSha256": "add44b79083a20a6d9f240a99c5fd47658f191ce8b3fa81da6f60c97e8b4470f",
     "generator": "KGEN-KAIOS/tools/validate-integration-artifacts.mjs --generate-kaios-genesis-record",
     "amountInput": "FORBIDDEN_DERIVED_FROM_SUCCESSFUL_SETTLEMENT_RECEIPT_AND_CHAIN_STATE",
     "nonceGate": "DEPLOYMENT_SIGNER_PENDING_NONCE_MUST_STILL_BE_55_AFTER_SETTLEMENT_EVIDENCE_VALIDATION",
-    "transactionAuthorized": false
+    "transactionAuthorized": true,
+    "actualMainnetAddress": "0xb02CBc7698646653D541F494F510Fe18638AC7ae",
+    "transactionHash": "0xb2ff08d1779229cc72904818ee5b342b2134ae247253c16156dd899f6bece336",
+    "blockNumber": 115637610,
+    "gasUsed": "540149"
   },
   "fork": {
     "blockNumber": 115460801,
@@ -56,7 +60,7 @@
     "formalEconomicBank8888": {
       "predictedProxy": "0x9EcAe137b3A307971EB77B4CDB3ba13aeeF5297C",
       "implementation": "0x94341fB340cF8Bd0069cD1Fcaf5bA0866B15c923",
-      "status": "NEW_CODE_BEARING_ERC1967_UUPS_PROXY_PREDICTION",
+      "status": "LIVE_CODE_BEARING_ERC1967_UUPS_PROXY",
       "legacyTreasury": "0x2caE692310b5A89C44c4E09Ba9F26385359d1Aa9",
       "evidence": "Fork-deployed GaolaozhuangCommercialBank8888_Upgradeable code-bearing proxy; EconomicRouter8888 is initialized directly to this proxy."
     }
@@ -79,12 +83,16 @@
       "nonce": 34,
       "predictedAddress": "0xA9e7CbF161E39E556f4B5b8E41397Ac4B87a932D",
       "forkAddress": "0xA9e7CbF161E39E556f4B5b8E41397Ac4B87a932D",
-      "actualMainnetAddress": null,
+      "actualMainnetAddress": "0xA9e7CbF161E39E556f4B5b8E41397Ac4B87a932D",
       "autoBackfill": "SET_FROM_SUCCESSFUL_MAINNET_DEPLOYMENT_RECEIPT_CONTRACT_ADDRESS",
       "transactionHash": "0x0c7a3585944b744aa309a662e1a562bebb9134b049cedd861a0b50d9a5b5fd9b",
       "blockNumber": 115460807,
       "gasUsed": "653603",
-      "status": "PASS"
+      "status": "PASS",
+      "mainnetTransactionHash": "0x3a08b751152d9861aafd6c4d98a0f2da6fe24657359e4927915de57c2e26f766",
+      "mainnetBlockNumber": 115628496,
+      "mainnetGasUsed": "653603",
+      "mainnetStatus": "PASS_LIVE"
     },
     {
       "order": 2,
@@ -93,12 +101,16 @@
       "nonce": 35,
       "predictedAddress": "0x8125045039Fe969490d57185233B7d64A494A829",
       "forkAddress": "0x8125045039Fe969490d57185233B7d64A494A829",
-      "actualMainnetAddress": null,
+      "actualMainnetAddress": "0x8125045039Fe969490d57185233B7d64A494A829",
       "autoBackfill": "SET_FROM_SUCCESSFUL_MAINNET_DEPLOYMENT_RECEIPT_CONTRACT_ADDRESS",
       "transactionHash": "0xd4998408162e7bb83b130d9b83a9128401b8b46f61fc605be93038c5807e25d8",
       "blockNumber": 115460808,
       "gasUsed": "2734493",
-      "status": "PASS"
+      "status": "PASS",
+      "mainnetTransactionHash": "0x6213d21f9463e01d5d4dd0fe8422da9354cdb19c612b3eaf413bab88bb1315cb",
+      "mainnetBlockNumber": 115628499,
+      "mainnetGasUsed": "2734493",
+      "mainnetStatus": "PASS_LIVE"
     },
     {
       "order": 3,
@@ -107,12 +119,16 @@
       "nonce": 36,
       "predictedAddress": "0x11d34c0F723aCd334B8F95076f73F07f06202aab",
       "forkAddress": "0x11d34c0F723aCd334B8F95076f73F07f06202aab",
-      "actualMainnetAddress": null,
+      "actualMainnetAddress": "0x11d34c0F723aCd334B8F95076f73F07f06202aab",
       "autoBackfill": "SET_FROM_SUCCESSFUL_MAINNET_DEPLOYMENT_RECEIPT_CONTRACT_ADDRESS",
       "transactionHash": "0xdc5261d62e8f76a0344e462bbf881136fe830fc6f1db7e152e2dc2ad535cc59e",
       "blockNumber": 115460809,
       "gasUsed": "306384",
-      "status": "PASS"
+      "status": "PASS",
+      "mainnetTransactionHash": "0x6bc60d0dbf1a1d1e62f8fe62f203239a126d597c5f44a0e44ac9def54679d8c3",
+      "mainnetBlockNumber": 115628510,
+      "mainnetGasUsed": "306384",
+      "mainnetStatus": "PASS_LIVE"
     },
     {
       "order": 4,
@@ -121,12 +137,16 @@
       "nonce": 37,
       "predictedAddress": "0x94341fB340cF8Bd0069cD1Fcaf5bA0866B15c923",
       "forkAddress": "0x94341fB340cF8Bd0069cD1Fcaf5bA0866B15c923",
-      "actualMainnetAddress": null,
+      "actualMainnetAddress": "0x94341fB340cF8Bd0069cD1Fcaf5bA0866B15c923",
       "autoBackfill": "SET_FROM_SUCCESSFUL_MAINNET_DEPLOYMENT_RECEIPT_CONTRACT_ADDRESS",
       "transactionHash": "0x765aad07d107e09f6f8ab0a5392d6a2b1b9553debbb6248611558b0287eaf76f",
       "blockNumber": 115460810,
       "gasUsed": "4016007",
-      "status": "PASS"
+      "status": "PASS",
+      "mainnetTransactionHash": "0xc434af43195b1edfea0bf083ec1adad3c606317ac2ee565c31e671c4ae6ba698",
+      "mainnetBlockNumber": 115628522,
+      "mainnetGasUsed": "4016007",
+      "mainnetStatus": "PASS_LIVE"
     },
     {
       "order": 5,
@@ -135,12 +155,16 @@
       "nonce": 38,
       "predictedAddress": "0x9EcAe137b3A307971EB77B4CDB3ba13aeeF5297C",
       "forkAddress": "0x9EcAe137b3A307971EB77B4CDB3ba13aeeF5297C",
-      "actualMainnetAddress": null,
+      "actualMainnetAddress": "0x9EcAe137b3A307971EB77B4CDB3ba13aeeF5297C",
       "autoBackfill": "SET_FROM_SUCCESSFUL_MAINNET_DEPLOYMENT_RECEIPT_CONTRACT_ADDRESS",
       "transactionHash": "0x0efc03f785c3c4c651c9695a5361f4f0b6111b83d3861dedd963f27ce3413942",
       "blockNumber": 115460811,
       "gasUsed": "425322",
-      "status": "PASS"
+      "status": "PASS",
+      "mainnetTransactionHash": "0xebe5688a6abec93883d1949d2d5dd6daaa76b10116f2af4090dbffe2cb8a8e24",
+      "mainnetBlockNumber": 115628524,
+      "mainnetGasUsed": "425322",
+      "mainnetStatus": "PASS_LIVE"
     },
     {
       "order": 6,
@@ -149,12 +173,16 @@
       "nonce": 39,
       "predictedAddress": "0x8E48643030826c9121Cd2E086B811b9083E9f862",
       "forkAddress": "0x8E48643030826c9121Cd2E086B811b9083E9f862",
-      "actualMainnetAddress": null,
+      "actualMainnetAddress": "0x8E48643030826c9121Cd2E086B811b9083E9f862",
       "autoBackfill": "SET_FROM_SUCCESSFUL_MAINNET_DEPLOYMENT_RECEIPT_CONTRACT_ADDRESS",
       "transactionHash": "0x078b9aa60a269d36950cfa9bd18890bdb4afe1c7bb0196d984735b29fefe0af4",
       "blockNumber": 115460812,
       "gasUsed": "2899103",
-      "status": "PASS"
+      "status": "PASS",
+      "mainnetTransactionHash": "0xca8d6873d26530308710c1576bb356ec9852689e3c4460353daf3929a12121c0",
+      "mainnetBlockNumber": 115628527,
+      "mainnetGasUsed": "2899103",
+      "mainnetStatus": "PASS_LIVE"
     },
     {
       "order": 7,
@@ -163,12 +191,16 @@
       "nonce": 40,
       "predictedAddress": "0xA447853985Ef6e6AbFcb14FCfDeFdced10Be0BDe",
       "forkAddress": "0xA447853985Ef6e6AbFcb14FCfDeFdced10Be0BDe",
-      "actualMainnetAddress": null,
+      "actualMainnetAddress": "0xA447853985Ef6e6AbFcb14FCfDeFdced10Be0BDe",
       "autoBackfill": "SET_FROM_SUCCESSFUL_MAINNET_DEPLOYMENT_RECEIPT_CONTRACT_ADDRESS",
       "transactionHash": "0x8c1e8400e957fc3404f327ba27a519e4bc2ff708bcaead930351a77dc8741cae",
       "blockNumber": 115460813,
       "gasUsed": "354735",
-      "status": "PASS"
+      "status": "PASS",
+      "mainnetTransactionHash": "0xeac9e86049a4523b7a17a25e838b6bf62ade95994de93f28cb337394c53ae3cf",
+      "mainnetBlockNumber": 115628538,
+      "mainnetGasUsed": "354735",
+      "mainnetStatus": "PASS_LIVE"
     },
     {
       "order": 8,
@@ -177,12 +209,16 @@
       "nonce": 41,
       "predictedAddress": "0x216d69a413354CBab7ddDdC4fCfe2B3E0468197d",
       "forkAddress": "0x216d69a413354CBab7ddDdC4fCfe2B3E0468197d",
-      "actualMainnetAddress": null,
+      "actualMainnetAddress": "0x216d69a413354CBab7ddDdC4fCfe2B3E0468197d",
       "autoBackfill": "SET_FROM_SUCCESSFUL_MAINNET_DEPLOYMENT_RECEIPT_CONTRACT_ADDRESS",
       "transactionHash": "0xe4c62de04d871761686b6937b1ba1e1a5dba72a1256aa32c9e6993ef1c5a9ed1",
       "blockNumber": 115460814,
       "gasUsed": "1399667",
-      "status": "PASS"
+      "status": "PASS",
+      "mainnetTransactionHash": "0x7659f72a65c70efdda6b779b65de61c958dbfbbee4c4f1105505687d3bd7d220",
+      "mainnetBlockNumber": 115628549,
+      "mainnetGasUsed": "1399667",
+      "mainnetStatus": "PASS_LIVE"
     },
     {
       "order": 9,
@@ -191,12 +227,16 @@
       "nonce": 42,
       "predictedAddress": "0x75A55Af6967932C4A1c896dB81Dd6F31e531c299",
       "forkAddress": "0x75A55Af6967932C4A1c896dB81Dd6F31e531c299",
-      "actualMainnetAddress": null,
+      "actualMainnetAddress": "0x75A55Af6967932C4A1c896dB81Dd6F31e531c299",
       "autoBackfill": "SET_FROM_SUCCESSFUL_MAINNET_DEPLOYMENT_RECEIPT_CONTRACT_ADDRESS",
       "transactionHash": "0x2619893d2aea9888be9a2219888ff8587e45d77480fe5b26e53d3ba946eb6a21",
       "blockNumber": 115460815,
       "gasUsed": "303999",
-      "status": "PASS"
+      "status": "PASS",
+      "mainnetTransactionHash": "0xd30d485f55ed2af6afff82d752b39c615e12dc3b385952c68e4f095439a910e0",
+      "mainnetBlockNumber": 115628553,
+      "mainnetGasUsed": "303999",
+      "mainnetStatus": "PASS_LIVE"
     },
     {
       "order": 10,
@@ -205,12 +245,16 @@
       "nonce": 43,
       "predictedAddress": "0x3ebc0A39F7981AAB3995AC828dc79A8B0753A05b",
       "forkAddress": "0x3ebc0A39F7981AAB3995AC828dc79A8B0753A05b",
-      "actualMainnetAddress": null,
+      "actualMainnetAddress": "0x3ebc0A39F7981AAB3995AC828dc79A8B0753A05b",
       "autoBackfill": "SET_FROM_SUCCESSFUL_MAINNET_DEPLOYMENT_RECEIPT_CONTRACT_ADDRESS",
       "transactionHash": "0x90454baff7d7865712a78cdbcffbcfb8005de70e0f59a1e11ff1b006b9acf52d",
       "blockNumber": 115460816,
       "gasUsed": "1261793",
-      "status": "PASS"
+      "status": "PASS",
+      "mainnetTransactionHash": "0x7ef6be94b298fdd917152ee06323f96198203f3b5aa6f6b74a69779e3991ebaf",
+      "mainnetBlockNumber": 115628556,
+      "mainnetGasUsed": "1261793",
+      "mainnetStatus": "PASS_LIVE"
     },
     {
       "order": 11,
@@ -219,12 +263,16 @@
       "nonce": 44,
       "predictedAddress": "0xC49f989c6ff0d22824df8D993Ce82207165C1428",
       "forkAddress": "0xC49f989c6ff0d22824df8D993Ce82207165C1428",
-      "actualMainnetAddress": null,
+      "actualMainnetAddress": "0xC49f989c6ff0d22824df8D993Ce82207165C1428",
       "autoBackfill": "SET_FROM_SUCCESSFUL_MAINNET_DEPLOYMENT_RECEIPT_CONTRACT_ADDRESS",
       "transactionHash": "0x2aca1d815704e17b6d9f43de2436fe1161d4c75c403f66e25189fee6771836bf",
       "blockNumber": 115460817,
       "gasUsed": "330557",
-      "status": "PASS"
+      "status": "PASS",
+      "mainnetTransactionHash": "0xc1904c2fef2a539182262618c441e6fa451aa4147e66272381a7078301691b6e",
+      "mainnetBlockNumber": 115628561,
+      "mainnetGasUsed": "330557",
+      "mainnetStatus": "PASS_LIVE"
     },
     {
       "order": 12,
@@ -233,12 +281,16 @@
       "nonce": 45,
       "predictedAddress": "0xA08A9CEcfa18b2FDb9ca8De0063A5029B9Ffc363",
       "forkAddress": "0xA08A9CEcfa18b2FDb9ca8De0063A5029B9Ffc363",
-      "actualMainnetAddress": null,
+      "actualMainnetAddress": "0xA08A9CEcfa18b2FDb9ca8De0063A5029B9Ffc363",
       "autoBackfill": "SET_FROM_SUCCESSFUL_MAINNET_DEPLOYMENT_RECEIPT_CONTRACT_ADDRESS",
       "transactionHash": "0x8dfc394fa2408d515b66b4e5fcdc5dc121521717522cfc4f940487adf4d1ff98",
       "blockNumber": 115460818,
       "gasUsed": "1261805",
-      "status": "PASS"
+      "status": "PASS",
+      "mainnetTransactionHash": "0xc64f00332edd4a7adf23ec5028b579d0a145eac5acece46dcef29096d2793b68",
+      "mainnetBlockNumber": 115628572,
+      "mainnetGasUsed": "1261805",
+      "mainnetStatus": "PASS_LIVE"
     },
     {
       "order": 13,
@@ -247,12 +299,16 @@
       "nonce": 46,
       "predictedAddress": "0x17587F49dFDE4e400D03Ae81364AC2af8E1629Df",
       "forkAddress": "0x17587F49dFDE4e400D03Ae81364AC2af8E1629Df",
-      "actualMainnetAddress": null,
+      "actualMainnetAddress": "0x17587F49dFDE4e400D03Ae81364AC2af8E1629Df",
       "autoBackfill": "SET_FROM_SUCCESSFUL_MAINNET_DEPLOYMENT_RECEIPT_CONTRACT_ADDRESS",
       "transactionHash": "0xea0c7302be24e8a6b034ca73034556f4ebd719a26f4c77c322e017c67dacb6ed",
       "blockNumber": 115460819,
       "gasUsed": "330557",
-      "status": "PASS"
+      "status": "PASS",
+      "mainnetTransactionHash": "0x71832f0a0bd85066d45347f521d5fee9dfd0b717ba2e40b87ef7f9960035a908",
+      "mainnetBlockNumber": 115628583,
+      "mainnetGasUsed": "330557",
+      "mainnetStatus": "PASS_LIVE"
     },
     {
       "order": 14,
@@ -261,12 +317,16 @@
       "nonce": 47,
       "predictedAddress": "0x8D231C82513cdfa978A7C157618Ff198b0a5d3E9",
       "forkAddress": "0x8D231C82513cdfa978A7C157618Ff198b0a5d3E9",
-      "actualMainnetAddress": null,
+      "actualMainnetAddress": "0x8D231C82513cdfa978A7C157618Ff198b0a5d3E9",
       "autoBackfill": "SET_FROM_SUCCESSFUL_MAINNET_DEPLOYMENT_RECEIPT_CONTRACT_ADDRESS",
       "transactionHash": "0xf1811ae684c3dd59cfbef6d456f82cae4b05d35b17d23ac63c37dd67e66cc4d0",
       "blockNumber": 115460820,
       "gasUsed": "1349091",
-      "status": "PASS"
+      "status": "PASS",
+      "mainnetTransactionHash": "0xa871163c208f06981ae680f07b50493e00f509ec03cf6c88542bb0cd49936359",
+      "mainnetBlockNumber": 115628594,
+      "mainnetGasUsed": "1349091",
+      "mainnetStatus": "PASS_LIVE"
     },
     {
       "order": 15,
@@ -275,12 +335,16 @@
       "nonce": 48,
       "predictedAddress": "0x61573a93a88c58DAa5066A0aA319f88cE34d88FC",
       "forkAddress": "0x61573a93a88c58DAa5066A0aA319f88cE34d88FC",
-      "actualMainnetAddress": null,
+      "actualMainnetAddress": "0x61573a93a88c58DAa5066A0aA319f88cE34d88FC",
       "autoBackfill": "SET_FROM_SUCCESSFUL_MAINNET_DEPLOYMENT_RECEIPT_CONTRACT_ADDRESS",
       "transactionHash": "0xc658797ed350a50715c3be3949d8b32a4f60393956718b9e4c96413305c217e0",
       "blockNumber": 115460821,
       "gasUsed": "304010",
-      "status": "PASS"
+      "status": "PASS",
+      "mainnetTransactionHash": "0x6ead47598ff45521ec92a51073303c897bdc300f9ac9e93105d5b053fd5a8ecc",
+      "mainnetBlockNumber": 115628604,
+      "mainnetGasUsed": "304010",
+      "mainnetStatus": "PASS_LIVE"
     },
     {
       "order": 16,
@@ -289,12 +353,16 @@
       "nonce": 49,
       "predictedAddress": "0x9d919E66AE2746D41D978e3d51DF594B2E5F5582",
       "forkAddress": "0x9d919E66AE2746D41D978e3d51DF594B2E5F5582",
-      "actualMainnetAddress": null,
+      "actualMainnetAddress": "0x9d919E66AE2746D41D978e3d51DF594B2E5F5582",
       "autoBackfill": "SET_FROM_SUCCESSFUL_MAINNET_DEPLOYMENT_RECEIPT_CONTRACT_ADDRESS",
       "transactionHash": "0x19f4ca8eb9a0a94c34518748e3bd9495f44dadda8fd0536cc2c2bd8462bd3c9a",
       "blockNumber": 115460822,
       "gasUsed": "1646003",
-      "status": "PASS"
+      "status": "PASS",
+      "mainnetTransactionHash": "0x75634c96256af7fcc404a7ee58a0da9bc7f7ae7698781b6deec32a5ced97ea0a",
+      "mainnetBlockNumber": 115628610,
+      "mainnetGasUsed": "1646003",
+      "mainnetStatus": "PASS_LIVE"
     },
     {
       "order": 17,
@@ -303,12 +371,16 @@
       "nonce": 50,
       "predictedAddress": "0xa2792fBDCc8A8AaC364053431D44E0a8D335E166",
       "forkAddress": "0xa2792fBDCc8A8AaC364053431D44E0a8D335E166",
-      "actualMainnetAddress": null,
+      "actualMainnetAddress": "0xa2792fBDCc8A8AaC364053431D44E0a8D335E166",
       "autoBackfill": "SET_FROM_SUCCESSFUL_MAINNET_DEPLOYMENT_RECEIPT_CONTRACT_ADDRESS",
       "transactionHash": "0x6775c8cd789390aa8522df88b34454e76062a7ee11413ce936094e1d0c91d00d",
       "blockNumber": 115460823,
       "gasUsed": "375214",
-      "status": "PASS"
+      "status": "PASS",
+      "mainnetTransactionHash": "0xe47a9761a3ad3dcb612cdd1dda2bd36e0606c836175870093b66f8e3ee550192",
+      "mainnetBlockNumber": 115628618,
+      "mainnetGasUsed": "375214",
+      "mainnetStatus": "PASS_LIVE"
     },
     {
       "order": 18,
@@ -317,12 +389,16 @@
       "nonce": 51,
       "predictedAddress": "0xff281a821dBbA44EEc7b57475E3c28A916fcDAE7",
       "forkAddress": "0xff281a821dBbA44EEc7b57475E3c28A916fcDAE7",
-      "actualMainnetAddress": null,
+      "actualMainnetAddress": "0xff281a821dBbA44EEc7b57475E3c28A916fcDAE7",
       "autoBackfill": "SET_FROM_SUCCESSFUL_MAINNET_DEPLOYMENT_RECEIPT_CONTRACT_ADDRESS",
       "transactionHash": "0x15fe5d63192038219ce207b75721c3d4318102d4f87b983f8ea89497e0906e05",
       "blockNumber": 115460824,
       "gasUsed": "1346137",
-      "status": "PASS"
+      "status": "PASS",
+      "mainnetTransactionHash": "0xb5d2735d66b2c0e1446882b8063d2ca348750d4078dcabe96099630a4760a2fe",
+      "mainnetBlockNumber": 115628620,
+      "mainnetGasUsed": "1346137",
+      "mainnetStatus": "PASS_LIVE"
     },
     {
       "order": 19,
@@ -331,12 +407,16 @@
       "nonce": 52,
       "predictedAddress": "0x72c14f5D2fa748C1579295A7E34c16453a3a17aB",
       "forkAddress": "0x72c14f5D2fa748C1579295A7E34c16453a3a17aB",
-      "actualMainnetAddress": null,
+      "actualMainnetAddress": "0x72c14f5D2fa748C1579295A7E34c16453a3a17aB",
       "autoBackfill": "SET_FROM_SUCCESSFUL_MAINNET_DEPLOYMENT_RECEIPT_CONTRACT_ADDRESS",
       "transactionHash": "0xd0f48b825224d7eeebdf3a69099cf9e0cb15fe51015fb6bab2105e1e1143b0ce",
       "blockNumber": 115460825,
       "gasUsed": "303989",
-      "status": "PASS"
+      "status": "PASS",
+      "mainnetTransactionHash": "0x4e069e7cc25b73c6c1d3ac66b4ee779075cfe58496bdfaac0df69146bfb05763",
+      "mainnetBlockNumber": 115628622,
+      "mainnetGasUsed": "303989",
+      "mainnetStatus": "PASS_LIVE"
     },
     {
       "order": 20,
@@ -345,12 +425,16 @@
       "nonce": 53,
       "predictedAddress": "0xD4E67B3a69e41524c424150E6b6e921b01D036db",
       "forkAddress": "0xD4E67B3a69e41524c424150E6b6e921b01D036db",
-      "actualMainnetAddress": null,
+      "actualMainnetAddress": "0xD4E67B3a69e41524c424150E6b6e921b01D036db",
       "autoBackfill": "SET_FROM_SUCCESSFUL_MAINNET_DEPLOYMENT_RECEIPT_CONTRACT_ADDRESS",
       "transactionHash": "0xf39fe8bdeb8bae1e29d7adeb3d10ba0240113bb8140ac99e6d2b7110be311c27",
       "blockNumber": 115460826,
       "gasUsed": "1373218",
-      "status": "PASS"
+      "status": "PASS",
+      "mainnetTransactionHash": "0x731bccd9d1116831d9b43966672cb27d9017c75b6806c32109c5c210d2c3be9c",
+      "mainnetBlockNumber": 115628625,
+      "mainnetGasUsed": "1373218",
+      "mainnetStatus": "PASS_LIVE"
     },
     {
       "order": 21,
@@ -359,12 +443,16 @@
       "nonce": 54,
       "predictedAddress": "0x44c2CA9B9eba19d8F79F6E1786fd9D25e73738e1",
       "forkAddress": "0x44c2CA9B9eba19d8F79F6E1786fd9D25e73738e1",
-      "actualMainnetAddress": null,
+      "actualMainnetAddress": "0x44c2CA9B9eba19d8F79F6E1786fd9D25e73738e1",
       "autoBackfill": "SET_FROM_SUCCESSFUL_MAINNET_DEPLOYMENT_RECEIPT_CONTRACT_ADDRESS",
       "transactionHash": "0xf6d177902136f1a019c63e23693ea0bc8b2168bfa499d1d24244cee02491802a",
       "blockNumber": 115460827,
       "gasUsed": "506666",
-      "status": "PASS"
+      "status": "PASS",
+      "mainnetTransactionHash": "0x4dae645b4b40348fc06bd65f08d238919c20011924bf54da82c3d7e5f0fd6343",
+      "mainnetBlockNumber": 115628629,
+      "mainnetGasUsed": "506666",
+      "mainnetStatus": "PASS_LIVE"
     }
   ],
   "organRegistryWiring": [
@@ -900,5 +988,149 @@
   },
   "blockers": [],
   "authorizationGate": "MAINNET_DEPLOY_APPROVED_NOT_RECEIVED",
-  "autoBackfillRule": "Each actual Mainnet deployment address must be written from its successful receipt and then codehash-verified; predicted addresses alone never become formal."
+  "autoBackfillRule": "Each actual Mainnet deployment address must be written from its successful receipt and then codehash-verified; predicted addresses alone never become formal.",
+  "mainnetExecution": {
+    "status": "PASS",
+    "genesisTimestamp": 1786597537,
+    "genesisTimestampIso": "2026-08-13T05:05:37.000Z",
+    "genesisBlock": 115637581,
+    "settlementTransactionHash": "0xc9fab344cc0055cab2e8dad1105f0a913fa94c15b39c76a241d3f190eb18767a",
+    "genesisEpochTransactionHash": "0xe2aad950d33214d05f44274d76d71f72a6d1f9a3192df8682d3a10913f0996be",
+    "inscriptionAddress": "0xb02CBc7698646653D541F494F510Fe18638AC7ae",
+    "inscriptionTransactionHash": "0xb2ff08d1779229cc72904818ee5b342b2134ae247253c16156dd899f6bece336",
+    "governanceFinalization": {
+      "proposalId": "0x241380b64e53008cc8ea0b6e0235c1ffbda639912329764eb9f8e200f6b255bb",
+      "delaySeconds": "3600",
+      "proposalReceipt": {
+        "transactionHash": "0x9b9ffb38f607a4a7d19a12bfe21cd56c6f7ed40c126b146e2ec0ed9f31dce70b",
+        "blockNumber": 115629071,
+        "gasUsed": "110400",
+        "contractAddress": null,
+        "status": 1,
+        "from": "0xCd60BF474e691F2484950a0276Eaf507616Ca4b9",
+        "to": "0xa2792fBDCc8A8AaC364053431D44E0a8D335E166"
+      },
+      "approvalReceipt": {
+        "transactionHash": "0xa54cc8e64c542ff715604450458e43b72a2c25a935216457df297d3e840cdfe8",
+        "blockNumber": 115629082,
+        "gasUsed": "57643",
+        "contractAddress": null,
+        "status": 1,
+        "from": "0xc15E08834fCA9F2d3462a3f8f0BC30524D6dd756",
+        "to": "0xa2792fBDCc8A8AaC364053431D44E0a8D335E166"
+      },
+      "eta": "1786597307",
+      "executed": true,
+      "executeReceipt": {
+        "transactionHash": "0xd525cba81a7f742d4b9152a642e1a42feaaa21fd0ff4e6f52418a88b5f8a05d3",
+        "blockNumber": 115637135,
+        "gasUsed": "61492",
+        "contractAddress": null,
+        "status": 1,
+        "from": "0xCd60BF474e691F2484950a0276Eaf507616Ca4b9",
+        "to": "0xa2792fBDCc8A8AaC364053431D44E0a8D335E166"
+      }
+    },
+    "finalValidation": {
+      "status": "PASS",
+      "validatedAtBlock": 115637969,
+      "finalNonces": {
+        "deployer": {
+          "latest": 56,
+          "pending": 56
+        },
+        "mother": {
+          "latest": 34,
+          "pending": 34
+        },
+        "jade": {
+          "latest": 1,
+          "pending": 1
+        }
+      },
+      "balancesWei": {
+        "deployer": "4366243841457930",
+        "mother": "2823775600000000",
+        "jade": "2997117850000000"
+      },
+      "versions": {
+        "bank18888": "2.0.0",
+        "bank8888": "1.0.0",
+        "celestialSeat500": "2.0.0",
+        "governance": "1.0.0"
+      },
+      "implementations": [
+        "0x8125045039Fe969490d57185233B7d64A494A829",
+        "0x94341fB340cF8Bd0069cD1Fcaf5bA0866B15c923",
+        "0x8E48643030826c9121Cd2E086B811b9083E9f862",
+        "0x216d69a413354CBab7ddDdC4fCfe2B3E0468197d",
+        "0x3ebc0A39F7981AAB3995AC828dc79A8B0753A05b",
+        "0xA08A9CEcfa18b2FDb9ca8De0063A5029B9Ffc363",
+        "0x8D231C82513cdfa978A7C157618Ff198b0a5d3E9",
+        "0x9d919E66AE2746D41D978e3d51DF594B2E5F5582",
+        "0xff281a821dBbA44EEc7b57475E3c28A916fcDAE7"
+      ],
+      "kaiosTotalSupply": "22213908930416874731235000",
+      "bank18888Balance": "22213908930416874731235000",
+      "bankHealth": {
+        "balance": "22213908930416874731235000",
+        "reserve": "11000000000000000000000000",
+        "available": "11213908930416874731235000",
+        "healthy": true,
+        "paused": false
+      },
+      "totalTransactions": 57,
+      "totalGasUsed": "27604633",
+      "totalWeiSpent": "1380231650000000",
+      "gates": {
+        "chainId56": "PASS",
+        "first21Deployments": "PASS",
+        "allExpectedAddresses": "PASS",
+        "bank18888": "PASS",
+        "bank8888": "PASS",
+        "celestialSeat500": "PASS",
+        "settlement11520": "PASS",
+        "furnace18911": "PASS",
+        "governanceFinalization": "PASS",
+        "motherGovernance": "PASS",
+        "jadeApprover": "PASS",
+        "guanyinPauser": "PASS",
+        "deployerPermanentGovernance": "NONE",
+        "kgenGenesisAccounting": "PASS",
+        "kaiosGenesisAccounting": "PASS",
+        "bankGenesisReceipt": "PASS",
+        "genesisInscription": "PASS",
+        "inscriptionImmutable": "PASS",
+        "arbitraryMint": "NONE",
+        "arbitraryDrain": "BLOCKED",
+        "legacyHeartTouched": "NO"
+      }
+    },
+    "gas": {
+      "totalGasUsed": "27604633",
+      "totalWeiSpent": "1380231650000000",
+      "totalBnbSpent": "0.00138023165",
+      "bySigner": {
+        "0xb3C54ca96De0dED4Ca0151F629ff9781506ba261": {
+          "transactionCount": 22,
+          "gasUsed": "24022502",
+          "weiSpent": "1201125100000000",
+          "bnbSpent": "0.0012011251"
+        },
+        "0xCd60BF474e691F2484950a0276Eaf507616Ca4b9": {
+          "transactionCount": 34,
+          "gasUsed": "3524488",
+          "weiSpent": "176224400000000",
+          "bnbSpent": "0.0001762244"
+        },
+        "0xc15E08834fCA9F2d3462a3f8f0BC30524D6dd756": {
+          "transactionCount": 1,
+          "gasUsed": "57643",
+          "weiSpent": "2882150000000",
+          "bnbSpent": "0.00000288215"
+        }
+      }
+    },
+    "legacyHeartTouched": false
+  }
 }

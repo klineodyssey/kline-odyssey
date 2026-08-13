@@ -20,10 +20,12 @@ This addendum does not regenerate the historical inventory below.
 | `KGEN-KAIOS/KAIOS_500_CELESTIAL_AND_MARS_SEATS_RUNTIME_CURRENT.md` | Runtime | 500 Celestial salary/public-function seats and Mars habitat-seat boundary | CURRENT |
 | `KGEN-KAIOS/KAIOS_YUNZHAN_CAVE_8895_SHADOW_BANK_REAL_ECONOMY_SPEC_V1.2.md` | Current specification | 8895 own-capital real-economy and non-minting boundary | Supersedes active V1.0 |
 | `KGEN-KAIOS/KAIOS_GENESIS_INSCRIPTION.md` | Canon inscription | Exact four-line KAIOS Genesis inscription | Staged V1.2 integrated without parallel active file |
-| `KGEN-KAIOS/contracts/KAIOS.sol` | Contract | Friction Mirror KAIOS monetary core | Review only |
-| `KGEN-KAIOS/tools/validate-integration-artifacts.mjs` | Validation / evidence tool | Sanitized integration checks and post-settlement chain-derived Genesis record mode | Mainnet transaction not authorized |
-| `KGEN-KAIOS/contracts/KAIOSOrganRegistry.sol` | Contract | Governed runtime organ resolution | Review only |
-| `KGEN-KAIOS/contracts/KAIOSAlchemyFurnace.sol` | Contract | 18911 Alchemy proof runtime | Review only |
+| `KGEN-KAIOS/KAIOS_GENESIS_MAINNET_RECORD.json` | Mainnet Genesis evidence | BSC Mainnet receipts, exact KGEN/KAIOS/18888 accounting, 21 deployments, governance finalization, immutable inscription and gas | LIVE / PASS |
+| `KGEN-KAIOS/KAIOS_GENESIS_MAINNET_INSCRIPTION.md` | Mainnet Genesis evidence | Human-readable on-chain Genesis quantities, addresses, transactions and final security gates | LIVE / PASS |
+| `KGEN-KAIOS/contracts/KAIOS.sol` | Contract | Friction Mirror KAIOS monetary core | Mainnet LIVE at `0xD4E67B3a69e41524c424150E6b6e921b01D036db` |
+| `KGEN-KAIOS/tools/validate-integration-artifacts.mjs` | Validation / evidence tool | Sanitized integration checks and post-settlement chain-derived Genesis record mode | Mainnet evidence generated and verified |
+| `KGEN-KAIOS/contracts/KAIOSOrganRegistry.sol` | Contract | Governed runtime organ resolution | Mainnet LIVE at `0xA9e7CbF161E39E556f4B5b8E41397Ac4B87a932D` |
+| `KGEN-KAIOS/contracts/KAIOSAlchemyFurnace.sol` | Contract | 18911 Alchemy proof runtime | Mainnet LIVE at `0x44c2CA9B9eba19d8F79F6E1786fd9D25e73738e1` |
 | `KGEN-KAIOS/contracts/KUFO.sol` | Contract | KUFO gram-scale Token Core | Review only |
 | `KGEN-KAIOS/contracts/KUFOClaimWormhole.sol` | Contract | 511111 matured proof claim organ | Review only |
 | `KGEN-KAIOS/contracts/KSHIP.sol` | Contract | KSHIP milligram-scale Token Core | Review only |
@@ -33,23 +35,24 @@ This addendum does not regenerate the historical inventory below.
 | `KGEN-KAIOS/reports/BSC_TESTNET_TEMPLEHEART_V3_4_REHEARSAL.md` | Testnet Evidence | Human-readable TempleHeart V3.3.2 to V3.4.0 UUPS rehearsal | PASS on BSC Testnet chainId 97 |
 | `KGEN-KAIOS/reports/BSC_TESTNET_TEMPLEHEART_V3_4_REHEARSAL.json` | Testnet Evidence | Machine-readable addresses, receipts, storage and security results | PASS on BSC Testnet chainId 97 |
 | `KGEN/docs/TEMPLEHEART_MAINNET_LINEAGE.md` | Mainnet Plan | Separates immutable V3.2.6 Legacy Heart from the new V3.4 UUPS proxy life; preserves the three-generation 18888 Bank lineage and defines the V2 KAIOS settlement runtime, Registry, governance, deployment, gas and emergency gates | 18888 implementation package complete; Mainnet transaction not authorized |
-| `KGEN-KAIOS/contracts/LingxiaoCelestialBank18888_Upgradeable.sol` | Contract | Current 18888 modular Bank Core with KAIOS binding, Genesis/accounting, reserve, capped modules, pause, health and governance finalization; no owner withdrawal | Implementation candidate; Mainnet transaction not authorized |
-| `KGEN-KAIOS/contracts/CelestialSeat500_Upgradeable.sol` | Contract module | 500 Celestial salary seats with on-chain Gregorian YYYYMM, exact day-5 00:00 UTC+8 maturity, accumulation, permissionless triggering and future-only salary/beneficiary checkpoints | Calendar V2 implementation candidate; Mainnet transaction not authorized |
-| `KGEN-KAIOS/contracts/CivilizationAllocation_Upgradeable.sol` | Contract module | Replay-safe civilization and public-infrastructure allocations | Implementation candidate |
-| `KGEN-KAIOS/contracts/EconomicRouter8888_Upgradeable.sol` | Contract module | Fixed 18888 to formal 8888 economic-capital route | Implementation candidate |
-| `KGEN-KAIOS/contracts/GaolaozhuangCommercialBank8888_Upgradeable.sol` | Contract | New code-bearing 8888 ERC1967/UUPS commercial Bank for monthly day-5 UTC+8 payroll, savings, funded interest checkpoints and registered commerce; legacy EOA remains lineage-only | Implementation candidate; Mainnet transaction not authorized |
-| `KGEN-KAIOS/contracts/ExchangeSettlement11520_Upgradeable.sol` | Contract module | Fixed 18888 to formal 11520 Universal Exchange settlement route | Implementation candidate |
-| `KGEN-KAIOS/contracts/BankRiskController_Upgradeable.sol` | Contract module | Reserve and public risk controls | Implementation candidate |
-| `KGEN-KAIOS/contracts/BankGovernance_Upgradeable.sol` | Contract module | Minimum one-hour delayed, two-party proposal/execution architecture | Implementation candidate |
-| `KGEN-KAIOS/contracts/BankMigration_Upgradeable.sol` | Contract module | Successor/chain/state evidence without an asset-migration transfer path | Implementation candidate |
+| `KGEN-KAIOS/contracts/LingxiaoCelestialBank18888_Upgradeable.sol` | Contract | Current 18888 modular Bank Core with KAIOS binding, Genesis/accounting, reserve, capped modules, pause, health and governance finalization; no owner withdrawal | Mainnet LIVE proxy `0x11d34c0F723aCd334B8F95076f73F07f06202aab` |
+| `KGEN-KAIOS/contracts/CelestialSeat500_Upgradeable.sol` | Contract module | 500 Celestial salary seats with on-chain Gregorian YYYYMM, exact day-5 00:00 UTC+8 maturity, accumulation, permissionless triggering and future-only salary/beneficiary checkpoints | Mainnet LIVE proxy `0xA447853985Ef6e6AbFcb14FCfDeFdced10Be0BDe` |
+| `KGEN-KAIOS/contracts/CivilizationAllocation_Upgradeable.sol` | Contract module | Replay-safe civilization and public-infrastructure allocations | Mainnet LIVE proxy `0x75A55Af6967932C4A1c896dB81Dd6F31e531c299` |
+| `KGEN-KAIOS/contracts/EconomicRouter8888_Upgradeable.sol` | Contract module | Fixed 18888 to formal 8888 economic-capital route | Mainnet LIVE proxy `0xC49f989c6ff0d22824df8D993Ce82207165C1428` |
+| `KGEN-KAIOS/contracts/GaolaozhuangCommercialBank8888_Upgradeable.sol` | Contract | New code-bearing 8888 ERC1967/UUPS commercial Bank for monthly day-5 UTC+8 payroll, savings, funded interest checkpoints and registered commerce; legacy EOA remains lineage-only | Mainnet LIVE proxy `0x9EcAe137b3A307971EB77B4CDB3ba13aeeF5297C` |
+| `KGEN-KAIOS/contracts/ExchangeSettlement11520_Upgradeable.sol` | Contract module | Fixed 18888 to formal 11520 Universal Exchange settlement route | Mainnet LIVE proxy `0x17587F49dFDE4e400D03Ae81364AC2af8E1629Df` |
+| `KGEN-KAIOS/contracts/BankRiskController_Upgradeable.sol` | Contract module | Reserve and public risk controls | Mainnet LIVE proxy `0x61573a93a88c58DAa5066A0aA319f88cE34d88FC` |
+| `KGEN-KAIOS/contracts/BankGovernance_Upgradeable.sol` | Contract module | Minimum one-hour delayed, two-party proposal/execution architecture | Mainnet LIVE proxy `0xa2792fBDCc8A8AaC364053431D44E0a8D335E166` |
+| `KGEN-KAIOS/contracts/BankMigration_Upgradeable.sol` | Contract module | Successor/chain/state evidence without an asset-migration transfer path | Mainnet LIVE but registered inactive proxy `0x72c14f5D2fa748C1579295A7E34c16453a3a17aB` |
 | `KGEN-KAIOS/operations/LINGXIAO_18888_FULL_BANK_RUNBOOK.md` | Runbook | Stop conditions, ordered deployment, upgrade and emergency procedures | Mainnet transaction not authorized |
 | `KGEN-KAIOS/reports/LINGXIAO_18888_FULL_BANK_SECURITY_REPORT.md` | Security report | Trust boundaries, enforced gates and residual UUPS governance risk | Review package |
 | `KGEN-KAIOS/tools/rehearse-lingxiao-mainnet-fork.mjs` | Mainnet pre-sign validation | ChainId 56 fork deployment, Genesis, lawful circulation, refill retry, governance upgrade and rollback with no Mainnet transaction | Pre-sign evidence tool |
-| `KGEN-KAIOS/config/LINGXIAO_18888_MAINNET_DEPLOYMENT_MANIFEST.json` | Deployment manifest | Frozen hashes, exact nonce-sensitive deployment order, receipt backfill rules, roles, modules, parameters and blockers | Mainnet transaction not authorized |
+| `KGEN-KAIOS/config/LINGXIAO_18888_MAINNET_DEPLOYMENT_MANIFEST.json` | Deployment manifest | Frozen hashes, exact deployment order, actual Mainnet receipts, roles, modules, parameters, gas and final gates | Mainnet Genesis LIVE / PASS |
 | `KGEN-KAIOS/config/mainnet-economic-config.template.json` | Deployment configuration | Human economic values and governance addresses; unknown values remain null | Human confirmation required |
 | `KGEN-KAIOS/config/mainnet-economic-config.final-review.json` | Mainnet economic/governance freeze | Human-approved exact economic encodings, final Mother/Jade Emperor/Guanyin identities, simulations and read-only previews | Economic and governance identity blockers zero; Mainnet transaction not authorized |
 | `KGEN-KAIOS/reports/mainnet-pre-sign/LINGXIAO_18888_MAINNET_FORK_REHEARSAL.json` | Fork evidence | Sanitized full Mainnet-fork receipts, state, gas and gates | 8888 and Celestial day-5 calendar wiring PASS; superseded fork-only economic fixtures are not Mainnet policy |
 | `KGEN-KAIOS/reports/mainnet-pre-sign/KAIOS_GENESIS_MAINNET_RECORD.json` | Genesis preview | BigInt chain-derived fork preview; never a formal Mainnet amount | PREVIEW_NOT_FINAL |
+| `KGEN-KAIOS/reports/mainnet-pre-sign/KAIOS_GENESIS_INSCRIPTION_UNSIGNED_DEPLOYMENT.json` | Inscription deployment evidence | Frozen unsigned nonce-55 package and successful actual deployment receipt | Mainnet LIVE / PASS |
 
 ## Summary
 | Category | Files |

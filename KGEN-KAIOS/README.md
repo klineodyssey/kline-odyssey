@@ -21,6 +21,8 @@ executable Mainnet transaction script or formal deployed address.
 | `KAIOS_500_CELESTIAL_AND_MARS_SEATS_RUNTIME_CURRENT.md` | Current 500 Celestial salary/public-function seat and Mars habitat-seat boundaries |
 | `KAIOS_YUNZHAN_CAVE_8895_SHADOW_BANK_REAL_ECONOMY_SPEC_V1.2.md` | Current 8895 own-capital, real-economy, risk and non-minting boundary |
 | `KAIOS_GENESIS_INSCRIPTION.md` | Single canonical Genesis inscription; the staged V1.2 correction is integrated here without a parallel versioned active file |
+| `KAIOS_GENESIS_MAINNET_RECORD.json` | Sanitized BSC Mainnet Genesis receipts, quantities, deployed addresses, governance evidence, gas and final security gates |
+| `KAIOS_GENESIS_MAINNET_INSCRIPTION.md` | Human-readable Mainnet Genesis evidence generated from the successful settlement receipt and chain state |
 | `contracts/KAIOS.sol` | Friction Mirror monetary core; 1 destroyed KGEN -> 1,000 KAIOS to 18888 |
 | `contracts/KAIOSOrganRegistry.sol` | Bootstrap-sealed and timelocked 18911/511111/KSHIP/Pair organ registry |
 | `contracts/KAIOSAlchemyFurnace.sol` | Holder-authorized KAIOS burn and 49-epoch maturity proof |
@@ -57,6 +59,7 @@ executable Mainnet transaction script or formal deployed address.
 | `config/mainnet-economic-config.final-review.json` | Human-approved Mainnet economic encodings and final Mother/Jade Emperor/Guanyin governance identities, with refreshed supply, nonce, gas and fork evidence |
 | `reports/mainnet-pre-sign/LINGXIAO_18888_MAINNET_FORK_REHEARSAL.json` | Complete sanitized chainId 56 fork transaction, storage, governance and money-flow evidence |
 | `reports/mainnet-pre-sign/KAIOS_GENESIS_MAINNET_RECORD.json` | Automatically generated fork preview; explicitly not the final Mainnet Genesis record |
+| `reports/mainnet-pre-sign/KAIOS_GENESIS_INSCRIPTION_UNSIGNED_DEPLOYMENT.json` | Frozen nonce-55 inscription package plus the actual successful deployment receipt; contains no signer secret |
 | `reports/KAIOS_TOKEN_LINEAGE_INTEGRATION_REVIEW_2026-08-09.md` | Executive review and evidence index |
 
 ## Purpose
