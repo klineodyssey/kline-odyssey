@@ -3,8 +3,8 @@
   "auditedAt": "2026-08-09T00:00:00+08:00",
   "status": "PASS",
   "scope": {
-    "repositoryTrackedFiles": 3734,
-    "repositoryReadableTextFiles": 3732,
+    "repositoryTrackedFiles": 3736,
+    "repositoryReadableTextFiles": 3734,
     "repositoryPdfFiles": 33,
     "repositoryPdfPages": 222,
     "externalPackage": {
@@ -16,7 +16,7 @@
       "pdfPages": 0,
       "pdfExtraction": "NOT_REQUESTED"
     },
-    "scannedFilesTotal": 3734
+    "scannedFilesTotal": 3736
   },
   "finalCanon": {
     "18888": "LINGXIAO_CELESTIAL_BANK",
@@ -251,7 +251,7 @@
     },
     {
       "path": "KGEN-KAIOS/KAIOS_CIVILIZATION_PHASE2_CANON.md",
-      "line": 26,
+      "line": 33,
       "pattern": "10_000_KAIOS",
       "legacyScale": true,
       "classification": "CURRENT_CORRECT",
@@ -551,7 +551,7 @@
     },
     {
       "path": "KGEN-KAIOS/operations/KAIOS_CIVILIZATION_PHASE2_RUNBOOK.md",
-      "line": 31,
+      "line": 39,
       "pattern": "10_000_KAIOS",
       "legacyScale": true,
       "classification": "CURRENT_CORRECT",

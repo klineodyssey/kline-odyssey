@@ -1,10 +1,18 @@
 # KAIOS Civilization Phase 2 Runbook
 
-Status: Stage-1 resume package. No Mainnet transaction is authorized by this document.
+Status: Mainnet Stage 1 complete; all three modules are LIVE_INACTIVE. Stage 2 activation and KGEN tax redirect are not authorized by this document.
 
-## Mainnet Stage-1 resume boundary
+## Mainnet Stage-1 result
 
-Nonce 56 successfully deployed the reviewed `CelestialEligibility_Upgradeable` implementation at `0x0D21328BdbE12e9E69838Fd33E3C20F0b27f2779` in transaction `0x039c28a90b5a87be6826c8f9323f9489eee67474b1de9fdd8c2377bc4464b93b`. It is valid and must not be redeployed. The deployment signer is now at nonce 57.
+Nonce 56 successfully deployed the reviewed `CelestialEligibility_Upgradeable` implementation at `0x0D21328BdbE12e9E69838Fd33E3C20F0b27f2779` in transaction `0x039c28a90b5a87be6826c8f9323f9489eee67474b1de9fdd8c2377bc4464b93b`. It was reused; the remaining five contracts were deployed at nonces 57-61 and the deployment signer finished at nonce 62.
+
+The formal proxies are:
+
+- CelestialEligibility: `0xA50743fd0fe022714831482355A27559027368F9`;
+- KGENReserveRedemption: `0xA06eF53c9AD4Af739FD13Ca1Ded446437134b0EE`;
+- CelestialCapitalCommitment: `0x04fC1536EC51E8CCaAcB961E5Af6151De47b078c`.
+
+Mother proposed and Jade Emperor approved all three inactive registrations and the contribution-verifier configuration. The 3,600-second delay matured before execution. Formal BankGovernance now holds module admin, governance, and upgrader roles; Mother and the deployment signer retain none of those permanent module roles. Guanyin retains pauser. No module was enabled or used.
 
 OpenZeppelin UUPS implementations contain the address-valued `__self` immutable. Never compare raw `keccak256(artifact.deployedBytecode)` directly to `keccak256(eth_getCode)`. Use `tools/uups-runtime-verifier.mjs`: patch the compiler `immutableReferences` with the actual implementation address and compare exact runtime, then independently normalize those ranges in artifact and chain runtime and compare again. Both comparisons must pass.
 
@@ -39,16 +47,18 @@ Do not modify KGEN, KAIOS Token Core, 18888 Bank Core, 18911, Genesis Inscriptio
 
 Only the deployment signer public address and live nonce remain pre-sign inputs. Generate an unsigned six-CREATE plan with `npm run phase2:deployment-plan`. The planner reads `config/phase2-mainnet-config.final-review.json`, accepts no economic override, uses no signer key and sends no transaction.
 
-## Candidate deployment order
+## Completed Stage-1 order
 
 1. CelestialEligibility implementation and ERC1967 proxy.
 2. KGENReserveRedemption implementation and ERC1967 proxy, initialized disabled.
 3. CelestialCapitalCommitment implementation and ERC1967 proxy.
-4. Guanyin pauses all three modules. Verify code, implementation slots, versions, formal dependencies, roles, disabled redemption, paused state and zero asset balances.
-5. Through formal BankGovernance: Mother proposes each Bank `configureModule`, Jade Emperor approves, wait at least 3,600 seconds, then execute. Register all three inactive.
+4. Verify code, implementation slots, versions, formal dependencies, roles, disabled redemption and zero asset balances.
+5. Through formal BankGovernance: Mother proposes each Bank `configureModule`, Jade Emperor approves, waits at least 3,600 seconds, then executes. Register all three inactive.
 6. Finalize module governance to formal BankGovernance and verify deployment signer/bootstrap authority is absent.
 7. Configure Mother as contribution verifier through the same delayed governance path. This role provides no withdrawal, sweep, upgrade bypass or seat authority.
-8. Stop after read-only validation. Enabling or unpausing any module requires separate Human authorization.
+8. Stop after read-only validation. Enabling, pausing/unpausing, KGEN tax redirect, redemption, capital commitment, or eligibility writes require separate Human authorization.
+
+Public receipts and exact final state are recorded in `reports/KAIOS_CIVILIZATION_PHASE2_MAINNET_STAGE1_2026-08-14.json` and its Markdown companion.
 
 ## Separate future tax-routing change
 

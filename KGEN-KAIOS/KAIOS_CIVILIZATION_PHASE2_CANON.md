@@ -1,6 +1,13 @@
 # KAIOS Civilization Phase 2 Canon
 
-Status: implementation candidate; no Mainnet transaction authorized.
+Status: Mainnet Stage 1 deployed and governance-finalized; all three modules remain registered inactive.
+
+Formal Phase 2 proxies are `0xA50743fd0fe022714831482355A27559027368F9`
+(CelestialEligibility), `0xA06eF53c9AD4Af739FD13Ca1Ded446437134b0EE`
+(KGENReserveRedemption), and `0x04fC1536EC51E8CCaAcB961E5Af6151De47b078c`
+(CelestialCapitalCommitment). Stage 1 did not redirect KGEN tax, transfer KGEN
+ownership, enable a module, redeem KGEN, commit capital, submit an eligibility proof,
+or modify formal KGEN, KAIOS, 18911, or the 18888 Bank Core.
 
 ## Live systems preserved
 

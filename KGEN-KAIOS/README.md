@@ -11,8 +11,10 @@
 The review-only KGEN -> KAIOS -> KUFO -> KSHIP implementation is under
 `contracts/`, with a pinned Solidity 0.8.24 test harness in this directory.
 The package includes unsigned planning and fork-rehearsal tooling. KAIOS Genesis and the
-bank system are live; Phase 2 Stage 1 has one validated Eligibility implementation at
-`0x0D21328BdbE12e9E69838Fd33E3C20F0b27f2779`, while all Phase 2 proxies remain undeployed.
+bank system are live. Phase 2 Stage 1 is complete: all three modules are deployed,
+registered inactive, and governed by the formal delayed BankGovernance. KGEN tax routing,
+KGEN ownership, module activation, redemption, capital commitment, and eligibility writes
+remain unchanged or disabled.
 
 | Entry | Purpose |
 |---|---|
@@ -80,6 +82,8 @@ bank system are live; Phase 2 Stage 1 has one validated Eligibility implementati
 | `reports/KAIOS_CIVILIZATION_PHASE2_MAINNET_FORK_REHEARSAL.json` | Sanitized fork-only receipts, temporary addresses, exact flows and security gates |
 | `reports/PHASE2_UUPS_RUNTIME_VERIFICATION_2026-08-14.json` | Machine-readable read-only proof that the nonce-56 Eligibility implementation matches the reviewed artifact after UUPS `__self` reconstruction |
 | `reports/PHASE2_UUPS_RUNTIME_VERIFICATION_2026-08-14.md` | Human-readable runtime-verification incident resolution, remaining nonce-57 address plan, gas and funding evidence |
+| `reports/KAIOS_CIVILIZATION_PHASE2_MAINNET_STAGE1_2026-08-14.json` | Sanitized BSC Mainnet Stage 1 manifest: six deployments, delayed inactive registrations, governance finalization, roles, gas and unchanged economic state |
+| `reports/KAIOS_CIVILIZATION_PHASE2_MAINNET_STAGE1_2026-08-14.md` | Human-readable Phase 2 Mainnet Stage 1 deployment and inactive-module evidence |
 
 ## Purpose
 
