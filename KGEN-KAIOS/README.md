@@ -74,9 +74,9 @@ remain unchanged or disabled.
 | `scripts/verify-phase2-uups-runtime.mjs` | Read-only chain verifier for creation lineage, address-patched and normalized UUPS runtime, UUPS UUID, initializer lock, live nonce/address vacancy, gas and funding |
 | `tools/uups-runtime-verifier.mjs` | Deterministic compiler-immutable reconstruction and normalization shared by deployment tooling and regression tests |
 | `tools/rehearse-kaios-civilization-phase2-mainnet-fork.mjs` | ChainId 56 fork-only module deployment, delayed registration, tax redirect, redemption, 5M burn and 5M capital rehearsal |
-| `frontend-adapter/kaiosCivilizationPhase2Adapter.mjs` | Read-only status adapter and deterministic user-action calldata encoders with non-guaranteed-rate wording |
-| `indexer/kaios-civilization-phase2-events.schema.json` | Reorg-aware Phase 2 event evidence schema whose event names are compiler-ABI validated |
-| `dashboard/kaios-civilization-phase2-status.schema.json` | Read-only reserve/eligibility/capital API and dashboard schema |
+| `frontend-adapter/kaiosCivilizationPhase2Adapter.mjs` | Fail-closed Stage-2 activation resolver, read model, ABI-valid event reducer, and deterministic bounded calldata encoders with non-guaranteed-rate wording |
+| `indexer/kaios-civilization-phase2-events.schema.json` | Reorg-aware Phase 2/18888/BankGovernance/KGEN event evidence schema whose configured event names are compiler-ABI validated; Reserve KGEN transfers remain unclassified without deterministic attribution |
+| `dashboard/kaios-civilization-phase2-status.schema.json` | Fail-closed module activation, reserve/floor/caps, KGEN receiver, and governance-proposal read-model schema |
 | `operations/KAIOS_CIVILIZATION_PHASE2_RUNBOOK.md` | Deployment, registration, separate future KGEN redirect and stop-condition runbook |
 | `reports/KAIOS_CIVILIZATION_PHASE2_SECURITY_REPORT.md` | Phase 2 trust boundaries, enforced gates and residual UUPS governance risk |
 | `reports/KAIOS_CIVILIZATION_PHASE2_MAINNET_FORK_REHEARSAL.json` | Sanitized fork-only receipts, temporary addresses, exact flows and security gates |

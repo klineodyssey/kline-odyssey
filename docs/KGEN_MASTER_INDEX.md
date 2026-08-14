@@ -65,9 +65,9 @@ This addendum does not regenerate the historical inventory below.
 | `KGEN-KAIOS/reports/KAIOS_CIVILIZATION_PHASE2_MAINNET_STAGE1_2026-08-14.json` | Phase 2 Mainnet evidence | Six deployments, four delayed governance actions, three finalizations, roles, inactive state, gas and unchanged KGEN/KAIOS/18888 state | LIVE_INACTIVE / PASS |
 | `KGEN-KAIOS/reports/KAIOS_CIVILIZATION_PHASE2_MAINNET_STAGE1_2026-08-14.md` | Phase 2 Mainnet evidence | Human-readable Stage 1 addresses, receipts and security gates | LIVE_INACTIVE / PASS |
 | `KGEN-KAIOS/tools/rehearse-kaios-civilization-phase2-mainnet-fork.mjs` | Phase 2 fork validation | Formal-address fork simulation of delayed registration, future KGEN tax redirect, redemption, 5M burn and 5M capital | Fork-only / no Mainnet transaction |
-| `KGEN-KAIOS/frontend-adapter/kaiosCivilizationPhase2Adapter.mjs` | Phase 2 frontend adapter | Read-only reserve, mass qualification and capital-liability data plus bounded calldata encoders | Review only |
-| `KGEN-KAIOS/indexer/kaios-civilization-phase2-events.schema.json` | Phase 2 indexer | Reorg-aware public event evidence schema with compiler-ABI exact event validation | Review only |
-| `KGEN-KAIOS/dashboard/kaios-civilization-phase2-status.schema.json` | Phase 2 API schema | Public reserve/eligibility/capital status contract | Review only |
+| `KGEN-KAIOS/frontend-adapter/kaiosCivilizationPhase2Adapter.mjs` | Phase 2 frontend/read model | Fail-closed staged activation resolver, exact eligibility/capital wording, reserve/floor/limit model, governance proposal reads, and ABI-valid event replay | Review only |
+| `KGEN-KAIOS/indexer/kaios-civilization-phase2-events.schema.json` | Phase 2 indexer | Reorg-aware Phase 2, 18888 ModuleConfigured, BankGovernance lifecycle and KGEN receiver/Transfer evidence with compiler-ABI validation | Review only |
+| `KGEN-KAIOS/dashboard/kaios-civilization-phase2-status.schema.json` | Phase 2 API schema | Fail-closed activation, reserve accumulation, KGEN routing and governance status contract | Review only |
 
 ## Summary
 | Category | Files |

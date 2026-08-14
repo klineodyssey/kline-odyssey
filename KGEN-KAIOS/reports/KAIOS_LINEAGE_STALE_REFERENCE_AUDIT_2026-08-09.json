@@ -601,7 +601,7 @@
     },
     {
       "path": "KGEN-KAIOS/tests/token-surface.security.test.mjs",
-      "line": 257,
+      "line": 402,
       "pattern": "TEN_THOUSAND_KAIOS",
       "legacyScale": true,
       "classification": "TEST_FIXTURE",
@@ -701,7 +701,7 @@
     },
     {
       "path": "KGEN-KAIOS/tools/rehearse-kaios-civilization-phase2-mainnet-fork.mjs",
-      "line": 324,
+      "line": 429,
       "pattern": "10_000_KAIOS",
       "legacyScale": true,
       "classification": "CURRENT_CORRECT",
