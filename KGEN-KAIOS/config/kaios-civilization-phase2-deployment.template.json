@@ -1,55 +1,5 @@
 {
-  "status": "HUMAN_REVIEW_REQUIRED_NOT_DEPLOYED",
-  "chainId": 56,
-  "formalContracts": {
-    "kgen": "0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be",
-    "kaios": "0xD4E67B3a69e41524c424150E6b6e921b01D036db",
-    "lingxiaoBank18888": "0x11d34c0F723aCd334B8F95076f73F07f06202aab",
-    "alchemyFurnace18911": "0x44c2CA9B9eba19d8F79F6E1786fd9D25e73738e1",
-    "bankGovernance": "0xa2792fBDCc8A8AaC364053431D44E0a8D335E166",
-    "celestialSeat500": "0xA447853985Ef6e6AbFcb14FCfDeFdced10Be0BDe"
-  },
-  "governance": {
-    "primary": "0xCd60BF474e691F2484950a0276Eaf507616Ca4b9",
-    "distinctApprover": "0xc15e08834fca9f2d3462a3f8f0bc30524d6dd756",
-    "pauser": "0xebeeac6d09d2d28db8010b0923442c9eb2b702fe",
-    "delaySeconds": 3600
-  },
-  "deployment": {
-    "deployer": null,
-    "startNonce": null,
-    "addresses": {
-      "reserveRedemptionImplementation": null,
-      "reserveRedemptionProxy": null,
-      "celestialEligibilityImplementation": null,
-      "celestialEligibilityProxy": null,
-      "capitalCommitmentImplementation": null,
-      "capitalCommitmentProxy": null
-    }
-  },
-  "policy": {
-    "redemptionInitiallyEnabled": false,
-    "minimumKgenReserveWei": null,
-    "maxKgenPerTransactionWei": null,
-    "maxKgenPerUtcDayWei": null,
-    "maxKaiosPerTransactionWei": null,
-    "maxKaiosPerUtcDayWei": null,
-    "specialAlchemyDestinationCode": null,
-    "capitalMinimumLockPeriodSeconds": null
-  },
-  "humanGates": [
-    "DEPLOYER_AND_NONCE",
-    "ALL_RESERVE_RISK_LIMITS",
-    "SPECIAL_ALCHEMY_DESTINATION_CODE",
-    "CAPITAL_MINIMUM_LOCK_PERIOD",
-    "MODULE_REGISTRATION_AND_INITIAL_ACTIVATION",
-    "FUTURE_KGEN_BANK_TAX_REDIRECT"
-  ],
-  "prohibited": [
-    "MAINNET_TRANSACTION_WITHOUT_NEW_HUMAN_AUTHORIZATION",
-    "KGEN_SETTAXWALLETS_DURING_PHASE2_IMPLEMENTATION",
-    "KGEN_OR_KAIOS_REDEPLOY",
-    "LIVE_18888_OR_18911_MODIFICATION",
-    "AUTOMATIC_CELESTIAL_SEAT_ASSIGNMENT"
-  ]
+  "status": "SUPERSEDED_BY_PHASE2_MAINNET_CONFIG_FINAL_REVIEW",
+  "canonicalReplacement": "phase2-mainnet-config.final-review.json",
+  "note": "The Human-frozen V1 values are no longer open template inputs. Only live deployer address and nonce remain runtime pre-sign inputs."
 }

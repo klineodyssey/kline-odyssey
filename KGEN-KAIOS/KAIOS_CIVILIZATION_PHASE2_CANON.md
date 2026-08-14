@@ -23,22 +23,24 @@ The existing KGEN AMM tax remains 0.30%: 0.10% true burn, 0.10% bank receiver, 0
 
 A request fixes `lifeId`, payer, canonical beneficiary, KAIOS input, maximum/actual KGEN output, timestamps and final status. KAIOS must arrive exactly in the formal 18888 Bank and is accounted through `synchronizeAccounting()`. Existing KGEN leaves only to the canonical Life beneficiary. There is no reserve mint, owner sweep or arbitrary beneficiary field.
 
-Redemption is initially disabled in the deployment template. Activation, risk limits and the later KGEN tax receiver change require separate Human/governance authorization.
+The Human-frozen V1 risk values are: 100 KGEN minimum reserve, 10 KGEN and 10,000 KAIOS per transaction, and 100 KGEN and 100,000 KAIOS per UTC day. Redemption initializes disabled. The exact 18911 destination source is `KAIOS.CIVILIZATION.RESERVE_REDEMPTION.18888`; `keccak256` of those exact UTF-8 bytes is `0x55395831e30b8252c7921d7cd972d13c19b60c88750e075f89c94de80e0e0d24`.
+
+All three Phase 2 modules register inactive. Guanyin pauses their public write surfaces before read-only live validation. Activation and the later KGEN tax receiver change require separate Human/governance authorization.
 
 ## Single-burn mass eligibility
 
-`CelestialEligibility_Upgradeable` reads the existing formal 18911 proof. One proof must burn at least 5,000,000 KAIOS, bind the exact Life ID and canonical beneficiary, use the governed special destination code, and have internally consistent burn/maturity/KUFO-scale fields. Multiple smaller proofs cannot aggregate.
+`CelestialEligibility_Upgradeable` reads the existing formal 18911 proof. One proof must burn at least 5,000,000 KAIOS, bind the exact Life ID and canonical beneficiary, use the governed destination code, and have internally consistent burn/maturity/KUFO-scale fields. Multiple smaller proofs cannot aggregate.
 
 The threshold creates only `MASS_THRESHOLD_PASSED`. Constitution history and an active, extensible contribution record are independently required before review can advance. The contract is species-neutral and does not call CelestialSeat500.
 
 ## Non-burn capital commitment
 
-`CelestialCapitalCommitment_Upgradeable` accepts a single commitment of at least 5,000,000 KAIOS from the canonical Life beneficiary. Principal stays in module custody and is included in `totalCommittedPrincipal`; the Bank cannot spend it. V1 has no forfeiture. After the checkpointed lock expires, release can be triggered by anyone but transfers only to the fixed beneficiary.
+`CelestialCapitalCommitment_Upgradeable` accepts a single commitment of at least 5,000,000 KAIOS from the canonical Life beneficiary. Principal stays in module custody and is included in `totalCommittedPrincipal`; the Bank cannot spend it. V1 has no forfeiture. The minimum lock is exactly 2,592,000 seconds (30 × 24 × 60 × 60). After the checkpointed lock expires, release can be triggered by anyone but transfers only to the fixed beneficiary.
 
 Capital plus civilization evidence creates only eligibility for Wormhole-seat review. It does not create, transfer or assign a seat.
 
 ## Governance and future scope
 
-Module governance uses Mother proposal, distinct Jade Emperor approval, a 3,600-second delay and execution through formal BankGovernance. Guanyin has emergency pause only. The deployment signer receives no permanent governance role. UUPS upgrade authority is separated from asset movement; the V1 implementations expose no sweep or arbitrary withdrawal.
+Module governance uses Mother proposal, distinct Jade Emperor approval, a 3,600-second delay and execution through formal BankGovernance. Mother is the initial Civilization Contribution verifier but gains no asset or upgrade bypass from that verifier role. Guanyin has emergency pause only. The deployment signer receives no permanent governance role. UUPS upgrade authority is separated from asset movement; the V1 implementations expose no sweep or arbitrary withdrawal.
 
 511111, KUFO, Pair Registry, 8895, AMM pair and any new KGEN Token remain future work. Formal 18911 remains unchanged.

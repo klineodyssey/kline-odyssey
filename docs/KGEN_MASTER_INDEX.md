@@ -57,10 +57,11 @@ This addendum does not regenerate the historical inventory below.
 | `KGEN-KAIOS/contracts/KGENReserveRedemption_Upgradeable.sol` | Phase 2 contract module | Future KGEN bank-tax reserve custodian and capped 1,000 KAIOS to at-most-1 existing KGEN redemption rail; no mint/burn/sweep | Review only / not deployed |
 | `KGEN-KAIOS/contracts/CelestialEligibility_Upgradeable.sol` | Phase 2 contract module | Formal 18911 single-proof 5M threshold plus Life, constitution, contribution and review ledger; no seat issuance | Review only / not deployed |
 | `KGEN-KAIOS/contracts/CelestialCapitalCommitment_Upgradeable.sol` | Phase 2 contract module | Segregated non-burn 5M KAIOS liability commitment for Wormhole-seat review; no forfeiture | Review only / not deployed |
-| `KGEN-KAIOS/scripts/prepare-kaios-civilization-phase2-deployment.mjs` | Phase 2 deployment plan | Public-input-only six-CREATE prediction/calldata with null Human economic gates; never sends transactions | Review only |
+| `KGEN-KAIOS/config/phase2-mainnet-config.final-review.json` | Phase 2 parameter freeze | Exact Human-approved wei, seconds, destination bytes32, governance identities and inactive initial module states | Frozen review config / not deployed |
+| `KGEN-KAIOS/scripts/prepare-kaios-civilization-phase2-deployment.mjs` | Phase 2 deployment plan | Public-input-only six-CREATE prediction/calldata locked to the frozen V1 config; never sends transactions | Review only |
 | `KGEN-KAIOS/tools/rehearse-kaios-civilization-phase2-mainnet-fork.mjs` | Phase 2 fork validation | Formal-address fork simulation of delayed registration, future KGEN tax redirect, redemption, 5M burn and 5M capital | Fork-only / no Mainnet transaction |
 | `KGEN-KAIOS/frontend-adapter/kaiosCivilizationPhase2Adapter.mjs` | Phase 2 frontend adapter | Read-only reserve, mass qualification and capital-liability data plus bounded calldata encoders | Review only |
-| `KGEN-KAIOS/indexer/kaios-civilization-phase2-events.schema.json` | Phase 2 indexer | Reorg-aware public event evidence schema | Review only |
+| `KGEN-KAIOS/indexer/kaios-civilization-phase2-events.schema.json` | Phase 2 indexer | Reorg-aware public event evidence schema with compiler-ABI exact event validation | Review only |
 | `KGEN-KAIOS/dashboard/kaios-civilization-phase2-status.schema.json` | Phase 2 API schema | Public reserve/eligibility/capital status contract | Review only |
 
 ## Summary

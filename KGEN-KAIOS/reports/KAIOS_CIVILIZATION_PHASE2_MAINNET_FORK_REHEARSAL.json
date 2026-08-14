@@ -3,7 +3,19 @@
   "environment": "BSC_MAINNET_FORK_ONLY",
   "mainnetTransactionSent": false,
   "chainId": 56,
-  "forkBlock": 115715792,
+  "forkBlock": 115845287,
+  "frozenV1Parameters": {
+    "destinationCodeSource": "KAIOS.CIVILIZATION.RESERVE_REDEMPTION.18888",
+    "destinationCode": "0x55395831e30b8252c7921d7cd972d13c19b60c88750e075f89c94de80e0e0d24",
+    "minimumKgenReserve": "100.0",
+    "maxKgenPerTransaction": "10.0",
+    "maxKgenPerUtcDay": "100.0",
+    "maxKaiosPerTransaction": "10000.0",
+    "maxKaiosPerUtcDay": "100000.0",
+    "redemptionInitiallyEnabled": false,
+    "capitalMinimumLockPeriodSeconds": 2592000,
+    "initialBankModuleState": "INACTIVE"
+  },
   "formalAddresses": {
     "KGEN": "0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be",
     "KAIOS": "0xD4E67B3a69e41524c424150E6b6e921b01D036db",
@@ -31,13 +43,13 @@
       "receipts": {
         "implementation": {
           "hash": "0x60442ec313002d943932b614d82efe24a19a68808556b2a1c55901c1192705ed",
-          "blockNumber": 115715798,
+          "blockNumber": 115845293,
           "gasUsed": "2840550",
           "status": "PASS"
         },
         "proxy": {
-          "hash": "0x780cea508ac474b1e13559895e70e928fdee5d6c5a5a1a588b170e818a349360",
-          "blockNumber": 115715799,
+          "hash": "0xfdf9568b3a556096fc4a29645e51144d1587c23365482a5fa243417244ba07e9",
+          "blockNumber": 115845294,
           "gasUsed": "387946",
           "status": "PASS"
         }
@@ -49,14 +61,14 @@
       "receipts": {
         "implementation": {
           "hash": "0xe001b4cd2078d8f0b2326a897145b5a1865f2a8d9694d4f382b273a0c8465430",
-          "blockNumber": 115715800,
+          "blockNumber": 115845295,
           "gasUsed": "2424248",
           "status": "PASS"
         },
         "proxy": {
-          "hash": "0x45222ec1187a82fece9d94024af656392ede9338be46f40dccf170c9b5fefa52",
-          "blockNumber": 115715801,
-          "gasUsed": "556910",
+          "hash": "0xa773ae64aeec5ae5b73e4cc776ca72e98c9c187fb031440589f5eb02d72b85ec",
+          "blockNumber": 115845296,
+          "gasUsed": "537046",
           "status": "PASS"
         }
       }
@@ -67,13 +79,13 @@
       "receipts": {
         "implementation": {
           "hash": "0x09149b664d1bb0399ac3350fddeee67549505c41e732063e44d9bbd565d50a10",
-          "blockNumber": 115715802,
+          "blockNumber": 115845297,
           "gasUsed": "2218099",
           "status": "PASS"
         },
         "proxy": {
-          "hash": "0xd1c6c6ca208a56ec686ffed4134bc6ccdf803726ef38752ec03157ccf9d596bb",
-          "blockNumber": 115715803,
+          "hash": "0xa57df5a2af71d21e6fe985e389739606c9477ac11d1f461e013bf970add08815",
+          "blockNumber": 115845298,
           "gasUsed": "391313",
           "status": "PASS"
         }
@@ -81,230 +93,452 @@
     }
   },
   "transactions": {
-    "bindLife": {
-      "hash": "0xc636ff695c0578d41b533089187f59a0844fa1dd947cba4a6b47538007cc6098",
-      "blockNumber": 115715804,
-      "gasUsed": "56515",
+    "initialPauseEligibility": {
+      "hash": "0xc60176b6aab694dbe8b905d59a85a8e53f64751459105566d66249f18c9f6e74",
+      "blockNumber": 115845299,
+      "gasUsed": "52168",
       "status": "PASS"
     },
-    "enableLifeReserveRedemption": {
-      "hash": "0x059635fe23f5893f6c7aa836c34e80292bb194ee42e891ef23de988af7edc809",
-      "blockNumber": 115715805,
-      "gasUsed": "38581",
+    "initialPauseReserve": {
+      "hash": "0xed6e3c6c47272f098dcfacd9aa9023e98f40e3b0373b78445d880c6638f92b91",
+      "blockNumber": 115845300,
+      "gasUsed": "52014",
       "status": "PASS"
     },
-    "grantMotherContributionVerifier": {
-      "hash": "0x58322499a247a88bc1646f79d5b4a044ce50697c228feaf1f81288784b33f8b6",
-      "blockNumber": 115715806,
-      "gasUsed": "55999",
-      "status": "PASS"
-    },
-    "recordConstitution": {
-      "hash": "0x4470f13b1e36cf77aaeaca4c2c7ec3c6e99c1315469ce314e1404aebad3bf478",
-      "blockNumber": 115715807,
-      "gasUsed": "82094",
-      "status": "PASS"
-    },
-    "recordContribution": {
-      "hash": "0xd9be54c2c9dc5e58fb0e5fc01960d443670e033a72084ea8626bfc1e9f997383",
-      "blockNumber": 115715808,
-      "gasUsed": "171858",
+    "initialPauseCapital": {
+      "hash": "0x86c930f934e41afb4d59001f49fa77c028d00e7839e26a8ede05a58bfe411228",
+      "blockNumber": 115845301,
+      "gasUsed": "34863",
       "status": "PASS"
     },
     "registerEligibility_propose": {
-      "hash": "0x8ddd9b566073d00fd9f14b3e428a2661a1ac7f7c86977dd0b98808dcdcfc37fc",
-      "blockNumber": 115715809,
-      "gasUsed": "111404",
+      "hash": "0xc957d10245e596026dfa9b0e921a5574ff0738afa825a715eb579ebc16a8c046",
+      "blockNumber": 115845302,
+      "gasUsed": "111392",
       "status": "PASS"
     },
     "registerEligibility_approve": {
-      "hash": "0xd318b3716537e2b8cf4e63e7b3221a27aa83e62630a0a1fd94538bfb6bff35b1",
-      "blockNumber": 115715810,
+      "hash": "0x7ff380a15b739d8287a6ba878ed7f7034e6b61315063c9af10871323fe14379a",
+      "blockNumber": 115845303,
       "gasUsed": "57667",
       "status": "PASS"
     },
     "registerReserve_propose": {
-      "hash": "0x29779f2397693ab16572dd8be9a9871d8417c2d8c78bf597fcdb132b2fcd2fe8",
-      "blockNumber": 115715811,
+      "hash": "0x575fcfe90af967fb50feabc329f1baaabe2a1ad5dc50c655179977883c248779",
+      "blockNumber": 115845304,
       "gasUsed": "111392",
       "status": "PASS"
     },
     "registerReserve_approve": {
-      "hash": "0x6ca6a51f9d77f1c89729790229a2e4b53d67f806b2b4c39117a11f047da00b55",
-      "blockNumber": 115715812,
-      "gasUsed": "57655",
+      "hash": "0x5b61af2d8dcff5c7b1585779e6482fb1914d8ad89136bf37ba2dd24b2830d2e8",
+      "blockNumber": 115845305,
+      "gasUsed": "57667",
       "status": "PASS"
     },
     "registerCapital_propose": {
-      "hash": "0x9f22cec1424ff705a51a0806b535f1d50bfb15490d6481ca2ddfc4ee1f1b36ee",
-      "blockNumber": 115715813,
-      "gasUsed": "111380",
+      "hash": "0xcb2ea54aadf569ce815ad90da63064a3847be2c771f913e0586b2688195e7d79",
+      "blockNumber": 115845306,
+      "gasUsed": "111392",
       "status": "PASS"
     },
     "registerCapital_approve": {
-      "hash": "0x836cd8d51746e2a0e64af7e73962c7e882ca49f3d760b84e6d157a321bd1d782",
-      "blockNumber": 115715814,
-      "gasUsed": "57643",
+      "hash": "0x292dbdf1a59605860fcd060a1f3f7e7fe3fd7d5c72239e71b38f78bf4f4b6769",
+      "blockNumber": 115845307,
+      "gasUsed": "57667",
       "status": "PASS"
     },
     "raiseForkAllocationCap_propose": {
-      "hash": "0xbea6f4f76e8c876481205889dfd40487bc941c206db4ccd93a50b201d721547e",
-      "blockNumber": 115715815,
-      "gasUsed": "111596",
+      "hash": "0x3d64171a241519b940ee6160570c69a5a42f1d73909aaf66b098d505964cc428",
+      "blockNumber": 115845308,
+      "gasUsed": "111584",
       "status": "PASS"
     },
     "raiseForkAllocationCap_approve": {
-      "hash": "0xf6c1f591cf9d91c8d49d1cce20e90ee1bfc3711ce02f3ed87e92c8d4242f394f",
-      "blockNumber": 115715816,
-      "gasUsed": "57667",
+      "hash": "0x3717348293d0916a4099f9eb9143fefbf5a130f20c12192a03f5df5e37f8c018",
+      "blockNumber": 115845309,
+      "gasUsed": "57655",
       "status": "PASS"
     },
     "createForkAllocation_propose": {
-      "hash": "0xefdaaaab43d5c270607915c3b9560c47f798a40453d640b9448f24f184596687",
-      "blockNumber": 115715817,
-      "gasUsed": "111402",
+      "hash": "0x9818a9080f9268624cba00e1d84ad5ef7f31fe9a65cb8a9c23a169f74efb8153",
+      "blockNumber": 115845310,
+      "gasUsed": "111390",
       "status": "PASS"
     },
     "createForkAllocation_approve": {
-      "hash": "0x927df911219b72e53d3fbf990691e165974fc4b86e760c50ae7809c257534547",
-      "blockNumber": 115715818,
-      "gasUsed": "57667",
+      "hash": "0xf5226db2064e2ee010b3dffc0e4f396088f5d2347f8a0dd038f3f56155a96a6b",
+      "blockNumber": 115845311,
+      "gasUsed": "57655",
       "status": "PASS"
     },
     "registerEligibility_execute": {
-      "hash": "0x00ffbc4295e4c72d89d822493663acd5495b08a3a60141d9b7cc2f42c1b61d46",
-      "blockNumber": 115715820,
-      "gasUsed": "158489",
+      "hash": "0x2936f2c68b5876814ba36d7816705aec17807c8726507327221012da039b50a3",
+      "blockNumber": 115845313,
+      "gasUsed": "158477",
       "status": "PASS"
     },
     "registerReserve_execute": {
-      "hash": "0x9abf10b74e6b920ecc5cf4d374248c7493233ae28d3ddc389f733b436b4b9b49",
-      "blockNumber": 115715821,
+      "hash": "0xd464802f26934afd8b7bebdbd217a220d8c4dce8d9cba3fbf46987fe606655db",
+      "blockNumber": 115845314,
       "gasUsed": "158477",
       "status": "PASS"
     },
     "registerCapital_execute": {
-      "hash": "0x381525ccdee400bbfe669711c012b55a577172d82436497b071e421b751f80ef",
-      "blockNumber": 115715822,
-      "gasUsed": "158465",
+      "hash": "0xf97e7a038ac2fd6768b7f3167ad173f87b714af98030b8c546fe855b172437e5",
+      "blockNumber": 115845315,
+      "gasUsed": "158477",
       "status": "PASS"
     },
     "raiseForkAllocationCap_execute": {
-      "hash": "0x40f7d74ad0d78eb89899addb2dfe8c5fcfe9eaa1d8b5113013fd4b3503d32a56",
-      "blockNumber": 115715823,
-      "gasUsed": "84736",
+      "hash": "0x9dc471a1822c7ddf90871d87fdccc87efdaa658a70d32f447279cde2a9bd46ce",
+      "blockNumber": 115845316,
+      "gasUsed": "87524",
       "status": "PASS"
     },
     "createForkAllocation_execute": {
-      "hash": "0x9fd91e1276aae2aa4eb86743d4c0fcdab78e5067ad2e86f7a21c00731c72e3be",
-      "blockNumber": 115715824,
-      "gasUsed": "151115",
+      "hash": "0x79cd50634ee89c3de31fd79195a14f11ae06135708eee10d3d2df5d7cd6cc009",
+      "blockNumber": 115845317,
+      "gasUsed": "151103",
       "status": "PASS"
     },
     "executeForkAllocation": {
       "hash": "0x8016b16aecc30c25e44b7d4341e6765564b2af7a2fcc3b1477c2c03699acbe42",
-      "blockNumber": 115715825,
+      "blockNumber": 115845318,
       "gasUsed": "240153",
+      "status": "PASS"
+    },
+    "finalizeEligibilityGovernance": {
+      "hash": "0x573a2b55f71827448a8cbb9280f0a0f097985368384871e8b4df3ebc8eb014c6",
+      "blockNumber": 115845319,
+      "gasUsed": "119994",
+      "status": "PASS"
+    },
+    "finalizeReserveGovernance": {
+      "hash": "0x6168487d94eaf9e5fd8436e9681d18810b918e81b9771a365061e6ef6bbf704d",
+      "blockNumber": 115845320,
+      "gasUsed": "119972",
+      "status": "PASS"
+    },
+    "finalizeCapitalGovernance": {
+      "hash": "0x88078e528779c34a4640c140295cbe54e2907dc356808707b24d15a52494b216",
+      "blockNumber": 115845321,
+      "gasUsed": "119950",
+      "status": "PASS"
+    },
+    "activateEligibility_propose": {
+      "hash": "0xc1b44e0bb9b4c7277f4ee629d4a3848c8c2a057271b2a94ecc8b024bf8781547",
+      "blockNumber": 115845322,
+      "gasUsed": "111404",
+      "status": "PASS"
+    },
+    "activateEligibility_approve": {
+      "hash": "0x85e2ed34b752d662168bd2aae6a7b9cdb466ffedee714abdad83fdcba119220b",
+      "blockNumber": 115845323,
+      "gasUsed": "57667",
+      "status": "PASS"
+    },
+    "activateReserve_propose": {
+      "hash": "0x16539e9bfc5a7fe7628adbac5c220f0e3a332f7639259791a2bae7c9b840be24",
+      "blockNumber": 115845324,
+      "gasUsed": "111404",
+      "status": "PASS"
+    },
+    "activateReserve_approve": {
+      "hash": "0x444e8060e774532da70ad0ea9a3cbabb122d5fe575dfd2ff4a8950b6b2c111b2",
+      "blockNumber": 115845325,
+      "gasUsed": "57667",
+      "status": "PASS"
+    },
+    "activateCapital_propose": {
+      "hash": "0x7159f6637e2fbd82467ab58ecc8ca0cfe57df56d67ca242249a4ca1f11c454bb",
+      "blockNumber": 115845326,
+      "gasUsed": "111392",
+      "status": "PASS"
+    },
+    "activateCapital_approve": {
+      "hash": "0x1a4c9aed34a9fab1ccbc2ada69638ff9717cbaea000593c19b6058e397896920",
+      "blockNumber": 115845327,
+      "gasUsed": "57655",
+      "status": "PASS"
+    },
+    "unpauseEligibility_propose": {
+      "hash": "0xfed214d59184698cfca19527732c3c6ffd38baabc7572535bf99d65d21826ff0",
+      "blockNumber": 115845328,
+      "gasUsed": "109508",
+      "status": "PASS"
+    },
+    "unpauseEligibility_approve": {
+      "hash": "0x1e95031d4bc44fcc98e2f968c55e427dcd5528fdf49254d6b83dba9296e7c7d7",
+      "blockNumber": 115845329,
+      "gasUsed": "57667",
+      "status": "PASS"
+    },
+    "unpauseReserve_propose": {
+      "hash": "0xee7ad1746ee6cc173c9db15260809423ba80ae810fd54e1fb59466265cc83825",
+      "blockNumber": 115845330,
+      "gasUsed": "109508",
+      "status": "PASS"
+    },
+    "unpauseReserve_approve": {
+      "hash": "0x97f8cf84dde6de4bb469131e66f3310ee7b3b5085ad63d677aa9a174780c92bf",
+      "blockNumber": 115845331,
+      "gasUsed": "57667",
+      "status": "PASS"
+    },
+    "unpauseCapital_propose": {
+      "hash": "0xaa725e04ee3754023a5d48ffc63c1a6ca0a4e213a9cb300c17088faf9a93866b",
+      "blockNumber": 115845332,
+      "gasUsed": "109508",
+      "status": "PASS"
+    },
+    "unpauseCapital_approve": {
+      "hash": "0x67834621dc99b3ecf54401c6b890504381366489e2446bd806ac28d23e57ad87",
+      "blockNumber": 115845333,
+      "gasUsed": "57667",
+      "status": "PASS"
+    },
+    "enableForkRedemption_propose": {
+      "hash": "0x08f189e8d9756df4e9f87dedcb8acda58476e37af0316d1069f279a11349e9ca",
+      "blockNumber": 115845334,
+      "gasUsed": "109666",
+      "status": "PASS"
+    },
+    "enableForkRedemption_approve": {
+      "hash": "0x3f8a65dbbb565b74e042973aacb77b62f74772e5a18fb7cd558e3e2b20e5c9c5",
+      "blockNumber": 115845335,
+      "gasUsed": "57667",
+      "status": "PASS"
+    },
+    "setMotherContributionVerifier_propose": {
+      "hash": "0xe96d177f84ace2ddfaf182a3d35ef30f3c36a6a0660f5fe3fa75cef2ae6eca75",
+      "blockNumber": 115845336,
+      "gasUsed": "110052",
+      "status": "PASS"
+    },
+    "setMotherContributionVerifier_approve": {
+      "hash": "0x180a858def0995a8ae8ec9a819eaed6f8476002e458ca35645072a65dfdc9c47",
+      "blockNumber": 115845337,
+      "gasUsed": "57667",
+      "status": "PASS"
+    },
+    "bindForkLife_propose": {
+      "hash": "0xa6e7433d5bd7f10cebee4f50cc2431459b2353ea6a6b47a7e375a6a6a079bffd",
+      "blockNumber": 115845338,
+      "gasUsed": "110582",
+      "status": "PASS"
+    },
+    "bindForkLife_approve": {
+      "hash": "0xf588db136d3ff27ad294cc185e73399fbdd4c56c40e00dd0be4000637ca6125a",
+      "blockNumber": 115845339,
+      "gasUsed": "57667",
+      "status": "PASS"
+    },
+    "enableForkLifeReserve_propose": {
+      "hash": "0x7792680792759245812b0f7d5960f00be20be17a71db2cebae37e1a26155f10a",
+      "blockNumber": 115845340,
+      "gasUsed": "110196",
+      "status": "PASS"
+    },
+    "enableForkLifeReserve_approve": {
+      "hash": "0x3f8842197e325a895d9854c5b58784e21cd4625837040c755b0c902dc2cb9018",
+      "blockNumber": 115845341,
+      "gasUsed": "57667",
+      "status": "PASS"
+    },
+    "recordForkConstitution_propose": {
+      "hash": "0x0514662138722888d4ca2f79908650eb25ce74348129d3b1973400928be9d0b2",
+      "blockNumber": 115845342,
+      "gasUsed": "110726",
+      "status": "PASS"
+    },
+    "recordForkConstitution_approve": {
+      "hash": "0x408acc34355b38d9d1c3eb609338371fdc3f0caae506db99fcd5c3c6a25b1d4c",
+      "blockNumber": 115845343,
+      "gasUsed": "57667",
+      "status": "PASS"
+    },
+    "activateEligibility_execute": {
+      "hash": "0x17a99dfa14daaba8ebcbb84e5e888896e6cfec8129de99f6b34ad3b7241614d9",
+      "blockNumber": 115845345,
+      "gasUsed": "81744",
+      "status": "PASS"
+    },
+    "activateReserve_execute": {
+      "hash": "0x8ed260a15715361b4539e923cc08cb57f219406d4265b42bcf713b9eaf27e524",
+      "blockNumber": 115845346,
+      "gasUsed": "81744",
+      "status": "PASS"
+    },
+    "activateCapital_execute": {
+      "hash": "0xe08a36bb316a5a5f1ca8611e1e3ca600409a0f6ae177d1b98a91eaccb8810f9b",
+      "blockNumber": 115845347,
+      "gasUsed": "81732",
+      "status": "PASS"
+    },
+    "unpauseEligibility_execute": {
+      "hash": "0x8ea23fb3bb8d004c145fc709ddabc8a34cb9af47595228d6f7c65fc9545668d2",
+      "blockNumber": 115845348,
+      "gasUsed": "56314",
+      "status": "PASS"
+    },
+    "unpauseReserve_execute": {
+      "hash": "0x103f82c25d55521cf0764742702b486e11f3a3f4de9ea14a345a9573f96bad78",
+      "blockNumber": 115845349,
+      "gasUsed": "56270",
+      "status": "PASS"
+    },
+    "unpauseCapital_execute": {
+      "hash": "0x339d50de5a7109d925b1a86b8769af3f714e1e10de6e7a2b52485851f037dddb",
+      "blockNumber": 115845350,
+      "gasUsed": "61101",
+      "status": "PASS"
+    },
+    "enableForkRedemption_execute": {
+      "hash": "0xda03c066f1927e3de893fe0e86c0fa06cad5d6cc5ea29f2b6416a8af86d5a9b6",
+      "blockNumber": 115845351,
+      "gasUsed": "78699",
+      "status": "PASS"
+    },
+    "setMotherContributionVerifier_execute": {
+      "hash": "0x7c7631cc2835d8d6b4ae41ef46c311a80887b480595cc23c54a5781d0498838e",
+      "blockNumber": 115845352,
+      "gasUsed": "82422",
+      "status": "PASS"
+    },
+    "bindForkLife_execute": {
+      "hash": "0xe8be6410e0520363db245214c4e30991abfb23e8925c624ef3c28eceeab918e4",
+      "blockNumber": 115845353,
+      "gasUsed": "82962",
+      "status": "PASS"
+    },
+    "enableForkLifeReserve_execute": {
+      "hash": "0xc735e7fdb1804a25cc5a8c0cb28f976e92468147d4b11949dd37953e0d752a7c",
+      "blockNumber": 115845354,
+      "gasUsed": "65004",
+      "status": "PASS"
+    },
+    "recordForkConstitution_execute": {
+      "hash": "0xce03f51c98273cb1f03da3640af3eaa61304d6f32161c8dc4d1ef5b4686a113f",
+      "blockNumber": 115845355,
+      "gasUsed": "108541",
+      "status": "PASS"
+    },
+    "recordContribution": {
+      "hash": "0x5846d27a8c8a87dd1d5cf488ad695163129292776685c52c89a6e73f40dc12a6",
+      "blockNumber": 115845356,
+      "gasUsed": "174150",
       "status": "PASS"
     },
     "forkOnlySetTaxWallets": {
       "hash": "0x86ff433df28b178994d4fb8d53bcc8e4158d8a661e657bafae40f00ed928e569",
-      "blockNumber": 115715826,
+      "blockNumber": 115845357,
       "gasUsed": "67663",
       "status": "PASS"
     },
     "forkOnlyTaxablePairTransfer": {
       "hash": "0xd2bab1f04a6ec510890f0d779aa270c04ab9004143c6441fe0a9237bfdd74d6f",
-      "blockNumber": 115715827,
+      "blockNumber": 115845358,
       "gasUsed": "112901",
+      "status": "PASS"
+    },
+    "forkOnlyVoluntaryKgenReserveSeed": {
+      "hash": "0x79a4a4ec8c957e3aa57d4fe4d6fbcd66bce5fa73895eb0dab53c6b9d49f784d1",
+      "blockNumber": 115845359,
+      "gasUsed": "36927",
       "status": "PASS"
     },
     "approveReserveKaios": {
       "hash": "0x4930d6fe982b2e0197de721adc2062d7aa69797e150e3c59a5fbc36e28c158de",
-      "blockNumber": 115715828,
+      "blockNumber": 115845360,
       "gasUsed": "46020",
       "status": "PASS"
     },
     "redeem1000Kaios": {
-      "hash": "0x07b558e891d232d524254f1fb0ed6429cdccc110b08d0987d4d74506e84a1127",
-      "blockNumber": 115715829,
+      "hash": "0xdbd587e00999a9106b0158bd1c2f3ccb7e82a9717130b03ee12f56dee5231140",
+      "blockNumber": 115845361,
       "gasUsed": "410557",
       "status": "PASS"
     },
     "approveFurnaceKaios": {
       "hash": "0xcb5417ca7b6fdb2bdf0505c6a00c85e303ad72048cbf2e281725ae33cd211f1c",
-      "blockNumber": 115715830,
+      "blockNumber": 115845362,
       "gasUsed": "46020",
       "status": "PASS"
     },
     "burnSingle5mKaios": {
-      "hash": "0x97986fdb78f297baec2d0184c14f60b514414cbeaf0f36f038a3fde104519fce",
-      "blockNumber": 115715831,
+      "hash": "0xd4a45522905bce7d96a19ba9ca2d37316ab2174a008cc524fc252000365308c6",
+      "blockNumber": 115845363,
       "gasUsed": "451705",
       "status": "PASS"
     },
     "submitSingle5mProof": {
-      "hash": "0x033a07fe2ffcaa58a2b56ab6704e0490e85adcd3d31d042c072a9b0b9435ab1c",
-      "blockNumber": 115715832,
+      "hash": "0xafcf6ab221bc6d4c5cea6b8191366ecf9bbbcec3ff3c13f0c257e52d5057418a",
+      "blockNumber": 115845364,
       "gasUsed": "284928",
       "status": "PASS"
     },
-    "beginMassCandidateReview": {
-      "hash": "0xc6ae44d40b634285e09066a3b3d417174b88993d1560da5482c10241996bace8",
-      "blockNumber": 115715833,
-      "gasUsed": "66094",
+    "beginMassCandidateReview_propose": {
+      "hash": "0xbca6bfb31eff23d818845fd1f69dd53522c20b7f0fd4402633e03e5cea2fc745",
+      "blockNumber": 115845365,
+      "gasUsed": "110568",
       "status": "PASS"
     },
-    "markMassCandidateEligible": {
-      "hash": "0xf636678d4064c8ba4064f07f74a090d347084e33557b0ff7a83a6fd68bde0df7",
-      "blockNumber": 115715834,
-      "gasUsed": "55405",
+    "beginMassCandidateReview_approve": {
+      "hash": "0xb1cbacd7db41624f5a835391de5035fe3e38de1a8751ab826955bdeac8d4fcbf",
+      "blockNumber": 115845366,
+      "gasUsed": "57667",
+      "status": "PASS"
+    },
+    "markMassCandidateEligible_propose": {
+      "hash": "0xeac6f14773c5d48e99e1b63138fb359c1ec7ec5619b05041f14ebd9c6906ed92",
+      "blockNumber": 115845367,
+      "gasUsed": "110568",
+      "status": "PASS"
+    },
+    "markMassCandidateEligible_approve": {
+      "hash": "0x7e6a2ab98819203ec80908f7be9a89376489dc0faf79a355f664e133f329b7b0",
+      "blockNumber": 115845368,
+      "gasUsed": "57667",
+      "status": "PASS"
+    },
+    "beginMassCandidateReview_execute": {
+      "hash": "0xfee0b6ba5345b22fa855a15e902e59a5887b68386533100eb7bcd95b6526f90a",
+      "blockNumber": 115845370,
+      "gasUsed": "92517",
+      "status": "PASS"
+    },
+    "markMassCandidateEligible_execute": {
+      "hash": "0x067d634726e0e6800df11d115e08d6c3ebef30589132959617b2090cfb87be83",
+      "blockNumber": 115845371,
+      "gasUsed": "81828",
       "status": "PASS"
     },
     "approveCapitalKaios": {
       "hash": "0xd058f58441123ef7268a1857edc0f31eaebfc1c6b6b1d7c4d7dd1e51f6af4d28",
-      "blockNumber": 115715835,
+      "blockNumber": 115845372,
       "gasUsed": "46020",
       "status": "PASS"
     },
     "commit5mKaiosCapital": {
       "hash": "0x06cf0383165c96973c57997f608527546966595f29707184ae1b6af267c76ca6",
-      "blockNumber": 115715836,
+      "blockNumber": 115845373,
       "gasUsed": "259901",
       "status": "PASS"
     },
     "submitCapitalReview": {
-      "hash": "0x1e27a11339251095702d2dc70128c647b5fde312b2c92f317502198f99ff9e6b",
-      "blockNumber": 115715837,
+      "hash": "0xdd84b0c7526e5524955c4de0b07da49b2caf58ecdbd1f0ff37195760c471963e",
+      "blockNumber": 115845374,
       "gasUsed": "78865",
       "status": "PASS"
     },
-    "finalizeEligibilityGovernance": {
-      "hash": "0x66bfaecf95911bb898ad60c25dba108b84eee3305faf3584d197a8999c4ee387",
-      "blockNumber": 115715838,
-      "gasUsed": "119994",
-      "status": "PASS"
-    },
-    "finalizeReserveGovernance": {
-      "hash": "0x1b52bcd016bfdebb28a5f66c0b1242cb55cf8a2bca22b541445a3a7e6760994a",
-      "blockNumber": 115715839,
-      "gasUsed": "119972",
-      "status": "PASS"
-    },
-    "finalizeCapitalGovernance": {
-      "hash": "0x53e1f1564175c155857605d09b7c9a8b7a0a977d35253e437db14351d74f1728",
-      "blockNumber": 115715840,
-      "gasUsed": "119950",
-      "status": "PASS"
-    },
     "guanyinPauseReserve": {
-      "hash": "0x18de6a206b1ed265f76190fa27d5d50f94e65954e7fdd7f2a018bf8954a34ced",
-      "blockNumber": 115715841,
+      "hash": "0x94f2adacb5a58e44f2276def205b8f9c687013bde27b154fd17583f2aa955569",
+      "blockNumber": 115845375,
       "gasUsed": "34914",
       "status": "PASS"
     }
   },
-  "gasUsed": "13341930",
+  "gasUsed": "16344025",
   "simulatedFutureTaxFlowFor2000Kgen": {
     "trueBurn": "2.0",
     "reserve": "2.0",
@@ -317,11 +551,12 @@
     "maximumExistingKgenOut": "1.0",
     "kgenSupplyUnchanged": true,
     "kaiosSupplyUnchangedByRedemption": true,
-    "finalReserveKgen": "1.0",
+    "finalReserveKgen": "100.0",
+    "minimumReservePreserved": true,
     "formal18888KaiosReceipt": "PASS"
   },
   "alchemyEligibility": {
-    "proofId": "0x987ff259a64775b5c93611adcf3cb3fe2572f7b2c33820da8aef128fb098b783",
+    "proofId": "0x0218034356990c3f136de1ddbf98299cc913dd61a1341c5b9c15cfd0d42310c1",
     "singleBurnKaios": "5000000.0",
     "thresholdPassed": true,
     "multipleProofAggregation": "BLOCKED_BY_DESIGN",

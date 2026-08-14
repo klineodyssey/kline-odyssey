@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import path from "node:path";
 import { after, test } from "node:test";
-import { ZeroAddress, getCreateAddress, keccak256, sha256 } from "ethers";
+import { ZeroAddress, getCreateAddress, id, keccak256, parseEther, sha256 } from "ethers";
 import {
   ETHER,
   artifact,
@@ -50,6 +50,64 @@ test("compiler and OpenZeppelin dependencies are exactly pinned", () => {
   assert.equal(packageLock.packages["node_modules/solc"].version, "0.8.24");
   assert.equal(packageLock.packages["node_modules/@openzeppelin/contracts"].version, "5.0.2");
   assert.equal(packageLock.packages["node_modules/@openzeppelin/contracts-upgradeable"].version, "5.0.2");
+});
+
+test("Phase 2 frozen Mainnet config encodes the exact Human V1 parameters", () => {
+  const config = JSON.parse(
+    fs.readFileSync(path.join(root, "config", "phase2-mainnet-config.final-review.json"), "utf8"),
+  );
+  const reserve = config.parameters.reserveRedemption;
+  const eligibility = config.parameters.celestialEligibility;
+  const capital = config.parameters.capitalCommitment;
+
+  assert.equal(config.status, "HUMAN_V1_PARAMETERS_FROZEN_NOT_DEPLOYED");
+  assert.equal(BigInt(reserve.minimumKgenReserveWei), parseEther("100"));
+  assert.equal(BigInt(reserve.maxKgenPerTransactionWei), parseEther("10"));
+  assert.equal(BigInt(reserve.maxKgenPerUtcDayWei), parseEther("100"));
+  assert.equal(BigInt(reserve.maxKaiosPerTransactionWei), parseEther("10000"));
+  assert.equal(BigInt(reserve.maxKaiosPerUtcDayWei), parseEther("100000"));
+  assert.equal(reserve.redemptionInitiallyEnabled, false);
+  assert.equal(
+    eligibility.requiredDestinationCodeSource,
+    "KAIOS.CIVILIZATION.RESERVE_REDEMPTION.18888",
+  );
+  assert.equal(id(eligibility.requiredDestinationCodeSource), eligibility.requiredDestinationCode);
+  assert.equal(BigInt(eligibility.singleProofMinimumKaiosWei), parseEther("5000000"));
+  assert.equal(eligibility.multiProofAggregationAllowed, false);
+  assert.equal(BigInt(capital.singleCommitmentMinimumKaiosWei), parseEther("5000000"));
+  assert.equal(capital.minimumLockPeriodSeconds, 2_592_000);
+  assert.equal(capital.kaiosBurned, false);
+  assert.equal(config.governance.contributionVerifier, config.governance.primary);
+  assert.deepEqual(Object.values(config.initialModuleStates), ["INACTIVE", "INACTIVE", "INACTIVE"]);
+});
+
+test("Phase 2 indexer schema event names exactly match compiler-generated ABIs", () => {
+  const contractNames = [
+    "KGENReserveRedemption_Upgradeable",
+    "CelestialEligibility_Upgradeable",
+    "CelestialCapitalCommitment_Upgradeable",
+  ];
+  const compiledEvents = [...new Set(contractNames.flatMap((name) =>
+    artifact(name).abi.filter((entry) => entry.type === "event").map((entry) => entry.name),
+  ))].sort();
+  const schema = JSON.parse(
+    fs.readFileSync(path.join(root, "indexer", "kaios-civilization-phase2-events.schema.json"), "utf8"),
+  );
+  const indexedEvents = [...schema.properties.events.items.properties.event.enum].sort();
+
+  assert.deepEqual(indexedEvents, compiledEvents, "INDEXER_SCHEMA_ABI_MATCH");
+  for (const requiredEvent of [
+    "EligibilityPaused",
+    "EligibilityUnpaused",
+    "MinimumLockPeriodUpdated",
+    "BankModuleInitialized",
+    "Initialized",
+    "ModuleGovernanceFinalized",
+    "RoleAdminChanged",
+    "RoleGranted",
+    "RoleRevoked",
+  ]) assert.equal(indexedEvents.includes(requiredEvent), true, requiredEvent);
+  assert.equal(indexedEvents.includes("GovernanceFinalized"), false);
 });
 
 test("pre-sign package contains no executable Mainnet transaction script or formal deployed-address manifest", () => {

@@ -65,11 +65,12 @@ executable Mainnet transaction script or formal deployed address.
 | `reports/mainnet-pre-sign/KAIOS_GENESIS_INSCRIPTION_UNSIGNED_DEPLOYMENT.json` | Frozen nonce-55 inscription package plus the actual successful deployment receipt; contains no signer secret |
 | `reports/KAIOS_TOKEN_LINEAGE_INTEGRATION_REVIEW_2026-08-09.md` | Executive review and evidence index |
 | `KAIOS_CIVILIZATION_PHASE2_CANON.md` | Current Phase 2 separation of White Hole physics, reserve redemption, market price, alchemy, capital and eligibility |
-| `config/kaios-civilization-phase2-deployment.template.json` | Secret-free Phase 2 Human input gates; every unresolved economic value remains null |
-| `scripts/prepare-kaios-civilization-phase2-deployment.mjs` | Six-CREATE predicted-address and unsigned calldata planner; no RPC or private-key input |
+| `config/kaios-civilization-phase2-deployment.template.json` | Superseded intake pointer to the frozen Phase 2 final-review config |
+| `config/phase2-mainnet-config.final-review.json` | Human-frozen V1 Phase 2 wei/seconds/bytes32 values, governance identities and inactive module states |
+| `scripts/prepare-kaios-civilization-phase2-deployment.mjs` | Six-CREATE predicted-address and unsigned calldata planner locked to the final-review config; no RPC or private-key input |
 | `tools/rehearse-kaios-civilization-phase2-mainnet-fork.mjs` | ChainId 56 fork-only module deployment, delayed registration, tax redirect, redemption, 5M burn and 5M capital rehearsal |
 | `frontend-adapter/kaiosCivilizationPhase2Adapter.mjs` | Read-only status adapter and deterministic user-action calldata encoders with non-guaranteed-rate wording |
-| `indexer/kaios-civilization-phase2-events.schema.json` | Reorg-aware Phase 2 event evidence schema |
+| `indexer/kaios-civilization-phase2-events.schema.json` | Reorg-aware Phase 2 event evidence schema whose event names are compiler-ABI validated |
 | `dashboard/kaios-civilization-phase2-status.schema.json` | Read-only reserve/eligibility/capital API and dashboard schema |
 | `operations/KAIOS_CIVILIZATION_PHASE2_RUNBOOK.md` | Deployment, registration, separate future KGEN redirect and stop-condition runbook |
 | `reports/KAIOS_CIVILIZATION_PHASE2_SECURITY_REPORT.md` | Phase 2 trust boundaries, enforced gates and residual UUPS governance risk |

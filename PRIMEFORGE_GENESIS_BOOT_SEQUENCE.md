@@ -34,6 +34,16 @@ FORMAL_ENTRY: PRIMEFORGE_GENESIS_BOOT_SEQUENCE.md
 ANCESTOR: PRIMEFORGE_GENESIS_BOOT_SEQUENCE_V1_4.md  
 BOOT_POLICY: Fixed filename; update content cumulatively; never rename the formal entry.  
 
+## KAIOS Civilization Phase 2 Parameter Freeze Registration
+
+These entries are pre-sign configuration and validation records only. They do not authorize or send a Mainnet transaction.
+
+| Repository path | Purpose |
+|---|---|
+| `KGEN-KAIOS/config/phase2-mainnet-config.final-review.json` | Human-frozen Phase 2 V1 wei, seconds, destination bytes32, governance identities and inactive module states. |
+| `KGEN-KAIOS/indexer/kaios-civilization-phase2-events.schema.json` | Reorg-aware index schema whose event set must exactly match the three compiler-generated module ABIs. |
+| `KGEN-KAIOS/operations/KAIOS_CIVILIZATION_PHASE2_RUNBOOK.md` | No-transaction deployment order, delayed governance, initial pause and separate activation gates. |
+
 ## Forest And Agriculture Candidate Queue Registration
 
 These entries are governance and research records. They do not activate the

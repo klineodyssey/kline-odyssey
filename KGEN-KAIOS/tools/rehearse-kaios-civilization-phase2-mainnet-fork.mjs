@@ -38,7 +38,8 @@ const MODULE = {
   RESERVE: id("KAIOS.BANK.MODULE.KGEN_RESERVE_REDEMPTION"),
   CAPITAL: id("KAIOS.BANK.MODULE.CELESTIAL_CAPITAL_COMMITMENT"),
 };
-const DESTINATION = id("KAIOS.CELESTIAL.SPECIAL.MARS_QITIAN_MANSION");
+const DESTINATION_SOURCE = "KAIOS.CIVILIZATION.RESERVE_REDEMPTION.18888";
+const DESTINATION = id(DESTINATION_SOURCE);
 const artifact = (name) => JSON.parse(fs.readFileSync(path.join(root, "artifacts", `${name}.json`), "utf8"));
 const expect = (condition, message) => { if (!condition) throw new Error(message); };
 const json = (value) => JSON.stringify(value, (_, item) => typeof item === "bigint" ? item.toString() : item, 2);
@@ -115,9 +116,9 @@ async function main() {
     const eligibility = await deployProxy("CelestialEligibility_Upgradeable", [A.BANK, A.MOTHER, A.MOTHER, A.GUANYIN, A.FURNACE, DESTINATION]);
     const reserve = await deployProxy("KGENReserveRedemption_Upgradeable", [
       A.BANK, A.MOTHER, A.MOTHER, A.GUANYIN, A.KGEN, A.KAIOS, eligibility.proxy,
-      parseEther("0.5"), parseEther("1"), parseEther("1"), parseEther("1000"), parseEther("1000"), true,
+      parseEther("100"), parseEther("10"), parseEther("100"), parseEther("10000"), parseEther("100000"), false,
     ]);
-    const capital = await deployProxy("CelestialCapitalCommitment_Upgradeable", [A.BANK, A.MOTHER, A.MOTHER, A.GUANYIN, A.KAIOS, eligibility.proxy, 3_600]);
+    const capital = await deployProxy("CelestialCapitalCommitment_Upgradeable", [A.BANK, A.MOTHER, A.MOTHER, A.GUANYIN, A.KAIOS, eligibility.proxy, 2_592_000]);
 
     const bank = new Contract(A.BANK, artifact("LingxiaoCelestialBank18888_Upgradeable").abi, provider);
     const governance = new Contract(A.GOVERNANCE_MODULE, artifact("BankGovernance_Upgradeable").abi, provider);
@@ -127,14 +128,17 @@ async function main() {
     const furnace = new Contract(A.FURNACE, artifact("KAIOSAlchemyFurnace").abi, provider);
     const seat500 = new Contract(A.SEAT500, artifact("CelestialSeat500_Upgradeable").abi, provider);
 
-    const lifeId = id("PHASE2-FORK-LIFE-001");
-    await transact("bindLife", eligibility.contract.bindLife(lifeId, userAddress, true));
-    await transact("enableLifeReserveRedemption", eligibility.contract.setReserveRedemptionEligibility(lifeId, true));
-    await transact("grantMotherContributionVerifier", eligibility.contract.setContributionVerifier(A.MOTHER, true));
-    await transact("recordConstitution", eligibility.contract.recordConstitutionHistory(lifeId, id("PHASE2-CONSTITUTION-EVIDENCE"), true));
-    await transact("recordContribution", eligibility.contract.recordContribution(id("PHASE2-CONTRIBUTION-001"), lifeId, id("CYBERSECURITY"), id("PHASE2-CONTRIBUTION-EVIDENCE")));
+    expect(!(await reserve.contract.redemptionEnabled()), "REDEMPTION_NOT_INITIALIZED_DISABLED");
+    await transact("initialPauseEligibility", eligibility.contract.connect(pauser).pause());
+    await transact("initialPauseReserve", reserve.contract.connect(pauser).pause());
+    await transact("initialPauseCapital", capital.contract.connect(pauser).pause());
+    expect(await eligibility.contract.paused(), "ELIGIBILITY_INITIAL_PAUSE_FAILED");
+    expect(await reserve.contract.paused(), "RESERVE_INITIAL_PAUSE_FAILED");
+    expect(await capital.contract.paused(), "CAPITAL_INITIAL_PAUSE_FAILED");
 
-    const proposed = [];
+    const lifeId = id("PHASE2-FORK-LIFE-001");
+
+    let proposed = [];
     async function propose(label, target, data) {
       const proposalId = id(`PHASE2-FORK:${forkBlock}:${label}`);
       await transact(`${label}_propose`, governance.connect(mother).propose(proposalId, target, 0, data));
@@ -147,7 +151,7 @@ async function main() {
       ["registerReserve", MODULE.RESERVE, reserve, "KGENReserveRedemption_Upgradeable"],
       ["registerCapital", MODULE.CAPITAL, capital, "CelestialCapitalCommitment_Upgradeable"],
     ]) {
-      const data = bank.interface.encodeFunctionData("configureModule", [moduleId, item.proxy, bankVersion(name), 0, 0, true]);
+      const data = bank.interface.encodeFunctionData("configureModule", [moduleId, item.proxy, bankVersion(name), 0, 0, false]);
       await propose(label, A.BANK, data);
     }
     const existingAllocation = await bank.module(MODULE.ALLOCATION);
@@ -167,6 +171,39 @@ async function main() {
       await transact(`${item.label}_execute`, governance.connect(outsider).execute(item.proposalId, item.data, { gasLimit: 2_000_000 }));
     }
     await transact("executeForkAllocation", allocation.connect(outsider).executeAllocation(allocationId, { gasLimit: 1_500_000 }));
+
+    for (const moduleId of [MODULE.ELIGIBILITY, MODULE.RESERVE, MODULE.CAPITAL]) {
+      expect(!(await bank.module(moduleId)).enabled, `MODULE_NOT_INITIALIZED_INACTIVE:${moduleId}`);
+    }
+    await transact("finalizeEligibilityGovernance", eligibility.contract.finalizeModuleGovernance(A.GOVERNANCE_MODULE));
+    await transact("finalizeReserveGovernance", reserve.contract.finalizeModuleGovernance(A.GOVERNANCE_MODULE));
+    await transact("finalizeCapitalGovernance", capital.contract.finalizeModuleGovernance(A.GOVERNANCE_MODULE));
+
+    proposed = [];
+    for (const [label, moduleId, item, name] of [
+      ["activateEligibility", MODULE.ELIGIBILITY, eligibility, "CelestialEligibility_Upgradeable"],
+      ["activateReserve", MODULE.RESERVE, reserve, "KGENReserveRedemption_Upgradeable"],
+      ["activateCapital", MODULE.CAPITAL, capital, "CelestialCapitalCommitment_Upgradeable"],
+    ]) {
+      await propose(label, A.BANK, bank.interface.encodeFunctionData("configureModule", [
+        moduleId, item.proxy, bankVersion(name), 0, 0, true,
+      ]));
+    }
+    await propose("unpauseEligibility", eligibility.proxy, eligibility.contract.interface.encodeFunctionData("unpause"));
+    await propose("unpauseReserve", reserve.proxy, reserve.contract.interface.encodeFunctionData("unpause"));
+    await propose("unpauseCapital", capital.proxy, capital.contract.interface.encodeFunctionData("unpause"));
+    await propose("enableForkRedemption", reserve.proxy, reserve.contract.interface.encodeFunctionData("setRedemptionEnabled", [true]));
+    await propose("setMotherContributionVerifier", eligibility.proxy, eligibility.contract.interface.encodeFunctionData("setContributionVerifier", [A.MOTHER, true]));
+    await propose("bindForkLife", eligibility.proxy, eligibility.contract.interface.encodeFunctionData("bindLife", [lifeId, userAddress, true]));
+    await propose("enableForkLifeReserve", eligibility.proxy, eligibility.contract.interface.encodeFunctionData("setReserveRedemptionEligibility", [lifeId, true]));
+    await propose("recordForkConstitution", eligibility.proxy, eligibility.contract.interface.encodeFunctionData("recordConstitutionHistory", [lifeId, id("PHASE2-CONSTITUTION-EVIDENCE"), true]));
+    await eip1193.request({ method: "evm_increaseTime", params: [3_601] });
+    await eip1193.request({ method: "evm_mine", params: [] });
+    for (const item of proposed) {
+      await transact(`${item.label}_execute`, governance.connect(outsider).execute(item.proposalId, item.data, { gasLimit: 2_000_000 }));
+    }
+    await transact("recordContribution", eligibility.contract.recordContribution(id("PHASE2-CONTRIBUTION-001"), lifeId, id("CYBERSECURITY"), id("PHASE2-CONTRIBUTION-EVIDENCE")));
+    proposed = [];
 
     const currentReward = getAddress(await kgen.rewardWallet());
     const currentAutoLP = getAddress(await kgen.autoLPWallet());
@@ -196,13 +233,15 @@ async function main() {
     expect(taxDeltas.autoLP === parseEther("1"), "AUTOLP_TAX_MISMATCH");
     expect(taxDeltas.recipient === parseEther("1994"), "TRADE_RECIPIENT_MISMATCH");
 
+    await transact("forkOnlyVoluntaryKgenReserveSeed", kgen.connect(kgenOwner).transfer(reserve.proxy, parseEther("99")));
+
     const kgenSupplyBeforeRedemption = await kgen.totalSupply();
     const kaiosSupplyBeforeRedemption = await kaios.totalSupply();
     await transact("approveReserveKaios", kaios.connect(user).approve(reserve.proxy, parseEther("1000")));
     await transact("redeem1000Kaios", reserve.contract.connect(user).requestRedemption(id("PHASE2-FORK-REDEMPTION"), lifeId, parseEther("1000"), (await provider.getBlock("latest")).timestamp + 3_600));
     expect(await kgen.totalSupply() === kgenSupplyBeforeRedemption, "REDEMPTION_INCREASED_KGEN_SUPPLY");
     expect(await kaios.totalSupply() === kaiosSupplyBeforeRedemption, "REDEMPTION_BURNED_KAIOS");
-    expect(await kgen.balanceOf(reserve.proxy) === parseEther("1"), "RESERVE_PAYOUT_OR_FLOOR_MISMATCH");
+    expect(await kgen.balanceOf(reserve.proxy) === parseEther("100"), "RESERVE_PAYOUT_OR_FLOOR_MISMATCH");
 
     const seatCountBefore = await seat500.seatCount();
     await transact("approveFurnaceKaios", kaios.connect(user).approve(A.FURNACE, parseEther("5000000")));
@@ -216,8 +255,13 @@ async function main() {
     }
     expect(proofId, "ALCHEMY_PROOF_EVENT_NOT_FOUND");
     await transact("submitSingle5mProof", eligibility.contract.connect(user).submitAlchemyMassProof(proofId, lifeId));
-    await transact("beginMassCandidateReview", eligibility.contract.beginCivilizationReview(proofId, id("PHASE2-FORK-CANDIDATE-REVIEW")));
-    await transact("markMassCandidateEligible", eligibility.contract.markEligibleForReview(proofId, id("PHASE2-FORK-CANDIDATE-ELIGIBLE")));
+    await propose("beginMassCandidateReview", eligibility.proxy, eligibility.contract.interface.encodeFunctionData("beginCivilizationReview", [proofId, id("PHASE2-FORK-CANDIDATE-REVIEW")]));
+    await propose("markMassCandidateEligible", eligibility.proxy, eligibility.contract.interface.encodeFunctionData("markEligibleForReview", [proofId, id("PHASE2-FORK-CANDIDATE-ELIGIBLE")]));
+    await eip1193.request({ method: "evm_increaseTime", params: [3_601] });
+    await eip1193.request({ method: "evm_mine", params: [] });
+    for (const item of proposed) {
+      await transact(`${item.label}_execute`, governance.connect(outsider).execute(item.proposalId, item.data, { gasLimit: 2_000_000 }));
+    }
     expect((await eligibility.contract.candidate(proofId)).status === 3n, "MASS_CANDIDATE_NOT_ELIGIBLE_FOR_REVIEW");
     expect(await seat500.seatCount() === seatCountBefore, "MASS_BURN_AUTOMATICALLY_ASSIGNED_SEAT");
 
@@ -229,10 +273,6 @@ async function main() {
     expect(await kaios.balanceOf(capital.proxy) === parseEther("5000000"), "CAPITAL_CUSTODY_MISMATCH");
     expect(await seat500.seatCount() === seatCountBefore, "CAPITAL_AUTOMATICALLY_ASSIGNED_SEAT");
 
-    await transact("finalizeEligibilityGovernance", eligibility.contract.finalizeModuleGovernance(A.GOVERNANCE_MODULE));
-    await transact("finalizeReserveGovernance", reserve.contract.finalizeModuleGovernance(A.GOVERNANCE_MODULE));
-    await transact("finalizeCapitalGovernance", capital.contract.finalizeModuleGovernance(A.GOVERNANCE_MODULE));
-
     await transact("guanyinPauseReserve", reserve.contract.connect(pauser).pause());
     expect(await reserve.contract.paused(), "GUANYIN_PAUSE_FAILED");
     const finalKgenSupply = await kgen.totalSupply();
@@ -243,6 +283,18 @@ async function main() {
       mainnetTransactionSent: false,
       chainId: 56,
       forkBlock,
+      frozenV1Parameters: {
+        destinationCodeSource: DESTINATION_SOURCE,
+        destinationCode: DESTINATION,
+        minimumKgenReserve: "100.0",
+        maxKgenPerTransaction: "10.0",
+        maxKgenPerUtcDay: "100.0",
+        maxKaiosPerTransaction: "10000.0",
+        maxKaiosPerUtcDay: "100000.0",
+        redemptionInitiallyEnabled: false,
+        capitalMinimumLockPeriodSeconds: 2_592_000,
+        initialBankModuleState: "INACTIVE",
+      },
       formalAddresses: A,
       liveKgenTaxBeforeForkMutation: { owner: KGEN_OWNER, bankWallet: getAddress(bankWallet), rewardWallet: getAddress(rewardWallet), autoLPWallet: getAddress(autoLPWallet), pairEnabled },
       forkDeployments: {
@@ -256,7 +308,7 @@ async function main() {
       reserveRedemption: {
         kaiosIn: "1000.0", maximumExistingKgenOut: "1.0", kgenSupplyUnchanged: finalKgenSupply === kgenSupplyBeforeRedemption,
         kaiosSupplyUnchangedByRedemption: kaiosSupplyBeforeRedemption - finalKaiosSupply === parseEther("5000000"),
-        finalReserveKgen: formatEther(await kgen.balanceOf(reserve.proxy)), formal18888KaiosReceipt: "PASS",
+        finalReserveKgen: formatEther(await kgen.balanceOf(reserve.proxy)), minimumReservePreserved: true, formal18888KaiosReceipt: "PASS",
       },
       alchemyEligibility: { proofId, singleBurnKaios: "5000000.0", thresholdPassed: true, multipleProofAggregation: "BLOCKED_BY_DESIGN", seatIssued: false },
       capitalCommitment: { commitmentId, committedKaios: "5000000.0", burned: false, liabilityAccounted: true, seatIssued: false },
@@ -269,7 +321,7 @@ async function main() {
       future: { wormhole511111: "FUTURE", kufo: "FUTURE", pairRegistry: "FUTURE", market8895: "FUTURE" },
     };
     fs.writeFileSync(reportJson, `${json(report)}\n`);
-    fs.writeFileSync(reportMd, `# KAIOS Civilization Phase 2 Mainnet Fork Rehearsal\n\nStatus: PASS. Environment: BSC Mainnet fork only. No Mainnet transaction was sent.\n\n- Fork block: ${forkBlock}\n- Future 2,000 KGEN taxable trade: ${taxDeltas.trueBurn / 10n ** 18n} KGEN true burn, ${taxDeltas.reserve / 10n ** 18n} KGEN reserve, ${taxDeltas.reward / 10n ** 18n} KGEN Reward, ${taxDeltas.autoLP / 10n ** 18n} KGEN AutoLP, ${taxDeltas.recipient / 10n ** 18n} KGEN recipient.\n- Reserve redemption: 1,000 KAIOS deposited to formal 18888 accounting and 1 existing KGEN paid; neither supply was changed by redemption.\n- Alchemy eligibility: one formal 18911 proof burned exactly 5,000,000 KAIOS and passed only the mass threshold/review ledger; no seat was assigned.\n- Capital commitment: 5,000,000 KAIOS remained in module custody as principal liability; no burn and no seat assignment.\n- Governance: formal Mother/Jade delayed module registration exercised; Guanyin pause passed.\n\nMachine-readable receipts and temporary fork addresses are in \`reports/KAIOS_CIVILIZATION_PHASE2_MAINNET_FORK_REHEARSAL.json\`.\n`);
+    fs.writeFileSync(reportMd, `# KAIOS Civilization Phase 2 Mainnet Fork Rehearsal\n\nStatus: PASS. Environment: BSC Mainnet fork only. No Mainnet transaction was sent.\n\n- Fork block: ${forkBlock}\n- Frozen V1 parameters: 100 KGEN reserve floor; 10 KGEN / 10,000 KAIOS per transaction; 100 KGEN / 100,000 KAIOS per UTC day; redemption initially disabled; capital lock 2,592,000 seconds.\n- Destination source: ${DESTINATION_SOURCE}; bytes32: ${DESTINATION}.\n- All three modules were registered inactive and paused before read-only validation. Fork-only later activation exercised formal Mother/Jade delayed governance for unpause/enable; Guanyin remained pause-only.\n- Future 2,000 KGEN taxable trade: ${taxDeltas.trueBurn / 10n ** 18n} KGEN true burn, ${taxDeltas.reserve / 10n ** 18n} KGEN reserve, ${taxDeltas.reward / 10n ** 18n} KGEN Reward, ${taxDeltas.autoLP / 10n ** 18n} KGEN AutoLP, ${taxDeltas.recipient / 10n ** 18n} KGEN recipient.\n- Reserve redemption: 1,000 KAIOS deposited to formal 18888 accounting and 1 existing KGEN paid; neither supply was changed by redemption; the 100 KGEN floor remained.\n- Alchemy eligibility: one formal 18911 proof burned exactly 5,000,000 KAIOS and passed only the mass threshold/review ledger; no seat was assigned.\n- Capital commitment: 5,000,000 KAIOS remained in module custody as principal liability; no burn and no seat assignment.\n- Governance: formal Mother/Jade delayed module registration and later fork-only activation exercised; Guanyin pause passed.\n\nMachine-readable receipts and temporary fork addresses are in \`reports/KAIOS_CIVILIZATION_PHASE2_MAINNET_FORK_REHEARSAL.json\`.\n`);
     console.log(`PHASE2_MAINNET_FORK_REHEARSAL=PASS block=${forkBlock} gas=${gasUsed}`);
   } finally {
     await eip1193.disconnect();

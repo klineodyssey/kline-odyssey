@@ -1,0 +1,87 @@
+{
+  "status": "HUMAN_V1_PARAMETERS_FROZEN_NOT_DEPLOYED",
+  "chainId": 56,
+  "formalContracts": {
+    "kgen": "0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be",
+    "kaios": "0xD4E67B3a69e41524c424150E6b6e921b01D036db",
+    "lingxiaoBank18888": "0x11d34c0F723aCd334B8F95076f73F07f06202aab",
+    "alchemyFurnace18911": "0x44c2CA9B9eba19d8F79F6E1786fd9D25e73738e1",
+    "bankGovernance": "0xa2792fBDCc8A8AaC364053431D44E0a8D335E166",
+    "celestialSeat500": "0xA447853985Ef6e6AbFcb14FCfDeFdced10Be0BDe"
+  },
+  "governance": {
+    "primary": "0xCd60BF474e691F2484950a0276Eaf507616Ca4b9",
+    "distinctApprover": "0xc15e08834fca9f2d3462a3f8f0bc30524d6dd756",
+    "pauser": "0xebeeac6d09d2d28db8010b0923442c9eb2b702fe",
+    "contributionVerifier": "0xCd60BF474e691F2484950a0276Eaf507616Ca4b9",
+    "delaySeconds": 3600
+  },
+  "deployment": {
+    "deployer": null,
+    "startNonce": null,
+    "addresses": {
+      "reserveRedemptionImplementation": null,
+      "reserveRedemptionProxy": null,
+      "celestialEligibilityImplementation": null,
+      "celestialEligibilityProxy": null,
+      "capitalCommitmentImplementation": null,
+      "capitalCommitmentProxy": null
+    }
+  },
+  "parameters": {
+    "reserveRedemption": {
+      "referenceKaiosPerKgenWei": "1000000000000000000000",
+      "minimumKgenReserveWei": "100000000000000000000",
+      "maxKgenPerTransactionWei": "10000000000000000000",
+      "maxKgenPerUtcDayWei": "100000000000000000000",
+      "maxKaiosPerTransactionWei": "10000000000000000000000",
+      "maxKaiosPerUtcDayWei": "100000000000000000000000",
+      "redemptionInitiallyEnabled": false,
+      "kgenMintAllowed": false,
+      "kaiosBurnedByRedemption": false
+    },
+    "celestialEligibility": {
+      "requiredDestinationCodeSource": "KAIOS.CIVILIZATION.RESERVE_REDEMPTION.18888",
+      "requiredDestinationCode": "0x55395831e30b8252c7921d7cd972d13c19b60c88750e075f89c94de80e0e0d24",
+      "singleProofMinimumKaiosWei": "5000000000000000000000000",
+      "comparison": "GREATER_THAN_OR_EQUAL",
+      "multiProofAggregationAllowed": false,
+      "automaticSeatAssignment": false
+    },
+    "capitalCommitment": {
+      "singleCommitmentMinimumKaiosWei": "5000000000000000000000000",
+      "minimumLockPeriodSeconds": 2592000,
+      "kaiosBurned": false,
+      "forfeiturePolicy": "NONE_V1",
+      "automaticSeatAssignment": false
+    }
+  },
+  "initialModuleStates": {
+    "CelestialEligibility_Upgradeable": "INACTIVE",
+    "KGENReserveRedemption_Upgradeable": "INACTIVE",
+    "CelestialCapitalCommitment_Upgradeable": "INACTIVE"
+  },
+  "initialWriteProtection": {
+    "bankRegistrationEnabled": false,
+    "redemptionEnabled": false,
+    "guanyinPauseBeforeReadOnlyValidation": [
+      "CelestialEligibility_Upgradeable",
+      "KGENReserveRedemption_Upgradeable",
+      "CelestialCapitalCommitment_Upgradeable"
+    ],
+    "activationRequiresSeparateHumanAuthorization": true
+  },
+  "remainingOperationalGates": [
+    "LIVE_DEPLOYER_AND_NONCE_PRECHECK",
+    "SEPARATE_PHASE2_MAINNET_DEPLOY_AUTHORIZATION",
+    "SEPARATE_FUTURE_KGEN_BANK_TAX_REDIRECT_AUTHORIZATION",
+    "SEPARATE_MODULE_ACTIVATION_AUTHORIZATION"
+  ],
+  "prohibited": [
+    "MAINNET_TRANSACTION_WITHOUT_NEW_HUMAN_AUTHORIZATION",
+    "KGEN_SETTAXWALLETS_DURING_PHASE2_PARAMETER_FREEZE",
+    "KGEN_OR_KAIOS_REDEPLOY",
+    "LIVE_18888_OR_18911_MODIFICATION",
+    "AUTOMATIC_CELESTIAL_SEAT_ASSIGNMENT"
+  ]
+}

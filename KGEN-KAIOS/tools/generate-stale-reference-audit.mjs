@@ -65,6 +65,13 @@ function classify(relativePath, content, line, pattern) {
   const isLegacy = pattern.legacyScale
     || (pattern.id === "KAIOS_PER_KGEN" && /10_000|10000/u.test(line));
   if (!isLegacy) return ["CURRENT_CORRECT", "Identifier occurrence; numeric value audited independently."];
+  if (
+    ["10000_KAIOS", "10_000_KAIOS"].includes(pattern.id)
+    && /(?:cap|limit|per transaction|per UTC day)/iu.test(line)
+    && !/(?:1\s*KGEN|burned KGEN|creates)/iu.test(line)
+  ) {
+    return ["CURRENT_CORRECT", "Operational KAIOS cap/limit; not a KGEN-to-KAIOS conversion definition."];
+  }
   if (contractCritical.test(normalized)) {
     return ["CONTRACT_CRITICAL", "A contract-critical source retains the superseded monetary scale."];
   }

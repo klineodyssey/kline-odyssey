@@ -3,8 +3,8 @@
   "auditedAt": "2026-08-09T00:00:00+08:00",
   "status": "PASS",
   "scope": {
-    "repositoryTrackedFiles": 3728,
-    "repositoryReadableTextFiles": 3726,
+    "repositoryTrackedFiles": 3729,
+    "repositoryReadableTextFiles": 3727,
     "repositoryPdfFiles": 33,
     "repositoryPdfPages": 222,
     "externalPackage": {
@@ -16,7 +16,7 @@
       "pdfPages": 0,
       "pdfExtraction": "NOT_REQUESTED"
     },
-    "scannedFilesTotal": 3728
+    "scannedFilesTotal": 3729
   },
   "finalCanon": {
     "18888": "LINGXIAO_CELESTIAL_BANK",
@@ -33,21 +33,25 @@
     ]
   },
   "singleSourceOfTruth": "KGEN-KAIOS/KAIOS_FrictionMirror_Multiverse_README.md",
-  "legacyScaleReferenceCount": 46,
+  "legacyScaleReferenceCount": 50,
   "legacyScaleFiles": [
     "KGEN-KAIOS/CODEX_HANDOFF_2026-08-09.md",
     "KGEN-KAIOS/KAIOS_CELESTIAL_BANK_CONSERVATION_WHITEPAPER_V1.8.md",
+    "KGEN-KAIOS/KAIOS_CIVILIZATION_PHASE2_CANON.md",
     "KGEN-KAIOS/KAIOS_FrictionMirror_Multiverse_README.md",
     "KGEN-KAIOS/KAIOS_MULTICIVILIZATION_RELIGIOUS_NEUTRALITY_LIFE_MIGRATION_RUNTIME_V1.0.md",
     "KGEN-KAIOS/KAIOS_WHITE_HOLE_ATOMIC_CONVERSION_AND_LIQUIDITY_RUNTIME_CURRENT.md",
     "KGEN-KAIOS/archive/KAIOSV01_BurnProofGenesis_DRAFT_ARCHIVE.md",
     "KGEN-KAIOS/archive/KAIOS_CELESTIAL_BANK_CONSERVATION_WHITEPAPER_V1.2_ARCHIVE.md",
     "KGEN-KAIOS/archive/KAIOS_CELESTIAL_BANK_CONSERVATION_WHITEPAPER_V1.3_ARCHIVE.md",
+    "KGEN-KAIOS/operations/KAIOS_CIVILIZATION_PHASE2_RUNBOOK.md",
+    "KGEN-KAIOS/reports/KAIOS_CIVILIZATION_PHASE2_MAINNET_FORK_REHEARSAL.md",
     "KGEN-KAIOS/reports/KAIOS_TOKEN_LINEAGE_INTEGRATION_CLOSEOUT_20260809.md",
     "KGEN-KAIOS/reports/KAIOS_TOKEN_LINEAGE_INTEGRATION_REVIEW_2026-08-09.md",
     "KGEN-KAIOS/reports/RECOVERY-KAIOS-TOKEN-LINEAGE-INTEGRATION-20260809.md",
     "KGEN-KAIOS/tests/token-surface.security.test.mjs",
     "KGEN-KAIOS/tools/generate-stale-reference-audit.mjs",
+    "KGEN-KAIOS/tools/rehearse-kaios-civilization-phase2-mainnet-fork.mjs",
     "KGEN-KAIOS/tools/verify-current-lineage.mjs",
     "K線西遊記/daily/2026-01-21/subtitle_en.srt",
     "K線西遊記/daily/20260129/悟空新文_Weight_of_the_World/Wukong_Essay_Weight_Not_Smart_subtitle_en.srt",
@@ -140,7 +144,7 @@
     }
   ],
   "classifications": {
-    "CURRENT_CORRECT": 32,
+    "CURRENT_CORRECT": 36,
     "SUPERSEDED_HISTORY": 20,
     "ACTIVE_CONFLICT": 0,
     "COMMENT_ONLY": 25,
@@ -244,6 +248,16 @@
       "sourceKind": "REPOSITORY_TRACKED",
       "excerpt": "- 舊 1:10,000 / 720 billion 規則全部廢止。",
       "rationale": "Audit, supersession, or negative-reference text; not an executable monetary definition."
+    },
+    {
+      "path": "KGEN-KAIOS/KAIOS_CIVILIZATION_PHASE2_CANON.md",
+      "line": 26,
+      "pattern": "10_000_KAIOS",
+      "legacyScale": true,
+      "classification": "CURRENT_CORRECT",
+      "sourceKind": "REPOSITORY_TRACKED",
+      "excerpt": "The Human-frozen V1 risk values are: 100 KGEN minimum reserve, 10 KGEN and 10,000 KAIOS per transaction, and 100 KGEN and 100,000 KAIOS per UTC day. Redemption initializes disabled. The exact 18911 destination source is `KAIOS.CIVILIZATION.",
+      "rationale": "Operational KAIOS cap/limit; not a KGEN-to-KAIOS conversion definition."
     },
     {
       "path": "KGEN-KAIOS/KAIOS_FrictionMirror_Multiverse_README.md",
@@ -536,6 +550,26 @@
       "rationale": "Identifier occurrence; numeric value audited independently."
     },
     {
+      "path": "KGEN-KAIOS/operations/KAIOS_CIVILIZATION_PHASE2_RUNBOOK.md",
+      "line": 14,
+      "pattern": "10_000_KAIOS",
+      "legacyScale": true,
+      "classification": "CURRENT_CORRECT",
+      "sourceKind": "REPOSITORY_TRACKED",
+      "excerpt": "- transaction caps: 10 KGEN (`10000000000000000000`) and 10,000 KAIOS (`10000000000000000000000`);",
+      "rationale": "Operational KAIOS cap/limit; not a KGEN-to-KAIOS conversion definition."
+    },
+    {
+      "path": "KGEN-KAIOS/reports/KAIOS_CIVILIZATION_PHASE2_MAINNET_FORK_REHEARSAL.md",
+      "line": 6,
+      "pattern": "10_000_KAIOS",
+      "legacyScale": true,
+      "classification": "CURRENT_CORRECT",
+      "sourceKind": "REPOSITORY_TRACKED",
+      "excerpt": "- Frozen V1 parameters: 100 KGEN reserve floor; 10 KGEN / 10,000 KAIOS per transaction; 100 KGEN / 100,000 KAIOS per UTC day; redemption initially disabled; capital lock 2,592,000 seconds.",
+      "rationale": "Operational KAIOS cap/limit; not a KGEN-to-KAIOS conversion definition."
+    },
+    {
       "path": "KGEN-KAIOS/reports/KAIOS_TOKEN_LINEAGE_INTEGRATION_CLOSEOUT_20260809.md",
       "line": 7,
       "pattern": "1_TO_10_000",
@@ -567,7 +601,7 @@
     },
     {
       "path": "KGEN-KAIOS/tests/token-surface.security.test.mjs",
-      "line": 199,
+      "line": 257,
       "pattern": "TEN_THOUSAND_KAIOS",
       "legacyScale": true,
       "classification": "TEST_FIXTURE",
@@ -627,7 +661,7 @@
     },
     {
       "path": "KGEN-KAIOS/tools/generate-stale-reference-audit.mjs",
-      "line": 104,
+      "line": 111,
       "pattern": "KAIOS_PER_KGEN",
       "legacyScale": true,
       "classification": "COMMENT_ONLY",
@@ -637,7 +671,7 @@
     },
     {
       "path": "KGEN-KAIOS/tools/generate-stale-reference-audit.mjs",
-      "line": 289,
+      "line": 296,
       "pattern": "MAX_SUPPLY",
       "legacyScale": false,
       "classification": "CURRENT_CORRECT",
@@ -647,7 +681,7 @@
     },
     {
       "path": "KGEN-KAIOS/tools/generate-stale-reference-audit.mjs",
-      "line": 336,
+      "line": 343,
       "pattern": "1_TO_10_000",
       "legacyScale": true,
       "classification": "COMMENT_ONLY",
@@ -657,13 +691,23 @@
     },
     {
       "path": "KGEN-KAIOS/tools/generate-stale-reference-audit.mjs",
-      "line": 343,
+      "line": 350,
       "pattern": "MAX_SUPPLY",
       "legacyScale": false,
       "classification": "CURRENT_CORRECT",
       "sourceKind": "REPOSITORY_TRACKED",
       "excerpt": "\"- `KAIOS_MAX_SUPPLY = 72_000_000_000`\",",
       "rationale": "Identifier occurrence; numeric value audited independently."
+    },
+    {
+      "path": "KGEN-KAIOS/tools/rehearse-kaios-civilization-phase2-mainnet-fork.mjs",
+      "line": 324,
+      "pattern": "10_000_KAIOS",
+      "legacyScale": true,
+      "classification": "CURRENT_CORRECT",
+      "sourceKind": "REPOSITORY_TRACKED",
+      "excerpt": "fs.writeFileSync(reportMd, `# KAIOS Civilization Phase 2 Mainnet Fork Rehearsal\\n\\nStatus: PASS. Environment: BSC Mainnet fork only. No Mainnet transaction was sent.\\n\\n- Fork block: ${forkBlock}\\n- Frozen V1 parameters: 100 KGEN reserve fl",
+      "rationale": "Operational KAIOS cap/limit; not a KGEN-to-KAIOS conversion definition."
     },
     {
       "path": "KGEN-KAIOS/tools/rehearse-lingxiao-mainnet-fork.mjs",
