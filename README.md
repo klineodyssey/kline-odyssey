@@ -1029,8 +1029,8 @@ Where the Market Becomes the Myth.
 
 ## 🔥 Latest Video｜最新發布
 
-▶ 如果 AI 開始領薪水，它會怎麼花？1 KGEN = 1000 kg = 1000 KAIOS。讓 AI 擁有 Life ID，工作、存錢、買土地、開公司，真正進入文明。  
-👉 https://www.youtube.com/watch?v=w2GX1n8FX-k
+▶ KGEN 不只是一顆幣。1 KGEN = 1000 KAIOS，從白洞燃燒、神明銀行，到鍊丹爐、蟲洞、KUFO、KSHIP，讓質量一路長出工作、薪資、公司與數位生命經濟。#KGEN #KAIOS  
+👉 https://www.youtube.com/watch?v=CCr2UfDcyZ8
 
 （本區由 GitHub Actions 自動更新；首頁 iframe 保持固定世界觀主軸影片）
 <!-- LATEST_VIDEO_END -->
