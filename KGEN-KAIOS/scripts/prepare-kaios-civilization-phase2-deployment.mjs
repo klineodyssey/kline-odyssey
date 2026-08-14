@@ -10,6 +10,7 @@ import {
   keccak256,
   sha256,
 } from "ethers";
+import { patchUupsSelfAddress } from "../tools/uups-runtime-verifier.mjs";
 
 const root = path.resolve(import.meta.dirname, "..");
 const artifact = (name) => JSON.parse(fs.readFileSync(path.join(root, "artifacts", `${name}.json`), "utf8"));
@@ -45,6 +46,9 @@ const GOVERNANCE_DELAY = 3_600;
 
 const deployer = getAddress(required("PHASE2_DEPLOYMENT_SIGNER_ADDRESS"));
 const startNonce = requiredUint("PHASE2_DEPLOYMENT_SIGNER_NONCE");
+const existingEligibilityImplementation = process.env.PHASE2_EXISTING_ELIGIBILITY_IMPLEMENTATION_ADDRESS
+  ? getAddress(process.env.PHASE2_EXISTING_ELIGIBILITY_IMPLEMENTATION_ADDRESS)
+  : null;
 const minimumKgenReserve = configUint("reserveRedemption", "minimumKgenReserveWei");
 const maxKgenPerTx = configUint("reserveRedemption", "maxKgenPerTransactionWei");
 const maxKgenPerDay = configUint("reserveRedemption", "maxKgenPerUtcDayWei");
@@ -81,16 +85,27 @@ async function appendDirect(name, args, identity) {
 }
 async function appendUpgradeable(name, initializeArgs, identity) {
   const implementation = await appendDirect(name, [], `${identity}_IMPLEMENTATION`);
+  return appendProxy(name, implementation, initializeArgs, identity);
+}
+async function appendProxy(name, implementation, initializeArgs, identity) {
   const initializer = new Interface(artifact(name).abi).encodeFunctionData("initialize", initializeArgs);
   const proxy = await appendDirect("ERC1967Proxy", [implementation, initializer], `${identity}_PROXY`);
   return { implementation, proxy, initializer };
 }
 
-const eligibility = await appendUpgradeable(
-  "CelestialEligibility_Upgradeable",
-  [BANK, MOTHER, MOTHER, GUANYIN, FURNACE, destinationCode],
-  "CELESTIAL_ELIGIBILITY",
-);
+const eligibilityInitializeArgs = [BANK, MOTHER, MOTHER, GUANYIN, FURNACE, destinationCode];
+const eligibility = existingEligibilityImplementation
+  ? await appendProxy(
+    "CelestialEligibility_Upgradeable",
+    existingEligibilityImplementation,
+    eligibilityInitializeArgs,
+    "CELESTIAL_ELIGIBILITY",
+  )
+  : await appendUpgradeable(
+    "CelestialEligibility_Upgradeable",
+    eligibilityInitializeArgs,
+    "CELESTIAL_ELIGIBILITY",
+  );
 const reserve = await appendUpgradeable(
   "KGENReserveRedemption_Upgradeable",
   [
@@ -177,8 +192,32 @@ const futureActivation = [
   };
 });
 
+const implementationRuntimeVerification = [
+  ["CELESTIAL_ELIGIBILITY", "CelestialEligibility_Upgradeable", eligibility.implementation],
+  ["KGEN_RESERVE_REDEMPTION", "KGENReserveRedemption_Upgradeable", reserve.implementation],
+  ["CELESTIAL_CAPITAL_COMMITMENT", "CelestialCapitalCommitment_Upgradeable", capital.implementation],
+].map(([identity, contractName, implementation]) => {
+  const compiled = artifact(contractName);
+  const patchedRuntime = patchUupsSelfAddress(
+    compiled.deployedBytecode,
+    compiled.immutableReferences,
+    implementation,
+  );
+  return {
+    identity,
+    contractName,
+    implementation,
+    rawArtifactRuntimeHash: keccak256(compiled.deployedBytecode),
+    patchedExpectedRuntimeHash: keccak256(patchedRuntime),
+    immutableReferences: compiled.immutableReferences,
+    verificationRule: "PATCH_UUPS_SELF_ADDRESS_AND_COMPARE_EXACT_THEN_NORMALIZE_REFERENCES",
+  };
+});
+
 console.log(output({
-  status: "UNSIGNED_PHASE2_DEPLOYMENT_PLAN_NO_TRANSACTION",
+  status: existingEligibilityImplementation
+    ? "UNSIGNED_PHASE2_RESUME_DEPLOYMENT_PLAN_NO_TRANSACTION"
+    : "UNSIGNED_PHASE2_DEPLOYMENT_PLAN_NO_TRANSACTION",
   chainId: CHAIN_ID,
   deployer,
   startNonce,
@@ -200,6 +239,12 @@ console.log(output({
     capitalLockSeconds,
   },
   deployments: actions,
+  existingDeploymentReused: existingEligibilityImplementation ? {
+    identity: "CELESTIAL_ELIGIBILITY_IMPLEMENTATION",
+    address: existingEligibilityImplementation,
+    redeploy: false,
+  } : null,
+  implementationRuntimeVerification,
   initialModuleControls: moduleControls,
   moduleRegistration: registrations,
   postFinalizationGovernanceConfiguration: [{

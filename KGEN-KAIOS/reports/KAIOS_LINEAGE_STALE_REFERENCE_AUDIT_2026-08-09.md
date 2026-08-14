@@ -2,8 +2,8 @@
 
 **Status:** PASS
 
-- Scanned files: 3729
-- Repository tracked files: 3729
+- Scanned files: 3734
+- Repository tracked files: 3734
 - Human package files: 0
 - Legacy 1:10,000 / 720B reference hits: 50
 - ACTIVE_CONFLICT: 0
@@ -111,7 +111,7 @@ The Human-reported `KAIOS_GENESIS_INSCRIPTION_V1.0.md` is superseded by the stag
 | CURRENT_CORRECT | `KGEN-KAIOS/contracts/KSHIP.sol:43` | MAX_SUPPLY | Identifier occurrence; numeric value audited independently. |
 | CURRENT_CORRECT | `KGEN-KAIOS/contracts/KUFO.sol:49` | MAX_SUPPLY | Identifier occurrence; numeric value audited independently. |
 | CURRENT_CORRECT | `KGEN-KAIOS/contracts/KUFO.sol:88` | MAX_SUPPLY | Identifier occurrence; numeric value audited independently. |
-| CURRENT_CORRECT | `KGEN-KAIOS/operations/KAIOS_CIVILIZATION_PHASE2_RUNBOOK.md:14` | 10_000_KAIOS | Operational KAIOS cap/limit; not a KGEN-to-KAIOS conversion definition. |
+| CURRENT_CORRECT | `KGEN-KAIOS/operations/KAIOS_CIVILIZATION_PHASE2_RUNBOOK.md:31` | 10_000_KAIOS | Operational KAIOS cap/limit; not a KGEN-to-KAIOS conversion definition. |
 | CURRENT_CORRECT | `KGEN-KAIOS/reports/KAIOS_CIVILIZATION_PHASE2_MAINNET_FORK_REHEARSAL.md:6` | 10_000_KAIOS | Operational KAIOS cap/limit; not a KGEN-to-KAIOS conversion definition. |
 | SUPERSEDED_HISTORY | `KGEN-KAIOS/reports/KAIOS_TOKEN_LINEAGE_INTEGRATION_CLOSEOUT_20260809.md:7` | 1_TO_10_000 | Historical bytes are retained behind an explicit SUPERSEDED marker. |
 | COMMENT_ONLY | `KGEN-KAIOS/reports/KAIOS_TOKEN_LINEAGE_INTEGRATION_REVIEW_2026-08-09.md:8` | KAIOS_PER_KGEN | Audit, supersession, or negative-reference text; not an executable monetary definition. |

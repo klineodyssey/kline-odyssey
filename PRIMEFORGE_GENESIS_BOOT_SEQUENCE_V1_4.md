@@ -599,6 +599,13 @@ Where the Market Becomes the Myth.
 /KGEN-KAIOS/contracts/BankMigration_Upgradeable.sol
 /KGEN-KAIOS/operations/LINGXIAO_18888_FULL_BANK_RUNBOOK.md
 /KGEN-KAIOS/reports/LINGXIAO_18888_FULL_BANK_SECURITY_REPORT.md
+/KGEN-KAIOS/KAIOS_CIVILIZATION_PHASE2_CANON.md
+/KGEN-KAIOS/config/phase2-mainnet-config.final-review.json
+/KGEN-KAIOS/scripts/prepare-kaios-civilization-phase2-deployment.mjs
+/KGEN-KAIOS/scripts/verify-phase2-uups-runtime.mjs
+/KGEN-KAIOS/tools/uups-runtime-verifier.mjs
+/KGEN-KAIOS/operations/KAIOS_CIVILIZATION_PHASE2_RUNBOOK.md
+/KGEN-KAIOS/reports/PHASE2_UUPS_RUNTIME_VERIFICATION_2026-08-14.md
 /docs/spec/KGEN_Runtime_Specification_V1_0.md
 /docs/biology/KGEN_Civilization_Biology_Runtime_V1_0.md
 /docs/neural/KGEN_Universe_Neural_System_V1_0.md

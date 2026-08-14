@@ -1,0 +1,171 @@
+{
+  "status": "PASS",
+  "environment": "BSC_MAINNET_READ_ONLY",
+  "mainnetTransactionSentThisFix": false,
+  "chainId": 56,
+  "blockNumber": 115875323,
+  "incident": {
+    "implementation": "0x0D21328BdbE12e9E69838Fd33E3C20F0b27f2779",
+    "transactionHash": "0x039c28a90b5a87be6826c8f9323f9489eee67474b1de9fdd8c2377bc4464b93b",
+    "blockNumber": 115864643,
+    "creationBytecodeMatch": true
+  },
+  "eligibilityImplementation": {
+    "address": "0x0D21328BdbE12e9E69838Fd33E3C20F0b27f2779",
+    "version": "1.0.0",
+    "proxiableUUID": "0x360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc",
+    "initializerLocked": true,
+    "ownerFunctionExposed": false,
+    "roleState": {
+      "0xb3C54ca96De0dED4Ca0151F629ff9781506ba261": {
+        "DEFAULT_ADMIN_ROLE": false,
+        "GOVERNANCE_ROLE": false,
+        "UPGRADER_ROLE": false
+      },
+      "0xCd60BF474e691F2484950a0276Eaf507616Ca4b9": {
+        "DEFAULT_ADMIN_ROLE": false,
+        "GOVERNANCE_ROLE": false,
+        "UPGRADER_ROLE": false
+      },
+      "0xc15E08834fCA9F2d3462a3f8f0BC30524D6dd756": {
+        "DEFAULT_ADMIN_ROLE": false,
+        "GOVERNANCE_ROLE": false,
+        "UPGRADER_ROLE": false
+      },
+      "0xEBEeAC6d09D2d28Db8010b0923442C9Eb2b702FE": {
+        "DEFAULT_ADMIN_ROLE": false,
+        "GOVERNANCE_ROLE": false,
+        "UPGRADER_ROLE": false
+      }
+    },
+    "runtimeVerification": {
+      "status": "PASS",
+      "reason": null,
+      "artifactBytes": 12785,
+      "deployedBytes": 12785,
+      "immutableReferences": [
+        {
+          "sourceId": "23419",
+          "start": 5804,
+          "length": 32
+        },
+        {
+          "sourceId": "23419",
+          "start": 6993,
+          "length": 32
+        }
+      ],
+      "rawArtifactRuntimeHash": "0xae98738d325dec42889d794de951c018ec50bebf16379bc530bab0e250b455c7",
+      "patchedExpectedRuntimeHash": "0x8802e43df4bfdadfa88d9404943b3b8de6767672fe7b994072b2fbaaff252309",
+      "actualRuntimeHash": "0x8802e43df4bfdadfa88d9404943b3b8de6767672fe7b994072b2fbaaff252309",
+      "normalizedArtifactRuntimeHash": "0xae98738d325dec42889d794de951c018ec50bebf16379bc530bab0e250b455c7",
+      "normalizedActualRuntimeHash": "0xae98738d325dec42889d794de951c018ec50bebf16379bc530bab0e250b455c7",
+      "patchedRuntimeMatch": true,
+      "normalizedRuntimeMatch": true
+    }
+  },
+  "remainingDeployment": {
+    "liveNonce": {
+      "latest": 57,
+      "pending": 57
+    },
+    "actions": [
+      {
+        "identity": "CELESTIAL_ELIGIBILITY_PROXY",
+        "contractName": "ERC1967Proxy",
+        "nonce": 57,
+        "predictedAddress": "0xA50743fd0fe022714831482355A27559027368F9",
+        "codePresent": false
+      },
+      {
+        "identity": "KGEN_RESERVE_REDEMPTION_IMPLEMENTATION",
+        "contractName": "KGENReserveRedemption_Upgradeable",
+        "nonce": 58,
+        "predictedAddress": "0x8D4a697549Ee45e9973041d0f1c0d0394B1A1034",
+        "codePresent": false
+      },
+      {
+        "identity": "KGEN_RESERVE_REDEMPTION_PROXY",
+        "contractName": "ERC1967Proxy",
+        "nonce": 59,
+        "predictedAddress": "0xA06eF53c9AD4Af739FD13Ca1Ded446437134b0EE",
+        "codePresent": false
+      },
+      {
+        "identity": "CELESTIAL_CAPITAL_COMMITMENT_IMPLEMENTATION",
+        "contractName": "CelestialCapitalCommitment_Upgradeable",
+        "nonce": 60,
+        "predictedAddress": "0x09b4371B071d8957622DD640dbd0F713897Db167",
+        "codePresent": false
+      },
+      {
+        "identity": "CELESTIAL_CAPITAL_COMMITMENT_PROXY",
+        "contractName": "ERC1967Proxy",
+        "nonce": 61,
+        "predictedAddress": "0x04fC1536EC51E8CCaAcB961E5Af6151De47b078c",
+        "codePresent": false
+      }
+    ],
+    "futureImplementationRuntimePlans": [
+      {
+        "identity": "KGEN_RESERVE_REDEMPTION_IMPLEMENTATION",
+        "contractName": "KGENReserveRedemption_Upgradeable",
+        "predictedAddress": "0x8D4a697549Ee45e9973041d0f1c0d0394B1A1034",
+        "status": "PREDICTED_ONLY_NOT_DEPLOYED",
+        "artifactBytes": 10856,
+        "immutableReferences": [
+          {
+            "sourceId": "23419",
+            "start": 5163,
+            "length": 32
+          },
+          {
+            "sourceId": "23419",
+            "start": 5374,
+            "length": 32
+          }
+        ],
+        "rawArtifactRuntimeHash": "0x27b2706a325eb8bac27510853cc89f80bb16cb070bf998667ad1e3471b2e5160",
+        "patchedExpectedRuntimeHash": "0x3e45364adc0c5720c4029bba7aba98030daa2067f2ec84646e758187bb369446",
+        "verificationRule": "PATCH_UUPS_SELF_ADDRESS_AND_COMPARE_EXACT_THEN_NORMALIZE_REFERENCES"
+      },
+      {
+        "identity": "CELESTIAL_CAPITAL_COMMITMENT_IMPLEMENTATION",
+        "contractName": "CelestialCapitalCommitment_Upgradeable",
+        "predictedAddress": "0x09b4371B071d8957622DD640dbd0F713897Db167",
+        "status": "PREDICTED_ONLY_NOT_DEPLOYED",
+        "artifactBytes": 9903,
+        "immutableReferences": [
+          {
+            "sourceId": "23419",
+            "start": 4221,
+            "length": 32
+          },
+          {
+            "sourceId": "23419",
+            "start": 4432,
+            "length": 32
+          }
+        ],
+        "rawArtifactRuntimeHash": "0x45368261e90f5ce32838432863cef7fa94749ce8937876776741dad65b28da72",
+        "patchedExpectedRuntimeHash": "0xfaac8a87eecf811b04d59969804985161f3bd6e79ef6a995fcdec8dfbe091428",
+        "verificationRule": "PATCH_UUPS_SELF_ADDRESS_AND_COMPARE_EXACT_THEN_NORMALIZE_REFERENCES"
+      }
+    ]
+  },
+  "gasAndFunding": {
+    "source": "AUDITED_MAINNET_FORK_RECEIPTS",
+    "remainingDeploymentGas": "5958652",
+    "governanceAndFinalizationGas": "1592665",
+    "directGas": "7551317",
+    "bufferedGas": "9061581",
+    "gasPriceWei": "50000000",
+    "bufferedRequiredWei": "453079050000000",
+    "balancesWei": {
+      "deploymentSigner": "4224216341457930",
+      "mother": "2823775600000000",
+      "jadeEmperor": "2997117850000000",
+      "guanyin": "3000000000000000"
+    }
+  }
+}

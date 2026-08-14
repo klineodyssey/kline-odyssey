@@ -10,8 +10,9 @@
 
 The review-only KGEN -> KAIOS -> KUFO -> KSHIP implementation is under
 `contracts/`, with a pinned Solidity 0.8.24 test harness in this directory.
-The package includes unsigned planning and fork-rehearsal tooling, but no
-executable Mainnet transaction script or formal deployed address.
+The package includes unsigned planning and fork-rehearsal tooling. KAIOS Genesis and the
+bank system are live; Phase 2 Stage 1 has one validated Eligibility implementation at
+`0x0D21328BdbE12e9E69838Fd33E3C20F0b27f2779`, while all Phase 2 proxies remain undeployed.
 
 | Entry | Purpose |
 |---|---|
@@ -67,7 +68,9 @@ executable Mainnet transaction script or formal deployed address.
 | `KAIOS_CIVILIZATION_PHASE2_CANON.md` | Current Phase 2 separation of White Hole physics, reserve redemption, market price, alchemy, capital and eligibility |
 | `config/kaios-civilization-phase2-deployment.template.json` | Superseded intake pointer to the frozen Phase 2 final-review config |
 | `config/phase2-mainnet-config.final-review.json` | Human-frozen V1 Phase 2 wei/seconds/bytes32 values, governance identities and inactive module states |
-| `scripts/prepare-kaios-civilization-phase2-deployment.mjs` | Six-CREATE predicted-address and unsigned calldata planner locked to the final-review config; no RPC or private-key input |
+| `scripts/prepare-kaios-civilization-phase2-deployment.mjs` | Six-CREATE planner or nonce-57 five-CREATE resume planner; reuses the valid live Eligibility implementation and emits address-patched UUPS runtime hashes |
+| `scripts/verify-phase2-uups-runtime.mjs` | Read-only chain verifier for creation lineage, address-patched and normalized UUPS runtime, UUPS UUID, initializer lock, live nonce/address vacancy, gas and funding |
+| `tools/uups-runtime-verifier.mjs` | Deterministic compiler-immutable reconstruction and normalization shared by deployment tooling and regression tests |
 | `tools/rehearse-kaios-civilization-phase2-mainnet-fork.mjs` | ChainId 56 fork-only module deployment, delayed registration, tax redirect, redemption, 5M burn and 5M capital rehearsal |
 | `frontend-adapter/kaiosCivilizationPhase2Adapter.mjs` | Read-only status adapter and deterministic user-action calldata encoders with non-guaranteed-rate wording |
 | `indexer/kaios-civilization-phase2-events.schema.json` | Reorg-aware Phase 2 event evidence schema whose event names are compiler-ABI validated |
@@ -75,6 +78,8 @@ executable Mainnet transaction script or formal deployed address.
 | `operations/KAIOS_CIVILIZATION_PHASE2_RUNBOOK.md` | Deployment, registration, separate future KGEN redirect and stop-condition runbook |
 | `reports/KAIOS_CIVILIZATION_PHASE2_SECURITY_REPORT.md` | Phase 2 trust boundaries, enforced gates and residual UUPS governance risk |
 | `reports/KAIOS_CIVILIZATION_PHASE2_MAINNET_FORK_REHEARSAL.json` | Sanitized fork-only receipts, temporary addresses, exact flows and security gates |
+| `reports/PHASE2_UUPS_RUNTIME_VERIFICATION_2026-08-14.json` | Machine-readable read-only proof that the nonce-56 Eligibility implementation matches the reviewed artifact after UUPS `__self` reconstruction |
+| `reports/PHASE2_UUPS_RUNTIME_VERIFICATION_2026-08-14.md` | Human-readable runtime-verification incident resolution, remaining nonce-57 address plan, gas and funding evidence |
 
 ## Purpose
 

@@ -1,6 +1,23 @@
 # KAIOS Civilization Phase 2 Runbook
 
-Status: unsigned candidate. No Mainnet transaction is authorized by this document.
+Status: Stage-1 resume package. No Mainnet transaction is authorized by this document.
+
+## Mainnet Stage-1 resume boundary
+
+Nonce 56 successfully deployed the reviewed `CelestialEligibility_Upgradeable` implementation at `0x0D21328BdbE12e9E69838Fd33E3C20F0b27f2779` in transaction `0x039c28a90b5a87be6826c8f9323f9489eee67474b1de9fdd8c2377bc4464b93b`. It is valid and must not be redeployed. The deployment signer is now at nonce 57.
+
+OpenZeppelin UUPS implementations contain the address-valued `__self` immutable. Never compare raw `keccak256(artifact.deployedBytecode)` directly to `keccak256(eth_getCode)`. Use `tools/uups-runtime-verifier.mjs`: patch the compiler `immutableReferences` with the actual implementation address and compare exact runtime, then independently normalize those ranges in artifact and chain runtime and compare again. Both comparisons must pass.
+
+Generate the unsigned five-CREATE resume plan with public inputs only:
+
+```powershell
+$env:PHASE2_DEPLOYMENT_SIGNER_ADDRESS='0xb3C54ca96De0dED4Ca0151F629ff9781506ba261'
+$env:PHASE2_DEPLOYMENT_SIGNER_NONCE='57'
+$env:PHASE2_EXISTING_ELIGIBILITY_IMPLEMENTATION_ADDRESS='0x0D21328BdbE12e9E69838Fd33E3C20F0b27f2779'
+npm.cmd run phase2:deployment-plan
+```
+
+Before any separately authorized resume, run `npm.cmd run phase2:uups-runtime-verify`. The read-only verifier checks creation lineage, patched and normalized runtime, version, UUPS UUID, initializer lock, blank implementation roles, nonce, remaining address vacancy, gas, and balances.
 
 ## Immutable prerequisites
 
