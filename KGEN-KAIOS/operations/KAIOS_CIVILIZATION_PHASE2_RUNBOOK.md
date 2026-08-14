@@ -1,6 +1,6 @@
 # KAIOS Civilization Phase 2 Runbook
 
-Status: Mainnet Stage 1 complete; all three modules are LIVE_INACTIVE. Stage 2 activation and KGEN tax redirect are not authorized by this document.
+Status: Mainnet Stage 2B complete. Eligibility and Capital are LIVE_ACTIVE; Reserve is LIVE_INACTIVE with redemption disabled. KGEN tax redirect and all Stage 2C actions remain unauthorized by this document.
 
 ## Mainnet Stage-1 result
 
