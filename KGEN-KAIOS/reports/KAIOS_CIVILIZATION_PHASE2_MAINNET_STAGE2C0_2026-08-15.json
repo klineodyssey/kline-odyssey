@@ -1,0 +1,104 @@
+{
+  "schema": "KAIOS_CIVILIZATION_PHASE2_MAINNET_STAGE2C0_EVIDENCE_V1",
+  "status": "PASS",
+  "network": "BSC Mainnet",
+  "chainId": 56,
+  "sourceHead": "57478af6237f4f75a6a4d95723c2a984e910f66c",
+  "precheckBlock": 116012980,
+  "ownershipBlock": 116012988,
+  "ownershipBlockHash": "0x6765f6fa66bc2bf4484b6d8b1053352203cf9f84daca129dbf52e19de526b395",
+  "ownershipTimestamp": 1786766537,
+  "ownershipTimestampUtc": "2026-08-15T04:02:17Z",
+  "ownershipTimestampAsiaTaipei": "2026-08-15T12:02:17+08:00",
+  "formalAddresses": {
+    "kgen": "0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be",
+    "bankGovernance": "0xa2792fBDCc8A8AaC364053431D44E0a8D335E166",
+    "bank18888": "0x11d34c0F723aCd334B8F95076f73F07f06202aab",
+    "reserveRedemptionProxy": "0xA06eF53c9AD4Af739FD13Ca1Ded446437134b0EE"
+  },
+  "authorizedCall": {
+    "target": "0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be",
+    "function": "transferOwnership(address)",
+    "newOwner": "0xa2792fBDCc8A8AaC364053431D44E0a8D335E166",
+    "selector": "0xf2fde38b",
+    "calldata": "0xf2fde38b000000000000000000000000a2792fbdcc8a8aac364053431d44e0a8d335e166",
+    "calldataHash": "0xf8b9bcd780c92e7e21231aceca59ec452973c953782fb0690eb6d7f12ac62857"
+  },
+  "transaction": {
+    "transactionHash": "0xaca082ab94175bc1eba95685cc5095bb6fea8f01d03517aecd4e0948f818e9f9",
+    "from": "0xb3C54ca96De0dED4Ca0151F629ff9781506ba261",
+    "to": "0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be",
+    "nonce": 62,
+    "finalSignerNonce": 63,
+    "status": "PASS",
+    "gasUsed": "28656",
+    "effectiveGasPriceWei": "50000000",
+    "feeWei": "1432800000000",
+    "bnbSpent": "0.0000014328"
+  },
+  "ownershipTransferred": {
+    "previousOwner": "0xb3C54ca96De0dED4Ca0151F629ff9781506ba261",
+    "newOwner": "0xa2792fBDCc8A8AaC364053431D44E0a8D335E166",
+    "indexerOwner": "0xa2792fBDCc8A8AaC364053431D44E0a8D335E166",
+    "rpcOwner": "0xa2792fBDCc8A8AaC364053431D44E0a8D335E166",
+    "indexerOwnerRpcMatch": true
+  },
+  "taxState": {
+    "before": {
+      "bank": "0xFA4d34c46e86058e672936fa03cfd79F4C7A4b3c",
+      "reward": "0x0Fd21cf643211d067A18A416DA219827dA26E288",
+      "autoLP": "0xE87F6975Fa3d4F3D56Dce49fc978884285A3eD85"
+    },
+    "after": {
+      "bank": "0xFA4d34c46e86058e672936fa03cfd79F4C7A4b3c",
+      "reward": "0x0Fd21cf643211d067A18A416DA219827dA26E288",
+      "autoLP": "0xE87F6975Fa3d4F3D56Dce49fc978884285A3eD85"
+    },
+    "taxBps": {
+      "total": 30,
+      "trueBurn": 10,
+      "bank": 10,
+      "reward": 5,
+      "autoLP": 5
+    },
+    "taxRedirectMainnet": "NOT_EXECUTED",
+    "oldBankTaxExemption": "PRESENT",
+    "formerOwnerTaxExemption": "PRESENT"
+  },
+  "authorityValidation": {
+    "oldOwnerDirectSetTaxWallets": "BLOCKED",
+    "oldOwnerDirectSetTaxExempt": "BLOCKED",
+    "oldOwnerDirectSetMarketMakerPair": "BLOCKED",
+    "oldOwnerDirectTransferOwnership": "BLOCKED",
+    "bankGovernanceOwnerAuthority": "PASS",
+    "motherProposerRole": true,
+    "jadeApproverRole": true,
+    "governanceDelaySeconds": 3600,
+    "validationMode": "READ_ONLY_ETH_CALL"
+  },
+  "phase2State": {
+    "before": {
+      "eligibility": "LIVE_ACTIVE",
+      "capitalCommitment": "LIVE_ACTIVE",
+      "reserveRedemption": "LIVE_INACTIVE",
+      "redemptionEnabled": false
+    },
+    "after": {
+      "eligibility": "LIVE_ACTIVE",
+      "capitalCommitment": "LIVE_ACTIVE",
+      "reserveRedemption": "LIVE_INACTIVE",
+      "redemptionEnabled": false
+    }
+  },
+  "mainnetTransactions": {
+    "authorized": 1,
+    "sent": 1,
+    "setTaxWallets": 0,
+    "setTaxExempt": 0,
+    "setMarketMakerPair": 0,
+    "reserveActivation": 0,
+    "redemptionEnable": 0,
+    "redemption": 0
+  },
+  "secretMaterialRecorded": false
+}

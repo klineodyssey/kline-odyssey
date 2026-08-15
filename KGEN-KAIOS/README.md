@@ -11,10 +11,11 @@
 The review-only KGEN -> KAIOS -> KUFO -> KSHIP implementation is under
 `contracts/`, with a pinned Solidity 0.8.24 test harness in this directory.
 The package includes unsigned planning and fork-rehearsal tooling. KAIOS Genesis and the
-bank system are live. Phase 2 Stage 2B is complete: CelestialEligibility and
+bank system are live. Phase 2 Stage 2C-0 is complete: CelestialEligibility and
 CelestialCapitalCommitment are active; KGENReserveRedemption is inactive with redemption
-disabled. KGEN tax routing and ownership remain unchanged. No live Capital commitment was
-made, and Reserve redemption plus all Stage 2C economic writes remain disabled.
+disabled; and formal KGEN ownership is held by delayed BankGovernance. KGEN tax routing
+remains unchanged. No live Capital commitment was made, and Reserve redemption plus all
+Stage 2C-1/2C-2 economic writes remain disabled.
 
 | Entry | Purpose |
 |---|---|
@@ -88,6 +89,8 @@ made, and Reserve redemption plus all Stage 2C economic writes remain disabled.
 | `reports/KAIOS_CIVILIZATION_PHASE2_MAINNET_STAGE2A_2026-08-15.md` | Human-readable Stage 2A activation and isolation evidence |
 | `reports/KAIOS_CIVILIZATION_PHASE2_MAINNET_STAGE2B_2026-08-15.json` | Sanitized BSC Mainnet Stage 2B activation/unpause receipts, independent governance delays, intermediate safety gate and final read-model/indexer evidence |
 | `reports/KAIOS_CIVILIZATION_PHASE2_MAINNET_STAGE2B_2026-08-15.md` | Human-readable Stage 2B Capital activation and governed-unpause evidence |
+| `reports/KAIOS_CIVILIZATION_PHASE2_MAINNET_STAGE2C0_2026-08-15.json` | Sanitized BSC Mainnet KGEN ownership-migration receipt, event, tax/module state and owner-authority evidence |
+| `reports/KAIOS_CIVILIZATION_PHASE2_MAINNET_STAGE2C0_2026-08-15.md` | Human-readable Stage 2C-0 ownership migration and unchanged-economic-state evidence |
 
 ## Purpose
 
