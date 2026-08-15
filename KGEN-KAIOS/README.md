@@ -11,11 +11,12 @@
 The review-only KGEN -> KAIOS -> KUFO -> KSHIP implementation is under
 `contracts/`, with a pinned Solidity 0.8.24 test harness in this directory.
 The package includes unsigned planning and fork-rehearsal tooling. KAIOS Genesis and the
-bank system are live. Phase 2 Stage 2C-0 is complete: CelestialEligibility and
-CelestialCapitalCommitment are active; KGENReserveRedemption is inactive with redemption
-disabled; and formal KGEN ownership is held by delayed BankGovernance. KGEN tax routing
-remains unchanged. No live Capital commitment was made, and Reserve redemption plus all
-Stage 2C-1/2C-2 economic writes remain disabled.
+bank system are live. Phase 2 Stage 2C-1 is complete: CelestialEligibility and
+CelestialCapitalCommitment are active; KGENReserveRedemption is registry-inactive with
+redemption disabled; formal KGEN ownership is held by delayed BankGovernance; and the
+fixed 0.10% Bank-tax receiver is now KGENReserveRedemption. Reward, AutoLP and all fixed
+tax rates remain unchanged. The Reserve is in passive accumulation mode; no live Capital
+commitment, redemption, exemption cleanup or Stage 2C-2 write was performed.
 
 | Entry | Purpose |
 |---|---|
@@ -91,6 +92,8 @@ Stage 2C-1/2C-2 economic writes remain disabled.
 | `reports/KAIOS_CIVILIZATION_PHASE2_MAINNET_STAGE2B_2026-08-15.md` | Human-readable Stage 2B Capital activation and governed-unpause evidence |
 | `reports/KAIOS_CIVILIZATION_PHASE2_MAINNET_STAGE2C0_2026-08-15.json` | Sanitized BSC Mainnet KGEN ownership-migration receipt, event, tax/module state and owner-authority evidence |
 | `reports/KAIOS_CIVILIZATION_PHASE2_MAINNET_STAGE2C0_2026-08-15.md` | Human-readable Stage 2C-0 ownership migration and unchanged-economic-state evidence |
+| `reports/KAIOS_CIVILIZATION_PHASE2_MAINNET_STAGE2C1_2026-08-15.json` | Sanitized BSC Mainnet delayed-governance KGEN Bank-tax redirect, unchanged-rate/module state and observability evidence |
+| `reports/KAIOS_CIVILIZATION_PHASE2_MAINNET_STAGE2C1_2026-08-15.md` | Human-readable Stage 2C-1 tax redirect and Reserve accumulation-mode evidence |
 
 ## Purpose
 

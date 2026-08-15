@@ -22,6 +22,8 @@
 |---|---|---|---|
 | Stage 2C-0 machine-readable KGEN ownership migration | `KGEN-KAIOS/reports/KAIOS_CIVILIZATION_PHASE2_MAINNET_STAGE2C0_2026-08-15.json` | BSC Mainnet chainId 56 | PASS |
 | Stage 2C-0 human-readable KGEN ownership migration | `KGEN-KAIOS/reports/KAIOS_CIVILIZATION_PHASE2_MAINNET_STAGE2C0_2026-08-15.md` | BSC Mainnet chainId 56 | PASS |
+| Stage 2C-1 machine-readable KGEN Bank-tax redirect | `KGEN-KAIOS/reports/KAIOS_CIVILIZATION_PHASE2_MAINNET_STAGE2C1_2026-08-15.json` | BSC Mainnet chainId 56 | PASS |
+| Stage 2C-1 human-readable KGEN Bank-tax redirect | `KGEN-KAIOS/reports/KAIOS_CIVILIZATION_PHASE2_MAINNET_STAGE2C1_2026-08-15.md` | BSC Mainnet chainId 56 | PASS |
 
 ## Report Rules
 
