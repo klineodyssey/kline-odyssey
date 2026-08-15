@@ -3,8 +3,8 @@
   "auditedAt": "2026-08-09T00:00:00+08:00",
   "status": "PASS",
   "scope": {
-    "repositoryTrackedFiles": 3736,
-    "repositoryReadableTextFiles": 3734,
+    "repositoryTrackedFiles": 3740,
+    "repositoryReadableTextFiles": 3738,
     "repositoryPdfFiles": 33,
     "repositoryPdfPages": 222,
     "externalPackage": {
@@ -16,7 +16,7 @@
       "pdfPages": 0,
       "pdfExtraction": "NOT_REQUESTED"
     },
-    "scannedFilesTotal": 3736
+    "scannedFilesTotal": 3740
   },
   "finalCanon": {
     "18888": "LINGXIAO_CELESTIAL_BANK",
@@ -601,7 +601,7 @@
     },
     {
       "path": "KGEN-KAIOS/tests/token-surface.security.test.mjs",
-      "line": 402,
+      "line": 476,
       "pattern": "TEN_THOUSAND_KAIOS",
       "legacyScale": true,
       "classification": "TEST_FIXTURE",

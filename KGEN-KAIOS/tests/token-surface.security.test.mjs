@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import path from "node:path";
 import { after, test } from "node:test";
-import { ZeroAddress, getCreateAddress, id, keccak256, parseEther, sha256 } from "ethers";
+import { ZeroAddress, getAddress, getCreateAddress, id, keccak256, parseEther, sha256 } from "ethers";
 import {
   ETHER,
   artifact,
@@ -18,6 +18,7 @@ import {
   createPhase2IndexState,
   reducePhase2IndexedEvent,
   resolveActivationState,
+  verifyIndexedKgenOwner,
 } from "../frontend-adapter/kaiosCivilizationPhase2Adapter.mjs";
 
 const root = path.resolve(import.meta.dirname, "..");
@@ -253,6 +254,79 @@ test("Phase 2 index reducer reconstructs activation governance and never guesses
   assert.equal(state.proposals["0x03"].executed, true);
   assert.equal(state.kgenTaxWallets.bank, PHASE2_FORMAL.reserveRedemption);
   assert.equal(state.kgenInflows[0].classification, "UNCLASSIFIED_KGEN_INFLOW");
+});
+
+test("Phase 2 index reducer reconstructs dynamic KGEN ownership in canonical event order", () => {
+  const deployer = "0xb3C54ca96De0dED4Ca0151F629ff9781506ba261";
+  const governance = PHASE2_FORMAL.bankGovernance;
+  const futureOwner = "0x00000000000000000000000000000000000000f1";
+  const event = ({ previousOwner, newOwner, blockNumber, transactionIndex, logIndex, transactionHash, removed = false }) => ({
+    contract: "KGEN_Token_V7_5_2",
+    contractAddress: PHASE2_FORMAL.kgen,
+    event: "OwnershipTransferred",
+    blockNumber,
+    transactionIndex,
+    logIndex,
+    transactionHash,
+    removed,
+    args: { previousOwner, newOwner },
+  });
+  let state = createPhase2IndexState();
+  state = reducePhase2IndexedEvent(state, event({
+    previousOwner: ZeroAddress, newOwner: deployer, blockNumber: 10, transactionIndex: 0, logIndex: 0,
+    transactionHash: `0x${"10".repeat(32)}`,
+  }));
+  assert.equal(state.kgen.owner, deployer);
+  state = reducePhase2IndexedEvent(state, event({
+    previousOwner: deployer, newOwner: governance, blockNumber: 20, transactionIndex: 1, logIndex: 3,
+    transactionHash: `0x${"20".repeat(32)}`,
+  }));
+  assert.equal(state.kgen.owner, governance);
+  assert.equal(state.kgen.previousOwner, deployer);
+  assert.equal(state.kgen.ownershipChangedAtBlock, 20);
+  assert.equal(state.kgen.ownershipChangedAtTransactionIndex, 1);
+  assert.equal(state.kgen.ownershipChangedAtLogIndex, 3);
+
+  state = reducePhase2IndexedEvent(state, event({
+    previousOwner: deployer, newOwner: futureOwner, blockNumber: 19, transactionIndex: 9, logIndex: 99,
+    transactionHash: `0x${"19".repeat(32)}`,
+  }));
+  assert.equal(state.kgen.owner, governance, "an out-of-order stale event must not replace the canonical owner");
+
+  state = reducePhase2IndexedEvent(state, event({
+    previousOwner: governance, newOwner: futureOwner, blockNumber: 20, transactionIndex: 2, logIndex: 5,
+    transactionHash: `0x${"21".repeat(32)}`,
+  }));
+  assert.equal(state.kgen.owner, getAddress(futureOwner));
+  assert.equal(state.kgen.previousOwner, governance);
+
+  state = reducePhase2IndexedEvent(state, event({
+    previousOwner: futureOwner, newOwner: deployer, blockNumber: 21, transactionIndex: 0, logIndex: 0,
+    transactionHash: `0x${"22".repeat(32)}`, removed: true,
+  }));
+  assert.equal(state.kgen.owner, getAddress(futureOwner), "removed logs are excluded from the canonical replay");
+});
+
+test("Phase 2 read model independently verifies indexed KGEN owner and fails closed on mismatch", () => {
+  const owner = "0xb3C54ca96De0dED4Ca0151F629ff9781506ba261";
+  const state = createPhase2IndexState();
+  state.kgen.owner = owner;
+  const verified = verifyIndexedKgenOwner(state, owner);
+  assert.equal(verified.currentKgenOwner, owner);
+  assert.equal(verified.ownerSource, "INDEXER_AND_RPC");
+  assert.equal(verified.ownerVerified, true);
+  assert.equal(verified.governanceSensitiveWriteAllowed, true);
+
+  const mismatch = verifyIndexedKgenOwner(state, PHASE2_FORMAL.bankGovernance);
+  assert.equal(mismatch.ownerSource, "INDEXER_RPC_MISMATCH");
+  assert.equal(mismatch.ownerVerified, false);
+  assert.equal(mismatch.errorMismatch, true);
+  assert.equal(mismatch.governanceSensitiveWriteAllowed, false);
+
+  const rpcOnly = verifyIndexedKgenOwner(createPhase2IndexState(), owner);
+  assert.equal(rpcOnly.ownerSource, "RPC_ONLY");
+  assert.equal(rpcOnly.ownerVerified, false);
+  assert.equal(rpcOnly.governanceSensitiveWriteAllowed, false);
 });
 
 test("pre-sign package contains no executable Mainnet transaction script or formal deployed-address manifest", () => {

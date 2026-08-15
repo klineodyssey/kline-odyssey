@@ -23,6 +23,7 @@
           "event": { "enum": ["AlchemyMassThresholdPassed", "BankModuleInitialized", "CandidateStatusChanged", "CapitalCommitmentInitialized", "CapitalCommitmentPaused", "CapitalCommitmentUnpaused", "CapitalCommitted", "CapitalReleased", "CapitalReviewStatusChanged", "ConstitutionHistoryRecorded", "ContributionRecorded", "ContributionStatusChanged", "EligibilityInitialized", "EligibilityPaused", "EligibilityUnpaused", "GovernanceProposalApproved", "GovernanceProposalCancelled", "GovernanceProposalCreated", "GovernanceProposalExecuted", "Initialized", "LifeBound", "MinimumLockPeriodUpdated", "ModuleConfigured", "ModuleGovernanceFinalized", "OwnershipTransferred", "RedemptionAvailabilityChanged", "RedemptionCompleted", "RedemptionInitialized", "RedemptionPaused", "RedemptionRiskConfigured", "RedemptionUnpaused", "ReserveRedemptionEligibilitySet", "RoleAdminChanged", "RoleGranted", "RoleRevoked", "SetTaxWallets", "Transfer", "Upgraded"] },
           "transactionHash": { "type": "string", "pattern": "^0x[0-9a-fA-F]{64}$" },
           "blockNumber": { "type": "integer", "minimum": 0 },
+          "transactionIndex": { "type": "integer", "minimum": 0 },
           "blockHash": { "type": "string", "pattern": "^0x[0-9a-fA-F]{64}$" },
           "logIndex": { "type": "integer", "minimum": 0 },
           "removed": { "type": "boolean" },

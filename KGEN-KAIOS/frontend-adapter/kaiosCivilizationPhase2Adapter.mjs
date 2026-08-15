@@ -67,6 +67,7 @@ const KGEN_ABI = [
   "function rewardWallet() view returns (address)",
   "function autoLPWallet() view returns (address)",
   "function balanceOf(address) view returns (uint256)",
+  "event OwnershipTransferred(address indexed previousOwner,address indexed newOwner)",
   "event SetTaxWallets(address indexed bank,address indexed reward,address indexed autolp)",
   "event Transfer(address indexed from,address indexed to,uint256 value)",
 ];
@@ -76,6 +77,49 @@ const same = (left, right) => {
   try { return getAddress(left) === getAddress(right); } catch { return false; }
 };
 const hasCode = (code) => typeof code === "string" && code !== "0x";
+const eventPosition = (event) => {
+  if (event?.blockNumber === null || event?.blockNumber === undefined
+    || event?.logIndex === null || event?.logIndex === undefined) return null;
+  if (!Number.isInteger(Number(event?.blockNumber)) || !Number.isInteger(Number(event?.logIndex))) return null;
+  return {
+    blockNumber: Number(event.blockNumber),
+    transactionIndex: Number.isInteger(Number(event.transactionIndex)) ? Number(event.transactionIndex) : -1,
+    logIndex: Number(event.logIndex),
+  };
+};
+const compareEventPosition = (left, right) => {
+  for (const key of ["blockNumber", "transactionIndex", "logIndex"]) {
+    if (left[key] !== right[key]) return left[key] < right[key] ? -1 : 1;
+  }
+  return 0;
+};
+
+export function verifyIndexedKgenOwner(indexedState, rpcOwner) {
+  const canonicalRpcOwner = getAddress(rpcOwner);
+  const indexedOwner = indexedState?.kgen?.owner;
+  if (!indexedOwner) {
+    return {
+      currentKgenOwner: canonicalRpcOwner,
+      indexedKgenOwner: null,
+      rpcKgenOwner: canonicalRpcOwner,
+      ownerSource: "RPC_ONLY",
+      ownerVerified: false,
+      errorMismatch: false,
+      governanceSensitiveWriteAllowed: false,
+    };
+  }
+  const canonicalIndexedOwner = getAddress(indexedOwner);
+  const ownerVerified = canonicalIndexedOwner === canonicalRpcOwner;
+  return {
+    currentKgenOwner: canonicalRpcOwner,
+    indexedKgenOwner: canonicalIndexedOwner,
+    rpcKgenOwner: canonicalRpcOwner,
+    ownerSource: ownerVerified ? "INDEXER_AND_RPC" : "INDEXER_RPC_MISMATCH",
+    ownerVerified,
+    errorMismatch: !ownerVerified,
+    governanceSensitiveWriteAllowed: ownerVerified,
+  };
+}
 
 export function resolveActivationState(kind, snapshot) {
   const mismatch = snapshot?.mismatch || snapshot?.unknown || snapshot?.chainId !== 56
@@ -106,6 +150,12 @@ export function resolveActivationState(kind, snapshot) {
 export function createPhase2IndexState() {
   return {
     modules: {}, proposals: {}, kgenTaxWallets: null, kgenInflows: [],
+    kgen: {
+      owner: null, previousOwner: null, ownerSource: null, ownerVerified: false,
+      ownershipChangedAtBlock: null, ownershipChangedAtTransactionIndex: null,
+      ownershipChangedAtLogIndex: null, ownershipChangedAtTx: null,
+      ownershipChangedAtTimestamp: null,
+    },
     eligibility: { paused: null, governanceFinalized: false, records: [] },
     reserveRedemption: { paused: null, governanceFinalized: false, redemptionEnabled: null, requests: [] },
     capitalCommitment: { paused: null, governanceFinalized: false, commitments: [] },
@@ -115,6 +165,7 @@ export function createPhase2IndexState() {
 
 export function reducePhase2IndexedEvent(previous, event) {
   const state = structuredClone(previous);
+  if (event.removed === true) return state;
   const args = event.args ?? {};
   const moduleKey = event.contract === "CelestialEligibility_Upgradeable" ? "eligibility"
     : event.contract === "KGENReserveRedemption_Upgradeable" ? "reserveRedemption"
@@ -139,6 +190,34 @@ export function reducePhase2IndexedEvent(previous, event) {
   } else if (event.event === "GovernanceProposalCancelled") {
     const proposal = state.proposals[text(args.proposalId)] ?? {};
     state.proposals[text(args.proposalId)] = { ...proposal, cancelled: true };
+  } else if (
+    event.event === "OwnershipTransferred"
+    && event.contract === "KGEN_Token_V7_5_2"
+    && same(event.contractAddress, PHASE2_FORMAL.kgen)
+  ) {
+    const nextPosition = eventPosition(event);
+    const current = state.kgen ?? createPhase2IndexState().kgen;
+    const currentPosition = current.ownershipChangedAtBlock === null ? null : {
+      blockNumber: Number(current.ownershipChangedAtBlock),
+      transactionIndex: current.ownershipChangedAtTransactionIndex === null ? -1 : Number(current.ownershipChangedAtTransactionIndex),
+      logIndex: Number(current.ownershipChangedAtLogIndex),
+    };
+    const isNewer = nextPosition && (!currentPosition || compareEventPosition(nextPosition, currentPosition) > 0);
+    const isIdempotentReplay = nextPosition && currentPosition
+      && compareEventPosition(nextPosition, currentPosition) === 0
+      && event.transactionHash === current.ownershipChangedAtTx
+      && same(args.newOwner, current.owner);
+    if (isNewer || (!currentPosition && !nextPosition) || isIdempotentReplay) {
+      state.kgen = {
+        owner: getAddress(args.newOwner), previousOwner: getAddress(args.previousOwner),
+        ownerSource: "INDEXED_OWNERSHIP_TRANSFER", ownerVerified: false,
+        ownershipChangedAtBlock: nextPosition?.blockNumber ?? event.blockNumber ?? null,
+        ownershipChangedAtTransactionIndex: nextPosition?.transactionIndex ?? event.transactionIndex ?? null,
+        ownershipChangedAtLogIndex: nextPosition?.logIndex ?? event.logIndex ?? null,
+        ownershipChangedAtTx: event.transactionHash ?? null,
+        ownershipChangedAtTimestamp: event.blockTimestamp ?? event.timestamp ?? null,
+      };
+    }
   } else if (event.event === "SetTaxWallets") {
     state.kgenTaxWallets = { bank: args.bank, reward: args.reward, autoLP: args.autolp, transactionHash: event.transactionHash };
   } else if (
@@ -199,8 +278,9 @@ export class KaiosCivilizationPhase2Adapter {
 
   async systemStatus({
     humanActivation = {}, lifeId = null, kaiosIn = 0n, proposalIds = [],
-    reserveActivationMarginConfirmed = false,
+    reserveActivationMarginConfirmed = false, indexedState = null,
   } = {}) {
+    let kgenOwnership = null;
     try {
       const network = await this.provider.getNetwork();
       const chainId = Number(network.chainId);
@@ -241,6 +321,10 @@ export class KaiosCivilizationPhase2Adapter {
         redemptionEnabled, reserveAboveFloor, activationMarginConfirmed: reserveActivationMarginConfirmed,
         taxReceiverMatches: same(bankWallet, PHASE2_FORMAL.reserveRedemption),
       };
+      kgenOwnership = verifyIndexedKgenOwner(indexedState, kgenOwner);
+      if (indexedState && kgenOwnership.errorMismatch) throw new Error(
+        `KGEN_OWNER_INDEX_RPC_MISMATCH:${kgenOwnership.indexedKgenOwner}:${kgenOwnership.rpcKgenOwner}`,
+      );
       let beneficiary = null, eligible = false, limitsValid = false, dailyLimitsValid = false;
       if (lifeId) {
         [beneficiary, eligible] = await Promise.all([
@@ -293,12 +377,24 @@ export class KaiosCivilizationPhase2Adapter {
           activationState: reserveState, hardFloorKgen: text(minimumKgenReserve),
           activationMargin: "HUMAN_DECISION_REQUIRED", wording: PHASE2_WORDING,
         },
-        kgen: { owner: kgenOwner, bankWallet, rewardWallet, autoLPWallet },
+        kgen: {
+          owner: kgenOwner, currentKgenOwner: kgenOwnership.currentKgenOwner,
+          indexedOwner: kgenOwnership.indexedKgenOwner, rpcOwner: kgenOwnership.rpcKgenOwner,
+          ownerSource: kgenOwnership.ownerSource, ownerVerified: kgenOwnership.ownerVerified,
+          governanceSensitiveWriteAllowed: kgenOwnership.governanceSensitiveWriteAllowed,
+          bankWallet, rewardWallet, autoLPWallet,
+        },
         governance: { delaySeconds: Number(await this.governance.governanceDelay()), proposals: pendingProposals },
       };
     } catch (error) {
       const failed = { registered: false, registryActive: false, paused: null, governanceFinalized: false, runtimeReady: false, writeAllowed: false, activationState: ACTIVATION_STATE.ERROR_MISMATCH };
-      return { chainId: null, error: error.shortMessage ?? error.message, eligibility: { ...failed }, capitalCommitment: { ...failed }, reserveRedemption: { ...failed }, kgen: null, governance: null };
+      const failedKgen = kgenOwnership ? {
+        owner: kgenOwnership.currentKgenOwner, currentKgenOwner: kgenOwnership.currentKgenOwner,
+        indexedOwner: kgenOwnership.indexedKgenOwner, rpcOwner: kgenOwnership.rpcKgenOwner,
+        ownerSource: kgenOwnership.ownerSource, ownerVerified: false,
+        governanceSensitiveWriteAllowed: false,
+      } : null;
+      return { chainId: null, error: error.shortMessage ?? error.message, eligibility: { ...failed }, capitalCommitment: { ...failed }, reserveRedemption: { ...failed }, kgen: failedKgen, governance: null };
     }
   }
 
