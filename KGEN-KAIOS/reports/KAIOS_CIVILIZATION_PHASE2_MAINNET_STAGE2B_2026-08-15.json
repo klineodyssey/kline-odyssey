@@ -1,0 +1,214 @@
+{
+  "schema": "KAIOS_CIVILIZATION_PHASE2_MAINNET_STAGE2B_EVIDENCE_V1",
+  "status": "PASS",
+  "network": "BSC Mainnet",
+  "chainId": 56,
+  "sourceHead": "cad5a0016694064720828114dad9dd72b4c6d3f4",
+  "activationBlock": 115965212,
+  "activationTimestamp": 1786745030,
+  "activationTimestampUtc": "2026-08-14T22:03:50Z",
+  "activationTimestampAsiaTaipei": "2026-08-15T06:03:50+08:00",
+  "unpauseBlock": 115973222,
+  "unpauseTimestamp": 1786748634,
+  "unpauseTimestampUtc": "2026-08-14T23:03:54Z",
+  "unpauseTimestampAsiaTaipei": "2026-08-15T07:03:54+08:00",
+  "formalAddresses": {
+    "eligibilityProxy": "0xA50743fd0fe022714831482355A27559027368F9",
+    "capitalCommitmentProxy": "0x04fC1536EC51E8CCaAcB961E5Af6151De47b078c",
+    "reserveRedemptionProxy": "0xA06eF53c9AD4Af739FD13Ca1Ded446437134b0EE",
+    "bank18888": "0x11d34c0F723aCd334B8F95076f73F07f06202aab",
+    "bankGovernance": "0xa2792fBDCc8A8AaC364053431D44E0a8D335E166",
+    "kgen": "0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be",
+    "furnace18911": "0x44c2CA9B9eba19d8F79F6E1786fd9D25e73738e1"
+  },
+  "governance": {
+    "mother": "0xCd60BF474e691F2484950a0276Eaf507616Ca4b9",
+    "jadeEmperor": "0xc15E08834fCA9F2d3462a3f8f0BC30524D6dd756",
+    "guanyin": "0xEBEeAC6d09D2d28Db8010b0923442C9Eb2b702FE",
+    "delaySeconds": 3600,
+    "activation": {
+      "proposalId": "0xc50ee2680f47b54339bfd0fcd2eb33288200ad7d533240b9253e3f6c650e2696",
+      "calldataHash": "0x49972fba9a4f1dbbb0009823ae6b9904f19dc4077d466ae601a04da4b4bf42e7",
+      "executableAt": 1786745028,
+      "executedAt": 1786745030,
+      "delaySatisfied": true
+    },
+    "unpause": {
+      "proposalId": "0x9b296398752833323dec48385f5fcbc6351038cb8c9643ce79a4450f42a2077a",
+      "calldataHash": "0x2e0b3eaf0cdee5e3edb3587a639f993dc24c3ed89ce7321ef60ccd2d17df98b1",
+      "executableAt": 1786748633,
+      "executedAt": 1786748634,
+      "createdOnlyAfterIntermediateGate": true,
+      "delaySatisfied": true
+    }
+  },
+  "transactions": {
+    "capitalActivationProposal": {
+      "transactionHash": "0x8872f2b63a5b85d656412e738fc64d36bcce965149fcbd8e2f7f33e78020fe80",
+      "from": "0xCd60BF474e691F2484950a0276Eaf507616Ca4b9",
+      "to": "0xa2792fBDCc8A8AaC364053431D44E0a8D335E166",
+      "nonce": 47,
+      "blockNumber": 115957209,
+      "blockHash": "0x7526ba9e8c305bcf2bb477cd00a2b05f0b16e2899d93ee53398edee34e1db464",
+      "timestamp": 1786741428,
+      "gasUsed": "111392",
+      "gasPriceWei": "50000000",
+      "feeWei": "5569600000000",
+      "status": "PASS"
+    },
+    "capitalActivationApproval": {
+      "transactionHash": "0x4f046dc310b46196d71ce9eae63529560d769ddf8f119029549cdfae40aee389",
+      "from": "0xc15E08834fCA9F2d3462a3f8f0BC30524D6dd756",
+      "to": "0xa2792fBDCc8A8AaC364053431D44E0a8D335E166",
+      "nonce": 6,
+      "blockNumber": 115957215,
+      "blockHash": "0x379c6eea9cd91597267e539c0b66524c9c04e372194624ee872d73850ed8a9dc",
+      "timestamp": 1786741431,
+      "gasUsed": "57655",
+      "gasPriceWei": "50000000",
+      "feeWei": "2882750000000",
+      "status": "PASS"
+    },
+    "capitalActivationExecution": {
+      "transactionHash": "0x62e2c339c6e5b973dd1922e1be847bc6d51399d7bdd46c2b5dbe072149069641",
+      "from": "0xCd60BF474e691F2484950a0276Eaf507616Ca4b9",
+      "to": "0xa2792fBDCc8A8AaC364053431D44E0a8D335E166",
+      "nonce": 48,
+      "blockNumber": 115965212,
+      "blockHash": "0xca2379a4f56dfd7217aa2fdd3b5f95aa470b3dd336cd52f2c12e5ec17f8e0447",
+      "timestamp": 1786745030,
+      "gasUsed": "81732",
+      "gasPriceWei": "50000000",
+      "feeWei": "4086600000000",
+      "status": "PASS"
+    },
+    "capitalUnpauseProposal": {
+      "transactionHash": "0x577e30b8d4165c44b5a70d103aa57dfe663fe9967a355a4fea91ba3a383f2a3b",
+      "from": "0xCd60BF474e691F2484950a0276Eaf507616Ca4b9",
+      "to": "0xa2792fBDCc8A8AaC364053431D44E0a8D335E166",
+      "nonce": 49,
+      "blockNumber": 115965219,
+      "blockHash": "0xa9c384f21d6d3fb769dcdd90bfc78fce743169388c55b4629e687b313c9f93aa",
+      "timestamp": 1786745033,
+      "gasUsed": "109508",
+      "gasPriceWei": "50000000",
+      "feeWei": "5475400000000",
+      "status": "PASS"
+    },
+    "capitalUnpauseApproval": {
+      "transactionHash": "0x9e46edc8b4421086d65b797e05aac2b16a34a595141fbd8a63b4bf21ffd49e08",
+      "from": "0xc15E08834fCA9F2d3462a3f8f0BC30524D6dd756",
+      "to": "0xa2792fBDCc8A8AaC364053431D44E0a8D335E166",
+      "nonce": 7,
+      "blockNumber": 115965225,
+      "blockHash": "0xd98ac07697b7bf9c8bedf9bc7bdd7c5d30d1b0bb2ef572b7952770a191c960ef",
+      "timestamp": 1786745036,
+      "gasUsed": "57667",
+      "gasPriceWei": "50000000",
+      "feeWei": "2883350000000",
+      "status": "PASS"
+    },
+    "capitalUnpauseExecution": {
+      "transactionHash": "0x428c384bd3fa60a18bb898e97f06dc65f9553de72456da2318569771bf023156",
+      "from": "0xCd60BF474e691F2484950a0276Eaf507616Ca4b9",
+      "to": "0xa2792fBDCc8A8AaC364053431D44E0a8D335E166",
+      "nonce": 50,
+      "blockNumber": 115973222,
+      "blockHash": "0x95d6410af6dab13348164eee22d7b24270072c9fc1a52e74982de8a68b621055",
+      "timestamp": 1786748634,
+      "gasUsed": "61101",
+      "gasPriceWei": "50000000",
+      "feeWei": "3055050000000",
+      "status": "PASS"
+    }
+  },
+  "gas": {
+    "totalGasUsed": "479055",
+    "totalFeeWei": "23952750000000",
+    "totalBnbSpent": "0.00002395275"
+  },
+  "stateTransition": {
+    "before": {
+      "eligibility": "LIVE_ACTIVE",
+      "capitalCommitment": "LIVE_PAUSED_INACTIVE",
+      "reserveRedemption": "LIVE_INACTIVE"
+    },
+    "intermediate": {
+      "eligibility": "LIVE_ACTIVE",
+      "capitalCommitment": "LIVE_ACTIVE_PAUSED",
+      "reserveRedemption": "LIVE_INACTIVE",
+      "frontendCapital": "PAUSED",
+      "newCommitment": "BLOCKED"
+    },
+    "after": {
+      "eligibility": "LIVE_ACTIVE",
+      "capitalCommitment": "LIVE_ACTIVE",
+      "reserveRedemption": "LIVE_INACTIVE",
+      "redemptionEnabled": false,
+      "frontendCapital": "ACTIVE"
+    }
+  },
+  "capitalRuntime": {
+    "minimumCommitmentWei": "5000000000000000000000000",
+    "minimumLockPeriodSeconds": 2592000,
+    "totalCommittedPrincipalWei": "0",
+    "kaiosBalanceWei": "0",
+    "liabilityInvariantHolds": true,
+    "kaiosBurned": false,
+    "kgenMoved": false,
+    "forfeiture": false,
+    "automaticSeat": false
+  },
+  "frontendReadModel": {
+    "registered": true,
+    "registryActive": true,
+    "paused": false,
+    "governanceFinalized": true,
+    "runtimeReady": true,
+    "writeAllowed": true,
+    "activationState": "ACTIVE",
+    "status": "PASS"
+  },
+  "indexer": {
+    "status": "PASS",
+    "eventsObserved": [
+      "GovernanceProposalCreated",
+      "GovernanceProposalApproved",
+      "ModuleConfigured",
+      "GovernanceProposalExecuted",
+      "GovernanceProposalCreated",
+      "GovernanceProposalApproved",
+      "CapitalCommitmentUnpaused",
+      "GovernanceProposalExecuted"
+    ],
+    "capitalModuleActive": true,
+    "capitalPaused": false,
+    "bothProposalsApprovedAndExecuted": true,
+    "missingRequiredEvents": []
+  },
+  "kgenState": {
+    "owner": "0xb3C54ca96De0dED4Ca0151F629ff9781506ba261",
+    "bankWallet": "0xFA4d34c46e86058e672936fa03cfd79F4C7A4b3c",
+    "rewardWallet": "0x0Fd21cf643211d067A18A416DA219827dA26E288",
+    "autoLPWallet": "0xE87F6975Fa3d4F3D56Dce49fc978884285A3eD85",
+    "unchanged": true,
+    "taxRedirectExecuted": false
+  },
+  "security": {
+    "capitalIntermediateActivePaused": "PASS",
+    "capitalGovernedUnpause": "PASS",
+    "capitalKaiosBurn": "NONE",
+    "capitalKgenMovement": "NONE",
+    "capitalBeneficiaryRedirect": "BLOCKED_BY_FROZEN_RUNTIME_AND_FORK_TESTS",
+    "capitalEarlyRelease": "BLOCKED_BY_FROZEN_RUNTIME_AND_FORK_TESTS",
+    "capitalMatureRelease": "PASS_BY_FROZEN_RUNTIME_AND_FORK_TESTS",
+    "capitalReleaseWhilePaused": "PASS_BY_FROZEN_RUNTIME_AND_FORK_TESTS",
+    "capitalForfeiture": "NONE",
+    "automaticCelestialSeat": "NONE",
+    "liveFiveMillionKaiosCommitmentExecuted": false,
+    "reserveActivationExecuted": false,
+    "redemptionEnabled": false,
+    "kgenTaxRedirectExecuted": false,
+    "secretRecorded": false
+  }
+}

@@ -1,0 +1,141 @@
+{
+  "schema": "KAIOS_CIVILIZATION_PHASE2_MAINNET_STAGE2A_EVIDENCE_V1",
+  "status": "PASS",
+  "network": "BSC Mainnet",
+  "chainId": 56,
+  "sourceHead": "6f35f64e1269b341f3cc7021e6f2865bda138c32",
+  "activationBlock": 115948920,
+  "activationTimestamp": 1786737697,
+  "activationTimestampUtc": "2026-08-14T20:01:37.000Z",
+  "activationTimestampAsiaTaipei": "2026-08-15T04:01:37+08:00",
+  "formalAddresses": {
+    "eligibilityProxy": "0xA50743fd0fe022714831482355A27559027368F9",
+    "capitalCommitmentProxy": "0x04fC1536EC51E8CCaAcB961E5Af6151De47b078c",
+    "reserveRedemptionProxy": "0xA06eF53c9AD4Af739FD13Ca1Ded446437134b0EE",
+    "bank18888": "0x11d34c0F723aCd334B8F95076f73F07f06202aab",
+    "bankGovernance": "0xa2792fBDCc8A8AaC364053431D44E0a8D335E166",
+    "kgen": "0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be",
+    "furnace18911": "0x44c2CA9B9eba19d8F79F6E1786fd9D25e73738e1"
+  },
+  "governance": {
+    "mother": "0xCd60BF474e691F2484950a0276Eaf507616Ca4b9",
+    "jadeEmperor": "0xc15E08834fCA9F2d3462a3f8f0BC30524D6dd756",
+    "guanyin": "0xEBEeAC6d09D2d28Db8010b0923442C9Eb2b702FE",
+    "delaySeconds": 3600,
+    "proposalId": "0x6fb952a000fa2615e9fb9e93e25d62e0d527035924416aca957fb1eccd56d172",
+    "activationCalldataHash": "0x7ca0c089f2cd7b14d96e939a054e5cda3a4e3be57699381cc56b12cb6f2d21b1",
+    "executableAt": 1786737661,
+    "executedAt": 1786737697,
+    "delaySatisfied": true
+  },
+  "transactions": {
+    "capitalPrePause": {
+      "transactionHash": "0x9bf04df052d6b080e9f51ee39a2e4730b2578549aa1c3ee3e5c3387a684277fc",
+      "from": "0xEBEeAC6d09D2d28Db8010b0923442C9Eb2b702FE",
+      "to": "0x04fC1536EC51E8CCaAcB961E5Af6151De47b078c",
+      "nonce": 0,
+      "blockNumber": 115940661,
+      "blockHash": "0x81443a5ccdaef3ccbac3a2de482f26c1692f30b75b8f048607e22311363084b4",
+      "timestamp": 1786733980,
+      "gasUsed": "34863",
+      "gasPriceWei": "50000000",
+      "feeWei": "1743150000000",
+      "status": "PASS"
+    },
+    "eligibilityProposal": {
+      "transactionHash": "0x887c29045c96f38f08893f401211d2163e42e01024d342a61f988cd3243ae2bf",
+      "from": "0xCd60BF474e691F2484950a0276Eaf507616Ca4b9",
+      "to": "0xa2792fBDCc8A8AaC364053431D44E0a8D335E166",
+      "nonce": 45,
+      "blockNumber": 115940840,
+      "blockHash": "0x48af4f9076630a38be4f0bf188c0979f0a59e989d52c17a5b1f4ed1c45a38258",
+      "timestamp": 1786734061,
+      "gasUsed": "111392",
+      "gasPriceWei": "50000000",
+      "feeWei": "5569600000000",
+      "status": "PASS"
+    },
+    "eligibilityApproval": {
+      "transactionHash": "0x41f02fbaa5e7aead2a9be4dccfc27fbe16ad51f487443212e245671a65219967",
+      "from": "0xc15E08834fCA9F2d3462a3f8f0BC30524D6dd756",
+      "to": "0xa2792fBDCc8A8AaC364053431D44E0a8D335E166",
+      "nonce": 5,
+      "blockNumber": 115940946,
+      "blockHash": "0x2be7fa50a50653b77a131ddedc73957c25ac246eda867bf99827fb8e4453ba9a",
+      "timestamp": 1786734108,
+      "gasUsed": "57655",
+      "gasPriceWei": "50000000",
+      "feeWei": "2882750000000",
+      "status": "PASS"
+    },
+    "eligibilityExecution": {
+      "transactionHash": "0x861bed04da39eb6d55d801d9fc683050068521b853eef15be46169e7725f6a53",
+      "from": "0xCd60BF474e691F2484950a0276Eaf507616Ca4b9",
+      "to": "0xa2792fBDCc8A8AaC364053431D44E0a8D335E166",
+      "nonce": 46,
+      "blockNumber": 115948920,
+      "blockHash": "0x4ac3c334f8143c0f84838818e9e6b0eb6595c49080a5744a189460d8995ff9f3",
+      "timestamp": 1786737697,
+      "gasUsed": "81732",
+      "gasPriceWei": "50000000",
+      "feeWei": "4086600000000",
+      "status": "PASS"
+    }
+  },
+  "gas": {
+    "totalGasUsed": "285642",
+    "totalFeeWei": "14282100000000",
+    "totalBnbSpent": "0.0000142821"
+  },
+  "beforeState": {
+    "eligibility": "LIVE_INACTIVE_PAUSED_FALSE",
+    "capitalCommitment": "LIVE_INACTIVE_PAUSED_FALSE",
+    "reserveRedemption": "LIVE_INACTIVE_REDEMPTION_DISABLED"
+  },
+  "afterState": {
+    "eligibility": "LIVE_ACTIVE",
+    "capitalCommitment": "LIVE_PAUSED_INACTIVE",
+    "reserveRedemption": "LIVE_INACTIVE",
+    "redemptionEnabled": false,
+    "capitalCommitmentEnabled": false
+  },
+  "frontendReadModel": {
+    "eligibility": "ACTIVE",
+    "capitalCommitment": "PAUSED",
+    "reserveRedemption": "INACTIVE",
+    "status": "PASS"
+  },
+  "indexer": {
+    "status": "PASS",
+    "eventsObserved": [
+      "CapitalCommitmentPaused",
+      "GovernanceProposalCreated",
+      "GovernanceProposalApproved",
+      "ModuleConfigured",
+      "GovernanceProposalExecuted"
+    ],
+    "missingRequiredEvents": []
+  },
+  "kgenState": {
+    "owner": "0xb3C54ca96De0dED4Ca0151F629ff9781506ba261",
+    "bankWallet": "0xFA4d34c46e86058e672936fa03cfd79F4C7A4b3c",
+    "rewardWallet": "0x0Fd21cf643211d067A18A416DA219827dA26E288",
+    "autoLPWallet": "0xE87F6975Fa3d4F3D56Dce49fc978884285A3eD85",
+    "unchanged": true,
+    "taxRedirectExecuted": false
+  },
+  "security": {
+    "guanyinSignerMatch": "PASS",
+    "capitalWriteWhilePaused": "BLOCKED",
+    "eligibilityMultiBurnAggregation": "BLOCKED_BY_FROZEN_RUNTIME_AND_FORK_TESTS",
+    "eligibilityAutomaticSeat": "NONE",
+    "kgenOwnerChanged": false,
+    "kgenTaxRedirectExecuted": false,
+    "capitalActivationExecuted": false,
+    "capitalUnpauseExecuted": false,
+    "reserveActivationExecuted": false,
+    "redemptionEnabled": false,
+    "liveFiveMillionKaiosBurnTestExecuted": false,
+    "secretRecorded": false
+  }
+}

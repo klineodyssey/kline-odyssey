@@ -18,6 +18,10 @@
     "bank:api": "node tools/generate-lingxiao-bank-api.mjs",
     "bank:deployment-plan": "node scripts/prepare-lingxiao-18888-deployment.mjs",
     "bank:upgrade-plan": "node scripts/prepare-lingxiao-18888-upgrade.mjs",
+    "phase2:deployment-plan": "node scripts/prepare-kaios-civilization-phase2-deployment.mjs",
+    "phase2:uups-runtime-verify": "node scripts/verify-phase2-uups-runtime.mjs",
+    "phase2:mainnet-fork-rehearse": "node tools/rehearse-kaios-civilization-phase2-mainnet-fork.mjs",
+    "phase2:test": "node --test --test-concurrency=1 tests/phase2-civilization.integration.test.mjs tests/phase2-civilization.fuzz-invariant.test.mjs",
     "test": "node --test --test-concurrency=1 --test-reporter=spec tests/*.test.mjs",
     "test:all": "npm run compile && npm run storage:validate && npm run canon:audit && npm run lineage:verify && npm run integrity:validate && npm test"
   },

@@ -7,6 +7,9 @@
     { "moduleId": "0x24b8150af34ecded6c75de16b22b3a7fa6477e94cb23ea338a9453af3ed8961b", "contract": "ExchangeSettlement11520_Upgradeable", "version": "1.0.0", "initialState": "ACTIVE" },
     { "moduleId": "0xbcba21ba5cfe25784fa28567a77ab492bb1265a40a221a37df6a976728cd105d", "contract": "BankRiskController_Upgradeable", "version": "1.0.0", "initialState": "ACTIVE" },
     { "moduleId": "0x408269e9739994f2f410704684700c1f0c29b98f7210d29834da2c315b4dd2ce", "contract": "BankGovernance_Upgradeable", "version": "1.0.0", "initialState": "ACTIVE" },
-    { "moduleId": "0xbc0740979a57ecb6aedf2d22cb378fe98c7a380d156a63372e04e276797310f8", "contract": "BankMigration_Upgradeable", "version": "1.0.0", "initialState": "REGISTERED_BUT_INACTIVE" }
+    { "moduleId": "0xbc0740979a57ecb6aedf2d22cb378fe98c7a380d156a63372e04e276797310f8", "contract": "BankMigration_Upgradeable", "version": "1.0.0", "initialState": "REGISTERED_BUT_INACTIVE" },
+    { "moduleId": "0x010f42099385571f486f2951f8662d7a91d979e0cf2e0b193dd3c1b11df7c548", "contract": "KGENReserveRedemption_Upgradeable", "version": "1.0.0", "initialState": "REGISTERED_BUT_INACTIVE", "address": null, "status": "PHASE2_CANDIDATE_NOT_DEPLOYED" },
+    { "moduleId": "0x90b11fa3ae86f07612e6a3f0eca6d75c1498d703251dcd750e4427b2640a16aa", "contract": "CelestialEligibility_Upgradeable", "version": "1.0.0", "initialState": "REGISTERED_BUT_INACTIVE", "address": null, "status": "PHASE2_CANDIDATE_NOT_DEPLOYED" },
+    { "moduleId": "0xe18474c647be4ac588784db06c20e46c5ce22cdbe45f2b0f19d40241c3165e12", "contract": "CelestialCapitalCommitment_Upgradeable", "version": "1.0.0", "initialState": "REGISTERED_BUT_INACTIVE", "address": null, "status": "PHASE2_CANDIDATE_NOT_DEPLOYED" }
   ]
 }

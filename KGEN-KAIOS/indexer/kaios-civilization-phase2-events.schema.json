@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "KAIOS Civilization Phase 2 Reorg-aware Event Index",
+  "x-contractEvents": {
+    "KGENReserveRedemption_Upgradeable": ["BankModuleInitialized", "Initialized", "ModuleGovernanceFinalized", "RedemptionAvailabilityChanged", "RedemptionCompleted", "RedemptionInitialized", "RedemptionPaused", "RedemptionRiskConfigured", "RedemptionUnpaused", "RoleAdminChanged", "RoleGranted", "RoleRevoked", "Upgraded"],
+    "CelestialEligibility_Upgradeable": ["AlchemyMassThresholdPassed", "BankModuleInitialized", "CandidateStatusChanged", "ConstitutionHistoryRecorded", "ContributionRecorded", "ContributionStatusChanged", "EligibilityInitialized", "EligibilityPaused", "EligibilityUnpaused", "Initialized", "LifeBound", "ModuleGovernanceFinalized", "ReserveRedemptionEligibilitySet", "RoleAdminChanged", "RoleGranted", "RoleRevoked", "Upgraded"],
+    "CelestialCapitalCommitment_Upgradeable": ["BankModuleInitialized", "CapitalCommitmentInitialized", "CapitalCommitmentPaused", "CapitalCommitmentUnpaused", "CapitalCommitted", "CapitalReleased", "CapitalReviewStatusChanged", "Initialized", "MinimumLockPeriodUpdated", "ModuleGovernanceFinalized", "RoleAdminChanged", "RoleGranted", "RoleRevoked", "Upgraded"],
+    "LingxiaoCelestialBank18888_Upgradeable": ["ModuleConfigured"],
+    "BankGovernance_Upgradeable": ["GovernanceProposalApproved", "GovernanceProposalCancelled", "GovernanceProposalCreated", "GovernanceProposalExecuted"],
+    "KGEN_Token_V7_5_2": ["OwnershipTransferred", "SetTaxWallets", "Transfer"]
+  },
+  "type": "object",
+  "required": ["chainId", "events"],
+  "properties": {
+    "chainId": { "const": 56 },
+    "events": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["contract", "event", "transactionHash", "blockNumber", "blockHash", "logIndex", "removed"],
+        "properties": {
+          "contract": { "enum": ["KGENReserveRedemption_Upgradeable", "CelestialEligibility_Upgradeable", "CelestialCapitalCommitment_Upgradeable", "LingxiaoCelestialBank18888_Upgradeable", "BankGovernance_Upgradeable", "KGEN_Token_V7_5_2"] },
+          "event": { "enum": ["AlchemyMassThresholdPassed", "BankModuleInitialized", "CandidateStatusChanged", "CapitalCommitmentInitialized", "CapitalCommitmentPaused", "CapitalCommitmentUnpaused", "CapitalCommitted", "CapitalReleased", "CapitalReviewStatusChanged", "ConstitutionHistoryRecorded", "ContributionRecorded", "ContributionStatusChanged", "EligibilityInitialized", "EligibilityPaused", "EligibilityUnpaused", "GovernanceProposalApproved", "GovernanceProposalCancelled", "GovernanceProposalCreated", "GovernanceProposalExecuted", "Initialized", "LifeBound", "MinimumLockPeriodUpdated", "ModuleConfigured", "ModuleGovernanceFinalized", "OwnershipTransferred", "RedemptionAvailabilityChanged", "RedemptionCompleted", "RedemptionInitialized", "RedemptionPaused", "RedemptionRiskConfigured", "RedemptionUnpaused", "ReserveRedemptionEligibilitySet", "RoleAdminChanged", "RoleGranted", "RoleRevoked", "SetTaxWallets", "Transfer", "Upgraded"] },
+          "transactionHash": { "type": "string", "pattern": "^0x[0-9a-fA-F]{64}$" },
+          "blockNumber": { "type": "integer", "minimum": 0 },
+          "transactionIndex": { "type": "integer", "minimum": 0 },
+          "blockHash": { "type": "string", "pattern": "^0x[0-9a-fA-F]{64}$" },
+          "logIndex": { "type": "integer", "minimum": 0 },
+          "removed": { "type": "boolean" },
+          "args": { "type": "object" },
+          "classification": {
+            "enum": ["MODULE_CONFIGURATION", "GOVERNANCE_LIFECYCLE", "KGEN_TAX_WALLET_CHANGE", "UNCLASSIFIED_KGEN_INFLOW", "PHASE2_RUNTIME_EVENT"]
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  }
+}

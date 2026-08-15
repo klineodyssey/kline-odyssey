@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import path from "node:path";
 import { after, test } from "node:test";
-import { ZeroAddress, getCreateAddress, keccak256, sha256 } from "ethers";
+import { ZeroAddress, getAddress, getCreateAddress, id, keccak256, parseEther, sha256 } from "ethers";
 import {
   ETHER,
   artifact,
@@ -11,6 +11,15 @@ import {
   eventArgs,
   setupLingxiaoFullBankSystem,
 } from "./helpers.mjs";
+import {
+  ACTIVATION_STATE,
+  PHASE2_FORMAL,
+  KaiosCivilizationPhase2Adapter,
+  createPhase2IndexState,
+  reducePhase2IndexedEvent,
+  resolveActivationState,
+  verifyIndexedKgenOwner,
+} from "../frontend-adapter/kaiosCivilizationPhase2Adapter.mjs";
 
 const root = path.resolve(import.meta.dirname, "..");
 after(cleanupProviders);
@@ -50,6 +59,274 @@ test("compiler and OpenZeppelin dependencies are exactly pinned", () => {
   assert.equal(packageLock.packages["node_modules/solc"].version, "0.8.24");
   assert.equal(packageLock.packages["node_modules/@openzeppelin/contracts"].version, "5.0.2");
   assert.equal(packageLock.packages["node_modules/@openzeppelin/contracts-upgradeable"].version, "5.0.2");
+});
+
+test("Phase 2 frozen Mainnet config encodes the exact Human V1 parameters", () => {
+  const config = JSON.parse(
+    fs.readFileSync(path.join(root, "config", "phase2-mainnet-config.final-review.json"), "utf8"),
+  );
+  const reserve = config.parameters.reserveRedemption;
+  const eligibility = config.parameters.celestialEligibility;
+  const capital = config.parameters.capitalCommitment;
+
+  assert.equal(config.status, "HUMAN_V1_PARAMETERS_FROZEN_NOT_DEPLOYED");
+  assert.equal(BigInt(reserve.minimumKgenReserveWei), parseEther("100"));
+  assert.equal(BigInt(reserve.maxKgenPerTransactionWei), parseEther("10"));
+  assert.equal(BigInt(reserve.maxKgenPerUtcDayWei), parseEther("100"));
+  assert.equal(BigInt(reserve.maxKaiosPerTransactionWei), parseEther("10000"));
+  assert.equal(BigInt(reserve.maxKaiosPerUtcDayWei), parseEther("100000"));
+  assert.equal(reserve.redemptionInitiallyEnabled, false);
+  assert.equal(
+    eligibility.requiredDestinationCodeSource,
+    "KAIOS.CIVILIZATION.RESERVE_REDEMPTION.18888",
+  );
+  assert.equal(id(eligibility.requiredDestinationCodeSource), eligibility.requiredDestinationCode);
+  assert.equal(BigInt(eligibility.singleProofMinimumKaiosWei), parseEther("5000000"));
+  assert.equal(eligibility.multiProofAggregationAllowed, false);
+  assert.equal(BigInt(capital.singleCommitmentMinimumKaiosWei), parseEther("5000000"));
+  assert.equal(capital.minimumLockPeriodSeconds, 2_592_000);
+  assert.equal(capital.kaiosBurned, false);
+  assert.equal(config.governance.contributionVerifier, config.governance.primary);
+  assert.deepEqual(Object.values(config.initialModuleStates), ["INACTIVE", "INACTIVE", "INACTIVE"]);
+});
+
+test("Phase 2 indexer schema retains module events and adds only compiler-generated cross-contract events", () => {
+  const phase2ContractNames = [
+    "KGENReserveRedemption_Upgradeable",
+    "CelestialEligibility_Upgradeable",
+    "CelestialCapitalCommitment_Upgradeable",
+  ];
+  const indexedContractNames = [
+    ...phase2ContractNames,
+    "LingxiaoCelestialBank18888_Upgradeable",
+    "BankGovernance_Upgradeable",
+    "KGEN_Token_V7_5_2",
+  ];
+  const phase2CompiledEvents = [...new Set(phase2ContractNames.flatMap((name) =>
+    artifact(name).abi.filter((entry) => entry.type === "event").map((entry) => entry.name),
+  ))].sort();
+  const allCompiledEvents = new Set(indexedContractNames.flatMap((name) =>
+    artifact(name).abi.filter((entry) => entry.type === "event").map((entry) => entry.name),
+  ));
+  const schema = JSON.parse(
+    fs.readFileSync(path.join(root, "indexer", "kaios-civilization-phase2-events.schema.json"), "utf8"),
+  );
+  const indexedEvents = [...schema.properties.events.items.properties.event.enum].sort();
+  const mappedEvents = [...new Set(Object.values(schema["x-contractEvents"]).flat())].sort();
+
+  assert.deepEqual(indexedEvents, mappedEvents, "schema event enum must equal the contract-event routing map");
+  for (const [contractName, eventNames] of Object.entries(schema["x-contractEvents"])) {
+    const contractEvents = new Set(artifact(contractName).abi.filter((entry) => entry.type === "event").map((entry) => entry.name));
+    for (const eventName of eventNames) {
+      assert.equal(contractEvents.has(eventName), true, `${contractName}.${eventName} absent from compiler ABI`);
+    }
+  }
+  for (const eventName of phase2CompiledEvents) {
+    assert.equal(indexedEvents.includes(eventName), true, `missing Phase 2 event ${eventName}`);
+  }
+  for (const eventName of indexedEvents) {
+    assert.equal(allCompiledEvents.has(eventName), true, `event absent from compiler ABI: ${eventName}`);
+  }
+  for (const requiredEvent of [
+    "EligibilityPaused",
+    "EligibilityUnpaused",
+    "MinimumLockPeriodUpdated",
+    "BankModuleInitialized",
+    "Initialized",
+    "ModuleGovernanceFinalized",
+    "RoleAdminChanged",
+    "RoleGranted",
+    "RoleRevoked",
+    "ModuleConfigured",
+    "GovernanceProposalCreated",
+    "GovernanceProposalApproved",
+    "GovernanceProposalExecuted",
+    "GovernanceProposalCancelled",
+    "SetTaxWallets",
+    "Transfer",
+  ]) assert.equal(indexedEvents.includes(requiredEvent), true, requiredEvent);
+  assert.equal(indexedEvents.includes("GovernanceFinalized"), false, "bank event is outside Phase 2 activation schema");
+});
+
+test("Phase 2 frontend activation resolver fails closed and represents every staged state", () => {
+  const base = {
+    chainId: 56,
+    formalAddressMatch: true,
+    codePresent: true,
+    versionMatch: true,
+    abiMatch: true,
+    registered: true,
+    governanceFinalized: true,
+    registryActive: false,
+    paused: false,
+    humanActivationConfirmed: false,
+  };
+  assert.equal(resolveActivationState("eligibility", { ...base, registered: false }), ACTIVATION_STATE.BUILDING);
+  assert.equal(resolveActivationState("eligibility", base), ACTIVATION_STATE.INACTIVE);
+  assert.equal(resolveActivationState("capitalCommitment", { ...base, paused: true }), ACTIVATION_STATE.PAUSED);
+  assert.equal(resolveActivationState("eligibility", { ...base, registryActive: true, humanActivationConfirmed: true }), ACTIVATION_STATE.ACTIVE);
+  assert.equal(resolveActivationState("eligibility", { ...base, chainId: 97 }), ACTIVATION_STATE.ERROR_MISMATCH);
+  assert.equal(resolveActivationState("eligibility", { ...base, formalAddressMatch: false }), ACTIVATION_STATE.ERROR_MISMATCH);
+  assert.equal(resolveActivationState("eligibility", { ...base, versionMatch: false }), ACTIVATION_STATE.ERROR_MISMATCH);
+  assert.equal(resolveActivationState("eligibility", { ...base, unknown: true }), ACTIVATION_STATE.ERROR_MISMATCH);
+
+  const reserve = {
+    ...base,
+    taxReceiverMatches: true,
+    redemptionEnabled: false,
+    reserveAboveFloor: false,
+    activationMarginConfirmed: false,
+  };
+  assert.equal(resolveActivationState("reserveRedemption", reserve), ACTIVATION_STATE.RESERVE_ACCUMULATING);
+  assert.equal(resolveActivationState("reserveRedemption", { ...reserve, taxReceiverMatches: false }), ACTIVATION_STATE.INACTIVE);
+  assert.equal(resolveActivationState("reserveRedemption", {
+    ...reserve,
+    registryActive: true,
+    humanActivationConfirmed: true,
+    redemptionEnabled: true,
+    reserveAboveFloor: false,
+    activationMarginConfirmed: true,
+  }), ACTIVATION_STATE.REDEMPTION_DISABLED);
+  assert.equal(resolveActivationState("reserveRedemption", {
+    ...reserve,
+    registryActive: true,
+    humanActivationConfirmed: true,
+    redemptionEnabled: true,
+    reserveAboveFloor: true,
+    activationMarginConfirmed: true,
+  }), ACTIVATION_STATE.REDEMPTION_READY);
+});
+
+test("Phase 2 live adapter fails closed before any contract read on an RPC chain mismatch", async () => {
+  const adapter = new KaiosCivilizationPhase2Adapter({
+    provider: { getNetwork: async () => ({ chainId: 97n }) },
+  });
+  const status = await adapter.systemStatus({ humanActivation: { eligibility: true, capitalCommitment: true, reserveRedemption: true } });
+  assert.match(status.error, /CHAIN_ID_MISMATCH/u);
+  assert.equal(status.eligibility.activationState, ACTIVATION_STATE.ERROR_MISMATCH);
+  assert.equal(status.capitalCommitment.writeAllowed, false);
+  assert.equal(status.reserveRedemption.writeAllowed, false);
+});
+
+test("Phase 2 index reducer reconstructs activation governance and never guesses KGEN tax attribution", () => {
+  const tx = "0x" + "11".repeat(32);
+  let state = createPhase2IndexState();
+  state = reducePhase2IndexedEvent(state, {
+    contract: "LingxiaoCelestialBank18888_Upgradeable",
+    event: "ModuleConfigured",
+    transactionHash: tx,
+    args: { moduleId: "0x01", module: PHASE2_FORMAL.eligibility, versionHash: "0x02", perTransactionLimit: 0n, epochLimit: 0n, active: true },
+  });
+  state = reducePhase2IndexedEvent(state, {
+    contract: "BankGovernance_Upgradeable",
+    event: "GovernanceProposalCreated",
+    transactionHash: tx,
+    args: { proposalId: "0x03", target: PHASE2_FORMAL.bank18888, dataHash: "0x04", executableAt: 1234n, proposer: "0x0000000000000000000000000000000000000001" },
+  });
+  state = reducePhase2IndexedEvent(state, {
+    contract: "BankGovernance_Upgradeable",
+    event: "GovernanceProposalApproved",
+    transactionHash: tx,
+    args: { proposalId: "0x03", approver: "0x0000000000000000000000000000000000000002" },
+  });
+  state = reducePhase2IndexedEvent(state, {
+    contract: "BankGovernance_Upgradeable",
+    event: "GovernanceProposalExecuted",
+    transactionHash: tx,
+    args: { proposalId: "0x03" },
+  });
+  state = reducePhase2IndexedEvent(state, {
+    contract: "KGEN_Token_V7_5_2",
+    contractAddress: PHASE2_FORMAL.kgen,
+    event: "SetTaxWallets",
+    transactionHash: tx,
+    args: { bank: PHASE2_FORMAL.reserveRedemption, reward: "0x0000000000000000000000000000000000000003", autolp: "0x0000000000000000000000000000000000000004" },
+  });
+  state = reducePhase2IndexedEvent(state, {
+    contract: "KGEN_Token_V7_5_2",
+    contractAddress: PHASE2_FORMAL.kgen,
+    event: "Transfer",
+    transactionHash: tx,
+    args: { from: "0x0000000000000000000000000000000000000005", to: PHASE2_FORMAL.reserveRedemption, value: 1n },
+  });
+  assert.equal(state.modules["0x01"].active, true);
+  assert.equal(state.proposals["0x03"].approved, true);
+  assert.equal(state.proposals["0x03"].executed, true);
+  assert.equal(state.kgenTaxWallets.bank, PHASE2_FORMAL.reserveRedemption);
+  assert.equal(state.kgenInflows[0].classification, "UNCLASSIFIED_KGEN_INFLOW");
+});
+
+test("Phase 2 index reducer reconstructs dynamic KGEN ownership in canonical event order", () => {
+  const deployer = "0xb3C54ca96De0dED4Ca0151F629ff9781506ba261";
+  const governance = PHASE2_FORMAL.bankGovernance;
+  const futureOwner = "0x00000000000000000000000000000000000000f1";
+  const event = ({ previousOwner, newOwner, blockNumber, transactionIndex, logIndex, transactionHash, removed = false }) => ({
+    contract: "KGEN_Token_V7_5_2",
+    contractAddress: PHASE2_FORMAL.kgen,
+    event: "OwnershipTransferred",
+    blockNumber,
+    transactionIndex,
+    logIndex,
+    transactionHash,
+    removed,
+    args: { previousOwner, newOwner },
+  });
+  let state = createPhase2IndexState();
+  state = reducePhase2IndexedEvent(state, event({
+    previousOwner: ZeroAddress, newOwner: deployer, blockNumber: 10, transactionIndex: 0, logIndex: 0,
+    transactionHash: `0x${"10".repeat(32)}`,
+  }));
+  assert.equal(state.kgen.owner, deployer);
+  state = reducePhase2IndexedEvent(state, event({
+    previousOwner: deployer, newOwner: governance, blockNumber: 20, transactionIndex: 1, logIndex: 3,
+    transactionHash: `0x${"20".repeat(32)}`,
+  }));
+  assert.equal(state.kgen.owner, governance);
+  assert.equal(state.kgen.previousOwner, deployer);
+  assert.equal(state.kgen.ownershipChangedAtBlock, 20);
+  assert.equal(state.kgen.ownershipChangedAtTransactionIndex, 1);
+  assert.equal(state.kgen.ownershipChangedAtLogIndex, 3);
+
+  state = reducePhase2IndexedEvent(state, event({
+    previousOwner: deployer, newOwner: futureOwner, blockNumber: 19, transactionIndex: 9, logIndex: 99,
+    transactionHash: `0x${"19".repeat(32)}`,
+  }));
+  assert.equal(state.kgen.owner, governance, "an out-of-order stale event must not replace the canonical owner");
+
+  state = reducePhase2IndexedEvent(state, event({
+    previousOwner: governance, newOwner: futureOwner, blockNumber: 20, transactionIndex: 2, logIndex: 5,
+    transactionHash: `0x${"21".repeat(32)}`,
+  }));
+  assert.equal(state.kgen.owner, getAddress(futureOwner));
+  assert.equal(state.kgen.previousOwner, governance);
+
+  state = reducePhase2IndexedEvent(state, event({
+    previousOwner: futureOwner, newOwner: deployer, blockNumber: 21, transactionIndex: 0, logIndex: 0,
+    transactionHash: `0x${"22".repeat(32)}`, removed: true,
+  }));
+  assert.equal(state.kgen.owner, getAddress(futureOwner), "removed logs are excluded from the canonical replay");
+});
+
+test("Phase 2 read model independently verifies indexed KGEN owner and fails closed on mismatch", () => {
+  const owner = "0xb3C54ca96De0dED4Ca0151F629ff9781506ba261";
+  const state = createPhase2IndexState();
+  state.kgen.owner = owner;
+  const verified = verifyIndexedKgenOwner(state, owner);
+  assert.equal(verified.currentKgenOwner, owner);
+  assert.equal(verified.ownerSource, "INDEXER_AND_RPC");
+  assert.equal(verified.ownerVerified, true);
+  assert.equal(verified.governanceSensitiveWriteAllowed, true);
+
+  const mismatch = verifyIndexedKgenOwner(state, PHASE2_FORMAL.bankGovernance);
+  assert.equal(mismatch.ownerSource, "INDEXER_RPC_MISMATCH");
+  assert.equal(mismatch.ownerVerified, false);
+  assert.equal(mismatch.errorMismatch, true);
+  assert.equal(mismatch.governanceSensitiveWriteAllowed, false);
+
+  const rpcOnly = verifyIndexedKgenOwner(createPhase2IndexState(), owner);
+  assert.equal(rpcOnly.ownerSource, "RPC_ONLY");
+  assert.equal(rpcOnly.ownerVerified, false);
+  assert.equal(rpcOnly.governanceSensitiveWriteAllowed, false);
 });
 
 test("pre-sign package contains no executable Mainnet transaction script or formal deployed-address manifest", () => {
@@ -163,12 +440,12 @@ test("18888 modules expose no owner withdrawal, sweep, arbitrary token transfer,
   }
 });
 
-test("all seven UUPS modules reserve a deterministic 100-slot custom namespace", () => {
+test("all ten UUPS modules reserve a deterministic 100-slot custom namespace", () => {
   const evidence = JSON.parse(
     fs.readFileSync(path.join(root, "reports", "SOLIDITY_COMPILE_EVIDENCE.json"), "utf8"),
   );
   assert.equal(evidence.upgradeableModuleStorageValidation.status, "PASS");
-  assert.equal(evidence.upgradeableModuleStorageValidation.modules.length, 7);
+  assert.equal(evidence.upgradeableModuleStorageValidation.modules.length, 10);
   for (const module of evidence.upgradeableModuleStorageValidation.modules) {
     assert.equal(module.status, "PASS", module.contractName);
     assert.equal(module.namespaceSlots, 100, module.contractName);

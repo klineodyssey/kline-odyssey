@@ -1,0 +1,74 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "KAIOS Civilization Phase 2 Fail-closed Read Model",
+  "type": "object",
+  "required": ["chainId", "addresses", "eligibility", "capitalCommitment", "reserveRedemption", "kgen", "governance"],
+  "properties": {
+    "chainId": { "const": 56 },
+    "addresses": { "type": "object" },
+    "eligibility": { "$ref": "#/$defs/moduleStatus" },
+    "capitalCommitment": { "$ref": "#/$defs/moduleStatus" },
+    "reserveRedemption": {
+      "allOf": [
+        { "$ref": "#/$defs/moduleStatus" },
+        {
+          "type": "object",
+          "required": ["redemptionEnabled", "reserveKgen", "minimumKgenReserve", "excessKgenReserve", "maxKgenPerTx", "maxKgenPerDay", "maxKaiosPerTx", "maxKaiosPerDay", "activationMargin"],
+          "properties": {
+            "redemptionEnabled": { "type": "boolean" },
+            "reserveKgen": { "$ref": "#/$defs/uintString" },
+            "minimumKgenReserve": { "$ref": "#/$defs/uintString" },
+            "excessKgenReserve": { "$ref": "#/$defs/uintString" },
+            "maxKgenPerTx": { "$ref": "#/$defs/uintString" },
+            "maxKgenPerDay": { "$ref": "#/$defs/uintString" },
+            "maxKaiosPerTx": { "$ref": "#/$defs/uintString" },
+            "maxKaiosPerDay": { "$ref": "#/$defs/uintString" },
+            "activationMargin": { "const": "HUMAN_DECISION_REQUIRED" },
+            "eligible": { "type": "boolean" },
+            "limitsValid": { "type": "boolean" },
+            "dailyLimitsValid": { "type": "boolean" }
+          }
+        }
+      ]
+    },
+    "kgen": {
+      "type": "object",
+      "required": ["owner", "bankWallet", "rewardWallet", "autoLPWallet"],
+      "properties": {
+        "owner": { "$ref": "#/$defs/address" },
+        "bankWallet": { "$ref": "#/$defs/address" },
+        "rewardWallet": { "$ref": "#/$defs/address" },
+        "autoLPWallet": { "$ref": "#/$defs/address" }
+      }
+    },
+    "governance": {
+      "type": "object",
+      "required": ["delaySeconds", "proposals"],
+      "properties": {
+        "delaySeconds": { "const": 3600 },
+        "proposals": { "type": "object" }
+      }
+    }
+  },
+  "$defs": {
+    "address": { "type": "string", "pattern": "^0x[0-9a-fA-F]{40}$" },
+    "uintString": { "type": "string", "pattern": "^[0-9]+$" },
+    "activationState": {
+      "enum": ["BUILDING", "INACTIVE", "PAUSED", "ACTIVE", "RESERVE_ACCUMULATING", "REDEMPTION_DISABLED", "REDEMPTION_READY", "ERROR_MISMATCH"]
+    },
+    "moduleStatus": {
+      "type": "object",
+      "required": ["registered", "registryActive", "paused", "governanceFinalized", "runtimeReady", "writeAllowed", "activationState"],
+      "properties": {
+        "registered": { "type": "boolean" },
+        "registryActive": { "type": "boolean" },
+        "paused": { "type": ["boolean", "null"] },
+        "governanceFinalized": { "type": "boolean" },
+        "runtimeReady": { "type": "boolean" },
+        "writeAllowed": { "type": "boolean" },
+        "activationState": { "$ref": "#/$defs/activationState" }
+      }
+    }
+  },
+  "additionalProperties": false
+}

@@ -1,10 +1,10 @@
 {
   "status": "PASS",
   "checks": {
-    "files": 96,
-    "json": 28,
-    "markdown": 32,
-    "utf8": 95,
+    "files": 137,
+    "json": 42,
+    "markdown": 44,
+    "utf8": 136,
     "bom": 0,
     "corruption": 0,
     "secretHits": 0,
@@ -32,8 +32,10 @@
     "deploymentFiles": [
       "KGEN-KAIOS/config/LINGXIAO_18888_MAINNET_DEPLOYMENT_MANIFEST.json",
       "KGEN-KAIOS/config/LINGXIAO_18888_MAINNET_DEPLOYMENT_MANIFEST.md",
-      "KGEN-KAIOS/scripts/prepare-lingxiao-18888-deployment.mjs",
-      "KGEN-KAIOS/reports/mainnet-pre-sign/KAIOS_GENESIS_INSCRIPTION_UNSIGNED_DEPLOYMENT.json"
+      "KGEN-KAIOS/config/kaios-civilization-phase2-deployment.template.json",
+      "KGEN-KAIOS/reports/mainnet-pre-sign/KAIOS_GENESIS_INSCRIPTION_UNSIGNED_DEPLOYMENT.json",
+      "KGEN-KAIOS/scripts/prepare-kaios-civilization-phase2-deployment.mjs",
+      "KGEN-KAIOS/scripts/prepare-lingxiao-18888-deployment.mjs"
     ]
   },
   "failures": []

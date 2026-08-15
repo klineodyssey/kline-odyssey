@@ -1,0 +1,5 @@
+{
+  "status": "SUPERSEDED_BY_PHASE2_MAINNET_CONFIG_FINAL_REVIEW",
+  "canonicalReplacement": "phase2-mainnet-config.final-review.json",
+  "note": "The Human-frozen V1 values are no longer open template inputs. Only live deployer address and nonce remain runtime pre-sign inputs."
+}

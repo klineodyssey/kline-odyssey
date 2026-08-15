@@ -10,8 +10,13 @@
 
 The review-only KGEN -> KAIOS -> KUFO -> KSHIP implementation is under
 `contracts/`, with a pinned Solidity 0.8.24 test harness in this directory.
-The package includes unsigned planning and fork-rehearsal tooling, but no
-executable Mainnet transaction script or formal deployed address.
+The package includes unsigned planning and fork-rehearsal tooling. KAIOS Genesis and the
+bank system are live. Phase 2 Stage 2C-1 is complete: CelestialEligibility and
+CelestialCapitalCommitment are active; KGENReserveRedemption is registry-inactive with
+redemption disabled; formal KGEN ownership is held by delayed BankGovernance; and the
+fixed 0.10% Bank-tax receiver is now KGENReserveRedemption. Reward, AutoLP and all fixed
+tax rates remain unchanged. The Reserve is in passive accumulation mode; no live Capital
+commitment, redemption, exemption cleanup or Stage 2C-2 write was performed.
 
 | Entry | Purpose |
 |---|---|
@@ -40,6 +45,9 @@ executable Mainnet transaction script or formal deployed address.
 | `contracts/BankRiskController_Upgradeable.sol` | Reserve floor, alert threshold and public bank-risk state |
 | `contracts/BankGovernance_Upgradeable.sol` | One-hour minimum delayed, distinct-proposer/approver governance executor |
 | `contracts/BankMigration_Upgradeable.sol` | Successor/chain/state evidence framework with no asset-transfer path |
+| `contracts/KGENReserveRedemption_Upgradeable.sol` | Phase 2 existing-reserve KGEN redemption rail; KAIOS enters formal 18888 accounting, no KGEN mint and no KAIOS burn |
+| `contracts/CelestialEligibility_Upgradeable.sol` | Phase 2 species-neutral Life/contribution ledger and formal 18911 single-proof 5M mass-threshold review; no seat authority |
+| `contracts/CelestialCapitalCommitment_Upgradeable.sol` | Phase 2 non-burning 5M KAIOS principal-liability commitment for Wormhole-seat review; no forfeiture or automatic seat |
 | `abi/` | Compiler-generated public ABIs for KAIOS, Bank Core and seven modules |
 | `config/lingxiao-18888-bank-system.json` | Secret-free canonical public deployment inputs and unresolved-address gates |
 | `config/lingxiao-18888-module-registry.json` | Reviewed module IDs, contracts and versions |
@@ -61,6 +69,31 @@ executable Mainnet transaction script or formal deployed address.
 | `reports/mainnet-pre-sign/KAIOS_GENESIS_MAINNET_RECORD.json` | Automatically generated fork preview; explicitly not the final Mainnet Genesis record |
 | `reports/mainnet-pre-sign/KAIOS_GENESIS_INSCRIPTION_UNSIGNED_DEPLOYMENT.json` | Frozen nonce-55 inscription package plus the actual successful deployment receipt; contains no signer secret |
 | `reports/KAIOS_TOKEN_LINEAGE_INTEGRATION_REVIEW_2026-08-09.md` | Executive review and evidence index |
+| `KAIOS_CIVILIZATION_PHASE2_CANON.md` | Current Phase 2 separation of White Hole physics, reserve redemption, market price, alchemy, capital and eligibility |
+| `config/kaios-civilization-phase2-deployment.template.json` | Superseded intake pointer to the frozen Phase 2 final-review config |
+| `config/phase2-mainnet-config.final-review.json` | Human-frozen V1 Phase 2 wei/seconds/bytes32 values, governance identities and inactive module states |
+| `scripts/prepare-kaios-civilization-phase2-deployment.mjs` | Six-CREATE planner or nonce-57 five-CREATE resume planner; reuses the valid live Eligibility implementation and emits address-patched UUPS runtime hashes |
+| `scripts/verify-phase2-uups-runtime.mjs` | Read-only chain verifier for creation lineage, address-patched and normalized UUPS runtime, UUPS UUID, initializer lock, live nonce/address vacancy, gas and funding |
+| `tools/uups-runtime-verifier.mjs` | Deterministic compiler-immutable reconstruction and normalization shared by deployment tooling and regression tests |
+| `tools/rehearse-kaios-civilization-phase2-mainnet-fork.mjs` | ChainId 56 fork-only module deployment, delayed registration, tax redirect, redemption, 5M burn and 5M capital rehearsal |
+| `frontend-adapter/kaiosCivilizationPhase2Adapter.mjs` | Fail-closed Stage-2 activation resolver, read model, ABI-valid event reducer, and deterministic bounded calldata encoders with non-guaranteed-rate wording |
+| `indexer/kaios-civilization-phase2-events.schema.json` | Reorg-aware Phase 2/18888/BankGovernance/KGEN event evidence schema whose configured event names are compiler-ABI validated; Reserve KGEN transfers remain unclassified without deterministic attribution |
+| `dashboard/kaios-civilization-phase2-status.schema.json` | Fail-closed module activation, reserve/floor/caps, KGEN receiver, and governance-proposal read-model schema |
+| `operations/KAIOS_CIVILIZATION_PHASE2_RUNBOOK.md` | Deployment, registration, separate future KGEN redirect and stop-condition runbook |
+| `reports/KAIOS_CIVILIZATION_PHASE2_SECURITY_REPORT.md` | Phase 2 trust boundaries, enforced gates and residual UUPS governance risk |
+| `reports/KAIOS_CIVILIZATION_PHASE2_MAINNET_FORK_REHEARSAL.json` | Sanitized fork-only receipts, temporary addresses, exact flows and security gates |
+| `reports/PHASE2_UUPS_RUNTIME_VERIFICATION_2026-08-14.json` | Machine-readable read-only proof that the nonce-56 Eligibility implementation matches the reviewed artifact after UUPS `__self` reconstruction |
+| `reports/PHASE2_UUPS_RUNTIME_VERIFICATION_2026-08-14.md` | Human-readable runtime-verification incident resolution, remaining nonce-57 address plan, gas and funding evidence |
+| `reports/KAIOS_CIVILIZATION_PHASE2_MAINNET_STAGE1_2026-08-14.json` | Sanitized BSC Mainnet Stage 1 manifest: six deployments, delayed inactive registrations, governance finalization, roles, gas and unchanged economic state |
+| `reports/KAIOS_CIVILIZATION_PHASE2_MAINNET_STAGE1_2026-08-14.md` | Human-readable Phase 2 Mainnet Stage 1 deployment and inactive-module evidence |
+| `reports/KAIOS_CIVILIZATION_PHASE2_MAINNET_STAGE2A_2026-08-15.json` | Sanitized BSC Mainnet Stage 2A receipts, delayed Eligibility activation, staged module state, KGEN unchanged and indexer/read-model evidence |
+| `reports/KAIOS_CIVILIZATION_PHASE2_MAINNET_STAGE2A_2026-08-15.md` | Human-readable Stage 2A activation and isolation evidence |
+| `reports/KAIOS_CIVILIZATION_PHASE2_MAINNET_STAGE2B_2026-08-15.json` | Sanitized BSC Mainnet Stage 2B activation/unpause receipts, independent governance delays, intermediate safety gate and final read-model/indexer evidence |
+| `reports/KAIOS_CIVILIZATION_PHASE2_MAINNET_STAGE2B_2026-08-15.md` | Human-readable Stage 2B Capital activation and governed-unpause evidence |
+| `reports/KAIOS_CIVILIZATION_PHASE2_MAINNET_STAGE2C0_2026-08-15.json` | Sanitized BSC Mainnet KGEN ownership-migration receipt, event, tax/module state and owner-authority evidence |
+| `reports/KAIOS_CIVILIZATION_PHASE2_MAINNET_STAGE2C0_2026-08-15.md` | Human-readable Stage 2C-0 ownership migration and unchanged-economic-state evidence |
+| `reports/KAIOS_CIVILIZATION_PHASE2_MAINNET_STAGE2C1_2026-08-15.json` | Sanitized BSC Mainnet delayed-governance KGEN Bank-tax redirect, unchanged-rate/module state and observability evidence |
+| `reports/KAIOS_CIVILIZATION_PHASE2_MAINNET_STAGE2C1_2026-08-15.md` | Human-readable Stage 2C-1 tax redirect and Reserve accumulation-mode evidence |
 
 ## Purpose
 
