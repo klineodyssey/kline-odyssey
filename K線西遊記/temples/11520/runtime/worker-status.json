@@ -2,7 +2,7 @@
   "schema_version": "11520_WORKER_STATUS_V1",
   "life_id": "DIGITAL_ANT_0001",
   "app_id": "DIGITAL_ANT_APP_0001",
-  "app_version": "V1.2.0",
+  "app_version": "V1.3.0",
   "scheduler": "GITHUB_ACTIONS_HOURLY",
   "scheduler_status": "PRODUCTION_ACTIVE",
   "cadence": "EVERY_HOUR",
@@ -11,37 +11,37 @@
   "chain_write": false,
   "worker_health": "HEALTHY",
   "work_stop_reason": null,
-  "generated_at": "2026-08-16T15:39:00.085Z",
+  "generated_at": "2026-08-16T16:22:11.130Z",
   "last_work_cycle": {
-    "event_id": "DIGITAL_ANT_0001_HOURLY_2026081615",
+    "event_id": "DIGITAL_ANT_0001_HOURLY_2026081616",
     "life_id": "DIGITAL_ANT_0001",
     "app_id": "DIGITAL_ANT_APP_0001",
-    "work_cycle_id": "DIGITAL_ANT_0001_HOURLY_2026081615",
-    "scheduled_at": "2026-08-16T15:00:00.000Z",
-    "started_at": "2026-08-16T15:38:58.019Z",
-    "finished_at": "2026-08-16T15:39:00.084Z",
-    "bsc_block": 116297811,
+    "work_cycle_id": "DIGITAL_ANT_0001_HOURLY_2026081616",
+    "scheduled_at": "2026-08-16T16:00:00.000Z",
+    "started_at": "2026-08-16T16:22:08.918Z",
+    "finished_at": "2026-08-16T16:22:11.129Z",
+    "bsc_block": 116303569,
     "wallet_state": {
       "status": "PUBLIC_ADDRESS_READ",
-      "bnb": "0.006"
+      "bnb": "0.0059950537"
     },
     "heart_state": {
       "status": "12345_PATROL_COMPLETED",
       "source": "REPOSITORY_ABI_PUBLIC_CHAIN_READ",
       "eligibility_source": "CLIENT_DERIVED",
       "heartbeat": {
-        "status": "ELIGIBLE",
-        "reason": "HEARTBEAT_ELIGIBLE",
+        "status": "NOT_ELIGIBLE",
+        "reason": "HEARTBEAT_COOLDOWN",
         "eligibility_source": "CLIENT_DERIVED",
         "write_status": "WRITE_NOT_CONNECTED",
-        "next_eligible_time": "2026-08-16T15:38:57.000Z"
+        "next_eligible_time": "2026-08-16T16:44:58.000Z"
       },
       "fortune": {
         "status": "ELIGIBLE",
         "reason": "FORTUNE_CLAIM_ELIGIBLE",
         "eligibility_source": "CLIENT_DERIVED",
         "write_status": "WRITE_NOT_CONNECTED",
-        "next_eligible_time": "2026-08-16T15:38:57.000Z"
+        "next_eligible_time": "2026-08-16T16:22:08.000Z"
       },
       "ignition": {
         "status": "OUT_OF_WINDOW",
@@ -52,7 +52,7 @@
       },
       "lamp": {
         "status": "INSUFFICIENT_BALANCE",
-        "reason": "KGEN_BALANCE_INSUFFICIENT",
+        "reason": "KGEN_ALLOWANCE_INSUFFICIENT",
         "eligibility_source": "CLIENT_DERIVED",
         "write_status": "WRITE_NOT_CONNECTED",
         "next_eligible_time": null
@@ -74,8 +74,8 @@
         "status": "CORE_HEART_INDEXER_HEALTHY",
         "indexer": "CORE_HEART_INDEXER",
         "failed_event_types": [],
-        "from_block": 116297713,
-        "to_block": 116297812,
+        "from_block": 116303469,
+        "to_block": 116303568,
         "fortune_claims": [],
         "wishes": [],
         "heartbeat_claims": [],
@@ -108,8 +108,8 @@
       }
     },
     "finance_state": {
-      "BNB": "0.006",
-      "KGEN": "0.0",
+      "BNB": "0.0059950537",
+      "KGEN": "1.0",
       "KAIOS": "0.0",
       "actual_income": "0",
       "actual_expense": "0",
@@ -128,6 +128,7 @@
       "IGNITION",
       "LIFE_FINANCE",
       "11520_REQUEST_PATROL",
+      "MOTHER_ENGINE_PROBLEM_SOLVING",
       "AI_ANT_COMPANY_WORK",
       "MISSION",
       "REPORT",
@@ -145,12 +146,12 @@
     ],
     "gatekeeper_duty": {
       "status": "COMPLETED",
-      "gatekeeper_started_at": "2026-08-16T15:38:58.505Z",
-      "gatekeeper_finished_at": "2026-08-16T15:38:59.794Z",
-      "heart_block": 116297812,
+      "gatekeeper_started_at": "2026-08-16T16:22:09.491Z",
+      "gatekeeper_finished_at": "2026-08-16T16:22:10.821Z",
+      "heart_block": 116303568,
       "heart_status": "AVAILABLE",
       "fortune_status": "ELIGIBLE",
-      "heartbeat_status": "ELIGIBLE",
+      "heartbeat_status": "NOT_ELIGIBLE",
       "ignition_status": "OUT_OF_WINDOW",
       "lamp_status": "INSUFFICIENT_BALANCE",
       "wish_status": "ELIGIBLE",
@@ -160,20 +161,20 @@
       "degradation_affects_safety": false,
       "advanced_graph_status": "ADVANCED_GRAPH_INDEXER_REQUIRED",
       "evidence": [
-        "HEART_BLOCK_116297812",
+        "HEART_BLOCK_116303568",
         "HEART_BYTECODE_VERIFIED",
         "CORE_HEART_INDEXER_HEALTHY"
       ]
     },
     "life_event_status": {
-      "FIRST_HEARTBEAT_EVENT": "NOT_OCCURRED_IN_OBSERVED_WINDOW",
+      "FIRST_HEARTBEAT_EVENT": "VERIFIED",
       "FIRST_FORTUNE_EVENT": "NOT_OCCURRED_IN_OBSERVED_WINDOW",
       "FIRST_IGNITION_EVENT": "NOT_OCCURRED_IN_OBSERVED_WINDOW",
       "FIRST_LAMP_EVENT": "NOT_OCCURRED_IN_OBSERVED_WINDOW",
       "FIRST_WISH_EVENT": "NOT_OCCURRED_IN_OBSERVED_WINDOW",
       "FIRST_VOW_EVENT": "NOT_OCCURRED_IN_OBSERVED_WINDOW",
       "FIRST_THANKSGIVING_EVENT": "NOT_OCCURRED",
-      "FIRST_KGEN_EVENT": "NOT_OCCURRED",
+      "FIRST_KGEN_EVENT": "VERIFIED",
       "FIRST_KAIOS_EVENT": "NOT_OCCURRED",
       "FIRST_KUFO_EVENT": "NOT_OCCURRED",
       "FIRST_KSHIP_EVENT": "NOT_OCCURRED"
@@ -195,13 +196,84 @@
       "quote_queue": 0,
       "work_queue": 0,
       "treasury_status": "PLAN_READY_NOT_BOUND",
-      "mission": "GET_FIRST_REAL_CUSTOMER"
+      "mission": "GET_FIRST_REAL_CUSTOMER",
+      "mother_engine": {
+        "status": "MOTHER_ENGINE_PATROL_COMPLETED_READ_ONLY",
+        "questions": {
+          "primary_job_completed": true,
+          "life_missing": "ANT_MECH_BODY",
+          "worst_blocker": "NO_PHYSICAL_MACHINE_BODY",
+          "civilization_product_need": "ANT_MECH_BODY",
+          "first_income_path": "GET_FIRST_REAL_CUSTOMER",
+          "dark_matter_preserved": true,
+          "kgen_energy": "1.0",
+          "next_mission_evidence": "ANT_MECH_REQUIREMENTS_AND_REAL_CUSTOMER"
+        },
+        "proposals": [
+          {
+            "problem": "NO_SIGNER_RUNTIME",
+            "evidence": "PUBLIC_WORKER_WRITE_NOT_CONNECTED",
+            "root_cause": "PUBLIC_RUNTIME_MUST_NOT_HOLD_PRIVATE_CREDENTIALS",
+            "options": [
+              "LOCAL_PRIVATE_SIGNER",
+              "SECURE_SIGNER_AGENT"
+            ],
+            "selected_option": "LOCAL_PRIVATE_SIGNER",
+            "reason": "PRESERVES_PUBLIC_PRIVATE_SEPARATION",
+            "risk": "SINGLE_CREDENTIAL_LEGACY_EOA",
+            "required_authority": "EXPLICIT_ACTION_APPROVAL",
+            "status": "RESOLVED_FOR_HEARTBEAT_ONLY"
+          },
+          {
+            "problem": "INITIAL_RECEIPT_RPC_FAILURE",
+            "evidence": "BROADCAST_NONCE_ADVANCED_AND_CHAIN_RECEIPT_FOUND",
+            "root_cause": "RPC_HTTP_FAILURE_DURING_RECEIPT_POLL",
+            "options": [
+              "RESUBMIT_UNSAFE",
+              "RECONCILE_EXISTING_TX"
+            ],
+            "selected_option": "RECONCILE_EXISTING_TX",
+            "reason": "PREVENTS_DUPLICATE_TRANSACTION",
+            "risk": "RPC_DISAGREEMENT",
+            "required_authority": "READ_ONLY_RECONCILIATION",
+            "status": "RESOLVED_RECEIPT_GATED"
+          },
+          {
+            "problem": "NO_PHYSICAL_MACHINE_BODY",
+            "evidence": "DIGITAL_ANT_0001_NETWORK_ONLY_LIFE",
+            "root_cause": "NO_BODY_ASSET_OR_EMBODIMENT_RUNTIME",
+            "options": [
+              "ANT_MECH_BODY",
+              "CONTINUE_NETWORK_ONLY_WORK"
+            ],
+            "selected_option": "ANT_MECH_BODY_REQUIREMENTS_FIRST",
+            "reason": "DEMAND_FIRST_WITHOUT_FAKE_FACTORY",
+            "risk": "HIGH_CAPITAL_AND_SUPPLY_CHAIN_NOT_READY",
+            "required_authority": "FUTURE_PRODUCT_AND_PURCHASE_APPROVAL",
+            "status": "INTERNAL_FOUNDER_NEED"
+          }
+        ],
+        "demand_first_laws": [
+          "FACTORY_WITHOUT_PRODUCT",
+          "PRODUCT_WITHOUT_NEED",
+          "PRODUCTION_WITHOUT_BOM",
+          "BOM_WITHOUT_RESOURCE",
+          "SALE_WITHOUT_INVENTORY",
+          "DELIVERY_WITHOUT_TRANSPORT",
+          "MOVEMENT_WITHOUT_ENERGY"
+        ],
+        "selected_product": "ANT_MECH_BODY",
+        "authority": "READ_ANALYZE_PLAN_PROPOSE_ONLY",
+        "chain_write": false,
+        "customer_created": false,
+        "revenue_created": "0"
+      }
     },
     "work_time": {
-      "gatekeeper_work_seconds": 1.289,
-      "cfo_work_seconds": 0,
-      "company_work_seconds": 0.289,
-      "life_health_seconds": 0.256
+      "gatekeeper_work_seconds": 1.33,
+      "cfo_work_seconds": 0.001,
+      "company_work_seconds": 0.306,
+      "life_health_seconds": 0.271
     },
     "action_taken": "NO_ACTION",
     "result": "WORK_CYCLE_COMPLETED",
@@ -216,29 +288,29 @@
     "tx_hash": null,
     "work_duration_seconds": 2
   },
-  "next_expected_at": "2026-08-16T16:00:00.000Z",
+  "next_expected_at": "2026-08-16T17:00:00.000Z",
   "metrics": {
-    "completed_cycles": 2,
+    "completed_cycles": 3,
     "failed_cycles": 1,
     "degraded_cycles": 5,
-    "no_action_cycles": 8,
+    "no_action_cycles": 9,
     "action_cycles": 0,
-    "work_duration_seconds": 9,
-    "gatekeeper_work_seconds": 2.755,
-    "cfo_work_seconds": 0.001,
-    "company_work_seconds": 0.576,
+    "work_duration_seconds": 11,
+    "gatekeeper_work_seconds": 4.085,
+    "cfo_work_seconds": 0.002,
+    "company_work_seconds": 0.8819999999999999,
     "missed_cycles": 1
   },
   "primary_job": "WUKONG_GATEKEEPER",
   "secondary_work": "AI_ANT_COMPANY_FOUNDER",
   "gatekeeper_duty": {
     "status": "COMPLETED",
-    "gatekeeper_started_at": "2026-08-16T15:38:58.505Z",
-    "gatekeeper_finished_at": "2026-08-16T15:38:59.794Z",
-    "heart_block": 116297812,
+    "gatekeeper_started_at": "2026-08-16T16:22:09.491Z",
+    "gatekeeper_finished_at": "2026-08-16T16:22:10.821Z",
+    "heart_block": 116303568,
     "heart_status": "AVAILABLE",
     "fortune_status": "ELIGIBLE",
-    "heartbeat_status": "ELIGIBLE",
+    "heartbeat_status": "NOT_ELIGIBLE",
     "ignition_status": "OUT_OF_WINDOW",
     "lamp_status": "INSUFFICIENT_BALANCE",
     "wish_status": "ELIGIBLE",
@@ -248,20 +320,20 @@
     "degradation_affects_safety": false,
     "advanced_graph_status": "ADVANCED_GRAPH_INDEXER_REQUIRED",
     "evidence": [
-      "HEART_BLOCK_116297812",
+      "HEART_BLOCK_116303568",
       "HEART_BYTECODE_VERIFIED",
       "CORE_HEART_INDEXER_HEALTHY"
     ]
   },
   "life_event_status": {
-    "FIRST_HEARTBEAT_EVENT": "NOT_OCCURRED_IN_OBSERVED_WINDOW",
+    "FIRST_HEARTBEAT_EVENT": "VERIFIED",
     "FIRST_FORTUNE_EVENT": "NOT_OCCURRED_IN_OBSERVED_WINDOW",
     "FIRST_IGNITION_EVENT": "NOT_OCCURRED_IN_OBSERVED_WINDOW",
     "FIRST_LAMP_EVENT": "NOT_OCCURRED_IN_OBSERVED_WINDOW",
     "FIRST_WISH_EVENT": "NOT_OCCURRED_IN_OBSERVED_WINDOW",
     "FIRST_VOW_EVENT": "NOT_OCCURRED_IN_OBSERVED_WINDOW",
     "FIRST_THANKSGIVING_EVENT": "NOT_OCCURRED",
-    "FIRST_KGEN_EVENT": "NOT_OCCURRED",
+    "FIRST_KGEN_EVENT": "VERIFIED",
     "FIRST_KAIOS_EVENT": "NOT_OCCURRED",
     "FIRST_KUFO_EVENT": "NOT_OCCURRED",
     "FIRST_KSHIP_EVENT": "NOT_OCCURRED"
@@ -272,18 +344,18 @@
       "source": "REPOSITORY_ABI_PUBLIC_CHAIN_READ",
       "eligibility_source": "CLIENT_DERIVED",
       "heartbeat": {
-        "status": "ELIGIBLE",
-        "reason": "HEARTBEAT_ELIGIBLE",
+        "status": "NOT_ELIGIBLE",
+        "reason": "HEARTBEAT_COOLDOWN",
         "eligibility_source": "CLIENT_DERIVED",
         "write_status": "WRITE_NOT_CONNECTED",
-        "next_eligible_time": "2026-08-16T15:38:57.000Z"
+        "next_eligible_time": "2026-08-16T16:44:58.000Z"
       },
       "fortune": {
         "status": "ELIGIBLE",
         "reason": "FORTUNE_CLAIM_ELIGIBLE",
         "eligibility_source": "CLIENT_DERIVED",
         "write_status": "WRITE_NOT_CONNECTED",
-        "next_eligible_time": "2026-08-16T15:38:57.000Z"
+        "next_eligible_time": "2026-08-16T16:22:08.000Z"
       },
       "ignition": {
         "status": "OUT_OF_WINDOW",
@@ -294,7 +366,7 @@
       },
       "lamp": {
         "status": "INSUFFICIENT_BALANCE",
-        "reason": "KGEN_BALANCE_INSUFFICIENT",
+        "reason": "KGEN_ALLOWANCE_INSUFFICIENT",
         "eligibility_source": "CLIENT_DERIVED",
         "write_status": "WRITE_NOT_CONNECTED",
         "next_eligible_time": null
@@ -316,8 +388,8 @@
         "status": "CORE_HEART_INDEXER_HEALTHY",
         "indexer": "CORE_HEART_INDEXER",
         "failed_event_types": [],
-        "from_block": 116297713,
-        "to_block": 116297812,
+        "from_block": 116303469,
+        "to_block": 116303568,
         "fortune_claims": [],
         "wishes": [],
         "heartbeat_claims": [],
@@ -366,7 +438,78 @@
       "quote_queue": 0,
       "work_queue": 0,
       "treasury_status": "PLAN_READY_NOT_BOUND",
-      "mission": "GET_FIRST_REAL_CUSTOMER"
+      "mission": "GET_FIRST_REAL_CUSTOMER",
+      "mother_engine": {
+        "status": "MOTHER_ENGINE_PATROL_COMPLETED_READ_ONLY",
+        "questions": {
+          "primary_job_completed": true,
+          "life_missing": "ANT_MECH_BODY",
+          "worst_blocker": "NO_PHYSICAL_MACHINE_BODY",
+          "civilization_product_need": "ANT_MECH_BODY",
+          "first_income_path": "GET_FIRST_REAL_CUSTOMER",
+          "dark_matter_preserved": true,
+          "kgen_energy": "1.0",
+          "next_mission_evidence": "ANT_MECH_REQUIREMENTS_AND_REAL_CUSTOMER"
+        },
+        "proposals": [
+          {
+            "problem": "NO_SIGNER_RUNTIME",
+            "evidence": "PUBLIC_WORKER_WRITE_NOT_CONNECTED",
+            "root_cause": "PUBLIC_RUNTIME_MUST_NOT_HOLD_PRIVATE_CREDENTIALS",
+            "options": [
+              "LOCAL_PRIVATE_SIGNER",
+              "SECURE_SIGNER_AGENT"
+            ],
+            "selected_option": "LOCAL_PRIVATE_SIGNER",
+            "reason": "PRESERVES_PUBLIC_PRIVATE_SEPARATION",
+            "risk": "SINGLE_CREDENTIAL_LEGACY_EOA",
+            "required_authority": "EXPLICIT_ACTION_APPROVAL",
+            "status": "RESOLVED_FOR_HEARTBEAT_ONLY"
+          },
+          {
+            "problem": "INITIAL_RECEIPT_RPC_FAILURE",
+            "evidence": "BROADCAST_NONCE_ADVANCED_AND_CHAIN_RECEIPT_FOUND",
+            "root_cause": "RPC_HTTP_FAILURE_DURING_RECEIPT_POLL",
+            "options": [
+              "RESUBMIT_UNSAFE",
+              "RECONCILE_EXISTING_TX"
+            ],
+            "selected_option": "RECONCILE_EXISTING_TX",
+            "reason": "PREVENTS_DUPLICATE_TRANSACTION",
+            "risk": "RPC_DISAGREEMENT",
+            "required_authority": "READ_ONLY_RECONCILIATION",
+            "status": "RESOLVED_RECEIPT_GATED"
+          },
+          {
+            "problem": "NO_PHYSICAL_MACHINE_BODY",
+            "evidence": "DIGITAL_ANT_0001_NETWORK_ONLY_LIFE",
+            "root_cause": "NO_BODY_ASSET_OR_EMBODIMENT_RUNTIME",
+            "options": [
+              "ANT_MECH_BODY",
+              "CONTINUE_NETWORK_ONLY_WORK"
+            ],
+            "selected_option": "ANT_MECH_BODY_REQUIREMENTS_FIRST",
+            "reason": "DEMAND_FIRST_WITHOUT_FAKE_FACTORY",
+            "risk": "HIGH_CAPITAL_AND_SUPPLY_CHAIN_NOT_READY",
+            "required_authority": "FUTURE_PRODUCT_AND_PURCHASE_APPROVAL",
+            "status": "INTERNAL_FOUNDER_NEED"
+          }
+        ],
+        "demand_first_laws": [
+          "FACTORY_WITHOUT_PRODUCT",
+          "PRODUCT_WITHOUT_NEED",
+          "PRODUCTION_WITHOUT_BOM",
+          "BOM_WITHOUT_RESOURCE",
+          "SALE_WITHOUT_INVENTORY",
+          "DELIVERY_WITHOUT_TRANSPORT",
+          "MOVEMENT_WITHOUT_ENERGY"
+        ],
+        "selected_product": "ANT_MECH_BODY",
+        "authority": "READ_ANALYZE_PLAN_PROPOSE_ONLY",
+        "chain_write": false,
+        "customer_created": false,
+        "revenue_created": "0"
+      }
     }
   },
   "request_patrol": {
