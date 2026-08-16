@@ -47,7 +47,7 @@ First Heartbeat, Fortune, Ignition, Lamp, Wish, Vow and Thanksgiving events requ
 
 ## Local Validation
 
-- Universal Exchange tests: `184 / 184 PASS`
+- Universal Exchange tests: `185 / 185 PASS`
 - ES module syntax: `PASS`
 - Local public Worker: `WORK_CYCLE_COMPLETED`
 - Local Gatekeeper duty: `COMPLETED`
@@ -61,10 +61,30 @@ The release is built in an isolated worktree from `origin/main`. Protected paths
 
 ## Deployment Record
 
-- Release commit: `PENDING`
-- Pull request: `PENDING`
-- Pages deployment: `PENDING`
+- Release commit: `77c1518b9d06d53be1d9f0ffb477982251a6f1a6`
+- Pull request: `#143 / MERGED`
+- Merge commit: `ed78d2bf3ce474a5e5967abbf53ba1cd999d2512`
+- First V3.5 Work Evidence commit: `3f544c2319c872efeca2fcbfbd940f21ae610c8a`
+- Release Pages deployment: Actions run `31950827920 / PASS`
+- Work Evidence Pages deployment: Actions run `31951455398 / PASS`
 - Public URL: `https://klineodyssey.github.io/kline-odyssey/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/11520/index.html#/LIFE`
-- First V3.5 production Gatekeeper evidence: `PENDING`
+- First V3.5 production Gatekeeper evidence: `DIGITAL_ANT_0001_HOURLY_2026081614 / WORK_CYCLE_COMPLETED / block 116284684`
+- Worker health: `HEALTHY`
+- Gatekeeper duty: `COMPLETED`
+- Core Heart Indexer: `CORE_HEART_INDEXER_HEALTHY`
+- Advanced Graph Indexer: `ADVANCED_GRAPH_INDEXER_REQUIRED`
+- Heartbeat / Fortune / Wish: `ELIGIBLE / WRITE_NOT_CONNECTED`
+- Ignition: `OUT_OF_WINDOW`
+- Lamp: `INSUFFICIENT_BALANCE`
+- Thanksgiving / Vow: `NOT_ELIGIBLE`
+- First Heartbeat / Fortune / Ignition / Lamp / Wish: `NOT_OCCURRED_IN_OBSERVED_WINDOW`
+- First KGEN / KAIOS: `NOT_OCCURRED`
+- BNB / KGEN / KAIOS: `0.006 / 0 / 0`
+- Gatekeeper / CFO / Company time: `1.466s / 0.001s / 0.287s`
+- Company patrol: `COMPANY_PATROL_COMPLETED`, after primary duty
+- Real customers: `0`
+- Browser visual smoke: browser-control service unavailable; HTTP/content verification used and this limitation is not reported as UI PASS
+- Production HTTP: Portal, Life page, App, Manifest and shared Worker snapshot returned `200`
+- Public signer / chain write: `false / false`
 
-This report is cumulative for V3.5 and will be completed with immutable release and production evidence after CI, merge, hourly Worker execution and Pages verification.
+The static checksum package excludes mutable `runtime/worker-status.json` and append-only Work Events; those files carry their own Git commit history and would invalidate a static release checksum every hour. All immutable V3.5 release assets remain SHA-256 verified.

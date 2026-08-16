@@ -2234,3 +2234,11 @@ test("V3.5 Canonical App and Gatekeeper runtime preserve Birth and zero first-as
   assert.equal(seed.next_stage.gatekeeper_runtime.life_events.FIRST_KAIOS_EVENT, "NOT_OCCURRED");
   assert.equal(seed.next_stage.gatekeeper_runtime.secure_signer, "NOT_CONNECTED");
 });
+
+test("V3.5 mutable hourly evidence is excluded from static release checksums", async () => {
+  const sums = await fs.readFile(new URL("../K線西遊記/temples/11520/SHA256SUMS.txt", import.meta.url), "utf8");
+  assert.doesNotMatch(sums, /runtime\/worker-status\.json/);
+  assert.doesNotMatch(sums, /runtime\/work-events/);
+  assert.match(sums, /  app\.mjs/);
+  assert.match(sums, /  MANIFEST\.json/);
+});
