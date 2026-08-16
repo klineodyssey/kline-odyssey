@@ -72,9 +72,14 @@ import {
   , I18N_SUPPORTED_LOCALES, I18N_REQUIRED_KEYS, I18N_CATALOGS, translateUi,
   validatePrimaryI18nCatalogs, detectVoiceCapabilities, deriveWorkerHealth,
   normalizeHeartActionStatus, validateSharedWorkerStatus
+  , DIGITAL_ANT_WORK_PRIORITIES, DIGITAL_ANT_HOURLY_DUTY_ORDER,
+  validateGatekeeperDutyStatus, assertCompanyWorkAllowedAfterGatekeeper,
+  validateFirstLifeEventEvidence, appendFirstDigitalAntLifeEvent,
+  DIGITAL_ANT_LIFE_WORK_CONTRACT, createDailyGatekeeperReport,
+  DIGITAL_ANT_SECURE_SIGNER_WORKER, DIGITAL_ANT_LIVE_ACTION_POLICY, prepareSecureHeartAction
 } from "../core/index.mjs";
 import { verifyDigitalAntWalletBinding } from "../core/security/wallet-binding.mjs";
-import { TEMPLE_HEART_READ_ABI, TEMPLE_HEART_DRY_RUN_ABI, TEMPLE_HEART_VERIFIED_ACTIONS } from "../core/integrations/temple-heart-12345.mjs";
+import { TEMPLE_HEART_READ_ABI, TEMPLE_HEART_DRY_RUN_ABI, TEMPLE_HEART_VERIFIED_ACTIONS, readCoreHeartEvents } from "../core/integrations/temple-heart-12345.mjs";
 import { buildSharedWorkerStatus, createPublicReadProvider, readCompanyPatrol, readPublicRequestPatrol } from "../core/jobs/public-read-only-worker.mjs";
 
 const seed = JSON.parse(await fs.readFile(new URL("../core/data/canonical.json", import.meta.url), "utf8"));
@@ -634,7 +639,7 @@ test("V2.4 Life App release preserves Life ID, Birth and independent App version
   assert.equal(life.life_id, "DIGITAL_ANT_0001");
   assert.equal(life.birth_timestamp, "2026-08-15T06:20:45.000Z");
   assert.equal(app.life_id, life.life_id);
-  assert.equal(app.version, "V1.1.0");
+  assert.equal(app.version, "V1.2.0");
   assert.equal(app.status, "RELEASED_LOCAL");
   assert.equal(await calculateAppManifestHash(app), app.manifest_hash);
   assert.equal(app.permissions.CHAIN_READ, true);
@@ -657,7 +662,7 @@ test("V2.4 hourly cycle is once per UTC hour and duration uses actual timestamps
   };
   const first = await runDigitalAntHourlyCycle(input);
   const duplicate = await runDigitalAntHourlyCycle({ ...input, scheduledAt: "2026-08-15T10:59:59.000Z" });
-  assert.equal(first.status, "WORK_CYCLE_DEGRADED");
+  assert.equal(first.status, "WORK_CYCLE_COMPLETED");
   assert.equal(first.event.payload.work_duration_seconds, 5);
   assert.equal(duplicate.status, "IDEMPOTENT_NOOP");
   assert.equal((await state.store.history(life.life_id, "LIFE")).filter((event) => event.event_type === "HOURLY_WORK_EVENT").length, 1);
@@ -2103,10 +2108,10 @@ test("V3.4 shared status is global truth while IndexedDB remains local cache", a
   assert.equal(status.chain_write, false);
 });
 
-test("V3.4 App upgrade preserves Life ID and immutable Birth", async () => {
+test("V3.5 App upgrade preserves Life ID and immutable Birth", async () => {
   const app = seed.apps.find((item) => item.app_id === "DIGITAL_ANT_APP_0001");
   const life = seed.lives.find((item) => item.life_id === "DIGITAL_ANT_0001");
-  assert.equal(app.version, "V1.1.0");
+  assert.equal(app.version, "V1.2.0");
   assert.equal(app.life_id, life.life_id);
   assert.equal(life.birth_timestamp, "2026-08-15T06:20:45.000Z");
   assert.equal(await calculateAppManifestHash(app), app.manifest_hash);
@@ -2139,4 +2144,93 @@ test("V3.4 Node worker uses a signer-free fetch transport and verifies BSC chain
   assert.equal(await provider.getBlockNumber(), 0x1234);
   assert.deepEqual(await provider.listAccounts(), []);
   assert.deepEqual(methods, ["eth_chainId", "eth_blockNumber", "eth_chainId", "eth_accounts"]);
+});
+
+function gatekeeperDuty(overrides = {}) {
+  return {
+    status: "COMPLETED", gatekeeper_started_at: "2026-08-16T13:00:01.000Z", gatekeeper_finished_at: "2026-08-16T13:00:03.000Z",
+    heart_block: 116236674, heart_status: "AVAILABLE", fortune_status: "ELIGIBLE", heartbeat_status: "ELIGIBLE",
+    ignition_status: "OUT_OF_WINDOW", lamp_status: "INSUFFICIENT_BALANCE", wish_status: "ELIGIBLE", vow_status: "NOT_ELIGIBLE",
+    claim_monitor_status: "CORE_HEART_INDEXER_HEALTHY", risk_status: "NORMAL", degradation_affects_safety: false,
+    evidence: ["HEART_BLOCK_116236674", "HEART_BYTECODE_VERIFIED"], ...overrides
+  };
+}
+
+test("V3.5 Primary Wukong Gatekeeper job always precedes Company work", () => {
+  assert.deepEqual(DIGITAL_ANT_WORK_PRIORITIES, ["SURVIVE", "WUKONG_GATEKEEPER", "CFO_OF_SELF", "AI_ANT_COMPANY", "DREAM_SPACECRAFT_MARS"]);
+  assert.ok(DIGITAL_ANT_HOURLY_DUTY_ORDER.indexOf("12345_GATEKEEPER_PATROL") < DIGITAL_ANT_HOURLY_DUTY_ORDER.indexOf("AI_ANT_COMPANY_WORK"));
+  assert.equal(DIGITAL_ANT_LIFE_WORK_CONTRACT.primary_job, "WUKONG_GATEKEEPER");
+  assert.equal(DIGITAL_ANT_LIFE_WORK_CONTRACT.secondary_work, "AI_ANT_COMPANY_FOUNDER");
+});
+
+test("V3.5 Primary job bypass fails while safe degraded duty may continue", () => {
+  assert.equal(assertCompanyWorkAllowedAfterGatekeeper(gatekeeperDuty()), true);
+  assert.equal(assertCompanyWorkAllowedAfterGatekeeper(gatekeeperDuty({ status: "DEGRADED", degradation_affects_safety: false })), true);
+  assert.throws(() => assertCompanyWorkAllowedAfterGatekeeper(gatekeeperDuty({ status: "FAILED_CRITICAL", degradation_affects_safety: true })), (error) => error.code === "PRIMARY_JOB_BYPASS");
+  assert.equal(validateGatekeeperDutyStatus(gatekeeperDuty()).status, "COMPLETED");
+});
+
+test("V3.5 First asset events require a real balance increase and immutable evidence", async () => {
+  const state = await runtime();
+  const life = await state.registries.life.get("DIGITAL_ANT_0001");
+  const evidence = { life_id: life.life_id, asset: "KGEN", balance_before_wei: "0", balance_after_wei: "1", amount_wei: "1", tx_hash: `0x${"a".repeat(64)}`, block: 116300000, timestamp: "2026-08-16T13:00:00.000Z", receipt_status: 1, source: "FORTUNE" };
+  assert.equal(validateFirstLifeEventEvidence("FIRST_KGEN_EVENT", evidence), evidence);
+  const first = await appendFirstDigitalAntLifeEvent({ store: state.store, life, eventType: "FIRST_KGEN_EVENT", evidence });
+  assert.equal(first.status, "FIRST_LIFE_EVENT_APPENDED");
+  const second = await appendFirstDigitalAntLifeEvent({ store: state.store, life, eventType: "FIRST_KGEN_EVENT", evidence });
+  assert.equal(second.status, "IDEMPOTENT_NOOP");
+  assert.equal(life.birth_timestamp, "2026-08-15T06:20:45.000Z");
+  assert.throws(() => validateFirstLifeEventEvidence("FIRST_KAIOS_EVENT", { ...evidence, balance_after_wei: "0" }), (error) => error.code === "FIRST_ASSET_BALANCE_INCREASE_REQUIRED");
+});
+
+test("V3.5 Heart first events require success receipts, timestamps, blocks and tx hashes", () => {
+  const base = { life_id: "DIGITAL_ANT_0001", tx_hash: `0x${"b".repeat(64)}`, block: 116300001, timestamp: "2026-08-16T13:01:00.000Z", receipt_status: 1 };
+  for (const eventType of ["FIRST_HEARTBEAT_EVENT", "FIRST_FORTUNE_EVENT", "FIRST_IGNITION_EVENT", "FIRST_LAMP_EVENT", "FIRST_WISH_EVENT", "FIRST_VOW_EVENT", "FIRST_THANKSGIVING_EVENT"]) {
+    assert.equal(validateFirstLifeEventEvidence(eventType, base), base);
+    assert.throws(() => validateFirstLifeEventEvidence(eventType, { ...base, receipt_status: 0 }), (error) => error.code === "FIRST_EVENT_SUCCESS_RECEIPT_REQUIRED");
+  }
+  assert.throws(() => validateFirstLifeEventEvidence("FIRST_WISH_EVENT", { ...base, tx_hash: null }), (error) => error.code === "FIRST_EVENT_TX_EVIDENCE_REQUIRED");
+  assert.throws(() => validateFirstLifeEventEvidence("FIRST_LAMP_EVENT", { ...base, timestamp: null }), (error) => error.code === "FIRST_EVENT_TIMESTAMP_EVIDENCE_REQUIRED");
+});
+
+test("V3.5 Core Heart indexer is independent from optional advanced transaction graph", async () => {
+  const event = { blockNumber: 12, transactionIndex: 0, transactionHash: `0x${"c".repeat(64)}`, args: { user: "0xc8346d6DC80f16941ee874D523f0C17F1548d437", amount: 1n, epochIndex: 1n, wishHash: `0x${"d".repeat(64)}`, reward: 1n, dayIndex: 1n, daysAdded: 1n, paid: 1n, newExpireAt: 1n, option: 1 } };
+  const heart = { filters: { FortuneClaimed: () => "F", WishMade: () => "W", HeartbeatClaimed: () => "H", IgniteClaimed: () => "I", LampLit: () => "L", Vowed: () => "V" }, queryFilter: async () => [event] };
+  const indexed = await readCoreHeartEvents(heart, 1, 12);
+  assert.equal(indexed.status, "CORE_HEART_INDEXER_HEALTHY");
+  assert.equal(indexed.fortune_claims.length, 1);
+  assert.equal(indexed.vows.length, 1);
+  assert.equal(indexed.indexer, "CORE_HEART_INDEXER");
+});
+
+test("V3.5 Secure Signer stays private, disconnected and fail-closed", () => {
+  assert.equal(DIGITAL_ANT_SECURE_SIGNER_WORKER.status, "NOT_CONNECTED");
+  assert.equal(DIGITAL_ANT_SECURE_SIGNER_WORKER.public_pages_access, false);
+  assert.equal(DIGITAL_ANT_SECURE_SIGNER_WORKER.public_workflow_access, false);
+  assert.equal(DIGITAL_ANT_LIVE_ACTION_POLICY.actions.fortuneClaim.enabled, false);
+  assert.throws(() => prepareSecureHeartAction({ proposal: { action: "fortuneClaim" }, latest: {}, signerStatus: "NOT_CONNECTED" }), (error) => error.code === "SECURE_SIGNER_NOT_CONNECTED");
+});
+
+test("V3.5 Survival reserve blocks an otherwise revalidated secure action", () => {
+  const policy = { ...DIGITAL_ANT_LIVE_ACTION_POLICY, status: "APPROVED_ACTIVE", actions: { ...DIGITAL_ANT_LIVE_ACTION_POLICY.actions, heartbeatClaim: { ...DIGITAL_ANT_LIVE_ACTION_POLICY.actions.heartbeatClaim, enabled: true } } };
+  assert.throws(() => prepareSecureHeartAction({ proposal: { action: "heartbeatClaim" }, policy, signerStatus: "CONNECTED_SECURE_RUNTIME", latest: { chain_id: 56, contract_verified: true, eligible: true, security_status: "HEALTHY", block: 116300002, gas_estimate: "100000", bnb_after_action_wei: "1", minimum_bnb_reserve_wei: "2" } }), (error) => error.code === "SURVIVAL_RESERVE_VIOLATION");
+});
+
+test("V3.5 Daily Gatekeeper report separates duty evidence and truthful zero balances", () => {
+  const report = createDailyGatekeeperReport({ date: "2026-08-16", workEvents: [{ gatekeeper_duty: gatekeeperDuty() }], balances: { BNB: "0.006", KGEN: "0", KAIOS: "0" }, generatedAt: "2026-08-16T13:10:00.000Z" });
+  assert.equal(report.completed, 1);
+  assert.equal(report.first_kgen_status, "NOT_OCCURRED");
+  assert.equal(report.first_kaios_status, "NOT_OCCURRED");
+  assert.equal(report.chain_write, false);
+});
+
+test("V3.5 Canonical App and Gatekeeper runtime preserve Birth and zero first-asset evidence", async () => {
+  const app = seed.apps.find((item) => item.app_id === "DIGITAL_ANT_APP_0001");
+  assert.equal(seed.schema_version, "3.5.0");
+  assert.equal(app.version, "V1.2.0");
+  assert.equal(await calculateAppManifestHash(app), app.manifest_hash);
+  assert.equal(seed.lives[0].birth_timestamp, "2026-08-15T06:20:45.000Z");
+  assert.equal(seed.next_stage.gatekeeper_runtime.life_events.FIRST_KGEN_EVENT, "NOT_OCCURRED");
+  assert.equal(seed.next_stage.gatekeeper_runtime.life_events.FIRST_KAIOS_EVENT, "NOT_OCCURRED");
+  assert.equal(seed.next_stage.gatekeeper_runtime.secure_signer, "NOT_CONNECTED");
 });

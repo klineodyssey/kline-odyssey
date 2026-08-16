@@ -1,5 +1,15 @@
 # 11520 Changelog
 
+## 3.5.0
+
+- Upgraded `DIGITAL_ANT_APP_0001` to V1.2.0 without changing Life ID, immutable Birth Certificate, Wallet binding, Listing or Company identity.
+- Enforced `WUKONG_GATEKEEPER` as the primary job before CFO and Company work. Critical Gatekeeper failure skips secondary work; safe optional degradation remains explicit evidence.
+- Added `GATEKEEPER_DUTY_STATUS`, separate Gatekeeper/CFO/Company work-time accounting and a cumulative daily Gatekeeper report.
+- Added the Core Heart Event Indexer for Fortune, Heartbeat, Ignition, Lamp, Wish and Vow. Advanced transfer/approval/funding graphs remain optional and indexer-gated.
+- Added append-only, idempotent First-Life-Event evidence guards. A successful receipt is mandatory, and First KGEN/KAIOS also require a real balance increase.
+- Added a fail-closed Secure Signer Worker interface and per-action Heart policy. It is `NOT_CONNECTED`; no private key, signer, chain write or asset action is present in the public Worker.
+- Added evidence-derived Life timeline and primary/secondary duty UI. Events without proof display `NOT YET`.
+
 ## 3.4.0
 
 - Upgraded `DIGITAL_ANT_APP_0001` to V1.1.0 without changing Life ID, immutable Birth Certificate, personal Wallet ownership, Mission identity or non-transferable identity right.

@@ -453,6 +453,40 @@ export function validateIncidentStateTransition(previousState, nextState, eviden
   return Object.freeze({ previous_state: previousState, next_state: nextState, evidence, append_only: true });
 }
 
+export const DIGITAL_ANT_SECURE_SIGNER_WORKER = Object.freeze({
+  worker_id: "DIGITAL_ANT_SECURE_SIGNER_WORKER",
+  runtime_class: "LOCAL_OR_SECURE_SIGNER_AGENT",
+  status: "NOT_CONNECTED",
+  public_pages_access: false,
+  public_workflow_access: false,
+  proposal_trust: "UNTRUSTED_REVALIDATE_AT_LATEST_BLOCK",
+  chain_id: 56,
+  private_key_storage: "USER_CONTROLLED_SECURE_ENVIRONMENT_ONLY",
+  chain_write: false
+});
+
+export const DIGITAL_ANT_LIVE_ACTION_POLICY = Object.freeze({
+  policy_id: "DIGITAL_ANT_LIVE_ACTION_POLICY",
+  status: "POLICY_DRAFT_NOT_ENABLED",
+  survival_reserve: "OWNER_APPROVAL_REQUIRED",
+  actions: Object.freeze(Object.fromEntries([
+    ["heartbeatClaim", "heartbeatClaim()"], ["fortuneClaim", "fortuneClaim(uint256)"], ["igniteAndClaim", "igniteAndClaim()"],
+    ["lightLamp", "lightLamp(uint256)"], ["makeWish", "makeWish(bytes32)"], ["vowTo", "vowTo(uint8,uint256)"]
+  ].map(([action, signature]) => [action, Object.freeze({ action, signature, enabled: false, max_gas: null, max_value: null, cooldown: "CONTRACT_DERIVED", daily_limit: null, minimum_bnb_reserve: "POLICY_REQUIRED", mission_reason: "REQUIRED", security_requirement: "HEALTHY_AND_REVALIDATED" })])))
+});
+
+export function prepareSecureHeartAction({ proposal, latest, policy = DIGITAL_ANT_LIVE_ACTION_POLICY, signerStatus = "NOT_CONNECTED" }) {
+  invariant(proposal?.action && policy.actions[proposal.action], "UNKNOWN_HEART_ACTION", "Secure Signer received an unknown Heart action");
+  const actionPolicy = policy.actions[proposal.action];
+  invariant(signerStatus === "CONNECTED_SECURE_RUNTIME", "SECURE_SIGNER_NOT_CONNECTED", "Heart write requires a separate secure signer runtime");
+  invariant(policy.status === "APPROVED_ACTIVE" && actionPolicy.enabled === true, "LIVE_ACTION_POLICY_NOT_ENABLED", "Heart action is not enabled by approved policy");
+  invariant(latest?.chain_id === 56 && latest.contract_verified === true, "SECURE_SIGNER_CHAIN_OR_CONTRACT_INVALID", "Secure Signer must reverify chain and Heart contract");
+  invariant(latest.eligible === true && latest.security_status === "HEALTHY", "SECURE_SIGNER_REVALIDATION_FAILED", "Secure Signer must reverify current eligibility and security");
+  invariant(Number.isInteger(latest.block) && latest.block > 0 && latest.gas_estimate !== null, "SECURE_SIGNER_LATEST_BLOCK_AND_GAS_REQUIRED", "Secure Signer requires latest-block gas evidence");
+  invariant(BigInt(latest.bnb_after_action_wei ?? "0") >= BigInt(latest.minimum_bnb_reserve_wei ?? "0"), "SURVIVAL_RESERVE_VIOLATION", "Heart action cannot consume the survival reserve");
+  return Object.freeze({ status: "READY_FOR_SECURE_SIGNATURE", action: proposal.action, block: latest.block, chain_id: 56, signer_scope: "PRIVATE_SECURE_RUNTIME_ONLY", broadcast: false });
+}
+
 export async function appendWalletRecoveryEvent({ store, life, eventType, payload, timestamp }) {
   requireEnum(eventType, ["KEY_UNAVAILABLE", "WALLET_CONTROL_LOST", "RECOVERY_PENDING", "WALLET_ROTATION_PENDING", "WALLET_ROTATED", "RECOVERED", "RETIRED_WALLET"], "recovery.event_type");
   invariant(payload?.life_id === life.life_id, "RECOVERY_LIFE_ID_MISMATCH", "Recovery event cannot replace Life ID");

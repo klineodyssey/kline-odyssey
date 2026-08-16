@@ -1,6 +1,12 @@
-# 11520 Universal Exchange V3.4 Current Handoff
+# 11520 Universal Exchange V3.5 Current Handoff
 
-V3.4 is the active cumulative public release. It retains every V3.3 evidence and authority gate while upgrading `DIGITAL_ANT_APP_0001` to V1.1.0, adding the `zh-TW / en / ja / ko` I18N Runtime, browser Voice Concierge and a real hourly public read-only Worker. Life ID, immutable Birth Certificate, Wallet ownership and Listing identity rights are unchanged.
+V3.5 is the active cumulative public release. It retains the V3.4 multilingual gateway, Voice Concierge and production hourly public Worker while upgrading `DIGITAL_ANT_APP_0001` to V1.2.0 and enforcing `WUKONG_GATEKEEPER` before CFO and Company work. Life ID, immutable Birth Certificate, Wallet ownership and Listing identity rights are unchanged.
+
+Each cycle now records a formal Gatekeeper duty projection, Core Heart Indexer status, optional Advanced Graph status and separate Gatekeeper/CFO/Company work durations. Company patrol may run only after a completed Gatekeeper duty or a safe optional degradation; a critical primary-job failure produces `SKIPPED_DUE_TO_GATEKEEPER_FAILURE`.
+
+First Heartbeat, Fortune, Ignition, Lamp, Wish, Vow, Thanksgiving, KGEN and KAIOS events are append-only and idempotent. They require successful receipt, block, transaction hash and timestamp evidence; KGEN/KAIOS additionally require a real balance increase. Missing evidence remains `NOT YET` and never receives an invented date.
+
+The Core Heart Indexer reads Fortune, Heartbeat, Ignition, Lamp, Wish and Vow events. Advanced Transfer, Approval, funding-graph and clustering analysis remains `ADVANCED_GRAPH_INDEXER_REQUIRED`, but this optional limitation no longer degrades a healthy core patrol. The public Worker has no signer. The separate Secure Signer specification remains `NOT_CONNECTED`, revalidates all proposals against fresh chain state, and disables every Heart action until policy approval.
 
 The Worker is stateless and externally scheduled by `.github/workflows/universal_exchange_v2.yml`. It never receives a signer. Each UTC hour writes at most one `HOURLY_WORK_EVENT` plus `runtime/worker-status.json`; duplicate scheduler calls return `IDEMPOTENT_NOOP`. The snapshot is shared public truth, while IndexedDB is only browser-local draft/cache. RPC, Heart or indexer failures are recorded as degraded/failed evidence and never redefine Life death.
 
@@ -24,11 +30,11 @@ node core/security/verify-wallet-binding.mjs
 
 The wallet command prints only `VERIFIED_BOUND` or `STOP`. Do not add logging around its environment inputs. `DIGITAL_ANT_0001` is `BORN / ALIVE / ON_DUTY` from immutable first-BNB evidence at block `116031445`; the private key remains local-only while the verified public address and Birth Certificate are publishable. Runtime boot replays the canonical birth and the canonical first workday into append-only IndexedDB history exactly once.
 
-Post-Birth Work Runtime V1.0 is read-only and dry-run. Its hourly job records Heart observation, finance snapshot, Wish and KGEN proposals, Work Event and daily reports. `NO_ACTION` is valid; no signer, broadcast, fake income or fake expense is created. The latest bundled public observation is block `116039099`; refreshes must retain block/timestamp evidence. Heart event-flow clustering needs an indexer and must remain `INDEXER_REQUIRED` until one is available.
+Post-Birth Work Runtime remains public-read-only and dry-run. Its hourly job records Heart observation, finance snapshot, Wish and KGEN proposals, Work Event and daily reports. `NO_ACTION` is valid; no signer, broadcast, fake income or fake expense is created. The latest bundled public observation must retain block/timestamp evidence. Advanced transaction-graph analysis remains separately indexer-gated.
 
 The local Registry contains the same `11520_LISTING_DIGITAL_ANT_0001`; V2.4 updates that profile in place with `DIGITAL_ANT_APP_0001 / V1.0.0 / RELEASED_LOCAL`. The SHA-256 manifest and `AI_LIFE_APP_RELEASE_EVENT` are verified at boot. Identity right remains not offered and settlement remains `NOT_DEPLOYED`.
 
-`core/jobs/public-read-only-worker.mjs` is the one-shot external scheduler entry. The workflow is configured for hourly invocation, but because this worktree is not committed or pushed its honest actual state is `CONFIGURED_LOCAL_NOT_ACTIVE`. Duplicate cycle IDs for the same UTC hour are idempotent within the shared event store; cross-run durable synchronization remains a pending adapter. AI Ant Company is `FORMING / LOCAL_11520`; Company Treasury remains unbound and all payment authority remains disabled.
+`core/jobs/public-read-only-worker.mjs` is the one-shot production scheduler entry. The GitHub Actions workflow invokes it hourly at minute 17. Duplicate cycle IDs for the same UTC hour are idempotent within the shared event store. AI Ant Company is `FORMING / LOCAL_11520`; Company Treasury remains unbound and all payment authority remains disabled.
 
 V2.5 adds `core/security/life-security.mjs`. `DIGITAL_ANT_0001` remains the same born Life and uses a legacy EOA with no on-chain recovery authority. Missing runtime credentials first produce `KEY_UNAVAILABLE`, not control loss or death. Confirmed irreversible loss permits a Life-preserving Wallet rotation plan, but never claims that assets in the old EOA were recovered. `ANT_QUEEN_MOTHER_ENGINE` is architecture only, has no wallet, cannot hold private keys, cannot confiscate assets, and cannot execute rescue funding.
 
