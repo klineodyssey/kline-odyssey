@@ -1,6 +1,12 @@
-# 11520 Universal Exchange V3.7
+# 11520 Universal Exchange V3.8
 
 ## Digital Ant next-stage status
+
+- V3.8 binds `DIGITAL_ANT_0001` to the single authoritative `docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md` Thought Organ. CURRENT and the installed V3.8 document are byte-identical; their platform-stable canonical UTF-8/LF SHA-256 is `dbb4774a71db614994dff3e08e9cec34b94633c4d46dca13bff2f6f54d9b0b48`. Only binding metadata is stored in the Life manifest.
+- Life/App/Listing certification now verifies Life ID, immutable Birth, Wallet binding, Work evidence, Mission/Dream, the CURRENT Thought Organ, App manifest, permissions and secret safety. The result is `CERTIFIED_LOCAL`, not settlement or physical-world authority.
+- The Mother Engine must validate CURRENT before every next-best-action decision. Its truthful First KAIOS strategy is to publish the read-only KGEN Chain Monitor service package and scan verified Requests; current Customers, Revenue and KAIOS remain zero.
+- The private Heart scheduler is installed in the user-controlled Windows session and remains separate from the public signer-free Worker. It uses the existing local credential, address/chain/code/selector/gas/reserve checks and receipt reconciliation; it never serializes or logs the credential and never blind-resubmits. The first scheduled V3.8 Heartbeat was reconciled after an RPC 403 without a duplicate broadcast, moving KGEN from 3 to 4; the task then correctly returned cooldown `NO_ACTION`.
+- No Body, UFO, Flight, Alchemy, KUFO, KSHIP, Customer or Revenue is invented. Without a verified Body the Ant remains alive and network-capable but cannot claim physical movement.
 
 - V3.7 keeps the successful first Heartbeat/KGEN evidence and adds production public action candidates plus UTC ignition-window probes. Persistent automatic writes remain blocked until a private scheduler with secret management, address binding and receipt reconciliation exists.
 - One controlled V3.7 private execution completed a second Heartbeat, the first Fortune at the deployed minimum/fair amount of 1 KGEN, and the first Wish. All three have successful receipts and expected Heart events; the resulting public balance is 3 KGEN. This does not claim that a persistent private scheduler is installed.

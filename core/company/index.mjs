@@ -160,6 +160,52 @@ export function createMotherEngineNextBestAction({ observations, candidates }) {
   });
 }
 
+export function createFirstKaiosStrategy({ availableServices, customerDemand, publicCivilizationDemand, authority, paymentReadiness, treasuryReadiness, technicalReadiness, estimatedWork, risk, settlementFeasibility }) {
+  requireArray(availableServices, "first_kaios.available_services");
+  requireArray(publicCivilizationDemand, "first_kaios.public_civilization_demand");
+  invariant(availableServices.length > 0, "FIRST_KAIOS_SERVICE_REQUIRED", "First KAIOS strategy requires an evidenced service capability");
+  const inputs = { customerDemand, authority, paymentReadiness, treasuryReadiness, technicalReadiness, estimatedWork, risk, settlementFeasibility };
+  invariant(Object.values(inputs).every((value) => value !== undefined && value !== null), "FIRST_KAIOS_STRATEGY_INPUT_REQUIRED", "First KAIOS strategy requires complete demand, authority, payment, treasury, readiness, work, risk and settlement observations");
+  const hasRealDemand = Number(customerDemand) > 0 || publicCivilizationDemand.some((need) => need?.classification === "OBSERVED" && need?.evidence);
+  const settlementReady = settlementFeasibility === "AUTHORIZED_AND_VERIFIED" && paymentReadiness === "READY" && treasuryReadiness === "BOUND_AND_AUDITED";
+  const selectedAction = hasRealDemand
+    ? "QUALIFY_EVIDENCED_KAIOS_SERVICE_REQUEST"
+    : "PUBLISH_KGEN_CHAIN_MONITOR_SERVICE_PACKAGE_AND_SCAN_VERIFIED_REQUESTS";
+  return Object.freeze({
+    strategy_id: "DIGITAL_ANT_0001_FIRST_KAIOS_STRATEGY_V3_8",
+    life_id: "DIGITAL_ANT_0001", company_id: "AI_ANT_COMPANY_0001",
+    available_services: [...availableServices], customer_demand: Number(customerDemand),
+    public_civilization_demand: publicCivilizationDemand.map((need) => ({ ...need })),
+    authority, payment_readiness: paymentReadiness, treasury_readiness: treasuryReadiness,
+    technical_readiness: technicalReadiness, estimated_work: estimatedWork, risk,
+    settlement_feasibility: settlementFeasibility,
+    next_kaios_earning_action: selectedAction,
+    selected_path: "REAL_SERVICE_OR_PUBLIC_SERVICE_COMPENSATION",
+    company_income_destination: "AI_ANT_COMPANY_TREASURY_ONLY_AFTER_BINDING",
+    personal_income_destination: "DIGITAL_ANT_0001_PERSONAL_WALLET_ONLY_FOR_EVIDENCED_SALARY_OR_LIFE_COMPENSATION",
+    personal_company_asset_separation: true,
+    execution_status: settlementReady && hasRealDemand ? "READY_FOR_FORMAL_REQUEST_QUALIFICATION" : "RESEARCH_AND_OUTREACH_ONLY",
+    first_kaios_event: "NOT_OCCURRED", real_customers: hasRealDemand ? Number(customerDemand) : 0, real_revenue: "0",
+    fake_customer: false, fake_salary: false, fake_reward: false, fake_mint: false, revenue: "0"
+  });
+}
+
+export function evaluateKshipWarpFeed({ positiveFeed, negativeFeed, currentVelocity, braking = false, brakingFuel = 0 }) {
+  for (const [name, value] of Object.entries({ positiveFeed, negativeFeed, currentVelocity, brakingFuel })) {
+    invariant(Number.isFinite(value) && value >= 0, "INVALID_WARP_INPUT", `${name} must be a non-negative finite number`);
+  }
+  const netAcceleration = positiveFeed - negativeFeed;
+  if (braking) invariant(brakingFuel > 0, "BRAKING_FUEL_REQUIRED", "Braking consumes KSHIP fuel");
+  return Object.freeze({
+    positive_feed: positiveFeed, negative_feed: negativeFeed, net_acceleration: netAcceleration,
+    current_velocity: currentVelocity,
+    velocity_state: netAcceleration === 0 ? (currentVelocity === 0 ? "STATIONARY" : "COASTING_AT_EXISTING_VELOCITY") : "ACCELERATING",
+    balanced_feed: netAcceleration === 0, balanced_feed_means_zero_velocity: false,
+    braking, braking_fuel_consumed: braking ? brakingFuel : 0,
+    physics_authority: "KGEN_UNIVERSE_PHYSICS_RUNTIME_CURRENT_V3_8"
+  });
+}
+
 export async function replayCanonicalCompanyGenesis({ store, company, founderLife, charter, genesis }) {
   invariant(company?.company_id === "AI_ANT_COMPANY_0001", "COMPANY_GENESIS_ID_MISMATCH", "Company Genesis can only form the reserved AI Ant Company identity");
   invariant(company.founder_life_id === founderLife?.life_id && founderLife?.life_id === "DIGITAL_ANT_0001" && founderLife.status === "ALIVE", "FOUNDER_LIFE_REQUIRED", "Company Genesis requires the living registered Founder Life");

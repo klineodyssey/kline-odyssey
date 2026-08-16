@@ -10,6 +10,7 @@ on:
       - "core/**"
       - "tests/universal-exchange.test.mjs"
       - "K線西遊記/temples/11520/**"
+      - "docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md"
       - ".github/ISSUE_TEMPLATE/civilization-request.yml"
       - ".github/workflows/universal_exchange_v2.yml"
   pull_request:
@@ -17,6 +18,7 @@ on:
       - "core/**"
       - "tests/universal-exchange.test.mjs"
       - "K線西遊記/temples/11520/**"
+      - "docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md"
 
 permissions:
   contents: read

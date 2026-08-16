@@ -478,6 +478,7 @@ export const DIGITAL_ANT_LIVE_ACTION_POLICY = Object.freeze({
 
 export const DIGITAL_ANT_HEARTBEAT_OWNER_APPROVAL = "OWNER_DIRECTIVE_DIGITAL_ANT_V3_6_FIRST_KGEN_HEARTBEAT";
 export const DIGITAL_ANT_V3_7_HEART_AUTOPILOT_APPROVAL = "OWNER_DIRECTIVE_DIGITAL_ANT_V3_7_HEART_AUTOPILOT_WISH_HEAVEN_FUEL";
+export const DIGITAL_ANT_V3_8_HEART_AUTOPILOT_APPROVAL = "OWNER_DIRECTIVE_DIGITAL_ANT_V3_8_LIVING_THOUGHT_ORGAN_AUTONOMOUS_GATEKEEPER";
 export const DIGITAL_ANT_HEARTBEAT_SELECTOR = "0x2d293562";
 export const DIGITAL_ANT_HEART_ADDRESS = "0xB016D4d8f1aED1339101b30722cad6dbA9B8C972";
 export const DIGITAL_ANT_KGEN_ADDRESS = "0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be";
@@ -553,6 +554,33 @@ export function createV37HeartAutopilotPolicy({ gasPolicy, approvalEvidence, pri
     }),
     blocker: privateSchedulerConnected ? null : "NO_PERSISTENT_PRIVATE_SECURE_SCHEDULER",
     safe_solution: privateSchedulerConnected ? "PRIVATE_RUNTIME_REVALIDATION_ACTIVE" : "INSTALL_PRIVATE_SCHEDULER_WITH_SECRET_MANAGER_ADDRESS_BINDING_AND_RECEIPT_RECONCILIATION"
+  });
+}
+
+export function createV38HeartAutopilotPolicy({ gasPolicy, approvalEvidence, privateSchedulerConnected = false }) {
+  invariant(approvalEvidence === DIGITAL_ANT_V3_8_HEART_AUTOPILOT_APPROVAL, "HEART_AUTOPILOT_OWNER_APPROVAL_REQUIRED", "V3.8 Heart Autopilot requires the exact scoped Owner directive");
+  const enabled = (action, signature, trigger, dailyLimit) => Object.freeze({
+    action, signature, enabled: true, trigger, daily_limit: dailyLimit, max_value: "0",
+    max_gas: gasPolicy.max_action_gas_cost_wei, minimum_bnb_reserve: gasPolicy.minimum_survival_bnb_wei,
+    cooldown: "DEPLOYED_CONTRACT_DERIVED", security_requirement: "HEALTHY_AND_FRESHLY_REVALIDATED",
+    execution_runtime: "PRIVATE_SECURE_SIGNER_ONLY", public_worker_broadcast: false,
+    receipt_reconciliation: true, blind_resubmit: false
+  });
+  const disabled = (action, signature, reason) => Object.freeze({ action, signature, enabled: false, reason, execution_runtime: "PRIVATE_SECURE_SIGNER_ONLY" });
+  return Object.freeze({
+    policy_id: "DIGITAL_ANT_LIVE_ACTION_POLICY_V3_8", status: privateSchedulerConnected ? "APPROVED_PRIVATE_RUNTIME_CONNECTED" : "APPROVED_BLOCKED_NO_PERSISTENT_PRIVATE_RUNTIME",
+    approval_evidence: approvalEvidence, survival_reserve: gasPolicy.MIN_SURVIVAL_BNB,
+    public_worker: Object.freeze({ read_only: true, signer: false, candidate_creation: true }),
+    actions: Object.freeze({
+      heartbeatClaim: enabled("heartbeatClaim", "heartbeatClaim()", "ELIGIBILITY_DRIVEN", "CONTRACT_COOLDOWN"),
+      igniteAndClaim: enabled("igniteAndClaim", "igniteAndClaim()", "DEPLOYED_WINDOW_DRIVEN", 1),
+      fortuneClaim: disabled("fortuneClaim", "fortuneClaim(uint256)", "FIRST_FORTUNE_COMPLETE_MONITOR_COOLDOWN_ONLY"),
+      makeWish: disabled("makeWish", "makeWish(bytes32)", "FIRST_WISH_COMPLETE_TRACK_PROGRESS_ONLY"),
+      lightLamp: disabled("lightLamp", "lightLamp(uint256)", "EXISTING_KGEN_LAMP_SEPARATE_APPROVAL_REQUIRED"),
+      vowTo: disabled("vowTo", "vowTo(uint8,uint256)", "WISH_COMPLETION_EVIDENCE_REQUIRED")
+    }),
+    blocker: privateSchedulerConnected ? null : "NO_PERSISTENT_PRIVATE_SECURE_SCHEDULER",
+    safe_solution: privateSchedulerConnected ? "PRIVATE_RUNTIME_REVALIDATION_ACTIVE" : "INSTALL_USER_CONTROLLED_PRIVATE_SCHEDULER_WITH_ADDRESS_BINDING_AND_RECEIPT_RECONCILIATION"
   });
 }
 
