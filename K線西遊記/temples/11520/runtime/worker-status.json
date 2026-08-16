@@ -11,16 +11,16 @@
   "chain_write": false,
   "worker_health": "DEGRADED",
   "work_stop_reason": "INDEXER_FAILURE",
-  "generated_at": "2026-08-16T09:44:56.695Z",
+  "generated_at": "2026-08-16T10:42:47.402Z",
   "last_work_cycle": {
-    "event_id": "DIGITAL_ANT_0001_HOURLY_2026081609",
+    "event_id": "DIGITAL_ANT_0001_HOURLY_2026081610",
     "life_id": "DIGITAL_ANT_0001",
     "app_id": "DIGITAL_ANT_APP_0001",
-    "work_cycle_id": "DIGITAL_ANT_0001_HOURLY_2026081609",
-    "scheduled_at": "2026-08-16T09:00:00.000Z",
-    "started_at": "2026-08-16T09:44:55.751Z",
-    "finished_at": "2026-08-16T09:44:56.694Z",
-    "bsc_block": 116250619,
+    "work_cycle_id": "DIGITAL_ANT_0001_HOURLY_2026081610",
+    "scheduled_at": "2026-08-16T10:00:00.000Z",
+    "started_at": "2026-08-16T10:42:45.881Z",
+    "finished_at": "2026-08-16T10:42:47.401Z",
+    "bsc_block": 116258329,
     "wallet_state": {
       "status": "PUBLIC_ADDRESS_READ",
       "bnb": "0.006"
@@ -34,14 +34,14 @@
         "reason": "HEARTBEAT_ELIGIBLE",
         "eligibility_source": "CLIENT_DERIVED",
         "write_status": "WRITE_NOT_CONNECTED",
-        "next_eligible_time": "2026-08-16T09:44:55.000Z"
+        "next_eligible_time": "2026-08-16T10:42:46.000Z"
       },
       "fortune": {
         "status": "ELIGIBLE",
         "reason": "FORTUNE_CLAIM_ELIGIBLE",
         "eligibility_source": "CLIENT_DERIVED",
         "write_status": "WRITE_NOT_CONNECTED",
-        "next_eligible_time": "2026-08-16T09:44:55.000Z"
+        "next_eligible_time": "2026-08-16T10:42:46.000Z"
       },
       "ignition": {
         "status": "OUT_OF_WINDOW",
@@ -79,8 +79,8 @@
           "IGNITION",
           "LAMP"
         ],
-        "from_block": 116250520,
-        "to_block": 116250619,
+        "from_block": 116258231,
+        "to_block": 116258330,
         "fortune_claims": [],
         "wishes": [],
         "heartbeat_claims": [],
@@ -139,16 +139,16 @@
     ],
     "gas_spent": "0",
     "tx_hash": null,
-    "work_duration_seconds": 0
+    "work_duration_seconds": 1
   },
-  "next_expected_at": "2026-08-16T10:00:00.000Z",
+  "next_expected_at": "2026-08-16T11:00:00.000Z",
   "metrics": {
     "completed_cycles": 0,
     "failed_cycles": 1,
-    "degraded_cycles": 2,
-    "no_action_cycles": 3,
+    "degraded_cycles": 3,
+    "no_action_cycles": 4,
     "action_cycles": 0,
-    "work_duration_seconds": 1,
+    "work_duration_seconds": 2,
     "missed_cycles": 0
   },
   "patrols": {
@@ -161,14 +161,14 @@
         "reason": "HEARTBEAT_ELIGIBLE",
         "eligibility_source": "CLIENT_DERIVED",
         "write_status": "WRITE_NOT_CONNECTED",
-        "next_eligible_time": "2026-08-16T09:44:55.000Z"
+        "next_eligible_time": "2026-08-16T10:42:46.000Z"
       },
       "fortune": {
         "status": "ELIGIBLE",
         "reason": "FORTUNE_CLAIM_ELIGIBLE",
         "eligibility_source": "CLIENT_DERIVED",
         "write_status": "WRITE_NOT_CONNECTED",
-        "next_eligible_time": "2026-08-16T09:44:55.000Z"
+        "next_eligible_time": "2026-08-16T10:42:46.000Z"
       },
       "ignition": {
         "status": "OUT_OF_WINDOW",
@@ -206,8 +206,8 @@
           "IGNITION",
           "LAMP"
         ],
-        "from_block": 116250520,
-        "to_block": 116250619,
+        "from_block": 116258231,
+        "to_block": 116258330,
         "fortune_claims": [],
         "wishes": [],
         "heartbeat_claims": [],
