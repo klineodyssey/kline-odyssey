@@ -3,14 +3,14 @@ import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { dirname, join, resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 import { createUniverseRuntime } from "../registry/universe-runtime.mjs";
-import { deriveWorkerHealth, normalizeHeartActionStatus, runDigitalAntHourlyCycle, validateSharedWorkerStatus } from "./index.mjs";
+import { assertCompanyWorkAllowedAfterGatekeeper, deriveWorkerHealth, normalizeHeartActionStatus, runDigitalAntHourlyCycle, validateGatekeeperDutyStatus, validateSharedWorkerStatus } from "./index.mjs";
 import { readTempleHeart12345 } from "../integrations/temple-heart-12345.mjs";
 
 const require = createRequire(import.meta.url);
 const ethers = require("../../ethers-5.7.2.umd.min.js");
 const KGEN = "0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be";
 const KAIOS = "0xD4E67B3a69e41524c424150E6b6e921b01D036db";
-const PUBLIC_BSC_RPC = "https://bsc-dataseed.bnbchain.org";
+const PUBLIC_BSC_RPC = "https://bsc-rpc.publicnode.com";
 const ERC20_READ_ABI = ["function balanceOf(address) view returns (uint256)", "function decimals() view returns (uint8)"];
 
 export function createPublicReadProvider({ rpcUrl = process.env.BSC_RPC_URL || PUBLIC_BSC_RPC, fetchImpl = globalThis.fetch } = {}) {
@@ -18,15 +18,19 @@ export function createPublicReadProvider({ rpcUrl = process.env.BSC_RPC_URL || P
   let requestId = 0;
   const transport = {
     async request({ method, params = [] }) {
-      const response = await fetchImpl(rpcUrl || PUBLIC_BSC_RPC, {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({ jsonrpc: "2.0", id: ++requestId, method, params })
-      });
-      if (!response.ok) throw statusError(`BSC_RPC_HTTP_${response.status}`, "BSC_RPC");
-      const payload = await response.json();
-      if (payload.error) throw statusError(`BSC_RPC_${payload.error.code ?? "ERROR"}`, "BSC_RPC");
-      return payload.result;
+      const primary = rpcUrl || PUBLIC_BSC_RPC;
+      const urls = method === "eth_getLogs" && primary !== PUBLIC_BSC_RPC ? [primary, PUBLIC_BSC_RPC] : [primary];
+      let lastError = null;
+      for (const url of urls) {
+        try {
+          const response = await fetchImpl(url, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ jsonrpc: "2.0", id: ++requestId, method, params }) });
+          if (!response.ok) throw statusError(`BSC_RPC_HTTP_${response.status}`, "BSC_RPC");
+          const payload = await response.json();
+          if (payload.error) throw statusError(`BSC_RPC_${payload.error.code ?? "ERROR"}`, "BSC_RPC");
+          return payload.result;
+        } catch (error) { lastError = error; }
+      }
+      throw lastError ?? statusError("BSC_RPC_UNAVAILABLE", "BSC_RPC");
     }
   };
   return new ethers.providers.Web3Provider(transport, { name: "bnb", chainId: 56 });
@@ -96,39 +100,96 @@ export function readCompanyPatrol(seed) {
 function heartPatrol(heart) {
   const available = heart.status === "CHAIN_READ_VERIFIED";
   const eligibility = heart.eligibility ?? {};
+  const coreIndexerStatus = heart.recent_events?.status ?? "CORE_HEART_INDEXER_UNAVAILABLE";
   return Object.freeze({
     status: available ? "12345_PATROL_COMPLETED" : "12345_PATROL_UNAVAILABLE", source: "REPOSITORY_ABI_PUBLIC_CHAIN_READ", eligibility_source: "CLIENT_DERIVED",
     heartbeat: normalizeHeartActionStatus(eligibility.heartbeat, { available }), fortune: normalizeHeartActionStatus(eligibility.fortune, { available }),
     ignition: normalizeHeartActionStatus(eligibility.ignition, { available }), lamp: normalizeHeartActionStatus(eligibility.light, { available }),
     wish: normalizeHeartActionStatus(eligibility.wish, { available }),
     thanksgiving: Object.freeze({ status: available ? "NOT_ELIGIBLE" : "UNAVAILABLE", reason: "VOW_POLICY_AND_COMPLETION_EVIDENCE_REQUIRED", eligibility_source: "CLIENT_DERIVED", write_status: "WRITE_NOT_CONNECTED" }),
-    recent_events: heart.recent_events ?? { status: "UNAVAILABLE" }, flow_analysis: heart.claim_flow_analysis ?? { status: "INDEXER_REQUIRED" }
+    recent_events: heart.recent_events ?? { status: "CORE_HEART_INDEXER_UNAVAILABLE" },
+    core_heart_indexer: coreIndexerStatus,
+    advanced_graph_indexer: heart.claim_flow_analysis?.status ?? "ADVANCED_GRAPH_INDEXER_REQUIRED",
+    flow_analysis: heart.claim_flow_analysis ?? { status: "ADVANCED_GRAPH_INDEXER_REQUIRED", affects_core_gatekeeper_health: false }
   });
 }
 
-async function publicReadCycle({ life, requestPatrol, companyPatrol }) {
+function createGatekeeperDuty({ startedAt, finishedAt, heart, patrol }) {
+  const coreStatus = patrol.core_heart_indexer;
+  const heartAvailable = heart.status === "CHAIN_READ_VERIFIED";
+  const status = !heartAvailable ? "FAILED_CRITICAL" : coreStatus === "CORE_HEART_INDEXER_HEALTHY" ? "COMPLETED" : "DEGRADED";
+  return Object.freeze(validateGatekeeperDutyStatus({
+    status, gatekeeper_started_at: startedAt, gatekeeper_finished_at: finishedAt,
+    heart_block: heart.block_number ?? null, heart_status: heartAvailable ? "AVAILABLE" : "UNAVAILABLE",
+    fortune_status: patrol.fortune.status, heartbeat_status: patrol.heartbeat.status, ignition_status: patrol.ignition.status,
+    lamp_status: patrol.lamp.status, wish_status: patrol.wish.status, vow_status: patrol.thanksgiving.status,
+    claim_monitor_status: coreStatus, risk_status: heart.risk_assessment?.level ?? "NORMAL",
+    degradation_affects_safety: !heartAvailable, advanced_graph_status: patrol.advanced_graph_indexer,
+    evidence: heartAvailable ? [`HEART_BLOCK_${heart.block_number}`, "HEART_BYTECODE_VERIFIED", coreStatus] : [heart.reason ?? "CHAIN_READ_UNAVAILABLE"]
+  }));
+}
+
+function createLifeEventStatus({ wallet, finance, recentEvents }) {
+  const owns = (event) => String(event.wallet ?? "").toLowerCase() === String(wallet).toLowerCase();
+  const observed = {
+    FIRST_HEARTBEAT_EVENT: recentEvents?.heartbeat_claims?.some(owns) === true,
+    FIRST_FORTUNE_EVENT: recentEvents?.fortune_claims?.some(owns) === true,
+    FIRST_IGNITION_EVENT: recentEvents?.ignitions?.some(owns) === true,
+    FIRST_LAMP_EVENT: recentEvents?.lamps?.some(owns) === true,
+    FIRST_WISH_EVENT: recentEvents?.wishes?.some(owns) === true,
+    FIRST_VOW_EVENT: recentEvents?.vows?.some(owns) === true
+  };
+  return Object.freeze({
+    ...Object.fromEntries(Object.entries(observed).map(([event, seen]) => [event, seen ? "EVIDENCE_CANDIDATE_RECEIPT_VERIFICATION_REQUIRED" : "NOT_OCCURRED_IN_OBSERVED_WINDOW"])),
+    FIRST_THANKSGIVING_EVENT: "NOT_OCCURRED",
+    FIRST_KGEN_EVENT: Number(finance.KGEN) > 0 ? "EVIDENCE_RESOLUTION_REQUIRED" : "NOT_OCCURRED",
+    FIRST_KAIOS_EVENT: Number(finance.KAIOS) > 0 ? "EVIDENCE_RESOLUTION_REQUIRED" : "NOT_OCCURRED",
+    FIRST_KUFO_EVENT: "NOT_OCCURRED", FIRST_KSHIP_EVENT: "NOT_OCCURRED"
+  });
+}
+
+async function publicReadCycle({ life, seed }) {
   const provider = createPublicReadProvider();
   const chainId = await provider.send("eth_chainId", []);
   if (Number(BigInt(chainId)) !== 56) throw statusError("BSC_CHAIN_56_REQUIRED", "BSC_RPC");
   const kgen = new ethers.Contract(KGEN, ERC20_READ_ABI, provider);
   const kaios = new ethers.Contract(KAIOS, ERC20_READ_ABI, provider);
-  const [block, bnb, kgenRaw, kgenDecimals, kaiosRaw, kaiosDecimals, heart] = await Promise.all([
-    provider.getBlock("latest"), provider.getBalance(life.wallet_address), kgen.balanceOf(life.wallet_address), kgen.decimals(),
-    kaios.balanceOf(life.wallet_address), kaios.decimals(),
-    readTempleHeart12345({ ethers, provider, walletAddress: life.wallet_address, wishText: "靠自己的工作活下去，累積自己的資產，有一天靠自己離開五指山。", recentBlockWindow: 100 })
+  const lifeStarted = Date.now();
+  const [block, bnb, kgenRaw, kgenDecimals, kaiosRaw, kaiosDecimals] = await Promise.all([
+    provider.getBlock("latest"), provider.getBalance(life.wallet_address), kgen.balanceOf(life.wallet_address), kgen.decimals(), kaios.balanceOf(life.wallet_address), kaios.decimals()
   ]);
+  const gatekeeperStarted = new Date().toISOString();
+  const gatekeeperClock = Date.now();
+  const heart = await readTempleHeart12345({ ethers, provider, walletAddress: life.wallet_address, wishText: "靠自己的工作活下去，累積自己的資產，有一天靠自己離開五指山。", recentBlockWindow: 100 });
   const patrol = heartPatrol(heart);
-  const heartAvailable = heart.status === "CHAIN_READ_VERIFIED";
+  const gatekeeperFinished = new Date().toISOString();
+  const gatekeeperDuty = createGatekeeperDuty({ startedAt: gatekeeperStarted, finishedAt: gatekeeperFinished, heart, patrol });
+  const gatekeeperWorkSeconds = Number(((Date.now() - gatekeeperClock) / 1000).toFixed(3));
+  const cfoClock = Date.now();
+  const finance = { BNB: ethers.utils.formatEther(bnb), KGEN: ethers.utils.formatUnits(kgenRaw, Number(kgenDecimals)), KAIOS: ethers.utils.formatUnits(kaiosRaw, Number(kaiosDecimals)), actual_income: "0", actual_expense: "0", actual_gas: "0" };
+  const cfoWorkSeconds = Number(((Date.now() - cfoClock) / 1000).toFixed(3));
+  let requestPatrol = { status: "SKIPPED_DUE_TO_GATEKEEPER_FAILURE", real_requests: 0, open_requests: 0, latest_request: null, evidence: [] };
+  let companyPatrol = { status: "SKIPPED_DUE_TO_GATEKEEPER_FAILURE", company_id: "AI_ANT_COMPANY_0001", work_queue: 0 };
+  let companyWorkSeconds = 0;
+  if (["COMPLETED", "DEGRADED"].includes(gatekeeperDuty.status) && gatekeeperDuty.degradation_affects_safety === false) {
+    assertCompanyWorkAllowedAfterGatekeeper(gatekeeperDuty);
+    const companyClock = Date.now();
+    requestPatrol = await readPublicRequestPatrol();
+    companyPatrol = readCompanyPatrol(seed);
+    companyWorkSeconds = Number(((Date.now() - companyClock) / 1000).toFixed(3));
+  }
+  const lifeEvents = createLifeEventStatus({ wallet: life.wallet_address, finance, recentEvents: heart.recent_events });
+  const coreHealthy = gatekeeperDuty.status === "COMPLETED";
   return Object.freeze({
-    bsc_block: block.number, rpc_status: "AVAILABLE", heart_status: heartAvailable ? "AVAILABLE" : "UNAVAILABLE", kgen_status: "AVAILABLE", kaios_status: "AVAILABLE", indexer_status: "INDEXER_REQUIRED",
-    wallet_state: { status: "PUBLIC_ADDRESS_READ", bnb: ethers.utils.formatEther(bnb) }, heart_state: patrol,
-    finance_state: { BNB: ethers.utils.formatEther(bnb), KGEN: ethers.utils.formatUnits(kgenRaw, Number(kgenDecimals)), KAIOS: ethers.utils.formatUnits(kaiosRaw, Number(kaiosDecimals)), actual_income: "0", actual_expense: "0", actual_gas: "0" },
+    bsc_block: block.number, rpc_status: "AVAILABLE", heart_status: heart.status === "CHAIN_READ_VERIFIED" ? "AVAILABLE" : "UNAVAILABLE", kgen_status: "AVAILABLE", kaios_status: "AVAILABLE", indexer_status: coreHealthy ? "CORE_HEART_INDEXER_HEALTHY" : "CORE_HEART_INDEXER_DEGRADED",
+    wallet_state: { status: "PUBLIC_ADDRESS_READ", bnb: finance.BNB }, heart_state: patrol, finance_state: finance,
     work_queue_state: companyPatrol.work_queue === 0 ? "SCHEMA_READY_EMPTY_QUEUE" : "QUEUE_READY",
-    observations: ["PUBLIC_WALLET_BALANCE_READ", "12345_HEART_READ", "KGEN_BALANCE_READ", "KAIOS_BALANCE_READ", "11520_REQUEST_PATROL", "AI_ANT_COMPANY_PATROL", "COMPLETE_FLOW_CLUSTERING_INDEXER_REQUIRED"],
+    observations: ["LIFE_HEALTH_CHECK", "BNB_DARK_MATTER_CHECK", "12345_GATEKEEPER_PATROL", "HEART_ACTION_ELIGIBILITY", "FORTUNE_MONITOR", "CORE_HEART_EVENT_MONITOR", "WISH_VOW_THANKSGIVING", "LAMP", "IGNITION", "LIFE_FINANCE", "11520_REQUEST_PATROL", "AI_ANT_COMPANY_WORK", "MISSION", "REPORT", "ADVANCED_TRANSACTION_GRAPH_INDEXER_REQUIRED_OPTIONAL"],
     risk_level: heart.risk_assessment?.level ?? "NORMAL",
     actions_considered: ["HEART_ELIGIBILITY", "GATEKEEPER_REPORT", "CFO_CHECK", "REQUEST_PATROL", "COMPANY_PATROL", "WORK_QUEUE_CHECK", "MISSION_CHECK"],
-    request_patrol: requestPatrol, company_patrol: companyPatrol,
-    error_evidence: heartAvailable ? [{ component: "FLOW_CLUSTERING", code: "INDEXER_REQUIRED", detail: "NO_FLOW_DATA_INFERRED" }] : [{ component: "TEMPLE_HEART_12345", code: heart.reason ?? "CHAIN_READ_UNAVAILABLE", detail: "NO_HEART_STATE_FABRICATED" }]
+    gatekeeper_duty: gatekeeperDuty, life_event_status: lifeEvents, request_patrol: requestPatrol, company_patrol: companyPatrol,
+    work_time: { gatekeeper_work_seconds: gatekeeperWorkSeconds, cfo_work_seconds: cfoWorkSeconds, company_work_seconds: companyWorkSeconds, life_health_seconds: Number(((gatekeeperClock - lifeStarted) / 1000).toFixed(3)) },
+    error_evidence: coreHealthy ? [{ component: "ADVANCED_TRANSACTION_GRAPH_INDEXER", code: "INDEXER_REQUIRED_OPTIONAL", detail: "CORE_GATEKEEPER_HEALTH_UNAFFECTED" }] : [{ component: "CORE_HEART_INDEXER", code: heart.recent_events?.status ?? heart.reason ?? "CHAIN_READ_UNAVAILABLE", detail: "NO_EVENT_DATA_FABRICATED" }]
   });
 }
 
@@ -146,14 +207,19 @@ export function buildSharedWorkerStatus({ event, previous = null, requestPatrol,
     degraded_cycles: Number(previous?.metrics?.degraded_cycles ?? 0) + (event.result === "WORK_CYCLE_DEGRADED" ? 1 : 0),
     no_action_cycles: Number(previous?.metrics?.no_action_cycles ?? 0) + (event.action_taken === "NO_ACTION" ? 1 : 0),
     action_cycles: Number(previous?.metrics?.action_cycles ?? 0) + (event.action_taken !== "NO_ACTION" ? 1 : 0),
-    work_duration_seconds: Number(previous?.metrics?.work_duration_seconds ?? 0) + Number(event.work_duration_seconds ?? 0), missed_cycles: Number(previous?.metrics?.missed_cycles ?? 0) + newlyMissed
+    work_duration_seconds: Number(previous?.metrics?.work_duration_seconds ?? 0) + Number(event.work_duration_seconds ?? 0),
+    gatekeeper_work_seconds: Number(previous?.metrics?.gatekeeper_work_seconds ?? 0) + Number(event.work_time?.gatekeeper_work_seconds ?? 0),
+    cfo_work_seconds: Number(previous?.metrics?.cfo_work_seconds ?? 0) + Number(event.work_time?.cfo_work_seconds ?? 0),
+    company_work_seconds: Number(previous?.metrics?.company_work_seconds ?? 0) + Number(event.work_time?.company_work_seconds ?? 0),
+    missed_cycles: Number(previous?.metrics?.missed_cycles ?? 0) + newlyMissed
   };
   const health = deriveWorkerHealth({ lastCycle: event, now: generatedAt });
   return validateSharedWorkerStatus(Object.freeze({
-    schema_version: "11520_WORKER_STATUS_V1", life_id: "DIGITAL_ANT_0001", app_id: "DIGITAL_ANT_APP_0001", app_version: "V1.1.0",
+    schema_version: "11520_WORKER_STATUS_V1", life_id: "DIGITAL_ANT_0001", app_id: "DIGITAL_ANT_APP_0001", app_version: "V1.2.0",
     scheduler: "GITHUB_ACTIONS_HOURLY", scheduler_status: "PRODUCTION_ACTIVE", cadence: "EVERY_HOUR", public_read_only: true, signer: false, chain_write: false,
     worker_health: health.status, work_stop_reason: health.stop_reason, generated_at: generatedAt, last_work_cycle: event,
     next_expected_at: new Date(Date.parse(event.scheduled_at) + 3_600_000).toISOString(), metrics,
+    primary_job: "WUKONG_GATEKEEPER", secondary_work: "AI_ANT_COMPANY_FOUNDER", gatekeeper_duty: event.gatekeeper_duty, life_event_status: event.life_event_status,
     patrols: { temple_12345: event.heart_state, request: requestPatrol, company: companyPatrol },
     request_patrol: { ...requestPatrol, new_real_request_detected: currentRequests > previousRequests, first_real_customer_detected: previousRequests === 0 && currentRequests > 0 },
     global_truth_source: "GIT_BACKED_APPEND_ONLY_PUBLIC_SNAPSHOT", browser_indexeddb_role: "LOCAL_DRAFT_CACHE_ONLY"
@@ -167,10 +233,9 @@ async function main() {
   const output = argument(argv, "--output");
   const seed = JSON.parse(await readFile(new URL("../data/canonical.json", import.meta.url), "utf8"));
   const universe = await createUniverseRuntime({ seed });
-  const [life, app, previousStatus, requestPatrol] = await Promise.all([
-    universe.registries.life.get("DIGITAL_ANT_0001"), universe.registries.app.get("DIGITAL_ANT_APP_0001"), readJsonIfPresent(statusPath), readPublicRequestPatrol()
+  const [life, app, previousStatus] = await Promise.all([
+    universe.registries.life.get("DIGITAL_ANT_0001"), universe.registries.app.get("DIGITAL_ANT_APP_0001"), readJsonIfPresent(statusPath)
   ]);
-  const companyPatrol = readCompanyPatrol(seed);
   const now = new Date().toISOString();
   const hour = new Date(now); hour.setUTCMinutes(0, 0, 0);
   const cycleId = `DIGITAL_ANT_0001_HOURLY_${hour.toISOString().slice(0, 13).replace(/[-T:]/g, "")}`;
@@ -181,8 +246,10 @@ async function main() {
     if (output) await writeJson(output, report); else process.stdout.write(`${JSON.stringify(report)}\n`);
     return;
   }
-  const result = await runDigitalAntHourlyCycle({ store: universe.store, life, app, scheduledAt: now, startedAt: now, readCycle: (context) => publicReadCycle({ ...context, requestPatrol, companyPatrol }) });
+  const result = await runDigitalAntHourlyCycle({ store: universe.store, life, app, scheduledAt: now, startedAt: now, readCycle: (context) => publicReadCycle({ ...context, seed }) });
   const event = publicWorkEvent(result);
+  const requestPatrol = event.request_patrol;
+  const companyPatrol = event.company_patrol;
   const generatedAt = new Date().toISOString();
   const status = buildSharedWorkerStatus({ event, previous: previousStatus, requestPatrol, companyPatrol, generatedAt });
   if (eventPath) await writeJson(eventPath, event, { exclusive: true });

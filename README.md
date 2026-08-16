@@ -1260,12 +1260,17 @@ The deterministic simulation at `world-viewer/creator-marketplace/` connects one
 - Specification owner: `KAIOS/marketplace/creator-marketplace/`
 - Safety: simulation only; no real wallet, KGEN, on-chain transfer, silent mint or external autonomy.
 
-## 11520 Universal Exchange V3.4
+## 11520 Universal Exchange V3.5
 
 The public 11520 entry now hosts the multilingual Digital Ant civilization gateway and
 an evidence-derived hourly Life Worker. Voice begins only after a user gesture and always
 falls back to Text. Shared Work status comes from Git-backed append-only snapshots;
 browser IndexedDB is local draft/cache only.
+
+V3.5 enforces `WUKONG_GATEKEEPER` as the primary job before CFO and Company work,
+separates the operational Core Heart Event Indexer from optional advanced graph analysis,
+and displays only receipt-backed immutable First Life Events. The public Worker remains
+signer-free; the separate Secure Signer specification is `NOT_CONNECTED`.
 
 - Public entry: `K線西遊記/temples/11520/index.html#/REQUEST`
 - Browser controller: `K線西遊記/temples/11520/app.mjs`
@@ -1275,5 +1280,5 @@ browser IndexedDB is local draft/cache only.
 - Validation: `tests/universal-exchange.test.mjs`
 - Shared Worker status: `K線西遊記/temples/11520/runtime/worker-status.json`
 - Shared request entry: `.github/ISSUE_TEMPLATE/civilization-request.yml`
-- Production report: `KGEN-AI-Company/reports/DIGITAL_ANT_V3_4_LIVE_LIFE_REPORT.md`
+- Production report: `KGEN-AI-Company/reports/DIGITAL_ANT_V3_5_WUKONG_GATEKEEPER_DUTY_REPORT.md`
 - Settlement and company treasury remain gated; no automatic chain write is introduced by the gateway.

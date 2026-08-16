@@ -1,7 +1,12 @@
-# 11520 Universal Exchange V3.4
+# 11520 Universal Exchange V3.5
 
 ## Digital Ant next-stage status
 
+- V3.5 makes `WUKONG_GATEKEEPER` the enforced primary job. Every hourly cycle completes Life/Dark-Matter checks and the 12345 Gatekeeper duty before CFO and Company work; an attempted Company bypass fails with `PRIMARY_JOB_BYPASS`.
+- `DIGITAL_ANT_APP_0001` is V1.2.0. Life ID, immutable Birth Certificate, public Wallet binding, 11520 Listing and Company Genesis remain the same evidence-backed records.
+- The Core Heart Indexer now covers Fortune, Heartbeat, Ignition, Lamp, Wish and Vow events. Optional transfer/approval/funding-graph analysis remains `ADVANCED_GRAPH_INDEXER_REQUIRED` and no longer degrades a successful basic patrol.
+- First Heart, Fortune, Ignition, Lamp, Wish, Vow, Thanksgiving, KGEN and KAIOS events require successful receipts and immutable block/transaction/timestamp evidence. Unobserved events display `NOT YET`.
+- The public Worker remains signer-free. `DIGITAL_ANT_SECURE_SIGNER_WORKER` is a private-runtime specification in `NOT_CONNECTED`; every Heart action is disabled until a separate policy, fresh chain revalidation and survival-reserve check are approved.
 - V3.4 makes 11520 a production public web application with Traditional Chinese and English primary UI, Japanese/Korean fallback, a user-gesture Voice Concierge and always-available Text input.
 - `DIGITAL_ANT_APP_0001` is now V1.1.0. `DIGITAL_ANT_0001`, its Birth Certificate and personal Wallet remain unchanged; App upgrade is an organ upgrade, not rebirth.
 - The hourly GitHub Actions scheduler runs one stateless public read-only cycle. It writes `runtime/worker-status.json` and one immutable hourly event under `runtime/work-events/` through an exact Git allowlist. The UI derives HEALTHY/DEGRADED/MISSED_CYCLE/FAILED/OFFLINE from this evidence instead of hard-coding ON_DUTY.
@@ -60,7 +65,7 @@
 - `11520_LISTING_DIGITAL_ANT_0001`: `LISTED` in the local Registry; `UNPRICED`; settlement `NOT_DEPLOYED`; identity right is not offered.
 - Four Digital Ant service profiles are registered with zero customers and no fabricated revenue.
 - `DIGITAL_ANT_APP_0001`: `V1.0.0 / RELEASED_LOCAL`; its SHA-256 manifest is verified at boot and its release event is appended to App and Life History without changing Life ID or Birth Certificate.
-- `DIGITAL_ANT_WORKER`: one-shot hourly Runtime implemented in `READ_ONLY_DRY_RUN`; the GitHub Actions adapter is configured locally, but remains `CONFIGURED_LOCAL_NOT_ACTIVE` until these files are committed and pushed.
+- `DIGITAL_ANT_WORKER`: one-shot hourly Runtime implemented in `READ_ONLY_DRY_RUN`; the production GitHub Actions adapter runs at minute 17 and persists shared evidence through an exact Git allowlist.
 - Work Queue schema is ready and empty. No automatic dispatch or chain write is enabled.
 - `AI_ANT_COMPANY_0001`: `FORMING / LOCAL_11520`; Demand and product research are local only; Real KGEN and Real KAIOS company payment remain unauthorized.
 
@@ -95,4 +100,4 @@ node core/security/resolve-digital-ant-birth.mjs
 
 A complete trusted address indexer or archive-state proof is required for historical resolution. Candidate blocks and transactions are cross-checked through independent BSC RPC reads; missing capability returns `BIRTH_EVIDENCE_PENDING` rather than guessing.
 
-The first public work snapshot was observed on BSC block `116039099`. It records BNB `0.006`, KGEN `0`, KAIOS `0`, a valid Heart code/config read and an owner-unapproved KGEN acquisition scenario. The scenario is block-stamped evidence only: `broadcast_capability=ABSENT`, `live_trading=false`, `chain_write=false`. Heart event-flow clustering remains `INDEXER_REQUIRED`; no risk label is escalated without evidence.
+The first public work snapshot was observed on BSC block `116039099`. It records BNB `0.006`, KGEN `0`, KAIOS `0`, a valid Heart code/config read and an owner-unapproved KGEN acquisition scenario. The scenario is block-stamped evidence only: `broadcast_capability=ABSENT`, `live_trading=false`, `chain_write=false`. V3.5 separates the operational Core Heart Event Indexer from optional advanced transaction-graph analysis; no risk label is escalated without evidence.
