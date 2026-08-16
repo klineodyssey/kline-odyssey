@@ -5,18 +5,28 @@
   "worker_id": "cursor-01",
   "reviewer": "codex-gm-01",
   "branch": "cursor-handoff/KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-CANDIDATES-001",
-  "status": "DISPATCHED",
+  "status": "R2_CLAIMED",
   "dispatch_mode": "MANUAL_HUMAN_INITIATION_ONLY",
   "queue_policy": "ONE_TASK_AT_A_TIME",
   "claim_created": true,
-  "claim_id": "CLAIM-KAIOS-LIFE-ENERGY-PAYROLL-001-cursor-01",
-  "fencing_token": "FENCE-KAIOS-LIFE-ENERGY-PAYROLL-001-R1",
-  "record_version": 1,
-  "claim_effective_when": "THIS_ENVELOPE_AND_MATCHING_REGISTRY_CLAIM_EXIST_ON_ORIGIN_MAIN",
-  "claimed_at": "2026-08-03T12:45:00Z",
-  "lease_expires_at": "2026-08-05T12:45:00Z",
+  "claim_id": "CLAIM-KAIOS-LIFE-ENERGY-PAYROLL-R2-001-cursor-01",
+  "fencing_token": "FENCE-KAIOS-LIFE-ENERGY-PAYROLL-R2-001-R2",
+  "record_version": 2,
+  "claim_effective_when": "HUMAN_DIRECT_AUTHORIZATION_AND_MATCHING_R2_REGISTRY_CLAIM_ARE_PUBLISHED_ON_THE_CODEX_GM_DRAFT_PR",
+  "claimed_at": "2026-08-16T12:49:02Z",
+  "lease_expires_at": "2026-08-18T12:49:02Z",
   "expiry_action": "FAIL_CLOSED_REQUIRE_CODEX_REVALIDATION",
-  "execution_base": "9f481900eb46ae38dd670d6a1bf8a6b784533f77",
+  "claim_closed_at": "2026-08-16T12:02:26Z",
+  "claim_release_event": "CLAIM-EVENT-KAIOS-LIFE-ENERGY-PAYROLL-001-003",
+  "delivery_review_decision": "REWORK_REQUIRED",
+  "delivery_review_head": "ff8fca3e610ac936e8998112255901a78296b238",
+  "acceptance_checks": { "passed": 9, "total": 11 },
+  "rework_required": [
+    "Make approved payroll ledger replay equal every recorded post-payroll account balance, including household, energy, compute, maintenance and platform splits.",
+    "Remove or relocate candidate_metadata so both colony ledgers conform to additionalProperties=false."
+  ],
+  "fresh_claim_required_before_rework": false,
+  "execution_base": "ff8fca3e610ac936e8998112255901a78296b238",
   "cursor_response_commit": "f07ebe7cebe90d26540fc50df03f34a6a985551c",
   "cursor_draft_pr": 118,
   "human_response_file_received": true,
@@ -68,6 +78,57 @@
   "external_wake_workflow_allowed": false,
   "merge_allowed": false,
   "deploy_allowed": false,
-  "completion_rule": "UPDATE_DRAFT_PR_118_AND_STOP_AT_PENDING_CODEX_REVIEW",
-  "notes": "The Human/Cursor response is proven on the existing Cursor-authored branch. This claim authorizes only the seven expected candidate files. Cursor execution may be initiated manually by Human and must not use an external autonomous wake workflow."
+  "completion_rule": "DELIVER_R2_THEN_STOP_AT_CODEX_REVIEW; ACCEPTANCE_DOES_NOT_AUTHORIZE_PAYMENT_OR_MERGE",
+  "prior_claim": {
+    "claim_id": "CLAIM-KAIOS-LIFE-ENERGY-PAYROLL-001-cursor-01",
+    "fencing_token": "FENCE-KAIOS-LIFE-ENERGY-PAYROLL-001-R1",
+    "status": "CLOSED_AND_RELEASED",
+    "claim_closed_at": "2026-08-16T12:02:26Z",
+    "claim_release_event": "CLAIM-EVENT-KAIOS-LIFE-ENERGY-PAYROLL-001-003"
+  },
+  "r2_task_packet": {
+    "TASK_ID": "KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-R2-001",
+    "OBJECTIVE": "Correct only the two independently verified payroll candidate blockers: restore exact 120-credit approved allocation replay/conservation and remove schema-invalid candidate_metadata from both colony ledgers.",
+    "ALLOWED_FILES": [
+      "KAIOS/economy/candidates/payroll-v0/CURSOR_AI_WORKER_PAYROLL_FIXTURES_V0.json",
+      "KAIOS/economy/candidates/colony-ledger-v0/CURSOR_ANT_COLONY_RESOURCE_LEDGER_V0.json",
+      "KAIOS/economy/candidates/colony-ledger-v0/CURSOR_BEE_HIVE_RESOURCE_LEDGER_V0.json",
+      "KAIOS/world-viewer/candidates/life-energy-payroll/CURSOR_LIFE_ENERGY_PAYROLL_TEST_SCENARIOS_V0.json",
+      "KGEN-AI-Company/reports/CURSOR_LIFE_ENERGY_PAYROLL_CANDIDATE_REPORT.md"
+    ],
+    "FORBIDDEN_FILES": [
+      "KAIOS/economy/life-energy-payroll/*SCHEMA*",
+      "KAIOS/economy/life-energy-payroll/*SPEC*",
+      "KGEN-KAIOS/worker_registry.json",
+      "KAIOS/life/forest-agriculture/KAIOS_CURSOR_CONTINUOUS_WORK_QUEUE.json",
+      "api/kaios/ai-company/v1/cursor-queue.json",
+      "core/**",
+      "KGEN/**",
+      "**/*CURRENT*"
+    ],
+    "ACCEPTANCE_CRITERIA": [
+      "Approved payroll replay credits exactly 120 and every recorded account balance matches the ledger replay, including worker 80 plus household 10, energy 10, compute 8, maintenance 7 and platform 5.",
+      "Both colony ledger documents validate against KAIOS_COLONY_RESOURCE_LEDGER_SCHEMA_V1.json with additionalProperties=false.",
+      "Duplicate payroll protection, missing-wallet handling and rework escrow remain passing.",
+      "No Canon, schema, runtime authority, contract, wallet, Mainnet or payment behavior changes."
+    ],
+    "TESTS": [
+      "node KAIOS/economy/life-energy-payroll/life-energy-payroll-spec-validator.mjs",
+      "node --test KGEN-KAIOS/world-viewer/tests/life-energy-payroll-runtime.test.mjs KGEN-KAIOS/world-viewer/tests/life-energy-payroll-public-integration.test.mjs",
+      "JSON parse all changed candidate files",
+      "git diff --check"
+    ],
+    "DELIVERY_FORMAT": [
+      "TASK_ID",
+      "FILES_CHANGED",
+      "COMMIT_SHA",
+      "TESTS_RUN",
+      "TEST_RESULTS",
+      "KNOWN_LIMITATIONS",
+      "DEPENDENCIES",
+      "MAINNET_WRITE = NO",
+      "READY_FOR_REVIEW = YES/NO"
+    ]
+  },
+  "notes": "The delivered R1 branch is preserved as evidence. Human explicitly authorized this fresh, non-overlapping R2 rework claim. No payment, escrow release, integration, merge or Mainnet action is authorized."
 }

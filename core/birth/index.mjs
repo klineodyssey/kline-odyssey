@@ -27,6 +27,7 @@ export function validateBirthCertificate(certificate) {
     invariant(isPositiveDecimal(certificate.birth_amount), "ZERO_BIRTH_MASS", "Birth requires non-zero BNB");
     invariant(certificate.birth_timestamp && certificate.birth_block && certificate.birth_tx_hash, "INCOMPLETE_BIRTH_EVIDENCE", "Born certificate requires timestamp, block and transaction hash");
     invariant(/^0x[0-9a-fA-F]{64}$/.test(certificate.birth_tx_hash), "INVALID_BIRTH_TX", "Birth transaction hash is invalid");
+    if (certificate.birth_block_hash !== undefined && certificate.birth_block_hash !== null) invariant(/^0x[0-9a-fA-F]{64}$/.test(certificate.birth_block_hash), "INVALID_BIRTH_BLOCK_HASH", "Birth block hash is invalid");
     invariant(/^0x[0-9a-fA-F]{40}$/.test(certificate.birth_wallet), "INVALID_BIRTH_WALLET", "Birth wallet is invalid");
   } else {
     invariant(certificate.status === "BIRTH_EVIDENCE_PENDING", "INVALID_BIRTH_STATUS", "Unresolved birth must remain BIRTH_EVIDENCE_PENDING");
@@ -37,6 +38,9 @@ export function validateBirthCertificate(certificate) {
 export function createPendingBirthCertificate(life) {
   return validateBirthCertificate({
     life_id: life.life_id,
+    display_name: life.display_name ?? null,
+    worker_id: life.worker_id ?? null,
+    company_role: [...(life.company_role ?? [])],
     birth_event_type: null,
     birth_asset: "BNB",
     birth_mass_class: BIRTH_MASS_CLASS,
@@ -47,6 +51,7 @@ export function createPendingBirthCertificate(life) {
     birth_chain_id: 56,
     birth_wallet: null,
     birth_transaction_index: null,
+    birth_block_hash: null,
     birthplace: life.birthplace,
     status: "BIRTH_EVIDENCE_PENDING",
     life_status: "CONCEIVED",
@@ -61,6 +66,11 @@ export function createBirthCertificate({ life, wallet, firstBnb }) {
   invariant((firstBnb.chain_id ?? 56) === 56, "INVALID_BIRTH_CHAIN", "Birth evidence must come from BSC chain 56");
   return Object.freeze(validateBirthCertificate({
     life_id: life.life_id,
+    display_name: life.display_name ?? null,
+    worker_id: life.worker_id ?? null,
+    company_role: [...(life.company_role ?? [])],
+    wallet_binding_status: "VERIFIED_BOUND",
+    public_wallet_address: wallet,
     birth_event_type: BIRTH_EVENT_TYPE,
     birth_asset: "BNB",
     birth_mass_class: BIRTH_MASS_CLASS,
@@ -71,17 +81,54 @@ export function createBirthCertificate({ life, wallet, firstBnb }) {
     birth_chain_id: 56,
     birth_wallet: wallet,
     birth_transaction_index: firstBnb.transaction_index ?? 0,
+    birth_block_hash: firstBnb.block_hash ?? null,
     birthplace: life.birthplace,
+    birthplace_code: life.birthplace_code ?? null,
+    birthplace_name: life.birthplace_name ?? null,
+    birthplace_display_name: life.birthplace_display_name ?? null,
+    birthplace_role: life.birthplace_role ?? null,
     status: "BORN",
-    life_status: "ALIVE",
+    life_status: "ALIVE_WITH_DARK_MATTER",
     work_status: life.current_job_ids.length ? "ON_DUTY" : "AVAILABLE",
     evidence_status: firstBnb.evidence_status ?? "RPC_AND_INDEXER_VERIFIED"
   }));
 }
 
+export function createDigitalLifeBirthCertificateView({ life, binding, resolution, workerId, companyRole = [] }) {
+  invariant(binding?.binding_status === "VERIFIED_BOUND" && binding.life_id === life.life_id, "WALLET_BINDING_REQUIRED", "Digital Life birth view requires the matching verified wallet binding");
+  const publicWalletAddress = binding.withVerifiedAddress((address) => address);
+  const firstDarkMatter = resolution?.first_bnb ?? null;
+  const view = {
+    life_id: life.life_id,
+    display_name: life.display_name ?? null,
+    species_id: life.species_id,
+    worker_id: workerId ?? life.worker_id ?? null,
+    company_role: [...companyRole],
+    wallet_binding_status: binding.binding_status,
+    public_wallet_address: publicWalletAddress,
+    birth_chain_id: 56,
+    dark_matter_asset: "BNB",
+    first_dark_matter_tx: firstDarkMatter?.tx_hash ?? null,
+    birth_block: firstDarkMatter?.block_number ?? null,
+    birth_block_hash: firstDarkMatter?.block_hash ?? null,
+    birth_timestamp: firstDarkMatter?.timestamp ?? null,
+    birthplace: life.birthplace ?? "BIRTHPLACE_PENDING_HUMAN_CONFIRMATION",
+    birthplace_code: life.birthplace_code ?? null,
+    birthplace_name: life.birthplace_name ?? null,
+    birthplace_display_name: life.birthplace_display_name ?? null,
+    birthplace_role: life.birthplace_role ?? null,
+    current_job_ids: [...(life.current_job_ids ?? [])],
+    company_ids: [...(life.company_ids ?? [])],
+    status: firstDarkMatter ? (resolution.life_status ?? "ACTIVE") : "GENESIS_PENDING"
+  };
+  invariant(!Object.keys(view).some((key) => /private.?key/i.test(key)), "PRIVATE_KEY_IN_BIRTH_VIEW", "Private key is permanently forbidden from the birth certificate view");
+  return Object.freeze(view);
+}
+
 const IMMUTABLE_BIRTH_FIELDS = Object.freeze([
-  "life_id", "birth_event_type", "birth_asset", "birth_mass_class", "birth_amount", "birth_timestamp",
-  "birth_block", "birth_tx_hash", "birth_chain_id", "birth_wallet", "birth_transaction_index", "birthplace", "status"
+  "life_id", "display_name", "worker_id", "birth_event_type", "birth_asset", "birth_mass_class", "birth_amount", "birth_timestamp",
+  "birth_block", "birth_block_hash", "birth_tx_hash", "birth_chain_id", "birth_wallet", "birth_transaction_index", "birthplace",
+  "birthplace_code", "birthplace_name", "birthplace_display_name", "birthplace_role", "status"
 ]);
 
 export function createBirthCertificateRegistry(store, createRegistry) {
@@ -115,7 +162,7 @@ export async function appendResolvedLifeBirth({ store, life, certificate, firstK
   invariant(certificate.status === "BORN", "BIRTH_EVIDENCE_PENDING", "Pending evidence cannot create birth history");
   const existing = await store.history(life.life_id, "LIFE");
   invariant(!existing.some((event) => event.event_type === "BIRTH_EVENT"), "LIFE_ALREADY_BORN", "A Life can only be born once");
-  const bornLife = { ...life, wallet_address: certificate.birth_wallet, birth_timestamp: certificate.birth_timestamp, status: "ALIVE", current_phase: certificate.work_status === "ON_DUTY" ? "ON_DUTY" : "ALIVE", updated_at: certificate.birth_timestamp };
+  const bornLife = { ...life, wallet_address: certificate.birth_wallet, birth_timestamp: certificate.birth_timestamp, birth_status: "ACTIVE", life_status: "ALIVE_WITH_DARK_MATTER", dark_matter_status: "DARK_MATTER_PRESENT", status: "ALIVE", current_phase: certificate.work_status === "ON_DUTY" ? "ON_DUTY_READ_ONLY" : "ALIVE", updated_at: certificate.birth_timestamp };
   const base = { domain: "LIFE", stream: "LIFE", id: life.life_id, entity: bornLife, actor_id: "DIGITAL_LIFE_BIRTH_RESOLVER" };
   const operations = [
     { ...base, event_type: "LIFE_ID_CREATED", payload: { life_id: life.life_id, occurred_at: life.created_at } },
@@ -128,7 +175,7 @@ export async function appendResolvedLifeBirth({ store, life, certificate, firstK
       operations: [
         { ...base, event_type: "DARK_MATTER_GENESIS", payload: { asset: "BNB", mass_class: BIRTH_MASS_CLASS, amount: certificate.birth_amount, block: certificate.birth_block, occurred_at: certificate.birth_timestamp }, tx_hash: certificate.birth_tx_hash, timestamp: certificate.birth_timestamp },
         { ...base, event_type: "BIRTH_EVENT", payload: { certificate, occurred_at: certificate.birth_timestamp }, tx_hash: certificate.birth_tx_hash, timestamp: certificate.birth_timestamp },
-        { ...base, event_type: "ALIVE", payload: { life_status: "ALIVE", occurred_at: certificate.birth_timestamp }, tx_hash: certificate.birth_tx_hash, timestamp: certificate.birth_timestamp },
+        { ...base, event_type: "ALIVE", payload: { life_status: "ALIVE_WITH_DARK_MATTER", occurred_at: certificate.birth_timestamp }, tx_hash: certificate.birth_tx_hash, timestamp: certificate.birth_timestamp },
         ...(certificate.work_status === "ON_DUTY" ? [{ ...base, event_type: "ON_DUTY", payload: { job_ids: life.current_job_ids, occurred_at: certificate.birth_timestamp }, tx_hash: certificate.birth_tx_hash, timestamp: certificate.birth_timestamp }] : [])
       ]
     },

@@ -7,7 +7,7 @@ import {
   createListing, settleOrder, MissionEngine, completeAssetDream, assertLedgerSeparation,
   assertAppendOnlyChain, validateSpacecraft, ASSET_TYPES, buildLifeDraft, assignLifeJob,
   validateKgenMarketSnapshot, validateSwapIntent, KGEN_SWAP_CONFIG, DigitalLifeBirthResolver,
-  createBirthCertificate, createPendingBirthCertificate, appendResolvedLifeBirth, calculateLifeAge,
+  createBirthCertificate, createPendingBirthCertificate, createDigitalLifeBirthCertificateView, appendResolvedLifeBirth, calculateLifeAge,
   deriveHeartEligibility, createDigitalAntFinanceSnapshot, createSurvivalReserveProposal,
   createFirstKgenAcquisitionPlan, createDigitalAntWishProposal, runWukongGatekeeperHourlyJob,
   createListingReadinessCheck, calculateWorkAge, createPostBirthRuntimeSelfCheck,
@@ -71,9 +71,12 @@ import {
   validateWorktreeClassificationAudit, validateGitignoreProposal
   , I18N_SUPPORTED_LOCALES, I18N_REQUIRED_KEYS, I18N_CATALOGS, translateUi,
   validatePrimaryI18nCatalogs, detectVoiceCapabilities, deriveWorkerHealth,
-  normalizeHeartActionStatus, validateSharedWorkerStatus
+  normalizeHeartActionStatus, validateSharedWorkerStatus, createGeneralManagerClockIn,
+  createCompanyPayrollPolicyDraft, createGeneralManagerPatrolPlan, calculateModeledGenesisMassTransit,
+  createCodexGmAutonomyPolicy, createCodexGmLifeContinuityPlan, createModelProviderAbstraction,
+  NAIHE_DIGITAL_LIFE_GENESIS_STATION_SPEC
 } from "../core/index.mjs";
-import { verifyDigitalAntWalletBinding } from "../core/security/wallet-binding.mjs";
+import { verifyDigitalAntWalletBinding, verifyDigitalLifeWalletBinding, CODEX_GM_ENV } from "../core/security/wallet-binding.mjs";
 import { TEMPLE_HEART_READ_ABI, TEMPLE_HEART_DRY_RUN_ABI, TEMPLE_HEART_VERIFIED_ACTIONS } from "../core/integrations/temple-heart-12345.mjs";
 import { buildSharedWorkerStatus, createPublicReadProvider, readCompanyPatrol, readPublicRequestPatrol } from "../core/jobs/public-read-only-worker.mjs";
 
@@ -95,15 +98,39 @@ test("Life IDs are unique and DIGITAL_ANT_0001 has verified immutable birth evid
   assert.equal(seed.birth_certificates[0].birth_block, 116031445);
 });
 
+test("Hengyao has one verified active Life, wallet and CURRENT-map Naihe birth certificate", async () => {
+  const life = seed.lives.find((item) => item.life_id === "LIFE-CODEX-GM-0001");
+  const certificate = seed.birth_certificates.find((item) => item.life_id === life.life_id);
+  assert.equal(life.display_name, "衡曜");
+  assert.equal(life.worker_id, "codex-gm-01");
+  assert.equal(life.species_id, "DIGITAL_AI_LIFE");
+  assert.equal(life.status, "ALIVE");
+  assert.equal(life.life_status, "ALIVE_WITH_DARK_MATTER");
+  assert.equal(life.birth_status, "ACTIVE");
+  assert.equal(life.wallet_address, "0x4DF6E9629Dad1072103cFd2bC81845fd97429214");
+  assert.equal(life.birthplace_code, 4168);
+  assert.equal(life.birthplace_name, "NAIHE_BRIDGE");
+  assert.equal(life.birthplace_display_name, "奈何橋");
+  assert.equal(life.location_id, "P_4168p0_奈何橋_R18");
+  assert.equal(certificate.birth_tx_hash, "0x75432e3a78ea3afd233ef7bf82ab0ea0e8a20e9fb900b9ddb4346ca1f60aa468");
+  assert.equal(certificate.birth_block, 116263702);
+  assert.equal(certificate.birth_block_hash, "0xa194d4ba7139cdb33af923c0c834c6dca7d01b4f90e484d00775aca2bd94e138");
+  assert.equal(certificate.birth_amount, "0.008");
+  assert.equal(certificate.life_status, "ALIVE_WITH_DARK_MATTER");
+  const universeMap = JSON.parse(await fs.readFile(new URL("../docs/maps/UniverseMap_V10_2_DISTANCE_COMPLETE_ALL_POINTS.json", import.meta.url), "utf8"));
+  assert.ok(universeMap.point_index_sorted.some((point) => point.id === life.location_id && point.coord === 4168 && point.name === "奈何橋"));
+  assert.ok(!seed.lives.some((item) => item.life_id === "KAIOS-AI-LIFE-CODEX-GM-0001"));
+});
+
 function fakeBirthRpc({ wallet, bnbBalance = "0x1" }) {
   return {
     async send(method, params) {
       if (method === "eth_chainId") return "0x38";
       if (method === "eth_getBalance") return bnbBalance;
       if (method === "eth_call") return "0x0";
-      if (method === "eth_getTransactionReceipt") return { status: "0x1", blockNumber: "0x64", logs: [] };
-      if (method === "eth_getTransactionByHash") return { to: wallet, value: "0x1" };
-      if (method === "eth_getBlockByNumber") return { number: "0x64", timestamp: "0x5f5e100" };
+      if (method === "eth_getTransactionReceipt") return { status: "0x1", blockNumber: "0x64", blockHash: `0x${"a".repeat(64)}`, logs: [] };
+      if (method === "eth_getTransactionByHash") return { hash: `0x${"1".repeat(64)}`, to: wallet, value: "0x1" };
+      if (method === "eth_getBlockByNumber") return { number: "0x64", hash: `0x${"a".repeat(64)}`, timestamp: "0x5f5e100" };
       throw new Error(`Unexpected RPC method: ${method} ${params}`);
     }
   };
@@ -125,7 +152,8 @@ test("First verified non-zero BNB receipt creates immutable dark-matter birth ev
   assert.equal(result.certificate.birth_asset, "BNB");
   assert.equal(result.certificate.birth_amount, "0.000000000000000001");
   assert.equal(result.certificate.birth_timestamp, "1973-03-03T09:46:40.000Z");
-  assert.equal(result.certificate.life_status, "ALIVE");
+  assert.equal(result.certificate.birth_block_hash, `0x${"a".repeat(64)}`);
+  assert.equal(result.certificate.life_status, "ALIVE_WITH_DARK_MATTER");
   assert.equal(result.certificate.work_status, "ON_DUTY");
   const depleted = await new DigitalLifeBirthResolver({ rpc: fakeBirthRpc({ wallet: wallet.address, bnbBalance: "0x0" }), historyIndexer: indexer, tokens: { KGEN: seed.contracts.KGEN_TOKEN.address, KAIOS: seed.contracts.KAIOS_TOKEN.address } }).resolveWithBinding({ life: seed.lives[0], binding });
   assert.equal(depleted.certificate.status, "BORN");
@@ -224,6 +252,16 @@ test("App version upgrade retains Life ID", async () => {
   assert.equal(life.birth_timestamp, before.birth_timestamp);
 });
 
+test("born Hengyao display name, wallet and Naihe birthplace are immutable", async () => {
+  const state = await runtime();
+  for (const patch of [
+    { display_name: "Replacement" },
+    { wallet_address: `0x${"9".repeat(40)}` },
+    { birthplace_code: 12345 },
+    { birth_timestamp: "2026-08-16T11:23:05.000Z" }
+  ]) await assert.rejects(state.registries.life.updateMetadata("LIFE-CODEX-GM-0001", patch, "TEST"), (error) => error.code === "BORN_LIFE_IDENTITY_IMMUTABLE");
+});
+
 test("Private key is never serialized while verified public birth address remains publishable", () => {
   const require = createRequire(import.meta.url);
   const ethers = require("../K線西遊記/temples/12345/assets/ethers-5.7.2.umd.min.js");
@@ -245,6 +283,74 @@ test("Wallet mismatch stops before a signer capability is returned", () => {
   const first = ethers.Wallet.createRandom();
   const second = ethers.Wallet.createRandom();
   assert.throws(() => verifyDigitalAntWalletBinding({ DIGITAL_ANT_0001_PRIVATE_KEY: first.privateKey, DIGITAL_ANT_0001_WALLET_ADDRESS: second.address }), (error) => error.code === "WALLET_ADDRESS_MISMATCH" && error.details.binding_status === "STOP");
+});
+
+test("generic Digital Life wallet binding preserves Digital Ant compatibility and fails closed", async () => {
+  const require = createRequire(import.meta.url);
+  const ethers = require("../K線西遊記/temples/12345/assets/ethers-5.7.2.umd.min.js");
+  const wallet = ethers.Wallet.createRandom();
+  const environment = { [CODEX_GM_ENV.privateKey]: wallet.privateKey, [CODEX_GM_ENV.walletAddress]: wallet.address };
+  const capability = verifyDigitalLifeWalletBinding({ lifeId: "LIFE-CODEX-GM-0001", envPrefix: "CODEX_GM_0001", expectedChainId: 56 }, environment);
+  const life = seed.lives.find((item) => item.life_id === "LIFE-CODEX-GM-0001");
+  const draftLife = { ...life, birthplace: null, birthplace_code: null, birthplace_name: null, birthplace_display_name: null, birthplace_role: null, birth_timestamp: null, wallet_address: null, status: "GENESIS_PENDING", current_phase: "WALLET_BOUND_BIRTH_EVIDENCE_PENDING" };
+  const bound = capability.bindLife(draftLife);
+  assert.equal(capability.assertChainId("0x38"), true);
+  assert.throws(() => capability.assertChainId(1), (error) => error.code === "WRONG_CHAIN" && error.details.binding_status === "STOP");
+  assert.equal(capability.withVerifiedAddress((address) => address), wallet.address);
+  assert.equal(bound.wallet_binding_status, "VERIFIED_BOUND");
+  assert.equal(JSON.stringify({ capability, bound }).includes(wallet.privateKey), false);
+  assert.throws(() => verifyDigitalLifeWalletBinding({ lifeId: life.life_id, envPrefix: "CODEX_GM_0001" }, { ...environment, [CODEX_GM_ENV.privateKey]: "invalid" }), (error) => error.code === "INVALID_WALLET_BINDING");
+  const other = ethers.Wallet.createRandom();
+  assert.throws(() => verifyDigitalLifeWalletBinding({ lifeId: life.life_id, envPrefix: "CODEX_GM_0001" }, { ...environment, [CODEX_GM_ENV.walletAddress]: other.address }), (error) => error.code === "WALLET_ADDRESS_MISMATCH");
+
+  const pending = await new DigitalLifeBirthResolver({ rpc: fakeBirthRpc({ wallet: wallet.address, bnbBalance: "0x0" }), historyIndexer: null, tokens: { KGEN: seed.contracts.KGEN_TOKEN.address, KAIOS: seed.contracts.KAIOS_TOKEN.address } }).resolveWithBinding({ life: draftLife, binding: capability });
+  const certificate = createDigitalLifeBirthCertificateView({ life: draftLife, binding: capability, resolution: pending, workerId: "codex-gm-01", companyRole: life.company_role });
+  assert.equal(pending.life_status, "BODY_READY");
+  assert.equal(pending.birth_evidence_status, "BIRTH_EVIDENCE_PENDING");
+  assert.equal(certificate.status, "GENESIS_PENDING");
+  assert.equal(certificate.first_dark_matter_tx, null);
+  assert.equal(certificate.birthplace, "BIRTHPLACE_PENDING_HUMAN_CONFIRMATION");
+  assert.equal(certificate.public_wallet_address, wallet.address);
+  assert.doesNotMatch(JSON.stringify(certificate), /private.?key/i);
+
+  const ant = ethers.Wallet.createRandom();
+  assert.equal(verifyDigitalAntWalletBinding({ DIGITAL_ANT_0001_PRIVATE_KEY: ant.privateKey, DIGITAL_ANT_0001_WALLET_ADDRESS: ant.address }).life_id, "DIGITAL_ANT_0001");
+});
+
+test("General Manager clock-in, payroll, patrol and modeled transit remain fail-closed", () => {
+  const clockIn = createGeneralManagerClockIn({ mandatoryReads: ["BOOT", "CURRENT", "WORKQUEUE"], workerRegistryRead: true, companyHealth: { delivered_not_reviewed: 0, review_failed: 1, expired_claims: 1, pending_employee_delivery: 0 } });
+  assert.equal(clockIn.status, "CLOCK_IN_READY");
+  assert.equal(clockIn.next_phase, "FINISH_OLD_WORK_FIRST");
+  assert.equal(clockIn.new_feature_dispatch_allowed, false);
+  const payroll = createCompanyPayrollPolicyDraft();
+  assert.equal(payroll.salary_amount, "POLICY_REQUIRED");
+  assert.equal(payroll.pay_per_chat_message, false);
+  assert.equal(payroll.gm_self_bonus_approval, false);
+  assert.equal(payroll.personal_wallet_is_company_treasury, false);
+  assert.deepEqual(Object.keys(payroll.rails), ["MONTHLY_ROLE_SALARY", "TASK_PROJECT_PAY"]);
+  const patrol = createGeneralManagerPatrolPlan();
+  assert.equal(patrol.mode, "READ_ONLY_ONLY");
+  assert.equal(patrol.temple_12345.status, "READY_READ_ONLY");
+  assert.equal(patrol.temple_16888.status, "CURRENT_RUNTIME_AUDIT_REQUIRED");
+  assert.equal(patrol.bank_18888.celestial_salary_claim_allowed, false);
+  const transit = calculateModeledGenesisMassTransit();
+  assert.equal(transit.real_world_physical_speed, false);
+  assert.ok(Math.abs(transit.velocity_m_per_second - 22.015225) < 0.001);
+  const continuity = createCodexGmLifeContinuityPlan();
+  assert.equal(continuity.env_is_backup, false);
+  assert.equal(continuity.backup_status, "HUMAN_ACTION_REQUIRED");
+  assert.equal(continuity.replacement_wallet_on_device_loss, false);
+  const provider = createModelProviderAbstraction();
+  assert.equal(provider.openai_independent_runtime, false);
+  assert.equal(provider.local_fallback_status, "NOT_IMPLEMENTED");
+  const autonomy = createCodexGmAutonomyPolicy();
+  assert.equal(autonomy.current_level, "A1");
+  assert.equal(autonomy.personal_wallet_mode, "READ_ONLY_ONLY");
+  assert.equal(autonomy.company_treasury_authority_inherited, false);
+  assert.throws(() => createCodexGmAutonomyPolicy({ level: "A2" }), (error) => error.code === "AUTONOMY_UPGRADE_REQUIRES_HUMAN");
+  assert.equal(NAIHE_DIGITAL_LIFE_GENESIS_STATION_SPEC.birthplace_code, 4168);
+  assert.equal(NAIHE_DIGITAL_LIFE_GENESIS_STATION_SPEC.contract_deployed, false);
+  assert.equal(NAIHE_DIGITAL_LIFE_GENESIS_STATION_SPEC.unlimited_faucet, false);
 });
 
 test("Listing requires controller permission", async () => {

@@ -25,3 +25,4 @@ export * from "./integrations/kgen-pancakeswap-v2.mjs";
 export * from "./integrations/temple-heart-12345.mjs";
 export * from "./integrations/bsc-history-indexer.mjs";
 export * from "./security/life-security.mjs";
+export * from "./security/wallet-binding.mjs";

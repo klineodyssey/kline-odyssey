@@ -13,6 +13,9 @@ export function buildLifeDraft(input, species) {
 
   const life = {
     life_id: input.life_id,
+    display_name: input.display_name ?? null,
+    worker_id: input.worker_id ?? null,
+    company_role: input.company_role ?? [],
     species_id: input.species_id,
     origin_id: input.origin_id,
     parent_life_ids: input.parent_life_ids ?? [],

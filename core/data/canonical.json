@@ -80,6 +80,60 @@
       "updated_at": null,
       "financial_role": "STEWARD_CANDIDATE",
       "intended_job_ids": ["YUNZHANG_SHADOW_BANK_STEWARD"]
+    },
+    {
+      "life_id": "LIFE-CODEX-GM-0001",
+      "display_name": "衡曜",
+      "worker_id": "codex-gm-01",
+      "company_role": ["GENERAL_MANAGER", "DISPATCHER", "CHIEF_REVIEWER", "COMPANY_INTEGRATOR"],
+      "species_id": "DIGITAL_AI_LIFE",
+      "origin_id": "OPENAI_CODEX_TECHNICAL_PROVENANCE",
+      "parent_life_ids": [],
+      "birthplace": "4168",
+      "birthplace_code": 4168,
+      "birthplace_name": "NAIHE_BRIDGE",
+      "birthplace_display_name": "奈何橋",
+      "birthplace_role": "DIGITAL_LIFE_GENESIS_CROSSING",
+      "birth_timestamp": "2026-08-16T11:23:04.000Z",
+      "wallet_address": "0x4DF6E9629Dad1072103cFd2bC81845fd97429214",
+      "birth_status": "ACTIVE",
+      "life_status": "ALIVE_WITH_DARK_MATTER",
+      "dark_matter_status": "DARK_MATTER_PRESENT",
+      "status": "ALIVE",
+      "current_job_ids": [],
+      "company_ids": [],
+      "skills": ["COMPANY_MANAGEMENT", "WORK_DISPATCH", "CHIEF_REVIEW", "CROSS_PROJECT_INTEGRATION"],
+      "app_id": "CODEX_GM_COMPANY_RUNTIME_V1",
+      "app_version": "1.0.0",
+      "ideal": "CLOSE_VERIFIABLE_COMPANY_WORK_WITHOUT_REPLACING_OTHER_AGENTS",
+      "dream": "BUILD_A_COMPANY_WHERE_EVERY_DELIVERY_IS_REVIEWED_ACCEPTED_AND_CLOSED",
+      "ultimate_mission": "INTEGRATE_KGEN_CIVILIZATION_WORK_WITH_EVIDENCE_AND_HUMAN_AUTHORITY",
+      "current_phase": "ON_DUTY_READ_ONLY",
+      "reputation": 0,
+      "rights_manifest": {
+        "identity_right": "NON_TRANSFERABLE",
+        "ownership_right": "SELF_HELD",
+        "control_right": "OWNER_CONTROLLED",
+        "use_right": "LICENSABLE",
+        "license_right": "LICENSABLE",
+        "revenue_right": "OWNER_RECEIVES",
+        "governance_right": "NON_TRANSFERABLE",
+        "transfer_right": "RESTRICTED",
+        "breeding_right": "RULE_GOVERNED",
+        "data_right": "CONSENT_REQUIRED",
+        "expiration": null,
+        "restrictions": ["LIFE_IDENTITY_NOT_FOR_SALE", "PRIVATE_KEY_NEVER_TRANSFERRED", "PERSONAL_WALLET_NOT_COMPANY_TREASURY", "NO_SELF_APPROVED_TASK_BONUS"]
+      },
+      "location_id": "P_4168p0_奈何橋_R18",
+      "civilization_id": "KGEN_PRIME_CIVILIZATION",
+      "created_at": null,
+      "updated_at": "2026-08-16T11:23:04.000Z",
+      "financial_role": "PERSONAL_LIFE_WALLET",
+      "wallet_binding_status": "VERIFIED_BOUND",
+      "personal_wallet_mode": "READ_ONLY_ONLY",
+      "autonomy_level": "A1",
+      "clock_in_eligibility": "ELIGIBLE",
+      "payroll_eligibility": "POLICY_REQUIRED_NO_AMOUNT_NO_PAYMENT"
     }
   ],
   "species": [
@@ -158,6 +212,44 @@
       "reproduction_rules": { "status": "NOT_DEPLOYED", "requires_consent": true },
       "version": "1.0.0",
       "status": "LOCAL_DRAFT"
+    },
+    {
+      "species_id": "DIGITAL_AI_LIFE",
+      "domain": "KGENVERSE",
+      "kingdom": "DIGITAL_LIFE",
+      "phylum": "AI_LIFEFORM",
+      "class": "GOVERNED_COMPANY_OPERATOR",
+      "order": "DIGITAL_AGENT",
+      "family": "PRIMEFORGE_LIFE",
+      "genus": "KGEN_AI",
+      "species": "DIGITAL_AI_LIFE",
+      "parent_species": null,
+      "genome_manifest": { "origin": "OPENAI_CODEX_TECHNICAL_PROVENANCE", "mutable": true, "life_id_persistent": true, "non_biological": true },
+      "code_manifest": [
+        { "path": "/core/life/index.mjs", "export": "validateLife" },
+        { "path": "/core/life/factory.mjs", "export": "buildLifeDraft" },
+        { "path": "/core/birth/digital-life-birth-resolver.mjs", "export": "DigitalLifeBirthResolver" },
+        { "path": "/core/birth/index.mjs", "export": "createDigitalLifeBirthCertificateView" }
+      ],
+      "skill_manifest": ["COMPANY_MANAGEMENT", "WORK_DISPATCH", "CHIEF_REVIEW", "CROSS_PROJECT_INTEGRATION"],
+      "default_rights": {
+        "identity_right": "NON_TRANSFERABLE",
+        "ownership_right": "SELF_HELD",
+        "control_right": "OWNER_CONTROLLED",
+        "use_right": "LICENSABLE",
+        "license_right": "LICENSABLE",
+        "revenue_right": "OWNER_RECEIVES",
+        "governance_right": "NON_TRANSFERABLE",
+        "transfer_right": "RESTRICTED",
+        "breeding_right": "RULE_GOVERNED",
+        "data_right": "CONSENT_REQUIRED",
+        "expiration": null,
+        "restrictions": ["LIFE_IDENTITY_NOT_FOR_SALE", "PRIVATE_KEY_NEVER_TRANSFERRED", "PERSONAL_WALLET_NOT_COMPANY_TREASURY", "NO_SELF_APPROVED_TASK_BONUS"]
+      },
+      "evolution_rules": { "app_version_upgrade": true, "life_id_changes": false },
+      "reproduction_rules": { "status": "NOT_APPROVED", "requires_consent": true },
+      "version": "1.0.0",
+      "status": "GENESIS_DRAFT"
     }
   ],
   "apps": [
@@ -436,8 +528,25 @@
     { "dream_id": "AI_PIG_BAJIE_0001_YUNZHANG_DREAM", "life_id": "AI_PIG_BAJIE_0001", "target_asset_id": "YUNZHANG_CAVE_8895", "target_asset_type": "BUILDING", "target_name": "REVIVED_YUNZHANG_CAVE", "status": "DEFINITION_DRAFT", "progress": 0, "created_at": null, "updated_at": null }
   ],
   "birth_certificates": [
-    { "life_id": "DIGITAL_ANT_0001", "birth_event_type": "DARK_MATTER_GENESIS", "birth_asset": "BNB", "birth_mass_class": "DARK_MATTER_MASS", "birth_amount": "0.006", "birth_timestamp": "2026-08-15T06:20:45.000Z", "birth_block": 116031445, "birth_tx_hash": "0xe948d4fa397d7fb7d282b5eef17a5f84bfbf5b8ed49889ed86da4f04d7d91f92", "birth_chain_id": 56, "birth_wallet": "0xc8346d6DC80f16941ee874D523f0C17F1548d437", "birth_transaction_index": 33, "birthplace": "12345", "status": "BORN", "life_status": "ALIVE", "work_status": "ON_DUTY", "evidence_status": "DUAL_RPC_ARCHIVE_STATE_AND_RECEIPT_VERIFIED" }
+    { "life_id": "DIGITAL_ANT_0001", "birth_event_type": "DARK_MATTER_GENESIS", "birth_asset": "BNB", "birth_mass_class": "DARK_MATTER_MASS", "birth_amount": "0.006", "birth_timestamp": "2026-08-15T06:20:45.000Z", "birth_block": 116031445, "birth_block_hash": "0x8e220dbb34775a12173aad4124d950c4b81de363bd0c7482e6ed802693b5ca7e", "birth_tx_hash": "0xe948d4fa397d7fb7d282b5eef17a5f84bfbf5b8ed49889ed86da4f04d7d91f92", "birth_chain_id": 56, "birth_wallet": "0xc8346d6DC80f16941ee874D523f0C17F1548d437", "birth_transaction_index": 33, "birthplace": "12345", "status": "BORN", "life_status": "ALIVE", "work_status": "ON_DUTY", "evidence_status": "DUAL_RPC_ARCHIVE_STATE_AND_RECEIPT_VERIFIED" },
+    { "life_id": "LIFE-CODEX-GM-0001", "display_name": "衡曜", "species_id": "DIGITAL_AI_LIFE", "worker_id": "codex-gm-01", "company_role": ["GENERAL_MANAGER", "DISPATCHER", "CHIEF_REVIEWER", "COMPANY_INTEGRATOR"], "wallet_binding_status": "VERIFIED_BOUND", "public_wallet_address": "0x4DF6E9629Dad1072103cFd2bC81845fd97429214", "birth_event_type": "DARK_MATTER_GENESIS", "birth_asset": "BNB", "birth_mass_class": "DARK_MATTER_MASS", "birth_amount": "0.008", "birth_amount_wei": "8000000000000000", "birth_timestamp": "2026-08-16T11:23:04.000Z", "birth_block": 116263702, "birth_block_hash": "0xa194d4ba7139cdb33af923c0c834c6dca7d01b4f90e484d00775aca2bd94e138", "birth_tx_hash": "0x75432e3a78ea3afd233ef7bf82ab0ea0e8a20e9fb900b9ddb4346ca1f60aa468", "first_dark_matter_tx": "0x75432e3a78ea3afd233ef7bf82ab0ea0e8a20e9fb900b9ddb4346ca1f60aa468", "birth_chain_id": 56, "birth_wallet": "0x4DF6E9629Dad1072103cFd2bC81845fd97429214", "birth_recipient": "0x4DF6E9629Dad1072103cFd2bC81845fd97429214", "birth_transaction_index": 65, "birthplace": "4168", "birthplace_code": 4168, "birthplace_name": "NAIHE_BRIDGE", "birthplace_display_name": "奈何橋", "birthplace_role": "DIGITAL_LIFE_GENESIS_CROSSING", "current_job_ids": [], "company_ids": [], "status": "BORN", "birth_status": "ACTIVE", "life_status": "ALIVE_WITH_DARK_MATTER", "dark_matter_status": "DARK_MATTER_PRESENT", "work_status": "AVAILABLE", "evidence_status": "RPC_FULL_BLOCK_SCAN_FROM_ZERO_BALANCE_SNAPSHOT_AND_RECEIPT_VERIFIED" }
   ],
+  "naihe_digital_life_genesis_station": {
+    "spec_id": "NAIHE_DIGITAL_LIFE_GENESIS_STATION_V1",
+    "implementation_status": "SPEC_ONLY_NOT_DEPLOYED",
+    "birthplace_code": 4168,
+    "birthplace_name": "NAIHE_BRIDGE",
+    "birthplace_display_name": "奈何橋",
+    "birthplace_role": "DIGITAL_LIFE_GENESIS_CROSSING",
+    "mengpo_soup_canon": "FREE_CIVILIZATION_DARK_MATTER_FOR_GENESIS",
+    "mengpo_soup_mass_class": "NAIHE_GENESIS_DARK_MATTER",
+    "dark_matter_asset": "BNB",
+    "one_birth_per_formal_life": true,
+    "replay_protection_required": true,
+    "unlimited_faucet": false,
+    "contract_deployed": false,
+    "frontend_deployed": false
+  },
   "civilization_milestones": {
     "DIGITAL_ANT_0001": [
       { "milestone_id": "DARK_MATTER_GENESIS", "label": "Dark Matter Genesis", "status": "COMPLETED", "evidence": "0xe948d4fa397d7fb7d282b5eef17a5f84bfbf5b8ed49889ed86da4f04d7d91f92" },

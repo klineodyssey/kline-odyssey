@@ -1,59 +1,81 @@
 {
   "metadata": {
-    "version": "4.2",
+    "version": "4.3",
     "status": "ACTIVE",
-    "updated_at": "2026-07-13T12:49:00+08:00",
+    "updated_at": "2026-08-16T20:49:02+08:00",
     "manager": "codex-gm-01",
-    "task_id": "KAIOS-V11-READINESS-RECOVERY-20260713",
-    "source_commit": "90d7283c8b6880255e1176b4ebba1f54da35da21",
+    "life_id": "LIFE-CODEX-GM-0001",
+    "task_id": "HENGYAO-FIRST-GM-CLOCK-IN-001",
+    "source_commit": null,
     "source_of_truth": true
   },
   "daily_operation": {
-    "date": "2026-07-13",
+    "date": "2026-08-16",
     "completed": true,
     "ready_for_human_task": true,
-    "v11_readiness": "READY",
-    "v11_development_started": false,
-    "implementation_workqueue_created": false,
+    "clock_in_order": [
+      "LIGHT_BOOT",
+      "COMPANY_HEALTH",
+      "FINISH_OLD_WORK_FIRST",
+      "DISPATCH",
+      "PATROL_EXTERNAL_WORLD",
+      "HUMAN_REQUEST"
+    ],
     "blocking_reasons": [],
-    "pending_handoff": 0,
+    "pending_handoff": 1,
     "pending_review": 0,
-    "pending_push": 0,
+    "pending_push": 1,
     "protected_path_alerts": 0
   },
-  "decisions": {
-    "today": 12,
-    "pending": 0,
-    "approved_or_closed": 10,
-    "rejected": 2,
-    "rollback_history": 0
+  "life": {
+    "display_name": "衡曜",
+    "life_id": "LIFE-CODEX-GM-0001",
+    "worker_id": "codex-gm-01",
+    "status": "ALIVE_WITH_DARK_MATTER",
+    "autonomy": "A1_PERSONAL_WALLET_READ",
+    "personal_wallet_balance_bnb": "0.008",
+    "continuity": "PARTIAL",
+    "encrypted_backup_status": "HUMAN_ACTION_REQUIRED"
   },
-  "attendance": {
-    "roster_records": 11,
-    "on_duty": 1,
-    "working_now": 0,
-    "waiting_review": 0,
-    "blocked": 0
+  "company_health": {
+    "open_prs_before_gm_draft": 5,
+    "open_prs_without_exact_head_checks": 5,
+    "github_health": "WARN_MISSING_PR_CHECKS",
+    "pages_status": "BUILT",
+    "pages_https": true,
+    "pages_12345_http": 200,
+    "pages_16888_http": 200,
+    "active_employee_claims": 1,
+    "delivered_not_reviewed": 0
   },
   "workqueue": {
-    "total": 37,
-    "open": 25,
-    "review": 0,
-    "approved": 0,
-    "done": 10,
-    "rejected": 2,
-    "blocked": 0
+    "active_task": "KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-R2-001",
+    "worker": "cursor-01",
+    "status": "CLAIMED",
+    "claim_id": "CLAIM-KAIOS-LIFE-ENERGY-PAYROLL-R2-001-cursor-01",
+    "lease_expires_at": "2026-08-18T12:49:02Z",
+    "map_handoff": "KGEN-MAP-4168-NAIHE-GENESIS-STATION-UI-001",
+    "map_handoff_status": "HOLD_FOR_MAP_WORLD_AGENT"
   },
-  "reconciliation": {
-    "visible_handoff_evidence_branches": 21,
-    "pending_handoff_decisions": 0,
-    "local_only_commits": 0,
-    "pending_push_patches": 0,
-    "unapproved_v11_draft_isolated": true
+  "patrol": {
+    "snapshot_block": 116276269,
+    "snapshot_block_hash": "0x68118a75c38cc4ade3c371286874ac402520f61abdd88375ce70b8e67df42531",
+    "chain_id": 56,
+    "temple_12345": "READ_PASS",
+    "temple_16888": "READ_PASS_YUELAO_CONTRACT_PRESENT",
+    "bank_18888": "READ_PASS",
+    "eligibility": "LIVE_ACTIVE",
+    "capital_commitment": "LIVE_ACTIVE",
+    "reserve_redemption": "LIVE_INACTIVE_ACCUMULATING",
+    "redemption_enabled": false,
+    "reserve_kgen": "20.0",
+    "kgen_owner": "0xa2792fBDCc8A8AaC364053431D44E0a8D335E166",
+    "kgen_bank_wallet": "0xA06eF53c9AD4Af739FD13Ca1Ded446437134b0EE"
   },
-  "main_commit": "90d7283c8b6880255e1176b4ebba1f54da35da21",
-  "pages_workflow_run": 29224741774,
-  "pages_result": "success",
-  "network_closeout": "RECOVERED",
-  "maintenance_mode": "HUMAN_APPROVAL_WAIT"
+  "publication": {
+    "branch": "codex/codex-gm-life-runtime-v1",
+    "draft_pr": null,
+    "publication_pending_at_snapshot": true,
+    "mainnet_write": false
+  }
 }
