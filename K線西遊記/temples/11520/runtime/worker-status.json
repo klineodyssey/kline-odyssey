@@ -11,16 +11,16 @@
   "chain_write": false,
   "worker_health": "DEGRADED",
   "work_stop_reason": "INDEXER_FAILURE",
-  "generated_at": "2026-08-16T11:37:06.001Z",
+  "generated_at": "2026-08-16T13:03:31.030Z",
   "last_work_cycle": {
-    "event_id": "DIGITAL_ANT_0001_HOURLY_2026081611",
+    "event_id": "DIGITAL_ANT_0001_HOURLY_2026081613",
     "life_id": "DIGITAL_ANT_0001",
     "app_id": "DIGITAL_ANT_APP_0001",
-    "work_cycle_id": "DIGITAL_ANT_0001_HOURLY_2026081611",
-    "scheduled_at": "2026-08-16T11:00:00.000Z",
-    "started_at": "2026-08-16T11:37:04.522Z",
-    "finished_at": "2026-08-16T11:37:06.000Z",
-    "bsc_block": 116265570,
+    "work_cycle_id": "DIGITAL_ANT_0001_HOURLY_2026081613",
+    "scheduled_at": "2026-08-16T13:00:00.000Z",
+    "started_at": "2026-08-16T13:03:28.627Z",
+    "finished_at": "2026-08-16T13:03:31.029Z",
+    "bsc_block": 116277086,
     "wallet_state": {
       "status": "PUBLIC_ADDRESS_READ",
       "bnb": "0.006"
@@ -34,21 +34,21 @@
         "reason": "HEARTBEAT_ELIGIBLE",
         "eligibility_source": "CLIENT_DERIVED",
         "write_status": "WRITE_NOT_CONNECTED",
-        "next_eligible_time": "2026-08-16T11:37:04.000Z"
+        "next_eligible_time": "2026-08-16T13:03:28.000Z"
       },
       "fortune": {
         "status": "ELIGIBLE",
         "reason": "FORTUNE_CLAIM_ELIGIBLE",
         "eligibility_source": "CLIENT_DERIVED",
         "write_status": "WRITE_NOT_CONNECTED",
-        "next_eligible_time": "2026-08-16T11:37:04.000Z"
+        "next_eligible_time": "2026-08-16T13:03:28.000Z"
       },
       "ignition": {
         "status": "OUT_OF_WINDOW",
         "reason": "IGNITE_OUT_OF_WINDOW",
         "eligibility_source": "CLIENT_DERIVED",
         "write_status": "WRITE_NOT_CONNECTED",
-        "next_eligible_time": "2026-08-17T00:00:00.000Z"
+        "next_eligible_time": "2026-08-16T23:59:59.000Z"
       },
       "lamp": {
         "status": "INSUFFICIENT_BALANCE",
@@ -79,8 +79,8 @@
           "IGNITION",
           "LAMP"
         ],
-        "from_block": 116265471,
-        "to_block": 116265570,
+        "from_block": 116276987,
+        "to_block": 116277086,
         "fortune_claims": [],
         "wishes": [],
         "heartbeat_claims": [],
@@ -139,17 +139,17 @@
     ],
     "gas_spent": "0",
     "tx_hash": null,
-    "work_duration_seconds": 1
+    "work_duration_seconds": 2
   },
-  "next_expected_at": "2026-08-16T12:00:00.000Z",
+  "next_expected_at": "2026-08-16T14:00:00.000Z",
   "metrics": {
     "completed_cycles": 0,
     "failed_cycles": 1,
-    "degraded_cycles": 4,
-    "no_action_cycles": 5,
+    "degraded_cycles": 5,
+    "no_action_cycles": 6,
     "action_cycles": 0,
-    "work_duration_seconds": 3,
-    "missed_cycles": 0
+    "work_duration_seconds": 5,
+    "missed_cycles": 1
   },
   "patrols": {
     "temple_12345": {
@@ -161,21 +161,21 @@
         "reason": "HEARTBEAT_ELIGIBLE",
         "eligibility_source": "CLIENT_DERIVED",
         "write_status": "WRITE_NOT_CONNECTED",
-        "next_eligible_time": "2026-08-16T11:37:04.000Z"
+        "next_eligible_time": "2026-08-16T13:03:28.000Z"
       },
       "fortune": {
         "status": "ELIGIBLE",
         "reason": "FORTUNE_CLAIM_ELIGIBLE",
         "eligibility_source": "CLIENT_DERIVED",
         "write_status": "WRITE_NOT_CONNECTED",
-        "next_eligible_time": "2026-08-16T11:37:04.000Z"
+        "next_eligible_time": "2026-08-16T13:03:28.000Z"
       },
       "ignition": {
         "status": "OUT_OF_WINDOW",
         "reason": "IGNITE_OUT_OF_WINDOW",
         "eligibility_source": "CLIENT_DERIVED",
         "write_status": "WRITE_NOT_CONNECTED",
-        "next_eligible_time": "2026-08-17T00:00:00.000Z"
+        "next_eligible_time": "2026-08-16T23:59:59.000Z"
       },
       "lamp": {
         "status": "INSUFFICIENT_BALANCE",
@@ -206,8 +206,8 @@
           "IGNITION",
           "LAMP"
         ],
-        "from_block": 116265471,
-        "to_block": 116265570,
+        "from_block": 116276987,
+        "to_block": 116277086,
         "fortune_claims": [],
         "wishes": [],
         "heartbeat_claims": [],
