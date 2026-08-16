@@ -1,0 +1,49 @@
+name: 11520 Civilization Request
+description: Submit a real, identity-backed request to AI Ant Company. This creates a request, not an order or payment.
+title: "[11520 Request] "
+labels: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        GitHub provides the requester identity evidence. Do not include private keys, wallet secrets, passwords, or private contact details.
+  - type: textarea
+    id: desired-outcome
+    attributes:
+      label: What do you want to build or accomplish?
+      description: Describe the real desired outcome. A confirmed request is not yet a quote, order, contract, or revenue.
+      placeholder: I need…
+    validations:
+      required: true
+  - type: dropdown
+    id: project-type
+    attributes:
+      label: Project type
+      options:
+        - SOFTWARE
+        - DIGITAL_LIFE
+        - MEDIA
+        - FINANCIAL
+        - LAND
+        - CONSTRUCTION
+        - SOCIAL_ASSISTANCE
+        - MIXED_WORLD
+        - NOT_SURE
+    validations:
+      required: true
+  - type: textarea
+    id: constraints
+    attributes:
+      label: Constraints, timing, and success criteria
+      description: Include non-sensitive requirements, deadline, desired quality, and how you will recognize success.
+  - type: checkboxes
+    id: confirmation
+    attributes:
+      label: Request confirmation
+      options:
+        - label: This is a real request from me or the organization I am authorized to represent.
+          required: true
+        - label: I understand this does not authorize payment, chain writes, or automatic execution.
+          required: true
+        - label: I did not include private keys or other wallet secrets.
+          required: true

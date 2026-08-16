@@ -25,6 +25,79 @@ export const DIGITAL_ANT_APP_PERMISSIONS = Object.freeze({
   PRIVATE_KEY_BROWSER_ACCESS: false
 });
 
+export const I18N_SUPPORTED_LOCALES = Object.freeze(["zh-TW", "en", "ja", "ko"]);
+export const I18N_REQUIRED_KEYS = Object.freeze([
+  "navigation.home", "navigation.request", "navigation.life", "navigation.apps", "navigation.company",
+  "navigation.wallet", "navigation.mission", "navigation.work", "request.title", "request.cta",
+  "request.confirm", "request.board", "voice.title", "voice.start", "voice.stop", "voice.unavailable",
+  "voice.textFallback", "status.title", "status.online", "status.offline", "status.missedCycle",
+  "safety.title", "quote.title", "company.title", "life.title", "wallet.title", "mission.title", "work.title",
+  "errors.generic"
+]);
+
+export const I18N_CATALOGS = Object.freeze({
+  "zh-TW": Object.freeze({
+    "navigation.home": "首頁", "navigation.request": "告訴螞蟻", "navigation.life": "生命", "navigation.apps": "應用",
+    "navigation.company": "公司", "navigation.wallet": "錢包", "navigation.mission": "使命", "navigation.work": "工作",
+    "request.title": "公開文明需求入口", "request.cta": "告訴螞蟻，你想在這個世界完成什麼？", "request.confirm": "確認需求",
+    "request.board": "文明需求看板", "voice.title": "AI 文明語音客服", "voice.start": "開啟語音客服", "voice.stop": "停止聆聽",
+    "voice.unavailable": "此瀏覽器無法使用語音擷取", "voice.textFallback": "仍可使用文字輸入",
+    "status.title": "公開生命狀態", "status.online": "上線", "status.offline": "離線", "status.missedCycle": "錯過工作週期",
+    "safety.title": "安全", "quote.title": "報價", "company.title": "我的公司", "life.title": "我的生命",
+    "wallet.title": "錢包", "mission.title": "使命", "work.title": "螞蟻工作狀態", "errors.generic": "發生錯誤"
+  }),
+  en: Object.freeze({
+    "navigation.home": "Home", "navigation.request": "Tell the Ant", "navigation.life": "Life", "navigation.apps": "Apps",
+    "navigation.company": "Company", "navigation.wallet": "Wallet", "navigation.mission": "Mission", "navigation.work": "Work",
+    "request.title": "Public Civilization Request Gateway", "request.cta": "Tell the Ant what you want to build in this world.", "request.confirm": "Confirm Request",
+    "request.board": "Civilization Request Board", "voice.title": "AI Civilization Voice Concierge", "voice.start": "Open Voice Concierge", "voice.stop": "Stop Listening",
+    "voice.unavailable": "Voice capture is unavailable in this browser", "voice.textFallback": "Text input remains available",
+    "status.title": "Public Life Status", "status.online": "Online", "status.offline": "Offline", "status.missedCycle": "Missed work cycle",
+    "safety.title": "Safety", "quote.title": "Quote", "company.title": "My Company", "life.title": "My Life",
+    "wallet.title": "Wallet", "mission.title": "Mission", "work.title": "Ant Worker Status", "errors.generic": "Something went wrong"
+  }),
+  ja: Object.freeze({
+    "navigation.home": "ホーム", "navigation.request": "アリに伝える", "navigation.life": "生命", "navigation.apps": "アプリ",
+    "navigation.company": "会社", "request.cta": "この世界で作りたいものをアリに伝えてください。", "voice.start": "音声コンシェルジュを開く"
+  }),
+  ko: Object.freeze({
+    "navigation.home": "홈", "navigation.request": "개미에게 말하기", "navigation.life": "생명", "navigation.apps": "앱",
+    "navigation.company": "회사", "request.cta": "이 세계에서 만들고 싶은 것을 개미에게 말해 주세요.", "voice.start": "음성 안내 시작"
+  })
+});
+
+export function normalizeUiLocale(locale) {
+  const value = String(locale ?? "").trim();
+  if (/^zh(?:-|$)/i.test(value)) return "zh-TW";
+  if (/^ja(?:-|$)/i.test(value)) return "ja";
+  if (/^ko(?:-|$)/i.test(value)) return "ko";
+  if (/^en(?:-|$)/i.test(value)) return "en";
+  return "zh-TW";
+}
+
+export function translateUi(key, locale = "zh-TW") {
+  const normalized = normalizeUiLocale(locale);
+  return I18N_CATALOGS[normalized]?.[key] ?? I18N_CATALOGS.en[key] ?? I18N_CATALOGS["zh-TW"][key] ?? "Translation unavailable";
+}
+
+export function validatePrimaryI18nCatalogs() {
+  const missing = {};
+  for (const locale of ["zh-TW", "en"]) missing[locale] = I18N_REQUIRED_KEYS.filter((key) => !I18N_CATALOGS[locale]?.[key]);
+  invariant(Object.values(missing).every((keys) => keys.length === 0), "I18N_PRIMARY_CATALOG_INCOMPLETE", "Traditional Chinese and English catalogs must be complete");
+  return Object.freeze(missing);
+}
+
+export function detectVoiceCapabilities(scope = globalThis) {
+  const Recognition = scope?.SpeechRecognition ?? scope?.webkitSpeechRecognition;
+  return Object.freeze({
+    recognition: typeof Recognition === "function",
+    synthesis: Boolean(scope?.speechSynthesis && typeof scope?.SpeechSynthesisUtterance === "function"),
+    autoplay: false,
+    activation: "USER_GESTURE_REQUIRED",
+    fallback: "TEXT_FALLBACK"
+  });
+}
+
 const FORBIDDEN_RELEASE_CAPABILITIES = Object.freeze([
   "AUTO_TRADING", "CHAIN_WRITE", "PROJECT_ESCROW", "REAL_PAYROLL", "COMPANY_TREASURY", "MARS_FACTORY"
 ]);
@@ -61,7 +134,8 @@ export function validateApp(app) {
 
 export async function replayCanonicalAppRelease({ store, app, life, listing, appAsset }) {
   validateApp(app);
-  invariant(app.status === "RELEASED_LOCAL" && app.version === "V1.0.0", "APP_RELEASE_NOT_FORMAL", "Canonical Digital Ant App release is incomplete");
+  invariant(app.status === "RELEASED_LOCAL" && /^V\d+\.\d+\.\d+$/.test(app.version), "APP_RELEASE_NOT_FORMAL", "Canonical Digital Ant App release is incomplete");
+  invariant(app.history.some((event) => event.event_type === "AI_LIFE_APP_RELEASE_EVENT" && event.version === app.version && event.manifest_hash === app.manifest_hash), "APP_RELEASE_HISTORY_REQUIRED", "Current App version requires append-only release evidence");
   invariant(app.life_id === life.life_id && life.life_id === "DIGITAL_ANT_0001", "APP_LIFE_ID_MISMATCH", "App release cannot replace its Life ID");
   invariant(life.birth_timestamp === "2026-08-15T06:20:45.000Z", "BIRTH_IMMUTABLE", "App release cannot rewrite the immutable Birth Certificate");
   invariant(await calculateAppManifestHash(app) === app.manifest_hash, "APP_MANIFEST_HASH_MISMATCH", "App manifest hash does not match the released manifest");
@@ -79,7 +153,7 @@ export async function replayCanonicalAppRelease({ store, app, life, listing, app
     permissions: app.permissions,
     manifest_hash: app.manifest_hash,
     status: app.status,
-    release_scope: "LOCAL_11520",
+    release_scope: app.history.findLast((event) => event.version === app.version)?.release_scope ?? "LOCAL_11520",
     tx_hash: null
   });
   const base = { actor_id: life.life_id, timestamp: app.released_at, tx_hash: null };

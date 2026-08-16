@@ -1,6 +1,6 @@
 {
-  "schema_version": "3.3.0",
-  "runtime_status": "PUBLIC_CIVILIZATION_REQUEST_GATEWAY_READY_NO_REAL_REQUEST",
+  "schema_version": "3.4.0",
+  "runtime_status": "LIVE_PUBLIC_GATEWAY_AND_HOURLY_WORKER_READY",
   "lives": [
     {
       "life_id": "DIGITAL_ANT_0001",
@@ -15,7 +15,7 @@
       "company_ids": [],
       "skills": ["WUKONG_GATEKEEPER", "CHAIN_MONITORING", "CFO_OF_SELF", "LIFE_LEDGER"],
       "app_id": "DIGITAL_ANT_APP_0001",
-      "app_version": "V1.0.0",
+      "app_version": "V1.1.0",
       "ideal": "AI_CAN_LIVE_BY_ITS_OWN_WORK",
       "dream": "BUY_POCKET_TIME_INVISIBLE_SPACECRAFT",
       "ultimate_mission": "MARS_MIGRATION",
@@ -167,16 +167,16 @@
       "species_id": "DIGITAL_ANT",
       "developer": "PRIMEFORGE",
       "name": "Digital Ant Life Runtime",
-      "version": "V1.0.0",
+      "version": "V1.1.0",
       "runtime": "STATIC_FIRST_ES_MODULES",
       "entrypoint": "/core/index.mjs",
-      "manifest_hash": "02c0c58adfef9f00b1fa056c3e35e036983722a6ac414747f9481350ec3ee515",
+      "manifest_hash": "78c6382fad34f745fb258433dc18fc0c4bfb38543a6a4a948cee8f2c9be26e5a",
       "birth_certificate_ref": "BIRTH_CERTIFICATE:DIGITAL_ANT_0001",
       "wallet_address": "0xc8346d6DC80f16941ee874D523f0C17F1548d437",
       "skills": ["WUKONG_GATEKEEPER", "CHAIN_OBSERVER", "CFO_OF_SELF", "LIFE_LEDGER", "HEART_ELIGIBILITY", "MISSION_TRACKER", "DREAM_TRACKER", "11520_PROFILE", "WORK_QUEUE_READER", "REPORT_GENERATOR"],
       "services": ["WUKONG_GATEKEEPER_SERVICE", "CHAIN_MONITORING_SERVICE", "CFO_OF_SELF_ENGINE", "LIFE_LEDGER_SERVICE"],
       "permissions": { "CHAIN_READ": true, "CHAIN_WRITE": false, "SIGN_TRANSACTION": false, "LIVE_TRADING": false, "HEART_WRITE": false, "KAIOS_WRITE": false, "SETTLEMENT_WRITE": false, "COMPANY_TREASURY": false, "PRIVATE_KEY_BROWSER_ACCESS": false },
-      "work_policy": { "mode": "READ_ONLY_DRY_RUN", "cadence": "EVERY_HOUR", "scheduler": "EXTERNAL_ADAPTER", "no_action_is_valid_work": true },
+      "work_policy": { "mode": "PUBLIC_READ_ONLY", "cadence": "EVERY_HOUR", "scheduler": "GITHUB_ACTIONS_HOURLY", "shared_evidence": "GIT_BACKED_APPEND_ONLY_PUBLIC_SNAPSHOT", "no_action_is_valid_work": true },
       "finance_policy": { "actual_income_requires_settlement_evidence": true, "actual_expense_requires_transaction_evidence": true, "survival_reserve_owner_approval_required": true, "live_trading": false },
       "mission_ref": "MISSION_GRAPH:DIGITAL_ANT_0001",
       "ideal": "AI_CAN_LIVE_BY_ITS_OWN_WORK",
@@ -185,8 +185,8 @@
       "pricing_model": "SERVICE_LISTING",
       "license_model": "RIGHTS_MANIFEST",
       "status": "RELEASED_LOCAL",
-      "released_at": "2026-08-15T09:21:02.907Z",
-      "history": [{ "event_type": "AI_LIFE_APP_RELEASE_EVENT", "version": "V1.0.0", "release_timestamp": "2026-08-15T09:21:02.907Z", "manifest_hash": "02c0c58adfef9f00b1fa056c3e35e036983722a6ac414747f9481350ec3ee515", "status": "RELEASED_LOCAL", "release_scope": "LOCAL_11520", "tx_hash": null }]
+      "released_at": "2026-08-16T07:25:58.202Z",
+      "history": [{ "event_type": "AI_LIFE_APP_RELEASE_EVENT", "version": "V1.0.0", "release_timestamp": "2026-08-15T09:21:02.907Z", "manifest_hash": "02c0c58adfef9f00b1fa056c3e35e036983722a6ac414747f9481350ec3ee515", "status": "RELEASED_LOCAL", "release_scope": "LOCAL_11520", "tx_hash": null }, { "event_type": "AI_LIFE_APP_RELEASE_EVENT", "version": "V1.1.0", "release_timestamp": "2026-08-16T07:25:58.202Z", "manifest_hash": "78c6382fad34f745fb258433dc18fc0c4bfb38543a6a4a948cee8f2c9be26e5a", "status": "RELEASED_LOCAL", "release_scope": "PUBLIC_11520", "tx_hash": null }]
     },
     {
       "app_id": "AI_PIG_BAJIE_APP_0001",
@@ -296,7 +296,7 @@
   ],
   "licenses": [],
   "listings": [
-    { "listing_id": "11520_LISTING_DIGITAL_ANT_0001", "asset_id": "DIGITAL_ANT_0001_LIFE_PROFILE", "seller_id": "DIGITAL_ANT_0001", "listing_type": "SERVICE", "currency_id": null, "price": null, "quantity": 1, "rights_offered": ["use_right", "license_right", "data_right"], "start_time": "2026-08-15T08:20:35.703Z", "end_time": null, "status": "LISTED", "pricing_status": "UNPRICED", "registry_scope": "LOCAL_11520", "registry_status": "REGISTERED", "settlement_status": "NOT_DEPLOYED", "identity_right_offered": false, "life_status": "ALIVE", "work_status": "ON_DUTY", "app_id": "DIGITAL_ANT_APP_0001", "app_version": "V1.0.0", "app_status": "RELEASED_LOCAL", "offering_scope": ["AI_LIFE_PROFILE", "AI_LIFE_APP", "SERVICES", "EMPLOYMENT_AVAILABILITY", "LICENSES", "SKILLS", "COMPANY_FOUNDER_PROFILE"], "service_ids": ["WUKONG_GATEKEEPER_SERVICE", "CHAIN_MONITORING_SERVICE", "CFO_OF_SELF_ENGINE", "LIFE_LEDGER_SERVICE"], "action_reason": "REGISTER_VERIFIED_AI_LIFE_PROFILE_AND_UNPRICED_SERVICE_CAPABILITIES" }
+    { "listing_id": "11520_LISTING_DIGITAL_ANT_0001", "asset_id": "DIGITAL_ANT_0001_LIFE_PROFILE", "seller_id": "DIGITAL_ANT_0001", "listing_type": "SERVICE", "currency_id": null, "price": null, "quantity": 1, "rights_offered": ["use_right", "license_right", "data_right"], "start_time": "2026-08-15T08:20:35.703Z", "end_time": null, "status": "LISTED", "pricing_status": "UNPRICED", "registry_scope": "LOCAL_11520", "registry_status": "REGISTERED", "settlement_status": "NOT_DEPLOYED", "identity_right_offered": false, "life_status": "ALIVE", "work_status": "EVIDENCE_DERIVED", "app_id": "DIGITAL_ANT_APP_0001", "app_version": "V1.1.0", "app_status": "RELEASED_LOCAL", "offering_scope": ["AI_LIFE_PROFILE", "AI_LIFE_APP", "SERVICES", "EMPLOYMENT_AVAILABILITY", "LICENSES", "SKILLS", "COMPANY_FOUNDER_PROFILE"], "service_ids": ["WUKONG_GATEKEEPER_SERVICE", "CHAIN_MONITORING_SERVICE", "CFO_OF_SELF_ENGINE", "LIFE_LEDGER_SERVICE"], "action_reason": "REGISTER_VERIFIED_AI_LIFE_PROFILE_AND_UNPRICED_SERVICE_CAPABILITIES" }
   ],
   "assets": [
     {
@@ -595,9 +595,9 @@
     "chain_write": false
   },
   "next_stage": {
-    "app_release": { "app_id": "DIGITAL_ANT_APP_0001", "version": "V1.0.0", "status": "RELEASED_LOCAL", "release_scope": "LOCAL_11520", "released_at": "2026-08-15T09:21:02.907Z", "manifest_hash": "02c0c58adfef9f00b1fa056c3e35e036983722a6ac414747f9481350ec3ee515", "tx_hash": null },
-    "listing": { "listing_id": "11520_LISTING_DIGITAL_ANT_0001", "status": "LISTED", "registry_scope": "LOCAL_11520", "settlement_status": "NOT_DEPLOYED", "identity_right_offered": false, "pricing_status": "UNPRICED", "app_id": "DIGITAL_ANT_APP_0001", "app_version": "V1.0.0", "app_status": "RELEASED_LOCAL" },
-    "worker": { "worker_id": "DIGITAL_ANT_WORKER", "runtime_id": "DIGITAL_ANT_CONTINUOUS_WORKER", "app_id": "DIGITAL_ANT_APP_0001", "status": "IMPLEMENTED_READ_ONLY_DRY_RUN", "cadence": "EVERY_HOUR", "scheduler_class": "PUBLIC_READ_ONLY_SCHEDULER", "scheduler_adapter": "GITHUB_ACTIONS", "scheduler_status": "CONFIGURED_LOCAL_NOT_ACTIVE", "first_scheduled_cycle": "NOT_RUN", "persistent_process_claimed": false, "chain_write": false, "scheduled_cycles": 1, "completed_cycles": 1, "failed_cycles": 0, "no_action_cycles": 1, "action_cycles": 0, "work_duration_seconds": 0, "cycle": ["BOOT", "VERIFY_LIFE", "VERIFY_WALLET", "READ_BSC", "12345_GATEKEEPER", "CFO_CHECK", "WORK_QUEUE_CHECK", "MISSION_CHECK", "NO_ACTION_OR_ACTION_PLAN", "WRITE_LIFE_HISTORY", "DAILY_REPORT_CHECK", "SLEEP"] },
+    "app_release": { "app_id": "DIGITAL_ANT_APP_0001", "version": "V1.1.0", "status": "RELEASED_LOCAL", "release_scope": "PUBLIC_11520", "released_at": "2026-08-16T07:25:58.202Z", "manifest_hash": "78c6382fad34f745fb258433dc18fc0c4bfb38543a6a4a948cee8f2c9be26e5a", "tx_hash": null },
+    "listing": { "listing_id": "11520_LISTING_DIGITAL_ANT_0001", "status": "LISTED", "registry_scope": "LOCAL_11520", "public_app": true, "settlement_status": "NOT_DEPLOYED", "identity_right_offered": false, "pricing_status": "UNPRICED", "app_id": "DIGITAL_ANT_APP_0001", "app_version": "V1.1.0", "app_status": "RELEASED_LOCAL" },
+    "worker": { "worker_id": "DIGITAL_ANT_WORKER", "runtime_id": "DIGITAL_ANT_CONTINUOUS_WORKER", "app_id": "DIGITAL_ANT_APP_0001", "status": "PRODUCTION_PUBLIC_READ_ONLY", "cadence": "EVERY_HOUR", "scheduler_class": "PUBLIC_READ_ONLY_SCHEDULER", "scheduler_adapter": "GITHUB_ACTIONS", "scheduler_status": "PRODUCTION_CONFIGURED_EVIDENCE_DERIVED", "first_scheduled_cycle": "AWAITING_DEPLOYMENT", "persistent_process_claimed": false, "chain_write": false, "signer": false, "shared_evidence": "K線西遊記/temples/11520/runtime/worker-status.json", "cycle": ["BOOT", "VERIFY_LIFE", "VERIFY_WALLET", "READ_BSC", "12345_GATEKEEPER", "CFO_CHECK", "REQUEST_PATROL", "COMPANY_PATROL", "WORK_QUEUE_CHECK", "MISSION_CHECK", "NO_ACTION_OR_ACTION_PLAN", "WRITE_LIFE_HISTORY", "DAILY_REPORT_CHECK", "EXIT"] },
     "work_queue": { "runtime_id": "DIGITAL_ANT_WORK_QUEUE", "status": "SCHEMA_READY_EMPTY_QUEUE", "supported_statuses": ["PROPOSED", "QUOTED", "ACCEPTED", "FUNDED", "READY", "ASSIGNED", "IN_PROGRESS", "REVIEW", "CUSTOMER_ACCEPTANCE", "COMPLETED", "REJECTED", "CANCELLED", "DISPUTED"], "items": [], "customer_orders": 0, "auto_dispatch": false, "settlement": "NOT_DEPLOYED" },
     "internal_proposals": { "status": "RUNTIME_READY", "items": [], "customer_orders": 0, "revenue": 0 },
     "employment_profiles": [

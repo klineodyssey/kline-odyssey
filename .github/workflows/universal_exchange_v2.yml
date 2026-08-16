@@ -9,6 +9,7 @@ on:
       - "core/**"
       - "tests/universal-exchange.test.mjs"
       - "K線西遊記/temples/11520/**"
+      - ".github/ISSUE_TEMPLATE/civilization-request.yml"
       - ".github/workflows/universal_exchange_v2.yml"
   pull_request:
     paths:
@@ -36,15 +37,47 @@ jobs:
   digital-ant-public-read-only-worker:
     if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      issues: read
+    concurrency:
+      group: digital-ant-public-hourly-worker
+      cancel-in-progress: false
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
           node-version: "20"
       - name: Run one independent read-only hourly cycle
         env:
           BSC_RPC_URL: ${{ vars.BSC_RPC_URL }}
-        run: node core/jobs/public-read-only-worker.mjs --output "$RUNNER_TEMP/digital-ant-hourly-worker.json"
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          node core/jobs/public-read-only-worker.mjs \
+            --status "K線西遊記/temples/11520/runtime/worker-status.json" \
+            --events-dir "K線西遊記/temples/11520/runtime/work-events" \
+            --output "$RUNNER_TEMP/digital-ant-hourly-worker.json"
+      - name: Commit append-only public Work Evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "digital-ant-worker"
+          git config user.email "digital-ant-worker@users.noreply.github.com"
+          git add -- "K線西遊記/temples/11520/runtime/worker-status.json"
+          git add -- "K線西遊記/temples/11520/runtime/work-events"
+          if git diff --cached --quiet; then
+            echo "No new hourly evidence (idempotent run)."
+            exit 0
+          fi
+          git commit -m "Record Digital Ant hourly work evidence"
+          git fetch origin main
+          if [ "$(git rev-parse HEAD^)" != "$(git rev-parse origin/main)" ]; then
+            git rebase origin/main
+          fi
+          git push origin HEAD:main
       - name: Preserve public Work Event evidence
         uses: actions/upload-artifact@v4
         with:

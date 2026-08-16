@@ -43,6 +43,7 @@ This file is the **unique library-level Master Index** (ORG-P2-003 D7). Other `*
 | Civilization Portal | `civilization/` | Permanent user-facing entry for assets, Universe Data Layer, Time Engine and Civilization AI |
 | Economy Portal | `economy/` | Permanent user-facing entry for Economy Engine, Business, Market, Bank and Tax standards |
 | Exchange Portal | `exchange/` | Permanent user-facing entry for Huaguo Mountain Exchange 11520 and listing standards |
+| 11520 Live Life V3.4 | `K線西遊記/temples/11520/` | Multilingual public web app, Voice/Text civilization request gateway and Git-backed hourly Digital Ant Work Evidence |
 | Wallet Portal | `wallet/` | Permanent user-facing entry for wallet shell and V10 wallet/payment standards |
 | Membership Portal | `membership/` | Permanent user-facing entry for membership, authentication, player and security standards |
 | Library Portal | `library/` | Permanent user-facing entry for Master Library, Canon and Whitepaper |

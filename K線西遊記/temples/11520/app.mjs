@@ -4,12 +4,13 @@ import {
   createPublicCivilizationDraftIntent, interpretPublicCivilizationIntent,
   confirmPublicCivilizationIntent, toPublicCivilizationRequest,
   routePublicCivilizationProject, qualifyPublicCivilizationRequest, createNonBindingEstimatePreview,
-  appendPublicRequestHistoryEvent
-} from "../../../core/index.mjs?v=11520-v3.3-public-request-gateway";
-import { readTempleHeart12345 } from "../../../core/integrations/temple-heart-12345.mjs?v=11520-v3.3-public-request-gateway";
+  appendPublicRequestHistoryEvent, I18N_SUPPORTED_LOCALES, translateUi, normalizeUiLocale,
+  validatePrimaryI18nCatalogs, detectVoiceCapabilities, deriveWorkerHealth
+} from "../../../core/index.mjs?v=11520-v3.4-live-life";
+import { readTempleHeart12345 } from "../../../core/integrations/temple-heart-12345.mjs?v=11520-v3.4-live-life";
 
 const NAVIGATION = Object.freeze([
-  ["HOME", "HOME"], ["REQUEST", "TELL THE ANT"], ["LIFE", "LIFE"], ["LIFE_FACTORY", "LIFE FACTORY"], ["APPS", "APPS"], ["COMPANIES", "COMPANIES"],
+  ["HOME", "navigation.home"], ["REQUEST", "navigation.request"], ["LIFE", "navigation.life"], ["LIFE_FACTORY", "LIFE FACTORY"], ["APPS", "navigation.apps"], ["COMPANIES", "navigation.company"],
   ["TOKENS", "TOKENS"], ["JOBS", "JOBS"], ["SERVICES", "SERVICES"], ["PROPERTY", "PROPERTY"],
   ["FACTORIES", "FACTORIES"], ["SPACECRAFT", "SPACECRAFT"], ["PORTFOLIO", "PORTFOLIO"],
   ["MY_LIFE", "MY LIFE"], ["MY_COMPANY", "MY COMPANY"]
@@ -20,6 +21,12 @@ const nav = document.querySelector("#nav");
 let universe;
 let pendingPublicIntent = null;
 let lastGatewayReceipt = null;
+const localeFromUrl = new URLSearchParams(location.search).get("lang");
+let uiLocale = normalizeUiLocale(localeFromUrl || localStorage.getItem("11520.uiLocale") || navigator.language);
+let voiceLocale = localStorage.getItem("11520.voiceLocale") || ({ "zh-TW": "zh-TW", en: "en-US", ja: "ja-JP", ko: "ko-KR" }[uiLocale]);
+let sharedWorkerStatus = null;
+const voiceCapabilities = detectVoiceCapabilities(globalThis);
+const t = (key) => translateUi(key, uiLocale);
 
 function html(value) {
   return String(value ?? "").replace(/[&<>'"]/g, (character) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" })[character]);
@@ -48,7 +55,33 @@ function currentRoute() {
 }
 
 function renderNav(active) {
-  nav.innerHTML = NAVIGATION.map(([id, label]) => `<a class="${active === id ? "active" : ""}" href="#/${id}">${label}</a>`).join("");
+  nav.innerHTML = NAVIGATION.map(([id, label]) => `<a class="${active === id ? "active" : ""}" href="#/${id}">${label.includes(".") ? html(t(label)) : html(label)}</a>`).join("");
+}
+
+async function loadSharedWorkerStatus() {
+  try {
+    const response = await fetch(`./runtime/worker-status.json?ts=${Date.now()}`, { cache: "no-store" });
+    if (!response.ok) throw new Error(`HTTP_${response.status}`);
+    const status = await response.json();
+    const health = deriveWorkerHealth({ lastCycle: status.last_work_cycle, now: new Date().toISOString() });
+    sharedWorkerStatus = { ...status, worker_health: health.status, work_stop_reason: health.stop_reason };
+  } catch {
+    sharedWorkerStatus = { worker_health: "OFFLINE", work_stop_reason: "SCHEDULER_OFFLINE", scheduler_status: "SHARED_STATUS_UNAVAILABLE", metrics: {}, patrols: {}, request_patrol: { real_requests: 0 } };
+  }
+  return sharedWorkerStatus;
+}
+
+function workerStatusMarkup() {
+  const status = sharedWorkerStatus ?? { worker_health: "OFFLINE", scheduler_status: "LOADING_SHARED_STATUS", metrics: {}, patrols: {}, request_patrol: {} };
+  const cycle = status.last_work_cycle;
+  const heart = status.patrols?.temple_12345 ?? {};
+  const action = (name) => kv(name, badge(heart[name.toLowerCase()]?.status ?? "UNAVAILABLE"), true);
+  return `<div class="grid two">
+    <article class="card"><div class="eyebrow">${html(t("work.title"))}</div><h3>${badge(status.worker_health)}</h3>${kv("Scheduler", status.scheduler_status)}${kv("Last Work", cycle?.finished_at ?? "NO_SHARED_EVIDENCE")}${kv("Next Expected", status.next_expected_at)}${kv("Result", cycle?.result ?? "NOT_RUN")}${kv("Stop reason", status.work_stop_reason ?? "NONE")}${kv("Global truth", status.global_truth_source ?? "UNAVAILABLE")}${kv("Browser IndexedDB", status.browser_indexeddb_role ?? "LOCAL_DRAFT_CACHE_ONLY")}</article>
+    <article class="card"><div class="eyebrow">12345 PUBLIC PATROL</div>${action("Heartbeat")}${action("Fortune")}${action("Ignition")}${action("Lamp")}${action("Wish")}${action("Thanksgiving")}${kv("Eligibility", heart.eligibility_source ?? "CLIENT_DERIVED")}${kv("Heart write", "WRITE_NOT_CONNECTED")}</article>
+    <article class="card"><div class="eyebrow">REQUEST PATROL</div>${kv("Status", status.patrols?.request?.status)}${kv("Real Requests", status.request_patrol?.real_requests ?? 0)}${kv("Open Requests", status.request_patrol?.open_requests ?? 0)}${kv("First Customer Alert", String(status.request_patrol?.first_real_customer_detected ?? false))}</article>
+    <article class="card"><div class="eyebrow">COMPANY PATROL</div>${kv("Status", status.patrols?.company?.status)}${kv("Company", status.patrols?.company?.company_status)}${kv("Request Queue", status.patrols?.company?.request_queue ?? 0)}${kv("Quote Queue", status.patrols?.company?.quote_queue ?? 0)}${kv("Work Queue", status.patrols?.company?.work_queue ?? 0)}${kv("Treasury", status.patrols?.company?.treasury_status)}</article>
+  </div>`;
 }
 
 function hero(eyebrow, title, description) {
@@ -69,8 +102,9 @@ async function homeView() {
     ["KGEN AMM", "USER WALLET LIVE", "Runtime-verified PancakeSwap V2 pair"],
     ["11520 settlement", "MAINNET CONTRACT", "Adapter not integrated; no fabricated settlement"]
   ];
-  return `${hero("K11520 · UNIVERSAL MARKET RUNTIME", "A market and Life Factory for civilization assets.", "KGEN wallet-confirmed AMM trading is enabled only after live chain verification. Universal listing settlement and unverified currencies remain gated.")}
-    <a class="card gateway-cta" href="#/REQUEST"><div><div class="eyebrow">PUBLIC CIVILIZATION REQUEST GATEWAY</div><h2>告訴螞蟻你想要什麼</h2><p>TELL THE ANT WHAT YOU WANT · Draft first, understand, confirm, then Request.</p></div><span aria-hidden="true">→</span></a>
+  return `${hero("K11520 · UNIVERSAL MARKET RUNTIME V3.4", uiLocale === "zh-TW" ? "文明資產的公開市場與生命工廠。" : "A public market and Life Factory for civilization assets.", uiLocale === "zh-TW" ? "世界狀態、生命工作與需求皆以共享證據為準；未部署功能不冒充完成。" : "World state, Life work and requests are evidence-backed; undeployed functions never appear completed.")}
+    <a class="card gateway-cta" href="#/REQUEST"><div><div class="eyebrow">${html(t("request.title"))}</div><h2>${html(t("request.cta"))}</h2><p>DRAFT → UNDERSTAND → CONFIRM → REQUEST</p></div><span aria-hidden="true">→</span></a>
+    ${section(t("status.title"), workerStatusMarkup())}
     <div class="grid">${cards.map(([name, value, note]) => `<article class="card"><div class="eyebrow">${html(name)}</div><div class="metric">${html(value)}</div><p>${html(note)}</p></article>`).join("")}</div>
     ${section("Civilization path", `<div class="card path">${["12345", "DIGITAL ANT", "11520 LIFE LISTING", "AI LIFE APP", "AI ANT COMPANY", "KAIOS", "SPACECRAFT", "MARS", "KUFO", "CHIP INDUSTRY", "MARS CITY", "MARS MIGRATION"].map((item, index, all) => `<span>${html(item)}</span>${index < all.length - 1 ? "<i>→</i>" : ""}`).join("")}</div>`)}
     ${section("12345 Heart read integration", `<article class="card" id="heart-status"><div class="eyebrow">REPOSITORY ABI · READ ONLY</div><h3>Checking provider capability…</h3><p>No write transaction will be created.</p></article>`)}`;
@@ -115,9 +149,9 @@ async function publicRequestGatewayView() {
   const publicRequests = requestEvents.map((event) => event.payload).filter(Boolean);
   const understanding = pendingPublicIntent ? gatewayUnderstandingMarkup(pendingPublicIntent.draft, pendingPublicIntent.understanding) : `<article class="card empty-stage"><div class="eyebrow">WAITING FOR YOUR INTENT</div><h3>先說出目標。</h3><p>The system will classify, explain constraints, and ask you to confirm before any Request exists.</p></article>`;
   const receipt = lastGatewayReceipt ? `<article class="card receipt"><div class="eyebrow">LOCAL REQUEST RECEIPT · REAL</div><h3>${html(lastGatewayReceipt.request.request_id)}</h3>${kv("Status", badge(lastGatewayReceipt.request.status), true)}${kv("Project type", lastGatewayReceipt.request.project_type)}${kv("Route", lastGatewayReceipt.route.route_id)}${kv("Qualification", badge(lastGatewayReceipt.qualification.status), true)}${kv("Estimate", badge(lastGatewayReceipt.estimate.status), true)}${kv("Quote", "NOT_CREATED")}${kv("Customer", "NOT_CREATED")}${kv("Revenue", "0")}${kv("Contact evidence public", "false")}</article>` : "";
-  return `${hero("PUBLIC CIVILIZATION REQUEST GATEWAY · V3.3", gateway.cta.zh, gateway.cta.en)}
+  return `${hero("PUBLIC CIVILIZATION REQUEST GATEWAY · V3.4", t("request.cta"), uiLocale === "zh-TW" ? gateway.cta.en : gateway.cta.zh)}
     <div class="system-status">${badge(gateway.status)} ${badge("REAL / DRAFT / HYPOTHESIS / SIMULATION EXPLICIT")} ${badge("NO PAYMENT")}</div>
-    ${section("PUBLIC REQUEST ENTRY", `<div class="grid two"><form class="card form-grid gateway-form" id="public-gateway-form">
+    ${section(t("request.title"), `<div class="grid two"><form class="card form-grid gateway-form" id="public-gateway-form">
       <div class="notice full">Your first submission creates only a DRAFT_INTENT. Anonymous entries remain ANONYMOUS_DRAFT. Contact evidence is never displayed and its raw value is never written to History.</div>
       <div class="field"><label for="gateway-requester">Requester identity</label><input id="gateway-requester" maxlength="120" pattern="[A-Za-z0-9][A-Za-z0-9_-]*" placeholder="Optional for Draft; required for Request"></div>
       <div class="field"><label for="gateway-input-type">Input type</label><select id="gateway-input-type"><option value="TEXT">TEXT</option><option value="VOICE_TRANSCRIPT">VOICE TRANSCRIPT</option></select></div>
@@ -126,10 +160,10 @@ async function publicRequestGatewayView() {
       <div class="field full"><label for="gateway-request-text">What do you need?</label><textarea id="gateway-request-text" required maxlength="4000" rows="6" placeholder="我要…… / I need…"></textarea></div>
       <div class="field full"><label for="gateway-ideal">Customer Ideal — beauty, creativity, emotion, style, performance, budget or reliability preferences</label><textarea id="gateway-ideal" maxlength="2000" rows="3" placeholder="Optional: tell us what would make the result feel right, not merely functional."></textarea></div>
       <div class="full"><button class="button" type="submit">AI UNDERSTAND</button> <span id="gateway-draft-result" class="muted" role="status"></span></div>
-    </form><article class="card"><div class="eyebrow">VOICE GATEWAY</div><h3>${badge(gateway.voice_gateway.status)}</h3>${kv("Input", gateway.voice_gateway.input)}${kv("Capture", gateway.voice_gateway.capture)}${pills(gateway.voice_gateway.future_flow)}<p>Paste a transcript today. Direct microphone capture remains unavailable until consent, capture and transcription adapters exist.</p></article></div>`)}
+    </form><article class="card voice-console"><div class="eyebrow">${html(t("voice.title"))}</div><h3>${badge(voiceCapabilities.recognition ? "READY" : "VOICE_CAPTURE_UNAVAILABLE")}</h3><p>${html(t("request.cta"))}</p><div class="field"><label for="voice-language">Voice language</label><select id="voice-language"><option value="zh-TW">繁中</option><option value="en-US">English</option><option value="ja-JP">日本語</option><option value="ko-KR">한국어</option></select></div><div class="voice-actions"><button class="button" id="voice-start" type="button">${html(t("voice.start"))}</button><button class="button secondary" id="voice-stop" type="button" disabled>${html(t("voice.stop"))}</button><button class="button secondary" id="voice-speak" type="button" disabled>READ AI UNDERSTANDING</button></div><p id="voice-status" class="muted" role="status">${html(voiceCapabilities.recognition ? "USER_GESTURE_REQUIRED" : `${t("voice.unavailable")} · ${t("voice.textFallback")}`)}</p>${kv("Autoplay", "DISABLED")}${kv("Speech output", voiceCapabilities.synthesis ? "READY_AFTER_USER_ACTION" : "UNAVAILABLE")}${kv("Private data speech", "FORBIDDEN")}</article></div>`)}
     ${section("AI UNDERSTANDING → CONFIRM", `<div id="gateway-understanding">${understanding}</div>${receipt}`)}
     ${section("CUSTOMER JOURNEY", `<div class="card journey">${gateway.journey.map((step, index) => `<div class="journey-step"><span>${index + 1}</span><strong>${html(step)}</strong>${badge(index < 3 ? "READY" : "PENDING")}</div>`).join("")}</div>`)}
-    ${section("CIVILIZATION REQUEST BOARD", `<div class="grid two"><article class="card"><div class="eyebrow">${html(gateway.public_board.board_id)}</div><h3>${badge(gateway.public_board.status)}</h3>${kv("Local Draft Intents", draftEvents.length)}${kv("Open Requests", requestEvents.length)}${kv("Qualified", gateway.public_board.qualified_requests)}${kv("Planning", gateway.public_board.planning)}${kv("Quoted", gateway.public_board.quoted)}${kv("Accepted", gateway.public_board.accepted)}${kv("In Progress", gateway.public_board.in_progress)}${kv("Delivered", gateway.public_board.delivered)}${kv("Closed", gateway.public_board.closed)}</article><article class="card"><div class="eyebrow">PRIVACY LAW</div>${pills(gateway.request_visibilities)}${kv("Contact evidence public", String(gateway.public_board.contact_evidence_public))}${kv("Sensitive full text public", String(gateway.public_board.sensitive_request_full_text_public))}${kv("Canonical Requests", gateway.real_state.requests)}${kv("Local public projections", publicRequests.length)}</article></div>${publicRequests.length ? `<div class="grid">${publicRequests.map((request) => `<article class="card"><div class="eyebrow">${html(request.record_class)} · ${html(request.visibility)}</div><h3>${html(request.request_id)}</h3><p>${html(request.original_request)}</p>${kv("Project", request.project_type)}${kv("Status", badge(request.status), true)}${kv("Contact evidence public", String(request.contact_evidence_public))}</article>`).join("")}</div>` : empty("NO_REAL_REQUESTS")}`)}
+    ${section(t("request.board"), `<div class="grid two"><article class="card"><div class="eyebrow">SHARED PUBLIC BOARD</div><h3>${badge(sharedWorkerStatus?.patrols?.request?.status ?? "LOADING")}</h3>${kv("Local Draft Intents", draftEvents.length)}${kv("Local confirmed cache", requestEvents.length)}${kv("Shared Real Requests", sharedWorkerStatus?.request_patrol?.real_requests ?? 0)}${kv("Shared Open Requests", sharedWorkerStatus?.request_patrol?.open_requests ?? 0)}<p>Shared requests use authenticated GitHub identity. Browser IndexedDB is draft/cache only.</p><a class="button request-link" href="https://github.com/klineodyssey/kline-odyssey/issues/new?template=civilization-request.yml" target="_blank" rel="noopener">SUBMIT SHARED REAL REQUEST</a></article><article class="card"><div class="eyebrow">PRIVACY LAW</div>${pills(gateway.request_visibilities)}${kv("Contact evidence public", String(gateway.public_board.contact_evidence_public))}${kv("Sensitive full text public", String(gateway.public_board.sensitive_request_full_text_public))}${kv("Global truth", "GIT_BACKED_SHARED_SOURCE")}${kv("Local projections", publicRequests.length)}</article></div>${publicRequests.length ? `<div class="grid">${publicRequests.map((request) => `<article class="card"><div class="eyebrow">LOCAL CACHE · ${html(request.record_class)} · ${html(request.visibility)}</div><h3>${html(request.request_id)}</h3><p>${html(request.original_request)}</p>${kv("Project", request.project_type)}${kv("Status", badge(request.status), true)}${kv("Contact evidence public", String(request.contact_evidence_public))}</article>`).join("")}</div>` : empty("NO_LOCAL_CONFIRMED_REQUESTS")}`)}
     ${section("QUALIFICATION / ESTIMATE / PAYMENT GATES", `<div class="grid"><article class="card"><div class="eyebrow">QUALIFICATION</div><h3>${badge(gateway.qualification_bridge.status)}</h3>${pills(gateway.qualification_bridge.checks)}${pills(gateway.qualification_bridge.results)}${kv("Automatic Quote", String(gateway.qualification_bridge.automatic_quote))}</article><article class="card"><div class="eyebrow">QUOTE GATE</div><h3>${badge(gateway.quote_gate.status)}</h3>${kv("Mode", gateway.quote_gate.mode)}${kv("Cost policy", gateway.quote_gate.cost_policy)}${kv("Margin policy", gateway.quote_gate.margin_policy)}${kv("Risk reserve", gateway.quote_gate.risk_reserve_policy)}${kv("Real Quote", String(gateway.quote_gate.real_quote_enabled))}</article><article class="card"><div class="eyebrow">TREASURY GATE</div><h3>${badge(gateway.treasury_gate.status)}</h3>${kv("Company Treasury", gateway.treasury_gate.company_treasury)}${kv("Accepted assets", gateway.treasury_gate.accepted_assets.length)}${kv("Payment enabled", String(gateway.treasury_gate.payment_enabled))}</article></div>`)}
     ${section("ROUTE STATUS", `<div class="grid">${Object.entries(gateway.pipeline_routes).map(([route, status]) => `<article class="card"><div class="eyebrow">${html(route)}</div><h3>${badge(status)}</h3><p>${html(route === "KGEN_CHAIN_MONITOR" ? "Read-only fast path; target and monitoring scope still required." : "A Project Plan may be produced, but no Life, Building, media delivery, recipient or Wallet is created.")}</p></article>`).join("")}</div>`)}
     ${section("WORKTREE CLASSIFICATION AUDIT", `<div class="grid two"><article class="card"><div class="eyebrow">${html(universe.seed.next_stage.worktree_classification_audit.audit_id)}</div><h3>${badge(universe.seed.next_stage.worktree_classification_audit.status)}</h3>${kv("Snapshot untracked", universe.seed.next_stage.worktree_classification_audit.total_untracked)}${Object.entries(universe.seed.next_stage.worktree_classification_audit.classifications).map(([name, count]) => kv(name, count)).join("")}${kv("Deleted", String(universe.seed.next_stage.worktree_classification_audit.deletion_performed))}${kv("Staged", String(universe.seed.next_stage.worktree_classification_audit.stage_performed))}</article><article class="card"><div class="eyebrow">${html(universe.seed.next_stage.gitignore_proposal.proposal_id)}</div><h3>${badge(universe.seed.next_stage.gitignore_proposal.status)}</h3>${pills(universe.seed.next_stage.gitignore_proposal.candidate_patterns)}${kv("Current evidence matches", universe.seed.next_stage.gitignore_proposal.evidence_matches)}${kv("Formal asset review", universe.seed.next_stage.gitignore_proposal.formal_asset_exclusion_review)}${kv("Applied", String(universe.seed.next_stage.gitignore_proposal.applied))}</article></div>`)}`;
@@ -449,6 +483,66 @@ function bindPublicGatewayEvents() {
     }
   });
   if (pendingPublicIntent) bindGatewayConfirmationEvent();
+  bindVoiceEvents();
+}
+
+function bindVoiceEvents() {
+  const language = document.querySelector("#voice-language");
+  if (language) language.value = voiceLocale;
+  language?.addEventListener("change", () => {
+    voiceLocale = language.value;
+    localStorage.setItem("11520.voiceLocale", voiceLocale);
+  });
+  const start = document.querySelector("#voice-start");
+  const stop = document.querySelector("#voice-stop");
+  const status = document.querySelector("#voice-status");
+  const speak = document.querySelector("#voice-speak");
+  speak && (speak.disabled = !(voiceCapabilities.synthesis && pendingPublicIntent?.understanding));
+  if (!voiceCapabilities.recognition) {
+    start && (start.disabled = true);
+    status && (status.textContent = `${t("voice.unavailable")} · ${t("voice.textFallback")}`);
+  } else {
+    const Recognition = globalThis.SpeechRecognition ?? globalThis.webkitSpeechRecognition;
+    let recognition = null;
+    start?.addEventListener("click", () => {
+      recognition = new Recognition();
+      recognition.lang = voiceLocale;
+      recognition.interimResults = false;
+      recognition.continuous = false;
+      recognition.onstart = () => { start.disabled = true; stop.disabled = false; status.textContent = "VOICE_SESSION_ACTIVE"; };
+      recognition.onresult = (event) => {
+        const transcript = event.results?.[0]?.[0]?.transcript?.trim() ?? "";
+        document.querySelector("#gateway-request-text").value = transcript;
+        document.querySelector("#gateway-input-type").value = "VOICE_TRANSCRIPT";
+        status.textContent = transcript ? "TRANSCRIPT_READY_REQUIRES_CONFIRMATION" : "NO_TRANSCRIPT_CAPTURED";
+      };
+      recognition.onerror = () => { status.textContent = `VOICE_CAPTURE_UNAVAILABLE · ${t("voice.textFallback")}`; };
+      recognition.onend = () => { start.disabled = false; stop.disabled = true; };
+      recognition.start();
+    });
+    stop?.addEventListener("click", () => recognition?.stop());
+  }
+  speak?.addEventListener("click", () => {
+    if (!voiceCapabilities.synthesis || !pendingPublicIntent?.understanding) return;
+    const utterance = new SpeechSynthesisUtterance(pendingPublicIntent.understanding.understood_goal);
+    utterance.lang = voiceLocale;
+    globalThis.speechSynthesis.cancel();
+    globalThis.speechSynthesis.speak(utterance);
+  });
+}
+
+function bindLanguageRuntime() {
+  const selector = document.querySelector("#language-selector");
+  if (!selector || selector.dataset.bound === "true") return;
+  selector.dataset.bound = "true";
+  selector.value = uiLocale;
+  selector.addEventListener("change", async () => {
+    uiLocale = normalizeUiLocale(selector.value);
+    localStorage.setItem("11520.uiLocale", uiLocale);
+    document.documentElement.lang = uiLocale;
+    document.querySelector("#skip-link").textContent = uiLocale === "zh-TW" ? "跳至主要內容" : "Skip to main content";
+    await render();
+  });
 }
 
 function bindGatewayConfirmationEvent() {
@@ -583,11 +677,15 @@ async function updateHeartStatus() {
 
 async function boot() {
   try {
+    validatePrimaryI18nCatalogs();
+    document.documentElement.lang = uiLocale;
     const seed = await loadCanonicalSeed();
     let store;
     try { store = createBrowserUniverseStore(); } catch { store = undefined; }
     universe = await createUniverseRuntime({ seed, store });
+    await loadSharedWorkerStatus();
     addEventListener("hashchange", render);
+    bindLanguageRuntime();
     await render();
   } catch (error) {
     content.innerHTML = `<div class="notice error"><strong>RUNTIME STOP</strong><p>${html(error.message)}</p></div>`;

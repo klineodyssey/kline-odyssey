@@ -1,0 +1,43 @@
+{
+  "schema_version": "11520_WORKER_STATUS_V1",
+  "life_id": "DIGITAL_ANT_0001",
+  "app_id": "DIGITAL_ANT_APP_0001",
+  "app_version": "V1.1.0",
+  "scheduler": "GITHUB_ACTIONS_HOURLY",
+  "scheduler_status": "AWAITING_FIRST_PRODUCTION_CYCLE",
+  "cadence": "EVERY_HOUR",
+  "public_read_only": true,
+  "signer": false,
+  "chain_write": false,
+  "worker_health": "OFFLINE",
+  "work_stop_reason": "SCHEDULER_OFFLINE",
+  "generated_at": null,
+  "last_work_cycle": null,
+  "next_expected_at": null,
+  "metrics": {
+    "completed_cycles": 0,
+    "failed_cycles": 0,
+    "degraded_cycles": 0,
+    "no_action_cycles": 0,
+    "action_cycles": 0,
+    "work_duration_seconds": 0,
+    "missed_cycles": 0
+  },
+  "patrols": {
+    "temple_12345": { "status": "AWAITING_FIRST_PRODUCTION_CYCLE" },
+    "request": { "status": "AWAITING_FIRST_PRODUCTION_CYCLE", "real_requests": 0 },
+    "company": { "status": "AWAITING_FIRST_PRODUCTION_CYCLE" }
+  },
+  "request_patrol": {
+    "status": "AWAITING_FIRST_PRODUCTION_CYCLE",
+    "source": "GITHUB_ISSUES_AUTHENTICATED_IDENTITY",
+    "real_requests": 0,
+    "open_requests": 0,
+    "latest_request": null,
+    "evidence": [],
+    "new_real_request_detected": false,
+    "first_real_customer_detected": false
+  },
+  "global_truth_source": "GIT_BACKED_APPEND_ONLY_PUBLIC_SNAPSHOT",
+  "browser_indexeddb_role": "LOCAL_DRAFT_CACHE_ONLY"
+}

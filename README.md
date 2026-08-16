@@ -1260,11 +1260,12 @@ The deterministic simulation at `world-viewer/creator-marketplace/` connects one
 - Specification owner: `KAIOS/marketplace/creator-marketplace/`
 - Safety: simulation only; no real wallet, KGEN, on-chain transfer, silent mint or external autonomy.
 
-## 11520 Universal Exchange V3.3
+## 11520 Universal Exchange V3.4
 
-The public 11520 entry now hosts the Digital Ant Public Civilization Request Gateway.
-It converts text or confirmed voice transcripts into evidence-gated request records;
-drafts, estimates and proposals never become customers, quotes or revenue by implication.
+The public 11520 entry now hosts the multilingual Digital Ant civilization gateway and
+an evidence-derived hourly Life Worker. Voice begins only after a user gesture and always
+falls back to Text. Shared Work status comes from Git-backed append-only snapshots;
+browser IndexedDB is local draft/cache only.
 
 - Public entry: `K線西遊記/temples/11520/index.html#/REQUEST`
 - Browser controller: `K線西遊記/temples/11520/app.mjs`
@@ -1272,4 +1273,7 @@ drafts, estimates and proposals never become customers, quotes or revenue by imp
 - Canonical records: `core/data/canonical.json`
 - Architecture: `docs/KGEN_11520_V2_ARCHITECTURE.md`
 - Validation: `tests/universal-exchange.test.mjs`
+- Shared Worker status: `K線西遊記/temples/11520/runtime/worker-status.json`
+- Shared request entry: `.github/ISSUE_TEMPLATE/civilization-request.yml`
+- Production report: `KGEN-AI-Company/reports/DIGITAL_ANT_V3_4_LIVE_LIFE_REPORT.md`
 - Settlement and company treasury remain gated; no automatic chain write is introduced by the gateway.

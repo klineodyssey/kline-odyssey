@@ -1,5 +1,15 @@
 # 11520 Changelog
 
+## 3.4.0
+
+- Upgraded `DIGITAL_ANT_APP_0001` to V1.1.0 without changing Life ID, immutable Birth Certificate, personal Wallet ownership, Mission identity or non-transferable identity right.
+- Added complete Traditional Chinese and English core catalogs, selectable Japanese/Korean catalogs with English then Traditional Chinese fallback, and persistent user-controlled language selection.
+- Added a user-gesture-only browser Voice Concierge with independent voice language, Speech Recognition transcript confirmation, Speech Synthesis output and text fallback. Autoplay and secret speech are forbidden.
+- Activated the stateless GitHub Actions hourly read-only Worker. Each UTC hour has one idempotent Work Cycle; shared status and append-only events are committed through an exact file allowlist.
+- Added evidence-derived Worker health, 12345 Heart action states, Request patrol and Company patrol. A missed cycle reports `MISSED_CYCLE`; `NO_ACTION` remains valid work.
+- Added an authenticated GitHub Issues request form as the shared Public Request source. IndexedDB remains local draft/cache only and cannot define global customer counts.
+- Kept Heart writes, signer access, transfers, settlement, AutoLP, Treasury spending and all private-key access disabled.
+
 ## 3.3.0
 
 - Added the public `TELL THE ANT WHAT YOU WANT` Request Gateway with Text and pasted Voice-transcript inputs plus explicit unavailable states for Image, File, Map and microphone capture.

@@ -1,4 +1,10 @@
-# 11520 Universal Exchange V3.3 Current Handoff
+# 11520 Universal Exchange V3.4 Current Handoff
+
+V3.4 is the active cumulative public release. It retains every V3.3 evidence and authority gate while upgrading `DIGITAL_ANT_APP_0001` to V1.1.0, adding the `zh-TW / en / ja / ko` I18N Runtime, browser Voice Concierge and a real hourly public read-only Worker. Life ID, immutable Birth Certificate, Wallet ownership and Listing identity rights are unchanged.
+
+The Worker is stateless and externally scheduled by `.github/workflows/universal_exchange_v2.yml`. It never receives a signer. Each UTC hour writes at most one `HOURLY_WORK_EVENT` plus `runtime/worker-status.json`; duplicate scheduler calls return `IDEMPOTENT_NOOP`. The snapshot is shared public truth, while IndexedDB is only browser-local draft/cache. RPC, Heart or indexer failures are recorded as degraded/failed evidence and never redefine Life death.
+
+The Voice Concierge starts only after user interaction. Speech Recognition creates a transcript that still requires requester confirmation; Speech Synthesis reads only the public AI understanding. Unsupported browsers retain Text input. Shared real requests use the authenticated GitHub Issue form; no private contact evidence belongs in that public record.
 
 The active entrypoint is `index.html`; its controller is `app.mjs`, and all business rules live under `/core`. V3.3 cumulatively retains Digital Life Birth Law V1.3, immutable BNB birth evidence, the V2.4 Life App release, V2.5 Life Security, V2.6 Queen/Smart Wallet readiness, V2.7 Life Doctor, V2.8 Company readiness, V2.9 Company Genesis, V3.0 Civilization Demand, the V3.1 AI Civilization OS, the V3.2 Customer Acquisition gates, KAIOS mainnet registry data, the shared Life Factory and verified KGEN/PancakeSwap V2 user-wallet adapter.
 

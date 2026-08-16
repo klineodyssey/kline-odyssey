@@ -349,9 +349,11 @@ Runtime authority remains: `C:\Desktop\kline-odyssey\docs\physics\KGEN_Universe_
 
 No Runtime CURRENT file was modified by this registration pass.
 
-## 11520 V3.3 Subordinate Runtime Registration
+## 11520 V3.4 Subordinate Runtime Registration
 
 `core/index.mjs` is the subordinate domain entry used by
 `K線西遊記/temples/11520/app.mjs`. It does not replace the Universe Physics
 Runtime CURRENT. The public request gateway is evidence-gated and keeps
-Customer, Quote, Settlement and Revenue state separate.
+Customer, Quote, Settlement and Revenue state separate. The hourly GitHub
+Actions adapter is signerless, stateless and persists shared Work Evidence only
+under `K線西遊記/temples/11520/runtime/`; IndexedDB remains local cache.

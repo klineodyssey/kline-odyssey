@@ -339,6 +339,18 @@ Company Treasury remains `NOT_BOUND`, therefore payment is `PAYMENT_INFRASTRUCTU
 
 The read-only `WORKTREE_CLASSIFICATION_AUDIT_V3_3` classifies the observed 4,527 untracked paths as Project Source, User Data or Generated Artifact without deletion, staging or commit. No observed Cache, Temp or Build Output justified an automatic ignore change. `GITIGNORE_PROPOSAL_V3_3` lists possible patterns for formal-asset review and remains unapplied.
 
+## V3.4 Live Life, I18N, Voice and shared Work Evidence
+
+V3.4 keeps the same Universal Exchange and Life identities. `DIGITAL_ANT_APP_0001` advances to V1.1.0; `DIGITAL_ANT_0001`, immutable Birth Certificate, public Wallet binding and non-transferable identity right do not change. The App adds a complete Traditional Chinese/English core catalog, Japanese/Korean catalogs with English then Traditional Chinese fallback, and a user-controlled persisted language selector.
+
+The browser Voice Concierge cannot autoplay. A user gesture starts capability/permission checks; Speech Recognition produces a transcript that still requires confirmation before a Draft Intent can advance. Speech Synthesis reads only the public AI understanding. Unsupported browsers retain Text input, and no voice path may speak or store a private key or contact evidence.
+
+`DIGITAL_ANT_CONTINUOUS_WORKER` is a stateless public read-only process scheduled hourly by GitHub Actions. It has no signer, private key, Heart write, transfer, settlement or Treasury authority. One UTC-hour cycle produces at most one append-only `HOURLY_WORK_EVENT`; repeated calls are `IDEMPOTENT_NOOP`. Shared status is committed to `K線西遊記/temples/11520/runtime/worker-status.json`, while hourly evidence is kept under `runtime/work-events/`. Browser IndexedDB is local draft/cache, never global truth.
+
+Worker Health is derived from timestamps and results: `HEALTHY`, `DEGRADED`, `MISSED_CYCLE`, `FAILED` or `OFFLINE`. `NO_ACTION` is a valid completed decision. Heartbeat, Fortune, Ignition, Lamp, Wish and Thanksgiving/Vow statuses remain `CLIENT_DERIVED`; absent secure signer infrastructure is shown as `WRITE_NOT_CONNECTED`. Complete transaction-flow analysis remains `INDEXER_REQUIRED`.
+
+Shared real Requests use authenticated GitHub Issues with an explicit request template. This makes the requester source auditable without exposing private contact evidence. A GitHub Request is still not a Customer, Quote, Order, Contract, Settlement or Revenue. Company Treasury remains unbound and all financial writes remain disabled.
+
 ## Truth labels
 
 - `DEPLOYED`: a verified contract address exists for that capability.
