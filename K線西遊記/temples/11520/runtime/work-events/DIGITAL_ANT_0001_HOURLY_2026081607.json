@@ -1,0 +1,29 @@
+{
+  "event_id": "DIGITAL_ANT_0001_HOURLY_2026081607",
+  "life_id": "DIGITAL_ANT_0001",
+  "app_id": "DIGITAL_ANT_APP_0001",
+  "work_cycle_id": "DIGITAL_ANT_0001_HOURLY_2026081607",
+  "scheduled_at": "2026-08-16T07:00:00.000Z",
+  "started_at": "2026-08-16T07:39:42.994Z",
+  "finished_at": "2026-08-16T07:39:43.000Z",
+  "bsc_block": null,
+  "wallet_state": "UNAVAILABLE",
+  "heart_state": "UNAVAILABLE",
+  "finance_state": "UNAVAILABLE",
+  "work_queue_state": "SCHEMA_READY_EMPTY_QUEUE",
+  "observations": [],
+  "risk_level": "NORMAL",
+  "actions_considered": [],
+  "action_taken": "NO_ACTION",
+  "result": "WORK_CYCLE_FAILED",
+  "error_evidence": [
+    {
+      "component": "PUBLIC_CHAIN_READ",
+      "code": "NETWORK_ERROR",
+      "detail": "PUBLIC_READ_FAILED_NO_VALUE_FABRICATED"
+    }
+  ],
+  "gas_spent": "0",
+  "tx_hash": null,
+  "work_duration_seconds": 0
+}
