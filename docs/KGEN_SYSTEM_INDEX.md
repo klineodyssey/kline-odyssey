@@ -775,9 +775,11 @@ The following permanent KGEN knowledge-base files were created from a Boot V1.4 
 
 Permanent rule reaffirmed: every future Boot, Runtime, Whitepaper and Constitution update must be a full cumulative update, never a deletion-only or diff-only update.
 
-## 11520 Universal Exchange V3.3 System Registration
+## 11520 Universal Exchange V3.4 System Registration
 
 The active public frontend is `K線西遊記/temples/11520/index.html`. Its domain
 system is rooted at `core/index.mjs`; canonical state is loaded from
 `core/data/canonical.json`. The gateway cannot create a real Request without
-requester identity, explicit confirmation and non-public contact evidence.
+requester identity and explicit confirmation. Shared real requests use GitHub
+identity; private contact evidence is never public. I18N/Voice and Worker Health
+are subordinate organs and do not replace the Universe Runtime CURRENT.

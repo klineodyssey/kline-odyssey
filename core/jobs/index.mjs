@@ -31,12 +31,45 @@ export const DIGITAL_ANT_WORKER = Object.freeze({
   life_id: "DIGITAL_ANT_0001",
   cadence: "EVERY_HOUR",
   mode: "READ_ONLY_DRY_RUN",
-  scheduler_status: "CONFIGURED_LOCAL_NOT_ACTIVE",
+  scheduler_status: "PRODUCTION_SCHEDULER_CONFIGURED",
   scheduler_class: "PUBLIC_READ_ONLY_SCHEDULER",
   cycle: Object.freeze(["BOOT", "VERIFY_LIFE", "VERIFY_WALLET", "READ_BSC", "12345_GATEKEEPER", "CFO_CHECK", "WORK_QUEUE_CHECK", "MISSION_CHECK", "NO_ACTION_OR_ACTION_PLAN", "WRITE_LIFE_HISTORY", "DAILY_REPORT_CHECK", "SLEEP"]),
   chain_write: false,
   signer_action: false
 });
+
+export const WORKER_HEALTH_STATUSES = Object.freeze(["HEALTHY", "DEGRADED", "MISSED_CYCLE", "FAILED", "OFFLINE"]);
+export const WORK_STOP_REASONS = Object.freeze(["SCHEDULER_OFFLINE", "RPC_FAILURE", "PERMISSION_FAILURE", "INDEXER_FAILURE", "NO_PRIVATE_KEY", "NO_WORK", "SECURITY_STOP"]);
+
+export function deriveWorkerHealth({ lastCycle = null, now = new Date().toISOString(), cadenceSeconds = 3600, graceSeconds = 900 } = {}) {
+  const current = Date.parse(now);
+  invariant(Number.isFinite(current), "INVALID_WORKER_HEALTH_TIME", "Worker health requires a valid current time");
+  if (!lastCycle?.finished_at) return Object.freeze({ status: "OFFLINE", stop_reason: "SCHEDULER_OFFLINE", age_seconds: null, evidence: "NO_SHARED_WORK_EVIDENCE" });
+  const finished = Date.parse(lastCycle.finished_at);
+  invariant(Number.isFinite(finished) && current >= finished, "INVALID_WORKER_EVIDENCE_TIME", "Worker evidence time is invalid");
+  const age = Math.floor((current - finished) / 1000);
+  if (age > cadenceSeconds + graceSeconds) return Object.freeze({ status: "MISSED_CYCLE", stop_reason: "SCHEDULER_OFFLINE", age_seconds: age, evidence: lastCycle.work_cycle_id });
+  if (lastCycle.result === "WORK_CYCLE_FAILED") return Object.freeze({ status: "FAILED", stop_reason: lastCycle.stop_reason ?? "RPC_FAILURE", age_seconds: age, evidence: lastCycle.work_cycle_id });
+  if (lastCycle.result === "WORK_CYCLE_DEGRADED") return Object.freeze({ status: "DEGRADED", stop_reason: lastCycle.stop_reason ?? "INDEXER_FAILURE", age_seconds: age, evidence: lastCycle.work_cycle_id });
+  return Object.freeze({ status: "HEALTHY", stop_reason: null, age_seconds: age, evidence: lastCycle.work_cycle_id });
+}
+
+export function normalizeHeartActionStatus(action, { available = true, writeConnected = false } = {}) {
+  if (!available || !action) return Object.freeze({ status: "UNAVAILABLE", eligibility_source: "CLIENT_DERIVED", write_status: "WRITE_NOT_CONNECTED" });
+  const reason = String(action.reason ?? "");
+  let status = action.eligible ? "ELIGIBLE" : "NOT_ELIGIBLE";
+  if (reason.includes("OUT_OF_WINDOW")) status = "OUT_OF_WINDOW";
+  else if (reason.includes("INSUFFICIENT")) status = "INSUFFICIENT_BALANCE";
+  return Object.freeze({ status, reason, eligibility_source: action.source ?? "CLIENT_DERIVED", write_status: writeConnected ? "WRITE_CONNECTED" : "WRITE_NOT_CONNECTED", next_eligible_time: action.next_eligible_time ?? null });
+}
+
+export function validateSharedWorkerStatus(status) {
+  invariant(status?.schema_version === "11520_WORKER_STATUS_V1", "INVALID_SHARED_WORKER_STATUS", "Shared Worker Status schema is invalid");
+  invariant(status.life_id === "DIGITAL_ANT_0001" && status.app_id === "DIGITAL_ANT_APP_0001", "WORKER_IDENTITY_MISMATCH", "Shared Worker Status cannot replace Life or App identity");
+  invariant(status.public_read_only === true && status.signer === false && status.chain_write === false, "PUBLIC_WORKER_AUTHORITY_ESCALATION", "Public Worker must not have signer or chain-write authority");
+  invariant(WORKER_HEALTH_STATUSES.includes(status.worker_health), "INVALID_WORKER_HEALTH", "Shared Worker health is invalid");
+  return status;
+}
 
 export const SCHEDULER_ADAPTER_TYPES = Object.freeze(["LOCAL", "GITHUB_ACTIONS", "CRON", "SELF_HOSTED_AGENT", "EXTERNAL_SCHEDULER"]);
 export const WORK_QUEUE_STATUSES = Object.freeze(["PROPOSED", "QUOTED", "ACCEPTED", "FUNDED", "READY", "ASSIGNED", "IN_PROGRESS", "REVIEW", "CUSTOMER_ACCEPTANCE", "COMPLETED", "REJECTED", "CANCELLED", "DISPUTED"]);

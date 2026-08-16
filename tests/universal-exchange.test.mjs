@@ -69,9 +69,13 @@ import {
   appendPublicRequestHistoryEvent, replayCanonicalPublicRequestGateway,
   classifyWorktreePath, buildWorktreeClassificationAudit,
   validateWorktreeClassificationAudit, validateGitignoreProposal
+  , I18N_SUPPORTED_LOCALES, I18N_REQUIRED_KEYS, I18N_CATALOGS, translateUi,
+  validatePrimaryI18nCatalogs, detectVoiceCapabilities, deriveWorkerHealth,
+  normalizeHeartActionStatus, validateSharedWorkerStatus
 } from "../core/index.mjs";
 import { verifyDigitalAntWalletBinding } from "../core/security/wallet-binding.mjs";
 import { TEMPLE_HEART_READ_ABI, TEMPLE_HEART_DRY_RUN_ABI, TEMPLE_HEART_VERIFIED_ACTIONS } from "../core/integrations/temple-heart-12345.mjs";
+import { buildSharedWorkerStatus, readCompanyPatrol, readPublicRequestPatrol } from "../core/jobs/public-read-only-worker.mjs";
 
 const seed = JSON.parse(await fs.readFile(new URL("../core/data/canonical.json", import.meta.url), "utf8"));
 
@@ -471,7 +475,7 @@ test("Listing readiness may be READY_TO_LIST but never implies LISTED", () => {
   assert.equal(check.identity_right_offered, false);
 });
 
-test("Digital Ant formal local listing registers profile rights without selling Life identity", async () => {
+test("Digital Ant formal local Registry listing is public without selling Life identity", async () => {
   const state = await runtime();
   const listing = await state.registries.market.get("11520_LISTING_DIGITAL_ANT_0001");
   const asset = await state.registries.asset.get(listing.asset_id);
@@ -630,7 +634,7 @@ test("V2.4 Life App release preserves Life ID, Birth and independent App version
   assert.equal(life.life_id, "DIGITAL_ANT_0001");
   assert.equal(life.birth_timestamp, "2026-08-15T06:20:45.000Z");
   assert.equal(app.life_id, life.life_id);
-  assert.equal(app.version, "V1.0.0");
+  assert.equal(app.version, "V1.1.0");
   assert.equal(app.status, "RELEASED_LOCAL");
   assert.equal(await calculateAppManifestHash(app), app.manifest_hash);
   assert.equal(app.permissions.CHAIN_READ, true);
@@ -2021,4 +2025,99 @@ test("V3.3 Gitignore remains a review-only proposal", () => {
   assert.equal(validateGitignoreProposal(proposal), proposal);
   assert.equal(proposal.applied, false);
   assert.equal(proposal.evidence_matches, 0);
+});
+
+test("V3.4 Traditional Chinese and English I18N catalogs are complete", () => {
+  assert.deepEqual(validatePrimaryI18nCatalogs(), { "zh-TW": [], en: [] });
+  assert.deepEqual(I18N_SUPPORTED_LOCALES, ["zh-TW", "en", "ja", "ko"]);
+  for (const key of I18N_REQUIRED_KEYS) {
+    assert.ok(I18N_CATALOGS["zh-TW"][key]);
+    assert.ok(I18N_CATALOGS.en[key]);
+    assert.notEqual(translateUi(key, "zh-TW"), key);
+    assert.notEqual(translateUi(key, "en"), key);
+  }
+});
+
+test("V3.4 Japanese and Korean use English then Traditional Chinese fallback without raw keys", () => {
+  assert.equal(translateUi("navigation.home", "ja"), "ホーム");
+  assert.equal(translateUi("navigation.home", "ko"), "홈");
+  assert.equal(translateUi("wallet.title", "ja"), "Wallet");
+  assert.equal(translateUi("wallet.title", "ko"), "Wallet");
+  assert.equal(translateUi("unknown.translation.key", "ja"), "Translation unavailable");
+});
+
+test("V3.4 Voice Concierge requires user action and falls back to text", () => {
+  assert.deepEqual(detectVoiceCapabilities({}), { recognition: false, synthesis: false, autoplay: false, activation: "USER_GESTURE_REQUIRED", fallback: "TEXT_FALLBACK" });
+  const scope = { SpeechRecognition: function Recognition() {}, speechSynthesis: {}, SpeechSynthesisUtterance: function Utterance() {} };
+  assert.deepEqual(detectVoiceCapabilities(scope), { recognition: true, synthesis: true, autoplay: false, activation: "USER_GESTURE_REQUIRED", fallback: "TEXT_FALLBACK" });
+});
+
+test("V3.4 Worker health is evidence-derived and detects missed cycles", () => {
+  const noEvidence = deriveWorkerHealth({ now: "2026-08-16T10:00:00.000Z" });
+  assert.equal(noEvidence.status, "OFFLINE");
+  const healthy = deriveWorkerHealth({ lastCycle: { work_cycle_id: "C1", finished_at: "2026-08-16T09:30:00.000Z", result: "WORK_CYCLE_COMPLETED" }, now: "2026-08-16T10:00:00.000Z" });
+  assert.equal(healthy.status, "HEALTHY");
+  const missed = deriveWorkerHealth({ lastCycle: { work_cycle_id: "C1", finished_at: "2026-08-16T08:30:00.000Z", result: "WORK_CYCLE_COMPLETED" }, now: "2026-08-16T10:00:00.000Z" });
+  assert.equal(missed.status, "MISSED_CYCLE");
+  assert.equal(missed.stop_reason, "SCHEDULER_OFFLINE");
+});
+
+test("V3.4 NO_ACTION remains valid Work and Public Worker has no signer", () => {
+  const event = { work_cycle_id: "DIGITAL_ANT_0001_HOURLY_2026081609", scheduled_at: "2026-08-16T09:00:00.000Z", started_at: "2026-08-16T09:00:01.000Z", finished_at: "2026-08-16T09:00:04.000Z", result: "WORK_CYCLE_COMPLETED", action_taken: "NO_ACTION", work_duration_seconds: 3, heart_state: { status: "12345_PATROL_COMPLETED" } };
+  const requestPatrol = { status: "SHARED_REQUEST_SOURCE_VERIFIED", real_requests: 0, open_requests: 0, evidence: [] };
+  const companyPatrol = { status: "COMPANY_PATROL_COMPLETED", work_queue: 0 };
+  const status = buildSharedWorkerStatus({ event, requestPatrol, companyPatrol, generatedAt: "2026-08-16T09:00:05.000Z" });
+  assert.equal(status.worker_health, "HEALTHY");
+  assert.equal(status.metrics.no_action_cycles, 1);
+  assert.equal(status.metrics.completed_cycles, 1);
+  assert.equal(status.public_read_only, true);
+  assert.equal(status.signer, false);
+  assert.equal(status.chain_write, false);
+  assert.equal(validateSharedWorkerStatus(status), status);
+});
+
+test("V3.4 Heart statuses remain CLIENT_DERIVED and writes stay disconnected", () => {
+  assert.equal(normalizeHeartActionStatus({ eligible: true, reason: "HEARTBEAT_ELIGIBLE", source: "CLIENT_DERIVED" }).status, "ELIGIBLE");
+  assert.equal(normalizeHeartActionStatus({ eligible: false, reason: "IGNITE_OUT_OF_WINDOW", source: "CLIENT_DERIVED" }).status, "OUT_OF_WINDOW");
+  assert.equal(normalizeHeartActionStatus({ eligible: false, reason: "KGEN_BALANCE_INSUFFICIENT", source: "CLIENT_DERIVED" }).status, "INSUFFICIENT_BALANCE");
+  assert.equal(normalizeHeartActionStatus(null, { available: false }).status, "UNAVAILABLE");
+  assert.equal(normalizeHeartActionStatus({ eligible: true, reason: "WISH_HASH_VALID", source: "CLIENT_DERIVED" }).write_status, "WRITE_NOT_CONNECTED");
+});
+
+test("V3.4 Request and Company patrols preserve zero real business", async () => {
+  const fakeFetch = async () => ({ ok: true, async json() { return [{ number: 137, title: "Pull request", pull_request: {}, state: "open", created_at: "2026-08-16T00:00:00.000Z" }]; } });
+  const requests = await readPublicRequestPatrol({ repository: "klineodyssey/kline-odyssey", fetchImpl: fakeFetch });
+  assert.equal(requests.real_requests, 0);
+  const company = readCompanyPatrol(seed);
+  assert.equal(company.status, "COMPANY_PATROL_COMPLETED");
+  assert.equal(company.request_queue, 0);
+  assert.equal(company.quote_queue, 0);
+  assert.equal(company.work_queue, 0);
+});
+
+test("V3.4 shared status is global truth while IndexedDB remains local cache", async () => {
+  const status = JSON.parse(await fs.readFile(new URL("../K線西遊記/temples/11520/runtime/worker-status.json", import.meta.url), "utf8"));
+  assert.equal(status.global_truth_source, "GIT_BACKED_APPEND_ONLY_PUBLIC_SNAPSHOT");
+  assert.equal(status.browser_indexeddb_role, "LOCAL_DRAFT_CACHE_ONLY");
+  assert.equal(status.signer, false);
+  assert.equal(status.chain_write, false);
+});
+
+test("V3.4 App upgrade preserves Life ID and immutable Birth", async () => {
+  const app = seed.apps.find((item) => item.app_id === "DIGITAL_ANT_APP_0001");
+  const life = seed.lives.find((item) => item.life_id === "DIGITAL_ANT_0001");
+  assert.equal(app.version, "V1.1.0");
+  assert.equal(app.life_id, life.life_id);
+  assert.equal(life.birth_timestamp, "2026-08-15T06:20:45.000Z");
+  assert.equal(await calculateAppManifestHash(app), app.manifest_hash);
+  assert.equal(app.history.at(-1).release_scope, "PUBLIC_11520");
+});
+
+test("V3.4 workflow is hourly, exact-scoped and cannot access signer secrets", async () => {
+  const workflow = await fs.readFile(new URL("../.github/workflows/universal_exchange_v2.yml", import.meta.url), "utf8");
+  assert.match(workflow, /cron: "17 \* \* \* \*"/);
+  assert.match(workflow, /--status "K線西遊記\/temples\/11520\/runtime\/worker-status\.json"/);
+  assert.match(workflow, /git add -- "K線西遊記\/temples\/11520\/runtime\/worker-status\.json"/);
+  assert.doesNotMatch(workflow, /git add \./);
+  assert.doesNotMatch(workflow, /DIGITAL_ANT_0001_PRIVATE_KEY|SIGN_TRANSACTION|PRIVATE_KEY/);
 });

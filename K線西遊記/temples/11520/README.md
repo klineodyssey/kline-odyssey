@@ -1,6 +1,12 @@
-# 11520 Universal Exchange V3.3
+# 11520 Universal Exchange V3.4
 
 ## Digital Ant next-stage status
+
+- V3.4 makes 11520 a production public web application with Traditional Chinese and English primary UI, Japanese/Korean fallback, a user-gesture Voice Concierge and always-available Text input.
+- `DIGITAL_ANT_APP_0001` is now V1.1.0. `DIGITAL_ANT_0001`, its Birth Certificate and personal Wallet remain unchanged; App upgrade is an organ upgrade, not rebirth.
+- The hourly GitHub Actions scheduler runs one stateless public read-only cycle. It writes `runtime/worker-status.json` and one immutable hourly event under `runtime/work-events/` through an exact Git allowlist. The UI derives HEALTHY/DEGRADED/MISSED_CYCLE/FAILED/OFFLINE from this evidence instead of hard-coding ON_DUTY.
+- 12345 patrol uses the existing verified read adapter and labels Heartbeat, Fortune, Ignition, Lamp, Wish and Thanksgiving/Vow as client-derived eligibility with `WRITE_NOT_CONNECTED`. No GitHub workflow receives the Digital Ant private key.
+- Shared real requests use authenticated GitHub Issues. Browser IndexedDB remains local draft/cache only; a local Draft or confirmation is never promoted to global Customer, Quote, Order, Settlement or Revenue.
 
 - V3.3 adds `PUBLIC_CIVILIZATION_REQUEST_GATEWAY` as the public 11520 `TELL THE ANT WHAT YOU WANT` entry. Text and pasted Voice transcripts create `DRAFT_INTENT` first; Image, File, Map and direct microphone capture are explicitly `NOT_AVAILABLE`.
 - The Concierge returns understood goal, project class, expected output, missing information, constraints, safety, executability and next step before confirmation. Anonymous or unconfirmed entries cannot become Requests.
