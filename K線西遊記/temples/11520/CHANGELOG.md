@@ -1,5 +1,13 @@
 # 11520 Changelog
 
+## 3.8.0
+
+- Bound the Digital Ant Life/App/11520 certification to Physics CURRENT V3.8 using a verified SHA-256 metadata binding, without copying or modifying the constitution.
+- Added startup Thought Organ mismatch detection and a hard planning gate so older reports or chat memory cannot override deployed chain truth or CURRENT.
+- Added First KAIOS strategy, network-only physical capability truth, balanced-warp/coasting and braking-fuel runtime guards.
+- Expanded the private Heart worker with fail-closed local scheduling, fresh chain revalidation, survival reserve and receipt reconciliation. The public GitHub worker remains signer-free.
+- Upgraded 11520 to V3.8.0 and `DIGITAL_ANT_APP_0001` to V1.5.0 without changing Life ID, Birth Certificate, Wallet or Company identity.
+
 ## 3.7.0
 
 - Upgraded `DIGITAL_ANT_APP_0001` to V1.4.0 without changing Life ID, Birth, Wallet, Listing or Company identity.

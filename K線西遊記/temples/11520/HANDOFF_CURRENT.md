@@ -1,6 +1,12 @@
-# 11520 Universal Exchange V3.7 Current Handoff
+# 11520 Universal Exchange V3.8 Current Handoff
 
-V3.7 is the active cumulative public release. It retains the multilingual gateway, Voice Concierge, verified first Heartbeat/KGEN and production public Worker while upgrading `DIGITAL_ANT_APP_0001` to V1.4.0. Life ID, immutable Birth Certificate, Wallet ownership and Listing identity rights are unchanged.
+V3.8 is the active cumulative public release. It retains the multilingual gateway, Voice Concierge, verified Heart/KGEN/Fortune/Wish history and production public Worker while upgrading `DIGITAL_ANT_APP_0001` to V1.5.0. Life ID, immutable Birth Certificate, Wallet ownership and Listing identity rights are unchanged.
+
+`DIGITAL_ANT_0001` now binds the single authoritative Physics Thought Organ at `docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md`. The installed CURRENT is byte-identical to V3.8 with SHA-256 `0ee983ac575096594b93c5dfe1cfa218a8cb08822a83e647332db7300f2bcbaa`. The Life manifest stores only binding, version, hash, authority, compatibility and evidence; it never copies the constitution. Startup mismatch blocks Mother Engine planning and records a truthful health state.
+
+AI Life certification includes Thought Organ integrity and secret safety and is `CERTIFIED_LOCAL`; it grants no settlement, physical movement or chain custody authority. The First KAIOS strategy remains evidence-first: publish the read-only KGEN Chain Monitor package and scan verified Requests. Customers, Revenue, Company Treasury binding and KAIOS remain zero.
+
+The user-controlled private Windows scheduler `DIGITAL_ANT_SECURE_HEART_WORKER` is installed at five-minute cadence plus logon and executes only Heartbeat/Ignition gates. Its command contains no credential. A V3.8 Heartbeat broadcast encountered an RPC 403 while awaiting the receipt; the persisted tx/nonce was reconciled through a second public RPC without resubmission. Receipt status, `HeartbeatClaimed`, KGEN 3 → 4 and BNB gas are verified. A subsequent scheduled run returned cooldown `NO_ACTION`. This scheduler is intentionally limited to an active user session until an audited always-on secret manager exists.
 
 The public Worker now creates Heart action candidates and runs additional UTC 00:02/00:07 probes for the deployed 00:00–00:10 Ignition window. It still has no signer and never broadcasts. Persistent Heartbeat/Ignition/Fortune/Wish auto-write is blocked because there is no private secure scheduler; the safe path requires a private secret manager, address binding, fresh chain/contract/eligibility/gas/reserve checks and receipt reconciliation with no blind resubmission.
 

@@ -1,4 +1,5 @@
 import { createRequire } from "node:module";
+import { createHash } from "node:crypto";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { dirname, join, resolve } from "node:path";
 import { pathToFileURL } from "node:url";
@@ -6,15 +7,18 @@ import { createUniverseRuntime } from "../registry/universe-runtime.mjs";
 import { assertCompanyWorkAllowedAfterGatekeeper, deriveWorkerHealth, evaluateIgnitionWindow, normalizeHeartActionStatus, runDigitalAntHourlyCycle, validateGatekeeperDutyStatus, validateSharedWorkerStatus, DIGITAL_ANT_WISH_TEXT } from "./index.mjs";
 import { readTempleHeart12345 } from "../integrations/temple-heart-12345.mjs";
 import { createHeartActionCandidate } from "../security/life-security.mjs";
-import { createMotherEngineNextBestAction } from "../company/index.mjs";
+import { assertThoughtOrganReadyForPlanning, createAiLifeCertification, verifyThoughtOrganHealth } from "../life/index.mjs";
+import { createFirstKaiosStrategy, createMotherEngineNextBestAction } from "../company/index.mjs";
 
 const require = createRequire(import.meta.url);
 const ethers = require("../../ethers-5.7.2.umd.min.js");
 const KGEN = "0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be";
 const KAIOS = "0xD4E67B3a69e41524c424150E6b6e921b01D036db";
 const PUBLIC_BSC_RPC = "https://bsc-rpc.publicnode.com";
+const PUBLIC_BSC_RPC_FALLBACKS = Object.freeze(["https://bsc-dataseed1.defibit.io/", "https://bsc-dataseed1.ninicoin.io/"]);
 const ERC20_READ_ABI = ["function balanceOf(address) view returns (uint256)", "function decimals() view returns (uint8)"];
 const FIRST_HEARTBEAT_KGEN_EVIDENCE = new URL("../../K線西遊記/temples/11520/runtime/life-events/DIGITAL_ANT_0001_FIRST_HEARTBEAT_AND_KGEN_V3_6.json", import.meta.url);
+const PHYSICS_CURRENT = new URL("../../docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md", import.meta.url);
 
 export function createPublicReadProvider({ rpcUrl = process.env.BSC_RPC_URL || PUBLIC_BSC_RPC, fetchImpl = globalThis.fetch } = {}) {
   if (typeof fetchImpl !== "function") throw statusError("FETCH_TRANSPORT_UNAVAILABLE", "BSC_RPC");
@@ -22,7 +26,7 @@ export function createPublicReadProvider({ rpcUrl = process.env.BSC_RPC_URL || P
   const transport = {
     async request({ method, params = [] }) {
       const primary = rpcUrl || PUBLIC_BSC_RPC;
-      const urls = method === "eth_getLogs" && primary !== PUBLIC_BSC_RPC ? [primary, PUBLIC_BSC_RPC] : [primary];
+      const urls = [...new Set([primary, PUBLIC_BSC_RPC, ...PUBLIC_BSC_RPC_FALLBACKS])];
       let lastError = null;
       for (const url of urls) {
         try {
@@ -86,6 +90,27 @@ export async function readPublicRequestPatrol({ repository = process.env.GITHUB_
   });
 }
 
+export async function inspectPhysicsThoughtOrgan({ seed, readFileImpl = readFile, checkedAt = new Date().toISOString() } = {}) {
+  const binding = seed?.next_stage?.thought_organ_binding_v3_8 ?? seed?.lives?.find((life) => life.life_id === "DIGITAL_ANT_0001")?.thought_organs?.[0];
+  let bytes = null;
+  let text = "";
+  try {
+    bytes = await readFileImpl(PHYSICS_CURRENT);
+    text = bytes.toString("utf8");
+  } catch {}
+  const versionMatch = text.match(/^VERSION:\s*CURRENT\s*\/\s*(V3\.8[^\\\r\n]*)/m);
+  const documentMatch = text.match(/^DOC_ID:\s*([^\\\r\n]+)/m);
+  const observation = Object.freeze({
+    document_id: documentMatch?.[1]?.trim() ?? null,
+    version: versionMatch?.[1]?.trim() ?? null,
+    path: "docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md",
+    sha256: bytes ? createHash("sha256").update(bytes).digest("hex") : null,
+    exists: Boolean(bytes), readable: Boolean(bytes), runtime_authority: "CURRENT", checked_at: checkedAt
+  });
+  const health = verifyThoughtOrganHealth(binding, observation);
+  return Object.freeze({ binding, observation, health });
+}
+
 export function readCompanyPatrol(seed) {
   const stage = seed?.next_stage ?? {};
   const queues = stage.company_queues ?? {};
@@ -100,12 +125,32 @@ export function readCompanyPatrol(seed) {
   });
 }
 
-export function readMotherEnginePatrol(seed, { gatekeeperDuty, finance }) {
+export function readMotherEnginePatrol(seed, { gatekeeperDuty, finance, thoughtOrganHealth }) {
   assertCompanyWorkAllowedAfterGatekeeper(gatekeeperDuty);
+  assertThoughtOrganReadyForPlanning(thoughtOrganHealth);
   const stage = seed?.next_stage ?? {};
   const firstKgen = stage.first_heartbeat_kgen_event ?? {};
   const product = stage.divine_product_priority ?? {};
   const supplyChain = stage.demand_first_supply_chain ?? {};
+  const firstKaiosStrategy = createFirstKaiosStrategy({
+    availableServices: ["KGEN_CHAIN_MONITOR", "CHAIN_MONITORING", "LIFE_LEDGER", "CFO_REPORT"],
+    customerDemand: stage.customer_request_engine?.customer_count ?? 0,
+    publicCivilizationDemand: [],
+    authority: "READ_ANALYZE_PLAN_PROPOSE_ONLY",
+    paymentReadiness: "PAYMENT_INFRASTRUCTURE_PENDING",
+    treasuryReadiness: stage.company_treasury?.status ?? "PLAN_READY_NOT_BOUND",
+    technicalReadiness: "KGEN_CHAIN_MONITOR_READ_ONLY_READY",
+    estimatedWork: "SERVICE_PACKAGE_AND_VERIFIED_REQUEST_SCAN",
+    risk: "LOW_ASSET_RISK_READ_ONLY",
+    settlementFeasibility: "NOT_AUTHORIZED_RECEIVABLE_ONLY"
+  });
+  const privateSchedulerActive = String(stage.persistent_private_scheduler_v3_8?.status ?? "").startsWith("INSTALLED_");
+  const candidates = [
+    ...(!privateSchedulerActive ? [{ problem: "NO_PERSISTENT_PRIVATE_SECURE_SCHEDULER", priority: 0, action: "CONNECT_PRIVATE_HEART_AUTOPILOT_WITH_SECRET_MANAGER", reason: "Heartbeat action candidates cannot be signed by the public Worker", required_authority: "PRIVATE_RUNTIME_INSTALLATION", expected_result: "ELIGIBILITY_DRIVEN_RECEIPT_GATED_HEARTBEAT" }] : []),
+    { problem: "FIRST_KAIOS_NOT_OCCURRED", priority: 1, action: firstKaiosStrategy.next_kaios_earning_action, reason: "The next lawful economic milestone requires real demand and evidenced compensation", required_authority: "READ_ONLY_RESEARCH_AND_EXTERNAL_REQUEST_EVIDENCE", expected_result: "VERIFIED_KAIOS_EARNING_OPPORTUNITY_NOT_FAKE_REVENUE" },
+    { problem: "NO_REAL_CUSTOMER", priority: 3, action: "SCAN_REAL_CIVILIZATION_REQUESTS", reason: "First lawful KAIOS path requires real demand", required_authority: "READ_ONLY", expected_result: "EVIDENCED_LEAD_OR_REQUEST" },
+    { problem: "UFO_NOT_DESIGNED", priority: 6, action: "RESEARCH_UFO_REQUIREMENTS_AFTER_PRIMARY_DUTY", reason: "Demand-first law requires requirements before design", required_authority: "READ_ONLY", expected_result: "UFO_REQUIREMENTS_DRAFT" }
+  ];
   const nextBestAction = createMotherEngineNextBestAction({
     observations: [
       `PRIMARY_JOB_${gatekeeperDuty.status}`,
@@ -114,11 +159,7 @@ export function readMotherEnginePatrol(seed, { gatekeeperDuty, finance }) {
       `CUSTOMERS_${stage.customer_request_engine?.customer_count ?? 0}`,
       `TREASURY_${stage.company_treasury?.status ?? "NOT_BOUND"}`
     ],
-    candidates: [
-      { problem: "NO_PERSISTENT_PRIVATE_SECURE_SCHEDULER", priority: 0, action: "CONNECT_PRIVATE_HEART_AUTOPILOT_WITH_SECRET_MANAGER", reason: "Heartbeat action candidates cannot be signed by the public Worker", required_authority: "PRIVATE_RUNTIME_INSTALLATION", expected_result: "ELIGIBILITY_DRIVEN_RECEIPT_GATED_HEARTBEAT" },
-      { problem: "NO_REAL_CUSTOMER", priority: 3, action: "SCAN_REAL_CIVILIZATION_REQUESTS", reason: "First lawful KAIOS path requires real demand", required_authority: "READ_ONLY", expected_result: "EVIDENCED_LEAD_OR_REQUEST" },
-      { problem: "UFO_NOT_DESIGNED", priority: 6, action: "RESEARCH_UFO_REQUIREMENTS_AFTER_PRIMARY_DUTY", reason: "Demand-first law requires requirements before design", required_authority: "READ_ONLY", expected_result: "UFO_REQUIREMENTS_DRAFT" }
-    ]
+    candidates
   });
   return Object.freeze({
     status: "MOTHER_ENGINE_PATROL_COMPLETED_READ_ONLY",
@@ -132,6 +173,8 @@ export function readMotherEnginePatrol(seed, { gatekeeperDuty, finance }) {
       kgen_energy: finance.KGEN,
       next_mission_evidence: firstKgen.status?.startsWith("COMPLETED_") ? "ANT_MECH_REQUIREMENTS_AND_REAL_CUSTOMER" : "FIRST_KGEN_EVENT"
     }),
+    thought_organ: thoughtOrganHealth,
+    first_kaios_strategy: firstKaiosStrategy,
     proposals: stage.mother_engine_problem_solver?.proposals ?? [],
     next_best_action: nextBestAction,
     proactive_problem_discovery: "OBSERVE_DETECT_DIAGNOSE_PRIORITIZE_PROPOSE_EXECUTE_IF_AUTHORIZED_VERIFY",
@@ -195,7 +238,8 @@ function createLifeEventStatus({ wallet, finance, recentEvents, verifiedFirstEve
   });
 }
 
-async function publicReadCycle({ life, seed, verifiedFirstEvents = null }) {
+export async function publicReadCycle({ life, seed, verifiedFirstEvents = null }) {
+  const thoughtOrgan = await inspectPhysicsThoughtOrgan({ seed });
   const provider = createPublicReadProvider();
   const chainId = await provider.send("eth_chainId", []);
   if (Number(BigInt(chainId)) !== 56) throw statusError("BSC_CHAIN_56_REQUIRED", "BSC_RPC");
@@ -229,12 +273,21 @@ async function publicReadCycle({ life, seed, verifiedFirstEvents = null }) {
   if (["COMPLETED", "DEGRADED"].includes(gatekeeperDuty.status) && gatekeeperDuty.degradation_affects_safety === false) {
     assertCompanyWorkAllowedAfterGatekeeper(gatekeeperDuty);
     const companyClock = Date.now();
-    motherEnginePatrol = readMotherEnginePatrol(seed, { gatekeeperDuty, finance });
+    motherEnginePatrol = readMotherEnginePatrol(seed, { gatekeeperDuty, finance, thoughtOrganHealth: thoughtOrgan.health });
     requestPatrol = await readPublicRequestPatrol();
     companyPatrol = Object.freeze({ ...readCompanyPatrol(seed), mother_engine: motherEnginePatrol });
     companyWorkSeconds = Number(((Date.now() - companyClock) / 1000).toFixed(3));
   }
   const lifeEvents = createLifeEventStatus({ wallet: life.wallet_address, finance, recentEvents: heart.recent_events, verifiedFirstEvents });
+  const walletBinding = seed.life_security?.DIGITAL_ANT_0001?.profile?.wallet_binding_history?.find((binding) => binding.status === "ACTIVE");
+  const app = seed.apps?.find((item) => item.app_id === "DIGITAL_ANT_APP_0001");
+  const certification = createAiLifeCertification({
+    life, birthCertificate: seed.birth_certificates?.find((certificate) => certificate.life_id === life.life_id), walletBinding,
+    workHistory: [seed.next_stage?.worker?.first_scheduled_cycle].filter(Boolean),
+    mission: Array.isArray(seed.missions) ? seed.missions.find((mission) => mission.life_id === life.life_id) : seed.missions?.[life.life_id], dream: seed.dreams?.find((dream) => dream.life_id === life.life_id),
+    thoughtOrganHealth: thoughtOrgan.health, app, permissions: app?.permissions,
+    evidence: [thoughtOrgan.binding.sha256, `HEART_BLOCK_${heart.block_number}`, seed.next_stage?.worker?.shared_evidence].filter(Boolean), secretSafe: true
+  });
   const coreHealthy = gatekeeperDuty.status === "COMPLETED";
   return Object.freeze({
     bsc_block: block.number, rpc_status: "AVAILABLE", heart_status: heart.status === "CHAIN_READ_VERIFIED" ? "AVAILABLE" : "UNAVAILABLE", kgen_status: "AVAILABLE", kaios_status: "AVAILABLE", indexer_status: coreHealthy ? "CORE_HEART_INDEXER_HEALTHY" : "CORE_HEART_INDEXER_DEGRADED",
@@ -243,7 +296,7 @@ async function publicReadCycle({ life, seed, verifiedFirstEvents = null }) {
     observations: ["LIFE_HEALTH_CHECK", "BNB_DARK_MATTER_CHECK", "12345_GATEKEEPER_PATROL", "HEART_ACTION_ELIGIBILITY", "HEART_ACTION_CANDIDATE", "IGNITION_WINDOW_CHECK", "FORTUNE_MONITOR", "CORE_HEART_EVENT_MONITOR", "WISH_VOW_THANKSGIVING", "LAMP", "IGNITION", "LIFE_FINANCE", "11520_REQUEST_PATROL", "MOTHER_ENGINE_PROBLEM_SOLVING", "MOTHER_ENGINE_NEXT_BEST_ACTION", "AI_ANT_COMPANY_WORK", "MISSION", "REPORT", "ADVANCED_TRANSACTION_GRAPH_INDEXER_REQUIRED_OPTIONAL"],
     risk_level: heart.risk_assessment?.level ?? "NORMAL",
     actions_considered: ["HEARTBEAT_ACTION_CANDIDATE", "IGNITION_ACTION_CANDIDATE", "FORTUNE_ACTION_CANDIDATE", "WISH_ACTION_CANDIDATE", "GATEKEEPER_REPORT", "CFO_CHECK", "REQUEST_PATROL", "COMPANY_PATROL", "WORK_QUEUE_CHECK", "MISSION_CHECK"],
-    gatekeeper_duty: gatekeeperDuty, heart_action_candidates: actionCandidates, ignition_window: ignitionWindow, life_event_status: lifeEvents, request_patrol: requestPatrol, mother_engine_patrol: motherEnginePatrol, company_patrol: companyPatrol,
+    gatekeeper_duty: gatekeeperDuty, heart_action_candidates: actionCandidates, ignition_window: ignitionWindow, life_event_status: lifeEvents, thought_organ_health: thoughtOrgan.health, life_certification: certification, request_patrol: requestPatrol, mother_engine_patrol: motherEnginePatrol, company_patrol: companyPatrol,
     work_time: { gatekeeper_work_seconds: gatekeeperWorkSeconds, cfo_work_seconds: cfoWorkSeconds, company_work_seconds: companyWorkSeconds, life_health_seconds: Number(((gatekeeperClock - lifeStarted) / 1000).toFixed(3)) },
     error_evidence: coreHealthy ? [{ component: "ADVANCED_TRANSACTION_GRAPH_INDEXER", code: "INDEXER_REQUIRED_OPTIONAL", detail: "CORE_GATEKEEPER_HEALTH_UNAFFECTED" }] : [{ component: "CORE_HEART_INDEXER", code: heart.recent_events?.status ?? heart.reason ?? "CHAIN_READ_UNAVAILABLE", detail: "NO_EVENT_DATA_FABRICATED" }]
   });
@@ -271,11 +324,11 @@ export function buildSharedWorkerStatus({ event, previous = null, requestPatrol,
   };
   const health = deriveWorkerHealth({ lastCycle: event, now: generatedAt });
   return validateSharedWorkerStatus(Object.freeze({
-    schema_version: "11520_WORKER_STATUS_V1", life_id: "DIGITAL_ANT_0001", app_id: "DIGITAL_ANT_APP_0001", app_version: "V1.4.0",
+    schema_version: "11520_WORKER_STATUS_V1", life_id: "DIGITAL_ANT_0001", app_id: "DIGITAL_ANT_APP_0001", app_version: "V1.5.0",
     scheduler: "GITHUB_ACTIONS_HOURLY_PLUS_IGNITION_WINDOW_PROBES", scheduler_status: "PRODUCTION_ACTIVE", cadence: "EVERY_HOUR_AND_UTC_00_02_00_07", public_read_only: true, signer: false, chain_write: false,
     worker_health: health.status, work_stop_reason: health.stop_reason, generated_at: generatedAt, last_work_cycle: event,
     next_expected_at: new Date(Date.parse(event.scheduled_at) + 3_600_000).toISOString(), metrics,
-    primary_job: "WUKONG_GATEKEEPER", secondary_work: "AI_ANT_COMPANY_FOUNDER", gatekeeper_duty: event.gatekeeper_duty, heart_action_candidates: event.heart_action_candidates, ignition_window: event.ignition_window, life_event_status: event.life_event_status,
+    primary_job: "WUKONG_GATEKEEPER", secondary_work: "AI_ANT_COMPANY_FOUNDER", gatekeeper_duty: event.gatekeeper_duty, heart_action_candidates: event.heart_action_candidates, ignition_window: event.ignition_window, life_event_status: event.life_event_status, thought_organ_health: event.thought_organ_health, life_certification: event.life_certification,
     patrols: { temple_12345: event.heart_state, request: requestPatrol, mother_engine: event.mother_engine_patrol, company: companyPatrol },
     request_patrol: { ...requestPatrol, new_real_request_detected: currentRequests > previousRequests, first_real_customer_detected: previousRequests === 0 && currentRequests > 0 },
     global_truth_source: "GIT_BACKED_APPEND_ONLY_PUBLIC_SNAPSHOT", browser_indexeddb_role: "LOCAL_DRAFT_CACHE_ONLY"

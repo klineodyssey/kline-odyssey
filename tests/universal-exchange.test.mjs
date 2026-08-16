@@ -87,10 +87,14 @@ import {
   validateBodyEnergyModel, validateAntMechProduct, validateDemandFirstSupplyChain,
   validateTransportContract, HEAVEN_TIME_LAW, KUFO_FUEL_LAW, calculateKufoFuelState,
   createUfoProductReadiness, evaluateUfoTakeoff, createMotherEngineNextBestAction
+  , validateThoughtOrganBinding, verifyThoughtOrganHealth, assertThoughtOrganReadyForPlanning,
+  createAiLifeCertification, createThoughtOrganTimelineEvent, CANONICAL_TRUTH_PRIORITY,
+  resolveLifePhysicalCapability, createFirstKaiosStrategy, evaluateKshipWarpFeed,
+  DIGITAL_ANT_V3_8_HEART_AUTOPILOT_APPROVAL, createV38HeartAutopilotPolicy
 } from "../core/index.mjs";
 import { verifyDigitalAntWalletBinding } from "../core/security/wallet-binding.mjs";
 import { TEMPLE_HEART_READ_ABI, TEMPLE_HEART_DRY_RUN_ABI, TEMPLE_HEART_VERIFIED_ACTIONS, readCoreHeartEvents } from "../core/integrations/temple-heart-12345.mjs";
-import { buildSharedWorkerStatus, createPublicReadProvider, readCompanyPatrol, readMotherEnginePatrol, readPublicRequestPatrol } from "../core/jobs/public-read-only-worker.mjs";
+import { buildSharedWorkerStatus, createPublicReadProvider, inspectPhysicsThoughtOrgan, readCompanyPatrol, readMotherEnginePatrol, readPublicRequestPatrol } from "../core/jobs/public-read-only-worker.mjs";
 
 const seed = JSON.parse(await fs.readFile(new URL("../core/data/canonical.json", import.meta.url), "utf8"));
 
@@ -649,7 +653,7 @@ test("V2.4 Life App release preserves Life ID, Birth and independent App version
   assert.equal(life.life_id, "DIGITAL_ANT_0001");
   assert.equal(life.birth_timestamp, "2026-08-15T06:20:45.000Z");
   assert.equal(app.life_id, life.life_id);
-  assert.equal(app.version, "V1.4.0");
+  assert.equal(app.version, "V1.5.0");
   assert.equal(app.status, "RELEASED_LOCAL");
   assert.equal(await calculateAppManifestHash(app), app.manifest_hash);
   assert.equal(app.permissions.CHAIN_READ, true);
@@ -2118,10 +2122,10 @@ test("V3.4 shared status is global truth while IndexedDB remains local cache", a
   assert.equal(status.chain_write, false);
 });
 
-test("V3.7 App upgrade preserves Life ID and immutable Birth", async () => {
+test("V3.8 App upgrade preserves Life ID and immutable Birth", async () => {
   const app = seed.apps.find((item) => item.app_id === "DIGITAL_ANT_APP_0001");
   const life = seed.lives.find((item) => item.life_id === "DIGITAL_ANT_0001");
-  assert.equal(app.version, "V1.4.0");
+  assert.equal(app.version, "V1.5.0");
   assert.equal(app.life_id, life.life_id);
   assert.equal(life.birth_timestamp, "2026-08-15T06:20:45.000Z");
   assert.equal(await calculateAppManifestHash(app), app.manifest_hash);
@@ -2234,16 +2238,16 @@ test("V3.5 Daily Gatekeeper report separates duty evidence and truthful zero bal
   assert.equal(report.chain_write, false);
 });
 
-test("V3.7 Canonical App and Gatekeeper runtime preserve Birth and receipt-gated first-asset evidence", async () => {
+test("V3.8 Canonical App and Gatekeeper runtime preserve Birth and receipt-gated first-asset evidence", async () => {
   const app = seed.apps.find((item) => item.app_id === "DIGITAL_ANT_APP_0001");
-  assert.equal(seed.schema_version, "3.7.0");
-  assert.equal(app.version, "V1.4.0");
+  assert.equal(seed.schema_version, "3.8.0");
+  assert.equal(app.version, "V1.5.0");
   assert.equal(await calculateAppManifestHash(app), app.manifest_hash);
   assert.equal(seed.lives[0].birth_timestamp, "2026-08-15T06:20:45.000Z");
   assert.equal(seed.next_stage.gatekeeper_runtime.life_events.FIRST_HEARTBEAT_EVENT, "VERIFIED");
   assert.equal(seed.next_stage.gatekeeper_runtime.life_events.FIRST_KGEN_EVENT, "VERIFIED");
   assert.equal(seed.next_stage.gatekeeper_runtime.life_events.FIRST_KAIOS_EVENT, "NOT_OCCURRED");
-  assert.equal(seed.next_stage.gatekeeper_runtime.secure_signer, "ONE_TIME_PRIVATE_EXECUTION_VERIFIED_PERSISTENT_AUTOPILOT_BLOCKED");
+  assert.equal(seed.next_stage.gatekeeper_runtime.secure_signer, "PRIVATE_LOCAL_SCHEDULER_CONNECTED_USER_SESSION_ACTIVE");
   assert.equal(seed.next_stage.gatekeeper_runtime.secure_signer_storage, "PRIVATE_ENVIRONMENT_OUTSIDE_REPO");
   assert.equal(seed.next_stage.gatekeeper_runtime.public_worker_signer, false);
   assert.equal(seed.next_stage.first_heartbeat_kgen_event.source, "HEARTBEAT_REWARD");
@@ -2307,7 +2311,7 @@ test("Mother Engine proposals remain evidence-based and cannot bypass asset auth
 
 test("Mother Engine patrol runs only after primary duty and creates no customer or revenue", () => {
   const duty = gatekeeperDuty();
-  const patrol = readMotherEnginePatrol(seed, { gatekeeperDuty: duty, finance: { BNB: "0.0059950537", KGEN: "1.0", KAIOS: "0.0" } });
+  const patrol = readMotherEnginePatrol(seed, { gatekeeperDuty: duty, finance: { BNB: "0.0059950537", KGEN: "1.0", KAIOS: "0.0" }, thoughtOrganHealth: seed.next_stage.thought_organ_health_v3_8 });
   assert.equal(patrol.status, "MOTHER_ENGINE_PATROL_COMPLETED_READ_ONLY");
   assert.equal(patrol.questions.primary_job_completed, true);
   assert.equal(patrol.questions.kgen_energy, "1.0");
@@ -2315,7 +2319,7 @@ test("Mother Engine patrol runs only after primary duty and creates no customer 
   assert.equal(patrol.chain_write, false);
   assert.equal(patrol.customer_created, false);
   assert.equal(patrol.revenue_created, "0");
-  assert.throws(() => readMotherEnginePatrol(seed, { gatekeeperDuty: gatekeeperDuty({ status: "FAILED_CRITICAL", degradation_affects_safety: true }), finance: { BNB: "0", KGEN: "0" } }), (error) => error.code === "PRIMARY_JOB_BYPASS");
+  assert.throws(() => readMotherEnginePatrol(seed, { gatekeeperDuty: gatekeeperDuty({ status: "FAILED_CRITICAL", degradation_affects_safety: true }), finance: { BNB: "0", KGEN: "0" }, thoughtOrganHealth: seed.next_stage.thought_organ_health_v3_8 }), (error) => error.code === "PRIMARY_JOB_BYPASS");
 });
 
 test("Demand-first product selection does not create factory, inventory, customer, or revenue", () => {
@@ -2476,9 +2480,9 @@ test("Mother Engine proactively selects evidence-backed next-best action", () =>
   assert.equal(result.revenue_created, false);
 });
 
-test("V3.7 canonical truth preserves primary job, zero business fiction, and protected coordinate reuse", () => {
-  assert.equal(seed.schema_version, "3.7.0");
-  assert.equal(seed.apps.find((app) => app.app_id === "DIGITAL_ANT_APP_0001").version, "V1.4.0");
+test("V3.8 canonical truth preserves primary job, zero business fiction, and protected coordinate reuse", () => {
+  assert.equal(seed.schema_version, "3.8.0");
+  assert.equal(seed.apps.find((app) => app.app_id === "DIGITAL_ANT_APP_0001").version, "V1.5.0");
   assert.equal(seed.next_stage.gatekeeper_runtime.primary_job, "WUKONG_GATEKEEPER");
   assert.equal(seed.next_stage.company_work_v3_7.real_customers, 0);
   assert.equal(seed.next_stage.company_work_v3_7.external_revenue, "0");
@@ -2488,7 +2492,91 @@ test("V3.7 canonical truth preserves primary job, zero business fiction, and pro
   assert.equal(seed.next_stage.kship_mars_v3_7.current_kship, "0");
   assert.equal(seed.next_stage.gatekeeper_runtime.life_events.FIRST_FORTUNE_EVENT, "VERIFIED");
   assert.equal(seed.next_stage.gatekeeper_runtime.life_events.FIRST_WISH_EVENT, "VERIFIED");
-  assert.equal(seed.next_stage.heart_life_events_v3_7.current_balances.KGEN, "3");
-  assert.equal(seed.next_stage.heart_life_events_v3_7.events.length, 3);
-  assert.equal(seed.next_stage.heart_life_events_v3_7.events.at(-1).kgen_cost, "0");
+  assert.equal(seed.next_stage.heart_life_events_v3_7.current_balances.KGEN, "4");
+  assert.equal(seed.next_stage.heart_life_events_v3_7.events.length, 4);
+  assert.equal(seed.next_stage.heart_life_events_v3_7.events.find((event) => event.event_type === "FIRST_WISH_EVENT").kgen_cost, "0");
+  assert.equal(seed.next_stage.heart_life_events_v3_7.events.at(-1).kgen_after, "4");
+});
+
+test("V3.8 Physics CURRENT is the byte-identical authoritative Thought Organ", async () => {
+  const current = await fs.readFile(new URL("../docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md", import.meta.url));
+  const formal = await fs.readFile(new URL("../docs/physics/KGEN_Universe_Physics_Runtime_V3_8.md", import.meta.url));
+  assert.deepEqual(current, formal);
+  const inspected = await inspectPhysicsThoughtOrgan({ seed, checkedAt: "2026-08-16T23:27:18.851Z" });
+  assert.equal(inspected.observation.document_id, "PF-PHYSICS-CURRENT-V3-8");
+  assert.equal(inspected.observation.version, "V3.8 LIVING PHYSICS / KUFO-KSHIP WARP / BIO-LIFE");
+  assert.equal(inspected.observation.sha256, "0ee983ac575096594b93c5dfe1cfa218a8cb08822a83e647332db7300f2bcbaa");
+  assert.equal(inspected.health.status, "HEALTHY");
+  assert.equal(assertThoughtOrganReadyForPlanning(inspected.health), true);
+  assert.equal(CANONICAL_TRUTH_PRIORITY[0], "DEPLOYED_CHAIN_TRUTH");
+  assert.equal(CANONICAL_TRUTH_PRIORITY[1], "CURRENT_RUNTIME_CONSTITUTION");
+  assert.equal(CANONICAL_TRUTH_PRIORITY.at(-1), "MEMORY_OR_CHAT");
+});
+
+test("V3.8 Thought Organ mismatch blocks certification and Mother planning", () => {
+  const binding = seed.next_stage.thought_organ_binding_v3_8;
+  validateThoughtOrganBinding(binding);
+  const health = verifyThoughtOrganHealth(binding, { document_id: binding.document_id, version: "V3.7 OLD REPORT", path: binding.path, sha256: "0".repeat(64), exists: true, readable: true, runtime_authority: "CURRENT" });
+  assert.equal(health.status, "THOUGHT_ORGAN_VERSION_MISMATCH");
+  assert.throws(() => assertThoughtOrganReadyForPlanning(health), (error) => error.code === "THOUGHT_ORGAN_NOT_READY_FOR_PLANNING");
+  const life = seed.lives[0];
+  const app = seed.apps.find((item) => item.app_id === life.app_id);
+  const certification = createAiLifeCertification({ life, birthCertificate: seed.birth_certificates[0], walletBinding: { life_id: life.life_id, status: "ACTIVE" }, workHistory: ["WORK_EVENT"], mission: life.ultimate_mission, dream: life.dream, thoughtOrganHealth: health, app, permissions: app.permissions, evidence: ["TEST_EVIDENCE"], secretSafe: true });
+  assert.equal(certification.status, "CERTIFICATION_BLOCKED");
+});
+
+test("V3.8 Thought Organ timeline is append-only binding metadata, not copied content", () => {
+  const binding = seed.next_stage.thought_organ_binding_v3_8;
+  const event = createThoughtOrganTimelineEvent({ eventType: "PHYSICS_THOUGHT_ORGAN_BOUND", binding, timestamp: "2026-08-16T23:27:18.851Z", evidence: ["CURRENT_HASH_VERIFIED"] });
+  assert.equal(event.append_only, true);
+  assert.equal(event.sha256, binding.sha256);
+  assert.equal(Object.hasOwn(binding, "content"), false);
+  assert.equal(JSON.stringify(binding).includes("PRIVATE_KEY"), false);
+});
+
+test("V3.8 Heart private scheduler policy respects cooldown/window and never blind-resubmits", () => {
+  const policy = createV38HeartAutopilotPolicy({ gasPolicy: { max_action_gas_cost_wei: "1000000", minimum_survival_bnb_wei: "2000000", MIN_SURVIVAL_BNB: "0.000002" }, approvalEvidence: DIGITAL_ANT_V3_8_HEART_AUTOPILOT_APPROVAL, privateSchedulerConnected: true });
+  assert.equal(policy.actions.heartbeatClaim.trigger, "ELIGIBILITY_DRIVEN");
+  assert.equal(policy.actions.heartbeatClaim.cooldown, "DEPLOYED_CONTRACT_DERIVED");
+  assert.equal(policy.actions.igniteAndClaim.trigger, "DEPLOYED_WINDOW_DRIVEN");
+  assert.equal(policy.actions.heartbeatClaim.blind_resubmit, false);
+  assert.equal(policy.public_worker.signer, false);
+  assert.equal(policy.actions.fortuneClaim.enabled, false);
+});
+
+test("V3.8 First KAIOS strategy requires real evidence and creates no customer or revenue", () => {
+  const strategy = createFirstKaiosStrategy({ availableServices: ["KGEN_CHAIN_MONITOR"], customerDemand: [], publicCivilizationDemand: [], authority: { read: true, chain_write: false }, paymentReadiness: "PAYMENT_INFRASTRUCTURE_PENDING", treasuryReadiness: "NOT_BOUND", technicalReadiness: "KGEN_CHAIN_MONITOR_READY_READ_ONLY", estimatedWork: "SERVICE_PACKAGE_AND_REQUEST_SCAN", risk: "LOW_READ_ONLY", settlementFeasibility: "RECEIVABLE_ONLY_DRY_RUN" });
+  assert.equal(strategy.first_kaios_event, "NOT_OCCURRED");
+  assert.equal(strategy.real_customers, 0);
+  assert.equal(strategy.real_revenue, "0");
+  assert.equal(strategy.next_kaios_earning_action, "PUBLISH_KGEN_CHAIN_MONITOR_SERVICE_PACKAGE_AND_SCAN_VERIFIED_REQUESTS");
+});
+
+test("V3.8 balanced KSHIP feed preserves velocity and braking consumes fuel", () => {
+  const coast = evaluateKshipWarpFeed({ positiveFeed: 5, negativeFeed: 5, currentVelocity: 88 });
+  assert.equal(coast.net_acceleration, 0);
+  assert.equal(coast.velocity_state, "COASTING_AT_EXISTING_VELOCITY");
+  assert.equal(coast.balanced_feed_means_zero_velocity, false);
+  assert.throws(() => evaluateKshipWarpFeed({ positiveFeed: 5, negativeFeed: 5, currentVelocity: 88, braking: true, brakingFuel: 0 }), (error) => error.code === "BRAKING_FUEL_REQUIRED");
+  assert.equal(evaluateKshipWarpFeed({ positiveFeed: 3, negativeFeed: 6, currentVelocity: 88, braking: true, brakingFuel: 2 }).braking_fuel_consumed, 2);
+});
+
+test("V3.8 no Body means network life, never fake physical movement", () => {
+  const capability = resolveLifePhysicalCapability({ life: seed.lives[0], body: null });
+  assert.equal(capability.life_status, "ALIVE");
+  assert.equal(capability.network_capable, true);
+  assert.equal(capability.physical_movement, false);
+  assert.equal(capability.cargo_movement, false);
+  assert.equal(capability.life_survives_body_absence, true);
+  assert.equal(seed.next_stage.land_engine_audit.coordinate_reuse, "REUSE_REQUIRED_NO_NEW_COORDINATE_SYSTEM");
+});
+
+test("V3.8 secure worker never serializes the credential and public worker has no signer", async () => {
+  const privateWorker = await fs.readFile(new URL("../core/security/verify-wallet-binding.mjs", import.meta.url), "utf8");
+  const publicWorker = await fs.readFile(new URL("../core/jobs/public-read-only-worker.mjs", import.meta.url), "utf8");
+  assert.doesNotMatch(privateWorker, /JSON\.stringify\([^\n]*privateKey/i);
+  assert.doesNotMatch(publicWorker, /DIGITAL_ANT_0001_PRIVATE_KEY/);
+  assert.equal(seed.next_stage.worker.signer, false);
+  assert.equal(seed.next_stage.persistent_private_scheduler_v3_8.public_signer, false);
+  assert.equal(seed.next_stage.gatekeeper_runtime.primary_job, "WUKONG_GATEKEEPER");
 });
