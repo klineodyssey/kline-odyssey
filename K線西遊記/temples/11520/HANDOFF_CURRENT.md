@@ -2,7 +2,7 @@
 
 V3.8 is the active cumulative public release. It retains the multilingual gateway, Voice Concierge, verified Heart/KGEN/Fortune/Wish history and production public Worker while upgrading `DIGITAL_ANT_APP_0001` to V1.5.0. Life ID, immutable Birth Certificate, Wallet ownership and Listing identity rights are unchanged.
 
-`DIGITAL_ANT_0001` now binds the single authoritative Physics Thought Organ at `docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md`. The installed CURRENT is byte-identical to V3.8 with SHA-256 `0ee983ac575096594b93c5dfe1cfa218a8cb08822a83e647332db7300f2bcbaa`. The Life manifest stores only binding, version, hash, authority, compatibility and evidence; it never copies the constitution. Startup mismatch blocks Mother Engine planning and records a truthful health state.
+`DIGITAL_ANT_0001` now binds the single authoritative Physics Thought Organ at `docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md`. The installed CURRENT is byte-identical to V3.8; the cross-platform canonical UTF-8/LF SHA-256 is `dbb4774a71db614994dff3e08e9cec34b94633c4d46dca13bff2f6f54d9b0b48`. The Life manifest stores only binding, version, hash, authority, compatibility and evidence; it never copies the constitution. Startup mismatch blocks Mother Engine planning and records a truthful health state.
 
 AI Life certification includes Thought Organ integrity and secret safety and is `CERTIFIED_LOCAL`; it grants no settlement, physical movement or chain custody authority. The First KAIOS strategy remains evidence-first: publish the read-only KGEN Chain Monitor package and scan verified Requests. Customers, Revenue, Company Treasury binding and KAIOS remain zero.
 

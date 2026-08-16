@@ -104,7 +104,7 @@ export async function inspectPhysicsThoughtOrgan({ seed, readFileImpl = readFile
     document_id: documentMatch?.[1]?.trim() ?? null,
     version: versionMatch?.[1]?.trim() ?? null,
     path: "docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md",
-    sha256: bytes ? createHash("sha256").update(bytes).digest("hex") : null,
+    sha256: bytes ? createHash("sha256").update(text.replace(/\r\n/g, "\n"), "utf8").digest("hex") : null,
     exists: Boolean(bytes), readable: Boolean(bytes), runtime_authority: "CURRENT", checked_at: checkedAt
   });
   const health = verifyThoughtOrganHealth(binding, observation);
