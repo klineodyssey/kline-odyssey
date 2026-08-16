@@ -11,16 +11,16 @@
   "chain_write": false,
   "worker_health": "HEALTHY",
   "work_stop_reason": null,
-  "generated_at": "2026-08-16T16:22:11.130Z",
+  "generated_at": "2026-08-16T17:36:21.840Z",
   "last_work_cycle": {
-    "event_id": "DIGITAL_ANT_0001_HOURLY_2026081616",
+    "event_id": "DIGITAL_ANT_0001_HOURLY_2026081617",
     "life_id": "DIGITAL_ANT_0001",
     "app_id": "DIGITAL_ANT_APP_0001",
-    "work_cycle_id": "DIGITAL_ANT_0001_HOURLY_2026081616",
-    "scheduled_at": "2026-08-16T16:00:00.000Z",
-    "started_at": "2026-08-16T16:22:08.918Z",
-    "finished_at": "2026-08-16T16:22:11.129Z",
-    "bsc_block": 116303569,
+    "work_cycle_id": "DIGITAL_ANT_0001_HOURLY_2026081617",
+    "scheduled_at": "2026-08-16T17:00:00.000Z",
+    "started_at": "2026-08-16T17:36:21.173Z",
+    "finished_at": "2026-08-16T17:36:21.839Z",
+    "bsc_block": 116313459,
     "wallet_state": {
       "status": "PUBLIC_ADDRESS_READ",
       "bnb": "0.0059950537"
@@ -30,25 +30,25 @@
       "source": "REPOSITORY_ABI_PUBLIC_CHAIN_READ",
       "eligibility_source": "CLIENT_DERIVED",
       "heartbeat": {
-        "status": "NOT_ELIGIBLE",
-        "reason": "HEARTBEAT_COOLDOWN",
+        "status": "ELIGIBLE",
+        "reason": "HEARTBEAT_ELIGIBLE",
         "eligibility_source": "CLIENT_DERIVED",
         "write_status": "WRITE_NOT_CONNECTED",
-        "next_eligible_time": "2026-08-16T16:44:58.000Z"
+        "next_eligible_time": "2026-08-16T17:36:20.000Z"
       },
       "fortune": {
         "status": "ELIGIBLE",
         "reason": "FORTUNE_CLAIM_ELIGIBLE",
         "eligibility_source": "CLIENT_DERIVED",
         "write_status": "WRITE_NOT_CONNECTED",
-        "next_eligible_time": "2026-08-16T16:22:08.000Z"
+        "next_eligible_time": "2026-08-16T17:36:20.000Z"
       },
       "ignition": {
         "status": "OUT_OF_WINDOW",
         "reason": "IGNITE_OUT_OF_WINDOW",
         "eligibility_source": "CLIENT_DERIVED",
         "write_status": "WRITE_NOT_CONNECTED",
-        "next_eligible_time": "2026-08-16T23:59:59.000Z"
+        "next_eligible_time": "2026-08-17T00:00:00.000Z"
       },
       "lamp": {
         "status": "INSUFFICIENT_BALANCE",
@@ -74,8 +74,8 @@
         "status": "CORE_HEART_INDEXER_HEALTHY",
         "indexer": "CORE_HEART_INDEXER",
         "failed_event_types": [],
-        "from_block": 116303469,
-        "to_block": 116303568,
+        "from_block": 116313360,
+        "to_block": 116313459,
         "fortune_claims": [],
         "wishes": [],
         "heartbeat_claims": [],
@@ -146,12 +146,12 @@
     ],
     "gatekeeper_duty": {
       "status": "COMPLETED",
-      "gatekeeper_started_at": "2026-08-16T16:22:09.491Z",
-      "gatekeeper_finished_at": "2026-08-16T16:22:10.821Z",
-      "heart_block": 116303568,
+      "gatekeeper_started_at": "2026-08-16T17:36:21.377Z",
+      "gatekeeper_finished_at": "2026-08-16T17:36:21.655Z",
+      "heart_block": 116313459,
       "heart_status": "AVAILABLE",
       "fortune_status": "ELIGIBLE",
-      "heartbeat_status": "NOT_ELIGIBLE",
+      "heartbeat_status": "ELIGIBLE",
       "ignition_status": "OUT_OF_WINDOW",
       "lamp_status": "INSUFFICIENT_BALANCE",
       "wish_status": "ELIGIBLE",
@@ -161,7 +161,7 @@
       "degradation_affects_safety": false,
       "advanced_graph_status": "ADVANCED_GRAPH_INDEXER_REQUIRED",
       "evidence": [
-        "HEART_BLOCK_116303568",
+        "HEART_BLOCK_116313459",
         "HEART_BYTECODE_VERIFIED",
         "CORE_HEART_INDEXER_HEALTHY"
       ]
@@ -270,10 +270,10 @@
       }
     },
     "work_time": {
-      "gatekeeper_work_seconds": 1.33,
+      "gatekeeper_work_seconds": 0.278,
       "cfo_work_seconds": 0.001,
-      "company_work_seconds": 0.306,
-      "life_health_seconds": 0.271
+      "company_work_seconds": 0.183,
+      "life_health_seconds": 0.08
     },
     "action_taken": "NO_ACTION",
     "result": "WORK_CYCLE_COMPLETED",
@@ -286,31 +286,31 @@
     ],
     "gas_spent": "0",
     "tx_hash": null,
-    "work_duration_seconds": 2
+    "work_duration_seconds": 0
   },
-  "next_expected_at": "2026-08-16T17:00:00.000Z",
+  "next_expected_at": "2026-08-16T18:00:00.000Z",
   "metrics": {
-    "completed_cycles": 3,
+    "completed_cycles": 4,
     "failed_cycles": 1,
     "degraded_cycles": 5,
-    "no_action_cycles": 9,
+    "no_action_cycles": 10,
     "action_cycles": 0,
     "work_duration_seconds": 11,
-    "gatekeeper_work_seconds": 4.085,
-    "cfo_work_seconds": 0.002,
-    "company_work_seconds": 0.8819999999999999,
+    "gatekeeper_work_seconds": 4.3629999999999995,
+    "cfo_work_seconds": 0.003,
+    "company_work_seconds": 1.065,
     "missed_cycles": 1
   },
   "primary_job": "WUKONG_GATEKEEPER",
   "secondary_work": "AI_ANT_COMPANY_FOUNDER",
   "gatekeeper_duty": {
     "status": "COMPLETED",
-    "gatekeeper_started_at": "2026-08-16T16:22:09.491Z",
-    "gatekeeper_finished_at": "2026-08-16T16:22:10.821Z",
-    "heart_block": 116303568,
+    "gatekeeper_started_at": "2026-08-16T17:36:21.377Z",
+    "gatekeeper_finished_at": "2026-08-16T17:36:21.655Z",
+    "heart_block": 116313459,
     "heart_status": "AVAILABLE",
     "fortune_status": "ELIGIBLE",
-    "heartbeat_status": "NOT_ELIGIBLE",
+    "heartbeat_status": "ELIGIBLE",
     "ignition_status": "OUT_OF_WINDOW",
     "lamp_status": "INSUFFICIENT_BALANCE",
     "wish_status": "ELIGIBLE",
@@ -320,7 +320,7 @@
     "degradation_affects_safety": false,
     "advanced_graph_status": "ADVANCED_GRAPH_INDEXER_REQUIRED",
     "evidence": [
-      "HEART_BLOCK_116303568",
+      "HEART_BLOCK_116313459",
       "HEART_BYTECODE_VERIFIED",
       "CORE_HEART_INDEXER_HEALTHY"
     ]
@@ -344,25 +344,25 @@
       "source": "REPOSITORY_ABI_PUBLIC_CHAIN_READ",
       "eligibility_source": "CLIENT_DERIVED",
       "heartbeat": {
-        "status": "NOT_ELIGIBLE",
-        "reason": "HEARTBEAT_COOLDOWN",
+        "status": "ELIGIBLE",
+        "reason": "HEARTBEAT_ELIGIBLE",
         "eligibility_source": "CLIENT_DERIVED",
         "write_status": "WRITE_NOT_CONNECTED",
-        "next_eligible_time": "2026-08-16T16:44:58.000Z"
+        "next_eligible_time": "2026-08-16T17:36:20.000Z"
       },
       "fortune": {
         "status": "ELIGIBLE",
         "reason": "FORTUNE_CLAIM_ELIGIBLE",
         "eligibility_source": "CLIENT_DERIVED",
         "write_status": "WRITE_NOT_CONNECTED",
-        "next_eligible_time": "2026-08-16T16:22:08.000Z"
+        "next_eligible_time": "2026-08-16T17:36:20.000Z"
       },
       "ignition": {
         "status": "OUT_OF_WINDOW",
         "reason": "IGNITE_OUT_OF_WINDOW",
         "eligibility_source": "CLIENT_DERIVED",
         "write_status": "WRITE_NOT_CONNECTED",
-        "next_eligible_time": "2026-08-16T23:59:59.000Z"
+        "next_eligible_time": "2026-08-17T00:00:00.000Z"
       },
       "lamp": {
         "status": "INSUFFICIENT_BALANCE",
@@ -388,8 +388,8 @@
         "status": "CORE_HEART_INDEXER_HEALTHY",
         "indexer": "CORE_HEART_INDEXER",
         "failed_event_types": [],
-        "from_block": 116303469,
-        "to_block": 116303568,
+        "from_block": 116313360,
+        "to_block": 116313459,
         "fortune_claims": [],
         "wishes": [],
         "heartbeat_claims": [],
