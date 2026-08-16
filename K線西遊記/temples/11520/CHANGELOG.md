@@ -1,5 +1,16 @@
 # 11520 Changelog
 
+## 3.7.0
+
+- Upgraded `DIGITAL_ANT_APP_0001` to V1.4.0 without changing Life ID, Birth, Wallet, Listing or Company identity.
+- Added public evidence-based Heartbeat/Ignition/Fortune/Wish candidates, UTC ignition-window probes, private-only policy gates and no-resubmit receipt reconciliation.
+- Recorded a verified second Heartbeat, first Fortune (minimum/fair 1 KGEN) and first Wish from a controlled private invocation; persistent automatic signing remains blocked.
+- Recorded the complete Wish and hash, with zero KGEN token cost, dynamic BNB gas and Vow locked until mission completion.
+- Read-verified the deployed 18911 Furnace architecture while truthfully blocking KAIOS Incense and KUFO Claim because the Ant has zero KAIOS and 511111/KSHIP Converter are not registered.
+- Formalized `1 K18888 Heaven Day = 1 K280 year`, one-year KUFO half-life, deterministic lazy decay, separate propulsion use, conserved KSHIP derivation and the permanent `KUFO != UFO` distinction.
+- Added demand-first UFO/takeoff and KSHIP/Mars industry projections without creating a vehicle, fuel, factory, customer or revenue.
+- Added proactive Mother Engine problem discovery and evidence-backed next-best-action selection.
+
 ## 3.5.0
 
 - Upgraded `DIGITAL_ANT_APP_0001` to V1.2.0 without changing Life ID, immutable Birth Certificate, Wallet binding, Listing or Company identity.

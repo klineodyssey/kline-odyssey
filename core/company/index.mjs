@@ -70,6 +70,96 @@ export const DEMAND_FIRST_CIVILIZATION_LAWS = Object.freeze([
 ]);
 export const DIVINE_PRODUCT_CANDIDATES = Object.freeze(["ANT_MECH_BODY", "KUFO_CLOUD", "POCKET_TIME_UFO", "KSHIP_CARRIER", "ENERGY_CORE", "NAVIGATION_CORE", "CARGO_MODULE", "MAINTENANCE_SERVICE"]);
 
+export const HEAVEN_TIME_LAW = Object.freeze({
+  law_id: "K18888_HEAVEN_TIME_LAW_V3_7",
+  k280_time_standard: "CANONICAL_PHYSICAL_TIME",
+  k18888_time_standard: "HEAVEN_TIME",
+  heaven_day_k280_years: 1,
+  heaven_day_k280_days: 365.2422,
+  kufo_half_life_k280_years: 1,
+  superseded_rule: "1_K280_DAY_EQUALS_3_HEAVEN_DAYS",
+  superseded_rule_status: "SUPERSEDED_WRONG",
+  literary_time_rule: "ONE_DAY_APART_FEELS_LIKE_THREE_AUTUMNS",
+  literary_time_runtime_authority: false
+});
+
+export const KUFO_FUEL_LAW = Object.freeze({
+  asset_id: "KUFO",
+  definition: "HEAVEN_HIGH_DENSITY_DECAY_FUEL",
+  half_life: "1_K18888_HEAVEN_DAY_EQUALS_1_K280_YEAR",
+  kship_per_kufo_scale: 1000,
+  decay_mode: "LAZY_DETERMINISTIC_CANONICAL_TIME",
+  natural_decay_separate_from_propulsion: true,
+  browser_local_clock_authority: false,
+  operator_confiscation_authority: false,
+  vehicle_identity: false
+});
+
+export function calculateKufoFuelState(batch, observedAt) {
+  requireFields(batch, ["batch_id", "owner", "alchemy_proof", "birth_timestamp", "birth_block", "initial_kufo", "propulsion_consumed_kufo"], "KufoFuelBatch");
+  requireId(batch.batch_id, "batch_id");
+  invariant(batch.alchemy_proof && Number.isInteger(batch.birth_block) && batch.birth_block > 0, "KUFO_BIRTH_EVIDENCE_REQUIRED", "KUFO fuel requires real alchemy and block evidence");
+  const birthMs = Date.parse(batch.birth_timestamp);
+  const observedMs = Date.parse(observedAt);
+  invariant(Number.isFinite(birthMs) && Number.isFinite(observedMs) && observedMs >= birthMs, "KUFO_CANONICAL_TIME_REQUIRED", "KUFO decay requires canonical time at or after birth");
+  const initial = Number(batch.initial_kufo);
+  const propulsion = Number(batch.propulsion_consumed_kufo);
+  invariant(Number.isFinite(initial) && initial > 0 && Number.isFinite(propulsion) && propulsion >= 0 && propulsion <= initial, "KUFO_FUEL_AMOUNT_INVALID", "KUFO batch amounts must conserve fuel");
+  const elapsedYears = (observedMs - birthMs) / (HEAVEN_TIME_LAW.heaven_day_k280_days * 86_400_000);
+  const afterPropulsion = initial - propulsion;
+  const remaining = afterPropulsion * (2 ** (-elapsedYears / HEAVEN_TIME_LAW.kufo_half_life_k280_years));
+  const naturalDecay = afterPropulsion - remaining;
+  return Object.freeze({
+    batch_id: batch.batch_id, owner: batch.owner, observed_at: observedAt,
+    initial_kufo: initial, propulsion_consumed_kufo: propulsion,
+    natural_decay_kufo: naturalDecay, remaining_kufo: remaining,
+    generated_kship: naturalDecay * KUFO_FUEL_LAW.kship_per_kufo_scale,
+    mass_conservation_status: Math.abs(initial - (remaining + naturalDecay + propulsion)) < 1e-12 ? "CONSERVED" : "VIOLATION",
+    calculation: "KUFO_REMAINING_EQUALS_POST_PROPULSION_KUFO_TIMES_2_POW_NEGATIVE_ELAPSED_OVER_HALF_LIFE",
+    time_authority: "CANONICAL_K280_TIMESTAMP_REQUIRED"
+  });
+}
+
+export function createUfoProductReadiness({ needEvidence = [], bodyReady = false, designReady = false, bomReady = false, supplyChainReady = false } = {}) {
+  requireArray(needEvidence, "ufo.need_evidence");
+  return Object.freeze({
+    product_id: "UFO_PRODUCT", vehicle_class: "UFO", fuel_asset: "KUFO", secondary_energy: "KSHIP",
+    purchase_currency: "KAIOS", chain_gas: "BNB", status: needEvidence.length ? "DEMAND_IDENTIFIED_NOT_DESIGNED" : "NO_VERIFIED_DEMAND",
+    price: null, price_status: "NOT_PRICED", owned: false, ownership_status: "NOT_OWNED",
+    factory: "NOT_CREATED", production_line: "NOT_CREATED", body_ready: bodyReady, design_ready: designReady,
+    bom_ready: bomReady, supply_chain_ready: supplyChainReady, demand_evidence: [...needEvidence], kufo_is_ufo: false
+  });
+}
+
+export function evaluateUfoTakeoff({ availableKufo, requiredKufo, returnReserveKufo, vehicleMass, payloadMass, distance, gravityFactor, efficiency }) {
+  const values = [availableKufo, requiredKufo, returnReserveKufo, vehicleMass, payloadMass, distance, gravityFactor, efficiency].map(Number);
+  invariant(values.every(Number.isFinite) && values.every((value) => value >= 0) && Number(efficiency) > 0, "TAKEOFF_MODEL_INVALID", "Takeoff requires finite non-negative physical inputs and positive efficiency");
+  const minimumRequired = Number(requiredKufo) + Number(returnReserveKufo);
+  const allowed = Number(availableKufo) >= minimumRequired;
+  return Object.freeze({
+    status: allowed ? "TAKEOFF_ALLOWED_BY_FUEL_GATE_ONLY" : "TAKEOFF_DENIED",
+    reason: allowed ? "OTHER_SAFETY_GATES_STILL_REQUIRED" : "FUEL_INSUFFICIENT",
+    available_kufo: Number(availableKufo), minimum_required_kufo: minimumRequired,
+    model: Object.freeze({ vehicle_mass: Number(vehicleMass), payload_mass: Number(payloadMass), distance: Number(distance), gravity_factor: Number(gravityFactor), efficiency: Number(efficiency), return_reserve_kufo: Number(returnReserveKufo) })
+  });
+}
+
+export function createMotherEngineNextBestAction({ observations, candidates }) {
+  requireArray(observations, "mother_engine.observations");
+  requireArray(candidates, "mother_engine.candidates");
+  invariant(observations.length > 0 && candidates.length > 0, "MOTHER_ENGINE_DISCOVERY_EVIDENCE_REQUIRED", "Next-best action requires observed evidence and candidates");
+  const ordered = [...candidates].sort((a, b) => Number(a.priority) - Number(b.priority) || String(a.action).localeCompare(String(b.action)));
+  const selected = ordered[0];
+  requireFields(selected, ["problem", "priority", "action", "reason", "required_authority", "expected_result"], "MotherEngineCandidate");
+  return Object.freeze({
+    event_type: "MOTHER_ENGINE_NEXT_BEST_ACTION", status: "PROPOSED_EVIDENCE_BASED",
+    problem: selected.problem, evidence: [...observations], priority: selected.priority,
+    possible_actions: ordered.map((item) => item.action), selected_action: selected.action,
+    reason: selected.reason, required_authority: selected.required_authority, expected_result: selected.expected_result,
+    execute_if_authorized_only: true, customer_created: false, revenue_created: false
+  });
+}
+
 export async function replayCanonicalCompanyGenesis({ store, company, founderLife, charter, genesis }) {
   invariant(company?.company_id === "AI_ANT_COMPANY_0001", "COMPANY_GENESIS_ID_MISMATCH", "Company Genesis can only form the reserved AI Ant Company identity");
   invariant(company.founder_life_id === founderLife?.life_id && founderLife?.life_id === "DIGITAL_ANT_0001" && founderLife.status === "ALIVE", "FOUNDER_LIFE_REQUIRED", "Company Genesis requires the living registered Founder Life");

@@ -1,5 +1,17 @@
 # 11520 Universal Exchange V2 Architecture
 
+## V3.7 Heart Autopilot candidates and Heaven fuel civilization
+
+The public GitHub Worker remains signer-free. It now emits evidence-based Heartbeat, Ignition, Fortune and one-time Wish action candidates, plus UTC 00:02/00:07 ignition-window probes. Candidates are never trusted for signature: a separate private scheduler must re-read chain 56, addresses/code, eligibility/window, nonce, gas, survival reserve and security state, then reconcile the original transaction instead of blindly resubmitting after an RPC timeout. That persistent private scheduler is not installed, so production auto-write is truthfully `BLOCKED_NO_PERSISTENT_PRIVATE_SECURE_SCHEDULER`; the documented safe solution is outside Pages, Repo and public Actions.
+
+One controlled private invocation completed a second Heartbeat, first Fortune at the deployed minimum/fair amount of 1 KGEN, and first Wish. Receipts, expected Heart logs, block times, gas and balance transitions are preserved in the cumulative canonical record. Current verified KGEN is 3. This is evidence for the manual secure path, not evidence of persistent auto-write.
+
+`DIGITAL_ANT_WISH_0001` stores the human-readable mission in the public Life record and only its `bytes32` hash in a future `makeWish` action. Wish costs no KGEN but requires dynamic BNB gas. Vow remains locked until verified mission completion. Existing TempleHeart `lightLamp` remains KGEN-based and no TempleHeart source is changed.
+
+The canonical 18911 furnace address and runtime are dual-RPC readable on BSC mainnet, but the Registry currently returns zero addresses for the 511111 Wormhole and KSHIP Converter. The Ant also has zero KAIOS. Therefore KAIOS Incense is opt-in and `BLOCKED_NO_KAIOS`; Alchemy Proof, KUFO Claim and KSHIP generation remain unoccurred/not executable. The deployed furnace's 49 maturation epochs are distinct from KUFO half-life.
+
+Heaven time is now cumulative and unambiguous: one K18888 Heaven Day equals one K280 year (about 365.2422 K280 days), and KUFO half-life is one such Heaven Day/year. The former `1 K280 day = 3 Heaven days` rule is `SUPERSEDED_WRONG`; “three autumns” is literary only. KUFO is deterministic, timestamped decay fuel—not a UFO. Natural decay and propulsion consumption are separate, and decayed KUFO produces KSHIP at the declared 1:1000 scale while conserving the modelled mass. A UFO is a demand-first product bought in KAIOS, fuelled by KUFO, supported by KSHIP and gated from takeoff when fuel plus return reserve is insufficient. No vehicle, factory, chip line, KUFO or KSHIP is invented.
+
 ## V3.6 first Heartbeat, first KGEN and demand-first civilization
 
 `DIGITAL_ANT_0001` completed its first mainnet `heartbeatClaim()` at block `116298614`. The successful receipt, `HeartbeatClaimed` log, KGEN `Transfer`, timestamp and 0 → 1 KGEN balance change are preserved as one public evidence package and two separate first-event records. The source is `HEARTBEAT_REWARD`; no Fortune event is inferred.

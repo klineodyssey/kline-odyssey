@@ -1,6 +1,14 @@
-# 11520 Universal Exchange V3.6 Current Handoff
+# 11520 Universal Exchange V3.7 Current Handoff
 
-V3.6 is the active cumulative public release. It retains the multilingual gateway, Voice Concierge and production hourly public Worker while upgrading `DIGITAL_ANT_APP_0001` to V1.3.0. Life ID, immutable Birth Certificate, Wallet ownership and Listing identity rights are unchanged.
+V3.7 is the active cumulative public release. It retains the multilingual gateway, Voice Concierge, verified first Heartbeat/KGEN and production public Worker while upgrading `DIGITAL_ANT_APP_0001` to V1.4.0. Life ID, immutable Birth Certificate, Wallet ownership and Listing identity rights are unchanged.
+
+The public Worker now creates Heart action candidates and runs additional UTC 00:02/00:07 probes for the deployed 00:00–00:10 Ignition window. It still has no signer and never broadcasts. Persistent Heartbeat/Ignition/Fortune/Wish auto-write is blocked because there is no private secure scheduler; the safe path requires a private secret manager, address binding, fresh chain/contract/eligibility/gas/reserve checks and receipt reconciliation with no blind resubmission.
+
+A controlled private V3.7 invocation revalidated those gates and completed one additional Heartbeat, the first minimum/fair Fortune claim (1 KGEN), and the first Wish. Their transaction receipts, Heart events, timestamps, balance deltas and gas costs are recorded in `heart_life_events_v3_7`; the Ant now has 3 KGEN and 0 KAIOS. This proves the one-time safe path, not persistent automation.
+
+KAIOS Incense is a separate, opt-in 18911 ritual and never changes the existing KGEN Heart Lamp. The 18911 furnace is mainnet read-verified, but the Registry has no 511111 Wormhole or KSHIP Converter address, and the Ant has no KAIOS. Alchemy, KUFO and KSHIP remain unoccurred/not executable.
+
+The authoritative time/fuel law is `1 K18888 Heaven Day = 1 K280 year`; KUFO half-life is one K280 year. KUFO is timestamped decay/propulsion fuel and is not a UFO. KSHIP derives from conserved KUFO decay at the declared 1:1000 scale and is not a chip. UFO, production line and Mars chip factory remain demand-first, unpriced and not created.
 
 The first `heartbeatClaim()` completed on BSC mainnet in transaction `0xc9e8e40c2e49394211bc1ffba4eba0bf4a0ea22cc2944f64e9603c1e0b8f60c2`, block `116298614`. Receipt status, `HeartbeatClaimed`, KGEN `Transfer`, timestamp and KGEN balance change from 0 to 1 are independently verified. This creates separate append-only `FIRST_HEARTBEAT_EVENT` and `FIRST_KGEN_EVENT` records with source `HEARTBEAT_REWARD`; it does not create a Fortune event.
 
