@@ -888,4 +888,10 @@ Runtime V1 implementation:
 | `.github/ISSUE_TEMPLATE/civilization-request.yml` | Authenticated shared real-request entry; not a Quote, Order or payment. |
 | `KGEN-AI-Company/reports/DIGITAL_ANT_V3_4_LIVE_LIFE_REPORT.md` | V3.4 task envelope, validation, protected-path and production deployment evidence. |
 | `docs/KGEN_11520_V2_ARCHITECTURE.md` | Cumulative architecture and authority gates. |
+
+### V3.6 additive files
+
+| Path | Purpose |
+|---|---|
+| `K線西遊記/temples/11520/runtime/life-events/DIGITAL_ANT_0001_FIRST_HEARTBEAT_AND_KGEN_V3_6.json` | Public append-only receipt/log/balance evidence for the first Heartbeat and first KGEN events. |
 | `tests/universal-exchange.test.mjs` | Domain and public request safety regression suite. |

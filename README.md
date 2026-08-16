@@ -1260,7 +1260,7 @@ The deterministic simulation at `world-viewer/creator-marketplace/` connects one
 - Specification owner: `KAIOS/marketplace/creator-marketplace/`
 - Safety: simulation only; no real wallet, KGEN, on-chain transfer, silent mint or external autonomy.
 
-## 11520 Universal Exchange V3.5
+## 11520 Universal Exchange V3.6
 
 The public 11520 entry now hosts the multilingual Digital Ant civilization gateway and
 an evidence-derived hourly Life Worker. Voice begins only after a user gesture and always
@@ -1279,6 +1279,10 @@ signer-free; the separate Secure Signer specification is `NOT_CONNECTED`.
 - Architecture: `docs/KGEN_11520_V2_ARCHITECTURE.md`
 - Validation: `tests/universal-exchange.test.mjs`
 - Shared Worker status: `K線西遊記/temples/11520/runtime/worker-status.json`
+- Verified first Heartbeat/KGEN evidence: `K線西遊記/temples/11520/runtime/life-events/DIGITAL_ANT_0001_FIRST_HEARTBEAT_AND_KGEN_V3_6.json`
+- Public safety-policy source: `core/security/life-security.mjs`. The credential-capable signer remains outside the Repo, Pages, browser and public workflows.
+
+V3.6 verifies the first `heartbeatClaim()` and first 1 KGEN reward from one successful BSC receipt while keeping Fortune separate. The public scheduler remains read-only. Demand-first KGEN energy, ANT_MECH, transport and supply-chain models are architecture-only and reuse the existing K280/12345/Universe Map coordinate system.
 - Shared request entry: `.github/ISSUE_TEMPLATE/civilization-request.yml`
 - Production report: `KGEN-AI-Company/reports/DIGITAL_ANT_V3_5_WUKONG_GATEKEEPER_DUTY_REPORT.md`
 - Settlement and company treasury remain gated; no automatic chain write is introduced by the gateway.

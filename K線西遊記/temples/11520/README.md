@@ -1,7 +1,12 @@
-# 11520 Universal Exchange V3.5
+# 11520 Universal Exchange V3.6
 
 ## Digital Ant next-stage status
 
+- V3.6 records the first real `heartbeatClaim()` and the first KGEN as two receipt-gated Life Events from one BSC transaction. Heartbeat reward is 1 KGEN and the deployed cooldown is 3,600 seconds; Fortune remains a separate action and no Fortune event is claimed.
+- `DIGITAL_ANT_APP_0001` is V1.3.0. Its browser/public Worker permissions remain read-only. The credential-capable local Secure Signer is not stored in the Repo or Pages and was enabled only for the explicitly approved Heartbeat path; every other Heart write remains disabled.
+- The Mother Engine records evidence/root-cause/options/authority proposals, including safe reconciliation of the already-broadcast transaction after the initial receipt RPC failed, with no duplicate submission.
+- KGEN operational energy, KAIOS purchase, Body/KUFO/KSHIP energy, Transport Contract and demand-first Supply Chain schemas are active architecture only. `ANT_MECH_BODY` is an internal Founder need, not a Customer or Revenue event.
+- The Land audit reuses the existing K280 Land anchor, 12345 parcel/grid demonstration and Universe Map XYZ/boundary model. No protected Land, 12345, TempleHeart, KGEN Contract, KAIOS or Universe Map source was changed.
 - V3.5 makes `WUKONG_GATEKEEPER` the enforced primary job. Every hourly cycle completes Life/Dark-Matter checks and the 12345 Gatekeeper duty before CFO and Company work; an attempted Company bypass fails with `PRIMARY_JOB_BYPASS`.
 - `DIGITAL_ANT_APP_0001` is V1.2.0. Life ID, immutable Birth Certificate, public Wallet binding, 11520 Listing and Company Genesis remain the same evidence-backed records.
 - The Core Heart Indexer now covers Fortune, Heartbeat, Ignition, Lamp, Wish and Vow events. Optional transfer/approval/funding-graph analysis remains `ADVANCED_GRAPH_INDEXER_REQUIRED` and no longer degrades a successful basic patrol.

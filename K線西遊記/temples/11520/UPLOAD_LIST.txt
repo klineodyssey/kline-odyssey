@@ -1,10 +1,14 @@
 core/
 tests/universal-exchange.test.mjs
 docs/KGEN_11520_V2_ARCHITECTURE.md
+docs/KGEN_MASTER_INDEX.md
+docs/KGEN_FRONTEND_INDEX.md
+README.md
 K線西遊記/temples/11520/
 K線西遊記/data/kgen-5d-world-map.json
 K線西遊記/index.html
 .github/workflows/universal_exchange_v2.yml
+.github/workflows/deploy-pages-static.yml
 .github/ISSUE_TEMPLATE/civilization-request.yml
 .env.example
 .gitignore
