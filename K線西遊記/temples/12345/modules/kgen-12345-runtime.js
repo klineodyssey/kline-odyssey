@@ -10,21 +10,23 @@ LEGACY: modules/archive/kgen-12345-runtime.legacy.js (quarantined, not loaded)
 
   window.KGEN_12345_CONFIG = Object.freeze({
     templeId: "12345",
-    version: "V2.1.9",
-    tag: "12345-TEMPLE-RUNTIME-CORE-V2.1.9",
+    version: "V3.4.0-FRONTEND",
+    tag: "12345-TEMPLE-RUNTIME-CORE-V3.4.0",
     chain: {
       KGEN: "0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be",
-      HEART: "0xB016D4d8f1aED1339101b30722cad6dbA9B8C972",
+      HEART: null,
+      LEGACY_HEART: "0xB016D4d8f1aED1339101b30722cad6dbA9B8C972",
       BRAIN: "0xd0605F4EF10e5C1438F11AF9edc36926769239d6",
       MARS: "0x3529dbFbaD465C2269F8096879A1c298d5257298",
       BSC: "0x38",
       RPC: "https://bsc-dataseed.binance.org/"
     },
     assets: {
-      heart: "./assets/heart.png",
+      heart: "./assets/heart-front.png",
+      heartFallback: "./assets/heart.png",
       front: "./assets/bull-front.png",
       back: "./assets/bear-rear.png",
-      core: "./assets/warp-core.png"
+      core: "./assets/warp-universe.png"
     },
     cupKeys: [
       "kgen12345_cup_count_v10492",

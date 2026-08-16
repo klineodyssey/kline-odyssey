@@ -7,21 +7,23 @@
   const BRIDGE_LOGIC_VERSION = "V10.49.2 restored logic";
   const MUSIC_PLAYLIST_URL = "./music/playlist.json";
   const KLINE_CACHE_KEY = "kgen12345_kline_cache_v205";
-  const HEART_CONTRACT = "KGEN_TempleHeart_V3_2_6.sol";
+  const HEART_CONTRACT = "KGEN_TempleHeart_Upgradeable.sol";
   const CONFIG = window.KGEN_12345_CONFIG || {};
   const CHAIN = Object.assign({
     KGEN: "0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be",
-    HEART: "0xB016D4d8f1aED1339101b30722cad6dbA9B8C972",
+    HEART: null,
+    LEGACY_HEART: "0xB016D4d8f1aED1339101b30722cad6dbA9B8C972",
     BRAIN: "0xd0605F4EF10e5C1438F11AF9edc36926769239d6",
     MARS: "0x3529dbFbaD465C2269F8096879A1c298d5257298",
     BSC: "0x38",
     RPC: "https://bsc-dataseed.binance.org/"
   }, CONFIG.chain || {});
   const ASSETS = Object.assign({
-    heart: "./assets/heart.png",
+    heart: "./assets/heart-front.png",
+    heartFallback: "./assets/heart.png",
     front: "./assets/bull-front.png",
     back: "./assets/bear-rear.png",
-    core: "./assets/warp-core.png"
+    core: "./assets/warp-universe.png"
   }, CONFIG.assets || {});
   const CUP_KEYS = Array.isArray(CONFIG.cupKeys) && CONFIG.cupKeys.length ? CONFIG.cupKeys.slice() : [
     "kgen12345_cup_count_v10492",
@@ -45,39 +47,11 @@
     BINANCE_DEEPLINK: "bnc://app.binance.com/cedefi/dapp?url=" + encodeURIComponent("https://klineodyssey.github.io/kline-odyssey/wallet-12345.html?autoconnect=1&bridge=1")
   };
 
-  const HEART_VIEW_ABI = [
-    "function lastFortuneAt(address) view returns (uint256)",
-    "function lastHeartbeatAt(address) view returns (uint256)",
-    "function lastIgniteDay(address) view returns (uint256)",
-    "function fortuneCooldownSeconds() view returns (uint256)",
-    "function heartbeatCooldownSeconds() view returns (uint256)",
-    "function igniteWindowStart() view returns (uint256)",
-    "function igniteWindowEnd() view returns (uint256)",
-    "function fortuneEpochClaims(uint256) view returns (uint256)",
-    "function fortuneEpochMaxClaims() view returns (uint256)",
-    "function fortuneCapEnabled() view returns (bool)",
-    "function currentFortuneEpochIndex() view returns (uint256)",
-    "function fortuneMin() view returns (uint256)",
-    "function fortuneMax() view returns (uint256)",
-    "function kgen() view returns (address)",
-    "function timeOfDaySeconds() view returns (uint256)",
-    "function currentDayIndex() view returns (uint256)"
-  ];
   const ERC20_VIEW_ABI = [
     "function balanceOf(address) view returns (uint256)",
     "function allowance(address owner, address spender) view returns (uint256)",
     "function decimals() view returns (uint8)",
     "function approve(address spender, uint256 amount) external returns (bool)"
-  ];
-  const HEART_ABI_V326 = [
-    "function fortuneClaim(uint256 amountWhole) external",
-    "function heartbeatClaim() external",
-    "function igniteAndClaim() external",
-    "function vowTo(uint8 option, uint256 amountWhole) external",
-    "function lightLamp(uint256 daysToAdd) external",
-    "function makeWish(bytes32 wishHash) external",
-    "function festivalClaim(uint8 festivalId) external",
-    "function newYearCountdownClaim() external"
   ];
 
   const NY_SLOT_IDS = ["kh-ny-slot", "kh-ny-countdown", "cd-1231", "kgen-ny-countdown", "human-cd-1231", "v714-ny-count"];
@@ -861,23 +835,12 @@
       if(this.state.symbol === "KGEN16888") return n.toFixed(2);
       return n.toFixed(2);
     },
-    getDeg: function(){
-      const steer = $("steer-input-val");
-      return steer ? Number(steer.value || 0) : 0;
-    },
-    sideZh: function(deg){
-      return deg >= -90 && deg <= 90 ? "多" : "空";
-    },
-    predict: function(last){
-      const deg = this.getDeg();
-      const side = this.sideZh(deg);
-      const angle = Math.round(Math.abs(deg));
+    latestCandleSnapshot: function(last){
+      const side = last.close >= last.open ? "陽線" : "陰線";
       const range = Math.max(0.000001, last.high - last.low);
       const body = Math.abs(last.close - last.open);
       const wick = Math.max(0.000001, range - body);
-      let hit = 62 + Math.min(14, angle * 0.09) + Math.min(7, (body / range) * 7) - Math.min(12, (wick / range) * 8);
-      hit = Math.max(63.5, Math.min(91.5, hit));
-      return { side: side, angle: angle, range: range, wick: wick, hit: hit };
+      return { side: side, range: range, body: body, wick: wick };
     },
     draw: function(data){
       const canvas = $("kline-canvas");
@@ -926,10 +889,10 @@
     updatePanel: function(data, live){
       if(!data || !data.length) return;
       const last = data[data.length - 1];
-      const p = this.predict(last);
+      const p = this.latestCandleSnapshot(last);
       const sourceLabel = this.state.source === "Live" ? "Live" : this.state.source === "Cache" ? "Cache" : "Demo";
       setNodeText($("ke-side"), p.side);
-      setNodeText($("ke-angle"), String(p.angle));
+      setNodeText($("ke-angle"), "--");
       setNodeText($("ke-open"), this.fmt(last.open));
       setNodeText($("ke-high"), this.fmt(last.high));
       setNodeText($("ke-low"), this.fmt(last.low));
@@ -939,9 +902,9 @@
       setNodeText($("ke-mode"), sourceLabel + "｜" + (this.state.symbol === "KGENLP" ? "真 LP 價" : this.state.symbol === "KGEN16888" ? "宇宙基準價" : "真市場"));
       setNodeText($("ke-live-symbol"), this.state.symbol + " / " + this.state.interval);
       setNodeText($("ke-live-price"), this.fmt(live));
-      setNodeText($("kc-predict"), "預測：" + p.side);
-      setNodeText($("kc-dir"), this.state.symbol + " → " + p.side + "方K");
-      setNodeText($("kc-hit"), "命中率：" + p.hit.toFixed(1) + "%");
+      setNodeText($("kc-predict"), "最新 K 棒：" + p.side);
+      setNodeText($("kc-dir"), this.state.symbol + " 最新 K 棒：" + p.side);
+      setNodeText($("kc-hit"), "前端不預測勝負");
       const timeA = new Date(last.openTime).toLocaleTimeString("zh-TW", { hour: "2-digit", minute: "2-digit" });
       const timeB = new Date(last.closeTime).toLocaleTimeString("zh-TW", { hour: "2-digit", minute: "2-digit" });
       setNodeText($("moon-a"), timeA);
@@ -1222,6 +1185,19 @@
     resolveMainFigure: function(){
       return $("fairy-img") || $("core-window") || $("core-anchor");
     },
+    isFrontAngle: function(angle){
+      return Number(angle) >= -90 && Number(angle) <= 90;
+    },
+    syncDirectionalAsset: function(angle){
+      const image = $("fairy-img");
+      if(!image || (window.app && window.app.isCam)) return;
+      const front = this.isFrontAngle(angle);
+      const heartAsset = image.dataset.assetCanon === "ASSET_CANON_PENDING_HEART_FRONT" ? ASSETS.heartFallback : ASSETS.heart;
+      const next = front ? (this.mode === "heart" ? heartAsset : ASSETS.front) : ASSETS.back;
+      if(!String(image.getAttribute("src") || "").endsWith(next.replace("./", ""))) image.src = next;
+      setNodeText($("kc-dir"), front ? "視覺：多方／心臟前鏡" : "視覺：空方／後鏡");
+      setNodeText($("cp-side"), front ? "方向：多方／心臟前鏡" : "方向：空方／後鏡");
+    },
     patchAppSteer: function(){
       const self = this;
       const patch = function(){
@@ -1234,7 +1210,8 @@
           const steer = $("steer-input-val");
           if(steer) steer.value = String(ang);
           self.syncCoreTransform();
-          const modeLabel = ang >= -45 && ang <= 45 ? "多方" : ang >= 135 || ang <= -135 ? "空方" : "中性";
+          self.syncDirectionalAsset(ang);
+          const modeLabel = self.isFrontAngle(ang) ? "多方／心臟前鏡" : "空方／後鏡";
           setNodeText($("k12345-slider-status"), "CORE 角度 " + ang + "°｜" + modeLabel + "｜縮放 " + self.move.z + "%");
           try{
             if(typeof app.updateCoordPanel === "function") app.updateCoordPanel();
@@ -1259,6 +1236,7 @@
       const steer = $("steer-input-val");
       if(steer) steer.value = String(ang);
       this.syncCoreTransform();
+      this.syncDirectionalAsset(ang);
       if(!silent) StatusRuntime.push("方向盤角度 " + ang + "°");
     },
     bindControls: function(){
@@ -1359,9 +1337,7 @@
       app.syncFromWheel = function(){
         const steer = $("steer-input-val");
         const ang = steer ? Number(steer.value || 0) : 0;
-        if(ang >= -45 && ang <= 45) MirrorRuntime.apply("front");
-        else if(ang >= 135 || ang <= -135) MirrorRuntime.apply("back");
-        else StatusRuntime.push("方向盤角度 " + ang + "°（未達多/空閾值）");
+        MirrorRuntime.apply(MirrorRuntime.isFrontAngle(ang) ? "front" : "back");
       };
     },
     apply: async function(mode){
@@ -1426,7 +1402,7 @@
         this.applySteer(45, true);
         setNodeText($("cp-deg-num"), "45°｜多方");
         setNodeText($("cp-side"), "方向：多方｜前鏡");
-        setNodeText($("kc-dir"), "方向盤 → 多方K");
+        setNodeText($("kc-dir"), "視覺：多方／心臟前鏡");
         setNodeText($("wish-label"), "悟空心臟｜前鏡多方");
         StatusRuntime.push("前鏡多方：前鏡頭已開啟｜bull-front｜角度 45°");
       }else if(this.mode === "back"){
@@ -1436,19 +1412,19 @@
         this.applySteer(135, true);
         setNodeText($("cp-deg-num"), "135°｜空方");
         setNodeText($("cp-side"), "方向：空方｜後鏡");
-        setNodeText($("kc-dir"), "方向盤 → 空方K");
+        setNodeText($("kc-dir"), "視覺：空方／後鏡");
         setNodeText($("wish-label"), "悟空心臟｜後鏡空方");
         StatusRuntime.push("後鏡空方：後鏡頭已開啟｜bear-rear｜角度 135°");
       }else{
         stopCamera();
         if(image){
-          image.src = ASSETS.heart;
+          image.src = image.dataset.assetCanon === "ASSET_CANON_PENDING_HEART_FRONT" ? ASSETS.heartFallback : ASSETS.heart;
           image.style.opacity = "1";
           image.style.visibility = "visible";
         }
         setNodeText($("cp-deg-num"), "待部署");
         setNodeText($("cp-side"), "循環：Heart ↔ Brain");
-        setNodeText($("kc-dir"), "方向盤 → --方K");
+        setNodeText($("kc-dir"), "視覺：多方／心臟前鏡");
         setNodeText($("wish-label"), "悟空心臟，財氣覺醒");
         StatusRuntime.push("已恢復心臟核心圖｜鏡頭已關閉");
       }
@@ -1815,8 +1791,7 @@
       return WalletRuntime.connect();
     },
     heartContract: async function(){
-      await this.ensureConnected();
-      return new ethers.Contract(CHAIN.HEART, HEART_ABI_V326, this.state.signer);
+      throw new Error("LEGACY_HEART_WRITE_DISABLED");
     },
     currentBlockTs: function(){
       if(!this.state.blockTs) return Math.floor(Date.now() / 1000);
@@ -1935,7 +1910,7 @@
             }catch(_){ }
           }
 
-          const heartView = new ethers.Contract(CHAIN.HEART, HEART_VIEW_ABI, provider);
+          throw new Error("LEGACY_HEART_VIEW_DISABLED");
           let tokenAddress = CHAIN.KGEN;
           try{
             tokenAddress = await heartView.kgen();
@@ -2870,7 +2845,6 @@
       });
       this.patchWalletHub();
       this.bindWalletHubButtons();
-      this.maybeAutoConnectFromBridge();
     },
     walletDeepLink: function(kind){
       WalletDebugRuntime.logAction("walletDeepLink", kind);
@@ -3524,7 +3498,7 @@
 
   const ActionRuntime = {
     inited: false,
-    footerLabels: ["拍照", "錄影", "前鏡多方", "後鏡空方", "悟空心臟", "螢幕錄影", "規則活動", "右側神規"],
+    footerLabels: ["拍照", "錄影", "前鏡多方", "後鏡空方", "玩漲跌", "螢幕錄影", "規則活動", "右側神規"],
     init: function(){
       if(this.inited) return;
       this.inited = true;
@@ -3652,10 +3626,10 @@
         },
         function(){ MirrorRuntime.toggleFront(); },
         function(){ MirrorRuntime.toggleBack(); },
-        function(){ ActionRuntime.toggleHeartPanel(); },
+        function(){ if(window.KGENMobilePanels) window.KGENMobilePanels.openGame(); else if(window.KGENFortuneGameUI) window.KGENFortuneGameUI.toggle(); },
         function(){ ScreenRecorderRuntime.openPanel(); ScreenRecorderRuntime.start(); },
         function(){ LayoutRuntime.toggleFestivalPanel(); },
-        function(){ LayoutRuntime.toggleRightRuleWithStatus(); }
+        function(){ if(window.KGENMobilePanels) window.KGENMobilePanels.openRules(); else LayoutRuntime.toggleRightRuleWithStatus(); }
       ];
       buttons.forEach(function(button, index){
         button.textContent = ActionRuntime.footerLabels[index] || button.textContent;
@@ -3880,12 +3854,9 @@
       MediaRuntime.init();
       KlineRuntime.init();
       CountdownRuntime.init();
-      HolyCupRuntime.init();
       MirrorRuntime.init();
       ScreenRecorderRuntime.init();
-      ApproveRuntime.init();
       WalletRuntime.init();
-      HeartRuntime.init();
       ActionRuntime.init();
       LandRuntime.init();
       MonitorGridRuntime.init();
@@ -3893,11 +3864,9 @@
       ClaimDebugRuntime.init();
       TimerRegistry.register("clock", function(){ HudRuntime.tick(); }, 1000);
       TimerRegistry.register("countdown", function(){ CountdownRuntime.tick(); }, 1000);
-      TimerRegistry.register("heart", function(){ HeartRuntime.refreshChainData(false); }, 12000);
-      TimerRegistry.register("status", function(){ StatusRuntime.tick(); HeartRuntime.statusTick(); }, 1000);
+      TimerRegistry.register("status", function(){ StatusRuntime.tick(); }, 1000);
       TimerRegistry.register("monitor-dots", function(){ MonitorGridRuntime.tick(); }, 1000);
       StatusRuntime.push("KGEN_RUNTIME_CORE V2.3.3 TRUST VOICE UI FIX ready");
-      WalletRuntime.maybeAutoConnectFromMetamask();
       return this;
     }
   };
@@ -3909,7 +3878,6 @@
   window.KGEN_MIRROR_VIEW = MirrorRuntime;
   window.KGEN_SCREEN_REC = ScreenRecorderRuntime;
   window.KGEN_APPROVE_RUNTIME = ApproveRuntime;
-  window.KGEN_HEART_ABI_V326 = HEART_ABI_V326;
   window.KGEN_HEART_CONTRACT = HEART_CONTRACT;
   window.RUNTIME_GENOME = Object.assign({}, window.RUNTIME_GENOME || {}, {
     species: "12345-WukongTemple",

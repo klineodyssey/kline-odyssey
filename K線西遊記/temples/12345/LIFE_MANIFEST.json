@@ -210,6 +210,72 @@
         "diagnosis": "舊再生 CSS 缺失"
       }
     ],
+    "v34_frontend": [
+      {
+        "path": "/K線西遊記/temples/12345/config/contracts.json",
+        "life_layer": "DNA",
+        "life_type": "Canonical Contract Configuration",
+        "sha256": null,
+        "bytes": null,
+        "diagnosis": "V3.4 network contract configuration missing"
+      },
+      {
+        "path": "/K線西遊記/temples/12345/abi/temple-heart.json",
+        "life_layer": "DNA",
+        "life_type": "Compiler Generated Canonical ABI",
+        "sha256": null,
+        "bytes": null,
+        "diagnosis": "TempleHeart V3.4 canonical ABI missing"
+      },
+      {
+        "path": "/K線西遊記/temples/12345/modules/contract-resolver.js",
+        "life_layer": "ORGAN",
+        "life_type": "Contract Safety Resolver",
+        "sha256": null,
+        "bytes": null,
+        "diagnosis": "Current Heart verification gate missing"
+      },
+      {
+        "path": "/K線西遊記/temples/12345/modules/transaction-state.js",
+        "life_layer": "ORGAN",
+        "life_type": "Transaction State Controller",
+        "sha256": null,
+        "bytes": null,
+        "diagnosis": "Receipt-confirmed transaction state controller missing"
+      },
+      {
+        "path": "/K線西遊記/temples/12345/modules/temple-heart-runtime.js",
+        "life_layer": "ORGAN",
+        "life_type": "TempleHeart V3.4 Frontend Runtime",
+        "sha256": null,
+        "bytes": null,
+        "diagnosis": "TempleHeart V3.4 frontend runtime missing"
+      },
+      {
+        "path": "/K線西遊記/temples/12345/modules/temple-heart.css",
+        "life_layer": "SKIN",
+        "life_type": "Responsive TempleHeart V3.4 Skin",
+        "sha256": null,
+        "bytes": null,
+        "diagnosis": "TempleHeart responsive skin missing"
+      },
+      {
+        "path": "/K線西遊記/temples/12345/modules/fortune-game-adapter.js",
+        "life_layer": "ORGAN",
+        "life_type": "Pending FortuneGame Interface Adapter",
+        "sha256": null,
+        "bytes": null,
+        "diagnosis": "FortuneGame readiness adapter missing"
+      },
+      {
+        "path": "/K線西遊記/temples/12345/modules/fortune-game-ui.js",
+        "life_layer": "ORGAN",
+        "life_type": "Pending FortuneGame UI Shell",
+        "sha256": null,
+        "bytes": null,
+        "diagnosis": "FortuneGame pending UI shell missing"
+      }
+    ],
     "cells": [
       {
         "path": "/K線西遊記/temples/12345/assets/bull-front.png",
@@ -1666,12 +1732,12 @@
     "USE_DOCS_MAPS_AS_SOURCE_OF_TRUTH"
   ],
   "frontend_ritual_fix": {
-    "version": "V10.49.2_FRONTEND_RITUAL_FIX",
+    "version": "V3.4.0_FRONTEND_CHAIN_QUALIFICATION",
     "contract_unchanged": true,
-    "fortune_button": "領發財金 fortuneClaim",
-    "cup_rule": "single cup button; click 3 times to unlock fortuneClaim",
-    "ignite_display": "front-end countdown shows Taiwan 08:00 target; contract remains UTC",
+    "fortune_button": "fortuneClaim(bytes32 proofId) requires on-chain qualification",
+    "cup_rule": "three local cup interactions are UI ritual state only and never unlock an on-chain claim",
+    "ignite_display": "UTC 00:00:00-00:09:59 with contract state and revert as final authority",
     "new_year": "hidden unless countdown window",
-    "makeWish": "block empty wish before transaction"
+    "makeWish": "makeWish(bytes32 wishHash, bytes32 civilizationId)"
   }
 }

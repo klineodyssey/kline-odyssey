@@ -11,18 +11,24 @@ flowchart TD
   T12345 --> Three["External: three.js r128"]
   T12345 --> Ethers["External: ethers 5.7.2 CDN"]
   T12345 --> Fonts["External: Google Fonts"]
-  T12345 --> WalletConnect["External: WalletConnect provider"]
+  T12345 --> WalletConnect["External: WalletConnect provider 2.23.10 lazy ESM"]
   T12345 --> CoreCSS["modules/kgen-12345-core.css"]
   T12345 --> RegenCSS["modules/kgen-12345-divine-regeneration.css"]
   T12345 --> RuntimeCSS["modules/runtime-main.css"]
   T12345 --> LandEngine["C:\Desktop\kline-odyssey\K線西遊記\modules\kgen-land-engine.js"]
   T12345 --> AppShell["modules/kgen-12345-app-shell.js"]
-  T12345 --> Web3Shell["modules/kgen-12345-web3-shell.js"]
   T12345 --> LegacyRuntime["modules/kgen-12345-runtime.js"]
   T12345 --> MotherLegacy["modules/kgen-12345-mother-runtime.js"]
   T12345 --> RegenLegacy["modules/kgen-12345-divine-regeneration.js"]
   T12345 --> AIService["modules/kgen-12345-ai-service.js"]
   T12345 --> RuntimeMain["modules/runtime-main.js"]
+  T12345 --> ContractConfig["config/contracts.json"]
+  T12345 --> HeartABI["abi/temple-heart.json"]
+  T12345 --> ContractResolver["modules/contract-resolver.js"]
+  T12345 --> TxState["modules/transaction-state.js"]
+  T12345 --> HeartV34["modules/temple-heart-runtime.js"]
+  T12345 --> FortuneAdapter["modules/fortune-game-adapter.js"]
+  T12345 --> FortuneUI["modules/fortune-game-ui.js"]
   T12345 --> RuntimeBootstrap["modules/runtime-bootstrap.js"]
   T12345 --> LifeManifest["LIFE_MANIFEST.json"]
   T12345 --> RuntimeGenome["RUNTIME_GENOME.json"]
@@ -237,3 +243,15 @@ flowchart TD
 | 199 | C:\Desktop\kline-odyssey\K線西遊記\temples\12345\VERSION_GOVERNANCE_V10_39_0.json | Temple | Temple 12345 support file, governance file, module, data or asset. | active/support | Integrity/governance file; do not edit casually. | count=8: KGEN_BOOT_GRAPH.md<br>KGEN_MASTER_INDEX.md<br>KGEN_MODULE_MAP.md<br>K線西遊記/temples/12345/PACKAGE_MANIFEST.txt<br>PACKAGE_MANIFEST.txt<br>... |
 | 200 | C:\Desktop\kline-odyssey\K線西遊記\temples\12345\VERSION_INFO.txt | Temple | Temple 12345 support file, governance file, module, data or asset. | active/support | Integrity/governance file; do not edit casually. | count=8: KGEN_BOOT_GRAPH.md<br>KGEN_MASTER_INDEX.md<br>KGEN_MODULE_MAP.md<br>K線西遊記/temples/12345/SOP/TEMPLE_12345_AI_SOP_V10_18_TRUE_LINK.md<br>SHA256SUMS_V10_30_MASTER_STABLE.txt<br>... |
 | 201 | C:\Desktop\kline-odyssey\K線西遊記\temples\12345\wallet-12345.html | Temple | Temple 12345 support file, governance file, module, data or asset. | active/support | Check Boot, Runtime CURRENT, Universe Map, AGENTS and existing function before editing. | count=36: DEPLOY_STRUCTURE.md<br>KGEN_BOOT_GRAPH.md<br>KGEN_MASTER_INDEX.md<br>KGEN_MODULE_MAP.md<br>K線西遊記/temples/12345/LIFE_MANIFEST.json<br>... |
+
+---
+
+## Frontend V3.4 canonical runtime — 2026-08-09
+
+The active entry remains `K線西遊記/temples/12345/index.html`. Its current contract path is:
+
+`config/contracts.json` → `modules/contract-resolver.js` → compiler-generated `abi/temple-heart.json` → `modules/temple-heart-runtime.js` → shared `modules/transaction-state.js`.
+
+FortuneGame remains an ABI-neutral pending shell through `modules/fortune-game-adapter.js` and `modules/fortune-game-ui.js`. No FortuneGame ABI, bet method, result calculation, or claim selector is present.
+
+`modules/kgen-12345-web3-shell.js` and the other unloaded/versioned modules remain preserved as technical-debt inventory; they are not part of the canonical entry load chain and were not bulk-deleted. The legacy Heart address is read-only and cannot receive V3.4 writes.

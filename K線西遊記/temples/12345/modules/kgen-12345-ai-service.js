@@ -9,7 +9,7 @@ PURPOSE: Frontend AI customer service (FAQ + Web Speech + button voice delegate)
 
   const VERSION = "V3.0-AI-SERVICE";
   const WELCOME_KEY = "kgen12345_ai_welcome_v30";
-  const AVATAR_SRC = "./assets/heart.png";
+  const AVATAR_SRC = "./assets/heart-front.png";
   const VOICE_DEBOUNCE_MS = 500;
 
   const FAQ = [
@@ -144,7 +144,7 @@ PURPOSE: Frontend AI customer service (FAQ + Web Speech + button voice delegate)
       panel.id = "kgen-ai-service-panel";
       panel.innerHTML = [
         '<div class="kgen-ai-head">',
-        '  <div class="kgen-ai-avatar-wrap"><img class="kgen-ai-avatar" src="' + AVATAR_SRC + '" alt="悟空客服"></div>',
+        '  <div class="kgen-ai-avatar-wrap"><img class="kgen-ai-avatar" src="' + AVATAR_SRC + '" data-canon="heart-front.png" onerror="console.warn(\'ASSET_CANON_PENDING_HEART_FRONT\');this.dataset.assetCanon=\'ASSET_CANON_PENDING_HEART_FRONT\';this.onerror=null;this.src=\'./assets/heart.png\'" alt="悟空客服"></div>',
         '  <div class="kgen-ai-head-text">',
         '    <div class="kgen-ai-title">AI客服</div>',
         '    <div class="kgen-ai-sub">前端版｜常見問題</div>',

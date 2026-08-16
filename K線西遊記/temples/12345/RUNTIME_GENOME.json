@@ -99,6 +99,14 @@
     "REQUIRED_RUNTIME_ORGANS": [
       "modules/runtime-main.js",
       "modules/runtime-main.css",
+      "modules/contract-resolver.js",
+      "modules/transaction-state.js",
+      "modules/temple-heart-runtime.js",
+      "modules/temple-heart.css",
+      "modules/fortune-game-adapter.js",
+      "modules/fortune-game-ui.js",
+      "config/contracts.json",
+      "abi/temple-heart.json",
       "modules/runtime-core.css",
       "modules/runtime-mother.js",
       "modules/runtime-regeneration.js",
@@ -173,7 +181,22 @@
       "../../modules/kgen-land-engine.js"
     ]
   },
-  "runtime_version": "V2.0",
+  "temple_heart_v34_frontend": {
+    "status": "ACTIVE_FRONTEND_CONTRACTS_PENDING",
+    "canonical_contract_config": "config/contracts.json",
+    "canonical_temple_heart_abi": "abi/temple-heart.json",
+    "contract_resolver": "modules/contract-resolver.js",
+    "transaction_state": "modules/transaction-state.js",
+    "frontend_runtime": "modules/temple-heart-runtime.js",
+    "responsive_skin": "modules/temple-heart.css",
+    "fortune_game_adapter": "modules/fortune-game-adapter.js",
+    "fortune_game_ui": "modules/fortune-game-ui.js",
+    "mainnet_current_heart": "PENDING",
+    "mainnet_fortune_game": "PENDING",
+    "legacy_heart_mode": "READ_ONLY",
+    "asset_canon_pending": "heart-front.png"
+  },
+  "runtime_version": "V3.4.0-FRONTEND",
   "runtime_core": {
     "version": "V2.0",
     "tag": "12345-TEMPLE-RUNTIME-CORE-V2.0",
@@ -196,12 +219,12 @@
     }
   },
   "frontend_ritual_fix": {
-    "version": "V10.49.2_FRONTEND_RITUAL_FIX",
+    "version": "V3.4.0_FRONTEND_CHAIN_QUALIFICATION",
     "contract_unchanged": true,
-    "fortune_button": "領發財金 fortuneClaim",
-    "cup_rule": "single cup button; click 3 times to unlock fortuneClaim",
-    "ignite_display": "front-end countdown shows Taiwan 08:00 target; contract remains UTC",
+    "fortune_button": "fortuneClaim(bytes32 proofId) requires on-chain qualification",
+    "cup_rule": "three local cup interactions are UI ritual state only and never unlock an on-chain claim",
+    "ignite_display": "UTC 00:00:00-00:09:59 with contract state and revert as final authority",
     "new_year": "hidden unless countdown window",
-    "makeWish": "block empty wish before transaction"
+    "makeWish": "makeWish(bytes32 wishHash, bytes32 civilizationId)"
   }
 }
