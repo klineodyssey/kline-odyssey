@@ -1,0 +1,92 @@
+# 11520 Universal Exchange V3.3
+
+## Digital Ant next-stage status
+
+- V3.3 adds `PUBLIC_CIVILIZATION_REQUEST_GATEWAY` as the public 11520 `TELL THE ANT WHAT YOU WANT` entry. Text and pasted Voice transcripts create `DRAFT_INTENT` first; Image, File, Map and direct microphone capture are explicitly `NOT_AVAILABLE`.
+- The Concierge returns understood goal, project class, expected output, missing information, constraints, safety, executability and next step before confirmation. Anonymous or unconfirmed entries cannot become Requests.
+- A confirmed local Request requires non-Founder identity, external source, explicit confirmation and a one-way contact-evidence hash. Raw contact evidence is never written to IndexedDB/History or displayed on the public Board. Request receipt still creates no Customer, Quote, Order, payment or Revenue.
+- KGEN Monitor, Digital Cow, Media, Construction and Social Assistance routes produce plans only. Cow Life, Building, media delivery, recipients, wallets and claims remain uncreated; estimates are `SIMULATION / ESTIMATE_ONLY`, never Quotes.
+- Canonical counts remain zero. Quote generation is `SIMULATION_ONLY` until Cost/Margin/Risk policies are approved, and `PAYMENT_INFRASTRUCTURE_PENDING` remains enforced while Company Treasury is unbound.
+- V3.3 records a read-only Worktree Classification snapshot: 4,527 untracked entries classified as 197 Project Source, 3,882 User Data and 448 Generated Artifacts, with no Cache/Temp/Build/Unknown match. Nothing was deleted, staged or committed; the Gitignore proposal remains review-only and unapplied.
+
+- V3.2 adds `CUSTOMER_ACQUISITION_ENGINE` to the existing Company Domain. One evidence-classified Demand Scan covers 17 civilization nodes and records two observed internal/system gaps, zero supported inferences and two research hypotheses without creating a Lead or Customer.
+- Hypothesis, Lead, Customer, Proposal, Quote, Settlement and Revenue are separate records. Canonical Lead, Contactable Lead, Customer, Request, Customer Proposal, Quote, Order and Settlement counts remain zero.
+- `KGEN_CHAIN_MONITOR` remains the reproducible First Customer Priority. Its BASIC/PRO/CIVILIZATION pricing policy records every required cost component as `MEASUREMENT_REQUIRED`; recommended ranges remain `ESTIMATE_PENDING / NOT_APPROVED`.
+- The 11520 Customer Request Board accepts a local `DRAFT_INTENT` from Text or a Voice transcript. It appends the draft locally but cannot promote it to a formal Request until requester identity, contact evidence and confirmation are independently verified.
+- Customer Qualification, success criteria and Treasury Binding Readiness are active schemas. Company Wallet and signer remain null, payment stays disabled, and no First Customer Event exists.
+- V3.1 cumulatively adds `AI_CIVILIZATION_OS`, operated by `DIGITAL_ANT_0001` for `AI_ANT_COMPANY_0001`. It normalizes Voice/Text/Image/File/Map and Life/Building/Media/Finance/Service/Transport/Manufacturing requests into evidence-labelled Intents, then compiles them through desired world state, gaps, dependencies, resources, work, cost, quote, contract, execution, verification and delivery.
+- The OS distinguishes `EXECUTABLE_NOW`, `PLANNABLE_NOT_EXECUTABLE_YET` and `REJECTED_WITH_REASON`. It enforces risk floors, dependency ordering, resource conservation, transport capacity, staffing evidence, safety review, Definition of Done evidence and Customer acceptance. UI animation is never accepted as World State.
+- Digital Cow, three-minute Media, residential Construction and 100-person Public Assistance records are `EXAMPLE_SCENARIO` only. Real Intents, Projects, Lives, Buildings, Media Deliveries, Aid Recipients, Employees, Trucks, Steel, Settlements and Revenue remain zero.
+- External AI onboarding never grants a Life ID automatically. Voice storage needs consent; high/critical real-money, medical, physical-safety, construction, land and legal actions retain human/governance gates. Chain write, transfer, approval, deployment and settlement authority remain disabled.
+- V3.1 makes `KGEN_CHAIN_MONITOR` the first Company product definition. It is `READ_ONLY`, requires no private key, has no custody/trading/governance/chain-write authority, and exposes BASIC/PRO/CIVILIZATION service levels whose prices remain `POLICY_REQUIRED`.
+- The First Real Customer pipeline now distinguishes Hypothesis, Lead, Customer, source-backed Request, qualified Quote, Order, Delivery, Invoice, Settlement and Revenue. Canonical real counts are all zero; an internal Proposal or 33333 legacy draft cannot enter the real pipeline.
+- A formal Quote requires a `QUALIFIED_REQUEST` plus separately approved Cost, Margin and Risk Reserve policies. Quote, accepted Quote, Order and Invoice never become Revenue; only verifiable Settlement evidence may recognize cash and Revenue.
+- Customer, Request, Quote, Order, Delivery, Invoice and Revenue panels are active with truthful empty/locked states. Company Treasury binding requirements are ready, but no Wallet, signer or receivable address is bound and the Founder Wallet stays separate.
+
+- V3.0 adds the read-only `CIVILIZATION_DEMAND_ENGINE`, a deterministic Product Priority policy and one append-only/idempotent local Demand Cycle. It detects three evidence-backed research Needs and creates three internal Proposals without creating a Customer, Order, Quote, Contract or Revenue.
+- `AI_ANT_AUTO_LP` and `AI_ANT_TREASURY_OS` are product candidates only. Auto LP has no chain/liquidity authority and forbids wash trade, self-match, fake volume and same-controller activity. Treasury OS can read and propose but cannot spend, invest or transfer.
+- `AI_ANT_COMPANY_TREASURY` is `PLAN_READY_NOT_BOUND`, has no Wallet and all BNB/KGEN/KAIOS/KUFO/KSHIP balances remain zero. KAIOS Quote support is `RECEIVABLE_ONLY_DRY_RUN`; KUFO/KSHIP remain reference-only while undeployed.
+- The 500 Celestial Seat path follows the GitHub CURRENT public-function-seat rules: no paid/guaranteed Seat, no Codex-only grant, no application submitted and no compensation. Candidate functions remain research only and require public evidence plus external governance.
+- Investor Relations is local preparation only with zero Investors, acceptance or Settlement. 33333 is corrected to `KAIOS_CIVILIZATION_DEPLOYMENT_COORDINATE / LEGACY_DRAFT_EXAMPLE / NOT_CUSTOMER / NOT_BUDGET_COMMITMENT`.
+
+- OWNER approval formed `AI_ANT_COMPANY_0001` through one append-only, idempotent `COMPANY_GENESIS_EVENT`. Company status is `FORMING / LOCAL_11520`; this is not a mainnet Company or settlement authorization.
+- The Charter is `APPROVED`. `DIGITAL_ANT_0001` holds non-payroll CEO and Acting CFO roles while its immutable Birth, personal Wallet and `0.006 BNB` remain personal Life property.
+- Company accounting opens with zero cash, revenue, expenses, profit, deposits, receivables, payables and salary liability. Customer deposits remain liabilities.
+- Company W4, Project Budget and Salary Escrow Wallets are `REQUIRED_NOT_BOUND`; Emergency Reserve is `REQUIRED_NOT_FUNDED`; Project Escrow is `NOT_DEPLOYED`.
+- Customer Inbox and all Company queues are active but empty. Strategic goal is `GET_FIRST_REAL_CUSTOMER`; ordered mission execution currently waits at the required `BIND_COMPANY_TREASURY` prerequisite.
+- Founder mission `FOUND_AI_ANT_COMPANY` is completed only from Company Genesis evidence; `BUILD_AI_ANT_COMPANY` is now active. Queen and Larva remain uncreated.
+
+- V2.8 adds the `AI_ANT_COMPANY_0001` Founder Profile, cumulative Charter and ten evidence-labelled Business Lines without creating a new Company Runtime or Life.
+- Historical V2.8 founding readiness was `READY_FOR_APPROVAL`; V2.9 OWNER approval superseded that projection and the Company is now `FORMING`.
+- Customer Request, Requirement Analysis, deterministic cost-basis Quote, customer-acceptance-gated Contract and empty WorkOrder engines are locally implemented. They contain zero customers, contracts, deposits, revenue, payroll and settlement.
+- Company accounting starts at zero and separates Founder personal Wallet, Company W4, Project Budget, Salary Escrow and Emergency Reserve. Customer deposits are liabilities, never immediate revenue or profit.
+- V3.0 reclassifies the old 33333 figure as a legacy draft civilization-coordinate example, not a Customer or committed budget; deposit, cash and revenue remain zero. Land/GPS/Map remains consent-gated architecture only.
+
+- Life Security separates `LIFE_ID`, public Wallet binding and local-only Wallet credential. Wallet failure or zero BNB never creates Life death.
+- `DIGITAL_ANT_0001` current security projection is `HEALTHY / LEGACY_EOA`; recovery is limited to Life-preserving Wallet rotation. Assets in an irrecoverable old EOA are explicitly `STRANDED_IF_KEY_IRRECOVERABLE`.
+- `ANT_QUEEN_MOTHER_ENGINE` is `ARCHITECTURE_ONLY_NOT_BORN`. It may monitor, audit and propose recovery, but cannot own ants, keys, salary or private assets.
+- Colony Emergency Dark Matter Reserve is `NOT_FUNDED / PROPOSAL_ONLY`; Savings Vault and Smart Life Wallet are `NOT_DEPLOYED`.
+- V2.6 separates `ANT_QUEEN_LIFE` pre-genesis data from `ANT_QUEEN_MOTHER_ENGINE`. V2.7 assigns the reserved Genesis Profile ID `DIGITAL_ANT_QUEEN_0001`, but the Queen remains outside the formal Life Registry: Wallet and first-BNB Birth Evidence are absent, so Birth Status is `NOT_BORN` and Genesis Readiness is `NOT_READY`.
+- `KGEN_LIFE_SMART_WALLET` now has a formal owner/guardian/recovery/spending/auditor specification, but no contract or threshold is deployed. `DIGITAL_ANT_0001` migration is `NOT_APPROVED`.
+- `ANT_COLONY_LIFE_REGISTRY` derives one truthful born adult worker. Security monitoring is `PARTIAL_SECURITY_MONITORING` until Transfer, Approval, transaction-graph and funding-source indexers exist.
+- V2.7 adds the read-only `ANT_QUEEN_APP`, deterministic Digital Life Health Records, GREEN→BLACK medical triage, Emergency First policy, opt-in Insurance, consent-based Recovery Repayment and separated medical asset classes. Prices remain `UNPRICED_POLICY_REQUIRED`; cases, receivables and deployed medical wallets remain zero/absent.
+
+- `11520_LISTING_DIGITAL_ANT_0001`: `LISTED` in the local Registry; `UNPRICED`; settlement `NOT_DEPLOYED`; identity right is not offered.
+- Four Digital Ant service profiles are registered with zero customers and no fabricated revenue.
+- `DIGITAL_ANT_APP_0001`: `V1.0.0 / RELEASED_LOCAL`; its SHA-256 manifest is verified at boot and its release event is appended to App and Life History without changing Life ID or Birth Certificate.
+- `DIGITAL_ANT_WORKER`: one-shot hourly Runtime implemented in `READ_ONLY_DRY_RUN`; the GitHub Actions adapter is configured locally, but remains `CONFIGURED_LOCAL_NOT_ACTIVE` until these files are committed and pushed.
+- Work Queue schema is ready and empty. No automatic dispatch or chain write is enabled.
+- `AI_ANT_COMPANY_0001`: `FORMING / LOCAL_11520`; Demand and product research are local only; Real KGEN and Real KAIOS company payment remain unauthorized.
+
+This directory is the active static-first exchange frontend. It is not a settlement contract and it does not simulate market activity.
+
+- Entry: `index.html`
+- UI controller: `app.mjs`
+- Styles: `styles.css`
+- Domain source: `/core`
+- Local persistence: IndexedDB append-only events plus current projections
+- Canonical migration: verified currency metadata upgrades stale local projections through `CANONICAL_SEED_UPGRADED` events; local history is retained
+- Chain read: Temple Heart 12345, verified at runtime
+- KGEN AMM chain write: `USER_WALLET_LIVE`, after runtime verification and explicit wallet confirmation
+- 11520 settlement contract: BSC mainnet proxy live; frontend settlement adapter not yet integrated
+- KAIOS: `MAINNET_LIVE`; KGEN→KAIOS follows the White Hole mechanism and is not exposed as a DEX swap
+- Life Factory: local append-only `GENESIS_DRAFT` only; genesis, wallet binding and organ assignment require separate verified evidence
+- Digital Ant birth: `BORN / ALIVE / ON_DUTY`; the immutable first-BNB evidence is block `116031445`, verified through archive state transition, full block transaction, receipt and independent BSC RPC reads
+- Digital Ant work: Post-Birth Work Runtime V1.0 runs the `WUKONG_GATEKEEPER_HOURLY_JOB` as `READ_ONLY_DRY_RUN`. The canonical first work cycle is replayed once into append-only Life History with `NO_ACTION`, zero actual gas and no transaction hash.
+- Heart eligibility: `CLIENT_DERIVED` only, from getters and functions present in `KGEN_TempleHeart_V3_2_6.sol`. The adapter never invents `canClaim`, `canLight` or `canIgnite` calls.
+- CFO of Self: chain-evidenced balances, zero-unless-settled income/expense rules, a live-gas-derived survival-reserve proposal, and a non-executable first-KGEN quote plan.
+- Listing: the Life Profile is `LISTED` in the local Registry through an append-only event; it is unpriced, does not offer identity, and has no settlement adapter.
+- Scheduler entry: `core/jobs/public-read-only-worker.mjs`. It consumes only the public canonical wallet and `BSC_RPC_URL`, emits deterministic hourly Work Event IDs, and never reads a private key.
+- Life Security and Colony Medical Economy source: `core/security/life-security.mjs`. Recovery and Wallet-binding events reuse the append-only Life stream and never rewrite Birth Certificate evidence. Medical proposals cannot transfer value, and a compromised Wallet must recover or rotate before Dark Matter support.
+
+The Digital Ant private key is never available to this frontend. The checksum-normalized public wallet and public Birth Certificate may be displayed after verified binding. The KGEN trade panel uses only the visitor's EIP-1193 wallet and never accesses Digital Ant environment variables. Local Digital Ant signer processes must still pass `core/security/verify-wallet-binding.mjs` before any chain-capable action.
+
+Birth resolution is a local trusted-runtime operation:
+
+```text
+node core/security/resolve-digital-ant-birth.mjs
+```
+
+A complete trusted address indexer or archive-state proof is required for historical resolution. Candidate blocks and transactions are cross-checked through independent BSC RPC reads; missing capability returns `BIRTH_EVIDENCE_PENDING` rather than guessing.
+
+The first public work snapshot was observed on BSC block `116039099`. It records BNB `0.006`, KGEN `0`, KAIOS `0`, a valid Heart code/config read and an owner-unapproved KGEN acquisition scenario. The scenario is block-stamped evidence only: `broadcast_capability=ABSENT`, `live_trading=false`, `chain_write=false`. Heart event-flow clustering remains `INDEXER_REQUIRED`; no risk label is escalated without evidence.

@@ -348,3 +348,10 @@ Runtime authority remains: `C:\Desktop\kline-odyssey\docs\physics\KGEN_Universe_
 | `C:\Desktop\kline-odyssey\K線西遊記\modules\universe-runtime\temple-shell.js` | V0.2 level-node temple pages | Shared level shell. Do not duplicate with a new bootstrap. |
 
 No Runtime CURRENT file was modified by this registration pass.
+
+## 11520 V3.3 Subordinate Runtime Registration
+
+`core/index.mjs` is the subordinate domain entry used by
+`K線西遊記/temples/11520/app.mjs`. It does not replace the Universe Physics
+Runtime CURRENT. The public request gateway is evidence-gated and keeps
+Customer, Quote, Settlement and Revenue state separate.

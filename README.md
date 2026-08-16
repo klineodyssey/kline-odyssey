@@ -1259,3 +1259,17 @@ The deterministic simulation at `world-viewer/creator-marketplace/` connects one
 - Runtime owner: `KGEN-KAIOS/world-viewer/marketplace/creator-marketplace-runtime.js`
 - Specification owner: `KAIOS/marketplace/creator-marketplace/`
 - Safety: simulation only; no real wallet, KGEN, on-chain transfer, silent mint or external autonomy.
+
+## 11520 Universal Exchange V3.3
+
+The public 11520 entry now hosts the Digital Ant Public Civilization Request Gateway.
+It converts text or confirmed voice transcripts into evidence-gated request records;
+drafts, estimates and proposals never become customers, quotes or revenue by implication.
+
+- Public entry: `K線西遊記/temples/11520/index.html#/REQUEST`
+- Browser controller: `K線西遊記/temples/11520/app.mjs`
+- Domain core: `core/index.mjs`
+- Canonical records: `core/data/canonical.json`
+- Architecture: `docs/KGEN_11520_V2_ARCHITECTURE.md`
+- Validation: `tests/universal-exchange.test.mjs`
+- Settlement and company treasury remain gated; no automatic chain write is introduced by the gateway.

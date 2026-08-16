@@ -569,6 +569,43 @@ Where the Market Becomes the Myth.
 
 ---
 
+# 23. 11520 Universal Exchange V3.3 累積式登錄
+
+本節為 Boot V1.4 的累積式增補，不取代 Universe Physics Runtime CURRENT，
+也不修改 12345 Runtime、TempleHeart、KGEN 或其他既有合約。
+
+正式入口與依賴：
+
+```text
+K線西遊記/index.html
+↓
+K線西遊記/temples/11520/index.html#/REQUEST
+↓
+K線西遊記/temples/11520/app.mjs
+↓
+core/index.mjs
+↓
+core/registry/universe-runtime.mjs
+↓
+core/data/canonical.json
+```
+
+治理規則：
+
+```text
+DRAFT_INTENT != REQUEST
+REQUEST != CUSTOMER
+ESTIMATE != QUOTE
+QUOTE != REVENUE
+UNBOUND_TREASURY blocks PAYMENT
+Contact Evidence is never public
+Private Key is never browser data
+```
+
+GitHub Pages 必須發布 `core/`，否則 11520 的 ES module 依賴不完整。
+
+---
+
 # 13. AI 必讀路徑索引
 
 本 Repo 啟動時，以本節路徑為準。
