@@ -2118,6 +2118,8 @@ test("V3.4 workflow is hourly, exact-scoped and cannot access signer secrets", a
   assert.match(workflow, /cron: "17 \* \* \* \*"/);
   assert.match(workflow, /--status "K線西遊記\/temples\/11520\/runtime\/worker-status\.json"/);
   assert.match(workflow, /git add -- "K線西遊記\/temples\/11520\/runtime\/worker-status\.json"/);
+  assert.match(workflow, /actions: write/);
+  assert.match(workflow, /gh workflow run deploy-pages-static\.yml --ref main/);
   assert.doesNotMatch(workflow, /git add \./);
   assert.doesNotMatch(workflow, /DIGITAL_ANT_0001_PRIVATE_KEY|SIGN_TRANSACTION|PRIVATE_KEY/);
 });
