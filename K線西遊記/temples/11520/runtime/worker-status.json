@@ -11,16 +11,16 @@
   "chain_write": false,
   "worker_health": "HEALTHY",
   "work_stop_reason": null,
-  "generated_at": "2026-08-16T14:00:32.848Z",
+  "generated_at": "2026-08-16T15:39:00.085Z",
   "last_work_cycle": {
-    "event_id": "DIGITAL_ANT_0001_HOURLY_2026081614",
+    "event_id": "DIGITAL_ANT_0001_HOURLY_2026081615",
     "life_id": "DIGITAL_ANT_0001",
     "app_id": "DIGITAL_ANT_APP_0001",
-    "work_cycle_id": "DIGITAL_ANT_0001_HOURLY_2026081614",
-    "scheduled_at": "2026-08-16T14:00:00.000Z",
-    "started_at": "2026-08-16T14:00:30.533Z",
-    "finished_at": "2026-08-16T14:00:32.847Z",
-    "bsc_block": 116284684,
+    "work_cycle_id": "DIGITAL_ANT_0001_HOURLY_2026081615",
+    "scheduled_at": "2026-08-16T15:00:00.000Z",
+    "started_at": "2026-08-16T15:38:58.019Z",
+    "finished_at": "2026-08-16T15:39:00.084Z",
+    "bsc_block": 116297811,
     "wallet_state": {
       "status": "PUBLIC_ADDRESS_READ",
       "bnb": "0.006"
@@ -34,14 +34,14 @@
         "reason": "HEARTBEAT_ELIGIBLE",
         "eligibility_source": "CLIENT_DERIVED",
         "write_status": "WRITE_NOT_CONNECTED",
-        "next_eligible_time": "2026-08-16T14:00:30.000Z"
+        "next_eligible_time": "2026-08-16T15:38:57.000Z"
       },
       "fortune": {
         "status": "ELIGIBLE",
         "reason": "FORTUNE_CLAIM_ELIGIBLE",
         "eligibility_source": "CLIENT_DERIVED",
         "write_status": "WRITE_NOT_CONNECTED",
-        "next_eligible_time": "2026-08-16T14:00:30.000Z"
+        "next_eligible_time": "2026-08-16T15:38:57.000Z"
       },
       "ignition": {
         "status": "OUT_OF_WINDOW",
@@ -74,8 +74,8 @@
         "status": "CORE_HEART_INDEXER_HEALTHY",
         "indexer": "CORE_HEART_INDEXER",
         "failed_event_types": [],
-        "from_block": 116284586,
-        "to_block": 116284685,
+        "from_block": 116297713,
+        "to_block": 116297812,
         "fortune_claims": [],
         "wishes": [],
         "heartbeat_claims": [],
@@ -145,9 +145,9 @@
     ],
     "gatekeeper_duty": {
       "status": "COMPLETED",
-      "gatekeeper_started_at": "2026-08-16T14:00:31.093Z",
-      "gatekeeper_finished_at": "2026-08-16T14:00:32.559Z",
-      "heart_block": 116284685,
+      "gatekeeper_started_at": "2026-08-16T15:38:58.505Z",
+      "gatekeeper_finished_at": "2026-08-16T15:38:59.794Z",
+      "heart_block": 116297812,
       "heart_status": "AVAILABLE",
       "fortune_status": "ELIGIBLE",
       "heartbeat_status": "ELIGIBLE",
@@ -160,7 +160,7 @@
       "degradation_affects_safety": false,
       "advanced_graph_status": "ADVANCED_GRAPH_INDEXER_REQUIRED",
       "evidence": [
-        "HEART_BLOCK_116284685",
+        "HEART_BLOCK_116297812",
         "HEART_BYTECODE_VERIFIED",
         "CORE_HEART_INDEXER_HEALTHY"
       ]
@@ -198,10 +198,10 @@
       "mission": "GET_FIRST_REAL_CUSTOMER"
     },
     "work_time": {
-      "gatekeeper_work_seconds": 1.466,
-      "cfo_work_seconds": 0.001,
-      "company_work_seconds": 0.287,
-      "life_health_seconds": 0.383
+      "gatekeeper_work_seconds": 1.289,
+      "cfo_work_seconds": 0,
+      "company_work_seconds": 0.289,
+      "life_health_seconds": 0.256
     },
     "action_taken": "NO_ACTION",
     "result": "WORK_CYCLE_COMPLETED",
@@ -216,26 +216,26 @@
     "tx_hash": null,
     "work_duration_seconds": 2
   },
-  "next_expected_at": "2026-08-16T15:00:00.000Z",
+  "next_expected_at": "2026-08-16T16:00:00.000Z",
   "metrics": {
-    "completed_cycles": 1,
+    "completed_cycles": 2,
     "failed_cycles": 1,
     "degraded_cycles": 5,
-    "no_action_cycles": 7,
+    "no_action_cycles": 8,
     "action_cycles": 0,
-    "work_duration_seconds": 7,
-    "gatekeeper_work_seconds": 1.466,
+    "work_duration_seconds": 9,
+    "gatekeeper_work_seconds": 2.755,
     "cfo_work_seconds": 0.001,
-    "company_work_seconds": 0.287,
+    "company_work_seconds": 0.576,
     "missed_cycles": 1
   },
   "primary_job": "WUKONG_GATEKEEPER",
   "secondary_work": "AI_ANT_COMPANY_FOUNDER",
   "gatekeeper_duty": {
     "status": "COMPLETED",
-    "gatekeeper_started_at": "2026-08-16T14:00:31.093Z",
-    "gatekeeper_finished_at": "2026-08-16T14:00:32.559Z",
-    "heart_block": 116284685,
+    "gatekeeper_started_at": "2026-08-16T15:38:58.505Z",
+    "gatekeeper_finished_at": "2026-08-16T15:38:59.794Z",
+    "heart_block": 116297812,
     "heart_status": "AVAILABLE",
     "fortune_status": "ELIGIBLE",
     "heartbeat_status": "ELIGIBLE",
@@ -248,7 +248,7 @@
     "degradation_affects_safety": false,
     "advanced_graph_status": "ADVANCED_GRAPH_INDEXER_REQUIRED",
     "evidence": [
-      "HEART_BLOCK_116284685",
+      "HEART_BLOCK_116297812",
       "HEART_BYTECODE_VERIFIED",
       "CORE_HEART_INDEXER_HEALTHY"
     ]
@@ -276,14 +276,14 @@
         "reason": "HEARTBEAT_ELIGIBLE",
         "eligibility_source": "CLIENT_DERIVED",
         "write_status": "WRITE_NOT_CONNECTED",
-        "next_eligible_time": "2026-08-16T14:00:30.000Z"
+        "next_eligible_time": "2026-08-16T15:38:57.000Z"
       },
       "fortune": {
         "status": "ELIGIBLE",
         "reason": "FORTUNE_CLAIM_ELIGIBLE",
         "eligibility_source": "CLIENT_DERIVED",
         "write_status": "WRITE_NOT_CONNECTED",
-        "next_eligible_time": "2026-08-16T14:00:30.000Z"
+        "next_eligible_time": "2026-08-16T15:38:57.000Z"
       },
       "ignition": {
         "status": "OUT_OF_WINDOW",
@@ -316,8 +316,8 @@
         "status": "CORE_HEART_INDEXER_HEALTHY",
         "indexer": "CORE_HEART_INDEXER",
         "failed_event_types": [],
-        "from_block": 116284586,
-        "to_block": 116284685,
+        "from_block": 116297713,
+        "to_block": 116297812,
         "fortune_claims": [],
         "wishes": [],
         "heartbeat_claims": [],

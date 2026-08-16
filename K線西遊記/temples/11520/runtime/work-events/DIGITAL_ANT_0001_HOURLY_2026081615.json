@@ -1,0 +1,204 @@
+{
+  "event_id": "DIGITAL_ANT_0001_HOURLY_2026081615",
+  "life_id": "DIGITAL_ANT_0001",
+  "app_id": "DIGITAL_ANT_APP_0001",
+  "work_cycle_id": "DIGITAL_ANT_0001_HOURLY_2026081615",
+  "scheduled_at": "2026-08-16T15:00:00.000Z",
+  "started_at": "2026-08-16T15:38:58.019Z",
+  "finished_at": "2026-08-16T15:39:00.084Z",
+  "bsc_block": 116297811,
+  "wallet_state": {
+    "status": "PUBLIC_ADDRESS_READ",
+    "bnb": "0.006"
+  },
+  "heart_state": {
+    "status": "12345_PATROL_COMPLETED",
+    "source": "REPOSITORY_ABI_PUBLIC_CHAIN_READ",
+    "eligibility_source": "CLIENT_DERIVED",
+    "heartbeat": {
+      "status": "ELIGIBLE",
+      "reason": "HEARTBEAT_ELIGIBLE",
+      "eligibility_source": "CLIENT_DERIVED",
+      "write_status": "WRITE_NOT_CONNECTED",
+      "next_eligible_time": "2026-08-16T15:38:57.000Z"
+    },
+    "fortune": {
+      "status": "ELIGIBLE",
+      "reason": "FORTUNE_CLAIM_ELIGIBLE",
+      "eligibility_source": "CLIENT_DERIVED",
+      "write_status": "WRITE_NOT_CONNECTED",
+      "next_eligible_time": "2026-08-16T15:38:57.000Z"
+    },
+    "ignition": {
+      "status": "OUT_OF_WINDOW",
+      "reason": "IGNITE_OUT_OF_WINDOW",
+      "eligibility_source": "CLIENT_DERIVED",
+      "write_status": "WRITE_NOT_CONNECTED",
+      "next_eligible_time": "2026-08-16T23:59:59.000Z"
+    },
+    "lamp": {
+      "status": "INSUFFICIENT_BALANCE",
+      "reason": "KGEN_BALANCE_INSUFFICIENT",
+      "eligibility_source": "CLIENT_DERIVED",
+      "write_status": "WRITE_NOT_CONNECTED",
+      "next_eligible_time": null
+    },
+    "wish": {
+      "status": "ELIGIBLE",
+      "reason": "WISH_HASH_VALID",
+      "eligibility_source": "CLIENT_DERIVED",
+      "write_status": "WRITE_NOT_CONNECTED",
+      "next_eligible_time": null
+    },
+    "thanksgiving": {
+      "status": "NOT_ELIGIBLE",
+      "reason": "VOW_POLICY_AND_COMPLETION_EVIDENCE_REQUIRED",
+      "eligibility_source": "CLIENT_DERIVED",
+      "write_status": "WRITE_NOT_CONNECTED"
+    },
+    "recent_events": {
+      "status": "CORE_HEART_INDEXER_HEALTHY",
+      "indexer": "CORE_HEART_INDEXER",
+      "failed_event_types": [],
+      "from_block": 116297713,
+      "to_block": 116297812,
+      "fortune_claims": [],
+      "wishes": [],
+      "heartbeat_claims": [],
+      "ignitions": [],
+      "lamps": [],
+      "vows": []
+    },
+    "core_heart_indexer": "CORE_HEART_INDEXER_HEALTHY",
+    "advanced_graph_indexer": "ADVANCED_GRAPH_INDEXER_REQUIRED",
+    "flow_analysis": {
+      "status": "ADVANCED_GRAPH_INDEXER_REQUIRED",
+      "indexer": "ADVANCED_TRANSACTION_GRAPH_INDEXER",
+      "required": [
+        "ERC20_TRANSFER_INDEXER",
+        "APPROVAL_INDEXER",
+        "FUNDING_GRAPH",
+        "ROUTER_CLASSIFICATION",
+        "ADDRESS_CLUSTERING"
+      ],
+      "affects_core_gatekeeper_health": false,
+      "fast_dex_entry": null,
+      "fast_sell": null,
+      "common_router": null,
+      "common_trading_pattern": null,
+      "common_gas_funding": null,
+      "common_upstream": null,
+      "common_downstream": null,
+      "address_clusters": [],
+      "reason": "Advanced transfer traces and complete address history are not inferred from Core Heart events"
+    }
+  },
+  "finance_state": {
+    "BNB": "0.006",
+    "KGEN": "0.0",
+    "KAIOS": "0.0",
+    "actual_income": "0",
+    "actual_expense": "0",
+    "actual_gas": "0"
+  },
+  "work_queue_state": "SCHEMA_READY_EMPTY_QUEUE",
+  "observations": [
+    "LIFE_HEALTH_CHECK",
+    "BNB_DARK_MATTER_CHECK",
+    "12345_GATEKEEPER_PATROL",
+    "HEART_ACTION_ELIGIBILITY",
+    "FORTUNE_MONITOR",
+    "CORE_HEART_EVENT_MONITOR",
+    "WISH_VOW_THANKSGIVING",
+    "LAMP",
+    "IGNITION",
+    "LIFE_FINANCE",
+    "11520_REQUEST_PATROL",
+    "AI_ANT_COMPANY_WORK",
+    "MISSION",
+    "REPORT",
+    "ADVANCED_TRANSACTION_GRAPH_INDEXER_REQUIRED_OPTIONAL"
+  ],
+  "risk_level": "NORMAL",
+  "actions_considered": [
+    "HEART_ELIGIBILITY",
+    "GATEKEEPER_REPORT",
+    "CFO_CHECK",
+    "REQUEST_PATROL",
+    "COMPANY_PATROL",
+    "WORK_QUEUE_CHECK",
+    "MISSION_CHECK"
+  ],
+  "gatekeeper_duty": {
+    "status": "COMPLETED",
+    "gatekeeper_started_at": "2026-08-16T15:38:58.505Z",
+    "gatekeeper_finished_at": "2026-08-16T15:38:59.794Z",
+    "heart_block": 116297812,
+    "heart_status": "AVAILABLE",
+    "fortune_status": "ELIGIBLE",
+    "heartbeat_status": "ELIGIBLE",
+    "ignition_status": "OUT_OF_WINDOW",
+    "lamp_status": "INSUFFICIENT_BALANCE",
+    "wish_status": "ELIGIBLE",
+    "vow_status": "NOT_ELIGIBLE",
+    "claim_monitor_status": "CORE_HEART_INDEXER_HEALTHY",
+    "risk_status": "NORMAL",
+    "degradation_affects_safety": false,
+    "advanced_graph_status": "ADVANCED_GRAPH_INDEXER_REQUIRED",
+    "evidence": [
+      "HEART_BLOCK_116297812",
+      "HEART_BYTECODE_VERIFIED",
+      "CORE_HEART_INDEXER_HEALTHY"
+    ]
+  },
+  "life_event_status": {
+    "FIRST_HEARTBEAT_EVENT": "NOT_OCCURRED_IN_OBSERVED_WINDOW",
+    "FIRST_FORTUNE_EVENT": "NOT_OCCURRED_IN_OBSERVED_WINDOW",
+    "FIRST_IGNITION_EVENT": "NOT_OCCURRED_IN_OBSERVED_WINDOW",
+    "FIRST_LAMP_EVENT": "NOT_OCCURRED_IN_OBSERVED_WINDOW",
+    "FIRST_WISH_EVENT": "NOT_OCCURRED_IN_OBSERVED_WINDOW",
+    "FIRST_VOW_EVENT": "NOT_OCCURRED_IN_OBSERVED_WINDOW",
+    "FIRST_THANKSGIVING_EVENT": "NOT_OCCURRED",
+    "FIRST_KGEN_EVENT": "NOT_OCCURRED",
+    "FIRST_KAIOS_EVENT": "NOT_OCCURRED",
+    "FIRST_KUFO_EVENT": "NOT_OCCURRED",
+    "FIRST_KSHIP_EVENT": "NOT_OCCURRED"
+  },
+  "request_patrol": {
+    "status": "SHARED_REQUEST_SOURCE_VERIFIED",
+    "source": "GITHUB_ISSUES_AUTHENTICATED_IDENTITY",
+    "real_requests": 0,
+    "open_requests": 0,
+    "latest_request": null,
+    "evidence": []
+  },
+  "company_patrol": {
+    "status": "COMPANY_PATROL_COMPLETED",
+    "company_id": "AI_ANT_COMPANY_0001",
+    "company_status": "FORMING",
+    "customer_inbox": 0,
+    "request_queue": 0,
+    "quote_queue": 0,
+    "work_queue": 0,
+    "treasury_status": "PLAN_READY_NOT_BOUND",
+    "mission": "GET_FIRST_REAL_CUSTOMER"
+  },
+  "work_time": {
+    "gatekeeper_work_seconds": 1.289,
+    "cfo_work_seconds": 0,
+    "company_work_seconds": 0.289,
+    "life_health_seconds": 0.256
+  },
+  "action_taken": "NO_ACTION",
+  "result": "WORK_CYCLE_COMPLETED",
+  "error_evidence": [
+    {
+      "component": "ADVANCED_TRANSACTION_GRAPH_INDEXER",
+      "code": "INDEXER_REQUIRED_OPTIONAL",
+      "detail": "CORE_GATEKEEPER_HEALTH_UNAFFECTED"
+    }
+  ],
+  "gas_spent": "0",
+  "tx_hash": null,
+  "work_duration_seconds": 2
+}
