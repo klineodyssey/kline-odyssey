@@ -602,6 +602,14 @@ The following permanent KGEN knowledge-base files were created from a Boot V1.4 
 
 Permanent rule reaffirmed: every future Boot, Runtime, Whitepaper and Constitution update must be a full cumulative update, never a deletion-only or diff-only update.
 
+## 11520 V3.3 Additive Dependencies
+
+| Source | Depends on | Purpose |
+|---|---|---|
+| `K線西遊記/temples/11520/index.html` | `app.mjs`, `styles.css` | Public Universal Exchange shell. |
+| `K線西遊記/temples/11520/app.mjs` | `core/index.mjs`, `core/integrations/temple-heart-12345.mjs` | Request gateway and read-only runtime projection. |
+| `core/registry/universe-runtime.mjs` | `core/data/canonical.json`, domain registries | Canonical replay and IndexedDB projection. |
+
 ## KGEN 5D Production Build V0.2 Dependency Registration - 2026-07-05
 
 ### Portal V3.0 Local Entrances

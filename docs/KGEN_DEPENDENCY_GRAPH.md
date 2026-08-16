@@ -2140,6 +2140,18 @@ Generated: 2026-07-05
 | C:\Desktop\kline-odyssey\wukong-temple\index.html | 1541 | str | wukong_temple_export.json | C:\Desktop\kline-odyssey\wukong-temple\wukong_temple_export.json |
 | C:\Desktop\kline-odyssey\wukong-temple\mars-villa\index.html | 33 | html | wukong-temple/ | C:\Desktop\kline-odyssey\wukong-temple\mars-villa\wukong-temple |
 
+## 11520 V3.3 Public Request Dependency Graph
+
+`K線西遊記/index.html`
+→ `K線西遊記/temples/11520/index.html`
+→ `K線西遊記/temples/11520/app.mjs`
+→ `core/index.mjs`
+→ `core/registry/universe-runtime.mjs`
+→ `core/data/canonical.json`
+
+Public request interpretation additionally uses `core/company/index.mjs`.
+History remains append-only through the shared Registry and History domains.
+
 ## Case Mismatch
 | Source | Line | Kind | Ref | Existing path |
 | --- | --- | --- | --- | --- |

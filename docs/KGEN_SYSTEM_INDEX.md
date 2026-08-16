@@ -774,3 +774,10 @@ The following permanent KGEN knowledge-base files were created from a Boot V1.4 
 | KGEN_AI_RULES.md | C:\Desktop\kline-odyssey\KGEN_AI_RULES.md | Permanent AI rules, protected files, official versions and AI project map. |
 
 Permanent rule reaffirmed: every future Boot, Runtime, Whitepaper and Constitution update must be a full cumulative update, never a deletion-only or diff-only update.
+
+## 11520 Universal Exchange V3.3 System Registration
+
+The active public frontend is `K線西遊記/temples/11520/index.html`. Its domain
+system is rooted at `core/index.mjs`; canonical state is loaded from
+`core/data/canonical.json`. The gateway cannot create a real Request without
+requester identity, explicit confirmation and non-public contact evidence.

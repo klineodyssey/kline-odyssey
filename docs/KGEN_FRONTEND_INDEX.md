@@ -421,3 +421,4 @@ Site root: C:\Desktop\kline-odyssey\K線西遊記
 | `C:\Desktop\kline-odyssey\K線西遊記\index.html` | 16 local portal targets under temples/game | PASS: 16/16 targets exist. |
 | `C:\Desktop\kline-odyssey\K線西遊記\game\kline-5d\index.html` | `C:\Desktop\kline-odyssey\K線西遊記\modules\kgen-game-core.css`, `C:\Desktop\kline-odyssey\K線西遊記\modules\kgen-game-core.js`, `C:\Desktop\kline-odyssey\K線西遊記\modules\universe-runtime\organ-economy.js`, `C:\Desktop\kline-odyssey\K線西遊記\modules\universe-runtime\temple-hub.js`, `C:\Desktop\kline-odyssey\K線西遊記\modules\universe-runtime\kline-5d-engine.js` | PASS: all local targets exist. |
 | V0.2 temple pages | Shared core CSS/JS and V0.2 universe-runtime modules | PASS: registered in temple map and dependency index. |
+| `K線西遊記/temples/11520/index.html#/REQUEST` | `app.mjs`, `styles.css`, `core/index.mjs`, `core/data/canonical.json` | V3.3 public request gateway; Text and Voice Transcript Draft supported, Image/File/Map marked NOT_AVAILABLE. |

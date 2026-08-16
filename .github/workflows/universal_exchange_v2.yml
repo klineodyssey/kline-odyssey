@@ -1,0 +1,54 @@
+name: 11520 Universal Exchange V2
+
+on:
+  schedule:
+    - cron: "17 * * * *"
+  workflow_dispatch:
+  push:
+    paths:
+      - "core/**"
+      - "tests/universal-exchange.test.mjs"
+      - "K線西遊記/temples/11520/**"
+      - ".github/workflows/universal_exchange_v2.yml"
+  pull_request:
+    paths:
+      - "core/**"
+      - "tests/universal-exchange.test.mjs"
+      - "K線西遊記/temples/11520/**"
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Validate ES modules
+        shell: bash
+        run: find core -name '*.mjs' -print0 | xargs -0 -n1 node --check
+      - name: Run Universal Exchange tests
+        run: node --test tests/universal-exchange.test.mjs
+
+  digital-ant-public-read-only-worker:
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Run one independent read-only hourly cycle
+        env:
+          BSC_RPC_URL: ${{ vars.BSC_RPC_URL }}
+        run: node core/jobs/public-read-only-worker.mjs --output "$RUNNER_TEMP/digital-ant-hourly-worker.json"
+      - name: Preserve public Work Event evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: digital-ant-hourly-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/digital-ant-hourly-worker.json
+          if-no-files-found: error
+          retention-days: 30

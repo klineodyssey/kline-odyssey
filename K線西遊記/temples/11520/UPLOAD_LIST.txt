@@ -1,0 +1,9 @@
+core/
+tests/universal-exchange.test.mjs
+docs/KGEN_11520_V2_ARCHITECTURE.md
+K線西遊記/temples/11520/
+K線西遊記/data/kgen-5d-world-map.json
+K線西遊記/index.html
+.github/workflows/universal_exchange_v2.yml
+.env.example
+.gitignore

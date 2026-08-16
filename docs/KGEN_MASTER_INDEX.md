@@ -876,3 +876,13 @@ Runtime V1 implementation:
 | `KAIOS/ai-company/KAIOS_CURSOR_CONTINUOUS_QUEUE_REPORT.md` | Continuous Cursor queue record. |
 | `RECOVERY-KAIOS-AI-COMPANY-RUNTIME-V1.md` | Recovery point. |
 | `KAIOS_AI_COMPANY_RUNTIME_V1_CLOSEOUT.md` | Runtime closeout. |
+
+## 11520 Universal Exchange V3.3 Registration
+
+| Repository path | Purpose |
+|---|---|
+| `core/` | Multi-domain Digital Life, Registry, Company, Market, History, Security and request-gateway core. |
+| `core/data/canonical.json` | Evidence-labelled canonical universe records; real customer/request/revenue counts remain zero until verified events exist. |
+| `K線西遊記/temples/11520/` | Universal Exchange V3.3 frontend and public civilization request entry. |
+| `docs/KGEN_11520_V2_ARCHITECTURE.md` | Cumulative architecture and authority gates. |
+| `tests/universal-exchange.test.mjs` | Domain and public request safety regression suite. |
