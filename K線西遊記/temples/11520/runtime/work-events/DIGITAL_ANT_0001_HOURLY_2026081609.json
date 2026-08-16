@@ -1,0 +1,129 @@
+{
+  "event_id": "DIGITAL_ANT_0001_HOURLY_2026081609",
+  "life_id": "DIGITAL_ANT_0001",
+  "app_id": "DIGITAL_ANT_APP_0001",
+  "work_cycle_id": "DIGITAL_ANT_0001_HOURLY_2026081609",
+  "scheduled_at": "2026-08-16T09:00:00.000Z",
+  "started_at": "2026-08-16T09:44:55.751Z",
+  "finished_at": "2026-08-16T09:44:56.694Z",
+  "bsc_block": 116250619,
+  "wallet_state": {
+    "status": "PUBLIC_ADDRESS_READ",
+    "bnb": "0.006"
+  },
+  "heart_state": {
+    "status": "12345_PATROL_COMPLETED",
+    "source": "REPOSITORY_ABI_PUBLIC_CHAIN_READ",
+    "eligibility_source": "CLIENT_DERIVED",
+    "heartbeat": {
+      "status": "ELIGIBLE",
+      "reason": "HEARTBEAT_ELIGIBLE",
+      "eligibility_source": "CLIENT_DERIVED",
+      "write_status": "WRITE_NOT_CONNECTED",
+      "next_eligible_time": "2026-08-16T09:44:55.000Z"
+    },
+    "fortune": {
+      "status": "ELIGIBLE",
+      "reason": "FORTUNE_CLAIM_ELIGIBLE",
+      "eligibility_source": "CLIENT_DERIVED",
+      "write_status": "WRITE_NOT_CONNECTED",
+      "next_eligible_time": "2026-08-16T09:44:55.000Z"
+    },
+    "ignition": {
+      "status": "OUT_OF_WINDOW",
+      "reason": "IGNITE_OUT_OF_WINDOW",
+      "eligibility_source": "CLIENT_DERIVED",
+      "write_status": "WRITE_NOT_CONNECTED",
+      "next_eligible_time": "2026-08-17T00:00:00.000Z"
+    },
+    "lamp": {
+      "status": "INSUFFICIENT_BALANCE",
+      "reason": "KGEN_BALANCE_INSUFFICIENT",
+      "eligibility_source": "CLIENT_DERIVED",
+      "write_status": "WRITE_NOT_CONNECTED",
+      "next_eligible_time": null
+    },
+    "wish": {
+      "status": "ELIGIBLE",
+      "reason": "WISH_HASH_VALID",
+      "eligibility_source": "CLIENT_DERIVED",
+      "write_status": "WRITE_NOT_CONNECTED",
+      "next_eligible_time": null
+    },
+    "thanksgiving": {
+      "status": "NOT_ELIGIBLE",
+      "reason": "VOW_POLICY_AND_COMPLETION_EVIDENCE_REQUIRED",
+      "eligibility_source": "CLIENT_DERIVED",
+      "write_status": "WRITE_NOT_CONNECTED"
+    },
+    "recent_events": {
+      "status": "PARTIAL_EVENT_READ",
+      "failed_event_types": [
+        "FORTUNE",
+        "WISH",
+        "HEARTBEAT",
+        "IGNITION",
+        "LAMP"
+      ],
+      "from_block": 116250520,
+      "to_block": 116250619,
+      "fortune_claims": [],
+      "wishes": [],
+      "heartbeat_claims": [],
+      "ignitions": [],
+      "lamps": []
+    },
+    "flow_analysis": {
+      "status": "INDEXER_REQUIRED",
+      "fast_dex_entry": null,
+      "fast_sell": null,
+      "common_router": null,
+      "common_trading_pattern": null,
+      "common_gas_funding": null,
+      "common_upstream": null,
+      "common_downstream": null,
+      "address_clusters": [],
+      "reason": "ERC20 transfer traces and complete address history are not inferred from Heart events alone"
+    }
+  },
+  "finance_state": {
+    "BNB": "0.006",
+    "KGEN": "0.0",
+    "KAIOS": "0.0",
+    "actual_income": "0",
+    "actual_expense": "0",
+    "actual_gas": "0"
+  },
+  "work_queue_state": "SCHEMA_READY_EMPTY_QUEUE",
+  "observations": [
+    "PUBLIC_WALLET_BALANCE_READ",
+    "12345_HEART_READ",
+    "KGEN_BALANCE_READ",
+    "KAIOS_BALANCE_READ",
+    "11520_REQUEST_PATROL",
+    "AI_ANT_COMPANY_PATROL",
+    "COMPLETE_FLOW_CLUSTERING_INDEXER_REQUIRED"
+  ],
+  "risk_level": "NORMAL",
+  "actions_considered": [
+    "HEART_ELIGIBILITY",
+    "GATEKEEPER_REPORT",
+    "CFO_CHECK",
+    "REQUEST_PATROL",
+    "COMPANY_PATROL",
+    "WORK_QUEUE_CHECK",
+    "MISSION_CHECK"
+  ],
+  "action_taken": "NO_ACTION",
+  "result": "WORK_CYCLE_DEGRADED",
+  "error_evidence": [
+    {
+      "component": "FLOW_CLUSTERING",
+      "code": "INDEXER_REQUIRED",
+      "detail": "NO_FLOW_DATA_INFERRED"
+    }
+  ],
+  "gas_spent": "0",
+  "tx_hash": null,
+  "work_duration_seconds": 0
+}
