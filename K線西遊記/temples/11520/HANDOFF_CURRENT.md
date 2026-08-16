@@ -1,6 +1,12 @@
-# 11520 Universal Exchange V3.5 Current Handoff
+# 11520 Universal Exchange V3.6 Current Handoff
 
-V3.5 is the active cumulative public release. It retains the V3.4 multilingual gateway, Voice Concierge and production hourly public Worker while upgrading `DIGITAL_ANT_APP_0001` to V1.2.0 and enforcing `WUKONG_GATEKEEPER` before CFO and Company work. Life ID, immutable Birth Certificate, Wallet ownership and Listing identity rights are unchanged.
+V3.6 is the active cumulative public release. It retains the multilingual gateway, Voice Concierge and production hourly public Worker while upgrading `DIGITAL_ANT_APP_0001` to V1.3.0. Life ID, immutable Birth Certificate, Wallet ownership and Listing identity rights are unchanged.
+
+The first `heartbeatClaim()` completed on BSC mainnet in transaction `0xc9e8e40c2e49394211bc1ffba4eba0bf4a0ea22cc2944f64e9603c1e0b8f60c2`, block `116298614`. Receipt status, `HeartbeatClaimed`, KGEN `Transfer`, timestamp and KGEN balance change from 0 to 1 are independently verified. This creates separate append-only `FIRST_HEARTBEAT_EVENT` and `FIRST_KGEN_EVENT` records with source `HEARTBEAT_REWARD`; it does not create a Fortune event.
+
+The Secure Signer is a private local-only runtime and is not stored in the Repo, GitHub Pages artifact, browser or public workflow. It derives and compares the credential address, then rechecks chain 56, contract/code identity, KGEN address, function selector, reward/cooldown, eligibility, nonce, balance, current gas estimate, dynamic survival reserve and security state before signing. Only this explicitly owner-approved Heartbeat path was enabled; Fortune, Ignition, Lamp, Wish and Vow writes remain disabled. The public repository contains only fail-closed policy/validation code and public receipt evidence.
+
+V3.6 also formalizes the demand-first civilization law and the KGEN operational-energy accounting role. `ANT_MECH_BODY` is the top requirements-only internal Founder need: purchase is modelled in KAIOS, operation in KGEN, with no Customer, Revenue, BOM, inventory or factory invented. Existing K280/12345/Universe Map coordinate structures are reused; no Land or coordinate runtime was modified.
 
 Each cycle now records a formal Gatekeeper duty projection, Core Heart Indexer status, optional Advanced Graph status and separate Gatekeeper/CFO/Company work durations. Company patrol may run only after a completed Gatekeeper duty or a safe optional degradation; a critical primary-job failure produces `SKIPPED_DUE_TO_GATEKEEPER_FAILURE`.
 

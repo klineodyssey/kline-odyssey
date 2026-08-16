@@ -177,3 +177,10 @@
 - Added read-only 12345 Heart integration with runtime bytecode verification.
 - Removed random candles, simulated order book, hard-coded TVL, fabricated prices and demo land ownership.
 - Kept settlement and undeployed currencies explicitly marked `NOT_DEPLOYED`.
+# V3.6.0
+
+- Verified the first BSC Heartbeat and first KGEN with successful receipt, Heart/KGEN logs and 0 → 1 KGEN balance evidence.
+- Used a private local Secure Signer with fresh mainnet revalidation, address binding, dynamic gas/survival reserve and receipt reconciliation. Credential-capable code is not stored in the Repo, Pages or public workflows; only its fail-closed public policy and verified receipt evidence are released.
+- Added Mother Engine problem-solving proposals, demand-first product/supply-chain guards, KGEN/KAIOS/BNB economic roles, ANT_MECH requirements, vehicle energy and transport schemas.
+- Audited and reused existing K280, 12345 and Universe Map coordinate structures without modifying protected workstreams.
+- Upgraded `DIGITAL_ANT_APP_0001` to V1.3.0 and exposed verified first-event evidence in the public Life UI.

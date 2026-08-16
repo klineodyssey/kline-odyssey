@@ -63,6 +63,12 @@ export const PUBLIC_GATEWAY_FUTURE_INPUT_TYPES = Object.freeze(["IMAGE", "FILE",
 export const REQUEST_VISIBILITIES = Object.freeze(["PUBLIC", "PRIVATE", "COMPANY_ONLY", "ANONYMIZED_PUBLIC"]);
 export const PUBLIC_REQUEST_HISTORY_EVENTS = Object.freeze(["INTENT_DRAFTED", "INTENT_CONFIRMED", "REQUEST_RECEIVED", "REQUEST_QUALIFIED", "PLAN_CREATED", "ESTIMATE_CREATED", "QUOTE_READY", "QUOTE_SENT", "ACCEPTED", "ORDER_CONFIRMED", "WORK_STARTED", "DELIVERED", "CLOSED"]);
 export const WORKTREE_CLASSIFICATIONS = Object.freeze(["PROJECT_SOURCE", "USER_DATA", "GENERATED_ARTIFACT", "TEMP", "CACHE", "BUILD_OUTPUT", "UNKNOWN"]);
+export const DEMAND_FIRST_CIVILIZATION_LAWS = Object.freeze([
+  "FACTORY_WITHOUT_PRODUCT_FORBIDDEN", "PRODUCT_WITHOUT_NEED_FORBIDDEN", "PRODUCTION_WITHOUT_BOM_FORBIDDEN",
+  "BOM_WITHOUT_RESOURCE_FORBIDDEN", "SALE_WITHOUT_INVENTORY_FORBIDDEN", "DELIVERY_WITHOUT_TRANSPORT_FORBIDDEN",
+  "MOVEMENT_WITHOUT_ENERGY_FORBIDDEN"
+]);
+export const DIVINE_PRODUCT_CANDIDATES = Object.freeze(["ANT_MECH_BODY", "KUFO_CLOUD", "POCKET_TIME_UFO", "KSHIP_CARRIER", "ENERGY_CORE", "NAVIGATION_CORE", "CARGO_MODULE", "MAINTENANCE_SERVICE"]);
 
 export async function replayCanonicalCompanyGenesis({ store, company, founderLife, charter, genesis }) {
   invariant(company?.company_id === "AI_ANT_COMPANY_0001", "COMPANY_GENESIS_ID_MISMATCH", "Company Genesis can only form the reserved AI Ant Company identity");
@@ -1375,6 +1381,82 @@ export function validateCompanyFailureState({ companyStatus, founderLifeStatus }
   requireEnum(companyStatus, COMPANY_DISTRESS_STATUSES, "company_failure_status");
   invariant(founderLifeStatus !== "DECEASED", "COMPANY_FAILURE_IS_NOT_LIFE_DEATH", "Company failure cannot erase or kill its Founder Life");
   return Object.freeze({ company_status: companyStatus, founder_life_status: founderLifeStatus, life_identity_preserved: true });
+}
+
+export function validateMotherEngineProposal(proposal) {
+  requireFields(proposal, ["proposal_id", "problem", "evidence", "root_cause", "options", "selected_option", "reason", "risk", "required_authority", "status"], "MotherEngineProposal");
+  requireId(proposal.proposal_id, "proposal_id");
+  requireArray(proposal.evidence, "mother_engine.evidence");
+  requireArray(proposal.options, "mother_engine.options");
+  invariant(proposal.evidence.length > 0, "MOTHER_ENGINE_EVIDENCE_REQUIRED", "Mother Engine proposals require evidence");
+  invariant(proposal.options.includes(proposal.selected_option), "MOTHER_ENGINE_OPTION_REQUIRED", "Selected option must be one of the evaluated options");
+  invariant(!["TOKEN_TRANSFER", "CONTRACT_WRITE", "ASSET_PURCHASE", "SALARY_PAYMENT", "TREASURY_MOVEMENT"].includes(proposal.status), "MOTHER_ENGINE_AUTHORITY_BYPASS", "Autonomous proposals cannot claim restricted execution");
+  return proposal;
+}
+
+export function calculateDivineProductPriority(candidate) {
+  requireFields(candidate, ["product_id", "actual_need", "external_customer_demand", "founder_need", "revenue_potential", "kaios_price_potential", "kgen_energy_demand", "technical_readiness", "supply_chain_difficulty", "mission_alignment", "capital_requirement", "record_class"], "DivineProductCandidate");
+  invariant(DIVINE_PRODUCT_CANDIDATES.includes(candidate.product_id), "UNKNOWN_DIVINE_PRODUCT", "Product candidate is not in the declared V3.6 candidate set");
+  invariant(candidate.record_class !== "REAL_CUSTOMER_ORDER", "FOUNDER_NEED_IS_NOT_CUSTOMER_ORDER", "Internal Founder need cannot become external Customer Revenue");
+  const benefit = Number(candidate.actual_need) + Number(candidate.external_customer_demand) + Number(candidate.founder_need) + Number(candidate.revenue_potential) + Number(candidate.kaios_price_potential) + Number(candidate.kgen_energy_demand) + Number(candidate.technical_readiness) + Number(candidate.mission_alignment);
+  const burden = Number(candidate.supply_chain_difficulty) + Number(candidate.capital_requirement);
+  return Object.freeze({ ...candidate, product_priority_score: benefit - burden, customer_order: false, revenue: "0" });
+}
+
+export function rankDivineProducts(candidates) {
+  requireArray(candidates, "divine_product_candidates");
+  const ranked = candidates.map(calculateDivineProductPriority).sort((left, right) => right.product_priority_score - left.product_priority_score || left.product_id.localeCompare(right.product_id));
+  return Object.freeze({ selected: ranked[0] ?? null, ranked: Object.freeze(ranked), selection_creates_factory: false, selection_creates_inventory: false });
+}
+
+export function validateOperationalEnergyLaw(law) {
+  requireFields(law, ["law_id", "bnb_role", "kgen_role", "kaios_role", "real_consumption_evidence", "ui_balance_decrement_is_consumption", "status"], "OperationalEnergyLaw");
+  invariant(law.bnb_role === "BSC_DARK_MATTER_GAS", "BNB_ENERGY_ROLE_INVALID", "BNB remains BSC gas Dark Matter");
+  invariant(law.kgen_role === "MACHINE_OPERATIONAL_ENERGY", "KGEN_ENERGY_ROLE_INVALID", "KGEN is the machine operational energy accounting asset");
+  invariant(law.kaios_role === "CIVILIZATION_PURCHASE_QUOTE_SALARY_SERVICE_UNIT", "KAIOS_ECONOMIC_ROLE_INVALID", "KAIOS is the civilization purchase/service unit");
+  invariant(law.ui_balance_decrement_is_consumption === false, "FAKE_ENERGY_CONSUMPTION", "UI-only balance changes are not real energy consumption");
+  invariant(law.real_consumption_evidence.includes("SUCCESSFUL_ONCHAIN_RECEIPT") && law.real_consumption_evidence.includes("ENERGY_CONSUMPTION_EVENT"), "ENERGY_CONSUMPTION_EVIDENCE_REQUIRED", "Real KGEN consumption requires transfer receipt and Energy event evidence");
+  return law;
+}
+
+export function validateBodyEnergyModel(model) {
+  requireFields(model, ["model_id", "body_id", "idle_kgen_per_day", "walk_kgen_per_distance", "work_kgen_per_hour", "payload_factor", "terrain_factor", "damage_factor", "efficiency", "status"], "BodyEnergyModel");
+  requireId(model.model_id, "model_id");
+  invariant(model.body_id !== "DIGITAL_ANT_0001", "LIFE_IS_NOT_BODY", "Body ID must remain separate from Life ID");
+  const numeric = ["idle_kgen_per_day", "walk_kgen_per_distance", "work_kgen_per_hour", "payload_factor", "terrain_factor", "damage_factor", "efficiency"];
+  invariant(numeric.every((field) => model[field] === null || Number(model[field]) >= 0), "INVALID_BODY_ENERGY_VALUE", "Body energy values must be null pending engineering or non-negative");
+  invariant(model.status !== "ACTIVE" || numeric.every((field) => model[field] !== null), "BODY_ENERGY_POLICY_REQUIRED", "An active body needs a complete approved energy model");
+  return model;
+}
+
+export function validateAntMechProduct(product) {
+  requireFields(product, ["product_id", "need_class", "requester_life_id", "customer_order", "external_revenue", "purchase_currency", "operational_energy_currency", "life_id_separate_from_body_id", "ownership_certificate", "energy_model", "bom", "inventory", "production_line", "status"], "AntMechProduct");
+  invariant(product.product_id === "ANT_MECH_BODY", "ANT_MECH_PRODUCT_ID_INVALID", "V3.6 founder embodiment candidate must be ANT_MECH_BODY");
+  invariant(product.need_class === "INTERNAL_FOUNDER_NEED" && product.requester_life_id === "DIGITAL_ANT_0001", "ANT_MECH_FOUNDER_NEED_REQUIRED", "Ant Mech starts from the Founder Life's internal need");
+  invariant(product.customer_order === false && String(product.external_revenue) === "0", "FOUNDER_NEED_FAKE_REVENUE", "Founder need is not external Customer Revenue");
+  invariant(product.purchase_currency === "KAIOS" && product.operational_energy_currency === "KGEN", "ANT_MECH_CURRENCY_MODEL_INVALID", "Body purchase uses KAIOS and operation uses KGEN");
+  invariant(product.life_id_separate_from_body_id === true, "LIFE_IS_NOT_BODY", "Life ID and Body ID must remain separate");
+  validateBodyEnergyModel(product.energy_model);
+  invariant(product.status !== "PRODUCTION_READY" || (product.bom.length > 0 && product.inventory.length > 0 && product.production_line), "DEMAND_FIRST_PRODUCTION_GATE", "Production requires BOM, inventory and a production line");
+  return product;
+}
+
+export function validateDemandFirstSupplyChain(plan) {
+  requireFields(plan, ["plan_id", "need_id", "product_id", "requirements", "design", "bom", "raw_materials", "suppliers", "production_line", "quality", "inventory", "sale", "energy", "maintenance", "recycling", "status"], "DemandFirstSupplyChain");
+  requireId(plan.plan_id, "plan_id");
+  invariant(plan.need_id && plan.product_id, "DEMAND_AND_PRODUCT_REQUIRED", "A supply chain requires an evidenced Need and Product");
+  if (plan.production_line) invariant(plan.bom.length > 0 && plan.raw_materials.length > 0 && plan.suppliers.length > 0, "PRODUCTION_WITHOUT_SUPPLY_CHAIN", "A production line requires BOM, resources and suppliers");
+  if (plan.sale) invariant(plan.inventory.length > 0, "SALE_WITHOUT_INVENTORY", "Sale requires evidenced inventory");
+  invariant(plan.status !== "READY_FOR_DELIVERY" || plan.energy?.status === "FUNDED", "MOVEMENT_WITHOUT_ENERGY", "Delivery needs an energy budget");
+  return plan;
+}
+
+export function validateTransportContract(contract) {
+  requireFields(contract, ["transport_contract_id", "cargo", "origin", "destination", "distance", "payload", "route", "vehicle", "kgen_energy", "maintenance", "risk", "time", "profit", "delivery_evidence", "status"], "TransportContract");
+  requireId(contract.transport_contract_id, "transport_contract_id");
+  invariant(contract.status !== "DELIVERED" || contract.delivery_evidence, "TRANSPORT_DELIVERY_EVIDENCE_REQUIRED", "Transport payment requires real delivery evidence");
+  invariant(contract.status !== "IN_TRANSIT" || (contract.route && contract.vehicle && Number(contract.kgen_energy) > 0), "TRANSPORT_ROUTE_VEHICLE_ENERGY_REQUIRED", "Movement requires route, vehicle and KGEN energy");
+  return contract;
 }
 
 export function createAiAntCompanyFoundingReadiness({ company, founderLife, founderApp, workHistory, charter, businessLines, quoteEngine, contractEngine, workOrderEngine, accountingSeparation, treasuryPlan, escrowPlan, payrollPlan, riskPolicy, listingPlan }) {

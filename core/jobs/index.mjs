@@ -73,9 +73,12 @@ export function validateFirstLifeEventEvidence(eventType, evidence) {
   invariant(DIGITAL_ANT_FIRST_LIFE_EVENTS.includes(eventType), "INVALID_FIRST_LIFE_EVENT", "Unsupported first Life event type");
   invariant(evidence?.life_id === "DIGITAL_ANT_0001", "FIRST_EVENT_LIFE_ID_MISMATCH", "First Life event must belong to DIGITAL_ANT_0001");
   invariant(/^0x[0-9a-fA-F]{64}$/.test(evidence.tx_hash ?? ""), "FIRST_EVENT_TX_EVIDENCE_REQUIRED", "First Life event requires a real transaction hash");
-  invariant(Number.isInteger(evidence.block) && evidence.block > 0, "FIRST_EVENT_BLOCK_EVIDENCE_REQUIRED", "First Life event requires a real block number");
-  invariant(validIso(evidence.timestamp), "FIRST_EVENT_TIMESTAMP_EVIDENCE_REQUIRED", "First Life event requires a verified timestamp");
-  invariant(evidence.receipt_status === 1, "FIRST_EVENT_SUCCESS_RECEIPT_REQUIRED", "A failed transaction cannot complete a Life event");
+  const block = evidence.block ?? evidence.block_number;
+  const timestamp = evidence.timestamp ?? evidence.block_timestamp;
+  const receiptSuccess = evidence.receipt_status === 1 || evidence.receipt_status_code === 1 || evidence.receipt_status === "SUCCESS";
+  invariant(Number.isInteger(block) && block > 0, "FIRST_EVENT_BLOCK_EVIDENCE_REQUIRED", "First Life event requires a real block number");
+  invariant(validIso(timestamp), "FIRST_EVENT_TIMESTAMP_EVIDENCE_REQUIRED", "First Life event requires a verified timestamp");
+  invariant(receiptSuccess, "FIRST_EVENT_SUCCESS_RECEIPT_REQUIRED", "A failed transaction cannot complete a Life event");
   if (["FIRST_KGEN_EVENT", "FIRST_KAIOS_EVENT", "FIRST_KUFO_EVENT", "FIRST_KSHIP_EVENT"].includes(eventType)) {
     invariant(BigInt(evidence.balance_after_wei ?? "0") > BigInt(evidence.balance_before_wei ?? "0"), "FIRST_ASSET_BALANCE_INCREASE_REQUIRED", "First asset event requires a verified non-zero balance increase");
   }
@@ -89,7 +92,7 @@ export async function appendFirstDigitalAntLifeEvent({ store, life, eventType, e
   const history = await store.history(life.life_id, "LIFE");
   const existing = history.find((event) => event.event_type === eventType);
   if (existing) return Object.freeze({ status: "IDEMPOTENT_NOOP", event: existing });
-  const event = await store.commit({ domain: "LIFE", stream: "LIFE", id: life.life_id, entity: life, event_type: eventType, actor_id: actorId, timestamp: evidence.timestamp, payload: evidence, tx_hash: evidence.tx_hash });
+  const event = await store.commit({ domain: "LIFE", stream: "LIFE", id: life.life_id, entity: life, event_type: eventType, actor_id: actorId, timestamp: evidence.timestamp ?? evidence.block_timestamp, payload: evidence, tx_hash: evidence.tx_hash });
   return Object.freeze({ status: "FIRST_LIFE_EVENT_APPENDED", event });
 }
 

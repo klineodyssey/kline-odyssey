@@ -1,5 +1,6 @@
 import { invariant } from "../shared/errors.mjs";
 import { requireArray, requireEnum, requireFields, requireId } from "../shared/schema.mjs";
+import { createSurvivalReserveProposal } from "../accounting/index.mjs";
 
 export const WALLET_SECURITY_STATUSES = Object.freeze([
   "HEALTHY", "LOW_DARK_MATTER", "DARK_MATTER_DEPLETED", "SUSPICIOUS_ACTIVITY", "CONTROL_AT_RISK",
@@ -474,6 +475,60 @@ export const DIGITAL_ANT_LIVE_ACTION_POLICY = Object.freeze({
     ["lightLamp", "lightLamp(uint256)"], ["makeWish", "makeWish(bytes32)"], ["vowTo", "vowTo(uint8,uint256)"]
   ].map(([action, signature]) => [action, Object.freeze({ action, signature, enabled: false, max_gas: null, max_value: null, cooldown: "CONTRACT_DERIVED", daily_limit: null, minimum_bnb_reserve: "POLICY_REQUIRED", mission_reason: "REQUIRED", security_requirement: "HEALTHY_AND_REVALIDATED" })])))
 });
+
+export const DIGITAL_ANT_HEARTBEAT_OWNER_APPROVAL = "OWNER_DIRECTIVE_DIGITAL_ANT_V3_6_FIRST_KGEN_HEARTBEAT";
+export const DIGITAL_ANT_HEARTBEAT_SELECTOR = "0x2d293562";
+export const DIGITAL_ANT_HEART_ADDRESS = "0xB016D4d8f1aED1339101b30722cad6dbA9B8C972";
+export const DIGITAL_ANT_KGEN_ADDRESS = "0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be";
+export const DIGITAL_ANT_HEART_CODE_HASH = "0x1d3eba15b4c4895710c6e68f3f27e97cb0e2c94edc254d9f1e9148b3d7f55d32";
+
+export function createHeartbeatGasPolicy({ currentBnbWei, gasPriceWei, gasEstimate }) {
+  const proposal = createSurvivalReserveProposal({
+    currentBnbWei: String(currentBnbWei), gasPriceWei: String(gasPriceWei), estimatedGasUnits: [String(gasEstimate)],
+    coverageTransactions: 4, emergencyTransactions: 2, safetyBps: 20_000
+  });
+  return Object.freeze({
+    policy_id: "DIGITAL_ANT_V3_6_DYNAMIC_GAS_SURVIVAL_POLICY", basis: proposal.basis,
+    gas_price_wei: proposal.gas_price_wei, gas_estimate: String(gasEstimate),
+    MIN_SURVIVAL_BNB: proposal.MIN_SURVIVAL_BNB, minimum_survival_bnb_wei: proposal.recommended_survival_reserve_wei,
+    EMERGENCY_BNB_RESERVE: proposal.EMERGENCY_BNB, emergency_bnb_reserve_wei: proposal.emergency_bnb_wei,
+    MAX_ACTION_GAS_COST: proposal.proposed_action_gas_buffer_bnb, max_action_gas_cost_wei: proposal.proposed_action_gas_buffer_wei,
+    permanent_universe_constant: false, owner_directive_scope: "ONE_HEARTBEAT_ACTION_PER_SECURE_INVOCATION"
+  });
+}
+
+export function createApprovedHeartbeatActionPolicy(gasPolicy, approvalEvidence) {
+  invariant(approvalEvidence === DIGITAL_ANT_HEARTBEAT_OWNER_APPROVAL, "HEARTBEAT_OWNER_APPROVAL_REQUIRED", "The V3.6 Owner directive is required for a Heart write");
+  const disabled = (action, signature) => Object.freeze({ action, signature, enabled: false, max_gas: null, max_value: null, cooldown: "CONTRACT_DERIVED", daily_limit: 0, minimum_bnb_reserve: "POLICY_REQUIRED", mission_reason: "REQUIRED", security_requirement: "HEALTHY_AND_REVALIDATED" });
+  return Object.freeze({
+    policy_id: "DIGITAL_ANT_LIVE_ACTION_POLICY_V3_6_HEARTBEAT_ONLY", status: "APPROVED_ACTIVE", approval_evidence: approvalEvidence,
+    survival_reserve: gasPolicy.MIN_SURVIVAL_BNB,
+    actions: Object.freeze({
+      heartbeatClaim: Object.freeze({ action: "heartbeatClaim", signature: "heartbeatClaim()", enabled: true, max_gas: gasPolicy.max_action_gas_cost_wei, max_value: "0", cooldown: "CONTRACT_DERIVED", daily_limit: "CONTRACT_COOLDOWN_AND_ONE_PER_INVOCATION", minimum_bnb_reserve: gasPolicy.minimum_survival_bnb_wei, mission_reason: "WUKONG_GATEKEEPER_HEARTBEAT_DUTY", security_requirement: "HEALTHY_AND_REVALIDATED" }),
+      fortuneClaim: disabled("fortuneClaim", "fortuneClaim(uint256)"), igniteAndClaim: disabled("igniteAndClaim", "igniteAndClaim()"),
+      lightLamp: disabled("lightLamp", "lightLamp(uint256)"), makeWish: disabled("makeWish", "makeWish(bytes32)"), vowTo: disabled("vowTo", "vowTo(uint8,uint256)")
+    })
+  });
+}
+
+export function evaluateHeartbeatSafety(snapshot, { approvalEvidence, expectedCodeHash = DIGITAL_ANT_HEART_CODE_HASH } = {}) {
+  const blockers = [];
+  if (snapshot.chain_id !== 56) blockers.push("CHAIN_ID_MISMATCH");
+  if (snapshot.wallet_binding !== "MATCH") blockers.push("WALLET_ADDRESS_MISMATCH");
+  if (snapshot.heart_address?.toLowerCase() !== DIGITAL_ANT_HEART_ADDRESS.toLowerCase()) blockers.push("HEART_ADDRESS_MISMATCH");
+  if (snapshot.heart_code_hash?.toLowerCase() !== expectedCodeHash.toLowerCase()) blockers.push("HEART_BYTECODE_MISMATCH");
+  if (snapshot.kgen_address?.toLowerCase() !== DIGITAL_ANT_KGEN_ADDRESS.toLowerCase()) blockers.push("KGEN_ADDRESS_MISMATCH");
+  if (snapshot.function_selector !== DIGITAL_ANT_HEARTBEAT_SELECTOR) blockers.push("FUNCTION_SELECTOR_MISMATCH");
+  if (snapshot.function_selector_in_bytecode !== true) blockers.push("FUNCTION_SELECTOR_NOT_IN_HEART_BYTECODE");
+  if (snapshot.heartbeat_reward !== "1") blockers.push("HEARTBEAT_REWARD_RUNTIME_MISMATCH");
+  if (snapshot.heartbeat_cooldown_seconds !== "3600") blockers.push("HEARTBEAT_COOLDOWN_RUNTIME_MISMATCH");
+  if (snapshot.eligible !== true) blockers.push("HEARTBEAT_NOT_ELIGIBLE");
+  if (snapshot.security_status !== "HEALTHY") blockers.push("CRITICAL_SECURITY_INCIDENT");
+  if (approvalEvidence !== DIGITAL_ANT_HEARTBEAT_OWNER_APPROVAL) blockers.push("OWNER_APPROVAL_MISSING");
+  if (snapshot.eligible === true && snapshot.gas_estimate_status !== "AVAILABLE") blockers.push("GAS_ESTIMATE_UNAVAILABLE");
+  if (BigInt(snapshot.bnb_after_action_wei ?? "0") < BigInt(snapshot.minimum_bnb_reserve_wei ?? "0")) blockers.push("SURVIVAL_RESERVE_VIOLATION");
+  return Object.freeze({ status: blockers.length ? "HARD_STOP" : "SAFE_EXECUTION_PATH", blockers, action: "heartbeatClaim", broadcast_authority: blockers.length === 0, receipt_gated: true });
+}
 
 export function prepareSecureHeartAction({ proposal, latest, policy = DIGITAL_ANT_LIVE_ACTION_POLICY, signerStatus = "NOT_CONNECTED" }) {
   invariant(proposal?.action && policy.actions[proposal.action], "UNKNOWN_HEART_ACTION", "Secure Signer received an unknown Heart action");

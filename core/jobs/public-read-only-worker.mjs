@@ -12,6 +12,7 @@ const KGEN = "0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be";
 const KAIOS = "0xD4E67B3a69e41524c424150E6b6e921b01D036db";
 const PUBLIC_BSC_RPC = "https://bsc-rpc.publicnode.com";
 const ERC20_READ_ABI = ["function balanceOf(address) view returns (uint256)", "function decimals() view returns (uint8)"];
+const FIRST_HEARTBEAT_KGEN_EVIDENCE = new URL("../../K線西遊記/temples/11520/runtime/life-events/DIGITAL_ANT_0001_FIRST_HEARTBEAT_AND_KGEN_V3_6.json", import.meta.url);
 
 export function createPublicReadProvider({ rpcUrl = process.env.BSC_RPC_URL || PUBLIC_BSC_RPC, fetchImpl = globalThis.fetch } = {}) {
   if (typeof fetchImpl !== "function") throw statusError("FETCH_TRANSPORT_UNAVAILABLE", "BSC_RPC");
@@ -97,6 +98,34 @@ export function readCompanyPatrol(seed) {
   });
 }
 
+export function readMotherEnginePatrol(seed, { gatekeeperDuty, finance }) {
+  assertCompanyWorkAllowedAfterGatekeeper(gatekeeperDuty);
+  const stage = seed?.next_stage ?? {};
+  const firstKgen = stage.first_heartbeat_kgen_event ?? {};
+  const product = stage.divine_product_priority ?? {};
+  const supplyChain = stage.demand_first_supply_chain ?? {};
+  return Object.freeze({
+    status: "MOTHER_ENGINE_PATROL_COMPLETED_READ_ONLY",
+    questions: Object.freeze({
+      primary_job_completed: ["COMPLETED", "DEGRADED"].includes(gatekeeperDuty.status) && gatekeeperDuty.degradation_affects_safety === false,
+      life_missing: product.top_product ?? "EVIDENCE_REQUIRED",
+      worst_blocker: stage.mother_engine_problem_solver?.proposals?.find((proposal) => !String(proposal.status).startsWith("RESOLVED"))?.problem ?? "NO_OPEN_CRITICAL_BLOCKER",
+      civilization_product_need: product.top_product ?? "NOT_SELECTED",
+      first_income_path: "GET_FIRST_REAL_CUSTOMER",
+      dark_matter_preserved: Number(finance.BNB) > 0,
+      kgen_energy: finance.KGEN,
+      next_mission_evidence: firstKgen.status?.startsWith("COMPLETED_") ? "ANT_MECH_REQUIREMENTS_AND_REAL_CUSTOMER" : "FIRST_KGEN_EVENT"
+    }),
+    proposals: stage.mother_engine_problem_solver?.proposals ?? [],
+    demand_first_laws: supplyChain.forbidden ?? [],
+    selected_product: product.top_product ?? null,
+    authority: "READ_ANALYZE_PLAN_PROPOSE_ONLY",
+    chain_write: false,
+    customer_created: false,
+    revenue_created: "0"
+  });
+}
+
 function heartPatrol(heart) {
   const available = heart.status === "CHAIN_READ_VERIFIED";
   const eligibility = heart.eligibility ?? {};
@@ -129,7 +158,7 @@ function createGatekeeperDuty({ startedAt, finishedAt, heart, patrol }) {
   }));
 }
 
-function createLifeEventStatus({ wallet, finance, recentEvents }) {
+function createLifeEventStatus({ wallet, finance, recentEvents, verifiedFirstEvents = null }) {
   const owns = (event) => String(event.wallet ?? "").toLowerCase() === String(wallet).toLowerCase();
   const observed = {
     FIRST_HEARTBEAT_EVENT: recentEvents?.heartbeat_claims?.some(owns) === true,
@@ -140,15 +169,15 @@ function createLifeEventStatus({ wallet, finance, recentEvents }) {
     FIRST_VOW_EVENT: recentEvents?.vows?.some(owns) === true
   };
   return Object.freeze({
-    ...Object.fromEntries(Object.entries(observed).map(([event, seen]) => [event, seen ? "EVIDENCE_CANDIDATE_RECEIPT_VERIFICATION_REQUIRED" : "NOT_OCCURRED_IN_OBSERVED_WINDOW"])),
+    ...Object.fromEntries(Object.entries(observed).map(([event, seen]) => [event, verifiedFirstEvents?.[event] ? "VERIFIED" : seen ? "EVIDENCE_CANDIDATE_RECEIPT_VERIFICATION_REQUIRED" : "NOT_OCCURRED_IN_OBSERVED_WINDOW"])),
     FIRST_THANKSGIVING_EVENT: "NOT_OCCURRED",
-    FIRST_KGEN_EVENT: Number(finance.KGEN) > 0 ? "EVIDENCE_RESOLUTION_REQUIRED" : "NOT_OCCURRED",
+    FIRST_KGEN_EVENT: verifiedFirstEvents?.FIRST_KGEN_EVENT ? "VERIFIED" : Number(finance.KGEN) > 0 ? "EVIDENCE_RESOLUTION_REQUIRED" : "NOT_OCCURRED",
     FIRST_KAIOS_EVENT: Number(finance.KAIOS) > 0 ? "EVIDENCE_RESOLUTION_REQUIRED" : "NOT_OCCURRED",
     FIRST_KUFO_EVENT: "NOT_OCCURRED", FIRST_KSHIP_EVENT: "NOT_OCCURRED"
   });
 }
 
-async function publicReadCycle({ life, seed }) {
+async function publicReadCycle({ life, seed, verifiedFirstEvents = null }) {
   const provider = createPublicReadProvider();
   const chainId = await provider.send("eth_chainId", []);
   if (Number(BigInt(chainId)) !== 56) throw statusError("BSC_CHAIN_56_REQUIRED", "BSC_RPC");
@@ -170,24 +199,26 @@ async function publicReadCycle({ life, seed }) {
   const cfoWorkSeconds = Number(((Date.now() - cfoClock) / 1000).toFixed(3));
   let requestPatrol = { status: "SKIPPED_DUE_TO_GATEKEEPER_FAILURE", real_requests: 0, open_requests: 0, latest_request: null, evidence: [] };
   let companyPatrol = { status: "SKIPPED_DUE_TO_GATEKEEPER_FAILURE", company_id: "AI_ANT_COMPANY_0001", work_queue: 0 };
+  let motherEnginePatrol = { status: "SKIPPED_DUE_TO_GATEKEEPER_FAILURE", chain_write: false };
   let companyWorkSeconds = 0;
   if (["COMPLETED", "DEGRADED"].includes(gatekeeperDuty.status) && gatekeeperDuty.degradation_affects_safety === false) {
     assertCompanyWorkAllowedAfterGatekeeper(gatekeeperDuty);
     const companyClock = Date.now();
+    motherEnginePatrol = readMotherEnginePatrol(seed, { gatekeeperDuty, finance });
     requestPatrol = await readPublicRequestPatrol();
-    companyPatrol = readCompanyPatrol(seed);
+    companyPatrol = Object.freeze({ ...readCompanyPatrol(seed), mother_engine: motherEnginePatrol });
     companyWorkSeconds = Number(((Date.now() - companyClock) / 1000).toFixed(3));
   }
-  const lifeEvents = createLifeEventStatus({ wallet: life.wallet_address, finance, recentEvents: heart.recent_events });
+  const lifeEvents = createLifeEventStatus({ wallet: life.wallet_address, finance, recentEvents: heart.recent_events, verifiedFirstEvents });
   const coreHealthy = gatekeeperDuty.status === "COMPLETED";
   return Object.freeze({
     bsc_block: block.number, rpc_status: "AVAILABLE", heart_status: heart.status === "CHAIN_READ_VERIFIED" ? "AVAILABLE" : "UNAVAILABLE", kgen_status: "AVAILABLE", kaios_status: "AVAILABLE", indexer_status: coreHealthy ? "CORE_HEART_INDEXER_HEALTHY" : "CORE_HEART_INDEXER_DEGRADED",
     wallet_state: { status: "PUBLIC_ADDRESS_READ", bnb: finance.BNB }, heart_state: patrol, finance_state: finance,
     work_queue_state: companyPatrol.work_queue === 0 ? "SCHEMA_READY_EMPTY_QUEUE" : "QUEUE_READY",
-    observations: ["LIFE_HEALTH_CHECK", "BNB_DARK_MATTER_CHECK", "12345_GATEKEEPER_PATROL", "HEART_ACTION_ELIGIBILITY", "FORTUNE_MONITOR", "CORE_HEART_EVENT_MONITOR", "WISH_VOW_THANKSGIVING", "LAMP", "IGNITION", "LIFE_FINANCE", "11520_REQUEST_PATROL", "AI_ANT_COMPANY_WORK", "MISSION", "REPORT", "ADVANCED_TRANSACTION_GRAPH_INDEXER_REQUIRED_OPTIONAL"],
+    observations: ["LIFE_HEALTH_CHECK", "BNB_DARK_MATTER_CHECK", "12345_GATEKEEPER_PATROL", "HEART_ACTION_ELIGIBILITY", "FORTUNE_MONITOR", "CORE_HEART_EVENT_MONITOR", "WISH_VOW_THANKSGIVING", "LAMP", "IGNITION", "LIFE_FINANCE", "11520_REQUEST_PATROL", "MOTHER_ENGINE_PROBLEM_SOLVING", "AI_ANT_COMPANY_WORK", "MISSION", "REPORT", "ADVANCED_TRANSACTION_GRAPH_INDEXER_REQUIRED_OPTIONAL"],
     risk_level: heart.risk_assessment?.level ?? "NORMAL",
     actions_considered: ["HEART_ELIGIBILITY", "GATEKEEPER_REPORT", "CFO_CHECK", "REQUEST_PATROL", "COMPANY_PATROL", "WORK_QUEUE_CHECK", "MISSION_CHECK"],
-    gatekeeper_duty: gatekeeperDuty, life_event_status: lifeEvents, request_patrol: requestPatrol, company_patrol: companyPatrol,
+    gatekeeper_duty: gatekeeperDuty, life_event_status: lifeEvents, request_patrol: requestPatrol, mother_engine_patrol: motherEnginePatrol, company_patrol: companyPatrol,
     work_time: { gatekeeper_work_seconds: gatekeeperWorkSeconds, cfo_work_seconds: cfoWorkSeconds, company_work_seconds: companyWorkSeconds, life_health_seconds: Number(((gatekeeperClock - lifeStarted) / 1000).toFixed(3)) },
     error_evidence: coreHealthy ? [{ component: "ADVANCED_TRANSACTION_GRAPH_INDEXER", code: "INDEXER_REQUIRED_OPTIONAL", detail: "CORE_GATEKEEPER_HEALTH_UNAFFECTED" }] : [{ component: "CORE_HEART_INDEXER", code: heart.recent_events?.status ?? heart.reason ?? "CHAIN_READ_UNAVAILABLE", detail: "NO_EVENT_DATA_FABRICATED" }]
   });
@@ -215,12 +246,12 @@ export function buildSharedWorkerStatus({ event, previous = null, requestPatrol,
   };
   const health = deriveWorkerHealth({ lastCycle: event, now: generatedAt });
   return validateSharedWorkerStatus(Object.freeze({
-    schema_version: "11520_WORKER_STATUS_V1", life_id: "DIGITAL_ANT_0001", app_id: "DIGITAL_ANT_APP_0001", app_version: "V1.2.0",
+    schema_version: "11520_WORKER_STATUS_V1", life_id: "DIGITAL_ANT_0001", app_id: "DIGITAL_ANT_APP_0001", app_version: "V1.3.0",
     scheduler: "GITHUB_ACTIONS_HOURLY", scheduler_status: "PRODUCTION_ACTIVE", cadence: "EVERY_HOUR", public_read_only: true, signer: false, chain_write: false,
     worker_health: health.status, work_stop_reason: health.stop_reason, generated_at: generatedAt, last_work_cycle: event,
     next_expected_at: new Date(Date.parse(event.scheduled_at) + 3_600_000).toISOString(), metrics,
     primary_job: "WUKONG_GATEKEEPER", secondary_work: "AI_ANT_COMPANY_FOUNDER", gatekeeper_duty: event.gatekeeper_duty, life_event_status: event.life_event_status,
-    patrols: { temple_12345: event.heart_state, request: requestPatrol, company: companyPatrol },
+    patrols: { temple_12345: event.heart_state, request: requestPatrol, mother_engine: event.mother_engine_patrol, company: companyPatrol },
     request_patrol: { ...requestPatrol, new_real_request_detected: currentRequests > previousRequests, first_real_customer_detected: previousRequests === 0 && currentRequests > 0 },
     global_truth_source: "GIT_BACKED_APPEND_ONLY_PUBLIC_SNAPSHOT", browser_indexeddb_role: "LOCAL_DRAFT_CACHE_ONLY"
   }));
@@ -233,9 +264,13 @@ async function main() {
   const output = argument(argv, "--output");
   const seed = JSON.parse(await readFile(new URL("../data/canonical.json", import.meta.url), "utf8"));
   const universe = await createUniverseRuntime({ seed });
-  const [life, app, previousStatus] = await Promise.all([
-    universe.registries.life.get("DIGITAL_ANT_0001"), universe.registries.app.get("DIGITAL_ANT_APP_0001"), readJsonIfPresent(statusPath)
+  const [life, app, previousStatus, firstEventEvidence] = await Promise.all([
+    universe.registries.life.get("DIGITAL_ANT_0001"), universe.registries.app.get("DIGITAL_ANT_APP_0001"), readJsonIfPresent(statusPath), readJsonIfPresent(FIRST_HEARTBEAT_KGEN_EVIDENCE)
   ]);
+  const verifiedFirstEvents = firstEventEvidence?.status?.startsWith("COMPLETED_") ? {
+    FIRST_HEARTBEAT_EVENT: firstEventEvidence.first_heartbeat_event,
+    FIRST_KGEN_EVENT: firstEventEvidence.first_kgen_event
+  } : null;
   const now = new Date().toISOString();
   const hour = new Date(now); hour.setUTCMinutes(0, 0, 0);
   const cycleId = `DIGITAL_ANT_0001_HOURLY_${hour.toISOString().slice(0, 13).replace(/[-T:]/g, "")}`;
@@ -246,7 +281,7 @@ async function main() {
     if (output) await writeJson(output, report); else process.stdout.write(`${JSON.stringify(report)}\n`);
     return;
   }
-  const result = await runDigitalAntHourlyCycle({ store: universe.store, life, app, scheduledAt: now, startedAt: now, readCycle: (context) => publicReadCycle({ ...context, seed }) });
+  const result = await runDigitalAntHourlyCycle({ store: universe.store, life, app, scheduledAt: now, startedAt: now, readCycle: (context) => publicReadCycle({ ...context, seed, verifiedFirstEvents }) });
   const event = publicWorkEvent(result);
   const requestPatrol = event.request_patrol;
   const companyPatrol = event.company_patrol;

@@ -1,5 +1,17 @@
 # 11520 Universal Exchange V2 Architecture
 
+## V3.6 first Heartbeat, first KGEN and demand-first civilization
+
+`DIGITAL_ANT_0001` completed its first mainnet `heartbeatClaim()` at block `116298614`. The successful receipt, `HeartbeatClaimed` log, KGEN `Transfer`, timestamp and 0 → 1 KGEN balance change are preserved as one public evidence package and two separate first-event records. The source is `HEARTBEAT_REWARD`; no Fortune event is inferred.
+
+The signer boundary is split permanently. GitHub Pages and the hourly public Worker remain read-only and receive no credential. The credential-capable Secure Signer runs only in a private local environment and is not stored in the Repo. Public `core/security/life-security.mjs` contains only fail-closed policy and validation code. Before the approved action, the private runtime derived and compared the expected Wallet, then freshly verified BSC chain 56, Heart/KGEN identities, deployed Heart code hash, function selector, runtime reward/cooldown, eligibility, nonce, fee/estimate, dynamic survival reserve and critical-security state. A successful receipt, expected events and verified balance increase are required before Life events complete. The explicit V3.6 approval enabled Heartbeat only; all other Heart writes remain disabled.
+
+The Demand-First law prohibits factory without product, product without need, production without BOM/resources, sale without inventory, delivery without transport and movement without energy. KAIOS is the purchase/quote/service unit, KGEN is the operational energy-accounting asset, and BNB is BSC gas. Real energy consumption requires an authorized KGEN transfer, successful receipt and `ENERGY_CONSUMPTION_EVENT`; a UI decrement is never evidence.
+
+`ANT_MECH_BODY` is the top internal Founder need, not an external Customer or Revenue record. Its price currency is KAIOS and operating energy is KGEN; Body ID remains separate from Life ID. Energy coefficients, BOM, suppliers, production, inventory and purchase authority remain unapproved/empty. KUFO/KSHIP and Transport Contract models are architecture only.
+
+The Land audit reuses the existing shared `kgen-land-engine.js`, 12345 grid/parcel demo, K280 Land architecture and Universe Map XYZ/boundary model. K280 raptor embodiment remains a separate runtime. No protected Land, 12345, TempleHeart, KGEN Contract, KAIOS, Boot, Physics or Universe Map file was modified.
+
 STATUS: V3.2 FIRST REAL CUSTOMER ACQUISITION
 KGEN AMM SETTLEMENT: USER_WALLET_LIVE
 11520 SETTLEMENT CONTRACT: MAINNET_LIVE_PROXY_ADAPTER_NOT_INTEGRATED

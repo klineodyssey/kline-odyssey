@@ -95,6 +95,7 @@ export function createSurvivalReserveProposal({ currentBnbWei, gasPriceWei, esti
     proposed_action_gas_buffer_bnb: formatUnits(proposedActionGas),
     MIN_SURVIVAL_BNB: formatUnits(protectedReserve),
     EMERGENCY_BNB: formatUnits(emergency > balance ? balance : emergency),
+    emergency_bnb_wei: (emergency > balance ? balance : emergency).toString(),
     MAX_SPENDABLE_BNB: formatUnits(spendable),
     max_spendable_wei: spendable.toString(),
     owner_approved: false,
