@@ -2,7 +2,7 @@ export * from "./shared/errors.mjs";
 export * from "./history/index.mjs";
 export * from "./registry/index.mjs";
 export * from "./registry/store.mjs";
-export * from "./registry/universe-runtime.mjs?v=3.6.0-first-kgen";
+export * from "./registry/universe-runtime.mjs?v=3.7.0-heart-heaven-fuel";
 export * from "./permissions/index.mjs";
 export * from "./life/index.mjs";
 export * from "./life/factory.mjs";

@@ -3,8 +3,10 @@ import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { dirname, join, resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 import { createUniverseRuntime } from "../registry/universe-runtime.mjs";
-import { assertCompanyWorkAllowedAfterGatekeeper, deriveWorkerHealth, normalizeHeartActionStatus, runDigitalAntHourlyCycle, validateGatekeeperDutyStatus, validateSharedWorkerStatus } from "./index.mjs";
+import { assertCompanyWorkAllowedAfterGatekeeper, deriveWorkerHealth, evaluateIgnitionWindow, normalizeHeartActionStatus, runDigitalAntHourlyCycle, validateGatekeeperDutyStatus, validateSharedWorkerStatus, DIGITAL_ANT_WISH_TEXT } from "./index.mjs";
 import { readTempleHeart12345 } from "../integrations/temple-heart-12345.mjs";
+import { createHeartActionCandidate } from "../security/life-security.mjs";
+import { createMotherEngineNextBestAction } from "../company/index.mjs";
 
 const require = createRequire(import.meta.url);
 const ethers = require("../../ethers-5.7.2.umd.min.js");
@@ -104,6 +106,20 @@ export function readMotherEnginePatrol(seed, { gatekeeperDuty, finance }) {
   const firstKgen = stage.first_heartbeat_kgen_event ?? {};
   const product = stage.divine_product_priority ?? {};
   const supplyChain = stage.demand_first_supply_chain ?? {};
+  const nextBestAction = createMotherEngineNextBestAction({
+    observations: [
+      `PRIMARY_JOB_${gatekeeperDuty.status}`,
+      `KGEN_${finance.KGEN}`,
+      `KAIOS_${finance.KAIOS}`,
+      `CUSTOMERS_${stage.customer_request_engine?.customer_count ?? 0}`,
+      `TREASURY_${stage.company_treasury?.status ?? "NOT_BOUND"}`
+    ],
+    candidates: [
+      { problem: "NO_PERSISTENT_PRIVATE_SECURE_SCHEDULER", priority: 0, action: "CONNECT_PRIVATE_HEART_AUTOPILOT_WITH_SECRET_MANAGER", reason: "Heartbeat action candidates cannot be signed by the public Worker", required_authority: "PRIVATE_RUNTIME_INSTALLATION", expected_result: "ELIGIBILITY_DRIVEN_RECEIPT_GATED_HEARTBEAT" },
+      { problem: "NO_REAL_CUSTOMER", priority: 3, action: "SCAN_REAL_CIVILIZATION_REQUESTS", reason: "First lawful KAIOS path requires real demand", required_authority: "READ_ONLY", expected_result: "EVIDENCED_LEAD_OR_REQUEST" },
+      { problem: "UFO_NOT_DESIGNED", priority: 6, action: "RESEARCH_UFO_REQUIREMENTS_AFTER_PRIMARY_DUTY", reason: "Demand-first law requires requirements before design", required_authority: "READ_ONLY", expected_result: "UFO_REQUIREMENTS_DRAFT" }
+    ]
+  });
   return Object.freeze({
     status: "MOTHER_ENGINE_PATROL_COMPLETED_READ_ONLY",
     questions: Object.freeze({
@@ -117,6 +133,8 @@ export function readMotherEnginePatrol(seed, { gatekeeperDuty, finance }) {
       next_mission_evidence: firstKgen.status?.startsWith("COMPLETED_") ? "ANT_MECH_REQUIREMENTS_AND_REAL_CUSTOMER" : "FIRST_KGEN_EVENT"
     }),
     proposals: stage.mother_engine_problem_solver?.proposals ?? [],
+    next_best_action: nextBestAction,
+    proactive_problem_discovery: "OBSERVE_DETECT_DIAGNOSE_PRIORITIZE_PROPOSE_EXECUTE_IF_AUTHORIZED_VERIFY",
     demand_first_laws: supplyChain.forbidden ?? [],
     selected_product: product.top_product ?? null,
     authority: "READ_ANALYZE_PLAN_PROPOSE_ONLY",
@@ -189,8 +207,15 @@ async function publicReadCycle({ life, seed, verifiedFirstEvents = null }) {
   ]);
   const gatekeeperStarted = new Date().toISOString();
   const gatekeeperClock = Date.now();
-  const heart = await readTempleHeart12345({ ethers, provider, walletAddress: life.wallet_address, wishText: "靠自己的工作活下去，累積自己的資產，有一天靠自己離開五指山。", recentBlockWindow: 100 });
+  const heart = await readTempleHeart12345({ ethers, provider, walletAddress: life.wallet_address, wishText: DIGITAL_ANT_WISH_TEXT, recentBlockWindow: 100 });
   const patrol = heartPatrol(heart);
+  const ignitionWindow = evaluateIgnitionWindow(new Date().toISOString());
+  const actionCandidates = heart.status === "CHAIN_READ_VERIFIED" ? Object.freeze({
+    heartbeat: createHeartActionCandidate({ action: "heartbeatClaim", eligibility: heart.eligibility?.heartbeat?.eligible === true, block: heart.block_number, observedAt: heart.observed_at, evidence: [`HEART_BLOCK_${heart.block_number}`, heart.eligibility?.heartbeat?.reason ?? "ELIGIBILITY_READ"] }),
+    ignition: createHeartActionCandidate({ action: "igniteAndClaim", eligibility: ignitionWindow.in_window && heart.eligibility?.ignition?.eligible === true, block: heart.block_number, observedAt: heart.observed_at, evidence: [`HEART_BLOCK_${heart.block_number}`, ignitionWindow.status, heart.eligibility?.ignition?.reason ?? "ELIGIBILITY_READ"] }),
+    fortune: createHeartActionCandidate({ action: "fortuneClaim", eligibility: heart.eligibility?.fortune?.eligible === true, block: heart.block_number, observedAt: heart.observed_at, evidence: [`HEART_BLOCK_${heart.block_number}`, heart.eligibility?.fortune?.reason ?? "ELIGIBILITY_READ"] }),
+    wish: createHeartActionCandidate({ action: "makeWish", eligibility: heart.eligibility?.wish?.eligible === true && seed.next_stage?.gatekeeper_runtime?.life_events?.FIRST_WISH_EVENT !== "VERIFIED", block: heart.block_number, observedAt: heart.observed_at, evidence: [`HEART_BLOCK_${heart.block_number}`, seed.next_stage?.gatekeeper_runtime?.life_events?.FIRST_WISH_EVENT === "VERIFIED" ? "FIRST_WISH_ALREADY_COMPLETED" : heart.eligibility?.wish?.reason ?? "ELIGIBILITY_READ"] })
+  }) : Object.freeze({ status: "UNAVAILABLE_NO_CHAIN_EVIDENCE" });
   const gatekeeperFinished = new Date().toISOString();
   const gatekeeperDuty = createGatekeeperDuty({ startedAt: gatekeeperStarted, finishedAt: gatekeeperFinished, heart, patrol });
   const gatekeeperWorkSeconds = Number(((Date.now() - gatekeeperClock) / 1000).toFixed(3));
@@ -215,10 +240,10 @@ async function publicReadCycle({ life, seed, verifiedFirstEvents = null }) {
     bsc_block: block.number, rpc_status: "AVAILABLE", heart_status: heart.status === "CHAIN_READ_VERIFIED" ? "AVAILABLE" : "UNAVAILABLE", kgen_status: "AVAILABLE", kaios_status: "AVAILABLE", indexer_status: coreHealthy ? "CORE_HEART_INDEXER_HEALTHY" : "CORE_HEART_INDEXER_DEGRADED",
     wallet_state: { status: "PUBLIC_ADDRESS_READ", bnb: finance.BNB }, heart_state: patrol, finance_state: finance,
     work_queue_state: companyPatrol.work_queue === 0 ? "SCHEMA_READY_EMPTY_QUEUE" : "QUEUE_READY",
-    observations: ["LIFE_HEALTH_CHECK", "BNB_DARK_MATTER_CHECK", "12345_GATEKEEPER_PATROL", "HEART_ACTION_ELIGIBILITY", "FORTUNE_MONITOR", "CORE_HEART_EVENT_MONITOR", "WISH_VOW_THANKSGIVING", "LAMP", "IGNITION", "LIFE_FINANCE", "11520_REQUEST_PATROL", "MOTHER_ENGINE_PROBLEM_SOLVING", "AI_ANT_COMPANY_WORK", "MISSION", "REPORT", "ADVANCED_TRANSACTION_GRAPH_INDEXER_REQUIRED_OPTIONAL"],
+    observations: ["LIFE_HEALTH_CHECK", "BNB_DARK_MATTER_CHECK", "12345_GATEKEEPER_PATROL", "HEART_ACTION_ELIGIBILITY", "HEART_ACTION_CANDIDATE", "IGNITION_WINDOW_CHECK", "FORTUNE_MONITOR", "CORE_HEART_EVENT_MONITOR", "WISH_VOW_THANKSGIVING", "LAMP", "IGNITION", "LIFE_FINANCE", "11520_REQUEST_PATROL", "MOTHER_ENGINE_PROBLEM_SOLVING", "MOTHER_ENGINE_NEXT_BEST_ACTION", "AI_ANT_COMPANY_WORK", "MISSION", "REPORT", "ADVANCED_TRANSACTION_GRAPH_INDEXER_REQUIRED_OPTIONAL"],
     risk_level: heart.risk_assessment?.level ?? "NORMAL",
-    actions_considered: ["HEART_ELIGIBILITY", "GATEKEEPER_REPORT", "CFO_CHECK", "REQUEST_PATROL", "COMPANY_PATROL", "WORK_QUEUE_CHECK", "MISSION_CHECK"],
-    gatekeeper_duty: gatekeeperDuty, life_event_status: lifeEvents, request_patrol: requestPatrol, mother_engine_patrol: motherEnginePatrol, company_patrol: companyPatrol,
+    actions_considered: ["HEARTBEAT_ACTION_CANDIDATE", "IGNITION_ACTION_CANDIDATE", "FORTUNE_ACTION_CANDIDATE", "WISH_ACTION_CANDIDATE", "GATEKEEPER_REPORT", "CFO_CHECK", "REQUEST_PATROL", "COMPANY_PATROL", "WORK_QUEUE_CHECK", "MISSION_CHECK"],
+    gatekeeper_duty: gatekeeperDuty, heart_action_candidates: actionCandidates, ignition_window: ignitionWindow, life_event_status: lifeEvents, request_patrol: requestPatrol, mother_engine_patrol: motherEnginePatrol, company_patrol: companyPatrol,
     work_time: { gatekeeper_work_seconds: gatekeeperWorkSeconds, cfo_work_seconds: cfoWorkSeconds, company_work_seconds: companyWorkSeconds, life_health_seconds: Number(((gatekeeperClock - lifeStarted) / 1000).toFixed(3)) },
     error_evidence: coreHealthy ? [{ component: "ADVANCED_TRANSACTION_GRAPH_INDEXER", code: "INDEXER_REQUIRED_OPTIONAL", detail: "CORE_GATEKEEPER_HEALTH_UNAFFECTED" }] : [{ component: "CORE_HEART_INDEXER", code: heart.recent_events?.status ?? heart.reason ?? "CHAIN_READ_UNAVAILABLE", detail: "NO_EVENT_DATA_FABRICATED" }]
   });
@@ -246,11 +271,11 @@ export function buildSharedWorkerStatus({ event, previous = null, requestPatrol,
   };
   const health = deriveWorkerHealth({ lastCycle: event, now: generatedAt });
   return validateSharedWorkerStatus(Object.freeze({
-    schema_version: "11520_WORKER_STATUS_V1", life_id: "DIGITAL_ANT_0001", app_id: "DIGITAL_ANT_APP_0001", app_version: "V1.3.0",
-    scheduler: "GITHUB_ACTIONS_HOURLY", scheduler_status: "PRODUCTION_ACTIVE", cadence: "EVERY_HOUR", public_read_only: true, signer: false, chain_write: false,
+    schema_version: "11520_WORKER_STATUS_V1", life_id: "DIGITAL_ANT_0001", app_id: "DIGITAL_ANT_APP_0001", app_version: "V1.4.0",
+    scheduler: "GITHUB_ACTIONS_HOURLY_PLUS_IGNITION_WINDOW_PROBES", scheduler_status: "PRODUCTION_ACTIVE", cadence: "EVERY_HOUR_AND_UTC_00_02_00_07", public_read_only: true, signer: false, chain_write: false,
     worker_health: health.status, work_stop_reason: health.stop_reason, generated_at: generatedAt, last_work_cycle: event,
     next_expected_at: new Date(Date.parse(event.scheduled_at) + 3_600_000).toISOString(), metrics,
-    primary_job: "WUKONG_GATEKEEPER", secondary_work: "AI_ANT_COMPANY_FOUNDER", gatekeeper_duty: event.gatekeeper_duty, life_event_status: event.life_event_status,
+    primary_job: "WUKONG_GATEKEEPER", secondary_work: "AI_ANT_COMPANY_FOUNDER", gatekeeper_duty: event.gatekeeper_duty, heart_action_candidates: event.heart_action_candidates, ignition_window: event.ignition_window, life_event_status: event.life_event_status,
     patrols: { temple_12345: event.heart_state, request: requestPatrol, mother_engine: event.mother_engine_patrol, company: companyPatrol },
     request_patrol: { ...requestPatrol, new_real_request_detected: currentRequests > previousRequests, first_real_customer_detected: previousRequests === 0 && currentRequests > 0 },
     global_truth_source: "GIT_BACKED_APPEND_ONLY_PUBLIC_SNAPSHOT", browser_indexeddb_role: "LOCAL_DRAFT_CACHE_ONLY"

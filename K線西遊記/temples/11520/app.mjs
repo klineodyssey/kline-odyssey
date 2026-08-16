@@ -6,8 +6,8 @@ import {
   routePublicCivilizationProject, qualifyPublicCivilizationRequest, createNonBindingEstimatePreview,
   appendPublicRequestHistoryEvent, I18N_SUPPORTED_LOCALES, translateUi, normalizeUiLocale,
   validatePrimaryI18nCatalogs, detectVoiceCapabilities, deriveWorkerHealth
-} from "../../../core/index.mjs?v=11520-v3.6-first-kgen";
-import { readTempleHeart12345 } from "../../../core/integrations/temple-heart-12345.mjs?v=11520-v3.6-first-kgen";
+} from "../../../core/index.mjs?v=11520-v3.7-heart-heaven-fuel";
+import { readTempleHeart12345 } from "../../../core/integrations/temple-heart-12345.mjs?v=11520-v3.7-heart-heaven-fuel";
 
 const NAVIGATION = Object.freeze([
   ["HOME", "navigation.home"], ["REQUEST", "navigation.request"], ["LIFE", "navigation.life"], ["LIFE_FACTORY", "LIFE FACTORY"], ["APPS", "navigation.apps"], ["COMPANIES", "navigation.company"],
@@ -83,7 +83,7 @@ function workerStatusMarkup() {
     <article class="card"><div class="eyebrow">PRIMARY JOB · 12345 GATEKEEPER</div><h3>${badge(duty.status ?? "NOT_STARTED")}</h3>${kv("Last patrol", duty.gatekeeper_finished_at ?? "NO_SHARED_EVIDENCE")}${kv("Heart block", duty.heart_block)}${kv("Core Heart Indexer", duty.claim_monitor_status ?? heart.core_heart_indexer ?? "UNAVAILABLE")}${kv("Advanced Graph", duty.advanced_graph_status ?? heart.advanced_graph_indexer ?? "INDEXER_REQUIRED_OPTIONAL")}${action("Heartbeat")}${action("Fortune")}${action("Ignition")}${action("Lamp")}${action("Wish")}${action("Thanksgiving")}${kv("Eligibility", heart.eligibility_source ?? "CLIENT_DERIVED")}${kv("Public worker signer", "NO")}${kv("Private signer", "SEPARATE_LOCAL_RUNTIME")}</article>
     <article class="card"><div class="eyebrow">WORK TIME BY DUTY</div>${kv("Gatekeeper", `${metrics.gatekeeper_work_seconds ?? 0}s`)}${kv("CFO of Self", `${metrics.cfo_work_seconds ?? 0}s`)}${kv("AI Ant Company", `${metrics.company_work_seconds ?? 0}s`)}${kv("Total", `${metrics.work_duration_seconds ?? 0}s`)}</article>
     <article class="card"><div class="eyebrow">REQUEST PATROL</div>${kv("Status", status.patrols?.request?.status)}${kv("Real Requests", status.request_patrol?.real_requests ?? 0)}${kv("Open Requests", status.request_patrol?.open_requests ?? 0)}${kv("First Customer Alert", String(status.request_patrol?.first_real_customer_detected ?? false))}</article>
-    <article class="card"><div class="eyebrow">MOTHER ENGINE</div>${kv("Status", status.patrols?.mother_engine?.status ?? "PENDING_NEXT_PUBLIC_CYCLE")}${kv("Selected product", status.patrols?.mother_engine?.selected_product ?? "ANT_MECH_BODY")}${kv("Authority", status.patrols?.mother_engine?.authority ?? "READ_ANALYZE_PLAN_PROPOSE_ONLY")}${kv("Customer created", String(status.patrols?.mother_engine?.customer_created ?? false))}${kv("Revenue created", status.patrols?.mother_engine?.revenue_created ?? "0")}</article>
+    <article class="card"><div class="eyebrow">MOTHER ENGINE</div>${kv("Status", status.patrols?.mother_engine?.status ?? "PENDING_NEXT_PUBLIC_CYCLE")}${kv("Next Best Action", status.patrols?.mother_engine?.next_best_action?.selected_action ?? "CONNECT_PRIVATE_HEART_AUTOPILOT_WITH_SECRET_MANAGER")}${kv("Required authority", status.patrols?.mother_engine?.next_best_action?.required_authority ?? "PRIVATE_RUNTIME_INSTALLATION")}${kv("Authority", status.patrols?.mother_engine?.authority ?? "READ_ANALYZE_PLAN_PROPOSE_ONLY")}${kv("Customer created", String(status.patrols?.mother_engine?.customer_created ?? false))}${kv("Revenue created", status.patrols?.mother_engine?.revenue_created ?? "0")}</article>
     <article class="card"><div class="eyebrow">COMPANY PATROL</div>${kv("Status", status.patrols?.company?.status)}${kv("Company", status.patrols?.company?.company_status)}${kv("Request Queue", status.patrols?.company?.request_queue ?? 0)}${kv("Quote Queue", status.patrols?.company?.quote_queue ?? 0)}${kv("Work Queue", status.patrols?.company?.work_queue ?? 0)}${kv("Treasury", status.patrols?.company?.treasury_status)}</article>
   </div>`;
 }
@@ -105,6 +105,26 @@ function firstKgenEvidenceMarkup() {
   </div>`;
 }
 
+function heartHeavenFuelMarkup() {
+  const stage = universe?.seed?.next_stage ?? {};
+  const autopilot = stage.heart_autopilot_v3_7 ?? {};
+  const incense = stage.kaios_incense_alchemy_v3_7 ?? {};
+  const heaven = stage.heaven_time_v3_7 ?? {};
+  const fuel = stage.kufo_fuel_v3_7 ?? {};
+  const ufo = stage.ufo_civilization_v3_7 ?? {};
+  const mars = stage.kship_mars_v3_7 ?? {};
+  const company = stage.company_work_v3_7 ?? {};
+  const lifeEvents = stage.heart_life_events_v3_7 ?? {};
+  return `<div class="grid two">
+    <article class="card"><div class="eyebrow">HEART AUTOPILOT TRUTH</div><h3>${badge(autopilot.status ?? "NOT_READY")}</h3>${kv("Heartbeat candidates", String(autopilot.heartbeat?.public_candidate ?? false))}${kv("Heartbeat Auto-Write", String(autopilot.heartbeat?.auto_write ?? false))}${kv("Heartbeat count", autopilot.heartbeat?.verified_total_count ?? 1)}${kv("Heartbeat KGEN", autopilot.heartbeat?.verified_kgen_earned ?? "1")}${kv("Ignition probes", (autopilot.ignition?.scheduler_probes ?? []).join(" / "))}${kv("Fortune", autopilot.fortune?.first_event ?? autopilot.fortune?.amount_policy)}${kv("Current BNB", lifeEvents.current_balances?.BNB)}${kv("Current KGEN", lifeEvents.current_balances?.KGEN)}${kv("Current KAIOS", lifeEvents.current_balances?.KAIOS)}${kv("Root cause", autopilot.root_cause)}${kv("Safe solution", autopilot.safe_solution)}</article>
+    <article class="card"><div class="eyebrow">DIGITAL ANT WISH</div><h3>${badge(autopilot.wish?.status ?? "NOT YET")}</h3><p>${html(autopilot.wish?.text ?? "NOT RECORDED")}</p>${kv("Wish hash", autopilot.wish?.wish_hash)}${kv("KGEN cost", autopilot.wish?.token_cost?.KGEN)}${kv("Gas", autopilot.wish?.token_cost?.BNB)}${kv("Vow", autopilot.vow?.status)}${kv("Lamp asset", autopilot.lamp?.asset ?? "KGEN")}</article>
+    <article class="card"><div class="eyebrow">KAIOS INCENSE · 18911</div><h3>${badge(incense.status ?? "NOT_DEPLOYED")}</h3>${kv("Furnace", incense.furnace?.status)}${kv("Holder authorization", incense.holder_authorization)}${kv("Alchemy Proof", incense.alchemy_proof?.status)}${kv("511111 Wormhole", incense.wormhole_511111?.status)}${kv("KUFO Claim", incense.kufo_claim?.status)}${kv("KSHIP Converter", incense.kship_converter?.status)}</article>
+    <article class="card"><div class="eyebrow">HEAVEN TIME · KUFO FUEL</div><h3>1 HEAVEN DAY = 1 K280 YEAR</h3>${kv("K280", heaven.k280)}${kv("K18888", heaven.k18888)}${kv("Old 3-day rule", heaven.old_three_day_rule)}${kv("KUFO", fuel.definition)}${kv("Half-life", fuel.half_life_k280_years === 1 ? "1 K280 YEAR" : "NOT VERIFIED")}${kv("Decay", fuel.formula)}${kv("KSHIP scale", `1 decayed KUFO → ${fuel.kship_scale_per_decayed_kufo ?? 1000} KSHIP`)}</article>
+    <article class="card"><div class="eyebrow">UFO · DEMAND FIRST</div><h3>${badge(ufo.status ?? "NOT_DESIGNED")}</h3>${kv("KUFO is UFO", String(fuel.kufo_is_ufo))}${kv("Purchase", ufo.purchase_currency)}${kv("Fuel", ufo.primary_fuel)}${kv("Secondary energy", ufo.secondary_energy)}${kv("Price", ufo.price_status)}${kv("Owned", ufo.ownership_status)}${kv("Factory", ufo.factory)}${kv("Takeoff", ufo.takeoff_gate)}</article>
+    <article class="card"><div class="eyebrow">KSHIP / MARS / COMPANY</div><h3>${badge(mars.status ?? "NOT_DEPLOYED")}</h3>${kv("KSHIP role", mars.role)}${kv("KSHIP is chip", String(mars.kship_is_chip))}${kv("Chip Factory", mars.chip_factory)}${kv("Real Customers", company.real_customers ?? 0)}${kv("Real Revenue", company.external_revenue ?? "0")}${kv("Treasury", company.company_treasury ?? "NOT_BOUND")}${kv("First KAIOS path", company.first_kaios_path)}</article>
+  </div>`;
+}
+
 function hero(eyebrow, title, description) {
   return `<section class="hero"><div class="eyebrow">${html(eyebrow)}</div><h1>${html(title)}</h1><p>${html(description)}</p></section>`;
 }
@@ -123,10 +143,11 @@ async function homeView() {
     ["KGEN AMM", "USER WALLET LIVE", "Runtime-verified PancakeSwap V2 pair"],
     ["11520 settlement", "MAINNET CONTRACT", "Adapter not integrated; no fabricated settlement"]
   ];
-  return `${hero("K11520 · UNIVERSAL MARKET RUNTIME V3.6", uiLocale === "zh-TW" ? "文明資產的公開市場與生命工廠。" : "A public market and Life Factory for civilization assets.", uiLocale === "zh-TW" ? "第一次 Heartbeat 與第一顆 KGEN 已由鏈上收據驗證；公開 Worker 仍維持只讀。" : "The first Heartbeat and first KGEN are receipt-verified; the public Worker remains read-only.")}
+  return `${hero("K11520 · UNIVERSAL MARKET RUNTIME V3.7", uiLocale === "zh-TW" ? "文明資產的公開市場與生命工廠。" : "A public market and Life Factory for civilization assets.", uiLocale === "zh-TW" ? "Heartbeat 候選已進入公開巡邏；私密自動簽署尚未安全連線。KUFO 是燃料，不是飛碟。" : "Heartbeat candidates are patrolled publicly; private auto-signing is not safely connected. KUFO is fuel, not a vehicle.")}
     <a class="card gateway-cta" href="#/REQUEST"><div><div class="eyebrow">${html(t("request.title"))}</div><h2>${html(t("request.cta"))}</h2><p>DRAFT → UNDERSTAND → CONFIRM → REQUEST</p></div><span aria-hidden="true">→</span></a>
     ${section(t("status.title"), workerStatusMarkup())}
     ${section("FIRST HEARTBEAT / FIRST KGEN", firstKgenEvidenceMarkup())}
+    ${section("HEART + HEAVEN FUEL CIVILIZATION", heartHeavenFuelMarkup())}
     <div class="grid">${cards.map(([name, value, note]) => `<article class="card"><div class="eyebrow">${html(name)}</div><div class="metric">${html(value)}</div><p>${html(note)}</p></article>`).join("")}</div>
     ${section("Civilization path", `<div class="card path">${["12345", "DIGITAL ANT", "11520 LIFE LISTING", "AI LIFE APP", "AI ANT COMPANY", "KAIOS", "SPACECRAFT", "MARS", "KUFO", "CHIP INDUSTRY", "MARS CITY", "MARS MIGRATION"].map((item, index, all) => `<span>${html(item)}</span>${index < all.length - 1 ? "<i>→</i>" : ""}`).join("")}</div>`)}
     ${section("12345 Heart read integration", `<article class="card" id="heart-status"><div class="eyebrow">REPOSITORY ABI · READ ONLY</div><h3>Checking provider capability…</h3><p>No write transaction will be created.</p></article>`)}`;

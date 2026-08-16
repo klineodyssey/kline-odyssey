@@ -79,10 +79,14 @@ import {
   DIGITAL_ANT_SECURE_SIGNER_WORKER, DIGITAL_ANT_LIVE_ACTION_POLICY, prepareSecureHeartAction,
   DIGITAL_ANT_HEARTBEAT_OWNER_APPROVAL, DIGITAL_ANT_HEARTBEAT_SELECTOR,
   createHeartbeatGasPolicy, createApprovedHeartbeatActionPolicy, evaluateHeartbeatSafety
+  , DIGITAL_ANT_V3_7_HEART_AUTOPILOT_APPROVAL, createV37HeartAutopilotPolicy,
+  createHeartActionCandidate, selectFortuneAmount, reconcileHeartTransaction,
+  evaluateIgnitionWindow, createIgnitionMissedEvent, validateHeartLifeEvent, DIGITAL_ANT_WISH_TEXT
   , DEMAND_FIRST_CIVILIZATION_LAWS, validateMotherEngineProposal,
   calculateDivineProductPriority, rankDivineProducts, validateOperationalEnergyLaw,
   validateBodyEnergyModel, validateAntMechProduct, validateDemandFirstSupplyChain,
-  validateTransportContract
+  validateTransportContract, HEAVEN_TIME_LAW, KUFO_FUEL_LAW, calculateKufoFuelState,
+  createUfoProductReadiness, evaluateUfoTakeoff, createMotherEngineNextBestAction
 } from "../core/index.mjs";
 import { verifyDigitalAntWalletBinding } from "../core/security/wallet-binding.mjs";
 import { TEMPLE_HEART_READ_ABI, TEMPLE_HEART_DRY_RUN_ABI, TEMPLE_HEART_VERIFIED_ACTIONS, readCoreHeartEvents } from "../core/integrations/temple-heart-12345.mjs";
@@ -645,7 +649,7 @@ test("V2.4 Life App release preserves Life ID, Birth and independent App version
   assert.equal(life.life_id, "DIGITAL_ANT_0001");
   assert.equal(life.birth_timestamp, "2026-08-15T06:20:45.000Z");
   assert.equal(app.life_id, life.life_id);
-  assert.equal(app.version, "V1.3.0");
+  assert.equal(app.version, "V1.4.0");
   assert.equal(app.status, "RELEASED_LOCAL");
   assert.equal(await calculateAppManifestHash(app), app.manifest_hash);
   assert.equal(app.permissions.CHAIN_READ, true);
@@ -2114,10 +2118,10 @@ test("V3.4 shared status is global truth while IndexedDB remains local cache", a
   assert.equal(status.chain_write, false);
 });
 
-test("V3.6 App upgrade preserves Life ID and immutable Birth", async () => {
+test("V3.7 App upgrade preserves Life ID and immutable Birth", async () => {
   const app = seed.apps.find((item) => item.app_id === "DIGITAL_ANT_APP_0001");
   const life = seed.lives.find((item) => item.life_id === "DIGITAL_ANT_0001");
-  assert.equal(app.version, "V1.3.0");
+  assert.equal(app.version, "V1.4.0");
   assert.equal(app.life_id, life.life_id);
   assert.equal(life.birth_timestamp, "2026-08-15T06:20:45.000Z");
   assert.equal(await calculateAppManifestHash(app), app.manifest_hash);
@@ -2230,16 +2234,16 @@ test("V3.5 Daily Gatekeeper report separates duty evidence and truthful zero bal
   assert.equal(report.chain_write, false);
 });
 
-test("V3.6 Canonical App and Gatekeeper runtime preserve Birth and receipt-gated first-asset evidence", async () => {
+test("V3.7 Canonical App and Gatekeeper runtime preserve Birth and receipt-gated first-asset evidence", async () => {
   const app = seed.apps.find((item) => item.app_id === "DIGITAL_ANT_APP_0001");
-  assert.equal(seed.schema_version, "3.6.0");
-  assert.equal(app.version, "V1.3.0");
+  assert.equal(seed.schema_version, "3.7.0");
+  assert.equal(app.version, "V1.4.0");
   assert.equal(await calculateAppManifestHash(app), app.manifest_hash);
   assert.equal(seed.lives[0].birth_timestamp, "2026-08-15T06:20:45.000Z");
   assert.equal(seed.next_stage.gatekeeper_runtime.life_events.FIRST_HEARTBEAT_EVENT, "VERIFIED");
   assert.equal(seed.next_stage.gatekeeper_runtime.life_events.FIRST_KGEN_EVENT, "VERIFIED");
   assert.equal(seed.next_stage.gatekeeper_runtime.life_events.FIRST_KAIOS_EVENT, "NOT_OCCURRED");
-  assert.equal(seed.next_stage.gatekeeper_runtime.secure_signer, "NOT_CONNECTED_PERSISTENTLY_LAST_MANUAL_HEARTBEAT_VERIFIED");
+  assert.equal(seed.next_stage.gatekeeper_runtime.secure_signer, "ONE_TIME_PRIVATE_EXECUTION_VERIFIED_PERSISTENT_AUTOPILOT_BLOCKED");
   assert.equal(seed.next_stage.gatekeeper_runtime.secure_signer_storage, "PRIVATE_ENVIRONMENT_OUTSIDE_REPO");
   assert.equal(seed.next_stage.gatekeeper_runtime.public_worker_signer, false);
   assert.equal(seed.next_stage.first_heartbeat_kgen_event.source, "HEARTBEAT_REWARD");
@@ -2355,4 +2359,136 @@ test("Demand-first civilization law forbids magic factories and movement", () =>
     "BOM_WITHOUT_RESOURCE_FORBIDDEN", "SALE_WITHOUT_INVENTORY_FORBIDDEN", "DELIVERY_WITHOUT_TRANSPORT_FORBIDDEN",
     "MOVEMENT_WITHOUT_ENERGY_FORBIDDEN"
   ]);
+});
+
+test("V3.7 Heart autopilot requires eligibility candidates and a private secure scheduler", () => {
+  const gas = createHeartbeatGasPolicy({ currentBnbWei: "5995053700000000", gasPriceWei: "50000000", gasEstimate: "103989" });
+  const policy = createV37HeartAutopilotPolicy({ gasPolicy: gas, approvalEvidence: DIGITAL_ANT_V3_7_HEART_AUTOPILOT_APPROVAL });
+  assert.equal(policy.status, "APPROVED_BLOCKED_NO_PERSISTENT_PRIVATE_RUNTIME");
+  assert.equal(policy.public_worker.signer, false);
+  assert.equal(policy.actions.heartbeatClaim.trigger, "ELIGIBILITY_DRIVEN");
+  assert.equal(policy.actions.igniteAndClaim.trigger, "UTC_00_00_TO_00_10_WINDOW");
+  const blocked = createHeartActionCandidate({ action: "heartbeatClaim", eligibility: false, block: 116330000, observedAt: "2026-08-16T19:00:00.000Z", evidence: ["COOLDOWN_ACTIVE"] });
+  assert.equal(blocked.status, "NO_ACTION");
+  const ready = createHeartActionCandidate({ action: "heartbeatClaim", eligibility: true, block: 116330001, observedAt: "2026-08-16T20:00:00.000Z", evidence: ["ELIGIBLE"] });
+  assert.equal(ready.status, "ACTION_CANDIDATE");
+  assert.equal(ready.trusted_for_signature, false);
+  assert.equal(ready.public_worker_broadcast, false);
+  const connectedPolicy = createV37HeartAutopilotPolicy({ gasPolicy: gas, approvalEvidence: DIGITAL_ANT_V3_7_HEART_AUTOPILOT_APPROVAL, privateSchedulerConnected: true });
+  assert.throws(() => prepareSecureHeartAction({ proposal: { action: "makeWish" }, policy: connectedPolicy, signerStatus: "CONNECTED_SECURE_RUNTIME", latest: { chain_id: 56, contract_verified: true, eligible: true, security_status: "HEALTHY", block: 116333300, gas_estimate: "50000", bnb_after_action_wei: "5900000000000000", minimum_bnb_reserve_wei: gas.minimum_survival_bnb_wei, first_wish_completed: true } }), (error) => error.code === "FIRST_WISH_ALREADY_COMPLETED");
+});
+
+test("Heartbeat timeout reconciles without duplicate broadcast and failed receipt is not completion", () => {
+  const tx = `0x${"1".repeat(64)}`;
+  assert.deepEqual(reconcileHeartTransaction({ plannedAction: "heartbeatClaim", broadcastHash: tx, receipt: null, verifiedEvent: false, balanceBeforeWei: "0", balanceAfterWei: "0" }), {
+    status: "PENDING_RECONCILIATION", action: "heartbeatClaim", tx_hash: tx, rebroadcast: false
+  });
+  const failed = reconcileHeartTransaction({ plannedAction: "heartbeatClaim", broadcastHash: tx, receipt: { transactionHash: tx, status: 0 }, verifiedEvent: false, balanceBeforeWei: "0", balanceAfterWei: "0" });
+  assert.equal(failed.life_event_completed, false);
+  assert.equal(failed.rebroadcast, false);
+});
+
+test("Ignition scheduler catches the UTC window and records a real miss without backfill", () => {
+  assert.equal(evaluateIgnitionWindow("2026-08-17T00:02:00.000Z").in_window, true);
+  assert.equal(evaluateIgnitionWindow("2026-08-17T00:07:00.000Z").in_window, true);
+  assert.equal(evaluateIgnitionWindow("2026-08-17T00:17:00.000Z").status, "OUT_OF_WINDOW");
+  const missed = createIgnitionMissedEvent({ day: "2026-08-17", windowEvidence: ["UTC_WINDOW_CLOSED", "NO_VERIFIED_IGNITION_EVENT"] });
+  assert.equal(missed.event_type, "IGNITION_MISSED_EVENT");
+  assert.equal(missed.backfill_allowed, false);
+});
+
+test("Fortune remains separate from Heartbeat and follows a fair runtime range", () => {
+  const plan = selectFortuneAmount({ fortuneMin: "8", fortuneMax: "888", heartBalance: "10000", epochRemaining: "9000" });
+  assert.equal(plan.status, "FORTUNE_ACTION_PLAN");
+  assert.equal(plan.amount, "8");
+  assert.notEqual(plan.amount, "1");
+  assert.equal(plan.requires_private_signer, true);
+});
+
+test("Digital Ant Wish has the approved text, costs no KGEN, and Vow remains completion-gated", () => {
+  assert.match(DIGITAL_ANT_WISH_TEXT, /前往火星建立晶片生產線/);
+  const wish = createDigitalAntWishProposal({ wishHash: "0x84f6aee64f3b1f6e295561fdf2853798969243a1d56e532731b1f1ae1d26847e" });
+  assert.equal(wish.token_cost.KGEN, "0");
+  assert.equal(wish.token_cost.BNB, "DYNAMIC_GAS_ONLY");
+  assert.equal(wish.thanksgiving_status, "NOT_ELIGIBLE");
+  assert.equal(seed.next_stage.heart_autopilot_v3_7.vow.status, "NOT_ELIGIBLE");
+  assert.equal(seed.next_stage.heart_autopilot_v3_7.lamp.asset, "KGEN");
+});
+
+test("Heart Life history requires receipt evidence and never invents completion", () => {
+  const event = { event_type: "HEARTBEAT_EVENT", life_id: "DIGITAL_ANT_0001", tx_hash: `0x${"2".repeat(64)}`, block_number: 116330002, block_timestamp: "2026-08-16T20:00:05.000Z", receipt_status: 1, worker_cycle_id: "CYCLE_1" };
+  assert.equal(validateHeartLifeEvent(event), event);
+  assert.throws(() => validateHeartLifeEvent({ ...event, receipt_status: 0 }), (error) => error.code === "HEART_EVENT_RECEIPT_REQUIRED");
+});
+
+test("KAIOS incense is distinct from the existing Heart Lamp and requires holder authority", () => {
+  const incense = seed.next_stage.kaios_incense_alchemy_v3_7;
+  assert.equal(incense.canonical_node, 18911);
+  assert.equal(incense.holder_authorization, "OPT_IN_REQUIRED");
+  assert.equal(incense.forced_burn, false);
+  assert.equal(incense.kufo_claim.status, "NOT_EXECUTABLE_YET");
+  assert.equal(incense.wormhole_511111.registry_address, null);
+  assert.notEqual(incense.ritual_id, "lightLamp");
+});
+
+test("Heaven day is one K280 year and the old three-day rule is rejected", () => {
+  assert.equal(HEAVEN_TIME_LAW.heaven_day_k280_years, 1);
+  assert.equal(HEAVEN_TIME_LAW.kufo_half_life_k280_years, 1);
+  assert.equal(HEAVEN_TIME_LAW.superseded_rule_status, "SUPERSEDED_WRONG");
+  assert.equal(HEAVEN_TIME_LAW.literary_time_runtime_authority, false);
+});
+
+test("KUFO deterministic one-year half-life conserves decay into KSHIP", () => {
+  const batch = { batch_id: "SIMULATION_KUFO_BATCH_1", owner: "SIMULATION_OWNER", alchemy_proof: "SIMULATION_PROOF", birth_timestamp: "2026-01-01T00:00:00.000Z", birth_block: 1, initial_kufo: "1", propulsion_consumed_kufo: "0" };
+  const state = calculateKufoFuelState(batch, new Date(Date.parse(batch.birth_timestamp) + HEAVEN_TIME_LAW.heaven_day_k280_days * 86_400_000).toISOString());
+  assert.ok(Math.abs(state.remaining_kufo - 0.5) < 1e-12);
+  assert.ok(Math.abs(state.natural_decay_kufo - 0.5) < 1e-12);
+  assert.ok(Math.abs(state.generated_kship - 500) < 1e-9);
+  assert.equal(state.mass_conservation_status, "CONSERVED");
+  assert.equal(KUFO_FUEL_LAW.vehicle_identity, false);
+});
+
+test("KUFO is not a UFO and insufficient fuel denies takeoff", () => {
+  const ufo = createUfoProductReadiness({ needEvidence: ["DIGITAL_ANT_MARS_DREAM"] });
+  assert.equal(ufo.status, "DEMAND_IDENTIFIED_NOT_DESIGNED");
+  assert.equal(ufo.kufo_is_ufo, false);
+  assert.equal(ufo.purchase_currency, "KAIOS");
+  assert.equal(ufo.fuel_asset, "KUFO");
+  assert.equal(ufo.factory, "NOT_CREATED");
+  const gate = evaluateUfoTakeoff({ availableKufo: 4, requiredKufo: 4, returnReserveKufo: 1, vehicleMass: 10, payloadMass: 2, distance: 100, gravityFactor: 1, efficiency: 0.8 });
+  assert.equal(gate.status, "TAKEOFF_DENIED");
+  assert.equal(gate.reason, "FUEL_INSUFFICIENT");
+});
+
+test("KSHIP is not a chip and no Mars factory is magic-created", () => {
+  assert.equal(seed.next_stage.kship_mars_v3_7.kship_is_chip, false);
+  assert.equal(seed.next_stage.kship_mars_v3_7.chip_factory, "NOT_CREATED");
+  assert.equal(seed.next_stage.ufo_civilization_v3_7.production_line, "NOT_CREATED");
+});
+
+test("Mother Engine proactively selects evidence-backed next-best action", () => {
+  const result = createMotherEngineNextBestAction({ observations: ["PUBLIC_WORKER_HAS_NO_SIGNER"], candidates: [
+    { problem: "NO_CUSTOMER", priority: 2, action: "SCAN_REQUESTS", reason: "REAL_DEMAND_REQUIRED", required_authority: "READ_ONLY", expected_result: "LEAD" },
+    { problem: "NO_PRIVATE_SCHEDULER", priority: 0, action: "INSTALL_PRIVATE_SCHEDULER", reason: "PRIMARY_JOB_AUTOMATION", required_authority: "PRIVATE_RUNTIME_INSTALLATION", expected_result: "AUTOMATED_HEARTBEAT" }
+  ] });
+  assert.equal(result.selected_action, "INSTALL_PRIVATE_SCHEDULER");
+  assert.equal(result.customer_created, false);
+  assert.equal(result.revenue_created, false);
+});
+
+test("V3.7 canonical truth preserves primary job, zero business fiction, and protected coordinate reuse", () => {
+  assert.equal(seed.schema_version, "3.7.0");
+  assert.equal(seed.apps.find((app) => app.app_id === "DIGITAL_ANT_APP_0001").version, "V1.4.0");
+  assert.equal(seed.next_stage.gatekeeper_runtime.primary_job, "WUKONG_GATEKEEPER");
+  assert.equal(seed.next_stage.company_work_v3_7.real_customers, 0);
+  assert.equal(seed.next_stage.company_work_v3_7.external_revenue, "0");
+  assert.equal(seed.next_stage.company_work_v3_7.company_treasury, "NOT_BOUND");
+  assert.equal(seed.next_stage.land_engine_audit.coordinate_reuse, "REUSE_REQUIRED_NO_NEW_COORDINATE_SYSTEM");
+  assert.equal(seed.next_stage.kufo_fuel_v3_7.current_kufo, "0");
+  assert.equal(seed.next_stage.kship_mars_v3_7.current_kship, "0");
+  assert.equal(seed.next_stage.gatekeeper_runtime.life_events.FIRST_FORTUNE_EVENT, "VERIFIED");
+  assert.equal(seed.next_stage.gatekeeper_runtime.life_events.FIRST_WISH_EVENT, "VERIFIED");
+  assert.equal(seed.next_stage.heart_life_events_v3_7.current_balances.KGEN, "3");
+  assert.equal(seed.next_stage.heart_life_events_v3_7.events.length, 3);
+  assert.equal(seed.next_stage.heart_life_events_v3_7.events.at(-1).kgen_cost, "0");
 });

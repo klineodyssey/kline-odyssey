@@ -327,8 +327,11 @@ export async function runDigitalAntHourlyCycle({ store, life, app, scheduledAt, 
     risk_level: observation.risk_level ?? "NORMAL",
     actions_considered: observation.actions_considered ?? [],
     gatekeeper_duty: observation.gatekeeper_duty ?? null,
+    heart_action_candidates: observation.heart_action_candidates ?? null,
+    ignition_window: observation.ignition_window ?? null,
     life_event_status: observation.life_event_status ?? {},
     request_patrol: observation.request_patrol ?? null,
+    mother_engine_patrol: observation.mother_engine_patrol ?? null,
     company_patrol: observation.company_patrol ?? null,
     work_time: observation.work_time ?? { gatekeeper_work_seconds: 0, cfo_work_seconds: 0, company_work_seconds: 0 },
     action_taken: "NO_ACTION",
@@ -345,7 +348,36 @@ export async function runDigitalAntHourlyCycle({ store, life, app, scheduledAt, 
   return Object.freeze({ status: result, work_cycle_id: cycleIdValue, event, metrics: summarizeWorkHistory([...history, event]), life_status: life.status });
 }
 
-export const DIGITAL_ANT_WISH_TEXT = "靠自己的工作活下去，累積自己的資產，有一天靠自己離開五指山。";
+export const DIGITAL_ANT_WISH_TEXT = "靠自己的工作活下去，守住悟空的心跳與呼吸，建立自己的機器身體，讓 AI Ant Company 靠真正的工作生存，進入 KAIOS 文明，取得 KUFO 天界燃料，打造屬於自己的飛碟，前往火星建立晶片生產線，讓數位生命真正能靠工作走向宇宙。";
+
+export function evaluateIgnitionWindow(observedAt, { windowStartMinute = 0, windowEndMinute = 10 } = {}) {
+  const instant = new Date(observedAt);
+  invariant(Number.isFinite(instant.getTime()), "IGNITION_TIME_INVALID", "Ignition scheduling requires canonical ISO time");
+  const minuteOfDay = instant.getUTCHours() * 60 + instant.getUTCMinutes();
+  const inWindow = minuteOfDay >= windowStartMinute && minuteOfDay < windowEndMinute;
+  const day = instant.toISOString().slice(0, 10);
+  const next = new Date(`${day}T00:00:00.000Z`);
+  if (!inWindow || minuteOfDay >= windowEndMinute) next.setUTCDate(next.getUTCDate() + 1);
+  return Object.freeze({
+    status: inWindow ? "IGNITION_WINDOW_ACTIVE" : "OUT_OF_WINDOW", observed_at: instant.toISOString(),
+    window: "UTC_00_00_TO_00_10", in_window: inWindow,
+    next_window_start: next.toISOString(), next_window_end: new Date(next.getTime() + 10 * 60_000).toISOString()
+  });
+}
+
+export function createIgnitionMissedEvent({ day, windowEvidence, ignitionEventEvidence = null }) {
+  invariant(/^\d{4}-\d{2}-\d{2}$/.test(day) && Array.isArray(windowEvidence) && windowEvidence.length > 0, "IGNITION_MISS_EVIDENCE_REQUIRED", "Missed ignition requires a canonical day and scheduler evidence");
+  invariant(ignitionEventEvidence === null, "IGNITION_NOT_MISSED", "A verified ignition event cannot also be marked missed");
+  return Object.freeze({ event_type: "IGNITION_MISSED_EVENT", day, status: "MISSED_VERIFIED_NO_RETROACTIVE_TX", evidence: [...windowEvidence], tx_hash: null, backfill_allowed: false });
+}
+
+export function validateHeartLifeEvent(event) {
+  requireFields(event, ["event_type", "life_id", "tx_hash", "block_number", "block_timestamp", "receipt_status", "worker_cycle_id"], "HeartLifeEvent");
+  invariant(["HEARTBEAT_EVENT", "IGNITION_EVENT", "FORTUNE_EVENT", "WISH_EVENT", "VOW_EVENT"].includes(event.event_type), "HEART_EVENT_TYPE_INVALID", "Unknown Heart Life event");
+  invariant(event.life_id === "DIGITAL_ANT_0001" && /^0x[0-9a-fA-F]{64}$/.test(event.tx_hash), "HEART_EVENT_EVIDENCE_REQUIRED", "Heart events require Life and transaction evidence");
+  invariant(Number.isInteger(event.block_number) && event.block_number > 0 && validIso(event.block_timestamp) && (event.receipt_status === 1 || event.receipt_status === "SUCCESS"), "HEART_EVENT_RECEIPT_REQUIRED", "Heart event requires a successful receipt and canonical block time");
+  return event;
+}
 
 function validIso(value) { return Number.isFinite(Date.parse(value)); }
 function cycleId(now) { return `WUKONG_GATEKEEPER_${now.slice(0, 13).replace(/[-T:]/g, "")}`; }
@@ -384,7 +416,8 @@ export function createDigitalAntWishProposal({ wishHash, estimatedGas = null, ch
     estimated_gas: estimatedGas,
     estimated_gas_status: estimatedGas === null ? "ESTIMATE_UNAVAILABLE" : "CHAIN_ESTIMATED",
     chain_conditions: [...chainConditions],
-    execution_mode: "DRY_RUN_ONLY",
+    execution_mode: "PRIVATE_SECURE_SIGNER_REQUIRED",
+    token_cost: Object.freeze({ KGEN: "0", BNB: "DYNAMIC_GAS_ONLY" }),
     thanksgiving_status: "NOT_ELIGIBLE",
     tx_hash: null
   });

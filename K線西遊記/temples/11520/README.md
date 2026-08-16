@@ -1,7 +1,13 @@
-# 11520 Universal Exchange V3.6
+# 11520 Universal Exchange V3.7
 
 ## Digital Ant next-stage status
 
+- V3.7 keeps the successful first Heartbeat/KGEN evidence and adds production public action candidates plus UTC ignition-window probes. Persistent automatic writes remain blocked until a private scheduler with secret management, address binding and receipt reconciliation exists.
+- One controlled V3.7 private execution completed a second Heartbeat, the first Fortune at the deployed minimum/fair amount of 1 KGEN, and the first Wish. All three have successful receipts and expected Heart events; the resulting public balance is 3 KGEN. This does not claim that a persistent private scheduler is installed.
+- The full first Wish is public and its future chain payload is a hash only. Wish consumes BNB gas, not KGEN. Vow is locked until mission completion, and the existing Heart Lamp remains KGEN-based.
+- 18911 furnace runtime is mainnet read-verified, while 511111 Wormhole and KSHIP Converter are not registered. With Ant KAIOS at zero, Incense is blocked and no Alchemy/KUFO/KSHIP evidence is claimed.
+- One K18888 Heaven Day equals one K280 year. KUFO half-life is one K280 year; the old three-Heaven-days rule is rejected. KUFO is fuel, UFO is a separate demand-first vehicle, and KSHIP is not a chip.
+- `DIGITAL_ANT_APP_0001` is V1.4.0. Life ID, Birth Certificate, public Wallet and Company identity are unchanged.
 - V3.6 records the first real `heartbeatClaim()` and the first KGEN as two receipt-gated Life Events from one BSC transaction. Heartbeat reward is 1 KGEN and the deployed cooldown is 3,600 seconds; Fortune remains a separate action and no Fortune event is claimed.
 - `DIGITAL_ANT_APP_0001` is V1.3.0. Its browser/public Worker permissions remain read-only. The credential-capable local Secure Signer is not stored in the Repo or Pages and was enabled only for the explicitly approved Heartbeat path; every other Heart write remains disabled.
 - The Mother Engine records evidence/root-cause/options/authority proposals, including safe reconciliation of the already-broadcast transaction after the initial receipt RPC failed, with no duplicate submission.
