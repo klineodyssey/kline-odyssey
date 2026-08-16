@@ -75,7 +75,7 @@ import {
 } from "../core/index.mjs";
 import { verifyDigitalAntWalletBinding } from "../core/security/wallet-binding.mjs";
 import { TEMPLE_HEART_READ_ABI, TEMPLE_HEART_DRY_RUN_ABI, TEMPLE_HEART_VERIFIED_ACTIONS } from "../core/integrations/temple-heart-12345.mjs";
-import { buildSharedWorkerStatus, readCompanyPatrol, readPublicRequestPatrol } from "../core/jobs/public-read-only-worker.mjs";
+import { buildSharedWorkerStatus, createPublicReadProvider, readCompanyPatrol, readPublicRequestPatrol } from "../core/jobs/public-read-only-worker.mjs";
 
 const seed = JSON.parse(await fs.readFile(new URL("../core/data/canonical.json", import.meta.url), "utf8"));
 
@@ -2122,4 +2122,21 @@ test("V3.4 workflow is hourly, exact-scoped and cannot access signer secrets", a
   assert.match(workflow, /gh workflow run deploy-pages-static\.yml --ref main/);
   assert.doesNotMatch(workflow, /git add \./);
   assert.doesNotMatch(workflow, /DIGITAL_ANT_0001_PRIVATE_KEY|SIGN_TRANSACTION|PRIVATE_KEY/);
+});
+
+test("V3.4 Node worker uses a signer-free fetch transport and verifies BSC chain 56", async () => {
+  const methods = [];
+  const provider = createPublicReadProvider({
+    rpcUrl: "https://rpc.example.invalid",
+    fetchImpl: async (_url, init) => {
+      const request = JSON.parse(init.body);
+      methods.push(request.method);
+      const result = request.method === "eth_chainId" ? "0x38" : request.method === "eth_accounts" ? [] : "0x1234";
+      return { ok: true, json: async () => ({ jsonrpc: "2.0", id: request.id, result }) };
+    }
+  });
+  assert.equal(Number(BigInt(await provider.send("eth_chainId", []))), 56);
+  assert.equal(await provider.getBlockNumber(), 0x1234);
+  assert.deepEqual(await provider.listAccounts(), []);
+  assert.deepEqual(methods, ["eth_chainId", "eth_blockNumber", "eth_chainId", "eth_accounts"]);
 });

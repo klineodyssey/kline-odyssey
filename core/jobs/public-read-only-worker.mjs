@@ -13,6 +13,25 @@ const KAIOS = "0xD4E67B3a69e41524c424150E6b6e921b01D036db";
 const PUBLIC_BSC_RPC = "https://bsc-dataseed.bnbchain.org";
 const ERC20_READ_ABI = ["function balanceOf(address) view returns (uint256)", "function decimals() view returns (uint8)"];
 
+export function createPublicReadProvider({ rpcUrl = process.env.BSC_RPC_URL || PUBLIC_BSC_RPC, fetchImpl = globalThis.fetch } = {}) {
+  if (typeof fetchImpl !== "function") throw statusError("FETCH_TRANSPORT_UNAVAILABLE", "BSC_RPC");
+  let requestId = 0;
+  const transport = {
+    async request({ method, params = [] }) {
+      const response = await fetchImpl(rpcUrl || PUBLIC_BSC_RPC, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ jsonrpc: "2.0", id: ++requestId, method, params })
+      });
+      if (!response.ok) throw statusError(`BSC_RPC_HTTP_${response.status}`, "BSC_RPC");
+      const payload = await response.json();
+      if (payload.error) throw statusError(`BSC_RPC_${payload.error.code ?? "ERROR"}`, "BSC_RPC");
+      return payload.result;
+    }
+  };
+  return new ethers.providers.Web3Provider(transport, { name: "bnb", chainId: 56 });
+}
+
 function argument(argv, name) {
   const index = argv.indexOf(name);
   return index >= 0 && argv[index + 1] ? resolve(argv[index + 1]) : null;
@@ -88,9 +107,9 @@ function heartPatrol(heart) {
 }
 
 async function publicReadCycle({ life, requestPatrol, companyPatrol }) {
-  const provider = new ethers.providers.JsonRpcProvider(process.env.BSC_RPC_URL || PUBLIC_BSC_RPC, 56);
-  const network = await provider.getNetwork();
-  if (Number(network.chainId) !== 56) throw statusError("BSC_CHAIN_56_REQUIRED", "BSC_RPC");
+  const provider = createPublicReadProvider();
+  const chainId = await provider.send("eth_chainId", []);
+  if (Number(BigInt(chainId)) !== 56) throw statusError("BSC_CHAIN_56_REQUIRED", "BSC_RPC");
   const kgen = new ethers.Contract(KGEN, ERC20_READ_ABI, provider);
   const kaios = new ethers.Contract(KAIOS, ERC20_READ_ABI, provider);
   const [block, bnb, kgenRaw, kgenDecimals, kaiosRaw, kaiosDecimals, heart] = await Promise.all([
