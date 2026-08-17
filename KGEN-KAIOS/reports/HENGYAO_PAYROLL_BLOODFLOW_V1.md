@@ -2,7 +2,7 @@
 
 **Task:** `KAIOS-HENGYAO-GM-PAYROLL-BLOODFLOW-V1-001`  
 **Execution base:** `672ab4884e8cf6f9d07c176a862fb858cafe8161`  
-**Status:** fresh-fork PASS; three Mainnet proposals are approved and the full 3,600-second timelock is running. No execution occurred before the latest ETA.
+**Status:** Mainnet governance executed after the full 3,600-second timelock; the Hengyao September 2026 payroll is scheduled and remains unclaimed until maturity.
 
 ## Exact rail
 
@@ -28,7 +28,24 @@ Three independent proposals use Mother proposal, Jade Emperor approval, at least
 
 Only after all three executions and exact read-back may Hengyao directly schedule payroll ID `0x24305470fe1e35c8b06c111237606babb6de7c4e36c41b57980e2a1779e0ba54` for `88 KAIOS` in contract epoch `24320`. `202609` is not a valid substitute for the contract epoch.
 
-Mainnet proposal/approval receipts are recorded in the machine-readable package. The latest proposal ETA is `2026-08-17T13:48:01Z`; the pre-execution state remains 18888 available `11,213,908.930416874731235 KAIOS`, 8888 assets `0`, account count `0`, payroll count `0`, and Hengyao Payroll role absent.
+Mainnet proposal, approval, execution, and schedule receipts are recorded in the machine-readable package. The latest proposal ETA was `2026-08-17T13:48:01Z`; the first execution was mined at `2026-08-17T13:50:14Z`, after the full delay.
+
+Final read-back at block `116475334`:
+
+- 18888 available: `11,213,020.930416874731235 KAIOS`; reserve unchanged at `11,000,000 KAIOS`.
+- 8888 assets: `888 KAIOS`; free capital after scheduling: `800 KAIOS`.
+- Hengyao LIFE account: active, fixed beneficiary/controller `0x4DF6E9629Dad1072103cFd2bC81845fd97429214`.
+- Hengyao roles: `PAYROLL_ADMIN_ROLE=true`, `DEFAULT_ADMIN_ROLE=false`, `ACCOUNT_ADMIN_ROLE=false`.
+- Payroll: `88 KAIOS`, epoch `24320`, `claimed=false`; first maturity is `2026-09-04T16:00:00Z` (`2026-09-05T00:00:00+08:00`).
+
+Execution transactions:
+
+1. Route capital: `0x9059f3c6c2fdabf61a06c3b2eacbc985b9171d2731f74713000e8264fa37fccc`.
+2. Create LIFE account: `0xd1d1f9d2520d41731b1da29120a35a2074920f0591b2a82cdd814dec986ca29d`.
+3. Grant exact payroll role: `0xabd0f90b9a3b3a12d7cca7a6e9953bc6140995179c8076a70696cf9f186789f8`.
+4. Hengyao schedule: `0xb12a7429dedce539223857f588793f4ea0a08246178cc33f4b472f1643723ded`.
+
+Total gas for all proposal, approval, execution, and schedule transactions was `0.0000630842 BNB`; Hengyao's personal schedule used `0.00000979445 BNB`. No claim or business payment was sent.
 
 ## Fresh-fork result
 

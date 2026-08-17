@@ -72,7 +72,7 @@ test("frozen caps preserve 18888 reserve arithmetic and transaction value bounda
   assert.equal(POLICY.transactionValue, 0n);
 });
 
-test("committed unsigned package matches the reproducible plan and contains no execution claim", async () => {
+test("committed package matches the reproducible plan and records exact execution evidence", async () => {
   const report = JSON.parse(await fs.readFile(new URL("../reports/HENGYAO_PAYROLL_BLOODFLOW_V1_UNSIGNED_PACKAGE.json", import.meta.url), "utf8"));
   assert.equal(report.taskId, plan.taskId);
   assert.equal(report.executionBase, "672ab4884e8cf6f9d07c176a862fb858cafe8161");
@@ -84,6 +84,9 @@ test("committed unsigned package matches the reproducible plan and contains no e
   assert.deepEqual(report.operations.map((item) => item.data), Object.values(plan.calls).map((item) => item.data));
   assert.equal(report.hengyaoSchedule.data, plan.schedulePayroll.data);
   assert.equal(report.forkRehearsal.status, "PASS");
-  assert.equal(report.mainnetTransactionSentAtPackageCreation, false);
+  assert.equal(report.mainnetTransactionSent, true);
+  assert.equal(report.mainnetGovernance.status, "EXECUTED_AND_HENGYAO_PAYROLL_SCHEDULED");
+  assert.equal(report.mainnetGovernance.executionTransactions.length, 3);
+  assert.equal(report.mainnetGovernance.hengyaoScheduleTransaction.transactionHash, "0xb12a7429dedce539223857f588793f4ea0a08246178cc33f4b472f1643723ded");
   assert.equal(report.boundaries.privateKeySerialized, false);
 });
