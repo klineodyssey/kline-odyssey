@@ -1,0 +1,104 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/schemas/natural-resource-reward-v1.schema.json",
+  "title": "Natural Resource Reward Claim V1",
+  "description": "33333 policy authorization and 18888 funded settlement record. Listing or evidence never creates a resource.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "claimId",
+    "lifeId",
+    "projectId",
+    "canonicalBeneficiary",
+    "resourceCategory",
+    "locationEvidence",
+    "measurementMethod",
+    "baselineQuantity",
+    "verifiedQuantity",
+    "verifiedDelta",
+    "unitId",
+    "qualityFactorPpm",
+    "scarcityFactorPpm",
+    "persistenceFactorPpm",
+    "rewardAmountWei",
+    "evidenceHash",
+    "policyReviewer",
+    "measurementReviewer",
+    "settlementReviewer",
+    "reviewerSeparationRequired",
+    "epochId",
+    "epochCapWei",
+    "duplicateProofKey",
+    "status",
+    "appeal"
+  ],
+  "properties": {
+    "schemaVersion": { "const": "1.0.0-design" },
+    "claimId": { "$ref": "#/$defs/id" },
+    "lifeId": { "$ref": "#/$defs/id" },
+    "projectId": { "$ref": "#/$defs/id" },
+    "canonicalBeneficiary": { "$ref": "#/$defs/address" },
+    "resourceCategory": {
+      "enum": ["WATER", "FOOD", "FOREST", "SOIL", "ENERGY", "RECYCLING", "BIODIVERSITY", "OTHER_GOVERNED"]
+    },
+    "locationEvidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["locationId", "evidenceHash"],
+      "properties": {
+        "locationId": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "evidenceHash": { "$ref": "#/$defs/id" }
+      }
+    },
+    "measurementMethod": { "type": "string", "minLength": 1, "maxLength": 512 },
+    "baselineQuantity": { "$ref": "#/$defs/decimalString" },
+    "verifiedQuantity": { "$ref": "#/$defs/decimalString" },
+    "verifiedDelta": { "$ref": "#/$defs/decimalString" },
+    "unitId": { "type": "string", "pattern": "^[A-Z0-9_.-]{1,64}$" },
+    "qualityFactorPpm": { "$ref": "#/$defs/factor" },
+    "scarcityFactorPpm": { "$ref": "#/$defs/factor" },
+    "persistenceFactorPpm": { "$ref": "#/$defs/factor" },
+    "rewardFormula": { "const": "verified_quantity*quality_factor*scarcity_factor*persistence_factor" },
+    "rewardAmountWei": { "$ref": "#/$defs/uintString" },
+    "evidenceHash": { "$ref": "#/$defs/id" },
+    "policyReviewer": { "$ref": "#/$defs/address" },
+    "measurementReviewer": { "$ref": "#/$defs/address" },
+    "settlementReviewer": { "$ref": "#/$defs/address" },
+    "reviewerSeparationRequired": { "const": true },
+    "epochId": { "type": "string", "minLength": 1, "maxLength": 64 },
+    "epochCapWei": { "$ref": "#/$defs/uintString" },
+    "duplicateProofKey": { "$ref": "#/$defs/id" },
+    "status": { "enum": ["SUBMITTED", "MEASURED", "POLICY_APPROVED", "FUNDED", "CLAIMABLE", "PAID", "REVERSED", "APPEALED", "REJECTED"] },
+    "reversalReasonHash": { "oneOf": [{ "$ref": "#/$defs/id" }, { "type": "null" }] },
+    "appeal": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "evidenceHash", "reviewer"],
+      "properties": {
+        "status": { "enum": ["NONE", "OPEN", "UPHELD", "DENIED", "REMEDIATED"] },
+        "evidenceHash": { "oneOf": [{ "$ref": "#/$defs/id" }, { "type": "null" }] },
+        "reviewer": { "oneOf": [{ "$ref": "#/$defs/address" }, { "type": "null" }] }
+      }
+    }
+  },
+  "allOf": [
+    {
+      "not": {
+        "properties": {
+          "policyReviewer": { "const": "0x0000000000000000000000000000000000000000" },
+          "measurementReviewer": { "const": "0x0000000000000000000000000000000000000000" },
+          "settlementReviewer": { "const": "0x0000000000000000000000000000000000000000" }
+        },
+        "required": ["policyReviewer", "measurementReviewer", "settlementReviewer"]
+      }
+    }
+  ],
+  "$defs": {
+    "address": { "type": "string", "pattern": "^0x[a-fA-F0-9]{40}$" },
+    "id": { "type": "string", "pattern": "^0x[a-fA-F0-9]{64}$" },
+    "uintString": { "type": "string", "pattern": "^(0|[1-9][0-9]*)$" },
+    "decimalString": { "type": "string", "pattern": "^(0|[1-9][0-9]*)(\\.[0-9]+)?$" },
+    "factor": { "type": "integer", "minimum": 0, "maximum": 10000000 }
+  }
+}

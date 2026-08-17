@@ -1,0 +1,154 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/schemas/celestial-seat-v2.schema.json",
+  "title": "Celestial Autonomous Treasury Protocol Seat V2",
+  "description": "Design-only record for a species-neutral 18888 civilization public-function seat. This schema grants no live authority.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "seatId",
+    "lifeId",
+    "canonicalBeneficiary",
+    "applicantType",
+    "state",
+    "evidence",
+    "governance",
+    "performanceBond",
+    "salary",
+    "updatedAt"
+  ],
+  "properties": {
+    "schemaVersion": { "const": "2.0.0-design" },
+    "seatId": { "type": "integer", "minimum": 1, "maximum": 500 },
+    "lifeId": { "$ref": "#/$defs/id" },
+    "canonicalBeneficiary": { "$ref": "#/$defs/address" },
+    "applicantType": {
+      "enum": ["HUMAN", "AI_LIFE", "OTHER_LIFE", "COMPANY", "COOPERATIVE", "ECOLOGICAL_AGENT"]
+    },
+    "state": {
+      "enum": [
+        "APPLICATION",
+        "EVIDENCE_REVIEW",
+        "CONDITIONAL_APPROVAL",
+        "CAPITAL_COMMITMENT_PENDING",
+        "TRIAL_OPERATION",
+        "ACTIVE",
+        "RESTRICTED",
+        "SUSPENDED",
+        "RETIRED",
+        "PRINCIPAL_RELEASE_PENDING",
+        "PRINCIPAL_RELEASED"
+      ]
+    },
+    "evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["contribution", "constitution", "safety", "supplyChain", "technicalReview"],
+      "properties": {
+        "contribution": { "$ref": "#/$defs/evidence" },
+        "constitution": { "$ref": "#/$defs/evidence" },
+        "safety": { "$ref": "#/$defs/evidence" },
+        "supplyChain": { "$ref": "#/$defs/evidence" },
+        "technicalReview": { "$ref": "#/$defs/evidence" }
+      }
+    },
+    "governance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["proposalId", "motherProposed", "jadeApproved", "timelockSeconds", "executed"],
+      "properties": {
+        "proposalId": { "$ref": "#/$defs/idOrPending" },
+        "motherProposed": { "type": "boolean" },
+        "jadeApproved": { "type": "boolean" },
+        "timelockSeconds": { "const": 3600 },
+        "executed": { "type": "boolean" }
+      }
+    },
+    "performanceBond": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "commitmentId",
+        "asset",
+        "principalWei",
+        "minimumPrincipalWei",
+        "burned",
+        "interestBearing",
+        "refundableLiability",
+        "beneficiary",
+        "releaseAt",
+        "releasedAt"
+      ],
+      "properties": {
+        "commitmentId": { "$ref": "#/$defs/idOrPending" },
+        "asset": { "const": "KAIOS" },
+        "principalWei": { "$ref": "#/$defs/uintString" },
+        "minimumPrincipalWei": { "const": "5000000000000000000000000" },
+        "burned": { "const": false },
+        "interestBearing": { "const": false },
+        "refundableLiability": { "const": true },
+        "beneficiary": { "$ref": "#/$defs/address" },
+        "releaseAt": { "type": ["integer", "null"], "minimum": 0 },
+        "releasedAt": { "type": ["integer", "null"], "minimum": 0 }
+      }
+    },
+    "salary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["baseKaiosWei", "weightPpm", "maturityRule", "fixedBeneficiary", "source", "accrualEnabled"],
+      "properties": {
+        "baseKaiosWei": { "const": "88000000000000000000" },
+        "weightPpm": { "type": "integer", "minimum": 1000000, "maximum": 5000000 },
+        "maturityRule": { "const": "GREGORIAN_MONTH_DAY_5_00_00_UTC_PLUS_8" },
+        "fixedBeneficiary": { "$ref": "#/$defs/address" },
+        "source": { "const": "APPROVED_FUNDED_SALARY_BUDGET" },
+        "accrualEnabled": { "type": "boolean" },
+        "stopEffectiveEpoch": { "type": ["string", "null"], "pattern": "^[0-9]{6}$" }
+      }
+    },
+    "alchemyProofId": { "type": "null", "description": "A 18911 proof is forbidden as an 18888 qualification input." },
+    "updatedAt": { "type": "string", "format": "date-time" }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "state": { "const": "ACTIVE" } }, "required": ["state"] },
+      "then": {
+        "properties": {
+          "salary": { "properties": { "accrualEnabled": { "const": true } } },
+          "performanceBond": {
+            "properties": {
+              "principalWei": { "pattern": "^(?:[5-9][0-9]{24}|[1-9][0-9]{25,})$" },
+              "releasedAt": { "type": "null" }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": { "properties": { "state": { "const": "PRINCIPAL_RELEASED" } }, "required": ["state"] },
+      "then": {
+        "properties": {
+          "salary": { "properties": { "accrualEnabled": { "const": false } } },
+          "performanceBond": { "properties": { "releasedAt": { "type": "integer" } } }
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "address": { "type": "string", "pattern": "^0x[a-fA-F0-9]{40}$" },
+    "id": { "type": "string", "pattern": "^0x[a-fA-F0-9]{64}$" },
+    "idOrPending": { "oneOf": [{ "$ref": "#/$defs/id" }, { "const": "PENDING" }] },
+    "uintString": { "type": "string", "pattern": "^(0|[1-9][0-9]*)$" },
+    "evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "evidenceHash", "reviewer"],
+      "properties": {
+        "status": { "enum": ["PENDING", "VERIFIED", "REJECTED", "REVOKED"] },
+        "evidenceHash": { "$ref": "#/$defs/idOrPending" },
+        "reviewer": { "oneOf": [{ "$ref": "#/$defs/address" }, { "const": "PENDING" }] }
+      }
+    }
+  }
+}

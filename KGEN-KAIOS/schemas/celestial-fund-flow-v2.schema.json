@@ -1,0 +1,98 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/schemas/celestial-fund-flow-v2.schema.json",
+  "title": "Celestial Fund Flow V2",
+  "description": "Exact-wei design ledger for segregated performance bond, payroll, resource reward and reserve rails.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "snapshotId", "asset", "balances", "movements", "invariants"],
+  "properties": {
+    "schemaVersion": { "const": "2.0.0-design" },
+    "snapshotId": { "$ref": "#/$defs/id" },
+    "asset": { "const": "KAIOS" },
+    "balances": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "bankBalanceWei",
+        "committedEscrowBalanceWei",
+        "outstandingCommittedPrincipalWei",
+        "claimableSalaryWei",
+        "approvedFundedSalaryBudgetWei",
+        "salaryPaidWei",
+        "claimableRewardWei",
+        "fundedResourceRewardPoolWei",
+        "resourceRewardPaidWei",
+        "minimumReserveWei",
+        "availableTreasuryWei"
+      ],
+      "properties": {
+        "bankBalanceWei": { "$ref": "#/$defs/uintString" },
+        "committedEscrowBalanceWei": { "$ref": "#/$defs/uintString" },
+        "outstandingCommittedPrincipalWei": { "$ref": "#/$defs/uintString" },
+        "claimableSalaryWei": { "$ref": "#/$defs/uintString" },
+        "approvedFundedSalaryBudgetWei": { "$ref": "#/$defs/uintString" },
+        "salaryPaidWei": { "$ref": "#/$defs/uintString" },
+        "claimableRewardWei": { "$ref": "#/$defs/uintString" },
+        "fundedResourceRewardPoolWei": { "$ref": "#/$defs/uintString" },
+        "resourceRewardPaidWei": { "$ref": "#/$defs/uintString" },
+        "minimumReserveWei": { "$ref": "#/$defs/uintString" },
+        "availableTreasuryWei": { "$ref": "#/$defs/uintString" }
+      }
+    },
+    "movements": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["movementId", "rail", "source", "destination", "amountWei", "purposeHash", "status"],
+        "properties": {
+          "movementId": { "$ref": "#/$defs/id" },
+          "rail": {
+            "enum": [
+              "PERFORMANCE_BOND_IN",
+              "PERFORMANCE_BOND_RELEASE",
+              "SALARY_BUDGET_FUNDING",
+              "SALARY_CLAIM",
+              "RESOURCE_REWARD_FUNDING",
+              "RESOURCE_REWARD_CLAIM",
+              "RESERVE_FUNDING",
+              "OTHER_AVAILABLE_TREASURY"
+            ]
+          },
+          "source": { "$ref": "#/$defs/address" },
+          "destination": { "$ref": "#/$defs/address" },
+          "amountWei": { "$ref": "#/$defs/positiveUintString" },
+          "purposeHash": { "$ref": "#/$defs/id" },
+          "status": { "enum": ["AUTHORIZED", "SETTLED", "REVERSED"] }
+        }
+      }
+    },
+    "invariants": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "seatPrincipalUsedForSalaryWei",
+        "seatPrincipalUsedForRewardWei",
+        "alchemyProofUsedForCelestialSeatCount",
+        "duplicateSalaryClaimCount",
+        "duplicateResourceRewardClaimCount",
+        "arbitraryAdminWithdrawCount"
+      ],
+      "properties": {
+        "seatPrincipalUsedForSalaryWei": { "const": "0" },
+        "seatPrincipalUsedForRewardWei": { "const": "0" },
+        "alchemyProofUsedForCelestialSeatCount": { "const": 0 },
+        "duplicateSalaryClaimCount": { "const": 0 },
+        "duplicateResourceRewardClaimCount": { "const": 0 },
+        "arbitraryAdminWithdrawCount": { "const": 0 }
+      }
+    }
+  },
+  "$defs": {
+    "address": { "type": "string", "pattern": "^0x[a-fA-F0-9]{40}$" },
+    "id": { "type": "string", "pattern": "^0x[a-fA-F0-9]{64}$" },
+    "uintString": { "type": "string", "pattern": "^(0|[1-9][0-9]*)$" },
+    "positiveUintString": { "type": "string", "pattern": "^[1-9][0-9]*$" }
+  }
+}
