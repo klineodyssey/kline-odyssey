@@ -2498,6 +2498,8 @@ test("V3.8 canonical truth preserves primary job, zero business fiction, and pro
   assert.equal(seed.next_stage.heart_life_events_v3_7.events.at(-1).event_type, "FIRST_IGNITION_EVENT");
   assert.equal(seed.next_stage.heart_life_events_v3_7.events.at(-1).kgen_after, "12");
   assert.equal(seed.next_stage.gatekeeper_runtime.life_events.FIRST_IGNITION_EVENT, "VERIFIED");
+  assert.equal(seed.next_stage.heart_autopilot_v3_7.ignition.auto_write, true);
+  assert.equal(seed.next_stage.heart_autopilot_v3_7.ignition.write_runtime, "PRIVATE_WINDOW_GATED_SCHEDULER");
 });
 
 test("V3.8 Physics CURRENT is the byte-identical authoritative Thought Organ", async () => {
