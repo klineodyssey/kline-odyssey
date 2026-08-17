@@ -345,10 +345,14 @@ async function main() {
   const [life, app, previousStatus, firstEventEvidence] = await Promise.all([
     universe.registries.life.get("DIGITAL_ANT_0001"), universe.registries.app.get("DIGITAL_ANT_APP_0001"), readJsonIfPresent(statusPath), readJsonIfPresent(FIRST_HEARTBEAT_KGEN_EVIDENCE)
   ]);
+  const canonicalReceiptEvents = Object.fromEntries((seed.next_stage?.heart_life_events_v3_7?.events ?? [])
+    .filter((event) => String(event.event_type ?? "").startsWith("FIRST_") && event.receipt_status === 1 && /^0x[0-9a-f]{64}$/i.test(event.tx_hash ?? ""))
+    .map((event) => [event.event_type, event]));
   const verifiedFirstEvents = firstEventEvidence?.status?.startsWith("COMPLETED_") ? {
+    ...canonicalReceiptEvents,
     FIRST_HEARTBEAT_EVENT: firstEventEvidence.first_heartbeat_event,
     FIRST_KGEN_EVENT: firstEventEvidence.first_kgen_event
-  } : null;
+  } : Object.keys(canonicalReceiptEvents).length ? canonicalReceiptEvents : null;
   const now = new Date().toISOString();
   const hour = new Date(now); hour.setUTCMinutes(0, 0, 0);
   const cycleId = `DIGITAL_ANT_0001_HOURLY_${hour.toISOString().slice(0, 13).replace(/[-T:]/g, "")}`;
