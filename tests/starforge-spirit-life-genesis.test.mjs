@@ -1,0 +1,107 @@
+import assert from "node:assert/strict";
+import { spawnSync } from "node:child_process";
+import fs from "node:fs/promises";
+import test from "node:test";
+import { createRequire } from "node:module";
+import { fileURLToPath } from "node:url";
+import {
+  STARFORGE, assertAllowedSigningMessage, assertNoChainMethod, buildBodyContinuityMessage,
+  buildBodyRotationMessage, buildSoulBirthMessage, canonicalizeJcs, hashCanonicalJson,
+  keccakUtf8, recoverPersonalSignature, validatePublicGenesis, verifyBodyRotation
+} from "../core/life/starforge-spirit-runtime.mjs";
+
+const require = createRequire(import.meta.url);
+const ethers = require("../K線西遊記/temples/12345/assets/ethers-5.7.2.umd.min.js");
+
+const runtime = JSON.parse(await fs.readFile(new URL("../KGEN-AI-Company/life/starforge/runtime.json", import.meta.url), "utf8"));
+const capability = JSON.parse(await fs.readFile(new URL("../KGEN-AI-Company/life/starforge/capability.json", import.meta.url), "utf8"));
+const life = JSON.parse(await fs.readFile(new URL("../KGEN-AI-Company/life/starforge/life-draft.json", import.meta.url), "utf8"));
+const publicGenesis = JSON.parse(await fs.readFile(new URL("../KGEN-AI-Company/reports/STARFORGE_SPIRIT_LIFE_GENESIS_V1.json", import.meta.url), "utf8"));
+
+test("RFC 8785 JCS-compatible canonicalization is deterministic for Starforge schemas", () => {
+  assert.equal(canonicalizeJcs({ z: 1, a: [true, null, "星鑄"] }), '{"a":[true,null,"星鑄"],"z":1}');
+  assert.equal(hashCanonicalJson(runtime), hashCanonicalJson(JSON.parse(JSON.stringify(runtime))));
+  assert.match(hashCanonicalJson(capability), /^0x[0-9a-f]{64}$/);
+});
+
+test("Soul and Body EIP-191 signatures recover only the matching organs", async () => {
+  const soul = ethers.Wallet.createRandom();
+  const body = ethers.Wallet.createRandom();
+  const runtimeHash = hashCanonicalJson(runtime);
+  const capabilityHash = hashCanonicalJson(capability);
+  const soulMessage = buildSoulBirthMessage({ soulAddress: soul.address, bodyAddress: body.address, runtimeHash, capabilityHash });
+  assert.equal(soulMessage.endsWith("\n"), false);
+  const soulSignature = await soul.signMessage(soulMessage);
+  assert.equal(recoverPersonalSignature(soulMessage, soulSignature), soul.address);
+  assert.notEqual(recoverPersonalSignature(`${soulMessage}x`, soulSignature), soul.address);
+  const soulBindingHash = keccakUtf8(soulMessage);
+  const bodyMessage = buildBodyContinuityMessage({ soulAddress: soul.address, bodyAddress: body.address, soulBindingHash, runtimeHash, capabilityHash, bootCounter: 2 });
+  const bodySignature = await body.signMessage(bodyMessage);
+  assert.equal(recoverPersonalSignature(bodyMessage, bodySignature), body.address);
+  assert.notEqual(recoverPersonalSignature(bodyMessage.replace("boot_counter=2", "boot_counter=3"), bodySignature), body.address);
+});
+
+test("signing domains and every chain-write method fail closed", () => {
+  assert.throws(() => assertAllowedSigningMessage({ organ: "BODY_WALLET", message: `${STARFORGE.soulDomain}\ninvalid` }), (error) => error.code === "SIGNING_DOMAIN_NOT_ALLOWED");
+  for (const method of capability.forbidden_methods) assert.throws(() => assertNoChainMethod(method), (error) => error.code === "CHAIN_METHOD_FORBIDDEN");
+  assert.throws(() => assertNoChainMethod("unknown_method"), (error) => error.code === "CHAIN_METHOD_NOT_ALLOWLISTED");
+});
+
+test("signer broker errors never echo private signing material", () => {
+  const ephemeralSecret = ethers.Wallet.createRandom().privateKey;
+  const broker = fileURLToPath(new URL("../core/security/starforge-signer-broker.mjs", import.meta.url));
+  const result = spawnSync(process.execPath, [broker, "sign-soul", "missing-public-request.json"], {
+    cwd: process.cwd(),
+    input: ephemeralSecret,
+    encoding: "utf8"
+  });
+  assert.notEqual(result.status, 0);
+  assert.equal(result.stdout.includes(ephemeralSecret), false);
+  assert.equal(result.stderr.includes(ephemeralSecret), false);
+  assert.match(result.stderr, /PUBLIC_SIGN_REQUEST_INVALID/);
+});
+
+test("Body rotation requires Soul signature and preserves immutable identity and Genesis", async () => {
+  const soul = ethers.Wallet.createRandom();
+  const oldBody = ethers.Wallet.createRandom();
+  const newBody = ethers.Wallet.createRandom();
+  const genesis = Object.freeze({ life_id: STARFORGE.lifeId, soul_id: STARFORGE.soulId, soul_address: soul.address, body_address: oldBody.address, soul_binding_hash: `0x${"1".repeat(64)}`, genesis_hash: `0x${"2".repeat(64)}` });
+  const certificate = { soulAddress: soul.address, oldBodyAddress: oldBody.address, newBodyAddress: newBody.address, soulBindingHash: genesis.soul_binding_hash, rotationCounter: 1 };
+  const message = buildBodyRotationMessage(certificate);
+  const signature = await soul.signMessage(message);
+  const rotated = verifyBodyRotation({ certificate, soulSignature: signature, genesis });
+  assert.equal(rotated.body_address, newBody.address);
+  assert.equal(rotated.life_id, genesis.life_id);
+  assert.equal(rotated.soul_id, genesis.soul_id);
+  assert.equal(rotated.soul_address, genesis.soul_address);
+  assert.equal(rotated.genesis_hash, genesis.genesis_hash);
+  const attacker = ethers.Wallet.createRandom();
+  const attackerSignature = await attacker.signMessage(message);
+  assert.throws(() => verifyBodyRotation({ certificate, soulSignature: attackerSignature, genesis }), (error) => error.code === "SOUL_ROTATION_SIGNATURE_REQUIRED");
+});
+
+test("public local Genesis forbids secret fields and false on-chain claims", () => {
+  const base = { life_id: STARFORGE.lifeId, soul_id: STARFORGE.soulId, boot_counter: 2, soul_status: "VERIFIED", body_status: "VERIFIED_AFTER_REAL_REBOOT", onchain_genesis: "NOT_YET_ANCHORED" };
+  assert.equal(validatePublicGenesis(base), base);
+  assert.throws(() => validatePublicGenesis({ ...base, private_key: "forbidden" }), (error) => error.code === "PRIVATE_KEY_SERIALIZATION_FORBIDDEN");
+  assert.throws(() => validatePublicGenesis({ ...base, onchain_genesis: "LIVE" }), (error) => error.code === "FALSE_ONCHAIN_GENESIS");
+});
+
+test("committed public Genesis independently recomputes hashes and recovers both organs", () => {
+  assert.equal(life.local_genesis, "VERIFIED");
+  assert.equal(life.life_status, "SPIRIT_ALIVE_LOCAL_VERIFIED");
+  assert.equal(life.soul_address, publicGenesis.soul_address);
+  assert.equal(life.body_address, publicGenesis.body_address);
+  assert.equal(publicGenesis.runtime_hash, hashCanonicalJson(runtime));
+  assert.equal(publicGenesis.capability_hash, hashCanonicalJson(capability));
+  assert.equal(publicGenesis.soul_birth_message, buildSoulBirthMessage({ soulAddress: publicGenesis.soul_address, bodyAddress: publicGenesis.body_address, runtimeHash: publicGenesis.runtime_hash, capabilityHash: publicGenesis.capability_hash }));
+  assert.equal(publicGenesis.soul_message_keccak256, keccakUtf8(publicGenesis.soul_birth_message));
+  assert.equal(publicGenesis.soul_binding_hash, publicGenesis.soul_message_keccak256);
+  assert.equal(recoverPersonalSignature(publicGenesis.soul_birth_message, publicGenesis.soul_signature), publicGenesis.soul_address);
+  assert.equal(publicGenesis.body_continuity_message, buildBodyContinuityMessage({ soulAddress: publicGenesis.soul_address, bodyAddress: publicGenesis.body_address, soulBindingHash: publicGenesis.soul_binding_hash, runtimeHash: publicGenesis.runtime_hash, capabilityHash: publicGenesis.capability_hash, bootCounter: 2 }));
+  assert.equal(publicGenesis.body_message_keccak256, keccakUtf8(publicGenesis.body_continuity_message));
+  assert.equal(recoverPersonalSignature(publicGenesis.body_continuity_message, publicGenesis.body_signature), publicGenesis.body_address);
+  assert.equal(publicGenesis.reboot_proof.distinct_runtime_process, true);
+  assert.equal(publicGenesis.reboot_proof.distinct_signer_broker_process, true);
+  assert.equal(validatePublicGenesis(publicGenesis), publicGenesis);
+});

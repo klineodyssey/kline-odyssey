@@ -6,6 +6,7 @@ export * from "./registry/universe-runtime.mjs?v=3.4.0-live-life";
 export * from "./permissions/index.mjs";
 export * from "./life/index.mjs";
 export * from "./life/factory.mjs";
+export * from "./life/starforge-spirit-runtime.mjs";
 export * from "./birth/index.mjs";
 export * from "./birth/digital-life-birth-resolver.mjs";
 export * from "./species/index.mjs";

@@ -1,0 +1,35 @@
+{
+  "schema": "KAIOS_STARFORGE_CAPABILITY_V1",
+  "life_id": "LIFE-KAIOS-STARFORGE-0001",
+  "economic_capability": "A1_READ_ONLY",
+  "identity_capability": "READ_PUBLIC_STATE_AND_SIGN_ALLOWLISTED_OFFCHAIN_CHALLENGES",
+  "company_treasury_authority": "NONE",
+  "onchain_governance_authority": "NONE",
+  "role_18888": "NONE",
+  "formal_celestial_seat_500": "NONE",
+  "soul_wallet": {
+    "allowed_domains": [
+      "KAIOS_STARFORGE_SOUL_BIRTH_V1",
+      "KAIOS_STARFORGE_BODY_ROTATION_V1"
+    ],
+    "receives_assets": false,
+    "pays_assets": false,
+    "general_transaction_signing": false
+  },
+  "body_wallet": {
+    "allowed_domains": [
+      "KAIOS_STARFORGE_BODY_CONTINUITY_V1"
+    ],
+    "public_chain_read": true,
+    "chain_write": false
+  },
+  "forbidden_methods": [
+    "eth_sendTransaction",
+    "eth_sendRawTransaction",
+    "approve",
+    "transfer",
+    "transferFrom",
+    "swap",
+    "deploy"
+  ]
+}
