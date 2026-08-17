@@ -1,0 +1,102 @@
+{
+  "taskId": "KAIOS-HENGYAO-GM-PAYROLL-BLOODFLOW-V1-001",
+  "status": "FORK_REHEARSED_UNSIGNED_MAINNET_PACKAGE",
+  "executionBase": "672ab4884e8cf6f9d07c176a862fb858cafe8161",
+  "chainId": 56,
+  "mainnetTransactionSentAtPackageCreation": false,
+  "liveSnapshot": {
+    "blockNumber": 116466353,
+    "blockHash": "0xcd305b94586ea851e31537f741587e96cbe2df74552cdb024b0ce4d164dcaddf",
+    "timestamp": 1786970602,
+    "available18888": "11213908.930416874731235",
+    "reserve18888": "11000000.0",
+    "assets8888": "0.0",
+    "freeCapital8888": "0.0",
+    "accountCount8888": "0",
+    "payrollCount8888": "0",
+    "currentCalendarEpoch8888": "24319"
+  },
+  "identifiers": {
+    "purposeUtf8": "KAIOS_AI_COMPANY_PAYROLL_GENESIS_POOL_V1",
+    "purposeHash": "0x27ea560595229367d181c6af8c5d6a0d247dfcb34d469fbbe9d7c08c63e99d2e",
+    "routeDomain": "0xb13d0845c93752f8c48622f9d8f06b2b5b503a2b264f614b59130b81156e5e54",
+    "routeId": "0xae9577b23482c2bc76c7cee0798e0a69cd549305548cabde0b0781fe3d2f6cf6",
+    "modulePaymentId": "0x8a72a57fcd579b4dcc1ae2f8633df30ba941b01a5e3a42542f43634fbe88937d",
+    "accountId": "0x1544ffc7af87fdca8a1ab6ed819010fec50004b2768536aa902d3bf508619dc5",
+    "identityId": "0xce67706eeb99189cd46e3d6498d636e571ecb8b2410b1fc147575b69ecb9e02a",
+    "lifeId": "0x3932f06a621c63ba85ce1be2b8db9536629750315da02a7e978cef4155a3532a",
+    "payrollId": "0x24305470fe1e35c8b06c111237606babb6de7c4e36c41b57980e2a1779e0ba54",
+    "payrollAdminRole": "0x351c518a63f302fd3436c2d47c197d41df314c9a32018c5ae62e6d78e0688592"
+  },
+  "governance": {
+    "target": "0xa2792fBDCc8A8AaC364053431D44E0a8D335E166",
+    "proposer": "0xCd60BF474e691F2484950a0276Eaf507616Ca4b9",
+    "approver": "0xc15E08834fCA9F2d3462a3f8f0BC30524D6dd756",
+    "delaySeconds": 3600,
+    "permissionlessExecutionAfterDelay": true
+  },
+  "operations": [
+    {
+      "stage": "ROUTE_CAPITAL",
+      "proposalId": "0xde5fedfe760d96791e04c4e8e88d46e9c6e84be25d9b686d167737db9d471b4f",
+      "target": "0xC49f989c6ff0d22824df8D993Ce82207165C1428",
+      "value": "0",
+      "dataHash": "0xd58c958a6efd740a5cbe4e5a5bf28f192f3d3e49595e9c0c933084e58f6e2e49",
+      "data": "0xbc69bab9ae9577b23482c2bc76c7cee0798e0a69cd549305548cabde0b0781fe3d2f6cf60000000000000000000000000000000000000000000000302379bf2ca2e0000027ea560595229367d181c6af8c5d6a0d247dfcb34d469fbbe9d7c08c63e99d2e"
+    },
+    {
+      "stage": "CREATE_HENGYAO_LIFE_ACCOUNT",
+      "proposalId": "0xaac14eca5420a013c943d6d5c12c380d852808473a7a45011efb07bd1dc3ce08",
+      "target": "0x9EcAe137b3A307971EB77B4CDB3ba13aeeF5297C",
+      "value": "0",
+      "dataHash": "0xed2842e469d6f33544eab34dd28c5d475ebed4bf3e5ae5a5736862681fe8cdac",
+      "data": "0x95edd3921544ffc7af87fdca8a1ab6ed819010fec50004b2768536aa902d3bf508619dc5ce67706eeb99189cd46e3d6498d636e571ecb8b2410b1fc147575b69ecb9e02a3932f06a621c63ba85ce1be2b8db9536629750315da02a7e978cef4155a3532a00000000000000000000000000000000000000000000000000000000000000000000000000000000000000004df6e9629dad1072103cfd2bc81845fd974292140000000000000000000000004df6e9629dad1072103cfd2bc81845fd974292140000000000000000000000000000000000000000000000000000000000000001"
+    },
+    {
+      "stage": "GRANT_HENGYAO_PAYROLL_ADMIN_8888",
+      "proposalId": "0xf5e001644c6f2e9fec756113733024052cb3918d07cbce2a1f0ba528c4aa5b48",
+      "target": "0x9EcAe137b3A307971EB77B4CDB3ba13aeeF5297C",
+      "value": "0",
+      "dataHash": "0x59310288cc4f2d0a75acfad5e76797b99fd2f6e4d32f663fac93bc1244f9b654",
+      "data": "0x2f2ff15d351c518a63f302fd3436c2d47c197d41df314c9a32018c5ae62e6d78e06885920000000000000000000000004df6e9629dad1072103cfd2bc81845fd97429214"
+    }
+  ],
+  "hengyaoSchedule": {
+    "signer": "0x4DF6E9629Dad1072103cFd2bC81845fd97429214",
+    "target": "0x9EcAe137b3A307971EB77B4CDB3ba13aeeF5297C",
+    "value": "0",
+    "dataHash": "0xd1f95718cd4f521f705ea061ef64148beaf1ddf116ccf1f30b417a1643f3bfac",
+    "data": "0xfa41201324305470fe1e35c8b06c111237606babb6de7c4e36c41b57980e2a1779e0ba543932f06a621c63ba85ce1be2b8db9536629750315da02a7e978cef4155a3532a0000000000000000000000004df6e9629dad1072103cfd2bc81845fd97429214000000000000000000000000000000000000000000000004c53ecdc18a6000000000000000000000000000000000000000000000000000000000000000005f00"
+  },
+  "forkRehearsal": {
+    "status": "PASS",
+    "forkBlock": 116466076,
+    "forkBlockHash": "0x366de0a676680dd6759b9fa90b86bcdee8b940d05cae4054f0b59eea3843dda6",
+    "available18888After": "11213020.930416874731235",
+    "assets8888AfterRoute": "888.0",
+    "freeCapital8888AfterSchedule": "800.0",
+    "payrollLiabilityAfterSchedule": "88.0",
+    "accountCount": "1",
+    "payrollCount": "1",
+    "claimableAt": "2026-09-04T16:00:00.000Z",
+    "accountBalanceAfterSimulatedMatureClaim": "88.0",
+    "duplicatePayroll": "BLOCKED",
+    "claimBeforeMaturity": "BLOCKED",
+    "duplicateClaim": "BLOCKED",
+    "nonRolePayroll": "BLOCKED",
+    "perTransactionGasCap": "PASS",
+    "perDayGasCap": "PASS"
+  },
+  "boundaries": {
+    "solidityChanged": false,
+    "abiChanged": false,
+    "deploymentAddressChanged": false,
+    "currentCanonChanged": false,
+    "rewardUsed": false,
+    "kgenReserveUsed": false,
+    "fiveMillionKaiosBurn": false,
+    "seatAssigned": false,
+    "privateKeySerialized": false
+  }
+}
+
