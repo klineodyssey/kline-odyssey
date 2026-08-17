@@ -38,6 +38,14 @@ Final read-back at block `116475334`:
 - Hengyao roles: `PAYROLL_ADMIN_ROLE=true`, `DEFAULT_ADMIN_ROLE=false`, `ACCOUNT_ADMIN_ROLE=false`.
 - Payroll: `88 KAIOS`, epoch `24320`, `claimed=false`; first maturity is `2026-09-04T16:00:00Z` (`2026-09-05T00:00:00+08:00`).
 
+## Post-execution closure snapshot
+
+The current public source of truth is `postExecutionSnapshot` in the machine-readable package. A fresh read-only verification at block `116487188` (`0xbd08ee5d787f104123642bab33d75cb9651359e8b436aba4654a54c35c3b0e8a`) confirmed the same conservation state: 18888 available `11,213,020.930416874731235 KAIOS`, reserve `11,000,000 KAIOS`, 8888 assets `888 KAIOS`, free capital `800 KAIOS`, payroll liability `88 KAIOS`, and Hengyao LIFE-account balance `0 KAIOS`. The payroll remains unclaimed at epoch `24320`; Hengyao has `PAYROLL_ADMIN_ROLE` but neither default-admin nor account-admin authority. Hengyao's personal BNB balance at that same block was `0.00799020555 BNB`.
+
+PR #153's decision snapshot is retained as historical `PRE_EXECUTION` evidence and points here through `superseded_by`. It is no longer the current live source of truth. Mainnet execution is historical and complete; this closeout sent no new transaction.
+
+The A3 restrictions remain policy, not complete technical signer enforcement: `POLICY_SCOPE = DEFINED`, `SIGNER_ENFORCEMENT = PENDING`, `FURTHER_PAYROLL_SCHEDULE = FROZEN`, and `FURTHER_8888_TOPUP = FORBIDDEN_WITHOUT_NEW_AUTHORIZATION`. No salary claim is authorized before maturity, and maturity itself requires a new live-state and authorization review.
+
 Execution transactions:
 
 1. Route capital: `0x9059f3c6c2fdabf61a06c3b2eacbc985b9171d2731f74713000e8264fa37fccc`.

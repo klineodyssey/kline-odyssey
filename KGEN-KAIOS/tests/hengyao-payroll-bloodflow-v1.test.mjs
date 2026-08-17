@@ -88,5 +88,18 @@ test("committed package matches the reproducible plan and records exact executio
   assert.equal(report.mainnetGovernance.status, "EXECUTED_AND_HENGYAO_PAYROLL_SCHEDULED");
   assert.equal(report.mainnetGovernance.executionTransactions.length, 3);
   assert.equal(report.mainnetGovernance.hengyaoScheduleTransaction.transactionHash, "0xb12a7429dedce539223857f588793f4ea0a08246178cc33f4b472f1643723ded");
+  assert.equal(report.postExecutionSnapshot.snapshotPhase, "POST_EXECUTION");
+  assert.equal(report.postExecutionSnapshot.sourceOfTruth, true);
+  assert.equal(report.postExecutionSnapshot.asOfBlock, 116487188);
+  assert.equal(report.postExecutionSnapshot.bank18888.available, "11213020.930416874731235");
+  assert.equal(report.postExecutionSnapshot.bank8888.assets, "888.0");
+  assert.equal(report.postExecutionSnapshot.bank8888.freeCapital, "800.0");
+  assert.equal(report.postExecutionSnapshot.bank8888.payrollLiability, "88.0");
+  assert.equal(report.postExecutionSnapshot.hengyao.personalWalletBalanceBnb, "0.00799020555");
+  assert.equal(report.postExecutionSnapshot.payroll.claimed, false);
+  assert.equal(report.postExecutionSnapshot.policyEnforcement.signerEnforcement, "PENDING");
+  assert.equal(report.postExecutionSnapshot.policyEnforcement.furtherPayrollSchedule, "FROZEN");
+  assert.equal(report.postExecutionSnapshot.policyEnforcement.further8888Topup, "FORBIDDEN_WITHOUT_NEW_AUTHORIZATION");
+  assert.equal(report.postExecutionSnapshot.newMainnetTransactionSentByCloseout, false);
   assert.equal(report.boundaries.privateKeySerialized, false);
 });

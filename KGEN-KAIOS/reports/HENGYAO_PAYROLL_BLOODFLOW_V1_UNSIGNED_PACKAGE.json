@@ -35,6 +35,63 @@
     "payrollAmount": "88.0",
     "payrollClaimed": false
   },
+  "postExecutionSnapshot": {
+    "snapshotPhase": "POST_EXECUTION",
+    "sourceOfTruth": true,
+    "asOfBlock": 116487188,
+    "asOfBlockHash": "0xbd08ee5d787f104123642bab33d75cb9651359e8b436aba4654a54c35c3b0e8a",
+    "asOfTimestamp": "2026-08-17T15:19:41.000Z",
+    "supersedes": {
+      "path": "KGEN-KAIOS/decision/decision_snapshot.json",
+      "snapshotPhase": "PRE_EXECUTION",
+      "pullRequest": 153,
+      "head": "566c89a1856d7e5535cb0fe3497d23948d045541"
+    },
+    "payrollOperationsPullRequest": 154,
+    "mainnetExecutionStatus": "EXECUTED_PAYROLL_SCHEDULED_AWAITING_MATURITY",
+    "newMainnetTransactionSentByCloseout": false,
+    "bank18888": {
+      "available": "11213020.930416874731235",
+      "reserve": "11000000.0",
+      "paused": false
+    },
+    "bank8888": {
+      "assets": "888.0",
+      "freeCapital": "800.0",
+      "payrollLiability": "88.0",
+      "paused": false,
+      "currentCalendarEpoch": "24319"
+    },
+    "hengyao": {
+      "personalWalletBalanceBnb": "0.00799020555",
+      "accountBalanceKaios": "0.0",
+      "payrollAdminRole": true,
+      "defaultAdminRole": false,
+      "accountAdminRole": false
+    },
+    "payroll": {
+      "amount": "88.0",
+      "epoch": "24320",
+      "claimed": false,
+      "claimableAt": "2026-09-04T16:00:00.000Z",
+      "claimableAtUtc8": "2026-09-05T00:00:00+08:00"
+    },
+    "policyEnforcement": {
+      "policyScope": "DEFINED",
+      "signerEnforcement": "PENDING",
+      "furtherPayrollSchedule": "FROZEN",
+      "further8888Topup": "FORBIDDEN_WITHOUT_NEW_AUTHORIZATION"
+    },
+    "cursorR2": {
+      "taskId": "KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-R2-001",
+      "deliveryStatus": "DELIVERY_PENDING",
+      "claimStatus": "CLAIMED",
+      "leaseExpiresAt": "2026-08-18T12:49:02Z",
+      "paymentStatus": "NOT_PAYABLE"
+    },
+    "totalExecutionGasBnb": "0.0000630842",
+    "privateKeyExposed": false
+  },
   "identifiers": {
     "purposeUtf8": "KAIOS_AI_COMPANY_PAYROLL_GENESIS_POOL_V1",
     "purposeHash": "0x27ea560595229367d181c6af8c5d6a0d247dfcb34d469fbbe9d7c08c63e99d2e",
