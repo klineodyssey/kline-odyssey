@@ -1,6 +1,6 @@
 {
   "taskId": "KAIOS-HENGYAO-GM-PAYROLL-BLOODFLOW-V1-001",
-  "status": "FORK_REHEARSED_UNSIGNED_MAINNET_PACKAGE",
+  "status": "MAINNET_GOVERNANCE_APPROVED_TIMELOCK_PENDING",
   "executionBase": "672ab4884e8cf6f9d07c176a862fb858cafe8161",
   "chainId": 56,
   "mainnetTransactionSentAtPackageCreation": false,
@@ -87,6 +87,56 @@
     "perTransactionGasCap": "PASS",
     "perDayGasCap": "PASS"
   },
+  "mainnetGovernance": {
+    "status": "APPROVED_TIMELOCK_PENDING",
+    "latestExecutableAt": 1786974481,
+    "latestExecutableAtIso": "2026-08-17T13:48:01Z",
+    "proposalTransactions": [
+      {
+        "stage": "ROUTE_CAPITAL",
+        "transactionHash": "0xd92f73d6f2604e69d3c752ad07d1907837c9f591198b30f316071e60249b06b1",
+        "blockNumber": 116466953,
+        "gasUsed": "110798"
+      },
+      {
+        "stage": "CREATE_HENGYAO_LIFE_ACCOUNT",
+        "transactionHash": "0x7b73fc8a1da3228f74ba17a4fecb5d4946f6bd1559aa84fbbe7386130c6ee22e",
+        "blockNumber": 116466963,
+        "gasUsed": "112163"
+      },
+      {
+        "stage": "GRANT_HENGYAO_PAYROLL_ADMIN_8888",
+        "transactionHash": "0xbb878cc4a64bc31f235a0bbd3f48e3d58a0f9d49e1531c635f5f3da0442f9b4d",
+        "blockNumber": 116466973,
+        "gasUsed": "110424"
+      }
+    ],
+    "approvalTransactions": [
+      {
+        "stage": "ROUTE_CAPITAL",
+        "transactionHash": "0x4cf568f1fc865106e164b56814b6ddf56af8b7ce8f10b98df7eec9c684310622",
+        "blockNumber": 116467004,
+        "gasUsed": "57667"
+      },
+      {
+        "stage": "CREATE_HENGYAO_LIFE_ACCOUNT",
+        "transactionHash": "0xd85103c7897eb01458bd6d3401d987a6513942f658a454002ccaaf8f66e1c60f",
+        "blockNumber": 116467014,
+        "gasUsed": "57667"
+      },
+      {
+        "stage": "GRANT_HENGYAO_PAYROLL_ADMIN_8888",
+        "transactionHash": "0xbd6f99467e3b3b78459a89e4ab8b12a8c189d7c6fba28f71c80ec9b6ea3d6126",
+        "blockNumber": 116467024,
+        "gasUsed": "57667"
+      }
+    ],
+    "executionTransactions": [],
+    "hengyaoScheduleTransaction": null,
+    "proposalGasCostBnb": "0.00001666925",
+    "approvalGasCostBnb": "0.00000865005",
+    "privateKeyExposed": false
+  },
   "boundaries": {
     "solidityChanged": false,
     "abiChanged": false,
@@ -99,4 +149,3 @@
     "privateKeySerialized": false
   }
 }
-

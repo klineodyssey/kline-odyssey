@@ -2,7 +2,7 @@
 
 **Task:** `KAIOS-HENGYAO-GM-PAYROLL-BLOODFLOW-V1-001`  
 **Execution base:** `672ab4884e8cf6f9d07c176a862fb858cafe8161`  
-**Status:** fresh-fork PASS; Mainnet package is staged and must pass an immediate state refresh before each action.
+**Status:** fresh-fork PASS; three Mainnet proposals are approved and the full 3,600-second timelock is running. No execution occurred before the latest ETA.
 
 ## Exact rail
 
@@ -28,6 +28,8 @@ Three independent proposals use Mother proposal, Jade Emperor approval, at least
 
 Only after all three executions and exact read-back may Hengyao directly schedule payroll ID `0x24305470fe1e35c8b06c111237606babb6de7c4e36c41b57980e2a1779e0ba54` for `88 KAIOS` in contract epoch `24320`. `202609` is not a valid substitute for the contract epoch.
 
+Mainnet proposal/approval receipts are recorded in the machine-readable package. The latest proposal ETA is `2026-08-17T13:48:01Z`; the pre-execution state remains 18888 available `11,213,908.930416874731235 KAIOS`, 8888 assets `0`, account count `0`, payroll count `0`, and Hengyao Payroll role absent.
+
 ## Fresh-fork result
 
 Fork block `116466076` reproduced the current empty 8888 state. The three delayed proposals, approvals, and executions passed in strict route/account/role order. Hengyao then scheduled the exact payroll. Before maturity, claim reverted. At `2026-09-04T16:00:00Z`, permissionless claim credited the fixed 8888 LIFE account, shifting `88 KAIOS` from payroll liability to account liability without moving KAIOS out of 8888. Duplicate scheduling, duplicate claiming, early claiming, and non-role scheduling were blocked.
@@ -41,4 +43,3 @@ The deployed `PAYROLL_ADMIN_ROLE` is a broad on-chain scheduling role; the contr
 Similarly, `createBusinessPayment(..., CLAIM_TO_WALLET, ...)` does not itself prove that a wallet is a registered merchant. No autonomous external spend is enabled by this package. The first spend additionally requires a verified encrypted offline backup A and a fail-closed merchant-registration read.
 
 No Reward principal, KGEN reserve, 5M performance bond, Celestial Seat, Solidity, ABI, deployment address, or CURRENT Canon is modified.
-
