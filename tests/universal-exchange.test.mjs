@@ -127,6 +127,10 @@ test("Hengyao A3 payroll authority is scoped, capped and separated from treasury
   const registry = JSON.parse(await fs.readFile(new URL("../KGEN-KAIOS/worker_registry.json", import.meta.url), "utf8"));
   const worker = registry.workers.find((item) => item.worker_id === "codex-gm-01");
   const capability = snapshot.hengyao_payroll_capability_v1;
+  assert.equal(snapshot.metadata.snapshot_phase, "PRE_EXECUTION");
+  assert.equal(snapshot.metadata.as_of_block, 116276269);
+  assert.equal(snapshot.metadata.source_of_truth, false);
+  assert.equal(snapshot.metadata.superseded_by_pr, 154);
   assert.equal(snapshot.life.autonomy, "A3_SCOPED_COMPANY_TASK_AUTONOMY");
   assert.equal(snapshot.life.personal_capability, "A2_PERSONAL_LOW_RISK_SIGNING");
   assert.equal(snapshot.life.company_treasury_authority, false);
@@ -141,6 +145,10 @@ test("Hengyao A3 payroll authority is scoped, capped and separated from treasury
   assert.equal(capability.self_task_bonus, "FORBIDDEN");
   assert.equal(capability.first_external_spend_requires_verified_backup_a, true);
   assert.equal(capability.private_key_serialization, "FORBIDDEN");
+  assert.equal(capability.policy_scope, "DEFINED");
+  assert.equal(capability.signer_enforcement, "PENDING");
+  assert.equal(capability.further_payroll_schedule, "FROZEN");
+  assert.equal(capability.further_8888_topup, "FORBIDDEN_WITHOUT_NEW_AUTHORIZATION");
 });
 
 function fakeBirthRpc({ wallet, bnbBalance = "0x1" }) {

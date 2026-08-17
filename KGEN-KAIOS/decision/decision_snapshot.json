@@ -1,13 +1,18 @@
 {
   "metadata": {
-    "version": "4.4",
-    "status": "ACTIVE",
-    "updated_at": "2026-08-17T20:32:06+08:00",
+    "version": "4.5",
+    "status": "SUPERSEDED_PRE_EXECUTION_SNAPSHOT",
+    "updated_at": "2026-08-17T23:19:41+08:00",
     "manager": "codex-gm-01",
     "life_id": "LIFE-CODEX-GM-0001",
     "task_id": "KAIOS-HENGYAO-GM-PAYROLL-BLOODFLOW-V1-001",
-    "source_commit": null,
-    "source_of_truth": true
+    "source_commit": "3fe4e2192fddef038bcec533866b2b03e4e85eb5",
+    "source_of_truth": false,
+    "snapshot_phase": "PRE_EXECUTION",
+    "as_of_block": 116276269,
+    "as_of_block_hash": "0x68118a75c38cc4ade3c371286874ac402520f61abdd88375ce70b8e67df42531",
+    "superseded_by": "KGEN-KAIOS/reports/HENGYAO_PAYROLL_BLOODFLOW_V1_UNSIGNED_PACKAGE.json#postExecutionSnapshot",
+    "superseded_by_pr": 154
   },
   "daily_operation": {
     "date": "2026-08-17",
@@ -63,7 +68,11 @@
     "simulation_required": true,
     "receipt_verification_required": true,
     "audit_log_required": true,
-    "private_key_serialization": "FORBIDDEN"
+    "private_key_serialization": "FORBIDDEN",
+    "policy_scope": "DEFINED",
+    "signer_enforcement": "PENDING",
+    "further_payroll_schedule": "FROZEN",
+    "further_8888_topup": "FORBIDDEN_WITHOUT_NEW_AUTHORIZATION"
   },
   "company_health": {
     "open_prs_before_gm_draft": 5,
