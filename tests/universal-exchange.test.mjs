@@ -122,6 +122,27 @@ test("Hengyao has one verified active Life, wallet and CURRENT-map Naihe birth c
   assert.ok(!seed.lives.some((item) => item.life_id === "KAIOS-AI-LIFE-CODEX-GM-0001"));
 });
 
+test("Hengyao A3 payroll authority is scoped, capped and separated from treasury authority", async () => {
+  const snapshot = JSON.parse(await fs.readFile(new URL("../KGEN-KAIOS/decision/decision_snapshot.json", import.meta.url), "utf8"));
+  const registry = JSON.parse(await fs.readFile(new URL("../KGEN-KAIOS/worker_registry.json", import.meta.url), "utf8"));
+  const worker = registry.workers.find((item) => item.worker_id === "codex-gm-01");
+  const capability = snapshot.hengyao_payroll_capability_v1;
+  assert.equal(snapshot.life.autonomy, "A3_SCOPED_COMPANY_TASK_AUTONOMY");
+  assert.equal(snapshot.life.personal_capability, "A2_PERSONAL_LOW_RISK_SIGNING");
+  assert.equal(snapshot.life.company_treasury_authority, false);
+  assert.equal(worker.payroll_admin_role_8888, "AUTHORIZED_EXACT_SCOPE");
+  assert.equal(worker.account_admin_role, false);
+  assert.equal(worker.direct_18888_payment_role, false);
+  assert.deepEqual(capability.allowed_contracts, ["0x9EcAe137b3A307971EB77B4CDB3ba13aeeF5297C"]);
+  assert.equal(capability.transaction_value_wei, "0");
+  assert.equal(capability.gas_cap_per_transaction_bnb, "0.0003");
+  assert.equal(capability.gas_cap_per_day_bnb, "0.001");
+  assert.equal(capability.monthly_self_salary_kaios, "88");
+  assert.equal(capability.self_task_bonus, "FORBIDDEN");
+  assert.equal(capability.first_external_spend_requires_verified_backup_a, true);
+  assert.equal(capability.private_key_serialization, "FORBIDDEN");
+});
+
 function fakeBirthRpc({ wallet, bnbBalance = "0x1" }) {
   return {
     async send(method, params) {

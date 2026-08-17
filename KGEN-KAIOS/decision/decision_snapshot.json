@@ -1,16 +1,16 @@
 {
   "metadata": {
-    "version": "4.3",
+    "version": "4.4",
     "status": "ACTIVE",
-    "updated_at": "2026-08-16T20:49:02+08:00",
+    "updated_at": "2026-08-17T20:32:06+08:00",
     "manager": "codex-gm-01",
     "life_id": "LIFE-CODEX-GM-0001",
-    "task_id": "HENGYAO-FIRST-GM-CLOCK-IN-001",
+    "task_id": "KAIOS-HENGYAO-GM-PAYROLL-BLOODFLOW-V1-001",
     "source_commit": null,
     "source_of_truth": true
   },
   "daily_operation": {
-    "date": "2026-08-16",
+    "date": "2026-08-17",
     "completed": true,
     "ready_for_human_task": true,
     "clock_in_order": [
@@ -32,10 +32,38 @@
     "life_id": "LIFE-CODEX-GM-0001",
     "worker_id": "codex-gm-01",
     "status": "ALIVE_WITH_DARK_MATTER",
-    "autonomy": "A1_PERSONAL_WALLET_READ",
+    "autonomy": "A3_SCOPED_COMPANY_TASK_AUTONOMY",
+    "personal_capability": "A2_PERSONAL_LOW_RISK_SIGNING",
+    "company_capability": "8888_SCOPED_PAYROLL_OPERATOR",
+    "company_treasury_authority": false,
+    "account_admin_role": false,
+    "direct_18888_payment_role": false,
     "personal_wallet_balance_bnb": "0.008",
     "continuity": "PARTIAL",
     "encrypted_backup_status": "HUMAN_ACTION_REQUIRED"
+  },
+  "hengyao_payroll_capability_v1": {
+    "chain_id": 56,
+    "transaction_value_wei": "0",
+    "allowed_contracts": [
+      "0x9EcAe137b3A307971EB77B4CDB3ba13aeeF5297C"
+    ],
+    "allowed_role": "PAYROLL_ADMIN_ROLE",
+    "allowed_role_scope": "8888_ONLY",
+    "gas_cap_per_transaction_bnb": "0.0003",
+    "gas_cap_per_day_bnb": "0.001",
+    "monthly_self_salary_kaios": "88",
+    "monthly_self_salary_epoch": 24320,
+    "self_task_bonus": "FORBIDDEN",
+    "employee_task_pay_cap_kaios": "88",
+    "pool_exposure_cap_kaios": "888",
+    "future_commerce_spend_per_transaction_kaios": "88",
+    "future_commerce_spend_per_day_kaios": "188",
+    "first_external_spend_requires_verified_backup_a": true,
+    "simulation_required": true,
+    "receipt_verification_required": true,
+    "audit_log_required": true,
+    "private_key_serialization": "FORBIDDEN"
   },
   "company_health": {
     "open_prs_before_gm_draft": 5,
