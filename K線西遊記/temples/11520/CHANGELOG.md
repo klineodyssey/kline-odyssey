@@ -6,6 +6,7 @@
 - Added startup Thought Organ mismatch detection and a hard planning gate so older reports or chat memory cannot override deployed chain truth or CURRENT.
 - Added First KAIOS strategy, network-only physical capability truth, balanced-warp/coasting and braking-fuel runtime guards.
 - Expanded the private Heart worker with fail-closed local scheduling, fresh chain revalidation, survival reserve and receipt reconciliation. The public GitHub worker remains signer-free.
+- Recorded the private scheduler's receipt/event/balance-verified first Ignition at the deployed UTC window, updating KGEN from 4 to 12 without exposing signer material.
 - Upgraded 11520 to V3.8.0 and `DIGITAL_ANT_APP_0001` to V1.5.0 without changing Life ID, Birth Certificate, Wallet or Company identity.
 
 ## 3.7.0

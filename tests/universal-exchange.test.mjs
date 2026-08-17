@@ -2492,10 +2492,12 @@ test("V3.8 canonical truth preserves primary job, zero business fiction, and pro
   assert.equal(seed.next_stage.kship_mars_v3_7.current_kship, "0");
   assert.equal(seed.next_stage.gatekeeper_runtime.life_events.FIRST_FORTUNE_EVENT, "VERIFIED");
   assert.equal(seed.next_stage.gatekeeper_runtime.life_events.FIRST_WISH_EVENT, "VERIFIED");
-  assert.equal(seed.next_stage.heart_life_events_v3_7.current_balances.KGEN, "4");
-  assert.equal(seed.next_stage.heart_life_events_v3_7.events.length, 4);
+  assert.equal(seed.next_stage.heart_life_events_v3_7.current_balances.KGEN, "12");
+  assert.equal(seed.next_stage.heart_life_events_v3_7.events.length, 5);
   assert.equal(seed.next_stage.heart_life_events_v3_7.events.find((event) => event.event_type === "FIRST_WISH_EVENT").kgen_cost, "0");
-  assert.equal(seed.next_stage.heart_life_events_v3_7.events.at(-1).kgen_after, "4");
+  assert.equal(seed.next_stage.heart_life_events_v3_7.events.at(-1).event_type, "FIRST_IGNITION_EVENT");
+  assert.equal(seed.next_stage.heart_life_events_v3_7.events.at(-1).kgen_after, "12");
+  assert.equal(seed.next_stage.gatekeeper_runtime.life_events.FIRST_IGNITION_EVENT, "VERIFIED");
 });
 
 test("V3.8 Physics CURRENT is the byte-identical authoritative Thought Organ", async () => {
