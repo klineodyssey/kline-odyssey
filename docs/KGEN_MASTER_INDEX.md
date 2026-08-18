@@ -877,13 +877,14 @@ Runtime V1 implementation:
 | `RECOVERY-KAIOS-AI-COMPANY-RUNTIME-V1.md` | Recovery point. |
 | `KAIOS_AI_COMPANY_RUNTIME_V1_CLOSEOUT.md` | Runtime closeout. |
 
-## 11520 Universal Exchange V3.9 Registration
+## 11520 Universal Exchange V4.0 Registration
 
 | Repository path | Purpose |
 |---|---|
 | `core/` | Multi-domain Digital Life, Registry, Company, Market, History, Security, request-gateway and evidence-gated CFO field-service core. |
 | `core/data/canonical.json` | Evidence-labelled canonical universe records; real customer/request/revenue counts remain zero until verified events exist. |
-| `K線西遊記/temples/11520/` | Universal Exchange V3.9 multilingual frontend, Voice/Text Concierge, shared Worker health, public civilization request entry and autonomous CFO field-service truth dashboard. |
+| `K線西遊記/temples/11520/` | Universal Exchange V4.0 Player First frontend, animated Wukong Hair Voice/Text Concierge, local membership/first mission, shared Worker health and evidence-gated request entry. |
+| `K線西遊記/temples/8888/index.html` | Audited 8888 player exploration entry; visitor Wallet connect plus Job/KUFO/ATM demand drafts, with Banking/Inventory/Settlement truthfully not deployed. |
 | `.github/workflows/universal_exchange_v2.yml` | Hourly signerless Worker, exact-scope Work Evidence persistence and Universal Exchange validation. |
 | `.github/ISSUE_TEMPLATE/civilization-request.yml` | Authenticated shared real-request entry; not a Quote, Order or payment. |
 | `KGEN-AI-Company/reports/DIGITAL_ANT_V3_4_LIVE_LIFE_REPORT.md` | V3.4 task envelope, validation, protected-path and production deployment evidence. |
@@ -903,3 +904,12 @@ Runtime V1 implementation:
 | `core/company/index.mjs` | Cash/KUFO/Waste/Delivery demand, route, energy, cost, profit, delivery and workforce evidence gates. |
 | `core/jobs/public-read-only-worker.mjs` | Post-Gatekeeper hourly CFO field-service patrol; read/scan/plan only, no signer or settlement. |
 | `core/data/canonical.json` | Four coordinate-verified nodes and truthful zero-inventory/zero-job/zero-revenue V3.9 projection. |
+
+### V4.0 Player First additions
+
+| Path | Purpose |
+|---|---|
+| `core/apps/index.mjs` | Voice error normalization, local membership/mission, independent Hair-Life proposal, transformation, identity and remote-organ invariants. |
+| `core/data/canonical.json` | Player-first, membership, no-new-Life, Zhang Cuiyun, remote Gatekeeper and evidence-based 8888 audit projections. |
+| `K線西遊記/temples/11520/app.mjs` | First-screen concierge, working Voice/Speech/Text fallback, Join, first mission and return flow. |
+| `K線西遊記/temples/11520/styles.css` | Animated CSS 3D character and visible 2D/reduced-motion fallback. |

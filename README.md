@@ -1260,12 +1260,23 @@ The deterministic simulation at `world-viewer/creator-marketplace/` connects one
 - Specification owner: `KAIOS/marketplace/creator-marketplace/`
 - Safety: simulation only; no real wallet, KGEN, on-chain transfer, silent mint or external autonomy.
 
-## 11520 Universal Exchange V3.9
+## 11520 Universal Exchange V4.0
 
-The public 11520 entry now hosts the multilingual Digital Ant civilization gateway and
-an evidence-derived hourly Life Worker. Voice begins only after a user gesture and always
-falls back to Text. Shared Work status comes from Git-backed append-only snapshots;
+The public 11520 entry now opens with an animated Wukong Hair concierge and a first-minute
+Voice/Text/Explore/Join/Work/My AI journey. Voice begins only after a user gesture, reports
+the real permission/device/network failure reason, produces audible Speech Synthesis where
+the browser permits it, and always falls back to Text. Shared Work status comes from Git-backed append-only snapshots;
 browser IndexedDB is local draft/cache only.
+
+V4.0 adds local opt-in Huaguoshan membership, a non-financial arrival badge, evidence-based
+first missions and a return hook without inventing global players or currency rewards. No
+second Life is born: Zhang Cuiyun is a 72-transformation of `DIGITAL_ANT_0001`, while any
+future Hair Life requires a visible Owner-reviewed Genesis proposal. The remote 12345 organ
+is chain/network work, never physical teleportation.
+
+The 8888 audit exposes its real status: a static simulation and design records exist, while
+production ATM inventory, real withdrawal, KUFO stock, payroll settlement and Bank backend
+do not. Its V4 player buttons create only a request draft and return to 11520 for confirmation.
 
 V3.9 adds an autonomous CFO field-service patrol after the WUKONG_GATEKEEPER duty.
 It scans existing K280/Universe Map nodes for cash logistics, KUFO supply, waste collection
@@ -1278,7 +1289,7 @@ separates the operational Core Heart Event Indexer from optional advanced graph 
 and displays only receipt-backed immutable First Life Events. The public Worker remains
 signer-free; the separate Secure Signer specification is `NOT_CONNECTED`.
 
-- Public entry: `K線西遊記/temples/11520/index.html#/REQUEST`
+- Public entry: `K線西遊記/temples/11520/index.html`
 - Browser controller: `K線西遊記/temples/11520/app.mjs`
 - Domain core: `core/index.mjs`
 - Canonical records: `core/data/canonical.json`

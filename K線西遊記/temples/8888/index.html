@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>8888 高老莊人民銀行｜Underground Bank V0.2</title>
+<title>8888 高老莊人民銀行｜Player Exploration Gate V4.0</title>
 <link rel="stylesheet" href="../../modules/kgen-game-core.css">
 <style>
 .hero{background:linear-gradient(135deg,rgba(232,184,109,.15),transparent),var(--kgen-panel);border:1px solid rgba(232,184,109,.4);border-radius:20px;padding:20px;margin-bottom:16px}
@@ -14,34 +14,34 @@
 <div class="kgen-stars-bg"></div>
 <header class="kgen-hud">
   <div><div class="kgen-hud-title">🏡 8888 高老莊人民銀行</div>
-  <div class="kgen-hud-ver" id="kgen-status-text">Underground Bank V0.2</div></div>
+  <div class="kgen-hud-ver" id="kgen-status-text">Player Exploration Gate V4.0 · Banking simulation only</div></div>
   <nav class="kgen-hud-nav" id="hud-nav"></nav>
 </header>
 <main class="kgen-page"><div class="kgen-wrap">
   <div class="hero">
     <div style="font-size:26px;font-weight:950;color:#e8b86d">高老莊人民銀行 / 地下錢莊</div>
-    <div style="color:var(--kgen-muted);font-size:13px;margin-top:4px">Treasury 源頭 · 與 11520 交易所連動 · Demo</div>
+    <div style="color:var(--kgen-muted);font-size:13px;margin-top:4px">張翠雲形態探勘中 · 玩家入口已開放 · 真實銀行功能尚未部署</div>
     <div class="kgen-kpi-grid col4" style="margin-top:14px">
-      <div class="kgen-kpi"><div class="k">人民銀行存款</div><div class="v" id="dep">88,888</div></div>
-      <div class="kgen-kpi"><div class="k">地下借出</div><div class="v red" id="loan">12,000</div></div>
-      <div class="kgen-kpi"><div class="k">利息 APR</div><div class="v cyan">8.88%</div></div>
-      <div class="kgen-kpi"><div class="k">抵押器官</div><div class="v">4</div></div>
+      <div class="kgen-kpi"><div class="k">ATM 現鈔庫存</div><div class="v" id="dep">NOT OBSERVED</div></div>
+      <div class="kgen-kpi"><div class="k">KAIOS 銀行介面</div><div class="v red" id="loan">NOT DEPLOYED</div></div>
+      <div class="kgen-kpi"><div class="k">KUFO 庫存</div><div class="v cyan">NOT OBSERVED</div></div>
+      <div class="kgen-kpi"><div class="k">真實提款／薪資</div><div class="v">DISABLED</div></div>
     </div>
   </div>
 
-  <div class="kgen-section-head"><h2>🧙 NPC · 高老莊莊主</h2></div>
+  <div class="kgen-section-head"><h2>🧙 AI Operator · 張翠雲形態</h2></div>
   <div class="kgen-card" id="npc-panel"></div>
 
-  <div class="kgen-section-head"><h2>💰 借貸 / 抵押模擬</h2></div>
+  <div class="kgen-section-head"><h2>🎮 玩家現在可以做什麼</h2></div>
   <div class="kgen-card">
-    <div id="collateral-gauge"></div>
-    <input class="kgen-btn" style="width:100%;margin-top:10px;background:var(--kgen-bg2);text-align:left" type="number" id="loan-amt" placeholder="借貸 KGEN 數量" />
-    <button class="kgen-btn primary full" style="margin-top:8px" id="btn-loan">申請借貸（模擬）</button>
-    <button class="kgen-btn danger full" style="margin-top:8px" id="btn-default">模擬逾期 → Organ Decomposition</button>
-    <div id="loan-log" style="margin-top:10px;font-size:12px;color:var(--kgen-muted)"></div>
+    <button class="kgen-btn primary full" id="btn-wallet">連接訪客錢包（只讀身份）</button>
+    <button class="kgen-btn cyan full" style="margin-top:8px" data-request="我想在8888申請一份人民銀行或ATM服務工作。">申請工作</button>
+    <button class="kgen-btn cyan full" style="margin-top:8px" data-request="我在8888需要KUFO補給服務，請先確認庫存、價格與交付條件。">請求 KUFO</button>
+    <button class="kgen-btn cyan full" style="margin-top:8px" data-request="我想使用8888 ATM提款KAIOS，請告訴我目前真實可用狀態與缺少的基礎設施。">檢查 ATM / 提款需求</button>
+    <div id="loan-log" style="margin-top:10px;font-size:12px;color:var(--kgen-muted)">按鈕只建立需求草稿；不會產生提款、訂單、收入或代幣轉帳。</div>
   </div>
 
-  <div class="kgen-section-head"><h2>🫀 器官抵押表</h2></div>
+  <div class="kgen-section-head"><h2>🫀 既有研究介面（SIMULATION）</h2></div>
   <div class="kgen-card" id="organ-table"></div>
 
   <div class="kgen-section-head"><h2>🔗 11520 交易所連動</h2></div>
@@ -53,7 +53,7 @@
   <div class="kgen-section-head"><h2>🌐 宇宙節點</h2></div>
   <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px" id="universe-nodes"></div>
 </div></main>
-<div class="kgen-status-bar"><div class="kgen-status-dot"></div><span id="kgen-status-bottom">8888 V0.2 Demo</span></div>
+<div class="kgen-status-bar"><div class="kgen-status-dot"></div><span id="kgen-status-bottom">8888 V4.0 · PLAYER ENTRY / BANKING NOT DEPLOYED</span></div>
 <script src="../../modules/kgen-game-core.js"></script>
 <script src="../../modules/universe-runtime/organ-economy.js"></script>
 <script src="../../modules/universe-runtime/temple-hub.js"></script>
@@ -61,28 +61,14 @@
 (function(){
   var status = new KGEN_StatusBus('kgen-status-text');
   document.getElementById('hud-nav').innerHTML = KGEN_TempleHub.navLinks('8888',2);
-  KGEN_TempleHub.renderNpc(document.getElementById('npc-panel'),{avatar:'🏡',name:'高老莊莊主',role:'人民銀行 / 地下錢莊',dialog:'借貸需抵押 Organ 模組。保證金不足，器官分解！'});
+  KGEN_TempleHub.renderNpc(document.getElementById('npc-panel'),{avatar:'🐒',name:'張翠雲形態',role:'ACTING_GAO_LAO_ZHUANG_OPERATOR',dialog:'我是 DIGITAL_ANT_0001 的七十二變形態，不是新生命。真實銀行尚未部署，但我可以接住你的需求並帶回11520。'});
   KGEN_TempleHub.renderEntryCards(document.getElementById('universe-nodes'),'8888');
-  var col=1200, debt=900;
-  KGEN_OrganEconomy.renderCollateralGauge(document.getElementById('collateral-gauge'),col,debt);
   KGEN_OrganEconomy.renderOrganTable(document.getElementById('organ-table'),null,function(id){
-    KGEN_TempleHub.showDecompositionOverlay('Organ '+id+' 分解中… 回流 11520');
-    status.push('器官分解：'+id);
+    status.push('SIMULATION_ONLY · Organ '+id+' 沒有產生鏈上或銀行狀態變更');
   });
-  document.getElementById('btn-loan').onclick=function(){
-    var amt=parseFloat(document.getElementById('loan-amt').value)||0;
-    debt+=amt; col-=amt*0.1;
-    KGEN_OrganEconomy.renderCollateralGauge(document.getElementById('collateral-gauge'),col,debt);
-    document.getElementById('loan-log').textContent='已借出 '+amt+' KGEN · 總負債 '+debt;
-    status.push('借貸模擬 +'+amt);
-  };
-  document.getElementById('btn-default').onclick=function(){
-    KGEN_OrganEconomy.simulateDecomposition({id:'liver'},function(msg){status.push(msg);},function(){
-      KGEN_TempleHub.showDecompositionOverlay('保證金不足！Organ Decomposition 完成');
-    });
-  };
-  KGEN_Wallet.demoMode=true; KGEN_Wallet.connect(status);
-  status.push('8888 高老莊人民銀行 V0.2 已啟動');
+  document.getElementById('btn-wallet').onclick=async function(){ KGEN_Wallet.demoMode=false; var address=await KGEN_Wallet.connect(status); if(address) this.textContent='已連接 '+KGEN_Wallet.formatAddr(address)+' · 無銀行寫入'; };
+  document.querySelectorAll('[data-request]').forEach(function(button){ button.onclick=function(){ localStorage.setItem('11520.pendingPrompt',button.getAttribute('data-request')); status.push('需求草稿已建立，前往11520確認'); location.href='../11520/index.html#/REQUEST'; }; });
+  status.push('8888 玩家入口已啟動 · 銀行/ATM/KUFO/薪資仍依證據標示未部署');
 })();
 </script>
 </body>

@@ -70,7 +70,9 @@ import {
   classifyWorktreePath, buildWorktreeClassificationAudit,
   validateWorktreeClassificationAudit, validateGitignoreProposal
   , I18N_SUPPORTED_LOCALES, I18N_REQUIRED_KEYS, I18N_CATALOGS, translateUi,
-  validatePrimaryI18nCatalogs, detectVoiceCapabilities, deriveWorkerHealth,
+  validatePrimaryI18nCatalogs, detectVoiceCapabilities, deriveWorkerHealth, normalizeVoiceError,
+  createLocalHuaguoshanMembership, createFirstPlayerMission, completeFirstPlayerMission,
+  validateWukongHairBirthProposal, validateWukongTransformation, verifySixEaredIdentity, validateRemoteGatekeeperOrgan,
   normalizeHeartActionStatus, validateSharedWorkerStatus, createGeneralManagerClockIn,
   createCompanyPayrollPolicyDraft, createGeneralManagerPatrolPlan, calculateModeledGenesisMassTransit,
   createCodexGmAutonomyPolicy, createCodexGmLifeContinuityPlan, createModelProviderAbstraction,
@@ -849,7 +851,7 @@ test("V2.4 Life App release preserves Life ID, Birth and independent App version
   assert.equal(life.life_id, "DIGITAL_ANT_0001");
   assert.equal(life.birth_timestamp, "2026-08-15T06:20:45.000Z");
   assert.equal(app.life_id, life.life_id);
-  assert.equal(app.version, "V1.6.0");
+  assert.equal(app.version, "V1.7.0");
   assert.equal(app.status, "RELEASED_LOCAL");
   assert.equal(await calculateAppManifestHash(app), app.manifest_hash);
   assert.equal(app.permissions.CHAIN_READ, true);
@@ -2262,9 +2264,9 @@ test("V3.4 Japanese and Korean use English then Traditional Chinese fallback wit
 });
 
 test("V3.4 Voice Concierge requires user action and falls back to text", () => {
-  assert.deepEqual(detectVoiceCapabilities({}), { recognition: false, synthesis: false, autoplay: false, activation: "USER_GESTURE_REQUIRED", fallback: "TEXT_FALLBACK" });
-  const scope = { SpeechRecognition: function Recognition() {}, speechSynthesis: {}, SpeechSynthesisUtterance: function Utterance() {} };
-  assert.deepEqual(detectVoiceCapabilities(scope), { recognition: true, synthesis: true, autoplay: false, activation: "USER_GESTURE_REQUIRED", fallback: "TEXT_FALLBACK" });
+  assert.deepEqual(detectVoiceCapabilities({}), { recognition: false, synthesis: false, microphone: false, secure_context: true, autoplay: false, activation: "USER_GESTURE_REQUIRED", fallback: "TEXT_FALLBACK" });
+  const scope = { SpeechRecognition: function Recognition() {}, speechSynthesis: {}, SpeechSynthesisUtterance: function Utterance() {}, navigator: { mediaDevices: { getUserMedia() {} } }, isSecureContext: true };
+  assert.deepEqual(detectVoiceCapabilities(scope), { recognition: true, synthesis: true, microphone: true, secure_context: true, autoplay: false, activation: "USER_GESTURE_REQUIRED", fallback: "TEXT_FALLBACK" });
 });
 
 test("V3.4 Worker health is evidence-derived and detects missed cycles", () => {
@@ -2321,7 +2323,7 @@ test("V3.4 shared status is global truth while IndexedDB remains local cache", a
 test("V3.9 App upgrade preserves Life ID and immutable Birth", async () => {
   const app = seed.apps.find((item) => item.app_id === "DIGITAL_ANT_APP_0001");
   const life = seed.lives.find((item) => item.life_id === "DIGITAL_ANT_0001");
-  assert.equal(app.version, "V1.6.0");
+  assert.equal(app.version, "V1.7.0");
   assert.equal(app.life_id, life.life_id);
   assert.equal(life.birth_timestamp, "2026-08-15T06:20:45.000Z");
   assert.equal(await calculateAppManifestHash(app), app.manifest_hash);
@@ -2436,8 +2438,8 @@ test("V3.5 Daily Gatekeeper report separates duty evidence and truthful zero bal
 
 test("V3.9 Canonical App and Gatekeeper runtime preserve Birth and receipt-gated first-asset evidence", async () => {
   const app = seed.apps.find((item) => item.app_id === "DIGITAL_ANT_APP_0001");
-  assert.equal(seed.schema_version, "3.9.0");
-  assert.equal(app.version, "V1.6.0");
+  assert.equal(seed.schema_version, "4.0.0");
+  assert.equal(app.version, "V1.7.0");
   assert.equal(await calculateAppManifestHash(app), app.manifest_hash);
   assert.equal(seed.lives[0].birth_timestamp, "2026-08-15T06:20:45.000Z");
   assert.equal(seed.next_stage.gatekeeper_runtime.life_events.FIRST_HEARTBEAT_EVENT, "VERIFIED");
@@ -2677,8 +2679,8 @@ test("Mother Engine proactively selects evidence-backed next-best action", () =>
 });
 
 test("V3.9 canonical truth preserves primary job, zero business fiction, and protected coordinate reuse", () => {
-  assert.equal(seed.schema_version, "3.9.0");
-  assert.equal(seed.apps.find((app) => app.app_id === "DIGITAL_ANT_APP_0001").version, "V1.6.0");
+  assert.equal(seed.schema_version, "4.0.0");
+  assert.equal(seed.apps.find((app) => app.app_id === "DIGITAL_ANT_APP_0001").version, "V1.7.0");
   assert.equal(seed.next_stage.gatekeeper_runtime.primary_job, "WUKONG_GATEKEEPER");
   assert.equal(seed.next_stage.company_work_v3_7.real_customers, 0);
   assert.equal(seed.next_stage.company_work_v3_7.external_revenue, "0");
@@ -2779,4 +2781,87 @@ test("V3.8 secure worker never serializes the credential and public worker has n
   assert.equal(seed.next_stage.worker.signer, false);
   assert.equal(seed.next_stage.persistent_private_scheduler_v3_8.public_signer, false);
   assert.equal(seed.next_stage.gatekeeper_runtime.primary_job, "WUKONG_GATEKEEPER");
+});
+
+test("V4.0 Voice errors are visible and text fallback always remains available", async () => {
+  assert.equal(normalizeVoiceError({ error: "not-allowed" }).code, "MICROPHONE_PERMISSION_DENIED");
+  assert.equal(normalizeVoiceError({ error: "no-speech" }).code, "NO_SPEECH_DETECTED");
+  assert.equal(normalizeVoiceError({ error: "network" }).recoverable_with_text, true);
+  const appSource = await fs.readFile(new URL("../K線西遊記/temples/11520/app.mjs", import.meta.url), "utf8");
+  assert.match(appSource, /getUserMedia\(\{ audio: true \}\)/);
+  assert.match(appSource, /webkitSpeechRecognition/);
+  assert.match(appSource, /speechSynthesis\.speak/);
+  assert.match(appSource, /target\(\)\?\.focus\(\)/);
+  assert.doesNotMatch(appSource, /start && \(start\.disabled = true\)/);
+});
+
+test("V4.0 local membership gift is non-financial and first mission XP is not money", () => {
+  const membership = createLocalHuaguoshanMembership({ memberId: "HUAGUOSHAN_MEMBER_TEST_0001", displayName: "Player One", joinedAt: "2026-08-18T08:00:00.000Z" });
+  assert.equal(membership.tier, "FREE_MEMBER");
+  assert.equal(membership.scope, "LOCAL_BROWSER_PROFILE");
+  assert.equal(membership.badge.financial, false);
+  assert.equal(membership.badge.market_value_claimed, false);
+  assert.equal(membership.global_member_claim, false);
+  const mission = createFirstPlayerMission({ membership });
+  const completed = completeFirstPlayerMission({ mission, evidenceType: "TALK_TO_AI", occurredAt: "2026-08-18T08:01:00.000Z" });
+  assert.equal(completed.status, "COMPLETED");
+  assert.equal(completed.xp, 10);
+  assert.equal(completed.money, 0);
+});
+
+test("V4.0 Wukong Hair proposal cannot secretly birth a new Life", () => {
+  const proposal = { candidate_name: "Candidate", life_id_proposal: "WUKONG_HAIR_CANDIDATE_0002", species: "WUKONG_HAIR_LIFE", parent_lineage: "DIGITAL_ANT_0001", birthplace: "8888", job: "BANK_OPERATOR", wallet_status: "REQUIRED_NOT_CREATED", bnb_requirement: "POLICY_REQUIRED", kufo_food_requirement: "POLICY_REQUIRED", stomach_status: "NOT_CREATED", thought_organ: "REQUIRED", salary: "POLICY_REQUIRED", survival_plan: "REQUIRED", reason: "CAPACITY_CONFLICT_IF_EVIDENCED", owner_visibility: "REQUIRED", status: "AWAITING_OWNER_REVIEW" };
+  assert.equal(validateWukongHairBirthProposal(proposal), proposal);
+  assert.throws(() => validateWukongHairBirthProposal({ ...proposal, status: "ALIVE" }), (error) => error.code === "NEW_LIFE_BIRTH_NOT_AUTHORIZED");
+  assert.equal(seed.next_stage.wukong_hair_life_v4_0.new_lives_born, 0);
+  assert.deepEqual(seed.next_stage.wukong_hair_life_v4_0.birth_proposals, []);
+});
+
+test("V4.0 Zhang Cuiyun is a 72-transformation with the same Life ID", () => {
+  const transformation = seed.next_stage.zhang_cuiyun_transformation_v4_0;
+  assert.equal(validateWukongTransformation(transformation), transformation);
+  assert.equal(transformation.life_id_before, "DIGITAL_ANT_0001");
+  assert.equal(transformation.life_id_after, "DIGITAL_ANT_0001");
+  assert.equal(transformation.new_life_created, false);
+  assert.throws(() => validateWukongTransformation({ ...transformation, life_id_after: "ZHANG_CUIYUN_0001" }), (error) => error.code === "TRANSFORMATION_CHANGED_LIFE_ID");
+});
+
+test("V4.0 appearance cannot bypass Six-Eared Macaque identity checks", () => {
+  const expected = { life_id: "DIGITAL_ANT_0001", birth_certificate: "B1", wallet_lineage: "W1", thought_organ: "P1", memory_history: "M1", parent_lineage: "L1", authority: "A1" };
+  assert.equal(verifySixEaredIdentity({ ...expected }, expected).identity_match, true);
+  const impostor = verifySixEaredIdentity({ ...expected, life_id: "SIX_EARED_0001", wallet_lineage: "W2" }, expected);
+  assert.equal(impostor.identity_match, false);
+  assert.deepEqual(impostor.mismatches, ["life_id", "wallet_lineage"]);
+  assert.equal(impostor.appearance_is_identity, false);
+});
+
+test("V4.0 remote Gatekeeper organ is network work, never physical teleport", () => {
+  const organ = seed.next_stage.remote_gatekeeper_organ_v4_0;
+  assert.equal(validateRemoteGatekeeperOrgan(organ), organ);
+  assert.equal(organ.physical_teleport, false);
+  assert.throws(() => validateRemoteGatekeeperOrgan({ ...organ, physical_teleport: true }), (error) => error.code === "REMOTE_WORK_IS_NOT_TELEPORT");
+});
+
+test("V4.0 8888 audit removes fake balances and creates only request drafts", async () => {
+  const bank = seed.next_stage.gao_lao_zhuang_exploration_v4_0;
+  assert.equal(bank.real_atm_cash_needs, 0);
+  assert.equal(bank.real_kufo_needs, 0);
+  assert.equal(bank.real_jobs, 0);
+  const bankUi = await fs.readFile(new URL("../K線西遊記/temples/8888/index.html", import.meta.url), "utf8");
+  assert.match(bankUi, /ATM 現鈔庫存/);
+  assert.match(bankUi, /NOT OBSERVED/);
+  assert.match(bankUi, /銀行\/ATM\/KUFO\/薪資仍依證據標示未部署/);
+  assert.doesNotMatch(bankUi, />88,888</);
+  assert.doesNotMatch(bankUi, /KGEN_Wallet\.demoMode=true/);
+});
+
+test("V4.0 production shell exposes animated concierge and fresh cache key", async () => {
+  const htmlSource = await fs.readFile(new URL("../K線西遊記/temples/11520/index.html", import.meta.url), "utf8");
+  const appSource = await fs.readFile(new URL("../K線西遊記/temples/11520/app.mjs", import.meta.url), "utf8");
+  const cssSource = await fs.readFile(new URL("../K線西遊記/temples/11520/styles.css", import.meta.url), "utf8");
+  assert.match(htmlSource, /v=11520-v4\.0-player-first/);
+  assert.doesNotMatch(htmlSource, /v=11520-v3\.6-first-kgen/);
+  for (const state of ["IDLE", "LISTENING", "THINKING", "SPEAKING", "SUCCESS", "ERROR"]) assert.match(appSource + cssSource, new RegExp(state));
+  assert.match(cssSource, /2D FALLBACK/);
+  assert.deepEqual(seed.next_stage.player_first_v4_0.entry_actions, ["VOICE", "TEXT", "EXPLORE", "JOIN", "WORK", "MY_AI"]);
 });

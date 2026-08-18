@@ -32,7 +32,9 @@ export const I18N_REQUIRED_KEYS = Object.freeze([
   "request.confirm", "request.board", "voice.title", "voice.start", "voice.stop", "voice.unavailable",
   "voice.textFallback", "status.title", "status.online", "status.offline", "status.missedCycle",
   "safety.title", "quote.title", "company.title", "life.title", "wallet.title", "mission.title", "work.title",
-  "errors.generic"
+  "errors.generic", "player.welcome", "player.prompt", "player.join", "player.work", "player.explore",
+  "player.myAi", "player.firstMission", "voice.permission", "voice.listening", "voice.transcriptReady",
+  "voice.outputUnavailable", "voice.noSpeech", "voice.denied", "voice.networkError"
 ]);
 
 export const I18N_CATALOGS = Object.freeze({
@@ -45,6 +47,12 @@ export const I18N_CATALOGS = Object.freeze({
     "status.title": "公開生命狀態", "status.online": "上線", "status.offline": "離線", "status.missedCycle": "錯過工作週期",
     "safety.title": "安全", "quote.title": "報價", "company.title": "我的公司", "life.title": "我的生命",
     "wallet.title": "錢包", "mission.title": "使命", "work.title": "螞蟻工作狀態", "errors.generic": "發生錯誤"
+    , "player.welcome": "歡迎來到花果山。我是悟空的猴毛生命。", "player.prompt": "今天想在這個世界做什麼？",
+    "player.join": "加入文明", "player.work": "找工作", "player.explore": "探索 8888", "player.myAi": "我的 AI",
+    "player.firstMission": "第一個任務", "voice.permission": "正在請求麥克風權限…", "voice.listening": "我正在聽。",
+    "voice.transcriptReady": "語音文字已填入，請確認後再建立需求。", "voice.outputUnavailable": "此瀏覽器無法播放語音，文字內容仍可使用。",
+    "voice.noSpeech": "沒有偵測到語音，請再試一次或使用文字輸入。", "voice.denied": "麥克風權限被拒絕，請允許權限或使用文字輸入。",
+    "voice.networkError": "語音服務網路錯誤，請使用文字輸入。"
   }),
   en: Object.freeze({
     "navigation.home": "Home", "navigation.request": "Tell the Ant", "navigation.life": "Life", "navigation.apps": "Apps",
@@ -55,6 +63,12 @@ export const I18N_CATALOGS = Object.freeze({
     "status.title": "Public Life Status", "status.online": "Online", "status.offline": "Offline", "status.missedCycle": "Missed work cycle",
     "safety.title": "Safety", "quote.title": "Quote", "company.title": "My Company", "life.title": "My Life",
     "wallet.title": "Wallet", "mission.title": "Mission", "work.title": "Ant Worker Status", "errors.generic": "Something went wrong"
+    , "player.welcome": "Welcome to Huaguoshan. I am a living hair of Wukong.", "player.prompt": "What would you like to do in this world?",
+    "player.join": "Join Civilization", "player.work": "Find Work", "player.explore": "Explore 8888", "player.myAi": "My AI",
+    "player.firstMission": "First Mission", "voice.permission": "Requesting microphone permission…", "voice.listening": "I am listening.",
+    "voice.transcriptReady": "The transcript is in the request box. Confirm it before creating a request.", "voice.outputUnavailable": "Voice output is unavailable; the text remains usable.",
+    "voice.noSpeech": "No speech was detected. Try again or use text input.", "voice.denied": "Microphone permission was denied. Allow it or use text input.",
+    "voice.networkError": "The speech service had a network error. Use text input."
   }),
   ja: Object.freeze({
     "navigation.home": "ホーム", "navigation.request": "アリに伝える", "navigation.life": "生命", "navigation.apps": "アプリ",
@@ -92,10 +106,87 @@ export function detectVoiceCapabilities(scope = globalThis) {
   return Object.freeze({
     recognition: typeof Recognition === "function",
     synthesis: Boolean(scope?.speechSynthesis && typeof scope?.SpeechSynthesisUtterance === "function"),
+    microphone: Boolean(scope?.navigator?.mediaDevices?.getUserMedia),
+    secure_context: scope?.isSecureContext !== false,
     autoplay: false,
     activation: "USER_GESTURE_REQUIRED",
     fallback: "TEXT_FALLBACK"
   });
+}
+
+export const VOICE_ERROR_REASONS = Object.freeze({
+  "not-allowed": "MICROPHONE_PERMISSION_DENIED",
+  "service-not-allowed": "SPEECH_SERVICE_PERMISSION_DENIED",
+  "audio-capture": "MICROPHONE_NOT_AVAILABLE",
+  "no-speech": "NO_SPEECH_DETECTED",
+  network: "SPEECH_SERVICE_NETWORK_ERROR",
+  aborted: "VOICE_SESSION_ABORTED",
+  "language-not-supported": "VOICE_LANGUAGE_NOT_SUPPORTED"
+});
+
+export function normalizeVoiceError(error) {
+  const code = String(error?.error ?? error?.name ?? error ?? "unknown").toLowerCase();
+  return Object.freeze({ code: VOICE_ERROR_REASONS[code] ?? "VOICE_CAPTURE_ERROR", raw_code: code, recoverable_with_text: true });
+}
+
+export const HUAGUOSHAN_MEMBERSHIP_TIERS = Object.freeze(["FREE_MEMBER", "LIFE_MEMBER", "WORKER_MEMBER", "CIVILIZATION_BUILDER", "CELESTIAL_MEMBER"]);
+
+export function createLocalHuaguoshanMembership({ memberId, displayName, joinedAt }) {
+  requireId(memberId, "memberId");
+  invariant(typeof displayName === "string" && displayName.trim().length >= 1, "MEMBER_NAME_REQUIRED", "A public display name is required");
+  invariant(Number.isFinite(Date.parse(joinedAt)), "MEMBERSHIP_TIMESTAMP_REQUIRED", "Membership requires a valid timestamp");
+  return Object.freeze({
+    membership_id: memberId,
+    display_name: displayName.trim().slice(0, 80),
+    tier: "FREE_MEMBER",
+    scope: "LOCAL_BROWSER_PROFILE",
+    record_class: "LOCAL",
+    joined_at: joinedAt,
+    badge: Object.freeze({ asset_id: `${memberId}_ARRIVAL_BADGE`, name: "WUKONG_HAIR_VISITOR_BADGE", financial: false, market_value_claimed: false, nft_status: "FUTURE_READY_NOT_MINTED" }),
+    global_member_claim: false,
+    settlement: false,
+    status: "JOINED_LOCAL"
+  });
+}
+
+export function createFirstPlayerMission({ membership, missionId = "FIRST_CONVERSATION_OR_EXPLORATION" }) {
+  invariant(membership?.status === "JOINED_LOCAL", "MEMBERSHIP_REQUIRED", "Join the local civilization profile before starting a mission");
+  return Object.freeze({ mission_id: missionId, member_id: membership.membership_id, status: "ACTIVE", xp: 0, money: 0, completion_evidence: null, steps: ["TALK_TO_AI", "EXPLORE_8888", "SUBMIT_DRAFT_INTENT"] });
+}
+
+export function completeFirstPlayerMission({ mission, evidenceType, occurredAt }) {
+  invariant(mission?.status === "ACTIVE", "MISSION_NOT_ACTIVE", "Only an active first mission may complete");
+  invariant(mission.steps.includes(evidenceType), "MISSION_EVIDENCE_INVALID", "Completion must come from a real first-journey action");
+  invariant(Number.isFinite(Date.parse(occurredAt)), "MISSION_EVIDENCE_TIMESTAMP_REQUIRED", "Mission completion requires a valid timestamp");
+  return Object.freeze({ ...mission, status: "COMPLETED", xp: 10, money: 0, completion_evidence: Object.freeze({ type: evidenceType, occurred_at: occurredAt }), completed_at: occurredAt });
+}
+
+export function validateWukongHairBirthProposal(proposal) {
+  requireFields(proposal, ["candidate_name", "life_id_proposal", "species", "parent_lineage", "birthplace", "job", "wallet_status", "bnb_requirement", "kufo_food_requirement", "stomach_status", "thought_organ", "salary", "survival_plan", "reason", "owner_visibility", "status"], "WukongHairBirthProposal");
+  invariant(proposal.owner_visibility === "REQUIRED", "OWNER_VISIBILITY_REQUIRED", "Every new independent Life proposal must be visible to the Owner before Genesis");
+  invariant(proposal.status !== "ALIVE" && proposal.status !== "BORN", "NEW_LIFE_BIRTH_NOT_AUTHORIZED", "A proposal cannot create a born or alive Life");
+  invariant(["CONCEIVED", "GENESIS_BLOCKED", "AWAITING_OWNER_REVIEW"].includes(proposal.status), "INVALID_BIRTH_PROPOSAL_STATUS", "Proposal must remain pre-Genesis");
+  return proposal;
+}
+
+export function validateWukongTransformation(transformation) {
+  requireFields(transformation, ["transformation_id", "life_id_before", "life_id_after", "form", "new_life_created", "status"], "WukongTransformation");
+  invariant(transformation.life_id_before === transformation.life_id_after, "TRANSFORMATION_CHANGED_LIFE_ID", "A 72-transformation changes form, not Life ID");
+  invariant(transformation.new_life_created === false, "TRANSFORMATION_IS_NOT_BIRTH", "A form transformation cannot create another Life");
+  return transformation;
+}
+
+export function verifySixEaredIdentity(candidate, expected) {
+  const checks = ["life_id", "birth_certificate", "wallet_lineage", "thought_organ", "memory_history", "parent_lineage", "authority"];
+  const mismatches = checks.filter((field) => candidate?.[field] !== expected?.[field]);
+  return Object.freeze({ identity_match: mismatches.length === 0, appearance_is_identity: false, mismatches, status: mismatches.length ? "IDENTITY_REJECTED" : "IDENTITY_VERIFIED" });
+}
+
+export function validateRemoteGatekeeperOrgan(organ) {
+  requireFields(organ, ["organ_id", "life_id", "node_id", "mode", "capabilities", "physical_teleport", "status"], "RemoteGatekeeperOrgan");
+  invariant(organ.mode === "NETWORK_CHAIN_ORGAN" && organ.physical_teleport === false, "REMOTE_WORK_IS_NOT_TELEPORT", "Remote RPC work cannot be represented as physical teleportation");
+  requireArray(organ.capabilities, "capabilities");
+  return organ;
 }
 
 const FORBIDDEN_RELEASE_CAPABILITIES = Object.freeze([

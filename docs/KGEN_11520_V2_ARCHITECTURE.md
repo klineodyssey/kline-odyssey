@@ -1,5 +1,17 @@
 # 11520 Universal Exchange V2 Architecture
 
+## V4.0 Player First, Voice/Character repair and 8888 exploration
+
+The Production entry is now a first-minute player experience rather than a status dashboard. `WUKONG_HAIR_3D_CONCIERGE` is a lightweight CSS 3D character with explicit idle, listening, thinking, speaking, success and error states; unsupported 3D and reduced-motion devices retain a visible 2D avatar. The six first actions are Voice, Text, Explore, Join, Work and My AI.
+
+Voice is a user-gesture state machine. The click path immediately updates visible state, optionally speaks the welcome in the same gesture, requests microphone permission without retaining the stream, supports both `SpeechRecognition` and `webkitSpeechRecognition`, reports permission/device/no-speech/network/abort errors, and focuses Text fallback on failure. Speech Synthesis selects an available locale voice after `voiceschanged`; no autoplay, audio persistence, secret narration or direct Order creation is permitted. Transcripts remain drafts pending explicit confirmation.
+
+Huaguoshan membership is a local, opt-in player profile until shared authenticated persistence is deployed. The arrival badge is non-financial and future-NFT-ready but not minted or assigned market value. The first local mission awards XP, never currency. Return state stores only public display name, mission/XP/work/request-draft continuity; it excludes keys, audio and private contact evidence.
+
+Every actual Wukong Hair birth must be an independent Life with unique Life ID, Wallet, certificate, memory, job, salary/metabolism/history and survival evidence. Frontend transformations cannot create a Life. `ZHANG_CUIYUN_FORM` preserves `DIGITAL_ANT_0001`; the Six-Eared identity gate compares certificate, Wallet lineage, Thought Organ, memory, parent lineage and authority. The remote 12345 organ performs network/chain work and never represents physical teleportation.
+
+The 8888 exploration reuses the existing V0.2 page and supporting Constitution/Treasury/account/payroll/advisor records. It truthfully labels Banking, ATM/KUFO inventory, withdrawal and payroll gaps, removes fictional account totals, and converts player job/KUFO/ATM actions into 11520 demand drafts. No Bank, customer, cash cargo, KUFO sale, settlement or Revenue is inferred from a click.
+
 ## V3.8 Living Physics Thought Organ and autonomous Life
 
 `DIGITAL_ANT_0001` binds the single authoritative `docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md` as an active `PHYSICS_CONSTITUTION` Thought Organ. The Life manifest keeps only document ID, version, path, SHA-256, CURRENT authority, compatibility, supersede policy and public evidence. It never copies the constitution. Runtime startup reads the actual file, hashes the bytes and blocks Mother Engine planning on missing, unreadable, version-mismatched or hash-mismatched CURRENT evidence. Truth priority is deployed chain, CURRENT constitution, canonical manifest, App runtime, older versioned document, old report, then memory/chat.

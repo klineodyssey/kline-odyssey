@@ -1,6 +1,14 @@
-# 11520 Universal Exchange V3.9 Current Handoff
+# 11520 Universal Exchange V4.0 Current Handoff
 
-V3.9 is the active cumulative public release. It retains the multilingual gateway, Voice Concierge, verified Heart/KGEN/Fortune/Wish history, Physics Thought Organ and production public Worker while upgrading `DIGITAL_ANT_APP_0001` to V1.6.0. Life ID, immutable Birth Certificate, Wallet ownership and Listing identity rights are unchanged.
+V4.0 is the active cumulative public release. It repairs the Production player entry and upgrades `DIGITAL_ANT_APP_0001` to V1.7.0 without changing Life ID, immutable Birth Certificate, Wallet ownership, Thought Organ, Primary Job or Listing identity rights.
+
+The first screen now provides an animated Wukong Hair concierge, Voice, Text, Explore, Join, Work and My AI. Voice controls never silently disable: a user gesture triggers audible Speech Synthesis where supported, microphone permission and Speech Recognition are explicit, errors are shown by reason, and unsupported capture focuses the Text fallback. The character has idle/listening/thinking/speaking/success/error states with CSS 3D and 2D/reduced-motion fallback. Audio is not stored and a transcript cannot create a Request without confirmation.
+
+Membership is local opt-in until a shared authenticated membership service exists. Its arrival badge is non-financial and not minted; local XP is not KAIOS/KGEN/Revenue. Public player/member/conversion metrics remain zero unless shared evidence exists. The first mission completes only from a conversation draft, 8888 exploration or another recorded local action.
+
+The 8888 repository audit found a static V0.2 simulation, constitution, Treasury contract source and supporting account/payroll/advisor schemas, but no production Bank backend, verified ATM/KUFO inventory, real withdrawal, payroll settlement or KAIOS cash-cargo runtime. The V4.0 8888 page removes fabricated-looking balances, marks those gaps, enables an explicit visitor-wallet connection and routes player job/KUFO/ATM needs back to the 11520 draft-confirmation flow.
+
+`ZHANG_CUIYUN_FORM` is a 72-transformation of `DIGITAL_ANT_0001`, never another Life. No Wukong Hair Life was born. Any future independent Hair Life requires an Owner-visible pre-Genesis proposal, unique identity/Wallet/Birth/Memory/Job/metabolism/survival evidence, and cannot become `ALIVE` from frontend code. `12345_GATEKEEPER_REMOTE_ORGAN` is network/chain capability, not physical teleportation.
 
 After every safe WUKONG_GATEKEEPER duty, the CFO now runs an evidence-based field-service scan over the existing K280/Universe Map nodes. The business lines are cash logistics, KUFO supply, waste collection and general delivery. The current scan finds no verified ATM inventory, waste inventory or cargo request, so its honest result is `NO_VERIFIED_FIELD_JOB_AVAILABLE`: zero candidates, zero jobs, no route, no quote, no settlement, zero Revenue and no First KAIOS event.
 
