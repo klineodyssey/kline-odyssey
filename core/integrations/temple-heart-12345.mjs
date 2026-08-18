@@ -146,25 +146,26 @@ async function estimate(call) {
   try { return decimalString(await call()); } catch { return null; }
 }
 
-async function readRecentHeartEvents(heart, fromBlock, toBlock) {
-  if (fromBlock === null || fromBlock === undefined) return { status: "NOT_REQUESTED", from_block: null, to_block: toBlock, fortune_claims: [], wishes: [], heartbeat_claims: [], ignitions: [], lamps: [] };
+export async function readCoreHeartEvents(heart, fromBlock, toBlock) {
+  if (fromBlock === null || fromBlock === undefined) return { status: "NOT_REQUESTED", indexer: "CORE_HEART_INDEXER", from_block: null, to_block: toBlock, fortune_claims: [], wishes: [], heartbeat_claims: [], ignitions: [], lamps: [], vows: [] };
   try {
     const settled = await Promise.allSettled([
-      heart.queryFilter(heart.filters.FortuneClaimed(), fromBlock, toBlock), heart.queryFilter(heart.filters.WishMade(), fromBlock, toBlock), heart.queryFilter(heart.filters.HeartbeatClaimed(), fromBlock, toBlock), heart.queryFilter(heart.filters.IgniteClaimed(), fromBlock, toBlock), heart.queryFilter(heart.filters.LampLit(), fromBlock, toBlock)
+      heart.queryFilter(heart.filters.FortuneClaimed(), fromBlock, toBlock), heart.queryFilter(heart.filters.WishMade(), fromBlock, toBlock), heart.queryFilter(heart.filters.HeartbeatClaimed(), fromBlock, toBlock), heart.queryFilter(heart.filters.IgniteClaimed(), fromBlock, toBlock), heart.queryFilter(heart.filters.LampLit(), fromBlock, toBlock), heart.queryFilter(heart.filters.Vowed(), fromBlock, toBlock)
     ]);
-    const [fortune, wishes, heartbeat, ignitions, lamps] = settled.map((result) => result.status === "fulfilled" ? result.value : []);
-    const failed = settled.map((result, index) => result.status === "rejected" ? ["FORTUNE", "WISH", "HEARTBEAT", "IGNITION", "LAMP"][index] : null).filter(Boolean);
+    const [fortune, wishes, heartbeat, ignitions, lamps, vows] = settled.map((result) => result.status === "fulfilled" ? result.value : []);
+    const failed = settled.map((result, index) => result.status === "rejected" ? ["FORTUNE", "WISH", "HEARTBEAT", "IGNITION", "LAMP", "VOW"][index] : null).filter(Boolean);
     const base = (event) => ({ block_number: event.blockNumber, transaction_index: event.transactionIndex, tx_hash: event.transactionHash });
     return {
-      status: failed.length ? "PARTIAL_EVENT_READ" : "CHAIN_READ_VERIFIED", failed_event_types: failed, from_block: fromBlock, to_block: toBlock,
+      status: failed.length ? "CORE_HEART_INDEXER_PARTIAL" : "CORE_HEART_INDEXER_HEALTHY", indexer: "CORE_HEART_INDEXER", failed_event_types: failed, from_block: fromBlock, to_block: toBlock,
       fortune_claims: fortune.map((event) => ({ ...base(event), wallet: event.args.user, amount_wei: decimalString(event.args.amount), epoch_index: decimalString(event.args.epochIndex) })),
       wishes: wishes.map((event) => ({ ...base(event), wallet: event.args.user, wish_hash: event.args.wishHash })),
       heartbeat_claims: heartbeat.map((event) => ({ ...base(event), wallet: event.args.user, reward_whole: decimalString(event.args.reward) })),
       ignitions: ignitions.map((event) => ({ ...base(event), wallet: event.args.user, reward_whole: decimalString(event.args.reward), day_index: decimalString(event.args.dayIndex) })),
-      lamps: lamps.map((event) => ({ ...base(event), wallet: event.args.user, days_added: decimalString(event.args.daysAdded), paid_wei: decimalString(event.args.paid), expires_at: decimalString(event.args.newExpireAt) }))
+      lamps: lamps.map((event) => ({ ...base(event), wallet: event.args.user, days_added: decimalString(event.args.daysAdded), paid_wei: decimalString(event.args.paid), expires_at: decimalString(event.args.newExpireAt) })),
+      vows: vows.map((event) => ({ ...base(event), wallet: event.args.user, option: Number(event.args.option), amount_wei: decimalString(event.args.amount) }))
     };
   } catch {
-    return { status: "EVENT_READ_UNAVAILABLE", from_block: fromBlock, to_block: toBlock, fortune_claims: [], wishes: [], heartbeat_claims: [], ignitions: [], lamps: [] };
+    return { status: "CORE_HEART_INDEXER_UNAVAILABLE", indexer: "CORE_HEART_INDEXER", from_block: fromBlock, to_block: toBlock, fortune_claims: [], wishes: [], heartbeat_claims: [], ignitions: [], lamps: [], vows: [] };
   }
 }
 
@@ -185,9 +186,16 @@ export async function readTempleHeart12345({ ethers = globalThis.ethers, provide
     const kgenDecimals = Number(await token.decimals());
     const account = walletAddress ? await Promise.all([heart.lastFortuneAt(walletAddress), heart.lastHeartbeatAt(walletAddress), heart.lastIgniteDay(walletAddress), heart.lampExpireAt(walletAddress), token.balanceOf(walletAddress), token.allowance(walletAddress, TEMPLE_HEART_ADDRESS), heart.fortuneEpochClaims(currentEpoch)]) : null;
     const wishHash = wishText ? ethers.utils.id(wishText) : null;
-    const gasEstimates = walletAddress ? {
-      heartbeat: await estimate(() => heart.estimateGas.heartbeatClaim({ from: walletAddress })), ignition: await estimate(() => heart.estimateGas.igniteAndClaim({ from: walletAddress })), fortune: await estimate(() => heart.estimateGas.fortuneClaim(fortuneAmountWhole, { from: walletAddress })), light: await estimate(() => heart.estimateGas.lightLamp(lampDays, { from: walletAddress })), wish: wishHash ? await estimate(() => heart.estimateGas.makeWish(wishHash, { from: walletAddress })) : null
-    } : null;
+    const gasEstimates = walletAddress ? await (async () => {
+      const [heartbeat, ignition, fortune, light, wish] = await Promise.all([
+        estimate(() => heart.estimateGas.heartbeatClaim({ from: walletAddress })),
+        estimate(() => heart.estimateGas.igniteAndClaim({ from: walletAddress })),
+        estimate(() => heart.estimateGas.fortuneClaim(fortuneAmountWhole, { from: walletAddress })),
+        estimate(() => heart.estimateGas.lightLamp(lampDays, { from: walletAddress })),
+        wishHash ? estimate(() => heart.estimateGas.makeWish(wishHash, { from: walletAddress })) : Promise.resolve(null)
+      ]);
+      return { heartbeat, ignition, fortune, light, wish };
+    })() : null;
     const snapshot = {
       status: "CHAIN_READ_VERIFIED", chain_id: 56, block_number: latestBlock.number, block_timestamp: latestBlock.timestamp, observed_at: new Date(latestBlock.timestamp * 1000).toISOString(), contract_code_verified: true, config_locked: configLocked,
       kgen_token: kgen, kgen_token_matches: lower(kgen) === "0xba3d3810e58735cb6813bc1cdc5458c0d71432be", kgen_decimals: kgenDecimals, heart_balance_wei: decimalString(heartBalance),
@@ -198,8 +206,8 @@ export async function readTempleHeart12345({ ethers = globalThis.ethers, provide
       gas_estimates: gasEstimates, actions: TEMPLE_HEART_VERIFIED_ACTIONS, write_status: "DRY_RUN_ONLY"
     };
     const fromBlock = recentBlockWindow > 0 ? Math.max(0, latestBlock.number - recentBlockWindow + 1) : null;
-    snapshot.recent_events = await readRecentHeartEvents(heart, fromBlock, latestBlock.number);
-    snapshot.claim_flow_analysis = { status: "INDEXER_REQUIRED", fast_dex_entry: null, fast_sell: null, common_router: null, common_trading_pattern: null, common_gas_funding: null, common_upstream: null, common_downstream: null, address_clusters: [], reason: "ERC20 transfer traces and complete address history are not inferred from Heart events alone" };
+    snapshot.recent_events = await readCoreHeartEvents(heart, fromBlock, latestBlock.number);
+    snapshot.claim_flow_analysis = { status: "ADVANCED_GRAPH_INDEXER_REQUIRED", indexer: "ADVANCED_TRANSACTION_GRAPH_INDEXER", required: ["ERC20_TRANSFER_INDEXER", "APPROVAL_INDEXER", "FUNDING_GRAPH", "ROUTER_CLASSIFICATION", "ADDRESS_CLUSTERING"], affects_core_gatekeeper_health: false, fast_dex_entry: null, fast_sell: null, common_router: null, common_trading_pattern: null, common_gas_funding: null, common_upstream: null, common_downstream: null, address_clusters: [], reason: "Advanced transfer traces and complete address history are not inferred from Core Heart events" };
     snapshot.risk_assessment = classifyGatekeeperRisk();
     snapshot.eligibility = account ? deriveHeartEligibility(snapshot, { fortuneAmountWhole, lampDays, wishHash }) : null;
     return Object.freeze(snapshot);

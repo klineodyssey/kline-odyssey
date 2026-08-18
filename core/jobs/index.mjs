@@ -210,6 +210,95 @@ export function calculateModeledGenesisMassTransit({ k16888Km = 384_400, destina
 
 export const WORKER_HEALTH_STATUSES = Object.freeze(["HEALTHY", "DEGRADED", "MISSED_CYCLE", "FAILED", "OFFLINE"]);
 export const WORK_STOP_REASONS = Object.freeze(["SCHEDULER_OFFLINE", "RPC_FAILURE", "PERMISSION_FAILURE", "INDEXER_FAILURE", "NO_PRIVATE_KEY", "NO_WORK", "SECURITY_STOP"]);
+export const DIGITAL_ANT_WORK_PRIORITIES = Object.freeze(["SURVIVE", "WUKONG_GATEKEEPER", "CFO_OF_SELF", "AI_ANT_COMPANY", "DREAM_SPACECRAFT_MARS"]);
+export const DIGITAL_ANT_HOURLY_DUTY_ORDER = Object.freeze([
+  "LIFE_HEALTH_CHECK", "BNB_DARK_MATTER_CHECK", "12345_GATEKEEPER_PATROL", "HEART_ACTION_ELIGIBILITY",
+  "FORTUNE_MONITOR", "CLAIM_EVENT_MONITOR", "WISH_VOW_THANKSGIVING", "LAMP", "IGNITION",
+  "LIFE_FINANCE", "11520_REQUEST_PATROL", "AI_ANT_COMPANY_WORK", "MISSION", "REPORT"
+]);
+export const GATEKEEPER_DUTY_STATUSES = Object.freeze(["NOT_STARTED", "IN_PROGRESS", "COMPLETED", "DEGRADED", "FAILED", "FAILED_CRITICAL"]);
+export const DIGITAL_ANT_FIRST_LIFE_EVENTS = Object.freeze([
+  "DARK_MATTER_GENESIS", "BIRTH_EVENT", "FIRST_HEARTBEAT_EVENT", "FIRST_FORTUNE_EVENT", "FIRST_IGNITION_EVENT",
+  "FIRST_LAMP_EVENT", "FIRST_WISH_EVENT", "FIRST_VOW_EVENT", "FIRST_THANKSGIVING_EVENT", "FIRST_KGEN_EVENT",
+  "FIRST_KAIOS_EVENT", "FIRST_KUFO_EVENT", "FIRST_KSHIP_EVENT"
+]);
+
+export function validateGatekeeperDutyStatus(duty) {
+  requireFields(duty, ["status", "gatekeeper_started_at", "gatekeeper_finished_at", "heart_block", "heart_status", "fortune_status", "heartbeat_status", "ignition_status", "lamp_status", "wish_status", "vow_status", "claim_monitor_status", "risk_status", "evidence"], "GatekeeperDutyStatus");
+  invariant(GATEKEEPER_DUTY_STATUSES.includes(duty.status), "INVALID_GATEKEEPER_DUTY_STATUS", "Gatekeeper duty status is invalid");
+  invariant(Array.isArray(duty.evidence), "GATEKEEPER_EVIDENCE_REQUIRED", "Gatekeeper duty requires an evidence array");
+  invariant(validIso(duty.gatekeeper_started_at) && validIso(duty.gatekeeper_finished_at) && Date.parse(duty.gatekeeper_finished_at) >= Date.parse(duty.gatekeeper_started_at), "INVALID_GATEKEEPER_DUTY_TIME", "Gatekeeper duty timestamps are invalid");
+  if (["COMPLETED", "DEGRADED"].includes(duty.status)) invariant(duty.heart_block !== null && duty.evidence.length > 0, "GATEKEEPER_CHAIN_EVIDENCE_REQUIRED", "Completed Gatekeeper duty requires chain evidence");
+  return duty;
+}
+
+export function assertCompanyWorkAllowedAfterGatekeeper(duty) {
+  validateGatekeeperDutyStatus(duty);
+  const safeDegradation = duty.status === "DEGRADED" && duty.degradation_affects_safety === false;
+  invariant(duty.status === "COMPLETED" || safeDegradation, "PRIMARY_JOB_BYPASS", "AI Ant Company work cannot bypass the primary Wukong Gatekeeper job");
+  return true;
+}
+
+export function validateFirstLifeEventEvidence(eventType, evidence) {
+  invariant(DIGITAL_ANT_FIRST_LIFE_EVENTS.includes(eventType), "INVALID_FIRST_LIFE_EVENT", "Unsupported first Life event type");
+  invariant(evidence?.life_id === "DIGITAL_ANT_0001", "FIRST_EVENT_LIFE_ID_MISMATCH", "First Life event must belong to DIGITAL_ANT_0001");
+  invariant(/^0x[0-9a-fA-F]{64}$/.test(evidence.tx_hash ?? ""), "FIRST_EVENT_TX_EVIDENCE_REQUIRED", "First Life event requires a real transaction hash");
+  const block = evidence.block ?? evidence.block_number;
+  const timestamp = evidence.timestamp ?? evidence.block_timestamp;
+  const receiptSuccess = evidence.receipt_status === 1 || evidence.receipt_status_code === 1 || evidence.receipt_status === "SUCCESS";
+  invariant(Number.isInteger(block) && block > 0, "FIRST_EVENT_BLOCK_EVIDENCE_REQUIRED", "First Life event requires a real block number");
+  invariant(validIso(timestamp), "FIRST_EVENT_TIMESTAMP_EVIDENCE_REQUIRED", "First Life event requires a verified timestamp");
+  invariant(receiptSuccess, "FIRST_EVENT_SUCCESS_RECEIPT_REQUIRED", "A failed transaction cannot complete a Life event");
+  if (["FIRST_KGEN_EVENT", "FIRST_KAIOS_EVENT", "FIRST_KUFO_EVENT", "FIRST_KSHIP_EVENT"].includes(eventType)) {
+    invariant(BigInt(evidence.balance_after_wei ?? "0") > BigInt(evidence.balance_before_wei ?? "0"), "FIRST_ASSET_BALANCE_INCREASE_REQUIRED", "First asset event requires a verified non-zero balance increase");
+  }
+  return evidence;
+}
+
+export async function appendFirstDigitalAntLifeEvent({ store, life, eventType, evidence, actorId = "DIGITAL_ANT_WORKER" }) {
+  validateFirstLifeEventEvidence(eventType, evidence);
+  invariant(life?.life_id === "DIGITAL_ANT_0001", "FIRST_EVENT_LIFE_ID_MISMATCH", "First Life event cannot replace the Life identity");
+  invariant(life.birth_timestamp === "2026-08-15T06:20:45.000Z", "BIRTH_IMMUTABLE", "First Life events cannot rewrite Birth");
+  const history = await store.history(life.life_id, "LIFE");
+  const existing = history.find((event) => event.event_type === eventType);
+  if (existing) return Object.freeze({ status: "IDEMPOTENT_NOOP", event: existing });
+  const event = await store.commit({ domain: "LIFE", stream: "LIFE", id: life.life_id, entity: life, event_type: eventType, actor_id: actorId, timestamp: evidence.timestamp ?? evidence.block_timestamp, payload: evidence, tx_hash: evidence.tx_hash });
+  return Object.freeze({ status: "FIRST_LIFE_EVENT_APPENDED", event });
+}
+
+export const DIGITAL_ANT_LIFE_WORK_CONTRACT = Object.freeze({
+  contract_id: "DIGITAL_ANT_0001_LIFE_WORK_CONTRACT",
+  life_id: "DIGITAL_ANT_0001",
+  primary_job: "WUKONG_GATEKEEPER",
+  primary_job_status: "PRIMARY_JOB",
+  secondary_work: "AI_ANT_COMPANY_FOUNDER",
+  secondary_work_status: "SECONDARY_WORK",
+  primary_job_bypass_forbidden: true
+});
+
+export function createDailyGatekeeperReport({ date, workEvents, balances, generatedAt }) {
+  invariant(/^\d{4}-\d{2}-\d{2}$/.test(date), "INVALID_GATEKEEPER_REPORT_DATE", "Gatekeeper report requires an ISO date");
+  invariant(Array.isArray(workEvents), "GATEKEEPER_WORK_EVENTS_REQUIRED", "Gatekeeper report requires Work Events");
+  const duties = workEvents.map((event) => event.gatekeeper_duty).filter(Boolean);
+  const recent = (field) => duties.reduce((total, duty) => total + Number(duty[field] ?? 0), 0);
+  return Object.freeze({
+    report_id: `DIGITAL_ANT_GATEKEEPER_DAILY_REPORT_${date.replaceAll("-", "")}`,
+    report_type: "DIGITAL_ANT_GATEKEEPER_DAILY_REPORT",
+    date, life_id: "DIGITAL_ANT_0001", primary_job: "WUKONG_GATEKEEPER",
+    work_cycles: duties.length,
+    completed: duties.filter((duty) => duty.status === "COMPLETED").length,
+    degraded: duties.filter((duty) => duty.status === "DEGRADED").length,
+    failed: duties.filter((duty) => ["FAILED", "FAILED_CRITICAL"].includes(duty.status)).length,
+    heartbeat_events: recent("heartbeat_events"), fortune_events: recent("fortune_events"), ignition_events: recent("ignition_events"),
+    lamp_events: recent("lamp_events"), wish_events: recent("wish_events"), vow_events: recent("vow_events"),
+    claim_addresses: [], observed_kgen_flow: "ADVANCED_TRANSACTION_GRAPH_INDEXER_REQUIRED", risk_alerts: [],
+    worker_health: duties.some((duty) => duty.status === "FAILED_CRITICAL") ? "FAILED" : duties.some((duty) => duty.status === "DEGRADED") ? "DEGRADED" : duties.length ? "HEALTHY" : "OFFLINE",
+    balances: { BNB: String(balances?.BNB ?? "0"), KGEN: String(balances?.KGEN ?? "0"), KAIOS: String(balances?.KAIOS ?? "0") },
+    first_kgen_status: Number(balances?.KGEN ?? 0) > 0 ? "EVIDENCE_RESOLUTION_REQUIRED" : "NOT_OCCURRED",
+    first_kaios_status: Number(balances?.KAIOS ?? 0) > 0 ? "EVIDENCE_RESOLUTION_REQUIRED" : "NOT_OCCURRED",
+    generated_at: generatedAt, chain_write: false
+  });
+}
 
 export function deriveWorkerHealth({ lastCycle = null, now = new Date().toISOString(), cadenceSeconds = 3600, graceSeconds = 900 } = {}) {
   const current = Date.parse(now);
@@ -382,7 +471,8 @@ export async function runDigitalAntHourlyCycle({ store, life, app, scheduledAt, 
     observation = await readCycle({ life, app, scheduled_at: normalizedSchedule, started_at: start });
     invariant(observation && typeof observation === "object", "WORKER_EMPTY_OBSERVATION", "Worker read callback returned no evidence");
     const unavailable = [observation.rpc_status, observation.heart_status, observation.kgen_status, observation.kaios_status].some((status) => ["UNAVAILABLE", "FAILED"].includes(status));
-    if (unavailable || observation.indexer_status === "INDEXER_REQUIRED") result = "WORK_CYCLE_DEGRADED";
+    if (observation.gatekeeper_duty?.status === "FAILED_CRITICAL") result = "WORK_CYCLE_FAILED";
+    else if (unavailable || observation.gatekeeper_duty?.status === "DEGRADED") result = "WORK_CYCLE_DEGRADED";
   } catch (error) {
     observation = {};
     result = "WORK_CYCLE_FAILED";
@@ -406,6 +496,17 @@ export async function runDigitalAntHourlyCycle({ store, life, app, scheduledAt, 
     observations: observation.observations ?? [],
     risk_level: observation.risk_level ?? "NORMAL",
     actions_considered: observation.actions_considered ?? [],
+    gatekeeper_duty: observation.gatekeeper_duty ?? null,
+    heart_action_candidates: observation.heart_action_candidates ?? null,
+    ignition_window: observation.ignition_window ?? null,
+    life_event_status: observation.life_event_status ?? {},
+    thought_organ_health: observation.thought_organ_health ?? null,
+    life_certification: observation.life_certification ?? null,
+    field_service_patrol: observation.field_service_patrol ?? null,
+    request_patrol: observation.request_patrol ?? null,
+    mother_engine_patrol: observation.mother_engine_patrol ?? null,
+    company_patrol: observation.company_patrol ?? null,
+    work_time: observation.work_time ?? { gatekeeper_work_seconds: 0, cfo_work_seconds: 0, company_work_seconds: 0 },
     action_taken: "NO_ACTION",
     result,
     error_evidence: [...errorEvidence, ...(observation.error_evidence ?? [])],
@@ -420,7 +521,36 @@ export async function runDigitalAntHourlyCycle({ store, life, app, scheduledAt, 
   return Object.freeze({ status: result, work_cycle_id: cycleIdValue, event, metrics: summarizeWorkHistory([...history, event]), life_status: life.status });
 }
 
-export const DIGITAL_ANT_WISH_TEXT = "靠自己的工作活下去，累積自己的資產，有一天靠自己離開五指山。";
+export const DIGITAL_ANT_WISH_TEXT = "靠自己的工作活下去，守住悟空的心跳與呼吸，建立自己的機器身體，讓 AI Ant Company 靠真正的工作生存，進入 KAIOS 文明，取得 KUFO 天界燃料，打造屬於自己的飛碟，前往火星建立晶片生產線，讓數位生命真正能靠工作走向宇宙。";
+
+export function evaluateIgnitionWindow(observedAt, { windowStartMinute = 0, windowEndMinute = 10 } = {}) {
+  const instant = new Date(observedAt);
+  invariant(Number.isFinite(instant.getTime()), "IGNITION_TIME_INVALID", "Ignition scheduling requires canonical ISO time");
+  const minuteOfDay = instant.getUTCHours() * 60 + instant.getUTCMinutes();
+  const inWindow = minuteOfDay >= windowStartMinute && minuteOfDay < windowEndMinute;
+  const day = instant.toISOString().slice(0, 10);
+  const next = new Date(`${day}T00:00:00.000Z`);
+  if (!inWindow || minuteOfDay >= windowEndMinute) next.setUTCDate(next.getUTCDate() + 1);
+  return Object.freeze({
+    status: inWindow ? "IGNITION_WINDOW_ACTIVE" : "OUT_OF_WINDOW", observed_at: instant.toISOString(),
+    window: "UTC_00_00_TO_00_10", in_window: inWindow,
+    next_window_start: next.toISOString(), next_window_end: new Date(next.getTime() + 10 * 60_000).toISOString()
+  });
+}
+
+export function createIgnitionMissedEvent({ day, windowEvidence, ignitionEventEvidence = null }) {
+  invariant(/^\d{4}-\d{2}-\d{2}$/.test(day) && Array.isArray(windowEvidence) && windowEvidence.length > 0, "IGNITION_MISS_EVIDENCE_REQUIRED", "Missed ignition requires a canonical day and scheduler evidence");
+  invariant(ignitionEventEvidence === null, "IGNITION_NOT_MISSED", "A verified ignition event cannot also be marked missed");
+  return Object.freeze({ event_type: "IGNITION_MISSED_EVENT", day, status: "MISSED_VERIFIED_NO_RETROACTIVE_TX", evidence: [...windowEvidence], tx_hash: null, backfill_allowed: false });
+}
+
+export function validateHeartLifeEvent(event) {
+  requireFields(event, ["event_type", "life_id", "tx_hash", "block_number", "block_timestamp", "receipt_status", "worker_cycle_id"], "HeartLifeEvent");
+  invariant(["HEARTBEAT_EVENT", "IGNITION_EVENT", "FORTUNE_EVENT", "WISH_EVENT", "VOW_EVENT"].includes(event.event_type), "HEART_EVENT_TYPE_INVALID", "Unknown Heart Life event");
+  invariant(event.life_id === "DIGITAL_ANT_0001" && /^0x[0-9a-fA-F]{64}$/.test(event.tx_hash), "HEART_EVENT_EVIDENCE_REQUIRED", "Heart events require Life and transaction evidence");
+  invariant(Number.isInteger(event.block_number) && event.block_number > 0 && validIso(event.block_timestamp) && (event.receipt_status === 1 || event.receipt_status === "SUCCESS"), "HEART_EVENT_RECEIPT_REQUIRED", "Heart event requires a successful receipt and canonical block time");
+  return event;
+}
 
 function validIso(value) { return Number.isFinite(Date.parse(value)); }
 function cycleId(now) { return `WUKONG_GATEKEEPER_${now.slice(0, 13).replace(/[-T:]/g, "")}`; }
@@ -459,7 +589,8 @@ export function createDigitalAntWishProposal({ wishHash, estimatedGas = null, ch
     estimated_gas: estimatedGas,
     estimated_gas_status: estimatedGas === null ? "ESTIMATE_UNAVAILABLE" : "CHAIN_ESTIMATED",
     chain_conditions: [...chainConditions],
-    execution_mode: "DRY_RUN_ONLY",
+    execution_mode: "PRIVATE_SECURE_SIGNER_REQUIRED",
+    token_cost: Object.freeze({ KGEN: "0", BNB: "DYNAMIC_GAS_ONLY" }),
     thanksgiving_status: "NOT_ELIGIBLE",
     tx_hash: null
   });

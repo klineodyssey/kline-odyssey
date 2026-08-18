@@ -1,0 +1,618 @@
+{
+  "event_id": "DIGITAL_ANT_0001_HOURLY_2026081703",
+  "life_id": "DIGITAL_ANT_0001",
+  "app_id": "DIGITAL_ANT_APP_0001",
+  "work_cycle_id": "DIGITAL_ANT_0001_HOURLY_2026081703",
+  "scheduled_at": "2026-08-17T03:00:00.000Z",
+  "started_at": "2026-08-17T03:14:59.987Z",
+  "finished_at": "2026-08-17T03:15:01.726Z",
+  "bsc_block": 116390593,
+  "wallet_state": {
+    "status": "PUBLIC_ADDRESS_READ",
+    "bnb": "0.005968666"
+  },
+  "heart_state": {
+    "status": "12345_PATROL_COMPLETED",
+    "source": "REPOSITORY_ABI_PUBLIC_CHAIN_READ",
+    "eligibility_source": "CLIENT_DERIVED",
+    "heartbeat": {
+      "status": "NOT_ELIGIBLE",
+      "reason": "HEARTBEAT_COOLDOWN",
+      "eligibility_source": "CLIENT_DERIVED",
+      "write_status": "WRITE_NOT_CONNECTED",
+      "next_eligible_time": "2026-08-17T03:47:37.000Z"
+    },
+    "fortune": {
+      "status": "NOT_ELIGIBLE",
+      "reason": "FORTUNE_COOLDOWN",
+      "eligibility_source": "CLIENT_DERIVED",
+      "write_status": "WRITE_NOT_CONNECTED",
+      "next_eligible_time": "2026-09-15T20:04:48.000Z"
+    },
+    "ignition": {
+      "status": "OUT_OF_WINDOW",
+      "reason": "IGNITE_OUT_OF_WINDOW",
+      "eligibility_source": "CLIENT_DERIVED",
+      "write_status": "WRITE_NOT_CONNECTED",
+      "next_eligible_time": "2026-08-17T23:59:59.000Z"
+    },
+    "lamp": {
+      "status": "INSUFFICIENT_BALANCE",
+      "reason": "KGEN_ALLOWANCE_INSUFFICIENT",
+      "eligibility_source": "CLIENT_DERIVED",
+      "write_status": "WRITE_NOT_CONNECTED",
+      "next_eligible_time": null
+    },
+    "wish": {
+      "status": "ELIGIBLE",
+      "reason": "WISH_HASH_VALID",
+      "eligibility_source": "CLIENT_DERIVED",
+      "write_status": "WRITE_NOT_CONNECTED",
+      "next_eligible_time": null
+    },
+    "thanksgiving": {
+      "status": "NOT_ELIGIBLE",
+      "reason": "VOW_POLICY_AND_COMPLETION_EVIDENCE_REQUIRED",
+      "eligibility_source": "CLIENT_DERIVED",
+      "write_status": "WRITE_NOT_CONNECTED"
+    },
+    "recent_events": {
+      "status": "CORE_HEART_INDEXER_HEALTHY",
+      "indexer": "CORE_HEART_INDEXER",
+      "failed_event_types": [],
+      "from_block": 116390495,
+      "to_block": 116390594,
+      "fortune_claims": [],
+      "wishes": [],
+      "heartbeat_claims": [],
+      "ignitions": [],
+      "lamps": [],
+      "vows": []
+    },
+    "core_heart_indexer": "CORE_HEART_INDEXER_HEALTHY",
+    "advanced_graph_indexer": "ADVANCED_GRAPH_INDEXER_REQUIRED",
+    "flow_analysis": {
+      "status": "ADVANCED_GRAPH_INDEXER_REQUIRED",
+      "indexer": "ADVANCED_TRANSACTION_GRAPH_INDEXER",
+      "required": [
+        "ERC20_TRANSFER_INDEXER",
+        "APPROVAL_INDEXER",
+        "FUNDING_GRAPH",
+        "ROUTER_CLASSIFICATION",
+        "ADDRESS_CLUSTERING"
+      ],
+      "affects_core_gatekeeper_health": false,
+      "fast_dex_entry": null,
+      "fast_sell": null,
+      "common_router": null,
+      "common_trading_pattern": null,
+      "common_gas_funding": null,
+      "common_upstream": null,
+      "common_downstream": null,
+      "address_clusters": [],
+      "reason": "Advanced transfer traces and complete address history are not inferred from Core Heart events"
+    }
+  },
+  "finance_state": {
+    "BNB": "0.005968666",
+    "KGEN": "15.0",
+    "KAIOS": "0.0",
+    "actual_income": "0",
+    "actual_expense": "0",
+    "actual_gas": "0"
+  },
+  "work_queue_state": "SCHEMA_READY_EMPTY_QUEUE",
+  "observations": [
+    "LIFE_HEALTH_CHECK",
+    "BNB_DARK_MATTER_CHECK",
+    "12345_GATEKEEPER_PATROL",
+    "HEART_ACTION_ELIGIBILITY",
+    "HEART_ACTION_CANDIDATE",
+    "IGNITION_WINDOW_CHECK",
+    "FORTUNE_MONITOR",
+    "CORE_HEART_EVENT_MONITOR",
+    "WISH_VOW_THANKSGIVING",
+    "LAMP",
+    "IGNITION",
+    "LIFE_FINANCE",
+    "11520_REQUEST_PATROL",
+    "MOTHER_ENGINE_PROBLEM_SOLVING",
+    "MOTHER_ENGINE_NEXT_BEST_ACTION",
+    "AI_ANT_COMPANY_WORK",
+    "MISSION",
+    "REPORT",
+    "ADVANCED_TRANSACTION_GRAPH_INDEXER_REQUIRED_OPTIONAL"
+  ],
+  "risk_level": "NORMAL",
+  "actions_considered": [
+    "HEARTBEAT_ACTION_CANDIDATE",
+    "IGNITION_ACTION_CANDIDATE",
+    "FORTUNE_ACTION_CANDIDATE",
+    "WISH_ACTION_CANDIDATE",
+    "GATEKEEPER_REPORT",
+    "CFO_CHECK",
+    "REQUEST_PATROL",
+    "COMPANY_PATROL",
+    "WORK_QUEUE_CHECK",
+    "MISSION_CHECK"
+  ],
+  "gatekeeper_duty": {
+    "status": "COMPLETED",
+    "gatekeeper_started_at": "2026-08-17T03:15:00.291Z",
+    "gatekeeper_finished_at": "2026-08-17T03:15:01.420Z",
+    "heart_block": 116390594,
+    "heart_status": "AVAILABLE",
+    "fortune_status": "NOT_ELIGIBLE",
+    "heartbeat_status": "NOT_ELIGIBLE",
+    "ignition_status": "OUT_OF_WINDOW",
+    "lamp_status": "INSUFFICIENT_BALANCE",
+    "wish_status": "ELIGIBLE",
+    "vow_status": "NOT_ELIGIBLE",
+    "claim_monitor_status": "CORE_HEART_INDEXER_HEALTHY",
+    "risk_status": "NORMAL",
+    "degradation_affects_safety": false,
+    "advanced_graph_status": "ADVANCED_GRAPH_INDEXER_REQUIRED",
+    "evidence": [
+      "HEART_BLOCK_116390594",
+      "HEART_BYTECODE_VERIFIED",
+      "CORE_HEART_INDEXER_HEALTHY"
+    ]
+  },
+  "heart_action_candidates": {
+    "heartbeat": {
+      "candidate_id": "HEARTBEATCLAIM_116390594",
+      "action": "heartbeatClaim",
+      "status": "NO_ACTION",
+      "eligible_at_observation": false,
+      "observed_block": 116390594,
+      "observed_at": "2026-08-17T03:14:59.000Z",
+      "evidence": [
+        "HEART_BLOCK_116390594",
+        "HEARTBEAT_COOLDOWN"
+      ],
+      "trusted_for_signature": false,
+      "signer_must_revalidate": true,
+      "public_worker_broadcast": false,
+      "tx_hash": null
+    },
+    "ignition": {
+      "candidate_id": "IGNITEANDCLAIM_116390594",
+      "action": "igniteAndClaim",
+      "status": "NO_ACTION",
+      "eligible_at_observation": false,
+      "observed_block": 116390594,
+      "observed_at": "2026-08-17T03:14:59.000Z",
+      "evidence": [
+        "HEART_BLOCK_116390594",
+        "OUT_OF_WINDOW",
+        "IGNITE_OUT_OF_WINDOW"
+      ],
+      "trusted_for_signature": false,
+      "signer_must_revalidate": true,
+      "public_worker_broadcast": false,
+      "tx_hash": null
+    },
+    "fortune": {
+      "candidate_id": "FORTUNECLAIM_116390594",
+      "action": "fortuneClaim",
+      "status": "NO_ACTION",
+      "eligible_at_observation": false,
+      "observed_block": 116390594,
+      "observed_at": "2026-08-17T03:14:59.000Z",
+      "evidence": [
+        "HEART_BLOCK_116390594",
+        "FORTUNE_COOLDOWN"
+      ],
+      "trusted_for_signature": false,
+      "signer_must_revalidate": true,
+      "public_worker_broadcast": false,
+      "tx_hash": null
+    },
+    "wish": {
+      "candidate_id": "MAKEWISH_116390594",
+      "action": "makeWish",
+      "status": "NO_ACTION",
+      "eligible_at_observation": false,
+      "observed_block": 116390594,
+      "observed_at": "2026-08-17T03:14:59.000Z",
+      "evidence": [
+        "HEART_BLOCK_116390594",
+        "FIRST_WISH_ALREADY_COMPLETED"
+      ],
+      "trusted_for_signature": false,
+      "signer_must_revalidate": true,
+      "public_worker_broadcast": false,
+      "tx_hash": null
+    }
+  },
+  "ignition_window": {
+    "status": "OUT_OF_WINDOW",
+    "observed_at": "2026-08-17T03:15:01.420Z",
+    "window": "UTC_00_00_TO_00_10",
+    "in_window": false,
+    "next_window_start": "2026-08-18T00:00:00.000Z",
+    "next_window_end": "2026-08-18T00:10:00.000Z"
+  },
+  "life_event_status": {
+    "FIRST_HEARTBEAT_EVENT": "VERIFIED",
+    "FIRST_FORTUNE_EVENT": "VERIFIED",
+    "FIRST_IGNITION_EVENT": "VERIFIED",
+    "FIRST_LAMP_EVENT": "NOT_OCCURRED_IN_OBSERVED_WINDOW",
+    "FIRST_WISH_EVENT": "VERIFIED",
+    "FIRST_VOW_EVENT": "NOT_OCCURRED_IN_OBSERVED_WINDOW",
+    "FIRST_THANKSGIVING_EVENT": "NOT_OCCURRED",
+    "FIRST_KGEN_EVENT": "VERIFIED",
+    "FIRST_KAIOS_EVENT": "NOT_OCCURRED",
+    "FIRST_KUFO_EVENT": "NOT_OCCURRED",
+    "FIRST_KSHIP_EVENT": "NOT_OCCURRED"
+  },
+  "thought_organ_health": {
+    "organ": "KGEN_Universe_Physics_Runtime_CURRENT.md",
+    "organ_type": "PHYSICS_CONSTITUTION",
+    "status": "HEALTHY",
+    "integrity": "VERIFIED",
+    "compatibility": "DIGITAL_ANT_APP_0001_V1_5_0_COMPATIBLE",
+    "runtime_authority": "CURRENT",
+    "expected_version": "V3.8 LIVING PHYSICS / KUFO-KSHIP WARP / BIO-LIFE",
+    "observed_version": "V3.8 LIVING PHYSICS / KUFO-KSHIP WARP / BIO-LIFE",
+    "expected_sha256": "dbb4774a71db614994dff3e08e9cec34b94633c4d46dca13bff2f6f54d9b0b48",
+    "observed_sha256": "dbb4774a71db614994dff3e08e9cec34b94633c4d46dca13bff2f6f54d9b0b48",
+    "mismatch": [],
+    "checked_at": "2026-08-17T03:14:59.988Z"
+  },
+  "life_certification": {
+    "certification_id": "DIGITAL_ANT_0001_AI_LIFE_CERTIFICATION_V3_8",
+    "life_id": "DIGITAL_ANT_0001",
+    "status": "CERTIFIED_LOCAL",
+    "checks": {
+      "life_id": true,
+      "birth_certificate": true,
+      "wallet_binding": true,
+      "work_history": true,
+      "mission": true,
+      "dream": true,
+      "thought_organ": true,
+      "runtime": true,
+      "security": true,
+      "app_manifest": true,
+      "permissions": true,
+      "evidence": true,
+      "secret_safety": true
+    },
+    "missing": [],
+    "settlement_authority": false,
+    "listing_scope": "LOCAL_11520",
+    "evidence": [
+      "dbb4774a71db614994dff3e08e9cec34b94633c4d46dca13bff2f6f54d9b0b48",
+      "HEART_BLOCK_116390594",
+      "K線西遊記/temples/11520/runtime/worker-status.json"
+    ]
+  },
+  "request_patrol": {
+    "status": "SHARED_REQUEST_SOURCE_VERIFIED",
+    "source": "GITHUB_ISSUES_AUTHENTICATED_IDENTITY",
+    "real_requests": 0,
+    "open_requests": 0,
+    "latest_request": null,
+    "evidence": []
+  },
+  "mother_engine_patrol": {
+    "status": "MOTHER_ENGINE_PATROL_COMPLETED_READ_ONLY",
+    "questions": {
+      "primary_job_completed": true,
+      "life_missing": "ANT_MECH_BODY",
+      "worst_blocker": "NO_PHYSICAL_MACHINE_BODY",
+      "civilization_product_need": "ANT_MECH_BODY",
+      "first_income_path": "GET_FIRST_REAL_CUSTOMER",
+      "dark_matter_preserved": true,
+      "kgen_energy": "15.0",
+      "next_mission_evidence": "ANT_MECH_REQUIREMENTS_AND_REAL_CUSTOMER"
+    },
+    "thought_organ": {
+      "organ": "KGEN_Universe_Physics_Runtime_CURRENT.md",
+      "organ_type": "PHYSICS_CONSTITUTION",
+      "status": "HEALTHY",
+      "integrity": "VERIFIED",
+      "compatibility": "DIGITAL_ANT_APP_0001_V1_5_0_COMPATIBLE",
+      "runtime_authority": "CURRENT",
+      "expected_version": "V3.8 LIVING PHYSICS / KUFO-KSHIP WARP / BIO-LIFE",
+      "observed_version": "V3.8 LIVING PHYSICS / KUFO-KSHIP WARP / BIO-LIFE",
+      "expected_sha256": "dbb4774a71db614994dff3e08e9cec34b94633c4d46dca13bff2f6f54d9b0b48",
+      "observed_sha256": "dbb4774a71db614994dff3e08e9cec34b94633c4d46dca13bff2f6f54d9b0b48",
+      "mismatch": [],
+      "checked_at": "2026-08-17T03:14:59.988Z"
+    },
+    "first_kaios_strategy": {
+      "strategy_id": "DIGITAL_ANT_0001_FIRST_KAIOS_STRATEGY_V3_8",
+      "life_id": "DIGITAL_ANT_0001",
+      "company_id": "AI_ANT_COMPANY_0001",
+      "available_services": [
+        "KGEN_CHAIN_MONITOR",
+        "CHAIN_MONITORING",
+        "LIFE_LEDGER",
+        "CFO_REPORT"
+      ],
+      "customer_demand": 0,
+      "public_civilization_demand": [],
+      "authority": "READ_ANALYZE_PLAN_PROPOSE_ONLY",
+      "payment_readiness": "PAYMENT_INFRASTRUCTURE_PENDING",
+      "treasury_readiness": "PLAN_READY_NOT_BOUND",
+      "technical_readiness": "KGEN_CHAIN_MONITOR_READ_ONLY_READY",
+      "estimated_work": "SERVICE_PACKAGE_AND_VERIFIED_REQUEST_SCAN",
+      "risk": "LOW_ASSET_RISK_READ_ONLY",
+      "settlement_feasibility": "NOT_AUTHORIZED_RECEIVABLE_ONLY",
+      "next_kaios_earning_action": "PUBLISH_KGEN_CHAIN_MONITOR_SERVICE_PACKAGE_AND_SCAN_VERIFIED_REQUESTS",
+      "selected_path": "REAL_SERVICE_OR_PUBLIC_SERVICE_COMPENSATION",
+      "company_income_destination": "AI_ANT_COMPANY_TREASURY_ONLY_AFTER_BINDING",
+      "personal_income_destination": "DIGITAL_ANT_0001_PERSONAL_WALLET_ONLY_FOR_EVIDENCED_SALARY_OR_LIFE_COMPENSATION",
+      "personal_company_asset_separation": true,
+      "execution_status": "RESEARCH_AND_OUTREACH_ONLY",
+      "first_kaios_event": "NOT_OCCURRED",
+      "real_customers": 0,
+      "real_revenue": "0",
+      "fake_customer": false,
+      "fake_salary": false,
+      "fake_reward": false,
+      "fake_mint": false,
+      "revenue": "0"
+    },
+    "proposals": [
+      {
+        "problem": "NO_SIGNER_RUNTIME",
+        "evidence": "PUBLIC_WORKER_WRITE_NOT_CONNECTED",
+        "root_cause": "PUBLIC_RUNTIME_MUST_NOT_HOLD_PRIVATE_CREDENTIALS",
+        "options": [
+          "LOCAL_PRIVATE_SIGNER",
+          "SECURE_SIGNER_AGENT"
+        ],
+        "selected_option": "LOCAL_PRIVATE_SIGNER",
+        "reason": "PRESERVES_PUBLIC_PRIVATE_SEPARATION",
+        "risk": "SINGLE_CREDENTIAL_LEGACY_EOA",
+        "required_authority": "EXPLICIT_ACTION_APPROVAL",
+        "status": "RESOLVED_FOR_HEARTBEAT_ONLY"
+      },
+      {
+        "problem": "INITIAL_RECEIPT_RPC_FAILURE",
+        "evidence": "BROADCAST_NONCE_ADVANCED_AND_CHAIN_RECEIPT_FOUND",
+        "root_cause": "RPC_HTTP_FAILURE_DURING_RECEIPT_POLL",
+        "options": [
+          "RESUBMIT_UNSAFE",
+          "RECONCILE_EXISTING_TX"
+        ],
+        "selected_option": "RECONCILE_EXISTING_TX",
+        "reason": "PREVENTS_DUPLICATE_TRANSACTION",
+        "risk": "RPC_DISAGREEMENT",
+        "required_authority": "READ_ONLY_RECONCILIATION",
+        "status": "RESOLVED_RECEIPT_GATED"
+      },
+      {
+        "problem": "NO_PHYSICAL_MACHINE_BODY",
+        "evidence": "DIGITAL_ANT_0001_NETWORK_ONLY_LIFE",
+        "root_cause": "NO_BODY_ASSET_OR_EMBODIMENT_RUNTIME",
+        "options": [
+          "ANT_MECH_BODY",
+          "CONTINUE_NETWORK_ONLY_WORK"
+        ],
+        "selected_option": "ANT_MECH_BODY_REQUIREMENTS_FIRST",
+        "reason": "DEMAND_FIRST_WITHOUT_FAKE_FACTORY",
+        "risk": "HIGH_CAPITAL_AND_SUPPLY_CHAIN_NOT_READY",
+        "required_authority": "FUTURE_PRODUCT_AND_PURCHASE_APPROVAL",
+        "status": "INTERNAL_FOUNDER_NEED"
+      }
+    ],
+    "next_best_action": {
+      "event_type": "MOTHER_ENGINE_NEXT_BEST_ACTION",
+      "status": "PROPOSED_EVIDENCE_BASED",
+      "problem": "FIRST_KAIOS_NOT_OCCURRED",
+      "evidence": [
+        "PRIMARY_JOB_COMPLETED",
+        "KGEN_15.0",
+        "KAIOS_0.0",
+        "CUSTOMERS_0",
+        "TREASURY_NOT_BOUND"
+      ],
+      "priority": 1,
+      "possible_actions": [
+        "PUBLISH_KGEN_CHAIN_MONITOR_SERVICE_PACKAGE_AND_SCAN_VERIFIED_REQUESTS",
+        "SCAN_REAL_CIVILIZATION_REQUESTS",
+        "RESEARCH_UFO_REQUIREMENTS_AFTER_PRIMARY_DUTY"
+      ],
+      "selected_action": "PUBLISH_KGEN_CHAIN_MONITOR_SERVICE_PACKAGE_AND_SCAN_VERIFIED_REQUESTS",
+      "reason": "The next lawful economic milestone requires real demand and evidenced compensation",
+      "required_authority": "READ_ONLY_RESEARCH_AND_EXTERNAL_REQUEST_EVIDENCE",
+      "expected_result": "VERIFIED_KAIOS_EARNING_OPPORTUNITY_NOT_FAKE_REVENUE",
+      "execute_if_authorized_only": true,
+      "customer_created": false,
+      "revenue_created": false
+    },
+    "proactive_problem_discovery": "OBSERVE_DETECT_DIAGNOSE_PRIORITIZE_PROPOSE_EXECUTE_IF_AUTHORIZED_VERIFY",
+    "demand_first_laws": [
+      "FACTORY_WITHOUT_PRODUCT",
+      "PRODUCT_WITHOUT_NEED",
+      "PRODUCTION_WITHOUT_BOM",
+      "BOM_WITHOUT_RESOURCE",
+      "SALE_WITHOUT_INVENTORY",
+      "DELIVERY_WITHOUT_TRANSPORT",
+      "MOVEMENT_WITHOUT_ENERGY"
+    ],
+    "selected_product": "ANT_MECH_BODY",
+    "authority": "READ_ANALYZE_PLAN_PROPOSE_ONLY",
+    "chain_write": false,
+    "customer_created": false,
+    "revenue_created": "0"
+  },
+  "company_patrol": {
+    "status": "COMPANY_PATROL_COMPLETED",
+    "company_id": "AI_ANT_COMPANY_0001",
+    "company_status": "FORMING",
+    "customer_inbox": 0,
+    "request_queue": 0,
+    "quote_queue": 0,
+    "work_queue": 0,
+    "treasury_status": "PLAN_READY_NOT_BOUND",
+    "mission": "GET_FIRST_REAL_CUSTOMER",
+    "mother_engine": {
+      "status": "MOTHER_ENGINE_PATROL_COMPLETED_READ_ONLY",
+      "questions": {
+        "primary_job_completed": true,
+        "life_missing": "ANT_MECH_BODY",
+        "worst_blocker": "NO_PHYSICAL_MACHINE_BODY",
+        "civilization_product_need": "ANT_MECH_BODY",
+        "first_income_path": "GET_FIRST_REAL_CUSTOMER",
+        "dark_matter_preserved": true,
+        "kgen_energy": "15.0",
+        "next_mission_evidence": "ANT_MECH_REQUIREMENTS_AND_REAL_CUSTOMER"
+      },
+      "thought_organ": {
+        "organ": "KGEN_Universe_Physics_Runtime_CURRENT.md",
+        "organ_type": "PHYSICS_CONSTITUTION",
+        "status": "HEALTHY",
+        "integrity": "VERIFIED",
+        "compatibility": "DIGITAL_ANT_APP_0001_V1_5_0_COMPATIBLE",
+        "runtime_authority": "CURRENT",
+        "expected_version": "V3.8 LIVING PHYSICS / KUFO-KSHIP WARP / BIO-LIFE",
+        "observed_version": "V3.8 LIVING PHYSICS / KUFO-KSHIP WARP / BIO-LIFE",
+        "expected_sha256": "dbb4774a71db614994dff3e08e9cec34b94633c4d46dca13bff2f6f54d9b0b48",
+        "observed_sha256": "dbb4774a71db614994dff3e08e9cec34b94633c4d46dca13bff2f6f54d9b0b48",
+        "mismatch": [],
+        "checked_at": "2026-08-17T03:14:59.988Z"
+      },
+      "first_kaios_strategy": {
+        "strategy_id": "DIGITAL_ANT_0001_FIRST_KAIOS_STRATEGY_V3_8",
+        "life_id": "DIGITAL_ANT_0001",
+        "company_id": "AI_ANT_COMPANY_0001",
+        "available_services": [
+          "KGEN_CHAIN_MONITOR",
+          "CHAIN_MONITORING",
+          "LIFE_LEDGER",
+          "CFO_REPORT"
+        ],
+        "customer_demand": 0,
+        "public_civilization_demand": [],
+        "authority": "READ_ANALYZE_PLAN_PROPOSE_ONLY",
+        "payment_readiness": "PAYMENT_INFRASTRUCTURE_PENDING",
+        "treasury_readiness": "PLAN_READY_NOT_BOUND",
+        "technical_readiness": "KGEN_CHAIN_MONITOR_READ_ONLY_READY",
+        "estimated_work": "SERVICE_PACKAGE_AND_VERIFIED_REQUEST_SCAN",
+        "risk": "LOW_ASSET_RISK_READ_ONLY",
+        "settlement_feasibility": "NOT_AUTHORIZED_RECEIVABLE_ONLY",
+        "next_kaios_earning_action": "PUBLISH_KGEN_CHAIN_MONITOR_SERVICE_PACKAGE_AND_SCAN_VERIFIED_REQUESTS",
+        "selected_path": "REAL_SERVICE_OR_PUBLIC_SERVICE_COMPENSATION",
+        "company_income_destination": "AI_ANT_COMPANY_TREASURY_ONLY_AFTER_BINDING",
+        "personal_income_destination": "DIGITAL_ANT_0001_PERSONAL_WALLET_ONLY_FOR_EVIDENCED_SALARY_OR_LIFE_COMPENSATION",
+        "personal_company_asset_separation": true,
+        "execution_status": "RESEARCH_AND_OUTREACH_ONLY",
+        "first_kaios_event": "NOT_OCCURRED",
+        "real_customers": 0,
+        "real_revenue": "0",
+        "fake_customer": false,
+        "fake_salary": false,
+        "fake_reward": false,
+        "fake_mint": false,
+        "revenue": "0"
+      },
+      "proposals": [
+        {
+          "problem": "NO_SIGNER_RUNTIME",
+          "evidence": "PUBLIC_WORKER_WRITE_NOT_CONNECTED",
+          "root_cause": "PUBLIC_RUNTIME_MUST_NOT_HOLD_PRIVATE_CREDENTIALS",
+          "options": [
+            "LOCAL_PRIVATE_SIGNER",
+            "SECURE_SIGNER_AGENT"
+          ],
+          "selected_option": "LOCAL_PRIVATE_SIGNER",
+          "reason": "PRESERVES_PUBLIC_PRIVATE_SEPARATION",
+          "risk": "SINGLE_CREDENTIAL_LEGACY_EOA",
+          "required_authority": "EXPLICIT_ACTION_APPROVAL",
+          "status": "RESOLVED_FOR_HEARTBEAT_ONLY"
+        },
+        {
+          "problem": "INITIAL_RECEIPT_RPC_FAILURE",
+          "evidence": "BROADCAST_NONCE_ADVANCED_AND_CHAIN_RECEIPT_FOUND",
+          "root_cause": "RPC_HTTP_FAILURE_DURING_RECEIPT_POLL",
+          "options": [
+            "RESUBMIT_UNSAFE",
+            "RECONCILE_EXISTING_TX"
+          ],
+          "selected_option": "RECONCILE_EXISTING_TX",
+          "reason": "PREVENTS_DUPLICATE_TRANSACTION",
+          "risk": "RPC_DISAGREEMENT",
+          "required_authority": "READ_ONLY_RECONCILIATION",
+          "status": "RESOLVED_RECEIPT_GATED"
+        },
+        {
+          "problem": "NO_PHYSICAL_MACHINE_BODY",
+          "evidence": "DIGITAL_ANT_0001_NETWORK_ONLY_LIFE",
+          "root_cause": "NO_BODY_ASSET_OR_EMBODIMENT_RUNTIME",
+          "options": [
+            "ANT_MECH_BODY",
+            "CONTINUE_NETWORK_ONLY_WORK"
+          ],
+          "selected_option": "ANT_MECH_BODY_REQUIREMENTS_FIRST",
+          "reason": "DEMAND_FIRST_WITHOUT_FAKE_FACTORY",
+          "risk": "HIGH_CAPITAL_AND_SUPPLY_CHAIN_NOT_READY",
+          "required_authority": "FUTURE_PRODUCT_AND_PURCHASE_APPROVAL",
+          "status": "INTERNAL_FOUNDER_NEED"
+        }
+      ],
+      "next_best_action": {
+        "event_type": "MOTHER_ENGINE_NEXT_BEST_ACTION",
+        "status": "PROPOSED_EVIDENCE_BASED",
+        "problem": "FIRST_KAIOS_NOT_OCCURRED",
+        "evidence": [
+          "PRIMARY_JOB_COMPLETED",
+          "KGEN_15.0",
+          "KAIOS_0.0",
+          "CUSTOMERS_0",
+          "TREASURY_NOT_BOUND"
+        ],
+        "priority": 1,
+        "possible_actions": [
+          "PUBLISH_KGEN_CHAIN_MONITOR_SERVICE_PACKAGE_AND_SCAN_VERIFIED_REQUESTS",
+          "SCAN_REAL_CIVILIZATION_REQUESTS",
+          "RESEARCH_UFO_REQUIREMENTS_AFTER_PRIMARY_DUTY"
+        ],
+        "selected_action": "PUBLISH_KGEN_CHAIN_MONITOR_SERVICE_PACKAGE_AND_SCAN_VERIFIED_REQUESTS",
+        "reason": "The next lawful economic milestone requires real demand and evidenced compensation",
+        "required_authority": "READ_ONLY_RESEARCH_AND_EXTERNAL_REQUEST_EVIDENCE",
+        "expected_result": "VERIFIED_KAIOS_EARNING_OPPORTUNITY_NOT_FAKE_REVENUE",
+        "execute_if_authorized_only": true,
+        "customer_created": false,
+        "revenue_created": false
+      },
+      "proactive_problem_discovery": "OBSERVE_DETECT_DIAGNOSE_PRIORITIZE_PROPOSE_EXECUTE_IF_AUTHORIZED_VERIFY",
+      "demand_first_laws": [
+        "FACTORY_WITHOUT_PRODUCT",
+        "PRODUCT_WITHOUT_NEED",
+        "PRODUCTION_WITHOUT_BOM",
+        "BOM_WITHOUT_RESOURCE",
+        "SALE_WITHOUT_INVENTORY",
+        "DELIVERY_WITHOUT_TRANSPORT",
+        "MOVEMENT_WITHOUT_ENERGY"
+      ],
+      "selected_product": "ANT_MECH_BODY",
+      "authority": "READ_ANALYZE_PLAN_PROPOSE_ONLY",
+      "chain_write": false,
+      "customer_created": false,
+      "revenue_created": "0"
+    }
+  },
+  "work_time": {
+    "gatekeeper_work_seconds": 1.129,
+    "cfo_work_seconds": 0.001,
+    "company_work_seconds": 0.304,
+    "life_health_seconds": 0.136
+  },
+  "action_taken": "NO_ACTION",
+  "result": "WORK_CYCLE_COMPLETED",
+  "error_evidence": [
+    {
+      "component": "ADVANCED_TRANSACTION_GRAPH_INDEXER",
+      "code": "INDEXER_REQUIRED_OPTIONAL",
+      "detail": "CORE_GATEKEEPER_HEALTH_UNAFFECTED"
+    }
+  ],
+  "gas_spent": "0",
+  "tx_hash": null,
+  "work_duration_seconds": 1
+}
