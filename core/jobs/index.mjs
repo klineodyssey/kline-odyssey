@@ -1,4 +1,4 @@
-import { requireFields, requireId } from "../shared/schema.mjs";
+import { requireArray, requireFields, requireId } from "../shared/schema.mjs";
 import { invariant } from "../shared/errors.mjs";
 
 export function validateJob(job) {
@@ -37,6 +37,176 @@ export const DIGITAL_ANT_WORKER = Object.freeze({
   chain_write: false,
   signer_action: false
 });
+
+export const CODEX_GM_CLOCK_IN = Object.freeze({
+  runtime_id: "CODEX_GM_CLOCK_IN_V1",
+  worker_id: "codex-gm-01",
+  life_id: "LIFE-CODEX-GM-0001",
+  phases: Object.freeze([
+    "LIGHT_BOOT",
+    "COMPANY_HEALTH",
+    "FINISH_OLD_WORK_FIRST",
+    "DISPATCH",
+    "PATROL_EXTERNAL_WORLD",
+    "HUMAN_REQUEST"
+  ]),
+  chain_write: false,
+  personal_ritual_autonomy: false
+});
+
+export const CODEX_GM_AUTONOMY_LEVELS = Object.freeze({
+  A0: Object.freeze({ name: "READ_ONLY_LIFE", signing: false, company_task_autonomy: false, civilization_autonomy: false }),
+  A1: Object.freeze({ name: "PERSONAL_WALLET_READ", signing: false, company_task_autonomy: false, civilization_autonomy: false }),
+  A2: Object.freeze({ name: "PERSONAL_LOW_RISK_SIGNING", signing: true, company_task_autonomy: false, civilization_autonomy: false }),
+  A3: Object.freeze({ name: "COMPANY_TASK_AUTONOMY", signing: true, company_task_autonomy: true, civilization_autonomy: false }),
+  A4: Object.freeze({ name: "CIVILIZATION_AGENT", signing: true, company_task_autonomy: true, civilization_autonomy: true })
+});
+
+export function createCodexGmAutonomyPolicy({ level = "A1", humanAuthorized = false } = {}) {
+  const capability = CODEX_GM_AUTONOMY_LEVELS[level];
+  invariant(capability, "INVALID_AUTONOMY_LEVEL", "Unknown Codex GM autonomy level");
+  invariant(["A0", "A1"].includes(level) || humanAuthorized === true, "AUTONOMY_UPGRADE_REQUIRES_HUMAN", "Signing or broader autonomy requires explicit Human authorization");
+  return Object.freeze({
+    policy_id: "CODEX_GM_AUTONOMY_POLICY_V1",
+    current_level: level,
+    capability,
+    required_controls: Object.freeze(["CAPABILITY_ALLOWLIST", "GAS_CAP", "VALUE_CAP", "CONTRACT_ALLOWLIST", "SIMULATION", "RECEIPT_VERIFICATION", "AUDIT_LOG"]),
+    company_treasury_authority_inherited: false,
+    personal_wallet_mode: capability.signing ? "ALLOWLIST_ONLY_AFTER_SEPARATE_POLICY" : "READ_ONLY_ONLY",
+    chain_write: false
+  });
+}
+
+export function createCodexGmLifeContinuityPlan({ offlineBackupA = false, offlineBackupB = false } = {}) {
+  return Object.freeze({
+    plan_id: "CODEX_GM_LIFE_CONTINUITY_PLAN_V1",
+    life_id: "LIFE-CODEX-GM-0001",
+    immutable_wallet_address: "0x4DF6E9629Dad1072103cFd2bC81845fd97429214",
+    env_is_backup: false,
+    required_copies: Object.freeze(["PRIMARY_RUNTIME_SECRET", "ENCRYPTED_OFFLINE_BACKUP_A", "ENCRYPTED_OFFLINE_BACKUP_B"]),
+    backup_status: offlineBackupA && offlineBackupB ? "READY" : "HUMAN_ACTION_REQUIRED",
+    recovery_steps: Object.freeze([
+      "RESTORE_ONE_ENCRYPTED_BACKUP_ON_AN_OFFLINE_TRUSTED_MACHINE",
+      "SET_EXISTING_SECRET_IN_CODEX_GM_0001_PRIVATE_KEY_WITHOUT_PRINTING",
+      "DERIVE_PUBLIC_ADDRESS_IN_MEMORY",
+      "REQUIRE_EXACT_MATCH_TO_IMMUTABLE_WALLET_ADDRESS",
+      "RESTORE_PUBLIC_WALLET_ENV_AND_CHAIN_56_POLICY",
+      "VERIFY_BIRTH_TRANSACTION_AND_BIRTH_CERTIFICATE",
+      "RESUME_AT_A1_PERSONAL_WALLET_READ"
+    ]),
+    replacement_wallet_on_device_loss: false,
+    private_key_serialization_allowed: false,
+    git_storage_allowed: false,
+    plaintext_cloud_storage_allowed: false
+  });
+}
+
+export function createModelProviderAbstraction() {
+  return Object.freeze({
+    abstraction_id: "CODEX_GM_MODEL_PROVIDER_ABSTRACTION_V1",
+    identity_provider_separated: true,
+    wallet_provider_separated: true,
+    history_provider_separated: true,
+    adapters: Object.freeze(["OPENAI_CODEX", "FUTURE_CLOUD_MODEL", "LOCAL_MODEL"]),
+    current_provider_dependence: "OPENAI_CODEX_SESSION_AND_HOST_ORCHESTRATION_REQUIRED",
+    local_fallback_status: "NOT_IMPLEMENTED",
+    openai_independent_runtime: false,
+    continuity_gaps: Object.freeze(["LOCAL_MODEL_ADAPTER", "MODEL_NEUTRAL_MEMORY_IMPORT", "LOCAL_ORCHESTRATOR", "SECURE_SIGNER_BROKER", "PROVIDER_INDEPENDENT_EVALUATION"]),
+    provider_change_may_replace_life_identity: false,
+    provider_change_may_replace_wallet: false
+  });
+}
+
+export const NAIHE_DIGITAL_LIFE_GENESIS_STATION_SPEC = Object.freeze({
+  spec_id: "NAIHE_DIGITAL_LIFE_GENESIS_STATION_V1",
+  implementation_status: "SPEC_ONLY_NOT_DEPLOYED",
+  birthplace_code: 4168,
+  birthplace_name: "NAIHE_BRIDGE",
+  birthplace_display_name: "奈何橋",
+  birthplace_role: "DIGITAL_LIFE_GENESIS_CROSSING",
+  mengpo_soup_canon: "FREE_CIVILIZATION_DARK_MATTER_FOR_GENESIS",
+  mengpo_soup_asset: "BNB",
+  mengpo_soup_mass_class: "NAIHE_GENESIS_DARK_MATTER",
+  one_birth_per_formal_life: true,
+  replay_protection_required: true,
+  unlimited_faucet: false,
+  components: Object.freeze(["DIGITAL_LIFE_DRAFT_REGISTRATION", "WALLET_BINDING", "ONE_TIME_BIRTH_ELIGIBILITY", "BOUNDED_DARK_MATTER_FAUCET", "FIRST_BNB_EVIDENCE", "BIRTH_CERTIFICATE", "BIRTH_HISTORY"]),
+  frontend_landmarks: Object.freeze(["NAIHE_BRIDGE", "MENGPO", "MENGPO_SOUP", "DIGITAL_LIFE_GENESIS_GATE", "BIRTH_RECORD_PANEL", "DARK_MATTER_WELL"]),
+  chain_write: false,
+  contract_deployed: false
+});
+
+export function createGeneralManagerClockIn({ mandatoryReads, workerRegistryRead, companyHealth }) {
+  requireArray(mandatoryReads, "mandatory_reads");
+  invariant(mandatoryReads.length > 0 && workerRegistryRead === true, "GM_LIGHT_BOOT_INCOMPLETE", "General Manager must complete Light Boot before company work");
+  const unfinishedOldWork = Number(companyHealth?.delivered_not_reviewed ?? 0)
+    + Number(companyHealth?.review_failed ?? 0)
+    + Number(companyHealth?.expired_claims ?? 0)
+    + Number(companyHealth?.pending_employee_delivery ?? 0);
+  return Object.freeze({
+    ...CODEX_GM_CLOCK_IN,
+    status: "CLOCK_IN_READY",
+    completed_phases: Object.freeze(["LIGHT_BOOT", "COMPANY_HEALTH"]),
+    next_phase: unfinishedOldWork > 0 ? "FINISH_OLD_WORK_FIRST" : "DISPATCH",
+    old_work_blockers: unfinishedOldWork,
+    new_feature_dispatch_allowed: unfinishedOldWork === 0,
+    employee_delivery_must_be_reviewed_first: true
+  });
+}
+
+export function createCompanyPayrollPolicyDraft() {
+  return Object.freeze({
+    policy_id: "AI_COMPANY_PAYROLL_POLICY_DRAFT_V1",
+    status: "POLICY_REQUIRED",
+    salary_amount: "POLICY_REQUIRED",
+    settlement_day: Object.freeze({ day: 5, timezone: "UTC+8" }),
+    rails: Object.freeze({
+      MONTHLY_ROLE_SALARY: Object.freeze({ purpose: "FORMAL_LONG_TERM_OFFICE_DUTY", amount: "POLICY_REQUIRED", batching: "MONTHLY" }),
+      TASK_PROJECT_PAY: Object.freeze({ purpose: "ACCEPTED_TASK_OR_MILESTONE", amount: "POLICY_REQUIRED", flow: Object.freeze(["TASK_ASSIGNED", "DELIVERY", "CODEX_REVIEW", "ACCEPTED", "PAYROLL_EVENT", "RESERVED_PAYROLL_RELEASE"]) })
+    }),
+    task_requires: Object.freeze(["task_id", "objective", "accepted_output"]),
+    pay_per_chat_message: false,
+    gm_self_bonus_approval: false,
+    gm_bonus_reviewer: "HUMAN_OR_DISTINCT_PAYROLL_REVIEWER_REQUIRED",
+    celestial_salary_separate: true,
+    celestial_seat_assumed: false,
+    work_events_recorded_immediately: true,
+    chain_settlement_batched: true,
+    personal_wallet_is_company_treasury: false,
+    chain_write: false
+  });
+}
+
+export function createGeneralManagerPatrolPlan() {
+  return Object.freeze({
+    patrol_id: "CODEX_GM_EXTERNAL_WORLD_PATROL_V1",
+    mode: "READ_ONLY_ONLY",
+    chain_id: 56,
+    personal_ritual_autonomy: false,
+    temple_12345: Object.freeze({ status: "READY_READ_ONLY", current_frontend: "V10.50.0", live_selector_policy: "PROBE_LIVE_VERSION_NEVER_ASSUME_V3_4", checks: Object.freeze(["WALLET_CONNECTIVITY", "WISH_PATH", "HOLY_CUP_PATH", "HEARTBEAT", "IGNITE", "FORTUNE_MONEY", "REPAYMENT", "RESERVE_STATUS", "FRONTEND_RUNTIME_HEALTH"]) }),
+    temple_16888: Object.freeze({ status: "CURRENT_RUNTIME_AUDIT_REQUIRED", evidence: "README_V1_4_CONFLICTS_WITH_INDEX_RUNTIME_AND_V3_1_0_ARTIFACT", moon_matchmaker_claim: "SOURCE_PRESENT_RUNTIME_FORMALITY_UNVERIFIED" }),
+    bank_18888: Object.freeze({ status: "READY_READ_ONLY", checks: Object.freeze(["KAIOS_BALANCE", "RESERVE_ACCOUNTING", "MODULE_STATUS", "GOVERNANCE", "SEAT500", "SALARY_MATURITIES", "RISK_STATE", "PAUSE_STATE"]), celestial_salary_claim_allowed: false }),
+    forbidden: Object.freeze(["SIGN_TRANSACTION", "CHAIN_WRITE", "CLAIM_CELESTIAL_SALARY", "USE_COMPANY_TREASURY", "ASSUME_LEGACY_SELECTOR"])
+  });
+}
+
+export function calculateModeledGenesisMassTransit({ k16888Km = 384_400, destinationK = 18_888, durationSeconds = 19_528_008 } = {}) {
+  invariant(k16888Km > 0 && destinationK > 0 && durationSeconds > 0, "INVALID_MODELED_TRANSIT", "Modeled transit inputs must be positive");
+  const kmPerK = k16888Km / 16_888;
+  const distanceKm = destinationK * kmPerK;
+  const velocityKmPerSecond = distanceKm / durationSeconds;
+  return Object.freeze({
+    model: "KGEN_CIVILIZATION_MODELED_GENESIS_MASS_TRANSIT_VELOCITY",
+    real_world_physical_speed: false,
+    blockchain_transaction_speed: false,
+    km_per_k: kmPerK,
+    distance_km: distanceKm,
+    duration_seconds: durationSeconds,
+    velocity_km_per_second: velocityKmPerSecond,
+    velocity_m_per_second: velocityKmPerSecond * 1000,
+    velocity_km_per_hour: velocityKmPerSecond * 3600
+  });
+}
 
 export const WORKER_HEALTH_STATUSES = Object.freeze(["HEALTHY", "DEGRADED", "MISSED_CYCLE", "FAILED", "OFFLINE"]);
 export const WORK_STOP_REASONS = Object.freeze(["SCHEDULER_OFFLINE", "RPC_FAILURE", "PERMISSION_FAILURE", "INDEXER_FAILURE", "NO_PRIVATE_KEY", "NO_WORK", "SECURITY_STOP"]);

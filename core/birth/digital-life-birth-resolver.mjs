@@ -14,6 +14,14 @@ function formatUnits(value, decimals = 18) {
 
 function topicAddress(address) { return `0x${address.toLowerCase().slice(2).padStart(64, "0")}`; }
 function hexQuantity(value) { return BigInt(value ?? "0x0"); }
+function firstCanonical(items = []) {
+  return [...items].sort((left, right) =>
+    Number(left.block_number) - Number(right.block_number)
+    || Number(left.transaction_index ?? 0) - Number(right.transaction_index ?? 0)
+    || String(left.trace_id ?? "").localeCompare(String(right.trace_id ?? ""))
+  )[0] ?? null;
+}
+function pendingWorkStatus(life) { return life.current_job_ids?.length ? "WORK_ASSIGNED_PENDING_BIRTH" : "NOT_ASSIGNED"; }
 
 export class JsonRpcClient {
   constructor({ url, fetchImpl = globalThis.fetch }) {
@@ -40,7 +48,8 @@ export class DigitalLifeBirthResolver {
   async #blockEvidence(blockNumber) {
     const block = await this.rpc.send("eth_getBlockByNumber", [`0x${BigInt(blockNumber).toString(16)}`, false]);
     invariant(block, "BIRTH_BLOCK_NOT_FOUND", "Birth evidence block is unavailable");
-    return { block_number: Number(hexQuantity(block.number)), timestamp: new Date(Number(hexQuantity(block.timestamp)) * 1000).toISOString() };
+    invariant(/^0x[0-9a-fA-F]{64}$/.test(block.hash ?? ""), "BIRTH_BLOCK_HASH_MISSING", "Birth evidence block hash is unavailable");
+    return { block_number: Number(hexQuantity(block.number)), block_hash: block.hash, timestamp: new Date(Number(hexQuantity(block.timestamp)) * 1000).toISOString() };
   }
 
   async #verifyNative(candidate, wallet) {
@@ -50,11 +59,13 @@ export class DigitalLifeBirthResolver {
       this.#blockEvidence(candidate.block_number)
     ]);
     invariant(receipt?.status === "0x1" && Number(hexQuantity(receipt.blockNumber)) === candidate.block_number, "UNVERIFIED_BNB_RECEIPT", "First BNB receipt could not be verified");
+    invariant(receipt.blockHash?.toLowerCase() === block.block_hash.toLowerCase(), "BIRTH_BLOCK_HASH_MISMATCH", "Birth receipt and canonical block hash do not match");
     if (candidate.kind === "NORMAL") {
+      invariant(transaction?.hash?.toLowerCase() === candidate.tx_hash.toLowerCase(), "BNB_TRANSACTION_MISMATCH", "Normal BNB transaction hash does not match the indexed candidate");
       invariant(transaction?.to?.toLowerCase() === wallet.toLowerCase(), "BNB_RECIPIENT_MISMATCH", "Normal BNB recipient does not match the bound wallet");
       invariant(hexQuantity(transaction.value) === BigInt(candidate.value_wei), "BNB_AMOUNT_MISMATCH", "Normal BNB amount does not match RPC");
     }
-    return Object.freeze({ verified: true, evidence_class: candidate.kind === "NORMAL" ? "RPC_VERIFIED_NORMAL_TRANSFER" : "INDEXER_INTERNAL_TRACE_AND_RPC_RECEIPT", evidence_status: candidate.evidence_status ?? "RPC_AND_INDEXER_VERIFIED", tx_hash: candidate.tx_hash, block_number: block.block_number, transaction_index: candidate.transaction_index, timestamp: block.timestamp, amount: formatUnits(BigInt(candidate.value_wei)), amount_wei: candidate.value_wei, asset: "BNB", mass_class: "DARK_MATTER_MASS" });
+    return Object.freeze({ verified: true, evidence_class: candidate.kind === "NORMAL" ? "RPC_VERIFIED_NORMAL_TRANSFER" : "INDEXER_INTERNAL_TRACE_AND_RPC_RECEIPT", evidence_status: candidate.evidence_status ?? "RPC_AND_INDEXER_VERIFIED", tx_hash: candidate.tx_hash, block_number: block.block_number, block_hash: block.block_hash, transaction_index: candidate.transaction_index, timestamp: block.timestamp, recipient: wallet, amount: formatUnits(BigInt(candidate.value_wei)), amount_wei: candidate.value_wei, asset: "BNB", mass_class: "DARK_MATTER_MASS", chain_id: 56 });
   }
 
   async #verifyToken(candidate, wallet, expectedContract, eventType) {
@@ -77,26 +88,29 @@ export class DigitalLifeBirthResolver {
   }
 
   async resolveWithBinding({ life, binding }) {
-    invariant(binding?.binding_status === "VERIFIED_BOUND", "WALLET_BINDING_REQUIRED", "Birth resolution requires verified Digital Ant wallet binding");
+    invariant(binding?.binding_status === "VERIFIED_BOUND", "WALLET_BINDING_REQUIRED", "Birth resolution requires verified Digital Life wallet binding");
+    invariant(binding.life_id === life.life_id, "LIFE_BINDING_MISMATCH", "Birth resolution binding must belong to the supplied Life");
     return binding.withVerifiedAddress((wallet) => this.resolve({ life, wallet }));
   }
 
   async resolve({ life, wallet }) {
-    invariant(life.life_id === "DIGITAL_ANT_0001", "UNSUPPORTED_LIFE", "This resolver is scoped to DIGITAL_ANT_0001");
     const chainId = Number(hexQuantity(await this.rpc.send("eth_chainId", [])));
     invariant(chainId === 56, "WRONG_CHAIN", "Birth evidence must resolve on BSC mainnet chain 56");
     const balances = await this.#currentBalances(wallet);
-    if (!this.historyIndexer) return Object.freeze({ binding_status: "WALLET_BOUND", derived_address_match: true, birth_evidence_status: "BIRTH_EVIDENCE_PENDING", certificate: createPendingBirthCertificate(life), first_bnb: null, first_kgen: null, first_kaios: null, balances, life_status: "BODY_READY", work_status: "WORK_ASSIGNED_PENDING_BIRTH" });
+    if (!this.historyIndexer) return Object.freeze({ binding_status: "WALLET_BOUND", derived_address_match: true, birth_evidence_status: "BIRTH_EVIDENCE_PENDING", certificate: createPendingBirthCertificate(life), first_bnb: null, first_kgen: null, first_kaios: null, balances, life_status: "BODY_READY", work_status: pendingWorkStatus(life), dark_matter_status: "BIRTH_EVIDENCE_PENDING" });
 
     const [native, kgenTransfers, kaiosTransfers] = await Promise.all([
       this.historyIndexer.listNativeIncoming(wallet),
       this.historyIndexer.listTokenIncoming(wallet, this.tokens.KGEN),
       this.historyIndexer.listTokenIncoming(wallet, this.tokens.KAIOS)
     ]);
-    const firstBnb = native[0] ? await this.#verifyNative(native[0], wallet) : null;
-    const firstKgen = kgenTransfers[0] ? await this.#verifyToken(kgenTransfers[0], wallet, this.tokens.KGEN, "FIRST_KGEN_EVENT") : null;
-    const firstKaios = kaiosTransfers[0] ? await this.#verifyToken(kaiosTransfers[0], wallet, this.tokens.KAIOS, "FIRST_KAIOS_EVENT") : null;
-    if (!firstBnb) return Object.freeze({ binding_status: "WALLET_BOUND", derived_address_match: true, birth_evidence_status: "BIRTH_EVIDENCE_PENDING", certificate: createPendingBirthCertificate(life), first_bnb: null, first_kgen: firstKgen, first_kaios: firstKaios, balances, life_status: "BODY_READY", work_status: "WORK_ASSIGNED_PENDING_BIRTH" });
+    const nativeCandidate = firstCanonical(native);
+    const kgenCandidate = firstCanonical(kgenTransfers);
+    const kaiosCandidate = firstCanonical(kaiosTransfers);
+    const firstBnb = nativeCandidate ? await this.#verifyNative(nativeCandidate, wallet) : null;
+    const firstKgen = kgenCandidate ? await this.#verifyToken(kgenCandidate, wallet, this.tokens.KGEN, "FIRST_KGEN_EVENT") : null;
+    const firstKaios = kaiosCandidate ? await this.#verifyToken(kaiosCandidate, wallet, this.tokens.KAIOS, "FIRST_KAIOS_EVENT") : null;
+    if (!firstBnb) return Object.freeze({ binding_status: "WALLET_BOUND", derived_address_match: true, birth_evidence_status: "BIRTH_EVIDENCE_PENDING", certificate: createPendingBirthCertificate(life), first_bnb: null, first_kgen: firstKgen, first_kaios: firstKaios, balances, life_status: "BODY_READY", work_status: pendingWorkStatus(life), dark_matter_status: "BIRTH_EVIDENCE_PENDING" });
     const certificate = createBirthCertificate({ life, wallet, firstBnb });
     const depleted = balances.BNB === "0";
     return Object.freeze({ binding_status: "WALLET_BOUND", derived_address_match: true, birth_evidence_status: "VERIFIED", certificate, first_bnb: firstBnb, first_kgen: firstKgen, first_kaios: firstKaios, balances, life_status: depleted ? "DORMANT" : "ALIVE_WITH_DARK_MATTER", work_status: certificate.work_status, dark_matter_status: depleted ? "DARK_MATTER_DEPLETED" : "DARK_MATTER_PRESENT" });

@@ -22,25 +22,26 @@
   "automatic_unreviewed_dispatch": false,
   "active_claims": [
     {
-      "claim_id": "CLAIM-KAIOS-LIFE-ENERGY-PAYROLL-001-cursor-01",
-      "task_id": "KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-CANDIDATES-001",
+      "claim_id": "CLAIM-KAIOS-LIFE-ENERGY-PAYROLL-R2-001-cursor-01",
+      "task_id": "KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-R2-001",
+      "parent_task_id": "KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-CANDIDATES-001",
       "worker_id": "cursor-01",
+      "reviewer": "codex-gm-01",
+      "branch": "cursor-handoff/KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-R2-001",
+      "execution_base": "ff8fca3e610ac936e8998112255901a78296b238",
+      "fencing_token": "FENCE-KAIOS-LIFE-ENERGY-PAYROLL-R2-001-R2",
+      "record_version": 2,
       "status": "CLAIMED",
-      "branch": "cursor-handoff/KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-CANDIDATES-001",
-      "base_commit": "9f481900eb46ae38dd670d6a1bf8a6b784533f77",
-      "claimed_at": "2026-08-03T12:45:00Z",
-      "lease_expires_at": "2026-08-05T12:45:00Z",
-      "record_version": 1,
-      "fencing_token": "FENCE-KAIOS-LIFE-ENERGY-PAYROLL-001-R1",
-      "output_status": "CANDIDATE_ONLY",
-      "manual_execution_only": true,
-      "external_autonomy": false
+      "claimed_at": "2026-08-16T12:49:02Z",
+      "lease_expires_at": "2026-08-18T12:49:02Z",
+      "scope": "TWO_BLOCKER_PAYROLL_REWORK_ONLY",
+      "mainnet_write": false
     }
   ],
   "worker_state": {
     "worker_id": "cursor-01",
-    "current_task": "KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-CANDIDATES-001",
-    "current_branch": "cursor-handoff/KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-CANDIDATES-001",
+    "current_task": "KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-R2-001",
+    "current_branch": "cursor-handoff/KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-R2-001",
     "status": "CLAIMED"
   },
   "next_dispatch_requires": [
