@@ -1260,12 +1260,18 @@ The deterministic simulation at `world-viewer/creator-marketplace/` connects one
 - Specification owner: `KAIOS/marketplace/creator-marketplace/`
 - Safety: simulation only; no real wallet, KGEN, on-chain transfer, silent mint or external autonomy.
 
-## 11520 Universal Exchange V3.6
+## 11520 Universal Exchange V3.9
 
 The public 11520 entry now hosts the multilingual Digital Ant civilization gateway and
 an evidence-derived hourly Life Worker. Voice begins only after a user gesture and always
 falls back to Text. Shared Work status comes from Git-backed append-only snapshots;
 browser IndexedDB is local draft/cache only.
+
+V3.9 adds an autonomous CFO field-service patrol after the WUKONG_GATEKEEPER duty.
+It scans existing K280/Universe Map nodes for cash logistics, KUFO supply, waste collection
+and delivery demand, then applies route, energy, cost, profit, delivery and workforce gates.
+No verified inventory or cargo request currently exists, so Field Jobs, Revenue and First
+KAIOS remain zero; no route, worker, vehicle or settlement is fabricated.
 
 V3.5 enforces `WUKONG_GATEKEEPER` as the primary job before CFO and Company work,
 separates the operational Core Heart Event Indexer from optional advanced graph analysis,

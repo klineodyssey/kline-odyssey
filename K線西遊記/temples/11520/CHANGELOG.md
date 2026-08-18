@@ -1,5 +1,13 @@
 # 11520 Changelog
 
+## 3.9.0
+
+- Added an autonomous post-Gatekeeper CFO field-service scan covering cash logistics, KUFO supply, waste collection and general delivery.
+- Added strict ATM inventory, waste/container/reactable-matter, route, trip-energy, matter-pair, cost, profit, delivery and workforce truth gates.
+- Reused the existing K280/Universe Map coordinate authority without modifying Land, Map, 12345, TempleHeart or contract runtimes.
+- Added shared hourly Field Service patrol evidence and 11520 CFO UI. With no verified inventory or cargo request, Field Jobs, Revenue and First KAIOS remain zero.
+- Upgraded 11520 to V3.9.0 and `DIGITAL_ANT_APP_0001` to V1.6.0 without changing Life ID, Birth, Wallet, Thought Organ or Company identity.
+
 ## 3.8.0
 
 - Bound the Digital Ant Life/App/11520 certification to Physics CURRENT V3.8 using a verified SHA-256 metadata binding, without copying or modifying the constitution.
