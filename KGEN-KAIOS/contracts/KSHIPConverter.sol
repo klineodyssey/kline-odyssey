@@ -1,13 +1,15 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.24;
 
+import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
+
 interface IKUFOCarrierBurnable {
-    function burnForCarrier(
+    function burnMaturedDecayForCarrier(
         address owner,
         address beneficiary,
-        uint256 kufoAmount,
+        uint256 maximumKufoAmount,
         bytes32 carrierProofId
-    ) external returns (uint256 expectedKship);
+    ) external returns (uint256 kufoBurned, uint256 expectedKship);
 }
 
 interface IKSHIPMinter {
@@ -16,9 +18,9 @@ interface IKSHIPMinter {
 
 /**
  * @title KSHIPConverter
- * @notice Holder-authorized KUFO burn to KSHIP carrier accounting conversion.
+ * @notice Holder-authorized conversion of newly matured KUFO decay into KSHIP.
  */
-contract KSHIPConverter {
+contract KSHIPConverter is ReentrancyGuard {
     IKUFOCarrierBurnable public immutable kufo;
     IKSHIPMinter public immutable kship;
     uint256 public conversionCount;
@@ -37,17 +39,23 @@ contract KSHIPConverter {
         kship = IKSHIPMinter(kshipToken);
     }
 
-    function convert(uint256 kufoAmount, address beneficiary)
+    function convert(uint256 maximumKufoAmount, address beneficiary)
         external
-        returns (bytes32 proofId, uint256 kshipAmount)
+        nonReentrant
+        returns (bytes32 proofId, uint256 kufoBurned, uint256 kshipAmount)
     {
         uint256 number = ++conversionCount;
         proofId = keccak256(
-            abi.encode(block.chainid, address(this), number, msg.sender, beneficiary, kufoAmount)
+            abi.encode(block.chainid, address(this), number, msg.sender, beneficiary, maximumKufoAmount)
         );
-        kshipAmount = kufo.burnForCarrier(msg.sender, beneficiary, kufoAmount, proofId);
+        (kufoBurned, kshipAmount) = kufo.burnMaturedDecayForCarrier(
+            msg.sender,
+            beneficiary,
+            maximumKufoAmount,
+            proofId
+        );
         (address verifiedBeneficiary, uint256 verifiedAmount) = kship.mintFromCarrierProof(proofId);
         require(verifiedBeneficiary == beneficiary && verifiedAmount == kshipAmount, "LINEAGE_MISMATCH");
-        emit KSHIPConversion(proofId, msg.sender, beneficiary, kufoAmount, kshipAmount);
+        emit KSHIPConversion(proofId, msg.sender, beneficiary, kufoBurned, kshipAmount);
     }
 }

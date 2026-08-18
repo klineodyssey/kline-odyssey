@@ -45,6 +45,7 @@ contract KAIOS is ERC20, ERC20Capped {
     uint256 public constant KGEN_GENESIS_SUPPLY = 72_000_000 ether;
     uint256 public constant KAIOS_PER_KGEN = 1_000;
     uint256 public constant KUFO_PER_KAIOS = 1_000;
+    uint256 public constant KAIOS_WEI_PER_KGEN_CATALYST_WEI = 1_000;
 
     uint256 public constant KGEN_KILOGRAMS_PER_TOKEN = 1_000;
     uint256 public constant KAIOS_KILOGRAMS_PER_TOKEN = 1;
@@ -85,6 +86,9 @@ contract KAIOS is ERC20, ERC20Capped {
         bytes32 destinationCode;
         uint256 blockNumber;
         uint256 timestamp;
+        // Appended to preserve the deployed V1 proof-reader ABI prefix.
+        address catalystOwner;
+        uint256 requiredKgenCatalyst;
     }
 
     mapping(bytes32 => AlchemyBurnRecord) private _alchemyBurnRecords;
@@ -97,6 +101,8 @@ contract KAIOS is ERC20, ERC20Capped {
     error NothingToSettle(uint256 actualBurned, uint256 alreadySettled);
     error OnlyOfficialAlchemyFurnace(address caller);
     error InsufficientHolderAllowance(uint256 currentAllowance, uint256 requiredAllowance);
+    error InexactKgenCatalystRatio(uint256 kaiosAmount);
+    error IncorrectKgenCatalyst(uint256 provided, uint256 required);
 
     event WhiteHoleMassSettled(
         uint256 indexed settlementNumber,
@@ -112,9 +118,11 @@ contract KAIOS is ERC20, ERC20Capped {
         uint256 indexed burnNumber,
         bytes32 indexed alchemyProofId,
         address indexed owner,
+        address catalystOwner,
         address beneficiary,
         address furnace,
         uint256 kaiosBurned,
+        uint256 requiredKgenCatalyst,
         uint256 expectedKufo,
         bytes32 lifeId,
         bytes32 destinationCode
@@ -191,8 +199,10 @@ contract KAIOS is ERC20, ERC20Capped {
 
     function burnForAlchemy(
         address owner,
+        address catalystOwner,
         address beneficiary,
         uint256 kaiosAmount,
+        uint256 requiredKgenCatalyst,
         bytes32 lifeId,
         bytes32 destinationCode
     )
@@ -203,8 +213,17 @@ contract KAIOS is ERC20, ERC20Capped {
         if (msg.sender != currentFurnace || currentFurnace == address(0)) {
             revert OnlyOfficialAlchemyFurnace(msg.sender);
         }
-        if (owner == address(0) || beneficiary == address(0)) revert ZeroAddress();
+        if (owner == address(0) || catalystOwner == address(0) || beneficiary == address(0)) {
+            revert ZeroAddress();
+        }
         if (kaiosAmount == 0) revert ZeroAmount();
+        if (kaiosAmount % KAIOS_WEI_PER_KGEN_CATALYST_WEI != 0) {
+            revert InexactKgenCatalystRatio(kaiosAmount);
+        }
+        uint256 exactCatalyst = kaiosAmount / KAIOS_WEI_PER_KGEN_CATALYST_WEI;
+        if (requiredKgenCatalyst != exactCatalyst) {
+            revert IncorrectKgenCatalyst(requiredKgenCatalyst, exactCatalyst);
+        }
 
         uint256 currentAllowance = allowance(owner, msg.sender);
         if (currentAllowance < kaiosAmount) {
@@ -223,10 +242,13 @@ contract KAIOS is ERC20, ERC20Capped {
                 address(this),
                 burnNumber,
                 owner,
+                catalystOwner,
                 beneficiary,
                 kaiosAmount,
+                requiredKgenCatalyst,
                 lifeId,
-                destinationCode
+                destinationCode,
+                msg.sender
             )
         );
 
@@ -244,16 +266,20 @@ contract KAIOS is ERC20, ERC20Capped {
             lifeId: lifeId,
             destinationCode: destinationCode,
             blockNumber: block.number,
-            timestamp: block.timestamp
+            timestamp: block.timestamp,
+            catalystOwner: catalystOwner,
+            requiredKgenCatalyst: requiredKgenCatalyst
         });
 
         emit KAIOSBurnedForAlchemy(
             burnNumber,
             alchemyProofId,
             owner,
+            catalystOwner,
             beneficiary,
             msg.sender,
             kaiosAmount,
+            requiredKgenCatalyst,
             expectedKufo,
             lifeId,
             destinationCode

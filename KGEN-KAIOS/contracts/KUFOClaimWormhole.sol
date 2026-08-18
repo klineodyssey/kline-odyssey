@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.24;
 
+import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
+
 interface IAlchemyProofFurnace {
     function consumeMaturedProof(bytes32 proofId)
         external
@@ -15,7 +17,7 @@ interface IKUFOMinter {
  * @title KUFOClaimWormhole
  * @notice Point 511111 claim organ. Callers cannot redirect the burn-time beneficiary.
  */
-contract KUFOClaimWormhole {
+contract KUFOClaimWormhole is ReentrancyGuard {
     IAlchemyProofFurnace public immutable furnace;
     IKUFOMinter public immutable kufo;
 
@@ -27,7 +29,7 @@ contract KUFOClaimWormhole {
         kufo = IKUFOMinter(kufoToken);
     }
 
-    function claim(bytes32 proofId) external returns (address beneficiary, uint256 kufoAmount) {
+    function claim(bytes32 proofId) external nonReentrant returns (address beneficiary, uint256 kufoAmount) {
         (beneficiary, kufoAmount) = furnace.consumeMaturedProof(proofId);
         (address verifiedBeneficiary, uint256 verifiedAmount) = kufo.mintFromMaturedProof(proofId);
         require(verifiedBeneficiary == beneficiary && verifiedAmount == kufoAmount, "LINEAGE_MISMATCH");

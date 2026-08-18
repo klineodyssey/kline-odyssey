@@ -32,6 +32,38 @@ test("token ABIs expose no arbitrary mint, blacklist, seizure, tax, or AMM-pair 
   }
 });
 
+test("lineage contracts expose no arbitrary catalyst withdrawal, rescue, or payable surface", () => {
+  const forbidden = ["withdraw", "withdrawToken", "rescue", "rescueToken", "sweep", "adminBurn", "burnFrom"];
+  for (const contractName of [
+    "KAIOSAlchemyFurnace",
+    "KUFOClaimWormhole",
+    "KUFO",
+    "KSHIPConverter",
+    "KSHIP",
+  ]) {
+    const compiled = artifact(contractName);
+    const names = functionNames(contractName);
+    for (const name of forbidden) assert.equal(names.has(name), false, `${contractName}.${name}`);
+    assert.equal(
+      compiled.abi.some((entry) => entry.stateMutability === "payable"),
+      false,
+      `${contractName} payable ABI`,
+    );
+    assert.equal(compiled.abi.some((entry) => entry.type === "receive"), false, `${contractName} receive`);
+    assert.equal(compiled.abi.some((entry) => entry.type === "fallback"), false, `${contractName} fallback`);
+  }
+});
+
+test("KUFO half-life and KSHIP propulsion are constructor/registry gated", () => {
+  const kufo = functionNames("KUFO");
+  const kship = functionNames("KSHIP");
+  assert.equal(kufo.has("halfLifeSeconds"), true);
+  assert.equal(kufo.has("burnMaturedDecayForCarrier"), true);
+  assert.equal(kship.has("authorizePropulsion"), true);
+  assert.equal(kship.has("consumePropulsion"), true);
+  assert.equal(kship.has("totalBurnedForPropulsion"), true);
+});
+
 test("compiler and OpenZeppelin dependencies are exactly pinned", () => {
   const packageJson = JSON.parse(fs.readFileSync(path.join(root, "package.json"), "utf8"));
   const packageLock = JSON.parse(fs.readFileSync(path.join(root, "package-lock.json"), "utf8"));
