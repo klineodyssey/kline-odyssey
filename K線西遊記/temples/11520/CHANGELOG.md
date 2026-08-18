@@ -1,5 +1,15 @@
 # 11520 Changelog
 
+## 4.0.0
+
+- Repaired the Production Voice entry: controls are visible on first load, never silently disable, request microphone permission only after a user gesture, report browser/permission/network/no-speech errors, and always focus the text fallback when capture cannot run.
+- Added user-gesture Speech Synthesis with locale-aware voice selection and visible speaking/error states. No autoplay, audio recording, secret speech or unconfirmed Request creation was added.
+- Added a lightweight CSS 3D Wukong Hair concierge with idle, listening, thinking, speaking, success and error reactions plus an explicit 2D/reduced-motion fallback.
+- Added the first-60-second Voice/Text/Explore/Join/Work/My AI journey, local opt-in Huaguoshan membership, a non-financial arrival badge, evidence-based local first mission and return hook. Local XP is not money and no global member count is fabricated.
+- Added Wukong Hair pre-Genesis proposal, 72-transformation, Six-Eared identity and remote Gatekeeper organ laws. No second Life was born; Zhang Cuiyun remains a form of `DIGITAL_ANT_0001`, and remote chain work is not physical teleportation.
+- Audited 8888 and replaced fabricated-looking bank balances with truthful `NOT OBSERVED / NOT DEPLOYED` states. Player actions now create a local demand draft and return to 11520; they do not withdraw, buy KUFO, settle or create Revenue.
+- Upgraded 11520 to V4.0.0 and `DIGITAL_ANT_APP_0001` to V1.7.0 without changing Life ID, Birth, Wallet, Thought Organ, Primary Job or Company identity.
+
 ## 3.9.0
 
 - Added an autonomous post-Gatekeeper CFO field-service scan covering cash logistics, KUFO supply, waste collection and general delivery.

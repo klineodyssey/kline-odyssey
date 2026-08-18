@@ -5,9 +5,10 @@ import {
   confirmPublicCivilizationIntent, toPublicCivilizationRequest,
   routePublicCivilizationProject, qualifyPublicCivilizationRequest, createNonBindingEstimatePreview,
   appendPublicRequestHistoryEvent, I18N_SUPPORTED_LOCALES, translateUi, normalizeUiLocale,
-  validatePrimaryI18nCatalogs, detectVoiceCapabilities, deriveWorkerHealth
-} from "../../../core/index.mjs?v=11520-v3.9-autonomous-field-service";
-import { readTempleHeart12345 } from "../../../core/integrations/temple-heart-12345.mjs?v=11520-v3.9-autonomous-field-service";
+  validatePrimaryI18nCatalogs, detectVoiceCapabilities, deriveWorkerHealth, normalizeVoiceError,
+  createLocalHuaguoshanMembership, createFirstPlayerMission, completeFirstPlayerMission
+} from "../../../core/index.mjs?v=11520-v4.0-player-first";
+import { readTempleHeart12345 } from "../../../core/integrations/temple-heart-12345.mjs?v=11520-v4.0-player-first";
 
 const NAVIGATION = Object.freeze([
   ["HOME", "navigation.home"], ["REQUEST", "navigation.request"], ["LIFE", "navigation.life"], ["LIFE_FACTORY", "LIFE FACTORY"], ["APPS", "navigation.apps"], ["COMPANIES", "navigation.company"],
@@ -27,6 +28,23 @@ let voiceLocale = localStorage.getItem("11520.voiceLocale") || ({ "zh-TW": "zh-T
 let sharedWorkerStatus = null;
 const voiceCapabilities = detectVoiceCapabilities(globalThis);
 const t = (key) => translateUi(key, uiLocale);
+const PLAYER_PROFILE_KEY = "11520.huaguoshanMember.v4";
+const PLAYER_MISSION_KEY = "11520.firstMission.v4";
+const PLAYER_METRICS_KEY = "11520.playerMetrics.v4";
+let activeRecognition = null;
+
+function readLocalJson(key, fallback = null) {
+  try { return JSON.parse(localStorage.getItem(key)) ?? fallback; } catch { return fallback; }
+}
+
+function writeLocalJson(key, value) { localStorage.setItem(key, JSON.stringify(value)); return value; }
+
+function recordLocalPlayerMetric(name) {
+  const metrics = readLocalJson(PLAYER_METRICS_KEY, {});
+  metrics[name] = Number(metrics[name] ?? 0) + 1;
+  writeLocalJson(PLAYER_METRICS_KEY, metrics);
+  return metrics[name];
+}
 
 function html(value) {
   return String(value ?? "").replace(/[&<>'"]/g, (character) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" })[character]);
@@ -141,6 +159,41 @@ function hero(eyebrow, title, description) {
   return `<section class="hero"><div class="eyebrow">${html(eyebrow)}</div><h1>${html(title)}</h1><p>${html(description)}</p></section>`;
 }
 
+function conciergeAvatarMarkup() {
+  return `<div class="concierge-stage" aria-label="Wukong Hair animated concierge">
+    <div class="concierge-avatar" id="concierge-avatar" data-state="IDLE" role="img" aria-label="Animated Wukong Hair concierge, idle">
+      <div class="avatar-aura"></div><div class="avatar-tail"></div><div class="avatar-head"><span class="avatar-ear left"></span><span class="avatar-ear right"></span><span class="avatar-eye left"></span><span class="avatar-eye right"></span><span class="avatar-mouth"></span><span class="avatar-crown">毛</span></div><div class="avatar-body"><span class="avatar-heart"></span></div>
+    </div><div class="avatar-shadow"></div><p id="concierge-character-state" class="muted">IDLE · CSS 3D / 2D FALLBACK</p>
+  </div>`;
+}
+
+function playerFirstMarkup() {
+  const member = readLocalJson(PLAYER_PROFILE_KEY);
+  const mission = readLocalJson(PLAYER_MISSION_KEY);
+  const returning = Boolean(member);
+  const welcome = returning
+    ? (uiLocale === "zh-TW" ? `${member.display_name}，歡迎回來。昨天的任務是 ${mission?.status ?? "尚未開始"}，今天要繼續嗎？` : `Welcome back, ${member.display_name}. Your mission is ${mission?.status ?? "not started"}. Continue today?`)
+    : `${t("player.welcome")} ${t("player.prompt")}`;
+  return `<section class="player-first card">
+    ${conciergeAvatarMarkup()}
+    <div class="concierge-copy"><div class="eyebrow">WUKONG HAIR LIFE · PLAYER FIRST V4.0</div><h1>${html(welcome)}</h1><p>${html(uiLocale === "zh-TW" ? "先說出夢想；我會理解、確認、規劃，不會用畫面假裝完成。" : "Tell me the dream first. I will understand, confirm and plan it without pretending it is complete.")}</p>
+      <label class="sr-only" for="home-concierge-text">${html(t("request.cta"))}</label><textarea id="home-concierge-text" rows="3" maxlength="4000" placeholder="${html(t("request.cta"))}"></textarea>
+      <div class="first-actions">
+        <button class="button voice-start" type="button" data-target="#home-concierge-text">🎙 ${html(t("voice.start"))}</button>
+        <button class="button secondary voice-stop" type="button" disabled>${html(t("voice.stop"))}</button>
+        <button class="button secondary voice-speak" type="button" data-speech="welcome">🔊 ${html(uiLocale === "zh-TW" ? "聽螞蟻說話" : "Hear the Ant")}</button>
+        <button class="button" id="home-text-continue" type="button">✍ TEXT</button>
+        <a class="button secondary" id="explore-8888" href="../8888/index.html">🧭 ${html(t("player.explore"))}</a>
+        <button class="button secondary" id="join-civilization" type="button">🏔 ${html(t("player.join"))}</button>
+        <a class="button secondary" href="#/JOBS">🛠 ${html(t("player.work"))}</a>
+        <a class="button secondary" href="#/MY_LIFE">✨ ${html(t("player.myAi"))}</a>
+      </div>
+      <p class="voice-state" id="home-voice-status" role="status">${html(voiceCapabilities.recognition ? "VOICE_READY · USER_GESTURE_REQUIRED" : `${t("voice.unavailable")} · ${t("voice.textFallback")}`)}</p>
+      <div id="join-panel" class="join-panel" ${member ? "" : "hidden"}>${member ? `<strong>${html(member.display_name)}</strong> · ${badge(member.tier)} · ${badge(member.badge.name)}<p>NON-FINANCIAL · ${html(member.badge.nft_status)} · LOCAL PROFILE</p><button class="button secondary" id="start-first-mission" type="button">${html(t("player.firstMission"))}: ${html(mission?.status ?? "START")}</button>` : ""}</div>
+    </div>
+  </section>`;
+}
+
 async function homeView() {
   const [lives, species, assets, companies, listings] = await Promise.all([
     universe.registries.life.list(), universe.registries.species.list(), universe.registries.asset.list(),
@@ -155,7 +208,7 @@ async function homeView() {
     ["KGEN AMM", "USER WALLET LIVE", "Runtime-verified PancakeSwap V2 pair"],
     ["11520 settlement", "MAINNET CONTRACT", "Adapter not integrated; no fabricated settlement"]
   ];
-  return `${hero("K11520 · UNIVERSAL MARKET RUNTIME V3.9", uiLocale === "zh-TW" ? "文明資產的公開市場與生命工廠。" : "A public market and Life Factory for civilization assets.", uiLocale === "zh-TW" ? "DIGITAL_ANT_0001 先守門，再由 CFO 掃描真實現場需求；沒有證據就沒有訂單。" : "DIGITAL_ANT_0001 guards first, then its CFO scans verified field demand; no evidence means no job.")}
+  return `${playerFirstMarkup()}${hero("K11520 · PLAYER FIRST RUNTIME V4.0", uiLocale === "zh-TW" ? "文明資產的公開市場與生命工廠。" : "A public market and Life Factory for civilization assets.", uiLocale === "zh-TW" ? "DIGITAL_ANT_0001 先守門，再照顧玩家、掃描真實需求；沒有證據就沒有訂單。" : "DIGITAL_ANT_0001 guards first, then helps players and scans verified demand; no evidence means no job.")}
     <a class="card gateway-cta" href="#/REQUEST"><div><div class="eyebrow">${html(t("request.title"))}</div><h2>${html(t("request.cta"))}</h2><p>DRAFT → UNDERSTAND → CONFIRM → REQUEST</p></div><span aria-hidden="true">→</span></a>
     ${section(t("status.title"), workerStatusMarkup())}
     ${section("CFO FIELD SERVICE BUSINESS", fieldServiceMarkup())}
@@ -216,7 +269,7 @@ async function publicRequestGatewayView() {
       <div class="field full"><label for="gateway-request-text">What do you need?</label><textarea id="gateway-request-text" required maxlength="4000" rows="6" placeholder="我要…… / I need…"></textarea></div>
       <div class="field full"><label for="gateway-ideal">Customer Ideal — beauty, creativity, emotion, style, performance, budget or reliability preferences</label><textarea id="gateway-ideal" maxlength="2000" rows="3" placeholder="Optional: tell us what would make the result feel right, not merely functional."></textarea></div>
       <div class="full"><button class="button" type="submit">AI UNDERSTAND</button> <span id="gateway-draft-result" class="muted" role="status"></span></div>
-    </form><article class="card voice-console"><div class="eyebrow">${html(t("voice.title"))}</div><h3>${badge(voiceCapabilities.recognition ? "READY" : "VOICE_CAPTURE_UNAVAILABLE")}</h3><p>${html(t("request.cta"))}</p><div class="field"><label for="voice-language">Voice language</label><select id="voice-language"><option value="zh-TW">繁中</option><option value="en-US">English</option><option value="ja-JP">日本語</option><option value="ko-KR">한국어</option></select></div><div class="voice-actions"><button class="button" id="voice-start" type="button">${html(t("voice.start"))}</button><button class="button secondary" id="voice-stop" type="button" disabled>${html(t("voice.stop"))}</button><button class="button secondary" id="voice-speak" type="button" disabled>READ AI UNDERSTANDING</button></div><p id="voice-status" class="muted" role="status">${html(voiceCapabilities.recognition ? "USER_GESTURE_REQUIRED" : `${t("voice.unavailable")} · ${t("voice.textFallback")}`)}</p>${kv("Autoplay", "DISABLED")}${kv("Speech output", voiceCapabilities.synthesis ? "READY_AFTER_USER_ACTION" : "UNAVAILABLE")}${kv("Private data speech", "FORBIDDEN")}</article></div>`)}
+    </form><article class="card voice-console"><div class="eyebrow">${html(t("voice.title"))}</div><h3>${badge(voiceCapabilities.recognition ? "READY" : "VOICE_CAPTURE_UNAVAILABLE_TEXT_READY")}</h3><p>${html(t("request.cta"))}</p><div class="field"><label for="voice-language">Voice language</label><select id="voice-language"><option value="zh-TW">繁中</option><option value="en-US">English</option><option value="ja-JP">日本語</option><option value="ko-KR">한국어</option></select></div><div class="voice-actions"><button class="button voice-start" type="button" data-target="#gateway-request-text">${html(t("voice.start"))}</button><button class="button secondary voice-stop" type="button" disabled>${html(t("voice.stop"))}</button><button class="button secondary voice-speak" type="button" data-speech="understanding">READ AI UNDERSTANDING</button></div><p class="voice-state muted" role="status">${html(voiceCapabilities.recognition ? "USER_GESTURE_REQUIRED" : `${t("voice.unavailable")} · ${t("voice.textFallback")}`)}</p>${kv("Autoplay", "DISABLED")}${kv("Speech output", voiceCapabilities.synthesis ? "READY_AFTER_USER_ACTION" : "VOICE_OUTPUT_UNAVAILABLE")}${kv("Private data speech", "FORBIDDEN")}</article></div>`)}
     ${section("AI UNDERSTANDING → CONFIRM", `<div id="gateway-understanding">${understanding}</div>${receipt}`)}
     ${section("CUSTOMER JOURNEY", `<div class="card journey">${gateway.journey.map((step, index) => `<div class="journey-step"><span>${index + 1}</span><strong>${html(step)}</strong>${badge(index < 3 ? "READY" : "PENDING")}</div>`).join("")}</div>`)}
     ${section(t("request.board"), `<div class="grid two"><article class="card"><div class="eyebrow">SHARED PUBLIC BOARD</div><h3>${badge(sharedWorkerStatus?.patrols?.request?.status ?? "LOADING")}</h3>${kv("Local Draft Intents", draftEvents.length)}${kv("Local confirmed cache", requestEvents.length)}${kv("Shared Real Requests", sharedWorkerStatus?.request_patrol?.real_requests ?? 0)}${kv("Shared Open Requests", sharedWorkerStatus?.request_patrol?.open_requests ?? 0)}<p>Shared requests use authenticated GitHub identity. Browser IndexedDB is draft/cache only.</p><a class="button request-link" href="https://github.com/klineodyssey/kline-odyssey/issues/new?template=civilization-request.yml" target="_blank" rel="noopener">SUBMIT SHARED REAL REQUEST</a></article><article class="card"><div class="eyebrow">PRIVACY LAW</div>${pills(gateway.request_visibilities)}${kv("Contact evidence public", String(gateway.public_board.contact_evidence_public))}${kv("Sensitive full text public", String(gateway.public_board.sensitive_request_full_text_public))}${kv("Global truth", "GIT_BACKED_SHARED_SOURCE")}${kv("Local projections", publicRequests.length)}</article></div>${publicRequests.length ? `<div class="grid">${publicRequests.map((request) => `<article class="card"><div class="eyebrow">LOCAL CACHE · ${html(request.record_class)} · ${html(request.visibility)}</div><h3>${html(request.request_id)}</h3><p>${html(request.original_request)}</p>${kv("Project", request.project_type)}${kv("Status", badge(request.status), true)}${kv("Contact evidence public", String(request.contact_evidence_public))}</article>`).join("")}</div>` : empty("NO_LOCAL_CONFIRMED_REQUESTS")}`)}
@@ -497,6 +550,7 @@ async function render() {
 }
 
 function bindViewEvents(route) {
+  if (route.page === "HOME") bindPlayerFirstEvents();
   if (route.page === "LIFE_FACTORY") bindLifeFactoryEvents();
   if (route.page === "TOKENS") bindTokenEvents();
   if (route.page === "REQUEST") bindPublicGatewayEvents();
@@ -535,6 +589,9 @@ function bindViewEvents(route) {
 }
 
 function bindPublicGatewayEvents() {
+  const carriedPrompt = localStorage.getItem("11520.pendingPrompt");
+  const carriedTarget = document.querySelector("#gateway-request-text");
+  if (carriedPrompt && carriedTarget && !carriedTarget.value) carriedTarget.value = carriedPrompt;
   document.querySelector("#public-gateway-form")?.addEventListener("submit", async (event) => {
     event.preventDefault();
     const form = event.currentTarget;
@@ -559,6 +616,12 @@ function bindPublicGatewayEvents() {
       document.querySelector("#gateway-understanding").innerHTML = gatewayUnderstandingMarkup(draft, understanding);
       bindGatewayConfirmationEvent();
       result.textContent = `${draft.status}: AI understanding created. No Request, Customer, Quote or Revenue exists before confirmation.`;
+      recordLocalPlayerMetric("first_conversation_completion");
+      const firstMission = readLocalJson(PLAYER_MISSION_KEY);
+      if (firstMission?.status === "ACTIVE") {
+        writeLocalJson(PLAYER_MISSION_KEY, completeFirstPlayerMission({ mission: firstMission, evidenceType: "SUBMIT_DRAFT_INTENT", occurredAt: draft.created_at }));
+        recordLocalPlayerMetric("first_mission_completion");
+      }
       form.querySelector("button[type=submit]").disabled = true;
     } catch (error) {
       result.textContent = `${error.code ?? "DRAFT_INTENT_REJECTED"}: ${error.message}`;
@@ -575,42 +638,183 @@ function bindVoiceEvents() {
     voiceLocale = language.value;
     localStorage.setItem("11520.voiceLocale", voiceLocale);
   });
-  const start = document.querySelector("#voice-start");
-  const stop = document.querySelector("#voice-stop");
-  const status = document.querySelector("#voice-status");
-  const speak = document.querySelector("#voice-speak");
-  speak && (speak.disabled = !(voiceCapabilities.synthesis && pendingPublicIntent?.understanding));
-  if (!voiceCapabilities.recognition) {
-    start && (start.disabled = true);
-    status && (status.textContent = `${t("voice.unavailable")} · ${t("voice.textFallback")}`);
-  } else {
-    const Recognition = globalThis.SpeechRecognition ?? globalThis.webkitSpeechRecognition;
-    let recognition = null;
-    start?.addEventListener("click", () => {
-      recognition = new Recognition();
-      recognition.lang = voiceLocale;
-      recognition.interimResults = false;
-      recognition.continuous = false;
-      recognition.onstart = () => { start.disabled = true; stop.disabled = false; status.textContent = "VOICE_SESSION_ACTIVE"; };
-      recognition.onresult = (event) => {
-        const transcript = event.results?.[0]?.[0]?.transcript?.trim() ?? "";
-        document.querySelector("#gateway-request-text").value = transcript;
-        document.querySelector("#gateway-input-type").value = "VOICE_TRANSCRIPT";
-        status.textContent = transcript ? "TRANSCRIPT_READY_REQUIRES_CONFIRMATION" : "NO_TRANSCRIPT_CAPTURED";
-      };
-      recognition.onerror = () => { status.textContent = `VOICE_CAPTURE_UNAVAILABLE · ${t("voice.textFallback")}`; };
-      recognition.onend = () => { start.disabled = false; stop.disabled = true; };
-      recognition.start();
-    });
-    stop?.addEventListener("click", () => recognition?.stop());
+  bindVoiceControls(document);
+}
+
+function setConciergeState(state, message = null, root = document) {
+  const avatar = root.querySelector?.("#concierge-avatar");
+  const label = root.querySelector?.("#concierge-character-state");
+  if (avatar) {
+    avatar.dataset.state = state;
+    avatar.setAttribute("aria-label", `Animated Wukong Hair concierge, ${state.toLowerCase()}`);
   }
-  speak?.addEventListener("click", () => {
-    if (!voiceCapabilities.synthesis || !pendingPublicIntent?.understanding) return;
-    const utterance = new SpeechSynthesisUtterance(pendingPublicIntent.understanding.understood_goal);
+  if (label) label.textContent = message ? `${state} · ${message}` : state;
+}
+
+function voiceMessageFor(reason) {
+  if (reason === "MICROPHONE_PERMISSION_DENIED" || reason === "SPEECH_SERVICE_PERMISSION_DENIED") return t("voice.denied");
+  if (reason === "NO_SPEECH_DETECTED") return t("voice.noSpeech");
+  if (reason === "SPEECH_SERVICE_NETWORK_ERROR") return t("voice.networkError");
+  return `${reason} · ${t("voice.textFallback")}`;
+}
+
+function chooseVoice(locale) {
+  const voices = globalThis.speechSynthesis?.getVoices?.() ?? [];
+  const exact = voices.find((voice) => voice.lang.toLowerCase() === locale.toLowerCase());
+  const language = locale.split("-")[0].toLowerCase();
+  return exact ?? voices.find((voice) => voice.lang.toLowerCase().startsWith(language)) ?? voices[0] ?? null;
+}
+
+function speakText(text, status, root = document) {
+  if (!voiceCapabilities.synthesis || !text) {
+    if (status) status.textContent = t("voice.outputUnavailable");
+    setConciergeState("ERROR", "VOICE_OUTPUT_UNAVAILABLE", root);
+    recordLocalPlayerMetric("voice_failure");
+    return false;
+  }
+  try {
+    const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = voiceLocale;
+    const selected = chooseVoice(voiceLocale);
+    if (selected) utterance.voice = selected;
+    utterance.onstart = () => { if (status) status.textContent = "VOICE_OUTPUT_SPEAKING"; setConciergeState("SPEAKING", null, root); };
+    utterance.onend = () => { if (status) status.textContent = "VOICE_OUTPUT_COMPLETE"; setConciergeState("IDLE", null, root); recordLocalPlayerMetric("voice_output_success"); };
+    utterance.onerror = (event) => { if (status) status.textContent = `VOICE_OUTPUT_ERROR · ${event.error ?? "UNKNOWN"}`; setConciergeState("ERROR", "VOICE_OUTPUT_ERROR", root); recordLocalPlayerMetric("voice_failure"); };
     globalThis.speechSynthesis.cancel();
+    globalThis.speechSynthesis.resume();
     globalThis.speechSynthesis.speak(utterance);
+    return true;
+  } catch (error) {
+    if (status) status.textContent = `VOICE_OUTPUT_ERROR · ${error.name ?? "UNKNOWN"}`;
+    setConciergeState("ERROR", "VOICE_OUTPUT_ERROR", root);
+    recordLocalPlayerMetric("voice_failure");
+    return false;
+  }
+}
+
+async function requestMicrophonePermission() {
+  if (!voiceCapabilities.secure_context) throw Object.assign(new Error("HTTPS is required for microphone access."), { name: "SecurityError" });
+  if (!voiceCapabilities.microphone) return "RECOGNITION_MANAGED_PERMISSION";
+  const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+  stream.getTracks().forEach((track) => track.stop());
+  return "MICROPHONE_PERMISSION_GRANTED";
+}
+
+function bindVoiceControls(root = document) {
+  const starts = root.querySelectorAll?.(".voice-start") ?? [];
+  starts.forEach((start) => {
+    if (start.dataset.bound === "true") return;
+    start.dataset.bound = "true";
+    const container = start.closest(".player-first, .voice-console") ?? root;
+    const stop = container.querySelector(".voice-stop");
+    const status = container.querySelector(".voice-state");
+    const target = () => document.querySelector(start.dataset.target);
+    start.addEventListener("click", async () => {
+      const welcome = `${t("player.welcome")} ${t("player.prompt")}`;
+      if (voiceCapabilities.synthesis) speakText(welcome, status, root);
+      if (!voiceCapabilities.recognition) {
+        status.textContent = `${t("voice.unavailable")} · ${t("voice.textFallback")}`;
+        setConciergeState("ERROR", "VOICE_CAPTURE_UNAVAILABLE", root);
+        target()?.focus();
+        recordLocalPlayerMetric("voice_failure");
+        return;
+      }
+      start.disabled = true;
+      status.textContent = t("voice.permission");
+      setConciergeState("THINKING", "MICROPHONE_PERMISSION", root);
+      try {
+        await requestMicrophonePermission();
+        const Recognition = globalThis.SpeechRecognition ?? globalThis.webkitSpeechRecognition;
+        const recognition = new Recognition();
+        activeRecognition = recognition;
+        recognition.lang = voiceLocale;
+        recognition.interimResults = false;
+        recognition.continuous = false;
+        recognition.maxAlternatives = 1;
+        recognition.onstart = () => { start.disabled = true; if (stop) stop.disabled = false; status.textContent = t("voice.listening"); setConciergeState("LISTENING", null, root); };
+        recognition.onresult = (event) => {
+          const transcript = event.results?.[0]?.[0]?.transcript?.trim() ?? "";
+          if (target()) target().value = transcript;
+          const gatewayType = document.querySelector("#gateway-input-type");
+          if (gatewayType) gatewayType.value = "VOICE_TRANSCRIPT";
+          if (transcript) localStorage.setItem("11520.pendingPrompt", transcript);
+          status.textContent = transcript ? t("voice.transcriptReady") : t("voice.noSpeech");
+          setConciergeState(transcript ? "SUCCESS" : "ERROR", transcript ? "TRANSCRIPT_READY" : "NO_SPEECH", root);
+          recordLocalPlayerMetric(transcript ? "voice_success" : "voice_failure");
+        };
+        recognition.onerror = (event) => {
+          const reason = normalizeVoiceError(event).code;
+          status.textContent = voiceMessageFor(reason);
+          setConciergeState("ERROR", reason, root);
+          target()?.focus();
+          recordLocalPlayerMetric("voice_failure");
+        };
+        recognition.onend = () => { start.disabled = false; if (stop) stop.disabled = true; activeRecognition = null; if (document.activeElement !== target()) setConciergeState("IDLE", null, root); };
+        recognition.start();
+      } catch (error) {
+        const reason = normalizeVoiceError(error).code;
+        status.textContent = voiceMessageFor(reason === "VOICE_CAPTURE_ERROR" && error?.name === "SecurityError" ? "MICROPHONE_PERMISSION_DENIED" : reason);
+        start.disabled = false;
+        if (stop) stop.disabled = true;
+        setConciergeState("ERROR", reason, root);
+        target()?.focus();
+        recordLocalPlayerMetric("voice_failure");
+      }
+    });
+    stop?.addEventListener("click", () => activeRecognition?.stop());
   });
+  root.querySelectorAll?.(".voice-speak").forEach((speak) => {
+    if (speak.dataset.bound === "true") return;
+    speak.dataset.bound = "true";
+    speak.addEventListener("click", () => {
+      const status = speak.closest(".player-first, .voice-console")?.querySelector(".voice-state");
+      const text = speak.dataset.speech === "understanding" ? pendingPublicIntent?.understanding?.understood_goal : `${t("player.welcome")} ${t("player.prompt")}`;
+      if (!text) { status.textContent = uiLocale === "zh-TW" ? "請先讓 AI 理解需求。" : "Ask the AI to understand the request first."; return; }
+      speakText(text, status, root);
+    });
+  });
+  if (voiceCapabilities.synthesis) globalThis.speechSynthesis.onvoiceschanged = () => chooseVoice(voiceLocale);
+}
+
+function bindPlayerFirstEvents() {
+  bindVoiceControls(document);
+  if (!sessionStorage.getItem("11520.v4.3dObserved")) {
+    sessionStorage.setItem("11520.v4.3dObserved", "true");
+    recordLocalPlayerMetric("three_d_load_success");
+    if (readLocalJson(PLAYER_PROFILE_KEY)) recordLocalPlayerMetric("return_player");
+  }
+  const prompt = localStorage.getItem("11520.pendingPrompt") ?? "";
+  const input = document.querySelector("#home-concierge-text");
+  if (input && prompt) input.value = prompt;
+  document.querySelector("#home-text-continue")?.addEventListener("click", () => {
+    const value = input?.value.trim() ?? "";
+    if (value) localStorage.setItem("11520.pendingPrompt", value);
+    location.hash = "/REQUEST";
+  });
+  document.querySelector("#explore-8888")?.addEventListener("click", () => {
+    recordLocalPlayerMetric("explore_8888");
+    const mission = readLocalJson(PLAYER_MISSION_KEY);
+    if (mission?.status === "ACTIVE") writeLocalJson(PLAYER_MISSION_KEY, completeFirstPlayerMission({ mission, evidenceType: "EXPLORE_8888", occurredAt: new Date().toISOString() }));
+  });
+  document.querySelector("#join-civilization")?.addEventListener("click", () => {
+    const panel = document.querySelector("#join-panel");
+    panel.hidden = false;
+    panel.innerHTML = `<form id="join-form" class="form-grid"><div class="field full"><label for="member-name">${html(uiLocale === "zh-TW" ? "公開暱稱" : "Public display name")}</label><input id="member-name" maxlength="80" required autocomplete="nickname"></div><div class="full"><button class="button" type="submit">${html(t("player.join"))}</button> <span class="muted" id="join-result" role="status">LOCAL PROFILE · NO TOKEN GIFT</span></div></form>`;
+    document.querySelector("#join-form")?.addEventListener("submit", (event) => {
+      event.preventDefault();
+      try {
+        const membership = createLocalHuaguoshanMembership({ memberId: `HUAGUOSHAN_MEMBER_${crypto.randomUUID().replaceAll("-", "").toUpperCase()}`, displayName: document.querySelector("#member-name").value, joinedAt: new Date().toISOString() });
+        writeLocalJson(PLAYER_PROFILE_KEY, membership);
+        const mission = createFirstPlayerMission({ membership });
+        writeLocalJson(PLAYER_MISSION_KEY, mission);
+        recordLocalPlayerMetric("join_count");
+        recordLocalPlayerMetric("first_mission_start");
+        setConciergeState("SUCCESS", "JOINED_LOCAL", document);
+        panel.innerHTML = `<strong>${html(membership.display_name)}</strong> · ${badge(membership.tier)} · ${badge(membership.badge.name)}<p>NON-FINANCIAL · ${html(membership.badge.nft_status)} · LOCAL PROFILE</p><button class="button secondary" id="start-first-mission" type="button">${html(t("player.firstMission"))}: ACTIVE</button>`;
+      } catch (error) { document.querySelector("#join-result").textContent = `${error.code ?? "JOIN_REJECTED"}: ${error.message}`; }
+    });
+  });
+  document.querySelector("#start-first-mission")?.addEventListener("click", () => { location.hash = "/REQUEST"; });
 }
 
 function bindLanguageRuntime() {
