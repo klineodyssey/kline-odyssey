@@ -2,7 +2,7 @@
   "schema_version": "11520_WORKER_STATUS_V1",
   "life_id": "DIGITAL_ANT_0001",
   "app_id": "DIGITAL_ANT_APP_0001",
-  "app_version": "V1.5.0",
+  "app_version": "V1.6.0",
   "scheduler": "GITHUB_ACTIONS_HOURLY_PLUS_IGNITION_WINDOW_PROBES",
   "scheduler_status": "PRODUCTION_ACTIVE",
   "cadence": "EVERY_HOUR_AND_UTC_00_02_00_07",
@@ -11,19 +11,19 @@
   "chain_write": false,
   "worker_health": "HEALTHY",
   "work_stop_reason": null,
-  "generated_at": "2026-08-17T23:40:51.988Z",
+  "generated_at": "2026-08-18T00:48:26.619Z",
   "last_work_cycle": {
-    "event_id": "DIGITAL_ANT_0001_HOURLY_2026081723",
+    "event_id": "DIGITAL_ANT_0001_HOURLY_2026081800",
     "life_id": "DIGITAL_ANT_0001",
     "app_id": "DIGITAL_ANT_APP_0001",
-    "work_cycle_id": "DIGITAL_ANT_0001_HOURLY_2026081723",
-    "scheduled_at": "2026-08-17T23:00:00.000Z",
-    "started_at": "2026-08-17T23:40:49.154Z",
-    "finished_at": "2026-08-17T23:40:51.987Z",
-    "bsc_block": 116553987,
+    "work_cycle_id": "DIGITAL_ANT_0001_HOURLY_2026081800",
+    "scheduled_at": "2026-08-18T00:00:00.000Z",
+    "started_at": "2026-08-18T00:48:23.206Z",
+    "finished_at": "2026-08-18T00:48:26.618Z",
+    "bsc_block": 116562992,
     "wallet_state": {
       "status": "PUBLIC_ADDRESS_READ",
-      "bnb": "0.0059071763"
+      "bnb": "0.00590057205"
     },
     "heart_state": {
       "status": "12345_PATROL_COMPLETED",
@@ -34,7 +34,7 @@
         "reason": "HEARTBEAT_COOLDOWN",
         "eligibility_source": "CLIENT_DERIVED",
         "write_status": "WRITE_NOT_CONNECTED",
-        "next_eligible_time": "2026-08-18T00:22:38.000Z"
+        "next_eligible_time": "2026-08-18T01:27:38.000Z"
       },
       "fortune": {
         "status": "NOT_ELIGIBLE",
@@ -48,7 +48,7 @@
         "reason": "IGNITE_OUT_OF_WINDOW",
         "eligibility_source": "CLIENT_DERIVED",
         "write_status": "WRITE_NOT_CONNECTED",
-        "next_eligible_time": "2026-08-17T23:59:59.000Z"
+        "next_eligible_time": "2026-08-18T23:59:59.000Z"
       },
       "lamp": {
         "status": "INSUFFICIENT_BALANCE",
@@ -74,8 +74,8 @@
         "status": "CORE_HEART_INDEXER_HEALTHY",
         "indexer": "CORE_HEART_INDEXER",
         "failed_event_types": [],
-        "from_block": 116553888,
-        "to_block": 116553987,
+        "from_block": 116562893,
+        "to_block": 116562992,
         "fortune_claims": [],
         "wishes": [],
         "heartbeat_claims": [],
@@ -108,8 +108,8 @@
       }
     },
     "finance_state": {
-      "BNB": "0.0059071763",
-      "KGEN": "34.0",
+      "BNB": "0.00590057205",
+      "KGEN": "43.0",
       "KAIOS": "0.0",
       "actual_income": "0",
       "actual_expense": "0",
@@ -129,6 +129,13 @@
       "LAMP",
       "IGNITION",
       "LIFE_FINANCE",
+      "CFO_FIELD_SERVICE_DEMAND_SCAN",
+      "ATM_CASH_SCAN",
+      "ATM_KUFO_SCAN",
+      "WASTE_SCAN",
+      "CARGO_SCAN",
+      "ROUTE_EVIDENCE_SCAN",
+      "FUEL_AND_PROFIT_GATE",
       "11520_REQUEST_PATROL",
       "MOTHER_ENGINE_PROBLEM_SOLVING",
       "MOTHER_ENGINE_NEXT_BEST_ACTION",
@@ -152,9 +159,9 @@
     ],
     "gatekeeper_duty": {
       "status": "COMPLETED",
-      "gatekeeper_started_at": "2026-08-17T23:40:49.551Z",
-      "gatekeeper_finished_at": "2026-08-17T23:40:51.696Z",
-      "heart_block": 116553987,
+      "gatekeeper_started_at": "2026-08-18T00:48:23.680Z",
+      "gatekeeper_finished_at": "2026-08-18T00:48:26.287Z",
+      "heart_block": 116562992,
       "heart_status": "AVAILABLE",
       "fortune_status": "NOT_ELIGIBLE",
       "heartbeat_status": "NOT_ELIGIBLE",
@@ -167,21 +174,21 @@
       "degradation_affects_safety": false,
       "advanced_graph_status": "ADVANCED_GRAPH_INDEXER_REQUIRED",
       "evidence": [
-        "HEART_BLOCK_116553987",
+        "HEART_BLOCK_116562992",
         "HEART_BYTECODE_VERIFIED",
         "CORE_HEART_INDEXER_HEALTHY"
       ]
     },
     "heart_action_candidates": {
       "heartbeat": {
-        "candidate_id": "HEARTBEATCLAIM_116553987",
+        "candidate_id": "HEARTBEATCLAIM_116562992",
         "action": "heartbeatClaim",
         "status": "NO_ACTION",
         "eligible_at_observation": false,
-        "observed_block": 116553987,
-        "observed_at": "2026-08-17T23:40:48.000Z",
+        "observed_block": 116562992,
+        "observed_at": "2026-08-18T00:48:22.000Z",
         "evidence": [
-          "HEART_BLOCK_116553987",
+          "HEART_BLOCK_116562992",
           "HEARTBEAT_COOLDOWN"
         ],
         "trusted_for_signature": false,
@@ -190,14 +197,14 @@
         "tx_hash": null
       },
       "ignition": {
-        "candidate_id": "IGNITEANDCLAIM_116553987",
+        "candidate_id": "IGNITEANDCLAIM_116562992",
         "action": "igniteAndClaim",
         "status": "NO_ACTION",
         "eligible_at_observation": false,
-        "observed_block": 116553987,
-        "observed_at": "2026-08-17T23:40:48.000Z",
+        "observed_block": 116562992,
+        "observed_at": "2026-08-18T00:48:22.000Z",
         "evidence": [
-          "HEART_BLOCK_116553987",
+          "HEART_BLOCK_116562992",
           "OUT_OF_WINDOW",
           "IGNITE_OUT_OF_WINDOW"
         ],
@@ -207,14 +214,14 @@
         "tx_hash": null
       },
       "fortune": {
-        "candidate_id": "FORTUNECLAIM_116553987",
+        "candidate_id": "FORTUNECLAIM_116562992",
         "action": "fortuneClaim",
         "status": "NO_ACTION",
         "eligible_at_observation": false,
-        "observed_block": 116553987,
-        "observed_at": "2026-08-17T23:40:48.000Z",
+        "observed_block": 116562992,
+        "observed_at": "2026-08-18T00:48:22.000Z",
         "evidence": [
-          "HEART_BLOCK_116553987",
+          "HEART_BLOCK_116562992",
           "FORTUNE_COOLDOWN"
         ],
         "trusted_for_signature": false,
@@ -223,14 +230,14 @@
         "tx_hash": null
       },
       "wish": {
-        "candidate_id": "MAKEWISH_116553987",
+        "candidate_id": "MAKEWISH_116562992",
         "action": "makeWish",
         "status": "NO_ACTION",
         "eligible_at_observation": false,
-        "observed_block": 116553987,
-        "observed_at": "2026-08-17T23:40:48.000Z",
+        "observed_block": 116562992,
+        "observed_at": "2026-08-18T00:48:22.000Z",
         "evidence": [
-          "HEART_BLOCK_116553987",
+          "HEART_BLOCK_116562992",
           "FIRST_WISH_ALREADY_COMPLETED"
         ],
         "trusted_for_signature": false,
@@ -241,11 +248,11 @@
     },
     "ignition_window": {
       "status": "OUT_OF_WINDOW",
-      "observed_at": "2026-08-17T23:40:51.696Z",
+      "observed_at": "2026-08-18T00:48:26.287Z",
       "window": "UTC_00_00_TO_00_10",
       "in_window": false,
-      "next_window_start": "2026-08-18T00:00:00.000Z",
-      "next_window_end": "2026-08-18T00:10:00.000Z"
+      "next_window_start": "2026-08-19T00:00:00.000Z",
+      "next_window_end": "2026-08-19T00:10:00.000Z"
     },
     "life_event_status": {
       "FIRST_HEARTBEAT_EVENT": "VERIFIED",
@@ -272,7 +279,7 @@
       "expected_sha256": "dbb4774a71db614994dff3e08e9cec34b94633c4d46dca13bff2f6f54d9b0b48",
       "observed_sha256": "dbb4774a71db614994dff3e08e9cec34b94633c4d46dca13bff2f6f54d9b0b48",
       "mismatch": [],
-      "checked_at": "2026-08-17T23:40:49.155Z"
+      "checked_at": "2026-08-18T00:48:23.207Z"
     },
     "life_certification": {
       "certification_id": "DIGITAL_ANT_0001_AI_LIFE_CERTIFICATION_V3_8",
@@ -298,9 +305,67 @@
       "listing_scope": "LOCAL_11520",
       "evidence": [
         "dbb4774a71db614994dff3e08e9cec34b94633c4d46dca13bff2f6f54d9b0b48",
-        "HEART_BLOCK_116553987",
+        "HEART_BLOCK_116562992",
         "K線西遊記/temples/11520/runtime/worker-status.json"
       ]
+    },
+    "field_service_patrol": {
+      "scan_id": "KGEN_FIELD_SERVICE_DEMAND_SCAN_V3_9",
+      "status": "NO_VERIFIED_FIELD_JOB_AVAILABLE",
+      "nodes_scanned": 4,
+      "verified_nodes": [
+        {
+          "node_id": "11520",
+          "name": "花果山",
+          "coordinate": 11520,
+          "map_point_id": "P_11520p0_花果山_R36",
+          "evidence": "docs/maps/UniverseMap_V10_2_DISTANCE_COMPLETE_ALL_POINTS.json",
+          "inventory_evidence": "NOT_AVAILABLE"
+        },
+        {
+          "node_id": "12345",
+          "name": "五指山",
+          "coordinate": 12345,
+          "map_point_id": "P_12345p0_五指山_R37",
+          "evidence": "docs/maps/UniverseMap_V10_2_DISTANCE_COMPLETE_ALL_POINTS.json",
+          "inventory_evidence": "NOT_AVAILABLE"
+        },
+        {
+          "node_id": "18888",
+          "name": "凌霄寶殿",
+          "coordinate": 18888,
+          "map_point_id": "P_18888p0_凌霄寶殿_R60",
+          "evidence": "docs/maps/UniverseMap_V10_2_DISTANCE_COMPLETE_ALL_POINTS.json",
+          "inventory_evidence": "NOT_AVAILABLE"
+        },
+        {
+          "node_id": "18911",
+          "name": "煉丹爐",
+          "coordinate": 18911,
+          "map_point_id": "P_18911p0_煉丹爐_R67",
+          "evidence": "docs/maps/UniverseMap_V10_2_DISTANCE_COMPLETE_ALL_POINTS.json",
+          "inventory_evidence": "NOT_AVAILABLE"
+        }
+      ],
+      "atm_cash_needs": 0,
+      "atm_kufo_needs": 0,
+      "waste_collection_needs": 0,
+      "cargo_needs": 0,
+      "candidate_jobs": [],
+      "real_field_jobs": 0,
+      "selected_next_best_job": null,
+      "revenue": "0",
+      "first_kaios_event": "NOT_OCCURRED",
+      "primary_job_gate": "GATEKEEPER_DUTY_COMPLETED_BEFORE_CFO_SCAN",
+      "route_authority": "EXISTING_K280_LAND_AND_UNIVERSE_MAP_ONLY",
+      "cash_ledger_separation": {
+        "ledger_asset": "KAIOS_LEDGER",
+        "physical_cargo": "KAIOS_CASH_CARGO",
+        "ledger_transfer_is_cash_delivery": false
+      },
+      "authority": "READ_SCAN_CALCULATE_PLAN_QUOTE_DRAFT_ONLY",
+      "settlement": false,
+      "chain_write": false
     },
     "request_patrol": {
       "status": "SHARED_REQUEST_SOURCE_VERIFIED",
@@ -319,7 +384,7 @@
         "civilization_product_need": "ANT_MECH_BODY",
         "first_income_path": "GET_FIRST_REAL_CUSTOMER",
         "dark_matter_preserved": true,
-        "kgen_energy": "34.0",
+        "kgen_energy": "43.0",
         "next_mission_evidence": "ANT_MECH_REQUIREMENTS_AND_REAL_CUSTOMER"
       },
       "thought_organ": {
@@ -334,7 +399,7 @@
         "expected_sha256": "dbb4774a71db614994dff3e08e9cec34b94633c4d46dca13bff2f6f54d9b0b48",
         "observed_sha256": "dbb4774a71db614994dff3e08e9cec34b94633c4d46dca13bff2f6f54d9b0b48",
         "mismatch": [],
-        "checked_at": "2026-08-17T23:40:49.155Z"
+        "checked_at": "2026-08-18T00:48:23.207Z"
       },
       "first_kaios_strategy": {
         "strategy_id": "DIGITAL_ANT_0001_FIRST_KAIOS_STRATEGY_V3_8",
@@ -369,6 +434,64 @@
         "fake_reward": false,
         "fake_mint": false,
         "revenue": "0"
+      },
+      "field_service": {
+        "scan_id": "KGEN_FIELD_SERVICE_DEMAND_SCAN_V3_9",
+        "status": "NO_VERIFIED_FIELD_JOB_AVAILABLE",
+        "nodes_scanned": 4,
+        "verified_nodes": [
+          {
+            "node_id": "11520",
+            "name": "花果山",
+            "coordinate": 11520,
+            "map_point_id": "P_11520p0_花果山_R36",
+            "evidence": "docs/maps/UniverseMap_V10_2_DISTANCE_COMPLETE_ALL_POINTS.json",
+            "inventory_evidence": "NOT_AVAILABLE"
+          },
+          {
+            "node_id": "12345",
+            "name": "五指山",
+            "coordinate": 12345,
+            "map_point_id": "P_12345p0_五指山_R37",
+            "evidence": "docs/maps/UniverseMap_V10_2_DISTANCE_COMPLETE_ALL_POINTS.json",
+            "inventory_evidence": "NOT_AVAILABLE"
+          },
+          {
+            "node_id": "18888",
+            "name": "凌霄寶殿",
+            "coordinate": 18888,
+            "map_point_id": "P_18888p0_凌霄寶殿_R60",
+            "evidence": "docs/maps/UniverseMap_V10_2_DISTANCE_COMPLETE_ALL_POINTS.json",
+            "inventory_evidence": "NOT_AVAILABLE"
+          },
+          {
+            "node_id": "18911",
+            "name": "煉丹爐",
+            "coordinate": 18911,
+            "map_point_id": "P_18911p0_煉丹爐_R67",
+            "evidence": "docs/maps/UniverseMap_V10_2_DISTANCE_COMPLETE_ALL_POINTS.json",
+            "inventory_evidence": "NOT_AVAILABLE"
+          }
+        ],
+        "atm_cash_needs": 0,
+        "atm_kufo_needs": 0,
+        "waste_collection_needs": 0,
+        "cargo_needs": 0,
+        "candidate_jobs": [],
+        "real_field_jobs": 0,
+        "selected_next_best_job": null,
+        "revenue": "0",
+        "first_kaios_event": "NOT_OCCURRED",
+        "primary_job_gate": "GATEKEEPER_DUTY_COMPLETED_BEFORE_CFO_SCAN",
+        "route_authority": "EXISTING_K280_LAND_AND_UNIVERSE_MAP_ONLY",
+        "cash_ledger_separation": {
+          "ledger_asset": "KAIOS_LEDGER",
+          "physical_cargo": "KAIOS_CASH_CARGO",
+          "ledger_transfer_is_cash_delivery": false
+        },
+        "authority": "READ_SCAN_CALCULATE_PLAN_QUOTE_DRAFT_ONLY",
+        "settlement": false,
+        "chain_write": false
       },
       "proposals": [
         {
@@ -420,18 +543,18 @@
         "problem": "FIRST_KAIOS_NOT_OCCURRED",
         "evidence": [
           "PRIMARY_JOB_COMPLETED",
-          "KGEN_34.0",
+          "KGEN_43.0",
           "KAIOS_0.0",
           "CUSTOMERS_0",
           "TREASURY_NOT_BOUND"
         ],
         "priority": 1,
         "possible_actions": [
-          "PUBLISH_KGEN_CHAIN_MONITOR_SERVICE_PACKAGE_AND_SCAN_VERIFIED_REQUESTS",
+          "SCAN_VERIFIED_FIELD_AND_DIGITAL_SERVICE_DEMAND",
           "SCAN_REAL_CIVILIZATION_REQUESTS",
           "RESEARCH_UFO_REQUIREMENTS_AFTER_PRIMARY_DUTY"
         ],
-        "selected_action": "PUBLISH_KGEN_CHAIN_MONITOR_SERVICE_PACKAGE_AND_SCAN_VERIFIED_REQUESTS",
+        "selected_action": "SCAN_VERIFIED_FIELD_AND_DIGITAL_SERVICE_DEMAND",
         "reason": "The next lawful economic milestone requires real demand and evidenced compensation",
         "required_authority": "READ_ONLY_RESEARCH_AND_EXTERNAL_REQUEST_EVIDENCE",
         "expected_result": "VERIFIED_KAIOS_EARNING_OPPORTUNITY_NOT_FAKE_REVENUE",
@@ -474,7 +597,7 @@
           "civilization_product_need": "ANT_MECH_BODY",
           "first_income_path": "GET_FIRST_REAL_CUSTOMER",
           "dark_matter_preserved": true,
-          "kgen_energy": "34.0",
+          "kgen_energy": "43.0",
           "next_mission_evidence": "ANT_MECH_REQUIREMENTS_AND_REAL_CUSTOMER"
         },
         "thought_organ": {
@@ -489,7 +612,7 @@
           "expected_sha256": "dbb4774a71db614994dff3e08e9cec34b94633c4d46dca13bff2f6f54d9b0b48",
           "observed_sha256": "dbb4774a71db614994dff3e08e9cec34b94633c4d46dca13bff2f6f54d9b0b48",
           "mismatch": [],
-          "checked_at": "2026-08-17T23:40:49.155Z"
+          "checked_at": "2026-08-18T00:48:23.207Z"
         },
         "first_kaios_strategy": {
           "strategy_id": "DIGITAL_ANT_0001_FIRST_KAIOS_STRATEGY_V3_8",
@@ -524,6 +647,64 @@
           "fake_reward": false,
           "fake_mint": false,
           "revenue": "0"
+        },
+        "field_service": {
+          "scan_id": "KGEN_FIELD_SERVICE_DEMAND_SCAN_V3_9",
+          "status": "NO_VERIFIED_FIELD_JOB_AVAILABLE",
+          "nodes_scanned": 4,
+          "verified_nodes": [
+            {
+              "node_id": "11520",
+              "name": "花果山",
+              "coordinate": 11520,
+              "map_point_id": "P_11520p0_花果山_R36",
+              "evidence": "docs/maps/UniverseMap_V10_2_DISTANCE_COMPLETE_ALL_POINTS.json",
+              "inventory_evidence": "NOT_AVAILABLE"
+            },
+            {
+              "node_id": "12345",
+              "name": "五指山",
+              "coordinate": 12345,
+              "map_point_id": "P_12345p0_五指山_R37",
+              "evidence": "docs/maps/UniverseMap_V10_2_DISTANCE_COMPLETE_ALL_POINTS.json",
+              "inventory_evidence": "NOT_AVAILABLE"
+            },
+            {
+              "node_id": "18888",
+              "name": "凌霄寶殿",
+              "coordinate": 18888,
+              "map_point_id": "P_18888p0_凌霄寶殿_R60",
+              "evidence": "docs/maps/UniverseMap_V10_2_DISTANCE_COMPLETE_ALL_POINTS.json",
+              "inventory_evidence": "NOT_AVAILABLE"
+            },
+            {
+              "node_id": "18911",
+              "name": "煉丹爐",
+              "coordinate": 18911,
+              "map_point_id": "P_18911p0_煉丹爐_R67",
+              "evidence": "docs/maps/UniverseMap_V10_2_DISTANCE_COMPLETE_ALL_POINTS.json",
+              "inventory_evidence": "NOT_AVAILABLE"
+            }
+          ],
+          "atm_cash_needs": 0,
+          "atm_kufo_needs": 0,
+          "waste_collection_needs": 0,
+          "cargo_needs": 0,
+          "candidate_jobs": [],
+          "real_field_jobs": 0,
+          "selected_next_best_job": null,
+          "revenue": "0",
+          "first_kaios_event": "NOT_OCCURRED",
+          "primary_job_gate": "GATEKEEPER_DUTY_COMPLETED_BEFORE_CFO_SCAN",
+          "route_authority": "EXISTING_K280_LAND_AND_UNIVERSE_MAP_ONLY",
+          "cash_ledger_separation": {
+            "ledger_asset": "KAIOS_LEDGER",
+            "physical_cargo": "KAIOS_CASH_CARGO",
+            "ledger_transfer_is_cash_delivery": false
+          },
+          "authority": "READ_SCAN_CALCULATE_PLAN_QUOTE_DRAFT_ONLY",
+          "settlement": false,
+          "chain_write": false
         },
         "proposals": [
           {
@@ -575,18 +756,18 @@
           "problem": "FIRST_KAIOS_NOT_OCCURRED",
           "evidence": [
             "PRIMARY_JOB_COMPLETED",
-            "KGEN_34.0",
+            "KGEN_43.0",
             "KAIOS_0.0",
             "CUSTOMERS_0",
             "TREASURY_NOT_BOUND"
           ],
           "priority": 1,
           "possible_actions": [
-            "PUBLISH_KGEN_CHAIN_MONITOR_SERVICE_PACKAGE_AND_SCAN_VERIFIED_REQUESTS",
+            "SCAN_VERIFIED_FIELD_AND_DIGITAL_SERVICE_DEMAND",
             "SCAN_REAL_CIVILIZATION_REQUESTS",
             "RESEARCH_UFO_REQUIREMENTS_AFTER_PRIMARY_DUTY"
           ],
-          "selected_action": "PUBLISH_KGEN_CHAIN_MONITOR_SERVICE_PACKAGE_AND_SCAN_VERIFIED_REQUESTS",
+          "selected_action": "SCAN_VERIFIED_FIELD_AND_DIGITAL_SERVICE_DEMAND",
           "reason": "The next lawful economic milestone requires real demand and evidenced compensation",
           "required_authority": "READ_ONLY_RESEARCH_AND_EXTERNAL_REQUEST_EVIDENCE",
           "expected_result": "VERIFIED_KAIOS_EARNING_OPPORTUNITY_NOT_FAKE_REVENUE",
@@ -612,10 +793,10 @@
       }
     },
     "work_time": {
-      "gatekeeper_work_seconds": 2.145,
-      "cfo_work_seconds": 0,
-      "company_work_seconds": 0.289,
-      "life_health_seconds": 0.219
+      "gatekeeper_work_seconds": 2.607,
+      "cfo_work_seconds": 0.001,
+      "company_work_seconds": 0.329,
+      "life_health_seconds": 0.24
     },
     "action_taken": "NO_ACTION",
     "result": "WORK_CYCLE_COMPLETED",
@@ -628,28 +809,28 @@
     ],
     "gas_spent": "0",
     "tx_hash": null,
-    "work_duration_seconds": 2
+    "work_duration_seconds": 3
   },
-  "next_expected_at": "2026-08-18T00:00:00.000Z",
+  "next_expected_at": "2026-08-18T01:00:00.000Z",
   "metrics": {
-    "completed_cycles": 29,
+    "completed_cycles": 30,
     "failed_cycles": 1,
     "degraded_cycles": 5,
-    "no_action_cycles": 35,
+    "no_action_cycles": 36,
     "action_cycles": 0,
-    "work_duration_seconds": 51,
-    "gatekeeper_work_seconds": 39.21999999999999,
-    "cfo_work_seconds": 0.014000000000000005,
-    "company_work_seconds": 9.375000000000002,
+    "work_duration_seconds": 54,
+    "gatekeeper_work_seconds": 41.82699999999999,
+    "cfo_work_seconds": 0.015000000000000006,
+    "company_work_seconds": 9.704000000000002,
     "missed_cycles": 6
   },
   "primary_job": "WUKONG_GATEKEEPER",
   "secondary_work": "AI_ANT_COMPANY_FOUNDER",
   "gatekeeper_duty": {
     "status": "COMPLETED",
-    "gatekeeper_started_at": "2026-08-17T23:40:49.551Z",
-    "gatekeeper_finished_at": "2026-08-17T23:40:51.696Z",
-    "heart_block": 116553987,
+    "gatekeeper_started_at": "2026-08-18T00:48:23.680Z",
+    "gatekeeper_finished_at": "2026-08-18T00:48:26.287Z",
+    "heart_block": 116562992,
     "heart_status": "AVAILABLE",
     "fortune_status": "NOT_ELIGIBLE",
     "heartbeat_status": "NOT_ELIGIBLE",
@@ -662,21 +843,21 @@
     "degradation_affects_safety": false,
     "advanced_graph_status": "ADVANCED_GRAPH_INDEXER_REQUIRED",
     "evidence": [
-      "HEART_BLOCK_116553987",
+      "HEART_BLOCK_116562992",
       "HEART_BYTECODE_VERIFIED",
       "CORE_HEART_INDEXER_HEALTHY"
     ]
   },
   "heart_action_candidates": {
     "heartbeat": {
-      "candidate_id": "HEARTBEATCLAIM_116553987",
+      "candidate_id": "HEARTBEATCLAIM_116562992",
       "action": "heartbeatClaim",
       "status": "NO_ACTION",
       "eligible_at_observation": false,
-      "observed_block": 116553987,
-      "observed_at": "2026-08-17T23:40:48.000Z",
+      "observed_block": 116562992,
+      "observed_at": "2026-08-18T00:48:22.000Z",
       "evidence": [
-        "HEART_BLOCK_116553987",
+        "HEART_BLOCK_116562992",
         "HEARTBEAT_COOLDOWN"
       ],
       "trusted_for_signature": false,
@@ -685,14 +866,14 @@
       "tx_hash": null
     },
     "ignition": {
-      "candidate_id": "IGNITEANDCLAIM_116553987",
+      "candidate_id": "IGNITEANDCLAIM_116562992",
       "action": "igniteAndClaim",
       "status": "NO_ACTION",
       "eligible_at_observation": false,
-      "observed_block": 116553987,
-      "observed_at": "2026-08-17T23:40:48.000Z",
+      "observed_block": 116562992,
+      "observed_at": "2026-08-18T00:48:22.000Z",
       "evidence": [
-        "HEART_BLOCK_116553987",
+        "HEART_BLOCK_116562992",
         "OUT_OF_WINDOW",
         "IGNITE_OUT_OF_WINDOW"
       ],
@@ -702,14 +883,14 @@
       "tx_hash": null
     },
     "fortune": {
-      "candidate_id": "FORTUNECLAIM_116553987",
+      "candidate_id": "FORTUNECLAIM_116562992",
       "action": "fortuneClaim",
       "status": "NO_ACTION",
       "eligible_at_observation": false,
-      "observed_block": 116553987,
-      "observed_at": "2026-08-17T23:40:48.000Z",
+      "observed_block": 116562992,
+      "observed_at": "2026-08-18T00:48:22.000Z",
       "evidence": [
-        "HEART_BLOCK_116553987",
+        "HEART_BLOCK_116562992",
         "FORTUNE_COOLDOWN"
       ],
       "trusted_for_signature": false,
@@ -718,14 +899,14 @@
       "tx_hash": null
     },
     "wish": {
-      "candidate_id": "MAKEWISH_116553987",
+      "candidate_id": "MAKEWISH_116562992",
       "action": "makeWish",
       "status": "NO_ACTION",
       "eligible_at_observation": false,
-      "observed_block": 116553987,
-      "observed_at": "2026-08-17T23:40:48.000Z",
+      "observed_block": 116562992,
+      "observed_at": "2026-08-18T00:48:22.000Z",
       "evidence": [
-        "HEART_BLOCK_116553987",
+        "HEART_BLOCK_116562992",
         "FIRST_WISH_ALREADY_COMPLETED"
       ],
       "trusted_for_signature": false,
@@ -736,11 +917,11 @@
   },
   "ignition_window": {
     "status": "OUT_OF_WINDOW",
-    "observed_at": "2026-08-17T23:40:51.696Z",
+    "observed_at": "2026-08-18T00:48:26.287Z",
     "window": "UTC_00_00_TO_00_10",
     "in_window": false,
-    "next_window_start": "2026-08-18T00:00:00.000Z",
-    "next_window_end": "2026-08-18T00:10:00.000Z"
+    "next_window_start": "2026-08-19T00:00:00.000Z",
+    "next_window_end": "2026-08-19T00:10:00.000Z"
   },
   "life_event_status": {
     "FIRST_HEARTBEAT_EVENT": "VERIFIED",
@@ -767,7 +948,7 @@
     "expected_sha256": "dbb4774a71db614994dff3e08e9cec34b94633c4d46dca13bff2f6f54d9b0b48",
     "observed_sha256": "dbb4774a71db614994dff3e08e9cec34b94633c4d46dca13bff2f6f54d9b0b48",
     "mismatch": [],
-    "checked_at": "2026-08-17T23:40:49.155Z"
+    "checked_at": "2026-08-18T00:48:23.207Z"
   },
   "life_certification": {
     "certification_id": "DIGITAL_ANT_0001_AI_LIFE_CERTIFICATION_V3_8",
@@ -793,7 +974,7 @@
     "listing_scope": "LOCAL_11520",
     "evidence": [
       "dbb4774a71db614994dff3e08e9cec34b94633c4d46dca13bff2f6f54d9b0b48",
-      "HEART_BLOCK_116553987",
+      "HEART_BLOCK_116562992",
       "K線西遊記/temples/11520/runtime/worker-status.json"
     ]
   },
@@ -807,7 +988,7 @@
         "reason": "HEARTBEAT_COOLDOWN",
         "eligibility_source": "CLIENT_DERIVED",
         "write_status": "WRITE_NOT_CONNECTED",
-        "next_eligible_time": "2026-08-18T00:22:38.000Z"
+        "next_eligible_time": "2026-08-18T01:27:38.000Z"
       },
       "fortune": {
         "status": "NOT_ELIGIBLE",
@@ -821,7 +1002,7 @@
         "reason": "IGNITE_OUT_OF_WINDOW",
         "eligibility_source": "CLIENT_DERIVED",
         "write_status": "WRITE_NOT_CONNECTED",
-        "next_eligible_time": "2026-08-17T23:59:59.000Z"
+        "next_eligible_time": "2026-08-18T23:59:59.000Z"
       },
       "lamp": {
         "status": "INSUFFICIENT_BALANCE",
@@ -847,8 +1028,8 @@
         "status": "CORE_HEART_INDEXER_HEALTHY",
         "indexer": "CORE_HEART_INDEXER",
         "failed_event_types": [],
-        "from_block": 116553888,
-        "to_block": 116553987,
+        "from_block": 116562893,
+        "to_block": 116562992,
         "fortune_claims": [],
         "wishes": [],
         "heartbeat_claims": [],
@@ -880,6 +1061,64 @@
         "reason": "Advanced transfer traces and complete address history are not inferred from Core Heart events"
       }
     },
+    "field_service": {
+      "scan_id": "KGEN_FIELD_SERVICE_DEMAND_SCAN_V3_9",
+      "status": "NO_VERIFIED_FIELD_JOB_AVAILABLE",
+      "nodes_scanned": 4,
+      "verified_nodes": [
+        {
+          "node_id": "11520",
+          "name": "花果山",
+          "coordinate": 11520,
+          "map_point_id": "P_11520p0_花果山_R36",
+          "evidence": "docs/maps/UniverseMap_V10_2_DISTANCE_COMPLETE_ALL_POINTS.json",
+          "inventory_evidence": "NOT_AVAILABLE"
+        },
+        {
+          "node_id": "12345",
+          "name": "五指山",
+          "coordinate": 12345,
+          "map_point_id": "P_12345p0_五指山_R37",
+          "evidence": "docs/maps/UniverseMap_V10_2_DISTANCE_COMPLETE_ALL_POINTS.json",
+          "inventory_evidence": "NOT_AVAILABLE"
+        },
+        {
+          "node_id": "18888",
+          "name": "凌霄寶殿",
+          "coordinate": 18888,
+          "map_point_id": "P_18888p0_凌霄寶殿_R60",
+          "evidence": "docs/maps/UniverseMap_V10_2_DISTANCE_COMPLETE_ALL_POINTS.json",
+          "inventory_evidence": "NOT_AVAILABLE"
+        },
+        {
+          "node_id": "18911",
+          "name": "煉丹爐",
+          "coordinate": 18911,
+          "map_point_id": "P_18911p0_煉丹爐_R67",
+          "evidence": "docs/maps/UniverseMap_V10_2_DISTANCE_COMPLETE_ALL_POINTS.json",
+          "inventory_evidence": "NOT_AVAILABLE"
+        }
+      ],
+      "atm_cash_needs": 0,
+      "atm_kufo_needs": 0,
+      "waste_collection_needs": 0,
+      "cargo_needs": 0,
+      "candidate_jobs": [],
+      "real_field_jobs": 0,
+      "selected_next_best_job": null,
+      "revenue": "0",
+      "first_kaios_event": "NOT_OCCURRED",
+      "primary_job_gate": "GATEKEEPER_DUTY_COMPLETED_BEFORE_CFO_SCAN",
+      "route_authority": "EXISTING_K280_LAND_AND_UNIVERSE_MAP_ONLY",
+      "cash_ledger_separation": {
+        "ledger_asset": "KAIOS_LEDGER",
+        "physical_cargo": "KAIOS_CASH_CARGO",
+        "ledger_transfer_is_cash_delivery": false
+      },
+      "authority": "READ_SCAN_CALCULATE_PLAN_QUOTE_DRAFT_ONLY",
+      "settlement": false,
+      "chain_write": false
+    },
     "request": {
       "status": "SHARED_REQUEST_SOURCE_VERIFIED",
       "source": "GITHUB_ISSUES_AUTHENTICATED_IDENTITY",
@@ -897,7 +1136,7 @@
         "civilization_product_need": "ANT_MECH_BODY",
         "first_income_path": "GET_FIRST_REAL_CUSTOMER",
         "dark_matter_preserved": true,
-        "kgen_energy": "34.0",
+        "kgen_energy": "43.0",
         "next_mission_evidence": "ANT_MECH_REQUIREMENTS_AND_REAL_CUSTOMER"
       },
       "thought_organ": {
@@ -912,7 +1151,7 @@
         "expected_sha256": "dbb4774a71db614994dff3e08e9cec34b94633c4d46dca13bff2f6f54d9b0b48",
         "observed_sha256": "dbb4774a71db614994dff3e08e9cec34b94633c4d46dca13bff2f6f54d9b0b48",
         "mismatch": [],
-        "checked_at": "2026-08-17T23:40:49.155Z"
+        "checked_at": "2026-08-18T00:48:23.207Z"
       },
       "first_kaios_strategy": {
         "strategy_id": "DIGITAL_ANT_0001_FIRST_KAIOS_STRATEGY_V3_8",
@@ -947,6 +1186,64 @@
         "fake_reward": false,
         "fake_mint": false,
         "revenue": "0"
+      },
+      "field_service": {
+        "scan_id": "KGEN_FIELD_SERVICE_DEMAND_SCAN_V3_9",
+        "status": "NO_VERIFIED_FIELD_JOB_AVAILABLE",
+        "nodes_scanned": 4,
+        "verified_nodes": [
+          {
+            "node_id": "11520",
+            "name": "花果山",
+            "coordinate": 11520,
+            "map_point_id": "P_11520p0_花果山_R36",
+            "evidence": "docs/maps/UniverseMap_V10_2_DISTANCE_COMPLETE_ALL_POINTS.json",
+            "inventory_evidence": "NOT_AVAILABLE"
+          },
+          {
+            "node_id": "12345",
+            "name": "五指山",
+            "coordinate": 12345,
+            "map_point_id": "P_12345p0_五指山_R37",
+            "evidence": "docs/maps/UniverseMap_V10_2_DISTANCE_COMPLETE_ALL_POINTS.json",
+            "inventory_evidence": "NOT_AVAILABLE"
+          },
+          {
+            "node_id": "18888",
+            "name": "凌霄寶殿",
+            "coordinate": 18888,
+            "map_point_id": "P_18888p0_凌霄寶殿_R60",
+            "evidence": "docs/maps/UniverseMap_V10_2_DISTANCE_COMPLETE_ALL_POINTS.json",
+            "inventory_evidence": "NOT_AVAILABLE"
+          },
+          {
+            "node_id": "18911",
+            "name": "煉丹爐",
+            "coordinate": 18911,
+            "map_point_id": "P_18911p0_煉丹爐_R67",
+            "evidence": "docs/maps/UniverseMap_V10_2_DISTANCE_COMPLETE_ALL_POINTS.json",
+            "inventory_evidence": "NOT_AVAILABLE"
+          }
+        ],
+        "atm_cash_needs": 0,
+        "atm_kufo_needs": 0,
+        "waste_collection_needs": 0,
+        "cargo_needs": 0,
+        "candidate_jobs": [],
+        "real_field_jobs": 0,
+        "selected_next_best_job": null,
+        "revenue": "0",
+        "first_kaios_event": "NOT_OCCURRED",
+        "primary_job_gate": "GATEKEEPER_DUTY_COMPLETED_BEFORE_CFO_SCAN",
+        "route_authority": "EXISTING_K280_LAND_AND_UNIVERSE_MAP_ONLY",
+        "cash_ledger_separation": {
+          "ledger_asset": "KAIOS_LEDGER",
+          "physical_cargo": "KAIOS_CASH_CARGO",
+          "ledger_transfer_is_cash_delivery": false
+        },
+        "authority": "READ_SCAN_CALCULATE_PLAN_QUOTE_DRAFT_ONLY",
+        "settlement": false,
+        "chain_write": false
       },
       "proposals": [
         {
@@ -998,18 +1295,18 @@
         "problem": "FIRST_KAIOS_NOT_OCCURRED",
         "evidence": [
           "PRIMARY_JOB_COMPLETED",
-          "KGEN_34.0",
+          "KGEN_43.0",
           "KAIOS_0.0",
           "CUSTOMERS_0",
           "TREASURY_NOT_BOUND"
         ],
         "priority": 1,
         "possible_actions": [
-          "PUBLISH_KGEN_CHAIN_MONITOR_SERVICE_PACKAGE_AND_SCAN_VERIFIED_REQUESTS",
+          "SCAN_VERIFIED_FIELD_AND_DIGITAL_SERVICE_DEMAND",
           "SCAN_REAL_CIVILIZATION_REQUESTS",
           "RESEARCH_UFO_REQUIREMENTS_AFTER_PRIMARY_DUTY"
         ],
-        "selected_action": "PUBLISH_KGEN_CHAIN_MONITOR_SERVICE_PACKAGE_AND_SCAN_VERIFIED_REQUESTS",
+        "selected_action": "SCAN_VERIFIED_FIELD_AND_DIGITAL_SERVICE_DEMAND",
         "reason": "The next lawful economic milestone requires real demand and evidenced compensation",
         "required_authority": "READ_ONLY_RESEARCH_AND_EXTERNAL_REQUEST_EVIDENCE",
         "expected_result": "VERIFIED_KAIOS_EARNING_OPPORTUNITY_NOT_FAKE_REVENUE",
@@ -1052,7 +1349,7 @@
           "civilization_product_need": "ANT_MECH_BODY",
           "first_income_path": "GET_FIRST_REAL_CUSTOMER",
           "dark_matter_preserved": true,
-          "kgen_energy": "34.0",
+          "kgen_energy": "43.0",
           "next_mission_evidence": "ANT_MECH_REQUIREMENTS_AND_REAL_CUSTOMER"
         },
         "thought_organ": {
@@ -1067,7 +1364,7 @@
           "expected_sha256": "dbb4774a71db614994dff3e08e9cec34b94633c4d46dca13bff2f6f54d9b0b48",
           "observed_sha256": "dbb4774a71db614994dff3e08e9cec34b94633c4d46dca13bff2f6f54d9b0b48",
           "mismatch": [],
-          "checked_at": "2026-08-17T23:40:49.155Z"
+          "checked_at": "2026-08-18T00:48:23.207Z"
         },
         "first_kaios_strategy": {
           "strategy_id": "DIGITAL_ANT_0001_FIRST_KAIOS_STRATEGY_V3_8",
@@ -1102,6 +1399,64 @@
           "fake_reward": false,
           "fake_mint": false,
           "revenue": "0"
+        },
+        "field_service": {
+          "scan_id": "KGEN_FIELD_SERVICE_DEMAND_SCAN_V3_9",
+          "status": "NO_VERIFIED_FIELD_JOB_AVAILABLE",
+          "nodes_scanned": 4,
+          "verified_nodes": [
+            {
+              "node_id": "11520",
+              "name": "花果山",
+              "coordinate": 11520,
+              "map_point_id": "P_11520p0_花果山_R36",
+              "evidence": "docs/maps/UniverseMap_V10_2_DISTANCE_COMPLETE_ALL_POINTS.json",
+              "inventory_evidence": "NOT_AVAILABLE"
+            },
+            {
+              "node_id": "12345",
+              "name": "五指山",
+              "coordinate": 12345,
+              "map_point_id": "P_12345p0_五指山_R37",
+              "evidence": "docs/maps/UniverseMap_V10_2_DISTANCE_COMPLETE_ALL_POINTS.json",
+              "inventory_evidence": "NOT_AVAILABLE"
+            },
+            {
+              "node_id": "18888",
+              "name": "凌霄寶殿",
+              "coordinate": 18888,
+              "map_point_id": "P_18888p0_凌霄寶殿_R60",
+              "evidence": "docs/maps/UniverseMap_V10_2_DISTANCE_COMPLETE_ALL_POINTS.json",
+              "inventory_evidence": "NOT_AVAILABLE"
+            },
+            {
+              "node_id": "18911",
+              "name": "煉丹爐",
+              "coordinate": 18911,
+              "map_point_id": "P_18911p0_煉丹爐_R67",
+              "evidence": "docs/maps/UniverseMap_V10_2_DISTANCE_COMPLETE_ALL_POINTS.json",
+              "inventory_evidence": "NOT_AVAILABLE"
+            }
+          ],
+          "atm_cash_needs": 0,
+          "atm_kufo_needs": 0,
+          "waste_collection_needs": 0,
+          "cargo_needs": 0,
+          "candidate_jobs": [],
+          "real_field_jobs": 0,
+          "selected_next_best_job": null,
+          "revenue": "0",
+          "first_kaios_event": "NOT_OCCURRED",
+          "primary_job_gate": "GATEKEEPER_DUTY_COMPLETED_BEFORE_CFO_SCAN",
+          "route_authority": "EXISTING_K280_LAND_AND_UNIVERSE_MAP_ONLY",
+          "cash_ledger_separation": {
+            "ledger_asset": "KAIOS_LEDGER",
+            "physical_cargo": "KAIOS_CASH_CARGO",
+            "ledger_transfer_is_cash_delivery": false
+          },
+          "authority": "READ_SCAN_CALCULATE_PLAN_QUOTE_DRAFT_ONLY",
+          "settlement": false,
+          "chain_write": false
         },
         "proposals": [
           {
@@ -1153,18 +1508,18 @@
           "problem": "FIRST_KAIOS_NOT_OCCURRED",
           "evidence": [
             "PRIMARY_JOB_COMPLETED",
-            "KGEN_34.0",
+            "KGEN_43.0",
             "KAIOS_0.0",
             "CUSTOMERS_0",
             "TREASURY_NOT_BOUND"
           ],
           "priority": 1,
           "possible_actions": [
-            "PUBLISH_KGEN_CHAIN_MONITOR_SERVICE_PACKAGE_AND_SCAN_VERIFIED_REQUESTS",
+            "SCAN_VERIFIED_FIELD_AND_DIGITAL_SERVICE_DEMAND",
             "SCAN_REAL_CIVILIZATION_REQUESTS",
             "RESEARCH_UFO_REQUIREMENTS_AFTER_PRIMARY_DUTY"
           ],
-          "selected_action": "PUBLISH_KGEN_CHAIN_MONITOR_SERVICE_PACKAGE_AND_SCAN_VERIFIED_REQUESTS",
+          "selected_action": "SCAN_VERIFIED_FIELD_AND_DIGITAL_SERVICE_DEMAND",
           "reason": "The next lawful economic milestone requires real demand and evidenced compensation",
           "required_authority": "READ_ONLY_RESEARCH_AND_EXTERNAL_REQUEST_EVIDENCE",
           "expected_result": "VERIFIED_KAIOS_EARNING_OPPORTUNITY_NOT_FAKE_REVENUE",
