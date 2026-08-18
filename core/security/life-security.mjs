@@ -1,5 +1,6 @@
 import { invariant } from "../shared/errors.mjs";
 import { requireArray, requireEnum, requireFields, requireId } from "../shared/schema.mjs";
+import { createSurvivalReserveProposal } from "../accounting/index.mjs";
 
 export const WALLET_SECURITY_STATUSES = Object.freeze([
   "HEALTHY", "LOW_DARK_MATTER", "DARK_MATTER_DEPLETED", "SUSPICIOUS_ACTIVITY", "CONTROL_AT_RISK",
@@ -451,6 +452,186 @@ export function validateIncidentStateTransition(previousState, nextState, eviden
   invariant(previousState === nextState || evidence.length > 0, "INCIDENT_TRANSITION_EVIDENCE_REQUIRED", "Security incident state changes require append-only evidence");
   invariant(!(previousState === "COMPROMISED" && nextState === "NORMAL"), "INCIDENT_RECOVERY_STEP_REQUIRED", "Compromised state must pass through Recovery before Normal");
   return Object.freeze({ previous_state: previousState, next_state: nextState, evidence, append_only: true });
+}
+
+export const DIGITAL_ANT_SECURE_SIGNER_WORKER = Object.freeze({
+  worker_id: "DIGITAL_ANT_SECURE_SIGNER_WORKER",
+  runtime_class: "LOCAL_OR_SECURE_SIGNER_AGENT",
+  status: "NOT_CONNECTED",
+  public_pages_access: false,
+  public_workflow_access: false,
+  proposal_trust: "UNTRUSTED_REVALIDATE_AT_LATEST_BLOCK",
+  chain_id: 56,
+  private_key_storage: "USER_CONTROLLED_SECURE_ENVIRONMENT_ONLY",
+  chain_write: false
+});
+
+export const DIGITAL_ANT_LIVE_ACTION_POLICY = Object.freeze({
+  policy_id: "DIGITAL_ANT_LIVE_ACTION_POLICY",
+  status: "POLICY_DRAFT_NOT_ENABLED",
+  survival_reserve: "OWNER_APPROVAL_REQUIRED",
+  actions: Object.freeze(Object.fromEntries([
+    ["heartbeatClaim", "heartbeatClaim()"], ["fortuneClaim", "fortuneClaim(uint256)"], ["igniteAndClaim", "igniteAndClaim()"],
+    ["lightLamp", "lightLamp(uint256)"], ["makeWish", "makeWish(bytes32)"], ["vowTo", "vowTo(uint8,uint256)"]
+  ].map(([action, signature]) => [action, Object.freeze({ action, signature, enabled: false, max_gas: null, max_value: null, cooldown: "CONTRACT_DERIVED", daily_limit: null, minimum_bnb_reserve: "POLICY_REQUIRED", mission_reason: "REQUIRED", security_requirement: "HEALTHY_AND_REVALIDATED" })])))
+});
+
+export const DIGITAL_ANT_HEARTBEAT_OWNER_APPROVAL = "OWNER_DIRECTIVE_DIGITAL_ANT_V3_6_FIRST_KGEN_HEARTBEAT";
+export const DIGITAL_ANT_V3_7_HEART_AUTOPILOT_APPROVAL = "OWNER_DIRECTIVE_DIGITAL_ANT_V3_7_HEART_AUTOPILOT_WISH_HEAVEN_FUEL";
+export const DIGITAL_ANT_V3_8_HEART_AUTOPILOT_APPROVAL = "OWNER_DIRECTIVE_DIGITAL_ANT_V3_8_LIVING_THOUGHT_ORGAN_AUTONOMOUS_GATEKEEPER";
+export const DIGITAL_ANT_HEARTBEAT_SELECTOR = "0x2d293562";
+export const DIGITAL_ANT_HEART_ADDRESS = "0xB016D4d8f1aED1339101b30722cad6dbA9B8C972";
+export const DIGITAL_ANT_KGEN_ADDRESS = "0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be";
+export const DIGITAL_ANT_HEART_CODE_HASH = "0x1d3eba15b4c4895710c6e68f3f27e97cb0e2c94edc254d9f1e9148b3d7f55d32";
+
+export function createHeartbeatGasPolicy({ currentBnbWei, gasPriceWei, gasEstimate }) {
+  const proposal = createSurvivalReserveProposal({
+    currentBnbWei: String(currentBnbWei), gasPriceWei: String(gasPriceWei), estimatedGasUnits: [String(gasEstimate)],
+    coverageTransactions: 4, emergencyTransactions: 2, safetyBps: 20_000
+  });
+  return Object.freeze({
+    policy_id: "DIGITAL_ANT_V3_6_DYNAMIC_GAS_SURVIVAL_POLICY", basis: proposal.basis,
+    gas_price_wei: proposal.gas_price_wei, gas_estimate: String(gasEstimate),
+    MIN_SURVIVAL_BNB: proposal.MIN_SURVIVAL_BNB, minimum_survival_bnb_wei: proposal.recommended_survival_reserve_wei,
+    EMERGENCY_BNB_RESERVE: proposal.EMERGENCY_BNB, emergency_bnb_reserve_wei: proposal.emergency_bnb_wei,
+    MAX_ACTION_GAS_COST: proposal.proposed_action_gas_buffer_bnb, max_action_gas_cost_wei: proposal.proposed_action_gas_buffer_wei,
+    permanent_universe_constant: false, owner_directive_scope: "ONE_HEARTBEAT_ACTION_PER_SECURE_INVOCATION"
+  });
+}
+
+export function createApprovedHeartbeatActionPolicy(gasPolicy, approvalEvidence) {
+  invariant(approvalEvidence === DIGITAL_ANT_HEARTBEAT_OWNER_APPROVAL, "HEARTBEAT_OWNER_APPROVAL_REQUIRED", "The V3.6 Owner directive is required for a Heart write");
+  const disabled = (action, signature) => Object.freeze({ action, signature, enabled: false, max_gas: null, max_value: null, cooldown: "CONTRACT_DERIVED", daily_limit: 0, minimum_bnb_reserve: "POLICY_REQUIRED", mission_reason: "REQUIRED", security_requirement: "HEALTHY_AND_REVALIDATED" });
+  return Object.freeze({
+    policy_id: "DIGITAL_ANT_LIVE_ACTION_POLICY_V3_6_HEARTBEAT_ONLY", status: "APPROVED_ACTIVE", approval_evidence: approvalEvidence,
+    survival_reserve: gasPolicy.MIN_SURVIVAL_BNB,
+    actions: Object.freeze({
+      heartbeatClaim: Object.freeze({ action: "heartbeatClaim", signature: "heartbeatClaim()", enabled: true, max_gas: gasPolicy.max_action_gas_cost_wei, max_value: "0", cooldown: "CONTRACT_DERIVED", daily_limit: "CONTRACT_COOLDOWN_AND_ONE_PER_INVOCATION", minimum_bnb_reserve: gasPolicy.minimum_survival_bnb_wei, mission_reason: "WUKONG_GATEKEEPER_HEARTBEAT_DUTY", security_requirement: "HEALTHY_AND_REVALIDATED" }),
+      fortuneClaim: disabled("fortuneClaim", "fortuneClaim(uint256)"), igniteAndClaim: disabled("igniteAndClaim", "igniteAndClaim()"),
+      lightLamp: disabled("lightLamp", "lightLamp(uint256)"), makeWish: disabled("makeWish", "makeWish(bytes32)"), vowTo: disabled("vowTo", "vowTo(uint8,uint256)")
+    })
+  });
+}
+
+export function evaluateHeartbeatSafety(snapshot, { approvalEvidence, expectedCodeHash = DIGITAL_ANT_HEART_CODE_HASH } = {}) {
+  const blockers = [];
+  if (snapshot.chain_id !== 56) blockers.push("CHAIN_ID_MISMATCH");
+  if (snapshot.wallet_binding !== "MATCH") blockers.push("WALLET_ADDRESS_MISMATCH");
+  if (snapshot.heart_address?.toLowerCase() !== DIGITAL_ANT_HEART_ADDRESS.toLowerCase()) blockers.push("HEART_ADDRESS_MISMATCH");
+  if (snapshot.heart_code_hash?.toLowerCase() !== expectedCodeHash.toLowerCase()) blockers.push("HEART_BYTECODE_MISMATCH");
+  if (snapshot.kgen_address?.toLowerCase() !== DIGITAL_ANT_KGEN_ADDRESS.toLowerCase()) blockers.push("KGEN_ADDRESS_MISMATCH");
+  if (snapshot.function_selector !== DIGITAL_ANT_HEARTBEAT_SELECTOR) blockers.push("FUNCTION_SELECTOR_MISMATCH");
+  if (snapshot.function_selector_in_bytecode !== true) blockers.push("FUNCTION_SELECTOR_NOT_IN_HEART_BYTECODE");
+  if (snapshot.heartbeat_reward !== "1") blockers.push("HEARTBEAT_REWARD_RUNTIME_MISMATCH");
+  if (snapshot.heartbeat_cooldown_seconds !== "3600") blockers.push("HEARTBEAT_COOLDOWN_RUNTIME_MISMATCH");
+  if (snapshot.eligible !== true) blockers.push("HEARTBEAT_NOT_ELIGIBLE");
+  if (snapshot.security_status !== "HEALTHY") blockers.push("CRITICAL_SECURITY_INCIDENT");
+  if (approvalEvidence !== DIGITAL_ANT_HEARTBEAT_OWNER_APPROVAL) blockers.push("OWNER_APPROVAL_MISSING");
+  if (snapshot.eligible === true && snapshot.gas_estimate_status !== "AVAILABLE") blockers.push("GAS_ESTIMATE_UNAVAILABLE");
+  if (BigInt(snapshot.bnb_after_action_wei ?? "0") < BigInt(snapshot.minimum_bnb_reserve_wei ?? "0")) blockers.push("SURVIVAL_RESERVE_VIOLATION");
+  return Object.freeze({ status: blockers.length ? "HARD_STOP" : "SAFE_EXECUTION_PATH", blockers, action: "heartbeatClaim", broadcast_authority: blockers.length === 0, receipt_gated: true });
+}
+
+export function createV37HeartAutopilotPolicy({ gasPolicy, approvalEvidence, privateSchedulerConnected = false }) {
+  invariant(approvalEvidence === DIGITAL_ANT_V3_7_HEART_AUTOPILOT_APPROVAL, "HEART_AUTOPILOT_OWNER_APPROVAL_REQUIRED", "V3.7 Heart Autopilot requires the exact scoped Owner directive");
+  const enabledInPrivateRuntime = (action, signature, trigger, dailyLimit) => Object.freeze({
+    action, signature, enabled: true, trigger, daily_limit: dailyLimit, max_value: "0",
+    max_gas: gasPolicy.max_action_gas_cost_wei, minimum_bnb_reserve: gasPolicy.minimum_survival_bnb_wei,
+    cooldown: "DEPLOYED_CONTRACT_DERIVED", security_requirement: "HEALTHY_AND_FRESHLY_REVALIDATED",
+    execution_runtime: "PRIVATE_SECURE_SIGNER_ONLY", public_worker_broadcast: false, receipt_reconciliation: true
+  });
+  return Object.freeze({
+    policy_id: "DIGITAL_ANT_LIVE_ACTION_POLICY_V3_7", status: privateSchedulerConnected ? "APPROVED_PRIVATE_RUNTIME_CONNECTED" : "APPROVED_BLOCKED_NO_PERSISTENT_PRIVATE_RUNTIME",
+    approval_evidence: approvalEvidence, survival_reserve: gasPolicy.MIN_SURVIVAL_BNB,
+    public_worker: Object.freeze({ read_only: true, signer: false, candidate_creation: true }),
+    actions: Object.freeze({
+      heartbeatClaim: enabledInPrivateRuntime("heartbeatClaim", "heartbeatClaim()", "ELIGIBILITY_DRIVEN", "CONTRACT_COOLDOWN"),
+      igniteAndClaim: enabledInPrivateRuntime("igniteAndClaim", "igniteAndClaim()", "UTC_00_00_TO_00_10_WINDOW", 1),
+      fortuneClaim: enabledInPrivateRuntime("fortuneClaim", "fortuneClaim(uint256)", "THIRTY_DAY_ELIGIBILITY_AND_FAIRNESS_POLICY", "CONTRACT_COOLDOWN"),
+      makeWish: enabledInPrivateRuntime("makeWish", "makeWish(bytes32)", "ONE_TIME_MISSION_DRIVEN", 1),
+      lightLamp: Object.freeze({ action: "lightLamp", signature: "lightLamp(uint256)", enabled: false, asset: "KGEN", reason: "INSUFFICIENT_BALANCE_AND_SEPARATE_APPROVAL_REQUIRED" }),
+      vowTo: Object.freeze({ action: "vowTo", signature: "vowTo(uint8,uint256)", enabled: false, asset: "KGEN", reason: "WISH_COMPLETION_EVIDENCE_REQUIRED" })
+    }),
+    blocker: privateSchedulerConnected ? null : "NO_PERSISTENT_PRIVATE_SECURE_SCHEDULER",
+    safe_solution: privateSchedulerConnected ? "PRIVATE_RUNTIME_REVALIDATION_ACTIVE" : "INSTALL_PRIVATE_SCHEDULER_WITH_SECRET_MANAGER_ADDRESS_BINDING_AND_RECEIPT_RECONCILIATION"
+  });
+}
+
+export function createV38HeartAutopilotPolicy({ gasPolicy, approvalEvidence, privateSchedulerConnected = false }) {
+  invariant(approvalEvidence === DIGITAL_ANT_V3_8_HEART_AUTOPILOT_APPROVAL, "HEART_AUTOPILOT_OWNER_APPROVAL_REQUIRED", "V3.8 Heart Autopilot requires the exact scoped Owner directive");
+  const enabled = (action, signature, trigger, dailyLimit) => Object.freeze({
+    action, signature, enabled: true, trigger, daily_limit: dailyLimit, max_value: "0",
+    max_gas: gasPolicy.max_action_gas_cost_wei, minimum_bnb_reserve: gasPolicy.minimum_survival_bnb_wei,
+    cooldown: "DEPLOYED_CONTRACT_DERIVED", security_requirement: "HEALTHY_AND_FRESHLY_REVALIDATED",
+    execution_runtime: "PRIVATE_SECURE_SIGNER_ONLY", public_worker_broadcast: false,
+    receipt_reconciliation: true, blind_resubmit: false
+  });
+  const disabled = (action, signature, reason) => Object.freeze({ action, signature, enabled: false, reason, execution_runtime: "PRIVATE_SECURE_SIGNER_ONLY" });
+  return Object.freeze({
+    policy_id: "DIGITAL_ANT_LIVE_ACTION_POLICY_V3_8", status: privateSchedulerConnected ? "APPROVED_PRIVATE_RUNTIME_CONNECTED" : "APPROVED_BLOCKED_NO_PERSISTENT_PRIVATE_RUNTIME",
+    approval_evidence: approvalEvidence, survival_reserve: gasPolicy.MIN_SURVIVAL_BNB,
+    public_worker: Object.freeze({ read_only: true, signer: false, candidate_creation: true }),
+    actions: Object.freeze({
+      heartbeatClaim: enabled("heartbeatClaim", "heartbeatClaim()", "ELIGIBILITY_DRIVEN", "CONTRACT_COOLDOWN"),
+      igniteAndClaim: enabled("igniteAndClaim", "igniteAndClaim()", "DEPLOYED_WINDOW_DRIVEN", 1),
+      fortuneClaim: disabled("fortuneClaim", "fortuneClaim(uint256)", "FIRST_FORTUNE_COMPLETE_MONITOR_COOLDOWN_ONLY"),
+      makeWish: disabled("makeWish", "makeWish(bytes32)", "FIRST_WISH_COMPLETE_TRACK_PROGRESS_ONLY"),
+      lightLamp: disabled("lightLamp", "lightLamp(uint256)", "EXISTING_KGEN_LAMP_SEPARATE_APPROVAL_REQUIRED"),
+      vowTo: disabled("vowTo", "vowTo(uint8,uint256)", "WISH_COMPLETION_EVIDENCE_REQUIRED")
+    }),
+    blocker: privateSchedulerConnected ? null : "NO_PERSISTENT_PRIVATE_SECURE_SCHEDULER",
+    safe_solution: privateSchedulerConnected ? "PRIVATE_RUNTIME_REVALIDATION_ACTIVE" : "INSTALL_USER_CONTROLLED_PRIVATE_SCHEDULER_WITH_ADDRESS_BINDING_AND_RECEIPT_RECONCILIATION"
+  });
+}
+
+export function createHeartActionCandidate({ action, eligibility, block, observedAt, evidence = [] }) {
+  invariant(["heartbeatClaim", "igniteAndClaim", "fortuneClaim", "makeWish"].includes(action), "UNKNOWN_HEART_ACTION", "Public Worker can only create declared V3.7 action candidates");
+  invariant(Number.isInteger(block) && block > 0 && Array.isArray(evidence) && evidence.length > 0, "HEART_ACTION_CANDIDATE_EVIDENCE_REQUIRED", "Action candidates require current block evidence");
+  return Object.freeze({
+    candidate_id: `${action.toUpperCase()}_${block}`, action, status: eligibility === true ? "ACTION_CANDIDATE" : "NO_ACTION",
+    eligible_at_observation: eligibility === true, observed_block: block, observed_at: observedAt,
+    evidence: [...evidence], trusted_for_signature: false, signer_must_revalidate: true,
+    public_worker_broadcast: false, tx_hash: null
+  });
+}
+
+export function selectFortuneAmount({ fortuneMin, fortuneMax, heartBalance, epochRemaining, lifeNeed = "WORK_SURVIVAL", claimantPressure = "UNKNOWN" }) {
+  const minimum = BigInt(String(fortuneMin));
+  const maximum = BigInt(String(fortuneMax));
+  const available = [BigInt(String(heartBalance)), BigInt(String(epochRemaining))].reduce((a, b) => a < b ? a : b);
+  invariant(minimum > 0n && maximum >= minimum, "FORTUNE_RUNTIME_RANGE_INVALID", "Fortune selection requires deployed min/max evidence");
+  if (available < minimum) return Object.freeze({ status: "NO_ACTION", amount: "0", reason: "HEART_OR_EPOCH_CAPACITY_BELOW_FORTUNE_MINIMUM" });
+  const amount = available < maximum ? available : minimum;
+  return Object.freeze({
+    status: "FORTUNE_ACTION_PLAN", amount: amount.toString(), range: Object.freeze({ min: minimum.toString(), max: maximum.toString() }),
+    reason: "MINIMUM_FAIR_ALLOCATION_PRESERVES_HEART_FOR_OTHER_CLAIMANTS", life_need: lifeNeed, claimant_pressure: claimantPressure,
+    requires_fresh_eligibility: true, requires_private_signer: true, receipt_gated: true
+  });
+}
+
+export function reconcileHeartTransaction({ plannedAction, broadcastHash, receipt, verifiedEvent, balanceBeforeWei, balanceAfterWei }) {
+  invariant(/^0x[0-9a-fA-F]{64}$/.test(broadcastHash ?? ""), "HEART_TX_HASH_REQUIRED", "Reconciliation requires the broadcast transaction hash");
+  if (!receipt) return Object.freeze({ status: "PENDING_RECONCILIATION", action: plannedAction, tx_hash: broadcastHash, rebroadcast: false });
+  invariant(receipt.transactionHash?.toLowerCase() === broadcastHash.toLowerCase(), "HEART_RECEIPT_HASH_MISMATCH", "Receipt must match the broadcast transaction");
+  if (receipt.status !== 1) return Object.freeze({ status: "FAILED_RECEIPT", action: plannedAction, tx_hash: broadcastHash, rebroadcast: false, life_event_completed: false });
+  invariant(verifiedEvent === true, "HEART_EVENT_VERIFICATION_REQUIRED", "A successful receipt still requires the expected Heart event");
+  const rewardAction = ["heartbeatClaim", "fortuneClaim", "igniteAndClaim"].includes(plannedAction);
+  if (rewardAction) invariant(BigInt(balanceAfterWei) > BigInt(balanceBeforeWei), "HEART_REWARD_BALANCE_VERIFY_REQUIRED", "Reward action requires a verified KGEN increase");
+  return Object.freeze({ status: "COMPLETED_VERIFIED", action: plannedAction, tx_hash: broadcastHash, rebroadcast: false, life_event_completed: true });
+}
+
+export function prepareSecureHeartAction({ proposal, latest, policy = DIGITAL_ANT_LIVE_ACTION_POLICY, signerStatus = "NOT_CONNECTED" }) {
+  invariant(proposal?.action && policy.actions[proposal.action], "UNKNOWN_HEART_ACTION", "Secure Signer received an unknown Heart action");
+  const actionPolicy = policy.actions[proposal.action];
+  invariant(signerStatus === "CONNECTED_SECURE_RUNTIME", "SECURE_SIGNER_NOT_CONNECTED", "Heart write requires a separate secure signer runtime");
+  invariant(["APPROVED_ACTIVE", "APPROVED_PRIVATE_RUNTIME_CONNECTED"].includes(policy.status) && actionPolicy.enabled === true, "LIVE_ACTION_POLICY_NOT_ENABLED", "Heart action is not enabled by approved policy");
+  invariant(latest?.chain_id === 56 && latest.contract_verified === true, "SECURE_SIGNER_CHAIN_OR_CONTRACT_INVALID", "Secure Signer must reverify chain and Heart contract");
+  invariant(latest.eligible === true && latest.security_status === "HEALTHY", "SECURE_SIGNER_REVALIDATION_FAILED", "Secure Signer must reverify current eligibility and security");
+  if (proposal.action === "makeWish") invariant(latest.first_wish_completed !== true, "FIRST_WISH_ALREADY_COMPLETED", "The one-time Digital Ant mission Wish cannot be automatically repeated");
+  if (proposal.action === "vowTo") invariant(latest.wish_completed === true, "WISH_COMPLETION_REQUIRED", "Vow requires verified Wish/Mission completion");
+  invariant(Number.isInteger(latest.block) && latest.block > 0 && latest.gas_estimate !== null, "SECURE_SIGNER_LATEST_BLOCK_AND_GAS_REQUIRED", "Secure Signer requires latest-block gas evidence");
+  invariant(BigInt(latest.bnb_after_action_wei ?? "0") >= BigInt(latest.minimum_bnb_reserve_wei ?? "0"), "SURVIVAL_RESERVE_VIOLATION", "Heart action cannot consume the survival reserve");
+  return Object.freeze({ status: "READY_FOR_SECURE_SIGNATURE", action: proposal.action, block: latest.block, chain_id: 56, signer_scope: "PRIVATE_SECURE_RUNTIME_ONLY", broadcast: false });
 }
 
 export async function appendWalletRecoveryEvent({ store, life, eventType, payload, timestamp }) {

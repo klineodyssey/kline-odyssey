@@ -1,5 +1,43 @@
 # 11520 Changelog
 
+## 3.9.0
+
+- Added an autonomous post-Gatekeeper CFO field-service scan covering cash logistics, KUFO supply, waste collection and general delivery.
+- Added strict ATM inventory, waste/container/reactable-matter, route, trip-energy, matter-pair, cost, profit, delivery and workforce truth gates.
+- Reused the existing K280/Universe Map coordinate authority without modifying Land, Map, 12345, TempleHeart or contract runtimes.
+- Added shared hourly Field Service patrol evidence and 11520 CFO UI. With no verified inventory or cargo request, Field Jobs, Revenue and First KAIOS remain zero.
+- Upgraded 11520 to V3.9.0 and `DIGITAL_ANT_APP_0001` to V1.6.0 without changing Life ID, Birth, Wallet, Thought Organ or Company identity.
+
+## 3.8.0
+
+- Bound the Digital Ant Life/App/11520 certification to Physics CURRENT V3.8 using a verified SHA-256 metadata binding, without copying or modifying the constitution.
+- Added startup Thought Organ mismatch detection and a hard planning gate so older reports or chat memory cannot override deployed chain truth or CURRENT.
+- Added First KAIOS strategy, network-only physical capability truth, balanced-warp/coasting and braking-fuel runtime guards.
+- Expanded the private Heart worker with fail-closed local scheduling, fresh chain revalidation, survival reserve and receipt reconciliation. The public GitHub worker remains signer-free.
+- Recorded the private scheduler's receipt/event/balance-verified first Ignition at the deployed UTC window, updating KGEN from 4 to 12 without exposing signer material.
+- Upgraded 11520 to V3.8.0 and `DIGITAL_ANT_APP_0001` to V1.5.0 without changing Life ID, Birth Certificate, Wallet or Company identity.
+
+## 3.7.0
+
+- Upgraded `DIGITAL_ANT_APP_0001` to V1.4.0 without changing Life ID, Birth, Wallet, Listing or Company identity.
+- Added public evidence-based Heartbeat/Ignition/Fortune/Wish candidates, UTC ignition-window probes, private-only policy gates and no-resubmit receipt reconciliation.
+- Recorded a verified second Heartbeat, first Fortune (minimum/fair 1 KGEN) and first Wish from a controlled private invocation; persistent automatic signing remains blocked.
+- Recorded the complete Wish and hash, with zero KGEN token cost, dynamic BNB gas and Vow locked until mission completion.
+- Read-verified the deployed 18911 Furnace architecture while truthfully blocking KAIOS Incense and KUFO Claim because the Ant has zero KAIOS and 511111/KSHIP Converter are not registered.
+- Formalized `1 K18888 Heaven Day = 1 K280 year`, one-year KUFO half-life, deterministic lazy decay, separate propulsion use, conserved KSHIP derivation and the permanent `KUFO != UFO` distinction.
+- Added demand-first UFO/takeoff and KSHIP/Mars industry projections without creating a vehicle, fuel, factory, customer or revenue.
+- Added proactive Mother Engine problem discovery and evidence-backed next-best-action selection.
+
+## 3.5.0
+
+- Upgraded `DIGITAL_ANT_APP_0001` to V1.2.0 without changing Life ID, immutable Birth Certificate, Wallet binding, Listing or Company identity.
+- Enforced `WUKONG_GATEKEEPER` as the primary job before CFO and Company work. Critical Gatekeeper failure skips secondary work; safe optional degradation remains explicit evidence.
+- Added `GATEKEEPER_DUTY_STATUS`, separate Gatekeeper/CFO/Company work-time accounting and a cumulative daily Gatekeeper report.
+- Added the Core Heart Event Indexer for Fortune, Heartbeat, Ignition, Lamp, Wish and Vow. Advanced transfer/approval/funding graphs remain optional and indexer-gated.
+- Added append-only, idempotent First-Life-Event evidence guards. A successful receipt is mandatory, and First KGEN/KAIOS also require a real balance increase.
+- Added a fail-closed Secure Signer Worker interface and per-action Heart policy. It is `NOT_CONNECTED`; no private key, signer, chain write or asset action is present in the public Worker.
+- Added evidence-derived Life timeline and primary/secondary duty UI. Events without proof display `NOT YET`.
+
 ## 3.4.0
 
 - Upgraded `DIGITAL_ANT_APP_0001` to V1.1.0 without changing Life ID, immutable Birth Certificate, personal Wallet ownership, Mission identity or non-transferable identity right.
@@ -167,3 +205,10 @@
 - Added read-only 12345 Heart integration with runtime bytecode verification.
 - Removed random candles, simulated order book, hard-coded TVL, fabricated prices and demo land ownership.
 - Kept settlement and undeployed currencies explicitly marked `NOT_DEPLOYED`.
+# V3.6.0
+
+- Verified the first BSC Heartbeat and first KGEN with successful receipt, Heart/KGEN logs and 0 → 1 KGEN balance evidence.
+- Used a private local Secure Signer with fresh mainnet revalidation, address binding, dynamic gas/survival reserve and receipt reconciliation. Credential-capable code is not stored in the Repo, Pages or public workflows; only its fail-closed public policy and verified receipt evidence are released.
+- Added Mother Engine problem-solving proposals, demand-first product/supply-chain guards, KGEN/KAIOS/BNB economic roles, ANT_MECH requirements, vehicle energy and transport schemas.
+- Audited and reused existing K280, 12345 and Universe Map coordinate structures without modifying protected workstreams.
+- Upgraded `DIGITAL_ANT_APP_0001` to V1.3.0 and exposed verified first-event evidence in the public Life UI.

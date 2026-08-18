@@ -877,15 +877,29 @@ Runtime V1 implementation:
 | `RECOVERY-KAIOS-AI-COMPANY-RUNTIME-V1.md` | Recovery point. |
 | `KAIOS_AI_COMPANY_RUNTIME_V1_CLOSEOUT.md` | Runtime closeout. |
 
-## 11520 Universal Exchange V3.4 Registration
+## 11520 Universal Exchange V3.9 Registration
 
 | Repository path | Purpose |
 |---|---|
-| `core/` | Multi-domain Digital Life, Registry, Company, Market, History, Security and request-gateway core. |
+| `core/` | Multi-domain Digital Life, Registry, Company, Market, History, Security, request-gateway and evidence-gated CFO field-service core. |
 | `core/data/canonical.json` | Evidence-labelled canonical universe records; real customer/request/revenue counts remain zero until verified events exist. |
-| `K線西遊記/temples/11520/` | Universal Exchange V3.4 multilingual frontend, Voice/Text Concierge, shared Worker health and public civilization request entry. |
+| `K線西遊記/temples/11520/` | Universal Exchange V3.9 multilingual frontend, Voice/Text Concierge, shared Worker health, public civilization request entry and autonomous CFO field-service truth dashboard. |
 | `.github/workflows/universal_exchange_v2.yml` | Hourly signerless Worker, exact-scope Work Evidence persistence and Universal Exchange validation. |
 | `.github/ISSUE_TEMPLATE/civilization-request.yml` | Authenticated shared real-request entry; not a Quote, Order or payment. |
 | `KGEN-AI-Company/reports/DIGITAL_ANT_V3_4_LIVE_LIFE_REPORT.md` | V3.4 task envelope, validation, protected-path and production deployment evidence. |
 | `docs/KGEN_11520_V2_ARCHITECTURE.md` | Cumulative architecture and authority gates. |
+
+### V3.6 additive files
+
+| Path | Purpose |
+|---|---|
+| `K線西遊記/temples/11520/runtime/life-events/DIGITAL_ANT_0001_FIRST_HEARTBEAT_AND_KGEN_V3_6.json` | Public append-only receipt/log/balance evidence for the first Heartbeat and first KGEN events. |
 | `tests/universal-exchange.test.mjs` | Domain and public request safety regression suite. |
+
+### V3.9 autonomous field-service additions
+
+| Path | Purpose |
+|---|---|
+| `core/company/index.mjs` | Cash/KUFO/Waste/Delivery demand, route, energy, cost, profit, delivery and workforce evidence gates. |
+| `core/jobs/public-read-only-worker.mjs` | Post-Gatekeeper hourly CFO field-service patrol; read/scan/plan only, no signer or settlement. |
+| `core/data/canonical.json` | Four coordinate-verified nodes and truthful zero-inventory/zero-job/zero-revenue V3.9 projection. |

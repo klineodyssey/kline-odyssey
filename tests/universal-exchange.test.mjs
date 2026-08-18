@@ -74,17 +74,126 @@ import {
   normalizeHeartActionStatus, validateSharedWorkerStatus, createGeneralManagerClockIn,
   createCompanyPayrollPolicyDraft, createGeneralManagerPatrolPlan, calculateModeledGenesisMassTransit,
   createCodexGmAutonomyPolicy, createCodexGmLifeContinuityPlan, createModelProviderAbstraction,
-  NAIHE_DIGITAL_LIFE_GENESIS_STATION_SPEC
+  NAIHE_DIGITAL_LIFE_GENESIS_STATION_SPEC,
+  DIGITAL_ANT_WORK_PRIORITIES, DIGITAL_ANT_HOURLY_DUTY_ORDER,
+  validateGatekeeperDutyStatus, assertCompanyWorkAllowedAfterGatekeeper,
+  validateFirstLifeEventEvidence, appendFirstDigitalAntLifeEvent,
+  DIGITAL_ANT_LIFE_WORK_CONTRACT, createDailyGatekeeperReport,
+  DIGITAL_ANT_SECURE_SIGNER_WORKER, DIGITAL_ANT_LIVE_ACTION_POLICY, prepareSecureHeartAction,
+  DIGITAL_ANT_HEARTBEAT_OWNER_APPROVAL, DIGITAL_ANT_HEARTBEAT_SELECTOR,
+  createHeartbeatGasPolicy, createApprovedHeartbeatActionPolicy, evaluateHeartbeatSafety
+  , DIGITAL_ANT_V3_7_HEART_AUTOPILOT_APPROVAL, createV37HeartAutopilotPolicy,
+  createHeartActionCandidate, selectFortuneAmount, reconcileHeartTransaction,
+  evaluateIgnitionWindow, createIgnitionMissedEvent, validateHeartLifeEvent, DIGITAL_ANT_WISH_TEXT
+  , DEMAND_FIRST_CIVILIZATION_LAWS, validateMotherEngineProposal,
+  calculateDivineProductPriority, rankDivineProducts, validateOperationalEnergyLaw,
+  validateBodyEnergyModel, validateAntMechProduct, validateDemandFirstSupplyChain,
+  validateTransportContract, HEAVEN_TIME_LAW, KUFO_FUEL_LAW, calculateKufoFuelState,
+  createUfoProductReadiness, evaluateUfoTakeoff, createMotherEngineNextBestAction
+  , validateThoughtOrganBinding, verifyThoughtOrganHealth, assertThoughtOrganReadyForPlanning,
+  createAiLifeCertification, createThoughtOrganTimelineEvent, CANONICAL_TRUTH_PRIORITY,
+  resolveLifePhysicalCapability, createFirstKaiosStrategy, evaluateKshipWarpFeed,
+  DIGITAL_ANT_V3_8_HEART_AUTOPILOT_APPROVAL, createV38HeartAutopilotPolicy
+  , KAIOS_CASH_LAW, createAtmFieldServiceRequests, validateWasteInventory,
+  calculateFieldTripEnergy, calculateMatterAntimatterEnergy, validateFieldRoute,
+  calculateFieldServiceQuote, validateFieldDeliveryEvidence, createWorkforceGap,
+  createFieldServiceDemandScan
 } from "../core/index.mjs";
 import { verifyDigitalAntWalletBinding, verifyDigitalLifeWalletBinding, CODEX_GM_ENV } from "../core/security/wallet-binding.mjs";
-import { TEMPLE_HEART_READ_ABI, TEMPLE_HEART_DRY_RUN_ABI, TEMPLE_HEART_VERIFIED_ACTIONS } from "../core/integrations/temple-heart-12345.mjs";
-import { buildSharedWorkerStatus, createPublicReadProvider, readCompanyPatrol, readPublicRequestPatrol } from "../core/jobs/public-read-only-worker.mjs";
+import { TEMPLE_HEART_READ_ABI, TEMPLE_HEART_DRY_RUN_ABI, TEMPLE_HEART_VERIFIED_ACTIONS, readCoreHeartEvents } from "../core/integrations/temple-heart-12345.mjs";
+import { buildSharedWorkerStatus, createPublicReadProvider, inspectPhysicsThoughtOrgan, readCompanyPatrol, readFieldServicePatrol, readMotherEnginePatrol, readPublicRequestPatrol } from "../core/jobs/public-read-only-worker.mjs";
 
 const seed = JSON.parse(await fs.readFile(new URL("../core/data/canonical.json", import.meta.url), "utf8"));
 
 async function runtime() {
   return createUniverseRuntime({ seed: structuredClone(seed), store: new MemoryUniverseStore() });
 }
+
+test("V3.9 field service scan preserves zero-job truth without inventory evidence", () => {
+  const scan = createFieldServiceDemandScan({ nodes: seed.next_stage.field_service_business_v3_9.verified_nodes });
+  assert.equal(scan.status, "NO_VERIFIED_FIELD_JOB_AVAILABLE");
+  assert.equal(scan.nodes_scanned, 4);
+  assert.equal(scan.candidate_jobs.length, 0);
+  assert.equal(scan.real_field_jobs, 0);
+  assert.equal(scan.revenue, "0");
+});
+
+test("V3.9 KAIOS ledger is not physical cash cargo", () => {
+  assert.equal(KAIOS_CASH_LAW.ledger_asset, "KAIOS_LEDGER");
+  assert.equal(KAIOS_CASH_LAW.physical_cargo, "KAIOS_CASH_CARGO");
+  assert.equal(KAIOS_CASH_LAW.ledger_transfer_is_cash_delivery, false);
+});
+
+test("V3.9 fixed ATM creates replenishment only from verified inventory", () => {
+  const base = { atm_id: "ATM_11520_0001", coordinate: 11520, mobility: "FIXED", kaios_cash_status: "LOW", kufo_status: "HUNGRY" };
+  assert.equal(createAtmFieldServiceRequests({ ...base, inventory_evidence: null }).requests.length, 0);
+  const verified = createAtmFieldServiceRequests({ ...base, inventory_evidence: "SIGNED_WORLD_SNAPSHOT" });
+  assert.deepEqual(verified.requests.map((request) => request.service_type), ["CASH_LOGISTICS", "KUFO_SUPPLY"]);
+  assert.throws(() => createAtmFieldServiceRequests({ ...base, mobility: "MOBILE", inventory_evidence: "EVIDENCE" }), /ATM service nodes are fixed/);
+});
+
+test("V3.9 waste inventory separates container, waste and reactable matter", () => {
+  const waste = { waste_id: "WASTE_1", source: "NODE_1", mass: 2, type: "GENERAL", container: "BIN_1", container_mass: 10, waste_mass: 2, reactable_matter_mass: 1.5, pickup_coordinate: 1, destination: 2, hazard_class: "LOW", recyclable: true, owner: "NODE_1", timestamp: "2026-08-18T00:00:00Z", evidence: "WORLD_SNAPSHOT" };
+  assert.equal(validateWasteInventory(waste).reactable_matter_mass, 1.5);
+  assert.throws(() => validateWasteInventory({ ...waste, mass: 12 }), /Waste mass excludes/);
+  assert.throws(() => validateWasteInventory({ ...waste, reactable_matter_mass: 12 }), /cannot include container mass/);
+});
+
+test("V3.9 trip energy uses complete physical components", () => {
+  const result = calculateFieldTripEnergy({ acceleration_work: 10, rolling_resistance: 2, drag: 3, climbing: 4, braking_loss: 5, systems_energy: 6, safety_reserve: 7 });
+  assert.equal(result.required_energy, 37);
+  assert.equal(result.mass_times_distance_only, false);
+});
+
+test("V3.9 matter and energy remain scalar while thrust supplies direction", () => {
+  const result = calculateMatterAntimatterEnergy({ positiveMatterMass: 2, kshipAntimatterMass: 1, efficiency: 0.5 });
+  assert.equal(result.paired_mass_each_side, 1);
+  assert.equal(result.mass_is_scalar, true);
+  assert.equal(result.energy_is_scalar, true);
+  assert.match(result.direction_source, /THRUST_VECTOR/);
+  assert.throws(() => calculateMatterAntimatterEnergy({ positiveMatterMass: 1, kshipAntimatterMass: 1, efficiency: null }), /Engine policy/);
+});
+
+test("V3.9 route requires existing K280 or Universe Map evidence", () => {
+  const route = { origin: "12345", destination: "11520", origin_coordinate: 12345, destination_coordinate: 11520, distance: 18778.422548555, route: [12345, 11520], travel_time: 3600, map_evidence: "docs/maps/UniverseMap_V10_2_DISTANCE_COMPLETE_ALL_POINTS.json" };
+  assert.equal(validateFieldRoute(route).map_evidence.includes("UniverseMap"), true);
+  assert.throws(() => validateFieldRoute({ ...route, map_evidence: null }), /Routes must reuse evidenced/);
+});
+
+test("V3.9 CFO quote exposes every cost and refuses non-positive profit", () => {
+  const base = { energy_cost: 1, labor_cost: 2, body_or_vehicle_depreciation: 3, maintenance: 4, bnb_chain_cost: 5, security_cost: 6, insurance_risk_reserve: 7, loading_cost: 8, unloading_cost: 9, other_verified_cost: 10, estimated_hours: 5 };
+  const profitable = calculateFieldServiceQuote({ ...base, target_profit: 10 });
+  assert.equal(profitable.total_cost, 55);
+  assert.equal(profitable.quoted_revenue, 65);
+  assert.equal(profitable.profit_per_hour, 2);
+  assert.equal(calculateFieldServiceQuote({ ...base, target_profit: 0 }).decision, "REPRICE_OPTIMIZE_NEGOTIATE_OR_DECLINE");
+  assert.equal(profitable.movement_is_revenue, false);
+});
+
+test("V3.9 delivery revenue requires complete receiver acceptance evidence", () => {
+  const evidence = { origin_evidence: "A", pickup_evidence: "B", cargo_evidence: "C", route_evidence: "D", arrival_coordinate: "E", delivery_timestamp: "F", receiver_evidence: "G", customer_acceptance: "H" };
+  assert.equal(validateFieldDeliveryEvidence(evidence).status, "DELIVERY_VERIFIED");
+  assert.throws(() => validateFieldDeliveryEvidence({ ...evidence, customer_acceptance: null }), /Revenue requires/);
+});
+
+test("V3.9 workforce gap follows verified demand and does not create Life", () => {
+  const gap = createWorkforceGap({ verifiedJobs: [{ verified: true }, { verified: true }], eligibleWorkers: [], availableCapacity: 1 });
+  assert.equal(gap.status, "WORKFORCE_GAP");
+  assert.equal(gap.job_posting_required, true);
+  assert.equal(gap.new_life_created, false);
+  assert.throws(() => createWorkforceGap({ verifiedJobs: [{ verified: false }], eligibleWorkers: [], availableCapacity: 0 }), /hypothetical jobs/);
+});
+
+test("V3.9 public CFO patrol runs after primary duty and creates no fake business", () => {
+  const patrol = readFieldServicePatrol(seed);
+  assert.equal(patrol.primary_job_gate, "GATEKEEPER_DUTY_COMPLETED_BEFORE_CFO_SCAN");
+  assert.equal(patrol.status, "NO_VERIFIED_FIELD_JOB_AVAILABLE");
+  assert.equal(patrol.real_field_jobs, 0);
+  assert.equal(patrol.settlement, false);
+  assert.equal(patrol.chain_write, false);
+  assert.equal(seed.next_stage.field_service_business_v3_9.workforce.job_postings, 0);
+  assert.equal(seed.next_stage.field_service_business_v3_9.first_kaios_event, "NOT_OCCURRED");
+});
 
 test("Life IDs are unique and DIGITAL_ANT_0001 has verified immutable birth evidence", () => {
   const ids = seed.lives.map((life) => life.life_id);
@@ -740,7 +849,7 @@ test("V2.4 Life App release preserves Life ID, Birth and independent App version
   assert.equal(life.life_id, "DIGITAL_ANT_0001");
   assert.equal(life.birth_timestamp, "2026-08-15T06:20:45.000Z");
   assert.equal(app.life_id, life.life_id);
-  assert.equal(app.version, "V1.1.0");
+  assert.equal(app.version, "V1.6.0");
   assert.equal(app.status, "RELEASED_LOCAL");
   assert.equal(await calculateAppManifestHash(app), app.manifest_hash);
   assert.equal(app.permissions.CHAIN_READ, true);
@@ -763,7 +872,7 @@ test("V2.4 hourly cycle is once per UTC hour and duration uses actual timestamps
   };
   const first = await runDigitalAntHourlyCycle(input);
   const duplicate = await runDigitalAntHourlyCycle({ ...input, scheduledAt: "2026-08-15T10:59:59.000Z" });
-  assert.equal(first.status, "WORK_CYCLE_DEGRADED");
+  assert.equal(first.status, "WORK_CYCLE_COMPLETED");
   assert.equal(first.event.payload.work_duration_seconds, 5);
   assert.equal(duplicate.status, "IDEMPOTENT_NOOP");
   assert.equal((await state.store.history(life.life_id, "LIFE")).filter((event) => event.event_type === "HOURLY_WORK_EVENT").length, 1);
@@ -2209,10 +2318,10 @@ test("V3.4 shared status is global truth while IndexedDB remains local cache", a
   assert.equal(status.chain_write, false);
 });
 
-test("V3.4 App upgrade preserves Life ID and immutable Birth", async () => {
+test("V3.9 App upgrade preserves Life ID and immutable Birth", async () => {
   const app = seed.apps.find((item) => item.app_id === "DIGITAL_ANT_APP_0001");
   const life = seed.lives.find((item) => item.life_id === "DIGITAL_ANT_0001");
-  assert.equal(app.version, "V1.1.0");
+  assert.equal(app.version, "V1.6.0");
   assert.equal(app.life_id, life.life_id);
   assert.equal(life.birth_timestamp, "2026-08-15T06:20:45.000Z");
   assert.equal(await calculateAppManifestHash(app), app.manifest_hash);
@@ -2245,4 +2354,429 @@ test("V3.4 Node worker uses a signer-free fetch transport and verifies BSC chain
   assert.equal(await provider.getBlockNumber(), 0x1234);
   assert.deepEqual(await provider.listAccounts(), []);
   assert.deepEqual(methods, ["eth_chainId", "eth_blockNumber", "eth_chainId", "eth_accounts"]);
+});
+
+function gatekeeperDuty(overrides = {}) {
+  return {
+    status: "COMPLETED", gatekeeper_started_at: "2026-08-16T13:00:01.000Z", gatekeeper_finished_at: "2026-08-16T13:00:03.000Z",
+    heart_block: 116236674, heart_status: "AVAILABLE", fortune_status: "ELIGIBLE", heartbeat_status: "ELIGIBLE",
+    ignition_status: "OUT_OF_WINDOW", lamp_status: "INSUFFICIENT_BALANCE", wish_status: "ELIGIBLE", vow_status: "NOT_ELIGIBLE",
+    claim_monitor_status: "CORE_HEART_INDEXER_HEALTHY", risk_status: "NORMAL", degradation_affects_safety: false,
+    evidence: ["HEART_BLOCK_116236674", "HEART_BYTECODE_VERIFIED"], ...overrides
+  };
+}
+
+test("V3.5 Primary Wukong Gatekeeper job always precedes Company work", () => {
+  assert.deepEqual(DIGITAL_ANT_WORK_PRIORITIES, ["SURVIVE", "WUKONG_GATEKEEPER", "CFO_OF_SELF", "AI_ANT_COMPANY", "DREAM_SPACECRAFT_MARS"]);
+  assert.ok(DIGITAL_ANT_HOURLY_DUTY_ORDER.indexOf("12345_GATEKEEPER_PATROL") < DIGITAL_ANT_HOURLY_DUTY_ORDER.indexOf("AI_ANT_COMPANY_WORK"));
+  assert.equal(DIGITAL_ANT_LIFE_WORK_CONTRACT.primary_job, "WUKONG_GATEKEEPER");
+  assert.equal(DIGITAL_ANT_LIFE_WORK_CONTRACT.secondary_work, "AI_ANT_COMPANY_FOUNDER");
+});
+
+test("V3.5 Primary job bypass fails while safe degraded duty may continue", () => {
+  assert.equal(assertCompanyWorkAllowedAfterGatekeeper(gatekeeperDuty()), true);
+  assert.equal(assertCompanyWorkAllowedAfterGatekeeper(gatekeeperDuty({ status: "DEGRADED", degradation_affects_safety: false })), true);
+  assert.throws(() => assertCompanyWorkAllowedAfterGatekeeper(gatekeeperDuty({ status: "FAILED_CRITICAL", degradation_affects_safety: true })), (error) => error.code === "PRIMARY_JOB_BYPASS");
+  assert.equal(validateGatekeeperDutyStatus(gatekeeperDuty()).status, "COMPLETED");
+});
+
+test("V3.5 First asset events require a real balance increase and immutable evidence", async () => {
+  const state = await runtime();
+  const life = await state.registries.life.get("DIGITAL_ANT_0001");
+  const evidence = { life_id: life.life_id, asset: "KGEN", balance_before_wei: "0", balance_after_wei: "1", amount_wei: "1", tx_hash: `0x${"a".repeat(64)}`, block: 116300000, timestamp: "2026-08-16T13:00:00.000Z", receipt_status: 1, source: "FORTUNE" };
+  assert.equal(validateFirstLifeEventEvidence("FIRST_KGEN_EVENT", evidence), evidence);
+  const first = await appendFirstDigitalAntLifeEvent({ store: state.store, life, eventType: "FIRST_KGEN_EVENT", evidence });
+  assert.equal(first.status, "FIRST_LIFE_EVENT_APPENDED");
+  const second = await appendFirstDigitalAntLifeEvent({ store: state.store, life, eventType: "FIRST_KGEN_EVENT", evidence });
+  assert.equal(second.status, "IDEMPOTENT_NOOP");
+  assert.equal(life.birth_timestamp, "2026-08-15T06:20:45.000Z");
+  assert.throws(() => validateFirstLifeEventEvidence("FIRST_KAIOS_EVENT", { ...evidence, balance_after_wei: "0" }), (error) => error.code === "FIRST_ASSET_BALANCE_INCREASE_REQUIRED");
+});
+
+test("V3.5 Heart first events require success receipts, timestamps, blocks and tx hashes", () => {
+  const base = { life_id: "DIGITAL_ANT_0001", tx_hash: `0x${"b".repeat(64)}`, block: 116300001, timestamp: "2026-08-16T13:01:00.000Z", receipt_status: 1 };
+  for (const eventType of ["FIRST_HEARTBEAT_EVENT", "FIRST_FORTUNE_EVENT", "FIRST_IGNITION_EVENT", "FIRST_LAMP_EVENT", "FIRST_WISH_EVENT", "FIRST_VOW_EVENT", "FIRST_THANKSGIVING_EVENT"]) {
+    assert.equal(validateFirstLifeEventEvidence(eventType, base), base);
+    assert.throws(() => validateFirstLifeEventEvidence(eventType, { ...base, receipt_status: 0 }), (error) => error.code === "FIRST_EVENT_SUCCESS_RECEIPT_REQUIRED");
+  }
+  assert.throws(() => validateFirstLifeEventEvidence("FIRST_WISH_EVENT", { ...base, tx_hash: null }), (error) => error.code === "FIRST_EVENT_TX_EVIDENCE_REQUIRED");
+  assert.throws(() => validateFirstLifeEventEvidence("FIRST_LAMP_EVENT", { ...base, timestamp: null }), (error) => error.code === "FIRST_EVENT_TIMESTAMP_EVIDENCE_REQUIRED");
+});
+
+test("V3.5 Core Heart indexer is independent from optional advanced transaction graph", async () => {
+  const event = { blockNumber: 12, transactionIndex: 0, transactionHash: `0x${"c".repeat(64)}`, args: { user: "0xc8346d6DC80f16941ee874D523f0C17F1548d437", amount: 1n, epochIndex: 1n, wishHash: `0x${"d".repeat(64)}`, reward: 1n, dayIndex: 1n, daysAdded: 1n, paid: 1n, newExpireAt: 1n, option: 1 } };
+  const heart = { filters: { FortuneClaimed: () => "F", WishMade: () => "W", HeartbeatClaimed: () => "H", IgniteClaimed: () => "I", LampLit: () => "L", Vowed: () => "V" }, queryFilter: async () => [event] };
+  const indexed = await readCoreHeartEvents(heart, 1, 12);
+  assert.equal(indexed.status, "CORE_HEART_INDEXER_HEALTHY");
+  assert.equal(indexed.fortune_claims.length, 1);
+  assert.equal(indexed.vows.length, 1);
+  assert.equal(indexed.indexer, "CORE_HEART_INDEXER");
+});
+
+test("V3.5 Secure Signer stays private, disconnected and fail-closed", () => {
+  assert.equal(DIGITAL_ANT_SECURE_SIGNER_WORKER.status, "NOT_CONNECTED");
+  assert.equal(DIGITAL_ANT_SECURE_SIGNER_WORKER.public_pages_access, false);
+  assert.equal(DIGITAL_ANT_SECURE_SIGNER_WORKER.public_workflow_access, false);
+  assert.equal(DIGITAL_ANT_LIVE_ACTION_POLICY.actions.fortuneClaim.enabled, false);
+  assert.throws(() => prepareSecureHeartAction({ proposal: { action: "fortuneClaim" }, latest: {}, signerStatus: "NOT_CONNECTED" }), (error) => error.code === "SECURE_SIGNER_NOT_CONNECTED");
+});
+
+test("V3.5 Survival reserve blocks an otherwise revalidated secure action", () => {
+  const policy = { ...DIGITAL_ANT_LIVE_ACTION_POLICY, status: "APPROVED_ACTIVE", actions: { ...DIGITAL_ANT_LIVE_ACTION_POLICY.actions, heartbeatClaim: { ...DIGITAL_ANT_LIVE_ACTION_POLICY.actions.heartbeatClaim, enabled: true } } };
+  assert.throws(() => prepareSecureHeartAction({ proposal: { action: "heartbeatClaim" }, policy, signerStatus: "CONNECTED_SECURE_RUNTIME", latest: { chain_id: 56, contract_verified: true, eligible: true, security_status: "HEALTHY", block: 116300002, gas_estimate: "100000", bnb_after_action_wei: "1", minimum_bnb_reserve_wei: "2" } }), (error) => error.code === "SURVIVAL_RESERVE_VIOLATION");
+});
+
+test("V3.5 Daily Gatekeeper report separates duty evidence and truthful zero balances", () => {
+  const report = createDailyGatekeeperReport({ date: "2026-08-16", workEvents: [{ gatekeeper_duty: gatekeeperDuty() }], balances: { BNB: "0.006", KGEN: "0", KAIOS: "0" }, generatedAt: "2026-08-16T13:10:00.000Z" });
+  assert.equal(report.completed, 1);
+  assert.equal(report.first_kgen_status, "NOT_OCCURRED");
+  assert.equal(report.first_kaios_status, "NOT_OCCURRED");
+  assert.equal(report.chain_write, false);
+});
+
+test("V3.9 Canonical App and Gatekeeper runtime preserve Birth and receipt-gated first-asset evidence", async () => {
+  const app = seed.apps.find((item) => item.app_id === "DIGITAL_ANT_APP_0001");
+  assert.equal(seed.schema_version, "3.9.0");
+  assert.equal(app.version, "V1.6.0");
+  assert.equal(await calculateAppManifestHash(app), app.manifest_hash);
+  assert.equal(seed.lives[0].birth_timestamp, "2026-08-15T06:20:45.000Z");
+  assert.equal(seed.next_stage.gatekeeper_runtime.life_events.FIRST_HEARTBEAT_EVENT, "VERIFIED");
+  assert.equal(seed.next_stage.gatekeeper_runtime.life_events.FIRST_KGEN_EVENT, "VERIFIED");
+  assert.equal(seed.next_stage.gatekeeper_runtime.life_events.FIRST_KAIOS_EVENT, "NOT_OCCURRED");
+  assert.equal(seed.next_stage.gatekeeper_runtime.secure_signer, "PRIVATE_LOCAL_SCHEDULER_CONNECTED_USER_SESSION_ACTIVE");
+  assert.equal(seed.next_stage.gatekeeper_runtime.secure_signer_storage, "PRIVATE_ENVIRONMENT_OUTSIDE_REPO");
+  assert.equal(seed.next_stage.gatekeeper_runtime.public_worker_signer, false);
+  assert.equal(seed.next_stage.first_heartbeat_kgen_event.source, "HEARTBEAT_REWARD");
+  assert.equal(seed.next_stage.first_heartbeat_kgen_event.kgen_balance_before, "0");
+  assert.equal(seed.next_stage.first_heartbeat_kgen_event.kgen_balance_after, "1");
+});
+
+test("V3.5 mutable hourly evidence is excluded from static release checksums", async () => {
+  const sums = await fs.readFile(new URL("../K線西遊記/temples/11520/SHA256SUMS.txt", import.meta.url), "utf8");
+  assert.doesNotMatch(sums, /runtime\/worker-status\.json/);
+  assert.doesNotMatch(sums, /runtime\/work-events/);
+  assert.match(sums, /  app\.mjs/);
+  assert.match(sums, /  MANIFEST\.json/);
+});
+
+test("V3.6 secure heartbeat path requires exact Owner approval and fresh safety evidence", () => {
+  const gas = createHeartbeatGasPolicy({ currentBnbWei: "6000000000000000", gasPriceWei: "50000000", gasEstimate: "103989" });
+  assert.equal(gas.permanent_universe_constant, false);
+  assert.ok(BigInt(gas.minimum_survival_bnb_wei) > 0n);
+  assert.ok(BigInt(gas.max_action_gas_cost_wei) < 6000000000000000n);
+  const policy = createApprovedHeartbeatActionPolicy(gas, DIGITAL_ANT_HEARTBEAT_OWNER_APPROVAL);
+  assert.equal(policy.actions.heartbeatClaim.enabled, true);
+  assert.equal(policy.actions.fortuneClaim.enabled, false);
+  assert.equal(policy.actions.igniteAndClaim.enabled, false);
+  assert.throws(() => createApprovedHeartbeatActionPolicy(gas, "UNRELATED_APPROVAL"), (error) => error.code === "HEARTBEAT_OWNER_APPROVAL_REQUIRED");
+  const snapshot = {
+    chain_id: 56, wallet_binding: "MATCH", heart_address: "0xB016D4d8f1aED1339101b30722cad6dbA9B8C972",
+    heart_code_hash: "0x1d3eba15b4c4895710c6e68f3f27e97cb0e2c94edc254d9f1e9148b3d7f55d32",
+    kgen_address: "0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be", function_selector: DIGITAL_ANT_HEARTBEAT_SELECTOR, function_selector_in_bytecode: true,
+    heartbeat_reward: "1", heartbeat_cooldown_seconds: "3600", eligible: true, security_status: "HEALTHY", gas_estimate_status: "AVAILABLE",
+    bnb_after_action_wei: "5994800550000000", minimum_bnb_reserve_wei: gas.minimum_survival_bnb_wei
+  };
+  assert.equal(evaluateHeartbeatSafety(snapshot, { approvalEvidence: DIGITAL_ANT_HEARTBEAT_OWNER_APPROVAL }).status, "SAFE_EXECUTION_PATH");
+  assert.ok(evaluateHeartbeatSafety({ ...snapshot, chain_id: 1 }, { approvalEvidence: DIGITAL_ANT_HEARTBEAT_OWNER_APPROVAL }).blockers.includes("CHAIN_ID_MISMATCH"));
+  assert.ok(evaluateHeartbeatSafety({ ...snapshot, wallet_binding: "MISMATCH" }, { approvalEvidence: DIGITAL_ANT_HEARTBEAT_OWNER_APPROVAL }).blockers.includes("WALLET_ADDRESS_MISMATCH"));
+  assert.ok(evaluateHeartbeatSafety({ ...snapshot, eligible: false }, { approvalEvidence: DIGITAL_ANT_HEARTBEAT_OWNER_APPROVAL }).blockers.includes("HEARTBEAT_NOT_ELIGIBLE"));
+  assert.ok(evaluateHeartbeatSafety({ ...snapshot, bnb_after_action_wei: "1" }, { approvalEvidence: DIGITAL_ANT_HEARTBEAT_OWNER_APPROVAL }).blockers.includes("SURVIVAL_RESERVE_VIOLATION"));
+});
+
+test("private Secure Signer runtime is omitted from the public Pages artifact", async () => {
+  const workflow = await fs.readFile(new URL("../.github/workflows/deploy-pages-static.yml", import.meta.url), "utf8");
+  assert.doesNotMatch(workflow, /DIGITAL_ANT_0001_PRIVATE_KEY:\s*\$\{\{/);
+  const publicWorkflow = await fs.readFile(new URL("../.github/workflows/universal_exchange_v2.yml", import.meta.url), "utf8");
+  assert.doesNotMatch(publicWorkflow, /DIGITAL_ANT_0001_PRIVATE_KEY/);
+  const coreIndex = await fs.readFile(new URL("../core/index.mjs", import.meta.url), "utf8");
+  assert.doesNotMatch(coreIndex, /digital-ant-secure-signer-worker/);
+});
+
+test("Mother Engine proposals remain evidence-based and cannot bypass asset authority", () => {
+  const proposal = {
+    proposal_id: "MOTHER_ENGINE_PROPOSAL_NO_SIGNER_RUNTIME", problem: "NO_SIGNER_RUNTIME",
+    evidence: ["PUBLIC_WORKER_WRITE_NOT_CONNECTED", "LOCAL_CREDENTIAL_ENV_PRESENT_REDACTED"],
+    root_cause: "PUBLIC_AND_PRIVATE_EXECUTION_WERE_NOT_CONNECTED",
+    options: ["KEEP_READ_ONLY", "PRIVATE_LOCAL_HEARTBEAT_SIGNER"], selected_option: "PRIVATE_LOCAL_HEARTBEAT_SIGNER",
+    reason: "PRIMARY_JOB_REQUIRES_RECEIPT_GATED_HEARTBEAT", risk: "REAL_CONTRACT_WRITE_R4",
+    required_authority: "OWNER_DIRECTIVE_AND_RUNTIME_REVALIDATION", status: "SAFE_PATH_SELECTED_PENDING_EXECUTION"
+  };
+  assert.equal(validateMotherEngineProposal(proposal), proposal);
+  assert.throws(() => validateMotherEngineProposal({ ...proposal, status: "TOKEN_TRANSFER" }), (error) => error.code === "MOTHER_ENGINE_AUTHORITY_BYPASS");
+});
+
+test("Mother Engine patrol runs only after primary duty and creates no customer or revenue", () => {
+  const duty = gatekeeperDuty();
+  const patrol = readMotherEnginePatrol(seed, { gatekeeperDuty: duty, finance: { BNB: "0.0059950537", KGEN: "1.0", KAIOS: "0.0" }, thoughtOrganHealth: seed.next_stage.thought_organ_health_v3_8 });
+  assert.equal(patrol.status, "MOTHER_ENGINE_PATROL_COMPLETED_READ_ONLY");
+  assert.equal(patrol.questions.primary_job_completed, true);
+  assert.equal(patrol.questions.kgen_energy, "1.0");
+  assert.equal(patrol.selected_product, "ANT_MECH_BODY");
+  assert.equal(patrol.chain_write, false);
+  assert.equal(patrol.customer_created, false);
+  assert.equal(patrol.revenue_created, "0");
+  assert.throws(() => readMotherEnginePatrol(seed, { gatekeeperDuty: gatekeeperDuty({ status: "FAILED_CRITICAL", degradation_affects_safety: true }), finance: { BNB: "0", KGEN: "0" }, thoughtOrganHealth: seed.next_stage.thought_organ_health_v3_8 }), (error) => error.code === "PRIMARY_JOB_BYPASS");
+});
+
+test("Demand-first product selection does not create factory, inventory, customer, or revenue", () => {
+  const candidates = [
+    { product_id: "ANT_MECH_BODY", actual_need: 5, external_customer_demand: 0, founder_need: 5, revenue_potential: 1, kaios_price_potential: 2, kgen_energy_demand: 4, technical_readiness: 1, supply_chain_difficulty: 5, mission_alignment: 5, capital_requirement: 5, record_class: "INTERNAL_FOUNDER_NEED" },
+    { product_id: "POCKET_TIME_UFO", actual_need: 2, external_customer_demand: 0, founder_need: 3, revenue_potential: 1, kaios_price_potential: 1, kgen_energy_demand: 4, technical_readiness: 0, supply_chain_difficulty: 5, mission_alignment: 4, capital_requirement: 5, record_class: "INTERNAL_RESEARCH" }
+  ];
+  assert.equal(calculateDivineProductPriority(candidates[0]).customer_order, false);
+  const ranked = rankDivineProducts(candidates);
+  assert.equal(ranked.selected.product_id, "ANT_MECH_BODY");
+  assert.equal(ranked.selection_creates_factory, false);
+  assert.equal(ranked.selection_creates_inventory, false);
+});
+
+test("KGEN energy law separates BNB gas, KAIOS purchase, and receipt-gated KGEN consumption", () => {
+  const law = { law_id: "KGEN_OPERATIONAL_ENERGY_LAW", bnb_role: "BSC_DARK_MATTER_GAS", kgen_role: "MACHINE_OPERATIONAL_ENERGY", kaios_role: "CIVILIZATION_PURCHASE_QUOTE_SALARY_SERVICE_UNIT", real_consumption_evidence: ["KGEN_TRANSFER", "SUCCESSFUL_ONCHAIN_RECEIPT", "ENERGY_CONSUMPTION_EVENT"], ui_balance_decrement_is_consumption: false, status: "ARCHITECTURE_ACTIVE_NO_ENERGY_SPEND_AUTHORITY" };
+  assert.equal(validateOperationalEnergyLaw(law), law);
+  assert.throws(() => validateOperationalEnergyLaw({ ...law, ui_balance_decrement_is_consumption: true }), (error) => error.code === "FAKE_ENERGY_CONSUMPTION");
+});
+
+test("Ant Mech is an internal Founder need with separate Body ID and no fake production", () => {
+  const energyModel = { model_id: "ANT_MECH_BODY_ENERGY_MODEL", body_id: "ANT_MECH_BODY_UNASSIGNED", idle_kgen_per_day: null, walk_kgen_per_distance: null, work_kgen_per_hour: null, payload_factor: null, terrain_factor: null, damage_factor: null, efficiency: null, status: "POLICY_REQUIRED_NOT_ACTIVATED" };
+  assert.equal(validateBodyEnergyModel(energyModel), energyModel);
+  const product = { product_id: "ANT_MECH_BODY", need_class: "INTERNAL_FOUNDER_NEED", requester_life_id: "DIGITAL_ANT_0001", customer_order: false, external_revenue: "0", purchase_currency: "KAIOS", operational_energy_currency: "KGEN", life_id_separate_from_body_id: true, ownership_certificate: "ASSET_NFT_CERTIFICATE_FUTURE", energy_model: energyModel, bom: [], inventory: [], production_line: null, status: "PRODUCT_REQUIREMENTS_DRAFT" };
+  assert.equal(validateAntMechProduct(product), product);
+  assert.throws(() => validateAntMechProduct({ ...product, status: "PRODUCTION_READY" }), (error) => error.code === "DEMAND_FIRST_PRODUCTION_GATE");
+});
+
+test("Supply chain and transport cannot magic-complete without evidence", () => {
+  const plan = { plan_id: "ANT_MECH_SUPPLY_CHAIN", need_id: "INTERNAL_FOUNDER_NEED_ANT_BODY", product_id: "ANT_MECH_BODY", requirements: [], design: null, bom: [], raw_materials: [], suppliers: [], production_line: null, quality: null, inventory: [], sale: null, energy: { status: "NOT_FUNDED" }, maintenance: null, recycling: null, status: "GAP_ANALYSIS" };
+  assert.equal(validateDemandFirstSupplyChain(plan), plan);
+  assert.throws(() => validateDemandFirstSupplyChain({ ...plan, production_line: "LINE_1" }), (error) => error.code === "PRODUCTION_WITHOUT_SUPPLY_CHAIN");
+  const transport = { transport_contract_id: "TRANSPORT_DRAFT_001", cargo: "CARGO_A", origin: "X", destination: "Y", distance: null, payload: null, route: null, vehicle: null, kgen_energy: "0", maintenance: null, risk: "UNASSESSED", time: null, profit: null, delivery_evidence: null, status: "DRAFT" };
+  assert.equal(validateTransportContract(transport), transport);
+  assert.throws(() => validateTransportContract({ ...transport, status: "DELIVERED" }), (error) => error.code === "TRANSPORT_DELIVERY_EVIDENCE_REQUIRED");
+});
+
+test("Demand-first civilization law forbids magic factories and movement", () => {
+  assert.deepEqual(DEMAND_FIRST_CIVILIZATION_LAWS, [
+    "FACTORY_WITHOUT_PRODUCT_FORBIDDEN", "PRODUCT_WITHOUT_NEED_FORBIDDEN", "PRODUCTION_WITHOUT_BOM_FORBIDDEN",
+    "BOM_WITHOUT_RESOURCE_FORBIDDEN", "SALE_WITHOUT_INVENTORY_FORBIDDEN", "DELIVERY_WITHOUT_TRANSPORT_FORBIDDEN",
+    "MOVEMENT_WITHOUT_ENERGY_FORBIDDEN"
+  ]);
+});
+
+test("V3.7 Heart autopilot requires eligibility candidates and a private secure scheduler", () => {
+  const gas = createHeartbeatGasPolicy({ currentBnbWei: "5995053700000000", gasPriceWei: "50000000", gasEstimate: "103989" });
+  const policy = createV37HeartAutopilotPolicy({ gasPolicy: gas, approvalEvidence: DIGITAL_ANT_V3_7_HEART_AUTOPILOT_APPROVAL });
+  assert.equal(policy.status, "APPROVED_BLOCKED_NO_PERSISTENT_PRIVATE_RUNTIME");
+  assert.equal(policy.public_worker.signer, false);
+  assert.equal(policy.actions.heartbeatClaim.trigger, "ELIGIBILITY_DRIVEN");
+  assert.equal(policy.actions.igniteAndClaim.trigger, "UTC_00_00_TO_00_10_WINDOW");
+  const blocked = createHeartActionCandidate({ action: "heartbeatClaim", eligibility: false, block: 116330000, observedAt: "2026-08-16T19:00:00.000Z", evidence: ["COOLDOWN_ACTIVE"] });
+  assert.equal(blocked.status, "NO_ACTION");
+  const ready = createHeartActionCandidate({ action: "heartbeatClaim", eligibility: true, block: 116330001, observedAt: "2026-08-16T20:00:00.000Z", evidence: ["ELIGIBLE"] });
+  assert.equal(ready.status, "ACTION_CANDIDATE");
+  assert.equal(ready.trusted_for_signature, false);
+  assert.equal(ready.public_worker_broadcast, false);
+  const connectedPolicy = createV37HeartAutopilotPolicy({ gasPolicy: gas, approvalEvidence: DIGITAL_ANT_V3_7_HEART_AUTOPILOT_APPROVAL, privateSchedulerConnected: true });
+  assert.throws(() => prepareSecureHeartAction({ proposal: { action: "makeWish" }, policy: connectedPolicy, signerStatus: "CONNECTED_SECURE_RUNTIME", latest: { chain_id: 56, contract_verified: true, eligible: true, security_status: "HEALTHY", block: 116333300, gas_estimate: "50000", bnb_after_action_wei: "5900000000000000", minimum_bnb_reserve_wei: gas.minimum_survival_bnb_wei, first_wish_completed: true } }), (error) => error.code === "FIRST_WISH_ALREADY_COMPLETED");
+});
+
+test("Heartbeat timeout reconciles without duplicate broadcast and failed receipt is not completion", () => {
+  const tx = `0x${"1".repeat(64)}`;
+  assert.deepEqual(reconcileHeartTransaction({ plannedAction: "heartbeatClaim", broadcastHash: tx, receipt: null, verifiedEvent: false, balanceBeforeWei: "0", balanceAfterWei: "0" }), {
+    status: "PENDING_RECONCILIATION", action: "heartbeatClaim", tx_hash: tx, rebroadcast: false
+  });
+  const failed = reconcileHeartTransaction({ plannedAction: "heartbeatClaim", broadcastHash: tx, receipt: { transactionHash: tx, status: 0 }, verifiedEvent: false, balanceBeforeWei: "0", balanceAfterWei: "0" });
+  assert.equal(failed.life_event_completed, false);
+  assert.equal(failed.rebroadcast, false);
+});
+
+test("Ignition scheduler catches the UTC window and records a real miss without backfill", () => {
+  assert.equal(evaluateIgnitionWindow("2026-08-17T00:02:00.000Z").in_window, true);
+  assert.equal(evaluateIgnitionWindow("2026-08-17T00:07:00.000Z").in_window, true);
+  assert.equal(evaluateIgnitionWindow("2026-08-17T00:17:00.000Z").status, "OUT_OF_WINDOW");
+  const missed = createIgnitionMissedEvent({ day: "2026-08-17", windowEvidence: ["UTC_WINDOW_CLOSED", "NO_VERIFIED_IGNITION_EVENT"] });
+  assert.equal(missed.event_type, "IGNITION_MISSED_EVENT");
+  assert.equal(missed.backfill_allowed, false);
+});
+
+test("Fortune remains separate from Heartbeat and follows a fair runtime range", () => {
+  const plan = selectFortuneAmount({ fortuneMin: "8", fortuneMax: "888", heartBalance: "10000", epochRemaining: "9000" });
+  assert.equal(plan.status, "FORTUNE_ACTION_PLAN");
+  assert.equal(plan.amount, "8");
+  assert.notEqual(plan.amount, "1");
+  assert.equal(plan.requires_private_signer, true);
+});
+
+test("Digital Ant Wish has the approved text, costs no KGEN, and Vow remains completion-gated", () => {
+  assert.match(DIGITAL_ANT_WISH_TEXT, /前往火星建立晶片生產線/);
+  const wish = createDigitalAntWishProposal({ wishHash: "0x84f6aee64f3b1f6e295561fdf2853798969243a1d56e532731b1f1ae1d26847e" });
+  assert.equal(wish.token_cost.KGEN, "0");
+  assert.equal(wish.token_cost.BNB, "DYNAMIC_GAS_ONLY");
+  assert.equal(wish.thanksgiving_status, "NOT_ELIGIBLE");
+  assert.equal(seed.next_stage.heart_autopilot_v3_7.vow.status, "NOT_ELIGIBLE");
+  assert.equal(seed.next_stage.heart_autopilot_v3_7.lamp.asset, "KGEN");
+});
+
+test("Heart Life history requires receipt evidence and never invents completion", () => {
+  const event = { event_type: "HEARTBEAT_EVENT", life_id: "DIGITAL_ANT_0001", tx_hash: `0x${"2".repeat(64)}`, block_number: 116330002, block_timestamp: "2026-08-16T20:00:05.000Z", receipt_status: 1, worker_cycle_id: "CYCLE_1" };
+  assert.equal(validateHeartLifeEvent(event), event);
+  assert.throws(() => validateHeartLifeEvent({ ...event, receipt_status: 0 }), (error) => error.code === "HEART_EVENT_RECEIPT_REQUIRED");
+});
+
+test("KAIOS incense is distinct from the existing Heart Lamp and requires holder authority", () => {
+  const incense = seed.next_stage.kaios_incense_alchemy_v3_7;
+  assert.equal(incense.canonical_node, 18911);
+  assert.equal(incense.holder_authorization, "OPT_IN_REQUIRED");
+  assert.equal(incense.forced_burn, false);
+  assert.equal(incense.kufo_claim.status, "NOT_EXECUTABLE_YET");
+  assert.equal(incense.wormhole_511111.registry_address, null);
+  assert.notEqual(incense.ritual_id, "lightLamp");
+});
+
+test("Heaven day is one K280 year and the old three-day rule is rejected", () => {
+  assert.equal(HEAVEN_TIME_LAW.heaven_day_k280_years, 1);
+  assert.equal(HEAVEN_TIME_LAW.kufo_half_life_k280_years, 1);
+  assert.equal(HEAVEN_TIME_LAW.superseded_rule_status, "SUPERSEDED_WRONG");
+  assert.equal(HEAVEN_TIME_LAW.literary_time_runtime_authority, false);
+});
+
+test("KUFO deterministic one-year half-life conserves decay into KSHIP", () => {
+  const batch = { batch_id: "SIMULATION_KUFO_BATCH_1", owner: "SIMULATION_OWNER", alchemy_proof: "SIMULATION_PROOF", birth_timestamp: "2026-01-01T00:00:00.000Z", birth_block: 1, initial_kufo: "1", propulsion_consumed_kufo: "0" };
+  const state = calculateKufoFuelState(batch, new Date(Date.parse(batch.birth_timestamp) + HEAVEN_TIME_LAW.heaven_day_k280_days * 86_400_000).toISOString());
+  assert.ok(Math.abs(state.remaining_kufo - 0.5) < 1e-12);
+  assert.ok(Math.abs(state.natural_decay_kufo - 0.5) < 1e-12);
+  assert.ok(Math.abs(state.generated_kship - 500) < 1e-9);
+  assert.equal(state.mass_conservation_status, "CONSERVED");
+  assert.equal(KUFO_FUEL_LAW.vehicle_identity, false);
+});
+
+test("KUFO is not a UFO and insufficient fuel denies takeoff", () => {
+  const ufo = createUfoProductReadiness({ needEvidence: ["DIGITAL_ANT_MARS_DREAM"] });
+  assert.equal(ufo.status, "DEMAND_IDENTIFIED_NOT_DESIGNED");
+  assert.equal(ufo.kufo_is_ufo, false);
+  assert.equal(ufo.purchase_currency, "KAIOS");
+  assert.equal(ufo.fuel_asset, "KUFO");
+  assert.equal(ufo.factory, "NOT_CREATED");
+  const gate = evaluateUfoTakeoff({ availableKufo: 4, requiredKufo: 4, returnReserveKufo: 1, vehicleMass: 10, payloadMass: 2, distance: 100, gravityFactor: 1, efficiency: 0.8 });
+  assert.equal(gate.status, "TAKEOFF_DENIED");
+  assert.equal(gate.reason, "FUEL_INSUFFICIENT");
+});
+
+test("KSHIP is not a chip and no Mars factory is magic-created", () => {
+  assert.equal(seed.next_stage.kship_mars_v3_7.kship_is_chip, false);
+  assert.equal(seed.next_stage.kship_mars_v3_7.chip_factory, "NOT_CREATED");
+  assert.equal(seed.next_stage.ufo_civilization_v3_7.production_line, "NOT_CREATED");
+});
+
+test("Mother Engine proactively selects evidence-backed next-best action", () => {
+  const result = createMotherEngineNextBestAction({ observations: ["PUBLIC_WORKER_HAS_NO_SIGNER"], candidates: [
+    { problem: "NO_CUSTOMER", priority: 2, action: "SCAN_REQUESTS", reason: "REAL_DEMAND_REQUIRED", required_authority: "READ_ONLY", expected_result: "LEAD" },
+    { problem: "NO_PRIVATE_SCHEDULER", priority: 0, action: "INSTALL_PRIVATE_SCHEDULER", reason: "PRIMARY_JOB_AUTOMATION", required_authority: "PRIVATE_RUNTIME_INSTALLATION", expected_result: "AUTOMATED_HEARTBEAT" }
+  ] });
+  assert.equal(result.selected_action, "INSTALL_PRIVATE_SCHEDULER");
+  assert.equal(result.customer_created, false);
+  assert.equal(result.revenue_created, false);
+});
+
+test("V3.9 canonical truth preserves primary job, zero business fiction, and protected coordinate reuse", () => {
+  assert.equal(seed.schema_version, "3.9.0");
+  assert.equal(seed.apps.find((app) => app.app_id === "DIGITAL_ANT_APP_0001").version, "V1.6.0");
+  assert.equal(seed.next_stage.gatekeeper_runtime.primary_job, "WUKONG_GATEKEEPER");
+  assert.equal(seed.next_stage.company_work_v3_7.real_customers, 0);
+  assert.equal(seed.next_stage.company_work_v3_7.external_revenue, "0");
+  assert.equal(seed.next_stage.company_work_v3_7.company_treasury, "NOT_BOUND");
+  assert.equal(seed.next_stage.land_engine_audit.coordinate_reuse, "REUSE_REQUIRED_NO_NEW_COORDINATE_SYSTEM");
+  assert.equal(seed.next_stage.kufo_fuel_v3_7.current_kufo, "0");
+  assert.equal(seed.next_stage.kship_mars_v3_7.current_kship, "0");
+  assert.equal(seed.next_stage.gatekeeper_runtime.life_events.FIRST_FORTUNE_EVENT, "VERIFIED");
+  assert.equal(seed.next_stage.gatekeeper_runtime.life_events.FIRST_WISH_EVENT, "VERIFIED");
+  assert.equal(seed.next_stage.heart_life_events_v3_7.current_balances.KGEN, "12");
+  assert.equal(seed.next_stage.heart_life_events_v3_7.events.length, 5);
+  assert.equal(seed.next_stage.heart_life_events_v3_7.events.find((event) => event.event_type === "FIRST_WISH_EVENT").kgen_cost, "0");
+  assert.equal(seed.next_stage.heart_life_events_v3_7.events.at(-1).event_type, "FIRST_IGNITION_EVENT");
+  assert.equal(seed.next_stage.heart_life_events_v3_7.events.at(-1).kgen_after, "12");
+  assert.equal(seed.next_stage.gatekeeper_runtime.life_events.FIRST_IGNITION_EVENT, "VERIFIED");
+  assert.equal(seed.next_stage.heart_autopilot_v3_7.ignition.auto_write, true);
+  assert.equal(seed.next_stage.heart_autopilot_v3_7.ignition.write_runtime, "PRIVATE_WINDOW_GATED_SCHEDULER");
+});
+
+test("V3.8 Physics CURRENT is the byte-identical authoritative Thought Organ", async () => {
+  const current = await fs.readFile(new URL("../docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md", import.meta.url));
+  const formal = await fs.readFile(new URL("../docs/physics/KGEN_Universe_Physics_Runtime_V3_8.md", import.meta.url));
+  assert.deepEqual(current, formal);
+  const inspected = await inspectPhysicsThoughtOrgan({ seed, checkedAt: "2026-08-16T23:27:18.851Z" });
+  assert.equal(inspected.observation.document_id, "PF-PHYSICS-CURRENT-V3-8");
+  assert.equal(inspected.observation.version, "V3.8 LIVING PHYSICS / KUFO-KSHIP WARP / BIO-LIFE");
+  assert.equal(inspected.observation.sha256, "dbb4774a71db614994dff3e08e9cec34b94633c4d46dca13bff2f6f54d9b0b48");
+  assert.equal(inspected.health.status, "HEALTHY");
+  assert.equal(assertThoughtOrganReadyForPlanning(inspected.health), true);
+  assert.equal(CANONICAL_TRUTH_PRIORITY[0], "DEPLOYED_CHAIN_TRUTH");
+  assert.equal(CANONICAL_TRUTH_PRIORITY[1], "CURRENT_RUNTIME_CONSTITUTION");
+  assert.equal(CANONICAL_TRUTH_PRIORITY.at(-1), "MEMORY_OR_CHAT");
+});
+
+test("V3.8 Thought Organ mismatch blocks certification and Mother planning", () => {
+  const binding = seed.next_stage.thought_organ_binding_v3_8;
+  validateThoughtOrganBinding(binding);
+  const health = verifyThoughtOrganHealth(binding, { document_id: binding.document_id, version: "V3.7 OLD REPORT", path: binding.path, sha256: "0".repeat(64), exists: true, readable: true, runtime_authority: "CURRENT" });
+  assert.equal(health.status, "THOUGHT_ORGAN_VERSION_MISMATCH");
+  assert.throws(() => assertThoughtOrganReadyForPlanning(health), (error) => error.code === "THOUGHT_ORGAN_NOT_READY_FOR_PLANNING");
+  const life = seed.lives[0];
+  const app = seed.apps.find((item) => item.app_id === life.app_id);
+  const certification = createAiLifeCertification({ life, birthCertificate: seed.birth_certificates[0], walletBinding: { life_id: life.life_id, status: "ACTIVE" }, workHistory: ["WORK_EVENT"], mission: life.ultimate_mission, dream: life.dream, thoughtOrganHealth: health, app, permissions: app.permissions, evidence: ["TEST_EVIDENCE"], secretSafe: true });
+  assert.equal(certification.status, "CERTIFICATION_BLOCKED");
+});
+
+test("V3.8 Thought Organ timeline is append-only binding metadata, not copied content", () => {
+  const binding = seed.next_stage.thought_organ_binding_v3_8;
+  const event = createThoughtOrganTimelineEvent({ eventType: "PHYSICS_THOUGHT_ORGAN_BOUND", binding, timestamp: "2026-08-16T23:27:18.851Z", evidence: ["CURRENT_HASH_VERIFIED"] });
+  assert.equal(event.append_only, true);
+  assert.equal(event.sha256, binding.sha256);
+  assert.equal(Object.hasOwn(binding, "content"), false);
+  assert.equal(JSON.stringify(binding).includes("PRIVATE_KEY"), false);
+});
+
+test("V3.8 Heart private scheduler policy respects cooldown/window and never blind-resubmits", () => {
+  const policy = createV38HeartAutopilotPolicy({ gasPolicy: { max_action_gas_cost_wei: "1000000", minimum_survival_bnb_wei: "2000000", MIN_SURVIVAL_BNB: "0.000002" }, approvalEvidence: DIGITAL_ANT_V3_8_HEART_AUTOPILOT_APPROVAL, privateSchedulerConnected: true });
+  assert.equal(policy.actions.heartbeatClaim.trigger, "ELIGIBILITY_DRIVEN");
+  assert.equal(policy.actions.heartbeatClaim.cooldown, "DEPLOYED_CONTRACT_DERIVED");
+  assert.equal(policy.actions.igniteAndClaim.trigger, "DEPLOYED_WINDOW_DRIVEN");
+  assert.equal(policy.actions.heartbeatClaim.blind_resubmit, false);
+  assert.equal(policy.public_worker.signer, false);
+  assert.equal(policy.actions.fortuneClaim.enabled, false);
+});
+
+test("V3.8 First KAIOS strategy requires real evidence and creates no customer or revenue", () => {
+  const strategy = createFirstKaiosStrategy({ availableServices: ["KGEN_CHAIN_MONITOR"], customerDemand: [], publicCivilizationDemand: [], authority: { read: true, chain_write: false }, paymentReadiness: "PAYMENT_INFRASTRUCTURE_PENDING", treasuryReadiness: "NOT_BOUND", technicalReadiness: "KGEN_CHAIN_MONITOR_READY_READ_ONLY", estimatedWork: "SERVICE_PACKAGE_AND_REQUEST_SCAN", risk: "LOW_READ_ONLY", settlementFeasibility: "RECEIVABLE_ONLY_DRY_RUN" });
+  assert.equal(strategy.first_kaios_event, "NOT_OCCURRED");
+  assert.equal(strategy.real_customers, 0);
+  assert.equal(strategy.real_revenue, "0");
+  assert.equal(strategy.next_kaios_earning_action, "PUBLISH_KGEN_CHAIN_MONITOR_SERVICE_PACKAGE_AND_SCAN_VERIFIED_REQUESTS");
+});
+
+test("V3.8 balanced KSHIP feed preserves velocity and braking consumes fuel", () => {
+  const coast = evaluateKshipWarpFeed({ positiveFeed: 5, negativeFeed: 5, currentVelocity: 88 });
+  assert.equal(coast.net_acceleration, 0);
+  assert.equal(coast.velocity_state, "COASTING_AT_EXISTING_VELOCITY");
+  assert.equal(coast.balanced_feed_means_zero_velocity, false);
+  assert.throws(() => evaluateKshipWarpFeed({ positiveFeed: 5, negativeFeed: 5, currentVelocity: 88, braking: true, brakingFuel: 0 }), (error) => error.code === "BRAKING_FUEL_REQUIRED");
+  assert.equal(evaluateKshipWarpFeed({ positiveFeed: 3, negativeFeed: 6, currentVelocity: 88, braking: true, brakingFuel: 2 }).braking_fuel_consumed, 2);
+});
+
+test("V3.8 no Body means network life, never fake physical movement", () => {
+  const capability = resolveLifePhysicalCapability({ life: seed.lives[0], body: null });
+  assert.equal(capability.life_status, "ALIVE");
+  assert.equal(capability.network_capable, true);
+  assert.equal(capability.physical_movement, false);
+  assert.equal(capability.cargo_movement, false);
+  assert.equal(capability.life_survives_body_absence, true);
+  assert.equal(seed.next_stage.land_engine_audit.coordinate_reuse, "REUSE_REQUIRED_NO_NEW_COORDINATE_SYSTEM");
+});
+
+test("V3.8 secure worker never serializes the credential and public worker has no signer", async () => {
+  const privateWorker = await fs.readFile(new URL("../core/security/verify-wallet-binding.mjs", import.meta.url), "utf8");
+  const publicWorker = await fs.readFile(new URL("../core/jobs/public-read-only-worker.mjs", import.meta.url), "utf8");
+  assert.doesNotMatch(privateWorker, /JSON\.stringify\([^\n]*privateKey/i);
+  assert.doesNotMatch(publicWorker, /DIGITAL_ANT_0001_PRIVATE_KEY/);
+  assert.equal(seed.next_stage.worker.signer, false);
+  assert.equal(seed.next_stage.persistent_private_scheduler_v3_8.public_signer, false);
+  assert.equal(seed.next_stage.gatekeeper_runtime.primary_job, "WUKONG_GATEKEEPER");
 });

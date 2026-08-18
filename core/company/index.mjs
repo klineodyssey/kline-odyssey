@@ -63,6 +63,152 @@ export const PUBLIC_GATEWAY_FUTURE_INPUT_TYPES = Object.freeze(["IMAGE", "FILE",
 export const REQUEST_VISIBILITIES = Object.freeze(["PUBLIC", "PRIVATE", "COMPANY_ONLY", "ANONYMIZED_PUBLIC"]);
 export const PUBLIC_REQUEST_HISTORY_EVENTS = Object.freeze(["INTENT_DRAFTED", "INTENT_CONFIRMED", "REQUEST_RECEIVED", "REQUEST_QUALIFIED", "PLAN_CREATED", "ESTIMATE_CREATED", "QUOTE_READY", "QUOTE_SENT", "ACCEPTED", "ORDER_CONFIRMED", "WORK_STARTED", "DELIVERED", "CLOSED"]);
 export const WORKTREE_CLASSIFICATIONS = Object.freeze(["PROJECT_SOURCE", "USER_DATA", "GENERATED_ARTIFACT", "TEMP", "CACHE", "BUILD_OUTPUT", "UNKNOWN"]);
+export const DEMAND_FIRST_CIVILIZATION_LAWS = Object.freeze([
+  "FACTORY_WITHOUT_PRODUCT_FORBIDDEN", "PRODUCT_WITHOUT_NEED_FORBIDDEN", "PRODUCTION_WITHOUT_BOM_FORBIDDEN",
+  "BOM_WITHOUT_RESOURCE_FORBIDDEN", "SALE_WITHOUT_INVENTORY_FORBIDDEN", "DELIVERY_WITHOUT_TRANSPORT_FORBIDDEN",
+  "MOVEMENT_WITHOUT_ENERGY_FORBIDDEN"
+]);
+export const DIVINE_PRODUCT_CANDIDATES = Object.freeze(["ANT_MECH_BODY", "KUFO_CLOUD", "POCKET_TIME_UFO", "KSHIP_CARRIER", "ENERGY_CORE", "NAVIGATION_CORE", "CARGO_MODULE", "MAINTENANCE_SERVICE"]);
+export const FIELD_SERVICE_TYPES = Object.freeze(["CASH_LOGISTICS", "KUFO_SUPPLY", "WASTE_COLLECTION", "GENERAL_DELIVERY"]);
+export const FIELD_SERVICE_ROLES = Object.freeze(["DELIVERY_WORKER", "CASH_TRANSPORTER", "KUFO_SUPPLY_WORKER", "WASTE_COLLECTION_WORKER", "ATM_SERVICE_WORKER", "SECURITY_WORKER", "ROUTE_PLANNER"]);
+export const FIELD_SERVICE_ACCOUNTING_CLASSES = Object.freeze(["SALARY_INCOME", "SERVICE_REVENUE", "FREIGHT_REVENUE", "KUFO_SALE_REVENUE", "CASH_LOGISTICS_REVENUE", "WASTE_SERVICE_REVENUE", "HEARTBEAT_REWARD", "FORTUNE", "EXPENSE"]);
+export const KAIOS_CASH_LAW = Object.freeze({ ledger_asset: "KAIOS_LEDGER", physical_cargo: "KAIOS_CASH_CARGO", ledger_transfer_is_cash_delivery: false });
+
+export const HEAVEN_TIME_LAW = Object.freeze({
+  law_id: "K18888_HEAVEN_TIME_LAW_V3_7",
+  k280_time_standard: "CANONICAL_PHYSICAL_TIME",
+  k18888_time_standard: "HEAVEN_TIME",
+  heaven_day_k280_years: 1,
+  heaven_day_k280_days: 365.2422,
+  kufo_half_life_k280_years: 1,
+  superseded_rule: "1_K280_DAY_EQUALS_3_HEAVEN_DAYS",
+  superseded_rule_status: "SUPERSEDED_WRONG",
+  literary_time_rule: "ONE_DAY_APART_FEELS_LIKE_THREE_AUTUMNS",
+  literary_time_runtime_authority: false
+});
+
+export const KUFO_FUEL_LAW = Object.freeze({
+  asset_id: "KUFO",
+  definition: "HEAVEN_HIGH_DENSITY_DECAY_FUEL",
+  half_life: "1_K18888_HEAVEN_DAY_EQUALS_1_K280_YEAR",
+  kship_per_kufo_scale: 1000,
+  decay_mode: "LAZY_DETERMINISTIC_CANONICAL_TIME",
+  natural_decay_separate_from_propulsion: true,
+  browser_local_clock_authority: false,
+  operator_confiscation_authority: false,
+  vehicle_identity: false
+});
+
+export function calculateKufoFuelState(batch, observedAt) {
+  requireFields(batch, ["batch_id", "owner", "alchemy_proof", "birth_timestamp", "birth_block", "initial_kufo", "propulsion_consumed_kufo"], "KufoFuelBatch");
+  requireId(batch.batch_id, "batch_id");
+  invariant(batch.alchemy_proof && Number.isInteger(batch.birth_block) && batch.birth_block > 0, "KUFO_BIRTH_EVIDENCE_REQUIRED", "KUFO fuel requires real alchemy and block evidence");
+  const birthMs = Date.parse(batch.birth_timestamp);
+  const observedMs = Date.parse(observedAt);
+  invariant(Number.isFinite(birthMs) && Number.isFinite(observedMs) && observedMs >= birthMs, "KUFO_CANONICAL_TIME_REQUIRED", "KUFO decay requires canonical time at or after birth");
+  const initial = Number(batch.initial_kufo);
+  const propulsion = Number(batch.propulsion_consumed_kufo);
+  invariant(Number.isFinite(initial) && initial > 0 && Number.isFinite(propulsion) && propulsion >= 0 && propulsion <= initial, "KUFO_FUEL_AMOUNT_INVALID", "KUFO batch amounts must conserve fuel");
+  const elapsedYears = (observedMs - birthMs) / (HEAVEN_TIME_LAW.heaven_day_k280_days * 86_400_000);
+  const afterPropulsion = initial - propulsion;
+  const remaining = afterPropulsion * (2 ** (-elapsedYears / HEAVEN_TIME_LAW.kufo_half_life_k280_years));
+  const naturalDecay = afterPropulsion - remaining;
+  return Object.freeze({
+    batch_id: batch.batch_id, owner: batch.owner, observed_at: observedAt,
+    initial_kufo: initial, propulsion_consumed_kufo: propulsion,
+    natural_decay_kufo: naturalDecay, remaining_kufo: remaining,
+    generated_kship: naturalDecay * KUFO_FUEL_LAW.kship_per_kufo_scale,
+    mass_conservation_status: Math.abs(initial - (remaining + naturalDecay + propulsion)) < 1e-12 ? "CONSERVED" : "VIOLATION",
+    calculation: "KUFO_REMAINING_EQUALS_POST_PROPULSION_KUFO_TIMES_2_POW_NEGATIVE_ELAPSED_OVER_HALF_LIFE",
+    time_authority: "CANONICAL_K280_TIMESTAMP_REQUIRED"
+  });
+}
+
+export function createUfoProductReadiness({ needEvidence = [], bodyReady = false, designReady = false, bomReady = false, supplyChainReady = false } = {}) {
+  requireArray(needEvidence, "ufo.need_evidence");
+  return Object.freeze({
+    product_id: "UFO_PRODUCT", vehicle_class: "UFO", fuel_asset: "KUFO", secondary_energy: "KSHIP",
+    purchase_currency: "KAIOS", chain_gas: "BNB", status: needEvidence.length ? "DEMAND_IDENTIFIED_NOT_DESIGNED" : "NO_VERIFIED_DEMAND",
+    price: null, price_status: "NOT_PRICED", owned: false, ownership_status: "NOT_OWNED",
+    factory: "NOT_CREATED", production_line: "NOT_CREATED", body_ready: bodyReady, design_ready: designReady,
+    bom_ready: bomReady, supply_chain_ready: supplyChainReady, demand_evidence: [...needEvidence], kufo_is_ufo: false
+  });
+}
+
+export function evaluateUfoTakeoff({ availableKufo, requiredKufo, returnReserveKufo, vehicleMass, payloadMass, distance, gravityFactor, efficiency }) {
+  const values = [availableKufo, requiredKufo, returnReserveKufo, vehicleMass, payloadMass, distance, gravityFactor, efficiency].map(Number);
+  invariant(values.every(Number.isFinite) && values.every((value) => value >= 0) && Number(efficiency) > 0, "TAKEOFF_MODEL_INVALID", "Takeoff requires finite non-negative physical inputs and positive efficiency");
+  const minimumRequired = Number(requiredKufo) + Number(returnReserveKufo);
+  const allowed = Number(availableKufo) >= minimumRequired;
+  return Object.freeze({
+    status: allowed ? "TAKEOFF_ALLOWED_BY_FUEL_GATE_ONLY" : "TAKEOFF_DENIED",
+    reason: allowed ? "OTHER_SAFETY_GATES_STILL_REQUIRED" : "FUEL_INSUFFICIENT",
+    available_kufo: Number(availableKufo), minimum_required_kufo: minimumRequired,
+    model: Object.freeze({ vehicle_mass: Number(vehicleMass), payload_mass: Number(payloadMass), distance: Number(distance), gravity_factor: Number(gravityFactor), efficiency: Number(efficiency), return_reserve_kufo: Number(returnReserveKufo) })
+  });
+}
+
+export function createMotherEngineNextBestAction({ observations, candidates }) {
+  requireArray(observations, "mother_engine.observations");
+  requireArray(candidates, "mother_engine.candidates");
+  invariant(observations.length > 0 && candidates.length > 0, "MOTHER_ENGINE_DISCOVERY_EVIDENCE_REQUIRED", "Next-best action requires observed evidence and candidates");
+  const ordered = [...candidates].sort((a, b) => Number(a.priority) - Number(b.priority) || String(a.action).localeCompare(String(b.action)));
+  const selected = ordered[0];
+  requireFields(selected, ["problem", "priority", "action", "reason", "required_authority", "expected_result"], "MotherEngineCandidate");
+  return Object.freeze({
+    event_type: "MOTHER_ENGINE_NEXT_BEST_ACTION", status: "PROPOSED_EVIDENCE_BASED",
+    problem: selected.problem, evidence: [...observations], priority: selected.priority,
+    possible_actions: ordered.map((item) => item.action), selected_action: selected.action,
+    reason: selected.reason, required_authority: selected.required_authority, expected_result: selected.expected_result,
+    execute_if_authorized_only: true, customer_created: false, revenue_created: false
+  });
+}
+
+export function createFirstKaiosStrategy({ availableServices, customerDemand, publicCivilizationDemand, authority, paymentReadiness, treasuryReadiness, technicalReadiness, estimatedWork, risk, settlementFeasibility }) {
+  requireArray(availableServices, "first_kaios.available_services");
+  requireArray(publicCivilizationDemand, "first_kaios.public_civilization_demand");
+  invariant(availableServices.length > 0, "FIRST_KAIOS_SERVICE_REQUIRED", "First KAIOS strategy requires an evidenced service capability");
+  const inputs = { customerDemand, authority, paymentReadiness, treasuryReadiness, technicalReadiness, estimatedWork, risk, settlementFeasibility };
+  invariant(Object.values(inputs).every((value) => value !== undefined && value !== null), "FIRST_KAIOS_STRATEGY_INPUT_REQUIRED", "First KAIOS strategy requires complete demand, authority, payment, treasury, readiness, work, risk and settlement observations");
+  const hasRealDemand = Number(customerDemand) > 0 || publicCivilizationDemand.some((need) => need?.classification === "OBSERVED" && need?.evidence);
+  const settlementReady = settlementFeasibility === "AUTHORIZED_AND_VERIFIED" && paymentReadiness === "READY" && treasuryReadiness === "BOUND_AND_AUDITED";
+  const selectedAction = hasRealDemand
+    ? "QUALIFY_EVIDENCED_KAIOS_SERVICE_REQUEST"
+    : "PUBLISH_KGEN_CHAIN_MONITOR_SERVICE_PACKAGE_AND_SCAN_VERIFIED_REQUESTS";
+  return Object.freeze({
+    strategy_id: "DIGITAL_ANT_0001_FIRST_KAIOS_STRATEGY_V3_8",
+    life_id: "DIGITAL_ANT_0001", company_id: "AI_ANT_COMPANY_0001",
+    available_services: [...availableServices], customer_demand: Number(customerDemand),
+    public_civilization_demand: publicCivilizationDemand.map((need) => ({ ...need })),
+    authority, payment_readiness: paymentReadiness, treasury_readiness: treasuryReadiness,
+    technical_readiness: technicalReadiness, estimated_work: estimatedWork, risk,
+    settlement_feasibility: settlementFeasibility,
+    next_kaios_earning_action: selectedAction,
+    selected_path: "REAL_SERVICE_OR_PUBLIC_SERVICE_COMPENSATION",
+    company_income_destination: "AI_ANT_COMPANY_TREASURY_ONLY_AFTER_BINDING",
+    personal_income_destination: "DIGITAL_ANT_0001_PERSONAL_WALLET_ONLY_FOR_EVIDENCED_SALARY_OR_LIFE_COMPENSATION",
+    personal_company_asset_separation: true,
+    execution_status: settlementReady && hasRealDemand ? "READY_FOR_FORMAL_REQUEST_QUALIFICATION" : "RESEARCH_AND_OUTREACH_ONLY",
+    first_kaios_event: "NOT_OCCURRED", real_customers: hasRealDemand ? Number(customerDemand) : 0, real_revenue: "0",
+    fake_customer: false, fake_salary: false, fake_reward: false, fake_mint: false, revenue: "0"
+  });
+}
+
+export function evaluateKshipWarpFeed({ positiveFeed, negativeFeed, currentVelocity, braking = false, brakingFuel = 0 }) {
+  for (const [name, value] of Object.entries({ positiveFeed, negativeFeed, currentVelocity, brakingFuel })) {
+    invariant(Number.isFinite(value) && value >= 0, "INVALID_WARP_INPUT", `${name} must be a non-negative finite number`);
+  }
+  const netAcceleration = positiveFeed - negativeFeed;
+  if (braking) invariant(brakingFuel > 0, "BRAKING_FUEL_REQUIRED", "Braking consumes KSHIP fuel");
+  return Object.freeze({
+    positive_feed: positiveFeed, negative_feed: negativeFeed, net_acceleration: netAcceleration,
+    current_velocity: currentVelocity,
+    velocity_state: netAcceleration === 0 ? (currentVelocity === 0 ? "STATIONARY" : "COASTING_AT_EXISTING_VELOCITY") : "ACCELERATING",
+    balanced_feed: netAcceleration === 0, balanced_feed_means_zero_velocity: false,
+    braking, braking_fuel_consumed: braking ? brakingFuel : 0,
+    physics_authority: "KGEN_UNIVERSE_PHYSICS_RUNTIME_CURRENT_V3_8"
+  });
+}
 
 export async function replayCanonicalCompanyGenesis({ store, company, founderLife, charter, genesis }) {
   invariant(company?.company_id === "AI_ANT_COMPANY_0001", "COMPANY_GENESIS_ID_MISMATCH", "Company Genesis can only form the reserved AI Ant Company identity");
@@ -1375,6 +1521,169 @@ export function validateCompanyFailureState({ companyStatus, founderLifeStatus }
   requireEnum(companyStatus, COMPANY_DISTRESS_STATUSES, "company_failure_status");
   invariant(founderLifeStatus !== "DECEASED", "COMPANY_FAILURE_IS_NOT_LIFE_DEATH", "Company failure cannot erase or kill its Founder Life");
   return Object.freeze({ company_status: companyStatus, founder_life_status: founderLifeStatus, life_identity_preserved: true });
+}
+
+export function validateMotherEngineProposal(proposal) {
+  requireFields(proposal, ["proposal_id", "problem", "evidence", "root_cause", "options", "selected_option", "reason", "risk", "required_authority", "status"], "MotherEngineProposal");
+  requireId(proposal.proposal_id, "proposal_id");
+  requireArray(proposal.evidence, "mother_engine.evidence");
+  requireArray(proposal.options, "mother_engine.options");
+  invariant(proposal.evidence.length > 0, "MOTHER_ENGINE_EVIDENCE_REQUIRED", "Mother Engine proposals require evidence");
+  invariant(proposal.options.includes(proposal.selected_option), "MOTHER_ENGINE_OPTION_REQUIRED", "Selected option must be one of the evaluated options");
+  invariant(!["TOKEN_TRANSFER", "CONTRACT_WRITE", "ASSET_PURCHASE", "SALARY_PAYMENT", "TREASURY_MOVEMENT"].includes(proposal.status), "MOTHER_ENGINE_AUTHORITY_BYPASS", "Autonomous proposals cannot claim restricted execution");
+  return proposal;
+}
+
+export function calculateDivineProductPriority(candidate) {
+  requireFields(candidate, ["product_id", "actual_need", "external_customer_demand", "founder_need", "revenue_potential", "kaios_price_potential", "kgen_energy_demand", "technical_readiness", "supply_chain_difficulty", "mission_alignment", "capital_requirement", "record_class"], "DivineProductCandidate");
+  invariant(DIVINE_PRODUCT_CANDIDATES.includes(candidate.product_id), "UNKNOWN_DIVINE_PRODUCT", "Product candidate is not in the declared V3.6 candidate set");
+  invariant(candidate.record_class !== "REAL_CUSTOMER_ORDER", "FOUNDER_NEED_IS_NOT_CUSTOMER_ORDER", "Internal Founder need cannot become external Customer Revenue");
+  const benefit = Number(candidate.actual_need) + Number(candidate.external_customer_demand) + Number(candidate.founder_need) + Number(candidate.revenue_potential) + Number(candidate.kaios_price_potential) + Number(candidate.kgen_energy_demand) + Number(candidate.technical_readiness) + Number(candidate.mission_alignment);
+  const burden = Number(candidate.supply_chain_difficulty) + Number(candidate.capital_requirement);
+  return Object.freeze({ ...candidate, product_priority_score: benefit - burden, customer_order: false, revenue: "0" });
+}
+
+export function rankDivineProducts(candidates) {
+  requireArray(candidates, "divine_product_candidates");
+  const ranked = candidates.map(calculateDivineProductPriority).sort((left, right) => right.product_priority_score - left.product_priority_score || left.product_id.localeCompare(right.product_id));
+  return Object.freeze({ selected: ranked[0] ?? null, ranked: Object.freeze(ranked), selection_creates_factory: false, selection_creates_inventory: false });
+}
+
+export function validateOperationalEnergyLaw(law) {
+  requireFields(law, ["law_id", "bnb_role", "kgen_role", "kaios_role", "real_consumption_evidence", "ui_balance_decrement_is_consumption", "status"], "OperationalEnergyLaw");
+  invariant(law.bnb_role === "BSC_DARK_MATTER_GAS", "BNB_ENERGY_ROLE_INVALID", "BNB remains BSC gas Dark Matter");
+  invariant(law.kgen_role === "MACHINE_OPERATIONAL_ENERGY", "KGEN_ENERGY_ROLE_INVALID", "KGEN is the machine operational energy accounting asset");
+  invariant(law.kaios_role === "CIVILIZATION_PURCHASE_QUOTE_SALARY_SERVICE_UNIT", "KAIOS_ECONOMIC_ROLE_INVALID", "KAIOS is the civilization purchase/service unit");
+  invariant(law.ui_balance_decrement_is_consumption === false, "FAKE_ENERGY_CONSUMPTION", "UI-only balance changes are not real energy consumption");
+  invariant(law.real_consumption_evidence.includes("SUCCESSFUL_ONCHAIN_RECEIPT") && law.real_consumption_evidence.includes("ENERGY_CONSUMPTION_EVENT"), "ENERGY_CONSUMPTION_EVIDENCE_REQUIRED", "Real KGEN consumption requires transfer receipt and Energy event evidence");
+  return law;
+}
+
+export function validateBodyEnergyModel(model) {
+  requireFields(model, ["model_id", "body_id", "idle_kgen_per_day", "walk_kgen_per_distance", "work_kgen_per_hour", "payload_factor", "terrain_factor", "damage_factor", "efficiency", "status"], "BodyEnergyModel");
+  requireId(model.model_id, "model_id");
+  invariant(model.body_id !== "DIGITAL_ANT_0001", "LIFE_IS_NOT_BODY", "Body ID must remain separate from Life ID");
+  const numeric = ["idle_kgen_per_day", "walk_kgen_per_distance", "work_kgen_per_hour", "payload_factor", "terrain_factor", "damage_factor", "efficiency"];
+  invariant(numeric.every((field) => model[field] === null || Number(model[field]) >= 0), "INVALID_BODY_ENERGY_VALUE", "Body energy values must be null pending engineering or non-negative");
+  invariant(model.status !== "ACTIVE" || numeric.every((field) => model[field] !== null), "BODY_ENERGY_POLICY_REQUIRED", "An active body needs a complete approved energy model");
+  return model;
+}
+
+export function validateAntMechProduct(product) {
+  requireFields(product, ["product_id", "need_class", "requester_life_id", "customer_order", "external_revenue", "purchase_currency", "operational_energy_currency", "life_id_separate_from_body_id", "ownership_certificate", "energy_model", "bom", "inventory", "production_line", "status"], "AntMechProduct");
+  invariant(product.product_id === "ANT_MECH_BODY", "ANT_MECH_PRODUCT_ID_INVALID", "V3.6 founder embodiment candidate must be ANT_MECH_BODY");
+  invariant(product.need_class === "INTERNAL_FOUNDER_NEED" && product.requester_life_id === "DIGITAL_ANT_0001", "ANT_MECH_FOUNDER_NEED_REQUIRED", "Ant Mech starts from the Founder Life's internal need");
+  invariant(product.customer_order === false && String(product.external_revenue) === "0", "FOUNDER_NEED_FAKE_REVENUE", "Founder need is not external Customer Revenue");
+  invariant(product.purchase_currency === "KAIOS" && product.operational_energy_currency === "KGEN", "ANT_MECH_CURRENCY_MODEL_INVALID", "Body purchase uses KAIOS and operation uses KGEN");
+  invariant(product.life_id_separate_from_body_id === true, "LIFE_IS_NOT_BODY", "Life ID and Body ID must remain separate");
+  validateBodyEnergyModel(product.energy_model);
+  invariant(product.status !== "PRODUCTION_READY" || (product.bom.length > 0 && product.inventory.length > 0 && product.production_line), "DEMAND_FIRST_PRODUCTION_GATE", "Production requires BOM, inventory and a production line");
+  return product;
+}
+
+export function validateDemandFirstSupplyChain(plan) {
+  requireFields(plan, ["plan_id", "need_id", "product_id", "requirements", "design", "bom", "raw_materials", "suppliers", "production_line", "quality", "inventory", "sale", "energy", "maintenance", "recycling", "status"], "DemandFirstSupplyChain");
+  requireId(plan.plan_id, "plan_id");
+  invariant(plan.need_id && plan.product_id, "DEMAND_AND_PRODUCT_REQUIRED", "A supply chain requires an evidenced Need and Product");
+  if (plan.production_line) invariant(plan.bom.length > 0 && plan.raw_materials.length > 0 && plan.suppliers.length > 0, "PRODUCTION_WITHOUT_SUPPLY_CHAIN", "A production line requires BOM, resources and suppliers");
+  if (plan.sale) invariant(plan.inventory.length > 0, "SALE_WITHOUT_INVENTORY", "Sale requires evidenced inventory");
+  invariant(plan.status !== "READY_FOR_DELIVERY" || plan.energy?.status === "FUNDED", "MOVEMENT_WITHOUT_ENERGY", "Delivery needs an energy budget");
+  return plan;
+}
+
+export function validateTransportContract(contract) {
+  requireFields(contract, ["transport_contract_id", "cargo", "origin", "destination", "distance", "payload", "route", "vehicle", "kgen_energy", "maintenance", "risk", "time", "profit", "delivery_evidence", "status"], "TransportContract");
+  requireId(contract.transport_contract_id, "transport_contract_id");
+  invariant(contract.status !== "DELIVERED" || contract.delivery_evidence, "TRANSPORT_DELIVERY_EVIDENCE_REQUIRED", "Transport payment requires real delivery evidence");
+  invariant(contract.status !== "IN_TRANSIT" || (contract.route && contract.vehicle && Number(contract.kgen_energy) > 0), "TRANSPORT_ROUTE_VEHICLE_ENERGY_REQUIRED", "Movement requires route, vehicle and KGEN energy");
+  return contract;
+}
+
+export function validateFieldServiceNeed(need) {
+  requireFields(need, ["need_id", "service_type", "source_node", "evidence", "status", "verified"], "FieldServiceNeed");
+  requireId(need.need_id, "need_id");
+  requireEnum(need.service_type, FIELD_SERVICE_TYPES, "field_service_type");
+  requireArray(need.evidence, "field_service_need.evidence");
+  invariant(need.verified !== true || need.evidence.length > 0, "FIELD_NEED_EVIDENCE_REQUIRED", "A verified field-service need requires external world-state evidence");
+  invariant(need.status !== "REAL_FIELD_JOB" || need.verified === true, "FAKE_FIELD_JOB_FORBIDDEN", "Only verified needs can become real field jobs");
+  return need;
+}
+
+export function createAtmFieldServiceRequests(atm) {
+  requireFields(atm, ["atm_id", "coordinate", "mobility", "inventory_evidence", "kaios_cash_status", "kufo_status"], "AtmFieldState");
+  requireId(atm.atm_id, "atm_id");
+  invariant(atm.mobility === "FIXED", "ATM_MOBILITY_INVALID", "ATM service nodes are fixed machines");
+  if (!atm.inventory_evidence) return Object.freeze({ atm_id: atm.atm_id, status: "INVENTORY_EVIDENCE_MISSING", requests: Object.freeze([]) });
+  const requests = [];
+  if (["LOW", "CRITICAL", "EMPTY"].includes(atm.kaios_cash_status)) requests.push(Object.freeze({ request_type: "ATM_CASH_REPLENISHMENT_REQUEST", service_type: "CASH_LOGISTICS", cargo_type: "KAIOS_CASH_CARGO", destination: atm.coordinate, verified: true }));
+  if (["LOW", "HUNGRY", "ENERGY_DEPLETED"].includes(atm.kufo_status)) requests.push(Object.freeze({ request_type: "KUFO_REPLENISHMENT_REQUEST", service_type: "KUFO_SUPPLY", cargo_type: "KUFO", destination: atm.coordinate, verified: true }));
+  return Object.freeze({ atm_id: atm.atm_id, status: requests.length ? "VERIFIED_REQUESTS_DETECTED" : "NO_SERVICE_REQUEST", requests: Object.freeze(requests) });
+}
+
+export function validateWasteInventory(waste) {
+  requireFields(waste, ["waste_id", "source", "mass", "type", "container", "container_mass", "waste_mass", "reactable_matter_mass", "pickup_coordinate", "destination", "hazard_class", "recyclable", "owner", "timestamp", "evidence"], "WasteInventory");
+  requireId(waste.waste_id, "waste_id");
+  invariant([waste.container_mass, waste.waste_mass, waste.reactable_matter_mass].every((value) => Number.isFinite(Number(value)) && Number(value) >= 0), "WASTE_MASS_INVALID", "Waste, container and reactable mass must be non-negative scalars");
+  invariant(Number(waste.mass) === Number(waste.waste_mass), "CONTAINER_IS_NOT_WASTE", "Waste mass excludes the reusable container mass");
+  invariant(Number(waste.reactable_matter_mass) <= Number(waste.waste_mass), "REACTABLE_MATTER_EXCEEDS_WASTE", "Reactable matter cannot include container mass or exceed waste mass");
+  invariant(Boolean(waste.evidence), "WASTE_EVIDENCE_REQUIRED", "Waste inventory requires observed evidence before collection work exists");
+  return waste;
+}
+
+export function calculateFieldTripEnergy(model) {
+  requireFields(model, ["acceleration_work", "rolling_resistance", "drag", "climbing", "braking_loss", "systems_energy", "safety_reserve"], "FieldTripEnergy");
+  const components = Object.fromEntries(Object.entries(model).map(([key, value]) => [key, Number(value)]));
+  invariant(Object.values(components).every((value) => Number.isFinite(value) && value >= 0), "TRIP_ENERGY_COMPONENT_INVALID", "Trip energy requires evidenced non-negative work components");
+  return Object.freeze({ ...components, required_energy: Object.values(components).reduce((sum, value) => sum + value, 0), formula: "ACCELERATION_WORK_PLUS_ROLLING_RESISTANCE_PLUS_DRAG_PLUS_CLIMBING_PLUS_BRAKING_LOSS_PLUS_SYSTEMS_PLUS_SAFETY_RESERVE", mass_times_distance_only: false });
+}
+
+export function calculateMatterAntimatterEnergy({ positiveMatterMass, kshipAntimatterMass, efficiency, speedOfLight = 299792458 }) {
+  const matter = Number(positiveMatterMass); const antimatter = Number(kshipAntimatterMass); const eta = Number(efficiency);
+  invariant([matter, antimatter].every((value) => Number.isFinite(value) && value >= 0), "MASS_PAIR_INVALID", "Matter masses are non-negative scalars");
+  invariant(Number.isFinite(eta) && eta > 0 && eta <= 1, "ENGINE_EFFICIENCY_POLICY_REQUIRED", "Engine policy must provide an efficiency in (0,1]");
+  const paired = Math.min(matter, antimatter);
+  return Object.freeze({ paired_mass_each_side: paired, total_reacting_mass: paired * 2, ideal_energy: paired * 2 * speedOfLight ** 2, usable_energy: eta * paired * 2 * speedOfLight ** 2, mass_is_scalar: true, energy_is_scalar: true, direction_source: "THRUST_VECTOR_FORCE_MOMENTUM_ACCELERATION" });
+}
+
+export function validateFieldRoute(route) {
+  requireFields(route, ["origin", "destination", "origin_coordinate", "destination_coordinate", "distance", "route", "travel_time", "map_evidence"], "FieldRoute");
+  invariant(route.origin_coordinate && route.destination_coordinate && route.route && route.map_evidence, "ROUTE_EVIDENCE_MISSING", "Routes must reuse evidenced K280 / Universe Map coordinates");
+  invariant(Number(route.distance) > 0 && Number(route.travel_time) > 0, "ROUTE_EVIDENCE_MISSING", "Distance and travel time must be derived from route evidence");
+  return route;
+}
+
+export function calculateFieldServiceQuote(input) {
+  requireFields(input, ["energy_cost", "labor_cost", "body_or_vehicle_depreciation", "maintenance", "bnb_chain_cost", "security_cost", "insurance_risk_reserve", "loading_cost", "unloading_cost", "other_verified_cost", "target_profit", "estimated_hours"], "FieldServiceQuote");
+  const names = ["energy_cost", "labor_cost", "body_or_vehicle_depreciation", "maintenance", "bnb_chain_cost", "security_cost", "insurance_risk_reserve", "loading_cost", "unloading_cost", "other_verified_cost", "target_profit", "estimated_hours"];
+  const values = Object.fromEntries(names.map((name) => [name, Number(input[name])]));
+  invariant(names.every((name) => Number.isFinite(values[name]) && values[name] >= 0), "FIELD_QUOTE_COST_BASIS_REQUIRED", "A field-service quote requires a non-negative evidenced cost basis");
+  invariant(values.estimated_hours > 0, "FIELD_QUOTE_TIME_REQUIRED", "Profit per hour requires positive estimated time");
+  const totalCost = names.slice(0, 10).reduce((sum, name) => sum + values[name], 0);
+  const quote = totalCost + values.target_profit;
+  const net = quote - totalCost;
+  return Object.freeze({ ...values, total_cost: totalCost, quoted_revenue: quote, expected_net_profit: net, profit_per_hour: net / values.estimated_hours, decision: net > 0 ? "PROFIT_GATE_PASS" : "REPRICE_OPTIMIZE_NEGOTIATE_OR_DECLINE", movement_is_revenue: false });
+}
+
+export function validateFieldDeliveryEvidence(evidence) {
+  requireFields(evidence, ["origin_evidence", "pickup_evidence", "cargo_evidence", "route_evidence", "arrival_coordinate", "delivery_timestamp", "receiver_evidence", "customer_acceptance"], "FieldDeliveryEvidence");
+  invariant(Object.values(evidence).every(Boolean), "DELIVERY_EVIDENCE_INCOMPLETE", "Revenue requires pickup, route, arrival, receiver and customer acceptance evidence");
+  return Object.freeze({ ...evidence, status: "DELIVERY_VERIFIED" });
+}
+
+export function createWorkforceGap({ verifiedJobs, eligibleWorkers, availableCapacity }) {
+  requireArray(verifiedJobs, "verified_field_jobs"); requireArray(eligibleWorkers, "eligible_workers");
+  invariant(verifiedJobs.every((job) => job.verified === true), "WORKFORCE_GAP_REQUIRES_REAL_DEMAND", "Hiring cannot be triggered by hypothetical jobs");
+  const gap = Math.max(0, verifiedJobs.length - Number(availableCapacity));
+  return Object.freeze({ status: gap > 0 ? "WORKFORCE_GAP" : "NO_WORKFORCE_GAP", gap, existing_workers_searched: true, eligible_workers: eligibleWorkers.length, job_posting_required: gap > 0, new_life_created: false });
+}
+
+export function createFieldServiceDemandScan({ nodes = [], atms = [], wastes = [], cargoRequests = [] } = {}) {
+  [nodes, atms, wastes, cargoRequests].forEach((items) => requireArray(items, "field_service_scan_input"));
+  const atmRequests = atms.flatMap((atm) => createAtmFieldServiceRequests(atm).requests);
+  const wasteRequests = wastes.map((waste) => (validateWasteInventory(waste), Object.freeze({ request_type: "WASTE_COLLECTION_REQUEST", service_type: "WASTE_COLLECTION", verified: true, source: waste.source })));
+  const verifiedCargo = cargoRequests.filter((request) => request?.verified === true && request?.evidence);
+  const candidates = [...atmRequests, ...wasteRequests, ...verifiedCargo];
+  return Object.freeze({ scan_id: "KGEN_FIELD_SERVICE_DEMAND_SCAN_V3_9", status: candidates.length ? "VERIFIED_CANDIDATES_AVAILABLE" : "NO_VERIFIED_FIELD_JOB_AVAILABLE", nodes_scanned: nodes.length, verified_nodes: Object.freeze(nodes), atm_cash_needs: atmRequests.filter((request) => request.service_type === "CASH_LOGISTICS").length, atm_kufo_needs: atmRequests.filter((request) => request.service_type === "KUFO_SUPPLY").length, waste_collection_needs: wasteRequests.length, cargo_needs: verifiedCargo.length, candidate_jobs: Object.freeze(candidates), real_field_jobs: 0, selected_next_best_job: null, revenue: "0", first_kaios_event: "NOT_OCCURRED" });
 }
 
 export function createAiAntCompanyFoundingReadiness({ company, founderLife, founderApp, workHistory, charter, businessLines, quoteEngine, contractEngine, workOrderEngine, accountingSeparation, treasuryPlan, escrowPlan, payrollPlan, riskPolicy, listingPlan }) {

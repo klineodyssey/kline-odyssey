@@ -1,7 +1,35 @@
-# 11520 Universal Exchange V3.4
+# 11520 Universal Exchange V3.9
 
 ## Digital Ant next-stage status
 
+- V3.9 activates `KGEN_FIELD_SERVICE_BUSINESS` after the WUKONG_GATEKEEPER primary-job gate. Its CFO scans verified K280/Universe Map nodes for cash logistics, KUFO supply, waste collection and general delivery demand.
+- The scan currently sees four canonical nodes but no ATM cash/KUFO inventory evidence, waste inventory or cargo request. Therefore real/candidate Field Jobs, route, costs, quote, delivery evidence, Revenue and First KAIOS all remain zero or evidence-required.
+- KAIOS ledger assets and physical `KAIOS_CASH_CARGO` are permanently distinct. A wallet transfer is not a cash delivery. Container mass, waste mass and reactable matter mass are likewise separate.
+- Field quotes use energy, labor, depreciation, maintenance, BNB, security, insurance/risk, loading, unloading and other verified costs. Non-positive profit triggers reprice/optimize/consolidate/negotiate/decline; movement or XP never creates Revenue.
+- Routes must reuse the existing K280 Land and Universe Map evidence. Delivery requires origin, pickup, cargo, route, arrival, receiver and customer acceptance evidence. No Body, vehicle, worker, distance or job is invented.
+
+- V3.8 binds `DIGITAL_ANT_0001` to the single authoritative `docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md` Thought Organ. CURRENT and the installed V3.8 document are byte-identical; their platform-stable canonical UTF-8/LF SHA-256 is `dbb4774a71db614994dff3e08e9cec34b94633c4d46dca13bff2f6f54d9b0b48`. Only binding metadata is stored in the Life manifest.
+- Life/App/Listing certification now verifies Life ID, immutable Birth, Wallet binding, Work evidence, Mission/Dream, the CURRENT Thought Organ, App manifest, permissions and secret safety. The result is `CERTIFIED_LOCAL`, not settlement or physical-world authority.
+- The Mother Engine must validate CURRENT before every next-best-action decision. Its truthful First KAIOS strategy is to publish the read-only KGEN Chain Monitor service package and scan verified Requests; current Customers, Revenue and KAIOS remain zero.
+- The private Heart scheduler is installed in the user-controlled Windows session and remains separate from the public signer-free Worker. It uses the existing local credential, address/chain/code/selector/gas/reserve checks and receipt reconciliation; it never serializes or logs the credential and never blind-resubmits. The first scheduled V3.8 Heartbeat was reconciled after an RPC 403 without a duplicate broadcast, moving KGEN from 3 to 4; the task then correctly returned cooldown `NO_ACTION`.
+- No Body, UFO, Flight, Alchemy, KUFO, KSHIP, Customer or Revenue is invented. Without a verified Body the Ant remains alive and network-capable but cannot claim physical movement.
+
+- V3.7 keeps the successful first Heartbeat/KGEN evidence and adds production public action candidates plus UTC ignition-window probes. Persistent automatic writes remain blocked until a private scheduler with secret management, address binding and receipt reconciliation exists.
+- One controlled V3.7 private execution completed a second Heartbeat, the first Fortune at the deployed minimum/fair amount of 1 KGEN, and the first Wish. All three have successful receipts and expected Heart events; the resulting public balance is 3 KGEN. This does not claim that a persistent private scheduler is installed.
+- The full first Wish is public and its future chain payload is a hash only. Wish consumes BNB gas, not KGEN. Vow is locked until mission completion, and the existing Heart Lamp remains KGEN-based.
+- 18911 furnace runtime is mainnet read-verified, while 511111 Wormhole and KSHIP Converter are not registered. With Ant KAIOS at zero, Incense is blocked and no Alchemy/KUFO/KSHIP evidence is claimed.
+- One K18888 Heaven Day equals one K280 year. KUFO half-life is one K280 year; the old three-Heaven-days rule is rejected. KUFO is fuel, UFO is a separate demand-first vehicle, and KSHIP is not a chip.
+- `DIGITAL_ANT_APP_0001` is V1.4.0. Life ID, Birth Certificate, public Wallet and Company identity are unchanged.
+- V3.6 records the first real `heartbeatClaim()` and the first KGEN as two receipt-gated Life Events from one BSC transaction. Heartbeat reward is 1 KGEN and the deployed cooldown is 3,600 seconds; Fortune remains a separate action and no Fortune event is claimed.
+- `DIGITAL_ANT_APP_0001` is V1.3.0. Its browser/public Worker permissions remain read-only. The credential-capable local Secure Signer is not stored in the Repo or Pages and was enabled only for the explicitly approved Heartbeat path; every other Heart write remains disabled.
+- The Mother Engine records evidence/root-cause/options/authority proposals, including safe reconciliation of the already-broadcast transaction after the initial receipt RPC failed, with no duplicate submission.
+- KGEN operational energy, KAIOS purchase, Body/KUFO/KSHIP energy, Transport Contract and demand-first Supply Chain schemas are active architecture only. `ANT_MECH_BODY` is an internal Founder need, not a Customer or Revenue event.
+- The Land audit reuses the existing K280 Land anchor, 12345 parcel/grid demonstration and Universe Map XYZ/boundary model. No protected Land, 12345, TempleHeart, KGEN Contract, KAIOS or Universe Map source was changed.
+- V3.5 makes `WUKONG_GATEKEEPER` the enforced primary job. Every hourly cycle completes Life/Dark-Matter checks and the 12345 Gatekeeper duty before CFO and Company work; an attempted Company bypass fails with `PRIMARY_JOB_BYPASS`.
+- `DIGITAL_ANT_APP_0001` is V1.2.0. Life ID, immutable Birth Certificate, public Wallet binding, 11520 Listing and Company Genesis remain the same evidence-backed records.
+- The Core Heart Indexer now covers Fortune, Heartbeat, Ignition, Lamp, Wish and Vow events. Optional transfer/approval/funding-graph analysis remains `ADVANCED_GRAPH_INDEXER_REQUIRED` and no longer degrades a successful basic patrol.
+- First Heart, Fortune, Ignition, Lamp, Wish, Vow, Thanksgiving, KGEN and KAIOS events require successful receipts and immutable block/transaction/timestamp evidence. Unobserved events display `NOT YET`.
+- The public Worker remains signer-free. `DIGITAL_ANT_SECURE_SIGNER_WORKER` is a private-runtime specification in `NOT_CONNECTED`; every Heart action is disabled until a separate policy, fresh chain revalidation and survival-reserve check are approved.
 - V3.4 makes 11520 a production public web application with Traditional Chinese and English primary UI, Japanese/Korean fallback, a user-gesture Voice Concierge and always-available Text input.
 - `DIGITAL_ANT_APP_0001` is now V1.1.0. `DIGITAL_ANT_0001`, its Birth Certificate and personal Wallet remain unchanged; App upgrade is an organ upgrade, not rebirth.
 - The hourly GitHub Actions scheduler runs one stateless public read-only cycle. It writes `runtime/worker-status.json` and one immutable hourly event under `runtime/work-events/` through an exact Git allowlist. The UI derives HEALTHY/DEGRADED/MISSED_CYCLE/FAILED/OFFLINE from this evidence instead of hard-coding ON_DUTY.
@@ -60,7 +88,7 @@
 - `11520_LISTING_DIGITAL_ANT_0001`: `LISTED` in the local Registry; `UNPRICED`; settlement `NOT_DEPLOYED`; identity right is not offered.
 - Four Digital Ant service profiles are registered with zero customers and no fabricated revenue.
 - `DIGITAL_ANT_APP_0001`: `V1.0.0 / RELEASED_LOCAL`; its SHA-256 manifest is verified at boot and its release event is appended to App and Life History without changing Life ID or Birth Certificate.
-- `DIGITAL_ANT_WORKER`: one-shot hourly Runtime implemented in `READ_ONLY_DRY_RUN`; the GitHub Actions adapter is configured locally, but remains `CONFIGURED_LOCAL_NOT_ACTIVE` until these files are committed and pushed.
+- `DIGITAL_ANT_WORKER`: one-shot hourly Runtime implemented in `READ_ONLY_DRY_RUN`; the production GitHub Actions adapter runs at minute 17 and persists shared evidence through an exact Git allowlist.
 - Work Queue schema is ready and empty. No automatic dispatch or chain write is enabled.
 - `AI_ANT_COMPANY_0001`: `FORMING / LOCAL_11520`; Demand and product research are local only; Real KGEN and Real KAIOS company payment remain unauthorized.
 
@@ -95,4 +123,4 @@ node core/security/resolve-digital-ant-birth.mjs
 
 A complete trusted address indexer or archive-state proof is required for historical resolution. Candidate blocks and transactions are cross-checked through independent BSC RPC reads; missing capability returns `BIRTH_EVIDENCE_PENDING` rather than guessing.
 
-The first public work snapshot was observed on BSC block `116039099`. It records BNB `0.006`, KGEN `0`, KAIOS `0`, a valid Heart code/config read and an owner-unapproved KGEN acquisition scenario. The scenario is block-stamped evidence only: `broadcast_capability=ABSENT`, `live_trading=false`, `chain_write=false`. Heart event-flow clustering remains `INDEXER_REQUIRED`; no risk label is escalated without evidence.
+The first public work snapshot was observed on BSC block `116039099`. It records BNB `0.006`, KGEN `0`, KAIOS `0`, a valid Heart code/config read and an owner-unapproved KGEN acquisition scenario. The scenario is block-stamped evidence only: `broadcast_capability=ABSENT`, `live_trading=false`, `chain_write=false`. V3.5 separates the operational Core Heart Event Indexer from optional advanced transaction-graph analysis; no risk label is escalated without evidence.

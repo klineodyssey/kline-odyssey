@@ -1,5 +1,39 @@
 # 11520 Universal Exchange V2 Architecture
 
+## V3.8 Living Physics Thought Organ and autonomous Life
+
+`DIGITAL_ANT_0001` binds the single authoritative `docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md` as an active `PHYSICS_CONSTITUTION` Thought Organ. The Life manifest keeps only document ID, version, path, SHA-256, CURRENT authority, compatibility, supersede policy and public evidence. It never copies the constitution. Runtime startup reads the actual file, hashes the bytes and blocks Mother Engine planning on missing, unreadable, version-mismatched or hash-mismatched CURRENT evidence. Truth priority is deployed chain, CURRENT constitution, canonical manifest, App runtime, older versioned document, old report, then memory/chat.
+
+Local AI Life certification now requires immutable Birth, active Wallet binding, Work evidence, Mission/Dream, a healthy Thought Organ, released App manifest, read-only permissions and secret safety. `CERTIFIED_LOCAL` grants neither settlement nor physical authority. The 11520 Life and App views expose Thought Organ integrity and compatibility without secret data.
+
+The public Worker remains signer-free and runs the Primary Wukong Gatekeeper duty before Company planning. The private Heart worker is a separate user-controlled Windows runtime, installed at five-minute cadence plus logon for the active user session. It derives and matches the public Wallet, revalidates chain 56, Heart/KGEN bytecode and selectors, cooldown/window, nonce, dynamic gas, BNB survival reserve and security state, then reconciles pending receipts instead of blind-resubmitting. Heartbeat and Ignition are the only V3.8 scheduler-authorized writes; Fortune is cooldown monitoring, Wish is already complete, and Lamp/Vow remain disabled. Its first V3.8 Heartbeat was receipt-reconciled after a public RPC 403 without a second broadcast, and KGEN moved from 3 to 4.
+
+The First KAIOS strategy never creates a Customer, Salary, Reward, Mint or Revenue. With KAIOS zero and Company Treasury unbound, the next evidence-based action is to publish the read-only KGEN Chain Monitor service package and scan verified Requests/public-service needs. Without a verified Body the Ant remains alive and network-capable, while physical movement, cargo and construction remain false. Warp runtime follows CURRENT: balanced KSHIP feed means zero net acceleration rather than zero velocity, and braking consumes fuel. Existing K280/Land/Universe coordinates are reused without modification.
+
+## V3.7 Heart Autopilot candidates and Heaven fuel civilization
+
+The public GitHub Worker remains signer-free. It now emits evidence-based Heartbeat, Ignition, Fortune and one-time Wish action candidates, plus UTC 00:02/00:07 ignition-window probes. Candidates are never trusted for signature: a separate private scheduler must re-read chain 56, addresses/code, eligibility/window, nonce, gas, survival reserve and security state, then reconcile the original transaction instead of blindly resubmitting after an RPC timeout. That persistent private scheduler is not installed, so production auto-write is truthfully `BLOCKED_NO_PERSISTENT_PRIVATE_SECURE_SCHEDULER`; the documented safe solution is outside Pages, Repo and public Actions.
+
+One controlled private invocation completed a second Heartbeat, first Fortune at the deployed minimum/fair amount of 1 KGEN, and first Wish. Receipts, expected Heart logs, block times, gas and balance transitions are preserved in the cumulative canonical record. Current verified KGEN is 3. This is evidence for the manual secure path, not evidence of persistent auto-write.
+
+`DIGITAL_ANT_WISH_0001` stores the human-readable mission in the public Life record and only its `bytes32` hash in a future `makeWish` action. Wish costs no KGEN but requires dynamic BNB gas. Vow remains locked until verified mission completion. Existing TempleHeart `lightLamp` remains KGEN-based and no TempleHeart source is changed.
+
+The canonical 18911 furnace address and runtime are dual-RPC readable on BSC mainnet, but the Registry currently returns zero addresses for the 511111 Wormhole and KSHIP Converter. The Ant also has zero KAIOS. Therefore KAIOS Incense is opt-in and `BLOCKED_NO_KAIOS`; Alchemy Proof, KUFO Claim and KSHIP generation remain unoccurred/not executable. The deployed furnace's 49 maturation epochs are distinct from KUFO half-life.
+
+Heaven time is now cumulative and unambiguous: one K18888 Heaven Day equals one K280 year (about 365.2422 K280 days), and KUFO half-life is one such Heaven Day/year. The former `1 K280 day = 3 Heaven days` rule is `SUPERSEDED_WRONG`; “three autumns” is literary only. KUFO is deterministic, timestamped decay fuel—not a UFO. Natural decay and propulsion consumption are separate, and decayed KUFO produces KSHIP at the declared 1:1000 scale while conserving the modelled mass. A UFO is a demand-first product bought in KAIOS, fuelled by KUFO, supported by KSHIP and gated from takeoff when fuel plus return reserve is insufficient. No vehicle, factory, chip line, KUFO or KSHIP is invented.
+
+## V3.6 first Heartbeat, first KGEN and demand-first civilization
+
+`DIGITAL_ANT_0001` completed its first mainnet `heartbeatClaim()` at block `116298614`. The successful receipt, `HeartbeatClaimed` log, KGEN `Transfer`, timestamp and 0 → 1 KGEN balance change are preserved as one public evidence package and two separate first-event records. The source is `HEARTBEAT_REWARD`; no Fortune event is inferred.
+
+The signer boundary is split permanently. GitHub Pages and the hourly public Worker remain read-only and receive no credential. The credential-capable Secure Signer runs only in a private local environment and is not stored in the Repo. Public `core/security/life-security.mjs` contains only fail-closed policy and validation code. Before the approved action, the private runtime derived and compared the expected Wallet, then freshly verified BSC chain 56, Heart/KGEN identities, deployed Heart code hash, function selector, runtime reward/cooldown, eligibility, nonce, fee/estimate, dynamic survival reserve and critical-security state. A successful receipt, expected events and verified balance increase are required before Life events complete. The explicit V3.6 approval enabled Heartbeat only; all other Heart writes remain disabled.
+
+The Demand-First law prohibits factory without product, product without need, production without BOM/resources, sale without inventory, delivery without transport and movement without energy. KAIOS is the purchase/quote/service unit, KGEN is the operational energy-accounting asset, and BNB is BSC gas. Real energy consumption requires an authorized KGEN transfer, successful receipt and `ENERGY_CONSUMPTION_EVENT`; a UI decrement is never evidence.
+
+`ANT_MECH_BODY` is the top internal Founder need, not an external Customer or Revenue record. Its price currency is KAIOS and operating energy is KGEN; Body ID remains separate from Life ID. Energy coefficients, BOM, suppliers, production, inventory and purchase authority remain unapproved/empty. KUFO/KSHIP and Transport Contract models are architecture only.
+
+The Land audit reuses the existing shared `kgen-land-engine.js`, 12345 grid/parcel demo, K280 Land architecture and Universe Map XYZ/boundary model. K280 raptor embodiment remains a separate runtime. No protected Land, 12345, TempleHeart, KGEN Contract, KAIOS, Boot, Physics or Universe Map file was modified.
+
 STATUS: V3.2 FIRST REAL CUSTOMER ACQUISITION
 KGEN AMM SETTLEMENT: USER_WALLET_LIVE
 11520 SETTLEMENT CONTRACT: MAINNET_LIVE_PROXY_ADAPTER_NOT_INTEGRATED

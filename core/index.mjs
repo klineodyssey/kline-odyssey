@@ -2,7 +2,7 @@ export * from "./shared/errors.mjs";
 export * from "./history/index.mjs";
 export * from "./registry/index.mjs";
 export * from "./registry/store.mjs";
-export * from "./registry/universe-runtime.mjs?v=3.4.0-live-life";
+export * from "./registry/universe-runtime.mjs?v=3.9.0-autonomous-field-service";
 export * from "./permissions/index.mjs";
 export * from "./life/index.mjs";
 export * from "./life/factory.mjs";
