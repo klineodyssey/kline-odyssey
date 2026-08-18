@@ -91,16 +91,106 @@ import {
   createAiLifeCertification, createThoughtOrganTimelineEvent, CANONICAL_TRUTH_PRIORITY,
   resolveLifePhysicalCapability, createFirstKaiosStrategy, evaluateKshipWarpFeed,
   DIGITAL_ANT_V3_8_HEART_AUTOPILOT_APPROVAL, createV38HeartAutopilotPolicy
+  , KAIOS_CASH_LAW, createAtmFieldServiceRequests, validateWasteInventory,
+  calculateFieldTripEnergy, calculateMatterAntimatterEnergy, validateFieldRoute,
+  calculateFieldServiceQuote, validateFieldDeliveryEvidence, createWorkforceGap,
+  createFieldServiceDemandScan
 } from "../core/index.mjs";
 import { verifyDigitalAntWalletBinding } from "../core/security/wallet-binding.mjs";
 import { TEMPLE_HEART_READ_ABI, TEMPLE_HEART_DRY_RUN_ABI, TEMPLE_HEART_VERIFIED_ACTIONS, readCoreHeartEvents } from "../core/integrations/temple-heart-12345.mjs";
-import { buildSharedWorkerStatus, createPublicReadProvider, inspectPhysicsThoughtOrgan, readCompanyPatrol, readMotherEnginePatrol, readPublicRequestPatrol } from "../core/jobs/public-read-only-worker.mjs";
+import { buildSharedWorkerStatus, createPublicReadProvider, inspectPhysicsThoughtOrgan, readCompanyPatrol, readFieldServicePatrol, readMotherEnginePatrol, readPublicRequestPatrol } from "../core/jobs/public-read-only-worker.mjs";
 
 const seed = JSON.parse(await fs.readFile(new URL("../core/data/canonical.json", import.meta.url), "utf8"));
 
 async function runtime() {
   return createUniverseRuntime({ seed: structuredClone(seed), store: new MemoryUniverseStore() });
 }
+
+test("V3.9 field service scan preserves zero-job truth without inventory evidence", () => {
+  const scan = createFieldServiceDemandScan({ nodes: seed.next_stage.field_service_business_v3_9.verified_nodes });
+  assert.equal(scan.status, "NO_VERIFIED_FIELD_JOB_AVAILABLE");
+  assert.equal(scan.nodes_scanned, 4);
+  assert.equal(scan.candidate_jobs.length, 0);
+  assert.equal(scan.real_field_jobs, 0);
+  assert.equal(scan.revenue, "0");
+});
+
+test("V3.9 KAIOS ledger is not physical cash cargo", () => {
+  assert.equal(KAIOS_CASH_LAW.ledger_asset, "KAIOS_LEDGER");
+  assert.equal(KAIOS_CASH_LAW.physical_cargo, "KAIOS_CASH_CARGO");
+  assert.equal(KAIOS_CASH_LAW.ledger_transfer_is_cash_delivery, false);
+});
+
+test("V3.9 fixed ATM creates replenishment only from verified inventory", () => {
+  const base = { atm_id: "ATM_11520_0001", coordinate: 11520, mobility: "FIXED", kaios_cash_status: "LOW", kufo_status: "HUNGRY" };
+  assert.equal(createAtmFieldServiceRequests({ ...base, inventory_evidence: null }).requests.length, 0);
+  const verified = createAtmFieldServiceRequests({ ...base, inventory_evidence: "SIGNED_WORLD_SNAPSHOT" });
+  assert.deepEqual(verified.requests.map((request) => request.service_type), ["CASH_LOGISTICS", "KUFO_SUPPLY"]);
+  assert.throws(() => createAtmFieldServiceRequests({ ...base, mobility: "MOBILE", inventory_evidence: "EVIDENCE" }), /ATM service nodes are fixed/);
+});
+
+test("V3.9 waste inventory separates container, waste and reactable matter", () => {
+  const waste = { waste_id: "WASTE_1", source: "NODE_1", mass: 2, type: "GENERAL", container: "BIN_1", container_mass: 10, waste_mass: 2, reactable_matter_mass: 1.5, pickup_coordinate: 1, destination: 2, hazard_class: "LOW", recyclable: true, owner: "NODE_1", timestamp: "2026-08-18T00:00:00Z", evidence: "WORLD_SNAPSHOT" };
+  assert.equal(validateWasteInventory(waste).reactable_matter_mass, 1.5);
+  assert.throws(() => validateWasteInventory({ ...waste, mass: 12 }), /Waste mass excludes/);
+  assert.throws(() => validateWasteInventory({ ...waste, reactable_matter_mass: 12 }), /cannot include container mass/);
+});
+
+test("V3.9 trip energy uses complete physical components", () => {
+  const result = calculateFieldTripEnergy({ acceleration_work: 10, rolling_resistance: 2, drag: 3, climbing: 4, braking_loss: 5, systems_energy: 6, safety_reserve: 7 });
+  assert.equal(result.required_energy, 37);
+  assert.equal(result.mass_times_distance_only, false);
+});
+
+test("V3.9 matter and energy remain scalar while thrust supplies direction", () => {
+  const result = calculateMatterAntimatterEnergy({ positiveMatterMass: 2, kshipAntimatterMass: 1, efficiency: 0.5 });
+  assert.equal(result.paired_mass_each_side, 1);
+  assert.equal(result.mass_is_scalar, true);
+  assert.equal(result.energy_is_scalar, true);
+  assert.match(result.direction_source, /THRUST_VECTOR/);
+  assert.throws(() => calculateMatterAntimatterEnergy({ positiveMatterMass: 1, kshipAntimatterMass: 1, efficiency: null }), /Engine policy/);
+});
+
+test("V3.9 route requires existing K280 or Universe Map evidence", () => {
+  const route = { origin: "12345", destination: "11520", origin_coordinate: 12345, destination_coordinate: 11520, distance: 18778.422548555, route: [12345, 11520], travel_time: 3600, map_evidence: "docs/maps/UniverseMap_V10_2_DISTANCE_COMPLETE_ALL_POINTS.json" };
+  assert.equal(validateFieldRoute(route).map_evidence.includes("UniverseMap"), true);
+  assert.throws(() => validateFieldRoute({ ...route, map_evidence: null }), /Routes must reuse evidenced/);
+});
+
+test("V3.9 CFO quote exposes every cost and refuses non-positive profit", () => {
+  const base = { energy_cost: 1, labor_cost: 2, body_or_vehicle_depreciation: 3, maintenance: 4, bnb_chain_cost: 5, security_cost: 6, insurance_risk_reserve: 7, loading_cost: 8, unloading_cost: 9, other_verified_cost: 10, estimated_hours: 5 };
+  const profitable = calculateFieldServiceQuote({ ...base, target_profit: 10 });
+  assert.equal(profitable.total_cost, 55);
+  assert.equal(profitable.quoted_revenue, 65);
+  assert.equal(profitable.profit_per_hour, 2);
+  assert.equal(calculateFieldServiceQuote({ ...base, target_profit: 0 }).decision, "REPRICE_OPTIMIZE_NEGOTIATE_OR_DECLINE");
+  assert.equal(profitable.movement_is_revenue, false);
+});
+
+test("V3.9 delivery revenue requires complete receiver acceptance evidence", () => {
+  const evidence = { origin_evidence: "A", pickup_evidence: "B", cargo_evidence: "C", route_evidence: "D", arrival_coordinate: "E", delivery_timestamp: "F", receiver_evidence: "G", customer_acceptance: "H" };
+  assert.equal(validateFieldDeliveryEvidence(evidence).status, "DELIVERY_VERIFIED");
+  assert.throws(() => validateFieldDeliveryEvidence({ ...evidence, customer_acceptance: null }), /Revenue requires/);
+});
+
+test("V3.9 workforce gap follows verified demand and does not create Life", () => {
+  const gap = createWorkforceGap({ verifiedJobs: [{ verified: true }, { verified: true }], eligibleWorkers: [], availableCapacity: 1 });
+  assert.equal(gap.status, "WORKFORCE_GAP");
+  assert.equal(gap.job_posting_required, true);
+  assert.equal(gap.new_life_created, false);
+  assert.throws(() => createWorkforceGap({ verifiedJobs: [{ verified: false }], eligibleWorkers: [], availableCapacity: 0 }), /hypothetical jobs/);
+});
+
+test("V3.9 public CFO patrol runs after primary duty and creates no fake business", () => {
+  const patrol = readFieldServicePatrol(seed);
+  assert.equal(patrol.primary_job_gate, "GATEKEEPER_DUTY_COMPLETED_BEFORE_CFO_SCAN");
+  assert.equal(patrol.status, "NO_VERIFIED_FIELD_JOB_AVAILABLE");
+  assert.equal(patrol.real_field_jobs, 0);
+  assert.equal(patrol.settlement, false);
+  assert.equal(patrol.chain_write, false);
+  assert.equal(seed.next_stage.field_service_business_v3_9.workforce.job_postings, 0);
+  assert.equal(seed.next_stage.field_service_business_v3_9.first_kaios_event, "NOT_OCCURRED");
+});
 
 test("Life IDs are unique and DIGITAL_ANT_0001 has verified immutable birth evidence", () => {
   const ids = seed.lives.map((life) => life.life_id);
@@ -653,7 +743,7 @@ test("V2.4 Life App release preserves Life ID, Birth and independent App version
   assert.equal(life.life_id, "DIGITAL_ANT_0001");
   assert.equal(life.birth_timestamp, "2026-08-15T06:20:45.000Z");
   assert.equal(app.life_id, life.life_id);
-  assert.equal(app.version, "V1.5.0");
+  assert.equal(app.version, "V1.6.0");
   assert.equal(app.status, "RELEASED_LOCAL");
   assert.equal(await calculateAppManifestHash(app), app.manifest_hash);
   assert.equal(app.permissions.CHAIN_READ, true);
@@ -2122,10 +2212,10 @@ test("V3.4 shared status is global truth while IndexedDB remains local cache", a
   assert.equal(status.chain_write, false);
 });
 
-test("V3.8 App upgrade preserves Life ID and immutable Birth", async () => {
+test("V3.9 App upgrade preserves Life ID and immutable Birth", async () => {
   const app = seed.apps.find((item) => item.app_id === "DIGITAL_ANT_APP_0001");
   const life = seed.lives.find((item) => item.life_id === "DIGITAL_ANT_0001");
-  assert.equal(app.version, "V1.5.0");
+  assert.equal(app.version, "V1.6.0");
   assert.equal(app.life_id, life.life_id);
   assert.equal(life.birth_timestamp, "2026-08-15T06:20:45.000Z");
   assert.equal(await calculateAppManifestHash(app), app.manifest_hash);
@@ -2238,10 +2328,10 @@ test("V3.5 Daily Gatekeeper report separates duty evidence and truthful zero bal
   assert.equal(report.chain_write, false);
 });
 
-test("V3.8 Canonical App and Gatekeeper runtime preserve Birth and receipt-gated first-asset evidence", async () => {
+test("V3.9 Canonical App and Gatekeeper runtime preserve Birth and receipt-gated first-asset evidence", async () => {
   const app = seed.apps.find((item) => item.app_id === "DIGITAL_ANT_APP_0001");
-  assert.equal(seed.schema_version, "3.8.0");
-  assert.equal(app.version, "V1.5.0");
+  assert.equal(seed.schema_version, "3.9.0");
+  assert.equal(app.version, "V1.6.0");
   assert.equal(await calculateAppManifestHash(app), app.manifest_hash);
   assert.equal(seed.lives[0].birth_timestamp, "2026-08-15T06:20:45.000Z");
   assert.equal(seed.next_stage.gatekeeper_runtime.life_events.FIRST_HEARTBEAT_EVENT, "VERIFIED");
@@ -2480,9 +2570,9 @@ test("Mother Engine proactively selects evidence-backed next-best action", () =>
   assert.equal(result.revenue_created, false);
 });
 
-test("V3.8 canonical truth preserves primary job, zero business fiction, and protected coordinate reuse", () => {
-  assert.equal(seed.schema_version, "3.8.0");
-  assert.equal(seed.apps.find((app) => app.app_id === "DIGITAL_ANT_APP_0001").version, "V1.5.0");
+test("V3.9 canonical truth preserves primary job, zero business fiction, and protected coordinate reuse", () => {
+  assert.equal(seed.schema_version, "3.9.0");
+  assert.equal(seed.apps.find((app) => app.app_id === "DIGITAL_ANT_APP_0001").version, "V1.6.0");
   assert.equal(seed.next_stage.gatekeeper_runtime.primary_job, "WUKONG_GATEKEEPER");
   assert.equal(seed.next_stage.company_work_v3_7.real_customers, 0);
   assert.equal(seed.next_stage.company_work_v3_7.external_revenue, "0");

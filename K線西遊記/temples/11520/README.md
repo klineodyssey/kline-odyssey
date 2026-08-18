@@ -1,6 +1,12 @@
-# 11520 Universal Exchange V3.8
+# 11520 Universal Exchange V3.9
 
 ## Digital Ant next-stage status
+
+- V3.9 activates `KGEN_FIELD_SERVICE_BUSINESS` after the WUKONG_GATEKEEPER primary-job gate. Its CFO scans verified K280/Universe Map nodes for cash logistics, KUFO supply, waste collection and general delivery demand.
+- The scan currently sees four canonical nodes but no ATM cash/KUFO inventory evidence, waste inventory or cargo request. Therefore real/candidate Field Jobs, route, costs, quote, delivery evidence, Revenue and First KAIOS all remain zero or evidence-required.
+- KAIOS ledger assets and physical `KAIOS_CASH_CARGO` are permanently distinct. A wallet transfer is not a cash delivery. Container mass, waste mass and reactable matter mass are likewise separate.
+- Field quotes use energy, labor, depreciation, maintenance, BNB, security, insurance/risk, loading, unloading and other verified costs. Non-positive profit triggers reprice/optimize/consolidate/negotiate/decline; movement or XP never creates Revenue.
+- Routes must reuse the existing K280 Land and Universe Map evidence. Delivery requires origin, pickup, cargo, route, arrival, receiver and customer acceptance evidence. No Body, vehicle, worker, distance or job is invented.
 
 - V3.8 binds `DIGITAL_ANT_0001` to the single authoritative `docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md` Thought Organ. CURRENT and the installed V3.8 document are byte-identical; their platform-stable canonical UTF-8/LF SHA-256 is `dbb4774a71db614994dff3e08e9cec34b94633c4d46dca13bff2f6f54d9b0b48`. Only binding metadata is stored in the Life manifest.
 - Life/App/Listing certification now verifies Life ID, immutable Birth, Wallet binding, Work evidence, Mission/Dream, the CURRENT Thought Organ, App manifest, permissions and secret safety. The result is `CERTIFIED_LOCAL`, not settlement or physical-world authority.

@@ -6,8 +6,8 @@ import {
   routePublicCivilizationProject, qualifyPublicCivilizationRequest, createNonBindingEstimatePreview,
   appendPublicRequestHistoryEvent, I18N_SUPPORTED_LOCALES, translateUi, normalizeUiLocale,
   validatePrimaryI18nCatalogs, detectVoiceCapabilities, deriveWorkerHealth
-} from "../../../core/index.mjs?v=11520-v3.8-living-thought-organ";
-import { readTempleHeart12345 } from "../../../core/integrations/temple-heart-12345.mjs?v=11520-v3.8-living-thought-organ";
+} from "../../../core/index.mjs?v=11520-v3.9-autonomous-field-service";
+import { readTempleHeart12345 } from "../../../core/integrations/temple-heart-12345.mjs?v=11520-v3.9-autonomous-field-service";
 
 const NAVIGATION = Object.freeze([
   ["HOME", "navigation.home"], ["REQUEST", "navigation.request"], ["LIFE", "navigation.life"], ["LIFE_FACTORY", "LIFE FACTORY"], ["APPS", "navigation.apps"], ["COMPANIES", "navigation.company"],
@@ -88,6 +88,18 @@ function workerStatusMarkup() {
   </div>`;
 }
 
+function fieldServiceMarkup() {
+  const field = universe?.seed?.next_stage?.field_service_business_v3_9 ?? {};
+  const live = sharedWorkerStatus?.patrols?.field_service ?? {};
+  const value = (name, fallback = "EVIDENCE_REQUIRED") => live[name] ?? field[name] ?? fallback;
+  return `<div class="grid two">
+    <article class="card"><div class="eyebrow">CFO AUTONOMOUS FIELD SERVICE</div><h3>${badge(value("status"))}</h3>${kv("Primary job gate", value("primary_job_gate"))}${kv("Nodes scanned", live.nodes_scanned ?? field.verified_nodes?.length ?? 0)}${kv("ATM cash needs", value("atm_cash_needs", 0))}${kv("ATM KUFO needs", value("atm_kufo_needs", 0))}${kv("Waste needs", value("waste_collection_needs", 0))}${kv("Cargo needs", value("cargo_needs", 0))}${kv("Real field jobs", value("real_field_jobs", 0))}${kv("Candidate jobs", Array.isArray(live.candidate_jobs) ? live.candidate_jobs.length : field.candidate_jobs ?? 0)}${kv("Next best job", field.selected_next_best_job ?? "NO_VERIFIED_FIELD_JOB_AVAILABLE")}</article>
+    <article class="card"><div class="eyebrow">ROUTE / PHYSICS TRUTH GATE</div>${kv("Origin", field.origin)}${kv("Destination", field.destination)}${kv("Distance", field.distance)}${kv("Route evidence", field.route_evidence)}${kv("Cargo mass", field.cargo_mass)}${kv("Travel time", field.travel_time)}${kv("Required energy", field.required_energy)}${kv("Required KUFO", field.required_kufo)}${kv("Required KSHIP", field.required_kship)}${kv("Positive matter", field.positive_matter_requirement)}${kv("Coordinate authority", field.route_authority)}</article>
+    <article class="card"><div class="eyebrow">CFO PROFIT GATE</div>${kv("Total cost", field.costs)}${kv("Quoted revenue", field.quoted_revenue)}${kv("Expected profit", field.expected_profit)}${kv("Profit / hour", field.profit_per_hour)}${kv("Delivery evidence", field.delivery_evidence)}${kv("Revenue", field.revenue ?? "0")}${kv("First KAIOS", field.first_kaios_event ?? "NOT_OCCURRED")}</article>
+    <article class="card"><div class="eyebrow">TRUTH / AUTHORITY</div>${kv("KAIOS ledger", field.kaios_cash_law?.ledger_asset)}${kv("KAIOS cash cargo", field.kaios_cash_law?.physical_cargo)}${kv("Ledger transfer = delivery", String(field.kaios_cash_law?.ledger_transfer_is_cash_delivery ?? false))}${kv("Settlement", String(field.authority?.settlement ?? false))}${kv("Payroll", String(field.authority?.payroll ?? false))}${kv("Chain write", String(field.authority?.chain_write ?? false))}${kv("New Life created", field.workforce?.new_lives ?? 0)}</article>
+  </div>`;
+}
+
 function firstKgenEvidenceMarkup() {
   const stage = universe?.seed?.next_stage ?? {};
   const event = stage.first_heartbeat_kgen_event ?? {};
@@ -143,9 +155,10 @@ async function homeView() {
     ["KGEN AMM", "USER WALLET LIVE", "Runtime-verified PancakeSwap V2 pair"],
     ["11520 settlement", "MAINNET CONTRACT", "Adapter not integrated; no fabricated settlement"]
   ];
-  return `${hero("K11520 · UNIVERSAL MARKET RUNTIME V3.8", uiLocale === "zh-TW" ? "文明資產的公開市場與生命工廠。" : "A public market and Life Factory for civilization assets.", uiLocale === "zh-TW" ? "DIGITAL_ANT_0001 已掛載 Physics CURRENT V3.8 思想器官；公開巡邏與私密簽署仍嚴格分離。" : "DIGITAL_ANT_0001 now binds the Physics CURRENT V3.8 Thought Organ; public patrol and private signing remain strictly separated.")}
+  return `${hero("K11520 · UNIVERSAL MARKET RUNTIME V3.9", uiLocale === "zh-TW" ? "文明資產的公開市場與生命工廠。" : "A public market and Life Factory for civilization assets.", uiLocale === "zh-TW" ? "DIGITAL_ANT_0001 先守門，再由 CFO 掃描真實現場需求；沒有證據就沒有訂單。" : "DIGITAL_ANT_0001 guards first, then its CFO scans verified field demand; no evidence means no job.")}
     <a class="card gateway-cta" href="#/REQUEST"><div><div class="eyebrow">${html(t("request.title"))}</div><h2>${html(t("request.cta"))}</h2><p>DRAFT → UNDERSTAND → CONFIRM → REQUEST</p></div><span aria-hidden="true">→</span></a>
     ${section(t("status.title"), workerStatusMarkup())}
+    ${section("CFO FIELD SERVICE BUSINESS", fieldServiceMarkup())}
     ${section("FIRST HEARTBEAT / FIRST KGEN", firstKgenEvidenceMarkup())}
     ${section("HEART + HEAVEN FUEL CIVILIZATION", heartHeavenFuelMarkup())}
     <div class="grid">${cards.map(([name, value, note]) => `<article class="card"><div class="eyebrow">${html(name)}</div><div class="metric">${html(value)}</div><p>${html(note)}</p></article>`).join("")}</div>
@@ -413,7 +426,8 @@ async function companyDetailView() {
   const moduleStatus = firstCustomer.module_status;
   const readyLines = stage.business_lines.filter((line) => line.status === "READY");
   const developingLines = stage.business_lines.filter((line) => line.status !== "READY");
-  return `${hero("MY COMPANY · V3.3", company.name, "The Public Civilization Request Gateway can now understand and confirm a real local Request while preserving privacy. Canonical Customer, Quote, Settlement and Revenue counts remain zero.")}
+  return `${hero("MY COMPANY · V3.9", company.name, "Digital and field services share evidence, quote, contract and accounting gates. No verified field inventory or customer request means zero jobs and zero revenue.")}
+    ${section("AUTONOMOUS CFO FIELD SERVICE", fieldServiceMarkup())}
     <div class="grid two">
       <article class="card"><div class="eyebrow">COMPANY IDENTITY</div>${kv("Company ID", company.company_id)}${kv("Founder", company.founder_life_id)}${kv("Status", badge(company.status), true)}${kv("11520", `${stage.company_profile.status} / ${stage.company_profile.scope}`)}${kv("Vision", company.vision)}${kv("Mission", company.mission)}${kv("Dream", company.dream)}${kv("Ultimate mission", company.ultimate_mission)}</article>
       <article class="card"><div class="eyebrow">COMPANY GENESIS</div><h3>${badge(readiness.status)}</h3>${kv("Genesis ID", universe.seed.company_genesis.genesis_id)}${kv("Owner approval", readiness.owner_approval)}${kv("Approval scope", universe.seed.company_genesis.approval_scope)}${kv("Company status", badge(readiness.company_status), true)}${kv("Chain Tx", "NONE · LOCAL EVENT")}</article>

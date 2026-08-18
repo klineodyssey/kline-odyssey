@@ -1,6 +1,12 @@
-# 11520 Universal Exchange V3.8 Current Handoff
+# 11520 Universal Exchange V3.9 Current Handoff
 
-V3.8 is the active cumulative public release. It retains the multilingual gateway, Voice Concierge, verified Heart/KGEN/Fortune/Wish history and production public Worker while upgrading `DIGITAL_ANT_APP_0001` to V1.5.0. Life ID, immutable Birth Certificate, Wallet ownership and Listing identity rights are unchanged.
+V3.9 is the active cumulative public release. It retains the multilingual gateway, Voice Concierge, verified Heart/KGEN/Fortune/Wish history, Physics Thought Organ and production public Worker while upgrading `DIGITAL_ANT_APP_0001` to V1.6.0. Life ID, immutable Birth Certificate, Wallet ownership and Listing identity rights are unchanged.
+
+After every safe WUKONG_GATEKEEPER duty, the CFO now runs an evidence-based field-service scan over the existing K280/Universe Map nodes. The business lines are cash logistics, KUFO supply, waste collection and general delivery. The current scan finds no verified ATM inventory, waste inventory or cargo request, so its honest result is `NO_VERIFIED_FIELD_JOB_AVAILABLE`: zero candidates, zero jobs, no route, no quote, no settlement, zero Revenue and no First KAIOS event.
+
+The Runtime distinguishes KAIOS ledger balances from physical KAIOS cash cargo; a chain transfer cannot masquerade as an armored delivery. Waste, reusable container and reactable matter are separate scalar masses. Trip energy sums acceleration work, rolling resistance, drag, climbing, braking loss, systems energy and safety reserve. Direction comes from thrust/force/momentum, not positive or negative energy labels.
+
+A job may be priced only after route, distance, time, cargo/body/vehicle, fuel and cost evidence exist. The CFO totals energy, labor, depreciation, maintenance, BNB chain, security, insurance/risk, loading, unloading and other verified costs, then applies a profit gate. Movement and XP are never Revenue. Delivery requires origin, pickup, cargo, route, arrival, receiver and customer acceptance evidence. Workforce demand can create a Job Posting only after verified workload exceeds existing capacity; it never auto-creates a Life.
 
 `DIGITAL_ANT_0001` now binds the single authoritative Physics Thought Organ at `docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md`. The installed CURRENT is byte-identical to V3.8; the cross-platform canonical UTF-8/LF SHA-256 is `dbb4774a71db614994dff3e08e9cec34b94633c4d46dca13bff2f6f54d9b0b48`. The Life manifest stores only binding, version, hash, authority, compatibility and evidence; it never copies the constitution. Startup mismatch blocks Mother Engine planning and records a truthful health state.
 
