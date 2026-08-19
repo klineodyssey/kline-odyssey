@@ -391,7 +391,16 @@
       "workspace_policy_acknowledged": true,
       "do_not_touch_acknowledged": true,
       "suspension": null,
-      "autonomy_scope": "A1_PERSONAL_WALLET_READ_AND_SYSTEM_REVIEW"
+      "autonomy_scope": "A3_SCOPED_COMPANY_TASK_AUTONOMY",
+      "personal_capability": "A2_PERSONAL_LOW_RISK_SIGNING",
+      "company_capability": "8888_SCOPED_PAYROLL_OPERATOR",
+      "company_treasury_authority": false,
+      "account_admin_role": false,
+      "direct_18888_payment_role": false,
+      "payroll_admin_role_8888": "AUTHORIZED_EXACT_SCOPE",
+      "gas_cap_per_transaction_bnb": "0.0003",
+      "gas_cap_per_day_bnb": "0.001",
+      "allowed_payroll_contract": "0x9EcAe137b3A307971EB77B4CDB3ba13aeeF5297C"
     },
     {
       "worker_id": "cursor-01",
