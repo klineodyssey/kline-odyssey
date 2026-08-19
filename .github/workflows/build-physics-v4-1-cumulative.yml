@@ -1,4 +1,4 @@
-name: Build Physics V4.1 cumulative twins
+name: Archive Physics V4.1 reconciliation
 
 on:
   push:
@@ -6,15 +6,13 @@ on:
       - codex/physics-civilization-full-runtime-v4-1
     paths:
       - .github/workflows/build-physics-v4-1-cumulative.yml
-      - docs/physics/reconciliation/KGEN_PHYSICS_V4_1_ACTIVE_SUPERSEDE_LAYER.md
-      - docs/physics/KGEN_Universe_Physics_Runtime_V3_8.md
   workflow_dispatch:
 
 permissions:
   contents: write
 
 jobs:
-  build-cumulative-twins:
+  archive-reconciliation:
     if: github.actor != 'github-actions[bot]'
     runs-on: ubuntu-latest
     steps:
@@ -23,86 +21,52 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Build cumulative V4.1 body from exact inherited V3.8
+      - name: Revalidate installed twins
         shell: bash
         run: |
           set -euo pipefail
-          source_v38='docs/physics/KGEN_Universe_Physics_Runtime_V3_8.md'
-          layer='docs/physics/reconciliation/KGEN_PHYSICS_V4_1_ACTIVE_SUPERSEDE_LAYER.md'
-          version='docs/physics/KGEN_Universe_Physics_Runtime_V4_1.md'
-          current='docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md'
+          v38='docs/physics/KGEN_Universe_Physics_Runtime_V3_8.md'
+          v41='docs/physics/KGEN_Universe_Physics_Runtime_V4_1.md'
+          cur='docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md'
+          cmp -s "$v41" "$cur"
+          test "$(git hash-object "$v38")" = '6eaa6d14d19f4f6d06d9172f1bd1a5cd55b35fcc'
+          grep -Fq '# PART 114. V3.8 Signature' "$v41"
+          grep -Fq 'GLOBAL_LINEAR_K_INDEX_TO_KM = SUPERSEDED' "$v41"
+          grep -Fq 'K280_YEAR_SECONDS = 31,556,926' "$v41"
 
-          test -s "$source_v38"
-          test -s "$layer"
-          grep -Fq '# PART 114. V3.8 Signature' "$source_v38"
-          grep -Fq 'END OF CURRENT / V3.8 LIVING PHYSICS / KUFO-KSHIP WARP / BIO-LIFE' "$source_v38"
-
-          {
-            printf '%s\n\n' '# KGEN Universe Physics Runtime V4.1'
-            printf '%s\n' '# KGEN_Universe_Physics_Runtime_V4_1.md'
-            printf '%s\n\n' '# KGEN_Universe_Physics_Runtime_CURRENT.md'
-            printf '%s\n' 'STATUS: ACTIVE_CUMULATIVE_REVIEW_CANDIDATE'
-            printf '%s\n' 'TYPE: Universe Physics Runtime Constitution'
-            printf '%s\n' 'VERSION: V4.1 CUMULATIVE LIVING PHYSICS'
-            printf '%s\n' 'SOURCE_OF_TRUTH: BRANCH_CANDIDATE_UNTIL_CANONICAL_INTEGRATION'
-            printf '%s\n' 'INHERITANCE: COMPLETE V3.8 BODY + V4.1 ACTIVE SUPERSEDE/EXTENSION LAYER'
-            printf '%s\n\n' 'BUILD_RULE: GENERATED FROM REPOSITORY SOURCES; DO NOT HAND-SUMMARIZE'
-            printf '%s\n\n' '------------------------------------------------------------------------'
-            sed 's/^SOURCE_OF_TRUTH: FALSE_UNTIL_TWIN_INSTALL$/SOURCE_OF_TRUTH: EMBEDDED_IN_V4_1_CUMULATIVE_TWIN/' "$layer"
-            printf '\n%s\n\n' '------------------------------------------------------------------------'
-            printf '%s\n\n' '# COMPLETE INHERITED V3.8 BODY — PRESERVED'
-            cat "$source_v38"
-            printf '\n%s\n' '------------------------------------------------------------------------'
-            printf '%s\n' '# V4.1 CUMULATIVE END MARKER'
-            printf '%s\n' 'V4_1_INHERITS_V3_8_COMPLETE_BODY = TRUE'
-            printf '%s\n' 'V4_1_CURRENT_TWIN_REQUIRED = TRUE'
-          } > "$version"
-
-          cp "$version" "$current"
-
-      - name: Validate no-loss and twin invariants
+      - name: Archive absorbed reconciliation evidence
         shell: bash
         run: |
           set -euo pipefail
-          source_v38='docs/physics/KGEN_Universe_Physics_Runtime_V3_8.md'
-          version='docs/physics/KGEN_Universe_Physics_Runtime_V4_1.md'
-          current='docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md'
+          src='docs/physics/reconciliation'
+          dst='docs/physics/archive/v4_1_reconciliation'
+          mkdir -p "$dst"
+          shopt -s nullglob
+          files=("$src"/*.md)
+          test "${#files[@]}" -gt 0
+          git mv "${files[@]}" "$dst"/
 
-          cmp -s "$version" "$current"
-          test "$(wc -c < "$version")" -gt "$(wc -c < "$source_v38")"
-          test "$(wc -l < "$version")" -gt "$(wc -l < "$source_v38")"
+          cat > "$dst/README.md" <<'EOF'
+          # Physics V4.1 Reconciliation Archive
 
-          grep -Fq '# PART 0. 創世宣言' "$version"
-          grep -Fq '# PART 99. Bio-Life Implementation Gate' "$version"
-          grep -Fq '# PART 102. V3.8 Canonical Supersede Table' "$version"
-          grep -Fq '# PART 103. Heaven Time / KUFO Runtime' "$version"
-          grep -Fq '# PART 104. KUFO → KSHIP / Warp Runtime' "$version"
-          grep -Fq '# PART 108. UFO Demand-First Civilization' "$version"
-          grep -Fq '# PART 114. V3.8 Signature' "$version"
-          grep -Fq 'GLOBAL_LINEAR_K_INDEX_TO_KM = SUPERSEDED' "$version"
-          grep -Fq 'K280_YEAR_SECONDS = 31,556,926' "$version"
-          grep -Fq 'PR #158' "$version"
-          grep -Fq 'DISPATCH = DENIED' "$version"
+          STATUS: ARCHIVED
+          SOURCE_OF_TRUTH: FALSE
+          DO_NOT_USE_FOR_IMPLEMENTATION: TRUE
+          SUPERSEDED_BY: ../../KGEN_Universe_Physics_Runtime_CURRENT.md
+          VERSION_TWIN: ../../KGEN_Universe_Physics_Runtime_V4_1.md
+          ARCHIVED_AT: 2026-08-20 Asia/Taipei
 
-          v38_blob_before="$(git hash-object "$source_v38")"
-          test "$v38_blob_before" = '6eaa6d14d19f4f6d06d9172f1bd1a5cd55b35fcc'
-          test "$(git hash-object "$version")" = "$(git hash-object "$current")"
+          These files are preserved as reconciliation, audit, supersession and construction evidence for the V4.1 cumulative Physics installation. Their accepted active content has been absorbed into the V4.1/CURRENT twin. Historical conflicts remain here for auditability; implementation must read CURRENT.
+          EOF
 
-          echo "V3.8 blob: $v38_blob_before"
-          echo "V4.1/CURRENT blob: $(git hash-object "$version")"
-          echo "V3.8 lines: $(wc -l < "$source_v38")"
-          echo "V4.1 lines: $(wc -l < "$version")"
+          git rm .github/workflows/build-physics-v4-1-cumulative.yml
 
-      - name: Commit generated twins
+      - name: Commit archive cleanup
         shell: bash
         run: |
           set -euo pipefail
-          git config user.name 'physics-v4-1-builder'
-          git config user.email 'physics-v4-1-builder@users.noreply.github.com'
-          git add docs/physics/KGEN_Universe_Physics_Runtime_V4_1.md docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md
-          if git diff --cached --quiet; then
-            echo 'Twins already current; no commit required.'
-            exit 0
-          fi
-          git commit -m 'Install complete cumulative Physics V4.1 twins'
+          git config user.name 'physics-v4-1-archiver'
+          git config user.email 'physics-v4-1-archiver@users.noreply.github.com'
+          git add -A
+          git commit -m 'Archive absorbed Physics V4.1 reconciliation evidence'
           git push origin HEAD:codex/physics-civilization-full-runtime-v4-1
