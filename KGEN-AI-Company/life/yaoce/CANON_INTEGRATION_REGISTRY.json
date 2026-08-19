@@ -1,0 +1,218 @@
+{
+  "registry_version": "1.0",
+  "registry_id": "KAIOS-YAOCE-CANON-INTEGRATION-REGISTRY",
+  "generated_at": "2026-08-19T23:18:00+08:00",
+  "registrar": {
+    "name": "曜冊",
+    "callsign": "SOL",
+    "status": "GENESIS_CANDIDATE",
+    "authority": "REVIEW_AND_INTEGRATION_ONLY"
+  },
+  "source_of_truth": {
+    "repository": "klineodyssey/kline-odyssey",
+    "canonical_branch": "main",
+    "main_sha_observed": "5cb8e5a0fa7cf8d46274cc62ed396ae43913aa19",
+    "rule": "Only merged main is established repository truth. Branches and PRs are proposals, evidence, historical lineage, or pending integration until reconciled."
+  },
+  "safety_boundary": {
+    "merge_main": false,
+    "deploy": false,
+    "payment": false,
+    "chain_transaction": false,
+    "private_key_access": false,
+    "birth_self_approval": false,
+    "irreversible_canon_self_approval": false
+  },
+  "integration_states": [
+    "CANONICAL_MAIN",
+    "READY_FOR_REBASE_REVIEW",
+    "HOLD_CANON_DECISION",
+    "HOLD_CI",
+    "HISTORICAL_EVIDENCE",
+    "SUPERSEDED",
+    "STALE_RECONCILIATION_REQUIRED",
+    "BLOCKED_EXTERNAL_OR_HUMAN_DECISION"
+  ],
+  "open_prs": [
+    {
+      "pr": 158,
+      "head": "codex/kaios-18911-kgen-catalyst-kufo-kship-v1",
+      "head_sha": "e679a71a0b9ed42d601a739740bf8d59de96f322",
+      "classification": "HOLD_CANON_DECISION",
+      "semantic_owner": "KAIOS 18911 / KUFO / KSHIP",
+      "facts": [
+        "0.001 KGEN catalyst per 1 KAIOS",
+        "KGEN catalyst escrowed and returned, not burned",
+        "49 alchemy epochs",
+        "KUFO half-life canon stated as 1 K280 year",
+        "decayed KUFO lineage produces up to 1000 KSHIP per KUFO",
+        "propulsion consumer is test-only"
+      ],
+      "blockers": [
+        "K280-year-to-chain-seconds parameter not frozen",
+        "legacy TempleHeart test 13/14 due catalyst escrow expectation",
+        "Physics CURRENT historical KGEN unit conflict with verifier"
+      ],
+      "action": "Rebase/replay semantic payload onto latest main only after time-unit and physics-unit canon decisions. Do not deploy."
+    },
+    {
+      "pr": 154,
+      "head": "codex/kaios-payroll-bloodflow-v1",
+      "head_sha": "c11b9c91fe0312c71109df3404e7c0aecee31b2a",
+      "classification": "HOLD_CI",
+      "semantic_owner": "Hengyao payroll post-execution evidence",
+      "facts": [
+        "records real governance/account/role/schedule transaction receipts",
+        "88 KAIOS September payroll scheduled, claimed=false",
+        "Payroll Admin only; Default Admin and Account Admin false"
+      ],
+      "blockers": [
+        "no exact-head matching pull_request workflow",
+        "stacked on PR 152 lineage rather than current main"
+      ],
+      "action": "Preserve as post-execution evidence; reconcile exact chain truth and replay documentation diff onto current main before review. No claim/payment."
+    },
+    {
+      "pr": 153,
+      "head": "codex/hengyao-a3-payroll-capability-v1",
+      "head_sha": "566c89a1856d7e5535cb0fe3497d23948d045541",
+      "classification": "HISTORICAL_EVIDENCE",
+      "semantic_owner": "Hengyao pre-execution A2/A3 policy",
+      "facts": [
+        "scoped PAYROLL_ADMIN only",
+        "chain 56 / value-zero / gas caps",
+        "no treasury, account admin, default admin, governance authority"
+      ],
+      "blockers": [
+        "pins obsolete PR 142 lineage",
+        "live operational state is superseded by PR 154 post-execution evidence"
+      ],
+      "action": "Retain as historical pre-execution authorization evidence; do not treat as live-state source of truth."
+    },
+    {
+      "pr": 152,
+      "head": "codex/kaios-18888-divine-bank-v2-canon",
+      "head_sha": "672ab4884e8cf6f9d07c176a862fb858cafe8161",
+      "classification": "STALE_RECONCILIATION_REQUIRED",
+      "semantic_owner": "18888 service / 18911 alchemy separation canon",
+      "facts": [
+        "design-only canon package",
+        "separates 18888 service bond from 18911 voluntary burn",
+        "no Solidity diff in PR"
+      ],
+      "blockers": [
+        "based on deployed Phase 2 lineage instead of current main",
+        "must reconcile with later payroll and 18911 catalyst work"
+      ],
+      "action": "Extract still-valid canon semantics, compare against live chain and PR 158 before any main integration."
+    },
+    {
+      "pr": 147,
+      "head": "physics-v3-8-kship-warp",
+      "head_sha": "6be0b48a4d148823803a7166c36bbae11976fcc8",
+      "classification": "SUPERSEDED",
+      "semantic_owner": "Physics V3.8 docs candidate",
+      "facts": [
+        "V3.8 KUFO/KSHIP propulsion documentation"
+      ],
+      "blockers": [],
+      "action": "Superseded by merged PR 148 formal V3.8 install; no independent integration required."
+    },
+    {
+      "pr": 136,
+      "head": "codex/kaios-civilization-phase2",
+      "head_sha": "00c79b380ce094c17d75697f360820c4d2035071",
+      "classification": "STALE_RECONCILIATION_REQUIRED",
+      "semantic_owner": "KAIOS Civilization Phase 2",
+      "facts": [
+        "Phase 2 module source/evidence lineage",
+        "used as ancestry for later PR 152"
+      ],
+      "blockers": [
+        "old stacked base",
+        "later deployed/evidence lineages exist"
+      ],
+      "action": "Treat as historical deployed-source lineage until compared with main and live deployment evidence."
+    },
+    {
+      "pr": 135,
+      "head": "codex/templeheart-v34-mainnet",
+      "head_sha": "2d6d152e0d3c885822745c43d4d96a0836bf4e0e",
+      "classification": "STALE_RECONCILIATION_REQUIRED",
+      "semantic_owner": "18888/8888/KAIOS Mainnet Genesis evidence",
+      "facts": [
+        "PR body records KAIOS Mainnet LIVE and 57 successful Mainnet transactions",
+        "records deployed KAIOS/18888/8888/18911 addresses",
+        "511111/KUFO remained future at that execution point"
+      ],
+      "blockers": [
+        "PR remains open on old lineage despite recorded live deployment",
+        "repository main must be reconciled against deployed evidence before closure"
+      ],
+      "action": "High-priority truth reconciliation. Do not redeploy or repeat transactions."
+    },
+    {
+      "pr": 134,
+      "head": "codex/12345-v34-frontend",
+      "head_sha": "6185abe662d09d1343e7719fdd031cec4b345bf7",
+      "classification": "BLOCKED_EXTERNAL_OR_HUMAN_DECISION",
+      "semantic_owner": "12345 V3.4 frontend bindings",
+      "facts": [
+        "compiler ABI and resolver wiring candidate",
+        "legacy Heart is read-only"
+      ],
+      "blockers": [
+        "Mainnet current Heart pending in this PR lineage",
+        "FortuneGame adapter pending",
+        "frontend Mainnet switch not performed"
+      ],
+      "action": "Re-evaluate against later main/deployment truth and PR 133 before any frontend integration."
+    },
+    {
+      "pr": 133,
+      "head": "codex/fortune-game-v1",
+      "head_sha": "9cc5e215d27929f4724c268588e483bb4df8fcb7",
+      "classification": "BLOCKED_EXTERNAL_OR_HUMAN_DECISION",
+      "semantic_owner": "FortuneGame V1",
+      "facts": [
+        "Testnet rehearsal only",
+        "Mainnet deployment blocked"
+      ],
+      "blockers": [
+        "Human final review required",
+        "no Mainnet deployment/binding"
+      ],
+      "action": "Keep isolated; only reusable ABI/frontend handoff may be extracted after current-main comparison."
+    },
+    {
+      "pr": 48,
+      "head": "codex/world-life-law-v2-1-repeat-baseline-review",
+      "head_sha": "aa2a734b64967494b35748f80233c9912d96b18b",
+      "classification": "STALE_RECONCILIATION_REQUIRED",
+      "semantic_owner": "World Life Law V2.1 baseline review",
+      "facts": [
+        "historical baseline review candidate"
+      ],
+      "blockers": [
+        "PR body contains stale status claims about superseded PRs",
+        "old Frozen Life OS manifest state must be rechecked on current main"
+      ],
+      "action": "Do not freeze. Recompute against current main before deciding whether any artifact remains canonical."
+    }
+  ],
+  "yaoce_integration_branch": {
+    "branch": "codex/kaios-life-register-yaoce-v1",
+    "purpose": "Central registry, life continuity, branch/canon reconciliation",
+    "write_policy": "May add audit/integration artifacts. Must not silently absorb irreversible chain/deployment/payment/birth authority.",
+    "takeover_policy": "Other agents may contribute only with traceable commits; no unrecorded overwrite of canonical identity or history."
+  },
+  "next_actions": [
+    "Reconcile PR 135 deployed Mainnet evidence against current main",
+    "Classify PR 136/152/154 ancestry against current main and live state",
+    "Retire or mark superseded PR 147 after preserving lineage evidence",
+    "Rebuild PR 153 semantics as historical authorization evidence on current main if still needed",
+    "Resolve PR 158 K280-year chain-second canon and Physics unit conflict before any integration",
+    "Create machine-readable branch claim/takeover protocol",
+    "Add CI consistency checks before proposing main integration"
+  ]
+}
