@@ -1,0 +1,26 @@
+{
+  "event": "CANON_DECISION_RECORDED",
+  "timestamp": "2026-08-20T00:27:00+08:00",
+  "subject": "PR_158_KUFO_HALF_LIFE_TIME_CONVERSION",
+  "human_approved": true,
+  "decision": {
+    "k280_day_hours": 24,
+    "k280_year_days": 365.2422,
+    "k280_year_seconds_exact": 31556926.08,
+    "k280_year_seconds_canonical_integer": 31556926,
+    "k18888_heaven_day_equals": "1_K280_YEAR",
+    "k111111_divine_army_hour_equals": "1_K18888_HEAVEN_DAY",
+    "k80000": "CHAIN_MULTIVERSE_BOUNDARY_NOT_TIME_TIER",
+    "kufo_half_life_seconds": 31556926
+  },
+  "pr": 158,
+  "resolved_blocker": "K280-year-to-chain-seconds parameter not frozen",
+  "remaining_blockers": [
+    "KGEN mass-unit canon conflict",
+    "legacy TempleHeart second-proof catalyst escrow expectation",
+    "exact-head CI path"
+  ],
+  "chain_transaction_sent": false,
+  "deployment": false,
+  "payment": false
+}
