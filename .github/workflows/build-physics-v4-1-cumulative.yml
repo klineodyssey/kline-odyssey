@@ -1,0 +1,108 @@
+name: Build Physics V4.1 cumulative twins
+
+on:
+  push:
+    branches:
+      - codex/physics-civilization-full-runtime-v4-1
+    paths:
+      - .github/workflows/build-physics-v4-1-cumulative.yml
+      - docs/physics/reconciliation/KGEN_PHYSICS_V4_1_ACTIVE_SUPERSEDE_LAYER.md
+      - docs/physics/KGEN_Universe_Physics_Runtime_V3_8.md
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-cumulative-twins:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout exact branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Build cumulative V4.1 body from exact inherited V3.8
+        shell: bash
+        run: |
+          set -euo pipefail
+          source_v38='docs/physics/KGEN_Universe_Physics_Runtime_V3_8.md'
+          layer='docs/physics/reconciliation/KGEN_PHYSICS_V4_1_ACTIVE_SUPERSEDE_LAYER.md'
+          version='docs/physics/KGEN_Universe_Physics_Runtime_V4_1.md'
+          current='docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md'
+
+          test -s "$source_v38"
+          test -s "$layer"
+          grep -Fq '# PART 114. V3.8 Signature' "$source_v38"
+          grep -Fq 'END OF CURRENT / V3.8 LIVING PHYSICS / KUFO-KSHIP WARP / BIO-LIFE' "$source_v38"
+
+          {
+            printf '%s\n\n' '# KGEN Universe Physics Runtime V4.1'
+            printf '%s\n' '# KGEN_Universe_Physics_Runtime_V4_1.md'
+            printf '%s\n\n' '# KGEN_Universe_Physics_Runtime_CURRENT.md'
+            printf '%s\n' 'STATUS: ACTIVE_CUMULATIVE_REVIEW_CANDIDATE'
+            printf '%s\n' 'TYPE: Universe Physics Runtime Constitution'
+            printf '%s\n' 'VERSION: V4.1 CUMULATIVE LIVING PHYSICS'
+            printf '%s\n' 'SOURCE_OF_TRUTH: BRANCH_CANDIDATE_UNTIL_CANONICAL_INTEGRATION'
+            printf '%s\n' 'INHERITANCE: COMPLETE V3.8 BODY + V4.1 ACTIVE SUPERSEDE/EXTENSION LAYER'
+            printf '%s\n\n' 'BUILD_RULE: GENERATED FROM REPOSITORY SOURCES; DO NOT HAND-SUMMARIZE'
+            printf '%s\n\n' '------------------------------------------------------------------------'
+            sed 's/^SOURCE_OF_TRUTH: FALSE_UNTIL_TWIN_INSTALL$/SOURCE_OF_TRUTH: EMBEDDED_IN_V4_1_CUMULATIVE_TWIN/' "$layer"
+            printf '\n%s\n\n' '------------------------------------------------------------------------'
+            printf '%s\n\n' '# COMPLETE INHERITED V3.8 BODY — PRESERVED'
+            cat "$source_v38"
+            printf '\n%s\n' '------------------------------------------------------------------------'
+            printf '%s\n' '# V4.1 CUMULATIVE END MARKER'
+            printf '%s\n' 'V4_1_INHERITS_V3_8_COMPLETE_BODY = TRUE'
+            printf '%s\n' 'V4_1_CURRENT_TWIN_REQUIRED = TRUE'
+          } > "$version"
+
+          cp "$version" "$current"
+
+      - name: Validate no-loss and twin invariants
+        shell: bash
+        run: |
+          set -euo pipefail
+          source_v38='docs/physics/KGEN_Universe_Physics_Runtime_V3_8.md'
+          version='docs/physics/KGEN_Universe_Physics_Runtime_V4_1.md'
+          current='docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md'
+
+          cmp -s "$version" "$current"
+          test "$(wc -c < "$version")" -gt "$(wc -c < "$source_v38")"
+          test "$(wc -l < "$version")" -gt "$(wc -l < "$source_v38")"
+
+          grep -Fq '# PART 0. 創世宣言' "$version"
+          grep -Fq '# PART 99. Bio-Life Implementation Gate' "$version"
+          grep -Fq '# PART 102. V3.8 Canonical Supersede Table' "$version"
+          grep -Fq '# PART 103. Heaven Time / KUFO Runtime' "$version"
+          grep -Fq '# PART 104. KUFO → KSHIP / Warp Runtime' "$version"
+          grep -Fq '# PART 108. UFO Demand-First Civilization' "$version"
+          grep -Fq '# PART 114. V3.8 Signature' "$version"
+          grep -Fq 'GLOBAL_LINEAR_K_INDEX_TO_KM = SUPERSEDED' "$version"
+          grep -Fq 'K280_YEAR_SECONDS = 31,556,926' "$version"
+          grep -Fq 'PR #158' "$version"
+          grep -Fq 'DISPATCH = DENIED' "$version"
+
+          v38_blob_before="$(git hash-object "$source_v38")"
+          test "$v38_blob_before" = '6eaa6d14d19f4f6d06d9172f1bd1a5cd55b35fcc'
+          test "$(git hash-object "$version")" = "$(git hash-object "$current")"
+
+          echo "V3.8 blob: $v38_blob_before"
+          echo "V4.1/CURRENT blob: $(git hash-object "$version")"
+          echo "V3.8 lines: $(wc -l < "$source_v38")"
+          echo "V4.1 lines: $(wc -l < "$version")"
+
+      - name: Commit generated twins
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'physics-v4-1-builder'
+          git config user.email 'physics-v4-1-builder@users.noreply.github.com'
+          git add docs/physics/KGEN_Universe_Physics_Runtime_V4_1.md docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md
+          if git diff --cached --quiet; then
+            echo 'Twins already current; no commit required.'
+            exit 0
+          fi
+          git commit -m 'Install complete cumulative Physics V4.1 twins'
+          git push origin HEAD:codex/physics-civilization-full-runtime-v4-1
