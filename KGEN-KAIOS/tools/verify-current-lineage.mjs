@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import process from "node:process";
+import { execFileSync } from "node:child_process";
 
 const repo = path.resolve(import.meta.dirname, "..", "..");
 const reportPath = path.join(repo, "KGEN-KAIOS", "reports", "CURRENT_LINEAGE_RECONCILIATION.json");
@@ -30,6 +31,16 @@ const currentSectionMarkers = new Map([
   ["docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md", "## 235. 現行質量尺度"],
 ]);
 const failures = [];
+const trackedPathByCaseFold = new Map(
+  execFileSync("git", ["ls-files"], { cwd: repo, encoding: "utf8" })
+    .split(/\r?\n/u)
+    .filter(Boolean)
+    .map((relativePath) => [relativePath.toLocaleLowerCase("en-US"), relativePath]),
+);
+
+function canonicalTrackedPath(relativePath) {
+  return trackedPathByCaseFold.get(relativePath.toLocaleLowerCase("en-US")) ?? relativePath;
+}
 
 function currentNormativeContent(relativePath, content) {
   const marker = currentSectionMarkers.get(relativePath);
@@ -73,8 +84,16 @@ for (const relativePath of new Set(
     .map((item) => item.path),
 )) {
   if (relativePath.includes("/archive/") || relativePath.includes("_ARCHIVE")) continue;
-  const header = fs.readFileSync(path.join(repo, relativePath), "utf8").split(/\r?\n/u).slice(0, 12).join("\n");
-  if (!header.includes("SUPERSEDED")) failures.push({ path: relativePath, reason: "MISSING_SUPERSEDED_MARKER" });
+  const trackedPath = canonicalTrackedPath(relativePath);
+  const absolutePath = path.join(repo, trackedPath);
+  if (!fs.existsSync(absolutePath)) {
+    failures.push({ path: relativePath, reason: "MISSING_TRACKED_ARCHIVE_REFERENCE" });
+    continue;
+  }
+  const header = fs.readFileSync(absolutePath, "utf8").split(/\r?\n/u).slice(0, 12).join("\n");
+  if (!header.includes("SUPERSEDED")) {
+    failures.push({ path: trackedPath, reason: "MISSING_SUPERSEDED_MARKER" });
+  }
 }
 
 const assertions = {
