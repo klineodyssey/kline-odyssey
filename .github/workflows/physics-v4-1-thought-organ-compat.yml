@@ -1,0 +1,119 @@
+name: Physics V4.1 Thought Organ Compatibility
+
+on:
+  push:
+    branches:
+      - codex/physics-civilization-full-runtime-v4-1
+    paths:
+      - .github/workflows/physics-v4-1-thought-organ-compat.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  patch-and-test:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Patch CURRENT reader and append V4.1 binding
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          import json, hashlib
+
+          version = Path('docs/physics/KGEN_Universe_Physics_Runtime_V4_1.md')
+          current = Path('docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md')
+          worker = Path('core/jobs/public-read-only-worker.mjs')
+          canonical = Path('core/data/canonical.json')
+
+          text = version.read_text(encoding='utf-8')
+          text = text.replace('VERSION: V4.1 CUMULATIVE LIVING PHYSICS\n', 'VERSION: CURRENT / V4.1 CUMULATIVE LIVING PHYSICS\nDOC_ID: PF-PHYSICS-CURRENT-V4-1\n', 1)
+          version.write_text(text, encoding='utf-8', newline='\n')
+          current.write_text(text, encoding='utf-8', newline='\n')
+
+          w = worker.read_text(encoding='utf-8')
+          old_binding = 'const binding = seed?.next_stage?.thought_organ_binding_v3_8 ?? seed?.lives?.find((life) => life.life_id === "DIGITAL_ANT_0001")?.thought_organs?.[0];'
+          new_binding = 'const binding = seed?.next_stage?.thought_organ_binding_current ?? seed?.next_stage?.thought_organ_binding_v3_8 ?? seed?.lives?.find((life) => life.life_id === "DIGITAL_ANT_0001")?.thought_organs?.find((organ) => organ.status === "ACTIVE") ?? seed?.lives?.find((life) => life.life_id === "DIGITAL_ANT_0001")?.thought_organs?.[0];'
+          if old_binding not in w:
+              raise SystemExit('expected V3.8 binding selector not found')
+          w = w.replace(old_binding, new_binding, 1)
+          old_regex = 'const versionMatch = text.match(/^VERSION:\\s*CURRENT\\s*\\/\\s*(V3\\.8[^\\\\\\r\\n]*)/m);'
+          new_regex = 'const versionMatch = text.match(/^VERSION:\\s*(?:CURRENT\\s*\\/\\s*)?([^\\\\\\r\\n]+)/m);'
+          if old_regex not in w:
+              raise SystemExit('expected V3.8 version regex not found')
+          w = w.replace(old_regex, new_regex, 1)
+          worker.write_text(w, encoding='utf-8', newline='\n')
+
+          data = json.loads(canonical.read_text(encoding='utf-8'))
+          ant = next(life for life in data['lives'] if life['life_id'] == 'DIGITAL_ANT_0001')
+          old = ant['thought_organs'][0]
+          normalized = text.replace('\r\n', '\n').encode('utf-8')
+          sha = hashlib.sha256(normalized).hexdigest()
+          new = dict(old)
+          new.update({
+              'binding_id': 'DIGITAL_ANT_0001_PHYSICS_THOUGHT_ORGAN_V4_1',
+              'document_id': 'PF-PHYSICS-CURRENT-V4-1',
+              'version': 'V4.1 CUMULATIVE LIVING PHYSICS',
+              'sha256': sha,
+              'status': 'ACTIVE',
+              'loaded_at': '2026-08-20T00:00:00.000Z',
+              'compatibility': 'DIGITAL_ANT_APP_0001_V1_6_0_COMPATIBLE',
+              'evidence': list(dict.fromkeys([*(old.get('evidence') or []), 'PHYSICS_V4_1_CUMULATIVE_TWIN', f'CANONICAL_UTF8_LF_SHA256_{sha.upper()}', 'PR_159_THOUGHT_ORGAN_COMPATIBILITY']))
+          })
+          data.setdefault('next_stage', {})['thought_organ_binding_current'] = new
+          if not any(x.get('binding_id') == new['binding_id'] for x in ant.get('thought_organs', [])):
+              ant.setdefault('thought_organs', []).append(new)
+          canonical.write_text(json.dumps(data, ensure_ascii=False, indent=2) + '\n', encoding='utf-8', newline='\n')
+          PY
+
+          cmp -s docs/physics/KGEN_Universe_Physics_Runtime_V4_1.md docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md
+          grep -Fq 'DOC_ID: PF-PHYSICS-CURRENT-V4-1' docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md
+          grep -Fq '# PART 114. V3.8 Signature' docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md
+
+      - name: Run exact Universal Exchange test suite
+        id: tests
+        shell: bash
+        run: |
+          set +e
+          node --test tests/universal-exchange.test.mjs > "$RUNNER_TEMP/v4_1_test.log" 2>&1
+          code=$?
+          cat "$RUNNER_TEMP/v4_1_test.log"
+          echo "exit_code=$code" >> "$GITHUB_OUTPUT"
+          exit 0
+
+      - name: Commit compatible patch only on PASS
+        if: steps.tests.outputs.exit_code == '0'
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -f .github/workflows/physics-v4-1-thought-organ-compat.yml
+          git config user.name 'physics-v4-1-compat'
+          git config user.email 'physics-v4-1-compat@users.noreply.github.com'
+          git add core/jobs/public-read-only-worker.mjs core/data/canonical.json docs/physics/KGEN_Universe_Physics_Runtime_V4_1.md docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md .github/workflows/physics-v4-1-thought-organ-compat.yml
+          git commit -m 'Update Thought Organ binding for Physics V4.1 CURRENT'
+          git push origin HEAD:codex/physics-civilization-full-runtime-v4-1
+
+      - name: Preserve failure diagnosis only on FAIL
+        if: steps.tests.outputs.exit_code != '0'
+        shell: bash
+        run: |
+          set -euo pipefail
+          git reset --hard HEAD
+          mkdir -p docs/physics/archive/v4_1_reconciliation
+          cp "$RUNNER_TEMP/v4_1_test.log" docs/physics/archive/v4_1_reconciliation/CI_THOUGHT_ORGAN_COMPAT_FAILURE.txt
+          git config user.name 'physics-v4-1-compat'
+          git config user.email 'physics-v4-1-compat@users.noreply.github.com'
+          git add docs/physics/archive/v4_1_reconciliation/CI_THOUGHT_ORGAN_COMPAT_FAILURE.txt
+          git commit -m 'Record V4.1 thought-organ compatibility test failure'
+          git push origin HEAD:codex/physics-civilization-full-runtime-v4-1
+          exit 1
