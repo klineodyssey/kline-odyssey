@@ -30,17 +30,36 @@ jobs:
           set -euo pipefail
           python3 <<'PY'
           from pathlib import Path
-          import json, hashlib, datetime
+          import json, hashlib, re
 
           version_path = Path('docs/physics/KGEN_Universe_Physics_Runtime_V4_1.md')
           current_path = Path('docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md')
-          text = version_path.read_text(encoding='utf-8')
-          text = text.replace('VERSION: V4.1 CUMULATIVE LIVING PHYSICS', 'VERSION: CURRENT / V4.1 CUMULATIVE LIVING PHYSICS', 1)
-          if 'DOC_ID: PF-PHYSICS-CURRENT-V4-1' not in text.split('------------------------------------------------------------------------',1)[0]:
-              text = text.replace('TYPE: Universe Physics Runtime Constitution\n', 'TYPE: Universe Physics Runtime Constitution\nDOC_ID: PF-PHYSICS-CURRENT-V4-1\n', 1)
+          text = version_path.read_text(encoding='utf-8').replace('\r\n','\n')
+
+          text, n_version = re.subn(
+              r'^VERSION:\s*(?:CURRENT\s*/\s*)?V4\.1 CUMULATIVE LIVING PHYSICS\s*$',
+              'VERSION: CURRENT / V4.1 CUMULATIVE LIVING PHYSICS',
+              text,
+              count=1,
+              flags=re.M,
+          )
+          if n_version != 1:
+              raise SystemExit(f'V4.1 VERSION header migration count={n_version}')
+
+          header = text.split('------------------------------------------------------------------------',1)[0]
+          if 'DOC_ID: PF-PHYSICS-CURRENT-V4-1' not in header:
+              text, n_doc = re.subn(
+                  r'^(TYPE:\s*Universe Physics Runtime Constitution\s*)$',
+                  r'\1\nDOC_ID: PF-PHYSICS-CURRENT-V4-1',
+                  text,
+                  count=1,
+                  flags=re.M,
+              )
+              if n_doc != 1:
+                  raise SystemExit(f'DOC_ID insertion count={n_doc}')
+
           version_path.write_text(text, encoding='utf-8', newline='\n')
           current_path.write_text(text, encoding='utf-8', newline='\n')
-
           normalized = current_path.read_text(encoding='utf-8').replace('\r\n','\n')
           sha256 = hashlib.sha256(normalized.encode('utf-8')).hexdigest()
 
@@ -51,7 +70,8 @@ jobs:
               global updated
               if isinstance(value, dict):
                   if value.get('organ_type') == 'PHYSICS_CONSTITUTION' and value.get('path') == 'docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md':
-                      value['binding_id'] = value.get('binding_id','PHYSICS_THOUGHT_ORGAN').replace('V3_8','V4_1')
+                      binding = value.get('binding_id','PHYSICS_THOUGHT_ORGAN')
+                      value['binding_id'] = re.sub(r'V3_8$', 'V4_1', binding) if 'V3_8' in binding else binding
                       value['document_id'] = 'PF-PHYSICS-CURRENT-V4-1'
                       value['version'] = 'V4.1 CUMULATIVE LIVING PHYSICS'
                       value['sha256'] = sha256
@@ -65,9 +85,11 @@ jobs:
                           'PR_159_V4_1_CUMULATIVE_MIGRATION'
                       ]
                       updated += 1
-                  for child in value.values(): walk(child)
+                  for child in value.values():
+                      walk(child)
               elif isinstance(value, list):
-                  for child in value: walk(child)
+                  for child in value:
+                      walk(child)
           walk(seed)
           if updated < 1:
               raise SystemExit('No Physics Thought Organ binding found in canonical.json')
@@ -75,11 +97,20 @@ jobs:
 
           worker_path = Path('core/jobs/public-read-only-worker.mjs')
           worker = worker_path.read_text(encoding='utf-8')
-          old = r'''  const versionMatch = text.match(/^VERSION:\s*CURRENT\s*\/\s*(V3\.8[^\\\r\n]*)/m);'''
-          new = r'''  const versionMatch = text.match(/^VERSION:\s*CURRENT\s*\/\s*(V[0-9]+(?:\.[0-9]+)?[^\\\r\n]*)/m);'''
-          if old not in worker:
-              raise SystemExit('Expected V3.8-only loader regex not found')
-          worker = worker.replace(old, new, 1)
+          worker, n_loader = re.subn(
+              r"const versionMatch = text\.match\(/\^VERSION:\\\s\*CURRENT\\\s\*\\/\\\s\*\(V3\\\.8\[\^.*?;/m\);",
+              "const versionMatch = text.match(/^VERSION:\\s*CURRENT\\s*\\/\\s*(V[0-9]+(?:\\.[0-9]+)?[^\\\\\\r\\n]*)/m);",
+              worker,
+              count=1,
+          )
+          if n_loader != 1:
+              # Safer line-oriented fallback: replace only the known declaration line.
+              lines = worker.splitlines()
+              hits = [i for i,l in enumerate(lines) if 'const versionMatch = text.match(' in l and 'V3\\.8' in l]
+              if len(hits) != 1:
+                  raise SystemExit(f'V3.8-only loader declaration hits={len(hits)}')
+              lines[hits[0]] = "  const versionMatch = text.match(/^VERSION:\\s*CURRENT\\s*\\/\\s*(V[0-9]+(?:\\.[0-9]+)?[^\\\\\\r\\n]*)/m);"
+              worker = '\n'.join(lines) + ('\n' if worker.endswith('\n') else '')
           worker_path.write_text(worker, encoding='utf-8', newline='\n')
 
           manifest_path = Path('K線西遊記/temples/11520/MANIFEST.json')
@@ -97,17 +128,22 @@ jobs:
         run: |
           set -euo pipefail
           cmp -s docs/physics/KGEN_Universe_Physics_Runtime_V4_1.md docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md
+          test "$(git hash-object docs/physics/KGEN_Universe_Physics_Runtime_V4_1.md)" = "$(git hash-object docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md)"
+          test "$(git hash-object docs/physics/KGEN_Universe_Physics_Runtime_V3_8.md)" = '6eaa6d14d19f4f6d06d9172f1bd1a5cd55b35fcc'
           grep -Fq 'DOC_ID: PF-PHYSICS-CURRENT-V4-1' docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md
           grep -Fq 'VERSION: CURRENT / V4.1 CUMULATIVE LIVING PHYSICS' docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md
           grep -Fq '# PART 114. V3.8 Signature' docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md
           node --check core/jobs/public-read-only-worker.mjs
           node --test tests/universal-exchange.test.mjs
 
-      - name: Commit migration and remove one-shot workflow
+      - name: Commit migration and remove one-shot workflows
         shell: bash
         run: |
           set -euo pipefail
           git rm .github/workflows/migrate-physics-v4-1-thought-organ.yml
+          if [ -f .github/workflows/physics-v4-1-thought-organ-compat.yml ]; then
+            git rm .github/workflows/physics-v4-1-thought-organ-compat.yml
+          fi
           git config user.name 'physics-v4-1-migrator'
           git config user.email 'physics-v4-1-migrator@users.noreply.github.com'
           git add docs/physics/KGEN_Universe_Physics_Runtime_V4_1.md \
