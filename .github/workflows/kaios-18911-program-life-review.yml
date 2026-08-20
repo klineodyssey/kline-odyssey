@@ -38,7 +38,10 @@ jobs:
 
       - name: Install pinned dependencies
         working-directory: KGEN-KAIOS
-        run: npm ci
+        # The committed lock contains Ganache's Darwin-only optional fsevents
+        # entry. --force keeps every pinned version while allowing npm to skip
+        # the unsupported optional binary on Linux.
+        run: npm ci --force
 
       - name: Run complete KAIOS lineage suite
         working-directory: KGEN-KAIOS
