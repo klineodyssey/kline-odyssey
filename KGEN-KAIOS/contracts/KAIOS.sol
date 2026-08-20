@@ -30,15 +30,15 @@ interface IKGENSupply {
  * Lingxiao Treasury address.
  *
  * ALCHEMY — POINT 18911
- * KAIOS may be voluntarily burned for future KUFO conversion only through the
+ * KAIOS may be voluntarily burned for immediate KUFO conversion only through the
  * current registered 18911 Alchemy Furnace organ. The holder must first give
  * ERC-20 allowance to that furnace. The furnace cannot burn more than the
  * holder explicitly approved.
  *
  * 1 KAIOS -> expected 1,000 KUFO accounting units (1 kg -> 1,000 g).
- * This contract NEVER mints KUFO. 49-Alchemy-Epoch maturation belongs to the
- * 18911 furnace/runtime. Matured proof claiming belongs to the 511111 wormhole
- * / Qitian Dasheng Palace protocol.
+ * This contract NEVER mints KUFO. The registered 511111 wormhole validates and
+ * releases the same-transaction proof. The KGEN contribution goes directly to
+ * an immutable catalyst bank and is neither burned nor escrowed by 18911.
  */
 contract KAIOS is ERC20, ERC20Capped {
     string public constant SELF_NAME = unicode"界衡";
@@ -54,6 +54,7 @@ contract KAIOS is ERC20, ERC20Capped {
     uint256 public constant KAIOS_PER_KGEN = 1_000;
     uint256 public constant KUFO_PER_KAIOS = 1_000;
     uint256 public constant KAIOS_WEI_PER_KGEN_CATALYST_WEI = 1_000;
+    uint256 public constant MIN_ALCHEMY_AMOUNT = 1 ether;
 
     uint256 public constant KGEN_KILOGRAMS_PER_TOKEN = 1_000;
     uint256 public constant KAIOS_KILOGRAMS_PER_TOKEN = 1;
@@ -101,6 +102,9 @@ contract KAIOS is ERC20, ERC20Capped {
         // Appended to preserve the deployed V1 proof-reader ABI prefix.
         address catalystOwner;
         uint256 requiredKgenCatalyst;
+        address catalystBank;
+        uint256 contributionBlock;
+        uint256 contributionTimestamp;
     }
 
     mapping(bytes32 => AlchemyBurnRecord) private _alchemyBurnRecords;
@@ -115,6 +119,7 @@ contract KAIOS is ERC20, ERC20Capped {
     error InsufficientHolderAllowance(uint256 currentAllowance, uint256 requiredAllowance);
     error InexactKgenCatalystRatio(uint256 kaiosAmount);
     error IncorrectKgenCatalyst(uint256 provided, uint256 required);
+    error AlchemyAmountBelowMinimum(uint256 provided, uint256 minimum);
 
     event WhiteHoleMassSettled(
         uint256 indexed settlementNumber,
@@ -133,6 +138,7 @@ contract KAIOS is ERC20, ERC20Capped {
         address catalystOwner,
         address beneficiary,
         address furnace,
+        address catalystBank,
         uint256 kaiosBurned,
         uint256 requiredKgenCatalyst,
         uint256 expectedKufo,
@@ -237,6 +243,7 @@ contract KAIOS is ERC20, ERC20Capped {
         address beneficiary,
         uint256 kaiosAmount,
         uint256 requiredKgenCatalyst,
+        address catalystBank,
         bytes32 subjectLifeId,
         bytes32 destinationCode
     )
@@ -247,10 +254,17 @@ contract KAIOS is ERC20, ERC20Capped {
         if (msg.sender != currentFurnace || currentFurnace == address(0)) {
             revert OnlyOfficialAlchemyFurnace(msg.sender);
         }
-        if (owner == address(0) || catalystOwner == address(0) || beneficiary == address(0)) {
+        if (
+            owner == address(0) ||
+            catalystOwner == address(0) ||
+            beneficiary == address(0) ||
+            catalystBank == address(0)
+        ) {
             revert ZeroAddress();
         }
-        if (kaiosAmount == 0) revert ZeroAmount();
+        if (kaiosAmount < MIN_ALCHEMY_AMOUNT) {
+            revert AlchemyAmountBelowMinimum(kaiosAmount, MIN_ALCHEMY_AMOUNT);
+        }
         if (kaiosAmount % KAIOS_WEI_PER_KGEN_CATALYST_WEI != 0) {
             revert InexactKgenCatalystRatio(kaiosAmount);
         }
@@ -280,6 +294,7 @@ contract KAIOS is ERC20, ERC20Capped {
                 beneficiary,
                 kaiosAmount,
                 requiredKgenCatalyst,
+                catalystBank,
                 subjectLifeId,
                 destinationCode,
                 msg.sender
@@ -302,7 +317,10 @@ contract KAIOS is ERC20, ERC20Capped {
             blockNumber: block.number,
             timestamp: block.timestamp,
             catalystOwner: catalystOwner,
-            requiredKgenCatalyst: requiredKgenCatalyst
+            requiredKgenCatalyst: requiredKgenCatalyst,
+            catalystBank: catalystBank,
+            contributionBlock: block.number,
+            contributionTimestamp: block.timestamp
         });
 
         emit KAIOSBurnedForAlchemy(
@@ -312,6 +330,7 @@ contract KAIOS is ERC20, ERC20Capped {
             catalystOwner,
             beneficiary,
             msg.sender,
+            catalystBank,
             kaiosAmount,
             requiredKgenCatalyst,
             expectedKufo,

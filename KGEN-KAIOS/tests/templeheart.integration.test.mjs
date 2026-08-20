@@ -124,7 +124,7 @@ async function setUintMappingValue(context, heart, mappingLabel, key, value) {
 }
 
 test("TempleHeart accepts only a holder-bound KAIOS Alchemy proof with wish-bound destination", async () => {
-  const context = await setupLineage({ epochSeconds: 10 });
+  const context = await setupLineage();
   const { heart } = await deployTempleHeart(context);
   await mintKaiosByBurningKgen(context, 2n * ETHER);
 
@@ -152,7 +152,7 @@ test("TempleHeart accepts only a holder-bound KAIOS Alchemy proof with wish-boun
 });
 
 test("TempleHeart rejects beneficiary redirect and mismatched purpose proofs", async () => {
-  const context = await setupLineage({ epochSeconds: 10 });
+  const context = await setupLineage();
   const { heart } = await deployTempleHeart(context);
   await mintKaiosByBurningKgen(context, 2n * ETHER);
   const civilizationId = id("CIV-ATTACK");

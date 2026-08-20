@@ -28,7 +28,6 @@ export async function deploy(name, signer, args = []) {
 
 export async function setupLineage({
   delay = 3600,
-  epochSeconds = 100,
   halfLifeSeconds = 1_000,
   totalAccounts = 10,
   withUfoConsumer = false,
@@ -57,11 +56,12 @@ export async function setupLineage({
     halfLifeSeconds,
   ]);
   const kship = await deploy("KSHIP", owner, [await registry.getAddress(), await kufo.getAddress()]);
+  const catalystBank = await deploy("MockOrgan", owner);
   const furnace = await deploy("KAIOSAlchemyFurnace", owner, [
     await kaios.getAddress(),
     await kgen.getAddress(),
+    await catalystBank.getAddress(),
     await registry.getAddress(),
-    epochSeconds,
   ]);
   const wormhole = await deploy("KUFOClaimWormhole", owner, [
     await furnace.getAddress(),
@@ -101,12 +101,12 @@ export async function setupLineage({
     kufo,
     kship,
     furnace,
+    catalystBank,
     wormhole,
     converter,
     ufoConsumer,
     pairRegistry,
     exchangeTreasury11520,
-    epochSeconds,
     halfLifeSeconds,
   };
 }

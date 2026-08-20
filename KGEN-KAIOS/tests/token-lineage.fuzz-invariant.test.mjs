@@ -60,13 +60,14 @@ test("invariant: arbitrary zero-tax KAIOS transfers preserve supply and settleme
   }
 });
 
-test("fuzz: catalyst escrow, atomic return and KUFO output preserve exact mass scale", async () => {
-  const context = await setupLineage({ epochSeconds: 1, halfLifeSeconds: 1_000 });
+test("fuzz: direct catalyst-bank contributions and immediate KUFO output preserve exact mass scale", async () => {
+  const context = await setupLineage({ halfLifeSeconds: 1_000 });
   await mintKaiosByBurningKgen(context, 10n * ETHER);
   const kgenSupply = await context.kgen.totalSupply();
   const treasuryAddress = await context.treasury.getAddress();
   const treasuryKgenBefore = await context.kgen.balanceOf(treasuryAddress);
-  const proofIds = [];
+  const catalystBankAddress = await context.catalystBank.getAddress();
+  const bankBefore = await context.kgen.balanceOf(catalystBankAddress);
   let totalKaios = 0n;
 
   for (const wholeKaios of deterministicValues(0x18911n, 8, 100n)) {
@@ -84,25 +85,22 @@ test("fuzz: catalyst escrow, atomic return and KUFO output preserve exact mass s
     assert.equal(catalyst, kaiosAmount / 1_000n);
     assert.equal(proof.kgenCatalystAmount, catalyst);
     assert.equal(proof.kufoAmount, kaiosAmount * 1_000n);
+    assert.equal(proof.catalystBank, catalystBankAddress);
+    assert.equal(proof.consumed, true);
     assert.equal(await context.kgen.totalSupply(), kgenSupply);
-    proofIds.push(proofId);
     totalKaios += kaiosAmount;
   }
 
-  assert.equal(await context.furnace.catalystLiability(), totalKaios / 1_000n);
-  await advanceTime(context.provider, 49);
-  for (const proofId of proofIds) {
-    await (await context.wormhole.claim(proofId, { gasLimit: 2_000_000 })).wait();
-  }
   assert.equal(await context.furnace.catalystLiability(), 0n);
-  assert.equal(await context.kgen.balanceOf(treasuryAddress), treasuryKgenBefore);
+  assert.equal(await context.kgen.balanceOf(treasuryAddress), treasuryKgenBefore - totalKaios / 1_000n);
+  assert.equal(await context.kgen.balanceOf(catalystBankAddress), bankBefore + totalKaios / 1_000n);
   assert.equal(await context.kufo.totalSupply(), totalKaios * 1_000n);
   assert.equal(await context.kgen.totalSupply(), kgenSupply);
   assert.equal(await context.kufo.conservationInvariantHolds(), true);
 });
 
 test("invariant: completed half-life decay is monotonic and never exceeds 1000 KSHIP per KUFO", async () => {
-  const context = await setupLineage({ epochSeconds: 1, halfLifeSeconds: 10 });
+  const context = await setupLineage({ halfLifeSeconds: 10 });
   await mintKaiosByBurningKgen(context, 1n * ETHER);
   const recipient = context.signers[2];
   const amount = 1n * ETHER;
@@ -110,9 +108,7 @@ test("invariant: completed half-life decay is monotonic and never exceeds 1000 K
   const receipt = await (await context.furnace.connect(context.treasury).burnForKufo(
     amount, await recipient.getAddress(), id("DECAY-FUZZ-LIFE"), id("DECAY-FUZZ-DEST"),
   )).wait();
-  const proofId = eventArgs(receipt, context.furnace, "AlchemyProofCreated").proofId;
-  await advanceTime(context.provider, 49);
-  await (await context.wormhole.claim(proofId)).wait();
+  assert.notEqual(eventArgs(receipt, context.furnace, "AlchemyProofCreated").proofId, null);
   const initial = (await context.kufo.decayLot(1)).initialAmount;
   let previous = 0n;
   for (let period = 1; period <= 12; period += 1) {

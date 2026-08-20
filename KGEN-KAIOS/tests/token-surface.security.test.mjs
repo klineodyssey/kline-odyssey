@@ -64,6 +64,20 @@ test("KUFO half-life and KSHIP propulsion are constructor/registry gated", () =>
   assert.equal(kship.has("totalBurnedForPropulsion"), true);
 });
 
+test("fresh alchemy exposes only atomic release and no delayed catalyst-return surface", () => {
+  const furnace = functionNames("KAIOSAlchemyFurnace");
+  const wormhole = functionNames("KUFOClaimWormhole");
+  const kufo = functionNames("KUFO");
+  assert.equal(furnace.has("consumeImmediateProof"), true);
+  assert.equal(furnace.has("consumeMaturedProof"), false);
+  assert.equal(furnace.has("currentEpoch"), false);
+  assert.equal(furnace.has("catalystBank"), true);
+  assert.equal(wormhole.has("releaseImmediate"), true);
+  assert.equal(wormhole.has("claim"), false);
+  assert.equal(kufo.has("mintFromImmediateProof"), true);
+  assert.equal(kufo.has("mintFromMaturedProof"), false);
+});
+
 test("compiler and OpenZeppelin dependencies are exactly pinned", () => {
   const packageJson = JSON.parse(fs.readFileSync(path.join(root, "package.json"), "utf8"));
   const packageLock = JSON.parse(fs.readFileSync(path.join(root, "package-lock.json"), "utf8"));

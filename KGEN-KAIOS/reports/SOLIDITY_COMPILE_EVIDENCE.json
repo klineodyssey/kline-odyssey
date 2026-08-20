@@ -85,14 +85,14 @@
     {
       "contractName": "KAIOS",
       "sourceName": "contracts/KAIOS.sol",
-      "bytecodeBytes": 9158,
-      "deployedBytecodeBytes": 7232
+      "bytecodeBytes": 9487,
+      "deployedBytecodeBytes": 7561
     },
     {
       "contractName": "KAIOSAlchemyFurnace",
       "sourceName": "contracts/KAIOSAlchemyFurnace.sol",
-      "bytecodeBytes": 6700,
-      "deployedBytecodeBytes": 5620
+      "bytecodeBytes": 7048,
+      "deployedBytecodeBytes": 5872
     },
     {
       "contractName": "KAIOSEventHorizonVaultV01",
@@ -139,14 +139,14 @@
     {
       "contractName": "KUFO",
       "sourceName": "contracts/KUFO.sol",
-      "bytecodeBytes": 15856,
-      "deployedBytecodeBytes": 14277
+      "bytecodeBytes": 16004,
+      "deployedBytecodeBytes": 14425
     },
     {
       "contractName": "KUFOClaimWormhole",
       "sourceName": "contracts/KUFOClaimWormhole.sol",
-      "bytecodeBytes": 2868,
-      "deployedBytecodeBytes": 1995
+      "bytecodeBytes": 2914,
+      "deployedBytecodeBytes": 2037
     },
     {
       "contractName": "KGEN_TempleHeart_V3_3_2_Baseline",
@@ -157,8 +157,8 @@
     {
       "contractName": "MockKGEN",
       "sourceName": "tests/contracts/MockKGEN.sol",
-      "bytecodeBytes": 2829,
-      "deployedBytecodeBytes": 1819
+      "bytecodeBytes": 3733,
+      "deployedBytecodeBytes": 2356
     },
     {
       "contractName": "MockMintOrgan",

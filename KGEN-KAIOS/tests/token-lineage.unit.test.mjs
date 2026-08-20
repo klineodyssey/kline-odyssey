@@ -52,7 +52,7 @@ test("program contracts expose unique frozen Life identities and guardian recrui
   );
 });
 
-async function burnAndMature(context, {
+async function burnImmediate(context, {
   amount = 1n * ETHER,
   beneficiary = context.signers[2],
   lifeId = id("LIFE-HOLDER-001"),
@@ -69,14 +69,11 @@ async function burnAndMature(context, {
     )
   ).wait();
   const proofId = eventArgs(receipt, context.furnace, "AlchemyProofCreated").proofId;
-  await advanceTime(context.provider, 49 * context.epochSeconds);
   return { proofId, beneficiary, amount };
 }
 
 async function claimKufo(context, options = {}) {
-  const result = await burnAndMature(context, options);
-  await (await context.wormhole.claim(result.proofId, { gasLimit: 2_000_000 })).wait();
-  return result;
+  return burnImmediate(context, options);
 }
 
 async function advanceToLotBoundary(context, lotId, periods) {
@@ -99,13 +96,14 @@ test("Friction Mirror reads actual KGEN supply loss and settles only to 18888", 
   await assert.rejects(context.kaios.settleWhiteHoleMass());
 });
 
-test("18911 requires exact independent KAIOS and KGEN allowances and escrows 0.001 KGEN per KAIOS", async () => {
-  const context = await setupLineage({ epochSeconds: 10 });
+test("18911 requires exact independent allowances and sends 0.001 KGEN per KAIOS directly to the bank", async () => {
+  const context = await setupLineage();
   await mintKaiosByBurningKgen(context, 2n * ETHER);
   const amount = 1n * ETHER;
   const catalyst = amount / 1_000n;
   const treasuryAddress = await context.treasury.getAddress();
   const furnaceAddress = await context.furnace.getAddress();
+  const catalystBankAddress = await context.catalystBank.getAddress();
 
   await (await context.kgen.connect(context.treasury).approve(furnaceAddress, catalyst)).wait();
   await assert.rejects(context.furnace.connect(context.treasury).burnForKufo(
@@ -119,6 +117,7 @@ test("18911 requires exact independent KAIOS and KGEN allowances and escrows 0.0
   await (await context.kgen.connect(context.treasury).approve(furnaceAddress, catalyst)).wait();
 
   const beforeKgen = await context.kgen.balanceOf(treasuryAddress);
+  const bankBefore = await context.kgen.balanceOf(catalystBankAddress);
   const supplyBeforeAlchemy = await context.kgen.totalSupply();
   const receipt = await (await context.furnace.connect(context.treasury).burnForKufo(
     amount, treasuryAddress, id("LIFE-CATALYST"), id("DEST-CATALYST"),
@@ -131,22 +130,44 @@ test("18911 requires exact independent KAIOS and KGEN allowances and escrows 0.0
   assert.equal(proof.catalystOwner, treasuryAddress);
   assert.equal(burnRecord.requiredKgenCatalyst, catalyst);
   assert.equal(burnRecord.catalystOwner, treasuryAddress);
-  assert.equal(await context.kgen.balanceOf(furnaceAddress), catalyst);
+  assert.equal(proof.catalystBank, catalystBankAddress);
+  assert.equal(burnRecord.catalystBank, catalystBankAddress);
+  assert.equal(proof.bankContributionVerified, true);
+  assert.equal(proof.consumed, true);
+  assert.equal(await context.kgen.balanceOf(furnaceAddress), 0n);
+  assert.equal(await context.kgen.balanceOf(catalystBankAddress), bankBefore + catalyst);
   assert.equal(await context.kgen.balanceOf(treasuryAddress), beforeKgen - catalyst);
-  assert.equal(await context.furnace.catalystLiability(), catalyst);
+  assert.equal(await context.furnace.catalystLiability(), 0n);
+  assert.equal(await context.kufo.balanceOf(treasuryAddress), amount * 1_000n);
   assert.equal(await context.kgen.totalSupply(), supplyBeforeAlchemy);
+  await assert.rejects(context.furnace.connect(context.treasury).burnForKufo(
+    ETHER - 1n, treasuryAddress, id("LIFE-BELOW-MINIMUM"), id("DEST-BELOW-MINIMUM"),
+  ));
   await assert.rejects(context.furnace.connect(context.treasury).burnForKufo(
     amount + 1n, treasuryAddress, id("LIFE-INEXACT"), id("DEST-INEXACT"),
   ));
+
+  const emptyHolder = context.signers[4];
+  const emptyAddress = await emptyHolder.getAddress();
+  const emptyKgen = await context.kgen.balanceOf(emptyAddress);
+  await (await context.kgen.connect(emptyHolder).transfer(await context.owner.getAddress(), emptyKgen)).wait();
+  await (await context.kaios.connect(context.treasury).transfer(emptyAddress, amount)).wait();
+  await (await context.kaios.connect(emptyHolder).approve(furnaceAddress, amount)).wait();
+  await (await context.kgen.connect(emptyHolder).approve(furnaceAddress, catalyst)).wait();
+  await assert.rejects(context.furnace.connect(emptyHolder).burnForKufo(
+    amount, emptyAddress, id("LIFE-KGEN-BALANCE"), id("DEST-KGEN-BALANCE"),
+  ));
 });
 
-test("511111 atomically returns catalyst and mints KUFO only to the fixed beneficiary", async () => {
-  const context = await setupLineage({ epochSeconds: 10 });
+test("511111 atomically releases KUFO while KGEN remains in the immutable bank", async () => {
+  const context = await setupLineage();
   await mintKaiosByBurningKgen(context, 2n * ETHER);
   const beneficiary = context.signers[2];
   const attacker = context.signers[3];
   const treasuryAddress = await context.treasury.getAddress();
   const beforeKgen = await context.kgen.balanceOf(treasuryAddress);
+  const bankAddress = await context.catalystBank.getAddress();
+  const bankBefore = await context.kgen.balanceOf(bankAddress);
   const amount = 1_250n * ETHER;
   await approveAlchemy(context, context.treasury, amount);
   const burnReceipt = await (await context.furnace.connect(context.treasury).burnForKufo(
@@ -158,42 +179,105 @@ test("511111 atomically returns catalyst and mints KUFO only to the fixed benefi
   const proofId = eventArgs(burnReceipt, context.furnace, "AlchemyProofCreated").proofId;
   const catalyst = amount / 1_000n;
 
-  await assert.rejects(context.wormhole.connect(attacker).claim(proofId));
-  assert.equal(await context.kgen.balanceOf(await context.furnace.getAddress()), catalyst);
-  await advanceTime(context.provider, 49 * context.epochSeconds);
-  await (await context.wormhole.connect(attacker).claim(proofId, { gasLimit: 2_000_000 })).wait();
-
   const kufoAmount = amount * 1_000n;
-  assert.equal(await context.kgen.balanceOf(treasuryAddress), beforeKgen);
+  assert.equal(await context.kgen.balanceOf(treasuryAddress), beforeKgen - catalyst);
+  assert.equal(await context.kgen.balanceOf(bankAddress), bankBefore + catalyst);
   assert.equal(await context.kgen.balanceOf(await context.furnace.getAddress()), 0n);
   assert.equal(await context.kufo.balanceOf(await beneficiary.getAddress()), kufoAmount);
   assert.equal(await context.kufo.balanceOf(await attacker.getAddress()), 0n);
-  assert.equal((await context.furnace.proof(proofId)).catalystReturned, true);
+  assert.equal((await context.furnace.proof(proofId)).consumed, true);
+  assert.equal(await context.kufo.alchemyProofMinted(proofId), true);
   assert.equal(await context.furnace.catalystLiability(), 0n);
-  await assert.rejects(context.wormhole.connect(attacker).claim(proofId));
+  await assert.rejects(context.wormhole.connect(attacker).releaseImmediate(proofId));
 });
 
-test("claim failure rolls catalyst return and proof consumption back atomically", async () => {
-  const context = await setupLineage({ epochSeconds: 1 });
+test("18911 rejects a fee-like KGEN bank receipt mismatch and rolls the transfer back", async () => {
+  const context = await setupLineage();
   await mintKaiosByBurningKgen(context, 1n * ETHER);
-  const { proofId, amount } = await burnAndMature(context);
+  const amount = 1n * ETHER;
+  await approveAlchemy(context, context.treasury, amount);
+  const treasuryAddress = await context.treasury.getAddress();
+  const bankAddress = await context.catalystBank.getAddress();
+  const ownerBefore = await context.kgen.balanceOf(treasuryAddress);
+  const bankBefore = await context.kgen.balanceOf(bankAddress);
+  const supplyBefore = await context.kgen.totalSupply();
+  await (await context.kgen.setTransferFee(1n)).wait();
+
+  await assert.rejects(async () => {
+    const transaction = await context.furnace.connect(context.treasury).burnForKufo(
+      amount,
+      treasuryAddress,
+      id("LIFE-FEE-MISMATCH"),
+      id("DEST-FEE-MISMATCH"),
+      { gasLimit: 2_000_000 },
+    );
+    await transaction.wait();
+  });
+  assert.equal(await context.kgen.balanceOf(treasuryAddress), ownerBefore);
+  assert.equal(await context.kgen.balanceOf(bankAddress), bankBefore);
+  assert.equal(await context.kgen.totalSupply(), supplyBefore);
+  assert.equal(await context.kaios.totalKaiosBurnedForAlchemy(), 0n);
+});
+
+test("18911 supports multiple exactly representable amounts with immediate KUFO delivery", async () => {
+  const context = await setupLineage();
+  await mintKaiosByBurningKgen(context, 5n * ETHER);
+  const beneficiary = context.signers[2];
+  const beneficiaryAddress = await beneficiary.getAddress();
+  const amounts = [ETHER, 1_500_000_000_000_000_000n, 1_234_567_890_123_456_000n];
+  let expectedKufo = 0n;
+  let expectedBank = 0n;
+
+  for (const amount of amounts) {
+    await approveAlchemy(context, context.treasury, amount);
+    await (await context.furnace.connect(context.treasury).burnForKufo(
+      amount,
+      beneficiaryAddress,
+      id(`LIFE-EXACT-${amount}`),
+      id("DEST-EXACT"),
+    )).wait();
+    expectedKufo += amount * 1_000n;
+    expectedBank += amount / 1_000n;
+  }
+
+  assert.equal(await context.kufo.balanceOf(beneficiaryAddress), expectedKufo);
+  assert.equal(await context.kgen.balanceOf(await context.catalystBank.getAddress()), expectedBank);
+  assert.equal(await context.kgen.balanceOf(await context.furnace.getAddress()), 0n);
+});
+
+test("KUFO release failure rolls bank contribution and KAIOS burn back atomically", async () => {
+  const context = await setupLineage();
+  await mintKaiosByBurningKgen(context, 1n * ETHER);
+  const amount = 1n * ETHER;
   const catalyst = amount / 1_000n;
-  const ownerBefore = await context.kgen.balanceOf(await context.treasury.getAddress());
+  await approveAlchemy(context, context.treasury, amount);
+  const treasuryAddress = await context.treasury.getAddress();
+  const beneficiaryAddress = await context.signers[2].getAddress();
+  const ownerBefore = await context.kgen.balanceOf(treasuryAddress);
+  const bankBefore = await context.kgen.balanceOf(await context.catalystBank.getAddress());
+  const kaiosSupplyBefore = await context.kaios.totalSupply();
 
   await context.provider.send("evm_setAccountCode", [await context.kufo.getAddress(), "0x60006000fd"]);
   await assert.rejects(async () => {
-    const transaction = await context.wormhole.claim(proofId, { gasLimit: 2_000_000 });
+    const transaction = await context.furnace.connect(context.treasury).burnForKufo(
+      amount,
+      beneficiaryAddress,
+      id("LIFE-ATOMIC-ROLLBACK"),
+      id("DEST-ATOMIC-ROLLBACK"),
+      { gasLimit: 2_000_000 },
+    );
     await transaction.wait();
   });
-  const proof = await context.furnace.proof(proofId);
-  assert.equal(proof.consumed, false);
-  assert.equal(proof.catalystReturned, false);
-  assert.equal(await context.kgen.balanceOf(await context.furnace.getAddress()), catalyst);
-  assert.equal(await context.kgen.balanceOf(await context.treasury.getAddress()), ownerBefore);
+  assert.equal(await context.kgen.balanceOf(await context.furnace.getAddress()), 0n);
+  assert.equal(await context.kgen.balanceOf(await context.catalystBank.getAddress()), bankBefore);
+  assert.equal(await context.kgen.balanceOf(treasuryAddress), ownerBefore);
+  assert.equal(await context.kaios.totalSupply(), kaiosSupplyBefore);
+  assert.equal(await context.furnace.totalKgenContributedToBank(), 0n);
+  assert.equal(catalyst, amount / 1_000n);
 });
 
 test("KUFO decay begins at birth, blocks immediate conversion and releases only new half-life decay", async () => {
-  const context = await setupLineage({ epochSeconds: 1, halfLifeSeconds: 100 });
+  const context = await setupLineage({ halfLifeSeconds: 100 });
   await mintKaiosByBurningKgen(context, 1n * ETHER);
   const recipient = context.signers[2];
   const initialKufo = 1_000n * ETHER;
@@ -263,7 +347,7 @@ test("KUFO decay begins at birth, blocks immediate conversion and releases only 
 });
 
 test("KUFO transfer and split preserve birth time and cannot increase aggregate KSHIP", async () => {
-  const context = await setupLineage({ epochSeconds: 1, halfLifeSeconds: 100 });
+  const context = await setupLineage({ halfLifeSeconds: 100 });
   await mintKaiosByBurningKgen(context, 1n * ETHER);
   const first = context.signers[2];
   const second = context.signers[3];
@@ -305,7 +389,7 @@ test("KSHIP propulsion is fail-closed without a consumer and exact holder author
     id("UFO-LIFE-1"), id("TRIP-CLOSED"), await closed.signers[2].getAddress(), 1n,
   ));
 
-  const context = await setupLineage({ epochSeconds: 1, halfLifeSeconds: 10, withUfoConsumer: true });
+  const context = await setupLineage({ halfLifeSeconds: 10, withUfoConsumer: true });
   await mintKaiosByBurningKgen(context, 1n * ETHER);
   const holder = context.signers[2];
   const holderAddress = await holder.getAddress();

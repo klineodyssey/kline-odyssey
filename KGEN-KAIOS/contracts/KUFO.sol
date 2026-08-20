@@ -19,6 +19,9 @@ interface IKAIOSBurnRecordSource {
         uint256 timestamp;
         address catalystOwner;
         uint256 requiredKgenCatalyst;
+        address catalystBank;
+        uint256 contributionBlock;
+        uint256 contributionTimestamp;
     }
 
     function alchemyBurnRecord(bytes32 proofId) external view returns (AlchemyBurnRecord memory);
@@ -29,20 +32,21 @@ interface IAlchemyFurnaceProofSource {
         address owner;
         address catalystOwner;
         address beneficiary;
+        address catalystBank;
         uint256 kaiosBurned;
         uint256 kgenCatalystAmount;
         uint256 kufoAmount;
         bytes32 lifeId;
         bytes32 destinationCode;
         bytes32 memorialProofId;
-        uint64 burnEpoch;
-        uint64 maturityEpoch;
+        uint64 contributionBlock;
+        uint64 contributionTimestamp;
+        bool bankContributionVerified;
+        bool releaseAuthorized;
         bool consumed;
-        bool catalystReturned;
     }
 
     function proof(bytes32 proofId) external view returns (Proof memory);
-    function currentEpoch() external view returns (uint64);
 }
 
 /**
@@ -94,7 +98,7 @@ contract KUFO is ERC20, ERC20Capped {
     uint256 public totalBurnedForKship;
     uint256 public nextLotId = 1;
 
-    mapping(bytes32 => bool) public maturedProofMinted;
+    mapping(bytes32 => bool) public alchemyProofMinted;
     mapping(bytes32 => bytes32) public proofBatchLifeId;
     mapping(bytes32 => bool) public carrierProofRecorded;
     mapping(uint256 => DecayLot) private _decayLots;
@@ -113,7 +117,7 @@ contract KUFO is ERC20, ERC20Capped {
     error NoMaturedDecay(address owner, uint256 requestedMaximum);
     error LineageBalanceMismatch(address owner, uint256 missingAmount);
 
-    event MaturedProofMinted(
+    event ImmediateAlchemyProofMinted(
         bytes32 indexed proofId,
         uint256 indexed lotId,
         address indexed beneficiary,
@@ -157,10 +161,10 @@ contract KUFO is ERC20, ERC20Capped {
         emit ProgramLifeRecruited(lifeId, SELF_NAME, SPECIES_ID, LIFE_TYPE, EMBODIMENT_STATUS);
     }
 
-    function mintFromMaturedProof(bytes32 proofId) external returns (address beneficiary, uint256 amount) {
+    function mintFromImmediateProof(bytes32 proofId) external returns (address beneficiary, uint256 amount) {
         address wormhole = organRegistry.organ(ORGAN_WORMHOLE_511111);
         if (msg.sender != wormhole || wormhole == address(0)) revert OnlyCurrentWormhole(msg.sender);
-        if (maturedProofMinted[proofId]) revert ProofAlreadyUsed(proofId);
+        if (alchemyProofMinted[proofId]) revert ProofAlreadyUsed(proofId);
 
         IKAIOSBurnRecordSource.AlchemyBurnRecord memory burnRecord = kaios.alchemyBurnRecord(proofId);
         if (
@@ -168,30 +172,36 @@ contract KUFO is ERC20, ERC20Capped {
             burnRecord.catalystOwner == address(0) ||
             burnRecord.beneficiary == address(0) ||
             burnRecord.furnace == address(0) ||
+            burnRecord.catalystBank == address(0) ||
             burnRecord.kaiosBurned == 0 ||
             burnRecord.kaiosBurned % KAIOS_WEI_PER_KGEN_CATALYST_WEI != 0 ||
             burnRecord.requiredKgenCatalyst != burnRecord.kaiosBurned / KAIOS_WEI_PER_KGEN_CATALYST_WEI ||
-            burnRecord.expectedKufo != burnRecord.kaiosBurned * 1_000
+            burnRecord.expectedKufo != burnRecord.kaiosBurned * 1_000 ||
+            burnRecord.contributionBlock != burnRecord.blockNumber ||
+            burnRecord.contributionTimestamp != burnRecord.timestamp
         ) revert InvalidLineageProof(proofId);
 
         IAlchemyFurnaceProofSource furnace = IAlchemyFurnaceProofSource(burnRecord.furnace);
         IAlchemyFurnaceProofSource.Proof memory furnaceProof = furnace.proof(proofId);
         if (
             !furnaceProof.consumed ||
-            !furnaceProof.catalystReturned ||
-            furnace.currentEpoch() < furnaceProof.maturityEpoch ||
+            furnaceProof.releaseAuthorized ||
+            !furnaceProof.bankContributionVerified ||
             furnaceProof.owner != burnRecord.owner ||
             furnaceProof.catalystOwner != burnRecord.catalystOwner ||
             furnaceProof.beneficiary != burnRecord.beneficiary ||
+            furnaceProof.catalystBank != burnRecord.catalystBank ||
             furnaceProof.kaiosBurned != burnRecord.kaiosBurned ||
             furnaceProof.kgenCatalystAmount != burnRecord.requiredKgenCatalyst ||
             furnaceProof.kufoAmount != burnRecord.expectedKufo ||
+            furnaceProof.contributionBlock != burnRecord.contributionBlock ||
+            furnaceProof.contributionTimestamp != burnRecord.contributionTimestamp ||
             furnaceProof.memorialProofId == bytes32(0)
         ) revert InvalidLineageProof(proofId);
 
         beneficiary = burnRecord.beneficiary;
         amount = burnRecord.expectedKufo;
-        maturedProofMinted[proofId] = true;
+        alchemyProofMinted[proofId] = true;
         totalMintedFromKaios += amount;
         _mint(beneficiary, amount);
         bytes32 batchLifeId = keccak256(
@@ -206,7 +216,7 @@ contract KUFO is ERC20, ERC20Capped {
             proofId,
             batchLifeId
         );
-        emit MaturedProofMinted(
+        emit ImmediateAlchemyProofMinted(
             proofId,
             lotId,
             beneficiary,

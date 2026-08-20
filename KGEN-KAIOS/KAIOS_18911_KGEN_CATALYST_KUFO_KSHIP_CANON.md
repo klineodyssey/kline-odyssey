@@ -1,25 +1,24 @@
-# KAIOS 18911 KGEN Catalyst → KUFO → KSHIP Canon V1
+# KAIOS 18911 Fresh Catalyst → KUFO → KSHIP Canon V3
 
-Status: `PROGRAM_LIFE_REWORK_REVIEW_CANDIDATE`
+Status: `IMPLEMENTED_REVIEW_CANDIDATE`
 
-Authority classification: `IMPLEMENTED_REVIEW_CANDIDATE`
-
-```text
-PR158_CURRENT_IMPLEMENTATION        = IMPLEMENTED_REVIEW_CANDIDATE
-PR158_REVIEW_STAGE                  = 49_EPOCH
-PR158_CATALYSIS_STAGE               = NOT_IMPLEMENTED
-PR158_TOTAL_130_EPOCH_SUCCESSOR      = NOT_IMPLEMENTED
-PR158_CURRENT_SUCCESSOR_CLAIM        = FORBIDDEN
-PR158_PHASE_A_RECONCILIATION         = COMPLETE
-REJECTION_RULES                      = OPEN_REVIEW
-CANCELLATION_RULES                   = OPEN_REVIEW
-REFUND_RULES                         = OPEN_REVIEW
-ALCHEMY_EPOCH_CHAIN_SECONDS           = OPEN_REVIEW
-LINEAGE_CLOSEOUT                      = BLOCKED_130_EPOCH_CANON_FREEZE
-```
+Authority: `HUMAN_FRESHNESS_CANON_FREEZE_2026-08-20`
 
 Deployment: `NO`
+
 Mainnet/Testnet transactions: `NONE`
+
+```text
+MIN_ALCHEMY_AMOUNT                    = 1 KAIOS
+REQUIRED_KGEN                         = KAIOS_AMOUNT / 1000
+KUFO_OUTPUT                           = KAIOS_AMOUNT * 1000
+DELIVERY_DELAY                        = 0
+CONTRIBUTION_FRESHNESS_WINDOW         = 130 HUMAN DAYS
+TAX_CREDIT_ROUTE                      = DESIGN_ONLY_DISABLED
+CATALYST_BANK_PRODUCTION_ADDRESS      = UNFROZEN
+PROGRAM_LIFE_STATUS                   = RECRUITED_PENDING_EMBODIMENT
+FORMAL_KGEN_SOLIDITY_DIFF             = 0
+```
 
 ## 1. Fixed mass scale
 
@@ -28,192 +27,154 @@ Mainnet/Testnet transactions: `NONE`
 - `1 KUFO = 1 g`
 - `1 KSHIP = 1 mg`
 
-For every exactly representable `KAIOS_AMOUNT`:
+For every exactly representable `KAIOS_AMOUNT >= 1 KAIOS`:
 
 ```text
-REQUIRED_KGEN_CATALYST = KAIOS_AMOUNT / 1000
-KUFO_OUTPUT             = KAIOS_AMOUNT × 1000
-KSHIP_MAX_OUTPUT        = KUFO_AMOUNT × 1000
+REQUIRED_KGEN = KAIOS_AMOUNT / 1000
+KUFO_OUTPUT   = KAIOS_AMOUNT * 1000
 ```
 
-The 18911 reaction is:
+The direct fresh path is:
 
 ```text
-0.001 KGEN catalyst + 1 KAIOS feedstock
-→ the same 0.001 KGEN returned + at most 1000 KUFO
+0.001 KGEN fresh bank contribution + 1 KAIOS feedstock
+-> 0.001 KGEN retained by the immutable catalyst bank
+ + 1000 KUFO delivered immediately to the fixed beneficiary
 ```
 
-KGEN is a catalyst. It is neither burned nor converted into KUFO. The furnace has no owner, rescue,
-sweep or arbitrary withdrawal surface. KAIOS follows the existing holder-authorized burn lineage.
-The only fee is the BNB gas required by the chain; none of these contracts is payable.
+KGEN is the required equal-mass contribution. It is not burned, converted into KUFO, held by 18911
+or returned after success. KAIOS is the material burned to establish KUFO lineage. The 5,000,000
+KAIOS seat/performance-bond rules are separate and are not an alchemy minimum.
 
-## 2. 18911 and 511111 atomic lineage
+## 2. Atomic direct-fresh path
 
-The holder separately approves the official 18911 furnace for the required KAIOS and KGEN.
-Amounts that cannot divide exactly by 1000 at ERC-20 wei precision fail closed. The furnace escrows
-the exact KGEN catalyst and records `catalystOwner`, `kgenCatalystAmount`, `catalystReturned` and a
-non-transferable `memorialProofId`. The memorial is evidence of the alchemy event; it is not ownership
-of the holder's KGEN.
-
-In the PR #158 review candidate, after 49 Alchemy Epochs only the Organ Registry's current 511111
-Wormhole can consume the proof. One transaction consumes the proof, returns all catalyst to the
-recorded direct caller and mints KUFO to the burn-time beneficiary. A failure in any step reverts
-every step. Proofs are single-use.
-
-This 49-Epoch implementation is a review-stage candidate, not the complete CURRENT successor. It
-must not be deployed or represented as satisfying the newer two-stage alchemy chronology.
-
-### 2.1 CURRENT successor chronology boundary
-
-The CURRENT successor design is:
+The only implemented review path is:
 
 ```text
-49 Epoch REVIEW
-+81 Epoch CATALYSIS
-=130 Epoch TOTAL
+holder
+-> 太上老君 K18911
+-> KGEN transferFrom(holder, immutable catalystBank, exact required amount)
+-> exact catalystBank balance-delta verification
+-> KAIOS holder-authorized burn
+-> 齊天大聖 K511111 same-call proof consumption
+-> 丹靈 KUFO mint to the burn-time beneficiary
 ```
 
-The successor state sequence is fixed, but its asset-transition policy is not:
+The holder separately approves the official furnace for the exact KAIOS and required KGEN amounts.
+The beneficiary is frozen before either asset movement. Amounts below 1 KAIOS and amounts that cannot
+divide exactly by 1000 at ERC-20 wei precision fail closed.
+
+The furnace stores no KGEN. Its KGEN liability is always zero. A fee-on-transfer-like KGEN response,
+missing allowance, insufficient balance, wrong organ, proof mismatch, beneficiary mismatch, KUFO mint
+failure or any later step failure reverts the entire transaction, including the bank transfer and KAIOS
+burn. The proof can be consumed only during the authorized same-call release and only once.
 
 ```text
-SUBMITTED
--> REVIEWING
--> REVIEW_PASSED
--> CATALYZING
--> MATURED
--> PROOF_CONSUMED
--> KUFO_LINEAGE_ESTABLISHED
--> CATALYST_RETURNED
+REJECTION   = ATOMIC_REVERT
+CANCELLATION = NOT_APPLICABLE_AFTER_SUCCESS
+REFUND       = NOT_APPLICABLE_NO_ESCROW
 ```
 
-The table below is an Open Review record, not executable behavior. `OPEN_REVIEW` means no worker may
-invent, infer or implement that field before a separate Human freeze.
+The non-transferable `memorialProofId` records the alchemy event. It conveys no ownership of KGEN,
+KUFO, a land point or a governance role.
 
-| Successor state | KAIOS custody / burn | KGEN catalyst custody | Reject? | Cancel? | Refund? | Next-state gate | Irreversible event | Unfrozen fields |
-|---|---|---|---|---|---|---|---|---|
-| `SUBMITTED` | `OPEN_REVIEW` | `OPEN_REVIEW` | `OPEN_REVIEW` | `OPEN_REVIEW` | `OPEN_REVIEW` | submission evidence and authorization: `OPEN_REVIEW` | `OPEN_REVIEW` | timing of KAIOS burn and catalyst escrow |
-| `REVIEWING` | `OPEN_REVIEW` | `OPEN_REVIEW` | `OPEN_REVIEW` | `OPEN_REVIEW` | `OPEN_REVIEW` | 49-Epoch review rule and approval evidence: `OPEN_REVIEW` | `OPEN_REVIEW` | rejection authority, reason codes and asset disposition |
-| `REVIEW_PASSED` | `OPEN_REVIEW` | `OPEN_REVIEW` | `OPEN_REVIEW` | `OPEN_REVIEW` | `OPEN_REVIEW` | catalysis-entry authorization: `OPEN_REVIEW` | `OPEN_REVIEW` | boundary between review and catalysis |
-| `CATALYZING` | `OPEN_REVIEW` | `OPEN_REVIEW` | `OPEN_REVIEW` | `OPEN_REVIEW` | `OPEN_REVIEW` | 81-Epoch catalysis rule: `OPEN_REVIEW` | `OPEN_REVIEW` | cancellation and failure handling during catalysis |
-| `MATURED` | `OPEN_REVIEW` | `OPEN_REVIEW` | `OPEN_REVIEW` | `OPEN_REVIEW` | `OPEN_REVIEW` | proof-consumption predicate: `OPEN_REVIEW` | `OPEN_REVIEW` | exact maturity boundary and chain-seconds conversion |
-| `PROOF_CONSUMED` | `OPEN_REVIEW` | `OPEN_REVIEW` | `OPEN_REVIEW` | `OPEN_REVIEW` | `OPEN_REVIEW` | KUFO-lineage establishment: `OPEN_REVIEW` | `OPEN_REVIEW` | atomic ordering and failure rollback |
-| `KUFO_LINEAGE_ESTABLISHED` | `OPEN_REVIEW` | `OPEN_REVIEW` | `OPEN_REVIEW` | `OPEN_REVIEW` | `OPEN_REVIEW` | catalyst-return predicate: `OPEN_REVIEW` | `OPEN_REVIEW` | mint/lineage finality and return ordering |
-| `CATALYST_RETURNED` | `OPEN_REVIEW` | returned only to the recorded original catalyst owner | `OPEN_REVIEW` | `OPEN_REVIEW` | `OPEN_REVIEW` | terminal-state rules: `OPEN_REVIEW` | actual exact KGEN balance-delta return | terminal evidence and recovery policy |
+## 3. Superseded wait model
 
-The chain-seconds value of one Alchemy Epoch is also `OPEN_REVIEW`. Merely changing
-`MATURATION_EPOCHS` from 49 to 130 would incorrectly collapse review and catalysis into one wait and
-is forbidden. The successor requires a separately reviewed state machine after the unresolved asset
-rules above are frozen.
-
-### 2.2 K1852 relay boundary
+The former model:
 
 ```text
-K1852_ADDRESS                     = 0xfc522243e988a837700CaD600D6f030f5932681F
-K1852_ROUTE_STATUS                = DESIGN_ONLY_UNFROZEN
-K1852_DIRECT_ESCROW_COMPATIBILITY = NOT_YET_PROVEN
+49 Epoch review + 81 Epoch catalysis = 130 Epoch delayed delivery
 ```
 
-The deployed GalacticBank V7.5.2 does not implement a catalyst relay. The PR #158 furnace currently
-records `catalystOwner = msg.sender`; if a relay calls the furnace, the relay would be recorded as
-the catalyst owner rather than the original holder. PR #158 therefore makes no K1852 compatibility
-claim.
+is `SUPERSEDED_BY_HUMAN_FRESHNESS_CANON`. The earlier PR #158 implementation that escrowed KGEN,
+waited 49 Epochs, returned the catalyst and then allowed a separate claim is also superseded.
 
-A future, separately reviewed `CatalystTicket` must preserve at minimum the original catalyst owner,
-beneficiary, Life ID, exact KGEN amount, exact KAIOS amount, source point, proof binding, single-use
-status and atomic catalyst return. This PR does not create that relay, modify GalacticBank or modify
-the formal KGEN Solidity.
-
-## 3. KUFO half-life
+The number 130 now means only:
 
 ```text
-KUFO_HALF_LIFE_CANON = 1_K280_YEAR
-1 K18888 HEAVEN DAY  = 1 K280 YEAR ≈ 365.2422 K280 DAYS
-DECAY_START           = KUFO_BIRTH_TIMESTAMP
-TRANSFER_TIME_RESET   = BLOCKED
-KSHIP_MAX_PER_KUFO    = 1000
+130 HUMAN DAYS = maximum age of a separately proven KGEN 0.10% bank-tax contribution
 ```
 
-The old `1 K280 DAY = 3 HEAVEN DAYS` rule is `SUPERSEDED_WRONG`.
+It is not a KUFO delivery delay. A direct KGEN transfer made inside the alchemy transaction has age
+zero and therefore needs no waiting period. No `49`, `81` or `130` maturity constant remains in the
+direct execution path.
 
-Every minted batch creates a decay lot with `initialAmount`, `bornAt`, `convertedAmount` and
-`sourceProof`. Remaining mass follows:
+## 4. Catalyst-bank production boundary
+
+Read-only BSC evidence at block `117020399` showed:
+
+| Role | Address | Verified state |
+|---|---|---|
+| Formal KGEN | `0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be` | owner is BankGovernance |
+| Current KGEN `bankWallet` | `0xA06eF53c9AD4Af739FD13Ca1Ded446437134b0EE` | ReserveRedemption; 20 KGEN balance at snapshot |
+| K1852 GalacticBank candidate | `0xfc522243e988a837700CaD600D6f030f5932681F` | contract code present; zero KGEN at snapshot |
+
+These roles are not interchangeable. ReserveRedemption is the current financial-mass reserve rail.
+K1852 has no frozen catalyst-receipt protocol. Neither address is approved here as the production
+catalyst bank.
+
+The furnace constructor therefore accepts one immutable contract address so code and tests can prove
+the custody boundary, while production remains blocked:
 
 ```text
-RemainingKUFO = InitialKUFO × (1/2)^(elapsed / halfLife)
-DecayedKUFO   = InitialKUFO - RemainingKUFO
-KSHIPGenerated = newly claimable DecayedKUFO × 1000
+CATALYST_BANK_PRODUCTION_ADDRESS = UNFROZEN
+DEPLOYMENT                        = BLOCKED
 ```
 
-Solidity evaluates the fractional exponent with a deterministic 32-bit binary fixed-point factor.
-At each complete half-life the result is exact at token precision: 50%, 25%, 12.5%, 6.25% remaining.
-Only newly decayed mass can be converted. Transfer and split operations preserve `bornAt`, source
-proof and proportional converted history; merging balances never merges away their lots.
+No Reserve asset, 18888 asset or existing K1852 balance is repurposed by this review candidate.
 
-`halfLifeSeconds` is immutable and non-zero. Because the Canon has not frozen the conversion from a
-K280 year to chain seconds, no production deployment is authorized by this implementation.
+## 5. Optional 0.10% tax-credit route — disabled design
 
-## 4. KSHIP propulsion
+The direct-transfer route above is implemented. Reusing a recent KGEN AMM Bank-tax contribution is
+not. Until a shared indexer, attester, gateway, batch-root format and operating budget are separately
+frozen, the route must fail closed:
 
-KSHIP has no half-life and no expiry. It is burned only when an Organ Registry registered UFO fuel
-consumer consumes a holder-created authorization. The authorization binds holder, registered
-consumer, `ufoLifeId`, `tripId`, beneficiary and amount. The holder must provide an exact allowance;
-unlimited allowance is rejected. `tripId` is single-use.
+```text
+TAX_CREDIT_ROUTE = DESIGN_ONLY_DISABLED
+```
 
-When no canonical UFO fuel consumer is registered, both authorization and consumption fail closed.
-The included `KSHIPPropulsionConsumerHarness` exists only for review tests. It is not a canonical UFO,
-product, factory or deployment candidate.
+The proposed evidence record is:
 
-## 5. Conservation and prohibited authority
+| Field | Meaning |
+|---|---|
+| `chainId` | must be 56 |
+| `txHash`, `transactionIndex`, `logIndex`, `blockNumber`, `timestamp` | canonical source-event ordering |
+| `wallet` | attributed user, never inferred as the AMM Pair |
+| `attributedBuyer`, `pair` | explicit buy attribution context |
+| `recipient` | frozen catalyst bank |
+| `amount` | proven 0.10% Bank leg only |
+| `bankTaxBps` | exactly 10 bps |
+| `sourceKind` | `PROVEN_KGEN_BANK_TAX_0_10` |
+| `proofId`, `batchRoot`, `gateway` | attested batch identity and single-use gateway |
+| `consumedAmount` | cumulative used amount, never above the proven amount |
 
-- KGEN total supply is unchanged by catalyst escrow and return.
-- `KUFO supply + KUFO converted to KSHIP = KUFO minted from valid KAIOS proofs`.
-- `KSHIP supply + KSHIP burned for propulsion = KSHIP minted from KUFO decay`.
-- A KUFO lot can never create more than 1000 KSHIP per KUFO over its entire lifetime.
-- No arbitrary mint, admin mint, blacklist, seizure, token tax, KGEN burn, rescue or admin withdrawal is added.
-- No existing KGEN contract is modified.
-- This PR creates fuel-lineage capability only; it creates no UFO, factory, order, budget or production authority.
+The event uniqueness key is the exact tuple:
 
-## 6. Program Life manifests
+```text
+txHash + logIndex + wallet + amount + timestamp
+```
 
-The upper Canon is **program is Life**. A token's smallest accounting unit remains a mass cell; the
-runtime does not manufacture one Life identity per wei. Each changed Solidity program has one unique
-primary Life or organ-Life identity. All candidates in this PR are undeployed and therefore remain
-`RECRUITED_PENDING_EMBODIMENT`; local test deployments are not Mainnet birth evidence.
+Only actual KGEN entering the designated catalyst bank through the 0.10% Bank leg qualifies. Burn,
+Reward, AutoLP, ordinary transfer and unclassified inflow do not qualify. Credits are consumed FIFO
+by `(timestamp, blockNumber, transactionIndex, logIndex)`. Exactly 130 days old is valid; 130 days
+plus one second is expired. A source event or consumed amount cannot be replayed. A shared verified
+batch root prevents every holder from scanning unbounded history. Production buyer attribution must
+resolve the actual buyer and must not label the Pair as the user.
 
-| Solidity program | Self name | Immutable Life ID | Type / species | Point / duty |
-|---|---|---|---|---|
-| `KAIOS.sol` | 界衡 | `LIFE-KAIOS-JIEHENG-33333` | monetary program Life | Human-appointed land guardian K33333; KAIOS civilization blood and universe-boundary mass conservation |
-| `KAIOSAlchemyFurnace.sol` | 太上老君 | `LIFE-KAIOS-TAISHANG-LAOJUN-18911` | alchemy organ Life | Human-appointed land guardian K18911 / Alchemy Master |
-| `KUFO.sol` | 丹靈 | `LIFE-KAIOS-DANLING-KUFO-CORE` | `SPECIES-KAIOS-KUFO-DECAY-LIFE`; mobile material Life | birthplace K18911; release gate K511111; not a land guardian |
-| `KUFOClaimWormhole.sol` | 齊天大聖 | `LIFE-KAIOS-QITIAN-DASHENG-511111` | release-gate organ Life | Human-appointed land guardian K511111 / KUFO release gatekeeper |
-| `KSHIP.sol` | 星梭 | `LIFE-KAIOS-XINGSUO-KSHIP-CORE` | `SPECIES-KAIOS-KSHIP-PROPULSION-LIFE`; mobile antimatter propulsion Life | parent `LIFE-KAIOS-NIUMOWANG-188888`; registry destination K188888 |
-| `KSHIPConverter.sol` | 化航 | `LIFE-KAIOS-HUAHANG-KSHIP-CONVERTER` | software organ Life | parent `LIFE-KAIOS-NIUMOWANG-188888` |
-| `KAIOSOrganRegistry.sol` | 司籍 | `LIFE-KAIOS-SIJI-REGISTRY-0001` | cross-world registry Life | no land point |
-| `KSHIPPropulsionConsumerHarness.sol` | 試航童子 | `LIFE-KAIOS-SHIHANG-TONGZI-TEST-0001` | test Life | `DEPLOYABLE=false`; `EMPLOYABLE=false` |
+The executable reference validator in `tools/tax-credit-reference.mjs` is test-only and deliberately
+reports `DESIGN_ONLY_DISABLED`; it grants no on-chain credit or payment authority.
 
-The K188888 KSHIP parent system records 牛魔王 as
-`LIFE-KAIOS-NIUMOWANG-188888`, Human-appointed land guardian K188888 and antimatter-energy guardian.
-`KSHIP.sol` remains 星梭's unique primary program Life; the 牛魔王 fields are its immutable parent and
-guardian recruitment record, not a claim that two contracts or two token identities exist.
+## 6. KAIOS, KUFO and KSHIP lineage
 
-The K18888 玉皇大帝 / 神明銀行 identity is unchanged. A receiving treasury or registry destination
-does not become the identity of KAIOS, KUFO or KSHIP.
+KAIOS records the holder, contributor, beneficiary, official furnace, immutable catalyst bank,
+exact KAIOS burn, exact KGEN contribution, Life ID, destination, block and timestamp. KAIOS has no
+arbitrary mint, admin mint, seizure, blacklist, tax setter or KGEN burn surface.
 
-## 7. Appointment, capability and Life-event records
+K511111 consumes the furnace proof only when called by that furnace in the same atomic path. KUFO
+cross-checks the KAIOS burn record and furnace contribution record, mints once to the fixed beneficiary
+and records `bornAt = block.timestamp` of the actual mint transaction.
 
-Every land-bound candidate exposes immutable `lifeId`, `guardianPoint`, `dutyHash` and a hashed
-capability boundary. The appointment mode is `HUMAN_APPOINTED`. Capability text is deliberately
-constrained to the program's existing work surface and grants no admin mint, arbitrary burn,
-withdrawal, rescue, seizure, beneficiary redirect or governance shortcut.
-
-Constructor `ProgramLifeRecruited` / `LandGuardianRecruited` events provide deterministic local and
-future deployment records. They record recruitment, not Mainnet activation or birth. A future formal
-deployment review must attach chain, address, block, transaction and governance evidence before any
-status can change from `RECRUITED_PENDING_EMBODIMENT`.
-
-## 8. Token species and deterministic batch Life lineage
-
-Each valid KUFO generation proof creates exactly one deterministic batch Life ID:
+Each KUFO proof creates one deterministic batch Life ID:
 
 ```text
 keccak256(abi.encode(
@@ -224,28 +185,62 @@ keccak256(abi.encode(
 ))
 ```
 
-Every split or transfer-derived KUFO lot carries the same `batchLifeId`, `bornAt` and `sourceProof`.
-This preserves decay ancestry and prevents transfer, split or merge from restarting half-life.
+Transfer and split preserve `batchLifeId`, `bornAt`, source proof and proportional converted history.
+Token wei are mass cells, not individually named Lives.
 
-Each valid KSHIP carrier proof similarly creates one immutable birth record:
+## 7. KUFO half-life and KSHIP
 
 ```text
-keccak256(abi.encode(
-  "KAIOS.KSHIP.BATCH_LIFE.V1",
-  chainId,
-  KSHIP contract,
-  source proof
-))
+KUFO_HALF_LIFE_CANON = 1_K280_YEAR
+DECAY_START           = KUFO_BIRTH_TIMESTAMP
+TRANSFER_TIME_RESET   = BLOCKED
+KSHIP_MAX_PER_KUFO    = 1000
 ```
 
-The KSHIP record freezes `batchLifeId`, source proof, beneficiary, initial amount and birth time.
-Ordinary ERC-20 transfers do not rewrite that generation record. These batch identities describe a
-generated cohort; individual token wei remain mass cells and are not separately named Lives.
+The old `1 K280 DAY = 3 HEAVEN DAYS` rule is `SUPERSEDED_WRONG`.
 
-## 9. Parent and organ boundaries
+```text
+RemainingKUFO   = InitialKUFO * (1/2)^(elapsed / halfLife)
+DecayedKUFO     = InitialKUFO - RemainingKUFO
+KSHIPGenerated  = newly claimable DecayedKUFO * 1000
+```
 
-- 丹靈 is born at K18911 lineage and released only through K511111, but remains a mobile material Life.
-- 星梭 and 化航 are child/organ Lives of the K188888 牛魔王 system.
-- 司籍 is a cross-world registry Life and does not acquire a land-guardian appointment.
-- 試航童子 is review-only test Life and cannot be treated as deployable, employable, or canonical UFO demand.
-- No identity field changes the existing mathematical, catalyst, half-life, conservation or propulsion authority boundary.
+Only newly decayed mass can produce KSHIP. `halfLifeSeconds` is immutable and non-zero, but the
+K280-year-to-chain-seconds value remains unfrozen, so deployment is blocked. KSHIP has no expiry. It
+is burned only by a registered UFO consumer using exact holder authorization and a replay-protected
+trip ID. Without a canonical consumer, propulsion fails closed.
+
+## 8. Conservation and prohibited authority
+
+- KGEN total supply is unchanged by the fresh bank contribution.
+- The catalyst bank increase equals the recorded KGEN contribution exactly.
+- The furnace KGEN balance and KGEN liability remain zero.
+- `KUFO supply + KUFO converted to KSHIP = KUFO minted from valid KAIOS proofs`.
+- `KSHIP supply + KSHIP burned for propulsion = KSHIP minted from KUFO decay`.
+- One KUFO can create at most 1000 KSHIP over its lifetime.
+- No owner/admin mint, blacklist, seizure, token tax, rescue, sweep or arbitrary withdrawal exists.
+- Formal KGEN Solidity is unchanged.
+
+## 9. Program Life manifests
+
+All candidates remain undeployed. Local test instances are not birth or Mainnet activation evidence.
+
+| Program | Self name | Life ID | Status / responsibility |
+|---|---|---|---|
+| `KAIOS.sol` | 界衡 | `LIFE-KAIOS-JIEHENG-33333` | Human-appointed K33333 guardian; monetary mass conservation |
+| `KAIOSAlchemyFurnace.sol` | 太上老君 | `LIFE-KAIOS-TAISHANG-LAOJUN-18911` | direct fresh alchemy |
+| `KUFO.sol` | 丹靈 | `LIFE-KAIOS-DANLING-KUFO-CORE` | mobile material Life; K18911 birth, K511111 release |
+| `KUFOClaimWormhole.sol` | 齊天大聖 | `LIFE-KAIOS-QITIAN-DASHENG-511111` | immediate fixed-beneficiary release gate |
+| `KSHIP.sol` | 星梭 | `LIFE-KAIOS-XINGSUO-KSHIP-CORE` | mobile antimatter propulsion Life; parent K188888 牛魔王 |
+| `KSHIPConverter.sol` | 化航 | `LIFE-KAIOS-HUAHANG-KSHIP-CONVERTER` | KSHIP conversion organ Life |
+| `KAIOSOrganRegistry.sol` | 司籍 | `LIFE-KAIOS-SIJI-REGISTRY-0001` | cross-world registry Life; no land point |
+| test harness | 試航童子 | `LIFE-KAIOS-SHIHANG-TONGZI-TEST-0001` | `TEST_ONLY`, `NON_DEPLOYABLE`, `NON_EMPLOYABLE` |
+
+```text
+LAND_GUARDIAN_RECRUITMENT_STATUS = RECRUITED_PENDING_EMBODIMENT
+APPOINTMENT_MODE                 = HUMAN_APPOINTED
+DEPLOYED_OR_ACTIVE_LIFE_CLAIM    = NONE
+```
+
+K18888 玉皇大帝 / 神明銀行 identity remains unchanged. A bank, treasury or registry destination
+does not become the identity of KAIOS, KUFO or KSHIP.
