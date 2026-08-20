@@ -1,0 +1,113 @@
+{
+  "schemaVersion": "1.0.0",
+  "status": "REVIEW_CANDIDATE_NOT_CURRENT",
+  "source": "Original repository-native artwork; no third-party visual assets",
+  "licenseStatus": "HUMAN_APPROVAL_REQUIRED",
+  "websiteReplacementAuthorized": false,
+  "assets": [
+    {
+      "path": "assets/kaios/kaios-apple-touch-icon-180.png",
+      "width": 180,
+      "height": 180,
+      "mode": "RGBA",
+      "sha256": "6ae7fc4ea2cf7e94778c3cf0ef5b54681b301f44f23946409f72a0d9aa564e39"
+    },
+    {
+      "path": "assets/kaios/kaios-favicon-32.png",
+      "width": 32,
+      "height": 32,
+      "mode": "RGBA",
+      "sha256": "28ab75f098ffb9fd6e34f0d6f45ab674d401eca42dfe249542ae507fc37e90a7"
+    },
+    {
+      "path": "assets/kaios/kaios-favicon-64.png",
+      "width": 64,
+      "height": 64,
+      "mode": "RGBA",
+      "sha256": "5deae0d6541c2faf1cb2d8fe30126912cd75de42d05d594533d22170c84f3d2c"
+    },
+    {
+      "path": "assets/kaios/kaios-logo-128.png",
+      "width": 128,
+      "height": 128,
+      "mode": "RGBA",
+      "sha256": "41d1d498b4ca74ef16be455575b9534ade9111cf46b8b390631134f903164c4d"
+    },
+    {
+      "path": "assets/kaios/kaios-logo-256.png",
+      "width": 256,
+      "height": 256,
+      "mode": "RGBA",
+      "sha256": "78dbe849e85cdb28580a55e88e320e7730689c82426e62d6dcb9cc6fc5820de5"
+    },
+    {
+      "path": "assets/kaios/kaios-logo-32.png",
+      "width": 32,
+      "height": 32,
+      "mode": "RGBA",
+      "sha256": "28ab75f098ffb9fd6e34f0d6f45ab674d401eca42dfe249542ae507fc37e90a7"
+    },
+    {
+      "path": "assets/kaios/kaios-logo-512.png",
+      "width": 512,
+      "height": 512,
+      "mode": "RGBA",
+      "sha256": "0f6b709baf13a2d9d19a6b69d9d76d583be2762e058d91d952fdf3f7efb788e1"
+    },
+    {
+      "path": "assets/kaios/kaios-logo-64.png",
+      "width": 64,
+      "height": 64,
+      "mode": "RGBA",
+      "sha256": "5deae0d6541c2faf1cb2d8fe30126912cd75de42d05d594533d22170c84f3d2c"
+    },
+    {
+      "path": "assets/kaios/kaios-og-1200x630.png",
+      "width": 1200,
+      "height": 630,
+      "mode": "RGB",
+      "sha256": "b91a3b908ab8089b01ad03de6626b87a298e827211109fc62e076c93fd79556c"
+    },
+    {
+      "path": "assets/kaios/kaios-token-512.png",
+      "width": 512,
+      "height": 512,
+      "mode": "RGBA",
+      "sha256": "43b041c2a77ef9dd77f943259664eee79408393255d10dafad73614aead40f48"
+    },
+    {
+      "path": "assets/kaios/kship-token-512.png",
+      "width": 512,
+      "height": 512,
+      "mode": "RGBA",
+      "sha256": "1e0d8f7c34caa0c27d025d81d1530d5b928da288dd83607c68f17e2df0121d2d"
+    },
+    {
+      "path": "assets/kaios/kufo-token-512.png",
+      "width": 512,
+      "height": 512,
+      "mode": "RGBA",
+      "sha256": "62f7503bdadd5b1fd2baf84c07c72b71ebcb96af0a79c0f3abbd969062d0a302"
+    },
+    {
+      "path": "assets/kaios/kaios-logo.svg",
+      "viewBox": "0 0 512 512",
+      "sha256": "874fd618676bacbc2da159289727aeb98d0384725c229d9608e45462df063d36"
+    },
+    {
+      "path": "assets/kaios/kaios-logo-light.svg",
+      "viewBox": "0 0 512 512",
+      "sha256": "fb56713bc598e4a41d3009ed29a27bba192347d54c43fd62e076befa1eee6711"
+    },
+    {
+      "path": "assets/kaios/kaios-logo-dark.svg",
+      "viewBox": "0 0 512 512",
+      "sha256": "73f9fbef3c01e554a5bdb3fcb4a9455740067cc187aae2a69338dbb4ee5bbd66"
+    },
+    {
+      "path": "assets/kaios/kaios-logo-monochrome.svg",
+      "viewBox": "0 0 512 512",
+      "sha256": "fcfb88624d35da7b49028784742a228ad576d2ae2c1d5d83a9e74ffa1af35f14"
+    }
+  ]
+}
