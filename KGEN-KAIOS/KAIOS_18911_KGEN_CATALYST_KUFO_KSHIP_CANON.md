@@ -2,6 +2,16 @@
 
 Status: `PROGRAM_LIFE_REWORK_REVIEW_CANDIDATE`
 
+Authority classification: `IMPLEMENTED_REVIEW_CANDIDATE`
+
+```text
+PR158_CURRENT_IMPLEMENTATION        = IMPLEMENTED_REVIEW_CANDIDATE
+PR158_REVIEW_STAGE                  = 49_EPOCH
+PR158_CATALYSIS_STAGE               = NOT_IMPLEMENTED
+PR158_TOTAL_130_EPOCH_SUCCESSOR      = NOT_IMPLEMENTED
+PR158_CURRENT_SUCCESSOR_CLAIM        = FORBIDDEN
+```
+
 Deployment: `NO`
 Mainnet/Testnet transactions: `NONE`
 
@@ -39,9 +49,73 @@ the exact KGEN catalyst and records `catalystOwner`, `kgenCatalystAmount`, `cata
 non-transferable `memorialProofId`. The memorial is evidence of the alchemy event; it is not ownership
 of the holder's KGEN.
 
-After 49 Alchemy Epochs, only the Organ Registry's current 511111 Wormhole can consume the proof.
-One transaction consumes the proof, returns all catalyst to the original catalyst owner and mints
-KUFO to the burn-time beneficiary. A failure in any step reverts every step. Proofs are single-use.
+In the PR #158 review candidate, after 49 Alchemy Epochs only the Organ Registry's current 511111
+Wormhole can consume the proof. One transaction consumes the proof, returns all catalyst to the
+recorded direct caller and mints KUFO to the burn-time beneficiary. A failure in any step reverts
+every step. Proofs are single-use.
+
+This 49-Epoch implementation is a review-stage candidate, not the complete CURRENT successor. It
+must not be deployed or represented as satisfying the newer two-stage alchemy chronology.
+
+### 2.1 CURRENT successor chronology boundary
+
+The CURRENT successor design is:
+
+```text
+49 Epoch REVIEW
++81 Epoch CATALYSIS
+=130 Epoch TOTAL
+```
+
+The successor state sequence is fixed, but its asset-transition policy is not:
+
+```text
+SUBMITTED
+-> REVIEWING
+-> REVIEW_PASSED
+-> CATALYZING
+-> MATURED
+-> PROOF_CONSUMED
+-> KUFO_LINEAGE_ESTABLISHED
+-> CATALYST_RETURNED
+```
+
+The table below is an Open Review record, not executable behavior. `OPEN_REVIEW` means no worker may
+invent, infer or implement that field before a separate Human freeze.
+
+| Successor state | KAIOS custody / burn | KGEN catalyst custody | Reject? | Cancel? | Refund? | Next-state gate | Irreversible event | Unfrozen fields |
+|---|---|---|---|---|---|---|---|---|
+| `SUBMITTED` | `OPEN_REVIEW` | `OPEN_REVIEW` | `OPEN_REVIEW` | `OPEN_REVIEW` | `OPEN_REVIEW` | submission evidence and authorization: `OPEN_REVIEW` | `OPEN_REVIEW` | timing of KAIOS burn and catalyst escrow |
+| `REVIEWING` | `OPEN_REVIEW` | `OPEN_REVIEW` | `OPEN_REVIEW` | `OPEN_REVIEW` | `OPEN_REVIEW` | 49-Epoch review rule and approval evidence: `OPEN_REVIEW` | `OPEN_REVIEW` | rejection authority, reason codes and asset disposition |
+| `REVIEW_PASSED` | `OPEN_REVIEW` | `OPEN_REVIEW` | `OPEN_REVIEW` | `OPEN_REVIEW` | `OPEN_REVIEW` | catalysis-entry authorization: `OPEN_REVIEW` | `OPEN_REVIEW` | boundary between review and catalysis |
+| `CATALYZING` | `OPEN_REVIEW` | `OPEN_REVIEW` | `OPEN_REVIEW` | `OPEN_REVIEW` | `OPEN_REVIEW` | 81-Epoch catalysis rule: `OPEN_REVIEW` | `OPEN_REVIEW` | cancellation and failure handling during catalysis |
+| `MATURED` | `OPEN_REVIEW` | `OPEN_REVIEW` | `OPEN_REVIEW` | `OPEN_REVIEW` | `OPEN_REVIEW` | proof-consumption predicate: `OPEN_REVIEW` | `OPEN_REVIEW` | exact maturity boundary and chain-seconds conversion |
+| `PROOF_CONSUMED` | `OPEN_REVIEW` | `OPEN_REVIEW` | `OPEN_REVIEW` | `OPEN_REVIEW` | `OPEN_REVIEW` | KUFO-lineage establishment: `OPEN_REVIEW` | `OPEN_REVIEW` | atomic ordering and failure rollback |
+| `KUFO_LINEAGE_ESTABLISHED` | `OPEN_REVIEW` | `OPEN_REVIEW` | `OPEN_REVIEW` | `OPEN_REVIEW` | `OPEN_REVIEW` | catalyst-return predicate: `OPEN_REVIEW` | `OPEN_REVIEW` | mint/lineage finality and return ordering |
+| `CATALYST_RETURNED` | `OPEN_REVIEW` | returned only to the recorded original catalyst owner | `OPEN_REVIEW` | `OPEN_REVIEW` | `OPEN_REVIEW` | terminal-state rules: `OPEN_REVIEW` | actual exact KGEN balance-delta return | terminal evidence and recovery policy |
+
+The chain-seconds value of one Alchemy Epoch is also `OPEN_REVIEW`. Merely changing
+`MATURATION_EPOCHS` from 49 to 130 would incorrectly collapse review and catalysis into one wait and
+is forbidden. The successor requires a separately reviewed state machine after the unresolved asset
+rules above are frozen.
+
+### 2.2 K1852 relay boundary
+
+```text
+K1852_ADDRESS                     = 0xfc522243e988a837700CaD600D6f030f5932681F
+K1852_ROUTE_STATUS                = DESIGN_ONLY_UNFROZEN
+K1852_DIRECT_ESCROW_COMPATIBILITY = NOT_YET_PROVEN
+```
+
+The deployed GalacticBank V7.5.2 does not implement a catalyst relay. The PR #158 furnace currently
+records `catalystOwner = msg.sender`; if a relay calls the furnace, the relay would be recorded as
+the catalyst owner rather than the original holder. PR #158 therefore makes no K1852 compatibility
+claim.
+
+A future, separately reviewed `CatalystTicket` must preserve at minimum the original catalyst owner,
+beneficiary, Life ID, exact KGEN amount, exact KAIOS amount, source point, proof binding, single-use
+status and atomic catalyst return. This PR does not create that relay, modify GalacticBank or modify
+the formal KGEN Solidity.
 
 ## 3. KUFO half-life
 
