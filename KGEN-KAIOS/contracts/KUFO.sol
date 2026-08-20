@@ -17,14 +17,10 @@ interface IKAIOSBurnRecordSource {
         bytes32 destinationCode;
         uint256 blockNumber;
         uint256 timestamp;
-        address catalystOwner;
-        uint256 requiredKgenCatalyst;
-        address catalystBank;
-        uint256 contributionBlock;
-        uint256 contributionTimestamp;
     }
 
     function alchemyBurnRecord(bytes32 proofId) external view returns (AlchemyBurnRecord memory);
+    function ORGAN_REGISTRY() external view returns (address);
 }
 
 interface IAlchemyFurnaceProofSource {
@@ -47,6 +43,8 @@ interface IAlchemyFurnaceProofSource {
     }
 
     function proof(bytes32 proofId) external view returns (Proof memory);
+    function lifeId() external view returns (bytes32);
+    function isActiveBody() external view returns (bool);
 }
 
 /**
@@ -71,6 +69,9 @@ contract KUFO is ERC20, ERC20Capped {
     uint256 private constant WAD = 1 ether;
     uint256 public constant KAIOS_WEI_PER_KGEN_CATALYST_WEI = 1_000;
     uint256 public constant MAX_SUPPLY = 72_000_000_000_000 ether;
+    uint256 public constant MAX_LOTS_PER_OPERATION = 64;
+    bytes32 public constant EXPECTED_FURNACE_LIFE_ID =
+        keccak256("LIFE-KAIOS-TAISHANG-LAOJUN-18911");
 
     struct DecayLot {
         address owner;
@@ -102,7 +103,11 @@ contract KUFO is ERC20, ERC20Capped {
     mapping(bytes32 => bytes32) public proofBatchLifeId;
     mapping(bytes32 => bool) public carrierProofRecorded;
     mapping(uint256 => DecayLot) private _decayLots;
-    mapping(address => uint256[]) private _ownerLotIds;
+    mapping(address => uint256) private _ownerLotHead;
+    mapping(address => uint256) private _ownerLotTail;
+    mapping(address => uint256) public activeLotCount;
+    mapping(uint256 => uint256) private _nextOwnerLot;
+    mapping(uint256 => uint256) private _previousOwnerLot;
     mapping(bytes32 => CarrierBurnRecord) private _carrierBurnRecords;
     bool private _controlledDecayBurn;
 
@@ -116,6 +121,11 @@ contract KUFO is ERC20, ERC20Capped {
     error InsufficientHolderAllowance(uint256 currentAllowance, uint256 requiredAllowance);
     error NoMaturedDecay(address owner, uint256 requestedMaximum);
     error LineageBalanceMismatch(address owner, uint256 missingAmount);
+    error LotOperationLimitExceeded(uint256 maximumLots);
+    error NotAContract(address account);
+    error RuntimeBindingMismatch(address expected, address actual);
+    error InvalidLotCursor(address owner, uint256 cursor);
+    error InvalidPageLimit(uint256 provided, uint256 maximum);
 
     event ImmediateAlchemyProofMinted(
         bytes32 indexed proofId,
@@ -154,8 +164,13 @@ contract KUFO is ERC20, ERC20Capped {
     {
         if (registry == address(0) || kaiosToken == address(0)) revert ZeroAddress();
         if (kufoHalfLifeSeconds == 0) revert InvalidHalfLife();
+        if (registry.code.length == 0) revert NotAContract(registry);
+        if (kaiosToken.code.length == 0) revert NotAContract(kaiosToken);
         organRegistry = IKAIOSOrganRegistry(registry);
         kaios = IKAIOSBurnRecordSource(kaiosToken);
+        if (kaios.ORGAN_REGISTRY() != registry) {
+            revert RuntimeBindingMismatch(registry, kaios.ORGAN_REGISTRY());
+        }
         halfLifeSeconds = kufoHalfLifeSeconds;
         lifeId = keccak256(bytes(LIFE_ID_TEXT));
         emit ProgramLifeRecruited(lifeId, SELF_NAME, SPECIES_ID, LIFE_TYPE, EMBODIMENT_STATUS);
@@ -169,33 +184,33 @@ contract KUFO is ERC20, ERC20Capped {
         IKAIOSBurnRecordSource.AlchemyBurnRecord memory burnRecord = kaios.alchemyBurnRecord(proofId);
         if (
             burnRecord.owner == address(0) ||
-            burnRecord.catalystOwner == address(0) ||
             burnRecord.beneficiary == address(0) ||
             burnRecord.furnace == address(0) ||
-            burnRecord.catalystBank == address(0) ||
             burnRecord.kaiosBurned == 0 ||
             burnRecord.kaiosBurned % KAIOS_WEI_PER_KGEN_CATALYST_WEI != 0 ||
-            burnRecord.requiredKgenCatalyst != burnRecord.kaiosBurned / KAIOS_WEI_PER_KGEN_CATALYST_WEI ||
             burnRecord.expectedKufo != burnRecord.kaiosBurned * 1_000 ||
-            burnRecord.contributionBlock != burnRecord.blockNumber ||
-            burnRecord.contributionTimestamp != burnRecord.timestamp
+            organRegistry.organ(keccak256("KAIOS.ORGAN.FURNACE.18911")) != burnRecord.furnace
         ) revert InvalidLineageProof(proofId);
 
         IAlchemyFurnaceProofSource furnace = IAlchemyFurnaceProofSource(burnRecord.furnace);
         IAlchemyFurnaceProofSource.Proof memory furnaceProof = furnace.proof(proofId);
         if (
+            furnace.lifeId() != EXPECTED_FURNACE_LIFE_ID ||
+            !furnace.isActiveBody() ||
             !furnaceProof.consumed ||
             furnaceProof.releaseAuthorized ||
             !furnaceProof.bankContributionVerified ||
             furnaceProof.owner != burnRecord.owner ||
-            furnaceProof.catalystOwner != burnRecord.catalystOwner ||
+            furnaceProof.catalystOwner != burnRecord.owner ||
             furnaceProof.beneficiary != burnRecord.beneficiary ||
-            furnaceProof.catalystBank != burnRecord.catalystBank ||
+            furnaceProof.catalystBank == address(0) ||
             furnaceProof.kaiosBurned != burnRecord.kaiosBurned ||
-            furnaceProof.kgenCatalystAmount != burnRecord.requiredKgenCatalyst ||
+            furnaceProof.kgenCatalystAmount != burnRecord.kaiosBurned / KAIOS_WEI_PER_KGEN_CATALYST_WEI ||
             furnaceProof.kufoAmount != burnRecord.expectedKufo ||
-            furnaceProof.contributionBlock != burnRecord.contributionBlock ||
-            furnaceProof.contributionTimestamp != burnRecord.contributionTimestamp ||
+            furnaceProof.lifeId != burnRecord.lifeId ||
+            furnaceProof.destinationCode != burnRecord.destinationCode ||
+            furnaceProof.contributionBlock != burnRecord.blockNumber ||
+            furnaceProof.contributionTimestamp != burnRecord.timestamp ||
             furnaceProof.memorialProofId == bytes32(0)
         ) revert InvalidLineageProof(proofId);
 
@@ -268,7 +283,36 @@ contract KUFO is ERC20, ERC20Capped {
     }
 
     function ownerLotIds(address owner) external view returns (uint256[] memory) {
-        return _ownerLotIds[owner];
+        uint256 count = activeLotCount[owner];
+        if (count > MAX_LOTS_PER_OPERATION) revert LotOperationLimitExceeded(MAX_LOTS_PER_OPERATION);
+        uint256[] memory ids = new uint256[](count);
+        uint256 lotId = _ownerLotHead[owner];
+        for (uint256 index = 0; index < ids.length; ++index) {
+            ids[index] = lotId;
+            lotId = _nextOwnerLot[lotId];
+        }
+        return ids;
+    }
+
+    function ownerLotIdsPage(address owner, uint256 cursor, uint256 limit)
+        external
+        view
+        returns (uint256[] memory ids, uint256 nextCursor)
+    {
+        if (limit == 0 || limit > MAX_LOTS_PER_OPERATION) {
+            revert InvalidPageLimit(limit, MAX_LOTS_PER_OPERATION);
+        }
+        uint256 lotId = cursor == 0 ? _ownerLotHead[owner] : cursor;
+        if (lotId != 0 && _decayLots[lotId].owner != owner) revert InvalidLotCursor(owner, cursor);
+        ids = new uint256[](limit);
+        uint256 count;
+        while (lotId != 0 && count < limit) {
+            ids[count] = lotId;
+            lotId = _nextOwnerLot[lotId];
+            unchecked { ++count; }
+        }
+        assembly ("memory-safe") { mstore(ids, count) }
+        nextCursor = lotId;
     }
 
     function carrierBurnRecord(bytes32 proofId) external view returns (CarrierBurnRecord memory) {
@@ -306,9 +350,12 @@ contract KUFO is ERC20, ERC20Capped {
     }
 
     function claimableDecayOf(address owner) external view returns (uint256 total) {
-        uint256[] storage ids = _ownerLotIds[owner];
-        for (uint256 index = 0; index < ids.length; ++index) {
-            if (_decayLots[ids[index]].owner == owner) total += claimableDecay(ids[index]);
+        uint256 count = activeLotCount[owner];
+        if (count > MAX_LOTS_PER_OPERATION) revert LotOperationLimitExceeded(MAX_LOTS_PER_OPERATION);
+        uint256 lotId = _ownerLotHead[owner];
+        while (lotId != 0) {
+            total += claimableDecay(lotId);
+            lotId = _nextOwnerLot[lotId];
         }
     }
 
@@ -317,31 +364,34 @@ contract KUFO is ERC20, ERC20Capped {
     }
 
     function _consumeMaturedDecay(address owner, uint256 maximumAmount) private returns (uint256 consumed) {
-        uint256[] storage ids = _ownerLotIds[owner];
-        for (uint256 index = 0; index < ids.length && consumed < maximumAmount; ++index) {
-            DecayLot storage lot = _decayLots[ids[index]];
-            if (lot.owner != owner) continue;
-            uint256 available = claimableDecay(ids[index]);
-            if (available == 0) continue;
+        uint256 lotId = _ownerLotHead[owner];
+        uint256 processed;
+        while (lotId != 0 && consumed < maximumAmount && processed < MAX_LOTS_PER_OPERATION) {
+            uint256 followingLotId = _nextOwnerLot[lotId];
+            DecayLot storage lot = _decayLots[lotId];
+            uint256 available = claimableDecay(lotId);
             uint256 take = Math.min(available, maximumAmount - consumed);
             lot.convertedAmount += take;
             consumed += take;
+            if (lot.convertedAmount == lot.initialAmount) _removeOwnerLot(owner, lotId);
+            lotId = followingLotId;
+            unchecked { ++processed; }
         }
     }
 
     function _moveLots(address from, address to, uint256 amount) private {
         uint256 remainingToMove = amount;
-        uint256[] storage ids = _ownerLotIds[from];
-        for (uint256 index = 0; index < ids.length && remainingToMove > 0; ++index) {
-            uint256 lotId = ids[index];
+        uint256 lotId = _ownerLotHead[from];
+        uint256 processed;
+        while (lotId != 0 && remainingToMove > 0 && processed < MAX_LOTS_PER_OPERATION) {
+            uint256 followingLotId = _nextOwnerLot[lotId];
             DecayLot storage lot = _decayLots[lotId];
-            if (lot.owner != from) continue;
             uint256 lotBalance = lot.initialAmount - lot.convertedAmount;
-            if (lotBalance == 0) continue;
             uint256 take = Math.min(lotBalance, remainingToMove);
             if (take == lotBalance) {
+                _removeOwnerLot(from, lotId);
                 lot.owner = to;
-                _ownerLotIds[to].push(lotId);
+                _appendOwnerLot(to, lotId);
             } else {
                 uint256 childInitial = Math.mulDiv(lot.initialAmount, take, lotBalance);
                 uint256 childConverted = childInitial - take;
@@ -365,8 +415,13 @@ contract KUFO is ERC20, ERC20Capped {
                 );
             }
             remainingToMove -= take;
+            lotId = followingLotId;
+            unchecked { ++processed; }
         }
-        if (remainingToMove != 0) revert LineageBalanceMismatch(from, remainingToMove);
+        if (remainingToMove != 0) {
+            if (lotId != 0) revert LotOperationLimitExceeded(MAX_LOTS_PER_OPERATION);
+            revert LineageBalanceMismatch(from, remainingToMove);
+        }
     }
 
     function _createLot(
@@ -386,7 +441,49 @@ contract KUFO is ERC20, ERC20Capped {
             sourceProof,
             batchLifeId
         );
-        _ownerLotIds[owner].push(lotId);
+        _appendOwnerLot(owner, lotId);
+    }
+
+    function claimableDecayPage(address owner, uint256 cursor, uint256 limit)
+        external
+        view
+        returns (uint256 total, uint256 nextCursor, uint256 processed)
+    {
+        if (limit == 0 || limit > MAX_LOTS_PER_OPERATION) {
+            revert InvalidPageLimit(limit, MAX_LOTS_PER_OPERATION);
+        }
+        uint256 lotId = cursor == 0 ? _ownerLotHead[owner] : cursor;
+        if (lotId != 0 && _decayLots[lotId].owner != owner) revert InvalidLotCursor(owner, cursor);
+        while (lotId != 0 && processed < limit) {
+            total += claimableDecay(lotId);
+            lotId = _nextOwnerLot[lotId];
+            unchecked { ++processed; }
+        }
+        nextCursor = lotId;
+    }
+
+    function _appendOwnerLot(address owner, uint256 lotId) private {
+        uint256 tail = _ownerLotTail[owner];
+        if (tail == 0) {
+            _ownerLotHead[owner] = lotId;
+        } else {
+            _nextOwnerLot[tail] = lotId;
+            _previousOwnerLot[lotId] = tail;
+        }
+        _ownerLotTail[owner] = lotId;
+        unchecked { ++activeLotCount[owner]; }
+    }
+
+    function _removeOwnerLot(address owner, uint256 lotId) private {
+        uint256 previous = _previousOwnerLot[lotId];
+        uint256 next = _nextOwnerLot[lotId];
+        if (previous == 0) _ownerLotHead[owner] = next;
+        else _nextOwnerLot[previous] = next;
+        if (next == 0) _ownerLotTail[owner] = previous;
+        else _previousOwnerLot[next] = previous;
+        delete _previousOwnerLot[lotId];
+        delete _nextOwnerLot[lotId];
+        unchecked { --activeLotCount[owner]; }
     }
 
     function _fractionalDecayFactor(uint256 bits) private pure returns (uint256 factor) {

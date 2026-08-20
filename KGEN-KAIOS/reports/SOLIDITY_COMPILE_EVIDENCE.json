@@ -10,8 +10,8 @@
   "evmVersion": "paris",
   "openzeppelinContracts": "5.0.2",
   "openzeppelinContractsUpgradeable": "5.0.2",
-  "sourceCount": 17,
-  "contractCount": 28,
+  "sourceCount": 18,
+  "contractCount": 29,
   "eip170MaximumDeployedBytecodeBytes": 24576,
   "oversizedContracts": [],
   "warnings": 0,
@@ -85,14 +85,14 @@
     {
       "contractName": "KAIOS",
       "sourceName": "contracts/KAIOS.sol",
-      "bytecodeBytes": 9487,
-      "deployedBytecodeBytes": 7561
+      "bytecodeBytes": 7228,
+      "deployedBytecodeBytes": 5873
     },
     {
       "contractName": "KAIOSAlchemyFurnace",
       "sourceName": "contracts/KAIOSAlchemyFurnace.sol",
-      "bytecodeBytes": 7048,
-      "deployedBytecodeBytes": 5872
+      "bytecodeBytes": 9196,
+      "deployedBytecodeBytes": 7072
     },
     {
       "contractName": "KAIOSEventHorizonVaultV01",
@@ -121,38 +121,44 @@
     {
       "contractName": "KSHIP",
       "sourceName": "contracts/KSHIP.sol",
-      "bytecodeBytes": 9549,
-      "deployedBytecodeBytes": 7471
+      "bytecodeBytes": 10190,
+      "deployedBytecodeBytes": 7541
     },
     {
       "contractName": "KSHIPConverter",
       "sourceName": "contracts/KSHIPConverter.sol",
-      "bytecodeBytes": 2498,
-      "deployedBytecodeBytes": 1751
+      "bytecodeBytes": 3609,
+      "deployedBytecodeBytes": 1889
     },
     {
       "contractName": "KSHIPPropulsionConsumerHarness",
       "sourceName": "contracts/KSHIPPropulsionConsumerHarness.sol",
-      "bytecodeBytes": 908,
-      "deployedBytecodeBytes": 880
+      "bytecodeBytes": 904,
+      "deployedBytecodeBytes": 876
     },
     {
       "contractName": "KUFO",
       "sourceName": "contracts/KUFO.sol",
-      "bytecodeBytes": 16004,
-      "deployedBytecodeBytes": 14425
+      "bytecodeBytes": 17686,
+      "deployedBytecodeBytes": 15723
     },
     {
       "contractName": "KUFOClaimWormhole",
       "sourceName": "contracts/KUFOClaimWormhole.sol",
-      "bytecodeBytes": 2914,
-      "deployedBytecodeBytes": 2037
+      "bytecodeBytes": 4042,
+      "deployedBytecodeBytes": 2175
     },
     {
       "contractName": "KGEN_TempleHeart_V3_3_2_Baseline",
       "sourceName": "tests/baseline/KGEN_TempleHeart_V3_3_2_Baseline.sol",
       "bytecodeBytes": 18513,
       "deployedBytecodeBytes": 18298
+    },
+    {
+      "contractName": "KUFOFragmentationHarness",
+      "sourceName": "tests/contracts/KUFOFragmentationHarness.sol",
+      "bytecodeBytes": 573,
+      "deployedBytecodeBytes": 545
     },
     {
       "contractName": "MockKGEN",

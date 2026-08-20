@@ -20,7 +20,7 @@ contract KSHIPPropulsionConsumerHarness {
     string public constant SELF_NAME = unicode"試航童子";
     string public constant LIFE_ID_TEXT = "LIFE-KAIOS-SHIHANG-TONGZI-TEST-0001";
     string public constant LIFE_TYPE = "TEST_LIFE";
-    string public constant EMBODIMENT_STATUS = "RECRUITED_PENDING_EMBODIMENT";
+    string public constant EMBODIMENT_STATUS = "TEST_ONLY_NON_DEPLOYABLE";
     bool public constant DEPLOYABLE = false;
     bool public constant EMPLOYABLE = false;
     bytes32 public constant LIFE_ID = keccak256(bytes(LIFE_ID_TEXT));

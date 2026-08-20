@@ -4,12 +4,14 @@ on:
   pull_request:
     paths:
       - "KGEN-KAIOS/**"
+      - "docs/physics/KGEN_KAIOS_SCALE_AND_PLANCK_RUNTIME_CURRENT.md"
       - ".github/workflows/kaios-18911-program-life-review.yml"
   push:
     branches:
       - "codex/kaios-18911-kgen-catalyst-kufo-kship-v1"
     paths:
       - "KGEN-KAIOS/**"
+      - "docs/physics/KGEN_KAIOS_SCALE_AND_PLANCK_RUNTIME_CURRENT.md"
       - ".github/workflows/kaios-18911-program-life-review.yml"
 
 permissions:
@@ -55,6 +57,16 @@ jobs:
           base="$(git merge-base origin/main HEAD)"
           if ! git diff --quiet "$base"...HEAD -- KGEN/contracts/KGEN_Token_V7_5_2.sol; then
             echo "Formal KGEN Solidity changed in this review branch." >&2
+            exit 1
+          fi
+
+      - name: Confirm deployed KAIOS Solidity is unchanged
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch --no-tags origin main
+          if ! git diff --quiet origin/main -- KGEN-KAIOS/contracts/KAIOS.sol; then
+            echo "KAIOS.sol differs from latest main; successor organs must use the deployed five-argument ABI." >&2
             exit 1
           fi
 

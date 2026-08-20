@@ -4,6 +4,7 @@ import { AbiCoder, Contract, Wallet, id, keccak256, toBeHex, zeroPadValue } from
 import {
   ETHER,
   advanceTime,
+  approveAlchemy,
   artifact,
   cleanupProviders,
   deploy,
@@ -76,7 +77,7 @@ async function makeWishAndHolyCup(context, heart, user, civilizationId, wishHash
 async function createFortuneProof(context, heart, user, civilizationId, wishHash, suffix, beneficiary = user) {
   const amount = 1n * ETHER;
   await (await context.kaios.connect(context.treasury).transfer(await user.getAddress(), amount)).wait();
-  await (await context.kaios.connect(user).approve(await context.furnace.getAddress(), amount)).wait();
+  await approveAlchemy(context, user, amount);
   const destination = await heart.alchemyDestinationCode(await heart.fortunePurposeCode(), wishHash);
   const receipt = await (
     await context.furnace.connect(user).burnForKufo(
@@ -134,7 +135,7 @@ test("TempleHeart accepts only a holder-bound KAIOS Alchemy proof with wish-boun
   const purpose = await heart.offeringPurposeCode(1);
   const destination = await heart.alchemyDestinationCode(purpose, wishHash);
   const amount = 250n * ETHER;
-  await (await context.kaios.connect(context.treasury).approve(await context.furnace.getAddress(), amount)).wait();
+  await approveAlchemy(context, context.treasury, amount);
   const burnReceipt = await (
     await context.furnace.connect(context.treasury).burnForKufo(
       amount,
@@ -161,7 +162,7 @@ test("TempleHeart rejects beneficiary redirect and mismatched purpose proofs", a
   const purpose = await heart.offeringPurposeCode(1);
   const destination = await heart.alchemyDestinationCode(purpose, wishHash);
   const amount = 100n * ETHER;
-  await (await context.kaios.connect(context.treasury).approve(await context.furnace.getAddress(), 2n * amount)).wait();
+  await approveAlchemy(context, context.treasury, amount);
 
   const redirectReceipt = await (
     await context.furnace.connect(context.treasury).burnForKufo(
@@ -174,6 +175,7 @@ test("TempleHeart rejects beneficiary redirect and mismatched purpose proofs", a
   const redirectProof = eventArgs(redirectReceipt, context.furnace, "AlchemyProofCreated").proofId;
   await assert.rejects(heart.connect(context.treasury).recordBurnOffering(redirectProof, 1));
 
+  await approveAlchemy(context, context.treasury, amount);
   const mismatchReceipt = await (
     await context.furnace.connect(context.treasury).burnForKufo(
       amount,
@@ -343,7 +345,7 @@ test("fortune ledger never claws back claims and requires a later voluntary repa
   const wishOne = id("WISH-FORTUNE-ONE");
   await makeWishAndHolyCup(context, heart, user, civilizationId, wishOne, "ONE");
   const proofOne = await createFortuneProof(context, heart, user, civilizationId, wishOne, "ONE");
-  const firstCatalyst = (await context.kaios.alchemyBurnRecord(proofOne)).requiredKgenCatalyst;
+  const firstCatalyst = (await context.furnace.proof(proofOne)).kgenCatalystAmount;
   await (await heart.connect(user).fortuneClaim(proofOne)).wait();
   const afterFirstClaim = await context.kgen.balanceOf(await user.getAddress());
   assert.equal(afterFirstClaim, fixtureSeedBalance - firstCatalyst + ETHER);
@@ -353,7 +355,7 @@ test("fortune ledger never claws back claims and requires a later voluntary repa
   const wishTwo = id("WISH-FORTUNE-TWO");
   await makeWishAndHolyCup(context, heart, user, civilizationId, wishTwo, "TWO");
   const proofTwo = await createFortuneProof(context, heart, user, civilizationId, wishTwo, "TWO");
-  const secondCatalyst = (await context.kaios.alchemyBurnRecord(proofTwo)).requiredKgenCatalyst;
+  const secondCatalyst = (await context.furnace.proof(proofTwo)).kgenCatalystAmount;
   await assert.rejects(heart.connect(user).fortuneClaim(proofTwo));
   assert.equal(await context.kgen.balanceOf(await user.getAddress()), afterFirstClaim - secondCatalyst);
 

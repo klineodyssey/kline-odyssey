@@ -16,6 +16,8 @@ interface IKUFOBurnRecordSource {
     }
 
     function carrierBurnRecord(bytes32 proofId) external view returns (CarrierBurnRecord memory);
+    function lifeId() external view returns (bytes32);
+    function organRegistry() external view returns (address);
 }
 
 /**
@@ -45,6 +47,8 @@ contract KSHIP is ERC20, ERC20Capped {
         "PROPULSION_ENERGY_ONLY_NO_ARBITRARY_BURN_TRANSFER_WITHDRAW";
     bytes32 public constant ORGAN_KSHIP_CONVERTER = keccak256("KAIOS.ORGAN.KSHIP.CONVERTER");
     bytes32 public constant ORGAN_UFO_FUEL_CONSUMER = keccak256("KAIOS.ORGAN.UFO.FUEL.CONSUMER");
+    bytes32 public constant EXPECTED_KUFO_LIFE_ID =
+        keccak256("LIFE-KAIOS-DANLING-KUFO-CORE");
     uint256 public constant MAX_SUPPLY = 72_000_000_000_000_000 ether;
 
     struct PropulsionAuthorization {
@@ -89,6 +93,9 @@ contract KSHIP is ERC20, ERC20Capped {
     error InvalidLineageProof(bytes32 proofId);
     error IncorrectExactAllowance(uint256 currentAllowance, uint256 requiredAllowance);
     error PropulsionAuthorizationMismatch(bytes32 tripId);
+    error NotAContract(address account);
+    error ProgramLifeMismatch(address account, bytes32 expected, bytes32 actual);
+    error RuntimeBindingMismatch(address expected, address actual);
 
     event CarrierProofMinted(
         bytes32 indexed proofId,
@@ -135,8 +142,17 @@ contract KSHIP is ERC20, ERC20Capped {
         ERC20Capped(MAX_SUPPLY)
     {
         if (registry == address(0) || kufoToken == address(0)) revert ZeroAddress();
+        if (registry.code.length == 0) revert NotAContract(registry);
+        if (kufoToken.code.length == 0) revert NotAContract(kufoToken);
         organRegistry = IKAIOSOrganRegistry(registry);
         kufo = IKUFOBurnRecordSource(kufoToken);
+        bytes32 kufoLifeId = kufo.lifeId();
+        if (kufoLifeId != EXPECTED_KUFO_LIFE_ID) {
+            revert ProgramLifeMismatch(kufoToken, EXPECTED_KUFO_LIFE_ID, kufoLifeId);
+        }
+        if (kufo.organRegistry() != registry) {
+            revert RuntimeBindingMismatch(registry, kufo.organRegistry());
+        }
         lifeId = keccak256(bytes(LIFE_ID_TEXT));
         parentLifeId = keccak256(bytes(PARENT_LIFE_ID_TEXT));
         guardianLifeId = keccak256(bytes(GUARDIAN_LIFE_ID_TEXT));

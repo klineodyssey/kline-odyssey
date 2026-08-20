@@ -1,6 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
-import { BrowserProvider, ContractFactory, id } from "ethers";
+import { BrowserProvider, ContractFactory, id, keccak256 } from "ethers";
 import ganache from "ganache";
 
 const root = path.resolve(import.meta.dirname, "..");
@@ -57,11 +57,21 @@ export async function setupLineage({
   ]);
   const kship = await deploy("KSHIP", owner, [await registry.getAddress(), await kufo.getAddress()]);
   const catalystBank = await deploy("MockOrgan", owner);
+  const [kaiosCodeHash, kgenCodeHash, registryCodeHash, catalystBankCodeHash] = await Promise.all([
+    provider.getCode(await kaios.getAddress()).then(keccak256),
+    provider.getCode(await kgen.getAddress()).then(keccak256),
+    provider.getCode(await registry.getAddress()).then(keccak256),
+    provider.getCode(await catalystBank.getAddress()).then(keccak256),
+  ]);
   const furnace = await deploy("KAIOSAlchemyFurnace", owner, [
     await kaios.getAddress(),
     await kgen.getAddress(),
     await catalystBank.getAddress(),
     await registry.getAddress(),
+    kaiosCodeHash,
+    kgenCodeHash,
+    registryCodeHash,
+    catalystBankCodeHash,
   ]);
   const wormhole = await deploy("KUFOClaimWormhole", owner, [
     await furnace.getAddress(),

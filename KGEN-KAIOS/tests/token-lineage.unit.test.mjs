@@ -18,7 +18,6 @@ afterEach(cleanupProviders);
 test("program contracts expose unique frozen Life identities and guardian recruitments", async () => {
   const context = await setupLineage();
   const identities = [
-    [context.kaios, "LIFE-KAIOS-JIEHENG-33333"],
     [context.furnace, "LIFE-KAIOS-TAISHANG-LAOJUN-18911"],
     [context.kufo, "LIFE-KAIOS-DANLING-KUFO-CORE"],
     [context.wormhole, "LIFE-KAIOS-QITIAN-DASHENG-511111"],
@@ -34,7 +33,7 @@ test("program contracts expose unique frozen Life identities and guardian recrui
     seen.add(value);
     assert.equal(await contract.EMBODIMENT_STATUS(), "RECRUITED_PENDING_EMBODIMENT");
   }
-  assert.equal(await context.kaios.guardianPoint(), 33_333n);
+  assert.equal(typeof context.kaios.lifeId, "undefined");
   assert.equal(await context.furnace.guardianPoint(), 18_911n);
   assert.equal(await context.wormhole.guardianPoint(), 511_111n);
   assert.equal(await context.kship.guardianPoint(), 188_888n);
@@ -46,10 +45,24 @@ test("program contracts expose unique frozen Life identities and guardian recrui
   assert.equal(await context.kship.MASS_CELL_IS_INDIVIDUAL_LIFE(), false);
   assert.equal(await context.ufoConsumer.DEPLOYABLE(), false);
   assert.equal(await context.ufoConsumer.EMPLOYABLE(), false);
+  assert.equal(await context.ufoConsumer.EMBODIMENT_STATUS(), "TEST_ONLY_NON_DEPLOYABLE");
   assert.equal(
     await context.ufoConsumer.LIFE_ID(),
     id("LIFE-KAIOS-SHIHANG-TONGZI-TEST-0001"),
   );
+});
+
+test("KSHIP and converter reject dependencies without the expected code-bound Life interfaces", async () => {
+  const context = await setupLineage();
+  const mock = await deploy("MockOrgan", context.owner);
+  await assert.rejects(deploy("KSHIP", context.owner, [
+    await context.registry.getAddress(),
+    await mock.getAddress(),
+  ]));
+  await assert.rejects(deploy("KSHIPConverter", context.owner, [
+    await context.kufo.getAddress(),
+    await mock.getAddress(),
+  ]));
 });
 
 async function burnImmediate(context, {
@@ -115,6 +128,16 @@ test("18911 requires exact independent allowances and sends 0.001 KGEN per KAIOS
     amount, treasuryAddress, id("LIFE-CATALYST"), id("DEST-CATALYST"),
   ));
   await (await context.kgen.connect(context.treasury).approve(furnaceAddress, catalyst)).wait();
+  await (await context.kaios.connect(context.treasury).approve(furnaceAddress, amount + 1n)).wait();
+  await assert.rejects(context.furnace.connect(context.treasury).burnForKufo(
+    amount, treasuryAddress, id("LIFE-CATALYST"), id("DEST-CATALYST"),
+  ));
+  await (await context.kaios.connect(context.treasury).approve(furnaceAddress, amount)).wait();
+  await (await context.kgen.connect(context.treasury).approve(furnaceAddress, catalyst + 1n)).wait();
+  await assert.rejects(context.furnace.connect(context.treasury).burnForKufo(
+    amount, treasuryAddress, id("LIFE-CATALYST"), id("DEST-CATALYST"),
+  ));
+  await (await context.kgen.connect(context.treasury).approve(furnaceAddress, catalyst)).wait();
 
   const beforeKgen = await context.kgen.balanceOf(treasuryAddress);
   const bankBefore = await context.kgen.balanceOf(catalystBankAddress);
@@ -128,10 +151,11 @@ test("18911 requires exact independent allowances and sends 0.001 KGEN per KAIOS
 
   assert.equal(proof.kgenCatalystAmount, catalyst);
   assert.equal(proof.catalystOwner, treasuryAddress);
-  assert.equal(burnRecord.requiredKgenCatalyst, catalyst);
-  assert.equal(burnRecord.catalystOwner, treasuryAddress);
   assert.equal(proof.catalystBank, catalystBankAddress);
-  assert.equal(burnRecord.catalystBank, catalystBankAddress);
+  assert.equal(burnRecord.owner, treasuryAddress);
+  assert.equal(burnRecord.furnace, furnaceAddress);
+  assert.equal(burnRecord.kaiosBurned, amount);
+  assert.equal(burnRecord.expectedKufo, amount * 1_000n);
   assert.equal(proof.bankContributionVerified, true);
   assert.equal(proof.consumed, true);
   assert.equal(await context.kgen.balanceOf(furnaceAddress), 0n);

@@ -9,14 +9,15 @@ import {IKAIOSOrganRegistry} from "./interfaces/IKAIOSOrganRegistry.sol";
 interface IKAIOSAlchemyBurnable {
     function burnForAlchemy(
         address owner,
-        address catalystOwner,
         address beneficiary,
         uint256 kaiosAmount,
-        uint256 requiredKgenCatalyst,
-        address catalystBank,
-        bytes32 subjectLifeId,
+        bytes32 lifeId,
         bytes32 destinationCode
     ) external returns (bytes32 alchemyProofId, uint256 expectedKufo);
+
+    function KGEN() external view returns (address);
+    function ORGAN_REGISTRY() external view returns (address);
+    function expectedKufoForKAIOS(uint256 kaiosAmount) external view returns (uint256);
 }
 
 interface IImmediateKUFOReleaseGate {
@@ -44,6 +45,9 @@ contract KAIOSAlchemyFurnace is ReentrancyGuard {
     string public constant CAPABILITY_BOUNDARY =
         "ATOMIC_ALCHEMY_ONLY_NO_KGEN_ESCROW_WITHDRAW_RESCUE_REDIRECT";
     bytes32 public constant ORGAN_WORMHOLE_511111 = keccak256("KAIOS.ORGAN.WORMHOLE.511111");
+    bytes32 public constant ORGAN_FURNACE_18911 = keccak256("KAIOS.ORGAN.FURNACE.18911");
+    address public constant PREDECESSOR = 0x44c2CA9B9eba19d8F79F6E1786fd9D25e73738e1;
+    uint64 public constant EMBODIMENT_VERSION = 3;
     uint256 public constant KAIOS_WEI_PER_KGEN_CATALYST_WEI = 1_000;
     uint256 public constant MIN_ALCHEMY_AMOUNT = 1 ether;
     uint64 public constant CONTRIBUTION_FRESHNESS_WINDOW_DAYS = 130;
@@ -67,6 +71,7 @@ contract KAIOSAlchemyFurnace is ReentrancyGuard {
     }
 
     IKAIOSAlchemyBurnable public immutable kaios;
+    IERC20 public immutable kaiosToken;
     IERC20 public immutable kgen;
     address public immutable catalystBank;
     IKAIOSOrganRegistry public immutable organRegistry;
@@ -74,12 +79,19 @@ contract KAIOSAlchemyFurnace is ReentrancyGuard {
     uint256 public immutable guardianPoint;
     bytes32 public immutable dutyHash;
     bytes32 public immutable capabilityBoundaryHash;
+    bytes32 public immutable kaiosRuntimeCodeHash;
+    bytes32 public immutable kgenRuntimeCodeHash;
+    bytes32 public immutable organRegistryCodeHash;
+    bytes32 public immutable catalystBankCodeHash;
     uint256 public totalKgenContributedToBank;
 
     mapping(bytes32 => Proof) private _proofs;
 
     error ZeroAddress();
     error NotAContract(address account);
+    error RuntimeCodeHashMismatch(address account, bytes32 expected, bytes32 actual);
+    error RuntimeBindingMismatch(address expected, address actual);
+    error RuntimeInterfaceMismatch(address account);
     error AlchemyAmountBelowMinimum(uint256 provided, uint256 minimum);
     error InexactKgenCatalystRatio(uint256 kaiosAmount);
     error CatalystBankBalanceDeltaMismatch(uint256 expectedAmount, uint256 actualAmount);
@@ -90,6 +102,7 @@ contract KAIOSAlchemyFurnace is ReentrancyGuard {
     error OnlyCurrentWormhole(address caller);
     error UnexpectedKufoOutput(uint256 expected, uint256 actual);
     error ReleaseResultMismatch(address beneficiary, uint256 amount);
+    error IncorrectExactAllowance(address asset, uint256 currentAllowance, uint256 requiredAllowance);
 
     event CatalystBankContribution(
         bytes32 indexed proofId,
@@ -127,22 +140,51 @@ contract KAIOSAlchemyFurnace is ReentrancyGuard {
         string appointmentMode,
         string embodimentStatus
     );
+    event SuccessorEmbodimentDeclared(
+        bytes32 indexed programLifeId,
+        address indexed predecessor,
+        uint64 indexed embodimentVersion,
+        address candidateBody
+    );
 
-    constructor(address kaiosToken, address canonicalKgen, address immutableCatalystBank, address registry) {
+    constructor(
+        address kaiosTokenAddress,
+        address canonicalKgen,
+        address immutableCatalystBank,
+        address registry,
+        bytes32 expectedKaiosRuntimeCodeHash,
+        bytes32 expectedKgenRuntimeCodeHash,
+        bytes32 expectedRegistryCodeHash,
+        bytes32 expectedCatalystBankCodeHash
+    ) {
         if (
-            kaiosToken == address(0) ||
+            kaiosTokenAddress == address(0) ||
             canonicalKgen == address(0) ||
             immutableCatalystBank == address(0) ||
             registry == address(0)
         ) revert ZeroAddress();
-        if (kaiosToken.code.length == 0) revert NotAContract(kaiosToken);
-        if (canonicalKgen.code.length == 0) revert NotAContract(canonicalKgen);
-        if (immutableCatalystBank.code.length == 0) revert NotAContract(immutableCatalystBank);
-        if (registry.code.length == 0) revert NotAContract(registry);
-        kaios = IKAIOSAlchemyBurnable(kaiosToken);
+        _requireRuntime(kaiosTokenAddress, expectedKaiosRuntimeCodeHash);
+        _requireRuntime(canonicalKgen, expectedKgenRuntimeCodeHash);
+        _requireRuntime(immutableCatalystBank, expectedCatalystBankCodeHash);
+        _requireRuntime(registry, expectedRegistryCodeHash);
+        kaios = IKAIOSAlchemyBurnable(kaiosTokenAddress);
+        kaiosToken = IERC20(kaiosTokenAddress);
         kgen = IERC20(canonicalKgen);
         catalystBank = immutableCatalystBank;
         organRegistry = IKAIOSOrganRegistry(registry);
+        kaiosRuntimeCodeHash = expectedKaiosRuntimeCodeHash;
+        kgenRuntimeCodeHash = expectedKgenRuntimeCodeHash;
+        organRegistryCodeHash = expectedRegistryCodeHash;
+        catalystBankCodeHash = expectedCatalystBankCodeHash;
+        if (kaios.KGEN() != canonicalKgen) {
+            revert RuntimeBindingMismatch(canonicalKgen, kaios.KGEN());
+        }
+        if (kaios.ORGAN_REGISTRY() != registry) {
+            revert RuntimeBindingMismatch(registry, kaios.ORGAN_REGISTRY());
+        }
+        if (kaios.expectedKufoForKAIOS(1 ether) != 1_000 ether) {
+            revert RuntimeInterfaceMismatch(kaiosTokenAddress);
+        }
         lifeId = keccak256(bytes(LIFE_ID_TEXT));
         guardianPoint = 18_911;
         dutyHash = keccak256(bytes(DUTY));
@@ -155,6 +197,7 @@ contract KAIOSAlchemyFurnace is ReentrancyGuard {
             APPOINTMENT_MODE,
             EMBODIMENT_STATUS
         );
+        emit SuccessorEmbodimentDeclared(lifeId, PREDECESSOR, EMBODIMENT_VERSION, address(this));
     }
 
     function burnForKufo(
@@ -172,6 +215,14 @@ contract KAIOSAlchemyFurnace is ReentrancyGuard {
         }
 
         uint256 catalystAmount = kaiosAmount / KAIOS_WEI_PER_KGEN_CATALYST_WEI;
+        uint256 kaiosAllowance = kaiosToken.allowance(msg.sender, address(this));
+        if (kaiosAllowance != kaiosAmount) {
+            revert IncorrectExactAllowance(address(kaiosToken), kaiosAllowance, kaiosAmount);
+        }
+        uint256 kgenAllowance = kgen.allowance(msg.sender, address(this));
+        if (kgenAllowance != catalystAmount) {
+            revert IncorrectExactAllowance(address(kgen), kgenAllowance, catalystAmount);
+        }
         uint256 bankBalanceBefore = kgen.balanceOf(catalystBank);
         kgen.safeTransferFrom(msg.sender, catalystBank, catalystAmount);
         uint256 bankBalanceAfter = kgen.balanceOf(catalystBank);
@@ -182,11 +233,8 @@ contract KAIOSAlchemyFurnace is ReentrancyGuard {
 
         (proofId, expectedKufo) = kaios.burnForAlchemy(
             msg.sender,
-            msg.sender,
             beneficiary,
             kaiosAmount,
-            catalystAmount,
-            catalystBank,
             subjectLifeId,
             destinationCode
         );
@@ -281,5 +329,17 @@ contract KAIOSAlchemyFurnace is ReentrancyGuard {
 
     function catalystLiability() external pure returns (uint256) {
         return 0;
+    }
+
+    function isActiveBody() external view returns (bool) {
+        return organRegistry.organ(ORGAN_FURNACE_18911) == address(this);
+    }
+
+    function _requireRuntime(address account, bytes32 expectedCodeHash) private view {
+        if (account.code.length == 0) revert NotAContract(account);
+        bytes32 actualCodeHash = account.codehash;
+        if (expectedCodeHash == bytes32(0) || actualCodeHash != expectedCodeHash) {
+            revert RuntimeCodeHashMismatch(account, expectedCodeHash, actualCodeHash);
+        }
     }
 }

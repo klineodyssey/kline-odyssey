@@ -1,0 +1,96 @@
+{
+  "reportId": "KAIOS_18911_V3_MAINNET_COMPATIBILITY_V1",
+  "generatedAt": "2026-08-20T16:22:51.652Z",
+  "mode": "READ_ONLY_MAINNET_AND_LOCAL_FORK_NO_BROADCAST",
+  "chainId": 56,
+  "liveSnapshot": {
+    "blockNumber": 117071439,
+    "blockHash": "0x39d444641e2cdc83f039600fa30d2dac5dbdd0165538eff889a84d574be0343a",
+    "blockTimestamp": 1787242964,
+    "kaios": "0xD4E67B3a69e41524c424150E6b6e921b01D036db",
+    "kgen": "0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be",
+    "organRegistry": "0xA9e7CbF161E39E556f4B5b8E41397Ac4B87a932D",
+    "activeFurnace": "0x44c2CA9B9eba19d8F79F6E1786fd9D25e73738e1",
+    "pendingFurnace": {
+      "candidate": "0x0000000000000000000000000000000000000000",
+      "executableAt": "0"
+    },
+    "registryOwner": "0xCd60BF474e691F2484950a0276Eaf507616Ca4b9",
+    "bootstrapOpen": false,
+    "minimumDelay": "3600",
+    "alchemyBurnCount": "0",
+    "totalKaiosBurnedForAlchemy": "0",
+    "kaiosBurnedForAlchemyEventReconciliation": "ZERO_EVENTS_PROVEN_BY_ATOMIC_COUNTER_AND_EVENT_SOURCE_PATH",
+    "rawFullRangeLogScan": "RPC_PROVIDER_RANGE_LIMITED; COUNTER_SOURCE_RECONCILIATION_USED",
+    "predecessor": {
+      "address": "0x44c2CA9B9eba19d8F79F6E1786fd9D25e73738e1",
+      "kaios": "0xD4E67B3a69e41524c424150E6b6e921b01D036db",
+      "organRegistry": "0xA9e7CbF161E39E556f4B5b8E41397Ac4B87a932D",
+      "alchemyEpochSeconds": "86400",
+      "maturationEpochs": "49",
+      "status": "DEPLOYED_V1_HISTORY_ACTIVE_BODY"
+    },
+    "code": {
+      "kaios": {
+        "hash": "0x3a036ce95ac0929b247b40c9a303c2c4bfaf9aeb9bc171c009ad3532316df023",
+        "bytes": 5776
+      },
+      "kgen": {
+        "hash": "0x251cff271c2c754743f9eb3bc11982163fd7ca756e0b0378cb0358418ffeecc1",
+        "bytes": 3905
+      },
+      "registry": {
+        "hash": "0x92dc6b31cec75b3064cf5eb2bc3261acb980f4ac55559823cac23af4937739f9",
+        "bytes": 2543
+      },
+      "predecessorFurnace": {
+        "hash": "0x2285508adda0f2723eb70d1af9280ea8b4e9e35eff425632a009856534b90a0b",
+        "bytes": 2084
+      }
+    }
+  },
+  "deployedKaiosAbiCompatibility": {
+    "burnForAlchemy": "burnForAlchemy(address,address,uint256,bytes32,bytes32)",
+    "candidateCallsDeployedFiveArgumentAbi": true,
+    "candidateDoesNotRequireKaiosCatalystFields": true
+  },
+  "dependencyIdentityValidation": {
+    "kaiosAndKgen": "CANONICAL_ADDRESS_PLUS_EXACT_RUNTIME_CODEHASH_PLUS_REQUIRED_INTERFACE",
+    "organRegistry": "CANONICAL_ADDRESS_PLUS_EXACT_RUNTIME_CODEHASH_PLUS_ORGAN_INTERFACE",
+    "deployedRegistryLifeIdGetter": "ABSENT_IN_LIVE_V1_RUNTIME",
+    "programLifeIdentity": "EXTERNAL_MANIFEST; MUST_NOT_BE_INFERRED_AS_LIVE_ABI"
+  },
+  "compilerReconciliation": {
+    "deployedLineageEvidence": "KAIOS_GENESIS_MAINNET_RECORD.json + SOLIDITY_COMPILE_EVIDENCE.json",
+    "compiler": "0.8.24+commit.e11b9ed9.Emscripten.clang",
+    "optimizer": {
+      "enabled": true,
+      "runs": 1
+    },
+    "viaIR": true,
+    "evmVersion": "paris",
+    "metadataBytecodeHash": "none",
+    "status": "MATCHES_FORMAL_DEPLOYMENT_LINEAGE_EVIDENCE"
+  },
+  "localFork": {
+    "forkBlockNumber": 117071439,
+    "forkBlockHash": "0x39d444641e2cdc83f039600fa30d2dac5dbdd0165538eff889a84d574be0343a",
+    "forkChainId": 56,
+    "candidateAddress": "0x2d6838F80B68db753a6AC5cD1b6Bb942DA681E0e",
+    "predecessor": "0x44c2CA9B9eba19d8F79F6E1786fd9D25e73738e1",
+    "embodimentVersion": "3",
+    "activeBody": false,
+    "catalystLiability": "0",
+    "catalystBank": {
+      "address": "0x11630785665515c29c0d49819E6E22aB03fA3bE9",
+      "classification": "FORK_ONLY_PLACEHOLDER_NOT_PRODUCTION"
+    },
+    "constructorRuntimeBindingChecks": "PASS",
+    "broadcastToMainnet": false
+  },
+  "deploymentGates": {
+    "productionCatalystBank": "UNFROZEN",
+    "kufoHalfLifeSeconds": "UNFROZEN",
+    "deployment": "BLOCKED"
+  }
+}

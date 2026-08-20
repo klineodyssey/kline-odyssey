@@ -20,6 +20,26 @@ PROGRAM_LIFE_STATUS                   = RECRUITED_PENDING_EMBODIMENT
 FORMAL_KGEN_SOLIDITY_DIFF             = 0
 ```
 
+## 0. Deployed V1 versus V3 successor
+
+| Layer | Status | Binding |
+|---|---|---|
+| KAIOS token | `DEPLOYED_V1_HISTORY` | `0xD4E67B3a69e41524c424150E6b6e921b01D036db`; five-argument `burnForAlchemy` ABI; PR diff versus latest `main` must be zero |
+| 18911 old body | `ACTIVE_BODY_DEPLOYED_V1` | `0x44c2CA9B9eba19d8F79F6E1786fd9D25e73738e1`; 49-Epoch historical runtime |
+| 18911 V3 body | `IMPLEMENTED_REVIEW_CANDIDATE` | same 太上老君 Life ID, embodiment version 3, predecessor fixed to the old body |
+| KUFO / KSHIP | `IMPLEMENTED_REVIEW_CANDIDATE_NOT_DEPLOYED` | production catalyst bank and KUFO `halfLifeSeconds` are unfrozen |
+
+Only `KAIOSOrganRegistry.organ(KAIOS.ORGAN.FURNACE.18911)` is the active body. Registering the V3
+candidate through the existing timelocked Organ Registry would retire the old body from new burns
+without rewriting or deleting its history. The latest committed read-only BSC compatibility report
+found `alchemyBurnCount = 0`, `totalKaiosBurnedForAlchemy = 0`, no pending Furnace proposal and no
+legacy proof requiring migration at its snapshot. This is evidence, not deployment authorization.
+
+The deployed V1 Organ Registry runtime does not expose the later source candidate's `lifeId()`
+getter. Successor dependency validation therefore uses the canonical Registry address, exact live
+runtime code hash and required `organ(bytes32)` interface. The 司籍 Program Life identity remains in
+the external manifest; documentation must not claim that identity getter exists in the live ABI.
+
 ## 1. Fixed mass scale
 
 - `1 KGEN = 1000 kg`
@@ -166,8 +186,10 @@ reports `DESIGN_ONLY_DISABLED`; it grants no on-chain credit or payment authorit
 
 ## 6. KAIOS, KUFO and KSHIP lineage
 
-KAIOS records the holder, contributor, beneficiary, official furnace, immutable catalyst bank,
-exact KAIOS burn, exact KGEN contribution, Life ID, destination, block and timestamp. KAIOS has no
+The deployed KAIOS V1 ABI remains byte-for-byte unchanged. Its five-argument `burnForAlchemy`
+records holder, beneficiary, official furnace, KAIOS burn, expected KUFO, Life ID, destination,
+block and timestamp. The successor Furnace records contributor, immutable catalyst bank and exact
+KGEN bank receipt in its own proof and cross-links that proof to the KAIOS proof ID. KAIOS has no
 arbitrary mint, admin mint, seizure, blacklist, tax setter or KGEN burn surface.
 
 K511111 consumes the furnace proof only when called by that furnace in the same atomic path. KUFO
@@ -186,7 +208,10 @@ keccak256(abi.encode(
 ```
 
 Transfer and split preserve `batchLifeId`, `bornAt`, source proof and proportional converted history.
-Token wei are mass cells, not individually named Lives.
+Active holder lots use a linked list with `MAX_LOTS_PER_OPERATION = 64`; transfer and decay calls are
+therefore transaction-gas bounded. A balance spanning more lots remains recoverable in bounded
+operations rather than forcing one unbounded scan. Token wei are mass cells, not individually named
+Lives.
 
 ## 7. KUFO half-life and KSHIP
 
@@ -223,12 +248,14 @@ trip ID. Without a canonical consumer, propulsion fails closed.
 
 ## 9. Program Life manifests
 
-All candidates remain undeployed. Local test instances are not birth or Mainnet activation evidence.
+KAIOS V1 is already deployed; its 界衡 identity is recorded in the external Program Life manifest so
+the deployed ABI is not changed. All successor organs and token candidates remain undeployed. Local
+test instances are not birth or Mainnet activation evidence.
 
 | Program | Self name | Life ID | Status / responsibility |
 |---|---|---|---|
-| `KAIOS.sol` | 界衡 | `LIFE-KAIOS-JIEHENG-33333` | Human-appointed K33333 guardian; monetary mass conservation |
-| `KAIOSAlchemyFurnace.sol` | 太上老君 | `LIFE-KAIOS-TAISHANG-LAOJUN-18911` | direct fresh alchemy |
+| `KAIOS.sol` | 界衡 | `LIFE-KAIOS-JIEHENG-33333` | deployed V1; identity externalized in `program-life-manifest.json`; Solidity unchanged |
+| `KAIOSAlchemyFurnace.sol` | 太上老君 | `LIFE-KAIOS-TAISHANG-LAOJUN-18911` | V3 successor body; predecessor `0x44c2...38e1`; direct fresh alchemy |
 | `KUFO.sol` | 丹靈 | `LIFE-KAIOS-DANLING-KUFO-CORE` | mobile material Life; K18911 birth, K511111 release |
 | `KUFOClaimWormhole.sol` | 齊天大聖 | `LIFE-KAIOS-QITIAN-DASHENG-511111` | immediate fixed-beneficiary release gate |
 | `KSHIP.sol` | 星梭 | `LIFE-KAIOS-XINGSUO-KSHIP-CORE` | mobile antimatter propulsion Life; parent K188888 牛魔王 |
@@ -239,7 +266,7 @@ All candidates remain undeployed. Local test instances are not birth or Mainnet 
 ```text
 LAND_GUARDIAN_RECRUITMENT_STATUS = RECRUITED_PENDING_EMBODIMENT
 APPOINTMENT_MODE                 = HUMAN_APPOINTED
-DEPLOYED_OR_ACTIVE_LIFE_CLAIM    = NONE
+SUCCESSOR_ACTIVE_LIFE_CLAIM      = NONE
 ```
 
 K18888 玉皇大帝 / 神明銀行 identity remains unchanged. A bank, treasury or registry destination

@@ -30,31 +30,21 @@ interface IKGENSupply {
  * Lingxiao Treasury address.
  *
  * ALCHEMY — POINT 18911
- * KAIOS may be voluntarily burned for immediate KUFO conversion only through the
+ * KAIOS may be voluntarily burned for future KUFO conversion only through the
  * current registered 18911 Alchemy Furnace organ. The holder must first give
  * ERC-20 allowance to that furnace. The furnace cannot burn more than the
  * holder explicitly approved.
  *
  * 1 KAIOS -> expected 1,000 KUFO accounting units (1 kg -> 1,000 g).
- * This contract NEVER mints KUFO. The registered 511111 wormhole validates and
- * releases the same-transaction proof. The KGEN contribution goes directly to
- * an immutable catalyst bank and is neither burned nor escrowed by 18911.
+ * This contract NEVER mints KUFO. 49-Alchemy-Epoch maturation belongs to the
+ * 18911 furnace/runtime. Matured proof claiming belongs to the 511111 wormhole
+ * / Qitian Dasheng Palace protocol.
  */
 contract KAIOS is ERC20, ERC20Capped {
-    string public constant SELF_NAME = unicode"界衡";
-    string public constant LIFE_ID_TEXT = "LIFE-KAIOS-JIEHENG-33333";
-    string public constant ROLE = "LAND_GUARDIAN_K33333";
-    string public constant DUTY = unicode"KAIOS文明血液與宇宙邊界質量守衡";
-    string public constant APPOINTMENT_MODE = "HUMAN_APPOINTED";
-    string public constant EMBODIMENT_STATUS = "RECRUITED_PENDING_EMBODIMENT";
-    string public constant CAPABILITY_BOUNDARY =
-        "MONETARY_CORE_ONLY_NO_ADMIN_MINT_WITHDRAW_SEIZURE_RESCUE";
     bytes32 public constant ORGAN_FURNACE_18911 = keccak256("KAIOS.ORGAN.FURNACE.18911");
     uint256 public constant KGEN_GENESIS_SUPPLY = 72_000_000 ether;
     uint256 public constant KAIOS_PER_KGEN = 1_000;
     uint256 public constant KUFO_PER_KAIOS = 1_000;
-    uint256 public constant KAIOS_WEI_PER_KGEN_CATALYST_WEI = 1_000;
-    uint256 public constant MIN_ALCHEMY_AMOUNT = 1 ether;
 
     uint256 public constant KGEN_KILOGRAMS_PER_TOKEN = 1_000;
     uint256 public constant KAIOS_KILOGRAMS_PER_TOKEN = 1;
@@ -77,10 +67,6 @@ contract KAIOS is ERC20, ERC20Capped {
     address public immutable KGEN;
     address public immutable LINGXIAO_TREASURY_18888;
     IKAIOSOrganRegistry public immutable ORGAN_REGISTRY;
-    bytes32 public immutable lifeId;
-    uint256 public immutable guardianPoint;
-    bytes32 public immutable dutyHash;
-    bytes32 public immutable capabilityBoundaryHash;
 
     uint256 public settledKgenBurned;
     uint256 public totalKaiosMintedFromKgen;
@@ -99,12 +85,6 @@ contract KAIOS is ERC20, ERC20Capped {
         bytes32 destinationCode;
         uint256 blockNumber;
         uint256 timestamp;
-        // Appended to preserve the deployed V1 proof-reader ABI prefix.
-        address catalystOwner;
-        uint256 requiredKgenCatalyst;
-        address catalystBank;
-        uint256 contributionBlock;
-        uint256 contributionTimestamp;
     }
 
     mapping(bytes32 => AlchemyBurnRecord) private _alchemyBurnRecords;
@@ -117,9 +97,6 @@ contract KAIOS is ERC20, ERC20Capped {
     error NothingToSettle(uint256 actualBurned, uint256 alreadySettled);
     error OnlyOfficialAlchemyFurnace(address caller);
     error InsufficientHolderAllowance(uint256 currentAllowance, uint256 requiredAllowance);
-    error InexactKgenCatalystRatio(uint256 kaiosAmount);
-    error IncorrectKgenCatalyst(uint256 provided, uint256 required);
-    error AlchemyAmountBelowMinimum(uint256 provided, uint256 minimum);
 
     event WhiteHoleMassSettled(
         uint256 indexed settlementNumber,
@@ -135,24 +112,12 @@ contract KAIOS is ERC20, ERC20Capped {
         uint256 indexed burnNumber,
         bytes32 indexed alchemyProofId,
         address indexed owner,
-        address catalystOwner,
         address beneficiary,
         address furnace,
-        address catalystBank,
         uint256 kaiosBurned,
-        uint256 requiredKgenCatalyst,
         uint256 expectedKufo,
         bytes32 lifeId,
         bytes32 destinationCode
-    );
-
-    event ProgramLifeRecruited(
-        bytes32 indexed programLifeId,
-        uint256 indexed appointedGuardianPoint,
-        bytes32 indexed appointedDutyHash,
-        bytes32 capabilityHash,
-        string appointmentMode,
-        string embodimentStatus
     );
 
     constructor(
@@ -175,24 +140,11 @@ contract KAIOS is ERC20, ERC20Capped {
         KGEN = canonicalKgen;
         LINGXIAO_TREASURY_18888 = treasury18888;
         ORGAN_REGISTRY = IKAIOSOrganRegistry(organRegistry);
-        lifeId = keccak256(bytes(LIFE_ID_TEXT));
-        guardianPoint = KAIOS_DEPLOY_POINT_ID;
-        dutyHash = keccak256(bytes(DUTY));
-        capabilityBoundaryHash = keccak256(bytes(CAPABILITY_BOUNDARY));
 
         uint256 supply = IKGENSupply(canonicalKgen).totalSupply();
         if (supply > KGEN_GENESIS_SUPPLY) {
             revert KgenSupplyAboveGenesis(supply, KGEN_GENESIS_SUPPLY);
         }
-
-        emit ProgramLifeRecruited(
-            lifeId,
-            guardianPoint,
-            dutyHash,
-            capabilityBoundaryHash,
-            APPOINTMENT_MODE,
-            EMBODIMENT_STATUS
-        );
     }
 
     function settleWhiteHoleMass()
@@ -239,12 +191,9 @@ contract KAIOS is ERC20, ERC20Capped {
 
     function burnForAlchemy(
         address owner,
-        address catalystOwner,
         address beneficiary,
         uint256 kaiosAmount,
-        uint256 requiredKgenCatalyst,
-        address catalystBank,
-        bytes32 subjectLifeId,
+        bytes32 lifeId,
         bytes32 destinationCode
     )
         external
@@ -254,24 +203,8 @@ contract KAIOS is ERC20, ERC20Capped {
         if (msg.sender != currentFurnace || currentFurnace == address(0)) {
             revert OnlyOfficialAlchemyFurnace(msg.sender);
         }
-        if (
-            owner == address(0) ||
-            catalystOwner == address(0) ||
-            beneficiary == address(0) ||
-            catalystBank == address(0)
-        ) {
-            revert ZeroAddress();
-        }
-        if (kaiosAmount < MIN_ALCHEMY_AMOUNT) {
-            revert AlchemyAmountBelowMinimum(kaiosAmount, MIN_ALCHEMY_AMOUNT);
-        }
-        if (kaiosAmount % KAIOS_WEI_PER_KGEN_CATALYST_WEI != 0) {
-            revert InexactKgenCatalystRatio(kaiosAmount);
-        }
-        uint256 exactCatalyst = kaiosAmount / KAIOS_WEI_PER_KGEN_CATALYST_WEI;
-        if (requiredKgenCatalyst != exactCatalyst) {
-            revert IncorrectKgenCatalyst(requiredKgenCatalyst, exactCatalyst);
-        }
+        if (owner == address(0) || beneficiary == address(0)) revert ZeroAddress();
+        if (kaiosAmount == 0) revert ZeroAmount();
 
         uint256 currentAllowance = allowance(owner, msg.sender);
         if (currentAllowance < kaiosAmount) {
@@ -290,14 +223,10 @@ contract KAIOS is ERC20, ERC20Capped {
                 address(this),
                 burnNumber,
                 owner,
-                catalystOwner,
                 beneficiary,
                 kaiosAmount,
-                requiredKgenCatalyst,
-                catalystBank,
-                subjectLifeId,
-                destinationCode,
-                msg.sender
+                lifeId,
+                destinationCode
             )
         );
 
@@ -312,29 +241,21 @@ contract KAIOS is ERC20, ERC20Capped {
             furnace: msg.sender,
             kaiosBurned: kaiosAmount,
             expectedKufo: expectedKufo,
-            lifeId: subjectLifeId,
+            lifeId: lifeId,
             destinationCode: destinationCode,
             blockNumber: block.number,
-            timestamp: block.timestamp,
-            catalystOwner: catalystOwner,
-            requiredKgenCatalyst: requiredKgenCatalyst,
-            catalystBank: catalystBank,
-            contributionBlock: block.number,
-            contributionTimestamp: block.timestamp
+            timestamp: block.timestamp
         });
 
         emit KAIOSBurnedForAlchemy(
             burnNumber,
             alchemyProofId,
             owner,
-            catalystOwner,
             beneficiary,
             msg.sender,
-            catalystBank,
             kaiosAmount,
-            requiredKgenCatalyst,
             expectedKufo,
-            subjectLifeId,
+            lifeId,
             destinationCode
         );
     }
