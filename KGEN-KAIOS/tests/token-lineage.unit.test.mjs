@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test, { afterEach } from "node:test";
-import { id } from "ethers";
+import { AbiCoder, id, keccak256, ZeroHash } from "ethers";
 import {
   ETHER,
   ORGAN_FURNACE_18911,
@@ -14,6 +14,43 @@ import {
 } from "./helpers.mjs";
 
 afterEach(cleanupProviders);
+
+test("program contracts expose unique frozen Life identities and guardian recruitments", async () => {
+  const context = await setupLineage();
+  const identities = [
+    [context.kaios, "LIFE-KAIOS-JIEHENG-33333"],
+    [context.furnace, "LIFE-KAIOS-TAISHANG-LAOJUN-18911"],
+    [context.kufo, "LIFE-KAIOS-DANLING-KUFO-CORE"],
+    [context.wormhole, "LIFE-KAIOS-QITIAN-DASHENG-511111"],
+    [context.kship, "LIFE-KAIOS-XINGSUO-KSHIP-CORE"],
+    [context.converter, "LIFE-KAIOS-HUAHANG-KSHIP-CONVERTER"],
+    [context.registry, "LIFE-KAIOS-SIJI-REGISTRY-0001"],
+  ];
+  const seen = new Set();
+  for (const [contract, text] of identities) {
+    const value = await contract.lifeId();
+    assert.equal(value, id(text));
+    assert.equal(seen.has(value), false, text);
+    seen.add(value);
+    assert.equal(await contract.EMBODIMENT_STATUS(), "RECRUITED_PENDING_EMBODIMENT");
+  }
+  assert.equal(await context.kaios.guardianPoint(), 33_333n);
+  assert.equal(await context.furnace.guardianPoint(), 18_911n);
+  assert.equal(await context.wormhole.guardianPoint(), 511_111n);
+  assert.equal(await context.kship.guardianPoint(), 188_888n);
+  assert.equal(await context.kship.guardianLifeId(), id("LIFE-KAIOS-NIUMOWANG-188888"));
+  assert.equal(await context.kship.parentLifeId(), id("LIFE-KAIOS-NIUMOWANG-188888"));
+  assert.equal(await context.converter.parentLifeId(), id("LIFE-KAIOS-NIUMOWANG-188888"));
+  assert.equal(await context.kufo.LAND_GUARDIAN(), false);
+  assert.equal(await context.kufo.MASS_CELL_IS_INDIVIDUAL_LIFE(), false);
+  assert.equal(await context.kship.MASS_CELL_IS_INDIVIDUAL_LIFE(), false);
+  assert.equal(await context.ufoConsumer.DEPLOYABLE(), false);
+  assert.equal(await context.ufoConsumer.EMPLOYABLE(), false);
+  assert.equal(
+    await context.ufoConsumer.LIFE_ID(),
+    id("LIFE-KAIOS-SHIHANG-TONGZI-TEST-0001"),
+  );
+});
 
 async function burnAndMature(context, {
   amount = 1n * ETHER,
@@ -169,13 +206,49 @@ test("KUFO decay begins at birth, blocks immediate conversion and releases only 
   const lot = await context.kufo.decayLot(1);
   assert.equal(lot.initialAmount, initialKufo);
   assert.equal(lot.convertedAmount, 0n);
+  assert.notEqual(lot.batchLifeId, ZeroHash);
+  assert.equal(lot.batchLifeId, await context.kufo.proofBatchLifeId(lot.sourceProof));
+  const chainId = (await context.provider.getNetwork()).chainId;
+  assert.equal(
+    lot.batchLifeId,
+    keccak256(AbiCoder.defaultAbiCoder().encode(
+      ["string", "uint256", "address", "bytes32"],
+      ["KAIOS.KUFO.BATCH_LIFE.V1", chainId, await context.kufo.getAddress(), lot.sourceProof],
+    )),
+  );
 
   await assert.rejects(context.converter.connect(recipient).convert(initialKufo, recipientAddress));
   await advanceToLotBoundary(context, 1, 1);
   assert.equal(await context.kufo.claimableDecay(1), initialKufo / 2n);
-  await (await context.converter.connect(recipient).convert(
+  const firstConversionReceipt = await (await context.converter.connect(recipient).convert(
     initialKufo, recipientAddress, { gasLimit: 2_000_000 },
   )).wait();
+  const firstCarrierProofId = eventArgs(
+    firstConversionReceipt,
+    context.converter,
+    "KSHIPConversion",
+  ).proofId;
+  const kshipBatch = await context.kship.batchLifeRecord(firstCarrierProofId);
+  assert.notEqual(kshipBatch.batchLifeId, ZeroHash);
+  assert.equal(kshipBatch.sourceProof, firstCarrierProofId);
+  assert.equal(kshipBatch.beneficiary, recipientAddress);
+  assert.equal(kshipBatch.initialAmount, (initialKufo / 2n) * 1_000n);
+  assert.equal(
+    kshipBatch.batchLifeId,
+    keccak256(AbiCoder.defaultAbiCoder().encode(
+      ["string", "uint256", "address", "bytes32"],
+      ["KAIOS.KSHIP.BATCH_LIFE.V1", chainId, await context.kship.getAddress(), firstCarrierProofId],
+    )),
+  );
+  const batchBornAt = kshipBatch.bornAt;
+  const batchLifeId = kshipBatch.batchLifeId;
+  const lineageWitness = context.signers[3];
+  await (await context.kship.connect(recipient).transfer(await lineageWitness.getAddress(), 1n)).wait();
+  const afterTransferBatch = await context.kship.batchLifeRecord(firstCarrierProofId);
+  assert.equal(afterTransferBatch.bornAt, batchBornAt);
+  assert.equal(afterTransferBatch.batchLifeId, batchLifeId);
+  assert.equal(afterTransferBatch.sourceProof, firstCarrierProofId);
+  await (await context.kship.connect(lineageWitness).transfer(recipientAddress, 1n)).wait();
   assert.equal(await context.kship.balanceOf(recipientAddress), (initialKufo / 2n) * 1_000n);
   assert.equal((await context.kufo.decayLot(1)).convertedAmount, initialKufo / 2n);
 
@@ -197,9 +270,11 @@ test("KUFO transfer and split preserve birth time and cannot increase aggregate 
   await claimKufo(context, { amount: 1n * ETHER, beneficiary: first });
   const initial = 1_000n * ETHER;
   const originalBornAt = (await context.kufo.decayLot(1)).bornAt;
+  const originalBatchLifeId = (await context.kufo.decayLot(1)).batchLifeId;
   await (await context.kufo.connect(first).transfer(await second.getAddress(), initial / 2n)).wait();
   const child = await context.kufo.decayLot(2);
   assert.equal(child.bornAt, originalBornAt);
+  assert.equal(child.batchLifeId, originalBatchLifeId);
   assert.equal(child.initialAmount, initial / 2n);
   for (const holder of [first, second]) {
     await (await context.kufo.connect(holder).approve(await context.converter.getAddress(), initial / 2n)).wait();

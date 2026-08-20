@@ -13,7 +13,7 @@ interface IKAIOSAlchemyBurnable {
         address beneficiary,
         uint256 kaiosAmount,
         uint256 requiredKgenCatalyst,
-        bytes32 lifeId,
+        bytes32 subjectLifeId,
         bytes32 destinationCode
     ) external returns (bytes32 alchemyProofId, uint256 expectedKufo);
 }
@@ -26,6 +26,14 @@ interface IKAIOSAlchemyBurnable {
 contract KAIOSAlchemyFurnace is ReentrancyGuard {
     using SafeERC20 for IERC20;
 
+    string public constant SELF_NAME = unicode"太上老君";
+    string public constant LIFE_ID_TEXT = "LIFE-KAIOS-TAISHANG-LAOJUN-18911";
+    string public constant ROLE = "LAND_GUARDIAN_K18911 / ALCHEMY_MASTER";
+    string public constant DUTY = unicode"守護18911煉丹審核、催化託管與不可重放血統";
+    string public constant APPOINTMENT_MODE = "HUMAN_APPOINTED";
+    string public constant EMBODIMENT_STATUS = "RECRUITED_PENDING_EMBODIMENT";
+    string public constant CAPABILITY_BOUNDARY =
+        "ALCHEMY_ONLY_NO_CATALYST_WITHDRAW_RESCUE_REDIRECT";
     bytes32 public constant ORGAN_WORMHOLE_511111 = keccak256("KAIOS.ORGAN.WORMHOLE.511111");
     uint256 public constant KAIOS_WEI_PER_KGEN_CATALYST_WEI = 1_000;
     uint64 public constant MATURATION_EPOCHS = 49;
@@ -50,6 +58,10 @@ contract KAIOSAlchemyFurnace is ReentrancyGuard {
     IERC20 public immutable kgen;
     IKAIOSOrganRegistry public immutable organRegistry;
     uint64 public immutable epochSeconds;
+    bytes32 public immutable lifeId;
+    uint256 public immutable guardianPoint;
+    bytes32 public immutable dutyHash;
+    bytes32 public immutable capabilityBoundaryHash;
     uint256 public totalCatalystEscrowed;
     uint256 public totalCatalystReturned;
 
@@ -87,6 +99,14 @@ contract KAIOSAlchemyFurnace is ReentrancyGuard {
         uint64 maturityEpoch
     );
     event AlchemyProofConsumed(bytes32 indexed proofId, address indexed beneficiary, uint256 kufoAmount);
+    event ProgramLifeRecruited(
+        bytes32 indexed programLifeId,
+        uint256 indexed appointedGuardianPoint,
+        bytes32 indexed appointedDutyHash,
+        bytes32 capabilityHash,
+        string appointmentMode,
+        string embodimentStatus
+    );
 
     constructor(address kaiosToken, address canonicalKgen, address registry, uint64 epochDurationSeconds) {
         if (kaiosToken == address(0) || canonicalKgen == address(0) || registry == address(0)) {
@@ -100,12 +120,24 @@ contract KAIOSAlchemyFurnace is ReentrancyGuard {
         kgen = IERC20(canonicalKgen);
         organRegistry = IKAIOSOrganRegistry(registry);
         epochSeconds = epochDurationSeconds;
+        lifeId = keccak256(bytes(LIFE_ID_TEXT));
+        guardianPoint = 18_911;
+        dutyHash = keccak256(bytes(DUTY));
+        capabilityBoundaryHash = keccak256(bytes(CAPABILITY_BOUNDARY));
+        emit ProgramLifeRecruited(
+            lifeId,
+            guardianPoint,
+            dutyHash,
+            capabilityBoundaryHash,
+            APPOINTMENT_MODE,
+            EMBODIMENT_STATUS
+        );
     }
 
     function burnForKufo(
         uint256 kaiosAmount,
         address beneficiary,
-        bytes32 lifeId,
+        bytes32 subjectLifeId,
         bytes32 destinationCode
     ) external nonReentrant returns (bytes32 proofId, uint256 expectedKufo) {
         if (kaiosAmount == 0) revert ZeroAmount();
@@ -128,7 +160,7 @@ contract KAIOSAlchemyFurnace is ReentrancyGuard {
             beneficiary,
             kaiosAmount,
             catalystAmount,
-            lifeId,
+            subjectLifeId,
             destinationCode
         );
 
@@ -144,7 +176,7 @@ contract KAIOSAlchemyFurnace is ReentrancyGuard {
             kaiosBurned: kaiosAmount,
             kgenCatalystAmount: catalystAmount,
             kufoAmount: expectedKufo,
-            lifeId: lifeId,
+            lifeId: subjectLifeId,
             destinationCode: destinationCode,
             memorialProofId: memorialProofId,
             burnEpoch: burnEpoch,
@@ -155,7 +187,7 @@ contract KAIOSAlchemyFurnace is ReentrancyGuard {
         totalCatalystEscrowed += catalystAmount;
 
         emit CatalystEscrowed(proofId, msg.sender, catalystAmount);
-        emit LaojunMemorialRecorded(memorialProofId, proofId, msg.sender, lifeId);
+        emit LaojunMemorialRecorded(memorialProofId, proofId, msg.sender, subjectLifeId);
         emit AlchemyProofCreated(
             proofId,
             msg.sender,

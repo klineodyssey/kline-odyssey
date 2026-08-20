@@ -26,13 +26,35 @@ const forbidden = [
 const safeConflictReferenceFiles = new Set([
   "docs/physics/KGEN_KAIOS_SCALE_AND_PLANCK_RUNTIME_CURRENT.md",
 ]);
+const currentSectionMarkers = new Map([
+  ["docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md", "## 235. 現行質量尺度"],
+]);
 const failures = [];
+
+function currentNormativeContent(relativePath, content) {
+  const marker = currentSectionMarkers.get(relativePath);
+  if (!marker) return content;
+  const offset = content.indexOf(marker);
+  if (offset < 0) {
+    failures.push({ path: relativePath, reason: "MISSING_CURRENT_SECTION_MARKER", marker });
+    return "";
+  }
+  return content.slice(offset);
+}
+
+function isExplicitSupersededReference(line) {
+  return /(?:SUPERSEDED|historical|歷史|舊)/iu.test(line);
+}
 
 for (const relativePath of activeFiles) {
   const absolutePath = path.join(repo, relativePath);
   const content = fs.readFileSync(absolutePath, "utf8");
+  const normativeContent = currentNormativeContent(relativePath, content);
   for (const pattern of safeConflictReferenceFiles.has(relativePath) ? [] : forbidden) {
-    if (content.includes(pattern)) failures.push({ path: relativePath, pattern });
+    const activeConflict = normativeContent
+      .split(/\r?\n/u)
+      .some((line) => line.includes(pattern) && !isExplicitSupersededReference(line));
+    if (activeConflict) failures.push({ path: relativePath, pattern });
   }
 }
 
@@ -56,7 +78,9 @@ for (const relativePath of new Set(
 }
 
 const assertions = {
-  kgenMassScale: fs.readFileSync(path.join(repo, activeFiles[0]), "utf8").includes("1 KGEN = 1 metric ton = 1,000 kg"),
+  kgenMassScale: fs
+    .readFileSync(path.join(repo, "docs/physics/KGEN_KAIOS_SCALE_AND_PLANCK_RUNTIME_CURRENT.md"), "utf8")
+    .includes("| KGEN | 1 metric ton = 1,000 kg |"),
   kaiosRatio: fs.readFileSync(path.join(repo, "KGEN-KAIOS/contracts/KAIOS.sol"), "utf8").includes("KAIOS_PER_KGEN = 1_000"),
   frictionMirror: fs.readFileSync(path.join(repo, "KGEN-KAIOS/contracts/KAIOS.sol"), "utf8").includes("IKGENSupply(KGEN).totalSupply()"),
   organRegistry: fs.readFileSync(path.join(repo, "KGEN-KAIOS/contracts/KAIOS.sol"), "utf8").includes("ORGAN_REGISTRY.organ"),

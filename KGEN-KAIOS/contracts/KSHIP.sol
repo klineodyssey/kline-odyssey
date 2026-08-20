@@ -24,6 +24,25 @@ interface IKUFOBurnRecordSource {
  * @dev KSHIP does not expire. Only an exact holder authorization may be consumed by the registered UFO organ.
  */
 contract KSHIP is ERC20, ERC20Capped {
+    string public constant SELF_NAME = unicode"星梭";
+    string public constant LIFE_ID_TEXT = "LIFE-KAIOS-XINGSUO-KSHIP-CORE";
+    string public constant SPECIES_ID = "SPECIES-KAIOS-KSHIP-PROPULSION-LIFE";
+    string public constant PARENT_LIFE_ID_TEXT = "LIFE-KAIOS-NIUMOWANG-188888";
+    string public constant LIFE_TYPE = "MOBILE_ANTIMATTER_PROPULSION_LIFE";
+    string public constant EMBODIMENT_STATUS = "RECRUITED_PENDING_EMBODIMENT";
+    uint256 public constant REGISTRY_DESTINATION_POINT = 188_888;
+    bool public constant MASS_CELL_IS_INDIVIDUAL_LIFE = false;
+    string public constant BATCH_LIFE_DOMAIN = "KAIOS.KSHIP.BATCH_LIFE.V1";
+
+    string public constant GUARDIAN_SELF_NAME = unicode"牛魔王";
+    string public constant GUARDIAN_LIFE_ID_TEXT = "LIFE-KAIOS-NIUMOWANG-188888";
+    string public constant GUARDIAN_ROLE =
+        "LAND_GUARDIAN_K188888 / ANTIMATTER_ENERGY_GUARDIAN";
+    string public constant GUARDIAN_DUTY = unicode"守護188888反物質推進能源、固定授權與航程防重放";
+    string public constant GUARDIAN_APPOINTMENT_MODE = "HUMAN_APPOINTED";
+    string public constant GUARDIAN_EMBODIMENT_STATUS = "RECRUITED_PENDING_EMBODIMENT";
+    string public constant GUARDIAN_CAPABILITY_BOUNDARY =
+        "PROPULSION_ENERGY_ONLY_NO_ARBITRARY_BURN_TRANSFER_WITHDRAW";
     bytes32 public constant ORGAN_KSHIP_CONVERTER = keccak256("KAIOS.ORGAN.KSHIP.CONVERTER");
     bytes32 public constant ORGAN_UFO_FUEL_CONSUMER = keccak256("KAIOS.ORGAN.UFO.FUEL.CONSUMER");
     uint256 public constant MAX_SUPPLY = 72_000_000_000_000_000 ether;
@@ -38,11 +57,26 @@ contract KSHIP is ERC20, ERC20Capped {
         bool consumed;
     }
 
+    struct BatchLifeRecord {
+        bytes32 batchLifeId;
+        bytes32 sourceProof;
+        address beneficiary;
+        uint256 initialAmount;
+        uint64 bornAt;
+    }
+
     IKAIOSOrganRegistry public immutable organRegistry;
     IKUFOBurnRecordSource public immutable kufo;
+    bytes32 public immutable lifeId;
+    bytes32 public immutable parentLifeId;
+    bytes32 public immutable guardianLifeId;
+    uint256 public immutable guardianPoint;
+    bytes32 public immutable guardianDutyHash;
+    bytes32 public immutable guardianCapabilityBoundaryHash;
     uint256 public totalMintedFromKufo;
     uint256 public totalBurnedForPropulsion;
     mapping(bytes32 => bool) public carrierProofMinted;
+    mapping(bytes32 => BatchLifeRecord) private _batchLifeRecords;
     mapping(bytes32 => PropulsionAuthorization) private _propulsionAuthorizations;
 
     error ZeroAddress();
@@ -56,7 +90,29 @@ contract KSHIP is ERC20, ERC20Capped {
     error IncorrectExactAllowance(uint256 currentAllowance, uint256 requiredAllowance);
     error PropulsionAuthorizationMismatch(bytes32 tripId);
 
-    event CarrierProofMinted(bytes32 indexed proofId, address indexed beneficiary, uint256 kshipAmount);
+    event CarrierProofMinted(
+        bytes32 indexed proofId,
+        bytes32 indexed batchLifeId,
+        address indexed beneficiary,
+        uint256 kshipAmount,
+        uint64 bornAt
+    );
+    event ProgramLifeRecruited(
+        bytes32 indexed programLifeId,
+        bytes32 indexed parentProgramLifeId,
+        string selfName,
+        string speciesId,
+        string lifeType,
+        string embodimentStatus
+    );
+    event LandGuardianRecruited(
+        bytes32 indexed recruitedGuardianLifeId,
+        uint256 indexed appointedGuardianPoint,
+        bytes32 indexed appointedDutyHash,
+        bytes32 capabilityHash,
+        string appointmentMode,
+        string embodimentStatus
+    );
     event PropulsionAuthorized(
         bytes32 indexed tripId,
         bytes32 indexed ufoLifeId,
@@ -81,6 +137,28 @@ contract KSHIP is ERC20, ERC20Capped {
         if (registry == address(0) || kufoToken == address(0)) revert ZeroAddress();
         organRegistry = IKAIOSOrganRegistry(registry);
         kufo = IKUFOBurnRecordSource(kufoToken);
+        lifeId = keccak256(bytes(LIFE_ID_TEXT));
+        parentLifeId = keccak256(bytes(PARENT_LIFE_ID_TEXT));
+        guardianLifeId = keccak256(bytes(GUARDIAN_LIFE_ID_TEXT));
+        guardianPoint = REGISTRY_DESTINATION_POINT;
+        guardianDutyHash = keccak256(bytes(GUARDIAN_DUTY));
+        guardianCapabilityBoundaryHash = keccak256(bytes(GUARDIAN_CAPABILITY_BOUNDARY));
+        emit ProgramLifeRecruited(
+            lifeId,
+            parentLifeId,
+            SELF_NAME,
+            SPECIES_ID,
+            LIFE_TYPE,
+            EMBODIMENT_STATUS
+        );
+        emit LandGuardianRecruited(
+            guardianLifeId,
+            guardianPoint,
+            guardianDutyHash,
+            guardianCapabilityBoundaryHash,
+            GUARDIAN_APPOINTMENT_MODE,
+            GUARDIAN_EMBODIMENT_STATUS
+        );
     }
 
     function mintFromCarrierProof(bytes32 proofId) external returns (address beneficiary, uint256 amount) {
@@ -101,8 +179,19 @@ contract KSHIP is ERC20, ERC20Capped {
         amount = burnRecord.expectedKship;
         carrierProofMinted[proofId] = true;
         totalMintedFromKufo += amount;
+        bytes32 batchLifeId = keccak256(
+            abi.encode(BATCH_LIFE_DOMAIN, block.chainid, address(this), proofId)
+        );
+        uint64 bornAt = uint64(block.timestamp);
+        _batchLifeRecords[proofId] = BatchLifeRecord({
+            batchLifeId: batchLifeId,
+            sourceProof: proofId,
+            beneficiary: beneficiary,
+            initialAmount: amount,
+            bornAt: bornAt
+        });
         _mint(beneficiary, amount);
-        emit CarrierProofMinted(proofId, beneficiary, amount);
+        emit CarrierProofMinted(proofId, batchLifeId, beneficiary, amount, bornAt);
     }
 
     function authorizePropulsion(
@@ -167,6 +256,10 @@ contract KSHIP is ERC20, ERC20Capped {
         returns (PropulsionAuthorization memory)
     {
         return _propulsionAuthorizations[tripId];
+    }
+
+    function batchLifeRecord(bytes32 proofId) external view returns (BatchLifeRecord memory) {
+        return _batchLifeRecords[proofId];
     }
 
     function conservationInvariantHolds() external view returns (bool) {

@@ -337,22 +337,25 @@ test("fortune ledger never claws back claims and requires a later voluntary repa
   const user = context.signers[2];
   const civilizationId = id("CIV-FORTUNE-LEDGER");
   await mintKaiosByBurningKgen(context, 10n * ETHER);
+  const fixtureSeedBalance = await context.kgen.balanceOf(await user.getAddress());
   await (await context.kgen.transfer(await heart.getAddress(), 20_050n * ETHER)).wait();
 
   const wishOne = id("WISH-FORTUNE-ONE");
   await makeWishAndHolyCup(context, heart, user, civilizationId, wishOne, "ONE");
   const proofOne = await createFortuneProof(context, heart, user, civilizationId, wishOne, "ONE");
+  const firstCatalyst = (await context.kaios.alchemyBurnRecord(proofOne)).requiredKgenCatalyst;
   await (await heart.connect(user).fortuneClaim(proofOne)).wait();
   const afterFirstClaim = await context.kgen.balanceOf(await user.getAddress());
-  assert.equal(afterFirstClaim, ETHER);
+  assert.equal(afterFirstClaim, fixtureSeedBalance - firstCatalyst + ETHER);
   await assert.rejects(heart.connect(user).fortuneClaim(proofOne));
 
   await advanceTime(context.provider, 30 * 86_400 + 1);
   const wishTwo = id("WISH-FORTUNE-TWO");
   await makeWishAndHolyCup(context, heart, user, civilizationId, wishTwo, "TWO");
   const proofTwo = await createFortuneProof(context, heart, user, civilizationId, wishTwo, "TWO");
+  const secondCatalyst = (await context.kaios.alchemyBurnRecord(proofTwo)).requiredKgenCatalyst;
   await assert.rejects(heart.connect(user).fortuneClaim(proofTwo));
-  assert.equal(await context.kgen.balanceOf(await user.getAddress()), afterFirstClaim);
+  assert.equal(await context.kgen.balanceOf(await user.getAddress()), afterFirstClaim - secondCatalyst);
 
   const voluntaryAmount = ETHER / 2n;
   await (await context.kgen.connect(user).approve(await heart.getAddress(), voluntaryAmount)).wait();
@@ -367,7 +370,10 @@ test("fortune ledger never claws back claims and requires a later voluntary repa
   assert.equal(ledger.claimCount, 2n);
   assert.equal(ledger.repaymentCount, 1n);
   assert.equal(ledger.repaidAfterLastClaim, false);
-  assert.equal(await context.kgen.balanceOf(await user.getAddress()), afterFirstClaim - voluntaryAmount + ETHER);
+  assert.equal(
+    await context.kgen.balanceOf(await user.getAddress()),
+    afterFirstClaim - secondCatalyst - voluntaryAmount + ETHER,
+  );
 
   const forbiddenNames = ["clawback", "seize", "freeze", "blacklist", "recoverFromPlayer"];
   const functionNames = artifact("KGEN_TempleHeart_Upgradeable").abi

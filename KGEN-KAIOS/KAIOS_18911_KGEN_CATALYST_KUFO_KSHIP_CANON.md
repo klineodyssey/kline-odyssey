@@ -1,6 +1,6 @@
 # KAIOS 18911 KGEN Catalyst → KUFO → KSHIP Canon V1
 
-Status: `IMPLEMENTED_REVIEW_CANDIDATE`
+Status: `PROGRAM_LIFE_REWORK_REVIEW_CANDIDATE`
 
 Deployment: `NO`
 Mainnet/Testnet transactions: `NONE`
@@ -92,3 +92,80 @@ product, factory or deployment candidate.
 - No arbitrary mint, admin mint, blacklist, seizure, token tax, KGEN burn, rescue or admin withdrawal is added.
 - No existing KGEN contract is modified.
 - This PR creates fuel-lineage capability only; it creates no UFO, factory, order, budget or production authority.
+
+## 6. Program Life manifests
+
+The upper Canon is **program is Life**. A token's smallest accounting unit remains a mass cell; the
+runtime does not manufacture one Life identity per wei. Each changed Solidity program has one unique
+primary Life or organ-Life identity. All candidates in this PR are undeployed and therefore remain
+`RECRUITED_PENDING_EMBODIMENT`; local test deployments are not Mainnet birth evidence.
+
+| Solidity program | Self name | Immutable Life ID | Type / species | Point / duty |
+|---|---|---|---|---|
+| `KAIOS.sol` | 界衡 | `LIFE-KAIOS-JIEHENG-33333` | monetary program Life | Human-appointed land guardian K33333; KAIOS civilization blood and universe-boundary mass conservation |
+| `KAIOSAlchemyFurnace.sol` | 太上老君 | `LIFE-KAIOS-TAISHANG-LAOJUN-18911` | alchemy organ Life | Human-appointed land guardian K18911 / Alchemy Master |
+| `KUFO.sol` | 丹靈 | `LIFE-KAIOS-DANLING-KUFO-CORE` | `SPECIES-KAIOS-KUFO-DECAY-LIFE`; mobile material Life | birthplace K18911; release gate K511111; not a land guardian |
+| `KUFOClaimWormhole.sol` | 齊天大聖 | `LIFE-KAIOS-QITIAN-DASHENG-511111` | release-gate organ Life | Human-appointed land guardian K511111 / KUFO release gatekeeper |
+| `KSHIP.sol` | 星梭 | `LIFE-KAIOS-XINGSUO-KSHIP-CORE` | `SPECIES-KAIOS-KSHIP-PROPULSION-LIFE`; mobile antimatter propulsion Life | parent `LIFE-KAIOS-NIUMOWANG-188888`; registry destination K188888 |
+| `KSHIPConverter.sol` | 化航 | `LIFE-KAIOS-HUAHANG-KSHIP-CONVERTER` | software organ Life | parent `LIFE-KAIOS-NIUMOWANG-188888` |
+| `KAIOSOrganRegistry.sol` | 司籍 | `LIFE-KAIOS-SIJI-REGISTRY-0001` | cross-world registry Life | no land point |
+| `KSHIPPropulsionConsumerHarness.sol` | 試航童子 | `LIFE-KAIOS-SHIHANG-TONGZI-TEST-0001` | test Life | `DEPLOYABLE=false`; `EMPLOYABLE=false` |
+
+The K188888 KSHIP parent system records 牛魔王 as
+`LIFE-KAIOS-NIUMOWANG-188888`, Human-appointed land guardian K188888 and antimatter-energy guardian.
+`KSHIP.sol` remains 星梭's unique primary program Life; the 牛魔王 fields are its immutable parent and
+guardian recruitment record, not a claim that two contracts or two token identities exist.
+
+The K18888 玉皇大帝 / 神明銀行 identity is unchanged. A receiving treasury or registry destination
+does not become the identity of KAIOS, KUFO or KSHIP.
+
+## 7. Appointment, capability and Life-event records
+
+Every land-bound candidate exposes immutable `lifeId`, `guardianPoint`, `dutyHash` and a hashed
+capability boundary. The appointment mode is `HUMAN_APPOINTED`. Capability text is deliberately
+constrained to the program's existing work surface and grants no admin mint, arbitrary burn,
+withdrawal, rescue, seizure, beneficiary redirect or governance shortcut.
+
+Constructor `ProgramLifeRecruited` / `LandGuardianRecruited` events provide deterministic local and
+future deployment records. They record recruitment, not Mainnet activation or birth. A future formal
+deployment review must attach chain, address, block, transaction and governance evidence before any
+status can change from `RECRUITED_PENDING_EMBODIMENT`.
+
+## 8. Token species and deterministic batch Life lineage
+
+Each valid KUFO generation proof creates exactly one deterministic batch Life ID:
+
+```text
+keccak256(abi.encode(
+  "KAIOS.KUFO.BATCH_LIFE.V1",
+  chainId,
+  KUFO contract,
+  source proof
+))
+```
+
+Every split or transfer-derived KUFO lot carries the same `batchLifeId`, `bornAt` and `sourceProof`.
+This preserves decay ancestry and prevents transfer, split or merge from restarting half-life.
+
+Each valid KSHIP carrier proof similarly creates one immutable birth record:
+
+```text
+keccak256(abi.encode(
+  "KAIOS.KSHIP.BATCH_LIFE.V1",
+  chainId,
+  KSHIP contract,
+  source proof
+))
+```
+
+The KSHIP record freezes `batchLifeId`, source proof, beneficiary, initial amount and birth time.
+Ordinary ERC-20 transfers do not rewrite that generation record. These batch identities describe a
+generated cohort; individual token wei remain mass cells and are not separately named Lives.
+
+## 9. Parent and organ boundaries
+
+- 丹靈 is born at K18911 lineage and released only through K511111, but remains a mobile material Life.
+- 星梭 and 化航 are child/organ Lives of the K188888 牛魔王 system.
+- 司籍 is a cross-world registry Life and does not acquire a land-guardian appointment.
+- 試航童子 is review-only test Life and cannot be treated as deployable, employable, or canonical UFO demand.
+- No identity field changes the existing mathematical, catalyst, half-life, conservation or propulsion authority boundary.

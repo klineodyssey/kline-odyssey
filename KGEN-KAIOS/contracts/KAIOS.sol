@@ -41,6 +41,14 @@ interface IKGENSupply {
  * / Qitian Dasheng Palace protocol.
  */
 contract KAIOS is ERC20, ERC20Capped {
+    string public constant SELF_NAME = unicode"界衡";
+    string public constant LIFE_ID_TEXT = "LIFE-KAIOS-JIEHENG-33333";
+    string public constant ROLE = "LAND_GUARDIAN_K33333";
+    string public constant DUTY = unicode"KAIOS文明血液與宇宙邊界質量守衡";
+    string public constant APPOINTMENT_MODE = "HUMAN_APPOINTED";
+    string public constant EMBODIMENT_STATUS = "RECRUITED_PENDING_EMBODIMENT";
+    string public constant CAPABILITY_BOUNDARY =
+        "MONETARY_CORE_ONLY_NO_ADMIN_MINT_WITHDRAW_SEIZURE_RESCUE";
     bytes32 public constant ORGAN_FURNACE_18911 = keccak256("KAIOS.ORGAN.FURNACE.18911");
     uint256 public constant KGEN_GENESIS_SUPPLY = 72_000_000 ether;
     uint256 public constant KAIOS_PER_KGEN = 1_000;
@@ -68,6 +76,10 @@ contract KAIOS is ERC20, ERC20Capped {
     address public immutable KGEN;
     address public immutable LINGXIAO_TREASURY_18888;
     IKAIOSOrganRegistry public immutable ORGAN_REGISTRY;
+    bytes32 public immutable lifeId;
+    uint256 public immutable guardianPoint;
+    bytes32 public immutable dutyHash;
+    bytes32 public immutable capabilityBoundaryHash;
 
     uint256 public settledKgenBurned;
     uint256 public totalKaiosMintedFromKgen;
@@ -128,6 +140,15 @@ contract KAIOS is ERC20, ERC20Capped {
         bytes32 destinationCode
     );
 
+    event ProgramLifeRecruited(
+        bytes32 indexed programLifeId,
+        uint256 indexed appointedGuardianPoint,
+        bytes32 indexed appointedDutyHash,
+        bytes32 capabilityHash,
+        string appointmentMode,
+        string embodimentStatus
+    );
+
     constructor(
         address canonicalKgen,
         address treasury18888,
@@ -148,11 +169,24 @@ contract KAIOS is ERC20, ERC20Capped {
         KGEN = canonicalKgen;
         LINGXIAO_TREASURY_18888 = treasury18888;
         ORGAN_REGISTRY = IKAIOSOrganRegistry(organRegistry);
+        lifeId = keccak256(bytes(LIFE_ID_TEXT));
+        guardianPoint = KAIOS_DEPLOY_POINT_ID;
+        dutyHash = keccak256(bytes(DUTY));
+        capabilityBoundaryHash = keccak256(bytes(CAPABILITY_BOUNDARY));
 
         uint256 supply = IKGENSupply(canonicalKgen).totalSupply();
         if (supply > KGEN_GENESIS_SUPPLY) {
             revert KgenSupplyAboveGenesis(supply, KGEN_GENESIS_SUPPLY);
         }
+
+        emit ProgramLifeRecruited(
+            lifeId,
+            guardianPoint,
+            dutyHash,
+            capabilityBoundaryHash,
+            APPOINTMENT_MODE,
+            EMBODIMENT_STATUS
+        );
     }
 
     function settleWhiteHoleMass()
@@ -203,7 +237,7 @@ contract KAIOS is ERC20, ERC20Capped {
         address beneficiary,
         uint256 kaiosAmount,
         uint256 requiredKgenCatalyst,
-        bytes32 lifeId,
+        bytes32 subjectLifeId,
         bytes32 destinationCode
     )
         external
@@ -246,7 +280,7 @@ contract KAIOS is ERC20, ERC20Capped {
                 beneficiary,
                 kaiosAmount,
                 requiredKgenCatalyst,
-                lifeId,
+                subjectLifeId,
                 destinationCode,
                 msg.sender
             )
@@ -263,7 +297,7 @@ contract KAIOS is ERC20, ERC20Capped {
             furnace: msg.sender,
             kaiosBurned: kaiosAmount,
             expectedKufo: expectedKufo,
-            lifeId: lifeId,
+            lifeId: subjectLifeId,
             destinationCode: destinationCode,
             blockNumber: block.number,
             timestamp: block.timestamp,
@@ -281,7 +315,7 @@ contract KAIOS is ERC20, ERC20Capped {
             kaiosAmount,
             requiredKgenCatalyst,
             expectedKufo,
-            lifeId,
+            subjectLifeId,
             destinationCode
         );
     }

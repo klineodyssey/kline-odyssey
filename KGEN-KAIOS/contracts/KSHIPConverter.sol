@@ -21,8 +21,15 @@ interface IKSHIPMinter {
  * @notice Holder-authorized conversion of newly matured KUFO decay into KSHIP.
  */
 contract KSHIPConverter is ReentrancyGuard {
+    string public constant SELF_NAME = unicode"化航";
+    string public constant LIFE_ID_TEXT = "LIFE-KAIOS-HUAHANG-KSHIP-CONVERTER";
+    string public constant PARENT_LIFE_ID_TEXT = "LIFE-KAIOS-NIUMOWANG-188888";
+    string public constant LIFE_TYPE = "SOFTWARE_ORGAN_LIFE";
+    string public constant EMBODIMENT_STATUS = "RECRUITED_PENDING_EMBODIMENT";
     IKUFOCarrierBurnable public immutable kufo;
     IKSHIPMinter public immutable kship;
+    bytes32 public immutable lifeId;
+    bytes32 public immutable parentLifeId;
     uint256 public conversionCount;
 
     event KSHIPConversion(
@@ -32,11 +39,27 @@ contract KSHIPConverter is ReentrancyGuard {
         uint256 kufoBurned,
         uint256 kshipMinted
     );
+    event ProgramLifeRecruited(
+        bytes32 indexed programLifeId,
+        bytes32 indexed parentProgramLifeId,
+        string selfName,
+        string lifeType,
+        string embodimentStatus
+    );
 
     constructor(address kufoToken, address kshipToken) {
         require(kufoToken != address(0) && kshipToken != address(0), "ZERO_ADDRESS");
         kufo = IKUFOCarrierBurnable(kufoToken);
         kship = IKSHIPMinter(kshipToken);
+        lifeId = keccak256(bytes(LIFE_ID_TEXT));
+        parentLifeId = keccak256(bytes(PARENT_LIFE_ID_TEXT));
+        emit ProgramLifeRecruited(
+            lifeId,
+            parentLifeId,
+            SELF_NAME,
+            LIFE_TYPE,
+            EMBODIMENT_STATUS
+        );
     }
 
     function convert(uint256 maximumKufoAmount, address beneficiary)

@@ -17,6 +17,14 @@ interface IKSHIPPropulsion {
  * @dev This is not a UFO product, factory, canonical consumer or deployment candidate.
  */
 contract KSHIPPropulsionConsumerHarness {
+    string public constant SELF_NAME = unicode"試航童子";
+    string public constant LIFE_ID_TEXT = "LIFE-KAIOS-SHIHANG-TONGZI-TEST-0001";
+    string public constant LIFE_TYPE = "TEST_LIFE";
+    string public constant EMBODIMENT_STATUS = "RECRUITED_PENDING_EMBODIMENT";
+    bool public constant DEPLOYABLE = false;
+    bool public constant EMPLOYABLE = false;
+    bytes32 public constant LIFE_ID = keccak256(bytes(LIFE_ID_TEXT));
+
     function consume(
         address kship,
         address holder,

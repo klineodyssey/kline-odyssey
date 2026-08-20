@@ -51,6 +51,16 @@ interface IAlchemyFurnaceProofSource {
  * @dev Binary fixed-point exponentiation realizes 2^(-elapsed/halfLife). Transfers split lots without changing bornAt.
  */
 contract KUFO is ERC20, ERC20Capped {
+    string public constant SELF_NAME = unicode"丹靈";
+    string public constant LIFE_ID_TEXT = "LIFE-KAIOS-DANLING-KUFO-CORE";
+    string public constant SPECIES_ID = "SPECIES-KAIOS-KUFO-DECAY-LIFE";
+    string public constant LIFE_TYPE = "MOBILE_MATERIAL_LIFE";
+    string public constant EMBODIMENT_STATUS = "RECRUITED_PENDING_EMBODIMENT";
+    uint256 public constant BIRTHPLACE_POINT = 18_911;
+    uint256 public constant RELEASE_GATE_POINT = 511_111;
+    bool public constant LAND_GUARDIAN = false;
+    bool public constant MASS_CELL_IS_INDIVIDUAL_LIFE = false;
+    string public constant BATCH_LIFE_DOMAIN = "KAIOS.KUFO.BATCH_LIFE.V1";
     bytes32 public constant ORGAN_WORMHOLE_511111 = keccak256("KAIOS.ORGAN.WORMHOLE.511111");
     bytes32 public constant ORGAN_KSHIP_CONVERTER = keccak256("KAIOS.ORGAN.KSHIP.CONVERTER");
     uint256 public constant KSHIP_PER_KUFO = 1_000;
@@ -64,6 +74,7 @@ contract KUFO is ERC20, ERC20Capped {
         uint256 convertedAmount;
         uint64 bornAt;
         bytes32 sourceProof;
+        bytes32 batchLifeId;
     }
 
     struct CarrierBurnRecord {
@@ -78,11 +89,13 @@ contract KUFO is ERC20, ERC20Capped {
     IKAIOSOrganRegistry public immutable organRegistry;
     IKAIOSBurnRecordSource public immutable kaios;
     uint256 public immutable halfLifeSeconds;
+    bytes32 public immutable lifeId;
     uint256 public totalMintedFromKaios;
     uint256 public totalBurnedForKship;
     uint256 public nextLotId = 1;
 
     mapping(bytes32 => bool) public maturedProofMinted;
+    mapping(bytes32 => bytes32) public proofBatchLifeId;
     mapping(bytes32 => bool) public carrierProofRecorded;
     mapping(uint256 => DecayLot) private _decayLots;
     mapping(address => uint256[]) private _ownerLotIds;
@@ -105,14 +118,23 @@ contract KUFO is ERC20, ERC20Capped {
         uint256 indexed lotId,
         address indexed beneficiary,
         uint256 kufoAmount,
-        uint64 bornAt
+        uint64 bornAt,
+        bytes32 batchLifeId
     );
     event DecayLotSplit(
         uint256 indexed parentLotId,
         uint256 indexed childLotId,
         address indexed newOwner,
         uint256 childInitialAmount,
-        uint256 childConvertedAmount
+        uint256 childConvertedAmount,
+        bytes32 batchLifeId
+    );
+    event ProgramLifeRecruited(
+        bytes32 indexed programLifeId,
+        string selfName,
+        string speciesId,
+        string lifeType,
+        string embodimentStatus
     );
     event KUFOBurnedForCarrier(
         bytes32 indexed carrierProofId,
@@ -131,6 +153,8 @@ contract KUFO is ERC20, ERC20Capped {
         organRegistry = IKAIOSOrganRegistry(registry);
         kaios = IKAIOSBurnRecordSource(kaiosToken);
         halfLifeSeconds = kufoHalfLifeSeconds;
+        lifeId = keccak256(bytes(LIFE_ID_TEXT));
+        emit ProgramLifeRecruited(lifeId, SELF_NAME, SPECIES_ID, LIFE_TYPE, EMBODIMENT_STATUS);
     }
 
     function mintFromMaturedProof(bytes32 proofId) external returns (address beneficiary, uint256 amount) {
@@ -170,8 +194,26 @@ contract KUFO is ERC20, ERC20Capped {
         maturedProofMinted[proofId] = true;
         totalMintedFromKaios += amount;
         _mint(beneficiary, amount);
-        uint256 lotId = _createLot(beneficiary, amount, 0, uint64(block.timestamp), proofId);
-        emit MaturedProofMinted(proofId, lotId, beneficiary, amount, uint64(block.timestamp));
+        bytes32 batchLifeId = keccak256(
+            abi.encode(BATCH_LIFE_DOMAIN, block.chainid, address(this), proofId)
+        );
+        proofBatchLifeId[proofId] = batchLifeId;
+        uint256 lotId = _createLot(
+            beneficiary,
+            amount,
+            0,
+            uint64(block.timestamp),
+            proofId,
+            batchLifeId
+        );
+        emit MaturedProofMinted(
+            proofId,
+            lotId,
+            beneficiary,
+            amount,
+            uint64(block.timestamp),
+            batchLifeId
+        );
     }
 
     function burnMaturedDecayForCarrier(
@@ -295,8 +337,22 @@ contract KUFO is ERC20, ERC20Capped {
                 uint256 childConverted = childInitial - take;
                 lot.initialAmount -= childInitial;
                 lot.convertedAmount -= childConverted;
-                uint256 childId = _createLot(to, childInitial, childConverted, lot.bornAt, lot.sourceProof);
-                emit DecayLotSplit(lotId, childId, to, childInitial, childConverted);
+                uint256 childId = _createLot(
+                    to,
+                    childInitial,
+                    childConverted,
+                    lot.bornAt,
+                    lot.sourceProof,
+                    lot.batchLifeId
+                );
+                emit DecayLotSplit(
+                    lotId,
+                    childId,
+                    to,
+                    childInitial,
+                    childConverted,
+                    lot.batchLifeId
+                );
             }
             remainingToMove -= take;
         }
@@ -308,10 +364,18 @@ contract KUFO is ERC20, ERC20Capped {
         uint256 initialAmount,
         uint256 convertedAmount,
         uint64 bornAt,
-        bytes32 sourceProof
+        bytes32 sourceProof,
+        bytes32 batchLifeId
     ) private returns (uint256 lotId) {
         lotId = nextLotId++;
-        _decayLots[lotId] = DecayLot(owner, initialAmount, convertedAmount, bornAt, sourceProof);
+        _decayLots[lotId] = DecayLot(
+            owner,
+            initialAmount,
+            convertedAmount,
+            bornAt,
+            sourceProof,
+            batchLifeId
+        );
         _ownerLotIds[owner].push(lotId);
     }
 
