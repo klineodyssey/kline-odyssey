@@ -1,0 +1,1152 @@
+{
+  "status": "REAL_BSC_MAINNET_GENESIS_SETTLEMENT_VERIFIED",
+  "chainId": "56",
+  "pointIds": {
+    "kaiosGoldAndSilverIsland": "33333",
+    "whiteHole": "36000",
+    "lingxiaoCelestialBank": "18888"
+  },
+  "addresses": {
+    "kaiosToken": "0xD4E67B3a69e41524c424150E6b6e921b01D036db",
+    "kgenToken": "0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be",
+    "lingxiaoBankProxy": "0x11d34c0F723aCd334B8F95076f73F07f06202aab",
+    "alchemyFurnace18911": "0x44c2CA9B9eba19d8F79F6E1786fd9D25e73738e1",
+    "organRegistry": "0xA9e7CbF161E39E556f4B5b8E41397Ac4B87a932D"
+  },
+  "settlement": {
+    "transactionHash": "0xc9fab344cc0055cab2e8dad1105f0a913fa94c15b39c76a241d3f190eb18767a",
+    "blockNumber": 115637581,
+    "timestamp": 1786597537,
+    "timestampIso": "2026-08-13T05:05:37.000Z",
+    "caller": "0xCd60BF474e691F2484950a0276Eaf507616Ca4b9",
+    "kgenGenesisSupply": {
+      "raw": "72000000000000000000000000",
+      "decimal18": "72000000.0"
+    },
+    "kgenSupplyAtSettlementBlock": {
+      "raw": "71977786091069583125268765",
+      "decimal18": "71977786.091069583125268765"
+    },
+    "historicalKgenBurn": {
+      "raw": "22213908930416874731235",
+      "decimal18": "22213.908930416874731235"
+    },
+    "actualGenesisKaiosMinted": {
+      "raw": "22213908930416874731235000",
+      "decimal18": "22213908.930416874731235"
+    },
+    "kaiosTotalSupply": {
+      "raw": "22213908930416874731235000",
+      "decimal18": "22213908.930416874731235"
+    },
+    "bankBalanceBefore": {
+      "raw": "0",
+      "decimal18": "0.0"
+    },
+    "bankBalanceAfter": {
+      "raw": "22213908930416874731235000",
+      "decimal18": "22213908.930416874731235"
+    },
+    "bankBalanceDelta": {
+      "raw": "22213908930416874731235000",
+      "decimal18": "22213908.930416874731235"
+    }
+  },
+  "inscription": [
+    "NO KGEN BURN, NO KAIOS MINT.",
+    "ONE BURNED KGEN CREATES ONE THOUSAND KAIOS.",
+    "NO DISCRETIONARY MINTING.",
+    "CIVILIZATION MASS SHALL BE CONSERVED."
+  ],
+  "generation": "AUTOMATIC_FROM_CHAIN_STATE_USING_BIGINT_NO_HUMAN_AMOUNT_INPUT",
+  "deployment": {
+    "status": "KAIOS_MAINNET_GENESIS_COMPLETE",
+    "frozenHead": "9492d73aaac7a9cee2cf9b813aa78468719aadcd",
+    "economicConfigSha256": "5e2fc57df2bae4778d5e405dfa07f8e3e78fe72a7de3dd9889aad4e6d86b8bd4",
+    "canonicalInscriptionKeccak256": "0xbc89db0915e1fd0e978ae0cfe194f4b46db22534febab35563de2802935b3704",
+    "canonicalInscriptionSha256": "add44b79083a20a6d9f240a99c5fd47658f191ce8b3fa81da6f60c97e8b4470f",
+    "identities": {
+      "deploymentSigner": "0xb3C54ca96De0dED4Ca0151F629ff9781506ba261",
+      "motherPrimaryGovernance": "0xCd60BF474e691F2484950a0276Eaf507616Ca4b9",
+      "jadeEmperorDistinctApprover": "0xc15E08834fCA9F2d3462a3f8f0BC30524D6dd756",
+      "guanyinFinalPauser": "0xEBEeAC6d09D2d28Db8010b0923442C9Eb2b702FE"
+    },
+    "legacyHeart": {
+      "address": "0xB016D4d8f1aED1339101b30722cad6dbA9B8C972",
+      "status": "DO_NOT_TOUCH",
+      "touched": false
+    },
+    "contracts": [
+      {
+        "order": 1,
+        "identity": "KAIOS_ORGAN_REGISTRY",
+        "address": "0xA9e7CbF161E39E556f4B5b8E41397Ac4B87a932D",
+        "transactionHash": "0x3a08b751152d9861aafd6c4d98a0f2da6fe24657359e4927915de57c2e26f766",
+        "blockNumber": 115628496,
+        "gasUsed": "653603",
+        "nonce": 34,
+        "status": "LIVE"
+      },
+      {
+        "order": 2,
+        "identity": "LINGXIAO_18888_BANK_IMPLEMENTATION",
+        "address": "0x8125045039Fe969490d57185233B7d64A494A829",
+        "transactionHash": "0x6213d21f9463e01d5d4dd0fe8422da9354cdb19c612b3eaf413bab88bb1315cb",
+        "blockNumber": 115628499,
+        "gasUsed": "2734493",
+        "nonce": 35,
+        "status": "LIVE"
+      },
+      {
+        "order": 3,
+        "identity": "LINGXIAO_18888_BANK_PROXY",
+        "address": "0x11d34c0F723aCd334B8F95076f73F07f06202aab",
+        "transactionHash": "0x6bc60d0dbf1a1d1e62f8fe62f203239a126d597c5f44a0e44ac9def54679d8c3",
+        "blockNumber": 115628510,
+        "gasUsed": "306384",
+        "nonce": 36,
+        "status": "LIVE"
+      },
+      {
+        "order": 4,
+        "identity": "GAOLAOZHUANG_8888_COMMERCIAL_BANK_IMPLEMENTATION",
+        "address": "0x94341fB340cF8Bd0069cD1Fcaf5bA0866B15c923",
+        "transactionHash": "0xc434af43195b1edfea0bf083ec1adad3c606317ac2ee565c31e671c4ae6ba698",
+        "blockNumber": 115628522,
+        "gasUsed": "4016007",
+        "nonce": 37,
+        "status": "LIVE"
+      },
+      {
+        "order": 5,
+        "identity": "GAOLAOZHUANG_8888_COMMERCIAL_BANK_PROXY",
+        "address": "0x9EcAe137b3A307971EB77B4CDB3ba13aeeF5297C",
+        "transactionHash": "0xebe5688a6abec93883d1949d2d5dd6daaa76b10116f2af4090dbffe2cb8a8e24",
+        "blockNumber": 115628524,
+        "gasUsed": "425322",
+        "nonce": 38,
+        "status": "LIVE"
+      },
+      {
+        "order": 6,
+        "identity": "CELESTIAL_SEAT_500_IMPLEMENTATION",
+        "address": "0x8E48643030826c9121Cd2E086B811b9083E9f862",
+        "transactionHash": "0xca8d6873d26530308710c1576bb356ec9852689e3c4460353daf3929a12121c0",
+        "blockNumber": 115628527,
+        "gasUsed": "2899103",
+        "nonce": 39,
+        "status": "LIVE"
+      },
+      {
+        "order": 7,
+        "identity": "CELESTIAL_SEAT_500_PROXY",
+        "address": "0xA447853985Ef6e6AbFcb14FCfDeFdced10Be0BDe",
+        "transactionHash": "0xeac9e86049a4523b7a17a25e838b6bf62ade95994de93f28cb337394c53ae3cf",
+        "blockNumber": 115628538,
+        "gasUsed": "354735",
+        "nonce": 40,
+        "status": "LIVE"
+      },
+      {
+        "order": 8,
+        "identity": "CIVILIZATION_ALLOCATION_IMPLEMENTATION",
+        "address": "0x216d69a413354CBab7ddDdC4fCfe2B3E0468197d",
+        "transactionHash": "0x7659f72a65c70efdda6b779b65de61c958dbfbbee4c4f1105505687d3bd7d220",
+        "blockNumber": 115628549,
+        "gasUsed": "1399667",
+        "nonce": 41,
+        "status": "LIVE"
+      },
+      {
+        "order": 9,
+        "identity": "CIVILIZATION_ALLOCATION_PROXY",
+        "address": "0x75A55Af6967932C4A1c896dB81Dd6F31e531c299",
+        "transactionHash": "0xd30d485f55ed2af6afff82d752b39c615e12dc3b385952c68e4f095439a910e0",
+        "blockNumber": 115628553,
+        "gasUsed": "303999",
+        "nonce": 42,
+        "status": "LIVE"
+      },
+      {
+        "order": 10,
+        "identity": "ECONOMIC_ROUTER_8888_IMPLEMENTATION",
+        "address": "0x3ebc0A39F7981AAB3995AC828dc79A8B0753A05b",
+        "transactionHash": "0x7ef6be94b298fdd917152ee06323f96198203f3b5aa6f6b74a69779e3991ebaf",
+        "blockNumber": 115628556,
+        "gasUsed": "1261793",
+        "nonce": 43,
+        "status": "LIVE"
+      },
+      {
+        "order": 11,
+        "identity": "ECONOMIC_ROUTER_8888_PROXY",
+        "address": "0xC49f989c6ff0d22824df8D993Ce82207165C1428",
+        "transactionHash": "0xc1904c2fef2a539182262618c441e6fa451aa4147e66272381a7078301691b6e",
+        "blockNumber": 115628561,
+        "gasUsed": "330557",
+        "nonce": 44,
+        "status": "LIVE"
+      },
+      {
+        "order": 12,
+        "identity": "EXCHANGE_SETTLEMENT_11520_IMPLEMENTATION",
+        "address": "0xA08A9CEcfa18b2FDb9ca8De0063A5029B9Ffc363",
+        "transactionHash": "0xc64f00332edd4a7adf23ec5028b579d0a145eac5acece46dcef29096d2793b68",
+        "blockNumber": 115628572,
+        "gasUsed": "1261805",
+        "nonce": 45,
+        "status": "LIVE"
+      },
+      {
+        "order": 13,
+        "identity": "EXCHANGE_SETTLEMENT_11520_PROXY",
+        "address": "0x17587F49dFDE4e400D03Ae81364AC2af8E1629Df",
+        "transactionHash": "0x71832f0a0bd85066d45347f521d5fee9dfd0b717ba2e40b87ef7f9960035a908",
+        "blockNumber": 115628583,
+        "gasUsed": "330557",
+        "nonce": 46,
+        "status": "LIVE"
+      },
+      {
+        "order": 14,
+        "identity": "BANK_RISK_CONTROLLER_IMPLEMENTATION",
+        "address": "0x8D231C82513cdfa978A7C157618Ff198b0a5d3E9",
+        "transactionHash": "0xa871163c208f06981ae680f07b50493e00f509ec03cf6c88542bb0cd49936359",
+        "blockNumber": 115628594,
+        "gasUsed": "1349091",
+        "nonce": 47,
+        "status": "LIVE"
+      },
+      {
+        "order": 15,
+        "identity": "BANK_RISK_CONTROLLER_PROXY",
+        "address": "0x61573a93a88c58DAa5066A0aA319f88cE34d88FC",
+        "transactionHash": "0x6ead47598ff45521ec92a51073303c897bdc300f9ac9e93105d5b053fd5a8ecc",
+        "blockNumber": 115628604,
+        "gasUsed": "304010",
+        "nonce": 48,
+        "status": "LIVE"
+      },
+      {
+        "order": 16,
+        "identity": "BANK_GOVERNANCE_IMPLEMENTATION",
+        "address": "0x9d919E66AE2746D41D978e3d51DF594B2E5F5582",
+        "transactionHash": "0x75634c96256af7fcc404a7ee58a0da9bc7f7ae7698781b6deec32a5ced97ea0a",
+        "blockNumber": 115628610,
+        "gasUsed": "1646003",
+        "nonce": 49,
+        "status": "LIVE"
+      },
+      {
+        "order": 17,
+        "identity": "BANK_GOVERNANCE_PROXY",
+        "address": "0xa2792fBDCc8A8AaC364053431D44E0a8D335E166",
+        "transactionHash": "0xe47a9761a3ad3dcb612cdd1dda2bd36e0606c836175870093b66f8e3ee550192",
+        "blockNumber": 115628618,
+        "gasUsed": "375214",
+        "nonce": 50,
+        "status": "LIVE"
+      },
+      {
+        "order": 18,
+        "identity": "BANK_MIGRATION_IMPLEMENTATION",
+        "address": "0xff281a821dBbA44EEc7b57475E3c28A916fcDAE7",
+        "transactionHash": "0xb5d2735d66b2c0e1446882b8063d2ca348750d4078dcabe96099630a4760a2fe",
+        "blockNumber": 115628620,
+        "gasUsed": "1346137",
+        "nonce": 51,
+        "status": "LIVE"
+      },
+      {
+        "order": 19,
+        "identity": "BANK_MIGRATION_PROXY",
+        "address": "0x72c14f5D2fa748C1579295A7E34c16453a3a17aB",
+        "transactionHash": "0x4e069e7cc25b73c6c1d3ac66b4ee779075cfe58496bdfaac0df69146bfb05763",
+        "blockNumber": 115628622,
+        "gasUsed": "303989",
+        "nonce": 52,
+        "status": "LIVE"
+      },
+      {
+        "order": 20,
+        "identity": "KAIOS_TOKEN_CORE",
+        "address": "0xD4E67B3a69e41524c424150E6b6e921b01D036db",
+        "transactionHash": "0x731bccd9d1116831d9b43966672cb27d9017c75b6806c32109c5c210d2c3be9c",
+        "blockNumber": 115628625,
+        "gasUsed": "1373218",
+        "nonce": 53,
+        "status": "LIVE"
+      },
+      {
+        "order": 21,
+        "identity": "ALCHEMY_FURNACE_18911",
+        "address": "0x44c2CA9B9eba19d8F79F6E1786fd9D25e73738e1",
+        "transactionHash": "0x4dae645b4b40348fc06bd65f08d238919c20011924bf54da82c3d7e5f0fd6343",
+        "blockNumber": 115628629,
+        "gasUsed": "506666",
+        "nonce": 54,
+        "status": "LIVE"
+      }
+    ],
+    "genesisInscription": {
+      "address": "0xb02CBc7698646653D541F494F510Fe18638AC7ae",
+      "transactionHash": "0xb2ff08d1779229cc72904818ee5b342b2134ae247253c16156dd899f6bece336",
+      "blockNumber": 115637610,
+      "gasUsed": "540149",
+      "nonce": 55,
+      "status": "LIVE"
+    },
+    "governanceFinalization": {
+      "proposalId": "0x241380b64e53008cc8ea0b6e0235c1ffbda639912329764eb9f8e200f6b255bb",
+      "delaySeconds": "3600",
+      "proposalReceipt": {
+        "transactionHash": "0x9b9ffb38f607a4a7d19a12bfe21cd56c6f7ed40c126b146e2ec0ed9f31dce70b",
+        "blockNumber": 115629071,
+        "gasUsed": "110400",
+        "contractAddress": null,
+        "status": 1,
+        "from": "0xCd60BF474e691F2484950a0276Eaf507616Ca4b9",
+        "to": "0xa2792fBDCc8A8AaC364053431D44E0a8D335E166"
+      },
+      "approvalReceipt": {
+        "transactionHash": "0xa54cc8e64c542ff715604450458e43b72a2c25a935216457df297d3e840cdfe8",
+        "blockNumber": 115629082,
+        "gasUsed": "57643",
+        "contractAddress": null,
+        "status": 1,
+        "from": "0xc15E08834fCA9F2d3462a3f8f0BC30524D6dd756",
+        "to": "0xa2792fBDCc8A8AaC364053431D44E0a8D335E166"
+      },
+      "eta": "1786597307",
+      "executed": true,
+      "executeReceipt": {
+        "transactionHash": "0xd525cba81a7f742d4b9152a642e1a42feaaa21fd0ff4e6f52418a88b5f8a05d3",
+        "blockNumber": 115637135,
+        "gasUsed": "61492",
+        "contractAddress": null,
+        "status": 1,
+        "from": "0xCd60BF474e691F2484950a0276Eaf507616Ca4b9",
+        "to": "0xa2792fBDCc8A8AaC364053431D44E0a8D335E166"
+      }
+    },
+    "genesisEpochTransaction": {
+      "transactionHash": "0xe2aad950d33214d05f44274d76d71f72a6d1f9a3192df8682d3a10913f0996be",
+      "blockNumber": 115637592,
+      "gasUsed": "112999",
+      "contractAddress": null,
+      "status": 1,
+      "from": "0xCd60BF474e691F2484950a0276Eaf507616Ca4b9",
+      "to": "0x11d34c0F723aCd334B8F95076f73F07f06202aab"
+    },
+    "transactionCount": 57,
+    "transactions": [
+      {
+        "identity": "DEPLOY_01_KAIOS_ORGAN_REGISTRY",
+        "signer": "0xb3C54ca96De0dED4Ca0151F629ff9781506ba261",
+        "nonce": 34,
+        "transactionHash": "0x3a08b751152d9861aafd6c4d98a0f2da6fe24657359e4927915de57c2e26f766",
+        "blockNumber": 115628496,
+        "gasUsed": "653603",
+        "gasPriceWei": "50000000",
+        "contractAddress": "0xA9e7CbF161E39E556f4B5b8E41397Ac4B87a932D",
+        "target": null,
+        "status": "SUCCESS"
+      },
+      {
+        "identity": "DEPLOY_02_LINGXIAO_18888_BANK_IMPLEMENTATION",
+        "signer": "0xb3C54ca96De0dED4Ca0151F629ff9781506ba261",
+        "nonce": 35,
+        "transactionHash": "0x6213d21f9463e01d5d4dd0fe8422da9354cdb19c612b3eaf413bab88bb1315cb",
+        "blockNumber": 115628499,
+        "gasUsed": "2734493",
+        "gasPriceWei": "50000000",
+        "contractAddress": "0x8125045039Fe969490d57185233B7d64A494A829",
+        "target": null,
+        "status": "SUCCESS"
+      },
+      {
+        "identity": "DEPLOY_03_LINGXIAO_18888_BANK_PROXY",
+        "signer": "0xb3C54ca96De0dED4Ca0151F629ff9781506ba261",
+        "nonce": 36,
+        "transactionHash": "0x6bc60d0dbf1a1d1e62f8fe62f203239a126d597c5f44a0e44ac9def54679d8c3",
+        "blockNumber": 115628510,
+        "gasUsed": "306384",
+        "gasPriceWei": "50000000",
+        "contractAddress": "0x11d34c0F723aCd334B8F95076f73F07f06202aab",
+        "target": null,
+        "status": "SUCCESS"
+      },
+      {
+        "identity": "DEPLOY_04_GAOLAOZHUANG_8888_COMMERCIAL_BANK_IMPLEMENTATION",
+        "signer": "0xb3C54ca96De0dED4Ca0151F629ff9781506ba261",
+        "nonce": 37,
+        "transactionHash": "0xc434af43195b1edfea0bf083ec1adad3c606317ac2ee565c31e671c4ae6ba698",
+        "blockNumber": 115628522,
+        "gasUsed": "4016007",
+        "gasPriceWei": "50000000",
+        "contractAddress": "0x94341fB340cF8Bd0069cD1Fcaf5bA0866B15c923",
+        "target": null,
+        "status": "SUCCESS"
+      },
+      {
+        "identity": "DEPLOY_05_GAOLAOZHUANG_8888_COMMERCIAL_BANK_PROXY",
+        "signer": "0xb3C54ca96De0dED4Ca0151F629ff9781506ba261",
+        "nonce": 38,
+        "transactionHash": "0xebe5688a6abec93883d1949d2d5dd6daaa76b10116f2af4090dbffe2cb8a8e24",
+        "blockNumber": 115628524,
+        "gasUsed": "425322",
+        "gasPriceWei": "50000000",
+        "contractAddress": "0x9EcAe137b3A307971EB77B4CDB3ba13aeeF5297C",
+        "target": null,
+        "status": "SUCCESS"
+      },
+      {
+        "identity": "DEPLOY_06_CELESTIAL_SEAT_500_IMPLEMENTATION",
+        "signer": "0xb3C54ca96De0dED4Ca0151F629ff9781506ba261",
+        "nonce": 39,
+        "transactionHash": "0xca8d6873d26530308710c1576bb356ec9852689e3c4460353daf3929a12121c0",
+        "blockNumber": 115628527,
+        "gasUsed": "2899103",
+        "gasPriceWei": "50000000",
+        "contractAddress": "0x8E48643030826c9121Cd2E086B811b9083E9f862",
+        "target": null,
+        "status": "SUCCESS"
+      },
+      {
+        "identity": "DEPLOY_07_CELESTIAL_SEAT_500_PROXY",
+        "signer": "0xb3C54ca96De0dED4Ca0151F629ff9781506ba261",
+        "nonce": 40,
+        "transactionHash": "0xeac9e86049a4523b7a17a25e838b6bf62ade95994de93f28cb337394c53ae3cf",
+        "blockNumber": 115628538,
+        "gasUsed": "354735",
+        "gasPriceWei": "50000000",
+        "contractAddress": "0xA447853985Ef6e6AbFcb14FCfDeFdced10Be0BDe",
+        "target": null,
+        "status": "SUCCESS"
+      },
+      {
+        "identity": "DEPLOY_08_CIVILIZATION_ALLOCATION_IMPLEMENTATION",
+        "signer": "0xb3C54ca96De0dED4Ca0151F629ff9781506ba261",
+        "nonce": 41,
+        "transactionHash": "0x7659f72a65c70efdda6b779b65de61c958dbfbbee4c4f1105505687d3bd7d220",
+        "blockNumber": 115628549,
+        "gasUsed": "1399667",
+        "gasPriceWei": "50000000",
+        "contractAddress": "0x216d69a413354CBab7ddDdC4fCfe2B3E0468197d",
+        "target": null,
+        "status": "SUCCESS"
+      },
+      {
+        "identity": "DEPLOY_09_CIVILIZATION_ALLOCATION_PROXY",
+        "signer": "0xb3C54ca96De0dED4Ca0151F629ff9781506ba261",
+        "nonce": 42,
+        "transactionHash": "0xd30d485f55ed2af6afff82d752b39c615e12dc3b385952c68e4f095439a910e0",
+        "blockNumber": 115628553,
+        "gasUsed": "303999",
+        "gasPriceWei": "50000000",
+        "contractAddress": "0x75A55Af6967932C4A1c896dB81Dd6F31e531c299",
+        "target": null,
+        "status": "SUCCESS"
+      },
+      {
+        "identity": "DEPLOY_10_ECONOMIC_ROUTER_8888_IMPLEMENTATION",
+        "signer": "0xb3C54ca96De0dED4Ca0151F629ff9781506ba261",
+        "nonce": 43,
+        "transactionHash": "0x7ef6be94b298fdd917152ee06323f96198203f3b5aa6f6b74a69779e3991ebaf",
+        "blockNumber": 115628556,
+        "gasUsed": "1261793",
+        "gasPriceWei": "50000000",
+        "contractAddress": "0x3ebc0A39F7981AAB3995AC828dc79A8B0753A05b",
+        "target": null,
+        "status": "SUCCESS"
+      },
+      {
+        "identity": "DEPLOY_11_ECONOMIC_ROUTER_8888_PROXY",
+        "signer": "0xb3C54ca96De0dED4Ca0151F629ff9781506ba261",
+        "nonce": 44,
+        "transactionHash": "0xc1904c2fef2a539182262618c441e6fa451aa4147e66272381a7078301691b6e",
+        "blockNumber": 115628561,
+        "gasUsed": "330557",
+        "gasPriceWei": "50000000",
+        "contractAddress": "0xC49f989c6ff0d22824df8D993Ce82207165C1428",
+        "target": null,
+        "status": "SUCCESS"
+      },
+      {
+        "identity": "DEPLOY_12_EXCHANGE_SETTLEMENT_11520_IMPLEMENTATION",
+        "signer": "0xb3C54ca96De0dED4Ca0151F629ff9781506ba261",
+        "nonce": 45,
+        "transactionHash": "0xc64f00332edd4a7adf23ec5028b579d0a145eac5acece46dcef29096d2793b68",
+        "blockNumber": 115628572,
+        "gasUsed": "1261805",
+        "gasPriceWei": "50000000",
+        "contractAddress": "0xA08A9CEcfa18b2FDb9ca8De0063A5029B9Ffc363",
+        "target": null,
+        "status": "SUCCESS"
+      },
+      {
+        "identity": "DEPLOY_13_EXCHANGE_SETTLEMENT_11520_PROXY",
+        "signer": "0xb3C54ca96De0dED4Ca0151F629ff9781506ba261",
+        "nonce": 46,
+        "transactionHash": "0x71832f0a0bd85066d45347f521d5fee9dfd0b717ba2e40b87ef7f9960035a908",
+        "blockNumber": 115628583,
+        "gasUsed": "330557",
+        "gasPriceWei": "50000000",
+        "contractAddress": "0x17587F49dFDE4e400D03Ae81364AC2af8E1629Df",
+        "target": null,
+        "status": "SUCCESS"
+      },
+      {
+        "identity": "DEPLOY_14_BANK_RISK_CONTROLLER_IMPLEMENTATION",
+        "signer": "0xb3C54ca96De0dED4Ca0151F629ff9781506ba261",
+        "nonce": 47,
+        "transactionHash": "0xa871163c208f06981ae680f07b50493e00f509ec03cf6c88542bb0cd49936359",
+        "blockNumber": 115628594,
+        "gasUsed": "1349091",
+        "gasPriceWei": "50000000",
+        "contractAddress": "0x8D231C82513cdfa978A7C157618Ff198b0a5d3E9",
+        "target": null,
+        "status": "SUCCESS"
+      },
+      {
+        "identity": "DEPLOY_15_BANK_RISK_CONTROLLER_PROXY",
+        "signer": "0xb3C54ca96De0dED4Ca0151F629ff9781506ba261",
+        "nonce": 48,
+        "transactionHash": "0x6ead47598ff45521ec92a51073303c897bdc300f9ac9e93105d5b053fd5a8ecc",
+        "blockNumber": 115628604,
+        "gasUsed": "304010",
+        "gasPriceWei": "50000000",
+        "contractAddress": "0x61573a93a88c58DAa5066A0aA319f88cE34d88FC",
+        "target": null,
+        "status": "SUCCESS"
+      },
+      {
+        "identity": "DEPLOY_16_BANK_GOVERNANCE_IMPLEMENTATION",
+        "signer": "0xb3C54ca96De0dED4Ca0151F629ff9781506ba261",
+        "nonce": 49,
+        "transactionHash": "0x75634c96256af7fcc404a7ee58a0da9bc7f7ae7698781b6deec32a5ced97ea0a",
+        "blockNumber": 115628610,
+        "gasUsed": "1646003",
+        "gasPriceWei": "50000000",
+        "contractAddress": "0x9d919E66AE2746D41D978e3d51DF594B2E5F5582",
+        "target": null,
+        "status": "SUCCESS"
+      },
+      {
+        "identity": "DEPLOY_17_BANK_GOVERNANCE_PROXY",
+        "signer": "0xb3C54ca96De0dED4Ca0151F629ff9781506ba261",
+        "nonce": 50,
+        "transactionHash": "0xe47a9761a3ad3dcb612cdd1dda2bd36e0606c836175870093b66f8e3ee550192",
+        "blockNumber": 115628618,
+        "gasUsed": "375214",
+        "gasPriceWei": "50000000",
+        "contractAddress": "0xa2792fBDCc8A8AaC364053431D44E0a8D335E166",
+        "target": null,
+        "status": "SUCCESS"
+      },
+      {
+        "identity": "DEPLOY_18_BANK_MIGRATION_IMPLEMENTATION",
+        "signer": "0xb3C54ca96De0dED4Ca0151F629ff9781506ba261",
+        "nonce": 51,
+        "transactionHash": "0xb5d2735d66b2c0e1446882b8063d2ca348750d4078dcabe96099630a4760a2fe",
+        "blockNumber": 115628620,
+        "gasUsed": "1346137",
+        "gasPriceWei": "50000000",
+        "contractAddress": "0xff281a821dBbA44EEc7b57475E3c28A916fcDAE7",
+        "target": null,
+        "status": "SUCCESS"
+      },
+      {
+        "identity": "DEPLOY_19_BANK_MIGRATION_PROXY",
+        "signer": "0xb3C54ca96De0dED4Ca0151F629ff9781506ba261",
+        "nonce": 52,
+        "transactionHash": "0x4e069e7cc25b73c6c1d3ac66b4ee779075cfe58496bdfaac0df69146bfb05763",
+        "blockNumber": 115628622,
+        "gasUsed": "303989",
+        "gasPriceWei": "50000000",
+        "contractAddress": "0x72c14f5D2fa748C1579295A7E34c16453a3a17aB",
+        "target": null,
+        "status": "SUCCESS"
+      },
+      {
+        "identity": "DEPLOY_20_KAIOS_TOKEN_CORE",
+        "signer": "0xb3C54ca96De0dED4Ca0151F629ff9781506ba261",
+        "nonce": 53,
+        "transactionHash": "0x731bccd9d1116831d9b43966672cb27d9017c75b6806c32109c5c210d2c3be9c",
+        "blockNumber": 115628625,
+        "gasUsed": "1373218",
+        "gasPriceWei": "50000000",
+        "contractAddress": "0xD4E67B3a69e41524c424150E6b6e921b01D036db",
+        "target": null,
+        "status": "SUCCESS"
+      },
+      {
+        "identity": "DEPLOY_21_ALCHEMY_FURNACE_18911",
+        "signer": "0xb3C54ca96De0dED4Ca0151F629ff9781506ba261",
+        "nonce": 54,
+        "transactionHash": "0x4dae645b4b40348fc06bd65f08d238919c20011924bf54da82c3d7e5f0fd6343",
+        "blockNumber": 115628629,
+        "gasUsed": "506666",
+        "gasPriceWei": "50000000",
+        "contractAddress": "0x44c2CA9B9eba19d8F79F6E1786fd9D25e73738e1",
+        "target": null,
+        "status": "SUCCESS"
+      },
+      {
+        "identity": "WIRE_01_BANK_BIND_KAIOS",
+        "signer": "0xCd60BF474e691F2484950a0276Eaf507616Ca4b9",
+        "nonce": 0,
+        "transactionHash": "0xd4fa8e6ccd050e24df0d3d5fa14efa31595264082a5467148129628fc2c68e47",
+        "blockNumber": 115628798,
+        "gasUsed": "60405",
+        "gasPriceWei": "50000000",
+        "contractAddress": null,
+        "target": "0x11d34c0F723aCd334B8F95076f73F07f06202aab",
+        "status": "SUCCESS"
+      },
+      {
+        "identity": "WIRE_02_BANK_8888_BIND_KAIOS",
+        "signer": "0xCd60BF474e691F2484950a0276Eaf507616Ca4b9",
+        "nonce": 1,
+        "transactionHash": "0x5c05ebd3511196d92c37fba482306ec8fdfbea2dabb95eb7a49e8c0ffdb436f0",
+        "blockNumber": 115628801,
+        "gasUsed": "67604",
+        "gasPriceWei": "50000000",
+        "contractAddress": null,
+        "target": "0x9EcAe137b3A307971EB77B4CDB3ba13aeeF5297C",
+        "status": "SUCCESS"
+      },
+      {
+        "identity": "WIRE_03_GRANT_DISTINCT_GOVERNANCE_APPROVER",
+        "signer": "0xCd60BF474e691F2484950a0276Eaf507616Ca4b9",
+        "nonce": 2,
+        "transactionHash": "0x0174b9bedb294e75b53d7d1cfa767d1cf3b16b13362a65c6ee2d234221a076ef",
+        "blockNumber": 115628812,
+        "gasUsed": "56100",
+        "gasPriceWei": "50000000",
+        "contractAddress": null,
+        "target": "0xa2792fBDCc8A8AaC364053431D44E0a8D335E166",
+        "status": "SUCCESS"
+      },
+      {
+        "identity": "WIRE_04_REVOKE_MOTHER_APPROVER_ROLE",
+        "signer": "0xCd60BF474e691F2484950a0276Eaf507616Ca4b9",
+        "nonce": 3,
+        "transactionHash": "0xb4ed19892e33943f1e467f910fc652fa291a76eba37c5b5d5c09903314f33689",
+        "blockNumber": 115628815,
+        "gasUsed": "34609",
+        "gasPriceWei": "50000000",
+        "contractAddress": null,
+        "target": "0xa2792fBDCc8A8AaC364053431D44E0a8D335E166",
+        "status": "SUCCESS"
+      },
+      {
+        "identity": "WIRE_05_GRANT_GUANYIN_FINAL_BANK_PAUSER",
+        "signer": "0xCd60BF474e691F2484950a0276Eaf507616Ca4b9",
+        "nonce": 4,
+        "transactionHash": "0x0a591427dc6cbf10a8190880d14ba798ec8d78d7dcad2b3fa6b1f26635ebb6f9",
+        "blockNumber": 115628818,
+        "gasUsed": "56210",
+        "gasPriceWei": "50000000",
+        "contractAddress": null,
+        "target": "0x11d34c0F723aCd334B8F95076f73F07f06202aab",
+        "status": "SUCCESS"
+      },
+      {
+        "identity": "WIRE_06_REVOKE_MOTHER_DIRECT_BANK_PAUSER",
+        "signer": "0xCd60BF474e691F2484950a0276Eaf507616Ca4b9",
+        "nonce": 5,
+        "transactionHash": "0x5f65f7e0c8138c9ec7f87df5b17e03b1b5f5a9363a5ba3707a88db2e68b67096",
+        "blockNumber": 115628828,
+        "gasUsed": "35093",
+        "gasPriceWei": "50000000",
+        "contractAddress": null,
+        "target": "0x11d34c0F723aCd334B8F95076f73F07f06202aab",
+        "status": "SUCCESS"
+      },
+      {
+        "identity": "WIRE_07_CONFIGURE_CelestialSeat500_Upgradeable",
+        "signer": "0xCd60BF474e691F2484950a0276Eaf507616Ca4b9",
+        "nonce": 6,
+        "transactionHash": "0xdab80ab52510837c382da70392bf11d5fd1cdd0051f414713171e5cf4493880e",
+        "blockNumber": 115628839,
+        "gasUsed": "171974",
+        "gasPriceWei": "50000000",
+        "contractAddress": null,
+        "target": "0x11d34c0F723aCd334B8F95076f73F07f06202aab",
+        "status": "SUCCESS"
+      },
+      {
+        "identity": "WIRE_08_CONFIGURE_CivilizationAllocation_Upgradeable",
+        "signer": "0xCd60BF474e691F2484950a0276Eaf507616Ca4b9",
+        "nonce": 7,
+        "transactionHash": "0x2347108838c1a52e6506761d69f4b926f2e735ab2c45d550a01ac914951cfd2d",
+        "blockNumber": 115628842,
+        "gasUsed": "172010",
+        "gasPriceWei": "50000000",
+        "contractAddress": null,
+        "target": "0x11d34c0F723aCd334B8F95076f73F07f06202aab",
+        "status": "SUCCESS"
+      },
+      {
+        "identity": "WIRE_09_CONFIGURE_EconomicRouter8888_Upgradeable",
+        "signer": "0xCd60BF474e691F2484950a0276Eaf507616Ca4b9",
+        "nonce": 8,
+        "transactionHash": "0xa12547c9561408a102c380c4cb28410b9c93b94436bcbb2fba5bcfec251ecd27",
+        "blockNumber": 115628853,
+        "gasUsed": "172010",
+        "gasPriceWei": "50000000",
+        "contractAddress": null,
+        "target": "0x11d34c0F723aCd334B8F95076f73F07f06202aab",
+        "status": "SUCCESS"
+      },
+      {
+        "identity": "WIRE_10_CONFIGURE_ExchangeSettlement11520_Upgradeable",
+        "signer": "0xCd60BF474e691F2484950a0276Eaf507616Ca4b9",
+        "nonce": 9,
+        "transactionHash": "0x4505ce0905f8d5fbc786ac690254214e5cadc4b27417f04554310cce34138cc7",
+        "blockNumber": 115628863,
+        "gasUsed": "171998",
+        "gasPriceWei": "50000000",
+        "contractAddress": null,
+        "target": "0x11d34c0F723aCd334B8F95076f73F07f06202aab",
+        "status": "SUCCESS"
+      },
+      {
+        "identity": "WIRE_11_CONFIGURE_BankRiskController_Upgradeable",
+        "signer": "0xCd60BF474e691F2484950a0276Eaf507616Ca4b9",
+        "nonce": 10,
+        "transactionHash": "0x8817f4372bbbc7cf052533960131a46d9f8475c5d69d999e13679a7c42587b78",
+        "blockNumber": 115628874,
+        "gasUsed": "131970",
+        "gasPriceWei": "50000000",
+        "contractAddress": null,
+        "target": "0x11d34c0F723aCd334B8F95076f73F07f06202aab",
+        "status": "SUCCESS"
+      },
+      {
+        "identity": "WIRE_12_CONFIGURE_BankGovernance_Upgradeable",
+        "signer": "0xCd60BF474e691F2484950a0276Eaf507616Ca4b9",
+        "nonce": 11,
+        "transactionHash": "0x3a2a3e682f9b579233f1fe308f7af639a9e8ff737c2602eefce817897aeb7b10",
+        "blockNumber": 115628885,
+        "gasUsed": "131970",
+        "gasPriceWei": "50000000",
+        "contractAddress": null,
+        "target": "0x11d34c0F723aCd334B8F95076f73F07f06202aab",
+        "status": "SUCCESS"
+      },
+      {
+        "identity": "WIRE_13_CONFIGURE_BankMigration_Upgradeable",
+        "signer": "0xCd60BF474e691F2484950a0276Eaf507616Ca4b9",
+        "nonce": 12,
+        "transactionHash": "0xbaaa8a13aa1341f5a36b0a491a2daf4325821ae63378e93f74e099b604268a59",
+        "blockNumber": 115628896,
+        "gasUsed": "131958",
+        "gasPriceWei": "50000000",
+        "contractAddress": null,
+        "target": "0x11d34c0F723aCd334B8F95076f73F07f06202aab",
+        "status": "SUCCESS"
+      },
+      {
+        "identity": "WIRE_14_SET_RISK_CONTROLLER",
+        "signer": "0xCd60BF474e691F2484950a0276Eaf507616Ca4b9",
+        "nonce": 13,
+        "transactionHash": "0xe070350837f7291bf60d58e643584c923be8c40a0d9ece38ced9c8ab93c01e55",
+        "blockNumber": 115628906,
+        "gasUsed": "56212",
+        "gasPriceWei": "50000000",
+        "contractAddress": null,
+        "target": "0x11d34c0F723aCd334B8F95076f73F07f06202aab",
+        "status": "SUCCESS"
+      },
+      {
+        "identity": "WIRE_15_APPLY_HUMAN_APPROVED_RISK_PARAMETERS",
+        "signer": "0xCd60BF474e691F2484950a0276Eaf507616Ca4b9",
+        "nonce": 14,
+        "transactionHash": "0x293352a454fbf8b11a429053e6f2ba16eebda09fc1585b172055a24647304bb1",
+        "blockNumber": 115628917,
+        "gasUsed": "110222",
+        "gasPriceWei": "50000000",
+        "contractAddress": null,
+        "target": "0x61573a93a88c58DAa5066A0aA319f88cE34d88FC",
+        "status": "SUCCESS"
+      },
+      {
+        "identity": "WIRE_16_REGISTRY_BOOTSTRAP_11520",
+        "signer": "0xCd60BF474e691F2484950a0276Eaf507616Ca4b9",
+        "nonce": 15,
+        "transactionHash": "0x5660ca95c0eac919acce74cc17000e8694549cab81e59487d14cd9d90341afe1",
+        "blockNumber": 115628928,
+        "gasUsed": "55195",
+        "gasPriceWei": "50000000",
+        "contractAddress": null,
+        "target": "0xA9e7CbF161E39E556f4B5b8E41397Ac4B87a932D",
+        "status": "SUCCESS"
+      },
+      {
+        "identity": "WIRE_17_REGISTRY_BOOTSTRAP_18888",
+        "signer": "0xCd60BF474e691F2484950a0276Eaf507616Ca4b9",
+        "nonce": 16,
+        "transactionHash": "0x13b20816cff2bb12b934f7cd27e09dac9a9c899c0e43c3c48d2d1a3711e529c3",
+        "blockNumber": 115628931,
+        "gasUsed": "55183",
+        "gasPriceWei": "50000000",
+        "contractAddress": null,
+        "target": "0xA9e7CbF161E39E556f4B5b8E41397Ac4B87a932D",
+        "status": "SUCCESS"
+      },
+      {
+        "identity": "WIRE_18_REGISTRY_BOOTSTRAP_KAIOS",
+        "signer": "0xCd60BF474e691F2484950a0276Eaf507616Ca4b9",
+        "nonce": 17,
+        "transactionHash": "0xaf47a561f4d57cd49d7ef3e5b2859762364ba5b77610400d4b495e5c6c7b74d4",
+        "blockNumber": 115628942,
+        "gasUsed": "55183",
+        "gasPriceWei": "50000000",
+        "contractAddress": null,
+        "target": "0xA9e7CbF161E39E556f4B5b8E41397Ac4B87a932D",
+        "status": "SUCCESS"
+      },
+      {
+        "identity": "WIRE_19_REGISTRY_BOOTSTRAP_18911",
+        "signer": "0xCd60BF474e691F2484950a0276Eaf507616Ca4b9",
+        "nonce": 18,
+        "transactionHash": "0x018e98cf7910f75f35ce1f90c086f577b0ba1fc9381f22a933e0579ab63d9180",
+        "blockNumber": 115628952,
+        "gasUsed": "55195",
+        "gasPriceWei": "50000000",
+        "contractAddress": null,
+        "target": "0xA9e7CbF161E39E556f4B5b8E41397Ac4B87a932D",
+        "status": "SUCCESS"
+      },
+      {
+        "identity": "WIRE_20_REGISTRY_SEAL_BOOTSTRAP",
+        "signer": "0xCd60BF474e691F2484950a0276Eaf507616Ca4b9",
+        "nonce": 19,
+        "transactionHash": "0xd53bd29fdeacb44988f3bf7ef1aef0c713e910d5766b8d96a1200abf49b8bb1f",
+        "blockNumber": 115628962,
+        "gasUsed": "24817",
+        "gasPriceWei": "50000000",
+        "contractAddress": null,
+        "target": "0xA9e7CbF161E39E556f4B5b8E41397Ac4B87a932D",
+        "status": "SUCCESS"
+      },
+      {
+        "identity": "WIRE_21_FINALIZE_CelestialSeat500_Upgradeable_GOVERNANCE",
+        "signer": "0xCd60BF474e691F2484950a0276Eaf507616Ca4b9",
+        "nonce": 20,
+        "transactionHash": "0xb16df0b2492812b968f44951cea950b3aa1d11b68f58cc33de7bbbe563641cb3",
+        "blockNumber": 115628964,
+        "gasUsed": "119950",
+        "gasPriceWei": "50000000",
+        "contractAddress": null,
+        "target": "0xA447853985Ef6e6AbFcb14FCfDeFdced10Be0BDe",
+        "status": "SUCCESS"
+      },
+      {
+        "identity": "WIRE_22_FINALIZE_CivilizationAllocation_Upgradeable_GOVERNANCE",
+        "signer": "0xCd60BF474e691F2484950a0276Eaf507616Ca4b9",
+        "nonce": 21,
+        "transactionHash": "0x1210ed8a2661a5e78744c484dfefbb626ffce0e3956a5ae49251ca27cb8ceb03",
+        "blockNumber": 115628975,
+        "gasUsed": "119987",
+        "gasPriceWei": "50000000",
+        "contractAddress": null,
+        "target": "0x75A55Af6967932C4A1c896dB81Dd6F31e531c299",
+        "status": "SUCCESS"
+      },
+      {
+        "identity": "WIRE_23_FINALIZE_EconomicRouter8888_Upgradeable_GOVERNANCE",
+        "signer": "0xCd60BF474e691F2484950a0276Eaf507616Ca4b9",
+        "nonce": 22,
+        "transactionHash": "0xfb7562c70256f9ed354a71bf67ab912a6d22b915a5671b0fc1d22a7677481f5b",
+        "blockNumber": 115628986,
+        "gasUsed": "120009",
+        "gasPriceWei": "50000000",
+        "contractAddress": null,
+        "target": "0xC49f989c6ff0d22824df8D993Ce82207165C1428",
+        "status": "SUCCESS"
+      },
+      {
+        "identity": "WIRE_24_FINALIZE_ExchangeSettlement11520_Upgradeable_GOVERNANCE",
+        "signer": "0xCd60BF474e691F2484950a0276Eaf507616Ca4b9",
+        "nonce": 23,
+        "transactionHash": "0x9b885894183b8a89045d061f6a1d41b2477c1551963c77a640cd15bd94982770",
+        "blockNumber": 115628996,
+        "gasUsed": "119987",
+        "gasPriceWei": "50000000",
+        "contractAddress": null,
+        "target": "0x17587F49dFDE4e400D03Ae81364AC2af8E1629Df",
+        "status": "SUCCESS"
+      },
+      {
+        "identity": "WIRE_25_FINALIZE_BankRiskController_Upgradeable_GOVERNANCE",
+        "signer": "0xCd60BF474e691F2484950a0276Eaf507616Ca4b9",
+        "nonce": 24,
+        "transactionHash": "0xc56e08e7d9ef9599da3d8de4ec64b47335a43048057ec195f56092e303516fc4",
+        "blockNumber": 115629007,
+        "gasUsed": "119987",
+        "gasPriceWei": "50000000",
+        "contractAddress": null,
+        "target": "0x61573a93a88c58DAa5066A0aA319f88cE34d88FC",
+        "status": "SUCCESS"
+      },
+      {
+        "identity": "WIRE_26_FINALIZE_BankGovernance_Upgradeable_GOVERNANCE",
+        "signer": "0xCd60BF474e691F2484950a0276Eaf507616Ca4b9",
+        "nonce": 25,
+        "transactionHash": "0x2587233813b7a98cdc6e8dc57a8cb6736a46ae78a951d9146e3ef53f766727da",
+        "blockNumber": 115629018,
+        "gasUsed": "117432",
+        "gasPriceWei": "50000000",
+        "contractAddress": null,
+        "target": "0xa2792fBDCc8A8AaC364053431D44E0a8D335E166",
+        "status": "SUCCESS"
+      },
+      {
+        "identity": "WIRE_27_FINALIZE_BankMigration_Upgradeable_GOVERNANCE",
+        "signer": "0xCd60BF474e691F2484950a0276Eaf507616Ca4b9",
+        "nonce": 26,
+        "transactionHash": "0xfbcf1088216c406cee98db678e1ec3d69d98f76720bbde2bce53c92a68383edd",
+        "blockNumber": 115629028,
+        "gasUsed": "119987",
+        "gasPriceWei": "50000000",
+        "contractAddress": null,
+        "target": "0x72c14f5D2fa748C1579295A7E34c16453a3a17aB",
+        "status": "SUCCESS"
+      },
+      {
+        "identity": "WIRE_28_FINALIZE_BANK_GOVERNANCE",
+        "signer": "0xCd60BF474e691F2484950a0276Eaf507616Ca4b9",
+        "nonce": 27,
+        "transactionHash": "0x31d2f83cad964a346960391724ea0a1651ef07efecf2be1d9f850b2bd77f4f64",
+        "blockNumber": 115629039,
+        "gasUsed": "143087",
+        "gasPriceWei": "50000000",
+        "contractAddress": null,
+        "target": "0x11d34c0F723aCd334B8F95076f73F07f06202aab",
+        "status": "SUCCESS"
+      },
+      {
+        "identity": "WIRE_SCHEDULE_INITIAL_8888_INTEREST_RATE",
+        "signer": "0xCd60BF474e691F2484950a0276Eaf507616Ca4b9",
+        "nonce": 28,
+        "transactionHash": "0x0759416b50150a06085e56b1e80e60a234ebf5946d9334b2c37eb2658210c2ad",
+        "blockNumber": 115629050,
+        "gasUsed": "79493",
+        "gasPriceWei": "50000000",
+        "contractAddress": null,
+        "target": "0x9EcAe137b3A307971EB77B4CDB3ba13aeeF5297C",
+        "status": "SUCCESS"
+      },
+      {
+        "identity": "WIRE_29_FINALIZE_BANK_8888_GOVERNANCE",
+        "signer": "0xCd60BF474e691F2484950a0276Eaf507616Ca4b9",
+        "nonce": 29,
+        "transactionHash": "0x63bbf099d5b131b2997a39f2599f13a663fd52831d2a1440b21a6798f79acd23",
+        "blockNumber": 115629060,
+        "gasUsed": "230256",
+        "gasPriceWei": "50000000",
+        "contractAddress": null,
+        "target": "0x9EcAe137b3A307971EB77B4CDB3ba13aeeF5297C",
+        "status": "SUCCESS"
+      },
+      {
+        "identity": "GOVERNANCE_PROPOSE_REVOKE_DIRECT_PAUSER",
+        "signer": "0xCd60BF474e691F2484950a0276Eaf507616Ca4b9",
+        "nonce": 30,
+        "transactionHash": "0x9b9ffb38f607a4a7d19a12bfe21cd56c6f7ed40c126b146e2ec0ed9f31dce70b",
+        "blockNumber": 115629071,
+        "gasUsed": "110400",
+        "gasPriceWei": "50000000",
+        "contractAddress": null,
+        "target": "0xa2792fBDCc8A8AaC364053431D44E0a8D335E166",
+        "status": "SUCCESS"
+      },
+      {
+        "identity": "GOVERNANCE_JADE_APPROVE_REVOKE_DIRECT_PAUSER",
+        "signer": "0xc15E08834fCA9F2d3462a3f8f0BC30524D6dd756",
+        "nonce": 0,
+        "transactionHash": "0xa54cc8e64c542ff715604450458e43b72a2c25a935216457df297d3e840cdfe8",
+        "blockNumber": 115629082,
+        "gasUsed": "57643",
+        "gasPriceWei": "50000000",
+        "contractAddress": null,
+        "target": "0xa2792fBDCc8A8AaC364053431D44E0a8D335E166",
+        "status": "SUCCESS"
+      },
+      {
+        "identity": "GOVERNANCE_EXECUTE_REVOKE_DIRECT_PAUSER",
+        "signer": "0xCd60BF474e691F2484950a0276Eaf507616Ca4b9",
+        "nonce": 31,
+        "transactionHash": "0xd525cba81a7f742d4b9152a642e1a42feaaa21fd0ff4e6f52418a88b5f8a05d3",
+        "blockNumber": 115637135,
+        "gasUsed": "61492",
+        "gasPriceWei": "50000000",
+        "contractAddress": null,
+        "target": "0xa2792fBDCc8A8AaC364053431D44E0a8D335E166",
+        "status": "SUCCESS"
+      },
+      {
+        "identity": "GENESIS_SETTLE_WHITE_HOLE_MASS_BY_MOTHER",
+        "signer": "0xCd60BF474e691F2484950a0276Eaf507616Ca4b9",
+        "nonce": 32,
+        "transactionHash": "0xc9fab344cc0055cab2e8dad1105f0a913fa94c15b39c76a241d3f190eb18767a",
+        "blockNumber": 115637581,
+        "gasUsed": "143504",
+        "gasPriceWei": "50000000",
+        "contractAddress": null,
+        "target": "0xD4E67B3a69e41524c424150E6b6e921b01D036db",
+        "status": "SUCCESS"
+      },
+      {
+        "identity": "GENESIS_START_BANK_EPOCH",
+        "signer": "0xCd60BF474e691F2484950a0276Eaf507616Ca4b9",
+        "nonce": 33,
+        "transactionHash": "0xe2aad950d33214d05f44274d76d71f72a6d1f9a3192df8682d3a10913f0996be",
+        "blockNumber": 115637592,
+        "gasUsed": "112999",
+        "gasPriceWei": "50000000",
+        "contractAddress": null,
+        "target": "0x11d34c0F723aCd334B8F95076f73F07f06202aab",
+        "status": "SUCCESS"
+      },
+      {
+        "identity": "DEPLOY_22_KAIOS_GENESIS_INSCRIPTION",
+        "signer": "0xb3C54ca96De0dED4Ca0151F629ff9781506ba261",
+        "nonce": 55,
+        "transactionHash": "0xb2ff08d1779229cc72904818ee5b342b2134ae247253c16156dd899f6bece336",
+        "blockNumber": 115637610,
+        "gasUsed": "540149",
+        "gasPriceWei": "50000000",
+        "contractAddress": "0xb02CBc7698646653D541F494F510Fe18638AC7ae",
+        "target": null,
+        "status": "SUCCESS"
+      }
+    ],
+    "gas": {
+      "totalGasUsed": "27604633",
+      "totalWeiSpent": "1380231650000000",
+      "totalBnbSpent": "0.00138023165",
+      "bySigner": {
+        "0xb3C54ca96De0dED4Ca0151F629ff9781506ba261": {
+          "transactionCount": 22,
+          "gasUsed": "24022502",
+          "weiSpent": "1201125100000000",
+          "bnbSpent": "0.0012011251"
+        },
+        "0xCd60BF474e691F2484950a0276Eaf507616Ca4b9": {
+          "transactionCount": 34,
+          "gasUsed": "3524488",
+          "weiSpent": "176224400000000",
+          "bnbSpent": "0.0001762244"
+        },
+        "0xc15E08834fCA9F2d3462a3f8f0BC30524D6dd756": {
+          "transactionCount": 1,
+          "gasUsed": "57643",
+          "weiSpent": "2882150000000",
+          "bnbSpent": "0.00000288215"
+        }
+      }
+    },
+    "finalNonces": {
+      "deployer": {
+        "latest": 56,
+        "pending": 56
+      },
+      "mother": {
+        "latest": 34,
+        "pending": 34
+      },
+      "jade": {
+        "latest": 1,
+        "pending": 1
+      }
+    },
+    "finalBalancesWei": {
+      "deployer": "4366243841457930",
+      "mother": "2823775600000000",
+      "jade": "2997117850000000"
+    }
+  },
+  "finalValidation": {
+    "status": "PASS",
+    "validatedAtBlock": 115637969,
+    "finalNonces": {
+      "deployer": {
+        "latest": 56,
+        "pending": 56
+      },
+      "mother": {
+        "latest": 34,
+        "pending": 34
+      },
+      "jade": {
+        "latest": 1,
+        "pending": 1
+      }
+    },
+    "balancesWei": {
+      "deployer": "4366243841457930",
+      "mother": "2823775600000000",
+      "jade": "2997117850000000"
+    },
+    "versions": {
+      "bank18888": "2.0.0",
+      "bank8888": "1.0.0",
+      "celestialSeat500": "2.0.0",
+      "governance": "1.0.0"
+    },
+    "implementations": [
+      "0x8125045039Fe969490d57185233B7d64A494A829",
+      "0x94341fB340cF8Bd0069cD1Fcaf5bA0866B15c923",
+      "0x8E48643030826c9121Cd2E086B811b9083E9f862",
+      "0x216d69a413354CBab7ddDdC4fCfe2B3E0468197d",
+      "0x3ebc0A39F7981AAB3995AC828dc79A8B0753A05b",
+      "0xA08A9CEcfa18b2FDb9ca8De0063A5029B9Ffc363",
+      "0x8D231C82513cdfa978A7C157618Ff198b0a5d3E9",
+      "0x9d919E66AE2746D41D978e3d51DF594B2E5F5582",
+      "0xff281a821dBbA44EEc7b57475E3c28A916fcDAE7"
+    ],
+    "kaiosTotalSupply": "22213908930416874731235000",
+    "bank18888Balance": "22213908930416874731235000",
+    "bankHealth": {
+      "balance": "22213908930416874731235000",
+      "reserve": "11000000000000000000000000",
+      "available": "11213908930416874731235000",
+      "healthy": true,
+      "paused": false
+    },
+    "totalTransactions": 57,
+    "totalGasUsed": "27604633",
+    "totalWeiSpent": "1380231650000000",
+    "gates": {
+      "chainId56": "PASS",
+      "first21Deployments": "PASS",
+      "allExpectedAddresses": "PASS",
+      "bank18888": "PASS",
+      "bank8888": "PASS",
+      "celestialSeat500": "PASS",
+      "settlement11520": "PASS",
+      "furnace18911": "PASS",
+      "governanceFinalization": "PASS",
+      "motherGovernance": "PASS",
+      "jadeApprover": "PASS",
+      "guanyinPauser": "PASS",
+      "deployerPermanentGovernance": "NONE",
+      "kgenGenesisAccounting": "PASS",
+      "kaiosGenesisAccounting": "PASS",
+      "bankGenesisReceipt": "PASS",
+      "genesisInscription": "PASS",
+      "inscriptionImmutable": "PASS",
+      "arbitraryMint": "NONE",
+      "arbitraryDrain": "BLOCKED",
+      "legacyHeartTouched": "NO"
+    }
+  },
+  "future": {
+    "wormhole511111AndKufo": "FUTURE_NOT_DEPLOYED",
+    "pairRegistry": "FUTURE_NOT_DEPLOYED"
+  }
+}
