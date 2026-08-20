@@ -1,0 +1,59 @@
+name: KAIOS 18911 Program Life Review
+
+on:
+  pull_request:
+    paths:
+      - "KGEN-KAIOS/**"
+      - ".github/workflows/kaios-18911-program-life-review.yml"
+  push:
+    branches:
+      - "codex/kaios-18911-kgen-catalyst-kufo-kship-v1"
+    paths:
+      - "KGEN-KAIOS/**"
+      - ".github/workflows/kaios-18911-program-life-review.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: kaios-18911-program-life-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  program-life-lineage:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout exact head
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: KGEN-KAIOS/package-lock.json
+
+      - name: Install pinned dependencies
+        working-directory: KGEN-KAIOS
+        run: npm ci
+
+      - name: Run complete KAIOS lineage suite
+        working-directory: KGEN-KAIOS
+        run: npm run test:all
+
+      - name: Confirm formal KGEN Solidity is unchanged
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch --no-tags origin main
+          base="$(git merge-base origin/main HEAD)"
+          if ! git diff --quiet "$base"...HEAD -- KGEN/contracts/KGEN_Token_V7_5_2.sol; then
+            echo "Formal KGEN Solidity changed in this review branch." >&2
+            exit 1
+          fi
+
+      - name: Validate patch whitespace
+        run: git diff --check
