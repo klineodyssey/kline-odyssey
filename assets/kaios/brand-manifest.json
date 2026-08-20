@@ -92,22 +92,22 @@
     {
       "path": "assets/kaios/kaios-logo.svg",
       "viewBox": "0 0 512 512",
-      "sha256": "874fd618676bacbc2da159289727aeb98d0384725c229d9608e45462df063d36"
+      "sha256": "d101fb9a251d7ecf56e3c4f880043f294658030899ccff3950d18660e7fb37eb"
     },
     {
       "path": "assets/kaios/kaios-logo-light.svg",
       "viewBox": "0 0 512 512",
-      "sha256": "fb56713bc598e4a41d3009ed29a27bba192347d54c43fd62e076befa1eee6711"
+      "sha256": "ecf77e2d18f2adc14586b8a65eaf4022e49db3cf68c2262ae32b1e0ac5ce60e5"
     },
     {
       "path": "assets/kaios/kaios-logo-dark.svg",
       "viewBox": "0 0 512 512",
-      "sha256": "73f9fbef3c01e554a5bdb3fcb4a9455740067cc187aae2a69338dbb4ee5bbd66"
+      "sha256": "a7f01ac9e506e72411fdcbb8137629c5f9e87b0d3362a2b882854a9f574143d0"
     },
     {
       "path": "assets/kaios/kaios-logo-monochrome.svg",
       "viewBox": "0 0 512 512",
-      "sha256": "fcfb88624d35da7b49028784742a228ad576d2ae2c1d5d83a9e74ffa1af35f14"
+      "sha256": "282ab419023aa6c504a6704b670ce137443c83b3106ecd1eef0f7a19ae7d540a"
     }
   ]
 }
