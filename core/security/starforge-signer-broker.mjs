@@ -1,6 +1,7 @@
 import fs from "node:fs/promises";
 import { createRequire } from "node:module";
 import { assertAllowedSigningMessage, recoverPersonalSignature } from "../life/starforge-spirit-runtime.mjs";
+import { assertEnergySigningMessage } from "../life/starforge-energy-wallet.mjs";
 
 const require = createRequire(import.meta.url);
 const ethers = require("../../K線西遊記/temples/12345/assets/ethers-5.7.2.umd.min.js");
@@ -22,7 +23,7 @@ async function readSecretOnce() {
 
 async function main() {
   const [action, inputPath] = process.argv.slice(2);
-  if (!new Set(["address", "sign-soul", "sign-body", "sign-rotation"]).has(action)) stop("SIGNER_ACTION_NOT_ALLOWED");
+  if (!new Set(["address", "sign-soul", "sign-body", "sign-rotation", "sign-energy-soul", "sign-energy-body"]).has(action)) stop("SIGNER_ACTION_NOT_ALLOWED");
   const secret = await readSecretOnce();
   let wallet;
   try { wallet = new ethers.Wallet(secret); }
@@ -36,8 +37,9 @@ async function main() {
   let request;
   try { request = JSON.parse(await fs.readFile(inputPath, "utf8")); }
   catch { stop("PUBLIC_SIGN_REQUEST_INVALID"); }
-  const organ = action === "sign-body" ? "BODY_WALLET" : "SOUL_WALLET";
-  assertAllowedSigningMessage({ organ, message: request.message });
+  const organ = action === "sign-body" || action === "sign-energy-body" ? "BODY_WALLET" : "SOUL_WALLET";
+  if (action.startsWith("sign-energy-")) assertEnergySigningMessage({ organ, message: request.message });
+  else assertAllowedSigningMessage({ organ, message: request.message });
   if (request.expected_address !== ethers.utils.getAddress(wallet.address)) stop("SIGNER_ADDRESS_MISMATCH");
   const signature = await wallet.signMessage(request.message);
   const recovered = recoverPersonalSignature(request.message, signature);

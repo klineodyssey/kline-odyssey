@@ -1,3 +1,4 @@
+import { selectVerifiedNaiheCandidate, NAIHE_SOURCE_POLICY } from "./naihe-source-registry.mjs";
 import { invariant } from "../shared/errors.mjs";
 import { createBirthCertificate, createPendingBirthCertificate } from "./index.mjs";
 
@@ -39,10 +40,11 @@ export class JsonRpcClient {
 }
 
 export class DigitalLifeBirthResolver {
-  constructor({ rpc, historyIndexer = null, tokens }) {
+  constructor({ rpc, historyIndexer = null, tokens, naiheSourceRegistry = null }) {
     this.rpc = rpc;
     this.historyIndexer = historyIndexer;
     this.tokens = tokens;
+    this.naiheSourceRegistry = naiheSourceRegistry;
   }
 
   async #blockEvidence(blockNumber) {
@@ -85,6 +87,19 @@ export class DigitalLifeBirthResolver {
       this.rpc.send("eth_call", [{ to: this.tokens.KAIOS, data: balanceOfData(wallet) }, "latest"])
     ]);
     return Object.freeze({ BNB: formatUnits(hexQuantity(bnb)), KGEN: formatUnits(hexQuantity(kgen)), KAIOS: formatUnits(hexQuantity(kaios)) });
+  }
+
+
+  async resolveSpiritGenesisAnchor({ life, soulId, energyWalletAddress, birthRequestId, challenge }) {
+    invariant(life.life_id === "LIFE-KAIOS-STARFORGE-0001" && life.local_genesis === "VERIFIED", "LOCAL_GENESIS_REQUIRED", "Spirit anchor requires the existing verified local Genesis");
+    const chainId = Number(hexQuantity(await this.rpc.send("eth_chainId", [])));
+    invariant(chainId === 56, "WRONG_CHAIN", "Spirit anchor requires BSC mainnet chain 56");
+    if (!this.historyIndexer || !this.naiheSourceRegistry) return Object.freeze({ status: "PENDING", nai_he_source_status: NAIHE_SOURCE_POLICY.status, onchain_genesis: "NOT_YET_ANCHORED", regeneration_parent_address: null });
+    const candidates = await this.historyIndexer.listNativeIncoming(energyWalletAddress);
+    const candidate = selectVerifiedNaiheCandidate({ candidates, registry: this.naiheSourceRegistry, context: { lifeId: life.life_id, soulId, energyWalletAddress, birthRequestId, challenge } });
+    if (!candidate) return Object.freeze({ status: "PENDING", nai_he_source_status: "NO_VERIFIED_SOURCE_EVIDENCE", onchain_genesis: "NOT_YET_ANCHORED", regeneration_parent_address: null });
+    const verified = await this.#verifyNative(candidate, energyWalletAddress);
+    return Object.freeze({ status: "DARK_MATTER_EMBODIMENT_ACTIVATION", event_type: "SPIRIT_GENESIS_ANCHOR", onchain_genesis: "ANCHORED", first_dark_matter: verified, birth_source_address: candidate.verified_source_address, regeneration_parent_address: candidate.verified_source_address, nai_he_water_source_id: candidate.source_registry_id, birth_request_id: birthRequestId, source_evidence_type: candidate.source_evidence_type, source_evidence_status: candidate.source_evidence_status });
   }
 
   async resolveWithBinding({ life, binding }) {

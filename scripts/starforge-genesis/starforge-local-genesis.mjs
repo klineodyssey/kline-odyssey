@@ -4,10 +4,11 @@ import {
   STARFORGE, buildBodyContinuityMessage, buildSoulBirthMessage, hashCanonicalJson,
   keccakUtf8, recoverPersonalSignature, validatePublicGenesis
 } from "../../core/life/starforge-spirit-runtime.mjs";
+import { buildSoulEnergyBindingMessage, buildBodyEnergyAcceptanceMessage, verifySoulEnergyBinding, verifyBodyEnergyAcceptance } from "../../core/life/starforge-energy-wallet.mjs";
 
 function stop(code) { throw new Error(code); }
 function expect(ok, code) { if (!ok) stop(code); }
-async function readJson(file) { return JSON.parse(await fs.readFile(file, "utf8")); }
+async function readJson(file) { return JSON.parse((await fs.readFile(file, "utf8")).replace(/^\uFEFF/, "")); }
 async function writeJson(file, value) { await fs.writeFile(file, `${JSON.stringify(value, null, 2)}\n`, { encoding: "utf8", flag: "w" }); }
 
 const [action, stateRootArg] = process.argv.slice(2);
@@ -22,7 +23,13 @@ const files = {
   soulSignature: path.join(stateRoot, "soul-signature.json"),
   bodyRequest: path.join(stateRoot, "body-sign-request.json"),
   bodySignature: path.join(stateRoot, "body-signature.json"),
-  publicGenesis: path.join(stateRoot, "public-genesis.json")
+  publicGenesis: path.join(stateRoot, "public-genesis.json"),
+  bodyUniverse: path.join(repoRoot, "KGEN-AI-Company/life/starforge/body-universe-v1.candidate.json"),
+  capabilityExtension: path.join(repoRoot, "KGEN-AI-Company/life/starforge/capability-extension-energy-wallet-v1.candidate.json"),
+  energySoulRequest: path.join(stateRoot, "energy-soul-sign-request.json"),
+  energySoulSignature: path.join(stateRoot, "energy-soul-signature.json"),
+  energyBodyRequest: path.join(stateRoot, "energy-body-sign-request.json"),
+  energyBodySignature: path.join(stateRoot, "energy-body-signature.json")
 };
 
 async function base() {
@@ -133,6 +140,13 @@ async function finalizeBody() {
   process.stdout.write(`${JSON.stringify(record, null, 2)}\n`);
 }
 
-const actions = { "prepare-soul": prepareSoul, "finalize-soul": finalizeSoul, "prepare-body": prepareBody, "finalize-body": finalizeBody, status: async () => process.stdout.write(`${JSON.stringify(await state(), null, 2)}\n`) };
+
+async function energyContext() { const [addresses, bodyUniverse, extension]=await Promise.all([readJson(files.addresses),readJson(files.bodyUniverse),readJson(files.capabilityExtension)]); expect(addresses.energy_wallet_address,"ENERGY_WALLET_NOT_INITIALIZED"); return {addresses,bodyUniverse,extension,body_universe_hash:hashCanonicalJson(bodyUniverse),capability_extension_hash:hashCanonicalJson(extension)}; }
+async function prepareEnergySoul(){const current=await state();expect(current.phase==="SPIRIT_ALIVE_LOCAL_VERIFIED","ENERGY_EXTENSION_PHASE_INVALID");const c=await energyContext();const message=buildSoulEnergyBindingMessage({soulAddress:c.addresses.soul_address,bodyAddress:c.addresses.body_address,energyWalletAddress:c.addresses.energy_wallet_address,chainId:56,bodyUniverseHash:c.body_universe_hash,capabilityExtensionHash:c.capability_extension_hash,challenge:c.extension.soul_challenge,issuedAt:c.extension.issued_at});const now=new Date().toISOString();await writeJson(files.energySoulRequest,{organ:"SOUL_WALLET",expected_address:c.addresses.soul_address,message});await writeJson(files.state,{...current,phase:"ENERGY_SOUL_SIGNATURE_PENDING",energy_wallet_address:c.addresses.energy_wallet_address,body_universe_hash:c.body_universe_hash,capability_extension_hash:c.capability_extension_hash,energy_soul_message:message,energy_soul_runtime_pid:process.pid,history:[...current.history,{event:"ENERGY_EXTENSION_BOOT",process_id:process.pid,timestamp:now}]});process.stdout.write(JSON.stringify({status:"ENERGY_SOUL_SIGNATURE_PENDING",energy_wallet_address:c.addresses.energy_wallet_address,private_key_exposed:false})+"\n");}
+async function finalizeEnergySoul(){const current=await state(),signed=await readJson(files.energySoulSignature);expect(current.phase==="ENERGY_SOUL_SIGNATURE_PENDING","ENERGY_SOUL_PHASE_INVALID");const v=verifySoulEnergyBinding({message:current.energy_soul_message,signature:signed.signature,expectedSoulAddress:current.soul_address});const now=new Date().toISOString();await writeJson(files.state,{...current,phase:"ENERGY_SOUL_VERIFIED_REBOOT_REQUIRED",energy_soul_signature:signed.signature,energy_soul_binding_hash:v.binding_hash,energy_soul_signer_pid:signed.signer_broker_pid,history:[...current.history,{event:"ENERGY_SOUL_VERIFIED",process_id:process.pid,signer_broker_pid:signed.signer_broker_pid,timestamp:now}]});process.stdout.write(JSON.stringify({status:"ENERGY_SOUL_VERIFIED_REBOOT_REQUIRED",soul_energy_binding_status:"VERIFIED",private_key_exposed:false})+"\n");}
+async function prepareEnergyBody(){const current=await state();expect(current.phase==="ENERGY_SOUL_VERIFIED_REBOOT_REQUIRED","ENERGY_REAL_REBOOT_REQUIRED");expect(current.energy_soul_runtime_pid!==process.pid,"ENERGY_RUNTIME_NOT_RESTARTED");const c=await energyContext();const message=buildBodyEnergyAcceptanceMessage({soulAddress:c.addresses.soul_address,bodyAddress:c.addresses.body_address,energyWalletAddress:c.addresses.energy_wallet_address,chainId:56,soulBindingHash:current.energy_soul_binding_hash,bodyUniverseHash:c.body_universe_hash,challenge:c.extension.body_challenge,bootCounter:4});const now=new Date().toISOString();await writeJson(files.energyBodyRequest,{organ:"BODY_WALLET",expected_address:c.addresses.body_address,message});await writeJson(files.state,{...current,phase:"ENERGY_BODY_SIGNATURE_PENDING",energy_body_message:message,energy_body_runtime_pid:process.pid,history:[...current.history,{event:"ENERGY_EXTENSION_REBOOT",process_id:process.pid,timestamp:now}]});process.stdout.write(JSON.stringify({status:"ENERGY_BODY_SIGNATURE_PENDING",private_key_exposed:false})+"\n");}
+async function finalizeEnergyBody(){const current=await state(),signed=await readJson(files.energyBodySignature);expect(current.phase==="ENERGY_BODY_SIGNATURE_PENDING","ENERGY_BODY_PHASE_INVALID");expect(current.energy_soul_signer_pid!==signed.signer_broker_pid,"ENERGY_SIGNER_NOT_RESTARTED");const v=verifyBodyEnergyAcceptance({message:current.energy_body_message,signature:signed.signature,expectedBodyAddress:current.body_address});const now=new Date().toISOString();const next={...current,phase:"ENERGY_WALLET_BOUND_READ_ONLY",energy_body_signature:signed.signature,energy_body_message_hash:v.message_hash,energy_body_signer_pid:signed.signer_broker_pid,energy_binding_status:"VERIFIED_AFTER_REAL_REBOOT",completed_at:now,history:[...current.history,{event:"ENERGY_WALLET_BOUND_READ_ONLY",process_id:process.pid,signer_broker_pid:signed.signer_broker_pid,timestamp:now}]};await writeJson(files.state,next);process.stdout.write(JSON.stringify({status:next.phase,energy_wallet_address:next.energy_wallet_address,soul_energy_binding_status:"VERIFIED",body_energy_acceptance_status:"VERIFIED_AFTER_REAL_REBOOT",private_key_exposed:false,mainnet_transaction_sent:false})+"\n");}
+
+const actions = { "prepare-soul": prepareSoul, "finalize-soul": finalizeSoul, "prepare-body": prepareBody, "finalize-body": finalizeBody, "prepare-energy-soul": prepareEnergySoul, "finalize-energy-soul": finalizeEnergySoul, "prepare-energy-body": prepareEnergyBody, "finalize-energy-body": finalizeEnergyBody, status: async () => process.stdout.write(`${JSON.stringify(await state(), null, 2)}\n`) };
 if (!actions[action]) stop("STARFORGE_GENESIS_ACTION_INVALID");
 actions[action]().catch((error) => { process.stderr.write(`${error.message}\n`); process.exit(2); });

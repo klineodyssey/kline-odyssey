@@ -20,7 +20,7 @@ export const STARFORGE = Object.freeze({
 });
 
 export const FORBIDDEN_CHAIN_METHODS = Object.freeze([
-  "eth_sendTransaction", "eth_sendRawTransaction", "approve", "transfer", "transferFrom", "swap", "deploy"
+  "eth_sendTransaction", "eth_sendRawTransaction", "approve", "transfer", "transferFrom", "swap", "wrap", "unwrap", "deploy"
 ]);
 
 function scalar(value) {
