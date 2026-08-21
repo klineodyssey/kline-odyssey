@@ -1,5 +1,5 @@
 {
-  "schema_version": "1.0.0",
+  "schema_version": "1.1.0",
   "status": "CANDIDATE_NOT_ACTIVE",
   "life_id": "LIFE-KAIOS-STARFORGE-0001",
   "organ_name": "LIFE_ENERGY_WALLET",
@@ -39,6 +39,8 @@
     "RECEIPT_GATED_STATE_TRANSITION"
   ],
   "issued_at": "2026-08-21T16:23:31Z",
-  "soul_challenge": "0x3f68c776d40da972173ab7fa99eb360fe64bb5584d17b4211dd9bf73d39531b1",
-  "body_challenge": "0x96ac392a31c61c90274a1b103211414fb8b0cb723b08530314114963922c50a0"
+  "soul_challenge": "0xd44b4c7cff0ce28fda22015c83a80e63ed86f5cbdd2db8b8a305f574e0a14b17",
+  "body_challenge": "0x43cbf99873a8ceaee3379e48f7da3d80117c8999ede94e17b8a58cdb263334c0",
+  "review_revision": 2,
+  "restart_evidence_class": "PROCESS_RESTART_NOT_OS_REBOOT"
 }

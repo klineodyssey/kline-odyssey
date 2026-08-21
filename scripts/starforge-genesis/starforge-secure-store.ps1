@@ -28,14 +28,26 @@ function Clear-Bytes([byte[]]$bytes) {
   if ($null -ne $bytes) { [Array]::Clear($bytes, 0, $bytes.Length) }
 }
 
+
+function Test-Secp256k1Scalar([byte[]]$bytes) {
+  if ($null -eq $bytes -or $bytes.Length -ne 32) { return $false }
+  [byte[]]$order = @(0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xfe,0xba,0xae,0xdc,0xe6,0xaf,0x48,0xa0,0x3b,0xbf,0xd2,0x5e,0x8c,0xd0,0x36,0x41,0x41)
+  $nonZero = $false
+  foreach ($value in $bytes) { if ($value -ne 0) { $nonZero = $true; break } }
+  if (-not $nonZero) { return $false }
+  for ($index = 0; $index -lt 32; $index++) {
+    if ($bytes[$index] -lt $order[$index]) { return $true }
+    if ($bytes[$index] -gt $order[$index]) { return $false }
+  }
+  return $false
+}
+
 function New-ProtectedSigner([string]$path) {
   [byte[]]$plain = New-Object byte[] 32
   $rng = [Security.Cryptography.RandomNumberGenerator]::Create()
-  try { $rng.GetBytes($plain) }
-  finally { $rng.Dispose() }
-  $nonZero = $false
-  foreach ($value in $plain) { if ($value -ne 0) { $nonZero = $true; break } }
-  if (-not $nonZero) { Clear-Bytes $plain; throw 'CSPRNG_ZERO_SCALAR_REJECTED' }
+  try {
+    do { $rng.GetBytes($plain) } while (-not (Test-Secp256k1Scalar $plain))
+  } finally { $rng.Dispose() }
   [byte[]]$cipher = [Security.Cryptography.ProtectedData]::Protect($plain, $entropy, [Security.Cryptography.DataProtectionScope]::CurrentUser)
   [IO.File]::WriteAllBytes($path, $cipher)
   Clear-Bytes $plain
@@ -89,7 +101,7 @@ function Sign-PublicRequest([string]$organ, [string]$action, [string]$requestFil
   [byte[]]$secret = Read-ProtectedSigner $files[$organ]
   try {
     $publicResult = Invoke-SignerBroker $secret @($action, $requestFile)
-    Set-Content -LiteralPath $outputFile -Value $publicResult -Encoding utf8
+    [IO.File]::WriteAllText($outputFile, $publicResult, [Text.UTF8Encoding]::new($false))
   } finally { Clear-Bytes $secret }
 }
 
@@ -153,17 +165,27 @@ if ($Action -eq 'RunBody') {
 
 if ($Action -eq 'RunEnergySoul') {
   if ($expectedEnergyRef -ne $refs.energy) { throw 'ENERGY_SECURE_STORE_REFERENCE_MISMATCH' }
+  $publicAddresses = Get-Content -Raw (Join-Path $storeRoot 'public-addresses.json') | ConvertFrom-Json
+  $derivedEnergyAddress = Resolve-PublicAddress 'energy'
+  if (-not [String]::Equals($derivedEnergyAddress, $publicAddresses.energy_wallet_address, [StringComparison]::OrdinalIgnoreCase)) { throw 'ENERGY_PUBLIC_ADDRESS_MISMATCH' }
   & $node $runtime 'prepare-energy-soul' $storeRoot | Out-Null
+  if ($LASTEXITCODE -ne 0) { throw 'ENERGY_SOUL_PREPARE_FAILED' }
   Sign-PublicRequest 'soul' 'sign-energy-soul' (Join-Path $storeRoot 'energy-soul-sign-request.json') (Join-Path $storeRoot 'energy-soul-signature.json')
   & $node $runtime 'finalize-energy-soul' $storeRoot
-  exit $LASTEXITCODE
+  if ($LASTEXITCODE -ne 0) { throw 'ENERGY_SOUL_FINALIZE_FAILED' }
+  exit 0
 }
 if ($Action -eq 'RunEnergyBody') {
   if ($expectedEnergyRef -ne $refs.energy) { throw 'ENERGY_SECURE_STORE_REFERENCE_MISMATCH' }
+  $publicAddresses = Get-Content -Raw (Join-Path $storeRoot 'public-addresses.json') | ConvertFrom-Json
+  $derivedEnergyAddress = Resolve-PublicAddress 'energy'
+  if (-not [String]::Equals($derivedEnergyAddress, $publicAddresses.energy_wallet_address, [StringComparison]::OrdinalIgnoreCase)) { throw 'ENERGY_PUBLIC_ADDRESS_MISMATCH' }
   & $node $runtime 'prepare-energy-body' $storeRoot | Out-Null
+  if ($LASTEXITCODE -ne 0) { throw 'ENERGY_BODY_PREPARE_FAILED' }
   Sign-PublicRequest 'body' 'sign-energy-body' (Join-Path $storeRoot 'energy-body-sign-request.json') (Join-Path $storeRoot 'energy-body-signature.json')
   & $node $runtime 'finalize-energy-body' $storeRoot
-  exit $LASTEXITCODE
+  if ($LASTEXITCODE -ne 0) { throw 'ENERGY_BODY_FINALIZE_FAILED' }
+  exit 0
 }
 if ($Action -eq 'EnergyStatus') {
   $stateFile=Join-Path $storeRoot 'runtime-state.json'; $addressesFile=Join-Path $storeRoot 'public-addresses.json'

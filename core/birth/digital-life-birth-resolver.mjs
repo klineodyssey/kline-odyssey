@@ -1,6 +1,6 @@
 import { selectVerifiedNaiheCandidate, NAIHE_SOURCE_POLICY } from "./naihe-source-registry.mjs";
 import { invariant } from "../shared/errors.mjs";
-import { createBirthCertificate, createPendingBirthCertificate } from "./index.mjs";
+import { createBirthCertificate, createPendingBirthCertificate, validateSpiritGenesisAnchorV2 } from "./index.mjs";
 
 const TRANSFER_TOPIC = "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef";
 
@@ -40,11 +40,13 @@ export class JsonRpcClient {
 }
 
 export class DigitalLifeBirthResolver {
-  constructor({ rpc, historyIndexer = null, tokens, naiheSourceRegistry = null }) {
+  constructor({ rpc, historyIndexer = null, tokens, naiheSourceRegistry = null, environment = "PRODUCTION" }) {
     this.rpc = rpc;
     this.historyIndexer = historyIndexer;
     this.tokens = tokens;
     this.naiheSourceRegistry = naiheSourceRegistry;
+    this.environment = environment;
+    if (naiheSourceRegistry) naiheSourceRegistry.assertCompatibleEnvironment(environment);
   }
 
   async #blockEvidence(blockNumber) {
@@ -66,6 +68,9 @@ export class DigitalLifeBirthResolver {
       invariant(transaction?.hash?.toLowerCase() === candidate.tx_hash.toLowerCase(), "BNB_TRANSACTION_MISMATCH", "Normal BNB transaction hash does not match the indexed candidate");
       invariant(transaction?.to?.toLowerCase() === wallet.toLowerCase(), "BNB_RECIPIENT_MISMATCH", "Normal BNB recipient does not match the bound wallet");
       invariant(hexQuantity(transaction.value) === BigInt(candidate.value_wei), "BNB_AMOUNT_MISMATCH", "Normal BNB amount does not match RPC");
+      invariant(transaction?.from?.toLowerCase() === candidate.verified_source_address?.toLowerCase(), "NAIHE_RPC_FROM_MISMATCH", "RPC transaction.from does not match the verified Naihe source");
+    } else {
+      invariant(candidate.source_evidence_type === "TRUSTED_INTERNAL_TRACE", "NAIHE_TRACE_ATTESTATION_REQUIRED", "Internal source requires trusted trace evidence");
     }
     return Object.freeze({ verified: true, evidence_class: candidate.kind === "NORMAL" ? "RPC_VERIFIED_NORMAL_TRANSFER" : "INDEXER_INTERNAL_TRACE_AND_RPC_RECEIPT", evidence_status: candidate.evidence_status ?? "RPC_AND_INDEXER_VERIFIED", tx_hash: candidate.tx_hash, block_number: block.block_number, block_hash: block.block_hash, transaction_index: candidate.transaction_index, timestamp: block.timestamp, recipient: wallet, amount: formatUnits(BigInt(candidate.value_wei)), amount_wei: candidate.value_wei, asset: "BNB", mass_class: "DARK_MATTER_MASS", chain_id: 56 });
   }
@@ -99,7 +104,26 @@ export class DigitalLifeBirthResolver {
     const candidate = selectVerifiedNaiheCandidate({ candidates, registry: this.naiheSourceRegistry, context: { lifeId: life.life_id, soulId, energyWalletAddress, birthRequestId, challenge } });
     if (!candidate) return Object.freeze({ status: "PENDING", nai_he_source_status: "NO_VERIFIED_SOURCE_EVIDENCE", onchain_genesis: "NOT_YET_ANCHORED", regeneration_parent_address: null });
     const verified = await this.#verifyNative(candidate, energyWalletAddress);
-    return Object.freeze({ status: "DARK_MATTER_EMBODIMENT_ACTIVATION", event_type: "SPIRIT_GENESIS_ANCHOR", onchain_genesis: "ANCHORED", first_dark_matter: verified, birth_source_address: candidate.verified_source_address, regeneration_parent_address: candidate.verified_source_address, nai_he_water_source_id: candidate.source_registry_id, birth_request_id: birthRequestId, source_evidence_type: candidate.source_evidence_type, source_evidence_status: candidate.source_evidence_status });
+    return validateSpiritGenesisAnchorV2({
+      life_id: life.life_id,
+      soul_id: soulId,
+      energy_wallet_address: energyWalletAddress,
+      birth_source_address: candidate.verified_source_address,
+      regeneration_parent_address: candidate.verified_source_address,
+      naihe_water_source_id: candidate.source_registry_id,
+      birth_request_id: birthRequestId,
+      source_evidence_type: candidate.source_evidence_type,
+      source_evidence_status: candidate.source_evidence_status,
+      anchor_tx_hash: verified.tx_hash,
+      anchor_block: verified.block_number,
+      anchor_timestamp: verified.timestamp,
+      chain_id: 56,
+      exact_amount_wei: verified.amount_wei,
+      status: "DARK_MATTER_EMBODIMENT_ACTIVATION",
+      event_type: "SPIRIT_GENESIS_ANCHOR",
+      onchain_genesis: "ANCHORED",
+      first_dark_matter: verified
+    });
   }
 
   async resolveWithBinding({ life, binding }) {

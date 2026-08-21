@@ -38,9 +38,11 @@ async function main() {
   try { request = JSON.parse(await fs.readFile(inputPath, "utf8")); }
   catch { stop("PUBLIC_SIGN_REQUEST_INVALID"); }
   const organ = action === "sign-body" || action === "sign-energy-body" ? "BODY_WALLET" : "SOUL_WALLET";
-  if (action.startsWith("sign-energy-")) assertEnergySigningMessage({ organ, message: request.message });
+  if (action.startsWith("sign-energy-")) assertEnergySigningMessage({ organ, message: request.message, context: request.context });
   else assertAllowedSigningMessage({ organ, message: request.message });
   if (request.expected_address !== ethers.utils.getAddress(wallet.address)) stop("SIGNER_ADDRESS_MISMATCH");
+  if (action === "sign-energy-soul" && ethers.utils.getAddress(request.context?.soulAddress) !== request.expected_address) stop("SIGNER_CONTEXT_ADDRESS_MISMATCH");
+  if (action === "sign-energy-body" && ethers.utils.getAddress(request.context?.bodyAddress) !== request.expected_address) stop("SIGNER_CONTEXT_ADDRESS_MISMATCH");
   const signature = await wallet.signMessage(request.message);
   const recovered = recoverPersonalSignature(request.message, signature);
   if (recovered !== request.expected_address) stop("SIGNATURE_RECOVERY_MISMATCH");
