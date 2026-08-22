@@ -45,9 +45,13 @@ jobs:
           jq empty KGEN-KAIOS/worker_registry.json
           jq empty KGEN-KAIOS/worker_status_schema.json
       - name: Verify fail-closed registration candidate
-        run: node --test KGEN-KAIOS/tests/starforge-worker-registration.test.mjs | tee /tmp/starforge-registration-tests.tap
+        run: |
+          set -o pipefail
+          node --test KGEN-KAIOS/tests/starforge-worker-registration.test.mjs | tee /tmp/starforge-registration-tests.tap
       - name: Run repository regression tests
-        run: node --test tests/*.test.mjs | tee /tmp/repository-regression-tests.tap
+        run: |
+          set -o pipefail
+          node --test tests/*.test.mjs | tee /tmp/repository-regression-tests.tap
       - name: Validate changed artifacts and scan secrets
         env:
           INTEGRATION_BASE_RANGE: ${{ env.BASE_SHA }}...HEAD
