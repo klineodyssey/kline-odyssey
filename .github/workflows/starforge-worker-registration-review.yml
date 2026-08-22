@@ -1,0 +1,39 @@
+name: Starforge Worker Registration Candidate
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - "codex/KAIOS-STARFORGE-WORKER-REGISTRATION-V1-001"
+    paths:
+      - "KGEN-KAIOS/worker_registry.json"
+      - "KGEN-KAIOS/worker_status_schema.json"
+      - "KGEN-KAIOS/WORKER_REGISTRY.md"
+      - "KGEN-KAIOS/workforce/**"
+      - "KGEN-KAIOS/tests/starforge-worker-registration.test.mjs"
+      - ".github/workflows/starforge-worker-registration-review.yml"
+  pull_request:
+    paths:
+      - "KGEN-KAIOS/worker_registry.json"
+      - "KGEN-KAIOS/worker_status_schema.json"
+      - "KGEN-KAIOS/WORKER_REGISTRY.md"
+      - "KGEN-KAIOS/workforce/**"
+      - "KGEN-KAIOS/tests/starforge-worker-registration.test.mjs"
+
+permissions:
+  contents: read
+
+jobs:
+  exact-candidate-validation:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Parse formal JSON
+        run: |
+          jq empty KGEN-KAIOS/worker_registry.json
+          jq empty KGEN-KAIOS/worker_status_schema.json
+      - name: Verify fail-closed registration candidate
+        run: node --test KGEN-KAIOS/tests/starforge-worker-registration.test.mjs
