@@ -1,7 +1,7 @@
 # Starforge Worker Registration Candidate
 
 **Task ID:** `KAIOS-STARFORGE-WORKER-REGISTRATION-V1-001`
-**Execution base:** `31c8726b7c76a74d0693a1fab4278d5a456eab03`
+**Execution base:** `f507724d1876c28e3d24a7316c440ea9304a5228`
 **Implementer:** `codex-gm-01`
 **Independent review:** `REQUIRED`
 **Status:** `ONBOARDING_CANDIDATE_ONLY`
