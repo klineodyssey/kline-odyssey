@@ -1,4 +1,9 @@
 const SCALE = 10n ** 18n;
+const BASE_ASSET = "KGEN";
+const BASE_DECIMALS = 18;
+const QUOTE_ASSET = "UNFROZEN_11520_NATIVE_QUOTE_CANDIDATE";
+const QUOTE_STATUS = "UNFROZEN_CANDIDATE";
+const QUOTE_DECIMALS = 18;
 
 function parseDecimal(value, label = "value") {
   const text = String(value).trim();
@@ -27,12 +32,67 @@ function normalizeActorId(value, label) {
   return normalized;
 }
 
+function normalizeEvidenceId(value) {
+  const normalized = String(value ?? "").trim();
+  if (!/^[A-Za-z0-9][A-Za-z0-9:._-]{2,127}$/.test(normalized)) {
+    throw new TypeError("verified actor evidence_id must be 3-128 canonical characters");
+  }
+  return normalized;
+}
+
+function resolveVerifiedActorContext({ actorContext, verifyActorContext, timestampMs, purpose, marketId }) {
+  if (typeof verifyActorContext !== "function") throw new Error("ACTOR_CONTEXT_VERIFIER_REQUIRED");
+  let verified;
+  try {
+    verified = verifyActorContext(actorContext, Object.freeze({ purpose, market_id: marketId, observed_at_ms: timestampMs }));
+  } catch {
+    throw new Error("ACTOR_CONTEXT_VERIFICATION_FAILED");
+  }
+  if (!verified || typeof verified !== "object" || verified.authentication_status !== "VERIFIED") {
+    throw new Error("ACTOR_CONTEXT_NOT_VERIFIED");
+  }
+
+  const actorId = normalizeActorId(verified.actor_id, "verified actor_id");
+  const controllerId = normalizeActorId(verified.controller_id, "verified controller_id");
+  const authenticationMethod = String(verified.authentication_method ?? "").trim();
+  if (!/^[A-Z][A-Z0-9_]{2,63}$/.test(authenticationMethod)) {
+    throw new TypeError("verified authentication_method must be canonical");
+  }
+  const evidenceId = normalizeEvidenceId(verified.evidence_id);
+  const issuedAtMs = Date.parse(String(verified.issued_at ?? ""));
+  if (!Number.isFinite(issuedAtMs) || issuedAtMs > timestampMs) throw new Error("ACTOR_CONTEXT_ISSUED_AT_INVALID");
+
+  let expiresAt = null;
+  if (verified.expires_at !== null && verified.expires_at !== undefined) {
+    const expiresAtMs = Date.parse(String(verified.expires_at));
+    if (!Number.isFinite(expiresAtMs) || expiresAtMs < issuedAtMs || timestampMs > expiresAtMs) {
+      throw new Error("ACTOR_CONTEXT_EXPIRED");
+    }
+    expiresAt = new Date(expiresAtMs).toISOString();
+  }
+
+  const sessionId = verified.session_id === null || verified.session_id === undefined
+    ? null
+    : normalizeEvidenceId(verified.session_id);
+  return Object.freeze({
+    actorId,
+    controllerId,
+    authenticationStatus: "VERIFIED",
+    authenticationMethod,
+    evidenceId,
+    issuedAt: new Date(issuedAtMs).toISOString(),
+    expiresAt,
+    sessionId
+  });
+}
+
 function cloneOrder(order) {
   return {
     id: order.id,
     side: order.side,
     owner: order.owner,
     controller: order.controller,
+    actorAuthority: { ...order.actorAuthority },
     price: formatDecimal(order.price),
     quantity: formatDecimal(order.quantity),
     remaining: formatDecimal(order.remaining),
@@ -68,21 +128,16 @@ function bucketStart(timestampMs, intervalMs) {
 export function createKgenNativeMarketCell({
   marketId = "11520_KGEN_NATIVE_MARKET",
   marketCellCoordinate = "0.00011520",
-  baseAsset = "KGEN",
-  quoteAsset = "UNFROZEN_11520_NATIVE_QUOTE_CANDIDATE",
-  quoteStatus = "UNFROZEN_CANDIDATE",
-  baseDecimals = 18,
-  quoteDecimals = 18,
   tickSize = "0.00000001",
   lotSize = "0.00000001",
   candleIntervalMs = 60_000,
-  clock = () => Date.now()
+  clock = () => Date.now(),
+  verifyActorContext
 } = {}) {
   if (!Number.isSafeInteger(candleIntervalMs) || candleIntervalMs <= 0) {
     throw new RangeError("candleIntervalMs must be a positive safe integer");
   }
-  if (!Number.isInteger(baseDecimals) || baseDecimals < 0 || baseDecimals > 18) throw new RangeError("baseDecimals must be 0..18");
-  if (!Number.isInteger(quoteDecimals) || quoteDecimals < 0 || quoteDecimals > 18) throw new RangeError("quoteDecimals must be 0..18");
+  if (typeof verifyActorContext !== "function") throw new Error("ACTOR_CONTEXT_VERIFIER_REQUIRED");
 
   const tickRaw = parseDecimal(tickSize, "tickSize");
   const lotRaw = parseDecimal(lotSize, "lotSize");
@@ -142,8 +197,8 @@ export function createKgenNativeMarketCell({
     const trade = {
       id: `T${trades.length + 1}`,
       marketId,
-      baseAsset,
-      quoteAsset,
+      baseAsset: BASE_ASSET,
+      quoteAsset: QUOTE_ASSET,
       priceRaw: price,
       quantityRaw: quantity,
       price: formatDecimal(price),
@@ -156,6 +211,8 @@ export function createKgenNativeMarketCell({
       takerOwner: taker.owner,
       makerController: maker.controller,
       takerController: taker.controller,
+      makerActorEvidenceId: maker.actorAuthority.evidenceId,
+      takerActorEvidenceId: taker.actorAuthority.evidenceId,
       timestampMs,
       timestamp: new Date(timestampMs).toISOString()
     };
@@ -186,22 +243,35 @@ export function createKgenNativeMarketCell({
     return fills;
   }
 
-  function placeOrder({ side, price, quantity, owner, controller }) {
+  function placeOrder({ side, price, quantity, actorContext }) {
     const normalizedSide = normalizeSide(side);
-    const normalizedOwner = normalizeActorId(owner, "owner");
-    const normalizedController = normalizeActorId(controller, "controller");
     const priceRaw = parseDecimal(price, "price");
     const quantityRaw = parseDecimal(quantity, "quantity");
     if (priceRaw % tickRaw !== 0n) throw new RangeError("price must align to tickSize");
     if (quantityRaw % lotRaw !== 0n) throw new RangeError("quantity must align to lotSize");
     const timestampMs = Number(clock());
     if (!Number.isFinite(timestampMs)) throw new TypeError("clock must return a finite millisecond timestamp");
+    const authority = resolveVerifiedActorContext({
+      actorContext,
+      verifyActorContext,
+      timestampMs,
+      purpose: "PLACE_ORDER",
+      marketId
+    });
 
     const order = {
       id: `O${nextOrder++}`,
       side: normalizedSide,
-      owner: normalizedOwner,
-      controller: normalizedController,
+      owner: authority.actorId,
+      controller: authority.controllerId,
+      actorAuthority: {
+        authenticationStatus: authority.authenticationStatus,
+        authenticationMethod: authority.authenticationMethod,
+        evidenceId: authority.evidenceId,
+        issuedAt: authority.issuedAt,
+        expiresAt: authority.expiresAt,
+        sessionId: authority.sessionId
+      },
       price: priceRaw,
       quantity: quantityRaw,
       remaining: quantityRaw,
@@ -222,14 +292,21 @@ export function createKgenNativeMarketCell({
     };
   }
 
-  function cancelOrder(orderId, { owner, controller } = {}) {
-    const normalizedOwner = normalizeActorId(owner, "owner");
-    const normalizedController = normalizeActorId(controller, "controller");
+  function cancelOrder(orderId, actorContext) {
+    const timestampMs = Number(clock());
+    if (!Number.isFinite(timestampMs)) throw new TypeError("clock must return a finite millisecond timestamp");
+    const authority = resolveVerifiedActorContext({
+      actorContext,
+      verifyActorContext,
+      timestampMs,
+      purpose: "CANCEL_ORDER",
+      marketId
+    });
     for (const book of [bids, asks]) {
       const index = book.findIndex((order) => order.id === orderId);
       if (index < 0) continue;
       const order = book[index];
-      if (order.owner !== normalizedOwner || order.controller !== normalizedController) {
+      if (order.owner !== authority.actorId || order.controller !== authority.controllerId) {
         throw new Error("CANCEL_AUTHORIZATION_FAILED");
       }
       return cloneOrder(book.splice(index, 1)[0]);
@@ -254,14 +331,14 @@ export function createKgenNativeMarketCell({
       marketCellCoordinate,
       marketCellCoordinateRole: "LOCATION_ONLY_NOT_PRICE",
       runtimeStatus: "PAPER_IN_MEMORY_CANDIDATE_NOT_ACTIVE_RUNTIME",
-      baseAsset,
-      baseDecimals,
-      quoteAsset,
-      quoteStatus,
-      quoteDecimals,
+      baseAsset: BASE_ASSET,
+      baseDecimals: BASE_DECIMALS,
+      quoteAsset: QUOTE_ASSET,
+      quoteStatus: QUOTE_STATUS,
+      quoteDecimals: QUOTE_DECIMALS,
       tickSize: formatDecimal(tickRaw),
       lotSize: formatDecimal(lotRaw),
-      priceStatus: quoteStatus === "FROZEN" ? "NATIVE_MARKET_PRICE" : "NATIVE_MARKET_PRICE_CANDIDATE",
+      priceStatus: "NATIVE_MARKET_PRICE_CANDIDATE",
       pricingAuthority: "NATIVE_11520_MATCHED_BUY_SELL_TRADES_ONLY",
       externalReferencePriceAuthority: false,
       ct: ct === null ? null : formatDecimal(ct),
@@ -271,6 +348,8 @@ export function createKgenNativeMarketCell({
       tradeCount: trades.length,
       selfMatchPolicy: "FAIL_CLOSED_SAME_OWNER_OR_CONTROLLER",
       anonymousActorPolicy: "FORBIDDEN",
+      actorAuthentication: "INDEPENDENT_VERIFIER_REQUIRED",
+      callerAssertedIdentityAuthority: false,
       settlement: "PAPER_IN_MEMORY_NO_ASSET_TRANSFER",
       chainWrite: false,
       signer: false

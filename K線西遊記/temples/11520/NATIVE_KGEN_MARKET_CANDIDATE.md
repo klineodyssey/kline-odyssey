@@ -15,11 +15,13 @@ External PancakeSwap, WBNB, USD, USDT or L/P-derived values have zero native CT 
 
 ## Market integrity
 
-- BUY and SELL require non-anonymous normalized owner and controller identities.
+- BUY and SELL accept only an opaque `actorContext` that an independently wired verifier resolves to a normalized actor, controller, authentication method, evidence ID, issue time, optional expiry and optional session ID.
+- caller-supplied owner/controller strings or `authenticated=true` flags have no authority.
+- forged, unknown, future-issued and expired actor contexts fail closed before the order reaches either book.
 - same-owner self-match: fail closed.
 - same-controller self-match: fail closed.
 - anonymous collision: forbidden.
-- cancellation requires exact owner + controller authorization.
+- cancellation requires a fresh verified actor context whose normalized actor and controller both match the order authority; knowledge of the public strings is insufficient.
 - price-time priority remains the matching rule for unrelated actors.
 - OHLC and volume are derived only from executed native trades.
 
@@ -35,6 +37,8 @@ The current quote asset is explicitly `UNFROZEN_11520_NATIVE_QUOTE_CANDIDATE`.
 - candidate lot size: `0.00000001`
 
 Until a quote asset/unit is independently frozen, any output is `NATIVE_MARKET_PRICE_CANDIDATE`, not a formal comparable KGEN price.
+
+`quoteStatus` and `quoteAsset` are not constructor authority. Caller attempts to set `FROZEN` or another quote are ignored; a future formal freeze requires an independently reviewed Canonical Market Registry or quote-authority integration.
 
 ## Runtime / settlement boundary
 
