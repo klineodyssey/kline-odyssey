@@ -59,6 +59,7 @@ The worker must then stop without changing WorkQueue, creating a branch, editing
 | LAND_VIEWER_SCHEMA_V2_COMPATIBILITY | DONE | Codex | Codex | P1 | Frontend | `codex/land-viewer-schema-v2-compatibility` | `KGEN-KAIOS/world-viewer/LAND_VIEWER_SCHEMA_V2_COMPATIBILITY_MERGE_CLOSEOUT.md` |
 | WORLD_VIEWER_ORGANISM_PACKAGE_INTEGRATION | HOLD | UNASSIGNED | Codex | P1 | Frontend | `NOT_CREATED` | `PENDING_SCOPE` |
 | KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-R2-001 | CLAIMED | cursor-01 | codex-gm-01 | P0 | Payroll QA | `cursor-handoff/KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-R2-001` | `KGEN-AI-Company/reports/CURSOR_LIFE_ENERGY_PAYROLL_CANDIDATE_REPORT.md` |
+| KAIOS-DISTINCT-T2-REVIEWER-RECRUITMENT-001 | HOLD | UNASSIGNED_EXISTING_LIFE_CANDIDATE | Human PrimeForge | P0 | Workforce Governance | `NOT_CREATED` | `PENDING_HUMAN_AUTHORITY` |
 | KGEN-MAP-4168-NAIHE-GENESIS-STATION-UI-001 | HOLD | Map / World Agent | codex-gm-01 | P2 | World Map | `NOT_CREATED` | `SPEC_HANDOFF_IN_CODEX_MANAGER_PROTOCOL` |
 | KGEN-BSCSCAN-LOGO-001 | DONE | Cursor + Codex | Codex | P1 | Token Metadata | `cursor/kgen-bscscan-logo-submission-v1` | `KGEN/registry/BscScan/KGEN_BSCSCAN_LOGO_SUBMISSION_V1_MERGE_CLOSEOUT.md` |
 
@@ -84,6 +85,25 @@ The worker must then stop without changing WorkQueue, creating a branch, editing
 - Scope source: `KGEN-AI-Company/CODEX_MANAGER_PROTOCOL.md`, section `4168 Map / World Agent Handoff`
 - Scope: future project-isolated frontend implementation for the existing 4168 奈何橋 point.
 - Activation: requires the responsible Agent to accept a separate bounded task; Company Core does not edit Map/Temple frontend here.
+
+### KAIOS-DISTINCT-T2-REVIEWER-RECRUITMENT-001 - Independent Reviewer Capacity Gap
+
+- Status: HOLD
+- Demand Type: REVIEWER_JOB_OPENING
+- Workforce Gap: `REVIEW_QUEUE_DEMAND > ELIGIBLE_DISTINCT_REVIEWER_CAPACITY`
+- Priority: P0 governance gate
+- Owner: UNASSIGNED_EXISTING_LIFE_CANDIDATE
+- Reviewer / Approval Authority: Human PrimeForge
+- Triggering PRs: `#170`, then `#169`
+- Claim State: NOT_CLAIMABLE
+- Branch State: NOT_CREATED
+- Current Resolution: `HOLD_NO_ELIGIBLE_EXISTING_LIFE`
+- Preferred Onboarding Candidate: existing `LIFE-KAIOS-STARFORGE-0001`, subject to Human approval and complete Worker Registry onboarding; this preference grants no employment, trust or review authority.
+- Alternative Existing Worker: `cursor-01` remains ineligible while its existing claim conflicts and its role/permission lacks independent review authority.
+- Minimum eligibility: valid Life ID and Worker ID; `ACTIVE`, `TRUSTED` or `SENIOR_TRUSTED`; T2+; all four acknowledgments; explicit `INDEPENDENT_REVIEW`, `CODE_REVIEW`, `CI_REVIEW` and `AUTHORITY_BOUNDARY_REVIEW`; no suspension or blocking violation; no active-claim conflict; registered controller evidence distinct from each submitter.
+- Activation requires: explicit Human authorization of the selected existing Life, complete onboarding evidence, Registry update through reviewed governance, conflict-of-interest verification, and a separately issued review WorkOrder.
+- Forbidden shortcuts: no new Life birth, automatic trust promotion, temporary reviewer grant, self-review, same-controller alias, fake acknowledgment, PR merge, deployment, payment, private-key access or Mainnet action.
+- Closure condition: one existing Life is lawfully registered as a distinct T2+ reviewer and independently reviews PR `#170`; PR `#169` review may begin only after PR `#170` receives `PASS`.
 
 ### KAIOS-GM-V4-2026-0001 - General Manager Decision Engine
 
