@@ -16,11 +16,23 @@ function formatDecimal(raw) {
   return fraction ? `${whole}.${fraction}` : String(whole);
 }
 
+function normalizeActorId(value, label) {
+  const normalized = String(value ?? "").trim().toLowerCase();
+  if (!normalized || normalized === "anonymous" || normalized === "anon") {
+    throw new TypeError(`${label} must be a non-anonymous actor/Life identifier`);
+  }
+  if (!/^[a-z0-9][a-z0-9:._-]{2,127}$/.test(normalized)) {
+    throw new TypeError(`${label} must be 3-128 normalized actor/Life characters`);
+  }
+  return normalized;
+}
+
 function cloneOrder(order) {
   return {
     id: order.id,
     side: order.side,
     owner: order.owner,
+    controller: order.controller,
     price: formatDecimal(order.price),
     quantity: formatDecimal(order.quantity),
     remaining: formatDecimal(order.remaining),
@@ -42,27 +54,38 @@ function bucketStart(timestampMs, intervalMs) {
 /**
  * 11520 KGEN native market-cell engine.
  *
- * Important canon boundary:
+ * PAPER_IN_MEMORY_CANDIDATE_NOT_ACTIVE_RUNTIME
+ *
+ * Canon / integrity boundary:
  * - `marketCellCoordinate` identifies the Huaguoshan Taiwan Exchange cell only.
  * - It NEVER seeds, fixes or influences price.
- * - CT is undefined before the first matched trade.
+ * - CT is undefined before the first valid matched trade.
  * - CT becomes exactly the most recent native 11520 matched trade price.
- * - PancakeSwap/WBNB/USD/L-P data may be displayed externally, but are not inputs here.
- * - This module is an in-memory/paper matching engine only. It has no signer, token custody,
- *   settlement, transfer, approval, chain-write or Mainnet authority.
+ * - PancakeSwap/WBNB/USD/L-P data are not pricing inputs.
+ * - Anonymous actors, same-owner matches and same-controller matches fail closed.
+ * - This module has no signer, custody, settlement, transfer, approval, chain-write or Mainnet authority.
  */
 export function createKgenNativeMarketCell({
   marketId = "11520_KGEN_NATIVE_MARKET",
   marketCellCoordinate = "0.00011520",
   baseAsset = "KGEN",
-  quoteUnit = "11520_NATIVE_QUOTE",
+  quoteAsset = "UNFROZEN_11520_NATIVE_QUOTE_CANDIDATE",
+  quoteStatus = "UNFROZEN_CANDIDATE",
+  baseDecimals = 18,
+  quoteDecimals = 18,
+  tickSize = "0.00000001",
+  lotSize = "0.00000001",
   candleIntervalMs = 60_000,
   clock = () => Date.now()
 } = {}) {
   if (!Number.isSafeInteger(candleIntervalMs) || candleIntervalMs <= 0) {
     throw new RangeError("candleIntervalMs must be a positive safe integer");
   }
+  if (!Number.isInteger(baseDecimals) || baseDecimals < 0 || baseDecimals > 18) throw new RangeError("baseDecimals must be 0..18");
+  if (!Number.isInteger(quoteDecimals) || quoteDecimals < 0 || quoteDecimals > 18) throw new RangeError("quoteDecimals must be 0..18");
 
+  const tickRaw = parseDecimal(tickSize, "tickSize");
+  const lotRaw = parseDecimal(lotSize, "lotSize");
   const bids = [];
   const asks = [];
   const trades = [];
@@ -102,12 +125,25 @@ export function createKgenNativeMarketCell({
     existing.trades += 1;
   }
 
+  function assertNoSelfMatch(taker) {
+    const opposite = taker.side === "BUY" ? asks : bids;
+    let remaining = taker.remaining;
+    for (const maker of opposite) {
+      if (remaining <= 0n) break;
+      const crosses = taker.side === "BUY" ? taker.price >= maker.price : taker.price <= maker.price;
+      if (!crosses) break;
+      if (maker.owner === taker.owner) throw new Error("SELF_MATCH_FORBIDDEN_SAME_OWNER");
+      if (maker.controller === taker.controller) throw new Error("SELF_MATCH_FORBIDDEN_SAME_CONTROLLER");
+      remaining -= remaining < maker.remaining ? remaining : maker.remaining;
+    }
+  }
+
   function executeTrade({ maker, taker, quantity, price, timestampMs }) {
     const trade = {
       id: `T${trades.length + 1}`,
       marketId,
       baseAsset,
-      quoteUnit,
+      quoteAsset,
       priceRaw: price,
       quantityRaw: quantity,
       price: formatDecimal(price),
@@ -116,6 +152,10 @@ export function createKgenNativeMarketCell({
       takerOrderId: taker.id,
       makerSide: maker.side,
       takerSide: taker.side,
+      makerOwner: maker.owner,
+      takerOwner: taker.owner,
+      makerController: maker.controller,
+      takerController: taker.controller,
       timestampMs,
       timestamp: new Date(timestampMs).toISOString()
     };
@@ -126,6 +166,7 @@ export function createKgenNativeMarketCell({
   }
 
   function match(taker, timestampMs) {
+    assertNoSelfMatch(taker);
     const opposite = taker.side === "BUY" ? asks : bids;
     const fills = [];
 
@@ -135,7 +176,6 @@ export function createKgenNativeMarketCell({
       if (!crosses) break;
 
       const quantity = taker.remaining < maker.remaining ? taker.remaining : maker.remaining;
-      // Price-time priority: a crossing taker executes at the resting maker price.
       const trade = executeTrade({ maker, taker, quantity, price: maker.price, timestampMs });
       fills.push(trade);
       taker.remaining -= quantity;
@@ -146,17 +186,22 @@ export function createKgenNativeMarketCell({
     return fills;
   }
 
-  function placeOrder({ side, price, quantity, owner = "ANONYMOUS" }) {
+  function placeOrder({ side, price, quantity, owner, controller }) {
     const normalizedSide = normalizeSide(side);
+    const normalizedOwner = normalizeActorId(owner, "owner");
+    const normalizedController = normalizeActorId(controller, "controller");
     const priceRaw = parseDecimal(price, "price");
     const quantityRaw = parseDecimal(quantity, "quantity");
+    if (priceRaw % tickRaw !== 0n) throw new RangeError("price must align to tickSize");
+    if (quantityRaw % lotRaw !== 0n) throw new RangeError("quantity must align to lotSize");
     const timestampMs = Number(clock());
     if (!Number.isFinite(timestampMs)) throw new TypeError("clock must return a finite millisecond timestamp");
 
     const order = {
       id: `O${nextOrder++}`,
       side: normalizedSide,
-      owner: String(owner),
+      owner: normalizedOwner,
+      controller: normalizedController,
       price: priceRaw,
       quantity: quantityRaw,
       remaining: quantityRaw,
@@ -177,10 +222,17 @@ export function createKgenNativeMarketCell({
     };
   }
 
-  function cancelOrder(orderId, owner = null) {
+  function cancelOrder(orderId, { owner, controller } = {}) {
+    const normalizedOwner = normalizeActorId(owner, "owner");
+    const normalizedController = normalizeActorId(controller, "controller");
     for (const book of [bids, asks]) {
-      const index = book.findIndex((order) => order.id === orderId && (owner === null || order.owner === String(owner)));
-      if (index >= 0) return cloneOrder(book.splice(index, 1)[0]);
+      const index = book.findIndex((order) => order.id === orderId);
+      if (index < 0) continue;
+      const order = book[index];
+      if (order.owner !== normalizedOwner || order.controller !== normalizedController) {
+        throw new Error("CANCEL_AUTHORIZATION_FAILED");
+      }
+      return cloneOrder(book.splice(index, 1)[0]);
     }
     return null;
   }
@@ -201,8 +253,15 @@ export function createKgenNativeMarketCell({
       marketId,
       marketCellCoordinate,
       marketCellCoordinateRole: "LOCATION_ONLY_NOT_PRICE",
+      runtimeStatus: "PAPER_IN_MEMORY_CANDIDATE_NOT_ACTIVE_RUNTIME",
       baseAsset,
-      quoteUnit,
+      baseDecimals,
+      quoteAsset,
+      quoteStatus,
+      quoteDecimals,
+      tickSize: formatDecimal(tickRaw),
+      lotSize: formatDecimal(lotRaw),
+      priceStatus: quoteStatus === "FROZEN" ? "NATIVE_MARKET_PRICE" : "NATIVE_MARKET_PRICE_CANDIDATE",
       pricingAuthority: "NATIVE_11520_MATCHED_BUY_SELL_TRADES_ONLY",
       externalReferencePriceAuthority: false,
       ct: ct === null ? null : formatDecimal(ct),
@@ -210,6 +269,8 @@ export function createKgenNativeMarketCell({
       bestBid: book.bestBid,
       bestAsk: book.bestAsk,
       tradeCount: trades.length,
+      selfMatchPolicy: "FAIL_CLOSED_SAME_OWNER_OR_CONTROLLER",
+      anonymousActorPolicy: "FORBIDDEN",
       settlement: "PAPER_IN_MEMORY_NO_ASSET_TRANSFER",
       chainWrite: false,
       signer: false
