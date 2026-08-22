@@ -1,17 +1,18 @@
 {
   "metadata": {
     "architecture_id": "PRIMEFORGE-COMPANY-AUTOPILOT-ARCH-001",
-    "version": "0.4.7",
-    "revision": "2026-08-01.4",
+    "version": "0.5.0-candidate",
+    "revision": "2026-08-23.1",
     "status": "ACTIVE_OPERATOR_PROTOCOL_NO_BACKGROUND_SERVICE",
-    "last_updated": "2026-08-01",
+    "last_updated": "2026-08-23",
     "updated_by": "codex-gm-01",
     "reviewed_by": "HUMAN_PRIMEFORGE_FULL_AUTOPILOT_001",
     "human_decision_ids": [
       "HUMAN-PRIMEFORGE-COMPANY-AUTOPILOT-001",
       "HUMAN-COMPANY-AUTOMATIC-MAINTENANCE-001",
       "HUMAN-COMPANY-OS-BOOT-001",
-      "HUMAN-PRIMEFORGE-FULL-AUTOPILOT-001"
+      "HUMAN-PRIMEFORGE-FULL-AUTOPILOT-001",
+      "KAIOS_AUTONOMOUS_AI_COMPANY_OPERATING_SYSTEM_V1_1"
     ],
     "source_commit": "ORIGIN_MAIN_a8d1d3aef66ce6dedf3438649e70c31740603ad3",
     "source_freshness": "REMOTE_VERIFIED_2026-08-01T12:07:00+08:00",
@@ -22,9 +23,34 @@
     "type": "INVOCATION_DRIVEN_GOVERNANCE_INTEGRATION",
     "is_background_daemon": false,
     "is_second_company_system": false,
-    "implementation_started": false,
+    "implementation_started": true,
     "workqueue_implementation_created": false,
-    "deployment_started": false
+    "deployment_started": false,
+    "safe_cycle_candidate": {
+      "implementation": "core/company/index.mjs#runAutonomousCompanyCycle",
+      "status": "IMPLEMENTED_LOCAL_CANDIDATE_NOT_CONNECTED",
+      "side_effects": false,
+      "reuses_formal_worker_registry": true,
+      "reuses_formal_workqueue": true,
+      "reuses_review_first_priority": true,
+      "replay_safe_with_supplied_cycle_history": true,
+      "background_scheduler": false,
+      "claim_persistence": false,
+      "worker_wake": false,
+      "github_write": false,
+      "mainnet_write": false,
+      "payment": false,
+      "private_key_access": false,
+      "missing_connectors": [
+        "DURABLE_CYCLE_EVENT_STORE",
+        "LATEST_REPOSITORY_SNAPSHOT_ADAPTER",
+        "ATOMIC_CLAIM_LEASE_CONNECTOR",
+        "AUTHORIZED_WORKER_WAKE_ADAPTER",
+        "INDEPENDENT_REVIEW_TRIGGER",
+        "EXACT_HEAD_CI_OBSERVER",
+        "BACKGROUND_INVOCATION_SCHEDULER"
+      ]
+    }
   },
   "company_os_boot": {
     "architecture": "COMPANY_OS_BOOT.md",
@@ -429,7 +455,7 @@
     "universe_map_modified": false,
     "frozen_baseline_modified": false,
     "protected_path_modified": false,
-    "implementation_started": false,
+    "implementation_started": true,
     "implementation_workqueue_created": false,
     "deployment_started": false,
     "commit_allowed_this_round": true,
