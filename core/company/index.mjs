@@ -2100,6 +2100,22 @@ export function runAutonomousCompanyCycle({
   }
 
   if (selected.source === "REVIEW_QUEUE") {
+    const submitter = workers.find((worker) => worker.worker_id === selected.submitter_worker_id);
+    if (!isAutonomousCompanyWorkerEligible(submitter, selected)
+      || !autonomousCompanyBranchMatches(submitter.allowed_branch_pattern, selected.branch, selected.task_id)) {
+      append("BLOCKER_STATE", { blocker: "AUTHORIZED_DELIVERY_SUBMITTER_REQUIRED", task_id: selected.task_id });
+      append("CLOCK_OUT", { result: "HOLD_SUBMITTER" });
+      return Object.freeze({
+        cycle_id,
+        status: "HOLD_SUBMITTER",
+        selected_action: null,
+        selected_task_id: selected.task_id,
+        selected_worker_id: null,
+        events: Object.freeze(events),
+        authority: noExternalAuthority,
+        next_safe_action: "RESTORE_AUTHORIZED_DELIVERY_SUBMITTER_BINDING"
+      });
+    }
     const reviewer = workers.find((worker) => worker.worker_id === selected.reviewer_id);
     if (!isAutonomousCompanyWorkerEligible(reviewer) || reviewer.worker_id === selected.submitter_worker_id) {
       append("BLOCKER_STATE", { blocker: "INDEPENDENT_REVIEWER_REQUIRED", task_id: selected.task_id });

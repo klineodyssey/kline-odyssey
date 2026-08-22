@@ -3050,6 +3050,22 @@ test("Autonomous Company requests review only after repaired delivery is submitt
   assert.deepEqual(result.events.map((event) => event.event_type), ["CLOCK_IN", "REVIEW_REQUEST", "CLOCK_OUT"]);
 });
 
+test("Autonomous Company review requires the registered authorized delivery submitter", () => {
+  const delivery = {
+    ...autonomousTask,
+    task_id: "DELIVERY-UNREGISTERED",
+    status: "DELIVERY_SUBMITTED",
+    submitter_worker_id: "unregistered-worker",
+    reviewer_id: "codex-gm-01",
+    branch: "cursor-handoff/DELIVERY-UNREGISTERED",
+    authorized_actions: ["READ", "TEST", "REVIEW_REQUEST"]
+  };
+  const result = autonomousCycle({ review_queue: [delivery] });
+  assert.equal(result.status, "HOLD_SUBMITTER");
+  assert.equal(result.events[1].payload.blocker, "AUTHORIZED_DELIVERY_SUBMITTER_REQUIRED");
+  assert.equal(result.events.some((event) => event.event_type === "REVIEW_REQUEST"), false);
+});
+
 test("Autonomous Company assignment requires a registered independent reviewer", () => {
   const result = autonomousCycle({ work_queue: [{ ...autonomousTask, reviewer_id: "missing-reviewer" }] });
   assert.equal(result.status, "HOLD_REVIEWER");
