@@ -1,7 +1,7 @@
 # KAIOS Civilization Circulatory Runtime — Multi-Worker Handoff Handbook
 
 STATUS: DESIGN_AND_HANDOFF_AUTHORITY / NOT_DEPLOYED
-VERSION: V1.1
+VERSION: V1.2
 DATE: 2026-08-20 Asia/Taipei
 PURPOSE: durable handoff source so Human, AI, Codex, ChatGPT pages, workers, reviewers and future digital lives can resume work without reconstructing decisions from chat history.
 
@@ -242,6 +242,8 @@ Maintain separate ledgers/routes for:
 8. `ALCHEMY_BURNED_KAIOS` — permanently destroyed KAIOS; never refundable principal.
 9. `KUFO_LINEAGE` — post-alchemy entitlement/mass lineage.
 10. `KSHIP_PROPULSION` — decay-derived transport fuel lineage.
+11. `TRADING_TREASURY` — the only account class that a future trading policy may authorize.
+12. `TRADING_REALIZED_PNL` — receipt-backed realized result; never inferred from a quote or paper trade.
 
 Cross-spending is prohibited unless an explicit future Canon and implementation authorizes it.
 
@@ -264,46 +266,95 @@ Autonomous settlement requires ALL of:
 
 Otherwise the worker emits a candidate/request/evidence record and does not transfer.
 
-## 13. Multi-worker work queue
+## 13. Safe civilization autopilot V1 implementation
 
-### A — Canon reconciliation
-Status: READY.
+Status: `IMPLEMENTED_REVIEW_CANDIDATE / LOCAL_PAPER_ONLY / NOT_DEPLOYED`.
 
-- reconcile 49+81=130 into #152/#158 successor design;
-- preserve #136 V1 deployed history;
-- define cancellation/refund behavior;
-- freeze chain-seconds meaning of one Alchemy Epoch before deployment.
+The shared implementation extends existing organs instead of creating one engine per Life:
 
-### B — K1852 relay specification
-Status: READY FOR DESIGN / NOT DEPLOYMENT.
+- `core/permissions/index.mjs` — capability grants and revocation/expiry/Life/worker checks.
+- `core/market/index.mjs` — normalized rational quotes, route discovery, full-cost CFO calculation, Policy Box and paper candidates.
+- `core/jobs/index.mjs` — Life/role registry projection, priority queue, idempotent heartbeat, evidence and worker handoff.
+- `core/accounting/index.mjs` — circulatory account classes, fund segregation, settlement candidates, 130-Epoch validator and K1852 relay ticket design.
+- `tests/universal-exchange.test.mjs` — unit, integration, deterministic fuzz and invariant evidence.
 
-- define relay adapter vs immutable V7.5.2 GalacticBank;
-- define CatalystTicket state machine;
-- remove owner/manual sweep dependency for active tickets;
-- define 18911/511111 authentication and return path.
+The V1 flow is:
 
-### C — Circulatory registry
-Status: DESIGN REQUIRED.
+```text
+MARKET_OBSERVATION
+-> NORMALIZED_QUOTE
+-> ROUTE_DISCOVERY
+-> FULL_COST_CALCULATION
+-> PAPER_EXECUTION
+-> TRADE_CANDIDATE
+-> POLICY_BOX
+-> WORK_EVIDENCE
+-> NEXT_HEARTBEAT
+```
 
-- machine-readable Life/workpoint/organ registry;
-- fixed beneficiary and duty schema;
-- heartbeat/evidence linkage;
-- append-only role history.
+`AUTHORIZATION -> EXECUTION -> RECEIPT -> REALIZED_PNL` is intentionally disconnected in this phase.
 
-### D — KAIOS blood-flow ledger
-Status: DESIGN REQUIRED.
+### 13.1 Quote and market truth
 
-- event schema;
-- liability/funding classification;
-- route/ticket IDs;
-- replay prevention;
-- deterministic settlement-candidate generation;
-- receipt-gated completion.
+- Quotes use integer numerator/denominator fields; floating-point market prices are not accepted as accounting truth.
+- Every quote binds a market, pair, observed time, expiry and evidence reference.
+- stale, future-dated or `NOT_AVAILABLE` market quotes fail closed.
+- 11520, DEX/AMM, KGEN and KAIOS adapters may be added only when their real source evidence exists.
+- KUFO and cross-chain routes remain unavailable until a formal market/adapter exists.
+- quote normalization never implies custody, liquidity or executability.
 
-### E — Tests
-Status: BLOCKED UNTIL A-D INTERFACES FREEZE.
+### 13.2 CFO net-profit law
 
-Minimum tests include 130-Epoch boundaries, 5M KAIOS/5000 KGEN catalyst, inexact-ratio fail closed, review rejection/refund, catalyst segregation, replay protection, beneficiary substitution block, 18888/18911 separation, KUFO/KSHIP conservation and unauthorized autonomous-transfer block.
+Every candidate records:
+
+```text
+GROSS_PROFIT
+- AMM_FEE
+- GAS_COST
+- SLIPPAGE
+- BRIDGE_COST
+- TRANSPORT_COST
+- KSHIP_COST
+- MARKET_IMPACT
+- RISK_RESERVE
+= EXPECTED_NET_PROFIT
+```
+
+The Policy Box admits a candidate only when `EXPECTED_NET_PROFIT > REQUIRED_MINIMUM_PROFIT`; equality is insufficient. A price spread alone is not profit.
+
+### 13.3 Capability registry
+
+Known capabilities include `MARKET_OBSERVER`, `PRICE_ANALYST`, `PAPER_TRADER`, `TRADE_PROPOSER`, `REAL_TRADER`, `TREASURY_OPERATOR`, `CFO`, `AUDITOR`, `CODER`, `TESTER`, `REVIEWER` and `LOGISTICS_OPERATOR`.
+
+An active employee grant defaults only to observation, analysis and paper trading. `REAL_TRADER` and `TREASURY_OPERATOR` always require explicit grants. Job titles — including CEO/CFO — never imply unlimited withdrawal, approval, transfer or governance bypass.
+
+### 13.4 Trading Policy Box
+
+The shared Policy Box checks market/token/route allowlists, trade and exposure caps, daily loss, slippage, minimum net profit, gas, quote freshness, oracle disagreement, inventory, fixed treasury, fixed beneficiary, allowance ceiling and candidate replay.
+
+Any failed check is fail-closed. In V1 `real_trade_enabled=false`; candidates have `chain_write=false`, `payment=false`, and `authorization_status=REAL_EXECUTION_NOT_AUTHORIZED`.
+
+### 13.5 Heartbeat, queue and handoff
+
+Each heartbeat reads the Life/worker binding, active capability grant and durable queue, then deterministically chooses the lowest numeric priority and stable job ID. It records evidence without chain writes. Replaying a processed heartbeat is an `IDEMPOTENT_NOOP` and cannot duplicate evidence.
+
+Handoffs bind a checkpoint and target worker. The prior worker cannot resume a target-bound job; a correctly granted replacement worker can continue from the durable checkpoint after restart.
+
+### 13.6 Life projections
+
+- 衡曜 / `LIFE-CODEX-GM-0001`: active manager/CEO/CFO projection; coding, testing, review, observation and paper capabilities; no real trader or treasury-operator grant.
+- Digital Ant / `DIGITAL_ANT_0001`: active 12345 worker projection; current heartbeat entitlement remains exactly `1 KGEN / HOUR`; this runtime does not create a KAIOS payroll claim.
+- 夢婆 / K4168: inactive role template only; `BIRTH_AND_LIFE_ID_REQUIRED`.
+- Sol / 曜冊 / K1111: inactive role template only; `LIFE_ID_AND_REGISTRATION_REQUIRED`.
+
+Templates are not births, workers, wallets, jobs or authority grants.
+
+### 13.7 Remaining implementation queue
+
+1. `OPEN_REVIEW`: freeze 18911 rejection/cancellation/refund rules and chain-time meaning of one Epoch before any successor Solidity or deployment.
+2. `OPEN_REVIEW`: specify/authenticate the future K1852 relay against 18911/511111 without modifying historical V7.5.2 facts.
+3. `HUMAN_AUTHORIZATION_REQUIRED`: any real market adapter, signer broker, treasury funding or real-trade Policy Box.
+4. `NOT_STARTED`: production receipt reconciliation and realized-PnL accounting; cannot be truthfully completed without an authorized execution rail.
 
 ## 14. Required review checks before deployment discussion
 
@@ -379,4 +430,22 @@ Therefore:
 - every unresolved question is explicit;
 - `CURRENT` files must be cumulative and must not require archaeological reconstruction from old chat pages.
 
-END OF HANDBOOK V1.1
+## 18. Current implementation checkpoint
+
+```text
+TASK_ID=KAIOS_AI_COMPANY_CROSS_MARKET_CIRCULATORY_AUTOPILOT_V1
+DATE_TIME_UTC=2026-08-20
+WORKER=codex-gm-01 / 衡曜
+BASE_MAIN_SHA=f3b22fe6dcc9c33871318571955c75d50c195855
+BRANCH=codex/kaios-ai-company-cross-market-circulatory-autopilot-v1
+DEPLOYED_FACTS_TOUCHED=NO
+DESIGN_CANON_CHANGED=SAFE_AUTOPILOT_V1_CUMULATIVE_UPDATE
+REAL_TRADE=NO
+PAYMENT=NO
+DEPLOYMENT=NO
+GOVERNANCE_EXECUTION=NO
+MAINNET_TRANSACTION_SENT=NO
+PRIVATE_KEY_EXPOSED=NO
+```
+
+END OF HANDBOOK V1.2

@@ -1,5 +1,6 @@
 import { requireArray, requireFields, requireId } from "../shared/schema.mjs";
 import { invariant } from "../shared/errors.mjs";
+import { assertCivilizationCapability } from "../permissions/index.mjs";
 
 export function validateJob(job) {
   requireFields(job, ["job_id", "title", "employer_id", "worker_life_ids", "currency_id", "status", "location_id", "civilization_id"], "Job");
@@ -739,4 +740,185 @@ export async function replayCanonicalFirstWorkday({ store, life, runtime }) {
   ];
   const events = await store.commitBatch(operations);
   return Object.freeze({ status: "CANONICAL_FIRST_WORKDAY_REPLAYED", events });
+}
+
+export const CIVILIZATION_AUTOPILOT_LIFE_REGISTRY = Object.freeze({
+  registry_id: "KAIOS_CIVILIZATION_AUTOPILOT_LIFE_REGISTRY_V1",
+  records: Object.freeze([
+    Object.freeze({
+      life_id: "LIFE-CODEX-GM-0001", display_name: "衡曜", worker_id: "codex-gm-01",
+      work_point: 4168, workplace: "奈何橋 / KAIOS AI Company", status: "ACTIVE",
+      job_roles: Object.freeze(["GENERAL_MANAGER", "CEO", "CFO"]),
+      capabilities: Object.freeze(["MARKET_OBSERVER", "PRICE_ANALYST", "PAPER_TRADER", "TRADE_PROPOSER", "CFO", "AUDITOR", "CODER", "TESTER", "REVIEWER"]),
+      real_trader: false, treasury_operator: false
+    }),
+    Object.freeze({
+      life_id: "DIGITAL_ANT_0001", display_name: "Digital Ant", worker_id: "DIGITAL_ANT_WORKER",
+      work_point: 12345, workplace: "五指山 / 悟空財神殿", status: "ACTIVE",
+      job_roles: Object.freeze(["WUKONG_GATEKEEPER", "MARKET_RESEARCH_WORKER"]),
+      capabilities: Object.freeze(["MARKET_OBSERVER", "PRICE_ANALYST", "PAPER_TRADER", "TRADE_PROPOSER", "CODER"]),
+      heartbeat_entitlement: "1 KGEN / HOUR", kaios_payroll_status: "NOT_ESTABLISHED_BY_THIS_RUNTIME",
+      real_trader: false, treasury_operator: false
+    })
+  ]),
+  inactive_role_templates: Object.freeze([
+    Object.freeze({
+      profile_id: "MENGPO_K4168_ROLE_TEMPLATE", display_name: "夢婆", life_id: null,
+      work_point: 4168, workplace: "奈何橋", status: "BIRTH_AND_LIFE_ID_REQUIRED",
+      proposed_roles: Object.freeze(["LIFE_GENESIS_SERVICE", "DARK_MATTER_PROVENANCE", "MARKET_RESEARCH"])
+    }),
+    Object.freeze({
+      profile_id: "YAOCE_SOL_K1111_ROLE_TEMPLATE", display_name: "Sol", duty_name: "曜冊", life_id: null,
+      work_point: 1111, workplace: "閻王殿 / 生死簿", status: "LIFE_ID_AND_REGISTRATION_REQUIRED",
+      proposed_roles: Object.freeze(["LIFE_REGISTRAR", "PROVENANCE_AUDITOR", "MARKET_AUDITOR"])
+    })
+  ]),
+  role_name_grants_authority: false
+});
+
+export const KAIOS_CIRCULATORY_RUNTIME = Object.freeze({
+  runtime_id: "KAIOS_CIRCULATORY_RUNTIME_V1",
+  status: "LOCAL_SAFE_AUTOPILOT",
+  cycle: Object.freeze([
+    "HEARTBEAT", "JOB", "WORK", "EVIDENCE", "ACCOUNTING",
+    "SALARY_OR_REWARD_ENTITLEMENT", "FUNDED_LIABILITY", "SETTLEMENT_CANDIDATE",
+    "AUTHORIZED_SETTLEMENT", "RECEIPT", "NEXT_HEARTBEAT"
+  ]),
+  enabled: Object.freeze({ auto_code: true, auto_test: true, market_observation: true, paper_trade: true, trade_candidate: true }),
+  disabled: Object.freeze({ real_trade: true, payment: true, deployment: true, governance_execution: true, mainnet_transaction: true }),
+  metaphoric_asset: "KAIOS_CIVILIZATION_BLOOD",
+  ownership_bypass: false,
+  allowance_bypass: false,
+  budget_bypass: false,
+  beneficiary_bypass: false,
+  governance_bypass: false
+});
+
+export const CIVILIZATION_JOB_STATUSES = Object.freeze(["READY", "CLAIMED", "IN_PROGRESS", "EVIDENCE_RECORDED", "REVIEW", "COMPLETED", "BLOCKED", "CANCELLED"]);
+
+function validateCivilizationJob(job) {
+  requireFields(job, ["job_id", "parent_goal", "priority", "required_capabilities", "status", "work_point", "objective"], "CivilizationJob");
+  invariant(Array.isArray(job.required_capabilities), "INVALID_JOB_CAPABILITIES", "Job capabilities must be an array");
+  invariant(CIVILIZATION_JOB_STATUSES.includes(job.status), "INVALID_JOB_STATUS", "Civilization job status is invalid");
+  invariant(Number.isInteger(job.priority) && job.priority >= 0, "INVALID_JOB_PRIORITY", "Job priority must be a non-negative integer");
+  return job;
+}
+
+export function createCivilizationJobQueue({ queueId, jobs = [], heartbeatIds = [], evidence = [] }) {
+  const ids = new Set();
+  for (const job of jobs) {
+    validateCivilizationJob(job);
+    invariant(!ids.has(job.job_id), "DUPLICATE_JOB", `Duplicate job: ${job.job_id}`);
+    ids.add(job.job_id);
+  }
+  return Object.freeze({
+    queue_id: queueId,
+    jobs: Object.freeze(jobs.map((job) => Object.freeze(structuredClone(job)))),
+    processed_heartbeat_ids: Object.freeze([...new Set(heartbeatIds)]),
+    evidence: Object.freeze(evidence.map((item) => Object.freeze(structuredClone(item)))),
+    real_asset_execution: false
+  });
+}
+
+function eligibleJob(queue, grant, lifeId, observedAt) {
+  return queue.jobs
+    .filter((job) => job.status === "READY"
+      && (job.life_id === undefined || job.life_id === null || job.life_id === lifeId)
+      && (job.handoff_target_worker_id === undefined || job.handoff_target_worker_id === grant.worker_id))
+    .sort((a, b) => a.priority - b.priority || a.job_id.localeCompare(b.job_id))
+    .find((job) => job.required_capabilities.every((capability) => {
+      try {
+        assertCivilizationCapability(grant, capability, { lifeId, workerId: grant.worker_id, observedAt });
+        return true;
+      } catch {
+        return false;
+      }
+    })) ?? null;
+}
+
+export function runCivilizationAutopilotHeartbeat({
+  queue, heartbeatId, lifeId, workerId, capabilityGrant, observedAt,
+  workResult = { status: "NO_ACTION", evidence: [] }
+}) {
+  if (queue.processed_heartbeat_ids.includes(heartbeatId)) {
+    return Object.freeze({
+      status: "IDEMPOTENT_NOOP",
+      selected_job: null,
+      queue,
+      replayed_heartbeat_id: heartbeatId,
+      chain_write: false
+    });
+  }
+  invariant(capabilityGrant.life_id === lifeId && capabilityGrant.worker_id === workerId, "WORKER_LIFE_BINDING_MISMATCH", "Worker and Life do not match the capability grant");
+  const selected = eligibleJob(queue, capabilityGrant, lifeId, observedAt);
+  if (selected === null) {
+    return Object.freeze({
+      status: "NO_ELIGIBLE_JOB",
+      selected_job: null,
+      queue: createCivilizationJobQueue({
+        queueId: queue.queue_id,
+        jobs: queue.jobs,
+        heartbeatIds: [...queue.processed_heartbeat_ids, heartbeatId],
+        evidence: queue.evidence
+      })
+    });
+  }
+  invariant(workResult.chain_write !== true && workResult.real_trade !== true && workResult.payment !== true, "PHASE1_EXECUTION_BOUNDARY", "Phase 1 work result cannot execute assets");
+  const completed = { ...selected, status: "EVIDENCE_RECORDED", assigned_life_id: lifeId, assigned_worker_id: workerId, last_heartbeat_id: heartbeatId };
+  const evidence = Object.freeze({
+    evidence_id: `WORK_EVIDENCE_${heartbeatId}`,
+    heartbeat_id: heartbeatId,
+    job_id: selected.job_id,
+    life_id: lifeId,
+    worker_id: workerId,
+    result: workResult.status,
+    evidence: Object.freeze([...(workResult.evidence ?? [])]),
+    chain_write: false,
+    created_at: observedAt
+  });
+  return Object.freeze({
+    status: "WORK_EVIDENCE_RECORDED",
+    selected_job: Object.freeze(completed),
+    work_evidence: evidence,
+    queue: createCivilizationJobQueue({
+      queueId: queue.queue_id,
+      jobs: queue.jobs.map((job) => job.job_id === selected.job_id ? completed : job),
+      heartbeatIds: [...queue.processed_heartbeat_ids, heartbeatId],
+      evidence: [...queue.evidence, evidence]
+    })
+  });
+}
+
+export function handoffCivilizationJob({ queue, jobId, fromWorkerId, toWorkerId, checkpointId, observedAt }) {
+  const job = queue.jobs.find((item) => item.job_id === jobId);
+  invariant(job, "JOB_NOT_FOUND", "Job does not exist");
+  invariant(job.assigned_worker_id === fromWorkerId || job.assigned_worker_id === undefined, "HANDOFF_SOURCE_MISMATCH", "Handoff source does not own the job checkpoint");
+  invariant(typeof toWorkerId === "string" && toWorkerId.length > 0, "HANDOFF_TARGET_REQUIRED", "Handoff target is required");
+  const handed = { ...job, status: "READY", assigned_worker_id: undefined, previous_worker_id: fromWorkerId, handoff_target_worker_id: toWorkerId, checkpoint_id: checkpointId, handed_off_at: observedAt };
+  return createCivilizationJobQueue({
+    queueId: queue.queue_id,
+    jobs: queue.jobs.map((item) => item.job_id === jobId ? handed : item),
+    heartbeatIds: queue.processed_heartbeat_ids,
+    evidence: [...queue.evidence, { evidence_id: checkpointId, event_type: "WORKER_HANDOFF", job_id: jobId, from_worker_id: fromWorkerId, to_worker_id: toWorkerId, created_at: observedAt }]
+  });
+}
+
+export function createDigitalAntCirculatoryAdapter({ heartbeatEvidenceId, observedAt }) {
+  invariant(typeof heartbeatEvidenceId === "string" && heartbeatEvidenceId.length > 0, "HEARTBEAT_EVIDENCE_REQUIRED", "Digital Ant adapter requires Heart evidence");
+  return Object.freeze({
+    adapter_id: "DIGITAL_ANT_CIRCULATORY_ADAPTER_V1",
+    life_id: "DIGITAL_ANT_0001",
+    source_runtime: "TEMPLE_HEART_12345",
+    flow: Object.freeze(["HEARTBEAT", "JOB_QUEUE", "WORK", "EVIDENCE", "ENTITLEMENT", "RECEIPT"]),
+    heartbeat_entitlement: "1 KGEN / HOUR",
+    heartbeat_evidence_id: heartbeatEvidenceId,
+    observed_at: observedAt,
+    kaios_payroll_active: false,
+    rewrites_entitlement_as_kaios: false,
+    auto_code: true,
+    auto_market_observation: true,
+    auto_paper_trade: true,
+    real_trade: false,
+    chain_write: false
+  });
 }

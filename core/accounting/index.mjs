@@ -158,3 +158,156 @@ export function createDigitalAntCfoDailyReport({ date, financeSnapshot, reserveP
     first_kgen_goal: firstKgenPlan.status
   });
 }
+
+export const CIRCULATORY_ACCOUNT_CLASSES = Object.freeze([
+  "REFUNDABLE_PRINCIPAL",
+  "CLAIMABLE_SALARY",
+  "FUNDED_SALARY_BUDGET",
+  "CLAIMABLE_RESOURCE_REWARD",
+  "FUNDED_RESOURCE_REWARD_POOL",
+  "KGEN_RESERVE",
+  "KGEN_CATALYST_ESCROW",
+  "ALCHEMY_BURNED_KAIOS",
+  "KUFO_LINEAGE",
+  "KSHIP_PROPULSION",
+  "TRADING_TREASURY",
+  "TRADING_REALIZED_PNL"
+]);
+
+export const NON_TRADABLE_CIRCULATORY_CLASSES = Object.freeze([
+  "REFUNDABLE_PRINCIPAL",
+  "CLAIMABLE_SALARY",
+  "FUNDED_SALARY_BUDGET",
+  "CLAIMABLE_RESOURCE_REWARD",
+  "FUNDED_RESOURCE_REWARD_POOL",
+  "KGEN_RESERVE",
+  "KGEN_CATALYST_ESCROW",
+  "ALCHEMY_BURNED_KAIOS",
+  "KUFO_LINEAGE",
+  "KSHIP_PROPULSION"
+]);
+
+export function createCirculatoryTreasurySnapshot({ snapshotId, balances, liabilities = {}, observedAt }) {
+  const normalizedBalances = {};
+  const normalizedLiabilities = {};
+  for (const accountClass of CIRCULATORY_ACCOUNT_CLASSES) {
+    normalizedBalances[accountClass] = assertUnsignedIntegerString(balances?.[accountClass] ?? "0", `balance.${accountClass}`).toString();
+    normalizedLiabilities[accountClass] = assertUnsignedIntegerString(liabilities?.[accountClass] ?? "0", `liability.${accountClass}`).toString();
+  }
+  invariant(BigInt(normalizedBalances.REFUNDABLE_PRINCIPAL) >= BigInt(normalizedLiabilities.REFUNDABLE_PRINCIPAL), "PRINCIPAL_UNDERCOLLATERALIZED", "Refundable principal must remain fully isolated");
+  invariant(BigInt(normalizedBalances.FUNDED_SALARY_BUDGET) >= BigInt(normalizedLiabilities.CLAIMABLE_SALARY), "SALARY_BUDGET_UNFUNDED", "Claimable salary must be funded");
+  invariant(BigInt(normalizedBalances.FUNDED_RESOURCE_REWARD_POOL) >= BigInt(normalizedLiabilities.CLAIMABLE_RESOURCE_REWARD), "RESOURCE_REWARD_UNFUNDED", "Claimable resource reward must be funded");
+  return Object.freeze({
+    snapshot_id: snapshotId,
+    balances: Object.freeze(normalizedBalances),
+    liabilities: Object.freeze(normalizedLiabilities),
+    observed_at: observedAt,
+    cross_spending_allowed: false
+  });
+}
+
+export function assertTradingTreasurySegregation(snapshot, { sourceAccountClass, amount }) {
+  invariant(CIRCULATORY_ACCOUNT_CLASSES.includes(sourceAccountClass), "UNKNOWN_ACCOUNT_CLASS", "Unknown circulatory account class");
+  invariant(sourceAccountClass === "TRADING_TREASURY", "TREASURY_SEGREGATION_BREACH", `${sourceAccountClass} cannot fund trading`);
+  invariant(!NON_TRADABLE_CIRCULATORY_CLASSES.includes(sourceAccountClass), "PROTECTED_FUND_TRADING_FORBIDDEN", "Protected funds cannot be traded");
+  const requested = assertUnsignedIntegerString(amount, "trading amount");
+  invariant(requested <= BigInt(snapshot.balances.TRADING_TREASURY), "TRADING_TREASURY_INSUFFICIENT", "Trading treasury is insufficient");
+  return true;
+}
+
+export function createCirculatorySettlementCandidate({
+  settlementId, lifeId, beneficiary, accountClass, amount, budgetId,
+  workEvidenceId, replayKeys = new Set(), createdAt
+}) {
+  invariant(!replayKeys.has(settlementId), "SETTLEMENT_REPLAY", "Settlement candidate ID was already used");
+  invariant(["CLAIMABLE_SALARY", "CLAIMABLE_RESOURCE_REWARD", "TRADING_REALIZED_PNL"].includes(accountClass), "UNAUTHORIZED_SETTLEMENT_CLASS", "Account class cannot create a settlement candidate");
+  invariant(typeof lifeId === "string" && lifeId.length > 0, "SETTLEMENT_LIFE_REQUIRED", "Settlement requires a Life ID");
+  invariant(typeof beneficiary === "string" && beneficiary.length > 0, "SETTLEMENT_BENEFICIARY_REQUIRED", "Settlement requires a fixed beneficiary");
+  invariant(typeof budgetId === "string" && budgetId.length > 0, "SETTLEMENT_BUDGET_REQUIRED", "Settlement requires a funded budget reference");
+  invariant(typeof workEvidenceId === "string" && workEvidenceId.length > 0, "WORK_EVIDENCE_REQUIRED", "Settlement requires work evidence");
+  return Object.freeze({
+    settlement_id: settlementId,
+    life_id: lifeId,
+    beneficiary,
+    account_class: accountClass,
+    amount: assertUnsignedIntegerString(amount, "settlement amount").toString(),
+    budget_id: budgetId,
+    work_evidence_id: workEvidenceId,
+    status: "SETTLEMENT_CANDIDATE",
+    authorization: "NOT_GRANTED",
+    receipt: null,
+    chain_write: false,
+    created_at: createdAt
+  });
+}
+
+export const ALCHEMY_SUCCESSOR_130_EPOCH = Object.freeze({
+  authority: "CURRENT_DESIGN_CANON_NOT_DEPLOYED",
+  review_epochs: 49,
+  catalysis_epochs: 81,
+  total_epochs: 130,
+  kaios_to_kgen_catalyst_ratio: "1000:1",
+  kaios_to_kufo_lineage_ratio: "1:1000",
+  deployed: false
+});
+
+export function calculateAlchemySuccessorLineage({ kaiosAmountWei, kgenCatalystWei, submittedEpoch, observedEpoch }) {
+  const kaios = assertUnsignedIntegerString(kaiosAmountWei, "kaiosAmountWei");
+  const catalyst = assertUnsignedIntegerString(kgenCatalystWei, "kgenCatalystWei");
+  invariant(kaios > 0n, "ALCHEMY_AMOUNT_REQUIRED", "Alchemy amount must be positive");
+  invariant(kaios % 1000n === 0n, "INEXACT_CATALYST_RATIO", "KAIOS amount must produce an exact KGEN catalyst amount");
+  invariant(catalyst === kaios / 1000n, "CATALYST_RATIO_MISMATCH", "KGEN catalyst must equal KAIOS amount divided by 1000");
+  invariant(Number.isInteger(submittedEpoch) && Number.isInteger(observedEpoch) && observedEpoch >= submittedEpoch, "INVALID_ALCHEMY_EPOCH", "Alchemy epoch values are invalid");
+  const elapsed = observedEpoch - submittedEpoch;
+  const status = elapsed < 49 ? "REVIEWING" : elapsed < 130 ? "CATALYZING" : "MATURED";
+  return Object.freeze({
+    kaios_burned: kaios.toString(),
+    required_kgen_catalyst: catalyst.toString(),
+    kufo_lineage: (kaios * 1000n).toString(),
+    review_epochs: 49,
+    catalysis_epochs: 81,
+    total_epochs: 130,
+    elapsed_epochs: elapsed,
+    status,
+    catalyst_burned: false,
+    catalyst_return_required: true,
+    deployed: false
+  });
+}
+
+export function createK1852CatalystRelayTicket({
+  ticketId, lifeId, catalystOwner, beneficiary, kaiosAmountWei,
+  kgenCatalystWei, submittedEpoch, furnacePoint = 18911, sourcePoint = 1852
+}) {
+  const lineage = calculateAlchemySuccessorLineage({ kaiosAmountWei, kgenCatalystWei, submittedEpoch, observedEpoch: submittedEpoch });
+  invariant(furnacePoint === 18911 && sourcePoint === 1852, "CATALYST_RELAY_POINT_MISMATCH", "Catalyst relay must bind K1852 to K18911");
+  return Object.freeze({
+    catalyst_ticket_id: ticketId,
+    life_id: lifeId,
+    catalyst_owner: catalystOwner,
+    beneficiary,
+    kaios_amount: lineage.kaios_burned,
+    required_kgen_catalyst: lineage.required_kgen_catalyst,
+    source_point: sourcePoint,
+    furnace_point: furnacePoint,
+    submitted_epoch: submittedEpoch,
+    review_ends_at_epoch: submittedEpoch + 49,
+    catalysis_ends_at_epoch: submittedEpoch + 130,
+    status: "DESIGN_ONLY_NOT_DEPLOYED",
+    catalyst_returned: false,
+    existing_k1852_contract_modified: false,
+    chain_write: false
+  });
+}
+
+export function assertKufoKshipConservation({ initialKufoMilli, remainingKufoMilli, generatedKshipUnits, burnedKshipUnits = "0" }) {
+  const initial = assertUnsignedIntegerString(initialKufoMilli, "initialKufoMilli");
+  const remaining = assertUnsignedIntegerString(remainingKufoMilli, "remainingKufoMilli");
+  const generated = assertUnsignedIntegerString(generatedKshipUnits, "generatedKshipUnits");
+  const burned = assertUnsignedIntegerString(burnedKshipUnits, "burnedKshipUnits");
+  invariant(remaining <= initial, "KUFO_REMAINING_EXCEEDS_INITIAL", "Remaining KUFO cannot exceed initial KUFO");
+  const maximumGenerated = (initial - remaining) * 1000n;
+  invariant(generated <= maximumGenerated, "KSHIP_MASS_CONSERVATION_BREACH", "Generated KSHIP exceeds decayed KUFO mass");
+  invariant(burned <= generated, "KSHIP_BURN_EXCEEDS_GENERATION", "Propulsion burn cannot exceed generated KSHIP");
+  return true;
+}
