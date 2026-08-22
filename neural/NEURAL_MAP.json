@@ -84,6 +84,18 @@
       "type": "civilization_map",
       "must_read": true
     },
+    "mars_centered_reference_frame_candidate": {
+      "path": "/docs/maps/mars-centered-reference-frame/data/mars-centered-reference-frame.candidate.json",
+      "type": "derived_local_map_candidate",
+      "must_read": false,
+      "status": "REVIEW_ONLY_CANDIDATE",
+      "inherits": "/docs/maps/UniverseMap_V10_2_DISTANCE_COMPLETE_ALL_POINTS.json",
+      "frame_id": "MARS_CENTERED",
+      "local_origin": "MARS/K0",
+      "preserves_origin": "UNIVERSE/K0",
+      "overrides_universe_k0": false,
+      "note": "Not CURRENT, not live ephemeris, and not loaded by boot or runtime. Independent review is required."
+    },
     "neural_map": {
       "path": "/neural/NEURAL_MAP.json",
       "type": "neural_index",

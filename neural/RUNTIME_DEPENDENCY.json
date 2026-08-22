@@ -34,6 +34,19 @@
       ]
     }
   },
+  "map_candidates": {
+    "mars_centered_reference_frame": {
+      "entry": "/docs/maps/mars-centered-reference-frame/data/mars-centered-reference-frame.candidate.json",
+      "schema": "/docs/maps/mars-centered-reference-frame/schemas/mars-centered-reference-frame.schema.json",
+      "calculator": "/docs/maps/mars-centered-reference-frame/runtime/mars-coordinate-calculator.mjs",
+      "test": "/docs/maps/mars-centered-reference-frame/tests/mars-coordinate-calculator.test.mjs",
+      "inherits": "/docs/maps/UniverseMap_V10_2_DISTANCE_COMPLETE_ALL_POINTS.json",
+      "loaded": false,
+      "boot_loaded": false,
+      "activation": "INDEPENDENT_REVIEW_REQUIRED",
+      "status": "REVIEW_ONLY_CANDIDATE"
+    }
+  },
   "temple_12345": {
     "entry": "/K線西遊記/temples/12345/index.html",
     "load_order": "document order as of Phase 0 audit",
