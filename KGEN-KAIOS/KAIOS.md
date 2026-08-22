@@ -1,34 +1,8 @@
 # KAIOS — Canonical Monetary Core
 
-**Status:** MAINNET_GENESIS_LIVE on BNB Smart Chain Mainnet (Chain ID 56).
+**Status:** Review candidate. Not audited and not authorized for mainnet deployment.
 
-This file is the canonical README for `KAIOS.sol`. It records the live first-generation KAIOS monetary core and the current 18911 -> future 511111 -> KUFO architecture.
-
-## Current Mainnet identity
-
-```text
-KAIOS Token Core
-0xD4E67B3a69e41524c424150E6b6e921b01D036db
-
-Network
-BNB Smart Chain Mainnet
-
-Chain ID
-56
-
-Genesis block
-115637581
-
-Genesis time
-2026-08-13 13:05:37 UTC+8
-
-Genesis evidence commit
-2d6d152e0d3c885822745c43d4d96a0836bf4e0e
-```
-
-The full current address index is `KAIOS_MAINNET_GENESIS_ADDRESS_MANIFEST_CURRENT.md`.
-
-Historical pre-Genesis statements such as `Review candidate`, `MAINNET_TRANSACTION = NOT_AUTHORIZED`, and `PREVIEW_NOT_FINAL` describe earlier review stages and do not override the later verified Genesis state.
+This file is the canonical README for `KAIOS.sol`. It merges the latest Friction Mirror monetary core with the current 18911 -> 511111 -> KUFO architecture.
 
 ## Canonical mass / denomination law
 
@@ -75,46 +49,13 @@ actual KGEN destroyed = 72,000,000 KGEN - current KGEN totalSupply()
 
 Only the not-yet-settled difference can be mirrored. The caller cannot choose the mint amount or the recipient.
 
-The verified Genesis settlement recorded:
-
-```text
-KGEN supply at settlement
-71,977,786.091069583125268765 KGEN
-
-Recognized historical KGEN burn
-22,213.908930416874731235 KGEN
-
-Actual Genesis KAIOS
-22,213,908.930416874731235 KAIOS
-
-18888 KAIOS balance after Genesis
-22,213,908.930416874731235 KAIOS
-```
-
-Genesis settlement transaction:
-`0xc9fab344cc0055cab2e8dad1105f0a913fa94c15b39c76a241d3f190eb18767a`
-
 ## 18888 Lingxiao Treasury
 
-Every first-generation KAIOS mint is sent to the immutable 18888 Treasury address supplied at deployment.
-
-Current public 18888 Bank proxy:
-
-```text
-0x11d34c0F723aCd334B8F95076f73F07f06202aab
-```
-
-The proxy is the public bank endpoint; its implementation address must not be substituted as the public bank address.
+Every first-generation KAIOS mint is sent to the immutable 18888 Treasury address supplied at deployment. The production address should preferably be a stable Treasury proxy so the Treasury implementation can evolve while its public receiving address remains constant.
 
 ## 33333 Gold & Silver Island
 
 `33333` is the semantic KAIOS deployment point. It is not the EVM contract address.
-
-Current KAIOS EVM address:
-
-```text
-0xD4E67B3a69e41524c424150E6b6e921b01D036db
-```
 
 ## 18911 Taishang Laojun Alchemy Furnace
 
@@ -129,12 +70,6 @@ holder owns KAIOS
 -> KAIOS is truly burned from parent totalSupply
 -> KAIOS records a unique Alchemy Proof
 -> expected child denomination = 1 KAIOS : 1,000 KUFO
-```
-
-Current deployed 18911 Furnace:
-
-```text
-0x44c2CA9B9eba19d8F79F6E1786fd9D25e73738e1
 ```
 
 The furnace cannot burn more than the holder has explicitly approved. KAIOS contains no owner/admin confiscation burn path.
@@ -155,13 +90,7 @@ BURNED -> REFINING -> MATURED -> CLAIMED
 
 `511111` is the future matured-proof claim / wormhole boundary for KUFO.
 
-As of the KAIOS Genesis evidence:
-
-```text
-511111 / KUFO = FUTURE_NOT_DEPLOYED
-```
-
-KAIOS does not mint KUFO. The future 511111/KUFO protocol must independently verify that:
+KAIOS does not mint KUFO. The 511111/KUFO protocol must independently verify that:
 
 - the source Alchemy Proof exists;
 - it came from the canonical KAIOS contract;
@@ -169,8 +98,6 @@ KAIOS does not mint KUFO. The future 511111/KUFO protocol must independently ver
 - the 49-Epoch maturation rules are satisfied;
 - the proof has not already been claimed;
 - the KUFO output matches `1 KAIOS = 1,000 KUFO`.
-
-GitHub source existence for `KUFO.sol`, `KUFOClaimWormhole.sol`, `KSHIP.sol`, or `KSHIPConverter.sol` is not Mainnet deployment proof.
 
 ## Conservation invariant
 
@@ -212,42 +139,43 @@ no direct child-token mint
 
 ## Deployment dependency note
 
-`KAIOS.sol` permanently binds the canonical KGEN token, the first-generation 18888 settlement treasury and one `KAIOSOrganRegistry`. It does not permanently bind a Furnace implementation. The registry bootstrap is configured once and irreversibly sealed; later organ changes require the registry governance delay.
+`KAIOS.sol` permanently binds the canonical KGEN token, the first-generation
+18888 settlement treasury and one `KAIOSOrganRegistry`. It does not permanently
+bind a Furnace implementation. The registry bootstrap is configured once and
+irreversibly sealed; later organ changes require the registry governance delay.
 
-The deployed/current and future organ lineage is:
-
-```text
-KAIOSOrganRegistry                     DEPLOYED
--> current KAIOSAlchemyFurnace 18911  DEPLOYED
--> KUFOClaimWormhole 511111            FUTURE_NOT_DEPLOYED
--> KUFO                                FUTURE_NOT_DEPLOYED
--> KSHIPConverter                      SOURCE EXISTS / DEPLOYMENT NOT PROVEN BY GENESIS
--> KSHIP                               SOURCE EXISTS / DEPLOYMENT NOT PROVEN BY GENESIS
--> KAIOSPairRegistry                   FUTURE_NOT_DEPLOYED AT GENESIS
-```
-
-Future KUFO must validate each claim against the immutable KAIOS burn record and the originating Furnace proof. Future KSHIP must validate each claim against the immutable KUFO carrier burn record. Replacing an organ therefore must not create token lineage without a real upstream holder-authorized burn.
-
-## Genesis validation record
-
-The Genesis evidence records:
+The implemented review-only organ chain is:
 
 ```text
-chainId56 = PASS
-first21Deployments = PASS
-allExpectedAddresses = PASS
-bank18888 = PASS
-bank8888 = PASS
-celestialSeat500 = PASS
-settlement11520 = PASS
-furnace18911 = PASS
-governanceFinalization = PASS
-kgenGenesisAccounting = PASS
-kaiosGenesisAccounting = PASS
-arbitraryMint = NONE
-arbitraryDrain = BLOCKED
-legacyHeartTouched = NO
-57 / 57 Mainnet transactions = SUCCESS
+KAIOSOrganRegistry
+-> current KAIOSAlchemyFurnace (18911)
+-> current KUFOClaimWormhole (511111)
+-> current KSHIPConverter
+-> current KAIOSPairRegistry
 ```
 
-The original pre-deployment compile/fuzz/invariant/security checklist remains historical evidence of the review process. Future 511111/KUFO/KSHIP deployment requires its own independent deployment authorization, receipts and evidence; the KAIOS Genesis record must not be rewritten to imply those future organs were already deployed.
+KUFO validates each claim against the immutable KAIOS burn record and the
+originating Furnace proof. KSHIP validates each claim against the immutable
+KUFO carrier burn record. Replacing an organ therefore cannot create token mass
+without a real upstream holder-authorized burn.
+
+## Required pre-deployment tests
+
+1. Pin the exact OpenZeppelin Contracts version compatible with Solidity 0.8.24.
+2. Verify the canonical KGEN production address and genesis supply.
+3. Verify the 18888 Treasury proxy address.
+4. Verify the 18911 furnace proxy address and deployment order.
+5. Compile `KAIOS.sol`.
+6. Test genesis KGEN supply => zero pending KAIOS.
+7. Test 1 destroyed KGEN => exactly 1,000 KAIOS to 18888.
+8. Test repeated settlement cannot double mint.
+9. Test KGEN supply increase after settlement is rejected.
+10. Test ordinary KAIOS transfers are 0% native tax.
+11. Test non-18911 callers cannot invoke `burnForAlchemy()`.
+12. Test 18911 cannot burn without sufficient holder allowance.
+13. Test 18911 cannot burn more than holder allowance.
+14. Test 1 KAIOS burn records expected 1,000 KUFO.
+15. Test Alchemy Proof IDs are unique.
+16. Test conservation invariant before and after alchemy burns.
+17. Fuzz settlement and alchemy accounting.
+18. Independently audit the KAIOS + 18911 + 511111/KUFO system before mainnet.
