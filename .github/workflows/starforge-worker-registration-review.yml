@@ -1,0 +1,81 @@
+name: Starforge Worker Registration Candidate
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - "codex/KAIOS-STARFORGE-WORKER-REGISTRATION-V1-001"
+    paths:
+      - "KGEN-KAIOS/worker_registry.json"
+      - "KGEN-KAIOS/worker_status_schema.json"
+      - "KGEN-KAIOS/WORKER_REGISTRY.md"
+      - "KGEN-KAIOS/workforce/**"
+      - "KGEN-KAIOS/tests/starforge-worker-registration.test.mjs"
+      - ".github/workflows/starforge-worker-registration-review.yml"
+  pull_request:
+    paths:
+      - "KGEN-KAIOS/worker_registry.json"
+      - "KGEN-KAIOS/worker_status_schema.json"
+      - "KGEN-KAIOS/WORKER_REGISTRY.md"
+      - "KGEN-KAIOS/workforce/**"
+      - "KGEN-KAIOS/tests/starforge-worker-registration.test.mjs"
+      - ".github/workflows/starforge-worker-registration-review.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  exact-candidate-validation:
+    runs-on: ubuntu-latest
+    env:
+      EXPECTED_HEAD: ${{ github.event.pull_request.head.sha || github.sha }}
+      BASE_SHA: ${{ github.event.pull_request.base.sha || 'f507724d1876c28e3d24a7316c440ea9304a5228' }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Bind checkout to exact candidate head
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_HEAD"
+      - name: Parse formal JSON
+        run: |
+          jq empty KGEN-KAIOS/worker_registry.json
+          jq empty KGEN-KAIOS/worker_status_schema.json
+      - name: Verify fail-closed registration candidate
+        run: |
+          set -o pipefail
+          node --test KGEN-KAIOS/tests/starforge-worker-registration.test.mjs | tee /tmp/starforge-registration-tests.tap
+      - name: Run repository regression tests
+        run: |
+          set -o pipefail
+          node --test tests/*.test.mjs | tee /tmp/repository-regression-tests.tap
+      - name: Validate changed artifacts and scan secrets
+        env:
+          INTEGRATION_BASE_RANGE: ${{ env.BASE_SHA }}...HEAD
+        run: node KGEN-KAIOS/tools/validate-integration-artifacts.mjs
+      - name: Reject whitespace damage
+        run: git diff --check "$BASE_SHA...HEAD"
+      - name: Create exact-head evidence
+        if: always()
+        run: |
+          mkdir -p /tmp/starforge-registration-exact-head
+          printf 'GITHUB_SHA=%s\nEXPECTED_HEAD=%s\nBASE_SHA=%s\nTREE_SHA=%s\n' \
+            "$GITHUB_SHA" "$EXPECTED_HEAD" "$BASE_SHA" "$(git rev-parse HEAD^{tree})" \
+            > /tmp/starforge-registration-exact-head/identity.txt
+          git diff --name-only "$BASE_SHA...HEAD" \
+            | while IFS= read -r file; do test ! -f "$file" || sha256sum "$file"; done \
+            > /tmp/starforge-registration-exact-head/file-sha256.txt
+          cp /tmp/starforge-registration-tests.tap /tmp/starforge-registration-exact-head/ 2>/dev/null || true
+          cp /tmp/repository-regression-tests.tap /tmp/starforge-registration-exact-head/ 2>/dev/null || true
+          cp KGEN-KAIOS/reports/INTEGRATION_ARTIFACT_VALIDATION.json /tmp/starforge-registration-exact-head/ 2>/dev/null || true
+      - name: Preserve exact-head evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: starforge-registration-exact-head-evidence-${{ env.EXPECTED_HEAD }}
+          path: /tmp/starforge-registration-exact-head/
+          if-no-files-found: error
+          retention-days: 30
