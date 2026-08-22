@@ -20,12 +20,16 @@
 
 ## Evidence state
 
-- Whole-Life runtime and TempleHeart source-boundary tests: `24/24 PASS` locally.
-- Root repository regression tests: pending final exact-head rerun.
-- Solidity compile, ABI diff, UUPS storage validation, EIP-170, TempleHeart integration, token fuzz/invariant, and secret scan: `PENDING_EXACT_HEAD_CI` because the local dependency install is blocked by workspace network policy.
-- Exact remote head and GitHub Actions URL: pending publication.
+- Whole-Life runtime and TempleHeart source-boundary tests: `24/24 PASS`.
+- Solidity/lineage/fuzz-invariant suite: `32/32 PASS`.
+- Root repository regression tests: `245/245 PASS`.
+- Solidity compilation: 27 contracts with solc 0.8.24; TempleHeart deployed bytecode is 23,769 bytes, below the EIP-170 limit of 24,576 bytes.
+- ABI validation: 206 baseline entries to 208 candidate entries; the only allowlisted additions are `MIN_FORTUNE_KGEN_PASS_RAW()` and `FortuneKgenPassRequired(uint256,uint256)`.
+- UUPS layout validation: all 58 baseline custom slots are preserved and the existing 15 candidate slots are append-only; the Fortune threshold is a constant and consumes no storage slot.
+- TempleHeart lineage, integration-artifact scan, secret scan, JSON validation, and `git diff --check`: `PASS`; secret hits and broken links: `0`.
+- The workflow checks out `${{ github.event.pull_request.head.sha || github.sha }}`, fails if checkout `HEAD` differs from `EXPECTED_HEAD`, and publishes `whole-life-circulation-exact-head-evidence-<EXPECTED_HEAD>` with base, tree, file hashes, and logs. The Draft PR body pins the authoritative run, artifact, and digest for the final source head.
 
-No pass condition will be filled from expectation. This handoff must be updated from the actual exact-head CI artifacts before review completion.
+No pass condition is filled from expectation. Publication remains review-only, and all exact-head evidence must be checked against the head shown by the Draft PR before approval.
 
 ## Independent-review gates
 

@@ -3,7 +3,7 @@
 **Review status:** `NO_GO_FOR_READY_MERGE_OR_ACTIVATION`
 **Allowed progression:** continue as Draft and address blocking findings
 **PR head reviewed:** `83ddef5e361b5f38fa7c9fed9f18b5ecd8698783`
-**Observed main:** `31c8726b7c76a74d0693a1fab4278d5a456eab03`
+**Observed main:** `f507724d1876c28e3d24a7316c440ea9304a5228`
 **Reviewer:** `codex-gm-01`
 **Independent review of this review:** recommended
 
@@ -17,8 +17,8 @@
 - The Starforge-specific anchor path binds BSC chain 56, exact 0.008 native BNB, recipient, Life ID, Soul ID, request ID, and challenge before accepting an anchor.
 - Energy Wallet capability is A1 read-only. Send, approve, transfer, swap, wrap, unwrap, deploy, and arbitrary chain-write methods are denied.
 - Native BNB and canonical WBNB are separated; WBNB with zero native BNB is correctly classified as chain-inoperable.
-- Exact PR head: 255/255 Node tests pass, 1,090 tracked JSON files parse, and 80 non-empty JSONL records parse.
-- A synthetic merge of the PR into the observed current main is conflict-free and also passes 255/255 tests locally.
+- Exact PR head: 255/255 Node tests pass in GitHub Actions at the reported exact head.
+- A fresh synthetic merge of that exact PR head into observed main `f507724d...` is conflict-free and locally passes 255/255 tests, 1,098 tracked JSON files, and 80 non-empty JSONL records.
 
 ## Blocking findings
 
@@ -29,10 +29,10 @@
 
 ## Exact-head conclusion
 
-The reported CI evidence matches PR head `83ddef5e...`. The PR head is seven commits behind observed main, so it does not yet have GitHub CI for the current merge head. The local current-main merge tree passes, but this is supporting evidence rather than a substitute for refreshed exact-head CI.
+The reported GitHub CI evidence still matches the unchanged PR head `83ddef5e...` and its files. That evidence does not cover the current-main merge tree. GitHub currently reports the PR as non-mergeable, while a fresh local synthetic merge into `f507724d...` is conflict-free and passes the checks above; the local result is supporting evidence, not refreshed GitHub CI for a merge head. The four security findings remain blocking regardless of mergeability.
 
 ## Prepared concise review comment
 
-> **NO-GO for Ready/merge/activation; GO to continue as Draft.** The undeployed Naihe, unassigned regeneration parent, and unanchored Genesis state are intentional review-only truth, but must remain activation blockers. Exact PR head `83ddef5e...` passes 255/255 tests and merges cleanly into observed main locally. Three security gaps still block progression: the generic resolver can accept missing/missing source addresses, Soul/Body signatures trust context and message from the same mutable request boundary, and replay state is an overwriteable snapshot rather than append-only rollback-detecting persistence. Energy Wallet is correctly A1/read-only with BNB/WBNB separation, but custody remains local and non-production. Please harden these points, add substitution/missing-source/rollback tests, sync to current main, and rerun exact-head CI.
+> **NO-GO for Ready/merge/activation; GO only to continue as Draft.** `NAIHE = NOT_DEPLOYED`, parent `UNASSIGNED`, and anchor `NOT_YET_ANCHORED` are truthful review-only states, but they must block activation. Exact PR head `83ddef5e...` still passes 255/255; a fresh local synthetic merge into main `f507724d...` is conflict-free and also passes 255/255 (1,098 JSON; 80 JSONL), although GitHub currently reports the PR non-mergeable and no refreshed merge-head CI exists. Blockers: generic native resolution accepts missing/missing source addresses; Soul/Body signing trusts context and message from the same mutable request; replay state is overwriteable and rollbackable; Energy Wallet custody remains local/non-production despite sound A1 and BNB/WBNB boundaries. Please harden these points and add missing-source, full-substitution, rollback, and custody-boundary tests before requesting Ready.
 
 No review was submitted, no PR was merged, and no deployment, asset transfer, governance action, Mainnet transaction, or private-key operation occurred.
