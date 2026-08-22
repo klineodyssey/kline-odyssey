@@ -1,5 +1,9 @@
 # 11520 Universal Exchange V4.0 Current Handoff
 
+## PR #169 native KGEN market candidate boundary
+
+`PR #169` adds a native KGEN BUY / SELL / MATCH / TRADE / CT / OHLC market-cell candidate, but it is **not part of the active V4.0 runtime**. Its formal classification is `PAPER_IN_MEMORY_CANDIDATE_NOT_ACTIVE_RUNTIME`; `app.mjs` does not import it, it has no signer, custody, settlement, token transfer, approval, Mainnet write or deployment authority. `0.00011520` is the Huaguoshan Taiwan Exchange market-cell identity only and never seeds price or CT. CT remains null before a valid native match and thereafter equals the latest valid native matched trade price. External PancakeSwap/WBNB/USD/L/P values have zero native CT authority. Same-owner and same-controller matching fail closed, anonymous actors are forbidden, and cancellation requires exact owner/controller authorization. The quote asset remains `UNFROZEN_11520_NATIVE_QUOTE_CANDIDATE`; therefore outputs are `NATIVE_MARKET_PRICE_CANDIDATE` until an independent quote-unit freeze. See `NATIVE_KGEN_MARKET_CANDIDATE.md` and the PR exact-head CI before any future activation.
+
 V4.0 is the active cumulative public release. It repairs the Production player entry and upgrades `DIGITAL_ANT_APP_0001` to V1.7.0 without changing Life ID, immutable Birth Certificate, Wallet ownership, Thought Organ, Primary Job or Listing identity rights.
 
 The first screen now provides an animated Wukong Hair concierge, Voice, Text, Explore, Join, Work and My AI. Voice controls never silently disable: a user gesture triggers audible Speech Synthesis where supported, microphone permission and Speech Recognition are explicit, errors are shown by reason, and unsupported capture focuses the Text fallback. The character has idle/listening/thinking/speaking/success/error states with CSS 3D and 2D/reduced-motion fallback. Audio is not stored and a transcript cannot create a Request without confirmation.
