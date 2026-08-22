@@ -44,9 +44,13 @@ jobs:
           jq empty neural/NEURAL_MAP.json
           jq empty neural/RUNTIME_DEPENDENCY.json
       - name: Run Mars coordinate, frame, evidence, and movement tests
-        run: node --test docs/maps/mars-centered-reference-frame/tests/*.test.mjs | tee /tmp/mars-reference-frame-tests.tap
+        run: |
+          set -o pipefail
+          node --test docs/maps/mars-centered-reference-frame/tests/*.test.mjs | tee /tmp/mars-reference-frame-tests.tap
       - name: Run repository regression tests
-        run: node --test tests/*.test.mjs | tee /tmp/repository-regression-tests.tap
+        run: |
+          set -o pipefail
+          node --test tests/*.test.mjs | tee /tmp/repository-regression-tests.tap
       - name: Validate changed artifacts and scan secrets
         env:
           INTEGRATION_BASE_RANGE: ${{ env.BASE_SHA }}...HEAD
