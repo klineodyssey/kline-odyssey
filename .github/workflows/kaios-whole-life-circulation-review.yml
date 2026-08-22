@@ -46,15 +46,21 @@ jobs:
           jq empty KGEN-KAIOS/life-circulation/schemas/life-circulatory-runtime.schema.json
           jq empty KGEN-KAIOS/life-circulation/examples/whole-life-circulation.candidate.json
       - name: Run circulation replay, fuzz, invariant, custody, and health tests
-        run: node --test KGEN-KAIOS/life-circulation/tests/*.test.mjs | tee /tmp/whole-life-circulation-tests.tap
+        run: |
+          set -o pipefail
+          node --test KGEN-KAIOS/life-circulation/tests/*.test.mjs | tee /tmp/whole-life-circulation-tests.tap
       - name: Compile, ABI-diff, storage-check, scan, and run token tests
         working-directory: KGEN-KAIOS
         env:
           INTEGRATION_BASE_RANGE: ${{ env.BASE_SHA }}...HEAD
           TEMPLEHEART_ABI_BASE_REF: ${{ env.BASE_SHA }}
-        run: npm run test:all | tee /tmp/whole-life-solidity-and-invariants.tap
+        run: |
+          set -o pipefail
+          npm run test:all | tee /tmp/whole-life-solidity-and-invariants.tap
       - name: Run repository regression tests
-        run: node --test tests/*.test.mjs | tee /tmp/repository-regression-tests.tap
+        run: |
+          set -o pipefail
+          node --test tests/*.test.mjs | tee /tmp/repository-regression-tests.tap
       - name: Reject whitespace damage
         run: git diff --check "$BASE_SHA...HEAD"
       - name: Create exact-head evidence
@@ -74,6 +80,7 @@ jobs:
           cp KGEN-KAIOS/reports/TEMPLEHEART_ABI_DIFF.json /tmp/whole-life-circulation-exact-head/ 2>/dev/null || true
           cp KGEN-KAIOS/reports/TEMPLEHEART_STORAGE_LAYOUT_VALIDATION.json /tmp/whole-life-circulation-exact-head/ 2>/dev/null || true
           cp KGEN-KAIOS/reports/INTEGRATION_ARTIFACT_VALIDATION.json /tmp/whole-life-circulation-exact-head/ 2>/dev/null || true
+          cp KGEN-KAIOS/reports/CURRENT_LINEAGE_RECONCILIATION.json /tmp/whole-life-circulation-exact-head/ 2>/dev/null || true
       - name: Preserve exact-head review reports
         if: always()
         uses: actions/upload-artifact@v4
