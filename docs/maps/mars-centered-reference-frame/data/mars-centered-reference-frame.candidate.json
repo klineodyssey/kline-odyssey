@@ -1,0 +1,242 @@
+{
+  "metadata": {
+    "schemaVersion": "1.0.0-candidate",
+    "status": "REVIEW_ONLY_CANDIDATE",
+    "taskId": "KAIOS-MARS-CENTERED-REFERENCE-FRAME-V1-001",
+    "implementer": "codex-gm-01",
+    "independentReview": "REQUIRED",
+    "executionBase": "f507724d1876c28e3d24a7316c440ea9304a5228"
+  },
+  "inheritedMap": {
+    "path": "/docs/maps/UniverseMap_V10_2_DISTANCE_COMPLETE_ALL_POINTS.json",
+    "version": "V10.2",
+    "mutation": "NONE",
+    "pointCountPreserved": 123
+  },
+  "scale": {
+    "distanceKm": "384400",
+    "kUnits": "16888",
+    "exactRational": "384400/16888",
+    "displayKmPerK": "22.761724301279"
+  },
+  "frame": {
+    "frameId": "MARS_CENTERED",
+    "localOrigin": "MARS/K0",
+    "preservedUniverseOrigin": "UNIVERSE/K0",
+    "overridesUniverseK0": false,
+    "status": "LOCAL_DERIVED_FRAME_CANDIDATE"
+  },
+  "points": [
+    {
+      "pointId": "MARS/K0",
+      "frameId": "MARS_CENTERED",
+      "kIndex": "0",
+      "displayK": 0,
+      "displayPointId": "MARS/K0",
+      "name": "火星中心／赤核奇點",
+      "pointType": "LOCAL_ORIGIN",
+      "altitudeKm": null,
+      "positionEvidence": {
+        "referenceFrame": "MARS_CENTERED",
+        "epoch": "WORK_ORDER_REFERENCE_2026-08-22_NOT_LIVE_EPHEMERIS",
+        "timestamp": "2026-08-22T01:06:46Z",
+        "source": "HUMAN_AUTHORIZED_WORK_ORDER_KAIOS-STARFORGE-WHOLE-LIFE-CIRCULATION-MARS-FRAME-V1-001",
+        "distanceKm": "0",
+        "kIndex": "0",
+        "uncertainty": "LOCAL_FRAME_DEFINITION"
+      },
+      "status": "DESIGN_REFERENCE_NOT_LIVE_EPHEMERIS"
+    },
+    {
+      "pointId": "MARS/K148.912268",
+      "frameId": "MARS_CENTERED",
+      "kIndex": "148.912268",
+      "displayK": 149,
+      "displayPointId": "MARS/K149",
+      "name": "火星平均表面／赤土人界",
+      "pointType": "MEAN_SURFACE",
+      "altitudeKm": "0",
+      "positionEvidence": {
+        "referenceFrame": "MARS_CENTERED",
+        "epoch": "WORK_ORDER_REFERENCE_2026-08-22_NOT_LIVE_EPHEMERIS",
+        "timestamp": "2026-08-22T01:06:46Z",
+        "source": "HUMAN_AUTHORIZED_WORK_ORDER_KAIOS-STARFORGE-WHOLE-LIFE-CIRCULATION-MARS-FRAME-V1-001",
+        "distanceKm": "3389.50",
+        "kIndex": "148.912268",
+        "uncertainty": "MEAN_RADIUS_DESIGN_INPUT_NOT_LIVE_EPHEMERIS"
+      },
+      "status": "DESIGN_REFERENCE_NOT_LIVE_EPHEMERIS"
+    },
+    {
+      "pointId": "MARS/K154.403944",
+      "frameId": "MARS_CENTERED",
+      "kIndex": "154.403944",
+      "displayK": null,
+      "displayPointId": null,
+      "name": "火星表面上方125 km大氣觀測界面／薄氣門",
+      "pointType": "ATMOSPHERE_INTERFACE",
+      "altitudeKm": "125",
+      "positionEvidence": {
+        "referenceFrame": "MARS_CENTERED",
+        "epoch": "WORK_ORDER_REFERENCE_2026-08-22_NOT_LIVE_EPHEMERIS",
+        "timestamp": "2026-08-22T01:06:46Z",
+        "source": "HUMAN_AUTHORIZED_WORK_ORDER_KAIOS-STARFORGE-WHOLE-LIFE-CIRCULATION-MARS-FRAME-V1-001",
+        "distanceKm": "3514.50",
+        "kIndex": "154.403944",
+        "uncertainty": "DESIGN_ALTITUDE_INPUT_NOT_LIVE_EPHEMERIS"
+      },
+      "status": "DESIGN_REFERENCE_NOT_LIVE_EPHEMERIS"
+    },
+    {
+      "pointId": "MARS/K160.115286",
+      "frameId": "MARS_CENTERED",
+      "kIndex": "160.115286",
+      "displayK": 160,
+      "displayPointId": "MARS/K160",
+      "name": "火星近軌港／255 km下界",
+      "pointType": "LOW_ORBIT_BOUNDARY",
+      "altitudeKm": "255",
+      "positionEvidence": {
+        "referenceFrame": "MARS_CENTERED",
+        "epoch": "WORK_ORDER_REFERENCE_2026-08-22_NOT_LIVE_EPHEMERIS",
+        "timestamp": "2026-08-22T01:06:46Z",
+        "source": "HUMAN_AUTHORIZED_WORK_ORDER_KAIOS-STARFORGE-WHOLE-LIFE-CIRCULATION-MARS-FRAME-V1-001",
+        "distanceKm": "3644.50",
+        "kIndex": "160.115286",
+        "uncertainty": "DESIGN_ALTITUDE_INPUT_NOT_LIVE_EPHEMERIS"
+      },
+      "status": "DESIGN_REFERENCE_NOT_LIVE_EPHEMERIS"
+    },
+    {
+      "pointId": "MARS/K412.007451",
+      "frameId": "MARS_CENTERED",
+      "kIndex": "412.007451",
+      "displayK": null,
+      "displayPointId": null,
+      "name": "Phobos火衛一／恐懼衛城",
+      "pointType": "MOON",
+      "altitudeKm": null,
+      "positionEvidence": {
+        "referenceFrame": "MARS_CENTERED",
+        "epoch": "WORK_ORDER_REFERENCE_2026-08-22_NOT_LIVE_EPHEMERIS",
+        "timestamp": "2026-08-22T01:06:46Z",
+        "source": "HUMAN_AUTHORIZED_WORK_ORDER_KAIOS-STARFORGE-WHOLE-LIFE-CIRCULATION-MARS-FRAME-V1-001",
+        "distanceKm": "9378",
+        "kIndex": "412.007451",
+        "uncertainty": "UNQUANTIFIED_DESIGN_INPUT_NOT_LIVE_EPHEMERIS"
+      },
+      "status": "DESIGN_REFERENCE_NOT_LIVE_EPHEMERIS"
+    },
+    {
+      "pointId": "MARS/K897.457719",
+      "frameId": "MARS_CENTERED",
+      "kIndex": "897.457719",
+      "displayK": null,
+      "displayPointId": null,
+      "name": "火星同步軌道／定火天環",
+      "pointType": "SYNCHRONOUS_ORBIT",
+      "altitudeKm": null,
+      "positionEvidence": {
+        "referenceFrame": "MARS_CENTERED",
+        "epoch": "WORK_ORDER_REFERENCE_2026-08-22_NOT_LIVE_EPHEMERIS",
+        "timestamp": "2026-08-22T01:06:46Z",
+        "source": "HUMAN_AUTHORIZED_WORK_ORDER_KAIOS-STARFORGE-WHOLE-LIFE-CIRCULATION-MARS-FRAME-V1-001",
+        "distanceKm": "20427.685172",
+        "kIndex": "897.457719",
+        "uncertainty": "UNQUANTIFIED_DESIGN_INPUT_NOT_LIVE_EPHEMERIS"
+      },
+      "status": "DESIGN_REFERENCE_NOT_LIVE_EPHEMERIS"
+    },
+    {
+      "pointId": "MARS/K1030.633694",
+      "frameId": "MARS_CENTERED",
+      "kIndex": "1030.633694",
+      "displayK": null,
+      "displayPointId": null,
+      "name": "Deimos火衛二／戰慄衛城",
+      "pointType": "MOON",
+      "altitudeKm": null,
+      "positionEvidence": {
+        "referenceFrame": "MARS_CENTERED",
+        "epoch": "WORK_ORDER_REFERENCE_2026-08-22_NOT_LIVE_EPHEMERIS",
+        "timestamp": "2026-08-22T01:06:46Z",
+        "source": "HUMAN_AUTHORIZED_WORK_ORDER_KAIOS-STARFORGE-WHOLE-LIFE-CIRCULATION-MARS-FRAME-V1-001",
+        "distanceKm": "23459",
+        "kIndex": "1030.633694",
+        "uncertainty": "UNQUANTIFIED_DESIGN_INPUT_NOT_LIVE_EPHEMERIS"
+      },
+      "status": "DESIGN_REFERENCE_NOT_LIVE_EPHEMERIS"
+    },
+    {
+      "pointId": "MARS/K10003635.796",
+      "frameId": "MARS_CENTERED",
+      "kIndex": "10003635.796",
+      "displayK": null,
+      "displayPointId": null,
+      "name": "火星到太陽平均距離",
+      "pointType": "EXTERNAL_BODY_MEAN_DISTANCE",
+      "altitudeKm": null,
+      "positionEvidence": {
+        "referenceFrame": "MARS_CENTERED",
+        "epoch": "WORK_ORDER_REFERENCE_2026-08-22_NOT_LIVE_EPHEMERIS",
+        "timestamp": "2026-08-22T01:06:46Z",
+        "source": "HUMAN_AUTHORIZED_WORK_ORDER_KAIOS-STARFORGE-WHOLE-LIFE-CIRCULATION-MARS-FRAME-V1-001",
+        "distanceKm": "227700000",
+        "kIndex": "10003635.796",
+        "uncertainty": "UNQUANTIFIED_MEAN_DISTANCE_NOT_LIVE_EPHEMERIS"
+      },
+      "status": "DESIGN_REFERENCE_NOT_LIVE_EPHEMERIS"
+    }
+  ],
+  "ranges": [
+    {
+      "rangeId": "MARS-LOW-ORBIT-COMMUNICATION-BAND",
+      "frameId": "MARS_CENTERED",
+      "rangeType": "LOW_ORBIT_COMMUNICATION_BAND",
+      "distanceKmMin": "3644.50",
+      "distanceKmMax": "3709.50",
+      "kIndexMin": "160.115286",
+      "kIndexMax": "162.970957",
+      "epoch": "WORK_ORDER_REFERENCE_2026-08-22_NOT_LIVE_EPHEMERIS",
+      "timestamp": "2026-08-22T01:06:46Z",
+      "source": "HUMAN_AUTHORIZED_WORK_ORDER_KAIOS-STARFORGE-WHOLE-LIFE-CIRCULATION-MARS-FRAME-V1-001",
+      "uncertainty": "DESIGN_ALTITUDE_RANGE_NOT_LIVE_EPHEMERIS",
+      "status": "DESIGN_REFERENCE_NOT_LIVE_EPHEMERIS"
+    },
+    {
+      "rangeId": "EARTH-MARS-DYNAMIC-DISTANCE-RANGE",
+      "frameId": "MARS_CENTERED",
+      "rangeType": "DYNAMIC_EARTH_MARS_DISTANCE",
+      "distanceKmMin": "54600000",
+      "distanceKmMax": "400200000",
+      "kIndexMin": "2398763.788",
+      "kIndexMax": "17582147.763",
+      "epoch": "WORK_ORDER_REFERENCE_RANGE_NOT_LIVE_EPHEMERIS",
+      "timestamp": "2026-08-22T01:06:46Z",
+      "source": "HUMAN_AUTHORIZED_WORK_ORDER_KAIOS-STARFORGE-WHOLE-LIFE-CIRCULATION-MARS-FRAME-V1-001",
+      "uncertainty": "DYNAMIC_RANGE_DESIGN_INPUT_NOT_CURRENT_POSITION",
+      "status": "DESIGN_REFERENCE_NOT_LIVE_EPHEMERIS"
+    }
+  ],
+  "civilizationGate": {
+    "pointId": "EARTH_CIV/K108000",
+    "referenceFrame": "EARTH_CIV",
+    "semanticType": "CIVILIZATION_GATE",
+    "isPhysicalDistance": false,
+    "physicalDistanceSubstitute": false,
+    "status": "PRESERVED_GATE_IDENTITY"
+  },
+  "movementCandidate": {
+    "routeId": "EARTH-CIV-GATE-TO-MARS-SURFACE-CANDIDATE",
+    "status": "DESIGN_ONLY_EVIDENCE_REQUIRED",
+    "sequence": [
+      { "sequence": 1, "pointRef": "EARTH_CIV/K108000", "action": "depart through civilization gate", "requiredEvidence": ["routeEvidenceId", "departureTimestamp"] },
+      { "sequence": 2, "pointRef": "TRANSIT/EARTH_TO_MARS", "action": "navigate or traverse a verified wormhole", "requiredEvidence": ["routeEvidenceId", "kshipFuelEvidenceId"] },
+      { "sequence": 3, "pointRef": "MARS/K160.115286", "action": "arrive at Mars near-orbit harbor", "requiredEvidence": ["arrivalEvidenceId", "arrivalTimestamp"] },
+      { "sequence": 4, "pointRef": "MARS/DECELERATION", "action": "decelerate", "requiredEvidence": ["decelerationEvidenceId", "kshipFuelEvidenceId"] },
+      { "sequence": 5, "pointRef": "MARS/DESCENT", "action": "descend", "requiredEvidence": ["descentEvidenceId"] },
+      { "sequence": 6, "pointRef": "MARS/K149", "action": "land on 赤土人界", "requiredEvidence": ["landingEvidenceId", "arrivalEvidenceId"] }
+    ],
+    "positionUpdateWithoutEvidence": false
+  }
+}

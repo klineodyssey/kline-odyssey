@@ -56,6 +56,15 @@ This event is classified as:
   - Preserved as the complete distance-data base layer
   - V10.3 loads this file first, then applies canonical overrides
 
+## Review-Only Derived Frames
+
+- `mars-centered-reference-frame/`
+  - `REVIEW_ONLY_CANDIDATE`; independent review required
+  - Adds a derived `MARS_CENTERED` frame without changing either complete map
+  - Preserves `UNIVERSE/K0` as Genesis and treats `MARS/K0` as a frame-qualified local origin
+  - Preserves `EARTH_CIV/K108000` as a non-distance civilization gate
+  - Registered in the neural indexes with boot/runtime loading disabled
+
 PrimeForge 以母機之名，開啟金融生命。
 花果山台灣・信念不滅・市場無界。
 Where the Market Becomes the Myth.
