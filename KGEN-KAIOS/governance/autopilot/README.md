@@ -37,7 +37,7 @@ This directory is an **architecture proposal and integration profile**, not a se
 | Human Decisions | `HUMAN-PRIMEFORGE-COMPANY-AUTOPILOT-001`; `HUMAN-COMPANY-AUTOMATIC-MAINTENANCE-001`; `HUMAN-COMPANY-OS-BOOT-001`; `HUMAN-PRIMEFORGE-FULL-AUTOPILOT-001` |
 | Design | `AUTHORIZED` |
 | Architecture | `OPERATIONALLY_DELEGATED / ACTIVE OPERATOR PROTOCOL` |
-| Runtime implementation | `NOT_STARTED` |
+| Runtime implementation | `SAFE_CYCLE_PLANNER_CANDIDATE_IMPLEMENTED_NOT_CONNECTED` |
 | Background automation | `NOT_RUNNING` |
 | WorkQueue implementation task | `NOT_CREATED` |
 | Deployment | `NOT_STARTED` |
@@ -113,6 +113,22 @@ Codex reran Company Boot and `git fetch origin --prune` at `2026-07-15T17:29:48+
 | `architecture_backlog_registry.json` | Machine-readable proposal backlog |
 | `canonical_atomic_claim_authority.json` | Machine-readable Claim authority proposal |
 | `company_autopilot_architecture_review.json` | Machine-readable review score and gates |
+
+## Safe Cycle Planner Candidate
+
+`core/company/index.mjs` now exports `runAutonomousCompanyCycle()` as the first executable, side-effect-free candidate built on this package. It consumes normalized snapshots of the existing Worker Registry, WorkQueue, Review Queue, exact `main` SHA and task authority; it does not create a competing queue or registry.
+
+The candidate can deterministically:
+
+- clock the General Manager in and out for one cycle;
+- reject stale `main`, replayed cycles, T0/T1 workers, branch-policy mismatches and incomplete task envelopes;
+- preserve `REVIEW → REPAIR → HUMAN_DECISION → ARCHITECTURE → IMPLEMENTATION` ordering;
+- emit one append-only `REVIEW_REQUEST` or safe `WORK_ORDER`/`HANDOFF` candidate;
+- route `REWORK_REQUIRED` back to the explicitly recorded original authorized worker before a new review can be requested;
+- require every work or repair candidate to retain a registered, active, T2+ reviewer distinct from the worker;
+- keep every event free of external side effects.
+
+It cannot persist a Claim, edit GitHub, launch a worker, merge, push `main`, pay, access a private key, deploy or send a transaction. Those connectors remain `NOT_CONNECTED`; the existing Claim/Lease Controller and independent Review gates must authorize them before any future activation.
 
 ## Imported Authorities
 
