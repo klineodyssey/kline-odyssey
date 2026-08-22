@@ -4,7 +4,7 @@ STATUS: HUMAN/CHATGPT HANDOFF — CODEX REVIEW REQUIRED
 
 ## First question to Codex
 
-Before starting new integration, report whether the previously assigned work is complete. In particular inspect PR #127 (`codex/templeheart-v3.3.0-uups`). It is still OPEN + DRAFT and contains obsolete KAIOS assumptions (`KAIOS_PER_KGEN = 10_000` and legacy `IKAIOSBurnProofGenesis`). Do NOT merge it as-is.
+Before starting new integration, read `KAIOS_FrictionMirror_Multiverse_README.md` as the KAIOS monetary and point-identity single source of truth. Then report whether the previously assigned work is complete. In particular inspect PR #127 (`codex/templeheart-v3.3.0-uups`). It is still OPEN + DRAFT and contains obsolete KAIOS assumptions (`KAIOS_PER_KGEN = 10_000` and legacy `IKAIOSBurnProofGenesis`). Do NOT merge it as-is.
 
 Return one of:
 

@@ -1,4 +1,5 @@
 # 《33333 金銀島文明基金憲章》
+> **SUPERSEDED IDENTITY SPEC:** Human Final Canon 2026-08-09 assigns 33333 exclusively to the KAIOS Gold & Silver Island token deployment point. This historical Proof-of-Civilization design is retained for lineage only and is not CURRENT.
 ## Gold Island 33333 Civilization Contribution Constitution
 ### Volume V｜V1.0 Genesis Edition
 

@@ -10,173 +10,882 @@
   "evmVersion": "paris",
   "openzeppelinContracts": "5.0.2",
   "openzeppelinContractsUpgradeable": "5.0.2",
-  "sourceCount": 16,
-  "contractCount": 27,
+  "sourceCount": 29,
+  "contractCount": 39,
   "eip170MaximumDeployedBytecodeBytes": 24576,
   "oversizedContracts": [],
+  "lingxiaoCelestialBank18888StorageValidation": {
+    "status": "PASS",
+    "strategy": "V2 modular bank preserves slots 0-3, appends module/accounting/risk state in slots 4-13, and consumes ten reserved gap slots while retaining a 50-slot namespace",
+    "expected": [
+      {
+        "label": "kgen",
+        "slot": "0",
+        "offset": 0,
+        "type": "t_address"
+      },
+      {
+        "label": "kaios",
+        "slot": "1",
+        "offset": 0,
+        "type": "t_address"
+      },
+      {
+        "label": "kaiosBound",
+        "slot": "1",
+        "offset": 20,
+        "type": "t_bool"
+      },
+      {
+        "label": "totalKaiosDisbursed",
+        "slot": "2",
+        "offset": 0,
+        "type": "t_uint256"
+      },
+      {
+        "label": "_disbursements",
+        "slot": "3",
+        "offset": 0,
+        "type": "t_mapping(t_bytes32,t_struct(Disbursement)_storage)"
+      },
+      {
+        "label": "_modules",
+        "slot": "4",
+        "offset": 0,
+        "type": "t_mapping(t_bytes32,t_struct(ModuleConfig)_storage)"
+      },
+      {
+        "label": "_moduleIds",
+        "slot": "5",
+        "offset": 0,
+        "type": "t_mapping(t_address,t_bytes32)"
+      },
+      {
+        "label": "_modulePayments",
+        "slot": "6",
+        "offset": 0,
+        "type": "t_mapping(t_bytes32,t_bool)"
+      },
+      {
+        "label": "totalKaiosAccountedInflow",
+        "slot": "7",
+        "offset": 0,
+        "type": "t_uint256"
+      },
+      {
+        "label": "totalKaiosModuleDisbursed",
+        "slot": "8",
+        "offset": 0,
+        "type": "t_uint256"
+      },
+      {
+        "label": "reserveRequirement",
+        "slot": "9",
+        "offset": 0,
+        "type": "t_uint256"
+      },
+      {
+        "label": "lastAccountedGrossAssets",
+        "slot": "10",
+        "offset": 0,
+        "type": "t_uint256"
+      },
+      {
+        "label": "genesisStartedAt",
+        "slot": "11",
+        "offset": 0,
+        "type": "t_uint64"
+      },
+      {
+        "label": "genesisStarted",
+        "slot": "11",
+        "offset": 8,
+        "type": "t_bool"
+      },
+      {
+        "label": "riskController",
+        "slot": "11",
+        "offset": 9,
+        "type": "t_address"
+      },
+      {
+        "label": "genesisOpeningBalance",
+        "slot": "12",
+        "offset": 0,
+        "type": "t_uint256"
+      },
+      {
+        "label": "paused",
+        "slot": "13",
+        "offset": 0,
+        "type": "t_bool"
+      },
+      {
+        "label": "governanceFinalized",
+        "slot": "13",
+        "offset": 1,
+        "type": "t_bool"
+      },
+      {
+        "label": "bootstrapUpgrader",
+        "slot": "13",
+        "offset": 2,
+        "type": "t_address"
+      },
+      {
+        "label": "__gap",
+        "slot": "14",
+        "offset": 0,
+        "type": "t_array(t_uint256)36_storage"
+      }
+    ],
+    "actual": [
+      {
+        "label": "kgen",
+        "slot": "0",
+        "offset": 0,
+        "type": "t_address"
+      },
+      {
+        "label": "kaios",
+        "slot": "1",
+        "offset": 0,
+        "type": "t_address"
+      },
+      {
+        "label": "kaiosBound",
+        "slot": "1",
+        "offset": 20,
+        "type": "t_bool"
+      },
+      {
+        "label": "totalKaiosDisbursed",
+        "slot": "2",
+        "offset": 0,
+        "type": "t_uint256"
+      },
+      {
+        "label": "_disbursements",
+        "slot": "3",
+        "offset": 0,
+        "type": "t_mapping(t_bytes32,t_struct(Disbursement)_storage)"
+      },
+      {
+        "label": "_modules",
+        "slot": "4",
+        "offset": 0,
+        "type": "t_mapping(t_bytes32,t_struct(ModuleConfig)_storage)"
+      },
+      {
+        "label": "_moduleIds",
+        "slot": "5",
+        "offset": 0,
+        "type": "t_mapping(t_address,t_bytes32)"
+      },
+      {
+        "label": "_modulePayments",
+        "slot": "6",
+        "offset": 0,
+        "type": "t_mapping(t_bytes32,t_bool)"
+      },
+      {
+        "label": "totalKaiosAccountedInflow",
+        "slot": "7",
+        "offset": 0,
+        "type": "t_uint256"
+      },
+      {
+        "label": "totalKaiosModuleDisbursed",
+        "slot": "8",
+        "offset": 0,
+        "type": "t_uint256"
+      },
+      {
+        "label": "reserveRequirement",
+        "slot": "9",
+        "offset": 0,
+        "type": "t_uint256"
+      },
+      {
+        "label": "lastAccountedGrossAssets",
+        "slot": "10",
+        "offset": 0,
+        "type": "t_uint256"
+      },
+      {
+        "label": "genesisStartedAt",
+        "slot": "11",
+        "offset": 0,
+        "type": "t_uint64"
+      },
+      {
+        "label": "genesisStarted",
+        "slot": "11",
+        "offset": 8,
+        "type": "t_bool"
+      },
+      {
+        "label": "riskController",
+        "slot": "11",
+        "offset": 9,
+        "type": "t_address"
+      },
+      {
+        "label": "genesisOpeningBalance",
+        "slot": "12",
+        "offset": 0,
+        "type": "t_uint256"
+      },
+      {
+        "label": "paused",
+        "slot": "13",
+        "offset": 0,
+        "type": "t_bool"
+      },
+      {
+        "label": "governanceFinalized",
+        "slot": "13",
+        "offset": 1,
+        "type": "t_bool"
+      },
+      {
+        "label": "bootstrapUpgrader",
+        "slot": "13",
+        "offset": 2,
+        "type": "t_address"
+      },
+      {
+        "label": "__gap",
+        "slot": "14",
+        "offset": 0,
+        "type": "t_array(t_uint256)36_storage"
+      }
+    ]
+  },
+  "upgradeableModuleStorageValidation": {
+    "status": "PASS",
+    "strategy": "Every module preserves the shared slots 0-1 prefix and reserves a deterministic 100-slot custom namespace",
+    "modules": [
+      {
+        "contractName": "CelestialSeat500_Upgradeable",
+        "status": "PASS",
+        "namespaceSlots": 100,
+        "basePrefixPreserved": true
+      },
+      {
+        "contractName": "CivilizationAllocation_Upgradeable",
+        "status": "PASS",
+        "namespaceSlots": 100,
+        "basePrefixPreserved": true
+      },
+      {
+        "contractName": "EconomicRouter8888_Upgradeable",
+        "status": "PASS",
+        "namespaceSlots": 100,
+        "basePrefixPreserved": true
+      },
+      {
+        "contractName": "ExchangeSettlement11520_Upgradeable",
+        "status": "PASS",
+        "namespaceSlots": 100,
+        "basePrefixPreserved": true
+      },
+      {
+        "contractName": "BankRiskController_Upgradeable",
+        "status": "PASS",
+        "namespaceSlots": 100,
+        "basePrefixPreserved": true
+      },
+      {
+        "contractName": "BankGovernance_Upgradeable",
+        "status": "PASS",
+        "namespaceSlots": 100,
+        "basePrefixPreserved": true
+      },
+      {
+        "contractName": "BankMigration_Upgradeable",
+        "status": "PASS",
+        "namespaceSlots": 100,
+        "basePrefixPreserved": true
+      }
+    ]
+  },
+  "celestialSeat500StorageValidation": {
+    "status": "PASS",
+    "strategy": "Calendar V2 preserves the complete duration-candidate prefix and Seat struct, appends three slots at 54-56, and shrinks only the trailing reserve from 46 to 43 slots",
+    "prefixPreserved": true,
+    "seatStructPreserved": true,
+    "appendOnly": true,
+    "legacyPrefixThroughSlot": 53,
+    "appendedSlots": [
+      54,
+      55,
+      56
+    ],
+    "namespaceSlots": 100,
+    "layout": [
+      {
+        "label": "bank",
+        "slot": "0",
+        "offset": 0,
+        "type": "t_contract(ILingxiaoCelestialBank18888)"
+      },
+      {
+        "label": "moduleId",
+        "slot": "1",
+        "offset": 0,
+        "type": "t_bytes32"
+      },
+      {
+        "label": "governanceFinalized",
+        "slot": "2",
+        "offset": 0,
+        "type": "t_bool"
+      },
+      {
+        "label": "bootstrapUpgrader",
+        "slot": "2",
+        "offset": 1,
+        "type": "t_address"
+      },
+      {
+        "label": "__gap",
+        "slot": "3",
+        "offset": 0,
+        "type": "t_array(t_uint256)47_storage"
+      },
+      {
+        "label": "salaryEpochSeconds",
+        "slot": "50",
+        "offset": 0,
+        "type": "t_uint64"
+      },
+      {
+        "label": "seatCount",
+        "slot": "51",
+        "offset": 0,
+        "type": "t_uint256"
+      },
+      {
+        "label": "totalSalaryClaimed",
+        "slot": "52",
+        "offset": 0,
+        "type": "t_uint256"
+      },
+      {
+        "label": "_seats",
+        "slot": "53",
+        "offset": 0,
+        "type": "t_mapping(t_uint256,t_struct(Seat)_storage)"
+      },
+      {
+        "label": "_salaryBaseCheckpoints",
+        "slot": "54",
+        "offset": 0,
+        "type": "t_array(t_struct(SalaryBaseCheckpoint)_storage)dyn_storage"
+      },
+      {
+        "label": "_calendarSeats",
+        "slot": "55",
+        "offset": 0,
+        "type": "t_mapping(t_uint256,t_struct(CalendarSeatState)_storage)"
+      },
+      {
+        "label": "_seatTermsCheckpoints",
+        "slot": "56",
+        "offset": 0,
+        "type": "t_mapping(t_uint256,t_array(t_struct(SeatTermsCheckpoint)_storage)dyn_storage)"
+      },
+      {
+        "label": "__gap",
+        "slot": "57",
+        "offset": 0,
+        "type": "t_array(t_uint256)43_storage"
+      }
+    ]
+  },
+  "gaolaozhuangCommercialBank8888StorageValidation": {
+    "status": "PASS",
+    "strategy": "V1 fixes a deterministic 50-slot append-only namespace; future implementations may only consume the trailing gap",
+    "namespaceSlots": 50,
+    "labels": [
+      {
+        "label": "kgen",
+        "slot": "0",
+        "offset": 0,
+        "type": "t_address"
+      },
+      {
+        "label": "kaios",
+        "slot": "1",
+        "offset": 0,
+        "type": "t_address"
+      },
+      {
+        "label": "celestialBank18888",
+        "slot": "2",
+        "offset": 0,
+        "type": "t_address"
+      },
+      {
+        "label": "legacyTreasury",
+        "slot": "3",
+        "offset": 0,
+        "type": "t_address"
+      },
+      {
+        "label": "bootstrapAdmin",
+        "slot": "4",
+        "offset": 0,
+        "type": "t_address"
+      },
+      {
+        "label": "bootstrapUpgrader",
+        "slot": "5",
+        "offset": 0,
+        "type": "t_address"
+      },
+      {
+        "label": "kaiosBound",
+        "slot": "5",
+        "offset": 20,
+        "type": "t_bool"
+      },
+      {
+        "label": "paused",
+        "slot": "5",
+        "offset": 21,
+        "type": "t_bool"
+      },
+      {
+        "label": "governanceFinalized",
+        "slot": "5",
+        "offset": 22,
+        "type": "t_bool"
+      },
+      {
+        "label": "minimumReserve",
+        "slot": "6",
+        "offset": 0,
+        "type": "t_uint256"
+      },
+      {
+        "label": "totalAccountLiability",
+        "slot": "7",
+        "offset": 0,
+        "type": "t_uint256"
+      },
+      {
+        "label": "totalPayrollLiability",
+        "slot": "8",
+        "offset": 0,
+        "type": "t_uint256"
+      },
+      {
+        "label": "totalPaymentLiability",
+        "slot": "9",
+        "offset": 0,
+        "type": "t_uint256"
+      },
+      {
+        "label": "interestFundingReserve",
+        "slot": "10",
+        "offset": 0,
+        "type": "t_uint256"
+      },
+      {
+        "label": "totalSalaryPaidToWallet",
+        "slot": "11",
+        "offset": 0,
+        "type": "t_uint256"
+      },
+      {
+        "label": "totalSalaryCreditedToAccounts",
+        "slot": "12",
+        "offset": 0,
+        "type": "t_uint256"
+      },
+      {
+        "label": "totalCommercialSettlement",
+        "slot": "13",
+        "offset": 0,
+        "type": "t_uint256"
+      },
+      {
+        "label": "totalInterestCredited",
+        "slot": "14",
+        "offset": 0,
+        "type": "t_uint256"
+      },
+      {
+        "label": "totalPendingInterest",
+        "slot": "15",
+        "offset": 0,
+        "type": "t_uint256"
+      },
+      {
+        "label": "accountCount",
+        "slot": "16",
+        "offset": 0,
+        "type": "t_uint256"
+      },
+      {
+        "label": "payrollCount",
+        "slot": "17",
+        "offset": 0,
+        "type": "t_uint256"
+      },
+      {
+        "label": "paymentCount",
+        "slot": "18",
+        "offset": 0,
+        "type": "t_uint256"
+      },
+      {
+        "label": "_accounts",
+        "slot": "19",
+        "offset": 0,
+        "type": "t_mapping(t_bytes32,t_struct(CommercialAccount)7372_storage)"
+      },
+      {
+        "label": "_payroll",
+        "slot": "20",
+        "offset": 0,
+        "type": "t_mapping(t_bytes32,t_struct(PayrollEntry)7390_storage)"
+      },
+      {
+        "label": "_payments",
+        "slot": "21",
+        "offset": 0,
+        "type": "t_mapping(t_bytes32,t_struct(BusinessPayment)7410_storage)"
+      },
+      {
+        "label": "_interestRates",
+        "slot": "22",
+        "offset": 0,
+        "type": "t_array(t_struct(InterestRateCheckpoint)7415_storage)dyn_storage"
+      },
+      {
+        "label": "__gap",
+        "slot": "23",
+        "offset": 0,
+        "type": "t_array(t_uint256)27_storage"
+      }
+    ]
+  },
   "warnings": 0,
   "contracts": [
     {
       "contractName": "KGEN_TempleHeart_Upgradeable",
       "sourceName": "../KGEN/contracts/KGEN_TempleHeart_Upgradeable.sol",
       "bytecodeBytes": 23768,
-      "deployedBytecodeBytes": 23553
+      "bytecodeHash": "0x7f88247184c95831dcca55945d447f7c23bbcb3028fd4920f39f2e1b58fda354",
+      "deployedBytecodeBytes": 23553,
+      "deployedBytecodeHash": "0x75d59141359a17e59ce8316ac4ae729a1e57336bb0b0b7db2d2feb576dd9d3a7"
     },
     {
       "contractName": "ERC1967Proxy",
       "sourceName": "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol",
       "bytecodeBytes": 682,
-      "deployedBytecodeBytes": 92
+      "bytecodeHash": "0xdf26c9b8fa82c64beeb8e651d5663e33ae2670743ea2bfdbb83b95ebb533aaae",
+      "deployedBytecodeBytes": 92,
+      "deployedBytecodeHash": "0x572e640425d4d6c1f70e591dec2930f8d9481f510d67a7b9577543ebaeb5dfb6"
     },
     {
       "contractName": "ERC1967Utils",
       "sourceName": "@openzeppelin/contracts/proxy/ERC1967/ERC1967Utils.sol",
       "bytecodeBytes": 46,
-      "deployedBytecodeBytes": 17
+      "bytecodeHash": "0x24ea8a9e1c6c56cebe82683981c916ab529307088c3d39275d392c04fef54e16",
+      "deployedBytecodeBytes": 17,
+      "deployedBytecodeHash": "0xb4c8e3acc8b3b8dcf1675b179d233595b039f71765e2c860838a19b4fbddf1cf"
     },
     {
       "contractName": "SafeERC20",
       "sourceName": "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol",
       "bytecodeBytes": 46,
-      "deployedBytecodeBytes": 17
+      "bytecodeHash": "0x24ea8a9e1c6c56cebe82683981c916ab529307088c3d39275d392c04fef54e16",
+      "deployedBytecodeBytes": 17,
+      "deployedBytecodeHash": "0xb4c8e3acc8b3b8dcf1675b179d233595b039f71765e2c860838a19b4fbddf1cf"
     },
     {
       "contractName": "Address",
       "sourceName": "@openzeppelin/contracts/utils/Address.sol",
       "bytecodeBytes": 46,
-      "deployedBytecodeBytes": 17
+      "bytecodeHash": "0x24ea8a9e1c6c56cebe82683981c916ab529307088c3d39275d392c04fef54e16",
+      "deployedBytecodeBytes": 17,
+      "deployedBytecodeHash": "0xb4c8e3acc8b3b8dcf1675b179d233595b039f71765e2c860838a19b4fbddf1cf"
     },
     {
       "contractName": "StorageSlot",
       "sourceName": "@openzeppelin/contracts/utils/StorageSlot.sol",
       "bytecodeBytes": 46,
-      "deployedBytecodeBytes": 17
+      "bytecodeHash": "0x24ea8a9e1c6c56cebe82683981c916ab529307088c3d39275d392c04fef54e16",
+      "deployedBytecodeBytes": 17,
+      "deployedBytecodeHash": "0xb4c8e3acc8b3b8dcf1675b179d233595b039f71765e2c860838a19b4fbddf1cf"
     },
     {
       "contractName": "Strings",
       "sourceName": "@openzeppelin/contracts/utils/Strings.sol",
       "bytecodeBytes": 46,
-      "deployedBytecodeBytes": 17
+      "bytecodeHash": "0x24ea8a9e1c6c56cebe82683981c916ab529307088c3d39275d392c04fef54e16",
+      "deployedBytecodeBytes": 17,
+      "deployedBytecodeHash": "0xb4c8e3acc8b3b8dcf1675b179d233595b039f71765e2c860838a19b4fbddf1cf"
     },
     {
       "contractName": "ECDSA",
       "sourceName": "@openzeppelin/contracts/utils/cryptography/ECDSA.sol",
       "bytecodeBytes": 46,
-      "deployedBytecodeBytes": 17
+      "bytecodeHash": "0x24ea8a9e1c6c56cebe82683981c916ab529307088c3d39275d392c04fef54e16",
+      "deployedBytecodeBytes": 17,
+      "deployedBytecodeHash": "0xb4c8e3acc8b3b8dcf1675b179d233595b039f71765e2c860838a19b4fbddf1cf"
     },
     {
       "contractName": "MessageHashUtils",
       "sourceName": "@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol",
       "bytecodeBytes": 46,
-      "deployedBytecodeBytes": 17
+      "bytecodeHash": "0x24ea8a9e1c6c56cebe82683981c916ab529307088c3d39275d392c04fef54e16",
+      "deployedBytecodeBytes": 17,
+      "deployedBytecodeHash": "0xb4c8e3acc8b3b8dcf1675b179d233595b039f71765e2c860838a19b4fbddf1cf"
     },
     {
       "contractName": "Math",
       "sourceName": "@openzeppelin/contracts/utils/math/Math.sol",
       "bytecodeBytes": 46,
-      "deployedBytecodeBytes": 17
+      "bytecodeHash": "0x24ea8a9e1c6c56cebe82683981c916ab529307088c3d39275d392c04fef54e16",
+      "deployedBytecodeBytes": 17,
+      "deployedBytecodeHash": "0xb4c8e3acc8b3b8dcf1675b179d233595b039f71765e2c860838a19b4fbddf1cf"
     },
     {
       "contractName": "SignedMath",
       "sourceName": "@openzeppelin/contracts/utils/math/SignedMath.sol",
       "bytecodeBytes": 46,
-      "deployedBytecodeBytes": 17
+      "bytecodeHash": "0x24ea8a9e1c6c56cebe82683981c916ab529307088c3d39275d392c04fef54e16",
+      "deployedBytecodeBytes": 17,
+      "deployedBytecodeHash": "0xb4c8e3acc8b3b8dcf1675b179d233595b039f71765e2c860838a19b4fbddf1cf"
+    },
+    {
+      "contractName": "BankGovernance_Upgradeable",
+      "sourceName": "contracts/BankGovernance_Upgradeable.sol",
+      "bytecodeBytes": 7465,
+      "bytecodeHash": "0x9ba451cfe621128f3b6937f8830a9cf8d8361909c23a0515360dae6f378e9bef",
+      "deployedBytecodeBytes": 7255,
+      "deployedBytecodeHash": "0x7721a69e34acf8ee148b8d75091cf71f61c409bc832d3132f540a22ed4b5c391"
+    },
+    {
+      "contractName": "BankMigration_Upgradeable",
+      "sourceName": "contracts/BankMigration_Upgradeable.sol",
+      "bytecodeBytes": 6074,
+      "bytecodeHash": "0xec6bc23243b64a1d84d94f6cc47955d77cc3e03ae53276c04ebc0044b55451eb",
+      "deployedBytecodeBytes": 5864,
+      "deployedBytecodeHash": "0x96fe6d7635bea507eea9a2bb126909fedfa8d831d9244dbf2df439217c5dd368"
+    },
+    {
+      "contractName": "BankRiskController_Upgradeable",
+      "sourceName": "contracts/BankRiskController_Upgradeable.sol",
+      "bytecodeBytes": 6088,
+      "bytecodeHash": "0x39e4cacd17fe3279a13d04b1dd82779179fcae9d36ed304d9c7029cfea8e81c5",
+      "deployedBytecodeBytes": 5878,
+      "deployedBytecodeHash": "0x038eab42a1d601e0553609f4ead0e955f7edb964ab38baca1b1fc1bd94e4a958"
+    },
+    {
+      "contractName": "CelestialSeat500_Upgradeable",
+      "sourceName": "contracts/CelestialSeat500_Upgradeable.sol",
+      "bytecodeBytes": 13263,
+      "bytecodeHash": "0x9a63317a1f2841e7fb03099b8824d3b429f27c42a41c22edfc46c336f031c3f3",
+      "deployedBytecodeBytes": 13052,
+      "deployedBytecodeHash": "0xe71750e3ced670995db7f66cc044855c450e7b991ebe3d94cae18e5f440940ff"
+    },
+    {
+      "contractName": "CivilizationAllocation_Upgradeable",
+      "sourceName": "contracts/CivilizationAllocation_Upgradeable.sol",
+      "bytecodeBytes": 6323,
+      "bytecodeHash": "0xe2b0b571024f8976282a12b28fa31a9be0a13e5ad1dd31c5efc0906ad09cf078",
+      "deployedBytecodeBytes": 6113,
+      "deployedBytecodeHash": "0x34d62bc57d6cb588d7471128d469202a0cd5278a8b7ace44785c148a61c4236e"
+    },
+    {
+      "contractName": "EconomicRouter8888_Upgradeable",
+      "sourceName": "contracts/EconomicRouter8888_Upgradeable.sol",
+      "bytecodeBytes": 5684,
+      "bytecodeHash": "0xf781eced5b1af2d10829c9dc5feaed821731a593b3d5d7010293164180d2d965",
+      "deployedBytecodeBytes": 5474,
+      "deployedBytecodeHash": "0x51d28d692c74bb656e8ecd05433d99606766891a4e3f9392e096a01a988dc97b"
+    },
+    {
+      "contractName": "ExchangeSettlement11520_Upgradeable",
+      "sourceName": "contracts/ExchangeSettlement11520_Upgradeable.sol",
+      "bytecodeBytes": 5684,
+      "bytecodeHash": "0xe64258f11dd7ff85e272d8dbb5ac961a55cf9a560fbf73ab5aaa96df95256e9f",
+      "deployedBytecodeBytes": 5474,
+      "deployedBytecodeHash": "0x505cefc01f6df515406bdf28dec432056fd4e5f7f37c808248d0fe63530378d0"
+    },
+    {
+      "contractName": "GaolaozhuangCommercialBank8888_Upgradeable",
+      "sourceName": "contracts/GaolaozhuangCommercialBank8888_Upgradeable.sol",
+      "bytecodeBytes": 18436,
+      "bytecodeHash": "0x6db0a450065b47d3b12ea695afbc8db6f1a02e98f94e97a78518b4c17f2387e9",
+      "deployedBytecodeBytes": 18221,
+      "deployedBytecodeHash": "0x63a418103df4396a8d6cb944c4d0c1ce46d8a942f4e6d3d03f6c88686e0998f9"
     },
     {
       "contractName": "KAIOS",
       "sourceName": "contracts/KAIOS.sol",
-      "bytecodeBytes": 7228,
-      "deployedBytecodeBytes": 5873
+      "bytecodeBytes": 7131,
+      "bytecodeHash": "0x54b4e49d01d4a7f1dcd615e66a90ee639320c9ac19fa208b3444bd0f74d16811",
+      "deployedBytecodeBytes": 5776,
+      "deployedBytecodeHash": "0x4add4038124198d1879aa2c22894712809c50acbba32e5e83cbc5176a5241d57"
     },
     {
       "contractName": "KAIOSAlchemyFurnace",
       "sourceName": "contracts/KAIOSAlchemyFurnace.sol",
       "bytecodeBytes": 2381,
-      "deployedBytecodeBytes": 2084
+      "bytecodeHash": "0x95735d91e2fe86488f19239795b5c7ff26c9fe278357676549d68ee1ea55c541",
+      "deployedBytecodeBytes": 2084,
+      "deployedBytecodeHash": "0xb7641e12e9612e871fa99886f599c29e602ba1925c68fc67666c8991b60a4258"
     },
     {
       "contractName": "KAIOSEventHorizonVaultV01",
       "sourceName": "contracts/KAIOSEventHorizonVaultV01.sol",
       "bytecodeBytes": 1867,
-      "deployedBytecodeBytes": 1689
+      "bytecodeHash": "0xd0497bbceb5836e6977502267da06f9054a60505b00c2486ec0775771963f883",
+      "deployedBytecodeBytes": 1689,
+      "deployedBytecodeHash": "0x91a008c5b34e91d7c7dfdc95f7921798381baaf10a053c1777b1f7e44de4aadb"
     },
     {
       "contractName": "KAIOSGenesisInscription",
       "sourceName": "contracts/KAIOSGenesisInscription.sol",
-      "bytecodeBytes": 2159,
-      "deployedBytecodeBytes": 1641
+      "bytecodeBytes": 3764,
+      "bytecodeHash": "0x85df6e81055ceedc008c4c94e844c59bfa061df4f50806034da66c702a16c61e",
+      "deployedBytecodeBytes": 2002,
+      "deployedBytecodeHash": "0x2e0ea12c380b60bbc6bd05125102a33ba7339b330ec62cd852a1c7d637d78894"
     },
     {
       "contractName": "KAIOSOrganRegistry",
       "sourceName": "contracts/KAIOSOrganRegistry.sol",
-      "bytecodeBytes": 2718,
-      "deployedBytecodeBytes": 2404
+      "bytecodeBytes": 2857,
+      "bytecodeHash": "0xe98271e85c24c0aa287ba49cb9ef09f5df3754f2e53c774800452df90eac34c5",
+      "deployedBytecodeBytes": 2543,
+      "deployedBytecodeHash": "0xa94d18fd3592a336e1e1154e46b7076b68615f9206da1b32a8170a1aed581611"
     },
     {
       "contractName": "KAIOSPairRegistry",
       "sourceName": "contracts/KAIOSPairRegistry.sol",
       "bytecodeBytes": 1756,
-      "deployedBytecodeBytes": 1535
+      "bytecodeHash": "0xe95387c1ea4596b919c4913a2dea1465cd6e8f428afe8f75e21181b951b2703a",
+      "deployedBytecodeBytes": 1535,
+      "deployedBytecodeHash": "0xc00173a34acc6e680264341c743d54d1f253e5618d9a59e60dd114cf256446f3"
     },
     {
       "contractName": "KSHIP",
       "sourceName": "contracts/KSHIP.sol",
       "bytecodeBytes": 4153,
-      "deployedBytecodeBytes": 3118
+      "bytecodeHash": "0xb238201a40e2819a517e48cc9eff1869453bb4e09db0aabf12e15c6f74bcefe8",
+      "deployedBytecodeBytes": 3118,
+      "deployedBytecodeHash": "0x11ea161d88f6463ba017410a574f6dcdf519696e48dc58f60b307d3d933a4876"
     },
     {
       "contractName": "KSHIPConverter",
       "sourceName": "contracts/KSHIPConverter.sol",
       "bytecodeBytes": 1221,
-      "deployedBytecodeBytes": 950
+      "bytecodeHash": "0x318120281effd7ee716356ef4d0b008ea3cd714596b3bf8b2b8ba96a2f2e5161",
+      "deployedBytecodeBytes": 950,
+      "deployedBytecodeHash": "0x911af8e4500566113571cdfeebb20bd3e579e5d6a1a36381e1827c663f1fbd66"
     },
     {
       "contractName": "KUFO",
       "sourceName": "contracts/KUFO.sol",
       "bytecodeBytes": 6051,
-      "deployedBytecodeBytes": 4992
+      "bytecodeHash": "0x657f730f84eaea6c5a850bd5f117dbd0b6c851d3f44d1fd622547a0de3032087",
+      "deployedBytecodeBytes": 4992,
+      "deployedBytecodeHash": "0x0b35a50e02dd1562efb69f33ea332dbc205aaf471f66d334e75491d7f94076de"
     },
     {
       "contractName": "KUFOClaimWormhole",
       "sourceName": "contracts/KUFOClaimWormhole.sol",
       "bytecodeBytes": 1035,
-      "deployedBytecodeBytes": 765
+      "bytecodeHash": "0x7b424c045dfd783957404e36ba2e24e7cd4835c0a318033935d4330a4428c667",
+      "deployedBytecodeBytes": 765,
+      "deployedBytecodeHash": "0x5aa420e209a5701fae746a179bcde8d62d5cbb5a9be109c6da9957409087fb45"
+    },
+    {
+      "contractName": "LingxiaoCelestialBank18888_Upgradeable",
+      "sourceName": "contracts/LingxiaoCelestialBank18888_Upgradeable.sol",
+      "bytecodeBytes": 12504,
+      "bytecodeHash": "0xff5594efa2cd283aed2cab9f27634c06a4da3d2737c645addfdc54f53757d43b",
+      "deployedBytecodeBytes": 12293,
+      "deployedBytecodeHash": "0xcfe00d93cf874129e6d01003f2fb265128d469dd350e5a5cab79beafb518f00c"
     },
     {
       "contractName": "KGEN_TempleHeart_V3_3_2_Baseline",
       "sourceName": "tests/baseline/KGEN_TempleHeart_V3_3_2_Baseline.sol",
       "bytecodeBytes": 18513,
-      "deployedBytecodeBytes": 18298
+      "bytecodeHash": "0x55a38999912f4c8d5b67f120a18097ad48e8f7399ce58842fcb241db16383d2d",
+      "deployedBytecodeBytes": 18298,
+      "deployedBytecodeHash": "0xfa67e109d9aea0acdf0b54f64214ab071f73b24514c9a72dd91fcbe3ab863d27"
+    },
+    {
+      "contractName": "CelestialSeat500_DurationEpochV1Fixture",
+      "sourceName": "tests/contracts/CelestialSeat500_DurationEpochV1Fixture.sol",
+      "bytecodeBytes": 5755,
+      "bytecodeHash": "0xd64d2241e2670562ae78c1ed1a807b8fcb27273f4ab2fe6b4d75373c7c070cbb",
+      "deployedBytecodeBytes": 5545,
+      "deployedBytecodeHash": "0x9171fd8034d3ff5d26ac8b2c8ef4d4939be6d063193169a95d452a082bc2a266"
+    },
+    {
+      "contractName": "MockKAIOSForTreasury",
+      "sourceName": "tests/contracts/MockKGEN.sol",
+      "bytecodeBytes": 2884,
+      "bytecodeHash": "0xad734a0cfc7c36dfd85a4c4312b9bf4e8c4602db41e119d448101a2a3687348e",
+      "deployedBytecodeBytes": 1954,
+      "deployedBytecodeHash": "0xd352cc373dab1f29f406add52e26b784b79db1f81a78c320c79de08e6b82748d"
     },
     {
       "contractName": "MockKGEN",
       "sourceName": "tests/contracts/MockKGEN.sol",
       "bytecodeBytes": 2829,
-      "deployedBytecodeBytes": 1819
+      "bytecodeHash": "0xae27adb542476b57782be11b61dd1d54a01f079564d1661596388c3ba8c354dd",
+      "deployedBytecodeBytes": 1819,
+      "deployedBytecodeHash": "0xbc8c3571d8ed32f32150c6604b4b5f0630f84a72a9f17e4b4e4bb1c3f6583f50"
     },
     {
       "contractName": "MockMintOrgan",
       "sourceName": "tests/contracts/MockMintOrgan.sol",
       "bytecodeBytes": 430,
-      "deployedBytecodeBytes": 402
+      "bytecodeHash": "0x39e18396e6f45934d30bb8c737f3ffe29c6a6ddfc8310b5c2b4b26cbbfc6e610",
+      "deployedBytecodeBytes": 402,
+      "deployedBytecodeHash": "0xa9698d60469e76f3bb6e8661653b041761bf6ccc32c3b00e69f1a7769c18d040"
+    },
+    {
+      "contractName": "MockNonUUPS",
+      "sourceName": "tests/contracts/MockNonUUPS.sol",
+      "bytecodeBytes": 243,
+      "bytecodeHash": "0x5abc7eedd19145c74fa5d233dc80abc94ecd646e519fe2070c934b9da00fccd7",
+      "deployedBytecodeBytes": 216,
+      "deployedBytecodeHash": "0x3b87952c8c623e6fec8e2d613a69b48edbd299c9700c19cf3af7ff41a84bfd0e"
     },
     {
       "contractName": "MockOrgan",
       "sourceName": "tests/contracts/MockOrgan.sol",
       "bytecodeBytes": 42,
-      "deployedBytecodeBytes": 17
+      "bytecodeHash": "0x4629c270e251989e1303f62f972a55bf78613ec4972bba9ddc860b87858ba57a",
+      "deployedBytecodeBytes": 17,
+      "deployedBytecodeHash": "0xb4c8e3acc8b3b8dcf1675b179d233595b039f71765e2c860838a19b4fbddf1cf"
     },
     {
       "contractName": "TestFortuneGame",
       "sourceName": "tests/contracts/MockOrgan.sol",
       "bytecodeBytes": 308,
-      "deployedBytecodeBytes": 280
+      "bytecodeHash": "0x1295c1ad8d214975c5dd14e471ddc2a04941f0a0bbfed33bafb4bc8ef9d823b9",
+      "deployedBytecodeBytes": 280,
+      "deployedBytecodeHash": "0x84330106494fb7596fa3dffd94098aa5c53369ae61575eb36b82446662210ee8"
     },
     {
       "contractName": "TestERC1967Proxy",
       "sourceName": "tests/contracts/TestERC1967Proxy.sol",
       "bytecodeBytes": 660,
-      "deployedBytecodeBytes": 92
+      "bytecodeHash": "0x66699f70001daaf3ca3936eded5dd1dafed96a71fe7a982d471f2d1aa3247b75",
+      "deployedBytecodeBytes": 92,
+      "deployedBytecodeHash": "0x572e640425d4d6c1f70e591dec2930f8d9481f510d67a7b9577543ebaeb5dfb6"
     }
   ]
 }

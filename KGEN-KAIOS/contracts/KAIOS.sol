@@ -26,8 +26,8 @@ interface IKGENSupply {
  * FIRST-GENERATION WHITE HOLE — POINT 36000
  * KAIOS observes the canonical KGEN totalSupply() directly. Only the newly
  * observed permanent reduction from the 72,000,000 KGEN genesis supply is
- * mirrored into KAIOS. Every settlement mints only to the immutable 18888
- * Lingxiao Treasury address.
+ * mirrored into KAIOS. Every settlement mints only to the immutable current
+ * 18888 Lingxiao Celestial Bank settlement address.
  *
  * ALCHEMY — POINT 18911
  * KAIOS may be voluntarily burned for future KUFO conversion only through the
@@ -59,7 +59,7 @@ contract KAIOS is ERC20, ERC20Capped {
     uint256 public constant WORMHOLE_POINT_ID = 511_111;
 
     string public constant GENESIS_INSCRIPTION_SHORT =
-        "NO KGEN BURN, NO KAIOS MINT. ONE BURNED KGEN CREATES ONE THOUSAND KAIOS. KAIOS NATIVE TAX IS ZERO. ONLY HOLDER-AUTHORIZED ALCHEMY MAY BURN KAIOS. NO DISCRETIONARY MINTING OR SEIZURE. CIVILIZATION MASS SHALL BE CONSERVED.";
+        "NO KGEN BURN, NO KAIOS MINT. ONE BURNED KGEN CREATES ONE THOUSAND KAIOS. NO DISCRETIONARY MINTING. CIVILIZATION MASS SHALL BE CONSERVED.";
 
     bytes32 public constant GENESIS_INSCRIPTION_SHORT_HASH =
         keccak256(bytes(GENESIS_INSCRIPTION_SHORT));

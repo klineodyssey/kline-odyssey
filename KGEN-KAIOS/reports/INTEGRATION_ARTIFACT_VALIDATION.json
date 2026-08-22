@@ -1,21 +1,40 @@
 {
   "status": "PASS",
   "checks": {
-    "files": 26,
-    "json": 5,
-    "markdown": 5,
-    "utf8": 24,
+    "files": 96,
+    "json": 28,
+    "markdown": 32,
+    "utf8": 95,
     "bom": 0,
     "corruption": 0,
     "secretHits": 0,
     "brokenLinks": 0
   },
   "protectedChanges": {
-    "currentFiles": [],
-    "constitutionFiles": [],
-    "bootSequenceChanged": false,
+    "currentFiles": [
+      "KGEN-KAIOS/18888_Celestial_Bank_KAIOS_WhiteHole_Whitepaper_V2.0_CURRENT.md",
+      "KGEN-KAIOS/KAIOS_500_CELESTIAL_AND_MARS_SEATS_RUNTIME_CURRENT.md",
+      "KGEN-KAIOS/KAIOS_WHITE_HOLE_ATOMIC_CONVERSION_AND_LIQUIDITY_RUNTIME_CURRENT.md",
+      "KGEN-KAIOS/reports/CURRENT_LINEAGE_RECONCILIATION.json"
+    ],
+    "constitutionFiles": [
+      "docs/constitution/00_PrimeForge_Creation_Declaration.md",
+      "docs/constitution/01_KGEN_Universe_Constitution.md",
+      "docs/constitution/02_KAIOS_Civilization_Constitution.md",
+      "docs/constitution/03_Celestial_Bank_18888.md",
+      "docs/constitution/04_People_Bank_8888.md",
+      "docs/constitution/05_Gold_Island_33333.md",
+      "docs/constitution/06_Huaguo_Exchange_11520.md",
+      "docs/constitution/08_AI_Company.md"
+    ],
+    "bootSequenceChanged": true,
     "walletOrPrivateKeyFiles": [],
-    "deploymentFiles": []
+    "deploymentFiles": [
+      "KGEN-KAIOS/config/LINGXIAO_18888_MAINNET_DEPLOYMENT_MANIFEST.json",
+      "KGEN-KAIOS/config/LINGXIAO_18888_MAINNET_DEPLOYMENT_MANIFEST.md",
+      "KGEN-KAIOS/scripts/prepare-lingxiao-18888-deployment.mjs",
+      "KGEN-KAIOS/reports/mainnet-pre-sign/KAIOS_GENESIS_INSCRIPTION_UNSIGNED_DEPLOYMENT.json"
+    ]
   },
   "failures": []
 }

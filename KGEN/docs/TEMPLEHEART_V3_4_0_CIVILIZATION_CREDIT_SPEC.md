@@ -4,11 +4,19 @@ Status: REVIEW CANDIDATE — NOT MAINNET DEPLOYED
 Human canon date: 2026-08-09
 Executable source: `KGEN/contracts/KGEN_TempleHeart_Upgradeable.sol`
 
-## V3.3.2 baseline and upgrade rule
+## Mainnet lineage correction
+
+The formal address `0xB016D4d8f1aED1339101b30722cad6dbA9B8C972` is a direct deployment of `KGEN_TempleHeart_V3_2_6`. It is not ERC1967/UUPS and is permanently classified as `LEGACY_TEMPLEHEART_V3_2_6`. It must not be upgraded, storage-migrated, delegatecall-migrated, self-destructed, force-drained, or funded with new KGEN.
+
+Mainnet V3.4 begins as a new implementation plus a new ERC1967/UUPS proxy. The new proxy becomes the canonical upgradeable Heart from V3.4 onward. Complete lineage, Registry, governance, deployment, gas, emergency, frontend, and funding gates are defined in `KGEN/docs/TEMPLEHEART_MAINNET_LINEAGE.md`.
+
+No Mainnet transaction is authorized by this specification.
+
+## V3.3.2 test baseline and V3.4 storage rule
 
 V3.4.0 is an append-only UUPS candidate over the V3.3.2 custom storage layout. The executable filename remains version-free under repository governance. Solidity is pinned to 0.8.24 and both OpenZeppelin packages are pinned to 5.0.2.
 
-No mainnet deployment or proxy upgrade is authorized by this candidate.
+The V3.3.2 baseline proves the candidate's append-only development lineage and testnet upgrade safety. It is not the storage baseline of the directly deployed V3.2.6 Legacy Heart and never authorizes an upgrade of the Legacy address.
 
 ## 1. Game Survival Gate
 
