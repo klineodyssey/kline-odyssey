@@ -124,6 +124,8 @@ The candidate can deterministically:
 - reject stale `main`, replayed cycles, T0/T1 workers, branch-policy mismatches and incomplete task envelopes;
 - preserve `REVIEW → REPAIR → HUMAN_DECISION → ARCHITECTURE → IMPLEMENTATION` ordering;
 - emit one append-only `REVIEW_REQUEST` or safe `WORK_ORDER`/`HANDOFF` candidate;
+- route `REWORK_REQUIRED` back to the explicitly recorded original authorized worker before a new review can be requested;
+- require every work or repair candidate to retain a registered, active, T2+ reviewer distinct from the worker;
 - keep every event free of external side effects.
 
 It cannot persist a Claim, edit GitHub, launch a worker, merge, push `main`, pay, access a private key, deploy or send a transaction. Those connectors remain `NOT_CONNECTED`; the existing Claim/Lease Controller and independent Review gates must authorize them before any future activation.

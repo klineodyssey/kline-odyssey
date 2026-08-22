@@ -2016,7 +2016,11 @@ export function runAutonomousCompanyCycle({
 
   const reviewCandidates = review_queue
     .filter((item) => ["DELIVERY_SUBMITTED", "REVIEW", "REWORK_REQUIRED"].includes(item.status))
-    .map((item) => ({ ...item, priority_class: item.status === "REWORK_REQUIRED" ? "REPAIR" : "REVIEW", source: "REVIEW_QUEUE" }));
+    .map((item) => ({
+      ...item,
+      priority_class: item.status === "REWORK_REQUIRED" ? "REPAIR" : "REVIEW",
+      source: item.status === "REWORK_REQUIRED" ? "REPAIR_QUEUE" : "REVIEW_QUEUE"
+    }));
   const workCandidates = work_queue
     .filter((item) => ["OPEN", "CLAIMABLE"].includes(item.status))
     .map((item) => ({ ...item, source: "WORK_QUEUE" }));
@@ -2125,11 +2129,47 @@ export function runAutonomousCompanyCycle({
     });
   }
 
+  const reviewer = workers.find((candidate) => candidate.worker_id === selected.reviewer_id);
+  if (!isAutonomousCompanyWorkerEligible(reviewer)) {
+    append("BLOCKER_STATE", { blocker: "INDEPENDENT_REVIEWER_REQUIRED", task_id: selected.task_id });
+    append("CLOCK_OUT", { result: "HOLD_REVIEWER" });
+    return Object.freeze({
+      cycle_id,
+      status: "HOLD_REVIEWER",
+      selected_action: null,
+      selected_task_id: selected.task_id,
+      selected_worker_id: null,
+      events: Object.freeze(events),
+      authority: noExternalAuthority,
+      next_safe_action: "ASSIGN_DISTINCT_AUTHORIZED_REVIEWER"
+    });
+  }
+
   const eligibleWorkers = workers.filter((worker) => isAutonomousCompanyWorkerEligible(worker, selected));
-  const worker = selected.assigned_worker_id
-    ? eligibleWorkers.find((candidate) => candidate.worker_id === selected.assigned_worker_id)
-    : eligibleWorkers[0];
-  if (!worker || worker.worker_id === selected.reviewer_id || !autonomousCompanyBranchMatches(worker.allowed_branch_pattern, selected.branch, selected.task_id)) {
+  const requiredRepairWorkerId = selected.source === "REPAIR_QUEUE" ? selected.original_worker_id : null;
+  if (selected.source === "REPAIR_QUEUE" && (typeof requiredRepairWorkerId !== "string" || !requiredRepairWorkerId.trim())) {
+    append("BLOCKER_STATE", { blocker: "ORIGINAL_REPAIR_WORKER_REQUIRED", task_id: selected.task_id });
+    append("CLOCK_OUT", { result: "HOLD_REPAIR_WORKER" });
+    return Object.freeze({
+      cycle_id,
+      status: "HOLD_REPAIR_WORKER",
+      selected_action: null,
+      selected_task_id: selected.task_id,
+      selected_worker_id: null,
+      events: Object.freeze(events),
+      authority: noExternalAuthority,
+      next_safe_action: "RESTORE_ORIGINAL_AUTHORIZED_WORKER_BINDING"
+    });
+  }
+
+  const requiredWorkerId = requiredRepairWorkerId ?? selected.assigned_worker_id;
+  const worker = requiredWorkerId
+    ? eligibleWorkers.find((candidate) => candidate.worker_id === requiredWorkerId)
+    : eligibleWorkers.find((candidate) => (
+      candidate.worker_id !== reviewer.worker_id
+      && autonomousCompanyBranchMatches(candidate.allowed_branch_pattern, selected.branch, selected.task_id)
+    ));
+  if (!worker || worker.worker_id === reviewer.worker_id || !autonomousCompanyBranchMatches(worker.allowed_branch_pattern, selected.branch, selected.task_id)) {
     append("BLOCKER_STATE", { blocker: "ELIGIBLE_DISTINCT_WORKER_REQUIRED", task_id: selected.task_id });
     append("CLOCK_OUT", { result: "HOLD_WORKER" });
     return Object.freeze({
@@ -2144,17 +2184,31 @@ export function runAutonomousCompanyCycle({
     });
   }
 
-  append("WORK_ORDER", { task_id: selected.task_id, worker_id: worker.worker_id, branch: selected.branch });
-  append("HANDOFF", { task_id: selected.task_id, to_worker_id: worker.worker_id, reviewer_id: selected.reviewer_id });
-  append("CLOCK_OUT", { result: "ASSIGNMENT_CANDIDATE_READY" });
+  const isRepair = selected.source === "REPAIR_QUEUE";
+  append("WORK_ORDER", {
+    task_id: selected.task_id,
+    worker_id: worker.worker_id,
+    branch: selected.branch,
+    work_type: isRepair ? "REPAIR" : "IMPLEMENTATION"
+  });
+  append("HANDOFF", {
+    task_id: selected.task_id,
+    to_worker_id: worker.worker_id,
+    reviewer_id: reviewer.worker_id,
+    handoff_type: isRepair ? "REPAIR_RETURN" : "INITIAL_ASSIGNMENT"
+  });
+  const readyStatus = isRepair ? "REPAIR_ASSIGNMENT_CANDIDATE_READY" : "ASSIGNMENT_CANDIDATE_READY";
+  append("CLOCK_OUT", { result: readyStatus });
   return Object.freeze({
     cycle_id,
-    status: "ASSIGNMENT_CANDIDATE_READY",
-    selected_action: "SAFE_ASSIGNMENT_CANDIDATE",
+    status: readyStatus,
+    selected_action: isRepair ? "REPAIR_WORK_ORDER_CANDIDATE" : "SAFE_ASSIGNMENT_CANDIDATE",
     selected_task_id: selected.task_id,
     selected_worker_id: worker.worker_id,
     events: Object.freeze(events),
     authority: noExternalAuthority,
-    next_safe_action: "PERSIST_CLAIM_ATOMICALLY_WHEN_CONNECTOR_IS_AUTHORIZED"
+    next_safe_action: isRepair
+      ? "PERSIST_REPAIR_CLAIM_ATOMICALLY_WHEN_CONNECTOR_IS_AUTHORIZED"
+      : "PERSIST_CLAIM_ATOMICALLY_WHEN_CONNECTOR_IS_AUTHORIZED"
   });
 }

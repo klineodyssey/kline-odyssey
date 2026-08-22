@@ -36,7 +36,7 @@ Cursor checks the queue every 10 minutes, writes progress every 2 hours, writes 
 
 The first executable Company-cycle candidate is `runAutonomousCompanyCycle()` in `core/company/index.mjs`. It reuses the formal Worker Registry, WorkQueue, Review-first policy, task-envelope authority, branch policy and independent reviewer boundary.
 
-The candidate is deterministic and side-effect-free. It emits append-only machine events for `CLOCK_IN`, `WORK_ORDER`, `HANDOFF`, `REVIEW_REQUEST`, `BLOCKER_STATE` and `CLOCK_OUT`, while rejecting replayed cycle IDs. Its output is a plan, not an external action: no Claim is persisted, no employee is started, no GitHub state changes, and no payment, signer, deployment, governance or chain capability is present.
+The candidate is deterministic and side-effect-free. It emits append-only machine events for `CLOCK_IN`, `WORK_ORDER`, `HANDOFF`, `REVIEW_REQUEST`, `BLOCKER_STATE` and `CLOCK_OUT`, while rejecting replayed cycle IDs. `REWORK_REQUIRED` returns to the explicit original authorized worker as a repair candidate; only a later `DELIVERY_SUBMITTED` record can request a new independent review. Every work candidate requires a registered, active, T2+ reviewer distinct from its worker. Its output is a plan, not an external action: no Claim is persisted, no employee is started, no GitHub state changes, and no payment, signer, deployment, governance or chain capability is present.
 
 Current connection state:
 
