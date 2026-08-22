@@ -5,6 +5,17 @@ export const LIFE_STAGES = Object.freeze(["CONCEIVED", "BODY_READY", "BORN", "AL
 export const BIRTH_EVENT_TYPE = "DARK_MATTER_GENESIS";
 export const BIRTH_MASS_CLASS = "DARK_MATTER_MASS";
 
+
+export const SPIRIT_GENESIS_ANCHOR_V2_FIELDS = Object.freeze(["life_id","soul_id","energy_wallet_address","birth_source_address","regeneration_parent_address","naihe_water_source_id","birth_request_id","source_evidence_type","source_evidence_status","anchor_tx_hash","anchor_block","anchor_timestamp","chain_id","exact_amount_wei","status"]);
+export function validateSpiritGenesisAnchorV2(record) {
+  requireFields(record, SPIRIT_GENESIS_ANCHOR_V2_FIELDS, "SpiritGenesisAnchorV2");
+  invariant(record.chain_id === 56, "INVALID_BIRTH_CHAIN", "Spirit anchor requires chain 56");
+  invariant(record.exact_amount_wei === "8000000000000000", "NAIHE_AMOUNT_MISMATCH", "Spirit anchor requires exactly 0.008 BNB");
+  invariant(record.status === "DARK_MATTER_EMBODIMENT_ACTIVATION", "SECOND_GENESIS_FORBIDDEN", "Existing Starforge Life can only receive an embodiment anchor");
+  invariant(record.birth_source_address === record.regeneration_parent_address, "NAIHE_PARENT_MISMATCH", "Verified source becomes the immutable regeneration parent");
+  return Object.freeze(record);
+}
+
 function isPositiveDecimal(value) {
   const text = String(value ?? "");
   return /^\d+(?:\.\d+)?$/.test(text) && /[1-9]/.test(text.replace(".", ""));

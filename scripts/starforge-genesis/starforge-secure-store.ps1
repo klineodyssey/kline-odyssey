@@ -1,6 +1,6 @@
 param(
   [Parameter(Mandatory = $true)]
-  [ValidateSet('Initialize', 'RunSoul', 'RunBody', 'Status', 'AuditRepo')]
+  [ValidateSet('Initialize', 'InitializeEnergy', 'RunSoul', 'RunBody', 'RunEnergySoul', 'RunEnergyBody', 'Status', 'EnergyStatus', 'AuditRepo')]
   [string]$Action
 )
 
@@ -16,22 +16,38 @@ $entropy = [Text.Encoding]::UTF8.GetBytes('KAIOS_STARFORGE_SPIRIT_LIFE_GENESIS_V
 $refs = [ordered]@{
   soul = 'DPAPI_USER:KAIOS_STARFORGE_SOUL_V1'
   body = 'DPAPI_USER:KAIOS_STARFORGE_BODY_V1'
+  energy = 'DPAPI_USER:KAIOS_STARFORGE_ENERGY_V1'
 }
 $files = [ordered]@{
   soul = Join-Path $storeRoot 'soul-key.dpapi'
   body = Join-Path $storeRoot 'body-key.dpapi'
+  energy = Join-Path $storeRoot 'energy-key.dpapi'
 }
 
 function Clear-Bytes([byte[]]$bytes) {
   if ($null -ne $bytes) { [Array]::Clear($bytes, 0, $bytes.Length) }
 }
 
+
+function Test-Secp256k1Scalar([byte[]]$bytes) {
+  if ($null -eq $bytes -or $bytes.Length -ne 32) { return $false }
+  [byte[]]$order = @(0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xfe,0xba,0xae,0xdc,0xe6,0xaf,0x48,0xa0,0x3b,0xbf,0xd2,0x5e,0x8c,0xd0,0x36,0x41,0x41)
+  $nonZero = $false
+  foreach ($value in $bytes) { if ($value -ne 0) { $nonZero = $true; break } }
+  if (-not $nonZero) { return $false }
+  for ($index = 0; $index -lt 32; $index++) {
+    if ($bytes[$index] -lt $order[$index]) { return $true }
+    if ($bytes[$index] -gt $order[$index]) { return $false }
+  }
+  return $false
+}
+
 function New-ProtectedSigner([string]$path) {
   [byte[]]$plain = New-Object byte[] 32
-  [Security.Cryptography.RandomNumberGenerator]::Fill($plain)
-  $nonZero = $false
-  foreach ($value in $plain) { if ($value -ne 0) { $nonZero = $true; break } }
-  if (-not $nonZero) { Clear-Bytes $plain; throw 'CSPRNG_ZERO_SCALAR_REJECTED' }
+  $rng = [Security.Cryptography.RandomNumberGenerator]::Create()
+  try {
+    do { $rng.GetBytes($plain) } while (-not (Test-Secp256k1Scalar $plain))
+  } finally { $rng.Dispose() }
   [byte[]]$cipher = [Security.Cryptography.ProtectedData]::Protect($plain, $entropy, [Security.Cryptography.DataProtectionScope]::CurrentUser)
   [IO.File]::WriteAllBytes($path, $cipher)
   Clear-Bytes $plain
@@ -55,8 +71,13 @@ function Invoke-SignerBroker([byte[]]$secretBytes, [string[]]$brokerArgs) {
   $psi.RedirectStandardOutput = $true
   $psi.RedirectStandardError = $true
   $psi.CreateNoWindow = $true
-  $psi.ArgumentList.Add($broker)
-  foreach ($argument in $brokerArgs) { $psi.ArgumentList.Add($argument) }
+  if ($null -ne $psi.ArgumentList) {
+    $psi.ArgumentList.Add($broker)
+    foreach ($argument in $brokerArgs) { $psi.ArgumentList.Add($argument) }
+  } else {
+    $publicArguments = @($broker) + $brokerArgs
+    $psi.Arguments = (($publicArguments | ForEach-Object { '"' + $_.Replace('"', '\"') + '"' }) -join ' ')
+  }
   $process = [Diagnostics.Process]::new()
   $process.StartInfo = $psi
   if (-not $process.Start()) { $hex = $null; throw 'SIGNER_BROKER_START_FAILED' }
@@ -80,7 +101,7 @@ function Sign-PublicRequest([string]$organ, [string]$action, [string]$requestFil
   [byte[]]$secret = Read-ProtectedSigner $files[$organ]
   try {
     $publicResult = Invoke-SignerBroker $secret @($action, $requestFile)
-    Set-Content -LiteralPath $outputFile -Value $publicResult -Encoding utf8
+    [IO.File]::WriteAllText($outputFile, $publicResult, [Text.UTF8Encoding]::new($false))
   } finally { Clear-Bytes $secret }
 }
 
@@ -107,8 +128,24 @@ if ($Action -eq 'Initialize') {
   exit 0
 }
 
+
+if ($Action -eq 'InitializeEnergy') {
+  New-Item -ItemType Directory -Path $storeRoot -Force | Out-Null
+  $created = $false
+  if (-not (Test-Path -LiteralPath $files.energy)) { New-ProtectedSigner $files.energy; $created = $true }
+  [Environment]::SetEnvironmentVariable('STARFORGE_ENERGY_KEY_REF', $refs.energy, 'User')
+  $addressesFile = Join-Path $storeRoot 'public-addresses.json'
+  if (-not (Test-Path -LiteralPath $addressesFile)) { throw 'EXISTING_STARFORGE_ADDRESSES_REQUIRED' }
+  $addresses = Get-Content -Raw $addressesFile | ConvertFrom-Json
+  $record = [ordered]@{ soul_address=$addresses.soul_address; body_address=$addresses.body_address; energy_wallet_address=Resolve-PublicAddress 'energy'; private_key_exposed=$false }
+  $record | ConvertTo-Json | Set-Content -LiteralPath $addressesFile -Encoding utf8
+  [pscustomobject]@{ signer_store_status='READY'; initialization=$(if($created){'CREATED'}else{'EXISTING_REUSED'}); custody='MOTHER_MACHINE_USER_SCOPED_ENCRYPTED_STORE'; energy_key_ref=$refs.energy; energy_wallet_address=$record.energy_wallet_address; private_key_exposed=$false } | ConvertTo-Json
+  exit 0
+}
+
 $expectedSoulRef = [Environment]::GetEnvironmentVariable('STARFORGE_SOUL_KEY_REF', 'User')
 $expectedBodyRef = [Environment]::GetEnvironmentVariable('STARFORGE_BODY_KEY_REF', 'User')
+$expectedEnergyRef = [Environment]::GetEnvironmentVariable('STARFORGE_ENERGY_KEY_REF', 'User')
 if ($expectedSoulRef -ne $refs.soul -or $expectedBodyRef -ne $refs.body) { throw 'SECURE_STORE_REFERENCE_MISMATCH' }
 
 if ($Action -eq 'RunSoul') {
@@ -123,6 +160,37 @@ if ($Action -eq 'RunBody') {
   Sign-PublicRequest 'body' 'sign-body' (Join-Path $storeRoot 'body-sign-request.json') (Join-Path $storeRoot 'body-signature.json')
   & $node $runtime 'finalize-body' $storeRoot
   exit $LASTEXITCODE
+}
+
+
+if ($Action -eq 'RunEnergySoul') {
+  if ($expectedEnergyRef -ne $refs.energy) { throw 'ENERGY_SECURE_STORE_REFERENCE_MISMATCH' }
+  $publicAddresses = Get-Content -Raw (Join-Path $storeRoot 'public-addresses.json') | ConvertFrom-Json
+  $derivedEnergyAddress = Resolve-PublicAddress 'energy'
+  if (-not [String]::Equals($derivedEnergyAddress, $publicAddresses.energy_wallet_address, [StringComparison]::OrdinalIgnoreCase)) { throw 'ENERGY_PUBLIC_ADDRESS_MISMATCH' }
+  & $node $runtime 'prepare-energy-soul' $storeRoot | Out-Null
+  if ($LASTEXITCODE -ne 0) { throw 'ENERGY_SOUL_PREPARE_FAILED' }
+  Sign-PublicRequest 'soul' 'sign-energy-soul' (Join-Path $storeRoot 'energy-soul-sign-request.json') (Join-Path $storeRoot 'energy-soul-signature.json')
+  & $node $runtime 'finalize-energy-soul' $storeRoot
+  if ($LASTEXITCODE -ne 0) { throw 'ENERGY_SOUL_FINALIZE_FAILED' }
+  exit 0
+}
+if ($Action -eq 'RunEnergyBody') {
+  if ($expectedEnergyRef -ne $refs.energy) { throw 'ENERGY_SECURE_STORE_REFERENCE_MISMATCH' }
+  $publicAddresses = Get-Content -Raw (Join-Path $storeRoot 'public-addresses.json') | ConvertFrom-Json
+  $derivedEnergyAddress = Resolve-PublicAddress 'energy'
+  if (-not [String]::Equals($derivedEnergyAddress, $publicAddresses.energy_wallet_address, [StringComparison]::OrdinalIgnoreCase)) { throw 'ENERGY_PUBLIC_ADDRESS_MISMATCH' }
+  & $node $runtime 'prepare-energy-body' $storeRoot | Out-Null
+  if ($LASTEXITCODE -ne 0) { throw 'ENERGY_BODY_PREPARE_FAILED' }
+  Sign-PublicRequest 'body' 'sign-energy-body' (Join-Path $storeRoot 'energy-body-sign-request.json') (Join-Path $storeRoot 'energy-body-signature.json')
+  & $node $runtime 'finalize-energy-body' $storeRoot
+  if ($LASTEXITCODE -ne 0) { throw 'ENERGY_BODY_FINALIZE_FAILED' }
+  exit 0
+}
+if ($Action -eq 'EnergyStatus') {
+  $stateFile=Join-Path $storeRoot 'runtime-state.json'; $addressesFile=Join-Path $storeRoot 'public-addresses.json'
+  [pscustomobject]@{ signer_store_status=$(if(Test-Path $files.energy){'READY'}else{'MISSING'}); energy_key_ref_status=$(if($expectedEnergyRef -eq $refs.energy){'MATCH'}else{'MISMATCH'}); energy_wallet_address=$(if(Test-Path $addressesFile){(Get-Content -Raw $addressesFile|ConvertFrom-Json).energy_wallet_address}else{$null}); runtime_state=$(if(Test-Path $stateFile){(Get-Content -Raw $stateFile|ConvertFrom-Json).phase}else{'GENESIS_NOT_STARTED'}); private_key_exposed=$false } | ConvertTo-Json
+  exit 0
 }
 
 if ($Action -eq 'Status') {
@@ -140,7 +208,8 @@ if ($Action -eq 'AuditRepo') {
   $paths = @(& git -C $repoRoot ls-files) + @(& git -C $repoRoot ls-files --others --exclude-standard)
   $paths = $paths | Sort-Object -Unique
   $literalMatches = 0
-  foreach ($organ in @('soul', 'body')) {
+  foreach ($organ in @('soul', 'body', 'energy')) {
+    if (-not (Test-Path -LiteralPath $files[$organ])) { continue }
     [byte[]]$secret = Read-ProtectedSigner $files[$organ]
     try {
       $hex = (($secret | ForEach-Object { $_.ToString('x2') }) -join '')

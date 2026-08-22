@@ -44,6 +44,7 @@ test("Soul and Body EIP-191 signatures recover only the matching organs", async 
 test("signing domains and every chain-write method fail closed", () => {
   assert.throws(() => assertAllowedSigningMessage({ organ: "BODY_WALLET", message: `${STARFORGE.soulDomain}\ninvalid` }), (error) => error.code === "SIGNING_DOMAIN_NOT_ALLOWED");
   for (const method of capability.forbidden_methods) assert.throws(() => assertNoChainMethod(method), (error) => error.code === "CHAIN_METHOD_FORBIDDEN");
+  for (const method of ["wrap", "unwrap"]) assert.throws(() => assertNoChainMethod(method), (error) => error.code === "CHAIN_METHOD_FORBIDDEN");
   assert.throws(() => assertNoChainMethod("unknown_method"), (error) => error.code === "CHAIN_METHOD_NOT_ALLOWLISTED");
 });
 

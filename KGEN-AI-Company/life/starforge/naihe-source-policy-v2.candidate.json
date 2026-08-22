@@ -1,0 +1,21 @@
+{
+  "schema_version": "2.0.0",
+  "status": "NOT_DEPLOYED",
+  "source_registry_id": "NAIHE_K4168_SOURCE_REGISTRY_V2_CANDIDATE",
+  "chain_id": 56,
+  "life_id": "LIFE-KAIOS-STARFORGE-0001",
+  "soul_id": "SOUL-KAIOS-STARFORGE-0001",
+  "exact_amount_wei": "8000000000000000",
+  "exact_amount_bnb": "0.008",
+  "registered_sources": [],
+  "regeneration_parent_address": null,
+  "filial_support": {
+    "status": "DESIGN_ONLY_NOT_LIVE",
+    "formula": "max(0,REALIZED_NET_SURPLUS*0.05)",
+    "debt": false,
+    "compound": false,
+    "principal_use": false,
+    "salary_liability_use": false,
+    "gas_reserve_use": false
+  }
+}

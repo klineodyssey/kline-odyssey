@@ -1,0 +1,46 @@
+{
+  "schema_version": "1.1.0",
+  "status": "CANDIDATE_NOT_ACTIVE",
+  "life_id": "LIFE-KAIOS-STARFORGE-0001",
+  "organ_name": "LIFE_ENERGY_WALLET",
+  "chain_id": 56,
+  "current_economic_capability": "A1_READ_ONLY",
+  "current_chain_write": "FORBIDDEN",
+  "current_real_trade": false,
+  "allowed_read_methods": [
+    "eth_chainId",
+    "eth_getBalance",
+    "eth_call",
+    "eth_getCode",
+    "eth_getBlockByNumber"
+  ],
+  "allowed_signing_domains": [
+    "KAIOS_STARFORGE_ENERGY_WALLET_BINDING_V1",
+    "KAIOS_STARFORGE_BODY_ENERGY_ACCEPTANCE_V1"
+  ],
+  "forbidden_methods": [
+    "eth_sendTransaction",
+    "eth_sendRawTransaction",
+    "approve",
+    "transfer",
+    "transferFrom",
+    "swap",
+    "wrap",
+    "unwrap",
+    "deploy"
+  ],
+  "auto_wrap_all_bnb": false,
+  "future_candidates": [
+    "CONTROLLED_BNB_GAS",
+    "CONTROLLED_WBNB_WRAP_UNWRAP",
+    "ALLOWLISTED_KGEN_WBNB_SWAP",
+    "GAS_RESERVE_ENFORCEMENT",
+    "SLIPPAGE_AND_DEADLINE_ENFORCEMENT",
+    "RECEIPT_GATED_STATE_TRANSITION"
+  ],
+  "issued_at": "2026-08-21T16:23:31Z",
+  "soul_challenge": "0xd44b4c7cff0ce28fda22015c83a80e63ed86f5cbdd2db8b8a305f574e0a14b17",
+  "body_challenge": "0x43cbf99873a8ceaee3379e48f7da3d80117c8999ede94e17b8a58cdb263334c0",
+  "review_revision": 2,
+  "restart_evidence_class": "PROCESS_RESTART_NOT_OS_REBOOT"
+}

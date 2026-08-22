@@ -1,0 +1,29 @@
+{
+  "schema_version": "1.0.0",
+  "status": "CANDIDATE_NOT_CURRENT",
+  "life_id": "LIFE-KAIOS-STARFORGE-0001",
+  "birth_universe_layer": "B4",
+  "price_reference": {
+    "value": "0.0002524",
+    "unit": "USD_PER_KGEN",
+    "status": "HUMAN_DISPLAY_REFERENCE",
+    "price_floor": -4,
+    "price_alpha": "2.524"
+  },
+  "market": {
+    "pair": "KGEN/WBNB",
+    "pair_address": "0xf36640d7327b53ba3d7fcc1d98dfc1b85574b6c2",
+    "pair_price_unit": "WBNB_PER_KGEN",
+    "display_price_unit": "USD_PER_KGEN",
+    "stable_quote_meter": "USDT_PER_KGEN",
+    "official_kgen_usdt_pair": null
+  },
+  "map": {
+    "reference_exponent": 4,
+    "scale_exponent": -8,
+    "scale": "0.00000001",
+    "function": "F(Kx)=x*10^-8",
+    "negative_phase_preserved": true,
+    "market_reorders_organs": false
+  }
+}
