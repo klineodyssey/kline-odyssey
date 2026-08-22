@@ -1,0 +1,278 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://klineodyssey.github.io/kline-odyssey/schemas/naihe-reservoir-system-v1.schema.json",
+  "title": "K4168 Naihe Reservoir Candidate Records",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "reservoir",
+    "life_fluid_assets",
+    "pools",
+    "refill_requests",
+    "draw_requests",
+    "transformations",
+    "soup_doses",
+    "genesis_assistance_requests",
+    "donations",
+    "investment_returns"
+  ],
+  "properties": {
+    "reservoir": { "$ref": "#/$defs/NaiheReservoir" },
+    "life_fluid_assets": { "type": "array", "items": { "$ref": "#/$defs/LifeFluidAsset" } },
+    "pools": { "type": "array", "items": { "$ref": "#/$defs/ReservoirPool" } },
+    "refill_requests": { "type": "array", "items": { "$ref": "#/$defs/ReservoirRefillRequest" } },
+    "draw_requests": { "type": "array", "items": { "$ref": "#/$defs/MengpoDrawRequest" } },
+    "transformations": { "type": "array", "items": { "$ref": "#/$defs/MengpoTransformationRecord" } },
+    "soup_doses": { "type": "array", "items": { "$ref": "#/$defs/MengpoSoupDose" } },
+    "genesis_assistance_requests": { "type": "array", "items": { "$ref": "#/$defs/GenesisAssistanceRequest" } },
+    "donations": { "type": "array", "items": { "$ref": "#/$defs/PublicGoodDonation" } },
+    "investment_returns": { "type": "array", "items": { "$ref": "#/$defs/PublicGoodInvestmentReturn" } }
+  },
+  "$defs": {
+    "Id": { "type": "string", "minLength": 1, "maxLength": 160 },
+    "Amount": { "type": "string", "pattern": "^(0|[1-9][0-9]*)$" },
+    "Address": { "type": ["string", "null"], "pattern": "^0x[0-9A-Fa-f]{40}$" },
+    "Timestamp": { "type": "string", "format": "date-time" },
+    "Receipt": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["receipt_id", "receipt_hash", "status", "recorded_at"],
+      "properties": {
+        "receipt_id": { "$ref": "#/$defs/Id" },
+        "receipt_hash": { "type": "string", "pattern": "^0x[0-9a-fA-F]{64}$" },
+        "status": { "enum": ["VERIFIED_PAPER", "VERIFIED_ONCHAIN", "REJECTED", "PENDING"] },
+        "recorded_at": { "$ref": "#/$defs/Timestamp" }
+      }
+    },
+    "Authority": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["authority_id", "approver", "signer_policy", "authorization_status"],
+      "properties": {
+        "authority_id": { "$ref": "#/$defs/Id" },
+        "approver": { "$ref": "#/$defs/Id" },
+        "signer_policy": { "$ref": "#/$defs/Id" },
+        "authorization_status": { "enum": ["AUTHORIZED_PAPER_ONLY", "AUTHORIZED_ONCHAIN", "PENDING", "REJECTED"] }
+      }
+    },
+    "NaiheReservoir": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["reservoir_id", "point", "chain_id", "address", "deployment_status", "parent_role", "trading_principal", "created_at"],
+      "properties": {
+        "reservoir_id": { "$ref": "#/$defs/Id" },
+        "point": { "const": "K4168" },
+        "chain_id": { "const": 56 },
+        "address": { "$ref": "#/$defs/Address" },
+        "deployment_status": { "enum": ["NOT_DEPLOYED", "CANDIDATE", "DEPLOYED_VERIFIED"] },
+        "parent_role": { "const": false },
+        "trading_principal": { "const": false },
+        "created_at": { "$ref": "#/$defs/Timestamp" }
+      }
+    },
+    "LifeFluidAsset": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["asset_id", "symbol", "contract_address", "chain_id", "deployment_status", "canon_status", "scale", "mass_unit", "energy_role", "life_role", "transport_role", "decimals", "half_life", "source_organs", "sink_organs", "allowed_transformations", "reserve_policy", "transfer_policy", "pool_eligibility", "status"],
+      "properties": {
+        "asset_id": { "$ref": "#/$defs/Id" },
+        "symbol": { "$ref": "#/$defs/Id" },
+        "contract_address": { "$ref": "#/$defs/Address" },
+        "chain_id": { "type": ["integer", "null"], "minimum": 1 },
+        "deployment_status": { "$ref": "#/$defs/Id" },
+        "canon_status": { "$ref": "#/$defs/Id" },
+        "scale": { "$ref": "#/$defs/Id" },
+        "mass_unit": { "$ref": "#/$defs/Id" },
+        "energy_role": { "$ref": "#/$defs/Id" },
+        "life_role": { "$ref": "#/$defs/Id" },
+        "transport_role": { "$ref": "#/$defs/Id" },
+        "decimals": { "type": ["integer", "null"], "minimum": 0, "maximum": 255 },
+        "half_life": { "type": ["string", "null"] },
+        "source_organs": { "type": "array", "items": { "$ref": "#/$defs/Id" }, "uniqueItems": true },
+        "sink_organs": { "type": "array", "items": { "$ref": "#/$defs/Id" }, "uniqueItems": true },
+        "allowed_transformations": { "type": "array", "items": { "$ref": "#/$defs/Id" }, "uniqueItems": true },
+        "reserve_policy": { "$ref": "#/$defs/Id" },
+        "transfer_policy": { "$ref": "#/$defs/Id" },
+        "pool_eligibility": { "type": "boolean" },
+        "status": { "$ref": "#/$defs/Id" }
+      }
+    },
+    "ReservoirPool": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["pool_id", "reservoir_id", "asset_id", "decimals", "mass_scale", "unit", "balance", "reserve_floor", "draw_limit", "transformation_paths", "accounting_status", "active"],
+      "properties": {
+        "pool_id": { "$ref": "#/$defs/Id" },
+        "reservoir_id": { "$ref": "#/$defs/Id" },
+        "asset_id": { "$ref": "#/$defs/Id" },
+        "decimals": { "type": "integer", "minimum": 0, "maximum": 255 },
+        "mass_scale": { "$ref": "#/$defs/Id" },
+        "unit": { "$ref": "#/$defs/Id" },
+        "balance": { "$ref": "#/$defs/Amount" },
+        "reserve_floor": { "$ref": "#/$defs/Amount" },
+        "draw_limit": { "$ref": "#/$defs/Amount" },
+        "transformation_paths": { "type": "array", "items": { "$ref": "#/$defs/Id" }, "uniqueItems": true },
+        "accounting_status": { "$ref": "#/$defs/Id" },
+        "active": { "type": "boolean" }
+      }
+    },
+    "ReservoirRefillRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["refill_id", "asset_id", "amount", "source_treasury", "destination_reservoir", "source_balance_before", "source_balance_after", "destination_balance_before", "destination_balance_after", "minimum_reserve", "maximum_reserve", "epoch_cap", "emergency_reserve", "genesis_demand", "authority", "replay_key", "requested_at", "receipt"],
+      "properties": {
+        "refill_id": { "$ref": "#/$defs/Id" },
+        "asset_id": { "$ref": "#/$defs/Id" },
+        "amount": { "$ref": "#/$defs/Amount" },
+        "source_treasury": { "$ref": "#/$defs/Address" },
+        "destination_reservoir": { "$ref": "#/$defs/Address" },
+        "source_balance_before": { "$ref": "#/$defs/Amount" },
+        "source_balance_after": { "$ref": "#/$defs/Amount" },
+        "destination_balance_before": { "$ref": "#/$defs/Amount" },
+        "destination_balance_after": { "$ref": "#/$defs/Amount" },
+        "minimum_reserve": { "$ref": "#/$defs/Amount" },
+        "maximum_reserve": { "$ref": "#/$defs/Amount" },
+        "epoch_cap": { "$ref": "#/$defs/Amount" },
+        "emergency_reserve": { "$ref": "#/$defs/Amount" },
+        "genesis_demand": { "type": "integer", "minimum": 0 },
+        "authority": { "$ref": "#/$defs/Authority" },
+        "replay_key": { "$ref": "#/$defs/Id" },
+        "requested_at": { "$ref": "#/$defs/Timestamp" },
+        "receipt": { "$ref": "#/$defs/Receipt" }
+      }
+    },
+    "MengpoDrawRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["draw_id", "reservoir_id", "operator_life_id", "source_asset_id", "source_amount", "source_scale", "recipient_life_id", "genesis_id", "authority", "replay_key", "requested_at", "receipt"],
+      "properties": {
+        "draw_id": { "$ref": "#/$defs/Id" },
+        "reservoir_id": { "$ref": "#/$defs/Id" },
+        "operator_life_id": { "$ref": "#/$defs/Id" },
+        "source_asset_id": { "$ref": "#/$defs/Id" },
+        "source_amount": { "$ref": "#/$defs/Amount" },
+        "source_scale": { "$ref": "#/$defs/Id" },
+        "recipient_life_id": { "$ref": "#/$defs/Id" },
+        "genesis_id": { "$ref": "#/$defs/Id" },
+        "authority": { "$ref": "#/$defs/Authority" },
+        "replay_key": { "$ref": "#/$defs/Id" },
+        "requested_at": { "$ref": "#/$defs/Timestamp" },
+        "receipt": { "$ref": "#/$defs/Receipt" }
+      }
+    },
+    "MengpoTransformationRecord": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["transformation_id", "draw_id", "rule_id", "rule_status", "input_asset_id", "input_amount", "input_scale", "input_mass", "output_asset_id", "output_amount", "output_mass", "energy_input", "energy_output", "decay", "loss", "byproduct", "catalyst_return", "recipient_life_id", "genesis_id", "reservoir_balance_before", "reservoir_balance_after", "authority", "replay_key", "transformed_at", "receipt"],
+      "properties": {
+        "transformation_id": { "$ref": "#/$defs/Id" },
+        "draw_id": { "$ref": "#/$defs/Id" },
+        "rule_id": { "$ref": "#/$defs/Id" },
+        "rule_status": { "enum": ["UNFROZEN", "TEST_ONLY_FROZEN_MOCK", "HUMAN_FROZEN"] },
+        "input_asset_id": { "$ref": "#/$defs/Id" },
+        "input_amount": { "$ref": "#/$defs/Amount" },
+        "input_scale": { "$ref": "#/$defs/Id" },
+        "input_mass": { "$ref": "#/$defs/Amount" },
+        "output_asset_id": { "$ref": "#/$defs/Id" },
+        "output_amount": { "$ref": "#/$defs/Amount" },
+        "output_mass": { "$ref": "#/$defs/Amount" },
+        "energy_input": { "$ref": "#/$defs/Amount" },
+        "energy_output": { "$ref": "#/$defs/Amount" },
+        "decay": { "$ref": "#/$defs/Amount" },
+        "loss": { "$ref": "#/$defs/Amount" },
+        "byproduct": { "$ref": "#/$defs/Amount" },
+        "catalyst_return": { "$ref": "#/$defs/Amount" },
+        "recipient_life_id": { "$ref": "#/$defs/Id" },
+        "genesis_id": { "$ref": "#/$defs/Id" },
+        "reservoir_balance_before": { "$ref": "#/$defs/Amount" },
+        "reservoir_balance_after": { "$ref": "#/$defs/Amount" },
+        "authority": { "$ref": "#/$defs/Authority" },
+        "replay_key": { "$ref": "#/$defs/Id" },
+        "transformed_at": { "$ref": "#/$defs/Timestamp" },
+        "receipt": { "$ref": "#/$defs/Receipt" }
+      }
+    },
+    "MengpoSoupDose": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["dose_id", "transformation_id", "draw_id", "output_asset_id", "output_amount", "chain_id", "recipient_life_id", "recipient_address", "genesis_id", "regeneration_parent_status", "replay_key", "prepared_at", "receipt"],
+      "properties": {
+        "dose_id": { "$ref": "#/$defs/Id" },
+        "transformation_id": { "$ref": "#/$defs/Id" },
+        "draw_id": { "$ref": "#/$defs/Id" },
+        "output_asset_id": { "$ref": "#/$defs/Id" },
+        "output_amount": { "$ref": "#/$defs/Amount" },
+        "chain_id": { "const": 56 },
+        "recipient_life_id": { "$ref": "#/$defs/Id" },
+        "recipient_address": { "$ref": "#/$defs/Address" },
+        "genesis_id": { "$ref": "#/$defs/Id" },
+        "regeneration_parent_status": { "enum": ["UNASSIGNED_ORPHAN", "SEPARATELY_VERIFIED", "NOT_APPLICABLE"] },
+        "replay_key": { "$ref": "#/$defs/Id" },
+        "prepared_at": { "$ref": "#/$defs/Timestamp" },
+        "receipt": { "$ref": "#/$defs/Receipt" }
+      }
+    },
+    "GenesisAssistanceRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["request_id", "life_id", "genesis_id", "identity_unique", "second_genesis", "soul_body_energy_bound", "public_good_eligible", "economic_sponsor", "naihe_source", "service_operator", "regeneration_parent_status", "recipient_address", "chain_id", "requested_amount", "authority", "replay_key", "requested_at", "receipt"],
+      "properties": {
+        "request_id": { "$ref": "#/$defs/Id" },
+        "life_id": { "$ref": "#/$defs/Id" },
+        "genesis_id": { "$ref": "#/$defs/Id" },
+        "identity_unique": { "const": true },
+        "second_genesis": { "const": false },
+        "soul_body_energy_bound": { "const": true },
+        "public_good_eligible": { "const": true },
+        "economic_sponsor": { "$ref": "#/$defs/Id" },
+        "naihe_source": { "$ref": "#/$defs/Id" },
+        "service_operator": { "$ref": "#/$defs/Id" },
+        "regeneration_parent_status": { "enum": ["UNASSIGNED_ORPHAN", "SEPARATELY_VERIFIED"] },
+        "recipient_address": { "$ref": "#/$defs/Address" },
+        "chain_id": { "const": 56 },
+        "requested_amount": { "$ref": "#/$defs/Amount" },
+        "authority": { "$ref": "#/$defs/Authority" },
+        "replay_key": { "$ref": "#/$defs/Id" },
+        "requested_at": { "$ref": "#/$defs/Timestamp" },
+        "receipt": { "$ref": "#/$defs/Receipt" }
+      }
+    },
+    "PublicGoodDonation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["donation_id", "donor_life_id", "asset_id", "amount", "source_address", "destination_treasury", "voluntary", "authority", "replay_key", "donated_at", "receipt"],
+      "properties": {
+        "donation_id": { "$ref": "#/$defs/Id" },
+        "donor_life_id": { "$ref": "#/$defs/Id" },
+        "asset_id": { "$ref": "#/$defs/Id" },
+        "amount": { "$ref": "#/$defs/Amount" },
+        "source_address": { "$ref": "#/$defs/Address" },
+        "destination_treasury": { "$ref": "#/$defs/Address" },
+        "voluntary": { "const": true },
+        "authority": { "$ref": "#/$defs/Authority" },
+        "replay_key": { "$ref": "#/$defs/Id" },
+        "donated_at": { "$ref": "#/$defs/Timestamp" },
+        "receipt": { "$ref": "#/$defs/Receipt" }
+      }
+    },
+    "PublicGoodInvestmentReturn": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["return_id", "investment_fund_id", "asset_id", "realized_amount", "realized", "settled", "receipted", "genesis_reserve_used", "authority", "replay_key", "settled_at", "receipt"],
+      "properties": {
+        "return_id": { "$ref": "#/$defs/Id" },
+        "investment_fund_id": { "$ref": "#/$defs/Id" },
+        "asset_id": { "$ref": "#/$defs/Id" },
+        "realized_amount": { "$ref": "#/$defs/Amount" },
+        "realized": { "const": true },
+        "settled": { "const": true },
+        "receipted": { "const": true },
+        "genesis_reserve_used": { "const": false },
+        "authority": { "$ref": "#/$defs/Authority" },
+        "replay_key": { "$ref": "#/$defs/Id" },
+        "settled_at": { "$ref": "#/$defs/Timestamp" },
+        "receipt": { "$ref": "#/$defs/Receipt" }
+      }
+    }
+  }
+}
