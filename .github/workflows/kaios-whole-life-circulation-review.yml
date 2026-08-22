@@ -38,9 +38,9 @@ jobs:
           cache-dependency-path: KGEN-KAIOS/package-lock.json
       - name: Bind checkout to exact candidate head
         run: test "$(git rev-parse HEAD)" = "$EXPECTED_HEAD"
-      - name: Install pinned review dependencies
+      - name: Install pinned review dependencies without platform-only optional packages
         working-directory: KGEN-KAIOS
-        run: npm ci
+        run: npm ci --omit=optional
       - name: Parse closed schemas and examples
         run: |
           jq empty KGEN-KAIOS/life-circulation/schemas/life-circulatory-runtime.schema.json
