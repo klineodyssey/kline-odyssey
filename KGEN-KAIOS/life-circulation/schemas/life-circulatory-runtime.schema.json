@@ -1,0 +1,432 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/life-circulation/schemas/life-circulatory-runtime.schema.json",
+  "title": "KAIOS Whole-Life Circulatory Runtime Candidate",
+  "type": "object",
+  "required": [
+    "metadata",
+    "life",
+    "lifeId",
+    "pulseState",
+    "bloodBank",
+    "organs",
+    "vessels",
+    "assetLedgers",
+    "medicalRecoveries",
+    "lastPulse"
+  ],
+  "properties": {
+    "metadata": { "$ref": "#/$defs/metadata" },
+    "life": { "$ref": "#/$defs/life" },
+    "lifeId": { "$ref": "#/$defs/nonEmptyString" },
+    "pulseState": { "$ref": "#/$defs/pulseState" },
+    "bloodBank": { "$ref": "#/$defs/bloodBank" },
+    "organs": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/organ" }
+    },
+    "vessels": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/vessel" }
+    },
+    "assetLedgers": {
+      "type": "array",
+      "minItems": 2,
+      "items": { "$ref": "#/$defs/assetLedger" }
+    },
+    "medicalRecoveries": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/medicalRecovery" }
+    },
+    "lastPulse": {
+      "oneOf": [
+        { "$ref": "#/$defs/pulseRecord" },
+        { "type": "null" }
+      ]
+    }
+  },
+  "$defs": {
+    "nonEmptyString": {
+      "type": "string",
+      "minLength": 1
+    },
+    "amount": {
+      "type": "string",
+      "pattern": "^(0|[1-9][0-9]*)$"
+    },
+    "timestampOrNull": {
+      "oneOf": [
+        { "type": "string", "format": "date-time" },
+        { "type": "null" }
+      ]
+    },
+    "pulseState": {
+      "type": "string",
+      "enum": [
+        "PULSE_DUE",
+        "PULSE_EXECUTING",
+        "PULSE_COMPLETED",
+        "PULSE_MISSED",
+        "PULSE_RECOVERY_REQUIRED"
+      ]
+    },
+    "healthState": {
+      "type": "string",
+      "enum": [
+        "HEALTHY",
+        "LOW_BLOOD",
+        "ISCHEMIA_RISK",
+        "NO_FLOW",
+        "ORGAN_FAILURE_RECOVERY_REQUIRED",
+        "RECOVERING",
+        "RECOVERED"
+      ]
+    },
+    "metadata": {
+      "type": "object",
+      "required": ["schemaVersion", "status", "implementer", "independentReview", "executionBase"],
+      "properties": {
+        "schemaVersion": { "type": "string", "const": "1.0.0-candidate" },
+        "status": { "type": "string", "const": "REVIEW_ONLY_CANDIDATE" },
+        "implementer": { "type": "string", "const": "codex-gm-01" },
+        "independentReview": { "type": "string", "const": "REQUIRED" },
+        "executionBase": { "type": "string", "pattern": "^[0-9a-f]{40}$" }
+      },
+      "additionalProperties": false
+    },
+    "life": {
+      "type": "object",
+      "required": [
+        "lifeId",
+        "civilizationHeartRef",
+        "lifeHeartOrganId",
+        "brainOrganId",
+        "energyWalletOrganId",
+        "communicationOrganId",
+        "immuneMedicalOrganId",
+        "regenerationParentLifeId"
+      ],
+      "properties": {
+        "lifeId": { "$ref": "#/$defs/nonEmptyString" },
+        "civilizationHeartRef": { "type": "string", "const": "K12345" },
+        "lifeHeartOrganId": { "$ref": "#/$defs/nonEmptyString" },
+        "brainOrganId": { "$ref": "#/$defs/nonEmptyString" },
+        "energyWalletOrganId": { "$ref": "#/$defs/nonEmptyString" },
+        "communicationOrganId": { "$ref": "#/$defs/nonEmptyString" },
+        "immuneMedicalOrganId": { "$ref": "#/$defs/nonEmptyString" },
+        "regenerationParentLifeId": {
+          "oneOf": [
+            { "$ref": "#/$defs/nonEmptyString" },
+            { "type": "null" }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "physicalPositionRef": {
+      "type": "object",
+      "required": ["physicalReferenceFrame", "physicalPosition", "timestamp", "evidenceId"],
+      "properties": {
+        "physicalReferenceFrame": { "$ref": "#/$defs/nonEmptyString" },
+        "physicalPosition": { "$ref": "#/$defs/nonEmptyString" },
+        "timestamp": { "type": "string", "format": "date-time" },
+        "evidenceId": { "$ref": "#/$defs/nonEmptyString" }
+      },
+      "additionalProperties": false
+    },
+    "organ": {
+      "type": "object",
+      "required": [
+        "lifeId",
+        "organId",
+        "organType",
+        "pointId",
+        "scaleExponent",
+        "walletOrBeneficiary",
+        "availableKaios",
+        "reservedKaios",
+        "incomingKaios",
+        "outgoingKaios",
+        "minimumReserve",
+        "targetReserve",
+        "maximumReserve",
+        "scheduledWorkCostKaios",
+        "verifiedRecoveryCostKaios",
+        "metabolicRatePerSecond",
+        "priorityClass",
+        "weight",
+        "healthState",
+        "lastPulseAt",
+        "lastFlowEvidence",
+        "physicalPositionRef",
+        "status"
+      ],
+      "properties": {
+        "lifeId": { "$ref": "#/$defs/nonEmptyString" },
+        "organId": { "$ref": "#/$defs/nonEmptyString" },
+        "organType": {
+          "type": "string",
+          "enum": [
+            "LIFE_HEART_PULSAR",
+            "BRAIN_DECISION",
+            "REPRODUCTION",
+            "EXTERNAL_AUTHORIZED_BANK",
+            "ALCHEMY_CONVERSION",
+            "ENERGY_WALLET",
+            "COMMUNICATION_NEURAL",
+            "MOBILITY",
+            "IMMUNE_MEDICAL",
+            "BLOOD_BANK",
+            "WORK_PRODUCTION"
+          ]
+        },
+        "pointId": { "type": "string", "pattern": "^[0-9]+$" },
+        "scaleExponent": { "type": "integer", "minimum": -99, "maximum": 99 },
+        "walletOrBeneficiary": { "type": "string", "pattern": "^0x[0-9a-fA-F]{40}$" },
+        "availableKaios": { "$ref": "#/$defs/amount" },
+        "reservedKaios": { "$ref": "#/$defs/amount" },
+        "incomingKaios": { "$ref": "#/$defs/amount" },
+        "outgoingKaios": { "$ref": "#/$defs/amount" },
+        "minimumReserve": { "$ref": "#/$defs/amount" },
+        "targetReserve": { "$ref": "#/$defs/amount" },
+        "maximumReserve": { "$ref": "#/$defs/amount" },
+        "scheduledWorkCostKaios": { "$ref": "#/$defs/amount" },
+        "verifiedRecoveryCostKaios": { "$ref": "#/$defs/amount" },
+        "metabolicRatePerSecond": { "$ref": "#/$defs/amount" },
+        "priorityClass": { "type": "string", "enum": ["P0", "P1", "P2"] },
+        "weight": { "type": "string", "pattern": "^[1-9][0-9]*$" },
+        "healthState": { "$ref": "#/$defs/healthState" },
+        "lastPulseAt": { "$ref": "#/$defs/timestampOrNull" },
+        "lastFlowEvidence": {
+          "oneOf": [
+            { "$ref": "#/$defs/nonEmptyString" },
+            { "type": "null" }
+          ]
+        },
+        "physicalPositionRef": { "$ref": "#/$defs/physicalPositionRef" },
+        "status": { "type": "string", "enum": ["ACTIVE", "PAUSED", "RECOVERY_REQUIRED", "DESIGN_ONLY"] }
+      },
+      "additionalProperties": false
+    },
+    "bloodBank": {
+      "type": "object",
+      "required": [
+        "lifeId",
+        "organId",
+        "assetType",
+        "availableKaios",
+        "reservedKaios",
+        "incomingKaios",
+        "outgoingKaios",
+        "minimumReserve",
+        "inTransitKaios",
+        "settlementEscrowKaios",
+        "lastPulseAt",
+        "status"
+      ],
+      "properties": {
+        "lifeId": { "$ref": "#/$defs/nonEmptyString" },
+        "organId": { "$ref": "#/$defs/nonEmptyString" },
+        "assetType": { "type": "string", "const": "KAIOS" },
+        "availableKaios": { "$ref": "#/$defs/amount" },
+        "reservedKaios": { "$ref": "#/$defs/amount" },
+        "incomingKaios": { "$ref": "#/$defs/amount" },
+        "outgoingKaios": { "$ref": "#/$defs/amount" },
+        "minimumReserve": { "$ref": "#/$defs/amount" },
+        "inTransitKaios": { "$ref": "#/$defs/amount" },
+        "settlementEscrowKaios": { "$ref": "#/$defs/amount" },
+        "lastPulseAt": { "$ref": "#/$defs/timestampOrNull" },
+        "status": { "type": "string", "enum": ["ACTIVE", "PAUSED", "RECOVERY_REQUIRED"] }
+      },
+      "additionalProperties": false
+    },
+    "vessel": {
+      "type": "object",
+      "required": [
+        "routeId",
+        "lifeId",
+        "sourceOrganId",
+        "destinationOrganId",
+        "assetType",
+        "capacityPerPulse",
+        "minimumTransfer",
+        "maximumTransfer",
+        "priority",
+        "cooldownSeconds",
+        "enabled",
+        "inTransit",
+        "lastTransferAt",
+        "replayProtectionId"
+      ],
+      "properties": {
+        "routeId": { "$ref": "#/$defs/nonEmptyString" },
+        "lifeId": { "$ref": "#/$defs/nonEmptyString" },
+        "sourceOrganId": { "$ref": "#/$defs/nonEmptyString" },
+        "destinationOrganId": { "$ref": "#/$defs/nonEmptyString" },
+        "assetType": { "type": "string", "enum": ["KAIOS", "NATIVE_BNB", "WBNB", "KGEN", "KUFO", "KSHIP"] },
+        "capacityPerPulse": { "$ref": "#/$defs/amount" },
+        "minimumTransfer": { "$ref": "#/$defs/amount" },
+        "maximumTransfer": { "$ref": "#/$defs/amount" },
+        "priority": { "type": "string", "enum": ["P0", "P1", "P2"] },
+        "cooldownSeconds": { "$ref": "#/$defs/amount" },
+        "enabled": { "type": "boolean" },
+        "inTransit": { "$ref": "#/$defs/amount" },
+        "lastTransferAt": { "$ref": "#/$defs/timestampOrNull" },
+        "replayProtectionId": { "$ref": "#/$defs/nonEmptyString" }
+      },
+      "additionalProperties": false
+    },
+    "organBalance": {
+      "type": "object",
+      "required": ["organId", "balance"],
+      "properties": {
+        "organId": { "$ref": "#/$defs/nonEmptyString" },
+        "balance": { "$ref": "#/$defs/amount" }
+      },
+      "additionalProperties": false
+    },
+    "assetLedger": {
+      "type": "object",
+      "required": [
+        "assetType",
+        "ledgerClass",
+        "openingAssets",
+        "verifiedExternalInflow",
+        "verifiedExternalOutflow",
+        "explicitFees",
+        "closingBloodBank",
+        "closingOrganBalances",
+        "inTransit",
+        "settlementEscrow"
+      ],
+      "properties": {
+        "assetType": { "type": "string", "enum": ["KGEN", "KAIOS", "KUFO", "KSHIP", "NATIVE_BNB", "WBNB"] },
+        "ledgerClass": {
+          "type": "string",
+          "enum": [
+            "KAIOS_BLOOD",
+            "NATIVE_BNB_GAS",
+            "WBNB_ASSET",
+            "KGEN_CIVILIZATION_PASS",
+            "KGEN_CATALYST_ESCROW",
+            "SALARY",
+            "REWARD",
+            "BOND_18888",
+            "CATALYST_18911",
+            "KUFO_LINEAGE",
+            "KSHIP_FUEL"
+          ]
+        },
+        "openingAssets": { "$ref": "#/$defs/amount" },
+        "verifiedExternalInflow": { "$ref": "#/$defs/amount" },
+        "verifiedExternalOutflow": { "$ref": "#/$defs/amount" },
+        "explicitFees": { "$ref": "#/$defs/amount" },
+        "closingBloodBank": { "$ref": "#/$defs/amount" },
+        "closingOrganBalances": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/organBalance" }
+        },
+        "inTransit": { "$ref": "#/$defs/amount" },
+        "settlementEscrow": { "$ref": "#/$defs/amount" }
+      },
+      "additionalProperties": false
+    },
+    "medicalRecovery": {
+      "type": "object",
+      "required": [
+        "recoveryId",
+        "lifeId",
+        "organId",
+        "state",
+        "startedAt",
+        "earliestCompletionAt",
+        "requiredResourceKaios",
+        "consumedResourceKaios",
+        "ischemiaEvidenceId",
+        "workFailureEvidenceId",
+        "medicalServiceEventId",
+        "recoveryProofId",
+        "completedAt"
+      ],
+      "properties": {
+        "recoveryId": { "$ref": "#/$defs/nonEmptyString" },
+        "lifeId": { "$ref": "#/$defs/nonEmptyString" },
+        "organId": { "$ref": "#/$defs/nonEmptyString" },
+        "state": { "type": "string", "enum": ["RECOVERING", "RECOVERED"] },
+        "startedAt": { "type": "string", "format": "date-time" },
+        "earliestCompletionAt": { "type": "string", "format": "date-time" },
+        "requiredResourceKaios": { "$ref": "#/$defs/amount" },
+        "consumedResourceKaios": { "$ref": "#/$defs/amount" },
+        "ischemiaEvidenceId": { "$ref": "#/$defs/nonEmptyString" },
+        "workFailureEvidenceId": { "$ref": "#/$defs/nonEmptyString" },
+        "medicalServiceEventId": { "$ref": "#/$defs/nonEmptyString" },
+        "recoveryProofId": {
+          "oneOf": [
+            { "$ref": "#/$defs/nonEmptyString" },
+            { "type": "null" }
+          ]
+        },
+        "completedAt": { "$ref": "#/$defs/timestampOrNull" }
+      },
+      "additionalProperties": false
+    },
+    "allocationEntry": {
+      "type": "object",
+      "required": ["organId", "routeId", "beneficiary", "priorityClass", "needKaios", "amountKaios"],
+      "properties": {
+        "organId": { "$ref": "#/$defs/nonEmptyString" },
+        "routeId": { "$ref": "#/$defs/nonEmptyString" },
+        "beneficiary": { "type": "string", "pattern": "^0x[0-9a-fA-F]{40}$" },
+        "priorityClass": { "type": "string", "enum": ["P0", "P1", "P2"] },
+        "needKaios": { "$ref": "#/$defs/amount" },
+        "amountKaios": { "$ref": "#/$defs/amount" }
+      },
+      "additionalProperties": false
+    },
+    "allocation": {
+      "type": "object",
+      "required": ["distributableKaios", "allocatedKaios", "unallocatedKaios", "closingBloodBankAvailableKaios", "allocations"],
+      "properties": {
+        "distributableKaios": { "$ref": "#/$defs/amount" },
+        "allocatedKaios": { "$ref": "#/$defs/amount" },
+        "unallocatedKaios": { "$ref": "#/$defs/amount" },
+        "closingBloodBankAvailableKaios": { "$ref": "#/$defs/amount" },
+        "allocations": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/allocationEntry" }
+        }
+      },
+      "additionalProperties": false
+    },
+    "pulseRecord": {
+      "type": "object",
+      "required": [
+        "pulseId",
+        "lifeId",
+        "epoch",
+        "triggeredBy",
+        "triggeredAt",
+        "completedAt",
+        "callerRewardKaios",
+        "replayProtectionId",
+        "journalRecordHash",
+        "allocation"
+      ],
+      "properties": {
+        "pulseId": { "$ref": "#/$defs/nonEmptyString" },
+        "lifeId": { "$ref": "#/$defs/nonEmptyString" },
+        "epoch": { "$ref": "#/$defs/amount" },
+        "triggeredBy": { "$ref": "#/$defs/nonEmptyString" },
+        "triggeredAt": { "type": "string", "format": "date-time" },
+        "completedAt": { "type": "string", "format": "date-time" },
+        "callerRewardKaios": { "type": "string", "const": "0" },
+        "replayProtectionId": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+        "journalRecordHash": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+        "allocation": { "$ref": "#/$defs/allocation" }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}
