@@ -43,15 +43,17 @@ KAIOS --holder allowance / 18911--> KUFO
 KUFO --holder allowance / current converter--> KSHIP
 ```
 
-- 1 KAIOS voluntarily burned creates a proof for 1,000 KUFO.
-- 1 KAIOS is 1 kg and 1 KUFO is 1 g.
-- The 49 Alchemy Epoch maturation rule belongs to the current 18911 Furnace
-  Runtime, not to immutable KAIOS monetary law.
-- Point 511111 consumes each matured proof exactly once.
-- The KUFO beneficiary is fixed when KAIOS is burned. A later claim caller
-  cannot redirect the recipient.
-- 1 KUFO voluntarily burned creates 1,000 KSHIP.
-- 1 KSHIP is a 1 mg Carrier Genesis accounting unit.
+- Deployed V1 history uses the old 18911 body and its 49-Epoch runtime.
+- The V3 successor candidate leaves deployed `KAIOS.sol` unchanged and calls its five-argument
+  `burnForAlchemy(owner, beneficiary, amount, lifeId, destinationCode)` ABI.
+- 1 KAIOS requires an exact, separate 0.001 KGEN allowance and direct bank contribution; KGEN never
+  enters the Furnace. The successful transaction immediately burns 1 KAIOS and mints 1,000 KUFO.
+- The 130-human-day rule is a contribution freshness limit for the disabled tax-credit design, not a
+  KUFO delivery delay.
+- Point 511111 consumes each V3 Furnace proof exactly once in the same transaction.
+- The KUFO beneficiary is fixed when KAIOS is burned and cannot be redirected.
+- KUFO later decays; only newly decayed KUFO can produce at most 1,000 KSHIP per KUFO lifetime.
+- 1 KAIOS is 1 kg, 1 KUFO is 1 g and 1 KSHIP is 1 mg.
 - Neutrino-like penetration is future Ship Physics Runtime scope, not ERC-20
   behavior.
 
@@ -101,7 +103,9 @@ Before any Mainnet decision:
 - unit, fuzz and invariant tests;
 - proof replay and beneficiary redirect tests;
 - allowance-bound burn tests;
-- cap and 49-epoch boundary tests;
+- deployed KAIOS five-argument ABI and `KAIOS.sol` no-diff checks;
+- exact KGEN/KAIOS allowance, bank-delta, atomic rollback and immediate-release tests;
+- KUFO lot-fragmentation and transaction-gas-bound tests;
 - complete KGEN/KAIOS/KUFO/KSHIP conservation tests;
 - Pair Registry governance tests;
 - UUPS storage-layout validation for TempleHeart integration;

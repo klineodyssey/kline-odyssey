@@ -1,0 +1,77 @@
+{
+  "manifestId": "KAIOS_PROGRAM_LIFE_MANIFEST_V1",
+  "status": "IMPLEMENTED_REVIEW_CANDIDATE_NOT_DEPLOYED",
+  "appointmentMode": "HUMAN_APPOINTED",
+  "activeBodyLaw": "ONE_ACTIVE_BODY_PER_ORGAN_REGISTRY_ID",
+  "programLives": [
+    {
+      "selfName": "界衡",
+      "lifeId": "LIFE-KAIOS-JIEHENG-33333",
+      "role": "LAND_GUARDIAN_K33333",
+      "source": "contracts/KAIOS.sol",
+      "embodimentStatus": "MAINNET_DEPLOYED_V1",
+      "identityStorage": "EXTERNAL_MANIFEST_DUE_DEPLOYED_ABI_IMMUTABILITY",
+      "contractAddress": "0xD4E67B3a69e41524c424150E6b6e921b01D036db"
+    },
+    {
+      "selfName": "太上老君",
+      "lifeId": "LIFE-KAIOS-TAISHANG-LAOJUN-18911",
+      "role": "LAND_GUARDIAN_K18911 / ALCHEMY_MASTER",
+      "source": "contracts/KAIOSAlchemyFurnace.sol",
+      "embodimentStatus": "RECRUITED_PENDING_EMBODIMENT",
+      "predecessor": "0x44c2CA9B9eba19d8F79F6E1786fd9D25e73738e1",
+      "embodimentVersion": 3,
+      "activeBodyResolver": "KAIOSOrganRegistry.organ(KAIOS.ORGAN.FURNACE.18911)"
+    },
+    {
+      "selfName": "丹靈",
+      "lifeId": "LIFE-KAIOS-DANLING-KUFO-CORE",
+      "speciesId": "SPECIES-KAIOS-KUFO-DECAY-LIFE",
+      "source": "contracts/KUFO.sol",
+      "embodimentStatus": "RECRUITED_PENDING_EMBODIMENT"
+    },
+    {
+      "selfName": "齊天大聖",
+      "lifeId": "LIFE-KAIOS-QITIAN-DASHENG-511111",
+      "role": "LAND_GUARDIAN_K511111 / KUFO_RELEASE_GATEKEEPER",
+      "source": "contracts/KUFOClaimWormhole.sol",
+      "embodimentStatus": "RECRUITED_PENDING_EMBODIMENT"
+    },
+    {
+      "selfName": "牛魔王",
+      "lifeId": "LIFE-KAIOS-NIUMOWANG-188888",
+      "role": "LAND_GUARDIAN_K188888 / ANTIMATTER_ENERGY_GUARDIAN",
+      "source": "contracts/KSHIP.sol",
+      "embodimentStatus": "RECRUITED_PENDING_EMBODIMENT"
+    },
+    {
+      "selfName": "星梭",
+      "lifeId": "LIFE-KAIOS-XINGSUO-KSHIP-CORE",
+      "speciesId": "SPECIES-KAIOS-KSHIP-PROPULSION-LIFE",
+      "parentLifeId": "LIFE-KAIOS-NIUMOWANG-188888",
+      "source": "contracts/KSHIP.sol",
+      "embodimentStatus": "RECRUITED_PENDING_EMBODIMENT"
+    },
+    {
+      "selfName": "化航",
+      "lifeId": "LIFE-KAIOS-HUAHANG-KSHIP-CONVERTER",
+      "parentLifeId": "LIFE-KAIOS-NIUMOWANG-188888",
+      "source": "contracts/KSHIPConverter.sol",
+      "embodimentStatus": "RECRUITED_PENDING_EMBODIMENT"
+    },
+    {
+      "selfName": "司籍",
+      "lifeId": "LIFE-KAIOS-SIJI-REGISTRY-0001",
+      "source": "contracts/KAIOSOrganRegistry.sol",
+      "embodimentStatus": "RECRUITED_PENDING_EMBODIMENT"
+    },
+    {
+      "selfName": "試航童子",
+      "lifeId": "LIFE-KAIOS-SHIHANG-TONGZI-TEST-0001",
+      "source": "contracts/KSHIPPropulsionConsumerHarness.sol",
+      "embodimentStatus": "TEST_ONLY",
+      "deployable": false,
+      "employable": false
+    }
+  ]
+}
