@@ -61,6 +61,11 @@ The legacy `crossDayBreath()` selector is retained only for ABI compatibility an
 The retained claim system is:
 
 - 1–8 KGEN, selected by civilization `blessingPower`.
+- Before any Fortune payout, the claimant's actual KGEN balance must be at least exactly `1_000_000_000_000_000_000` raw units (1 KGEN at 18 decimals).
+- A balance of `999_999_999_999_999_999` raw units fails closed. The pending Fortune reward cannot be counted toward this pre-existing balance gate.
+- The 1 KGEN pass is never burned, seized, escrowed, locked, approved, or transferred by `fortuneClaim`; it remains the claimant's property.
+- This pass applies only to Fortune Money. Heartbeat remains a 1 KGEN reward with an 88-success UTC-hour cap, and Ignite remains an 8 KGEN reward with an 88-success UTC-day cap.
+- A valid Heartbeat may provide a new Life's first 1 KGEN civilization pass, subject to the existing Wish, wallet/civilization cooldown, global cap, and Heart reserve rules.
 - 30-day wallet and civilization cooldown.
 - Maximum 500 successful claimants per 30-day epoch.
 - Wish + Holy Cup + holder/beneficiary-bound KAIOS Alchemy proof.

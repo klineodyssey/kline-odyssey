@@ -24,6 +24,10 @@ No deployment script or Mainnet address is included.
 | `contracts/KAIOSPairRegistry.sol` | External pair metadata without Token Core authority |
 | `reports/KAIOS_TOKEN_LINEAGE_INTEGRATION_REVIEW_2026-08-09.md` | Executive review and evidence index |
 
+## Whole-Life Circulation And K12345 Pass Candidate
+
+`life-circulation/` contains the review-only per-Life circulation candidate: a recursively closed Organ/Blood Bank/Vessel/Pulse schema, deterministic integer allocator, exact asset-conservation validator, persistent replay journal, medical recovery state machine, and fractal Organ coordinate calculator. It keeps K12345 as Wukong's civilization heart while every Life has its own Heart/Pulsar. The associated TempleHeart change adds only the exact pre-existing 1 KGEN Fortune pass; it does not burn, lock, seize, or transfer that pass and does not alter KGEN token tax or deployment state.
+
 ## Purpose
 
 KAIOS is the KGEN AI Operating System. It is not another document library and it is not a mass document expansion. It is the architecture layer that coordinates AI workers, tasks, claims, reports, reviews, recovery, dashboard state, and security policy.

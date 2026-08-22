@@ -1,0 +1,64 @@
+name: KAIOS Whole-Life Circulation Candidate
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - "codex/KAIOS-WHOLE-LIFE-CIRCULATION-12345-HEART-V1-001"
+    paths:
+      - "KGEN/contracts/KGEN_TempleHeart_Upgradeable.sol"
+      - "KGEN/docs/TEMPLEHEART_V3_4_0_CIVILIZATION_CREDIT_SPEC.md"
+      - "KGEN-KAIOS/**"
+      - ".github/workflows/kaios-whole-life-circulation-review.yml"
+  pull_request:
+    paths:
+      - "KGEN/contracts/KGEN_TempleHeart_Upgradeable.sol"
+      - "KGEN/docs/TEMPLEHEART_V3_4_0_CIVILIZATION_CREDIT_SPEC.md"
+      - "KGEN-KAIOS/**"
+
+permissions:
+  contents: read
+
+jobs:
+  exact-head-review:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: KGEN-KAIOS/package-lock.json
+      - name: Install pinned review dependencies
+        working-directory: KGEN-KAIOS
+        run: npm ci
+      - name: Parse closed schemas and examples
+        run: |
+          jq empty KGEN-KAIOS/life-circulation/schemas/life-circulatory-runtime.schema.json
+          jq empty KGEN-KAIOS/life-circulation/examples/whole-life-circulation.candidate.json
+      - name: Run circulation replay, fuzz, invariant, custody, and health tests
+        run: node --test KGEN-KAIOS/life-circulation/tests/*.test.mjs
+      - name: Compile, ABI-diff, storage-check, scan, and run token tests
+        working-directory: KGEN-KAIOS
+        env:
+          INTEGRATION_BASE_RANGE: origin/main...HEAD
+          TEMPLEHEART_ABI_BASE_REF: "f507724d1876c28e3d24a7316c440ea9304a5228"
+        run: npm run test:all
+      - name: Run repository regression tests
+        run: node --test tests/*.test.mjs
+      - name: Reject whitespace damage
+        run: git diff --check origin/main...HEAD
+      - name: Preserve exact-head review reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: whole-life-circulation-review-${{ github.sha }}
+          path: |
+            KGEN-KAIOS/reports/SOLIDITY_COMPILE_EVIDENCE.json
+            KGEN-KAIOS/reports/TEMPLEHEART_ABI_DIFF.json
+            KGEN-KAIOS/reports/TEMPLEHEART_STORAGE_LAYOUT_VALIDATION.json
+            KGEN-KAIOS/reports/INTEGRATION_ARTIFACT_VALIDATION.json
+          if-no-files-found: warn
+          retention-days: 30
