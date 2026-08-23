@@ -46,4 +46,3 @@ jobs:
           node --test KGEN-KAIOS/civilization/multiverse-life-tax-v1/multiverse-life-tax.test.mjs
       - name: Reject whitespace damage
         run: git diff --check "$BASE_SHA...HEAD"
-

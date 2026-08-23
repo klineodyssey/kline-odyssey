@@ -128,4 +128,3 @@ The safe claim is durable, timestamped and migratable evidence, not immortality.
 `ASSET_OR_TOKEN_TRANSFER = NO`
 
 `CHAIN_OR_GOVERNANCE_STATE_CHANGE = NO`
-

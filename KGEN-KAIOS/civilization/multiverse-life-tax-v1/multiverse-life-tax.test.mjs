@@ -491,4 +491,3 @@ test("candidate registry creates no formal Life, company or real-world state", (
   });
   assert.equal(registry.long_horizon.one_hundred_million_year_survival_guarantee, false);
 });
-
