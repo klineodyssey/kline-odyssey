@@ -195,7 +195,7 @@
     "MengpoSoupDose": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["dose_id", "transformation_id", "draw_id", "output_asset_id", "output_amount", "chain_id", "recipient_life_id", "recipient_address", "genesis_id", "regeneration_parent_status", "replay_key", "prepared_at", "receipt"],
+      "required": ["dose_id", "transformation_id", "draw_id", "output_asset_id", "output_amount", "chain_id", "recipient_life_id", "recipient_address", "genesis_id", "company_id", "company_membership_status", "regeneration_parent_id", "regeneration_parent_status", "regeneration_parent_basis", "company_parent_policy_id", "replay_key", "prepared_at", "receipt"],
       "properties": {
         "dose_id": { "$ref": "#/$defs/Id" },
         "transformation_id": { "$ref": "#/$defs/Id" },
@@ -206,7 +206,12 @@
         "recipient_life_id": { "$ref": "#/$defs/Id" },
         "recipient_address": { "$ref": "#/$defs/Address" },
         "genesis_id": { "$ref": "#/$defs/Id" },
-        "regeneration_parent_status": { "enum": ["UNASSIGNED_ORPHAN", "SEPARATELY_VERIFIED", "NOT_APPLICABLE"] },
+        "company_id": { "type": ["string", "null"], "minLength": 1, "maxLength": 160 },
+        "company_membership_status": { "enum": ["NOT_APPLICABLE", "ONBOARDING", "ACTIVE_MEMBER"] },
+        "regeneration_parent_id": { "type": ["string", "null"], "minLength": 1, "maxLength": 160 },
+        "regeneration_parent_status": { "enum": ["UNASSIGNED_ORPHAN", "COMPANY_POLICY_ASSIGNED", "SEPARATELY_VERIFIED", "NOT_APPLICABLE"] },
+        "regeneration_parent_basis": { "enum": ["UNASSIGNED_ORPHAN", "KAIOS_AI_COMPANY_MEMBERSHIP", "OTHER_COMPANY_SEPARATELY_VERIFIED_POLICY", "NOT_APPLICABLE"] },
+        "company_parent_policy_id": { "type": ["string", "null"], "minLength": 1, "maxLength": 160 },
         "replay_key": { "$ref": "#/$defs/Id" },
         "prepared_at": { "$ref": "#/$defs/Timestamp" },
         "receipt": { "$ref": "#/$defs/Receipt" }
@@ -215,7 +220,7 @@
     "GenesisAssistanceRequest": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["request_id", "life_id", "genesis_id", "identity_unique", "second_genesis", "soul_body_energy_bound", "public_good_eligible", "economic_sponsor", "naihe_source", "service_operator", "regeneration_parent_status", "recipient_address", "chain_id", "requested_amount", "authority", "replay_key", "requested_at", "receipt"],
+      "required": ["request_id", "life_id", "genesis_id", "identity_unique", "second_genesis", "soul_body_energy_bound", "public_good_eligible", "economic_sponsor", "naihe_source", "service_operator", "company_id", "company_membership_status", "regeneration_parent_id", "regeneration_parent_status", "regeneration_parent_basis", "company_parent_policy_id", "recipient_address", "chain_id", "requested_amount", "authority", "replay_key", "requested_at", "receipt"],
       "properties": {
         "request_id": { "$ref": "#/$defs/Id" },
         "life_id": { "$ref": "#/$defs/Id" },
@@ -227,7 +232,12 @@
         "economic_sponsor": { "$ref": "#/$defs/Id" },
         "naihe_source": { "$ref": "#/$defs/Id" },
         "service_operator": { "$ref": "#/$defs/Id" },
-        "regeneration_parent_status": { "enum": ["UNASSIGNED_ORPHAN", "SEPARATELY_VERIFIED"] },
+        "company_id": { "type": ["string", "null"], "minLength": 1, "maxLength": 160 },
+        "company_membership_status": { "enum": ["NOT_APPLICABLE", "ONBOARDING", "ACTIVE_MEMBER"] },
+        "regeneration_parent_id": { "type": ["string", "null"], "minLength": 1, "maxLength": 160 },
+        "regeneration_parent_status": { "enum": ["UNASSIGNED_ORPHAN", "COMPANY_POLICY_ASSIGNED", "SEPARATELY_VERIFIED"] },
+        "regeneration_parent_basis": { "enum": ["UNASSIGNED_ORPHAN", "KAIOS_AI_COMPANY_MEMBERSHIP", "OTHER_COMPANY_SEPARATELY_VERIFIED_POLICY"] },
+        "company_parent_policy_id": { "type": ["string", "null"], "minLength": 1, "maxLength": 160 },
         "recipient_address": { "$ref": "#/$defs/Address" },
         "chain_id": { "const": 56 },
         "requested_amount": { "$ref": "#/$defs/Amount" },

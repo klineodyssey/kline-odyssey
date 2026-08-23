@@ -1,4 +1,6 @@
 const EXACT_GENESIS_BNB_WEI = 8_000_000_000_000_000n;
+const KAIOS_AI_COMPANY_ID = "KAIOS_AI_COMPANY_V1";
+const KAIOS_AI_COMPANY_PARENT_POLICY_ID = "KAIOS_AI_COMPANY_REGENERATION_PARENT_BY_MEMBERSHIP_V1";
 
 function fail(code, message = code) {
   const error = new Error(message);
@@ -36,16 +38,37 @@ export function validateRoleSeparation({
   reservoir,
   serviceOperator,
   mengpoSoup,
-  regenerationParent
+  regenerationParent,
+  companyId = null,
+  companyMembershipStatus = "NOT_APPLICABLE",
+  regenerationParentBasis = "UNASSIGNED_ORPHAN",
+  companyParentPolicyId = null
 }) {
   distinct([economicSponsor, naiheSource, reservoir, serviceOperator, mengpoSoup], "CIVILIZATION_ROLE_COLLISION");
-  if (normalized(regenerationParent) !== "unassigned_orphan" && regenerationParent) {
-    distinct(
-      [economicSponsor, naiheSource, reservoir, serviceOperator, mengpoSoup, regenerationParent],
-      "PARENT_ROLE_COLLISION"
-    );
+  const parent = normalized(regenerationParent);
+  if (!parent || parent === "unassigned_orphan") {
+    requireTrue(regenerationParentBasis === "UNASSIGNED_ORPHAN", "PARENT_POLICY_REQUIRED");
+    return true;
   }
-  return true;
+
+  distinct([naiheSource, reservoir, serviceOperator, mengpoSoup, regenerationParent], "PARENT_ROLE_COLLISION");
+
+  if (regenerationParentBasis === "KAIOS_AI_COMPANY_MEMBERSHIP") {
+    requireTrue(companyId === KAIOS_AI_COMPANY_ID, "COMPANY_PARENT_POLICY_SCOPE_MISMATCH");
+    requireTrue(companyMembershipStatus === "ACTIVE_MEMBER", "COMPANY_MEMBERSHIP_NOT_ACTIVE");
+    requireTrue(companyParentPolicyId === KAIOS_AI_COMPANY_PARENT_POLICY_ID, "COMPANY_PARENT_POLICY_MISMATCH");
+    requireTrue(regenerationParent === companyId, "COMPANY_PARENT_ID_MISMATCH");
+    return true;
+  }
+
+  if (regenerationParentBasis === "OTHER_COMPANY_SEPARATELY_VERIFIED_POLICY") {
+    requireTrue(companyId && companyId !== KAIOS_AI_COMPANY_ID, "COMPANY_PARENT_POLICY_SCOPE_MISMATCH");
+    requireTrue(companyMembershipStatus === "ACTIVE_MEMBER", "COMPANY_MEMBERSHIP_NOT_ACTIVE");
+    requireTrue(Boolean(companyParentPolicyId), "COMPANY_PARENT_POLICY_REQUIRED");
+    return true;
+  }
+
+  fail("PARENT_POLICY_REQUIRED");
 }
 
 export function classifyOperationalState({ bnbBalanceWei, wbnbBalanceWei }) {
@@ -85,6 +108,7 @@ export class NaiheReservoirPaperRuntime {
     this.refills = new Set();
     this.drawReplayKeys = new Set();
     this.draws = new Map();
+    this.transformedDrawIds = new Set();
     this.transformations = new Map();
     this.doses = new Map();
     this.pendingGenesisIds = new Set();
@@ -174,6 +198,7 @@ export class NaiheReservoirPaperRuntime {
   transformDraw(record) {
     const draw = this.draws.get(record.drawId);
     requireTrue(draw, "DRAW_NOT_FOUND");
+    requireTrue(!this.transformedDrawIds.has(record.drawId), "DRAW_ALREADY_TRANSFORMED");
     requireTrue(!this.transformations.has(record.transformationId), "DUPLICATE_TRANSFORMATION");
     requireTrue(record.ruleStatus === "TEST_ONLY_FROZEN_MOCK", "UNFROZEN_CONVERSION");
     requireTrue(record.inputAssetId === draw.sourceAssetId, "TRANSFORMATION_INPUT_ASSET_MISMATCH");
@@ -187,6 +212,7 @@ export class NaiheReservoirPaperRuntime {
     requireTrue(amount(record.energyInput) >= amount(record.energyOutput), "ENERGY_ACCOUNTING_FAILED");
     const transformed = Object.freeze({ ...record, reservoirBalanceBefore: draw.reservoirBalanceBefore, reservoirBalanceAfter: draw.reservoirBalanceAfter });
     this.transformations.set(record.transformationId, transformed);
+    this.transformedDrawIds.add(record.drawId);
     return transformed;
   }
 
@@ -196,12 +222,19 @@ export class NaiheReservoirPaperRuntime {
     requireTrue(dose.chainId === 56, "WRONG_CHAIN");
     requireTrue(dose.recipientLifeId === transformation.recipientLifeId, "WRONG_RECIPIENT");
     requireTrue(dose.genesisId === transformation.genesisId, "GENESIS_BINDING_MISMATCH");
+    requireTrue(dose.outputAssetId === transformation.outputAssetId, "DOSE_OUTPUT_ASSET_MISMATCH");
     requireTrue(normalized(dose.recipientAddress) === normalized(dose.expectedRecipientAddress), "WRONG_RECIPIENT");
     requireTrue(!this.doses.has(dose.doseId) && this.pendingGenesisIds.has(dose.genesisId) && !this.genesisIds.has(dose.genesisId), "DUPLICATE_GENESIS");
     if (dose.outputAssetId === "BSC_NATIVE_BNB") {
       requireTrue(amount(dose.outputAmount) === EXACT_GENESIS_BNB_WEI, "WRONG_GENESIS_AMOUNT");
     }
-    requireTrue(dose.regenerationParentStatus === "UNASSIGNED_ORPHAN" || dose.regenerationParentStatus === "SEPARATELY_VERIFIED", "PARENT_STATUS_INVALID");
+    requireTrue(amount(dose.outputAmount) === amount(transformation.outputAmount), "DOSE_OUTPUT_AMOUNT_MISMATCH");
+    requireTrue(
+      dose.regenerationParentStatus === "UNASSIGNED_ORPHAN"
+        || dose.regenerationParentStatus === "COMPANY_POLICY_ASSIGNED"
+        || dose.regenerationParentStatus === "SEPARATELY_VERIFIED",
+      "PARENT_STATUS_INVALID"
+    );
     this.doses.set(dose.doseId, Object.freeze({ ...dose }));
     this.pendingGenesisIds.delete(dose.genesisId);
     this.genesisIds.add(dose.genesisId);
@@ -222,4 +255,4 @@ export class NaiheReservoirPaperRuntime {
   }
 }
 
-export { EXACT_GENESIS_BNB_WEI };
+export { EXACT_GENESIS_BNB_WEI, KAIOS_AI_COMPANY_ID, KAIOS_AI_COMPANY_PARENT_POLICY_ID };

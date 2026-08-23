@@ -26,7 +26,9 @@ Direct Public Good Treasury payments to Life candidates are not the default Gene
 - service operator;
 - regeneration parent.
 
-The sponsor, reservoir, bridge, Mengpo, soup, contract owner, and transaction signer do not become a parent by default. An orphan Life may retain `REGENERATION_PARENT_STATUS = UNASSIGNED_ORPHAN`.
+Regeneration parenthood is company-policy-scoped. A Life that has actually joined `KAIOS_AI_COMPANY_V1` under verified active membership receives that company as its regeneration parent and obtains its company Life relationship without creating a second Genesis. The assignment comes from verified company membership, not from the funding wallet, Naihe source, reservoir, Mengpo, soup, contract owner, or transaction signer.
+
+`ONBOARDING`, an application, a payment, or a source transfer is not active membership and cannot assign a parent. Other companies define and independently review their own Life and regeneration-parent rules; the KAIOS AI Company rule is not a universal rule. Until a qualifying company rule is evidenced, a Life may retain `REGENERATION_PARENT_STATUS = UNASSIGNED_ORPHAN`.
 
 ## Verified repository and chain snapshot
 
@@ -110,13 +112,16 @@ The exact `0.008 BNB` event is verified history for Hengyao and a candidate requ
 1. A refill moves one conserved amount into the reservoir; it cannot duplicate a balance elsewhere.
 2. A draw decreases the matching pool by the exact draw amount.
 3. Draw IDs and Genesis IDs are single-use.
-4. Sponsor and service roles never imply parenthood.
-5. Undeployed assets and an undeployed reservoir cannot create active pools.
-6. Unfrozen transformations cannot execute.
-7. Investment funds cannot spend Genesis reserve.
-8. Reservoir assets cannot become trading principal.
-9. Exact Genesis doses validate chain, recipient and amount.
-10. Any real external action requires a separate machine-verifiable authority.
+4. Funding and service roles never imply parenthood.
+5. Verified active membership in `KAIOS_AI_COMPANY_V1` assigns that company as regeneration parent under `KAIOS_AI_COMPANY_REGENERATION_PARENT_BY_MEMBERSHIP_V1`.
+6. `ONBOARDING` is not active membership, and other companies must use their own separately reviewed parent policy.
+7. Undeployed assets and an undeployed reservoir cannot create active pools.
+8. Unfrozen transformations cannot execute.
+9. One draw may produce at most one transformation, and a dose must byte-match the selected transformation output asset and amount.
+10. Investment funds cannot spend Genesis reserve.
+11. Reservoir assets cannot become trading principal.
+12. Exact Genesis doses validate chain, recipient and amount.
+13. Any real external action requires a separate machine-verifiable authority.
 
 ## Files
 

@@ -3,6 +3,8 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import {
   EXACT_GENESIS_BNB_WEI,
+  KAIOS_AI_COMPANY_ID,
+  KAIOS_AI_COMPANY_PARENT_POLICY_ID,
   NaiheReservoirPaperRuntime,
   validateLifeFluidRegistry,
   validateRoleSeparation
@@ -31,14 +33,19 @@ function fresh() {
   return runtime;
 }
 
-function roles(parent = "UNASSIGNED_ORPHAN") {
+function roles(parent = "UNASSIGNED_ORPHAN", overrides = {}) {
   return {
     economicSponsor: "PUBLIC_GOOD_TREASURY",
     naiheSource: "K4168_VERIFIED_SOURCE",
     reservoir: "K4168_NAIHE_RESERVOIR",
     serviceOperator: MENGPO,
     mengpoSoup: "MENGPO_SOUP_DOSE",
-    regenerationParent: parent
+    regenerationParent: parent,
+    companyId: null,
+    companyMembershipStatus: "NOT_APPLICABLE",
+    regenerationParentBasis: "UNASSIGNED_ORPHAN",
+    companyParentPolicyId: null,
+    ...overrides
   };
 }
 
@@ -61,9 +68,8 @@ function draw(overrides = {}) {
   };
 }
 
-function transformed(runtime, overrides = {}) {
-  runtime.authorizeDraw(draw());
-  return runtime.transformDraw({
+function transformation(overrides = {}) {
+  return {
     transformationId: "TRANSFORM-001",
     drawId: "DRAW-001",
     ruleStatus: "TEST_ONLY_FROZEN_MOCK",
@@ -81,7 +87,12 @@ function transformed(runtime, overrides = {}) {
     recipientLifeId: "LIFE-ORPHAN-001",
     genesisId: "GENESIS-001",
     ...overrides
-  });
+  };
+}
+
+function transformed(runtime, overrides = {}) {
+  runtime.authorizeDraw(draw());
+  return runtime.transformDraw(transformation(overrides));
 }
 
 function dose(overrides = {}) {
@@ -121,8 +132,8 @@ test("soup_not_parent", () => {
   assert.throws(() => validateRoleSeparation(roles("MENGPO_SOUP_DOSE")), { code: "PARENT_ROLE_COLLISION" });
 });
 
-test("sponsor_not_parent", () => {
-  assert.throws(() => validateRoleSeparation(roles("PUBLIC_GOOD_TREASURY")), { code: "PARENT_ROLE_COLLISION" });
+test("sponsor funding alone does not assign parenthood", () => {
+  assert.throws(() => validateRoleSeparation(roles("PUBLIC_GOOD_TREASURY")), { code: "PARENT_POLICY_REQUIRED" });
 });
 
 test("civilization service roles remain distinct even for an orphan", () => {
@@ -133,6 +144,33 @@ test("civilization service roles remain distinct even for an orphan", () => {
 
 test("orphan_parent_can_be_unassigned", () => {
   assert.equal(validateRoleSeparation(roles()), true);
+});
+
+test("active KAIOS AI Company membership assigns the company as regeneration parent", () => {
+  assert.equal(validateRoleSeparation(roles(KAIOS_AI_COMPANY_ID, {
+    companyId: KAIOS_AI_COMPANY_ID,
+    companyMembershipStatus: "ACTIVE_MEMBER",
+    regenerationParentBasis: "KAIOS_AI_COMPANY_MEMBERSHIP",
+    companyParentPolicyId: KAIOS_AI_COMPANY_PARENT_POLICY_ID
+  })), true);
+});
+
+test("AI Company onboarding is not active membership and cannot assign parenthood", () => {
+  assert.throws(() => validateRoleSeparation(roles(KAIOS_AI_COMPANY_ID, {
+    companyId: KAIOS_AI_COMPANY_ID,
+    companyMembershipStatus: "ONBOARDING",
+    regenerationParentBasis: "KAIOS_AI_COMPANY_MEMBERSHIP",
+    companyParentPolicyId: KAIOS_AI_COMPANY_PARENT_POLICY_ID
+  })), { code: "COMPANY_MEMBERSHIP_NOT_ACTIVE" });
+});
+
+test("another company cannot inherit the KAIOS AI Company parent policy", () => {
+  assert.throws(() => validateRoleSeparation(roles("OTHER_COMPANY_PARENT", {
+    companyId: "OTHER_COMPANY_V1",
+    companyMembershipStatus: "ACTIVE_MEMBER",
+    regenerationParentBasis: "KAIOS_AI_COMPANY_MEMBERSHIP",
+    companyParentPolicyId: KAIOS_AI_COMPANY_PARENT_POLICY_ID
+  })), { code: "COMPANY_PARENT_POLICY_SCOPE_MISMATCH" });
 });
 
 test("unregistered_asset_rejected", () => {
@@ -159,6 +197,12 @@ test("duplicate_draw_rejected", () => {
   const runtime = fresh();
   runtime.authorizeDraw(draw());
   assert.throws(() => runtime.authorizeDraw(draw()), { code: "DUPLICATE_DRAW" });
+});
+
+test("one draw cannot produce multiple transformations", () => {
+  const runtime = fresh();
+  transformed(runtime);
+  assert.throws(() => runtime.transformDraw(transformation({ transformationId: "TRANSFORM-002" })), { code: "DRAW_ALREADY_TRANSFORMED" });
 });
 
 test("duplicate_genesis_rejected", () => {
@@ -193,6 +237,18 @@ test("wrong_amount_rejected", () => {
   const runtime = fresh();
   transformed(runtime);
   assert.throws(() => runtime.prepareSoupDose(dose({ outputAmount: (EXACT_GENESIS_BNB_WEI - 1n).toString() })), { code: "WRONG_GENESIS_AMOUNT" });
+});
+
+test("dose output asset must match the selected transformation", () => {
+  const runtime = fresh();
+  transformed(runtime);
+  assert.throws(() => runtime.prepareSoupDose(dose({ outputAssetId: "KAIOS_MAINNET" })), { code: "DOSE_OUTPUT_ASSET_MISMATCH" });
+});
+
+test("dose output amount must match the selected transformation", () => {
+  const runtime = fresh();
+  transformed(runtime, { outputAmount: (EXACT_GENESIS_BNB_WEI + 1n).toString() });
+  assert.throws(() => runtime.prepareSoupDose(dose()), { code: "DOSE_OUTPUT_AMOUNT_MISMATCH" });
 });
 
 test("wrong_chain_rejected", () => {
