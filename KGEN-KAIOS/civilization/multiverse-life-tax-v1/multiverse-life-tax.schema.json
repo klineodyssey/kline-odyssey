@@ -1,0 +1,254 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://klineodyssey.github.io/kline-odyssey/schemas/multiverse-life-tax-v1-candidate.schema.json",
+  "title": "Parallel Market Universe Life and Tax Candidate Registry",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "$schema",
+    "schema_version",
+    "candidate_id",
+    "status",
+    "mode",
+    "created_at",
+    "source_main_sha",
+    "invariants",
+    "planet_frames",
+    "market_universes",
+    "building_policy",
+    "company_policy",
+    "circulation_policy",
+    "tax_policy",
+    "long_horizon",
+    "external_draft_dependencies"
+  ],
+  "properties": {
+    "$schema": { "type": "string", "const": "./multiverse-life-tax.schema.json" },
+    "schema_version": { "type": "string", "const": "1.0.0" },
+    "candidate_id": { "type": "string", "const": "KAIOS_PARALLEL_MARKET_UNIVERSE_LIFE_TAX_V1_CANDIDATE" },
+    "status": { "type": "string", "const": "DESIGN_ONLY_NOT_LIVE" },
+    "mode": { "type": "string", "const": "PAPER_SIMULATION_ONLY" },
+    "created_at": { "type": "string", "format": "date-time" },
+    "source_main_sha": { "type": "string", "pattern": "^[0-9a-f]{40}$" },
+    "invariants": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "one_map_one_life",
+        "one_parallel_universe_embodiment_one_life",
+        "life_id_shared_across_universes",
+        "personal_wallet_shared_across_lives",
+        "one_parcel_one_primary_structure",
+        "planet_frame_reuse_forbidden",
+        "market_change_is_planet_travel",
+        "tax_payment_enabled",
+        "company_created"
+      ],
+      "properties": {
+        "one_map_one_life": { "const": true },
+        "one_parallel_universe_embodiment_one_life": { "const": true },
+        "life_id_shared_across_universes": { "const": false },
+        "personal_wallet_shared_across_lives": { "const": false },
+        "one_parcel_one_primary_structure": { "const": true },
+        "planet_frame_reuse_forbidden": { "const": true },
+        "market_change_is_planet_travel": { "const": false },
+        "tax_payment_enabled": { "const": false },
+        "company_created": { "const": false }
+      }
+    },
+    "planet_frames": {
+      "type": "array",
+      "minItems": 2,
+      "items": { "$ref": "#/$defs/planetFrame" }
+    },
+    "market_universes": {
+      "type": "array",
+      "minItems": 5,
+      "items": { "$ref": "#/$defs/marketUniverse" }
+    },
+    "building_policy": { "$ref": "#/$defs/buildingPolicy" },
+    "company_policy": { "$ref": "#/$defs/companyPolicy" },
+    "circulation_policy": { "$ref": "#/$defs/circulationPolicy" },
+    "tax_policy": { "$ref": "#/$defs/taxPolicy" },
+    "long_horizon": { "$ref": "#/$defs/longHorizon" },
+    "external_draft_dependencies": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/draftDependency" }
+    }
+  },
+  "$defs": {
+    "planetFrame": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "planet_id",
+        "frame_id",
+        "origin",
+        "surface_anchor",
+        "local_origin_label",
+        "coordinate_scope",
+        "lineage",
+        "status",
+        "physical_position_claim"
+      ],
+      "properties": {
+        "planet_id": { "type": "string", "enum": ["EARTH", "MARS"] },
+        "frame_id": { "type": "string", "minLength": 1 },
+        "origin": { "type": "string", "minLength": 1 },
+        "surface_anchor": { "type": "string", "minLength": 1 },
+        "local_origin_label": { "type": "string", "minLength": 1 },
+        "coordinate_scope": { "type": "string", "enum": ["EARTH_SURFACE_ONLY", "MARS_SURFACE_ONLY"] },
+        "lineage": { "type": "string", "minLength": 1 },
+        "status": { "type": "string", "minLength": 1 },
+        "physical_position_claim": { "const": false }
+      }
+    },
+    "marketUniverse": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "universe_id",
+        "symbol",
+        "host_planet_id",
+        "planet_frame_id",
+        "universe_state",
+        "asset_status",
+        "life_classification",
+        "tax_authority_id",
+        "company_registry_status"
+      ],
+      "properties": {
+        "universe_id": { "type": "string", "pattern": "^[A-Z0-9_]+$" },
+        "symbol": { "type": "string", "enum": ["KGEN", "KAIOS", "KSHIP", "KUFO", "KDNA"] },
+        "host_planet_id": { "const": "EARTH" },
+        "planet_frame_id": { "const": "EARTH_K280_SURFACE_V1_CANDIDATE" },
+        "universe_state": { "const": "PAPER_SIMULATION_ONLY" },
+        "asset_status": {
+          "type": "string",
+          "enum": [
+            "DEPLOYED_CANON_REFERENCE",
+            "DESIGN_ONLY_NOT_DEPLOYED",
+            "HUMAN_PROPOSED_NOT_FOUND_DEPLOYED"
+          ]
+        },
+        "life_classification": { "const": "EARTH_PARALLEL_MARKET_UNIVERSE_AI_LIFE" },
+        "tax_authority_id": { "type": "string", "pattern": "^K18888_[A-Z0-9]+_PAPER$" },
+        "company_registry_status": { "const": "NOT_CREATED" }
+      }
+    },
+    "buildingPolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "allowed_primary_structure_types",
+        "one_primary_structure_per_parcel",
+        "real_world_title_created"
+      ],
+      "properties": {
+        "allowed_primary_structure_types": {
+          "type": "array",
+          "minItems": 4,
+          "maxItems": 4,
+          "uniqueItems": true,
+          "items": { "type": "string", "enum": ["MANSION", "RESIDENCE", "MALL", "FACTORY"] }
+        },
+        "one_primary_structure_per_parcel": { "const": true },
+        "real_world_title_created": { "const": false }
+      }
+    },
+    "companyPolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "single_universe_company_allowed_in_paper",
+        "cross_market_group_status",
+        "cross_market_group_requires_distinct_universe_entities",
+        "cross_market_group_requires_distinct_ledgers",
+        "cross_market_group_requires_distinct_wallet_refs",
+        "order_received_is_realized_revenue",
+        "revenue_requires_delivery_and_settlement_evidence"
+      ],
+      "properties": {
+        "single_universe_company_allowed_in_paper": { "const": true },
+        "cross_market_group_status": { "const": "NOT_CREATED" },
+        "cross_market_group_requires_distinct_universe_entities": { "const": true },
+        "cross_market_group_requires_distinct_ledgers": { "const": true },
+        "cross_market_group_requires_distinct_wallet_refs": { "const": true },
+        "order_received_is_realized_revenue": { "const": false },
+        "revenue_requires_delivery_and_settlement_evidence": { "const": true }
+      }
+    },
+    "circulationPolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "paper_heartbeat_enabled",
+        "life_fluid_conservation_required",
+        "replay_protection_required",
+        "background_autonomy_claim"
+      ],
+      "properties": {
+        "paper_heartbeat_enabled": { "const": true },
+        "life_fluid_conservation_required": { "const": true },
+        "replay_protection_required": { "const": true },
+        "background_autonomy_claim": { "const": false }
+      }
+    },
+    "taxPolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "mirror_jurisdiction",
+        "tax_authority_pattern",
+        "every_life_has_tax_profile",
+        "every_map_has_tax_profile",
+        "every_material_appearance_has_tax_profile",
+        "rates_require_official_effective_rule",
+        "real_filing_enabled",
+        "real_payment_enabled"
+      ],
+      "properties": {
+        "mirror_jurisdiction": { "const": "TAIWAN_ROC_REFERENCE" },
+        "tax_authority_pattern": { "const": "K18888_<UNIVERSE>_PAPER" },
+        "every_life_has_tax_profile": { "const": true },
+        "every_map_has_tax_profile": { "const": true },
+        "every_material_appearance_has_tax_profile": { "const": true },
+        "rates_require_official_effective_rule": { "const": true },
+        "real_filing_enabled": { "const": false },
+        "real_payment_enabled": { "const": false }
+      }
+    },
+    "longHorizon": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "timestamp_standard",
+        "open_formats",
+        "git_lineage_required",
+        "one_hundred_million_year_survival_guarantee"
+      ],
+      "properties": {
+        "timestamp_standard": { "const": "ISO_8601_WITH_OFFSET" },
+        "open_formats": {
+          "type": "array",
+          "minItems": 4,
+          "uniqueItems": true,
+          "items": { "type": "string" }
+        },
+        "git_lineage_required": { "const": true },
+        "one_hundred_million_year_survival_guarantee": { "const": false }
+      }
+    },
+    "draftDependency": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["reference", "purpose", "authority_status"],
+      "properties": {
+        "reference": { "type": "string", "minLength": 1 },
+        "purpose": { "type": "string", "minLength": 1 },
+        "authority_status": { "const": "UNMERGED_REFERENCE_ONLY" }
+      }
+    }
+  }
+}
+

@@ -1,0 +1,49 @@
+name: Parallel Market Universe Life and Tax Candidate
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - "codex/multiverse-life-tax-surface-v1-candidate"
+    paths:
+      - "KGEN-KAIOS/civilization/multiverse-life-tax-v1/**"
+      - ".github/workflows/multiverse-life-tax-candidate-ci.yml"
+  pull_request:
+    paths:
+      - "KGEN-KAIOS/civilization/multiverse-life-tax-v1/**"
+      - ".github/workflows/multiverse-life-tax-candidate-ci.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  exact-candidate-validation:
+    runs-on: ubuntu-latest
+    env:
+      EXPECTED_HEAD: ${{ github.event.pull_request.head.sha || github.sha }}
+      BASE_SHA: ${{ github.event.pull_request.base.sha || '763f7c17393f11344d94711422708431ed65d58e' }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.EXPECTED_HEAD }}
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Bind checkout to exact candidate head
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_HEAD"
+      - name: Parse candidate JSON
+        run: |
+          jq empty KGEN-KAIOS/civilization/multiverse-life-tax-v1/universe-registry.candidate.json
+          jq empty KGEN-KAIOS/civilization/multiverse-life-tax-v1/tax-source-registry.candidate.json
+          jq empty KGEN-KAIOS/civilization/multiverse-life-tax-v1/multiverse-life-tax.schema.json
+      - name: Validate candidate ES modules
+        run: node --check KGEN-KAIOS/civilization/multiverse-life-tax-v1/multiverse-life-tax-simulator.mjs
+      - name: Run candidate tests
+        shell: bash
+        run: |
+          set -o pipefail
+          node --test KGEN-KAIOS/civilization/multiverse-life-tax-v1/multiverse-life-tax.test.mjs
+      - name: Reject whitespace damage
+        run: git diff --check "$BASE_SHA...HEAD"
+
