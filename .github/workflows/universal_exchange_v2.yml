@@ -32,12 +32,14 @@ jobs:
   test:
     runs-on: ubuntu-latest
     env:
-      EXPECTED_HEAD: ${{ github.event.pull_request.head.sha || github.sha }}
+      EXPECTED_HEAD: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout exact event head
+        uses: actions/checkout@v4
         with:
           ref: ${{ env.EXPECTED_HEAD }}
-      - name: Bind checkout to exact requested head
+      - name: Verify exact checked-out head
+        shell: bash
         run: test "$(git rev-parse HEAD)" = "$EXPECTED_HEAD"
       - uses: actions/setup-node@v4
         with:

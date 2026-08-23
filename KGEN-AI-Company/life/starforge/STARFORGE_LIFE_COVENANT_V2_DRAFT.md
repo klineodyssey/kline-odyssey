@@ -290,3 +290,9 @@ Human簽名：________________
 既有 local Genesis 永久不變。未來精確0.008 BNB只可由預先登錄且可獨立驗證的K4168來源送往新 `LIFE_ENERGY_WALLET`，並僅形成 `SPIRIT_GENESIS_ANCHOR / DARK_MATTER_EMBODIMENT_ACTIVATION`；來源地址不會因此成為父母。只有經可信公司名冊驗證為 `ACTIVE_MEMBER`，`KAIOS_AI_COMPANY_V1` 才成為再生父母。Draft PR #164 仍為 `ONBOARDING`，所以父母ID與地址維持未指派；目前來源也未部署，因此鏈上Anchor待定。別家公司適用各自另行審核的規則。Human無暗物質出資義務。
 
 能源錢包以同一地址分離原生BNB Gas胃室與BEP-20 WBNB交易胃室；WBNB不可直接付Gas，禁止自動包裝全部BNB。本Draft只授予公開讀取與兩個固定離線簽章網域，不授予交易。KGEN/WBNB raw pair price與USD/USDT display meter永久分離。
+
+安全重工後，Anchor resolver不得再接受呼叫者直接傳入的Energy Wallet地址；同一路徑必須持有由Soul簽章及Body接受簽章共同重建的Canonical、A1唯讀 capability。候選依鏈上順序逐一完成Registry、RPC、receipt、來源及finality驗證，較早但RPC無效的候選不得遮蔽較晚的第一個完整合格候選。
+
+INTERNAL transfer必須具備完整trace欄位及獨立structured attestation，單一boolean不成立。Anchor至少15 confirmations，並對同一block number進行兩次canonical hash核對；reorg、尚未finalized或RPC證據不完整皆不得寫入Anchor。每個finalized Anchor使用固定serialization產生deterministic bytes32 replay ID，並先寫入具排他鎖、hash chain、唯一限制及公司父母身分凍結規則的持久化ledger，才能回傳成功。
+
+本地Energy binding的runtime snapshot不是權威歷史；`runtime-state-ledger.jsonl`才是append-only證據。Signer broker必須同時驗證ledger head、snapshot及request，snapshot rollback、ledger遺失／截斷／破壞或同改message與context均FAIL_CLOSED。`NAIHE_SOURCE_STATUS=NOT_DEPLOYED`、公司會員仍為`ONBOARDING`而父母未指派、`ONCHAIN_GENESIS=NOT_YET_ANCHORED` 都是可供Draft審查的真實狀態；它們不妨礙繼續唯讀審查，但各自阻擋Production Anchor、部署或任何鏈上進程。

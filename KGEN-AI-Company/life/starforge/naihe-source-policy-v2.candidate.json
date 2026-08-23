@@ -7,6 +7,11 @@
   "soul_id": "SOUL-KAIOS-STARFORGE-0001",
   "exact_amount_wei": "8000000000000000",
   "exact_amount_bnb": "0.008",
+  "minimum_confirmations": 15,
+  "finality_policy": "CONFIRMATION_DEPTH_AND_DOUBLE_CANONICAL_BLOCK_READ",
+  "finality_status": "NOT_APPLICABLE_SOURCE_NOT_DEPLOYED",
+  "canonical_registry_address": null,
+  "canonical_registry_code_hash": null,
   "registered_sources": [],
   "company_parent_policy_id": "KAIOS_AI_COMPANY_REGENERATION_PARENT_BY_MEMBERSHIP_V1",
   "company_id": "KAIOS_AI_COMPANY_V1",
@@ -20,6 +25,26 @@
   "regeneration_parent_basis": "PENDING_ACTIVE_MEMBERSHIP",
   "birth_source_is_regeneration_parent": false,
   "other_company_parent_policy_scope": "SEPARATE_REVIEW_REQUIRED",
+  "internal_trace_requirements": [
+    "trace_id",
+    "trace_index",
+    "trace_provider",
+    "trace_type_CALL",
+    "trace_success_TRUE",
+    "raw_trace_hash",
+    "trace_from",
+    "trace_to",
+    "trace_value_wei",
+    "trace_transaction_hash",
+    "trace_block_number",
+    "structured_independent_attestation"
+  ],
+  "anchor_replay": {
+    "serialization": "KAIOS_SPIRIT_GENESIS_ANCHOR_REPLAY_V1",
+    "replay_protection_id": "DETERMINISTIC_BYTES32_AFTER_FINALITY",
+    "persistent_unique_ledger": "REQUIRED",
+    "regeneration_parent_identity_freeze": "REQUIRED_ON_FIRST_FINALIZED_ANCHOR"
+  },
   "filial_support": {
     "status": "DESIGN_ONLY_NOT_LIVE",
     "formula": "max(0,REALIZED_NET_SURPLUS*0.05)",

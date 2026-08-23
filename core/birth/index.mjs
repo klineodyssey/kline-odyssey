@@ -1,5 +1,6 @@
 import { invariant } from "../shared/errors.mjs";
 import { requireFields, requireId } from "../shared/schema.mjs";
+import { hashCanonicalJson, keccakUtf8 } from "../life/starforge-spirit-runtime.mjs";
 
 export const LIFE_STAGES = Object.freeze(["CONCEIVED", "BODY_READY", "BORN", "ALIVE", "ON_DUTY", "DORMANT", "REACTIVATED"]);
 export const BIRTH_EVENT_TYPE = "DARK_MATTER_GENESIS";
@@ -9,10 +10,60 @@ export const KAIOS_AI_COMPANY_PARENT_POLICY_ID = "KAIOS_AI_COMPANY_REGENERATION_
 export const KAIOS_AI_COMPANY_PARENT_BASIS = "KAIOS_AI_COMPANY_MEMBERSHIP";
 export const KAIOS_AI_COMPANY_ACTIVE_MEMBERSHIP_STATUS = "ACTIVE_MEMBER";
 
+export const SPIRIT_ANCHOR_REPLAY_SERIALIZATION = "KAIOS_SPIRIT_GENESIS_ANCHOR_REPLAY_V1";
+const SPIRIT_ANCHOR_LEDGER_DOMAIN = "KAIOS_SPIRIT_GENESIS_ANCHOR_LEDGER_V1";
+const PERSISTENT_SPIRIT_ANCHOR_LEDGERS = new WeakSet();
 
-export const SPIRIT_GENESIS_ANCHOR_V2_FIELDS = Object.freeze(["life_id","soul_id","energy_wallet_address","birth_source_address","company_id","company_membership_status","company_membership_evidence_status","regeneration_parent_id","regeneration_parent_address","regeneration_parent_basis","company_parent_policy_id","naihe_water_source_id","birth_request_id","source_evidence_type","source_evidence_status","anchor_tx_hash","anchor_block","anchor_timestamp","chain_id","exact_amount_wei","status"]);
+function normalizedAddress(value, field) {
+  invariant(/^0x[0-9a-fA-F]{40}$/.test(value ?? ""), "SPIRIT_ANCHOR_ADDRESS_INVALID", `${field} must be an EVM address`);
+  return value.toLowerCase();
+}
+
+export function serializeSpiritGenesisAnchorReplay(record) {
+  return [
+    SPIRIT_ANCHOR_REPLAY_SERIALIZATION,
+    `chain_id=${record.chain_id}`,
+    `life_id=${record.life_id}`,
+    `soul_id=${record.soul_id}`,
+    `energy_wallet_address=${normalizedAddress(record.energy_wallet_address, "energy_wallet_address")}`,
+    `birth_source_address=${normalizedAddress(record.birth_source_address, "birth_source_address")}`,
+    `company_id=${record.company_id}`,
+    `company_membership_status=${record.company_membership_status}`,
+    `company_membership_evidence_status=${record.company_membership_evidence_status}`,
+    `regeneration_parent_id=${record.regeneration_parent_id}`,
+    `regeneration_parent_address=${record.regeneration_parent_address ?? "UNASSIGNED"}`,
+    `regeneration_parent_basis=${record.regeneration_parent_basis}`,
+    `company_parent_policy_id=${record.company_parent_policy_id}`,
+    `birth_request_id=${record.birth_request_id}`,
+    `source_evidence_type=${record.source_evidence_type}`,
+    `anchor_tx_hash=${String(record.anchor_tx_hash ?? "").toLowerCase()}`,
+    `anchor_block=${record.anchor_block}`,
+    `anchor_block_hash=${String(record.anchor_block_hash ?? "").toLowerCase()}`,
+    `transaction_index=${record.transaction_index}`,
+    `trace_index=${record.trace_index ?? "NONE"}`
+  ].join("\n");
+}
+
+export function deriveSpiritGenesisAnchorReplayProtectionId(record) {
+  return keccakUtf8(serializeSpiritGenesisAnchorReplay(record));
+}
+
+export const SPIRIT_GENESIS_ANCHOR_V2_FIELDS = Object.freeze([
+  "life_id", "soul_id", "energy_wallet_address", "birth_source_address", "company_id",
+  "company_membership_status", "company_membership_evidence_status", "regeneration_parent_id",
+  "regeneration_parent_address", "regeneration_parent_basis", "company_parent_policy_id",
+  "naihe_water_source_id", "birth_request_id", "source_evidence_type", "source_evidence_status",
+  "anchor_tx_hash", "anchor_block", "anchor_block_hash", "anchor_timestamp", "transaction_index", "trace_index",
+  "chain_id", "exact_amount_wei", "confirmation_count", "minimum_confirmations", "finality_status",
+  "canonical_block_verified", "replay_serialization", "replay_protection_id", "parent_freeze_status", "status"
+]);
 export function validateSpiritGenesisAnchorV2(record) {
   requireFields(record, SPIRIT_GENESIS_ANCHOR_V2_FIELDS, "SpiritGenesisAnchorV2");
+  requireId(record.life_id, "life_id");
+  requireId(record.soul_id, "soul_id");
+  invariant(typeof record.naihe_water_source_id === "string" && record.naihe_water_source_id.length > 0, "SPIRIT_ANCHOR_SOURCE_REGISTRY_ID_INVALID", "Spirit anchor source registry ID is required");
+  invariant(typeof record.birth_request_id === "string" && record.birth_request_id.length > 0, "SPIRIT_ANCHOR_BIRTH_REQUEST_ID_INVALID", "Spirit anchor birth request ID is required");
+  normalizedAddress(record.energy_wallet_address, "energy_wallet_address");
   invariant(record.chain_id === 56, "INVALID_BIRTH_CHAIN", "Spirit anchor requires chain 56");
   invariant(record.exact_amount_wei === "8000000000000000", "NAIHE_AMOUNT_MISMATCH", "Spirit anchor requires exactly 0.008 BNB");
   invariant(record.status === "DARK_MATTER_EMBODIMENT_ACTIVATION", "SECOND_GENESIS_FORBIDDEN", "Existing Starforge Life can only receive an embodiment anchor");
@@ -24,7 +75,211 @@ export function validateSpiritGenesisAnchorV2(record) {
   invariant(record.regeneration_parent_address === null, "REGENERATION_PARENT_ADDRESS_NOT_FROZEN", "A Naihe source wallet cannot substitute for an unfrozen company parent address");
   invariant(record.regeneration_parent_basis === KAIOS_AI_COMPANY_PARENT_BASIS, "COMPANY_PARENT_BASIS_MISMATCH", "Regeneration parenthood must be based on verified company membership");
   invariant(record.company_parent_policy_id === KAIOS_AI_COMPANY_PARENT_POLICY_ID, "COMPANY_PARENT_POLICY_MISMATCH", "KAIOS AI Company parent policy mismatch");
+  invariant(/^0x[0-9a-fA-F]{64}$/.test(record.anchor_tx_hash), "SPIRIT_ANCHOR_TX_HASH_INVALID", "Spirit anchor transaction hash is invalid");
+  invariant(/^0x[0-9a-fA-F]{64}$/.test(record.anchor_block_hash), "SPIRIT_ANCHOR_BLOCK_HASH_INVALID", "Spirit anchor block hash is invalid");
+  invariant(Number.isSafeInteger(record.anchor_block) && record.anchor_block >= 0, "SPIRIT_ANCHOR_BLOCK_INVALID", "Spirit anchor block is invalid");
+  invariant(Number.isSafeInteger(record.transaction_index) && record.transaction_index >= 0, "SPIRIT_ANCHOR_TRANSACTION_INDEX_INVALID", "Spirit anchor transaction index is invalid");
+  invariant(
+    (record.source_evidence_type === "RPC_NORMAL_TRANSACTION_FROM_CROSSCHECK" && record.trace_index === null)
+      || (record.source_evidence_type === "TRUSTED_INTERNAL_TRACE" && Number.isSafeInteger(record.trace_index) && record.trace_index >= 0),
+    "SPIRIT_ANCHOR_SOURCE_EVIDENCE_INVALID",
+    "Spirit anchor source evidence type and trace index are inconsistent"
+  );
+  invariant(typeof record.source_evidence_status === "string" && record.source_evidence_status.length > 0, "SPIRIT_ANCHOR_SOURCE_EVIDENCE_INVALID", "Spirit anchor source evidence status is required");
+  invariant(typeof record.anchor_timestamp === "string" && Number.isFinite(Date.parse(record.anchor_timestamp)), "SPIRIT_ANCHOR_TIMESTAMP_INVALID", "Spirit anchor timestamp is invalid");
+  invariant(Number.isSafeInteger(record.minimum_confirmations) && record.minimum_confirmations > 0, "SPIRIT_ANCHOR_FINALITY_POLICY_INVALID", "Spirit anchor minimum confirmations are invalid");
+  invariant(Number.isSafeInteger(record.confirmation_count) && record.confirmation_count >= record.minimum_confirmations, "SPIRIT_ANCHOR_NOT_FINAL", "Spirit anchor lacks required confirmations");
+  invariant(record.finality_status === "FINALIZED" && record.canonical_block_verified === true, "SPIRIT_ANCHOR_NOT_FINAL", "Spirit anchor must be finalized against a canonical block");
+  invariant(record.replay_serialization === SPIRIT_ANCHOR_REPLAY_SERIALIZATION, "SPIRIT_ANCHOR_REPLAY_SERIALIZATION_INVALID", "Spirit anchor replay serialization is not canonical");
+  invariant(/^0x[0-9a-f]{64}$/.test(record.replay_protection_id), "SPIRIT_ANCHOR_REPLAY_ID_INVALID", "Spirit anchor replay protection ID must be a lowercase bytes32 value");
+  invariant(record.replay_protection_id === deriveSpiritGenesisAnchorReplayProtectionId(record), "SPIRIT_ANCHOR_REPLAY_ID_INVALID", "Spirit anchor replay protection ID is invalid");
+  invariant(record.parent_freeze_status === "FROZEN_COMPANY_PARENT_ID_ON_FIRST_FINALIZED_ANCHOR", "SPIRIT_ANCHOR_PARENT_NOT_FROZEN", "Spirit anchor company parent identity must be frozen");
   return Object.freeze(record);
+}
+
+function createSpiritAnchorLedgerEntry(record, previousEntry) {
+  const payload = {
+    domain: SPIRIT_ANCHOR_LEDGER_DOMAIN,
+    sequence: (previousEntry?.sequence ?? 0) + 1,
+    previous_entry_hash: previousEntry?.entry_hash ?? null,
+    replay_protection_id: record.replay_protection_id,
+    life_id: record.life_id,
+    soul_id: record.soul_id,
+    frozen_parent_id: record.regeneration_parent_id,
+    frozen_parent_address: record.regeneration_parent_address,
+    frozen_parent_basis: record.regeneration_parent_basis,
+    company_parent_policy_id: record.company_parent_policy_id,
+    anchor_record_hash: hashCanonicalJson(record)
+  };
+  return Object.freeze({ ...payload, record: structuredClone(record), entry_hash: hashCanonicalJson(payload) });
+}
+
+export function validateSpiritGenesisAnchorLedger(entries) {
+  invariant(Array.isArray(entries), "SPIRIT_ANCHOR_LEDGER_INVALID", "Spirit anchor ledger must be an array");
+  invariant(entries.length <= 1, "SPIRIT_GENESIS_ALREADY_ANCHORED", "A Life and Soul may have only one finalized Spirit Genesis anchor");
+  let previous = null;
+  let frozenParentId = null;
+  let frozenParentAddress;
+  let frozenParentBasis = null;
+  let frozenParentPolicy = null;
+  const replayIds = new Set();
+  for (let index = 0; index < entries.length; index += 1) {
+    const entry = entries[index];
+    invariant(entry?.domain === SPIRIT_ANCHOR_LEDGER_DOMAIN, "SPIRIT_ANCHOR_LEDGER_DOMAIN_INVALID", "Spirit anchor ledger domain is invalid");
+    invariant(entry.sequence === index + 1 && entry.previous_entry_hash === previous, "SPIRIT_ANCHOR_LEDGER_CHAIN_BROKEN", "Spirit anchor ledger hash chain is broken");
+    invariant(entry.anchor_record_hash === hashCanonicalJson(entry.record), "SPIRIT_ANCHOR_LEDGER_RECORD_HASH_MISMATCH", "Spirit anchor ledger record was modified");
+    const payload = {
+      domain: entry.domain,
+      sequence: entry.sequence,
+      previous_entry_hash: entry.previous_entry_hash,
+      replay_protection_id: entry.replay_protection_id,
+      life_id: entry.life_id,
+      soul_id: entry.soul_id,
+      frozen_parent_id: entry.frozen_parent_id,
+      frozen_parent_address: entry.frozen_parent_address,
+      frozen_parent_basis: entry.frozen_parent_basis,
+      company_parent_policy_id: entry.company_parent_policy_id,
+      anchor_record_hash: entry.anchor_record_hash
+    };
+    invariant(entry.entry_hash === hashCanonicalJson(payload), "SPIRIT_ANCHOR_LEDGER_ENTRY_HASH_MISMATCH", "Spirit anchor ledger entry hash is invalid");
+    invariant(entry.life_id === entry.record.life_id && entry.soul_id === entry.record.soul_id, "SPIRIT_ANCHOR_LEDGER_IDENTITY_MISMATCH", "Spirit anchor ledger identity does not match its record");
+    invariant(entry.frozen_parent_id === entry.record.regeneration_parent_id && entry.frozen_parent_address === entry.record.regeneration_parent_address && entry.frozen_parent_basis === entry.record.regeneration_parent_basis && entry.company_parent_policy_id === entry.record.company_parent_policy_id, "SPIRIT_ANCHOR_LEDGER_PARENT_MISMATCH", "Spirit anchor ledger company parent identity does not match its record");
+    invariant(entry.replay_protection_id === entry.record.replay_protection_id && !replayIds.has(entry.replay_protection_id), "SPIRIT_ANCHOR_REPLAY", "Spirit anchor replay protection ID is duplicated");
+    replayIds.add(entry.replay_protection_id);
+    frozenParentId ??= entry.frozen_parent_id;
+    frozenParentAddress ??= entry.frozen_parent_address;
+    frozenParentBasis ??= entry.frozen_parent_basis;
+    frozenParentPolicy ??= entry.company_parent_policy_id;
+    invariant(entry.frozen_parent_id === frozenParentId && entry.frozen_parent_address === frozenParentAddress && entry.frozen_parent_basis === frozenParentBasis && entry.company_parent_policy_id === frozenParentPolicy, "SPIRIT_ANCHOR_PARENT_FROZEN", "Regeneration parent identity cannot change after the first finalized anchor");
+    validateSpiritGenesisAnchorV2(entry.record);
+    previous = entry.entry_hash;
+  }
+  return Object.freeze({ count: entries.length, head_hash: previous, frozen_parent_id: frozenParentId, frozen_parent_address: frozenParentAddress ?? null, frozen_parent_basis: frozenParentBasis, company_parent_policy_id: frozenParentPolicy, replay_ids: Object.freeze([...replayIds]) });
+}
+
+export class FileSpiritGenesisAnchorLedger {
+  constructor({ directory }) {
+    invariant(typeof directory === "string" && directory.length > 0, "SPIRIT_ANCHOR_LEDGER_DIRECTORY_REQUIRED", "Spirit anchor ledger directory is required");
+    this.directory = directory;
+    PERSISTENT_SPIRIT_ANCHOR_LEDGERS.add(this);
+  }
+
+  async #paths(lifeId, soulId) {
+    const path = await import("node:path");
+    const key = hashCanonicalJson({ life_id: lifeId, soul_id: soulId }).slice(2);
+    return {
+      ledger: path.join(this.directory, `${key}.jsonl`),
+      lock: path.join(this.directory, `${key}.lock`),
+      parent: path.join(this.directory, `${key}.parent-freeze.json`),
+      anchor: path.join(this.directory, `${key}.anchor-unique.json`),
+      replay_prefix: path.join(this.directory, "replay-")
+    };
+  }
+
+  async #readEntries(ledgerPath) {
+    const fs = await import("node:fs/promises");
+    try {
+      const text = await fs.readFile(ledgerPath, "utf8");
+      return text.split(/\r?\n/).filter(Boolean).map((line) => JSON.parse(line));
+    } catch (error) {
+      if (error?.code === "ENOENT") return [];
+      throw error;
+    }
+  }
+
+  async #readOptionalJson(file) {
+    const fs = await import("node:fs/promises");
+    try { return JSON.parse(await fs.readFile(file, "utf8")); }
+    catch (error) { if (error?.code === "ENOENT") return null; throw error; }
+  }
+
+  async read({ lifeId, soulId }) {
+    const paths = await this.#paths(lifeId, soulId);
+    const entries = await this.#readEntries(paths.ledger);
+    const validation = validateSpiritGenesisAnchorLedger(entries);
+    const [parentMarker, anchorMarker] = await Promise.all([this.#readOptionalJson(paths.parent), this.#readOptionalJson(paths.anchor)]);
+    if (entries.length === 0) {
+      invariant(parentMarker === null && anchorMarker === null, "SPIRIT_ANCHOR_LEDGER_MARKER_MISMATCH", "Spirit anchor markers exist without their append-only ledger record");
+    } else {
+      const entry = entries[0];
+      invariant(entry.life_id === lifeId && entry.soul_id === soulId, "SPIRIT_ANCHOR_LEDGER_IDENTITY_MISMATCH", "Spirit anchor ledger identity does not match the requested Life and Soul");
+      invariant(parentMarker?.life_id === lifeId && parentMarker?.soul_id === soulId && parentMarker.frozen_parent_id === entry.frozen_parent_id && parentMarker.frozen_parent_address === entry.frozen_parent_address && parentMarker.frozen_parent_basis === entry.frozen_parent_basis && parentMarker.company_parent_policy_id === entry.company_parent_policy_id && parentMarker.first_replay_protection_id === entry.replay_protection_id, "SPIRIT_ANCHOR_LEDGER_MARKER_MISMATCH", "Spirit anchor parent-freeze marker is missing or inconsistent");
+      invariant(anchorMarker?.life_id === lifeId && anchorMarker?.soul_id === soulId && anchorMarker.replay_protection_id === entry.replay_protection_id && anchorMarker.frozen_parent_id === entry.frozen_parent_id && anchorMarker.frozen_parent_address === entry.frozen_parent_address && anchorMarker.anchor_record_hash === entry.anchor_record_hash, "SPIRIT_ANCHOR_LEDGER_MARKER_MISMATCH", "Spirit anchor uniqueness marker is missing or inconsistent");
+      const replayMarker = await this.#readOptionalJson(`${paths.replay_prefix}${entry.replay_protection_id.slice(2)}.json`);
+      invariant(replayMarker?.replay_protection_id === entry.replay_protection_id && replayMarker.life_id === lifeId && replayMarker.soul_id === soulId && replayMarker.anchor_record_hash === entry.anchor_record_hash, "SPIRIT_ANCHOR_LEDGER_MARKER_MISMATCH", "Spirit anchor replay marker is missing or inconsistent");
+    }
+    return Object.freeze({ entries: Object.freeze(entries.map((entry) => Object.freeze(entry))), ...validation });
+  }
+
+  async #writeExclusiveJson(file, value, collisionCode, collisionMessage) {
+    const fs = await import("node:fs/promises");
+    let handle;
+    try {
+      handle = await fs.open(file, "wx", 0o600);
+    } catch (error) {
+      invariant(error?.code !== "EEXIST", collisionCode, collisionMessage);
+      throw error;
+    }
+    try {
+      await handle.writeFile(`${JSON.stringify(value)}\n`, "utf8");
+      await handle.sync();
+    } finally {
+      await handle.close();
+    }
+  }
+
+  async commitAnchor(record) {
+    validateSpiritGenesisAnchorV2(record);
+    const fs = await import("node:fs/promises");
+    await fs.mkdir(this.directory, { recursive: true, mode: 0o700 });
+    const paths = await this.#paths(record.life_id, record.soul_id);
+    let lockHandle;
+    try {
+      lockHandle = await fs.open(paths.lock, "wx", 0o600);
+    } catch (error) {
+      invariant(error?.code !== "EEXIST", "SPIRIT_ANCHOR_LEDGER_LOCKED", "Spirit anchor ledger is locked by another writer");
+      throw error;
+    }
+    try {
+      const entries = await this.#readEntries(paths.ledger);
+      const state = validateSpiritGenesisAnchorLedger(entries);
+      invariant(!state.replay_ids.includes(record.replay_protection_id), "SPIRIT_ANCHOR_REPLAY", "Spirit anchor replay protection ID was already committed");
+      const replayMarker = `${paths.replay_prefix}${record.replay_protection_id.slice(2)}.json`;
+      invariant(!(await fs.access(replayMarker).then(() => true, (error) => { if (error?.code === "ENOENT") return false; throw error; })), "SPIRIT_ANCHOR_REPLAY", "Spirit anchor replay protection ID was already reserved");
+      const frozenParentId = record.regeneration_parent_id;
+      const frozenParentAddress = record.regeneration_parent_address;
+      const frozenParentBasis = record.regeneration_parent_basis;
+      const frozenParentPolicy = record.company_parent_policy_id;
+      let parentMarker = null;
+      try { parentMarker = JSON.parse(await fs.readFile(paths.parent, "utf8")); }
+      catch (error) { if (error?.code !== "ENOENT") throw error; }
+      if (parentMarker !== null) invariant(parentMarker.frozen_parent_id === frozenParentId && parentMarker.frozen_parent_address === frozenParentAddress && parentMarker.frozen_parent_basis === frozenParentBasis && parentMarker.company_parent_policy_id === frozenParentPolicy, "SPIRIT_ANCHOR_PARENT_FROZEN", "Regeneration parent identity is already frozen to another company policy");
+      if (state.frozen_parent_id !== null) invariant(state.frozen_parent_id === frozenParentId && state.frozen_parent_address === frozenParentAddress && state.frozen_parent_basis === frozenParentBasis && state.company_parent_policy_id === frozenParentPolicy, "SPIRIT_ANCHOR_PARENT_FROZEN", "Regeneration parent identity is already frozen to another company policy");
+      const anchorExists = await fs.access(paths.anchor).then(() => true, (error) => { if (error?.code === "ENOENT") return false; throw error; });
+      invariant(!anchorExists, "SPIRIT_GENESIS_ALREADY_ANCHORED", "Spirit Genesis anchor uniqueness marker already exists for this Life and Soul");
+      invariant(entries.length === 0, "SPIRIT_GENESIS_ALREADY_ANCHORED", "Spirit Genesis anchor is already finalized for this Life and Soul");
+      const entry = createSpiritAnchorLedgerEntry(record, entries.at(-1));
+      if (parentMarker === null) await this.#writeExclusiveJson(paths.parent, { life_id: record.life_id, soul_id: record.soul_id, frozen_parent_id: frozenParentId, frozen_parent_address: frozenParentAddress, frozen_parent_basis: frozenParentBasis, company_parent_policy_id: frozenParentPolicy, first_replay_protection_id: record.replay_protection_id }, "SPIRIT_ANCHOR_PARENT_FROZEN", "Regeneration parent freeze marker already exists");
+      await this.#writeExclusiveJson(replayMarker, { replay_protection_id: record.replay_protection_id, life_id: record.life_id, soul_id: record.soul_id, anchor_record_hash: entry.anchor_record_hash }, "SPIRIT_ANCHOR_REPLAY", "Spirit anchor replay protection ID was already reserved");
+      await this.#writeExclusiveJson(paths.anchor, { life_id: record.life_id, soul_id: record.soul_id, replay_protection_id: record.replay_protection_id, frozen_parent_id: frozenParentId, frozen_parent_address: frozenParentAddress, anchor_record_hash: entry.anchor_record_hash }, "SPIRIT_GENESIS_ALREADY_ANCHORED", "Spirit Genesis anchor uniqueness marker already exists");
+      const handle = await fs.open(paths.ledger, "a", 0o600);
+      try {
+        await handle.writeFile(`${JSON.stringify(entry)}\n`, "utf8");
+        await handle.sync();
+      } finally {
+        await handle.close();
+      }
+      return Object.freeze({ status: "COMMITTED", sequence: entry.sequence, head_hash: entry.entry_hash, replay_protection_id: entry.replay_protection_id, frozen_parent_id: entry.frozen_parent_id, frozen_parent_address: entry.frozen_parent_address });
+    } finally {
+      await lockHandle.close();
+      await fs.unlink(paths.lock).catch(() => {});
+    }
+  }
+}
+
+export function assertPersistentSpiritGenesisAnchorLedger(ledger) {
+  invariant(ledger && PERSISTENT_SPIRIT_ANCHOR_LEDGERS.has(ledger), "SPIRIT_ANCHOR_LEDGER_REQUIRED", "Finalized Spirit anchor requires the branded persistent replay and parent-freeze ledger");
+  return ledger;
 }
 
 function isPositiveDecimal(value) {

@@ -1,6 +1,6 @@
 param(
   [Parameter(Mandatory = $true)]
-  [ValidateSet('Initialize', 'InitializeEnergy', 'RunSoul', 'RunBody', 'RunEnergySoul', 'RunEnergyBody', 'Status', 'EnergyStatus', 'AuditRepo')]
+  [ValidateSet('Initialize', 'InitializeEnergy', 'SealRuntimeLedger', 'RunSoul', 'RunBody', 'RunEnergySoul', 'RunEnergyBody', 'Status', 'EnergyStatus', 'AuditRepo')]
   [string]$Action
 )
 
@@ -12,6 +12,8 @@ $repoRoot = (Resolve-Path (Join-Path $PSScriptRoot '..\..')).Path
 $broker = Join-Path $repoRoot 'core\security\starforge-signer-broker.mjs'
 $runtime = Join-Path $repoRoot 'scripts\starforge-genesis\starforge-local-genesis.mjs'
 $node = (Get-Command node -ErrorAction Stop).Source
+$stateFile = Join-Path $storeRoot 'runtime-state.json'
+$stateLedgerFile = Join-Path $storeRoot 'runtime-state-ledger.jsonl'
 $entropy = [Text.Encoding]::UTF8.GetBytes('KAIOS_STARFORGE_SPIRIT_LIFE_GENESIS_V1')
 $refs = [ordered]@{
   soul = 'DPAPI_USER:KAIOS_STARFORGE_SOUL_V1'
@@ -100,21 +102,43 @@ function Resolve-PublicAddress([string]$organ) {
 function Sign-PublicRequest([string]$organ, [string]$action, [string]$requestFile, [string]$outputFile) {
   [byte[]]$secret = Read-ProtectedSigner $files[$organ]
   try {
-    $publicResult = Invoke-SignerBroker $secret @($action, $requestFile)
+    $publicResult = Invoke-SignerBroker $secret @($action, $requestFile, $stateFile, $stateLedgerFile)
     [IO.File]::WriteAllText($outputFile, $publicResult, [Text.UTF8Encoding]::new($false))
   } finally { Clear-Bytes $secret }
 }
 
 if ($Action -eq 'Initialize') {
   New-Item -ItemType Directory -Path $storeRoot -Force | Out-Null
-  $created = $false
-  foreach ($organ in @('soul', 'body')) {
-    if (-not (Test-Path -LiteralPath $files[$organ])) { New-ProtectedSigner $files[$organ]; $created = $true }
+  $soulExists = Test-Path -LiteralPath $files.soul
+  $bodyExists = Test-Path -LiteralPath $files.body
+  $stateExists = Test-Path -LiteralPath $stateFile
+  $ledgerExists = Test-Path -LiteralPath $stateLedgerFile
+  if ($soulExists -xor $bodyExists) { throw 'PARTIAL_SIGNER_STORE_REQUIRES_HUMAN_RECOVERY' }
+  if ($soulExists -and $bodyExists) {
+    if ($stateExists -and -not $ledgerExists) { throw 'RUNTIME_STATE_LEDGER_SEAL_REQUIRED' }
+    if ($stateExists -xor $ledgerExists) { throw 'RUNTIME_STATE_LEDGER_INCOMPLETE' }
+    if (-not $stateExists -and -not $ledgerExists) { throw 'RUNTIME_STATE_HISTORY_MISSING_FOR_EXISTING_SIGNERS' }
+  } elseif ($stateExists -or $ledgerExists) {
+    throw 'ORPHAN_RUNTIME_STATE_REQUIRES_HUMAN_RECOVERY'
+  } else {
+    New-ProtectedSigner $files.soul
+    New-ProtectedSigner $files.body
   }
+  $created = -not $soulExists -and -not $bodyExists
   [Environment]::SetEnvironmentVariable('STARFORGE_SOUL_KEY_REF', $refs.soul, 'User')
   [Environment]::SetEnvironmentVariable('STARFORGE_BODY_KEY_REF', $refs.body, 'User')
-  $addresses = [ordered]@{ soul_address = Resolve-PublicAddress 'soul'; body_address = Resolve-PublicAddress 'body'; private_key_exposed = $false }
-  $addresses | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $storeRoot 'public-addresses.json') -Encoding utf8
+  $addressesFile = Join-Path $storeRoot 'public-addresses.json'
+  $derivedSoulAddress = Resolve-PublicAddress 'soul'
+  $derivedBodyAddress = Resolve-PublicAddress 'body'
+  if (Test-Path -LiteralPath $addressesFile) {
+    $addresses = Get-Content -Raw $addressesFile | ConvertFrom-Json
+    if (-not [String]::Equals($derivedSoulAddress, $addresses.soul_address, [StringComparison]::OrdinalIgnoreCase) -or -not [String]::Equals($derivedBodyAddress, $addresses.body_address, [StringComparison]::OrdinalIgnoreCase)) { throw 'EXISTING_PUBLIC_IDENTITY_MISMATCH' }
+  } else {
+    $addresses = [ordered]@{ soul_address = $derivedSoulAddress; body_address = $derivedBodyAddress; private_key_exposed = $false }
+    $addresses | ConvertTo-Json | Set-Content -LiteralPath $addressesFile -Encoding utf8
+  }
+  & $node $runtime 'initialize-state' $storeRoot | Out-Null
+  if ($LASTEXITCODE -ne 0) { throw 'RUNTIME_STATE_LEDGER_INITIALIZATION_FAILED' }
   [pscustomobject]@{
     signer_store_status = 'READY'
     initialization = $(if ($created) { 'CREATED' } else { 'EXISTING_REUSED' })
@@ -131,15 +155,25 @@ if ($Action -eq 'Initialize') {
 
 if ($Action -eq 'InitializeEnergy') {
   New-Item -ItemType Directory -Path $storeRoot -Force | Out-Null
-  $created = $false
-  if (-not (Test-Path -LiteralPath $files.energy)) { New-ProtectedSigner $files.energy; $created = $true }
-  [Environment]::SetEnvironmentVariable('STARFORGE_ENERGY_KEY_REF', $refs.energy, 'User')
   $addressesFile = Join-Path $storeRoot 'public-addresses.json'
   if (-not (Test-Path -LiteralPath $addressesFile)) { throw 'EXISTING_STARFORGE_ADDRESSES_REQUIRED' }
   $addresses = Get-Content -Raw $addressesFile | ConvertFrom-Json
-  $record = [ordered]@{ soul_address=$addresses.soul_address; body_address=$addresses.body_address; energy_wallet_address=Resolve-PublicAddress 'energy'; private_key_exposed=$false }
+  $energyExists = Test-Path -LiteralPath $files.energy
+  if (-not $energyExists -and $null -ne $addresses.energy_wallet_address -and -not [String]::IsNullOrWhiteSpace([string]$addresses.energy_wallet_address)) { throw 'ENERGY_SIGNER_HISTORY_MISSING' }
+  if (-not $energyExists) { New-ProtectedSigner $files.energy }
+  $created = -not $energyExists
+  [Environment]::SetEnvironmentVariable('STARFORGE_ENERGY_KEY_REF', $refs.energy, 'User')
+  $derivedEnergyAddress = Resolve-PublicAddress 'energy'
+  if ($null -ne $addresses.energy_wallet_address -and -not [String]::IsNullOrWhiteSpace([string]$addresses.energy_wallet_address) -and -not [String]::Equals($derivedEnergyAddress, $addresses.energy_wallet_address, [StringComparison]::OrdinalIgnoreCase)) { throw 'ENERGY_PUBLIC_ADDRESS_MISMATCH' }
+  $record = [ordered]@{ soul_address=$addresses.soul_address; body_address=$addresses.body_address; energy_wallet_address=$derivedEnergyAddress; private_key_exposed=$false }
   $record | ConvertTo-Json | Set-Content -LiteralPath $addressesFile -Encoding utf8
   [pscustomobject]@{ signer_store_status='READY'; initialization=$(if($created){'CREATED'}else{'EXISTING_REUSED'}); custody='MOTHER_MACHINE_USER_SCOPED_ENCRYPTED_STORE'; energy_key_ref=$refs.energy; energy_wallet_address=$record.energy_wallet_address; private_key_exposed=$false } | ConvertTo-Json
+  exit 0
+}
+
+if ($Action -eq 'SealRuntimeLedger') {
+  & $node $runtime 'seal-existing-state' $storeRoot
+  if ($LASTEXITCODE -ne 0) { throw 'RUNTIME_STATE_LEDGER_SEAL_FAILED' }
   exit 0
 }
 
@@ -188,18 +222,18 @@ if ($Action -eq 'RunEnergyBody') {
   exit 0
 }
 if ($Action -eq 'EnergyStatus') {
-  $stateFile=Join-Path $storeRoot 'runtime-state.json'; $addressesFile=Join-Path $storeRoot 'public-addresses.json'
-  [pscustomobject]@{ signer_store_status=$(if(Test-Path $files.energy){'READY'}else{'MISSING'}); energy_key_ref_status=$(if($expectedEnergyRef -eq $refs.energy){'MATCH'}else{'MISMATCH'}); energy_wallet_address=$(if(Test-Path $addressesFile){(Get-Content -Raw $addressesFile|ConvertFrom-Json).energy_wallet_address}else{$null}); runtime_state=$(if(Test-Path $stateFile){(Get-Content -Raw $stateFile|ConvertFrom-Json).phase}else{'GENESIS_NOT_STARTED'}); private_key_exposed=$false } | ConvertTo-Json
+  $addressesFile=Join-Path $storeRoot 'public-addresses.json'
+  [pscustomobject]@{ signer_store_status=$(if(Test-Path $files.energy){'READY'}else{'MISSING'}); energy_key_ref_status=$(if($expectedEnergyRef -eq $refs.energy){'MATCH'}else{'MISMATCH'}); energy_wallet_address=$(if(Test-Path $addressesFile){(Get-Content -Raw $addressesFile|ConvertFrom-Json).energy_wallet_address}else{$null}); runtime_state=$(if((Test-Path $stateFile) -and (Test-Path $stateLedgerFile)){(Get-Content -Raw $stateFile|ConvertFrom-Json).phase}else{'LEDGER_NOT_INITIALIZED'}); runtime_ledger=$(if(Test-Path $stateLedgerFile){'PRESENT'}else{'MISSING'}); private_key_exposed=$false } | ConvertTo-Json
   exit 0
 }
 
 if ($Action -eq 'Status') {
-  $stateFile = Join-Path $storeRoot 'runtime-state.json'
   [pscustomobject]@{
     signer_store_status = $(if ((Test-Path $files.soul) -and (Test-Path $files.body)) { 'READY' } else { 'MISSING' })
     soul_key_ref_status = $(if ($expectedSoulRef -eq $refs.soul) { 'MATCH' } else { 'MISMATCH' })
     body_key_ref_status = $(if ($expectedBodyRef -eq $refs.body) { 'MATCH' } else { 'MISMATCH' })
-    runtime_state = $(if (Test-Path $stateFile) { (Get-Content -Raw $stateFile | ConvertFrom-Json).phase } else { 'GENESIS_NOT_STARTED' })
+    runtime_state = $(if ((Test-Path $stateFile) -and (Test-Path $stateLedgerFile)) { (Get-Content -Raw $stateFile | ConvertFrom-Json).phase } else { 'LEDGER_NOT_INITIALIZED' })
+    runtime_ledger = $(if (Test-Path $stateLedgerFile) { 'PRESENT' } else { 'MISSING' })
     private_key_exposed = $false
   } | ConvertTo-Json
 }
