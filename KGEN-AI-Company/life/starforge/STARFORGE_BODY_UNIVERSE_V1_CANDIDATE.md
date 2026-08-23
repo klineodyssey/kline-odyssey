@@ -2,7 +2,7 @@
 
 Status: `CANDIDATE_NOT_CURRENT`; no chain write, trade, payment, deployment or second Genesis.
 
-Starforge retains the immutable V1 Life, Soul, Body and local Genesis. A future exact `0.008 BNB` from an independently verified K4168 source is only `SPIRIT_GENESIS_ANCHOR / DARK_MATTER_EMBODIMENT_ACTIVATION`. No source is deployed, so the parent and anchor remain unassigned/pending.
+Starforge retains the immutable V1 Life, Soul, Body and local Genesis. A future exact `0.008 BNB` from an independently verified K4168 source is only `SPIRIT_GENESIS_ANCHOR / DARK_MATTER_EMBODIMENT_ACTIVATION`; the source address is not a regeneration parent. Verified `ACTIVE_MEMBER` membership in `KAIOS_AI_COMPANY_V1` assigns that company identity as regeneration parent under `KAIOS_AI_COMPANY_REGENERATION_PARENT_BY_MEMBERSHIP_V1`. Draft PR #164 remains `ONBOARDING`, so Starforge's parent is unassigned; no source is deployed, so the anchor is also pending. Other companies require their own separately reviewed rule.
 
 ## Coordinate and market separation
 
@@ -16,7 +16,7 @@ One DPAPI CurrentUser-protected energy wallet has separate native BNB gas and BE
 
 The Energy extension now requires a byte-for-byte canonical message rebuilt from trusted runtime context, persistent consumed message/challenge records, and monotonically increasing session counters. Distinct process identifiers are reported only as `PROCESS_RESTART_NOT_OS_REBOOT`; they are not evidence of a Mother Machine reboot.
 
-Production Naihe source resolution is unconditionally disabled while `NAIHE_SOURCE_STATUS = NOT_DEPLOYED`. Test registries cannot enter a production resolver. A normal transfer must match RPC `transaction.from`; an internal transfer requires a trusted trace verifier rather than a caller-provided boolean.
+Production Naihe source resolution is unconditionally disabled while `NAIHE_SOURCE_STATUS = NOT_DEPLOYED`. Test registries cannot enter a production resolver. A normal transfer must match RPC `transaction.from`; an internal transfer requires a trusted trace verifier rather than a caller-provided boolean. Company parent assignment is independently fail-closed behind a trusted membership verifier; `ONBOARDING`, funding, and source evidence cannot assign parenthood.
 
 Updated public signing and recovery evidence is appended only after the local rework flow is rerun. Private keys and DPAPI ciphertext remain excluded.
 

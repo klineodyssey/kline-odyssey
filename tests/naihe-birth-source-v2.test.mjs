@@ -1,7 +1,13 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { DigitalLifeBirthResolver } from "../core/birth/digital-life-birth-resolver.mjs";
-import { validateSpiritGenesisAnchorV2 } from "../core/birth/index.mjs";
+import {
+  KAIOS_AI_COMPANY_ACTIVE_MEMBERSHIP_STATUS,
+  KAIOS_AI_COMPANY_ID,
+  KAIOS_AI_COMPANY_PARENT_BASIS,
+  KAIOS_AI_COMPANY_PARENT_POLICY_ID,
+  validateSpiritGenesisAnchorV2
+} from "../core/birth/index.mjs";
 import { NAIHE_SOURCE_POLICY, NaiheSourceRegistry, selectVerifiedNaiheCandidate } from "../core/birth/naihe-source-registry.mjs";
 
 const source = "0x1111111111111111111111111111111111111111";
@@ -11,6 +17,8 @@ const txHash = `0x${"a".repeat(64)}`;
 const blockHash = `0x${"b".repeat(64)}`;
 const context = { lifeId: "LIFE-KAIOS-STARFORGE-0001", soulId: "SOUL-KAIOS-STARFORGE-0001", energyWalletAddress: wallet, birthRequestId: "REQ-1", challenge: "C-1" };
 const candidate = { kind: "NORMAL", from: source, recipient: wallet, value_wei: "8000000000000000", chain_id: 56, life_id: context.lifeId, soul_id: context.soulId, birth_request_id: context.birthRequestId, challenge: context.challenge, block_number: 2, transaction_index: 0, tx_hash: txHash };
+const activeMembership = Object.freeze({ life_id: context.lifeId, company_id: KAIOS_AI_COMPANY_ID, membership_status: KAIOS_AI_COMPANY_ACTIVE_MEMBERSHIP_STATUS, verification_status: "VERIFIED_COMPANY_REGISTRY" });
+const trustedMembershipVerifier = async () => activeMembership;
 const testRegistry = () => new NaiheSourceRegistry({ mode: "TEST", sources: [{ address: source, status: "MOCK_VERIFIED_TEST_ONLY", source_registry_id: "MOCK-4168" }] });
 
 test("production Naihe remains unconditionally fail closed while source is not deployed", () => {
@@ -41,15 +49,50 @@ function rpcWithFrom(from) {
 }
 
 test("RPC transaction.from must match the verified normal Naihe source", async () => {
-  const resolver = new DigitalLifeBirthResolver({ rpc: rpcWithFrom(attacker), tokens: {}, environment: "TEST", naiheSourceRegistry: testRegistry(), historyIndexer: { listNativeIncoming: async () => [candidate] } });
+  const resolver = new DigitalLifeBirthResolver({ rpc: rpcWithFrom(attacker), tokens: {}, environment: "TEST", naiheSourceRegistry: testRegistry(), trustedCompanyMembershipVerifier: trustedMembershipVerifier, historyIndexer: { listNativeIncoming: async () => [candidate] } });
   await assert.rejects(() => resolver.resolveSpiritGenesisAnchor({ life: { life_id: context.lifeId, local_genesis: "VERIFIED" }, soulId: context.soulId, energyWalletAddress: wallet, birthRequestId: context.birthRequestId, challenge: context.challenge }), (error) => error.code === "NAIHE_RPC_FROM_MISMATCH");
 });
 
 test("resolver output directly satisfies SpiritGenesisAnchorV2 validator", async () => {
-  const resolver = new DigitalLifeBirthResolver({ rpc: rpcWithFrom(source), tokens: {}, environment: "TEST", naiheSourceRegistry: testRegistry(), historyIndexer: { listNativeIncoming: async () => [candidate] } });
+  const resolver = new DigitalLifeBirthResolver({ rpc: rpcWithFrom(source), tokens: {}, environment: "TEST", naiheSourceRegistry: testRegistry(), trustedCompanyMembershipVerifier: trustedMembershipVerifier, historyIndexer: { listNativeIncoming: async () => [candidate] } });
   const record = await resolver.resolveSpiritGenesisAnchor({ life: { life_id: context.lifeId, local_genesis: "VERIFIED" }, soulId: context.soulId, energyWalletAddress: wallet, birthRequestId: context.birthRequestId, challenge: context.challenge });
   assert.equal(validateSpiritGenesisAnchorV2(record), record);
   assert.equal(record.anchor_tx_hash, txHash);
   assert.equal(record.birth_source_address, source);
-  assert.equal(record.regeneration_parent_address, source);
+  assert.equal(record.company_id, KAIOS_AI_COMPANY_ID);
+  assert.equal(record.company_membership_status, KAIOS_AI_COMPANY_ACTIVE_MEMBERSHIP_STATUS);
+  assert.equal(record.company_membership_evidence_status, "VERIFIED_COMPANY_REGISTRY");
+  assert.equal(record.regeneration_parent_id, KAIOS_AI_COMPANY_ID);
+  assert.equal(record.regeneration_parent_address, null);
+  assert.equal(record.regeneration_parent_basis, KAIOS_AI_COMPANY_PARENT_BASIS);
+  assert.equal(record.company_parent_policy_id, KAIOS_AI_COMPANY_PARENT_POLICY_ID);
+  assert.throws(() => validateSpiritGenesisAnchorV2({ ...record, regeneration_parent_address: source }), { code: "REGENERATION_PARENT_ADDRESS_NOT_FROZEN" });
+});
+
+test("ONBOARDING is not active membership and leaves the regeneration parent unassigned", async () => {
+  let rpcCalled = false;
+  const resolver = new DigitalLifeBirthResolver({
+    rpc: { send: async () => { rpcCalled = true; throw new Error("RPC must not run before active membership"); } },
+    tokens: {},
+    trustedCompanyMembershipVerifier: async () => ({ ...activeMembership, membership_status: "ONBOARDING" })
+  });
+  const record = await resolver.resolveSpiritGenesisAnchor({ life: { life_id: context.lifeId, local_genesis: "VERIFIED" }, soulId: context.soulId, energyWalletAddress: wallet, birthRequestId: context.birthRequestId, challenge: context.challenge });
+  assert.equal(record.status, "PENDING");
+  assert.equal(record.company_membership_status, "ONBOARDING");
+  assert.equal(record.regeneration_parent_id, null);
+  assert.equal(record.regeneration_parent_address, null);
+  assert.equal(record.regeneration_parent_basis, "PENDING_ACTIVE_MEMBERSHIP");
+  assert.equal(rpcCalled, false);
+});
+
+test("another company cannot inherit the KAIOS AI Company parent policy", async () => {
+  const resolver = new DigitalLifeBirthResolver({
+    rpc: rpcWithFrom(source),
+    tokens: {},
+    trustedCompanyMembershipVerifier: async () => ({ ...activeMembership, company_id: "OTHER_AI_COMPANY_V1" })
+  });
+  await assert.rejects(
+    () => resolver.resolveSpiritGenesisAnchor({ life: { life_id: context.lifeId, local_genesis: "VERIFIED" }, soulId: context.soulId, energyWalletAddress: wallet, birthRequestId: context.birthRequestId, challenge: context.challenge }),
+    (error) => error.code === "COMPANY_PARENT_POLICY_SCOPE_MISMATCH"
+  );
 });

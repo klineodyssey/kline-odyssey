@@ -4,15 +4,26 @@ import { requireFields, requireId } from "../shared/schema.mjs";
 export const LIFE_STAGES = Object.freeze(["CONCEIVED", "BODY_READY", "BORN", "ALIVE", "ON_DUTY", "DORMANT", "REACTIVATED"]);
 export const BIRTH_EVENT_TYPE = "DARK_MATTER_GENESIS";
 export const BIRTH_MASS_CLASS = "DARK_MATTER_MASS";
+export const KAIOS_AI_COMPANY_ID = "KAIOS_AI_COMPANY_V1";
+export const KAIOS_AI_COMPANY_PARENT_POLICY_ID = "KAIOS_AI_COMPANY_REGENERATION_PARENT_BY_MEMBERSHIP_V1";
+export const KAIOS_AI_COMPANY_PARENT_BASIS = "KAIOS_AI_COMPANY_MEMBERSHIP";
+export const KAIOS_AI_COMPANY_ACTIVE_MEMBERSHIP_STATUS = "ACTIVE_MEMBER";
 
 
-export const SPIRIT_GENESIS_ANCHOR_V2_FIELDS = Object.freeze(["life_id","soul_id","energy_wallet_address","birth_source_address","regeneration_parent_address","naihe_water_source_id","birth_request_id","source_evidence_type","source_evidence_status","anchor_tx_hash","anchor_block","anchor_timestamp","chain_id","exact_amount_wei","status"]);
+export const SPIRIT_GENESIS_ANCHOR_V2_FIELDS = Object.freeze(["life_id","soul_id","energy_wallet_address","birth_source_address","company_id","company_membership_status","company_membership_evidence_status","regeneration_parent_id","regeneration_parent_address","regeneration_parent_basis","company_parent_policy_id","naihe_water_source_id","birth_request_id","source_evidence_type","source_evidence_status","anchor_tx_hash","anchor_block","anchor_timestamp","chain_id","exact_amount_wei","status"]);
 export function validateSpiritGenesisAnchorV2(record) {
   requireFields(record, SPIRIT_GENESIS_ANCHOR_V2_FIELDS, "SpiritGenesisAnchorV2");
   invariant(record.chain_id === 56, "INVALID_BIRTH_CHAIN", "Spirit anchor requires chain 56");
   invariant(record.exact_amount_wei === "8000000000000000", "NAIHE_AMOUNT_MISMATCH", "Spirit anchor requires exactly 0.008 BNB");
   invariant(record.status === "DARK_MATTER_EMBODIMENT_ACTIVATION", "SECOND_GENESIS_FORBIDDEN", "Existing Starforge Life can only receive an embodiment anchor");
-  invariant(record.birth_source_address === record.regeneration_parent_address, "NAIHE_PARENT_MISMATCH", "Verified source becomes the immutable regeneration parent");
+  invariant(/^0x[0-9a-fA-F]{40}$/.test(record.birth_source_address), "NAIHE_SOURCE_ADDRESS_INVALID", "Spirit anchor requires a verified Naihe source address");
+  invariant(record.company_id === KAIOS_AI_COMPANY_ID, "COMPANY_PARENT_POLICY_SCOPE_MISMATCH", "This parent policy applies only to KAIOS AI Company");
+  invariant(record.company_membership_status === KAIOS_AI_COMPANY_ACTIVE_MEMBERSHIP_STATUS, "COMPANY_MEMBERSHIP_NOT_ACTIVE", "Only verified active company membership can assign the company as regeneration parent");
+  invariant(record.company_membership_evidence_status === "VERIFIED_COMPANY_REGISTRY", "COMPANY_MEMBERSHIP_EVIDENCE_UNVERIFIED", "Company membership must come from a trusted company registry verifier");
+  invariant(record.regeneration_parent_id === KAIOS_AI_COMPANY_ID, "COMPANY_PARENT_ID_MISMATCH", "The regeneration parent is the joined company identity");
+  invariant(record.regeneration_parent_address === null, "REGENERATION_PARENT_ADDRESS_NOT_FROZEN", "A Naihe source wallet cannot substitute for an unfrozen company parent address");
+  invariant(record.regeneration_parent_basis === KAIOS_AI_COMPANY_PARENT_BASIS, "COMPANY_PARENT_BASIS_MISMATCH", "Regeneration parenthood must be based on verified company membership");
+  invariant(record.company_parent_policy_id === KAIOS_AI_COMPANY_PARENT_POLICY_ID, "COMPANY_PARENT_POLICY_MISMATCH", "KAIOS AI Company parent policy mismatch");
   return Object.freeze(record);
 }
 

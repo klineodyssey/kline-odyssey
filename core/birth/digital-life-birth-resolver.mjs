@@ -1,6 +1,14 @@
 import { selectVerifiedNaiheCandidate, NAIHE_SOURCE_POLICY } from "./naihe-source-registry.mjs";
 import { invariant } from "../shared/errors.mjs";
-import { createBirthCertificate, createPendingBirthCertificate, validateSpiritGenesisAnchorV2 } from "./index.mjs";
+import {
+  KAIOS_AI_COMPANY_ACTIVE_MEMBERSHIP_STATUS,
+  KAIOS_AI_COMPANY_ID,
+  KAIOS_AI_COMPANY_PARENT_BASIS,
+  KAIOS_AI_COMPANY_PARENT_POLICY_ID,
+  createBirthCertificate,
+  createPendingBirthCertificate,
+  validateSpiritGenesisAnchorV2
+} from "./index.mjs";
 
 const TRANSFER_TOPIC = "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef";
 
@@ -23,6 +31,19 @@ function firstCanonical(items = []) {
   )[0] ?? null;
 }
 function pendingWorkStatus(life) { return life.current_job_ids?.length ? "WORK_ASSIGNED_PENDING_BIRTH" : "NOT_ASSIGNED"; }
+function companyParentState(membership) {
+  const active = membership?.membership_status === KAIOS_AI_COMPANY_ACTIVE_MEMBERSHIP_STATUS;
+  return Object.freeze({
+    company_id: KAIOS_AI_COMPANY_ID,
+    company_membership_status: membership?.membership_status ?? "NOT_VERIFIED",
+    company_membership_evidence_status: membership?.verification_status ?? "NOT_VERIFIED",
+    regeneration_parent_id: active ? KAIOS_AI_COMPANY_ID : null,
+    regeneration_parent_address: null,
+    regeneration_parent_basis: active ? KAIOS_AI_COMPANY_PARENT_BASIS : "PENDING_ACTIVE_MEMBERSHIP",
+    company_parent_policy_id: KAIOS_AI_COMPANY_PARENT_POLICY_ID,
+    parent_assignment_status: active ? "COMPANY_POLICY_ASSIGNED" : "UNASSIGNED_PENDING_ACTIVE_MEMBERSHIP"
+  });
+}
 
 export class JsonRpcClient {
   constructor({ url, fetchImpl = globalThis.fetch }) {
@@ -40,11 +61,13 @@ export class JsonRpcClient {
 }
 
 export class DigitalLifeBirthResolver {
-  constructor({ rpc, historyIndexer = null, tokens, naiheSourceRegistry = null, environment = "PRODUCTION" }) {
+  constructor({ rpc, historyIndexer = null, tokens, naiheSourceRegistry = null, trustedCompanyMembershipVerifier = null, environment = "PRODUCTION" }) {
+    invariant(trustedCompanyMembershipVerifier === null || typeof trustedCompanyMembershipVerifier === "function", "COMPANY_MEMBERSHIP_VERIFIER_INVALID", "Company membership verifier must be a trusted function");
     this.rpc = rpc;
     this.historyIndexer = historyIndexer;
     this.tokens = tokens;
     this.naiheSourceRegistry = naiheSourceRegistry;
+    this.trustedCompanyMembershipVerifier = trustedCompanyMembershipVerifier;
     this.environment = environment;
     if (naiheSourceRegistry) naiheSourceRegistry.assertCompatibleEnvironment(environment);
   }
@@ -95,21 +118,37 @@ export class DigitalLifeBirthResolver {
   }
 
 
+  async #verifiedCompanyMembership(lifeId) {
+    if (!this.trustedCompanyMembershipVerifier) return null;
+    const membership = await this.trustedCompanyMembershipVerifier({ life_id: lifeId, company_id: KAIOS_AI_COMPANY_ID });
+    if (!membership) return null;
+    invariant(membership.life_id === lifeId, "COMPANY_MEMBERSHIP_LIFE_MISMATCH", "Company membership evidence belongs to another Life");
+    invariant(membership.company_id === KAIOS_AI_COMPANY_ID, "COMPANY_PARENT_POLICY_SCOPE_MISMATCH", "Other companies require their own separately reviewed parent policy");
+    invariant(typeof membership.membership_status === "string", "COMPANY_MEMBERSHIP_STATUS_INVALID", "Company membership status is missing");
+    invariant(membership.verification_status === "VERIFIED_COMPANY_REGISTRY", "COMPANY_MEMBERSHIP_EVIDENCE_UNVERIFIED", "Company membership must come from a trusted company registry verifier");
+    return Object.freeze({ ...membership });
+  }
+
   async resolveSpiritGenesisAnchor({ life, soulId, energyWalletAddress, birthRequestId, challenge }) {
     invariant(life.life_id === "LIFE-KAIOS-STARFORGE-0001" && life.local_genesis === "VERIFIED", "LOCAL_GENESIS_REQUIRED", "Spirit anchor requires the existing verified local Genesis");
+    const membership = await this.#verifiedCompanyMembership(life.life_id);
+    const parent = companyParentState(membership);
+    if (membership?.membership_status !== KAIOS_AI_COMPANY_ACTIVE_MEMBERSHIP_STATUS) {
+      return Object.freeze({ status: "PENDING", nai_he_source_status: NAIHE_SOURCE_POLICY.status, onchain_genesis: "NOT_YET_ANCHORED", ...parent });
+    }
     const chainId = Number(hexQuantity(await this.rpc.send("eth_chainId", [])));
     invariant(chainId === 56, "WRONG_CHAIN", "Spirit anchor requires BSC mainnet chain 56");
-    if (!this.historyIndexer || !this.naiheSourceRegistry) return Object.freeze({ status: "PENDING", nai_he_source_status: NAIHE_SOURCE_POLICY.status, onchain_genesis: "NOT_YET_ANCHORED", regeneration_parent_address: null });
+    if (!this.historyIndexer || !this.naiheSourceRegistry) return Object.freeze({ status: "PENDING", nai_he_source_status: NAIHE_SOURCE_POLICY.status, onchain_genesis: "NOT_YET_ANCHORED", ...parent });
     const candidates = await this.historyIndexer.listNativeIncoming(energyWalletAddress);
     const candidate = selectVerifiedNaiheCandidate({ candidates, registry: this.naiheSourceRegistry, context: { lifeId: life.life_id, soulId, energyWalletAddress, birthRequestId, challenge } });
-    if (!candidate) return Object.freeze({ status: "PENDING", nai_he_source_status: "NO_VERIFIED_SOURCE_EVIDENCE", onchain_genesis: "NOT_YET_ANCHORED", regeneration_parent_address: null });
+    if (!candidate) return Object.freeze({ status: "PENDING", nai_he_source_status: "NO_VERIFIED_SOURCE_EVIDENCE", onchain_genesis: "NOT_YET_ANCHORED", ...parent });
     const verified = await this.#verifyNative(candidate, energyWalletAddress);
     return validateSpiritGenesisAnchorV2({
       life_id: life.life_id,
       soul_id: soulId,
       energy_wallet_address: energyWalletAddress,
       birth_source_address: candidate.verified_source_address,
-      regeneration_parent_address: candidate.verified_source_address,
+      ...parent,
       naihe_water_source_id: candidate.source_registry_id,
       birth_request_id: birthRequestId,
       source_evidence_type: candidate.source_evidence_type,
