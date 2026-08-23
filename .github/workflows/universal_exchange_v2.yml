@@ -31,8 +31,14 @@ permissions:
 jobs:
   test:
     runs-on: ubuntu-latest
+    env:
+      EXPECTED_HEAD: ${{ github.event.pull_request.head.sha || github.sha }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.EXPECTED_HEAD }}
+      - name: Bind checkout to exact requested head
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_HEAD"
       - uses: actions/setup-node@v4
         with:
           node-version: "20"
