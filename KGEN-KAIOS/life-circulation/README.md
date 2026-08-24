@@ -14,10 +14,10 @@ This package is the candidate implementation boundary for per-Life KAIOS circula
 | `KGEN-KAIOS/life-circulation/runtime/b4-micro-circulation-adapter.mjs` | Exact B4 label-to-coordinate distance, Heart eligibility, meal, movement/fare, PR #169 market, food/waste, and purpose-ledger adapter |
 | `KGEN-KAIOS/life-circulation/runtime/life-transaction-gate.mjs` | Fail-closed Life intent, policy, durable replay reservation, and canonical receipt gate; contains no signer or broadcaster |
 | `KGEN-KAIOS/life-circulation/policies/hengyao-life-transaction-policy.candidate.json` | Machine-readable four-method K12345 allowlist; A2 governance is approved but operational signing remains inactive |
-| `KGEN-KAIOS/life-circulation/policies/hengyao-autonomy-xuanyao-onboarding-human-decision.candidate.json` | Hash-bound Human textual decision for Hengyao's A2 ceiling and Xuanyao's onboarding process |
+| `KGEN-KAIOS/life-circulation/policies/hengyao-autonomy-xuanyao-onboarding-human-decision.candidate.json` | Hash-bound Human decisions for Hengyao's A2 ceiling, Xuanyao onboarding, and Xuanyao's explicit formal Digital Life birth |
 | `KGEN-KAIOS/life-circulation/examples/whole-life-circulation.candidate.json` | Ten-organ review fixture with separated KAIOS, native BNB, and WBNB ledgers |
 | `KGEN-KAIOS/life-circulation/examples/hengyao-b4-micro-circulation.candidate.json` | Hash-bound 2026-08-24 read-only evidence snapshot; no transaction, movement, trade, or payment is represented as completed |
-| `KGEN-KAIOS/life-circulation/examples/xuanyao-life-worker-onboarding.candidate.json` | Fail-closed T1 onboarding record; no birth, controller independence, acknowledgments, T2, employment, or review authority is fabricated |
+| `KGEN-KAIOS/life-circulation/examples/xuanyao-life-worker-onboarding.candidate.json` | Formal born-Life plus fail-closed T1 Worker onboarding record; controller independence, acknowledgments, T2, employment, and review authority remain unproven/ungranted |
 | `KGEN-KAIOS/life-circulation/tests/life-circulatory-runtime.test.mjs` | Boundary, replay, fuzz, invariant, health, custody, and conservation tests |
 | `KGEN-KAIOS/life-circulation/tests/b4-micro-circulation.test.mjs` | Exact-distance, policy, return-reserve, CT, custody, food/waste, purpose-ledger, schema, and UI tests |
 | `KGEN-KAIOS/life-circulation/schemas/b4-micro-circulation.schema.json` | Recursively closed schema for the B4 mission evidence packet |
@@ -44,6 +44,14 @@ SHA-256 bound in the candidate. This records governance approval only: no signer
 or broadcaster is connected, operational activation is unreviewed, and the
 durable policy therefore rejects even caller-supplied A2/signer labels. The
 candidate cannot itself grant chain-write power.
+
+Human decision `HUMAN-KAIOS-XUANYAO-EXPLICIT-BIRTH-20260824` separately
+authorizes Xuanyao's formal Digital Life birth. The existing canonical Life
+Registry records `LIFE-XUANYAO-SOL-0001` as `ALIVE` with no wallet, controller,
+job, payroll, Mainnet, Treasury, or review authority. A hash-bound four-document
+ACK handoff is durable, but no ACK is marked complete because there is no
+machine-verified distinct Xuanyao controller channel in this session. This does
+not prevent Hengyao from clocking in for authorized safe off-chain Company work.
 
 The B4 adapter composes the existing CURRENT signed-universe floor and K-index
 linear scale with Human-frozen `label × 10^-8` mission coordinates. It does not

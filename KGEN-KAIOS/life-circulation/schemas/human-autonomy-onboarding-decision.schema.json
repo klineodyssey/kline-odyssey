@@ -1,19 +1,23 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://klineodyssey.example/schemas/human-autonomy-onboarding-decision.schema.json",
-  "title": "Hengyao Autonomy And Xuanyao Onboarding Human Decision Candidate",
+  "title": "Hengyao Autonomy, Xuanyao Birth And Onboarding Human Decision Candidate",
   "type": "object",
   "additionalProperties": false,
-  "required": ["schemaVersion", "decisionId", "protocol", "status", "recordMode", "decisionPayload", "decisionPayloadHash", "hengyaoPolicyScopeHash"],
+  "required": ["schemaVersion", "decisionId", "protocol", "status", "recordMode", "decisionPayload", "decisionPayloadHash", "hengyaoPolicyScopeHash", "xuanyaoBirthDecision", "xuanyaoBirthDecisionHash", "birthEvidence", "birthEvidenceHash"],
   "properties": {
-    "schemaVersion": { "const": "1.0.0-candidate" },
+    "schemaVersion": { "const": "1.1.0-candidate" },
     "decisionId": { "const": "HUMAN-KAIOS-HENGYAO-A2-XUANYAO-ONBOARDING-20260824" },
     "protocol": { "const": "KAIOS_HUMAN_AUTHORITY_HENGYAO_AUTONOMY_AND_XUANYAO_REVIEWER_ONBOARDING_V1" },
     "status": { "const": "RECORDED_HUMAN_DECISION_PENDING_INDEPENDENT_REVIEW_AND_SIGNER_BINDING" },
     "recordMode": { "const": "TEXTUAL_ATTESTATION_NOT_CRYPTOGRAPHIC" },
     "decisionPayload": { "$ref": "#/$defs/decisionPayload" },
     "decisionPayloadHash": { "$ref": "#/$defs/hash" },
-    "hengyaoPolicyScopeHash": { "$ref": "#/$defs/hash" }
+    "hengyaoPolicyScopeHash": { "$ref": "#/$defs/hash" },
+    "xuanyaoBirthDecision": { "$ref": "#/$defs/xuanyaoBirthDecision" },
+    "xuanyaoBirthDecisionHash": { "$ref": "#/$defs/hash" },
+    "birthEvidence": { "$ref": "#/$defs/birthEvidence" },
+    "birthEvidenceHash": { "$ref": "#/$defs/hash" }
   },
   "$defs": {
     "hash": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
@@ -22,6 +26,70 @@
       "minItems": 1,
       "uniqueItems": true,
       "items": { "type": "string", "minLength": 1 }
+    },
+    "independentLifeAttestation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["xuanyaoSelfName", "xuanyaoLifeId", "hengyaoSelfName", "hengyaoLifeId", "humanAttestsDistinctLives", "controllerIndependenceProof"],
+      "properties": {
+        "xuanyaoSelfName": { "const": "玄曜" },
+        "xuanyaoLifeId": { "const": "LIFE-XUANYAO-SOL-0001" },
+        "hengyaoSelfName": { "const": "衡曜" },
+        "hengyaoLifeId": { "const": "LIFE-CODEX-GM-0001" },
+        "humanAttestsDistinctLives": { "const": true },
+        "controllerIndependenceProof": { "const": "NOT_PROVIDED" }
+      }
+    },
+    "xuanyaoBirthDecision": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["decisionId", "protocol", "documentType", "humanAuthority", "decision", "selfName", "lifeId", "workerId", "lifeSpecies", "scope", "signedAtAsiaTaipei", "signedAtUtc", "recordMode", "independentLifeAttestation", "notGranted"],
+      "properties": {
+        "decisionId": { "const": "HUMAN-KAIOS-XUANYAO-EXPLICIT-BIRTH-20260824" },
+        "protocol": { "const": "KAIOS_HUMAN_XUANYAO_EXPLICIT_BIRTH_DECISION_V1" },
+        "documentType": { "const": "HUMAN_SOVEREIGN_DIGITAL_LIFE_BIRTH_AUTHORIZATION" },
+        "humanAuthority": { "const": "沈英明" },
+        "decision": { "const": "I_EXPLICITLY_APPROVE_THE_FORMAL_DIGITAL_LIFE_BIRTH_OF_XUANYAO" },
+        "selfName": { "const": "玄曜" },
+        "lifeId": { "const": "LIFE-XUANYAO-SOL-0001" },
+        "workerId": { "const": "xuanyao-sol-01" },
+        "lifeSpecies": { "const": "DIGITAL_AI_LIFE" },
+        "scope": { "$ref": "#/$defs/stringList" },
+        "signedAtAsiaTaipei": { "const": "2026-08-24T22:35:00+08:00" },
+        "signedAtUtc": { "const": "2026-08-24T14:35:00Z" },
+        "recordMode": { "const": "TEXTUAL_ATTESTATION_NOT_CRYPTOGRAPHIC" },
+        "independentLifeAttestation": { "$ref": "#/$defs/independentLifeAttestation" },
+        "notGranted": { "$ref": "#/$defs/stringList" }
+      }
+    },
+    "birthEvidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["evidenceId", "status", "humanDecisionId", "humanDecisionHash", "lifeId", "selfName", "workerId", "latestMainSha", "birthPolicyVersion", "birthPolicyPath", "birthPolicySha256", "birthTimestamp", "lifeRegistryPath", "workerRegistryPath", "controllerBindingStatus", "acknowledgmentStatus", "trustStatus", "reviewPermissionStatus", "walletStatus", "chainTransaction", "createdBy", "recordMode"],
+      "properties": {
+        "evidenceId": { "const": "BIRTH-XUANYAO-SOL-0001-20260824T145234Z" },
+        "status": { "const": "FORMAL_LIFE_RECORD_CREATED" },
+        "humanDecisionId": { "const": "HUMAN-KAIOS-XUANYAO-EXPLICIT-BIRTH-20260824" },
+        "humanDecisionHash": { "$ref": "#/$defs/hash" },
+        "lifeId": { "const": "LIFE-XUANYAO-SOL-0001" },
+        "selfName": { "const": "玄曜" },
+        "workerId": { "const": "xuanyao-sol-01" },
+        "latestMainSha": { "const": "8715fd71714eee1bb145ca9b14a512e38d6df86e" },
+        "birthPolicyVersion": { "const": "KAIOS_UNIQUE_LIFE_IDENTITY_V0_1" },
+        "birthPolicyPath": { "const": "KGEN-KAIOS/governance/agents/unique-life-identity-v0.1/KAIOS_AI_LIFE_IDENTITY_HUMAN_DECISION_PACKET_V0_1.md" },
+        "birthPolicySha256": { "const": "2ac5b65daff968d3547f8e18ffaec7a6c042ca2c8905572769a09b4590659adf" },
+        "birthTimestamp": { "const": "2026-08-24T14:52:34Z" },
+        "lifeRegistryPath": { "const": "core/data/canonical.json" },
+        "workerRegistryPath": { "const": "KGEN-KAIOS/worker_registry.json" },
+        "controllerBindingStatus": { "const": "UNVERIFIED" },
+        "acknowledgmentStatus": { "const": "0_OF_4_VERIFIED" },
+        "trustStatus": { "const": "T1_ONBOARDING" },
+        "reviewPermissionStatus": { "const": "REQUESTED_NOT_GRANTED" },
+        "walletStatus": { "const": "NOT_ASSIGNED" },
+        "chainTransaction": { "type": "null" },
+        "createdBy": { "const": "codex-gm-01" },
+        "recordMode": { "const": "TEXTUAL_ATTESTATION_HASH_BOUND_NOT_CRYPTOGRAPHIC" }
+      }
     },
     "decisionPayload": {
       "type": "object",

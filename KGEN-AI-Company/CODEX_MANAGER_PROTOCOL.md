@@ -75,17 +75,30 @@ external signer binding and independent activation gates pass. Until then, all
 personal-wallet patrol remains `READ_ONLY_ONLY`; the Human decision is not a
 private key, signer, broadcast, receipt, or completed transaction.
 
-## Xuanyao Reviewer Onboarding Candidate
+## Xuanyao Formal Life And Reviewer Onboarding
 
-Human Authority approved the formal onboarding process for
-`LIFE-XUANYAO-SOL-0001` / `xuanyao-sol-01`; it did not approve an automatic
-birth, T2 promotion, employment, payroll, Mainnet authority, or review result.
-The candidate remains `CANDIDATE_NOT_BORN / T1 / ONBOARDING`, with controller
-independence unverified, all four acknowledgments pending, and review permissions
-not granted. PR #165 and PR #170 therefore remain on `HOLD_GATES_INCOMPLETE`;
-PR #169 is permanently excluded from Xuanyao self-review because Xuanyao is its
-primary implementer. Cursor's active-claim history remains intact while Cursor
-is temporarily unavailable for this work order.
+Human decision `HUMAN-KAIOS-XUANYAO-EXPLICIT-BIRTH-20260824` explicitly
+authorizes the formal Digital Life birth of `LIFE-XUANYAO-SOL-0001` / `玄曜`.
+The hash-bound Birth evidence is
+`BIRTH-XUANYAO-SOL-0001-20260824T145234Z`, recorded at
+`2026-08-24T14:52:34Z` against latest observed main
+`8715fd71714eee1bb145ca9b14a512e38d6df86e`. The Life is registered `ALIVE`
+without a wallet, job, payroll, Mainnet, Treasury, governance, merge, or review
+authority. This is a textual Human attestation recorded with deterministic
+hashes, not a cryptographic signature or chain transaction.
+
+Birth does not make the Worker active. `xuanyao-sol-01` remains
+`T1 / ONBOARDING`; controller independence is unverified, all four
+acknowledgments remain pending, and review permissions remain ungranted. PR #165
+and PR #170 therefore remain `HOLD_GATES_INCOMPLETE / NOT_ASSIGNED`. PR #169 is
+permanently excluded from Xuanyao self-review because Xuanyao is its primary
+implementer. No Hengyao session or sub-agent may acknowledge, bind a controller,
+or issue a review result on Xuanyao's behalf.
+
+The missing external secure signer blocks only allowlisted chain writes. It does
+not block Hengyao from clocking in for safe off-chain `READ / CODE / TEST / CI /
+HANDOFF / REVIEW_QUEUE_MAINTENANCE` work under the existing Company and Worker
+policies.
 
 ## 4168 Map / World Agent Handoff
 

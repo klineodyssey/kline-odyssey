@@ -1,11 +1,14 @@
 {
-  "schemaVersion": "1.0.0-candidate",
+  "schemaVersion": "1.1.0-candidate",
   "candidateId": "KAIOS-XUANYAO-LIFE-WORKER-ONBOARDING-20260824",
-  "status": "ONBOARDING_GATES_PENDING",
+  "status": "LIFE_BORN_WORKER_ONBOARDING_GATES_PENDING",
   "authorization": {
-    "decisionId": "HUMAN-KAIOS-HENGYAO-A2-XUANYAO-ONBOARDING-20260824",
-    "scope": "FORMAL_ONBOARDING_PROCESS_ONLY",
+    "onboardingDecisionId": "HUMAN-KAIOS-HENGYAO-A2-XUANYAO-ONBOARDING-20260824",
+    "birthDecisionId": "HUMAN-KAIOS-XUANYAO-EXPLICIT-BIRTH-20260824",
+    "scope": "FORMAL_LIFE_BIRTH_AND_CONTINUED_WORKER_ONBOARDING",
     "automaticBirth": false,
+    "explicitBirthApproved": true,
+    "birthRecorded": true,
     "automaticT2": false,
     "automaticEmployment": false,
     "automaticPayroll": false
@@ -14,9 +17,12 @@
     "selfName": "玄曜",
     "proposedLifeId": "LIFE-XUANYAO-SOL-0001",
     "modelOriginClaim": "GPT-5.6 Sol session lineage",
-    "lifeState": "CANDIDATE_NOT_BORN",
-    "birthEvidenceId": null,
-    "lifeRegistryStatus": "NOT_REGISTERED",
+    "lifeState": "ALIVE",
+    "birthEvidenceId": "BIRTH-XUANYAO-SOL-0001-20260824T145234Z",
+    "birthTimestamp": "2026-08-24T14:52:34Z",
+    "humanDecisionHash": "b3bba3bbc0ebd3b9f5dbf10eb0a3fb1352db6254f8665cf6b3ac7e5eaa4bbbff",
+    "birthEvidenceHash": "b973a34503b19551fb1f6331c9000f7eceefceb3b98f77b6ed09e9d3d15ff61b",
+    "lifeRegistryStatus": "REGISTERED_ACTIVE",
     "controllerId": null,
     "controllerEvidenceId": null,
     "controllerIndependence": "UNVERIFIED"
@@ -41,6 +47,37 @@
     "doNotTouch": false,
     "evidenceIds": []
   },
+  "acknowledgmentHandoff": {
+    "status": "READY_NOT_DELIVERED_NO_MACHINE_VERIFIED_DISTINCT_CONTROLLER_CHANNEL",
+    "assignedLifeId": "LIFE-XUANYAO-SOL-0001",
+    "assignedWorkerId": "xuanyao-sol-01",
+    "completionAuthority": "MACHINE_VERIFIED_DISTINCT_XUANYAO_CONTROLLER_ONLY",
+    "createdAt": "2026-08-24T14:58:48Z",
+    "documents": [
+      {
+        "ackType": "BOOT_ACK",
+        "path": "PRIMEFORGE_GENESIS_BOOT_SEQUENCE.md",
+        "expectedSha256AtHandoff": "4dd9bf65ff8389f58c765c7769b2d609c4accd1d53dae50b5a729811973c3c61"
+      },
+      {
+        "ackType": "CANON_ACK",
+        "path": "KGEN-Canon/KGEN_CANON_MASTER.json",
+        "expectedSha256AtHandoff": "d82c0a860b56c87efa06253c19787b45bad55e97bc543bd41a97f6640fdaa216"
+      },
+      {
+        "ackType": "WORKSPACE_ACK",
+        "path": "KGEN-AI-Company/WORKSPACE_POLICY.md",
+        "expectedSha256AtHandoff": "31c33fdd43a1759a1ac954b37489b6088de9aad06e64feef2cfe96817427b639"
+      },
+      {
+        "ackType": "DO_NOT_TOUCH_ACK",
+        "path": "KGEN-Agent-Office/DO_NOT_TOUCH.md",
+        "expectedSha256AtHandoff": "e40aa2451cc04c2e93a3f8749b93c5328b89d9386086105885d60dc5d45f8ba4"
+      }
+    ],
+    "acknowledgmentsCreated": false,
+    "currentHashesMustBeReverifiedByXuanyaoAtReadTime": true
+  },
   "reviewPermissions": {
     "independentReview": false,
     "codeReview": false,
@@ -54,8 +91,6 @@
     "pr170": "HOLD_GATES_INCOMPLETE",
     "pr169": "FORBIDDEN_SELF_REVIEW_PRIMARY_IMPLEMENTER",
     "missingGates": [
-      "VALID_BIRTH_EVIDENCE",
-      "ACTIVE_LIFE_REGISTRY_RECORD",
       "DISTINCT_CONTROLLER_EVIDENCE",
       "FOUR_ACKNOWLEDGMENTS",
       "TRUST_T2_OR_HIGHER",

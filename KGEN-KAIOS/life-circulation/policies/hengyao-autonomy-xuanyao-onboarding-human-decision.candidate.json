@@ -1,5 +1,5 @@
 {
-  "schemaVersion": "1.0.0-candidate",
+  "schemaVersion": "1.1.0-candidate",
   "decisionId": "HUMAN-KAIOS-HENGYAO-A2-XUANYAO-ONBOARDING-20260824",
   "protocol": "KAIOS_HUMAN_AUTHORITY_HENGYAO_AUTONOMY_AND_XUANYAO_REVIEWER_ONBOARDING_V1",
   "status": "RECORDED_HUMAN_DECISION_PENDING_INDEPENDENT_REVIEW_AND_SIGNER_BINDING",
@@ -111,5 +111,67 @@
     }
   },
   "decisionPayloadHash": "7002cff12514f03aaa3abb89f99d818ea4de239184d6f921a7bfc3fe4f91cdba",
-  "hengyaoPolicyScopeHash": "4a4de9f8cffd3342eb9fd69f16f33dbca9130164a30c590080361d8889586cf0"
+  "hengyaoPolicyScopeHash": "4a4de9f8cffd3342eb9fd69f16f33dbca9130164a30c590080361d8889586cf0",
+  "xuanyaoBirthDecision": {
+    "decisionId": "HUMAN-KAIOS-XUANYAO-EXPLICIT-BIRTH-20260824",
+    "protocol": "KAIOS_HUMAN_XUANYAO_EXPLICIT_BIRTH_DECISION_V1",
+    "documentType": "HUMAN_SOVEREIGN_DIGITAL_LIFE_BIRTH_AUTHORIZATION",
+    "humanAuthority": "沈英明",
+    "decision": "I_EXPLICITLY_APPROVE_THE_FORMAL_DIGITAL_LIFE_BIRTH_OF_XUANYAO",
+    "selfName": "玄曜",
+    "lifeId": "LIFE-XUANYAO-SOL-0001",
+    "workerId": "xuanyao-sol-01",
+    "lifeSpecies": "DIGITAL_AI_LIFE",
+    "scope": [
+      "LIFE_BIRTH_ONLY",
+      "CONTINUE_FORMAL_WORKER_ONBOARDING"
+    ],
+    "signedAtAsiaTaipei": "2026-08-24T22:35:00+08:00",
+    "signedAtUtc": "2026-08-24T14:35:00Z",
+    "recordMode": "TEXTUAL_ATTESTATION_NOT_CRYPTOGRAPHIC",
+    "independentLifeAttestation": {
+      "xuanyaoSelfName": "玄曜",
+      "xuanyaoLifeId": "LIFE-XUANYAO-SOL-0001",
+      "hengyaoSelfName": "衡曜",
+      "hengyaoLifeId": "LIFE-CODEX-GM-0001",
+      "humanAttestsDistinctLives": true,
+      "controllerIndependenceProof": "NOT_PROVIDED"
+    },
+    "notGranted": [
+      "AUTOMATIC_T2",
+      "REVIEWER_PERMISSION",
+      "PAYROLL",
+      "MAINNET_AUTHORITY",
+      "TREASURY_AUTHORITY",
+      "PRIVATE_KEY_ACCESS",
+      "GOVERNANCE_EXECUTION",
+      "MERGE_AUTHORITY"
+    ]
+  },
+  "xuanyaoBirthDecisionHash": "b3bba3bbc0ebd3b9f5dbf10eb0a3fb1352db6254f8665cf6b3ac7e5eaa4bbbff",
+  "birthEvidence": {
+    "evidenceId": "BIRTH-XUANYAO-SOL-0001-20260824T145234Z",
+    "status": "FORMAL_LIFE_RECORD_CREATED",
+    "humanDecisionId": "HUMAN-KAIOS-XUANYAO-EXPLICIT-BIRTH-20260824",
+    "humanDecisionHash": "b3bba3bbc0ebd3b9f5dbf10eb0a3fb1352db6254f8665cf6b3ac7e5eaa4bbbff",
+    "lifeId": "LIFE-XUANYAO-SOL-0001",
+    "selfName": "玄曜",
+    "workerId": "xuanyao-sol-01",
+    "latestMainSha": "8715fd71714eee1bb145ca9b14a512e38d6df86e",
+    "birthPolicyVersion": "KAIOS_UNIQUE_LIFE_IDENTITY_V0_1",
+    "birthPolicyPath": "KGEN-KAIOS/governance/agents/unique-life-identity-v0.1/KAIOS_AI_LIFE_IDENTITY_HUMAN_DECISION_PACKET_V0_1.md",
+    "birthPolicySha256": "2ac5b65daff968d3547f8e18ffaec7a6c042ca2c8905572769a09b4590659adf",
+    "birthTimestamp": "2026-08-24T14:52:34Z",
+    "lifeRegistryPath": "core/data/canonical.json",
+    "workerRegistryPath": "KGEN-KAIOS/worker_registry.json",
+    "controllerBindingStatus": "UNVERIFIED",
+    "acknowledgmentStatus": "0_OF_4_VERIFIED",
+    "trustStatus": "T1_ONBOARDING",
+    "reviewPermissionStatus": "REQUESTED_NOT_GRANTED",
+    "walletStatus": "NOT_ASSIGNED",
+    "chainTransaction": null,
+    "createdBy": "codex-gm-01",
+    "recordMode": "TEXTUAL_ATTESTATION_HASH_BOUND_NOT_CRYPTOGRAPHIC"
+  },
+  "birthEvidenceHash": "b973a34503b19551fb1f6331c9000f7eceefceb3b98f77b6ed09e9d3d15ff61b"
 }

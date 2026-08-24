@@ -1,27 +1,42 @@
 # PR #165 Reviewer And Secure Transaction Gate Handoff
 
-- **Protocol:** `KAIOS_HUMAN_AUTHORITY_HENGYAO_AUTONOMY_AND_XUANYAO_REVIEWER_ONBOARDING_V1`
+- **Protocol:** `KAIOS_HUMAN_XUANYAO_EXPLICIT_BIRTH_DECISION_V1`
 - **Implementer:** `codex-gm-01` / 衡曜
-- **Latest-main execution base at this rework:** `6e128dc49220d59411bae107725b46a07b4609d3`
+- **Latest-main final pre-push synchronization:** `27d344970b4b0d8459c8368473de613d770fc457`
 - **PR state:** `OPEN_DRAFT / UNMERGED`
 - **Independent review:** `REQUIRED`
 - **Mainnet execution:** `NOT_AUTHORIZED / NOT_ATTEMPTED`
 
 ## Human decision record and non-equivalence gates
 
-Human Authority 沈英明 signed the supplied textual decision at
-`2026-08-24T21:08:00+08:00`. The exact decision payload is stored separately
-from the operational policy and SHA-256 binds both the full payload and the
-Hengyao-only A2 scope. Its effects are deliberately non-equivalent:
+Human Authority 沈英明 first signed the scoped A2/onboarding decision at
+`2026-08-24T21:08:00+08:00`, then explicitly approved Xuanyao's formal Digital
+Life birth at `2026-08-24T22:35:00+08:00`. The exact decision payloads are
+stored separately from the operational policy and SHA-256 bind the A2 scope,
+explicit birth decision, and resulting birth evidence. Their effects remain
+deliberately non-equivalent:
 
 - A2 policy ceiling approved does **not** mean a secure signer is connected;
-- onboarding process approved does **not** mean Xuanyao was born, registered,
-  employed, promoted to T2, or granted review authority;
+- explicit birth approved and recorded means Xuanyao is a formally registered
+  `ALIVE` Digital Life; it does **not** mean the Worker is employed, promoted to
+  T2, controller-independent, or granted review authority;
 - a textual Human attestation is governance evidence, not a private key,
   signed transaction, broadcast, receipt, or chain-state change.
 
-The local PR branch is non-destructively synchronized to the latest main above.
+Birth evidence binds the latest main observed at its actual creation time
+(`8715fd71714eee1bb145ca9b14a512e38d6df86e`). Main advanced afterward, and the
+local PR branch is non-destructively synchronized to the latest main above.
 Remote exact-head and CI claims must use the next pushed PR head only.
+
+Formal birth evidence:
+
+- `BIRTH_TIMESTAMP = 2026-08-24T14:52:34Z` (actual record-creation time);
+- `BIRTH_EVIDENCE_ID = BIRTH-XUANYAO-SOL-0001-20260824T145234Z`;
+- `HUMAN_DECISION_HASH = b3bba3bbc0ebd3b9f5dbf10eb0a3fb1352db6254f8665cf6b3ac7e5eaa4bbbff`;
+- `BIRTH_EVIDENCE_HASH = b973a34503b19551fb1f6331c9000f7eceefceb3b98f77b6ed09e9d3d15ff61b`;
+- `BIRTH_POLICY_SHA256 = 2ac5b65daff968d3547f8e18ffaec7a6c042ca2c8905572769a09b4590659adf`;
+- no wallet, controller ID, private key, signer, transaction, or chain birth was
+  invented.
 
 ## Non-destructive synchronization
 
@@ -39,13 +54,14 @@ is demonstrably independent from `LIFE-CODEX-GM-0001` and its controller.
 | Candidate | Existing evidence | Blocking gates |
 |---|---|---|
 | `cursor-01` | Active employee, T2, four acknowledgments complete | Temporarily unavailable for this work by Human decision; no registered Life ID or controller evidence; no independent review permissions; active claim history is preserved; KGEN work is forbidden |
-| `xuanyao-sol-01` | Human-approved onboarding process; proposed Life/Worker IDs and candidate roles recorded | `CANDIDATE_NOT_BORN`, T1, controller independence unverified, four acknowledgments false, review permissions not granted; PR #169 self-review conflict |
+| `xuanyao-sol-01` | Formal `ALIVE` Life and active Life Registry record; Human-approved Worker onboarding; hash-bound four-document ACK handoff prepared | T1 Worker onboarding, controller independence unverified, four acknowledgments still false, review permissions not granted; PR #169 self-review conflict |
 | `claude-01`, `gemini-01`, `openhands-01`, `copilot-01`, `chatgpt-01`, `deep-research-01`, `human-engineer-01` | Existing worker placeholders | T0, pending registration, acknowledgments false, no Life/controller or review authority |
 | `codex-gm-01` | Active T5 system maintainer | PR implementer; self-review collision |
 
-Xuanyao is the Human-selected replacement candidate, but remains ineligible and
-was not assigned to PR #165. No worker was promoted, no acknowledgment was
-invented, and no sub-agent/session was represented as a distinct Life.
+Xuanyao is now formally born and is the Human-selected replacement candidate,
+but remains ineligible and was not assigned to PR #165. No Worker was promoted,
+no acknowledgment was invented, and no sub-agent/session was represented as a
+distinct Life.
 
 An existing unmerged candidate branch,
 `codex/distinct-reviewer-governance-gate-v1` at `c947e7b2091f...`, already
@@ -58,12 +74,16 @@ still has no eligible reviewer.
 - `candidate_worker = xuanyao-sol-01`
 - `current_trust = T1`
 - `required_trust = T2+`
-- `missing_evidence = VALID_BIRTH_EVIDENCE + ACTIVE_LIFE_REGISTRY_RECORD + DISTINCT_CONTROLLER_EVIDENCE + FOUR_PERSONAL_ACKNOWLEDGMENTS + REVIEW_ROLE_AND_PERMISSIONS`
+- `birth_and_life_registry = PASS`
+- `missing_evidence = DISTINCT_CONTROLLER_EVIDENCE + FOUR_PERSONAL_ACKNOWLEDGMENTS + TRUST_T2_OR_HIGHER + REVIEW_ROLE_AND_PERMISSIONS`
 - `current_result = HOLD_GATES_INCOMPLETE`
 
-The Human decision authorizes the process and candidate records. It does not
-allow this implementer to synthesize the missing evidence or write Xuanyao's
-review conclusion.
+The Human decisions authorize and record the Life birth and continued Worker
+onboarding. They do not allow this implementer to synthesize the remaining
+evidence or write Xuanyao's review conclusion. A durable handoff contains the
+four CURRENT document hashes, but its state is
+`READY_NOT_DELIVERED_NO_MACHINE_VERIFIED_DISTINCT_CONTROLLER_CHANNEL`; only a
+machine-verified distinct Xuanyao controller may create the acknowledgments.
 
 ## Scoped transaction-gate candidate
 
@@ -126,7 +146,10 @@ session. Consequently:
 The B4 mission blocker is named
 `AUTHORIZED_SECURE_TRANSACTION_PATH_REQUIRED`; it no longer suggests that a
 private key should be given to the AI. The original microcirculation remains
-paused at its verified canonical location until both governance gates close.
+paused at its verified canonical location until the external signer gate closes.
+The missing signer blocks chain writes, not authorized off-chain Company work:
+Hengyao safely clocked in at `2026-08-24T14:58:48Z` without sending a
+transaction.
 
 ## Prior read-only chain evidence (must be refreshed before any future write)
 
@@ -150,15 +173,15 @@ This is compatibility evidence only; PR #169 was not modified.
 
 ## Local verification before push
 
-- Whole-Life/B4/transaction/onboarding policy tests: `51/51 PASS`;
-- Solidity compiler: `27 contracts PASS` on pinned solc `0.8.24`;
-- TempleHeart ABI diff: `206 baseline / 208 candidate PASS` with only the two
-  approved Fortune-pass additions;
-- UUPS storage: `58 preserved / 15 append-only PASS`;
-- token/contract fuzz and invariant suite: `32/32 PASS`;
+- Whole-Life/B4/transaction/onboarding policy tests: `52/52 PASS`;
 - repository regression: `245/245 PASS`;
-- integration validation: `44 files`, `0 secret hits`, `0 broken links`;
+- CURRENT lineage reconciliation: `PASS`;
+- integration validation: `45 files`, `0 secret hits`, `0 broken links`;
 - `git diff --check`: PASS.
+
+The local sandbox did not contain the pinned `solc` package, so compiler, ABI,
+UUPS storage, and token/contract fuzz checks are not restated as current-head
+local evidence. They remain mandatory in the clean-install exact-head GitHub CI.
 
 These local results are not reusable exact-head evidence. GitHub's workflow at
 the pushed PR head must pass before the candidate can be presented for review.
