@@ -1,0 +1,91 @@
+name: KAIOS Hengyao Payroll Review
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - "codex/kaios-payroll-bloodflow-v1"
+    paths:
+      - "KGEN-KAIOS/reports/HENGYAO_PAYROLL_BLOODFLOW_V1.md"
+      - "KGEN-KAIOS/reports/HENGYAO_PAYROLL_BLOODFLOW_V1_UNSIGNED_PACKAGE.json"
+      - "KGEN-KAIOS/scripts/hengyao-payroll-bloodflow-v1-plan.mjs"
+      - "KGEN-KAIOS/scripts/operate-hengyao-payroll-bloodflow-v1.mjs"
+      - "KGEN-KAIOS/scripts/prepare-hengyao-payroll-bloodflow-v1.mjs"
+      - "KGEN-KAIOS/tests/hengyao-payroll-bloodflow-v1.test.mjs"
+      - "KGEN-KAIOS/tools/rehearse-hengyao-payroll-bloodflow-mainnet-fork.mjs"
+      - ".github/workflows/kaios-hengyao-payroll-review.yml"
+  pull_request:
+    paths:
+      - "KGEN-KAIOS/reports/HENGYAO_PAYROLL_BLOODFLOW_V1.md"
+      - "KGEN-KAIOS/reports/HENGYAO_PAYROLL_BLOODFLOW_V1_UNSIGNED_PACKAGE.json"
+      - "KGEN-KAIOS/scripts/hengyao-payroll-bloodflow-v1-plan.mjs"
+      - "KGEN-KAIOS/scripts/operate-hengyao-payroll-bloodflow-v1.mjs"
+      - "KGEN-KAIOS/scripts/prepare-hengyao-payroll-bloodflow-v1.mjs"
+      - "KGEN-KAIOS/tests/hengyao-payroll-bloodflow-v1.test.mjs"
+      - "KGEN-KAIOS/tools/rehearse-hengyao-payroll-bloodflow-mainnet-fork.mjs"
+      - ".github/workflows/kaios-hengyao-payroll-review.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  exact-head-review:
+    runs-on: ubuntu-latest
+    env:
+      EXPECTED_HEAD: ${{ github.event.pull_request.head.sha || github.sha }}
+      EVENT_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: KGEN-KAIOS/package-lock.json
+      - name: Resolve review base
+        run: |
+          if test -n "$EVENT_BASE_SHA"; then
+            base_sha="$EVENT_BASE_SHA"
+          else
+            git fetch --no-tags origin codex/kaios-18888-divine-bank-v2-canon
+            base_sha="$(git rev-parse origin/codex/kaios-18888-divine-bank-v2-canon)"
+          fi
+          printf 'BASE_SHA=%s\n' "$base_sha" >> "$GITHUB_ENV"
+      - name: Bind checkout to exact candidate head
+        run: |
+          test "$(git rev-parse HEAD)" = "$EXPECTED_HEAD"
+          git merge-base --is-ancestor "$BASE_SHA" HEAD
+      - name: Install pinned dependencies
+        working-directory: KGEN-KAIOS
+        run: npm ci
+      - name: Parse payroll evidence
+        run: jq empty KGEN-KAIOS/reports/HENGYAO_PAYROLL_BLOODFLOW_V1_UNSIGNED_PACKAGE.json
+      - name: Run closed payroll tests
+        run: |
+          set -o pipefail
+          node --test --test-concurrency=1 KGEN-KAIOS/tests/hengyao-payroll-bloodflow-v1.test.mjs | tee /tmp/hengyao-payroll-tests.tap
+      - name: Enforce no Solidity scope
+        run: test -z "$(git diff --name-only "$BASE_SHA...HEAD" -- KGEN-KAIOS/contracts KGEN/contracts)"
+      - name: Reject whitespace damage
+        run: git diff --check "$BASE_SHA...HEAD"
+      - name: Create exact-head evidence
+        if: always()
+        run: |
+          mkdir -p /tmp/hengyao-payroll-exact-head
+          printf 'GITHUB_SHA=%s\nEXPECTED_HEAD=%s\nBASE_SHA=%s\nTREE_SHA=%s\n' \
+            "$GITHUB_SHA" "$EXPECTED_HEAD" "$BASE_SHA" "$(git rev-parse HEAD^{tree})" \
+            > /tmp/hengyao-payroll-exact-head/identity.txt
+          git diff --name-only "$BASE_SHA...HEAD" \
+            | while IFS= read -r file; do test ! -f "$file" || sha256sum "$file"; done \
+            > /tmp/hengyao-payroll-exact-head/file-sha256.txt
+          cp /tmp/hengyao-payroll-tests.tap /tmp/hengyao-payroll-exact-head/ 2>/dev/null || true
+      - name: Preserve exact-head evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: hengyao-payroll-exact-head-evidence-${{ env.EXPECTED_HEAD }}
+          path: /tmp/hengyao-payroll-exact-head/
+          if-no-files-found: error
+          retention-days: 30
