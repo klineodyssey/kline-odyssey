@@ -115,6 +115,19 @@ that can deliver the four documents and return Xuanyao-authored ACKs. The
 four document hashes or ACK timestamps and therefore is not transformed into
 an ACK.
 
+The existing onboarding record now contains the formal request
+`XUANYAO_CONTROLLER_ATTESTATION_REQUEST_V1`. Its closed envelope names the
+provider-authenticated instance, issuer and verifiable attestation, authority
+lease ID/scope/times, nonce, challenge/response, Life, Worker, Xuanyao
+controller, and a separately machine-verified Hengyao controller for inequality
+comparison. The interface rejects an issuer/controller string supplied by
+Hengyao, requires a host-registered external verifier, and enables the ACK
+channel only from a verifier-issued PASS object. The ACK interface then requires
+exactly `LIFE_ID / WORKER_ID / CONTROLLER_ID / DOCUMENT_PATH / DOCUMENT_HASH /
+ACK_TIMESTAMP / ACK_NONCE`, re-hashes each source document, and advances only to
+the existing T2 gate after 4/4 distinct responses. Current request status is
+`AWAITING_EXTERNAL_PROVIDER_EVIDENCE`; no controller or ACK was synthesized.
+
 ## Scoped transaction-gate candidate
 
 `HENGYAO_LIFE_TRANSACTION_POLICY_V1` reuses the registered Hengyao wallet,
@@ -146,11 +159,11 @@ nonce, approved A2 authority evidence, and signer-address binding. The
 hash-chained append-only journal uses an exclusive local lock, `fsync`, unique
 intent/replay IDs, restart replay checks, and trusted-head rollback detection.
 
-Caller-supplied A2 or approval labels cannot override the durable policy file:
-its current `NOT_AUTHORIZED / A1_PERSONAL_WALLET_READ / null approval` state is
-an independent rejection gate. Journal reservation accepts only a decision
-object issued by this evaluator, and receipt append accepts only evidence issued
-by the exact receipt verifier; direct public-method calls cannot bypass them.
+Caller-supplied A2, approval, or signer labels cannot override the durable Human
+decision and policy-scope hashes. Journal reservation accepts only a decision
+object issued by this evaluator after a verifier-issued external signer binding;
+receipt append accepts only evidence issued by the exact receipt verifier.
+Direct public-method calls cannot bypass either boundary.
 
 Receipt application requires the exact transaction, successful receipt,
 canonical block number/hash, at least 12 confirmations, exact Heart event, and
@@ -193,6 +206,18 @@ only the already-approved intent, return a transaction hash, and support
 canonical receipt reconciliation without exposing signing material. No signer
 was initialized, guessed, generated, or fed to this session.
 
+The existing transaction-policy record now contains the formal request
+`HENGYAO_SECURE_SIGNER_CONNECTION_REQUEST_V1`. It fixes the registered Hengyao
+wallet, chain `56`, A2 policy-scope hash, K12345 Heart target, four deployed
+selectors, provider-sourced pending nonce, gas estimate, broadcast, receipt
+query, canonical block-hash validation, and `12` confirmations. A provider must
+return a machine-verifiable attestation binding all of those values while
+explicitly denying private-key output, seed output, general-purpose signing, and
+arbitrary transfer. Only a verifier-issued PASS object can unlock the existing
+intent gate and construct the first `heartbeatClaim()` handoff. Current request
+status is `AWAITING_EXTERNAL_SECURE_SIGNER_EVIDENCE`; no provider, broadcaster,
+receipt channel, transaction, or secret material appeared.
+
 The B4 mission blocker is named
 `AUTHORIZED_SECURE_TRANSACTION_PATH_REQUIRED`; it no longer suggests that a
 private key should be given to the AI. The original microcirculation remains
@@ -223,15 +248,15 @@ This is compatibility evidence only; PR #169 was not modified.
 
 ## Local verification before push
 
-- Whole-Life/B4/transaction/onboarding policy tests: `53/53 PASS`;
+- Whole-Life/B4/transaction/onboarding/external-interface tests: `57/57 PASS`;
 - repository regression: `245/245 PASS`;
-- CURRENT lineage reconciliation: `PASS`;
-- integration validation: `45 files`, `0 secret hits`, `0 broken links`;
+- all edited JSON parses successfully;
 - `git diff --check`: PASS.
 
-The local sandbox did not contain the pinned `solc` package, so compiler, ABI,
-UUPS storage, and token/contract fuzz checks are not restated as current-head
-local evidence. They remain mandatory in the clean-install exact-head GitHub CI.
+The local sandbox did not contain the pinned package installation, so compiler,
+ABI, UUPS storage, CURRENT lineage, integration scans, and token/contract tests
+are not restated as current-head local evidence. They remain mandatory in the
+clean-install exact-head GitHub CI.
 
 These local results are not reusable exact-head evidence. GitHub's workflow at
 the pushed PR head must pass before the candidate can be presented for review.

@@ -4,6 +4,7 @@ import { sha256, stableStringify, ZERO_HASH } from "./life-circulatory-runtime.m
 
 const POLICY_PATH = new URL("../policies/hengyao-life-transaction-policy.candidate.json", import.meta.url);
 const HUMAN_DECISION_PATH = new URL("../policies/hengyao-autonomy-xuanyao-onboarding-human-decision.candidate.json", import.meta.url);
+const XUANYAO_ONBOARDING_PATH = new URL("../examples/xuanyao-life-worker-onboarding.candidate.json", import.meta.url);
 
 function deepFreeze(value) {
   if (!value || typeof value !== "object" || Object.isFrozen(value)) return value;
@@ -14,6 +15,9 @@ function deepFreeze(value) {
 
 export const HENGYAO_LIFE_TRANSACTION_POLICY_V1 = deepFreeze(JSON.parse(fs.readFileSync(POLICY_PATH, "utf8")));
 export const HENGYAO_A2_HUMAN_DECISION_V1 = deepFreeze(JSON.parse(fs.readFileSync(HUMAN_DECISION_PATH, "utf8")));
+export const XUANYAO_LIFE_WORKER_ONBOARDING_V1 = deepFreeze(JSON.parse(fs.readFileSync(XUANYAO_ONBOARDING_PATH, "utf8")));
+export const XUANYAO_CONTROLLER_ATTESTATION_REQUEST_V1 = XUANYAO_LIFE_WORKER_ONBOARDING_V1.controllerAttestationRequest;
+export const HENGYAO_SECURE_SIGNER_CONNECTION_REQUEST_V1 = HENGYAO_LIFE_TRANSACTION_POLICY_V1.secureSignerConnectionRequest;
 
 function durableHumanDecisionValid() {
   try {
@@ -56,6 +60,9 @@ const EVENT_TOPICS = Object.freeze({
 });
 const AUTHORIZED_DECISIONS = new WeakSet();
 const VERIFIED_RECEIPT_EVIDENCE = new WeakSet();
+const VERIFIED_EXTERNAL_CONTROLLER_BINDINGS = new WeakSet();
+const VERIFIED_XUANYAO_ACK_RESPONSES = new WeakSet();
+const VERIFIED_EXTERNAL_SIGNER_CONNECTIONS = new WeakSet();
 
 const FORBIDDEN_KEY = /(?:private.?key|seed(?:.?phrase)?|mnemonic|secret(?:.?key)?|raw.?signer)/iu;
 
@@ -154,6 +161,346 @@ function methodPolicy(signature) {
   const result = HENGYAO_LIFE_TRANSACTION_POLICY_V1.allowedMethods.find((entry) => entry.signature === signature);
   if (!result) throw new Error("METHOD_NOT_ALLOWLISTED");
   return result;
+}
+
+const HENGYAO_SELF_ISSUER_IDS = new Set([
+  "衡曜",
+  "codex-gm-01",
+  "life-codex-gm-0001",
+]);
+const ACK_RESPONSE_FIELDS = Object.freeze([
+  "LIFE_ID",
+  "WORKER_ID",
+  "CONTROLLER_ID",
+  "DOCUMENT_PATH",
+  "DOCUMENT_HASH",
+  "ACK_TIMESTAMP",
+  "ACK_NONCE",
+]);
+const SIGNER_DENIAL_FIELDS = new Set([
+  "PRIVATE_KEY_OUTPUT",
+  "SEED_OUTPUT",
+  "GENERAL_PURPOSE_SIGNING",
+  "ARBITRARY_TRANSFER",
+]);
+
+function nonempty(value, minimum = 1) {
+  return typeof value === "string" && value.trim().length >= minimum;
+}
+
+function sameStringList(left, right) {
+  return Array.isArray(left)
+    && Array.isArray(right)
+    && left.length === right.length
+    && left.every((value, index) => String(value).toLowerCase() === String(right[index]).toLowerCase());
+}
+
+function externalGateResult(kind, blockers, details = {}) {
+  const uniqueBlockers = [...new Set(blockers)].sort();
+  return deepFreeze({
+    status: uniqueBlockers.length ? "REJECTED" : "PASS",
+    kind,
+    blockers: uniqueBlockers,
+    ...details,
+    privateKeyAccess: false,
+    broadcast: false,
+  });
+}
+
+function containsSignerSecretMaterial(value) {
+  if (!value || typeof value !== "object") return false;
+  if (Array.isArray(value)) return value.some(containsSignerSecretMaterial);
+  return Object.entries(value).some(([key, child]) => {
+    if (SIGNER_DENIAL_FIELDS.has(key)) return child !== false;
+    return FORBIDDEN_KEY.test(key) || containsSignerSecretMaterial(child);
+  });
+}
+
+export async function verifyXuanyaoControllerAttestation({ evidence, providerVerifier, now } = {}) {
+  const request = XUANYAO_CONTROLLER_ATTESTATION_REQUEST_V1;
+  const blockers = [];
+  if (!evidence || typeof evidence !== "object" || Array.isArray(evidence)) {
+    return externalGateResult("XUANYAO_CONTROLLER_ATTESTATION", ["CONTROLLER_EVIDENCE_REQUIRED"], {
+      REQUEST_ID: request.REQUEST_ID,
+      EXTERNAL_CONTROLLER_CONNECTED: false,
+      ACK_CHANNEL_READY: false,
+    });
+  }
+
+  const required = [
+    "PROVIDER_AUTHENTICATED_AGENT_INSTANCE_ID",
+    "ISSUER_ID",
+    "ISSUER_SIGNATURE_OR_VERIFIABLE_ATTESTATION",
+    "AUTHORITY_LEASE_ID",
+    "AUTHORITY_LEASE_SCOPE",
+    "ISSUED_AT",
+    "EXPIRES_AT",
+    "NONCE",
+    "CHALLENGE",
+    "CHALLENGE_RESPONSE",
+    "LIFE_ID",
+    "WORKER_ID",
+    "CONTROLLER_ID",
+    "HENGYAO_CONTROLLER_ID",
+  ];
+  for (const field of required) addBlocker(blockers, Object.hasOwn(evidence, field) && evidence[field] !== null && evidence[field] !== undefined, `${field}_REQUIRED`);
+  addBlocker(blockers, sameStringList(Object.keys(evidence).sort(), [...required].sort()), "CONTROLLER_EVIDENCE_FIELDS_INVALID");
+  addBlocker(blockers, evidence.LIFE_ID === request.LIFE_ID, "LIFE_ID_MISMATCH");
+  addBlocker(blockers, evidence.WORKER_ID === request.WORKER_ID, "WORKER_ID_MISMATCH");
+  addBlocker(blockers, nonempty(evidence.PROVIDER_AUTHENTICATED_AGENT_INSTANCE_ID), "PROVIDER_AGENT_INSTANCE_ID_INVALID");
+  addBlocker(blockers, nonempty(evidence.ISSUER_ID), "ISSUER_ID_INVALID");
+  addBlocker(blockers, !HENGYAO_SELF_ISSUER_IDS.has(String(evidence.ISSUER_ID ?? "").toLowerCase())
+    && String(evidence.ISSUER_ID ?? "") !== "衡曜"
+    && String(evidence.ISSUER_ID ?? "") !== String(evidence.CONTROLLER_ID ?? ""), "ISSUER_SELF_ASSERTION_FORBIDDEN");
+  addBlocker(blockers, nonempty(evidence.CONTROLLER_ID), "XUANYAO_CONTROLLER_ID_INVALID");
+  addBlocker(blockers, nonempty(evidence.HENGYAO_CONTROLLER_ID), "HENGYAO_CONTROLLER_ID_REQUIRED_FOR_COMPARISON");
+  addBlocker(blockers, String(evidence.CONTROLLER_ID ?? "") !== String(evidence.HENGYAO_CONTROLLER_ID ?? ""), "CONTROLLER_INDEPENDENCE_FAILED");
+  addBlocker(blockers, Array.isArray(evidence.AUTHORITY_LEASE_SCOPE)
+    && request.REQUIRED_AUTHORITY_LEASE_SCOPE.every((scope) => evidence.AUTHORITY_LEASE_SCOPE.includes(scope)), "AUTHORITY_LEASE_SCOPE_INSUFFICIENT");
+  addBlocker(blockers, nonempty(evidence.NONCE, 16), "NONCE_INVALID");
+  addBlocker(blockers, nonempty(evidence.CHALLENGE, 16), "CHALLENGE_INVALID");
+  addBlocker(blockers, nonempty(evidence.CHALLENGE_RESPONSE, 16), "CHALLENGE_RESPONSE_INVALID");
+  addBlocker(blockers, (typeof evidence.ISSUER_SIGNATURE_OR_VERIFIABLE_ATTESTATION === "object" && evidence.ISSUER_SIGNATURE_OR_VERIFIABLE_ATTESTATION !== null)
+    || nonempty(evidence.ISSUER_SIGNATURE_OR_VERIFIABLE_ATTESTATION, 16), "ISSUER_ATTESTATION_INVALID");
+
+  let currentTime = Number.NaN;
+  try {
+    currentTime = isoTime(now, "CURRENT_TIME").milliseconds;
+    const issuedAt = isoTime(evidence.ISSUED_AT, "ATTESTATION_ISSUED_AT").milliseconds;
+    const expiresAt = isoTime(evidence.EXPIRES_AT, "ATTESTATION_EXPIRES_AT").milliseconds;
+    addBlocker(blockers, issuedAt <= currentTime && currentTime < expiresAt && expiresAt > issuedAt, "AUTHORITY_LEASE_TIME_INVALID");
+  } catch (error) {
+    blockers.push(error?.message || "AUTHORITY_LEASE_TIME_INVALID");
+  }
+
+  let providerResult = null;
+  if (typeof providerVerifier !== "function") {
+    blockers.push("HOST_REGISTERED_EXTERNAL_PROVIDER_VERIFIER_REQUIRED");
+  } else {
+    try {
+      providerResult = await providerVerifier({ request, evidence: deepFreeze(structuredClone(evidence)), now });
+    } catch {
+      blockers.push("EXTERNAL_PROVIDER_VERIFICATION_FAILED");
+    }
+  }
+  if (!providerResult || typeof providerResult !== "object") {
+    blockers.push("EXTERNAL_PROVIDER_VERIFICATION_RESULT_REQUIRED");
+  } else {
+    addBlocker(blockers, !containsSecretField(providerResult), "PROVIDER_RESULT_SECRET_MATERIAL_FORBIDDEN");
+    addBlocker(blockers, providerResult.VERIFIED === true, "PROVIDER_ATTESTATION_NOT_VERIFIED");
+    addBlocker(blockers, providerResult.ISSUER_SIGNATURE_VERIFIED === true, "ISSUER_SIGNATURE_NOT_VERIFIED");
+    addBlocker(blockers, providerResult.AUTHORITY_LEASE_VERIFIED === true, "AUTHORITY_LEASE_NOT_VERIFIED");
+    addBlocker(blockers, providerResult.CHALLENGE_RESPONSE_VERIFIED === true, "CHALLENGE_RESPONSE_NOT_VERIFIED");
+    addBlocker(blockers, providerResult.LEASE_REVOCATION_STATUS === "ACTIVE", "AUTHORITY_LEASE_NOT_ACTIVE");
+    for (const field of ["PROVIDER_AUTHENTICATED_AGENT_INSTANCE_ID", "ISSUER_ID", "AUTHORITY_LEASE_ID", "LIFE_ID", "WORKER_ID", "ISSUED_AT", "EXPIRES_AT", "NONCE", "CHALLENGE", "CHALLENGE_RESPONSE", "CONTROLLER_ID", "HENGYAO_CONTROLLER_ID"]) {
+      addBlocker(blockers, providerResult[field] === evidence[field], `${field}_VERIFIER_MISMATCH`);
+    }
+    addBlocker(blockers, sameStringList(providerResult.AUTHORITY_LEASE_SCOPE, evidence.AUTHORITY_LEASE_SCOPE), "AUTHORITY_LEASE_SCOPE_VERIFIER_MISMATCH");
+    addBlocker(blockers, /^[0-9a-f]{64}$/u.test(String(providerResult.ATTESTATION_DIGEST ?? "")), "ATTESTATION_DIGEST_INVALID");
+    try {
+      const verifiedAt = isoTime(providerResult.VERIFIED_AT, "PROVIDER_VERIFIED_AT").milliseconds;
+      addBlocker(blockers, Number.isFinite(currentTime) && verifiedAt <= currentTime, "PROVIDER_VERIFIED_AT_INVALID");
+    } catch (error) {
+      blockers.push(error?.message || "PROVIDER_VERIFIED_AT_INVALID");
+    }
+  }
+
+  const result = externalGateResult("XUANYAO_CONTROLLER_ATTESTATION", blockers, {
+    REQUEST_ID: request.REQUEST_ID,
+    LIFE_ID: request.LIFE_ID,
+    WORKER_ID: request.WORKER_ID,
+    CONTROLLER_ID: evidence.CONTROLLER_ID ?? null,
+    HENGYAO_CONTROLLER_ID: evidence.HENGYAO_CONTROLLER_ID ?? null,
+    EXTERNAL_CONTROLLER_CONNECTED: blockers.length === 0,
+    CONTROLLER_INDEPENDENCE: blockers.length === 0 ? "MACHINE_VERIFIED_DISTINCT" : "UNVERIFIED",
+    ACK_CHANNEL_READY: blockers.length === 0,
+    VERIFIED_AT: blockers.length === 0 ? providerResult.VERIFIED_AT : null,
+    ATTESTATION_DIGEST: blockers.length === 0 ? providerResult.ATTESTATION_DIGEST : null,
+    NEXT_ACTIONS: blockers.length === 0 ? request.ACK_CHANNEL.AUTO_CONTINUE_AFTER_CONTROLLER_PASS : [],
+  });
+  if (result.status === "PASS") VERIFIED_EXTERNAL_CONTROLLER_BINDINGS.add(result);
+  return result;
+}
+
+export function verifyXuanyaoAckResponse({ controllerVerification, response, now } = {}) {
+  const blockers = [];
+  const request = XUANYAO_CONTROLLER_ATTESTATION_REQUEST_V1;
+  addBlocker(blockers, VERIFIED_EXTERNAL_CONTROLLER_BINDINGS.has(controllerVerification), "VERIFIED_XUANYAO_CONTROLLER_BINDING_REQUIRED");
+  if (!response || typeof response !== "object" || Array.isArray(response)) {
+    return externalGateResult("XUANYAO_ACK_RESPONSE", [...blockers, "ACK_RESPONSE_REQUIRED"], { verified: false });
+  }
+  addBlocker(blockers, sameStringList(Object.keys(response).sort(), [...ACK_RESPONSE_FIELDS].sort()), "ACK_RESPONSE_FIELDS_INVALID");
+  addBlocker(blockers, response.LIFE_ID === request.LIFE_ID, "ACK_LIFE_ID_MISMATCH");
+  addBlocker(blockers, response.WORKER_ID === request.WORKER_ID, "ACK_WORKER_ID_MISMATCH");
+  addBlocker(blockers, response.CONTROLLER_ID === controllerVerification?.CONTROLLER_ID, "ACK_CONTROLLER_ID_MISMATCH");
+  addBlocker(blockers, nonempty(response.ACK_NONCE, 16), "ACK_NONCE_INVALID");
+  const document = XUANYAO_LIFE_WORKER_ONBOARDING_V1.acknowledgmentHandoff.documents.find(({ documentPath }) => documentPath === response.DOCUMENT_PATH);
+  addBlocker(blockers, Boolean(document), "ACK_DOCUMENT_NOT_IN_HANDOFF");
+  if (document) {
+    addBlocker(blockers, response.DOCUMENT_HASH === document.documentSha256, "ACK_DOCUMENT_HASH_MISMATCH");
+    try {
+      const liveHash = sha256(fs.readFileSync(path.resolve(import.meta.dirname, "../../..", document.documentPath)));
+      addBlocker(blockers, liveHash === document.documentSha256, "ACK_DOCUMENT_HASH_STALE");
+    } catch {
+      blockers.push("ACK_DOCUMENT_UNREADABLE");
+    }
+  }
+  try {
+    const ackAt = isoTime(response.ACK_TIMESTAMP, "ACK_TIMESTAMP").milliseconds;
+    const verifiedAt = isoTime(controllerVerification?.VERIFIED_AT, "CONTROLLER_VERIFIED_AT").milliseconds;
+    const currentTime = isoTime(now, "CURRENT_TIME").milliseconds;
+    addBlocker(blockers, ackAt >= verifiedAt && ackAt <= currentTime, "ACK_TIMESTAMP_OUTSIDE_VERIFIED_CONTROLLER_WINDOW");
+  } catch (error) {
+    blockers.push(error?.message || "ACK_TIMESTAMP_INVALID");
+  }
+  const result = externalGateResult("XUANYAO_ACK_RESPONSE", blockers, {
+    REQUEST_ID: request.REQUEST_ID,
+    ACK_TYPE: document?.ackType ?? null,
+    DOCUMENT_PATH: response.DOCUMENT_PATH ?? null,
+    ACK_NONCE: response.ACK_NONCE ?? null,
+    verified: blockers.length === 0,
+    ACK_EVIDENCE_HASH: blockers.length === 0 ? sha256(stableStringify(response)) : null,
+  });
+  if (result.status === "PASS") VERIFIED_XUANYAO_ACK_RESPONSES.add(result);
+  return result;
+}
+
+export function evaluateXuanyaoAckSet({ ackVerifications } = {}) {
+  const blockers = [];
+  addBlocker(blockers, Array.isArray(ackVerifications) && ackVerifications.length === 4, "FOUR_ACK_VERIFICATIONS_REQUIRED");
+  if (Array.isArray(ackVerifications)) {
+    addBlocker(blockers, ackVerifications.every((entry) => VERIFIED_XUANYAO_ACK_RESPONSES.has(entry)), "UNVERIFIED_ACK_RESPONSE_PRESENT");
+    addBlocker(blockers, new Set(ackVerifications.map(({ ACK_TYPE }) => ACK_TYPE)).size === 4, "ACK_TYPES_NOT_COMPLETE_OR_DISTINCT");
+    addBlocker(blockers, new Set(ackVerifications.map(({ ACK_NONCE }) => ACK_NONCE)).size === 4, "ACK_NONCES_NOT_DISTINCT");
+  }
+  return externalGateResult("XUANYAO_ACK_SET", blockers, {
+    XUANYAO_ACKS: blockers.length === 0 ? "4/4_MACHINE_VERIFIED" : "INCOMPLETE",
+    ACK_CHANNEL_READY: blockers.length === 0,
+    NEXT_ACTION: blockers.length === 0 ? "PROCESS_T2_GATE_UNDER_EXISTING_POLICY" : "WAIT_FOR_VERIFIED_XUANYAO_ACK_RESPONSES",
+  });
+}
+
+export async function verifyHengyaoSecureSignerConnection({ evidence, providerVerifier, now } = {}) {
+  const request = HENGYAO_SECURE_SIGNER_CONNECTION_REQUEST_V1;
+  const blockers = [];
+  if (!evidence || typeof evidence !== "object" || Array.isArray(evidence)) {
+    return externalGateResult("HENGYAO_SECURE_SIGNER_CONNECTION", ["SECURE_SIGNER_EVIDENCE_REQUIRED"], {
+      REQUEST_ID: request.REQUEST_ID,
+      EXTERNAL_SIGNER_CONNECTED: false,
+    });
+  }
+  const required = [
+    "REGISTERED_HENGYAO_WALLET", "CHAIN_ID", "SIGNER_PROVIDER_ID", "SIGNER_ADDRESS_BINDING", "POLICY_HASH",
+    "ALLOWED_TARGET", "ALLOWED_SELECTORS", "NONCE_SOURCE", "GAS_ESTIMATE_SUPPORT", "BROADCAST_CAPABILITY",
+    "RECEIPT_QUERY_CAPABILITY", "CANONICAL_BLOCK_HASH_VALIDATION", "MIN_CONFIRMATIONS", "PRIVATE_KEY_OUTPUT",
+    "SEED_OUTPUT", "GENERAL_PURPOSE_SIGNING", "ARBITRARY_TRANSFER",
+  ];
+  for (const field of required) addBlocker(blockers, Object.hasOwn(evidence, field), `${field}_REQUIRED`);
+  addBlocker(blockers, sameStringList(Object.keys(evidence).sort(), [...required].sort()), "SIGNER_EVIDENCE_FIELDS_INVALID");
+  addBlocker(blockers, !containsSignerSecretMaterial(evidence), "SECRET_MATERIAL_OR_FORBIDDEN_CAPABILITY_PRESENT");
+  addBlocker(blockers, nonempty(evidence.SIGNER_PROVIDER_ID), "SIGNER_PROVIDER_ID_INVALID");
+  addBlocker(blockers, !HENGYAO_SELF_ISSUER_IDS.has(String(evidence.SIGNER_PROVIDER_ID ?? "").toLowerCase())
+    && String(evidence.SIGNER_PROVIDER_ID ?? "") !== "衡曜", "SELF_ASSERTED_SIGNER_PROVIDER_FORBIDDEN");
+  try {
+    addBlocker(blockers, address(evidence.REGISTERED_HENGYAO_WALLET, "EVIDENCE_REGISTERED_WALLET") === address(request.REGISTERED_HENGYAO_WALLET, "REQUEST_REGISTERED_WALLET"), "REGISTERED_HENGYAO_WALLET_MISMATCH");
+    addBlocker(blockers, address(evidence.SIGNER_ADDRESS_BINDING, "EVIDENCE_SIGNER_BINDING") === address(request.SIGNER_ADDRESS_BINDING, "REQUEST_SIGNER_BINDING"), "SIGNER_ADDRESS_BINDING_MISMATCH");
+    addBlocker(blockers, address(evidence.ALLOWED_TARGET, "EVIDENCE_ALLOWED_TARGET") === address(request.ALLOWED_TARGET, "REQUEST_ALLOWED_TARGET"), "ALLOWED_TARGET_MISMATCH");
+  } catch (error) {
+    blockers.push(error?.message || "SIGNER_ADDRESS_EVIDENCE_INVALID");
+  }
+  addBlocker(blockers, Number(evidence.CHAIN_ID) === request.CHAIN_ID, "CHAIN_ID_MISMATCH");
+  addBlocker(blockers, evidence.POLICY_HASH === request.POLICY_HASH
+    && evidence.POLICY_HASH === HENGYAO_LIFE_TRANSACTION_POLICY_V1.activation.approvalPolicyScopeHash, "POLICY_HASH_MISMATCH");
+  addBlocker(blockers, sameStringList(evidence.ALLOWED_SELECTORS, request.ALLOWED_SELECTORS), "ALLOWED_SELECTORS_MISMATCH");
+  addBlocker(blockers, evidence.NONCE_SOURCE === request.NONCE_SOURCE, "NONCE_SOURCE_MISMATCH");
+  for (const field of ["GAS_ESTIMATE_SUPPORT", "BROADCAST_CAPABILITY", "RECEIPT_QUERY_CAPABILITY", "CANONICAL_BLOCK_HASH_VALIDATION"]) {
+    addBlocker(blockers, evidence[field] === true, `${field}_REQUIRED`);
+  }
+  addBlocker(blockers, Number(evidence.MIN_CONFIRMATIONS) === request.MIN_CONFIRMATIONS, "MIN_CONFIRMATIONS_MISMATCH");
+  for (const field of SIGNER_DENIAL_FIELDS) addBlocker(blockers, evidence[field] === false, `${field}_MUST_BE_FALSE`);
+
+  let currentTime = Number.NaN;
+  try { currentTime = isoTime(now, "CURRENT_TIME").milliseconds; }
+  catch (error) { blockers.push(error?.message || "CURRENT_TIME_INVALID"); }
+  let providerResult = null;
+  if (typeof providerVerifier !== "function") {
+    blockers.push("HOST_REGISTERED_EXTERNAL_SIGNER_PROVIDER_VERIFIER_REQUIRED");
+  } else {
+    try {
+      providerResult = await providerVerifier({ request, evidence: deepFreeze(structuredClone(evidence)), now });
+    } catch {
+      blockers.push("EXTERNAL_SIGNER_PROVIDER_VERIFICATION_FAILED");
+    }
+  }
+  if (!providerResult || typeof providerResult !== "object") {
+    blockers.push("EXTERNAL_SIGNER_PROVIDER_VERIFICATION_RESULT_REQUIRED");
+  } else {
+    addBlocker(blockers, !containsSignerSecretMaterial(providerResult), "SIGNER_PROVIDER_RESULT_SECRET_MATERIAL_FORBIDDEN");
+    addBlocker(blockers, providerResult.VERIFIED === true, "SIGNER_PROVIDER_ATTESTATION_NOT_VERIFIED");
+    addBlocker(blockers, providerResult.SIGNER_PROVIDER_ID === evidence.SIGNER_PROVIDER_ID, "SIGNER_PROVIDER_ID_VERIFIER_MISMATCH");
+    try {
+      addBlocker(blockers, address(providerResult.REGISTERED_HENGYAO_WALLET, "VERIFIER_REGISTERED_WALLET") === address(evidence.REGISTERED_HENGYAO_WALLET, "EVIDENCE_REGISTERED_WALLET"), "REGISTERED_WALLET_VERIFIER_MISMATCH");
+      addBlocker(blockers, address(providerResult.SIGNER_ADDRESS_BINDING, "VERIFIER_SIGNER_BINDING") === address(evidence.SIGNER_ADDRESS_BINDING, "EVIDENCE_SIGNER_BINDING"), "SIGNER_ADDRESS_VERIFIER_MISMATCH");
+      addBlocker(blockers, address(providerResult.ALLOWED_TARGET, "VERIFIER_ALLOWED_TARGET") === address(evidence.ALLOWED_TARGET, "EVIDENCE_ALLOWED_TARGET"), "ALLOWED_TARGET_VERIFIER_MISMATCH");
+    } catch (error) {
+      blockers.push(error?.message || "SIGNER_PROVIDER_ADDRESS_RESULT_INVALID");
+    }
+    addBlocker(blockers, Number(providerResult.CHAIN_ID) === Number(evidence.CHAIN_ID), "CHAIN_ID_VERIFIER_MISMATCH");
+    addBlocker(blockers, providerResult.POLICY_HASH === evidence.POLICY_HASH, "POLICY_HASH_VERIFIER_MISMATCH");
+    addBlocker(blockers, sameStringList(providerResult.ALLOWED_SELECTORS, evidence.ALLOWED_SELECTORS), "SELECTORS_VERIFIER_MISMATCH");
+    addBlocker(blockers, providerResult.NONCE_SOURCE === evidence.NONCE_SOURCE, "NONCE_SOURCE_VERIFIER_MISMATCH");
+    addBlocker(blockers, Number(providerResult.MIN_CONFIRMATIONS) === Number(evidence.MIN_CONFIRMATIONS), "MIN_CONFIRMATIONS_VERIFIER_MISMATCH");
+    for (const field of ["GAS_ESTIMATE_SUPPORT", "BROADCAST_CAPABILITY", "RECEIPT_QUERY_CAPABILITY", "CANONICAL_BLOCK_HASH_VALIDATION"]) {
+      addBlocker(blockers, providerResult[field] === true, `${field}_NOT_PROVIDER_VERIFIED`);
+    }
+    for (const field of SIGNER_DENIAL_FIELDS) addBlocker(blockers, providerResult[field] === false, `${field}_PROVIDER_DENIAL_REQUIRED`);
+    addBlocker(blockers, /^[0-9a-f]{64}$/u.test(String(providerResult.ATTESTATION_DIGEST ?? "")), "SIGNER_ATTESTATION_DIGEST_INVALID");
+    addBlocker(blockers, nonempty(providerResult.PROVIDER_ATTESTATION_ID), "SIGNER_PROVIDER_ATTESTATION_ID_REQUIRED");
+    try {
+      const verifiedAt = isoTime(providerResult.VERIFIED_AT, "SIGNER_PROVIDER_VERIFIED_AT").milliseconds;
+      addBlocker(blockers, Number.isFinite(currentTime) && verifiedAt <= currentTime, "SIGNER_PROVIDER_VERIFIED_AT_INVALID");
+    } catch (error) {
+      blockers.push(error?.message || "SIGNER_PROVIDER_VERIFIED_AT_INVALID");
+    }
+  }
+  const result = externalGateResult("HENGYAO_SECURE_SIGNER_CONNECTION", blockers, {
+    REQUEST_ID: request.REQUEST_ID,
+    SIGNER_PROVIDER_ID: evidence.SIGNER_PROVIDER_ID ?? null,
+    SIGNER_ADDRESS_BINDING: evidence.SIGNER_ADDRESS_BINDING ?? null,
+    POLICY_HASH: evidence.POLICY_HASH ?? null,
+    EXTERNAL_SIGNER_CONNECTED: blockers.length === 0,
+    HEARTBEAT_EXECUTION_READY: blockers.length === 0,
+    FIRST_ACTION: blockers.length === 0 ? request.FIRST_ACTION_AFTER_MACHINE_VERIFICATION : null,
+    VERIFIED_AT: blockers.length === 0 ? providerResult.VERIFIED_AT : null,
+    PROVIDER_ATTESTATION_ID: blockers.length === 0 ? providerResult.PROVIDER_ATTESTATION_ID : null,
+    ATTESTATION_DIGEST: blockers.length === 0 ? providerResult.ATTESTATION_DIGEST : null,
+    AUTO_CONTINUE_AFTER_CANONICAL_RECEIPT: blockers.length === 0 ? request.AUTO_CONTINUE_AFTER_CANONICAL_RECEIPT : [],
+  });
+  if (result.status === "PASS") VERIFIED_EXTERNAL_SIGNER_CONNECTIONS.add(result);
+  return result;
+}
+
+export function createHeartbeatClaimHandoff({ signerConnectionVerification, expectedNonce, replayNonce, createdAt, expiresAt, missionId = "KAIOS-FIRST-HEARTBEAT" } = {}) {
+  if (!VERIFIED_EXTERNAL_SIGNER_CONNECTIONS.has(signerConnectionVerification)) throw new Error("VERIFIED_EXTERNAL_SIGNER_CONNECTION_REQUIRED");
+  const intent = createLifeTransactionIntent({
+    methodSignature: "heartbeatClaim()",
+    args: [],
+    expectedNonce,
+    replayNonce,
+    createdAt,
+    expiresAt,
+    missionId,
+  });
+  return deepFreeze({
+    status: "READY_FOR_EXISTING_TRANSACTION_GATE",
+    requestId: HENGYAO_SECURE_SIGNER_CONNECTION_REQUEST_V1.REQUEST_ID,
+    signerProviderId: signerConnectionVerification.SIGNER_PROVIDER_ID,
+    firstAction: "heartbeatClaim()",
+    intent,
+    broadcast: false,
+    privateKeyAccess: false,
+    nextAction: "SIMULATE_RESERVE_AND_SUBMIT_TO_VERIFIED_EXTERNAL_SIGNER",
+  });
 }
 
 export function encodeAllowedHeartCalldata(signature, args = []) {
@@ -256,7 +603,7 @@ function methodContextBlockers(intent, context, blockers) {
   }
 }
 
-export function evaluateLifeTransactionIntent({ intent, trustedContext, journal, now } = {}) {
+export function evaluateLifeTransactionIntent({ intent, trustedContext, signerConnectionVerification, journal, now } = {}) {
   const blockers = [];
   if (!intent || typeof intent !== "object" || !trustedContext || typeof trustedContext !== "object") {
     return deepFreeze({ status: "REJECTED", blockers: ["INTENT_AND_TRUSTED_CONTEXT_REQUIRED"], broadcast: false, privateKeyAccess: false });
@@ -275,12 +622,13 @@ export function evaluateLifeTransactionIntent({ intent, trustedContext, journal,
     addBlocker(blockers, intent.policyVersion === HENGYAO_LIFE_TRANSACTION_POLICY_V1.schemaVersion, "POLICY_VERSION_MISMATCH");
     addBlocker(blockers, intent.policyId === HENGYAO_LIFE_TRANSACTION_POLICY_V1.policyId, "POLICY_ID_MISMATCH");
     addBlocker(blockers, HENGYAO_A2_HUMAN_DECISION_VALID, "DURABLE_HUMAN_DECISION_INVALID");
-    addBlocker(blockers, HENGYAO_LIFE_TRANSACTION_POLICY_V1.activation.currentStatus === "AUTHORIZED_ACTIVE"
+    const verifiedExternalSigner = VERIFIED_EXTERNAL_SIGNER_CONNECTIONS.has(signerConnectionVerification)
+      && signerConnectionVerification.POLICY_HASH === HENGYAO_LIFE_TRANSACTION_POLICY_V1.activation.approvalPolicyScopeHash
+      && address(signerConnectionVerification.SIGNER_ADDRESS_BINDING, "VERIFIED_SIGNER_BINDING") === address(HENGYAO_LIFE_TRANSACTION_POLICY_V1.walletAddress, "POLICY_WALLET");
+    addBlocker(blockers, verifiedExternalSigner
       && HENGYAO_LIFE_TRANSACTION_POLICY_V1.activation.currentAuthority === HENGYAO_LIFE_TRANSACTION_POLICY_V1.activation.requiredAuthority
-      && Boolean(String(HENGYAO_LIFE_TRANSACTION_POLICY_V1.activation.approvalEvidenceId ?? "").trim())
-      && HENGYAO_LIFE_TRANSACTION_POLICY_V1.activation.operationalActivationReviewed === true, "DURABLE_POLICY_NOT_ACTIVATED");
-    addBlocker(blockers, HENGYAO_LIFE_TRANSACTION_POLICY_V1.activation.secureSignerConnected === true
-      && HENGYAO_LIFE_TRANSACTION_POLICY_V1.activation.broadcasterIncluded === true, "DURABLE_SECURE_SIGNER_BINDING_REQUIRED");
+      && Boolean(String(HENGYAO_LIFE_TRANSACTION_POLICY_V1.activation.approvalEvidenceId ?? "").trim()), "DURABLE_POLICY_NOT_ACTIVATED");
+    addBlocker(blockers, verifiedExternalSigner, "DURABLE_SECURE_SIGNER_BINDING_REQUIRED");
     addBlocker(blockers, intent.lifeId === HENGYAO_LIFE_TRANSACTION_POLICY_V1.lifeId && intent.lifeId === trustedContext.lifeId, "LIFE_ID_MISMATCH");
     addBlocker(blockers, intent.workerId === HENGYAO_LIFE_TRANSACTION_POLICY_V1.workerId && intent.workerId === trustedContext.workerId, "WORKER_ID_MISMATCH");
     addBlocker(blockers, address(intent.walletAddress, "INTENT_WALLET") === address(HENGYAO_LIFE_TRANSACTION_POLICY_V1.walletAddress, "POLICY_WALLET")
@@ -465,8 +813,8 @@ export class TransactionReplayJournal {
   }
 }
 
-export function reserveAuthorizedLifeTransaction({ intent, trustedContext, journal, now } = {}) {
-  const decision = evaluateLifeTransactionIntent({ intent, trustedContext, journal, now });
+export function reserveAuthorizedLifeTransaction({ intent, trustedContext, signerConnectionVerification, journal, now } = {}) {
+  const decision = evaluateLifeTransactionIntent({ intent, trustedContext, signerConnectionVerification, journal, now });
   if (decision.status !== "APPROVED_FOR_EXTERNAL_SECURE_SIGNER") return decision;
   const journalRecord = journal.reserve(intent, now, decision);
   return deepFreeze({

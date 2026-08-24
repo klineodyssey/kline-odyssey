@@ -6,13 +6,20 @@ import test from "node:test";
 import { randomUUID } from "node:crypto";
 import {
   HENGYAO_LIFE_TRANSACTION_POLICY_V1,
+  HENGYAO_SECURE_SIGNER_CONNECTION_REQUEST_V1,
   HENGYAO_A2_HUMAN_DECISION_V1,
   HENGYAO_A2_HUMAN_DECISION_VALID,
+  XUANYAO_CONTROLLER_ATTESTATION_REQUEST_V1,
   TransactionReplayJournal,
+  createHeartbeatClaimHandoff,
   createLifeTransactionIntent,
   encodeAllowedHeartCalldata,
+  evaluateXuanyaoAckSet,
   evaluateLifeTransactionIntent,
   reserveAuthorizedLifeTransaction,
+  verifyHengyaoSecureSignerConnection,
+  verifyXuanyaoAckResponse,
+  verifyXuanyaoControllerAttestation,
   verifyAndApplyLifeTransactionReceipt,
 } from "../runtime/life-transaction-gate.mjs";
 import { sha256, stableStringify, ZERO_HASH } from "../runtime/life-circulatory-runtime.mjs";
@@ -209,6 +216,10 @@ test("Hengyao A2 decision is hash-bound while operational signing remains inacti
   assert.ok(policy.requiredGates.includes("DURABLE_HUMAN_DECISION"));
   assert.ok(policy.forbiddenActions.includes("ARBITRARY_TRANSFER"));
   assert.ok(policy.forbiddenActions.includes("PRIVATE_KEY_OUTPUT"));
+  assert.equal(HENGYAO_SECURE_SIGNER_CONNECTION_REQUEST_V1.REQUEST_ID, "HENGYAO_SECURE_SIGNER_CONNECTION_REQUEST_V1");
+  assert.equal(HENGYAO_SECURE_SIGNER_CONNECTION_REQUEST_V1.POLICY_HASH, policy.activation.approvalPolicyScopeHash);
+  assert.equal(HENGYAO_SECURE_SIGNER_CONNECTION_REQUEST_V1.MIN_CONFIRMATIONS, 12);
+  assert.equal(HENGYAO_SECURE_SIGNER_CONNECTION_REQUEST_V1.PRIVATE_KEY_OUTPUT, false);
 });
 
 test("only the four exact deployed Heart methods can be encoded", () => {
@@ -358,4 +369,213 @@ test("transaction journal detects tampering and trusted-head rollback", () => {
   fs.writeFileSync(filePath, original);
   assert.throws(() => new TransactionReplayJournal(filePath, { expectedHeadHash: `0x${"0".repeat(64)}` }), /TRUSTED_CHECKPOINT_MISMATCH/);
   assert.match(reserved.recordHash, /^[0-9a-f]{64}$/u);
+});
+
+function controllerEvidence(overrides = {}) {
+  return {
+    PROVIDER_AUTHENTICATED_AGENT_INSTANCE_ID: "provider-agent-instance-xuanyao-0001",
+    ISSUER_ID: "external-provider-identity-issuer-01",
+    ISSUER_SIGNATURE_OR_VERIFIABLE_ATTESTATION: "provider-attestation-signature-0001",
+    AUTHORITY_LEASE_ID: "ALEASE-XUANYAO-EXTERNAL-0001",
+    AUTHORITY_LEASE_SCOPE: ["XUANYAO_WORKER_ONBOARDING", "XUANYAO_ACK_CHANNEL"],
+    ISSUED_AT: "2026-08-24T17:20:00.000Z",
+    EXPIRES_AT: "2026-08-24T18:20:00.000Z",
+    NONCE: "controller-nonce-00000001",
+    CHALLENGE: "controller-challenge-00001",
+    CHALLENGE_RESPONSE: "controller-response-000001",
+    LIFE_ID: "LIFE-XUANYAO-SOL-0001",
+    WORKER_ID: "xuanyao-sol-01",
+    CONTROLLER_ID: "controller-provider-xuanyao-01",
+    HENGYAO_CONTROLLER_ID: "controller-provider-hengyao-01",
+    ...overrides,
+  };
+}
+
+function controllerProviderVerifier(evidence, overrides = {}) {
+  return async () => ({
+    VERIFIED: true,
+    ISSUER_SIGNATURE_VERIFIED: true,
+    AUTHORITY_LEASE_VERIFIED: true,
+    CHALLENGE_RESPONSE_VERIFIED: true,
+    LEASE_REVOCATION_STATUS: "ACTIVE",
+    PROVIDER_AUTHENTICATED_AGENT_INSTANCE_ID: evidence.PROVIDER_AUTHENTICATED_AGENT_INSTANCE_ID,
+    ISSUER_ID: evidence.ISSUER_ID,
+    AUTHORITY_LEASE_ID: evidence.AUTHORITY_LEASE_ID,
+    AUTHORITY_LEASE_SCOPE: [...evidence.AUTHORITY_LEASE_SCOPE],
+    ISSUED_AT: evidence.ISSUED_AT,
+    EXPIRES_AT: evidence.EXPIRES_AT,
+    NONCE: evidence.NONCE,
+    CHALLENGE: evidence.CHALLENGE,
+    CHALLENGE_RESPONSE: evidence.CHALLENGE_RESPONSE,
+    LIFE_ID: evidence.LIFE_ID,
+    WORKER_ID: evidence.WORKER_ID,
+    CONTROLLER_ID: evidence.CONTROLLER_ID,
+    HENGYAO_CONTROLLER_ID: evidence.HENGYAO_CONTROLLER_ID,
+    ATTESTATION_DIGEST: "a".repeat(64),
+    VERIFIED_AT: "2026-08-24T17:29:00.000Z",
+    ...overrides,
+  });
+}
+
+test("Xuanyao controller request rejects self assertion and same-controller evidence", async () => {
+  assert.equal(XUANYAO_CONTROLLER_ATTESTATION_REQUEST_V1.REQUEST_ID, "XUANYAO_CONTROLLER_ATTESTATION_REQUEST_V1");
+  assert.equal(XUANYAO_CONTROLLER_ATTESTATION_REQUEST_V1.ACK_CHANNEL.ACK_CHANNEL_READY, false);
+  const missingVerifier = await verifyXuanyaoControllerAttestation({
+    evidence: controllerEvidence(),
+    now: "2026-08-24T17:30:00.000Z",
+  });
+  assert.equal(missingVerifier.status, "REJECTED");
+  assert.ok(missingVerifier.blockers.includes("HOST_REGISTERED_EXTERNAL_PROVIDER_VERIFIER_REQUIRED"));
+  const selfEvidence = controllerEvidence({
+    ISSUER_ID: "codex-gm-01",
+    CONTROLLER_ID: "controller-provider-hengyao-01",
+  });
+  const selfAsserted = await verifyXuanyaoControllerAttestation({
+    evidence: selfEvidence,
+    providerVerifier: controllerProviderVerifier(selfEvidence),
+    now: "2026-08-24T17:30:00.000Z",
+  });
+  assert.equal(selfAsserted.status, "REJECTED");
+  assert.ok(selfAsserted.blockers.includes("ISSUER_SELF_ASSERTION_FORBIDDEN"));
+  assert.ok(selfAsserted.blockers.includes("CONTROLLER_INDEPENDENCE_FAILED"));
+});
+
+test("provider-verified distinct controller enables only Xuanyao's independent four-ACK channel", async () => {
+  const evidence = controllerEvidence();
+  const controller = await verifyXuanyaoControllerAttestation({
+    evidence,
+    providerVerifier: controllerProviderVerifier(evidence),
+    now: "2026-08-24T17:30:00.000Z",
+  });
+  assert.equal(controller.status, "PASS");
+  assert.equal(controller.CONTROLLER_INDEPENDENCE, "MACHINE_VERIFIED_DISTINCT");
+  assert.equal(controller.ACK_CHANNEL_READY, true);
+  const onboarding = JSON.parse(fs.readFileSync(path.join(packageRoot, "examples", "xuanyao-life-worker-onboarding.candidate.json"), "utf8"));
+  const ackVerifications = onboarding.acknowledgmentHandoff.documents.map((document, index) => verifyXuanyaoAckResponse({
+    controllerVerification: controller,
+    response: {
+      LIFE_ID: "LIFE-XUANYAO-SOL-0001",
+      WORKER_ID: "xuanyao-sol-01",
+      CONTROLLER_ID: evidence.CONTROLLER_ID,
+      DOCUMENT_PATH: document.documentPath,
+      DOCUMENT_HASH: document.documentSha256,
+      ACK_TIMESTAMP: `2026-08-24T17:31:0${index}.000Z`,
+      ACK_NONCE: `xuanyao-ack-nonce-0000${index}`,
+    },
+    now: "2026-08-24T17:32:00.000Z",
+  }));
+  for (const ack of ackVerifications) assert.equal(ack.status, "PASS");
+  const ackSet = evaluateXuanyaoAckSet({ ackVerifications });
+  assert.equal(ackSet.status, "PASS");
+  assert.equal(ackSet.XUANYAO_ACKS, "4/4_MACHINE_VERIFIED");
+  assert.equal(ackSet.NEXT_ACTION, "PROCESS_T2_GATE_UNDER_EXISTING_POLICY");
+});
+
+function signerEvidence(overrides = {}) {
+  const request = HENGYAO_SECURE_SIGNER_CONNECTION_REQUEST_V1;
+  return {
+    REGISTERED_HENGYAO_WALLET: request.REGISTERED_HENGYAO_WALLET,
+    CHAIN_ID: request.CHAIN_ID,
+    SIGNER_PROVIDER_ID: "external-secure-custody-provider-01",
+    SIGNER_ADDRESS_BINDING: request.SIGNER_ADDRESS_BINDING,
+    POLICY_HASH: request.POLICY_HASH,
+    ALLOWED_TARGET: request.ALLOWED_TARGET,
+    ALLOWED_SELECTORS: [...request.ALLOWED_SELECTORS],
+    NONCE_SOURCE: request.NONCE_SOURCE,
+    GAS_ESTIMATE_SUPPORT: true,
+    BROADCAST_CAPABILITY: true,
+    RECEIPT_QUERY_CAPABILITY: true,
+    CANONICAL_BLOCK_HASH_VALIDATION: true,
+    MIN_CONFIRMATIONS: 12,
+    PRIVATE_KEY_OUTPUT: false,
+    SEED_OUTPUT: false,
+    GENERAL_PURPOSE_SIGNING: false,
+    ARBITRARY_TRANSFER: false,
+    ...overrides,
+  };
+}
+
+function signerProviderVerifier(evidence, overrides = {}) {
+  return async () => ({
+    VERIFIED: true,
+    REGISTERED_HENGYAO_WALLET: evidence.REGISTERED_HENGYAO_WALLET,
+    CHAIN_ID: evidence.CHAIN_ID,
+    SIGNER_PROVIDER_ID: evidence.SIGNER_PROVIDER_ID,
+    SIGNER_ADDRESS_BINDING: evidence.SIGNER_ADDRESS_BINDING,
+    POLICY_HASH: evidence.POLICY_HASH,
+    ALLOWED_TARGET: evidence.ALLOWED_TARGET,
+    ALLOWED_SELECTORS: [...evidence.ALLOWED_SELECTORS],
+    NONCE_SOURCE: evidence.NONCE_SOURCE,
+    GAS_ESTIMATE_SUPPORT: true,
+    BROADCAST_CAPABILITY: true,
+    RECEIPT_QUERY_CAPABILITY: true,
+    CANONICAL_BLOCK_HASH_VALIDATION: true,
+    MIN_CONFIRMATIONS: evidence.MIN_CONFIRMATIONS,
+    PRIVATE_KEY_OUTPUT: false,
+    SEED_OUTPUT: false,
+    GENERAL_PURPOSE_SIGNING: false,
+    ARBITRARY_TRANSFER: false,
+    PROVIDER_ATTESTATION_ID: "provider-attestation-hengyao-signer-0001",
+    ATTESTATION_DIGEST: "b".repeat(64),
+    VERIFIED_AT: "2026-08-24T17:29:00.000Z",
+    ...overrides,
+  });
+}
+
+test("secure signer request rejects labels, secret output and arbitrary signing capabilities", async () => {
+  const evidence = signerEvidence();
+  const missingVerifier = await verifyHengyaoSecureSignerConnection({ evidence, now: "2026-08-24T17:30:00.000Z" });
+  assert.equal(missingVerifier.status, "REJECTED");
+  assert.ok(missingVerifier.blockers.includes("HOST_REGISTERED_EXTERNAL_SIGNER_PROVIDER_VERIFIER_REQUIRED"));
+  const unsafeEvidence = signerEvidence({ PRIVATE_KEY_OUTPUT: true, GENERAL_PURPOSE_SIGNING: true });
+  const unsafe = await verifyHengyaoSecureSignerConnection({
+    evidence: unsafeEvidence,
+    providerVerifier: signerProviderVerifier(unsafeEvidence, { PRIVATE_KEY_OUTPUT: true, GENERAL_PURPOSE_SIGNING: true }),
+    now: "2026-08-24T17:30:00.000Z",
+  });
+  assert.equal(unsafe.status, "REJECTED");
+  assert.ok(unsafe.blockers.includes("SECRET_MATERIAL_OR_FORBIDDEN_CAPABILITY_PRESENT"));
+  assert.ok(unsafe.blockers.includes("PRIVATE_KEY_OUTPUT_MUST_BE_FALSE"));
+  assert.ok(unsafe.blockers.includes("GENERAL_PURPOSE_SIGNING_MUST_BE_FALSE"));
+});
+
+test("provider-verified signer unlocks the existing gate for heartbeatClaim only", async () => {
+  const evidence = signerEvidence();
+  const signer = await verifyHengyaoSecureSignerConnection({
+    evidence,
+    providerVerifier: signerProviderVerifier(evidence),
+    now: "2026-08-24T17:30:00.000Z",
+  });
+  assert.equal(signer.status, "PASS");
+  assert.equal(signer.EXTERNAL_SIGNER_CONNECTED, true);
+  assert.equal(signer.FIRST_ACTION, "heartbeatClaim()");
+  const handoff = createHeartbeatClaimHandoff({
+    signerConnectionVerification: signer,
+    expectedNonce: "7",
+    replayNonce: `0x${"cd".repeat(32)}`,
+    createdAt: "2026-08-24T17:31:00.000Z",
+    expiresAt: "2026-08-24T17:36:00.000Z",
+  });
+  assert.equal(handoff.intent.methodSignature, "heartbeatClaim()");
+  assert.equal(handoff.intent.calldata, "0x2d293562");
+  const context = trustedContext(handoff.intent, {
+    policyApproval: {
+      status: "APPROVED_ACTIVE",
+      policyId: policy.policyId,
+      decisionId: policy.activation.approvalEvidenceId,
+      decisionHash: policy.activation.approvalDecisionHash,
+      policyScopeHash: policy.activation.approvalPolicyScopeHash,
+    },
+  });
+  const journal = new TransactionReplayJournal(tempJournal());
+  const reserved = reserveAuthorizedLifeTransaction({
+    intent: handoff.intent,
+    trustedContext: context,
+    signerConnectionVerification: signer,
+    journal,
+    now: "2026-08-24T17:32:00.000Z",
+  });
+  assert.equal(reserved.status, "RESERVED_FOR_EXTERNAL_SECURE_SIGNER");
+  assert.equal(reserved.broadcast, false);
+  assert.equal(reserved.privateKeyAccess, false);
 });

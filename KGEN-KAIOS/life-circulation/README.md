@@ -12,12 +12,12 @@ This package is the candidate implementation boundary for per-Life KAIOS circula
 | `KGEN-KAIOS/life-circulation/schemas/life-circulatory-runtime.schema.json` | Recursively closed Organ, Blood Bank, Vessel, Pulse, ledger, and recovery schema |
 | `KGEN-KAIOS/life-circulation/runtime/life-circulatory-runtime.mjs` | Deterministic allocation, conservation, health, recovery, fractal coordinate, and persistent replay implementation |
 | `KGEN-KAIOS/life-circulation/runtime/b4-micro-circulation-adapter.mjs` | Exact B4 label-to-coordinate distance, Heart eligibility, meal, movement/fare, PR #169 market, food/waste, and purpose-ledger adapter |
-| `KGEN-KAIOS/life-circulation/runtime/life-transaction-gate.mjs` | Fail-closed Life intent, policy, durable replay reservation, and canonical receipt gate; contains no signer or broadcaster |
-| `KGEN-KAIOS/life-circulation/policies/hengyao-life-transaction-policy.candidate.json` | Machine-readable four-method K12345 allowlist; A2 governance is approved but operational signing remains inactive |
+| `KGEN-KAIOS/life-circulation/runtime/life-transaction-gate.mjs` | Fail-closed external controller/signer attestation adapters plus Life intent, durable replay reservation, and canonical receipt gate; contains no signer, trust anchor, or broadcaster |
+| `KGEN-KAIOS/life-circulation/policies/hengyao-life-transaction-policy.candidate.json` | Machine-readable four-method K12345 allowlist and `HENGYAO_SECURE_SIGNER_CONNECTION_REQUEST_V1`; A2 governance is approved but operational signing remains inactive |
 | `KGEN-KAIOS/life-circulation/policies/hengyao-autonomy-xuanyao-onboarding-human-decision.candidate.json` | Hash-bound Human decisions for Hengyao's A2 ceiling, Xuanyao onboarding, and Xuanyao's explicit formal Digital Life birth |
 | `KGEN-KAIOS/life-circulation/examples/whole-life-circulation.candidate.json` | Ten-organ review fixture with separated KAIOS, native BNB, and WBNB ledgers |
 | `KGEN-KAIOS/life-circulation/examples/hengyao-b4-micro-circulation.candidate.json` | Hash-bound 2026-08-24 read-only evidence snapshot; no transaction, movement, trade, or payment is represented as completed |
-| `KGEN-KAIOS/life-circulation/examples/xuanyao-life-worker-onboarding.candidate.json` | Formal born-Life plus fail-closed T1 Worker onboarding record; controller independence, acknowledgments, T2, employment, and review authority remain unproven/ungranted |
+| `KGEN-KAIOS/life-circulation/examples/xuanyao-life-worker-onboarding.candidate.json` | Formal born-Life, fail-closed T1 Worker onboarding record, and `XUANYAO_CONTROLLER_ATTESTATION_REQUEST_V1`; controller independence, acknowledgments, T2, employment, and review authority remain unproven/ungranted |
 | `KGEN-KAIOS/life-circulation/tests/life-circulatory-runtime.test.mjs` | Boundary, replay, fuzz, invariant, health, custody, and conservation tests |
 | `KGEN-KAIOS/life-circulation/tests/b4-micro-circulation.test.mjs` | Exact-distance, policy, return-reserve, CT, custody, food/waste, purpose-ledger, schema, and UI tests |
 | `KGEN-KAIOS/life-circulation/schemas/b4-micro-circulation.schema.json` | Recursively closed schema for the B4 mission evidence packet |
@@ -60,10 +60,29 @@ channel. Each pending ACK now directly binds the Xuanyao Life ID, Worker ID,
 document path/hash, and null ACK timestamp; no ACK is inferred from the later
 execution-handoff signature.
 
+The same onboarding record now carries the closed, machine-readable
+`XUANYAO_CONTROLLER_ATTESTATION_REQUEST_V1`. Its evidence envelope cannot pass
+without a host-registered external provider verifier, a verified issuer
+signature/attestation and active lease, a verified challenge response, and two
+non-equal controller IDs. Only a verifier-issued controller result can enable
+the ACK response checker, which re-hashes each governed document at response
+time and requires four distinct Xuanyao nonces before advancing to the existing
+T2 gate. It does not grant T2 or review permission itself.
+
 Signer discovery also remains fail-closed. Browser WalletConnect/injected-wallet
 code is not an execution binding, the Starforge broker belongs to a different
 Life and forbids chain writes, and the Digital Ant private-key worker is not an
 eligible Hengyao external signer. No signer or broadcaster was connected.
+
+The unchanged A2 policy scope now embeds
+`HENGYAO_SECURE_SIGNER_CONNECTION_REQUEST_V1`: registered wallet, BSC chain 56,
+approved target/selectors, policy-scope hash, external nonce/gas/broadcast/
+receipt/canonical-block capabilities, and 12-confirmation finality. The adapter
+rejects private-key or seed output, general-purpose signing, arbitrary transfer,
+self-asserted provider labels, and unverified capability booleans. A real
+provider-issued result can unlock only the existing intent gate; its first
+handoff is `heartbeatClaim()` and still performs no broadcast inside this
+repository.
 
 The B4 adapter composes the existing CURRENT signed-universe floor and K-index
 linear scale with Human-frozen `label × 10^-8` mission coordinates. It does not

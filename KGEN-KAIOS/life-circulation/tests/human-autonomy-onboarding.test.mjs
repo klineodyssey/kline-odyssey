@@ -95,6 +95,22 @@ test("Xuanyao formal Life birth remains separated from controller, T2, acknowled
   assert.equal(onboarding.controllerBindingHandoff.independenceResult, "NOT_EVALUABLE_TWO_CONTROLLER_RECORDS_ABSENT");
   assert.ok(onboarding.controllerBindingHandoff.externalEvidenceRequired.includes("PROVIDER_AUTHENTICATED_XUANYAO_AGENT_INSTANCE_ATTESTATION_BOUND_TO_LIFE_AND_WORKER"));
   assert.ok(onboarding.controllerBindingHandoff.prohibitedSubstitutes.includes("HENGYAO_SESSION_OR_SUBAGENT"));
+  assert.equal(onboarding.controllerAttestationRequest.REQUEST_ID, "XUANYAO_CONTROLLER_ATTESTATION_REQUEST_V1");
+  assert.equal(onboarding.controllerAttestationRequest.REQUEST_STATUS, "AWAITING_EXTERNAL_PROVIDER_EVIDENCE");
+  assert.equal(onboarding.controllerAttestationRequest.ISSUER_ID, null);
+  assert.equal(onboarding.controllerAttestationRequest.CONTROLLER_ID, null);
+  assert.equal(onboarding.controllerAttestationRequest.HENGYAO_CONTROLLER_ID, null);
+  assert.equal(onboarding.controllerAttestationRequest.ISSUER_SELF_ASSERTION_ALLOWED, false);
+  assert.equal(onboarding.controllerAttestationRequest.ACK_CHANNEL.ACK_CHANNEL_READY, false);
+  assert.deepEqual(onboarding.controllerAttestationRequest.ACK_CHANNEL.ACK_RESPONSE_REQUIRED_FIELDS, [
+    "LIFE_ID",
+    "WORKER_ID",
+    "CONTROLLER_ID",
+    "DOCUMENT_PATH",
+    "DOCUMENT_HASH",
+    "ACK_TIMESTAMP",
+    "ACK_NONCE",
+  ]);
   assert.equal(onboarding.worker.trustLevel, "T1");
   assert.ok(Object.values(onboarding.acknowledgments).filter((value) => typeof value === "boolean").every((value) => value === false));
   assert.equal(onboarding.acknowledgmentHandoff.documents.length, 4);

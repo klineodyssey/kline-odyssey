@@ -19,7 +19,8 @@
     "forbiddenActions",
     "activation",
     "receipt",
-    "privateKeyPolicy"
+    "privateKeyPolicy",
+    "secureSignerConnectionRequest"
   ],
   "properties": {
     "schemaVersion": { "const": "1.0.0-candidate" },
@@ -51,7 +52,8 @@
     },
     "activation": { "$ref": "#/$defs/activation" },
     "receipt": { "$ref": "#/$defs/receipt" },
-    "privateKeyPolicy": { "$ref": "#/$defs/privateKeyPolicy" }
+    "privateKeyPolicy": { "$ref": "#/$defs/privateKeyPolicy" },
+    "secureSignerConnectionRequest": { "$ref": "#/$defs/secureSignerConnectionRequest" }
   },
   "$defs": {
     "allowedTarget": {
@@ -127,6 +129,49 @@
         "seedAcceptedByGate": { "const": false },
         "secretLoggingAllowed": { "const": false },
         "custodyBoundary": { "const": "EXTERNAL_AUTHORIZED_SECURE_SIGNER_ONLY" }
+      }
+    },
+    "secureSignerConnectionRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["REQUEST_TYPE", "REQUEST_ID", "REQUEST_STATUS", "REQUEST_CREATED_AT", "REGISTERED_HENGYAO_WALLET", "CHAIN_ID", "SIGNER_PROVIDER_ID", "SIGNER_ADDRESS_BINDING", "POLICY_HASH", "POLICY_HASH_SCOPE", "ALLOWED_TARGET", "ALLOWED_SELECTORS", "NONCE_SOURCE", "GAS_ESTIMATE_SUPPORT", "BROADCAST_CAPABILITY", "RECEIPT_QUERY_CAPABILITY", "CANONICAL_BLOCK_HASH_VALIDATION", "MIN_CONFIRMATIONS", "PRIVATE_KEY_OUTPUT", "SEED_OUTPUT", "GENERAL_PURPOSE_SIGNING", "ARBITRARY_TRANSFER", "PROVIDER_ATTESTATION_REQUIRED", "FIRST_ACTION_AFTER_MACHINE_VERIFICATION", "AUTO_CONTINUE_AFTER_CANONICAL_RECEIPT"],
+      "properties": {
+        "REQUEST_TYPE": { "const": "HENGYAO_SECURE_SIGNER_CONNECTION_REQUEST" },
+        "REQUEST_ID": { "const": "HENGYAO_SECURE_SIGNER_CONNECTION_REQUEST_V1" },
+        "REQUEST_STATUS": { "const": "AWAITING_EXTERNAL_SECURE_SIGNER_EVIDENCE" },
+        "REQUEST_CREATED_AT": { "type": "string", "pattern": "^20[0-9]{2}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$" },
+        "REGISTERED_HENGYAO_WALLET": { "const": "0x4DF6E9629Dad1072103cFd2bC81845fd97429214" },
+        "CHAIN_ID": { "const": 56 },
+        "SIGNER_PROVIDER_ID": { "type": "null" },
+        "SIGNER_ADDRESS_BINDING": { "const": "0x4DF6E9629Dad1072103cFd2bC81845fd97429214" },
+        "POLICY_HASH": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+        "POLICY_HASH_SCOPE": { "const": "HENGYAO_A2_APPROVED_POLICY_SCOPE_STABLE_STRINGIFY_SHA256" },
+        "ALLOWED_TARGET": { "const": "0xB016D4d8f1aED1339101b30722cad6dbA9B8C972" },
+        "ALLOWED_SELECTORS": {
+          "type": "array",
+          "minItems": 4,
+          "maxItems": 4,
+          "uniqueItems": true,
+          "items": { "type": "string", "pattern": "^0x[0-9a-fA-F]{8}$" }
+        },
+        "NONCE_SOURCE": { "const": "EXTERNAL_PROVIDER_BSC_PENDING_NONCE" },
+        "GAS_ESTIMATE_SUPPORT": { "const": true },
+        "BROADCAST_CAPABILITY": { "const": true },
+        "RECEIPT_QUERY_CAPABILITY": { "const": true },
+        "CANONICAL_BLOCK_HASH_VALIDATION": { "const": true },
+        "MIN_CONFIRMATIONS": { "const": 12 },
+        "PRIVATE_KEY_OUTPUT": { "const": false },
+        "SEED_OUTPUT": { "const": false },
+        "GENERAL_PURPOSE_SIGNING": { "const": false },
+        "ARBITRARY_TRANSFER": { "const": false },
+        "PROVIDER_ATTESTATION_REQUIRED": { "const": true },
+        "FIRST_ACTION_AFTER_MACHINE_VERIFICATION": { "const": "heartbeatClaim()" },
+        "AUTO_CONTINUE_AFTER_CANONICAL_RECEIPT": {
+          "type": "array",
+          "minItems": 4,
+          "uniqueItems": true,
+          "items": { "type": "string", "minLength": 1 }
+        }
       }
     }
   }
