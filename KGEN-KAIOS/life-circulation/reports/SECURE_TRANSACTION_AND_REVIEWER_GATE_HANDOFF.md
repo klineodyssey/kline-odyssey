@@ -226,6 +226,41 @@ The missing signer blocks chain writes, not authorized off-chain Company work:
 Hengyao safely clocked in at `2026-08-24T14:58:48Z` without sending a
 transaction.
 
+## External capability procurement and continuity state
+
+The unchanged provider baseline is now closed to repeated scanning. No eligible
+external controller provider or Hengyao secure signer is available, so the two
+gaps are recorded in the existing Company WorkQueue as external infrastructure
+demands rather than internal bugs:
+
+| Demand ID | Purpose | State | Existing connection interface |
+|---|---|---|---|
+| `KAIOS-EXTERNAL-AGENT-IDENTITY-PROVIDER-001` | Machine-verifiable independent Xuanyao/Hengyao controllers and a routable Xuanyao ACK channel | `UNFULFILLED_EXTERNAL_INFRASTRUCTURE_DEMAND / PROCUREMENT_INTEGRATION_WAIT` | `XUANYAO_CONTROLLER_ATTESTATION_REQUEST_V1` |
+| `KAIOS-EXTERNAL-EVM-SECURE-SIGNER-001` | External-custody, policy-bounded Hengyao A2 execution on BSC chain 56 | `UNFULFILLED_EXTERNAL_INFRASTRUCTURE_DEMAND / PROCUREMENT_INTEGRATION_WAIT` | `HENGYAO_SECURE_SIGNER_CONNECTION_REQUEST_V1` |
+
+For both records, `MISSING_CODE = NO`, `MISSING_EXTERNAL_CAPABILITY = YES`, and
+`ENGINEERING_LOOP = DO_NOT_SPIN`. The existing schemas, requests, validators,
+transaction gate, ACK hashes, A2 policy, and PR #165 synchronization work are
+not rebuilt. Another provider scan is authorized only if installed connectors,
+the plugin catalog, host capabilities, or configured providers change.
+
+Demand A requires a provider-signed agent-instance attestation, authority
+lease, controller ID, Life/Worker bindings, challenge-response, expiry, nonce,
+machine-verifiable issuer, independent-controller comparison, and routable ACK
+channel. Demand B requires the existing Hengyao wallet, BSC chain 56, external
+secure custody, policy-enforced target/selector allowlists, nonce/gas/broadcast,
+receipt and canonical-block queries, 12 confirmations, machine-verifiable
+provider evidence, and explicit denial of private-key output, arbitrary
+transfer, and general-purpose signing.
+
+No external procurement, provider installation, wallet connection, custody
+connection, payment, trade, movement, chain write, or review assignment is
+claimed. Safe off-chain Company work continues. PR #165 remains open, draft,
+unmerged, and is kept current through non-destructive synchronization and
+exact-head CI. The next safe Company task is queue and dependency patrol plus
+review preparation; the two dependent paths resume automatically only when the
+corresponding external evidence becomes machine-verifiable.
+
 ## Prior read-only chain evidence (must be refreshed before any future write)
 
 At `2026-08-24T12:24:13.722Z`, two independent BSC RPC providers agreed on the

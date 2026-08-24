@@ -117,6 +117,46 @@ Digital Ant local private-key worker is also a different-Life adapter and is
 incompatible with the Hengyao external-custody boundary. Neither may be
 repurposed to claim signer connectivity.
 
+## External Capability Procurement And Integration Wait State
+
+The provider inventory has been exhausted for the current installed connector,
+plugin-catalog, host-capability, and provider-configuration baseline. Neither an
+eligible external controller-identity provider nor an eligible Hengyao secure
+signer is connected. These are external infrastructure gaps, not missing code:
+
+- `KAIOS-EXTERNAL-AGENT-IDENTITY-PROVIDER-001` records the need for a
+  provider-signed agent-instance attestation, scoped authority lease, Life and
+  Worker binding, controller ID, challenge-response, expiry, nonce,
+  machine-verifiable issuer, independent controller comparison, and routable
+  Xuanyao ACK channel.
+- `KAIOS-EXTERNAL-EVM-SECURE-SIGNER-001` records the need for an
+  external-custody EVM signer on BSC chain 56 bound to the registered Hengyao
+  wallet and the existing A2 policy, with target/selector allowlists, nonce,
+  gas, broadcast, receipt query, canonical-block verification, 12
+  confirmations, and no private-key output, arbitrary transfer, or
+  general-purpose signing.
+
+Both demands are `UNFULFILLED_EXTERNAL_INFRASTRUCTURE_DEMAND` in
+`PROCUREMENT_INTEGRATION_WAIT`. Internal engineering must not create another
+candidate, identity system, signing system, or repeated discovery loop to
+simulate fulfillment. An identical provider scan is permitted only after
+`INSTALLED_CONNECTORS_CHANGED`, `PLUGIN_CATALOG_CHANGED`,
+`HOST_CAPABILITY_CHANGED`, or `NEW_PROVIDER_CONFIGURED`.
+
+The wait state blocks only the dependent controller/ACK/reviewer path and chain
+writes. Safe off-chain Company work continues, including read, code, test, CI,
+non-destructive PR synchronization, market engineering, demand discovery,
+queue patrol, documentation, and review preparation. PR #165 remains an open,
+unmerged draft and must receive exact-head CI after any future mainline sync.
+
+When Demand A is fulfilled, the existing verifier resumes controller binding,
+enables the independent ACK channel, processes Xuanyao's four responses, T2,
+and review-permission gates, and assigns PR #165 only if all gates pass. When
+Demand B is fulfilled, the existing transaction gate binds the signer, sends
+`heartbeatClaim()`, verifies its canonical receipt and exact KGEN transfer, then
+continues the free Wish and microcirculation under the approved policy. Neither
+path requires a repeated internal design cycle.
+
 ## 4168 Map / World Agent Handoff
 
 `KGEN-MAP-4168-NAIHE-GENESIS-STATION-UI-001` is a specification handoff, not a Company Core UI implementation. The responsible Map / World Agent may later implement the existing `4168 奈何橋` point with `孟婆`, `孟婆湯`, `Dark Matter Genesis Fountain`, `Digital Life Genesis Gate`, and `Birth Record Panel` after accepting a project-isolated task.
