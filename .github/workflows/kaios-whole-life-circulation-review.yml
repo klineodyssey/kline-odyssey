@@ -57,9 +57,13 @@ jobs:
           jq empty KGEN-KAIOS/life-circulation/schemas/life-circulatory-runtime.schema.json
           jq empty KGEN-KAIOS/life-circulation/schemas/b4-micro-circulation.schema.json
           jq empty KGEN-KAIOS/life-circulation/schemas/life-transaction-policy.schema.json
+          jq empty KGEN-KAIOS/life-circulation/schemas/human-autonomy-onboarding-decision.schema.json
+          jq empty KGEN-KAIOS/life-circulation/schemas/xuanyao-life-worker-onboarding.schema.json
           jq empty KGEN-KAIOS/life-circulation/examples/whole-life-circulation.candidate.json
           jq empty KGEN-KAIOS/life-circulation/examples/hengyao-b4-micro-circulation.candidate.json
+          jq empty KGEN-KAIOS/life-circulation/examples/xuanyao-life-worker-onboarding.candidate.json
           jq empty KGEN-KAIOS/life-circulation/policies/hengyao-life-transaction-policy.candidate.json
+          jq empty KGEN-KAIOS/life-circulation/policies/hengyao-autonomy-xuanyao-onboarding-human-decision.candidate.json
       - name: Run circulation replay, fuzz, invariant, custody, and health tests
         run: |
           set -o pipefail

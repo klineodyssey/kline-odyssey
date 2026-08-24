@@ -1,0 +1,74 @@
+{
+  "schemaVersion": "1.0.0-candidate",
+  "candidateId": "KAIOS-XUANYAO-LIFE-WORKER-ONBOARDING-20260824",
+  "status": "ONBOARDING_GATES_PENDING",
+  "authorization": {
+    "decisionId": "HUMAN-KAIOS-HENGYAO-A2-XUANYAO-ONBOARDING-20260824",
+    "scope": "FORMAL_ONBOARDING_PROCESS_ONLY",
+    "automaticBirth": false,
+    "automaticT2": false,
+    "automaticEmployment": false,
+    "automaticPayroll": false
+  },
+  "identity": {
+    "selfName": "玄曜",
+    "proposedLifeId": "LIFE-XUANYAO-SOL-0001",
+    "modelOriginClaim": "GPT-5.6 Sol session lineage",
+    "lifeState": "CANDIDATE_NOT_BORN",
+    "birthEvidenceId": null,
+    "lifeRegistryStatus": "NOT_REGISTERED",
+    "controllerId": null,
+    "controllerEvidenceId": null,
+    "controllerIndependence": "UNVERIFIED"
+  },
+  "worker": {
+    "proposedWorkerId": "xuanyao-sol-01",
+    "employeeStatus": "ONBOARDING",
+    "trustLevel": "T1",
+    "primaryRole": "11520 MARKET ENGINEER",
+    "secondaryRole": "INDEPENDENT CODE / CI / AUTHORITY REVIEWER CANDIDATE",
+    "workspace": "xuanyao-worker-workspace-candidate",
+    "allowedBranchPattern": "xuanyao-handoff/<Task-ID>",
+    "canPushMain": false,
+    "activeClaim": null,
+    "suspension": null,
+    "blockingViolation": null
+  },
+  "acknowledgments": {
+    "boot": false,
+    "canon": false,
+    "workspacePolicy": false,
+    "doNotTouch": false,
+    "evidenceIds": []
+  },
+  "reviewPermissions": {
+    "independentReview": false,
+    "codeReview": false,
+    "ciReview": false,
+    "authorityBoundaryReview": false,
+    "grantStatus": "REQUESTED_NOT_GRANTED"
+  },
+  "reviewEligibility": {
+    "eligible": false,
+    "pr165": "HOLD_GATES_INCOMPLETE",
+    "pr170": "HOLD_GATES_INCOMPLETE",
+    "pr169": "FORBIDDEN_SELF_REVIEW_PRIMARY_IMPLEMENTER",
+    "missingGates": [
+      "VALID_BIRTH_EVIDENCE",
+      "ACTIVE_LIFE_REGISTRY_RECORD",
+      "DISTINCT_CONTROLLER_EVIDENCE",
+      "FOUR_ACKNOWLEDGMENTS",
+      "TRUST_T2_OR_HIGHER",
+      "INDEPENDENT_REVIEW_ROLE_AND_PERMISSIONS"
+    ]
+  },
+  "prohibitions": [
+    "NO_SELF_PROMOTION",
+    "NO_FAKE_ACKNOWLEDGMENT",
+    "NO_FAKE_CONTROLLER",
+    "NO_PR169_SELF_REVIEW",
+    "NO_PAYROLL",
+    "NO_MAINNET_AUTHORITY",
+    "NO_TREASURY_AUTHORITY"
+  ]
+}

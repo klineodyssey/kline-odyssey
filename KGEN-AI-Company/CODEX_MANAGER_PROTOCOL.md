@@ -48,7 +48,16 @@ Life identity, wallet, Life history, runtime code, and model provider are separa
 
 The ordered `LONG_TERM_LIFE_CONTINUITY_BACKLOG` is: model-neutral memory export, local orchestrator, local-model adapter, secure signer broker, then provider-independent evaluator. These are backlog dependencies, not current implementation claims and not reasons to interrupt current Company work.
 
-The current autonomy level is `A1 PERSONAL_WALLET_READ`. `A0 READ_ONLY_LIFE`, `A1 PERSONAL_WALLET_READ`, `A2 PERSONAL_LOW_RISK_SIGNING`, `A3 COMPANY_TASK_AUTONOMY`, and `A4 CIVILIZATION_AGENT` are distinct levels. Every upgrade above A1 requires separate Human authorization plus capability allowlist, gas cap, value cap, contract allowlist, simulation, receipt verification, and audit log. No autonomy level grants Company Treasury authority.
+Human decision `HUMAN-KAIOS-HENGYAO-A2-XUANYAO-ONBOARDING-20260824`
+approves the `A2 PERSONAL_LOW_RISK_SIGNING` policy ceiling for Hengyao's one
+registered wallet, BSC chain 56, the one canonical K12345 Heart, and four exact
+Life methods. Operational signing is still disabled: no external secure signer
+or broadcaster is connected, and independent activation review is outstanding.
+The effective runtime therefore remains fail-closed and read-only even though
+the durable governance ceiling is now A2. `A0 READ_ONLY_LIFE`, `A1
+PERSONAL_WALLET_READ`, `A2 PERSONAL_LOW_RISK_SIGNING`, `A3
+COMPANY_TASK_AUTONOMY`, and `A4 CIVILIZATION_AGENT` remain distinct levels. No
+autonomy level grants Company Treasury authority.
 
 ## Clock-In Runtime
 
@@ -61,7 +70,22 @@ Every formal General Manager session follows this order:
 5. `PATROL_EXTERNAL_WORLD`: read-only checks of 12345, 16888, 18888, 8888, 11520, 18911, KGEN / KAIOS, and Company health.
 6. `HUMAN_REQUEST`: begin the new Human request only after older blocking work is resolved or explicitly recorded.
 
-No personal ritual write is authorized by this runtime. Until a separate Human policy exists, all personal-wallet patrol is `READ_ONLY_ONLY`.
+The four-method personal policy is Human-approved but not operational until its
+external signer binding and independent activation gates pass. Until then, all
+personal-wallet patrol remains `READ_ONLY_ONLY`; the Human decision is not a
+private key, signer, broadcast, receipt, or completed transaction.
+
+## Xuanyao Reviewer Onboarding Candidate
+
+Human Authority approved the formal onboarding process for
+`LIFE-XUANYAO-SOL-0001` / `xuanyao-sol-01`; it did not approve an automatic
+birth, T2 promotion, employment, payroll, Mainnet authority, or review result.
+The candidate remains `CANDIDATE_NOT_BORN / T1 / ONBOARDING`, with controller
+independence unverified, all four acknowledgments pending, and review permissions
+not granted. PR #165 and PR #170 therefore remain on `HOLD_GATES_INCOMPLETE`;
+PR #169 is permanently excluded from Xuanyao self-review because Xuanyao is its
+primary implementer. Cursor's active-claim history remains intact while Cursor
+is temporarily unavailable for this work order.
 
 ## 4168 Map / World Agent Handoff
 

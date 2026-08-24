@@ -6,6 +6,8 @@ import test from "node:test";
 import { randomUUID } from "node:crypto";
 import {
   HENGYAO_LIFE_TRANSACTION_POLICY_V1,
+  HENGYAO_A2_HUMAN_DECISION_V1,
+  HENGYAO_A2_HUMAN_DECISION_VALID,
   TransactionReplayJournal,
   createLifeTransactionIntent,
   encodeAllowedHeartCalldata,
@@ -181,7 +183,7 @@ function validate(value, rule, pointer = "#") {
   }
 }
 
-test("Hengyao transaction policy is recursively closed, durable, and not activated", () => {
+test("Hengyao A2 decision is hash-bound while operational signing remains inactive", () => {
   const visit = (node, pointer = "#") => {
     if (!node || typeof node !== "object" || Array.isArray(node)) return;
     if (node.type === "object") assert.equal(node.additionalProperties, false, `${pointer} is open`);
@@ -190,14 +192,21 @@ test("Hengyao transaction policy is recursively closed, durable, and not activat
   visit(schema);
   validate(policy, schema);
   assert.deepEqual(HENGYAO_LIFE_TRANSACTION_POLICY_V1, policy);
-  assert.equal(policy.activation.currentAuthority, "A1_PERSONAL_WALLET_READ");
-  assert.equal(policy.activation.currentStatus, "NOT_AUTHORIZED");
+  assert.equal(policy.activation.currentAuthority, "A2_PERSONAL_LOW_RISK_SIGNING");
+  assert.equal(policy.activation.currentStatus, "APPROVED_PENDING_SECURE_SIGNER_BINDING");
+  assert.equal(policy.activation.approvalEvidenceId, HENGYAO_A2_HUMAN_DECISION_V1.decisionId);
+  assert.equal(policy.activation.approvalDecisionHash, HENGYAO_A2_HUMAN_DECISION_V1.decisionPayloadHash);
+  assert.equal(policy.activation.approvalPolicyScopeHash, HENGYAO_A2_HUMAN_DECISION_V1.hengyaoPolicyScopeHash);
+  assert.equal(HENGYAO_A2_HUMAN_DECISION_VALID, true);
+  assert.equal(policy.activation.secureSignerConnected, false);
   assert.equal(policy.activation.broadcasterIncluded, false);
+  assert.equal(policy.activation.operationalActivationReviewed, false);
   assert.equal(policy.walletAddress, "0x4DF6E9629Dad1072103cFd2bC81845fd97429214");
   assert.equal(policy.allowedTarget.address, "0xB016D4d8f1aED1339101b30722cad6dbA9B8C972");
   assert.equal(policy.allowedTarget.codeHash, "0x1d3eba15b4c4895710c6e68f3f27e97cb0e2c94edc254d9f1e9148b3d7f55d32");
   assert.equal(policy.tokenRegistry.KGEN, "0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be");
   assert.ok(policy.requiredGates.includes("DURABLE_POLICY_ACTIVATION"));
+  assert.ok(policy.requiredGates.includes("DURABLE_HUMAN_DECISION"));
   assert.ok(policy.forbiddenActions.includes("ARBITRARY_TRANSFER"));
   assert.ok(policy.forbiddenActions.includes("PRIVATE_KEY_OUTPUT"));
 });
@@ -211,7 +220,7 @@ test("only the four exact deployed Heart methods can be encoded", () => {
   assert.throws(() => createIntent({ valueWei: "1" }), /NATIVE_VALUE_FORBIDDEN/);
 });
 
-test("current A1 authority cannot reserve a transaction even when simulation passes", () => {
+test("A1 caller cannot reserve and the A2 decision does not replace signer activation", () => {
   const intent = createIntent();
   const journal = new TransactionReplayJournal(tempJournal());
   const result = reserveAuthorizedLifeTransaction({
@@ -229,6 +238,7 @@ test("current A1 authority cannot reserve a transaction even when simulation pas
   assert.ok(result.blockers.includes("MACHINE_VERIFIABLE_POLICY_APPROVAL_REQUIRED"));
   assert.ok(result.blockers.includes("SECURE_SIGNER_BINDING_REQUIRED"));
   assert.ok(result.blockers.includes("DURABLE_POLICY_NOT_ACTIVATED"));
+  assert.ok(result.blockers.includes("DURABLE_SECURE_SIGNER_BINDING_REQUIRED"));
   assert.equal(journal.sequence, 0);
 });
 
@@ -239,6 +249,7 @@ test("mocked A2 cannot override the inactive durable policy and replay survives 
   const result = reserveAuthorizedLifeTransaction({ intent, trustedContext: trustedContext(intent), journal, now: "2026-08-24T12:01:00.000Z" });
   assert.equal(result.status, "REJECTED");
   assert.ok(result.blockers.includes("DURABLE_POLICY_NOT_ACTIVATED"));
+  assert.ok(result.blockers.includes("DURABLE_SECURE_SIGNER_BINDING_REQUIRED"));
   assert.equal(result.broadcast, false);
   assert.equal(result.privateKeyAccess, false);
   assert.throws(() => journal.reserve(intent, "2026-08-24T12:01:00.000Z", result), /AUTHORIZED_INTENT_DECISION_REQUIRED/);

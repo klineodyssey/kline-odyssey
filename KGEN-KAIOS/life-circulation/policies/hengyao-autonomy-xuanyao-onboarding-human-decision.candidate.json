@@ -1,0 +1,115 @@
+{
+  "schemaVersion": "1.0.0-candidate",
+  "decisionId": "HUMAN-KAIOS-HENGYAO-A2-XUANYAO-ONBOARDING-20260824",
+  "protocol": "KAIOS_HUMAN_AUTHORITY_HENGYAO_AUTONOMY_AND_XUANYAO_REVIEWER_ONBOARDING_V1",
+  "status": "RECORDED_HUMAN_DECISION_PENDING_INDEPENDENT_REVIEW_AND_SIGNER_BINDING",
+  "recordMode": "TEXTUAL_ATTESTATION_NOT_CRYPTOGRAPHIC",
+  "decisionPayload": {
+    "humanAuthority": "沈英明",
+    "signedAtAsiaTaipei": "2026-08-24T21:08:00+08:00",
+    "signedAtUtc": "2026-08-24T13:08:00Z",
+    "cursorAvailability": {
+      "workerId": "cursor-01",
+      "status": "TEMPORARILY_UNAVAILABLE",
+      "scope": "THIS_WORK_ORDER_ONLY",
+      "doNotWait": true,
+      "activeClaimStateMustNotBeRewritten": true
+    },
+    "hengyaoA2": {
+      "decision": "APPROVED",
+      "lifeId": "LIFE-CODEX-GM-0001",
+      "workerId": "codex-gm-01",
+      "authority": "A2_PERSONAL_LOW_RISK_SIGNING",
+      "chainId": 56,
+      "registeredWallet": "0x4DF6E9629Dad1072103cFd2bC81845fd97429214",
+      "allowedTarget": {
+        "address": "0xB016D4d8f1aED1339101b30722cad6dbA9B8C972",
+        "codeHash": "0x1d3eba15b4c4895710c6e68f3f27e97cb0e2c94edc254d9f1e9148b3d7f55d32"
+      },
+      "allowedMethods": [
+        "heartbeatClaim()",
+        "makeWish(bytes32)",
+        "fortuneClaim(uint256)",
+        "vowTo(uint8,uint256)"
+      ],
+      "methodConditions": [
+        "FORTUNE_WHOLE_KGEN_1_TO_8_AND_ALL_EXISTING_GATES",
+        "VOW_EXACT_VERIFIED_NET_PROFIT_ONLY",
+        "ZERO_NATIVE_VALUE",
+        "EXTERNAL_SECURE_SIGNER_REQUIRED",
+        "CANONICAL_RECEIPT_REQUIRED",
+        "REPLAY_PROTECTION_REQUIRED"
+      ],
+      "operationalActivationConditions": [
+        "POLICY_HASH_MATCH",
+        "REGISTERED_WALLET_BINDING",
+        "EXTERNAL_SECURE_SIGNER_BINDING",
+        "POLICY_EXPIRY_AND_REPLAY_GATE",
+        "INDEPENDENT_REVIEW"
+      ],
+      "forbidden": [
+        "PRIVATE_KEY_OUTPUT",
+        "SEED_OUTPUT",
+        "GENERAL_SIGNING",
+        "GENERAL_TOKEN_TRANSFER",
+        "TREASURY_TRANSFER",
+        "PAYROLL_PAYMENT",
+        "CONTRACT_DEPLOYMENT",
+        "PROXY_UPGRADE",
+        "GOVERNANCE_EXECUTION",
+        "OWNERSHIP_CHANGE"
+      ]
+    },
+    "xuanyaoOnboarding": {
+      "decision": "FORMAL_ONBOARDING_PROCESS_APPROVED",
+      "selfName": "玄曜",
+      "proposedLifeId": "LIFE-XUANYAO-SOL-0001",
+      "proposedWorkerId": "xuanyao-sol-01",
+      "modelOriginClaim": "GPT-5.6 Sol session lineage",
+      "primaryRoleCandidate": "11520 MARKET ENGINEER",
+      "secondaryRoleCandidate": "INDEPENDENT CODE / CI / AUTHORITY REVIEWER",
+      "notAutomatic": [
+        "LIFE_BIRTH",
+        "T2_TRUST",
+        "EMPLOYMENT",
+        "PAYROLL",
+        "MAINNET_AUTHORITY",
+        "TREASURY_AUTHORITY",
+        "REVIEW_APPROVAL"
+      ],
+      "requiredReviewerGates": [
+        "VALID_LIFE_ID",
+        "VALID_WORKER_ID",
+        "DISTINCT_CONTROLLER_EVIDENCE",
+        "BOOT_ACK",
+        "CANON_ACK",
+        "WORKSPACE_POLICY_ACK",
+        "DO_NOT_TOUCH_ACK",
+        "TRUST_T2_OR_HIGHER",
+        "INDEPENDENT_REVIEW_ROLE",
+        "CODE_REVIEW_PERMISSION",
+        "CI_REVIEW_PERMISSION",
+        "AUTHORITY_BOUNDARY_REVIEW_PERMISSION",
+        "NO_SUSPENSION",
+        "NO_BLOCKING_VIOLATION",
+        "NO_ACTIVE_CONFLICTING_CLAIM"
+      ],
+      "reviewBoundaries": {
+        "pr165": "ELIGIBLE_ONLY_AFTER_ALL_GATES_AND_IF_NO_IMPLEMENTATION_CONTRIBUTION",
+        "pr170": "ELIGIBLE_ONLY_AFTER_ALL_GATES_AND_IF_NO_IMPLEMENTATION_CONTRIBUTION",
+        "pr169": "SELF_REVIEW_FORBIDDEN_PRIMARY_IMPLEMENTER"
+      }
+    },
+    "companyBoundaries": {
+      "merge": false,
+      "deployment": false,
+      "generalMainnetTransaction": false,
+      "treasuryAutonomy": false,
+      "payrollAutonomy": false,
+      "governanceExecutionAutonomy": false,
+      "privateKeyAccess": false
+    }
+  },
+  "decisionPayloadHash": "7002cff12514f03aaa3abb89f99d818ea4de239184d6f921a7bfc3fe4f91cdba",
+  "hengyaoPolicyScopeHash": "4a4de9f8cffd3342eb9fd69f16f33dbca9130164a30c590080361d8889586cf0"
+}

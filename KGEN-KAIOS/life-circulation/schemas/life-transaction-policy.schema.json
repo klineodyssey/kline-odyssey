@@ -24,7 +24,7 @@
   "properties": {
     "schemaVersion": { "const": "1.0.0-candidate" },
     "policyId": { "const": "HENGYAO_LIFE_TRANSACTION_POLICY_V1" },
-    "status": { "const": "HUMAN_GOVERNANCE_APPROVAL_REQUIRED" },
+    "status": { "const": "HUMAN_GOVERNANCE_APPROVED_PENDING_SECURE_SIGNER" },
     "lifeId": { "const": "LIFE-CODEX-GM-0001" },
     "workerId": { "const": "codex-gm-01" },
     "walletAddress": { "type": "string", "pattern": "^0x[0-9a-fA-F]{40}$" },
@@ -39,7 +39,7 @@
     },
     "requiredGates": {
       "type": "array",
-      "minItems": 21,
+      "minItems": 22,
       "uniqueItems": true,
       "items": { "type": "string", "minLength": 1 }
     },
@@ -89,14 +89,18 @@
     "activation": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["currentAuthority", "requiredAuthority", "currentStatus", "approvalEvidenceId", "secureSignerConnected", "broadcasterIncluded"],
+      "required": ["currentAuthority", "requiredAuthority", "currentStatus", "approvalEvidenceId", "approvalEvidencePath", "approvalDecisionHash", "approvalPolicyScopeHash", "secureSignerConnected", "broadcasterIncluded", "operationalActivationReviewed"],
       "properties": {
-        "currentAuthority": { "const": "A1_PERSONAL_WALLET_READ" },
+        "currentAuthority": { "const": "A2_PERSONAL_LOW_RISK_SIGNING" },
         "requiredAuthority": { "const": "A2_PERSONAL_LOW_RISK_SIGNING" },
-        "currentStatus": { "const": "NOT_AUTHORIZED" },
-        "approvalEvidenceId": { "type": "null" },
+        "currentStatus": { "const": "APPROVED_PENDING_SECURE_SIGNER_BINDING" },
+        "approvalEvidenceId": { "const": "HUMAN-KAIOS-HENGYAO-A2-XUANYAO-ONBOARDING-20260824" },
+        "approvalEvidencePath": { "const": "KGEN-KAIOS/life-circulation/policies/hengyao-autonomy-xuanyao-onboarding-human-decision.candidate.json" },
+        "approvalDecisionHash": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+        "approvalPolicyScopeHash": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
         "secureSignerConnected": { "const": false },
-        "broadcasterIncluded": { "const": false }
+        "broadcasterIncluded": { "const": false },
+        "operationalActivationReviewed": { "const": false }
       }
     },
     "receipt": {

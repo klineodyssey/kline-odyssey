@@ -3,6 +3,7 @@ import path from "node:path";
 import { sha256, stableStringify, ZERO_HASH } from "./life-circulatory-runtime.mjs";
 
 const POLICY_PATH = new URL("../policies/hengyao-life-transaction-policy.candidate.json", import.meta.url);
+const HUMAN_DECISION_PATH = new URL("../policies/hengyao-autonomy-xuanyao-onboarding-human-decision.candidate.json", import.meta.url);
 
 function deepFreeze(value) {
   if (!value || typeof value !== "object" || Object.isFrozen(value)) return value;
@@ -12,6 +13,37 @@ function deepFreeze(value) {
 }
 
 export const HENGYAO_LIFE_TRANSACTION_POLICY_V1 = deepFreeze(JSON.parse(fs.readFileSync(POLICY_PATH, "utf8")));
+export const HENGYAO_A2_HUMAN_DECISION_V1 = deepFreeze(JSON.parse(fs.readFileSync(HUMAN_DECISION_PATH, "utf8")));
+
+function durableHumanDecisionValid() {
+  try {
+    const decision = HENGYAO_A2_HUMAN_DECISION_V1;
+    const scope = decision.decisionPayload.hengyaoA2;
+    const activation = HENGYAO_LIFE_TRANSACTION_POLICY_V1.activation;
+    const allowedMethods = HENGYAO_LIFE_TRANSACTION_POLICY_V1.allowedMethods.map(({ signature }) => signature);
+    return decision.decisionId === activation.approvalEvidenceId
+      && decision.status === "RECORDED_HUMAN_DECISION_PENDING_INDEPENDENT_REVIEW_AND_SIGNER_BINDING"
+      && decision.recordMode === "TEXTUAL_ATTESTATION_NOT_CRYPTOGRAPHIC"
+      && sha256(stableStringify(decision.decisionPayload)) === decision.decisionPayloadHash
+      && sha256(stableStringify(scope)) === decision.hengyaoPolicyScopeHash
+      && decision.decisionPayloadHash === activation.approvalDecisionHash
+      && decision.hengyaoPolicyScopeHash === activation.approvalPolicyScopeHash
+      && decision.decisionPayload.humanAuthority === "沈英明"
+      && scope.decision === "APPROVED"
+      && scope.lifeId === HENGYAO_LIFE_TRANSACTION_POLICY_V1.lifeId
+      && scope.workerId === HENGYAO_LIFE_TRANSACTION_POLICY_V1.workerId
+      && scope.authority === HENGYAO_LIFE_TRANSACTION_POLICY_V1.activation.requiredAuthority
+      && scope.chainId === HENGYAO_LIFE_TRANSACTION_POLICY_V1.chainId
+      && address(scope.registeredWallet, "DECISION_WALLET") === address(HENGYAO_LIFE_TRANSACTION_POLICY_V1.walletAddress, "POLICY_WALLET")
+      && address(scope.allowedTarget.address, "DECISION_TARGET") === address(HENGYAO_LIFE_TRANSACTION_POLICY_V1.allowedTarget.address, "POLICY_TARGET")
+      && bytes32(scope.allowedTarget.codeHash, "DECISION_CODE_HASH") === bytes32(HENGYAO_LIFE_TRANSACTION_POLICY_V1.allowedTarget.codeHash, "POLICY_CODE_HASH")
+      && stableStringify(scope.allowedMethods) === stableStringify(allowedMethods);
+  } catch {
+    return false;
+  }
+}
+
+export const HENGYAO_A2_HUMAN_DECISION_VALID = durableHumanDecisionValid();
 
 const KGEN_WEI = 10n ** 18n;
 const MAX_INTENT_LIFETIME_SECONDS = 300;
@@ -242,9 +274,13 @@ export function evaluateLifeTransactionIntent({ intent, trustedContext, journal,
     addBlocker(blockers, sha256(stableStringify(payload)) === intentId, "INTENT_ID_MISMATCH");
     addBlocker(blockers, intent.policyVersion === HENGYAO_LIFE_TRANSACTION_POLICY_V1.schemaVersion, "POLICY_VERSION_MISMATCH");
     addBlocker(blockers, intent.policyId === HENGYAO_LIFE_TRANSACTION_POLICY_V1.policyId, "POLICY_ID_MISMATCH");
+    addBlocker(blockers, HENGYAO_A2_HUMAN_DECISION_VALID, "DURABLE_HUMAN_DECISION_INVALID");
     addBlocker(blockers, HENGYAO_LIFE_TRANSACTION_POLICY_V1.activation.currentStatus === "AUTHORIZED_ACTIVE"
       && HENGYAO_LIFE_TRANSACTION_POLICY_V1.activation.currentAuthority === HENGYAO_LIFE_TRANSACTION_POLICY_V1.activation.requiredAuthority
-      && Boolean(String(HENGYAO_LIFE_TRANSACTION_POLICY_V1.activation.approvalEvidenceId ?? "").trim()), "DURABLE_POLICY_NOT_ACTIVATED");
+      && Boolean(String(HENGYAO_LIFE_TRANSACTION_POLICY_V1.activation.approvalEvidenceId ?? "").trim())
+      && HENGYAO_LIFE_TRANSACTION_POLICY_V1.activation.operationalActivationReviewed === true, "DURABLE_POLICY_NOT_ACTIVATED");
+    addBlocker(blockers, HENGYAO_LIFE_TRANSACTION_POLICY_V1.activation.secureSignerConnected === true
+      && HENGYAO_LIFE_TRANSACTION_POLICY_V1.activation.broadcasterIncluded === true, "DURABLE_SECURE_SIGNER_BINDING_REQUIRED");
     addBlocker(blockers, intent.lifeId === HENGYAO_LIFE_TRANSACTION_POLICY_V1.lifeId && intent.lifeId === trustedContext.lifeId, "LIFE_ID_MISMATCH");
     addBlocker(blockers, intent.workerId === HENGYAO_LIFE_TRANSACTION_POLICY_V1.workerId && intent.workerId === trustedContext.workerId, "WORKER_ID_MISMATCH");
     addBlocker(blockers, address(intent.walletAddress, "INTENT_WALLET") === address(HENGYAO_LIFE_TRANSACTION_POLICY_V1.walletAddress, "POLICY_WALLET")
@@ -265,7 +301,10 @@ export function evaluateLifeTransactionIntent({ intent, trustedContext, journal,
     addBlocker(blockers, trustedContext.currentAuthority === "A2_PERSONAL_LOW_RISK_SIGNING", "A2_AUTHORITY_REQUIRED");
     addBlocker(blockers, trustedContext.policyApproval?.status === "APPROVED_ACTIVE"
       && trustedContext.policyApproval?.policyId === intent.policyId
-      && Boolean(String(trustedContext.policyApproval?.decisionId ?? "").trim()), "MACHINE_VERIFIABLE_POLICY_APPROVAL_REQUIRED");
+      && trustedContext.policyApproval?.decisionId === HENGYAO_LIFE_TRANSACTION_POLICY_V1.activation.approvalEvidenceId
+      && trustedContext.policyApproval?.decisionHash === HENGYAO_LIFE_TRANSACTION_POLICY_V1.activation.approvalDecisionHash
+      && trustedContext.policyApproval?.policyScopeHash === HENGYAO_LIFE_TRANSACTION_POLICY_V1.activation.approvalPolicyScopeHash,
+    "MACHINE_VERIFIABLE_POLICY_APPROVAL_REQUIRED");
     addBlocker(blockers, trustedContext.securityStatus === "HEALTHY", "SECURITY_STATUS_BLOCKED");
     addBlocker(blockers, trustedContext.secureSignerConnected === true
       && address(trustedContext.secureSignerAddress, "SECURE_SIGNER_ADDRESS") === address(intent.walletAddress, "INTENT_WALLET"), "SECURE_SIGNER_BINDING_REQUIRED");

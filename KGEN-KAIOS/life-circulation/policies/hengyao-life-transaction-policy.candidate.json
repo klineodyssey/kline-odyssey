@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0.0-candidate",
   "policyId": "HENGYAO_LIFE_TRANSACTION_POLICY_V1",
-  "status": "HUMAN_GOVERNANCE_APPROVAL_REQUIRED",
+  "status": "HUMAN_GOVERNANCE_APPROVED_PENDING_SECURE_SIGNER",
   "lifeId": "LIFE-CODEX-GM-0001",
   "workerId": "codex-gm-01",
   "walletAddress": "0x4DF6E9629Dad1072103cFd2bC81845fd97429214",
@@ -67,6 +67,7 @@
     "SURVIVAL_RESERVE",
     "POLICY_VERSION",
     "DURABLE_POLICY_ACTIVATION",
+    "DURABLE_HUMAN_DECISION",
     "EXPIRY",
     "REPLAY_NONCE",
     "SECURE_SIGNER_BINDING",
@@ -86,12 +87,16 @@
     "PRIVATE_KEY_OUTPUT"
   ],
   "activation": {
-    "currentAuthority": "A1_PERSONAL_WALLET_READ",
+    "currentAuthority": "A2_PERSONAL_LOW_RISK_SIGNING",
     "requiredAuthority": "A2_PERSONAL_LOW_RISK_SIGNING",
-    "currentStatus": "NOT_AUTHORIZED",
-    "approvalEvidenceId": null,
+    "currentStatus": "APPROVED_PENDING_SECURE_SIGNER_BINDING",
+    "approvalEvidenceId": "HUMAN-KAIOS-HENGYAO-A2-XUANYAO-ONBOARDING-20260824",
+    "approvalEvidencePath": "KGEN-KAIOS/life-circulation/policies/hengyao-autonomy-xuanyao-onboarding-human-decision.candidate.json",
+    "approvalDecisionHash": "7002cff12514f03aaa3abb89f99d818ea4de239184d6f921a7bfc3fe4f91cdba",
+    "approvalPolicyScopeHash": "4a4de9f8cffd3342eb9fd69f16f33dbca9130164a30c590080361d8889586cf0",
     "secureSignerConnected": false,
-    "broadcasterIncluded": false
+    "broadcasterIncluded": false,
+    "operationalActivationReviewed": false
   },
   "receipt": {
     "minimumConfirmations": 12,
