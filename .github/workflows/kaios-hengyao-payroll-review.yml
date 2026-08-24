@@ -59,7 +59,7 @@ jobs:
           git merge-base --is-ancestor "$BASE_SHA" HEAD
       - name: Install pinned dependencies
         working-directory: KGEN-KAIOS
-        run: npm ci
+        run: npm ci --omit=optional
       - name: Parse payroll evidence
         run: jq empty KGEN-KAIOS/reports/HENGYAO_PAYROLL_BLOODFLOW_V1_UNSIGNED_PACKAGE.json
       - name: Run closed payroll tests
