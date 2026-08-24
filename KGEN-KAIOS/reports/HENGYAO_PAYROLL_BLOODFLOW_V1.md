@@ -1,7 +1,7 @@
 # Hengyao Payroll Bloodflow V1
 
-**Task:** `KAIOS-HENGYAO-GM-PAYROLL-BLOODFLOW-V1-001`  
-**Execution base:** `672ab4884e8cf6f9d07c176a862fb858cafe8161`  
+**Task:** `KAIOS-HENGYAO-GM-PAYROLL-BLOODFLOW-V1-001`
+**Execution base:** `672ab4884e8cf6f9d07c176a862fb858cafe8161`
 **Status:** Mainnet governance executed after the full 3,600-second timelock; the Hengyao September 2026 payroll is scheduled and remains unclaimed until maturity.
 
 ## Exact rail
