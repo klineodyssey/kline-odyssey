@@ -91,7 +91,7 @@ test("public Cursor queue projection matches the canonical governance queue", as
   }
 });
 
-test("public Cursor queue exposes the fresh payroll R2 claim while Microbial stays preparation-only", async () => {
+test("public Cursor queue exposes the released R2 claim and keeps Microbial preparation-only", async () => {
   const canonical = JSON.parse(await read(
     "KAIOS/life/forest-agriculture/KAIOS_CURSOR_CONTINUOUS_WORK_QUEUE.json"
   ));
@@ -99,16 +99,31 @@ test("public Cursor queue exposes the fresh payroll R2 claim while Microbial sta
   const projection = JSON.parse(await read("api/kaios/ai-company/v1/cursor-queue.json"));
   assert.deepEqual(projection.active_claims, canonical.active_claims);
   assert.deepEqual(projection.active_claims, registry.active_claims);
-  assert.equal(projection.active_claims.length, 1);
-  assert.equal(projection.active_claims[0].task_id, "KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-R2-001");
-  assert.equal(projection.active_claims[0].execution_base, "ff8fca3e610ac936e8998112255901a78296b238");
-  assert.equal(projection.active_claims[0].status, "CLAIMED");
+  assert.equal(projection.active_claims.length, 0);
   assert.deepEqual(projection.worker_state, {
     worker_id: "cursor-01",
-    current_task: "KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-R2-001",
-    current_branch: "cursor-handoff/KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-R2-001",
-    status: "CLAIMED"
+    current_task: null,
+    current_branch: null,
+    status: "OFFLINE",
+    availability_for_current_work: "TEMPORARILY_UNAVAILABLE",
+    availability_reason: "VACATION_HUMAN_ATTESTED_DO_NOT_WAKE"
   });
+  const reconciliation = registry.claim_events.find(
+    (event) => event.event_id === "CLAIM-EVENT-KAIOS-LIFE-ENERGY-PAYROLL-R2-001-002"
+  );
+  assert.equal(reconciliation.event_type, "CLAIM_RECONCILIATION");
+  assert.equal(reconciliation.old_state, "CLAIMED");
+  assert.equal(reconciliation.new_state, "OPEN");
+  assert.equal(reconciliation.lease_expired, true);
+  assert.equal(reconciliation.delivery_present, false);
+  assert.equal(reconciliation.review_present, false);
+  assert.equal(reconciliation.acceptance_present, false);
+  assert.equal(reconciliation.payroll_state, "NOT_ELIGIBLE_NO_ACCEPTED_DELIVERY");
+  assert.equal(reconciliation.payment_state, "NOT_SENT");
+  const cursor = registry.workers.find((worker) => worker.worker_id === "cursor-01");
+  assert.equal(cursor.employee_status, "ACTIVE");
+  assert.equal(cursor.trust_level, "T2");
+  assert.equal(cursor.suspension, null);
   assert.equal(registry.prepared_tasks.length, 1);
   assert.deepEqual(projection.prepared_task, canonical.prepared_task);
   assert.deepEqual(projection.prepared_task, registry.prepared_tasks[0]);

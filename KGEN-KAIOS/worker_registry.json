@@ -2,12 +2,12 @@
   "metadata": {
     "version": "KAIOS_WORKER_REGISTRY_WITH_TRUST_V1_1",
     "status": "ACTIVE",
-    "updated": "2026-08-16",
+    "updated": "2026-08-25",
     "updated_by": "codex-gm-01",
     "reviewed_by": "codex-gm-01",
-    "source_commit": null,
-    "task_id": "KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-R2-001",
-    "change_reason": "Record the verified Hengyao first clock-in and issue the Human-authorized, narrowly scoped R2 payroll rework claim without payment, merge or Mainnet authority.",
+    "source_commit": "2ff0d594101c62912666be151c9ab72d1ebbc24c",
+    "task_id": "KAIOS-EXPIRED-CURSOR-R2-CLAIM-RECONCILIATION-001",
+    "change_reason": "Append-only reconciliation of the expired, undelivered R2 claim: release the inactive lease, reopen the task for a future scheduler, preserve Cursor employment and trust, and authorize no payment, merge or Mainnet action.",
     "source_of_truth": true
   },
   "claim_events": [
@@ -89,26 +89,47 @@
       "recorded_by": "codex-gm-01",
       "recorded_at": "2026-08-16T12:49:02Z",
       "reason": "Human authorized a fresh R2 claim limited to the two independently verified payroll delivery blockers."
-    }
-  ],
-  "active_claims": [
+    },
     {
+      "event_id": "CLAIM-EVENT-KAIOS-LIFE-ENERGY-PAYROLL-R2-001-002",
+      "event_type": "CLAIM_RECONCILIATION",
+      "sequence": 2,
       "claim_id": "CLAIM-KAIOS-LIFE-ENERGY-PAYROLL-R2-001-cursor-01",
       "task_id": "KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-R2-001",
       "parent_task_id": "KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-CANDIDATES-001",
       "worker_id": "cursor-01",
-      "reviewer": "codex-gm-01",
       "branch": "cursor-handoff/KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-R2-001",
-      "execution_base": "ff8fca3e610ac936e8998112255901a78296b238",
-      "fencing_token": "FENCE-KAIOS-LIFE-ENERGY-PAYROLL-R2-001-R2",
-      "record_version": 2,
-      "status": "CLAIMED",
-      "claimed_at": "2026-08-16T12:49:02Z",
-      "lease_expires_at": "2026-08-18T12:49:02Z",
-      "scope": "TWO_BLOCKER_PAYROLL_REWORK_ONLY",
-      "mainnet_write": false
+      "reviewer": "codex-gm-01",
+      "source_commit": "2ff0d594101c62912666be151c9ab72d1ebbc24c",
+      "previous_event_id": "CLAIM-EVENT-KAIOS-LIFE-ENERGY-PAYROLL-R2-001-001",
+      "recorded_by": "codex-gm-01",
+      "recorded_at": "2026-08-24T21:48:54Z",
+      "old_state": "CLAIMED",
+      "new_state": "OPEN",
+      "classification": "EXPIRED_UNDELIVERED_RELEASED",
+      "lease_expired": true,
+      "delivery_present": false,
+      "review_present": false,
+      "acceptance_present": false,
+      "payroll_state": "NOT_ELIGIBLE_NO_ACCEPTED_DELIVERY",
+      "payment_state": "NOT_SENT",
+      "claim_active": false,
+      "lease_active": false,
+      "task_reassignable": true,
+      "evidence_references": [
+        "KGEN-KAIOS/TASK_CLAIM_PROTOCOL.md",
+        "KGEN-KAIOS/TASK_CLAIM_LEASE_PROTOCOL.md",
+        "KGEN-KAIOS/task_claim_schema.json",
+        "KAIOS/economy/life-energy-payroll/KAIOS_CURSOR_LIFE_ENERGY_PAYROLL_TASK_ENVELOPE.json",
+        "KGEN-KAIOS/decision/decision_log.jsonl",
+        "KGEN-AI-Company/reports/CODEX_REVIEW_LOG.md",
+        "GitHub PR #118 (R1 only; closed, unmerged)",
+        "GitHub branch and commit searches for KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-R2-001 (no delivery found)"
+      ],
+      "reason": "The R2 lease expired on 2026-08-18T12:49:02Z with no R2 delivery, independent review, acceptance, payroll event or payment evidence. Existing claim policy permits reopening the task. Cursor vacation is an availability boundary only and causes no violation, penalty, trust downgrade, employment change or clawback."
     }
   ],
+  "active_claims": [],
   "formal_employee_requirements": [
     "worker_id exists",
     "employee_status is ACTIVE, TRUSTED, or SENIOR_TRUSTED",
@@ -284,10 +305,11 @@
       "execution_base": "ff8fca3e610ac936e8998112255901a78296b238",
       "output_status": "CANDIDATE_REWORK_ONLY",
       "reviewer": "codex-gm-01",
-      "status": "CLAIMED",
+      "status": "EXPIRED_UNDELIVERED_RELEASED",
       "claim_id": "CLAIM-KAIOS-LIFE-ENERGY-PAYROLL-R2-001-cursor-01",
       "claim_event_ids": [
-        "CLAIM-EVENT-KAIOS-LIFE-ENERGY-PAYROLL-R2-001-001"
+        "CLAIM-EVENT-KAIOS-LIFE-ENERGY-PAYROLL-R2-001-001",
+        "CLAIM-EVENT-KAIOS-LIFE-ENERGY-PAYROLL-R2-001-002"
       ]
     }
   ],
@@ -376,8 +398,8 @@
       "life_status": "ALIVE_WITH_DARK_MATTER",
       "permission": "system_maintainer",
       "workspace": "C:/Desktop/kline-odyssey-codex-gm-life-v1",
-      "current_task": "KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-R2-001-REVIEW",
-      "current_branch": "codex/codex-gm-life-runtime-v1",
+      "current_task": "KAIOS-EXPIRED-CURSOR-R2-CLAIM-RECONCILIATION-001",
+      "current_branch": "codex/KAIOS-EXPIRED-CURSOR-R2-CLAIM-RECONCILIATION-V1-001",
       "status": "ACTIVE",
       "employee_status": "ACTIVE",
       "trust_level": "T5",
@@ -404,11 +426,13 @@
         "LIFE_RESEARCH_ANALYST"
       ],
       "workspace": "cursor-worker-workspace",
-      "current_task": "KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-R2-001",
-      "current_branch": "cursor-handoff/KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-R2-001",
-      "status": "CLAIMED",
+      "current_task": null,
+      "current_branch": null,
+      "status": "OFFLINE",
+      "availability_for_current_work": "TEMPORARILY_UNAVAILABLE",
+      "availability_reason": "VACATION_HUMAN_ATTESTED_DO_NOT_WAKE",
       "pending_rework_task_id": null,
-      "fresh_claim_required": false,
+      "fresh_claim_required": true,
       "employee_status": "ACTIVE",
       "trust_level": "T2",
       "heartbeat": "2026-08-16T12:49:02Z",

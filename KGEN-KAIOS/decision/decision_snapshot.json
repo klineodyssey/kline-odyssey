@@ -2,11 +2,11 @@
   "metadata": {
     "version": "4.3",
     "status": "ACTIVE",
-    "updated_at": "2026-08-16T20:49:02+08:00",
+    "updated_at": "2026-08-25T05:48:54+08:00",
     "manager": "codex-gm-01",
     "life_id": "LIFE-CODEX-GM-0001",
-    "task_id": "HENGYAO-FIRST-GM-CLOCK-IN-001",
-    "source_commit": null,
+    "task_id": "KAIOS-EXPIRED-CURSOR-R2-CLAIM-RECONCILIATION-001",
+    "source_commit": "2ff0d594101c62912666be151c9ab72d1ebbc24c",
     "source_of_truth": true
   },
   "daily_operation": {
@@ -45,15 +45,19 @@
     "pages_https": true,
     "pages_12345_http": 200,
     "pages_16888_http": 200,
-    "active_employee_claims": 1,
+    "active_employee_claims": 0,
     "delivered_not_reviewed": 0
   },
   "workqueue": {
-    "active_task": "KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-R2-001",
-    "worker": "cursor-01",
-    "status": "CLAIMED",
-    "claim_id": "CLAIM-KAIOS-LIFE-ENERGY-PAYROLL-R2-001-cursor-01",
-    "lease_expires_at": "2026-08-18T12:49:02Z",
+    "active_task": null,
+    "worker": null,
+    "status": "NO_ACTIVE_CLAIM",
+    "claim_id": null,
+    "lease_expires_at": null,
+    "reassignable_task": "KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-R2-001",
+    "reassignable_task_status": "OPEN",
+    "reconciliation_event_id": "CLAIM-EVENT-KAIOS-LIFE-ENERGY-PAYROLL-R2-001-002",
+    "cursor_availability": "TEMPORARILY_UNAVAILABLE_VACATION",
     "map_handoff": "KGEN-MAP-4168-NAIHE-GENESIS-STATION-UI-001",
     "map_handoff_status": "HOLD_FOR_MAP_WORLD_AGENT"
   },
@@ -73,7 +77,7 @@
     "kgen_bank_wallet": "0xA06eF53c9AD4Af739FD13Ca1Ded446437134b0EE"
   },
   "publication": {
-    "branch": "codex/codex-gm-life-runtime-v1",
+    "branch": "codex/KAIOS-EXPIRED-CURSOR-R2-CLAIM-RECONCILIATION-V1-001",
     "draft_pr": null,
     "publication_pending_at_snapshot": true,
     "mainnet_write": false

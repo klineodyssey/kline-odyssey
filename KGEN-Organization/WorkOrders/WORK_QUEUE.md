@@ -58,22 +58,26 @@ The worker must then stop without changing WorkQueue, creating a branch, editing
 | KAIOS-CANONICAL-ORGANISM-V0-1 | DONE | Codex | Codex | P1 | Life Architecture | `codex/kaios-canonical-organism-schema-v0-1` | `KGEN-KAIOS/organism/KAIOS_CANONICAL_ORGANISM_V0_1_BASELINE_MERGE_CLOSEOUT.md` |
 | LAND_VIEWER_SCHEMA_V2_COMPATIBILITY | DONE | Codex | Codex | P1 | Frontend | `codex/land-viewer-schema-v2-compatibility` | `KGEN-KAIOS/world-viewer/LAND_VIEWER_SCHEMA_V2_COMPATIBILITY_MERGE_CLOSEOUT.md` |
 | WORLD_VIEWER_ORGANISM_PACKAGE_INTEGRATION | HOLD | UNASSIGNED | Codex | P1 | Frontend | `NOT_CREATED` | `PENDING_SCOPE` |
-| KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-R2-001 | CLAIMED | cursor-01 | codex-gm-01 | P0 | Payroll QA | `cursor-handoff/KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-R2-001` | `KGEN-AI-Company/reports/CURSOR_LIFE_ENERGY_PAYROLL_CANDIDATE_REPORT.md` |
+| KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-R2-001 | OPEN | UNASSIGNED | codex-gm-01 | P0 | Payroll QA | `NOT_CREATED_FUTURE_CLAIM` | `KGEN-AI-Company/reports/CURSOR_LIFE_ENERGY_PAYROLL_CANDIDATE_REPORT.md` |
 | KGEN-MAP-4168-NAIHE-GENESIS-STATION-UI-001 | HOLD | Map / World Agent | codex-gm-01 | P2 | World Map | `NOT_CREATED` | `SPEC_HANDOFF_IN_CODEX_MANAGER_PROTOCOL` |
 | KGEN-BSCSCAN-LOGO-001 | DONE | Cursor + Codex | Codex | P1 | Token Metadata | `cursor/kgen-bscscan-logo-submission-v1` | `KGEN/registry/BscScan/KGEN_BSCSCAN_LOGO_SUBMISSION_V1_MERGE_CLOSEOUT.md` |
 
 ### KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-R2-001 - Payroll Candidate Rework
 
-- Status: CLAIMED
-- Owner: cursor-01
+- Status: OPEN
+- Owner: UNASSIGNED
 - Reviewer: codex-gm-01
 - Priority: P0
 - Execution Base: `ff8fca3e610ac936e8998112255901a78296b238`
-- Claim ID: `CLAIM-KAIOS-LIFE-ENERGY-PAYROLL-R2-001-cursor-01`
-- Lease: `2026-08-16T12:49:02Z` through `2026-08-18T12:49:02Z`
+- Prior Claim ID: `CLAIM-KAIOS-LIFE-ENERGY-PAYROLL-R2-001-cursor-01`
+- Prior Lease: `2026-08-16T12:49:02Z` through `2026-08-18T12:49:02Z` — expired and inactive
+- Reconciliation: `CLAIM-EVENT-KAIOS-LIFE-ENERGY-PAYROLL-R2-001-002` (`EXPIRED_UNDELIVERED_RELEASED`)
+- Delivery / Review / Acceptance: `NONE / NONE / NONE`
+- Payroll / Payment: `NOT_ELIGIBLE_NO_ACCEPTED_DELIVERY / NOT_SENT`
+- Reassignment: available to the normal Scheduler under a future fresh claim; do not wake or assign temporarily unavailable `cursor-01`
 - Exact task packet: `KAIOS/economy/life-energy-payroll/KAIOS_CURSOR_LIFE_ENERGY_PAYROLL_TASK_ENVELOPE.json`
 - Objective: fix only the 120-versus-80 approved-ledger replay defect and the two schema-invalid `candidate_metadata` fields.
-- Stop condition: submit a bounded candidate delivery for Codex review; no payment, escrow release, merge, Canon change, contract change or Mainnet write.
+- Stop condition after a future valid claim: submit a bounded candidate delivery for Codex review; no payment, escrow release, merge, Canon change, contract change or Mainnet write.
 
 ### KGEN-MAP-4168-NAIHE-GENESIS-STATION-UI-001 - Naihe Genesis Station Handoff
 
