@@ -378,7 +378,7 @@
         "endLocation": { "$ref": "#/$defs/nonEmptyString" },
         "gmClockIn": { "type": "boolean" },
         "nextCompanyWork": { "$ref": "#/$defs/nullableString" },
-        "hardBlockers": { "type": "array", "uniqueItems": true, "items": { "type": "string", "enum": ["PRIVATE_KEY_NOT_AUTHORIZED", "IRREVERSIBLE_MAINNET_AUTHORITY_MISSING", "REAL_ASSET_INSUFFICIENT", "HUMAN_GOVERNANCE_REQUIRED", "CANON_UNRESOLVABLE"] } },
+        "hardBlockers": { "type": "array", "uniqueItems": true, "items": { "type": "string", "enum": ["AUTHORIZED_SECURE_TRANSACTION_PATH_REQUIRED", "IRREVERSIBLE_MAINNET_AUTHORITY_MISSING", "REAL_ASSET_INSUFFICIENT", "HUMAN_GOVERNANCE_REQUIRED", "CANON_UNRESOLVABLE"] } },
         "autoResolvedBlockers": { "type": "array", "uniqueItems": true, "items": { "$ref": "#/$defs/nonEmptyString" } },
         "noFakeMovement": { "type": "boolean", "const": true },
         "noFakeTrade": { "type": "boolean", "const": true },

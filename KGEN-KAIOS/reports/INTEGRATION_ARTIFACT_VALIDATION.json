@@ -1,10 +1,10 @@
 {
   "status": "PASS",
   "checks": {
-    "files": 31,
-    "json": 10,
-    "markdown": 10,
-    "utf8": 31,
+    "files": 36,
+    "json": 12,
+    "markdown": 11,
+    "utf8": 36,
     "bom": 0,
     "corruption": 0,
     "secretHits": 0,

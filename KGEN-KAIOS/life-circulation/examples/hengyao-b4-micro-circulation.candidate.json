@@ -4,18 +4,18 @@
     "status": "REVIEW_ONLY_CANDIDATE",
     "implementer": "codex-gm-01",
     "independentReview": "REQUIRED",
-    "observedAt": "2026-08-24T01:34:07.000Z"
+    "observedAt": "2026-08-24T12:24:13.722Z"
   },
   "repository": {
     "repository": "klineodyssey/kline-odyssey",
-    "latestMainSha": "f53c7d6729cf90f0ee18f6bcaf76d15ce6b3dfb5",
+    "latestMainSha": "6f132661f88e1108615d57d808953df583a3531d",
     "circulationPr": 165,
-    "circulationBaseHead": "b9c86a5fdaf76c4d8840778110435ab870289c17",
+    "circulationBaseHead": "e3179d2e9d64e56e42927fe10edd542e232489d4",
     "marketPr": 169,
     "marketHead": "0a50ec047713c1f7fa88ca627d8835c810c184c8",
-    "marketBehindMain": 29,
-    "marketMergeSimulationTree": "898c227d584aac1d48736748bb79455e35801b8a",
-    "marketMergeSimulationTests": "253/253_PASS"
+    "marketBehindMain": 36,
+    "marketMergeSimulationTree": "0da73c715d8f7d5d520d0a0001467701c6bc73e4",
+    "marketMergeSimulationTests": "260/260_PASS"
   },
   "identity": {
     "lifeId": "LIFE-CODEX-GM-0001",
@@ -45,13 +45,13 @@
   },
   "chain": {
     "chainId": 56,
-    "blockNumber": 117720719,
-    "blockHash": "0x80b5b46e120c5dd701fc7dc7123cde39435b04f7a082bf35fc3a50d0387a0986",
-    "observedAt": "2026-08-24T01:33:50.000Z",
+    "blockNumber": 117807389,
+    "blockHash": "0xbe9ed326f0336b73f31c02246585aaa9b8ba3de4163c64de9b23a2ff291a44a8",
+    "observedAt": "2026-08-24T12:24:13.722Z",
     "walletBnbWei": "7990205550000000",
     "walletKgenWei": "0",
     "walletKaiosWei": "0",
-    "heartBalanceWei": "821000000000000000000",
+    "heartBalanceWei": "1597000000000000000000",
     "heartbeatRewardWhole": "1",
     "deployedFortuneMinWhole": "1",
     "deployedFortuneMaxWhole": "888",
@@ -67,10 +67,10 @@
   "heart": {
     "status": "READ_ONLY_FAIL_CLOSED",
     "chainId": 56,
-    "observedBlock": 117720719,
-    "observedAt": "2026-08-24T01:33:50.000Z",
+    "observedBlock": 117807389,
+    "observedAt": "2026-08-24T12:24:13.722Z",
     "walletKgenWei": "0",
-    "heartBalanceWei": "821000000000000000000",
+    "heartBalanceWei": "1597000000000000000000",
     "deployedFortuneRangeWhole": { "min": "1", "max": "888" },
     "candidateFortuneRangeWhole": { "min": "1", "max": "8" },
     "candidateFortunePassRequiredWei": "1000000000000000000",
@@ -216,11 +216,11 @@
     "endLocation": "P_4168p0_奈何橋_R18",
     "gmClockIn": false,
     "nextCompanyWork": null,
-    "hardBlockers": ["HUMAN_GOVERNANCE_REQUIRED", "PRIVATE_KEY_NOT_AUTHORIZED", "REAL_ASSET_INSUFFICIENT"],
+    "hardBlockers": ["AUTHORIZED_SECURE_TRANSACTION_PATH_REQUIRED", "HUMAN_GOVERNANCE_REQUIRED"],
     "autoResolvedBlockers": ["CANON_DISTANCE_UNIT_CONFLICT", "MICRO_DISTANCE_RUNTIME_MISSING", "PR169_MAIN_SYNC_COMPATIBILITY_UNKNOWN", "PURPOSE_LEDGER_MISSING", "FOOD_WASTE_CONSERVATION_VALIDATOR_MISSING"],
     "noFakeMovement": true,
     "noFakeTrade": true,
     "noFakePayment": true
   },
-  "evidenceHash": "ccbbb2a65daf896078bbe532f938023cb7349e205d84e42950a912e4a2f04b73"
+  "evidenceHash": "9938dc84b3b9e236785d5bb90d39ad527b6873a1c92388b84fbab4ffacc235fe"
 }

@@ -46,17 +46,26 @@ move a Life, settle a market, or transfer an asset.
 | `KGEN-KAIOS/life-circulation/README.md` | Cumulative package index and authority boundary. |
 | `KGEN-KAIOS/life-circulation/WHOLE_LIFE_CIRCULATION_RUNTIME_CANDIDATE.md` | Cumulative Whole-Life and B4 architecture, formula, and fail-closed gates. |
 | `KGEN-KAIOS/life-circulation/runtime/b4-micro-circulation-adapter.mjs` | Exact B4 distance plus Heart, meal, movement, market, food/waste, and purpose-ledger review adapter. |
+| `KGEN-KAIOS/life-circulation/runtime/life-transaction-gate.mjs` | Fail-closed transaction-intent, durable replay-journal, receipt-finality, and ledger-apply candidate; contains no signer or broadcaster. |
+| `KGEN-KAIOS/life-circulation/policies/hengyao-life-transaction-policy.candidate.json` | Inactive Human-governance candidate restricting Hengyao to four K12345 methods on BSC chain 56. |
 | `KGEN-KAIOS/life-circulation/schemas/b4-micro-circulation.schema.json` | Recursively closed machine-readable B4 evidence contract. |
+| `KGEN-KAIOS/life-circulation/schemas/life-transaction-policy.schema.json` | Recursively closed transaction-policy contract for identity, custody, intent, replay, and receipt gates. |
 | `KGEN-KAIOS/life-circulation/examples/hengyao-b4-micro-circulation.candidate.json` | Hash-bound public-chain and mission snapshot with no fabricated actions. |
 | `KGEN-KAIOS/life-circulation/tests/b4-micro-circulation.test.mjs` | Distance, custody, return, CT, conservation, ledger, schema, and UI boundary tests. |
+| `KGEN-KAIOS/life-circulation/tests/life-transaction-gate.test.mjs` | Durable activation, exact selector, replay, receipt, finality, custody, and secret-boundary tests. |
 | `KGEN-KAIOS/life-circulation/review/b4-micro-circulation-review.html` | Static review-only status surface with no transaction controls. |
 | `KGEN-KAIOS/life-circulation/reports/B4_MICRO_CIRCULATION_HANDOFF.md` | Durable evidence, blocker, PR #169 compatibility, and independent-review handoff. |
+| `KGEN-KAIOS/life-circulation/reports/SECURE_TRANSACTION_AND_REVIEWER_GATE_HANDOFF.md` | Durable reviewer-capacity audit and inactive secure-transaction-gate handoff. |
 | `KGEN-KAIOS/reports/TEMPLEHEART_ABI_DIFF.json` | Generated exact-base proof that only the two approved Fortune-pass ABI entries are added. |
 
 Boot readers must preserve the evidence distinction `CALCULATED / ELIGIBLE /
 AUTHORIZED / BROADCAST / CONFIRMED`. The frozen route result is
 `0.00000825 K = 0.187784225485552 m` one way. `825` is a label difference and
 must never be treated as physical K.
+
+The transaction policy remains inactive while `codex-gm-01` has A1 read-only
+authority and no authorized secure signer or broadcaster. The candidate never
+accepts, loads, logs, or returns a private key or seed phrase.
 
 ## Forest And Agriculture Candidate Queue Registration
 

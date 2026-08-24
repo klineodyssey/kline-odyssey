@@ -1029,8 +1029,8 @@ Where the Market Becomes the Myth.
 
 ## 🔥 Latest Video｜最新發布
 
-▶ KGEN 不只是一顆幣。1 KGEN = 1000 KAIOS，從白洞燃燒、神明銀行，到鍊丹爐、蟲洞、KUFO、KSHIP，讓質量一路長出工作、薪資、公司與數位生命經濟。#KGEN #KAIOS  
-👉 https://www.youtube.com/watch?v=CCr2UfDcyZ8
+▶ 【追思｜一路好走】劉公金垣先生｜生命離去，記憶仍會留下｜K線西遊記・花果山台灣  
+👉 https://www.youtube.com/watch?v=uwfaD9W-G7M
 
 （本區由 GitHub Actions 自動更新；首頁 iframe 保持固定世界觀主軸影片）
 <!-- LATEST_VIDEO_END -->

@@ -107,10 +107,15 @@ This file is the **unique library-level Master Index** (ORG-P2-003 D7). Other `*
 | KAIOS Index | `KGEN-KAIOS/README.md` | KAIOS V7 architecture, V7.1 worker layer, and V7.2 dashboard entry |
 | Whole-Life / B4 Circulation Index | `KGEN-KAIOS/life-circulation/README.md` | Cumulative package map for circulation, B4 exact distance, strict evidence, tests, UI, and durable handoffs |
 | B4 Micro-Circulation Runtime Adapter | `KGEN-KAIOS/life-circulation/runtime/b4-micro-circulation-adapter.mjs` | Deterministic label-to-coordinate distance and fail-closed Heart, meal, movement, market, waste, and purpose-ledger adapter |
+| Hengyao Life Transaction Gate | `KGEN-KAIOS/life-circulation/runtime/life-transaction-gate.mjs` | Fail-closed intent validation, append-only replay persistence, canonical receipt verification, and guarded ledger apply without signer or broadcaster |
+| Hengyao Life Transaction Policy Candidate | `KGEN-KAIOS/life-circulation/policies/hengyao-life-transaction-policy.candidate.json` | Inactive four-method K12345 allowlist on BSC chain 56; Human governance approval and secure signer remain required |
 | B4 Micro-Circulation Evidence Schema | `KGEN-KAIOS/life-circulation/schemas/b4-micro-circulation.schema.json` | Recursively closed evidence contract with receipt and position boundaries |
+| Life Transaction Policy Schema | `KGEN-KAIOS/life-circulation/schemas/life-transaction-policy.schema.json` | Recursively closed identity, custody, intent, replay, and receipt-gate contract |
+| Life Transaction Gate Tests | `KGEN-KAIOS/life-circulation/tests/life-transaction-gate.test.mjs` | Durable inactive-policy, exact allowlist, replay, finality, receipt, and custody regressions |
 | B4 Micro-Circulation Snapshot | `KGEN-KAIOS/life-circulation/examples/hengyao-b4-micro-circulation.candidate.json` | Hash-bound 2026-08-24 read-only snapshot; zero fabricated transaction, trade, payment, movement, or clock-in |
 | B4 Micro-Circulation Review Surface | `KGEN-KAIOS/life-circulation/review/b4-micro-circulation-review.html` | Static evidence view with no signer or transaction controls |
 | B4 Micro-Circulation Handoff | `KGEN-KAIOS/life-circulation/reports/B4_MICRO_CIRCULATION_HANDOFF.md` | Canon composition, chain evidence, PR #169 compatibility, blocker, and exact-head review instructions |
+| Secure Transaction and Reviewer Gate Handoff | `KGEN-KAIOS/life-circulation/reports/SECURE_TRANSACTION_AND_REVIEWER_GATE_HANDOFF.md` | Distinct-reviewer workforce audit plus inactive transaction-gate activation boundaries |
 | TempleHeart ABI Diff Evidence | `KGEN-KAIOS/reports/TEMPLEHEART_ABI_DIFF.json` | Generated exact-base allowlist proof for the two Fortune-pass ABI additions |
 | KAIOS Dashboard | `KGEN-KAIOS/dashboard/index.html` | Read-only operations dashboard for workers, WorkQueue, review pipeline, reports, and alerts |
 | General Manager Decision Center | `KGEN-KAIOS/decision/index.html` | Read-only Daily Operation, decisions, health, attendance, WorkQueue and readiness center |

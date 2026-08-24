@@ -190,7 +190,41 @@ policy is frozen, PR #169 is paper-only, and the canonical location remains
 `P_4168p0_奈何橋_R18`. Therefore no arrival, return, payment, trade, vow, or GM
 clock-in is asserted.
 
-## 10. Review and deployment gates
+## 10. Hengyao secure transaction gate candidate
+
+`HENGYAO_LIFE_TRANSACTION_POLICY_V1` is a scoped policy definition inside this
+existing candidate package, not a second signer system. It pins BSC chain 56,
+the deployed K12345 Heart address and code hash, the registered Hengyao Life,
+Worker and wallet, and four deployed ABI signatures only:
+
+- `heartbeatClaim()`;
+- `makeWish(bytes32)`;
+- `fortuneClaim(uint256)` with 1–8 whole KGEN and a pre-existing 1 KGEN pass;
+- `vowTo(uint8,uint256)` for the exact verified net profit, bounded to 8 KGEN,
+  using only a pre-existing allowance.
+
+Every method is nonpayable under the policy. Arbitrary transfers, new approvals,
+deployment, upgrade, governance, Treasury, ownership, payroll, and general token
+movement are absent and denied. Intent evaluation requires authority, wallet,
+nonce, balance, bytecode, simulation, gas, reserve, and signer-binding fields.
+This candidate does not include the future trusted-context adapter, so those
+fields cannot override the durable inactive policy document.
+
+An approved intent must be reserved in the persistent hash-chain journal before
+an external secure signer can receive it. The module contains no signer and no
+broadcaster. Ledger application requires a successful exact transaction,
+canonical block hash, at least 12 confirmations, exact Heart event, and exact
+KGEN transfer when applicable. Replays, rollback, tampering, stale nonce,
+expired intent, wrong selector, wrong target, wrong code hash, and secret fields
+fail closed.
+
+The committed activation is deliberately `A1_PERSONAL_WALLET_READ`,
+`NOT_AUTHORIZED`, and `secureSignerConnected=false`. A separate
+machine-verifiable Human approval, an activated policy revision, an approved
+trusted-context adapter for A2, and an externally-custodied signer are required
+before any intent can pass. No private key is requested or stored.
+
+## 11. Review and deployment gates
 
 The candidate may advance only after independent review of:
 

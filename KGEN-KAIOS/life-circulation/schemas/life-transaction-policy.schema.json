@@ -1,0 +1,129 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://klineodyssey.example/schemas/life-transaction-policy.schema.json",
+  "title": "Hengyao Life Transaction Policy Candidate",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "policyId",
+    "status",
+    "lifeId",
+    "workerId",
+    "walletAddress",
+    "chainId",
+    "allowedTarget",
+    "tokenRegistry",
+    "allowedMethods",
+    "requiredGates",
+    "forbiddenActions",
+    "activation",
+    "receipt",
+    "privateKeyPolicy"
+  ],
+  "properties": {
+    "schemaVersion": { "const": "1.0.0-candidate" },
+    "policyId": { "const": "HENGYAO_LIFE_TRANSACTION_POLICY_V1" },
+    "status": { "const": "HUMAN_GOVERNANCE_APPROVAL_REQUIRED" },
+    "lifeId": { "const": "LIFE-CODEX-GM-0001" },
+    "workerId": { "const": "codex-gm-01" },
+    "walletAddress": { "type": "string", "pattern": "^0x[0-9a-fA-F]{40}$" },
+    "chainId": { "const": 56 },
+    "allowedTarget": { "$ref": "#/$defs/allowedTarget" },
+    "tokenRegistry": { "$ref": "#/$defs/tokenRegistry" },
+    "allowedMethods": {
+      "type": "array",
+      "minItems": 4,
+      "maxItems": 4,
+      "items": { "$ref": "#/$defs/method" }
+    },
+    "requiredGates": {
+      "type": "array",
+      "minItems": 21,
+      "uniqueItems": true,
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "forbiddenActions": {
+      "type": "array",
+      "minItems": 10,
+      "uniqueItems": true,
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "activation": { "$ref": "#/$defs/activation" },
+    "receipt": { "$ref": "#/$defs/receipt" },
+    "privateKeyPolicy": { "$ref": "#/$defs/privateKeyPolicy" }
+  },
+  "$defs": {
+    "allowedTarget": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["address", "codeHash", "source", "runtimeVerificationRequired"],
+      "properties": {
+        "address": { "type": "string", "pattern": "^0x[0-9a-fA-F]{40}$" },
+        "codeHash": { "type": "string", "pattern": "^0x[0-9a-fA-F]{64}$" },
+        "source": { "type": "string", "minLength": 1 },
+        "runtimeVerificationRequired": { "const": true }
+      }
+    },
+    "tokenRegistry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["KGEN"],
+      "properties": {
+        "KGEN": { "type": "string", "pattern": "^0x[0-9a-fA-F]{40}$" }
+      }
+    },
+    "method": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["signature", "selector", "maxGasUnits", "maxNativeValueWei", "argumentPolicy", "receiptPolicy"],
+      "properties": {
+        "signature": { "enum": ["heartbeatClaim()", "makeWish(bytes32)", "fortuneClaim(uint256)", "vowTo(uint8,uint256)"] },
+        "selector": { "type": "string", "pattern": "^0x[0-9a-fA-F]{8}$" },
+        "maxGasUnits": { "type": "string", "pattern": "^[1-9][0-9]*$" },
+        "maxNativeValueWei": { "const": "0" },
+        "argumentPolicy": { "type": "string", "minLength": 1 },
+        "receiptPolicy": { "type": "string", "minLength": 1 }
+      }
+    },
+    "activation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["currentAuthority", "requiredAuthority", "currentStatus", "approvalEvidenceId", "secureSignerConnected", "broadcasterIncluded"],
+      "properties": {
+        "currentAuthority": { "const": "A1_PERSONAL_WALLET_READ" },
+        "requiredAuthority": { "const": "A2_PERSONAL_LOW_RISK_SIGNING" },
+        "currentStatus": { "const": "NOT_AUTHORIZED" },
+        "approvalEvidenceId": { "type": "null" },
+        "secureSignerConnected": { "const": false },
+        "broadcasterIncluded": { "const": false }
+      }
+    },
+    "receipt": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["minimumConfirmations", "canonicalBlockRequired", "successfulStatusRequired", "exactSenderRequired", "exactTargetRequired", "exactEventRequired", "exactTokenTransferRequiredWhenApplicable", "ledgerApplyBeforeVerification"],
+      "properties": {
+        "minimumConfirmations": { "type": "integer", "minimum": 1 },
+        "canonicalBlockRequired": { "const": true },
+        "successfulStatusRequired": { "const": true },
+        "exactSenderRequired": { "const": true },
+        "exactTargetRequired": { "const": true },
+        "exactEventRequired": { "const": true },
+        "exactTokenTransferRequiredWhenApplicable": { "const": true },
+        "ledgerApplyBeforeVerification": { "const": false }
+      }
+    },
+    "privateKeyPolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["privateKeyAcceptedByGate", "seedAcceptedByGate", "secretLoggingAllowed", "custodyBoundary"],
+      "properties": {
+        "privateKeyAcceptedByGate": { "const": false },
+        "seedAcceptedByGate": { "const": false },
+        "secretLoggingAllowed": { "const": false },
+        "custodyBoundary": { "const": "EXTERNAL_AUTHORIZED_SECURE_SIGNER_ONLY" }
+      }
+    }
+  }
+}

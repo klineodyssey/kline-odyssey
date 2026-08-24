@@ -35,11 +35,16 @@ settlement, or canonical Life-location authority.
 | Path | Category | Purpose | Status |
 |---|---|---|---|
 | `KGEN-KAIOS/life-circulation/runtime/b4-micro-circulation-adapter.mjs` | Runtime candidate | Exact B4 distance and fail-closed Heart, meal, movement, market, food/waste, and purpose-ledger functions | Review only |
+| `KGEN-KAIOS/life-circulation/runtime/life-transaction-gate.mjs` | Runtime candidate | Fail-closed transaction intent, durable replay journal, exact receipt/finality verification, and post-verification ledger apply; no signer or broadcaster | Review only |
+| `KGEN-KAIOS/life-circulation/policies/hengyao-life-transaction-policy.candidate.json` | Policy candidate | Inactive, four-method K12345 allowlist for Hengyao on BSC chain 56 | Human governance approval required |
 | `KGEN-KAIOS/life-circulation/schemas/b4-micro-circulation.schema.json` | JSON Schema | Recursively closed mission evidence contract | Review only |
+| `KGEN-KAIOS/life-circulation/schemas/life-transaction-policy.schema.json` | JSON Schema | Recursively closed transaction-policy evidence contract | Review only |
 | `KGEN-KAIOS/life-circulation/examples/hengyao-b4-micro-circulation.candidate.json` | JSON Evidence | Hash-bound read-only chain and mission snapshot | Review only |
 | `KGEN-KAIOS/life-circulation/tests/b4-micro-circulation.test.mjs` | Test | Distance, authority, return, CT, conservation, purpose-ledger, schema, and UI coverage | Candidate CI |
+| `KGEN-KAIOS/life-circulation/tests/life-transaction-gate.test.mjs` | Test | Inactive-policy, allowlist, replay, receipt, finality, custody, and secret-boundary coverage | Candidate CI |
 | `KGEN-KAIOS/life-circulation/review/b4-micro-circulation-review.html` | Frontend | Static status view without signer or transaction controls | Review only |
 | `KGEN-KAIOS/life-circulation/reports/B4_MICRO_CIRCULATION_HANDOFF.md` | Audit | Durable canon composition, live-read evidence, blockers, PR #169 compatibility, and exact-head handoff | Independent review required |
+| `KGEN-KAIOS/life-circulation/reports/SECURE_TRANSACTION_AND_REVIEWER_GATE_HANDOFF.md` | Audit | Reviewer-capacity governance gap and inactive secure-transaction-gate evidence | Independent review required |
 | `KGEN-KAIOS/reports/TEMPLEHEART_ABI_DIFF.json` | Test Evidence | Generated exact-base ABI allowlist proof | PASS candidate evidence |
 
 ## Summary

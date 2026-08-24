@@ -353,7 +353,7 @@ test("public-good purposes remain separate and only a valid receipt becomes paid
 
 test("live mission remains hard-blocked without signer, assets, and frozen settlement policies", () => {
   const snapshot = composeExample();
-  assert.deepEqual(snapshot.mission.hardBlockers, ["HUMAN_GOVERNANCE_REQUIRED", "PRIVATE_KEY_NOT_AUTHORIZED", "REAL_ASSET_INSUFFICIENT"]);
+  assert.deepEqual(snapshot.mission.hardBlockers, ["AUTHORIZED_SECURE_TRANSACTION_PATH_REQUIRED", "HUMAN_GOVERNANCE_REQUIRED"]);
   assert.equal(snapshot.heart.heartbeat.status, "ELIGIBLE_BUT_SECURE_SIGNER_NOT_CONNECTED");
   assert.equal(snapshot.movement.status, "BLOCKED_REAL_ASSET_INSUFFICIENT");
   assert.equal(snapshot.mission.arrived11520, false);

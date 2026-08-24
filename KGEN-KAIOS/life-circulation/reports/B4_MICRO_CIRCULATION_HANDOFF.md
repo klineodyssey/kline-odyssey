@@ -2,7 +2,7 @@
 
 - **Protocol:** `KAIOS_B4_MICRO_DISTANCE_CANON_RESOLUTION_AND_MISSION_RESUME_V1`
 - **Implementer:** `codex-gm-01` / 衡曜
-- **Execution base:** `f53c7d6729cf90f0ee18f6bcaf76d15ce6b3dfb5`
+- **Execution base:** `6f132661f88e1108615d57d808953df583a3531d`
 - **Status:** `ENGINEERING_CANDIDATE_COMPLETE_LIVE_MISSION_HARD_BLOCKED`
 **Independent review:** `REQUIRED`
 
@@ -38,13 +38,16 @@ mapping. No second Universe Runtime or parallel CURRENT is introduced.
 
 ## 2026-08-24 read-only chain evidence
 
-Two independent BSC RPC providers agreed on the public wallet balances and
-TempleHeart configuration around block `117720719`:
+Two independent BSC RPC providers agreed on the same block hash, public wallet
+balances, TempleHeart runtime code hash, and configuration at block
+`117807389`:
 
 - wallet `0x4DF6E9629Dad1072103cFd2bC81845fd97429214`;
 - native BNB `0.00799020555`;
 - KGEN `0` and KAIOS `0`;
-- TempleHeart balance `821 KGEN`;
+- TempleHeart balance `1597 KGEN`;
+- TempleHeart runtime code hash
+  `0x1d3eba15b4c4895710c6e68f3f27e97cb0e2c94edc254d9f1e9148b3d7f55d32`;
 - Heartbeat reward `1 KGEN`, estimate `PASS`, gas estimate `103989`;
 - deployed Fortune range `1–888 KGEN`, minimum-1 estimate `PASS`, gas estimate
   `118678`;
@@ -72,10 +75,10 @@ scheduler is scoped to Digital Ant and cannot be repurposed for Hengyao.
   `P_4168p0_奈何橋_R18`.
 - PR #169 exact head `0a50ec047713c1f7fa88ca627d8835c810c184c8`
   is the latest native 11520 candidate found. It is Draft, paper/in-memory,
-  settlement-free, and was 29 commits behind main at observation. A clean
+  settlement-free, and was 36 commits behind main at observation. A clean
   no-commit merge simulation against the execution base produced tree
-  `898c227d584aac1d48736748bb79455e35801b8a`; its focused tests passed
-  `253/253`. This is compatibility evidence, not a write to PR #169 and not
+  `0da73c715d8f7d5d520d0a0001467701c6bc73e4`; its focused tests passed
+  `260/260`. This is compatibility evidence, not a write to PR #169 and not
   reusable exact-head CI.
 - Best Buy, Best Sell, and CT are all `null`; there is no verified counterparty,
   no fruit trade, no settlement, no food input, no waste input, no recycling
@@ -112,10 +115,16 @@ Auto-resolved engineering blockers:
 
 Live hard blockers:
 
-- `PRIVATE_KEY_NOT_AUTHORIZED` — no authorized personal signer/connector;
-- `REAL_ASSET_INSUFFICIENT` — wallet KGEN and KAIOS are zero;
+- `AUTHORIZED_SECURE_TRANSACTION_PATH_REQUIRED` — the missing organ is a
+  machine-verifiable policy plus externally-custodied signer path, not disclosure
+  of a private key;
 - `HUMAN_GOVERNANCE_REQUIRED` — metabolism, meal settlement, energy-to-fuel,
   fare, market settlement, and position authority are not frozen/active.
+
+Wallet KGEN and KAIOS are presently zero, but that is a downstream state while
+the estimated, Heart-funded Heartbeat cannot use an authorized transaction
+path. It becomes an independent `REAL_ASSET_INSUFFICIENT` hard blocker only if
+the legal claim path is available and the required assets are still absent.
 
 Consequently `ARRIVED_11520 = NO`, `RETURN_STATUS = NOT_STARTED`, and
 `GM_CLOCK_IN = NO`. These are intentional fail-closed results, not incomplete

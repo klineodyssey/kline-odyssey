@@ -37,6 +37,14 @@ Its durable evidence honestly records zero executed transactions, trades,
 payments, arrivals, and clock-ins when signer, asset, settlement, and governance
 inputs are absent.
 
+The package also contains `HENGYAO_LIFE_TRANSACTION_POLICY_V1` and its
+fail-closed gate. It allows only four exact deployed K12345 selectors, validates
+the required authority/simulation/state fields, reserves replay nonces in a
+hash-chained journal, and applies receipts only after canonical-block, event,
+and exact KGEN Transfer verification. The committed activation remains A1 /
+`NOT_AUTHORIZED`; no trusted-context adapter, signer, or broadcaster is included,
+so caller-provided labels cannot activate it.
+
 ## Purpose
 
 KAIOS is the KGEN AI Operating System. It is not another document library and it is not a mass document expansion. It is the architecture layer that coordinates AI workers, tasks, claims, reports, reviews, recovery, dashboard state, and security policy.

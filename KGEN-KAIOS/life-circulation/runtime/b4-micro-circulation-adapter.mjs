@@ -643,8 +643,9 @@ export function buildB4MicroMissionSnapshot({
     { purpose: "FRUIT", asset: "KGEN", calculatedAmountRaw: "0", from: identity.walletAddress, to: PUBLIC_GOOD_TREASURY },
   ]);
   const hardBlockers = new Set();
-  if (authority?.secureSignerConnected !== true || authority?.personalHeartWriteAuthorized !== true) hardBlockers.add("PRIVATE_KEY_NOT_AUTHORIZED");
-  if (unsignedAmount(chainSnapshot.walletKgenWei, "walletKgenWei") === 0n) hardBlockers.add("REAL_ASSET_INSUFFICIENT");
+  const authorizedTransactionPath = authority?.secureSignerConnected === true && authority?.personalHeartWriteAuthorized === true;
+  if (!authorizedTransactionPath) hardBlockers.add("AUTHORIZED_SECURE_TRANSACTION_PATH_REQUIRED");
+  else if (unsignedAmount(chainSnapshot.walletKgenWei, "walletKgenWei") === 0n) hardBlockers.add("REAL_ASSET_INSUFFICIENT");
   if (metabolismPolicyStatus !== "FROZEN" || mealSettlementRuntimeStatus !== "ACTIVE_AUTHORIZED") hardBlockers.add("HUMAN_GOVERNANCE_REQUIRED");
   if (movement.physics.status !== "PHYSICS_AND_FUEL_POLICY_CALCULATED") hardBlockers.add("HUMAN_GOVERNANCE_REQUIRED");
   const snapshot = {
