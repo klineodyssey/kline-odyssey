@@ -3,4 +3,3 @@ import { assertHengyaoPayrollPlan, buildHengyaoPayrollPlan, jsonSafe } from "./h
 const plan = buildHengyaoPayrollPlan();
 assertHengyaoPayrollPlan(plan);
 process.stdout.write(`${JSON.stringify(jsonSafe(plan), null, 2)}\n`);
-
