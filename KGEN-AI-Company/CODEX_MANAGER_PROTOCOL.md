@@ -95,10 +95,27 @@ permanently excluded from Xuanyao self-review because Xuanyao is its primary
 implementer. No Hengyao session or sub-agent may acknowledge, bind a controller,
 or issue a review result on Xuanyao's behalf.
 
+The existing Unique Life Identity `authority_lease_record` is the required
+controller architecture; repository mainline/claim controllers, model names,
+provider names, and textual signatures cannot substitute for it. Current
+inspection found neither a provider-authenticated Xuanyao instance lease nor a
+machine-verifiable Hengyao Life-controller record, so controller inequality is
+not evaluable. The four-document handoff now records the Life ID, Worker ID,
+CURRENT path/hash, and a null ACK timestamp for each item. Delivery remains
+blocked until a distinct Xuanyao controller channel can return Xuanyao-authored
+responses.
+
 The missing external secure signer blocks only allowlisted chain writes. It does
 not block Hengyao from clocking in for safe off-chain `READ / CODE / TEST / CI /
 HANDOFF / REVIEW_QUEUE_MAINTENANCE` work under the existing Company and Worker
 policies.
+
+Browser-injected wallet and WalletConnect frontend code is discoverable but is
+not a connected execution signer. The existing Starforge broker belongs to a
+different Life and forbids general transaction and chain-write methods; the
+Digital Ant local private-key worker is also a different-Life adapter and is
+incompatible with the Hengyao external-custody boundary. Neither may be
+repurposed to claim signer connectivity.
 
 ## 4168 Map / World Agent Handoff
 

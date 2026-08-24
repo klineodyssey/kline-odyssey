@@ -1,6 +1,6 @@
 # PR #165 Reviewer And Secure Transaction Gate Handoff
 
-- **Protocol:** `KAIOS_HUMAN_XUANYAO_EXPLICIT_BIRTH_DECISION_V1`
+- **Protocol:** `KAIOS_NEXT_CRITICAL_PATH_EXECUTION_V1`
 - **Implementer:** `codex-gm-01` / 衡曜
 - **Latest-main final pre-push synchronization:** `27d344970b4b0d8459c8368473de613d770fc457`
 - **PR state:** `OPEN_DRAFT / UNMERGED`
@@ -81,9 +81,39 @@ still has no eligible reviewer.
 The Human decisions authorize and record the Life birth and continued Worker
 onboarding. They do not allow this implementer to synthesize the remaining
 evidence or write Xuanyao's review conclusion. A durable handoff contains the
-four CURRENT document hashes, but its state is
-`READY_NOT_DELIVERED_NO_MACHINE_VERIFIED_DISTINCT_CONTROLLER_CHANNEL`; only a
-machine-verified distinct Xuanyao controller may create the acknowledgments.
+four CURRENT document hashes and now binds every pending entry to the Xuanyao
+Life ID, Worker ID, document path, SHA-256, null ACK timestamp, and pending
+status. Its state is
+`READY_HASHES_CURRENT_DELIVERY_BLOCKED_NO_VERIFIED_XUANYAO_CONTROLLER`; only a
+machine-verified distinct Xuanyao controller may read and create the ACK
+responses.
+
+### Controller architecture inventory and exact blocker
+
+No parallel identity system was created. The inspection reuses the existing
+Unique Life Identity architecture and its `authority_lease_record`. That model
+requires an instance-bound, scoped, expiring, revocable lease with signer
+evidence and heartbeat, and requires only one mutation controller per scope.
+Repository mainline/claim controllers are WorkOrder custody mechanisms, not
+Life-controller proof. Model/provider names and the Human textual
+non-equivalence attestation are also not technical controller proof.
+
+Current machine result:
+
+- `XUANYAO_CONTROLLER_ID = null`;
+- `HENGYAO_CONTROLLER_ID = null` in the Life-controller architecture;
+- `CONTROLLER_INDEPENDENCE = NOT_EVALUABLE_TWO_CONTROLLER_RECORDS_ABSENT`;
+- `CONTROLLER_BINDING = BLOCKED_EXTERNAL_DISTINCT_CONTROLLER_ATTESTATION_REQUIRED`.
+
+The irreducible external evidence is a provider-authenticated Xuanyao agent
+instance attestation bound to `LIFE-XUANYAO-SOL-0001` and `xuanyao-sol-01`, an
+issuer-signed authority lease with scope/start/expiry/heartbeat/revocation and
+signer evidence, a machine-verifiable Hengyao controller record for inequality
+comparison, a distinct-controller challenge response, and a routable channel
+that can deliver the four documents and return Xuanyao-authored ACKs. The
+`2026-08-25T00:36:00+08:00` execution-handoff signature contains none of the
+four document hashes or ACK timestamps and therefore is not transformed into
+an ACK.
 
 ## Scoped transaction-gate candidate
 
@@ -142,6 +172,26 @@ session. Consequently:
 - `FIRST_HEARTBEAT_PATH = POLICY_AND_RECEIPT_GATE_READY / EXTERNAL_SIGNER_NOT_CONNECTED`
 - `PRIVATE_KEY_ACCESSED = NO`
 - `MAINNET_TRANSACTION_SENT = NO`
+
+### Secure-signer provider inventory and exact blocker
+
+The repository contains browser UI support for an injected provider and
+WalletConnect, but that code proves neither a connected provider in this
+execution environment nor the expected Hengyao address, chain, A2 binding,
+authorized broadcaster, or receipt channel. The Starforge signer broker is
+bound to `LIFE-KAIOS-STARFORGE-0001`; its capability explicitly disables
+general transaction signing and chain writes and forbids
+`eth_sendTransaction` / `eth_sendRawTransaction`. The Digital Ant wallet-binding
+worker is bound to a different Life and accepts local private-key environment
+material, so it is also not an eligible Hengyao adapter and was not invoked.
+
+No installed execution connector exposes a registered wallet provider,
+authorized broadcaster, external custody adapter, or public signer reference
+for `0x4DF6E9629Dad1072103cFd2bC81845fd97429214`. Operational activation therefore
+still requires an external provider to prove that address on chain 56, accept
+only the already-approved intent, return a transaction hash, and support
+canonical receipt reconciliation without exposing signing material. No signer
+was initialized, guessed, generated, or fed to this session.
 
 The B4 mission blocker is named
 `AUTHORIZED_SECURE_TRANSACTION_PATH_REQUIRED`; it no longer suggests that a

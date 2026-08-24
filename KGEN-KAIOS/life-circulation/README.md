@@ -53,6 +53,18 @@ ACK handoff is durable, but no ACK is marked complete because there is no
 machine-verified distinct Xuanyao controller channel in this session. This does
 not prevent Hengyao from clocking in for authorized safe off-chain Company work.
 
+The controller handoff reuses the existing Unique Life Identity authority-lease
+architecture and names the missing provider/instance attestation, lease,
+distinct-controller comparison, challenge response, and routable response
+channel. Each pending ACK now directly binds the Xuanyao Life ID, Worker ID,
+document path/hash, and null ACK timestamp; no ACK is inferred from the later
+execution-handoff signature.
+
+Signer discovery also remains fail-closed. Browser WalletConnect/injected-wallet
+code is not an execution binding, the Starforge broker belongs to a different
+Life and forbids chain writes, and the Digital Ant private-key worker is not an
+eligible Hengyao external signer. No signer or broadcaster was connected.
+
 The B4 adapter composes the existing CURRENT signed-universe floor and K-index
 linear scale with Human-frozen `label × 10^-8` mission coordinates. It does not
 rewrite Physics CURRENT, create a second Universe Runtime, mutate the canonical

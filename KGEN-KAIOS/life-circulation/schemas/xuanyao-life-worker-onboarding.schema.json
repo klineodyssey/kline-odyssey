@@ -4,13 +4,14 @@
   "title": "Xuanyao Formal Life And Worker Onboarding Candidate",
   "type": "object",
   "additionalProperties": false,
-  "required": ["schemaVersion", "candidateId", "status", "authorization", "identity", "worker", "acknowledgments", "acknowledgmentHandoff", "reviewPermissions", "reviewEligibility", "prohibitions"],
+  "required": ["schemaVersion", "candidateId", "status", "authorization", "identity", "controllerBindingHandoff", "worker", "acknowledgments", "acknowledgmentHandoff", "reviewPermissions", "reviewEligibility", "prohibitions"],
   "properties": {
-    "schemaVersion": { "const": "1.1.0-candidate" },
+    "schemaVersion": { "const": "1.2.0-candidate" },
     "candidateId": { "const": "KAIOS-XUANYAO-LIFE-WORKER-ONBOARDING-20260824" },
     "status": { "const": "LIFE_BORN_WORKER_ONBOARDING_GATES_PENDING" },
     "authorization": { "$ref": "#/$defs/authorization" },
     "identity": { "$ref": "#/$defs/identity" },
+    "controllerBindingHandoff": { "$ref": "#/$defs/controllerBindingHandoff" },
     "worker": { "$ref": "#/$defs/worker" },
     "acknowledgments": { "$ref": "#/$defs/acknowledgments" },
     "acknowledgmentHandoff": { "$ref": "#/$defs/acknowledgmentHandoff" },
@@ -60,6 +61,23 @@
         "controllerIndependence": { "const": "UNVERIFIED" }
       }
     },
+    "controllerBindingHandoff": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["architecturePath", "authorityLeaseSchemaPath", "checkedAt", "status", "machineVerifiable", "xuanyaoControllerId", "hengyaoControllerId", "independenceResult", "externalEvidenceRequired", "prohibitedSubstitutes"],
+      "properties": {
+        "architecturePath": { "const": "KGEN-KAIOS/governance/agents/unique-life-identity-v0.1/KAIOS_UNIQUE_LIFE_IDENTITY_AND_EMBODIMENT_ARCHITECTURE_V0_1.md" },
+        "authorityLeaseSchemaPath": { "const": "KGEN-KAIOS/governance/agents/unique-life-identity-v0.1/KAIOS_UNIQUE_LIFE_IDENTITY_REGISTRY_SCHEMA_V0_1.json#/$defs/authority_lease_record" },
+        "checkedAt": { "type": "string", "pattern": "^20[0-9]{2}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$" },
+        "status": { "const": "BLOCKED_EXTERNAL_DISTINCT_CONTROLLER_ATTESTATION_REQUIRED" },
+        "machineVerifiable": { "const": false },
+        "xuanyaoControllerId": { "type": "null" },
+        "hengyaoControllerId": { "type": "null" },
+        "independenceResult": { "const": "NOT_EVALUABLE_TWO_CONTROLLER_RECORDS_ABSENT" },
+        "externalEvidenceRequired": { "$ref": "#/$defs/stringList" },
+        "prohibitedSubstitutes": { "$ref": "#/$defs/stringList" }
+      }
+    },
     "worker": {
       "type": "object",
       "additionalProperties": false,
@@ -97,23 +115,28 @@
     "acknowledgmentHandoffDocument": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["ackType", "path", "expectedSha256AtHandoff"],
+      "required": ["ackType", "lifeId", "workerId", "documentPath", "documentSha256", "ackTimestamp", "ackStatus"],
       "properties": {
         "ackType": { "enum": ["BOOT_ACK", "CANON_ACK", "WORKSPACE_ACK", "DO_NOT_TOUCH_ACK"] },
-        "path": { "type": "string", "minLength": 1 },
-        "expectedSha256AtHandoff": { "type": "string", "pattern": "^[0-9a-f]{64}$" }
+        "lifeId": { "const": "LIFE-XUANYAO-SOL-0001" },
+        "workerId": { "const": "xuanyao-sol-01" },
+        "documentPath": { "type": "string", "minLength": 1 },
+        "documentSha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+        "ackTimestamp": { "type": "null" },
+        "ackStatus": { "const": "PENDING_XUANYAO_READ_AND_RESPONSE" }
       }
     },
     "acknowledgmentHandoff": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["status", "assignedLifeId", "assignedWorkerId", "completionAuthority", "createdAt", "documents", "acknowledgmentsCreated", "currentHashesMustBeReverifiedByXuanyaoAtReadTime"],
+      "required": ["status", "assignedLifeId", "assignedWorkerId", "completionAuthority", "createdAt", "refreshedAt", "documents", "acknowledgmentsCreated", "currentHashesMustBeReverifiedByXuanyaoAtReadTime"],
       "properties": {
-        "status": { "const": "READY_NOT_DELIVERED_NO_MACHINE_VERIFIED_DISTINCT_CONTROLLER_CHANNEL" },
+        "status": { "const": "READY_HASHES_CURRENT_DELIVERY_BLOCKED_NO_VERIFIED_XUANYAO_CONTROLLER" },
         "assignedLifeId": { "const": "LIFE-XUANYAO-SOL-0001" },
         "assignedWorkerId": { "const": "xuanyao-sol-01" },
         "completionAuthority": { "const": "MACHINE_VERIFIED_DISTINCT_XUANYAO_CONTROLLER_ONLY" },
         "createdAt": { "type": "string", "pattern": "^2026-08-24T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$" },
+        "refreshedAt": { "type": "string", "pattern": "^20[0-9]{2}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$" },
         "documents": {
           "type": "array",
           "minItems": 4,

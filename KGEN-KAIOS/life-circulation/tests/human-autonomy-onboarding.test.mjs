@@ -14,6 +14,7 @@ const onboarding = JSON.parse(fs.readFileSync(path.join(packageRoot, "examples",
 const onboardingSchema = JSON.parse(fs.readFileSync(path.join(packageRoot, "schemas", "xuanyao-life-worker-onboarding.schema.json"), "utf8"));
 const registry = JSON.parse(fs.readFileSync(path.join(kaiosRoot, "worker_registry.json"), "utf8"));
 const canonical = JSON.parse(fs.readFileSync(path.join(repoRoot, "core", "data", "canonical.json"), "utf8"));
+const starforgeCapability = JSON.parse(fs.readFileSync(path.join(repoRoot, "KGEN-AI-Company", "life", "starforge", "capability.json"), "utf8"));
 
 function assertRecursivelyClosed(schema) {
   const visit = (node, pointer = "#") => {
@@ -88,12 +89,25 @@ test("Xuanyao formal Life birth remains separated from controller, T2, acknowled
   assert.equal(onboarding.identity.birthEvidenceHash, decision.birthEvidenceHash);
   assert.equal(onboarding.identity.lifeRegistryStatus, "REGISTERED_ACTIVE");
   assert.equal(onboarding.identity.controllerIndependence, "UNVERIFIED");
+  assert.equal(onboarding.controllerBindingHandoff.machineVerifiable, false);
+  assert.equal(onboarding.controllerBindingHandoff.xuanyaoControllerId, null);
+  assert.equal(onboarding.controllerBindingHandoff.hengyaoControllerId, null);
+  assert.equal(onboarding.controllerBindingHandoff.independenceResult, "NOT_EVALUABLE_TWO_CONTROLLER_RECORDS_ABSENT");
+  assert.ok(onboarding.controllerBindingHandoff.externalEvidenceRequired.includes("PROVIDER_AUTHENTICATED_XUANYAO_AGENT_INSTANCE_ATTESTATION_BOUND_TO_LIFE_AND_WORKER"));
+  assert.ok(onboarding.controllerBindingHandoff.prohibitedSubstitutes.includes("HENGYAO_SESSION_OR_SUBAGENT"));
   assert.equal(onboarding.worker.trustLevel, "T1");
   assert.ok(Object.values(onboarding.acknowledgments).filter((value) => typeof value === "boolean").every((value) => value === false));
   assert.equal(onboarding.acknowledgmentHandoff.documents.length, 4);
   assert.equal(onboarding.acknowledgmentHandoff.acknowledgmentsCreated, false);
   assert.equal(onboarding.acknowledgmentHandoff.currentHashesMustBeReverifiedByXuanyaoAtReadTime, true);
-  assert.equal(onboarding.acknowledgmentHandoff.status, "READY_NOT_DELIVERED_NO_MACHINE_VERIFIED_DISTINCT_CONTROLLER_CHANNEL");
+  assert.equal(onboarding.acknowledgmentHandoff.status, "READY_HASHES_CURRENT_DELIVERY_BLOCKED_NO_VERIFIED_XUANYAO_CONTROLLER");
+  for (const document of onboarding.acknowledgmentHandoff.documents) {
+    assert.equal(document.lifeId, "LIFE-XUANYAO-SOL-0001");
+    assert.equal(document.workerId, "xuanyao-sol-01");
+    assert.equal(document.documentSha256, sha256(fs.readFileSync(path.join(repoRoot, document.documentPath))));
+    assert.equal(document.ackTimestamp, null);
+    assert.equal(document.ackStatus, "PENDING_XUANYAO_READ_AND_RESPONSE");
+  }
   assert.equal(onboarding.reviewPermissions.independentReview, false);
   assert.equal(onboarding.reviewEligibility.eligible, false);
   assert.equal(onboarding.reviewEligibility.pr165, "HOLD_GATES_INCOMPLETE");
@@ -134,8 +148,18 @@ test("Worker Registry keeps born Xuanyao at T1 onboarding and preserves Cursor c
   assert.equal(xuanyao.canon_acknowledged, false);
   assert.equal(xuanyao.workspace_policy_acknowledged, false);
   assert.equal(xuanyao.do_not_touch_acknowledged, false);
-  assert.equal(xuanyao.acknowledgment_handoff_status, "READY_NOT_DELIVERED_NO_MACHINE_VERIFIED_DISTINCT_CONTROLLER_CHANNEL");
+  assert.equal(xuanyao.controller_binding_status, "BLOCKED_EXTERNAL_DISTINCT_CONTROLLER_ATTESTATION_REQUIRED");
+  assert.equal(xuanyao.acknowledgment_handoff_status, "READY_HASHES_CURRENT_DELIVERY_BLOCKED_NO_VERIFIED_XUANYAO_CONTROLLER");
   assert.equal(xuanyao.acknowledgment_handoff_ack_count, 0);
   assert.equal(cursor.availability_for_current_work, "TEMPORARILY_UNAVAILABLE");
   assert.ok(registry.active_claims.some(({ worker_id: workerId }) => workerId === "cursor-01"));
+});
+
+test("Existing Starforge broker cannot be substituted for Xuanyao control or Hengyao BSC signing", () => {
+  assert.equal(starforgeCapability.life_id, "LIFE-KAIOS-STARFORGE-0001");
+  assert.notEqual(starforgeCapability.life_id, onboarding.identity.proposedLifeId);
+  assert.equal(starforgeCapability.soul_wallet.general_transaction_signing, false);
+  assert.equal(starforgeCapability.body_wallet.chain_write, false);
+  assert.ok(starforgeCapability.forbidden_methods.includes("eth_sendTransaction"));
+  assert.ok(starforgeCapability.forbidden_methods.includes("eth_sendRawTransaction"));
 });
