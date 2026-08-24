@@ -223,7 +223,7 @@ This is compatibility evidence only; PR #169 was not modified.
 
 ## Local verification before push
 
-- Whole-Life/B4/transaction/onboarding policy tests: `52/52 PASS`;
+- Whole-Life/B4/transaction/onboarding policy tests: `53/53 PASS`;
 - repository regression: `245/245 PASS`;
 - CURRENT lineage reconciliation: `PASS`;
 - integration validation: `45 files`, `0 secret hits`, `0 broken links`;
