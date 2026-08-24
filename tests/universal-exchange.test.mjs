@@ -99,7 +99,9 @@ import {
   , KAIOS_CASH_LAW, createAtmFieldServiceRequests, validateWasteInventory,
   calculateFieldTripEnergy, calculateMatterAntimatterEnergy, validateFieldRoute,
   calculateFieldServiceQuote, validateFieldDeliveryEvidence, createWorkforceGap,
-  createFieldServiceDemandScan
+  createFieldServiceDemandScan,
+  runAutonomousCompanyCycle, AUTONOMOUS_COMPANY_SAFE_ACTIONS,
+  AUTONOMOUS_COMPANY_FORBIDDEN_ACTIONS
 } from "../core/index.mjs";
 import { verifyDigitalAntWalletBinding, verifyDigitalLifeWalletBinding, CODEX_GM_ENV } from "../core/security/wallet-binding.mjs";
 import { TEMPLE_HEART_READ_ABI, TEMPLE_HEART_DRY_RUN_ABI, TEMPLE_HEART_VERIFIED_ACTIONS, readCoreHeartEvents } from "../core/integrations/temple-heart-12345.mjs";
@@ -2864,4 +2866,293 @@ test("V4.0 production shell exposes animated concierge and fresh cache key", asy
   for (const state of ["IDLE", "LISTENING", "THINKING", "SPEAKING", "SUCCESS", "ERROR"]) assert.match(appSource + cssSource, new RegExp(state));
   assert.match(cssSource, /2D FALLBACK/);
   assert.deepEqual(seed.next_stage.player_first_v4_0.entry_actions, ["VOICE", "TEXT", "EXPLORE", "JOIN", "WORK", "MY_AI"]);
+});
+
+const AUTONOMOUS_MAIN_SHA = "1".repeat(40);
+const autonomousManager = Object.freeze({
+  worker_id: "codex-gm-01",
+  role: "General Manager / Dispatcher / Reviewer",
+  status: "ACTIVE",
+  employee_status: "ACTIVE",
+  trust_level: "T5",
+  active_claim_count: 1,
+  boot_acknowledged: true,
+  canon_acknowledged: true,
+  workspace_policy_acknowledged: true,
+  do_not_touch_acknowledged: true,
+  suspension: null
+});
+const autonomousWorker = Object.freeze({
+  worker_id: "cursor-01",
+  role: "Worker",
+  status: "ACTIVE",
+  employee_status: "ACTIVE",
+  trust_level: "T2",
+  active_claim_count: 0,
+  current_task: null,
+  allowed_branch_pattern: "cursor-handoff/<Task-ID>",
+  boot_acknowledged: true,
+  canon_acknowledged: true,
+  workspace_policy_acknowledged: true,
+  do_not_touch_acknowledged: true,
+  suspension: null
+});
+const autonomousTask = Object.freeze({
+  task_id: "SAFE-TASK-001",
+  status: "CLAIMABLE",
+  priority_class: "IMPLEMENTATION",
+  priority: "P1",
+  risk_level: "R1",
+  assigned_worker_id: "cursor-01",
+  reviewer_id: "codex-gm-01",
+  branch: "cursor-handoff/SAFE-TASK-001",
+  authorized_actions: ["READ", "SAFE_BRANCH_WORK", "TEST", "HANDOFF"],
+  task_envelope_status: "AUTHORIZED",
+  authority_status: "MACHINE_VERIFIED",
+  dependencies_complete: true,
+  protected_paths_changed: false,
+  created_at: "2026-08-23T00:00:00Z"
+});
+
+function autonomousCycle(overrides = {}) {
+  return runAutonomousCompanyCycle({
+    cycle_id: "COMPANY-CYCLE-20260823-0001",
+    observed_at: "2026-08-23T00:01:00Z",
+    current_main_sha: AUTONOMOUS_MAIN_SHA,
+    expected_main_sha: AUTONOMOUS_MAIN_SHA,
+    manager: autonomousManager,
+    workers: [autonomousManager, autonomousWorker],
+    work_queue: [autonomousTask],
+    review_queue: [],
+    previous_cycle_ids: [],
+    ...overrides
+  });
+}
+
+test("Autonomous Company cycle creates only a safe assignment candidate", () => {
+  const result = autonomousCycle();
+  assert.equal(result.status, "ASSIGNMENT_CANDIDATE_READY");
+  assert.equal(result.selected_task_id, "SAFE-TASK-001");
+  assert.equal(result.selected_worker_id, "cursor-01");
+  assert.deepEqual(result.events.map((event) => event.event_type), ["CLOCK_IN", "WORK_ORDER", "HANDOFF", "CLOCK_OUT"]);
+  assert.ok(result.events.every((event) => event.append_only && event.external_effect === false));
+  assert.ok(Object.values(result.authority).every((value) => value === false));
+});
+
+test("Autonomous Company cycle is replay safe", () => {
+  const result = autonomousCycle({ previous_cycle_ids: ["COMPANY-CYCLE-20260823-0001"] });
+  assert.equal(result.status, "IDEMPOTENT_NOOP");
+  assert.deepEqual(result.events, []);
+});
+
+test("Autonomous Company cycle fails closed on stale main", () => {
+  const result = autonomousCycle({ expected_main_sha: "2".repeat(40) });
+  assert.equal(result.status, "HOLD_STALE_MAIN");
+  assert.equal(result.selected_action, null);
+  assert.equal(result.events[1].payload.blocker, "STALE_MAIN");
+});
+
+test("Autonomous Company cycle preserves review-first ordering", () => {
+  const review = {
+    ...autonomousTask,
+    task_id: "DELIVERY-001",
+    status: "DELIVERY_SUBMITTED",
+    submitter_worker_id: "cursor-01",
+    reviewer_id: "codex-gm-01",
+    branch: "cursor-handoff/DELIVERY-001",
+    authorized_actions: ["READ", "TEST", "REVIEW_REQUEST"]
+  };
+  const result = autonomousCycle({ review_queue: [review] });
+  assert.equal(result.status, "REVIEW_REQUEST_READY");
+  assert.equal(result.selected_task_id, "DELIVERY-001");
+  assert.equal(result.selected_worker_id, "codex-gm-01");
+});
+
+test("Autonomous Company cycle routes REWORK_REQUIRED to the original worker instead of review", () => {
+  const repair = {
+    ...autonomousTask,
+    task_id: "REPAIR-001",
+    status: "REWORK_REQUIRED",
+    original_worker_id: "cursor-01",
+    reviewer_id: "codex-gm-01",
+    branch: "cursor-handoff/REPAIR-001"
+  };
+  const result = autonomousCycle({ review_queue: [repair] });
+  assert.equal(result.status, "REPAIR_ASSIGNMENT_CANDIDATE_READY");
+  assert.equal(result.selected_action, "REPAIR_WORK_ORDER_CANDIDATE");
+  assert.equal(result.selected_worker_id, "cursor-01");
+  assert.deepEqual(result.events.map((event) => event.event_type), ["CLOCK_IN", "WORK_ORDER", "HANDOFF", "CLOCK_OUT"]);
+  assert.equal(result.events[1].payload.work_type, "REPAIR");
+  assert.equal(result.events.some((event) => event.event_type === "REVIEW_REQUEST"), false);
+});
+
+test("Autonomous Company repair requires an explicit original authorized worker", () => {
+  const repair = {
+    ...autonomousTask,
+    task_id: "REPAIR-NO-WORKER",
+    status: "REWORK_REQUIRED",
+    original_worker_id: null,
+    branch: "cursor-handoff/REPAIR-NO-WORKER"
+  };
+  const result = autonomousCycle({ review_queue: [repair] });
+  assert.equal(result.status, "HOLD_REPAIR_WORKER");
+  assert.equal(result.events[1].payload.blocker, "ORIGINAL_REPAIR_WORKER_REQUIRED");
+});
+
+test("Autonomous Company repair revalidates trust acknowledgments branch and claim boundaries", () => {
+  const repair = {
+    ...autonomousTask,
+    task_id: "REPAIR-GATES",
+    status: "REWORK_REQUIRED",
+    original_worker_id: "cursor-01",
+    branch: "cursor-handoff/REPAIR-GATES"
+  };
+  for (const [index, workerPatch] of [
+    { trust_level: "T1" },
+    { canon_acknowledged: false },
+    { allowed_branch_pattern: "sol/<Task-ID>" },
+    { active_claim_count: 1, current_task: "OTHER-TASK" }
+  ].entries()) {
+    const result = autonomousCycle({
+      cycle_id: `COMPANY-CYCLE-REPAIR-GATE-${index + 1}`,
+      workers: [autonomousManager, { ...autonomousWorker, ...workerPatch }],
+      review_queue: [repair]
+    });
+    assert.equal(result.status, "HOLD_WORKER");
+  }
+});
+
+test("Autonomous Company repair worker must remain distinct from reviewer", () => {
+  const repair = {
+    ...autonomousTask,
+    task_id: "REPAIR-SELF-REVIEW",
+    status: "REWORK_REQUIRED",
+    original_worker_id: "cursor-01",
+    reviewer_id: "cursor-01",
+    branch: "cursor-handoff/REPAIR-SELF-REVIEW"
+  };
+  const result = autonomousCycle({ review_queue: [repair] });
+  assert.equal(result.status, "HOLD_WORKER");
+});
+
+test("Autonomous Company requests review only after repaired delivery is submitted", () => {
+  const repairedDelivery = {
+    ...autonomousTask,
+    task_id: "REPAIR-COMPLETE",
+    status: "DELIVERY_SUBMITTED",
+    submitter_worker_id: "cursor-01",
+    reviewer_id: "codex-gm-01",
+    branch: "cursor-handoff/REPAIR-COMPLETE",
+    authorized_actions: ["READ", "TEST", "REVIEW_REQUEST"]
+  };
+  const result = autonomousCycle({ review_queue: [repairedDelivery] });
+  assert.equal(result.status, "REVIEW_REQUEST_READY");
+  assert.deepEqual(result.events.map((event) => event.event_type), ["CLOCK_IN", "REVIEW_REQUEST", "CLOCK_OUT"]);
+});
+
+test("Autonomous Company review requires the registered authorized delivery submitter", () => {
+  const delivery = {
+    ...autonomousTask,
+    task_id: "DELIVERY-UNREGISTERED",
+    status: "DELIVERY_SUBMITTED",
+    submitter_worker_id: "unregistered-worker",
+    reviewer_id: "codex-gm-01",
+    branch: "cursor-handoff/DELIVERY-UNREGISTERED",
+    authorized_actions: ["READ", "TEST", "REVIEW_REQUEST"]
+  };
+  const result = autonomousCycle({ review_queue: [delivery] });
+  assert.equal(result.status, "HOLD_SUBMITTER");
+  assert.equal(result.events[1].payload.blocker, "AUTHORIZED_DELIVERY_SUBMITTER_REQUIRED");
+  assert.equal(result.events.some((event) => event.event_type === "REVIEW_REQUEST"), false);
+});
+
+test("Autonomous Company assignment requires a registered independent reviewer", () => {
+  const result = autonomousCycle({ work_queue: [{ ...autonomousTask, reviewer_id: "missing-reviewer" }] });
+  assert.equal(result.status, "HOLD_REVIEWER");
+  assert.equal(result.events[1].payload.blocker, "INDEPENDENT_REVIEWER_REQUIRED");
+});
+
+test("Autonomous Company cycle refuses self review", () => {
+  const review = {
+    ...autonomousTask,
+    task_id: "DELIVERY-SELF",
+    status: "DELIVERY_SUBMITTED",
+    submitter_worker_id: "cursor-01",
+    reviewer_id: "cursor-01",
+    branch: "cursor-handoff/DELIVERY-SELF",
+    authorized_actions: ["READ", "TEST", "REVIEW_REQUEST"]
+  };
+  const result = autonomousCycle({ review_queue: [review] });
+  assert.equal(result.status, "HOLD_REVIEWER");
+  assert.equal(result.events[1].payload.blocker, "INDEPENDENT_REVIEWER_REQUIRED");
+});
+
+test("Autonomous Company cycle rejects unregistered or T1 workers", () => {
+  const result = autonomousCycle({ workers: [autonomousManager, { ...autonomousWorker, trust_level: "T1" }] });
+  assert.equal(result.status, "HOLD_WORKER");
+  assert.equal(result.selected_worker_id, null);
+});
+
+test("Autonomous Company cycle rejects branch-policy mismatch", () => {
+  const result = autonomousCycle({ work_queue: [{ ...autonomousTask, branch: "sol/unauthorized" }] });
+  assert.equal(result.status, "HOLD_WORKER");
+});
+
+test("Autonomous Company cycle blocks high-risk external actions", () => {
+  for (const action of AUTONOMOUS_COMPANY_FORBIDDEN_ACTIONS) {
+    const result = autonomousCycle({
+      cycle_id: `COMPANY-CYCLE-BLOCK-${action}`,
+      work_queue: [{ ...autonomousTask, authorized_actions: ["READ", action] }]
+    });
+    assert.equal(result.status, "HOLD_TASK_AUTHORITY", action);
+    assert.deepEqual(result.events[1].payload.forbidden_actions, [action]);
+  }
+});
+
+test("Autonomous Company cycle rejects unknown authority instead of guessing", () => {
+  const result = autonomousCycle({ work_queue: [{ ...autonomousTask, authorized_actions: ["READ", "UNKNOWN_POWER"] }] });
+  assert.equal(result.status, "HOLD_TASK_AUTHORITY");
+  assert.deepEqual(result.events[1].payload.unknown_actions, ["UNKNOWN_POWER"]);
+});
+
+test("Autonomous Company cycle stops for Human decisions", () => {
+  const result = autonomousCycle({ work_queue: [{ ...autonomousTask, priority_class: "HUMAN_DECISION" }] });
+  assert.equal(result.status, "HOLD_HUMAN_DECISION");
+  assert.equal(result.events[1].payload.blocker, "HUMAN_DECISION_REQUIRED");
+  assert.equal(result.authority.mainnet_tx_sent, false);
+});
+
+test("Autonomous Company cycle rejects high or unknown implementation risk", () => {
+  for (const risk_level of ["R2", "HIGH", "CRITICAL", "UNCLASSIFIED"]) {
+    const result = autonomousCycle({
+      cycle_id: `COMPANY-CYCLE-RISK-${risk_level}`,
+      work_queue: [{ ...autonomousTask, risk_level }]
+    });
+    assert.equal(result.status, "HOLD_TASK_AUTHORITY", risk_level);
+    assert.equal(result.events[1].payload.risk_is_safe, false);
+  }
+});
+
+test("Autonomous Company cycle cannot assign over an unrelated active claim", () => {
+  const occupiedWorker = { ...autonomousWorker, active_claim_count: 1, current_task: "OTHER-TASK" };
+  const result = autonomousCycle({ workers: [autonomousManager, occupiedWorker] });
+  assert.equal(result.status, "HOLD_WORKER");
+});
+
+test("Autonomous Company cycle requires a machine-verified task envelope", () => {
+  for (const patch of [
+    { task_envelope_status: "DRAFT" },
+    { authority_status: "CHAT_ONLY" },
+    { dependencies_complete: false },
+    { protected_paths_changed: true }
+  ]) {
+    const result = autonomousCycle({ work_queue: [{ ...autonomousTask, ...patch }] });
+    assert.equal(result.status, "HOLD_TASK_AUTHORITY");
+  }
+});
+
+test("Autonomous Company cycle has an explicit bounded safe-action vocabulary", () => {
+  assert.ok(AUTONOMOUS_COMPANY_SAFE_ACTIONS.includes("OPEN_DRAFT_PR"));
+  assert.ok(!AUTONOMOUS_COMPANY_SAFE_ACTIONS.includes("MERGE_MAIN"));
+  assert.ok(!AUTONOMOUS_COMPANY_SAFE_ACTIONS.includes("MAINNET_TRANSACTION"));
 });

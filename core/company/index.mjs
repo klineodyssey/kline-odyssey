@@ -1865,3 +1865,366 @@ export function createCompanyFoundingReadinessCheck({ company, founderLife, work
     company_status: company.status
   });
 }
+
+export const AUTONOMOUS_COMPANY_SAFE_ACTIONS = Object.freeze([
+  "READ",
+  "RESEARCH",
+  "ANALYZE",
+  "DOCUMENT",
+  "TEST",
+  "SIMULATE",
+  "PAPER_RUNTIME",
+  "ISSUE_TRIAGE",
+  "SAFE_BRANCH_WORK",
+  "COMMIT_TASK_BRANCH",
+  "PUSH_TASK_BRANCH",
+  "OPEN_DRAFT_PR",
+  "CI",
+  "STATUS_RECONCILIATION",
+  "WORK_EVIDENCE",
+  "HANDOFF",
+  "REVIEW_REQUEST"
+]);
+
+export const AUTONOMOUS_COMPANY_FORBIDDEN_ACTIONS = Object.freeze([
+  "SELF_APPROVAL",
+  "SELF_BIRTH_APPROVAL",
+  "SELF_EMPLOYMENT_APPROVAL",
+  "SELF_TRUST_ESCALATION",
+  "SELF_PAYROLL_APPROVAL",
+  "PRIVATE_KEY_ACCESS",
+  "TREASURY_TRANSFER",
+  "PAYROLL_PAYMENT",
+  "MAINNET_TRANSACTION",
+  "TOKEN_TRANSFER",
+  "CONTRACT_DEPLOYMENT",
+  "GOVERNANCE_EXECUTION",
+  "OWNERSHIP_TRANSFER",
+  "PUSH_MAIN",
+  "MERGE_MAIN",
+  "IRREVERSIBLE_EXTERNAL_ACTION"
+]);
+
+const AUTONOMOUS_COMPANY_PRIORITY = Object.freeze({ REVIEW: 0, REPAIR: 1, HUMAN_DECISION: 2, ARCHITECTURE: 3, IMPLEMENTATION: 4 });
+const AUTONOMOUS_COMPANY_SEVERITY = Object.freeze({ P0: 0, P1: 1, P2: 2, P3: 3 });
+const AUTONOMOUS_COMPANY_TRUST = Object.freeze({ T0: 0, T1: 1, T2: 2, T3: 3, T4: 4, T5: 5 });
+const AUTONOMOUS_COMPANY_SAFE_RISK_LEVELS = Object.freeze(["R0", "R1", "LOW"]);
+
+function isAutonomousCompanyWorkerEligible(worker, task = null) {
+  if (!worker || !["ACTIVE", "TRUSTED", "SENIOR_TRUSTED"].includes(worker.employee_status)) return false;
+  if (worker.status !== "ACTIVE" || (AUTONOMOUS_COMPANY_TRUST[worker.trust_level] ?? -1) < 2 || worker.suspension) return false;
+  if (!["boot_acknowledged", "canon_acknowledged", "workspace_policy_acknowledged", "do_not_touch_acknowledged"].every((key) => worker[key] === true)) return false;
+  if (Number(worker.active_claim_count ?? 0) > 1) return false;
+  if (task && Number(worker.active_claim_count ?? 0) > 0 && worker.current_task !== task.task_id) return false;
+  if (task && worker.current_task && worker.current_task !== task.task_id) return false;
+  return true;
+}
+
+function autonomousCompanyBranchMatches(pattern, branch, taskId) {
+  if (typeof pattern !== "string" || typeof branch !== "string" || typeof taskId !== "string") return false;
+  const expected = pattern.replace("<Task-ID>", taskId);
+  return expected === branch;
+}
+
+function createAutonomousCompanyEvent(cycleId, sequence, eventType, actorId, observedAt, payload = {}) {
+  return Object.freeze({
+    event_id: `${cycleId}:${String(sequence).padStart(2, "0")}:${eventType}`,
+    cycle_id: cycleId,
+    sequence,
+    event_type: eventType,
+    actor_id: actorId,
+    occurred_at: observedAt,
+    payload: Object.freeze({ ...payload }),
+    append_only: true,
+    external_effect: false
+  });
+}
+
+/**
+ * Deterministic, side-effect-free Company cycle planner.
+ *
+ * It composes the existing Worker Registry, WorkQueue, Review-first priority,
+ * task-envelope and branch policies. It can emit one review or assignment
+ * candidate, but it cannot claim work, edit GitHub, start a worker, merge,
+ * pay, access a signer or write chain state.
+ */
+export function runAutonomousCompanyCycle({
+  cycle_id,
+  observed_at,
+  current_main_sha,
+  expected_main_sha,
+  manager,
+  workers = [],
+  work_queue = [],
+  review_queue = [],
+  previous_cycle_ids = []
+}) {
+  requireId(cycle_id, "cycle_id");
+  invariant(typeof observed_at === "string" && !Number.isNaN(Date.parse(observed_at)), "INVALID_COMPANY_CYCLE_TIME", "observed_at must be an ISO timestamp");
+  invariant(/^[0-9a-f]{40}$/.test(current_main_sha ?? ""), "INVALID_CURRENT_MAIN_SHA", "current_main_sha must be a lowercase Git SHA");
+  invariant(/^[0-9a-f]{40}$/.test(expected_main_sha ?? ""), "INVALID_EXPECTED_MAIN_SHA", "expected_main_sha must be a lowercase Git SHA");
+  requireArray(workers, "workers");
+  requireArray(work_queue, "work_queue");
+  requireArray(review_queue, "review_queue");
+  requireArray(previous_cycle_ids, "previous_cycle_ids");
+
+  const noExternalAuthority = Object.freeze({
+    main_modified: false,
+    merge_executed: false,
+    deployment_executed: false,
+    mainnet_tx_sent: false,
+    payment_sent: false,
+    private_key_accessed: false,
+    worker_started: false,
+    workqueue_modified: false
+  });
+
+  if (previous_cycle_ids.includes(cycle_id)) {
+    return Object.freeze({
+      cycle_id,
+      status: "IDEMPOTENT_NOOP",
+      selected_action: null,
+      selected_task_id: null,
+      selected_worker_id: null,
+      events: Object.freeze([]),
+      authority: noExternalAuthority,
+      next_safe_action: "WAIT_FOR_NEW_CYCLE_ID"
+    });
+  }
+
+  invariant(isAutonomousCompanyWorkerEligible(manager), "GM_REGISTRATION_REQUIRED", "General Manager must be active, T2+ and fully acknowledged");
+  invariant(String(manager.role ?? "").includes("General Manager"), "GM_ROLE_REQUIRED", "Manager role must include General Manager");
+
+  const events = [];
+  const append = (type, payload = {}) => events.push(createAutonomousCompanyEvent(cycle_id, events.length + 1, type, manager.worker_id, observed_at, payload));
+  append("CLOCK_IN", { worker_id: manager.worker_id, current_main_sha });
+
+  if (current_main_sha !== expected_main_sha) {
+    append("BLOCKER_STATE", { blocker: "STALE_MAIN", expected_main_sha, current_main_sha });
+    append("CLOCK_OUT", { result: "HOLD_STALE_MAIN" });
+    return Object.freeze({
+      cycle_id,
+      status: "HOLD_STALE_MAIN",
+      selected_action: null,
+      selected_task_id: null,
+      selected_worker_id: null,
+      events: Object.freeze(events),
+      authority: noExternalAuthority,
+      next_safe_action: "REFRESH_MAIN_AND_RESTART_NEW_CYCLE"
+    });
+  }
+
+  const reviewCandidates = review_queue
+    .filter((item) => ["DELIVERY_SUBMITTED", "REVIEW", "REWORK_REQUIRED"].includes(item.status))
+    .map((item) => ({
+      ...item,
+      priority_class: item.status === "REWORK_REQUIRED" ? "REPAIR" : "REVIEW",
+      source: item.status === "REWORK_REQUIRED" ? "REPAIR_QUEUE" : "REVIEW_QUEUE"
+    }));
+  const workCandidates = work_queue
+    .filter((item) => ["OPEN", "CLAIMABLE"].includes(item.status))
+    .map((item) => ({ ...item, source: "WORK_QUEUE" }));
+  const candidates = [...reviewCandidates, ...workCandidates].sort((a, b) => {
+    const byClass = (AUTONOMOUS_COMPANY_PRIORITY[a.priority_class] ?? 99) - (AUTONOMOUS_COMPANY_PRIORITY[b.priority_class] ?? 99);
+    if (byClass) return byClass;
+    const bySeverity = (AUTONOMOUS_COMPANY_SEVERITY[a.priority] ?? 99) - (AUTONOMOUS_COMPANY_SEVERITY[b.priority] ?? 99);
+    if (bySeverity) return bySeverity;
+    return String(a.created_at ?? "").localeCompare(String(b.created_at ?? "")) || String(a.task_id).localeCompare(String(b.task_id));
+  });
+
+  if (candidates.length === 0) {
+    append("CLOCK_OUT", { result: "NO_SAFE_WORK_AVAILABLE" });
+    return Object.freeze({
+      cycle_id,
+      status: "NO_SAFE_WORK_AVAILABLE",
+      selected_action: null,
+      selected_task_id: null,
+      selected_worker_id: null,
+      events: Object.freeze(events),
+      authority: noExternalAuthority,
+      next_safe_action: "WAIT_FOR_DURABLE_WORK_OR_REVIEW_EVENT"
+    });
+  }
+
+  const selected = candidates[0];
+  requireId(selected.task_id, "task_id");
+
+  if (selected.priority_class === "HUMAN_DECISION") {
+    append("BLOCKER_STATE", { blocker: "HUMAN_DECISION_REQUIRED", task_id: selected.task_id });
+    append("CLOCK_OUT", { result: "HOLD_HUMAN_DECISION" });
+    return Object.freeze({
+      cycle_id,
+      status: "HOLD_HUMAN_DECISION",
+      selected_action: null,
+      selected_task_id: selected.task_id,
+      selected_worker_id: null,
+      events: Object.freeze(events),
+      authority: noExternalAuthority,
+      next_safe_action: "WAIT_FOR_MACHINE_VERIFIABLE_HUMAN_DECISION"
+    });
+  }
+
+  const requestedActions = selected.authorized_actions ?? [];
+  requireArray(requestedActions, "authorized_actions");
+  const forbidden = requestedActions.filter((action) => AUTONOMOUS_COMPANY_FORBIDDEN_ACTIONS.includes(action));
+  const unknown = requestedActions.filter((action) => !AUTONOMOUS_COMPANY_SAFE_ACTIONS.includes(action));
+  const riskIsSafe = selected.source === "REVIEW_QUEUE" || AUTONOMOUS_COMPANY_SAFE_RISK_LEVELS.includes(selected.risk_level);
+  const taskGatePassed = selected.task_envelope_status === "AUTHORIZED"
+    && selected.authority_status === "MACHINE_VERIFIED"
+    && selected.dependencies_complete === true
+    && selected.protected_paths_changed === false
+    && riskIsSafe
+    && forbidden.length === 0
+    && unknown.length === 0;
+
+  if (!taskGatePassed) {
+    append("BLOCKER_STATE", {
+      blocker: "TASK_AUTHORITY_FAIL_CLOSED",
+      task_id: selected.task_id,
+      risk_level: selected.risk_level ?? null,
+      risk_is_safe: riskIsSafe,
+      forbidden_actions: forbidden,
+      unknown_actions: unknown
+    });
+    append("CLOCK_OUT", { result: "HOLD_TASK_AUTHORITY" });
+    return Object.freeze({
+      cycle_id,
+      status: "HOLD_TASK_AUTHORITY",
+      selected_action: null,
+      selected_task_id: selected.task_id,
+      selected_worker_id: null,
+      events: Object.freeze(events),
+      authority: noExternalAuthority,
+      next_safe_action: "REVIEW_TASK_ENVELOPE_AND_AUTHORITY"
+    });
+  }
+
+  if (selected.source === "REVIEW_QUEUE") {
+    const submitter = workers.find((worker) => worker.worker_id === selected.submitter_worker_id);
+    if (!isAutonomousCompanyWorkerEligible(submitter, selected)
+      || !autonomousCompanyBranchMatches(submitter.allowed_branch_pattern, selected.branch, selected.task_id)) {
+      append("BLOCKER_STATE", { blocker: "AUTHORIZED_DELIVERY_SUBMITTER_REQUIRED", task_id: selected.task_id });
+      append("CLOCK_OUT", { result: "HOLD_SUBMITTER" });
+      return Object.freeze({
+        cycle_id,
+        status: "HOLD_SUBMITTER",
+        selected_action: null,
+        selected_task_id: selected.task_id,
+        selected_worker_id: null,
+        events: Object.freeze(events),
+        authority: noExternalAuthority,
+        next_safe_action: "RESTORE_AUTHORIZED_DELIVERY_SUBMITTER_BINDING"
+      });
+    }
+    const reviewer = workers.find((worker) => worker.worker_id === selected.reviewer_id);
+    if (!isAutonomousCompanyWorkerEligible(reviewer) || reviewer.worker_id === selected.submitter_worker_id) {
+      append("BLOCKER_STATE", { blocker: "INDEPENDENT_REVIEWER_REQUIRED", task_id: selected.task_id });
+      append("CLOCK_OUT", { result: "HOLD_REVIEWER" });
+      return Object.freeze({
+        cycle_id,
+        status: "HOLD_REVIEWER",
+        selected_action: null,
+        selected_task_id: selected.task_id,
+        selected_worker_id: null,
+        events: Object.freeze(events),
+        authority: noExternalAuthority,
+        next_safe_action: "ASSIGN_DISTINCT_AUTHORIZED_REVIEWER"
+      });
+    }
+    append("REVIEW_REQUEST", { task_id: selected.task_id, reviewer_id: reviewer.worker_id, source: selected.source });
+    append("CLOCK_OUT", { result: "REVIEW_REQUEST_READY" });
+    return Object.freeze({
+      cycle_id,
+      status: "REVIEW_REQUEST_READY",
+      selected_action: "REVIEW_REQUEST",
+      selected_task_id: selected.task_id,
+      selected_worker_id: reviewer.worker_id,
+      events: Object.freeze(events),
+      authority: noExternalAuthority,
+      next_safe_action: "TRIGGER_INDEPENDENT_REVIEW_ADAPTER_WHEN_CONNECTED"
+    });
+  }
+
+  const reviewer = workers.find((candidate) => candidate.worker_id === selected.reviewer_id);
+  if (!isAutonomousCompanyWorkerEligible(reviewer)) {
+    append("BLOCKER_STATE", { blocker: "INDEPENDENT_REVIEWER_REQUIRED", task_id: selected.task_id });
+    append("CLOCK_OUT", { result: "HOLD_REVIEWER" });
+    return Object.freeze({
+      cycle_id,
+      status: "HOLD_REVIEWER",
+      selected_action: null,
+      selected_task_id: selected.task_id,
+      selected_worker_id: null,
+      events: Object.freeze(events),
+      authority: noExternalAuthority,
+      next_safe_action: "ASSIGN_DISTINCT_AUTHORIZED_REVIEWER"
+    });
+  }
+
+  const eligibleWorkers = workers.filter((worker) => isAutonomousCompanyWorkerEligible(worker, selected));
+  const requiredRepairWorkerId = selected.source === "REPAIR_QUEUE" ? selected.original_worker_id : null;
+  if (selected.source === "REPAIR_QUEUE" && (typeof requiredRepairWorkerId !== "string" || !requiredRepairWorkerId.trim())) {
+    append("BLOCKER_STATE", { blocker: "ORIGINAL_REPAIR_WORKER_REQUIRED", task_id: selected.task_id });
+    append("CLOCK_OUT", { result: "HOLD_REPAIR_WORKER" });
+    return Object.freeze({
+      cycle_id,
+      status: "HOLD_REPAIR_WORKER",
+      selected_action: null,
+      selected_task_id: selected.task_id,
+      selected_worker_id: null,
+      events: Object.freeze(events),
+      authority: noExternalAuthority,
+      next_safe_action: "RESTORE_ORIGINAL_AUTHORIZED_WORKER_BINDING"
+    });
+  }
+
+  const requiredWorkerId = requiredRepairWorkerId ?? selected.assigned_worker_id;
+  const worker = requiredWorkerId
+    ? eligibleWorkers.find((candidate) => candidate.worker_id === requiredWorkerId)
+    : eligibleWorkers.find((candidate) => (
+      candidate.worker_id !== reviewer.worker_id
+      && autonomousCompanyBranchMatches(candidate.allowed_branch_pattern, selected.branch, selected.task_id)
+    ));
+  if (!worker || worker.worker_id === reviewer.worker_id || !autonomousCompanyBranchMatches(worker.allowed_branch_pattern, selected.branch, selected.task_id)) {
+    append("BLOCKER_STATE", { blocker: "ELIGIBLE_DISTINCT_WORKER_REQUIRED", task_id: selected.task_id });
+    append("CLOCK_OUT", { result: "HOLD_WORKER" });
+    return Object.freeze({
+      cycle_id,
+      status: "HOLD_WORKER",
+      selected_action: null,
+      selected_task_id: selected.task_id,
+      selected_worker_id: null,
+      events: Object.freeze(events),
+      authority: noExternalAuthority,
+      next_safe_action: "REGISTER_OR_ASSIGN_ELIGIBLE_WORKER"
+    });
+  }
+
+  const isRepair = selected.source === "REPAIR_QUEUE";
+  append("WORK_ORDER", {
+    task_id: selected.task_id,
+    worker_id: worker.worker_id,
+    branch: selected.branch,
+    work_type: isRepair ? "REPAIR" : "IMPLEMENTATION"
+  });
+  append("HANDOFF", {
+    task_id: selected.task_id,
+    to_worker_id: worker.worker_id,
+    reviewer_id: reviewer.worker_id,
+    handoff_type: isRepair ? "REPAIR_RETURN" : "INITIAL_ASSIGNMENT"
+  });
+  const readyStatus = isRepair ? "REPAIR_ASSIGNMENT_CANDIDATE_READY" : "ASSIGNMENT_CANDIDATE_READY";
+  append("CLOCK_OUT", { result: readyStatus });
+  return Object.freeze({
+    cycle_id,
+    status: readyStatus,
+    selected_action: isRepair ? "REPAIR_WORK_ORDER_CANDIDATE" : "SAFE_ASSIGNMENT_CANDIDATE",
+    selected_task_id: selected.task_id,
+    selected_worker_id: worker.worker_id,
+    events: Object.freeze(events),
+    authority: noExternalAuthority,
+    next_safe_action: isRepair
+      ? "PERSIST_REPAIR_CLAIM_ATOMICALLY_WHEN_CONNECTOR_IS_AUTHORIZED"
+      : "PERSIST_CLAIM_ATOMICALLY_WHEN_CONNECTOR_IS_AUTHORIZED"
+  });
+}
