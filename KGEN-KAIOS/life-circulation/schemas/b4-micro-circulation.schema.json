@@ -1,0 +1,390 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/life-circulation/schemas/b4-micro-circulation.schema.json",
+  "title": "KAIOS B4 Micro-Circulation Mission Candidate",
+  "type": "object",
+  "required": ["metadata", "repository", "identity", "coordinate", "chain", "heart", "meal", "movement", "market", "food", "waste", "publicGood", "mission", "evidenceHash"],
+  "properties": {
+    "metadata": { "$ref": "#/$defs/metadata" },
+    "repository": { "$ref": "#/$defs/repository" },
+    "identity": { "$ref": "#/$defs/identity" },
+    "coordinate": { "$ref": "#/$defs/coordinate" },
+    "chain": { "$ref": "#/$defs/chain" },
+    "heart": { "$ref": "#/$defs/heart" },
+    "meal": { "$ref": "#/$defs/meal" },
+    "movement": { "$ref": "#/$defs/movement" },
+    "market": { "$ref": "#/$defs/market" },
+    "food": { "$ref": "#/$defs/food" },
+    "waste": { "$ref": "#/$defs/waste" },
+    "publicGood": { "$ref": "#/$defs/publicGood" },
+    "mission": { "$ref": "#/$defs/mission" },
+    "evidenceHash": { "$ref": "#/$defs/hash32" }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "amount": { "type": "string", "pattern": "^(0|[1-9][0-9]*)$" },
+    "decimal": { "type": "string", "pattern": "^(0|[1-9][0-9]*)(\\.[0-9]+)?$" },
+    "signedAmount": { "type": "string", "pattern": "^-?(0|[1-9][0-9]*)$" },
+    "nonEmptyString": { "type": "string", "minLength": 1 },
+    "sha": { "type": "string", "pattern": "^[0-9a-f]{40}$" },
+    "hash32": { "type": "string", "pattern": "^(0x)?[0-9a-f]{64}$" },
+    "address": { "type": "string", "pattern": "^0x[0-9a-fA-F]{40}$" },
+    "nullableString": { "oneOf": [{ "$ref": "#/$defs/nonEmptyString" }, { "type": "null" }] },
+    "nullableAmount": { "oneOf": [{ "$ref": "#/$defs/amount" }, { "type": "null" }] },
+    "metadata": {
+      "type": "object",
+      "required": ["schemaVersion", "status", "implementer", "independentReview", "observedAt"],
+      "properties": {
+        "schemaVersion": { "type": "string", "const": "1.0.0-candidate" },
+        "status": { "type": "string", "const": "REVIEW_ONLY_CANDIDATE" },
+        "implementer": { "type": "string", "const": "codex-gm-01" },
+        "independentReview": { "type": "string", "const": "REQUIRED" },
+        "observedAt": { "type": "string", "format": "date-time" }
+      },
+      "additionalProperties": false
+    },
+    "repository": {
+      "type": "object",
+      "required": ["repository", "latestMainSha", "circulationPr", "circulationBaseHead", "marketPr", "marketHead", "marketBehindMain", "marketMergeSimulationTree", "marketMergeSimulationTests"],
+      "properties": {
+        "repository": { "type": "string", "const": "klineodyssey/kline-odyssey" },
+        "latestMainSha": { "$ref": "#/$defs/sha" },
+        "circulationPr": { "type": "integer", "const": 165 },
+        "circulationBaseHead": { "$ref": "#/$defs/sha" },
+        "marketPr": { "type": "integer", "const": 169 },
+        "marketHead": { "$ref": "#/$defs/sha" },
+        "marketBehindMain": { "type": "integer", "minimum": 0 },
+        "marketMergeSimulationTree": { "$ref": "#/$defs/sha" },
+        "marketMergeSimulationTests": { "$ref": "#/$defs/nonEmptyString" }
+      },
+      "additionalProperties": false
+    },
+    "identity": {
+      "type": "object",
+      "required": ["lifeId", "workerId", "displayName", "walletAddress", "bodyStatus", "currentCanonicalLocation"],
+      "properties": {
+        "lifeId": { "type": "string", "const": "LIFE-CODEX-GM-0001" },
+        "workerId": { "type": "string", "const": "codex-gm-01" },
+        "displayName": { "type": "string", "const": "衡曜" },
+        "walletAddress": { "$ref": "#/$defs/address" },
+        "bodyStatus": { "$ref": "#/$defs/nonEmptyString" },
+        "currentCanonicalLocation": { "$ref": "#/$defs/nonEmptyString" }
+      },
+      "additionalProperties": false
+    },
+    "microPoint": {
+      "type": "object",
+      "required": ["label", "x", "floor", "alpha", "theta"],
+      "properties": {
+        "label": { "$ref": "#/$defs/amount" },
+        "x": { "$ref": "#/$defs/decimal" },
+        "floor": { "type": "integer", "const": -4 },
+        "alpha": { "$ref": "#/$defs/decimal" },
+        "theta": { "type": "string", "const": "0" }
+      },
+      "additionalProperties": false
+    },
+    "coordinate": {
+      "type": "object",
+      "required": ["status", "referenceFrame", "start", "destination", "labelScaleExponent", "labelDelta", "physicalDeltaK", "kIndexLinearMeters", "landGrainK", "landGrainM", "distanceM", "returnDistanceM", "roundTripM", "formula", "forbiddenFormulae", "policyId"],
+      "properties": {
+        "status": { "type": "string", "const": "RESOLVED_HUMAN_FROZEN_COMPOSITION_CANDIDATE" },
+        "referenceFrame": { "type": "string", "const": "KGEN_MICRO_UNIVERSE/B4" },
+        "start": { "$ref": "#/$defs/microPoint" },
+        "destination": { "$ref": "#/$defs/microPoint" },
+        "labelScaleExponent": { "type": "integer", "const": -8 },
+        "labelDelta": { "type": "string", "const": "825" },
+        "physicalDeltaK": { "type": "string", "const": "0.00000825" },
+        "kIndexLinearMeters": { "type": "string", "const": "22761.72430127901" },
+        "landGrainK": { "type": "string", "const": "0.0001" },
+        "landGrainM": { "type": "string", "const": "2.276172430127901" },
+        "distanceM": { "type": "string", "const": "0.187784225485552" },
+        "returnDistanceM": { "type": "string", "const": "0.187784225485552" },
+        "roundTripM": { "type": "string", "const": "0.375568450971104" },
+        "formula": { "$ref": "#/$defs/nonEmptyString" },
+        "forbiddenFormulae": { "type": "array", "minItems": 2, "uniqueItems": true, "items": { "$ref": "#/$defs/nonEmptyString" } },
+        "policyId": { "type": "string", "const": "KAIOS_B4_MICRO_COORDINATE_COMPOSITION_V1" }
+      },
+      "additionalProperties": false
+    },
+    "chain": {
+      "type": "object",
+      "required": ["chainId", "blockNumber", "blockHash", "observedAt", "walletBnbWei", "walletKgenWei", "walletKaiosWei", "heartBalanceWei", "heartbeatRewardWhole", "deployedFortuneMinWhole", "deployedFortuneMaxWhole", "heartbeatEstimateStatus", "fortuneEstimateStatus", "wishEstimateStatus", "heartbeatGasEstimate", "fortuneGasEstimate", "wishGasEstimate", "wishHash", "writeAttempted"],
+      "properties": {
+        "chainId": { "type": "integer", "const": 56 },
+        "blockNumber": { "type": "integer", "minimum": 1 },
+        "blockHash": { "$ref": "#/$defs/hash32" },
+        "observedAt": { "type": "string", "format": "date-time" },
+        "walletBnbWei": { "$ref": "#/$defs/amount" },
+        "walletKgenWei": { "$ref": "#/$defs/amount" },
+        "walletKaiosWei": { "$ref": "#/$defs/amount" },
+        "heartBalanceWei": { "$ref": "#/$defs/amount" },
+        "heartbeatRewardWhole": { "$ref": "#/$defs/amount" },
+        "deployedFortuneMinWhole": { "$ref": "#/$defs/amount" },
+        "deployedFortuneMaxWhole": { "$ref": "#/$defs/amount" },
+        "heartbeatEstimateStatus": { "type": "string", "enum": ["PASS", "REVERT", "UNAVAILABLE"] },
+        "fortuneEstimateStatus": { "type": "string", "enum": ["PASS", "REVERT", "UNAVAILABLE"] },
+        "wishEstimateStatus": { "type": "string", "enum": ["PASS", "REVERT", "UNAVAILABLE"] },
+        "heartbeatGasEstimate": { "$ref": "#/$defs/amount" },
+        "fortuneGasEstimate": { "$ref": "#/$defs/amount" },
+        "wishGasEstimate": { "$ref": "#/$defs/amount" },
+        "wishHash": { "$ref": "#/$defs/hash32" },
+        "writeAttempted": { "type": "boolean", "const": false }
+      },
+      "additionalProperties": false
+    },
+    "range": {
+      "type": "object",
+      "required": ["min", "max"],
+      "properties": { "min": { "$ref": "#/$defs/amount" }, "max": { "$ref": "#/$defs/amount" } },
+      "additionalProperties": false
+    },
+    "heartAction": {
+      "type": "object",
+      "required": ["gasEstimate", "status", "executed", "txHash"],
+      "properties": {
+        "rewardWhole": { "$ref": "#/$defs/amount" },
+        "requestedWhole": { "$ref": "#/$defs/amount" },
+        "policyEligible": { "type": "boolean" },
+        "deployedEstimateEligible": { "type": "boolean" },
+        "candidatePassSatisfied": { "type": "boolean" },
+        "candidatePolicyEligible": { "type": "boolean" },
+        "wishHash": { "$ref": "#/$defs/hash32" },
+        "costKgenWhole": { "$ref": "#/$defs/amount" },
+        "gasEstimate": { "$ref": "#/$defs/amount" },
+        "status": { "$ref": "#/$defs/nonEmptyString" },
+        "executed": { "type": "boolean", "const": false },
+        "txHash": { "type": "null" }
+      },
+      "additionalProperties": false
+    },
+    "heart": {
+      "type": "object",
+      "required": ["status", "chainId", "observedBlock", "observedAt", "walletKgenWei", "heartBalanceWei", "deployedFortuneRangeWhole", "candidateFortuneRangeWhole", "candidateFortunePassRequiredWei", "heartbeat", "fortune", "wish", "noBroadcastCapability"],
+      "properties": {
+        "status": { "$ref": "#/$defs/nonEmptyString" },
+        "chainId": { "type": "integer", "const": 56 },
+        "observedBlock": { "type": "integer", "minimum": 1 },
+        "observedAt": { "type": "string", "format": "date-time" },
+        "walletKgenWei": { "$ref": "#/$defs/amount" },
+        "heartBalanceWei": { "$ref": "#/$defs/amount" },
+        "deployedFortuneRangeWhole": { "$ref": "#/$defs/range" },
+        "candidateFortuneRangeWhole": { "$ref": "#/$defs/range" },
+        "candidateFortunePassRequiredWei": { "$ref": "#/$defs/amount" },
+        "heartbeat": { "$ref": "#/$defs/heartAction" },
+        "fortune": { "$ref": "#/$defs/heartAction" },
+        "wish": { "$ref": "#/$defs/heartAction" },
+        "noBroadcastCapability": { "type": "boolean", "const": true }
+      },
+      "additionalProperties": false
+    },
+    "meal": {
+      "type": "object",
+      "required": ["status", "inputKgenWhole", "wishReceiptConfirmed", "rateBps", "ratePercent", "calculatedKaiosWhole", "actualKaiosWhole", "settlementRuntimeStatus", "settlementReceipt", "mintsKaios", "metabolismPolicyStatus", "consumedKaiosWhole", "mealPaymentTx"],
+      "properties": {
+        "status": { "$ref": "#/$defs/nonEmptyString" },
+        "inputKgenWhole": { "$ref": "#/$defs/amount" },
+        "wishReceiptConfirmed": { "type": "boolean" },
+        "rateBps": { "type": "integer", "enum": [5000, 8000] },
+        "ratePercent": { "type": "string", "enum": ["50", "80"] },
+        "calculatedKaiosWhole": { "$ref": "#/$defs/amount" },
+        "actualKaiosWhole": { "$ref": "#/$defs/amount" },
+        "settlementRuntimeStatus": { "$ref": "#/$defs/nonEmptyString" },
+        "settlementReceipt": { "type": "null" },
+        "mintsKaios": { "type": "boolean", "const": false },
+        "metabolismPolicyStatus": { "$ref": "#/$defs/nonEmptyString" },
+        "consumedKaiosWhole": { "$ref": "#/$defs/nullableAmount" },
+        "mealPaymentTx": { "type": "null" }
+      },
+      "additionalProperties": false
+    },
+    "body": {
+      "type": "object",
+      "required": ["bodyId", "bodyType", "realWorldHumanoid", "status"],
+      "properties": {
+        "bodyId": { "$ref": "#/$defs/nonEmptyString" },
+        "bodyType": { "type": "string", "const": "DIGITAL_FOLDER_BODY_CANDIDATE" },
+        "realWorldHumanoid": { "type": "boolean", "const": false },
+        "status": { "$ref": "#/$defs/nonEmptyString" }
+      },
+      "additionalProperties": false
+    },
+    "physics": {
+      "type": "object",
+      "required": ["status", "distanceM", "missingInputs", "totalMassKg", "forceN", "accelerationWorkJ", "totalEnergyJ", "travelTimeSeconds", "outboundFuelKgenWei", "returnFuelKgenWei", "energyModelEvidenceId", "usesMassEnergyConversion"],
+      "properties": {
+        "status": { "$ref": "#/$defs/nonEmptyString" },
+        "distanceM": { "$ref": "#/$defs/decimal" },
+        "missingInputs": { "type": "array", "uniqueItems": true, "items": { "$ref": "#/$defs/nonEmptyString" } },
+        "totalMassKg": { "$ref": "#/$defs/nullableString" },
+        "forceN": { "$ref": "#/$defs/nullableString" },
+        "accelerationWorkJ": { "$ref": "#/$defs/nullableString" },
+        "totalEnergyJ": { "$ref": "#/$defs/nullableString" },
+        "travelTimeSeconds": { "$ref": "#/$defs/nullableString" },
+        "outboundFuelKgenWei": { "$ref": "#/$defs/nullableAmount" },
+        "returnFuelKgenWei": { "$ref": "#/$defs/nullableAmount" },
+        "energyModelEvidenceId": { "$ref": "#/$defs/nullableString" },
+        "usesMassEnergyConversion": { "type": "boolean", "const": false }
+      },
+      "additionalProperties": false
+    },
+    "fare": {
+      "type": "object",
+      "required": ["status", "fareKgenWei", "missingEvidence"],
+      "properties": {
+        "status": { "$ref": "#/$defs/nonEmptyString" },
+        "components": {
+          "type": "object",
+          "required": ["energyCostKgenWei", "laborCostKgenWei", "vehicleDepreciationKgenWei", "maintenanceKgenWei", "riskReserveKgenWei", "profitKgenWei"],
+          "properties": {
+            "energyCostKgenWei": { "$ref": "#/$defs/amount" },
+            "laborCostKgenWei": { "$ref": "#/$defs/amount" },
+            "vehicleDepreciationKgenWei": { "$ref": "#/$defs/amount" },
+            "maintenanceKgenWei": { "$ref": "#/$defs/amount" },
+            "riskReserveKgenWei": { "$ref": "#/$defs/amount" },
+            "profitKgenWei": { "$ref": "#/$defs/amount" }
+          },
+          "additionalProperties": false
+        },
+        "fareKgenWei": { "$ref": "#/$defs/nullableAmount" },
+        "missingEvidence": { "type": "array", "uniqueItems": true, "items": { "$ref": "#/$defs/nonEmptyString" } }
+      },
+      "additionalProperties": false
+    },
+    "movement": {
+      "type": "object",
+      "required": ["status", "movementEngine", "realWorldHumanoidClaimed", "currentCanonicalLocation", "plannedOriginX", "plannedDestinationX", "distanceM", "body", "physics", "outboundFare", "returnFare", "emergencyReserveKgenWei", "requiredFundsKgenWei", "movementEvidenceComplete", "arrived11520", "positionMutationCommitted"],
+      "properties": {
+        "status": { "$ref": "#/$defs/nonEmptyString" },
+        "movementEngine": { "type": "string", "const": "DIGITAL_BODY_PLUS_KGEN_MASS_CANDIDATE" },
+        "realWorldHumanoidClaimed": { "type": "boolean", "const": false },
+        "currentCanonicalLocation": { "$ref": "#/$defs/nonEmptyString" },
+        "plannedOriginX": { "type": "string", "const": "0.00012345" },
+        "plannedDestinationX": { "type": "string", "const": "0.00011520" },
+        "distanceM": { "type": "string", "const": "0.187784225485552" },
+        "body": { "$ref": "#/$defs/body" },
+        "physics": { "$ref": "#/$defs/physics" },
+        "outboundFare": { "$ref": "#/$defs/fare" },
+        "returnFare": { "$ref": "#/$defs/fare" },
+        "emergencyReserveKgenWei": { "$ref": "#/$defs/amount" },
+        "requiredFundsKgenWei": { "$ref": "#/$defs/nullableAmount" },
+        "movementEvidenceComplete": { "type": "boolean" },
+        "arrived11520": { "type": "boolean" },
+        "positionMutationCommitted": { "type": "boolean", "const": false }
+      },
+      "additionalProperties": false
+    },
+    "market": {
+      "type": "object",
+      "required": ["status", "implementation", "marketCellCoordinate", "bestBuy", "bestSell", "ct", "tradeCount", "quoteAsset", "quoteStatus", "action", "fruitQuantityKgen", "fruitTradePrice", "settlement", "txHash"],
+      "properties": {
+        "status": { "$ref": "#/$defs/nonEmptyString" },
+        "implementation": { "type": "string", "const": "PR169_EXACT_HEAD_INTERFACE" },
+        "marketCellCoordinate": { "type": "string", "const": "0.00011520" },
+        "bestBuy": { "$ref": "#/$defs/nullableString" },
+        "bestSell": { "$ref": "#/$defs/nullableString" },
+        "ct": { "$ref": "#/$defs/nullableString" },
+        "tradeCount": { "type": "integer", "minimum": 0 },
+        "quoteAsset": { "$ref": "#/$defs/nonEmptyString" },
+        "quoteStatus": { "$ref": "#/$defs/nonEmptyString" },
+        "action": { "$ref": "#/$defs/nonEmptyString" },
+        "fruitQuantityKgen": { "$ref": "#/$defs/nullableString" },
+        "fruitTradePrice": { "$ref": "#/$defs/nullableString" },
+        "settlement": { "$ref": "#/$defs/nonEmptyString" },
+        "txHash": { "type": "null" }
+      },
+      "additionalProperties": false
+    },
+    "food": {
+      "type": "object",
+      "required": ["status", "unit", "input", "metabolized", "stored", "waste", "evidenceId"],
+      "properties": {
+        "status": { "$ref": "#/$defs/nonEmptyString" },
+        "unit": { "$ref": "#/$defs/nonEmptyString" },
+        "input": { "$ref": "#/$defs/amount" },
+        "metabolized": { "$ref": "#/$defs/amount" },
+        "stored": { "$ref": "#/$defs/amount" },
+        "waste": { "$ref": "#/$defs/amount" },
+        "evidenceId": { "$ref": "#/$defs/nullableString" }
+      },
+      "additionalProperties": false
+    },
+    "waste": {
+      "type": "object",
+      "required": ["status", "massUnit", "inputWasteMass", "recycledOutputMass", "residualWasteMass", "processingLossMass", "costKgenWei", "revenueKgenWei", "netProfitKgenWei", "evidenceId"],
+      "properties": {
+        "status": { "$ref": "#/$defs/nonEmptyString" },
+        "massUnit": { "$ref": "#/$defs/nonEmptyString" },
+        "inputWasteMass": { "$ref": "#/$defs/amount" },
+        "recycledOutputMass": { "$ref": "#/$defs/amount" },
+        "residualWasteMass": { "$ref": "#/$defs/amount" },
+        "processingLossMass": { "$ref": "#/$defs/amount" },
+        "costKgenWei": { "$ref": "#/$defs/amount" },
+        "revenueKgenWei": { "$ref": "#/$defs/amount" },
+        "netProfitKgenWei": { "$ref": "#/$defs/signedAmount" },
+        "evidenceId": { "$ref": "#/$defs/nullableString" }
+      },
+      "additionalProperties": false
+    },
+    "purposeLedger": {
+      "type": "object",
+      "required": ["purpose", "asset", "calculatedAmountRaw", "actualAmountRaw", "chainId", "from", "to", "status", "txHash", "blockNumber", "blockHash", "receiptStatus", "confirmationCount", "finalityStatus", "canonicalBlockVerified", "assetContract", "providerId", "evidenceId"],
+      "properties": {
+        "purpose": { "type": "string", "enum": ["MEAL", "MICRO_UNIVERSE_TRANSPORT", "FRUIT", "DONATION"] },
+        "asset": { "type": "string", "enum": ["KGEN", "KAIOS", "NATIVE_BNB"] },
+        "calculatedAmountRaw": { "$ref": "#/$defs/amount" },
+        "actualAmountRaw": { "$ref": "#/$defs/amount" },
+        "chainId": { "type": "integer", "const": 56 },
+        "from": { "$ref": "#/$defs/address" },
+        "to": { "type": "string", "const": "0xB73D6716005B37BEC742D64482fA26033eE1A4E1" },
+        "status": { "type": "string", "enum": ["CALCULATED_NOT_SENT", "CONFIRMED"] },
+        "txHash": { "oneOf": [{ "$ref": "#/$defs/hash32" }, { "type": "null" }] },
+        "blockNumber": { "oneOf": [{ "type": "integer", "minimum": 1 }, { "type": "null" }] },
+        "blockHash": { "oneOf": [{ "$ref": "#/$defs/hash32" }, { "type": "null" }] },
+        "receiptStatus": { "oneOf": [{ "type": "integer", "const": 1 }, { "type": "null" }] },
+        "confirmationCount": { "oneOf": [{ "type": "integer", "minimum": 1 }, { "type": "null" }] },
+        "finalityStatus": { "oneOf": [{ "type": "string", "const": "CANONICAL_BLOCK_AND_MINIMUM_CONFIRMATIONS_VERIFIED" }, { "type": "null" }] },
+        "canonicalBlockVerified": { "type": "boolean" },
+        "assetContract": { "oneOf": [{ "$ref": "#/$defs/address" }, { "type": "null" }] },
+        "providerId": { "$ref": "#/$defs/nullableString" },
+        "evidenceId": { "$ref": "#/$defs/nullableString" }
+      },
+      "additionalProperties": false
+    },
+    "publicGoodTotals": {
+      "type": "object",
+      "required": ["KAIOS", "KGEN", "NATIVE_BNB"],
+      "properties": { "KAIOS": { "$ref": "#/$defs/amount" }, "KGEN": { "$ref": "#/$defs/amount" }, "NATIVE_BNB": { "$ref": "#/$defs/amount" } },
+      "additionalProperties": false
+    },
+    "publicGood": {
+      "type": "object",
+      "required": ["status", "treasury", "purposeLedgers", "actualTotalsRaw"],
+      "properties": {
+        "status": { "$ref": "#/$defs/nonEmptyString" },
+        "treasury": { "type": "string", "const": "0xB73D6716005B37BEC742D64482fA26033eE1A4E1" },
+        "purposeLedgers": { "type": "array", "minItems": 3, "items": { "$ref": "#/$defs/purposeLedger" } },
+        "actualTotalsRaw": { "$ref": "#/$defs/publicGoodTotals" }
+      },
+      "additionalProperties": false
+    },
+    "mission": {
+      "type": "object",
+      "required": ["status", "arrived11520", "returnStatus", "endLocation", "gmClockIn", "nextCompanyWork", "hardBlockers", "autoResolvedBlockers", "noFakeMovement", "noFakeTrade", "noFakePayment"],
+      "properties": {
+        "status": { "$ref": "#/$defs/nonEmptyString" },
+        "arrived11520": { "type": "boolean" },
+        "returnStatus": { "$ref": "#/$defs/nonEmptyString" },
+        "endLocation": { "$ref": "#/$defs/nonEmptyString" },
+        "gmClockIn": { "type": "boolean" },
+        "nextCompanyWork": { "$ref": "#/$defs/nullableString" },
+        "hardBlockers": { "type": "array", "uniqueItems": true, "items": { "type": "string", "enum": ["PRIVATE_KEY_NOT_AUTHORIZED", "IRREVERSIBLE_MAINNET_AUTHORITY_MISSING", "REAL_ASSET_INSUFFICIENT", "HUMAN_GOVERNANCE_REQUIRED", "CANON_UNRESOLVABLE"] } },
+        "autoResolvedBlockers": { "type": "array", "uniqueItems": true, "items": { "$ref": "#/$defs/nonEmptyString" } },
+        "noFakeMovement": { "type": "boolean", "const": true },
+        "noFakeTrade": { "type": "boolean", "const": true },
+        "noFakePayment": { "type": "boolean", "const": true }
+      },
+      "additionalProperties": false
+    }
+  }
+}

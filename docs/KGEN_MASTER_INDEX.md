@@ -26,6 +26,22 @@ This addendum does not regenerate the historical inventory below.
 | `KGEN-KAIOS/reports/BSC_TESTNET_TEMPLEHEART_V3_4_REHEARSAL.md` | Testnet Evidence | Human-readable TempleHeart V3.3.2 to V3.4.0 UUPS rehearsal | PASS on BSC Testnet chainId 97 |
 | `KGEN-KAIOS/reports/BSC_TESTNET_TEMPLEHEART_V3_4_REHEARSAL.json` | Testnet Evidence | Machine-readable addresses, receipts, storage and security results | PASS on BSC Testnet chainId 97 |
 
+## 2026-08-24 B4 Micro-Circulation Candidate Addendum
+
+This is a review-only addendum to the historical inventory. It does not make
+the candidate a Physics CURRENT, deployed Runtime, wallet connector, market
+settlement, or canonical Life-location authority.
+
+| Path | Category | Purpose | Status |
+|---|---|---|---|
+| `KGEN-KAIOS/life-circulation/runtime/b4-micro-circulation-adapter.mjs` | Runtime candidate | Exact B4 distance and fail-closed Heart, meal, movement, market, food/waste, and purpose-ledger functions | Review only |
+| `KGEN-KAIOS/life-circulation/schemas/b4-micro-circulation.schema.json` | JSON Schema | Recursively closed mission evidence contract | Review only |
+| `KGEN-KAIOS/life-circulation/examples/hengyao-b4-micro-circulation.candidate.json` | JSON Evidence | Hash-bound read-only chain and mission snapshot | Review only |
+| `KGEN-KAIOS/life-circulation/tests/b4-micro-circulation.test.mjs` | Test | Distance, authority, return, CT, conservation, purpose-ledger, schema, and UI coverage | Candidate CI |
+| `KGEN-KAIOS/life-circulation/review/b4-micro-circulation-review.html` | Frontend | Static status view without signer or transaction controls | Review only |
+| `KGEN-KAIOS/life-circulation/reports/B4_MICRO_CIRCULATION_HANDOFF.md` | Audit | Durable canon composition, live-read evidence, blockers, PR #169 compatibility, and exact-head handoff | Independent review required |
+| `KGEN-KAIOS/reports/TEMPLEHEART_ABI_DIFF.json` | Test Evidence | Generated exact-base ABI allowlist proof | PASS candidate evidence |
+
 ## Summary
 | Category | Files |
 | --- | --- |

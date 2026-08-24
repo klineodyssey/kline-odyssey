@@ -25,7 +25,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       EXPECTED_HEAD: ${{ github.event.pull_request.head.sha || github.sha }}
-      BASE_SHA: ${{ github.event.pull_request.base.sha || 'f507724d1876c28e3d24a7316c440ea9304a5228' }}
+      EVENT_BASE_SHA: ${{ github.event.pull_request.base.sha }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -36,15 +36,28 @@ jobs:
           node-version: "20"
           cache: npm
           cache-dependency-path: KGEN-KAIOS/package-lock.json
+      - name: Resolve current review base
+        run: |
+          if test -n "$EVENT_BASE_SHA"; then
+            base_sha="$EVENT_BASE_SHA"
+          else
+            git fetch --no-tags origin main
+            base_sha="$(git rev-parse origin/main)"
+          fi
+          printf 'BASE_SHA=%s\n' "$base_sha" >> "$GITHUB_ENV"
       - name: Bind checkout to exact candidate head
-        run: test "$(git rev-parse HEAD)" = "$EXPECTED_HEAD"
+        run: |
+          test "$(git rev-parse HEAD)" = "$EXPECTED_HEAD"
+          git merge-base --is-ancestor "$BASE_SHA" HEAD
       - name: Install pinned review dependencies
         working-directory: KGEN-KAIOS
         run: npm ci
       - name: Parse closed schemas and examples
         run: |
           jq empty KGEN-KAIOS/life-circulation/schemas/life-circulatory-runtime.schema.json
+          jq empty KGEN-KAIOS/life-circulation/schemas/b4-micro-circulation.schema.json
           jq empty KGEN-KAIOS/life-circulation/examples/whole-life-circulation.candidate.json
+          jq empty KGEN-KAIOS/life-circulation/examples/hengyao-b4-micro-circulation.candidate.json
       - name: Run circulation replay, fuzz, invariant, custody, and health tests
         run: |
           set -o pipefail

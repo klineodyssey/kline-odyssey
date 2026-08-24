@@ -1,7 +1,7 @@
 # Whole-Life Circulation And K12345 Heart Handoff
 
 **Task:** `KAIOS-WHOLE-LIFE-CIRCULATION-12345-HEART-V1-001`
-**Execution base:** `f507724d1876c28e3d24a7316c440ea9304a5228`
+**Execution base refreshed:** `f53c7d6729cf90f0ee18f6bcaf76d15ce6b3dfb5`
 **Implementer:** `codex-gm-01`
 **Independent review:** `REQUIRED`
 **Candidate state:** `REVIEW_ONLY_CANDIDATE`
@@ -17,10 +17,14 @@
 - health and medical recovery state machines;
 - fractal Organ coordinate calculator;
 - Starforge PR #163 security review draft.
+- exact B4 `label × 10^-8` distance adapter, receipt-gated Heart/meal/public-good
+  state, bidirectional movement/fare evidence gates, PR #169 market boundary,
+  food/waste conservation, strict schema, durable snapshot, tests, and static
+  review surface. See `B4_MICRO_CIRCULATION_HANDOFF.md`.
 
 ## Evidence state
 
-- Whole-Life runtime and TempleHeart source-boundary tests: `24/24 PASS`.
+- Whole-Life/B4 runtime and TempleHeart source-boundary tests: `38/38 PASS`.
 - Solidity/lineage/fuzz-invariant suite: `32/32 PASS`.
 - Root repository regression tests: `245/245 PASS`.
 - Solidity compilation: 27 contracts with solc 0.8.24; TempleHeart deployed bytecode is 23,769 bytes, below the EIP-170 limit of 24,576 bytes.
@@ -39,6 +43,9 @@ No pass condition is filled from expectation. Publication remains review-only, a
 4. Re-run exact 1 KGEN, one-wei-short, pre-transfer, no-burn/no-lock, Heartbeat-entry, range, cap, replay, conservation, fuzz, health, and custody tests.
 5. Confirm the persistent journal's trusted checkpoint is externalized before any production runtime.
 6. Keep deployment, keeper funding, signer custody, payment, governance execution, and Mainnet transactions blocked.
+7. Confirm that the B4 distance is `0.187784225485552 m`, that `825` is never
+   treated as physical K, and that all live mission outputs remain unexecuted
+   while the snapshot blockers remain present.
 
 ## Next handoff action
 

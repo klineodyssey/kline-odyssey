@@ -23,10 +23,19 @@ No deployment script or Mainnet address is included.
 | `contracts/KSHIPConverter.sol` | Holder-authorized KUFO-to-KSHIP conversion organ |
 | `contracts/KAIOSPairRegistry.sol` | External pair metadata without Token Core authority |
 | `reports/KAIOS_TOKEN_LINEAGE_INTEGRATION_REVIEW_2026-08-09.md` | Executive review and evidence index |
+| `KGEN-KAIOS/reports/TEMPLEHEART_ABI_DIFF.json` | Generated exact-base ABI allowlist evidence for the TempleHeart candidate |
 
 ## Whole-Life Circulation And K12345 Pass Candidate
 
 `life-circulation/` contains the review-only per-Life circulation candidate: a recursively closed Organ/Blood Bank/Vessel/Pulse schema, deterministic integer allocator, exact asset-conservation validator, persistent replay journal, medical recovery state machine, and fractal Organ coordinate calculator. It keeps K12345 as Wukong's civilization heart while every Life has its own Heart/Pulsar. The associated TempleHeart change adds only the exact pre-existing 1 KGEN Fortune pass; it does not burn, lock, seize, or transfer that pass and does not alter KGEN token tax or deployment state.
+
+The same package now contains the Human-frozen B4 micro-circulation review
+adapter. It computes `0.00012345 → 0.00011520` as `0.00000825 K` and
+`0.187784225485552 m`, while keeping Heart claims, meal conversion, movement,
+PR #169 native-market state, food/waste, and public-good ledgers receipt-gated.
+Its durable evidence honestly records zero executed transactions, trades,
+payments, arrivals, and clock-ins when signer, asset, settlement, and governance
+inputs are absent.
 
 ## Purpose
 
