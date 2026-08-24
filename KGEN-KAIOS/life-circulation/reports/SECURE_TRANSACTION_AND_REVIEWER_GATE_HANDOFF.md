@@ -2,7 +2,7 @@
 
 - **Protocol:** `KAIOS_NEXT_CRITICAL_PATH_EXECUTION_V1`
 - **Implementer:** `codex-gm-01` / 衡曜
-- **Latest-main final pre-push synchronization:** `27d344970b4b0d8459c8368473de613d770fc457`
+- **Latest-main final pre-push synchronization:** `1bd1b670a8d6f176a23ad273cd599a622a868a6e`
 - **PR state:** `OPEN_DRAFT / UNMERGED`
 - **Independent review:** `REQUIRED`
 - **Mainnet execution:** `NOT_AUTHORIZED / NOT_ATTEMPTED`
