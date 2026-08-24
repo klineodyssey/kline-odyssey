@@ -57,9 +57,10 @@ jobs:
         run: |
           test "$(git rev-parse HEAD)" = "$EXPECTED_HEAD"
           git merge-base --is-ancestor "$BASE_SHA" HEAD
-      - name: Install pinned dependencies
-        working-directory: KGEN-KAIOS
-        run: npm ci --omit=optional
+      - name: Install exact test dependency
+        run: |
+          npm install --prefix /tmp/kaios-payroll-deps --package-lock=false --ignore-scripts --no-audit --no-fund ethers@6.13.4
+          ln -s /tmp/kaios-payroll-deps/node_modules KGEN-KAIOS/node_modules
       - name: Parse payroll evidence
         run: jq empty KGEN-KAIOS/reports/HENGYAO_PAYROLL_BLOODFLOW_V1_UNSIGNED_PACKAGE.json
       - name: Run closed payroll tests
