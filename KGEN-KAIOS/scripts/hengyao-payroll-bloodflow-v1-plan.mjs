@@ -165,4 +165,3 @@ export function assertHengyaoPayrollPlan(plan) {
 export function jsonSafe(value) {
   return JSON.parse(JSON.stringify(value, (_, item) => typeof item === "bigint" ? item.toString() : item));
 }
-
