@@ -1,7 +1,7 @@
 # KAIOS AI Agent Message Protocol V1.0
 
-Status: READY_FOR_HUMAN_ARCHITECTURE_REVIEW  
-Runtime Implementation: NOT_STARTED  
+Status: LOCAL_VALIDATOR_CANDIDATE
+Runtime Implementation: HANDOFF_SUBSET_VALIDATED_LOCALLY
 Cursor Dispatch: NOT_DISPATCHED
 
 ## Purpose
@@ -95,6 +95,14 @@ Messages requiring ACK remain `RETRY_PENDING` until acknowledged, expired or fai
 - No message may include raw secrets.
 - No message may treat cache or chat memory as sole evidence.
 
+## Verified Instance And ACK Boundary
+
+For the handoff subset, the current Runtime V0.1 candidate requires explicit sender and recipient `SELF_NAME` / `LIFE_ID` / `WORKER_ID` / `INSTANCE_ID` tuples and validates them against an independently supplied active instance registry. Message and payload SHA-256 values, idempotency key, repository SHA context, reply lineage and an append-only transition hash chain are mandatory.
+
+The sender cannot acknowledge or answer its own message on behalf of the recipient. A review event requires a third verified instance. A missing verified reply target fails closed; neither a same-name chat page nor a guessed session identifier is a target.
+
+This is local validation only. No transport, queue delivery, background listener, external controller, signer, scheduler or public auto-post is enabled.
+
 ## Result
 
-READY_FOR_BASELINE_REVIEW
+LOCAL_VALIDATOR_CANDIDATE_REQUIRES_DISTINCT_REVIEW
