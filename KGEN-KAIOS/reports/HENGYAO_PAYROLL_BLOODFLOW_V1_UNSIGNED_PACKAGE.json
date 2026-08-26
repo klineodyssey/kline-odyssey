@@ -37,7 +37,9 @@
   },
   "postExecutionSnapshot": {
     "snapshotPhase": "POST_EXECUTION",
-    "sourceOfTruth": true,
+    "sourceOfTruth": false,
+    "snapshotRole": "HISTORICAL_POST_EXECUTION_CLOSURE",
+    "supersededBy": "latestReadOnlyObservation",
     "asOfBlock": 116487188,
     "asOfBlockHash": "0xbd08ee5d787f104123642bab33d75cb9651359e8b436aba4654a54c35c3b0e8a",
     "asOfTimestamp": "2026-08-17T15:19:41.000Z",
@@ -90,6 +92,54 @@
       "paymentStatus": "NOT_PAYABLE"
     },
     "totalExecutionGasBnb": "0.0000630842",
+    "privateKeyExposed": false
+  },
+  "latestReadOnlyObservation": {
+    "snapshotPhase": "LATEST_READ_ONLY_OBSERVATION",
+    "sourceOfTruth": true,
+    "chainId": 56,
+    "asOfBlock": 118270285,
+    "asOfBlockHash": "0x327977d8a16b4dfef34d3cadecea5f3e9a4e335fb53e6823a469a1de7f89b278",
+    "asOfTimestamp": "2026-08-26T22:17:57.000Z",
+    "asOfTimestampUtc8": "2026-08-27T06:17:57+08:00",
+    "preservesHistoricalSnapshots": true,
+    "bank18888": {
+      "proxy": "0x11d34c0F723aCd334B8F95076f73F07f06202aab",
+      "implementation": "0x8125045039Fe969490d57185233B7d64A494A829",
+      "version": "2.0.0",
+      "proxyCodeHash": "0x572e640425d4d6c1f70e591dec2930f8d9481f510d67a7b9577543ebaeb5dfb6",
+      "kaiosToken": "0xD4E67B3a69e41524c424150E6b6e921b01D036db",
+      "kgenToken": "0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be",
+      "kaiosBalance": "22213020.930416874731235",
+      "reserve": "11000000.0",
+      "available": "11213020.930416874731235",
+      "accountedInflow": "22213908.930416874731235",
+      "officialOutflow": "888.0",
+      "kgenBalance": "0.0",
+      "bnbBalance": "0.0",
+      "healthy": true,
+      "paused": false
+    },
+    "deltaFromPostExecutionSnapshot": {
+      "kaiosBalance": "0.0",
+      "reserve": "0.0",
+      "available": "0.0",
+      "officialOutflow": "0.0"
+    },
+    "verification": {
+      "bankHealthMatchesKaiosBalance": true,
+      "kaiosBalanceMatchesTokenBalanceOf": true,
+      "availableMatchesBalanceMinusReserve": true,
+      "genesisOpeningBalanceMatchesAccountedInflow": true,
+      "multiRpcLatestBlockCrossCheck": "PASS"
+    },
+    "transactionState": {
+      "latestKnownAuthorizedOutflowTransaction": "0x9059f3c6c2fdabf61a06c3b2eacbc985b9171d2731f74713000e8264fa37fccc",
+      "latestKnownAuthorizedOutflowAmountKaios": "888.0",
+      "netKaiosBalanceChangeSincePostExecutionSnapshot": "0.0",
+      "eventRangeScanStatus": "NOT_COMPLETE_RPC_RANGE_LIMIT",
+      "newMainnetTransactionSentByRefresh": false
+    },
     "privateKeyExposed": false
   },
   "identifiers": {

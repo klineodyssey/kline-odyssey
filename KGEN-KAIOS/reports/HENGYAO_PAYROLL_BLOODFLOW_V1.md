@@ -38,9 +38,15 @@ Final read-back at block `116475334`:
 - Hengyao roles: `PAYROLL_ADMIN_ROLE=true`, `DEFAULT_ADMIN_ROLE=false`, `ACCOUNT_ADMIN_ROLE=false`.
 - Payroll: `88 KAIOS`, epoch `24320`, `claimed=false`; first maturity is `2026-09-04T16:00:00Z` (`2026-09-05T00:00:00+08:00`).
 
+## Latest read-only 18888 state
+
+The current public source of truth is `latestReadOnlyObservation` in the machine-readable package. At BSC block `118270285` (`0x327977d8a16b4dfef34d3cadecea5f3e9a4e335fb53e6823a469a1de7f89b278`, `2026-08-26T22:17:57Z`), the 18888 proxy held a gross balance of `22,213,020.930416874731235 KAIOS`. Of that amount, `11,000,000 KAIOS` remained reserved and `11,213,020.930416874731235 KAIOS` was available. The contract reported cumulative accounted inflow of `22,213,908.930416874731235 KAIOS` and cumulative official outflow of `888 KAIOS`; its KGEN and native BNB balances were both zero. The proxy was healthy and unpaused, and direct KAIOS `balanceOf`, `kaiosBalance()`, `bankHealth()`, reserve, and available-balance cross-checks agreed exactly.
+
+The gross KAIOS balance, reserve, available amount, and cumulative official outflow are unchanged from the post-execution closure state. The latest known authorized outflow remains the `888 KAIOS` payroll-pool route transaction `0x9059f3c6c2fdabf61a06c3b2eacbc985b9171d2731f74713000e8264fa37fccc`. This refresh was read-only and sent no transaction. A complete historical event scan is not claimed because the public RPC used for verification imposed a bounded `eth_getLogs` range; current contract accounting and token balances were read directly at the recorded block.
+
 ## Post-execution closure snapshot
 
-The current public source of truth is `postExecutionSnapshot` in the machine-readable package. A fresh read-only verification at block `116487188` (`0xbd08ee5d787f104123642bab33d75cb9651359e8b436aba4654a54c35c3b0e8a`) confirmed the same conservation state: 18888 available `11,213,020.930416874731235 KAIOS`, reserve `11,000,000 KAIOS`, 8888 assets `888 KAIOS`, free capital `800 KAIOS`, payroll liability `88 KAIOS`, and Hengyao LIFE-account balance `0 KAIOS`. The payroll remains unclaimed at epoch `24320`; Hengyao has `PAYROLL_ADMIN_ROLE` but neither default-admin nor account-admin authority. Hengyao's personal BNB balance at that same block was `0.00799020555 BNB`.
+`postExecutionSnapshot` is retained as historical closure evidence at block `116487188` (`0xbd08ee5d787f104123642bab33d75cb9651359e8b436aba4654a54c35c3b0e8a`). It records 18888 available `11,213,020.930416874731235 KAIOS`, reserve `11,000,000 KAIOS`, 8888 assets `888 KAIOS`, free capital `800 KAIOS`, payroll liability `88 KAIOS`, and Hengyao LIFE-account balance `0 KAIOS`. The payroll remained unclaimed at epoch `24320`; Hengyao had `PAYROLL_ADMIN_ROLE` but neither default-admin nor account-admin authority. Hengyao's personal BNB balance at that block was `0.00799020555 BNB`.
 
 PR #153's decision snapshot is retained as historical `PRE_EXECUTION` evidence and points here through `superseded_by`. It is no longer the current live source of truth. Mainnet execution is historical and complete; this closeout sent no new transaction.
 
