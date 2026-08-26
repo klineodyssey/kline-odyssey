@@ -1,9 +1,11 @@
 # Cursor Session Clock-In SOP (方案 2)
 
-**Status:** ACTIVE — Human-approved standing procedure  
+**Status:** DISABLED — `cursor-01` archived; reapplication and interview required
 **Human decision:** `HUMAN-AUTO-CLOCKIN-001` (2026-08-02)  
 **Worker:** `cursor-01`  
 **Reviewer:** `codex-gm-01`
+
+> Current gate (2026-08-27): Human directed non-disciplinary Cursor offboarding because Cursor is not currently in use. This historical SOP cannot clock in, claim, wake or dispatch `cursor-01`. A future Cursor return requires a new application, identity check, interview, sandbox trial, onboarding approval and new task.
 
 ## Purpose
 

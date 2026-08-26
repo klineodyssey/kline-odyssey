@@ -4,7 +4,7 @@
   "task_id": "KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-CANDIDATES-001",
   "worker_id": "cursor-01",
   "worker_type": "Cursor",
-  "status": "CLAIMED",
+  "status": "CLOSED_AND_RELEASED_REWORK_REQUIRED",
   "branch": "cursor-handoff/KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-CANDIDATES-001",
   "base_commit": "9f481900eb46ae38dd670d6a1bf8a6b784533f77",
   "branch_tip_at_claim": "f07ebe7cebe90d26540fc50df03f34a6a985551c",
@@ -49,5 +49,5 @@
   "deploy_allowed": false,
   "reviewer": "codex-gm-01",
   "expiry_action": "FAIL_CLOSED_REQUIRE_CODEX_REVALIDATION",
-  "notes": "Atomicity is provided by one mainline compare-and-set transition from zero active claims to this single fenced claim. The activation uses a direct Codex fast-forward main update so the codex-branch merge wake filter is not invoked. Branch and Draft PR pre-existed and are recorded as Cursor evidence, not fabricated by Codex."
+  "notes": "Historical R1 claim. Independent review required rework, then the claim was closed and released. The later R2 lease expired without delivery, review, acceptance or payment. Human directed non-disciplinary Cursor offboarding on 2026-08-27; this claim cannot be reactivated and any future Cursor return requires a new application, interview, onboarding and task."
 }

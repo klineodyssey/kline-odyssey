@@ -91,7 +91,7 @@ test("public Cursor queue projection matches the canonical governance queue", as
   }
 });
 
-test("public Cursor queue exposes the released R2 claim and keeps Microbial preparation-only", async () => {
+test("public Cursor queue is fail-closed after non-disciplinary offboarding", async () => {
   const canonical = JSON.parse(await read(
     "KAIOS/life/forest-agriculture/KAIOS_CURSOR_CONTINUOUS_WORK_QUEUE.json"
   ));
@@ -105,8 +105,8 @@ test("public Cursor queue exposes the released R2 claim and keeps Microbial prep
     current_task: null,
     current_branch: null,
     status: "OFFLINE",
-    availability_for_current_work: "TEMPORARILY_UNAVAILABLE",
-    availability_reason: "VACATION_HUMAN_ATTESTED_DO_NOT_WAKE"
+    availability_for_current_work: "NOT_EMPLOYED",
+    availability_reason: "HUMAN_DIRECTED_NON_DISCIPLINARY_OFFBOARDING_CURSOR_NOT_IN_USE"
   });
   const reconciliation = registry.claim_events.find(
     (event) => event.event_id === "CLAIM-EVENT-KAIOS-LIFE-ENERGY-PAYROLL-R2-001-002"
@@ -121,17 +121,20 @@ test("public Cursor queue exposes the released R2 claim and keeps Microbial prep
   assert.equal(reconciliation.payroll_state, "NOT_ELIGIBLE_NO_ACCEPTED_DELIVERY");
   assert.equal(reconciliation.payment_state, "NOT_SENT");
   const cursor = registry.workers.find((worker) => worker.worker_id === "cursor-01");
-  assert.equal(cursor.employee_status, "ACTIVE");
-  assert.equal(cursor.trust_level, "T2");
+  assert.equal(cursor.employee_status, "ARCHIVED");
+  assert.equal(cursor.trust_level, "T0");
+  assert.equal(cursor.permission, "pending_readonly");
+  assert.equal(cursor.dispatch_rule,
+    "NO_DISPATCH_WHILE_ARCHIVED; REAPPLICATION_AND_INTERVIEW_REQUIRED");
   assert.equal(cursor.suspension, null);
   assert.equal(registry.prepared_tasks.length, 1);
   assert.deepEqual(projection.prepared_task, canonical.prepared_task);
   assert.deepEqual(projection.prepared_task, registry.prepared_tasks[0]);
   const prepared = projection.prepared_task;
   assert.equal(prepared.task_id, "KAIOS-CURSOR-MICROBIAL-RESEARCH-001");
-  assert.equal(prepared.status, "PREPARATION_ONLY");
-  assert.equal(prepared.claim_state, "NOT_CLAIMED");
-  assert.equal(prepared.dispatch_state, "NOT_DISPATCHED");
+  assert.equal(prepared.status, "CANCELLED_WORKER_OFFBOARDED");
+  assert.equal(prepared.claim_state, "CLOSED_NOT_CLAIMABLE");
+  assert.equal(prepared.dispatch_state, "CANCELLED");
   assert.equal(prepared.execution_base, null);
   assert.equal(prepared.descendant_wildcard_allowed, false);
   assert.equal(prepared.branch_state, "NOT_CREATED");

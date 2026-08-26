@@ -35,7 +35,7 @@ A registry name is not enough to mark a worker active. Active duty requires Boot
 | Worker ID | Name | Type | Department | Status | Trust | Desk | Current Task |
 |---|---|---|---|---|---|---|---|
 | `codex-gm-01` | Codex-General-Manager | Codex | CEO_Codex | ACTIVE_ON_DUTY | T5 | Codex Review Workspace | KGEN-WORKFORCE-ROSTER-2026-0001 |
-| `cursor-01` | Cursor Primary Worker | Cursor | Construction / Documentation / QA | ACTIVE_IDLE | T2 | Cursor Worker Workspace | - |
+| `cursor-01` | Cursor Primary Worker (historical) | Cursor | Former Construction / Documentation / QA | ARCHIVED | T0 | Not assigned | - |
 | `cursor-generic-01` | Cursor Generic Candidate | Cursor | Worker Pool | REGISTERED_NOT_ACTIVATED | T0 | Not assigned | - |
 | `claude-01` | Claude Candidate | Claude | Worker Pool | REGISTERED_NOT_ACTIVATED | T0 | Not assigned | - |
 | `gemini-01` | Gemini Candidate | Gemini | Worker Pool | REGISTERED_NOT_ACTIVATED | T0 | Not assigned | - |
@@ -49,7 +49,7 @@ A registry name is not enough to mark a worker active. Active duty requires Boot
 ## Rules
 
 - Codex is the only default merge and push-main authority.
-- Cursor may push only `cursor-handoff/<Task-ID>` and may not push main.
+- `cursor-01` is non-disciplinarily offboarded and archived because Cursor is not currently in use. It has no claim, branch, tool, payroll or company-work authority. Any future return requires a fresh application, identity check, interview, sandbox trial, onboarding approval and new task; historical work remains preserved.
 - Unactivated AI workers are candidates, not active employees.
 - Human Engineer and Human Operator are separate records.
 - No token, private key, password, seed phrase, IP address, private email or real local path is stored in this roster.

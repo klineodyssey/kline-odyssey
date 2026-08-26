@@ -2,9 +2,9 @@
   "metadata": {
     "version": "2.0",
     "status": "ACTIVE",
-    "last_updated": "2026-08-01",
-    "task_id": "KAIOS-CURSOR-WORKER-REGISTRY-REPAIR-001",
-    "base_commit": "29c5d51769f35ff7cd4af14e97f63958e6e201a0",
+    "last_updated": "2026-08-27",
+    "task_id": "KAIOS-EXPIRED-CURSOR-R2-CLAIM-RECONCILIATION-001",
+    "base_commit": "80002b27b91fd951c470cfe32dc243162ea906af",
     "source_of_truth": true,
     "purpose": "Every Agent is represented as one employee with permanent Employee UUID and desk assignment. V1 files are preserved as compatibility records.",
     "privacy": "Logical workspaces only; no real local paths, tokens, IPs, secrets or private credentials."
@@ -40,12 +40,12 @@
   "summary": {
     "total_agents": 15,
     "new_agent_records_since_v1": 4,
-    "today_on_duty": 2,
+    "today_on_duty": 1,
     "active_idle": 1,
     "waiting": 6,
     "offline": 6,
     "suspended": 0,
-    "archived": 0
+    "archived": 1
   },
   "agents": [
     {
@@ -74,14 +74,14 @@
       "legacy_worker_id": "cursor-01",
       "name": "Cursor Primary Worker",
       "agent_type": "Cursor Agent",
-      "status": "ACTIVE_ON_DUTY",
-      "activation_state": "ACTIVE",
+      "status": "ARCHIVED",
+      "activation_state": "REAPPLICATION_INTERVIEW_REQUIRED",
       "department": "Documentation",
-      "office_desk": "Desk-002",
-      "project": "KAIOS Foundational Life Candidates",
-      "git_branch": "cursor-handoff/<Task-ID>",
-      "tool_profile": "cursor-foundational-life-creator",
-      "current_workorder": "KAIOS-PR67-CURSOR-FOUNDATIONAL-LIFE-CANDIDATES-001",
+      "office_desk": null,
+      "project": null,
+      "git_branch": null,
+      "tool_profile": "registration-required",
+      "current_workorder": null,
       "creation_time": "2026-07-11",
       "last_activity_at": "2026-08-01T06:25:03Z",
       "last_commit": null,

@@ -45,9 +45,9 @@ assert.ok(colony.required.includes("winter_or_emergency_reserve"));
 assert.equal(colony.properties.simulation_only.const, true);
 
 const dispatch = documents["KAIOS_CURSOR_LIFE_ENERGY_PAYROLL_TASK_ENVELOPE.json"];
-assert.equal(dispatch.status, "R2_EXPIRED_UNDELIVERED_RELEASED");
+assert.equal(dispatch.status, "R2_CLOSED_NO_DELIVERY_WORKER_OFFBOARDED");
 assert.equal(dispatch.claim_created, true);
-assert.equal(dispatch.r2_reconciliation.classification, "EXPIRED_UNDELIVERED_RELEASED");
+assert.equal(dispatch.r2_reconciliation.classification, "EXPIRED_UNDELIVERED_RELEASED_THEN_CLOSED_WORKER_OFFBOARDED");
 assert.equal(dispatch.r2_reconciliation.lease_expired, true);
 assert.equal(dispatch.r2_reconciliation.delivery_present, false);
 assert.equal(dispatch.r2_reconciliation.review_present, false);
@@ -56,10 +56,10 @@ assert.equal(dispatch.r2_reconciliation.payroll_state, "NOT_ELIGIBLE_NO_ACCEPTED
 assert.equal(dispatch.r2_reconciliation.payment_state, "NOT_SENT");
 assert.equal(dispatch.r2_reconciliation.claim_active, false);
 assert.equal(dispatch.r2_reconciliation.lease_active, false);
-assert.equal(dispatch.r2_reconciliation.task_reassignable, true);
+assert.equal(dispatch.r2_reconciliation.task_reassignable, false);
 assert.equal(dispatch.r2_reconciliation.do_not_wake_cursor, true);
-assert.equal(dispatch.r2_reconciliation.trust_changed, false);
-assert.equal(dispatch.r2_reconciliation.employment_changed, false);
+assert.equal(dispatch.r2_reconciliation.trust_changed, true);
+assert.equal(dispatch.r2_reconciliation.employment_changed, true);
 assert.equal(dispatch.r2_reconciliation.mainnet_write, false);
 assert.ok(dispatch.forbidden_work.includes("KGEN"));
 assert.ok(dispatch.forbidden_work.includes("real wallet"));

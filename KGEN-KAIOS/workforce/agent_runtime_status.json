@@ -2,21 +2,21 @@
   "metadata": {
     "version": "2.0",
     "status": "ACTIVE",
-    "last_updated": "2026-07-13",
-    "task_id": "KGEN-WORKFORCE-V2-2026-0001",
-    "base_commit": "3e236b33dc1265a5343f0ed241564f00492adcd4",
+    "last_updated": "2026-08-27",
+    "task_id": "KAIOS-EXPIRED-CURSOR-R2-CLAIM-RECONCILIATION-001",
+    "base_commit": "80002b27b91fd951c470cfe32dc243162ea906af",
     "source_of_truth": true,
     "purpose": "Every Agent is represented as one employee with permanent Employee UUID and desk assignment. V1 files are preserved as compatibility records.",
     "privacy": "Logical workspaces only; no real local paths, tokens, IPs, secrets or private credentials."
   },
-  "snapshot_at": "2026-07-13",
+  "snapshot_at": "2026-08-27T05:42:35+08:00",
   "status_summary": {
     "ACTIVE_ON_DUTY": 1,
-    "ACTIVE_IDLE": 2,
+    "ACTIVE_IDLE": 1,
     "WAITING": 6,
     "OFFLINE": 6,
     "SUSPENDED": 0,
-    "ARCHIVED": 0
+    "ARCHIVED": 1
   },
   "currently_working_agents": [
     {

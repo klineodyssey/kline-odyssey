@@ -1,5 +1,9 @@
 # Cursor Auto Work Protocol
 
+## Current Status — Disabled Pending Reapplication
+
+`cursor-01` is `ARCHIVED` and not employed as of 2026-08-27. This protocol cannot start work while that status remains. Any future Cursor instance must complete a new application, identity check, interview, sandbox trial and onboarding before receiving a new task. Until then the only valid result is `REGISTRATION_REQUIRED`; no queue scan, claim, branch, file edit or payroll action is allowed.
+
 ## Core Rule
 
 Cursor works from GitHub files, not chat memory. The live task source is `KGEN-Organization/WorkOrders/WORK_QUEUE.md`.

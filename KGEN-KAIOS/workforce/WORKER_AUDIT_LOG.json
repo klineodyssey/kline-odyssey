@@ -1,24 +1,25 @@
 {
   "metadata": {
     "version": "1.1",
-    "revision": "2026-07-13.1",
+    "revision": "2026-08-27.1",
     "status": "ACTIVE",
-    "last_updated": "2026-07-13",
+    "last_updated": "2026-08-27",
     "updated_by": "Codex",
     "reviewed_by": "Codex",
-    "source_commit": "fcba675",
-    "task_id": "KAIOS-GM-V4-2026-0001",
-    "change_reason": "Record concurrent handoffs without claim lease evidence and a force-updated branch.",
+    "source_commit": "80002b27b91fd951c470cfe32dc243162ea906af",
+    "task_id": "KAIOS-EXPIRED-CURSOR-R2-CLAIM-RECONCILIATION-001",
+    "change_reason": "Preserve prior audit history and record Human-directed non-disciplinary Cursor offboarding after an expired undelivered R2 claim.",
     "source_of_truth": true
   },
   "summary": {
-    "formal_employee_count": 2,
+    "formal_employee_count": 1,
     "unregistered_worker_count": 7,
     "suspended_worker_count": 0,
     "revoked_worker_count": 0,
     "limited_autonomy_worker_count": 0,
     "protected_path_violation_count": 0,
-    "governance_violation_event_count": 1
+    "governance_violation_event_count": 1,
+    "archived_worker_count": 1
   },
   "events": [
     {
@@ -46,6 +47,23 @@
       "immediate_action": "Reject handoff submissions; require one-task claim lease and no-force-push rerun.",
       "final_disposition": "WARNING_AND_MANDATORY_REVIEW",
       "related_report": "KGEN-AI-Company/reports/DAILY_HANDOFF_REVIEW_2026-07-13.md"
+    },
+    {
+      "event_id": "WORKFORCE-OFFBOARDING-2026-0001",
+      "event_type": "NON_DISCIPLINARY_OFFBOARDING",
+      "timestamp": "2026-08-27T05:42:35+08:00",
+      "worker_id": "cursor-01",
+      "detected_by": "human-primeforge",
+      "severity": "NONE",
+      "result": "Worker archived with no current employment, claim, branch, tool, payroll or dispatch authority; historical work remains preserved.",
+      "evidence": [
+        "Human stated Cursor subscription/use is not being continued",
+        "R2 lease expired without delivery, review, acceptance or payment",
+        "Future Cursor use must begin with a fresh application and interview"
+      ],
+      "immediate_action": "Close the R2 task, disable current Cursor queues and tools, archive the worker record, and retain append-only history.",
+      "final_disposition": "ARCHIVED_REAPPLICATION_REQUIRED",
+      "related_report": "KGEN-AI-Company/reports/CODEX_REVIEW_LOG.md"
     }
   ],
   "open_items": [

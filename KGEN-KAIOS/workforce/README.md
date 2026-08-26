@@ -76,7 +76,7 @@ No worker, including Senior Trusted workers, may bypass protected paths, contrac
 
 ## Current Workforce Snapshot
 
-The current roster is maintained in `employee_roster.json`. As of this baseline, Codex is on duty, `cursor-01` is registered but idle, the Human Operator is recorded separately, and other AI / Human candidates remain `REGISTERED_NOT_ACTIVATED` until onboarding and sandbox trial evidence exists.
+The current roster is maintained in `employee_roster.json`. As of 2026-08-27, Codex is on duty, `cursor-01` is non-disciplinarily offboarded and `ARCHIVED`, the Human Operator is recorded separately, and other AI / Human candidates remain `REGISTERED_NOT_ACTIVATED` until onboarding and sandbox trial evidence exists. Historical Cursor work remains preserved, but future Cursor use requires a fresh application, identity check, interview, sandbox trial, onboarding approval and new task.
 
 ## Workforce V2 Agent Model
 

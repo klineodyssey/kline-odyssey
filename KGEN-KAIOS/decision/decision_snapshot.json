@@ -2,11 +2,11 @@
   "metadata": {
     "version": "4.3",
     "status": "ACTIVE",
-    "updated_at": "2026-08-25T05:48:54+08:00",
+    "updated_at": "2026-08-27T05:42:35+08:00",
     "manager": "codex-gm-01",
     "life_id": "LIFE-CODEX-GM-0001",
     "task_id": "KAIOS-EXPIRED-CURSOR-R2-CLAIM-RECONCILIATION-001",
-    "source_commit": "2ff0d594101c62912666be151c9ab72d1ebbc24c",
+    "source_commit": "80002b27b91fd951c470cfe32dc243162ea906af",
     "source_of_truth": true
   },
   "daily_operation": {
@@ -54,10 +54,13 @@
     "status": "NO_ACTIVE_CLAIM",
     "claim_id": null,
     "lease_expires_at": null,
-    "reassignable_task": "KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-R2-001",
-    "reassignable_task_status": "OPEN",
+    "closed_task": "KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-R2-001",
+    "closed_task_status": "CLOSED_NO_DELIVERY_WORKER_OFFBOARDED",
     "reconciliation_event_id": "CLAIM-EVENT-KAIOS-LIFE-ENERGY-PAYROLL-R2-001-002",
-    "cursor_availability": "TEMPORARILY_UNAVAILABLE_VACATION",
+    "cursor_availability": "OFFBOARDED_NOT_EMPLOYED",
+    "cursor_employee_status": "ARCHIVED",
+    "cursor_trust_level": "T0",
+    "cursor_reapplication_required": true,
     "map_handoff": "KGEN-MAP-4168-NAIHE-GENESIS-STATION-UI-001",
     "map_handoff_status": "HOLD_FOR_MAP_WORLD_AGENT"
   },

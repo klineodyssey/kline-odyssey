@@ -2,12 +2,12 @@
   "metadata": {
     "version": "KAIOS_WORKER_REGISTRY_WITH_TRUST_V1_1",
     "status": "ACTIVE",
-    "updated": "2026-08-25",
+    "updated": "2026-08-27",
     "updated_by": "codex-gm-01",
     "reviewed_by": "codex-gm-01",
-    "source_commit": "2ff0d594101c62912666be151c9ab72d1ebbc24c",
+    "source_commit": "80002b27b91fd951c470cfe32dc243162ea906af",
     "task_id": "KAIOS-EXPIRED-CURSOR-R2-CLAIM-RECONCILIATION-001",
-    "change_reason": "Append-only reconciliation of the expired, undelivered R2 claim: release the inactive lease, reopen the task for a future scheduler, preserve Cursor employment and trust, and authorize no payment, merge or Mainnet action.",
+    "change_reason": "Reconcile the expired undelivered R2 claim and the Human-directed non-disciplinary Cursor offboarding: close the task, archive cursor-01, remove active work authority, require a fresh application and interview before any future employment, and authorize no payment, merge or Mainnet action.",
     "source_of_truth": true
   },
   "claim_events": [
@@ -126,7 +126,7 @@
         "GitHub PR #118 (R1 only; closed, unmerged)",
         "GitHub branch and commit searches for KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-R2-001 (no delivery found)"
       ],
-      "reason": "The R2 lease expired on 2026-08-18T12:49:02Z with no R2 delivery, independent review, acceptance, payroll event or payment evidence. Existing claim policy permits reopening the task. Cursor vacation is an availability boundary only and causes no violation, penalty, trust downgrade, employment change or clawback."
+      "reason": "The R2 lease expired on 2026-08-18T12:49:02Z with no R2 delivery, independent review, acceptance, payroll event or payment evidence. The claim and lease were released without penalty. A later Human decision closed the unperformed task and archived Cursor employment because the Cursor service is no longer in use; future return requires a new application and interview."
     }
   ],
   "active_claims": [],
@@ -305,7 +305,7 @@
       "execution_base": "ff8fca3e610ac936e8998112255901a78296b238",
       "output_status": "CANDIDATE_REWORK_ONLY",
       "reviewer": "codex-gm-01",
-      "status": "EXPIRED_UNDELIVERED_RELEASED",
+      "status": "CLOSED_NO_DELIVERY_WORKER_OFFBOARDED",
       "claim_id": "CLAIM-KAIOS-LIFE-ENERGY-PAYROLL-R2-001-cursor-01",
       "claim_event_ids": [
         "CLAIM-EVENT-KAIOS-LIFE-ENERGY-PAYROLL-R2-001-001",
@@ -319,9 +319,9 @@
       "task_id": "KAIOS-CURSOR-MICROBIAL-RESEARCH-001",
       "worker_id": "cursor-01",
       "reviewer": "codex-gm-01",
-      "status": "PREPARATION_ONLY",
-      "claim_state": "NOT_CLAIMED",
-      "dispatch_state": "NOT_DISPATCHED",
+      "status": "CANCELLED_WORKER_OFFBOARDED",
+      "claim_state": "CLOSED_NOT_CLAIMABLE",
+      "dispatch_state": "CANCELLED",
       "preparation_source_commit": "7008e4f9449f6df050171cf47ec6ec56419925e9",
       "execution_base": null,
       "execution_base_binding": "SEPARATE_ACTIVATION_PR_MUST_BIND_EXACT_PREPARATION_MERGE_SHA",
@@ -418,23 +418,23 @@
     {
       "worker_id": "cursor-01",
       "worker_type": "Cursor",
-      "role": "Foundational Life Candidate Creator / Life Research Analyst / Documentation / QA Worker",
-      "permission": "worker_code_limited",
+      "role": "Former Foundational Life Candidate Creator / Life Research Analyst / Documentation / QA Worker",
+      "permission": "pending_readonly",
       "worker_class": "FOUNDATIONAL_LIFE_CREATOR",
       "worker_classes": [
         "FOUNDATIONAL_LIFE_CREATOR",
         "LIFE_RESEARCH_ANALYST"
       ],
-      "workspace": "cursor-worker-workspace",
+      "workspace": "archived-cursor-worker-record",
       "current_task": null,
       "current_branch": null,
       "status": "OFFLINE",
-      "availability_for_current_work": "TEMPORARILY_UNAVAILABLE",
-      "availability_reason": "VACATION_HUMAN_ATTESTED_DO_NOT_WAKE",
+      "availability_for_current_work": "NOT_EMPLOYED",
+      "availability_reason": "HUMAN_DIRECTED_NON_DISCIPLINARY_OFFBOARDING_CURSOR_NOT_IN_USE",
       "pending_rework_task_id": null,
-      "fresh_claim_required": true,
-      "employee_status": "ACTIVE",
-      "trust_level": "T2",
+      "fresh_claim_required": false,
+      "employee_status": "ARCHIVED",
+      "trust_level": "T0",
       "heartbeat": "2026-08-16T12:49:02Z",
       "last_report": "KGEN-AI-Company/reports/CODEX_REVIEW_LOG.md",
       "allowed_branch_pattern": "cursor-handoff/<Task-ID>",
@@ -511,11 +511,11 @@
         "RIGHTS_AUTHORITY",
         "ECONOMY_AUTHORITY"
       ],
-      "dispatch_rule": "ONE_EXPLICIT_TASK; NORMALIZE_BRANCH_BEFORE_CLAIM; ISOLATED_WORKTREE",
+      "dispatch_rule": "NO_DISPATCH_WHILE_ARCHIVED; REAPPLICATION_AND_INTERVIEW_REQUIRED",
       "review_rule": "CODEX_FINAL_REVIEW_REQUIRED; CURSOR_SELF_APPROVAL_DENIED",
       "completion_rule": "CANDIDATE_ONLY; DRAFT_PR; STOP_AT_PENDING_CODEX_REVIEW",
       "closeout_rule": "CODEX_ONLY_AFTER_REVIEW; CURSOR_MUST_NOT_MARK_CANONICAL",
-      "recovery_rule": "KEEP_TASK_ID_AND_CLAIM_LINEAGE; RESUME_ON_CANONICAL_HANDOFF_BRANCH",
+      "recovery_rule": "PRESERVE_HISTORY; NO_AUTOMATIC_REACTIVATION; REQUIRE_NEW_APPLICATION_IDENTITY_CHECK_INTERVIEW_SANDBOX_TRIAL_ONBOARDING_AND_NEW_TASK",
       "boot_acknowledged": true,
       "canon_acknowledged": true,
       "workspace_policy_acknowledged": true,
