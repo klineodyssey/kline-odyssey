@@ -445,9 +445,9 @@ Therefore:
 
 ```text
 TASK_ID=KAIOS_AI_COMPANY_CROSS_MARKET_CIRCULATORY_AUTOPILOT_V1
-DATE_TIME_UTC=2026-08-20
+DATE_TIME_UTC=2026-08-27
 WORKER=codex-gm-01 / 衡曜
-BASE_MAIN_SHA=5d539d237bf948011d234203e451aa980a7b7ce8
+BASE_MAIN_SHA=830b79214781fb1231f3619336de394f400a0bfd
 BRANCH=codex/kaios-ai-company-cross-market-circulatory-autopilot-v1
 DEPLOYED_FACTS_TOUCHED=NO
 DESIGN_CANON_CHANGED=SAFE_AUTOPILOT_V1_CUMULATIVE_UPDATE_AND_FRESH_CONTRIBUTION_RECONCILIATION
@@ -461,7 +461,9 @@ PRIVATE_KEY_EXPOSED=NO
 
 ## 19. Master company and K11520 GPU execution checkpoint
 
-Observed main at this checkpoint: `5d539d237bf948011d234203e451aa980a7b7ce8`.
+Observed main at this checkpoint: `830b79214781fb1231f3619336de394f400a0bfd`.
+
+Latest read-only BSC evidence window at this checkpoint: blocks `118411912`–`118412257` (`2026-08-27T16:00:27Z`–`2026-08-27T16:03:02Z`). KGEN owner remained the BankGovernance proxy, KGEN Bank Wallet remained the Reserve Redemption proxy, 18888 available remained `11,213,020.930416874731235 KAIOS`, and 8888 remained `888 KAIOS` assets / `800 KAIOS` free capital / `88 KAIOS` payroll liability. No chain write was sent.
 
 Human-assigned company universe address and exchange coordinate:
 
@@ -492,29 +494,29 @@ No real GPU inventory, funded capital account or production 11520 settlement con
 
 Evidence rule: every SHA below is a checkpoint observation against the stated main, not durable CURRENT proof. Before using any row for review, integration or release ordering, fetch the live PR exact head, compare state, checks, reviews and threads again.
 
-1. `P0_CURRENT_GENESIS_PHASE2_AND_27_PR_LINEAGE_RECONCILIATION` — PR #187, exact head `c16e630a27b152e6cdcf5060b4371b999de34608`, implemented candidate / CI PASS / Draft.
-2. `P0_CURSOR_DEPARTURE_R2_CLAIM_CLOSEOUT_AND_REGISTRY_CLEANUP` — PR #176, exact head `8ff6ee1770837e472811eea73d2889e80e9f5387`, fail-closed departure and expired-claim reconciliation / CI PASS / Draft.
-3. `P0_DISTINCT_REVIEWER_CAPABILITY` — PR #171 records `NO_ELIGIBLE_DISTINCT_T2_REVIEWER`; Sol/曜冊 PR #183 remains T1 onboarding hold. Reviewer capacity is still zero and must not be faked.
-4. `P0_SYNC_CORRECT_AND_REVIEW_PR169_11520_NATIVE_MARKET` — PR #169, exact head `b600e59bd0a0b7bbf386886630a94a26df7fde0a`, dual-role 0.00011520 Canon plus authenticated native matching / CI PASS / Draft.
-5. `P0_NVIDIA_GPU_11520_MARKET_PILOT_AND_REAL_TRADE_READINESS` — PR #178, exact head `1e659cd4af3d299dc2bb3aa01a580dd6e2db4524`, paper pilot / fail-closed real-readiness verifier / CI PASS / Draft.
-6. `P1_KGEN_EXTERNAL_EXCHANGE_BRAND_AND_TOKEN_METADATA` — PR #179, exact head `f2208d5ba364efac54f6114f62d5d68523c280fb`, current owner/bank-wallet/supply reconciliation, fail-closed BSC wallet discovery and listing package / CI PASS / external submissions not performed.
-7. `P1_KAIOS_MARKET_GENESIS_PAIR_AND_LIQUIDITY` — PR #180, exact head `f050395ddd162cc643b078f021179c71016ff4f7`, pair/liquidity readiness only / CI PASS / pair not created.
-8. `P1_11520_UNIVERSAL_LISTING_REGISTRY` — PR #181, exact head `24608b43375c5a246ef414fd1d70862c8f0ce83e`, universal listing/physical inventory evidence / CI PASS / Draft.
-9. `P1_11520_WAREHOUSE_ESCROW_SETTLEMENT_RECEIPT_ACCOUNTING` — PR #181 plus unsigned-payment PR #186; model/readiness implemented, custody and production execution unbound.
-10. `P1_AUTONOMOUS_CLOCK_IN_WORKQUEUE_HANDOFF_AND_REPAIR_LOOP` — PR #170, exact head `7344450a21c11f26a4722ec18c15cc6e430569d2`, local durable cycle/read-only repo observer/repair loop / CI PASS; worker wake, background scheduler and distinct-review trigger remain disconnected.
-11. `P1_CUSTOMER_GATEWAY_QUOTATION_PROJECT_DISPATCH_AND_DELIVERY_DASHBOARD` — PR #182, checkpoint head `54a17bd3f5377a2c1f35e93ec021b3e63bae361d`, deterministic Option-B project lifecycle / CI PASS / receivable and escrow unbound.
+1. `P0_CURRENT_GENESIS_PHASE2_AND_27_PR_LINEAGE_RECONCILIATION` — PR #187, exact head `8fd4aaed797b35dbd920fd2d3522efd5449817ad`, implemented candidate / exact-head CI PASS / Draft.
+2. `P0_CURSOR_DEPARTURE_R2_CLAIM_CLOSEOUT_AND_REGISTRY_CLEANUP` — PR #176, exact head `91b3a5ddf37d25efbe6d1ed2aeb1270334cc2489`, Cursor archived at T0/not-employed/offline and expired claim closed fail-closed / exact-head CI PASS / Draft / no payment.
+3. `P0_DISTINCT_REVIEWER_CAPABILITY` — PR #171 exact head `ddf8ce2bce0de7125fa4c747d44b6877315c0eaa` records `NO_ELIGIBLE_DISTINCT_T2_REVIEWER`; Sol/曜冊 PR #183 exact head `19fc10c086e0cb49f99356d432ed3a75f47c2eac` remains a T1 candidate onboarding hold. Reviewer capacity is still zero and must not be faked.
+4. `P0_SYNC_CORRECT_AND_REVIEW_PR169_11520_NATIVE_MARKET` — PR #169, exact head `248ec77a0b44347c20c05b41db5a65bc4eb0b42d`, dual-role `0.00011520` Canon plus authenticated native matching / exact-head CI PASS / Draft.
+5. `P0_NVIDIA_GPU_11520_MARKET_PILOT_AND_REAL_TRADE_READINESS` — PR #178, exact head `e69cc659da5c6d8858fc4d9104070ffd0e391b2a`, paper pilot / fail-closed real-readiness verifier / exact-head CI PASS / Draft.
+6. `P1_KGEN_EXTERNAL_EXCHANGE_BRAND_AND_TOKEN_METADATA` — PR #179, exact head `d88ed1bfbee8b495b3bfb776b865cbb061384309`, current owner/bank-wallet/supply reconciliation, fail-closed BSC wallet discovery and listing package / exact-head CI PASS / external submissions not performed.
+7. `P1_KAIOS_MARKET_GENESIS_PAIR_AND_LIQUIDITY` — PR #180, exact head `6f703eaffbe6a5acf9fa37cb7f33e2d1dc939e37`, pair/liquidity readiness only / exact-head CI PASS / no pair or liquidity transaction.
+8. `P1_11520_UNIVERSAL_LISTING_REGISTRY` — PR #181, exact head `8a8e8edad878bb143a98254edebc887da66f358d`, universal listing/physical inventory evidence / exact-head CI PASS / Draft.
+9. `P1_11520_WAREHOUSE_ESCROW_SETTLEMENT_RECEIPT_ACCOUNTING` — PR #181 plus unsigned-payment PR #186 exact head `355d4603ecefe53cf5bbfc67a9e9f43988f75ed5`; model/readiness implemented, caller-asserted authority rejected, calldata withheld, custody and production execution unbound.
+10. `P1_AUTONOMOUS_CLOCK_IN_WORKQUEUE_HANDOFF_AND_REPAIR_LOOP` — PR #170, exact head `9a2a20fe58568bd4c9a61d08f8e8d54d85efd1ad`, local durable cycle/read-only repo observer/repair loop / exact-head CI PASS; worker wake, background scheduler and distinct-review trigger remain disconnected.
+11. `P1_CUSTOMER_GATEWAY_QUOTATION_PROJECT_DISPATCH_AND_DELIVERY_DASHBOARD` — PR #182, exact head `1f80835f11b22826eb13e2ee515b15700505e0a0`, deterministic Option-B project lifecycle / exact-head CI PASS / receivable and escrow unbound.
 12. `P1_18888_8888_PAYROLL_AND_COMPANY_REVENUE_SEPARATION` — PR #154 exact head `c2ecfa03f5b18fefd15f020377385fe12a78067a` plus PR #186. Live scheduled 88 KAIOS payroll is unclaimed; further top-up/payment remains frozen.
 13. `P1_LIFE_GENESIS_WORKER_EMPLOYMENT_TRUST_AND_PAYROLL_ELIGIBILITY` — PR #165 exact head `0645524aece309d0ed3b41b771b422612b599e94` and PR #183. State separation is implemented; Xuanyao and Sol are not auto-promoted, born, employed or paid.
-14. `P2_18911_KUFO_AND_KSHIP_SUCCESSOR_SYSTEMS` — PR #158 exact head `0ea0bc02aa6f485fba825e6e7b54d1a683a8a626`, complete local/fork review candidate / exact-head CI PASS / deployment blocked by unfrozen catalyst bank and half-life seconds.
-15. `P2_K4168_NAIHE_RESERVOIR_PUBLIC_GOOD_AND_MENGPO_SOUP` — PR #172 exact head `ddcfd01d18eff5438c827b2d26d0960b3e31aee0`, schema/simulator 31/31 and exact-head CI PASS / reservoir and Mengpo not deployed.
-16. `P2_UNIVERSE_MAP_BRAND_MOBILE_FRONTEND_AND_WEBSITE_INTEGRATION` — brand PR #162, address-manifest PR #184 and mobile PR #185 exact head `b54b26223e9a9d2566b5d02b205747fa28c1d72a`. Mobile V4.0.2 passed 390px browser QA after excluding Node-only signer modules from the public dependency graph.
+14. `P2_18911_KUFO_AND_KSHIP_SUCCESSOR_SYSTEMS` — PR #158 exact head `ac9ffddfff662f6c2dc8c0f0f523485e10f873dd`, complete local/fork review candidate / 29-contract compile and 48/48 full suite PASS / exact-head CI PASS / deployment blocked by unfrozen catalyst bank, half-life seconds and distinct review.
+15. `P2_K4168_NAIHE_RESERVOIR_PUBLIC_GOOD_AND_MENGPO_SOUP` — PR #172 exact head `ab362422c7a28fd67601a153807c9e5769704e74`, schema/simulator 32/32 and exact-head CI PASS; company membership/onboarding/funding/service parent claims now fail closed / reservoir and Mengpo not deployed.
+16. `P2_UNIVERSE_MAP_BRAND_MOBILE_FRONTEND_AND_WEBSITE_INTEGRATION` — brand PR #162 exact head `f403a27d78acef85a599ec712fcb2a168c771409`, address-manifest PR #184 exact head `f161a81f7cbf22906d38855b5a1f4d088c5cf411`, and mobile PR #185 exact head `4cc06bf5c310211a571167b41eb5568868c65f09`. Cumulative K11520 integration PR #188 exact head `1491e4f5ca932da38df31fdb79127fc87ef44c2a` contains PR #169/#178/#179/#180/#181/#185 source heads with 289/289 combined tests and exact-head CI PASS; it remains Draft.
 
 ### 19.2 Current release order and blockers
 
 The next integration order is:
 
 1. obtain a genuinely distinct T2 reviewer or keep review-dependent PRs on HOLD;
-2. reconcile overlapping 11520 CURRENT files in PRs #169, #181 and #185 without force push;
+2. independently review cumulative PR #188 and verify its six source-head ancestry before selecting merge order; do not merge any source or integration PR automatically;
 3. independently review PR #178 inventory/readiness gates before any real GPU acquisition or trade;
 4. freeze a fixed company capital account, budget caps, settlement connector and beneficiary before enabling real trade;
 5. create no KAIOS pair or liquidity transaction until its separate policy, asset amount and signer authorization are frozen;
