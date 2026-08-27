@@ -25,17 +25,17 @@ export function assertLedgerSeparation(lifeLedger, companyLedger) {
 }
 
 export function create11520SettlementAccounting({ receipt, companyId, feeAtomic = "0" }) {
-  invariant(receipt?.status === "CHAIN_VERIFIED_UNCONSUMED_CANDIDATE", "CONFIRMED_SETTLEMENT_RECEIPT_REQUIRED", "Accounting requires an independently chain-verified, unconsumed settlement receipt candidate");
+  invariant(receipt?.status === "CHAIN_RECEIPT_CANDIDATE_NOT_REPOSITORY_BOUND", "SETTLEMENT_RECEIPT_CANDIDATE_REQUIRED", "Draft accounting requires a bound receipt candidate; it does not prove settlement or revenue");
   invariant(/^\d+$/.test(String(receipt.amount_atomic)) && /^\d+$/.test(String(feeAtomic)), "INVALID_ACCOUNTING_ATOMIC_AMOUNT", "Settlement accounting amounts must be unsigned atomic integers");
   const gross = BigInt(receipt.amount_atomic);
   const fee = BigInt(feeAtomic);
   invariant(fee <= gross, "SETTLEMENT_FEE_EXCEEDS_GROSS", "Settlement fee cannot exceed gross proceeds");
   const net = gross - fee;
   const entries = [
-    Object.freeze({ account: receipt.buyer_actor_id, direction: "DEBIT", amount_atomic: gross.toString(), currency_id: receipt.currency_id, reference_id: receipt.receipt_id, class: "ASSET_PURCHASE" }),
-    Object.freeze({ account: receipt.seller_actor_id, direction: "CREDIT", amount_atomic: net.toString(), currency_id: receipt.currency_id, reference_id: receipt.receipt_id, class: "SALE_PROCEEDS" })
+    Object.freeze({ account: receipt.buyer_actor_id, direction: "DEBIT", amount_atomic: gross.toString(), currency_id: receipt.currency_id, reference_id: receipt.receipt_id, class: "PROVISIONAL_ASSET_PURCHASE_MODEL", posting_status: "NOT_POSTED" }),
+    Object.freeze({ account: receipt.seller_actor_id, direction: "CREDIT", amount_atomic: net.toString(), currency_id: receipt.currency_id, reference_id: receipt.receipt_id, class: "PROVISIONAL_SALE_PROCEEDS_MODEL", posting_status: "NOT_POSTED" })
   ];
-  if (fee > 0n) entries.push(Object.freeze({ account: companyId, direction: "CREDIT", amount_atomic: fee.toString(), currency_id: receipt.currency_id, reference_id: receipt.receipt_id, class: "SETTLEMENT_FEE_REVENUE" }));
+  if (fee > 0n) entries.push(Object.freeze({ account: companyId, direction: "CREDIT", amount_atomic: fee.toString(), currency_id: receipt.currency_id, reference_id: receipt.receipt_id, class: "PROVISIONAL_SETTLEMENT_FEE_MODEL", posting_status: "NOT_POSTED" }));
   const debits = entries.filter((entry) => entry.direction === "DEBIT").reduce((sum, entry) => sum + BigInt(entry.amount_atomic), 0n);
   const credits = entries.filter((entry) => entry.direction === "CREDIT").reduce((sum, entry) => sum + BigInt(entry.amount_atomic), 0n);
   invariant(debits === credits, "SETTLEMENT_ACCOUNTING_UNBALANCED", "Settlement accounting must balance debits and credits");
@@ -48,7 +48,8 @@ export function create11520SettlementAccounting({ receipt, companyId, feeAtomic 
     seller_net_atomic: net.toString(),
     entries: Object.freeze(entries),
     balanced: true,
-    revenue_status: "RECEIPT_GATED_CANDIDATE",
+    accounting_status: "DRAFT_MODEL_ONLY_NOT_POSTED",
+    revenue_status: "NOT_REVENUE_UNVERIFIED_SETTLEMENT_CONNECTOR",
     payroll_funding_status: "NOT_AUTOMATIC"
   });
 }
