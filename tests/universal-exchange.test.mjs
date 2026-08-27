@@ -3030,8 +3030,13 @@ test("V4.0.2 production shell preserves concierge and exposes the browser-safe m
   const appSource = await fs.readFile(new URL("../K線西遊記/temples/11520/app.mjs", import.meta.url), "utf8");
   const cssSource = await fs.readFile(new URL("../K線西遊記/temples/11520/styles.css", import.meta.url), "utf8");
   assert.match(htmlSource, /v=11520-v4\.0\.2-browser-safe/);
+  assert.match(htmlSource, /styles\.css\?v=11520-v4\.0\.2-browser-safe-mobile-overflow-fix2/);
   assert.doesNotMatch(htmlSource, /v=11520-v3\.6-first-kgen/);
   for (const state of ["IDLE", "LISTENING", "THINKING", "SPEAKING", "SUCCESS", "ERROR"]) assert.match(appSource + cssSource, new RegExp(state));
   assert.match(cssSource, /2D FALLBACK/);
+  assert.match(cssSource, /\.sidebar\{[^}]*overflow:auto;min-width:0;max-width:100vw/);
+  assert.match(cssSource, /\.content\{padding:20px;min-width:0;max-width:100vw/);
+  assert.match(cssSource, /\.kv\{grid-template-columns:1fr\}/);
+  assert.match(cssSource, /overflow-wrap:anywhere/);
   assert.deepEqual(seed.next_stage.player_first_v4_0.entry_actions, ["VOICE", "TEXT", "EXPLORE", "JOIN", "WORK", "MY_AI"]);
 });
