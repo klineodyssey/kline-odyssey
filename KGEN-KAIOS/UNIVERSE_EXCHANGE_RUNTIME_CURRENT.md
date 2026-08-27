@@ -316,11 +316,14 @@ only that the repository contains no accepted real GPU inventory or funded
 trading capital. It does not create a GPU, warehouse custody, capital,
 settlement, signer authority or trade permission.
 
-The repository verifier being wired removes only the technical
-`REPOSITORY_BOUND_GPU_EVIDENCE_VERIFIER_NOT_WIRED` blocker. Every substantive
-inventory, ownership, cargo, transport, warehouse, capital, production-market,
-Policy Box, settlement, signer, distinct-review and no-broadcast fork gate must
-still pass independently before a separate execution review can begin.
+The fixed repository source readers are wired only for closed-schema,
+zero-inventory and zero-capital truth. They are not external evidence verifiers
+and therefore do not remove the
+`REPOSITORY_BOUND_GPU_EVIDENCE_VERIFIER_NOT_WIRED` blocker. Non-empty,
+self-labelled verified inventory or funded-account records remain rejected
+until independently reviewed trust anchors bind the external inventory,
+ownership, cargo, transport, warehouse, capital, production-market, Policy Box,
+settlement, signer, distinct-review and no-broadcast fork evidence.
 
 ### 10.5 KAIOS Market Genesis Readiness — 2026-08-27
 

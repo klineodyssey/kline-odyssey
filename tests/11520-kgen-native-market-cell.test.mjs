@@ -443,7 +443,7 @@ test("GPU real-trade gate fails closed with the complete ordered blocker set", (
   assert.equal(result.chain_write, false);
 });
 
-test("repository-bound GPU registry is wired but truthfully records no real inventory", async () => {
+test("repository GPU and capital sources are wired but verification authority remains unwired", async () => {
   const evidence = await readRepositoryBoundGpu11520Evidence();
   assert.equal(evidence.verification_status, "NO_VERIFIED_EVIDENCE");
   assert.equal(evidence.registry_status, "NO_VERIFIED_REAL_GPU_INVENTORY");
@@ -455,18 +455,20 @@ test("repository-bound GPU registry is wired but truthfully records no real inve
   assert.equal(evidence.chain_write, false);
 
   const result = evaluateGpu11520RealTradeReadiness({ evidenceBundle: evidence });
-  assert.equal(result.repository_verifier_status, "WIRED");
-  assert.ok(!result.blockers.includes("REPOSITORY_BOUND_GPU_EVIDENCE_VERIFIER_NOT_WIRED"));
+  assert.equal(result.repository_source_status, "SOURCE_WIRED_SCHEMA_ONLY");
+  assert.equal(result.repository_verifier_status, "NOT_WIRED");
+  assert.ok(result.blockers.includes("REPOSITORY_BOUND_GPU_EVIDENCE_VERIFIER_NOT_WIRED"));
   assert.ok(result.blockers.includes("INDEPENDENT_EVIDENCE_BUNDLE_NOT_VERIFIED"));
   assert.ok(result.blockers.includes("VERIFIED_GPU_INVENTORY_REQUIRED"));
   assert.equal(result.status, "BLOCKED_FAIL_CLOSED");
   assert.equal(result.real_trade_enabled, false);
 });
 
-test("copying repository GPU evidence loses verifier identity", async () => {
+test("copying repository GPU evidence loses source identity", async () => {
   const evidence = await readRepositoryBoundGpu11520Evidence();
   const copied = structuredClone(evidence);
   const result = evaluateGpu11520RealTradeReadiness({ evidenceBundle: copied });
+  assert.equal(result.repository_source_status, "SOURCE_NOT_WIRED");
   assert.equal(result.repository_verifier_status, "NOT_WIRED");
   assert.ok(result.blockers.includes("REPOSITORY_BOUND_GPU_EVIDENCE_VERIFIER_NOT_WIRED"));
   assert.equal(result.real_trade_enabled, false);

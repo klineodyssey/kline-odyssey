@@ -515,19 +515,11 @@ function validateGpuEvidenceRegistry(registry) {
     || registry.warehouse_id !== "0.00011520_K11520_GPU_BONDED_WAREHOUSE") {
     throw new TypeError("GPU evidence registry identity mismatch");
   }
-  if (!new Set(["NO_VERIFIED_REAL_GPU_INVENTORY", "VERIFIED_RECORDS_PRESENT"]).has(registry.status)) {
-    throw new TypeError("GPU evidence registry status is invalid");
+  if (registry.status !== "NO_VERIFIED_REAL_GPU_INVENTORY") {
+    throw new TypeError("GPU registry cannot claim verified authority before an external repository-bound verifier is wired");
   }
-  if (!Array.isArray(registry.records)) throw new TypeError("GPU evidence registry records must be an array");
-  registry.records.forEach(validateRepositoryGpuRecord);
-  if (registry.status === "NO_VERIFIED_REAL_GPU_INVENTORY" && registry.records.length !== 0) {
-    throw new TypeError("GPU registry cannot contain records while declaring no inventory");
-  }
-  if (registry.status === "VERIFIED_RECORDS_PRESENT" && registry.records.length === 0) {
-    throw new TypeError("GPU registry cannot declare verified records while empty");
-  }
-  if (new Set(registry.records.map((record) => record.evidence_root)).size !== registry.records.length) {
-    throw new TypeError("GPU repository evidence roots must be unique");
+  if (!Array.isArray(registry.records) || registry.records.length !== 0) {
+    throw new TypeError("GPU registry must remain empty until external evidence authority is independently verified");
   }
   return registry;
 }
@@ -543,42 +535,11 @@ function validateTradingCapitalRegistry(registry) {
     || registry.company_address !== COMPANY_ADDRESS) {
     throw new TypeError("Trading capital registry identity mismatch");
   }
-  if (!new Set(["NO_FUNDED_TRADING_CAPITAL", "FUNDED_ACCOUNTS_PRESENT"]).has(registry.status)) {
-    throw new TypeError("Trading capital registry status is invalid");
+  if (registry.status !== "NO_FUNDED_TRADING_CAPITAL") {
+    throw new TypeError("Trading capital registry cannot claim funded authority before an external repository-bound verifier is wired");
   }
-  if (!Array.isArray(registry.accounts)) throw new TypeError("Trading capital accounts must be an array");
-  const accountKeys = [
-    "account_id", "status", "company_id", "chain_id", "asset", "wallet_address",
-    "available_atomic", "budget_id", "budget_status", "authority_evidence_id",
-    "observed_block", "expires_at", "revoked", "segregated_from_payroll", "segregated_from_reserves"
-  ];
-  for (const account of registry.accounts) {
-    exactObjectKeys(account, accountKeys, "TradingCapitalAccount");
-    if (account.status !== "FUNDED_VERIFIED"
-      || account.company_id !== registry.company_id
-      || account.chain_id !== 56
-      || !new Set(["KGEN", "KAIOS"]).has(account.asset)
-      || !/^0x[0-9a-fA-F]{40}$/.test(account.wallet_address)
-      || !positiveAtomic(account.available_atomic)
-      || !exactEvidence(account.budget_id)
-      || account.budget_status !== "AUTHORIZED_ACTIVE"
-      || !exactEvidence(account.authority_evidence_id)
-      || !Number.isSafeInteger(account.observed_block) || account.observed_block <= 0
-      || typeof account.expires_at !== "string" || Number.isNaN(Date.parse(account.expires_at))
-      || account.revoked !== false
-      || account.segregated_from_payroll !== true
-      || account.segregated_from_reserves !== true) {
-      throw new TypeError("Trading capital account is not a closed verified record");
-    }
-  }
-  if (registry.status === "NO_FUNDED_TRADING_CAPITAL" && registry.accounts.length !== 0) {
-    throw new TypeError("Trading capital registry cannot contain accounts while declaring none");
-  }
-  if (registry.status === "FUNDED_ACCOUNTS_PRESENT" && registry.accounts.length === 0) {
-    throw new TypeError("Trading capital registry cannot declare accounts while empty");
-  }
-  if (new Set(registry.accounts.map((account) => account.account_id)).size !== registry.accounts.length) {
-    throw new TypeError("Trading capital account IDs must be unique");
+  if (!Array.isArray(registry.accounts) || registry.accounts.length !== 0) {
+    throw new TypeError("Trading capital registry must remain empty until funding authority is independently verified");
   }
   return registry;
 }
@@ -597,8 +558,10 @@ async function readFixedRepositoryJson(url, errorCode) {
 /**
  * Read the fixed repository GPU evidence registry. Callers may select an
  * evidence root, but cannot substitute the path, parser, transport or data.
- * An empty canonical registry proves only that no verified real GPU inventory
- * is presently recorded; it never creates inventory, settlement or authority.
+ * Empty canonical registries prove only that no verified real GPU inventory
+ * or funded trading capital is presently recorded. These source readers are
+ * not external evidence verifiers and cannot remove the repository-bound
+ * verification-authority blocker.
  */
 export async function readRepositoryBoundGpu11520Evidence({ evidenceRoot = null } = {}) {
   if (evidenceRoot !== null && !exactEvidence(evidenceRoot)) throw new TypeError("GPU evidenceRoot is invalid");
@@ -654,12 +617,11 @@ export function evaluateGpu11520RealTradeReadiness({
   executorLifeId = "LIFE-CODEX-GM-0001",
   executorControllerId = "codex-gm-01"
 } = {}) {
-  const repositoryVerifierWired = repositoryBoundGpuEvidenceBundles.has(evidenceBundle);
-  const blockers = repositoryVerifierWired ? [] : ["REPOSITORY_BOUND_GPU_EVIDENCE_VERIFIER_NOT_WIRED"];
+  const repositorySourceWired = repositoryBoundGpuEvidenceBundles.has(evidenceBundle);
+  const repositoryVerifierWired = false;
+  const blockers = ["REPOSITORY_BOUND_GPU_EVIDENCE_VERIFIER_NOT_WIRED"];
   let verified = null;
-  if (repositoryVerifierWired && evidenceBundle?.verification_status === "VERIFIED") {
-    verified = evidenceBundle;
-  } else if (typeof verifyEvidenceBundle === "function") {
+  if (typeof verifyEvidenceBundle === "function") {
     try {
       const candidate = verifyEvidenceBundle(evidenceBundle, Object.freeze({
         purpose: "GPU_11520_REAL_TRADE_READINESS",
@@ -811,6 +773,7 @@ export function evaluateGpu11520RealTradeReadiness({
     route: "K12345_TO_K11520",
     evidence_root: verified?.evidence_root ?? null,
     observed_block: verified?.observed_block ?? null,
+    repository_source_status: repositorySourceWired ? "SOURCE_WIRED_SCHEMA_ONLY" : "SOURCE_NOT_WIRED",
     repository_verifier_status: repositoryVerifierWired ? "WIRED" : "NOT_WIRED",
     quote_asset: quoteAsset || null,
     status: orderedBlockers.length === 0
