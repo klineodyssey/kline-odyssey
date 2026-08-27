@@ -25,7 +25,7 @@ import {
   evaluateGpu11520RealTradeReadiness,
   readExchangeSettlement11520SnapshotQuorum,
   readRepositoryBoundGpu11520Evidence
-} from "./modules/kgen-native-market-cell.mjs?v=11520-v4.0.4-settlement-code-identity";
+} from "./modules/kgen-native-market-cell.mjs?v=11520-v4.0.5-settlement-runtime-identity";
 
 const NAVIGATION = Object.freeze([
   ["HOME", "navigation.home"], ["REQUEST", "navigation.request"], ["LIFE", "navigation.life"], ["LIFE_FACTORY", "LIFE FACTORY"], ["APPS", "navigation.apps"], ["COMPANIES", "navigation.company"],
@@ -349,7 +349,7 @@ async function tokensView() {
       observed_at: null,
       block_number: null,
       configured_capability_claim_unverified: "GOVERNANCE_AUTHORIZED_18888_KAIOS_PAYMENT_TO_FIXED_11520_BRAIN",
-      expected_runtime_code_hashes_repository_bound: false,
+      expected_runtime_code_hashes_repository_bound: true,
       runtime_code_identity_verified: false,
       total_settled_atomic: null,
       gpu_trade_compatibility: "NOT_VERIFIED_FAIL_CLOSED",
@@ -385,11 +385,11 @@ async function tokensView() {
       <div class="eyebrow">OPEN BLOCKERS</div>${pills(gpuReadiness.blockers)}
     </article>`)}
     ${section("11520 settlement code-identity gate", `<article class="card">
-      <div class="notice">Historical deployment evidence describes V1 as an 18888 KAIOS payment module to the fixed 11520 Brain. This live read-only quorum adapter does not promote that historical capability until expected runtime code hashes are repository-bound.</div>
+      <div class="notice">Frozen source/compiler evidence and exact runtime hashes are repository-bound. A successful fixed-endpoint quorum can verify the historical V1 runtime identity; V1 still cannot atomically settle a GPU trade.</div>
       ${kv("Observed status", badge(settlement11520.status), true)}
       ${kv("Observed block", settlement11520.block_number ?? "UNAVAILABLE")}
       ${kv("Observed at", settlement11520.observed_at ?? "UNAVAILABLE")}
-      ${kv("Configured capability claim", settlement11520.configured_capability_claim_unverified ?? "UNVERIFIED")}
+      ${kv("Runtime capability", settlement11520.deployed_capability ?? settlement11520.configured_capability_claim_unverified ?? "UNVERIFIED")}
       ${kv("Expected code hashes bound", String(settlement11520.expected_runtime_code_hashes_repository_bound ?? false))}
       ${kv("Runtime code identity verified", String(settlement11520.runtime_code_identity_verified ?? false))}
       ${kv("Total settled (atomic KAIOS)", settlement11520.total_settled_atomic ?? "UNVERIFIED")}

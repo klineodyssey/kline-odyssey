@@ -8,7 +8,8 @@ import {
   evaluateExchangeSettlement11520Snapshot,
   evaluateGpu11520RealTradeReadiness,
   readExchangeSettlement11520SnapshotQuorum,
-  readRepositoryBoundGpu11520Evidence
+  readRepositoryBoundGpu11520Evidence,
+  verifyExchangeSettlement11520RuntimeCodeIdentity
 } from "../K線西遊記/temples/11520/modules/kgen-native-market-cell.mjs";
 
 const verifiedContexts = new WeakMap();
@@ -621,7 +622,7 @@ test("deployed 11520 settlement probe is read-only and caller transports cannot 
   assert.equal(evaluated.block_hash, null);
   assert.equal(evaluated.gpu_trade_compatibility, "INCOMPATIBLE_WITH_ATOMIC_GPU_TRADE_SETTLEMENT");
   assert.equal(evaluated.production_gpu_settlement_adapter_status, "NOT_IMPLEMENTED");
-  assert.equal(evaluated.expected_runtime_code_hashes_repository_bound, false);
+  assert.equal(evaluated.expected_runtime_code_hashes_repository_bound, true);
   assert.equal(evaluated.runtime_code_identity_verified, false);
   assert.equal(evaluated.deployed_capability, null);
   assert.equal(evaluated.configured_capability_claim_unverified, EXCHANGE_SETTLEMENT_11520_CONFIG.deployed_capability);
@@ -629,13 +630,25 @@ test("deployed 11520 settlement probe is read-only and caller transports cannot 
   assert.equal(evaluated.transaction_payload, null);
 });
 
-test("11520 settlement evaluator cannot promote unbound runtime hashes to deployed semantics", async () => {
+test("11520 settlement runtime identity is pinned to frozen source evidence and exact deployed hashes", async () => {
   const source = await readFile(new URL("../K線西遊記/temples/11520/modules/kgen-native-market-cell.mjs", import.meta.url), "utf8");
-  assert.doesNotMatch(source, /RPC_QUORUM_VERIFIED_DEPLOYED_V1/);
-  assert.match(source, /BLOCKED_SETTLEMENT_CODE_IDENTITY_NOT_REPOSITORY_BOUND/);
-  assert.match(source, /expected_runtime_code_hashes_repository_bound:\s*false/);
-  assert.match(source, /runtime_code_identity_verified:\s*false/);
-  assert.match(source, /deployed_capability:\s*null/);
+  const identity = EXCHANGE_SETTLEMENT_11520_CONFIG.runtime_identity;
+  assert.equal(identity.frozen_source_commit, "9492d73aaac7a9cee2cf9b813aa78468719aadcd");
+  assert.equal(identity.compiler, "0.8.24+commit.e11b9ed9.Emscripten.clang");
+  assert.equal(identity.proxy_runtime_bytes, 92);
+  assert.equal(identity.implementation_runtime_bytes, 5474);
+  assert.equal(identity.implementation_masked_keccak256, "0x505cefc01f6df515406bdf28dec432056fd4e5f7f37c808248d0fe63530378d0");
+  assert.deepEqual(identity.immutable_self_offsets, [{ start: 2292, length: 20 }, { start: 2500, length: 20 }]);
+  assert.equal(verifyExchangeSettlement11520RuntimeCodeIdentity({
+    proxy_code_sha256: identity.proxy_runtime_sha256,
+    implementation_code_sha256: identity.implementation_runtime_sha256
+  }), true);
+  assert.equal(verifyExchangeSettlement11520RuntimeCodeIdentity({
+    proxy_code_sha256: identity.proxy_runtime_sha256,
+    implementation_code_sha256: `0x${"00".repeat(32)}`
+  }), false);
+  assert.match(source, /VERIFIED_HISTORICAL_V1_RUNTIME_IDENTITY/);
+  assert.match(source, /expected_runtime_code_hashes_repository_bound:\s*true/);
 });
 
 test("11520 settlement quorum rejects wrong chain and endpoint disagreement", async () => {

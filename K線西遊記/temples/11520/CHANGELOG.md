@@ -1,5 +1,11 @@
 # 11520 Changelog
 
+## 4.0.5
+
+- Bound the deployed ExchangeSettlement11520 proxy and implementation runtime SHA-256 values to frozen source commit `9492d73aaac7a9cee2cf9b813aa78468719aadcd`, Solidity `0.8.24` compiler evidence and the two deterministic UUPS `__self` immutable offsets.
+- A successful fixed-endpoint, three-confirmation quorum can now verify the historical V1 runtime identity without granting any GPU settlement, signer, inventory, capital or chain-write capability.
+- V1 remains incompatible with atomic GPU buyer payment, seller settlement and warehouse ownership delivery; real GPU trade remains fail-closed.
+
 ## 4.0.4
 
 - Reclassified the live 11520 settlement observation as `BLOCKED_SETTLEMENT_CODE_IDENTITY_NOT_REPOSITORY_BOUND`: RPC quorum, addresses, getters and hash-shaped observations do not prove exact runtime bytecode until expected code hashes are independently bound in the repository.

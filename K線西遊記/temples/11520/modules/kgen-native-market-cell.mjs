@@ -36,7 +36,27 @@ export const EXCHANGE_SETTLEMENT_11520_CONFIG = Object.freeze({
   module_id: "0x24b8150af34ecded6c75de16b22b3a7fa6477e94cb23ea338a9453af3ed8961b",
   governance_role: "0x71840dc4906352362b0cdaf79870196c8e42acafade72d5d5a6d59291253ceb1",
   version: "1.0.0",
-  deployed_capability: "GOVERNANCE_AUTHORIZED_18888_KAIOS_PAYMENT_TO_FIXED_11520_BRAIN"
+  deployed_capability: "GOVERNANCE_AUTHORIZED_18888_KAIOS_PAYMENT_TO_FIXED_11520_BRAIN",
+  runtime_identity: Object.freeze({
+    frozen_source_commit: "9492d73aaac7a9cee2cf9b813aa78468719aadcd",
+    compile_evidence_path: "KGEN-KAIOS/reports/SOLIDITY_COMPILE_EVIDENCE.json",
+    compiler: "0.8.24+commit.e11b9ed9.Emscripten.clang",
+    optimizer_runs: 1,
+    via_ir: true,
+    evm_version: "paris",
+    metadata_bytecode_hash: "none",
+    proxy_runtime_bytes: 92,
+    proxy_runtime_keccak256: "0x572e640425d4d6c1f70e591dec2930f8d9481f510d67a7b9577543ebaeb5dfb6",
+    proxy_runtime_sha256: "0x85361cb9411e9752b95987780720bd7559bc87083fce4d435bfea6acd823d32d",
+    implementation_runtime_bytes: 5474,
+    implementation_masked_keccak256: "0x505cefc01f6df515406bdf28dec432056fd4e5f7f37c808248d0fe63530378d0",
+    implementation_runtime_sha256: "0xb4f497f105c4e234eeaa586c920feb717f237d0639ec2ce6e50f75caad8e34b2",
+    immutable_self_address: "0xA08A9CEcfa18b2FDb9ca8De0063A5029B9Ffc363",
+    immutable_self_offsets: Object.freeze([
+      Object.freeze({ start: 2292, length: 20 }),
+      Object.freeze({ start: 2500, length: 20 })
+    ])
+  })
 });
 
 function parseDecimal(value, label = "value") {
@@ -675,6 +695,7 @@ export async function readExchangeSettlement11520SnapshotQuorum({
 export function evaluateExchangeSettlement11520Snapshot(snapshot) {
   if (!snapshot || typeof snapshot !== "object") throw new TypeError("Settlement11520 snapshot is required");
   const repositoryVerified = verifiedSettlement11520Snapshots.has(snapshot);
+  const runtimeIdentityVerified = verifyExchangeSettlement11520RuntimeCodeIdentity(snapshot);
   const checks = Object.freeze({
     repository_bound_rpc_quorum: repositoryVerified,
     chain_56: snapshot.chain_id === EXCHANGE_SETTLEMENT_11520_CONFIG.chain_id,
@@ -688,25 +709,30 @@ export function evaluateExchangeSettlement11520Snapshot(snapshot) {
     governance_role_active: snapshot.governance_role_active === true,
     code_evidence: [snapshot.proxy_code_sha256, snapshot.implementation_code_sha256, snapshot.bank_code_sha256, snapshot.fixed_exchange_code_sha256]
       .every((value) => /^0x[0-9a-f]{64}$/i.test(canonicalText(value))),
+    proxy_code_identity: !repositoryVerified || canonicalText(snapshot.proxy_code_sha256).toLowerCase()
+      === EXCHANGE_SETTLEMENT_11520_CONFIG.runtime_identity.proxy_runtime_sha256,
+    implementation_code_identity: !repositoryVerified || canonicalText(snapshot.implementation_code_sha256).toLowerCase()
+      === EXCHANGE_SETTLEMENT_11520_CONFIG.runtime_identity.implementation_runtime_sha256,
     total_settled_valid: /^\d+$/.test(String(snapshot.total_settled_atomic ?? ""))
   });
   const interfaceObserved = Object.values(checks).every(Boolean);
-  const blockers = interfaceObserved
-    ? Object.freeze(["SETTLEMENT_CODE_IDENTITY_NOT_REPOSITORY_BOUND"])
+  const deployedRuntimeVerified = interfaceObserved && repositoryVerified && runtimeIdentityVerified;
+  const blockers = deployedRuntimeVerified
+    ? Object.freeze([])
     : Object.freeze(Object.entries(checks).filter(([, passed]) => !passed).map(([name]) => name.toUpperCase()));
   return deepFreeze({
-    status: interfaceObserved
-      ? "BLOCKED_SETTLEMENT_CODE_IDENTITY_NOT_REPOSITORY_BOUND"
+    status: deployedRuntimeVerified
+      ? "VERIFIED_HISTORICAL_V1_RUNTIME_IDENTITY"
       : "BLOCKED_SETTLEMENT_IDENTITY_OR_TRANSPORT_MISMATCH",
     checks,
     blockers,
     observed_at: snapshot.observed_at ?? null,
     block_number: snapshot.block_number ?? null,
     block_hash: repositoryVerified ? snapshot.block_hash : null,
-    expected_runtime_code_hashes_repository_bound: false,
-    runtime_code_identity_verified: false,
-    deployed_capability: null,
-    configured_capability_claim_unverified: EXCHANGE_SETTLEMENT_11520_CONFIG.deployed_capability,
+    expected_runtime_code_hashes_repository_bound: true,
+    runtime_code_identity_verified: deployedRuntimeVerified,
+    deployed_capability: deployedRuntimeVerified ? EXCHANGE_SETTLEMENT_11520_CONFIG.deployed_capability : null,
+    configured_capability_claim_unverified: deployedRuntimeVerified ? null : EXCHANGE_SETTLEMENT_11520_CONFIG.deployed_capability,
     total_settled_atomic: /^\d+$/.test(String(snapshot.total_settled_atomic ?? "")) ? String(snapshot.total_settled_atomic) : null,
     gpu_trade_compatibility: "INCOMPATIBLE_WITH_ATOMIC_GPU_TRADE_SETTLEMENT",
     incompatibilities: Object.freeze([
@@ -725,6 +751,13 @@ export function evaluateExchangeSettlement11520Snapshot(snapshot) {
     signer_requested: false,
     chain_write: false
   });
+}
+
+export function verifyExchangeSettlement11520RuntimeCodeIdentity(snapshot) {
+  if (!snapshot || typeof snapshot !== "object") return false;
+  const identity = EXCHANGE_SETTLEMENT_11520_CONFIG.runtime_identity;
+  return canonicalText(snapshot.proxy_code_sha256).toLowerCase() === identity.proxy_runtime_sha256
+    && canonicalText(snapshot.implementation_code_sha256).toLowerCase() === identity.implementation_runtime_sha256;
 }
 
 const GPU_REAL_TRADE_GATE_ORDER = Object.freeze([
