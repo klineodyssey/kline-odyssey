@@ -83,6 +83,7 @@ The worker must then stop without changing WorkQueue, creating a branch, editing
 - Dispatch gate: first bind an independently verifiable immutable Human decision; then complete identity checks, assign any policy-valid Worker ID only through authorized Company governance, verify worker type/controller independence, record all four acknowledgments, define logical workspace and branch namespace, and issue a bounded T1 credential only if separately authorized.
 - Forbidden: PR #169 review, PR #170 review, CURRENT Canon edits, T2 promotion, employment activation, payroll, merge, deployment, asset transfer, Mainnet transaction, governance execution and private-key access.
 - Output authority: proposal evidence only; no onboarding, ownership, Canon, Worker, employment, payroll or Reviewer authority.
+- Dispatcher posture: neutral proposal only; immutable Human decision evidence and distinct independent review remain external gates.
 
 ### KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-R2-001 - Payroll Candidate Rework
 
