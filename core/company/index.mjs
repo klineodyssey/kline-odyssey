@@ -1865,3 +1865,193 @@ export function createCompanyFoundingReadinessCheck({ company, founderLife, work
     company_status: company.status
   });
 }
+
+export const KAIOS_18888_PAYMENT_CONFIG = Object.freeze({
+  chain_id: 56,
+  kaios_address: "0xD4E67B3a69e41524c424150E6b6e921b01D036db",
+  bank_address: "0x11d34c0F723aCd334B8F95076f73F07f06202aab",
+  public_good_treasury: "0xB73D6716005B37BEC742D64482fA26033eE1A4E1",
+  minimum_delay_seconds: 3600,
+  allowed_purposes: Object.freeze(["PUBLIC_GOOD_TREASURY_REFILL"]),
+  execution_mode: "UNSIGNED_PREPARATION_ONLY"
+});
+
+const KAIOS_18888_PAYMENT_REQUEST_FIELDS = Object.freeze([
+  "request_id", "chain_id", "bank_address", "beneficiary", "amount_wei", "purpose_code",
+  "budget_id", "nonce", "requested_by", "requested_at", "authorization_status"
+]);
+
+function sameEvmAddress(left, right) {
+  return /^0x[0-9a-fA-F]{40}$/.test(String(left)) && String(left).toLowerCase() === String(right).toLowerCase();
+}
+
+function assertExactObjectFields(record, fields, label) {
+  requireFields(record, fields, label);
+  const unknown = Object.keys(record).filter((field) => !fields.includes(field));
+  invariant(unknown.length === 0, "UNKNOWN_PAYMENT_FIELD", `${label} contains unsupported fields: ${unknown.join(", ")}`);
+}
+
+export function validateKaios18888PaymentRequest(request, {
+  availableBudgetWei,
+  maxTransactionWei,
+  config = KAIOS_18888_PAYMENT_CONFIG
+} = {}) {
+  assertExactObjectFields(request, KAIOS_18888_PAYMENT_REQUEST_FIELDS, "Kaios18888PaymentRequest");
+  invariant(/^[A-Z0-9][A-Z0-9_-]{7,127}$/.test(request.request_id), "INVALID_PAYMENT_REQUEST_ID", "Payment request ID must be a stable uppercase identifier");
+  invariant(request.chain_id === config.chain_id, "WRONG_CHAIN", "18888 payment preparation requires BSC chain 56");
+  invariant(sameEvmAddress(request.bank_address, config.bank_address), "WRONG_BANK", "Payment request must target the canonical 18888 proxy");
+  invariant(sameEvmAddress(request.beneficiary, config.public_good_treasury), "WRONG_BENEFICIARY", "This route is bound to the Public Good Treasury");
+  invariant(config.allowed_purposes.includes(request.purpose_code), "PURPOSE_NOT_ALLOWED", "Payment purpose is not allowlisted");
+  invariant(/^\d+$/.test(request.amount_wei) && BigInt(request.amount_wei) > 0n, "INVALID_PAYMENT_AMOUNT", "Payment amount must be positive integer Wei");
+  invariant(/^[A-Z0-9][A-Z0-9_-]{3,127}$/.test(request.budget_id), "INVALID_BUDGET_ID", "A fixed company budget ID is required");
+  invariant(/^[A-Z0-9][A-Z0-9_-]{7,127}$/.test(request.nonce), "INVALID_PAYMENT_NONCE", "A replay-safe nonce is required");
+  invariant(typeof request.requested_by === "string" && request.requested_by.length >= 3, "REQUESTER_REQUIRED", "Payment requester identity is required");
+  invariant(!Number.isNaN(Date.parse(request.requested_at)), "INVALID_REQUEST_TIMESTAMP", "Payment request timestamp must be ISO-8601 compatible");
+  invariant(["PROPOSAL_PREPARATION_ONLY", "HUMAN_APPROVED_MACHINE_VERIFIABLE"].includes(request.authorization_status), "INVALID_AUTHORIZATION_STATUS", "Payment authorization status is invalid");
+  invariant(/^\d+$/.test(String(availableBudgetWei ?? "")) && BigInt(availableBudgetWei) >= BigInt(request.amount_wei), "UNFUNDED_BUDGET", "The fixed project budget does not fund this request");
+  invariant(/^\d+$/.test(String(maxTransactionWei ?? "")) && BigInt(maxTransactionWei) >= BigInt(request.amount_wei), "PAYMENT_CAP_EXCEEDED", "Payment exceeds the approved per-transaction cap");
+  return request;
+}
+
+export function prepareKaios18888UnsignedDisbursement({
+  ethers,
+  request,
+  availableBudgetWei,
+  maxTransactionWei,
+  observedTimestamp,
+  requestedDelaySeconds = KAIOS_18888_PAYMENT_CONFIG.minimum_delay_seconds,
+  config = KAIOS_18888_PAYMENT_CONFIG
+}) {
+  invariant(ethers?.utils?.Interface && ethers?.utils?.defaultAbiCoder, "ETHERS_REQUIRED", "Unsigned 18888 preparation requires ethers encoding utilities");
+  validateKaios18888PaymentRequest(request, { availableBudgetWei, maxTransactionWei, config });
+  invariant(Number.isInteger(observedTimestamp) && observedTimestamp > 0, "INVALID_CHAIN_TIMESTAMP", "A fresh chain timestamp is required");
+  invariant(Number.isInteger(requestedDelaySeconds) && requestedDelaySeconds >= config.minimum_delay_seconds, "TIMELOCK_TOO_SHORT", "18888 disbursement delay must be at least one hour");
+
+  const coder = ethers.utils.defaultAbiCoder;
+  const requestHash = ethers.utils.keccak256(ethers.utils.toUtf8Bytes(request.request_id));
+  const budgetHash = ethers.utils.keccak256(ethers.utils.toUtf8Bytes(request.budget_id));
+  const nonceHash = ethers.utils.keccak256(ethers.utils.toUtf8Bytes(request.nonce));
+  const purposeHash = ethers.utils.keccak256(ethers.utils.toUtf8Bytes(`${request.purpose_code}|${request.budget_id}|${request.request_id}`));
+  const disbursementId = ethers.utils.keccak256(coder.encode(
+    ["bytes32", "address", "address", "uint256", "bytes32", "bytes32"],
+    [requestHash, config.bank_address, request.beneficiary, request.amount_wei, budgetHash, nonceHash]
+  ));
+  const executableAt = observedTimestamp + requestedDelaySeconds;
+  const bankInterface = new ethers.utils.Interface([
+    "function proposeDisbursement(bytes32 disbursementId,address beneficiary,uint256 amount,bytes32 purposeHash,uint64 executableAt)",
+    "function approveDisbursement(bytes32 disbursementId)",
+    "function claimDisbursement(bytes32 disbursementId)"
+  ]);
+  return Object.freeze({
+    status: "UNSIGNED_DISBURSEMENT_PREPARED",
+    execution_authority: "ABSENT_BY_DESIGN",
+    chain_id: config.chain_id,
+    disbursement_id: disbursementId,
+    purpose_hash: purposeHash,
+    executable_at: executableAt,
+    beneficiary: request.beneficiary,
+    amount_wei: request.amount_wei,
+    budget_id: request.budget_id,
+    nonce: request.nonce,
+    calls: Object.freeze([
+      Object.freeze({ step: "PROPOSE", to: config.bank_address, value: "0", data: bankInterface.encodeFunctionData("proposeDisbursement", [disbursementId, request.beneficiary, request.amount_wei, purposeHash, executableAt]), required_role: "PAYMENT_PROPOSER_ROLE" }),
+      Object.freeze({ step: "APPROVE", to: config.bank_address, value: "0", data: bankInterface.encodeFunctionData("approveDisbursement", [disbursementId]), required_role: "PAYMENT_APPROVER_ROLE_DISTINCT_FROM_PROPOSER" }),
+      Object.freeze({ step: "BENEFICIARY_CLAIM", to: config.bank_address, value: "0", data: bankInterface.encodeFunctionData("claimDisbursement", [disbursementId]), required_role: "FIXED_BENEFICIARY_AFTER_MATURITY" })
+    ]),
+    transaction_sent: false,
+    signer_requested: false
+  });
+}
+
+export function validateKaios18888PaymentReadiness(snapshot, config = KAIOS_18888_PAYMENT_CONFIG) {
+  const fields = ["chain_id", "bank_address", "kaios_address", "beneficiary", "bank_code", "kaios_code", "bank_paused", "bank_healthy", "available_wei", "amount_wei", "proposer_has_role", "approver_has_role", "proposer_address", "approver_address", "existing_beneficiary"];
+  assertExactObjectFields(snapshot, fields, "Kaios18888PaymentReadiness");
+  const gates = Object.freeze({
+    chain: snapshot.chain_id === config.chain_id,
+    bank: sameEvmAddress(snapshot.bank_address, config.bank_address) && snapshot.bank_code !== "0x",
+    token: sameEvmAddress(snapshot.kaios_address, config.kaios_address) && snapshot.kaios_code !== "0x",
+    beneficiary: sameEvmAddress(snapshot.beneficiary, config.public_good_treasury),
+    bank_health: snapshot.bank_paused === false && snapshot.bank_healthy === true,
+    funded: /^\d+$/.test(snapshot.available_wei) && /^\d+$/.test(snapshot.amount_wei) && BigInt(snapshot.available_wei) >= BigInt(snapshot.amount_wei),
+    proposer_role: snapshot.proposer_has_role === true,
+    approver_role: snapshot.approver_has_role === true,
+    independent_approval: !sameEvmAddress(snapshot.proposer_address, snapshot.approver_address),
+    replay_free: sameEvmAddress(snapshot.existing_beneficiary, "0x0000000000000000000000000000000000000000")
+  });
+  const blockers = Object.entries(gates).filter(([, passed]) => !passed).map(([gate]) => gate);
+  return Object.freeze({
+    status: blockers.length === 0 ? "READY_TO_PREPARE_UNSIGNED" : "FAIL_CLOSED",
+    gates,
+    blockers,
+    transaction_authority: "NOT_INCLUDED",
+    transaction_sent: false
+  });
+}
+
+const KAIOS_18888_READ_ABI = Object.freeze([
+  "function kaios() view returns (address)",
+  "function bankHealth() view returns (uint256 balance,uint256 reserve,uint256 available,uint256 accountedInflow,uint256 totalOutflow,bool healthy,bool isPaused)",
+  "function PAYMENT_PROPOSER_ROLE() view returns (bytes32)",
+  "function PAYMENT_APPROVER_ROLE() view returns (bytes32)",
+  "function hasRole(bytes32 role,address account) view returns (bool)",
+  "function disbursement(bytes32 disbursementId) view returns (tuple(address beneficiary,uint256 amount,uint64 executableAt,address proposer,address approver,bytes32 purposeHash,bool executed,bool cancelled))"
+]);
+
+export async function readKaios18888PaymentReadiness({
+  ethers,
+  provider,
+  prepared,
+  proposerAddress,
+  approverAddress,
+  bankReader,
+  config = KAIOS_18888_PAYMENT_CONFIG
+}) {
+  invariant(ethers?.Contract && provider?.getNetwork && provider?.getCode && provider?.getBlockNumber, "READ_PROVIDER_REQUIRED", "A read-only ethers provider is required");
+  invariant(prepared?.status === "UNSIGNED_DISBURSEMENT_PREPARED", "PREPARED_PAYMENT_REQUIRED", "Prepare and validate the unsigned payment before reading readiness");
+  invariant(sameEvmAddress(prepared.beneficiary, config.public_good_treasury), "WRONG_BENEFICIARY", "Prepared payment beneficiary is not the fixed Public Good Treasury");
+  invariant(sameEvmAddress(proposerAddress, proposerAddress) && sameEvmAddress(approverAddress, approverAddress), "ROLE_ACCOUNT_REQUIRED", "Proposer and approver addresses are required for the read-only role check");
+
+  const network = await provider.getNetwork();
+  const blockNumber = await provider.getBlockNumber();
+  const [bankCode, kaiosCode] = await Promise.all([
+    provider.getCode(config.bank_address, blockNumber),
+    provider.getCode(config.kaios_address, blockNumber)
+  ]);
+  const bank = bankReader ?? new ethers.Contract(config.bank_address, KAIOS_18888_READ_ABI, provider);
+  const [kaiosAddress, health, proposerRole, approverRole, existing] = await Promise.all([
+    bank.kaios(),
+    bank.bankHealth(),
+    bank.PAYMENT_PROPOSER_ROLE(),
+    bank.PAYMENT_APPROVER_ROLE(),
+    bank.disbursement(prepared.disbursement_id)
+  ]);
+  const [proposerHasRole, approverHasRole] = await Promise.all([
+    bank.hasRole(proposerRole, proposerAddress),
+    bank.hasRole(approverRole, approverAddress)
+  ]);
+  const snapshot = Object.freeze({
+    chain_id: Number(network.chainId),
+    bank_address: config.bank_address,
+    kaios_address: kaiosAddress,
+    beneficiary: prepared.beneficiary,
+    bank_code: bankCode,
+    kaios_code: kaiosCode,
+    bank_paused: Boolean(health.isPaused ?? health[6]),
+    bank_healthy: Boolean(health.healthy ?? health[5]),
+    available_wei: String(health.available ?? health[2]),
+    amount_wei: prepared.amount_wei,
+    proposer_has_role: proposerHasRole,
+    approver_has_role: approverHasRole,
+    proposer_address: proposerAddress,
+    approver_address: approverAddress,
+    existing_beneficiary: existing.beneficiary ?? existing[0]
+  });
+  return Object.freeze({
+    observed_block: blockNumber,
+    snapshot,
+    readiness: validateKaios18888PaymentReadiness(snapshot, config),
+    provider_mode: "READ_ONLY",
+    signer_requested: false,
+    transaction_sent: false
+  });
+}
