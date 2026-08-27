@@ -2877,6 +2877,8 @@ test("V4.0 production shell exposes animated concierge and fresh cache key", asy
 const AUTONOMOUS_MAIN_SHA = "1".repeat(40);
 const autonomousManager = Object.freeze({
   worker_id: "codex-gm-01",
+  life_identity_ref: "LIFE-CODEX-GM-0001",
+  controller_id: "CONTROLLER-CODEX-GM-0001",
   role: "General Manager / Dispatcher / Reviewer",
   status: "ACTIVE",
   employee_status: "ACTIVE",
@@ -2890,6 +2892,8 @@ const autonomousManager = Object.freeze({
 });
 const autonomousWorker = Object.freeze({
   worker_id: "cursor-01",
+  life_identity_ref: "LIFE-CURSOR-0001",
+  controller_id: "CONTROLLER-CURSOR-0001",
   role: "Worker",
   status: "ACTIVE",
   employee_status: "ACTIVE",
@@ -2912,6 +2916,9 @@ const autonomousTask = Object.freeze({
   assigned_worker_id: "cursor-01",
   reviewer_id: "codex-gm-01",
   branch: "cursor-handoff/SAFE-TASK-001",
+  repository: "klineodyssey/kline-odyssey",
+  active_task_pr: 170,
+  expected_head_sha: "b".repeat(40),
   authorized_actions: ["READ", "SAFE_BRANCH_WORK", "TEST", "HANDOFF"],
   task_envelope_status: "AUTHORIZED",
   authority_status: "MACHINE_VERIFIED",
@@ -3093,6 +3100,34 @@ test("Autonomous Company cycle refuses self review", () => {
   assert.equal(result.events[1].payload.blocker, "INDEPENDENT_REVIEWER_REQUIRED");
 });
 
+test("Autonomous Company cycle rejects a different worker label sharing the submitter Life or controller", () => {
+  const delivery = {
+    ...autonomousTask,
+    task_id: "DELIVERY-CONTROLLER-COLLISION",
+    status: "DELIVERY_SUBMITTED",
+    submitter_worker_id: "cursor-01",
+    reviewer_id: "reviewer-alias-01",
+    branch: "cursor-handoff/DELIVERY-CONTROLLER-COLLISION",
+    authorized_actions: ["READ", "TEST", "REVIEW_REQUEST"]
+  };
+  for (const collision of [
+    { life_identity_ref: autonomousWorker.life_identity_ref, controller_id: "CONTROLLER-REVIEWER-ALIAS" },
+    { life_identity_ref: "LIFE-REVIEWER-ALIAS", controller_id: autonomousWorker.controller_id }
+  ]) {
+    const reviewerAlias = {
+      ...autonomousManager,
+      worker_id: "reviewer-alias-01",
+      role: "Independent Reviewer",
+      active_claim_count: 0,
+      ...collision
+    };
+    const result = autonomousCycle({ workers: [autonomousManager, autonomousWorker, reviewerAlias], review_queue: [delivery] });
+    assert.equal(result.status, "HOLD_REVIEWER");
+    assert.equal(result.events[1].payload.blocker, "INDEPENDENT_REVIEWER_REQUIRED");
+    assert.equal(result.events.some((event) => event.event_type === "REVIEW_REQUEST"), false);
+  }
+});
+
 test("Autonomous Company cycle rejects unregistered or T1 workers", () => {
   const result = autonomousCycle({ workers: [autonomousManager, { ...autonomousWorker, trust_level: "T1" }] });
   assert.equal(result.status, "HOLD_WORKER");
@@ -3137,6 +3172,23 @@ test("Autonomous Company cycle rejects high or unknown implementation risk", () 
     assert.equal(result.status, "HOLD_TASK_AUTHORITY", risk_level);
     assert.equal(result.events[1].payload.risk_is_safe, false);
   }
+});
+
+test("Autonomous Company cycle applies the same risk gate to review queue deliveries", () => {
+  const delivery = {
+    ...autonomousTask,
+    task_id: "DELIVERY-CRITICAL-RISK",
+    status: "DELIVERY_SUBMITTED",
+    risk_level: "CRITICAL",
+    submitter_worker_id: "cursor-01",
+    reviewer_id: "codex-gm-01",
+    branch: "cursor-handoff/DELIVERY-CRITICAL-RISK",
+    authorized_actions: ["READ", "TEST", "REVIEW_REQUEST"]
+  };
+  const result = autonomousCycle({ review_queue: [delivery] });
+  assert.equal(result.status, "HOLD_TASK_AUTHORITY");
+  assert.equal(result.events[1].payload.risk_is_safe, false);
+  assert.equal(result.events.some((event) => event.event_type === "REVIEW_REQUEST"), false);
 });
 
 test("Autonomous Company cycle cannot assign over an unrelated active claim", () => {
@@ -3216,7 +3268,7 @@ test("Latest Repository Snapshot adapter discovers fresh main PR divergence and 
   const responses = new Map([
     ["https://api.github.test/repos/klineodyssey/kline-odyssey", { default_branch: "main" }],
     ["https://api.github.test/repos/klineodyssey/kline-odyssey/commits/main", { sha: mainSha, commit: { committer: { date: "2026-08-27T06:00:00Z" } } }],
-    ["https://api.github.test/repos/klineodyssey/kline-odyssey/pulls/170", { state: "open", draft: true, head: { sha: headSha } }],
+    ["https://api.github.test/repos/klineodyssey/kline-odyssey/pulls/170", { state: "open", draft: true, head: { sha: headSha, ref: autonomousTask.branch }, base: { ref: "main" } }],
     [`https://api.github.test/repos/klineodyssey/kline-odyssey/compare/main...${headSha}`, { ahead_by: 8, behind_by: 0 }],
     [`https://api.github.test/repos/klineodyssey/kline-odyssey/commits/${headSha}/check-runs`, { check_runs: [{ name: "test", status: "completed", conclusion: "success" }, { name: "optional", status: "completed", conclusion: "skipped" }] }]
   ]);
@@ -3235,6 +3287,8 @@ test("Latest Repository Snapshot adapter discovers fresh main PR divergence and 
   assert.equal(snapshot.main_sha, mainSha);
   assert.equal(snapshot.main_commit_time, "2026-08-27T06:00:00Z");
   assert.equal(snapshot.active_task_pr.head_sha, headSha);
+  assert.equal(snapshot.active_task_pr.head_ref, autonomousTask.branch);
+  assert.equal(snapshot.active_task_pr.base_ref, "main");
   assert.equal(snapshot.active_task_pr.behind_main, 0);
   assert.equal(snapshot.active_task_pr.ahead_main, 8);
   assert.equal(snapshot.active_task_pr.ci_status, "PASS");
@@ -3279,7 +3333,7 @@ test("Latest Repository Snapshot adapter fails closed on unavailable or malforme
   const skippedOnlyFetch = async (url) => {
     if (url.endsWith("/repos/klineodyssey/kline-odyssey")) return { ok: true, status: 200, json: async () => ({ default_branch: "main" }) };
     if (url.endsWith("/commits/main")) return { ok: true, status: 200, json: async () => ({ sha: "a".repeat(40), commit: { committer: { date: "2026-08-27T06:00:00Z" } } }) };
-    if (url.endsWith("/pulls/170")) return { ok: true, status: 200, json: async () => ({ state: "open", draft: true, head: { sha: headSha } }) };
+    if (url.endsWith("/pulls/170")) return { ok: true, status: 200, json: async () => ({ state: "open", draft: true, head: { sha: headSha, ref: autonomousTask.branch }, base: { ref: "main" } }) };
     if (url.endsWith(`/compare/main...${headSha}`)) return { ok: true, status: 200, json: async () => ({ ahead_by: 1, behind_by: 0 }) };
     if (url.endsWith(`/commits/${headSha}/check-runs`)) return { ok: true, status: 200, json: async () => ({ check_runs: [{ name: "test", status: "completed", conclusion: "skipped" }] }) };
     return { ok: false, status: 404, json: async () => ({}) };
@@ -3308,7 +3362,7 @@ test("Read-plan-persist Company invocation uses fresh GitHub main and writes onl
     assert.equal(options.method, "GET");
     if (url.endsWith("/repos/klineodyssey/kline-odyssey")) return { ok: true, status: 200, json: async () => ({ default_branch: "main" }) };
     if (url.endsWith("/commits/main")) return { ok: true, status: 200, json: async () => ({ sha: mainSha, commit: { committer: { date: "2026-08-27T06:00:00Z" } } }) };
-    if (url.endsWith("/pulls/170")) return { ok: true, status: 200, json: async () => ({ state: "open", draft: true, head: { sha: headSha } }) };
+    if (url.endsWith("/pulls/170")) return { ok: true, status: 200, json: async () => ({ state: "open", draft: true, head: { sha: headSha, ref: autonomousTask.branch }, base: { ref: "main" } }) };
     if (url.endsWith(`/compare/main...${headSha}`)) return { ok: true, status: 200, json: async () => ({ ahead_by: 12, behind_by: 0 }) };
     if (url.endsWith(`/commits/${headSha}/check-runs`)) return { ok: true, status: 200, json: async () => ({ check_runs: [{ name: "test", status: "completed", conclusion: "success" }] }) };
     return { ok: false, status: 404, json: async () => ({}) };
@@ -3334,10 +3388,35 @@ test("Read-plan-persist Company invocation uses fresh GitHub main and writes onl
   assert.equal(result.repository_snapshot.main_sha, mainSha);
   assert.equal(result.pre_persistence_snapshot.main_sha, mainSha);
   assert.equal(result.ci_gate.status, "EXACT_HEAD_CI_PASS");
+  assert.equal(result.task_repository_gate.status, "TASK_REPOSITORY_BINDING_VERIFIED");
   assert.equal(result.cycle_result.status, "ASSIGNMENT_CANDIDATE_READY");
   assert.equal(result.persistence.status, "CYCLE_EVENTS_PERSISTED");
   assert.equal(result.authority.local_company_history_write, true);
   for (const field of ["github_write", "claim_write", "worker_wake", "reviewer_wake", "signer", "chain_write"]) assert.equal(result.authority[field], false);
+});
+
+test("Read-plan-persist Company invocation cannot reuse a green PR for an unrelated task branch", async () => {
+  const mainSha = AUTONOMOUS_MAIN_SHA;
+  const headSha = "b".repeat(40);
+  const fetch_impl = async (url) => {
+    if (url.endsWith("/repos/klineodyssey/kline-odyssey")) return { ok: true, status: 200, json: async () => ({ default_branch: "main" }) };
+    if (url.endsWith("/commits/main")) return { ok: true, status: 200, json: async () => ({ sha: mainSha, commit: { committer: { date: "2026-08-27T06:00:00Z" } } }) };
+    if (url.endsWith("/pulls/170")) return { ok: true, status: 200, json: async () => ({ state: "open", draft: true, head: { sha: headSha, ref: "codex/unrelated-green-pr" }, base: { ref: "main" } }) };
+    if (url.endsWith(`/compare/main...${headSha}`)) return { ok: true, status: 200, json: async () => ({ ahead_by: 1, behind_by: 0 }) };
+    if (url.endsWith(`/commits/${headSha}/check-runs`)) return { ok: true, status: 200, json: async () => ({ check_runs: [{ name: "test", status: "completed", conclusion: "success" }] }) };
+    return { ok: false, status: 404, json: async () => ({}) };
+  };
+  const store = new MemoryUniverseStore();
+  const result = await runAutonomousCompanyReadOnlyCycle({
+    repository_request: { repository: "klineodyssey/kline-odyssey", active_task_pr: 170, observed_at: "2026-08-27T06:01:00Z", fetch_impl, api_base: "https://api.github.test" },
+    cycle_input: { cycle_id: "COMPANY-CYCLE-WRONG-PR-BINDING", expected_main_sha: mainSha, expected_head_sha: headSha, manager: autonomousManager, workers: [autonomousManager, autonomousWorker], work_queue: [autonomousTask], review_queue: [], previous_cycle_ids: [] },
+    store,
+    company: { company_id: "KAIOS_AI_COMPANY" }
+  });
+  assert.equal(result.status, "HOLD_TASK_REPOSITORY_BINDING");
+  assert.equal(result.task_repository_gate.observed_branch, "codex/unrelated-green-pr");
+  assert.equal(result.persistence, null);
+  assert.equal((await store.history("KAIOS_AI_COMPANY", "COMPANY")).length, 0);
 });
 
 test("Read-plan-persist Company invocation refuses persistence when main moves after planning", async () => {
@@ -3351,7 +3430,7 @@ test("Read-plan-persist Company invocation refuses persistence when main moves a
       mainReads += 1;
       return { ok: true, status: 200, json: async () => ({ sha: mainReads === 1 ? firstMain : movedMain, commit: { committer: { date: "2026-08-27T06:00:00Z" } } }) };
     }
-    if (url.endsWith("/pulls/170")) return { ok: true, status: 200, json: async () => ({ state: "open", draft: true, head: { sha: headSha } }) };
+    if (url.endsWith("/pulls/170")) return { ok: true, status: 200, json: async () => ({ state: "open", draft: true, head: { sha: headSha, ref: autonomousTask.branch }, base: { ref: "main" } }) };
     if (url.endsWith(`/compare/main...${headSha}`)) return { ok: true, status: 200, json: async () => ({ ahead_by: 12, behind_by: 0 }) };
     if (url.endsWith(`/commits/${headSha}/check-runs`)) return { ok: true, status: 200, json: async () => ({ check_runs: [{ name: "test", status: "completed", conclusion: "success" }] }) };
     return { ok: false, status: 404, json: async () => ({}) };

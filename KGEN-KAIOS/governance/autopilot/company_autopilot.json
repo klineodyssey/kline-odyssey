@@ -14,9 +14,10 @@
       "HUMAN-PRIMEFORGE-FULL-AUTOPILOT-001",
       "KAIOS_AUTONOMOUS_AI_COMPANY_OPERATING_SYSTEM_V1_1"
     ],
-    "source_commit": "ORIGIN_MAIN_a8d1d3aef66ce6dedf3438649e70c31740603ad3",
-    "source_freshness": "REMOTE_VERIFIED_2026-08-01T12:07:00+08:00",
-    "source_of_truth": true
+    "source_commit": "EXECUTION_BASE_830b79214781fb1231f3619336de394f400a0bfd",
+    "source_freshness": "EXECUTION_BASE_VERIFIED_2026-08-27",
+    "source_of_truth": false,
+    "source_of_truth_boundary": "ARCHITECTURE_CANDIDATE_REQUIRES_LATEST_GITHUB_AND_CANONICAL_REGISTRY_READ"
   },
   "system_identity": {
     "name": "PrimeForge Company Autopilot",
@@ -30,9 +31,12 @@
       "implementation": "core/company/index.mjs#runAutonomousCompanyCycle",
       "status": "IMPLEMENTED_LOCAL_CANDIDATE_NOT_CONNECTED",
       "side_effects": false,
-      "reuses_formal_worker_registry": true,
-      "reuses_formal_workqueue": true,
+      "reuses_formal_worker_registry": false,
+      "reuses_formal_workqueue": false,
+      "canonical_input_provenance": "NOT_CONNECTED_FAIL_CLOSED",
       "reuses_review_first_priority": true,
+      "reviewer_independence": ["DISTINCT_WORKER_ID", "DISTINCT_LIFE_IDENTITY_REF", "DISTINCT_CONTROLLER_ID"],
+      "review_queue_risk_bypass": false,
       "replay_safe_with_supplied_cycle_history": true,
       "durable_company_history": {
         "implementation": "core/company/index.mjs#persistAutonomousCompanyCycle",
@@ -52,8 +56,9 @@
       },
       "read_plan_persist_cycle": {
         "implementation": "core/company/index.mjs#runAutonomousCompanyReadOnlyCycle",
-        "flow": ["READ_LATEST_REPOSITORY", "VERIFY_NAMED_EXACT_HEAD_CI", "PLAN_SAFE_CYCLE", "RE_READ_REPOSITORY", "PERSIST_LOCAL_COMPANY_HISTORY"],
+        "flow": ["READ_LATEST_REPOSITORY", "VERIFY_NAMED_EXACT_HEAD_CI", "PLAN_SAFE_CYCLE", "BIND_SELECTED_TASK_TO_REPOSITORY_PR_BRANCH_AND_HEAD", "RE_READ_REPOSITORY", "PERSIST_LOCAL_COMPANY_HISTORY"],
         "exact_head_ci_gate": "INTEGRATED_BEFORE_PLAN_AND_RECHECKED_BEFORE_PERSISTENCE",
+        "task_repository_binding": "REQUIRED_BEFORE_PERSISTENCE",
         "credential_destination": "HTTPS_CANONICAL_GITHUB_API_ONLY",
         "moving_repository_result": "HOLD_WITHOUT_PERSISTENCE",
         "external_effects": false,

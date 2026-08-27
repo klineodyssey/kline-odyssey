@@ -1923,11 +1923,28 @@ const AUTONOMOUS_COMPANY_SAFE_RISK_LEVELS = Object.freeze(["R0", "R1", "LOW"]);
 function isAutonomousCompanyWorkerEligible(worker, task = null) {
   if (!worker || !["ACTIVE", "TRUSTED", "SENIOR_TRUSTED"].includes(worker.employee_status)) return false;
   if (worker.status !== "ACTIVE" || (AUTONOMOUS_COMPANY_TRUST[worker.trust_level] ?? -1) < 2 || worker.suspension) return false;
+  if (typeof worker.life_identity_ref !== "string" || !worker.life_identity_ref.trim()) return false;
+  if (typeof worker.controller_id !== "string" || !worker.controller_id.trim()) return false;
   if (!["boot_acknowledged", "canon_acknowledged", "workspace_policy_acknowledged", "do_not_touch_acknowledged"].every((key) => worker[key] === true)) return false;
   if (Number(worker.active_claim_count ?? 0) > 1) return false;
   if (task && Number(worker.active_claim_count ?? 0) > 0 && worker.current_task !== task.task_id) return false;
   if (task && worker.current_task && worker.current_task !== task.task_id) return false;
   return true;
+}
+
+function autonomousCompanyActorsAreDistinct(left, right) {
+  if (!left || !right) return false;
+  const normalize = (value) => typeof value === "string" ? value.trim().toLowerCase() : "";
+  const leftWorker = normalize(left.worker_id);
+  const rightWorker = normalize(right.worker_id);
+  const leftLife = normalize(left.life_identity_ref);
+  const rightLife = normalize(right.life_identity_ref);
+  const leftController = normalize(left.controller_id);
+  const rightController = normalize(right.controller_id);
+  return Boolean(leftWorker && rightWorker && leftLife && rightLife && leftController && rightController)
+    && leftWorker !== rightWorker
+    && leftLife !== rightLife
+    && leftController !== rightController;
 }
 
 function autonomousCompanyBranchMatches(pattern, branch, taskId) {
@@ -2078,7 +2095,7 @@ export function runAutonomousCompanyCycle({
   requireArray(requestedActions, "authorized_actions");
   const forbidden = requestedActions.filter((action) => AUTONOMOUS_COMPANY_FORBIDDEN_ACTIONS.includes(action));
   const unknown = requestedActions.filter((action) => !AUTONOMOUS_COMPANY_SAFE_ACTIONS.includes(action));
-  const riskIsSafe = selected.source === "REVIEW_QUEUE" || AUTONOMOUS_COMPANY_SAFE_RISK_LEVELS.includes(selected.risk_level);
+  const riskIsSafe = AUTONOMOUS_COMPANY_SAFE_RISK_LEVELS.includes(selected.risk_level);
   const taskGatePassed = selected.task_envelope_status === "AUTHORIZED"
     && selected.authority_status === "MACHINE_VERIFIED"
     && selected.dependencies_complete === true
@@ -2127,7 +2144,7 @@ export function runAutonomousCompanyCycle({
       });
     }
     const reviewer = workers.find((worker) => worker.worker_id === selected.reviewer_id);
-    if (!isAutonomousCompanyWorkerEligible(reviewer) || reviewer.worker_id === selected.submitter_worker_id) {
+    if (!isAutonomousCompanyWorkerEligible(reviewer) || !autonomousCompanyActorsAreDistinct(reviewer, submitter)) {
       append("BLOCKER_STATE", { blocker: "INDEPENDENT_REVIEWER_REQUIRED", task_id: selected.task_id });
       append("CLOCK_OUT", { result: "HOLD_REVIEWER" });
       return Object.freeze({
@@ -2192,10 +2209,10 @@ export function runAutonomousCompanyCycle({
   const worker = requiredWorkerId
     ? eligibleWorkers.find((candidate) => candidate.worker_id === requiredWorkerId)
     : eligibleWorkers.find((candidate) => (
-      candidate.worker_id !== reviewer.worker_id
+      autonomousCompanyActorsAreDistinct(candidate, reviewer)
       && autonomousCompanyBranchMatches(candidate.allowed_branch_pattern, selected.branch, selected.task_id)
     ));
-  if (!worker || worker.worker_id === reviewer.worker_id || !autonomousCompanyBranchMatches(worker.allowed_branch_pattern, selected.branch, selected.task_id)) {
+  if (!worker || !autonomousCompanyActorsAreDistinct(worker, reviewer) || !autonomousCompanyBranchMatches(worker.allowed_branch_pattern, selected.branch, selected.task_id)) {
     append("BLOCKER_STATE", { blocker: "ELIGIBLE_DISTINCT_WORKER_REQUIRED", task_id: selected.task_id });
     append("CLOCK_OUT", { result: "HOLD_WORKER" });
     return Object.freeze({
@@ -2662,12 +2679,16 @@ export async function readLatestRepositorySnapshot({
   if (active_task_pr !== null) {
     const pr = await read(`/pulls/${active_task_pr}`);
     invariant(/^[0-9a-f]{40}$/.test(pr.head?.sha ?? ""), "GITHUB_PR_HEAD_INVALID", "GitHub pull request head is invalid");
+    invariant(typeof pr.head?.ref === "string" && pr.head.ref.trim(), "GITHUB_PR_HEAD_REF_INVALID", "GitHub pull request head branch is invalid");
+    invariant(typeof pr.base?.ref === "string" && pr.base.ref.trim(), "GITHUB_PR_BASE_REF_INVALID", "GitHub pull request base branch is invalid");
     const comparison = await read(`/compare/${encodeURIComponent(repositoryState.default_branch)}...${pr.head.sha}`);
     const checks = await read(`/commits/${pr.head.sha}/check-runs`);
     invariant(Number.isInteger(comparison.ahead_by) && Number.isInteger(comparison.behind_by), "GITHUB_DIVERGENCE_INVALID", "GitHub comparison is missing ahead/behind counts");
     pullRequest = Object.freeze({
       number: active_task_pr,
       head_sha: pr.head.sha,
+      head_ref: pr.head.ref,
+      base_ref: pr.base.ref,
       state: String(pr.state ?? "").toUpperCase(),
       draft: pr.draft === true,
       ahead_main: comparison.ahead_by,
@@ -2706,6 +2727,30 @@ export function evaluateExactHeadCiGate({ repository_snapshot, expected_head_sha
   return Object.freeze({ status: "EXACT_HEAD_CI_PASS", exact_head: pr.head_sha, ci_status: pr.ci_status, behind_main: 0, external_effect: false });
 }
 
+function evaluateAutonomousTaskRepositoryBinding({ cycle_result, cycle_input, repository_snapshot }) {
+  if (!cycle_result?.selected_task_id) return Object.freeze({ status: "NO_SELECTED_TASK", task_id: null, external_effect: false });
+  const selected = [...(cycle_input.review_queue ?? []), ...(cycle_input.work_queue ?? [])]
+    .find((item) => item?.task_id === cycle_result.selected_task_id);
+  const pr = repository_snapshot.active_task_pr;
+  const verified = Boolean(selected && pr)
+    && selected.repository === repository_snapshot.repository
+    && selected.active_task_pr === pr.number
+    && selected.branch === pr.head_ref
+    && selected.expected_head_sha === pr.head_sha;
+  return Object.freeze({
+    status: verified ? "TASK_REPOSITORY_BINDING_VERIFIED" : "HOLD_TASK_REPOSITORY_BINDING",
+    task_id: cycle_result.selected_task_id,
+    repository: selected?.repository ?? null,
+    active_task_pr: selected?.active_task_pr ?? null,
+    branch: selected?.branch ?? null,
+    expected_head_sha: selected?.expected_head_sha ?? null,
+    observed_pr: pr?.number ?? null,
+    observed_branch: pr?.head_ref ?? null,
+    observed_head_sha: pr?.head_sha ?? null,
+    external_effect: false
+  });
+}
+
 /**
  * Invocation-driven safe Company loop: observe GitHub, plan one cycle, then
  * persist only its local append-only evidence. It deliberately exposes no
@@ -2736,6 +2781,22 @@ export async function runAutonomousCompanyReadOnlyCycle({
     observed_at: repositorySnapshot.observed_at,
     current_main_sha: repositorySnapshot.main_sha
   });
+  const taskRepositoryGate = evaluateAutonomousTaskRepositoryBinding({
+    cycle_result: cycleResult,
+    cycle_input,
+    repository_snapshot: repositorySnapshot
+  });
+  if (taskRepositoryGate.status === "HOLD_TASK_REPOSITORY_BINDING") {
+    return Object.freeze({
+      status: "HOLD_TASK_REPOSITORY_BINDING",
+      repository_snapshot: repositorySnapshot,
+      task_repository_gate: taskRepositoryGate,
+      ci_gate: ciGate,
+      cycle_result: cycleResult,
+      persistence: null,
+      authority: Object.freeze({ local_company_history_write: false, github_read: true, github_write: false, claim_write: false, worker_wake: false, reviewer_wake: false, signer: false, chain_write: false })
+    });
+  }
   const prePersistenceSnapshot = await readLatestRepositorySnapshot(repository_request);
   const prePersistenceGate = evaluateExactHeadCiGate({ repository_snapshot: prePersistenceSnapshot, expected_head_sha: cycle_input.expected_head_sha ?? null });
   const repositoryMoved = prePersistenceSnapshot.main_sha !== repositorySnapshot.main_sha
@@ -2747,6 +2808,7 @@ export async function runAutonomousCompanyReadOnlyCycle({
       pre_persistence_snapshot: prePersistenceSnapshot,
       ci_gate: prePersistenceGate,
       cycle_result: cycleResult,
+      task_repository_gate: taskRepositoryGate,
       persistence: null,
       authority: Object.freeze({ local_company_history_write: false, github_read: true, github_write: false, claim_write: false, worker_wake: false, reviewer_wake: false, signer: false, chain_write: false })
     });
@@ -2758,6 +2820,7 @@ export async function runAutonomousCompanyReadOnlyCycle({
     pre_persistence_snapshot: prePersistenceSnapshot,
     ci_gate: prePersistenceGate,
     cycle_result: cycleResult,
+    task_repository_gate: taskRepositoryGate,
     persistence,
     authority: Object.freeze({ local_company_history_write: true, github_read: true, github_write: false, claim_write: false, worker_wake: false, reviewer_wake: false, signer: false, chain_write: false })
   });

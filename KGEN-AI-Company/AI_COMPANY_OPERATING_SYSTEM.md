@@ -34,15 +34,15 @@ Cursor checks the queue every 10 minutes, writes progress every 2 hours, writes 
 
 ## 8. Autonomous Safe-Cycle Candidate
 
-The first executable Company-cycle candidate is `runAutonomousCompanyCycle()` in `core/company/index.mjs`. It reuses the formal Worker Registry, WorkQueue, Review-first policy, task-envelope authority, branch policy and independent reviewer boundary.
+The first executable Company-cycle candidate is `runAutonomousCompanyCycle()` in `core/company/index.mjs`. It consumes Worker Registry, WorkQueue and task-envelope-shaped inputs, but those inputs are not yet loaded from or cryptographically bound to the canonical repository records. Until that provenance connector exists, callers cannot turn supplied objects into Company authority.
 
-The candidate is deterministic and separates planning from effects. It emits append-only machine events for `CLOCK_IN`, `WORK_ORDER`, `HANDOFF`, `REVIEW_REQUEST`, `BLOCKER_STATE` and `CLOCK_OUT`, while rejecting replayed cycle IDs. `REWORK_REQUIRED` returns to the explicit original authorized worker as a repair candidate; only a later `DELIVERY_SUBMITTED` record can request a new independent review. Every work candidate requires a registered, active, T2+ reviewer distinct from its worker.
+The candidate is deterministic and separates planning from effects. It emits append-only machine events for `CLOCK_IN`, `WORK_ORDER`, `HANDOFF`, `REVIEW_REQUEST`, `BLOCKER_STATE` and `CLOCK_OUT`, while rejecting replayed cycle IDs. `REWORK_REQUIRED` returns to the explicit original authorized worker as a repair candidate; only a later `DELIVERY_SUBMITTED` record can request a new independent review. Every work candidate requires a registered, active, T2+ reviewer whose worker ID, Life identity reference and controller ID are all distinct from the worker. The R0/R1 risk gate applies equally to Review Queue items; `UNKNOWN`, R2, `HIGH` and `CRITICAL` all fail closed.
 
 `persistAutonomousCompanyCycle()` now records a safe cycle in the existing Company history stream instead of creating another queue or Company OS. Deterministic event IDs, payload hashes and the existing `previous_event_id` chain make replay visible and fail closed; `IndexedDbUniverseStore` provides browser persistence. `restoreAutonomousCompanyCycleState()` reconstructs prior cycle IDs and the latest clock-out result after restart.
 
 `readLatestRepositorySnapshot()` is the first read-only Company eye. At clock-in it obtains the repository default branch, current main SHA and time, active PR head/state, divergence and named exact-head check runs from GitHub. Bearer credentials may only be sent to the canonical `https://api.github.com` origin; custom test adapters must run without a token. Missing, skipped-only, unrelated, failed or incomplete required checks cannot produce `PASS`. It has no mutation, merge, branch-push, signer or chain method. A failed or malformed GitHub response produces no fabricated snapshot.
 
-`runAutonomousCompanyReadOnlyCycle()` composes the eye, exact-head CI gate, planner and durable Company history into one invocation-driven cycle. It requires the expected head, open PR, `behind_main = 0` and named passing checks before planning, then re-reads main and the PR head immediately before persistence. A moving repository or stale/incomplete CI leaves no durable cycle event. Neither function can claim a task, wake a worker, wake a reviewer or mutate GitHub.
+`runAutonomousCompanyReadOnlyCycle()` composes the eye, exact-head CI gate, planner and durable Company history into one invocation-driven cycle. It requires the expected head, open PR, `behind_main = 0` and named passing checks before planning, then binds the selected task to the observed repository, PR number, branch and exact head. It re-reads main and the PR head immediately before persistence. A mismatched task/PR binding, moving repository or stale/incomplete CI leaves no durable cycle event. Neither function can claim a task, wake a worker, wake a reviewer or mutate GitHub.
 
 `createLocalSqliteClaimRegistrySimulator()` implements the approved migration step for a one-host SQLite state-machine test only. It uses transactional unique active locks, compare-and-swap `record_version`, monotonic fencing tokens, review custody, same-worker repair lineage, reconciled close/release and an append-only operation ledger. Its public authority marker is always `LOCAL_SQLITE_SIMULATOR_NOT_AUTHORITY`; it cannot dispatch or wake a worker and is not the selected shared SQL Claim Registry service.
 
@@ -57,6 +57,7 @@ Current connection state:
 - durable Company cycle memory: `LOCAL_CANDIDATE_IMPLEMENTED_EXISTING_STORE`
 - latest repository self-discovery: `READ_ONLY_CANDIDATE_IMPLEMENTED`
 - exact-head CI observer: `READ_ONLY_ON_INVOCATION_IMPLEMENTED`
+- canonical Worker Registry, WorkQueue and task-envelope provenance: `NOT_CONNECTED_FAIL_CLOSED`
 - local SQLite Claim state-machine simulator: `IMPLEMENTED_SANDBOX_ONLY`
 - shared transactional Claim authority: `NOT_CONNECTED`
 - employee wake: `EXISTING_CURSOR_WORKFLOW_PRESENT_NOT_CONNECTED_TO_CYCLE`
