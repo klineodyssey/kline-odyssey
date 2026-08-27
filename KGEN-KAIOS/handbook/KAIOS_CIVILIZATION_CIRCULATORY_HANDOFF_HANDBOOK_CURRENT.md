@@ -240,7 +240,7 @@ Checkpoint classification at `2026-08-27T12:37:23Z`:
 | 4 | K11520 native KGEN market | #169, cumulatively integrated by #188 | ENGINEERING_PASS; DRAFT; DISTINCT_REVIEW_PENDING |
 | 5 | NVIDIA GPU market pilot / real readiness | #178, cumulatively integrated by #188 | PAPER_PASS; REAL_INVENTORY_AND_SETTLEMENT_BLOCKED |
 | 6 | KGEN external metadata / wallet discovery | #179 | ENGINEERING_PASS; EXTERNAL_PUBLICATION_NOT_PERFORMED |
-| 7 | KAIOS market genesis | #180 plus fresh read-only evidence | READINESS_GATE_PASS; RPC_QUORUM_NO_PAIR_OBSERVATION_AT_BLOCK_118386241 |
+| 7 | KAIOS market genesis | #180 plus fresh read-only evidence | READINESS_GATE_PASS; RPC_QUORUM_NO_PAIR_OBSERVATION_AT_BLOCK_118404108 |
 | 8 | Universal listing registry | #181, cumulatively integrated by #188 | PAPER_PASS; PRODUCTION_AUTHORITY_UNBOUND |
 | 9 | Warehouse / escrow / settlement / accounting | #181/#188 | PAPER_PASS; REAL_CUSTODY_AND_SETTLEMENT_BLOCKED |
 | 10 | Autonomous company safe cycle | #170 | ENGINEERING_PASS; CONNECTORS_AND_DISTINCT_REVIEW_PENDING |
@@ -346,9 +346,9 @@ The remembered counts of 27 and 36 open PRs are superseded. GitHub reported 38 o
 - #183 exact head is `19fc10c086e0cb49f99356d432ed3a75f47c2eac`; it is a neutral T1 onboarding proposal HOLD, not a Life birth, Worker registration, T2 promotion or employment grant.
 - #158 remains an undeployed review candidate; catalyst bank, half-life seconds and legacy compatibility are deployment blockers.
 - #161 is synchronized to current main at `fbb36f50034c1d6ccf0eca0064bcab9d9d50ac4d`; its paper-only circulatory and cross-market engine passed exact-head CI, but real execution remains disabled.
-- #170 is synchronized to current main at `f25e2278c31afe59ea8b00a04928fd9487c6f844`; safe-cycle tests pass, but it cannot approve itself or activate missing repository/claim/wake/review/scheduler connectors.
+- #170 is synchronized to current main at `366ee1ba00f61ed5ff16192d9cb3df7b8fad5641`; 271/271 local tests and exact-head push/PR CI `33085748987` / `33085751970` pass. Reviewer independence now requires distinct Worker, Life and controller identities; Review Queue items cannot bypass the R0/R1 risk gate; and the selected task must match the observed repository, PR, branch and exact head before local persistence. Canonical Registry/WorkQueue/task-envelope provenance, shared Claim authority, wake/review connectors and distinct independent review remain unavailable.
 - #179 exact head is `d88ed1bfbee8b495b3bfb776b865cbb061384309`; its committed BSC supply snapshot is block `118374207` and all external metadata submissions remain unperformed.
-- #180 records a read-only Pancake V2 factory observation of no KAIOS/WBNB pair. #188's fixed-transport RPC quorum later observed zero-address KAIOS/WBNB, KAIOS/KGEN and KAIOS/USDT pairs at block `118386241`. These are timestamped observations, not permanent market claims or authorization to create liquidity.
+- #180 records a read-only Pancake V2 factory observation of no KAIOS/WBNB pair. A later fixed-transport RPC quorum observed zero-address KAIOS/WBNB, KAIOS/KGEN and KAIOS/USDT pairs at block `118404108` (`2026-08-27T15:01:55Z`). These are timestamped observations, not permanent market claims or authorization to create liquidity.
 
 ### Fresh BSC read-only circulation checkpoint
 
@@ -363,6 +363,16 @@ At BSC block `118384842` (`2026-08-27T12:37:23Z`), public `eth_call` and balance
 - PancakeSwap V2 KAIOS/WBNB pair: not found (factory returned the zero address).
 
 This checkpoint performed no signing, transaction construction, broadcast, payment, liquidity operation or chain write. It does not authorize the available K18888 capital, the K8888 payroll pool or the Hengyao BNB balance for GPU inventory or trading. Credential binding remains `CONNECTED_BINDING_ONLY`; the fixed trading-capital registry reports `NO_FUNDED_TRADING_CAPITAL` with zero accounts, and transaction Policy Broker, production settlement and independent GPU/warehouse evidence verification remain unavailable.
+
+### Later BSC read-only banking checkpoint
+
+At BSC block `118404995` (`2026-08-27T15:08:34Z`, hash `0x232caf4a3af5144da878dedd177f7ee58c7664bc8b4a885dec57525ae3de6722`), two fixed HTTPS providers returned identical contract state:
+
+- K18888 balance / reserve / available: `22,213,020.930416874731235 / 11,000,000 / 11,213,020.930416874731235 KAIOS`.
+- K8888 assets / free capital / payroll liability: `888 / 800 / 88 KAIOS`; accounts/payrolls: `1/1`.
+- Hengyao account balance: `0 KAIOS`; bound beneficiary: `0x4DF6E9629Dad1072103cFd2bC81845fd97429214`.
+
+This later checkpoint was `eth_call` only. It did not claim, pay, transfer, sign or modify chain state.
 
 ### Fresh KAIOS market RPC-quorum checkpoint
 
