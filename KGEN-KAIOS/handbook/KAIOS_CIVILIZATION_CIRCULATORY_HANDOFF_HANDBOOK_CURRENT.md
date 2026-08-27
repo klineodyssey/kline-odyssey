@@ -1,7 +1,7 @@
 # KAIOS Civilization Circulatory Runtime — Multi-Worker Handoff Handbook
 
 STATUS: DESIGN_AND_HANDOFF_AUTHORITY / NOT_DEPLOYED
-VERSION: V1.3
+VERSION: V1.4
 DATE: 2026-08-27 Asia/Taipei
 PURPOSE: durable handoff source so Human, AI, Codex, ChatGPT pages, workers, reviewers and future digital lives can resume work without reconstructing decisions from chat history.
 
@@ -13,9 +13,9 @@ Every worker taking over this task MUST:
 
 1. Read this file before coding.
 2. Fetch latest `main`; never assume a remembered SHA is current.
-3. Preserve PR #136 exact Phase 2 deployed-evidence lineage at `00c79b380ce094c17d75697f360820c4d2035071` as history; it is 258 commits behind current `main` at this checkpoint.
+3. Preserve PR #136 exact Phase 2 deployed-evidence lineage at `00c79b380ce094c17d75697f360820c4d2035071` as history; it is 259 commits behind current `main` at this checkpoint.
 4. Preserve PR #152 exact design-only Canon lineage at `672ab4884e8cf6f9d07c176a862fb858cafe8161` as history; PR #158 proposes a later freshness model, but that proposal remains unbound until an immutable repository-bound Human decision record is added.
-5. Read PR #158 exact catalyst/KUFO/KSHIP implementation candidate at `794485504d6039b438ea410516b30f4df6f5ee6f` and independently verify its latest head before review.
+5. Read PR #158 exact catalyst/KUFO/KSHIP implementation candidate at `ac9ffddfff662f6c2dc8c0f0f523485e10f873dd` and independently verify its latest head before review.
 6. Read PR #160 Mainnet provenance reconciliation before closeout of #135/#136.
 7. Preserve deployed evidence as history. Never rewrite later design as if already deployed.
 8. Re-run exact-head CI after every semantic code change.
@@ -230,6 +230,29 @@ The current 16-workstream order is: Genesis/PR lineage; Cursor offboarding; dist
 
 Engineering candidates may proceed on isolated Draft branches. Real trade, payment, deployment and governance stay fail-closed unless the corresponding signer, budget, inventory, counterparty, settlement and independent-review gates are all machine-verifiably satisfied.
 
+Checkpoint classification at `2026-08-27T11:32:04Z`:
+
+| # | Workstream | Durable candidate/evidence | Current state |
+|---|---|---|---|
+| 1 | Genesis / Phase 2 / open-PR lineage | #187 plus deployed-history lineage #135/#136/#160/#184 | ENGINEERING_CURRENT; DISTINCT_REVIEW_PENDING |
+| 2 | Cursor R2 departure and claim closeout | #176 | CLOSED_FAIL_CLOSED; NO_DELIVERY; NO_PAYMENT |
+| 3 | Distinct reviewer capacity | #171 and #183 | GOVERNANCE_HOLD; NO_ELIGIBLE_DIFFERENT_LIFE_AND_CONTROLLER_T2_REVIEWER |
+| 4 | K11520 native KGEN market | #169, cumulatively integrated by #188 | ENGINEERING_PASS; DRAFT; DISTINCT_REVIEW_PENDING |
+| 5 | NVIDIA GPU market pilot / real readiness | #178, cumulatively integrated by #188 | PAPER_PASS; REAL_INVENTORY_AND_SETTLEMENT_BLOCKED |
+| 6 | KGEN external metadata / wallet discovery | #179 | ENGINEERING_PASS; EXTERNAL_PUBLICATION_NOT_PERFORMED |
+| 7 | KAIOS market genesis | #180 | READINESS_GATE_PASS; PANCAKESWAP_V2_PAIR_NOT_FOUND_AT_BLOCK_118374460 |
+| 8 | Universal listing registry | #181, cumulatively integrated by #188 | PAPER_PASS; PRODUCTION_AUTHORITY_UNBOUND |
+| 9 | Warehouse / escrow / settlement / accounting | #181/#188 | PAPER_PASS; REAL_CUSTODY_AND_SETTLEMENT_BLOCKED |
+| 10 | Autonomous company safe cycle | #170 | ENGINEERING_PASS; CONNECTORS_AND_DISTINCT_REVIEW_PENDING |
+| 11 | Customer gateway / quote / project runtime | #182 | SIMULATION_PASS; PAYMENT_ADDRESS_AND_ESCROW_UNBOUND |
+| 12 | 18888/8888 payroll and company revenue separation | #154/#161/#182 plus live read-only evidence | LIVE_PAYROLL_SCHEDULE_PRESERVED; CLAIM_NOT_MATURE; REAL_REVENUE_UNFUNDED |
+| 13 | Life / worker / employment / trust / payroll eligibility | #163-#165/#176/#183 | CANDIDATES_AND_HOLDS; NO_AUTOMATIC_BIRTH_OR_TRUST_PROMOTION |
+| 14 | K18911 / KUFO / KSHIP successor | #158 | ENGINEERING_PASS; UNDEPLOYED; CATALYST_BANK_AND_HALF_LIFE_UNFROZEN |
+| 15 | K4168 Naihe reservoir / Public Good / Mengpo | #172 | DESIGN_AND_SIMULATION_PASS; RESERVOIR_NOT_DEPLOYED |
+| 16 | Universe Map / brand / mobile / website integration | #162/#185/#188 | REVIEW_CANDIDATES_PASS; PUBLICATION_AND_MAINNET_WRITE_DISABLED |
+
+`ENGINEERING_PASS` means the stated branch tests and exact-head CI passed. It does not mean independent approval, merge, deployment, funded inventory, signer connectivity or a live market transaction.
+
 ## 14. Required review checks before deployment discussion
 
 - Solidity compile clean.
@@ -306,13 +329,13 @@ Therefore:
 
 ## 18. GitHub PR lineage checkpoint — 2026-08-27
 
-Observed at `2026-08-27T10:03:17Z` against `origin/main = 830b79214781fb1231f3619336de394f400a0bfd`.
+Observed at `2026-08-27T11:32:04Z` against `origin/main = 830b79214781fb1231f3619336de394f400a0bfd`.
 
 The remembered counts of 27 and 36 open PRs are superseded. GitHub reported 38 open PRs at this checkpoint. A green workflow means tests passed at that head; it is not an independent review, deployment claim or merge authorization.
 
-### Current-base candidates (0-1 commits behind main)
+### Current-base candidates (0 commits behind main)
 
-`#188, #187, #186, #185, #184, #183, #182, #181, #180, #179, #178, #176, #172, #169, #162, #158`
+`#188, #187, #185, #183, #182, #180, #179, #176, #172, #170, #162, #161, #158`
 
 - #188 cumulatively integrates #169, #181 and #185 on current main. It preserves the assigned `0.00011520` K11520 company/KGEN-price coordinate without seeding matched-trade CT, and combines the paper market, listing/warehouse gates and browser-safe mobile wallet. Its exact-head CI is green, but it remains Draft and still requires distinct review.
 - #187 is this lineage reconciliation candidate. It is evidence/documentation only and cannot approve itself.
@@ -320,19 +343,23 @@ The remembered counts of 27 and 36 open PRs are superseded. GitHub reported 38 o
 - #185 is the mobile chain-56 wallet/watch-asset candidate; it sends no token transaction and does not claim a KAIOS DEX pair exists.
 - #184 is the cumulative Mainnet address manifest candidate and supersedes the compact-document role of #167 without deleting #167 history.
 - #178 remains stacked on #169 and is PAPER inventory/market only.
-- #183 is a T1 onboarding HOLD, not a Life birth, Worker registration, T2 promotion or employment grant.
+- #183 exact head is `19fc10c086e0cb49f99356d432ed3a75f47c2eac`; it is a neutral T1 onboarding proposal HOLD, not a Life birth, Worker registration, T2 promotion or employment grant.
 - #158 remains an undeployed review candidate; catalyst bank, half-life seconds and legacy compatibility are deployment blockers.
+- #161 is synchronized to current main at `fbb36f50034c1d6ccf0eca0064bcab9d9d50ac4d`; its paper-only circulatory and cross-market engine passed exact-head CI, but real execution remains disabled.
+- #170 is synchronized to current main at `f25e2278c31afe59ea8b00a04928fd9487c6f844`; safe-cycle tests pass, but it cannot approve itself or activate missing repository/claim/wake/review/scheduler connectors.
+- #179 exact head is `d88ed1bfbee8b495b3bfb776b865cbb061384309`; its committed BSC supply snapshot is block `118374207` and all external metadata submissions remain unperformed.
+- #180 records a read-only Pancake V2 factory observation of no KAIOS/WBNB pair at block `118374460`; this is a timestamped observation, not a permanent market claim or authorization to create liquidity.
 
 These branches must be resynchronized whenever `main` advances semantically, then re-run exact-head CI.
 
-### Stale or stacked candidates requiring reconciliation
+### One-to-two-behind, stale or stacked candidates requiring reconciliation
 
-`#177, #174, #173, #171, #170, #168, #167, #166, #165, #164, #163, #161, #160, #159, #154, #153, #152, #136, #135, #134, #133, #48`
+`#186, #184, #181, #178, #177, #174, #173, #171, #169, #168, #167, #166, #165, #164, #163, #160, #159, #154, #153, #152, #136, #135, #134, #133, #48`
 
 - #163 security review remains an independent dependency. #164 and #165 must not substitute for it.
 - #164/#165 share registry surfaces and require schema/merge reconciliation plus a distinct reviewer.
 - #170 cannot receive final approval from its own implementer; #171 records the unresolved distinct-reviewer capacity gap.
-- #161 is 134 commits behind and must not be treated as the current integrated company runtime merely because its architecture remains useful.
+- #169 is two commits behind current main, but its latest semantics and tests are cumulatively integrated on current main by #188; preserve #169 as dependency history rather than silently merging it alone.
 - #167 is 93 commits behind; use #184 for the cumulative address-manifest review candidate.
 - #135 -> #136 -> #152 -> #153 -> #154 is historical stacked lineage. Preserve deployed evidence, but do not wholesale merge the stack into current `main`.
 - #133/#134 and #48 are old independent candidates hundreds of commits behind; require explicit product-owner disposition, not silent merge.
