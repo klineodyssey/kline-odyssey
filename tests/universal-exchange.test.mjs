@@ -616,6 +616,22 @@ test("mobile wallet entry switches to BSC and only registers canonical KGEN or K
   assert.throws(() => createMetaMaskMobileDeepLink("javascript:alert(1)"), (error) => error.code === "INVALID_DAPP_URL");
 });
 
+test("11520 browser entry avoids the Node-only aggregate core export surface", async () => {
+  const appSource = await fs.readFile(new URL("../K線西遊記/temples/11520/app.mjs", import.meta.url), "utf8");
+  assert.doesNotMatch(appSource, /core\/index\.mjs/, "browser entry must not import the aggregate index that exports Node-only signer modules");
+  for (const browserSafeModule of [
+    "core/registry/universe-runtime.mjs",
+    "core/market/index.mjs",
+    "core/portfolio/index.mjs",
+    "core/life/factory.mjs",
+    "core/life/index.mjs",
+    "core/jobs/index.mjs",
+    "core/company/index.mjs",
+    "core/apps/index.mjs",
+    "core/integrations/kgen-pancakeswap-v2.mjs"
+  ]) assert.match(appSource, new RegExp(browserSafeModule.replaceAll("/", "\\/")));
+});
+
 test("Universal asset and listing type enumerations support all first-day markets", async () => {
   assert.equal(ASSET_TYPES.length, 17);
   for (const type of ["TOKEN", "LIFE", "APP", "COMPANY", "EQUITY", "JOB", "SERVICE", "LAND", "BUILDING", "FACTORY", "SPACECRAFT", "EQUIPMENT", "ENERGY", "DATA", "LICENSE", "CONTRACT", "GOODS"]) assert.ok(ASSET_TYPES.includes(type));
@@ -2887,11 +2903,11 @@ test("V4.0 8888 audit removes fake balances and creates only request drafts", as
   assert.doesNotMatch(bankUi, /KGEN_Wallet\.demoMode=true/);
 });
 
-test("V4.0.1 production shell preserves concierge and exposes the mobile wallet cache key", async () => {
+test("V4.0.2 production shell preserves concierge and exposes the browser-safe mobile wallet cache key", async () => {
   const htmlSource = await fs.readFile(new URL("../K線西遊記/temples/11520/index.html", import.meta.url), "utf8");
   const appSource = await fs.readFile(new URL("../K線西遊記/temples/11520/app.mjs", import.meta.url), "utf8");
   const cssSource = await fs.readFile(new URL("../K線西遊記/temples/11520/styles.css", import.meta.url), "utf8");
-  assert.match(htmlSource, /v=11520-v4\.0\.1-mobile-wallet/);
+  assert.match(htmlSource, /v=11520-v4\.0\.2-browser-safe/);
   assert.doesNotMatch(htmlSource, /v=11520-v3\.6-first-kgen/);
   for (const state of ["IDLE", "LISTENING", "THINKING", "SPEAKING", "SUCCESS", "ERROR"]) assert.match(appSource + cssSource, new RegExp(state));
   assert.match(cssSource, /2D FALLBACK/);

@@ -1,8 +1,8 @@
-# 11520 Universal Exchange V4.0.1
+# 11520 Universal Exchange V4.0.2
 
 ## Digital Ant next-stage status
 
-- V4.0.1 adds a mobile injected-wallet entry, fail-closed BSC chain-56 switching and user-initiated wallet display metadata for canonical KGEN and KAIOS. These controls never receive a private key and connect/add-token actions send no transaction.
+- V4.0.2 preserves the mobile injected-wallet entry, fail-closed BSC chain-56 switching and user-initiated wallet display metadata for canonical KGEN and KAIOS. It loads only explicit browser-safe modules; Node-only signer and Starforge modules are excluded from the public browser dependency graph. These controls never receive a private key and connect/add-token actions send no transaction.
 - KGEN/WBNB remains the only verified external AMM route. KAIOS is a live Mainnet token without a verified DEX pair; no KAIOS swap, quote or synthetic price is exposed.
 
 - V3.9 activates `KGEN_FIELD_SERVICE_BUSINESS` after the WUKONG_GATEKEEPER primary-job gate. Its CFO scans verified K280/Universe Map nodes for cash logistics, KUFO supply, waste collection and general delivery demand.

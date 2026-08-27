@@ -1,6 +1,6 @@
-# 11520 Universal Exchange V4.0.1 Current Handoff
+# 11520 Universal Exchange V4.0.2 Current Handoff
 
-V4.0.1 is the cumulative mobile-wallet candidate. It retains the V4.0 player entry and `DIGITAL_ANT_APP_0001` V1.7.0 without changing Life ID, immutable Birth Certificate, Wallet ownership, Thought Organ, Primary Job or Listing identity rights.
+V4.0.2 is the cumulative browser-safe mobile-wallet candidate. It retains the V4.0 player entry and `DIGITAL_ANT_APP_0001` V1.7.0 without changing Life ID, immutable Birth Certificate, Wallet ownership, Thought Organ, Primary Job or Listing identity rights. The production page imports explicit browser-safe modules and does not load the aggregate Node-only signer export surface.
 
 The Token page now provides a MetaMask mobile deep link, verifies or requests BNB Smart Chain chain 56, and lets the user ask the wallet to display only the canonical KGEN and KAIOS contracts. Connect and add-token actions send no transaction and never expose a private key. KGEN/WBNB remains the only verified external AMM route. KAIOS is Mainnet-live but has no verified DEX pair, so the UI exposes no KAIOS trade action or fabricated price.
 

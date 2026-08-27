@@ -1,14 +1,24 @@
+import { createBrowserUniverseStore, createUniverseRuntime, loadCanonicalSeed } from "../../../core/registry/universe-runtime.mjs?v=11520-v4.0.2-browser-safe";
+import { createListing } from "../../../core/market/index.mjs?v=11520-v4.0.2-browser-safe";
+import { buildPortfolio } from "../../../core/portfolio/index.mjs?v=11520-v4.0.2-browser-safe";
+import { createLifeDraft } from "../../../core/life/factory.mjs?v=11520-v4.0.2-browser-safe";
+import { calculateLifeAge } from "../../../core/life/index.mjs?v=11520-v4.0.2-browser-safe";
+import { calculateWorkAge, deriveWorkerHealth } from "../../../core/jobs/index.mjs?v=11520-v4.0.2-browser-safe";
 import {
-  createBrowserUniverseStore, createUniverseRuntime, loadCanonicalSeed,
-  createListing, buildPortfolio, createLifeDraft, createKgenSwapAdapter, KGEN_SWAP_CONFIG, KAIOS_TOKEN_CONFIG,
-  watchBscWalletAsset, ensureBscWalletNetwork, createMetaMaskMobileDeepLink, calculateLifeAge, calculateWorkAge,
   createPublicCivilizationDraftIntent, interpretPublicCivilizationIntent,
   confirmPublicCivilizationIntent, toPublicCivilizationRequest,
   routePublicCivilizationProject, qualifyPublicCivilizationRequest, createNonBindingEstimatePreview,
-  appendPublicRequestHistoryEvent, I18N_SUPPORTED_LOCALES, translateUi, normalizeUiLocale,
-  validatePrimaryI18nCatalogs, detectVoiceCapabilities, deriveWorkerHealth, normalizeVoiceError,
-  createLocalHuaguoshanMembership, createFirstPlayerMission, completeFirstPlayerMission
-} from "../../../core/index.mjs?v=11520-v4.0-player-first";
+  appendPublicRequestHistoryEvent
+} from "../../../core/company/index.mjs?v=11520-v4.0.2-browser-safe";
+import {
+  I18N_SUPPORTED_LOCALES, translateUi, normalizeUiLocale, validatePrimaryI18nCatalogs,
+  detectVoiceCapabilities, normalizeVoiceError, createLocalHuaguoshanMembership,
+  createFirstPlayerMission, completeFirstPlayerMission
+} from "../../../core/apps/index.mjs?v=11520-v4.0.2-browser-safe";
+import {
+  createKgenSwapAdapter, KGEN_SWAP_CONFIG, KAIOS_TOKEN_CONFIG, watchBscWalletAsset,
+  ensureBscWalletNetwork, createMetaMaskMobileDeepLink
+} from "../../../core/integrations/kgen-pancakeswap-v2.mjs?v=11520-v4.0.2-browser-safe";
 import { readTempleHeart12345 } from "../../../core/integrations/temple-heart-12345.mjs?v=11520-v4.0-player-first";
 
 const NAVIGATION = Object.freeze([
