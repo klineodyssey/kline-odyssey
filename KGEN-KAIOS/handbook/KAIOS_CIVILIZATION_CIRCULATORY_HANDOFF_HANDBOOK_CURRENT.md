@@ -14,7 +14,7 @@ Every worker taking over this task MUST:
 1. Read this file before coding.
 2. Fetch latest `main`; never assume a remembered SHA is current.
 3. Preserve PR #136 exact Phase 2 deployed-evidence lineage at `00c79b380ce094c17d75697f360820c4d2035071` as history; it is 258 commits behind current `main` at this checkpoint.
-4. Preserve PR #152 exact design-only Canon lineage at `672ab4884e8cf6f9d07c176a862fb858cafe8161` as history; later Human freshness Canon supersedes its alchemy interpretation.
+4. Preserve PR #152 exact design-only Canon lineage at `672ab4884e8cf6f9d07c176a862fb858cafe8161` as history; PR #158 proposes a later freshness model, but that proposal remains unbound until an immutable repository-bound Human decision record is added.
 5. Read PR #158 exact catalyst/KUFO/KSHIP implementation candidate at `794485504d6039b438ea410516b30f4df6f5ee6f` and independently verify its latest head before review.
 6. Read PR #160 Mainnet provenance reconciliation before closeout of #135/#136.
 7. Preserve deployed evidence as history. Never rewrite later design as if already deployed.
@@ -54,13 +54,13 @@ For exactly representable amounts:
 - equal-mass catalyst = 5,000 KGEN = 5,000,000 kg.
 - KUFO lineage target = 5,000,000,000 KUFO.
 
-KGEN is not burned and is not converted into KUFO. The Human-frozen V3 successor model uses an exact fresh KGEN bank contribution; the contribution remains in the immutable catalyst bank as a civilization asset and is not escrowed or returned. Earlier catalyst-escrow-and-return designs are historical candidates, not CURRENT behavior.
+KGEN is not burned and is not converted into KUFO. PR #158 records a V3 successor implementation direction using an exact fresh KGEN bank contribution retained by an immutable catalyst bank rather than escrowed or returned. That direction is `UNBOUND_HUMAN_DIRECTION_REFERENCE / IMPLEMENTED_REVIEW_CANDIDATE` until an immutable repository-bound Human decision record identifies the subject, fields, authority, scope and supersession lineage. Repetition in this handbook does not promote it to `CURRENT_DESIGN_CANON`. Earlier catalyst-escrow-and-return designs remain preserved historical candidates.
 
 ## 3. 18911 alchemy chronology
 
 Historical/deployed V1 furnace semantics use a 49-Epoch proof maturity period. The earlier proposed `49 REVIEW + 81 CATALYSIS = 130 Epoch delivery delay` model is `HISTORICAL_SUPERSEDED`.
 
-The Human-frozen V3 successor Canon is:
+PR #158 records the following V3 successor candidate:
 
 ```text
 MIN_ALCHEMY_AMOUNT = 1 KAIOS
@@ -74,7 +74,7 @@ REFUND = NOT_APPLICABLE_NO_ESCROW
 
 The target atomic path is holder -> successor K18911 -> exact KGEN transfer directly to immutable catalyst bank -> deployed KAIOS burn ABI -> K511111 release -> immediate KUFO mint to the fixed beneficiary. Any failed step reverts the full transaction. The furnace must retain no KGEN.
 
-This is `CURRENT_DESIGN_CANON / IMPLEMENTED_REVIEW_CANDIDATE`, not deployed. Production deployment remains blocked until the catalyst-bank address and KUFO `halfLifeSeconds` are frozen and legacy V1 proof compatibility is resolved.
+This is `UNBOUND_HUMAN_DIRECTION_REFERENCE / IMPLEMENTED_REVIEW_CANDIDATE`, not deployed or current Canon. Production discussion remains blocked until immutable repository-bound Human decision evidence is added, the catalyst-bank address and KUFO `halfLifeSeconds` are frozen, legacy V1 proof compatibility is resolved, and distinct review passes.
 
 ## 4. 18888 service and 18911 alchemy separation
 
@@ -112,7 +112,7 @@ This is `OPEN_REVIEW`, not deployed functionality and not a production catalyst-
 
 Do NOT modify historical V7.5.2 KGEN or GalacticBank deployments and pretend new methods already exist there.
 
-The direct V3 route must verify an exact balance increase at a frozen immutable catalyst bank in the same atomic transaction. It does not use a return ticket.
+The candidate direct V3 route would have to verify an exact balance increase at a frozen immutable catalyst bank in the same atomic transaction. It proposes no return ticket, but this remains unbound candidate behavior rather than active Canon.
 
 The alternative KGEN 0.10% bank-share credit route remains `DESIGN_ONLY_DISABLED`. A future proof must bind `txHash + logIndex + wallet + amount + timestamp`, use only the actual Bank share, preserve the actual buyer identity, accept contributions no older than 130 days (the exact boundary remains valid), consume credits FIFO, and prevent replay. Indexer, attester, batch-root and operating budget remain unfrozen.
 
