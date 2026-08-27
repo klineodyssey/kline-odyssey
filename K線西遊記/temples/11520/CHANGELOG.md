@@ -1,5 +1,12 @@
 # 11520 Changelog
 
+## 4.0.4
+
+- Reclassified the live 11520 settlement observation as `BLOCKED_SETTLEMENT_CODE_IDENTITY_NOT_REPOSITORY_BOUND`: RPC quorum, addresses, getters and hash-shaped observations do not prove exact runtime bytecode until expected code hashes are independently bound in the repository.
+- Kept historical ExchangeSettlement11520 deployment evidence separate from current runtime verification. The historical V1 capability remains incompatible with atomic GPU buyer-payment, seller-beneficiary and custody delivery.
+- Added a fail-closed GPU atomic-settlement binding envelope for one listing, GPU serial, warehouse receipt, verified buyer/seller authorities, fixed beneficiary, KGEN/KAIOS amount, nonce and expiry. It exposes no payload, signer, allowance, settlement or revenue authority.
+- Reconciled KGEN external-metadata evidence so current BankGovernance ownership, current Reserve Redemption `bankWallet`, former owner and historical Bank reserve are distinct roles.
+
 ## 4.0.2
 
 - Repaired the production browser entry after mobile QA found the page could remain at `Loading canonical universe…`. The browser no longer imports the aggregate `core/index.mjs`, whose signer and Starforge exports intentionally depend on Node-only `node:module`.

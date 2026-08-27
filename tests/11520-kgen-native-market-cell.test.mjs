@@ -550,7 +550,9 @@ test("public GPU readiness panel is read-only and exposes the fixed fail-closed 
   assert.match(app, /readRepositoryBoundGpu11520Evidence/);
   assert.match(app, /evaluateGpu11520RealTradeReadiness/);
   assert.match(app, /readExchangeSettlement11520SnapshotQuorum/);
-  assert.match(app, /11520 deployed settlement compatibility/);
+  assert.match(app, /11520 settlement code-identity gate/);
+  assert.match(app, /Expected code hashes bound/);
+  assert.match(app, /Runtime code identity verified/);
   assert.match(app, /This panel cannot create inventory, fund capital, request a signer, settle a trade or send a transaction/);
   assert.doesNotMatch(app, /id="gpu-(?:trade|settle|sign|broadcast)"/);
 });

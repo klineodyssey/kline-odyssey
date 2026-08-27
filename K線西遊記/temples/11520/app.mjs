@@ -25,7 +25,7 @@ import {
   evaluateGpu11520RealTradeReadiness,
   readExchangeSettlement11520SnapshotQuorum,
   readRepositoryBoundGpu11520Evidence
-} from "./modules/kgen-native-market-cell.mjs?v=11520-v4.0.3-settlement-compatibility";
+} from "./modules/kgen-native-market-cell.mjs?v=11520-v4.0.4-settlement-code-identity";
 
 const NAVIGATION = Object.freeze([
   ["HOME", "navigation.home"], ["REQUEST", "navigation.request"], ["LIFE", "navigation.life"], ["LIFE_FACTORY", "LIFE FACTORY"], ["APPS", "navigation.apps"], ["COMPANIES", "navigation.company"],
@@ -348,10 +348,13 @@ async function tokensView() {
       status: "READ_ONLY_RPC_CHECK_FAILED",
       observed_at: null,
       block_number: null,
-      deployed_capability: "GOVERNANCE_AUTHORIZED_18888_KAIOS_PAYMENT_TO_FIXED_11520_BRAIN",
+      configured_capability_claim_unverified: "GOVERNANCE_AUTHORIZED_18888_KAIOS_PAYMENT_TO_FIXED_11520_BRAIN",
+      expected_runtime_code_hashes_repository_bound: false,
+      runtime_code_identity_verified: false,
       total_settled_atomic: null,
       gpu_trade_compatibility: "NOT_VERIFIED_FAIL_CLOSED",
       production_gpu_settlement_adapter_status: "NOT_IMPLEMENTED",
+      blockers: Object.freeze([error?.message || "SETTLEMENT_11520_READ_FAILED"]),
       incompatibilities: Object.freeze([error?.message || "SETTLEMENT_11520_READ_FAILED"]),
       real_trade_enabled: false,
       chain_write: false
@@ -381,17 +384,20 @@ async function tokensView() {
       ${kv("Chain write", String(gpuReadiness.chain_write))}
       <div class="eyebrow">OPEN BLOCKERS</div>${pills(gpuReadiness.blockers)}
     </article>`)}
-    ${section("11520 deployed settlement compatibility", `<article class="card">
-      <div class="notice">Read-only BSC quorum check. Deployed V1 can make a governance-authorized 18888 KAIOS payment to the fixed 11520 Brain; it is not an atomic buyer/seller GPU settlement rail.</div>
+    ${section("11520 settlement code-identity gate", `<article class="card">
+      <div class="notice">Historical deployment evidence describes V1 as an 18888 KAIOS payment module to the fixed 11520 Brain. This live read-only quorum adapter does not promote that historical capability until expected runtime code hashes are repository-bound.</div>
       ${kv("Observed status", badge(settlement11520.status), true)}
       ${kv("Observed block", settlement11520.block_number ?? "UNAVAILABLE")}
       ${kv("Observed at", settlement11520.observed_at ?? "UNAVAILABLE")}
-      ${kv("Deployed capability", settlement11520.deployed_capability)}
+      ${kv("Configured capability claim", settlement11520.configured_capability_claim_unverified ?? "UNVERIFIED")}
+      ${kv("Expected code hashes bound", String(settlement11520.expected_runtime_code_hashes_repository_bound ?? false))}
+      ${kv("Runtime code identity verified", String(settlement11520.runtime_code_identity_verified ?? false))}
       ${kv("Total settled (atomic KAIOS)", settlement11520.total_settled_atomic ?? "UNVERIFIED")}
       ${kv("GPU compatibility", badge(settlement11520.gpu_trade_compatibility), true)}
       ${kv("Production GPU adapter", badge(settlement11520.production_gpu_settlement_adapter_status), true)}
       ${kv("Real trade enabled", String(settlement11520.real_trade_enabled))}
       ${kv("Chain write", String(settlement11520.chain_write))}
+      <div class="eyebrow">IDENTITY BLOCKERS</div>${pills(settlement11520.blockers ?? [])}
       <div class="eyebrow">INCOMPATIBILITIES</div>${pills(settlement11520.incompatibilities)}
     </article>`)}
     ${section("KGEN / WBNB live AMM", `<form class="card form-grid" id="kgen-swap-form">
