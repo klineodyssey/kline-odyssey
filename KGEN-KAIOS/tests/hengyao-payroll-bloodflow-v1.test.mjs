@@ -106,7 +106,7 @@ test("committed package matches the reproducible plan and records exact executio
   assert.equal(report.latestReadOnlyObservation.snapshotPhase, "LATEST_READ_ONLY_OBSERVATION");
   assert.equal(report.latestReadOnlyObservation.sourceOfTruth, true);
   assert.equal(report.latestReadOnlyObservation.chainId, 56);
-  assert.equal(report.latestReadOnlyObservation.asOfBlock, 118329214);
+  assert.equal(report.latestReadOnlyObservation.asOfBlock, 118356924);
   assert.equal(report.latestReadOnlyObservation.bank18888.kaiosBalance, "22213020.930416874731235");
   assert.equal(report.latestReadOnlyObservation.bank18888.reserve, "11000000.0");
   assert.equal(report.latestReadOnlyObservation.bank18888.available, "11213020.930416874731235");
