@@ -68,4 +68,3 @@ Current safety state:
 - `TARGET_DELIVERY = 2026-11-13T18:00:00+08:00, NON_BINDING_ESTIMATE_ONLY`
 
 This PR may continue only as local Draft design, tests and review preparation under its existing branch authorization. Project activation, Work Package dispatch, Worker onboarding, payment, milestone release, final acceptance and merge remain independently evidence-gated.
-
