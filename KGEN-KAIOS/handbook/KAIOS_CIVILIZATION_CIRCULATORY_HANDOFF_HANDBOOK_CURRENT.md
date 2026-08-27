@@ -386,4 +386,4 @@ These branches must be resynchronized whenever `main` advances semantically, the
 4. Preserve deployed Mainnet evidence from the #135/#136 lineage while reconciling documentation through #184 and live chain reads.
 5. Keep every PR Draft/HOLD and do not merge under the current work order.
 
-END OF HANDBOOK V1.3
+END OF HANDBOOK V1.4
