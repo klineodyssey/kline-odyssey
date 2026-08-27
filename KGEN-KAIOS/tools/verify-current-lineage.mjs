@@ -26,19 +26,12 @@ const forbidden = [
 const safeConflictReferenceFiles = new Set([
   "docs/physics/KGEN_KAIOS_SCALE_AND_PLANCK_RUNTIME_CURRENT.md",
 ]);
-const supersededHistoricalPatterns = new Map([
-  ["docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md", new Map([
-    ["1 KGEN = 1 kg", ["SUPERSEDED_SCALE_RULE", /1 KGEN\s*=\s*1000 kg/u]],
-  ])],
-]);
 const failures = [];
 
 for (const relativePath of activeFiles) {
   const absolutePath = path.join(repo, relativePath);
   const content = fs.readFileSync(absolutePath, "utf8");
   for (const pattern of safeConflictReferenceFiles.has(relativePath) ? [] : forbidden) {
-    const allowance = supersededHistoricalPatterns.get(relativePath)?.get(pattern);
-    if (allowance && allowance.every((marker) => typeof marker === "string" ? content.includes(marker) : marker.test(content))) continue;
     if (content.includes(pattern)) failures.push({ path: relativePath, pattern });
   }
 }
@@ -63,7 +56,7 @@ for (const relativePath of new Set(
 }
 
 const assertions = {
-  kgenMassScale: /1 KGEN\s*=\s*1000 kg/u.test(fs.readFileSync(path.join(repo, activeFiles[0]), "utf8")),
+  kgenMassScale: fs.readFileSync(path.join(repo, activeFiles[0]), "utf8").includes("1 KGEN = 1 metric ton = 1,000 kg"),
   kaiosRatio: fs.readFileSync(path.join(repo, "KGEN-KAIOS/contracts/KAIOS.sol"), "utf8").includes("KAIOS_PER_KGEN = 1_000"),
   frictionMirror: fs.readFileSync(path.join(repo, "KGEN-KAIOS/contracts/KAIOS.sol"), "utf8").includes("IKGENSupply(KGEN).totalSupply()"),
   organRegistry: fs.readFileSync(path.join(repo, "KGEN-KAIOS/contracts/KAIOS.sol"), "utf8").includes("ORGAN_REGISTRY.organ"),

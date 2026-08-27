@@ -298,7 +298,7 @@ Other pools are optional. The chosen pool must not be described as guaranteed li
 
 ### 10.4 KAIOS Market Genesis Readiness — 2026-08-27
 
-A read-only BSC chain 56 observation at block `118324943` found:
+A read-only BSC chain 56 candidate observation at block `118324943` reported:
 
 ```text
 KAIOS Token code = PRESENT
@@ -308,11 +308,13 @@ PancakeSwap V2 KAIOS / KGEN pair = ZERO ADDRESS
 PancakeSwap V2 KAIOS / USDT pair = ZERO ADDRESS
 ```
 
-The current external market status is therefore
-`NO_LIVE_KAIOS_PAIR_DETECTED`. KAIOS is Mainnet-live as a token, but it has no
-verified AMM price, no registered Pair Registry organ and no evidenced external
-liquidity in the three checked principal routes. Token deployment must not be
-misreported as market deployment.
+Because this repository does not yet contain a repository-bound snapshot verifier
+that binds the canonical factory result, block hash, code hashes, evidence hash,
+freshness and revocation state, the runtime status is
+`UNVERIFIED_EXTERNAL_MARKET_OBSERVATION`. The reported zero addresses are useful
+read-only evidence candidates, but caller labels cannot establish the broader
+claim `NO_LIVE_KAIOS_PAIR_DETECTED`. KAIOS is Mainnet-live as a token; token
+deployment must not be misreported as market deployment.
 
 Any genesis-liquidity proposal must identify exact two-sided capital, asset
 ownership, budget evidence, a fixed funding account, an approved risk policy,
@@ -320,11 +322,17 @@ a secure signer and governance review. The initial deposit ratio is only an
 opening market input; it does not replace the white-hole mass rule and does not
 guarantee a future price.
 
-The following capital classes are prohibited from funding a market-genesis
+The only candidate funding class admitted by the closed local allowlist is
+`COMPANY_TRADING_TREASURY`; it still remains unusable until a machine-verifiable
+funding registry binds the exact account, asset, balance, budget, authority,
+expiry and revocation state. Caller-provided booleans or labels are never
+authorization. The following capital classes are prohibited from funding a market-genesis
 proposal: 18888 reserve or performance bond, 8888 payroll liability or funded
 salary, KGEN reserve, KGEN catalyst escrow, Naihe Genesis reserve, Public Good
 emergency reserve and refundable principal. The readiness runtime creates no
-calldata, approval, transfer, pair, liquidity position or Mainnet transaction.
+calldata, approval, transfer, pair, liquidity position or Mainnet transaction,
+and it is structurally incapable of returning `READY_FOR_INDEPENDENT_REVIEW`
+until the missing repository-bound verifiers are implemented.
 
 ---
 

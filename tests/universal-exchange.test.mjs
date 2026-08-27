@@ -121,18 +121,19 @@ const kaiosNoPairSnapshot = Object.freeze({
   })
 });
 
-test("KAIOS market snapshot preserves the latest BSC no-pair truth", () => {
+test("KAIOS market snapshot remains unverified until repository-bound evidence exists", () => {
   const market = evaluateKaiosExternalMarketSnapshot(kaiosNoPairSnapshot);
   assert.equal(KAIOS_MARKET_GENESIS_CONFIG.company_address, "0.00011520");
-  assert.equal(market.market_status, "NO_LIVE_KAIOS_PAIR_DETECTED");
-  assert.equal(market.pair_registry_status, "NOT_DEPLOYED_OR_NOT_REGISTERED");
-  assert.equal(market.price_status, "NO_MATCHED_OR_AMM_PRICE");
+  assert.equal(market.market_status, "UNVERIFIED_EXTERNAL_MARKET_OBSERVATION");
+  assert.equal(market.pair_registry_status, "CALLER_REPORTED_ZERO_UNVERIFIED");
+  assert.equal(market.price_status, "UNVERIFIED_NO_MARKET_PRICE_AUTHORITY");
+  assert.equal(market.authoritative_no_pair_claim, false);
   assert.equal(market.execution_performed, false);
   assert.throws(() => evaluateKaiosExternalMarketSnapshot({ ...kaiosNoPairSnapshot, chain_id: 1 }), (error) => error.code === "KAIOS_MARKET_WRONG_CHAIN");
   assert.throws(() => evaluateKaiosExternalMarketSnapshot({ ...kaiosNoPairSnapshot, pairs: { ...kaiosNoPairSnapshot.pairs, KGEN: "UNKNOWN" } }), (error) => error.code === "KAIOS_PAIR_ADDRESS_INVALID");
 });
 
-test("KAIOS pair proposal requires funded two-sided capital and independent gates", () => {
+test("KAIOS pair proposal cannot self-upgrade caller claims into verified readiness", () => {
   const base = {
     snapshot: kaiosNoPairSnapshot,
     quoteAsset: "KGEN",
@@ -150,17 +151,22 @@ test("KAIOS pair proposal requires funded two-sided capital and independent gate
     pairRegistryPlanApproved: true
   };
   const proposal = createKaiosMarketGenesisProposal(base);
-  assert.equal(proposal.status, "READY_FOR_INDEPENDENT_REVIEW");
+  assert.equal(proposal.status, "BLOCKED_MACHINE_VERIFIABLE_MARKET_GENESIS_EVIDENCE_NOT_IMPLEMENTED");
   assert.deepEqual(proposal.initial_quote_rational, {
     numerator_quote_atomic: "1000000000000000000",
     denominator_kaios_atomic: "1000000000000000000000"
   });
   assert.equal(proposal.execution_authorized, false);
   assert.equal(proposal.mainnet_transaction_sent, false);
+  assert.equal(proposal.caller_claims_are_authority, false);
+  assert.equal(proposal.checks.repository_bound_market_snapshot, false);
+  assert.equal(proposal.checks.closed_funding_registry, false);
+  assert.equal(proposal.checks.secure_signer_verified, false);
 
   const underfunded = createKaiosMarketGenesisProposal({ ...base, quoteAvailableAtomic: "0", signerReady: false });
-  assert.deepEqual(underfunded.blockers, ["QUOTE_FUNDED", "SECURE_SIGNER"]);
-  assert.equal(underfunded.status, "BLOCKED_MISSING_MARKET_GENESIS_EVIDENCE");
+  assert.ok(underfunded.blockers.includes("QUOTE_FUNDED"));
+  assert.ok(underfunded.blockers.includes("SECURE_SIGNER_VERIFIED"));
+  assert.equal(underfunded.status, "BLOCKED_MACHINE_VERIFIABLE_MARKET_GENESIS_EVIDENCE_NOT_IMPLEMENTED");
 });
 
 test("KAIOS market genesis cannot use protected bank, payroll, catalyst or public-good reserves", () => {
@@ -172,6 +178,7 @@ test("KAIOS market genesis cannot use protected bank, payroll, catalyst or publi
   for (const fundingSourceClass of ["BANK_18888_RESERVE", "BANK_8888_PAYROLL_LIABILITY", "KGEN_CATALYST_ESCROW", "NAIHE_GENESIS_RESERVE"]) {
     assert.throws(() => createKaiosMarketGenesisProposal({ ...common, fundingSourceClass }), (error) => error.code === "KAIOS_MARKET_PROTECTED_CAPITAL");
   }
+  assert.throws(() => createKaiosMarketGenesisProposal({ ...common, fundingSourceClass: "RENAMED_UNVERIFIED_TREASURY" }), (error) => error.code === "KAIOS_MARKET_FUNDING_SOURCE_UNREGISTERED");
 });
 
 async function runtime() {
