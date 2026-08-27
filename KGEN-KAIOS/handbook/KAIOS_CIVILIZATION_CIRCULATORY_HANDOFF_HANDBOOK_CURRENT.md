@@ -230,7 +230,7 @@ The current 16-workstream order is: Genesis/PR lineage; Cursor offboarding; dist
 
 Engineering candidates may proceed on isolated Draft branches. Real trade, payment, deployment and governance stay fail-closed unless the corresponding signer, budget, inventory, counterparty, settlement and independent-review gates are all machine-verifiably satisfied.
 
-Checkpoint classification at `2026-08-27T12:10:48Z`:
+Checkpoint classification at `2026-08-27T12:30:23Z`:
 
 | # | Workstream | Durable candidate/evidence | Current state |
 |---|---|---|---|
@@ -329,7 +329,7 @@ Therefore:
 
 ## 18. GitHub PR lineage checkpoint — 2026-08-27
 
-Observed at `2026-08-27T12:10:48Z` against `origin/main = 830b79214781fb1231f3619336de394f400a0bfd`.
+Observed at `2026-08-27T12:30:23Z` against `origin/main = 830b79214781fb1231f3619336de394f400a0bfd`.
 
 The remembered counts of 27 and 36 open PRs are superseded. GitHub reported 38 open PRs at this checkpoint. A green workflow means tests passed at that head; it is not an independent review, deployment claim or merge authorization.
 
@@ -337,7 +337,7 @@ The remembered counts of 27 and 36 open PRs are superseded. GitHub reported 38 o
 
 `#188, #187, #185, #183, #182, #180, #179, #176, #172, #170, #162, #161, #158`
 
-- #188 exact head `4500ab7262d01575f822f23de74e347aa79ac9d2` cumulatively integrates #169, #178, #179, #180, #181 and #185 on current main. It preserves the assigned `0.00011520` K11520 company/KGEN-price coordinate without seeding matched-trade CT, combines the paper market, listing/warehouse gates and browser-safe mobile wallet, and adds a read-only GPU real-trade readiness evaluator. Caller-supplied evidence and verifier callbacks cannot promote readiness because `REPOSITORY_BOUND_GPU_EVIDENCE_VERIFIER_NOT_WIRED` remains unconditional; even a hypothetical complete candidate bundle stays `BLOCKED_FAIL_CLOSED` and produces no transaction payload or signer request. Exact-head Universal CI and Product QA are green, but it remains Draft and still requires distinct review and real inventory/capital/settlement/signer evidence.
+- #188 exact head `f267a095c7a05db36e57d38724d0fd7be2e78c96` cumulatively integrates #169, #178, #179, #180, #181 and #185 on current main. It preserves the assigned `0.00011520` K11520 company/KGEN-price coordinate without seeding matched-trade CT, combines the paper market, listing/warehouse gates and browser-safe mobile wallet, and adds a read-only GPU real-trade readiness evaluator. Caller-supplied evidence and verifier callbacks cannot promote readiness because `REPOSITORY_BOUND_GPU_EVIDENCE_VERIFIER_NOT_WIRED` remains unconditional; even a hypothetical complete candidate bundle stays `BLOCKED_FAIL_CLOSED` and produces no transaction payload or signer request. The Mother Machine can now produce public `CONNECTED_BINDING_ONLY / VERIFIED_BOUND` evidence only for the repository-bound Hengyao Life, environment, chain-56 wallet profile. This proves credential binding without exposing the signer and grants no identity, transaction, treasury or trading authority; the transaction Policy Broker remains unconnected. Exact-head push CI, PR CI and Product QA are green, but #188 remains Draft and still requires distinct review, real inventory, funded segregated capital, production market/settlement, a reviewed Policy Broker and no-broadcast fork evidence.
 - #187 is this lineage reconciliation candidate. It is evidence/documentation only and cannot approve itself.
 - #186 is the unsigned/read-only 18888 Public Good payment adapter; live read is fail-closed because the tested Mother/Jade addresses do not hold the bank payment roles.
 - #185 is the mobile chain-56 wallet/watch-asset candidate; it sends no token transaction and does not claim a KAIOS DEX pair exists.
