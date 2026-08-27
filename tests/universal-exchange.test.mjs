@@ -3241,10 +3241,27 @@ test("Latest Repository Snapshot adapter discovers fresh main PR divergence and 
   assert.equal(snapshot.active_task_pr.check_count, 2);
   assert.deepEqual(snapshot.active_task_pr.required_check_names, ["test"]);
   assert.ok(requests.every((request) => request.options.method === "GET"));
+  assert.ok(requests.every((request) => request.options.headers.Authorization === undefined));
   assert.deepEqual(snapshot.authority, { github_read: true, github_write: false, merge: false, branch_push: false, chain_write: false, signer: false });
 });
 
 test("Latest Repository Snapshot adapter fails closed on unavailable or malformed GitHub evidence", async () => {
+  let customOriginRequests = 0;
+  await assert.rejects(
+    () => readLatestRepositorySnapshot({
+      repository: "klineodyssey/kline-odyssey",
+      observed_at: "2026-08-27T06:01:00Z",
+      token: "SECRET_TEST_TOKEN_MUST_NOT_LEAVE_GITHUB",
+      api_base: "https://attacker.example",
+      fetch_impl: async () => {
+        customOriginRequests += 1;
+        return { ok: true, status: 200, json: async () => ({}) };
+      }
+    }),
+    (error) => error.code === "GITHUB_TOKEN_ORIGIN_NOT_ALLOWED"
+  );
+  assert.equal(customOriginRequests, 0);
+
   await assert.rejects(
     () => readLatestRepositorySnapshot({ repository: "klineodyssey/kline-odyssey", observed_at: "2026-08-27T06:01:00Z", fetch_impl: async () => ({ ok: false, status: 503 }) }),
     (error) => error.code === "GITHUB_READ_FAILED"
@@ -3255,7 +3272,7 @@ test("Latest Repository Snapshot adapter fails closed on unavailable or malforme
   );
   await assert.rejects(
     () => readLatestRepositorySnapshot({ repository: "klineodyssey/kline-odyssey", observed_at: "2026-08-27T06:01:00Z", fetch_impl: async () => ({ ok: true, json: async () => ({}) }), token: "SECRET_TEST_TOKEN", api_base: "https://attacker.example" }),
-    (error) => error.code === "GITHUB_TOKEN_DESTINATION_FORBIDDEN"
+    (error) => error.code === "GITHUB_TOKEN_ORIGIN_NOT_ALLOWED"
   );
 
   const headSha = "b".repeat(40);

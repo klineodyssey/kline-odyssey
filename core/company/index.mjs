@@ -2596,7 +2596,7 @@ function normalizeGitHubApiBase(apiBase, token) {
   invariant(!parsed.username && !parsed.password && !parsed.search && !parsed.hash, "GITHUB_API_BASE_INVALID", "GitHub API base cannot contain credentials, query or fragment");
   invariant(parsed.pathname === "/" || parsed.pathname === "", "GITHUB_API_BASE_PATH_FORBIDDEN", "GitHub API base cannot contain a path");
   if (token) {
-    invariant(parsed.origin === CANONICAL_GITHUB_API_ORIGIN, "GITHUB_TOKEN_DESTINATION_FORBIDDEN", "GitHub bearer credentials may only be sent to the canonical GitHub API origin");
+    invariant(parsed.origin === CANONICAL_GITHUB_API_ORIGIN, "GITHUB_TOKEN_ORIGIN_NOT_ALLOWED", "GitHub bearer credentials may only be sent to the canonical GitHub API origin");
   }
   return parsed.origin;
 }
