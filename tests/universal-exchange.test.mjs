@@ -156,7 +156,24 @@ function gpuWarehouseReceipt11520() {
   };
 }
 
-test("11520 universal listing requires verified actor and physical warehouse provenance", () => {
+function serviceListingCandidate11520() {
+  const asset = { ...gpuAsset11520(), asset_id: "SERVICE_GPU_LOGISTICS_0001", asset_type: "SERVICE" };
+  const listing = {
+    ...gpuListing11520(),
+    listing_id: "LISTING_SERVICE_GPU_LOGISTICS_0001",
+    asset_id: asset.asset_id,
+    listing_type: "SERVICE",
+    currency_id: "KAIOS",
+    rights_offered: ["use_right"]
+  };
+  return create11520UniversalListingCandidate({
+    listing, asset, sellerActorContext: { evidence_id: "EVIDENCE_SELLER" }, verifyActorContext: verify11520TestActor,
+    observedAt: "2026-08-27T13:31:00+08:00", unitPriceAtomic: "88000000000000000000",
+    quantityAtomic: "1", evidenceIds: ["SERVICE_SCOPE_0001"]
+  });
+}
+
+test("11520 physical listing cannot promote caller-asserted warehouse labels", () => {
   const candidate = create11520UniversalListingCandidate({
     listing: gpuListing11520(), asset: gpuAsset11520(), sellerActorContext: { evidence_id: "EVIDENCE_SELLER", actor_id: "FORGED_LABEL" },
     verifyActorContext: verify11520TestActor, observedAt: "2026-08-27T13:31:00+08:00",
@@ -166,8 +183,16 @@ test("11520 universal listing requires verified actor and physical warehouse pro
   assert.equal(UNIVERSAL_11520_MARKET.company_address, "0.00011520");
   assert.equal(candidate.seller_authority.actor_id, "LIFE_GPU_SELLER");
   assert.equal(candidate.total_ask_atomic, "2000000000000000000");
-  assert.equal(candidate.inventory_class, "PHYSICAL_WAREHOUSE_CANDIDATE");
+  assert.equal(candidate.inventory_class, "PHYSICAL_WAREHOUSE_EVIDENCE_PENDING");
+  assert.equal(candidate.status, "WAREHOUSE_EVIDENCE_REQUIRED");
+  assert.equal(candidate.warehouse_receipt.evidence_class, "CALLER_ASSERTED_UNVERIFIED");
+  assert.equal(candidate.warehouse_receipt.status, "WAREHOUSE_EVIDENCE_PENDING");
   assert.equal(candidate.custody_transfer, false);
+  assert.throws(() => create11520EscrowCandidate({
+    listingCandidate: candidate, buyerActorContext: { evidence_id: "EVIDENCE_BUYER" },
+    verifyActorContext: verify11520TestActor, observedAt: "2026-08-27T13:32:00+08:00",
+    amountAtomic: candidate.total_ask_atomic
+  }), (error) => error.code === "LISTING_CANDIDATE_REQUIRED");
   assert.throws(() => create11520UniversalListingCandidate({
     listing: gpuListing11520(), asset: gpuAsset11520(), sellerActorContext: { evidence_id: "EVIDENCE_SELLER" }, verifyActorContext: verify11520TestActor,
     observedAt: "2026-08-27T13:31:00+08:00", unitPriceAtomic: "1", quantityAtomic: "1", evidenceIds: ["EVIDENCE"], warehouseReceipt: null
@@ -192,12 +217,8 @@ test("11520 lists Life work as a separate Service asset and never sells Life ide
   assert.equal(serviceCandidate.quote_currency, "KAIOS");
 });
 
-test("11520 escrow is paper-only and blocks self or same-controller settlement", () => {
-  const listingCandidate = create11520UniversalListingCandidate({
-    listing: gpuListing11520(), asset: gpuAsset11520(), sellerActorContext: { evidence_id: "EVIDENCE_SELLER" },
-    verifyActorContext: verify11520TestActor, observedAt: "2026-08-27T13:31:00+08:00",
-    unitPriceAtomic: "2000000000000000000", quantityAtomic: "1", evidenceIds: ["GPU_METADATA_HASH"], warehouseReceipt: gpuWarehouseReceipt11520()
-  });
+test("11520 service escrow is paper-only and blocks self or same-controller settlement", () => {
+  const listingCandidate = serviceListingCandidate11520();
   const escrow = create11520EscrowCandidate({ listingCandidate, buyerActorContext: { evidence_id: "EVIDENCE_BUYER" }, verifyActorContext: verify11520TestActor, observedAt: "2026-08-27T13:32:00+08:00", amountAtomic: listingCandidate.total_ask_atomic });
   assert.equal(escrow.status, "UNFUNDED_MODEL_ONLY");
   assert.equal(escrow.allowance_requested, false);
@@ -206,11 +227,8 @@ test("11520 escrow is paper-only and blocks self or same-controller settlement",
   assert.throws(() => create11520EscrowCandidate({ listingCandidate, buyerActorContext: { evidence_id: "EVIDENCE_BUYER" }, verifyActorContext: verify11520TestActor, observedAt: "2026-08-27T13:32:00+08:00", amountAtomic: "1" }), (error) => error.code === "ESCROW_AMOUNT_MISMATCH");
 });
 
-test("11520 receipt binds parties and amount, prevents replay, and balances accounting", () => {
-  const listingCandidate = create11520UniversalListingCandidate({
-    listing: gpuListing11520(), asset: gpuAsset11520(), sellerActorContext: { evidence_id: "EVIDENCE_SELLER" }, verifyActorContext: verify11520TestActor,
-    observedAt: "2026-08-27T13:31:00+08:00", unitPriceAtomic: "2000000000000000000", quantityAtomic: "1", evidenceIds: ["GPU_METADATA_HASH"], warehouseReceipt: gpuWarehouseReceipt11520()
-  });
+test("11520 receipt callback cannot manufacture settlement or revenue", () => {
+  const listingCandidate = serviceListingCandidate11520();
   const escrow = create11520EscrowCandidate({ listingCandidate, buyerActorContext: { evidence_id: "EVIDENCE_BUYER" }, verifyActorContext: verify11520TestActor, observedAt: "2026-08-27T13:32:00+08:00", amountAtomic: listingCandidate.total_ask_atomic });
   const receiptInput = {
     receipt_id: "SETTLEMENT_GPU_TEST_0001", listing_id: escrow.listing_id, escrow_id: escrow.escrow_id, chain_id: 56,
@@ -219,14 +237,18 @@ test("11520 receipt binds parties and amount, prevents replay, and balances acco
     asset_id: escrow.asset_id, currency_id: escrow.currency_id, amount_atomic: escrow.amount_atomic, confirmed_at: "2026-08-27T13:40:00+08:00"
   };
   const verifyChainReceipt = (txHash) => txHash === receiptInput.tx_hash ? { chain_id: 56, block_number: 118325000, receipt_status: 1 } : null;
-  const receipt = validate11520SettlementReceipt(receiptInput, { escrowCandidate: escrow, verifyChainReceipt });
-  assert.equal(receipt.status, "CHAIN_VERIFIED_UNCONSUMED_CANDIDATE");
+  const receiptCandidate = validate11520SettlementReceipt(receiptInput, { escrowCandidate: escrow, verifyChainReceipt });
+  assert.equal(receiptCandidate.status, "CHAIN_RECEIPT_CANDIDATE_NOT_REPOSITORY_BOUND");
+  assert.equal(receiptCandidate.chain_settlement_proven, false);
   assert.throws(() => validate11520SettlementReceipt(receiptInput, { escrowCandidate: escrow, verifyChainReceipt, consumedReceiptIds: [receiptInput.receipt_id] }), (error) => error.code === "SETTLEMENT_RECEIPT_REPLAY");
   assert.throws(() => validate11520SettlementReceipt({ ...receiptInput, beneficiary: "ATTACKER" }, { escrowCandidate: escrow, verifyChainReceipt }), (error) => error.code === "SETTLEMENT_BENEFICIARY_MISMATCH");
   assert.throws(() => validate11520SettlementReceipt({ ...receiptInput, block_number: 1 }, { escrowCandidate: escrow, verifyChainReceipt }), (error) => error.code === "SETTLEMENT_CHAIN_RECEIPT_MISMATCH");
-  const accounting = create11520SettlementAccounting({ receipt, companyId: "KAIOS_AI_COMPANY", feeAtomic: "10000000000000000" });
+  const accounting = create11520SettlementAccounting({ receipt: receiptCandidate, companyId: "KAIOS_AI_COMPANY", feeAtomic: "10000000000000000" });
   assert.equal(accounting.balanced, true);
+  assert.equal(accounting.accounting_status, "DRAFT_MODEL_ONLY_NOT_POSTED");
+  assert.equal(accounting.revenue_status, "NOT_REVENUE_UNVERIFIED_SETTLEMENT_CONNECTOR");
   assert.equal(accounting.payroll_funding_status, "NOT_AUTOMATIC");
+  assert.ok(accounting.entries.every((entry) => entry.posting_status === "NOT_POSTED"));
   assert.equal(accounting.entries.reduce((sum, entry) => sum + (entry.direction === "DEBIT" ? BigInt(entry.amount_atomic) : -BigInt(entry.amount_atomic)), 0n), 0n);
 });
 
