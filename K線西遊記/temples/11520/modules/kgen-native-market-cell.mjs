@@ -9,6 +9,35 @@ const GPU_EVIDENCE_REGISTRY_URL = new URL("../runtime/gpu-real-evidence-registry
 const GPU_TRADING_CAPITAL_REGISTRY_URL = new URL("../runtime/company-trading-capital-registry.v1.json", import.meta.url);
 const repositoryBoundGpuEvidenceBundles = new WeakSet();
 const repositoryBoundGpuEvidenceFetch = typeof globalThis.fetch === "function" ? globalThis.fetch.bind(globalThis) : null;
+const SETTLEMENT_11520_RPC_URLS = Object.freeze([
+  "https://bsc-dataseed.binance.org",
+  "https://bsc.publicnode.com"
+]);
+const repositoryBoundSettlement11520Fetch = typeof globalThis.fetch === "function" ? globalThis.fetch.bind(globalThis) : null;
+const verifiedSettlement11520Snapshots = new WeakSet();
+const SETTLEMENT_11520_IMPLEMENTATION_SLOT = "0x360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc";
+const SETTLEMENT_11520_SELECTORS = Object.freeze({
+  version: "0x54fd4d50",
+  bank: "0x76cdb03b",
+  module_id: "0xa1308f27",
+  governance_finalized: "0x2f70c6e0",
+  fixed_exchange: "0xf1ecdb42",
+  total_settled: "0xeace4c91",
+  has_role: "0x91d14854"
+});
+
+export const EXCHANGE_SETTLEMENT_11520_CONFIG = Object.freeze({
+  chain_id: 56,
+  proxy: "0x17587F49dFDE4e400D03Ae81364AC2af8E1629Df",
+  implementation: "0xA08A9CEcfa18b2FDb9ca8De0063A5029B9Ffc363",
+  bank: "0x11d34c0F723aCd334B8F95076f73F07f06202aab",
+  governance: "0xa2792fBDCc8A8AaC364053431D44E0a8D335E166",
+  fixed_exchange: "0xd0605F4EF10e5C1438F11AF9edc36926769239d6",
+  module_id: "0x24b8150af34ecded6c75de16b22b3a7fa6477e94cb23ea338a9453af3ed8961b",
+  governance_role: "0x71840dc4906352362b0cdaf79870196c8e42acafade72d5d5a6d59291253ceb1",
+  version: "1.0.0",
+  deployed_capability: "GOVERNANCE_AUTHORIZED_18888_KAIOS_PAYMENT_TO_FIXED_11520_BRAIN"
+});
 
 function parseDecimal(value, label = "value") {
   const text = String(value).trim();
@@ -434,6 +463,260 @@ export function createGpu11520PaperMarket({ quoteAsset, ...options } = {}) {
     quoteDecimals: 18,
     lotSize: options.lotSize ?? "1",
     priceStatus: `GPU_${normalizedQuote}_MARKET_PRICE_CANDIDATE`
+  });
+}
+
+function settlementRpcHexQuantity(value, label) {
+  if (typeof value !== "string" || !/^0x[0-9a-f]+$/i.test(value)) {
+    throw new TypeError(`${label} must be a JSON-RPC hex quantity`);
+  }
+  const number = Number(BigInt(value));
+  if (!Number.isSafeInteger(number)) throw new RangeError(`${label} exceeds the safe integer range`);
+  return number;
+}
+
+function settlementRpcWord(value, label) {
+  if (typeof value !== "string" || !/^0x[0-9a-f]{64}$/i.test(value)) {
+    throw new TypeError(`${label} must be one ABI word`);
+  }
+  return value.toLowerCase();
+}
+
+function settlementRpcAddress(value, label) {
+  return `0x${settlementRpcWord(value, label).slice(-40)}`;
+}
+
+function settlementRpcBoolean(value, label) {
+  const parsed = BigInt(settlementRpcWord(value, label));
+  if (parsed !== 0n && parsed !== 1n) throw new TypeError(`${label} must be an ABI boolean`);
+  return parsed === 1n;
+}
+
+function settlementRpcUint(value, label) {
+  return BigInt(settlementRpcWord(value, label)).toString();
+}
+
+function settlementRpcString(value, label) {
+  if (typeof value !== "string" || !/^0x[0-9a-f]+$/i.test(value) || value.length < 130) {
+    throw new TypeError(`${label} must be an ABI string`);
+  }
+  const body = value.slice(2);
+  if (BigInt(`0x${body.slice(0, 64)}`) !== 32n) throw new TypeError(`${label} ABI offset is invalid`);
+  const byteLength = Number(BigInt(`0x${body.slice(64, 128)}`));
+  if (!Number.isSafeInteger(byteLength) || byteLength < 0 || byteLength > 64) {
+    throw new TypeError(`${label} ABI length is invalid`);
+  }
+  const encoded = body.slice(128, 128 + byteLength * 2);
+  if (encoded.length !== byteLength * 2) throw new TypeError(`${label} ABI payload is truncated`);
+  return new TextDecoder().decode(Uint8Array.from(encoded.match(/.{2}/g) ?? [], (byte) => Number.parseInt(byte, 16)));
+}
+
+function settlementRoleCallData(role, account) {
+  if (!/^0x[0-9a-f]{64}$/i.test(role) || !/^0x[0-9a-f]{40}$/i.test(account)) {
+    throw new TypeError("Settlement role query requires canonical role and account values");
+  }
+  return `${SETTLEMENT_11520_SELECTORS.has_role}${role.slice(2).toLowerCase()}${account.slice(2).toLowerCase().padStart(64, "0")}`;
+}
+
+async function settlementCodeSha256(code, label) {
+  if (typeof code !== "string" || !/^0x(?:[0-9a-f]{2})+$/i.test(code)) {
+    throw new TypeError(`${label} bytecode is missing or malformed`);
+  }
+  if (!globalThis.crypto?.subtle) throw new Error("SETTLEMENT_11520_CRYPTO_UNAVAILABLE");
+  const bytes = Uint8Array.from(code.slice(2).match(/.{2}/g) ?? [], (byte) => Number.parseInt(byte, 16));
+  const digest = await globalThis.crypto.subtle.digest("SHA-256", bytes);
+  return `0x${[...new Uint8Array(digest)].map((byte) => byte.toString(16).padStart(2, "0")).join("")}`;
+}
+
+async function settlementRpcRequest({ url, method, params, fetchImpl, signal, id }) {
+  const response = await fetchImpl(url, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ jsonrpc: "2.0", id, method, params }),
+    signal
+  });
+  if (response?.ok !== true) throw new Error(`SETTLEMENT_11520_RPC_HTTP_FAILURE:${method}`);
+  const payload = await response.json();
+  if (!payload || payload.error !== undefined || payload.result === undefined) {
+    throw new Error(`SETTLEMENT_11520_RPC_RESPONSE_FAILURE:${method}`);
+  }
+  return payload.result;
+}
+
+async function observeSettlement11520AtBlock({ url, blockNumber, fetchImpl, signal, requestId }) {
+  const blockTag = `0x${BigInt(blockNumber).toString(16)}`;
+  const call = (data, offset) => settlementRpcRequest({
+    url,
+    method: "eth_call",
+    params: [{ to: EXCHANGE_SETTLEMENT_11520_CONFIG.proxy, data }, blockTag],
+    fetchImpl,
+    signal,
+    id: requestId + offset
+  });
+  const [block, proxyCode, implementationWord, implementationCode, bankCode, fixedExchangeCode,
+    version, bank, moduleId, governanceFinalized, fixedExchange, totalSettled, governanceRole] = await Promise.all([
+    settlementRpcRequest({ url, method: "eth_getBlockByNumber", params: [blockTag, false], fetchImpl, signal, id: requestId }),
+    settlementRpcRequest({ url, method: "eth_getCode", params: [EXCHANGE_SETTLEMENT_11520_CONFIG.proxy, blockTag], fetchImpl, signal, id: requestId + 1 }),
+    settlementRpcRequest({ url, method: "eth_getStorageAt", params: [EXCHANGE_SETTLEMENT_11520_CONFIG.proxy, SETTLEMENT_11520_IMPLEMENTATION_SLOT, blockTag], fetchImpl, signal, id: requestId + 2 }),
+    settlementRpcRequest({ url, method: "eth_getCode", params: [EXCHANGE_SETTLEMENT_11520_CONFIG.implementation, blockTag], fetchImpl, signal, id: requestId + 3 }),
+    settlementRpcRequest({ url, method: "eth_getCode", params: [EXCHANGE_SETTLEMENT_11520_CONFIG.bank, blockTag], fetchImpl, signal, id: requestId + 4 }),
+    settlementRpcRequest({ url, method: "eth_getCode", params: [EXCHANGE_SETTLEMENT_11520_CONFIG.fixed_exchange, blockTag], fetchImpl, signal, id: requestId + 5 }),
+    call(SETTLEMENT_11520_SELECTORS.version, 6),
+    call(SETTLEMENT_11520_SELECTORS.bank, 7),
+    call(SETTLEMENT_11520_SELECTORS.module_id, 8),
+    call(SETTLEMENT_11520_SELECTORS.governance_finalized, 9),
+    call(SETTLEMENT_11520_SELECTORS.fixed_exchange, 10),
+    call(SETTLEMENT_11520_SELECTORS.total_settled, 11),
+    call(settlementRoleCallData(EXCHANGE_SETTLEMENT_11520_CONFIG.governance_role, EXCHANGE_SETTLEMENT_11520_CONFIG.governance), 12)
+  ]);
+  if (!block || !/^0x[0-9a-f]{64}$/i.test(block.hash)) throw new Error("SETTLEMENT_11520_BLOCK_HASH_REQUIRED");
+  if (settlementRpcHexQuantity(block.number, "block.number") !== blockNumber) throw new Error("SETTLEMENT_11520_BLOCK_MISMATCH");
+  const implementation = settlementRpcAddress(implementationWord, "implementation slot");
+  return Object.freeze({
+    block_hash: block.hash.toLowerCase(),
+    block_timestamp: settlementRpcHexQuantity(block.timestamp, "block.timestamp"),
+    proxy_code_sha256: await settlementCodeSha256(proxyCode, "settlement proxy"),
+    implementation,
+    implementation_code_sha256: await settlementCodeSha256(implementationCode, "settlement implementation"),
+    bank_code_sha256: await settlementCodeSha256(bankCode, "18888 bank"),
+    fixed_exchange_code_sha256: await settlementCodeSha256(fixedExchangeCode, "fixed 11520 exchange"),
+    version: settlementRpcString(version, "settlement version"),
+    bank: settlementRpcAddress(bank, "settlement bank"),
+    module_id: settlementRpcWord(moduleId, "settlement module ID"),
+    governance_finalized: settlementRpcBoolean(governanceFinalized, "governance finalized"),
+    fixed_exchange: settlementRpcAddress(fixedExchange, "fixed exchange"),
+    total_settled_atomic: settlementRpcUint(totalSettled, "total settled"),
+    governance_role_active: settlementRpcBoolean(governanceRole, "governance role")
+  });
+}
+
+/**
+ * Observe the already deployed ExchangeSettlement11520 proxy through two fixed
+ * BSC RPC endpoints at one confirmed block. This is a read-only compatibility
+ * probe: it cannot build calldata, request a signer, settle, fund or broadcast.
+ */
+export async function readExchangeSettlement11520SnapshotQuorum({
+  rpcUrls = SETTLEMENT_11520_RPC_URLS,
+  confirmations = 3,
+  fetchImpl = repositoryBoundSettlement11520Fetch,
+  timeoutMs = 15000
+} = {}) {
+  if (typeof fetchImpl !== "function") throw new Error("SETTLEMENT_11520_FETCH_REQUIRED");
+  if (!Array.isArray(rpcUrls) || new Set(rpcUrls).size < 2) throw new Error("SETTLEMENT_11520_RPC_QUORUM_REQUIRED");
+  if (!rpcUrls.every((url) => /^https:\/\//.test(String(url)))) throw new Error("SETTLEMENT_11520_RPC_HTTPS_REQUIRED");
+  if (!Number.isInteger(confirmations) || confirmations < 1) throw new Error("SETTLEMENT_11520_CONFIRMATIONS_REQUIRED");
+  if (!Number.isInteger(timeoutMs) || timeoutMs <= 0) throw new Error("SETTLEMENT_11520_TIMEOUT_INVALID");
+  const repositoryBoundTransport = fetchImpl === repositoryBoundSettlement11520Fetch
+    && confirmations === 3
+    && rpcUrls.length === SETTLEMENT_11520_RPC_URLS.length
+    && rpcUrls.every((url, index) => url === SETTLEMENT_11520_RPC_URLS[index]);
+
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const heads = await Promise.all(rpcUrls.map(async (url, index) => {
+      const [chainIdHex, blockNumberHex] = await Promise.all([
+        settlementRpcRequest({ url, method: "eth_chainId", params: [], fetchImpl, signal: controller.signal, id: index * 100 + 1 }),
+        settlementRpcRequest({ url, method: "eth_blockNumber", params: [], fetchImpl, signal: controller.signal, id: index * 100 + 2 })
+      ]);
+      if (settlementRpcHexQuantity(chainIdHex, "chainId") !== EXCHANGE_SETTLEMENT_11520_CONFIG.chain_id) {
+        throw new Error("SETTLEMENT_11520_WRONG_CHAIN");
+      }
+      return settlementRpcHexQuantity(blockNumberHex, "blockNumber");
+    }));
+    const blockNumber = Math.min(...heads) - confirmations;
+    if (!Number.isSafeInteger(blockNumber) || blockNumber <= 0) throw new Error("SETTLEMENT_11520_CONFIRMED_BLOCK_INVALID");
+    const observations = await Promise.all(rpcUrls.map((url, index) => observeSettlement11520AtBlock({
+      url,
+      blockNumber,
+      fetchImpl,
+      signal: controller.signal,
+      requestId: index * 1000 + 10
+    })));
+    const expected = JSON.stringify(observations[0]);
+    if (!observations.every((observation) => JSON.stringify(observation) === expected)) {
+      throw new Error("SETTLEMENT_11520_RPC_QUORUM_MISMATCH");
+    }
+    const observed = observations[0];
+    const snapshot = deepFreeze({
+      observed_at: new Date(observed.block_timestamp * 1000).toISOString(),
+      block_number: blockNumber,
+      block_hash: observed.block_hash,
+      chain_id: EXCHANGE_SETTLEMENT_11520_CONFIG.chain_id,
+      provider_count: rpcUrls.length,
+      confirmations,
+      proxy: EXCHANGE_SETTLEMENT_11520_CONFIG.proxy,
+      proxy_code_sha256: observed.proxy_code_sha256,
+      implementation: observed.implementation,
+      implementation_code_sha256: observed.implementation_code_sha256,
+      bank: observed.bank,
+      bank_code_sha256: observed.bank_code_sha256,
+      fixed_exchange: observed.fixed_exchange,
+      fixed_exchange_code_sha256: observed.fixed_exchange_code_sha256,
+      module_id: observed.module_id,
+      version: observed.version,
+      governance_finalized: observed.governance_finalized,
+      governance_role_active: observed.governance_role_active,
+      total_settled_atomic: observed.total_settled_atomic,
+      evidence_class: repositoryBoundTransport
+        ? "RPC_QUORUM_VERIFIED_READ_ONLY"
+        : "CALLER_SUPPLIED_TRANSPORT_SCHEMA_PROBE",
+      transaction_payload: null,
+      signer_requested: false,
+      chain_write: false
+    });
+    if (repositoryBoundTransport) verifiedSettlement11520Snapshots.add(snapshot);
+    return snapshot;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+export function evaluateExchangeSettlement11520Snapshot(snapshot) {
+  if (!snapshot || typeof snapshot !== "object") throw new TypeError("Settlement11520 snapshot is required");
+  const repositoryVerified = verifiedSettlement11520Snapshots.has(snapshot);
+  const checks = Object.freeze({
+    repository_bound_rpc_quorum: repositoryVerified,
+    chain_56: snapshot.chain_id === EXCHANGE_SETTLEMENT_11520_CONFIG.chain_id,
+    proxy: canonicalText(snapshot.proxy).toLowerCase() === EXCHANGE_SETTLEMENT_11520_CONFIG.proxy.toLowerCase(),
+    implementation: canonicalText(snapshot.implementation).toLowerCase() === EXCHANGE_SETTLEMENT_11520_CONFIG.implementation.toLowerCase(),
+    bank_18888: canonicalText(snapshot.bank).toLowerCase() === EXCHANGE_SETTLEMENT_11520_CONFIG.bank.toLowerCase(),
+    fixed_11520_brain: canonicalText(snapshot.fixed_exchange).toLowerCase() === EXCHANGE_SETTLEMENT_11520_CONFIG.fixed_exchange.toLowerCase(),
+    module_id: canonicalText(snapshot.module_id).toLowerCase() === EXCHANGE_SETTLEMENT_11520_CONFIG.module_id.toLowerCase(),
+    version: snapshot.version === EXCHANGE_SETTLEMENT_11520_CONFIG.version,
+    governance_finalized: snapshot.governance_finalized === true,
+    governance_role_active: snapshot.governance_role_active === true,
+    code_evidence: [snapshot.proxy_code_sha256, snapshot.implementation_code_sha256, snapshot.bank_code_sha256, snapshot.fixed_exchange_code_sha256]
+      .every((value) => /^0x[0-9a-f]{64}$/i.test(canonicalText(value))),
+    total_settled_valid: /^\d+$/.test(String(snapshot.total_settled_atomic ?? ""))
+  });
+  const blockers = Object.entries(checks).filter(([, passed]) => !passed).map(([name]) => name.toUpperCase());
+  const identityVerified = blockers.length === 0;
+  return deepFreeze({
+    status: identityVerified ? "RPC_QUORUM_VERIFIED_DEPLOYED_V1" : "BLOCKED_SETTLEMENT_IDENTITY_OR_TRANSPORT_MISMATCH",
+    checks,
+    blockers,
+    observed_at: snapshot.observed_at ?? null,
+    block_number: snapshot.block_number ?? null,
+    block_hash: repositoryVerified ? snapshot.block_hash : null,
+    deployed_capability: EXCHANGE_SETTLEMENT_11520_CONFIG.deployed_capability,
+    total_settled_atomic: /^\d+$/.test(String(snapshot.total_settled_atomic ?? "")) ? String(snapshot.total_settled_atomic) : null,
+    gpu_trade_compatibility: "INCOMPATIBLE_WITH_ATOMIC_GPU_TRADE_SETTLEMENT",
+    incompatibilities: Object.freeze([
+      "FIXED_BENEFICIARY_IS_11520_BRAIN_NOT_TRADE_SELLER",
+      "KAIOS_ONLY_18888_MODULE_PAYMENT_NOT_BUYER_PAYMENT_RAIL",
+      "NO_GPU_INVENTORY_CUSTODY_OR_ATOMIC_DELIVERY",
+      "NO_BUYER_SELLER_ORDER_AUTHORITY_BINDING",
+      "NO_KGEN_OR_KAIOS_DUAL_QUOTE_MARKET_SETTLEMENT",
+      "NO_TRADE_RECEIPT_TO_INVENTORY_SERIAL_BINDING"
+    ]),
+    production_gpu_settlement_adapter_status: "NOT_IMPLEMENTED",
+    company_budget_authorized: false,
+    funding_ready: false,
+    real_trade_enabled: false,
+    transaction_payload: null,
+    signer_requested: false,
+    chain_write: false
   });
 }
 

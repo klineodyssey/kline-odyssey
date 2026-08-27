@@ -21,9 +21,11 @@ import {
 } from "../../../core/integrations/kgen-pancakeswap-v2.mjs?v=11520-v4.0.2-browser-safe";
 import { readTempleHeart12345 } from "../../../core/integrations/temple-heart-12345.mjs?v=11520-v4.0-player-first";
 import {
+  evaluateExchangeSettlement11520Snapshot,
   evaluateGpu11520RealTradeReadiness,
+  readExchangeSettlement11520SnapshotQuorum,
   readRepositoryBoundGpu11520Evidence
-} from "./modules/kgen-native-market-cell.mjs?v=11520-v4.0.2-gpu-readiness";
+} from "./modules/kgen-native-market-cell.mjs?v=11520-v4.0.3-settlement-compatibility";
 
 const NAVIGATION = Object.freeze([
   ["HOME", "navigation.home"], ["REQUEST", "navigation.request"], ["LIFE", "navigation.life"], ["LIFE_FACTORY", "LIFE FACTORY"], ["APPS", "navigation.apps"], ["COMPANIES", "navigation.company"],
@@ -320,6 +322,7 @@ async function tokensView() {
   const genesis = universe.seed.kaios_genesis;
   const mobileWalletLink = createMetaMaskMobileDeepLink(location.href);
   let gpuReadiness;
+  let settlement11520;
   try {
     const evidence = await readRepositoryBoundGpu11520Evidence();
     gpuReadiness = evaluateGpu11520RealTradeReadiness({ evidenceBundle: evidence });
@@ -332,6 +335,24 @@ async function tokensView() {
       repository_verifier_status: "NOT_WIRED",
       status: "BLOCKED_FAIL_CLOSED",
       blockers: Object.freeze([error?.message || "GPU_READINESS_SOURCE_UNAVAILABLE"]),
+      real_trade_enabled: false,
+      chain_write: false
+    });
+  }
+  try {
+    settlement11520 = evaluateExchangeSettlement11520Snapshot(
+      await readExchangeSettlement11520SnapshotQuorum({ timeoutMs: 10000 })
+    );
+  } catch (error) {
+    settlement11520 = Object.freeze({
+      status: "READ_ONLY_RPC_CHECK_FAILED",
+      observed_at: null,
+      block_number: null,
+      deployed_capability: "GOVERNANCE_AUTHORIZED_18888_KAIOS_PAYMENT_TO_FIXED_11520_BRAIN",
+      total_settled_atomic: null,
+      gpu_trade_compatibility: "NOT_VERIFIED_FAIL_CLOSED",
+      production_gpu_settlement_adapter_status: "NOT_IMPLEMENTED",
+      incompatibilities: Object.freeze([error?.message || "SETTLEMENT_11520_READ_FAILED"]),
       real_trade_enabled: false,
       chain_write: false
     });
@@ -359,6 +380,19 @@ async function tokensView() {
       ${kv("Real trade enabled", String(gpuReadiness.real_trade_enabled))}
       ${kv("Chain write", String(gpuReadiness.chain_write))}
       <div class="eyebrow">OPEN BLOCKERS</div>${pills(gpuReadiness.blockers)}
+    </article>`)}
+    ${section("11520 deployed settlement compatibility", `<article class="card">
+      <div class="notice">Read-only BSC quorum check. Deployed V1 can make a governance-authorized 18888 KAIOS payment to the fixed 11520 Brain; it is not an atomic buyer/seller GPU settlement rail.</div>
+      ${kv("Observed status", badge(settlement11520.status), true)}
+      ${kv("Observed block", settlement11520.block_number ?? "UNAVAILABLE")}
+      ${kv("Observed at", settlement11520.observed_at ?? "UNAVAILABLE")}
+      ${kv("Deployed capability", settlement11520.deployed_capability)}
+      ${kv("Total settled (atomic KAIOS)", settlement11520.total_settled_atomic ?? "UNVERIFIED")}
+      ${kv("GPU compatibility", badge(settlement11520.gpu_trade_compatibility), true)}
+      ${kv("Production GPU adapter", badge(settlement11520.production_gpu_settlement_adapter_status), true)}
+      ${kv("Real trade enabled", String(settlement11520.real_trade_enabled))}
+      ${kv("Chain write", String(settlement11520.chain_write))}
+      <div class="eyebrow">INCOMPATIBILITIES</div>${pills(settlement11520.incompatibilities)}
     </article>`)}
     ${section("KGEN / WBNB live AMM", `<form class="card form-grid" id="kgen-swap-form">
       <div class="notice full">LIVE BSC transaction. Connect a wallet on chain 56. The Router supports KGEN fee-on-transfer behavior. Quotes are live and may differ from final receipt due to token tax, pool movement and gas. Nothing is submitted without wallet confirmation.</div>

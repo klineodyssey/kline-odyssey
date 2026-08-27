@@ -2,9 +2,12 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
 import {
+  EXCHANGE_SETTLEMENT_11520_CONFIG,
   createGpu11520PaperMarket,
   createKgenNativeMarketCell,
+  evaluateExchangeSettlement11520Snapshot,
   evaluateGpu11520RealTradeReadiness,
+  readExchangeSettlement11520SnapshotQuorum,
   readRepositoryBoundGpu11520Evidence
 } from "../K線西遊記/temples/11520/modules/kgen-native-market-cell.mjs";
 
@@ -546,6 +549,102 @@ test("public GPU readiness panel is read-only and exposes the fixed fail-closed 
   assert.match(app, /11520 NVIDIA GPU real-trade readiness/);
   assert.match(app, /readRepositoryBoundGpu11520Evidence/);
   assert.match(app, /evaluateGpu11520RealTradeReadiness/);
+  assert.match(app, /readExchangeSettlement11520SnapshotQuorum/);
+  assert.match(app, /11520 deployed settlement compatibility/);
   assert.match(app, /This panel cannot create inventory, fund capital, request a signer, settle a trade or send a transaction/);
   assert.doesNotMatch(app, /id="gpu-(?:trade|settle|sign|broadcast)"/);
+});
+
+function abiWord(value) {
+  return BigInt(value).toString(16).padStart(64, "0");
+}
+
+function abiAddress(address) {
+  return `0x${address.slice(2).toLowerCase().padStart(64, "0")}`;
+}
+
+function abiString(value) {
+  const encoded = Buffer.from(value, "utf8").toString("hex");
+  return `0x${abiWord(32)}${abiWord(encoded.length / 2)}${encoded.padEnd(64, "0")}`;
+}
+
+function settlementRpcFixture({ wrongChain = false, disagree = false } = {}) {
+  return async (url, options) => {
+    const request = JSON.parse(options.body);
+    let result;
+    if (request.method === "eth_chainId") result = wrongChain ? "0x1" : "0x38";
+    else if (request.method === "eth_blockNumber") result = "0x100";
+    else if (request.method === "eth_getBlockByNumber") {
+      result = {
+        number: request.params[0],
+        hash: disagree && url.endsWith("two.example") ? `0x${"22".repeat(32)}` : `0x${"11".repeat(32)}`,
+        timestamp: "0x64"
+      };
+    } else if (request.method === "eth_getCode") result = "0x6000";
+    else if (request.method === "eth_getStorageAt") result = abiAddress(EXCHANGE_SETTLEMENT_11520_CONFIG.implementation);
+    else if (request.method === "eth_call") {
+      const selector = request.params[0].data.slice(0, 10);
+      const values = new Map([
+        ["0x54fd4d50", abiString(EXCHANGE_SETTLEMENT_11520_CONFIG.version)],
+        ["0x76cdb03b", abiAddress(EXCHANGE_SETTLEMENT_11520_CONFIG.bank)],
+        ["0xa1308f27", EXCHANGE_SETTLEMENT_11520_CONFIG.module_id],
+        ["0x2f70c6e0", `0x${abiWord(1)}`],
+        ["0xf1ecdb42", abiAddress(EXCHANGE_SETTLEMENT_11520_CONFIG.fixed_exchange)],
+        ["0xeace4c91", `0x${abiWord(0)}`],
+        ["0x91d14854", `0x${abiWord(1)}`]
+      ]);
+      result = values.get(selector);
+      if (!result) throw new Error(`UNEXPECTED_SETTLEMENT_CALL:${selector}`);
+    } else throw new Error(`UNEXPECTED_SETTLEMENT_RPC:${request.method}`);
+    return { ok: true, async json() { return { jsonrpc: "2.0", id: request.id, result }; } };
+  };
+}
+
+test("deployed 11520 settlement probe is read-only and caller transports cannot become authority", async () => {
+  const snapshot = await readExchangeSettlement11520SnapshotQuorum({
+    rpcUrls: ["https://one.example", "https://two.example"],
+    fetchImpl: settlementRpcFixture()
+  });
+  assert.equal(snapshot.chain_id, 56);
+  assert.equal(snapshot.proxy, EXCHANGE_SETTLEMENT_11520_CONFIG.proxy);
+  assert.equal(snapshot.implementation.toLowerCase(), EXCHANGE_SETTLEMENT_11520_CONFIG.implementation.toLowerCase());
+  assert.equal(snapshot.evidence_class, "CALLER_SUPPLIED_TRANSPORT_SCHEMA_PROBE");
+  assert.equal(snapshot.transaction_payload, null);
+  assert.equal(snapshot.signer_requested, false);
+  assert.equal(snapshot.chain_write, false);
+
+  const evaluated = evaluateExchangeSettlement11520Snapshot(snapshot);
+  assert.equal(evaluated.status, "BLOCKED_SETTLEMENT_IDENTITY_OR_TRANSPORT_MISMATCH");
+  assert.deepEqual(evaluated.blockers, ["REPOSITORY_BOUND_RPC_QUORUM"]);
+  assert.equal(evaluated.block_hash, null);
+  assert.equal(evaluated.gpu_trade_compatibility, "INCOMPATIBLE_WITH_ATOMIC_GPU_TRADE_SETTLEMENT");
+  assert.equal(evaluated.production_gpu_settlement_adapter_status, "NOT_IMPLEMENTED");
+  assert.equal(evaluated.real_trade_enabled, false);
+  assert.equal(evaluated.transaction_payload, null);
+});
+
+test("11520 settlement quorum rejects wrong chain and endpoint disagreement", async () => {
+  await assert.rejects(
+    readExchangeSettlement11520SnapshotQuorum({
+      rpcUrls: ["https://one.example", "https://two.example"],
+      fetchImpl: settlementRpcFixture({ wrongChain: true })
+    }),
+    /SETTLEMENT_11520_WRONG_CHAIN/
+  );
+  await assert.rejects(
+    readExchangeSettlement11520SnapshotQuorum({
+      rpcUrls: ["https://one.example", "https://two.example"],
+      fetchImpl: settlementRpcFixture({ disagree: true })
+    }),
+    /SETTLEMENT_11520_RPC_QUORUM_MISMATCH/
+  );
+});
+
+test("11520 deployed V1 capability is funding-only and cannot be relabelled as GPU settlement", () => {
+  assert.equal(
+    EXCHANGE_SETTLEMENT_11520_CONFIG.deployed_capability,
+    "GOVERNANCE_AUTHORIZED_18888_KAIOS_PAYMENT_TO_FIXED_11520_BRAIN"
+  );
+  assert.notEqual(EXCHANGE_SETTLEMENT_11520_CONFIG.fixed_exchange, EXCHANGE_SETTLEMENT_11520_CONFIG.governance);
+  assert.equal(EXCHANGE_SETTLEMENT_11520_CONFIG.chain_id, 56);
 });

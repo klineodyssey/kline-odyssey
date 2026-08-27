@@ -46,7 +46,7 @@ Until a quote asset/unit is independently frozen, any output is `NATIVE_MARKET_P
 
 ## Runtime / settlement boundary
 
-This module is not imported by the active 11520 app and does not change the current production runtime.
+The active 11520 app imports only this module's read-only readiness and deployed-contract compatibility probes. It does not instantiate the native or GPU paper matcher and does not activate a production market.
 
 - signer: no
 - private key: no
@@ -59,6 +59,12 @@ This module is not imported by the active 11520 app and does not change the curr
 - governance execution: no
 
 The existing PancakeSwap user-wallet adapter remains separate and unchanged.
+
+### Deployed ExchangeSettlement11520 boundary
+
+The existing BSC mainnet proxy `0x17587F49dFDE4e400D03Ae81364AC2af8E1629Df` is now inspected through a fixed two-endpoint, three-confirmation read-only quorum adapter. It checks the EIP-1967 implementation `0xA08A9CEcfa18b2FDb9ca8De0063A5029B9Ffc363`, 18888 bank, fixed `0xd0605F4EF10e5C1438F11AF9edc36926769239d6` Brain beneficiary, module ID, version, governance finalization/role and `totalSettled`. The adapter exposes no calldata builder, signer, allowance, settlement or broadcast path; caller-supplied RPC transports are schema probes and do not receive verified status.
+
+Historical Solidity and the live ABI agree that V1 only lets its governance role request an 18888 KAIOS module payment to that one fixed Brain address. It does not bind buyer/seller authority, collect buyer KGEN or KAIOS, custody a GPU, link a serial/warehouse receipt, transfer inventory atomically or settle to the seller. Therefore `RPC_QUORUM_VERIFIED_DEPLOYED_V1` does **not** mean GPU settlement compatibility. The exact current classification is `INCOMPATIBLE_WITH_ATOMIC_GPU_TRADE_SETTLEMENT / PRODUCTION_GPU_SETTLEMENT_ADAPTER_NOT_IMPLEMENTED`.
 
 ## CI requirement
 
