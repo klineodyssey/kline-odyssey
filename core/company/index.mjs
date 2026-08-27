@@ -1398,17 +1398,17 @@ function validateOptionBMilestones(milestones, totalPrice) {
 }
 
 export function createOperatingCompanyBindingProposal({
-  proposal_id, project_id, request_id, customer_id, conditional_acceptance_evidence,
+  proposal_id, project_id, request_id, customer_id, conditional_acceptance_reference,
   cost_breakdown, milestones, accepted_direction_at, earliest_start_at, target_delivery_at,
   workforce, payment_architecture, human_gates = [], external_dependencies = []
 }) {
   for (const [field, value] of Object.entries({ proposal_id, project_id, request_id, customer_id })) requireId(value, field);
-  invariant(typeof conditional_acceptance_evidence === "string" && conditional_acceptance_evidence.trim(), "CONDITIONAL_ACCEPTANCE_EVIDENCE_REQUIRED", "A Binding Project Proposal requires the Customer's conditional acceptance evidence");
+  invariant(typeof conditional_acceptance_reference === "string" && conditional_acceptance_reference.trim(), "CONDITIONAL_ACCEPTANCE_REFERENCE_REQUIRED", "A proposal candidate may retain only a Customer acceptance reference");
   invariant(cost_breakdown && typeof cost_breakdown === "object" && !Array.isArray(cost_breakdown), "OPTION_B_COST_BREAKDOWN_REQUIRED", "Option B requires a reproducible cost breakdown");
   invariant(Object.keys(cost_breakdown).length === OPTION_B_BINDING_COST_FIELDS.length && OPTION_B_BINDING_COST_FIELDS.every((field) => Object.hasOwn(cost_breakdown, field)), "OPTION_B_COST_FIELDS_INVALID", "Option B cost breakdown must contain only the canonical cost fields");
   const normalizedCosts = Object.fromEntries(OPTION_B_BINDING_COST_FIELDS.map((field) => [field, quoteAmount(cost_breakdown[field], field).toString()]));
   const totalPrice = OPTION_B_BINDING_COST_FIELDS.reduce((sum, field) => sum + BigInt(normalizedCosts[field]), 0n);
-  invariant(totalPrice > 0n, "OPTION_B_TOTAL_PRICE_INVALID", "Binding proposal total must be positive");
+  invariant(totalPrice > 0n, "OPTION_B_TOTAL_PRICE_INVALID", "Proposed total must be positive");
   validateOptionBMilestones(milestones, totalPrice);
   requireFields(workforce, ["ai_workers_required", "distinct_reviewers_required", "current_distinct_reviewer_capacity", "workforce_gap_plan"], "OptionBWorkforce");
   invariant(Number.isInteger(workforce.ai_workers_required) && workforce.ai_workers_required > 0, "OPTION_B_WORKER_REQUIREMENT_INVALID", "Option B requires a positive worker estimate");
@@ -1417,38 +1417,42 @@ export function createOperatingCompanyBindingProposal({
   requireFields(payment_architecture, ["company_receivable_address", "project_escrow", "signer_policy", "refund_policy", "dispute_policy", "milestone_release_policy", "payment_ready"], "OptionBPaymentArchitecture");
   invariant(payment_architecture.payment_ready === false && payment_architecture.company_receivable_address === null && payment_architecture.project_escrow === "NOT_DEPLOYED", "OPTION_B_PAYMENT_NOT_READY", "This candidate cannot bind a receivable address, deploy escrow or enable payment");
   for (const field of ["accepted_direction_at", "earliest_start_at", "target_delivery_at"]) invariant(Number.isFinite(Date.parse({ accepted_direction_at, earliest_start_at, target_delivery_at }[field])), "OPTION_B_DATE_INVALID", `${field} must be an ISO timestamp`);
-  invariant(Date.parse(earliest_start_at) >= Date.parse(accepted_direction_at) && Date.parse(target_delivery_at) >= Date.parse(earliest_start_at), "OPTION_B_DATE_SEQUENCE_INVALID", "Acceptance, start and target delivery dates must be chronological");
+  invariant(Date.parse(earliest_start_at) >= Date.parse(accepted_direction_at) && Date.parse(target_delivery_at) >= Date.parse(earliest_start_at), "OPTION_B_DATE_SEQUENCE_INVALID", "Acceptance-reference, start and target delivery dates must be chronological");
   requireArray(human_gates, "option_b.human_gates");
   requireArray(external_dependencies, "option_b.external_dependencies");
   const reviewBlocked = workforce.current_distinct_reviewer_capacity < workforce.distinct_reviewers_required;
   return Object.freeze({
     proposal_id, project_id, request_id, customer_id, option: "OPERATING_AI_COMPANY", currency: "KAIOS",
-    conditional_acceptance_evidence: conditional_acceptance_evidence.trim(), cost_breakdown: Object.freeze(normalizedCosts),
-    total_binding_price: totalPrice.toString(), milestones: Object.freeze(milestones.map((item) => Object.freeze({ ...item, deliverables: Object.freeze([...item.deliverables]), acceptance_tests: Object.freeze([...item.acceptance_tests]) }))),
+    conditional_acceptance_reference: conditional_acceptance_reference.trim(),
+    conditional_acceptance_verified: false, authority_resolution: "NOT_IMPLEMENTED_FAIL_CLOSED",
+    cost_breakdown: Object.freeze(normalizedCosts), total_proposed_price: totalPrice.toString(),
+    milestones: Object.freeze(milestones.map((item) => Object.freeze({ ...item, deliverables: Object.freeze([...item.deliverables]), acceptance_tests: Object.freeze([...item.acceptance_tests]) }))),
     accepted_direction_at, earliest_start_at, target_delivery_at, workforce: Object.freeze({ ...workforce }),
     payment_architecture: Object.freeze({ ...payment_architecture }), human_gates: Object.freeze([...human_gates]), external_dependencies: Object.freeze([...external_dependencies]),
-    engineering_preparation_authorized: true, project_activated: false, payment_requested: false, payment_received: false,
+    engineering_preparation_authorized: false, project_activated: false, payment_requested: false, payment_received: false,
     real_revenue: "0", chain_write: false, distinct_review_blocked: reviewBlocked,
-    status: reviewBlocked ? "BINDING_PROPOSAL_READY_REVIEW_CAPACITY_BLOCKED" : "BINDING_PROPOSAL_READY_AWAITING_CUSTOMER_ACCEPTANCE"
+    status: "DRAFT_PROPOSAL_NOT_AUTHORIZED"
   });
 }
 
 export function validateOperatingCompanyBindingProposal(proposal) {
-  requireFields(proposal, ["proposal_id", "project_id", "request_id", "customer_id", "option", "currency", "conditional_acceptance_evidence", "cost_breakdown", "total_binding_price", "milestones", "accepted_direction_at", "earliest_start_at", "target_delivery_at", "workforce", "payment_architecture", "human_gates", "external_dependencies", "engineering_preparation_authorized", "project_activated", "payment_requested", "payment_received", "real_revenue", "chain_write", "distinct_review_blocked", "status"], "OperatingCompanyBindingProposal");
+  requireFields(proposal, ["proposal_id", "project_id", "request_id", "customer_id", "option", "currency", "conditional_acceptance_reference", "conditional_acceptance_verified", "authority_resolution", "cost_breakdown", "total_proposed_price", "milestones", "accepted_direction_at", "earliest_start_at", "target_delivery_at", "workforce", "payment_architecture", "human_gates", "external_dependencies", "engineering_preparation_authorized", "project_activated", "payment_requested", "payment_received", "real_revenue", "chain_write", "distinct_review_blocked", "status"], "OperatingCompanyProposalCandidate");
   const rebuilt = createOperatingCompanyBindingProposal({
     proposal_id: proposal.proposal_id, project_id: proposal.project_id, request_id: proposal.request_id, customer_id: proposal.customer_id,
-    conditional_acceptance_evidence: proposal.conditional_acceptance_evidence, cost_breakdown: proposal.cost_breakdown,
+    conditional_acceptance_reference: proposal.conditional_acceptance_reference, cost_breakdown: proposal.cost_breakdown,
     milestones: proposal.milestones, accepted_direction_at: proposal.accepted_direction_at, earliest_start_at: proposal.earliest_start_at,
     target_delivery_at: proposal.target_delivery_at, workforce: proposal.workforce, payment_architecture: proposal.payment_architecture,
     human_gates: proposal.human_gates, external_dependencies: proposal.external_dependencies
   });
-  invariant(rebuilt.total_binding_price === String(proposal.total_binding_price) && proposal.option === "OPERATING_AI_COMPANY" && proposal.currency === "KAIOS", "OPTION_B_BINDING_PROPOSAL_MISMATCH", "Binding proposal must reproduce the canonical Option B total and currency");
-  invariant(proposal.project_activated === false && proposal.payment_requested === false && proposal.payment_received === false && String(proposal.real_revenue) === "0" && proposal.chain_write === false, "OPTION_B_FALSE_BUSINESS_STATE", "A Binding Proposal cannot fabricate activation, payment, Revenue or chain writes");
-  return proposal;
+  for (const field of ["option", "currency", "conditional_acceptance_verified", "authority_resolution", "total_proposed_price", "engineering_preparation_authorized", "project_activated", "payment_requested", "payment_received", "real_revenue", "chain_write", "distinct_review_blocked", "status"]) {
+    invariant(String(proposal[field]) === String(rebuilt[field]), "OPTION_B_PROPOSAL_DERIVED_STATE_MISMATCH", `${field} must equal the fail-closed rebuilt value`);
+  }
+  return rebuilt;
 }
 
 export function createOptionBWorkBreakdown({ proposal, work_packages }) {
-  validateOperatingCompanyBindingProposal(proposal);
+  const validatedProposal = validateOperatingCompanyBindingProposal(proposal);
+  invariant(validatedProposal.status === "DRAFT_PROPOSAL_NOT_AUTHORIZED" && validatedProposal.engineering_preparation_authorized === false, "OPTION_B_AUTHORITY_NOT_FAIL_CLOSED", "WBS creation requires the proposal to remain fail-closed");
   requireArray(work_packages, "option_b.work_packages");
   invariant(work_packages.length === OPTION_B_WORK_PACKAGE_IDS.length, "OPTION_B_WBS_COUNT_INVALID", "Option B requires all twelve work packages");
   const ids = work_packages.map((item) => item.task_id);
@@ -1457,16 +1461,15 @@ export function createOptionBWorkBreakdown({ proposal, work_packages }) {
   const normalized = work_packages.map((item, index) => {
     requireFields(item, ["task_id", "assigned_role", "required_skills", "trust_required", "reviewer_required", "dependencies", "files_allowed", "branch", "estimated_hours", "start_gate", "acceptance_tests", "delivery_artifact"], "OptionBWorkPackage");
     for (const field of ["required_skills", "dependencies", "files_allowed", "acceptance_tests"]) requireArray(item[field], `option_b.${item.task_id}.${field}`);
-    invariant(!Object.hasOwn(item, "assigned_worker_id"), "OPTION_B_PREMATURE_WORKER_ASSIGNMENT", "WBS assigns roles; a Registry-qualified dispatcher assigns workers later");
-    invariant(typeof item.assigned_role === "string" && item.assigned_role && /^T[2-9]$/.test(item.trust_required), "OPTION_B_WORK_AUTHORITY_INVALID", "Each package requires a role and T2+ trust");
+    invariant(!Object.hasOwn(item, "assigned_worker_id"), "OPTION_B_PREMATURE_WORKER_ASSIGNMENT", "WBS assigns roles; only the canonical Company Dispatcher may later resolve a Registry-qualified worker");
+    invariant(typeof item.assigned_role === "string" && item.assigned_role && ["T2", "T3", "T4", "T5"].includes(item.trust_required), "OPTION_B_WORK_AUTHORITY_INVALID", "Each package requires a role and a CURRENT T2-T5 trust candidate");
     invariant(item.branch.startsWith("codex/") && item.files_allowed.length > 0 && item.acceptance_tests.length > 0, "OPTION_B_WORK_SCOPE_INVALID", "Each package requires an isolated branch, file scope and acceptance tests");
     invariant(Number.isInteger(item.estimated_hours) && item.estimated_hours > 0, "OPTION_B_WORK_HOURS_INVALID", "Estimated hours must be positive integers");
     for (const dependency of item.dependencies) invariant(ids.indexOf(dependency) >= 0 && ids.indexOf(dependency) < index, "OPTION_B_DEPENDENCY_INVALID", "Dependencies must exist earlier in topological order");
     totalHours += item.estimated_hours;
-    const reviewBlocked = item.reviewer_required && proposal.distinct_review_blocked;
-    return Object.freeze({ ...item, required_skills: Object.freeze([...item.required_skills]), dependencies: Object.freeze([...item.dependencies]), files_allowed: Object.freeze([...item.files_allowed]), acceptance_tests: Object.freeze([...item.acceptance_tests]), assigned_worker_id: null, status: reviewBlocked ? "ENGINEERING_PREPARATION_ALLOWED_REVIEW_BLOCKED" : "READY_FOR_REGISTRY_DISPATCH" });
+    return Object.freeze({ ...item, required_skills: Object.freeze([...item.required_skills]), dependencies: Object.freeze([...item.dependencies]), files_allowed: Object.freeze([...item.files_allowed]), acceptance_tests: Object.freeze([...item.acceptance_tests]), assigned_worker_id: null, claim_id: null, fencing_token: null, status: "DRAFT_ROLE_SCOPED_NOT_DISPATCHABLE" });
   });
-  return Object.freeze({ wbs_id: `WBS_${proposal.project_id}`, project_id: proposal.project_id, work_packages: Object.freeze(normalized), total_estimated_hours: totalHours, assigned_workers: 0, distinct_review_blocked: proposal.distinct_review_blocked, external_effect: false, status: proposal.distinct_review_blocked ? "WBS_READY_REVIEW_CAPACITY_BLOCKED" : "WBS_READY_FOR_DISPATCH" });
+  return Object.freeze({ wbs_id: `WBS_${proposal.project_id}`, project_id: proposal.project_id, work_packages: Object.freeze(normalized), total_estimated_hours: totalHours, assigned_workers: 0, distinct_review_blocked: proposal.distinct_review_blocked, registry_dispatch_authorized: false, external_effect: false, status: "DRAFT_WBS_NOT_DISPATCHABLE" });
 }
 
 function addUtcBusinessDays(timestamp, businessDays) {
