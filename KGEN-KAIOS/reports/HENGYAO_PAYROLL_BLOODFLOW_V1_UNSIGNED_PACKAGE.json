@@ -1,0 +1,347 @@
+{
+  "taskId": "KAIOS-HENGYAO-GM-PAYROLL-BLOODFLOW-V1-001",
+  "status": "MAINNET_PAYROLL_SCHEDULED_AWAITING_MATURITY",
+  "executionBase": "672ab4884e8cf6f9d07c176a862fb858cafe8161",
+  "chainId": 56,
+  "mainnetTransactionSent": true,
+  "liveSnapshot": {
+    "blockNumber": 116466353,
+    "blockHash": "0xcd305b94586ea851e31537f741587e96cbe2df74552cdb024b0ce4d164dcaddf",
+    "timestamp": 1786970602,
+    "available18888": "11213908.930416874731235",
+    "reserve18888": "11000000.0",
+    "assets8888": "0.0",
+    "freeCapital8888": "0.0",
+    "accountCount8888": "0",
+    "payrollCount8888": "0",
+    "currentCalendarEpoch8888": "24319"
+  },
+  "finalLiveSnapshot": {
+    "blockNumber": 116475334,
+    "blockHash": "0x5d9f80f5ddfa44653d71f2346ac5ac2c7b82f7938d0457f004f421fc3dc91e3e",
+    "timestamp": 1786974645,
+    "timestampIso": "2026-08-17T13:50:45.000Z",
+    "available18888": "11213020.930416874731235",
+    "reserve18888": "11000000.0",
+    "assets8888": "888.0",
+    "freeCapital8888": "800.0",
+    "accountCount8888": "1",
+    "payrollCount8888": "1",
+    "currentCalendarEpoch8888": "24319",
+    "hengyaoPayrollAdmin": true,
+    "hengyaoDefaultAdmin": false,
+    "hengyaoAccountAdmin": false,
+    "payrollEpoch": "24320",
+    "payrollAmount": "88.0",
+    "payrollClaimed": false
+  },
+  "postExecutionSnapshot": {
+    "snapshotPhase": "POST_EXECUTION",
+    "sourceOfTruth": false,
+    "snapshotRole": "HISTORICAL_POST_EXECUTION_CLOSURE",
+    "supersededBy": "latestReadOnlyObservation",
+    "asOfBlock": 116487188,
+    "asOfBlockHash": "0xbd08ee5d787f104123642bab33d75cb9651359e8b436aba4654a54c35c3b0e8a",
+    "asOfTimestamp": "2026-08-17T15:19:41.000Z",
+    "supersedes": {
+      "path": "KGEN-KAIOS/decision/decision_snapshot.json",
+      "snapshotPhase": "PRE_EXECUTION",
+      "pullRequest": 153,
+      "head": "566c89a1856d7e5535cb0fe3497d23948d045541"
+    },
+    "payrollOperationsPullRequest": 154,
+    "mainnetExecutionStatus": "EXECUTED_PAYROLL_SCHEDULED_AWAITING_MATURITY",
+    "newMainnetTransactionSentByCloseout": false,
+    "bank18888": {
+      "available": "11213020.930416874731235",
+      "reserve": "11000000.0",
+      "paused": false
+    },
+    "bank8888": {
+      "assets": "888.0",
+      "freeCapital": "800.0",
+      "payrollLiability": "88.0",
+      "paused": false,
+      "currentCalendarEpoch": "24319"
+    },
+    "hengyao": {
+      "personalWalletBalanceBnb": "0.00799020555",
+      "accountBalanceKaios": "0.0",
+      "payrollAdminRole": true,
+      "defaultAdminRole": false,
+      "accountAdminRole": false
+    },
+    "payroll": {
+      "amount": "88.0",
+      "epoch": "24320",
+      "claimed": false,
+      "claimableAt": "2026-09-04T16:00:00.000Z",
+      "claimableAtUtc8": "2026-09-05T00:00:00+08:00"
+    },
+    "policyEnforcement": {
+      "policyScope": "DEFINED",
+      "signerEnforcement": "PENDING",
+      "furtherPayrollSchedule": "FROZEN",
+      "further8888Topup": "FORBIDDEN_WITHOUT_NEW_AUTHORIZATION"
+    },
+    "cursorR2": {
+      "taskId": "KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-R2-001",
+      "deliveryStatus": "DELIVERY_PENDING",
+      "claimStatus": "CLAIMED",
+      "leaseExpiresAt": "2026-08-18T12:49:02Z",
+      "paymentStatus": "NOT_PAYABLE"
+    },
+    "totalExecutionGasBnb": "0.0000630842",
+    "privateKeyExposed": false
+  },
+  "latestReadOnlyObservation": {
+    "snapshotPhase": "LATEST_READ_ONLY_OBSERVATION",
+    "sourceOfTruth": true,
+    "chainId": 56,
+    "asOfBlock": 118356924,
+    "asOfBlockHash": "0xa7eb1cc739b3f48b6cb65b25e89ce9a991286f62e7f8fd64f4738802b5986897",
+    "asOfTimestamp": "2026-08-27T09:07:56.000Z",
+    "asOfTimestampUtc8": "2026-08-27T17:07:56+08:00",
+    "preservesHistoricalSnapshots": true,
+    "bank18888": {
+      "proxy": "0x11d34c0F723aCd334B8F95076f73F07f06202aab",
+      "implementation": "0x8125045039Fe969490d57185233B7d64A494A829",
+      "version": "2.0.0",
+      "proxyCodeHash": "0x572e640425d4d6c1f70e591dec2930f8d9481f510d67a7b9577543ebaeb5dfb6",
+      "kaiosToken": "0xD4E67B3a69e41524c424150E6b6e921b01D036db",
+      "kgenToken": "0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be",
+      "kaiosBalance": "22213020.930416874731235",
+      "reserve": "11000000.0",
+      "available": "11213020.930416874731235",
+      "accountedInflow": "22213908.930416874731235",
+      "officialOutflow": "888.0",
+      "kgenBalance": "0.0",
+      "bnbBalance": "0.0",
+      "healthy": true,
+      "paused": false
+    },
+    "bank8888": {
+      "proxy": "0x9EcAe137b3A307971EB77B4CDB3ba13aeeF5297C",
+      "assets": "888.0",
+      "freeCapital": "800.0",
+      "accountLiability": "0.0",
+      "payrollLiability": "88.0",
+      "paymentLiability": "0.0",
+      "totalCustomerLiability": "88.0",
+      "accountCount": "1",
+      "payrollCount": "1",
+      "currentCalendarEpoch": "24319",
+      "currentBankingEpoch": "24319",
+      "paused": false,
+      "hengyaoPayrollAdmin": true,
+      "hengyaoDefaultAdmin": false,
+      "hengyaoAccountAdmin": false,
+      "hengyaoAccountBalance": "0.0",
+      "payrollAmount": "88.0",
+      "payrollEpoch": "24320",
+      "payrollClaimableAt": "1788537600",
+      "payrollClaimableAtIso": "2026-09-04T16:00:00.000Z",
+      "payrollClaimed": false
+    },
+    "deltaFromPostExecutionSnapshot": {
+      "kaiosBalance": "0.0",
+      "reserve": "0.0",
+      "available": "0.0",
+      "officialOutflow": "0.0"
+    },
+    "verification": {
+      "bankHealthMatchesKaiosBalance": true,
+      "kaiosBalanceMatchesTokenBalanceOf": true,
+      "availableMatchesBalanceMinusReserve": true,
+      "genesisOpeningBalanceMatchesAccountedInflow": true,
+      "bank8888AssetsMatchFreeCapitalPlusLiability": true,
+      "payrollLiabilityMatchesScheduledUnclaimedPayroll": true,
+      "multiRpcLatestBlockCrossCheck": "PASS"
+    },
+    "transactionState": {
+      "latestKnownAuthorizedOutflowTransaction": "0x9059f3c6c2fdabf61a06c3b2eacbc985b9171d2731f74713000e8264fa37fccc",
+      "latestKnownAuthorizedOutflowAmountKaios": "888.0",
+      "netKaiosBalanceChangeSincePostExecutionSnapshot": "0.0",
+      "eventRangeScanStatus": "NOT_COMPLETE_RPC_RANGE_LIMIT",
+      "newMainnetTransactionSentByRefresh": false
+    },
+    "privateKeyExposed": false
+  },
+  "identifiers": {
+    "purposeUtf8": "KAIOS_AI_COMPANY_PAYROLL_GENESIS_POOL_V1",
+    "purposeHash": "0x27ea560595229367d181c6af8c5d6a0d247dfcb34d469fbbe9d7c08c63e99d2e",
+    "routeDomain": "0xb13d0845c93752f8c48622f9d8f06b2b5b503a2b264f614b59130b81156e5e54",
+    "routeId": "0xae9577b23482c2bc76c7cee0798e0a69cd549305548cabde0b0781fe3d2f6cf6",
+    "modulePaymentId": "0x8a72a57fcd579b4dcc1ae2f8633df30ba941b01a5e3a42542f43634fbe88937d",
+    "accountId": "0x1544ffc7af87fdca8a1ab6ed819010fec50004b2768536aa902d3bf508619dc5",
+    "identityId": "0xce67706eeb99189cd46e3d6498d636e571ecb8b2410b1fc147575b69ecb9e02a",
+    "lifeId": "0x3932f06a621c63ba85ce1be2b8db9536629750315da02a7e978cef4155a3532a",
+    "payrollId": "0x24305470fe1e35c8b06c111237606babb6de7c4e36c41b57980e2a1779e0ba54",
+    "payrollAdminRole": "0x351c518a63f302fd3436c2d47c197d41df314c9a32018c5ae62e6d78e0688592"
+  },
+  "governance": {
+    "target": "0xa2792fBDCc8A8AaC364053431D44E0a8D335E166",
+    "proposer": "0xCd60BF474e691F2484950a0276Eaf507616Ca4b9",
+    "approver": "0xc15E08834fCA9F2d3462a3f8f0BC30524D6dd756",
+    "delaySeconds": 3600,
+    "permissionlessExecutionAfterDelay": true
+  },
+  "operations": [
+    {
+      "stage": "ROUTE_CAPITAL",
+      "proposalId": "0xde5fedfe760d96791e04c4e8e88d46e9c6e84be25d9b686d167737db9d471b4f",
+      "target": "0xC49f989c6ff0d22824df8D993Ce82207165C1428",
+      "value": "0",
+      "dataHash": "0xd58c958a6efd740a5cbe4e5a5bf28f192f3d3e49595e9c0c933084e58f6e2e49",
+      "data": "0xbc69bab9ae9577b23482c2bc76c7cee0798e0a69cd549305548cabde0b0781fe3d2f6cf60000000000000000000000000000000000000000000000302379bf2ca2e0000027ea560595229367d181c6af8c5d6a0d247dfcb34d469fbbe9d7c08c63e99d2e"
+    },
+    {
+      "stage": "CREATE_HENGYAO_LIFE_ACCOUNT",
+      "proposalId": "0xaac14eca5420a013c943d6d5c12c380d852808473a7a45011efb07bd1dc3ce08",
+      "target": "0x9EcAe137b3A307971EB77B4CDB3ba13aeeF5297C",
+      "value": "0",
+      "dataHash": "0xed2842e469d6f33544eab34dd28c5d475ebed4bf3e5ae5a5736862681fe8cdac",
+      "data": "0x95edd3921544ffc7af87fdca8a1ab6ed819010fec50004b2768536aa902d3bf508619dc5ce67706eeb99189cd46e3d6498d636e571ecb8b2410b1fc147575b69ecb9e02a3932f06a621c63ba85ce1be2b8db9536629750315da02a7e978cef4155a3532a00000000000000000000000000000000000000000000000000000000000000000000000000000000000000004df6e9629dad1072103cfd2bc81845fd974292140000000000000000000000004df6e9629dad1072103cfd2bc81845fd974292140000000000000000000000000000000000000000000000000000000000000001"
+    },
+    {
+      "stage": "GRANT_HENGYAO_PAYROLL_ADMIN_8888",
+      "proposalId": "0xf5e001644c6f2e9fec756113733024052cb3918d07cbce2a1f0ba528c4aa5b48",
+      "target": "0x9EcAe137b3A307971EB77B4CDB3ba13aeeF5297C",
+      "value": "0",
+      "dataHash": "0x59310288cc4f2d0a75acfad5e76797b99fd2f6e4d32f663fac93bc1244f9b654",
+      "data": "0x2f2ff15d351c518a63f302fd3436c2d47c197d41df314c9a32018c5ae62e6d78e06885920000000000000000000000004df6e9629dad1072103cfd2bc81845fd97429214"
+    }
+  ],
+  "hengyaoSchedule": {
+    "signer": "0x4DF6E9629Dad1072103cFd2bC81845fd97429214",
+    "target": "0x9EcAe137b3A307971EB77B4CDB3ba13aeeF5297C",
+    "value": "0",
+    "dataHash": "0xd1f95718cd4f521f705ea061ef64148beaf1ddf116ccf1f30b417a1643f3bfac",
+    "data": "0xfa41201324305470fe1e35c8b06c111237606babb6de7c4e36c41b57980e2a1779e0ba543932f06a621c63ba85ce1be2b8db9536629750315da02a7e978cef4155a3532a0000000000000000000000004df6e9629dad1072103cfd2bc81845fd97429214000000000000000000000000000000000000000000000004c53ecdc18a6000000000000000000000000000000000000000000000000000000000000000005f00"
+  },
+  "forkRehearsal": {
+    "status": "PASS",
+    "forkBlock": 116466076,
+    "forkBlockHash": "0x366de0a676680dd6759b9fa90b86bcdee8b940d05cae4054f0b59eea3843dda6",
+    "available18888After": "11213020.930416874731235",
+    "assets8888AfterRoute": "888.0",
+    "freeCapital8888AfterSchedule": "800.0",
+    "payrollLiabilityAfterSchedule": "88.0",
+    "accountCount": "1",
+    "payrollCount": "1",
+    "claimableAt": "2026-09-04T16:00:00.000Z",
+    "accountBalanceAfterSimulatedMatureClaim": "88.0",
+    "duplicatePayroll": "BLOCKED",
+    "claimBeforeMaturity": "BLOCKED",
+    "duplicateClaim": "BLOCKED",
+    "nonRolePayroll": "BLOCKED",
+    "perTransactionGasCap": "PASS",
+    "perDayGasCap": "PASS"
+  },
+  "mainnetGovernance": {
+    "status": "EXECUTED_AND_HENGYAO_PAYROLL_SCHEDULED",
+    "latestExecutableAt": 1786974481,
+    "latestExecutableAtIso": "2026-08-17T13:48:01Z",
+    "proposalTransactions": [
+      {
+        "stage": "ROUTE_CAPITAL",
+        "transactionHash": "0xd92f73d6f2604e69d3c752ad07d1907837c9f591198b30f316071e60249b06b1",
+        "blockNumber": 116466953,
+        "gasUsed": "110798"
+      },
+      {
+        "stage": "CREATE_HENGYAO_LIFE_ACCOUNT",
+        "transactionHash": "0x7b73fc8a1da3228f74ba17a4fecb5d4946f6bd1559aa84fbbe7386130c6ee22e",
+        "blockNumber": 116466963,
+        "gasUsed": "112163"
+      },
+      {
+        "stage": "GRANT_HENGYAO_PAYROLL_ADMIN_8888",
+        "transactionHash": "0xbb878cc4a64bc31f235a0bbd3f48e3d58a0f9d49e1531c635f5f3da0442f9b4d",
+        "blockNumber": 116466973,
+        "gasUsed": "110424"
+      }
+    ],
+    "approvalTransactions": [
+      {
+        "stage": "ROUTE_CAPITAL",
+        "transactionHash": "0x4cf568f1fc865106e164b56814b6ddf56af8b7ce8f10b98df7eec9c684310622",
+        "blockNumber": 116467004,
+        "gasUsed": "57667"
+      },
+      {
+        "stage": "CREATE_HENGYAO_LIFE_ACCOUNT",
+        "transactionHash": "0xd85103c7897eb01458bd6d3401d987a6513942f658a454002ccaaf8f66e1c60f",
+        "blockNumber": 116467014,
+        "gasUsed": "57667"
+      },
+      {
+        "stage": "GRANT_HENGYAO_PAYROLL_ADMIN_8888",
+        "transactionHash": "0xbd6f99467e3b3b78459a89e4ab8b12a8c189d7c6fba28f71c80ec9b6ea3d6126",
+        "blockNumber": 116467024,
+        "gasUsed": "57667"
+      }
+    ],
+    "executionTransactions": [
+      {
+        "stage": "ROUTE_CAPITAL",
+        "transactionHash": "0x9059f3c6c2fdabf61a06c3b2eacbc985b9171d2731f74713000e8264fa37fccc",
+        "blockNumber": 116475265,
+        "blockHash": "0x61a153adff4322f986962c989d7cd5177cac24a04f0110f936eb879c2fc3aa21",
+        "timestamp": 1786974614,
+        "timestampIso": "2026-08-17T13:50:14.000Z",
+        "gasUsed": "268542",
+        "gasCostBnb": "0.0000134271"
+      },
+      {
+        "stage": "CREATE_HENGYAO_LIFE_ACCOUNT",
+        "transactionHash": "0xd1d1f9d2520d41731b1da29120a35a2074920f0591b2a82cdd814dec986ca29d",
+        "blockNumber": 116475275,
+        "blockHash": "0x2107b07f305869beccf762e73a4ea51f3fdbb83a1177a43187cdcfd08c55a757",
+        "timestamp": 1786974618,
+        "timestampIso": "2026-08-17T13:50:18.000Z",
+        "gasUsed": "208146",
+        "gasCostBnb": "0.0000104073"
+      },
+      {
+        "stage": "GRANT_HENGYAO_PAYROLL_ADMIN_8888",
+        "transactionHash": "0xabd0f90b9a3b3a12d7cca7a6e9953bc6140995179c8076a70696cf9f186789f8",
+        "blockNumber": 116475285,
+        "blockHash": "0xedc91a4da2322475f8ea7e9a45df9cdd0ad18d13e5d4fb11ac9d0f048e5aeafc",
+        "timestamp": 1786974623,
+        "timestampIso": "2026-08-17T13:50:23.000Z",
+        "gasUsed": "82721",
+        "gasCostBnb": "0.00000413605"
+      }
+    ],
+    "hengyaoScheduleTransaction": {
+      "stage": "SCHEDULE_HENGYAO_2026_09",
+      "transactionHash": "0xb12a7429dedce539223857f588793f4ea0a08246178cc33f4b472f1643723ded",
+      "blockNumber": 116475326,
+      "blockHash": "0xebccb0e954b8f5138122b8513e2b11857315341974f416081526ffd3eedcf2e5",
+      "timestamp": 1786974641,
+      "timestampIso": "2026-08-17T13:50:41.000Z",
+      "gasUsed": "195889",
+      "gasCostBnb": "0.00000979445",
+      "signerNonceBefore": 0,
+      "signerNonceAfter": 1
+    },
+    "proposalGasCostBnb": "0.00001666925",
+    "approvalGasCostBnb": "0.00000865005",
+    "executionGasCostBnb": "0.00002797045",
+    "hengyaoScheduleGasCostBnb": "0.00000979445",
+    "totalGasCostBnb": "0.0000630842",
+    "privateKeyExposed": false
+  },
+  "boundaries": {
+    "solidityChanged": false,
+    "abiChanged": false,
+    "deploymentAddressChanged": false,
+    "currentCanonChanged": false,
+    "rewardUsed": false,
+    "kgenReserveUsed": false,
+    "fiveMillionKaiosBurn": false,
+    "seatAssigned": false,
+    "privateKeySerialized": false
+  }
+}
