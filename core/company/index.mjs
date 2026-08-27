@@ -1865,3 +1865,126 @@ export function createCompanyFoundingReadinessCheck({ company, founderLife, work
     company_status: company.status
   });
 }
+
+export const KAIOS_MARKET_GENESIS_CONFIG = Object.freeze({
+  chain_id: 56,
+  company_address: "0.00011520",
+  company_k_coordinate: "K11520",
+  kaios_token: "0xD4E67B3a69e41524c424150E6b6e921b01D036db",
+  kgen_token: "0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be",
+  wbnb_token: "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c",
+  usdt_token: "0x55d398326f99059fF775485246999027B3197955",
+  pancakeswap_v2_factory: "0xcA143Ce32Fe78f1f7019d7d551a6402fC5350c73",
+  organ_registry: "0xA9e7CbF161E39E556f4B5b8E41397Ac4B87a932D",
+  pair_registry_organ_id: "0x7f0ccf230c57abe19671b563448caa0159a9a9f51d4548c25dacd532e9e1b86e",
+  permitted_quote_assets: Object.freeze(["WBNB", "KGEN", "USDT"]),
+  execution_authority: "NOT_GRANTED_BY_READINESS_RUNTIME"
+});
+
+const KAIOS_MARKET_PROTECTED_CAPITAL = Object.freeze([
+  "BANK_18888_RESERVE",
+  "BANK_18888_PERFORMANCE_BOND",
+  "BANK_8888_PAYROLL_LIABILITY",
+  "BANK_8888_FUNDED_SALARY",
+  "KGEN_RESERVE",
+  "KGEN_CATALYST_ESCROW",
+  "NAIHE_GENESIS_RESERVE",
+  "PUBLIC_GOOD_EMERGENCY_RESERVE",
+  "REFUNDABLE_PRINCIPAL"
+]);
+
+function isZeroAddress(value) {
+  return /^0x0{40}$/i.test(value);
+}
+
+function isEvmAddress(value) {
+  return typeof value === "string" && /^0x[0-9a-f]{40}$/i.test(value);
+}
+
+export function evaluateKaiosExternalMarketSnapshot(snapshot) {
+  requireFields(snapshot, ["observed_at", "block_number", "chain_id", "kaios_code", "pair_registry_organ", "pairs"], "KaiosExternalMarketSnapshot");
+  invariant(snapshot.chain_id === KAIOS_MARKET_GENESIS_CONFIG.chain_id, "KAIOS_MARKET_WRONG_CHAIN", "KAIOS market observation must use BSC chain 56");
+  invariant(Number.isInteger(snapshot.block_number) && snapshot.block_number > 0, "KAIOS_MARKET_BLOCK_REQUIRED", "KAIOS market observation requires a positive BSC block");
+  invariant(snapshot.kaios_code === "PRESENT", "KAIOS_TOKEN_CODE_REQUIRED", "Canonical KAIOS bytecode must be present");
+  requireFields(snapshot.pairs, KAIOS_MARKET_GENESIS_CONFIG.permitted_quote_assets, "KaiosPairSnapshot");
+  invariant(isEvmAddress(snapshot.pair_registry_organ), "KAIOS_PAIR_REGISTRY_ADDRESS_INVALID", "Pair Registry observation must be an EVM address");
+  invariant(KAIOS_MARKET_GENESIS_CONFIG.permitted_quote_assets.every((asset) => isEvmAddress(snapshot.pairs[asset])), "KAIOS_PAIR_ADDRESS_INVALID", "Every observed pair must be an EVM address or the zero address");
+
+  const livePairs = KAIOS_MARKET_GENESIS_CONFIG.permitted_quote_assets.filter((asset) => !isZeroAddress(snapshot.pairs[asset]));
+  const pairRegistryActive = !isZeroAddress(snapshot.pair_registry_organ);
+  return Object.freeze({
+    observed_at: snapshot.observed_at,
+    block_number: snapshot.block_number,
+    chain_id: snapshot.chain_id,
+    pair_registry_status: pairRegistryActive ? "ACTIVE_ORGAN_REQUIRES_INTERFACE_VERIFICATION" : "NOT_DEPLOYED_OR_NOT_REGISTERED",
+    live_pairs: Object.freeze([...livePairs]),
+    market_status: livePairs.length > 0 ? "EXTERNAL_PAIR_DETECTED_REQUIRES_LIQUIDITY_VERIFICATION" : "NO_LIVE_KAIOS_PAIR_DETECTED",
+    price_status: livePairs.length > 0 ? "RESERVE_READ_REQUIRED" : "NO_MATCHED_OR_AMM_PRICE",
+    execution_performed: false
+  });
+}
+
+export function createKaiosMarketGenesisProposal({
+  snapshot,
+  quoteAsset,
+  kaiosAmountAtomic,
+  quoteAmountAtomic,
+  fundingSourceClass,
+  fundingSourceId,
+  kaiosAvailableAtomic,
+  quoteAvailableAtomic,
+  budgetEvidence,
+  assetOwnerAuthorization,
+  riskPolicyApproved,
+  signerReady,
+  governanceReviewReady,
+  pairRegistryPlanApproved
+}) {
+  const market = evaluateKaiosExternalMarketSnapshot(snapshot);
+  invariant(KAIOS_MARKET_GENESIS_CONFIG.permitted_quote_assets.includes(quoteAsset), "KAIOS_MARKET_QUOTE_ASSET_FORBIDDEN", "Quote asset is not in the KAIOS market proposal allowlist");
+  invariant(!KAIOS_MARKET_PROTECTED_CAPITAL.includes(fundingSourceClass), "KAIOS_MARKET_PROTECTED_CAPITAL", "Protected civilization capital cannot fund KAIOS market liquidity");
+  invariant(typeof fundingSourceId === "string" && fundingSourceId.length > 0, "KAIOS_MARKET_FUNDING_SOURCE_REQUIRED", "A fixed funding source is required");
+  invariant([kaiosAmountAtomic, quoteAmountAtomic, kaiosAvailableAtomic, quoteAvailableAtomic].every((value) => /^\d+$/.test(String(value))), "KAIOS_MARKET_ATOMIC_AMOUNT_INVALID", "Market amounts must be unsigned integer atomic units");
+
+  const kaiosAmount = BigInt(kaiosAmountAtomic);
+  const quoteAmount = BigInt(quoteAmountAtomic);
+  const kaiosAvailable = BigInt(kaiosAvailableAtomic);
+  const quoteAvailable = BigInt(quoteAvailableAtomic);
+  invariant(kaiosAmount > 0n && quoteAmount > 0n, "KAIOS_MARKET_TWO_SIDED_CAPITAL_REQUIRED", "Initial liquidity requires positive KAIOS and quote capital");
+
+  const checks = Object.freeze({
+    no_existing_pair: market.market_status === "NO_LIVE_KAIOS_PAIR_DETECTED",
+    kaios_funded: kaiosAvailable >= kaiosAmount,
+    quote_funded: quoteAvailable >= quoteAmount,
+    budget_evidence: Boolean(budgetEvidence),
+    asset_owner_authorization: Boolean(assetOwnerAuthorization),
+    risk_policy: Boolean(riskPolicyApproved),
+    secure_signer: Boolean(signerReady),
+    governance_review: Boolean(governanceReviewReady),
+    pair_registry_plan: Boolean(pairRegistryPlanApproved)
+  });
+  const blockers = Object.entries(checks).filter(([, passed]) => !passed).map(([name]) => name.toUpperCase());
+
+  return Object.freeze({
+    proposal_id: `KAIOS_${quoteAsset}_MARKET_GENESIS_V1`,
+    company_address: KAIOS_MARKET_GENESIS_CONFIG.company_address,
+    company_k_coordinate: KAIOS_MARKET_GENESIS_CONFIG.company_k_coordinate,
+    chain_id: KAIOS_MARKET_GENESIS_CONFIG.chain_id,
+    venue: "PANCAKESWAP_V2_CANDIDATE",
+    base_asset: "KAIOS",
+    quote_asset: quoteAsset,
+    funding_source_class: fundingSourceClass,
+    funding_source_id: fundingSourceId,
+    initial_capital_atomic: Object.freeze({ KAIOS: kaiosAmount.toString(), [quoteAsset]: quoteAmount.toString() }),
+    initial_quote_rational: Object.freeze({ numerator_quote_atomic: quoteAmount.toString(), denominator_kaios_atomic: kaiosAmount.toString() }),
+    quote_is_market_input_not_protocol_ratio: true,
+    checks,
+    blockers: Object.freeze(blockers),
+    status: blockers.length === 0 ? "READY_FOR_INDEPENDENT_REVIEW" : "BLOCKED_MISSING_MARKET_GENESIS_EVIDENCE",
+    unsigned_payload_status: "NOT_CREATED",
+    execution_authorized: false,
+    execution_performed: false,
+    protected_capital_used: false,
+    mainnet_transaction_sent: false
+  });
+}

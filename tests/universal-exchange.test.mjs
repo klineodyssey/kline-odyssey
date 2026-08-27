@@ -99,13 +99,80 @@ import {
   , KAIOS_CASH_LAW, createAtmFieldServiceRequests, validateWasteInventory,
   calculateFieldTripEnergy, calculateMatterAntimatterEnergy, validateFieldRoute,
   calculateFieldServiceQuote, validateFieldDeliveryEvidence, createWorkforceGap,
-  createFieldServiceDemandScan
+  createFieldServiceDemandScan, KAIOS_MARKET_GENESIS_CONFIG,
+  evaluateKaiosExternalMarketSnapshot, createKaiosMarketGenesisProposal
 } from "../core/index.mjs";
 import { verifyDigitalAntWalletBinding, verifyDigitalLifeWalletBinding, CODEX_GM_ENV } from "../core/security/wallet-binding.mjs";
 import { TEMPLE_HEART_READ_ABI, TEMPLE_HEART_DRY_RUN_ABI, TEMPLE_HEART_VERIFIED_ACTIONS, readCoreHeartEvents } from "../core/integrations/temple-heart-12345.mjs";
 import { buildSharedWorkerStatus, createPublicReadProvider, inspectPhysicsThoughtOrgan, readCompanyPatrol, readFieldServicePatrol, readMotherEnginePatrol, readPublicRequestPatrol } from "../core/jobs/public-read-only-worker.mjs";
 
 const seed = JSON.parse(await fs.readFile(new URL("../core/data/canonical.json", import.meta.url), "utf8"));
+
+const kaiosNoPairSnapshot = Object.freeze({
+  observed_at: "2026-08-27T13:10:00+08:00",
+  block_number: 118324943,
+  chain_id: 56,
+  kaios_code: "PRESENT",
+  pair_registry_organ: "0x0000000000000000000000000000000000000000",
+  pairs: Object.freeze({
+    WBNB: "0x0000000000000000000000000000000000000000",
+    KGEN: "0x0000000000000000000000000000000000000000",
+    USDT: "0x0000000000000000000000000000000000000000"
+  })
+});
+
+test("KAIOS market snapshot preserves the latest BSC no-pair truth", () => {
+  const market = evaluateKaiosExternalMarketSnapshot(kaiosNoPairSnapshot);
+  assert.equal(KAIOS_MARKET_GENESIS_CONFIG.company_address, "0.00011520");
+  assert.equal(market.market_status, "NO_LIVE_KAIOS_PAIR_DETECTED");
+  assert.equal(market.pair_registry_status, "NOT_DEPLOYED_OR_NOT_REGISTERED");
+  assert.equal(market.price_status, "NO_MATCHED_OR_AMM_PRICE");
+  assert.equal(market.execution_performed, false);
+  assert.throws(() => evaluateKaiosExternalMarketSnapshot({ ...kaiosNoPairSnapshot, chain_id: 1 }), (error) => error.code === "KAIOS_MARKET_WRONG_CHAIN");
+  assert.throws(() => evaluateKaiosExternalMarketSnapshot({ ...kaiosNoPairSnapshot, pairs: { ...kaiosNoPairSnapshot.pairs, KGEN: "UNKNOWN" } }), (error) => error.code === "KAIOS_PAIR_ADDRESS_INVALID");
+});
+
+test("KAIOS pair proposal requires funded two-sided capital and independent gates", () => {
+  const base = {
+    snapshot: kaiosNoPairSnapshot,
+    quoteAsset: "KGEN",
+    kaiosAmountAtomic: "1000000000000000000000",
+    quoteAmountAtomic: "1000000000000000000",
+    fundingSourceClass: "COMPANY_TRADING_TREASURY",
+    fundingSourceId: "KAIOS_AI_COMPANY_TRADING_TREASURY_UNBOUND",
+    kaiosAvailableAtomic: "1000000000000000000000",
+    quoteAvailableAtomic: "1000000000000000000",
+    budgetEvidence: true,
+    assetOwnerAuthorization: true,
+    riskPolicyApproved: true,
+    signerReady: true,
+    governanceReviewReady: true,
+    pairRegistryPlanApproved: true
+  };
+  const proposal = createKaiosMarketGenesisProposal(base);
+  assert.equal(proposal.status, "READY_FOR_INDEPENDENT_REVIEW");
+  assert.deepEqual(proposal.initial_quote_rational, {
+    numerator_quote_atomic: "1000000000000000000",
+    denominator_kaios_atomic: "1000000000000000000000"
+  });
+  assert.equal(proposal.execution_authorized, false);
+  assert.equal(proposal.mainnet_transaction_sent, false);
+
+  const underfunded = createKaiosMarketGenesisProposal({ ...base, quoteAvailableAtomic: "0", signerReady: false });
+  assert.deepEqual(underfunded.blockers, ["QUOTE_FUNDED", "SECURE_SIGNER"]);
+  assert.equal(underfunded.status, "BLOCKED_MISSING_MARKET_GENESIS_EVIDENCE");
+});
+
+test("KAIOS market genesis cannot use protected bank, payroll, catalyst or public-good reserves", () => {
+  const common = {
+    snapshot: kaiosNoPairSnapshot, quoteAsset: "WBNB", kaiosAmountAtomic: "1", quoteAmountAtomic: "1",
+    fundingSourceId: "FORBIDDEN", kaiosAvailableAtomic: "1", quoteAvailableAtomic: "1",
+    budgetEvidence: true, assetOwnerAuthorization: true, riskPolicyApproved: true, signerReady: true, governanceReviewReady: true, pairRegistryPlanApproved: true
+  };
+  for (const fundingSourceClass of ["BANK_18888_RESERVE", "BANK_8888_PAYROLL_LIABILITY", "KGEN_CATALYST_ESCROW", "NAIHE_GENESIS_RESERVE"]) {
+    assert.throws(() => createKaiosMarketGenesisProposal({ ...common, fundingSourceClass }), (error) => error.code === "KAIOS_MARKET_PROTECTED_CAPITAL");
+  }
+});
 
 async function runtime() {
   return createUniverseRuntime({ seed: structuredClone(seed), store: new MemoryUniverseStore() });

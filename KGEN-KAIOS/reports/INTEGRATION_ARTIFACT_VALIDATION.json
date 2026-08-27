@@ -1,17 +1,19 @@
 {
   "status": "PASS",
   "checks": {
-    "files": 26,
-    "json": 5,
-    "markdown": 5,
-    "utf8": 24,
+    "files": 4,
+    "json": 0,
+    "markdown": 1,
+    "utf8": 4,
     "bom": 0,
     "corruption": 0,
     "secretHits": 0,
     "brokenLinks": 0
   },
   "protectedChanges": {
-    "currentFiles": [],
+    "currentFiles": [
+      "KGEN-KAIOS/UNIVERSE_EXCHANGE_RUNTIME_CURRENT.md"
+    ],
     "constitutionFiles": [],
     "bootSequenceChanged": false,
     "walletOrPrivateKeyFiles": [],
