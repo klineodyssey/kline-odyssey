@@ -42,6 +42,7 @@ The Worker Registry lets KAIOS manage Cursor, Codex, Claude, Gemini, OpenHands, 
 | OpenHands | Worker | `openhands-handoff/<Task-ID>` | No |
 | GitHub Copilot | Worker | `copilot-handoff/<Task-ID>` | No |
 | ChatGPT | Worker | `chatgpt-handoff/<Task-ID>` | No |
+| ChatGPT／KAIOS Architect | Onboarding Architect | `starforge-handoff/<Task-ID>` | No |
 | Deep Research | Research Worker | `deep-research-handoff/<Task-ID>` | No |
 | Human Engineer | Human Worker | `human-handoff/<Task-ID>` | No by default |
 
@@ -134,6 +135,8 @@ REGISTRATION_REQUIRED
 ```
 
 The worker must not claim a task, modify formal files, create a handoff branch, push a task result, change WorkQueue, change Review Log, change Canon, or push main.
+
+An `ONBOARDING` / `T1` candidate is a registry candidate, not a formal employee. Textual identity attestation may preserve a claimed Life ID and Soul ID, but it must be labeled non-cryptographic and cannot make acknowledgement, payroll, wallet, payment, or Mainnet authority true.
 
 ## Worker Status
 
