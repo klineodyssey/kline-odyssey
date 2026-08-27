@@ -690,16 +690,23 @@ export function evaluateExchangeSettlement11520Snapshot(snapshot) {
       .every((value) => /^0x[0-9a-f]{64}$/i.test(canonicalText(value))),
     total_settled_valid: /^\d+$/.test(String(snapshot.total_settled_atomic ?? ""))
   });
-  const blockers = Object.entries(checks).filter(([, passed]) => !passed).map(([name]) => name.toUpperCase());
-  const identityVerified = blockers.length === 0;
+  const interfaceObserved = Object.values(checks).every(Boolean);
+  const blockers = interfaceObserved
+    ? Object.freeze(["SETTLEMENT_CODE_IDENTITY_NOT_REPOSITORY_BOUND"])
+    : Object.freeze(Object.entries(checks).filter(([, passed]) => !passed).map(([name]) => name.toUpperCase()));
   return deepFreeze({
-    status: identityVerified ? "RPC_QUORUM_VERIFIED_DEPLOYED_V1" : "BLOCKED_SETTLEMENT_IDENTITY_OR_TRANSPORT_MISMATCH",
+    status: interfaceObserved
+      ? "BLOCKED_SETTLEMENT_CODE_IDENTITY_NOT_REPOSITORY_BOUND"
+      : "BLOCKED_SETTLEMENT_IDENTITY_OR_TRANSPORT_MISMATCH",
     checks,
     blockers,
     observed_at: snapshot.observed_at ?? null,
     block_number: snapshot.block_number ?? null,
     block_hash: repositoryVerified ? snapshot.block_hash : null,
-    deployed_capability: EXCHANGE_SETTLEMENT_11520_CONFIG.deployed_capability,
+    expected_runtime_code_hashes_repository_bound: false,
+    runtime_code_identity_verified: false,
+    deployed_capability: null,
+    configured_capability_claim_unverified: EXCHANGE_SETTLEMENT_11520_CONFIG.deployed_capability,
     total_settled_atomic: /^\d+$/.test(String(snapshot.total_settled_atomic ?? "")) ? String(snapshot.total_settled_atomic) : null,
     gpu_trade_compatibility: "INCOMPATIBLE_WITH_ATOMIC_GPU_TRADE_SETTLEMENT",
     incompatibilities: Object.freeze([

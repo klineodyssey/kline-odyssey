@@ -619,8 +619,21 @@ test("deployed 11520 settlement probe is read-only and caller transports cannot 
   assert.equal(evaluated.block_hash, null);
   assert.equal(evaluated.gpu_trade_compatibility, "INCOMPATIBLE_WITH_ATOMIC_GPU_TRADE_SETTLEMENT");
   assert.equal(evaluated.production_gpu_settlement_adapter_status, "NOT_IMPLEMENTED");
+  assert.equal(evaluated.expected_runtime_code_hashes_repository_bound, false);
+  assert.equal(evaluated.runtime_code_identity_verified, false);
+  assert.equal(evaluated.deployed_capability, null);
+  assert.equal(evaluated.configured_capability_claim_unverified, EXCHANGE_SETTLEMENT_11520_CONFIG.deployed_capability);
   assert.equal(evaluated.real_trade_enabled, false);
   assert.equal(evaluated.transaction_payload, null);
+});
+
+test("11520 settlement evaluator cannot promote unbound runtime hashes to deployed semantics", async () => {
+  const source = await readFile(new URL("../K線西遊記/temples/11520/modules/kgen-native-market-cell.mjs", import.meta.url), "utf8");
+  assert.doesNotMatch(source, /RPC_QUORUM_VERIFIED_DEPLOYED_V1/);
+  assert.match(source, /BLOCKED_SETTLEMENT_CODE_IDENTITY_NOT_REPOSITORY_BOUND/);
+  assert.match(source, /expected_runtime_code_hashes_repository_bound:\\s*false/);
+  assert.match(source, /runtime_code_identity_verified:\\s*false/);
+  assert.match(source, /deployed_capability:\\s*null/);
 });
 
 test("11520 settlement quorum rejects wrong chain and endpoint disagreement", async () => {
