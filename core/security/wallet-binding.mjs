@@ -93,6 +93,47 @@ export function verifyDigitalAntWalletBinding(environment = process.env) {
   return verifyDigitalLifeWalletBinding({ lifeId: "DIGITAL_ANT_0001", envPrefix: "DIGITAL_ANT_0001", expectedChainId: 56 }, environment);
 }
 
+/**
+ * Produce public, non-secret evidence that the configured credential derives
+ * the canonical Life wallet. This proves credential binding only. It grants
+ * no transaction, allowance, transfer, trade, treasury or broadcast authority
+ * and deliberately does not expose the signer callback.
+ */
+export function verifyDigitalLifeSignerConnection({
+  lifeId,
+  envPrefix,
+  expectedAddress,
+  expectedChainId = 56,
+  observedAt = new Date().toISOString()
+}, environment = process.env) {
+  invariant(/^0x[0-9a-fA-F]{40}$/.test(expectedAddress ?? ""), "EXPECTED_WALLET_ADDRESS_REQUIRED", "Signer connection evidence requires the canonical public wallet address");
+  const observedAtMs = Date.parse(String(observedAt ?? ""));
+  invariant(Number.isFinite(observedAtMs), "SIGNER_OBSERVED_AT_INVALID", "Signer connection evidence requires a valid observation timestamp");
+  const binding = verifyDigitalLifeWalletBinding({ lifeId, envPrefix, expectedChainId }, environment);
+  binding.assertChainId(expectedChainId);
+  const address = binding.withVerifiedAddress((value) => value);
+  const ethers = ethersRuntime();
+  const canonicalExpected = ethers.utils.getAddress(expectedAddress);
+  if (ethers.utils.getAddress(address) !== canonicalExpected) {
+    stopped("CANONICAL_LIFE_WALLET_MISMATCH", "Digital Life signer STOP: configured wallet does not match canonical Life identity");
+  }
+  return Object.freeze({
+    evidence_type: "DIGITAL_LIFE_SIGNER_CONNECTION_V1",
+    connection_evidence_id: `SIGNER-CONNECTION:${lifeId}:${expectedChainId}:${canonicalExpected.toLowerCase()}`,
+    life_id: lifeId,
+    wallet_address: canonicalExpected,
+    chain_id: expectedChainId,
+    observed_at: new Date(observedAtMs).toISOString(),
+    status: "CONNECTED_BINDING_ONLY",
+    credential_binding: "VERIFIED_BOUND",
+    transaction_authority: false,
+    policy_broker_connected: false,
+    signer_callback_exposed: false,
+    raw_key_exportable: false,
+    private_key_exposed: false
+  });
+}
+
 export function assertNoSensitiveSerialization(value) {
   const serialized = JSON.stringify(value);
   invariant(!/["'](?:private_key|privateKey|secret_key|secretKey)["']\s*:/i.test(serialized), "SENSITIVE_SERIALIZATION", "Private key fields cannot be serialized");

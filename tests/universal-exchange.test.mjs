@@ -195,7 +195,7 @@ test("KGEN wallet discovery uses the canonical BSC asset without transaction aut
   assert.doesNotMatch(rejected.status.textContent, /accepted by the wallet/i);
   assert.equal(rejected.button.disabled, false);
 });
-import { verifyDigitalAntWalletBinding, verifyDigitalLifeWalletBinding, CODEX_GM_ENV } from "../core/security/wallet-binding.mjs";
+import { verifyDigitalAntWalletBinding, verifyDigitalLifeWalletBinding, verifyDigitalLifeSignerConnection, CODEX_GM_ENV } from "../core/security/wallet-binding.mjs";
 import { TEMPLE_HEART_READ_ABI, TEMPLE_HEART_DRY_RUN_ABI, TEMPLE_HEART_VERIFIED_ACTIONS, readCoreHeartEvents } from "../core/integrations/temple-heart-12345.mjs";
 import { buildSharedWorkerStatus, createPublicReadProvider, inspectPhysicsThoughtOrgan, readCompanyPatrol, readFieldServicePatrol, readMotherEnginePatrol, readPublicRequestPatrol } from "../core/jobs/public-read-only-worker.mjs";
 
@@ -859,6 +859,37 @@ test("generic Digital Life wallet binding preserves Digital Ant compatibility an
 
   const ant = ethers.Wallet.createRandom();
   assert.equal(verifyDigitalAntWalletBinding({ DIGITAL_ANT_0001_PRIVATE_KEY: ant.privateKey, DIGITAL_ANT_0001_WALLET_ADDRESS: ant.address }).life_id, "DIGITAL_ANT_0001");
+});
+
+test("public signer connection evidence proves only canonical credential binding", () => {
+  const require = createRequire(import.meta.url);
+  const ethers = require("../K線西遊記/temples/12345/assets/ethers-5.7.2.umd.min.js");
+  const wallet = ethers.Wallet.createRandom();
+  const environment = { [CODEX_GM_ENV.privateKey]: wallet.privateKey, [CODEX_GM_ENV.walletAddress]: wallet.address };
+  const evidence = verifyDigitalLifeSignerConnection({
+    lifeId: "LIFE-CODEX-GM-0001",
+    envPrefix: "CODEX_GM_0001",
+    expectedAddress: wallet.address,
+    expectedChainId: 56,
+    observedAt: "2026-08-27T06:00:00Z"
+  }, environment);
+
+  assert.equal(evidence.status, "CONNECTED_BINDING_ONLY");
+  assert.equal(evidence.credential_binding, "VERIFIED_BOUND");
+  assert.equal(evidence.wallet_address, wallet.address);
+  assert.equal(evidence.chain_id, 56);
+  assert.equal(evidence.transaction_authority, false);
+  assert.equal(evidence.policy_broker_connected, false);
+  assert.equal(evidence.signer_callback_exposed, false);
+  assert.equal(evidence.raw_key_exportable, false);
+  assert.equal(evidence.private_key_exposed, false);
+  assert.equal(JSON.stringify(evidence).includes(wallet.privateKey), false);
+  assert.doesNotMatch(JSON.stringify(evidence), /["'](?:private_key|privateKey|secret_key|secretKey)["']\s*:/i);
+
+  const other = ethers.Wallet.createRandom();
+  assert.throws(() => verifyDigitalLifeSignerConnection({ lifeId: "LIFE-CODEX-GM-0001", envPrefix: "CODEX_GM_0001", expectedAddress: other.address }, environment), (error) => error.code === "CANONICAL_LIFE_WALLET_MISMATCH");
+  assert.throws(() => verifyDigitalLifeSignerConnection({ lifeId: "LIFE-CODEX-GM-0001", envPrefix: "CODEX_GM_0001", expectedAddress: wallet.address }, {}), (error) => error.code === "MISSING_PRIVATE_KEY");
+  assert.throws(() => verifyDigitalLifeSignerConnection({ lifeId: "LIFE-CODEX-GM-0001", envPrefix: "CODEX_GM_0001", expectedAddress: wallet.address, observedAt: "not-a-time" }, environment), (error) => error.code === "SIGNER_OBSERVED_AT_INVALID");
 });
 
 test("General Manager clock-in, payroll, patrol and modeled transit remain fail-closed", () => {
