@@ -631,9 +631,9 @@ test("11520 settlement evaluator cannot promote unbound runtime hashes to deploy
   const source = await readFile(new URL("../K線西遊記/temples/11520/modules/kgen-native-market-cell.mjs", import.meta.url), "utf8");
   assert.doesNotMatch(source, /RPC_QUORUM_VERIFIED_DEPLOYED_V1/);
   assert.match(source, /BLOCKED_SETTLEMENT_CODE_IDENTITY_NOT_REPOSITORY_BOUND/);
-  assert.match(source, /expected_runtime_code_hashes_repository_bound:\\s*false/);
-  assert.match(source, /runtime_code_identity_verified:\\s*false/);
-  assert.match(source, /deployed_capability:\\s*null/);
+  assert.match(source, /expected_runtime_code_hashes_repository_bound:\s*false/);
+  assert.match(source, /runtime_code_identity_verified:\s*false/);
+  assert.match(source, /deployed_capability:\s*null/);
 });
 
 test("11520 settlement quorum rejects wrong chain and endpoint disagreement", async () => {
