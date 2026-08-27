@@ -1,7 +1,7 @@
 # Whole-Life Circulation And K12345 Heart Handoff
 
 **Task:** `KAIOS-WHOLE-LIFE-CIRCULATION-12345-HEART-V1-001`
-**Execution base refreshed:** `f53c7d6729cf90f0ee18f6bcaf76d15ce6b3dfb5`
+**Execution base refreshed:** `5d539d237bf948011d234203e451aa980a7b7ce8`
 **Implementer:** `codex-gm-01`
 **Independent review:** `REQUIRED`
 **Candidate state:** `REVIEW_ONLY_CANDIDATE`
@@ -16,7 +16,7 @@
 - persistent hash-chained replay journal with trusted-head rollback detection;
 - health and medical recovery state machines;
 - fractal Organ coordinate calculator;
-- Starforge PR #163 security review draft.
+- unresolved dependency pointer to Starforge PR #163; this PR neither carries nor substitutes for PR #163's distinct security review;
 - exact B4 `label × 10^-8` distance adapter, receipt-gated Heart/meal/public-good
   state, bidirectional movement/fare evidence gates, PR #169 market boundary,
   food/waste conservation, strict schema, durable snapshot, tests, and static

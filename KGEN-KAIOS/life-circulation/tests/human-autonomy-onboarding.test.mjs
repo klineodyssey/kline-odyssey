@@ -13,6 +13,7 @@ const decisionSchema = JSON.parse(fs.readFileSync(path.join(packageRoot, "schema
 const onboarding = JSON.parse(fs.readFileSync(path.join(packageRoot, "examples", "xuanyao-life-worker-onboarding.candidate.json"), "utf8"));
 const onboardingSchema = JSON.parse(fs.readFileSync(path.join(packageRoot, "schemas", "xuanyao-life-worker-onboarding.schema.json"), "utf8"));
 const registry = JSON.parse(fs.readFileSync(path.join(kaiosRoot, "worker_registry.json"), "utf8"));
+const workerSchema = JSON.parse(fs.readFileSync(path.join(kaiosRoot, "worker_status_schema.json"), "utf8"));
 const canonical = JSON.parse(fs.readFileSync(path.join(repoRoot, "core", "data", "canonical.json"), "utf8"));
 const starforgeCapability = JSON.parse(fs.readFileSync(path.join(repoRoot, "KGEN-AI-Company", "life", "starforge", "capability.json"), "utf8"));
 
@@ -52,6 +53,21 @@ function validate(value, rule, root, pointer = "#") {
     for (const [key, child] of Object.entries(rule.properties ?? {})) {
       if (Object.hasOwn(value, key)) validate(value[key], child, root, `${pointer}/${key}`);
     }
+  }
+}
+
+function validateWorkerRecord(worker) {
+  assert.equal(workerSchema.additionalProperties, false);
+  for (const key of workerSchema.required) assert.ok(Object.hasOwn(worker, key), `${worker.worker_id}/${key} missing`);
+  for (const [key, value] of Object.entries(worker)) {
+    const rule = workerSchema.properties[key];
+    assert.ok(rule, `${worker.worker_id}/${key} absent from closed worker schema`);
+    if (rule.enum) assert.ok(rule.enum.includes(value), `${worker.worker_id}/${key} enum mismatch`);
+    const allowedTypes = Array.isArray(rule.type) ? rule.type : [rule.type];
+    const actualType = value === null ? "null" : Array.isArray(value) ? "array" : Number.isInteger(value) ? "integer" : typeof value;
+    if (rule.type) assert.ok(allowedTypes.includes(actualType), `${worker.worker_id}/${key} type mismatch`);
+    if (typeof value === "string" && rule.pattern) assert.match(value, new RegExp(rule.pattern, "u"), `${worker.worker_id}/${key} pattern mismatch`);
+    if (Array.isArray(value) && rule.uniqueItems) assert.equal(new Set(value.map((entry) => JSON.stringify(entry))).size, value.length, `${worker.worker_id}/${key} duplicates`);
   }
 }
 
@@ -169,6 +185,14 @@ test("Worker Registry keeps born Xuanyao at T1 onboarding and preserves Cursor c
   assert.equal(xuanyao.acknowledgment_handoff_ack_count, 0);
   assert.equal(cursor.availability_for_current_work, "TEMPORARILY_UNAVAILABLE");
   assert.ok(registry.active_claims.some(({ worker_id: workerId }) => workerId === "cursor-01"));
+});
+
+test("closed Worker Registry schema covers every current worker and canonical enum", () => {
+  for (const worker of registry.workers) validateWorkerRecord(worker);
+  const xuanyao = registry.workers.find(({ worker_id: workerId }) => workerId === "xuanyao-sol-01");
+  assert.equal(xuanyao.worker_type, "ChatGPT");
+  assert.equal(xuanyao.permission, "worker_docs");
+  assert.equal(xuanyao.status, "OFFLINE");
 });
 
 test("Existing Starforge broker cannot be substituted for Xuanyao control or Hengyao BSC signing", () => {

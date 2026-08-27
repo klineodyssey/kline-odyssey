@@ -129,14 +129,14 @@
     "assignedWorkerId": "xuanyao-sol-01",
     "completionAuthority": "MACHINE_VERIFIED_DISTINCT_XUANYAO_CONTROLLER_ONLY",
     "createdAt": "2026-08-24T14:58:48Z",
-    "refreshedAt": "2026-08-24T16:44:50Z",
+    "refreshedAt": "2026-08-27T08:00:33Z",
     "documents": [
       {
         "ackType": "BOOT_ACK",
         "lifeId": "LIFE-XUANYAO-SOL-0001",
         "workerId": "xuanyao-sol-01",
         "documentPath": "PRIMEFORGE_GENESIS_BOOT_SEQUENCE.md",
-        "documentSha256": "4dd9bf65ff8389f58c765c7769b2d609c4accd1d53dae50b5a729811973c3c61",
+        "documentSha256": "0de1614aee67e397f04e891531272217432b3211e3fffe5ccf980c0b1d69737e",
         "ackTimestamp": null,
         "ackStatus": "PENDING_XUANYAO_READ_AND_RESPONSE"
       },
@@ -145,7 +145,7 @@
         "lifeId": "LIFE-XUANYAO-SOL-0001",
         "workerId": "xuanyao-sol-01",
         "documentPath": "KGEN-Canon/KGEN_CANON_MASTER.json",
-        "documentSha256": "d82c0a860b56c87efa06253c19787b45bad55e97bc543bd41a97f6640fdaa216",
+        "documentSha256": "833fc5d311728c21a49391d01a3640b49ae0bf4c9f324122f80e60c6d321ad75",
         "ackTimestamp": null,
         "ackStatus": "PENDING_XUANYAO_READ_AND_RESPONSE"
       },
@@ -154,7 +154,7 @@
         "lifeId": "LIFE-XUANYAO-SOL-0001",
         "workerId": "xuanyao-sol-01",
         "documentPath": "KGEN-AI-Company/WORKSPACE_POLICY.md",
-        "documentSha256": "31c33fdd43a1759a1ac954b37489b6088de9aad06e64feef2cfe96817427b639",
+        "documentSha256": "da591e94b1aadbc4dd0af1ae0c298e62cbee9db050a69325023dab8127ceca5a",
         "ackTimestamp": null,
         "ackStatus": "PENDING_XUANYAO_READ_AND_RESPONSE"
       },
@@ -163,7 +163,7 @@
         "lifeId": "LIFE-XUANYAO-SOL-0001",
         "workerId": "xuanyao-sol-01",
         "documentPath": "KGEN-Agent-Office/DO_NOT_TOUCH.md",
-        "documentSha256": "e40aa2451cc04c2e93a3f8749b93c5328b89d9386086105885d60dc5d45f8ba4",
+        "documentSha256": "510d22b4e5e511e2b4ead0b21618642deebe4477cf9393c0660821dd48ff8e9f",
         "ackTimestamp": null,
         "ackStatus": "PENDING_XUANYAO_READ_AND_RESPONSE"
       }

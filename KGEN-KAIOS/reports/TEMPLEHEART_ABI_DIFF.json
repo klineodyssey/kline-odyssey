@@ -2,7 +2,7 @@
   "status": "PASS",
   "compiler": "0.8.24+commit.e11b9ed9.Emscripten.clang",
   "baseline": {
-    "ref": "6e128dc49220d59411bae107725b46a07b4609d3",
+    "ref": "f507724d1876c28e3d24a7316c440ea9304a5228",
     "path": "KGEN/contracts/KGEN_TempleHeart_Upgradeable.sol",
     "entries": 206
   },
