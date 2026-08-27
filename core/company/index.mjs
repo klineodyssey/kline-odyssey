@@ -2068,6 +2068,8 @@ const KAIOS_MARKET_RPC_URLS = Object.freeze([
   "https://bsc-dataseed.binance.org",
   "https://bsc.publicnode.com"
 ]);
+const repositoryBoundKaiosMarketFetch =
+  typeof globalThis.fetch === "function" ? globalThis.fetch.bind(globalThis) : null;
 const verifiedKaiosMarketSnapshots = new WeakSet();
 const ORGAN_SELECTOR = "0xc7e9a48e";
 const GET_PAIR_SELECTOR = "0xe6a43905";
@@ -2147,7 +2149,7 @@ async function observeKaiosMarketAtBlock({ url, blockNumber, fetchImpl, signal, 
 export async function readKaiosExternalMarketSnapshotQuorum({
   rpcUrls = KAIOS_MARKET_RPC_URLS,
   confirmations = 3,
-  fetchImpl = globalThis.fetch,
+  fetchImpl = repositoryBoundKaiosMarketFetch,
   timeoutMs = 15000
 } = {}) {
   invariant(typeof fetchImpl === "function", "KAIOS_MARKET_FETCH_REQUIRED", "KAIOS market snapshot requires fetch");
@@ -2155,6 +2157,11 @@ export async function readKaiosExternalMarketSnapshotQuorum({
   invariant(rpcUrls.every((url) => /^https:\/\//.test(String(url))), "KAIOS_MARKET_RPC_HTTPS_REQUIRED", "KAIOS market RPC endpoints must use HTTPS");
   invariant(Number.isInteger(confirmations) && confirmations >= 1, "KAIOS_MARKET_CONFIRMATIONS_REQUIRED", "KAIOS market snapshot requires at least one confirmation");
   invariant(Number.isInteger(timeoutMs) && timeoutMs > 0, "KAIOS_MARKET_TIMEOUT_INVALID", "KAIOS market snapshot timeout must be positive");
+  const repositoryBoundTransport =
+    fetchImpl === repositoryBoundKaiosMarketFetch &&
+    confirmations === 3 &&
+    rpcUrls.length === KAIOS_MARKET_RPC_URLS.length &&
+    rpcUrls.every((url, index) => url === KAIOS_MARKET_RPC_URLS[index]);
 
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
@@ -2188,13 +2195,15 @@ export async function readKaiosExternalMarketSnapshotQuorum({
       kaios_code: observed.kaios_code,
       pair_registry_organ: observed.pair_registry_organ,
       pairs: observed.pairs,
-      evidence_class: "RPC_QUORUM_VERIFIED_READ_ONLY",
+      evidence_class: repositoryBoundTransport
+        ? "RPC_QUORUM_VERIFIED_READ_ONLY"
+        : "CALLER_SUPPLIED_TRANSPORT_SCHEMA_PROBE",
       provider_count: rpcUrls.length,
       confirmations,
       execution_performed: false,
       mainnet_transaction_sent: false
     });
-    verifiedKaiosMarketSnapshots.add(snapshot);
+    if (repositoryBoundTransport) verifiedKaiosMarketSnapshots.add(snapshot);
     return snapshot;
   } finally {
     clearTimeout(timer);

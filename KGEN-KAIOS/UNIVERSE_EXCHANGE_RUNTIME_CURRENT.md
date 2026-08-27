@@ -315,9 +315,11 @@ The runtime now reads one confirmed block from at least two distinct HTTPS BSC
 RPC endpoints and requires exact agreement on chain ID, block hash, KAIOS
 bytecode presence, Pair Registry organ and all three Pancake V2 factory results.
 An RPC disagreement, wrong chain, missing code or malformed ABI result fails
-closed. Only the exact object produced by that adapter is marked
-`RPC_QUORUM_VERIFIED_READ_ONLY_OBSERVATION`; copying or caller-constructing the
-same fields loses that status.
+closed. Only the exact object produced through the built-in fixed RPC list and
+internally captured fetch transport is marked
+`RPC_QUORUM_VERIFIED_READ_ONLY_OBSERVATION`; caller-supplied RPC URLs or fetch
+transports are schema probes only, and copying or caller-constructing the same
+fields loses verified status.
 
 This proves only a timestamped no-pair observation at that block. It is not a
 permanent `NO_LIVE_KAIOS_PAIR` claim, price authority, repository-bound funding

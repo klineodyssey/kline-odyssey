@@ -389,17 +389,17 @@ function kaiosMarketRpcFetch({ mismatchUrl = null } = {}) {
   };
 }
 
-test("KAIOS read-only market adapter requires matching multi-RPC evidence at one confirmed block", async () => {
+test("caller-supplied KAIOS RPC transport remains an unverified schema probe", async () => {
   const rpcUrls = ["https://rpc-one.example", "https://rpc-two.example"];
   const snapshot = await readKaiosExternalMarketSnapshotQuorum({ rpcUrls, fetchImpl: kaiosMarketRpcFetch(), confirmations: 3 });
   assert.equal(snapshot.block_number, 997);
   assert.equal(snapshot.provider_count, 2);
-  assert.equal(snapshot.evidence_class, "RPC_QUORUM_VERIFIED_READ_ONLY");
+  assert.equal(snapshot.evidence_class, "CALLER_SUPPLIED_TRANSPORT_SCHEMA_PROBE");
   assert.equal(snapshot.mainnet_transaction_sent, false);
   const market = evaluateKaiosExternalMarketSnapshot(snapshot);
-  assert.equal(market.market_status, "RPC_QUORUM_VERIFIED_READ_ONLY_OBSERVATION");
-  assert.equal(market.pair_registry_status, "RPC_QUORUM_ZERO_AT_BLOCK");
-  assert.equal(market.timestamped_no_pair_observation, true);
+  assert.equal(market.market_status, "UNVERIFIED_EXTERNAL_MARKET_OBSERVATION");
+  assert.equal(market.pair_registry_status, "CALLER_REPORTED_ZERO_UNVERIFIED");
+  assert.equal(market.timestamped_no_pair_observation, false);
   assert.equal(market.authoritative_no_pair_claim, false);
   assert.equal(market.execution_performed, false);
 
