@@ -240,7 +240,7 @@ Checkpoint classification at `2026-08-27T12:37:23Z`:
 | 4 | K11520 native KGEN market | #169, cumulatively integrated by #188 | ENGINEERING_PASS; DRAFT; DISTINCT_REVIEW_PENDING |
 | 5 | NVIDIA GPU market pilot / real readiness | #178, cumulatively integrated by #188 | PAPER_PASS; REAL_INVENTORY_AND_SETTLEMENT_BLOCKED |
 | 6 | KGEN external metadata / wallet discovery | #179 | ENGINEERING_PASS; EXTERNAL_PUBLICATION_NOT_PERFORMED |
-| 7 | KAIOS market genesis | #180 plus fresh read-only evidence | READINESS_GATE_PASS; PANCAKESWAP_V2_PAIR_NOT_FOUND_AT_BLOCK_118384842 |
+| 7 | KAIOS market genesis | #180 plus fresh read-only evidence | READINESS_GATE_PASS; RPC_QUORUM_NO_PAIR_OBSERVATION_AT_BLOCK_118386241 |
 | 8 | Universal listing registry | #181, cumulatively integrated by #188 | PAPER_PASS; PRODUCTION_AUTHORITY_UNBOUND |
 | 9 | Warehouse / escrow / settlement / accounting | #181/#188 | PAPER_PASS; REAL_CUSTODY_AND_SETTLEMENT_BLOCKED |
 | 10 | Autonomous company safe cycle | #170 | ENGINEERING_PASS; CONNECTORS_AND_DISTINCT_REVIEW_PENDING |
@@ -337,7 +337,7 @@ The remembered counts of 27 and 36 open PRs are superseded. GitHub reported 38 o
 
 `#188, #187, #185, #183, #182, #180, #179, #176, #172, #170, #162, #161, #158`
 
-- #188 exact head `f267a095c7a05db36e57d38724d0fd7be2e78c96` cumulatively integrates #169, #178, #179, #180, #181 and #185 on current main. It preserves the assigned `0.00011520` K11520 company/KGEN-price coordinate without seeding matched-trade CT, combines the paper market, listing/warehouse gates and browser-safe mobile wallet, and adds a read-only GPU real-trade readiness evaluator. Caller-supplied evidence and verifier callbacks cannot promote readiness because `REPOSITORY_BOUND_GPU_EVIDENCE_VERIFIER_NOT_WIRED` remains unconditional; even a hypothetical complete candidate bundle stays `BLOCKED_FAIL_CLOSED` and produces no transaction payload or signer request. The Mother Machine can now produce public `CONNECTED_BINDING_ONLY / VERIFIED_BOUND` evidence only for the repository-bound Hengyao Life, environment, chain-56 wallet profile. This proves credential binding without exposing the signer and grants no identity, transaction, treasury or trading authority; the transaction Policy Broker remains unconnected. Exact-head push CI, PR CI and Product QA are green, but #188 remains Draft and still requires distinct review, real inventory, funded segregated capital, production market/settlement, a reviewed Policy Broker and no-broadcast fork evidence.
+- #188 exact head `4ff026a2cc9b7c51282655cf9754051346f8ddd5` cumulatively integrates #169, #178, #179, #180, #181 and #185 on current main. It preserves the assigned `0.00011520` K11520 company/KGEN-price coordinate without seeding matched-trade CT, combines the paper market, listing/warehouse gates and browser-safe mobile wallet, and adds a read-only GPU real-trade readiness evaluator. Caller-supplied GPU evidence and verifier callbacks cannot promote readiness because `REPOSITORY_BOUND_GPU_EVIDENCE_VERIFIER_NOT_WIRED` remains unconditional; even a hypothetical complete candidate bundle stays `BLOCKED_FAIL_CLOSED` and produces no transaction payload or signer request. It also adds a read-only KAIOS market-observation adapter: only the fixed default BSC RPC endpoints, built-in transport and three confirmations can produce `RPC_QUORUM_VERIFIED_READ_ONLY`; caller-supplied RPC URLs or fetch functions remain `CALLER_SUPPLIED_TRANSPORT_SCHEMA_PROBE` and cannot mint verified evidence. The Mother Machine can produce public `CONNECTED_BINDING_ONLY / VERIFIED_BOUND` evidence only for the repository-bound Hengyao Life, environment and chain-56 wallet profile. This proves credential binding without exposing the signer and grants no transaction, treasury or trading authority; the transaction Policy Broker remains unconnected. Local tests are 280/280 PASS and exact-head push CI, PR CI and Product QA are green, but #188 remains Draft and still requires distinct review, real inventory, funded segregated capital, production market/settlement, a reviewed Policy Broker and no-broadcast fork evidence.
 - #187 is this lineage reconciliation candidate. It is evidence/documentation only and cannot approve itself.
 - #186 is the unsigned/read-only 18888 Public Good payment adapter; live read is fail-closed because the tested Mother/Jade addresses do not hold the bank payment roles.
 - #185 is the mobile chain-56 wallet/watch-asset candidate; it sends no token transaction and does not claim a KAIOS DEX pair exists.
@@ -348,7 +348,7 @@ The remembered counts of 27 and 36 open PRs are superseded. GitHub reported 38 o
 - #161 is synchronized to current main at `fbb36f50034c1d6ccf0eca0064bcab9d9d50ac4d`; its paper-only circulatory and cross-market engine passed exact-head CI, but real execution remains disabled.
 - #170 is synchronized to current main at `f25e2278c31afe59ea8b00a04928fd9487c6f844`; safe-cycle tests pass, but it cannot approve itself or activate missing repository/claim/wake/review/scheduler connectors.
 - #179 exact head is `d88ed1bfbee8b495b3bfb776b865cbb061384309`; its committed BSC supply snapshot is block `118374207` and all external metadata submissions remain unperformed.
-- #180 records a read-only Pancake V2 factory observation of no KAIOS/WBNB pair; a fresh independent read at block `118384842` returned the zero address again. This is a timestamped observation, not a permanent market claim or authorization to create liquidity.
+- #180 records a read-only Pancake V2 factory observation of no KAIOS/WBNB pair. #188's fixed-transport RPC quorum later observed zero-address KAIOS/WBNB, KAIOS/KGEN and KAIOS/USDT pairs at block `118386241`. These are timestamped observations, not permanent market claims or authorization to create liquidity.
 
 ### Fresh BSC read-only circulation checkpoint
 
@@ -363,6 +363,18 @@ At BSC block `118384842` (`2026-08-27T12:37:23Z`), public `eth_call` and balance
 - PancakeSwap V2 KAIOS/WBNB pair: not found (factory returned the zero address).
 
 This checkpoint performed no signing, transaction construction, broadcast, payment, liquidity operation or chain write. It does not authorize the available K18888 capital, the K8888 payroll pool or the Hengyao BNB balance for GPU inventory or trading. Credential binding remains `CONNECTED_BINDING_ONLY`; transaction Policy Broker, segregated trading capital, production settlement and repository-bound GPU/warehouse evidence remain unavailable.
+
+### Fresh KAIOS market RPC-quorum checkpoint
+
+At BSC block `118386241` (`2026-08-27T12:47:52Z`), two fixed HTTPS BSC RPC endpoints agreed on chain 56 and block hash `0x0554bb8154deb5f63e7ea07506efc696384bd085f03c87b5e981d652b8d1a81b`. Read-only calls reported:
+
+- canonical KAIOS bytecode: present;
+- Organ Registry Pair Registry organ: zero address;
+- PancakeSwap V2 KAIOS/WBNB pair: zero address;
+- PancakeSwap V2 KAIOS/KGEN pair: zero address;
+- PancakeSwap V2 KAIOS/USDT pair: zero address.
+
+Evidence class is `RPC_QUORUM_VERIFIED_READ_ONLY`. The production evaluator does not accept caller-selected endpoints or a caller-supplied fetch implementation as verification authority; those inputs are schema probes only. This checkpoint created no signer request, transaction payload, pair, liquidity, approval or chain write.
 
 These branches must be resynchronized whenever `main` advances semantically, then re-run exact-head CI.
 
