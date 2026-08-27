@@ -230,7 +230,7 @@ The current 16-workstream order is: Genesis/PR lineage; Cursor offboarding; dist
 
 Engineering candidates may proceed on isolated Draft branches. Real trade, payment, deployment and governance stay fail-closed unless the corresponding signer, budget, inventory, counterparty, settlement and independent-review gates are all machine-verifiably satisfied.
 
-Checkpoint classification at `2026-08-27T11:32:04Z`:
+Checkpoint classification at `2026-08-27T12:10:48Z`:
 
 | # | Workstream | Durable candidate/evidence | Current state |
 |---|---|---|---|
@@ -329,7 +329,7 @@ Therefore:
 
 ## 18. GitHub PR lineage checkpoint — 2026-08-27
 
-Observed at `2026-08-27T11:32:04Z` against `origin/main = 830b79214781fb1231f3619336de394f400a0bfd`.
+Observed at `2026-08-27T12:10:48Z` against `origin/main = 830b79214781fb1231f3619336de394f400a0bfd`.
 
 The remembered counts of 27 and 36 open PRs are superseded. GitHub reported 38 open PRs at this checkpoint. A green workflow means tests passed at that head; it is not an independent review, deployment claim or merge authorization.
 
@@ -337,7 +337,7 @@ The remembered counts of 27 and 36 open PRs are superseded. GitHub reported 38 o
 
 `#188, #187, #185, #183, #182, #180, #179, #176, #172, #170, #162, #161, #158`
 
-- #188 cumulatively integrates #169, #181 and #185 on current main. It preserves the assigned `0.00011520` K11520 company/KGEN-price coordinate without seeding matched-trade CT, and combines the paper market, listing/warehouse gates and browser-safe mobile wallet. Its exact-head CI is green, but it remains Draft and still requires distinct review.
+- #188 exact head `3d1b0cc9fded45d369a7418e6287983281e3ec09` cumulatively integrates #169, #178, #179, #180, #181 and #185 on current main. It preserves the assigned `0.00011520` K11520 company/KGEN-price coordinate without seeding matched-trade CT, combines the paper market, listing/warehouse gates and browser-safe mobile wallet, and adds an opaque-bundle GPU real-trade readiness evaluator. Caller-asserted verification cannot pass the gate; even a hypothetical complete independently verified bundle produces no transaction payload or signer request. Its exact-head push/PR CI and Product QA are green, but it remains Draft and still requires distinct review and real inventory/capital/settlement/signer evidence.
 - #187 is this lineage reconciliation candidate. It is evidence/documentation only and cannot approve itself.
 - #186 is the unsigned/read-only 18888 Public Good payment adapter; live read is fail-closed because the tested Mother/Jade addresses do not hold the bank payment roles.
 - #185 is the mobile chain-56 wallet/watch-asset candidate; it sends no token transaction and does not claim a KAIOS DEX pair exists.
