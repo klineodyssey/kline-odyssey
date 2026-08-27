@@ -2583,6 +2583,21 @@ function githubSnapshotHeaders(token) {
   });
 }
 
+function normalizeGitHubSnapshotApiBase(apiBase, token) {
+  let parsed;
+  try {
+    parsed = new URL(apiBase);
+  } catch {
+    invariant(false, "GITHUB_API_BASE_INVALID", "GitHub API base must be a valid HTTPS origin");
+  }
+  invariant(parsed.protocol === "https:", "GITHUB_API_BASE_NOT_HTTPS", "GitHub API base must use HTTPS");
+  invariant(!parsed.username && !parsed.password && !parsed.search && !parsed.hash && (parsed.pathname === "" || parsed.pathname === "/"), "GITHUB_API_BASE_INVALID", "GitHub API base must be an origin without credentials, path, query or fragment");
+  if (token) {
+    invariant(parsed.origin === "https://api.github.com", "GITHUB_TOKEN_ORIGIN_NOT_ALLOWED", "Bearer tokens may only be sent to the canonical GitHub API origin");
+  }
+  return parsed.origin;
+}
+
 function aggregateGitHubChecks(checkRuns) {
   if (!Array.isArray(checkRuns) || checkRuns.length === 0) return "NO_CHECKS";
   if (checkRuns.some((run) => run.status !== "completed" || !run.conclusion)) return "PENDING";
@@ -2608,9 +2623,10 @@ export async function readLatestRepositorySnapshot({
   invariant(typeof fetch_impl === "function", "GITHUB_READ_ADAPTER_REQUIRED", "A read-only fetch adapter is required");
   invariant(active_task_pr === null || (Number.isInteger(active_task_pr) && active_task_pr > 0), "INVALID_ACTIVE_TASK_PR", "active_task_pr must be a positive integer or null");
 
+  const normalizedApiBase = normalizeGitHubSnapshotApiBase(api_base, token);
   const headers = githubSnapshotHeaders(token);
   const read = async (path) => {
-    const response = await fetch_impl(`${api_base}/repos/${repository}${path}`, { method: "GET", headers });
+    const response = await fetch_impl(`${normalizedApiBase}/repos/${repository}${path}`, { method: "GET", headers });
     invariant(response?.ok === true, "GITHUB_READ_FAILED", `GitHub read failed for ${path}: HTTP ${response?.status ?? "UNKNOWN"}`);
     return response.json();
   };
