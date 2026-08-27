@@ -6,9 +6,38 @@
   "masterRasterAsset": "assets/kgen/kgen-logo-256.png",
   "sharedMark": true,
   "source": "Repository canonical KGEN black-gold mark; no third-party visual assets",
-  "licenseStatus": "HUMAN_APPROVAL_EVIDENCE_REQUIRED",
+  "licenseStatus": "HUMAN_APPROVED_REPOSITORY_OWNED_MASTER_MARK",
+  "humanVisualDirection": {
+    "decisionId": "KAIOS_HENGYAO_MASTER_COMPANY_AND_11520_GPU_REAL_MARKET_WORK_ORDER_V3_FINAL",
+    "decision": "SAME_MASTER_MARK_DIFFERENT_SYMBOL_NAMES",
+    "authorizedBy": "\u6c88\u82f1\u660e",
+    "signedAtUtc": "2026-08-27T04:17:44Z",
+    "status": "HUMAN_APPROVED"
+  },
   "websiteReplacementAuthorized": false,
   "externalMetadataSubmissionStatus": "NOT_SUBMITTED_ACCOUNT_OWNERSHIP_GATE",
+  "tokenMetadata": {
+    "network": "BNB Smart Chain Mainnet",
+    "chainId": 56,
+    "address": "0xD4E67B3a69e41524c424150E6b6e921b01D036db",
+    "deploymentTransaction": "0x731bccd9d1116831d9b43966672cb27d9017c75b6806c32109c5c210d2c3be9c",
+    "name": "KAIOS Civilization Credit",
+    "symbol": "KAIOS",
+    "decimals": 18,
+    "tokenStatus": "MAINNET_LIVE",
+    "marketStatus": "NO_VERIFIED_PAIR_AT_OBSERVED_BLOCK",
+    "priceStatus": "UNAVAILABLE",
+    "observedBlock": 118404108,
+    "observedAtUtc": "2026-08-27T15:01:55Z",
+    "logo": "assets/kaios/kaios-token-512.png"
+  },
+  "externalDiscovery": {
+    "bscScanTokenInfo": "ACCOUNT_OWNERSHIP_GATE_NOT_SUBMITTED",
+    "trustWalletAssets": "NOT_SUBMITTED",
+    "pancakeTokenList": "NOT_SUBMITTED",
+    "coinMarketCap": "NOT_SUBMITTED",
+    "coinGecko": "NOT_SUBMITTED"
+  },
   "assets": [
     {
       "path": "assets/kaios/kaios-apple-touch-icon-180.png",
@@ -88,7 +117,7 @@
     },
     {
       "path": "assets/kaios/kaios-og-1200x630.png",
-      "sha256": "e760c0ffb1ad2216f642e88f6f6fe200c8565eb770c26d0ec37ff6e8507dbcf2",
+      "sha256": "a3e99c03d3df36498991ea826af875329a1cf132ed23b7c51170fe40238bb2b2",
       "width": 1200,
       "height": 630,
       "mode": "RGB"

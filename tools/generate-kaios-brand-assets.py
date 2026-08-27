@@ -44,7 +44,7 @@ def og_card() -> Image.Image:
     draw.text((540, 292), "KGEN SHARED CIVILIZATION MARK", font=font(31), fill="#fff1a8")
     draw.text((540, 356), "KAIOS · KUFO · KSHIP", font=font(34), fill="#ffffff")
     draw.text((540, 424), "SAME MASTER MARK · DIFFERENT SYMBOL NAME", font=font(22), fill="#c5b991")
-    draw.text((540, 470), "REVIEW CANDIDATE — NOT DEPLOYED", font=font(20), fill="#9d9d9d")
+    draw.text((540, 470), "SHARED BRAND REVIEW · TOKEN STATES DIFFER", font=font(20), fill="#9d9d9d")
     return image
 
 
@@ -99,9 +99,38 @@ manifest = {
     "masterRasterAsset": "assets/kgen/kgen-logo-256.png",
     "sharedMark": True,
     "source": "Repository canonical KGEN black-gold mark; no third-party visual assets",
-    "licenseStatus": "HUMAN_APPROVAL_EVIDENCE_REQUIRED",
+    "licenseStatus": "HUMAN_APPROVED_REPOSITORY_OWNED_MASTER_MARK",
+    "humanVisualDirection": {
+        "decisionId": "KAIOS_HENGYAO_MASTER_COMPANY_AND_11520_GPU_REAL_MARKET_WORK_ORDER_V3_FINAL",
+        "decision": "SAME_MASTER_MARK_DIFFERENT_SYMBOL_NAMES",
+        "authorizedBy": "沈英明",
+        "signedAtUtc": "2026-08-27T04:17:44Z",
+        "status": "HUMAN_APPROVED",
+    },
     "websiteReplacementAuthorized": False,
     "externalMetadataSubmissionStatus": "NOT_SUBMITTED_ACCOUNT_OWNERSHIP_GATE",
+    "tokenMetadata": {
+        "network": "BNB Smart Chain Mainnet",
+        "chainId": 56,
+        "address": "0xD4E67B3a69e41524c424150E6b6e921b01D036db",
+        "deploymentTransaction": "0x731bccd9d1116831d9b43966672cb27d9017c75b6806c32109c5c210d2c3be9c",
+        "name": "KAIOS Civilization Credit",
+        "symbol": "KAIOS",
+        "decimals": 18,
+        "tokenStatus": "MAINNET_LIVE",
+        "marketStatus": "NO_VERIFIED_PAIR_AT_OBSERVED_BLOCK",
+        "priceStatus": "UNAVAILABLE",
+        "observedBlock": 118404108,
+        "observedAtUtc": "2026-08-27T15:01:55Z",
+        "logo": "assets/kaios/kaios-token-512.png",
+    },
+    "externalDiscovery": {
+        "bscScanTokenInfo": "ACCOUNT_OWNERSHIP_GATE_NOT_SUBMITTED",
+        "trustWalletAssets": "NOT_SUBMITTED",
+        "pancakeTokenList": "NOT_SUBMITTED",
+        "coinMarketCap": "NOT_SUBMITTED",
+        "coinGecko": "NOT_SUBMITTED",
+    },
     "assets": [record(path) for path in asset_paths],
 }
 write_text_lf(OUT / "brand-manifest.json", json.dumps(manifest, indent=2) + "\n")
@@ -124,11 +153,13 @@ write_text_lf(
     OUT / "README.md",
     """# KAIOS / KUFO / KSHIP shared brand review candidate
 
-Status: `REVIEW_CANDIDATE_NOT_CURRENT`.
+Status: `REVIEW_CANDIDATE_NOT_CURRENT`; shared visual direction: `HUMAN_APPROVED`.
 
-Candidate visual direction is `SAME_KGEN_MASTER_MARK_DIFFERENT_SYMBOL_NAMES`; independently verifiable Human approval evidence remains required before CURRENT promotion. The canonical black-gold KGEN mark in `assets/kgen/kgen-logo.svg` is the visual master. KAIOS, KUFO and KSHIP reuse the same graphic; their symbol, contract address, lineage and deployment status remain separate metadata fields.
+The Human-approved visual direction is `SAME_KGEN_MASTER_MARK_DIFFERENT_SYMBOL_NAMES`, recorded by decision ID `KAIOS_HENGYAO_MASTER_COMPANY_AND_11520_GPU_REAL_MARKET_WORK_ORDER_V3_FINAL`. The canonical black-gold KGEN mark in `assets/kgen/kgen-logo.svg` is the visual master. KAIOS, KUFO and KSHIP reuse the same graphic; their symbol, contract address, lineage and deployment status remain separate metadata fields.
 
-The identical mark does not imply identical contracts, fungibility, conversion, deployment, price or authority. This Draft does not replace the website or submit token metadata to BscScan, MetaMask, CoinMarketCap or CoinGecko. BscScan submission currently remains gated by an authenticated account and contract-address ownership verification.
+KAIOS is live on BSC chain 56 at `0xD4E67B3a69e41524c424150E6b6e921b01D036db`, but the latest fixed-endpoint observation found no verified KAIOS/WBNB, KAIOS/KGEN or KAIOS/USDT pair. Therefore `TOKEN_LIVE`, `MARKET_NOT_LIVE` and `PRICE_UNAVAILABLE` are separate states. The identical mark does not imply identical contracts, fungibility, conversion, deployment, price or authority.
+
+This Draft does not replace the website or submit token metadata to BscScan, MetaMask, Trust Wallet, PancakeSwap, CoinMarketCap or CoinGecko. External submissions remain gated by the relevant authenticated account, ownership proof and platform review.
 
 All PNG token marks have transparent backgrounds. The 512-pixel KAIOS, KUFO and KSHIP token images are pixel-identical by design. Recommended alt text is token-specific even when the graphic is shared.
 """,
