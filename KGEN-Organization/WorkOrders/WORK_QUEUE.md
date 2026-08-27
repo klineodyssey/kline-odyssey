@@ -59,7 +59,7 @@ The worker must then stop without changing WorkQueue, creating a branch, editing
 | LAND_VIEWER_SCHEMA_V2_COMPATIBILITY | DONE | Codex | Codex | P1 | Frontend | `codex/land-viewer-schema-v2-compatibility` | `KGEN-KAIOS/world-viewer/LAND_VIEWER_SCHEMA_V2_COMPATIBILITY_MERGE_CLOSEOUT.md` |
 | WORLD_VIEWER_ORGANISM_PACKAGE_INTEGRATION | HOLD | UNASSIGNED | Codex | P1 | Frontend | `NOT_CREATED` | `PENDING_SCOPE` |
 | KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-R2-001 | CLAIMED | cursor-01 | codex-gm-01 | P0 | Payroll QA | `cursor-handoff/KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-R2-001` | `KGEN-AI-Company/reports/CURSOR_LIFE_ENERGY_PAYROLL_CANDIDATE_REPORT.md` |
-| KAIOS-DISTINCT-T2-REVIEWER-RECRUITMENT-001 | HOLD | UNASSIGNED_EXISTING_LIFE_CANDIDATE | Human PrimeForge | P0 | Workforce Governance | `NOT_CREATED` | `PENDING_HUMAN_AUTHORITY` |
+| KAIOS-DISTINCT-T2-REVIEWER-RECRUITMENT-001 | HOLD | UNASSIGNED_EXISTING_LIFE_CANDIDATE | UNASSIGNED_HUMAN_AUTHORITY_REQUIRED | P0 | Workforce Governance | `NOT_CREATED` | `PENDING_HUMAN_AUTHORITY` |
 | KGEN-MAP-4168-NAIHE-GENESIS-STATION-UI-001 | HOLD | Map / World Agent | codex-gm-01 | P2 | World Map | `NOT_CREATED` | `SPEC_HANDOFF_IN_CODEX_MANAGER_PROTOCOL` |
 | KGEN-BSCSCAN-LOGO-001 | DONE | Cursor + Codex | Codex | P1 | Token Metadata | `cursor/kgen-bscscan-logo-submission-v1` | `KGEN/registry/BscScan/KGEN_BSCSCAN_LOGO_SUBMISSION_V1_MERGE_CLOSEOUT.md` |
 
@@ -93,7 +93,8 @@ The worker must then stop without changing WorkQueue, creating a branch, editing
 - Workforce Gap: `REVIEW_QUEUE_DEMAND > ELIGIBLE_DISTINCT_REVIEWER_CAPACITY`
 - Priority: P0 governance gate
 - Owner: UNASSIGNED_EXISTING_LIFE_CANDIDATE
-- Reviewer / Approval Authority: Human PrimeForge
+- Reviewer / Approval Authority: UNASSIGNED_HUMAN_AUTHORITY_REQUIRED
+- Authority Evidence: NONE_BOUND_TO_THIS_WORKORDER
 - Evidence refreshed against main `db3b6368139154cbfa1cabd322b80f0cb1307bcc` on 2026-08-28 Asia/Taipei.
 - Triggering PRs: `#170`, then `#169`; neither may use `codex-gm-01` as its distinct reviewer.
 - Claim State: NOT_CLAIMABLE

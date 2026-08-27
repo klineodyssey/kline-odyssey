@@ -2884,5 +2884,7 @@ test("distinct-review workforce gap remains fail-closed without an eligible exte
   assert.deepEqual(eligibleExternalReviewers, []);
   assert.match(workQueue, /KAIOS-DISTINCT-T2-REVIEWER-RECRUITMENT-001 \| HOLD \| UNASSIGNED_EXISTING_LIFE_CANDIDATE/);
   assert.match(workQueue, /Current Resolution: `HOLD_NO_ELIGIBLE_EXISTING_LIFE`/);
+  assert.match(workQueue, /UNASSIGNED_HUMAN_AUTHORITY_REQUIRED/);
+  assert.match(workQueue, /Authority Evidence: NONE_BOUND_TO_THIS_WORKORDER/);
   assert.match(workQueue, /PR `#183` exact head `688bce72de2038648fc97eda4755176f23a7988c`/);
 });
