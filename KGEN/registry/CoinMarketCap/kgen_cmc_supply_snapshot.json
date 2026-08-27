@@ -6,10 +6,10 @@
   "contract": "0xba3d3810e58735cb6813bc1cdc5458c0d71432be",
   "decimals": 18,
   "snapshot": {
-    "block_number": 118355844,
-    "block_hash": "0x1986125463b3f712fcd90fe4ac55f1193a22a1f178f5132c73da6271768fdd86",
-    "block_timestamp_utc": "2026-08-27T08:59:50Z",
-    "generated_at_utc": "2026-08-27T09:00:01.027559Z",
+    "block_number": 118374207,
+    "block_hash": "0x3636149ce75ed8255874281bab87f12d318f04730a06f70c800a96ee7f05d477",
+    "block_timestamp_utc": "2026-08-27T11:17:35Z",
+    "generated_at_utc": "2026-08-27T11:17:42.592594Z",
     "rpc_method": "eth_call at frozen block",
     "holder_index_source": "https://api.gopluslabs.io/api/v1/token_security/56?contract_addresses=0xba3d3810e58735cb6813bc1cdc5458c0d71432be",
     "holder_count": 112,
@@ -164,5 +164,5 @@
     "contract_change": false,
     "token_configuration_change": false
   },
-  "integrity_sha256": "154bd287e8abd9dff932a006df977d13e79ac9fdad3c581066e4057163d6560d"
+  "integrity_sha256": "bf80023901e22c8fa460eb9bbc5b35afc5389f9db902a7393929c2da592fef2f"
 }
