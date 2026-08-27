@@ -158,8 +158,12 @@ test("movement requires route, time, KSHIP, braking, descent, landing and arriva
   }
 });
 
-test("complete chronological movement evidence permits only the position update", () => {
-  assert.deepEqual(validatePhysicalMovementEvidence(validMovement()), { status: "PASS", physicalPositionUpdateAllowed: true });
+test("complete chronological movement envelope remains held pending trusted evidence resolution", () => {
+  assert.deepEqual(validatePhysicalMovementEvidence(validMovement()), {
+    status: "HOLD_EXTERNAL_EVIDENCE_VERIFICATION_REQUIRED",
+    evidenceEnvelopeComplete: true,
+    physicalPositionUpdateAllowed: false,
+  });
   const reversed = validMovement();
   reversed.arrivalTimestamp = reversed.departureTimestamp;
   assert.throws(() => validatePhysicalMovementEvidence(reversed), /non-monotonic/);

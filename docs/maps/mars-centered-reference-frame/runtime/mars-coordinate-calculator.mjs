@@ -182,5 +182,9 @@ export function validatePhysicalMovementEvidence(movement) {
   if (!Number.isFinite(departure) || !Number.isFinite(arrival) || arrival <= departure) {
     throw new Error("movement timestamps are invalid or non-monotonic");
   }
-  return { status: "PASS", physicalPositionUpdateAllowed: true };
+  return {
+    status: "HOLD_EXTERNAL_EVIDENCE_VERIFICATION_REQUIRED",
+    evidenceEnvelopeComplete: true,
+    physicalPositionUpdateAllowed: false,
+  };
 }

@@ -73,7 +73,7 @@ EARTH_CIV/K108000
 → MARS/K149 landing
 ```
 
-A physical position update requires a Life ID, route evidence, monotonic departure/arrival timestamps, KSHIP fuel evidence, near-orbit arrival evidence, deceleration evidence, descent evidence and landing evidence. Missing any item rejects the update. The candidate records no actual route, fuel use, movement or arrival.
+A physical position update requires a Life ID, route evidence, monotonic departure/arrival timestamps, KSHIP fuel evidence, near-orbit arrival evidence, deceleration evidence, descent evidence and landing evidence. Missing any item rejects the envelope. These identifiers are structural references only: this candidate has no trusted external evidence resolver, so even a complete envelope returns `HOLD_EXTERNAL_EVIDENCE_VERIFICATION_REQUIRED` with `physicalPositionUpdateAllowed=false`. A separately authorized verifier must resolve and authenticate every referenced record before any future position update. The candidate records no actual route, fuel use, movement or arrival.
 
 ## 6. Activation boundary
 
