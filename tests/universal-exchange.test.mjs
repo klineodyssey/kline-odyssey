@@ -104,8 +104,8 @@ import {
   normalizeCrossMarketQuote, discoverCrossMarketRoute, calculateCrossMarketNetProfit,
   createTradingPolicyBox, evaluateTradingPolicyBox, createPaperTradeCandidate, recordPaperTradeReceipt,
   createCirculatoryTreasurySnapshot, assertTradingTreasurySegregation,
-  createCirculatorySettlementCandidate, calculateAlchemySuccessorLineage,
-  createK1852CatalystRelayTicket, assertKufoKshipConservation,
+  createCirculatorySettlementCandidate, calculateFreshAlchemyLineage,
+  createK1852ContributionProofCandidate, assertKufoKshipConservation,
   CIVILIZATION_AUTOPILOT_LIFE_REGISTRY, KAIOS_CIRCULATORY_RUNTIME,
   KAIOS_CROSS_MARKET_AUTOPILOT,
   createCivilizationJobQueue, runCivilizationAutopilotHeartbeat,
@@ -3099,9 +3099,9 @@ test("Deterministic fuzz preserves net-profit and 18911 mass invariants", () => 
     const result = calculateCrossMarketNetProfit({ grossProfit: gross.toString(), costs });
     assert.equal(BigInt(result.expected_net_profit), gross - total);
 
-    const kaios = (BigInt((next() % 1_000_000) + 1) * 1000n).toString();
-    const lineage = calculateAlchemySuccessorLineage({ kaiosAmountWei: kaios, kgenCatalystWei: (BigInt(kaios) / 1000n).toString(), submittedEpoch: index, observedEpoch: index + 130 });
-    assert.equal(BigInt(lineage.required_kgen_catalyst) * 1000n, BigInt(lineage.kaios_burned));
+    const kaios = BigInt((next() % 1_000_000) + 1) * 10n ** 18n;
+    const lineage = calculateFreshAlchemyLineage({ kaiosAmountWei: kaios.toString(), kgenContributionWei: (kaios / 1000n).toString(), contributionAgeSeconds: index, bankReceiptVerified: true });
+    assert.equal(BigInt(lineage.required_kgen_contribution) * 1000n, BigInt(lineage.kaios_burned));
     assert.equal(BigInt(lineage.kufo_lineage), BigInt(lineage.kaios_burned) * 1000n);
   }
 });
@@ -3122,25 +3122,32 @@ test("Life registry keeps Mengpo and Yaoce inactive until formal Life IDs exist"
   assert.equal(KAIOS_CIRCULATORY_RUNTIME.disabled.real_trade, true);
 });
 
-test("18911 successor uses 49 review plus 81 catalysis and exact 5M/5000 mass", () => {
+test("18911 fresh contribution Canon delivers immediately and preserves exact 5M/5000 mass", () => {
   const unit = 10n ** 18n;
   const kaios = 5_000_000n * unit;
-  const catalyst = 5_000n * unit;
-  assert.equal(calculateAlchemySuccessorLineage({ kaiosAmountWei: kaios.toString(), kgenCatalystWei: catalyst.toString(), submittedEpoch: 100, observedEpoch: 148 }).status, "REVIEWING");
-  assert.equal(calculateAlchemySuccessorLineage({ kaiosAmountWei: kaios.toString(), kgenCatalystWei: catalyst.toString(), submittedEpoch: 100, observedEpoch: 149 }).status, "CATALYZING");
-  const matured = calculateAlchemySuccessorLineage({ kaiosAmountWei: kaios.toString(), kgenCatalystWei: catalyst.toString(), submittedEpoch: 100, observedEpoch: 230 });
-  assert.equal(matured.status, "MATURED");
-  assert.equal(matured.required_kgen_catalyst, catalyst.toString());
-  assert.equal(matured.kufo_lineage, (kaios * 1000n).toString());
-  assert.equal(matured.deployed, false);
-  assert.throws(() => calculateAlchemySuccessorLineage({ kaiosAmountWei: "1001", kgenCatalystWei: "1", submittedEpoch: 0, observedEpoch: 0 }), (error) => error.code === "INEXACT_CATALYST_RATIO");
+  const contribution = 5_000n * unit;
+  const delivered = calculateFreshAlchemyLineage({ kaiosAmountWei: kaios.toString(), kgenContributionWei: contribution.toString(), contributionAgeSeconds: 130 * 24 * 60 * 60, bankReceiptVerified: true });
+  assert.equal(delivered.status, "IMMEDIATE_KUFO_DELIVERY_CANDIDATE");
+  assert.equal(delivered.required_kgen_contribution, contribution.toString());
+  assert.equal(delivered.kufo_lineage, (kaios * 1000n).toString());
+  assert.equal(delivered.delivery_delay_seconds, 0);
+  assert.equal(delivered.kgen_held_by_furnace, false);
+  assert.equal(delivered.kgen_return_required, false);
+  assert.equal(delivered.kgen_retained_by_bank, true);
+  assert.equal(delivered.deployed, false);
+  assert.throws(() => calculateFreshAlchemyLineage({ kaiosAmountWei: "1000000000000000001", kgenContributionWei: "1000000000000000", bankReceiptVerified: true }), (error) => error.code === "INEXACT_CONTRIBUTION_RATIO");
+  assert.throws(() => calculateFreshAlchemyLineage({ kaiosAmountWei: unit.toString(), kgenContributionWei: (unit / 1000n).toString(), contributionAgeSeconds: 130 * 24 * 60 * 60 + 1, bankReceiptVerified: true }), (error) => error.code === "KGEN_CONTRIBUTION_EXPIRED");
+  assert.throws(() => calculateFreshAlchemyLineage({ kaiosAmountWei: unit.toString(), kgenContributionWei: (unit / 1000n).toString(), bankReceiptVerified: false }), (error) => error.code === "KGEN_BANK_RECEIPT_REQUIRED");
 });
 
-test("K1852 relay remains a design ticket and KUFO/KSHIP conservation is bounded", () => {
-  const ticket = createK1852CatalystRelayTicket({ ticketId: "CATALYST_TICKET_1", lifeId: "LIFE_1", catalystOwner: "OWNER_1", beneficiary: "BENEFICIARY_1", kaiosAmountWei: "5000000", kgenCatalystWei: "5000", submittedEpoch: 10 });
+test("K1852 proof route remains disabled and KUFO/KSHIP conservation is bounded", () => {
+  const unit = 10n ** 18n;
+  const ticket = createK1852ContributionProofCandidate({ proofId: "CONTRIBUTION_PROOF_1", lifeId: "LIFE_1", originalContributor: "OWNER_1", beneficiary: "BENEFICIARY_1", kaiosAmountWei: unit.toString(), kgenContributionWei: (unit / 1000n).toString(), contributionTimestamp: "2026-08-20T00:00:00.000Z" });
   assert.equal(ticket.source_point, 1852);
   assert.equal(ticket.furnace_point, 18911);
-  assert.equal(ticket.status, "DESIGN_ONLY_NOT_DEPLOYED");
+  assert.equal(ticket.status, "DESIGN_ONLY_DISABLED");
+  assert.equal(ticket.executable, false);
+  assert.equal(ticket.kgen_return_required, false);
   assert.equal(ticket.existing_k1852_contract_modified, false);
   assert.equal(assertKufoKshipConservation({ initialKufoMilli: "1000", remainingKufoMilli: "500", generatedKshipUnits: "500000", burnedKshipUnits: "100" }), true);
   assert.throws(() => assertKufoKshipConservation({ initialKufoMilli: "1000", remainingKufoMilli: "500", generatedKshipUnits: "500001" }), (error) => error.code === "KSHIP_MASS_CONSERVATION_BREACH");

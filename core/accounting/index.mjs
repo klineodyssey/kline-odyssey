@@ -241,60 +241,84 @@ export function createCirculatorySettlementCandidate({
   });
 }
 
-export const ALCHEMY_SUCCESSOR_130_EPOCH = Object.freeze({
-  authority: "CURRENT_DESIGN_CANON_NOT_DEPLOYED",
-  review_epochs: 49,
-  catalysis_epochs: 81,
-  total_epochs: 130,
+export const ALCHEMY_FRESH_CONTRIBUTION_CANON = Object.freeze({
+  authority: "HUMAN_FRESHNESS_CANON_IMPLEMENTED_REVIEW_CANDIDATE_NOT_DEPLOYED",
+  minimum_kaios_amount_wei: "1000000000000000000",
+  contribution_freshness_window_days: 130,
+  contribution_freshness_window_seconds: 130 * 24 * 60 * 60,
+  delivery_delay_seconds: 0,
   kaios_to_kgen_catalyst_ratio: "1000:1",
   kaios_to_kufo_lineage_ratio: "1:1000",
+  kgen_destination: "IMMUTABLE_CATALYST_BANK_UNFROZEN",
+  kgen_escrowed_by_furnace: false,
+  kgen_returned: false,
+  kgen_retained_as_civilization_asset: true,
+  rejection: "ATOMIC_REVERT",
+  cancellation_after_success: "NOT_APPLICABLE",
+  refund: "NOT_APPLICABLE_NO_ESCROW",
+  tax_credit_route: "DESIGN_ONLY_DISABLED",
   deployed: false
 });
 
-export function calculateAlchemySuccessorLineage({ kaiosAmountWei, kgenCatalystWei, submittedEpoch, observedEpoch }) {
+export function calculateFreshAlchemyLineage({
+  kaiosAmountWei, kgenContributionWei, contributionAgeSeconds = 0,
+  bankReceiptVerified = false
+}) {
   const kaios = assertUnsignedIntegerString(kaiosAmountWei, "kaiosAmountWei");
-  const catalyst = assertUnsignedIntegerString(kgenCatalystWei, "kgenCatalystWei");
-  invariant(kaios > 0n, "ALCHEMY_AMOUNT_REQUIRED", "Alchemy amount must be positive");
-  invariant(kaios % 1000n === 0n, "INEXACT_CATALYST_RATIO", "KAIOS amount must produce an exact KGEN catalyst amount");
-  invariant(catalyst === kaios / 1000n, "CATALYST_RATIO_MISMATCH", "KGEN catalyst must equal KAIOS amount divided by 1000");
-  invariant(Number.isInteger(submittedEpoch) && Number.isInteger(observedEpoch) && observedEpoch >= submittedEpoch, "INVALID_ALCHEMY_EPOCH", "Alchemy epoch values are invalid");
-  const elapsed = observedEpoch - submittedEpoch;
-  const status = elapsed < 49 ? "REVIEWING" : elapsed < 130 ? "CATALYZING" : "MATURED";
+  const contribution = assertUnsignedIntegerString(kgenContributionWei, "kgenContributionWei");
+  invariant(kaios >= BigInt(ALCHEMY_FRESH_CONTRIBUTION_CANON.minimum_kaios_amount_wei), "ALCHEMY_MINIMUM_AMOUNT", "Alchemy requires at least 1 KAIOS");
+  invariant(kaios % 1000n === 0n, "INEXACT_CONTRIBUTION_RATIO", "KAIOS amount must produce an exact KGEN bank contribution");
+  invariant(contribution === kaios / 1000n, "CONTRIBUTION_RATIO_MISMATCH", "KGEN bank contribution must equal KAIOS amount divided by 1000");
+  invariant(Number.isInteger(contributionAgeSeconds) && contributionAgeSeconds >= 0, "INVALID_CONTRIBUTION_AGE", "Contribution age must be a non-negative integer number of seconds");
+  invariant(contributionAgeSeconds <= ALCHEMY_FRESH_CONTRIBUTION_CANON.contribution_freshness_window_seconds, "KGEN_CONTRIBUTION_EXPIRED", "KGEN bank contribution is older than the 130-day freshness window");
+  invariant(bankReceiptVerified === true, "KGEN_BANK_RECEIPT_REQUIRED", "Immediate KUFO delivery requires a verified exact catalyst-bank receipt");
   return Object.freeze({
     kaios_burned: kaios.toString(),
-    required_kgen_catalyst: catalyst.toString(),
+    required_kgen_contribution: contribution.toString(),
     kufo_lineage: (kaios * 1000n).toString(),
-    review_epochs: 49,
-    catalysis_epochs: 81,
-    total_epochs: 130,
-    elapsed_epochs: elapsed,
-    status,
-    catalyst_burned: false,
-    catalyst_return_required: true,
+    contribution_age_seconds: contributionAgeSeconds,
+    contribution_freshness_window_days: 130,
+    delivery_delay_seconds: 0,
+    status: "IMMEDIATE_KUFO_DELIVERY_CANDIDATE",
+    atomic_revert_required: true,
+    catalyst_bank_receipt_verified: true,
+    kgen_burned: false,
+    kgen_held_by_furnace: false,
+    kgen_return_required: false,
+    kgen_retained_by_bank: true,
+    tax_credit_route: "DESIGN_ONLY_DISABLED",
     deployed: false
   });
 }
 
-export function createK1852CatalystRelayTicket({
-  ticketId, lifeId, catalystOwner, beneficiary, kaiosAmountWei,
-  kgenCatalystWei, submittedEpoch, furnacePoint = 18911, sourcePoint = 1852
+export function createK1852ContributionProofCandidate({
+  proofId, lifeId, originalContributor, beneficiary, kaiosAmountWei,
+  kgenContributionWei, contributionTimestamp, furnacePoint = 18911, sourcePoint = 1852
 }) {
-  const lineage = calculateAlchemySuccessorLineage({ kaiosAmountWei, kgenCatalystWei, submittedEpoch, observedEpoch: submittedEpoch });
   invariant(furnacePoint === 18911 && sourcePoint === 1852, "CATALYST_RELAY_POINT_MISMATCH", "Catalyst relay must bind K1852 to K18911");
+  invariant(typeof proofId === "string" && proofId.length > 0, "CONTRIBUTION_PROOF_ID_REQUIRED", "Contribution proof ID is required");
+  invariant(typeof originalContributor === "string" && originalContributor.length > 0, "ORIGINAL_CONTRIBUTOR_REQUIRED", "A relay candidate must preserve the original contributor");
+  invariant(typeof beneficiary === "string" && beneficiary.length > 0, "CONTRIBUTION_BENEFICIARY_REQUIRED", "A fixed beneficiary is required");
+  invariant(Number.isFinite(Date.parse(contributionTimestamp)), "INVALID_CONTRIBUTION_TIMESTAMP", "A verifiable contribution timestamp is required");
+  const kaios = assertUnsignedIntegerString(kaiosAmountWei, "kaiosAmountWei");
+  const contribution = assertUnsignedIntegerString(kgenContributionWei, "kgenContributionWei");
+  invariant(kaios % 1000n === 0n && contribution === kaios / 1000n, "CONTRIBUTION_RATIO_MISMATCH", "Contribution proof must preserve the exact 1:1000 KGEN/KAIOS ratio");
   return Object.freeze({
-    catalyst_ticket_id: ticketId,
+    contribution_proof_id: proofId,
     life_id: lifeId,
-    catalyst_owner: catalystOwner,
+    original_contributor: originalContributor,
     beneficiary,
-    kaios_amount: lineage.kaios_burned,
-    required_kgen_catalyst: lineage.required_kgen_catalyst,
+    kaios_amount: kaios.toString(),
+    required_kgen_contribution: contribution.toString(),
     source_point: sourcePoint,
     furnace_point: furnacePoint,
-    submitted_epoch: submittedEpoch,
-    review_ends_at_epoch: submittedEpoch + 49,
-    catalysis_ends_at_epoch: submittedEpoch + 130,
-    status: "DESIGN_ONLY_NOT_DEPLOYED",
-    catalyst_returned: false,
+    contribution_timestamp: contributionTimestamp,
+    freshness_window_days: 130,
+    status: "DESIGN_ONLY_DISABLED",
+    executable: false,
+    proof_consumed: false,
+    bank_receipt_verified: false,
+    kgen_return_required: false,
     existing_k1852_contract_modified: false,
     chain_write: false
   });
