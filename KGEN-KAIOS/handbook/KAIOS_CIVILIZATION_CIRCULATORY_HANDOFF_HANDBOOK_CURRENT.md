@@ -463,7 +463,7 @@ PRIVATE_KEY_EXPOSED=NO
 
 Observed main at this checkpoint: `830b79214781fb1231f3619336de394f400a0bfd`.
 
-Latest read-only BSC evidence window at this checkpoint: blocks `118411912`–`118412257` (`2026-08-27T16:00:27Z`–`2026-08-27T16:03:02Z`). KGEN owner remained the BankGovernance proxy, KGEN Bank Wallet remained the Reserve Redemption proxy, 18888 available remained `11,213,020.930416874731235 KAIOS`, and 8888 remained `888 KAIOS` assets / `800 KAIOS` free capital / `88 KAIOS` payroll liability. No chain write was sent.
+Unverified read-only BSC observation at this checkpoint (`NOT_REPOSITORY_BOUND`): a reported window spans blocks `118411912`–`118412257` (`2026-08-27T16:00:27Z`–`2026-08-27T16:03:02Z`). The reported values identify KGEN owner as the BankGovernance proxy, KGEN Bank Wallet as the Reserve Redemption proxy, 18888 available as `11,213,020.930416874731235 KAIOS`, and 8888 as `888 KAIOS` assets / `800 KAIOS` free capital / `88 KAIOS` payroll liability. Without repository-bound block hashes, call inputs/outputs and runtime-code evidence, these observations do not prove current or deployed state, ownership authority, spendability, revenue, settlement, or payment capability. No chain write was sent.
 
 Human-assigned company universe address and exchange coordinate:
 
