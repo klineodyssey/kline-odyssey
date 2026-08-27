@@ -61,29 +61,6 @@ The worker must then stop without changing WorkQueue, creating a branch, editing
 | KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-R2-001 | CLAIMED | cursor-01 | codex-gm-01 | P0 | Payroll QA | `cursor-handoff/KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-R2-001` | `KGEN-AI-Company/reports/CURSOR_LIFE_ENERGY_PAYROLL_CANDIDATE_REPORT.md` |
 | KGEN-MAP-4168-NAIHE-GENESIS-STATION-UI-001 | HOLD | Map / World Agent | codex-gm-01 | P2 | World Map | `NOT_CREATED` | `SPEC_HANDOFF_IN_CODEX_MANAGER_PROTOCOL` |
 | KGEN-BSCSCAN-LOGO-001 | DONE | Cursor + Codex | Codex | P1 | Token Metadata | `cursor/kgen-bscscan-logo-submission-v1` | `KGEN/registry/BscScan/KGEN_BSCSCAN_LOGO_SUBMISSION_V1_MERGE_CLOSEOUT.md` |
-| KAIOS-SOL-YAOCE-LIFECYCLE-ROLE-SEPARATION-DRYRUN-001 | HOLD | UNASSIGNED | codex-gm-01 | P1 | Lifecycle Governance | `NOT_CREATED` | `PENDING_HUMAN_DECISION_IDENTITY_AND_ACKNOWLEDGMENTS` |
-
-### KAIOS-SOL-YAOCE-LIFECYCLE-ROLE-SEPARATION-DRYRUN-001 - T1 Lifecycle Role Separation Dry Run
-
-- Status: HOLD
-- Candidate proposal record: `sol-yaoce-reviewer-candidate-001`
-- Owner: UNASSIGNED
-- Reviewer: codex-gm-01
-- Priority: P1
-- Risk: R0 read-only
-- Human authorization: NOT BOUND (`HUMAN_REQUIRED`)
-- Scope: read-only schema and test-matrix review of Economic Sponsor, Naihe Source, Service Operator and Regeneration Parent separation.
-- Canonical Life ID: NOT ASSIGNED
-- Canonical Worker ID: NOT ASSIGNED
-- Controller identity: UNVERIFIED
-- Worker type: UNVERIFIED
-- Four acknowledgments: INCOMPLETE
-- Branch: NOT CREATED
-- Claim: NOT ISSUED
-- Dispatch gate: first bind an independently verifiable immutable Human decision; then complete identity checks, assign any policy-valid Worker ID only through authorized Company governance, verify worker type/controller independence, record all four acknowledgments, define logical workspace and branch namespace, and issue a bounded T1 credential only if separately authorized.
-- Forbidden: PR #169 review, PR #170 review, CURRENT Canon edits, T2 promotion, employment activation, payroll, merge, deployment, asset transfer, Mainnet transaction, governance execution and private-key access.
-- Output authority: proposal evidence only; no onboarding, ownership, Canon, Worker, employment, payroll or Reviewer authority.
-- Dispatcher posture: neutral proposal only; immutable Human decision evidence and distinct independent review remain external gates.
 
 ### KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-R2-001 - Payroll Candidate Rework
 
