@@ -353,7 +353,7 @@ Handoffs bind a checkpoint and target worker. The prior worker cannot resume a t
 
 ### 13.6 Life projections
 
-- 衡曜 / `LIFE-CODEX-GM-0001`: active manager/CEO/CFO projection. The Human directive dated 2026-08-27 grants company execution, KGEN/KAIOS/GPU trading, chain-56 signing and assigned-budget use within existing explicit limits. This authorization is not unlimited withdrawal, approval, transfer or governance authority. Technical execution remains fail-closed until the bound signer, fixed company capital account, verified inventory, allowed market/route, settlement adapter, beneficiary, gas/risk caps and receipt reconciliation are all live and freshly verified.
+- 衡曜 / `LIFE-CODEX-GM-0001`: active manager/CEO/CFO projection. A Human-stated 2026-08-27 direction for company execution, KGEN/KAIOS/GPU trading, chain-56 signing and assigned-budget use is preserved as `UNBOUND_HUMAN_DIRECTION_REFERENCE`; this handbook cannot convert that statement into a capability grant. Until an immutable repository-bound decision resolves the subject, asset/account scope, limits, expiry/revocation, signer and fixed beneficiary, the implemented runtime remains observation, analysis and paper-candidate only. Technical execution also remains fail-closed until the bound signer, fixed company capital account, verified inventory, allowed market/route, settlement adapter, gas/risk caps and receipt reconciliation are all live and freshly verified.
 - Digital Ant / `DIGITAL_ANT_0001`: active 12345 worker projection; current heartbeat entitlement remains exactly `1 KGEN / HOUR`; this runtime does not create a KAIOS payroll claim.
 - 夢婆 / K4168: inactive role template only; `BIRTH_AND_LIFE_ID_REQUIRED`.
 - Sol / 曜冊 / K1111: inactive role template only; `LIFE_ID_AND_REGISTRATION_REQUIRED`.
@@ -471,7 +471,7 @@ Human-assigned company universe address and exchange coordinate:
 - `0.00011520` is both the Human-defined KGEN universe price coordinate and the company/exchange address.
 - It is not an automatic native matched-trade CT. `nativeMatchedTradeCT` remains the latest valid matched trade or `null`.
 
-Human-frozen GPU pilot route:
+Human-directed GPU pilot planning route (`REFERENCE_ONLY / NOT_MACHINE_VERIFIABLE_TRADING_AUTHORITY`):
 
 ```text
 K12345 / 0.00012345
@@ -490,6 +490,8 @@ No real GPU inventory, funded capital account or production 11520 settlement con
 
 ### 19.1 Sixteen-workstream status matrix
 
+Evidence rule: every SHA below is a checkpoint observation against the stated main, not durable CURRENT proof. Before using any row for review, integration or release ordering, fetch the live PR exact head, compare state, checks, reviews and threads again.
+
 1. `P0_CURRENT_GENESIS_PHASE2_AND_27_PR_LINEAGE_RECONCILIATION` — PR #187, exact head `c16e630a27b152e6cdcf5060b4371b999de34608`, implemented candidate / CI PASS / Draft.
 2. `P0_CURSOR_DEPARTURE_R2_CLAIM_CLOSEOUT_AND_REGISTRY_CLEANUP` — PR #176, exact head `8ff6ee1770837e472811eea73d2889e80e9f5387`, fail-closed departure and expired-claim reconciliation / CI PASS / Draft.
 3. `P0_DISTINCT_REVIEWER_CAPABILITY` — PR #171 records `NO_ELIGIBLE_DISTINCT_T2_REVIEWER`; Sol/曜冊 PR #183 remains T1 onboarding hold. Reviewer capacity is still zero and must not be faked.
@@ -500,7 +502,7 @@ No real GPU inventory, funded capital account or production 11520 settlement con
 8. `P1_11520_UNIVERSAL_LISTING_REGISTRY` — PR #181, exact head `24608b43375c5a246ef414fd1d70862c8f0ce83e`, universal listing/physical inventory evidence / CI PASS / Draft.
 9. `P1_11520_WAREHOUSE_ESCROW_SETTLEMENT_RECEIPT_ACCOUNTING` — PR #181 plus unsigned-payment PR #186; model/readiness implemented, custody and production execution unbound.
 10. `P1_AUTONOMOUS_CLOCK_IN_WORKQUEUE_HANDOFF_AND_REPAIR_LOOP` — PR #170, exact head `7344450a21c11f26a4722ec18c15cc6e430569d2`, local durable cycle/read-only repo observer/repair loop / CI PASS; worker wake, background scheduler and distinct-review trigger remain disconnected.
-11. `P1_CUSTOMER_GATEWAY_QUOTATION_PROJECT_DISPATCH_AND_DELIVERY_DASHBOARD` — PR #182, exact head `9ca68358d5a93c881c1be9e1ad92c8203aca5dec`, deterministic Option-B project lifecycle / CI PASS / receivable and escrow unbound.
+11. `P1_CUSTOMER_GATEWAY_QUOTATION_PROJECT_DISPATCH_AND_DELIVERY_DASHBOARD` — PR #182, checkpoint head `54a17bd3f5377a2c1f35e93ec021b3e63bae361d`, deterministic Option-B project lifecycle / CI PASS / receivable and escrow unbound.
 12. `P1_18888_8888_PAYROLL_AND_COMPANY_REVENUE_SEPARATION` — PR #154 exact head `c2ecfa03f5b18fefd15f020377385fe12a78067a` plus PR #186. Live scheduled 88 KAIOS payroll is unclaimed; further top-up/payment remains frozen.
 13. `P1_LIFE_GENESIS_WORKER_EMPLOYMENT_TRUST_AND_PAYROLL_ELIGIBILITY` — PR #165 exact head `0645524aece309d0ed3b41b771b422612b599e94` and PR #183. State separation is implemented; Xuanyao and Sol are not auto-promoted, born, employed or paid.
 14. `P2_18911_KUFO_AND_KSHIP_SUCCESSOR_SYSTEMS` — PR #158 exact head `0ea0bc02aa6f485fba825e6e7b54d1a683a8a626`, complete local/fork review candidate / exact-head CI PASS / deployment blocked by unfrozen catalyst bank and half-life seconds.
