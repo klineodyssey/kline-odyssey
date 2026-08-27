@@ -495,7 +495,7 @@ No real GPU inventory, funded capital account or production 11520 settlement con
 3. `P0_DISTINCT_REVIEWER_CAPABILITY` — PR #171 records `NO_ELIGIBLE_DISTINCT_T2_REVIEWER`; Sol/曜冊 PR #183 remains T1 onboarding hold. Reviewer capacity is still zero and must not be faked.
 4. `P0_SYNC_CORRECT_AND_REVIEW_PR169_11520_NATIVE_MARKET` — PR #169, exact head `b600e59bd0a0b7bbf386886630a94a26df7fde0a`, dual-role 0.00011520 Canon plus authenticated native matching / CI PASS / Draft.
 5. `P0_NVIDIA_GPU_11520_MARKET_PILOT_AND_REAL_TRADE_READINESS` — PR #178, exact head `1e659cd4af3d299dc2bb3aa01a580dd6e2db4524`, paper pilot / fail-closed real-readiness verifier / CI PASS / Draft.
-6. `P1_KGEN_EXTERNAL_EXCHANGE_BRAND_AND_TOKEN_METADATA` — PR #179, exact head `9f6dda56131ae9ed11f74d2af757cc5fc0356a29`, current owner/bank-wallet/supply reconciliation and listing package / CI PASS / external submissions not performed.
+6. `P1_KGEN_EXTERNAL_EXCHANGE_BRAND_AND_TOKEN_METADATA` — PR #179, exact head `f2208d5ba364efac54f6114f62d5d68523c280fb`, current owner/bank-wallet/supply reconciliation, fail-closed BSC wallet discovery and listing package / CI PASS / external submissions not performed.
 7. `P1_KAIOS_MARKET_GENESIS_PAIR_AND_LIQUIDITY` — PR #180, exact head `f050395ddd162cc643b078f021179c71016ff4f7`, pair/liquidity readiness only / CI PASS / pair not created.
 8. `P1_11520_UNIVERSAL_LISTING_REGISTRY` — PR #181, exact head `24608b43375c5a246ef414fd1d70862c8f0ce83e`, universal listing/physical inventory evidence / CI PASS / Draft.
 9. `P1_11520_WAREHOUSE_ESCROW_SETTLEMENT_RECEIPT_ACCOUNTING` — PR #181 plus unsigned-payment PR #186; model/readiness implemented, custody and production execution unbound.
