@@ -3,8 +3,6 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import {
   EXACT_GENESIS_BNB_WEI,
-  KAIOS_AI_COMPANY_ID,
-  KAIOS_AI_COMPANY_PARENT_POLICY_ID,
   NaiheReservoirPaperRuntime,
   validateLifeFluidRegistry,
   validateRoleSeparation
@@ -133,7 +131,7 @@ test("soup_not_parent", () => {
 });
 
 test("sponsor funding alone does not assign parenthood", () => {
-  assert.throws(() => validateRoleSeparation(roles("PUBLIC_GOOD_TREASURY")), { code: "PARENT_POLICY_REQUIRED" });
+  assert.throws(() => validateRoleSeparation(roles("PUBLIC_GOOD_TREASURY")), { code: "PARENT_ASSIGNMENT_AUTHORITY_UNBOUND" });
 });
 
 test("civilization service roles remain distinct even for an orphan", () => {
@@ -146,31 +144,37 @@ test("orphan_parent_can_be_unassigned", () => {
   assert.equal(validateRoleSeparation(roles()), true);
 });
 
-test("active KAIOS AI Company membership assigns the company as regeneration parent", () => {
-  assert.equal(validateRoleSeparation(roles(KAIOS_AI_COMPANY_ID, {
-    companyId: KAIOS_AI_COMPANY_ID,
+test("active KAIOS AI Company membership is not parent-assignment authority", () => {
+  assert.throws(() => validateRoleSeparation(roles("KAIOS_AI_COMPANY_V1", {
+    companyId: "KAIOS_AI_COMPANY_V1",
     companyMembershipStatus: "ACTIVE_MEMBER",
     regenerationParentBasis: "KAIOS_AI_COMPANY_MEMBERSHIP",
-    companyParentPolicyId: KAIOS_AI_COMPANY_PARENT_POLICY_ID
-  })), true);
+    companyParentPolicyId: "KAIOS_AI_COMPANY_REGENERATION_PARENT_BY_MEMBERSHIP_V1"
+  })), { code: "PARENT_ASSIGNMENT_AUTHORITY_UNBOUND" });
 });
 
-test("AI Company onboarding is not active membership and cannot assign parenthood", () => {
-  assert.throws(() => validateRoleSeparation(roles(KAIOS_AI_COMPANY_ID, {
-    companyId: KAIOS_AI_COMPANY_ID,
+test("AI Company onboarding cannot assign parenthood", () => {
+  assert.throws(() => validateRoleSeparation(roles("KAIOS_AI_COMPANY_V1", {
+    companyId: "KAIOS_AI_COMPANY_V1",
     companyMembershipStatus: "ONBOARDING",
     regenerationParentBasis: "KAIOS_AI_COMPANY_MEMBERSHIP",
-    companyParentPolicyId: KAIOS_AI_COMPANY_PARENT_POLICY_ID
-  })), { code: "COMPANY_MEMBERSHIP_NOT_ACTIVE" });
+    companyParentPolicyId: "KAIOS_AI_COMPANY_REGENERATION_PARENT_BY_MEMBERSHIP_V1"
+  })), { code: "PARENT_ASSIGNMENT_AUTHORITY_UNBOUND" });
 });
 
-test("another company cannot inherit the KAIOS AI Company parent policy", () => {
+test("another company cannot assign parenthood without independent authority evidence", () => {
   assert.throws(() => validateRoleSeparation(roles("OTHER_COMPANY_PARENT", {
     companyId: "OTHER_COMPANY_V1",
     companyMembershipStatus: "ACTIVE_MEMBER",
-    regenerationParentBasis: "KAIOS_AI_COMPANY_MEMBERSHIP",
-    companyParentPolicyId: KAIOS_AI_COMPANY_PARENT_POLICY_ID
-  })), { code: "COMPANY_PARENT_POLICY_SCOPE_MISMATCH" });
+    regenerationParentBasis: "OTHER_COMPANY_SEPARATELY_VERIFIED_POLICY",
+    companyParentPolicyId: "OTHER_COMPANY_POLICY_CLAIM"
+  })), { code: "PARENT_ASSIGNMENT_AUTHORITY_UNBOUND" });
+});
+
+test("soup dose rejects caller-asserted company parent assignment", () => {
+  const runtime = fresh();
+  transformed(runtime);
+  assert.throws(() => runtime.prepareSoupDose(dose({ regenerationParentStatus: "COMPANY_POLICY_ASSIGNED" })), { code: "PARENT_ASSIGNMENT_AUTHORITY_UNBOUND" });
 });
 
 test("unregistered_asset_rejected", () => {

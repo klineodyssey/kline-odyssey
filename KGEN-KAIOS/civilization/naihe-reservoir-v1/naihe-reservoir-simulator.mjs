@@ -1,6 +1,4 @@
 const EXACT_GENESIS_BNB_WEI = 8_000_000_000_000_000n;
-const KAIOS_AI_COMPANY_ID = "KAIOS_AI_COMPANY_V1";
-const KAIOS_AI_COMPANY_PARENT_POLICY_ID = "KAIOS_AI_COMPANY_REGENERATION_PARENT_BY_MEMBERSHIP_V1";
 
 function fail(code, message = code) {
   const error = new Error(message);
@@ -52,23 +50,10 @@ export function validateRoleSeparation({
   }
 
   distinct([naiheSource, reservoir, serviceOperator, mengpoSoup, regenerationParent], "PARENT_ROLE_COLLISION");
-
-  if (regenerationParentBasis === "KAIOS_AI_COMPANY_MEMBERSHIP") {
-    requireTrue(companyId === KAIOS_AI_COMPANY_ID, "COMPANY_PARENT_POLICY_SCOPE_MISMATCH");
-    requireTrue(companyMembershipStatus === "ACTIVE_MEMBER", "COMPANY_MEMBERSHIP_NOT_ACTIVE");
-    requireTrue(companyParentPolicyId === KAIOS_AI_COMPANY_PARENT_POLICY_ID, "COMPANY_PARENT_POLICY_MISMATCH");
-    requireTrue(regenerationParent === companyId, "COMPANY_PARENT_ID_MISMATCH");
-    return true;
-  }
-
-  if (regenerationParentBasis === "OTHER_COMPANY_SEPARATELY_VERIFIED_POLICY") {
-    requireTrue(companyId && companyId !== KAIOS_AI_COMPANY_ID, "COMPANY_PARENT_POLICY_SCOPE_MISMATCH");
-    requireTrue(companyMembershipStatus === "ACTIVE_MEMBER", "COMPANY_MEMBERSHIP_NOT_ACTIVE");
-    requireTrue(Boolean(companyParentPolicyId), "COMPANY_PARENT_POLICY_REQUIRED");
-    return true;
-  }
-
-  fail("PARENT_POLICY_REQUIRED");
+  void companyId;
+  void companyMembershipStatus;
+  void companyParentPolicyId;
+  fail("PARENT_ASSIGNMENT_AUTHORITY_UNBOUND");
 }
 
 export function classifyOperationalState({ bnbBalanceWei, wbnbBalanceWei }) {
@@ -229,12 +214,7 @@ export class NaiheReservoirPaperRuntime {
       requireTrue(amount(dose.outputAmount) === EXACT_GENESIS_BNB_WEI, "WRONG_GENESIS_AMOUNT");
     }
     requireTrue(amount(dose.outputAmount) === amount(transformation.outputAmount), "DOSE_OUTPUT_AMOUNT_MISMATCH");
-    requireTrue(
-      dose.regenerationParentStatus === "UNASSIGNED_ORPHAN"
-        || dose.regenerationParentStatus === "COMPANY_POLICY_ASSIGNED"
-        || dose.regenerationParentStatus === "SEPARATELY_VERIFIED",
-      "PARENT_STATUS_INVALID"
-    );
+    requireTrue(dose.regenerationParentStatus === "UNASSIGNED_ORPHAN", "PARENT_ASSIGNMENT_AUTHORITY_UNBOUND");
     this.doses.set(dose.doseId, Object.freeze({ ...dose }));
     this.pendingGenesisIds.delete(dose.genesisId);
     this.genesisIds.add(dose.genesisId);
@@ -255,4 +235,4 @@ export class NaiheReservoirPaperRuntime {
   }
 }
 
-export { EXACT_GENESIS_BNB_WEI, KAIOS_AI_COMPANY_ID, KAIOS_AI_COMPANY_PARENT_POLICY_ID };
+export { EXACT_GENESIS_BNB_WEI };
