@@ -1,7 +1,7 @@
 # KAIOS Civilization Circulatory Runtime — Multi-Worker Handoff Handbook
 
 STATUS: DESIGN_AND_HANDOFF_AUTHORITY / NOT_DEPLOYED
-VERSION: V1.2
+VERSION: V1.3
 DATE: 2026-08-27 Asia/Taipei
 PURPOSE: durable handoff source so Human, AI, Codex, ChatGPT pages, workers, reviewers and future digital lives can resume work without reconstructing decisions from chat history.
 
@@ -306,14 +306,16 @@ Therefore:
 
 ## 18. GitHub PR lineage checkpoint — 2026-08-27
 
-Observed at `2026-08-27T06:36:37Z` against `origin/main = 5d539d237bf948011d234203e451aa980a7b7ce8`.
+Observed at `2026-08-27T10:03:17Z` against `origin/main = 830b79214781fb1231f3619336de394f400a0bfd`.
 
-The remembered count of 27 open PRs is superseded. GitHub reported 36 open PRs at this checkpoint. A green workflow means tests passed at that head; it is not an independent review, deployment claim or merge authorization.
+The remembered counts of 27 and 36 open PRs are superseded. GitHub reported 38 open PRs at this checkpoint. A green workflow means tests passed at that head; it is not an independent review, deployment claim or merge authorization.
 
 ### Current-base candidates (0-1 commits behind main)
 
-`#186, #185, #184, #183, #182, #181, #180, #179, #178, #176, #172, #169, #162, #158`
+`#188, #187, #186, #185, #184, #183, #182, #181, #180, #179, #178, #176, #172, #169, #162, #158`
 
+- #188 cumulatively integrates #169, #181 and #185 on current main. It preserves the assigned `0.00011520` K11520 company/KGEN-price coordinate without seeding matched-trade CT, and combines the paper market, listing/warehouse gates and browser-safe mobile wallet. Its exact-head CI is green, but it remains Draft and still requires distinct review.
+- #187 is this lineage reconciliation candidate. It is evidence/documentation only and cannot approve itself.
 - #186 is the unsigned/read-only 18888 Public Good payment adapter; live read is fail-closed because the tested Mother/Jade addresses do not hold the bank payment roles.
 - #185 is the mobile chain-56 wallet/watch-asset candidate; it sends no token transaction and does not claim a KAIOS DEX pair exists.
 - #184 is the cumulative Mainnet address manifest candidate and supersedes the compact-document role of #167 without deleting #167 history.
@@ -339,8 +341,8 @@ These branches must be resynchronized whenever `main` advances semantically, the
 
 1. Obtain distinct security/identity review for #163, then reconcile #164 and #165 in dependency order.
 2. Obtain a governance-eligible distinct reviewer for #170 before connector activation.
-3. Review current-base product candidates independently: #169, #178, #179-#186, #158, #162 and #172.
+3. Review #188 as the cumulative K11520 integration candidate, while preserving #169/#181/#185 as dependency history; review #178, #179-#186, #158, #162 and #172 independently where they are not superseded.
 4. Preserve deployed Mainnet evidence from the #135/#136 lineage while reconciling documentation through #184 and live chain reads.
 5. Keep every PR Draft/HOLD and do not merge under the current work order.
 
-END OF HANDBOOK V1.2
+END OF HANDBOOK V1.3
