@@ -24,6 +24,7 @@ GOPLUS_URL = (
 MAJOR_THRESHOLD = Decimal("0.01")
 ZERO_ADDRESS = "0x0000000000000000000000000000000000000000"
 MOTHER_ADDRESS = "0xcd60bf474e691f2484950a0276eaf507616ca4b9"
+LEGACY_BANK_WALLET = "0xfa4d34c46e86058e672936fa03cfd79f4c7a4b3c"
 PUBLIC_OWNERSHIP_UNVERIFIED_ADDRESSES = {
     "0xb73d6716005b37bec742d64482fa26033ee1a4e1",
     "0xef83804c264b47378fcf150086943b53fb90a90b",
@@ -108,6 +109,7 @@ def balance_of(address: str, block_tag: str) -> int:
 def classify(
     address: str,
     owner: str,
+    deployment_creator: str,
     bank: str,
     reward: str,
     auto_lp: str,
@@ -116,13 +118,27 @@ def classify(
     evidence = f"https://bscscan.com/token/{TOKEN}?a={address}"
     if address == owner:
         return (
+            "GOVERNANCE",
+            False,
+            "Current on-chain owner; governance authority is distinct from deployment provenance.",
+            evidence,
+        )
+    if address == deployment_creator:
+        return (
             "FOUNDER_OR_TEAM_CONTROLLED",
             False,
-            "Current on-chain owner and original mint recipient.",
+            "Deployment creator reported by the holder index; not the current on-chain owner.",
             evidence,
         )
     if address == bank:
         return ("BANK", False, "Current on-chain bankWallet.", evidence)
+    if address == LEGACY_BANK_WALLET:
+        return (
+            "BANK_LEGACY_RESERVE",
+            False,
+            "Historical KGEN bank receiver; changing bankWallet does not make its retained reserve circulating.",
+            evidence,
+        )
     if address == reward:
         return ("REWARD", False, "Current on-chain rewardWallet.", evidence)
     if address == auto_lp:
@@ -188,8 +204,9 @@ def main() -> None:
 
     if Decimal(token_info["total_supply"]) != Decimal(token_string(total_raw)):
         raise RuntimeError("GoPlus total supply and frozen-block RPC total differ")
-    if token_info["creator_address"].lower() != owner:
-        raise RuntimeError("GoPlus creator and current on-chain owner differ")
+    deployment_creator = token_info["creator_address"].lower()
+    if deployment_creator == ZERO_ADDRESS or owner == ZERO_ADDRESS:
+        raise RuntimeError("creator or current on-chain owner is zero")
 
     major_holders: list[dict] = []
     excluded_raw = 0
@@ -199,7 +216,7 @@ def main() -> None:
         address = ranked["address"].lower()
         raw_balance = balance_of(address, block_tag)
         category, circulating, reason, evidence = classify(
-            address, owner, bank, reward, auto_lp, pair
+            address, owner, deployment_creator, bank, reward, auto_lp, pair
         )
         if not circulating:
             excluded_raw += raw_balance
@@ -269,7 +286,10 @@ def main() -> None:
         },
         "on_chain_roles": {
             "owner": owner,
+            "deployment_creator_indexer": deployment_creator,
+            "owner_matches_deployment_creator": owner == deployment_creator,
             "bank_wallet": bank,
+            "legacy_bank_wallet": LEGACY_BANK_WALLET,
             "reward_wallet": reward,
             "auto_lp_wallet": auto_lp,
             "liquidity_pair": pair,
