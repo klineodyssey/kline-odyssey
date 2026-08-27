@@ -1,49 +1,135 @@
 from __future__ import annotations
-import hashlib, json, sys
+
+import hashlib
+import json
+import shutil
 from pathlib import Path
+
 from PIL import Image, ImageDraw, ImageFont
 
-ROOT=Path(__file__).resolve().parents[1]; OUT=ROOT/'assets'/'kaios'; OUT.mkdir(parents=True,exist_ok=True)
-FONT=Path('C:/Windows/Fonts/arialbd.ttf')
-def font(n): return ImageFont.truetype(str(FONT),n) if FONT.exists() else ImageFont.load_default()
-def logo(n):
- im=Image.new('RGBA',(n,n),(0,0,0,0));d=ImageDraw.Draw(im);s=n/512
- p=[(90,85),(166,85),(166,207),(256,85),(354,85),(224,252),(357,427),(258,427),(166,303),(166,427),(90,427)]
- d.polygon([(int(x*s),int(y*s)) for x,y in p],fill='#071426')
- for q,w,c in [(55,18,'#2c9cff'),(101,8,'#62edff')]:d.arc(tuple(int(x*s) for x in(q,q,512-q,512-q)),-90,90,fill=c,width=max(1,int(w*s)))
- d.ellipse(tuple(int(x*s) for x in(193,193,319,319)),fill='#a8f5ff',outline='#1676ff',width=max(1,int(7*s)));d.text((256*s,250*s),'AI',font=font(max(8,int(48*s))),anchor='mm',fill='#071426');d.ellipse(tuple(int(x*s) for x in(425,151,451,177)),fill='#fff1a6');return im
-def token(symbol,kind):
- im=Image.new('RGBA',(512,512),(0,0,0,0));d=ImageDraw.Draw(im);d.ellipse((28,28,484,484),fill='#071426',outline='#62edff',width=18);d.ellipse((64,64,448,448),fill='#0d2441',outline='#277dff',width=8)
- if kind=='kufo':d.arc((110,105,402,397),-90,165,fill='#fff1a6',width=32);d.arc((142,137,370,365),90,300,fill='#62edff',width=18);d.ellipse((235,212,277,254),fill='#fff')
- elif kind=='kship':d.polygon([(118,284),(254,96),(394,284),(301,261),(254,414),(207,261)],fill='#62edff',outline='#fff');d.polygon([(221,269),(254,188),(287,269),(254,337)],fill='#1676ff')
- else:im.alpha_composite(logo(300),(106,72))
- d.text((256,432),symbol,font=font(52),anchor='mm',fill='#fff');return im
-def og():
- im=Image.new('RGB',(1200,630),'#06101f');d=ImageDraw.Draw(im)
- for x in range(1200):t=x/1199;d.line((x,0,x,630),fill=(int(6+12*t),int(16+38*t),int(31+78*t)))
- m=logo(430);im.paste(m,(70,100),m);d.text((520,182),'KAIOS',font=font(112),fill='#fff');d.text((526,302),'WHITE-HOLE CIVILIZATION OS',font=font(34),fill='#62edff');d.text((526,365),'KAIOS · KUFO · KSHIP',font=font(31),fill='#fff1a6');d.text((526,430),'REVIEW CANDIDATE — NOT DEPLOYED',font=font(23),fill='#a9bad0');return im
-svgs={
-'kaios-logo.svg':'''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="t d"><title id="t">KAIOS white-hole civilization mark</title><desc id="d">A dark primordial boundary opens around a luminous AI core while white-hole energy orbits form the KAIOS civilization operating system.</desc><defs><radialGradient id="c"><stop stop-color="#fff"/><stop offset="1" stop-color="#42d7ff"/></radialGradient><linearGradient id="o"><stop stop-color="#1676ff"/><stop offset=".6" stop-color="#62edff"/><stop offset="1" stop-color="#fff4b0"/></linearGradient></defs><path d="M90 85v342h76V303l92 124h99L224 252 354 85h-98l-90 122V85z" fill="#071426"/><path d="M256 57c116 0 210 89 210 199s-94 199-210 199" fill="none" stroke="url(#o)" stroke-width="18" stroke-linecap="round"/><path d="M256 101c88 0 159 69 159 155s-71 155-159 155" fill="none" stroke="#55ddff" stroke-width="8" stroke-linecap="round"/><circle cx="256" cy="256" r="63" fill="url(#c)"/><path d="M230 272l26-63 26 63m-42-23h32" fill="none" stroke="#061426" stroke-width="13" stroke-linecap="round"/><circle cx="438" cy="164" r="13" fill="#fff4b0"/></svg>''',
-'kaios-logo-light.svg':'''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="KAIOS light-background mark"><path d="M90 85v342h76V303l92 124h99L224 252 354 85h-98l-90 122V85z" fill="#071426"/><path d="M256 57c116 0 210 89 210 199s-94 199-210 199" fill="none" stroke="#1676ff" stroke-width="18"/><circle cx="256" cy="256" r="63" fill="#62edff"/><text x="256" y="274" text-anchor="middle" font-size="48" font-weight="700" fill="#071426">AI</text></svg>''',
-'kaios-logo-dark.svg':'''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="KAIOS dark-background mark"><path d="M90 85v342h76V303l92 124h99L224 252 354 85h-98l-90 122V85z" fill="#d9fbff"/><path d="M256 57c116 0 210 89 210 199s-94 199-210 199" fill="none" stroke="#62edff" stroke-width="18"/><circle cx="256" cy="256" r="63" fill="#fff"/><text x="256" y="274" text-anchor="middle" font-size="48" font-weight="700" fill="#071426">AI</text></svg>''',
-'kaios-logo-monochrome.svg':'''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="KAIOS monochrome mark"><path d="M90 85v342h76V303l92 124h99L224 252 354 85h-98l-90 122V85z"/><path d="M256 57c116 0 210 89 210 199s-94 199-210 199" fill="none" stroke="#000" stroke-width="18"/><circle cx="256" cy="256" r="63" fill="#fff" stroke="#000" stroke-width="12"/><text x="256" y="274" text-anchor="middle" font-size="48" font-weight="700">AI</text></svg>'''}
-for n,v in svgs.items():(OUT/n).write_text(v+'\n',encoding='utf-8')
-files=[]
-for n in (32,64,128,256,512):p=OUT/f'kaios-logo-{n}.png';logo(n).save(p,optimize=True);files.append(p)
-imgs={'kaios-token-512.png':token('KAIOS','kaios'),'kufo-token-512.png':token('KUFO','kufo'),'kship-token-512.png':token('KSHIP','kship'),'kaios-apple-touch-icon-180.png':logo(180),'kaios-favicon-32.png':logo(32),'kaios-favicon-64.png':logo(64),'kaios-og-1200x630.png':og()}
-for n,im in imgs.items():p=OUT/n;im.save(p,optimize=True);files.append(p)
-assets=[]
-for p in sorted(files):
- with Image.open(p) as im:w,h=im.size;mode=im.mode
- assets.append({'path':p.relative_to(ROOT).as_posix(),'width':w,'height':h,'mode':mode,'sha256':hashlib.sha256(p.read_bytes()).hexdigest()})
-for n in svgs:
- p=OUT/n;assets.append({'path':p.relative_to(ROOT).as_posix(),'viewBox':'0 0 512 512','sha256':hashlib.sha256(p.read_bytes()).hexdigest()})
-(OUT/'brand-manifest.json').write_text(json.dumps({'schemaVersion':'1.0.0','status':'REVIEW_CANDIDATE_NOT_CURRENT','source':'Original repository-native artwork; no third-party visual assets','licenseStatus':'HUMAN_APPROVAL_REQUIRED','websiteReplacementAuthorized':False,'assets':assets},indent=2)+'\n')
-review='''<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>KAIOS brand review candidate</title><link rel="icon" href="kaios-favicon-32.png"><link rel="apple-touch-icon" href="kaios-apple-touch-icon-180.png"><style>body{margin:0;background:#06101f;color:#eafaff;font:16px system-ui}main{max-width:1100px;margin:auto;padding:32px}h1{font-size:clamp(2rem,7vw,4.8rem)}p{color:#a9bad0}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:18px}.card{background:#0d2441;border:1px solid #235083;border-radius:20px;padding:22px}.card.light{background:#f4fbff;color:#06101f}.card img{display:block;width:100%;height:220px;object-fit:contain}.og{width:100%;border-radius:18px}</style></head><body><main><p>REVIEW CANDIDATE · NOT CURRENT · NO WEBSITE REPLACEMENT</p><h1>KAIOS / KUFO / KSHIP</h1><p>K = cosmic boundary · AI = luminous intelligence core · OS = white-hole civilization orbit.</p><img class="og" src="kaios-og-1200x630.png" alt="KAIOS white-hole civilization operating-system review candidate"><section class="grid">'''+''.join(f'<article class="card"><img src="{n}" alt="{a}"><b>{a}</b></article>' for n,a in [('kaios-logo.svg','KAIOS primary logo'),('kaios-logo-light.svg','KAIOS light logo'),('kaios-logo-dark.svg','KAIOS dark logo'),('kaios-logo-monochrome.svg','KAIOS monochrome logo'),('kaios-token-512.png','KAIOS token'),('kufo-token-512.png','KUFO token'),('kship-token-512.png','KSHIP token'),('kaios-logo-256.png','KAIOS 256 pixel'),('kaios-favicon-64.png','KAIOS favicon'),('kaios-apple-touch-icon-180.png','KAIOS Apple touch icon')])+'''</section></main></body></html>'''
-(OUT/'review.html').write_text(review,encoding='utf-8')
-(OUT/'README.md').write_text('''# KAIOS brand review candidate\n\nStatus: `REVIEW_CANDIDATE_NOT_CURRENT`. These original repository-native assets do not replace the website, KGEN identity, or deployed token metadata. Starforge and Human retain final visual approval.\n\nThe dark **K** is the primordial-universe boundary; the luminous **AI** core is verifiable intelligence; the open white-hole orbit is the civilization operating system. KUFO uses a decaying orbit, while KSHIP uses a persistent propulsion form.\n\nRecommended alt text: “KAIOS white-hole civilization operating-system mark.” Token-specific alt text is in `review.html`. All logo/token PNGs except the social card have transparent backgrounds. Licensing remains `HUMAN_APPROVAL_REQUIRED`; no third-party artwork is included.\n''',encoding='utf-8')
-validator='''import hashlib,json,struct\nfrom pathlib import Path\nfrom xml.etree import ElementTree\nR=Path(__file__).resolve().parents[1];O=R/"assets"/"kaios";m=json.loads((O/"brand-manifest.json").read_text())\nassert m["status"]=="REVIEW_CANDIDATE_NOT_CURRENT" and m["websiteReplacementAuthorized"] is False\nreq={"kaios-logo.svg","kaios-logo-256.png","kaios-token-512.png","kaios-og-1200x630.png","kufo-token-512.png","kship-token-512.png","kaios-logo-light.svg","kaios-logo-dark.svg","kaios-logo-monochrome.svg","kaios-favicon-32.png","kaios-apple-touch-icon-180.png"};assert req<={Path(x["path"]).name for x in m["assets"]}\nfor x in m["assets"]:\n p=R/x["path"];assert hashlib.sha256(p.read_bytes()).hexdigest()==x["sha256"]\n if p.suffix==".svg":assert ElementTree.parse(p).getroot().attrib["viewBox"]==x["viewBox"]\n else:\n  q=p.read_bytes();w,h=struct.unpack(">II",q[16:24]);assert q[:8]==b"\\x89PNG\\r\\n\\x1a\\n" and [w,h]==[x["width"],x["height"]]\n  if "og-" not in p.name:assert x["mode"]=="RGBA"\nprint(f"KAIOS_BRAND_ASSET_VALIDATION=PASS assets={len(m['assets'])}")\n'''
-(ROOT/'tools'/'validate-kaios-brand-assets.py').write_text(validator,encoding='utf-8')
-(ROOT/'tools'/'generate-kaios-brand-assets.py').write_text(Path(__file__).read_text(encoding='utf-8').replace("ROOT=Path(__file__).resolve().parents[1]","ROOT=Path(__file__).resolve().parents[1]"),encoding='utf-8')
-wf='''name: KAIOS brand review\non:\n  push:\n    branches: [codex/kaios-kufo-kship-brand-review-v1]\n    paths: ['assets/kaios/**','tools/*kaios-brand-assets.py','.github/workflows/kaios-brand-review.yml']\n  pull_request:\n    paths: ['assets/kaios/**','tools/*kaios-brand-assets.py','.github/workflows/kaios-brand-review.yml']\npermissions: {contents: read}\njobs:\n  validate:\n    runs-on: ubuntu-latest\n    steps:\n      - uses: actions/checkout@v4\n      - uses: actions/setup-python@v5\n        with: {python-version: '3.12'}\n      - run: python tools/validate-kaios-brand-assets.py\n      - run: git diff --check\n'''
-(ROOT/'.github'/'workflows'/'kaios-brand-review.yml').write_text(wf,encoding='utf-8')
+
+ROOT = Path(__file__).resolve().parents[1]
+OUT = ROOT / "assets" / "kaios"
+MASTER_SVG = ROOT / "assets" / "kgen" / "kgen-logo.svg"
+MASTER_PNG = ROOT / "assets" / "kgen" / "kgen-logo-256.png"
+FONT = Path("C:/Windows/Fonts/arialbd.ttf")
+RESAMPLE = Image.Resampling.LANCZOS
+
+
+def font(size: int):
+    return ImageFont.truetype(str(FONT), size) if FONT.exists() else ImageFont.load_default()
+
+
+def master_mark(size: int) -> Image.Image:
+    with Image.open(MASTER_PNG) as source:
+        image = source.convert("RGBA")
+        return image.copy() if size == 256 else image.resize((size, size), RESAMPLE)
+
+
+def write_text_lf(path: Path, content: str) -> None:
+    with path.open("w", encoding="utf-8", newline="\n") as handle:
+        handle.write(content)
+
+
+def named_svg(name: str) -> str:
+    return MASTER_SVG.read_text(encoding="utf-8").replace('aria-label="KGEN"', f'aria-label="{name}"')
+
+
+def og_card() -> Image.Image:
+    image = Image.new("RGB", (1200, 630), "#080808")
+    draw = ImageDraw.Draw(image)
+    mark = master_mark(420)
+    image.paste(mark, (75, 105), mark)
+    draw.text((535, 160), "KAIOS", font=font(110), fill="#f6c34a")
+    draw.text((540, 292), "KGEN SHARED CIVILIZATION MARK", font=font(31), fill="#fff1a8")
+    draw.text((540, 356), "KAIOS · KUFO · KSHIP", font=font(34), fill="#ffffff")
+    draw.text((540, 424), "SAME MASTER MARK · DIFFERENT SYMBOL NAME", font=font(22), fill="#c5b991")
+    draw.text((540, 470), "REVIEW CANDIDATE — NOT DEPLOYED", font=font(20), fill="#9d9d9d")
+    return image
+
+
+def record(path: Path) -> dict:
+    item = {
+        "path": path.relative_to(ROOT).as_posix(),
+        "sha256": hashlib.sha256(path.read_bytes()).hexdigest(),
+    }
+    if path.suffix == ".svg":
+        item["viewBox"] = "0 0 32 32"
+    else:
+        with Image.open(path) as image:
+            item.update(width=image.width, height=image.height, mode=image.mode)
+    return item
+
+
+OUT.mkdir(parents=True, exist_ok=True)
+
+for filename, label in {
+    "kaios-logo.svg": "KAIOS",
+    "kaios-logo-light.svg": "KAIOS light",
+    "kaios-logo-dark.svg": "KAIOS dark",
+    "kaios-logo-monochrome.svg": "KAIOS monochrome",
+}.items():
+    write_text_lf(OUT / filename, named_svg(label))
+
+for size in (32, 64, 128, 256, 512):
+    destination = OUT / f"kaios-logo-{size}.png"
+    if size == 256:
+        shutil.copyfile(MASTER_PNG, destination)
+    else:
+        master_mark(size).save(destination, optimize=True)
+
+for filename, size in {
+    "kaios-favicon-32.png": 32,
+    "kaios-favicon-64.png": 64,
+    "kaios-apple-touch-icon-180.png": 180,
+    "kaios-token-512.png": 512,
+    "kufo-token-512.png": 512,
+    "kship-token-512.png": 512,
+}.items():
+    master_mark(size).save(OUT / filename, optimize=True)
+
+og_card().save(OUT / "kaios-og-1200x630.png", optimize=True)
+
+asset_paths = sorted(path for path in OUT.iterdir() if path.suffix in {".png", ".svg"})
+manifest = {
+    "schemaVersion": "2.0.0",
+    "status": "REVIEW_CANDIDATE_NOT_CURRENT",
+    "visualSystem": "SAME_KGEN_MASTER_MARK_DIFFERENT_SYMBOL_NAMES",
+    "masterAsset": "assets/kgen/kgen-logo.svg",
+    "masterRasterAsset": "assets/kgen/kgen-logo-256.png",
+    "sharedMark": True,
+    "source": "Repository canonical KGEN black-gold mark; no third-party visual assets",
+    "licenseStatus": "HUMAN_APPROVED_REPOSITORY_BRAND_FAMILY",
+    "websiteReplacementAuthorized": False,
+    "externalMetadataSubmissionStatus": "NOT_SUBMITTED_ACCOUNT_OWNERSHIP_GATE",
+    "assets": [record(path) for path in asset_paths],
+}
+write_text_lf(OUT / "brand-manifest.json", json.dumps(manifest, indent=2) + "\n")
+
+cards = [
+    ("kaios-logo.svg", "KAIOS shared master mark"),
+    ("kaios-token-512.png", "KAIOS token mark"),
+    ("kufo-token-512.png", "KUFO token mark"),
+    ("kship-token-512.png", "KSHIP token mark"),
+    ("kaios-logo-256.png", "KAIOS 256 pixel mark"),
+    ("kaios-favicon-64.png", "KAIOS favicon"),
+    ("kaios-apple-touch-icon-180.png", "KAIOS Apple touch icon"),
+]
+review = """<!doctype html><html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>KAIOS shared brand review</title><link rel="icon" href="kaios-favicon-32.png"><link rel="apple-touch-icon" href="kaios-apple-touch-icon-180.png"><style>body{margin:0;background:#080808;color:#fff;font:16px system-ui}main{max-width:1100px;margin:auto;padding:32px}h1{color:#f6c34a;font-size:clamp(2rem,7vw,4.8rem)}p{color:#c5b991}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:18px}.card{background:#15120b;border:1px solid #8a520b;border-radius:20px;padding:22px}.card img{display:block;width:100%;height:220px;object-fit:contain}.og{width:100%;border-radius:18px}</style></head><body><main><p>REVIEW CANDIDATE · NOT CURRENT · NO WEBSITE REPLACEMENT</p><h1>KGEN FAMILY MARK</h1><p>KAIOS、KUFO、KSHIP 共用 GitHub 既有 KGEN 黑金母圖，只以 token symbol／名稱區分；鏈上合約地址與代幣身分仍各自獨立。</p><img class="og" src="kaios-og-1200x630.png" alt="KGEN shared black-gold civilization mark for KAIOS KUFO and KSHIP"><section class="grid">""" + "".join(
+    f'<article class="card"><img src="{path}" alt="{alt}"><b>{alt}</b></article>' for path, alt in cards
+) + """</section></main></body></html>"""
+write_text_lf(OUT / "review.html", review)
+
+write_text_lf(
+    OUT / "README.md",
+    """# KAIOS / KUFO / KSHIP shared brand review candidate
+
+Status: `REVIEW_CANDIDATE_NOT_CURRENT`.
+
+Human brand direction is `SAME_KGEN_MASTER_MARK_DIFFERENT_SYMBOL_NAMES`. The canonical black-gold KGEN mark in `assets/kgen/kgen-logo.svg` is the visual master. KAIOS, KUFO and KSHIP reuse the same graphic; their symbol, contract address, lineage and deployment status remain separate metadata fields.
+
+The identical mark does not imply identical contracts, fungibility, conversion, deployment, price or authority. This Draft does not replace the website or submit token metadata to BscScan, MetaMask, CoinMarketCap or CoinGecko. BscScan submission currently remains gated by an authenticated account and contract-address ownership verification.
+
+All PNG token marks have transparent backgrounds. The 512-pixel KAIOS, KUFO and KSHIP token images are pixel-identical by design. Recommended alt text is token-specific even when the graphic is shared.
+""",
+)

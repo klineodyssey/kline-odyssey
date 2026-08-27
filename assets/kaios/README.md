@@ -1,7 +1,9 @@
-# KAIOS brand review candidate
+# KAIOS / KUFO / KSHIP shared brand review candidate
 
-Status: `REVIEW_CANDIDATE_NOT_CURRENT`. These original repository-native assets do not replace the website, KGEN identity, or deployed token metadata. Starforge and Human retain final visual approval.
+Status: `REVIEW_CANDIDATE_NOT_CURRENT`.
 
-The dark **K** is the primordial-universe boundary; the luminous **AI** core is verifiable intelligence; the open white-hole orbit is the civilization operating system. KUFO uses a decaying orbit, while KSHIP uses a persistent propulsion form.
+Human brand direction is `SAME_KGEN_MASTER_MARK_DIFFERENT_SYMBOL_NAMES`. The canonical black-gold KGEN mark in `assets/kgen/kgen-logo.svg` is the visual master. KAIOS, KUFO and KSHIP reuse the same graphic; their symbol, contract address, lineage and deployment status remain separate metadata fields.
 
-Recommended alt text: “KAIOS white-hole civilization operating-system mark.” Token-specific alt text is in `review.html`. All logo/token PNGs except the social card have transparent backgrounds. Licensing remains `HUMAN_APPROVAL_REQUIRED`; no third-party artwork is included.
+The identical mark does not imply identical contracts, fungibility, conversion, deployment, price or authority. This Draft does not replace the website or submit token metadata to BscScan, MetaMask, CoinMarketCap or CoinGecko. BscScan submission currently remains gated by an authenticated account and contract-address ownership verification.
+
+All PNG token marks have transparent backgrounds. The 512-pixel KAIOS, KUFO and KSHIP token images are pixel-identical by design. Recommended alt text is token-specific even when the graphic is shared.
