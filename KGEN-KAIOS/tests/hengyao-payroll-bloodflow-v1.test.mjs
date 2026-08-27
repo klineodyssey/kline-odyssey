@@ -106,7 +106,7 @@ test("committed package matches the reproducible plan and records exact executio
   assert.equal(report.latestReadOnlyObservation.snapshotPhase, "LATEST_READ_ONLY_OBSERVATION");
   assert.equal(report.latestReadOnlyObservation.sourceOfTruth, true);
   assert.equal(report.latestReadOnlyObservation.chainId, 56);
-  assert.equal(report.latestReadOnlyObservation.asOfBlock, 118270285);
+  assert.equal(report.latestReadOnlyObservation.asOfBlock, 118329214);
   assert.equal(report.latestReadOnlyObservation.bank18888.kaiosBalance, "22213020.930416874731235");
   assert.equal(report.latestReadOnlyObservation.bank18888.reserve, "11000000.0");
   assert.equal(report.latestReadOnlyObservation.bank18888.available, "11213020.930416874731235");
@@ -115,7 +115,15 @@ test("committed package matches the reproducible plan and records exact executio
   assert.equal(report.latestReadOnlyObservation.bank18888.bnbBalance, "0.0");
   assert.equal(report.latestReadOnlyObservation.bank18888.healthy, true);
   assert.equal(report.latestReadOnlyObservation.bank18888.paused, false);
+  assert.equal(report.latestReadOnlyObservation.bank8888.assets, "888.0");
+  assert.equal(report.latestReadOnlyObservation.bank8888.freeCapital, "800.0");
+  assert.equal(report.latestReadOnlyObservation.bank8888.payrollLiability, "88.0");
+  assert.equal(report.latestReadOnlyObservation.bank8888.accountLiability, "0.0");
+  assert.equal(report.latestReadOnlyObservation.bank8888.paymentLiability, "0.0");
+  assert.equal(report.latestReadOnlyObservation.bank8888.payrollClaimed, false);
+  assert.equal(report.latestReadOnlyObservation.bank8888.currentBankingEpoch, "24319");
   assert.equal(report.latestReadOnlyObservation.verification.kaiosBalanceMatchesTokenBalanceOf, true);
+  assert.equal(report.latestReadOnlyObservation.verification.bank8888AssetsMatchFreeCapitalPlusLiability, true);
   assert.equal(report.latestReadOnlyObservation.transactionState.newMainnetTransactionSentByRefresh, false);
   assert.equal(report.boundaries.privateKeySerialized, false);
 });

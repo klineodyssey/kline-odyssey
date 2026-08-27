@@ -98,10 +98,10 @@
     "snapshotPhase": "LATEST_READ_ONLY_OBSERVATION",
     "sourceOfTruth": true,
     "chainId": 56,
-    "asOfBlock": 118270285,
-    "asOfBlockHash": "0x327977d8a16b4dfef34d3cadecea5f3e9a4e335fb53e6823a469a1de7f89b278",
-    "asOfTimestamp": "2026-08-26T22:17:57.000Z",
-    "asOfTimestampUtc8": "2026-08-27T06:17:57+08:00",
+    "asOfBlock": 118329214,
+    "asOfBlockHash": "0x9024e9d09093e0c0c2c7d1e73b1907990046064bf19d11e5746f148479def12b",
+    "asOfTimestamp": "2026-08-27T05:40:04.000Z",
+    "asOfTimestampUtc8": "2026-08-27T13:40:04+08:00",
     "preservesHistoricalSnapshots": true,
     "bank18888": {
       "proxy": "0x11d34c0F723aCd334B8F95076f73F07f06202aab",
@@ -120,6 +120,29 @@
       "healthy": true,
       "paused": false
     },
+    "bank8888": {
+      "proxy": "0x9EcAe137b3A307971EB77B4CDB3ba13aeeF5297C",
+      "assets": "888.0",
+      "freeCapital": "800.0",
+      "accountLiability": "0.0",
+      "payrollLiability": "88.0",
+      "paymentLiability": "0.0",
+      "totalCustomerLiability": "88.0",
+      "accountCount": "1",
+      "payrollCount": "1",
+      "currentCalendarEpoch": "24319",
+      "currentBankingEpoch": "24319",
+      "paused": false,
+      "hengyaoPayrollAdmin": true,
+      "hengyaoDefaultAdmin": false,
+      "hengyaoAccountAdmin": false,
+      "hengyaoAccountBalance": "0.0",
+      "payrollAmount": "88.0",
+      "payrollEpoch": "24320",
+      "payrollClaimableAt": "1788537600",
+      "payrollClaimableAtIso": "2026-09-04T16:00:00.000Z",
+      "payrollClaimed": false
+    },
     "deltaFromPostExecutionSnapshot": {
       "kaiosBalance": "0.0",
       "reserve": "0.0",
@@ -131,6 +154,8 @@
       "kaiosBalanceMatchesTokenBalanceOf": true,
       "availableMatchesBalanceMinusReserve": true,
       "genesisOpeningBalanceMatchesAccountedInflow": true,
+      "bank8888AssetsMatchFreeCapitalPlusLiability": true,
+      "payrollLiabilityMatchesScheduledUnclaimedPayroll": true,
       "multiRpcLatestBlockCrossCheck": "PASS"
     },
     "transactionState": {
