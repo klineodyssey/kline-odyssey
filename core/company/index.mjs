@@ -2008,18 +2008,28 @@ export const KAIOS_18888_PAYMENT_CONFIG = Object.freeze({
   kaios_address: "0xD4E67B3a69e41524c424150E6b6e921b01D036db",
   bank_address: "0x11d34c0F723aCd334B8F95076f73F07f06202aab",
   public_good_treasury: "0xB73D6716005B37BEC742D64482fA26033eE1A4E1",
+  beneficiary_authority_status: "UNBOUND_CANDIDATE_ONLY",
+  budget_authority_status: "UNBOUND",
+  deployed_abi_status: "UNBOUND",
+  runtime_codehash_status: "UNBOUND",
   minimum_delay_seconds: 3600,
+  maximum_request_age_seconds: 900,
   allowed_purposes: Object.freeze(["PUBLIC_GOOD_TREASURY_REFILL"]),
-  execution_mode: "UNSIGNED_PREPARATION_ONLY"
+  execution_mode: "NON_AUTHORITATIVE_DRAFT_ONLY"
 });
 
 const KAIOS_18888_PAYMENT_REQUEST_FIELDS = Object.freeze([
   "request_id", "chain_id", "bank_address", "beneficiary", "amount_wei", "purpose_code",
-  "budget_id", "nonce", "requested_by", "requested_at", "authorization_status"
+  "budget_id", "nonce", "requested_by", "requested_at", "valid_until", "authorization_status"
 ]);
 
 function sameEvmAddress(left, right) {
   return /^0x[0-9a-fA-F]{40}$/.test(String(left)) && String(left).toLowerCase() === String(right).toLowerCase();
+}
+
+function assertRepositoryBoundKaios18888PaymentConfig(config) {
+  invariant(config === KAIOS_18888_PAYMENT_CONFIG, "CALLER_SUPPLIED_PAYMENT_CONFIG_FORBIDDEN", "18888 payment authority configuration must be the frozen repository-bound singleton");
+  return config;
 }
 
 function assertExactObjectFields(record, fields, label) {
@@ -2029,10 +2039,10 @@ function assertExactObjectFields(record, fields, label) {
 }
 
 export function validateKaios18888PaymentRequest(request, {
-  availableBudgetWei,
-  maxTransactionWei,
+  observedTimestamp,
   config = KAIOS_18888_PAYMENT_CONFIG
 } = {}) {
+  assertRepositoryBoundKaios18888PaymentConfig(config);
   assertExactObjectFields(request, KAIOS_18888_PAYMENT_REQUEST_FIELDS, "Kaios18888PaymentRequest");
   invariant(/^[A-Z0-9][A-Z0-9_-]{7,127}$/.test(request.request_id), "INVALID_PAYMENT_REQUEST_ID", "Payment request ID must be a stable uppercase identifier");
   invariant(request.chain_id === config.chain_id, "WRONG_CHAIN", "18888 payment preparation requires BSC chain 56");
@@ -2044,24 +2054,29 @@ export function validateKaios18888PaymentRequest(request, {
   invariant(/^[A-Z0-9][A-Z0-9_-]{7,127}$/.test(request.nonce), "INVALID_PAYMENT_NONCE", "A replay-safe nonce is required");
   invariant(typeof request.requested_by === "string" && request.requested_by.length >= 3, "REQUESTER_REQUIRED", "Payment requester identity is required");
   invariant(!Number.isNaN(Date.parse(request.requested_at)), "INVALID_REQUEST_TIMESTAMP", "Payment request timestamp must be ISO-8601 compatible");
-  invariant(["PROPOSAL_PREPARATION_ONLY", "HUMAN_APPROVED_MACHINE_VERIFIABLE"].includes(request.authorization_status), "INVALID_AUTHORIZATION_STATUS", "Payment authorization status is invalid");
-  invariant(/^\d+$/.test(String(availableBudgetWei ?? "")) && BigInt(availableBudgetWei) >= BigInt(request.amount_wei), "UNFUNDED_BUDGET", "The fixed project budget does not fund this request");
-  invariant(/^\d+$/.test(String(maxTransactionWei ?? "")) && BigInt(maxTransactionWei) >= BigInt(request.amount_wei), "PAYMENT_CAP_EXCEEDED", "Payment exceeds the approved per-transaction cap");
+  invariant(!Number.isNaN(Date.parse(request.valid_until)), "INVALID_REQUEST_EXPIRY", "Payment request expiry must be ISO-8601 compatible");
+  invariant(request.authorization_status === "PROPOSAL_PREPARATION_ONLY", "UNBOUND_PAYMENT_AUTHORITY", "This candidate cannot accept caller-asserted Human or governance authorization");
+  if (observedTimestamp !== undefined) {
+    invariant(Number.isInteger(observedTimestamp) && observedTimestamp > 0, "INVALID_CHAIN_TIMESTAMP", "A fresh chain timestamp is required");
+    const requestedAt = Math.floor(Date.parse(request.requested_at) / 1000);
+    const validUntil = Math.floor(Date.parse(request.valid_until) / 1000);
+    invariant(requestedAt <= observedTimestamp, "REQUEST_FROM_FUTURE", "Payment request cannot be newer than the observed chain time");
+    invariant(validUntil >= observedTimestamp, "PAYMENT_REQUEST_EXPIRED", "Payment request has expired");
+    invariant(observedTimestamp - requestedAt <= config.maximum_request_age_seconds, "STALE_PAYMENT_REQUEST", "Payment request observation is stale");
+  }
   return request;
 }
 
 export function prepareKaios18888UnsignedDisbursement({
   ethers,
   request,
-  availableBudgetWei,
-  maxTransactionWei,
   observedTimestamp,
   requestedDelaySeconds = KAIOS_18888_PAYMENT_CONFIG.minimum_delay_seconds,
   config = KAIOS_18888_PAYMENT_CONFIG
 }) {
-  invariant(ethers?.utils?.Interface && ethers?.utils?.defaultAbiCoder, "ETHERS_REQUIRED", "Unsigned 18888 preparation requires ethers encoding utilities");
-  validateKaios18888PaymentRequest(request, { availableBudgetWei, maxTransactionWei, config });
-  invariant(Number.isInteger(observedTimestamp) && observedTimestamp > 0, "INVALID_CHAIN_TIMESTAMP", "A fresh chain timestamp is required");
+  assertRepositoryBoundKaios18888PaymentConfig(config);
+  invariant(ethers?.utils?.defaultAbiCoder, "ETHERS_REQUIRED", "18888 draft preparation requires ethers hashing utilities");
+  validateKaios18888PaymentRequest(request, { observedTimestamp, config });
   invariant(Number.isInteger(requestedDelaySeconds) && requestedDelaySeconds >= config.minimum_delay_seconds, "TIMELOCK_TOO_SHORT", "18888 disbursement delay must be at least one hour");
 
   const coder = ethers.utils.defaultAbiCoder;
@@ -2074,13 +2089,8 @@ export function prepareKaios18888UnsignedDisbursement({
     [requestHash, config.bank_address, request.beneficiary, request.amount_wei, budgetHash, nonceHash]
   ));
   const executableAt = observedTimestamp + requestedDelaySeconds;
-  const bankInterface = new ethers.utils.Interface([
-    "function proposeDisbursement(bytes32 disbursementId,address beneficiary,uint256 amount,bytes32 purposeHash,uint64 executableAt)",
-    "function approveDisbursement(bytes32 disbursementId)",
-    "function claimDisbursement(bytes32 disbursementId)"
-  ]);
   return Object.freeze({
-    status: "UNSIGNED_DISBURSEMENT_PREPARED",
+    status: "NON_AUTHORITATIVE_PAYMENT_DRAFT",
     execution_authority: "ABSENT_BY_DESIGN",
     chain_id: config.chain_id,
     disbursement_id: disbursementId,
@@ -2090,10 +2100,14 @@ export function prepareKaios18888UnsignedDisbursement({
     amount_wei: request.amount_wei,
     budget_id: request.budget_id,
     nonce: request.nonce,
-    calls: Object.freeze([
-      Object.freeze({ step: "PROPOSE", to: config.bank_address, value: "0", data: bankInterface.encodeFunctionData("proposeDisbursement", [disbursementId, request.beneficiary, request.amount_wei, purposeHash, executableAt]), required_role: "PAYMENT_PROPOSER_ROLE" }),
-      Object.freeze({ step: "APPROVE", to: config.bank_address, value: "0", data: bankInterface.encodeFunctionData("approveDisbursement", [disbursementId]), required_role: "PAYMENT_APPROVER_ROLE_DISTINCT_FROM_PROPOSER" }),
-      Object.freeze({ step: "BENEFICIARY_CLAIM", to: config.bank_address, value: "0", data: bankInterface.encodeFunctionData("claimDisbursement", [disbursementId]), required_role: "FIXED_BENEFICIARY_AFTER_MATURITY" })
+    calls: null,
+    calldata: null,
+    blockers: Object.freeze([
+      "REPOSITORY_BOUND_HUMAN_OR_GOVERNANCE_AUTHORIZATION_REQUIRED",
+      "FUNDED_APPROVED_BUDGET_AND_CAP_REQUIRED",
+      "CANONICAL_BENEFICIARY_ROLE_REQUIRED",
+      "MAIN_TRACKED_DEPLOYED_ABI_REQUIRED",
+      "PROXY_IMPLEMENTATION_RUNTIME_CODEHASH_BINDING_REQUIRED"
     ]),
     transaction_sent: false,
     signer_requested: false
@@ -2101,7 +2115,8 @@ export function prepareKaios18888UnsignedDisbursement({
 }
 
 export function validateKaios18888PaymentReadiness(snapshot, config = KAIOS_18888_PAYMENT_CONFIG) {
-  const fields = ["chain_id", "bank_address", "kaios_address", "beneficiary", "bank_code", "kaios_code", "bank_paused", "bank_healthy", "available_wei", "amount_wei", "proposer_has_role", "approver_has_role", "proposer_address", "approver_address", "existing_beneficiary"];
+  assertRepositoryBoundKaios18888PaymentConfig(config);
+  const fields = ["chain_id", "bank_address", "kaios_address", "beneficiary", "bank_code", "kaios_code", "bank_paused", "bank_healthy", "available_wei", "amount_wei", "proposer_has_role", "approver_has_role", "proposer_address", "approver_address", "existing_beneficiary", "budget_authority_bound", "beneficiary_authority_bound", "deployed_abi_bound", "runtime_codehash_bound"];
   assertExactObjectFields(snapshot, fields, "Kaios18888PaymentReadiness");
   const gates = Object.freeze({
     chain: snapshot.chain_id === config.chain_id,
@@ -2113,11 +2128,15 @@ export function validateKaios18888PaymentReadiness(snapshot, config = KAIOS_1888
     proposer_role: snapshot.proposer_has_role === true,
     approver_role: snapshot.approver_has_role === true,
     independent_approval: !sameEvmAddress(snapshot.proposer_address, snapshot.approver_address),
-    replay_free: sameEvmAddress(snapshot.existing_beneficiary, "0x0000000000000000000000000000000000000000")
+    replay_free: sameEvmAddress(snapshot.existing_beneficiary, "0x0000000000000000000000000000000000000000"),
+    approved_budget: snapshot.budget_authority_bound === true && config.budget_authority_status === "BOUND_REPOSITORY_VERIFIED",
+    beneficiary_authority: snapshot.beneficiary_authority_bound === true && config.beneficiary_authority_status === "BOUND_REPOSITORY_VERIFIED",
+    deployed_abi: snapshot.deployed_abi_bound === true && config.deployed_abi_status === "BOUND_REPOSITORY_VERIFIED",
+    runtime_codehash: snapshot.runtime_codehash_bound === true && config.runtime_codehash_status === "BOUND_REPOSITORY_VERIFIED"
   });
   const blockers = Object.entries(gates).filter(([, passed]) => !passed).map(([gate]) => gate);
   return Object.freeze({
-    status: blockers.length === 0 ? "READY_TO_PREPARE_UNSIGNED" : "FAIL_CLOSED",
+    status: blockers.length === 0 ? "READY_FOR_SEPARATE_AUTHORIZED_ADAPTER" : "FAIL_CLOSED",
     gates,
     blockers,
     transaction_authority: "NOT_INCLUDED",
@@ -2143,8 +2162,9 @@ export async function readKaios18888PaymentReadiness({
   bankReader,
   config = KAIOS_18888_PAYMENT_CONFIG
 }) {
+  assertRepositoryBoundKaios18888PaymentConfig(config);
   invariant(ethers?.Contract && provider?.getNetwork && provider?.getCode && provider?.getBlockNumber, "READ_PROVIDER_REQUIRED", "A read-only ethers provider is required");
-  invariant(prepared?.status === "UNSIGNED_DISBURSEMENT_PREPARED", "PREPARED_PAYMENT_REQUIRED", "Prepare and validate the unsigned payment before reading readiness");
+  invariant(prepared?.status === "NON_AUTHORITATIVE_PAYMENT_DRAFT", "PAYMENT_DRAFT_REQUIRED", "A validated non-authoritative payment draft is required");
   invariant(sameEvmAddress(prepared.beneficiary, config.public_good_treasury), "WRONG_BENEFICIARY", "Prepared payment beneficiary is not the fixed Public Good Treasury");
   invariant(sameEvmAddress(proposerAddress, proposerAddress) && sameEvmAddress(approverAddress, approverAddress), "ROLE_ACCOUNT_REQUIRED", "Proposer and approver addresses are required for the read-only role check");
 
@@ -2181,13 +2201,17 @@ export async function readKaios18888PaymentReadiness({
     approver_has_role: approverHasRole,
     proposer_address: proposerAddress,
     approver_address: approverAddress,
-    existing_beneficiary: existing.beneficiary ?? existing[0]
+    existing_beneficiary: existing.beneficiary ?? existing[0],
+    budget_authority_bound: false,
+    beneficiary_authority_bound: false,
+    deployed_abi_bound: false,
+    runtime_codehash_bound: false
   });
   return Object.freeze({
     observed_block: blockNumber,
     snapshot,
     readiness: validateKaios18888PaymentReadiness(snapshot, config),
-    provider_mode: "READ_ONLY",
+    provider_mode: "READ_ONLY_UNVERIFIED_SCHEMA_PROBE",
     signer_requested: false,
     transaction_sent: false
   });
