@@ -1,6 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs/promises";
+import vm from "node:vm";
 import { createRequire } from "node:module";
 import {
   MemoryUniverseStore, createUniverseRuntime, resolveSpeciesCode, upgradeAppVersion,
@@ -102,19 +103,90 @@ import {
   createFieldServiceDemandScan
 } from "../core/index.mjs";
 
+async function exerciseKgenWalletDiscovery(provider) {
+  const homepage = await fs.readFile(new URL("../index.html", import.meta.url), "utf8");
+  const script = [...homepage.matchAll(/<script>([\s\S]*?)<\/script>/g)]
+    .map((match) => match[1])
+    .find((candidate) => candidate.includes("data-watch-kgen"));
+  assert.ok(script, "wallet discovery script must be present");
+  let clickHandler;
+  const button = {
+    disabled: false,
+    addEventListener(type, handler) {
+      if (type === "click") clickHandler = handler;
+    }
+  };
+  const status = { textContent: "INITIAL" };
+  const document = {
+    querySelector(selector) {
+      if (selector === "[data-watch-kgen]") return button;
+      if (selector === "[data-watch-kgen-status]") return status;
+      return null;
+    }
+  };
+  const window = { location: { href: "https://example.invalid/" } };
+  if (provider) window.ethereum = provider;
+  vm.runInNewContext(script, { document, window, URL });
+  assert.equal(typeof clickHandler, "function");
+  await clickHandler();
+  return { button, status };
+}
+
 test("KGEN wallet discovery uses the canonical BSC asset without transaction authority", async () => {
   const homepage = await fs.readFile(new URL("../index.html", import.meta.url), "utf8");
-  assert.match(homepage, /data-watch-kgen/);
-  assert.match(homepage, /method:\s*"wallet_watchAsset"/);
-  assert.match(homepage, /method:\s*"eth_chainId"/);
-  assert.match(homepage, /method:\s*"wallet_switchEthereumChain"/);
-  assert.match(homepage, /chainId:\s*"0x38"/);
+  assert.match(homepage, /wallet may ask to switch to BNB Smart Chain \(chain 56\)/);
   assert.match(homepage, /address:\s*"0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be"/);
   assert.match(homepage, /symbol:\s*"KGEN"/);
   assert.match(homepage, /decimals:\s*18/);
   assert.match(homepage, /assets\/kgen\/kgen-logo-256\.png/);
   assert.doesNotMatch(homepage, /eth_sendRawTransaction|eth_sendTransaction/);
   assert.doesNotMatch(homepage, /method:\s*"approve"|method:\s*"transfer"/);
+
+  const missing = await exerciseKgenWalletDiscovery(null);
+  assert.match(missing.status.textContent, /provider not detected/i);
+  assert.equal(missing.button.disabled, false);
+
+  const alreadyCalls = [];
+  const already = await exerciseKgenWalletDiscovery({
+    async request(payload) {
+      alreadyCalls.push(payload);
+      return payload.method === "eth_chainId" ? "0x38" : true;
+    }
+  });
+  assert.deepEqual(alreadyCalls.map(({ method }) => method), ["eth_chainId", "wallet_watchAsset"]);
+  assert.equal(alreadyCalls[1].params.options.address, "0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be");
+  assert.match(already.status.textContent, /accepted by the wallet/i);
+
+  const switchCalls = [];
+  await exerciseKgenWalletDiscovery({
+    async request(payload) {
+      switchCalls.push(payload);
+      if (payload.method === "eth_chainId") return "0x1";
+      if (payload.method === "wallet_watchAsset") return true;
+      return null;
+    }
+  });
+  assert.deepEqual(switchCalls.map(({ method }) => method), ["eth_chainId", "wallet_switchEthereumChain", "wallet_watchAsset"]);
+  assert.deepEqual(switchCalls[1].params, [{ chainId: "0x38" }]);
+
+  const declined = await exerciseKgenWalletDiscovery({
+    async request({ method }) {
+      if (method === "eth_chainId") return "0x38";
+      return false;
+    }
+  });
+  assert.match(declined.status.textContent, /did not add KGEN/i);
+  assert.doesNotMatch(declined.status.textContent, /accepted by the wallet/i);
+
+  const rejected = await exerciseKgenWalletDiscovery({
+    async request({ method }) {
+      if (method === "eth_chainId") return "0x1";
+      throw new Error("User rejected");
+    }
+  });
+  assert.match(rejected.status.textContent, /User rejected/);
+  assert.doesNotMatch(rejected.status.textContent, /accepted by the wallet/i);
+  assert.equal(rejected.button.disabled, false);
 });
 import { verifyDigitalAntWalletBinding, verifyDigitalLifeWalletBinding, CODEX_GM_ENV } from "../core/security/wallet-binding.mjs";
 import { TEMPLE_HEART_READ_ABI, TEMPLE_HEART_DRY_RUN_ABI, TEMPLE_HEART_VERIFIED_ACTIONS, readCoreHeartEvents } from "../core/integrations/temple-heart-12345.mjs";

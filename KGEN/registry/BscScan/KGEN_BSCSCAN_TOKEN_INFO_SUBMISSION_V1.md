@@ -86,10 +86,13 @@ Verified public contact email remains: **klineodyssey.io@gmail.com**
 
 ### Live public-state recheck — 2026-08-27
 
-The public BscScan token page was re-read on 2026-08-27. It still displays the
-generic empty-token icon, `Reputation: UNKNOWN`, and no published KGEN price.
-Therefore the prepared repository package must not be described as accepted or
-published by BscScan. The verified Solidity source is a separate fact and does
+Status: `UNVERIFIED_PUBLIC_OBSERVATION`
+
+No timestamped screenshot or immutable BscScan page snapshot is committed in this
+candidate. The observed generic empty-token icon, `Reputation: UNKNOWN`, and
+absence of a published KGEN price are contextual only and cannot prove current
+publication state. Therefore the prepared repository package must not be described
+as accepted or published by BscScan. The verified Solidity source is a separate fact and does
 not publish token branding or market metadata.
 
 The KGEN contract owner is the BankGovernance contract at
