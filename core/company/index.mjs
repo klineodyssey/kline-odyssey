@@ -1397,6 +1397,7 @@ function validateOptionBMilestones(milestones, totalPrice) {
   invariant(milestoneTotal === totalPrice, "OPTION_B_MILESTONE_TOTAL_MISMATCH", "Milestone amounts must exactly equal the binding proposal total");
 }
 
+// A caller-supplied reference is never authority; this candidate remains non-dispatchable until canonical resolution exists.
 export function createOperatingCompanyBindingProposal({
   proposal_id, project_id, request_id, customer_id, conditional_acceptance_reference,
   cost_breakdown, milestones, accepted_direction_at, earliest_start_at, target_delivery_at,
