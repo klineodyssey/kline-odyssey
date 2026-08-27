@@ -18,9 +18,9 @@
 | Phase 2 evidence lineage | PR `#136`, source head `00c79b380ce094c17d75697f360820c4d2035071` |
 | Phase 2 source status | Draft / open / unmerged; deployment facts are independently on-chain |
 | Current document classification | `CURRENT_CUMULATIVE_MANIFEST` |
-| Repository `origin/main` observed during this revision | `8db13871928a482a6a6719d93a240c52d58fa644` |
-| KGEN owner / Bank Wallet live verification block | `118333481` |
-| Last on-chain reserve observation used here | BSC block `118333481`, `2026-08-27T06:12:04Z` / `2026-08-27T14:12:04+08:00` |
+| Repository `origin/main` observed during this revision | `830b79214781fb1231f3619336de394f400a0bfd` |
+| KGEN owner / Bank Wallet live verification window | BSC blocks `118411912`–`118412257` |
+| Last on-chain reserve observation used here | BSC block `118412257`, `2026-08-27T16:03:02Z` / `2026-08-28T00:03:02+08:00` |
 
 ## 1. Current headline status
 
@@ -207,7 +207,7 @@ Therefore:
 - `0xa2792fBDCc8A8AaC364053431D44E0a8D335E166` is the governance/timelock smart-contract owner of KGEN.
 - `0xCd60BF474e691F2484950a0276Eaf507616Ca4b9` is the Mother governance proposer, not a substitute for `owner()`.
 
-Fresh BSC read-only verification at block `118333481` returned:
+Fresh BSC read-only verification during blocks `118411912`–`118412257` returned:
 
 ```text
 KGEN.owner()
@@ -272,7 +272,7 @@ The KGEN owner surface remains limited to the deployed contract's existing admin
 
 ### 5.5 Current Reserve Redemption observation
 
-At BSC block `118333481` (`2026-08-27T06:12:04Z` / `2026-08-27T14:12:04+08:00`):
+At BSC block `118412257` (`2026-08-27T16:03:02Z` / `2026-08-28T00:03:02+08:00`):
 
 | Field | Observed value |
 |---|---|
@@ -308,6 +308,25 @@ Recognized permanently burned KGEN × 1,000
 ```
 
 No address balance, tax routing, or transfer to a general wallet may substitute for a verified KGEN total-supply decrease.
+
+### 6.1 Current live balances — separate from Genesis values
+
+The immutable Genesis quantities above are historical settlement facts. The following read-only values are later live state observed during BSC blocks `118411912`–`118412257`; they must not overwrite the Genesis row.
+
+| Field | Live observed value |
+|---|---:|
+| KGEN total supply | `71,976,169.974243092224959062 KGEN` |
+| KGEN Reserve Redemption / current Bank Wallet balance | `20 KGEN` |
+| KAIOS total supply | `22,213,908.930416874731235 KAIOS` |
+| 18888 KAIOS token balance | `22,213,020.930416874731235 KAIOS` |
+| 18888 reserve requirement | `11,000,000 KAIOS` |
+| 18888 available KAIOS | `11,213,020.930416874731235 KAIOS` |
+| 8888 KAIOS token balance / assets | `888 KAIOS` |
+| 8888 free capital | `800 KAIOS` |
+| 8888 payroll liability | `88 KAIOS` |
+| 8888 account count / payroll count | `1 / 1` |
+
+The lower live KGEN supply reflects post-Genesis token burns. It does not by itself authorize or prove an additional KAIOS settlement. This revision sent no transaction and did not settle any pending burn amount.
 
 ## 7. Governance identities and security boundary
 
