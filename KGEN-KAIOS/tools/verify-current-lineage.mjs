@@ -24,9 +24,6 @@ const forbidden = [
   "IKAIOSBurnProofGenesis",
   "Species → Cell → Organ",
 ];
-const safeConflictReferenceFiles = new Set([
-  "docs/physics/KGEN_KAIOS_SCALE_AND_PLANCK_RUNTIME_CURRENT.md",
-]);
 const currentSectionMarkers = new Map([
   ["docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md", "## 235. 現行質量尺度"],
 ]);
@@ -55,7 +52,11 @@ function currentNormativeContent(relativePath, content) {
 }
 
 function isExplicitSupersededReference(line) {
-  return /(?:SUPERSEDED|historical|歷史|舊)/iu.test(line);
+  return /(?:SUPERSEDED|historical|obsolete|remove legacy|remove all obsolete|歷史|舊)/iu.test(line);
+}
+
+function forbiddenPatternsIn(content) {
+  return forbidden.filter((pattern) => content.includes(pattern));
 }
 
 for (const relativePath of activeFiles) {
@@ -63,11 +64,12 @@ for (const relativePath of activeFiles) {
   const content = fs.readFileSync(absolutePath, "utf8");
   const normativeContent = currentNormativeContent(relativePath, content);
   normativeContentByPath.set(relativePath, normativeContent);
-  const searchableContent = currentSectionMarkers.has(relativePath)
-    ? normativeContent.split(/\r?\n/u).filter((line) => !isExplicitSupersededReference(line)).join("\n")
-    : normativeContent;
-  for (const pattern of safeConflictReferenceFiles.has(relativePath) ? [] : forbidden) {
-    if (searchableContent.includes(pattern)) failures.push({ path: relativePath, pattern });
+  const searchableContent = normativeContent
+    .split(/\r?\n/u)
+    .filter((line) => !isExplicitSupersededReference(line))
+    .join("\n");
+  for (const pattern of forbiddenPatternsIn(searchableContent)) {
+    failures.push({ path: relativePath, pattern });
   }
 }
 
@@ -109,6 +111,8 @@ const assertions = {
   noMainnetDeployment: !fs.existsSync(path.join(repo, "KGEN-KAIOS", "deployments", "mainnet.json")),
   staleCurrentFindingsLimitedToPr127:
     audit.findings.filter((item) => item.classification === "CURRENT-CONFLICT").every((item) => item.path.startsWith("PR#127:")),
+  scaleCurrentActiveConflictProbe:
+    forbiddenPatternsIn("ACTIVE CURRENT RULE: 1 KGEN = 1 kg").includes("1 KGEN = 1 kg"),
 };
 for (const [name, passed] of Object.entries(assertions)) {
   if (!passed) failures.push({ assertion: name });
