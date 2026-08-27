@@ -1954,59 +1954,65 @@ test("V3.1 Digital Cow, Media, Construction and 100-person Aid remain Example Sc
   assert.equal(aid.claims_executed, 0);
 });
 
-test("Option B binding proposal reproduces 108888 KAIOS without inventing payment or Revenue", () => {
+test("Option B proposal remains unverified, non-binding and unauthorized from a caller reference alone", () => {
   assert.deepEqual(OPTION_B_BINDING_COST_FIELDS, ["direct_engineering_cost", "review_cost", "infra_cost", "security_cost", "project_management_cost", "risk_reserve", "contingency", "company_margin"]);
   const cost_breakdown = { direct_engineering_cost: "65000", review_cost: "9680", infra_cost: "3200", security_cost: "6400", project_management_cost: "7200", risk_reserve: "6000", contingency: "4408", company_margin: "7000" };
   const milestoneAmounts = ["21778", "27222", "27222", "21778", "10888"];
   const dueDates = ["2026-08-28T10:00:00.000Z", "2026-09-18T10:00:00.000Z", "2026-10-09T10:00:00.000Z", "2026-10-30T10:00:00.000Z", "2026-11-13T10:00:00.000Z"];
-  const milestones = milestoneAmounts.map((amount, index) => ({ milestone_id: `M${index}`, amount, deliverables: [`M${index}_DELIVERABLE`], acceptance_tests: [`M${index}_ACCEPTANCE`], due_at: dueDates[index], payment_trigger: index === 0 ? "BINDING_ACCEPTANCE_AND_ESCROW_READY" : "CUSTOMER_ACCEPTED_MILESTONE" }));
+  const milestones = milestoneAmounts.map((amount, index) => ({ milestone_id: `M${index}`, amount, deliverables: [`M${index}_DELIVERABLE`], acceptance_tests: [`M${index}_ACCEPTANCE`], due_at: dueDates[index], payment_trigger: "HUMAN_ACCEPTANCE_AND_AUTHORITY_REQUIRED" }));
   const proposal = createOperatingCompanyBindingProposal({
-    proposal_id: "OPTION_B_BINDING_PROPOSAL_V1", project_id: "KAIOS_AI_COMPANY_OPTION_B_V1", request_id: "RFQ_OPTION_B_001", customer_id: "HUMAN_CUSTOMER_SHEN_YINGMING",
-    conditional_acceptance_evidence: "KAIOS_AI_COMPANY_OPTION_B_CONDITIONAL_ACCEPTANCE_V1", cost_breakdown, milestones,
+    proposal_id: "OPTION_B_PROPOSAL_CANDIDATE_V1", project_id: "KAIOS_AI_COMPANY_OPTION_B_V1", request_id: "RFQ_OPTION_B_001", customer_id: "HUMAN_CUSTOMER_SHEN_YINGMING",
+    conditional_acceptance_reference: "KAIOS_AI_COMPANY_OPTION_B_CONDITIONAL_ACCEPTANCE_V1", cost_breakdown, milestones,
     accepted_direction_at: "2026-08-27T04:17:44.000Z", earliest_start_at: "2026-08-27T04:17:44.000Z", target_delivery_at: "2026-11-13T10:00:00.000Z",
-    workforce: { ai_workers_required: 4, distinct_reviewers_required: 1, current_distinct_reviewer_capacity: 0, workforce_gap_plan: "DISTINCT_T2_REVIEWER_RECRUITMENT_OR_POLICY_COMPLIANT_ONBOARDING" },
+    workforce: { ai_workers_required: 4, distinct_reviewers_required: 1, current_distinct_reviewer_capacity: 0, workforce_gap_plan: "HUMAN_AUTHORIZED_REVIEWER_CAPACITY_REQUIRED" },
     payment_architecture: { company_receivable_address: null, project_escrow: "NOT_DEPLOYED", signer_policy: "HUMAN_APPROVAL_REQUIRED", refund_policy: "OPEN_REVIEW", dispute_policy: "OPEN_REVIEW", milestone_release_policy: "ACCEPTANCE_AND_RECEIPT_REQUIRED", payment_ready: false },
-    human_gates: ["BINDING_PROPOSAL_ACCEPTANCE", "RECEIVABLE_AND_ESCROW_APPROVAL", "T2_REVIEWER_APPROVAL"], external_dependencies: ["PR169", "PR170", "PR176"]
+    human_gates: ["IMMUTABLE_ACCEPTANCE_AUTHORITY_RESOLUTION", "RECEIVABLE_AND_ESCROW_APPROVAL", "DISTINCT_REVIEWER_APPROVAL"], external_dependencies: ["PR169", "PR170", "PR176"]
   });
-  assert.equal(validateOperatingCompanyBindingProposal(proposal), proposal);
-  assert.equal(proposal.total_binding_price, "108888");
-  assert.equal(proposal.status, "BINDING_PROPOSAL_READY_REVIEW_CAPACITY_BLOCKED");
+  assert.equal(validateOperatingCompanyBindingProposal(proposal).status, "DRAFT_PROPOSAL_NOT_AUTHORIZED");
+  assert.equal(proposal.total_proposed_price, "108888");
+  assert.equal(proposal.conditional_acceptance_verified, false);
+  assert.equal(proposal.engineering_preparation_authorized, false);
   assert.equal(proposal.project_activated, false);
   assert.equal(proposal.payment_received, false);
   assert.equal(proposal.real_revenue, "0");
   assert.equal(proposal.chain_write, false);
+  assert.throws(() => validateOperatingCompanyBindingProposal({ ...proposal, engineering_preparation_authorized: true }), (error) => error.code === "OPTION_B_PROPOSAL_DERIVED_STATE_MISMATCH");
+  assert.throws(() => validateOperatingCompanyBindingProposal({ ...proposal, status: "READY_FOR_REGISTRY_DISPATCH" }), (error) => error.code === "OPTION_B_PROPOSAL_DERIVED_STATE_MISMATCH");
   assert.throws(() => createOperatingCompanyBindingProposal({ ...proposal, cost_breakdown: { ...cost_breakdown, hidden_fee: "1" } }), (error) => error.code === "OPTION_B_COST_FIELDS_INVALID");
   assert.throws(() => createOperatingCompanyBindingProposal({ ...proposal, cost_breakdown, milestones: milestones.map((item, index) => index === 4 ? { ...item, amount: "10887" } : item) }), (error) => error.code === "OPTION_B_MILESTONE_TOTAL_MISMATCH");
 });
 
-test("Option B WBS covers all 12 packages and delivery fails closed on zero distinct Reviewer capacity", () => {
+test("Option B WBS is complete but cannot dispatch workers or claims without canonical authority", () => {
   const costs = { direct_engineering_cost: "65000", review_cost: "9680", infra_cost: "3200", security_cost: "6400", project_management_cost: "7200", risk_reserve: "6000", contingency: "4408", company_margin: "7000" };
   const amounts = ["21778", "27222", "27222", "21778", "10888"];
   const dates = ["2026-08-28T10:00:00.000Z", "2026-09-18T10:00:00.000Z", "2026-10-09T10:00:00.000Z", "2026-10-30T10:00:00.000Z", "2026-11-13T10:00:00.000Z"];
   const proposal = createOperatingCompanyBindingProposal({
-    proposal_id: "OPTION_B_BINDING_PROPOSAL_V1", project_id: "KAIOS_AI_COMPANY_OPTION_B_V1", request_id: "RFQ_OPTION_B_001", customer_id: "HUMAN_CUSTOMER_SHEN_YINGMING", conditional_acceptance_evidence: "CONDITIONAL_ACCEPTANCE_V1", cost_breakdown: costs,
-    milestones: amounts.map((amount, index) => ({ milestone_id: `M${index}`, amount, deliverables: [`D${index}`], acceptance_tests: [`A${index}`], due_at: dates[index], payment_trigger: "ACCEPTANCE_REQUIRED" })),
+    proposal_id: "OPTION_B_PROPOSAL_CANDIDATE_V1", project_id: "KAIOS_AI_COMPANY_OPTION_B_V1", request_id: "RFQ_OPTION_B_001", customer_id: "HUMAN_CUSTOMER_SHEN_YINGMING", conditional_acceptance_reference: "UNVERIFIED_REFERENCE_ONLY", cost_breakdown: costs,
+    milestones: amounts.map((amount, index) => ({ milestone_id: `M${index}`, amount, deliverables: [`D${index}`], acceptance_tests: [`A${index}`], due_at: dates[index], payment_trigger: "HUMAN_ACCEPTANCE_REQUIRED" })),
     accepted_direction_at: "2026-08-27T04:17:44.000Z", earliest_start_at: "2026-08-27T04:17:44.000Z", target_delivery_at: "2026-11-13T10:00:00.000Z",
-    workforce: { ai_workers_required: 4, distinct_reviewers_required: 1, current_distinct_reviewer_capacity: 0, workforce_gap_plan: "REVIEW_WORKFORCE_GAP" },
+    workforce: { ai_workers_required: 4, distinct_reviewers_required: 1, current_distinct_reviewer_capacity: 0, workforce_gap_plan: "HUMAN_AUTHORIZED_REVIEWER_CAPACITY_REQUIRED" },
     payment_architecture: { company_receivable_address: null, project_escrow: "NOT_DEPLOYED", signer_policy: "POLICY_REQUIRED", refund_policy: "OPEN_REVIEW", dispute_policy: "OPEN_REVIEW", milestone_release_policy: "ACCEPTANCE_REQUIRED", payment_ready: false }
   });
   const hours = [56, 64, 72, 48, 80, 64, 72, 80, 72, 72, 56, 56];
   const work_packages = OPTION_B_WORK_PACKAGE_IDS.map((task_id, index) => ({
     task_id, assigned_role: index === 10 ? "INDEPENDENT_REVIEWER" : "COMPANY_ENGINEER", required_skills: ["CODE", "TEST"], trust_required: "T2", reviewer_required: true,
     dependencies: index === 0 ? [] : [OPTION_B_WORK_PACKAGE_IDS[index - 1]], files_allowed: ["core/company/index.mjs", "tests/universal-exchange.test.mjs"],
-    branch: `codex/option-b-${index + 1}`, estimated_hours: hours[index], start_gate: "AUTHORIZED_SAFE_LOCAL_ENGINEERING", acceptance_tests: [`${task_id}_PASS`], delivery_artifact: `${task_id}_ARTIFACT`
+    branch: `codex/option-b-${index + 1}`, estimated_hours: hours[index], start_gate: "HUMAN_AUTHORITY_AND_CANONICAL_DISPATCH_REQUIRED", acceptance_tests: [`${task_id}_PASS`], delivery_artifact: `${task_id}_ARTIFACT`
   }));
   const wbs = createOptionBWorkBreakdown({ proposal, work_packages });
   assert.equal(wbs.work_packages.length, 12);
   assert.equal(wbs.total_estimated_hours, 792);
   assert.equal(wbs.assigned_workers, 0);
-  assert.ok(wbs.work_packages.every((item) => item.assigned_worker_id === null && item.status === "ENGINEERING_PREPARATION_ALLOWED_REVIEW_BLOCKED"));
+  assert.equal(wbs.registry_dispatch_authorized, false);
+  assert.equal(wbs.status, "DRAFT_WBS_NOT_DISPATCHABLE");
+  assert.ok(wbs.work_packages.every((item) => item.assigned_worker_id === null && item.claim_id === null && item.fencing_token === null && item.status === "DRAFT_ROLE_SCOPED_NOT_DISPATCHABLE"));
   const schedule = estimateOptionBDeliverySchedule({ proposal, wbs, engineering_capacity_hours_per_day: 16, reviewer_capacity: 0, human_gate_business_days: 3 });
   assert.equal(schedule.engineering_business_days, 50);
   assert.equal(schedule.review_complete_at, null);
   assert.equal(schedule.status, "TARGET_DATE_CONDITIONAL_REVIEWER_CAPACITY_BLOCKED");
   assert.ok(schedule.critical_path.includes("DISTINCT_REVIEWER_CAPACITY_BLOCKED"));
   assert.throws(() => createOptionBWorkBreakdown({ proposal, work_packages: work_packages.map((item, index) => index === 0 ? { ...item, assigned_worker_id: "FAKE_WORKER" } : item) }), (error) => error.code === "OPTION_B_PREMATURE_WORKER_ASSIGNMENT");
+  assert.throws(() => createOptionBWorkBreakdown({ proposal, work_packages: work_packages.map((item, index) => index === 0 ? { ...item, trust_required: "T6" } : item) }), (error) => error.code === "OPTION_B_WORK_AUTHORITY_INVALID");
   assert.throws(() => createOptionBWorkBreakdown({ proposal, work_packages: work_packages.map((item, index) => index === 0 ? { ...item, dependencies: [OPTION_B_WORK_PACKAGE_IDS[11]] } : item) }), (error) => error.code === "OPTION_B_DEPENDENCY_INVALID");
 });
 
