@@ -68,3 +68,18 @@ The existing PancakeSwap user-wallet adapter remains separate and unchanged.
 - `tests/11520-kgen-native-market-cell.test.mjs`
 
 The candidate is not review-complete merely because unrelated 11520 tests are green.
+
+## NVIDIA GPU paper-market pilot
+
+The same verified price-time matching organ now supports two strictly isolated paper books at the assigned Company address:
+
+- `11520_NVIDIA_GPU_KGEN_PAPER_MARKET` — quote unit `KGEN_PER_GPU`;
+- `11520_NVIDIA_GPU_KAIOS_PAPER_MARKET` — quote unit `KAIOS_PER_GPU`.
+
+Each book begins with CT `null`; only its own valid matched trades create its CT, OHLC and volume. The fixed Company/KGEN coordinate `0.00011520` is not injected as either GPU price. GPU units use whole-chip lot size `1`, and the actor authentication, self-match, cancellation and paper/no-settlement boundaries above remain mandatory.
+
+The logistics candidate reuses the formal Universe Map route `K12345 (0.00012345) → K11520 (0.00011520)`, `825` K-index and `18,778.422548555 km`. Its landed-cost gate requires acquisition, Lamp service, packaging, transport, KSHIP/energy, food, labor, insurance, warehouse, listing, settlement, gas, tax and risk-reserve components before a minimum ask can exist.
+
+Current inventory is only `PAPER_SIMULATION_NOT_REAL_INVENTORY`. A real GPU cannot enter real-trade readiness without NVIDIA brand/model/serial/supplier, acquisition cost, ownership certificate, cargo receipt, K11520 warehouse receipt, a funded assigned Company budget, connected Hengyao signer and verified 11520 GPU settlement. No such evidence is bundled in this candidate, so real trade and chain write remain blocked.
+
+The acquisition pipeline records `wish -> heartbeat or cross-day breathing -> fortune entitlement and available funds -> K12345 Lamp service -> supplier GPU -> transport -> warehouse`. Wish, heartbeat, fortune and Lamp evidence are prerequisites only: none of them is a GPU, supplier receipt, ownership certificate or warehouse inventory. The paper candidate calculates fixed-route travel time, moving mass, energy, food, labor, insurance, warehouse and risk inputs, but it creates no real goods and claims no delivery. Real inventory remains fail-closed until every external receipt is independently verified.
