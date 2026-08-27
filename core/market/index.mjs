@@ -106,13 +106,19 @@ export function validate11520WarehouseReceipt(receipt, { asset, depositorAuthori
   invariant(receipt.warehouse_id === "0.00011520_K11520_GPU_BONDED_WAREHOUSE", "WAREHOUSE_DESTINATION_MISMATCH", "Physical 11520 inventory must be deposited at the registered K11520 warehouse");
   invariant(receipt.asset_id === asset.asset_id && receipt.asset_type === asset.asset_type, "WAREHOUSE_ASSET_MISMATCH", "Warehouse receipt must identify the listed asset");
   invariant(receipt.depositor_actor_id === depositorAuthority.actor_id, "WAREHOUSE_DEPOSITOR_MISMATCH", "Warehouse depositor must match the verified listing actor");
-  invariant(receipt.evidence_class === "EXTERNAL_VERIFIED" && receipt.status === "VERIFIED_CANDIDATE", "WAREHOUSE_EVIDENCE_REQUIRED", "Physical inventory requires externally verifiable warehouse evidence before formal activation");
   for (const field of ["supplier_id", "model", "serial_number", "ownership_evidence_id", "cargo_receipt_id"]) {
     invariant(typeof receipt[field] === "string" && receipt[field].trim().length > 0, "WAREHOUSE_PROVENANCE_REQUIRED", `Warehouse receipt requires ${field}`);
   }
   invariant(unsignedAtomic(receipt.acquisition_cost_atomic, "warehouse acquisition cost") > 0n, "WAREHOUSE_COST_REQUIRED", "Warehouse receipt requires a positive acquisition cost");
   invariant(UNIVERSAL_11520_MARKET.quote_currencies.includes(receipt.acquisition_currency), "WAREHOUSE_CURRENCY_FORBIDDEN", "Warehouse acquisition currency must be KGEN or KAIOS for this candidate");
-  return Object.freeze({ ...receipt });
+  return Object.freeze({
+    ...receipt,
+    caller_claimed_evidence_class: receipt.evidence_class,
+    caller_claimed_status: receipt.status,
+    evidence_class: "CALLER_ASSERTED_UNVERIFIED",
+    status: "WAREHOUSE_EVIDENCE_PENDING",
+    verification_authority: "FORMAL_REPOSITORY_BOUND_WAREHOUSE_VERIFIER_REQUIRED"
+  });
 }
 
 export function create11520UniversalListingCandidate({
@@ -155,8 +161,8 @@ export function create11520UniversalListingCandidate({
     quote_currency: listing.currency_id,
     evidence_ids: Object.freeze([...evidenceIds]),
     warehouse_receipt: warehouse,
-    inventory_class: physical ? "PHYSICAL_WAREHOUSE_CANDIDATE" : "DIGITAL_OR_SERVICE_CANDIDATE",
-    status: "READY_FOR_DISTINCT_LISTING_REVIEW",
+    inventory_class: physical ? "PHYSICAL_WAREHOUSE_EVIDENCE_PENDING" : "DIGITAL_OR_SERVICE_CANDIDATE",
+    status: physical ? "WAREHOUSE_EVIDENCE_REQUIRED" : "READY_FOR_DISTINCT_LISTING_REVIEW",
     settlement_status: "NOT_DEPLOYED",
     custody_transfer: false,
     mainnet_transaction_sent: false
