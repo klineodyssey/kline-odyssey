@@ -120,6 +120,15 @@ test("public Cursor queue is fail-closed after non-disciplinary offboarding", as
   assert.equal(reconciliation.acceptance_present, false);
   assert.equal(reconciliation.payroll_state, "NOT_ELIGIBLE_NO_ACCEPTED_DELIVERY");
   assert.equal(reconciliation.payment_state, "NOT_SENT");
+  const taskClose = registry.claim_events.find(
+    (event) => event.event_id === "CLAIM-EVENT-KAIOS-LIFE-ENERGY-PAYROLL-R2-001-003"
+  );
+  assert.equal(taskClose.event_type, "TASK_CLOSED_WORKER_OFFBOARDED");
+  assert.equal(taskClose.previous_event_id, reconciliation.event_id);
+  assert.equal(taskClose.old_state, "OPEN");
+  assert.equal(taskClose.new_state, "CLOSED");
+  assert.equal(taskClose.task_reassignable, false);
+  assert.equal(taskClose.payment_state, "NOT_SENT");
   const cursor = registry.workers.find((worker) => worker.worker_id === "cursor-01");
   assert.equal(cursor.employee_status, "ARCHIVED");
   assert.equal(cursor.trust_level, "T0");

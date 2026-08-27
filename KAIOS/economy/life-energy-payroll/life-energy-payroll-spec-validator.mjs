@@ -45,8 +45,24 @@ assert.ok(colony.required.includes("winter_or_emergency_reserve"));
 assert.equal(colony.properties.simulation_only.const, true);
 
 const dispatch = documents["KAIOS_CURSOR_LIFE_ENERGY_PAYROLL_TASK_ENVELOPE.json"];
+const registry = JSON.parse(fs.readFileSync(path.resolve(here, "../../../KGEN-KAIOS/worker_registry.json"), "utf8"));
+const r2Events = registry.claim_events.filter((event) => event.task_id === "KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-R2-001");
 assert.equal(dispatch.status, "R2_CLOSED_NO_DELIVERY_WORKER_OFFBOARDED");
 assert.equal(dispatch.claim_created, true);
+assert.deepEqual(r2Events.map((event) => event.event_type), [
+  "CLAIM_REGISTERED",
+  "CLAIM_RECONCILIATION",
+  "TASK_CLOSED_WORKER_OFFBOARDED"
+]);
+assert.deepEqual(r2Events.map((event) => event.sequence), [1, 2, 3]);
+assert.equal(r2Events[1].new_state, "OPEN");
+assert.equal(r2Events[1].task_reassignable, true);
+assert.equal(r2Events[2].previous_event_id, r2Events[1].event_id);
+assert.equal(r2Events[2].old_state, "OPEN");
+assert.equal(r2Events[2].new_state, "CLOSED");
+assert.equal(r2Events[2].task_reassignable, false);
+assert.equal(dispatch.r2_reconciliation.claim_release_event_id, r2Events[1].event_id);
+assert.equal(dispatch.r2_reconciliation.task_close_event_id, r2Events[2].event_id);
 assert.equal(dispatch.r2_reconciliation.classification, "EXPIRED_UNDELIVERED_RELEASED_THEN_CLOSED_WORKER_OFFBOARDED");
 assert.equal(dispatch.r2_reconciliation.lease_expired, true);
 assert.equal(dispatch.r2_reconciliation.delivery_present, false);

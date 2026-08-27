@@ -252,6 +252,22 @@ class CursorWorkerRegistryRepairTests(unittest.TestCase):
             [event["event_type"] for event in life_energy_events],
             ["CLAIM_REGISTERED", "CLAIM_CLOSED_REWORK_REQUIRED", "CLAIM_RELEASED"],
         )
+        r2_events = [
+            event
+            for event in self.registry["claim_events"]
+            if event["task_id"] == "KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-R2-001"
+        ]
+        self.assertEqual(
+            [event["event_type"] for event in r2_events],
+            ["CLAIM_REGISTERED", "CLAIM_RECONCILIATION", "TASK_CLOSED_WORKER_OFFBOARDED"],
+        )
+        self.assertEqual([event["sequence"] for event in r2_events], [1, 2, 3])
+        self.assertEqual(r2_events[1]["new_state"], "OPEN")
+        self.assertTrue(r2_events[1]["task_reassignable"])
+        self.assertEqual(r2_events[2]["previous_event_id"], r2_events[1]["event_id"])
+        self.assertEqual(r2_events[2]["old_state"], "OPEN")
+        self.assertEqual(r2_events[2]["new_state"], "CLOSED")
+        self.assertFalse(r2_events[2]["task_reassignable"])
 
     def test_dispatch_history_ends_with_life_energy_claim_and_excludes_microbial(self):
         final_dispatch = self.registry["dispatch_history"][-1]
@@ -516,6 +532,14 @@ class CursorWorkerRegistryRepairTests(unittest.TestCase):
         self.assertEqual(envelope["claim_id"], "CLAIM-KAIOS-LIFE-ENERGY-PAYROLL-R2-001-cursor-01")
         self.assertEqual(envelope["fencing_token"], "FENCE-KAIOS-LIFE-ENERGY-PAYROLL-R2-001-R2")
         self.assertFalse(envelope["r2_reconciliation"]["task_reassignable"])
+        self.assertEqual(
+            envelope["r2_reconciliation"]["claim_release_event_id"],
+            "CLAIM-EVENT-KAIOS-LIFE-ENERGY-PAYROLL-R2-001-002",
+        )
+        self.assertEqual(
+            envelope["r2_reconciliation"]["task_close_event_id"],
+            "CLAIM-EVENT-KAIOS-LIFE-ENERGY-PAYROLL-R2-001-003",
+        )
         self.assertTrue(envelope["automatic"] is False)
         self.assertTrue(envelope["external_autonomy"] is False)
         self.assertTrue(envelope["cursor_api_key_required"] is False)

@@ -80,8 +80,10 @@
   "deploy_allowed": false,
   "completion_rule": "TASK_CLOSED_NO_DELIVERY; NO_REACTIVATION; ANY_FUTURE_CURSOR_WORK_REQUIRES_NEW_APPLICATION_INTERVIEW_ONBOARDING_AND_NEW_TASK",
   "r2_reconciliation": {
-    "event_id": "CLAIM-EVENT-KAIOS-LIFE-ENERGY-PAYROLL-R2-001-002",
-    "recorded_at": "2026-08-24T21:48:54Z",
+    "claim_release_event_id": "CLAIM-EVENT-KAIOS-LIFE-ENERGY-PAYROLL-R2-001-002",
+    "task_close_event_id": "CLAIM-EVENT-KAIOS-LIFE-ENERGY-PAYROLL-R2-001-003",
+    "claim_release_recorded_at": "2026-08-24T21:48:54Z",
+    "task_close_recorded_at": "2026-08-27T23:19:47+08:00",
     "old_state": "CLAIMED",
     "new_task_state": "CLOSED",
     "classification": "EXPIRED_UNDELIVERED_RELEASED_THEN_CLOSED_WORKER_OFFBOARDED",

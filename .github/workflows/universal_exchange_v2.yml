@@ -11,6 +11,14 @@ on:
       - "tests/universal-exchange.test.mjs"
       - "K線西遊記/temples/11520/**"
       - "docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md"
+      - "KAIOS/economy/life-energy-payroll/**"
+      - "KGEN-KAIOS/worker_registry.json"
+      - "KGEN-KAIOS/worker_status_schema.json"
+      - "KGEN-KAIOS/governance/cursor/tests/**"
+      - "KGEN-KAIOS/workforce/**"
+      - "KAIOS/life/forest-agriculture/KAIOS_CURSOR_CONTINUOUS_WORK_QUEUE.json"
+      - "KAIOS/software-life/KAIOS_AI_WORKFORCE_24H_QUEUE.json"
+      - "api/kaios/ai-company/v1/cursor-queue.json"
       - ".github/ISSUE_TEMPLATE/civilization-request.yml"
       - ".github/workflows/universal_exchange_v2.yml"
   pull_request:
@@ -19,6 +27,14 @@ on:
       - "tests/universal-exchange.test.mjs"
       - "K線西遊記/temples/11520/**"
       - "docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md"
+      - "KAIOS/economy/life-energy-payroll/**"
+      - "KGEN-KAIOS/worker_registry.json"
+      - "KGEN-KAIOS/worker_status_schema.json"
+      - "KGEN-KAIOS/governance/cursor/tests/**"
+      - "KGEN-KAIOS/workforce/**"
+      - "KAIOS/life/forest-agriculture/KAIOS_CURSOR_CONTINUOUS_WORK_QUEUE.json"
+      - "KAIOS/software-life/KAIOS_AI_WORKFORCE_24H_QUEUE.json"
+      - "api/kaios/ai-company/v1/cursor-queue.json"
 
 permissions:
   contents: read
@@ -36,6 +52,10 @@ jobs:
         run: find core -name '*.mjs' -print0 | xargs -0 -n1 node --check
       - name: Run Universal Exchange tests
         run: node --test tests/universal-exchange.test.mjs
+      - name: Validate Cursor R2 payroll and offboarding reconciliation
+        run: |
+          node KAIOS/economy/life-energy-payroll/life-energy-payroll-spec-validator.mjs
+          python -m unittest KGEN-KAIOS/governance/cursor/tests/test_cursor_worker_registry_repair.py
 
   digital-ant-public-read-only-worker:
     if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'

@@ -71,7 +71,8 @@ The worker must then stop without changing WorkQueue, creating a branch, editing
 - Execution Base: `ff8fca3e610ac936e8998112255901a78296b238`
 - Prior Claim ID: `CLAIM-KAIOS-LIFE-ENERGY-PAYROLL-R2-001-cursor-01`
 - Prior Lease: `2026-08-16T12:49:02Z` through `2026-08-18T12:49:02Z` — expired and inactive
-- Reconciliation: `CLAIM-EVENT-KAIOS-LIFE-ENERGY-PAYROLL-R2-001-002` (`EXPIRED_UNDELIVERED_RELEASED`)
+- Claim release: `CLAIM-EVENT-KAIOS-LIFE-ENERGY-PAYROLL-R2-001-002` (`EXPIRED_UNDELIVERED_RELEASED`, task temporarily returned to `OPEN`)
+- Task close / offboarding: `CLAIM-EVENT-KAIOS-LIFE-ENERGY-PAYROLL-R2-001-003` (`CLOSED_NO_DELIVERY_WORKER_OFFBOARDED`)
 - Delivery / Review / Acceptance: `NONE / NONE / NONE`
 - Payroll / Payment: `NOT_ELIGIBLE_NO_ACCEPTED_DELIVERY / NOT_SENT`
 - Employment: `cursor-01` is `ARCHIVED / T0 / NOT_EMPLOYED` by Human-directed non-disciplinary offboarding.

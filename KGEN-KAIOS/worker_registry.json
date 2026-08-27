@@ -126,7 +126,44 @@
         "GitHub PR #118 (R1 only; closed, unmerged)",
         "GitHub branch and commit searches for KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-R2-001 (no delivery found)"
       ],
-      "reason": "The R2 lease expired on 2026-08-18T12:49:02Z with no R2 delivery, independent review, acceptance, payroll event or payment evidence. The claim and lease were released without penalty. A later Human decision closed the unperformed task and archived Cursor employment because the Cursor service is no longer in use; future return requires a new application and interview."
+      "reason": "The R2 lease expired on 2026-08-18T12:49:02Z with no R2 delivery, independent review, acceptance, payroll event or payment evidence. This event releases only the expired claim and lease without penalty and returns the unperformed task to OPEN; it does not encode the later employment decision."
+    },
+    {
+      "event_id": "CLAIM-EVENT-KAIOS-LIFE-ENERGY-PAYROLL-R2-001-003",
+      "event_type": "TASK_CLOSED_WORKER_OFFBOARDED",
+      "sequence": 3,
+      "claim_id": "CLAIM-KAIOS-LIFE-ENERGY-PAYROLL-R2-001-cursor-01",
+      "task_id": "KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-R2-001",
+      "parent_task_id": "KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-CANDIDATES-001",
+      "worker_id": "cursor-01",
+      "branch": "cursor-handoff/KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-R2-001",
+      "reviewer": "codex-gm-01",
+      "source_commit": "80002b27b91fd951c470cfe32dc243162ea906af",
+      "previous_event_id": "CLAIM-EVENT-KAIOS-LIFE-ENERGY-PAYROLL-R2-001-002",
+      "recorded_by": "codex-gm-01",
+      "recorded_at": "2026-08-27T23:19:47+08:00",
+      "old_state": "OPEN",
+      "new_state": "CLOSED",
+      "classification": "CLOSED_NO_DELIVERY_WORKER_OFFBOARDED",
+      "lease_expired": true,
+      "delivery_present": false,
+      "review_present": false,
+      "acceptance_present": false,
+      "payroll_state": "NOT_ELIGIBLE_NO_ACCEPTED_DELIVERY",
+      "payment_state": "NOT_SENT",
+      "claim_active": false,
+      "lease_active": false,
+      "task_reassignable": false,
+      "do_not_wake_cursor": true,
+      "future_cursor_return_rule": "NEW_APPLICATION_INTERVIEW_ONBOARDING_AND_NEW_TASK_REQUIRED",
+      "evidence_references": [
+        "KGEN-KAIOS/decision/decision_log.jsonl",
+        "KGEN-KAIOS/decision/decision_snapshot.json",
+        "KGEN-KAIOS/workforce/employee_roster.json",
+        "KGEN-KAIOS/workforce/agent_registry.json",
+        "KGEN-KAIOS/workforce/WORKER_AUDIT_LOG.json"
+      ],
+      "reason": "Human directed a non-disciplinary Cursor offboarding because the Cursor subscription is not being renewed and mobile work is being used instead. The unperformed task is closed without payment. Any future Cursor return requires a new application, interview, onboarding and new task."
     }
   ],
   "active_claims": [],
@@ -309,7 +346,8 @@
       "claim_id": "CLAIM-KAIOS-LIFE-ENERGY-PAYROLL-R2-001-cursor-01",
       "claim_event_ids": [
         "CLAIM-EVENT-KAIOS-LIFE-ENERGY-PAYROLL-R2-001-001",
-        "CLAIM-EVENT-KAIOS-LIFE-ENERGY-PAYROLL-R2-001-002"
+        "CLAIM-EVENT-KAIOS-LIFE-ENERGY-PAYROLL-R2-001-002",
+        "CLAIM-EVENT-KAIOS-LIFE-ENERGY-PAYROLL-R2-001-003"
       ]
     }
   ],
