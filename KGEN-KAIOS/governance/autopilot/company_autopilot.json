@@ -52,8 +52,10 @@
       },
       "read_plan_persist_cycle": {
         "implementation": "core/company/index.mjs#runAutonomousCompanyReadOnlyCycle",
-        "flow": ["READ_LATEST_REPOSITORY", "PLAN_SAFE_CYCLE", "PERSIST_LOCAL_COMPANY_HISTORY"],
-        "exact_head_ci_gate": "core/company/index.mjs#evaluateExactHeadCiGate",
+        "flow": ["READ_LATEST_REPOSITORY", "VERIFY_NAMED_EXACT_HEAD_CI", "PLAN_SAFE_CYCLE", "RE_READ_REPOSITORY", "PERSIST_LOCAL_COMPANY_HISTORY"],
+        "exact_head_ci_gate": "INTEGRATED_BEFORE_PLAN_AND_RECHECKED_BEFORE_PERSISTENCE",
+        "credential_destination": "HTTPS_CANONICAL_GITHUB_API_ONLY",
+        "moving_repository_result": "HOLD_WITHOUT_PERSISTENCE",
         "external_effects": false,
         "status": "IMPLEMENTED_INVOCATION_DRIVEN_CANDIDATE"
       },
@@ -240,14 +242,11 @@
       "PROTECTED_PATH_REPORT",
       "REGISTERED_AUTHOR_AND_REVIEWER"
     ],
-    "auto_merge": true,
-    "auto_merge_scope": [
-      "LOW_RISK",
-      "MEDIUM_RISK_AFTER_ALL_GATES"
-    ],
+    "auto_merge": false,
+    "auto_merge_scope": [],
     "high_risk_merge": "HUMAN_DECISION_REQUIRED",
-    "auto_push_main": true,
-    "auto_push_main_scope": "REVIEWED_BRANCH_AND_POST_MERGE_CLOSEOUT_ONLY",
+    "auto_push_main": false,
+    "auto_push_main_scope": "NONE_WITHOUT_SEPARATE_MACHINE_VERIFIABLE_AUTHORIZATION",
     "auto_deploy": false
   },
   "task_envelope_contract": {

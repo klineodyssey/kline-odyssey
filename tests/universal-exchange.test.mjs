@@ -3198,6 +3198,14 @@ test("Autonomous Company durable memory rejects unsupported or externally effect
     () => persistAutonomousCompanyCycle({ store, company, cycle_result: { ...result, events: [{ ...result.events[0], event_type: "PAYMENT_SENT" }] } }),
     (error) => error.code === "UNSUPPORTED_DURABLE_COMPANY_EVENT"
   );
+  await assert.rejects(
+    () => persistAutonomousCompanyCycle({
+      store,
+      company,
+      cycle_result: { ...result, cycle_id: "COMPANY-CYCLE-RESERVED-OVERRIDE", events: [{ ...result.events[0], cycle_id: "COMPANY-CYCLE-RESERVED-OVERRIDE", payload: { ...result.events[0].payload, external_effect: true } }] }
+    }),
+    (error) => error.code === "DURABLE_EVENT_RESERVED_FIELD_OVERRIDE"
+  );
   assert.deepEqual(AUTONOMOUS_COMPANY_DURABLE_EVENT_TYPES, ["CLOCK_IN", "WORK_ORDER", "HANDOFF", "REVIEW_REQUEST", "REWORK_ORDER", "BLOCKER_STATE", "CLOCK_OUT"]);
 });
 
@@ -3210,7 +3218,7 @@ test("Latest Repository Snapshot adapter discovers fresh main PR divergence and 
     ["https://api.github.test/repos/klineodyssey/kline-odyssey/commits/main", { sha: mainSha, commit: { committer: { date: "2026-08-27T06:00:00Z" } } }],
     ["https://api.github.test/repos/klineodyssey/kline-odyssey/pulls/170", { state: "open", draft: true, head: { sha: headSha } }],
     [`https://api.github.test/repos/klineodyssey/kline-odyssey/compare/main...${headSha}`, { ahead_by: 8, behind_by: 0 }],
-    [`https://api.github.test/repos/klineodyssey/kline-odyssey/commits/${headSha}/check-runs`, { check_runs: [{ status: "completed", conclusion: "success" }, { status: "completed", conclusion: "skipped" }] }]
+    [`https://api.github.test/repos/klineodyssey/kline-odyssey/commits/${headSha}/check-runs`, { check_runs: [{ name: "test", status: "completed", conclusion: "success" }, { name: "optional", status: "completed", conclusion: "skipped" }] }]
   ]);
   const fetch_impl = async (url, options) => {
     requests.push({ url, options });
@@ -3222,7 +3230,6 @@ test("Latest Repository Snapshot adapter discovers fresh main PR divergence and 
     active_task_pr: 170,
     observed_at: "2026-08-27T06:01:00Z",
     fetch_impl,
-    token: "TEST_TOKEN_NOT_LOGGED",
     api_base: "https://api.github.test"
   });
   assert.equal(snapshot.main_sha, mainSha);
@@ -3232,6 +3239,7 @@ test("Latest Repository Snapshot adapter discovers fresh main PR divergence and 
   assert.equal(snapshot.active_task_pr.ahead_main, 8);
   assert.equal(snapshot.active_task_pr.ci_status, "PASS");
   assert.equal(snapshot.active_task_pr.check_count, 2);
+  assert.deepEqual(snapshot.active_task_pr.required_check_names, ["test"]);
   assert.ok(requests.every((request) => request.options.method === "GET"));
   assert.deepEqual(snapshot.authority, { github_read: true, github_write: false, merge: false, branch_push: false, chain_write: false, signer: false });
 });
@@ -3245,6 +3253,22 @@ test("Latest Repository Snapshot adapter fails closed on unavailable or malforme
     () => readLatestRepositorySnapshot({ repository: "not-a-repository", observed_at: "2026-08-27T06:01:00Z", fetch_impl: async () => ({ ok: true, json: async () => ({}) }) }),
     (error) => error.code === "INVALID_GITHUB_REPOSITORY"
   );
+  await assert.rejects(
+    () => readLatestRepositorySnapshot({ repository: "klineodyssey/kline-odyssey", observed_at: "2026-08-27T06:01:00Z", fetch_impl: async () => ({ ok: true, json: async () => ({}) }), token: "SECRET_TEST_TOKEN", api_base: "https://attacker.example" }),
+    (error) => error.code === "GITHUB_TOKEN_DESTINATION_FORBIDDEN"
+  );
+
+  const headSha = "b".repeat(40);
+  const skippedOnlyFetch = async (url) => {
+    if (url.endsWith("/repos/klineodyssey/kline-odyssey")) return { ok: true, status: 200, json: async () => ({ default_branch: "main" }) };
+    if (url.endsWith("/commits/main")) return { ok: true, status: 200, json: async () => ({ sha: "a".repeat(40), commit: { committer: { date: "2026-08-27T06:00:00Z" } } }) };
+    if (url.endsWith("/pulls/170")) return { ok: true, status: 200, json: async () => ({ state: "open", draft: true, head: { sha: headSha } }) };
+    if (url.endsWith(`/compare/main...${headSha}`)) return { ok: true, status: 200, json: async () => ({ ahead_by: 1, behind_by: 0 }) };
+    if (url.endsWith(`/commits/${headSha}/check-runs`)) return { ok: true, status: 200, json: async () => ({ check_runs: [{ name: "test", status: "completed", conclusion: "skipped" }] }) };
+    return { ok: false, status: 404, json: async () => ({}) };
+  };
+  const skippedOnly = await readLatestRepositorySnapshot({ repository: "klineodyssey/kline-odyssey", active_task_pr: 170, observed_at: "2026-08-27T06:01:00Z", fetch_impl: skippedOnlyFetch, api_base: "https://api.github.test" });
+  assert.equal(skippedOnly.active_task_pr.ci_status, "MISSING_REQUIRED_CHECK");
 });
 
 test("Exact-head CI gate rejects stale heads behind main failures and incomplete checks", () => {
@@ -3262,19 +3286,24 @@ test("Exact-head CI gate rejects stale heads behind main failures and incomplete
 
 test("Read-plan-persist Company invocation uses fresh GitHub main and writes only local durable evidence", async () => {
   const mainSha = AUTONOMOUS_MAIN_SHA;
+  const headSha = "b".repeat(40);
   const fetch_impl = async (url, options) => {
     assert.equal(options.method, "GET");
     if (url.endsWith("/repos/klineodyssey/kline-odyssey")) return { ok: true, status: 200, json: async () => ({ default_branch: "main" }) };
     if (url.endsWith("/commits/main")) return { ok: true, status: 200, json: async () => ({ sha: mainSha, commit: { committer: { date: "2026-08-27T06:00:00Z" } } }) };
+    if (url.endsWith("/pulls/170")) return { ok: true, status: 200, json: async () => ({ state: "open", draft: true, head: { sha: headSha } }) };
+    if (url.endsWith(`/compare/main...${headSha}`)) return { ok: true, status: 200, json: async () => ({ ahead_by: 12, behind_by: 0 }) };
+    if (url.endsWith(`/commits/${headSha}/check-runs`)) return { ok: true, status: 200, json: async () => ({ check_runs: [{ name: "test", status: "completed", conclusion: "success" }] }) };
     return { ok: false, status: 404, json: async () => ({}) };
   };
   const store = new MemoryUniverseStore();
   const company = { company_id: "KAIOS_AI_COMPANY" };
   const result = await runAutonomousCompanyReadOnlyCycle({
-    repository_request: { repository: "klineodyssey/kline-odyssey", observed_at: "2026-08-27T06:01:00Z", fetch_impl, api_base: "https://api.github.test" },
+    repository_request: { repository: "klineodyssey/kline-odyssey", active_task_pr: 170, observed_at: "2026-08-27T06:01:00Z", fetch_impl, api_base: "https://api.github.test" },
     cycle_input: {
       cycle_id: "COMPANY-CYCLE-LIVE-READ-001",
       expected_main_sha: mainSha,
+      expected_head_sha: headSha,
       manager: autonomousManager,
       workers: [autonomousManager, autonomousWorker],
       work_queue: [autonomousTask],
@@ -3286,10 +3315,42 @@ test("Read-plan-persist Company invocation uses fresh GitHub main and writes onl
   });
   assert.equal(result.status, "READ_PLAN_PERSIST_CYCLE_COMPLETED");
   assert.equal(result.repository_snapshot.main_sha, mainSha);
+  assert.equal(result.pre_persistence_snapshot.main_sha, mainSha);
+  assert.equal(result.ci_gate.status, "EXACT_HEAD_CI_PASS");
   assert.equal(result.cycle_result.status, "ASSIGNMENT_CANDIDATE_READY");
   assert.equal(result.persistence.status, "CYCLE_EVENTS_PERSISTED");
   assert.equal(result.authority.local_company_history_write, true);
   for (const field of ["github_write", "claim_write", "worker_wake", "reviewer_wake", "signer", "chain_write"]) assert.equal(result.authority[field], false);
+});
+
+test("Read-plan-persist Company invocation refuses persistence when main moves after planning", async () => {
+  const firstMain = AUTONOMOUS_MAIN_SHA;
+  const movedMain = "e".repeat(40);
+  const headSha = "b".repeat(40);
+  let mainReads = 0;
+  const fetch_impl = async (url) => {
+    if (url.endsWith("/repos/klineodyssey/kline-odyssey")) return { ok: true, status: 200, json: async () => ({ default_branch: "main" }) };
+    if (url.endsWith("/commits/main")) {
+      mainReads += 1;
+      return { ok: true, status: 200, json: async () => ({ sha: mainReads === 1 ? firstMain : movedMain, commit: { committer: { date: "2026-08-27T06:00:00Z" } } }) };
+    }
+    if (url.endsWith("/pulls/170")) return { ok: true, status: 200, json: async () => ({ state: "open", draft: true, head: { sha: headSha } }) };
+    if (url.endsWith(`/compare/main...${headSha}`)) return { ok: true, status: 200, json: async () => ({ ahead_by: 12, behind_by: 0 }) };
+    if (url.endsWith(`/commits/${headSha}/check-runs`)) return { ok: true, status: 200, json: async () => ({ check_runs: [{ name: "test", status: "completed", conclusion: "success" }] }) };
+    return { ok: false, status: 404, json: async () => ({}) };
+  };
+  const store = new MemoryUniverseStore();
+  const company = { company_id: "KAIOS_AI_COMPANY" };
+  const result = await runAutonomousCompanyReadOnlyCycle({
+    repository_request: { repository: "klineodyssey/kline-odyssey", active_task_pr: 170, observed_at: "2026-08-27T06:01:00Z", fetch_impl, api_base: "https://api.github.test" },
+    cycle_input: { cycle_id: "COMPANY-CYCLE-MOVING-MAIN", expected_main_sha: firstMain, expected_head_sha: headSha, manager: autonomousManager, workers: [autonomousManager, autonomousWorker], work_queue: [autonomousTask], review_queue: [], previous_cycle_ids: [] },
+    store,
+    company
+  });
+  assert.equal(result.status, "HOLD_REPOSITORY_MOVED_BEFORE_PERSISTENCE");
+  assert.equal(result.persistence, null);
+  assert.equal((await store.history(company.company_id, "COMPANY")).length, 0);
+  assert.equal(result.authority.local_company_history_write, false);
 });
 
 test("Local SQLite Claim simulator enforces unique custody CAS fencing and idempotency without becoming authority", async () => {

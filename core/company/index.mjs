@@ -2262,11 +2262,18 @@ export async function persistAutonomousCompanyCycle({ store, company, cycle_resu
   }
 
   let expectedSequence = 1;
+  const reservedPayloadFields = Object.freeze(["cycle_id", "planner_event_id", "sequence", "cycle_status", "external_effect"]);
   const operations = cycle_result.events.map((event) => {
     invariant(event.cycle_id === cycle_result.cycle_id, "CYCLE_EVENT_ID_MISMATCH", "Every persisted event must belong to the planned cycle");
     invariant(event.sequence === expectedSequence, "CYCLE_EVENT_SEQUENCE_INVALID", "Company cycle events must be contiguous and ordered");
     invariant(AUTONOMOUS_COMPANY_DURABLE_EVENT_TYPES.includes(event.event_type), "UNSUPPORTED_DURABLE_COMPANY_EVENT", `Unsupported durable Company event: ${event.event_type}`);
     invariant(event.append_only === true && event.external_effect === false, "DURABLE_EVENT_SAFETY_BOUNDARY", "Persisted Company events must be append-only and side-effect-free");
+    invariant(event.payload && typeof event.payload === "object" && !Array.isArray(event.payload), "DURABLE_EVENT_PAYLOAD_REQUIRED", "Persisted Company events require an object payload");
+    invariant(
+      reservedPayloadFields.every((field) => !Object.prototype.hasOwnProperty.call(event.payload, field)),
+      "DURABLE_EVENT_RESERVED_FIELD_OVERRIDE",
+      "Planner payload cannot override durable Company event control fields"
+    );
     expectedSequence += 1;
     return {
       event_id: event.event_id,
@@ -2278,12 +2285,12 @@ export async function persistAutonomousCompanyCycle({ store, company, cycle_resu
       actor_id: event.actor_id,
       timestamp: event.occurred_at,
       payload: {
+        ...event.payload,
         cycle_id: cycle_result.cycle_id,
         planner_event_id: event.event_id,
         sequence: event.sequence,
         cycle_status: cycle_result.status,
-        external_effect: false,
-        ...event.payload
+        external_effect: false
       }
     };
   });
@@ -2575,6 +2582,25 @@ export async function createLocalSqliteClaimRegistrySimulator({ database_path = 
   return Object.freeze(api);
 }
 
+const CANONICAL_GITHUB_API_ORIGIN = "https://api.github.com";
+
+function normalizeGitHubApiBase(apiBase, token) {
+  invariant(typeof apiBase === "string" && apiBase.length > 0, "GITHUB_API_BASE_INVALID", "GitHub API base is required");
+  let parsed;
+  try {
+    parsed = new URL(apiBase);
+  } catch {
+    invariant(false, "GITHUB_API_BASE_INVALID", "GitHub API base must be an absolute HTTPS URL");
+  }
+  invariant(parsed.protocol === "https:", "GITHUB_API_BASE_INSECURE", "GitHub API reads require HTTPS");
+  invariant(!parsed.username && !parsed.password && !parsed.search && !parsed.hash, "GITHUB_API_BASE_INVALID", "GitHub API base cannot contain credentials, query or fragment");
+  invariant(parsed.pathname === "/" || parsed.pathname === "", "GITHUB_API_BASE_PATH_FORBIDDEN", "GitHub API base cannot contain a path");
+  if (token) {
+    invariant(parsed.origin === CANONICAL_GITHUB_API_ORIGIN, "GITHUB_TOKEN_DESTINATION_FORBIDDEN", "GitHub bearer credentials may only be sent to the canonical GitHub API origin");
+  }
+  return parsed.origin;
+}
+
 function githubSnapshotHeaders(token) {
   return Object.freeze({
     Accept: "application/vnd.github+json",
@@ -2583,10 +2609,17 @@ function githubSnapshotHeaders(token) {
   });
 }
 
-function aggregateGitHubChecks(checkRuns) {
+function aggregateGitHubChecks(checkRuns, requiredCheckNames) {
   if (!Array.isArray(checkRuns) || checkRuns.length === 0) return "NO_CHECKS";
-  if (checkRuns.some((run) => run.status !== "completed" || !run.conclusion)) return "PENDING";
-  if (checkRuns.some((run) => ["failure", "timed_out", "cancelled", "action_required", "startup_failure"].includes(run.conclusion))) return "FAIL";
+  invariant(Array.isArray(requiredCheckNames) && requiredCheckNames.length > 0, "GITHUB_REQUIRED_CHECKS_MISSING", "Exact-head CI observation requires named check contexts");
+  const failureConclusions = ["failure", "timed_out", "cancelled", "action_required", "startup_failure"];
+  for (const requiredName of requiredCheckNames) {
+    const matches = checkRuns.filter((run) => run?.name === requiredName);
+    if (matches.length === 0) return "MISSING_REQUIRED_CHECK";
+    if (matches.some((run) => failureConclusions.includes(run.conclusion))) return "FAIL";
+    if (matches.some((run) => run.status !== "completed" || !run.conclusion)) return "PENDING";
+    if (!matches.some((run) => run.conclusion === "success")) return "MISSING_REQUIRED_CHECK";
+  }
   return "PASS";
 }
 
@@ -2601,16 +2634,19 @@ export async function readLatestRepositorySnapshot({
   observed_at,
   fetch_impl = globalThis.fetch,
   token = null,
-  api_base = "https://api.github.com"
+  api_base = CANONICAL_GITHUB_API_ORIGIN,
+  required_check_names = ["test"]
 }) {
   invariant(/^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/.test(repository ?? ""), "INVALID_GITHUB_REPOSITORY", "Repository must use owner/name form");
   invariant(typeof observed_at === "string" && !Number.isNaN(Date.parse(observed_at)), "INVALID_REPOSITORY_OBSERVATION_TIME", "observed_at must be an ISO timestamp");
   invariant(typeof fetch_impl === "function", "GITHUB_READ_ADAPTER_REQUIRED", "A read-only fetch adapter is required");
   invariant(active_task_pr === null || (Number.isInteger(active_task_pr) && active_task_pr > 0), "INVALID_ACTIVE_TASK_PR", "active_task_pr must be a positive integer or null");
+  invariant(Array.isArray(required_check_names) && required_check_names.length > 0 && required_check_names.every((name) => typeof name === "string" && name.trim()), "GITHUB_REQUIRED_CHECKS_INVALID", "required_check_names must contain one or more named check contexts");
 
+  const normalizedApiBase = normalizeGitHubApiBase(api_base, token);
   const headers = githubSnapshotHeaders(token);
   const read = async (path) => {
-    const response = await fetch_impl(`${api_base}/repos/${repository}${path}`, { method: "GET", headers });
+    const response = await fetch_impl(`${normalizedApiBase}/repos/${repository}${path}`, { method: "GET", headers });
     invariant(response?.ok === true, "GITHUB_READ_FAILED", `GitHub read failed for ${path}: HTTP ${response?.status ?? "UNKNOWN"}`);
     return response.json();
   };
@@ -2636,8 +2672,9 @@ export async function readLatestRepositorySnapshot({
       draft: pr.draft === true,
       ahead_main: comparison.ahead_by,
       behind_main: comparison.behind_by,
-      ci_status: aggregateGitHubChecks(checks.check_runs),
-      check_count: Array.isArray(checks.check_runs) ? checks.check_runs.length : 0
+      ci_status: aggregateGitHubChecks(checks.check_runs, required_check_names),
+      check_count: Array.isArray(checks.check_runs) ? checks.check_runs.length : 0,
+      required_check_names: Object.freeze([...required_check_names])
     });
   }
 
@@ -2683,15 +2720,43 @@ export async function runAutonomousCompanyReadOnlyCycle({
   invariant(repository_request && typeof repository_request === "object", "REPOSITORY_REQUEST_REQUIRED", "Safe Company invocation requires a repository observation request");
   invariant(cycle_input && typeof cycle_input === "object", "COMPANY_CYCLE_INPUT_REQUIRED", "Safe Company invocation requires planner input");
   const repositorySnapshot = await readLatestRepositorySnapshot(repository_request);
+  const ciGate = evaluateExactHeadCiGate({ repository_snapshot: repositorySnapshot, expected_head_sha: cycle_input.expected_head_sha ?? null });
+  if (ciGate.status !== "EXACT_HEAD_CI_PASS") {
+    return Object.freeze({
+      status: "HOLD_EXACT_HEAD_CI_GATE",
+      repository_snapshot: repositorySnapshot,
+      ci_gate: ciGate,
+      cycle_result: null,
+      persistence: null,
+      authority: Object.freeze({ local_company_history_write: false, github_read: true, github_write: false, claim_write: false, worker_wake: false, reviewer_wake: false, signer: false, chain_write: false })
+    });
+  }
   const cycleResult = runAutonomousCompanyCycle({
     ...cycle_input,
     observed_at: repositorySnapshot.observed_at,
     current_main_sha: repositorySnapshot.main_sha
   });
+  const prePersistenceSnapshot = await readLatestRepositorySnapshot(repository_request);
+  const prePersistenceGate = evaluateExactHeadCiGate({ repository_snapshot: prePersistenceSnapshot, expected_head_sha: cycle_input.expected_head_sha ?? null });
+  const repositoryMoved = prePersistenceSnapshot.main_sha !== repositorySnapshot.main_sha
+    || prePersistenceSnapshot.active_task_pr?.head_sha !== repositorySnapshot.active_task_pr?.head_sha;
+  if (repositoryMoved || prePersistenceGate.status !== "EXACT_HEAD_CI_PASS") {
+    return Object.freeze({
+      status: "HOLD_REPOSITORY_MOVED_BEFORE_PERSISTENCE",
+      repository_snapshot: repositorySnapshot,
+      pre_persistence_snapshot: prePersistenceSnapshot,
+      ci_gate: prePersistenceGate,
+      cycle_result: cycleResult,
+      persistence: null,
+      authority: Object.freeze({ local_company_history_write: false, github_read: true, github_write: false, claim_write: false, worker_wake: false, reviewer_wake: false, signer: false, chain_write: false })
+    });
+  }
   const persistence = await persistAutonomousCompanyCycle({ store, company, cycle_result: cycleResult });
   return Object.freeze({
     status: "READ_PLAN_PERSIST_CYCLE_COMPLETED",
     repository_snapshot: repositorySnapshot,
+    pre_persistence_snapshot: prePersistenceSnapshot,
+    ci_gate: prePersistenceGate,
     cycle_result: cycleResult,
     persistence,
     authority: Object.freeze({ local_company_history_write: true, github_read: true, github_write: false, claim_write: false, worker_wake: false, reviewer_wake: false, signer: false, chain_write: false })
