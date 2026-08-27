@@ -1,7 +1,7 @@
 # KAIOS Civilization Circulatory Runtime — Multi-Worker Handoff Handbook
 
 STATUS: DESIGN_AND_HANDOFF_AUTHORITY / NOT_DEPLOYED
-VERSION: V1.3
+VERSION: V1.4
 DATE: 2026-08-27 Asia/Taipei
 PURPOSE: durable handoff source so Human, AI, Codex, ChatGPT pages, workers, reviewers and future digital lives can resume work without reconstructing decisions from chat history.
 
@@ -353,7 +353,7 @@ Handoffs bind a checkpoint and target worker. The prior worker cannot resume a t
 
 ### 13.6 Life projections
 
-- 衡曜 / `LIFE-CODEX-GM-0001`: active manager/CEO/CFO projection; coding, testing, review, observation and paper capabilities; no real trader or treasury-operator grant.
+- 衡曜 / `LIFE-CODEX-GM-0001`: active manager/CEO/CFO projection. The Human directive dated 2026-08-27 grants company execution, KGEN/KAIOS/GPU trading, chain-56 signing and assigned-budget use within existing explicit limits. This authorization is not unlimited withdrawal, approval, transfer or governance authority. Technical execution remains fail-closed until the bound signer, fixed company capital account, verified inventory, allowed market/route, settlement adapter, beneficiary, gas/risk caps and receipt reconciliation are all live and freshly verified.
 - Digital Ant / `DIGITAL_ANT_0001`: active 12345 worker projection; current heartbeat entitlement remains exactly `1 KGEN / HOUR`; this runtime does not create a KAIOS payroll claim.
 - 夢婆 / K4168: inactive role template only; `BIRTH_AND_LIFE_ID_REQUIRED`.
 - Sol / 曜冊 / K1111: inactive role template only; `LIFE_ID_AND_REGISTRATION_REQUIRED`.
@@ -364,8 +364,8 @@ Templates are not births, workers, wallets, jobs or authority grants.
 
 1. `DEPLOYMENT_BLOCKED`: freeze the immutable catalyst-bank production address and KUFO `halfLifeSeconds`; retain immediate-delivery and 130-day freshness semantics.
 2. `OPEN_REVIEW`: specify/authenticate any future K1852 contribution-proof route against 18911/511111 without modifying historical V7.5.2 facts; the tax-credit route remains disabled.
-3. `HUMAN_AUTHORIZATION_REQUIRED`: any real market adapter, signer broker, treasury funding or real-trade Policy Box.
-4. `NOT_STARTED`: production receipt reconciliation and realized-PnL accounting; cannot be truthfully completed without an authorized execution rail.
+3. `IMPLEMENTED_REVIEW_CANDIDATE`: real-market adapters, signer/budget readiness checks, settlement receipts and realized-PnL accounting now have Draft candidates, but no fixed funded trading capital, verified GPU inventory or production settlement connector is bound.
+4. `HUMAN_OR_GOVERNANCE_FREEZE_REQUIRED`: catalyst bank, KUFO half-life, KAIOS liquidity policy, company receivable/escrow, K4168 reservoir and any production Mainnet release.
 
 ## 14. Required review checks before deployment discussion
 
@@ -459,4 +459,65 @@ MAINNET_TRANSACTION_SENT=NO
 PRIVATE_KEY_EXPOSED=NO
 ```
 
-END OF HANDBOOK V1.3
+## 19. Master company and K11520 GPU execution checkpoint
+
+Observed main at this checkpoint: `5d539d237bf948011d234203e451aa980a7b7ce8`.
+
+Human-assigned company universe address and exchange coordinate:
+
+- `COMPANY_REGISTERED_UNIVERSE_ADDRESS = 0.00011520`
+- `COMPANY_K_COORDINATE = K11520`
+- `COMPANY_LOCATION_NAME = 花果山交易所`
+- `0.00011520` is both the Human-defined KGEN universe price coordinate and the company/exchange address.
+- It is not an automatic native matched-trade CT. `nativeMatchedTradeCT` remains the latest valid matched trade or `null`.
+
+Human-frozen GPU pilot route:
+
+```text
+K12345 / 0.00012345
+-> verified wish, heartbeat/breathing and fortune entitlement
+-> verified NVIDIA supplier/model/serial/acquisition evidence
+-> ownership and cargo receipt
+-> 18,778.422548555 km reference logistics route
+-> K11520 / 0.00011520 bonded warehouse
+-> GPU/KGEN and GPU/KAIOS listing candidates
+-> matched trade
+-> settlement receipt
+-> company revenue, cost, payroll and realized-profit accounting
+```
+
+No real GPU inventory, funded capital account or production 11520 settlement connector is currently bound, so real-trade readiness remains false and no trade may be reported.
+
+### 19.1 Sixteen-workstream status matrix
+
+1. `P0_CURRENT_GENESIS_PHASE2_AND_27_PR_LINEAGE_RECONCILIATION` — PR #187, exact head `c16e630a27b152e6cdcf5060b4371b999de34608`, implemented candidate / CI PASS / Draft.
+2. `P0_CURSOR_DEPARTURE_R2_CLAIM_CLOSEOUT_AND_REGISTRY_CLEANUP` — PR #176, exact head `8ff6ee1770837e472811eea73d2889e80e9f5387`, fail-closed departure and expired-claim reconciliation / CI PASS / Draft.
+3. `P0_DISTINCT_REVIEWER_CAPABILITY` — PR #171 records `NO_ELIGIBLE_DISTINCT_T2_REVIEWER`; Sol/曜冊 PR #183 remains T1 onboarding hold. Reviewer capacity is still zero and must not be faked.
+4. `P0_SYNC_CORRECT_AND_REVIEW_PR169_11520_NATIVE_MARKET` — PR #169, exact head `b600e59bd0a0b7bbf386886630a94a26df7fde0a`, dual-role 0.00011520 Canon plus authenticated native matching / CI PASS / Draft.
+5. `P0_NVIDIA_GPU_11520_MARKET_PILOT_AND_REAL_TRADE_READINESS` — PR #178, exact head `1e659cd4af3d299dc2bb3aa01a580dd6e2db4524`, paper pilot / fail-closed real-readiness verifier / CI PASS / Draft.
+6. `P1_KGEN_EXTERNAL_EXCHANGE_BRAND_AND_TOKEN_METADATA` — PR #179, exact head `9f6dda56131ae9ed11f74d2af757cc5fc0356a29`, current owner/bank-wallet/supply reconciliation and listing package / CI PASS / external submissions not performed.
+7. `P1_KAIOS_MARKET_GENESIS_PAIR_AND_LIQUIDITY` — PR #180, exact head `f050395ddd162cc643b078f021179c71016ff4f7`, pair/liquidity readiness only / CI PASS / pair not created.
+8. `P1_11520_UNIVERSAL_LISTING_REGISTRY` — PR #181, exact head `24608b43375c5a246ef414fd1d70862c8f0ce83e`, universal listing/physical inventory evidence / CI PASS / Draft.
+9. `P1_11520_WAREHOUSE_ESCROW_SETTLEMENT_RECEIPT_ACCOUNTING` — PR #181 plus unsigned-payment PR #186; model/readiness implemented, custody and production execution unbound.
+10. `P1_AUTONOMOUS_CLOCK_IN_WORKQUEUE_HANDOFF_AND_REPAIR_LOOP` — PR #170, exact head `7344450a21c11f26a4722ec18c15cc6e430569d2`, local durable cycle/read-only repo observer/repair loop / CI PASS; worker wake, background scheduler and distinct-review trigger remain disconnected.
+11. `P1_CUSTOMER_GATEWAY_QUOTATION_PROJECT_DISPATCH_AND_DELIVERY_DASHBOARD` — PR #182, exact head `9ca68358d5a93c881c1be9e1ad92c8203aca5dec`, deterministic Option-B project lifecycle / CI PASS / receivable and escrow unbound.
+12. `P1_18888_8888_PAYROLL_AND_COMPANY_REVENUE_SEPARATION` — PR #154 exact head `c2ecfa03f5b18fefd15f020377385fe12a78067a` plus PR #186. Live scheduled 88 KAIOS payroll is unclaimed; further top-up/payment remains frozen.
+13. `P1_LIFE_GENESIS_WORKER_EMPLOYMENT_TRUST_AND_PAYROLL_ELIGIBILITY` — PR #165 exact head `0645524aece309d0ed3b41b771b422612b599e94` and PR #183. State separation is implemented; Xuanyao and Sol are not auto-promoted, born, employed or paid.
+14. `P2_18911_KUFO_AND_KSHIP_SUCCESSOR_SYSTEMS` — PR #158 exact head `0ea0bc02aa6f485fba825e6e7b54d1a683a8a626`, complete local/fork review candidate / exact-head CI PASS / deployment blocked by unfrozen catalyst bank and half-life seconds.
+15. `P2_K4168_NAIHE_RESERVOIR_PUBLIC_GOOD_AND_MENGPO_SOUP` — PR #172 exact head `ddcfd01d18eff5438c827b2d26d0960b3e31aee0`, schema/simulator 31/31 and exact-head CI PASS / reservoir and Mengpo not deployed.
+16. `P2_UNIVERSE_MAP_BRAND_MOBILE_FRONTEND_AND_WEBSITE_INTEGRATION` — brand PR #162, address-manifest PR #184 and mobile PR #185 exact head `b54b26223e9a9d2566b5d02b205747fa28c1d72a`. Mobile V4.0.2 passed 390px browser QA after excluding Node-only signer modules from the public dependency graph.
+
+### 19.2 Current release order and blockers
+
+The next integration order is:
+
+1. obtain a genuinely distinct T2 reviewer or keep review-dependent PRs on HOLD;
+2. reconcile overlapping 11520 CURRENT files in PRs #169, #181 and #185 without force push;
+3. independently review PR #178 inventory/readiness gates before any real GPU acquisition or trade;
+4. freeze a fixed company capital account, budget caps, settlement connector and beneficiary before enabling real trade;
+5. create no KAIOS pair or liquidity transaction until its separate policy, asset amount and signer authorization are frozen;
+6. keep 18911, K4168 and brand candidates undeployed/unpublished until their explicit blockers are resolved.
+
+Safety checkpoint: `NO_MERGE / NO_DEPLOYMENT / NO_PAYMENT / NO_REAL_TRADE / NO_MAINNET_TRANSACTION / PRIVATE_KEY_EXPOSED=NO`.
+
+END OF HANDBOOK V1.4
