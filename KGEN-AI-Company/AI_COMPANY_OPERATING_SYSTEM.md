@@ -44,7 +44,9 @@ The candidate is deterministic and separates planning from effects. It emits app
 
 `runAutonomousCompanyReadOnlyCycle()` composes the eye, planner and durable Company history into one invocation-driven cycle. `evaluateExactHeadCiGate()` separately requires the expected head, open PR, `behind_main = 0` and completed passing checks. Neither function can claim a task, wake a worker, wake a reviewer or mutate GitHub.
 
-The cycle still cannot persist a Claim, start an employee, mutate GitHub, merge, push `main`, pay, access a private key, deploy or send a transaction. Those connectors remain independently gated.
+`createLocalSqliteClaimRegistrySimulator()` implements the approved migration step for a one-host SQLite state-machine test only. It uses transactional unique active locks, compare-and-swap `record_version`, monotonic fencing tokens, review custody, same-worker repair lineage, reconciled close/release and an append-only operation ledger. Its public authority marker is always `LOCAL_SQLITE_SIMULATOR_NOT_AUTHORITY`; it cannot dispatch or wake a worker and is not the selected shared SQL Claim Registry service.
+
+The cycle still cannot persist a shared authoritative Claim, start an employee, mutate GitHub, merge, push `main`, pay, access a private key, deploy or send a transaction. Those connectors remain independently gated.
 
 Current connection state:
 
@@ -53,7 +55,8 @@ Current connection state:
 - durable Company cycle memory: `LOCAL_CANDIDATE_IMPLEMENTED_EXISTING_STORE`
 - latest repository self-discovery: `READ_ONLY_CANDIDATE_IMPLEMENTED`
 - exact-head CI observer: `READ_ONLY_ON_INVOCATION_IMPLEMENTED`
-- durable atomic Claim: `NOT_CONNECTED`
+- local SQLite Claim state-machine simulator: `IMPLEMENTED_SANDBOX_ONLY`
+- shared transactional Claim authority: `NOT_CONNECTED`
 - employee wake: `EXISTING_CURSOR_WORKFLOW_PRESENT_NOT_CONNECTED_TO_CYCLE`
 - independent review trigger: `NOT_CONNECTED`
 - background scheduler: `NOT_RUNNING`

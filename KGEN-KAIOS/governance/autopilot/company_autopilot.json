@@ -1,7 +1,7 @@
 {
   "metadata": {
     "architecture_id": "PRIMEFORGE-COMPANY-AUTOPILOT-ARCH-001",
-    "version": "0.6.0-candidate",
+    "version": "0.7.0-candidate",
     "revision": "2026-08-27.1",
     "status": "ACTIVE_OPERATOR_PROTOCOL_NO_BACKGROUND_SERVICE",
     "last_updated": "2026-08-27",
@@ -57,6 +57,14 @@
         "external_effects": false,
         "status": "IMPLEMENTED_INVOCATION_DRIVEN_CANDIDATE"
       },
+      "local_sqlite_claim_simulator": {
+        "implementation": "core/company/index.mjs#createLocalSqliteClaimRegistrySimulator",
+        "storage": "NODE_SQLITE_SINGLE_HOST_SANDBOX",
+        "properties": ["TRANSACTION", "UNIQUE_ACTIVE_LOCKS", "COMPARE_AND_SWAP", "FENCING_TOKEN", "LEASE", "REVIEW_CUSTODY", "REPAIR_LINEAGE", "APPEND_ONLY_AUDIT", "RESTART_PERSISTENCE"],
+        "production_claim_authority": false,
+        "automatic_dispatch": false,
+        "status": "IMPLEMENTED_LOCAL_SIMULATOR_NOT_AUTHORITY"
+      },
       "background_scheduler": false,
       "claim_persistence": false,
       "worker_wake": false,
@@ -68,7 +76,6 @@
         "ATOMIC_CLAIM_LEASE_CONNECTOR",
         "AUTHORIZED_WORKER_WAKE_ADAPTER",
         "INDEPENDENT_REVIEW_TRIGGER",
-        "EXACT_HEAD_CI_OBSERVER",
         "BACKGROUND_INVOCATION_SCHEDULER"
       ]
     }

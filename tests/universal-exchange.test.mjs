@@ -1,6 +1,8 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs/promises";
+import os from "node:os";
+import path from "node:path";
 import { createRequire } from "node:module";
 import {
   MemoryUniverseStore, createUniverseRuntime, resolveSpeciesCode, upgradeAppVersion,
@@ -104,7 +106,8 @@ import {
   AUTONOMOUS_COMPANY_FORBIDDEN_ACTIONS, AUTONOMOUS_COMPANY_DURABLE_EVENT_TYPES,
   persistAutonomousCompanyCycle, restoreAutonomousCompanyCycleState,
   readLatestRepositorySnapshot, evaluateExactHeadCiGate,
-  runAutonomousCompanyReadOnlyCycle
+  runAutonomousCompanyReadOnlyCycle, createLocalSqliteClaimRegistrySimulator,
+  LOCAL_CLAIM_SIMULATOR_ACTIVE_STATES
 } from "../core/index.mjs";
 import { verifyDigitalAntWalletBinding, verifyDigitalLifeWalletBinding, CODEX_GM_ENV } from "../core/security/wallet-binding.mjs";
 import { TEMPLE_HEART_READ_ABI, TEMPLE_HEART_DRY_RUN_ABI, TEMPLE_HEART_VERIFIED_ACTIONS, readCoreHeartEvents } from "../core/integrations/temple-heart-12345.mjs";
@@ -3287,4 +3290,154 @@ test("Read-plan-persist Company invocation uses fresh GitHub main and writes onl
   assert.equal(result.persistence.status, "CYCLE_EVENTS_PERSISTED");
   assert.equal(result.authority.local_company_history_write, true);
   for (const field of ["github_write", "claim_write", "worker_wake", "reviewer_wake", "signer", "chain_write"]) assert.equal(result.authority[field], false);
+});
+
+test("Local SQLite Claim simulator enforces unique custody CAS fencing and idempotency without becoming authority", async () => {
+  assert.deepEqual(LOCAL_CLAIM_SIMULATOR_ACTIVE_STATES, ["ACTIVE", "EXECUTING", "REVIEW", "REPAIR", "RECOVERY_PENDING"]);
+  const simulator = await createLocalSqliteClaimRegistrySimulator();
+  const acquire = {
+    operation_id: "OP-CLAIM-001-ACQUIRE",
+    claim_id: "CLAIM-LOCAL-001",
+    task_id: "TASK-LOCAL-001",
+    clone_id: "CLONE-CODEX-001",
+    worker_id: "worker-local-01",
+    session_id: "session-local-01",
+    branch: "codex/task-local-001",
+    base_sha: "a".repeat(40),
+    observed_at: "2026-08-27T07:00:00Z",
+    lease_expiry: "2026-08-27T07:30:00Z"
+  };
+  try {
+    const claimed = simulator.acquire(acquire);
+    assert.equal(claimed.status, "ACTIVE");
+    assert.equal(claimed.record_version, 1);
+    assert.equal(claimed.fencing_token, 1);
+    assert.equal(claimed.production_claim_authority, false);
+    assert.equal(simulator.authority.status, "LOCAL_SQLITE_SIMULATOR_NOT_AUTHORITY");
+    assert.equal(simulator.acquire(acquire).operation_status, "IDEMPOTENT_NOOP");
+
+    assert.throws(() => simulator.acquire({
+      ...acquire,
+      operation_id: "OP-CLAIM-002-CONFLICT",
+      claim_id: "CLAIM-LOCAL-002",
+      clone_id: "CLONE-CODEX-002",
+      session_id: "session-local-02"
+    }), (error) => error.code === "CLAIM_ACTIVE_UNIQUE_CONFLICT");
+
+    const recovered = simulator.recover({
+      operation_id: "OP-CLAIM-001-RECOVER",
+      claim_id: acquire.claim_id,
+      expected_record_version: 1,
+      expected_fencing_token: 1,
+      new_session_id: "session-local-01-recovered",
+      observed_at: "2026-08-27T07:31:00Z",
+      lease_expiry: "2026-08-27T08:00:00Z"
+    });
+    assert.equal(recovered.record_version, 2);
+    assert.equal(recovered.fencing_token, 2);
+    assert.equal(recovered.session_id, "session-local-01-recovered");
+    assert.throws(() => simulator.heartbeat({
+      operation_id: "OP-CLAIM-001-STALE-HEARTBEAT",
+      claim_id: acquire.claim_id,
+      expected_record_version: 2,
+      expected_fencing_token: 1,
+      observed_at: "2026-08-27T07:32:00Z",
+      lease_expiry: "2026-08-27T08:01:00Z"
+    }), (error) => error.code === "STALE_SESSION_FENCED");
+  } finally {
+    simulator.closeDatabase();
+  }
+});
+
+test("Local SQLite Claim simulator preserves review custody repair lineage and reconciled close-release", async () => {
+  const directory = await fs.mkdtemp(path.join(os.tmpdir(), "kaios-claim-simulator-"));
+  const databasePath = path.join(directory, "claims.sqlite");
+  let simulator;
+  try {
+    simulator = await createLocalSqliteClaimRegistrySimulator({ database_path: databasePath });
+    const acquired = simulator.acquire({
+      operation_id: "OP-LIFECYCLE-ACQUIRE",
+      claim_id: "CLAIM-LIFECYCLE-001",
+      task_id: "TASK-LIFECYCLE-001",
+      clone_id: "CLONE-LIFECYCLE-001",
+      worker_id: "worker-lifecycle-01",
+      session_id: "session-lifecycle-01",
+      branch: "codex/task-lifecycle-001",
+      base_sha: "b".repeat(40),
+      observed_at: "2026-08-27T08:00:00Z",
+      lease_expiry: "2026-08-27T08:30:00Z"
+    });
+    const executing = simulator.heartbeat({
+      operation_id: "OP-LIFECYCLE-HEARTBEAT",
+      claim_id: acquired.claim_id,
+      expected_record_version: acquired.record_version,
+      expected_fencing_token: acquired.fencing_token,
+      observed_at: "2026-08-27T08:10:00Z",
+      lease_expiry: "2026-08-27T08:40:00Z"
+    });
+    const review = simulator.submitReview({
+      operation_id: "OP-LIFECYCLE-REVIEW-1",
+      claim_id: acquired.claim_id,
+      expected_record_version: executing.record_version,
+      expected_fencing_token: executing.fencing_token,
+      review_owner_id: "reviewer-lifecycle-01",
+      head_sha: "c".repeat(40),
+      observed_at: "2026-08-27T08:20:00Z"
+    });
+    assert.equal(review.status, "REVIEW");
+    assert.equal(review.worker_id, acquired.worker_id);
+    const repair = simulator.repair({
+      operation_id: "OP-LIFECYCLE-REPAIR",
+      claim_id: acquired.claim_id,
+      expected_record_version: review.record_version,
+      expected_fencing_token: review.fencing_token,
+      observed_at: "2026-08-27T09:00:00Z",
+      lease_expiry: "2026-08-27T09:30:00Z"
+    });
+    assert.equal(repair.status, "REPAIR");
+    assert.equal(repair.worker_id, acquired.worker_id);
+    assert.equal(repair.repair_cycle, 1);
+    const secondReview = simulator.submitReview({
+      operation_id: "OP-LIFECYCLE-REVIEW-2",
+      claim_id: acquired.claim_id,
+      expected_record_version: repair.record_version,
+      expected_fencing_token: repair.fencing_token,
+      review_owner_id: "reviewer-lifecycle-01",
+      head_sha: "d".repeat(40),
+      observed_at: "2026-08-27T09:15:00Z"
+    });
+    assert.throws(() => simulator.release({
+      operation_id: "OP-LIFECYCLE-EARLY-RELEASE",
+      claim_id: acquired.claim_id,
+      expected_record_version: secondReview.record_version,
+      expected_fencing_token: secondReview.fencing_token,
+      observed_at: "2026-08-27T09:16:00Z"
+    }), (error) => error.code === "CLAIM_RELEASE_STATE_INVALID");
+    const closed = simulator.close({
+      operation_id: "OP-LIFECYCLE-CLOSE",
+      claim_id: acquired.claim_id,
+      expected_record_version: secondReview.record_version,
+      expected_fencing_token: secondReview.fencing_token,
+      disposition: "APPROVED",
+      registry_reconciled: true,
+      observed_at: "2026-08-27T09:20:00Z"
+    });
+    const released = simulator.release({
+      operation_id: "OP-LIFECYCLE-RELEASE",
+      claim_id: acquired.claim_id,
+      expected_record_version: closed.record_version,
+      expected_fencing_token: closed.fencing_token,
+      observed_at: "2026-08-27T09:21:00Z"
+    });
+    assert.equal(released.status, "RELEASED");
+    assert.equal(released.disposition, "APPROVED");
+    assert.equal(simulator.getEvents(acquired.claim_id).length, 7);
+    simulator.closeDatabase();
+    simulator = await createLocalSqliteClaimRegistrySimulator({ database_path: databasePath });
+    assert.equal(simulator.getClaim(acquired.claim_id).status, "RELEASED");
+    assert.equal(simulator.getEvents(acquired.claim_id).at(-1).mutation, "RELEASE");
+  } finally {
+    simulator?.closeDatabase();
+    await fs.rm(directory, { recursive: true, force: true });
+  }
 });

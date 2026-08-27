@@ -2317,6 +2317,264 @@ export async function restoreAutonomousCompanyCycleState({ store, company_id }) 
   });
 }
 
+export const LOCAL_CLAIM_SIMULATOR_ACTIVE_STATES = Object.freeze(["ACTIVE", "EXECUTING", "REVIEW", "REPAIR", "RECOVERY_PENDING"]);
+
+/**
+ * One-host SQLite state-machine simulator for the proposed Claim Registry.
+ * It exercises transactions, unique active locks, compare-and-swap versions,
+ * fencing tokens and append-only mutation evidence. It is deliberately not a
+ * shared service, production authority, dispatcher, worker wake or cutover.
+ */
+export async function createLocalSqliteClaimRegistrySimulator({ database_path = ":memory:" } = {}) {
+  invariant(typeof database_path === "string" && database_path.length > 0, "CLAIM_SIMULATOR_PATH_REQUIRED", "Claim simulator requires a SQLite path or :memory:");
+  const { DatabaseSync } = await import("node:sqlite");
+  const database = new DatabaseSync(database_path);
+  database.exec("PRAGMA foreign_keys = ON");
+  database.exec("PRAGMA journal_mode = WAL");
+  database.exec(`
+    CREATE TABLE IF NOT EXISTS company_claims (
+      claim_id TEXT PRIMARY KEY,
+      task_id TEXT NOT NULL,
+      clone_id TEXT NOT NULL,
+      worker_id TEXT NOT NULL,
+      session_id TEXT NOT NULL,
+      review_owner_id TEXT,
+      status TEXT NOT NULL,
+      fencing_token INTEGER NOT NULL CHECK (fencing_token > 0),
+      lease_expiry TEXT NOT NULL,
+      heartbeat_at TEXT NOT NULL,
+      review_custody_at TEXT,
+      repair_cycle INTEGER NOT NULL DEFAULT 0 CHECK (repair_cycle >= 0),
+      branch TEXT NOT NULL,
+      base_sha TEXT NOT NULL,
+      head_sha TEXT,
+      record_version INTEGER NOT NULL CHECK (record_version > 0),
+      disposition TEXT,
+      registry_reconciled INTEGER NOT NULL DEFAULT 0 CHECK (registry_reconciled IN (0, 1)),
+      created_at TEXT NOT NULL,
+      updated_at TEXT NOT NULL,
+      closed_at TEXT,
+      released_at TEXT
+    );
+    CREATE UNIQUE INDEX IF NOT EXISTS company_claim_active_task
+      ON company_claims(task_id) WHERE status IN ('ACTIVE', 'EXECUTING', 'REVIEW', 'REPAIR', 'RECOVERY_PENDING');
+    CREATE UNIQUE INDEX IF NOT EXISTS company_claim_active_clone
+      ON company_claims(clone_id) WHERE status IN ('ACTIVE', 'EXECUTING', 'REVIEW', 'REPAIR', 'RECOVERY_PENDING');
+    CREATE UNIQUE INDEX IF NOT EXISTS company_claim_active_session
+      ON company_claims(session_id) WHERE status IN ('ACTIVE', 'EXECUTING', 'REVIEW', 'REPAIR', 'RECOVERY_PENDING');
+    CREATE UNIQUE INDEX IF NOT EXISTS company_claim_active_worker
+      ON company_claims(worker_id) WHERE status IN ('ACTIVE', 'EXECUTING', 'REVIEW', 'REPAIR', 'RECOVERY_PENDING');
+    CREATE TABLE IF NOT EXISTS company_claim_events (
+      operation_id TEXT PRIMARY KEY,
+      claim_id TEXT NOT NULL,
+      mutation TEXT NOT NULL,
+      record_version INTEGER NOT NULL,
+      fencing_token INTEGER NOT NULL,
+      created_at TEXT NOT NULL,
+      detail TEXT NOT NULL,
+      FOREIGN KEY (claim_id) REFERENCES company_claims(claim_id)
+    );
+  `);
+
+  const claimSelect = database.prepare("SELECT * FROM company_claims WHERE claim_id = ?");
+  const eventSelect = database.prepare("SELECT * FROM company_claim_events WHERE operation_id = ?");
+  const eventInsert = database.prepare("INSERT INTO company_claim_events (operation_id, claim_id, mutation, record_version, fencing_token, created_at, detail) VALUES (?, ?, ?, ?, ?, ?, ?)");
+  const parseTime = (value, field) => {
+    invariant(typeof value === "string" && !Number.isNaN(Date.parse(value)), "CLAIM_TIME_INVALID", `${field} must be an ISO timestamp`);
+    return value;
+  };
+  const claimTextId = (value, field) => {
+    invariant(typeof value === "string" && /^[A-Za-z0-9][A-Za-z0-9_.:-]*$/.test(value), "CLAIM_ID_INVALID", `${field} must be a non-empty machine identifier`);
+    return value;
+  };
+  const getClaim = (claimId) => {
+    const row = claimSelect.get(claimId);
+    invariant(row, "CLAIM_NOT_FOUND", `Claim not found: ${claimId}`);
+    return row;
+  };
+  const publicClaim = (row, operationStatus = "APPLIED") => Object.freeze({
+    ...row,
+    registry_reconciled: row.registry_reconciled === 1,
+    simulator_status: "LOCAL_SQLITE_SIMULATOR_NOT_AUTHORITY",
+    operation_status: operationStatus,
+    production_claim_authority: false,
+    worker_wake: false,
+    external_effect: false
+  });
+  const start = () => database.exec("BEGIN IMMEDIATE");
+  const commit = () => database.exec("COMMIT");
+  const rollback = () => {
+    try { database.exec("ROLLBACK"); } catch { /* no open transaction */ }
+  };
+  const replay = (operationId, mutation, claimId) => {
+    claimTextId(operationId, "operation_id");
+    const existing = eventSelect.get(operationId);
+    if (!existing) return null;
+    invariant(existing.mutation === mutation && existing.claim_id === claimId, "CLAIM_OPERATION_REPLAY_MISMATCH", "An operation_id cannot be reused for another claim or mutation");
+    return publicClaim(getClaim(claimId), "IDEMPOTENT_NOOP");
+  };
+  const assertCas = (row, input) => {
+    invariant(Number.isInteger(input.expected_record_version) && input.expected_record_version === row.record_version, "CLAIM_RECORD_VERSION_CONFLICT", "Claim record_version compare-and-swap failed");
+    invariant(Number.isInteger(input.expected_fencing_token) && input.expected_fencing_token === row.fencing_token, "STALE_SESSION_FENCED", "Claim fencing_token is stale");
+  };
+  const appendEvent = (operationId, claimId, mutation, row, observedAt, detail = {}) => {
+    eventInsert.run(operationId, claimId, mutation, row.record_version, row.fencing_token, observedAt, JSON.stringify(detail));
+  };
+  const transactional = (operationId, mutation, claimId, action) => {
+    const replayed = replay(operationId, mutation, claimId);
+    if (replayed) return replayed;
+    start();
+    try {
+      const result = action();
+      commit();
+      return result;
+    } catch (error) {
+      rollback();
+      if (String(error?.code ?? "").startsWith("SQLITE_CONSTRAINT") || /constraint failed/i.test(String(error?.message ?? ""))) {
+        invariant(false, "CLAIM_ACTIVE_UNIQUE_CONFLICT", "A task, clone, worker or session already holds active claim custody");
+      }
+      throw error;
+    }
+  };
+
+  const api = {
+    authority: Object.freeze({
+      status: "LOCAL_SQLITE_SIMULATOR_NOT_AUTHORITY",
+      shared_distributed_authority: false,
+      automatic_dispatch: false,
+      worker_wake: false,
+      github_write: false,
+      chain_write: false
+    }),
+    acquire(input) {
+      requireFields(input, ["operation_id", "claim_id", "task_id", "clone_id", "worker_id", "session_id", "branch", "base_sha", "observed_at", "lease_expiry"], "ClaimAcquire");
+      for (const field of ["operation_id", "claim_id", "task_id", "clone_id", "worker_id", "session_id"]) claimTextId(input[field], field);
+      parseTime(input.observed_at, "observed_at");
+      parseTime(input.lease_expiry, "lease_expiry");
+      invariant(Date.parse(input.lease_expiry) > Date.parse(input.observed_at), "CLAIM_LEASE_INVALID", "Claim lease must expire after acquisition");
+      invariant(typeof input.branch === "string" && input.branch.length > 0 && /^[0-9a-f]{40}$/.test(input.base_sha), "CLAIM_BRANCH_BASE_INVALID", "Claim requires a branch and exact base SHA");
+      return transactional(input.operation_id, "ACQUIRE", input.claim_id, () => {
+        database.prepare(`INSERT INTO company_claims
+          (claim_id, task_id, clone_id, worker_id, session_id, status, fencing_token, lease_expiry, heartbeat_at, branch, base_sha, record_version, created_at, updated_at)
+          VALUES (?, ?, ?, ?, ?, 'ACTIVE', 1, ?, ?, ?, ?, 1, ?, ?)`)
+          .run(input.claim_id, input.task_id, input.clone_id, input.worker_id, input.session_id, input.lease_expiry, input.observed_at, input.branch, input.base_sha, input.observed_at, input.observed_at);
+        const row = getClaim(input.claim_id);
+        appendEvent(input.operation_id, input.claim_id, "ACQUIRE", row, input.observed_at, { task_id: input.task_id, session_id: input.session_id });
+        return publicClaim(row);
+      });
+    },
+    heartbeat(input) {
+      requireFields(input, ["operation_id", "claim_id", "expected_record_version", "expected_fencing_token", "observed_at", "lease_expiry"], "ClaimHeartbeat");
+      parseTime(input.observed_at, "observed_at");
+      parseTime(input.lease_expiry, "lease_expiry");
+      return transactional(input.operation_id, "HEARTBEAT", input.claim_id, () => {
+        const row = getClaim(input.claim_id);
+        assertCas(row, input);
+        invariant(["ACTIVE", "EXECUTING"].includes(row.status), "CLAIM_HEARTBEAT_STATE_INVALID", "Heartbeat requires active execution custody");
+        invariant(Date.parse(input.observed_at) <= Date.parse(row.lease_expiry), "CLAIM_LEASE_EXPIRED", "Expired execution custody cannot heartbeat");
+        invariant(Date.parse(input.lease_expiry) > Date.parse(input.observed_at), "CLAIM_LEASE_INVALID", "Heartbeat lease must extend beyond observed_at");
+        database.prepare("UPDATE company_claims SET status = 'EXECUTING', heartbeat_at = ?, lease_expiry = ?, record_version = record_version + 1, updated_at = ? WHERE claim_id = ?")
+          .run(input.observed_at, input.lease_expiry, input.observed_at, input.claim_id);
+        const updated = getClaim(input.claim_id);
+        appendEvent(input.operation_id, input.claim_id, "HEARTBEAT", updated, input.observed_at);
+        return publicClaim(updated);
+      });
+    },
+    submitReview(input) {
+      requireFields(input, ["operation_id", "claim_id", "expected_record_version", "expected_fencing_token", "review_owner_id", "head_sha", "observed_at"], "ClaimSubmitReview");
+      claimTextId(input.review_owner_id, "review_owner_id");
+      parseTime(input.observed_at, "observed_at");
+      invariant(/^[0-9a-f]{40}$/.test(input.head_sha), "CLAIM_HEAD_SHA_INVALID", "Review custody requires an exact head SHA");
+      return transactional(input.operation_id, "SUBMIT_REVIEW", input.claim_id, () => {
+        const row = getClaim(input.claim_id);
+        assertCas(row, input);
+        invariant(["ACTIVE", "EXECUTING", "REPAIR"].includes(row.status), "CLAIM_REVIEW_STATE_INVALID", "Only execution or repair custody can enter review");
+        invariant(input.review_owner_id !== row.worker_id, "CLAIM_SELF_REVIEW_FORBIDDEN", "Review custody requires a distinct reviewer");
+        database.prepare("UPDATE company_claims SET status = 'REVIEW', review_owner_id = ?, review_custody_at = ?, head_sha = ?, record_version = record_version + 1, updated_at = ? WHERE claim_id = ?")
+          .run(input.review_owner_id, input.observed_at, input.head_sha, input.observed_at, input.claim_id);
+        const updated = getClaim(input.claim_id);
+        appendEvent(input.operation_id, input.claim_id, "SUBMIT_REVIEW", updated, input.observed_at, { review_owner_id: input.review_owner_id, head_sha: input.head_sha });
+        return publicClaim(updated);
+      });
+    },
+    repair(input) {
+      requireFields(input, ["operation_id", "claim_id", "expected_record_version", "expected_fencing_token", "observed_at", "lease_expiry"], "ClaimRepair");
+      parseTime(input.observed_at, "observed_at");
+      parseTime(input.lease_expiry, "lease_expiry");
+      invariant(Date.parse(input.lease_expiry) > Date.parse(input.observed_at), "CLAIM_LEASE_INVALID", "Repair lease must expire after repair begins");
+      return transactional(input.operation_id, "REPAIR", input.claim_id, () => {
+        const row = getClaim(input.claim_id);
+        assertCas(row, input);
+        invariant(row.status === "REVIEW", "CLAIM_REPAIR_STATE_INVALID", "Repair must return from review custody");
+        database.prepare("UPDATE company_claims SET status = 'REPAIR', review_owner_id = NULL, repair_cycle = repair_cycle + 1, lease_expiry = ?, heartbeat_at = ?, record_version = record_version + 1, updated_at = ? WHERE claim_id = ?")
+          .run(input.lease_expiry, input.observed_at, input.observed_at, input.claim_id);
+        const updated = getClaim(input.claim_id);
+        appendEvent(input.operation_id, input.claim_id, "REPAIR", updated, input.observed_at, { original_worker_id: row.worker_id });
+        return publicClaim(updated);
+      });
+    },
+    recover(input) {
+      requireFields(input, ["operation_id", "claim_id", "expected_record_version", "expected_fencing_token", "new_session_id", "observed_at", "lease_expiry"], "ClaimRecover");
+      claimTextId(input.new_session_id, "new_session_id");
+      parseTime(input.observed_at, "observed_at");
+      parseTime(input.lease_expiry, "lease_expiry");
+      invariant(Date.parse(input.lease_expiry) > Date.parse(input.observed_at), "CLAIM_LEASE_INVALID", "Recovery lease must expire after recovery");
+      return transactional(input.operation_id, "RECOVER", input.claim_id, () => {
+        const row = getClaim(input.claim_id);
+        assertCas(row, input);
+        invariant(["ACTIVE", "EXECUTING", "RECOVERY_PENDING", "EXPIRED", "ABANDONED"].includes(row.status), "CLAIM_RECOVERY_STATE_INVALID", "Claim is not recoverable");
+        invariant(["RECOVERY_PENDING", "EXPIRED", "ABANDONED"].includes(row.status) || Date.parse(input.observed_at) > Date.parse(row.lease_expiry), "CLAIM_RECOVERY_BEFORE_EXPIRY_FORBIDDEN", "Live execution custody cannot be recovered before lease expiry");
+        database.prepare("UPDATE company_claims SET status = 'ACTIVE', session_id = ?, fencing_token = fencing_token + 1, lease_expiry = ?, heartbeat_at = ?, record_version = record_version + 1, updated_at = ? WHERE claim_id = ?")
+          .run(input.new_session_id, input.lease_expiry, input.observed_at, input.observed_at, input.claim_id);
+        const updated = getClaim(input.claim_id);
+        appendEvent(input.operation_id, input.claim_id, "RECOVER", updated, input.observed_at, { previous_session_id: row.session_id, new_session_id: input.new_session_id });
+        return publicClaim(updated);
+      });
+    },
+    close(input) {
+      requireFields(input, ["operation_id", "claim_id", "expected_record_version", "expected_fencing_token", "disposition", "registry_reconciled", "observed_at"], "ClaimClose");
+      parseTime(input.observed_at, "observed_at");
+      invariant(["APPROVED", "REJECTED", "BLOCKED"].includes(input.disposition), "CLAIM_DISPOSITION_INVALID", "Close requires an approved, rejected or blocked disposition");
+      invariant(input.registry_reconciled === true, "CLAIM_REGISTRY_RECONCILIATION_REQUIRED", "Claim close requires cross-registry reconciliation");
+      return transactional(input.operation_id, "CLOSE", input.claim_id, () => {
+        const row = getClaim(input.claim_id);
+        assertCas(row, input);
+        invariant(row.status === "REVIEW" || row.status === "BLOCKED", "CLAIM_CLOSE_STATE_INVALID", "Only review or blocked custody can close");
+        database.prepare("UPDATE company_claims SET status = 'CLOSED', disposition = ?, registry_reconciled = 1, closed_at = ?, record_version = record_version + 1, updated_at = ? WHERE claim_id = ?")
+          .run(input.disposition, input.observed_at, input.observed_at, input.claim_id);
+        const updated = getClaim(input.claim_id);
+        appendEvent(input.operation_id, input.claim_id, "CLOSE", updated, input.observed_at, { disposition: input.disposition, registry_reconciled: true });
+        return publicClaim(updated);
+      });
+    },
+    release(input) {
+      requireFields(input, ["operation_id", "claim_id", "expected_record_version", "expected_fencing_token", "observed_at"], "ClaimRelease");
+      parseTime(input.observed_at, "observed_at");
+      return transactional(input.operation_id, "RELEASE", input.claim_id, () => {
+        const row = getClaim(input.claim_id);
+        assertCas(row, input);
+        invariant(row.status === "CLOSED" && row.registry_reconciled === 1 && row.disposition, "CLAIM_RELEASE_STATE_INVALID", "Release requires reconciled closed disposition");
+        database.prepare("UPDATE company_claims SET status = 'RELEASED', released_at = ?, record_version = record_version + 1, updated_at = ? WHERE claim_id = ?")
+          .run(input.observed_at, input.observed_at, input.claim_id);
+        const updated = getClaim(input.claim_id);
+        appendEvent(input.operation_id, input.claim_id, "RELEASE", updated, input.observed_at, { disposition: row.disposition });
+        return publicClaim(updated);
+      });
+    },
+    getClaim(claimId) {
+      return publicClaim(getClaim(claimId), "READ_ONLY");
+    },
+    getEvents(claimId) {
+      claimTextId(claimId, "claim_id");
+      return Object.freeze(database.prepare("SELECT * FROM company_claim_events WHERE claim_id = ? ORDER BY rowid").all(claimId).map((row) => Object.freeze({ ...row, detail: JSON.parse(row.detail) })));
+    },
+    closeDatabase() {
+      database.close();
+    }
+  };
+  return Object.freeze(api);
+}
+
 function githubSnapshotHeaders(token) {
   return Object.freeze({
     Accept: "application/vnd.github+json",

@@ -130,7 +130,9 @@ The candidate can deterministically:
 
 The candidate now reuses the existing Company history store to persist safe cycle events and recover the last cycle after restart. It also has a read-only GitHub snapshot adapter for current main, active PR divergence and exact-head checks. The read, plan and persist stages compose through `runAutonomousCompanyReadOnlyCycle()`; `evaluateExactHeadCiGate()` rejects stale heads, behind-main branches and incomplete or failed checks. These are local/invocation-driven candidates: there is still no background scheduler.
 
-It cannot persist an atomic Claim, edit GitHub, launch a worker, merge, push `main`, pay, access a private key, deploy or send a transaction. Those connectors remain `NOT_CONNECTED`; the existing Claim/Lease Controller and independent Review gates must authorize them before any future activation.
+The canonical migration's one-host SQLite simulator is now implemented as `createLocalSqliteClaimRegistrySimulator()`. It transactionally tests unique task/clone/session/worker custody, CAS record versions, fencing, leases, review custody, repair lineage, restart persistence and reconciled close/release. It is always labelled `LOCAL_SQLITE_SIMULATOR_NOT_AUTHORITY`; it is not a shared service and does not turn automatic dispatch on.
+
+It cannot persist a shared authoritative Claim, edit GitHub, launch a worker, merge, push `main`, pay, access a private key, deploy or send a transaction. Those connectors remain `NOT_CONNECTED`; the existing Claim/Lease Controller and independent Review gates must authorize them before any future activation.
 
 ## Imported Authorities
 
