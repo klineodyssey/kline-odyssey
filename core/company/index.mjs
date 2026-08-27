@@ -1831,7 +1831,7 @@ export function calculateGpuLandedCost({ quoteAsset, components, companyMarginAt
 export function evaluateGpu11520MarketReadiness({ inventory, route, landedCost, signerConnected = false, companyBudgetStatus = "NOT_BOUND", settlementStatus = "PAPER_ONLY" }) {
   validateGpuInventoryUnit(inventory);
   validateFieldRoute(route);
-  const blockers = [];
+  const blockers = ["INDEPENDENT_GPU_READINESS_VERIFIERS_NOT_WIRED"];
   if (landedCost?.status !== "QUOTE_COMPLETE") blockers.push("GPU_LANDED_COST_INCOMPLETE");
   if (inventory.inventory_mode !== "VERIFIED_REAL_INVENTORY") blockers.push("REAL_GPU_INVENTORY_NOT_VERIFIED");
   if (!inventory.warehouse_receipt) blockers.push("K11520_WAREHOUSE_RECEIPT_MISSING");
@@ -1842,8 +1842,8 @@ export function evaluateGpu11520MarketReadiness({ inventory, route, landedCost, 
     route_id: NVIDIA_GPU_11520_ROUTE.route_id,
     company_address: NVIDIA_GPU_11520_ROUTE.destination_address,
     paper_market_ready: landedCost?.status === "QUOTE_COMPLETE",
-    real_trade_ready: blockers.length === 0,
-    real_trade_status: blockers.length ? "BLOCKED_TECHNICAL_GATES" : "READY_WITHIN_AUTHORIZED_SCOPE",
+    real_trade_ready: false,
+    real_trade_status: "BLOCKED_INDEPENDENT_VERIFIERS_NOT_WIRED",
     blockers: Object.freeze(blockers),
     real_trade_executed: false,
     chain_write: false

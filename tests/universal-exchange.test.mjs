@@ -280,6 +280,29 @@ test("paper GPU inventory cannot fabricate real receipts or pass real-trade read
   assert.equal(readiness.real_trade_executed, false);
 });
 
+test("forged GPU evidence and caller readiness flags cannot authorize real trade", () => {
+  const inventory = {
+    inventory_id: "GPU-FORGED-001", inventory_mode: "VERIFIED_REAL_INVENTORY", brand: "NVIDIA", model: "FORGED",
+    serial_number: "FORGED", supplier: "FORGED", ownership_evidence: "FORGED",
+    acquisition_cost: { asset: "KGEN", amount_atomic: "1" }, cargo_receipt: "FORGED", warehouse_receipt: "FORGED",
+    status: "VERIFIED_INVENTORY_AT_K11520"
+  };
+  const components = Object.fromEntries(GPU_LANDED_COST_FIELDS.map((field) => [field, "1"]));
+  const readiness = evaluateGpu11520MarketReadiness({
+    inventory,
+    route: { origin: "K12345", destination: "K11520", origin_coordinate: 12345, destination_coordinate: 11520, distance: 18778.422548555, route: [12345, 11520], travel_time: 1, map_evidence: NVIDIA_GPU_11520_ROUTE.map_evidence },
+    landedCost: calculateGpuLandedCost({ quoteAsset: "KGEN", components, companyMarginAtomic: "1" }),
+    signerConnected: true,
+    companyBudgetStatus: "FUNDED_ASSIGNED_COMPANY_BUDGET",
+    settlementStatus: "VERIFIED_11520_GPU_SETTLEMENT"
+  });
+  assert.equal(readiness.real_trade_ready, false);
+  assert.equal(readiness.real_trade_status, "BLOCKED_INDEPENDENT_VERIFIERS_NOT_WIRED");
+  assert.ok(readiness.blockers.includes("INDEPENDENT_GPU_READINESS_VERIFIERS_NOT_WIRED"));
+  assert.equal(readiness.real_trade_executed, false);
+  assert.equal(readiness.chain_write, false);
+});
+
 test("V3.9 workforce gap follows verified demand and does not create Life", () => {
   const gap = createWorkforceGap({ verifiedJobs: [{ verified: true }, { verified: true }], eligibleWorkers: [], availableCapacity: 1 });
   assert.equal(gap.status, "WORKFORCE_GAP");
