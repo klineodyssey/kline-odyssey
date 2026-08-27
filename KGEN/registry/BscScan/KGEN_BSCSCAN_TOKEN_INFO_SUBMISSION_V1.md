@@ -82,7 +82,28 @@ Verified public contact email remains: **klineodyssey.io@gmail.com**
 
 ## Submission Status
 
-**READY_FOR_HUMAN_SUBMISSION**
+**EXTERNAL_PUBLICATION_NOT_YET_CONFIRMED**
+
+### Live public-state recheck — 2026-08-27
+
+The public BscScan token page was re-read on 2026-08-27. It still displays the
+generic empty-token icon, `Reputation: UNKNOWN`, and no published KGEN price.
+Therefore the prepared repository package must not be described as accepted or
+published by BscScan. The verified Solidity source is a separate fact and does
+not publish token branding or market metadata.
+
+The KGEN contract owner is the BankGovernance contract at
+`0xa2792fBDCc8A8AaC364053431D44E0a8D335E166`, not an externally owned wallet.
+The public ownership-claim process therefore cannot be completed by an
+unrelated wallet. A governance-authorized signer or contract-owner support path
+must be accepted by BscScan before an external submission can be represented as
+officially published. No ownership signature or external form submission was
+performed by this repository change.
+
+The website provides an explicit EIP-747 `wallet_watchAsset` request so a user
+can add the canonical KGEN contract to a compatible BSC wallet without sending
+a token transaction or approval. Wallet discovery and logo caching remain
+wallet-provider behavior; they are not evidence of a BscScan listing.
 
 GitHub Pages deployment run `30177479689` completed successfully. All three
 public logo URLs return HTTP 200 without login or redirect. The SVG returns
@@ -95,6 +116,6 @@ creator profile is excluded because its public access cannot currently be
 verified. The deprecated Instagram account is disabled and must not be
 submitted.
 
-Human must log into BscScan, verify contract ownership where required, sign the
-ownership-verification message, paste the prepared data, and submit the external
-form. Do not mark **SUBMITTED** until Human confirms external submission.
+Do not mark **SUBMITTED** or **PUBLISHED** until an authorized ownership path
+has completed the external process and the public BscScan token page has been
+re-verified.

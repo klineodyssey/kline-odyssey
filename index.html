@@ -1212,10 +1212,13 @@
           <article class="token-card">
             <h3>Contract</h3>
             <code class="token-address">0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be</code>
+            <p>Add the canonical BSC token directly to a compatible wallet. This does not send a transaction or grant token approval.</p>
             <div class="action-row">
               <a class="button primary" href="https://bscscan.com/token/0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be" target="_blank" rel="noopener">BscScan</a>
               <a class="button dark" href="https://pancakeswap.finance/swap?outputCurrency=0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be" target="_blank" rel="noopener">PancakeSwap</a>
+              <button class="button dark" type="button" data-watch-kgen>Add KGEN to Wallet</button>
             </div>
+            <p data-watch-kgen-status role="status" aria-live="polite">Wallet discovery is user-initiated. BscScan metadata publication is tracked separately.</p>
           </article>
           <article class="token-card">
             <h3>Market Monitors</h3>
@@ -1403,6 +1406,52 @@
       <div class="community-grid" style="margin-top:16px" data-official-links="x,telegram,youtube,tiktok,facebook_page,instagram,line_official,github" data-official-links-show-status="false"></div>
     </div>
   </footer>
+  <script>
+    (() => {
+      const button = document.querySelector("[data-watch-kgen]");
+      const status = document.querySelector("[data-watch-kgen-status]");
+      const token = Object.freeze({
+        address: "0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be",
+        symbol: "KGEN",
+        decimals: 18,
+        image: new URL("assets/kgen/kgen-logo-256.png", window.location.href).href
+      });
+
+      if (!button || !status) return;
+
+      button.addEventListener("click", async () => {
+        if (!window.ethereum?.request) {
+          status.textContent = "Compatible wallet provider not detected. Add KGEN manually with the canonical contract address above.";
+          return;
+        }
+
+        button.disabled = true;
+        status.textContent = "Waiting for wallet confirmation…";
+        try {
+          const chainId = await window.ethereum.request({ method: "eth_chainId" });
+          if (chainId !== "0x38") {
+            await window.ethereum.request({
+              method: "wallet_switchEthereumChain",
+              params: [{ chainId: "0x38" }]
+            });
+          }
+
+          const accepted = await window.ethereum.request({
+            method: "wallet_watchAsset",
+            params: { type: "ERC20", options: token }
+          });
+          status.textContent = accepted
+            ? "KGEN was accepted by the wallet. The wallet controls whether the logo remains cached and displayed."
+            : "The wallet did not add KGEN. No transaction or approval was sent.";
+        } catch (error) {
+          const reason = error && typeof error.message === "string" ? error.message : "Wallet request rejected";
+          status.textContent = `${reason}. No transaction or approval was sent.`;
+        } finally {
+          button.disabled = false;
+        }
+      });
+    })();
+  </script>
   <script src="assets/official-links.js" data-manifest="OfficialLinks.json"></script>
 </body>
 </html>

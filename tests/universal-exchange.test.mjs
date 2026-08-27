@@ -101,6 +101,21 @@ import {
   calculateFieldServiceQuote, validateFieldDeliveryEvidence, createWorkforceGap,
   createFieldServiceDemandScan
 } from "../core/index.mjs";
+
+test("KGEN wallet discovery uses the canonical BSC asset without transaction authority", async () => {
+  const homepage = await fs.readFile(new URL("../index.html", import.meta.url), "utf8");
+  assert.match(homepage, /data-watch-kgen/);
+  assert.match(homepage, /method:\s*"wallet_watchAsset"/);
+  assert.match(homepage, /method:\s*"eth_chainId"/);
+  assert.match(homepage, /method:\s*"wallet_switchEthereumChain"/);
+  assert.match(homepage, /chainId:\s*"0x38"/);
+  assert.match(homepage, /address:\s*"0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be"/);
+  assert.match(homepage, /symbol:\s*"KGEN"/);
+  assert.match(homepage, /decimals:\s*18/);
+  assert.match(homepage, /assets\/kgen\/kgen-logo-256\.png/);
+  assert.doesNotMatch(homepage, /eth_sendRawTransaction|eth_sendTransaction/);
+  assert.doesNotMatch(homepage, /method:\s*"approve"|method:\s*"transfer"/);
+});
 import { verifyDigitalAntWalletBinding, verifyDigitalLifeWalletBinding, CODEX_GM_ENV } from "../core/security/wallet-binding.mjs";
 import { TEMPLE_HEART_READ_ABI, TEMPLE_HEART_DRY_RUN_ABI, TEMPLE_HEART_VERIFIED_ACTIONS, readCoreHeartEvents } from "../core/integrations/temple-heart-12345.mjs";
 import { buildSharedWorkerStatus, createPublicReadProvider, inspectPhysicsThoughtOrgan, readCompanyPatrol, readFieldServicePatrol, readMotherEnginePatrol, readPublicRequestPatrol } from "../core/jobs/public-read-only-worker.mjs";
