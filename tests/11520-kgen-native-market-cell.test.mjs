@@ -421,6 +421,7 @@ test("GPU real-trade gate fails closed with the complete ordered blocker set", (
   const result = evaluateGpu11520RealTradeReadiness();
   assert.equal(result.status, "BLOCKED_FAIL_CLOSED");
   assert.deepEqual(result.blockers, [
+    "REPOSITORY_BOUND_GPU_EVIDENCE_VERIFIER_NOT_WIRED",
     "INDEPENDENT_EVIDENCE_BUNDLE_NOT_VERIFIED",
     "VERIFIED_GPU_INVENTORY_REQUIRED",
     "VERIFIED_GPU_OWNERSHIP_REQUIRED",
@@ -441,10 +442,10 @@ test("GPU real-trade gate fails closed with the complete ordered blocker set", (
   assert.equal(result.chain_write, false);
 });
 
-test("complete hypothetical GPU evidence only reaches separate execution review", () => {
+test("complete hypothetical GPU evidence remains blocked without a repository-bound verifier", () => {
   const result = evaluateGpu11520RealTradeReadiness(verifiedGpuReadinessInput());
-  assert.equal(result.status, "READY_FOR_SEPARATE_EXECUTION_REVIEW");
-  assert.deepEqual(result.blockers, []);
+  assert.equal(result.status, "BLOCKED_FAIL_CLOSED");
+  assert.deepEqual(result.blockers, ["REPOSITORY_BOUND_GPU_EVIDENCE_VERIFIER_NOT_WIRED"]);
   assert.equal(result.company_address, "0.00011520");
   assert.equal(result.route, "K12345_TO_K11520");
   assert.equal(result.quote_asset, "KGEN");
@@ -452,6 +453,8 @@ test("complete hypothetical GPU evidence only reaches separate execution review"
   assert.equal(result.observed_block, 118374460);
   assert.equal(result.real_trade_enabled, false);
   assert.equal(result.transaction_payload, null);
+  assert.equal(result.signer_requested, false);
+  assert.equal(result.chain_write, false);
 });
 
 test("GPU readiness rejects unsegregated capital, replayable warehouse and incomplete cost", () => {
