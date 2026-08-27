@@ -1,6 +1,6 @@
 # 11520 Universal Exchange V3.9
 
-Human authority assigns the KAIOS AI Company office, GPU bonded warehouse and exchange to `0.00011520 / K11520`. The native KGEN and NVIDIA GPU/KGEN + GPU/KAIOS engines in this repository are review candidates only until their explicit runtime, custody and settlement gates are separately activated. Paper inventory and paper matches must never be displayed as real warehouse stock or Mainnet settlement.
+This Draft models the KAIOS AI Company office and exchange coordinate at `0.00011520 / K11520`; the stronger GPU bonded-warehouse role remains `CANDIDATE_UNVERIFIED` because no independently verifiable immutable Human authority record is bound here. The native KGEN and NVIDIA GPU/KGEN + GPU/KAIOS engines in this repository are review candidates only until their explicit runtime, custody and settlement gates are separately activated. Paper inventory and paper matches must never be displayed as real warehouse stock or Mainnet settlement.
 
 ## PR #169 native KGEN market candidate
 
