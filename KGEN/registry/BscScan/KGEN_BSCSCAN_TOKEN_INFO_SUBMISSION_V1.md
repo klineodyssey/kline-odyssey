@@ -2,7 +2,7 @@
 
 Task ID: KGEN-BSCSCAN-SOCIAL-2026-0001
 Prepared by: Codex
-Record version: V1.1
+Record version: V1.2
 
 ---
 
@@ -102,6 +102,21 @@ unrelated wallet. A governance-authorized signer or contract-owner support path
 must be accepted by BscScan before an external submission can be represented as
 officially published. No ownership signature or external form submission was
 performed by this repository change.
+
+### Owner and Bank receiver lineage
+
+These are separate roles and must not be collapsed in an explorer submission:
+
+| Role | Current address | Evidence |
+|---|---|---|
+| Contract owner | `0xa2792fBDCc8A8AaC364053431D44E0a8D335E166` | Ownership moved from deployment signer `0xb3C54c...` in tx `0xaca082ab94175bc1eba95685cc5095bb6fea8f01d03517aecd4e0948f818e9f9`, block `116012988` |
+| Current 0.10% Bank-tax receiver | `0xA06eF53c9AD4Af739FD13Ca1Ded446437134b0EE` | Governed `setTaxWallets` execution tx `0x7d6be56b14133941991a1d22928603d82446bdcf80472fef9068ee0623d7bfdc`, block `116060103` |
+| Historical Bank receiver / retained reserve | `0xFA4d34c46e86058e672936fa03cfd79F4C7A4b3c` | Historical receiver; no longer returned by `bankWallet()` |
+
+The current Bank receiver is the deployed Reserve Redemption proxy in
+`LIVE_INACTIVE` state. It is not a personal wallet, not the KGEN contract owner,
+and its appearance in `bankWallet()` does not activate redemption or grant a
+generic withdrawal path.
 
 The website provides an explicit EIP-747 `wallet_watchAsset` request so a user
 can add the canonical KGEN contract to a compatible BSC wallet without sending
