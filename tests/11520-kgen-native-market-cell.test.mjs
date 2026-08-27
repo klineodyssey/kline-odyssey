@@ -1,6 +1,10 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { createGpu11520PaperMarket, createKgenNativeMarketCell } from "../K線西遊記/temples/11520/modules/kgen-native-market-cell.mjs";
+import {
+  createGpu11520PaperMarket,
+  createKgenNativeMarketCell,
+  evaluateGpu11520RealTradeReadiness
+} from "../K線西遊記/temples/11520/modules/kgen-native-market-cell.mjs";
 
 const verifiedContexts = new WeakMap();
 let nextEvidence = 1;
@@ -276,4 +280,227 @@ test("GPU paper market rejects unsupported quote assets and fractional chips", (
   const market = createGpu11520PaperMarket({ quoteAsset: "KAIOS", verifyActorContext });
   assert.throws(() => market.placeOrder({ side: "BUY", price: "1000", quantity: "0.5", actorContext: actor("fractional-buyer") }), /lotSize/);
   assert.equal(market.getMarketState().ct, null);
+});
+
+function completeGpuReadinessEvidence() {
+  const wallet = "0x4DF6E9629Dad1072103cFd2bC81845fd97429214";
+  return {
+    verification_status: "VERIFIED",
+    evidence_root: "GPU-READINESS-EVIDENCE-ROOT-0001",
+    observed_block: 118374460,
+    inventory: {
+      status: "VERIFIED_REAL_INVENTORY",
+      asset_type: "NVIDIA_GPU_CHIP",
+      manufacturer: "NVIDIA",
+      model: "VERIFIED_MODEL",
+      serial_number: "GPU-SERIAL-0001",
+      supplier_evidence_id: "SUPPLIER-EVIDENCE-0001",
+      acquisition_cost_atomic: "88000000000000000000000",
+      ownership_certificate_id: "OWNERSHIP-CERTIFICATE-0001",
+      owner_life_or_company_id: "KAIOS_AI_COMPANY",
+      cargo_receipt_id: "CARGO-RECEIPT-0001",
+      cargo_serial_number: "GPU-SERIAL-0001",
+      paper_simulation: false
+    },
+    transport: {
+      status: "VERIFIED_DELIVERED",
+      origin: "K12345",
+      destination: "K11520",
+      distance_km: "18778.422548555",
+      vehicle_id: "VEHICLE-VERIFIED-0001",
+      payload_mass_grams: "1500",
+      delivery_evidence_id: "DELIVERY-EVIDENCE-0001",
+      costs_atomic: {
+        energy: "1",
+        food: "1",
+        labor: "1",
+        insurance: "1",
+        warehouse: "1",
+        risk_reserve: "1"
+      }
+    },
+    warehouse: {
+      status: "VERIFIED_IN_CUSTODY",
+      location: "K11520",
+      serial_number: "GPU-SERIAL-0001",
+      receipt_id: "WAREHOUSE-RECEIPT-0001",
+      replay_protected: true
+    },
+    capital: {
+      account_id: "TRADING-CAPITAL-ACCOUNT-0001",
+      status: "FUNDED_VERIFIED",
+      asset: "KGEN",
+      available_atomic: "100000000000000000000000",
+      required_atomic: "88000000000000000000000",
+      funding_receipt_id: "FUNDING-RECEIPT-0001",
+      segregated_from_payroll: true,
+      segregated_from_reserves: true
+    },
+    market: {
+      market_id: "11520_NVIDIA_GPU_KGEN_MARKET",
+      quote_asset: "KGEN",
+      status: "ACTIVE_VERIFIED",
+      asset_allowlisted: true,
+      route_allowlisted: true,
+      price_fresh: true,
+      oracle_disagreement_within_limit: true,
+      registry_evidence_id: "MARKET-REGISTRY-EVIDENCE-0001"
+    },
+    policy_box: {
+      status: "VERIFIED_ACTIVE",
+      chain_id: 56,
+      treasury_account_id: "TRADING-CAPITAL-ACCOUNT-0001",
+      fixed_beneficiary: wallet,
+      policy_id: "GPU-TRADING-POLICY-0001",
+      max_trade_amount_atomic: "100000000000000000000000",
+      max_hourly_exposure_atomic: "100000000000000000000000",
+      max_daily_exposure_atomic: "100000000000000000000000",
+      max_daily_loss_atomic: "1000000000000000000000",
+      max_slippage_bps: "50",
+      gas_ceiling_wei: "300000000000000",
+      minimum_expected_net_profit_atomic: "1",
+      allowance_ceiling_atomic: "88000000000000000000000",
+      emergency_pause: false,
+      nonce_replay_protection: true,
+      receipt_required: true
+    },
+    settlement: {
+      status: "VERIFIED_PRODUCTION_ADAPTER",
+      chain_id: 56,
+      beneficiary: wallet,
+      inventory_serial_number: "GPU-SERIAL-0001",
+      replay_protected: true,
+      atomic_delivery: true,
+      adapter_evidence_id: "SETTLEMENT-ADAPTER-EVIDENCE-0001"
+    },
+    signer: {
+      status: "CONNECTED_SECURE_RUNTIME",
+      chain_id: 56,
+      wallet_address: wallet,
+      private_key_exposed: false,
+      raw_key_exportable: false,
+      connection_evidence_id: "SIGNER-CONNECTION-EVIDENCE-0001"
+    },
+    independent_review: {
+      status: "PASS",
+      trust_level: 2,
+      reviewer_life_id: "LIFE-INDEPENDENT-REVIEWER-0001",
+      reviewer_controller_id: "independent-reviewer-01",
+      exact_head_sha: "1234567890abcdef1234567890abcdef12345678"
+    },
+    fork_simulation: {
+      status: "PASS_NO_BROADCAST",
+      chain_id: 56,
+      broadcast: false,
+      atomic_rollback_tested: true,
+      mass_and_accounting_conservation: true,
+      evidence_id: "FORK-SIMULATION-EVIDENCE-0001"
+    }
+  };
+}
+
+const verifiedReadinessBundles = new WeakMap();
+let nextReadinessBundle = 1;
+
+function verifiedGpuReadinessInput(mutate) {
+  const verified = completeGpuReadinessEvidence();
+  if (typeof mutate === "function") mutate(verified);
+  const evidenceBundle = Object.freeze({ opaque_nonce: nextReadinessBundle++ });
+  verifiedReadinessBundles.set(evidenceBundle, verified);
+  return {
+    evidenceBundle,
+    verifyEvidenceBundle(candidate) {
+      const resolved = verifiedReadinessBundles.get(candidate);
+      if (!resolved) throw new Error("UNTRUSTED_GPU_READINESS_EVIDENCE");
+      return resolved;
+    }
+  };
+}
+
+test("GPU real-trade gate fails closed with the complete ordered blocker set", () => {
+  const result = evaluateGpu11520RealTradeReadiness();
+  assert.equal(result.status, "BLOCKED_FAIL_CLOSED");
+  assert.deepEqual(result.blockers, [
+    "INDEPENDENT_EVIDENCE_BUNDLE_NOT_VERIFIED",
+    "VERIFIED_GPU_INVENTORY_REQUIRED",
+    "VERIFIED_GPU_OWNERSHIP_REQUIRED",
+    "VERIFIED_GPU_CARGO_REQUIRED",
+    "VERIFIED_K12345_TO_K11520_TRANSPORT_REQUIRED",
+    "VERIFIED_K11520_WAREHOUSE_RECEIPT_REQUIRED",
+    "FUNDED_TRADING_CAPITAL_REQUIRED",
+    "PRODUCTION_MARKET_NOT_VERIFIED",
+    "TRADING_POLICY_BOX_NOT_VERIFIED",
+    "PRODUCTION_SETTLEMENT_NOT_VERIFIED",
+    "SECURE_SIGNER_NOT_CONNECTED",
+    "DISTINCT_T2_REVIEW_NOT_VERIFIED",
+    "FORK_SIMULATION_NOT_VERIFIED"
+  ]);
+  assert.equal(result.real_trade_enabled, false);
+  assert.equal(result.transaction_payload, null);
+  assert.equal(result.signer_requested, false);
+  assert.equal(result.chain_write, false);
+});
+
+test("complete hypothetical GPU evidence only reaches separate execution review", () => {
+  const result = evaluateGpu11520RealTradeReadiness(verifiedGpuReadinessInput());
+  assert.equal(result.status, "READY_FOR_SEPARATE_EXECUTION_REVIEW");
+  assert.deepEqual(result.blockers, []);
+  assert.equal(result.company_address, "0.00011520");
+  assert.equal(result.route, "K12345_TO_K11520");
+  assert.equal(result.quote_asset, "KGEN");
+  assert.equal(result.evidence_root, "GPU-READINESS-EVIDENCE-ROOT-0001");
+  assert.equal(result.observed_block, 118374460);
+  assert.equal(result.real_trade_enabled, false);
+  assert.equal(result.transaction_payload, null);
+});
+
+test("GPU readiness rejects unsegregated capital, replayable warehouse and incomplete cost", () => {
+  const input = verifiedGpuReadinessInput((evidence) => {
+    evidence.capital.segregated_from_payroll = false;
+    evidence.warehouse.replay_protected = false;
+    delete evidence.transport.costs_atomic.food;
+  });
+  const result = evaluateGpu11520RealTradeReadiness(input);
+  assert.ok(result.blockers.includes("FUNDED_TRADING_CAPITAL_REQUIRED"));
+  assert.ok(result.blockers.includes("VERIFIED_K11520_WAREHOUSE_RECEIPT_REQUIRED"));
+  assert.ok(result.blockers.includes("VERIFIED_K12345_TO_K11520_TRANSPORT_REQUIRED"));
+});
+
+test("GPU readiness rejects wrong signer, self-review and broadcasting fork evidence", () => {
+  const input = verifiedGpuReadinessInput((evidence) => {
+    evidence.signer.wallet_address = "0x0000000000000000000000000000000000000001";
+    evidence.independent_review.reviewer_life_id = "life-codex-gm-0001";
+    evidence.fork_simulation.broadcast = true;
+  });
+  const result = evaluateGpu11520RealTradeReadiness(input);
+  assert.ok(result.blockers.includes("SECURE_SIGNER_NOT_CONNECTED"));
+  assert.ok(result.blockers.includes("DISTINCT_T2_REVIEW_NOT_VERIFIED"));
+  assert.ok(result.blockers.includes("FORK_SIMULATION_NOT_VERIFIED"));
+});
+
+test("paper market state can never satisfy the production GPU market gate", () => {
+  const paper = createGpu11520PaperMarket({ quoteAsset: "KGEN", verifyActorContext }).getMarketState();
+  const input = verifiedGpuReadinessInput((evidence) => {
+    evidence.market = {
+      market_id: paper.marketId,
+      quote_asset: paper.quoteAsset,
+      status: paper.runtimeStatus,
+      asset_allowlisted: true,
+      route_allowlisted: true,
+      price_fresh: true,
+      oracle_disagreement_within_limit: true,
+      registry_evidence_id: "PAPER-MARKET-EVIDENCE-0001"
+    };
+  });
+  const result = evaluateGpu11520RealTradeReadiness(input);
+  assert.ok(result.blockers.includes("PRODUCTION_MARKET_NOT_VERIFIED"));
+  assert.equal(result.real_trade_enabled, false);
+});
+
+test("caller-asserted VERIFIED fields cannot bypass the independent evidence verifier", () => {
+  const forged = completeGpuReadinessEvidence();
+  const result = evaluateGpu11520RealTradeReadiness(forged);
+  assert.ok(result.blockers.includes("INDEPENDENT_EVIDENCE_BUNDLE_NOT_VERIFIED"));
+  assert.equal(result.status, "BLOCKED_FAIL_CLOSED");
+  assert.equal(result.real_trade_enabled, false);
 });

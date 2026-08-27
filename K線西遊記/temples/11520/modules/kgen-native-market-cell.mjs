@@ -432,3 +432,211 @@ export function createGpu11520PaperMarket({ quoteAsset, ...options } = {}) {
     priceStatus: `GPU_${normalizedQuote}_MARKET_PRICE_CANDIDATE`
   });
 }
+
+const GPU_REAL_TRADE_GATE_ORDER = Object.freeze([
+  "INDEPENDENT_EVIDENCE_BUNDLE_NOT_VERIFIED",
+  "VERIFIED_GPU_INVENTORY_REQUIRED",
+  "VERIFIED_GPU_OWNERSHIP_REQUIRED",
+  "VERIFIED_GPU_CARGO_REQUIRED",
+  "VERIFIED_K12345_TO_K11520_TRANSPORT_REQUIRED",
+  "VERIFIED_K11520_WAREHOUSE_RECEIPT_REQUIRED",
+  "FUNDED_TRADING_CAPITAL_REQUIRED",
+  "PRODUCTION_MARKET_NOT_VERIFIED",
+  "TRADING_POLICY_BOX_NOT_VERIFIED",
+  "PRODUCTION_SETTLEMENT_NOT_VERIFIED",
+  "SECURE_SIGNER_NOT_CONNECTED",
+  "DISTINCT_T2_REVIEW_NOT_VERIFIED",
+  "FORK_SIMULATION_NOT_VERIFIED"
+]);
+
+function canonicalText(value) {
+  return typeof value === "string" ? value.trim() : "";
+}
+
+function exactEvidence(value) {
+  return /^[A-Za-z0-9][A-Za-z0-9:._-]{2,127}$/.test(canonicalText(value));
+}
+
+function positiveAtomic(value) {
+  return /^\d+$/.test(String(value ?? "")) && BigInt(value) > 0n;
+}
+
+/**
+ * Read-only gate for a future real NVIDIA GPU trade at K11520.
+ *
+ * This evaluator deliberately has no provider, signer, allowance, transfer,
+ * settlement or broadcast method. Even a complete evidence bundle only
+ * becomes READY_FOR_SEPARATE_EXECUTION_REVIEW; a separately authorized
+ * executor must re-read fresh state and obtain its own receipt.
+ */
+export function evaluateGpu11520RealTradeReadiness({
+  evidenceBundle,
+  verifyEvidenceBundle,
+  executorLifeId = "LIFE-CODEX-GM-0001",
+  executorControllerId = "codex-gm-01"
+} = {}) {
+  const blockers = [];
+  let verified = null;
+  if (typeof verifyEvidenceBundle === "function") {
+    try {
+      const candidate = verifyEvidenceBundle(evidenceBundle, Object.freeze({
+        purpose: "GPU_11520_REAL_TRADE_READINESS",
+        company_address: COMPANY_ADDRESS,
+        company_k_coordinate: COMPANY_K_COORDINATE,
+        route: "K12345_TO_K11520"
+      }));
+      if (candidate?.verification_status === "VERIFIED"
+        && exactEvidence(candidate?.evidence_root)
+        && Number.isSafeInteger(candidate?.observed_block)
+        && candidate.observed_block > 0) {
+        verified = candidate;
+      }
+    } catch {
+      verified = null;
+    }
+  }
+  if (!verified) blockers.push("INDEPENDENT_EVIDENCE_BUNDLE_NOT_VERIFIED");
+
+  const inventory = verified?.inventory;
+  const transport = verified?.transport;
+  const warehouse = verified?.warehouse;
+  const capital = verified?.capital;
+  const market = verified?.market;
+  const policyBox = verified?.policy_box;
+  const settlement = verified?.settlement;
+  const signer = verified?.signer;
+  const independentReview = verified?.independent_review;
+  const forkSimulation = verified?.fork_simulation;
+  const quoteAsset = canonicalText(market?.quote_asset).toUpperCase();
+
+  const inventoryVerified = inventory?.status === "VERIFIED_REAL_INVENTORY"
+    && inventory?.asset_type === "NVIDIA_GPU_CHIP"
+    && canonicalText(inventory?.manufacturer).toUpperCase() === "NVIDIA"
+    && canonicalText(inventory?.model)
+    && canonicalText(inventory?.serial_number)
+    && exactEvidence(inventory?.supplier_evidence_id)
+    && positiveAtomic(inventory?.acquisition_cost_atomic)
+    && inventory?.paper_simulation === false;
+  if (!inventoryVerified) blockers.push("VERIFIED_GPU_INVENTORY_REQUIRED");
+
+  if (!(inventoryVerified
+    && exactEvidence(inventory?.ownership_certificate_id)
+    && canonicalText(inventory?.owner_life_or_company_id))) {
+    blockers.push("VERIFIED_GPU_OWNERSHIP_REQUIRED");
+  }
+
+  if (!(inventoryVerified
+    && exactEvidence(inventory?.cargo_receipt_id)
+    && canonicalText(inventory?.cargo_serial_number) === canonicalText(inventory?.serial_number))) {
+    blockers.push("VERIFIED_GPU_CARGO_REQUIRED");
+  }
+
+  const costFields = ["energy", "food", "labor", "insurance", "warehouse", "risk_reserve"];
+  const transportVerified = transport?.status === "VERIFIED_DELIVERED"
+    && transport?.origin === "K12345"
+    && transport?.destination === "K11520"
+    && transport?.distance_km === "18778.422548555"
+    && canonicalText(transport?.vehicle_id)
+    && positiveAtomic(transport?.payload_mass_grams)
+    && exactEvidence(transport?.delivery_evidence_id)
+    && costFields.every((field) => /^\d+$/.test(String(transport?.costs_atomic?.[field] ?? "")));
+  if (!transportVerified) blockers.push("VERIFIED_K12345_TO_K11520_TRANSPORT_REQUIRED");
+
+  const warehouseVerified = warehouse?.status === "VERIFIED_IN_CUSTODY"
+    && warehouse?.location === "K11520"
+    && canonicalText(warehouse?.serial_number) === canonicalText(inventory?.serial_number)
+    && exactEvidence(warehouse?.receipt_id)
+    && warehouse?.replay_protected === true;
+  if (!warehouseVerified) blockers.push("VERIFIED_K11520_WAREHOUSE_RECEIPT_REQUIRED");
+
+  const capitalVerified = capital?.status === "FUNDED_VERIFIED"
+    && ["KGEN", "KAIOS"].includes(quoteAsset)
+    && capital?.asset === quoteAsset
+    && positiveAtomic(capital?.available_atomic)
+    && positiveAtomic(capital?.required_atomic)
+    && BigInt(capital.available_atomic) >= BigInt(capital.required_atomic)
+    && exactEvidence(capital?.funding_receipt_id)
+    && capital?.segregated_from_payroll === true
+    && capital?.segregated_from_reserves === true;
+  if (!capitalVerified) blockers.push("FUNDED_TRADING_CAPITAL_REQUIRED");
+
+  const marketVerified = ["KGEN", "KAIOS"].includes(quoteAsset)
+    && market?.market_id === `11520_NVIDIA_GPU_${quoteAsset}_MARKET`
+    && market?.status === "ACTIVE_VERIFIED"
+    && market?.asset_allowlisted === true
+    && market?.route_allowlisted === true
+    && market?.price_fresh === true
+    && market?.oracle_disagreement_within_limit === true
+    && exactEvidence(market?.registry_evidence_id);
+  if (!marketVerified) blockers.push("PRODUCTION_MARKET_NOT_VERIFIED");
+
+  const requiredPolicyFields = [
+    "max_trade_amount_atomic", "max_hourly_exposure_atomic", "max_daily_exposure_atomic",
+    "max_daily_loss_atomic", "max_slippage_bps", "gas_ceiling_wei",
+    "minimum_expected_net_profit_atomic", "allowance_ceiling_atomic"
+  ];
+  const policyVerified = policyBox?.status === "VERIFIED_ACTIVE"
+    && policyBox?.chain_id === 56
+    && policyBox?.treasury_account_id === capital?.account_id
+    && canonicalText(policyBox?.fixed_beneficiary)
+    && exactEvidence(policyBox?.policy_id)
+    && requiredPolicyFields.every((field) => /^\d+$/.test(String(policyBox?.[field] ?? "")))
+    && policyBox?.emergency_pause === false
+    && policyBox?.nonce_replay_protection === true
+    && policyBox?.receipt_required === true;
+  if (!policyVerified) blockers.push("TRADING_POLICY_BOX_NOT_VERIFIED");
+
+  const settlementVerified = settlement?.status === "VERIFIED_PRODUCTION_ADAPTER"
+    && settlement?.chain_id === 56
+    && canonicalText(settlement?.beneficiary).toLowerCase() === canonicalText(policyBox?.fixed_beneficiary).toLowerCase()
+    && settlement?.inventory_serial_number === inventory?.serial_number
+    && settlement?.replay_protected === true
+    && settlement?.atomic_delivery === true
+    && exactEvidence(settlement?.adapter_evidence_id);
+  if (!settlementVerified) blockers.push("PRODUCTION_SETTLEMENT_NOT_VERIFIED");
+
+  const signerVerified = signer?.status === "CONNECTED_SECURE_RUNTIME"
+    && signer?.chain_id === 56
+    && /^0x[0-9a-fA-F]{40}$/.test(canonicalText(signer?.wallet_address))
+    && signer?.wallet_address.toLowerCase() === canonicalText(policyBox?.fixed_beneficiary).toLowerCase()
+    && signer?.private_key_exposed === false
+    && signer?.raw_key_exportable === false
+    && exactEvidence(signer?.connection_evidence_id);
+  if (!signerVerified) blockers.push("SECURE_SIGNER_NOT_CONNECTED");
+
+  const distinctReviewVerified = independentReview?.status === "PASS"
+    && Number.isInteger(independentReview?.trust_level)
+    && independentReview.trust_level >= 2
+    && canonicalText(independentReview?.reviewer_life_id)
+    && canonicalText(independentReview?.reviewer_controller_id)
+    && canonicalText(independentReview.reviewer_life_id).toLowerCase() !== canonicalText(executorLifeId).toLowerCase()
+    && canonicalText(independentReview.reviewer_controller_id).toLowerCase() !== canonicalText(executorControllerId).toLowerCase()
+    && exactEvidence(independentReview?.exact_head_sha);
+  if (!distinctReviewVerified) blockers.push("DISTINCT_T2_REVIEW_NOT_VERIFIED");
+
+  const forkVerified = forkSimulation?.status === "PASS_NO_BROADCAST"
+    && forkSimulation?.chain_id === 56
+    && forkSimulation?.broadcast === false
+    && forkSimulation?.atomic_rollback_tested === true
+    && forkSimulation?.mass_and_accounting_conservation === true
+    && exactEvidence(forkSimulation?.evidence_id);
+  if (!forkVerified) blockers.push("FORK_SIMULATION_NOT_VERIFIED");
+
+  const orderedBlockers = GPU_REAL_TRADE_GATE_ORDER.filter((code) => blockers.includes(code));
+  return Object.freeze({
+    company_address: COMPANY_ADDRESS,
+    company_k_coordinate: COMPANY_K_COORDINATE,
+    route: "K12345_TO_K11520",
+    evidence_root: verified?.evidence_root ?? null,
+    observed_block: verified?.observed_block ?? null,
+    quote_asset: quoteAsset || null,
+    status: orderedBlockers.length === 0
+      ? "READY_FOR_SEPARATE_EXECUTION_REVIEW"
+      : "BLOCKED_FAIL_CLOSED",
+    blockers: Object.freeze(orderedBlockers),
+    real_trade_enabled: false,
+    transaction_payload: null,
+    signer_requested: false,
+    chain_write: false
+  });
+}
