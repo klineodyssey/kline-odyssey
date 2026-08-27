@@ -7,12 +7,14 @@ on:
     paths:
       - KGEN-KAIOS/decision/decision_log.jsonl
       - KGEN-KAIOS/workforce/recruitment_queue.json
+      - KGEN-KAIOS/worker_registry.json
       - KGEN-Organization/WorkOrders/WORK_QUEUE.md
       - .github/workflows/sol_yaoce_proposal_safety.yml
   pull_request:
     paths:
       - KGEN-KAIOS/decision/decision_log.jsonl
       - KGEN-KAIOS/workforce/recruitment_queue.json
+      - KGEN-KAIOS/worker_registry.json
       - KGEN-Organization/WorkOrders/WORK_QUEUE.md
       - .github/workflows/sol_yaoce_proposal_safety.yml
 
@@ -33,11 +35,13 @@ jobs:
 
           decision_path = Path("KGEN-KAIOS/decision/decision_log.jsonl")
           queue_path = Path("KGEN-KAIOS/workforce/recruitment_queue.json")
+          registry_path = Path("KGEN-KAIOS/worker_registry.json")
           work_path = Path("KGEN-Organization/WorkOrders/WORK_QUEUE.md")
           forbidden_authority = "KAIOS_HUMAN_T1_ONBOARDING_AUTHORIZATION_V1"
 
           decisions = [json.loads(line) for line in decision_path.read_text().splitlines() if line.strip()]
           queue = json.loads(queue_path.read_text())
+          registry = json.loads(registry_path.read_text())
           work = work_path.read_text()
 
           proposal = next(
@@ -57,14 +61,23 @@ jobs:
               ("queue provenance is preserved", queue.get("metadata", {}).get("task_id") == "KGEN-WORKFORCE-ROSTER-2026-0001"),
               ("new task is appended as related", "KAIOS-SOL-YAOCE-AI-COMPANY-INDEPENDENT-REVIEWER-INTERVIEW-V1-001" in queue.get("metadata", {}).get("related_task_ids", [])),
               ("candidate status is proposal-only", candidate.get("status") == "PROPOSED_HUMAN_REQUIRED"),
+              ("canonical Life ID remains unassigned", candidate.get("canonical_life_id") is None),
+              ("canonical Worker ID remains unassigned", candidate.get("canonical_worker_id") is None),
               ("onboarding level is not authorized", candidate.get("authorized_onboarding_level") is None),
               ("Human authorization is absent", candidate.get("human_authorization") is None),
               ("trial remains dispatch-held", candidate.get("trial_dispatch_status") == "HOLD_HUMAN_DECISION_IDENTITY_AND_ACKNOWLEDGMENTS_REQUIRED"),
               ("WorkQueue owner is unassigned", "| KAIOS-SOL-YAOCE-LIFECYCLE-ROLE-SEPARATION-DRYRUN-001 | HOLD | UNASSIGNED |" in work),
               ("WorkQueue records unbound authority", "Human authorization: NOT BOUND (`HUMAN_REQUIRED`)" in work),
+              ("candidate has not entered Worker Registry", all(
+                  "sol" not in str(worker.get("worker_id", "")).lower()
+                  and "yaoce" not in str(worker.get("worker_id", "")).lower()
+                  and worker.get("self_name") != "Sol"
+                  and worker.get("role_name") != "曜冊"
+                  for worker in registry.get("workers", [])
+              )),
           ]
 
-          joined = decision_path.read_text() + queue_path.read_text() + work
+          joined = decision_path.read_text() + queue_path.read_text() + registry_path.read_text() + work
           checks.append(("self-authenticating authority token is absent", forbidden_authority not in joined))
 
           failed = [name for name, ok in checks if not ok]
