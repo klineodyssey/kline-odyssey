@@ -11,6 +11,7 @@ manifest = json.loads((OUT / "brand-manifest.json").read_text(encoding="utf-8"))
 assert manifest["status"] == "REVIEW_CANDIDATE_NOT_CURRENT"
 assert manifest["visualSystem"] == "SAME_KGEN_MASTER_MARK_DIFFERENT_SYMBOL_NAMES"
 assert manifest["sharedMark"] is True
+assert manifest["licenseStatus"] == "HUMAN_APPROVAL_EVIDENCE_REQUIRED"
 assert manifest["websiteReplacementAuthorized"] is False
 assert manifest["externalMetadataSubmissionStatus"] == "NOT_SUBMITTED_ACCOUNT_OWNERSHIP_GATE"
 

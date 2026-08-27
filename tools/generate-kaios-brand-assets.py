@@ -99,7 +99,7 @@ manifest = {
     "masterRasterAsset": "assets/kgen/kgen-logo-256.png",
     "sharedMark": True,
     "source": "Repository canonical KGEN black-gold mark; no third-party visual assets",
-    "licenseStatus": "HUMAN_APPROVED_REPOSITORY_BRAND_FAMILY",
+    "licenseStatus": "HUMAN_APPROVAL_EVIDENCE_REQUIRED",
     "websiteReplacementAuthorized": False,
     "externalMetadataSubmissionStatus": "NOT_SUBMITTED_ACCOUNT_OWNERSHIP_GATE",
     "assets": [record(path) for path in asset_paths],
@@ -126,7 +126,7 @@ write_text_lf(
 
 Status: `REVIEW_CANDIDATE_NOT_CURRENT`.
 
-Human brand direction is `SAME_KGEN_MASTER_MARK_DIFFERENT_SYMBOL_NAMES`. The canonical black-gold KGEN mark in `assets/kgen/kgen-logo.svg` is the visual master. KAIOS, KUFO and KSHIP reuse the same graphic; their symbol, contract address, lineage and deployment status remain separate metadata fields.
+Candidate visual direction is `SAME_KGEN_MASTER_MARK_DIFFERENT_SYMBOL_NAMES`; independently verifiable Human approval evidence remains required before CURRENT promotion. The canonical black-gold KGEN mark in `assets/kgen/kgen-logo.svg` is the visual master. KAIOS, KUFO and KSHIP reuse the same graphic; their symbol, contract address, lineage and deployment status remain separate metadata fields.
 
 The identical mark does not imply identical contracts, fungibility, conversion, deployment, price or authority. This Draft does not replace the website or submit token metadata to BscScan, MetaMask, CoinMarketCap or CoinGecko. BscScan submission currently remains gated by an authenticated account and contract-address ownership verification.
 
