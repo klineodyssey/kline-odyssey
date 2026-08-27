@@ -3484,12 +3484,12 @@ test("V4.0 8888 audit removes fake balances and creates only request drafts", as
   assert.doesNotMatch(bankUi, /KGEN_Wallet\.demoMode=true/);
 });
 
-test("V4.0.2 production shell preserves concierge and exposes the browser-safe mobile wallet cache key", async () => {
+test("V4.0.5 production shell preserves concierge and exposes the runtime-identity mobile cache key", async () => {
   const htmlSource = await fs.readFile(new URL("../K線西遊記/temples/11520/index.html", import.meta.url), "utf8");
   const appSource = await fs.readFile(new URL("../K線西遊記/temples/11520/app.mjs", import.meta.url), "utf8");
   const cssSource = await fs.readFile(new URL("../K線西遊記/temples/11520/styles.css", import.meta.url), "utf8");
-  assert.match(htmlSource, /v=11520-v4\.0\.2-browser-safe/);
-  assert.match(htmlSource, /styles\.css\?v=11520-v4\.0\.2-browser-safe-mobile-overflow-fix2/);
+  assert.match(htmlSource, /app\.mjs\?v=11520-v4\.0\.5-settlement-runtime-identity-2/);
+  assert.match(htmlSource, /styles\.css\?v=11520-v4\.0\.5-runtime-identity-overflow-fix/);
   assert.doesNotMatch(htmlSource, /v=11520-v3\.6-first-kgen/);
   for (const state of ["IDLE", "LISTENING", "THINKING", "SPEAKING", "SUCCESS", "ERROR"]) assert.match(appSource + cssSource, new RegExp(state));
   assert.match(cssSource, /2D FALLBACK/);
