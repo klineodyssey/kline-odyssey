@@ -69,5 +69,11 @@ export function validate11520SettlementReceipt(receipt, { escrowCandidate, verif
   invariant(receipt.listing_id === escrowCandidate.listing_id && receipt.escrow_id === escrowCandidate.escrow_id, "SETTLEMENT_BINDING_MISMATCH", "Receipt must bind the exact listing and escrow");
   invariant(receipt.buyer_actor_id === escrowCandidate.buyer_authority.actor_id && receipt.seller_actor_id === escrowCandidate.seller_actor_id && receipt.beneficiary === escrowCandidate.beneficiary, "SETTLEMENT_BENEFICIARY_MISMATCH", "Receipt parties and beneficiary cannot be redirected");
   invariant(receipt.asset_id === escrowCandidate.asset_id && receipt.currency_id === escrowCandidate.currency_id && atomic(receipt.amount_atomic, "receipt amount") === BigInt(escrowCandidate.amount_atomic), "SETTLEMENT_VALUE_MISMATCH", "Receipt asset, currency and amount must match escrow");
-  return Object.freeze({ ...receipt, status: "CHAIN_VERIFIED_UNCONSUMED_CANDIDATE", replay_state: "UNCONSUMED_IN_PROVIDED_DURABLE_INDEX" });
+  return Object.freeze({
+    ...receipt,
+    status: "CHAIN_RECEIPT_CANDIDATE_NOT_REPOSITORY_BOUND",
+    replay_state: "UNCONSUMED_IN_CALLER_PROVIDED_INDEX_ONLY",
+    verification_authority: "FORMAL_REPOSITORY_BOUND_SETTLEMENT_CONNECTOR_REQUIRED",
+    chain_settlement_proven: false
+  });
 }
