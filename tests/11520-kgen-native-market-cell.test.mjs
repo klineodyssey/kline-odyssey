@@ -448,6 +448,8 @@ test("repository-bound GPU registry is wired but truthfully records no real inve
   assert.equal(evidence.verification_status, "NO_VERIFIED_EVIDENCE");
   assert.equal(evidence.registry_status, "NO_VERIFIED_REAL_GPU_INVENTORY");
   assert.equal(evidence.record_count, 0);
+  assert.equal(evidence.capital_registry_status, "NO_FUNDED_TRADING_CAPITAL");
+  assert.equal(evidence.funded_account_count, 0);
   assert.equal(evidence.real_inventory_created, false);
   assert.equal(evidence.transaction_authority, false);
   assert.equal(evidence.chain_write, false);

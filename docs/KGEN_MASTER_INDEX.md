@@ -885,6 +885,7 @@ Runtime V1 implementation:
 | `core/data/canonical.json` | Evidence-labelled canonical universe records; real customer/request/revenue counts remain zero until verified events exist. |
 | `K線西遊記/temples/11520/` | Universal Exchange V4.0 Player First frontend, animated Wukong Hair Voice/Text Concierge, local membership/first mission, shared Worker health and evidence-gated request entry. |
 | `K線西遊記/temples/11520/runtime/gpu-real-evidence-registry.v1.json` | Closed repository-bound K11520 GPU evidence registry; currently records zero verified real inventory and grants no trade authority. |
+| `K線西遊記/temples/11520/runtime/company-trading-capital-registry.v1.json` | Closed repository-bound Company trading-capital registry; currently records zero funded accounts and remains segregated from payroll and reserves. |
 | `K線西遊記/temples/8888/index.html` | Audited 8888 player exploration entry; visitor Wallet connect plus Job/KUFO/ATM demand drafts, with Banking/Inventory/Settlement truthfully not deployed. |
 | `.github/workflows/universal_exchange_v2.yml` | Hourly signerless Worker, exact-scope Work Evidence persistence and Universal Exchange validation. |
 | `.github/ISSUE_TEMPLATE/civilization-request.yml` | Authenticated shared real-request entry; not a Quote, Order or payment. |

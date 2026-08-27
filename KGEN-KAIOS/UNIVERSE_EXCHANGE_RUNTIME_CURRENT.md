@@ -302,15 +302,19 @@ The NVIDIA GPU candidate uses one fixed repository evidence path:
 
 ```text
 K線西遊記/temples/11520/runtime/gpu-real-evidence-registry.v1.json
+K線西遊記/temples/11520/runtime/company-trading-capital-registry.v1.json
 ```
 
 The loader accepts no caller-selected path, parser, transport or data source.
-It validates a closed registry identity and unique evidence roots, then tracks
-only the exact returned object as repository-bound. Copying or reconstructing
-the fields loses that identity. The current registry contains zero records and
-states `NO_VERIFIED_REAL_GPU_INVENTORY`; this proves only that the repository
-contains no accepted real GPU inventory evidence. It does not create a GPU,
-warehouse custody, capital, settlement, signer authority or trade permission.
+It validates closed registry identities, unique evidence roots and unique
+capital accounts, then tracks only the exact returned object as repository-
+bound. Copying or reconstructing the fields loses that identity. A future GPU
+record must match its capital registry account by ID, asset, available amount,
+status and authority receipt. The current registries contain zero records and
+state `NO_VERIFIED_REAL_GPU_INVENTORY / NO_FUNDED_TRADING_CAPITAL`; this proves
+only that the repository contains no accepted real GPU inventory or funded
+trading capital. It does not create a GPU, warehouse custody, capital,
+settlement, signer authority or trade permission.
 
 The repository verifier being wired removes only the technical
 `REPOSITORY_BOUND_GPU_EVIDENCE_VERIFIER_NOT_WIRED` blocker. Every substantive

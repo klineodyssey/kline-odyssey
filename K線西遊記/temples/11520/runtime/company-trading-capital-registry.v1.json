@@ -1,0 +1,9 @@
+{
+  "schema_version": "1.0.0",
+  "registry_id": "KAIOS_AI_COMPANY_TRADING_CAPITAL_REGISTRY_V1",
+  "mode": "REPOSITORY_BOUND_CANDIDATE",
+  "company_id": "KAIOS_AI_COMPANY",
+  "company_address": "0.00011520",
+  "status": "NO_FUNDED_TRADING_CAPITAL",
+  "accounts": []
+}

@@ -6,6 +6,7 @@ const COMPANY_ADDRESS = "0.00011520";
 const COMPANY_K_COORDINATE = "K11520";
 const KGEN_PRICE_COORDINATE_UNIT = "USD_PER_KGEN";
 const GPU_EVIDENCE_REGISTRY_URL = new URL("../runtime/gpu-real-evidence-registry.v1.json", import.meta.url);
+const GPU_TRADING_CAPITAL_REGISTRY_URL = new URL("../runtime/company-trading-capital-registry.v1.json", import.meta.url);
 const repositoryBoundGpuEvidenceBundles = new WeakSet();
 const repositoryBoundGpuEvidenceFetch = typeof globalThis.fetch === "function" ? globalThis.fetch.bind(globalThis) : null;
 
@@ -531,14 +532,65 @@ function validateGpuEvidenceRegistry(registry) {
   return registry;
 }
 
-async function readGpuEvidenceRegistryFile() {
-  if (GPU_EVIDENCE_REGISTRY_URL.protocol === "file:") {
+function validateTradingCapitalRegistry(registry) {
+  exactObjectKeys(registry, [
+    "schema_version", "registry_id", "mode", "company_id", "company_address", "status", "accounts"
+  ], "TradingCapitalRegistry");
+  if (registry.schema_version !== "1.0.0"
+    || registry.registry_id !== "KAIOS_AI_COMPANY_TRADING_CAPITAL_REGISTRY_V1"
+    || registry.mode !== "REPOSITORY_BOUND_CANDIDATE"
+    || registry.company_id !== "KAIOS_AI_COMPANY"
+    || registry.company_address !== COMPANY_ADDRESS) {
+    throw new TypeError("Trading capital registry identity mismatch");
+  }
+  if (!new Set(["NO_FUNDED_TRADING_CAPITAL", "FUNDED_ACCOUNTS_PRESENT"]).has(registry.status)) {
+    throw new TypeError("Trading capital registry status is invalid");
+  }
+  if (!Array.isArray(registry.accounts)) throw new TypeError("Trading capital accounts must be an array");
+  const accountKeys = [
+    "account_id", "status", "company_id", "chain_id", "asset", "wallet_address",
+    "available_atomic", "budget_id", "budget_status", "authority_evidence_id",
+    "observed_block", "expires_at", "revoked", "segregated_from_payroll", "segregated_from_reserves"
+  ];
+  for (const account of registry.accounts) {
+    exactObjectKeys(account, accountKeys, "TradingCapitalAccount");
+    if (account.status !== "FUNDED_VERIFIED"
+      || account.company_id !== registry.company_id
+      || account.chain_id !== 56
+      || !new Set(["KGEN", "KAIOS"]).has(account.asset)
+      || !/^0x[0-9a-fA-F]{40}$/.test(account.wallet_address)
+      || !positiveAtomic(account.available_atomic)
+      || !exactEvidence(account.budget_id)
+      || account.budget_status !== "AUTHORIZED_ACTIVE"
+      || !exactEvidence(account.authority_evidence_id)
+      || !Number.isSafeInteger(account.observed_block) || account.observed_block <= 0
+      || typeof account.expires_at !== "string" || Number.isNaN(Date.parse(account.expires_at))
+      || account.revoked !== false
+      || account.segregated_from_payroll !== true
+      || account.segregated_from_reserves !== true) {
+      throw new TypeError("Trading capital account is not a closed verified record");
+    }
+  }
+  if (registry.status === "NO_FUNDED_TRADING_CAPITAL" && registry.accounts.length !== 0) {
+    throw new TypeError("Trading capital registry cannot contain accounts while declaring none");
+  }
+  if (registry.status === "FUNDED_ACCOUNTS_PRESENT" && registry.accounts.length === 0) {
+    throw new TypeError("Trading capital registry cannot declare accounts while empty");
+  }
+  if (new Set(registry.accounts.map((account) => account.account_id)).size !== registry.accounts.length) {
+    throw new TypeError("Trading capital account IDs must be unique");
+  }
+  return registry;
+}
+
+async function readFixedRepositoryJson(url, errorCode) {
+  if (url.protocol === "file:") {
     const { readFile } = await import("node:fs/promises");
-    return JSON.parse(await readFile(GPU_EVIDENCE_REGISTRY_URL, "utf8"));
+    return JSON.parse(await readFile(url, "utf8"));
   }
   if (!repositoryBoundGpuEvidenceFetch) throw new Error("GPU_EVIDENCE_REGISTRY_FETCH_UNAVAILABLE");
-  const response = await repositoryBoundGpuEvidenceFetch(GPU_EVIDENCE_REGISTRY_URL, { cache: "no-store", credentials: "same-origin" });
-  if (!response.ok) throw new Error("GPU_EVIDENCE_REGISTRY_READ_FAILED");
+  const response = await repositoryBoundGpuEvidenceFetch(url, { cache: "no-store", credentials: "same-origin" });
+  if (!response.ok) throw new Error(errorCode);
   return response.json();
 }
 
@@ -550,10 +602,23 @@ async function readGpuEvidenceRegistryFile() {
  */
 export async function readRepositoryBoundGpu11520Evidence({ evidenceRoot = null } = {}) {
   if (evidenceRoot !== null && !exactEvidence(evidenceRoot)) throw new TypeError("GPU evidenceRoot is invalid");
-  const registry = validateGpuEvidenceRegistry(await readGpuEvidenceRegistryFile());
+  const [registry, capitalRegistry] = await Promise.all([
+    readFixedRepositoryJson(GPU_EVIDENCE_REGISTRY_URL, "GPU_EVIDENCE_REGISTRY_READ_FAILED").then(validateGpuEvidenceRegistry),
+    readFixedRepositoryJson(GPU_TRADING_CAPITAL_REGISTRY_URL, "GPU_TRADING_CAPITAL_REGISTRY_READ_FAILED").then(validateTradingCapitalRegistry)
+  ]);
   const record = evidenceRoot === null
     ? (registry.records.length === 1 ? registry.records[0] : null)
     : (registry.records.find((candidate) => candidate.evidence_root === evidenceRoot) ?? null);
+  if (record) {
+    const account = capitalRegistry.accounts.find((candidate) => candidate.account_id === record.capital.account_id);
+    if (!account
+      || account.asset !== record.capital.asset
+      || account.available_atomic !== record.capital.available_atomic
+      || account.status !== record.capital.status
+      || account.authority_evidence_id !== record.capital.funding_receipt_id) {
+      throw new TypeError("GPU evidence capital does not match the fixed trading-capital registry");
+    }
+  }
   const result = deepFreeze(record ? structuredClone(record) : {
     verification_status: "NO_VERIFIED_EVIDENCE",
     evidence_root: evidenceRoot,
@@ -564,6 +629,9 @@ export async function readRepositoryBoundGpu11520Evidence({ evidenceRoot = null 
     company_address: registry.company_address,
     company_k_coordinate: registry.company_k_coordinate,
     warehouse_id: registry.warehouse_id,
+    capital_registry_id: capitalRegistry.registry_id,
+    capital_registry_status: capitalRegistry.status,
+    funded_account_count: capitalRegistry.accounts.length,
     real_inventory_created: false,
     transaction_authority: false,
     chain_write: false

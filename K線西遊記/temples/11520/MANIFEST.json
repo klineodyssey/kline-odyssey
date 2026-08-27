@@ -24,6 +24,8 @@
   "native_kgen_market_quote_promotion": "CONSTRUCTOR_PROMOTION_FORBIDDEN",
   "gpu_real_evidence_registry": "runtime/gpu-real-evidence-registry.v1.json",
   "gpu_real_evidence_registry_status": "REPOSITORY_BOUND_WIRED_NO_VERIFIED_REAL_GPU_INVENTORY",
+  "gpu_trading_capital_registry": "runtime/company-trading-capital-registry.v1.json",
+  "gpu_trading_capital_status": "NO_FUNDED_TRADING_CAPITAL",
   "gpu_real_trade_status": "BLOCKED_FAIL_CLOSED",
   "entrypoint": "index.html",
   "runtime": "app.mjs",
