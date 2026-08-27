@@ -11,6 +11,10 @@ on:
       - "tests/universal-exchange.test.mjs"
       - "K線西遊記/temples/11520/**"
       - "docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md"
+      - "docs/physics/KGEN_KAIOS_SCALE_AND_PLANCK_RUNTIME_CURRENT.md"
+      - "KGEN-KAIOS/handbook/KAIOS_CIVILIZATION_CIRCULATORY_HANDOFF_HANDBOOK_CURRENT.md"
+      - "KGEN-KAIOS/tools/verify-current-lineage.mjs"
+      - "KGEN-KAIOS/reports/CURRENT_LINEAGE_RECONCILIATION.json"
       - ".github/ISSUE_TEMPLATE/civilization-request.yml"
       - ".github/workflows/universal_exchange_v2.yml"
   pull_request:
@@ -19,6 +23,10 @@ on:
       - "tests/universal-exchange.test.mjs"
       - "K線西遊記/temples/11520/**"
       - "docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md"
+      - "docs/physics/KGEN_KAIOS_SCALE_AND_PLANCK_RUNTIME_CURRENT.md"
+      - "KGEN-KAIOS/handbook/KAIOS_CIVILIZATION_CIRCULATORY_HANDOFF_HANDBOOK_CURRENT.md"
+      - "KGEN-KAIOS/tools/verify-current-lineage.mjs"
+      - "KGEN-KAIOS/reports/CURRENT_LINEAGE_RECONCILIATION.json"
 
 permissions:
   contents: read
@@ -36,6 +44,8 @@ jobs:
         run: find core -name '*.mjs' -print0 | xargs -0 -n1 node --check
       - name: Run Universal Exchange tests
         run: node --test tests/universal-exchange.test.mjs
+      - name: Verify cumulative CURRENT lineage
+        run: node KGEN-KAIOS/tools/verify-current-lineage.mjs
 
   digital-ant-public-read-only-worker:
     if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
