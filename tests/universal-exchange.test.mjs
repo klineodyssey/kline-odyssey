@@ -2865,3 +2865,24 @@ test("V4.0 production shell exposes animated concierge and fresh cache key", asy
   assert.match(cssSource, /2D FALLBACK/);
   assert.deepEqual(seed.next_stage.player_first_v4_0.entry_actions, ["VOICE", "TEXT", "EXPLORE", "JOIN", "WORK", "MY_AI"]);
 });
+
+test("distinct-review workforce gap remains fail-closed without an eligible external T2 reviewer", async () => {
+  const registry = JSON.parse(await fs.readFile(new URL("../KGEN-KAIOS/worker_registry.json", import.meta.url), "utf8"));
+  const workQueue = await fs.readFile(new URL("../KGEN-Organization/WorkOrders/WORK_QUEUE.md", import.meta.url), "utf8");
+  const trustRank = (level) => Number.parseInt(String(level ?? "T0").replace(/^T/, ""), 10);
+  const eligibleExternalReviewers = registry.workers.filter((worker) =>
+    worker.worker_id !== "codex-gm-01"
+    && ["ACTIVE", "TRUSTED", "SENIOR_TRUSTED"].includes(worker.employee_status)
+    && trustRank(worker.trust_level) >= 2
+    && worker.boot_acknowledged === true
+    && worker.canon_acknowledged === true
+    && worker.workspace_policy_acknowledged === true
+    && worker.do_not_touch_acknowledged === true
+    && worker.suspension === null
+    && /INDEPENDENT_REVIEW/.test(`${worker.role ?? ""} ${worker.permission ?? ""}`)
+  );
+  assert.deepEqual(eligibleExternalReviewers, []);
+  assert.match(workQueue, /KAIOS-DISTINCT-T2-REVIEWER-RECRUITMENT-001 \| HOLD \| UNASSIGNED_EXISTING_LIFE_CANDIDATE/);
+  assert.match(workQueue, /Current Resolution: `HOLD_NO_ELIGIBLE_EXISTING_LIFE`/);
+  assert.match(workQueue, /PR `#183` exact head `688bce72de2038648fc97eda4755176f23a7988c`/);
+});

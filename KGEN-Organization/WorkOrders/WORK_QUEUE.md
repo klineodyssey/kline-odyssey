@@ -94,15 +94,15 @@ The worker must then stop without changing WorkQueue, creating a branch, editing
 - Priority: P0 governance gate
 - Owner: UNASSIGNED_EXISTING_LIFE_CANDIDATE
 - Reviewer / Approval Authority: Human PrimeForge
-- Evidence refreshed against main `5d539d237bf948011d234203e451aa980a7b7ce8` on 2026-08-27.
+- Evidence refreshed against main `db3b6368139154cbfa1cabd322b80f0cb1307bcc` on 2026-08-28 Asia/Taipei.
 - Triggering PRs: `#170`, then `#169`; neither may use `codex-gm-01` as its distinct reviewer.
 - Claim State: NOT_CLAIMABLE
 - Branch State: NOT_CREATED
 - Current Resolution: `HOLD_NO_ELIGIBLE_EXISTING_LIFE`
 - Existing candidate audit:
-  - `LIFE-KAIOS-STARFORGE-0001`: PR `#164` records only a T1/OFFLINE onboarding candidate with acknowledgments incomplete and reviewer `UNASSIGNED_DISTINCT_REVIEWER_REQUIRED`; it grants no employment, trust upgrade or review authority.
-  - `LIFE-XUANYAO-SOL-0001 / xuanyao-sol-01`: PR `#165` records T1/OFFLINE onboarding only; controller independence, four acknowledgments and review permission remain incomplete, and PR `#169` self-review is permanently forbidden.
-  - `Sol / 曜冊`: PR `#183` remains a T1 dry-run candidate without canonical Life ID or Worker ID and cannot review PR `#169` or `#170`.
+  - `LIFE-KAIOS-STARFORGE-0001`: PR `#164` exact head `65217e9c1df7ca2753cecd487d3bc654e32d63ea` records only a T1/OFFLINE onboarding candidate with acknowledgments incomplete and reviewer `UNASSIGNED_DISTINCT_REVIEWER_REQUIRED`; exact-head CI passes but grants no employment, trust upgrade or review authority.
+  - `LIFE-XUANYAO-SOL-0001 / xuanyao-sol-01`: PR `#165` exact head `8160a59afccac539504306cd78ce08df224ef0b0` records T1/OFFLINE onboarding only; controller independence, four acknowledgments and review permission remain incomplete, and PR `#169` self-review is permanently forbidden.
+  - `Sol / 曜冊`: PR `#183` exact head `688bce72de2038648fc97eda4755176f23a7988c` passes its 16/16 proposal-safety checks but remains a T1 dry-run candidate without canonical Life ID or Worker ID and cannot review PR `#169` or `#170`.
   - `cursor-01`: latest main still records `ACTIVE` / T2 with all four acknowledgments true, but its bounded worker permission, allowed-work list and `CODEX_FINAL_REVIEW_REQUIRED` rule do not grant independent-review authority for PR `#170` or `#169`; the R2 claim remains `CLAIMED` after lease expiry. Draft PR `#176` proposes departure/closeout records but cannot supersede main before Human merge.
 - Best Existing Reviewer Candidate: **NONE ELIGIBLE**. Latest main does not authorize a candidate ranking or selection; Starforge, Xuanyao, Sol / 曜冊 and `cursor-01` each remain blocked for the reasons above. Any lawful onboarding, permission change or distinct-controller assignment requires separate Human approval and independently reviewable evidence.
 - Minimum eligibility: valid Life ID and Worker ID; `ACTIVE`, `TRUSTED` or `SENIOR_TRUSTED`; T2+; all four acknowledgments; explicit `INDEPENDENT_REVIEW`, `CODE_REVIEW`, `CI_REVIEW` and `AUTHORITY_BOUNDARY_REVIEW`; no suspension or blocking violation; no active-claim conflict; registered controller evidence distinct from each submitter.
