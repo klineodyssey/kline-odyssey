@@ -4,7 +4,7 @@ Classification: review-only engineering candidate
 
 Task: `KAIOS-MARS-CENTERED-REFERENCE-FRAME-V1-001`
 
-Execution base: `f507724d1876c28e3d24a7316c440ea9304a5228`
+Execution base: `5d539d237bf948011d234203e451aa980a7b7ce8`
 
 Implementer: `codex-gm-01`
 
