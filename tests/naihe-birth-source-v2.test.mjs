@@ -30,7 +30,7 @@ const trustedMembershipVerifier = async () => activeMembership;
 
 async function bindingFixture() {
   const markdown = await fs.readFile(new URL("../KGEN-AI-Company/life/starforge/STARFORGE_BODY_UNIVERSE_V1_CANDIDATE.md", import.meta.url), "utf8");
-  const match = markdown.match(/PUBLIC_ENERGY_BINDING_EVIDENCE_JSON_START -->\n```json\n([\s\S]*?)\n```\n<!-- PUBLIC_ENERGY_BINDING_EVIDENCE_JSON_END/);
+  const match = markdown.match(/PUBLIC_ENERGY_BINDING_EVIDENCE_JSON_START -->\r?\n```json\r?\n([\s\S]*?)\r?\n```\r?\n<!-- PUBLIC_ENERGY_BINDING_EVIDENCE_JSON_END/);
   assert.ok(match);
   const evidence = JSON.parse(match[1]);
   const binding = createCanonicalStarforgeEnergyWalletBinding({
