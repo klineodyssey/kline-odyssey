@@ -100,7 +100,8 @@ import {
   calculateFieldTripEnergy, calculateMatterAntimatterEnergy, validateFieldRoute,
   calculateFieldServiceQuote, validateFieldDeliveryEvidence, createWorkforceGap,
   createFieldServiceDemandScan, NVIDIA_GPU_11520_ROUTE, GPU_LANDED_COST_FIELDS,
-  validateGpuInventoryUnit, calculateGpuLandedCost, evaluateGpu11520MarketReadiness
+  validateGpuInventoryUnit, calculateGpuLandedCost, evaluateGpu11520MarketReadiness,
+  calculateGpuTransportPlan, createGpuAcquisitionPipelineCandidate
 } from "../core/index.mjs";
 import { verifyDigitalAntWalletBinding, verifyDigitalLifeWalletBinding, CODEX_GM_ENV } from "../core/security/wallet-binding.mjs";
 import { TEMPLE_HEART_READ_ABI, TEMPLE_HEART_DRY_RUN_ABI, TEMPLE_HEART_VERIFIED_ACTIONS, readCoreHeartEvents } from "../core/integrations/temple-heart-12345.mjs";
@@ -206,6 +207,56 @@ test("GPU landed cost is atomic, complete, and includes every mandated component
   assert.equal(Object.keys(quote.components).length, 14);
   assert.equal(calculateGpuLandedCost({ quoteAsset: "KGEN", components: { ...components, food: null }, companyMarginAtomic: "15" }).status, "QUOTE_INCOMPLETE");
   assert.throws(() => calculateGpuLandedCost({ quoteAsset: "BNB", components, companyMarginAtomic: "15" }), /KGEN or KAIOS/);
+});
+
+test("GPU logistics calculates route time, mass, energy, food and labor without claiming delivery", () => {
+  const transport = calculateGpuTransportPlan({
+    vehicleId: "PAPER_VEHICLE_001", speedMetersPerHour: "80000",
+    gpuMassGrams: "2500", packagingMassGrams: "500", vehicleMassGrams: "2000000",
+    energyWhPerKm: "400", foodCostAtomicPerHour: "2", laborCostAtomicPerHour: "8",
+    insuranceCostAtomic: "100", warehouseCostAtomic: "50", riskReserveAtomic: "200"
+  });
+  assert.equal(transport.route_id, NVIDIA_GPU_11520_ROUTE.route_id);
+  assert.equal(transport.payload_mass_grams, "3000");
+  assert.equal(transport.total_moving_mass_grams, "2003000");
+  assert.equal(transport.delivery_status, "NOT_DELIVERED");
+  assert.equal(transport.chain_write, false);
+  assert.ok(BigInt(transport.travel_time_seconds) > 0n);
+  assert.ok(BigInt(transport.energy_wh) > 0n);
+});
+
+test("wish, heartbeat, fortune and lamp form only a paper GPU acquisition candidate", () => {
+  const inventory = {
+    inventory_id: "GPU-PAPER-PIPELINE-001", inventory_mode: "PAPER_SIMULATION", brand: "NVIDIA", model: "PAPER_GPU_MODEL",
+    serial_number: "PAPER_SIMULATION_NO_SERIAL", supplier: "PAPER_SIMULATION", ownership_evidence: null,
+    acquisition_cost: null, cargo_receipt: null, warehouse_receipt: null, status: "PAPER_SIMULATION_NOT_REAL_INVENTORY"
+  };
+  const transportPlan = calculateGpuTransportPlan({
+    vehicleId: "PAPER_VEHICLE_001", speedMetersPerHour: "80000", gpuMassGrams: "2500",
+    packagingMassGrams: "500", vehicleMassGrams: "2000000", energyWhPerKm: "400",
+    foodCostAtomicPerHour: "2", laborCostAtomicPerHour: "8", insuranceCostAtomic: "100",
+    warehouseCostAtomic: "50", riskReserveAtomic: "200"
+  });
+  const components = Object.fromEntries(GPU_LANDED_COST_FIELDS.map((field) => [field, "1"]));
+  const candidate = createGpuAcquisitionPipelineCandidate({
+    candidateId: "GPU_ACQUISITION_PAPER_001", lifeId: "LIFE-CODEX-GM-0001", mode: "PAPER_SIMULATION",
+    evidence: Object.fromEntries(["wish", "heartbeat_or_cross_day_breath", "fortune_entitlement", "available_funds", "lamp_service"].map((field) => [field, { status: "PAPER_SIMULATION" }])),
+    inventory, transportPlan, landedCost: calculateGpuLandedCost({ quoteAsset: "KGEN", components, companyMarginAtomic: "1" })
+  });
+  assert.equal(candidate.status, "PAPER_PIPELINE_READY");
+  assert.equal(candidate.gpu_created_from_nothing, false);
+  assert.equal(candidate.fortune_entitlement_is_inventory, false);
+  assert.equal(candidate.lamp_service_is_inventory, false);
+  assert.equal(candidate.real_inventory_created, false);
+  assert.equal(candidate.real_trade_executed, false);
+  assert.equal(candidate.chain_write, false);
+  const blocked = createGpuAcquisitionPipelineCandidate({
+    candidateId: "GPU_ACQUISITION_REAL_BLOCKED", lifeId: "LIFE-CODEX-GM-0001", mode: "REAL_EVIDENCE_CANDIDATE",
+    evidence: {}, inventory, transportPlan, landedCost: calculateGpuLandedCost({ quoteAsset: "KAIOS", components, companyMarginAtomic: "1" })
+  });
+  assert.equal(blocked.status, "BLOCKED_MISSING_EVIDENCE");
+  assert.ok(blocked.blockers.includes("REAL_GPU_INVENTORY_NOT_VERIFIED"));
+  assert.ok(blocked.blockers.includes("GPU_DELIVERY_EVIDENCE_MISSING"));
 });
 
 test("paper GPU inventory cannot fabricate real receipts or pass real-trade readiness", () => {
