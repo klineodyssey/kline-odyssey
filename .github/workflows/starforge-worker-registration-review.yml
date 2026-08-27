@@ -29,7 +29,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       EXPECTED_HEAD: ${{ github.event.pull_request.head.sha || github.sha }}
-      BASE_SHA: ${{ github.event.pull_request.base.sha || 'f507724d1876c28e3d24a7316c440ea9304a5228' }}
+      BASE_SHA: ${{ github.event.pull_request.base.sha || '5d539d237bf948011d234203e451aa980a7b7ce8' }}
     steps:
       - uses: actions/checkout@v4
         with:

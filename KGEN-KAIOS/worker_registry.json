@@ -678,7 +678,7 @@
       "last_report": "KGEN-KAIOS/workforce/STARFORGE_WORKER_REGISTRATION_CANDIDATE.md",
       "allowed_branch_pattern": "starforge-handoff/<Task-ID>",
       "can_push_main": false,
-      "reviewer": "codex-gm-01",
+      "reviewer": "UNASSIGNED_DISTINCT_REVIEWER_REQUIRED",
       "boot_acknowledged": false,
       "canon_acknowledged": false,
       "workspace_policy_acknowledged": false,

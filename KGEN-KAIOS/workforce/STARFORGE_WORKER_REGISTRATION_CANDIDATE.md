@@ -1,7 +1,7 @@
 # Starforge Worker Registration Candidate
 
 **Task ID:** `KAIOS-STARFORGE-WORKER-REGISTRATION-V1-001`
-**Execution base:** `f507724d1876c28e3d24a7316c440ea9304a5228`
+**Execution base:** `5d539d237bf948011d234203e451aa980a7b7ce8`
 **Implementer:** `codex-gm-01`
 **Independent review:** `REQUIRED`
 **Status:** `ONBOARDING_CANDIDATE_ONLY`
@@ -26,7 +26,7 @@ The exact observed `main` did not contain this Worker ID. Existing Starforge Gen
 - `status = OFFLINE`
 - `can_push_main = false`
 - allowed branch pattern is `starforge-handoff/<Task-ID>`
-- reviewer is `codex-gm-01`
+- reviewer is `UNASSIGNED_DISTINCT_REVIEWER_REQUIRED`; the implementer cannot review this candidate
 - Boot, Canon, Workspace Policy, and DO_NOT_TOUCH acknowledgements remain `false`
 - wallet, payment, and Mainnet authority are `NONE`
 - payroll eligibility is `false`

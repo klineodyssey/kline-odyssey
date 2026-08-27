@@ -24,7 +24,8 @@ test("Starforge has one review-only ONBOARDING/T1 registry candidate", () => {
   assert.equal(worker.heartbeat, null);
   assert.equal(worker.allowed_branch_pattern, "starforge-handoff/<Task-ID>");
   assert.equal(worker.can_push_main, false);
-  assert.equal(worker.reviewer, "codex-gm-01");
+  assert.equal(worker.reviewer, "UNASSIGNED_DISTINCT_REVIEWER_REQUIRED");
+  assert.notEqual(worker.reviewer, "codex-gm-01");
 });
 
 test("unverified acknowledgements and identity evidence stay fail closed", () => {
