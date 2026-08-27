@@ -61,6 +61,28 @@ The worker must then stop without changing WorkQueue, creating a branch, editing
 | KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-R2-001 | CLAIMED | cursor-01 | codex-gm-01 | P0 | Payroll QA | `cursor-handoff/KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-R2-001` | `KGEN-AI-Company/reports/CURSOR_LIFE_ENERGY_PAYROLL_CANDIDATE_REPORT.md` |
 | KGEN-MAP-4168-NAIHE-GENESIS-STATION-UI-001 | HOLD | Map / World Agent | codex-gm-01 | P2 | World Map | `NOT_CREATED` | `SPEC_HANDOFF_IN_CODEX_MANAGER_PROTOCOL` |
 | KGEN-BSCSCAN-LOGO-001 | DONE | Cursor + Codex | Codex | P1 | Token Metadata | `cursor/kgen-bscscan-logo-submission-v1` | `KGEN/registry/BscScan/KGEN_BSCSCAN_LOGO_SUBMISSION_V1_MERGE_CLOSEOUT.md` |
+| KAIOS-SOL-YAOCE-LIFECYCLE-ROLE-SEPARATION-DRYRUN-001 | HOLD | Sol / 曜冊 candidate | codex-gm-01 | P1 | Lifecycle Governance | `NOT_CREATED` | `PENDING_IDENTITY_AND_ACKNOWLEDGMENTS` |
+
+### KAIOS-SOL-YAOCE-LIFECYCLE-ROLE-SEPARATION-DRYRUN-001 - T1 Lifecycle Role Separation Dry Run
+
+- Status: HOLD
+- Candidate ID: `sol-yaoce-reviewer-candidate-001`
+- Owner: Sol / 曜冊 candidate
+- Reviewer: codex-gm-01
+- Priority: P1
+- Risk: R0 read-only
+- Human authorization: `KAIOS_HUMAN_T1_ONBOARDING_AUTHORIZATION_V1`
+- Scope: read-only schema and test-matrix review of Economic Sponsor, Naihe Source, Service Operator and Regeneration Parent separation.
+- Canonical Life ID: NOT ASSIGNED
+- Canonical Worker ID: NOT ASSIGNED
+- Controller identity: UNVERIFIED
+- Worker type: UNVERIFIED
+- Four acknowledgments: INCOMPLETE
+- Branch: NOT CREATED
+- Claim: NOT ISSUED
+- Dispatch gate: complete identity check, assign a policy-valid Worker ID through Company governance, verify worker type/controller independence, record all four acknowledgments, define logical workspace and branch namespace, then issue a bounded T1 credential.
+- Forbidden: PR #169 review, PR #170 review, CURRENT Canon edits, T2 promotion, employment activation, payroll, merge, deployment, asset transfer, Mainnet transaction, governance execution and private-key access.
+- Output authority: candidate review evidence only; no Canon or Reviewer authority.
 
 ### KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-R2-001 - Payroll Candidate Rework
 
