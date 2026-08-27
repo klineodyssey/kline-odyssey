@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
 import test from "node:test";
 import {
   createGpu11520PaperMarket,
@@ -538,4 +539,13 @@ test("caller-asserted VERIFIED fields cannot bypass the independent evidence ver
   assert.ok(result.blockers.includes("INDEPENDENT_EVIDENCE_BUNDLE_NOT_VERIFIED"));
   assert.equal(result.status, "BLOCKED_FAIL_CLOSED");
   assert.equal(result.real_trade_enabled, false);
+});
+
+test("public GPU readiness panel is read-only and exposes the fixed fail-closed gate", async () => {
+  const app = await readFile(new URL("../K線西遊記/temples/11520/app.mjs", import.meta.url), "utf8");
+  assert.match(app, /11520 NVIDIA GPU real-trade readiness/);
+  assert.match(app, /readRepositoryBoundGpu11520Evidence/);
+  assert.match(app, /evaluateGpu11520RealTradeReadiness/);
+  assert.match(app, /This panel cannot create inventory, fund capital, request a signer, settle a trade or send a transaction/);
+  assert.doesNotMatch(app, /id="gpu-(?:trade|settle|sign|broadcast)"/);
 });

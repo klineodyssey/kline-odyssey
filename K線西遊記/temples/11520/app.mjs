@@ -20,6 +20,10 @@ import {
   ensureBscWalletNetwork, createMetaMaskMobileDeepLink
 } from "../../../core/integrations/kgen-pancakeswap-v2.mjs?v=11520-v4.0.2-browser-safe";
 import { readTempleHeart12345 } from "../../../core/integrations/temple-heart-12345.mjs?v=11520-v4.0-player-first";
+import {
+  evaluateGpu11520RealTradeReadiness,
+  readRepositoryBoundGpu11520Evidence
+} from "./modules/kgen-native-market-cell.mjs?v=11520-v4.0.2-gpu-readiness";
 
 const NAVIGATION = Object.freeze([
   ["HOME", "navigation.home"], ["REQUEST", "navigation.request"], ["LIFE", "navigation.life"], ["LIFE_FACTORY", "LIFE FACTORY"], ["APPS", "navigation.apps"], ["COMPANIES", "navigation.company"],
@@ -315,6 +319,23 @@ async function tokensView() {
   const cards = currencies.map((item) => `<article class="card"><div class="eyebrow">${html(item.currency_id)}</div><h3>${html(item.name)}</h3>${kv("Civilization", item.civilization_scale)}${kv("Mass class", item.mass_class ?? "NOT_DEFINED")}${kv("Life role", item.life_role ?? "NOT_DEFINED")}${kv("Contract", item.currency_id === "BNB" ? "NATIVE ASSET · NO CONTRACT" : item.contract_address ? "REGISTERED · VERIFY AT RUNTIME" : "NOT_DEPLOYED")}${kv("Trade", badge(item.trade_status ?? "NOT_DEPLOYED"), true)}<p>${badge(item.status)}</p></article>`).join("");
   const genesis = universe.seed.kaios_genesis;
   const mobileWalletLink = createMetaMaskMobileDeepLink(location.href);
+  let gpuReadiness;
+  try {
+    const evidence = await readRepositoryBoundGpu11520Evidence();
+    gpuReadiness = evaluateGpu11520RealTradeReadiness({ evidenceBundle: evidence });
+  } catch (error) {
+    gpuReadiness = Object.freeze({
+      company_address: "0.00011520",
+      company_k_coordinate: "K11520",
+      route: "K12345_TO_K11520",
+      repository_source_status: "SOURCE_READ_FAILED",
+      repository_verifier_status: "NOT_WIRED",
+      status: "BLOCKED_FAIL_CLOSED",
+      blockers: Object.freeze([error?.message || "GPU_READINESS_SOURCE_UNAVAILABLE"]),
+      real_trade_enabled: false,
+      chain_write: false
+    });
+  }
   return `${hero("TOKEN MARKET", "Real chain state, explicit wallet consent.", "KGEN uses its verified BSC mainnet KGEN/WBNB pair and PancakeSwap V2 Router. No synthetic candles, order book, TVL, fills or prices are generated.")}
     <div class="grid">${cards}</div>
     ${section("Mobile wallet entry", `<article class="card">
@@ -327,6 +348,18 @@ async function tokensView() {
       <div class="mono" id="wallet-entry-result" role="status">No wallet permission requested yet.</div>
     </article>`)}
     ${section("KAIOS Mainnet Genesis", `<article class="card">${kv("Status", badge(genesis.status), true)}${kv("Mechanism", "KGEN WHITE HOLE · NOT A DEX SWAP")}${kv("Genesis timestamp", genesis.timestamp)}${kv("Genesis block", genesis.block)}${kv("Genesis KAIOS", genesis.genesis_kaios)}${kv("Settlement TX", genesis.settlement_tx_hash)}${kv("Epoch TX", genesis.epoch_tx_hash)}${kv("Receiving treasury", "18888 LINGXIAO CELESTIAL BANK")}</article>`)}
+    ${section("11520 NVIDIA GPU real-trade readiness", `<article class="card">
+      <div class="notice">Read-only status. This panel cannot create inventory, fund capital, request a signer, settle a trade or send a transaction.</div>
+      ${kv("Company address", gpuReadiness.company_address)}
+      ${kv("Company coordinate", gpuReadiness.company_k_coordinate)}
+      ${kv("Logistics route", gpuReadiness.route)}
+      ${kv("Repository source", badge(gpuReadiness.repository_source_status), true)}
+      ${kv("External verifier", badge(gpuReadiness.repository_verifier_status), true)}
+      ${kv("Readiness", badge(gpuReadiness.status), true)}
+      ${kv("Real trade enabled", String(gpuReadiness.real_trade_enabled))}
+      ${kv("Chain write", String(gpuReadiness.chain_write))}
+      <div class="eyebrow">OPEN BLOCKERS</div>${pills(gpuReadiness.blockers)}
+    </article>`)}
     ${section("KGEN / WBNB live AMM", `<form class="card form-grid" id="kgen-swap-form">
       <div class="notice full">LIVE BSC transaction. Connect a wallet on chain 56. The Router supports KGEN fee-on-transfer behavior. Quotes are live and may differ from final receipt due to token tax, pool movement and gas. Nothing is submitted without wallet confirmation.</div>
       <div class="field"><label for="swap-direction">Action</label><select id="swap-direction"><option value="BUY_KGEN">BUY KGEN with BNB</option><option value="SELL_KGEN">SELL KGEN for BNB</option></select></div>

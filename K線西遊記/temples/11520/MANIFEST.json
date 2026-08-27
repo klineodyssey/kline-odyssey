@@ -28,6 +28,7 @@
   "gpu_trading_capital_registry": "runtime/company-trading-capital-registry.v1.json",
   "gpu_trading_capital_status": "SOURCE_WIRED_SCHEMA_ONLY_NO_FUNDED_TRADING_CAPITAL",
   "gpu_real_trade_status": "BLOCKED_FAIL_CLOSED",
+  "gpu_real_trade_ui": "READ_ONLY_PUBLIC_BLOCKER_PANEL_NO_SIGNER_NO_TRANSACTION",
   "entrypoint": "index.html",
   "runtime": "app.mjs",
   "domain_core": "BROWSER_SAFE_DIRECT_MODULE_IMPORTS",
