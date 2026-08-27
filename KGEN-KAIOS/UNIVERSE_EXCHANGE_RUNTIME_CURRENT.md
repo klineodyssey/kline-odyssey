@@ -296,7 +296,29 @@ Player Token / KAIOS
 
 Other pools are optional. The chosen pool must not be described as guaranteed liquidity unless reserves and redemption terms actually support that claim.
 
-### 10.4 KAIOS Market Genesis Readiness — 2026-08-27
+### 10.4 K11520 GPU Repository Evidence Boundary — 2026-08-27
+
+The NVIDIA GPU candidate uses one fixed repository evidence path:
+
+```text
+K線西遊記/temples/11520/runtime/gpu-real-evidence-registry.v1.json
+```
+
+The loader accepts no caller-selected path, parser, transport or data source.
+It validates a closed registry identity and unique evidence roots, then tracks
+only the exact returned object as repository-bound. Copying or reconstructing
+the fields loses that identity. The current registry contains zero records and
+states `NO_VERIFIED_REAL_GPU_INVENTORY`; this proves only that the repository
+contains no accepted real GPU inventory evidence. It does not create a GPU,
+warehouse custody, capital, settlement, signer authority or trade permission.
+
+The repository verifier being wired removes only the technical
+`REPOSITORY_BOUND_GPU_EVIDENCE_VERIFIER_NOT_WIRED` blocker. Every substantive
+inventory, ownership, cargo, transport, warehouse, capital, production-market,
+Policy Box, settlement, signer, distinct-review and no-broadcast fork gate must
+still pass independently before a separate execution review can begin.
+
+### 10.5 KAIOS Market Genesis Readiness — 2026-08-27
 
 A read-only two-provider BSC chain 56 quorum observation at confirmed block
 `118386241` (`2026-08-27T12:47:52Z`, block hash

@@ -3,7 +3,8 @@ import test from "node:test";
 import {
   createGpu11520PaperMarket,
   createKgenNativeMarketCell,
-  evaluateGpu11520RealTradeReadiness
+  evaluateGpu11520RealTradeReadiness,
+  readRepositoryBoundGpu11520Evidence
 } from "../K線西遊記/temples/11520/modules/kgen-native-market-cell.mjs";
 
 const verifiedContexts = new WeakMap();
@@ -440,6 +441,33 @@ test("GPU real-trade gate fails closed with the complete ordered blocker set", (
   assert.equal(result.transaction_payload, null);
   assert.equal(result.signer_requested, false);
   assert.equal(result.chain_write, false);
+});
+
+test("repository-bound GPU registry is wired but truthfully records no real inventory", async () => {
+  const evidence = await readRepositoryBoundGpu11520Evidence();
+  assert.equal(evidence.verification_status, "NO_VERIFIED_EVIDENCE");
+  assert.equal(evidence.registry_status, "NO_VERIFIED_REAL_GPU_INVENTORY");
+  assert.equal(evidence.record_count, 0);
+  assert.equal(evidence.real_inventory_created, false);
+  assert.equal(evidence.transaction_authority, false);
+  assert.equal(evidence.chain_write, false);
+
+  const result = evaluateGpu11520RealTradeReadiness({ evidenceBundle: evidence });
+  assert.equal(result.repository_verifier_status, "WIRED");
+  assert.ok(!result.blockers.includes("REPOSITORY_BOUND_GPU_EVIDENCE_VERIFIER_NOT_WIRED"));
+  assert.ok(result.blockers.includes("INDEPENDENT_EVIDENCE_BUNDLE_NOT_VERIFIED"));
+  assert.ok(result.blockers.includes("VERIFIED_GPU_INVENTORY_REQUIRED"));
+  assert.equal(result.status, "BLOCKED_FAIL_CLOSED");
+  assert.equal(result.real_trade_enabled, false);
+});
+
+test("copying repository GPU evidence loses verifier identity", async () => {
+  const evidence = await readRepositoryBoundGpu11520Evidence();
+  const copied = structuredClone(evidence);
+  const result = evaluateGpu11520RealTradeReadiness({ evidenceBundle: copied });
+  assert.equal(result.repository_verifier_status, "NOT_WIRED");
+  assert.ok(result.blockers.includes("REPOSITORY_BOUND_GPU_EVIDENCE_VERIFIER_NOT_WIRED"));
+  assert.equal(result.real_trade_enabled, false);
 });
 
 test("complete hypothetical GPU evidence remains blocked without a repository-bound verifier", () => {

@@ -5,6 +5,9 @@ const MARKET_CELL_COORDINATE_ROLE = "KGEN_UNIVERSE_PRICE_AND_COMPANY_ADDRESS";
 const COMPANY_ADDRESS = "0.00011520";
 const COMPANY_K_COORDINATE = "K11520";
 const KGEN_PRICE_COORDINATE_UNIT = "USD_PER_KGEN";
+const GPU_EVIDENCE_REGISTRY_URL = new URL("../runtime/gpu-real-evidence-registry.v1.json", import.meta.url);
+const repositoryBoundGpuEvidenceBundles = new WeakSet();
+const repositoryBoundGpuEvidenceFetch = typeof globalThis.fetch === "function" ? globalThis.fetch.bind(globalThis) : null;
 
 function parseDecimal(value, label = "value") {
   const text = String(value).trim();
@@ -462,6 +465,113 @@ function positiveAtomic(value) {
   return /^\d+$/.test(String(value ?? "")) && BigInt(value) > 0n;
 }
 
+function exactObjectKeys(value, keys, label) {
+  if (!value || typeof value !== "object" || Array.isArray(value)) {
+    throw new TypeError(`${label} must be an object`);
+  }
+  const actual = Object.keys(value).sort();
+  const expected = [...keys].sort();
+  if (actual.length !== expected.length || actual.some((key, index) => key !== expected[index])) {
+    throw new TypeError(`${label} must use the closed repository schema`);
+  }
+}
+
+function deepFreeze(value) {
+  if (!value || typeof value !== "object" || Object.isFrozen(value)) return value;
+  for (const nested of Object.values(value)) deepFreeze(nested);
+  return Object.freeze(value);
+}
+
+const GPU_REPOSITORY_RECORD_KEYS = Object.freeze([
+  "verification_status", "evidence_root", "observed_block", "inventory", "transport",
+  "warehouse", "capital", "market", "policy_box", "settlement", "signer",
+  "independent_review", "fork_simulation"
+]);
+
+function validateRepositoryGpuRecord(record) {
+  exactObjectKeys(record, GPU_REPOSITORY_RECORD_KEYS, "GpuRepositoryEvidenceRecord");
+  if (record.verification_status !== "VERIFIED") throw new TypeError("GPU repository record must be VERIFIED");
+  if (!exactEvidence(record.evidence_root)) throw new TypeError("GPU repository evidence_root is invalid");
+  if (!Number.isSafeInteger(record.observed_block) || record.observed_block <= 0) throw new TypeError("GPU repository observed_block is invalid");
+  for (const field of GPU_REPOSITORY_RECORD_KEYS.slice(3)) {
+    if (!record[field] || typeof record[field] !== "object" || Array.isArray(record[field])) {
+      throw new TypeError(`GPU repository ${field} evidence is invalid`);
+    }
+  }
+  return record;
+}
+
+function validateGpuEvidenceRegistry(registry) {
+  exactObjectKeys(registry, [
+    "schema_version", "registry_id", "mode", "company_address", "company_k_coordinate",
+    "warehouse_id", "status", "records"
+  ], "GpuEvidenceRegistry");
+  if (registry.schema_version !== "1.0.0"
+    || registry.registry_id !== "KAIOS_11520_GPU_REAL_EVIDENCE_REGISTRY_V1"
+    || registry.mode !== "REPOSITORY_BOUND_CANDIDATE"
+    || registry.company_address !== COMPANY_ADDRESS
+    || registry.company_k_coordinate !== COMPANY_K_COORDINATE
+    || registry.warehouse_id !== "0.00011520_K11520_GPU_BONDED_WAREHOUSE") {
+    throw new TypeError("GPU evidence registry identity mismatch");
+  }
+  if (!new Set(["NO_VERIFIED_REAL_GPU_INVENTORY", "VERIFIED_RECORDS_PRESENT"]).has(registry.status)) {
+    throw new TypeError("GPU evidence registry status is invalid");
+  }
+  if (!Array.isArray(registry.records)) throw new TypeError("GPU evidence registry records must be an array");
+  registry.records.forEach(validateRepositoryGpuRecord);
+  if (registry.status === "NO_VERIFIED_REAL_GPU_INVENTORY" && registry.records.length !== 0) {
+    throw new TypeError("GPU registry cannot contain records while declaring no inventory");
+  }
+  if (registry.status === "VERIFIED_RECORDS_PRESENT" && registry.records.length === 0) {
+    throw new TypeError("GPU registry cannot declare verified records while empty");
+  }
+  if (new Set(registry.records.map((record) => record.evidence_root)).size !== registry.records.length) {
+    throw new TypeError("GPU repository evidence roots must be unique");
+  }
+  return registry;
+}
+
+async function readGpuEvidenceRegistryFile() {
+  if (GPU_EVIDENCE_REGISTRY_URL.protocol === "file:") {
+    const { readFile } = await import("node:fs/promises");
+    return JSON.parse(await readFile(GPU_EVIDENCE_REGISTRY_URL, "utf8"));
+  }
+  if (!repositoryBoundGpuEvidenceFetch) throw new Error("GPU_EVIDENCE_REGISTRY_FETCH_UNAVAILABLE");
+  const response = await repositoryBoundGpuEvidenceFetch(GPU_EVIDENCE_REGISTRY_URL, { cache: "no-store", credentials: "same-origin" });
+  if (!response.ok) throw new Error("GPU_EVIDENCE_REGISTRY_READ_FAILED");
+  return response.json();
+}
+
+/**
+ * Read the fixed repository GPU evidence registry. Callers may select an
+ * evidence root, but cannot substitute the path, parser, transport or data.
+ * An empty canonical registry proves only that no verified real GPU inventory
+ * is presently recorded; it never creates inventory, settlement or authority.
+ */
+export async function readRepositoryBoundGpu11520Evidence({ evidenceRoot = null } = {}) {
+  if (evidenceRoot !== null && !exactEvidence(evidenceRoot)) throw new TypeError("GPU evidenceRoot is invalid");
+  const registry = validateGpuEvidenceRegistry(await readGpuEvidenceRegistryFile());
+  const record = evidenceRoot === null
+    ? (registry.records.length === 1 ? registry.records[0] : null)
+    : (registry.records.find((candidate) => candidate.evidence_root === evidenceRoot) ?? null);
+  const result = deepFreeze(record ? structuredClone(record) : {
+    verification_status: "NO_VERIFIED_EVIDENCE",
+    evidence_root: evidenceRoot,
+    observed_block: null,
+    registry_id: registry.registry_id,
+    registry_status: registry.status,
+    record_count: registry.records.length,
+    company_address: registry.company_address,
+    company_k_coordinate: registry.company_k_coordinate,
+    warehouse_id: registry.warehouse_id,
+    real_inventory_created: false,
+    transaction_authority: false,
+    chain_write: false
+  });
+  repositoryBoundGpuEvidenceBundles.add(result);
+  return result;
+}
+
 /**
  * Read-only gate for a future real NVIDIA GPU trade at K11520.
  *
@@ -476,9 +586,12 @@ export function evaluateGpu11520RealTradeReadiness({
   executorLifeId = "LIFE-CODEX-GM-0001",
   executorControllerId = "codex-gm-01"
 } = {}) {
-  const blockers = ["REPOSITORY_BOUND_GPU_EVIDENCE_VERIFIER_NOT_WIRED"];
+  const repositoryVerifierWired = repositoryBoundGpuEvidenceBundles.has(evidenceBundle);
+  const blockers = repositoryVerifierWired ? [] : ["REPOSITORY_BOUND_GPU_EVIDENCE_VERIFIER_NOT_WIRED"];
   let verified = null;
-  if (typeof verifyEvidenceBundle === "function") {
+  if (repositoryVerifierWired && evidenceBundle?.verification_status === "VERIFIED") {
+    verified = evidenceBundle;
+  } else if (typeof verifyEvidenceBundle === "function") {
     try {
       const candidate = verifyEvidenceBundle(evidenceBundle, Object.freeze({
         purpose: "GPU_11520_REAL_TRADE_READINESS",
@@ -630,6 +743,7 @@ export function evaluateGpu11520RealTradeReadiness({
     route: "K12345_TO_K11520",
     evidence_root: verified?.evidence_root ?? null,
     observed_block: verified?.observed_block ?? null,
+    repository_verifier_status: repositoryVerifierWired ? "WIRED" : "NOT_WIRED",
     quote_asset: quoteAsset || null,
     status: orderedBlockers.length === 0
       ? "READY_FOR_SEPARATE_EXECUTION_REVIEW"
