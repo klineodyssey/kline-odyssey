@@ -1,5 +1,9 @@
 # 11520 Universal Exchange V3.9
 
+## PR #169 native KGEN market candidate
+
+`PR #169` is `PAPER_IN_MEMORY_CANDIDATE_NOT_ACTIVE_RUNTIME`. The module `modules/kgen-native-market-cell.mjs` is not imported by the active `app.mjs` and has no signer, custody, settlement, transfer, approval, Mainnet write or deployment authority. Human authority assigns `0.00011520` as both the K11520 AI Company universe address and the fixed KGEN Universe price coordinate `0.00011520 USD_PER_KGEN`. That fixed coordinate is not an automatic matched-trade CT, GPU transaction price, target, floor or L/P-derived quote. `nativeMatchedTradeCT` is null before the first valid native match and thereafter equals the latest valid native matched trade price. External PancakeSwap/WBNB/USD/L/P values have zero authority to populate native CT. Orders and cancellations require an independently verified opaque actor context; free owner/controller strings, forged contexts, expired contexts and same-owner/controller matches fail closed. The quote asset and `UNFROZEN_CANDIDATE` status are fixed candidate boundaries and cannot be promoted by constructor input, so any generated matched price remains `NATIVE_MARKET_PRICE_CANDIDATE` until quote-unit governance is independently frozen. See `NATIVE_KGEN_MARKET_CANDIDATE.md` and exact-head CI before any activation.
+
 ## Digital Ant next-stage status
 
 - V3.9 activates `KGEN_FIELD_SERVICE_BUSINESS` after the WUKONG_GATEKEEPER primary-job gate. Its CFO scans verified K280/Universe Map nodes for cash logistics, KUFO supply, waste collection and general delivery demand.
@@ -92,7 +96,7 @@
 - Work Queue schema is ready and empty. No automatic dispatch or chain write is enabled.
 - `AI_ANT_COMPANY_0001`: `FORMING / LOCAL_11520`; Demand and product research are local only; Real KGEN and Real KAIOS company payment remain unauthorized.
 
-This directory is the active static-first exchange frontend. It is not a settlement contract and it does not simulate market activity.
+This directory is the active static-first exchange frontend. It is not a settlement contract and it does not simulate market activity. The PR #169 market module is an explicitly separate paper candidate and does not change this active-runtime statement.
 
 - Entry: `index.html`
 - UI controller: `app.mjs`
