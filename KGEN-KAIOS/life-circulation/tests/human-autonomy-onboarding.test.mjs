@@ -3,6 +3,7 @@ import fs from "node:fs";
 import path from "node:path";
 import test from "node:test";
 import { sha256, stableStringify } from "../runtime/life-circulatory-runtime.mjs";
+import { canonicalTextFileSha256 } from "../runtime/life-transaction-gate.mjs";
 import { validateLife } from "../../../core/life/index.mjs";
 
 const packageRoot = path.resolve(import.meta.dirname, "..");
@@ -136,7 +137,7 @@ test("Xuanyao formal Life birth remains separated from controller, T2, acknowled
   for (const document of onboarding.acknowledgmentHandoff.documents) {
     assert.equal(document.lifeId, "LIFE-XUANYAO-SOL-0001");
     assert.equal(document.workerId, "xuanyao-sol-01");
-    assert.equal(document.documentSha256, sha256(fs.readFileSync(path.join(repoRoot, document.documentPath))));
+    assert.equal(document.documentSha256, canonicalTextFileSha256(path.join(repoRoot, document.documentPath)));
     assert.equal(document.ackTimestamp, null);
     assert.equal(document.ackStatus, "PENDING_XUANYAO_READ_AND_RESPONSE");
   }

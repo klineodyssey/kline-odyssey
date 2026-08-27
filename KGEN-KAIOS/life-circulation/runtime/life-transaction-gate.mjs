@@ -66,6 +66,11 @@ const VERIFIED_EXTERNAL_SIGNER_CONNECTIONS = new WeakSet();
 
 const FORBIDDEN_KEY = /(?:private.?key|seed(?:.?phrase)?|mnemonic|secret(?:.?key)?|raw.?signer)/iu;
 
+export function canonicalTextFileSha256(filePath) {
+  const canonicalText = fs.readFileSync(filePath, "utf8").replace(/\r\n?/gu, "\n");
+  return sha256(canonicalText);
+}
+
 function containsSecretField(value) {
   if (!value || typeof value !== "object") return false;
   if (Array.isArray(value)) return value.some(containsSecretField);
@@ -339,7 +344,7 @@ export function verifyXuanyaoAckResponse({ controllerVerification, response, now
   if (document) {
     addBlocker(blockers, response.DOCUMENT_HASH === document.documentSha256, "ACK_DOCUMENT_HASH_MISMATCH");
     try {
-      const liveHash = sha256(fs.readFileSync(path.resolve(import.meta.dirname, "../../..", document.documentPath)));
+      const liveHash = canonicalTextFileSha256(path.resolve(import.meta.dirname, "../../..", document.documentPath));
       addBlocker(blockers, liveHash === document.documentSha256, "ACK_DOCUMENT_HASH_STALE");
     } catch {
       blockers.push("ACK_DOCUMENT_UNREADABLE");
