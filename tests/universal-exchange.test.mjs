@@ -101,7 +101,9 @@ import {
   calculateFieldServiceQuote, validateFieldDeliveryEvidence, createWorkforceGap,
   createFieldServiceDemandScan,
   runAutonomousCompanyCycle, AUTONOMOUS_COMPANY_SAFE_ACTIONS,
-  AUTONOMOUS_COMPANY_FORBIDDEN_ACTIONS
+  AUTONOMOUS_COMPANY_FORBIDDEN_ACTIONS, AUTONOMOUS_COMPANY_DURABLE_EVENT_TYPES,
+  persistAutonomousCompanyCycle, restoreAutonomousCompanyCycleState,
+  readLatestRepositorySnapshot
 } from "../core/index.mjs";
 import { verifyDigitalAntWalletBinding, verifyDigitalLifeWalletBinding, CODEX_GM_ENV } from "../core/security/wallet-binding.mjs";
 import { TEMPLE_HEART_READ_ABI, TEMPLE_HEART_DRY_RUN_ABI, TEMPLE_HEART_VERIFIED_ACTIONS, readCoreHeartEvents } from "../core/integrations/temple-heart-12345.mjs";
@@ -3155,4 +3157,88 @@ test("Autonomous Company cycle has an explicit bounded safe-action vocabulary", 
   assert.ok(AUTONOMOUS_COMPANY_SAFE_ACTIONS.includes("OPEN_DRAFT_PR"));
   assert.ok(!AUTONOMOUS_COMPANY_SAFE_ACTIONS.includes("MERGE_MAIN"));
   assert.ok(!AUTONOMOUS_COMPANY_SAFE_ACTIONS.includes("MAINNET_TRANSACTION"));
+});
+
+test("Autonomous Company cycle persists into the existing append-only Company history and recovers after restart", async () => {
+  const store = new MemoryUniverseStore();
+  const company = { company_id: "KAIOS_AI_COMPANY" };
+  const result = autonomousCycle();
+  const persisted = await persistAutonomousCompanyCycle({ store, company, cycle_result: result });
+  assert.equal(persisted.status, "CYCLE_EVENTS_PERSISTED");
+  assert.deepEqual(persisted.persisted_events.map((event) => event.event_id), result.events.map((event) => event.event_id));
+  assert.ok(persisted.persisted_events.every((event) => event.payload_hash && event.stream === "COMPANY"));
+  assert.equal(assertAppendOnlyChain(await store.history(company.company_id, "COMPANY")), true);
+
+  const recovered = await restoreAutonomousCompanyCycleState({ store, company_id: company.company_id });
+  assert.equal(recovered.status, "RESTART_STATE_RECOVERED");
+  assert.deepEqual(recovered.previous_cycle_ids, [result.cycle_id]);
+  assert.equal(recovered.latest_cycle_id, result.cycle_id);
+  assert.equal(recovered.latest_cycle_status, "ASSIGNMENT_CANDIDATE_READY");
+  assert.equal(recovered.event_count, result.events.length);
+  assert.equal(recovered.external_effect, false);
+
+  const replay = await persistAutonomousCompanyCycle({ store, company, cycle_result: result });
+  assert.equal(replay.status, "IDEMPOTENT_NOOP");
+  assert.equal((await store.history(company.company_id, "COMPANY")).length, result.events.length);
+});
+
+test("Autonomous Company durable memory rejects unsupported or externally effective events", async () => {
+  const store = new MemoryUniverseStore();
+  const company = { company_id: "KAIOS_AI_COMPANY" };
+  const result = autonomousCycle();
+  await assert.rejects(
+    () => persistAutonomousCompanyCycle({ store, company, cycle_result: { ...result, authority: { ...result.authority, payment_sent: true } } }),
+    (error) => error.code === "EXTERNAL_EFFECT_CYCLE_PERSISTENCE_FORBIDDEN"
+  );
+  await assert.rejects(
+    () => persistAutonomousCompanyCycle({ store, company, cycle_result: { ...result, events: [{ ...result.events[0], event_type: "PAYMENT_SENT" }] } }),
+    (error) => error.code === "UNSUPPORTED_DURABLE_COMPANY_EVENT"
+  );
+  assert.deepEqual(AUTONOMOUS_COMPANY_DURABLE_EVENT_TYPES, ["CLOCK_IN", "WORK_ORDER", "HANDOFF", "REVIEW_REQUEST", "REWORK_ORDER", "BLOCKER_STATE", "CLOCK_OUT"]);
+});
+
+test("Latest Repository Snapshot adapter discovers fresh main PR divergence and exact-head CI read-only", async () => {
+  const mainSha = "a".repeat(40);
+  const headSha = "b".repeat(40);
+  const requests = [];
+  const responses = new Map([
+    ["https://api.github.test/repos/klineodyssey/kline-odyssey", { default_branch: "main" }],
+    ["https://api.github.test/repos/klineodyssey/kline-odyssey/commits/main", { sha: mainSha, commit: { committer: { date: "2026-08-27T06:00:00Z" } } }],
+    ["https://api.github.test/repos/klineodyssey/kline-odyssey/pulls/170", { state: "open", draft: true, head: { sha: headSha } }],
+    [`https://api.github.test/repos/klineodyssey/kline-odyssey/compare/main...${headSha}`, { ahead_by: 8, behind_by: 0 }],
+    [`https://api.github.test/repos/klineodyssey/kline-odyssey/commits/${headSha}/check-runs`, { check_runs: [{ status: "completed", conclusion: "success" }, { status: "completed", conclusion: "skipped" }] }]
+  ]);
+  const fetch_impl = async (url, options) => {
+    requests.push({ url, options });
+    const body = responses.get(url);
+    return body ? { ok: true, status: 200, json: async () => body } : { ok: false, status: 404, json: async () => ({}) };
+  };
+  const snapshot = await readLatestRepositorySnapshot({
+    repository: "klineodyssey/kline-odyssey",
+    active_task_pr: 170,
+    observed_at: "2026-08-27T06:01:00Z",
+    fetch_impl,
+    token: "TEST_TOKEN_NOT_LOGGED",
+    api_base: "https://api.github.test"
+  });
+  assert.equal(snapshot.main_sha, mainSha);
+  assert.equal(snapshot.main_commit_time, "2026-08-27T06:00:00Z");
+  assert.equal(snapshot.active_task_pr.head_sha, headSha);
+  assert.equal(snapshot.active_task_pr.behind_main, 0);
+  assert.equal(snapshot.active_task_pr.ahead_main, 8);
+  assert.equal(snapshot.active_task_pr.ci_status, "PASS");
+  assert.equal(snapshot.active_task_pr.check_count, 2);
+  assert.ok(requests.every((request) => request.options.method === "GET"));
+  assert.deepEqual(snapshot.authority, { github_read: true, github_write: false, merge: false, branch_push: false, chain_write: false, signer: false });
+});
+
+test("Latest Repository Snapshot adapter fails closed on unavailable or malformed GitHub evidence", async () => {
+  await assert.rejects(
+    () => readLatestRepositorySnapshot({ repository: "klineodyssey/kline-odyssey", observed_at: "2026-08-27T06:01:00Z", fetch_impl: async () => ({ ok: false, status: 503 }) }),
+    (error) => error.code === "GITHUB_READ_FAILED"
+  );
+  await assert.rejects(
+    () => readLatestRepositorySnapshot({ repository: "not-a-repository", observed_at: "2026-08-27T06:01:00Z", fetch_impl: async () => ({ ok: true, json: async () => ({}) }) }),
+    (error) => error.code === "INVALID_GITHUB_REPOSITORY"
+  );
 });

@@ -1,10 +1,10 @@
 {
   "metadata": {
     "architecture_id": "PRIMEFORGE-COMPANY-AUTOPILOT-ARCH-001",
-    "version": "0.5.0-candidate",
-    "revision": "2026-08-23.1",
+    "version": "0.6.0-candidate",
+    "revision": "2026-08-27.1",
     "status": "ACTIVE_OPERATOR_PROTOCOL_NO_BACKGROUND_SERVICE",
-    "last_updated": "2026-08-23",
+    "last_updated": "2026-08-27",
     "updated_by": "codex-gm-01",
     "reviewed_by": "HUMAN_PRIMEFORGE_FULL_AUTOPILOT_001",
     "human_decision_ids": [
@@ -34,6 +34,22 @@
       "reuses_formal_workqueue": true,
       "reuses_review_first_priority": true,
       "replay_safe_with_supplied_cycle_history": true,
+      "durable_company_history": {
+        "implementation": "core/company/index.mjs#persistAutonomousCompanyCycle",
+        "store": "EXISTING_UNIVERSE_STORE_COMPANY_STREAM",
+        "browser_persistence": "INDEXEDDB",
+        "deterministic_event_ids": true,
+        "append_only_hash_chain": true,
+        "restart_recovery": "core/company/index.mjs#restoreAutonomousCompanyCycleState",
+        "status": "IMPLEMENTED_LOCAL_CANDIDATE_NOT_BACKGROUND_INVOKED"
+      },
+      "latest_repository_snapshot": {
+        "implementation": "core/company/index.mjs#readLatestRepositorySnapshot",
+        "source": "GITHUB_REST_API",
+        "reads": ["LATEST_MAIN", "MAIN_COMMIT_TIME", "ACTIVE_PR_HEAD", "PR_STATE", "AHEAD_BEHIND", "EXACT_HEAD_CHECK_RUNS"],
+        "github_write": false,
+        "status": "IMPLEMENTED_READ_ONLY_CANDIDATE_NOT_BACKGROUND_INVOKED"
+      },
       "background_scheduler": false,
       "claim_persistence": false,
       "worker_wake": false,
@@ -42,8 +58,6 @@
       "payment": false,
       "private_key_access": false,
       "missing_connectors": [
-        "DURABLE_CYCLE_EVENT_STORE",
-        "LATEST_REPOSITORY_SNAPSHOT_ADAPTER",
         "ATOMIC_CLAIM_LEASE_CONNECTOR",
         "AUTHORIZED_WORKER_WAKE_ADAPTER",
         "INDEPENDENT_REVIEW_TRIGGER",

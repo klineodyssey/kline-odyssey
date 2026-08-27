@@ -36,12 +36,20 @@ Cursor checks the queue every 10 minutes, writes progress every 2 hours, writes 
 
 The first executable Company-cycle candidate is `runAutonomousCompanyCycle()` in `core/company/index.mjs`. It reuses the formal Worker Registry, WorkQueue, Review-first policy, task-envelope authority, branch policy and independent reviewer boundary.
 
-The candidate is deterministic and side-effect-free. It emits append-only machine events for `CLOCK_IN`, `WORK_ORDER`, `HANDOFF`, `REVIEW_REQUEST`, `BLOCKER_STATE` and `CLOCK_OUT`, while rejecting replayed cycle IDs. `REWORK_REQUIRED` returns to the explicit original authorized worker as a repair candidate; only a later `DELIVERY_SUBMITTED` record can request a new independent review. Every work candidate requires a registered, active, T2+ reviewer distinct from its worker. Its output is a plan, not an external action: no Claim is persisted, no employee is started, no GitHub state changes, and no payment, signer, deployment, governance or chain capability is present.
+The candidate is deterministic and separates planning from effects. It emits append-only machine events for `CLOCK_IN`, `WORK_ORDER`, `HANDOFF`, `REVIEW_REQUEST`, `BLOCKER_STATE` and `CLOCK_OUT`, while rejecting replayed cycle IDs. `REWORK_REQUIRED` returns to the explicit original authorized worker as a repair candidate; only a later `DELIVERY_SUBMITTED` record can request a new independent review. Every work candidate requires a registered, active, T2+ reviewer distinct from its worker.
+
+`persistAutonomousCompanyCycle()` now records a safe cycle in the existing Company history stream instead of creating another queue or Company OS. Deterministic event IDs, payload hashes and the existing `previous_event_id` chain make replay visible and fail closed; `IndexedDbUniverseStore` provides browser persistence. `restoreAutonomousCompanyCycleState()` reconstructs prior cycle IDs and the latest clock-out result after restart.
+
+`readLatestRepositorySnapshot()` is the first read-only Company eye. At clock-in it obtains the repository default branch, current main SHA and time, active PR head/state, divergence and exact-head check runs from GitHub. It has no mutation, merge, branch-push, signer or chain method. A failed or malformed GitHub response produces no fabricated snapshot.
+
+The cycle still cannot persist a Claim, start an employee, mutate GitHub, merge, push `main`, pay, access a private key, deploy or send a transaction. Those connectors remain independently gated.
 
 Current connection state:
 
 - General Manager automatic clock-in calculation: `CANDIDATE_IMPLEMENTED_INVOCATION_REQUIRED`
 - safe job selection: `CANDIDATE_IMPLEMENTED`
+- durable Company cycle memory: `LOCAL_CANDIDATE_IMPLEMENTED_EXISTING_STORE`
+- latest repository self-discovery: `READ_ONLY_CANDIDATE_IMPLEMENTED`
 - durable atomic Claim: `NOT_CONNECTED`
 - employee wake: `EXISTING_CURSOR_WORKFLOW_PRESENT_NOT_CONNECTED_TO_CYCLE`
 - independent review trigger: `NOT_CONNECTED`

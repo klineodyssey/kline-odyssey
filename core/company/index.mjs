@@ -1905,6 +1905,16 @@ export const AUTONOMOUS_COMPANY_FORBIDDEN_ACTIONS = Object.freeze([
   "IRREVERSIBLE_EXTERNAL_ACTION"
 ]);
 
+export const AUTONOMOUS_COMPANY_DURABLE_EVENT_TYPES = Object.freeze([
+  "CLOCK_IN",
+  "WORK_ORDER",
+  "HANDOFF",
+  "REVIEW_REQUEST",
+  "REWORK_ORDER",
+  "BLOCKER_STATE",
+  "CLOCK_OUT"
+]);
+
 const AUTONOMOUS_COMPANY_PRIORITY = Object.freeze({ REVIEW: 0, REPAIR: 1, HUMAN_DECISION: 2, ARCHITECTURE: 3, IMPLEMENTATION: 4 });
 const AUTONOMOUS_COMPANY_SEVERITY = Object.freeze({ P0: 0, P1: 1, P2: 2, P3: 3 });
 const AUTONOMOUS_COMPANY_TRUST = Object.freeze({ T0: 0, T1: 1, T2: 2, T3: 3, T4: 4, T5: 5 });
@@ -2226,5 +2236,161 @@ export function runAutonomousCompanyCycle({
     next_safe_action: isRepair
       ? "PERSIST_REPAIR_CLAIM_ATOMICALLY_WHEN_CONNECTOR_IS_AUTHORIZED"
       : "PERSIST_CLAIM_ATOMICALLY_WHEN_CONNECTOR_IS_AUTHORIZED"
+  });
+}
+
+/**
+ * Persists one already-planned safe Company cycle into the existing Company
+ * history stream. Event ids are deterministic, so IndexedDB rejects a racing
+ * duplicate and MemoryUniverseStore rejects it before mutation.
+ */
+export async function persistAutonomousCompanyCycle({ store, company, cycle_result }) {
+  invariant(store && typeof store.history === "function" && typeof store.commitBatch === "function", "COMPANY_EVENT_STORE_REQUIRED", "Company cycle persistence requires the existing UniverseStore interface");
+  invariant(company && typeof company.company_id === "string" && company.company_id.trim(), "COMPANY_ID_REQUIRED", "Company cycle persistence requires a Company identity");
+  invariant(cycle_result && typeof cycle_result.cycle_id === "string", "COMPANY_CYCLE_RESULT_REQUIRED", "A planned Company cycle result is required");
+  requireArray(cycle_result.events, "cycle_result.events");
+  invariant(cycle_result.authority && typeof cycle_result.authority === "object", "COMPANY_CYCLE_AUTHORITY_REQUIRED", "A planned Company cycle must expose its authority boundary");
+  invariant(
+    Object.values(cycle_result.authority ?? {}).every((value) => value === false),
+    "EXTERNAL_EFFECT_CYCLE_PERSISTENCE_FORBIDDEN",
+    "Durable Company memory only accepts cycles with no external authority effects"
+  );
+
+  const history = await store.history(company.company_id, "COMPANY");
+  if (history.some((event) => event.payload?.cycle_id === cycle_result.cycle_id)) {
+    return Object.freeze({ status: "IDEMPOTENT_NOOP", cycle_id: cycle_result.cycle_id, persisted_events: Object.freeze([]) });
+  }
+
+  let expectedSequence = 1;
+  const operations = cycle_result.events.map((event) => {
+    invariant(event.cycle_id === cycle_result.cycle_id, "CYCLE_EVENT_ID_MISMATCH", "Every persisted event must belong to the planned cycle");
+    invariant(event.sequence === expectedSequence, "CYCLE_EVENT_SEQUENCE_INVALID", "Company cycle events must be contiguous and ordered");
+    invariant(AUTONOMOUS_COMPANY_DURABLE_EVENT_TYPES.includes(event.event_type), "UNSUPPORTED_DURABLE_COMPANY_EVENT", `Unsupported durable Company event: ${event.event_type}`);
+    invariant(event.append_only === true && event.external_effect === false, "DURABLE_EVENT_SAFETY_BOUNDARY", "Persisted Company events must be append-only and side-effect-free");
+    expectedSequence += 1;
+    return {
+      event_id: event.event_id,
+      domain: "COMPANY",
+      stream: "COMPANY",
+      id: company.company_id,
+      entity: company,
+      event_type: event.event_type,
+      actor_id: event.actor_id,
+      timestamp: event.occurred_at,
+      payload: {
+        cycle_id: cycle_result.cycle_id,
+        planner_event_id: event.event_id,
+        sequence: event.sequence,
+        cycle_status: cycle_result.status,
+        external_effect: false,
+        ...event.payload
+      }
+    };
+  });
+
+  const persisted = operations.length ? await store.commitBatch(operations) : [];
+  return Object.freeze({
+    status: operations.length ? "CYCLE_EVENTS_PERSISTED" : "NO_EVENTS_TO_PERSIST",
+    cycle_id: cycle_result.cycle_id,
+    persisted_events: Object.freeze(persisted)
+  });
+}
+
+export async function restoreAutonomousCompanyCycleState({ store, company_id }) {
+  invariant(store && typeof store.history === "function", "COMPANY_EVENT_STORE_REQUIRED", "Company cycle recovery requires the existing UniverseStore interface");
+  requireId(company_id, "company_id");
+  const history = await store.history(company_id, "COMPANY");
+  const cycleEvents = history.filter((event) => typeof event.payload?.cycle_id === "string" && AUTONOMOUS_COMPANY_DURABLE_EVENT_TYPES.includes(event.event_type));
+  const cycleIds = [...new Set(cycleEvents.map((event) => event.payload.cycle_id))];
+  const latestCycleId = cycleIds.at(-1) ?? null;
+  const latestEvents = latestCycleId ? cycleEvents.filter((event) => event.payload.cycle_id === latestCycleId) : [];
+  const clockOut = latestEvents.findLast((event) => event.event_type === "CLOCK_OUT");
+  return Object.freeze({
+    status: latestCycleId ? "RESTART_STATE_RECOVERED" : "NO_DURABLE_CYCLE_HISTORY",
+    company_id,
+    previous_cycle_ids: Object.freeze(cycleIds),
+    latest_cycle_id: latestCycleId,
+    latest_cycle_status: clockOut?.payload?.result ?? latestEvents.at(-1)?.payload?.cycle_status ?? null,
+    latest_event_id: latestEvents.at(-1)?.event_id ?? null,
+    event_count: cycleEvents.length,
+    external_effect: false
+  });
+}
+
+function githubSnapshotHeaders(token) {
+  return Object.freeze({
+    Accept: "application/vnd.github+json",
+    "X-GitHub-Api-Version": "2022-11-28",
+    ...(token ? { Authorization: `Bearer ${token}` } : {})
+  });
+}
+
+function aggregateGitHubChecks(checkRuns) {
+  if (!Array.isArray(checkRuns) || checkRuns.length === 0) return "NO_CHECKS";
+  if (checkRuns.some((run) => run.status !== "completed" || !run.conclusion)) return "PENDING";
+  if (checkRuns.some((run) => ["failure", "timed_out", "cancelled", "action_required", "startup_failure"].includes(run.conclusion))) return "FAIL";
+  return "PASS";
+}
+
+/**
+ * Read-only GitHub adapter used at Company clock-in. It discovers current main,
+ * the active PR head, divergence and exact-head checks from GitHub instead of
+ * trusting chat or a stale handoff. It exposes no mutation method.
+ */
+export async function readLatestRepositorySnapshot({
+  repository,
+  active_task_pr = null,
+  observed_at,
+  fetch_impl = globalThis.fetch,
+  token = null,
+  api_base = "https://api.github.com"
+}) {
+  invariant(/^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/.test(repository ?? ""), "INVALID_GITHUB_REPOSITORY", "Repository must use owner/name form");
+  invariant(typeof observed_at === "string" && !Number.isNaN(Date.parse(observed_at)), "INVALID_REPOSITORY_OBSERVATION_TIME", "observed_at must be an ISO timestamp");
+  invariant(typeof fetch_impl === "function", "GITHUB_READ_ADAPTER_REQUIRED", "A read-only fetch adapter is required");
+  invariant(active_task_pr === null || (Number.isInteger(active_task_pr) && active_task_pr > 0), "INVALID_ACTIVE_TASK_PR", "active_task_pr must be a positive integer or null");
+
+  const headers = githubSnapshotHeaders(token);
+  const read = async (path) => {
+    const response = await fetch_impl(`${api_base}/repos/${repository}${path}`, { method: "GET", headers });
+    invariant(response?.ok === true, "GITHUB_READ_FAILED", `GitHub read failed for ${path}: HTTP ${response?.status ?? "UNKNOWN"}`);
+    return response.json();
+  };
+
+  const repositoryState = await read("");
+  invariant(typeof repositoryState.default_branch === "string" && repositoryState.default_branch, "GITHUB_DEFAULT_BRANCH_MISSING", "GitHub repository response is missing default_branch");
+  const mainCommit = await read(`/commits/${encodeURIComponent(repositoryState.default_branch)}`);
+  invariant(/^[0-9a-f]{40}$/.test(mainCommit.sha ?? ""), "GITHUB_MAIN_SHA_INVALID", "GitHub main commit response is invalid");
+  const mainCommitTime = mainCommit.commit?.committer?.date ?? mainCommit.commit?.author?.date;
+  invariant(typeof mainCommitTime === "string" && !Number.isNaN(Date.parse(mainCommitTime)), "GITHUB_MAIN_TIME_INVALID", "GitHub main commit time is invalid");
+
+  let pullRequest = null;
+  if (active_task_pr !== null) {
+    const pr = await read(`/pulls/${active_task_pr}`);
+    invariant(/^[0-9a-f]{40}$/.test(pr.head?.sha ?? ""), "GITHUB_PR_HEAD_INVALID", "GitHub pull request head is invalid");
+    const comparison = await read(`/compare/${encodeURIComponent(repositoryState.default_branch)}...${pr.head.sha}`);
+    const checks = await read(`/commits/${pr.head.sha}/check-runs`);
+    invariant(Number.isInteger(comparison.ahead_by) && Number.isInteger(comparison.behind_by), "GITHUB_DIVERGENCE_INVALID", "GitHub comparison is missing ahead/behind counts");
+    pullRequest = Object.freeze({
+      number: active_task_pr,
+      head_sha: pr.head.sha,
+      state: String(pr.state ?? "").toUpperCase(),
+      draft: pr.draft === true,
+      ahead_main: comparison.ahead_by,
+      behind_main: comparison.behind_by,
+      ci_status: aggregateGitHubChecks(checks.check_runs),
+      check_count: Array.isArray(checks.check_runs) ? checks.check_runs.length : 0
+    });
+  }
+
+  return Object.freeze({
+    snapshot_type: "LATEST_REPOSITORY_READ_ONLY",
+    observed_at,
+    repository,
+    default_branch: repositoryState.default_branch,
+    main_sha: mainCommit.sha,
+    main_commit_time: mainCommitTime,
+    active_task_pr: pullRequest,
+    authority: Object.freeze({ github_read: true, github_write: false, merge: false, branch_push: false, chain_write: false, signer: false })
   });
 }

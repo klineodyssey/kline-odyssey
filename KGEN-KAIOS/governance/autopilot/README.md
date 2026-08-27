@@ -128,7 +128,9 @@ The candidate can deterministically:
 - require every work or repair candidate to retain a registered, active, T2+ reviewer distinct from the worker;
 - keep every event free of external side effects.
 
-It cannot persist a Claim, edit GitHub, launch a worker, merge, push `main`, pay, access a private key, deploy or send a transaction. Those connectors remain `NOT_CONNECTED`; the existing Claim/Lease Controller and independent Review gates must authorize them before any future activation.
+The candidate now reuses the existing Company history store to persist safe cycle events and recover the last cycle after restart. It also has a read-only GitHub snapshot adapter for current main, active PR divergence and exact-head checks. These are local/invocation-driven candidates: there is still no background scheduler.
+
+It cannot persist an atomic Claim, edit GitHub, launch a worker, merge, push `main`, pay, access a private key, deploy or send a transaction. Those connectors remain `NOT_CONNECTED`; the existing Claim/Lease Controller and independent Review gates must authorize them before any future activation.
 
 ## Imported Authorities
 
