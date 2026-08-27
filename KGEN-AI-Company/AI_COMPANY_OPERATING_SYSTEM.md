@@ -31,3 +31,34 @@ No AI Company task may modify contracts, $templePath, wallet, bridge, Boot, Runt
 ## 7. Daily Rhythm
 
 Cursor checks the queue every 10 minutes, writes progress every 2 hours, writes integration status every 10 hours, and writes a daily report every 24 hours. Codex reviews every REVIEW task.
+
+## 8. Option B Operating Company Candidate (2026-08-27)
+
+This cumulative section records the current local engineering boundary without rewriting the historical V3.0 text above.
+
+The Human Customer conditionally selected `OPERATING_AI_COMPANY`. The reproducible proposed price is `108888 KAIOS`, composed of:
+
+- direct engineering: `65000`
+- distinct review: `9680`
+- CI and infrastructure: `3200`
+- security: `6400`
+- project management: `7200`
+- risk reserve: `6000`
+- contingency: `4408`
+- company margin: `7000`
+
+The five milestone amounts are `21778`, `27222`, `27222`, `21778`, and `10888 KAIOS`. They sum exactly to the proposed total. This is a Binding Proposal candidate, not a payment request, receipt, funded project, or recognized revenue.
+
+The twelve Work Packages are Customer Gateway, Requirement Intake, Quote Engine, Delivery Estimator, WBS/Dispatcher, Acceptance/Escrow Model, K18888 Transfer Adapter, K11520 Trader Cell, Revenue/Payroll Accounting, Employment-as-Genesis Pipeline, Distinct QA Loop, and Company Dashboard. Their current aggregate estimate is `792` engineering hours.
+
+Current safety state:
+
+- `COMPANY_RECEIVABLE_ADDRESS = NOT_BOUND`
+- `PROJECT_ESCROW = NOT_DEPLOYED`
+- `PAYMENT_READY = NO`
+- `REAL_REVENUE = 0`
+- `CHAIN_WRITE = NO`
+- `CURRENT_DISTINCT_T2_REVIEWER_CAPACITY = 0`
+- `TARGET_DELIVERY = 2026-11-13T18:00:00+08:00, CONDITIONAL`
+
+Safe local engineering preparation may continue. Project activation, payment, milestone release, final acceptance, and merge remain evidence-gated. Missing distinct Reviewer capacity blocks independent acceptance but does not create a fake Reviewer or authorize self-review.

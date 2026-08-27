@@ -63,6 +63,16 @@ export const PUBLIC_GATEWAY_FUTURE_INPUT_TYPES = Object.freeze(["IMAGE", "FILE",
 export const REQUEST_VISIBILITIES = Object.freeze(["PUBLIC", "PRIVATE", "COMPANY_ONLY", "ANONYMIZED_PUBLIC"]);
 export const PUBLIC_REQUEST_HISTORY_EVENTS = Object.freeze(["INTENT_DRAFTED", "INTENT_CONFIRMED", "REQUEST_RECEIVED", "REQUEST_QUALIFIED", "PLAN_CREATED", "ESTIMATE_CREATED", "QUOTE_READY", "QUOTE_SENT", "ACCEPTED", "ORDER_CONFIRMED", "WORK_STARTED", "DELIVERED", "CLOSED"]);
 export const WORKTREE_CLASSIFICATIONS = Object.freeze(["PROJECT_SOURCE", "USER_DATA", "GENERATED_ARTIFACT", "TEMP", "CACHE", "BUILD_OUTPUT", "UNKNOWN"]);
+export const OPTION_B_BINDING_COST_FIELDS = Object.freeze([
+  "direct_engineering_cost", "review_cost", "infra_cost", "security_cost",
+  "project_management_cost", "risk_reserve", "contingency", "company_margin"
+]);
+export const OPTION_B_WORK_PACKAGE_IDS = Object.freeze([
+  "WP1_CUSTOMER_GATEWAY", "WP2_REQUIREMENT_INTAKE", "WP3_QUOTE_ENGINE", "WP4_DELIVERY_ESTIMATOR",
+  "WP5_WBS_DISPATCHER", "WP6_ACCEPTANCE_ESCROW_MODEL", "WP7_K18888_TRANSFER_ADAPTER",
+  "WP8_K11520_TRADER_CELL", "WP9_REVENUE_PAYROLL_ACCOUNTING", "WP10_EMPLOYMENT_GENESIS_PIPELINE",
+  "WP11_DISTINCT_QA_LOOP", "WP12_COMPANY_DASHBOARD"
+]);
 export const DEMAND_FIRST_CIVILIZATION_LAWS = Object.freeze([
   "FACTORY_WITHOUT_PRODUCT_FORBIDDEN", "PRODUCT_WITHOUT_NEED_FORBIDDEN", "PRODUCTION_WITHOUT_BOM_FORBIDDEN",
   "BOM_WITHOUT_RESOURCE_FORBIDDEN", "SALE_WITHOUT_INVENTORY_FORBIDDEN", "DELIVERY_WITHOUT_TRANSPORT_FORBIDDEN",
@@ -1366,6 +1376,129 @@ export function createNonBindingEstimatePreview({ request, route }) {
         ? ["SCRIPT", "ASSET_GENERATION", "VOICE", "MUSIC", "EDITING", "QA", "DELIVERY"]
         : ["AI_LABOR", "COMPUTE", "STORAGE", "RPC_OR_NETWORK", "SECURITY", "TESTING", "MAINTENANCE", "RISK_RESERVE", "COMPANY_MARGIN"];
   return Object.freeze({ estimate_id: `ESTIMATE_${request.request_id}`, request_id: request.request_id, estimated_scope: route.expected_output, cost_drivers: Object.freeze(costDrivers), estimated_cost: null, currency: "POLICY_REQUIRED", estimated_time: "ESTIMATE_PENDING", missing_information: Object.freeze([...request.missing_information]), risks: Object.freeze([...route.known_constraints]), next_approval: "APPROVED_COST_MARGIN_AND_RISK_POLICIES", quote_id: null, binding: false, revenue: "0", record_class: "SIMULATION", status: "ESTIMATE_ONLY" });
+}
+
+function validateOptionBMilestones(milestones, totalPrice) {
+  requireArray(milestones, "option_b.milestones");
+  invariant(milestones.length === 5, "OPTION_B_MILESTONE_COUNT_INVALID", "Option B requires exactly M0 through M4");
+  let previousDue = -Infinity;
+  let milestoneTotal = 0n;
+  milestones.forEach((milestone, index) => {
+    requireFields(milestone, ["milestone_id", "amount", "deliverables", "acceptance_tests", "due_at", "payment_trigger"], "OptionBMilestone");
+    invariant(milestone.milestone_id === `M${index}`, "OPTION_B_MILESTONE_ORDER_INVALID", "Option B milestones must be ordered M0 through M4");
+    requireArray(milestone.deliverables, `option_b.${milestone.milestone_id}.deliverables`);
+    requireArray(milestone.acceptance_tests, `option_b.${milestone.milestone_id}.acceptance_tests`);
+    invariant(milestone.deliverables.length > 0 && milestone.acceptance_tests.length > 0, "OPTION_B_MILESTONE_EVIDENCE_REQUIRED", "Every milestone needs deliverables and acceptance tests");
+    const due = Date.parse(milestone.due_at);
+    invariant(Number.isFinite(due) && due > previousDue, "OPTION_B_MILESTONE_DATE_INVALID", "Milestone due dates must be valid and strictly increasing");
+    previousDue = due;
+    milestoneTotal += quoteAmount(milestone.amount, `${milestone.milestone_id}.amount`);
+  });
+  invariant(milestoneTotal === totalPrice, "OPTION_B_MILESTONE_TOTAL_MISMATCH", "Milestone amounts must exactly equal the binding proposal total");
+}
+
+export function createOperatingCompanyBindingProposal({
+  proposal_id, project_id, request_id, customer_id, conditional_acceptance_evidence,
+  cost_breakdown, milestones, accepted_direction_at, earliest_start_at, target_delivery_at,
+  workforce, payment_architecture, human_gates = [], external_dependencies = []
+}) {
+  for (const [field, value] of Object.entries({ proposal_id, project_id, request_id, customer_id })) requireId(value, field);
+  invariant(typeof conditional_acceptance_evidence === "string" && conditional_acceptance_evidence.trim(), "CONDITIONAL_ACCEPTANCE_EVIDENCE_REQUIRED", "A Binding Project Proposal requires the Customer's conditional acceptance evidence");
+  invariant(cost_breakdown && typeof cost_breakdown === "object" && !Array.isArray(cost_breakdown), "OPTION_B_COST_BREAKDOWN_REQUIRED", "Option B requires a reproducible cost breakdown");
+  invariant(Object.keys(cost_breakdown).length === OPTION_B_BINDING_COST_FIELDS.length && OPTION_B_BINDING_COST_FIELDS.every((field) => Object.hasOwn(cost_breakdown, field)), "OPTION_B_COST_FIELDS_INVALID", "Option B cost breakdown must contain only the canonical cost fields");
+  const normalizedCosts = Object.fromEntries(OPTION_B_BINDING_COST_FIELDS.map((field) => [field, quoteAmount(cost_breakdown[field], field).toString()]));
+  const totalPrice = OPTION_B_BINDING_COST_FIELDS.reduce((sum, field) => sum + BigInt(normalizedCosts[field]), 0n);
+  invariant(totalPrice > 0n, "OPTION_B_TOTAL_PRICE_INVALID", "Binding proposal total must be positive");
+  validateOptionBMilestones(milestones, totalPrice);
+  requireFields(workforce, ["ai_workers_required", "distinct_reviewers_required", "current_distinct_reviewer_capacity", "workforce_gap_plan"], "OptionBWorkforce");
+  invariant(Number.isInteger(workforce.ai_workers_required) && workforce.ai_workers_required > 0, "OPTION_B_WORKER_REQUIREMENT_INVALID", "Option B requires a positive worker estimate");
+  invariant(Number.isInteger(workforce.distinct_reviewers_required) && workforce.distinct_reviewers_required > 0 && Number.isInteger(workforce.current_distinct_reviewer_capacity) && workforce.current_distinct_reviewer_capacity >= 0, "OPTION_B_REVIEW_CAPACITY_INVALID", "Reviewer requirements and capacity must be explicit non-negative integers");
+  invariant(workforce.current_distinct_reviewer_capacity >= workforce.distinct_reviewers_required || workforce.workforce_gap_plan, "OPTION_B_REVIEW_GAP_PLAN_REQUIRED", "Insufficient Reviewer capacity requires a workforce gap plan");
+  requireFields(payment_architecture, ["company_receivable_address", "project_escrow", "signer_policy", "refund_policy", "dispute_policy", "milestone_release_policy", "payment_ready"], "OptionBPaymentArchitecture");
+  invariant(payment_architecture.payment_ready === false && payment_architecture.company_receivable_address === null && payment_architecture.project_escrow === "NOT_DEPLOYED", "OPTION_B_PAYMENT_NOT_READY", "This candidate cannot bind a receivable address, deploy escrow or enable payment");
+  for (const field of ["accepted_direction_at", "earliest_start_at", "target_delivery_at"]) invariant(Number.isFinite(Date.parse({ accepted_direction_at, earliest_start_at, target_delivery_at }[field])), "OPTION_B_DATE_INVALID", `${field} must be an ISO timestamp`);
+  invariant(Date.parse(earliest_start_at) >= Date.parse(accepted_direction_at) && Date.parse(target_delivery_at) >= Date.parse(earliest_start_at), "OPTION_B_DATE_SEQUENCE_INVALID", "Acceptance, start and target delivery dates must be chronological");
+  requireArray(human_gates, "option_b.human_gates");
+  requireArray(external_dependencies, "option_b.external_dependencies");
+  const reviewBlocked = workforce.current_distinct_reviewer_capacity < workforce.distinct_reviewers_required;
+  return Object.freeze({
+    proposal_id, project_id, request_id, customer_id, option: "OPERATING_AI_COMPANY", currency: "KAIOS",
+    conditional_acceptance_evidence: conditional_acceptance_evidence.trim(), cost_breakdown: Object.freeze(normalizedCosts),
+    total_binding_price: totalPrice.toString(), milestones: Object.freeze(milestones.map((item) => Object.freeze({ ...item, deliverables: Object.freeze([...item.deliverables]), acceptance_tests: Object.freeze([...item.acceptance_tests]) }))),
+    accepted_direction_at, earliest_start_at, target_delivery_at, workforce: Object.freeze({ ...workforce }),
+    payment_architecture: Object.freeze({ ...payment_architecture }), human_gates: Object.freeze([...human_gates]), external_dependencies: Object.freeze([...external_dependencies]),
+    engineering_preparation_authorized: true, project_activated: false, payment_requested: false, payment_received: false,
+    real_revenue: "0", chain_write: false, distinct_review_blocked: reviewBlocked,
+    status: reviewBlocked ? "BINDING_PROPOSAL_READY_REVIEW_CAPACITY_BLOCKED" : "BINDING_PROPOSAL_READY_AWAITING_CUSTOMER_ACCEPTANCE"
+  });
+}
+
+export function validateOperatingCompanyBindingProposal(proposal) {
+  requireFields(proposal, ["proposal_id", "project_id", "request_id", "customer_id", "option", "currency", "conditional_acceptance_evidence", "cost_breakdown", "total_binding_price", "milestones", "accepted_direction_at", "earliest_start_at", "target_delivery_at", "workforce", "payment_architecture", "human_gates", "external_dependencies", "engineering_preparation_authorized", "project_activated", "payment_requested", "payment_received", "real_revenue", "chain_write", "distinct_review_blocked", "status"], "OperatingCompanyBindingProposal");
+  const rebuilt = createOperatingCompanyBindingProposal({
+    proposal_id: proposal.proposal_id, project_id: proposal.project_id, request_id: proposal.request_id, customer_id: proposal.customer_id,
+    conditional_acceptance_evidence: proposal.conditional_acceptance_evidence, cost_breakdown: proposal.cost_breakdown,
+    milestones: proposal.milestones, accepted_direction_at: proposal.accepted_direction_at, earliest_start_at: proposal.earliest_start_at,
+    target_delivery_at: proposal.target_delivery_at, workforce: proposal.workforce, payment_architecture: proposal.payment_architecture,
+    human_gates: proposal.human_gates, external_dependencies: proposal.external_dependencies
+  });
+  invariant(rebuilt.total_binding_price === String(proposal.total_binding_price) && proposal.option === "OPERATING_AI_COMPANY" && proposal.currency === "KAIOS", "OPTION_B_BINDING_PROPOSAL_MISMATCH", "Binding proposal must reproduce the canonical Option B total and currency");
+  invariant(proposal.project_activated === false && proposal.payment_requested === false && proposal.payment_received === false && String(proposal.real_revenue) === "0" && proposal.chain_write === false, "OPTION_B_FALSE_BUSINESS_STATE", "A Binding Proposal cannot fabricate activation, payment, Revenue or chain writes");
+  return proposal;
+}
+
+export function createOptionBWorkBreakdown({ proposal, work_packages }) {
+  validateOperatingCompanyBindingProposal(proposal);
+  requireArray(work_packages, "option_b.work_packages");
+  invariant(work_packages.length === OPTION_B_WORK_PACKAGE_IDS.length, "OPTION_B_WBS_COUNT_INVALID", "Option B requires all twelve work packages");
+  const ids = work_packages.map((item) => item.task_id);
+  invariant(new Set(ids).size === ids.length && OPTION_B_WORK_PACKAGE_IDS.every((id) => ids.includes(id)), "OPTION_B_WBS_ID_INVALID", "Option B work package IDs must be complete and unique");
+  let totalHours = 0;
+  const normalized = work_packages.map((item, index) => {
+    requireFields(item, ["task_id", "assigned_role", "required_skills", "trust_required", "reviewer_required", "dependencies", "files_allowed", "branch", "estimated_hours", "start_gate", "acceptance_tests", "delivery_artifact"], "OptionBWorkPackage");
+    for (const field of ["required_skills", "dependencies", "files_allowed", "acceptance_tests"]) requireArray(item[field], `option_b.${item.task_id}.${field}`);
+    invariant(!Object.hasOwn(item, "assigned_worker_id"), "OPTION_B_PREMATURE_WORKER_ASSIGNMENT", "WBS assigns roles; a Registry-qualified dispatcher assigns workers later");
+    invariant(typeof item.assigned_role === "string" && item.assigned_role && /^T[2-9]$/.test(item.trust_required), "OPTION_B_WORK_AUTHORITY_INVALID", "Each package requires a role and T2+ trust");
+    invariant(item.branch.startsWith("codex/") && item.files_allowed.length > 0 && item.acceptance_tests.length > 0, "OPTION_B_WORK_SCOPE_INVALID", "Each package requires an isolated branch, file scope and acceptance tests");
+    invariant(Number.isInteger(item.estimated_hours) && item.estimated_hours > 0, "OPTION_B_WORK_HOURS_INVALID", "Estimated hours must be positive integers");
+    for (const dependency of item.dependencies) invariant(ids.indexOf(dependency) >= 0 && ids.indexOf(dependency) < index, "OPTION_B_DEPENDENCY_INVALID", "Dependencies must exist earlier in topological order");
+    totalHours += item.estimated_hours;
+    const reviewBlocked = item.reviewer_required && proposal.distinct_review_blocked;
+    return Object.freeze({ ...item, required_skills: Object.freeze([...item.required_skills]), dependencies: Object.freeze([...item.dependencies]), files_allowed: Object.freeze([...item.files_allowed]), acceptance_tests: Object.freeze([...item.acceptance_tests]), assigned_worker_id: null, status: reviewBlocked ? "ENGINEERING_PREPARATION_ALLOWED_REVIEW_BLOCKED" : "READY_FOR_REGISTRY_DISPATCH" });
+  });
+  return Object.freeze({ wbs_id: `WBS_${proposal.project_id}`, project_id: proposal.project_id, work_packages: Object.freeze(normalized), total_estimated_hours: totalHours, assigned_workers: 0, distinct_review_blocked: proposal.distinct_review_blocked, external_effect: false, status: proposal.distinct_review_blocked ? "WBS_READY_REVIEW_CAPACITY_BLOCKED" : "WBS_READY_FOR_DISPATCH" });
+}
+
+function addUtcBusinessDays(timestamp, businessDays) {
+  const date = new Date(timestamp);
+  invariant(Number.isFinite(date.getTime()), "OPTION_B_DATE_INVALID", "Schedule timestamps must be valid ISO dates");
+  let remaining = businessDays;
+  while (remaining > 0) {
+    date.setUTCDate(date.getUTCDate() + 1);
+    const weekday = date.getUTCDay();
+    if (weekday !== 0 && weekday !== 6) remaining -= 1;
+  }
+  return date.toISOString();
+}
+
+export function estimateOptionBDeliverySchedule({ proposal, wbs, engineering_capacity_hours_per_day, reviewer_capacity, human_gate_business_days = 0 }) {
+  validateOperatingCompanyBindingProposal(proposal);
+  invariant(wbs?.project_id === proposal.project_id && Number.isInteger(wbs.total_estimated_hours) && wbs.total_estimated_hours > 0, "OPTION_B_WBS_REQUIRED", "Delivery estimation requires the project's validated WBS");
+  invariant(Number.isInteger(engineering_capacity_hours_per_day) && engineering_capacity_hours_per_day > 0, "OPTION_B_ENGINEERING_CAPACITY_INVALID", "Engineering capacity must be a positive number of hours per business day");
+  invariant(Number.isInteger(reviewer_capacity) && reviewer_capacity >= 0 && Number.isInteger(human_gate_business_days) && human_gate_business_days >= 0, "OPTION_B_SCHEDULE_CAPACITY_INVALID", "Reviewer capacity and Human gate days must be explicit non-negative integers");
+  const engineeringDays = Math.ceil(wbs.total_estimated_hours / engineering_capacity_hours_per_day);
+  const engineeringCompleteAt = addUtcBusinessDays(proposal.earliest_start_at, engineeringDays);
+  const gatedAt = addUtcBusinessDays(engineeringCompleteAt, human_gate_business_days);
+  const reviewerBlocked = reviewer_capacity === 0;
+  return Object.freeze({
+    project_id: proposal.project_id, earliest_start_at: proposal.earliest_start_at,
+    engineering_business_days: engineeringDays, engineering_complete_at: engineeringCompleteAt,
+    human_gate_business_days, human_gates_complete_at: gatedAt, reviewer_capacity,
+    review_complete_at: reviewerBlocked ? null : addUtcBusinessDays(gatedAt, Math.ceil(OPTION_B_WORK_PACKAGE_IDS.length / reviewer_capacity)),
+    target_delivery_at: proposal.target_delivery_at, target_delivery_binding: false,
+    critical_path: Object.freeze(reviewerBlocked ? ["ENGINEERING", "HUMAN_GATES", "DISTINCT_REVIEWER_CAPACITY_BLOCKED"] : ["ENGINEERING", "HUMAN_GATES", "DISTINCT_REVIEW", "CUSTOMER_ACCEPTANCE"]),
+    status: reviewerBlocked ? "TARGET_DATE_CONDITIONAL_REVIEWER_CAPACITY_BLOCKED" : "DELIVERY_ESTIMATE_READY"
+  });
 }
 
 export function validatePublicCivilizationRequestGateway(gateway) {
