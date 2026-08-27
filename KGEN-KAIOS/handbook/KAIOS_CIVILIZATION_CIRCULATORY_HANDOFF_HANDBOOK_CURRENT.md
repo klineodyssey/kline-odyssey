@@ -230,7 +230,7 @@ The current 16-workstream order is: Genesis/PR lineage; Cursor offboarding; dist
 
 Engineering candidates may proceed on isolated Draft branches. Real trade, payment, deployment and governance stay fail-closed unless the corresponding signer, budget, inventory, counterparty, settlement and independent-review gates are all machine-verifiably satisfied.
 
-Checkpoint classification at `2026-08-27T12:30:23Z`:
+Checkpoint classification at `2026-08-27T12:37:23Z`:
 
 | # | Workstream | Durable candidate/evidence | Current state |
 |---|---|---|---|
@@ -240,7 +240,7 @@ Checkpoint classification at `2026-08-27T12:30:23Z`:
 | 4 | K11520 native KGEN market | #169, cumulatively integrated by #188 | ENGINEERING_PASS; DRAFT; DISTINCT_REVIEW_PENDING |
 | 5 | NVIDIA GPU market pilot / real readiness | #178, cumulatively integrated by #188 | PAPER_PASS; REAL_INVENTORY_AND_SETTLEMENT_BLOCKED |
 | 6 | KGEN external metadata / wallet discovery | #179 | ENGINEERING_PASS; EXTERNAL_PUBLICATION_NOT_PERFORMED |
-| 7 | KAIOS market genesis | #180 | READINESS_GATE_PASS; PANCAKESWAP_V2_PAIR_NOT_FOUND_AT_BLOCK_118374460 |
+| 7 | KAIOS market genesis | #180 plus fresh read-only evidence | READINESS_GATE_PASS; PANCAKESWAP_V2_PAIR_NOT_FOUND_AT_BLOCK_118384842 |
 | 8 | Universal listing registry | #181, cumulatively integrated by #188 | PAPER_PASS; PRODUCTION_AUTHORITY_UNBOUND |
 | 9 | Warehouse / escrow / settlement / accounting | #181/#188 | PAPER_PASS; REAL_CUSTODY_AND_SETTLEMENT_BLOCKED |
 | 10 | Autonomous company safe cycle | #170 | ENGINEERING_PASS; CONNECTORS_AND_DISTINCT_REVIEW_PENDING |
@@ -329,7 +329,7 @@ Therefore:
 
 ## 18. GitHub PR lineage checkpoint — 2026-08-27
 
-Observed at `2026-08-27T12:30:23Z` against `origin/main = 830b79214781fb1231f3619336de394f400a0bfd`.
+Observed at `2026-08-27T12:37:23Z` against `origin/main = 830b79214781fb1231f3619336de394f400a0bfd`.
 
 The remembered counts of 27 and 36 open PRs are superseded. GitHub reported 38 open PRs at this checkpoint. A green workflow means tests passed at that head; it is not an independent review, deployment claim or merge authorization.
 
@@ -348,7 +348,21 @@ The remembered counts of 27 and 36 open PRs are superseded. GitHub reported 38 o
 - #161 is synchronized to current main at `fbb36f50034c1d6ccf0eca0064bcab9d9d50ac4d`; its paper-only circulatory and cross-market engine passed exact-head CI, but real execution remains disabled.
 - #170 is synchronized to current main at `f25e2278c31afe59ea8b00a04928fd9487c6f844`; safe-cycle tests pass, but it cannot approve itself or activate missing repository/claim/wake/review/scheduler connectors.
 - #179 exact head is `d88ed1bfbee8b495b3bfb776b865cbb061384309`; its committed BSC supply snapshot is block `118374207` and all external metadata submissions remain unperformed.
-- #180 records a read-only Pancake V2 factory observation of no KAIOS/WBNB pair at block `118374460`; this is a timestamped observation, not a permanent market claim or authorization to create liquidity.
+- #180 records a read-only Pancake V2 factory observation of no KAIOS/WBNB pair; a fresh independent read at block `118384842` returned the zero address again. This is a timestamped observation, not a permanent market claim or authorization to create liquidity.
+
+### Fresh BSC read-only circulation checkpoint
+
+At BSC block `118384842` (`2026-08-27T12:37:23Z`), public `eth_call` and balance reads reported:
+
+- KGEN total supply: `71,976,169.974243092224959062 KGEN`; owner: Bank Governance `0xa2792fBDCc8A8AaC364053431D44E0a8D335E166`; current token `bankWallet`: `0xA06eF53c9AD4Af739FD13Ca1Ded446437134b0EE`.
+- Official KGEN/WBNB pair `0xf36640d7327b53ba3d7fcc1d98dfc1b85574b6c2`: `1,507,743.430766413416938743 KGEN` and `0.620800346671894633 WBNB`; reserve timestamp `2026-08-16T11:21:26Z`. These reserves are stale market evidence and must not be presented as a fresh trade price.
+- KAIOS total supply: `22,213,908.930416874731235 KAIOS`.
+- K18888: balance `22,213,020.930416874731235 KAIOS`, reserve requirement `11,000,000 KAIOS`, available `11,213,020.930416874731235 KAIOS`, total accounted inflow `22,213,908.930416874731235 KAIOS`, total/module disbursed `888 KAIOS`.
+- K8888: assets `888 KAIOS`, free capital `800 KAIOS`, payroll liability `88 KAIOS`, account/payment liabilities `0`, accounts/payrolls `1/1`, current calendar epoch `24319`.
+- Hengyao bound wallet public BNB balance: `0.00799020555 BNB`.
+- PancakeSwap V2 KAIOS/WBNB pair: not found (factory returned the zero address).
+
+This checkpoint performed no signing, transaction construction, broadcast, payment, liquidity operation or chain write. It does not authorize the available K18888 capital, the K8888 payroll pool or the Hengyao BNB balance for GPU inventory or trading. Credential binding remains `CONNECTED_BINDING_ONLY`; transaction Policy Broker, segregated trading capital, production settlement and repository-bound GPU/warehouse evidence remain unavailable.
 
 These branches must be resynchronized whenever `main` advances semantically, then re-run exact-head CI.
 
