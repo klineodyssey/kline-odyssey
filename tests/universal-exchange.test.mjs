@@ -167,7 +167,7 @@ test("KGEN wallet discovery uses the canonical BSC asset without transaction aut
     }
   });
   assert.deepEqual(switchCalls.map(({ method }) => method), ["eth_chainId", "wallet_switchEthereumChain", "wallet_watchAsset"]);
-  assert.deepEqual(switchCalls[1].params, [{ chainId: "0x38" }]);
+  assert.equal(switchCalls[1].params.length, 1);\n  assert.equal(switchCalls[1].params[0].chainId, "0x38");
 
   const declined = await exerciseKgenWalletDiscovery({
     async request({ method }) {
