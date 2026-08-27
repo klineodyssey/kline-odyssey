@@ -1,12 +1,12 @@
 {
   "reportId": "KAIOS_18911_V3_MAINNET_COMPATIBILITY_V1",
-  "generatedAt": "2026-08-20T16:22:51.652Z",
+  "generatedAt": "2026-08-27T05:56:56.708Z",
   "mode": "READ_ONLY_MAINNET_AND_LOCAL_FORK_NO_BROADCAST",
   "chainId": 56,
   "liveSnapshot": {
-    "blockNumber": 117071439,
-    "blockHash": "0x39d444641e2cdc83f039600fa30d2dac5dbdd0165538eff889a84d574be0343a",
-    "blockTimestamp": 1787242964,
+    "blockNumber": 118331442,
+    "blockHash": "0x599c0482d6abdde7bb67fa5970981934edbc5395864895d44efac38d53ed1fe7",
+    "blockTimestamp": 1787810207,
     "kaios": "0xD4E67B3a69e41524c424150E6b6e921b01D036db",
     "kgen": "0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be",
     "organRegistry": "0xA9e7CbF161E39E556f4B5b8E41397Ac4B87a932D",
@@ -73,16 +73,16 @@
     "status": "MATCHES_FORMAL_DEPLOYMENT_LINEAGE_EVIDENCE"
   },
   "localFork": {
-    "forkBlockNumber": 117071439,
-    "forkBlockHash": "0x39d444641e2cdc83f039600fa30d2dac5dbdd0165538eff889a84d574be0343a",
+    "forkBlockNumber": 118331442,
+    "forkBlockHash": "0x599c0482d6abdde7bb67fa5970981934edbc5395864895d44efac38d53ed1fe7",
     "forkChainId": 56,
-    "candidateAddress": "0x2d6838F80B68db753a6AC5cD1b6Bb942DA681E0e",
+    "candidateAddress": "0x6d5bB96D0006f5F47791E0d81D8A43AAA7705961",
     "predecessor": "0x44c2CA9B9eba19d8F79F6E1786fd9D25e73738e1",
     "embodimentVersion": "3",
     "activeBody": false,
     "catalystLiability": "0",
     "catalystBank": {
-      "address": "0x11630785665515c29c0d49819E6E22aB03fA3bE9",
+      "address": "0x17D88eAD8118a6A9a72126e599EaCf247c1a9b08",
       "classification": "FORK_ONLY_PLACEHOLDER_NOT_PRODUCTION"
     },
     "constructorRuntimeBindingChecks": "PASS",
