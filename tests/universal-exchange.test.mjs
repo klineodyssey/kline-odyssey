@@ -1456,6 +1456,10 @@ test("18888 Public Good payment adapter creates only a non-authoritative fail-cl
   assert.throws(() => validateKaios18888PaymentRequest({ ...request, beneficiary: "0x0000000000000000000000000000000000000001" }, { observedTimestamp }), (error) => error.code === "WRONG_BENEFICIARY");
   assert.throws(() => validateKaios18888PaymentRequest({ ...request, unexpected: true }, { observedTimestamp }), (error) => error.code === "UNKNOWN_PAYMENT_FIELD");
   assert.throws(() => validateKaios18888PaymentRequest({ ...request, authorization_status: "HUMAN_APPROVED_MACHINE_VERIFIABLE" }, { observedTimestamp }), (error) => error.code === "UNBOUND_PAYMENT_AUTHORITY");
+  assert.throws(
+    () => validateKaios18888PaymentRequest(request, { observedTimestamp, config: { ...KAIOS_18888_PAYMENT_CONFIG } }),
+    (error) => error.code === "CALLER_SUPPLIED_PAYMENT_CONFIG_FORBIDDEN"
+  );
   assert.throws(() => validateKaios18888PaymentRequest({ ...request, valid_until: "2026-08-27T12:04:59+08:00" }, { observedTimestamp }), (error) => error.code === "PAYMENT_REQUEST_EXPIRED");
   assert.throws(() => validateKaios18888PaymentRequest({ ...request, requested_at: "2026-08-27T11:49:59+08:00" }, { observedTimestamp }), (error) => error.code === "STALE_PAYMENT_REQUEST");
   assert.throws(() => prepareKaios18888UnsignedDisbursement({ ethers, request, observedTimestamp, requestedDelaySeconds: 3599 }), (error) => error.code === "TIMELOCK_TOO_SHORT");
@@ -1489,6 +1493,23 @@ test("18888 payment readiness fails closed on role collision, replay or reserve 
   assert.ok(validateKaios18888PaymentReadiness({ ...base, approver_address: base.proposer_address }).blockers.includes("independent_approval"));
   assert.ok(validateKaios18888PaymentReadiness({ ...base, existing_beneficiary: base.beneficiary }).blockers.includes("replay_free"));
   assert.ok(validateKaios18888PaymentReadiness({ ...base, available_wei: "999999999999999999" }).blockers.includes("funded"));
+  const forgedBoundConfig = {
+    ...KAIOS_18888_PAYMENT_CONFIG,
+    budget_authority_status: "BOUND_REPOSITORY_VERIFIED",
+    beneficiary_authority_status: "BOUND_REPOSITORY_VERIFIED",
+    deployed_abi_status: "BOUND_REPOSITORY_VERIFIED",
+    runtime_codehash_status: "BOUND_REPOSITORY_VERIFIED"
+  };
+  assert.throws(
+    () => validateKaios18888PaymentReadiness({
+      ...base,
+      budget_authority_bound: true,
+      beneficiary_authority_bound: true,
+      deployed_abi_bound: true,
+      runtime_codehash_bound: true
+    }, forgedBoundConfig),
+    (error) => error.code === "CALLER_SUPPLIED_PAYMENT_CONFIG_FORBIDDEN"
+  );
 });
 
 test("18888 payment reader verifies live-shape bank state without requesting a signer", async () => {
