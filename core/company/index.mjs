@@ -2722,6 +2722,17 @@ export function evaluateExactHeadCiGate({ repository_snapshot, expected_head_sha
     }
   }
   if (pr.state !== "OPEN") return Object.freeze({ status: "HOLD_PR_NOT_OPEN", exact_head: pr.head_sha, ci_status: pr.ci_status, behind_main: pr.behind_main, external_effect: false });
+  if (pr.base_ref !== repository_snapshot.default_branch) {
+    return Object.freeze({
+      status: "HOLD_PR_BASE_BRANCH_MISMATCH",
+      exact_head: pr.head_sha,
+      expected_base: repository_snapshot.default_branch,
+      observed_base: pr.base_ref,
+      ci_status: pr.ci_status,
+      behind_main: pr.behind_main,
+      external_effect: false
+    });
+  }
   if (pr.behind_main !== 0) return Object.freeze({ status: "HOLD_PR_BEHIND_MAIN", exact_head: pr.head_sha, ci_status: pr.ci_status, behind_main: pr.behind_main, external_effect: false });
   if (pr.ci_status !== "PASS") return Object.freeze({ status: pr.ci_status === "FAIL" ? "HOLD_EXACT_HEAD_CI_FAILED" : "HOLD_EXACT_HEAD_CI_INCOMPLETE", exact_head: pr.head_sha, ci_status: pr.ci_status, behind_main: pr.behind_main, external_effect: false });
   return Object.freeze({ status: "EXACT_HEAD_CI_PASS", exact_head: pr.head_sha, ci_status: pr.ci_status, behind_main: 0, external_effect: false });
@@ -2736,6 +2747,7 @@ function evaluateAutonomousTaskRepositoryBinding({ cycle_result, cycle_input, re
     && selected.repository === repository_snapshot.repository
     && selected.active_task_pr === pr.number
     && selected.branch === pr.head_ref
+    && pr.base_ref === repository_snapshot.default_branch
     && selected.expected_head_sha === pr.head_sha;
   return Object.freeze({
     status: verified ? "TASK_REPOSITORY_BINDING_VERIFIED" : "HOLD_TASK_REPOSITORY_BINDING",
@@ -2744,8 +2756,10 @@ function evaluateAutonomousTaskRepositoryBinding({ cycle_result, cycle_input, re
     active_task_pr: selected?.active_task_pr ?? null,
     branch: selected?.branch ?? null,
     expected_head_sha: selected?.expected_head_sha ?? null,
+    expected_base_branch: repository_snapshot.default_branch ?? null,
     observed_pr: pr?.number ?? null,
     observed_branch: pr?.head_ref ?? null,
+    observed_base_branch: pr?.base_ref ?? null,
     observed_head_sha: pr?.head_sha ?? null,
     external_effect: false
   });
@@ -2799,8 +2813,18 @@ export async function runAutonomousCompanyReadOnlyCycle({
   }
   const prePersistenceSnapshot = await readLatestRepositorySnapshot(repository_request);
   const prePersistenceGate = evaluateExactHeadCiGate({ repository_snapshot: prePersistenceSnapshot, expected_head_sha: cycle_input.expected_head_sha ?? null });
+  const prePersistenceTaskRepositoryGate = evaluateAutonomousTaskRepositoryBinding({
+    cycle_result: cycleResult,
+    cycle_input,
+    repository_snapshot: prePersistenceSnapshot
+  });
+  const taskBindingMoved = taskRepositoryGate.status === "TASK_REPOSITORY_BINDING_VERIFIED"
+    && prePersistenceTaskRepositoryGate.status !== "TASK_REPOSITORY_BINDING_VERIFIED";
   const repositoryMoved = prePersistenceSnapshot.main_sha !== repositorySnapshot.main_sha
-    || prePersistenceSnapshot.active_task_pr?.head_sha !== repositorySnapshot.active_task_pr?.head_sha;
+    || prePersistenceSnapshot.active_task_pr?.head_sha !== repositorySnapshot.active_task_pr?.head_sha
+    || prePersistenceSnapshot.active_task_pr?.head_ref !== repositorySnapshot.active_task_pr?.head_ref
+    || prePersistenceSnapshot.active_task_pr?.base_ref !== repositorySnapshot.active_task_pr?.base_ref
+    || taskBindingMoved;
   if (repositoryMoved || prePersistenceGate.status !== "EXACT_HEAD_CI_PASS") {
     return Object.freeze({
       status: "HOLD_REPOSITORY_MOVED_BEFORE_PERSISTENCE",
@@ -2809,6 +2833,7 @@ export async function runAutonomousCompanyReadOnlyCycle({
       ci_gate: prePersistenceGate,
       cycle_result: cycleResult,
       task_repository_gate: taskRepositoryGate,
+      pre_persistence_task_repository_gate: prePersistenceTaskRepositoryGate,
       persistence: null,
       authority: Object.freeze({ local_company_history_write: false, github_read: true, github_write: false, claim_write: false, worker_wake: false, reviewer_wake: false, signer: false, chain_write: false })
     });
@@ -2821,6 +2846,7 @@ export async function runAutonomousCompanyReadOnlyCycle({
     ci_gate: prePersistenceGate,
     cycle_result: cycleResult,
     task_repository_gate: taskRepositoryGate,
+    pre_persistence_task_repository_gate: prePersistenceTaskRepositoryGate,
     persistence,
     authority: Object.freeze({ local_company_history_write: true, github_read: true, github_write: false, claim_write: false, worker_wake: false, reviewer_wake: false, signer: false, chain_write: false })
   });

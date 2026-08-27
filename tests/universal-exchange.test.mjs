@@ -3346,9 +3346,11 @@ test("Exact-head CI gate rejects stale heads behind main failures and incomplete
   const head = "b".repeat(40);
   const base = {
     snapshot_type: "LATEST_REPOSITORY_READ_ONLY",
-    active_task_pr: { head_sha: head, state: "OPEN", behind_main: 0, ci_status: "PASS" }
+    default_branch: "main",
+    active_task_pr: { head_sha: head, head_ref: autonomousTask.branch, base_ref: "main", state: "OPEN", behind_main: 0, ci_status: "PASS" }
   };
   assert.equal(evaluateExactHeadCiGate({ repository_snapshot: base, expected_head_sha: head }).status, "EXACT_HEAD_CI_PASS");
+  assert.equal(evaluateExactHeadCiGate({ repository_snapshot: { ...base, active_task_pr: { ...base.active_task_pr, base_ref: "release" } }, expected_head_sha: head }).status, "HOLD_PR_BASE_BRANCH_MISMATCH");
   assert.equal(evaluateExactHeadCiGate({ repository_snapshot: base, expected_head_sha: "c".repeat(40) }).status, "HOLD_STALE_PR_HEAD");
   assert.equal(evaluateExactHeadCiGate({ repository_snapshot: { ...base, active_task_pr: { ...base.active_task_pr, behind_main: 1 } } }).status, "HOLD_PR_BEHIND_MAIN");
   assert.equal(evaluateExactHeadCiGate({ repository_snapshot: { ...base, active_task_pr: { ...base.active_task_pr, ci_status: "FAIL" } } }).status, "HOLD_EXACT_HEAD_CI_FAILED");
@@ -3389,6 +3391,7 @@ test("Read-plan-persist Company invocation uses fresh GitHub main and writes onl
   assert.equal(result.pre_persistence_snapshot.main_sha, mainSha);
   assert.equal(result.ci_gate.status, "EXACT_HEAD_CI_PASS");
   assert.equal(result.task_repository_gate.status, "TASK_REPOSITORY_BINDING_VERIFIED");
+  assert.equal(result.pre_persistence_task_repository_gate.status, "TASK_REPOSITORY_BINDING_VERIFIED");
   assert.equal(result.cycle_result.status, "ASSIGNMENT_CANDIDATE_READY");
   assert.equal(result.persistence.status, "CYCLE_EVENTS_PERSISTED");
   assert.equal(result.authority.local_company_history_write, true);
@@ -3444,6 +3447,36 @@ test("Read-plan-persist Company invocation refuses persistence when main moves a
     company
   });
   assert.equal(result.status, "HOLD_REPOSITORY_MOVED_BEFORE_PERSISTENCE");
+  assert.equal(result.persistence, null);
+  assert.equal((await store.history(company.company_id, "COMPANY")).length, 0);
+  assert.equal(result.authority.local_company_history_write, false);
+});
+
+test("Read-plan-persist Company invocation refuses persistence when PR branch changes after planning", async () => {
+  const mainSha = AUTONOMOUS_MAIN_SHA;
+  const headSha = "b".repeat(40);
+  let prReads = 0;
+  const fetch_impl = async (url) => {
+    if (url.endsWith("/repos/klineodyssey/kline-odyssey")) return { ok: true, status: 200, json: async () => ({ default_branch: "main" }) };
+    if (url.endsWith("/commits/main")) return { ok: true, status: 200, json: async () => ({ sha: mainSha, commit: { committer: { date: "2026-08-27T06:00:00Z" } } }) };
+    if (url.endsWith("/pulls/170")) {
+      prReads += 1;
+      return { ok: true, status: 200, json: async () => ({ state: "open", draft: true, head: { sha: headSha, ref: prReads === 1 ? autonomousTask.branch : "codex/renamed-after-plan" }, base: { ref: "main" } }) };
+    }
+    if (url.endsWith(`/compare/main...${headSha}`)) return { ok: true, status: 200, json: async () => ({ ahead_by: 12, behind_by: 0 }) };
+    if (url.endsWith(`/commits/${headSha}/check-runs`)) return { ok: true, status: 200, json: async () => ({ check_runs: [{ name: "test", status: "completed", conclusion: "success" }] }) };
+    return { ok: false, status: 404, json: async () => ({}) };
+  };
+  const store = new MemoryUniverseStore();
+  const company = { company_id: "KAIOS_AI_COMPANY" };
+  const result = await runAutonomousCompanyReadOnlyCycle({
+    repository_request: { repository: "klineodyssey/kline-odyssey", active_task_pr: 170, observed_at: "2026-08-27T06:01:00Z", fetch_impl, api_base: "https://api.github.test" },
+    cycle_input: { cycle_id: "COMPANY-CYCLE-MOVING-BRANCH", expected_main_sha: mainSha, expected_head_sha: headSha, manager: autonomousManager, workers: [autonomousManager, autonomousWorker], work_queue: [autonomousTask], review_queue: [], previous_cycle_ids: [] },
+    store,
+    company
+  });
+  assert.equal(result.status, "HOLD_REPOSITORY_MOVED_BEFORE_PERSISTENCE");
+  assert.equal(result.pre_persistence_task_repository_gate.status, "HOLD_TASK_REPOSITORY_BINDING");
   assert.equal(result.persistence, null);
   assert.equal((await store.history(company.company_id, "COMPANY")).length, 0);
   assert.equal(result.authority.local_company_history_write, false);

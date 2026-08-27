@@ -56,9 +56,9 @@
       },
       "read_plan_persist_cycle": {
         "implementation": "core/company/index.mjs#runAutonomousCompanyReadOnlyCycle",
-        "flow": ["READ_LATEST_REPOSITORY", "VERIFY_NAMED_EXACT_HEAD_CI", "PLAN_SAFE_CYCLE", "BIND_SELECTED_TASK_TO_REPOSITORY_PR_BRANCH_AND_HEAD", "RE_READ_REPOSITORY", "PERSIST_LOCAL_COMPANY_HISTORY"],
+        "flow": ["READ_LATEST_REPOSITORY", "VERIFY_NAMED_EXACT_HEAD_CI", "PLAN_SAFE_CYCLE", "BIND_SELECTED_TASK_TO_REPOSITORY_PR_DEFAULT_BASE_BRANCH_AND_HEAD", "RE_READ_REPOSITORY_REFS_AND_CHECKS", "PERSIST_LOCAL_COMPANY_HISTORY"],
         "exact_head_ci_gate": "INTEGRATED_BEFORE_PLAN_AND_RECHECKED_BEFORE_PERSISTENCE",
-        "task_repository_binding": "REQUIRED_BEFORE_PERSISTENCE",
+        "task_repository_binding": "REPOSITORY_PR_DEFAULT_BASE_TASK_BRANCH_EXACT_HEAD_REQUIRED_BEFORE_AND_AFTER_PLAN",
         "credential_destination": "HTTPS_CANONICAL_GITHUB_API_ONLY",
         "moving_repository_result": "HOLD_WITHOUT_PERSISTENCE",
         "external_effects": false,
