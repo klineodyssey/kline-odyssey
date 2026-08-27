@@ -42,14 +42,17 @@ The candidate is deterministic and separates planning from effects. It emits app
 
 `readLatestRepositorySnapshot()` is the first read-only Company eye. At clock-in it obtains the repository default branch, current main SHA and time, active PR head/state, divergence and exact-head check runs from GitHub. It has no mutation, merge, branch-push, signer or chain method. A failed or malformed GitHub response produces no fabricated snapshot.
 
+`runAutonomousCompanyReadOnlyCycle()` composes the eye, planner and durable Company history into one invocation-driven cycle. `evaluateExactHeadCiGate()` separately requires the expected head, open PR, `behind_main = 0` and completed passing checks. Neither function can claim a task, wake a worker, wake a reviewer or mutate GitHub.
+
 The cycle still cannot persist a Claim, start an employee, mutate GitHub, merge, push `main`, pay, access a private key, deploy or send a transaction. Those connectors remain independently gated.
 
 Current connection state:
 
-- General Manager automatic clock-in calculation: `CANDIDATE_IMPLEMENTED_INVOCATION_REQUIRED`
+- General Manager read/plan/persist clock-in: `CANDIDATE_IMPLEMENTED_INVOCATION_REQUIRED`
 - safe job selection: `CANDIDATE_IMPLEMENTED`
 - durable Company cycle memory: `LOCAL_CANDIDATE_IMPLEMENTED_EXISTING_STORE`
 - latest repository self-discovery: `READ_ONLY_CANDIDATE_IMPLEMENTED`
+- exact-head CI observer: `READ_ONLY_ON_INVOCATION_IMPLEMENTED`
 - durable atomic Claim: `NOT_CONNECTED`
 - employee wake: `EXISTING_CURSOR_WORKFLOW_PRESENT_NOT_CONNECTED_TO_CYCLE`
 - independent review trigger: `NOT_CONNECTED`

@@ -50,6 +50,13 @@
         "github_write": false,
         "status": "IMPLEMENTED_READ_ONLY_CANDIDATE_NOT_BACKGROUND_INVOKED"
       },
+      "read_plan_persist_cycle": {
+        "implementation": "core/company/index.mjs#runAutonomousCompanyReadOnlyCycle",
+        "flow": ["READ_LATEST_REPOSITORY", "PLAN_SAFE_CYCLE", "PERSIST_LOCAL_COMPANY_HISTORY"],
+        "exact_head_ci_gate": "core/company/index.mjs#evaluateExactHeadCiGate",
+        "external_effects": false,
+        "status": "IMPLEMENTED_INVOCATION_DRIVEN_CANDIDATE"
+      },
       "background_scheduler": false,
       "claim_persistence": false,
       "worker_wake": false,

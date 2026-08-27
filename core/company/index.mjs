@@ -2394,3 +2394,48 @@ export async function readLatestRepositorySnapshot({
     authority: Object.freeze({ github_read: true, github_write: false, merge: false, branch_push: false, chain_write: false, signer: false })
   });
 }
+
+export function evaluateExactHeadCiGate({ repository_snapshot, expected_head_sha = null }) {
+  invariant(repository_snapshot?.snapshot_type === "LATEST_REPOSITORY_READ_ONLY", "LATEST_REPOSITORY_SNAPSHOT_REQUIRED", "Exact-head CI gate requires a fresh read-only repository snapshot");
+  const pr = repository_snapshot.active_task_pr;
+  if (!pr) return Object.freeze({ status: "HOLD_ACTIVE_PR_REQUIRED", exact_head: null, ci_status: "UNKNOWN", behind_main: null, external_effect: false });
+  if (expected_head_sha !== null) {
+    invariant(/^[0-9a-f]{40}$/.test(expected_head_sha), "EXPECTED_HEAD_SHA_INVALID", "Expected PR head must be a lowercase Git SHA");
+    if (pr.head_sha !== expected_head_sha) {
+      return Object.freeze({ status: "HOLD_STALE_PR_HEAD", exact_head: pr.head_sha, expected_head: expected_head_sha, ci_status: pr.ci_status, behind_main: pr.behind_main, external_effect: false });
+    }
+  }
+  if (pr.state !== "OPEN") return Object.freeze({ status: "HOLD_PR_NOT_OPEN", exact_head: pr.head_sha, ci_status: pr.ci_status, behind_main: pr.behind_main, external_effect: false });
+  if (pr.behind_main !== 0) return Object.freeze({ status: "HOLD_PR_BEHIND_MAIN", exact_head: pr.head_sha, ci_status: pr.ci_status, behind_main: pr.behind_main, external_effect: false });
+  if (pr.ci_status !== "PASS") return Object.freeze({ status: pr.ci_status === "FAIL" ? "HOLD_EXACT_HEAD_CI_FAILED" : "HOLD_EXACT_HEAD_CI_INCOMPLETE", exact_head: pr.head_sha, ci_status: pr.ci_status, behind_main: pr.behind_main, external_effect: false });
+  return Object.freeze({ status: "EXACT_HEAD_CI_PASS", exact_head: pr.head_sha, ci_status: pr.ci_status, behind_main: 0, external_effect: false });
+}
+
+/**
+ * Invocation-driven safe Company loop: observe GitHub, plan one cycle, then
+ * persist only its local append-only evidence. It deliberately exposes no
+ * Claim, worker wake, review wake, GitHub mutation, signer or chain connector.
+ */
+export async function runAutonomousCompanyReadOnlyCycle({
+  repository_request,
+  cycle_input,
+  store,
+  company
+}) {
+  invariant(repository_request && typeof repository_request === "object", "REPOSITORY_REQUEST_REQUIRED", "Safe Company invocation requires a repository observation request");
+  invariant(cycle_input && typeof cycle_input === "object", "COMPANY_CYCLE_INPUT_REQUIRED", "Safe Company invocation requires planner input");
+  const repositorySnapshot = await readLatestRepositorySnapshot(repository_request);
+  const cycleResult = runAutonomousCompanyCycle({
+    ...cycle_input,
+    observed_at: repositorySnapshot.observed_at,
+    current_main_sha: repositorySnapshot.main_sha
+  });
+  const persistence = await persistAutonomousCompanyCycle({ store, company, cycle_result: cycleResult });
+  return Object.freeze({
+    status: "READ_PLAN_PERSIST_CYCLE_COMPLETED",
+    repository_snapshot: repositorySnapshot,
+    cycle_result: cycleResult,
+    persistence,
+    authority: Object.freeze({ local_company_history_write: true, github_read: true, github_write: false, claim_write: false, worker_wake: false, reviewer_wake: false, signer: false, chain_write: false })
+  });
+}

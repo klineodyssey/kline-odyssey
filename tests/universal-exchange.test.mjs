@@ -103,7 +103,8 @@ import {
   runAutonomousCompanyCycle, AUTONOMOUS_COMPANY_SAFE_ACTIONS,
   AUTONOMOUS_COMPANY_FORBIDDEN_ACTIONS, AUTONOMOUS_COMPANY_DURABLE_EVENT_TYPES,
   persistAutonomousCompanyCycle, restoreAutonomousCompanyCycleState,
-  readLatestRepositorySnapshot
+  readLatestRepositorySnapshot, evaluateExactHeadCiGate,
+  runAutonomousCompanyReadOnlyCycle
 } from "../core/index.mjs";
 import { verifyDigitalAntWalletBinding, verifyDigitalLifeWalletBinding, CODEX_GM_ENV } from "../core/security/wallet-binding.mjs";
 import { TEMPLE_HEART_READ_ABI, TEMPLE_HEART_DRY_RUN_ABI, TEMPLE_HEART_VERIFIED_ACTIONS, readCoreHeartEvents } from "../core/integrations/temple-heart-12345.mjs";
@@ -3241,4 +3242,49 @@ test("Latest Repository Snapshot adapter fails closed on unavailable or malforme
     () => readLatestRepositorySnapshot({ repository: "not-a-repository", observed_at: "2026-08-27T06:01:00Z", fetch_impl: async () => ({ ok: true, json: async () => ({}) }) }),
     (error) => error.code === "INVALID_GITHUB_REPOSITORY"
   );
+});
+
+test("Exact-head CI gate rejects stale heads behind main failures and incomplete checks", () => {
+  const head = "b".repeat(40);
+  const base = {
+    snapshot_type: "LATEST_REPOSITORY_READ_ONLY",
+    active_task_pr: { head_sha: head, state: "OPEN", behind_main: 0, ci_status: "PASS" }
+  };
+  assert.equal(evaluateExactHeadCiGate({ repository_snapshot: base, expected_head_sha: head }).status, "EXACT_HEAD_CI_PASS");
+  assert.equal(evaluateExactHeadCiGate({ repository_snapshot: base, expected_head_sha: "c".repeat(40) }).status, "HOLD_STALE_PR_HEAD");
+  assert.equal(evaluateExactHeadCiGate({ repository_snapshot: { ...base, active_task_pr: { ...base.active_task_pr, behind_main: 1 } } }).status, "HOLD_PR_BEHIND_MAIN");
+  assert.equal(evaluateExactHeadCiGate({ repository_snapshot: { ...base, active_task_pr: { ...base.active_task_pr, ci_status: "FAIL" } } }).status, "HOLD_EXACT_HEAD_CI_FAILED");
+  assert.equal(evaluateExactHeadCiGate({ repository_snapshot: { ...base, active_task_pr: { ...base.active_task_pr, ci_status: "PENDING" } } }).status, "HOLD_EXACT_HEAD_CI_INCOMPLETE");
+});
+
+test("Read-plan-persist Company invocation uses fresh GitHub main and writes only local durable evidence", async () => {
+  const mainSha = AUTONOMOUS_MAIN_SHA;
+  const fetch_impl = async (url, options) => {
+    assert.equal(options.method, "GET");
+    if (url.endsWith("/repos/klineodyssey/kline-odyssey")) return { ok: true, status: 200, json: async () => ({ default_branch: "main" }) };
+    if (url.endsWith("/commits/main")) return { ok: true, status: 200, json: async () => ({ sha: mainSha, commit: { committer: { date: "2026-08-27T06:00:00Z" } } }) };
+    return { ok: false, status: 404, json: async () => ({}) };
+  };
+  const store = new MemoryUniverseStore();
+  const company = { company_id: "KAIOS_AI_COMPANY" };
+  const result = await runAutonomousCompanyReadOnlyCycle({
+    repository_request: { repository: "klineodyssey/kline-odyssey", observed_at: "2026-08-27T06:01:00Z", fetch_impl, api_base: "https://api.github.test" },
+    cycle_input: {
+      cycle_id: "COMPANY-CYCLE-LIVE-READ-001",
+      expected_main_sha: mainSha,
+      manager: autonomousManager,
+      workers: [autonomousManager, autonomousWorker],
+      work_queue: [autonomousTask],
+      review_queue: [],
+      previous_cycle_ids: []
+    },
+    store,
+    company
+  });
+  assert.equal(result.status, "READ_PLAN_PERSIST_CYCLE_COMPLETED");
+  assert.equal(result.repository_snapshot.main_sha, mainSha);
+  assert.equal(result.cycle_result.status, "ASSIGNMENT_CANDIDATE_READY");
+  assert.equal(result.persistence.status, "CYCLE_EVENTS_PERSISTED");
+  assert.equal(result.authority.local_company_history_write, true);
+  for (const field of ["github_write", "claim_write", "worker_wake", "reviewer_wake", "signer", "chain_write"]) assert.equal(result.authority[field], false);
 });
