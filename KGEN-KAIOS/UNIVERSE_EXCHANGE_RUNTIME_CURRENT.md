@@ -298,7 +298,10 @@ Other pools are optional. The chosen pool must not be described as guaranteed li
 
 ### 10.4 KAIOS Market Genesis Readiness — 2026-08-27
 
-A read-only BSC chain 56 candidate observation at block `118324943` reported:
+A read-only two-provider BSC chain 56 quorum observation at confirmed block
+`118386241` (`2026-08-27T12:47:52Z`, block hash
+`0x0554bb8154deb5f63e7ea07506efc696384bd085f03c87b5e981d652b8d1a81b`)
+reported:
 
 ```text
 KAIOS Token code = PRESENT
@@ -308,13 +311,18 @@ PancakeSwap V2 KAIOS / KGEN pair = ZERO ADDRESS
 PancakeSwap V2 KAIOS / USDT pair = ZERO ADDRESS
 ```
 
-Because this repository does not yet contain a repository-bound snapshot verifier
-that binds the canonical factory result, block hash, code hashes, evidence hash,
-freshness and revocation state, the runtime status is
-`UNVERIFIED_EXTERNAL_MARKET_OBSERVATION`. The reported zero addresses are useful
-read-only evidence candidates, but caller labels cannot establish the broader
-claim `NO_LIVE_KAIOS_PAIR_DETECTED`. KAIOS is Mainnet-live as a token; token
-deployment must not be misreported as market deployment.
+The runtime now reads one confirmed block from at least two distinct HTTPS BSC
+RPC endpoints and requires exact agreement on chain ID, block hash, KAIOS
+bytecode presence, Pair Registry organ and all three Pancake V2 factory results.
+An RPC disagreement, wrong chain, missing code or malformed ABI result fails
+closed. Only the exact object produced by that adapter is marked
+`RPC_QUORUM_VERIFIED_READ_ONLY_OBSERVATION`; copying or caller-constructing the
+same fields loses that status.
+
+This proves only a timestamped no-pair observation at that block. It is not a
+permanent `NO_LIVE_KAIOS_PAIR` claim, price authority, repository-bound funding
+evidence or permission to create liquidity. KAIOS is Mainnet-live as a token;
+token deployment must not be misreported as market deployment.
 
 Any genesis-liquidity proposal must identify exact two-sided capital, asset
 ownership, budget evidence, a fixed funding account, an approved risk policy,
@@ -469,3 +477,8 @@ A civilization must not be rejected solely because it does not use Jade Emperor,
 
 - Added the read-only KAIOS external-pair observation and fail-closed market
   genesis funding boundary.
+
+### V1.2 — 2026-08-27
+
+- Added the two-provider, same-confirmed-block BSC market snapshot adapter.
+- Kept market creation, pricing, funding, signing and execution fail-closed.

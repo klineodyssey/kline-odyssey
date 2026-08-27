@@ -2059,10 +2059,147 @@ export const KAIOS_MARKET_GENESIS_CONFIG = Object.freeze({
   pair_registry_organ_id: "0x7f0ccf230c57abe19671b563448caa0159a9a9f51d4548c25dacd532e9e1b86e",
   permitted_quote_assets: Object.freeze(["WBNB", "KGEN", "USDT"]),
   permitted_funding_source_classes: Object.freeze(["COMPANY_TRADING_TREASURY"]),
-  snapshot_verifier_status: "NOT_IMPLEMENTED",
+  snapshot_verifier_status: "RPC_QUORUM_READ_ONLY_IMPLEMENTED",
   funding_registry_status: "NOT_IMPLEMENTED",
   execution_authority: "NOT_GRANTED_BY_READINESS_RUNTIME"
 });
+
+const KAIOS_MARKET_RPC_URLS = Object.freeze([
+  "https://bsc-dataseed.binance.org",
+  "https://bsc.publicnode.com"
+]);
+const verifiedKaiosMarketSnapshots = new WeakSet();
+const ORGAN_SELECTOR = "0xc7e9a48e";
+const GET_PAIR_SELECTOR = "0xe6a43905";
+
+function hexQuantityToNumber(value, field) {
+  invariant(typeof value === "string" && /^0x[0-9a-f]+$/i.test(value), "KAIOS_MARKET_RPC_HEX_INVALID", `${field} must be a JSON-RPC hex quantity`);
+  const number = Number(BigInt(value));
+  invariant(Number.isSafeInteger(number), "KAIOS_MARKET_RPC_NUMBER_UNSAFE", `${field} exceeds the safe integer range`);
+  return number;
+}
+
+function decodeRpcAddress(value, field) {
+  invariant(typeof value === "string" && /^0x[0-9a-f]{64}$/i.test(value), "KAIOS_MARKET_RPC_ADDRESS_INVALID", `${field} must be a 32-byte ABI address result`);
+  return `0x${value.slice(-40)}`;
+}
+
+function encodeAddressWord(address) {
+  invariant(isEvmAddress(address), "KAIOS_MARKET_RPC_INPUT_ADDRESS_INVALID", "RPC pair lookup requires a canonical EVM address");
+  return address.slice(2).toLowerCase().padStart(64, "0");
+}
+
+async function rpcRequest({ url, method, params, fetchImpl, signal, id }) {
+  const response = await fetchImpl(url, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ jsonrpc: "2.0", id, method, params }),
+    signal
+  });
+  invariant(response?.ok === true, "KAIOS_MARKET_RPC_HTTP_FAILURE", `RPC ${method} failed`);
+  const payload = await response.json();
+  invariant(payload && payload.error === undefined && payload.result !== undefined, "KAIOS_MARKET_RPC_RESPONSE_FAILURE", `RPC ${method} returned an invalid response`);
+  return payload.result;
+}
+
+async function observeKaiosMarketAtBlock({ url, blockNumber, fetchImpl, signal, requestId }) {
+  const blockTag = `0x${BigInt(blockNumber).toString(16)}`;
+  const call = (to, data, offset) => rpcRequest({
+    url,
+    method: "eth_call",
+    params: [{ to, data }, blockTag],
+    fetchImpl,
+    signal,
+    id: requestId + offset
+  });
+  const getPairData = (quote) => `${GET_PAIR_SELECTOR}${encodeAddressWord(KAIOS_MARKET_GENESIS_CONFIG.kaios_token)}${encodeAddressWord(quote)}`;
+  const [block, kaiosCode, pairRegistry, wbnbPair, kgenPair, usdtPair] = await Promise.all([
+    rpcRequest({ url, method: "eth_getBlockByNumber", params: [blockTag, false], fetchImpl, signal, id: requestId }),
+    rpcRequest({ url, method: "eth_getCode", params: [KAIOS_MARKET_GENESIS_CONFIG.kaios_token, blockTag], fetchImpl, signal, id: requestId + 1 }),
+    call(KAIOS_MARKET_GENESIS_CONFIG.organ_registry, `${ORGAN_SELECTOR}${KAIOS_MARKET_GENESIS_CONFIG.pair_registry_organ_id.slice(2)}`, 2),
+    call(KAIOS_MARKET_GENESIS_CONFIG.pancakeswap_v2_factory, getPairData(KAIOS_MARKET_GENESIS_CONFIG.wbnb_token), 3),
+    call(KAIOS_MARKET_GENESIS_CONFIG.pancakeswap_v2_factory, getPairData(KAIOS_MARKET_GENESIS_CONFIG.kgen_token), 4),
+    call(KAIOS_MARKET_GENESIS_CONFIG.pancakeswap_v2_factory, getPairData(KAIOS_MARKET_GENESIS_CONFIG.usdt_token), 5)
+  ]);
+  invariant(block && /^0x[0-9a-f]{64}$/i.test(block.hash), "KAIOS_MARKET_BLOCK_HASH_REQUIRED", "RPC market observation requires an exact block hash");
+  invariant(hexQuantityToNumber(block.number, "block.number") === blockNumber, "KAIOS_MARKET_BLOCK_MISMATCH", "RPC returned a different block than requested");
+  return Object.freeze({
+    block_hash: block.hash.toLowerCase(),
+    block_timestamp: hexQuantityToNumber(block.timestamp, "block.timestamp"),
+    kaios_code: kaiosCode && kaiosCode !== "0x" ? "PRESENT" : "ABSENT",
+    pair_registry_organ: decodeRpcAddress(pairRegistry, "pair registry organ"),
+    pairs: Object.freeze({
+      WBNB: decodeRpcAddress(wbnbPair, "KAIOS/WBNB pair"),
+      KGEN: decodeRpcAddress(kgenPair, "KAIOS/KGEN pair"),
+      USDT: decodeRpcAddress(usdtPair, "KAIOS/USDT pair")
+    })
+  });
+}
+
+/**
+ * Read the canonical KAIOS token, Pair Registry organ and Pancake V2 pairs
+ * from at least two independent BSC RPC endpoints at one confirmed block.
+ *
+ * This adapter is read-only. It exposes no signer, transaction, allowance,
+ * liquidity or broadcast method. A quorum observation is timestamped evidence,
+ * not permanent proof that a pair can never exist and not execution authority.
+ */
+export async function readKaiosExternalMarketSnapshotQuorum({
+  rpcUrls = KAIOS_MARKET_RPC_URLS,
+  confirmations = 3,
+  fetchImpl = globalThis.fetch,
+  timeoutMs = 15000
+} = {}) {
+  invariant(typeof fetchImpl === "function", "KAIOS_MARKET_FETCH_REQUIRED", "KAIOS market snapshot requires fetch");
+  invariant(Array.isArray(rpcUrls) && new Set(rpcUrls).size >= 2, "KAIOS_MARKET_RPC_QUORUM_REQUIRED", "KAIOS market snapshot requires at least two distinct RPC endpoints");
+  invariant(rpcUrls.every((url) => /^https:\/\//.test(String(url))), "KAIOS_MARKET_RPC_HTTPS_REQUIRED", "KAIOS market RPC endpoints must use HTTPS");
+  invariant(Number.isInteger(confirmations) && confirmations >= 1, "KAIOS_MARKET_CONFIRMATIONS_REQUIRED", "KAIOS market snapshot requires at least one confirmation");
+  invariant(Number.isInteger(timeoutMs) && timeoutMs > 0, "KAIOS_MARKET_TIMEOUT_INVALID", "KAIOS market snapshot timeout must be positive");
+
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const heads = await Promise.all(rpcUrls.map(async (url, index) => {
+      const [chainIdHex, blockNumberHex] = await Promise.all([
+        rpcRequest({ url, method: "eth_chainId", params: [], fetchImpl, signal: controller.signal, id: index * 100 + 1 }),
+        rpcRequest({ url, method: "eth_blockNumber", params: [], fetchImpl, signal: controller.signal, id: index * 100 + 2 })
+      ]);
+      const chainId = hexQuantityToNumber(chainIdHex, "chainId");
+      invariant(chainId === KAIOS_MARKET_GENESIS_CONFIG.chain_id, "KAIOS_MARKET_WRONG_CHAIN", "Every market RPC must report BSC chain 56");
+      return hexQuantityToNumber(blockNumberHex, "blockNumber");
+    }));
+    const blockNumber = Math.min(...heads) - confirmations;
+    invariant(blockNumber > 0, "KAIOS_MARKET_CONFIRMED_BLOCK_INVALID", "Confirmed market block must be positive");
+    const observations = await Promise.all(rpcUrls.map((url, index) => observeKaiosMarketAtBlock({
+      url,
+      blockNumber,
+      fetchImpl,
+      signal: controller.signal,
+      requestId: index * 1000 + 10
+    })));
+    const expected = JSON.stringify(observations[0]);
+    invariant(observations.every((observation) => JSON.stringify(observation) === expected), "KAIOS_MARKET_RPC_QUORUM_MISMATCH", "BSC RPC endpoints disagree on the KAIOS market snapshot");
+    const observed = observations[0];
+    const snapshot = Object.freeze({
+      observed_at: new Date(observed.block_timestamp * 1000).toISOString(),
+      block_number: blockNumber,
+      block_hash: observed.block_hash,
+      chain_id: KAIOS_MARKET_GENESIS_CONFIG.chain_id,
+      kaios_code: observed.kaios_code,
+      pair_registry_organ: observed.pair_registry_organ,
+      pairs: observed.pairs,
+      evidence_class: "RPC_QUORUM_VERIFIED_READ_ONLY",
+      provider_count: rpcUrls.length,
+      confirmations,
+      execution_performed: false,
+      mainnet_transaction_sent: false
+    });
+    verifiedKaiosMarketSnapshots.add(snapshot);
+    return snapshot;
+  } finally {
+    clearTimeout(timer);
+  }
+}
 
 const KAIOS_MARKET_PROTECTED_CAPITAL = Object.freeze([
   "BANK_18888_RESERVE",
@@ -2095,15 +2232,20 @@ export function evaluateKaiosExternalMarketSnapshot(snapshot) {
 
   const livePairs = KAIOS_MARKET_GENESIS_CONFIG.permitted_quote_assets.filter((asset) => !isZeroAddress(snapshot.pairs[asset]));
   const pairRegistryActive = !isZeroAddress(snapshot.pair_registry_organ);
+  const quorumVerified = verifiedKaiosMarketSnapshots.has(snapshot);
   return Object.freeze({
     observed_at: snapshot.observed_at,
     block_number: snapshot.block_number,
+    block_hash: quorumVerified ? snapshot.block_hash : null,
     chain_id: snapshot.chain_id,
-    pair_registry_status: pairRegistryActive ? "CALLER_REPORTED_NONZERO_REQUIRES_REPOSITORY_BOUND_VERIFICATION" : "CALLER_REPORTED_ZERO_UNVERIFIED",
+    pair_registry_status: quorumVerified
+      ? (pairRegistryActive ? "RPC_QUORUM_NONZERO_AT_BLOCK" : "RPC_QUORUM_ZERO_AT_BLOCK")
+      : (pairRegistryActive ? "CALLER_REPORTED_NONZERO_REQUIRES_REPOSITORY_BOUND_VERIFICATION" : "CALLER_REPORTED_ZERO_UNVERIFIED"),
     candidate_pairs: Object.freeze([...livePairs]),
-    market_status: "UNVERIFIED_EXTERNAL_MARKET_OBSERVATION",
+    market_status: quorumVerified ? "RPC_QUORUM_VERIFIED_READ_ONLY_OBSERVATION" : "UNVERIFIED_EXTERNAL_MARKET_OBSERVATION",
     price_status: "UNVERIFIED_NO_MARKET_PRICE_AUTHORITY",
-    evidence_status: "BLOCKED_REPOSITORY_BOUND_SNAPSHOT_VERIFIER_NOT_IMPLEMENTED",
+    evidence_status: quorumVerified ? "RPC_QUORUM_VERIFIED_READ_ONLY" : "BLOCKED_REPOSITORY_BOUND_SNAPSHOT_VERIFIER_NOT_IMPLEMENTED",
+    timestamped_no_pair_observation: quorumVerified && livePairs.length === 0,
     authoritative_no_pair_claim: false,
     execution_performed: false
   });
@@ -2139,6 +2281,7 @@ export function createKaiosMarketGenesisProposal({
   invariant(kaiosAmount > 0n && quoteAmount > 0n, "KAIOS_MARKET_TWO_SIDED_CAPITAL_REQUIRED", "Initial liquidity requires positive KAIOS and quote capital");
 
   const checks = Object.freeze({
+    rpc_quorum_market_snapshot: market.evidence_status === "RPC_QUORUM_VERIFIED_READ_ONLY",
     repository_bound_market_snapshot: false,
     closed_funding_registry: false,
     fixed_funding_account_binding: false,

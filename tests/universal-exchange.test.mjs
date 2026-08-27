@@ -103,7 +103,8 @@ import {
   calculateFieldServiceQuote, validateFieldDeliveryEvidence, createWorkforceGap,
   createFieldServiceDemandScan, UNIVERSAL_11520_MARKET, create11520UniversalListingCandidate,
   create11520EscrowCandidate, validate11520SettlementReceipt, create11520SettlementAccounting,
-  KAIOS_MARKET_GENESIS_CONFIG, evaluateKaiosExternalMarketSnapshot, createKaiosMarketGenesisProposal,
+  KAIOS_MARKET_GENESIS_CONFIG, readKaiosExternalMarketSnapshotQuorum,
+  evaluateKaiosExternalMarketSnapshot, createKaiosMarketGenesisProposal,
   NVIDIA_GPU_11520_ROUTE, GPU_LANDED_COST_FIELDS,
   validateGpuInventoryUnit, calculateGpuLandedCost, evaluateGpu11520MarketReadiness,
   calculateGpuTransportPlan, createGpuAcquisitionPipelineCandidate
@@ -367,6 +368,65 @@ test("KAIOS market snapshot remains unverified until repository-bound evidence e
   assert.equal(market.execution_performed, false);
   assert.throws(() => evaluateKaiosExternalMarketSnapshot({ ...kaiosNoPairSnapshot, chain_id: 1 }), (error) => error.code === "KAIOS_MARKET_WRONG_CHAIN");
   assert.throws(() => evaluateKaiosExternalMarketSnapshot({ ...kaiosNoPairSnapshot, pairs: { ...kaiosNoPairSnapshot.pairs, KGEN: "UNKNOWN" } }), (error) => error.code === "KAIOS_PAIR_ADDRESS_INVALID");
+});
+
+function kaiosMarketRpcFetch({ mismatchUrl = null } = {}) {
+  const zeroWord = `0x${"0".repeat(64)}`;
+  const oneWord = `0x${"0".repeat(63)}1`;
+  return async (url, options) => {
+    const request = JSON.parse(options.body);
+    let result;
+    if (request.method === "eth_chainId") result = "0x38";
+    else if (request.method === "eth_blockNumber") result = "0x3e8";
+    else if (request.method === "eth_getBlockByNumber") {
+      result = { number: "0x3e5", hash: `0x${"a".repeat(64)}`, timestamp: "0x66ce2e00" };
+    } else if (request.method === "eth_getCode") result = "0x6000";
+    else if (request.method === "eth_call") {
+      const isFactory = request.params[0].to.toLowerCase() === KAIOS_MARKET_GENESIS_CONFIG.pancakeswap_v2_factory.toLowerCase();
+      result = mismatchUrl === url && isFactory ? oneWord : zeroWord;
+    } else throw new Error(`unexpected RPC method ${request.method}`);
+    return { ok: true, async json() { return { jsonrpc: "2.0", id: request.id, result }; } };
+  };
+}
+
+test("KAIOS read-only market adapter requires matching multi-RPC evidence at one confirmed block", async () => {
+  const rpcUrls = ["https://rpc-one.example", "https://rpc-two.example"];
+  const snapshot = await readKaiosExternalMarketSnapshotQuorum({ rpcUrls, fetchImpl: kaiosMarketRpcFetch(), confirmations: 3 });
+  assert.equal(snapshot.block_number, 997);
+  assert.equal(snapshot.provider_count, 2);
+  assert.equal(snapshot.evidence_class, "RPC_QUORUM_VERIFIED_READ_ONLY");
+  assert.equal(snapshot.mainnet_transaction_sent, false);
+  const market = evaluateKaiosExternalMarketSnapshot(snapshot);
+  assert.equal(market.market_status, "RPC_QUORUM_VERIFIED_READ_ONLY_OBSERVATION");
+  assert.equal(market.pair_registry_status, "RPC_QUORUM_ZERO_AT_BLOCK");
+  assert.equal(market.timestamped_no_pair_observation, true);
+  assert.equal(market.authoritative_no_pair_claim, false);
+  assert.equal(market.execution_performed, false);
+
+  const callerCopy = evaluateKaiosExternalMarketSnapshot(structuredClone(snapshot));
+  assert.equal(callerCopy.market_status, "UNVERIFIED_EXTERNAL_MARKET_OBSERVATION");
+  assert.equal(callerCopy.timestamped_no_pair_observation, false);
+});
+
+test("KAIOS read-only market adapter rejects RPC disagreement, one provider and wrong chain", async () => {
+  const rpcUrls = ["https://rpc-one.example", "https://rpc-two.example"];
+  await assert.rejects(
+    readKaiosExternalMarketSnapshotQuorum({ rpcUrls, fetchImpl: kaiosMarketRpcFetch({ mismatchUrl: rpcUrls[1] }) }),
+    (error) => error.code === "KAIOS_MARKET_RPC_QUORUM_MISMATCH"
+  );
+  await assert.rejects(
+    readKaiosExternalMarketSnapshotQuorum({ rpcUrls: [rpcUrls[0]], fetchImpl: kaiosMarketRpcFetch() }),
+    (error) => error.code === "KAIOS_MARKET_RPC_QUORUM_REQUIRED"
+  );
+  const wrongChainFetch = async (url, options) => {
+    const request = JSON.parse(options.body);
+    if (request.method === "eth_chainId") return { ok: true, async json() { return { result: "0x1", id: request.id }; } };
+    return kaiosMarketRpcFetch()(url, options);
+  };
+  await assert.rejects(
+    readKaiosExternalMarketSnapshotQuorum({ rpcUrls, fetchImpl: wrongChainFetch }),
+    (error) => error.code === "KAIOS_MARKET_WRONG_CHAIN"
+  );
 });
 
 test("KAIOS pair proposal cannot self-upgrade caller claims into verified readiness", () => {
