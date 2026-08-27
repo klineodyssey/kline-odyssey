@@ -1890,6 +1890,11 @@ function sameEvmAddress(left, right) {
   return /^0x[0-9a-fA-F]{40}$/.test(String(left)) && String(left).toLowerCase() === String(right).toLowerCase();
 }
 
+function assertRepositoryBoundKaios18888PaymentConfig(config) {
+  invariant(config === KAIOS_18888_PAYMENT_CONFIG, "CALLER_SUPPLIED_PAYMENT_CONFIG_FORBIDDEN", "18888 payment authority configuration must be the frozen repository-bound singleton");
+  return config;
+}
+
 function assertExactObjectFields(record, fields, label) {
   requireFields(record, fields, label);
   const unknown = Object.keys(record).filter((field) => !fields.includes(field));
@@ -1900,6 +1905,7 @@ export function validateKaios18888PaymentRequest(request, {
   observedTimestamp,
   config = KAIOS_18888_PAYMENT_CONFIG
 } = {}) {
+  assertRepositoryBoundKaios18888PaymentConfig(config);
   assertExactObjectFields(request, KAIOS_18888_PAYMENT_REQUEST_FIELDS, "Kaios18888PaymentRequest");
   invariant(/^[A-Z0-9][A-Z0-9_-]{7,127}$/.test(request.request_id), "INVALID_PAYMENT_REQUEST_ID", "Payment request ID must be a stable uppercase identifier");
   invariant(request.chain_id === config.chain_id, "WRONG_CHAIN", "18888 payment preparation requires BSC chain 56");
@@ -1931,6 +1937,7 @@ export function prepareKaios18888UnsignedDisbursement({
   requestedDelaySeconds = KAIOS_18888_PAYMENT_CONFIG.minimum_delay_seconds,
   config = KAIOS_18888_PAYMENT_CONFIG
 }) {
+  assertRepositoryBoundKaios18888PaymentConfig(config);
   invariant(ethers?.utils?.defaultAbiCoder, "ETHERS_REQUIRED", "18888 draft preparation requires ethers hashing utilities");
   validateKaios18888PaymentRequest(request, { observedTimestamp, config });
   invariant(Number.isInteger(requestedDelaySeconds) && requestedDelaySeconds >= config.minimum_delay_seconds, "TIMELOCK_TOO_SHORT", "18888 disbursement delay must be at least one hour");
@@ -1971,6 +1978,7 @@ export function prepareKaios18888UnsignedDisbursement({
 }
 
 export function validateKaios18888PaymentReadiness(snapshot, config = KAIOS_18888_PAYMENT_CONFIG) {
+  assertRepositoryBoundKaios18888PaymentConfig(config);
   const fields = ["chain_id", "bank_address", "kaios_address", "beneficiary", "bank_code", "kaios_code", "bank_paused", "bank_healthy", "available_wei", "amount_wei", "proposer_has_role", "approver_has_role", "proposer_address", "approver_address", "existing_beneficiary", "budget_authority_bound", "beneficiary_authority_bound", "deployed_abi_bound", "runtime_codehash_bound"];
   assertExactObjectFields(snapshot, fields, "Kaios18888PaymentReadiness");
   const gates = Object.freeze({
@@ -2017,6 +2025,7 @@ export async function readKaios18888PaymentReadiness({
   bankReader,
   config = KAIOS_18888_PAYMENT_CONFIG
 }) {
+  assertRepositoryBoundKaios18888PaymentConfig(config);
   invariant(ethers?.Contract && provider?.getNetwork && provider?.getCode && provider?.getBlockNumber, "READ_PROVIDER_REQUIRED", "A read-only ethers provider is required");
   invariant(prepared?.status === "NON_AUTHORITATIVE_PAYMENT_DRAFT", "PAYMENT_DRAFT_REQUIRED", "A validated non-authoritative payment draft is required");
   invariant(sameEvmAddress(prepared.beneficiary, config.public_good_treasury), "WRONG_BENEFICIARY", "Prepared payment beneficiary is not the fixed Public Good Treasury");
