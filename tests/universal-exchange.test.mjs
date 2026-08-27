@@ -6,7 +6,8 @@ import {
   MemoryUniverseStore, createUniverseRuntime, resolveSpeciesCode, upgradeAppVersion,
   createListing, settleOrder, MissionEngine, completeAssetDream, assertLedgerSeparation,
   assertAppendOnlyChain, validateSpacecraft, ASSET_TYPES, buildLifeDraft, assignLifeJob,
-  validateKgenMarketSnapshot, validateSwapIntent, KGEN_SWAP_CONFIG, DigitalLifeBirthResolver,
+  validateKgenMarketSnapshot, validateSwapIntent, KGEN_SWAP_CONFIG, KAIOS_TOKEN_CONFIG, BSC_WALLET_ASSETS,
+  ensureBscWalletNetwork, watchBscWalletAsset, createMetaMaskMobileDeepLink, DigitalLifeBirthResolver,
   createBirthCertificate, createPendingBirthCertificate, createDigitalLifeBirthCertificateView, appendResolvedLifeBirth, calculateLifeAge,
   deriveHeartEligibility, createDigitalAntFinanceSnapshot, createSurvivalReserveProposal,
   createFirstKgenAcquisitionPlan, createDigitalAntWishProposal, runWukongGatekeeperHourlyJob,
@@ -586,6 +587,35 @@ test("KGEN live adapter validates only the registered BSC pair and explicit user
   assert.throws(() => validateSwapIntent({ direction: "SELL_KGEN", amount: "1", slippage_bps: 1, action_reason: "Real sale", confirmed: true }), (error) => error.code === "INVALID_SLIPPAGE");
 });
 
+test("mobile wallet entry switches to BSC and only registers canonical KGEN or KAIOS", async () => {
+  let chainId = "0x1";
+  const calls = [];
+  const ethereum = {
+    async request(payload) {
+      calls.push(structuredClone(payload));
+      if (payload.method === "eth_chainId") return chainId;
+      if (payload.method === "wallet_switchEthereumChain") { chainId = payload.params[0].chainId; return null; }
+      if (payload.method === "wallet_watchAsset") return true;
+      throw new Error(`Unexpected method ${payload.method}`);
+    }
+  };
+  const network = await ensureBscWalletNetwork({ ethereum });
+  assert.equal(network.chain_id, 56);
+  assert.ok(calls.some((call) => call.method === "wallet_switchEthereumChain" && call.params[0].chainId === "0x38"));
+
+  const kgen = await watchBscWalletAsset({ ethereum, symbol: "KGEN" });
+  const kaios = await watchBscWalletAsset({ ethereum, symbol: "KAIOS" });
+  assert.equal(kgen.address, KGEN_SWAP_CONFIG.token_address);
+  assert.equal(kaios.address, KAIOS_TOKEN_CONFIG.token_address);
+  assert.equal(BSC_WALLET_ASSETS.KGEN.image, BSC_WALLET_ASSETS.KAIOS.image);
+  const watchCalls = calls.filter((call) => call.method === "wallet_watchAsset");
+  assert.equal(watchCalls.length, 2);
+  assert.deepEqual(watchCalls.map((call) => call.params.options.symbol), ["KGEN", "KAIOS"]);
+  await assert.rejects(watchBscWalletAsset({ ethereum, symbol: "FAKE" }), (error) => error.code === "UNREGISTERED_WALLET_ASSET");
+  assert.equal(createMetaMaskMobileDeepLink("https://klineodyssey.github.io/kline-odyssey/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/11520/#/TOKENS"), "https://metamask.app.link/dapp/klineodyssey.github.io/kline-odyssey/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/11520/#/TOKENS");
+  assert.throws(() => createMetaMaskMobileDeepLink("javascript:alert(1)"), (error) => error.code === "INVALID_DAPP_URL");
+});
+
 test("Universal asset and listing type enumerations support all first-day markets", async () => {
   assert.equal(ASSET_TYPES.length, 17);
   for (const type of ["TOKEN", "LIFE", "APP", "COMPANY", "EQUITY", "JOB", "SERVICE", "LAND", "BUILDING", "FACTORY", "SPACECRAFT", "EQUIPMENT", "ENERGY", "DATA", "LICENSE", "CONTRACT", "GOODS"]) assert.ok(ASSET_TYPES.includes(type));
@@ -601,12 +631,14 @@ test("12345 integration names only functions present in formal Solidity source",
 });
 
 test("11520 production shell contains no random market generation or fake metrics", async () => {
-  const files = ["../K線西遊記/temples/11520/index.html", "../K線西遊記/temples/11520/app.mjs"];
+  const files = ["../K線西遊記/temples/11520/index.html", "../K線西遊記/temples/11520/app.mjs", "../core/integrations/kgen-pancakeswap-v2.mjs"];
   const source = (await Promise.all(files.map((file) => fs.readFile(new URL(file, import.meta.url), "utf8")))).join("\n");
   assert.ok(!source.includes("Math.random"));
   assert.ok(!/88,?888|模擬掛單|fake tvl/i.test(source));
   for (const route of ["HOME", "LIFE", "LIFE FACTORY", "APPS", "COMPANIES", "TOKENS", "JOBS", "SERVICES", "PROPERTY", "FACTORIES", "SPACECRAFT", "PORTFOLIO", "MY LIFE", "MY COMPANY"]) assert.ok(source.includes(route));
   assert.ok(source.includes("createKgenSwapAdapter"));
+  for (const id of ["wallet-connect", "watch-kgen", "watch-kaios", "open-metamask-mobile"]) assert.ok(source.includes(id));
+  assert.ok(source.includes("MAINNET_TOKEN_LIVE_NO_VERIFIED_DEX_PAIR"));
 });
 
 function heartFixture() {

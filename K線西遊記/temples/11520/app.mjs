@@ -1,6 +1,7 @@
 import {
   createBrowserUniverseStore, createUniverseRuntime, loadCanonicalSeed,
-  createListing, buildPortfolio, createLifeDraft, createKgenSwapAdapter, KGEN_SWAP_CONFIG, calculateLifeAge, calculateWorkAge,
+  createListing, buildPortfolio, createLifeDraft, createKgenSwapAdapter, KGEN_SWAP_CONFIG, KAIOS_TOKEN_CONFIG,
+  watchBscWalletAsset, ensureBscWalletNetwork, createMetaMaskMobileDeepLink, calculateLifeAge, calculateWorkAge,
   createPublicCivilizationDraftIntent, interpretPublicCivilizationIntent,
   confirmPublicCivilizationIntent, toPublicCivilizationRequest,
   routePublicCivilizationProject, qualifyPublicCivilizationRequest, createNonBindingEstimatePreview,
@@ -303,8 +304,18 @@ async function tokensView() {
   const currencies = await universe.registries.currency.list();
   const cards = currencies.map((item) => `<article class="card"><div class="eyebrow">${html(item.currency_id)}</div><h3>${html(item.name)}</h3>${kv("Civilization", item.civilization_scale)}${kv("Mass class", item.mass_class ?? "NOT_DEFINED")}${kv("Life role", item.life_role ?? "NOT_DEFINED")}${kv("Contract", item.currency_id === "BNB" ? "NATIVE ASSET · NO CONTRACT" : item.contract_address ? "REGISTERED · VERIFY AT RUNTIME" : "NOT_DEPLOYED")}${kv("Trade", badge(item.trade_status ?? "NOT_DEPLOYED"), true)}<p>${badge(item.status)}</p></article>`).join("");
   const genesis = universe.seed.kaios_genesis;
+  const mobileWalletLink = createMetaMaskMobileDeepLink(location.href);
   return `${hero("TOKEN MARKET", "Real chain state, explicit wallet consent.", "KGEN uses its verified BSC mainnet KGEN/WBNB pair and PancakeSwap V2 Router. No synthetic candles, order book, TVL, fills or prices are generated.")}
     <div class="grid">${cards}</div>
+    ${section("Mobile wallet entry", `<article class="card">
+      <div class="notice">This page never receives a private key. On mobile, open it inside MetaMask or another compatible injected-wallet browser. Every live transaction still requires the wallet's own confirmation screen.</div>
+      ${kv("Network", "BNB Smart Chain · chain 56")}
+      ${kv("KGEN", KGEN_SWAP_CONFIG.token_address)}
+      ${kv("KAIOS", KAIOS_TOKEN_CONFIG.token_address)}
+      ${kv("KAIOS market", badge(KAIOS_TOKEN_CONFIG.market_status), true)}
+      <p><button class="button secondary" id="wallet-connect" type="button">Connect / switch to BSC</button> <button class="button secondary" id="watch-kgen" type="button">Add KGEN to wallet</button> <button class="button secondary" id="watch-kaios" type="button">Add KAIOS to wallet</button> <a class="button" id="open-metamask-mobile" href="${html(mobileWalletLink)}" rel="noreferrer">Open in MetaMask mobile</a></p>
+      <div class="mono" id="wallet-entry-result" role="status">No wallet permission requested yet.</div>
+    </article>`)}
     ${section("KAIOS Mainnet Genesis", `<article class="card">${kv("Status", badge(genesis.status), true)}${kv("Mechanism", "KGEN WHITE HOLE · NOT A DEX SWAP")}${kv("Genesis timestamp", genesis.timestamp)}${kv("Genesis block", genesis.block)}${kv("Genesis KAIOS", genesis.genesis_kaios)}${kv("Settlement TX", genesis.settlement_tx_hash)}${kv("Epoch TX", genesis.epoch_tx_hash)}${kv("Receiving treasury", "18888 LINGXIAO CELESTIAL BANK")}</article>`)}
     ${section("KGEN / WBNB live AMM", `<form class="card form-grid" id="kgen-swap-form">
       <div class="notice full">LIVE BSC transaction. Connect a wallet on chain 56. The Router supports KGEN fee-on-transfer behavior. Quotes are live and may differ from final receipt due to token tax, pool movement and gas. Nothing is submitted without wallet confirmation.</div>
@@ -921,11 +932,29 @@ function swapFormIntent(confirmed = document.querySelector("#swap-confirm")?.che
 
 function bindTokenEvents() {
   const result = document.querySelector("#swap-result");
+  const walletResult = document.querySelector("#wallet-entry-result");
   let adapter;
   async function getAdapter() {
     if (!globalThis.ethereum) throw Object.assign(new Error("Install or enable an EIP-1193 wallet."), { code: "WALLET_PROVIDER_REQUIRED" });
     adapter ??= await createKgenSwapAdapter({ ethers: globalThis.ethers, ethereum: globalThis.ethereum, store: universe.store });
     return adapter;
+  }
+  document.querySelector("#wallet-connect")?.addEventListener("click", async () => {
+    try {
+      if (!globalThis.ethereum) throw Object.assign(new Error("Open this page in MetaMask mobile or install a compatible wallet."), { code: "WALLET_PROVIDER_REQUIRED" });
+      await ensureBscWalletNetwork({ ethereum: globalThis.ethereum });
+      const connected = await (await getAdapter()).connect();
+      walletResult.textContent = `BSC wallet connected: ${connected.account}. No transaction was sent.`;
+    } catch (error) { walletResult.textContent = `${error.code ?? "WALLET_CONNECT_STOP"}: ${error.message}`; }
+  });
+  for (const symbol of ["KGEN", "KAIOS"]) {
+    document.querySelector(`#watch-${symbol.toLowerCase()}`)?.addEventListener("click", async () => {
+      try {
+        if (!globalThis.ethereum) throw Object.assign(new Error("Open this page in MetaMask mobile or install a compatible wallet."), { code: "WALLET_PROVIDER_REQUIRED" });
+        const accepted = await watchBscWalletAsset({ ethereum: globalThis.ethereum, symbol });
+        walletResult.textContent = `${accepted.symbol} accepted by wallet at ${accepted.address}. This did not transfer tokens.`;
+      } catch (error) { walletResult.textContent = `${error.code ?? "WALLET_ASSET_STOP"}: ${error.message}`; }
+    });
   }
   document.querySelector("#verify-market")?.addEventListener("click", async () => {
     try {
