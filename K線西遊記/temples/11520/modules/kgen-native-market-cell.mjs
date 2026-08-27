@@ -434,6 +434,7 @@ export function createGpu11520PaperMarket({ quoteAsset, ...options } = {}) {
 }
 
 const GPU_REAL_TRADE_GATE_ORDER = Object.freeze([
+  "REPOSITORY_BOUND_GPU_EVIDENCE_VERIFIER_NOT_WIRED",
   "INDEPENDENT_EVIDENCE_BUNDLE_NOT_VERIFIED",
   "VERIFIED_GPU_INVENTORY_REQUIRED",
   "VERIFIED_GPU_OWNERSHIP_REQUIRED",
@@ -465,9 +466,9 @@ function positiveAtomic(value) {
  * Read-only gate for a future real NVIDIA GPU trade at K11520.
  *
  * This evaluator deliberately has no provider, signer, allowance, transfer,
- * settlement or broadcast method. Even a complete evidence bundle only
- * becomes READY_FOR_SEPARATE_EXECUTION_REVIEW; a separately authorized
- * executor must re-read fresh state and obtain its own receipt.
+ * settlement or broadcast method. The injected verifier callback is a schema
+ * probe only and is not repository-bound authority. Until a repository-bound
+ * verifier is wired, every result remains BLOCKED_FAIL_CLOSED.
  */
 export function evaluateGpu11520RealTradeReadiness({
   evidenceBundle,
@@ -475,7 +476,7 @@ export function evaluateGpu11520RealTradeReadiness({
   executorLifeId = "LIFE-CODEX-GM-0001",
   executorControllerId = "codex-gm-01"
 } = {}) {
-  const blockers = [];
+  const blockers = ["REPOSITORY_BOUND_GPU_EVIDENCE_VERIFIER_NOT_WIRED"];
   let verified = null;
   if (typeof verifyEvidenceBundle === "function") {
     try {
