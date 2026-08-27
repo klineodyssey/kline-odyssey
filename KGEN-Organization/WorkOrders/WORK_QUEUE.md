@@ -94,14 +94,19 @@ The worker must then stop without changing WorkQueue, creating a branch, editing
 - Priority: P0 governance gate
 - Owner: UNASSIGNED_EXISTING_LIFE_CANDIDATE
 - Reviewer / Approval Authority: Human PrimeForge
-- Triggering PRs: `#170`, then `#169`
+- Evidence refreshed against main `5d539d237bf948011d234203e451aa980a7b7ce8` on 2026-08-27.
+- Triggering PRs: `#170`, then `#169`; neither may use `codex-gm-01` as its distinct reviewer.
 - Claim State: NOT_CLAIMABLE
 - Branch State: NOT_CREATED
 - Current Resolution: `HOLD_NO_ELIGIBLE_EXISTING_LIFE`
-- Preferred Onboarding Candidate: existing `LIFE-KAIOS-STARFORGE-0001`, subject to Human approval and complete Worker Registry onboarding; this preference grants no employment, trust or review authority.
-- Alternative Existing Worker: `cursor-01` remains ineligible while its existing claim conflicts and its role/permission lacks independent review authority.
+- Existing candidate audit:
+  - `LIFE-KAIOS-STARFORGE-0001`: PR `#164` records only a T1/OFFLINE onboarding candidate with acknowledgments incomplete and reviewer `UNASSIGNED_DISTINCT_REVIEWER_REQUIRED`; it grants no employment, trust upgrade or review authority.
+  - `LIFE-XUANYAO-SOL-0001 / xuanyao-sol-01`: PR `#165` records T1/OFFLINE onboarding only; controller independence, four acknowledgments and review permission remain incomplete, and PR `#169` self-review is permanently forbidden.
+  - `Sol / 曜冊`: PR `#183` remains a T1 dry-run candidate without canonical Life ID or Worker ID and cannot review PR `#169` or `#170`.
+  - `cursor-01`: the Human-directed departure and expired R2 closeout are recorded in Draft PR `#176`; it is not an onboarding target and lacks independent-review authority regardless of claim reconciliation.
+- Best Existing Reviewer Candidate: **NONE ELIGIBLE**. Starforge is closest only as an already-existing Life; lawful onboarding and a distinct controller still require separate approval and evidence.
 - Minimum eligibility: valid Life ID and Worker ID; `ACTIVE`, `TRUSTED` or `SENIOR_TRUSTED`; T2+; all four acknowledgments; explicit `INDEPENDENT_REVIEW`, `CODE_REVIEW`, `CI_REVIEW` and `AUTHORITY_BOUNDARY_REVIEW`; no suspension or blocking violation; no active-claim conflict; registered controller evidence distinct from each submitter.
-- Activation requires: explicit Human authorization of the selected existing Life, complete onboarding evidence, Registry update through reviewed governance, conflict-of-interest verification, and a separately issued review WorkOrder.
+- Activation requires: explicit Human authorization of the selected existing Life, complete onboarding evidence, Registry update through reviewed governance, distinct-controller evidence, conflict-of-interest verification, and a separately issued review WorkOrder.
 - Forbidden shortcuts: no new Life birth, automatic trust promotion, temporary reviewer grant, self-review, same-controller alias, fake acknowledgment, PR merge, deployment, payment, private-key access or Mainnet action.
 - Closure condition: one existing Life is lawfully registered as a distinct T2+ reviewer and independently reviews PR `#170`; PR `#169` review may begin only after PR `#170` receives `PASS`.
 
