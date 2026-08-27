@@ -66,6 +66,8 @@ The existing BSC mainnet proxy `0x17587F49dFDE4e400D03Ae81364AC2af8E1629Df` is n
 
 Historical Solidity and the live ABI agree that V1 only lets its governance role request an 18888 KAIOS module payment to that one fixed Brain address. It does not bind buyer/seller authority, collect buyer KGEN or KAIOS, custody a GPU, link a serial/warehouse receipt, transfer inventory atomically or settle to the seller. Therefore `RPC_QUORUM_VERIFIED_DEPLOYED_V1` does **not** mean GPU settlement compatibility. The exact current classification is `INCOMPATIBLE_WITH_ATOMIC_GPU_TRADE_SETTLEMENT / PRODUCTION_GPU_SETTLEMENT_ADAPTER_NOT_IMPLEMENTED`.
 
+`core/settlement` reuses the same listing and actor organs to build a fail-closed GPU atomic-settlement envelope. The envelope binds one listing, one GPU serial, one K11520 warehouse receipt, one verified buyer/controller, one verified seller/controller and immutable beneficiary, one KGEN-or-KAIOS amount, one nonce and one expiry. It contains no unsigned payload and cannot request a signer or recognize revenue. A future production adapter must atomically collect exact buyer payment, lock the exact GPU unit, pay the fixed seller, transfer ownership and custody to the buyer and emit one replay-safe receipt; deployed V1 cannot perform that sequence.
+
 ## CI requirement
 
 `.github/workflows/universal_exchange_v2.yml` must run both:

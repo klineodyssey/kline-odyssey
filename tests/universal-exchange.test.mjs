@@ -103,6 +103,7 @@ import {
   calculateFieldServiceQuote, validateFieldDeliveryEvidence, createWorkforceGap,
   createFieldServiceDemandScan, UNIVERSAL_11520_MARKET, create11520UniversalListingCandidate,
   create11520EscrowCandidate, validate11520SettlementReceipt, create11520SettlementAccounting,
+  GPU_ATOMIC_SETTLEMENT_11520_REQUIREMENTS, create11520GpuAtomicSettlementCandidate,
   KAIOS_MARKET_GENESIS_CONFIG, readKaiosExternalMarketSnapshotQuorum,
   evaluateKaiosExternalMarketSnapshot, createKaiosMarketGenesisProposal,
   NVIDIA_GPU_11520_ROUTE, GPU_LANDED_COST_FIELDS,
@@ -343,6 +344,58 @@ test("11520 receipt callback cannot manufacture settlement or revenue", () => {
   assert.equal(accounting.payroll_funding_status, "NOT_AUTOMATIC");
   assert.ok(accounting.entries.every((entry) => entry.posting_status === "NOT_POSTED"));
   assert.equal(accounting.entries.reduce((sum, entry) => sum + (entry.direction === "DEBIT" ? BigInt(entry.amount_atomic) : -BigInt(entry.amount_atomic)), 0n), 0n);
+});
+
+test("11520 GPU atomic envelope binds warehouse unit, parties, currency and amount but cannot execute", () => {
+  const listingCandidate = create11520UniversalListingCandidate({
+    listing: gpuListing11520(), asset: gpuAsset11520(), sellerActorContext: { evidence_id: "EVIDENCE_SELLER" },
+    verifyActorContext: verify11520TestActor, observedAt: "2026-08-27T13:31:00+08:00",
+    unitPriceAtomic: "2000000000000000000", quantityAtomic: "1", evidenceIds: ["GPU_METADATA_HASH"],
+    warehouseReceipt: gpuWarehouseReceipt11520()
+  });
+  const candidate = create11520GpuAtomicSettlementCandidate({
+    listingCandidate, buyerActorContext: { evidence_id: "EVIDENCE_BUYER" }, verifyActorContext: verify11520TestActor,
+    observedAt: "2026-08-27T13:32:00+08:00", expiresAt: "2026-08-27T13:47:00+08:00",
+    tradeNonce: "GPU-TRADE-0001"
+  });
+  assert.equal(candidate.chain_id, 56);
+  assert.equal(candidate.market_id, "K11520_UNIVERSAL_EXCHANGE");
+  assert.equal(candidate.gpu_serial_number, "TEST-SERIAL-0001");
+  assert.equal(candidate.warehouse_receipt_id, "WAREHOUSE_GPU_NVIDIA_TEST_0001");
+  assert.equal(candidate.buyer_actor_id, "LIFE_GPU_BUYER");
+  assert.equal(candidate.seller_actor_id, "LIFE_GPU_SELLER");
+  assert.equal(candidate.beneficiary, "LIFE_GPU_SELLER");
+  assert.equal(candidate.currency_id, "KGEN");
+  assert.equal(candidate.amount_atomic, "2000000000000000000");
+  assert.deepEqual(candidate.atomic_actions, GPU_ATOMIC_SETTLEMENT_11520_REQUIREMENTS.atomic_actions);
+  assert.equal(candidate.deployed_v1_compatibility, "INCOMPATIBLE_WITH_ATOMIC_GPU_TRADE_SETTLEMENT");
+  assert.equal(candidate.production_adapter_status, "NOT_IMPLEMENTED");
+  assert.equal(candidate.settlement_ready, false);
+  assert.equal(candidate.unsigned_payload, null);
+  assert.equal(candidate.signer_requested, false);
+  assert.equal(candidate.buyer_payment_collected, false);
+  assert.equal(candidate.gpu_custody_transferred, false);
+  assert.equal(candidate.revenue_recognized, false);
+  assert.equal(candidate.real_trade_executed, false);
+  assert.equal(candidate.mainnet_transaction_sent, false);
+});
+
+test("11520 GPU atomic envelope rejects replay, expiry, self-control and warehouse tampering", () => {
+  const listingCandidate = create11520UniversalListingCandidate({
+    listing: gpuListing11520(), asset: gpuAsset11520(), sellerActorContext: { evidence_id: "EVIDENCE_SELLER" },
+    verifyActorContext: verify11520TestActor, observedAt: "2026-08-27T13:31:00+08:00",
+    unitPriceAtomic: "2000000000000000000", quantityAtomic: "1", evidenceIds: ["GPU_METADATA_HASH"],
+    warehouseReceipt: gpuWarehouseReceipt11520()
+  });
+  const base = {
+    listingCandidate, buyerActorContext: { evidence_id: "EVIDENCE_BUYER" }, verifyActorContext: verify11520TestActor,
+    observedAt: "2026-08-27T13:32:00+08:00", expiresAt: "2026-08-27T13:47:00+08:00", tradeNonce: "GPU-TRADE-0002"
+  };
+  assert.throws(() => create11520GpuAtomicSettlementCandidate({ ...base, consumedTradeNonces: [base.tradeNonce] }), (error) => error.code === "GPU_SETTLEMENT_NONCE_REPLAY");
+  assert.throws(() => create11520GpuAtomicSettlementCandidate({ ...base, expiresAt: base.observedAt }), (error) => error.code === "GPU_SETTLEMENT_EXPIRY_INVALID");
+  assert.throws(() => create11520GpuAtomicSettlementCandidate({ ...base, buyerActorContext: { evidence_id: "EVIDENCE_SAME_CONTROLLER" } }), (error) => error.code === "SAME_CONTROLLER_MATCH_FORBIDDEN");
+  const tampered = { ...listingCandidate, warehouse_receipt: { ...listingCandidate.warehouse_receipt, asset_id: "GPU_ATTACKER" } };
+  assert.throws(() => create11520GpuAtomicSettlementCandidate({ ...base, listingCandidate: tampered }), (error) => error.code === "GPU_SETTLEMENT_WAREHOUSE_ASSET_MISMATCH");
 });
 
 const kaiosNoPairSnapshot = Object.freeze({

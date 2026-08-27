@@ -56,6 +56,105 @@ export function create11520EscrowCandidate({ listingCandidate, buyerActorContext
   });
 }
 
+export const GPU_ATOMIC_SETTLEMENT_11520_REQUIREMENTS = Object.freeze({
+  chain_id: 56,
+  market_id: UNIVERSAL_11520_MARKET.market_id,
+  warehouse_id: "0.00011520_K11520_GPU_BONDED_WAREHOUSE",
+  allowed_quote_currencies: Object.freeze(["KGEN", "KAIOS"]),
+  atomic_actions: Object.freeze([
+    "COLLECT_EXACT_BUYER_PAYMENT",
+    "LOCK_EXACT_GPU_WAREHOUSE_UNIT",
+    "PAY_FIXED_SELLER_BENEFICIARY",
+    "TRANSFER_EXACT_GPU_OWNERSHIP_AND_CUSTODY_TO_BUYER",
+    "EMIT_SINGLE_BINDING_SETTLEMENT_RECEIPT"
+  ]),
+  deployed_v1_status: "INCOMPATIBLE_WITH_ATOMIC_GPU_TRADE_SETTLEMENT",
+  production_adapter_status: "NOT_IMPLEMENTED"
+});
+
+/**
+ * Builds the complete immutable binding envelope a future 11520 GPU settlement
+ * adapter must consume. This is deliberately not a transaction builder: the
+ * deployed V1 adapter cannot settle a buyer-to-seller physical GPU trade, and
+ * no repository-bound warehouse/capital/signer connector exists yet.
+ */
+export function create11520GpuAtomicSettlementCandidate({
+  listingCandidate,
+  buyerActorContext,
+  verifyActorContext,
+  observedAt,
+  expiresAt,
+  tradeNonce,
+  consumedTradeNonces = []
+}) {
+  invariant(listingCandidate?.market_id === UNIVERSAL_11520_MARKET.market_id, "GPU_SETTLEMENT_MARKET_MISMATCH", "GPU settlement must use the canonical K11520 market");
+  invariant(listingCandidate?.asset_type === "EQUIPMENT", "GPU_SETTLEMENT_ASSET_TYPE_INVALID", "GPU settlement requires a physical equipment listing");
+  invariant(GPU_ATOMIC_SETTLEMENT_11520_REQUIREMENTS.allowed_quote_currencies.includes(listingCandidate.quote_currency), "GPU_SETTLEMENT_CURRENCY_FORBIDDEN", "GPU settlement quote currency must be KGEN or KAIOS");
+  invariant(listingCandidate.warehouse_receipt?.warehouse_id === GPU_ATOMIC_SETTLEMENT_11520_REQUIREMENTS.warehouse_id, "GPU_SETTLEMENT_WAREHOUSE_MISMATCH", "GPU settlement must bind the canonical K11520 warehouse");
+  invariant(listingCandidate.warehouse_receipt?.asset_id === listingCandidate.asset_id, "GPU_SETTLEMENT_WAREHOUSE_ASSET_MISMATCH", "Warehouse receipt must bind the listed GPU asset");
+  invariant(typeof listingCandidate.warehouse_receipt?.serial_number === "string" && listingCandidate.warehouse_receipt.serial_number.trim(), "GPU_SETTLEMENT_SERIAL_REQUIRED", "GPU settlement must bind one GPU serial number");
+  invariant(listingCandidate.seller_authority?.actor_id && listingCandidate.seller_authority?.controller_id, "GPU_SETTLEMENT_SELLER_AUTHORITY_REQUIRED", "GPU settlement requires verified seller authority");
+
+  const buyer = verify11520ActorContext({ actorContext: buyerActorContext, verifyActorContext, purpose: "CREATE_GPU_ATOMIC_SETTLEMENT_CANDIDATE", observedAt });
+  const seller = listingCandidate.seller_authority;
+  invariant(buyer.actor_id !== seller.actor_id, "SELF_MATCH_FORBIDDEN", "GPU buyer and seller actor cannot match");
+  invariant(buyer.controller_id !== seller.controller_id, "SAME_CONTROLLER_MATCH_FORBIDDEN", "GPU buyer and seller controller cannot match");
+  invariant(typeof tradeNonce === "string" && /^[A-Za-z0-9:_-]{8,128}$/.test(tradeNonce), "GPU_SETTLEMENT_NONCE_INVALID", "GPU settlement requires a stable bounded nonce");
+  invariant(Array.isArray(consumedTradeNonces) && !consumedTradeNonces.includes(tradeNonce), "GPU_SETTLEMENT_NONCE_REPLAY", "GPU settlement nonce has already been consumed");
+  const observed = Date.parse(observedAt);
+  const expires = Date.parse(expiresAt);
+  invariant(Number.isFinite(observed) && Number.isFinite(expires) && expires > observed, "GPU_SETTLEMENT_EXPIRY_INVALID", "GPU settlement expiry must be later than its observation time");
+
+  const warehouse = listingCandidate.warehouse_receipt;
+  return Object.freeze({
+    candidate_id: `GPU_ATOMIC_${listingCandidate.listing.listing_id}_${tradeNonce}`,
+    trade_nonce: tradeNonce,
+    chain_id: GPU_ATOMIC_SETTLEMENT_11520_REQUIREMENTS.chain_id,
+    market_id: UNIVERSAL_11520_MARKET.market_id,
+    listing_id: listingCandidate.listing.listing_id,
+    asset_id: listingCandidate.asset_id,
+    gpu_serial_number: warehouse.serial_number,
+    warehouse_id: warehouse.warehouse_id,
+    warehouse_receipt_id: warehouse.receipt_id,
+    ownership_evidence_id: warehouse.ownership_evidence_id,
+    cargo_receipt_id: warehouse.cargo_receipt_id,
+    buyer_actor_id: buyer.actor_id,
+    buyer_controller_id: buyer.controller_id,
+    seller_actor_id: seller.actor_id,
+    seller_controller_id: seller.controller_id,
+    beneficiary: seller.actor_id,
+    currency_id: listingCandidate.quote_currency,
+    amount_atomic: atomic(listingCandidate.total_ask_atomic, "GPU settlement amount").toString(),
+    observed_at: observedAt,
+    expires_at: expiresAt,
+    atomic_actions: GPU_ATOMIC_SETTLEMENT_11520_REQUIREMENTS.atomic_actions,
+    binding_status: "COMPLETE_CANDIDATE_FIELDS_FAIL_CLOSED",
+    warehouse_evidence_status: warehouse.status,
+    deployed_v1_compatibility: GPU_ATOMIC_SETTLEMENT_11520_REQUIREMENTS.deployed_v1_status,
+    production_adapter_status: GPU_ATOMIC_SETTLEMENT_11520_REQUIREMENTS.production_adapter_status,
+    blockers: Object.freeze([
+      "WAREHOUSE_EVIDENCE_NOT_REPOSITORY_VERIFIED",
+      "FUNDED_TRADING_CAPITAL_NOT_BOUND",
+      "BUYER_PAYMENT_CUSTODY_NOT_IMPLEMENTED",
+      "GPU_INVENTORY_CUSTODY_TRANSFER_NOT_IMPLEMENTED",
+      "PRODUCTION_GPU_SETTLEMENT_ADAPTER_NOT_IMPLEMENTED",
+      "TRANSACTION_POLICY_BROKER_NOT_CONNECTED",
+      "NO_BROADCAST_FORK_SIMULATION_MISSING",
+      "DISTINCT_REVIEW_NOT_ACCEPTED"
+    ]),
+    replay_state: "CALLER_INDEX_CHECKED_DURABLE_STORE_REQUIRED",
+    settlement_ready: false,
+    unsigned_payload: null,
+    signer_requested: false,
+    allowance_requested: false,
+    buyer_payment_collected: false,
+    gpu_custody_transferred: false,
+    revenue_recognized: false,
+    real_trade_executed: false,
+    mainnet_transaction_sent: false
+  });
+}
+
 export function validate11520SettlementReceipt(receipt, { escrowCandidate, verifyChainReceipt, consumedReceiptIds = [] }) {
   invariant(escrowCandidate?.status === "UNFUNDED_MODEL_ONLY", "ESCROW_CANDIDATE_REQUIRED", "Settlement verification requires the exact escrow candidate");
   invariant(typeof verifyChainReceipt === "function", "CHAIN_RECEIPT_VERIFIER_REQUIRED", "Settlement receipt fields must be checked by an independent BSC receipt verifier");
