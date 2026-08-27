@@ -39,13 +39,18 @@ function createMarket(options = {}) {
   });
 }
 
-test("11520 market-cell coordinate never seeds CT", () => {
-  const market = createMarket({ marketCellCoordinate: "0.00011520" });
+test("11520 fixed KGEN price coordinate and Company address never seed matched-trade CT", () => {
+  const market = createMarket({ marketCellCoordinate: "0.99999999" });
   const state = market.getMarketState();
   assert.equal(state.marketCellCoordinate, "0.00011520");
-  assert.equal(state.marketCellCoordinateRole, "LOCATION_ONLY_NOT_PRICE");
+  assert.equal(state.marketCellCoordinateRole, "KGEN_UNIVERSE_PRICE_AND_COMPANY_ADDRESS");
+  assert.equal(state.companyAddress, "0.00011520");
+  assert.equal(state.companyKCoordinate, "K11520");
+  assert.equal(state.kgenUniversePriceCoordinate, "0.00011520");
+  assert.equal(state.kgenUniversePriceCoordinateUnit, "USD_PER_KGEN");
   assert.equal(state.runtimeStatus, "PAPER_IN_MEMORY_CANDIDATE_NOT_ACTIVE_RUNTIME");
   assert.equal(state.ct, null);
+  assert.equal(state.nativeMatchedTradeCT, null);
   assert.equal(state.externalReferencePriceAuthority, false);
 });
 
@@ -86,6 +91,7 @@ test("crossed market creates trade and CT at resting maker price", () => {
   assert.equal(result.fills[0].price, "0.00048");
   assert.equal(result.fills[0].quantity, "40");
   assert.equal(market.getMarketState().ct, "0.00048");
+  assert.equal(market.getMarketState().nativeMatchedTradeCT, "0.00048");
   assert.equal(market.getMarketState().tradeCount, 1);
   assert.equal(market.getOrderBook().asks[0].remaining, "60");
 });

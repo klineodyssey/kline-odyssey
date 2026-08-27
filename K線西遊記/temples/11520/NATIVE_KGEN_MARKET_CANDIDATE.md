@@ -3,13 +3,17 @@
 STATUS: `PAPER_IN_MEMORY_CANDIDATE_NOT_ACTIVE_RUNTIME`
 PR: `#169`
 MARKET: `11520_KGEN_NATIVE_MARKET`
-LOCATION / CELL IDENTITY: `0.00011520`
+COMPANY ADDRESS / KGEN UNIVERSE PRICE COORDINATE: `0.00011520`
+COMPANY K COORDINATE: `K11520`
+PRICE COORDINATE UNIT: `USD_PER_KGEN`
 
 ## Authority boundary
 
-`0.00011520` is a Huaguoshan Taiwan Exchange market-cell identity only. It is not CT, not a market price, not a price seed, not a target, not a floor and not an L/P-derived quote.
+`0.00011520` is simultaneously the Human-assigned K11520 AI Company universe address and the fixed KGEN Universe price coordinate `0.00011520 USD_PER_KGEN`. It is not an automatic matched-trade CT, GPU transaction price, order, target, floor or L/P-derived quote.
 
-CT is `null` before the first valid native 11520 matched trade. After a valid match, CT is exactly the latest executed native trade price and is the current market / universe boundary.
+The fixed coordinate and the changing native matched-trade CT are distinct fields in the same KGEN Universe. Constructor input cannot relabel or replace the formal Company address.
+
+`nativeMatchedTradeCT` is `null` before the first valid native 11520 matched trade. After a valid match, it is exactly the latest executed native trade price and is the current market / universe boundary. The compatibility field `ct` carries the same value.
 
 External PancakeSwap, WBNB, USD, USDT or L/P-derived values have zero native CT authority.
 

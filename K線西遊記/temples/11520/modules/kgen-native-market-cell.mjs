@@ -4,6 +4,11 @@ const BASE_DECIMALS = 18;
 const QUOTE_ASSET = "UNFROZEN_11520_NATIVE_QUOTE_CANDIDATE";
 const QUOTE_STATUS = "UNFROZEN_CANDIDATE";
 const QUOTE_DECIMALS = 18;
+const MARKET_CELL_COORDINATE = "0.00011520";
+const MARKET_CELL_COORDINATE_ROLE = "KGEN_UNIVERSE_PRICE_AND_COMPANY_ADDRESS";
+const COMPANY_ADDRESS = "0.00011520";
+const COMPANY_K_COORDINATE = "K11520";
+const KGEN_PRICE_COORDINATE_UNIT = "USD_PER_KGEN";
 
 function parseDecimal(value, label = "value") {
   const text = String(value).trim();
@@ -117,8 +122,9 @@ function bucketStart(timestampMs, intervalMs) {
  * PAPER_IN_MEMORY_CANDIDATE_NOT_ACTIVE_RUNTIME
  *
  * Canon / integrity boundary:
- * - `marketCellCoordinate` identifies the Huaguoshan Taiwan Exchange cell only.
- * - It NEVER seeds, fixes or influences price.
+ * - `0.00011520` is the fixed K11520 Company address and KGEN Universe
+ *   USD-per-KGEN price coordinate.
+ * - The fixed coordinate NEVER seeds, fixes or influences matched-trade CT.
  * - CT is undefined before the first valid matched trade.
  * - CT becomes exactly the most recent native 11520 matched trade price.
  * - PancakeSwap/WBNB/USD/L-P data are not pricing inputs.
@@ -127,7 +133,6 @@ function bucketStart(timestampMs, intervalMs) {
  */
 export function createKgenNativeMarketCell({
   marketId = "11520_KGEN_NATIVE_MARKET",
-  marketCellCoordinate = "0.00011520",
   tickSize = "0.00000001",
   lotSize = "0.00000001",
   candleIntervalMs = 60_000,
@@ -328,8 +333,12 @@ export function createKgenNativeMarketCell({
     const book = getOrderBook(1);
     return Object.freeze({
       marketId,
-      marketCellCoordinate,
-      marketCellCoordinateRole: "LOCATION_ONLY_NOT_PRICE",
+      marketCellCoordinate: MARKET_CELL_COORDINATE,
+      marketCellCoordinateRole: MARKET_CELL_COORDINATE_ROLE,
+      companyAddress: COMPANY_ADDRESS,
+      companyKCoordinate: COMPANY_K_COORDINATE,
+      kgenUniversePriceCoordinate: MARKET_CELL_COORDINATE,
+      kgenUniversePriceCoordinateUnit: KGEN_PRICE_COORDINATE_UNIT,
       runtimeStatus: "PAPER_IN_MEMORY_CANDIDATE_NOT_ACTIVE_RUNTIME",
       baseAsset: BASE_ASSET,
       baseDecimals: BASE_DECIMALS,
@@ -342,6 +351,7 @@ export function createKgenNativeMarketCell({
       pricingAuthority: "NATIVE_11520_MATCHED_BUY_SELL_TRADES_ONLY",
       externalReferencePriceAuthority: false,
       ct: ct === null ? null : formatDecimal(ct),
+      nativeMatchedTradeCT: ct === null ? null : formatDecimal(ct),
       ctMeaning: "CURRENT_NATIVE_MATCHED_TRADE_PRICE_UNIVERSE_BOUNDARY",
       bestBid: book.bestBid,
       bestAsk: book.bestAsk,
