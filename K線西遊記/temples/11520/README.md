@@ -1,10 +1,13 @@
-# 11520 Universal Exchange V3.9
+# 11520 Universal Exchange V4.0.2
 
 ## PR #169 native KGEN market candidate
 
 `PR #169` is `PAPER_IN_MEMORY_CANDIDATE_NOT_ACTIVE_RUNTIME`. The module `modules/kgen-native-market-cell.mjs` is not imported by the active `app.mjs` and has no signer, custody, settlement, transfer, approval, Mainnet write or deployment authority. Human authority assigns `0.00011520` as both the K11520 AI Company universe address and the fixed KGEN Universe price coordinate `0.00011520 USD_PER_KGEN`. That fixed coordinate is not an automatic matched-trade CT, GPU transaction price, target, floor or L/P-derived quote. `nativeMatchedTradeCT` is null before the first valid native match and thereafter equals the latest valid native matched trade price. External PancakeSwap/WBNB/USD/L/P values have zero authority to populate native CT. Orders and cancellations require an independently verified opaque actor context; free owner/controller strings, forged contexts, expired contexts and same-owner/controller matches fail closed. The quote asset and `UNFROZEN_CANDIDATE` status are fixed candidate boundaries and cannot be promoted by constructor input, so any generated matched price remains `NATIVE_MARKET_PRICE_CANDIDATE` until quote-unit governance is independently frozen. See `NATIVE_KGEN_MARKET_CANDIDATE.md` and exact-head CI before any activation.
 
 ## Digital Ant next-stage status
+
+- V4.0.2 preserves the mobile injected-wallet entry, fail-closed BSC chain-56 switching and user-initiated wallet display metadata for canonical KGEN and KAIOS. It loads only explicit browser-safe modules; Node-only signer and Starforge modules are excluded from the public browser dependency graph. These controls never receive a private key and connect/add-token actions send no transaction.
+- KGEN/WBNB remains the only verified external AMM route. KAIOS is a live Mainnet token without a verified DEX pair; no KAIOS swap, quote or synthetic price is exposed.
 
 - V3.9 activates `KGEN_FIELD_SERVICE_BUSINESS` after the WUKONG_GATEKEEPER primary-job gate. Its CFO scans verified K280/Universe Map nodes for cash logistics, KUFO supply, waste collection and general delivery demand.
 - The scan currently sees four canonical nodes but no ATM cash/KUFO inventory evidence, waste inventory or cargo request. Therefore real/candidate Field Jobs, route, costs, quote, delivery evidence, Revenue and First KAIOS all remain zero or evidence-required.
