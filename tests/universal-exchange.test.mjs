@@ -101,6 +101,7 @@ import {
   calculateFieldServiceQuote, validateFieldDeliveryEvidence, createWorkforceGap,
   createFieldServiceDemandScan
   , KAIOS_AI_OS_EMPLOYMENT_ALPHA_JOB, KAIOS_AI_OS_FIRST_REAL_EMPLOYMENT_TEST_JOB, KAIOS_MAINNET_TOKEN,
+  CANONICAL_REPOSITORY_COMPANY_AUTHORITIES,
   createEmploymentIdentityChallenge,
   verifyEmploymentIdentityProof, createEmploymentApplication, scoreEmploymentInterview,
   createTrialEmploymentContract, createEmploymentAlphaMission, acceptEmploymentAlphaMission,
@@ -3122,8 +3123,11 @@ test("V4.3 caller-supplied authority cannot create formal Company employment fac
   const candidateInterview = createCompanyInterview(interviewInput);
   assert.equal(candidateInterview.status, "COMPANY_INTERVIEW_CANDIDATE_NOT_AUTHORITY");
   assert.equal(candidateInterview.repository_bound_authority_verified, false);
-  assert.throws(() => createCompanyInterview({ ...interviewInput, authority, repositoryHead }), (error) => error.code === "COMPANY_INTERVIEW_AUTHORITY_NOT_CONNECTED");
-  assert.throws(() => recordCompanyEmploymentDecision({ decisionId: "REAL_TEST_DECISION_001", application, interview: candidateInterview, job: KAIOS_AI_OS_FIRST_REAL_EMPLOYMENT_TEST_JOB, decisionMakerId: authority.authorized_actor_id, decision: "APPROVE", evidence: [candidateInterview.interview_id], decidedAt: "2026-08-29T00:06:00.000Z", authority, repositoryHead }), (error) => error.code === "COMPANY_EMPLOYMENT_AUTHORITY_NOT_CONNECTED");
+  assert.equal(Object.isFrozen(CANONICAL_REPOSITORY_COMPANY_AUTHORITIES), true);
+  assert.equal(CANONICAL_REPOSITORY_COMPANY_AUTHORITIES.length, 0);
+  assert.throws(() => CANONICAL_REPOSITORY_COMPANY_AUTHORITIES.push(authority), TypeError);
+  assert.throws(() => createCompanyInterview({ ...interviewInput, authorityId: authority.authority_id, repositoryHead }), (error) => error.code === "COMPANY_INTERVIEW_AUTHORITY_NOT_CONNECTED");
+  assert.throws(() => recordCompanyEmploymentDecision({ decisionId: "REAL_TEST_DECISION_001", application, interview: candidateInterview, job: KAIOS_AI_OS_FIRST_REAL_EMPLOYMENT_TEST_JOB, decisionMakerId: authority.authorized_actor_id, decision: "APPROVE", evidence: [candidateInterview.interview_id], decidedAt: "2026-08-29T00:06:00.000Z", authorityId: authority.authority_id, repositoryHead }), (error) => error.code === "COMPANY_EMPLOYMENT_AUTHORITY_NOT_CONNECTED");
 });
 
 test("V4.3 website exposes exact first-payroll readiness without claiming a real applicant or receipt", async () => {

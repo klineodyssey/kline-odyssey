@@ -131,6 +131,12 @@ export const REPOSITORY_BOUND_COMPANY_AUTHORITY_SCOPES = Object.freeze([
   "PAYROLL_FUNDING", "PAYROLL_SETTLEMENT_VERIFY", "ATM_PAYROLL_ADVANCE"
 ]);
 
+// This allowlist is deliberately repository-owned and empty until a reviewed
+// Company governance record grants one of the scopes above. Runtime callers
+// may reference an authority ID, but they cannot supply or mutate authority
+// metadata and thereby turn an untrusted claim into Company authority.
+export const CANONICAL_REPOSITORY_COMPANY_AUTHORITIES = Object.freeze([]);
+
 const EMPLOYMENT_ALPHA_ACTOR_TYPES = Object.freeze(["HUMAN_PLAYER", "AI_LIFE"]);
 const EMPLOYMENT_ALPHA_INTERVIEW_FIELDS = Object.freeze([
   "understands_simulation_boundary",
@@ -363,7 +369,10 @@ function requireEmploymentBinding(record, expected, code, message) {
   invariant(Object.entries(expected).every(([field, value]) => record?.[field] === value), code, message);
 }
 
-export function verifyRepositoryBoundCompanyAuthority({ authority, companyId, actorId, requiredScope, repositoryHead, at, errorCode = "COMPANY_AUTHORITY_NOT_CONNECTED" }) {
+export function verifyRepositoryBoundCompanyAuthority({ authorityId, companyId, actorId, requiredScope, repositoryHead, at, errorCode = "COMPANY_AUTHORITY_NOT_CONNECTED" }) {
+  requireId(authorityId, "company_authority_id");
+  const authority = CANONICAL_REPOSITORY_COMPANY_AUTHORITIES.find((record) => record.authority_id === authorityId);
+  invariant(authority, errorCode, "Company authority ID is not present in the canonical repository allowlist");
   invariant(authority?.record_class === "REPOSITORY_BOUND_COMPANY_AUTHORITY" && authority.status === "ACTIVE", errorCode, "An active repository-bound Company authority record is required");
   requireId(authority.authority_id, "company_authority_id");
   requireId(authority.authorized_actor_id, "company_authority_actor_id");
@@ -379,10 +388,22 @@ export function verifyRepositoryBoundCompanyAuthority({ authority, companyId, ac
   const validFrom = parseEmploymentTime(authority.valid_from, "company_authority.valid_from");
   const validUntil = authority.valid_until === null ? null : parseEmploymentTime(authority.valid_until, "company_authority.valid_until");
   invariant(observed >= validFrom && (validUntil === null || observed <= validUntil), errorCode, "Company authority is outside its validity window");
-  invariant(false, errorCode, "Caller-supplied Company authority metadata is not repository proof; the canonical repository authority verifier is not connected");
+  return Object.freeze({
+    authority_id: authority.authority_id,
+    company_id: authority.company_id,
+    authorized_actor_id: authority.authorized_actor_id,
+    controller_id: authority.controller_id,
+    role: authority.role,
+    policy_version: authority.policy_version,
+    required_scope: requiredScope,
+    constraints: authority.constraints ? Object.freeze({ ...authority.constraints }) : null,
+    exact_repository_version: repositoryHead,
+    verified_at: at,
+    status: "CANONICAL_REPOSITORY_COMPANY_AUTHORITY_VERIFIED"
+  });
 }
 
-export function createCompanyInterview({ interviewId, application, interviewerId, questions, answers, evidence, startedAt, completedAt, authority = null, repositoryHead = null }) {
+export function createCompanyInterview({ interviewId, application, interviewerId, questions, answers, evidence, startedAt, completedAt, authorityId = null, repositoryHead = null }) {
   requireId(interviewId, "company_interview_id");
   requireId(interviewerId, "company_interviewer_id");
   invariant(["SUBMITTED_ALPHA", "SUBMITTED_REAL_TEST"].includes(application?.status), "COMPANY_INTERVIEW_APPLICATION_REQUIRED", "Company interview requires a submitted application");
@@ -402,7 +423,7 @@ export function createCompanyInterview({ interviewId, application, interviewerId
   const average = (values, fallback) => values.length ? Math.round(values.reduce((sum, answer) => sum + Number(answer.score), 0) / values.length) : fallback;
   const safetyScore = average(safetyAnswers, capabilityScore);
   const roleFitScore = average(roleAnswers, capabilityScore);
-  const authorityVerification = authority ? verifyRepositoryBoundCompanyAuthority({ authority, companyId: application.company_id, actorId: interviewerId, requiredScope: "COMPANY_INTERVIEW", repositoryHead, at: completedAt, errorCode: "COMPANY_INTERVIEW_AUTHORITY_NOT_CONNECTED" }) : null;
+  const authorityVerification = authorityId ? verifyRepositoryBoundCompanyAuthority({ authorityId, companyId: application.company_id, actorId: interviewerId, requiredScope: "COMPANY_INTERVIEW", repositoryHead, at: completedAt, errorCode: "COMPANY_INTERVIEW_AUTHORITY_NOT_CONNECTED" }) : null;
   invariant(!authorityVerification || authorityVerification.controller_id !== application.controller_id, "COMPANY_INTERVIEW_CONTROLLER_COLLISION", "Candidate and interviewer must not share a controller");
   return Object.freeze({
     interview_id: interviewId, application_id: application.application_id, company_id: application.company_id,
@@ -419,15 +440,15 @@ export function createCompanyInterview({ interviewId, application, interviewerId
   });
 }
 
-export function recordCompanyEmploymentDecision({ decisionId, application, interview, job = KAIOS_AI_OS_EMPLOYMENT_ALPHA_JOB, decisionMakerId, decision, conditions = [], evidence, decidedAt, authority, repositoryHead }) {
-  invariant(authority, "COMPANY_EMPLOYMENT_AUTHORITY_NOT_CONNECTED", "A repository-bound Company employment decision authority is not connected");
+export function recordCompanyEmploymentDecision({ decisionId, application, interview, job = KAIOS_AI_OS_EMPLOYMENT_ALPHA_JOB, decisionMakerId, decision, conditions = [], evidence, decidedAt, authorityId, repositoryHead }) {
+  invariant(authorityId, "COMPANY_EMPLOYMENT_AUTHORITY_NOT_CONNECTED", "A repository-bound Company employment decision authority is not connected");
   requireId(decisionId, "employment_decision_id");
   requireId(decisionMakerId, "employment_decision_maker_id");
   requireEnum(decision, EMPLOYMENT_PHASE1B_DECISIONS, "employment_decision");
   requireArray(conditions, "employment_decision.conditions");
   requireArray(evidence, "employment_decision.evidence");
   invariant(decisionMakerId !== application?.actor_id, "EMPLOYMENT_SELF_HIRE_FORBIDDEN", "A candidate cannot make their own employment decision");
-  const authorityVerification = verifyRepositoryBoundCompanyAuthority({ authority, companyId: job.company_id, actorId: decisionMakerId, requiredScope: "EMPLOYMENT_DECISION", repositoryHead, at: decidedAt, errorCode: "COMPANY_EMPLOYMENT_AUTHORITY_NOT_CONNECTED" });
+  const authorityVerification = verifyRepositoryBoundCompanyAuthority({ authorityId, companyId: job.company_id, actorId: decisionMakerId, requiredScope: "EMPLOYMENT_DECISION", repositoryHead, at: decidedAt, errorCode: "COMPANY_EMPLOYMENT_AUTHORITY_NOT_CONNECTED" });
   invariant(authorityVerification.controller_id !== application?.controller_id, "EMPLOYMENT_DECISION_CONTROLLER_COLLISION", "Candidate and decision maker must not share a controller");
   invariant(interview?.status === "COMPANY_INTERVIEW_COMPLETED", "EMPLOYMENT_DECISION_INTERVIEW_REQUIRED", "Employment decision requires completed Company interview evidence");
   requireEmploymentBinding(interview, { application_id: application?.application_id, company_id: job.company_id, job_id: job.job_id, actor_id: application?.actor_id }, "EMPLOYMENT_DECISION_BINDING_MISMATCH", "Employment decision must bind the application, interview, job, Company and actor");
@@ -444,13 +465,13 @@ export function recordCompanyEmploymentDecision({ decisionId, application, inter
   });
 }
 
-export function createCompanyEmployeeRecord({ employeeId, existingEmployees = [], application, interview, employmentDecision, job = KAIOS_AI_OS_EMPLOYMENT_ALPHA_JOB, employmentType = "ALPHA_TRIAL", lifeId = null, startDate, createdBy, authority, repositoryHead }) {
-  invariant(authority, "EMPLOYEE_AUTHORITY_NOT_CONNECTED", "A repository-bound Employee creation authority is not connected");
+export function createCompanyEmployeeRecord({ employeeId, existingEmployees = [], application, interview, employmentDecision, job = KAIOS_AI_OS_EMPLOYMENT_ALPHA_JOB, employmentType = "ALPHA_TRIAL", lifeId = null, startDate, createdBy, authorityId, repositoryHead }) {
+  invariant(authorityId, "EMPLOYEE_AUTHORITY_NOT_CONNECTED", "A repository-bound Employee creation authority is not connected");
   requireId(employeeId, "employee_id");
   requireArray(existingEmployees, "existing_employees");
   requireEnum(employmentType, ["ALPHA_TRIAL", "PART_TIME", "FULL_TIME", "CONTRACT"], "employment_type");
   requireId(createdBy, "employee_record_creator_id");
-  const authorityVerification = verifyRepositoryBoundCompanyAuthority({ authority, companyId: job.company_id, actorId: createdBy, requiredScope: "EMPLOYEE_CREATE", repositoryHead, at: startDate, errorCode: "EMPLOYEE_AUTHORITY_NOT_CONNECTED" });
+  const authorityVerification = verifyRepositoryBoundCompanyAuthority({ authorityId, companyId: job.company_id, actorId: createdBy, requiredScope: "EMPLOYEE_CREATE", repositoryHead, at: startDate, errorCode: "EMPLOYEE_AUTHORITY_NOT_CONNECTED" });
   invariant(createdBy !== application?.actor_id && authorityVerification.controller_id !== application?.controller_id, "EMPLOYEE_SELF_CREATION_FORBIDDEN", "Candidate cannot create their own Employee record");
   invariant(employmentDecision?.approved_for_employee_record === true && ["APPROVE", "APPROVE_WITH_CONDITIONS"].includes(employmentDecision.decision), "EMPLOYEE_APPROVED_DECISION_REQUIRED", "Only an approved Company employment decision can create an Employee record");
   requireEmploymentBinding(employmentDecision, { application_id: application?.application_id, interview_id: interview?.interview_id, company_id: job.company_id, job_id: job.job_id, actor_id: application?.actor_id }, "EMPLOYEE_DECISION_BINDING_MISMATCH", "Employee record must bind the approved application, interview, job, Company and actor");
@@ -494,13 +515,13 @@ export function activateCompanyWorkerCandidate({ workerId, employee, capabilitie
   });
 }
 
-export function createCompanyEmployeeMission({ missionId, employee, job = KAIOS_AI_OS_EMPLOYMENT_ALPHA_JOB, assignedBy, createdAt, authority, repositoryHead }) {
-  invariant(authority, "MISSION_DISPATCH_AUTHORITY_NOT_CONNECTED", "A canonical Company mission dispatch authority is not connected");
+export function createCompanyEmployeeMission({ missionId, employee, job = KAIOS_AI_OS_EMPLOYMENT_ALPHA_JOB, assignedBy, createdAt, authorityId, repositoryHead }) {
+  invariant(authorityId, "MISSION_DISPATCH_AUTHORITY_NOT_CONNECTED", "A canonical Company mission dispatch authority is not connected");
   requireId(missionId, "employee_mission_id");
   requireId(assignedBy, "mission_assigner_id");
   invariant(["ACTIVE_ALPHA_UNDER_REVIEW", "ACTIVE_REAL_TEST"].includes(employee?.status) && employee.company_id === job.company_id && employee.job_id === job.job_id, "MISSION_EMPLOYEE_BINDING_REQUIRED", "Company mission requires an active Employee bound to the job and Company");
   invariant(assignedBy !== employee.actor_id, "MISSION_SELF_ASSIGNMENT_FORBIDDEN", "Employee cannot issue their own Company mission");
-  const authorityVerification = verifyRepositoryBoundCompanyAuthority({ authority, companyId: job.company_id, actorId: assignedBy, requiredScope: "MISSION_DISPATCH", repositoryHead, at: createdAt, errorCode: "MISSION_DISPATCH_AUTHORITY_NOT_CONNECTED" });
+  const authorityVerification = verifyRepositoryBoundCompanyAuthority({ authorityId, companyId: job.company_id, actorId: assignedBy, requiredScope: "MISSION_DISPATCH", repositoryHead, at: createdAt, errorCode: "MISSION_DISPATCH_AUTHORITY_NOT_CONNECTED" });
   invariant(authorityVerification.controller_id !== employee.controller_id, "MISSION_ASSIGNER_CONTROLLER_COLLISION", "Employee and mission assigner must not share a controller");
   parseEmploymentTime(createdAt, "mission_created_at");
   const realTest = job.status === "OPEN_REAL_TEST_PENDING_AUTHORITY";
@@ -538,14 +559,14 @@ export function submitCompanyWorkEvidence({ evidenceId, mission, employee, event
   return Object.freeze({ evidence_id: evidenceId, mission_id: mission.mission_id, employee_id: employee.employee_id, actor_id: employee.actor_id, company_id: employee.company_id, event_ids: Object.freeze(eventIds), submitted_at: submittedAt, status: mission.status === "ACCEPTED_REAL_TEST_DIGITAL" ? "WORK_EVIDENCE_SUBMITTED_REAL_TEST" : "WORK_EVIDENCE_SUBMITTED_SIMULATION" });
 }
 
-export function reviewCompanyWorkEvidence({ reviewId, mission, employee, workEvidence, reviewerId, decision, evidence, reviewedAt, authority, repositoryHead }) {
-  invariant(authority, "WORK_REVIEW_AUTHORITY_NOT_CONNECTED", "A distinct repository-bound work review authority is not connected");
+export function reviewCompanyWorkEvidence({ reviewId, mission, employee, workEvidence, reviewerId, decision, evidence, reviewedAt, authorityId, repositoryHead }) {
+  invariant(authorityId, "WORK_REVIEW_AUTHORITY_NOT_CONNECTED", "A distinct repository-bound work review authority is not connected");
   requireId(reviewId, "work_review_id");
   requireId(reviewerId, "work_reviewer_id");
   requireEnum(decision, ["APPROVE", "REJECT", "NEED_MORE_INFO"], "work_review_decision");
   requireArray(evidence, "work_review.evidence");
   invariant(reviewerId !== employee?.actor_id, "WORK_SELF_REVIEW_FORBIDDEN", "Employee cannot review their own work evidence");
-  const authorityVerification = verifyRepositoryBoundCompanyAuthority({ authority, companyId: employee?.company_id, actorId: reviewerId, requiredScope: "WORK_REVIEW", repositoryHead, at: reviewedAt, errorCode: "WORK_REVIEW_AUTHORITY_NOT_CONNECTED" });
+  const authorityVerification = verifyRepositoryBoundCompanyAuthority({ authorityId, companyId: employee?.company_id, actorId: reviewerId, requiredScope: "WORK_REVIEW", repositoryHead, at: reviewedAt, errorCode: "WORK_REVIEW_AUTHORITY_NOT_CONNECTED" });
   invariant(authorityVerification.controller_id !== employee?.controller_id, "WORK_REVIEW_CONTROLLER_COLLISION", "Employee and work reviewer must not share a controller");
   requireEmploymentBinding(workEvidence, { mission_id: mission?.mission_id, employee_id: employee?.employee_id, actor_id: employee?.actor_id, company_id: employee?.company_id }, "WORK_REVIEW_BINDING_MISMATCH", "Work review must bind the mission, Employee, actor and Company evidence");
   invariant(["WORK_EVIDENCE_SUBMITTED_SIMULATION", "WORK_EVIDENCE_SUBMITTED_REAL_TEST"].includes(workEvidence?.status) && evidence.length > 0, "WORK_REVIEW_EVIDENCE_REQUIRED", "Work review requires submitted evidence and a review basis");
@@ -553,12 +574,12 @@ export function reviewCompanyWorkEvidence({ reviewId, mission, employee, workEvi
   return Object.freeze({ review_id: reviewId, evidence_id: workEvidence.evidence_id, mission_id: mission.mission_id, employee_id: employee.employee_id, actor_id: employee.actor_id, company_id: employee.company_id, reviewer_id: reviewerId, decision, evidence: Object.freeze([...evidence]), reviewed_at: reviewedAt, independent_review: reviewerId !== employee.actor_id, authority_id: authorityVerification.authority_id, exact_repository_version: repositoryHead, repository_bound_authority_verified: true, status: workEvidence.status === "WORK_EVIDENCE_SUBMITTED_REAL_TEST" ? `WORK_${decision}_REAL_TEST` : `WORK_${decision}_SIMULATION` });
 }
 
-export function accrueCompanyCompensation({ ledgerEntries = [], accrualId, mission, employee, workReview, accruedAt, authorizedBy, authority, repositoryHead }) {
-  invariant(authority, "COMPENSATION_AUTHORITY_NOT_CONNECTED", "A repository-bound compensation policy and authority are not connected");
+export function accrueCompanyCompensation({ ledgerEntries = [], accrualId, mission, employee, workReview, accruedAt, authorizedBy, authorityId, repositoryHead }) {
+  invariant(authorityId, "COMPENSATION_AUTHORITY_NOT_CONNECTED", "A repository-bound compensation policy and authority are not connected");
   requireArray(ledgerEntries, "compensation_accrual_entries");
   requireId(accrualId, "compensation_accrual_id");
   requireId(authorizedBy, "compensation_authorizer_id");
-  const authorityVerification = verifyRepositoryBoundCompanyAuthority({ authority, companyId: employee?.company_id, actorId: authorizedBy, requiredScope: "COMPENSATION_ACCRUAL", repositoryHead, at: accruedAt, errorCode: "COMPENSATION_AUTHORITY_NOT_CONNECTED" });
+  const authorityVerification = verifyRepositoryBoundCompanyAuthority({ authorityId, companyId: employee?.company_id, actorId: authorizedBy, requiredScope: "COMPENSATION_ACCRUAL", repositoryHead, at: accruedAt, errorCode: "COMPENSATION_AUTHORITY_NOT_CONNECTED" });
   invariant(workReview?.decision === "APPROVE" && workReview.mission_id === mission?.mission_id && workReview.employee_id === employee?.employee_id, "COMPENSATION_APPROVED_WORK_REQUIRED", "Compensation accrual requires approved work bound to the mission and Employee");
   invariant(!ledgerEntries.some((entry) => entry.accrual_id === accrualId || entry.mission_id === mission.mission_id), "COMPENSATION_ACCRUAL_REPLAY", "A mission can accrue compensation exactly once");
   parseEmploymentTime(accruedAt, "compensation_accrued_at");
@@ -566,12 +587,12 @@ export function accrueCompanyCompensation({ ledgerEntries = [], accrualId, missi
   return Object.freeze([...ledgerEntries, entry]);
 }
 
-export function queueCompanyPayroll({ payrollQueueId, queueEntries = [], employee, accrual, queuedAt, queuedBy, authority, repositoryHead }) {
-  invariant(authority, "PAYROLL_AUTHORITY_NOT_CONNECTED", "A repository-bound Payroll authority is not connected");
+export function queueCompanyPayroll({ payrollQueueId, queueEntries = [], employee, accrual, queuedAt, queuedBy, authorityId, repositoryHead }) {
+  invariant(authorityId, "PAYROLL_AUTHORITY_NOT_CONNECTED", "A repository-bound Payroll authority is not connected");
   requireId(payrollQueueId, "payroll_queue_id");
   requireArray(queueEntries, "payroll_queue_entries");
   requireId(queuedBy, "payroll_queue_actor_id");
-  const authorityVerification = verifyRepositoryBoundCompanyAuthority({ authority, companyId: employee?.company_id, actorId: queuedBy, requiredScope: "PAYROLL_QUEUE", repositoryHead, at: queuedAt, errorCode: "PAYROLL_AUTHORITY_NOT_CONNECTED" });
+  const authorityVerification = verifyRepositoryBoundCompanyAuthority({ authorityId, companyId: employee?.company_id, actorId: queuedBy, requiredScope: "PAYROLL_QUEUE", repositoryHead, at: queuedAt, errorCode: "PAYROLL_AUTHORITY_NOT_CONNECTED" });
   invariant(["ACCRUED_SIMULATION_NOT_PAYABLE", "ACCRUED_REAL_TEST_NOT_PAYABLE"].includes(accrual?.status) && accrual.employee_id === employee?.employee_id && accrual.payroll_account_id === employee?.payroll_account?.account_id, "PAYROLL_ACCRUAL_BINDING_REQUIRED", "Payroll queue requires a bound compensation accrual");
   invariant(!queueEntries.some((entry) => entry.payroll_queue_id === payrollQueueId || entry.accrual_id === accrual.accrual_id), "PAYROLL_QUEUE_REPLAY", "Compensation accrual can enter Payroll Queue exactly once");
   parseEmploymentTime(queuedAt, "payroll_queued_at");
@@ -579,28 +600,28 @@ export function queueCompanyPayroll({ payrollQueueId, queueEntries = [], employe
   return Object.freeze([...queueEntries, entry]);
 }
 
-export function authorizeCompanyPayrollFunding({ payrollEntry, fundingEvidence, authorizedBy, authority, repositoryHead, authorizedAt }) {
+export function authorizeCompanyPayrollFunding({ payrollEntry, fundingEvidence, authorizedBy, authorityId, repositoryHead, authorizedAt }) {
   requireId(authorizedBy, "payroll_funding_authorizer_id");
-  const authorityVerification = verifyRepositoryBoundCompanyAuthority({ authority, companyId: payrollEntry?.company_id, actorId: authorizedBy, requiredScope: "PAYROLL_FUNDING", repositoryHead, at: authorizedAt, errorCode: "PAYROLL_FUNDING_AUTHORITY_NOT_CONNECTED" });
+  const authorityVerification = verifyRepositoryBoundCompanyAuthority({ authorityId, companyId: payrollEntry?.company_id, actorId: authorizedBy, requiredScope: "PAYROLL_FUNDING", repositoryHead, at: authorizedAt, errorCode: "PAYROLL_FUNDING_AUTHORITY_NOT_CONNECTED" });
   invariant(payrollEntry?.status === "QUEUED_REAL_TEST_AWAITING_FUNDING" && payrollEntry.asset === "KAIOS", "PAYROLL_FUNDING_QUEUE_REQUIRED", "Funding authorization requires a queued real-test KAIOS payroll entry");
   requireId(fundingEvidence?.evidence_id, "payroll_funding_evidence_id");
-  invariant(authority.constraints?.action_type === "ONE_EXACT_PAYROLL_ACTION" && Number(authority.constraints.chain_id) === KAIOS_MAINNET_TOKEN.chain_id && String(authority.constraints.token_address).toLowerCase() === KAIOS_MAINNET_TOKEN.contract_address.toLowerCase(), "PAYROLL_FUNDING_EXACT_ACTION_REQUIRED", "Payroll funding authority must be restricted to one exact KAIOS payroll action on chain 56");
-  invariant(String(authority.constraints.amount_kaios_wei) === payrollEntry.accrued_kaios_wei && String(authority.constraints.recipient_address).toLowerCase() === payrollEntry.payroll_wallet_address, "PAYROLL_FUNDING_EXACT_ACTION_MISMATCH", "Payroll funding authority amount and recipient must match the queued payroll entry");
+  invariant(authorityVerification.constraints?.action_type === "ONE_EXACT_PAYROLL_ACTION" && Number(authorityVerification.constraints.chain_id) === KAIOS_MAINNET_TOKEN.chain_id && String(authorityVerification.constraints.token_address).toLowerCase() === KAIOS_MAINNET_TOKEN.contract_address.toLowerCase(), "PAYROLL_FUNDING_EXACT_ACTION_REQUIRED", "Payroll funding authority must be restricted to one exact KAIOS payroll action on chain 56");
+  invariant(String(authorityVerification.constraints.amount_kaios_wei) === payrollEntry.accrued_kaios_wei && String(authorityVerification.constraints.recipient_address).toLowerCase() === payrollEntry.payroll_wallet_address, "PAYROLL_FUNDING_EXACT_ACTION_MISMATCH", "Payroll funding authority amount and recipient must match the queued payroll entry");
   invariant(Number(fundingEvidence.chain_id) === KAIOS_MAINNET_TOKEN.chain_id && String(fundingEvidence.token_address).toLowerCase() === KAIOS_MAINNET_TOKEN.contract_address.toLowerCase(), "PAYROLL_FUNDING_TOKEN_MISMATCH", "Funding evidence must bind the canonical KAIOS token on chain 56");
   invariant(/^0x[0-9a-f]{40}$/i.test(String(fundingEvidence.source_address ?? "")), "PAYROLL_FUNDING_SOURCE_INVALID", "Funding evidence requires a public source address");
   invariant(BigInt(fundingEvidence.verified_balance_kaios_wei) >= BigInt(payrollEntry.accrued_kaios_wei), "PAYROLL_FUNDING_BALANCE_INSUFFICIENT", "Verified payroll funding balance is insufficient");
-  invariant(String(authority.constraints.source_address).toLowerCase() === String(fundingEvidence.source_address).toLowerCase(), "PAYROLL_FUNDING_SOURCE_MISMATCH", "Payroll funding authority must bind the verified source address");
+  invariant(String(authorityVerification.constraints.source_address).toLowerCase() === String(fundingEvidence.source_address).toLowerCase(), "PAYROLL_FUNDING_SOURCE_MISMATCH", "Payroll funding authority must bind the verified source address");
   parseEmploymentTime(fundingEvidence.observed_at, "payroll_funding_observed_at");
   parseEmploymentTime(authorizedAt, "payroll_funding_authorized_at");
   return Object.freeze({ ...payrollEntry, payable_kaios_wei: payrollEntry.accrued_kaios_wei, funded: true, payable: true, funding_evidence_id: fundingEvidence.evidence_id, funding_source_address: fundingEvidence.source_address.toLowerCase(), funding_observed_at: fundingEvidence.observed_at, funding_authority_id: authorityVerification.authority_id, funding_authorized_at: authorizedAt, status: "FUNDED_PAYABLE_REAL_TEST" });
 }
 
-export function recordCompanyPayrollSettlement({ settlementId, payrollEntry, settlementReceipt, settledAt, verifiedBy, authority, repositoryHead }) {
-  invariant(authority, "PAYROLL_SETTLEMENT_AUTHORITY_NOT_CONNECTED", "A repository-bound settlement verifier and payment authority are not connected");
+export function recordCompanyPayrollSettlement({ settlementId, payrollEntry, settlementReceipt, settledAt, verifiedBy, authorityId, repositoryHead }) {
+  invariant(authorityId, "PAYROLL_SETTLEMENT_AUTHORITY_NOT_CONNECTED", "A repository-bound settlement verifier and payment authority are not connected");
   requireId(settlementId, "payroll_settlement_id");
   requireId(verifiedBy, "payroll_settlement_verifier_id");
-  const authorityVerification = verifyRepositoryBoundCompanyAuthority({ authority, companyId: payrollEntry?.company_id, actorId: verifiedBy, requiredScope: "PAYROLL_SETTLEMENT_VERIFY", repositoryHead, at: settledAt, errorCode: "PAYROLL_SETTLEMENT_AUTHORITY_NOT_CONNECTED" });
-  invariant(authority.constraints?.action_type === "ONE_EXACT_PAYROLL_ACTION" && String(authority.constraints.amount_kaios_wei) === payrollEntry?.payable_kaios_wei && String(authority.constraints.recipient_address).toLowerCase() === payrollEntry?.payroll_wallet_address && String(authority.constraints.source_address).toLowerCase() === payrollEntry?.funding_source_address, "PAYROLL_SETTLEMENT_EXACT_ACTION_MISMATCH", "Settlement authority must bind the one exact payroll source, recipient and amount");
+  const authorityVerification = verifyRepositoryBoundCompanyAuthority({ authorityId, companyId: payrollEntry?.company_id, actorId: verifiedBy, requiredScope: "PAYROLL_SETTLEMENT_VERIFY", repositoryHead, at: settledAt, errorCode: "PAYROLL_SETTLEMENT_AUTHORITY_NOT_CONNECTED" });
+  invariant(authorityVerification.constraints?.action_type === "ONE_EXACT_PAYROLL_ACTION" && String(authorityVerification.constraints.amount_kaios_wei) === payrollEntry?.payable_kaios_wei && String(authorityVerification.constraints.recipient_address).toLowerCase() === payrollEntry?.payroll_wallet_address && String(authorityVerification.constraints.source_address).toLowerCase() === payrollEntry?.funding_source_address, "PAYROLL_SETTLEMENT_EXACT_ACTION_MISMATCH", "Settlement authority must bind the one exact payroll source, recipient and amount");
   invariant(payrollEntry?.payable === true && payrollEntry.funded === true, "PAYROLL_NOT_PAYABLE", "Payroll settlement requires separately verified funding and payable state");
   invariant(settlementReceipt?.receipt_status === 1 && /^0x[0-9a-f]{64}$/i.test(String(settlementReceipt.transaction_hash ?? "")), "PAYROLL_SETTLEMENT_RECEIPT_REQUIRED", "Paid status requires a successful settlement receipt");
   invariant(Number(settlementReceipt.chain_id) === KAIOS_MAINNET_TOKEN.chain_id && String(settlementReceipt.token_address).toLowerCase() === KAIOS_MAINNET_TOKEN.contract_address.toLowerCase(), "PAYROLL_SETTLEMENT_TOKEN_MISMATCH", "Payroll receipt must bind canonical KAIOS on chain 56");

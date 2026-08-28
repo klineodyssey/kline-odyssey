@@ -1,6 +1,9 @@
 # 11520 Universal Exchange
 
-## V4.1 Employment Alpha candidate — under review
+## V4.3 Employment Phase 1C candidate — under review
+
+- Company authority verification now resolves only repository-owned `authorityId` records from an immutable allowlist. Caller-supplied authority metadata is never repository proof. The allowlist remains empty until a reviewed governance record exists, so formal interview, hiring, mission, compensation and Payroll actions still fail closed.
+- The exact first-payroll integration policy remains `0.00000000000001 KAIOS` (`10000` base units at 18 decimals), but no actor, funding source, signer or successful receipt is connected and no payment is claimed.
 
 - The existing 11520 public website now exposes one connected playable path: public-wallet challenge verification → candidate application → local safety self-check → non-employment Alpha participation record → mission acceptance → ordered local-orientation trace validation → simulated KAIOS earning. The self-check is not a Company interview or employment decision.
 - This candidate does not create a canonical Life, Human employment decision, employee or Worker ID, Worker activation, funded payroll, real KAIOS transfer, transaction hash, location proof or cargo delivery. `company_decision`, `employee_id`, `worker_id` and activation authority remain null. The earning state is `EARNED_SIMULATION_NOT_PAYABLE` until treasury, payroll and settlement authority exist.

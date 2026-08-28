@@ -1,12 +1,12 @@
 # 11520 Universal Exchange Current Handoff
 
-## V4.2 Employment Phase 1B candidate — not yet active main
+## V4.3 Employment Phase 1C candidate — not yet active main
 
 This Draft candidate extends the existing V4.1 Employment Alpha without creating a second Company OS, Event Store, Worker Registry, payroll system, mission runtime, wallet verifier or 11520 market. The candidate safety self-check remains a separate applicant attestation and cannot create a Company decision, Employee, Worker, trust level, signer or payment authority.
 
 The candidate UI may progress through wallet control, application, self-check and a Company interview candidate. That interview is explicitly `COMPANY_INTERVIEW_CANDIDATE_NOT_AUTHORITY` with `repository_bound_interviewer_authority=false`. Human players and AI Life use the same candidate framework, while Actor, Life, Employee, Worker and wallet IDs remain separate.
 
-No repository-bound Company interviewer, employment decision maker, Employee creator, Worker activator, mission dispatcher, distinct work reviewer, compensation policy, Payroll authority, settlement verifier or ATM payroll authority is connected in this branch. Those runtime boundaries therefore fail closed with explicit `*_AUTHORITY_NOT_CONNECTED` errors. Caller-controlled IDs, scores, reviews, payable/funded flags or receipt-shaped data cannot create employment, an Employee/Worker identity, compensation, payroll or settlement truth.
+The repository-owned authority resolver is now connected to an immutable in-module allowlist. Runtime callers may submit only an `authorityId`; they can no longer inject an authority record. The allowlist is intentionally empty because no reviewed Company governance record currently grants interview, hiring, Employee creation, mission, work-review, compensation, Payroll funding or settlement scope. Those runtime boundaries therefore fail closed with explicit `*_AUTHORITY_NOT_CONNECTED` errors. Caller-controlled IDs, scores, reviews, payable/funded flags, authority-shaped objects or receipt-shaped data cannot create employment, an Employee/Worker identity, compensation, payroll or settlement truth.
 
 The append-only `COMPANY` stream remains replay-safe and rejects private keys, seed phrases, raw signatures and raw challenge material. Only non-authoritative candidate records may be appended from this flow; authoritative employment, Worker, mission, review, compensation, payroll and settlement events remain unavailable until repository-bound connectors and Human provenance exist.
 
