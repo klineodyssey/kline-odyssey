@@ -3131,7 +3131,7 @@ test("V4.3 caller-supplied authority cannot create formal Company employment fac
   assert.throws(() => recordCompanyEmploymentDecision({ decisionId: "REAL_TEST_DECISION_001", application, interview: candidateInterview, job: KAIOS_AI_OS_FIRST_REAL_EMPLOYMENT_TEST_JOB, decisionMakerId: authority.authorized_actor_id, decision: "APPROVE", evidence: [candidateInterview.interview_id], decidedAt: "2026-08-29T00:06:00.000Z", authorityId: authority.authority_id, repositoryHead }), (error) => error.code === "COMPANY_EMPLOYMENT_AUTHORITY_NOT_CONNECTED");
 });
 
-test("V4.3 Company authority proposal is reviewable but never active authority", () => {
+test("V4.3 Company authority proposal remains an unverified candidate and never active authority", () => {
   const repositoryHead = "2".repeat(40);
   const proposal = createRepositoryCompanyAuthorityProposal({
     proposalId: "COMPANY_AUTHORITY_PROPOSAL_001",
@@ -3148,8 +3148,15 @@ test("V4.3 Company authority proposal is reviewable but never active authority",
     proposedBy: "AI_ANT_COMPANY_GM_001",
     proposedAt: "2026-08-29T03:00:00.000Z"
   });
-  assert.equal(proposal.status, "PROPOSED_FOR_GOVERNANCE_REVIEW_NOT_AUTHORITY");
+  assert.equal(proposal.status, "UNVERIFIED_PROPOSAL_CANDIDATE_NOT_AUTHORITY");
+  assert.equal(proposal.record_class, "UNVERIFIED_COMPANY_AUTHORITY_PROPOSAL_CANDIDATE");
   assert.equal(proposal.authority_id, null);
+  assert.equal(proposal.exact_repository_version_claim, repositoryHead);
+  assert.equal(proposal.repository_version_verified, false);
+  assert.equal(proposal.proposed_by_claim, "AI_ANT_COMPANY_GM_001");
+  assert.equal(proposal.proposer_identity_verified, false);
+  assert.equal(proposal.exact_repository_version, undefined);
+  assert.equal(proposal.proposed_by, undefined);
   assert.equal(proposal.active, false);
   assert.equal(proposal.usable_as_authority, false);
   assert.ok(proposal.excluded_scopes.includes("PAYROLL_SETTLEMENT_VERIFY"));

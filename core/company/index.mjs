@@ -153,17 +153,17 @@ export function createRepositoryCompanyAuthorityProposal({
   requireId(proposedBy, "company_authority_proposal.proposed_by");
   requireArray(requestedScopes, "company_authority_proposal.requested_scopes");
   requireArray(evidence, "company_authority_proposal.evidence");
-  invariant(proposedBy !== candidateActorId, "COMPANY_AUTHORITY_SELF_PROPOSAL_FORBIDDEN", "A candidate cannot issue their own Company authority proposal");
+  invariant(proposedBy !== candidateActorId, "COMPANY_AUTHORITY_SELF_PROPOSAL_FORBIDDEN", "Matching candidate and proposer identifier strings are forbidden; this string check is not identity proof");
   invariant(typeof role === "string" && role.length > 0 && typeof policyVersion === "string" && policyVersion.length > 0, "COMPANY_AUTHORITY_PROPOSAL_POLICY_REQUIRED", "A Company authority proposal requires role and policy version");
-  invariant(requestedScopes.length > 0 && new Set(requestedScopes).size === requestedScopes.length && requestedScopes.every((scope) => COMPANY_OPERATIONAL_AUTHORITY_PROPOSAL_SCOPES.includes(scope)), "COMPANY_AUTHORITY_PROPOSAL_SCOPE_INVALID", "A Company operational authority proposal may request only unique non-financial operational scopes");
+  invariant(requestedScopes.length > 0 && new Set(requestedScopes).size === requestedScopes.length && requestedScopes.every((scope) => COMPANY_OPERATIONAL_AUTHORITY_PROPOSAL_SCOPES.includes(scope)), "COMPANY_AUTHORITY_PROPOSAL_SCOPE_INVALID", "A Company authority proposal candidate may request only unique proposal-eligible scopes; activation is separately governed");
   invariant(evidence.length > 0 && evidence.every((item) => typeof item === "string" && item.length > 0), "COMPANY_AUTHORITY_PROPOSAL_EVIDENCE_REQUIRED", "A Company authority proposal requires evidence references");
-  invariant(/^[0-9a-f]{40}$/i.test(String(exactRepositoryVersion ?? "")), "COMPANY_AUTHORITY_PROPOSAL_REPOSITORY_VERSION_INVALID", "A Company authority proposal must bind an exact repository version");
+  invariant(/^[0-9a-f]{40}$/i.test(String(exactRepositoryVersion ?? "")), "COMPANY_AUTHORITY_PROPOSAL_REPOSITORY_VERSION_INVALID", "A Company authority proposal candidate requires a SHA-shaped repository version claim; this is not repository provenance");
   const proposed = parseEmploymentTime(proposedAt, "company_authority_proposal.proposed_at");
   const starts = parseEmploymentTime(validFrom, "company_authority_proposal.valid_from");
   const ends = parseEmploymentTime(validUntil, "company_authority_proposal.valid_until");
   invariant(starts >= proposed && ends > starts, "COMPANY_AUTHORITY_PROPOSAL_WINDOW_INVALID", "Proposed authority must start no earlier than the proposal and end after it starts");
   return Object.freeze({
-    record_class: "REPOSITORY_BOUND_COMPANY_AUTHORITY_PROPOSAL",
+    record_class: "UNVERIFIED_COMPANY_AUTHORITY_PROPOSAL_CANDIDATE",
     proposal_id: proposalId,
     authority_id: null,
     company_id: companyId,
@@ -175,12 +175,16 @@ export function createRepositoryCompanyAuthorityProposal({
     valid_from: validFrom,
     valid_until: validUntil,
     evidence: Object.freeze([...evidence]),
-    exact_repository_version: exactRepositoryVersion,
-    proposed_by: proposedBy,
+    exact_repository_version_claim: exactRepositoryVersion,
+    repository_version_verified: false,
+    proposed_by_claim: proposedBy,
+    proposer_identity_verified: false,
     proposed_at: proposedAt,
     active: false,
     usable_as_authority: false,
     activation_requires: Object.freeze([
+      "REPOSITORY_VERSION_PROVENANCE_VERIFICATION",
+      "PROPOSER_IDENTITY_VERIFICATION",
       "DISTINCT_GOVERNANCE_REVIEW",
       "EXPLICIT_REPOSITORY_ALLOWLIST_CHANGE",
       "EXACT_HEAD_CI"
@@ -191,7 +195,7 @@ export function createRepositoryCompanyAuthorityProposal({
       "PAYROLL_SETTLEMENT_VERIFY",
       "ATM_PAYROLL_ADVANCE"
     ]),
-    status: "PROPOSED_FOR_GOVERNANCE_REVIEW_NOT_AUTHORITY"
+    status: "UNVERIFIED_PROPOSAL_CANDIDATE_NOT_AUTHORITY"
   });
 }
 
