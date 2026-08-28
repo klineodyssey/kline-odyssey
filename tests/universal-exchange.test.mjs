@@ -2911,18 +2911,26 @@ test("V4.1 Employment Alpha rejects wrong-chain and mismatched wallet proofs", (
   assert.throws(() => verifyEmploymentIdentityProof({ challenge: flow.challenge, recoveredAddress: flow.identity.wallet_address, signatureSha256: "b".repeat(64), verifiedAt: "2026-08-28T09:06:00.000Z" }), (error) => error.code === "EMPLOYMENT_CHALLENGE_EXPIRED");
 });
 
-test("V4.1 Employment Alpha interview is a company decision and cannot silently create formal employment", () => {
+test("V4.1 Employment Alpha self-check cannot create a Company decision, employee or Worker", () => {
   const { application, interview, contract } = createEmploymentAlphaTestFlow();
   assert.equal(interview.score, 100);
-  assert.equal(interview.company_decision, "ACCEPT_ALPHA_TRIAL");
-  assert.equal(contract.status, "ACTIVE_ALPHA_TRIAL_NOT_FORMAL_EMPLOYMENT");
+  assert.equal(interview.company_decision, null);
+  assert.equal(interview.candidate_self_check_result, "PASSED");
+  assert.equal(contract.status, "CANDIDATE_ALPHA_PARTICIPATION_NOT_EMPLOYMENT");
+  assert.match(contract.candidate_id, /^ALPHA_CANDIDATE_/);
+  assert.equal(contract.employee_id, null);
+  assert.equal(contract.worker_id, null);
+  assert.equal(contract.activation_authority, null);
+  assert.equal(contract.employment_created, false);
+  assert.equal(contract.worker_activated, false);
   assert.equal(contract.formal_employee, false);
   assert.equal(contract.company_owns_life, false);
   assert.equal(contract.payroll_account.status, "SIMULATION_LEDGER_ONLY");
   assert.equal(contract.compensation_policy.payable, false);
   const failed = scoreEmploymentInterview({ interviewId: "INTERVIEW_TEST_FAIL", application, answers: { understands_simulation_boundary: true }, completedAt: "2026-08-28T09:03:00.000Z" });
-  assert.equal(failed.status, "FAILED_ALPHA");
-  assert.throws(() => createTrialEmploymentContract({ contractId: "CONTRACT_FORBIDDEN", application, interview: failed, activatedAt: "2026-08-28T09:04:00.000Z" }), (error) => error.code === "EMPLOYMENT_INTERVIEW_PASS_REQUIRED");
+  assert.equal(failed.status, "CANDIDATE_SAFETY_SELF_CHECK_INCOMPLETE");
+  assert.equal(failed.company_decision, null);
+  assert.throws(() => createTrialEmploymentContract({ contractId: "CONTRACT_FORBIDDEN", application, interview: failed, activatedAt: "2026-08-28T09:04:00.000Z" }), (error) => error.code === "EMPLOYMENT_CANDIDATE_SELF_CHECK_REQUIRED");
 });
 
 test("V4.1 Employment Alpha mission requires ordered bound evidence", () => {
@@ -2955,7 +2963,8 @@ test("V4.1 website exposes the playable employment, mission, ATM and market entr
   const companySource = await fs.readFile(new URL("../core/company/index.mjs", import.meta.url), "utf8");
   for (const route of ["JOBS", "MISSIONS", "ATM", "MARKET"]) assert.match(appSource, new RegExp(`\\[\\\"${route}\\\"`));
   assert.match(appSource, /CONNECT WALLET \+ SIGN CHALLENGE/);
-  assert.match(companySource, /ACTIVE_ALPHA_TRIAL_NOT_FORMAL_EMPLOYMENT/);
+  assert.match(companySource, /CANDIDATE_ALPHA_PARTICIPATION_NOT_EMPLOYMENT/);
+  assert.doesNotMatch(companySource, /company_decision: passed \? "ACCEPT_ALPHA_TRIAL"/);
   assert.match(companySource, /EARNED_SIMULATION_NOT_PAYABLE/);
   assert.match(appSource, /formal_employee/);
   assert.match(appSource, /transaction_hash/);
