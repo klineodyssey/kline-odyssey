@@ -1,9 +1,5 @@
 const SCALE = 10n ** 18n;
-const BASE_ASSET = "KGEN";
-const BASE_DECIMALS = 18;
-const QUOTE_ASSET = "UNFROZEN_11520_NATIVE_QUOTE_CANDIDATE";
 const QUOTE_STATUS = "UNFROZEN_CANDIDATE";
-const QUOTE_DECIMALS = 18;
 const MARKET_CELL_COORDINATE = "0.00011520";
 const MARKET_CELL_COORDINATE_ROLE = "CANDIDATE_KGEN_UNIVERSE_PRICE_AND_COMPANY_ADDRESS";
 const MARKET_CELL_COORDINATE_STATUS = "UNVERIFIED_CANDIDATE";
@@ -134,8 +130,13 @@ function bucketStart(timestampMs, intervalMs) {
  * - Anonymous actors, same-owner matches and same-controller matches fail closed.
  * - This module has no signer, custody, settlement, transfer, approval, chain-write or Mainnet authority.
  */
-export function createKgenNativeMarketCell({
-  marketId = "11520_KGEN_NATIVE_MARKET",
+function createVerified11520PaperMarketCell({
+  marketId,
+  baseAsset,
+  baseDecimals,
+  quoteAsset,
+  quoteDecimals,
+  priceStatus,
   tickSize = "0.00000001",
   lotSize = "0.00000001",
   candleIntervalMs = 60_000,
@@ -205,8 +206,8 @@ export function createKgenNativeMarketCell({
     const trade = {
       id: `T${trades.length + 1}`,
       marketId,
-      baseAsset: BASE_ASSET,
-      quoteAsset: QUOTE_ASSET,
+      baseAsset,
+      quoteAsset,
       priceRaw: price,
       quantityRaw: quantity,
       price: formatDecimal(price),
@@ -346,14 +347,14 @@ export function createKgenNativeMarketCell({
       kgenUniversePriceCoordinate: MARKET_CELL_COORDINATE,
       kgenUniversePriceCoordinateUnit: KGEN_PRICE_COORDINATE_UNIT,
       runtimeStatus: "PAPER_IN_MEMORY_CANDIDATE_NOT_ACTIVE_RUNTIME",
-      baseAsset: BASE_ASSET,
-      baseDecimals: BASE_DECIMALS,
-      quoteAsset: QUOTE_ASSET,
+      baseAsset,
+      baseDecimals,
+      quoteAsset,
       quoteStatus: QUOTE_STATUS,
-      quoteDecimals: QUOTE_DECIMALS,
+      quoteDecimals,
       tickSize: formatDecimal(tickRaw),
       lotSize: formatDecimal(lotRaw),
-      priceStatus: "NATIVE_MARKET_PRICE_CANDIDATE",
+      priceStatus,
       pricingAuthority: "NATIVE_11520_MATCHED_BUY_SELL_TRADES_ONLY",
       externalReferencePriceAuthority: false,
       ct: ct === null ? null : formatDecimal(ct),
@@ -399,5 +400,41 @@ export function createKgenNativeMarketCell({
     getMarketState,
     getTrades,
     getCandles
+  });
+}
+
+export function createKgenNativeMarketCell(options = {}) {
+  return createVerified11520PaperMarketCell({
+    ...options,
+    marketId: options.marketId ?? "11520_KGEN_NATIVE_MARKET",
+    baseAsset: "KGEN",
+    baseDecimals: 18,
+    quoteAsset: "UNFROZEN_11520_NATIVE_QUOTE_CANDIDATE",
+    quoteDecimals: 18,
+    priceStatus: "NATIVE_MARKET_PRICE_CANDIDATE"
+  });
+}
+
+/**
+ * Paper-only GPU market at the assigned K11520 company/exchange address.
+ *
+ * The quote book is isolated by asset: GPU/KGEN and GPU/KAIOS never share
+ * orders, CT, OHLC or volume. A caller still needs a verified actor context;
+ * this function adds no custody, settlement, signer or chain-write ability.
+ */
+export function createGpu11520PaperMarket({ quoteAsset, ...options } = {}) {
+  const normalizedQuote = String(quoteAsset ?? "").trim().toUpperCase();
+  if (!new Set(["KGEN", "KAIOS"]).has(normalizedQuote)) {
+    throw new Error("GPU_QUOTE_ASSET_NOT_ALLOWED");
+  }
+  return createVerified11520PaperMarketCell({
+    ...options,
+    marketId: options.marketId ?? `11520_NVIDIA_GPU_${normalizedQuote}_PAPER_MARKET`,
+    baseAsset: "NVIDIA_GPU_CHIP",
+    baseDecimals: 0,
+    quoteAsset: normalizedQuote,
+    quoteDecimals: 18,
+    lotSize: options.lotSize ?? "1",
+    priceStatus: `GPU_${normalizedQuote}_MARKET_PRICE_CANDIDATE`
   });
 }

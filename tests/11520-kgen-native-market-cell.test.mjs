@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { createKgenNativeMarketCell } from "../K線西遊記/temples/11520/modules/kgen-native-market-cell.mjs";
+import { createGpu11520PaperMarket, createKgenNativeMarketCell } from "../K線西遊記/temples/11520/modules/kgen-native-market-cell.mjs";
 
 const verifiedContexts = new WeakMap();
 let nextEvidence = 1;
@@ -257,4 +257,29 @@ test("failed forged crossing cannot change CT volume or resting liquidity", () =
   assert.equal(market.getMarketState().tradeCount, 0);
   assert.equal(market.getCandles().length, 0);
   assert.equal(market.getOrderBook().asks[0].remaining, "2");
+});
+
+test("GPU/KGEN and GPU/KAIOS are isolated paper books with independent CT", () => {
+  const kgen = createGpu11520PaperMarket({ quoteAsset: "KGEN", verifyActorContext });
+  const kaios = createGpu11520PaperMarket({ quoteAsset: "KAIOS", verifyActorContext });
+  assert.equal(kgen.getMarketState().companyAddress, "0.00011520");
+  assert.equal(kgen.getMarketState().baseAsset, "NVIDIA_GPU_CHIP");
+  assert.equal(kgen.getMarketState().baseDecimals, 0);
+  assert.equal(kgen.getMarketState().quoteAsset, "KGEN");
+  assert.equal(kgen.getMarketState().ct, null);
+  assert.equal(kaios.getMarketState().quoteAsset, "KAIOS");
+
+  kgen.placeOrder({ side: "SELL", price: "88000", quantity: "1", actorContext: actor("gpu-seller") });
+  kgen.placeOrder({ side: "BUY", price: "88000", quantity: "1", actorContext: actor("gpu-buyer") });
+  assert.equal(kgen.getMarketState().ct, "88000");
+  assert.equal(kgen.getMarketState().tradeCount, 1);
+  assert.equal(kaios.getMarketState().ct, null);
+  assert.equal(kaios.getMarketState().tradeCount, 0);
+});
+
+test("GPU paper market rejects unsupported quote assets and fractional chips", () => {
+  assert.throws(() => createGpu11520PaperMarket({ quoteAsset: "BNB", verifyActorContext }), /GPU_QUOTE_ASSET_NOT_ALLOWED/);
+  const market = createGpu11520PaperMarket({ quoteAsset: "KAIOS", verifyActorContext });
+  assert.throws(() => market.placeOrder({ side: "BUY", price: "1000", quantity: "0.5", actorContext: actor("fractional-buyer") }), /lotSize/);
+  assert.equal(market.getMarketState().ct, null);
 });

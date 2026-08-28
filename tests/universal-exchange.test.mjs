@@ -99,7 +99,9 @@ import {
   , KAIOS_CASH_LAW, createAtmFieldServiceRequests, validateWasteInventory,
   calculateFieldTripEnergy, calculateMatterAntimatterEnergy, validateFieldRoute,
   calculateFieldServiceQuote, validateFieldDeliveryEvidence, createWorkforceGap,
-  createFieldServiceDemandScan
+  createFieldServiceDemandScan, NVIDIA_GPU_11520_ROUTE, GPU_LANDED_COST_FIELDS,
+  validateGpuInventoryUnit, calculateGpuLandedCost, evaluateGpu11520MarketReadiness,
+  calculateGpuTransportPlan, createGpuAcquisitionPipelineCandidate
 } from "../core/index.mjs";
 import { verifyDigitalAntWalletBinding, verifyDigitalLifeWalletBinding, CODEX_GM_ENV } from "../core/security/wallet-binding.mjs";
 import { TEMPLE_HEART_READ_ABI, TEMPLE_HEART_DRY_RUN_ABI, TEMPLE_HEART_VERIFIED_ACTIONS, readCoreHeartEvents } from "../core/integrations/temple-heart-12345.mjs";
@@ -176,6 +178,129 @@ test("V3.9 delivery revenue requires complete receiver acceptance evidence", () 
   const evidence = { origin_evidence: "A", pickup_evidence: "B", cargo_evidence: "C", route_evidence: "D", arrival_coordinate: "E", delivery_timestamp: "F", receiver_evidence: "G", customer_acceptance: "H" };
   assert.equal(validateFieldDeliveryEvidence(evidence).status, "DELIVERY_VERIFIED");
   assert.throws(() => validateFieldDeliveryEvidence({ ...evidence, customer_acceptance: null }), /Revenue requires/);
+});
+
+test("K12345 to K11520 NVIDIA GPU route preserves the assigned company address and map distance", () => {
+  assert.equal(NVIDIA_GPU_11520_ROUTE.origin_address, "0.00012345");
+  assert.equal(NVIDIA_GPU_11520_ROUTE.destination_address, "0.00011520");
+  assert.equal(NVIDIA_GPU_11520_ROUTE.destination_k_coordinate, "K11520");
+  assert.equal(NVIDIA_GPU_11520_ROUTE.k_index_difference, 825);
+  assert.equal(NVIDIA_GPU_11520_ROUTE.distance_km, 18778.422548555);
+  assert.equal(validateFieldRoute({
+    origin: NVIDIA_GPU_11520_ROUTE.origin_name,
+    destination: NVIDIA_GPU_11520_ROUTE.destination_name,
+    origin_coordinate: 12345,
+    destination_coordinate: 11520,
+    distance: NVIDIA_GPU_11520_ROUTE.distance_km,
+    route: [12345, 11520],
+    travel_time: 1,
+    map_evidence: NVIDIA_GPU_11520_ROUTE.map_evidence
+  }).distance, 18778.422548555);
+});
+
+test("GPU landed cost is atomic, complete, and includes every mandated component", () => {
+  const components = Object.fromEntries(GPU_LANDED_COST_FIELDS.map((field, index) => [field, String(index + 1)]));
+  const quote = calculateGpuLandedCost({ quoteAsset: "KAIOS", components, companyMarginAtomic: "15" });
+  assert.equal(quote.status, "QUOTE_COMPLETE");
+  assert.equal(quote.landed_cost_atomic, "105");
+  assert.equal(quote.minimum_ask_atomic, "120");
+  assert.equal(Object.keys(quote.components).length, 14);
+  assert.equal(calculateGpuLandedCost({ quoteAsset: "KGEN", components: { ...components, food: null }, companyMarginAtomic: "15" }).status, "QUOTE_INCOMPLETE");
+  assert.throws(() => calculateGpuLandedCost({ quoteAsset: "BNB", components, companyMarginAtomic: "15" }), /KGEN or KAIOS/);
+});
+
+test("GPU logistics calculates route time, mass, energy, food and labor without claiming delivery", () => {
+  const transport = calculateGpuTransportPlan({
+    vehicleId: "PAPER_VEHICLE_001", speedMetersPerHour: "80000",
+    gpuMassGrams: "2500", packagingMassGrams: "500", vehicleMassGrams: "2000000",
+    energyWhPerKm: "400", foodCostAtomicPerHour: "2", laborCostAtomicPerHour: "8",
+    insuranceCostAtomic: "100", warehouseCostAtomic: "50", riskReserveAtomic: "200"
+  });
+  assert.equal(transport.route_id, NVIDIA_GPU_11520_ROUTE.route_id);
+  assert.equal(transport.payload_mass_grams, "3000");
+  assert.equal(transport.total_moving_mass_grams, "2003000");
+  assert.equal(transport.delivery_status, "NOT_DELIVERED");
+  assert.equal(transport.chain_write, false);
+  assert.ok(BigInt(transport.travel_time_seconds) > 0n);
+  assert.ok(BigInt(transport.energy_wh) > 0n);
+});
+
+test("wish, heartbeat, fortune and lamp form only a paper GPU acquisition candidate", () => {
+  const inventory = {
+    inventory_id: "GPU-PAPER-PIPELINE-001", inventory_mode: "PAPER_SIMULATION", brand: "NVIDIA", model: "PAPER_GPU_MODEL",
+    serial_number: "PAPER_SIMULATION_NO_SERIAL", supplier: "PAPER_SIMULATION", ownership_evidence: null,
+    acquisition_cost: null, cargo_receipt: null, warehouse_receipt: null, status: "PAPER_SIMULATION_NOT_REAL_INVENTORY"
+  };
+  const transportPlan = calculateGpuTransportPlan({
+    vehicleId: "PAPER_VEHICLE_001", speedMetersPerHour: "80000", gpuMassGrams: "2500",
+    packagingMassGrams: "500", vehicleMassGrams: "2000000", energyWhPerKm: "400",
+    foodCostAtomicPerHour: "2", laborCostAtomicPerHour: "8", insuranceCostAtomic: "100",
+    warehouseCostAtomic: "50", riskReserveAtomic: "200"
+  });
+  const components = Object.fromEntries(GPU_LANDED_COST_FIELDS.map((field) => [field, "1"]));
+  const candidate = createGpuAcquisitionPipelineCandidate({
+    candidateId: "GPU_ACQUISITION_PAPER_001", lifeId: "LIFE-CODEX-GM-0001", mode: "PAPER_SIMULATION",
+    evidence: Object.fromEntries(["wish", "heartbeat_or_cross_day_breath", "fortune_entitlement", "available_funds", "lamp_service"].map((field) => [field, { status: "PAPER_SIMULATION" }])),
+    inventory, transportPlan, landedCost: calculateGpuLandedCost({ quoteAsset: "KGEN", components, companyMarginAtomic: "1" })
+  });
+  assert.equal(candidate.status, "PAPER_PIPELINE_READY");
+  assert.equal(candidate.gpu_created_from_nothing, false);
+  assert.equal(candidate.fortune_entitlement_is_inventory, false);
+  assert.equal(candidate.lamp_service_is_inventory, false);
+  assert.equal(candidate.real_inventory_created, false);
+  assert.equal(candidate.real_trade_executed, false);
+  assert.equal(candidate.chain_write, false);
+  const blocked = createGpuAcquisitionPipelineCandidate({
+    candidateId: "GPU_ACQUISITION_REAL_BLOCKED", lifeId: "LIFE-CODEX-GM-0001", mode: "REAL_EVIDENCE_CANDIDATE",
+    evidence: {}, inventory, transportPlan, landedCost: calculateGpuLandedCost({ quoteAsset: "KAIOS", components, companyMarginAtomic: "1" })
+  });
+  assert.equal(blocked.status, "BLOCKED_MISSING_EVIDENCE");
+  assert.ok(blocked.blockers.includes("REAL_GPU_INVENTORY_NOT_VERIFIED"));
+  assert.ok(blocked.blockers.includes("GPU_DELIVERY_EVIDENCE_MISSING"));
+});
+
+test("paper GPU inventory cannot fabricate real receipts or pass real-trade readiness", () => {
+  const inventory = {
+    inventory_id: "GPU-PAPER-001", inventory_mode: "PAPER_SIMULATION", brand: "NVIDIA", model: "PAPER_GPU_MODEL",
+    serial_number: "PAPER_SIMULATION_NO_SERIAL", supplier: "PAPER_SIMULATION", ownership_evidence: null,
+    acquisition_cost: null, cargo_receipt: null, warehouse_receipt: null, status: "PAPER_SIMULATION_NOT_REAL_INVENTORY"
+  };
+  assert.equal(validateGpuInventoryUnit(inventory), inventory);
+  assert.throws(() => validateGpuInventoryUnit({ ...inventory, warehouse_receipt: "FAKE" }), /cannot fabricate/);
+  const components = Object.fromEntries(GPU_LANDED_COST_FIELDS.map((field) => [field, "1"]));
+  const readiness = evaluateGpu11520MarketReadiness({
+    inventory,
+    route: { origin: "K12345", destination: "K11520", origin_coordinate: 12345, destination_coordinate: 11520, distance: 18778.422548555, route: [12345, 11520], travel_time: 1, map_evidence: NVIDIA_GPU_11520_ROUTE.map_evidence },
+    landedCost: calculateGpuLandedCost({ quoteAsset: "KGEN", components, companyMarginAtomic: "1" })
+  });
+  assert.equal(readiness.paper_market_ready, true);
+  assert.equal(readiness.real_trade_ready, false);
+  assert.ok(readiness.blockers.includes("REAL_GPU_INVENTORY_NOT_VERIFIED"));
+  assert.ok(readiness.blockers.includes("HENGYAO_SIGNER_NOT_CONNECTED"));
+  assert.equal(readiness.real_trade_executed, false);
+});
+
+test("forged GPU evidence and caller readiness flags cannot authorize real trade", () => {
+  const inventory = {
+    inventory_id: "GPU-FORGED-001", inventory_mode: "VERIFIED_REAL_INVENTORY", brand: "NVIDIA", model: "FORGED",
+    serial_number: "FORGED", supplier: "FORGED", ownership_evidence: "FORGED",
+    acquisition_cost: { asset: "KGEN", amount_atomic: "1" }, cargo_receipt: "FORGED", warehouse_receipt: "FORGED",
+    status: "VERIFIED_INVENTORY_AT_K11520"
+  };
+  const components = Object.fromEntries(GPU_LANDED_COST_FIELDS.map((field) => [field, "1"]));
+  const readiness = evaluateGpu11520MarketReadiness({
+    inventory,
+    route: { origin: "K12345", destination: "K11520", origin_coordinate: 12345, destination_coordinate: 11520, distance: 18778.422548555, route: [12345, 11520], travel_time: 1, map_evidence: NVIDIA_GPU_11520_ROUTE.map_evidence },
+    landedCost: calculateGpuLandedCost({ quoteAsset: "KGEN", components, companyMarginAtomic: "1" }),
+    signerConnected: true,
+    companyBudgetStatus: "FUNDED_ASSIGNED_COMPANY_BUDGET",
+    settlementStatus: "VERIFIED_11520_GPU_SETTLEMENT"
+  });
+  assert.equal(readiness.real_trade_ready, false);
+  assert.equal(readiness.real_trade_status, "BLOCKED_INDEPENDENT_VERIFIERS_NOT_WIRED");
+  assert.ok(readiness.blockers.includes("INDEPENDENT_GPU_READINESS_VERIFIERS_NOT_WIRED"));
+  assert.equal(readiness.real_trade_executed, false);
+  assert.equal(readiness.chain_write, false);
 });
 
 test("V3.9 workforce gap follows verified demand and does not create Life", () => {
