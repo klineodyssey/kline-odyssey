@@ -1892,7 +1892,7 @@ export function createAutonomousDemandToProductCycle({ cycleId, observations = [
     requireFields(observation, ["observation_id", "friction", "verification_status", "evidence"], "DemandObservation");
     requireId(observation.observation_id, "observation_id");
     invariant(["VERIFIED", "CANDIDATE", "REJECTED"].includes(observation.verification_status), "DEMAND_VERIFICATION_STATUS_INVALID", "Demand observations must be VERIFIED, CANDIDATE or REJECTED");
-    if (observation.verification_status === "VERIFIED") invariant(observation.evidence, "VERIFIED_DEMAND_EVIDENCE_REQUIRED", "Verified demand requires evidence");
+    invariant(observation.verification_status !== "VERIFIED", "DEMAND_EVIDENCE_VERIFIER_NOT_BOUND", "Verified demand is blocked because the demand evidence verifier is not repository-bound");
     const productId = AUTONOMOUS_PRODUCT_DEMAND_MAP[observation.friction] ?? null;
     if (!productId || observation.verification_status === "REJECTED" || observedProductIds.has(productId)) continue;
     observedProductIds.add(productId);
@@ -1989,7 +1989,7 @@ export function createKaiosAtmRepaymentCandidate({ repaymentId, advance, payerLi
   invariant(!usedRepaymentIds.includes(repaymentId), "ATM_DUPLICATE_REPAYMENT", "Repayment evidence cannot be reused");
   invariant(advance?.debtor_life_id === payerLifeId, "ATM_DEBTOR_ISOLATION", "One Life cannot repay or mutate another Life's debt without separate authority");
   invariant(kaiosWei(repaymentKaiosWei, "repayment_kaios_wei") === kaiosWei(advance.total_repayment_kaios_wei, "total_repayment_kaios_wei"), "ATM_REPAYMENT_AMOUNT_MISMATCH", "Repayment candidate must match principal plus the simple service fee");
-  return Object.freeze({ repayment_id: repaymentId, advance_id: advance.advance_id, payer_life_id: payerLifeId, repayment_kaios_wei: String(repaymentKaiosWei), replay_consumed: true, real_transfer: false, status: "REPAYMENT_CANDIDATE_NOT_SETTLED" });
+  return Object.freeze({ repayment_id: repaymentId, advance_id: advance.advance_id, payer_life_id: payerLifeId, repayment_kaios_wei: String(repaymentKaiosWei), replay_consumed: false, durable_replay_registry: "NOT_BOUND", real_transfer: false, status: "REPAYMENT_CANDIDATE_DURABLE_REPLAY_REQUIRED" });
 }
 
 export function createKaiosAtmProductCandidate({ demandDecision, ownerId = "AI_ANT_COMPANY_0001" }) {
@@ -2034,7 +2034,7 @@ export function createKaiosAtmProductCandidate({ demandDecision, ownerId = "AI_A
 
 export function calculateKaiosAtmEconomics({ feeRevenueKaiosWei = "0", feeSettlementEvidence = null, costs = {}, humanRelayCostKaiosWei = null }) {
   const revenue = kaiosWei(feeRevenueKaiosWei, "atm_fee_revenue_kaios_wei");
-  invariant(revenue === 0n || feeSettlementEvidence, "ATM_FAKE_REVENUE", "ATM revenue requires real settled service-fee evidence");
+  invariant(revenue === 0n, "ATM_SETTLEMENT_VERIFIER_NOT_BOUND", "ATM Revenue cannot be recognized until a repository-bound settlement verifier exists");
   const costFields = ["liquidity_cost_kaios_wei", "energy_cost_kaios_wei", "transport_cost_kaios_wei", "location_cost_kaios_wei", "maintenance_cost_kaios_wei", "network_cost_kaios_wei", "security_cost_kaios_wei", "depreciation_kaios_wei"];
   const normalizedCosts = Object.fromEntries(costFields.map((field) => [field, kaiosWei(costs[field] ?? "0", field).toString()]));
   const knownCosts = Object.values(normalizedCosts).reduce((sum, value) => sum + BigInt(value), 0n);
@@ -2046,9 +2046,9 @@ export function calculateKaiosAtmEconomics({ feeRevenueKaiosWei = "0", feeSettle
     known_operating_cost_kaios_wei: knownCosts.toString(),
     human_relay_cost_kaios_wei: relayPolicyPending ? "POLICY_REQUIRED" : relayCost.toString(),
     net_profit_kaios_wei: relayPolicyPending ? "POLICY_REQUIRED" : (revenue - knownCosts - relayCost).toString(),
-    revenue_evidence: feeSettlementEvidence,
-    real_revenue: revenue > 0n,
-    status: relayPolicyPending ? "COST_INCOMPLETE_HUMAN_LABOR_RATE_REQUIRED" : "SIMULATION_COMPLETE"
+    revenue_evidence: null,
+    real_revenue: false,
+    status: relayPolicyPending ? "COST_INCOMPLETE_HUMAN_LABOR_RATE_REQUIRED" : "SIMULATION_COMPLETE_ZERO_REVENUE_ONLY"
   });
 }
 
@@ -2064,29 +2064,32 @@ export function appendHumanRelayLaborEvent(events, event) {
   const start = Date.parse(event.start_time);
   const end = Date.parse(event.end_time);
   invariant(Number.isFinite(start) && Number.isFinite(end) && end >= start, "HUMAN_RELAY_TIME_INVALID", "Relay timestamps must be valid and ordered");
-  const normalized = Object.freeze({ ...event, duration_minutes: Number(((end - start) / 60000).toFixed(6)), payable_amount: "NOT_CALCULATED_RATE_PENDING" });
+  const normalized = Object.freeze({ ...event, candidate_duration_minutes: Number(((end - start) / 60000).toFixed(6)), authoritative_labor: false, evidence_status: "UNVERIFIED_CANDIDATE", payable_amount: "NOT_CALCULATED_RATE_PENDING" });
   return Object.freeze([...events, normalized]);
 }
 
 export function summarizeHumanRelayLaborLedger(events, humanLaborRateKaiosPerMinute = null) {
   requireArray(events, "human_relay_events");
-  const minutes = Number(events.reduce((sum, event) => sum + Number(event.duration_minutes ?? 0), 0).toFixed(6));
+  const candidateMinutes = Number(events.reduce((sum, event) => sum + Number(event.candidate_duration_minutes ?? 0), 0).toFixed(6));
   invariant(humanLaborRateKaiosPerMinute === null, "HUMAN_LABOR_RATE_POLICY_NOT_APPROVED", "The current Human relay labor rate is policy-required and cannot be invented by this Runtime");
   return Object.freeze({
     ledger_id: "AI_ANT_COMPANY_HUMAN_RELAY_LABOR_LEDGER_V1",
     event_count: events.length,
-    accrued_human_relay_minutes: minutes,
+    candidate_human_relay_minutes: candidateMinutes,
+    accrued_human_relay_minutes: 0,
+    authoritative_labor_events: 0,
+    human_labor_evidence: events.length ? "UNVERIFIED_CANDIDATE" : "NONE",
     human_labor_rate: "POLICY_REQUIRED",
     payable_amount: "NOT_CALCULATED_RATE_PENDING",
     payment_sent: false,
-    status: events.length ? "LABOR_TIME_ACCRUED_RATE_PENDING" : "NO_RELAY_EVENTS"
+    status: events.length ? "UNVERIFIED_RELAY_CANDIDATES_EVIDENCE_AND_RATE_PENDING" : "NO_RELAY_EVENTS"
   });
 }
 
 export function createCompanyCycleFinancialReport({ cycleId, revenueKaiosWei = "0", revenueEvidence = null, cashKaiosWei = "0", receivablesKaiosWei = "0", knownPayablesKaiosWei = "0", salaryLiabilityKaiosWei = "0", computeExpenseKaiosWei = "0", gasExpenseKaiosWei = "0", securityExpenseKaiosWei = "0", projectCostKaiosWei = "0", reserveKaiosWei = "0", humanRelaySummary }) {
   requireId(cycleId, "financial_cycle_id");
   const revenue = kaiosWei(revenueKaiosWei, "revenue_kaios_wei");
-  invariant(revenue === 0n || revenueEvidence, "COMPANY_FAKE_REVENUE", "Company Revenue requires settlement evidence");
+  invariant(revenue === 0n, "COMPANY_SETTLEMENT_VERIFIER_NOT_BOUND", "Company Revenue cannot be recognized until a repository-bound settlement verifier exists");
   const cash = kaiosWei(cashKaiosWei, "cash_kaios_wei");
   const receivables = kaiosWei(receivablesKaiosWei, "receivables_kaios_wei");
   const payables = kaiosWei(knownPayablesKaiosWei, "known_payables_kaios_wei");
@@ -2096,7 +2099,7 @@ export function createCompanyCycleFinancialReport({ cycleId, revenueKaiosWei = "
   const security = kaiosWei(securityExpenseKaiosWei, "security_expense_kaios_wei");
   const project = kaiosWei(projectCostKaiosWei, "project_cost_kaios_wei");
   const reserve = kaiosWei(reserveKaiosWei, "reserve_kaios_wei");
-  const relayRatePending = Number(humanRelaySummary?.accrued_human_relay_minutes ?? 0) > 0 && humanRelaySummary?.human_labor_rate === "POLICY_REQUIRED";
+  const relayRatePending = (Number(humanRelaySummary?.candidate_human_relay_minutes ?? 0) > 0 || Number(humanRelaySummary?.accrued_human_relay_minutes ?? 0) > 0) && humanRelaySummary?.human_labor_rate === "POLICY_REQUIRED";
   const knownExpenses = compute + gas + security + project;
   return Object.freeze({
     report_id: `CFO_REPORT_${cycleId}`,
@@ -2115,7 +2118,7 @@ export function createCompanyCycleFinancialReport({ cycleId, revenueKaiosWei = "
     project_cost: project.toString(),
     profit: relayRatePending ? "POLICY_REQUIRED" : (revenue - knownExpenses).toString(),
     reserve: reserve.toString(),
-    revenue_evidence: revenueEvidence,
+    revenue_evidence: null,
     payment_sent: false,
     status: relayRatePending ? "FINANCIAL_REPORT_RATE_POLICY_REQUIRED" : "FINANCIAL_REPORT_COMPLETE"
   });
