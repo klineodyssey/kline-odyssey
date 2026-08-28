@@ -102,7 +102,8 @@ import {
   createFieldServiceDemandScan
   , KAIOS_AI_OS_EMPLOYMENT_ALPHA_JOB, KAIOS_AI_OS_FIRST_REAL_EMPLOYMENT_TEST_JOB, KAIOS_MAINNET_TOKEN,
   CANONICAL_REPOSITORY_COMPANY_AUTHORITIES, COMPANY_OPERATIONAL_AUTHORITY_PROPOSAL_SCOPES,
-  createRepositoryCompanyAuthorityProposal, verifyRepositoryBoundCompanyAuthority,
+  createRepositoryCompanyAuthorityProposal, createCompanyAuthorityProposalReviewCandidate,
+  verifyRepositoryBoundCompanyAuthority,
   createEmploymentIdentityChallenge,
   verifyEmploymentIdentityProof, createEmploymentApplication, scoreEmploymentInterview,
   createTrialEmploymentContract, createEmploymentAlphaMission, acceptEmploymentAlphaMission,
@@ -3175,6 +3176,42 @@ test("V4.3 Company authority proposal cannot include financial, Worker or self-i
   };
   assert.throws(() => createRepositoryCompanyAuthorityProposal(input), (error) => error.code === "COMPANY_AUTHORITY_PROPOSAL_SCOPE_INVALID");
   assert.throws(() => createRepositoryCompanyAuthorityProposal({ ...input, requestedScopes: ["COMPANY_INTERVIEW"], proposedBy: input.candidateActorId }), (error) => error.code === "COMPANY_AUTHORITY_SELF_PROPOSAL_FORBIDDEN");
+});
+
+test("V4.3 unverified governance review candidate is append-only and cannot activate authority", async () => {
+  const proposal = createRepositoryCompanyAuthorityProposal({
+    proposalId: "COMPANY_AUTHORITY_PROPOSAL_REVIEW_TEST_001", companyId: "AI_ANT_COMPANY_0001",
+    candidateActorId: "COMPANY_OPERATOR_CANDIDATE_003", candidateControllerId: "COMPANY_CONTROLLER_CANDIDATE_003",
+    role: "COMPANY_EMPLOYMENT_OPERATOR_CANDIDATE", policyVersion: "KAIOS_FIRST_REAL_EMPLOYMENT_TEST_V1",
+    requestedScopes: ["COMPANY_INTERVIEW", "EMPLOYMENT_DECISION"],
+    validFrom: "2026-08-29T04:01:00.000Z", validUntil: "2026-08-29T05:01:00.000Z",
+    evidence: ["PR_191_REVIEW_REQUIRED"], exactRepositoryVersion: "4".repeat(40),
+    proposedBy: "COMPANY_GM_CLAIM_003", proposedAt: "2026-08-29T04:00:00.000Z"
+  });
+  const review = createCompanyAuthorityProposalReviewCandidate({
+    reviewId: "COMPANY_AUTHORITY_REVIEW_CANDIDATE_001", proposal,
+    reviewerIdClaim: "DISTINCT_REVIEWER_CLAIM_001", reviewerControllerIdClaim: "DISTINCT_CONTROLLER_CLAIM_001",
+    recommendation: "HOLD",
+    findings: [{ finding_id: "AUTH-REVIEW-001", severity: "P0", evidence: "Reviewer identity and proposal provenance are not verified" }],
+    evidence: [proposal.proposal_id, "DISTINCT_REVIEWER_REQUIRED"], reviewedAt: "2026-08-29T04:02:00.000Z"
+  });
+  assert.equal(review.status, "UNVERIFIED_GOVERNANCE_REVIEW_CANDIDATE_NOT_DECISION");
+  assert.equal(review.reviewer_identity_verified, false);
+  assert.equal(review.reviewer_independence_verified, false);
+  assert.equal(review.governance_decision, null);
+  assert.equal(review.activation_authorized, false);
+  assert.equal(review.authority_id, null);
+
+  const { store, registries } = await runtime();
+  const company = await registries.company.get("AI_ANT_COMPANY_0001");
+  const eventInput = { store, company, eventType: "COMPANY_AUTHORITY_PROPOSAL_REVIEW_CANDIDATE", record: review, actorId: "UNVERIFIED_REVIEW_RELAY", timestamp: review.reviewed_at };
+  const first = await appendEmploymentPhase1BCompanyEvent(eventInput);
+  const replay = await appendEmploymentPhase1BCompanyEvent(eventInput);
+  assert.equal(first.status, "COMPANY_AUTHORITY_PROPOSAL_REVIEW_CANDIDATE_APPENDED");
+  assert.equal(first.event.payload.record_class, "PHASE_1B_SIMULATION_CANDIDATE");
+  assert.equal(replay.status, "IDEMPOTENT_NOOP");
+  const history = await store.history(company.company_id, "COMPANY");
+  assert.equal(history.filter((event) => event.event_type === "COMPANY_AUTHORITY_PROPOSAL_REVIEW_CANDIDATE" && event.payload.record_id === review.review_id).length, 1);
 });
 
 test("V4.3 website exposes exact first-payroll readiness without claiming a real applicant or receipt", async () => {

@@ -199,6 +199,50 @@ export function createRepositoryCompanyAuthorityProposal({
   });
 }
 
+export const COMPANY_AUTHORITY_REVIEW_RECOMMENDATIONS = Object.freeze([
+  "RECOMMEND_APPROVE", "REQUEST_CHANGES", "HOLD"
+]);
+
+export function createCompanyAuthorityProposalReviewCandidate({
+  reviewId, proposal, reviewerIdClaim, reviewerControllerIdClaim, recommendation,
+  findings, evidence, reviewedAt
+}) {
+  requireId(reviewId, "company_authority_review_candidate.review_id");
+  requireId(reviewerIdClaim, "company_authority_review_candidate.reviewer_id_claim");
+  requireId(reviewerControllerIdClaim, "company_authority_review_candidate.reviewer_controller_id_claim");
+  requireEnum(recommendation, COMPANY_AUTHORITY_REVIEW_RECOMMENDATIONS, "company_authority_review_candidate.recommendation");
+  requireArray(findings, "company_authority_review_candidate.findings");
+  requireArray(evidence, "company_authority_review_candidate.evidence");
+  invariant(proposal?.status === "UNVERIFIED_PROPOSAL_CANDIDATE_NOT_AUTHORITY" && proposal.authority_id === null && proposal.active === false, "COMPANY_AUTHORITY_REVIEW_PROPOSAL_REQUIRED", "Authority review candidate requires an inactive unverified proposal candidate");
+  invariant(reviewerIdClaim !== proposal.candidate_actor_id && reviewerIdClaim !== proposal.proposed_by_claim, "COMPANY_AUTHORITY_REVIEWER_ID_COLLISION", "Reviewer identifier claim must differ from candidate and proposer identifier claims; this is not identity proof");
+  invariant(reviewerControllerIdClaim !== proposal.candidate_controller_id, "COMPANY_AUTHORITY_REVIEWER_CONTROLLER_COLLISION", "Reviewer controller claim must differ from the candidate controller claim; this is not controller proof");
+  invariant(findings.every((finding) => finding && typeof finding === "object" && typeof finding.finding_id === "string" && finding.finding_id.length > 0 && typeof finding.severity === "string" && typeof finding.evidence === "string" && finding.evidence.length > 0), "COMPANY_AUTHORITY_REVIEW_FINDING_INVALID", "Every review finding requires ID, severity and evidence text");
+  invariant(evidence.length > 0 && evidence.every((item) => typeof item === "string" && item.length > 0), "COMPANY_AUTHORITY_REVIEW_EVIDENCE_REQUIRED", "Authority review candidate requires evidence references");
+  parseEmploymentTime(reviewedAt, "company_authority_review_candidate.reviewed_at");
+  return Object.freeze({
+    record_class: "UNVERIFIED_COMPANY_AUTHORITY_GOVERNANCE_REVIEW_CANDIDATE",
+    review_id: reviewId,
+    proposal_id: proposal.proposal_id,
+    company_id: proposal.company_id,
+    candidate_actor_id: proposal.candidate_actor_id,
+    reviewer_id_claim: reviewerIdClaim,
+    reviewer_controller_id_claim: reviewerControllerIdClaim,
+    reviewer_identity_verified: false,
+    reviewer_controller_verified: false,
+    reviewer_independence_verified: false,
+    proposal_provenance_verified: false,
+    recommendation,
+    findings: Object.freeze(findings.map((finding) => Object.freeze({ ...finding }))),
+    evidence: Object.freeze([...evidence]),
+    governance_decision: null,
+    authority_id: null,
+    activation_authorized: false,
+    usable_as_authority: false,
+    reviewed_at: reviewedAt,
+    status: "UNVERIFIED_GOVERNANCE_REVIEW_CANDIDATE_NOT_DECISION"
+  });
+}
+
 const EMPLOYMENT_ALPHA_ACTOR_TYPES = Object.freeze(["HUMAN_PLAYER", "AI_LIFE"]);
 const EMPLOYMENT_ALPHA_INTERVIEW_FIELDS = Object.freeze([
   "understands_simulation_boundary",
@@ -416,7 +460,8 @@ export const EMPLOYMENT_PHASE1B_DECISIONS = Object.freeze(["APPROVE", "APPROVE_W
 export const EMPLOYMENT_PHASE1B_HISTORY_EVENT_TYPES = Object.freeze([
   "APPLICATION_SUBMITTED", "INTERVIEW_STARTED", "INTERVIEW_COMPLETED", "EMPLOYMENT_DECISION_RECORDED",
   "EMPLOYEE_CREATED", "WORKER_ACTIVATED", "MISSION_ASSIGNED", "MISSION_ACCEPTED",
-  "WORK_EVIDENCE_SUBMITTED", "WORK_REVIEWED", "COMPENSATION_ACCRUED", "PAYROLL_QUEUED", "PAYROLL_SETTLED"
+  "WORK_EVIDENCE_SUBMITTED", "WORK_REVIEWED", "COMPENSATION_ACCRUED", "PAYROLL_QUEUED", "PAYROLL_SETTLED",
+  "COMPANY_AUTHORITY_PROPOSAL_REVIEW_CANDIDATE"
 ]);
 
 const EMPLOYMENT_PHASE1B_EVENT_RECORD_IDS = Object.freeze({
@@ -424,7 +469,7 @@ const EMPLOYMENT_PHASE1B_EVENT_RECORD_IDS = Object.freeze({
   EMPLOYMENT_DECISION_RECORDED: "decision_id", EMPLOYEE_CREATED: "employee_id", WORKER_ACTIVATED: "worker_id",
   MISSION_ASSIGNED: "mission_id", MISSION_ACCEPTED: "mission_id", WORK_EVIDENCE_SUBMITTED: "evidence_id",
   WORK_REVIEWED: "review_id", COMPENSATION_ACCRUED: "accrual_id", PAYROLL_QUEUED: "payroll_queue_id",
-  PAYROLL_SETTLED: "settlement_id"
+  PAYROLL_SETTLED: "settlement_id", COMPANY_AUTHORITY_PROPOSAL_REVIEW_CANDIDATE: "review_id"
 });
 
 function requireEmploymentBinding(record, expected, code, message) {
