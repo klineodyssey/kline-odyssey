@@ -132,6 +132,8 @@ The candidate now reuses the existing Company history store to persist safe cycl
 
 The canonical migration's one-host SQLite simulator is now implemented as `createLocalSqliteClaimRegistrySimulator()`. It transactionally tests unique task/clone/session/worker custody, CAS record versions, fencing, leases, review custody, repair lineage and restart persistence. It is always labelled `LOCAL_SQLITE_SIMULATOR_NOT_AUTHORITY`; it is not a shared service and does not turn automatic dispatch on. It deliberately refuses close and release until canonical Review and Registry authority connectors can supply machine-verifiable evidence instead of caller assertions.
 
+`evaluateClaimCloseEvidenceCandidate()` prepares that connection without creating authority. It binds the current Claim, distinct reviewer, exact PR head/CI, Git object references, payload hashes, Registry version and fencing token; even a consistent packet remains unable to close or release until canonical source loaders are connected.
+
 It cannot persist a shared authoritative Claim, edit GitHub, launch a worker, merge, push `main`, pay, access a private key, deploy or send a transaction. Those connectors remain `NOT_CONNECTED`; the existing Claim/Lease Controller and independent Review gates must authorize them before any future activation.
 
 ## Imported Authorities

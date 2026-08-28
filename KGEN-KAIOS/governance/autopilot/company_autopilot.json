@@ -72,6 +72,7 @@
         "authoritative_review_decision": false,
         "authoritative_registry_reconciliation": false,
         "close_release": false,
+        "close_evidence_candidate": "STRUCTURAL_HASH_AND_LINEAGE_VALIDATION_ONLY_NOT_AUTHORITY",
         "automatic_dispatch": false,
         "status": "IMPLEMENTED_LOCAL_SIMULATOR_NOT_AUTHORITY"
       },

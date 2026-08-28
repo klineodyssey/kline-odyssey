@@ -2343,6 +2343,53 @@ export async function restoreAutonomousCompanyCycleState({ store, company_id }) 
 
 export const LOCAL_CLAIM_SIMULATOR_ACTIVE_STATES = Object.freeze(["ACTIVE", "EXECUTING", "REVIEW", "REPAIR", "RECOVERY_PENDING"]);
 
+export function evaluateClaimCloseEvidenceCandidate({ claim, repository_snapshot, review_evidence, registry_evidence }) {
+  requireFields(claim, ["claim_id", "task_id", "worker_id", "review_owner_id", "status", "head_sha", "record_version", "fencing_token"], "ClaimCloseEvidence.claim");
+  requireFields(review_evidence, ["evidence_type", "review_id", "claim_id", "task_id", "worker_id", "reviewer_id", "head_sha", "decision", "conflict_of_interest", "source_commit", "payload_sha256", "observed_at"], "ClaimCloseEvidence.review");
+  requireFields(registry_evidence, ["evidence_type", "reconciliation_id", "claim_id", "task_id", "worker_id", "claim_status", "record_version", "fencing_token", "review_id", "worker_registry_blob_sha", "work_queue_blob_sha", "task_envelope_blob_sha", "payload_sha256", "observed_at"], "ClaimCloseEvidence.registry");
+  invariant(repository_snapshot?.snapshot_type === "LATEST_REPOSITORY_READ_ONLY", "CLAIM_CLOSE_REPOSITORY_SNAPSHOT_REQUIRED", "Claim close evidence requires a fresh read-only repository snapshot");
+  const pr = repository_snapshot.active_task_pr;
+  invariant(pr && pr.state === "OPEN" && pr.base_ref === repository_snapshot.default_branch && pr.behind_main === 0 && pr.ci_status === "PASS", "CLAIM_CLOSE_EXACT_HEAD_CI_REQUIRED", "Claim close evidence requires an open, current, exact-head CI passing PR");
+  invariant(claim.status === "REVIEW", "CLAIM_CLOSE_REVIEW_CUSTODY_REQUIRED", "Claim close evidence can only be prepared from review custody");
+  invariant(/^[0-9a-f]{40}$/.test(claim.head_sha), "CLAIM_CLOSE_HEAD_INVALID", "Claim review custody must bind an exact head SHA");
+  invariant(pr.head_sha === claim.head_sha, "CLAIM_CLOSE_HEAD_MISMATCH", "Repository, Claim and review evidence must bind the same exact head");
+  invariant(review_evidence.evidence_type === "INDEPENDENT_REVIEW_RESULT", "CLAIM_CLOSE_REVIEW_EVIDENCE_TYPE_INVALID", "Review evidence type must be INDEPENDENT_REVIEW_RESULT");
+  invariant(review_evidence.claim_id === claim.claim_id && review_evidence.task_id === claim.task_id && review_evidence.worker_id === claim.worker_id, "CLAIM_CLOSE_REVIEW_LINEAGE_MISMATCH", "Review evidence must bind the Claim, Task and original Worker");
+  invariant(review_evidence.reviewer_id === claim.review_owner_id && review_evidence.reviewer_id !== claim.worker_id, "CLAIM_CLOSE_REVIEWER_MISMATCH", "Review evidence must come from the distinct review custodian");
+  invariant(review_evidence.head_sha === claim.head_sha, "CLAIM_CLOSE_REVIEW_HEAD_MISMATCH", "Review evidence must bind the Claim exact head");
+  invariant(review_evidence.source_commit === claim.head_sha, "CLAIM_CLOSE_REVIEW_SOURCE_MISMATCH", "Review source commit must equal the exact head held in review custody");
+  invariant(["APPROVED", "REJECTED", "BLOCKED"].includes(review_evidence.decision), "CLAIM_CLOSE_REVIEW_DECISION_INVALID", "Review evidence requires an explicit terminal decision");
+  invariant(review_evidence.conflict_of_interest === "NONE", "CLAIM_CLOSE_REVIEW_CONFLICT", "Independent review evidence cannot carry a conflict of interest");
+  invariant(registry_evidence.evidence_type === "CROSS_REGISTRY_RECONCILIATION", "CLAIM_CLOSE_REGISTRY_EVIDENCE_TYPE_INVALID", "Registry evidence type must be CROSS_REGISTRY_RECONCILIATION");
+  invariant(registry_evidence.claim_id === claim.claim_id && registry_evidence.task_id === claim.task_id && registry_evidence.worker_id === claim.worker_id, "CLAIM_CLOSE_REGISTRY_LINEAGE_MISMATCH", "Registry evidence must bind the Claim, Task and Worker");
+  invariant(registry_evidence.claim_status === claim.status && registry_evidence.record_version === claim.record_version && registry_evidence.fencing_token === claim.fencing_token, "CLAIM_CLOSE_REGISTRY_STATE_MISMATCH", "Registry evidence must bind the current Claim status, version and fencing token");
+  invariant(registry_evidence.review_id === review_evidence.review_id, "CLAIM_CLOSE_REVIEW_REGISTRY_MISMATCH", "Review and Registry evidence must bind the same review ID");
+  for (const value of [review_evidence.source_commit, registry_evidence.worker_registry_blob_sha, registry_evidence.work_queue_blob_sha, registry_evidence.task_envelope_blob_sha]) {
+    invariant(typeof value === "string" && /^[0-9a-f]{40}$/.test(value), "CLAIM_CLOSE_GIT_EVIDENCE_INVALID", "Claim close Git evidence must use exact lowercase object IDs");
+  }
+  for (const value of [review_evidence.payload_sha256, registry_evidence.payload_sha256]) {
+    invariant(typeof value === "string" && /^[0-9a-f]{64}$/.test(value), "CLAIM_CLOSE_PAYLOAD_HASH_INVALID", "Claim close payload evidence must use lowercase SHA-256");
+  }
+  for (const value of [review_evidence.observed_at, registry_evidence.observed_at]) {
+    invariant(typeof value === "string" && !Number.isNaN(Date.parse(value)), "CLAIM_CLOSE_EVIDENCE_TIME_INVALID", "Claim close evidence requires an ISO timestamp");
+  }
+  return Object.freeze({
+    status: "CLAIM_CLOSE_EVIDENCE_CONSISTENT_NOT_AUTHORITY",
+    claim_id: claim.claim_id,
+    task_id: claim.task_id,
+    review_id: review_evidence.review_id,
+    decision: review_evidence.decision,
+    exact_head: claim.head_sha,
+    structural_validation: true,
+    authoritative_review_registry_connected: false,
+    authoritative_worker_registry_connected: false,
+    close_allowed: false,
+    release_allowed: false,
+    blockers: Object.freeze(["CANONICAL_REVIEW_REGISTRY_CONNECTOR_NOT_CONNECTED", "CANONICAL_WORKER_REGISTRY_CONNECTOR_NOT_CONNECTED"]),
+    external_effect: false
+  });
+}
+
 /**
  * One-host SQLite state-machine simulator for the proposed Claim Registry.
  * It exercises transactions, unique active locks, compare-and-swap versions,

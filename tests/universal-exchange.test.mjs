@@ -107,7 +107,7 @@ import {
   persistAutonomousCompanyCycle, restoreAutonomousCompanyCycleState,
   readLatestRepositorySnapshot, evaluateExactHeadCiGate,
   runAutonomousCompanyReadOnlyCycle, createLocalSqliteClaimRegistrySimulator,
-  LOCAL_CLAIM_SIMULATOR_ACTIVE_STATES
+  LOCAL_CLAIM_SIMULATOR_ACTIVE_STATES, evaluateClaimCloseEvidenceCandidate
 } from "../core/index.mjs";
 import { verifyDigitalAntWalletBinding, verifyDigitalLifeWalletBinding, CODEX_GM_ENV } from "../core/security/wallet-binding.mjs";
 import { TEMPLE_HEART_READ_ABI, TEMPLE_HEART_DRY_RUN_ABI, TEMPLE_HEART_VERIFIED_ACTIONS, readCoreHeartEvents } from "../core/integrations/temple-heart-12345.mjs";
@@ -3625,4 +3625,42 @@ test("Local SQLite Claim simulator preserves review custody and repair lineage b
     simulator?.closeDatabase();
     await fs.rm(directory, { recursive: true, force: true });
   }
+});
+
+test("Claim close evidence candidate binds exact head reviewer and registry state without granting authority", () => {
+  const headSha = "a".repeat(40);
+  const claim = {
+    claim_id: "CLAIM-EVIDENCE-001", task_id: "TASK-EVIDENCE-001", worker_id: "worker-evidence-01",
+    review_owner_id: "reviewer-evidence-01", status: "REVIEW", head_sha: headSha, record_version: 4, fencing_token: 2
+  };
+  const repository_snapshot = {
+    snapshot_type: "LATEST_REPOSITORY_READ_ONLY", repository: "klineodyssey/kline-odyssey", default_branch: "main",
+    main_sha: "b".repeat(40), active_task_pr: { number: 170, head_sha: headSha, head_ref: "codex/evidence", base_ref: "main", state: "OPEN", draft: true, ahead_main: 1, behind_main: 0, ci_status: "PASS" }
+  };
+  const review_evidence = {
+    evidence_type: "INDEPENDENT_REVIEW_RESULT", review_id: "REVIEW-EVIDENCE-001", claim_id: claim.claim_id,
+    task_id: claim.task_id, worker_id: claim.worker_id, reviewer_id: claim.review_owner_id, head_sha: headSha,
+    decision: "APPROVED", conflict_of_interest: "NONE", source_commit: headSha, payload_sha256: "d".repeat(64), observed_at: "2026-08-28T13:00:00Z"
+  };
+  const registry_evidence = {
+    evidence_type: "CROSS_REGISTRY_RECONCILIATION", reconciliation_id: "RECONCILIATION-EVIDENCE-001",
+    claim_id: claim.claim_id, task_id: claim.task_id, worker_id: claim.worker_id, claim_status: claim.status,
+    record_version: claim.record_version, fencing_token: claim.fencing_token, review_id: review_evidence.review_id,
+    worker_registry_blob_sha: "e".repeat(40), work_queue_blob_sha: "f".repeat(40), task_envelope_blob_sha: "1".repeat(40),
+    payload_sha256: "2".repeat(64), observed_at: "2026-08-28T13:01:00Z"
+  };
+  const result = evaluateClaimCloseEvidenceCandidate({ claim, repository_snapshot, review_evidence, registry_evidence });
+  assert.equal(result.status, "CLAIM_CLOSE_EVIDENCE_CONSISTENT_NOT_AUTHORITY");
+  assert.equal(result.structural_validation, true);
+  assert.equal(result.close_allowed, false);
+  assert.equal(result.release_allowed, false);
+  assert.deepEqual(result.blockers, ["CANONICAL_REVIEW_REGISTRY_CONNECTOR_NOT_CONNECTED", "CANONICAL_WORKER_REGISTRY_CONNECTOR_NOT_CONNECTED"]);
+  assert.throws(() => evaluateClaimCloseEvidenceCandidate({
+    claim, repository_snapshot,
+    review_evidence: { ...review_evidence, reviewer_id: claim.worker_id },
+    registry_evidence
+  }), (error) => error.code === "CLAIM_CLOSE_REVIEWER_MISMATCH");
+  assert.throws(() => evaluateClaimCloseEvidenceCandidate({
+    claim: { ...claim, head_sha: "3".repeat(40) }, repository_snapshot, review_evidence, registry_evidence
+  }), (error) => error.code === "CLAIM_CLOSE_HEAD_MISMATCH");
 });

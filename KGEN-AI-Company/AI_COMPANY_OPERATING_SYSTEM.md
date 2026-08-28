@@ -46,6 +46,8 @@ The candidate is deterministic and separates planning from effects. It emits app
 
 `createLocalSqliteClaimRegistrySimulator()` implements the approved migration step for a one-host SQLite state-machine test only. It uses transactional unique active locks, compare-and-swap `record_version`, monotonic fencing tokens, review custody, same-worker repair lineage and an append-only operation ledger. Its public authority marker is always `LOCAL_SQLITE_SIMULATOR_NOT_AUTHORITY`; it cannot dispatch or wake a worker and is not the selected shared SQL Claim Registry service. Close and release now fail with explicit authority-not-connected errors because caller-provided review disposition and registry reconciliation are not machine-verifiable authority evidence.
 
+`evaluateClaimCloseEvidenceCandidate()` is the non-authoritative bridge toward those connectors. It cross-checks a fresh open PR with passing exact-head CI against Claim custody, distinct-reviewer evidence, exact Git object IDs, SHA-256 payload bindings and the current Registry version/fencing token. A structurally consistent packet is still labelled `CLAIM_CLOSE_EVIDENCE_CONSISTENT_NOT_AUTHORITY` and cannot close or release anything until the canonical Review and Worker Registry loaders are connected.
+
 The Universal Exchange verification job uses Node 24 so exact-head CI executes the built-in `node:sqlite` tests. The scheduled Digital Ant public worker remains on Node 20; this candidate does not change its production execution runtime.
 
 The cycle still cannot persist a shared authoritative Claim, start an employee, mutate GitHub, merge, push `main`, pay, access a private key, deploy or send a transaction. Those connectors remain independently gated.
