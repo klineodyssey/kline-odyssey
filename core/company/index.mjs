@@ -2032,6 +2032,111 @@ export function createKaiosAtmProductCandidate({ demandDecision, ownerId = "AI_A
   });
 }
 
+export const KAIOS_NAVIGATION_REUSED_COMPONENTS = Object.freeze([
+  "LocationPermission", "GpsSession", "StepCounter", "MapPosition",
+  "LandEntryEvent", "BirthplaceBinding", "FieldRoute", "11520_Listing"
+]);
+
+export function createKaiosNavigationProductCandidate({ demandDecision, requesterLifeId, ownerId = "AI_ANT_COMPANY_0001" }) {
+  invariant(demandDecision?.product_id === "KAIOS_NAVIGATION_APP", "KAIOS_NAVIGATION_DEMAND_REQUIRED", "KAIOS Navigation candidate requires the matching Demand-to-Product decision");
+  invariant(demandDecision.action === "PROPOSE_PRODUCT_CANDIDATE", "KAIOS_NAVIGATION_DUPLICATE_BUILD_FORBIDDEN", "An existing Navigation product must be reused instead of rebuilt");
+  requireId(requesterLifeId, "navigation_requester_life_id");
+  return Object.freeze({
+    product_id: "KAIOS_NAVIGATION_APP",
+    company_id: "AI_ANT_COMPANY_0001",
+    owner_id: ownerId,
+    requester_life_id: requesterLifeId,
+    product_class: "LIFE_ORGAN_APP_CANDIDATE",
+    market: "LIFE_ORGAN_APP_MARKET",
+    reused_runtime_components: KAIOS_NAVIGATION_REUSED_COMPONENTS,
+    capabilities: Object.freeze(["CURRENT_POSITION", "DESTINATION", "ROUTE", "DISTANCE", "TRAVEL_TIME", "ENERGY_REQUIREMENT", "TRANSPORT_COST", "MAP_EVIDENCE", "ARRIVAL_EVIDENCE", "NON_LOCATION_MODE"]),
+    precise_gps_required: false,
+    background_tracking: false,
+    external_customer: false,
+    customer_revenue: "0",
+    chain_write: false,
+    status: "IMPLEMENTED_REVIEW_CANDIDATE_NOT_LIVE",
+    listing: Object.freeze({
+      listing_id: "11520_LISTING_KAIOS_NAVIGATION_APP_CANDIDATE",
+      asset_id: "KAIOS_NAVIGATION_APP",
+      seller_id: ownerId,
+      listing_type: "LICENSE",
+      currency_id: null,
+      price: null,
+      quantity: 1,
+      rights_offered: Object.freeze(["use_right", "license_right"]),
+      start_time: null,
+      end_time: null,
+      status: "LOCAL_DRAFT",
+      pricing_status: "UNPRICED",
+      registry_scope: "LOCAL_11520_CANDIDATE",
+      settlement_status: "NOT_DEPLOYED",
+      identity_right_offered: false,
+      purchase_status: "NOT_AVAILABLE",
+      installation_status: "NOT_INSTALLED",
+      maintenance_status: "POLICY_REQUIRED",
+      resale_status: "POLICY_REQUIRED"
+    })
+  });
+}
+
+export function createKaiosNavigationRouteCandidate({ routeId, requesterLifeId, locationPermission, gpsSession, stepCounter, currentPosition, destinationPosition, fieldRoute, energyRequirement = null, transportCostKaiosWei = null, arrivalEvidence = null }) {
+  requireId(routeId, "navigation_route_id");
+  requireId(requesterLifeId, "navigation_requester_life_id");
+  validateLocationPermission(locationPermission);
+  validateGpsSession(gpsSession);
+  validateStepCounter(stepCounter);
+  validateMapPosition(currentPosition);
+  validateMapPosition(destinationPosition);
+  validateFieldRoute(fieldRoute);
+  for (const entity of [locationPermission, gpsSession, stepCounter, currentPosition, destinationPosition]) {
+    invariant(entity.subject_id === requesterLifeId, "NAVIGATION_SUBJECT_MISMATCH", "Navigation permission, session, counter and positions must belong to the requesting Life");
+  }
+  invariant(gpsSession.permission_id === null || gpsSession.permission_id === locationPermission.permission_id, "NAVIGATION_PERMISSION_MISMATCH", "GPS session must reference the supplied Location Permission");
+  invariant(gpsSession.coordinates_stored !== true || (locationPermission.status === "GRANTED" && gpsSession.status === "ACTIVE"), "NAVIGATION_PRECISE_GPS_WITHOUT_CONSENT", "Precise GPS storage requires an active session and explicit Location Permission");
+  invariant(currentPosition.location_id === fieldRoute.origin && destinationPosition.location_id === fieldRoute.destination, "NAVIGATION_ROUTE_POSITION_MISMATCH", "Map positions must match the evidenced FieldRoute endpoints");
+  const energyKnown = energyRequirement !== null && Number(energyRequirement) >= 0;
+  const costKnown = transportCostKaiosWei !== null;
+  const normalizedCost = costKnown ? kaiosWei(transportCostKaiosWei, "navigation_transport_cost_kaios_wei").toString() : "POLICY_REQUIRED";
+  const nonLocationMode = locationPermission.status !== "GRANTED" || gpsSession.status !== "ACTIVE";
+  return Object.freeze({
+    route_id: routeId,
+    requester_life_id: requesterLifeId,
+    current_position: currentPosition.location_id,
+    destination: destinationPosition.location_id,
+    route: Object.freeze([...fieldRoute.route]),
+    distance: fieldRoute.distance,
+    travel_time: fieldRoute.travel_time,
+    energy_requirement: energyKnown ? Number(energyRequirement) : "MODEL_REQUIRED",
+    transport_cost_kaios_wei: normalizedCost,
+    map_evidence: fieldRoute.map_evidence,
+    arrival_evidence: arrivalEvidence,
+    arrival_status: arrivalEvidence ? "ARRIVAL_EVIDENCE_CANDIDATE" : "NOT_ARRIVED",
+    non_location_mode: nonLocationMode,
+    precise_gps_stored: gpsSession.coordinates_stored === true,
+    real_movement_claimed: false,
+    status: energyKnown && costKnown ? "ROUTE_CANDIDATE_COMPLETE" : "ROUTE_CANDIDATE_COST_OR_ENERGY_INCOMPLETE"
+  });
+}
+
+export function createNavigationLifeOrganInstallationCandidate({ product, lifeId }) {
+  invariant(product?.product_id === "KAIOS_NAVIGATION_APP", "KAIOS_NAVIGATION_PRODUCT_REQUIRED", "Installation candidate requires the KAIOS Navigation App product");
+  requireId(lifeId, "navigation_installation_life_id");
+  return Object.freeze({
+    installation_id: `INSTALL_${product.product_id}_${lifeId}`,
+    product_id: product.product_id,
+    life_id: lifeId,
+    listing_id: product.listing.listing_id,
+    listing_status: product.listing.status,
+    purchase_status: "NOT_PURCHASED",
+    payment_status: "NOT_PAID",
+    installation_status: "NOT_INSTALLED",
+    settlement_evidence: null,
+    chain_write: false,
+    status: "INSTALLATION_CANDIDATE_WAITING_FOR_FORMAL_LISTING_PURCHASE_AND_SETTLEMENT"
+  });
+}
+
 export function calculateKaiosAtmEconomics({ feeRevenueKaiosWei = "0", feeSettlementEvidence = null, costs = {}, humanRelayCostKaiosWei = null }) {
   const revenue = kaiosWei(feeRevenueKaiosWei, "atm_fee_revenue_kaios_wei");
   invariant(revenue === 0n || feeSettlementEvidence, "ATM_FAKE_REVENUE", "ATM revenue requires real settled service-fee evidence");
@@ -2063,7 +2168,7 @@ export function appendHumanRelayLaborEvent(events, event) {
   invariant(["COMPLETED", "PARTIAL", "FAILED_CLOSED"].includes(event.status), "HUMAN_RELAY_STATUS_INVALID", "Relay status is invalid");
   const start = Date.parse(event.start_time);
   const end = Date.parse(event.end_time);
-  invariant(Number.isFinite(start) && Number.isFinite(end) && end >= start, "HUMAN_RELAY_TIME_INVALID", "Relay timestamps must be valid and ordered");
+  invariant(Number.isFinite(start) && Number.isFinite(end) && end > start, "HUMAN_RELAY_TIME_INVALID", "Relay timestamps must be valid, ordered and non-zero; unknown labor time cannot be recorded as free work");
   const normalized = Object.freeze({ ...event, duration_minutes: Number(((end - start) / 60000).toFixed(6)), payable_amount: "NOT_CALCULATED_RATE_PENDING" });
   return Object.freeze([...events, normalized]);
 }
