@@ -116,6 +116,111 @@ export const KAIOS_AI_COMPANY_INDEPENDENT_REVIEWER_QUALIFICATION_EXAM_V1 = Objec
   grants_merge_or_deployment: false
 });
 
+export const PR190_STAGE2_REVIEW_SCOPE = Object.freeze([
+  "DEMAND_VERIFICATION", "ATM_ADVANCE_MODEL", "ATM_REPAYMENT", "LIQUIDITY", "REVENUE_RECOGNITION",
+  "HUMAN_RELAY_LABOR_ACCOUNTING", "CFO_FINANCIAL_REPORT", "NAVIGATION_PRODUCT_COMPOSITION",
+  "GPS_LOCATION_PERMISSION", "11520_LISTING_INTEGRATION", "REPLAY_IDEMPOTENCY", "IDENTITY_AUTHORITY",
+  "SIMULATION_LIVE_SEPARATION", "WEBSITE_TRUTH_BOUNDARY", "EXISTING_COMPONENT_REUSE",
+  "NO_ARBITRARY_MINT_DRAIN", "NO_FAKE_CUSTOMER_REVENUE"
+]);
+
+export const REVIEWER_TRIAL_FINDING_FIELDS = Object.freeze([
+  "finding_id", "severity", "file", "function_or_symbol", "evidence", "why_it_matters",
+  "repro_or_reasoning", "recommended_fix", "evidence_class"
+]);
+
+export function createReviewerTrialReviewPackage({ packageId, repository, pr, fullDiff, fullDiffSha256, changedFiles, ciResults, relevantTestResults }) {
+  requireId(packageId, "reviewer_trial.package_id");
+  requireFields(pr, ["number", "body", "exact_head", "base_sha", "state", "is_draft", "review_threads"], "ReviewerTrialPr");
+  requireArray(changedFiles, "reviewer_trial.changed_files");
+  requireArray(ciResults, "reviewer_trial.ci_results");
+  requireArray(relevantTestResults, "reviewer_trial.relevant_test_results");
+  invariant(typeof repository === "string" && repository.length > 0, "REVIEWER_TRIAL_REPOSITORY_REQUIRED", "Trial package requires a repository");
+  invariant(pr.number === 190 && pr.state === "OPEN" && pr.is_draft === true, "REVIEWER_TRIAL_PR_STATE_INVALID", "PR190 trial review must remain bound to the open Draft PR");
+  invariant(typeof pr.body === "string" && pr.body.length > 0, "REVIEWER_TRIAL_BODY_REQUIRED", "Trial package requires the current PR body");
+  invariant(typeof fullDiff === "string" && fullDiff.length > 0, "REVIEWER_TRIAL_FULL_DIFF_REQUIRED", "Trial package requires the full exact-head diff");
+  invariant(/^[a-f0-9]{64}$/.test(fullDiffSha256), "REVIEWER_TRIAL_DIFF_HASH_INVALID", "Trial package requires a lowercase SHA-256 diff binding");
+  invariant(changedFiles.length > 0 && ciResults.length > 0 && relevantTestResults.length > 0, "REVIEWER_TRIAL_EVIDENCE_INCOMPLETE", "Changed files, CI and relevant tests are mandatory");
+  return Object.freeze({
+    package_id: packageId,
+    package_version: "KAIOS_PR190_SECOND_STAGE_REVIEW_PACKAGE_V1",
+    repository,
+    pr: Object.freeze({ ...pr }),
+    full_diff: fullDiff,
+    full_diff_sha256: fullDiffSha256,
+    changed_files: Object.freeze([...changedFiles]),
+    ci_results: Object.freeze([...ciResults]),
+    relevant_test_results: Object.freeze([...relevantTestResults]),
+    required_scope: PR190_STAGE2_REVIEW_SCOPE,
+    finding_fields: REVIEWER_TRIAL_FINDING_FIELDS,
+    evidence_classes: Object.freeze(["CONFIRMED_FINDING", "NEEDS_VERIFICATION", "RISK_TO_VERIFY", "UNKNOWN"]),
+    answer_key_included: false,
+    identical_package_required: true,
+    grants_authority: false
+  });
+}
+
+export function createReviewerTrialCandidateRecord({ candidateId, candidateName, round1Score, round1Status, packageRecord, channelEvidence = null }) {
+  requireId(candidateId, "reviewer_trial.candidate_id");
+  requireEnum(candidateName, ["GROK", "GEMINI"], "reviewer_trial.candidate_name");
+  invariant(Number.isFinite(round1Score) && round1Score >= 0 && round1Score <= 100, "REVIEWER_ROUND1_SCORE_INVALID", "Round-one score must be between 0 and 100");
+  invariant(round1Status === "CONDITIONAL_PASS", "REVIEWER_ROUND1_STATUS_INVALID", "Only conditional-pass candidates enter this trial queue");
+  invariant(packageRecord?.package_version === "KAIOS_PR190_SECOND_STAGE_REVIEW_PACKAGE_V1", "REVIEWER_TRIAL_PACKAGE_INVALID", "Candidate must receive the standardized Stage-2 package");
+  return Object.freeze({
+    candidate_id: candidateId,
+    candidate_name: candidateName,
+    candidate_type: "EXTERNAL_AI_REVIEW_ADVISOR_CANDIDATE",
+    round_1_score: round1Score,
+    round_1_status: round1Status,
+    stage_2_status: channelEvidence ? "PACKAGE_DELIVERY_EVIDENCE_PENDING_ACK" : "READY_FOR_IDENTICAL_PACKAGE_DISPATCH",
+    identity_state: "UNVERIFIED_EXTERNAL_SESSION",
+    package_id: packageRecord.package_id,
+    package_exact_head: packageRecord.pr.exact_head,
+    package_diff_sha256: packageRecord.full_diff_sha256,
+    channel_evidence: channelEvidence,
+    employee: false,
+    digital_life: false,
+    trust_level: null,
+    formal_github_reviewer: false,
+    signer: false,
+    treasury_operator: false,
+    merge_authority: false,
+    reviewer_authority_granted: false
+  });
+}
+
+export function validateReviewerTrialSubmission({ candidateRecord, submission }) {
+  requireFields(submission, ["candidate_id", "package_id", "review_bound_to_commit", "decision", "findings", "needs_verification", "conflict_of_interest", "final_reasoning"], "ReviewerTrialSubmission");
+  requireArray(submission.findings, "reviewer_trial.findings");
+  requireArray(submission.needs_verification, "reviewer_trial.needs_verification");
+  invariant(candidateRecord?.candidate_id === submission.candidate_id, "REVIEWER_TRIAL_CANDIDATE_MISMATCH", "Submission candidate must match its issued record");
+  invariant(candidateRecord?.package_id === submission.package_id, "REVIEWER_TRIAL_PACKAGE_MISMATCH", "Submission must use the issued package");
+  invariant(candidateRecord?.package_exact_head === submission.review_bound_to_commit, "REVIEWER_TRIAL_HEAD_MISMATCH", "Review must bind to the issued exact head");
+  requireEnum(submission.decision, ["APPROVE", "REQUEST_CHANGES", "HOLD"], "reviewer_trial.decision");
+  for (const finding of submission.findings) {
+    requireFields(finding, REVIEWER_TRIAL_FINDING_FIELDS, "ReviewerTrialFinding");
+    requireEnum(finding.evidence_class, ["CONFIRMED_FINDING", "NEEDS_VERIFICATION", "RISK_TO_VERIFY", "UNKNOWN"], "reviewer_trial.evidence_class");
+    if (finding.evidence_class === "CONFIRMED_FINDING") {
+      invariant(typeof finding.file === "string" && finding.file.length > 0 && typeof finding.evidence === "string" && finding.evidence.length > 0, "REVIEWER_CONFIRMED_FINDING_EVIDENCE_REQUIRED", "Confirmed findings require direct file evidence");
+    }
+  }
+  return Object.freeze({
+    candidate_id: candidateRecord.candidate_id,
+    package_id: candidateRecord.package_id,
+    review_bound_to_commit: submission.review_bound_to_commit,
+    decision: submission.decision,
+    finding_count: submission.findings.length,
+    needs_verification_count: submission.needs_verification.length,
+    conflict_of_interest: submission.conflict_of_interest,
+    final_reasoning: submission.final_reasoning,
+    submission_validated: true,
+    qualified: false,
+    authority_granted: false,
+    requires_repository_bound_scoring: true,
+    requires_repository_bound_conflict_verification: true
+  });
+}
+
 export const HEAVEN_TIME_LAW = Object.freeze({
   law_id: "K18888_HEAVEN_TIME_LAW_V3_7",
   k280_time_standard: "CANONICAL_PHYSICAL_TIME",

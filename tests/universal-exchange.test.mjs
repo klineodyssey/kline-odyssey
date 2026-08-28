@@ -103,7 +103,10 @@ import {
   KAIOS_AI_COMPANY_INDEPENDENT_REVIEWER_QUALIFICATION_EXAM_V1,
   evaluateIndependentReviewerEligibility, auditIndependentReviewerCapacity,
   advanceReviewerCandidatePipeline, evaluateReviewerQualificationExam,
-  createReviewerJobOpeningCandidate, reconcileGmOperationsSecretary
+  createReviewerJobOpeningCandidate, reconcileGmOperationsSecretary,
+  PR190_STAGE2_REVIEW_SCOPE, REVIEWER_TRIAL_FINDING_FIELDS,
+  createReviewerTrialReviewPackage, createReviewerTrialCandidateRecord,
+  validateReviewerTrialSubmission
 } from "../core/index.mjs";
 import { verifyDigitalAntWalletBinding, verifyDigitalLifeWalletBinding, CODEX_GM_ENV } from "../core/security/wallet-binding.mjs";
 import { TEMPLE_HEART_READ_ABI, TEMPLE_HEART_DRY_RUN_ABI, TEMPLE_HEART_VERIFIED_ACTIONS, readCoreHeartEvents } from "../core/integrations/temple-heart-12345.mjs";
@@ -2983,4 +2986,55 @@ test("V4.2 GM Secretary reconciles PR190 without impersonating GM or publishing 
     employees: [{ employee_status: "ACTIVE", identity_verified: false, life_id: null, worker_id: "FAKE" }]
   });
   assert.deepEqual(inconsistent.issues, ["LOCAL_DONE_BUT_GITHUB_UNKNOWN", "GITHUB_PR_HEAD_MISMATCH", "WEBSITE_FALSE_COMPLETE", "REVENUE_WITHOUT_SETTLEMENT", "EMPLOYEE_WITHOUT_VERIFIED_IDENTITY"]);
+});
+
+test("V4.2 PR190 Stage-2 Grok and Gemini candidates receive one identical commit-bound package without authority", () => {
+  const trialPackage = createReviewerTrialReviewPackage({
+    packageId: "KAIOS-PR190-STAGE2-5FD3F34F",
+    repository: "klineodyssey/kline-odyssey",
+    pr: { number: 190, body: "CURRENT PR190 BODY", exact_head: "5fd3f34fe4817979b1fcd126ef803e01ae5a3e00", base_sha: "d747b8c7bcf3b48172d42f9f3569b06ed512c09b", state: "OPEN", is_draft: true, review_threads: [] },
+    fullDiff: "diff --git a/core/company/index.mjs b/core/company/index.mjs\n+trial",
+    fullDiffSha256: "004d8a6cd2b6778c5eba6bc4ce2eaf2da34e321c1cf7d76113459ec33d9fcb40",
+    changedFiles: ["core/company/index.mjs", "tests/universal-exchange.test.mjs"],
+    ciResults: ["EXACT_HEAD_248_OF_248_PASS"],
+    relevantTestResults: ["DEMAND_ATM_NAVIGATION_ACCOUNTING_REPLAY_BOUNDARIES_PASS"]
+  });
+  assert.equal(trialPackage.required_scope.length, 17);
+  assert.equal(trialPackage.finding_fields.length, 9);
+  assert.equal(trialPackage.answer_key_included, false);
+  const grok = createReviewerTrialCandidateRecord({ candidateId: "REVIEWER-GROK-STAGE2-001", candidateName: "GROK", round1Score: 91, round1Status: "CONDITIONAL_PASS", packageRecord: trialPackage });
+  const gemini = createReviewerTrialCandidateRecord({ candidateId: "REVIEWER-GEMINI-STAGE2-001", candidateName: "GEMINI", round1Score: 86, round1Status: "CONDITIONAL_PASS", packageRecord: trialPackage });
+  assert.equal(grok.package_id, gemini.package_id);
+  assert.equal(grok.package_exact_head, gemini.package_exact_head);
+  assert.equal(grok.package_diff_sha256, gemini.package_diff_sha256);
+  for (const candidate of [grok, gemini]) {
+    assert.equal(candidate.stage_2_status, "READY_FOR_IDENTICAL_PACKAGE_DISPATCH");
+    assert.equal(candidate.employee, false);
+    assert.equal(candidate.digital_life, false);
+    assert.equal(candidate.trust_level, null);
+    assert.equal(candidate.formal_github_reviewer, false);
+    assert.equal(candidate.reviewer_authority_granted, false);
+  }
+});
+
+test("V4.2 reviewer trial rejects wrong commits and unsupported confirmed findings", () => {
+  const trialPackage = createReviewerTrialReviewPackage({
+    packageId: "KAIOS-PR190-STAGE2-VALIDATION",
+    repository: "klineodyssey/kline-odyssey",
+    pr: { number: 190, body: "BODY", exact_head: "5fd3f34fe4817979b1fcd126ef803e01ae5a3e00", base_sha: "d747b8c7bcf3b48172d42f9f3569b06ed512c09b", state: "OPEN", is_draft: true, review_threads: [] },
+    fullDiff: "FULL DIFF", fullDiffSha256: "004d8a6cd2b6778c5eba6bc4ce2eaf2da34e321c1cf7d76113459ec33d9fcb40",
+    changedFiles: ["core/company/index.mjs"], ciResults: ["PASS"], relevantTestResults: ["PASS"]
+  });
+  const candidate = createReviewerTrialCandidateRecord({ candidateId: "REVIEWER-GEMINI-STAGE2-VALIDATION", candidateName: "GEMINI", round1Score: 86, round1Status: "CONDITIONAL_PASS", packageRecord: trialPackage });
+  const baseSubmission = { candidate_id: candidate.candidate_id, package_id: candidate.package_id, review_bound_to_commit: candidate.package_exact_head, decision: "HOLD", findings: [], needs_verification: [], conflict_of_interest: "NONE_DECLARED", final_reasoning: "Evidence-bound hold" };
+  const valid = validateReviewerTrialSubmission({ candidateRecord: candidate, submission: baseSubmission });
+  assert.equal(valid.submission_validated, true);
+  assert.equal(valid.qualified, false);
+  assert.equal(valid.requires_repository_bound_scoring, true);
+  assert.throws(() => validateReviewerTrialSubmission({ candidateRecord: candidate, submission: { ...baseSubmission, review_bound_to_commit: "WRONG_HEAD" } }), /exact head/);
+  const unsupportedFinding = Object.fromEntries(REVIEWER_TRIAL_FINDING_FIELDS.map((field) => [field, ""]));
+  unsupportedFinding.finding_id = "F-001";
+  unsupportedFinding.severity = "P1";
+  unsupportedFinding.evidence_class = "CONFIRMED_FINDING";
+  assert.throws(() => validateReviewerTrialSubmission({ candidateRecord: candidate, submission: { ...baseSubmission, findings: [unsupportedFinding] } }), /direct file evidence/);
 });
