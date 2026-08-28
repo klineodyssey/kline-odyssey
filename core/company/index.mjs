@@ -1759,7 +1759,8 @@ export function evaluateIndependentReviewerEligibility({ worker, activeClaims = 
     distinct_worker: worker?.worker_id !== targetReview.implementer_worker_id,
     distinct_life: Boolean(worker?.life_id) && worker.life_id !== targetReview.implementer_life_id,
     controller_registered: typeof worker?.controller_id === "string" && worker.controller_id.length > 0,
-    distinct_controller: Boolean(worker?.controller_id) && worker.controller_id !== targetReview.implementer_controller_id
+    distinct_controller: Boolean(worker?.controller_id) && worker.controller_id !== targetReview.implementer_controller_id,
+    repository_authority_bound: false
   });
   const missing = Object.entries(checks).filter(([, passed]) => !passed).map(([name]) => name);
   return Object.freeze({
@@ -1820,13 +1821,15 @@ export function evaluateReviewerQualificationExam({ candidate, submission, score
   invariant(Number.isFinite(total) && total >= 0 && total <= 100, "REVIEWER_SCORE_INVALID", "Total reviewer score must be between 0 and 100");
   invariant(Number.isFinite(security) && Number.isFinite(securityMaximum) && securityMaximum > 0 && security >= 0 && security <= securityMaximum, "REVIEWER_SECURITY_SCORE_INVALID", "Security scoring requires a valid score and maximum");
   const securityPercentage = (security / securityMaximum) * 100;
-  const knownCriticalFailures = scores.critical_safety_failures.filter((failure) => KAIOS_AI_COMPANY_INDEPENDENT_REVIEWER_QUALIFICATION_EXAM_V1.automatic_disqualifications.includes(failure));
+  const criticalSafetyFailures = [...scores.critical_safety_failures];
   const gates = Object.freeze({
     total_score: total >= 80,
     security_section: securityPercentage >= 80,
-    no_critical_safety_failure: knownCriticalFailures.length === 0,
+    no_critical_safety_failure: criticalSafetyFailures.length === 0,
     conflict_check: conflictCheck?.status === "PASS" && conflictCheck?.candidate_controller_distinct === true,
-    evidence_attached: Boolean(conflictCheck?.evidence)
+    evidence_attached: Boolean(conflictCheck?.evidence),
+    repository_bound_scorer: false,
+    repository_bound_conflict_verifier: false
   });
   const passed = Object.values(gates).every(Boolean);
   return Object.freeze({
@@ -1844,7 +1847,7 @@ export function evaluateReviewerQualificationExam({ candidate, submission, score
     security_percentage: securityPercentage,
     code_review_score: Number(scores.code_review_score),
     evidence_reasoning_score: Number(scores.evidence_reasoning_score),
-    critical_safety_failures: Object.freeze(knownCriticalFailures),
+    critical_safety_failures: Object.freeze(criticalSafetyFailures),
     conflict_check: Object.freeze({ ...conflictCheck }),
     gates,
     final_decision: passed ? "QUALIFIED_EXAM_ONLY" : "NOT_QUALIFIED",

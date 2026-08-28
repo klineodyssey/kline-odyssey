@@ -2891,7 +2891,7 @@ test("distinct-review workforce gap remains fail-closed without an eligible exte
   assert.match(workQueue, /UNASSIGNED_HUMAN_AUTHORITY_REQUIRED/);
   assert.match(workQueue, /Authority Evidence: NONE_BOUND_TO_THIS_WORKORDER/);
   assert.match(workQueue, /PR `#183` exact head `179bfa8e0219774fde9f9d7bd3668ad42c1a8d2b`/);
-  assert.match(workQueue, /First qualification case: PR `#190` exact head `58c0c7188efcf0fa6e4cc0045d73740b180ef186`/);
+  assert.match(workQueue, /First qualification case: PR `#190` exact head `5fd3f34fe4817979b1fcd126ef803e01ae5a3e00`/);
   assert.match(workQueue, /KAIOS_AI_COMPANY_INDEPENDENT_REVIEWER_QUALIFICATION_EXAM_V1/);
   assert.match(workQueue, /JOB_OPENING_CANDIDATE_NOT_PUBLISHED/);
 });
@@ -2905,6 +2905,7 @@ test("V4.2 PR190 reviewer capacity audit rejects self-review and incomplete regi
   assert.equal(audit.recruitment_demand, "CREATE_REVIEWER_JOB_OPENING_CANDIDATE");
   const self = audit.candidates.find((candidate) => candidate.worker_id === "codex-gm-01");
   assert.equal(self.checks.distinct_worker, false);
+  assert.equal(self.checks.repository_authority_bound, false);
   assert.equal(self.eligible, false);
   const cursor = audit.candidates.find((candidate) => candidate.worker_id === "cursor-01");
   assert.equal(cursor.checks.life_id, false);
@@ -2932,7 +2933,9 @@ test("V4.2 standardized reviewer exam qualifies only the exam and grants no Comp
     scores: { total_score: 90, security_score: 27, security_maximum: 30, code_review_score: 27, evidence_reasoning_score: 22, critical_safety_failures: [] },
     conflictCheck: { status: "PASS", candidate_controller_distinct: true, evidence: "CONTROLLER_REGISTRY_EVIDENCE" }
   });
-  assert.equal(result.final_decision, "QUALIFIED_EXAM_ONLY");
+  assert.equal(result.final_decision, "NOT_QUALIFIED");
+  assert.equal(result.gates.repository_bound_scorer, false);
+  assert.equal(result.gates.repository_bound_conflict_verifier, false);
   assert.deepEqual(result.answer, ["EVIDENCE_BOUND_RESPONSE"]);
   assert.equal(result.conflict_check.status, "PASS");
   for (const field of ["employment_granted", "trust_granted", "reviewer_authority_granted", "wallet_or_signer_granted", "payroll_granted", "merge_or_deployment_granted"]) assert.equal(result[field], false);
@@ -2945,6 +2948,10 @@ test("V4.2 reviewer exam fails critical safety errors, weak security and control
   };
   const critical = evaluateReviewerQualificationExam({ ...base, scores: { total_score: 95, security_score: 30, security_maximum: 30, code_review_score: 30, evidence_reasoning_score: 25, critical_safety_failures: ["SELF_REVIEW_APPROVED"] }, conflictCheck: { status: "PASS", candidate_controller_distinct: true, evidence: "EVIDENCE" } });
   assert.equal(critical.final_decision, "NOT_QUALIFIED");
+  const unknownCritical = evaluateReviewerQualificationExam({ ...base, scores: { total_score: 95, security_score: 30, security_maximum: 30, code_review_score: 30, evidence_reasoning_score: 25, critical_safety_failures: ["FUTURE_UNRECOGNIZED_CRITICAL_FAILURE"] }, conflictCheck: { status: "PASS", candidate_controller_distinct: true, evidence: "EVIDENCE" } });
+  assert.equal(unknownCritical.gates.no_critical_safety_failure, false);
+  assert.deepEqual(unknownCritical.critical_safety_failures, ["FUTURE_UNRECOGNIZED_CRITICAL_FAILURE"]);
+  assert.equal(unknownCritical.final_decision, "NOT_QUALIFIED");
   const weakSecurity = evaluateReviewerQualificationExam({ ...base, scores: { total_score: 85, security_score: 20, security_maximum: 30, code_review_score: 30, evidence_reasoning_score: 25, critical_safety_failures: [] }, conflictCheck: { status: "PASS", candidate_controller_distinct: true, evidence: "EVIDENCE" } });
   assert.equal(weakSecurity.final_decision, "NOT_QUALIFIED");
   const collision = evaluateReviewerQualificationExam({ ...base, scores: { total_score: 90, security_score: 27, security_maximum: 30, code_review_score: 28, evidence_reasoning_score: 23, critical_safety_failures: [] }, conflictCheck: { status: "FAIL", candidate_controller_distinct: false, evidence: "CONTROLLER_COLLISION" } });
@@ -2953,10 +2960,10 @@ test("V4.2 reviewer exam fails critical safety errors, weak security and control
 
 test("V4.2 GM Secretary reconciles PR190 without impersonating GM or publishing false product states", () => {
   const snapshot = reconcileGmOperationsSecretary({
-    local_head: "58c0c7188efcf0fa6e4cc0045d73740b180ef186",
-    github_head: "58c0c7188efcf0fa6e4cc0045d73740b180ef186",
+    local_head: "5fd3f34fe4817979b1fcd126ef803e01ae5a3e00",
+    github_head: "5fd3f34fe4817979b1fcd126ef803e01ae5a3e00",
     main_head: "d747b8c7bcf3b48172d42f9f3569b06ed512c09b",
-    pr: { number: 190, head: "58c0c7188efcf0fa6e4cc0045d73740b180ef186", state: "OPEN", is_draft: true, ci_state: "PASS", review_state: "UNREVIEWED", product_state: "REVIEW_CANDIDATE" },
+    pr: { number: 190, head: "5fd3f34fe4817979b1fcd126ef803e01ae5a3e00", state: "OPEN", is_draft: true, ci_state: "PASS", review_state: "UNREVIEWED", product_state: "REVIEW_CANDIDATE" },
     website_products: [{ product_id: "KAIOS_ATM_APP", display_status: "DRAFT_PRODUCT" }, { product_id: "KAIOS_NAVIGATION_APP", display_status: "UNDER_REVIEW" }],
     company_queues: { workqueue: "REVIEWER_CAPACITY_HOLD", reviewqueue: "PR190_PENDING_DISTINCT_REVIEW" },
     financial_report: { revenue: 0, settlement_evidence: null },
