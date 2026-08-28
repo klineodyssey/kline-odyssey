@@ -1,12 +1,19 @@
+import { createBrowserUniverseStore, createUniverseRuntime, loadCanonicalSeed } from "../../../core/registry/universe-runtime.mjs?v=11520-v4.2-employment-phase1b";
+import { createListing } from "../../../core/market/index.mjs?v=11520-v4.2-employment-phase1b";
+import { buildPortfolio } from "../../../core/portfolio/index.mjs?v=11520-v4.2-employment-phase1b";
+import { createLifeDraft } from "../../../core/life/factory.mjs?v=11520-v4.2-employment-phase1b";
+import { calculateLifeAge } from "../../../core/life/index.mjs?v=11520-v4.2-employment-phase1b";
+import { calculateWorkAge, deriveWorkerHealth } from "../../../core/jobs/index.mjs?v=11520-v4.2-employment-phase1b";
+import { createKgenSwapAdapter, KGEN_SWAP_CONFIG } from "../../../core/integrations/kgen-pancakeswap-v2.mjs?v=11520-v4.2-employment-phase1b";
 import {
-  createBrowserUniverseStore, createUniverseRuntime, loadCanonicalSeed,
-  createListing, buildPortfolio, createLifeDraft, createKgenSwapAdapter, KGEN_SWAP_CONFIG, calculateLifeAge, calculateWorkAge,
+  I18N_SUPPORTED_LOCALES, translateUi, normalizeUiLocale, validatePrimaryI18nCatalogs,
+  detectVoiceCapabilities, normalizeVoiceError, createLocalHuaguoshanMembership,
+  createFirstPlayerMission, completeFirstPlayerMission
+} from "../../../core/apps/index.mjs?v=11520-v4.2-employment-phase1b";
+import {
   createPublicCivilizationDraftIntent, interpretPublicCivilizationIntent,
-  confirmPublicCivilizationIntent, toPublicCivilizationRequest,
-  routePublicCivilizationProject, qualifyPublicCivilizationRequest, createNonBindingEstimatePreview,
-  appendPublicRequestHistoryEvent, I18N_SUPPORTED_LOCALES, translateUi, normalizeUiLocale,
-  validatePrimaryI18nCatalogs, detectVoiceCapabilities, deriveWorkerHealth, normalizeVoiceError,
-  createLocalHuaguoshanMembership, createFirstPlayerMission, completeFirstPlayerMission,
+  confirmPublicCivilizationIntent, toPublicCivilizationRequest, routePublicCivilizationProject,
+  qualifyPublicCivilizationRequest, createNonBindingEstimatePreview, appendPublicRequestHistoryEvent,
   KAIOS_AI_OS_EMPLOYMENT_ALPHA_JOB, createEmploymentIdentityChallenge,
   verifyEmploymentIdentityProof, createEmploymentApplication, scoreEmploymentInterview,
   createTrialEmploymentContract, createEmploymentAlphaMission, acceptEmploymentAlphaMission,
@@ -15,7 +22,7 @@ import {
   activateCompanyWorkerCandidate, createCompanyEmployeeMission, acceptCompanyEmployeeMission,
   submitCompanyWorkEvidence, reviewCompanyWorkEvidence, accrueCompanyCompensation,
   queueCompanyPayroll, evaluateAtmPayrollAdvanceCandidate, appendEmploymentPhase1BCompanyEvent
-} from "../../../core/index.mjs?v=11520-v4.2-employment-phase1b";
+} from "../../../core/company/index.mjs?v=11520-v4.2-employment-phase1b";
 import { readTempleHeart12345 } from "../../../core/integrations/temple-heart-12345.mjs?v=11520-v4.2-employment-phase1b";
 
 const NAVIGATION = Object.freeze([

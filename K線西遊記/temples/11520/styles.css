@@ -15,3 +15,5 @@ textarea{font:inherit}.field textarea{background:#071017;color:var(--text);borde
 .employment-journey{grid-template-columns:repeat(4,minmax(0,1fr))}.employment-journey .journey-step{min-height:74px}.job-opening{border-color:#356d62;background:linear-gradient(145deg,rgba(18,49,48,.94),rgba(9,15,22,.94))}.interview-panel{border-color:#715f35}.earning-panel{border-color:#347453}.employment-actions{display:flex;gap:9px;flex-wrap:wrap}.employment-actions .button{flex:1 1 180px}
 @media(max-width:850px){.employment-journey{grid-template-columns:1fr 1fr}}
 @media(max-width:520px){.employment-journey{grid-template-columns:1fr}}
+.brand{min-width:0;overflow-wrap:anywhere}
+@media(max-width:520px){html,body{overflow-x:clip}.topbar{padding:12px 14px;max-width:100%}.brand{width:100%}.shell,.sidebar,.content{min-width:0;max-width:100%}.sidebar{max-width:100vw;overflow-x:hidden}.nav{min-width:0;flex-wrap:wrap}.nav a{flex:1 1 calc(50% - 4px)}.content{padding:16px}.kv{grid-template-columns:minmax(0,.45fr) minmax(0,1fr)}.kv strong{overflow-wrap:anywhere}}

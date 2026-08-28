@@ -2869,6 +2869,7 @@ test("V4.2 production shell preserves the concierge and uses a fresh Phase 1B ca
   const appSource = await fs.readFile(new URL("../K線西遊記/temples/11520/app.mjs", import.meta.url), "utf8");
   const cssSource = await fs.readFile(new URL("../K線西遊記/temples/11520/styles.css", import.meta.url), "utf8");
   assert.match(htmlSource, /v=11520-v4\.2-employment-phase1b/);
+  assert.match(htmlSource, /styles\.css\?v=11520-v4\.2-employment-phase1b-mobile4/);
   assert.doesNotMatch(htmlSource, /v=11520-v4\.0-player-first/);
   assert.doesNotMatch(htmlSource, /v=11520-v3\.6-first-kgen/);
   for (const state of ["IDLE", "LISTENING", "THINKING", "SPEAKING", "SUCCESS", "ERROR"]) assert.match(appSource + cssSource, new RegExp(state));
