@@ -2465,6 +2465,9 @@ export async function createLocalSqliteClaimRegistrySimulator({ database_path = 
     authority: Object.freeze({
       status: "LOCAL_SQLITE_SIMULATOR_NOT_AUTHORITY",
       shared_distributed_authority: false,
+      authoritative_review_decision: false,
+      authoritative_registry_reconciliation: false,
+      close_release: false,
       automatic_dispatch: false,
       worker_wake: false,
       github_write: false,
@@ -2560,30 +2563,12 @@ export async function createLocalSqliteClaimRegistrySimulator({ database_path = 
       parseTime(input.observed_at, "observed_at");
       invariant(["APPROVED", "REJECTED", "BLOCKED"].includes(input.disposition), "CLAIM_DISPOSITION_INVALID", "Close requires an approved, rejected or blocked disposition");
       invariant(input.registry_reconciled === true, "CLAIM_REGISTRY_RECONCILIATION_REQUIRED", "Claim close requires cross-registry reconciliation");
-      return transactional(input.operation_id, "CLOSE", input.claim_id, () => {
-        const row = getClaim(input.claim_id);
-        assertCas(row, input);
-        invariant(row.status === "REVIEW" || row.status === "BLOCKED", "CLAIM_CLOSE_STATE_INVALID", "Only review or blocked custody can close");
-        database.prepare("UPDATE company_claims SET status = 'CLOSED', disposition = ?, registry_reconciled = 1, closed_at = ?, record_version = record_version + 1, updated_at = ? WHERE claim_id = ?")
-          .run(input.disposition, input.observed_at, input.observed_at, input.claim_id);
-        const updated = getClaim(input.claim_id);
-        appendEvent(input.operation_id, input.claim_id, "CLOSE", updated, input.observed_at, { disposition: input.disposition, registry_reconciled: true });
-        return publicClaim(updated);
-      });
+      invariant(false, "CLAIM_CLOSE_AUTHORITY_NOT_CONNECTED", "Local simulator cannot trust caller-provided review disposition or registry reconciliation; canonical Review and Registry authority connectors are required");
     },
     release(input) {
       requireFields(input, ["operation_id", "claim_id", "expected_record_version", "expected_fencing_token", "observed_at"], "ClaimRelease");
       parseTime(input.observed_at, "observed_at");
-      return transactional(input.operation_id, "RELEASE", input.claim_id, () => {
-        const row = getClaim(input.claim_id);
-        assertCas(row, input);
-        invariant(row.status === "CLOSED" && row.registry_reconciled === 1 && row.disposition, "CLAIM_RELEASE_STATE_INVALID", "Release requires reconciled closed disposition");
-        database.prepare("UPDATE company_claims SET status = 'RELEASED', released_at = ?, record_version = record_version + 1, updated_at = ? WHERE claim_id = ?")
-          .run(input.observed_at, input.observed_at, input.claim_id);
-        const updated = getClaim(input.claim_id);
-        appendEvent(input.operation_id, input.claim_id, "RELEASE", updated, input.observed_at, { disposition: row.disposition });
-        return publicClaim(updated);
-      });
+      invariant(false, "CLAIM_RELEASE_AUTHORITY_NOT_CONNECTED", "Local simulator cannot release custody until canonical close evidence has been verified by connected Review and Registry authorities");
     },
     getClaim(claimId) {
       return publicClaim(getClaim(claimId), "READ_ONLY");

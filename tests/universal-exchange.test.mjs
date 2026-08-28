@@ -3539,7 +3539,7 @@ test("Local SQLite Claim simulator enforces unique custody CAS fencing and idemp
   }
 });
 
-test("Local SQLite Claim simulator preserves review custody repair lineage and reconciled close-release", async () => {
+test("Local SQLite Claim simulator preserves review custody and repair lineage but fails closed before authoritative close-release", async () => {
   const directory = await fs.mkdtemp(path.join(os.tmpdir(), "kaios-claim-simulator-"));
   const databasePath = path.join(directory, "claims.sqlite");
   let simulator;
@@ -3596,14 +3596,17 @@ test("Local SQLite Claim simulator preserves review custody repair lineage and r
       head_sha: "d".repeat(40),
       observed_at: "2026-08-27T09:15:00Z"
     });
+    assert.equal(simulator.authority.authoritative_review_decision, false);
+    assert.equal(simulator.authority.authoritative_registry_reconciliation, false);
+    assert.equal(simulator.authority.close_release, false);
     assert.throws(() => simulator.release({
       operation_id: "OP-LIFECYCLE-EARLY-RELEASE",
       claim_id: acquired.claim_id,
       expected_record_version: secondReview.record_version,
       expected_fencing_token: secondReview.fencing_token,
       observed_at: "2026-08-27T09:16:00Z"
-    }), (error) => error.code === "CLAIM_RELEASE_STATE_INVALID");
-    const closed = simulator.close({
+    }), (error) => error.code === "CLAIM_RELEASE_AUTHORITY_NOT_CONNECTED");
+    assert.throws(() => simulator.close({
       operation_id: "OP-LIFECYCLE-CLOSE",
       claim_id: acquired.claim_id,
       expected_record_version: secondReview.record_version,
@@ -3611,21 +3614,13 @@ test("Local SQLite Claim simulator preserves review custody repair lineage and r
       disposition: "APPROVED",
       registry_reconciled: true,
       observed_at: "2026-08-27T09:20:00Z"
-    });
-    const released = simulator.release({
-      operation_id: "OP-LIFECYCLE-RELEASE",
-      claim_id: acquired.claim_id,
-      expected_record_version: closed.record_version,
-      expected_fencing_token: closed.fencing_token,
-      observed_at: "2026-08-27T09:21:00Z"
-    });
-    assert.equal(released.status, "RELEASED");
-    assert.equal(released.disposition, "APPROVED");
-    assert.equal(simulator.getEvents(acquired.claim_id).length, 7);
+    }), (error) => error.code === "CLAIM_CLOSE_AUTHORITY_NOT_CONNECTED");
+    assert.equal(simulator.getClaim(acquired.claim_id).status, "REVIEW");
+    assert.equal(simulator.getEvents(acquired.claim_id).length, 5);
     simulator.closeDatabase();
     simulator = await createLocalSqliteClaimRegistrySimulator({ database_path: databasePath });
-    assert.equal(simulator.getClaim(acquired.claim_id).status, "RELEASED");
-    assert.equal(simulator.getEvents(acquired.claim_id).at(-1).mutation, "RELEASE");
+    assert.equal(simulator.getClaim(acquired.claim_id).status, "REVIEW");
+    assert.equal(simulator.getEvents(acquired.claim_id).at(-1).mutation, "SUBMIT_REVIEW");
   } finally {
     simulator?.closeDatabase();
     await fs.rm(directory, { recursive: true, force: true });

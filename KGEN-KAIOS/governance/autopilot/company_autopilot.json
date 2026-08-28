@@ -67,8 +67,11 @@
       "local_sqlite_claim_simulator": {
         "implementation": "core/company/index.mjs#createLocalSqliteClaimRegistrySimulator",
         "storage": "NODE_SQLITE_SINGLE_HOST_SANDBOX",
-        "properties": ["TRANSACTION", "UNIQUE_ACTIVE_LOCKS", "COMPARE_AND_SWAP", "FENCING_TOKEN", "LEASE", "REVIEW_CUSTODY", "REPAIR_LINEAGE", "APPEND_ONLY_AUDIT", "RESTART_PERSISTENCE"],
+        "properties": ["TRANSACTION", "UNIQUE_ACTIVE_LOCKS", "COMPARE_AND_SWAP", "FENCING_TOKEN", "LEASE", "REVIEW_CUSTODY", "REPAIR_LINEAGE", "APPEND_ONLY_AUDIT", "RESTART_PERSISTENCE", "CLOSE_RELEASE_FAIL_CLOSED_WITHOUT_CANONICAL_AUTHORITY"],
         "production_claim_authority": false,
+        "authoritative_review_decision": false,
+        "authoritative_registry_reconciliation": false,
+        "close_release": false,
         "automatic_dispatch": false,
         "status": "IMPLEMENTED_LOCAL_SIMULATOR_NOT_AUTHORITY"
       },
