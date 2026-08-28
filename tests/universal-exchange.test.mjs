@@ -101,7 +101,8 @@ import {
   calculateFieldServiceQuote, validateFieldDeliveryEvidence, createWorkforceGap,
   createFieldServiceDemandScan
   , KAIOS_AI_OS_EMPLOYMENT_ALPHA_JOB, KAIOS_AI_OS_FIRST_REAL_EMPLOYMENT_TEST_JOB, KAIOS_MAINNET_TOKEN,
-  CANONICAL_REPOSITORY_COMPANY_AUTHORITIES,
+  CANONICAL_REPOSITORY_COMPANY_AUTHORITIES, COMPANY_OPERATIONAL_AUTHORITY_PROPOSAL_SCOPES,
+  createRepositoryCompanyAuthorityProposal, verifyRepositoryBoundCompanyAuthority,
   createEmploymentIdentityChallenge,
   verifyEmploymentIdentityProof, createEmploymentApplication, scoreEmploymentInterview,
   createTrialEmploymentContract, createEmploymentAlphaMission, acceptEmploymentAlphaMission,
@@ -3128,6 +3129,45 @@ test("V4.3 caller-supplied authority cannot create formal Company employment fac
   assert.throws(() => CANONICAL_REPOSITORY_COMPANY_AUTHORITIES.push(authority), TypeError);
   assert.throws(() => createCompanyInterview({ ...interviewInput, authorityId: authority.authority_id, repositoryHead }), (error) => error.code === "COMPANY_INTERVIEW_AUTHORITY_NOT_CONNECTED");
   assert.throws(() => recordCompanyEmploymentDecision({ decisionId: "REAL_TEST_DECISION_001", application, interview: candidateInterview, job: KAIOS_AI_OS_FIRST_REAL_EMPLOYMENT_TEST_JOB, decisionMakerId: authority.authorized_actor_id, decision: "APPROVE", evidence: [candidateInterview.interview_id], decidedAt: "2026-08-29T00:06:00.000Z", authorityId: authority.authority_id, repositoryHead }), (error) => error.code === "COMPANY_EMPLOYMENT_AUTHORITY_NOT_CONNECTED");
+});
+
+test("V4.3 Company authority proposal is reviewable but never active authority", () => {
+  const repositoryHead = "2".repeat(40);
+  const proposal = createRepositoryCompanyAuthorityProposal({
+    proposalId: "COMPANY_AUTHORITY_PROPOSAL_001",
+    companyId: "AI_ANT_COMPANY_0001",
+    candidateActorId: "AI_ANT_COMPANY_HR_CANDIDATE_001",
+    candidateControllerId: "AI_ANT_COMPANY_HR_CANDIDATE_CONTROLLER_001",
+    role: "COMPANY_EMPLOYMENT_OPERATOR_CANDIDATE",
+    policyVersion: "KAIOS_FIRST_REAL_EMPLOYMENT_TEST_V1",
+    requestedScopes: [...COMPANY_OPERATIONAL_AUTHORITY_PROPOSAL_SCOPES],
+    validFrom: "2026-08-29T03:01:00.000Z",
+    validUntil: "2026-08-29T04:01:00.000Z",
+    evidence: ["PR_191_EXACT_HEAD_REVIEW_REQUIRED"],
+    exactRepositoryVersion: repositoryHead,
+    proposedBy: "AI_ANT_COMPANY_GM_001",
+    proposedAt: "2026-08-29T03:00:00.000Z"
+  });
+  assert.equal(proposal.status, "PROPOSED_FOR_GOVERNANCE_REVIEW_NOT_AUTHORITY");
+  assert.equal(proposal.authority_id, null);
+  assert.equal(proposal.active, false);
+  assert.equal(proposal.usable_as_authority, false);
+  assert.ok(proposal.excluded_scopes.includes("PAYROLL_SETTLEMENT_VERIFY"));
+  assert.equal(CANONICAL_REPOSITORY_COMPANY_AUTHORITIES.length, 0);
+  assert.throws(() => verifyRepositoryBoundCompanyAuthority({ authorityId: proposal.proposal_id, companyId: proposal.company_id, actorId: proposal.candidate_actor_id, requiredScope: "COMPANY_INTERVIEW", repositoryHead, at: proposal.valid_from, errorCode: "COMPANY_EMPLOYMENT_AUTHORITY_NOT_CONNECTED" }), (error) => error.code === "COMPANY_EMPLOYMENT_AUTHORITY_NOT_CONNECTED");
+});
+
+test("V4.3 Company authority proposal cannot include financial, Worker or self-issued scope", () => {
+  const input = {
+    proposalId: "COMPANY_AUTHORITY_PROPOSAL_002", companyId: "AI_ANT_COMPANY_0001",
+    candidateActorId: "COMPANY_CANDIDATE_002", candidateControllerId: "COMPANY_CONTROLLER_002",
+    role: "COMPANY_OPERATOR_CANDIDATE", policyVersion: "KAIOS_FIRST_REAL_EMPLOYMENT_TEST_V1",
+    requestedScopes: ["PAYROLL_FUNDING"], validFrom: "2026-08-29T03:01:00.000Z",
+    validUntil: "2026-08-29T04:01:00.000Z", evidence: ["REVIEW_REQUIRED"],
+    exactRepositoryVersion: "3".repeat(40), proposedBy: "COMPANY_GM_002", proposedAt: "2026-08-29T03:00:00.000Z"
+  };
+  assert.throws(() => createRepositoryCompanyAuthorityProposal(input), (error) => error.code === "COMPANY_AUTHORITY_PROPOSAL_SCOPE_INVALID");
+  assert.throws(() => createRepositoryCompanyAuthorityProposal({ ...input, requestedScopes: ["COMPANY_INTERVIEW"], proposedBy: input.candidateActorId }), (error) => error.code === "COMPANY_AUTHORITY_SELF_PROPOSAL_FORBIDDEN");
 });
 
 test("V4.3 website exposes exact first-payroll readiness without claiming a real applicant or receipt", async () => {

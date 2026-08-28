@@ -137,6 +137,64 @@ export const REPOSITORY_BOUND_COMPANY_AUTHORITY_SCOPES = Object.freeze([
 // metadata and thereby turn an untrusted claim into Company authority.
 export const CANONICAL_REPOSITORY_COMPANY_AUTHORITIES = Object.freeze([]);
 
+export const COMPANY_OPERATIONAL_AUTHORITY_PROPOSAL_SCOPES = Object.freeze([
+  "COMPANY_INTERVIEW", "EMPLOYMENT_DECISION", "EMPLOYEE_CREATE", "MISSION_DISPATCH",
+  "WORK_REVIEW", "COMPENSATION_ACCRUAL", "PAYROLL_QUEUE"
+]);
+
+export function createRepositoryCompanyAuthorityProposal({
+  proposalId, companyId, candidateActorId, candidateControllerId, role, policyVersion,
+  requestedScopes, validFrom, validUntil, evidence, exactRepositoryVersion, proposedBy, proposedAt
+}) {
+  requireId(proposalId, "company_authority_proposal_id");
+  requireId(companyId, "company_authority_proposal.company_id");
+  requireId(candidateActorId, "company_authority_proposal.candidate_actor_id");
+  requireId(candidateControllerId, "company_authority_proposal.candidate_controller_id");
+  requireId(proposedBy, "company_authority_proposal.proposed_by");
+  requireArray(requestedScopes, "company_authority_proposal.requested_scopes");
+  requireArray(evidence, "company_authority_proposal.evidence");
+  invariant(proposedBy !== candidateActorId, "COMPANY_AUTHORITY_SELF_PROPOSAL_FORBIDDEN", "A candidate cannot issue their own Company authority proposal");
+  invariant(typeof role === "string" && role.length > 0 && typeof policyVersion === "string" && policyVersion.length > 0, "COMPANY_AUTHORITY_PROPOSAL_POLICY_REQUIRED", "A Company authority proposal requires role and policy version");
+  invariant(requestedScopes.length > 0 && new Set(requestedScopes).size === requestedScopes.length && requestedScopes.every((scope) => COMPANY_OPERATIONAL_AUTHORITY_PROPOSAL_SCOPES.includes(scope)), "COMPANY_AUTHORITY_PROPOSAL_SCOPE_INVALID", "A Company operational authority proposal may request only unique non-financial operational scopes");
+  invariant(evidence.length > 0 && evidence.every((item) => typeof item === "string" && item.length > 0), "COMPANY_AUTHORITY_PROPOSAL_EVIDENCE_REQUIRED", "A Company authority proposal requires evidence references");
+  invariant(/^[0-9a-f]{40}$/i.test(String(exactRepositoryVersion ?? "")), "COMPANY_AUTHORITY_PROPOSAL_REPOSITORY_VERSION_INVALID", "A Company authority proposal must bind an exact repository version");
+  const proposed = parseEmploymentTime(proposedAt, "company_authority_proposal.proposed_at");
+  const starts = parseEmploymentTime(validFrom, "company_authority_proposal.valid_from");
+  const ends = parseEmploymentTime(validUntil, "company_authority_proposal.valid_until");
+  invariant(starts >= proposed && ends > starts, "COMPANY_AUTHORITY_PROPOSAL_WINDOW_INVALID", "Proposed authority must start no earlier than the proposal and end after it starts");
+  return Object.freeze({
+    record_class: "REPOSITORY_BOUND_COMPANY_AUTHORITY_PROPOSAL",
+    proposal_id: proposalId,
+    authority_id: null,
+    company_id: companyId,
+    candidate_actor_id: candidateActorId,
+    candidate_controller_id: candidateControllerId,
+    role,
+    policy_version: policyVersion,
+    requested_scopes: Object.freeze([...requestedScopes]),
+    valid_from: validFrom,
+    valid_until: validUntil,
+    evidence: Object.freeze([...evidence]),
+    exact_repository_version: exactRepositoryVersion,
+    proposed_by: proposedBy,
+    proposed_at: proposedAt,
+    active: false,
+    usable_as_authority: false,
+    activation_requires: Object.freeze([
+      "DISTINCT_GOVERNANCE_REVIEW",
+      "EXPLICIT_REPOSITORY_ALLOWLIST_CHANGE",
+      "EXACT_HEAD_CI"
+    ]),
+    excluded_scopes: Object.freeze([
+      "WORKER_ACTIVATE",
+      "PAYROLL_FUNDING",
+      "PAYROLL_SETTLEMENT_VERIFY",
+      "ATM_PAYROLL_ADVANCE"
+    ]),
+    status: "PROPOSED_FOR_GOVERNANCE_REVIEW_NOT_AUTHORITY"
+  });
+}
+
 const EMPLOYMENT_ALPHA_ACTOR_TYPES = Object.freeze(["HUMAN_PLAYER", "AI_LIFE"]);
 const EMPLOYMENT_ALPHA_INTERVIEW_FIELDS = Object.freeze([
   "understands_simulation_boundary",
