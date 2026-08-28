@@ -379,7 +379,7 @@ export function verifyRepositoryBoundCompanyAuthority({ authority, companyId, ac
   const validFrom = parseEmploymentTime(authority.valid_from, "company_authority.valid_from");
   const validUntil = authority.valid_until === null ? null : parseEmploymentTime(authority.valid_until, "company_authority.valid_until");
   invariant(observed >= validFrom && (validUntil === null || observed <= validUntil), errorCode, "Company authority is outside its validity window");
-  return Object.freeze({ authority_id: authority.authority_id, actor_id: actorId, controller_id: authority.controller_id, scope: requiredScope, exact_repository_version: repositoryHead, verified_at: at, status: "REPOSITORY_BOUND_AUTHORITY_VERIFIED" });
+  invariant(false, errorCode, "Caller-supplied Company authority metadata is not repository proof; the canonical repository authority verifier is not connected");
 }
 
 export function createCompanyInterview({ interviewId, application, interviewerId, questions, answers, evidence, startedAt, completedAt, authority = null, repositoryHead = null }) {
