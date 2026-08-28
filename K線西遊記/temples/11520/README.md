@@ -2,8 +2,8 @@
 
 ## V4.1 Employment Alpha candidate — under review
 
-- The existing 11520 public website now exposes one connected playable path: public-wallet challenge verification → job application → company-scored safety interview → Alpha trial contract → mission acceptance → ordered machine-evidence verification → simulated KAIOS earning.
-- This candidate does not create a canonical Life, formal employee, funded payroll, real KAIOS transfer, transaction hash, location proof or cargo delivery. The earning state is `EARNED_SIMULATION_NOT_PAYABLE` until treasury, payroll and settlement authority exist.
+- The existing 11520 public website now exposes one connected playable path: public-wallet challenge verification → candidate application → local safety self-check → non-employment Alpha participation record → mission acceptance → ordered local-orientation trace validation → simulated KAIOS earning. The self-check is not a Company interview or employment decision.
+- This candidate does not create a canonical Life, Human employment decision, employee or Worker ID, Worker activation, funded payroll, real KAIOS transfer, transaction hash, location proof or cargo delivery. `company_decision`, `employee_id`, `worker_id` and activation authority remain null. The earning state is `EARNED_SIMULATION_NOT_PAYABLE` until treasury, payroll and settlement authority exist.
 - Identity proof is local and chain-bound to BSC chain `56`. The browser verifies the recovered public address and persists only a SHA-256 signature commitment; it never requests or stores a private key, seed phrase or raw signature.
 - `JOBS`, `MISSIONS`, `ATM` and `MARKET` are direct website entries. ATM remains `UNDER_REVIEW / NO_WITHDRAWAL`, and Market reuses the existing 11520 listing registry rather than creating another exchange.
 
