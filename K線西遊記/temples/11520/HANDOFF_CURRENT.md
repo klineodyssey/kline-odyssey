@@ -1,4 +1,14 @@
-# 11520 Universal Exchange V4.0 Current Handoff
+# 11520 Universal Exchange Current Handoff
+
+## V4.1 Employment Alpha candidate — not yet active main
+
+This Draft candidate adds the first continuous KAIOS Civilization AI OS playable employment slice to the existing V4.0 public shell. It reuses the existing Company domain, 11520 registry and wallet connection stack; it does not create a second Company OS, exchange, payroll, map or Life registry.
+
+The website path is now: `JOBS → CONNECT WALLET + SIGN CHALLENGE → APPLY → INTERVIEW → ALPHA TRIAL CONTRACT → ACCEPT MISSION → VERIFY ORDERED EVIDENCE → SIMULATED KAIOS EARNING → ATM / MARKET`. The challenge is restricted to BSC chain 56, expires within ten minutes and persists only a SHA-256 signature commitment after recovered-address verification.
+
+All status boundaries remain explicit. The trial contract is `ACTIVE_ALPHA_TRIAL_NOT_FORMAL_EMPLOYMENT`; mission evidence is an in-app orientation proof rather than physical location/cargo proof; earnings are `EARNED_SIMULATION_NOT_PAYABLE`, unfunded, unsettled and have no transaction hash. ATM withdrawal remains disabled and under review. No Mainnet transaction, token mint, payroll payment, private-key access, deployment or merge is authorized by this candidate.
+
+## V4.0 active cumulative public release
 
 V4.0 is the active cumulative public release. It repairs the Production player entry and upgrades `DIGITAL_ANT_APP_0001` to V1.7.0 without changing Life ID, immutable Birth Certificate, Wallet ownership, Thought Organ, Primary Job or Listing identity rights.
 

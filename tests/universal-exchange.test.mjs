@@ -100,6 +100,10 @@ import {
   calculateFieldTripEnergy, calculateMatterAntimatterEnergy, validateFieldRoute,
   calculateFieldServiceQuote, validateFieldDeliveryEvidence, createWorkforceGap,
   createFieldServiceDemandScan
+  , KAIOS_AI_OS_EMPLOYMENT_ALPHA_JOB, createEmploymentIdentityChallenge,
+  verifyEmploymentIdentityProof, createEmploymentApplication, scoreEmploymentInterview,
+  createTrialEmploymentContract, createEmploymentAlphaMission, acceptEmploymentAlphaMission,
+  verifyEmploymentAlphaMission, appendKaiosAlphaEarning
 } from "../core/index.mjs";
 import { verifyDigitalAntWalletBinding, verifyDigitalLifeWalletBinding, CODEX_GM_ENV } from "../core/security/wallet-binding.mjs";
 import { TEMPLE_HEART_READ_ABI, TEMPLE_HEART_DRY_RUN_ABI, TEMPLE_HEART_VERIFIED_ACTIONS, readCoreHeartEvents } from "../core/integrations/temple-heart-12345.mjs";
@@ -2855,13 +2859,106 @@ test("V4.0 8888 audit removes fake balances and creates only request drafts", as
   assert.doesNotMatch(bankUi, /KGEN_Wallet\.demoMode=true/);
 });
 
-test("V4.0 production shell exposes animated concierge and fresh cache key", async () => {
+test("V4.1 production shell preserves the concierge and uses a fresh employment cache key", async () => {
   const htmlSource = await fs.readFile(new URL("../K線西遊記/temples/11520/index.html", import.meta.url), "utf8");
   const appSource = await fs.readFile(new URL("../K線西遊記/temples/11520/app.mjs", import.meta.url), "utf8");
   const cssSource = await fs.readFile(new URL("../K線西遊記/temples/11520/styles.css", import.meta.url), "utf8");
-  assert.match(htmlSource, /v=11520-v4\.0-player-first/);
+  assert.match(htmlSource, /v=11520-v4\.1-employment-alpha/);
+  assert.doesNotMatch(htmlSource, /v=11520-v4\.0-player-first/);
   assert.doesNotMatch(htmlSource, /v=11520-v3\.6-first-kgen/);
   for (const state of ["IDLE", "LISTENING", "THINKING", "SPEAKING", "SUCCESS", "ERROR"]) assert.match(appSource + cssSource, new RegExp(state));
   assert.match(cssSource, /2D FALLBACK/);
   assert.deepEqual(seed.next_stage.player_first_v4_0.entry_actions, ["VOICE", "TEXT", "EXPLORE", "JOIN", "WORK", "MY_AI"]);
+});
+
+function createEmploymentAlphaTestFlow() {
+  const challenge = createEmploymentIdentityChallenge({
+    challengeId: "EMPLOYMENT_CHALLENGE_TEST_001",
+    actorId: "PLAYER_TEST_001",
+    actorType: "HUMAN_PLAYER",
+    walletAddress: "0x1111111111111111111111111111111111111111",
+    chainId: 56,
+    nonce: "0123456789abcdef0123456789abcdef",
+    issuedAt: "2026-08-28T09:00:00.000Z",
+    expiresAt: "2026-08-28T09:05:00.000Z"
+  });
+  const identity = verifyEmploymentIdentityProof({ challenge, recoveredAddress: "0x1111111111111111111111111111111111111111", signatureSha256: "a".repeat(64), verifiedAt: "2026-08-28T09:01:00.000Z" });
+  const application = createEmploymentApplication({ applicationId: "APPLICATION_TEST_001", identityProof: identity, capabilities: ["SUBMIT_EVIDENCE"], submittedAt: "2026-08-28T09:02:00.000Z" });
+  const interview = scoreEmploymentInterview({ interviewId: "INTERVIEW_TEST_001", application, answers: { understands_simulation_boundary: true, accepts_evidence_requirement: true, accepts_no_private_key_request: true, accepts_no_fake_completion: true }, completedAt: "2026-08-28T09:03:00.000Z" });
+  const contract = createTrialEmploymentContract({ contractId: "CONTRACT_TEST_001", application, interview, activatedAt: "2026-08-28T09:04:00.000Z" });
+  const available = createEmploymentAlphaMission({ missionId: "MISSION_TEST_001", contract, createdAt: "2026-08-28T09:04:00.000Z" });
+  const mission = acceptEmploymentAlphaMission({ mission: available, actorId: identity.actor_id, acceptedAt: "2026-08-28T09:05:00.000Z" });
+  const events = KAIOS_AI_OS_EMPLOYMENT_ALPHA_JOB.proof_requirements.map((eventType, index) => ({ event_id: `EMPLOYMENT_EVENT_${index}`, event_type: eventType, actor_id: identity.actor_id, mission_id: mission.mission_id, occurred_at: `2026-08-28T09:0${index + 2}:00.000Z` }));
+  return { challenge, identity, application, interview, contract, mission, events };
+}
+
+test("V4.1 Employment Alpha binds wallet proof without persisting the raw signature", () => {
+  const { challenge, identity } = createEmploymentAlphaTestFlow();
+  assert.match(challenge.message, /chain_id=56/);
+  assert.match(challenge.message, /authority=OFFCHAIN_ALPHA_ONLY_NO_TRANSACTION/);
+  assert.equal(identity.status, "VERIFIED_LOCAL_WALLET_CONTROL");
+  assert.equal(identity.wallet_address, "0x1111111111111111111111111111111111111111");
+  assert.equal(identity.raw_signature_persisted, false);
+  assert.equal(identity.canonical_life_identity, false);
+  assert.equal("signature" in identity, false);
+});
+
+test("V4.1 Employment Alpha rejects wrong-chain and mismatched wallet proofs", () => {
+  const input = { challengeId: "EMPLOYMENT_CHALLENGE_TEST_002", actorId: "PLAYER_TEST_002", actorType: "HUMAN_PLAYER", walletAddress: "0x2222222222222222222222222222222222222222", chainId: 1, nonce: "abcdef0123456789abcdef0123456789", issuedAt: "2026-08-28T09:00:00.000Z", expiresAt: "2026-08-28T09:05:00.000Z" };
+  assert.throws(() => createEmploymentIdentityChallenge(input), (error) => error.code === "EMPLOYMENT_CHAIN_INVALID");
+  const flow = createEmploymentAlphaTestFlow();
+  assert.throws(() => verifyEmploymentIdentityProof({ challenge: flow.challenge, recoveredAddress: "0x2222222222222222222222222222222222222222", signatureSha256: "b".repeat(64), verifiedAt: "2026-08-28T09:01:00.000Z" }), (error) => error.code === "EMPLOYMENT_WALLET_RECOVERY_MISMATCH");
+  assert.throws(() => verifyEmploymentIdentityProof({ challenge: flow.challenge, recoveredAddress: flow.identity.wallet_address, signatureSha256: "b".repeat(64), verifiedAt: "2026-08-28T09:06:00.000Z" }), (error) => error.code === "EMPLOYMENT_CHALLENGE_EXPIRED");
+});
+
+test("V4.1 Employment Alpha interview is a company decision and cannot silently create formal employment", () => {
+  const { application, interview, contract } = createEmploymentAlphaTestFlow();
+  assert.equal(interview.score, 100);
+  assert.equal(interview.company_decision, "ACCEPT_ALPHA_TRIAL");
+  assert.equal(contract.status, "ACTIVE_ALPHA_TRIAL_NOT_FORMAL_EMPLOYMENT");
+  assert.equal(contract.formal_employee, false);
+  assert.equal(contract.company_owns_life, false);
+  assert.equal(contract.payroll_account.status, "SIMULATION_LEDGER_ONLY");
+  assert.equal(contract.compensation_policy.payable, false);
+  const failed = scoreEmploymentInterview({ interviewId: "INTERVIEW_TEST_FAIL", application, answers: { understands_simulation_boundary: true }, completedAt: "2026-08-28T09:03:00.000Z" });
+  assert.equal(failed.status, "FAILED_ALPHA");
+  assert.throws(() => createTrialEmploymentContract({ contractId: "CONTRACT_FORBIDDEN", application, interview: failed, activatedAt: "2026-08-28T09:04:00.000Z" }), (error) => error.code === "EMPLOYMENT_INTERVIEW_PASS_REQUIRED");
+});
+
+test("V4.1 Employment Alpha mission requires ordered bound evidence", () => {
+  const { mission, events } = createEmploymentAlphaTestFlow();
+  const verified = verifyEmploymentAlphaMission({ mission, evidenceEvents: events, verifiedAt: "2026-08-28T09:07:00.000Z" });
+  assert.equal(verified.status, "VERIFIED_ALPHA");
+  assert.equal(verified.verification_scope, "IN_APP_ORIENTATION_ONLY");
+  assert.equal(verified.real_location_claimed, false);
+  assert.equal(verified.real_cargo_claimed, false);
+  assert.throws(() => verifyEmploymentAlphaMission({ mission, evidenceEvents: events.slice(1), verifiedAt: "2026-08-28T09:07:00.000Z" }), (error) => error.code === "EMPLOYMENT_EVIDENCE_INCOMPLETE");
+  assert.throws(() => verifyEmploymentAlphaMission({ mission, evidenceEvents: events.map((event) => ({ ...event, event_id: "REPLAY" })), verifiedAt: "2026-08-28T09:07:00.000Z" }), (error) => error.code === "EMPLOYMENT_EVIDENCE_REPLAY");
+});
+
+test("V4.1 verified Alpha work creates one simulated earning and never fake payment", () => {
+  const { mission, events, contract } = createEmploymentAlphaTestFlow();
+  const verified = verifyEmploymentAlphaMission({ mission, evidenceEvents: events, verifiedAt: "2026-08-28T09:07:00.000Z" });
+  const entries = appendKaiosAlphaEarning({ earningId: "EARNING_TEST_001", mission: verified, contract, recordedAt: "2026-08-28T09:08:00.000Z" });
+  assert.equal(entries.length, 1);
+  assert.equal(entries[0].amount_kaios_wei, "8000000000000000000");
+  assert.equal(entries[0].status, "EARNED_SIMULATION_NOT_PAYABLE");
+  assert.equal(entries[0].funded, false);
+  assert.equal(entries[0].settled, false);
+  assert.equal(entries[0].transaction_hash, null);
+  assert.throws(() => appendKaiosAlphaEarning({ ledgerEntries: entries, earningId: "EARNING_TEST_002", mission: verified, contract, recordedAt: "2026-08-28T09:09:00.000Z" }), (error) => error.code === "EMPLOYMENT_REWARD_REPLAY");
+});
+
+test("V4.1 website exposes the playable employment, mission, ATM and market entries honestly", async () => {
+  const htmlSource = await fs.readFile(new URL("../K線西遊記/temples/11520/index.html", import.meta.url), "utf8");
+  const appSource = await fs.readFile(new URL("../K線西遊記/temples/11520/app.mjs", import.meta.url), "utf8");
+  const companySource = await fs.readFile(new URL("../core/company/index.mjs", import.meta.url), "utf8");
+  for (const route of ["JOBS", "MISSIONS", "ATM", "MARKET"]) assert.match(appSource, new RegExp(`\\[\\\"${route}\\\"`));
+  assert.match(appSource, /CONNECT WALLET \+ SIGN CHALLENGE/);
+  assert.match(companySource, /ACTIVE_ALPHA_TRIAL_NOT_FORMAL_EMPLOYMENT/);
+  assert.match(companySource, /EARNED_SIMULATION_NOT_PAYABLE/);
+  assert.match(appSource, /formal_employee/);
+  assert.match(appSource, /transaction_hash/);
+  assert.match(appSource, /WITHDRAW KAIOS/);
+  assert.match(htmlSource, /No simulated trades, volume, TVL, order book or ownership are presented as deployed facts/);
 });

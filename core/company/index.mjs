@@ -74,6 +74,177 @@ export const FIELD_SERVICE_ROLES = Object.freeze(["DELIVERY_WORKER", "CASH_TRANS
 export const FIELD_SERVICE_ACCOUNTING_CLASSES = Object.freeze(["SALARY_INCOME", "SERVICE_REVENUE", "FREIGHT_REVENUE", "KUFO_SALE_REVENUE", "CASH_LOGISTICS_REVENUE", "WASTE_SERVICE_REVENUE", "HEARTBEAT_REWARD", "FORTUNE", "EXPENSE"]);
 export const KAIOS_CASH_LAW = Object.freeze({ ledger_asset: "KAIOS_LEDGER", physical_cargo: "KAIOS_CASH_CARGO", ledger_transfer_is_cash_delivery: false });
 
+export const KAIOS_AI_OS_EMPLOYMENT_ALPHA_JOB = Object.freeze({
+  job_id: "K12345_ATM_CASH_TRANSPORT_ALPHA_TRAINEE",
+  company_id: "AI_ANT_COMPANY_0001",
+  title: "K12345 ATM Cash Transport Alpha Trainee",
+  actor_types: Object.freeze(["HUMAN_PLAYER", "AI_LIFE"]),
+  location_id: "K12345",
+  destination_id: "K11520",
+  role: "CASH_TRANSPORTER",
+  payment_asset: "KAIOS",
+  reward_kaios_wei: "8000000000000000000",
+  proof_requirements: Object.freeze([
+    "APPLICATION_SUBMITTED",
+    "INTERVIEW_PASSED",
+    "MISSION_ACCEPTED",
+    "ORIENTATION_CHECKLIST_CONFIRMED"
+  ]),
+  real_cargo: false,
+  real_payment: false,
+  settlement_status: "SIMULATION_ONLY",
+  status: "OPEN_ALPHA_SIMULATION"
+});
+
+const EMPLOYMENT_ALPHA_ACTOR_TYPES = Object.freeze(["HUMAN_PLAYER", "AI_LIFE"]);
+const EMPLOYMENT_ALPHA_INTERVIEW_FIELDS = Object.freeze([
+  "understands_simulation_boundary",
+  "accepts_evidence_requirement",
+  "accepts_no_private_key_request",
+  "accepts_no_fake_completion"
+]);
+
+function normalizeEmploymentWallet(address) {
+  invariant(/^0x[0-9a-fA-F]{40}$/.test(String(address ?? "")), "EMPLOYMENT_WALLET_INVALID", "Employment identity requires a valid public EVM wallet address");
+  return String(address).toLowerCase();
+}
+
+function parseEmploymentTime(value, field) {
+  const parsed = Date.parse(value);
+  invariant(Number.isFinite(parsed), "EMPLOYMENT_TIME_INVALID", `${field} must be a valid timestamp`);
+  return parsed;
+}
+
+export function createEmploymentIdentityChallenge({ challengeId, actorId, actorType, walletAddress, chainId, nonce, issuedAt, expiresAt }) {
+  requireId(challengeId, "employment_challenge_id");
+  requireId(actorId, "employment_actor_id");
+  requireEnum(actorType, EMPLOYMENT_ALPHA_ACTOR_TYPES, "employment_actor_type");
+  invariant(Number(chainId) === 56, "EMPLOYMENT_CHAIN_INVALID", "Employment wallet verification is bound to BNB Smart Chain mainnet chainId 56");
+  invariant(/^[A-Za-z0-9_-]{16,128}$/.test(String(nonce ?? "")), "EMPLOYMENT_NONCE_INVALID", "Employment wallet challenge requires a strong one-time nonce");
+  const issued = parseEmploymentTime(issuedAt, "issued_at");
+  const expires = parseEmploymentTime(expiresAt, "expires_at");
+  invariant(expires > issued && expires - issued <= 10 * 60 * 1000, "EMPLOYMENT_CHALLENGE_WINDOW_INVALID", "Employment wallet challenges expire within ten minutes");
+  const normalizedWallet = normalizeEmploymentWallet(walletAddress);
+  const message = [
+    "KAIOS CIVILIZATION AI OS EMPLOYMENT IDENTITY",
+    `challenge_id=${challengeId}`,
+    `actor_id=${actorId}`,
+    `actor_type=${actorType}`,
+    `wallet_address=${normalizedWallet}`,
+    "chain_id=56",
+    `nonce=${nonce}`,
+    `issued_at=${issuedAt}`,
+    `expires_at=${expiresAt}`,
+    "purpose=EMPLOYMENT_AND_PAYROLL_ADDRESS_CONTROL",
+    "authority=OFFCHAIN_ALPHA_ONLY_NO_TRANSACTION"
+  ].join("\n");
+  return Object.freeze({ challenge_id: challengeId, actor_id: actorId, actor_type: actorType, wallet_address: normalizedWallet, chain_id: 56, nonce, issued_at: issuedAt, expires_at: expiresAt, purpose: "EMPLOYMENT_AND_PAYROLL_ADDRESS_CONTROL", message, status: "CHALLENGE_ISSUED_LOCAL" });
+}
+
+export function verifyEmploymentIdentityProof({ challenge, recoveredAddress, signatureSha256, verifiedAt }) {
+  invariant(challenge?.status === "CHALLENGE_ISSUED_LOCAL", "EMPLOYMENT_CHALLENGE_REQUIRED", "Employment identity proof requires the canonical local challenge");
+  invariant(/^[0-9a-f]{64}$/i.test(String(signatureSha256 ?? "")), "EMPLOYMENT_SIGNATURE_HASH_REQUIRED", "Only a SHA-256 commitment to the public signature may be persisted");
+  const verified = parseEmploymentTime(verifiedAt, "verified_at");
+  invariant(verified >= parseEmploymentTime(challenge.issued_at, "issued_at") && verified <= parseEmploymentTime(challenge.expires_at, "expires_at"), "EMPLOYMENT_CHALLENGE_EXPIRED", "Employment identity proof must be verified inside the challenge window");
+  invariant(normalizeEmploymentWallet(recoveredAddress) === challenge.wallet_address, "EMPLOYMENT_WALLET_RECOVERY_MISMATCH", "Recovered signer must match the payroll wallet address");
+  return Object.freeze({
+    proof_id: `EMPLOYMENT_IDENTITY_${challenge.challenge_id}`,
+    challenge_id: challenge.challenge_id,
+    actor_id: challenge.actor_id,
+    actor_type: challenge.actor_type,
+    life_id: null,
+    wallet_address: challenge.wallet_address,
+    chain_id: challenge.chain_id,
+    authentication_method: "EIP191_PERSONAL_SIGN",
+    signature_sha256: signatureSha256.toLowerCase(),
+    verified_at: verifiedAt,
+    expires_at: challenge.expires_at,
+    canonical_life_identity: false,
+    raw_signature_persisted: false,
+    status: "VERIFIED_LOCAL_WALLET_CONTROL"
+  });
+}
+
+export function createEmploymentApplication({ applicationId, job = KAIOS_AI_OS_EMPLOYMENT_ALPHA_JOB, identityProof, capabilities = [], submittedAt }) {
+  requireId(applicationId, "employment_application_id");
+  requireArray(capabilities, "employment_capabilities");
+  invariant(job?.status === "OPEN_ALPHA_SIMULATION", "EMPLOYMENT_JOB_NOT_OPEN", "Only an open Alpha job can receive an Alpha application");
+  invariant(identityProof?.status === "VERIFIED_LOCAL_WALLET_CONTROL" && job.actor_types.includes(identityProof.actor_type), "EMPLOYMENT_IDENTITY_NOT_VERIFIED", "Application requires verified wallet control for an eligible actor type");
+  parseEmploymentTime(submittedAt, "submitted_at");
+  return Object.freeze({ application_id: applicationId, job_id: job.job_id, company_id: job.company_id, actor_id: identityProof.actor_id, actor_type: identityProof.actor_type, identity_proof_id: identityProof.proof_id, payroll_wallet_address: identityProof.wallet_address, capabilities: Object.freeze([...capabilities]), submitted_at: submittedAt, formal_employment_created: false, status: "SUBMITTED_ALPHA" });
+}
+
+export function scoreEmploymentInterview({ interviewId, application, answers, completedAt }) {
+  requireId(interviewId, "employment_interview_id");
+  invariant(application?.status === "SUBMITTED_ALPHA", "EMPLOYMENT_APPLICATION_REQUIRED", "Interview requires a submitted Alpha application");
+  parseEmploymentTime(completedAt, "completed_at");
+  const normalized = Object.fromEntries(EMPLOYMENT_ALPHA_INTERVIEW_FIELDS.map((field) => [field, answers?.[field] === true]));
+  const score = Object.values(normalized).filter(Boolean).length * 25;
+  const passed = score === 100;
+  return Object.freeze({ interview_id: interviewId, application_id: application.application_id, actor_id: application.actor_id, answers: Object.freeze(normalized), score, minimum_score: 100, evidence: "LOCAL_INTERACTIVE_EXAM", company_decision: passed ? "ACCEPT_ALPHA_TRIAL" : "REJECT_ALPHA_RETRY_ALLOWED", completed_at: completedAt, status: passed ? "PASSED_ALPHA" : "FAILED_ALPHA" });
+}
+
+export function createTrialEmploymentContract({ contractId, job = KAIOS_AI_OS_EMPLOYMENT_ALPHA_JOB, application, interview, activatedAt }) {
+  requireId(contractId, "employment_contract_id");
+  invariant(application?.status === "SUBMITTED_ALPHA" && interview?.status === "PASSED_ALPHA" && interview.application_id === application.application_id, "EMPLOYMENT_INTERVIEW_PASS_REQUIRED", "Alpha trial contract requires a passing interview bound to the application");
+  parseEmploymentTime(activatedAt, "activated_at");
+  return Object.freeze({
+    contract_id: contractId,
+    company_id: job.company_id,
+    job_id: job.job_id,
+    employee_id: `ALPHA_EMPLOYEE_${application.actor_id}`,
+    actor_id: application.actor_id,
+    actor_type: application.actor_type,
+    role: job.role,
+    payroll_account: Object.freeze({ asset: "KAIOS", wallet_address: application.payroll_wallet_address, address_control_proof: application.identity_proof_id, status: "SIMULATION_LEDGER_ONLY" }),
+    compensation_policy: Object.freeze({ reward_kaios_wei: job.reward_kaios_wei, settlement: "SIMULATION_ONLY", funded: false, payable: false }),
+    activated_at: activatedAt,
+    formal_employee: false,
+    company_owns_life: false,
+    status: "ACTIVE_ALPHA_TRIAL_NOT_FORMAL_EMPLOYMENT"
+  });
+}
+
+export function createEmploymentAlphaMission({ missionId, contract, createdAt }) {
+  requireId(missionId, "employment_mission_id");
+  invariant(contract?.status === "ACTIVE_ALPHA_TRIAL_NOT_FORMAL_EMPLOYMENT", "EMPLOYMENT_CONTRACT_REQUIRED", "Mission requires the active Alpha trial contract");
+  parseEmploymentTime(createdAt, "created_at");
+  return Object.freeze({ mission_id: missionId, contract_id: contract.contract_id, employee_id: contract.employee_id, actor_id: contract.actor_id, company_id: contract.company_id, job_id: contract.job_id, objective: "COMPLETE_SAFE_K12345_TO_K11520_CASH_TRANSPORT_ORIENTATION", origin: "K12345", destination: "K11520", reward_asset: "KAIOS", reward_kaios_wei: contract.compensation_policy.reward_kaios_wei, proof_requirements: KAIOS_AI_OS_EMPLOYMENT_ALPHA_JOB.proof_requirements, accepted_at: null, verified_at: null, real_location_claimed: false, real_cargo_claimed: false, real_payment: false, created_at: createdAt, status: "AVAILABLE_ALPHA" });
+}
+
+export function acceptEmploymentAlphaMission({ mission, actorId, acceptedAt }) {
+  invariant(mission?.status === "AVAILABLE_ALPHA" && mission.actor_id === actorId, "EMPLOYMENT_MISSION_NOT_AVAILABLE", "Only the assigned actor may accept an available mission");
+  parseEmploymentTime(acceptedAt, "accepted_at");
+  return Object.freeze({ ...mission, accepted_at: acceptedAt, status: "ACCEPTED_ALPHA" });
+}
+
+export function verifyEmploymentAlphaMission({ mission, evidenceEvents, verifiedAt }) {
+  invariant(mission?.status === "ACCEPTED_ALPHA", "EMPLOYMENT_MISSION_ACCEPTANCE_REQUIRED", "Mission verification requires prior acceptance");
+  requireArray(evidenceEvents, "employment_mission_evidence_events");
+  parseEmploymentTime(verifiedAt, "verified_at");
+  const ids = evidenceEvents.map((event) => event.event_id);
+  invariant(ids.every(Boolean) && new Set(ids).size === ids.length, "EMPLOYMENT_EVIDENCE_REPLAY", "Mission evidence event IDs must be present and unique");
+  invariant(evidenceEvents.every((event) => event.actor_id === mission.actor_id && event.mission_id === mission.mission_id && Number.isFinite(Date.parse(event.occurred_at))), "EMPLOYMENT_EVIDENCE_BINDING_MISMATCH", "Mission evidence must bind the assigned actor, mission and timestamp");
+  const eventTypes = evidenceEvents.map((event) => event.event_type);
+  const cursor = KAIOS_AI_OS_EMPLOYMENT_ALPHA_JOB.proof_requirements.reduce((position, requiredType) => {
+    const next = eventTypes.indexOf(requiredType, position);
+    invariant(next >= position, "EMPLOYMENT_EVIDENCE_INCOMPLETE", `Mission evidence requires ordered ${requiredType}`);
+    return next + 1;
+  }, 0);
+  invariant(cursor > 0, "EMPLOYMENT_EVIDENCE_INCOMPLETE", "Mission evidence is incomplete");
+  return Object.freeze({ ...mission, evidence_event_ids: Object.freeze(ids), verified_at: verifiedAt, verification_scope: "IN_APP_ORIENTATION_ONLY", real_location_claimed: false, real_cargo_claimed: false, real_payment: false, status: "VERIFIED_ALPHA" });
+}
+
+export function appendKaiosAlphaEarning({ ledgerEntries = [], earningId, mission, contract, recordedAt }) {
+  requireArray(ledgerEntries, "kaios_alpha_earning_entries");
+  requireId(earningId, "kaios_alpha_earning_id");
+  invariant(mission?.status === "VERIFIED_ALPHA" && mission.contract_id === contract?.contract_id, "EMPLOYMENT_VERIFIED_MISSION_REQUIRED", "KAIOS Alpha earning requires a verified mission bound to the employment contract");
+  invariant(!ledgerEntries.some((entry) => entry.mission_id === mission.mission_id || entry.earning_id === earningId), "EMPLOYMENT_REWARD_REPLAY", "A mission can create at most one Alpha earning entry");
+  parseEmploymentTime(recordedAt, "recorded_at");
+  const entry = Object.freeze({ earning_id: earningId, mission_id: mission.mission_id, contract_id: contract.contract_id, employee_id: contract.employee_id, actor_id: contract.actor_id, payroll_wallet_address: contract.payroll_account.wallet_address, asset: "KAIOS", amount_kaios_wei: mission.reward_kaios_wei, accounting_class: "SIMULATED_MISSION_EARNING", funded: false, payable: false, settled: false, transaction_hash: null, recorded_at: recordedAt, status: "EARNED_SIMULATION_NOT_PAYABLE" });
+  return Object.freeze([...ledgerEntries, entry]);
+}
+
 export const HEAVEN_TIME_LAW = Object.freeze({
   law_id: "K18888_HEAVEN_TIME_LAW_V3_7",
   k280_time_standard: "CANONICAL_PHYSICAL_TIME",

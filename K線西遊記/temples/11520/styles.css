@@ -12,3 +12,6 @@ textarea{font:inherit}.field textarea{background:#071017;color:var(--text);borde
 @supports not (transform-style:preserve-3d){.concierge-avatar,.avatar-head,.avatar-body{transform:none}.concierge-stage:after{content:"2D FALLBACK";position:absolute;bottom:20px;font-size:.65rem;color:var(--muted)}}
 @media(prefers-reduced-motion:reduce){.concierge-avatar,.avatar-aura,.avatar-heart,.avatar-shadow,.avatar-mouth,.avatar-ear{animation:none!important}}
 @media(max-width:850px){.player-first{grid-template-columns:1fr}.concierge-stage{min-height:260px}.concierge-avatar{transform:scale(.84);margin:-15px 0}.first-actions .button{flex:1 1 145px}.player-first h1{font-size:clamp(1.55rem,8vw,2.5rem)}}
+.employment-journey{grid-template-columns:repeat(4,minmax(0,1fr))}.employment-journey .journey-step{min-height:74px}.job-opening{border-color:#356d62;background:linear-gradient(145deg,rgba(18,49,48,.94),rgba(9,15,22,.94))}.interview-panel{border-color:#715f35}.earning-panel{border-color:#347453}.employment-actions{display:flex;gap:9px;flex-wrap:wrap}.employment-actions .button{flex:1 1 180px}
+@media(max-width:850px){.employment-journey{grid-template-columns:1fr 1fr}}
+@media(max-width:520px){.employment-journey{grid-template-columns:1fr}}
