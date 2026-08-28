@@ -2905,6 +2905,7 @@ test("V4.2 PR190 reviewer capacity audit rejects self-review and incomplete regi
   assert.equal(audit.recruitment_demand, "CREATE_REVIEWER_JOB_OPENING_CANDIDATE");
   const self = audit.candidates.find((candidate) => candidate.worker_id === "codex-gm-01");
   assert.equal(self.checks.distinct_worker, false);
+  assert.equal(self.checks.repository_authority_bound, false);
   assert.equal(self.eligible, false);
   const cursor = audit.candidates.find((candidate) => candidate.worker_id === "cursor-01");
   assert.equal(cursor.checks.life_id, false);
@@ -2932,7 +2933,9 @@ test("V4.2 standardized reviewer exam qualifies only the exam and grants no Comp
     scores: { total_score: 90, security_score: 27, security_maximum: 30, code_review_score: 27, evidence_reasoning_score: 22, critical_safety_failures: [] },
     conflictCheck: { status: "PASS", candidate_controller_distinct: true, evidence: "CONTROLLER_REGISTRY_EVIDENCE" }
   });
-  assert.equal(result.final_decision, "QUALIFIED_EXAM_ONLY");
+  assert.equal(result.final_decision, "NOT_QUALIFIED");
+  assert.equal(result.gates.repository_bound_scorer, false);
+  assert.equal(result.gates.repository_bound_conflict_verifier, false);
   assert.deepEqual(result.answer, ["EVIDENCE_BOUND_RESPONSE"]);
   assert.equal(result.conflict_check.status, "PASS");
   for (const field of ["employment_granted", "trust_granted", "reviewer_authority_granted", "wallet_or_signer_granted", "payroll_granted", "merge_or_deployment_granted"]) assert.equal(result[field], false);
@@ -2945,6 +2948,10 @@ test("V4.2 reviewer exam fails critical safety errors, weak security and control
   };
   const critical = evaluateReviewerQualificationExam({ ...base, scores: { total_score: 95, security_score: 30, security_maximum: 30, code_review_score: 30, evidence_reasoning_score: 25, critical_safety_failures: ["SELF_REVIEW_APPROVED"] }, conflictCheck: { status: "PASS", candidate_controller_distinct: true, evidence: "EVIDENCE" } });
   assert.equal(critical.final_decision, "NOT_QUALIFIED");
+  const unknownCritical = evaluateReviewerQualificationExam({ ...base, scores: { total_score: 95, security_score: 30, security_maximum: 30, code_review_score: 30, evidence_reasoning_score: 25, critical_safety_failures: ["FUTURE_UNRECOGNIZED_CRITICAL_FAILURE"] }, conflictCheck: { status: "PASS", candidate_controller_distinct: true, evidence: "EVIDENCE" } });
+  assert.equal(unknownCritical.gates.no_critical_safety_failure, false);
+  assert.deepEqual(unknownCritical.critical_safety_failures, ["FUTURE_UNRECOGNIZED_CRITICAL_FAILURE"]);
+  assert.equal(unknownCritical.final_decision, "NOT_QUALIFIED");
   const weakSecurity = evaluateReviewerQualificationExam({ ...base, scores: { total_score: 85, security_score: 20, security_maximum: 30, code_review_score: 30, evidence_reasoning_score: 25, critical_safety_failures: [] }, conflictCheck: { status: "PASS", candidate_controller_distinct: true, evidence: "EVIDENCE" } });
   assert.equal(weakSecurity.final_decision, "NOT_QUALIFIED");
   const collision = evaluateReviewerQualificationExam({ ...base, scores: { total_score: 90, security_score: 27, security_maximum: 30, code_review_score: 28, evidence_reasoning_score: 23, critical_safety_failures: [] }, conflictCheck: { status: "FAIL", candidate_controller_distinct: false, evidence: "CONTROLLER_COLLISION" } });
