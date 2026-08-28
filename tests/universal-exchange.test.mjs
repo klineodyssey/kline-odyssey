@@ -102,7 +102,8 @@ import {
   createFieldServiceDemandScan
   , KAIOS_AI_OS_EMPLOYMENT_ALPHA_JOB, KAIOS_AI_OS_FIRST_REAL_EMPLOYMENT_TEST_JOB, KAIOS_MAINNET_TOKEN,
   CANONICAL_REPOSITORY_COMPANY_AUTHORITIES, COMPANY_OPERATIONAL_AUTHORITY_PROPOSAL_SCOPES,
-  createRepositoryCompanyAuthorityProposal, createCompanyAuthorityProposalReviewCandidate,
+  createRepositoryCompanyAuthorityProposal, createCompanyAuthorityReviewRequestPacket,
+  createCompanyAuthorityProposalReviewCandidate,
   verifyRepositoryBoundCompanyAuthority,
   createEmploymentIdentityChallenge,
   verifyEmploymentIdentityProof, createEmploymentApplication, scoreEmploymentInterview,
@@ -3176,6 +3177,57 @@ test("V4.3 Company authority proposal cannot include financial, Worker or self-i
   };
   assert.throws(() => createRepositoryCompanyAuthorityProposal(input), (error) => error.code === "COMPANY_AUTHORITY_PROPOSAL_SCOPE_INVALID");
   assert.throws(() => createRepositoryCompanyAuthorityProposal({ ...input, requestedScopes: ["COMPANY_INTERVIEW"], proposedBy: input.candidateActorId }), (error) => error.code === "COMPANY_AUTHORITY_SELF_PROPOSAL_FORBIDDEN");
+});
+
+test("V4.3 authority review request packet is hash-bound, replay-safe and never a review", async () => {
+  const proposal = createRepositoryCompanyAuthorityProposal({
+    proposalId: "COMPANY_AUTHORITY_PROPOSAL_REQUEST_TEST_001", companyId: "AI_ANT_COMPANY_0001",
+    candidateActorId: "COMPANY_OPERATOR_CANDIDATE_004", candidateControllerId: "COMPANY_CONTROLLER_CANDIDATE_004",
+    role: "COMPANY_EMPLOYMENT_OPERATOR_CANDIDATE", policyVersion: "KAIOS_FIRST_REAL_EMPLOYMENT_TEST_V1",
+    requestedScopes: ["COMPANY_INTERVIEW", "EMPLOYMENT_DECISION"],
+    validFrom: "2026-08-29T05:01:00.000Z", validUntil: "2026-08-29T06:01:00.000Z",
+    evidence: ["PR_191_REVIEW_REQUIRED"], exactRepositoryVersion: "5".repeat(40),
+    proposedBy: "COMPANY_GM_CLAIM_004", proposedAt: "2026-08-29T05:00:00.000Z"
+  });
+  const input = {
+    requestId: "COMPANY_AUTHORITY_REVIEW_REQUEST_001", proposal,
+    repository: "klineodyssey/kline-odyssey", baseShaClaim: "a".repeat(40), headShaClaim: "b".repeat(40),
+    changedFilesClaim: ["tests/universal-exchange.test.mjs", "core/company/index.mjs"],
+    ciRunIdsClaim: ["33212207055", "33212204704"],
+    requiredReviewCapabilities: ["AUTHORITY_BOUNDARY_REVIEW", "CODE_REVIEW", "CI_REVIEW"],
+    requestedAt: "2026-08-29T05:02:00.000Z"
+  };
+  const packet = await createCompanyAuthorityReviewRequestPacket(input);
+  const samePacket = await createCompanyAuthorityReviewRequestPacket({
+    ...input,
+    changedFilesClaim: [...input.changedFilesClaim].reverse(),
+    ciRunIdsClaim: [...input.ciRunIdsClaim].reverse(),
+    requiredReviewCapabilities: [...input.requiredReviewCapabilities].reverse()
+  });
+  assert.equal(packet.packet_payload_sha256, samePacket.packet_payload_sha256);
+  assert.match(packet.packet_payload_sha256, /^[0-9a-f]{64}$/);
+  assert.match(packet.proposal_payload_sha256, /^[0-9a-f]{64}$/);
+  assert.equal(packet.repository_snapshot_verified, false);
+  assert.equal(packet.exact_head_ci_verified, false);
+  assert.equal(packet.counts_as_distinct_review, false);
+  assert.equal(packet.formal_review_decision, null);
+  assert.equal(packet.activation_authorized, false);
+
+  const { store, registries } = await runtime();
+  const company = await registries.company.get("AI_ANT_COMPANY_0001");
+  const eventInput = { store, company, eventType: "COMPANY_AUTHORITY_REVIEW_REQUEST_PACKET_CREATED", record: packet, actorId: "COMPANY_REVIEW_ROUTER", timestamp: packet.requested_at };
+  const first = await appendEmploymentPhase1BCompanyEvent(eventInput);
+  const replay = await appendEmploymentPhase1BCompanyEvent(eventInput);
+  assert.equal(first.status, "COMPANY_AUTHORITY_REVIEW_REQUEST_PACKET_CREATED_APPENDED");
+  assert.equal(first.event.payload.record_class, "PHASE_1B_SIMULATION_CANDIDATE");
+  assert.equal(replay.status, "IDEMPOTENT_NOOP");
+  await assert.rejects(
+    appendEmploymentPhase1BCompanyEvent({
+      ...eventInput,
+      record: { ...packet, head_sha_claim: "c".repeat(40) }
+    }),
+    (error) => error.code === "COMPANY_AUTHORITY_REVIEW_REQUEST_NOT_AUTHORITY"
+  );
 });
 
 test("V4.3 unverified governance review candidate is append-only and cannot activate authority", async () => {

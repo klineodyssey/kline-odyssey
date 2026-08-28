@@ -1,5 +1,6 @@
 import { requireArray, requireFields, requireId, requireEnum } from "../shared/schema.mjs";
 import { invariant } from "../shared/errors.mjs";
+import { sha256 } from "../shared/utils.mjs";
 
 export const COMPANY_FIELDS = Object.freeze([
   "company_id", "founder_life_id", "name", "wallet_address", "treasury_address", "employees", "equity",
@@ -202,6 +203,55 @@ export function createRepositoryCompanyAuthorityProposal({
 export const COMPANY_AUTHORITY_REVIEW_RECOMMENDATIONS = Object.freeze([
   "RECOMMEND_APPROVE", "REQUEST_CHANGES", "HOLD"
 ]);
+
+export async function createCompanyAuthorityReviewRequestPacket({
+  requestId, proposal, repository, baseShaClaim, headShaClaim, changedFilesClaim,
+  ciRunIdsClaim, requiredReviewCapabilities, requestedAt
+}) {
+  requireId(requestId, "company_authority_review_request.request_id");
+  requireArray(changedFilesClaim, "company_authority_review_request.changed_files_claim");
+  requireArray(ciRunIdsClaim, "company_authority_review_request.ci_run_ids_claim");
+  requireArray(requiredReviewCapabilities, "company_authority_review_request.required_review_capabilities");
+  invariant(proposal?.status === "UNVERIFIED_PROPOSAL_CANDIDATE_NOT_AUTHORITY" && proposal.authority_id === null && proposal.active === false, "COMPANY_AUTHORITY_REVIEW_REQUEST_PROPOSAL_REQUIRED", "Review request packet requires an inactive unverified authority proposal candidate");
+  invariant(/^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/.test(String(repository ?? "")), "COMPANY_AUTHORITY_REVIEW_REQUEST_REPOSITORY_INVALID", "Review request packet requires an owner/repository claim");
+  invariant(/^[0-9a-f]{40}$/i.test(String(baseShaClaim ?? "")) && /^[0-9a-f]{40}$/i.test(String(headShaClaim ?? "")), "COMPANY_AUTHORITY_REVIEW_REQUEST_SHA_INVALID", "Review request packet requires SHA-shaped base and head claims; these are not repository provenance");
+  const normalizedBaseSha = String(baseShaClaim).toLowerCase();
+  const normalizedHeadSha = String(headShaClaim).toLowerCase();
+  invariant(normalizedBaseSha !== normalizedHeadSha, "COMPANY_AUTHORITY_REVIEW_REQUEST_EMPTY_DIFF", "Review request packet requires distinct base and head claims");
+  invariant(changedFilesClaim.length > 0 && new Set(changedFilesClaim).size === changedFilesClaim.length && changedFilesClaim.every((path) => typeof path === "string" && path.length > 0 && !path.includes("..") && !path.startsWith("/") && !/^[A-Za-z]:/.test(path)), "COMPANY_AUTHORITY_REVIEW_REQUEST_FILES_INVALID", "Review request packet requires unique non-traversing repository-relative changed-file claims");
+  invariant(ciRunIdsClaim.length > 0 && new Set(ciRunIdsClaim.map(String)).size === ciRunIdsClaim.length && ciRunIdsClaim.every((runId) => /^[1-9][0-9]*$/.test(String(runId))), "COMPANY_AUTHORITY_REVIEW_REQUEST_CI_INVALID", "Review request packet requires unique positive CI run ID claims");
+  invariant(requiredReviewCapabilities.length > 0 && new Set(requiredReviewCapabilities).size === requiredReviewCapabilities.length && requiredReviewCapabilities.every((capability) => typeof capability === "string" && capability.length > 0), "COMPANY_AUTHORITY_REVIEW_REQUEST_CAPABILITIES_INVALID", "Review request packet requires unique reviewer capability requirements");
+  parseEmploymentTime(requestedAt, "company_authority_review_request.requested_at");
+  const proposalPayloadSha256 = await sha256(proposal);
+  const packetPayload = Object.freeze({
+    request_id: requestId,
+    proposal_id: proposal.proposal_id,
+    proposal_payload_sha256: proposalPayloadSha256,
+    repository,
+    base_sha_claim: normalizedBaseSha,
+    head_sha_claim: normalizedHeadSha,
+    changed_files_claim: Object.freeze([...changedFilesClaim].sort()),
+    ci_run_ids_claim: Object.freeze([...ciRunIdsClaim].map(String).sort()),
+    required_review_capabilities: Object.freeze([...requiredReviewCapabilities].sort()),
+    requested_at: requestedAt
+  });
+  return Object.freeze({
+    record_class: "UNVERIFIED_COMPANY_AUTHORITY_REVIEW_REQUEST_PACKET",
+    ...packetPayload,
+    packet_payload_sha256: await sha256(packetPayload),
+    company_id: proposal.company_id,
+    repository_snapshot_verified: false,
+    proposal_provenance_verified: false,
+    exact_head_ci_verified: false,
+    reviewer_assigned: false,
+    reviewer_identity_verified: false,
+    reviewer_independence_verified: false,
+    formal_review_decision: null,
+    counts_as_distinct_review: false,
+    activation_authorized: false,
+    status: "UNVERIFIED_REVIEW_REQUEST_PACKET_AWAITING_PROVENANCE_AND_DISTINCT_REVIEWER"
+  });
+}
 
 export function createCompanyAuthorityProposalReviewCandidate({
   reviewId, proposal, reviewerIdClaim, reviewerControllerIdClaim, recommendation,
@@ -461,7 +511,7 @@ export const EMPLOYMENT_PHASE1B_HISTORY_EVENT_TYPES = Object.freeze([
   "APPLICATION_SUBMITTED", "INTERVIEW_STARTED", "INTERVIEW_COMPLETED", "EMPLOYMENT_DECISION_RECORDED",
   "EMPLOYEE_CREATED", "WORKER_ACTIVATED", "MISSION_ASSIGNED", "MISSION_ACCEPTED",
   "WORK_EVIDENCE_SUBMITTED", "WORK_REVIEWED", "COMPENSATION_ACCRUED", "PAYROLL_QUEUED", "PAYROLL_SETTLED",
-  "COMPANY_AUTHORITY_PROPOSAL_REVIEW_CANDIDATE"
+  "COMPANY_AUTHORITY_REVIEW_REQUEST_PACKET_CREATED", "COMPANY_AUTHORITY_PROPOSAL_REVIEW_CANDIDATE"
 ]);
 
 const EMPLOYMENT_PHASE1B_EVENT_RECORD_IDS = Object.freeze({
@@ -469,7 +519,8 @@ const EMPLOYMENT_PHASE1B_EVENT_RECORD_IDS = Object.freeze({
   EMPLOYMENT_DECISION_RECORDED: "decision_id", EMPLOYEE_CREATED: "employee_id", WORKER_ACTIVATED: "worker_id",
   MISSION_ASSIGNED: "mission_id", MISSION_ACCEPTED: "mission_id", WORK_EVIDENCE_SUBMITTED: "evidence_id",
   WORK_REVIEWED: "review_id", COMPENSATION_ACCRUED: "accrual_id", PAYROLL_QUEUED: "payroll_queue_id",
-  PAYROLL_SETTLED: "settlement_id", COMPANY_AUTHORITY_PROPOSAL_REVIEW_CANDIDATE: "review_id"
+  PAYROLL_SETTLED: "settlement_id", COMPANY_AUTHORITY_REVIEW_REQUEST_PACKET_CREATED: "request_id",
+  COMPANY_AUTHORITY_PROPOSAL_REVIEW_CANDIDATE: "review_id"
 });
 
 function requireEmploymentBinding(record, expected, code, message) {
@@ -763,7 +814,38 @@ export async function appendEmploymentPhase1BCompanyEvent({ store, company, even
   parseEmploymentTime(timestamp, "employment_phase1b_history.timestamp");
   invariant(record.company_id === company.company_id, "EMPLOYMENT_HISTORY_COMPANY_BINDING_MISMATCH", "Employment Phase 1B record must bind the Company");
   invariant(!/(?:private_key|seed_phrase|raw_signature|challenge_message|challenge_nonce)/i.test(JSON.stringify(record)), "EMPLOYMENT_HISTORY_SECRET_FORBIDDEN", "Employment Phase 1B History cannot persist signing secrets or raw challenge material");
+  const isAuthorityReviewRequest = eventType === "COMPANY_AUTHORITY_REVIEW_REQUEST_PACKET_CREATED";
   const isAuthorityReviewCandidate = eventType === "COMPANY_AUTHORITY_PROPOSAL_REVIEW_CANDIDATE";
+  if (isAuthorityReviewRequest) {
+    const expectedPacketHash = await sha256({
+      request_id: record.request_id,
+      proposal_id: record.proposal_id,
+      proposal_payload_sha256: record.proposal_payload_sha256,
+      repository: record.repository,
+      base_sha_claim: record.base_sha_claim,
+      head_sha_claim: record.head_sha_claim,
+      changed_files_claim: record.changed_files_claim,
+      ci_run_ids_claim: record.ci_run_ids_claim,
+      required_review_capabilities: record.required_review_capabilities,
+      requested_at: record.requested_at
+    });
+    invariant(
+      record.record_class === "UNVERIFIED_COMPANY_AUTHORITY_REVIEW_REQUEST_PACKET"
+        && record.status === "UNVERIFIED_REVIEW_REQUEST_PACKET_AWAITING_PROVENANCE_AND_DISTINCT_REVIEWER"
+        && record.repository_snapshot_verified === false
+        && record.proposal_provenance_verified === false
+        && record.exact_head_ci_verified === false
+        && record.reviewer_assigned === false
+        && record.reviewer_identity_verified === false
+        && record.reviewer_independence_verified === false
+        && record.formal_review_decision === null
+        && record.counts_as_distinct_review === false
+        && record.activation_authorized === false
+        && record.packet_payload_sha256 === expectedPacketHash,
+      "COMPANY_AUTHORITY_REVIEW_REQUEST_NOT_AUTHORITY",
+      "Review request history accepts only an unverified, non-activating request packet"
+    );
+  }
   if (isAuthorityReviewCandidate) {
     invariant(
       record.record_class === "UNVERIFIED_COMPANY_AUTHORITY_GOVERNANCE_REVIEW_CANDIDATE"
@@ -790,7 +872,7 @@ export async function appendEmploymentPhase1BCompanyEvent({ store, company, even
     event_type: eventType, actor_id: actorId, timestamp,
     payload: {
       record_id: recordId,
-      record_class: isAuthorityReviewCandidate
+      record_class: isAuthorityReviewRequest || isAuthorityReviewCandidate
         ? "PHASE_1B_SIMULATION_CANDIDATE"
         : record.repository_bound_authority_verified === true
           ? "REPOSITORY_BOUND_OPERATIONAL_RECORD"
