@@ -250,6 +250,65 @@ export function appendKaiosAlphaEarning({ ledgerEntries = [], earningId, mission
   return Object.freeze([...ledgerEntries, entry]);
 }
 
+export const EMPLOYMENT_ALPHA_HISTORY_EVENT_TYPES = Object.freeze([
+  "EMPLOYMENT_IDENTITY_VERIFIED",
+  "EMPLOYMENT_APPLICATION_SUBMITTED",
+  "EMPLOYMENT_CANDIDATE_SAFETY_SELF_CHECK_COMPLETED",
+  "EMPLOYMENT_ALPHA_PARTICIPATION_RECORDED",
+  "EMPLOYMENT_MISSION_CREATED",
+  "EMPLOYMENT_MISSION_ACCEPTED",
+  "EMPLOYMENT_MISSION_VERIFIED",
+  "EMPLOYMENT_ALPHA_EARNING_RECORDED"
+]);
+
+const EMPLOYMENT_ALPHA_EVENT_RECORD_IDS = Object.freeze({
+  EMPLOYMENT_IDENTITY_VERIFIED: "proof_id",
+  EMPLOYMENT_APPLICATION_SUBMITTED: "application_id",
+  EMPLOYMENT_CANDIDATE_SAFETY_SELF_CHECK_COMPLETED: "interview_id",
+  EMPLOYMENT_ALPHA_PARTICIPATION_RECORDED: "contract_id",
+  EMPLOYMENT_MISSION_CREATED: "mission_id",
+  EMPLOYMENT_MISSION_ACCEPTED: "mission_id",
+  EMPLOYMENT_MISSION_VERIFIED: "mission_id",
+  EMPLOYMENT_ALPHA_EARNING_RECORDED: "earning_id"
+});
+
+function projectEmploymentAlphaHistoryRecord(eventType, record) {
+  const common = { actor_id: record.actor_id, status: record.status };
+  if (eventType === "EMPLOYMENT_IDENTITY_VERIFIED") return { ...common, proof_id: record.proof_id, actor_type: record.actor_type, wallet_address: record.wallet_address, chain_id: record.chain_id, authentication_method: record.authentication_method, signature_sha256: record.signature_sha256, canonical_life_identity: false, raw_signature_persisted: false };
+  if (eventType === "EMPLOYMENT_APPLICATION_SUBMITTED") return { ...common, application_id: record.application_id, job_id: record.job_id, company_id: record.company_id, actor_type: record.actor_type, identity_proof_id: record.identity_proof_id, payroll_wallet_address: record.payroll_wallet_address, formal_employment_created: false };
+  if (eventType === "EMPLOYMENT_CANDIDATE_SAFETY_SELF_CHECK_COMPLETED") return { ...common, interview_id: record.interview_id, application_id: record.application_id, score: record.score, minimum_score: record.minimum_score, company_decision: null, candidate_self_check_result: record.candidate_self_check_result, evidence: record.evidence };
+  if (eventType === "EMPLOYMENT_ALPHA_PARTICIPATION_RECORDED") return { ...common, contract_id: record.contract_id, company_id: record.company_id, job_id: record.job_id, candidate_id: record.candidate_id, employee_id: null, worker_id: null, role: record.role, payroll_account: record.payroll_account, compensation_policy: record.compensation_policy, activation_authority: null, employment_created: false, worker_activated: false, formal_employee: false, company_owns_life: false };
+  if (["EMPLOYMENT_MISSION_CREATED", "EMPLOYMENT_MISSION_ACCEPTED", "EMPLOYMENT_MISSION_VERIFIED"].includes(eventType)) return { ...common, mission_id: record.mission_id, contract_id: record.contract_id, candidate_id: record.candidate_id, employee_id: null, worker_id: null, company_id: record.company_id, job_id: record.job_id, objective: record.objective, origin: record.origin, destination: record.destination, accepted_at: record.accepted_at, verified_at: record.verified_at, verification_scope: record.verification_scope ?? null, real_location_claimed: false, real_cargo_claimed: false, real_payment: false };
+  return { ...common, earning_id: record.earning_id, mission_id: record.mission_id, contract_id: record.contract_id, candidate_id: record.candidate_id, employee_id: null, worker_id: null, payroll_wallet_address: record.payroll_wallet_address, asset: record.asset, amount_kaios_wei: record.amount_kaios_wei, accounting_class: record.accounting_class, funded: false, payable: false, settled: false, transaction_hash: null };
+}
+
+export async function appendEmploymentAlphaCompanyEvent({ store, company, eventType, record, actorId, timestamp }) {
+  requireEnum(eventType, EMPLOYMENT_ALPHA_HISTORY_EVENT_TYPES, "employment_history.event_type");
+  invariant(company?.company_id === KAIOS_AI_OS_EMPLOYMENT_ALPHA_JOB.company_id, "EMPLOYMENT_HISTORY_COMPANY_INVALID", "Employment Alpha History belongs to the job's registered Company");
+  invariant(record && typeof record === "object", "EMPLOYMENT_HISTORY_RECORD_REQUIRED", "Employment Alpha History requires a state record");
+  const recordIdField = EMPLOYMENT_ALPHA_EVENT_RECORD_IDS[eventType];
+  requireId(record[recordIdField], `employment_history.${recordIdField}`);
+  requireId(actorId, "employment_history.actor_id");
+  parseEmploymentTime(timestamp, "employment_history.timestamp");
+  invariant(record.actor_id === actorId, "EMPLOYMENT_HISTORY_ACTOR_MISMATCH", "Employment Alpha History actor must match the state record");
+  invariant(!/"(?:private_key|seed_phrase|signature|nonce|message)"\s*:/i.test(JSON.stringify(record)), "EMPLOYMENT_HISTORY_SECRET_FORBIDDEN", "Employment Alpha History cannot persist signing secrets or raw challenge material");
+  const recordId = record[recordIdField];
+  const history = await store.history(company.company_id, "COMPANY");
+  const existing = history.find((event) => event.event_type === eventType && event.payload?.record_id === recordId);
+  if (existing) return Object.freeze({ status: "IDEMPOTENT_NOOP", event: existing });
+  const event = await store.commit({
+    domain: "COMPANY",
+    stream: "COMPANY",
+    id: company.company_id,
+    entity: company,
+    event_type: eventType,
+    actor_id: actorId,
+    timestamp,
+    payload: { record_id: recordId, record_class: "SIMULATION", ...projectEmploymentAlphaHistoryRecord(eventType, record) }
+  });
+  return Object.freeze({ status: `${eventType}_APPENDED`, event });
+}
+
 export const HEAVEN_TIME_LAW = Object.freeze({
   law_id: "K18888_HEAVEN_TIME_LAW_V3_7",
   k280_time_standard: "CANONICAL_PHYSICAL_TIME",

@@ -103,7 +103,7 @@ import {
   , KAIOS_AI_OS_EMPLOYMENT_ALPHA_JOB, createEmploymentIdentityChallenge,
   verifyEmploymentIdentityProof, createEmploymentApplication, scoreEmploymentInterview,
   createTrialEmploymentContract, createEmploymentAlphaMission, acceptEmploymentAlphaMission,
-  verifyEmploymentAlphaMission, appendKaiosAlphaEarning
+  verifyEmploymentAlphaMission, appendKaiosAlphaEarning, appendEmploymentAlphaCompanyEvent
 } from "../core/index.mjs";
 import { verifyDigitalAntWalletBinding, verifyDigitalLifeWalletBinding, CODEX_GM_ENV } from "../core/security/wallet-binding.mjs";
 import { TEMPLE_HEART_READ_ABI, TEMPLE_HEART_DRY_RUN_ABI, TEMPLE_HEART_VERIFIED_ACTIONS, readCoreHeartEvents } from "../core/integrations/temple-heart-12345.mjs";
@@ -2957,6 +2957,67 @@ test("V4.1 verified Alpha work creates one simulated earning and never fake paym
   assert.throws(() => appendKaiosAlphaEarning({ ledgerEntries: entries, earningId: "EARNING_TEST_002", mission: verified, contract, recordedAt: "2026-08-28T09:09:00.000Z" }), (error) => error.code === "EMPLOYMENT_REWARD_REPLAY");
 });
 
+test("V4.1 Employment Alpha persists append-only company history and replays idempotently", async () => {
+  const { store, registries } = await runtime();
+  const company = await registries.company.get("AI_ANT_COMPANY_0001");
+  const { application } = createEmploymentAlphaTestFlow();
+  const input = {
+    store,
+    company,
+    eventType: "EMPLOYMENT_APPLICATION_SUBMITTED",
+    record: application,
+    actorId: application.actor_id,
+    timestamp: "2026-08-28T09:02:00.000Z"
+  };
+  const first = await appendEmploymentAlphaCompanyEvent(input);
+  const replay = await appendEmploymentAlphaCompanyEvent(input);
+  assert.equal(first.status, "EMPLOYMENT_APPLICATION_SUBMITTED_APPENDED");
+  assert.equal(replay.status, "IDEMPOTENT_NOOP");
+  assert.equal(replay.event.event_id, first.event.event_id);
+  const history = await store.history(company.company_id, "COMPANY");
+  const matching = history.filter((event) => event.event_type === input.eventType && event.payload.record_id === application.application_id);
+  assert.equal(matching.length, 1);
+  assert.equal(matching[0].payload.record_class, "SIMULATION");
+  assertAppendOnlyChain(history);
+});
+
+test("V4.1 Employment Alpha company history rejects raw signing material", async () => {
+  const { store, registries } = await runtime();
+  const company = await registries.company.get("AI_ANT_COMPANY_0001");
+  const { identity } = createEmploymentAlphaTestFlow();
+  await assert.rejects(
+    appendEmploymentAlphaCompanyEvent({
+      store,
+      company,
+      eventType: "EMPLOYMENT_IDENTITY_VERIFIED",
+      record: { ...identity, signature: "0xnot-allowed" },
+      actorId: identity.actor_id,
+      timestamp: "2026-08-28T09:01:00.000Z"
+    }),
+    (error) => error.code === "EMPLOYMENT_HISTORY_SECRET_FORBIDDEN"
+  );
+});
+
+test("V4.1 Employment Alpha earning history cannot imply funded or settled payment", async () => {
+  const { store, registries } = await runtime();
+  const company = await registries.company.get("AI_ANT_COMPANY_0001");
+  const { mission, events, contract } = createEmploymentAlphaTestFlow();
+  const verified = verifyEmploymentAlphaMission({ mission, evidenceEvents: events, verifiedAt: "2026-08-28T09:07:00.000Z" });
+  const [earning] = appendKaiosAlphaEarning({ earningId: "EARNING_HISTORY_TEST_001", mission: verified, contract, recordedAt: "2026-08-28T09:08:00.000Z" });
+  const result = await appendEmploymentAlphaCompanyEvent({
+    store,
+    company,
+    eventType: "EMPLOYMENT_ALPHA_EARNING_RECORDED",
+    record: earning,
+    actorId: earning.actor_id,
+    timestamp: earning.recorded_at
+  });
+  assert.equal(result.event.payload.funded, false);
+  assert.equal(result.event.payload.payable, false);
+  assert.equal(result.event.payload.settled, false);
+  assert.equal(result.event.payload.transaction_hash, null);
+});
+
 test("V4.1 website exposes the playable employment, mission, ATM and market entries honestly", async () => {
   const htmlSource = await fs.readFile(new URL("../K線西遊記/temples/11520/index.html", import.meta.url), "utf8");
   const appSource = await fs.readFile(new URL("../K線西遊記/temples/11520/app.mjs", import.meta.url), "utf8");
@@ -2969,5 +3030,6 @@ test("V4.1 website exposes the playable employment, mission, ATM and market entr
   assert.match(appSource, /formal_employee/);
   assert.match(appSource, /transaction_hash/);
   assert.match(appSource, /WITHDRAW KAIOS/);
+  assert.match(appSource, /appendEmploymentEvent/);
   assert.match(htmlSource, /No simulated trades, volume, TVL, order book or ownership are presented as deployed facts/);
 });

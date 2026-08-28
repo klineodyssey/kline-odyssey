@@ -10,7 +10,7 @@ import {
   KAIOS_AI_OS_EMPLOYMENT_ALPHA_JOB, createEmploymentIdentityChallenge,
   verifyEmploymentIdentityProof, createEmploymentApplication, scoreEmploymentInterview,
   createTrialEmploymentContract, createEmploymentAlphaMission, acceptEmploymentAlphaMission,
-  verifyEmploymentAlphaMission, appendKaiosAlphaEarning
+  verifyEmploymentAlphaMission, appendKaiosAlphaEarning, appendEmploymentAlphaCompanyEvent
 } from "../../../core/index.mjs?v=11520-v4.1-employment-alpha";
 import { readTempleHeart12345 } from "../../../core/integrations/temple-heart-12345.mjs?v=11520-v4.1-employment-alpha";
 
@@ -658,6 +658,11 @@ function bindViewEvents(route) {
 }
 
 function bindEmploymentAlphaEvents() {
+  async function appendEmploymentEvent(eventType, record, timestamp) {
+    const company = await universe.registries.company.get(KAIOS_AI_OS_EMPLOYMENT_ALPHA_JOB.company_id);
+    return appendEmploymentAlphaCompanyEvent({ store: universe.store, company, eventType, record, actorId: record.actor_id, timestamp });
+  }
+
   document.querySelector("#employment-wallet-form")?.addEventListener("submit", async (event) => {
     event.preventDefault();
     const result = document.querySelector("#employment-wallet-result");
@@ -686,6 +691,7 @@ function bindEmploymentAlphaEvents() {
       const signature = await signer.signMessage(challenge.message);
       const recoveredAddress = globalThis.ethers.utils.verifyMessage(challenge.message, signature);
       const identity = verifyEmploymentIdentityProof({ challenge, recoveredAddress, signatureSha256: await sha256Text(signature), verifiedAt: new Date().toISOString() });
+      await appendEmploymentEvent("EMPLOYMENT_IDENTITY_VERIFIED", identity, identity.verified_at);
       const current = readEmploymentAlphaState();
       writeEmploymentAlphaState({ identity, application: null, interview: null, contract: null, mission: null, earnings: current.identity?.wallet_address === identity.wallet_address ? current.earnings ?? [] : [] });
       result.textContent = "VERIFIED_LOCAL_WALLET_CONTROL · no transaction sent.";
@@ -699,6 +705,7 @@ function bindEmploymentAlphaEvents() {
     const state = readEmploymentAlphaState();
     try {
       const application = createEmploymentApplication({ applicationId: `APPLICATION_${crypto.randomUUID().replaceAll("-", "").toUpperCase()}`, identityProof: state.identity, capabilities: ["FOLLOW_INSTRUCTIONS", "SUBMIT_EVIDENCE", "USE_KAIOS_AI_OS"], submittedAt: new Date().toISOString() });
+      await appendEmploymentEvent("EMPLOYMENT_APPLICATION_SUBMITTED", application, application.submitted_at);
       writeEmploymentAlphaState({ ...state, application });
       await render();
     } catch (error) {
@@ -723,6 +730,7 @@ function bindEmploymentAlphaEvents() {
         },
         completedAt
       });
+      await appendEmploymentEvent("EMPLOYMENT_CANDIDATE_SAFETY_SELF_CHECK_COMPLETED", interview, completedAt);
       if (interview.status !== "CANDIDATE_SAFETY_SELF_CHECK_PASSED") {
         writeEmploymentAlphaState({ ...state, interview });
         await render();
@@ -730,6 +738,8 @@ function bindEmploymentAlphaEvents() {
       }
       const contract = createTrialEmploymentContract({ contractId: `CONTRACT_${crypto.randomUUID().replaceAll("-", "").toUpperCase()}`, application: state.application, interview, activatedAt: completedAt });
       const mission = createEmploymentAlphaMission({ missionId: `MISSION_${crypto.randomUUID().replaceAll("-", "").toUpperCase()}`, contract, createdAt: completedAt });
+      await appendEmploymentEvent("EMPLOYMENT_ALPHA_PARTICIPATION_RECORDED", contract, completedAt);
+      await appendEmploymentEvent("EMPLOYMENT_MISSION_CREATED", mission, completedAt);
       writeEmploymentAlphaState({ ...state, interview, contract, mission });
       await render();
     } catch (error) {
@@ -741,6 +751,7 @@ function bindEmploymentAlphaEvents() {
     const state = readEmploymentAlphaState();
     try {
       const mission = acceptEmploymentAlphaMission({ mission: state.mission, actorId: state.identity.actor_id, acceptedAt: new Date().toISOString() });
+      await appendEmploymentEvent("EMPLOYMENT_MISSION_ACCEPTED", mission, mission.accepted_at);
       writeEmploymentAlphaState({ ...state, mission });
       await render();
     } catch (error) {
@@ -761,6 +772,8 @@ function bindEmploymentAlphaEvents() {
       ];
       const mission = verifyEmploymentAlphaMission({ mission: state.mission, evidenceEvents, verifiedAt: now });
       const earnings = appendKaiosAlphaEarning({ ledgerEntries: state.earnings ?? [], earningId: `EARNING_${crypto.randomUUID().replaceAll("-", "").toUpperCase()}`, mission, contract: state.contract, recordedAt: now });
+      await appendEmploymentEvent("EMPLOYMENT_MISSION_VERIFIED", mission, now);
+      await appendEmploymentEvent("EMPLOYMENT_ALPHA_EARNING_RECORDED", earnings.at(-1), now);
       writeEmploymentAlphaState({ ...state, mission, earnings });
       await render();
     } catch (error) {
