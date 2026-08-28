@@ -2120,8 +2120,12 @@ test("Option B proposal remains unverified, non-binding and unauthorized from a 
   assert.equal(proposal.chain_write, false);
   assert.throws(() => validateOperatingCompanyBindingProposal({ ...proposal, engineering_preparation_authorized: true }), (error) => error.code === "OPTION_B_PROPOSAL_DERIVED_STATE_MISMATCH");
   assert.throws(() => validateOperatingCompanyBindingProposal({ ...proposal, status: "READY_FOR_REGISTRY_DISPATCH" }), (error) => error.code === "OPTION_B_PROPOSAL_DERIVED_STATE_MISMATCH");
+  assert.throws(() => validateOperatingCompanyBindingProposal({ ...proposal, payment_authorized: true }), (error) => error.code === "UNKNOWN_OPTION_B_FIELD");
   assert.throws(() => createOperatingCompanyBindingProposal({ ...proposal, cost_breakdown: { ...cost_breakdown, hidden_fee: "1" } }), (error) => error.code === "OPTION_B_COST_FIELDS_INVALID");
   assert.throws(() => createOperatingCompanyBindingProposal({ ...proposal, cost_breakdown, milestones: milestones.map((item, index) => index === 4 ? { ...item, amount: "10887" } : item) }), (error) => error.code === "OPTION_B_MILESTONE_TOTAL_MISMATCH");
+  assert.throws(() => createOperatingCompanyBindingProposal({ ...proposal, cost_breakdown, milestones: milestones.map((item, index) => index === 0 ? { ...item, payment_authorized: true } : item) }), (error) => error.code === "UNKNOWN_OPTION_B_FIELD");
+  assert.throws(() => createOperatingCompanyBindingProposal({ ...proposal, cost_breakdown, milestones, workforce: { ...proposal.workforce, dispatch_authorized: true } }), (error) => error.code === "UNKNOWN_OPTION_B_FIELD");
+  assert.throws(() => createOperatingCompanyBindingProposal({ ...proposal, cost_breakdown, milestones, payment_architecture: { ...proposal.payment_architecture, payment_authorized: true } }), (error) => error.code === "UNKNOWN_OPTION_B_FIELD");
 });
 
 test("Option B WBS is complete but cannot dispatch workers or claims without canonical authority", () => {
@@ -2154,6 +2158,7 @@ test("Option B WBS is complete but cannot dispatch workers or claims without can
   assert.equal(schedule.status, "TARGET_DATE_CONDITIONAL_REVIEWER_CAPACITY_BLOCKED");
   assert.ok(schedule.critical_path.includes("DISTINCT_REVIEWER_CAPACITY_BLOCKED"));
   assert.throws(() => createOptionBWorkBreakdown({ proposal, work_packages: work_packages.map((item, index) => index === 0 ? { ...item, assigned_worker_id: "FAKE_WORKER" } : item) }), (error) => error.code === "OPTION_B_PREMATURE_WORKER_ASSIGNMENT");
+  assert.throws(() => createOptionBWorkBreakdown({ proposal, work_packages: work_packages.map((item, index) => index === 0 ? { ...item, dispatch_authorized: true } : item) }), (error) => error.code === "UNKNOWN_OPTION_B_FIELD");
   assert.throws(() => createOptionBWorkBreakdown({ proposal, work_packages: work_packages.map((item, index) => index === 0 ? { ...item, trust_required: "T6" } : item) }), (error) => error.code === "OPTION_B_WORK_AUTHORITY_INVALID");
   assert.throws(() => createOptionBWorkBreakdown({ proposal, work_packages: work_packages.map((item, index) => index === 0 ? { ...item, dependencies: [OPTION_B_WORK_PACKAGE_IDS[11]] } : item) }), (error) => error.code === "OPTION_B_DEPENDENCY_INVALID");
 });

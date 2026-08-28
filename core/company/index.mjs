@@ -1384,7 +1384,7 @@ function validateOptionBMilestones(milestones, totalPrice) {
   let previousDue = -Infinity;
   let milestoneTotal = 0n;
   milestones.forEach((milestone, index) => {
-    requireFields(milestone, ["milestone_id", "amount", "deliverables", "acceptance_tests", "due_at", "payment_trigger"], "OptionBMilestone");
+    assertExactObjectFields(milestone, ["milestone_id", "amount", "deliverables", "acceptance_tests", "due_at", "payment_trigger"], "OptionBMilestone", "UNKNOWN_OPTION_B_FIELD");
     invariant(milestone.milestone_id === `M${index}`, "OPTION_B_MILESTONE_ORDER_INVALID", "Option B milestones must be ordered M0 through M4");
     requireArray(milestone.deliverables, `option_b.${milestone.milestone_id}.deliverables`);
     requireArray(milestone.acceptance_tests, `option_b.${milestone.milestone_id}.acceptance_tests`);
@@ -1411,11 +1411,11 @@ export function createOperatingCompanyBindingProposal({
   const totalPrice = OPTION_B_BINDING_COST_FIELDS.reduce((sum, field) => sum + BigInt(normalizedCosts[field]), 0n);
   invariant(totalPrice > 0n, "OPTION_B_TOTAL_PRICE_INVALID", "Proposed total must be positive");
   validateOptionBMilestones(milestones, totalPrice);
-  requireFields(workforce, ["ai_workers_required", "distinct_reviewers_required", "current_distinct_reviewer_capacity", "workforce_gap_plan"], "OptionBWorkforce");
+  assertExactObjectFields(workforce, ["ai_workers_required", "distinct_reviewers_required", "current_distinct_reviewer_capacity", "workforce_gap_plan"], "OptionBWorkforce", "UNKNOWN_OPTION_B_FIELD");
   invariant(Number.isInteger(workforce.ai_workers_required) && workforce.ai_workers_required > 0, "OPTION_B_WORKER_REQUIREMENT_INVALID", "Option B requires a positive worker estimate");
   invariant(Number.isInteger(workforce.distinct_reviewers_required) && workforce.distinct_reviewers_required > 0 && Number.isInteger(workforce.current_distinct_reviewer_capacity) && workforce.current_distinct_reviewer_capacity >= 0, "OPTION_B_REVIEW_CAPACITY_INVALID", "Reviewer requirements and capacity must be explicit non-negative integers");
   invariant(workforce.current_distinct_reviewer_capacity >= workforce.distinct_reviewers_required || workforce.workforce_gap_plan, "OPTION_B_REVIEW_GAP_PLAN_REQUIRED", "Insufficient Reviewer capacity requires a workforce gap plan");
-  requireFields(payment_architecture, ["company_receivable_address", "project_escrow", "signer_policy", "refund_policy", "dispute_policy", "milestone_release_policy", "payment_ready"], "OptionBPaymentArchitecture");
+  assertExactObjectFields(payment_architecture, ["company_receivable_address", "project_escrow", "signer_policy", "refund_policy", "dispute_policy", "milestone_release_policy", "payment_ready"], "OptionBPaymentArchitecture", "UNKNOWN_OPTION_B_FIELD");
   invariant(payment_architecture.payment_ready === false && payment_architecture.company_receivable_address === null && payment_architecture.project_escrow === "NOT_DEPLOYED", "OPTION_B_PAYMENT_NOT_READY", "This candidate cannot bind a receivable address, deploy escrow or enable payment");
   for (const field of ["accepted_direction_at", "earliest_start_at", "target_delivery_at"]) invariant(Number.isFinite(Date.parse({ accepted_direction_at, earliest_start_at, target_delivery_at }[field])), "OPTION_B_DATE_INVALID", `${field} must be an ISO timestamp`);
   invariant(Date.parse(earliest_start_at) >= Date.parse(accepted_direction_at) && Date.parse(target_delivery_at) >= Date.parse(earliest_start_at), "OPTION_B_DATE_SEQUENCE_INVALID", "Acceptance-reference, start and target delivery dates must be chronological");
@@ -1437,7 +1437,7 @@ export function createOperatingCompanyBindingProposal({
 }
 
 export function validateOperatingCompanyBindingProposal(proposal) {
-  requireFields(proposal, ["proposal_id", "project_id", "request_id", "customer_id", "option", "currency", "conditional_acceptance_reference", "conditional_acceptance_verified", "authority_resolution", "cost_breakdown", "total_proposed_price", "milestones", "accepted_direction_at", "earliest_start_at", "target_delivery_at", "workforce", "payment_architecture", "human_gates", "external_dependencies", "engineering_preparation_authorized", "project_activated", "payment_requested", "payment_received", "real_revenue", "chain_write", "distinct_review_blocked", "status"], "OperatingCompanyProposalCandidate");
+  assertExactObjectFields(proposal, ["proposal_id", "project_id", "request_id", "customer_id", "option", "currency", "conditional_acceptance_reference", "conditional_acceptance_verified", "authority_resolution", "cost_breakdown", "total_proposed_price", "milestones", "accepted_direction_at", "earliest_start_at", "target_delivery_at", "workforce", "payment_architecture", "human_gates", "external_dependencies", "engineering_preparation_authorized", "project_activated", "payment_requested", "payment_received", "real_revenue", "chain_write", "distinct_review_blocked", "status"], "OperatingCompanyProposalCandidate", "UNKNOWN_OPTION_B_FIELD");
   const rebuilt = createOperatingCompanyBindingProposal({
     proposal_id: proposal.proposal_id, project_id: proposal.project_id, request_id: proposal.request_id, customer_id: proposal.customer_id,
     conditional_acceptance_reference: proposal.conditional_acceptance_reference, cost_breakdown: proposal.cost_breakdown,
@@ -1460,9 +1460,9 @@ export function createOptionBWorkBreakdown({ proposal, work_packages }) {
   invariant(new Set(ids).size === ids.length && OPTION_B_WORK_PACKAGE_IDS.every((id) => ids.includes(id)), "OPTION_B_WBS_ID_INVALID", "Option B work package IDs must be complete and unique");
   let totalHours = 0;
   const normalized = work_packages.map((item, index) => {
-    requireFields(item, ["task_id", "assigned_role", "required_skills", "trust_required", "reviewer_required", "dependencies", "files_allowed", "branch", "estimated_hours", "start_gate", "acceptance_tests", "delivery_artifact"], "OptionBWorkPackage");
-    for (const field of ["required_skills", "dependencies", "files_allowed", "acceptance_tests"]) requireArray(item[field], `option_b.${item.task_id}.${field}`);
     invariant(!Object.hasOwn(item, "assigned_worker_id"), "OPTION_B_PREMATURE_WORKER_ASSIGNMENT", "WBS assigns roles; only the canonical Company Dispatcher may later resolve a Registry-qualified worker");
+    assertExactObjectFields(item, ["task_id", "assigned_role", "required_skills", "trust_required", "reviewer_required", "dependencies", "files_allowed", "branch", "estimated_hours", "start_gate", "acceptance_tests", "delivery_artifact"], "OptionBWorkPackage", "UNKNOWN_OPTION_B_FIELD");
+    for (const field of ["required_skills", "dependencies", "files_allowed", "acceptance_tests"]) requireArray(item[field], `option_b.${item.task_id}.${field}`);
     invariant(typeof item.assigned_role === "string" && item.assigned_role && ["T2", "T3", "T4", "T5"].includes(item.trust_required), "OPTION_B_WORK_AUTHORITY_INVALID", "Each package requires a role and a CURRENT T2-T5 trust candidate");
     invariant(item.branch.startsWith("codex/") && item.files_allowed.length > 0 && item.acceptance_tests.length > 0, "OPTION_B_WORK_SCOPE_INVALID", "Each package requires an isolated branch, file scope and acceptance tests");
     invariant(Number.isInteger(item.estimated_hours) && item.estimated_hours > 0, "OPTION_B_WORK_HOURS_INVALID", "Estimated hours must be positive integers");
@@ -2032,10 +2032,10 @@ function assertRepositoryBoundKaios18888PaymentConfig(config) {
   return config;
 }
 
-function assertExactObjectFields(record, fields, label) {
+function assertExactObjectFields(record, fields, label, errorCode = "UNKNOWN_PAYMENT_FIELD") {
   requireFields(record, fields, label);
   const unknown = Object.keys(record).filter((field) => !fields.includes(field));
-  invariant(unknown.length === 0, "UNKNOWN_PAYMENT_FIELD", `${label} contains unsupported fields: ${unknown.join(", ")}`);
+  invariant(unknown.length === 0, errorCode, `${label} contains unsupported fields: ${unknown.join(", ")}`);
 }
 
 export function validateKaios18888PaymentRequest(request, {
