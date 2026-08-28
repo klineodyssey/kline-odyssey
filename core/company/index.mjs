@@ -253,6 +253,117 @@ export async function createCompanyAuthorityReviewRequestPacket({
   });
 }
 
+export async function createReadOnlyGitHubRepositorySnapshotCandidate({
+  snapshotId, repository, mainSha, prNumber, baseSha, headSha, changedFiles,
+  checks, observedAt
+}) {
+  requireId(snapshotId, "github_repository_snapshot.snapshot_id");
+  requireArray(changedFiles, "github_repository_snapshot.changed_files");
+  requireArray(checks, "github_repository_snapshot.checks");
+  invariant(/^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/.test(String(repository ?? "")), "GITHUB_REPOSITORY_SNAPSHOT_REPOSITORY_INVALID", "Repository snapshot requires an owner/repository value");
+  invariant([mainSha, baseSha, headSha].every((sha) => /^[0-9a-f]{40}$/i.test(String(sha ?? ""))), "GITHUB_REPOSITORY_SNAPSHOT_SHA_INVALID", "Repository snapshot requires SHA-shaped main, base and head values");
+  invariant(Number.isInteger(prNumber) && prNumber > 0, "GITHUB_REPOSITORY_SNAPSHOT_PR_INVALID", "Repository snapshot requires a positive Pull Request number");
+  invariant(changedFiles.length > 0 && new Set(changedFiles).size === changedFiles.length && changedFiles.every((path) => typeof path === "string" && path.length > 0 && !path.includes("..") && !path.startsWith("/") && !/^[A-Za-z]:/.test(path)), "GITHUB_REPOSITORY_SNAPSHOT_FILES_INVALID", "Repository snapshot requires unique repository-relative changed files");
+  invariant(checks.length > 0 && checks.every((check) => check && typeof check === "object" && /^[1-9][0-9]*$/.test(String(check.run_id)) && typeof check.name === "string" && check.name.length > 0 && /^[0-9a-f]{40}$/i.test(String(check.head_sha ?? "")) && ["QUEUED", "IN_PROGRESS", "COMPLETED"].includes(check.status) && [null, "SUCCESS", "FAILURE", "CANCELLED", "SKIPPED"].includes(check.conclusion ?? null)), "GITHUB_REPOSITORY_SNAPSHOT_CHECK_INVALID", "Repository snapshot checks require run ID, name, exact head, status and bounded conclusion");
+  invariant(new Set(checks.map((check) => String(check.run_id))).size === checks.length, "GITHUB_REPOSITORY_SNAPSHOT_CHECK_DUPLICATE", "Repository snapshot check run IDs must be unique");
+  parseEmploymentTime(observedAt, "github_repository_snapshot.observed_at");
+  const payload = Object.freeze({
+    snapshot_id: snapshotId,
+    adapter_id: "GITHUB_READ_ONLY_SNAPSHOT_ADAPTER_V1",
+    repository,
+    main_sha: String(mainSha).toLowerCase(),
+    pr_number: prNumber,
+    base_sha: String(baseSha).toLowerCase(),
+    head_sha: String(headSha).toLowerCase(),
+    changed_files: Object.freeze([...changedFiles].sort()),
+    checks: Object.freeze(checks.map((check) => Object.freeze({
+      run_id: String(check.run_id),
+      name: check.name,
+      head_sha: String(check.head_sha).toLowerCase(),
+      status: check.status,
+      conclusion: check.conclusion ?? null
+    })).sort((left, right) => left.run_id.localeCompare(right.run_id))),
+    observed_at: observedAt
+  });
+  return Object.freeze({
+    record_class: "UNATTESTED_READ_ONLY_GITHUB_REPOSITORY_SNAPSHOT_CANDIDATE",
+    ...payload,
+    snapshot_payload_sha256: await sha256(payload),
+    read_only: true,
+    mutation_authority: false,
+    source_transport_attested: false,
+    repository_snapshot_verified: false,
+    status: "UNATTESTED_READ_ONLY_SNAPSHOT_CANDIDATE_NOT_PROVENANCE"
+  });
+}
+
+export async function verifyCompanyAuthorityReviewRequestSnapshotMatch({ verificationId, requestPacket, snapshot, verifiedAt }) {
+  requireId(verificationId, "company_authority_snapshot_match.verification_id");
+  invariant(requestPacket?.record_class === "UNVERIFIED_COMPANY_AUTHORITY_REVIEW_REQUEST_PACKET" && requestPacket.counts_as_distinct_review === false && requestPacket.activation_authorized === false, "COMPANY_AUTHORITY_SNAPSHOT_MATCH_REQUEST_REQUIRED", "Snapshot matching requires a non-authoritative review request packet");
+  invariant(snapshot?.record_class === "UNATTESTED_READ_ONLY_GITHUB_REPOSITORY_SNAPSHOT_CANDIDATE" && snapshot.read_only === true && snapshot.mutation_authority === false && snapshot.source_transport_attested === false, "COMPANY_AUTHORITY_SNAPSHOT_MATCH_CANDIDATE_REQUIRED", "Snapshot matching accepts only an unattested read-only snapshot candidate");
+  parseEmploymentTime(verifiedAt, "company_authority_snapshot_match.verified_at");
+  const expectedRequestPacketHash = await sha256({
+    request_id: requestPacket.request_id,
+    proposal_id: requestPacket.proposal_id,
+    proposal_payload_sha256: requestPacket.proposal_payload_sha256,
+    repository: requestPacket.repository,
+    base_sha_claim: requestPacket.base_sha_claim,
+    head_sha_claim: requestPacket.head_sha_claim,
+    changed_files_claim: requestPacket.changed_files_claim,
+    ci_run_ids_claim: requestPacket.ci_run_ids_claim,
+    required_review_capabilities: requestPacket.required_review_capabilities,
+    requested_at: requestPacket.requested_at
+  });
+  invariant(expectedRequestPacketHash === requestPacket.packet_payload_sha256, "COMPANY_AUTHORITY_REVIEW_REQUEST_INTEGRITY_MISMATCH", "Review request packet payload hash does not match its contents");
+  const expectedSnapshotHash = await sha256({
+    snapshot_id: snapshot.snapshot_id,
+    adapter_id: snapshot.adapter_id,
+    repository: snapshot.repository,
+    main_sha: snapshot.main_sha,
+    pr_number: snapshot.pr_number,
+    base_sha: snapshot.base_sha,
+    head_sha: snapshot.head_sha,
+    changed_files: snapshot.changed_files,
+    checks: snapshot.checks,
+    observed_at: snapshot.observed_at
+  });
+  invariant(expectedSnapshotHash === snapshot.snapshot_payload_sha256, "GITHUB_REPOSITORY_SNAPSHOT_INTEGRITY_MISMATCH", "Repository snapshot payload hash does not match its contents");
+  invariant(requestPacket.repository === snapshot.repository && requestPacket.base_sha_claim === snapshot.base_sha && requestPacket.head_sha_claim === snapshot.head_sha, "COMPANY_AUTHORITY_SNAPSHOT_REPOSITORY_HEAD_MISMATCH", "Review request repository, base and head claims must match the observed snapshot candidate");
+  invariant(requestPacket.changed_files_claim.length === snapshot.changed_files.length && requestPacket.changed_files_claim.every((path, index) => path === snapshot.changed_files[index]), "COMPANY_AUTHORITY_SNAPSHOT_FILES_MISMATCH", "Review request changed-file claims must exactly match the observed snapshot candidate");
+  const claimedChecks = requestPacket.ci_run_ids_claim.map((runId) => snapshot.checks.find((check) => check.run_id === runId));
+  invariant(claimedChecks.every(Boolean), "COMPANY_AUTHORITY_SNAPSHOT_CI_RUN_MISSING", "Every claimed CI run must exist in the observed snapshot candidate");
+  invariant(claimedChecks.every((check) => check.head_sha === requestPacket.head_sha_claim && check.status === "COMPLETED" && check.conclusion === "SUCCESS"), "COMPANY_AUTHORITY_SNAPSHOT_EXACT_HEAD_CI_MISMATCH", "Every claimed CI run must be a successful completed run on the claimed exact head");
+  const matchPayload = Object.freeze({
+    verification_id: verificationId,
+    request_id: requestPacket.request_id,
+    request_packet_payload_sha256: requestPacket.packet_payload_sha256,
+    proposal_id: requestPacket.proposal_id,
+    snapshot_id: snapshot.snapshot_id,
+    snapshot_payload_sha256: snapshot.snapshot_payload_sha256,
+    company_id: requestPacket.company_id,
+    repository_claim_match: true,
+    base_head_claim_match: true,
+    changed_files_claim_match: true,
+    exact_head_ci_claim_match: true,
+    snapshot_integrity_match: true,
+    verified_at: verifiedAt
+  });
+  return Object.freeze({
+    record_class: "UNATTESTED_COMPANY_AUTHORITY_REVIEW_SNAPSHOT_MATCH_CANDIDATE",
+    ...matchPayload,
+    match_payload_sha256: await sha256(matchPayload),
+    source_transport_attested: false,
+    repository_snapshot_verified: false,
+    proposal_provenance_verified: false,
+    exact_head_ci_verified: false,
+    reviewer_identity_verified: false,
+    reviewer_independence_verified: false,
+    counts_as_distinct_review: false,
+    activation_authorized: false,
+    status: "CLAIMS_MATCH_UNATTESTED_READ_ONLY_SNAPSHOT_AWAITING_TRUSTED_GITHUB_PROVENANCE"
+  });
+}
+
 export function createCompanyAuthorityProposalReviewCandidate({
   reviewId, proposal, reviewerIdClaim, reviewerControllerIdClaim, recommendation,
   findings, evidence, reviewedAt
@@ -511,7 +622,8 @@ export const EMPLOYMENT_PHASE1B_HISTORY_EVENT_TYPES = Object.freeze([
   "APPLICATION_SUBMITTED", "INTERVIEW_STARTED", "INTERVIEW_COMPLETED", "EMPLOYMENT_DECISION_RECORDED",
   "EMPLOYEE_CREATED", "WORKER_ACTIVATED", "MISSION_ASSIGNED", "MISSION_ACCEPTED",
   "WORK_EVIDENCE_SUBMITTED", "WORK_REVIEWED", "COMPENSATION_ACCRUED", "PAYROLL_QUEUED", "PAYROLL_SETTLED",
-  "COMPANY_AUTHORITY_REVIEW_REQUEST_PACKET_CREATED", "COMPANY_AUTHORITY_PROPOSAL_REVIEW_CANDIDATE"
+  "COMPANY_AUTHORITY_REVIEW_REQUEST_PACKET_CREATED", "COMPANY_AUTHORITY_REVIEW_SNAPSHOT_MATCH_CANDIDATE_CREATED",
+  "COMPANY_AUTHORITY_PROPOSAL_REVIEW_CANDIDATE"
 ]);
 
 const EMPLOYMENT_PHASE1B_EVENT_RECORD_IDS = Object.freeze({
@@ -520,6 +632,7 @@ const EMPLOYMENT_PHASE1B_EVENT_RECORD_IDS = Object.freeze({
   MISSION_ASSIGNED: "mission_id", MISSION_ACCEPTED: "mission_id", WORK_EVIDENCE_SUBMITTED: "evidence_id",
   WORK_REVIEWED: "review_id", COMPENSATION_ACCRUED: "accrual_id", PAYROLL_QUEUED: "payroll_queue_id",
   PAYROLL_SETTLED: "settlement_id", COMPANY_AUTHORITY_REVIEW_REQUEST_PACKET_CREATED: "request_id",
+  COMPANY_AUTHORITY_REVIEW_SNAPSHOT_MATCH_CANDIDATE_CREATED: "verification_id",
   COMPANY_AUTHORITY_PROPOSAL_REVIEW_CANDIDATE: "review_id"
 });
 
@@ -815,6 +928,7 @@ export async function appendEmploymentPhase1BCompanyEvent({ store, company, even
   invariant(record.company_id === company.company_id, "EMPLOYMENT_HISTORY_COMPANY_BINDING_MISMATCH", "Employment Phase 1B record must bind the Company");
   invariant(!/(?:private_key|seed_phrase|raw_signature|challenge_message|challenge_nonce)/i.test(JSON.stringify(record)), "EMPLOYMENT_HISTORY_SECRET_FORBIDDEN", "Employment Phase 1B History cannot persist signing secrets or raw challenge material");
   const isAuthorityReviewRequest = eventType === "COMPANY_AUTHORITY_REVIEW_REQUEST_PACKET_CREATED";
+  const isAuthoritySnapshotMatch = eventType === "COMPANY_AUTHORITY_REVIEW_SNAPSHOT_MATCH_CANDIDATE_CREATED";
   const isAuthorityReviewCandidate = eventType === "COMPANY_AUTHORITY_PROPOSAL_REVIEW_CANDIDATE";
   if (isAuthorityReviewRequest) {
     const expectedPacketHash = await sha256({
@@ -846,6 +960,38 @@ export async function appendEmploymentPhase1BCompanyEvent({ store, company, even
       "Review request history accepts only an unverified, non-activating request packet"
     );
   }
+  if (isAuthoritySnapshotMatch) {
+    const expectedMatchHash = await sha256({
+      verification_id: record.verification_id,
+      request_id: record.request_id,
+      request_packet_payload_sha256: record.request_packet_payload_sha256,
+      proposal_id: record.proposal_id,
+      snapshot_id: record.snapshot_id,
+      snapshot_payload_sha256: record.snapshot_payload_sha256,
+      company_id: record.company_id,
+      repository_claim_match: record.repository_claim_match,
+      base_head_claim_match: record.base_head_claim_match,
+      changed_files_claim_match: record.changed_files_claim_match,
+      exact_head_ci_claim_match: record.exact_head_ci_claim_match,
+      snapshot_integrity_match: record.snapshot_integrity_match,
+      verified_at: record.verified_at
+    });
+    invariant(
+      record.record_class === "UNATTESTED_COMPANY_AUTHORITY_REVIEW_SNAPSHOT_MATCH_CANDIDATE"
+        && record.status === "CLAIMS_MATCH_UNATTESTED_READ_ONLY_SNAPSHOT_AWAITING_TRUSTED_GITHUB_PROVENANCE"
+        && record.source_transport_attested === false
+        && record.repository_snapshot_verified === false
+        && record.proposal_provenance_verified === false
+        && record.exact_head_ci_verified === false
+        && record.reviewer_identity_verified === false
+        && record.reviewer_independence_verified === false
+        && record.counts_as_distinct_review === false
+        && record.activation_authorized === false
+        && record.match_payload_sha256 === expectedMatchHash,
+      "COMPANY_AUTHORITY_SNAPSHOT_MATCH_NOT_PROVENANCE",
+      "Snapshot match history accepts only an unattested non-authoritative match candidate"
+    );
+  }
   if (isAuthorityReviewCandidate) {
     invariant(
       record.record_class === "UNVERIFIED_COMPANY_AUTHORITY_GOVERNANCE_REVIEW_CANDIDATE"
@@ -872,7 +1018,7 @@ export async function appendEmploymentPhase1BCompanyEvent({ store, company, even
     event_type: eventType, actor_id: actorId, timestamp,
     payload: {
       record_id: recordId,
-      record_class: isAuthorityReviewRequest || isAuthorityReviewCandidate
+      record_class: isAuthorityReviewRequest || isAuthoritySnapshotMatch || isAuthorityReviewCandidate
         ? "PHASE_1B_SIMULATION_CANDIDATE"
         : record.repository_bound_authority_verified === true
           ? "REPOSITORY_BOUND_OPERATIONAL_RECORD"

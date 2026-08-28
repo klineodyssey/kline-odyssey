@@ -103,6 +103,7 @@ import {
   , KAIOS_AI_OS_EMPLOYMENT_ALPHA_JOB, KAIOS_AI_OS_FIRST_REAL_EMPLOYMENT_TEST_JOB, KAIOS_MAINNET_TOKEN,
   CANONICAL_REPOSITORY_COMPANY_AUTHORITIES, COMPANY_OPERATIONAL_AUTHORITY_PROPOSAL_SCOPES,
   createRepositoryCompanyAuthorityProposal, createCompanyAuthorityReviewRequestPacket,
+  createReadOnlyGitHubRepositorySnapshotCandidate, verifyCompanyAuthorityReviewRequestSnapshotMatch,
   createCompanyAuthorityProposalReviewCandidate,
   verifyRepositoryBoundCompanyAuthority,
   createEmploymentIdentityChallenge,
@@ -3227,6 +3228,65 @@ test("V4.3 authority review request packet is hash-bound, replay-safe and never 
       record: { ...packet, head_sha_claim: "c".repeat(40) }
     }),
     (error) => error.code === "COMPANY_AUTHORITY_REVIEW_REQUEST_NOT_AUTHORITY"
+  );
+});
+
+test("V4.3 read-only GitHub snapshot candidate matches exact-head claims without becoming provenance", async () => {
+  const proposal = createRepositoryCompanyAuthorityProposal({
+    proposalId: "COMPANY_AUTHORITY_PROPOSAL_SNAPSHOT_TEST_001", companyId: "AI_ANT_COMPANY_0001",
+    candidateActorId: "COMPANY_OPERATOR_CANDIDATE_005", candidateControllerId: "COMPANY_CONTROLLER_CANDIDATE_005",
+    role: "COMPANY_EMPLOYMENT_OPERATOR_CANDIDATE", policyVersion: "KAIOS_FIRST_REAL_EMPLOYMENT_TEST_V1",
+    requestedScopes: ["COMPANY_INTERVIEW"], validFrom: "2026-08-29T06:01:00.000Z", validUntil: "2026-08-29T07:01:00.000Z",
+    evidence: ["PR_191_REVIEW_REQUIRED"], exactRepositoryVersion: "6".repeat(40),
+    proposedBy: "COMPANY_GM_CLAIM_005", proposedAt: "2026-08-29T06:00:00.000Z"
+  });
+  const packet = await createCompanyAuthorityReviewRequestPacket({
+    requestId: "COMPANY_AUTHORITY_REVIEW_REQUEST_002", proposal, repository: "klineodyssey/kline-odyssey",
+    baseShaClaim: "a".repeat(40), headShaClaim: "b".repeat(40),
+    changedFilesClaim: ["core/company/index.mjs", "tests/universal-exchange.test.mjs"],
+    ciRunIdsClaim: ["33216337044", "33216340962"],
+    requiredReviewCapabilities: ["AUTHORITY_BOUNDARY_REVIEW", "CI_REVIEW"], requestedAt: "2026-08-29T06:02:00.000Z"
+  });
+  const snapshot = await createReadOnlyGitHubRepositorySnapshotCandidate({
+    snapshotId: "GITHUB_PR191_SNAPSHOT_001", repository: "klineodyssey/kline-odyssey",
+    mainSha: "9".repeat(40), prNumber: 191, baseSha: packet.base_sha_claim, headSha: packet.head_sha_claim,
+    changedFiles: [...packet.changed_files_claim],
+    checks: packet.ci_run_ids_claim.map((runId) => ({ run_id: runId, name: "test", head_sha: packet.head_sha_claim, status: "COMPLETED", conclusion: "SUCCESS" })),
+    observedAt: "2026-08-29T06:03:00.000Z"
+  });
+  const match = await verifyCompanyAuthorityReviewRequestSnapshotMatch({ verificationId: "COMPANY_AUTHORITY_SNAPSHOT_MATCH_001", requestPacket: packet, snapshot, verifiedAt: "2026-08-29T06:04:00.000Z" });
+  assert.equal(match.snapshot_integrity_match, true);
+  assert.match(match.request_packet_payload_sha256, /^[0-9a-f]{64}$/);
+  assert.match(match.snapshot_payload_sha256, /^[0-9a-f]{64}$/);
+  assert.match(match.match_payload_sha256, /^[0-9a-f]{64}$/);
+  assert.equal(match.exact_head_ci_claim_match, true);
+  assert.equal(match.source_transport_attested, false);
+  assert.equal(match.repository_snapshot_verified, false);
+  assert.equal(match.exact_head_ci_verified, false);
+  assert.equal(match.counts_as_distinct_review, false);
+  assert.equal(match.activation_authorized, false);
+
+  const { store, registries } = await runtime();
+  const company = await registries.company.get("AI_ANT_COMPANY_0001");
+  const eventInput = { store, company, eventType: "COMPANY_AUTHORITY_REVIEW_SNAPSHOT_MATCH_CANDIDATE_CREATED", record: match, actorId: "COMPANY_REPOSITORY_OBSERVER", timestamp: match.verified_at };
+  const first = await appendEmploymentPhase1BCompanyEvent(eventInput);
+  const replay = await appendEmploymentPhase1BCompanyEvent(eventInput);
+  assert.equal(first.event.payload.record_class, "PHASE_1B_SIMULATION_CANDIDATE");
+  assert.equal(replay.status, "IDEMPOTENT_NOOP");
+  await assert.rejects(
+    verifyCompanyAuthorityReviewRequestSnapshotMatch({
+      verificationId: "COMPANY_AUTHORITY_SNAPSHOT_MATCH_002", requestPacket: packet,
+      snapshot: { ...snapshot, head_sha: "c".repeat(40) }, verifiedAt: "2026-08-29T06:05:00.000Z"
+    }),
+    (error) => error.code === "GITHUB_REPOSITORY_SNAPSHOT_INTEGRITY_MISMATCH"
+  );
+  await assert.rejects(
+    verifyCompanyAuthorityReviewRequestSnapshotMatch({
+      verificationId: "COMPANY_AUTHORITY_SNAPSHOT_MATCH_003",
+      requestPacket: { ...packet, head_sha_claim: "c".repeat(40) }, snapshot,
+      verifiedAt: "2026-08-29T06:06:00.000Z"
+    }),
+    (error) => error.code === "COMPANY_AUTHORITY_REVIEW_REQUEST_INTEGRITY_MISMATCH"
   );
 });
 
