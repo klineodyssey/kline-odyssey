@@ -96,7 +96,7 @@ The worker must then stop without changing WorkQueue, creating a branch, editing
 - Reviewer / Approval Authority: UNASSIGNED_HUMAN_AUTHORITY_REQUIRED
 - Authority Evidence: NONE_BOUND_TO_THIS_WORKORDER
 - Evidence refreshed against main `d747b8c7bcf3b48172d42f9f3569b06ed512c09b` on 2026-08-28 Asia/Taipei.
-- First qualification case: PR `#190` exact head `58c0c7188efcf0fa6e4cc0045d73740b180ef186`, OPEN / DRAFT, exact-head CI PASS, submitted reviews `0`; implementer `codex-gm-01` cannot act as its distinct reviewer.
+- First qualification case: PR `#190` exact head `5fd3f34fe4817979b1fcd126ef803e01ae5a3e00`, OPEN / DRAFT, exact-head CI `248/248 PASS`, submitted reviews `0`; implementer `codex-gm-01` cannot act as its distinct reviewer.
 - Existing pending review demand also includes PR `#170` and PR `#169`; no case may use its implementer or same controller as the distinct reviewer.
 - Claim State: NOT_CLAIMABLE
 - Branch State: NOT_CREATED

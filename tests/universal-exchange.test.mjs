@@ -2891,7 +2891,7 @@ test("distinct-review workforce gap remains fail-closed without an eligible exte
   assert.match(workQueue, /UNASSIGNED_HUMAN_AUTHORITY_REQUIRED/);
   assert.match(workQueue, /Authority Evidence: NONE_BOUND_TO_THIS_WORKORDER/);
   assert.match(workQueue, /PR `#183` exact head `179bfa8e0219774fde9f9d7bd3668ad42c1a8d2b`/);
-  assert.match(workQueue, /First qualification case: PR `#190` exact head `58c0c7188efcf0fa6e4cc0045d73740b180ef186`/);
+  assert.match(workQueue, /First qualification case: PR `#190` exact head `5fd3f34fe4817979b1fcd126ef803e01ae5a3e00`/);
   assert.match(workQueue, /KAIOS_AI_COMPANY_INDEPENDENT_REVIEWER_QUALIFICATION_EXAM_V1/);
   assert.match(workQueue, /JOB_OPENING_CANDIDATE_NOT_PUBLISHED/);
 });
@@ -2953,10 +2953,10 @@ test("V4.2 reviewer exam fails critical safety errors, weak security and control
 
 test("V4.2 GM Secretary reconciles PR190 without impersonating GM or publishing false product states", () => {
   const snapshot = reconcileGmOperationsSecretary({
-    local_head: "58c0c7188efcf0fa6e4cc0045d73740b180ef186",
-    github_head: "58c0c7188efcf0fa6e4cc0045d73740b180ef186",
+    local_head: "5fd3f34fe4817979b1fcd126ef803e01ae5a3e00",
+    github_head: "5fd3f34fe4817979b1fcd126ef803e01ae5a3e00",
     main_head: "d747b8c7bcf3b48172d42f9f3569b06ed512c09b",
-    pr: { number: 190, head: "58c0c7188efcf0fa6e4cc0045d73740b180ef186", state: "OPEN", is_draft: true, ci_state: "PASS", review_state: "UNREVIEWED", product_state: "REVIEW_CANDIDATE" },
+    pr: { number: 190, head: "5fd3f34fe4817979b1fcd126ef803e01ae5a3e00", state: "OPEN", is_draft: true, ci_state: "PASS", review_state: "UNREVIEWED", product_state: "REVIEW_CANDIDATE" },
     website_products: [{ product_id: "KAIOS_ATM_APP", display_status: "DRAFT_PRODUCT" }, { product_id: "KAIOS_NAVIGATION_APP", display_status: "UNDER_REVIEW" }],
     company_queues: { workqueue: "REVIEWER_CAPACITY_HOLD", reviewqueue: "PR190_PENDING_DISTINCT_REVIEW" },
     financial_report: { revenue: 0, settlement_evidence: null },
