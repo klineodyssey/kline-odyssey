@@ -230,7 +230,7 @@ The current 16-workstream order is: Genesis/PR lineage; Cursor offboarding; dist
 
 Engineering candidates may proceed on isolated Draft branches. Real trade, payment, deployment and governance stay fail-closed unless the corresponding signer, budget, inventory, counterparty, settlement and independent-review gates are all machine-verifiably satisfied.
 
-Checkpoint classification at `2026-08-27T12:37:23Z`:
+Checkpoint classification refreshed at `2026-08-28T01:23:19Z`:
 
 | # | Workstream | Durable candidate/evidence | Current state |
 |---|---|---|---|
@@ -327,27 +327,27 @@ Therefore:
 - every unresolved question is explicit;
 - `CURRENT` files must be cumulative and must not require archaeological reconstruction from old chat pages.
 
-## 18. GitHub PR lineage checkpoint — 2026-08-27
+## 18. GitHub PR lineage checkpoint — 2026-08-28
 
-Observed at `2026-08-27T12:37:23Z` against `origin/main = 830b79214781fb1231f3619336de394f400a0bfd`.
+Observed at `2026-08-28T01:23:19Z` against `origin/main = db3b6368139154cbfa1cabd322b80f0cb1307bcc`.
 
-The remembered counts of 27 and 36 open PRs are superseded. GitHub reported 38 open PRs at this checkpoint. A green workflow means tests passed at that head; it is not an independent review, deployment claim or merge authorization.
+The remembered counts of 27, 36 and 38 open PRs are superseded. GitHub reported 36 open PRs at this checkpoint. A green workflow means tests passed at that head; it is not an independent review, deployment claim or merge authorization. Divergence is point-in-time evidence and changes whenever `main` or a PR head advances.
 
-### Current-base candidates (0 commits behind main)
+### Current open candidates and exact-head evidence
 
-`#188, #187, #185, #183, #182, #180, #179, #176, #172, #170, #162, #161, #158`
+At this checkpoint, #183, #176, #173, #172 and #171 were zero commits behind `main`. #187 was then non-destructively synchronized to that same `main` in this branch. Other open candidates require their own fresh divergence check before review or integration.
 
-- #188 exact head `e885542337873fa8fc1256d70ffd17d5f4ef3726` cumulatively integrates #169, #178, #179, #180, #181 and #185 on current main; ahead 74 / behind 0, 36 files, `+4035 / -113`. It preserves the assigned `0.00011520` K11520 company/KGEN-price coordinate without seeding matched-trade CT, combines the paper market, listing/warehouse gates and browser-safe mobile wallet, and keeps the GPU atomic-settlement candidate fail-closed with no payload, signer request, payment, inventory transfer, revenue recognition or Mainnet transaction. Fixed, closed-schema repository sources still record zero accepted GPU inventory and zero funded segregated trading-capital accounts; `REPOSITORY_BOUND_GPU_EVIDENCE_VERIFIER_NOT_WIRED` remains unconditional. Frozen source commit `9492d73aaac7a9cee2cf9b813aa78468719aadcd`, its Solidity `0.8.24` compile evidence, exact proxy/runtime hashes and two deterministic UUPS `__self` immutable offsets are now repository-bound. The fixed-endpoint, three-confirmation quorum may therefore verify `VERIFIED_HISTORICAL_V1_RUNTIME_IDENTITY` and the historical V1 governance-authorized 18888 KAIOS payment capability to the fixed Brain; caller-selected RPC or transport remains only a schema probe and cannot obtain authority. This verification does not turn V1 into GPU settlement: it remains `INCOMPATIBLE_WITH_ATOMIC_GPU_TRADE_SETTLEMENT`, the production GPU adapter remains `NOT_IMPLEMENTED`, and real GPU trade remains disabled. Exact-head Universal CI `33083972537` and Product QA `33083972598` are green; the superseded intermediate failure `33083823336` was a stale cache-key assertion and does not apply to the final head. These checks are not independent review, deployment action or execution authority. #188 remains Draft / HOLD P1 pending distinct review, independently verified inventory/ownership/warehouse evidence, funded segregated capital, production market/settlement, a reviewed Policy Broker, secure signer and no-broadcast fork evidence.
+- #188 exact head `1491e4f5ca932da38df31fdb79127fc87ef44c2a` cumulatively integrates #169, #178, #179, #180, #181 and #185; ahead 88 / behind 1 at this checkpoint. It preserves the assigned `0.00011520` K11520 company/KGEN-price coordinate without seeding matched-trade CT, combines the paper market, listing/warehouse gates and browser-safe mobile wallet, and keeps the GPU atomic-settlement candidate fail-closed with no payload, signer request, payment, inventory transfer, revenue recognition or Mainnet transaction. Fixed, closed-schema repository sources still record zero accepted GPU inventory and zero funded segregated trading-capital accounts; `REPOSITORY_BOUND_GPU_EVIDENCE_VERIFIER_NOT_WIRED` remains unconditional. Frozen source commit `9492d73aaac7a9cee2cf9b813aa78468719aadcd`, its Solidity `0.8.24` compile evidence, exact proxy/runtime hashes and two deterministic UUPS `__self` immutable offsets are repository-bound. The fixed-endpoint, three-confirmation quorum may verify `VERIFIED_HISTORICAL_V1_RUNTIME_IDENTITY` and the historical V1 governance-authorized 18888 KAIOS payment capability to the fixed Brain; caller-selected RPC or transport remains only a schema probe and cannot obtain authority. This verification does not turn V1 into GPU settlement: it remains `INCOMPATIBLE_WITH_ATOMIC_GPU_TRADE_SETTLEMENT`, the production GPU adapter remains `NOT_IMPLEMENTED`, and real GPU trade remains disabled. Exact-head Universal push/PR CI `33088969692` / `33088976065`, exact-head verification `33088976573` and Product QA `33088976069` are green. These checks are not independent review, deployment action or execution authority. #188 remains Draft / HOLD P1 pending distinct review, independently verified inventory/ownership/warehouse evidence, funded segregated capital, production market/settlement, a reviewed Policy Broker, secure signer and no-broadcast fork evidence.
 - #187 is this lineage reconciliation candidate. It is evidence/documentation only and cannot approve itself.
 - #186 is the unsigned/read-only 18888 Public Good payment adapter; live read is fail-closed because the tested Mother/Jade addresses do not hold the bank payment roles.
 - #185 is the mobile chain-56 wallet/watch-asset candidate; it sends no token transaction and does not claim a KAIOS DEX pair exists.
 - #184 is the cumulative Mainnet address manifest candidate and supersedes the compact-document role of #167 without deleting #167 history.
 - #178 remains stacked on #169 and is PAPER inventory/market only.
-- #183 exact head is `19fc10c086e0cb49f99356d432ed3a75f47c2eac`; it is a neutral T1 onboarding proposal HOLD, not a Life birth, Worker registration, T2 promotion or employment grant.
+- #183 exact head is `179bfa8e0219774fde9f9d7bd3668ad42c1a8d2b`; it is a neutral T1 onboarding proposal HOLD, not a Life birth, Worker registration, T2 promotion or employment grant. Exact-head push/PR proposal-safety CI `33126296739` / `33126299765` are green.
 - #158 remains an undeployed review candidate; catalyst bank, half-life seconds and legacy compatibility are deployment blockers.
-- #161 is synchronized to current main at `fbb36f50034c1d6ccf0eca0064bcab9d9d50ac4d`; its paper-only circulatory and cross-market engine passed exact-head CI, but real execution remains disabled.
-- #170 is synchronized to current main at `366ee1ba00f61ed5ff16192d9cb3df7b8fad5641`; 271/271 local tests and exact-head push/PR CI `33085748987` / `33085751970` pass. Reviewer independence now requires distinct Worker, Life and controller identities; Review Queue items cannot bypass the R0/R1 risk gate; and the selected task must match the observed repository, PR, branch and exact head before local persistence. Canonical Registry/WorkQueue/task-envelope provenance, shared Claim authority, wake/review connectors and distinct independent review remain unavailable.
-- #179 exact head is `d88ed1bfbee8b495b3bfb776b865cbb061384309`; its committed BSC supply snapshot is block `118374207` and all external metadata submissions remain unperformed.
+- #161 exact head is `a07b83ef82fed8380827921912534a7e3ad8adc2`; its paper-only circulatory and cross-market engine remains Draft, and real execution remains disabled. Its divergence and CI must be freshly rechecked before review.
+- #170 exact head is `9a2a20fe58568bd4c9a61d08f8e8d54d85efd1ad`; 272/272 local tests and exact-head push/PR CI `33086236891` / `33086240479` pass. It was ahead 17 / behind 1 at this checkpoint. Reviewer independence requires distinct Worker, Life and controller identities; Review Queue items cannot bypass the R0/R1 risk gate; and the selected task must match the observed repository, PR, branch and exact head before local persistence. Canonical Registry/WorkQueue/task-envelope provenance, shared Claim authority, wake/review connectors and distinct independent review remain unavailable.
+- #179 exact head is `d88ed1bfbee8b495b3bfb776b865cbb061384309`; it was ahead 9 / behind 1 at this checkpoint. Its committed BSC supply snapshot is block `118374207` and all external metadata submissions remain unperformed.
 - #180 records a read-only Pancake V2 factory observation of no KAIOS/WBNB pair. A later fixed-transport RPC quorum observed zero-address KAIOS/WBNB, KAIOS/KGEN and KAIOS/USDT pairs at block `118404108` (`2026-08-27T15:01:55Z`). These are timestamped observations, not permanent market claims or authorization to create liquidity.
 
 ### Fresh BSC read-only circulation checkpoint
@@ -388,15 +388,16 @@ Evidence class is `RPC_QUORUM_VERIFIED_READ_ONLY`. The production evaluator does
 
 These branches must be resynchronized whenever `main` advances semantically, then re-run exact-head CI.
 
-### One-to-two-behind, stale or stacked candidates requiring reconciliation
+### Stale, divergent or stacked candidates requiring reconciliation
 
-`#186, #184, #181, #178, #177, #174, #173, #171, #169, #168, #167, #166, #165, #164, #163, #160, #159, #154, #153, #152, #136, #135, #134, #133, #48`
+`#188, #186, #185, #184, #182, #181, #180, #179, #178, #177, #174, #170, #169, #168, #167, #166, #165, #164, #163, #162, #161, #160, #159, #158, #154, #153, #152, #136, #135, #134, #133, #48`
 
 - #163 security review remains an independent dependency. #164 and #165 must not substitute for it.
-- #164/#165 share registry surfaces and require schema/merge reconciliation plus a distinct reviewer.
+- #164 exact head `d36954801f43c76a81dd7f907cbc1dcbe6edb071` and #165 exact head `8160a59afccac539504306cd78ce08df224ef0b0` share registry surfaces and require schema/merge reconciliation plus a distinct reviewer. #164 exact-head Universal/validation CI `33127352611` / `33127354413` are green but do not resolve that governance dependency.
 - #170 cannot receive final approval from its own implementer; #171 records the unresolved distinct-reviewer capacity gap.
-- #169 is two commits behind current main, but its latest semantics and tests are cumulatively integrated on current main by #188; preserve #169 as dependency history rather than silently merging it alone.
-- #167 is 93 commits behind; use #184 for the cumulative address-manifest review candidate.
+- #173 exact head `629ba1b8a333dbcae988ce0454320a1efd36e997` is zero commits behind main and has green exact-head Universal/CURRENT-lineage CI `33130602041` / `33130604373`; it remains unmerged and cannot be treated as main.
+- #169 was divergent from current main at this checkpoint, but its latest semantics and tests are cumulatively integrated by #188; preserve #169 as dependency history rather than silently merging it alone.
+- #167 is a stale compact address-manifest candidate; use #184 for cumulative review while preserving #167 as history.
 - #135 -> #136 -> #152 -> #153 -> #154 is historical stacked lineage. Preserve deployed evidence, but do not wholesale merge the stack into current `main`.
 - #133/#134 and #48 are old independent candidates hundreds of commits behind; require explicit product-owner disposition, not silent merge.
 
