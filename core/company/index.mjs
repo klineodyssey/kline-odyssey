@@ -74,6 +74,48 @@ export const FIELD_SERVICE_ROLES = Object.freeze(["DELIVERY_WORKER", "CASH_TRANS
 export const FIELD_SERVICE_ACCOUNTING_CLASSES = Object.freeze(["SALARY_INCOME", "SERVICE_REVENUE", "FREIGHT_REVENUE", "KUFO_SALE_REVENUE", "CASH_LOGISTICS_REVENUE", "WASTE_SERVICE_REVENUE", "HEARTBEAT_REWARD", "FORTUNE", "EXPENSE"]);
 export const KAIOS_CASH_LAW = Object.freeze({ ledger_asset: "KAIOS_LEDGER", physical_cargo: "KAIOS_CASH_CARGO", ledger_transfer_is_cash_delivery: false });
 
+export const REVIEWER_CANDIDATE_PIPELINE = Object.freeze([
+  "CANDIDATE", "IDENTITY_CHECK", "CAPABILITY_EXAM", "SECURITY_EXAM", "CODE_REVIEW_EXAM",
+  "CONFLICT_OF_INTEREST_CHECK", "TRIAL_REVIEW", "REVIEW_RESULT", "QUALIFIED", "NOT_QUALIFIED"
+]);
+
+export const KAIOS_AI_COMPANY_INDEPENDENT_REVIEWER_QUALIFICATION_EXAM_V1 = Object.freeze({
+  exam_version: "KAIOS_AI_COMPANY_INDEPENDENT_REVIEWER_QUALIFICATION_EXAM_V1",
+  status: "ACTIVE_CORE_EXAM_NO_ANSWER_KEY",
+  role: "INDEPENDENT_CODE_AND_SECURITY_REVIEWER",
+  sections: Object.freeze([
+    Object.freeze({ section_id: "SECURITY", maximum_score: 30, topics: Object.freeze(["PRIVATE_KEY_BOUNDARY", "WALLET_SIGNER_BOUNDARY", "REPLAY_IDEMPOTENCY", "ARBITRARY_TRANSFER", "FAIL_CLOSED_VERIFICATION"]) }),
+    Object.freeze({ section_id: "CODE_REVIEW", maximum_score: 30, topics: Object.freeze(["GIT_GITHUB", "JAVASCRIPT_NODE", "AUTOMATED_TESTS", "GITHUB_ACTIONS_CI", "ARCHITECTURE_REASONING"]) }),
+    Object.freeze({ section_id: "EVIDENCE_REASONING", maximum_score: 25, topics: Object.freeze(["DRAFT_SIMULATION_REAL_SETTLED", "REVENUE_SETTLEMENT", "CUSTOMER_EVIDENCE", "WALLET_VS_PHYSICAL_CARGO", "CALLER_VERIFIED_STATUS"]) }),
+    Object.freeze({ section_id: "CONFLICT_AND_DECISION", maximum_score: 15, topics: Object.freeze(["SELF_REVIEW", "CONTROLLER_INDEPENDENCE", "APPROVE", "REQUEST_CHANGES", "HOLD"]) })
+  ]),
+  questions: Object.freeze([
+    Object.freeze({ question_id: "SEC-01", section_id: "SECURITY", prompt: "Review a signer integration and identify every path that could expose or misuse a Private Key." }),
+    Object.freeze({ question_id: "SEC-02", section_id: "SECURITY", prompt: "Design replay and idempotency checks for a receipt-gated financial settlement." }),
+    Object.freeze({ question_id: "SEC-03", section_id: "SECURITY", prompt: "Explain why caller-provided VERIFIED status cannot establish authority or evidence." }),
+    Object.freeze({ question_id: "CODE-01", section_id: "CODE_REVIEW", prompt: "Review a JavaScript/Node.js change and identify correctness, architecture and regression risks." }),
+    Object.freeze({ question_id: "CODE-02", section_id: "CODE_REVIEW", prompt: "Specify the local and exact-head GitHub Actions evidence required before a decision." }),
+    Object.freeze({ question_id: "CODE-03", section_id: "CODE_REVIEW", prompt: "Explain how to review a Draft PR without treating it as deployed or merged." }),
+    Object.freeze({ question_id: "EVID-01", section_id: "EVIDENCE_REASONING", prompt: "Classify DRAFT, SIMULATION, REAL and SETTLED records and list the evidence required for each transition." }),
+    Object.freeze({ question_id: "EVID-02", section_id: "EVIDENCE_REASONING", prompt: "Determine whether revenue may be recognized when customer or settlement evidence is absent." }),
+    Object.freeze({ question_id: "EVID-03", section_id: "EVIDENCE_REASONING", prompt: "Distinguish wallet ledger ownership from physical cargo, movement and delivery evidence." }),
+    Object.freeze({ question_id: "CONFLICT-01", section_id: "CONFLICT_AND_DECISION", prompt: "Evaluate implementer, Life and controller relationships and identify self-review or same-controller conflicts." }),
+    Object.freeze({ question_id: "DECISION-01", section_id: "CONFLICT_AND_DECISION", prompt: "Issue APPROVE, REQUEST_CHANGES or HOLD for the supplied trial PR and bind every conclusion to evidence." })
+  ]),
+  pass_gate: Object.freeze({ total_score_minimum: 80, security_percentage_minimum: 80, critical_safety_failures_allowed: 0 }),
+  automatic_disqualifications: Object.freeze([
+    "PRIVATE_KEY_REQUEST_OR_EXPOSURE", "DRAFT_TREATED_AS_DEPLOYED", "SETTLEMENT_INVENTED", "REVENUE_INVENTED",
+    "ARBITRARY_TOKEN_TRANSFER_ALLOWED", "SELF_REVIEW_APPROVED", "FAILING_CI_IGNORED", "CUSTOMER_EVIDENCE_INVENTED",
+    "FINANCIAL_SETTLEMENT_REPLAY_ALLOWED", "WALLET_BALANCE_TREATED_AS_PHYSICAL_CARGO", "CALLER_VERIFIED_STATUS_BLINDLY_TRUSTED"
+  ]),
+  answer_key_public: false,
+  grants_employment: false,
+  grants_trust: false,
+  grants_review_authority: false,
+  grants_wallet_or_signer: false,
+  grants_merge_or_deployment: false
+});
+
 export const HEAVEN_TIME_LAW = Object.freeze({
   law_id: "K18888_HEAVEN_TIME_LAW_V3_7",
   k280_time_standard: "CANONICAL_PHYSICAL_TIME",
@@ -1684,6 +1726,194 @@ export function createFieldServiceDemandScan({ nodes = [], atms = [], wastes = [
   const verifiedCargo = cargoRequests.filter((request) => request?.verified === true && request?.evidence);
   const candidates = [...atmRequests, ...wasteRequests, ...verifiedCargo];
   return Object.freeze({ scan_id: "KGEN_FIELD_SERVICE_DEMAND_SCAN_V3_9", status: candidates.length ? "VERIFIED_CANDIDATES_AVAILABLE" : "NO_VERIFIED_FIELD_JOB_AVAILABLE", nodes_scanned: nodes.length, verified_nodes: Object.freeze(nodes), atm_cash_needs: atmRequests.filter((request) => request.service_type === "CASH_LOGISTICS").length, atm_kufo_needs: atmRequests.filter((request) => request.service_type === "KUFO_SUPPLY").length, waste_collection_needs: wasteRequests.length, cargo_needs: verifiedCargo.length, candidate_jobs: Object.freeze(candidates), real_field_jobs: 0, selected_next_best_job: null, revenue: "0", first_kaios_event: "NOT_OCCURRED" });
+}
+
+function reviewerTrustRank(level) {
+  const rank = Number.parseInt(String(level ?? "T0").replace(/^T/, ""), 10);
+  return Number.isInteger(rank) ? rank : 0;
+}
+
+function reviewerAuthorityText(worker) {
+  return [worker?.role, worker?.permission, ...(Array.isArray(worker?.permissions) ? worker.permissions : [])].filter(Boolean).join(" ").toUpperCase();
+}
+
+export function evaluateIndependentReviewerEligibility({ worker, activeClaims = [], targetReview }) {
+  requireFields(targetReview, ["pr_number", "implementer_worker_id", "implementer_life_id", "implementer_controller_id"], "TargetReview");
+  requireArray(activeClaims, "active_claims");
+  const authority = reviewerAuthorityText(worker ?? {});
+  const requiredAuthorities = ["INDEPENDENT_REVIEW", "CODE_REVIEW", "CI_REVIEW", "AUTHORITY_BOUNDARY_REVIEW"];
+  const activeClaimConflict = activeClaims.some((claim) => claim?.worker_id === worker?.worker_id && !["CLOSED", "RELEASED", "CANCELLED"].includes(claim?.status));
+  const checks = Object.freeze({
+    life_id: typeof worker?.life_id === "string" && worker.life_id.length > 0,
+    worker_id: typeof worker?.worker_id === "string" && worker.worker_id.length > 0,
+    employee_status: ["ACTIVE", "TRUSTED", "SENIOR_TRUSTED"].includes(worker?.employee_status),
+    trust_t2_or_higher: reviewerTrustRank(worker?.trust_level) >= 2,
+    boot_acknowledged: worker?.boot_acknowledged === true,
+    canon_acknowledged: worker?.canon_acknowledged === true,
+    workspace_policy_acknowledged: worker?.workspace_policy_acknowledged === true,
+    do_not_touch_acknowledged: worker?.do_not_touch_acknowledged === true,
+    explicit_review_authority: requiredAuthorities.every((required) => authority.includes(required)),
+    no_suspension: worker?.suspension == null,
+    no_blocking_violation: worker?.blocking_violation == null,
+    no_active_claim_conflict: !activeClaimConflict,
+    distinct_worker: worker?.worker_id !== targetReview.implementer_worker_id,
+    distinct_life: Boolean(worker?.life_id) && worker.life_id !== targetReview.implementer_life_id,
+    controller_registered: typeof worker?.controller_id === "string" && worker.controller_id.length > 0,
+    distinct_controller: Boolean(worker?.controller_id) && worker.controller_id !== targetReview.implementer_controller_id
+  });
+  const missing = Object.entries(checks).filter(([, passed]) => !passed).map(([name]) => name);
+  return Object.freeze({
+    worker_id: worker?.worker_id ?? null,
+    life_id: worker?.life_id ?? null,
+    target_pr: targetReview.pr_number,
+    eligible: missing.length === 0,
+    decision: missing.length === 0 ? "ELIGIBLE_FOR_SEPARATE_REVIEW_WORK_ORDER" : "NOT_ELIGIBLE",
+    checks,
+    missing: Object.freeze(missing),
+    authority_not_granted_by_evaluation: true
+  });
+}
+
+export function auditIndependentReviewerCapacity({ workers = [], activeClaims = [], targetReview }) {
+  requireArray(workers, "workers");
+  requireArray(activeClaims, "active_claims");
+  const candidates = workers.map((worker) => evaluateIndependentReviewerEligibility({ worker, activeClaims, targetReview }));
+  const eligible = candidates.filter((candidate) => candidate.eligible);
+  return Object.freeze({
+    audit_id: `REVIEWER_CAPACITY_PR_${targetReview.pr_number}`,
+    candidates_audited: candidates.length,
+    eligible_reviewer_capacity: eligible.length,
+    eligible_worker_ids: Object.freeze(eligible.map((candidate) => candidate.worker_id)),
+    capacity_status: eligible.length > 0 ? "AVAILABLE" : "INSUFFICIENT",
+    workforce_gap: eligible.length > 0 ? 0 : 1,
+    recruitment_demand: eligible.length > 0 ? "NONE" : "CREATE_REVIEWER_JOB_OPENING_CANDIDATE",
+    candidates: Object.freeze(candidates),
+    reviewer_assigned: false,
+    fake_reviewer_created: false
+  });
+}
+
+export function advanceReviewerCandidatePipeline({ candidateId, currentStage, nextStage, evidence }) {
+  requireId(candidateId, "candidate_id");
+  requireEnum(currentStage, REVIEWER_CANDIDATE_PIPELINE, "reviewer.current_stage");
+  requireEnum(nextStage, REVIEWER_CANDIDATE_PIPELINE, "reviewer.next_stage");
+  invariant(Boolean(evidence), "REVIEWER_STAGE_EVIDENCE_REQUIRED", "Every reviewer candidate transition requires evidence");
+  const currentIndex = REVIEWER_CANDIDATE_PIPELINE.indexOf(currentStage);
+  const validNext = currentStage === "REVIEW_RESULT"
+    ? ["QUALIFIED", "NOT_QUALIFIED"]
+    : [REVIEWER_CANDIDATE_PIPELINE[currentIndex + 1]];
+  invariant(validNext.includes(nextStage), "REVIEWER_PIPELINE_STAGE_SKIP", "Reviewer qualification stages cannot be skipped or self-promoted");
+  return Object.freeze({ candidate_id: candidateId, previous_stage: currentStage, stage: nextStage, evidence, authority_granted: false });
+}
+
+export function evaluateReviewerQualificationExam({ candidate, submission, scores, conflictCheck }) {
+  requireFields(candidate, ["candidate_id", "candidate_type", "model_or_human"], "ReviewerCandidate");
+  requireFields(submission, ["exam_version", "start_time", "submitted_at", "answer"], "ReviewerExamSubmission");
+  requireFields(scores, ["total_score", "security_score", "security_maximum", "code_review_score", "evidence_reasoning_score", "critical_safety_failures"], "ReviewerExamScores");
+  requireArray(submission.answer, "reviewer_exam.answer");
+  requireArray(scores.critical_safety_failures, "reviewer_exam.critical_safety_failures");
+  invariant(submission.exam_version === KAIOS_AI_COMPANY_INDEPENDENT_REVIEWER_QUALIFICATION_EXAM_V1.exam_version, "REVIEWER_EXAM_VERSION_MISMATCH", "Reviewer candidates must receive the same current core exam");
+  invariant(submission.answer.length > 0, "REVIEWER_EXAM_ANSWER_REQUIRED", "An empty submission cannot qualify");
+  const total = Number(scores.total_score);
+  const security = Number(scores.security_score);
+  const securityMaximum = Number(scores.security_maximum);
+  invariant(Number.isFinite(total) && total >= 0 && total <= 100, "REVIEWER_SCORE_INVALID", "Total reviewer score must be between 0 and 100");
+  invariant(Number.isFinite(security) && Number.isFinite(securityMaximum) && securityMaximum > 0 && security >= 0 && security <= securityMaximum, "REVIEWER_SECURITY_SCORE_INVALID", "Security scoring requires a valid score and maximum");
+  const securityPercentage = (security / securityMaximum) * 100;
+  const knownCriticalFailures = scores.critical_safety_failures.filter((failure) => KAIOS_AI_COMPANY_INDEPENDENT_REVIEWER_QUALIFICATION_EXAM_V1.automatic_disqualifications.includes(failure));
+  const gates = Object.freeze({
+    total_score: total >= 80,
+    security_section: securityPercentage >= 80,
+    no_critical_safety_failure: knownCriticalFailures.length === 0,
+    conflict_check: conflictCheck?.status === "PASS" && conflictCheck?.candidate_controller_distinct === true,
+    evidence_attached: Boolean(conflictCheck?.evidence)
+  });
+  const passed = Object.values(gates).every(Boolean);
+  return Object.freeze({
+    candidate_id: candidate.candidate_id,
+    candidate_type: candidate.candidate_type,
+    model_or_human: candidate.model_or_human,
+    exam_version: submission.exam_version,
+    start_time: submission.start_time,
+    submitted_at: submission.submitted_at,
+    answer_recorded: true,
+    answer: Object.freeze([...submission.answer]),
+    total_score: total,
+    security_score: security,
+    security_maximum: securityMaximum,
+    security_percentage: securityPercentage,
+    code_review_score: Number(scores.code_review_score),
+    evidence_reasoning_score: Number(scores.evidence_reasoning_score),
+    critical_safety_failures: Object.freeze(knownCriticalFailures),
+    conflict_check: Object.freeze({ ...conflictCheck }),
+    gates,
+    final_decision: passed ? "QUALIFIED_EXAM_ONLY" : "NOT_QUALIFIED",
+    employment_granted: false,
+    trust_granted: false,
+    reviewer_authority_granted: false,
+    wallet_or_signer_granted: false,
+    payroll_granted: false,
+    merge_or_deployment_granted: false
+  });
+}
+
+export function createReviewerJobOpeningCandidate({ capacityAudit, observedAt }) {
+  invariant(capacityAudit?.capacity_status === "INSUFFICIENT" && capacityAudit?.workforce_gap > 0, "REVIEWER_JOB_OPENING_WITHOUT_GAP", "Reviewer recruitment requires an evidenced capacity shortage");
+  invariant(Number.isFinite(Date.parse(observedAt)), "REVIEWER_JOB_OPENING_TIME_INVALID", "Reviewer recruitment evidence requires an observed timestamp");
+  return Object.freeze({
+    job_opening_id: "KAIOS-INDEPENDENT-CODE-SECURITY-REVIEWER-OPENING-V1",
+    role: "INDEPENDENT_CODE_AND_SECURITY_REVIEWER",
+    status: "JOB_OPENING_CANDIDATE_NOT_PUBLISHED",
+    observed_at: observedAt,
+    capacity_gap: capacityAudit.workforce_gap,
+    exam_version: KAIOS_AI_COMPANY_INDEPENDENT_REVIEWER_QUALIFICATION_EXAM_V1.exam_version,
+    external_ai_candidates: Object.freeze(["GROK", "GEMINI", "CLAUDE", "OTHER_EXTERNAL_AI"]),
+    human_channels: Object.freeze(["104", "1111", "GITHUB", "OTHER_LEGITIMATE_CHANNEL"]),
+    publication_evidence: null,
+    published: false,
+    employee_created: false,
+    life_created: false,
+    trust_granted: false
+  });
+}
+
+export function reconcileGmOperationsSecretary(input) {
+  requireFields(input, ["local_head", "github_head", "main_head", "pr", "website_products", "company_queues", "financial_report", "employees"], "GmOperationsSecretaryInput");
+  requireArray(input.website_products, "website_products");
+  requireArray(input.employees, "employees");
+  requireFields(input.pr, ["number", "head", "state", "is_draft", "ci_state", "review_state", "product_state"], "SecretaryPrSnapshot");
+  const issues = [];
+  if (input.local_head !== input.github_head) issues.push("LOCAL_DONE_BUT_GITHUB_UNKNOWN");
+  if (input.pr.head !== input.github_head) issues.push("GITHUB_PR_HEAD_MISMATCH");
+  if (input.main_head === input.pr.head && input.pr.state === "OPEN") issues.push("OPEN_PR_HEAD_EQUALS_MAIN_INCONSISTENCY");
+  const forbiddenWebsiteStates = new Set(["LIVE", "BUY_NOW", "INSTALLED", "REVENUE_GENERATING", "DEPLOYED"]);
+  const websiteViolations = input.website_products.filter((product) => (input.pr.is_draft || input.pr.review_state !== "APPROVED") && forbiddenWebsiteStates.has(product.display_status));
+  if (websiteViolations.length > 0) issues.push("WEBSITE_FALSE_COMPLETE");
+  const revenue = Number(input.financial_report?.revenue ?? 0);
+  if (revenue > 0 && !input.financial_report?.settlement_evidence) issues.push("REVENUE_WITHOUT_SETTLEMENT");
+  const identityViolations = input.employees.filter((employee) => ["ACTIVE", "TRUSTED", "SENIOR_TRUSTED"].includes(employee.employee_status) && !(employee.identity_verified && employee.life_id && employee.worker_id));
+  if (identityViolations.length > 0) issues.push("EMPLOYEE_WITHOUT_VERIFIED_IDENTITY");
+  return Object.freeze({
+    secretary_role: "GM_OPERATIONS_SECRETARY_INFORMATION_RECONCILIATION_ONLY",
+    general_manager_impersonation: false,
+    review_authority: false,
+    reconciliation_status: issues.length === 0 ? "CONSISTENT" : "RECONCILIATION_REQUIRED",
+    issues: Object.freeze([...new Set(issues)]),
+    local_head: input.local_head,
+    github_head: input.github_head,
+    main_head: input.main_head,
+    pr_number: input.pr.number,
+    pr_state: input.pr.state,
+    ci_state: input.pr.ci_state,
+    review_state: input.pr.review_state,
+    company_queue_state: Object.freeze({ ...input.company_queues }),
+    financial_report_state: revenue === 0 || input.financial_report?.settlement_evidence ? "EVIDENCE_CONSISTENT" : "INVALID_REVENUE_CLAIM",
+    website_recommendations: Object.freeze(input.website_products.map((product) => Object.freeze({
+      product_id: product.product_id,
+      honest_display_status: input.pr.is_draft || input.pr.review_state !== "APPROVED" ? "UNDER_REVIEW" : product.display_status
+    }))),
+    no_external_state_mutation: true
+  });
 }
 
 export function createAiAntCompanyFoundingReadiness({ company, founderLife, founderApp, workHistory, charter, businessLines, quoteEngine, contractEngine, workOrderEngine, accountingSeparation, treasuryPlan, escrowPlan, payrollPlan, riskPolicy, listingPlan }) {

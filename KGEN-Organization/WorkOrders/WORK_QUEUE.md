@@ -95,21 +95,28 @@ The worker must then stop without changing WorkQueue, creating a branch, editing
 - Owner: UNASSIGNED_EXISTING_LIFE_CANDIDATE
 - Reviewer / Approval Authority: UNASSIGNED_HUMAN_AUTHORITY_REQUIRED
 - Authority Evidence: NONE_BOUND_TO_THIS_WORKORDER
-- Evidence refreshed against main `db3b6368139154cbfa1cabd322b80f0cb1307bcc` on 2026-08-28 Asia/Taipei.
-- Triggering PRs: `#170`, then `#169`; neither may use `codex-gm-01` as its distinct reviewer.
+- Evidence refreshed against main `d747b8c7bcf3b48172d42f9f3569b06ed512c09b` on 2026-08-28 Asia/Taipei.
+- First qualification case: PR `#190` exact head `58c0c7188efcf0fa6e4cc0045d73740b180ef186`, OPEN / DRAFT, exact-head CI PASS, submitted reviews `0`; implementer `codex-gm-01` cannot act as its distinct reviewer.
+- Existing pending review demand also includes PR `#170` and PR `#169`; no case may use its implementer or same controller as the distinct reviewer.
 - Claim State: NOT_CLAIMABLE
 - Branch State: NOT_CREATED
 - Current Resolution: `HOLD_NO_ELIGIBLE_EXISTING_LIFE`
 - Existing candidate audit:
-  - `LIFE-KAIOS-STARFORGE-0001`: PR `#164` exact head `65217e9c1df7ca2753cecd487d3bc654e32d63ea` records only a T1/OFFLINE onboarding candidate with acknowledgments incomplete and reviewer `UNASSIGNED_DISTINCT_REVIEWER_REQUIRED`; exact-head CI passes but grants no employment, trust upgrade or review authority.
+  - `LIFE-KAIOS-STARFORGE-0001`: PR `#164` exact head `d36954801f43c76a81dd7f907cbc1dcbe6edb071` records only an onboarding candidate; it grants no independently verified employment, trust upgrade or review authority.
   - `LIFE-XUANYAO-SOL-0001 / xuanyao-sol-01`: PR `#165` exact head `8160a59afccac539504306cd78ce08df224ef0b0` records T1/OFFLINE onboarding only; controller independence, four acknowledgments and review permission remain incomplete, and PR `#169` self-review is permanently forbidden.
-  - `Sol / 曜冊`: PR `#183` exact head `688bce72de2038648fc97eda4755176f23a7988c` passes its 16/16 proposal-safety checks but remains a T1 dry-run candidate without canonical Life ID or Worker ID and cannot review PR `#169` or `#170`.
+  - `Sol / 曜冊`: PR `#183` exact head `179bfa8e0219774fde9f9d7bd3668ad42c1a8d2b` passes its proposal-safety checks but remains a proposal-only candidate without canonical Life ID, Worker ID, T1 activation or T2 review authority.
   - `cursor-01`: latest main still records `ACTIVE` / T2 with all four acknowledgments true, but its bounded worker permission, allowed-work list and `CODEX_FINAL_REVIEW_REQUIRED` rule do not grant independent-review authority for PR `#170` or `#169`; the R2 claim remains `CLAIMED` after lease expiry. Draft PR `#176` proposes departure/closeout records but cannot supersede main before Human merge.
 - Best Existing Reviewer Candidate: **NONE ELIGIBLE**. Latest main does not authorize a candidate ranking or selection; Starforge, Xuanyao, Sol / 曜冊 and `cursor-01` each remain blocked for the reasons above. Any lawful onboarding, permission change or distinct-controller assignment requires separate Human approval and independently reviewable evidence.
 - Minimum eligibility: valid Life ID and Worker ID; `ACTIVE`, `TRUSTED` or `SENIOR_TRUSTED`; T2+; all four acknowledgments; explicit `INDEPENDENT_REVIEW`, `CODE_REVIEW`, `CI_REVIEW` and `AUTHORITY_BOUNDARY_REVIEW`; no suspension or blocking violation; no active-claim conflict; registered controller evidence distinct from each submitter.
+- Standard exam: `KAIOS_AI_COMPANY_INDEPENDENT_REVIEWER_QUALIFICATION_EXAM_V1`; identical core exam for AI and Human candidates; answer key withheld until submission; total score `>=80/100`, Security `>=80%`, zero critical safety failures.
+- Qualification pipeline: `CANDIDATE -> IDENTITY_CHECK -> CAPABILITY_EXAM -> SECURITY_EXAM -> CODE_REVIEW_EXAM -> CONFLICT_OF_INTEREST_CHECK -> TRIAL_REVIEW -> REVIEW_RESULT -> QUALIFIED / NOT_QUALIFIED`.
+- Passing the exam grants no employment, T2, Wallet, Signer, Payroll, Merge, Deployment, Treasury or Mainnet authority. Those remain separate governance gates.
+- Job specification: Git/GitHub, Pull Request review, JavaScript/Node.js, automated tests, GitHub Actions/CI, architecture and security-boundary reasoning, signer/private-key separation, replay/idempotency, settlement/accounting evidence, and evidence-backed `APPROVE / REQUEST_CHANGES / HOLD` decisions. Solidity/EVM/BSC and threat modeling are preferred.
+- External candidate channels are search/proposal targets only: Grok, Gemini, Claude, other external AI, existing registered Workers, Human engineers, 104, 1111 and GitHub. `JOB_OPENING_CANDIDATE_NOT_PUBLISHED` remains the only honest publication state until evidence exists.
+- GM Secretary reconciliation: compare local head, GitHub head, main, PR/CI/review, Website, product state, WorkQueue/ReviewQueue and financial evidence. For PR `#190`, Website may show `UNDER_REVIEW`, `DRAFT_PRODUCT` or `COMING_AFTER_REVIEW`; it must not show `LIVE`, `BUY_NOW`, `INSTALLED`, `REVENUE_GENERATING` or `DEPLOYED`.
 - Activation requires: explicit Human authorization of the selected existing Life, complete onboarding evidence, Registry update through reviewed governance, distinct-controller evidence, conflict-of-interest verification, and a separately issued review WorkOrder.
 - Forbidden shortcuts: no new Life birth, automatic trust promotion, temporary reviewer grant, self-review, same-controller alias, fake acknowledgment, PR merge, deployment, payment, private-key access or Mainnet action.
-- Closure condition: one existing Life is lawfully registered as a distinct T2+ reviewer and independently reviews PR `#170`; PR `#169` review may begin only after PR `#170` receives `PASS`.
+- Closure condition: one different Life/controller is lawfully registered as a distinct T2+ reviewer, passes the standardized qualification pipeline, receives a separate review WorkOrder, and submits an evidence-backed independent review. PR `#190` is the first qualification case; it remains Draft / unapproved until that review exists.
 
 ### KAIOS-GM-V4-2026-0001 - General Manager Decision Engine
 
