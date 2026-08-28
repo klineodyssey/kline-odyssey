@@ -5,7 +5,9 @@ const QUOTE_ASSET = "UNFROZEN_11520_NATIVE_QUOTE_CANDIDATE";
 const QUOTE_STATUS = "UNFROZEN_CANDIDATE";
 const QUOTE_DECIMALS = 18;
 const MARKET_CELL_COORDINATE = "0.00011520";
-const MARKET_CELL_COORDINATE_ROLE = "KGEN_UNIVERSE_PRICE_AND_COMPANY_ADDRESS";
+const MARKET_CELL_COORDINATE_ROLE = "CANDIDATE_KGEN_UNIVERSE_PRICE_AND_COMPANY_ADDRESS";
+const MARKET_CELL_COORDINATE_STATUS = "UNVERIFIED_CANDIDATE";
+const MARKET_CELL_COORDINATE_AUTHORITY = null;
 const COMPANY_ADDRESS = "0.00011520";
 const COMPANY_K_COORDINATE = "K11520";
 const KGEN_PRICE_COORDINATE_UNIT = "USD_PER_KGEN";
@@ -122,8 +124,9 @@ function bucketStart(timestampMs, intervalMs) {
  * PAPER_IN_MEMORY_CANDIDATE_NOT_ACTIVE_RUNTIME
  *
  * Canon / integrity boundary:
- * - `0.00011520` is the fixed K11520 Company address and KGEN Universe
- *   USD-per-KGEN price coordinate.
+ * - `0.00011520` is a preserved candidate K11520 Company-address and
+ *   USD-per-KGEN price-coordinate value. This module establishes no
+ *   repository-bound Human authority for that dual role.
  * - The fixed coordinate NEVER seeds, fixes or influences matched-trade CT.
  * - CT is undefined before the first valid matched trade.
  * - CT becomes exactly the most recent native 11520 matched trade price.
@@ -335,6 +338,9 @@ export function createKgenNativeMarketCell({
       marketId,
       marketCellCoordinate: MARKET_CELL_COORDINATE,
       marketCellCoordinateRole: MARKET_CELL_COORDINATE_ROLE,
+      marketCellCoordinateStatus: MARKET_CELL_COORDINATE_STATUS,
+      marketCellCoordinateAuthority: MARKET_CELL_COORDINATE_AUTHORITY,
+      repositoryBoundHumanCoordinateAuthority: false,
       companyAddress: COMPANY_ADDRESS,
       companyKCoordinate: COMPANY_K_COORDINATE,
       kgenUniversePriceCoordinate: MARKET_CELL_COORDINATE,
