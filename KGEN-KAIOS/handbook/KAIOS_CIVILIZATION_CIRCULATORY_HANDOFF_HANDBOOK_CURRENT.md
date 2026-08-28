@@ -235,7 +235,7 @@ Checkpoint classification refreshed at `2026-08-28T01:23:19Z`:
 | # | Workstream | Durable candidate/evidence | Current state |
 |---|---|---|---|
 | 1 | Genesis / Phase 2 / open-PR lineage | #187 plus deployed-history lineage #135/#136/#160/#184 | ENGINEERING_CURRENT; DISTINCT_REVIEW_PENDING |
-| 2 | Cursor R2 departure and claim closeout | #176 | CLOSED_FAIL_CLOSED; NO_DELIVERY; NO_PAYMENT |
+| 2 | Cursor R2 departure and claim closeout | #176 | CANDIDATE_CLOSEOUT_ONLY; MAIN_STILL_CLAIMED; NO_DELIVERY; NO_PAYMENT |
 | 3 | Distinct reviewer capacity | #171 and #183 | GOVERNANCE_HOLD; NO_ELIGIBLE_DIFFERENT_LIFE_AND_CONTROLLER_T2_REVIEWER |
 | 4 | K11520 native KGEN market | #169, cumulatively integrated by #188 | ENGINEERING_PASS; DRAFT; DISTINCT_REVIEW_PENDING |
 | 5 | NVIDIA GPU market pilot / real readiness | #178, cumulatively integrated by #188 | PAPER_PASS; REAL_INVENTORY_AND_SETTLEMENT_BLOCKED |
