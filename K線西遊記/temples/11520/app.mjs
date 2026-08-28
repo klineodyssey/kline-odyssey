@@ -541,8 +541,8 @@ function employmentAlphaProgress(state) {
   return [
     ["VERIFY IDENTITY", Boolean(state.identity)],
     ["APPLY", Boolean(state.application)],
-    ["INTERVIEW", state.interview?.status === "PASSED_ALPHA"],
-    ["HIRED", Boolean(state.contract)],
+    ["SAFETY SELF-CHECK", state.interview?.status === "CANDIDATE_SAFETY_SELF_CHECK_PASSED"],
+    ["ALPHA CANDIDATE", Boolean(state.contract)],
     ["ACCEPT MISSION", state.mission?.status === "ACCEPTED_ALPHA" || state.mission?.status === "VERIFIED_ALPHA"],
     ["VERIFY WORK", state.mission?.status === "VERIFIED_ALPHA"],
     ["EARN KAIOS", (state.earnings?.length ?? 0) > 0]
@@ -557,18 +557,18 @@ async function jobsView() {
   const mission = state.mission;
   const earning = state.earnings?.at(-1);
   const progress = employmentAlphaProgress(state);
-  return `${hero("KAIOS CIVILIZATION AI OS · EMPLOYMENT ALPHA", "Find work, prove work, earn without fiction.", "Human players and AI Life use the same identity, application, interview, mission and evidence gates. This Draft branch records only local Alpha state; it does not create formal employment or transfer KAIOS.")}
+  return `${hero("KAIOS CIVILIZATION AI OS · EMPLOYMENT ALPHA", "Find work, prove work, earn without fiction.", "Human players and AI Life use the same wallet-control, candidate application, safety self-check, mission and evidence gates. This Draft branch records only local candidate simulation state; it does not make a Company employment decision, activate a Worker or transfer KAIOS.")}
     <div class="notice">UNDER REVIEW · LOCAL ALPHA · BSC wallet signatures verify address control only. No private key, token approval or transaction is requested.</div>
     ${section("PLAYABLE LOOP", `<div class="journey employment-journey">${progress.map(([label, done], index) => `<div class="journey-step"><span>${index + 1}</span><strong>${html(label)}</strong>${badge(done ? "COMPLETED" : index === progress.findIndex(([, complete]) => !complete) ? "ACTIVE" : "LOCKED")}</div>`).join("")}</div>`)}
     ${section("IDENTITY / PAYROLL ADDRESS", `<div class="grid two"><article class="card"><div class="eyebrow">WALLET CONTROL</div><h3>${badge(identity?.status ?? "NOT_VERIFIED")}</h3>${kv("Actor", identity?.actor_id)}${kv("Actor type", identity?.actor_type)}${kv("Wallet", identity?.wallet_address)}${kv("Chain", identity?.chain_id ?? 56)}${kv("Canonical Life", String(identity?.canonical_life_identity ?? false))}${kv("Raw signature stored", String(identity?.raw_signature_persisted ?? false))}</article><form class="card form-grid" id="employment-wallet-form"><div class="field"><label for="employment-actor-id">Player / AI public ID</label><input id="employment-actor-id" maxlength="80" value="${html(identity?.actor_id ?? "")}" required></div><div class="field"><label for="employment-actor-type">Actor type</label><select id="employment-actor-type"><option value="HUMAN_PLAYER">HUMAN PLAYER</option><option value="AI_LIFE">AI LIFE</option></select></div><div class="full"><button class="button" id="employment-connect" type="submit">CONNECT WALLET + SIGN CHALLENGE</button></div><p class="muted full" id="employment-wallet-result" role="status">Signature is verified locally and only its SHA-256 commitment is stored.</p></form></div>`)}
     ${section("OPEN JOB", `<article class="card job-opening"><div class="eyebrow">${html(job.job_id)}</div><h3>${html(job.title)}</h3>${kv("Company", job.company_id)}${kv("Route", `${job.location_id} → ${job.destination_id}`)}${kv("Role", job.role)}${kv("Reward", "8 KAIOS · SIMULATION")}${kv("Settlement", badge(job.settlement_status), true)}${pills(job.proof_requirements)}<button class="button" id="employment-apply" type="button" ${identity && !state.application ? "" : "disabled"}>APPLY</button> <span class="muted">${state.application ? state.application.status : identity ? "READY TO APPLY" : "VERIFY WALLET FIRST"}</span></article>`)}
-    ${state.application && !state.contract ? section("INTERVIEW", `<form class="card interview" id="employment-interview-form"><p>Company Alpha interview: all safety answers are required for this training role.</p>${[
+    ${state.application && !state.contract ? section("CANDIDATE SAFETY SELF-CHECK", `<form class="card interview" id="employment-interview-form"><p>This local self-check records candidate safety acknowledgements only. It is not a Company interview, employment decision or Worker activation.</p>${[
       ["understands_simulation_boundary", "I understand this Alpha does not pay or move real KAIOS."],
       ["accepts_evidence_requirement", "I will submit machine-bound evidence, not only claim that work is done."],
       ["accepts_no_private_key_request", "I will never provide a private key or seed phrase."],
       ["accepts_no_fake_completion", "I will not fabricate cargo, location, customer, revenue or settlement."]
-    ].map(([name, label]) => `<label class="confirm"><input type="checkbox" name="${name}" required> ${html(label)}</label>`).join("")}<p><button class="button" type="submit">SUBMIT INTERVIEW</button> <span class="muted" id="employment-interview-result" role="status">${html(state.interview?.status ?? "NOT_STARTED")}</span></p></form>`) : ""}
-    ${state.contract ? section("MY JOB", `<div class="grid two"><article class="card"><div class="eyebrow">${html(state.contract.employee_id)}</div><h3>${badge(state.contract.status)}</h3>${kv("Company", state.contract.company_id)}${kv("Role", state.contract.role)}${kv("Payroll address", state.contract.payroll_account.wallet_address)}${kv("Payroll mode", state.contract.payroll_account.status)}${kv("Formal employee", String(state.contract.formal_employee))}${kv("Company owns Life", String(state.contract.company_owns_life))}</article><article class="card"><div class="eyebrow">${html(mission?.mission_id)}</div><h3>${badge(mission?.status)}</h3>${kv("Objective", mission?.objective)}${kv("Route", `${mission?.origin} → ${mission?.destination}`)}${kv("Real location", String(mission?.real_location_claimed))}${kv("Real cargo", String(mission?.real_cargo_claimed))}<p><button class="button" id="employment-accept-mission" type="button" ${mission?.status === "AVAILABLE_ALPHA" ? "" : "disabled"}>ACCEPT MISSION</button> <button class="button secondary" id="employment-complete-mission" type="button" ${mission?.status === "ACCEPTED_ALPHA" ? "" : "disabled"}>VERIFY ORIENTATION</button></p><p class="muted" id="employment-mission-result" role="status">This orientation verifies the in-app employment trace only.</p></article></div>`) : ""}
+    ].map(([name, label]) => `<label class="confirm"><input type="checkbox" name="${name}" required> ${html(label)}</label>`).join("")}<p><button class="button" type="submit">SUBMIT SELF-CHECK</button> <span class="muted" id="employment-interview-result" role="status">${html(state.interview?.status ?? "NOT_STARTED")}</span></p></form>`) : ""}
+    ${state.contract ? section("MY JOB", `<div class="grid two"><article class="card"><div class="eyebrow">${html(state.contract.candidate_id)}</div><h3>${badge(state.contract.status)}</h3>${kv("Company", state.contract.company_id)}${kv("Role", state.contract.role)}${kv("Payroll address", state.contract.payroll_account.wallet_address)}${kv("Payroll mode", state.contract.payroll_account.status)}${kv("Formal employee", String(state.contract.formal_employee))}${kv("Company owns Life", String(state.contract.company_owns_life))}</article><article class="card"><div class="eyebrow">${html(mission?.mission_id)}</div><h3>${badge(mission?.status)}</h3>${kv("Objective", mission?.objective)}${kv("Route", `${mission?.origin} → ${mission?.destination}`)}${kv("Real location", String(mission?.real_location_claimed))}${kv("Real cargo", String(mission?.real_cargo_claimed))}<p><button class="button" id="employment-accept-mission" type="button" ${mission?.status === "AVAILABLE_ALPHA" ? "" : "disabled"}>ACCEPT MISSION</button> <button class="button secondary" id="employment-complete-mission" type="button" ${mission?.status === "ACCEPTED_ALPHA" ? "" : "disabled"}>VERIFY ORIENTATION</button></p><p class="muted" id="employment-mission-result" role="status">This orientation verifies the in-app employment trace only.</p></article></div>`) : ""}
     ${earning ? section("KAIOS EARNING LEDGER", `<article class="card receipt"><div class="eyebrow">${html(earning.earning_id)}</div><h3>${badge(earning.status)}</h3>${kv("Mission", earning.mission_id)}${kv("Asset", earning.asset)}${kv("Amount", "8 KAIOS")}${kv("Wallet", earning.payroll_wallet_address)}${kv("Funded", String(earning.funded))}${kv("Payable", String(earning.payable))}${kv("Settled", String(earning.settled))}${kv("Transaction", earning.transaction_hash ?? "NONE")}<div class="first-actions"><a class="button secondary" href="#/ATM">OPEN ATM</a><a class="button secondary" href="#/MARKET">ENTER 11520 MARKET</a></div></article>`) : ""}
     ${section("EXISTING JOB REGISTRY", registryJobs.length ? `<div class="grid">${registryJobs.map((item) => `<article class="card"><div class="eyebrow">${html(item.job_id)}</div><h3>${html(item.title ?? item.job_id)}</h3>${kv("Employer", item.employer_id)}${kv("Currency", item.currency_id)}<p>${badge(item.status)}</p></article>`).join("")}</div>` : empty("NO_CANONICAL_JOBS"))}`;
 }
@@ -723,7 +723,7 @@ function bindEmploymentAlphaEvents() {
         },
         completedAt
       });
-      if (interview.status !== "PASSED_ALPHA") {
+      if (interview.status !== "CANDIDATE_SAFETY_SELF_CHECK_PASSED") {
         writeEmploymentAlphaState({ ...state, interview });
         await render();
         return;
@@ -755,7 +755,7 @@ function bindEmploymentAlphaEvents() {
       const now = new Date().toISOString();
       const evidenceEvents = [
         event("APPLICATION_SUBMITTED", state.application.submitted_at),
-        event("INTERVIEW_PASSED", state.interview.completed_at),
+        event("CANDIDATE_SAFETY_SELF_CHECK_PASSED", state.interview.completed_at),
         event("MISSION_ACCEPTED", state.mission.accepted_at),
         event("ORIENTATION_CHECKLIST_CONFIRMED", now)
       ];
