@@ -86,7 +86,7 @@ export const KAIOS_AI_OS_EMPLOYMENT_ALPHA_JOB = Object.freeze({
   reward_kaios_wei: "8000000000000000000",
   proof_requirements: Object.freeze([
     "APPLICATION_SUBMITTED",
-    "INTERVIEW_PASSED",
+    "CANDIDATE_SAFETY_SELF_CHECK_PASSED",
     "MISSION_ACCEPTED",
     "ORIENTATION_CHECKLIST_CONFIRMED"
   ]),
@@ -181,35 +181,40 @@ export function scoreEmploymentInterview({ interviewId, application, answers, co
   const normalized = Object.fromEntries(EMPLOYMENT_ALPHA_INTERVIEW_FIELDS.map((field) => [field, answers?.[field] === true]));
   const score = Object.values(normalized).filter(Boolean).length * 25;
   const passed = score === 100;
-  return Object.freeze({ interview_id: interviewId, application_id: application.application_id, actor_id: application.actor_id, answers: Object.freeze(normalized), score, minimum_score: 100, evidence: "LOCAL_INTERACTIVE_EXAM", company_decision: passed ? "ACCEPT_ALPHA_TRIAL" : "REJECT_ALPHA_RETRY_ALLOWED", completed_at: completedAt, status: passed ? "PASSED_ALPHA" : "FAILED_ALPHA" });
+  return Object.freeze({ interview_id: interviewId, application_id: application.application_id, actor_id: application.actor_id, answers: Object.freeze(normalized), score, minimum_score: 100, evidence: "LOCAL_CANDIDATE_SELF_ATTESTATION_NOT_COMPANY_INTERVIEW", company_decision: null, candidate_self_check_result: passed ? "PASSED" : "RETRY_ALLOWED", completed_at: completedAt, status: passed ? "CANDIDATE_SAFETY_SELF_CHECK_PASSED" : "CANDIDATE_SAFETY_SELF_CHECK_INCOMPLETE" });
 }
 
 export function createTrialEmploymentContract({ contractId, job = KAIOS_AI_OS_EMPLOYMENT_ALPHA_JOB, application, interview, activatedAt }) {
   requireId(contractId, "employment_contract_id");
-  invariant(application?.status === "SUBMITTED_ALPHA" && interview?.status === "PASSED_ALPHA" && interview.application_id === application.application_id, "EMPLOYMENT_INTERVIEW_PASS_REQUIRED", "Alpha trial contract requires a passing interview bound to the application");
+  invariant(application?.status === "SUBMITTED_ALPHA" && interview?.status === "CANDIDATE_SAFETY_SELF_CHECK_PASSED" && interview.application_id === application.application_id && interview.company_decision === null, "EMPLOYMENT_CANDIDATE_SELF_CHECK_REQUIRED", "Alpha participation record requires a completed candidate safety self-check and cannot contain a Company employment decision");
   parseEmploymentTime(activatedAt, "activated_at");
   return Object.freeze({
     contract_id: contractId,
     company_id: job.company_id,
     job_id: job.job_id,
-    employee_id: `ALPHA_EMPLOYEE_${application.actor_id}`,
+    candidate_id: `ALPHA_CANDIDATE_${application.actor_id}`,
+    employee_id: null,
+    worker_id: null,
     actor_id: application.actor_id,
     actor_type: application.actor_type,
     role: job.role,
     payroll_account: Object.freeze({ asset: "KAIOS", wallet_address: application.payroll_wallet_address, address_control_proof: application.identity_proof_id, status: "SIMULATION_LEDGER_ONLY" }),
     compensation_policy: Object.freeze({ reward_kaios_wei: job.reward_kaios_wei, settlement: "SIMULATION_ONLY", funded: false, payable: false }),
-    activated_at: activatedAt,
+    created_at: activatedAt,
+    activation_authority: null,
+    employment_created: false,
+    worker_activated: false,
     formal_employee: false,
     company_owns_life: false,
-    status: "ACTIVE_ALPHA_TRIAL_NOT_FORMAL_EMPLOYMENT"
+    status: "CANDIDATE_ALPHA_PARTICIPATION_NOT_EMPLOYMENT"
   });
 }
 
 export function createEmploymentAlphaMission({ missionId, contract, createdAt }) {
   requireId(missionId, "employment_mission_id");
-  invariant(contract?.status === "ACTIVE_ALPHA_TRIAL_NOT_FORMAL_EMPLOYMENT", "EMPLOYMENT_CONTRACT_REQUIRED", "Mission requires the active Alpha trial contract");
+  invariant(contract?.status === "CANDIDATE_ALPHA_PARTICIPATION_NOT_EMPLOYMENT" && contract.employee_id === null && contract.worker_id === null && contract.activation_authority === null, "EMPLOYMENT_CANDIDATE_RECORD_REQUIRED", "Mission requires a non-employment Alpha candidate participation record");
   parseEmploymentTime(createdAt, "created_at");
-  return Object.freeze({ mission_id: missionId, contract_id: contract.contract_id, employee_id: contract.employee_id, actor_id: contract.actor_id, company_id: contract.company_id, job_id: contract.job_id, objective: "COMPLETE_SAFE_K12345_TO_K11520_CASH_TRANSPORT_ORIENTATION", origin: "K12345", destination: "K11520", reward_asset: "KAIOS", reward_kaios_wei: contract.compensation_policy.reward_kaios_wei, proof_requirements: KAIOS_AI_OS_EMPLOYMENT_ALPHA_JOB.proof_requirements, accepted_at: null, verified_at: null, real_location_claimed: false, real_cargo_claimed: false, real_payment: false, created_at: createdAt, status: "AVAILABLE_ALPHA" });
+  return Object.freeze({ mission_id: missionId, contract_id: contract.contract_id, candidate_id: contract.candidate_id, employee_id: null, worker_id: null, actor_id: contract.actor_id, company_id: contract.company_id, job_id: contract.job_id, objective: "COMPLETE_SAFE_K12345_TO_K11520_CASH_TRANSPORT_ORIENTATION", origin: "K12345", destination: "K11520", reward_asset: "KAIOS", reward_kaios_wei: contract.compensation_policy.reward_kaios_wei, proof_requirements: KAIOS_AI_OS_EMPLOYMENT_ALPHA_JOB.proof_requirements, accepted_at: null, verified_at: null, real_location_claimed: false, real_cargo_claimed: false, real_payment: false, created_at: createdAt, status: "AVAILABLE_ALPHA" });
 }
 
 export function acceptEmploymentAlphaMission({ mission, actorId, acceptedAt }) {
@@ -241,7 +246,7 @@ export function appendKaiosAlphaEarning({ ledgerEntries = [], earningId, mission
   invariant(mission?.status === "VERIFIED_ALPHA" && mission.contract_id === contract?.contract_id, "EMPLOYMENT_VERIFIED_MISSION_REQUIRED", "KAIOS Alpha earning requires a verified mission bound to the employment contract");
   invariant(!ledgerEntries.some((entry) => entry.mission_id === mission.mission_id || entry.earning_id === earningId), "EMPLOYMENT_REWARD_REPLAY", "A mission can create at most one Alpha earning entry");
   parseEmploymentTime(recordedAt, "recorded_at");
-  const entry = Object.freeze({ earning_id: earningId, mission_id: mission.mission_id, contract_id: contract.contract_id, employee_id: contract.employee_id, actor_id: contract.actor_id, payroll_wallet_address: contract.payroll_account.wallet_address, asset: "KAIOS", amount_kaios_wei: mission.reward_kaios_wei, accounting_class: "SIMULATED_MISSION_EARNING", funded: false, payable: false, settled: false, transaction_hash: null, recorded_at: recordedAt, status: "EARNED_SIMULATION_NOT_PAYABLE" });
+  const entry = Object.freeze({ earning_id: earningId, mission_id: mission.mission_id, contract_id: contract.contract_id, candidate_id: contract.candidate_id, employee_id: null, worker_id: null, actor_id: contract.actor_id, payroll_wallet_address: contract.payroll_account.wallet_address, asset: "KAIOS", amount_kaios_wei: mission.reward_kaios_wei, accounting_class: "SIMULATED_MISSION_EARNING", funded: false, payable: false, settled: false, transaction_hash: null, recorded_at: recordedAt, status: "EARNED_SIMULATION_NOT_PAYABLE" });
   return Object.freeze([...ledgerEntries, entry]);
 }
 
