@@ -1,5 +1,19 @@
 # 11520 Universal Exchange Current Handoff
 
+## V4.2 Employment Phase 1B candidate — not yet active main
+
+This Draft candidate extends the existing V4.1 Employment Alpha without creating a second Company OS, Event Store, Worker Registry, payroll system, mission runtime, wallet verifier or 11520 market. The candidate safety self-check remains a separate applicant attestation and cannot create a Company decision, Employee, Worker, trust level, signer or payment authority.
+
+The new candidate flow is: `WALLET CONTROL → APPLICATION → CANDIDATE SAFETY SELF-CHECK → COMPANY INTERVIEW → COMPANY EMPLOYMENT DECISION → EMPLOYEE RECORD → EMPLOYEE-BOUND MISSION → WORK EVIDENCE → DISTINCT WORK REVIEW → COMPENSATION ACCRUAL → PAYROLL QUEUE → ATM / 11520 ENTRY`. Human players and AI Life use the same employment framework, while Actor, Life, Employee, Worker and wallet IDs remain separate. Human Alpha employment must not invent a Life ID; an AI Life without canonical Life identity receives `NEED_MORE_INFO` rather than an invented Employee record.
+
+The Company decision engine supports `APPROVE`, `APPROVE_WITH_CONDITIONS`, `REJECT`, `WAITLIST` and `NEED_MORE_INFO`. A candidate cannot interview, decide, assign or review itself. Approved simulation decisions create exactly one Employee record and a separate payroll account. Worker activation is an explicit policy-bound candidate requiring Employee, capability, task-scope, safety-policy and runtime evidence; it grants no T2, signer, treasury, governance or arbitrary Mainnet authority.
+
+Employment transitions reuse the existing append-only `COMPANY` stream with replay-safe `APPLICATION_SUBMITTED`, `INTERVIEW_STARTED`, `INTERVIEW_COMPLETED`, `EMPLOYMENT_DECISION_RECORDED`, `EMPLOYEE_CREATED`, `WORKER_ACTIVATED`, `MISSION_ASSIGNED`, `MISSION_ACCEPTED`, `WORK_EVIDENCE_SUBMITTED`, `WORK_REVIEWED`, `COMPENSATION_ACCRUED`, `PAYROLL_QUEUED` and `PAYROLL_SETTLED` event classes. Exact event-type/record-ID replay is `IDEMPOTENT_NOOP`; private keys, seed phrases, raw signatures and raw challenge material are rejected from history.
+
+Compensation truth is explicit: verified work can become `ACCRUED_SIMULATION_NOT_PAYABLE`, then `QUEUED_SIMULATION_AWAITING_FUNDING_AND_AUTHORITY`; accrued is not payable, payable is not paid, and paid requires a successful external settlement receipt. ATM advance evaluation is capped at 30% of verified accrued compensation and fails closed on missing payroll binding or insufficient prefunded liquidity. Real withdrawal, payroll settlement, token transfer, Mainnet transaction, deployment and merge remain disabled.
+
+The V4.2 Website Draft exposes Jobs, Applications, Company Interview, Employment Status, My Job, Missions, Work Evidence/Review, Salary, ATM and Market with `UNDER REVIEW`, `SIMULATION` and `NOT PAYABLE` truth labels. The full Node Runtime suite passes 256/256 at the candidate head; distinct review and exact-head GitHub CI are still required before any release decision.
+
 ## V4.1 Employment Alpha candidate — not yet active main
 
 This Draft candidate adds the first continuous KAIOS Civilization AI OS playable employment-candidate simulation slice to the existing V4.0 public shell. It reuses the existing Company domain, 11520 registry and wallet connection stack; it does not create a second Company OS, exchange, payroll, map or Life registry.

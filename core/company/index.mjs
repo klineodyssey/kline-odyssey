@@ -309,6 +309,233 @@ export async function appendEmploymentAlphaCompanyEvent({ store, company, eventT
   return Object.freeze({ status: `${eventType}_APPENDED`, event });
 }
 
+export const EMPLOYMENT_PHASE1B_DECISIONS = Object.freeze(["APPROVE", "APPROVE_WITH_CONDITIONS", "REJECT", "WAITLIST", "NEED_MORE_INFO"]);
+export const EMPLOYMENT_PHASE1B_HISTORY_EVENT_TYPES = Object.freeze([
+  "APPLICATION_SUBMITTED", "INTERVIEW_STARTED", "INTERVIEW_COMPLETED", "EMPLOYMENT_DECISION_RECORDED",
+  "EMPLOYEE_CREATED", "WORKER_ACTIVATED", "MISSION_ASSIGNED", "MISSION_ACCEPTED",
+  "WORK_EVIDENCE_SUBMITTED", "WORK_REVIEWED", "COMPENSATION_ACCRUED", "PAYROLL_QUEUED", "PAYROLL_SETTLED"
+]);
+
+const EMPLOYMENT_PHASE1B_EVENT_RECORD_IDS = Object.freeze({
+  APPLICATION_SUBMITTED: "application_id", INTERVIEW_STARTED: "interview_id", INTERVIEW_COMPLETED: "interview_id",
+  EMPLOYMENT_DECISION_RECORDED: "decision_id", EMPLOYEE_CREATED: "employee_id", WORKER_ACTIVATED: "worker_id",
+  MISSION_ASSIGNED: "mission_id", MISSION_ACCEPTED: "mission_id", WORK_EVIDENCE_SUBMITTED: "evidence_id",
+  WORK_REVIEWED: "review_id", COMPENSATION_ACCRUED: "accrual_id", PAYROLL_QUEUED: "payroll_queue_id",
+  PAYROLL_SETTLED: "settlement_id"
+});
+
+function requireEmploymentBinding(record, expected, code, message) {
+  invariant(Object.entries(expected).every(([field, value]) => record?.[field] === value), code, message);
+}
+
+export function createCompanyInterview({ interviewId, application, interviewerId, questions, answers, evidence, startedAt, completedAt }) {
+  requireId(interviewId, "company_interview_id");
+  requireId(interviewerId, "company_interviewer_id");
+  invariant(application?.status === "SUBMITTED_ALPHA", "COMPANY_INTERVIEW_APPLICATION_REQUIRED", "Company interview requires a submitted application");
+  invariant(interviewerId !== application.actor_id, "COMPANY_INTERVIEW_SELF_INTERVIEW_FORBIDDEN", "A candidate cannot act as the Company interviewer");
+  requireArray(questions, "company_interview.questions");
+  requireArray(answers, "company_interview.answers");
+  requireArray(evidence, "company_interview.evidence");
+  invariant(questions.length >= 3 && answers.length === questions.length, "COMPANY_INTERVIEW_ANSWERS_INCOMPLETE", "Company interview requires an answer for every question");
+  const started = parseEmploymentTime(startedAt, "started_at");
+  const completed = parseEmploymentTime(completedAt, "completed_at");
+  invariant(completed >= started, "COMPANY_INTERVIEW_TIME_INVALID", "Company interview cannot complete before it starts");
+  const scores = answers.map((answer) => Number(answer.score));
+  invariant(scores.every((score) => Number.isFinite(score) && score >= 0 && score <= 100), "COMPANY_INTERVIEW_SCORE_INVALID", "Every Company interview answer requires a 0-100 score");
+  const capabilityScore = Math.round(scores.reduce((sum, score) => sum + score, 0) / scores.length);
+  const safetyAnswers = answers.filter((answer) => answer.category === "SAFETY");
+  const roleAnswers = answers.filter((answer) => answer.category === "ROLE_FIT");
+  const average = (values, fallback) => values.length ? Math.round(values.reduce((sum, answer) => sum + Number(answer.score), 0) / values.length) : fallback;
+  const safetyScore = average(safetyAnswers, capabilityScore);
+  const roleFitScore = average(roleAnswers, capabilityScore);
+  return Object.freeze({
+    interview_id: interviewId, application_id: application.application_id, company_id: application.company_id,
+    job_id: application.job_id, actor_id: application.actor_id, interviewer_id: interviewerId,
+    questions: Object.freeze(questions.map((question) => Object.freeze({ ...question }))),
+    answers: Object.freeze(answers.map((answer) => Object.freeze({ ...answer }))),
+    capability_score: capabilityScore, safety_score: safetyScore, role_fit_score: roleFitScore,
+    evidence: Object.freeze([...evidence]), candidate_self_check: false, company_decision: null,
+    started_at: startedAt, completed_at: completedAt, status: "COMPANY_INTERVIEW_COMPLETED"
+  });
+}
+
+export function recordCompanyEmploymentDecision({ decisionId, application, interview, job = KAIOS_AI_OS_EMPLOYMENT_ALPHA_JOB, decisionMakerId, decision, conditions = [], evidence, decidedAt }) {
+  requireId(decisionId, "employment_decision_id");
+  requireId(decisionMakerId, "employment_decision_maker_id");
+  requireEnum(decision, EMPLOYMENT_PHASE1B_DECISIONS, "employment_decision");
+  requireArray(conditions, "employment_decision.conditions");
+  requireArray(evidence, "employment_decision.evidence");
+  invariant(decisionMakerId !== application?.actor_id, "EMPLOYMENT_SELF_HIRE_FORBIDDEN", "A candidate cannot make their own employment decision");
+  invariant(interview?.status === "COMPANY_INTERVIEW_COMPLETED", "EMPLOYMENT_DECISION_INTERVIEW_REQUIRED", "Employment decision requires completed Company interview evidence");
+  requireEmploymentBinding(interview, { application_id: application?.application_id, company_id: job.company_id, job_id: job.job_id, actor_id: application?.actor_id }, "EMPLOYMENT_DECISION_BINDING_MISMATCH", "Employment decision must bind the application, interview, job, Company and actor");
+  invariant(evidence.length > 0, "EMPLOYMENT_DECISION_EVIDENCE_REQUIRED", "Employment decision requires evidence");
+  if (decision === "APPROVE_WITH_CONDITIONS") invariant(conditions.length > 0, "EMPLOYMENT_DECISION_CONDITIONS_REQUIRED", "Conditional approval requires recorded conditions");
+  parseEmploymentTime(decidedAt, "decided_at");
+  return Object.freeze({
+    decision_id: decisionId, application_id: application.application_id, interview_id: interview.interview_id,
+    company_id: job.company_id, job_id: job.job_id, actor_id: application.actor_id,
+    decision_maker_id: decisionMakerId, decision, conditions: Object.freeze([...conditions]), evidence: Object.freeze([...evidence]),
+    approved_for_employee_record: ["APPROVE", "APPROVE_WITH_CONDITIONS"].includes(decision),
+    decided_at: decidedAt, status: "EMPLOYMENT_DECISION_RECORDED_SIMULATION"
+  });
+}
+
+export function createCompanyEmployeeRecord({ employeeId, existingEmployees = [], application, interview, employmentDecision, job = KAIOS_AI_OS_EMPLOYMENT_ALPHA_JOB, employmentType = "ALPHA_TRIAL", lifeId = null, startDate }) {
+  requireId(employeeId, "employee_id");
+  requireArray(existingEmployees, "existing_employees");
+  requireEnum(employmentType, ["ALPHA_TRIAL", "PART_TIME", "FULL_TIME", "CONTRACT"], "employment_type");
+  invariant(employmentDecision?.approved_for_employee_record === true && ["APPROVE", "APPROVE_WITH_CONDITIONS"].includes(employmentDecision.decision), "EMPLOYEE_APPROVED_DECISION_REQUIRED", "Only an approved Company employment decision can create an Employee record");
+  requireEmploymentBinding(employmentDecision, { application_id: application?.application_id, interview_id: interview?.interview_id, company_id: job.company_id, job_id: job.job_id, actor_id: application?.actor_id }, "EMPLOYEE_DECISION_BINDING_MISMATCH", "Employee record must bind the approved application, interview, job, Company and actor");
+  invariant(!existingEmployees.some((employee) => employee.employee_id === employeeId || (employee.actor_id === application.actor_id && employee.company_id === job.company_id && employee.status !== "TERMINATED")), "EMPLOYEE_RECORD_REPLAY", "Employee ID and active actor/Company employment must be unique");
+  invariant(application.actor_type === "AI_LIFE" ? typeof lifeId === "string" && lifeId.length > 0 : lifeId === null, "EMPLOYEE_LIFE_ID_BOUNDARY_INVALID", "AI Life employment requires an explicit Life ID while Human employment must not invent one");
+  parseEmploymentTime(startDate, "start_date");
+  return Object.freeze({
+    employee_id: employeeId, actor_id: application.actor_id, actor_type: application.actor_type, life_id: lifeId,
+    company_id: job.company_id, job_id: job.job_id, role: job.role, employment_type: employmentType,
+    start_date: startDate, status: "ACTIVE_ALPHA_UNDER_REVIEW", worker_id: null,
+    payroll_account: Object.freeze({
+      account_id: `PAYROLL_${employeeId}`, asset: "KAIOS", wallet_address: application.payroll_wallet_address,
+      address_control_proof: application.identity_proof_id, payday_policy: "CURRENT_CANONICAL_MONTHLY_DAY_5",
+      accrued_kaios_wei: "0", payable_kaios_wei: "0", paid_kaios_wei: "0", advance_kaios_wei: "0",
+      fees_kaios_wei: "0", debt_kaios_wei: "0", next_payday: null, payroll_history: Object.freeze([]),
+      funded: false, payable: false, paid: false, status: "SIMULATION_NOT_PAYABLE"
+    }),
+    compensation_policy: Object.freeze({ asset: "KAIOS", mission_reward_kaios_wei: job.reward_kaios_wei, settlement: "SIMULATION_ONLY" }),
+    company_owns_life: false, identity_equals_employee: false, created_from_decision_id: employmentDecision.decision_id
+  });
+}
+
+export function activateCompanyWorkerCandidate({ workerId, employee, capabilities, taskScope, safetyPolicy, runtimeEvidence, activatedAt }) {
+  requireId(workerId, "worker_id");
+  requireArray(capabilities, "worker.capabilities");
+  requireArray(taskScope, "worker.task_scope");
+  requireArray(safetyPolicy, "worker.safety_policy");
+  requireArray(runtimeEvidence, "worker.runtime_evidence");
+  invariant(employee?.status === "ACTIVE_ALPHA_UNDER_REVIEW", "WORKER_EMPLOYEE_REQUIRED", "Policy-bound Worker activation requires an active Employee record");
+  invariant(capabilities.length > 0 && taskScope.length > 0 && safetyPolicy.length > 0 && runtimeEvidence.length > 0, "WORKER_ACTIVATION_EVIDENCE_REQUIRED", "Worker activation requires capabilities, scope, safety policy and runtime evidence");
+  parseEmploymentTime(activatedAt, "activated_at");
+  return Object.freeze({
+    worker_id: workerId, employee_id: employee.employee_id, actor_id: employee.actor_id, company_id: employee.company_id,
+    capabilities: Object.freeze([...capabilities]), task_scope: Object.freeze([...taskScope]), safety_policy: Object.freeze([...safetyPolicy]),
+    runtime_evidence: Object.freeze([...runtimeEvidence]), trust_level: null, signer: false, treasury_authority: false,
+    governance_authority: false, mainnet_arbitrary_execution: false, activated_at: activatedAt,
+    status: "WORKER_ACTIVATION_CANDIDATE_UNDER_REVIEW"
+  });
+}
+
+export function createCompanyEmployeeMission({ missionId, employee, job = KAIOS_AI_OS_EMPLOYMENT_ALPHA_JOB, assignedBy, createdAt }) {
+  requireId(missionId, "employee_mission_id");
+  requireId(assignedBy, "mission_assigner_id");
+  invariant(employee?.status === "ACTIVE_ALPHA_UNDER_REVIEW" && employee.company_id === job.company_id && employee.job_id === job.job_id, "MISSION_EMPLOYEE_BINDING_REQUIRED", "Company mission requires an active Employee bound to the job and Company");
+  invariant(assignedBy !== employee.actor_id, "MISSION_SELF_ASSIGNMENT_FORBIDDEN", "Employee cannot issue their own Company mission");
+  parseEmploymentTime(createdAt, "mission_created_at");
+  return Object.freeze({
+    mission_id: missionId, employee_id: employee.employee_id, actor_id: employee.actor_id, company_id: employee.company_id,
+    job_id: employee.job_id, assigned_by: assignedBy, objective: "COMPLETE_SAFE_K12345_TO_K11520_CASH_TRANSPORT_ORIENTATION",
+    origin: "K12345", destination: "K11520", reward_asset: "KAIOS", reward_kaios_wei: job.reward_kaios_wei,
+    proof_requirements: Object.freeze(["MISSION_ACCEPTED", "ORIENTATION_CHECKLIST_CONFIRMED"]), accepted_at: null,
+    created_at: createdAt, real_location_claimed: false, real_cargo_claimed: false, real_payment: false, status: "ASSIGNED_SIMULATION"
+  });
+}
+
+export function acceptCompanyEmployeeMission({ mission, employee, acceptedAt }) {
+  invariant(mission?.status === "ASSIGNED_SIMULATION" && mission.employee_id === employee?.employee_id && mission.actor_id === employee.actor_id, "MISSION_WRONG_EMPLOYEE", "Only the assigned Employee may accept the mission");
+  parseEmploymentTime(acceptedAt, "mission_accepted_at");
+  return Object.freeze({ ...mission, accepted_at: acceptedAt, status: "ACCEPTED_SIMULATION" });
+}
+
+export function submitCompanyWorkEvidence({ evidenceId, mission, employee, events, submittedAt }) {
+  requireId(evidenceId, "work_evidence_id");
+  invariant(mission?.status === "ACCEPTED_SIMULATION" && mission.employee_id === employee?.employee_id && mission.actor_id === employee.actor_id, "WORK_EVIDENCE_MISSION_BINDING_REQUIRED", "Work evidence must bind the accepted mission and assigned Employee");
+  requireArray(events, "work_evidence.events");
+  const eventIds = events.map((event) => event.event_id);
+  invariant(eventIds.length >= mission.proof_requirements.length && eventIds.every(Boolean) && new Set(eventIds).size === eventIds.length, "WORK_EVIDENCE_REPLAY_OR_INCOMPLETE", "Work evidence IDs must be unique and complete");
+  invariant(events.every((event) => event.actor_id === employee.actor_id && event.employee_id === employee.employee_id && event.mission_id === mission.mission_id && Number.isFinite(Date.parse(event.occurred_at))), "WORK_EVIDENCE_BINDING_MISMATCH", "Every work evidence event must bind mission, Employee, actor and timestamp");
+  const eventTypes = events.map((event) => event.event_type);
+  mission.proof_requirements.reduce((position, requirement) => {
+    const next = eventTypes.indexOf(requirement, position);
+    invariant(next >= position, "WORK_EVIDENCE_REQUIREMENT_MISSING", `Work evidence requires ordered ${requirement}`);
+    return next + 1;
+  }, 0);
+  parseEmploymentTime(submittedAt, "work_evidence_submitted_at");
+  return Object.freeze({ evidence_id: evidenceId, mission_id: mission.mission_id, employee_id: employee.employee_id, actor_id: employee.actor_id, company_id: employee.company_id, event_ids: Object.freeze(eventIds), submitted_at: submittedAt, status: "WORK_EVIDENCE_SUBMITTED_SIMULATION" });
+}
+
+export function reviewCompanyWorkEvidence({ reviewId, mission, employee, workEvidence, reviewerId, decision, evidence, reviewedAt }) {
+  requireId(reviewId, "work_review_id");
+  requireId(reviewerId, "work_reviewer_id");
+  requireEnum(decision, ["APPROVE", "REJECT", "NEED_MORE_INFO"], "work_review_decision");
+  requireArray(evidence, "work_review.evidence");
+  invariant(reviewerId !== employee?.actor_id, "WORK_SELF_REVIEW_FORBIDDEN", "Employee cannot review their own work evidence");
+  requireEmploymentBinding(workEvidence, { mission_id: mission?.mission_id, employee_id: employee?.employee_id, actor_id: employee?.actor_id, company_id: employee?.company_id }, "WORK_REVIEW_BINDING_MISMATCH", "Work review must bind the mission, Employee, actor and Company evidence");
+  invariant(workEvidence?.status === "WORK_EVIDENCE_SUBMITTED_SIMULATION" && evidence.length > 0, "WORK_REVIEW_EVIDENCE_REQUIRED", "Work review requires submitted evidence and a review basis");
+  parseEmploymentTime(reviewedAt, "work_reviewed_at");
+  return Object.freeze({ review_id: reviewId, evidence_id: workEvidence.evidence_id, mission_id: mission.mission_id, employee_id: employee.employee_id, actor_id: employee.actor_id, company_id: employee.company_id, reviewer_id: reviewerId, decision, evidence: Object.freeze([...evidence]), reviewed_at: reviewedAt, independent_review: reviewerId !== employee.actor_id, status: `WORK_${decision}_SIMULATION` });
+}
+
+export function accrueCompanyCompensation({ ledgerEntries = [], accrualId, mission, employee, workReview, accruedAt }) {
+  requireArray(ledgerEntries, "compensation_accrual_entries");
+  requireId(accrualId, "compensation_accrual_id");
+  invariant(workReview?.decision === "APPROVE" && workReview.mission_id === mission?.mission_id && workReview.employee_id === employee?.employee_id, "COMPENSATION_APPROVED_WORK_REQUIRED", "Compensation accrual requires approved work bound to the mission and Employee");
+  invariant(!ledgerEntries.some((entry) => entry.accrual_id === accrualId || entry.mission_id === mission.mission_id), "COMPENSATION_ACCRUAL_REPLAY", "A mission can accrue compensation exactly once");
+  parseEmploymentTime(accruedAt, "compensation_accrued_at");
+  const entry = Object.freeze({ accrual_id: accrualId, mission_id: mission.mission_id, review_id: workReview.review_id, employee_id: employee.employee_id, actor_id: employee.actor_id, company_id: employee.company_id, payroll_account_id: employee.payroll_account.account_id, asset: "KAIOS", amount_kaios_wei: mission.reward_kaios_wei, accrued: true, payable: false, paid: false, funded: false, settlement_receipt: null, accrued_at: accruedAt, status: "ACCRUED_SIMULATION_NOT_PAYABLE" });
+  return Object.freeze([...ledgerEntries, entry]);
+}
+
+export function queueCompanyPayroll({ payrollQueueId, queueEntries = [], employee, accrual, queuedAt }) {
+  requireId(payrollQueueId, "payroll_queue_id");
+  requireArray(queueEntries, "payroll_queue_entries");
+  invariant(accrual?.status === "ACCRUED_SIMULATION_NOT_PAYABLE" && accrual.employee_id === employee?.employee_id && accrual.payroll_account_id === employee?.payroll_account?.account_id, "PAYROLL_ACCRUAL_BINDING_REQUIRED", "Payroll queue requires a bound compensation accrual");
+  invariant(!queueEntries.some((entry) => entry.payroll_queue_id === payrollQueueId || entry.accrual_id === accrual.accrual_id), "PAYROLL_QUEUE_REPLAY", "Compensation accrual can enter Payroll Queue exactly once");
+  parseEmploymentTime(queuedAt, "payroll_queued_at");
+  const entry = Object.freeze({ payroll_queue_id: payrollQueueId, accrual_id: accrual.accrual_id, employee_id: employee.employee_id, actor_id: employee.actor_id, company_id: employee.company_id, payroll_account_id: employee.payroll_account.account_id, payroll_wallet_address: employee.payroll_account.wallet_address, asset: accrual.asset, accrued_kaios_wei: accrual.amount_kaios_wei, payable_kaios_wei: "0", paid_kaios_wei: "0", advance_kaios_wei: "0", fees_kaios_wei: "0", debt_kaios_wei: "0", next_payday: null, funded: false, payable: false, paid: false, settlement_receipt: null, queued_at: queuedAt, status: "QUEUED_SIMULATION_AWAITING_FUNDING_AND_AUTHORITY" });
+  return Object.freeze([...queueEntries, entry]);
+}
+
+export function recordCompanyPayrollSettlement({ settlementId, payrollEntry, settlementReceipt, settledAt }) {
+  requireId(settlementId, "payroll_settlement_id");
+  invariant(payrollEntry?.payable === true && payrollEntry.funded === true, "PAYROLL_NOT_PAYABLE", "Payroll settlement requires separately verified funding and payable state");
+  invariant(settlementReceipt?.receipt_status === 1 && /^0x[0-9a-f]{64}$/i.test(String(settlementReceipt.transaction_hash ?? "")), "PAYROLL_SETTLEMENT_RECEIPT_REQUIRED", "Paid status requires a successful settlement receipt");
+  parseEmploymentTime(settledAt, "payroll_settled_at");
+  return Object.freeze({ settlement_id: settlementId, payroll_queue_id: payrollEntry.payroll_queue_id, employee_id: payrollEntry.employee_id, actor_id: payrollEntry.actor_id, company_id: payrollEntry.company_id, transaction_hash: settlementReceipt.transaction_hash.toLowerCase(), receipt_status: 1, settled_at: settledAt, paid: true, status: "PAYROLL_SETTLED_WITH_EXTERNAL_RECEIPT" });
+}
+
+export function evaluateAtmPayrollAdvanceCandidate({ employee, payrollEntry, requestedKaiosWei, availableLiquidityKaiosWei }) {
+  invariant(payrollEntry?.employee_id === employee?.employee_id && payrollEntry?.payroll_account_id === employee?.payroll_account?.account_id, "ATM_PAYROLL_BINDING_REQUIRED", "ATM advance requires verified Employee payroll binding");
+  invariant(payrollEntry.status === "QUEUED_SIMULATION_AWAITING_FUNDING_AND_AUTHORITY", "ATM_VERIFIED_PAYROLL_REQUIRED", "ATM cannot lend against unverified payroll");
+  const accrued = BigInt(payrollEntry.accrued_kaios_wei);
+  const requested = BigInt(requestedKaiosWei);
+  const liquidity = BigInt(availableLiquidityKaiosWei);
+  invariant(requested > 0n, "ATM_ADVANCE_AMOUNT_INVALID", "ATM advance amount must be positive");
+  const maximum = accrued * 30n / 100n;
+  invariant(requested <= maximum, "ATM_ADVANCE_LIMIT_EXCEEDED", "ATM advance cannot exceed 30 percent of machine-verified accrued compensation");
+  invariant(liquidity >= requested, "ATM_LIQUIDITY_INSUFFICIENT", "ATM advance fails closed when prefunded liquidity is insufficient");
+  return Object.freeze({ employee_id: employee.employee_id, payroll_queue_id: payrollEntry.payroll_queue_id, requested_kaios_wei: requested.toString(), maximum_kaios_wei: maximum.toString(), available_liquidity_kaios_wei: liquidity.toString(), real_withdrawal: false, transaction_hash: null, status: "ATM_ADVANCE_SIMULATION_ELIGIBLE_NOT_EXECUTED" });
+}
+
+export async function appendEmploymentPhase1BCompanyEvent({ store, company, eventType, record, actorId, timestamp }) {
+  requireEnum(eventType, EMPLOYMENT_PHASE1B_HISTORY_EVENT_TYPES, "employment_phase1b_history.event_type");
+  invariant(company?.company_id === KAIOS_AI_OS_EMPLOYMENT_ALPHA_JOB.company_id, "EMPLOYMENT_HISTORY_COMPANY_INVALID", "Employment Phase 1B History belongs to the registered Company");
+  invariant(record && typeof record === "object", "EMPLOYMENT_HISTORY_RECORD_REQUIRED", "Employment Phase 1B History requires a state record");
+  const recordIdField = EMPLOYMENT_PHASE1B_EVENT_RECORD_IDS[eventType];
+  requireId(record[recordIdField], `employment_phase1b_history.${recordIdField}`);
+  requireId(actorId, "employment_phase1b_history.actor_id");
+  parseEmploymentTime(timestamp, "employment_phase1b_history.timestamp");
+  invariant(record.company_id === company.company_id, "EMPLOYMENT_HISTORY_COMPANY_BINDING_MISMATCH", "Employment Phase 1B record must bind the Company");
+  invariant(!/(?:private_key|seed_phrase|raw_signature|challenge_message|challenge_nonce)/i.test(JSON.stringify(record)), "EMPLOYMENT_HISTORY_SECRET_FORBIDDEN", "Employment Phase 1B History cannot persist signing secrets or raw challenge material");
+  const recordId = record[recordIdField];
+  const history = await store.history(company.company_id, "COMPANY");
+  const existing = history.find((event) => event.event_type === eventType && event.payload?.record_id === recordId);
+  if (existing) return Object.freeze({ status: "IDEMPOTENT_NOOP", event: existing });
+  const event = await store.commit({
+    domain: "COMPANY", stream: "COMPANY", id: company.company_id, entity: company,
+    event_type: eventType, actor_id: actorId, timestamp,
+    payload: { record_id: recordId, record_class: "PHASE_1B_SIMULATION_CANDIDATE", record: structuredClone(record) }
+  });
+  return Object.freeze({ status: `${eventType}_APPENDED`, event });
+}
+
 export const HEAVEN_TIME_LAW = Object.freeze({
   law_id: "K18888_HEAVEN_TIME_LAW_V3_7",
   k280_time_standard: "CANONICAL_PHYSICAL_TIME",

@@ -34,6 +34,7 @@ Last optimized: 2026-06-11
 | Workforce Governance | https://klineodyssey.github.io/kline-odyssey/workforce/ |
 | Official Video Library | https://klineodyssey.github.io/kline-odyssey/video/ |
 | KAIOS Constitution | [KGEN-KAIOS/constitution/KAIOS_CONSTITUTION.md](KGEN-KAIOS/constitution/KAIOS_CONSTITUTION.md) |
+| KAIOS Civilization AI OS Employment Phase 1B | [11520 Website Draft](K線西遊記/temples/11520/index.html) · [Current Handoff](K線西遊記/temples/11520/HANDOFF_CURRENT.md) · Company interview, employment decision, Employee-bound mission, compensation accrual and Payroll Queue candidate; UNDER REVIEW / SIMULATION / NOT PAYABLE |
 | KAIOS 2026-08-09 Mass and Planck CURRENT | [docs/physics/KGEN_KAIOS_SCALE_AND_PLANCK_RUNTIME_CURRENT.md](docs/physics/KGEN_KAIOS_SCALE_AND_PLANCK_RUNTIME_CURRENT.md) |
 | KAIOS Token Lineage Integration Review | [KGEN-KAIOS/reports/KAIOS_TOKEN_LINEAGE_INTEGRATION_REVIEW_2026-08-09.md](KGEN-KAIOS/reports/KAIOS_TOKEN_LINEAGE_INTEGRATION_REVIEW_2026-08-09.md) |
 | TempleHeart V3.4 BSC Testnet Rehearsal | [KGEN-KAIOS/reports/BSC_TESTNET_TEMPLEHEART_V3_4_REHEARSAL.md](KGEN-KAIOS/reports/BSC_TESTNET_TEMPLEHEART_V3_4_REHEARSAL.md) |
