@@ -2012,7 +2012,9 @@ export function classifyKgenUniverseReference(price) {
   const numeric = Number(price);
   invariant(Number.isFinite(numeric) && numeric > 0, "KGEN_REFERENCE_PRICE_INVALID", "KGEN reference price must be positive and finite");
   const floor = Math.floor(Math.log10(numeric));
-  const alpha = Number((numeric / (10 ** floor)).toPrecision(15));
+  const boundaryLow = Number(`1e${floor}`);
+  const boundaryHigh = Number(`1e${floor + 1}`);
+  const alpha = Number((numeric / boundaryLow).toPrecision(15));
   return Object.freeze({
     price: numeric,
     unit: "USD_PER_KGEN",
@@ -2022,8 +2024,8 @@ export function classifyKgenUniverseReference(price) {
     alpha,
     phase: 0,
     universe: floor < 0 ? `B${Math.abs(floor)}` : `K${floor}`,
-    boundary_low: 10 ** floor,
-    boundary_high: 10 ** (floor + 1),
+    boundary_low: boundaryLow,
+    boundary_high: boundaryHigh,
     native_ct: null
   });
 }
