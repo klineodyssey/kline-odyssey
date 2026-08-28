@@ -3039,11 +3039,11 @@ test("V4.1 website exposes the playable employment, mission, ATM and market entr
   assert.match(htmlSource, /No simulated trades, volume, TVL, order book or ownership are presented as deployed facts/);
 });
 
-function createEmploymentPhase1BTestFlow() {
+function createEmploymentPhase1BCandidateInterview() {
   const alpha = createEmploymentAlphaTestFlow();
   const companyInterview = createCompanyInterview({
     interviewId: "COMPANY_INTERVIEW_PHASE1B_001", application: alpha.application,
-    interviewerId: "COMPANY_HR_INTERVIEWER_001",
+    interviewerId: "UNVERIFIED_COMPANY_INTERVIEWER_CANDIDATE_001",
     questions: [
       { question_id: "Q_CAPABILITY", category: "CAPABILITY" },
       { question_id: "Q_SAFETY", category: "SAFETY" },
@@ -3057,99 +3057,29 @@ function createEmploymentPhase1BTestFlow() {
     evidence: [alpha.application.application_id, alpha.interview.interview_id],
     startedAt: "2026-08-28T09:04:00.000Z", completedAt: "2026-08-28T09:05:00.000Z"
   });
-  const employmentDecision = recordCompanyEmploymentDecision({
-    decisionId: "EMPLOYMENT_DECISION_PHASE1B_001", application: alpha.application, interview: companyInterview,
-    decisionMakerId: "COMPANY_EMPLOYMENT_AUTHORITY_001", decision: "APPROVE_WITH_CONDITIONS",
-    conditions: ["SIMULATION_ONLY", "DISTINCT_REVIEW_REQUIRED"], evidence: [companyInterview.interview_id],
-    decidedAt: "2026-08-28T09:06:00.000Z"
-  });
-  const employee = createCompanyEmployeeRecord({ employeeId: "EMPLOYEE_PHASE1B_001", application: alpha.application, interview: companyInterview, employmentDecision, startDate: "2026-08-28T09:07:00.000Z" });
-  const assigned = createCompanyEmployeeMission({ missionId: "MISSION_PHASE1B_001", employee, assignedBy: "COMPANY_MISSION_DISPATCHER_001", createdAt: "2026-08-28T09:08:00.000Z" });
-  const mission = acceptCompanyEmployeeMission({ mission: assigned, employee, acceptedAt: "2026-08-28T09:09:00.000Z" });
-  const evidenceEvents = ["MISSION_ACCEPTED", "ORIENTATION_CHECKLIST_CONFIRMED"].map((eventType, index) => ({ event_id: `PHASE1B_EVIDENCE_${index}`, event_type: eventType, actor_id: employee.actor_id, employee_id: employee.employee_id, mission_id: mission.mission_id, occurred_at: `2026-08-28T09:${10 + index}:00.000Z` }));
-  const workEvidence = submitCompanyWorkEvidence({ evidenceId: "WORK_EVIDENCE_PHASE1B_001", mission, employee, events: evidenceEvents, submittedAt: "2026-08-28T09:12:00.000Z" });
-  const workReview = reviewCompanyWorkEvidence({ reviewId: "WORK_REVIEW_PHASE1B_001", mission, employee, workEvidence, reviewerId: "COMPANY_WORK_REVIEWER_001", decision: "APPROVE", evidence: [workEvidence.evidence_id], reviewedAt: "2026-08-28T09:13:00.000Z" });
-  const accruals = accrueCompanyCompensation({ accrualId: "ACCRUAL_PHASE1B_001", mission, employee, workReview, accruedAt: "2026-08-28T09:14:00.000Z" });
-  const payrollQueue = queueCompanyPayroll({ payrollQueueId: "PAYROLL_QUEUE_PHASE1B_001", employee, accrual: accruals[0], queuedAt: "2026-08-28T09:15:00.000Z" });
-  return { ...alpha, companyInterview, employmentDecision, employee, mission, evidenceEvents, workEvidence, workReview, accruals, payrollQueue };
+  return { ...alpha, companyInterview };
 }
 
-test("V4.2 candidate self-check is not a Company interview and cannot self-hire", () => {
-  const { application, interview } = createEmploymentAlphaTestFlow();
-  assert.equal(interview.evidence, "LOCAL_CANDIDATE_SELF_ATTESTATION_NOT_COMPANY_INTERVIEW");
-  assert.throws(() => createCompanyInterview({ interviewId: "SELF_INTERVIEW", application, interviewerId: application.actor_id, questions: [{}, {}, {}], answers: [{ score: 100 }, { score: 100 }, { score: 100 }], evidence: [], startedAt: "2026-08-28T09:03:00.000Z", completedAt: "2026-08-28T09:04:00.000Z" }), (error) => error.code === "COMPANY_INTERVIEW_SELF_INTERVIEW_FORBIDDEN");
-  assert.throws(() => createCompanyInterview({ interviewId: "NO_APPLICATION", application: null, interviewerId: "HR", questions: [], answers: [], evidence: [], startedAt: "2026-08-28T09:03:00.000Z", completedAt: "2026-08-28T09:04:00.000Z" }), (error) => error.code === "COMPANY_INTERVIEW_APPLICATION_REQUIRED");
+test("V4.2 Company interview remains a non-authoritative candidate", () => {
+  const { companyInterview } = createEmploymentPhase1BCandidateInterview();
+  assert.equal(companyInterview.status, "COMPANY_INTERVIEW_CANDIDATE_NOT_AUTHORITY");
+  assert.equal(companyInterview.repository_bound_interviewer_authority, false);
+  assert.equal(companyInterview.company_id, KAIOS_AI_OS_EMPLOYMENT_ALPHA_JOB.company_id);
 });
 
-test("V4.2 employment decision requires Company interview evidence and forbids candidate decision", () => {
-  const { application, companyInterview } = createEmploymentPhase1BTestFlow();
-  assert.throws(() => recordCompanyEmploymentDecision({ decisionId: "SELF_HIRE", application, interview: companyInterview, decisionMakerId: application.actor_id, decision: "APPROVE", evidence: [companyInterview.interview_id], decidedAt: "2026-08-28T09:06:00.000Z" }), (error) => error.code === "EMPLOYMENT_SELF_HIRE_FORBIDDEN");
-  assert.throws(() => recordCompanyEmploymentDecision({ decisionId: "NO_INTERVIEW", application, interview: null, decisionMakerId: "HR", decision: "APPROVE", evidence: ["NONE"], decidedAt: "2026-08-28T09:06:00.000Z" }), (error) => error.code === "EMPLOYMENT_DECISION_INTERVIEW_REQUIRED");
+test("V4.2 employment, Employee, Worker and mission authority fail closed", () => {
+  assert.throws(() => recordCompanyEmploymentDecision({}), (error) => error.code === "COMPANY_EMPLOYMENT_AUTHORITY_NOT_CONNECTED");
+  assert.throws(() => createCompanyEmployeeRecord({}), (error) => error.code === "EMPLOYEE_AUTHORITY_NOT_CONNECTED");
+  assert.throws(() => activateCompanyWorkerCandidate({}), (error) => error.code === "WORKER_ACTIVATION_AUTHORITY_NOT_CONNECTED");
+  assert.throws(() => createCompanyEmployeeMission({}), (error) => error.code === "MISSION_DISPATCH_AUTHORITY_NOT_CONNECTED");
 });
 
-test("V4.2 rejected candidate cannot become Employee and approved Employee is unique", () => {
-  const flow = createEmploymentPhase1BTestFlow();
-  const rejected = recordCompanyEmploymentDecision({ decisionId: "REJECTED_DECISION", application: flow.application, interview: flow.companyInterview, decisionMakerId: "COMPANY_EMPLOYMENT_AUTHORITY_001", decision: "REJECT", evidence: [flow.companyInterview.interview_id], decidedAt: "2026-08-28T09:06:00.000Z" });
-  assert.throws(() => createCompanyEmployeeRecord({ employeeId: "REJECTED_EMPLOYEE", application: flow.application, interview: flow.companyInterview, employmentDecision: rejected, startDate: "2026-08-28T09:07:00.000Z" }), (error) => error.code === "EMPLOYEE_APPROVED_DECISION_REQUIRED");
-  assert.equal(flow.employee.identity_equals_employee, false);
-  assert.equal(flow.employee.life_id, null);
-  assert.notEqual(flow.employee.employee_id, flow.employee.actor_id);
-  assert.throws(() => createCompanyEmployeeRecord({ employeeId: "EMPLOYEE_PHASE1B_002", existingEmployees: [flow.employee], application: flow.application, interview: flow.companyInterview, employmentDecision: flow.employmentDecision, startDate: "2026-08-28T09:08:00.000Z" }), (error) => error.code === "EMPLOYEE_RECORD_REPLAY");
-});
-
-test("V4.2 Worker identity stays separate and policy-bound activation requires Employee evidence", () => {
-  const { employee } = createEmploymentPhase1BTestFlow();
-  assert.throws(() => activateCompanyWorkerCandidate({ workerId: "WORKER_NO_EMPLOYEE", employee: null, capabilities: ["MISSION"], taskScope: ["SAFE"], safetyPolicy: ["NO_SECRETS"], runtimeEvidence: ["SCHEDULER"], activatedAt: "2026-08-28T09:08:00.000Z" }), (error) => error.code === "WORKER_EMPLOYEE_REQUIRED");
-  const worker = activateCompanyWorkerCandidate({ workerId: "WORKER_PHASE1B_001", employee, capabilities: ["MISSION"], taskScope: ["SAFE_SIMULATION"], safetyPolicy: ["NO_SECRETS"], runtimeEvidence: ["SCHEDULER_CANDIDATE"], activatedAt: "2026-08-28T09:08:00.000Z" });
-  assert.notEqual(worker.worker_id, employee.employee_id);
-  assert.equal(worker.employee_id, employee.employee_id);
-  assert.equal(worker.trust_level, null);
-  assert.equal(worker.signer, false);
-});
-
-test("V4.2 mission and work evidence are Employee-bound and fake evidence cannot accrue", () => {
-  const flow = createEmploymentPhase1BTestFlow();
-  assert.throws(() => acceptCompanyEmployeeMission({ mission: { ...flow.mission, status: "ASSIGNED_SIMULATION" }, employee: { ...flow.employee, employee_id: "WRONG_EMPLOYEE" }, acceptedAt: "2026-08-28T09:09:00.000Z" }), (error) => error.code === "MISSION_WRONG_EMPLOYEE");
-  assert.throws(() => submitCompanyWorkEvidence({ evidenceId: "FAKE_EVIDENCE", mission: flow.mission, employee: flow.employee, events: flow.evidenceEvents.map((event) => ({ ...event, employee_id: "WRONG_EMPLOYEE" })), submittedAt: "2026-08-28T09:12:00.000Z" }), (error) => error.code === "WORK_EVIDENCE_BINDING_MISMATCH");
-  assert.throws(() => reviewCompanyWorkEvidence({ reviewId: "SELF_REVIEW", mission: flow.mission, employee: flow.employee, workEvidence: flow.workEvidence, reviewerId: flow.employee.actor_id, decision: "APPROVE", evidence: [flow.workEvidence.evidence_id], reviewedAt: "2026-08-28T09:13:00.000Z" }), (error) => error.code === "WORK_SELF_REVIEW_FORBIDDEN");
-});
-
-test("V4.2 compensation accrues once and remains distinct from payable and paid", () => {
-  const flow = createEmploymentPhase1BTestFlow();
-  const accrual = flow.accruals[0];
-  const payroll = flow.payrollQueue[0];
-  assert.equal(accrual.accrued, true);
-  assert.equal(accrual.payable, false);
-  assert.equal(accrual.paid, false);
-  assert.equal(payroll.accrued_kaios_wei, "8000000000000000000");
-  assert.equal(payroll.payable_kaios_wei, "0");
-  assert.equal(payroll.paid_kaios_wei, "0");
-  assert.throws(() => accrueCompanyCompensation({ ledgerEntries: flow.accruals, accrualId: "ACCRUAL_PHASE1B_REPLAY", mission: flow.mission, employee: flow.employee, workReview: flow.workReview, accruedAt: "2026-08-28T09:16:00.000Z" }), (error) => error.code === "COMPENSATION_ACCRUAL_REPLAY");
-  assert.throws(() => queueCompanyPayroll({ payrollQueueId: "PAYROLL_QUEUE_REPLAY", queueEntries: flow.payrollQueue, employee: flow.employee, accrual, queuedAt: "2026-08-28T09:16:00.000Z" }), (error) => error.code === "PAYROLL_QUEUE_REPLAY");
-});
-
-test("V4.2 paid status requires settlement receipt and ATM fails closed on payroll or liquidity", () => {
-  const flow = createEmploymentPhase1BTestFlow();
-  const payroll = flow.payrollQueue[0];
-  assert.throws(() => recordCompanyPayrollSettlement({ settlementId: "SETTLEMENT_NO_RECEIPT", payrollEntry: { ...payroll, funded: true, payable: true }, settlementReceipt: null, settledAt: "2026-08-28T09:16:00.000Z" }), (error) => error.code === "PAYROLL_SETTLEMENT_RECEIPT_REQUIRED");
-  assert.throws(() => evaluateAtmPayrollAdvanceCandidate({ employee: flow.employee, payrollEntry: { ...payroll, status: "UNVERIFIED" }, requestedKaiosWei: "1", availableLiquidityKaiosWei: "1" }), (error) => error.code === "ATM_VERIFIED_PAYROLL_REQUIRED");
-  assert.throws(() => evaluateAtmPayrollAdvanceCandidate({ employee: flow.employee, payrollEntry: payroll, requestedKaiosWei: "1000000000000000000", availableLiquidityKaiosWei: "0" }), (error) => error.code === "ATM_LIQUIDITY_INSUFFICIENT");
-  const advance = evaluateAtmPayrollAdvanceCandidate({ employee: flow.employee, payrollEntry: payroll, requestedKaiosWei: "1000000000000000000", availableLiquidityKaiosWei: "1000000000000000000" });
-  assert.equal(advance.real_withdrawal, false);
-  assert.equal(advance.transaction_hash, null);
-});
-
-test("V4.2 Phase 1B Company events are append-only and replay-safe", async () => {
-  const { store, registries } = await runtime();
-  const company = await registries.company.get("AI_ANT_COMPANY_0001");
-  const { employmentDecision } = createEmploymentPhase1BTestFlow();
-  const input = { store, company, eventType: "EMPLOYMENT_DECISION_RECORDED", record: employmentDecision, actorId: employmentDecision.decision_maker_id, timestamp: employmentDecision.decided_at };
-  const first = await appendEmploymentPhase1BCompanyEvent(input);
-  const replay = await appendEmploymentPhase1BCompanyEvent(input);
-  assert.equal(first.status, "EMPLOYMENT_DECISION_RECORDED_APPENDED");
-  assert.equal(replay.status, "IDEMPOTENT_NOOP");
-  assert.equal(first.event.payload.record_class, "PHASE_1B_SIMULATION_CANDIDATE");
-  assert.equal(first.event.payload.record.decision, "APPROVE_WITH_CONDITIONS");
+test("V4.2 review, compensation, payroll, settlement and ATM authority fail closed", () => {
+  assert.throws(() => reviewCompanyWorkEvidence({}), (error) => error.code === "WORK_REVIEW_AUTHORITY_NOT_CONNECTED");
+  assert.throws(() => accrueCompanyCompensation({}), (error) => error.code === "COMPENSATION_AUTHORITY_NOT_CONNECTED");
+  assert.throws(() => queueCompanyPayroll({}), (error) => error.code === "PAYROLL_AUTHORITY_NOT_CONNECTED");
+  assert.throws(() => recordCompanyPayrollSettlement({}), (error) => error.code === "PAYROLL_SETTLEMENT_AUTHORITY_NOT_CONNECTED");
+  assert.throws(() => evaluateAtmPayrollAdvanceCandidate({}), (error) => error.code === "ATM_PAYROLL_AUTHORITY_NOT_CONNECTED");
 });
 
 test("V4.2 website exposes Company interview, employment, salary and honest simulation boundaries", async () => {

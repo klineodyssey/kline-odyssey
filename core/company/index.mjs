@@ -355,11 +355,12 @@ export function createCompanyInterview({ interviewId, application, interviewerId
     answers: Object.freeze(answers.map((answer) => Object.freeze({ ...answer }))),
     capability_score: capabilityScore, safety_score: safetyScore, role_fit_score: roleFitScore,
     evidence: Object.freeze([...evidence]), candidate_self_check: false, company_decision: null,
-    started_at: startedAt, completed_at: completedAt, status: "COMPANY_INTERVIEW_COMPLETED"
+    started_at: startedAt, completed_at: completedAt, repository_bound_interviewer_authority: false, status: "COMPANY_INTERVIEW_CANDIDATE_NOT_AUTHORITY"
   });
 }
 
 export function recordCompanyEmploymentDecision({ decisionId, application, interview, job = KAIOS_AI_OS_EMPLOYMENT_ALPHA_JOB, decisionMakerId, decision, conditions = [], evidence, decidedAt }) {
+  invariant(false, "COMPANY_EMPLOYMENT_AUTHORITY_NOT_CONNECTED", "A repository-bound Company employment decision authority is not connected");
   requireId(decisionId, "employment_decision_id");
   requireId(decisionMakerId, "employment_decision_maker_id");
   requireEnum(decision, EMPLOYMENT_PHASE1B_DECISIONS, "employment_decision");
@@ -381,6 +382,7 @@ export function recordCompanyEmploymentDecision({ decisionId, application, inter
 }
 
 export function createCompanyEmployeeRecord({ employeeId, existingEmployees = [], application, interview, employmentDecision, job = KAIOS_AI_OS_EMPLOYMENT_ALPHA_JOB, employmentType = "ALPHA_TRIAL", lifeId = null, startDate }) {
+  invariant(false, "EMPLOYEE_AUTHORITY_NOT_CONNECTED", "A repository-bound Employee creation authority is not connected");
   requireId(employeeId, "employee_id");
   requireArray(existingEmployees, "existing_employees");
   requireEnum(employmentType, ["ALPHA_TRIAL", "PART_TIME", "FULL_TIME", "CONTRACT"], "employment_type");
@@ -406,6 +408,7 @@ export function createCompanyEmployeeRecord({ employeeId, existingEmployees = []
 }
 
 export function activateCompanyWorkerCandidate({ workerId, employee, capabilities, taskScope, safetyPolicy, runtimeEvidence, activatedAt }) {
+  invariant(false, "WORKER_ACTIVATION_AUTHORITY_NOT_CONNECTED", "A canonical Worker Registry activation authority is not connected");
   requireId(workerId, "worker_id");
   requireArray(capabilities, "worker.capabilities");
   requireArray(taskScope, "worker.task_scope");
@@ -424,6 +427,7 @@ export function activateCompanyWorkerCandidate({ workerId, employee, capabilitie
 }
 
 export function createCompanyEmployeeMission({ missionId, employee, job = KAIOS_AI_OS_EMPLOYMENT_ALPHA_JOB, assignedBy, createdAt }) {
+  invariant(false, "MISSION_DISPATCH_AUTHORITY_NOT_CONNECTED", "A canonical Company mission dispatch authority is not connected");
   requireId(missionId, "employee_mission_id");
   requireId(assignedBy, "mission_assigner_id");
   invariant(employee?.status === "ACTIVE_ALPHA_UNDER_REVIEW" && employee.company_id === job.company_id && employee.job_id === job.job_id, "MISSION_EMPLOYEE_BINDING_REQUIRED", "Company mission requires an active Employee bound to the job and Company");
@@ -462,6 +466,7 @@ export function submitCompanyWorkEvidence({ evidenceId, mission, employee, event
 }
 
 export function reviewCompanyWorkEvidence({ reviewId, mission, employee, workEvidence, reviewerId, decision, evidence, reviewedAt }) {
+  invariant(false, "WORK_REVIEW_AUTHORITY_NOT_CONNECTED", "A distinct repository-bound work review authority is not connected");
   requireId(reviewId, "work_review_id");
   requireId(reviewerId, "work_reviewer_id");
   requireEnum(decision, ["APPROVE", "REJECT", "NEED_MORE_INFO"], "work_review_decision");
@@ -474,6 +479,7 @@ export function reviewCompanyWorkEvidence({ reviewId, mission, employee, workEvi
 }
 
 export function accrueCompanyCompensation({ ledgerEntries = [], accrualId, mission, employee, workReview, accruedAt }) {
+  invariant(false, "COMPENSATION_AUTHORITY_NOT_CONNECTED", "A repository-bound compensation policy and authority are not connected");
   requireArray(ledgerEntries, "compensation_accrual_entries");
   requireId(accrualId, "compensation_accrual_id");
   invariant(workReview?.decision === "APPROVE" && workReview.mission_id === mission?.mission_id && workReview.employee_id === employee?.employee_id, "COMPENSATION_APPROVED_WORK_REQUIRED", "Compensation accrual requires approved work bound to the mission and Employee");
@@ -484,6 +490,7 @@ export function accrueCompanyCompensation({ ledgerEntries = [], accrualId, missi
 }
 
 export function queueCompanyPayroll({ payrollQueueId, queueEntries = [], employee, accrual, queuedAt }) {
+  invariant(false, "PAYROLL_AUTHORITY_NOT_CONNECTED", "A repository-bound Payroll authority is not connected");
   requireId(payrollQueueId, "payroll_queue_id");
   requireArray(queueEntries, "payroll_queue_entries");
   invariant(accrual?.status === "ACCRUED_SIMULATION_NOT_PAYABLE" && accrual.employee_id === employee?.employee_id && accrual.payroll_account_id === employee?.payroll_account?.account_id, "PAYROLL_ACCRUAL_BINDING_REQUIRED", "Payroll queue requires a bound compensation accrual");
@@ -494,6 +501,7 @@ export function queueCompanyPayroll({ payrollQueueId, queueEntries = [], employe
 }
 
 export function recordCompanyPayrollSettlement({ settlementId, payrollEntry, settlementReceipt, settledAt }) {
+  invariant(false, "PAYROLL_SETTLEMENT_AUTHORITY_NOT_CONNECTED", "A repository-bound settlement verifier and payment authority are not connected");
   requireId(settlementId, "payroll_settlement_id");
   invariant(payrollEntry?.payable === true && payrollEntry.funded === true, "PAYROLL_NOT_PAYABLE", "Payroll settlement requires separately verified funding and payable state");
   invariant(settlementReceipt?.receipt_status === 1 && /^0x[0-9a-f]{64}$/i.test(String(settlementReceipt.transaction_hash ?? "")), "PAYROLL_SETTLEMENT_RECEIPT_REQUIRED", "Paid status requires a successful settlement receipt");
@@ -502,6 +510,7 @@ export function recordCompanyPayrollSettlement({ settlementId, payrollEntry, set
 }
 
 export function evaluateAtmPayrollAdvanceCandidate({ employee, payrollEntry, requestedKaiosWei, availableLiquidityKaiosWei }) {
+  invariant(false, "ATM_PAYROLL_AUTHORITY_NOT_CONNECTED", "A repository-bound ATM payroll advance authority is not connected");
   invariant(payrollEntry?.employee_id === employee?.employee_id && payrollEntry?.payroll_account_id === employee?.payroll_account?.account_id, "ATM_PAYROLL_BINDING_REQUIRED", "ATM advance requires verified Employee payroll binding");
   invariant(payrollEntry.status === "QUEUED_SIMULATION_AWAITING_FUNDING_AND_AUTHORITY", "ATM_VERIFIED_PAYROLL_REQUIRED", "ATM cannot lend against unverified payroll");
   const accrued = BigInt(payrollEntry.accrued_kaios_wei);
