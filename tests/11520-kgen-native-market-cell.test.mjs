@@ -49,11 +49,17 @@ function createMarket(options = {}) {
   });
 }
 
-test("11520 fixed KGEN price coordinate and Company address never seed matched-trade CT", () => {
+test("11520 candidate coordinate stays authority-unverified and never seeds matched-trade CT", () => {
   const market = createMarket({ marketCellCoordinate: "0.99999999" });
   const state = market.getMarketState();
   assert.equal(state.marketCellCoordinate, "0.00011520");
-  assert.equal(state.marketCellCoordinateRole, "KGEN_UNIVERSE_PRICE_AND_COMPANY_ADDRESS");
+  assert.equal(
+    state.marketCellCoordinateRole,
+    "CANDIDATE_KGEN_UNIVERSE_PRICE_AND_COMPANY_ADDRESS",
+  );
+  assert.equal(state.marketCellCoordinateStatus, "UNVERIFIED_CANDIDATE");
+  assert.equal(state.marketCellCoordinateAuthority, null);
+  assert.equal(state.repositoryBoundHumanCoordinateAuthority, false);
   assert.equal(state.companyAddress, "0.00011520");
   assert.equal(state.companyKCoordinate, "K11520");
   assert.equal(state.kgenUniversePriceCoordinate, "0.00011520");

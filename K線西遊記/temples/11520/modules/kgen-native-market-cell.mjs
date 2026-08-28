@@ -1,7 +1,9 @@
 const SCALE = 10n ** 18n;
 const QUOTE_STATUS = "UNFROZEN_CANDIDATE";
 const MARKET_CELL_COORDINATE = "0.00011520";
-const MARKET_CELL_COORDINATE_ROLE = "KGEN_UNIVERSE_PRICE_AND_COMPANY_ADDRESS";
+const MARKET_CELL_COORDINATE_ROLE = "CANDIDATE_KGEN_UNIVERSE_PRICE_AND_COMPANY_ADDRESS";
+const MARKET_CELL_COORDINATE_STATUS = "UNVERIFIED_CANDIDATE";
+const MARKET_CELL_COORDINATE_AUTHORITY = null;
 const COMPANY_ADDRESS = "0.00011520";
 const COMPANY_K_COORDINATE = "K11520";
 const KGEN_PRICE_COORDINATE_UNIT = "USD_PER_KGEN";
@@ -389,6 +391,9 @@ function createVerified11520PaperMarketCell({
       marketId,
       marketCellCoordinate: MARKET_CELL_COORDINATE,
       marketCellCoordinateRole: MARKET_CELL_COORDINATE_ROLE,
+      marketCellCoordinateStatus: MARKET_CELL_COORDINATE_STATUS,
+      marketCellCoordinateAuthority: MARKET_CELL_COORDINATE_AUTHORITY,
+      repositoryBoundHumanCoordinateAuthority: false,
       companyAddress: COMPANY_ADDRESS,
       companyKCoordinate: COMPANY_K_COORDINATE,
       kgenUniversePriceCoordinate: MARKET_CELL_COORDINATE,
