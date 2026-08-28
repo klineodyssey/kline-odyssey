@@ -2093,12 +2093,25 @@ export function createKaiosNavigationRouteCandidate({ routeId, requesterLifeId, 
     invariant(entity.subject_id === requesterLifeId, "NAVIGATION_SUBJECT_MISMATCH", "Navigation permission, session, counter and positions must belong to the requesting Life");
   }
   invariant(gpsSession.permission_id === null || gpsSession.permission_id === locationPermission.permission_id, "NAVIGATION_PERMISSION_MISMATCH", "GPS session must reference the supplied Location Permission");
-  invariant(gpsSession.coordinates_stored !== true || (locationPermission.status === "GRANTED" && gpsSession.status === "ACTIVE"), "NAVIGATION_PRECISE_GPS_WITHOUT_CONSENT", "Precise GPS storage requires an active session and explicit Location Permission");
+  invariant(stepCounter.gps_session_id === null || stepCounter.gps_session_id === gpsSession.gps_session_id, "NAVIGATION_SESSION_MISMATCH", "Step Counter must reference the supplied GPS session");
+  for (const position of [currentPosition, destinationPosition]) {
+    invariant(position.location_permission_id === null || position.location_permission_id === locationPermission.permission_id, "NAVIGATION_PERMISSION_MISMATCH", "Map positions must reference the supplied Location Permission");
+  }
+  const activePreciseGpsSession = locationPermission.status === "GRANTED"
+    && Boolean(locationPermission.granted_at)
+    && locationPermission.revoked_at === null
+    && gpsSession.status === "ACTIVE"
+    && Boolean(gpsSession.started_at)
+    && gpsSession.ended_at === null
+    && gpsSession.permission_id === locationPermission.permission_id;
+  invariant(gpsSession.coordinates_stored !== true || activePreciseGpsSession, "NAVIGATION_PRECISE_GPS_WITHOUT_CONSENT", "Precise GPS storage requires an active, unrevoked permission and an unended matching GPS session");
+  const positionCoordinatesPresent = [currentPosition, destinationPosition].some((position) => position.coordinates !== null);
+  invariant(!positionCoordinatesPresent || (activePreciseGpsSession && gpsSession.coordinates_stored === true), "NAVIGATION_PRECISE_POSITION_WITHOUT_CONSENT", "Precise MapPosition coordinates require the same active consent-bound GPS session");
   invariant(currentPosition.location_id === fieldRoute.origin && destinationPosition.location_id === fieldRoute.destination, "NAVIGATION_ROUTE_POSITION_MISMATCH", "Map positions must match the evidenced FieldRoute endpoints");
   const energyKnown = energyRequirement !== null && Number(energyRequirement) >= 0;
   const costKnown = transportCostKaiosWei !== null;
   const normalizedCost = costKnown ? kaiosWei(transportCostKaiosWei, "navigation_transport_cost_kaios_wei").toString() : "POLICY_REQUIRED";
-  const nonLocationMode = locationPermission.status !== "GRANTED" || gpsSession.status !== "ACTIVE";
+  const nonLocationMode = !activePreciseGpsSession;
   return Object.freeze({
     route_id: routeId,
     requester_life_id: requesterLifeId,

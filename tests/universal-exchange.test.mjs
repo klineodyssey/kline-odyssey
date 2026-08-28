@@ -294,6 +294,37 @@ test("V4.1 Navigation route reuses consent, position and FieldRoute evidence wit
   assert.throws(() => createKaiosNavigationRouteCandidate({ routeId: "NAV_ROUTE_WRONG_ENDPOINT", requesterLifeId: "LIFE-XUANYAO-SOL-0001", locationPermission, gpsSession, stepCounter, currentPosition: { ...currentPosition, location_id: "K999" }, destinationPosition, fieldRoute }), /must match the evidenced FieldRoute endpoints/);
   assert.throws(() => createKaiosNavigationRouteCandidate({ routeId: "NAV_ROUTE_NO_MAP", requesterLifeId: "LIFE-XUANYAO-SOL-0001", locationPermission, gpsSession, stepCounter, currentPosition, destinationPosition, fieldRoute: { ...fieldRoute, map_evidence: null } }), /Routes must reuse evidenced/);
   assert.throws(() => createKaiosNavigationRouteCandidate({ routeId: "NAV_ROUTE_GPS_WITHOUT_CONSENT", requesterLifeId: "LIFE-XUANYAO-SOL-0001", locationPermission, gpsSession: { ...gpsSession, coordinates_stored: true }, stepCounter, currentPosition, destinationPosition, fieldRoute }), /Precise GPS storage requires/);
+
+  const grantedPermission = { ...locationPermission, status: "GRANTED", granted_at: "2026-08-28T07:00:00Z", revoked_at: null };
+  const activeGpsSession = { ...gpsSession, permission_id: grantedPermission.permission_id, started_at: "2026-08-28T07:01:00Z", status: "ACTIVE", coordinates_stored: true };
+  const consentBoundCurrent = { ...currentPosition, location_permission_id: grantedPermission.permission_id, coordinates: { presentation: "0.00012345" }, status: "PRECISE" };
+  const consentBoundDestination = { ...destinationPosition, location_permission_id: grantedPermission.permission_id, coordinates: { presentation: "0.00011520" }, status: "PRECISE" };
+  const preciseRoute = createKaiosNavigationRouteCandidate({ routeId: "NAV_ROUTE_CONSENT_BOUND", requesterLifeId: "LIFE-XUANYAO-SOL-0001", locationPermission: grantedPermission, gpsSession: activeGpsSession, stepCounter, currentPosition: consentBoundCurrent, destinationPosition: consentBoundDestination, fieldRoute });
+  assert.equal(preciseRoute.non_location_mode, false);
+  assert.equal(preciseRoute.precise_gps_stored, true);
+
+  assert.throws(() => createKaiosNavigationRouteCandidate({
+    routeId: "NAV_ROUTE_REVOKED_PERMISSION", requesterLifeId: "LIFE-XUANYAO-SOL-0001",
+    locationPermission: { ...grantedPermission, revoked_at: "2026-08-28T07:02:00Z" }, gpsSession: activeGpsSession,
+    stepCounter, currentPosition: consentBoundCurrent, destinationPosition: consentBoundDestination, fieldRoute
+  }), /active, unrevoked permission/);
+  assert.throws(() => createKaiosNavigationRouteCandidate({
+    routeId: "NAV_ROUTE_ENDED_SESSION", requesterLifeId: "LIFE-XUANYAO-SOL-0001",
+    locationPermission: grantedPermission, gpsSession: { ...activeGpsSession, ended_at: "2026-08-28T07:03:00Z" },
+    stepCounter, currentPosition: consentBoundCurrent, destinationPosition: consentBoundDestination, fieldRoute
+  }), /unended matching GPS session/);
+  assert.throws(() => createKaiosNavigationRouteCandidate({
+    routeId: "NAV_ROUTE_FORGED_POSITION_PERMISSION", requesterLifeId: "LIFE-XUANYAO-SOL-0001",
+    locationPermission: grantedPermission, gpsSession: activeGpsSession, stepCounter,
+    currentPosition: { ...consentBoundCurrent, location_permission_id: "LOCATION_PERMISSION_FORGED" },
+    destinationPosition: consentBoundDestination, fieldRoute
+  }), /Map positions must reference/);
+  assert.throws(() => createKaiosNavigationRouteCandidate({
+    routeId: "NAV_ROUTE_WRONG_STEP_SESSION", requesterLifeId: "LIFE-XUANYAO-SOL-0001",
+    locationPermission: grantedPermission, gpsSession: activeGpsSession,
+    stepCounter: { ...stepCounter, gps_session_id: "GPS_SESSION_OTHER" },
+    currentPosition: consentBoundCurrent, destinationPosition: consentBoundDestination, fieldRoute
+  }), /Step Counter must reference/);
 });
 
 test("V4.1 Xuanyao Navigation organ remains unpurchased, unpaid and uninstalled", () => {
