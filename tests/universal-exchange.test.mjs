@@ -204,19 +204,20 @@ test("V4.0 Demand-to-Product distinguishes candidate demand, verified demand and
   const reuse = createAutonomousDemandToProductCycle({
     cycleId: "DEMAND_CYCLE_ATM_002",
     observations: [
-      { observation_id: "OBS_PRE_PAYDAY_002", friction: "PRE_PAYDAY_LIQUIDITY_NEED", verification_status: "VERIFIED", evidence: "MACHINE_VERIFIED_PAYROLL_GAP" },
-      { observation_id: "OBS_PRE_PAYDAY_DUP", friction: "PRE_PAYDAY_LIQUIDITY_NEED", verification_status: "VERIFIED", evidence: "SAME_NEED_SECOND_SIGNAL" }
+      { observation_id: "OBS_PRE_PAYDAY_002", friction: "PRE_PAYDAY_LIQUIDITY_NEED", verification_status: "CANDIDATE", evidence: null },
+      { observation_id: "OBS_PRE_PAYDAY_DUP", friction: "PRE_PAYDAY_LIQUIDITY_NEED", verification_status: "CANDIDATE", evidence: null }
     ],
     existingProducts: [{ product_id: "KAIOS_ATM_APP", status: "IMPLEMENTED_REVIEW_CANDIDATE_NOT_LIVE" }]
   });
-  assert.equal(reuse.real_demands_found, 1);
+  assert.equal(reuse.real_demands_found, 0);
+  assert.equal(reuse.candidate_demands_found, 1);
   assert.deepEqual(reuse.products_reused, ["KAIOS_ATM_APP"]);
   assert.deepEqual(reuse.new_products_proposed, []);
   assert.equal(reuse.decisions[0].build_duplicate, false);
   assert.throws(() => createAutonomousDemandToProductCycle({
     cycleId: "DEMAND_CYCLE_BAD_EVIDENCE",
-    observations: [{ observation_id: "OBS_BAD", friction: "NO_STORAGE", verification_status: "VERIFIED", evidence: null }]
-  }), /Verified demand requires evidence/);
+    observations: [{ observation_id: "OBS_BAD", friction: "NO_STORAGE", verification_status: "VERIFIED", evidence: "CALLER_ASSERTED_EVIDENCE" }]
+  }), /verifier is not repository-bound/);
 });
 
 test("V4.0 KAIOS ATM product reuses the existing 11520 listing contract without claiming a live sale", () => {
@@ -271,7 +272,9 @@ test("V4.0 KAIOS ATM repayment is replay-safe and Life debt stays isolated", () 
     atmLiquidityKaiosWei: "50000000000000000000"
   });
   const repayment = createKaiosAtmRepaymentCandidate({ repaymentId: "ATM_REPAY_001", advance, payerLifeId: "LIFE_ALICE_001", repaymentKaiosWei: advance.total_repayment_kaios_wei });
-  assert.equal(repayment.replay_consumed, true);
+  assert.equal(repayment.replay_consumed, false);
+  assert.equal(repayment.durable_replay_registry, "NOT_BOUND");
+  assert.equal(repayment.status, "REPAYMENT_CANDIDATE_DURABLE_REPLAY_REQUIRED");
   assert.equal(repayment.real_transfer, false);
   assert.throws(() => createKaiosAtmRepaymentCandidate({ repaymentId: "ATM_REPAY_001", advance, payerLifeId: "LIFE_ALICE_001", repaymentKaiosWei: advance.total_repayment_kaios_wei, usedRepaymentIds: ["ATM_REPAY_001"] }), /cannot be reused/);
   assert.throws(() => createKaiosAtmRepaymentCandidate({ repaymentId: "ATM_REPAY_BOB", advance, payerLifeId: "LIFE_BOB_001", repaymentKaiosWei: advance.total_repayment_kaios_wei }), /another Life's debt/);
@@ -279,15 +282,18 @@ test("V4.0 KAIOS ATM repayment is replay-safe and Life debt stays isolated", () 
 });
 
 test("V4.0 ATM economics rejects fake revenue and operating cost reduces profit", () => {
-  assert.throws(() => calculateKaiosAtmEconomics({ feeRevenueKaiosWei: "10", feeSettlementEvidence: null, humanRelayCostKaiosWei: "0" }), /real settled service-fee evidence/);
+  assert.throws(() => calculateKaiosAtmEconomics({ feeRevenueKaiosWei: "10", feeSettlementEvidence: null, humanRelayCostKaiosWei: "0" }), /repository-bound settlement verifier/);
+  assert.throws(() => calculateKaiosAtmEconomics({ feeRevenueKaiosWei: "10", feeSettlementEvidence: "CALLER_ASSERTED_SETTLEMENT", humanRelayCostKaiosWei: "0" }), /repository-bound settlement verifier/);
   const economics = calculateKaiosAtmEconomics({
-    feeRevenueKaiosWei: "10",
-    feeSettlementEvidence: "SETTLED_SERVICE_FEE_RECEIPT",
+    feeRevenueKaiosWei: "0",
+    feeSettlementEvidence: null,
     costs: { maintenance_cost_kaios_wei: "1", security_cost_kaios_wei: "2" },
     humanRelayCostKaiosWei: "1"
   });
   assert.equal(economics.known_operating_cost_kaios_wei, "3");
-  assert.equal(economics.net_profit_kaios_wei, "6");
+  assert.equal(economics.net_profit_kaios_wei, "-4");
+  assert.equal(economics.real_revenue, false);
+  assert.equal(economics.revenue_evidence, null);
   const incomplete = calculateKaiosAtmEconomics({ costs: {} });
   assert.equal(incomplete.human_relay_cost_kaios_wei, "POLICY_REQUIRED");
   assert.equal(incomplete.net_profit_kaios_wei, "POLICY_REQUIRED");
@@ -304,10 +310,15 @@ test("V4.0 Human relay labor is append-only, timed and not fake-payable", () => 
     round_trip_count: 1,
     status: "COMPLETED"
   });
-  assert.equal(events[0].duration_minutes, 12.5);
+  assert.equal(events[0].candidate_duration_minutes, 12.5);
+  assert.equal(events[0].authoritative_labor, false);
+  assert.equal(events[0].evidence_status, "UNVERIFIED_CANDIDATE");
   assert.equal(events[0].payable_amount, "NOT_CALCULATED_RATE_PENDING");
   const summary = summarizeHumanRelayLaborLedger(events);
-  assert.equal(summary.accrued_human_relay_minutes, 12.5);
+  assert.equal(summary.candidate_human_relay_minutes, 12.5);
+  assert.equal(summary.accrued_human_relay_minutes, 0);
+  assert.equal(summary.authoritative_labor_events, 0);
+  assert.equal(summary.human_labor_evidence, "UNVERIFIED_CANDIDATE");
   assert.equal(summary.human_labor_rate, "POLICY_REQUIRED");
   assert.equal(summary.payable_amount, "NOT_CALCULATED_RATE_PENDING");
   assert.equal(summary.payment_sent, false);
@@ -316,7 +327,7 @@ test("V4.0 Human relay labor is append-only, timed and not fake-payable", () => 
 });
 
 test("V4.0 CFO cycle report keeps unknown Human relay rate as a disclosed accrual", () => {
-  const relay = summarizeHumanRelayLaborLedger([{ duration_minutes: 8 }]);
+  const relay = summarizeHumanRelayLaborLedger([{ candidate_duration_minutes: 8 }]);
   const pending = createCompanyCycleFinancialReport({
     cycleId: "CFO_CYCLE_001",
     revenueKaiosWei: "0",
@@ -327,13 +338,14 @@ test("V4.0 CFO cycle report keeps unknown Human relay rate as a disclosed accrua
   assert.equal(pending.expenses, "POLICY_REQUIRED");
   assert.equal(pending.payables, "POLICY_REQUIRED");
   assert.equal(pending.profit, "POLICY_REQUIRED");
-  assert.equal(pending.human_relay_labor_accrual.accrued_human_relay_minutes, 8);
+  assert.equal(pending.human_relay_labor_accrual.candidate_human_relay_minutes, 8);
+  assert.equal(pending.human_relay_labor_accrual.accrued_human_relay_minutes, 0);
   assert.equal(pending.payment_sent, false);
 
   const noRelay = createCompanyCycleFinancialReport({ cycleId: "CFO_CYCLE_002", humanRelaySummary: summarizeHumanRelayLaborLedger([]) });
   assert.equal(noRelay.expenses, "0");
   assert.equal(noRelay.profit, "0");
-  assert.throws(() => createCompanyCycleFinancialReport({ cycleId: "CFO_FAKE_REVENUE", revenueKaiosWei: "1", humanRelaySummary: summarizeHumanRelayLaborLedger([]) }), /settlement evidence/);
+  assert.throws(() => createCompanyCycleFinancialReport({ cycleId: "CFO_FAKE_REVENUE", revenueKaiosWei: "1", revenueEvidence: "CALLER_ASSERTED_SETTLEMENT", humanRelaySummary: summarizeHumanRelayLaborLedger([]) }), /repository-bound settlement verifier/);
 });
 
 test("V3.9 workforce gap follows verified demand and does not create Life", () => {
