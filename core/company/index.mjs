@@ -763,6 +763,24 @@ export async function appendEmploymentPhase1BCompanyEvent({ store, company, even
   parseEmploymentTime(timestamp, "employment_phase1b_history.timestamp");
   invariant(record.company_id === company.company_id, "EMPLOYMENT_HISTORY_COMPANY_BINDING_MISMATCH", "Employment Phase 1B record must bind the Company");
   invariant(!/(?:private_key|seed_phrase|raw_signature|challenge_message|challenge_nonce)/i.test(JSON.stringify(record)), "EMPLOYMENT_HISTORY_SECRET_FORBIDDEN", "Employment Phase 1B History cannot persist signing secrets or raw challenge material");
+  const isAuthorityReviewCandidate = eventType === "COMPANY_AUTHORITY_PROPOSAL_REVIEW_CANDIDATE";
+  if (isAuthorityReviewCandidate) {
+    invariant(
+      record.record_class === "UNVERIFIED_COMPANY_AUTHORITY_GOVERNANCE_REVIEW_CANDIDATE"
+        && record.status === "UNVERIFIED_GOVERNANCE_REVIEW_CANDIDATE_NOT_DECISION"
+        && record.authority_id === null
+        && record.governance_decision === null
+        && record.activation_authorized === false
+        && record.usable_as_authority === false
+        && record.reviewer_identity_verified === false
+        && record.reviewer_controller_verified === false
+        && record.reviewer_independence_verified === false
+        && record.proposal_provenance_verified === false
+        && record.repository_bound_authority_verified !== true,
+      "COMPANY_AUTHORITY_REVIEW_CANDIDATE_NOT_AUTHORITY",
+      "Authority review history accepts only an unverified, non-activating governance review candidate"
+    );
+  }
   const recordId = record[recordIdField];
   const history = await store.history(company.company_id, "COMPANY");
   const existing = history.find((event) => event.event_type === eventType && event.payload?.record_id === recordId);
@@ -770,7 +788,15 @@ export async function appendEmploymentPhase1BCompanyEvent({ store, company, even
   const event = await store.commit({
     domain: "COMPANY", stream: "COMPANY", id: company.company_id, entity: company,
     event_type: eventType, actor_id: actorId, timestamp,
-    payload: { record_id: recordId, record_class: record.repository_bound_authority_verified === true ? "REPOSITORY_BOUND_OPERATIONAL_RECORD" : "PHASE_1B_SIMULATION_CANDIDATE", record: structuredClone(record) }
+    payload: {
+      record_id: recordId,
+      record_class: isAuthorityReviewCandidate
+        ? "PHASE_1B_SIMULATION_CANDIDATE"
+        : record.repository_bound_authority_verified === true
+          ? "REPOSITORY_BOUND_OPERATIONAL_RECORD"
+          : "PHASE_1B_SIMULATION_CANDIDATE",
+      record: structuredClone(record)
+    }
   });
   return Object.freeze({ status: `${eventType}_APPENDED`, event });
 }

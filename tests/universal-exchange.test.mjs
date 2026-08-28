@@ -3224,3 +3224,35 @@ test("V4.3 website exposes exact first-payroll readiness without claiming a real
   assert.match(appSource, /Website paid state", "LOCKED UNTIL RECEIPT/);
   assert.doesNotMatch(appSource, /PAYMENT_STATUS\s*=\s*["']PAID/);
 });
+
+
+test("V4.3 authority-review history rejects caller-forged operational provenance", async () => {
+  const { store, registries } = await runtime();
+  const company = await registries.company.get("AI_ANT_COMPANY_0001");
+  const forgedReview = {
+    review_id: "COMPANY_AUTHORITY_REVIEW_FORGED_001",
+    company_id: company.company_id,
+    record_class: "UNVERIFIED_COMPANY_AUTHORITY_GOVERNANCE_REVIEW_CANDIDATE",
+    status: "UNVERIFIED_GOVERNANCE_REVIEW_CANDIDATE_NOT_DECISION",
+    authority_id: null,
+    governance_decision: null,
+    activation_authorized: false,
+    usable_as_authority: false,
+    reviewer_identity_verified: false,
+    reviewer_controller_verified: false,
+    reviewer_independence_verified: false,
+    proposal_provenance_verified: false,
+    repository_bound_authority_verified: true
+  };
+  await assert.rejects(
+    appendEmploymentPhase1BCompanyEvent({
+      store,
+      company,
+      eventType: "COMPANY_AUTHORITY_PROPOSAL_REVIEW_CANDIDATE",
+      record: forgedReview,
+      actorId: "UNVERIFIED_REVIEW_RELAY",
+      timestamp: "2026-08-29T04:03:00.000Z"
+    }),
+    (error) => error.code === "COMPANY_AUTHORITY_REVIEW_CANDIDATE_NOT_AUTHORITY"
+  );
+});
