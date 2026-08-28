@@ -14,7 +14,8 @@ import {
   createPublicCivilizationDraftIntent, interpretPublicCivilizationIntent,
   confirmPublicCivilizationIntent, toPublicCivilizationRequest, routePublicCivilizationProject,
   qualifyPublicCivilizationRequest, createNonBindingEstimatePreview, appendPublicRequestHistoryEvent,
-  KAIOS_AI_OS_EMPLOYMENT_ALPHA_JOB, createEmploymentIdentityChallenge,
+  KAIOS_AI_OS_EMPLOYMENT_ALPHA_JOB, KAIOS_AI_OS_FIRST_REAL_EMPLOYMENT_TEST_JOB, KAIOS_MAINNET_TOKEN,
+  createEmploymentIdentityChallenge,
   verifyEmploymentIdentityProof, createEmploymentApplication, scoreEmploymentInterview,
   createTrialEmploymentContract, createEmploymentAlphaMission, acceptEmploymentAlphaMission,
   verifyEmploymentAlphaMission, appendKaiosAlphaEarning, appendEmploymentAlphaCompanyEvent,
@@ -609,12 +610,14 @@ async function employmentPhase1BJobsView() {
   const state = readEmploymentAlphaState();
   const registryJobs = await universe.registries.job.list();
   const job = KAIOS_AI_OS_EMPLOYMENT_ALPHA_JOB;
+  const realTestJob = KAIOS_AI_OS_FIRST_REAL_EMPLOYMENT_TEST_JOB;
   const mission = state.mission;
   const accrual = state.accruals?.at(-1);
   const payroll = state.payrollQueue?.at(-1);
   const progress = employmentAlphaProgress(state);
-  return `${hero("KAIOS CIVILIZATION AI OS · EMPLOYMENT PHASE 1B", "Interview, hire, work and accrue compensation without inventing payment.", "Human players and AI Life share one Company employment framework. Company interview and decision are separate from candidate self-check; Employee, Worker, Life and wallet identities remain distinct.")}
+  return `${hero("KAIOS CIVILIZATION AI OS · EMPLOYMENT PHASE 1C", "The real-test path is implemented and stops at the exact missing evidence.", "Human players and AI Life share one Company employment framework. A real payment can advance only after wallet-control proof, exact-head Company authority, verified payroll funding and a successful BSC receipt all agree.")}
     <div class="notice">UNDER REVIEW · PHASE 1B SIMULATION · Company decisions and Employee records are local Draft candidates. No canonical hiring, Worker trust, payroll payment or transaction occurs.</div>
+    ${section("FIRST REAL EMPLOYMENT TEST", `<div class="grid two"><article class="card"><div class="eyebrow">${html(realTestJob.job_id)}</div><h3>${badge("ENGINE_IMPLEMENTED · EXECUTION_HOLD")}</h3>${kv("Job", realTestJob.title)}${kv("Reward", "0.00000000000001 KAIOS · 10000 wei")}${kv("Mission", "DIGITAL ORIENTATION · NO PHYSICAL TRANSPORT")}${kv("KAIOS", KAIOS_MAINNET_TOKEN.contract_address)}${kv("Chain", KAIOS_MAINNET_TOKEN.chain_id)}${pills(realTestJob.proof_requirements)}</article><article class="card"><div class="eyebrow">LIVE EXECUTION GATES</div><h3>${badge("WAITING FOR REAL INPUTS")}</h3>${kv("Applicant wallet proof", "NOT_SUBMITTED")}${kv("Repository-bound Company authority", "NOT_CONNECTED")}${kv("Payroll funding source", "NOT_BOUND")}${kv("Exact-action signer", "NOT_CONNECTED")}${kv("Receipt", "NONE")}${kv("Website paid state", "LOCKED UNTIL RECEIPT")}<p class="muted">This page never asks for a private key or seed phrase and never marks salary paid from a simulated receipt.</p></article></div>`)}
     ${section("PLAYABLE LOOP", `<div class="journey employment-journey">${progress.map(([label, done], index) => `<div class="journey-step"><span>${index + 1}</span><strong>${html(label)}</strong>${badge(done ? "COMPLETED" : index === progress.findIndex(([, complete]) => !complete) ? "ACTIVE" : "LOCKED")}</div>`).join("")}</div>`)}
     ${section("IDENTITY / PAYROLL ADDRESS", `<div class="grid two"><article class="card"><div class="eyebrow">WALLET CONTROL</div><h3>${badge(state.identity?.status ?? "NOT_VERIFIED")}</h3>${kv("Actor", state.identity?.actor_id)}${kv("Actor type", state.identity?.actor_type)}${kv("Wallet", state.identity?.wallet_address)}${kv("Chain", state.identity?.chain_id ?? 56)}${kv("Canonical Life", String(state.identity?.canonical_life_identity ?? false))}${kv("Raw signature stored", String(state.identity?.raw_signature_persisted ?? false))}</article><form class="card form-grid" id="employment-wallet-form"><div class="field"><label for="employment-actor-id">Player / AI public ID</label><input id="employment-actor-id" maxlength="80" value="${html(state.identity?.actor_id ?? "")}" required></div><div class="field"><label for="employment-actor-type">Actor type</label><select id="employment-actor-type"><option value="HUMAN_PLAYER">HUMAN PLAYER</option><option value="AI_LIFE">AI LIFE</option></select></div><div class="full"><button class="button" type="submit">CONNECT WALLET + SIGN CHALLENGE</button></div><p class="muted full" id="employment-wallet-result" role="status">Public address control only; no private key or raw signature is persisted.</p></form></div>`)}
     ${section("OPEN JOB", `<article class="card job-opening"><div class="eyebrow">${html(job.job_id)}</div><h3>${html(job.title)}</h3>${kv("Company", job.company_id)}${kv("Route", `${job.location_id} → ${job.destination_id}`)}${kv("Role", job.role)}${kv("Reward", "8 KAIOS · SIMULATION")}${kv("Settlement", badge(job.settlement_status), true)}${pills(job.proof_requirements)}<button class="button" id="employment-apply" type="button" ${state.identity && !state.application ? "" : "disabled"}>APPLY</button> <span class="muted">${state.application ? state.application.status : state.identity ? "READY TO APPLY" : "VERIFY WALLET FIRST"}</span></article>`)}
@@ -911,7 +914,6 @@ function bindEmploymentPhase1BEvents() {
       const interviewStarted = Object.freeze({ interview_id: `COMPANY_INTERVIEW_${crypto.randomUUID().replaceAll("-", "").toUpperCase()}`, application_id: state.application.application_id, company_id: state.application.company_id, job_id: state.application.job_id, actor_id: state.application.actor_id, interviewer_id: companyInterviewer, started_at: startedAt, status: "COMPANY_INTERVIEW_STARTED" });
       await appendPhaseEvent("INTERVIEW_STARTED", interviewStarted, companyInterviewer, startedAt);
       const companyInterview = createCompanyInterview({ interviewId: interviewStarted.interview_id, application: state.application, interviewerId: companyInterviewer, questions, answers, evidence: [state.application.application_id, state.selfCheck.interview_id], startedAt, completedAt: new Date().toISOString() });
-      await appendPhaseEvent("INTERVIEW_COMPLETED", companyInterview, companyInterviewer, companyInterview.completed_at);
       writeEmploymentAlphaState({ ...state, companyInterview });
       await render();
     } catch (error) { document.querySelector("#company-interview-result").textContent = `${error.code ?? "COMPANY_INTERVIEW_REJECTED"}: ${error.message}`; }

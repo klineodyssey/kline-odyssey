@@ -100,14 +100,15 @@ import {
   calculateFieldTripEnergy, calculateMatterAntimatterEnergy, validateFieldRoute,
   calculateFieldServiceQuote, validateFieldDeliveryEvidence, createWorkforceGap,
   createFieldServiceDemandScan
-  , KAIOS_AI_OS_EMPLOYMENT_ALPHA_JOB, createEmploymentIdentityChallenge,
+  , KAIOS_AI_OS_EMPLOYMENT_ALPHA_JOB, KAIOS_AI_OS_FIRST_REAL_EMPLOYMENT_TEST_JOB, KAIOS_MAINNET_TOKEN,
+  createEmploymentIdentityChallenge,
   verifyEmploymentIdentityProof, createEmploymentApplication, scoreEmploymentInterview,
   createTrialEmploymentContract, createEmploymentAlphaMission, acceptEmploymentAlphaMission,
   verifyEmploymentAlphaMission, appendKaiosAlphaEarning, appendEmploymentAlphaCompanyEvent,
   createCompanyInterview, recordCompanyEmploymentDecision, createCompanyEmployeeRecord,
   activateCompanyWorkerCandidate, createCompanyEmployeeMission, acceptCompanyEmployeeMission,
   submitCompanyWorkEvidence, reviewCompanyWorkEvidence, accrueCompanyCompensation,
-  queueCompanyPayroll, recordCompanyPayrollSettlement, evaluateAtmPayrollAdvanceCandidate,
+  queueCompanyPayroll, authorizeCompanyPayrollFunding, recordCompanyPayrollSettlement, evaluateAtmPayrollAdvanceCandidate,
   appendEmploymentPhase1BCompanyEvent
 } from "../core/index.mjs";
 import { verifyDigitalAntWalletBinding, verifyDigitalLifeWalletBinding, CODEX_GM_ENV } from "../core/security/wallet-binding.mjs";
@@ -2864,12 +2865,12 @@ test("V4.0 8888 audit removes fake balances and creates only request drafts", as
   assert.doesNotMatch(bankUi, /KGEN_Wallet\.demoMode=true/);
 });
 
-test("V4.2 production shell preserves the concierge and uses a fresh Phase 1B cache key", async () => {
+test("V4.3 production shell preserves the concierge and uses fresh Employment gate assets", async () => {
   const htmlSource = await fs.readFile(new URL("../K線西遊記/temples/11520/index.html", import.meta.url), "utf8");
   const appSource = await fs.readFile(new URL("../K線西遊記/temples/11520/app.mjs", import.meta.url), "utf8");
   const cssSource = await fs.readFile(new URL("../K線西遊記/temples/11520/styles.css", import.meta.url), "utf8");
-  assert.match(htmlSource, /v=11520-v4\.2-employment-phase1b/);
-  assert.match(htmlSource, /styles\.css\?v=11520-v4\.2-employment-phase1b-mobile4/);
+  assert.match(htmlSource, /v=11520-v4\.3-real-employment-gates/);
+  assert.match(htmlSource, /styles\.css\?v=11520-v4\.3-real-employment-gates/);
   assert.doesNotMatch(htmlSource, /v=11520-v4\.0-player-first/);
   assert.doesNotMatch(htmlSource, /v=11520-v3\.6-first-kgen/);
   for (const state of ["IDLE", "LISTENING", "THINKING", "SPEAKING", "SUCCESS", "ERROR"]) assert.match(appSource + cssSource, new RegExp(state));
@@ -3086,9 +3087,95 @@ test("V4.2 review, compensation, payroll, settlement and ATM authority fail clos
 test("V4.2 website exposes Company interview, employment, salary and honest simulation boundaries", async () => {
   const htmlSource = await fs.readFile(new URL("../K線西遊記/temples/11520/index.html", import.meta.url), "utf8");
   const appSource = await fs.readFile(new URL("../K線西遊記/temples/11520/app.mjs", import.meta.url), "utf8");
-  assert.match(htmlSource, /V4\.2 · Employment Phase 1B/);
+  assert.match(htmlSource, /V4\.3 · Employment Phase 1C/);
   for (const label of ["COMPANY INTERVIEW", "COMPANY EMPLOYMENT DECISION", "EMPLOYMENT STATUS", "MY JOB \/ MISSION", "SALARY \/ PAYROLL QUEUE"]) assert.match(appSource, new RegExp(label));
   assert.match(appSource, /No canonical hiring, Worker trust, payroll payment or transaction occurs/);
   assert.match(appSource, /Real withdrawal stays disabled/);
   assert.doesNotMatch(appSource, /REAL_WITHDRAWAL_ENABLED/);
+});
+
+function repositoryCompanyAuthority({ actorId = "AI_ANT_COMPANY_HR_001", controllerId = "AI_ANT_COMPANY_HR_CONTROLLER_001", scopes = [], constraints = { action_type: "ONE_EXACT_PAYROLL_ACTION", chain_id: 56, token_address: KAIOS_MAINNET_TOKEN.contract_address, source_address: "0x2222222222222222222222222222222222222222", recipient_address: "0x1111111111111111111111111111111111111111", amount_kaios_wei: "10000" } } = {}) {
+  return Object.freeze({
+    record_class: "REPOSITORY_BOUND_COMPANY_AUTHORITY",
+    authority_id: `AUTHORITY_${actorId}`,
+    company_id: "AI_ANT_COMPANY_0001",
+    authorized_actor_id: actorId,
+    controller_id: controllerId,
+    role: "COMPANY_OPERATIONAL_REVIEW",
+    policy_version: "KAIOS_FIRST_REAL_EMPLOYMENT_TEST_V1",
+    authority_scope: Object.freeze([...scopes]),
+    valid_from: "2026-08-29T00:00:00.000Z",
+    valid_until: "2026-08-29T01:00:00.000Z",
+    evidence: Object.freeze(["HUMAN_WORK_ORDER_KAIOS_CIVILIZATION_AI_OS_FIRST_REAL_EMPLOYMENT_AND_PAYROLL_V1"]),
+    constraints: Object.freeze({ ...constraints }),
+    exact_repository_version: "1".repeat(40),
+    status: "ACTIVE"
+  });
+}
+
+function createFirstRealEmploymentFlow() {
+  const repositoryHead = "1".repeat(40);
+  const authority = repositoryCompanyAuthority({ scopes: [
+    "COMPANY_INTERVIEW", "EMPLOYMENT_DECISION", "EMPLOYEE_CREATE", "MISSION_DISPATCH",
+    "WORK_REVIEW", "COMPENSATION_ACCRUAL", "PAYROLL_QUEUE", "PAYROLL_FUNDING",
+    "PAYROLL_SETTLEMENT_VERIFY"
+  ] });
+  const challenge = createEmploymentIdentityChallenge({ challengeId: "REAL_TEST_CHALLENGE_001", actorId: "REAL_HUMAN_TESTER_001", actorType: "HUMAN_PLAYER", walletAddress: "0x1111111111111111111111111111111111111111", chainId: 56, nonce: "realtestnonce000000000001", issuedAt: "2026-08-29T00:01:00.000Z", expiresAt: "2026-08-29T00:06:00.000Z" });
+  const identity = verifyEmploymentIdentityProof({ challenge, recoveredAddress: challenge.wallet_address, signatureSha256: "a".repeat(64), verifiedAt: "2026-08-29T00:02:00.000Z" });
+  const application = createEmploymentApplication({ applicationId: "REAL_TEST_APPLICATION_001", job: KAIOS_AI_OS_FIRST_REAL_EMPLOYMENT_TEST_JOB, identityProof: identity, capabilities: ["COMPLETE_DIGITAL_ORIENTATION"], submittedAt: "2026-08-29T00:03:00.000Z" });
+  const interview = createCompanyInterview({ interviewId: "REAL_TEST_INTERVIEW_001", application, interviewerId: authority.authorized_actor_id, questions: [{ question_id: "Q1", category: "CAPABILITY" }, { question_id: "Q2", category: "SAFETY" }, { question_id: "Q3", category: "ROLE_FIT" }], answers: [{ question_id: "Q1", category: "CAPABILITY", score: 100 }, { question_id: "Q2", category: "SAFETY", score: 100 }, { question_id: "Q3", category: "ROLE_FIT", score: 100 }], evidence: [application.application_id], startedAt: "2026-08-29T00:04:00.000Z", completedAt: "2026-08-29T00:05:00.000Z", authority, repositoryHead });
+  const employmentDecision = recordCompanyEmploymentDecision({ decisionId: "REAL_TEST_DECISION_001", application, interview, job: KAIOS_AI_OS_FIRST_REAL_EMPLOYMENT_TEST_JOB, decisionMakerId: authority.authorized_actor_id, decision: "APPROVE", evidence: [interview.interview_id], decidedAt: "2026-08-29T00:06:00.000Z", authority, repositoryHead });
+  const employee = createCompanyEmployeeRecord({ employeeId: "REAL_TEST_EMPLOYEE_001", application, interview, employmentDecision, job: KAIOS_AI_OS_FIRST_REAL_EMPLOYMENT_TEST_JOB, employmentType: "PART_TIME", lifeId: null, startDate: "2026-08-29T00:07:00.000Z", createdBy: authority.authorized_actor_id, authority, repositoryHead });
+  const assigned = createCompanyEmployeeMission({ missionId: "REAL_TEST_MISSION_001", employee, job: KAIOS_AI_OS_FIRST_REAL_EMPLOYMENT_TEST_JOB, assignedBy: authority.authorized_actor_id, createdAt: "2026-08-29T00:08:00.000Z", authority, repositoryHead });
+  const mission = acceptCompanyEmployeeMission({ mission: assigned, employee, acceptedAt: "2026-08-29T00:09:00.000Z" });
+  const events = KAIOS_AI_OS_FIRST_REAL_EMPLOYMENT_TEST_JOB.proof_requirements.map((eventType, index) => ({ event_id: `REAL_TEST_EVENT_${index}`, event_type: eventType, actor_id: employee.actor_id, employee_id: employee.employee_id, mission_id: mission.mission_id, occurred_at: `2026-08-29T00:1${index}:00.000Z` }));
+  const workEvidence = submitCompanyWorkEvidence({ evidenceId: "REAL_TEST_WORK_EVIDENCE_001", mission, employee, events, submittedAt: "2026-08-29T00:14:00.000Z" });
+  const workReview = reviewCompanyWorkEvidence({ reviewId: "REAL_TEST_WORK_REVIEW_001", mission, employee, workEvidence, reviewerId: authority.authorized_actor_id, decision: "APPROVE", evidence: [workEvidence.evidence_id], reviewedAt: "2026-08-29T00:15:00.000Z", authority, repositoryHead });
+  const accrual = accrueCompanyCompensation({ accrualId: "REAL_TEST_ACCRUAL_001", mission, employee, workReview, accruedAt: "2026-08-29T00:16:00.000Z", authorizedBy: authority.authorized_actor_id, authority, repositoryHead }).at(-1);
+  const payrollEntry = queueCompanyPayroll({ payrollQueueId: "REAL_TEST_PAYROLL_QUEUE_001", employee, accrual, queuedAt: "2026-08-29T00:17:00.000Z", queuedBy: authority.authorized_actor_id, authority, repositoryHead }).at(-1);
+  return { repositoryHead, authority, identity, application, interview, employmentDecision, employee, mission, workEvidence, workReview, accrual, payrollEntry };
+}
+
+test("V4.3 exact repository authority can reach a real-test payroll queue without inventing payment", () => {
+  const flow = createFirstRealEmploymentFlow();
+  assert.equal(flow.application.status, "SUBMITTED_REAL_TEST");
+  assert.equal(flow.interview.status, "COMPANY_INTERVIEW_COMPLETED");
+  assert.equal(flow.employee.status, "ACTIVE_REAL_TEST");
+  assert.equal(flow.employee.worker_id, null);
+  assert.equal(flow.mission.real_location_claimed, false);
+  assert.equal(flow.mission.real_cargo_claimed, false);
+  assert.equal(flow.accrual.amount_kaios_wei, "10000");
+  assert.equal(flow.accrual.payable, false);
+  assert.equal(flow.payrollEntry.status, "QUEUED_REAL_TEST_AWAITING_FUNDING");
+  assert.equal(flow.payrollEntry.paid, false);
+});
+
+test("V4.3 funding and settlement require canonical KAIOS, exact parties, amount and balance delta", () => {
+  const flow = createFirstRealEmploymentFlow();
+  const fundingEvidence = { evidence_id: "REAL_TEST_FUNDING_EVIDENCE_001", chain_id: 56, token_address: KAIOS_MAINNET_TOKEN.contract_address, source_address: "0x2222222222222222222222222222222222222222", verified_balance_kaios_wei: "10000", observed_at: "2026-08-29T00:18:00.000Z" };
+  const funded = authorizeCompanyPayrollFunding({ payrollEntry: flow.payrollEntry, fundingEvidence, authorizedBy: flow.authority.authorized_actor_id, authority: flow.authority, repositoryHead: flow.repositoryHead, authorizedAt: "2026-08-29T00:19:00.000Z" });
+  assert.equal(funded.status, "FUNDED_PAYABLE_REAL_TEST");
+  const receipt = { receipt_status: 1, transaction_hash: `0x${"a".repeat(64)}`, chain_id: 56, token_address: KAIOS_MAINNET_TOKEN.contract_address, from: fundingEvidence.source_address, to: flow.employee.payroll_account.wallet_address, amount_kaios_wei: "10000", block_number: 123456789, block_hash: `0x${"b".repeat(64)}`, confirmations: 2, balance_before_kaios_wei: "7", balance_after_kaios_wei: "10007" };
+  const settlement = recordCompanyPayrollSettlement({ settlementId: "REAL_TEST_SETTLEMENT_001", payrollEntry: funded, settlementReceipt: receipt, settledAt: "2026-08-29T00:20:00.000Z", verifiedBy: flow.authority.authorized_actor_id, authority: flow.authority, repositoryHead: flow.repositoryHead });
+  assert.equal(settlement.status, "PAYROLL_SETTLED_WITH_VERIFIED_MAINNET_RECEIPT");
+  assert.equal(settlement.amount_kaios_wei, "10000");
+  assert.throws(() => recordCompanyPayrollSettlement({ settlementId: "REAL_TEST_SETTLEMENT_BAD", payrollEntry: funded, settlementReceipt: { ...receipt, balance_after_kaios_wei: "10008" }, settledAt: "2026-08-29T00:21:00.000Z", verifiedBy: flow.authority.authorized_actor_id, authority: flow.authority, repositoryHead: flow.repositoryHead }), (error) => error.code === "PAYROLL_SETTLEMENT_AMOUNT_MISMATCH");
+});
+
+test("V4.3 repository authority fails closed on stale head, wrong scope and controller collision", () => {
+  const flow = createFirstRealEmploymentFlow();
+  assert.throws(() => recordCompanyEmploymentDecision({ decisionId: "STALE", application: flow.application, interview: flow.interview, job: KAIOS_AI_OS_FIRST_REAL_EMPLOYMENT_TEST_JOB, decisionMakerId: flow.authority.authorized_actor_id, decision: "APPROVE", evidence: ["E"], decidedAt: "2026-08-29T00:06:00.000Z", authority: flow.authority, repositoryHead: "2".repeat(40) }), (error) => error.code === "COMPANY_EMPLOYMENT_AUTHORITY_NOT_CONNECTED");
+  const colliding = repositoryCompanyAuthority({ controllerId: flow.application.controller_id, scopes: ["EMPLOYMENT_DECISION"] });
+  assert.throws(() => recordCompanyEmploymentDecision({ decisionId: "COLLISION", application: flow.application, interview: flow.interview, job: KAIOS_AI_OS_FIRST_REAL_EMPLOYMENT_TEST_JOB, decisionMakerId: colliding.authorized_actor_id, decision: "APPROVE", evidence: ["E"], decidedAt: "2026-08-29T00:06:00.000Z", authority: colliding, repositoryHead: flow.repositoryHead }), (error) => error.code === "EMPLOYMENT_DECISION_CONTROLLER_COLLISION");
+});
+
+test("V4.3 website exposes exact first-payroll readiness without claiming a real applicant or receipt", async () => {
+  const htmlSource = await fs.readFile(new URL("../K線西遊記/temples/11520/index.html", import.meta.url), "utf8");
+  const appSource = await fs.readFile(new URL("../K線西遊記/temples/11520/app.mjs", import.meta.url), "utf8");
+  assert.match(htmlSource, /V4\.3 · Employment Phase 1C/);
+  assert.match(appSource, /0\.00000000000001 KAIOS · 10000 wei/);
+  assert.match(appSource, /Applicant wallet proof", "NOT_SUBMITTED/);
+  assert.match(appSource, /Payroll funding source", "NOT_BOUND/);
+  assert.match(appSource, /Website paid state", "LOCKED UNTIL RECEIPT/);
+  assert.doesNotMatch(appSource, /PAYMENT_STATUS\s*=\s*["']PAID/);
 });
