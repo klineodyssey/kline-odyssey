@@ -2012,7 +2012,7 @@ export function classifyKgenUniverseReference(price) {
   const numeric = Number(price);
   invariant(Number.isFinite(numeric) && numeric > 0, "KGEN_REFERENCE_PRICE_INVALID", "KGEN reference price must be positive and finite");
   const floor = Math.floor(Math.log10(numeric));
-  const alpha = numeric / (10 ** floor);
+  const alpha = Number((numeric / (10 ** floor)).toPrecision(15));
   return Object.freeze({
     price: numeric,
     unit: "USD_PER_KGEN",
