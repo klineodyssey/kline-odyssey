@@ -103,6 +103,7 @@ import {
   , KAIOS_AI_OS_EMPLOYMENT_ALPHA_JOB, KAIOS_AI_OS_FIRST_REAL_EMPLOYMENT_TEST_JOB, KAIOS_MAINNET_TOKEN,
   CANONICAL_REPOSITORY_COMPANY_AUTHORITIES, COMPANY_OPERATIONAL_AUTHORITY_PROPOSAL_SCOPES,
   createRepositoryCompanyAuthorityProposal, createCompanyAuthorityReviewRequestPacket,
+  COMPANY_PROVENANCE_ATTESTATION_REQUIRED_BINDINGS, createCompanyAuthorityProvenanceAttestationRequest,
   createReadOnlyGitHubRepositorySnapshotCandidate, fetchReadOnlyGitHubPullRequestSnapshot,
   verifyCompanyAuthorityReviewRequestSnapshotMatch,
   createCompanyAuthorityProposalReviewCandidate,
@@ -3229,6 +3230,71 @@ test("V4.3 authority review request packet is hash-bound, replay-safe and never 
       record: { ...packet, head_sha_claim: "c".repeat(40) }
     }),
     (error) => error.code === "COMPANY_AUTHORITY_REVIEW_REQUEST_NOT_AUTHORITY"
+  );
+});
+
+test("V4.3 proposal provenance request is hash-bound, replay-safe and awaits an external trust anchor", async () => {
+  const proposal = createRepositoryCompanyAuthorityProposal({
+    proposalId: "COMPANY_AUTHORITY_PROPOSAL_PROVENANCE_TEST_001", companyId: "AI_ANT_COMPANY_0001",
+    candidateActorId: "COMPANY_OPERATOR_CANDIDATE_007", candidateControllerId: "COMPANY_CONTROLLER_CANDIDATE_007",
+    role: "COMPANY_EMPLOYMENT_OPERATOR_CANDIDATE", policyVersion: "KAIOS_FIRST_REAL_EMPLOYMENT_TEST_V1",
+    requestedScopes: ["COMPANY_INTERVIEW"], validFrom: "2026-08-29T08:01:00.000Z",
+    validUntil: "2026-08-29T09:01:00.000Z", evidence: ["PR_191_REVIEW_REQUIRED"],
+    exactRepositoryVersion: "7".repeat(40), proposedBy: "COMPANY_GM_CLAIM_007",
+    proposedAt: "2026-08-29T08:00:00.000Z"
+  });
+  const packet = await createCompanyAuthorityReviewRequestPacket({
+    requestId: "COMPANY_AUTHORITY_REVIEW_REQUEST_004", proposal,
+    repository: "klineodyssey/kline-odyssey", baseShaClaim: "a".repeat(40), headShaClaim: "b".repeat(40),
+    changedFilesClaim: ["core/company/index.mjs", "tests/universal-exchange.test.mjs"],
+    ciRunIdsClaim: ["33223338578", "33223340917"],
+    requiredReviewCapabilities: ["AUTHORITY_BOUNDARY_REVIEW", "CI_REVIEW"],
+    requestedAt: "2026-08-29T08:02:00.000Z"
+  });
+  const request = await createCompanyAuthorityProvenanceAttestationRequest({
+    attestationRequestId: "COMPANY_PROVENANCE_ATTESTATION_REQUEST_001", proposal,
+    reviewRequestPacket: packet, requestedConnectorClass: "TRUSTED_EXTERNAL_READ_ONLY_CONNECTOR",
+    requestedAt: "2026-08-29T08:03:00.000Z"
+  });
+  assert.equal(request.status, "AWAITING_TRUSTED_EXTERNAL_CONNECTOR_ATTESTATION");
+  assert.deepEqual(request.required_bindings, COMPANY_PROVENANCE_ATTESTATION_REQUIRED_BINDINGS);
+  assert.match(request.request_payload_sha256, /^[0-9a-f]{64}$/);
+  assert.equal(request.connector_id, null);
+  assert.equal(request.connector_identity_verified, false);
+  assert.equal(request.detached_attestation_sha256, null);
+  assert.equal(request.detached_attestation_verified, false);
+  assert.equal(request.repository_snapshot_verified, false);
+  assert.equal(request.exact_head_ci_verified, false);
+  assert.equal(request.proposal_provenance_verified, false);
+  assert.equal(request.proposer_identity_verified, false);
+  assert.equal(request.counts_as_distinct_review, false);
+  assert.equal(request.activation_authorized, false);
+
+  const { store, registries } = await runtime();
+  const company = await registries.company.get("AI_ANT_COMPANY_0001");
+  const eventInput = {
+    store, company, eventType: "COMPANY_AUTHORITY_PROVENANCE_ATTESTATION_REQUEST_CREATED",
+    record: request, actorId: "COMPANY_REVIEW_ROUTER", timestamp: request.requested_at
+  };
+  const first = await appendEmploymentPhase1BCompanyEvent(eventInput);
+  const replay = await appendEmploymentPhase1BCompanyEvent(eventInput);
+  assert.equal(first.event.payload.record_class, "PHASE_1B_SIMULATION_CANDIDATE");
+  assert.equal(replay.status, "IDEMPOTENT_NOOP");
+  await assert.rejects(
+    appendEmploymentPhase1BCompanyEvent({
+      ...eventInput,
+      record: { ...request, proposal_provenance_verified: true }
+    }),
+    (error) => error.code === "COMPANY_PROVENANCE_ATTESTATION_REQUEST_NOT_AUTHORITY"
+  );
+  await assert.rejects(
+    createCompanyAuthorityProvenanceAttestationRequest({
+      attestationRequestId: "COMPANY_PROVENANCE_ATTESTATION_REQUEST_002", proposal,
+      reviewRequestPacket: { ...packet, head_sha_claim: "c".repeat(40) },
+      requestedConnectorClass: "TRUSTED_EXTERNAL_READ_ONLY_CONNECTOR",
+      requestedAt: "2026-08-29T08:04:00.000Z"
+    }),
+    (error) => error.code === "COMPANY_PROVENANCE_ATTESTATION_INPUT_INTEGRITY_MISMATCH"
   );
 });
 

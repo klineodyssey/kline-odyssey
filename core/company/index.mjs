@@ -253,6 +253,97 @@ export async function createCompanyAuthorityReviewRequestPacket({
   });
 }
 
+export const COMPANY_PROVENANCE_ATTESTATION_REQUIRED_BINDINGS = Object.freeze([
+  "CONNECTOR_IDENTITY",
+  "REPOSITORY",
+  "BASE_SHA",
+  "HEAD_SHA",
+  "PROPOSAL_PAYLOAD_SHA256",
+  "REVIEW_PACKET_PAYLOAD_SHA256",
+  "PROPOSER_ACTOR_ID",
+  "OBSERVED_AT",
+  "DETACHED_ATTESTATION_SHA256"
+]);
+
+export async function createCompanyAuthorityProvenanceAttestationRequest({
+  attestationRequestId, proposal, reviewRequestPacket, requestedConnectorClass, requestedAt
+}) {
+  requireId(attestationRequestId, "company_authority_provenance_attestation_request.attestation_request_id");
+  invariant(
+    proposal?.record_class === "UNVERIFIED_COMPANY_AUTHORITY_PROPOSAL_CANDIDATE"
+      && proposal.status === "UNVERIFIED_PROPOSAL_CANDIDATE_NOT_AUTHORITY"
+      && proposal.authority_id === null
+      && proposal.active === false,
+    "COMPANY_PROVENANCE_ATTESTATION_PROPOSAL_REQUIRED",
+    "A provenance attestation request requires an inactive Company authority proposal candidate"
+  );
+  invariant(
+    reviewRequestPacket?.record_class === "UNVERIFIED_COMPANY_AUTHORITY_REVIEW_REQUEST_PACKET"
+      && reviewRequestPacket.status === "UNVERIFIED_REVIEW_REQUEST_PACKET_AWAITING_PROVENANCE_AND_DISTINCT_REVIEWER"
+      && reviewRequestPacket.activation_authorized === false,
+    "COMPANY_PROVENANCE_ATTESTATION_REVIEW_PACKET_REQUIRED",
+    "A provenance attestation request requires a non-authoritative review request packet"
+  );
+  invariant(
+    requestedConnectorClass === "TRUSTED_EXTERNAL_READ_ONLY_CONNECTOR",
+    "COMPANY_PROVENANCE_ATTESTATION_CONNECTOR_CLASS_INVALID",
+    "Proposal provenance must be requested from a trusted external read-only connector"
+  );
+  parseEmploymentTime(requestedAt, "company_authority_provenance_attestation_request.requested_at");
+  const proposalPayloadSha256 = await sha256(proposal);
+  const expectedPacketPayloadSha256 = await sha256({
+    request_id: reviewRequestPacket.request_id,
+    proposal_id: reviewRequestPacket.proposal_id,
+    proposal_payload_sha256: reviewRequestPacket.proposal_payload_sha256,
+    repository: reviewRequestPacket.repository,
+    base_sha_claim: reviewRequestPacket.base_sha_claim,
+    head_sha_claim: reviewRequestPacket.head_sha_claim,
+    changed_files_claim: reviewRequestPacket.changed_files_claim,
+    ci_run_ids_claim: reviewRequestPacket.ci_run_ids_claim,
+    required_review_capabilities: reviewRequestPacket.required_review_capabilities,
+    requested_at: reviewRequestPacket.requested_at
+  });
+  invariant(
+    reviewRequestPacket.proposal_id === proposal.proposal_id
+      && reviewRequestPacket.company_id === proposal.company_id
+      && reviewRequestPacket.proposal_payload_sha256 === proposalPayloadSha256
+      && reviewRequestPacket.packet_payload_sha256 === expectedPacketPayloadSha256,
+    "COMPANY_PROVENANCE_ATTESTATION_INPUT_INTEGRITY_MISMATCH",
+    "Proposal and review request packet integrity must match before external provenance is requested"
+  );
+  const requestPayload = Object.freeze({
+    attestation_request_id: attestationRequestId,
+    company_id: proposal.company_id,
+    proposal_id: proposal.proposal_id,
+    proposal_payload_sha256: proposalPayloadSha256,
+    review_request_id: reviewRequestPacket.request_id,
+    review_packet_payload_sha256: expectedPacketPayloadSha256,
+    repository: reviewRequestPacket.repository,
+    base_sha_claim: reviewRequestPacket.base_sha_claim,
+    head_sha_claim: reviewRequestPacket.head_sha_claim,
+    proposer_actor_id_claim: proposal.proposed_by_claim,
+    requested_connector_class: requestedConnectorClass,
+    required_bindings: COMPANY_PROVENANCE_ATTESTATION_REQUIRED_BINDINGS,
+    requested_at: requestedAt
+  });
+  return Object.freeze({
+    record_class: "COMPANY_AUTHORITY_PROVENANCE_ATTESTATION_REQUEST",
+    ...requestPayload,
+    request_payload_sha256: await sha256(requestPayload),
+    connector_id: null,
+    connector_identity_verified: false,
+    detached_attestation_sha256: null,
+    detached_attestation_verified: false,
+    repository_snapshot_verified: false,
+    exact_head_ci_verified: false,
+    proposal_provenance_verified: false,
+    proposer_identity_verified: false,
+    counts_as_distinct_review: false,
+    activation_authorized: false,
+    status: "AWAITING_TRUSTED_EXTERNAL_CONNECTOR_ATTESTATION"
+  });
+}
+
 async function buildReadOnlyGitHubRepositorySnapshot({
   snapshotId, repository, mainSha, prNumber, baseSha, headSha, changedFiles,
   checks, observedAt, adapterId, sourceTransportAttested
@@ -701,7 +792,7 @@ export const EMPLOYMENT_PHASE1B_HISTORY_EVENT_TYPES = Object.freeze([
   "EMPLOYEE_CREATED", "WORKER_ACTIVATED", "MISSION_ASSIGNED", "MISSION_ACCEPTED",
   "WORK_EVIDENCE_SUBMITTED", "WORK_REVIEWED", "COMPENSATION_ACCRUED", "PAYROLL_QUEUED", "PAYROLL_SETTLED",
   "COMPANY_AUTHORITY_REVIEW_REQUEST_PACKET_CREATED", "COMPANY_AUTHORITY_REVIEW_SNAPSHOT_MATCH_CANDIDATE_CREATED",
-  "COMPANY_AUTHORITY_PROPOSAL_REVIEW_CANDIDATE"
+  "COMPANY_AUTHORITY_PROVENANCE_ATTESTATION_REQUEST_CREATED", "COMPANY_AUTHORITY_PROPOSAL_REVIEW_CANDIDATE"
 ]);
 
 const EMPLOYMENT_PHASE1B_EVENT_RECORD_IDS = Object.freeze({
@@ -711,6 +802,7 @@ const EMPLOYMENT_PHASE1B_EVENT_RECORD_IDS = Object.freeze({
   WORK_REVIEWED: "review_id", COMPENSATION_ACCRUED: "accrual_id", PAYROLL_QUEUED: "payroll_queue_id",
   PAYROLL_SETTLED: "settlement_id", COMPANY_AUTHORITY_REVIEW_REQUEST_PACKET_CREATED: "request_id",
   COMPANY_AUTHORITY_REVIEW_SNAPSHOT_MATCH_CANDIDATE_CREATED: "verification_id",
+  COMPANY_AUTHORITY_PROVENANCE_ATTESTATION_REQUEST_CREATED: "attestation_request_id",
   COMPANY_AUTHORITY_PROPOSAL_REVIEW_CANDIDATE: "review_id"
 });
 
@@ -1007,6 +1099,7 @@ export async function appendEmploymentPhase1BCompanyEvent({ store, company, even
   invariant(!/(?:private_key|seed_phrase|raw_signature|challenge_message|challenge_nonce)/i.test(JSON.stringify(record)), "EMPLOYMENT_HISTORY_SECRET_FORBIDDEN", "Employment Phase 1B History cannot persist signing secrets or raw challenge material");
   const isAuthorityReviewRequest = eventType === "COMPANY_AUTHORITY_REVIEW_REQUEST_PACKET_CREATED";
   const isAuthoritySnapshotMatch = eventType === "COMPANY_AUTHORITY_REVIEW_SNAPSHOT_MATCH_CANDIDATE_CREATED";
+  const isAuthorityProvenanceRequest = eventType === "COMPANY_AUTHORITY_PROVENANCE_ATTESTATION_REQUEST_CREATED";
   const isAuthorityReviewCandidate = eventType === "COMPANY_AUTHORITY_PROPOSAL_REVIEW_CANDIDATE";
   if (isAuthorityReviewRequest) {
     const expectedPacketHash = await sha256({
@@ -1075,6 +1168,40 @@ export async function appendEmploymentPhase1BCompanyEvent({ store, company, even
       "Snapshot match history accepts only an unattested non-authoritative match candidate"
     );
   }
+  if (isAuthorityProvenanceRequest) {
+    const expectedRequestHash = await sha256({
+      attestation_request_id: record.attestation_request_id,
+      company_id: record.company_id,
+      proposal_id: record.proposal_id,
+      proposal_payload_sha256: record.proposal_payload_sha256,
+      review_request_id: record.review_request_id,
+      review_packet_payload_sha256: record.review_packet_payload_sha256,
+      repository: record.repository,
+      base_sha_claim: record.base_sha_claim,
+      head_sha_claim: record.head_sha_claim,
+      proposer_actor_id_claim: record.proposer_actor_id_claim,
+      requested_connector_class: record.requested_connector_class,
+      required_bindings: record.required_bindings,
+      requested_at: record.requested_at
+    });
+    invariant(
+      record.record_class === "COMPANY_AUTHORITY_PROVENANCE_ATTESTATION_REQUEST"
+        && record.status === "AWAITING_TRUSTED_EXTERNAL_CONNECTOR_ATTESTATION"
+        && record.request_payload_sha256 === expectedRequestHash
+        && record.connector_id === null
+        && record.connector_identity_verified === false
+        && record.detached_attestation_sha256 === null
+        && record.detached_attestation_verified === false
+        && record.repository_snapshot_verified === false
+        && record.exact_head_ci_verified === false
+        && record.proposal_provenance_verified === false
+        && record.proposer_identity_verified === false
+        && record.counts_as_distinct_review === false
+        && record.activation_authorized === false,
+      "COMPANY_PROVENANCE_ATTESTATION_REQUEST_NOT_AUTHORITY",
+      "Provenance request history accepts only an unfulfilled, non-authoritative external connector request"
+    );
+  }
   if (isAuthorityReviewCandidate) {
     invariant(
       record.record_class === "UNVERIFIED_COMPANY_AUTHORITY_GOVERNANCE_REVIEW_CANDIDATE"
@@ -1101,7 +1228,7 @@ export async function appendEmploymentPhase1BCompanyEvent({ store, company, even
     event_type: eventType, actor_id: actorId, timestamp,
     payload: {
       record_id: recordId,
-      record_class: isAuthorityReviewRequest || isAuthoritySnapshotMatch || isAuthorityReviewCandidate
+      record_class: isAuthorityReviewRequest || isAuthoritySnapshotMatch || isAuthorityProvenanceRequest || isAuthorityReviewCandidate
         ? "PHASE_1B_SIMULATION_CANDIDATE"
         : record.repository_bound_authority_verified === true
           ? "REPOSITORY_BOUND_OPERATIONAL_RECORD"
