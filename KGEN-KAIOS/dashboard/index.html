@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>KAIOS Public Experimental Lab &amp; Circulation Dashboard</title>
   <meta name="description" content="KAIOS public experimental build truth, circulation, approval gates, single points of failure, workers and work queues.">
-  <link rel="stylesheet" href="./dashboard.css">
+  <link rel="stylesheet" href="./dashboard.css?v=leader-tree-20260829">
 </head>
 <body>
   <header class="app-header">
@@ -41,6 +41,25 @@
         <div><span>Known issues</span><strong id="knownIssueCount">Loading</strong></div>
       </div>
       <ul class="known-issues" id="knownIssues"><li>Loading</li></ul>
+    </section>
+
+    <section class="panel" aria-labelledby="leaderTitle">
+      <div class="section-title inline-title">
+        <div><p class="eyebrow">Repository Leader &amp; Queue Truth</p><h2 id="leaderTitle">Leader Tree／同步真相</h2></div>
+        <span class="pill danger" id="leaderReleaseStatus">Loading</span>
+      </div>
+      <p class="panel-note">Leader 是通過來源、測試、secret/IP 與 review-state 檢查的候選工作樹，不等於已合併或已發布。Human 的 dirty main 不會被清理、reset 或 stash。</p>
+      <div class="truth-grid">
+        <div><span>Main SHA</span><strong id="leaderMainSha">Loading</strong></div>
+        <div><span>Leader branch</span><strong id="leaderBranch">Loading</strong></div>
+        <div><span>Leader head</span><strong id="leaderHead">Loading</strong></div>
+        <div><span>Leader tree</span><strong id="leaderTree">Loading</strong></div>
+        <div><span>Leader vs main</span><strong id="leaderVsMain">Loading</strong></div>
+        <div><span>CI / review</span><strong id="leaderGate">Loading</strong></div>
+        <div><span>Queue drift</span><strong id="queueDriftStatus">Loading</strong></div>
+        <div><span>Expired active claims</span><strong id="expiredClaimCount">Loading</strong></div>
+      </div>
+      <ul class="known-issues" id="expiredClaims"><li>Loading</li></ul>
     </section>
 
     <section class="panel" id="moneyMap" aria-labelledby="moneyMapTitle">

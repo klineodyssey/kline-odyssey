@@ -160,6 +160,7 @@ main { padding-top: 22px; padding-bottom: 38px; }
 
 .section-title { margin-bottom: 12px; }
 .inline-title { display: flex; justify-content: space-between; gap: 12px; align-items: center; }
+.inline-title .pill { min-width: 0; max-width: 100%; white-space: normal; overflow-wrap: anywhere; text-align: center; }
 
 .table-wrap { overflow-x: auto; border: 1px solid var(--line-soft); border-radius: 8px; }
 table { width: 100%; border-collapse: collapse; min-width: 920px; }
@@ -252,6 +253,7 @@ tr:last-child td { border-bottom: 0; }
   .header-actions { justify-content: flex-start; margin-top: 16px; min-width: 0; }
   .health-grid, .status-grid { grid-template-columns: 1fr 1fr; }
   .inline-title { align-items: flex-start; flex-direction: column; }
+  .inline-title .pill { width: 100%; }
   .notice { align-items: flex-start; flex-direction: column; }
   .kv-list { grid-template-columns: 1fr; }
   table { min-width: 760px; }

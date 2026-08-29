@@ -8,7 +8,9 @@ on:
       - "api/kaios/k280/**"
       - "api/kaios/ai-company/**"
       - "KAIOS/ai-company/**"
+      - "KGEN-KAIOS/dashboard/**"
       - "index.html"
+      - ".github/workflows/deploy-pages-static.yml"
       - ".github/workflows/world-viewer-product-qa.yml"
   push:
     paths:
@@ -17,7 +19,9 @@ on:
       - "api/kaios/k280/**"
       - "api/kaios/ai-company/**"
       - "KAIOS/ai-company/**"
+      - "KGEN-KAIOS/dashboard/**"
       - "index.html"
+      - ".github/workflows/deploy-pages-static.yml"
       - ".github/workflows/world-viewer-product-qa.yml"
 
 permissions:
@@ -70,6 +74,8 @@ jobs:
           done < <(find KGEN-KAIOS/world-viewer -type f -name '*.js' -print0)
           node --input-type=module --check < world-viewer/ai-company-v1/app.js
           node --input-type=module --check < KAIOS/ai-company/generate-ai-company-v1-api.mjs
+          node --check KGEN-KAIOS/dashboard/dashboard.js
+          node -e 'const fs=require("fs"); const config=JSON.parse(fs.readFileSync("KGEN-KAIOS/dashboard/dashboard.config.json","utf8")); const html=fs.readFileSync("KGEN-KAIOS/dashboard/index.html","utf8"); if(!config.repository_leader_tree || !config.queue_reconciliation) throw new Error("leader/queue policy missing"); for(const id of ["leaderMainSha","leaderBranch","leaderHead","leaderTree","leaderVsMain","leaderGate","queueDriftStatus","expiredClaimCount","expiredClaims"]) if(!html.includes(`id="${id}"`)) throw new Error(`missing dashboard id ${id}`);'
 
       - name: Resolve changed-file scope
         id: changed

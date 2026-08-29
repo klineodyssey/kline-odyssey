@@ -9,6 +9,28 @@
   "pages_url": "https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/dashboard/",
   "repository": "https://github.com/klineodyssey/kline-odyssey",
   "refresh_interval_seconds": 0,
+  "repository_leader_tree": {
+    "policy_status": "CANDIDATE_UNDER_DISTINCT_REVIEW",
+    "selection_rule": "FRESHEST_VALIDATED_AND_CURRENT_LINEAGE_COMPATIBLE_AND_TESTED_AND_NO_SECRET_OR_IP_LEAK_AND_REVIEW_STATE_KNOWN",
+    "main_sha_source": "BUILD_INFO_OR_BASE_MAIN_COMMIT",
+    "leader_branch": "codex/public-lab-money-flow-audit",
+    "leader_head_source": "BUILD_INFO_SOURCE_COMMIT_OR_GITHUB_PR_HEAD",
+    "leader_tree_source": "BUILD_INFO_SOURCE_TREE_OR_GIT_TREE",
+    "leader_pr": 192,
+    "ci_status_source": "GITHUB_PR_EXACT_HEAD_CHECKS",
+    "review_status": "DISTINCT_REVIEW_MISSING",
+    "release_status": "HOLD_UNTIL_REVIEW_AND_REPOSITORY_POLICY_PASS",
+    "dirty_human_main_policy": "DO_NOT_TOUCH; USE_CLEAN_ISOLATED_WORKTREE",
+    "main_auto_sync_policy": "ONLY_AFTER_REQUIRED_REVIEW_BRANCH_PROTECTION_AND_EXACT_RELEASE_AUTHORITY",
+    "force_push_allowed": false,
+    "branch_protection_bypass_allowed": false
+  },
+  "queue_reconciliation": {
+    "active_claim_source": "KGEN-KAIOS/worker_registry.json",
+    "lease_rule": "EXPIRED_ACTIVE_CLAIM_IS_DRIFT_AND_MUST_FAIL_CLOSED",
+    "automatic_close_allowed": false,
+    "close_requires": ["canonical claim authority", "append-only close event", "recipient/worker state reconciliation", "independent review when required"]
+  },
   "public_chain_snapshot": {
     "chain_id": 56,
     "block_number": 118743165,

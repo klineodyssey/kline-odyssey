@@ -9,12 +9,14 @@
 
 This dashboard is the public status surface for the latest safe KAIOS experimental build. It gives players and operators a read-only view of build identity, known broken features, KAIOS/KGEN circulation, governance gates, financial single points of failure, workers, WorkQueue, review pipeline, reports, and alerts. A broken UI may remain visible and labelled; unauthorized real-asset execution always fails closed.
 
+It also exposes a repository Leader candidate and Queue drift surface. The Leader is a reviewable candidate selected by freshness, CURRENT-lineage compatibility, tests, secret/IP checks, and known review state; it is not an automatic merge authorization. Expired claims are detected from the existing Worker Registry and shown as `DRIFT_FOUND`, but the read-only dashboard never closes or rewrites a claim.
+
 ## Release channel
 
 - A push to `main` still publishes automatically.
 - A Human/authorized operator may dispatch `deploy-pages-static.yml` only with an exact tag or SHA already reachable from `origin/main`; an unmerged branch or commit is rejected even if the Pages environment policy later changes.
 - The workflow checks the release diff for secret-bearing paths, credential-like additions, and proprietary trading/quant/signal path names before copying the static site.
-- `build-info.json` binds the public page to the checked-out source commit and ref.
+- `build-info.json` binds the public page to the checked-out source commit, source tree, source ref, current `origin/main`, and ahead/behind counts.
 - Rollback uses the same workflow with an earlier reviewed exact SHA; it does not rewrite Git history.
 - A dirty Human `main` worktree is never cleaned, reset, stashed, or overwritten. GM engineering continues in an isolated worktree based on freshly fetched `origin/main`.
 

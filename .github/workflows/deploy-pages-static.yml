@@ -79,11 +79,16 @@ jobs:
         shell: bash
         env:
           RELEASE_MODE: ${{ github.event_name == 'workflow_dispatch' && inputs.release_mode || 'experimental' }}
+          SOURCE_REF_INPUT: ${{ github.event_name == 'workflow_dispatch' && inputs.release_ref || github.ref_name }}
         run: |
           set -euo pipefail
 
           SOURCE_SHA="$(git rev-parse HEAD)"
-          SOURCE_REF="${SOURCE_SHA}"
+          SOURCE_REF="${SOURCE_REF_INPUT}"
+          SOURCE_TREE="$(git rev-parse 'HEAD^{tree}')"
+          ORIGIN_MAIN_SHA="$(git rev-parse origin/main)"
+          SOURCE_AHEAD_OF_MAIN="$(git rev-list --count origin/main..HEAD)"
+          SOURCE_BEHIND_MAIN="$(git rev-list --count HEAD..origin/main)"
 
           rm -rf _site
           mkdir -p _site
@@ -172,9 +177,13 @@ jobs:
           mkdir -p "_site/KGEN-KAIOS/dashboard"
           cat > "_site/KGEN-KAIOS/dashboard/build-info.json" <<EOF
           {
-            "main_commit": "${SOURCE_SHA}",
+            "main_commit": "${ORIGIN_MAIN_SHA}",
+            "origin_main_commit": "${ORIGIN_MAIN_SHA}",
             "source_commit": "${SOURCE_SHA}",
+            "source_tree": "${SOURCE_TREE}",
             "source_ref": "${SOURCE_REF}",
+            "source_ahead_of_main": ${SOURCE_AHEAD_OF_MAIN},
+            "source_behind_main": ${SOURCE_BEHIND_MAIN},
             "branch": "${SOURCE_REF}",
             "workflow": "deploy-pages-static.yml",
             "generated_at": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
