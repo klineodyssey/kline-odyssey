@@ -48,6 +48,22 @@ The worker must then stop without changing WorkQueue, creating a branch, editing
 
 ## General Manager WorkOrders
 
+### KAIOS-CHIYAO-PR191-TRIAL-REVIEW-001 — Distinct technical review candidate handoff
+
+- Status: BLOCKED_EXTERNAL_CHANNEL_UNAVAILABLE
+- Owner: codex-gm-01 / Acting GM Operations Secretary
+- Reviewer Candidate: Chi-Yao (`Google / Gemini`)
+- Priority: P0 Review Capacity
+- Target: PR `#191` expected head `7e2404f346068b21b474fa18c112b916912531df`
+- Received Decision: `HOLD / TECHNICAL_REVIEW_CANDIDATE_ONLY`
+- Verified limitation: candidate did not verify exact GitHub head, base, current CI or submit a GitHub review.
+- Qualification evidence: positive evidence discipline recorded; formal Life/Worker identity, controller independence, Employment, T2 and review permissions remain pending.
+- Formal gate: `STILL_REQUIRED`; this record never means Approval.
+- Transport: no trusted routable Chi-Yao controller; do not repeat the same exam until the head changes or new access exists.
+- Work/CFO: trial work evidence candidate only; not accepted, not accrued, not payable and not paid.
+- Human Relay: one unverified relay event acknowledged; no duration or payable amount may be inferred.
+- Continuation: preserve this blocker and continue the next safe Company engineering workflow.
+
 ### KAIOS-AI-EMPLOYEE-FINANCIAL-ONBOARDING-001 — Gemini umbilical Payroll account policy
 
 - Status: REVIEW

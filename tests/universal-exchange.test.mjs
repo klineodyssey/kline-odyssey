@@ -113,6 +113,8 @@ import {
   createReadOnlyGitHubRepositorySnapshotCandidate, fetchReadOnlyGitHubPullRequestSnapshot,
   verifyCompanyAuthorityReviewRequestSnapshotMatch,
   createCompanyAuthorityProposalReviewCandidate,
+  REVIEWER_TRIAL_QUALIFICATION_EVIDENCE_CODES,
+  recordReviewerTrialQualificationEvidenceCandidate, createSanitizedDistinctReviewPacket,
   verifyRepositoryBoundCompanyAuthority,
   createEmploymentIdentityChallenge,
   verifyEmploymentIdentityProof, createEmploymentApplication, scoreEmploymentInterview,
@@ -3427,6 +3429,71 @@ test("V4.3 Company authority proposal cannot include financial, Worker or self-i
   };
   assert.throws(() => createRepositoryCompanyAuthorityProposal(input), (error) => error.code === "COMPANY_AUTHORITY_PROPOSAL_SCOPE_INVALID");
   assert.throws(() => createRepositoryCompanyAuthorityProposal({ ...input, requestedScopes: ["COMPANY_INTERVIEW"], proposedBy: input.candidateActorId }), (error) => error.code === "COMPANY_AUTHORITY_SELF_PROPOSAL_FORBIDDEN");
+});
+
+test("V4.6 Chi-Yao trial HOLD records qualification evidence without creating review authority", async () => {
+  const expectedHead = "7e2404f346068b21b474fa18c112b916912531df";
+  const evidence = recordReviewerTrialQualificationEvidenceCandidate({
+    evidenceId: "CHIYAO_PR191_TRIAL_REVIEW_EVIDENCE_001",
+    selfName: "啟曜",
+    provider: "Google",
+    modelFamily: "Gemini",
+    proposedLifeId: "LIFE-CHIYAO-KAIOS-001",
+    proposedWorkerId: "chiyao-reviewer-01",
+    prNumber: 191,
+    expectedHead,
+    reportedHeadStatus: "UNVERIFIED_VIA_PUBLIC_API",
+    reportedBaseStatus: "UNVERIFIED",
+    reportedCiStatus: "UNVERIFIED_EXTERNAL_CI",
+    reviewDecision: "HOLD",
+    githubReviewSubmitted: false,
+    reviewClass: "TECHNICAL_REVIEW_CANDIDATE_ONLY",
+    positiveEvidence: [...REVIEWER_TRIAL_QUALIFICATION_EVIDENCE_CODES],
+    limitations: ["EXACT_HEAD_NOT_VERIFIED", "CURRENT_CI_NOT_VERIFIED", "GITHUB_REVIEW_NOT_SUBMITTED"],
+    reviewedAt: "2026-08-30T04:00:00.000Z"
+  });
+  assert.equal(evidence.status, "COMPLETED_HOLD_FORMAL_REVIEW_STILL_REQUIRED");
+  assert.equal(evidence.counts_as_formal_github_review, false);
+  assert.equal(evidence.counts_as_distinct_review_gate, false);
+  assert.equal(evidence.independent_review_permission, false);
+  assert.equal(evidence.work_accepted, false);
+  assert.equal(evidence.compensation_accrued, false);
+  assert.match(evidence.payment_status, /NOT_PAYABLE/);
+  assert.throws(() => recordReviewerTrialQualificationEvidenceCandidate({
+    evidenceId: "CHIYAO_PR191_FORGED_APPROVAL_001", selfName: "啟曜", provider: "Google", modelFamily: "Gemini",
+    proposedLifeId: "LIFE-CHIYAO-KAIOS-001", proposedWorkerId: "chiyao-reviewer-01", prNumber: 191, expectedHead,
+    reportedHeadStatus: "UNVERIFIED_VIA_PUBLIC_API", reportedBaseStatus: "UNVERIFIED", reportedCiStatus: "UNVERIFIED_EXTERNAL_CI",
+    reviewDecision: "APPROVE", githubReviewSubmitted: false, reviewClass: "TECHNICAL_REVIEW_CANDIDATE_ONLY",
+    positiveEvidence: ["NO_FAKE_GITHUB_ACCESS"], limitations: ["EXACT_HEAD_NOT_VERIFIED"], reviewedAt: "2026-08-30T04:00:00.000Z"
+  }), (error) => error.code === "REVIEWER_TRIAL_HOLD_BOUNDARY_REQUIRED");
+
+  const packet = await createSanitizedDistinctReviewPacket({
+    packetId: "KAIOS_PR191_DISTINCT_REVIEW_PACKET_7E2404F3",
+    repository: "klineodyssey/kline-odyssey",
+    prNumber: 191,
+    baseHead: "e2646d19dbd5f49c061c6bc14f000a9ec7105e41",
+    exactHead: expectedHead,
+    diffSha256: "a".repeat(64),
+    diffSource: `https://github.com/klineodyssey/kline-odyssey/compare/e2646d19dbd5f49c061c6bc14f000a9ec7105e41...${expectedHead}.diff`,
+    filesChanged: ["core/company/index.mjs", "tests/universal-exchange.test.mjs"],
+    ciRuns: [{ run_id: "33271455283", name: "11520 Universal Exchange V2", head_sha: expectedHead, result: "SUCCESS", url: "https://github.com/klineodyssey/kline-odyssey/actions/runs/33271455283" }],
+    testSummary: ["UNIVERSAL_EXCHANGE_PASS"],
+    securityBoundaries: ["NO_AUTHORITY_ACTIVATION", "NO_CHAIN_WRITE"],
+    knownBlockers: ["DISTINCT_REVIEW_STILL_REQUIRED", "CHIYAO_EXTERNAL_CHANNEL_UNAVAILABLE"],
+    createdAt: "2026-08-30T04:01:00.000Z"
+  });
+  assert.equal(packet.status, "READY_FOR_DISTINCT_REVIEW_TRANSPORT");
+  assert.equal(packet.counts_as_review, false);
+  assert.equal(packet.counts_as_github_approval, false);
+  assert.match(packet.packet_sha256, /^[0-9a-f]{64}$/);
+  await assert.rejects(() => createSanitizedDistinctReviewPacket({
+    packetId: "KAIOS_PR191_SECRET_PACKET_FORBIDDEN", repository: "klineodyssey/kline-odyssey", prNumber: 191,
+    baseHead: "e2646d19dbd5f49c061c6bc14f000a9ec7105e41", exactHead: expectedHead, diffSha256: "b".repeat(64),
+    diffSource: `https://github.com/klineodyssey/kline-odyssey/compare/e2646d19dbd5f49c061c6bc14f000a9ec7105e41...${expectedHead}.diff`,
+    filesChanged: ["core/company/index.mjs"],
+    ciRuns: [{ run_id: "33271455283", name: "test", head_sha: expectedHead, result: "SUCCESS", url: "https://github.com/klineodyssey/kline-odyssey/actions/runs/33271455283", private_key: "forbidden" }],
+    testSummary: ["PASS"], securityBoundaries: ["FAIL_CLOSED"], knownBlockers: ["REVIEW_REQUIRED"], createdAt: "2026-08-30T04:01:00.000Z"
+  }), (error) => error.code === "DISTINCT_REVIEW_PACKET_SECRET_FIELD_FORBIDDEN");
 });
 
 test("V4.3 authority review request packet is hash-bound, replay-safe and never a review", async () => {

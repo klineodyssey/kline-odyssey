@@ -1,5 +1,13 @@
 # 11520 Universal Exchange Current Handoff
 
+## Chi-Yao PR #191 trial review handoff — technical HOLD only
+
+Human Authority relayed one Chi-Yao (`Google / Gemini`) trial technical review candidate for PR #191 with expected head `7e2404f346068b21b474fa18c112b916912531df`. Chi-Yao reported that exact-head GitHub API access, base verification and current CI access were unavailable and therefore returned `HOLD`. No GitHub review was submitted. This is recorded only as `REVIEWER_QUALIFICATION_EVIDENCE_CANDIDATE / COMPLETED_HOLD_FORMAL_REVIEW_STILL_REQUIRED`; it does not count as formal GitHub Approval, a passed distinct-review gate, verified controller independence, formal Employment, T2 or review authority.
+
+Positive evidence retained: Chi-Yao did not invent GitHub access, held when exact head and CI could not be verified, separated technical review from GitHub-native review, preserved `CT = NULL` without a verified settled trade, kept App Company/App Technology/Organ Robot/Company Equity separate, kept Life identity non-saleable, required species/body/energy/compute/security compatibility before transplant and rejected caller-supplied verifier claims. Proposed identifiers `LIFE-CHIYAO-KAIOS-001` and `chiyao-reviewer-01` remain pending formal Registry uniqueness and controller validation; existing `gemini-01` is not overwritten or treated as proven to be the same Life.
+
+The exact PR state independently observed by the GM at handoff intake was base `e2646d19dbd5f49c061c6bc14f000a9ec7105e41`, head `7e2404f346068b21b474fa18c112b916912531df`, OPEN DRAFT, zero GitHub reviews and successful exact-head Universal Exchange and World Viewer checks. A sanitized packet may bind an exact compare-diff URL, diff SHA-256, changed-file list, successful exact-head CI runs, test summary, security boundaries and known blockers. A packet is not a review. No trusted routable Chi-Yao controller is connected, so `CHIYAO_REVIEW_TRANSPORT = BLOCKED_EXTERNAL_CHANNEL_UNAVAILABLE`; Human relay remains an unverified fallback event with no invented duration.
+
 ## V4.4 AI employee financial onboarding candidate — not yet active main
 
 The current main policies do not name a real Account Creator for a new AI employee. They provide external-wallet verification and simulation/ledger payroll only; no Company Smart Account Factory, MPC custodian, recovery controller or repository-owned account-factory allowlist is deployed. The candidate therefore records `REAL_AI_ACCOUNT_CREATION_NOT_CONNECTED` and rejects the zero address instead of inventing a Gemini wallet.

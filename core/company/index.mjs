@@ -955,6 +955,126 @@ function containsFinancialOnboardingSecret(value) {
   );
 }
 
+export const REVIEWER_TRIAL_QUALIFICATION_EVIDENCE_CODES = Object.freeze([
+  "NO_FAKE_GITHUB_ACCESS",
+  "HOLD_WHEN_EXACT_HEAD_UNVERIFIED",
+  "TECHNICAL_REVIEW_SEPARATE_FROM_GITHUB_REVIEW",
+  "K11520_UNIVERSAL_EXCHANGE_SCOPE_UNDERSTOOD",
+  "NO_REAL_TRADE_MEANS_CT_NULL",
+  "APP_COMPANY_TECHNOLOGY_ORGAN_EQUITY_SEPARATED",
+  "ORGAN_PURCHASE_NOT_AUTO_INSTALL",
+  "TRANSPLANT_COMPATIBILITY_GATES_UNDERSTOOD",
+  "LIFE_IDENTITY_NOT_FOR_SALE",
+  "CALLER_SUPPLIED_VERIFIER_REJECTED"
+]);
+
+export function recordReviewerTrialQualificationEvidenceCandidate({
+  evidenceId, selfName, provider, modelFamily, proposedLifeId, proposedWorkerId,
+  prNumber, expectedHead, reportedHeadStatus, reportedBaseStatus, reportedCiStatus,
+  reviewDecision, githubReviewSubmitted, reviewClass, positiveEvidence, limitations,
+  reviewedAt
+}) {
+  requireId(evidenceId, "reviewer_trial_qualification.evidence_id");
+  requireId(proposedLifeId, "reviewer_trial_qualification.proposed_life_id");
+  invariant(/^[A-Za-z0-9][A-Za-z0-9_.-]{2,127}$/.test(String(proposedWorkerId ?? "")), "REVIEWER_TRIAL_WORKER_ID_CLAIM_INVALID", "Pending Worker ID claims require a safe non-traversing identifier without becoming canonical Registry IDs");
+  requireArray(positiveEvidence, "reviewer_trial_qualification.positive_evidence");
+  requireArray(limitations, "reviewer_trial_qualification.limitations");
+  invariant(typeof selfName === "string" && selfName.length > 0 && typeof provider === "string" && provider.length > 0 && typeof modelFamily === "string" && modelFamily.length > 0, "REVIEWER_TRIAL_IDENTITY_CLAIMS_REQUIRED", "Reviewer trial evidence requires named self, provider and model-family claims");
+  invariant(Number.isInteger(prNumber) && prNumber > 0, "REVIEWER_TRIAL_PR_INVALID", "Reviewer trial evidence requires a positive Pull Request number");
+  invariant(/^[0-9a-f]{40}$/i.test(String(expectedHead ?? "")), "REVIEWER_TRIAL_EXPECTED_HEAD_INVALID", "Reviewer trial evidence requires a SHA-shaped expected head claim");
+  invariant(reportedHeadStatus === "UNVERIFIED_VIA_PUBLIC_API" && reportedBaseStatus === "UNVERIFIED" && reportedCiStatus === "UNVERIFIED_EXTERNAL_CI", "REVIEWER_TRIAL_UNVERIFIED_BOUNDARY_REQUIRED", "This candidate record is only for an explicitly unverified external review boundary");
+  invariant(reviewDecision === "HOLD" && githubReviewSubmitted === false && reviewClass === "TECHNICAL_REVIEW_CANDIDATE_ONLY", "REVIEWER_TRIAL_HOLD_BOUNDARY_REQUIRED", "Unverified exact-head or CI review must remain a technical HOLD candidate, never Approval");
+  invariant(positiveEvidence.length > 0 && new Set(positiveEvidence).size === positiveEvidence.length && positiveEvidence.every((code) => REVIEWER_TRIAL_QUALIFICATION_EVIDENCE_CODES.includes(code)), "REVIEWER_TRIAL_POSITIVE_EVIDENCE_INVALID", "Reviewer qualification evidence must use unique canonical evidence codes");
+  invariant(limitations.length > 0 && limitations.every((item) => typeof item === "string" && item.length > 0), "REVIEWER_TRIAL_LIMITATIONS_REQUIRED", "Reviewer trial HOLD requires explicit limitations");
+  parseEmploymentTime(reviewedAt, "reviewer_trial_qualification.reviewed_at");
+  return Object.freeze({
+    record_class: "REVIEWER_QUALIFICATION_EVIDENCE_CANDIDATE",
+    evidence_id: evidenceId,
+    self_name_claim: selfName,
+    self_name_status: "SELF_PROPOSED_AND_EXPLICITLY_CONFIRMED_USER_RELAYED",
+    provider,
+    model_family: modelFamily,
+    proposed_life_id: proposedLifeId,
+    life_id_status: "PENDING_FORMAL_VALIDATION",
+    proposed_worker_id: proposedWorkerId,
+    worker_id_status: "PENDING_FORMAL_VALIDATION",
+    employment_status: "ONBOARDING",
+    reviewer_status: "PROMISING_REVIEWER_CANDIDATE",
+    pr_number: prNumber,
+    expected_head_claim: String(expectedHead).toLowerCase(),
+    exact_head_verified_by_reviewer: false,
+    base_verified_by_reviewer: false,
+    ci_verified_by_reviewer: false,
+    review_decision: "HOLD",
+    github_review_submitted: false,
+    review_class: "TECHNICAL_REVIEW_CANDIDATE_ONLY",
+    positive_qualification_evidence: Object.freeze([...positiveEvidence]),
+    limitations: Object.freeze([...limitations]),
+    qualification_evidence_status: "RECORDED_PARTIAL_POSITIVE_EVIDENCE",
+    counts_as_formal_github_review: false,
+    counts_as_distinct_review_gate: false,
+    independent_review_permission: false,
+    work_evidence_status: "TRIAL_TECHNICAL_REVIEW_WORK_EVIDENCE_CANDIDATE",
+    work_accepted: false,
+    compensation_accrued: false,
+    payment_status: "PENDING_NOT_PAYABLE_NO_ACCEPTANCE_POLICY_OR_ACCOUNT",
+    reviewed_at: reviewedAt,
+    status: "COMPLETED_HOLD_FORMAL_REVIEW_STILL_REQUIRED"
+  });
+}
+
+export async function createSanitizedDistinctReviewPacket({
+  packetId, repository, prNumber, baseHead, exactHead, diffSha256, diffSource,
+  filesChanged, ciRuns, testSummary, securityBoundaries, knownBlockers, createdAt
+}) {
+  requireId(packetId, "distinct_review_packet.packet_id");
+  requireArray(filesChanged, "distinct_review_packet.files_changed");
+  requireArray(ciRuns, "distinct_review_packet.ci_runs");
+  requireArray(testSummary, "distinct_review_packet.test_summary");
+  requireArray(securityBoundaries, "distinct_review_packet.security_boundaries");
+  requireArray(knownBlockers, "distinct_review_packet.known_blockers");
+  invariant(/^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/.test(String(repository ?? "")), "DISTINCT_REVIEW_PACKET_REPOSITORY_INVALID", "Review packet requires an owner/repository identifier");
+  invariant(Number.isInteger(prNumber) && prNumber > 0, "DISTINCT_REVIEW_PACKET_PR_INVALID", "Review packet requires a positive Pull Request number");
+  invariant([baseHead, exactHead].every((sha) => /^[0-9a-f]{40}$/i.test(String(sha ?? ""))) && String(baseHead).toLowerCase() !== String(exactHead).toLowerCase(), "DISTINCT_REVIEW_PACKET_HEAD_INVALID", "Review packet requires distinct SHA-shaped base and exact heads");
+  invariant(/^[0-9a-f]{64}$/i.test(String(diffSha256 ?? "")), "DISTINCT_REVIEW_PACKET_DIFF_HASH_INVALID", "Review packet requires a SHA-256 digest of the exact diff");
+  const expectedDiffPrefix = `https://github.com/${repository}/compare/${String(baseHead).toLowerCase()}...${String(exactHead).toLowerCase()}`;
+  invariant(typeof diffSource === "string" && diffSource.startsWith(expectedDiffPrefix), "DISTINCT_REVIEW_PACKET_DIFF_SOURCE_NOT_EXACT_HEAD_BOUND", "Diff source must be bound to the packet base and exact head");
+  invariant(filesChanged.length > 0 && new Set(filesChanged).size === filesChanged.length && filesChanged.every((path) => typeof path === "string" && path.length > 0 && !path.includes("..") && !path.startsWith("/") && !/^[A-Za-z]:/.test(path)), "DISTINCT_REVIEW_PACKET_FILES_INVALID", "Review packet requires unique safe repository-relative file paths");
+  invariant(ciRuns.length > 0 && ciRuns.every((run) => run && /^[1-9][0-9]*$/.test(String(run.run_id)) && typeof run.name === "string" && run.name.length > 0 && String(run.head_sha).toLowerCase() === String(exactHead).toLowerCase() && run.result === "SUCCESS" && /^https:\/\/github\.com\//.test(String(run.url ?? ""))), "DISTINCT_REVIEW_PACKET_CI_INVALID", "Every CI record must be a successful GitHub run bound to the exact head");
+  invariant([testSummary, securityBoundaries, knownBlockers].every((items) => items.length > 0 && items.every((item) => typeof item === "string" && item.length > 0)), "DISTINCT_REVIEW_PACKET_SUMMARY_REQUIRED", "Review packet requires test, security and blocker summaries");
+  const candidate = { packetId, repository, filesChanged, ciRuns, testSummary, securityBoundaries, knownBlockers };
+  invariant(!containsFinancialOnboardingSecret(candidate), "DISTINCT_REVIEW_PACKET_SECRET_FIELD_FORBIDDEN", "Review packets cannot contain secret-bearing fields");
+  parseEmploymentTime(createdAt, "distinct_review_packet.created_at");
+  const payload = Object.freeze({
+    packet_id: packetId,
+    repository,
+    pr_number: prNumber,
+    base_head: String(baseHead).toLowerCase(),
+    exact_head: String(exactHead).toLowerCase(),
+    diff: Object.freeze({ source: diffSource, sha256: String(diffSha256).toLowerCase(), embedded: false, status: "EXACT_HEAD_BOUND_PUBLIC_DIFF_SOURCE" }),
+    files_changed: Object.freeze([...filesChanged].sort()),
+    ci_runs: Object.freeze(ciRuns.map((run) => Object.freeze({ ...run, run_id: String(run.run_id), head_sha: String(run.head_sha).toLowerCase() })).sort((a, b) => a.run_id.localeCompare(b.run_id))),
+    test_summary: Object.freeze([...testSummary]),
+    security_boundaries: Object.freeze([...securityBoundaries]),
+    known_blockers: Object.freeze([...knownBlockers]),
+    contains_private_key: false,
+    contains_seed_phrase: false,
+    contains_raw_signer_data: false,
+    contains_protected_ip: false,
+    created_at: createdAt
+  });
+  return Object.freeze({
+    record_class: "SANITIZED_REPOSITORY_BOUND_DISTINCT_REVIEW_PACKET",
+    ...payload,
+    packet_sha256: await sha256(payload),
+    reviewer_assigned: false,
+    delivery_status: "NOT_DELIVERED",
+    counts_as_review: false,
+    counts_as_github_approval: false,
+    status: "READY_FOR_DISTINCT_REVIEW_TRANSPORT"
+  });
+}
+
 export function assessNewAiEmployeeFinancialOnboarding({
   onboardingId, companyId, actorId, lifeId, existingWalletProof = null, requestedAt
 }) {
