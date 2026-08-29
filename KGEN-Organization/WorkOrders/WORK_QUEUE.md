@@ -61,6 +61,18 @@ The worker must then stop without changing WorkQueue, creating a branch, editing
 | KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-R2-001 | CLAIMED | cursor-01 | codex-gm-01 | P0 | Payroll QA | `cursor-handoff/KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-R2-001` | `KGEN-AI-Company/reports/CURSOR_LIFE_ENERGY_PAYROLL_CANDIDATE_REPORT.md` |
 | KGEN-MAP-4168-NAIHE-GENESIS-STATION-UI-001 | HOLD | Map / World Agent | codex-gm-01 | P2 | World Map | `NOT_CREATED` | `SPEC_HANDOFF_IN_CODEX_MANAGER_PROTOCOL` |
 | KGEN-BSCSCAN-LOGO-001 | DONE | Cursor + Codex | Codex | P1 | Token Metadata | `cursor/kgen-bscscan-logo-submission-v1` | `KGEN/registry/BscScan/KGEN_BSCSCAN_LOGO_SUBMISSION_V1_MERGE_CLOSEOUT.md` |
+| KAIOS-GM-AUTONOMOUS-BATCH-SOURCE-SYNC-001 | REVIEW | codex-gm-01 | DISTINCT_REVIEWER_REQUIRED | P0 | Company Operations | `codex/kaios-ai-os-employment-alpha-v1` | `KGEN-KAIOS/governance/autopilot/PRIMEFORGE_COMPANY_AUTOPILOT.md` |
+
+### KAIOS-GM-AUTONOMOUS-BATCH-SOURCE-SYNC-001 - Batch Source and State Reconciliation
+
+- Status: REVIEW
+- Owner: codex-gm-01
+- Reviewer: DISTINCT_REVIEWER_REQUIRED
+- Priority: P0
+- Human source: `KAIOS_GM_AUTONOMOUS_BATCH_RUNTIME_SOURCE_AND_SYNC_WORK_ORDER_V1`
+- Scope: locate the actual Codex heartbeat source; correct unauthorized-versus-exact-authorized action semantics; reconcile the GM work page, queue and handoff; classify public/internal/confidential/secret/IP-protected information.
+- Public source rule: publish only the logical heartbeat source and public-safe prompt; do not publish the local target thread identifier or private machine path.
+- Acceptance: JSON parses; policy/source tests pass; secret/IP scan passes; exact-head CI passes; no merge, deploy, payment, trade, governance or chain write; distinct review remains required.
 
 ### KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-R2-001 - Payroll Candidate Rework
 

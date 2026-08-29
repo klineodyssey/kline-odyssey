@@ -1,9 +1,9 @@
 ---
 TITLE: "PrimeForge Company Autopilot Architecture"
-VERSION: "0.3.0"
-REVISION: "2026-07-16.1"
+VERSION: "0.4.0"
+REVISION: "2026-08-29.1"
 STATUS: "ACTIVE_OPERATOR_PROTOCOL_NO_BACKGROUND_SERVICE"
-LAST_UPDATED: "2026-07-16"
+LAST_UPDATED: "2026-08-29"
 UPDATED_BY: "Codex / codex-gm-01"
 REVIEWED_BY: "Human PrimeForge / HUMAN-PRIMEFORGE-FULL-AUTOPILOT-001"
 SOURCE_COMMIT: "6936d6fe69ee9f2167aea6de109987fb66311e94"
@@ -285,3 +285,76 @@ Next Human decision:
 - `REJECT_COMPANY_AUTOPILOT_ARCHITECTURE`
 
 Even architecture approval does not create an implementation WorkQueue. A separate Human implementation decision is required.
+
+## 16. Actual Invocation Source
+
+The invocation source that currently wakes the General Manager task is not a GitHub Action or a repository daemon. It is one Codex Desktop heartbeat automation:
+
+```text
+AUTOMATION_ID = kaios
+NAME = KAIOS 安全公司心跳
+SOURCE_TYPE = LOCAL_CODEX_HEARTBEAT_SCHEDULER
+LOGICAL_SOURCE_PATH = $CODEX_HOME/automations/kaios/automation.toml
+TRIGGER = RRULE_SCHEDULE
+SCHEDULE = HOURLY / INTERVAL 1
+TARGET = VERIFIED_CODEX_THREAD_BOUND_IN_LOCAL_AUTOMATION
+SOURCE_IS_IN_GITHUB = NO
+SOURCE_IS_LOCAL_ONLY = YES
+SOURCE_SHA256 = 9bce1375dc2a8d3f95a8670f7fb03fc8d39031ccd582e90c783fe3aaa618ca8b
+```
+
+The local absolute path and target thread identifier are operational metadata and are not committed to public Git. The Human may inspect them in the bound Codex host. This document preserves only the public-safe logical source.
+
+The heartbeat is the wake adapter. This Company Autopilot remains the repository-governed selection and checkpoint contract. Neither layer is a continuously running repository daemon.
+
+## 17. Public-Safe Heartbeat Prompt
+
+The complete public-safe prompt for the current heartbeat is:
+
+```text
+重新取得 GitHub 最新 main、BOOT、CURRENT、AI Company Boot、Worker Queue、Review Queue、active claims、所有相關 Draft PR exact head、Website release、CFO、HR、Payroll、Payment 與 Market 狀態。先執行 secret scan 與智慧財產分類檢查，再依《KAIOS Civilization Circulatory Runtime》V1.4 與既有 Company Autopilot，選擇目前最高優先、已授權且可安全推進的一件工作。執行讀取、分析、既有功能搜尋、必要程式或文件修改、測試、既有授權分支 commit/push、exact-head CI、Draft PR 證據、CURRENT/HANDOFF、Queue 與 GM Secretary 狀態更新。單一工作流遇到外部 blocker 時，保存狀態並改選下一件安全工作；不得偽造完成、Reviewer、Authority 或Settlement。未授權 merge、push main、deployment、payment、payroll、real trade、token/treasury transfer、governance、Mainnet/Testnet write 永久禁止；具備完整 machine-verifiable ONE_EXACT_ACTION authorization 時，只可進入該行為專屬執行閘門並於完成後驗證 receipt、balance 與 accounting。Private Key、Seed Phrase、raw signer credential 永不讀取、輸出或寫入公開資料。每次只回報實際完成、證據、阻擋、同步狀態與唯一下一個安全動作。
+```
+
+## 18. Batch Selection and Continuation
+
+Each invocation uses this cumulative sequence:
+
+```text
+FETCH_LATEST_MAIN
+-> READ_BOOT_AND_CURRENT
+-> READ_COMPANY_BOOT
+-> READ_WORK_AND_REVIEW_QUEUES
+-> READ_ACTIVE_CLAIMS_AND_DRAFT_PR_EXACT_HEADS
+-> READ_WEBSITE_CFO_HR_PAYROLL_PAYMENT_MARKET
+-> SECRET_AND_IP_CLASSIFICATION_CHECK
+-> RECONCILE_STATE
+-> SELECT_HIGHEST_PRIORITY_AUTHORIZED_SAFE_WORK
+-> EXECUTE_ONE_BOUNDED_SLICE
+-> TEST
+-> COMMIT_PUSH_AUTHORIZED_BRANCH
+-> VERIFY_EXACT_HEAD_CI
+-> UPDATE_PR_EVIDENCE_CURRENT_HANDOFF_QUEUE_AND_GM_STATUS
+-> IF_EXACT_RELEASE_AUTHORITY_EXISTS_FOLLOW_RELEASE_POLICY
+-> IF_EXACT_REAL_ACTION_AUTHORITY_EXISTS_EXECUTE_AND_VERIFY_RECEIPT
+-> CHECKPOINT
+-> SELECT_NEXT_SAFE_WORK_FOR_NEXT_INVOCATION
+```
+
+Selection reuses `PRIORITY_SCHEDULER.md`. A blocker is written with evidence, the blocked item retains custody, and the scheduler evaluates the next conflict-free item. One blocker does not idle unrelated safe work. A future invocation re-fetches every mutable source; it never treats the prior chat response as current state.
+
+## 19. Real-Execution Policy Correction
+
+The active policy is:
+
+```text
+UNAUTHORIZED_REAL_ACTION = PERMANENTLY_FORBIDDEN
+AUTHORIZED_EXACT_ACTION = MAY_PROCEED_TO_ACTION_SPECIFIC_EXECUTION_GATE
+PRIVATE_KEY_OUTPUT = PERMANENTLY_FORBIDDEN
+SEED_PHRASE_OUTPUT = PERMANENTLY_FORBIDDEN
+```
+
+An exact authorization binds action, actor, authority, purpose, chain, target, token or asset, source, recipient, amount, selector when applicable, nonce or replay key, validity window, policy hash and repository head when relevant. Missing or mismatched fields fail closed. Policy evaluation creates neither business approval nor signer authority.
+
+## 20. Publication Boundary
+
+Every public push must pass both a secret scan and the classification policy in `KGEN-KAIOS/genesis-dna/DNA_PRIVACY_AND_HEAVEN_SECRET.md`. The proprietary long/short engine, private trading algorithms, unpublished quant models, alpha strategies, signal logic, model parameters, private datasets and commercial formulas are `INTELLECTUAL_PROPERTY_PROTECTED` and are not public-pushable without a separate publication decision.

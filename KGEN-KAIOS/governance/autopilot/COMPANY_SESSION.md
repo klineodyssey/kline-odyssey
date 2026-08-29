@@ -114,3 +114,23 @@ Sessions must not persist tokens, API keys, private keys, seed phrases, password
 
 No Session store, checkpoint writer, resume engine, scheduler, implementation task, commit, push, or deployment is created in this architecture-only round.
 
+## GM Main Work Page
+
+Observed at `2026-08-29T16:09:56+08:00`; every later invocation must refresh these mutable values before acting.
+
+| Field | Current evidence |
+|---|---|
+| `NOW_WORKING_ON` | `KAIOS-GM-AUTONOMOUS-BATCH-SOURCE-SYNC-001` |
+| `LAST_COMPLETED` | Exact-authorized real-execution policy evaluator and tests on PR #191 |
+| `BLOCKED` | Real applicant, reviewed operational authority, bound payroll source, exact signer, receipt verifier and distinct PR reviewer remain absent |
+| `WAITING_REVIEW` | PR #191 exact-head independent review |
+| `WAITING_EXTERNAL` | Real applicant wallet-control proof and action-specific authority infrastructure |
+| `READY_NEXT` | Reconcile the heartbeat source, publication classification and current PR/queue evidence |
+| `LATEST_MAIN` | `4b698537c44df8a56a295d955d8e4844e957de41` |
+| `ACTIVE_BRANCH` | `codex/kaios-ai-os-employment-alpha-v1` |
+| `ACTIVE_PR` | `#191 / OPEN_DRAFT` |
+| `WEBSITE_STATUS` | Branch candidate verified; production Main unchanged |
+| `COMPANY_HEALTH` | `AMBER_REVIEW_AND_EXTERNAL_AUTHORITY_GAPS` |
+
+`GM_OPERATIONS_SECRETARY` is not present as an independently registered Worker. Until one is recruited and bound, `codex-gm-01` performs the mechanical reconciliation duty as `ACTING_GM_OPERATIONS_SECRETARY`; this does not create independent review, approval, signer, treasury or governance authority.
+

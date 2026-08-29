@@ -3680,3 +3680,32 @@ test("one blocked workflow does not stop the next safe Company workflow", () => 
   assert.deepEqual(result.blocked_workflow_ids, ["PR191_DISTINCT_REVIEW", "NO_EVIDENCE_TRADE"]);
   assert.equal(result.company_stopped_by_single_blocker, false);
 });
+
+test("Company Autopilot records the real local wake adapter without publishing target metadata", async () => {
+  const autopilot = JSON.parse(await fs.readFile(
+    new URL("../KGEN-KAIOS/governance/autopilot/company_autopilot.json", import.meta.url),
+    "utf8"
+  ));
+  assert.equal(autopilot.invocation_source.automation_id, "kaios");
+  assert.equal(autopilot.invocation_source.source_type, "LOCAL_CODEX_HEARTBEAT_SCHEDULER");
+  assert.equal(autopilot.invocation_source.source_is_in_github, false);
+  assert.equal(autopilot.invocation_source.source_is_local_only, true);
+  assert.equal(autopilot.invocation_source.background_repository_service, false);
+  assert.equal(autopilot.invocation_source.target_identifier_publication, "FORBIDDEN_OPERATIONAL_METADATA");
+  assert.equal(autopilot.batch_runtime.single_blocker_stops_company, false);
+});
+
+test("Batch publication policy separates unauthorized actions, exact authorization and protected IP", async () => {
+  const autopilot = JSON.parse(await fs.readFile(
+    new URL("../KGEN-KAIOS/governance/autopilot/company_autopilot.json", import.meta.url),
+    "utf8"
+  ));
+  assert.equal(autopilot.real_execution_policy.unauthorized_real_action, "PERMANENTLY_FORBIDDEN");
+  assert.equal(autopilot.real_execution_policy.authorized_exact_action, "MAY_PROCEED_TO_ACTION_SPECIFIC_EXECUTION_GATE");
+  assert.equal(autopilot.real_execution_policy.policy_evaluation_creates_signer_authority, false);
+  assert.equal(autopilot.publication_policy.pre_push_secret_scan_required, true);
+  assert.equal(autopilot.publication_policy.pre_push_ip_classification_required, true);
+  assert.ok(autopilot.publication_policy.non_public_by_default_classes.includes("INTELLECTUAL_PROPERTY_PROTECTED"));
+  assert.equal(autopilot.publication_policy.private_key_publication, "PERMANENTLY_FORBIDDEN");
+  assert.equal(autopilot.publication_policy.proprietary_long_short_engine_publication, "EXPLICIT_PUBLICATION_AUTHORITY_REQUIRED");
+});
