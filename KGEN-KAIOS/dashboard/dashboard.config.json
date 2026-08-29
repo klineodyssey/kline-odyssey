@@ -76,7 +76,7 @@
     "latest_main": "ac304fc585f5f86846d2c61b69ecad8f59bc0a66",
     "latest_public_website_sha": "ac304fc585f5f86846d2c61b69ecad8f59bc0a66",
     "active_branch": "codex/public-lab-money-flow-audit",
-    "active_pr": "PENDING",
+    "active_pr": "https://github.com/klineodyssey/kline-odyssey/pull/192",
     "now_working_on": "PUBLIC_EXPERIMENTAL_RELEASE_AND_END_TO_END_MONEY_FLOW_AUDIT",
     "last_completed": "READ_ONLY_BSC_BLOCK_118743165_SNAPSHOT",
     "waiting_review": "DISTINCT_REVIEW_REQUIRED_BEFORE_MERGE",
