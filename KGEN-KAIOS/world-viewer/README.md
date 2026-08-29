@@ -45,11 +45,12 @@ select a Life Path, travel in `NON_LOCATION_MODE` or consented navigation,
 meet water/food needs, finish reviewed simulated work, buy one simulated
 service, save, and continue. The Telepathy panel implements the existing
 KAIOS Agent Message Protocol as a safe-metadata Outbox candidate with payload
-hashing and replay protection. It does not claim delivery: Browser-to-GM and
-external-provider controller routes remain visibly blocked until a real
-routable controller exists. Human Relay evidence remains zero unless a
-repository-verified event and duration exist; its labor rate remains policy
-required.
+hashing and replay protection. Delivery and acknowledgement require
+repository-owned attestations bound to the exact message, payload, target,
+route and external transport; both attestation registries are intentionally
+empty. Browser-to-GM and external-provider controller routes therefore remain
+visibly blocked. Human Relay evidence remains zero unless a repository-verified
+event and duration exist; its labor rate remains policy required.
 
 ## Life Energy and Payroll
 

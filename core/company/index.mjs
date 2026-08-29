@@ -159,6 +159,11 @@ export const KAIOS_TELEPATHY_DELIVERY_STATES = Object.freeze([
   "EXPIRED", "ARCHIVED", "DUPLICATE_SUPPRESSED"
 ]);
 
+// These repository-owned exact-message attestation registries remain empty until
+// a reviewed external transport and acknowledgement verifier are connected.
+export const CANONICAL_KAIOS_TELEPATHY_DELIVERY_ATTESTATIONS = Object.freeze([]);
+export const CANONICAL_KAIOS_TELEPATHY_ACKNOWLEDGEMENT_ATTESTATIONS = Object.freeze([]);
+
 export const HUMAN_RELAY_LABOR_RATE_CANDIDATE = Object.freeze({
   amount_kaios_per_hour: "60",
   status: "NON_CANONICAL_POLICY_CANDIDATE",
@@ -209,32 +214,79 @@ export async function createKaiosTelepathyMessage({
   });
 }
 
-export function routeKaiosTelepathyMessage({ message, route, deliveredAt, processedIdempotencyKeys = [] }) {
+export function routeKaiosTelepathyMessage({
+  message, route = null, deliveryAttestationId = null, deliveredAt = null,
+  processedIdempotencyKeys = []
+}) {
   requireArray(processedIdempotencyKeys, "telepathy_message.processed_idempotency_keys");
   invariant(message?.status === "CREATED", "TELEPATHY_MESSAGE_NOT_ROUTABLE", "Only a created Telepathy message may be routed");
-  invariant(route && typeof route === "object" && typeof route.route_id === "string" && route.route_id.length > 0, "TELEPATHY_ROUTE_REQUIRED", "Telepathy routing requires an evidenced route");
-  invariant(route.to_life_id === message.to_life_id && route.to_worker_id === message.to_worker_id, "TELEPATHY_ROUTE_TARGET_MISMATCH", "Route target must match the message target");
+  invariant(
+    (route && typeof route === "object" && typeof route.route_id === "string" && route.route_id.length > 0)
+      || (typeof deliveryAttestationId === "string" && deliveryAttestationId.length > 0),
+    "TELEPATHY_ROUTE_REQUIRED",
+    "Telepathy routing requires a blocked route projection or a repository-owned exact-message delivery attestation"
+  );
+  if (route) {
+    invariant(route.to_life_id === message.to_life_id && route.to_worker_id === message.to_worker_id, "TELEPATHY_ROUTE_TARGET_MISMATCH", "Route target must match the message target");
+  }
   if (processedIdempotencyKeys.includes(message.idempotency_key)) {
     return Object.freeze({ ...message, status: "DUPLICATE_SUPPRESSED", ack_status: "NOT_DELIVERED", side_effects_executed: false, receipt: "IDEMPOTENCY_REPLAY_SUPPRESSED" });
   }
-  const delivered = Date.parse(deliveredAt);
-  invariant(Number.isFinite(delivered) && delivered >= Date.parse(message.created_at), "TELEPATHY_DELIVERY_TIME_INVALID", "Delivery time must not predate message creation");
-  if (delivered >= Date.parse(message.expires_at)) {
-    return Object.freeze({ ...message, route: route.route_id, status: "EXPIRED", ack_status: "NOT_DELIVERED", side_effects_executed: false, receipt: "MESSAGE_EXPIRED_BEFORE_DELIVERY" });
+  if (route?.available !== true && deliveryAttestationId === null) {
+    const observed = Date.parse(deliveredAt);
+    invariant(Number.isFinite(observed) && observed >= Date.parse(message.created_at), "TELEPATHY_DELIVERY_TIME_INVALID", "Route observation time must not predate message creation");
+    if (observed >= Date.parse(message.expires_at)) {
+      return Object.freeze({ ...message, route: route.route_id, status: "EXPIRED", ack_status: "NOT_DELIVERED", side_effects_executed: false, receipt: "MESSAGE_EXPIRED_BEFORE_DELIVERY" });
+    }
+    return Object.freeze({ ...message, route: route.route_id, status: "BLOCKED", ack_status: "NOT_DELIVERED", side_effects_executed: false, receipt: "TELEPATHY_DELIVERY_ROUTE_NOT_CONNECTED" });
   }
-  if (route.available !== true) {
-    return Object.freeze({ ...message, route: route.route_id, status: "BLOCKED", ack_status: "NOT_DELIVERED", side_effects_executed: false, receipt: route.blocker ?? "EXTERNAL_CHANNEL_UNAVAILABLE" });
-  }
-  invariant(["INTERNAL_COMPANY_RUNTIME", "ROUTABLE_PROVIDER_CONTROLLER"].includes(route.route_type), "TELEPATHY_ROUTE_TYPE_INVALID", "Only an internal Company route or evidenced provider controller may deliver a message");
-  return Object.freeze({ ...message, route: route.route_id, delivered_at: deliveredAt, status: "DELIVERED", ack_status: "ACK_REQUIRED", side_effects_executed: false, receipt: "DELIVERY_RECORDED_NO_ACTION_AUTHORITY" });
+  invariant(route?.available !== true, "CALLER_SUPPLIED_TELEPATHY_DELIVERY_ROUTE_FORBIDDEN", "A caller-supplied route cannot attest Telepathy delivery");
+  invariant(deliveredAt === null, "CALLER_SUPPLIED_TELEPATHY_DELIVERED_AT_FORBIDDEN", "A caller-supplied delivery time cannot attest Telepathy delivery");
+  requireId(deliveryAttestationId, "telepathy_message.delivery_attestation_id");
+  const attestation = CANONICAL_KAIOS_TELEPATHY_DELIVERY_ATTESTATIONS.find((item) => item.delivery_attestation_id === deliveryAttestationId);
+  invariant(attestation, "TELEPATHY_DELIVERY_ATTESTATION_NOT_CONNECTED", "Telepathy delivery attestation is not connected to the repository-owned registry");
+  invariant(attestation.external_transport_attested === true, "TELEPATHY_DELIVERY_TRANSPORT_NOT_ATTESTED", "Telepathy delivery requires a trusted external transport attestation");
+  invariant(
+    attestation.message_id === message.message_id
+      && attestation.payload_hash === message.payload_hash
+      && attestation.to_life_id === message.to_life_id
+      && attestation.to_worker_id === message.to_worker_id
+      && attestation.repository_context === message.repository_context,
+    "TELEPATHY_DELIVERY_ATTESTATION_MISMATCH",
+    "Telepathy delivery attestation must bind the exact message, payload, target and repository context"
+  );
+  invariant(["INTERNAL_COMPANY_RUNTIME", "ROUTABLE_PROVIDER_CONTROLLER"].includes(attestation.route_type), "TELEPATHY_ROUTE_TYPE_INVALID", "Only an internal Company route or evidenced provider controller may deliver a message");
+  const delivered = Date.parse(attestation.delivered_at);
+  invariant(Number.isFinite(delivered) && delivered >= Date.parse(message.created_at) && delivered < Date.parse(message.expires_at), "TELEPATHY_DELIVERY_TIME_INVALID", "Attested delivery must be within the message window");
+  return Object.freeze({ ...message, route: attestation.route_id, delivered_at: attestation.delivered_at, delivery_attestation_id: deliveryAttestationId, status: "DELIVERED", ack_status: "ACK_REQUIRED", side_effects_executed: false, receipt: "EXTERNAL_TRANSPORT_DELIVERY_ATTESTED_NO_ACTION_AUTHORITY" });
 }
 
-export function acknowledgeKaiosTelepathyMessage({ message, acknowledgedByLifeId, acknowledgedByWorkerId, acknowledgedAt }) {
+export function acknowledgeKaiosTelepathyMessage({
+  message, acknowledgementAttestationId = null,
+  acknowledgedByLifeId, acknowledgedByWorkerId, acknowledgedAt
+}) {
   invariant(message?.status === "DELIVERED", "TELEPATHY_MESSAGE_NOT_DELIVERED", "Only a delivered message may be acknowledged");
-  invariant(acknowledgedByLifeId === message.to_life_id && acknowledgedByWorkerId === message.to_worker_id, "TELEPATHY_ACK_ACTOR_MISMATCH", "Only the addressed Life and Worker may acknowledge delivery");
-  const acknowledged = Date.parse(acknowledgedAt);
-  invariant(Number.isFinite(acknowledged) && acknowledged >= Date.parse(message.delivered_at) && acknowledged < Date.parse(message.expires_at), "TELEPATHY_ACK_TIME_INVALID", "Acknowledgement must be within the delivery window");
-  return Object.freeze({ ...message, acknowledged_at: acknowledgedAt, status: "ACKNOWLEDGED", ack_status: "ACKNOWLEDGED", side_effects_executed: false, receipt: "ACK_RECORDED_NO_ACTION_AUTHORITY" });
+  invariant(
+    acknowledgedByLifeId === undefined && acknowledgedByWorkerId === undefined && acknowledgedAt === undefined,
+    "CALLER_SUPPLIED_TELEPATHY_ACKNOWLEDGEMENT_FORBIDDEN",
+    "Caller-supplied actors or timestamps cannot attest Telepathy acknowledgement"
+  );
+  requireId(acknowledgementAttestationId, "telepathy_message.acknowledgement_attestation_id");
+  const attestation = CANONICAL_KAIOS_TELEPATHY_ACKNOWLEDGEMENT_ATTESTATIONS.find((item) => item.acknowledgement_attestation_id === acknowledgementAttestationId);
+  invariant(attestation, "TELEPATHY_ACKNOWLEDGEMENT_ATTESTATION_NOT_CONNECTED", "Telepathy acknowledgement attestation is not connected to the repository-owned registry");
+  invariant(attestation.external_transport_attested === true, "TELEPATHY_ACKNOWLEDGEMENT_TRANSPORT_NOT_ATTESTED", "Telepathy acknowledgement requires a trusted external transport attestation");
+  invariant(
+    attestation.message_id === message.message_id
+      && attestation.payload_hash === message.payload_hash
+      && attestation.route_id === message.route
+      && attestation.acknowledged_by_life_id === message.to_life_id
+      && attestation.acknowledged_by_worker_id === message.to_worker_id,
+    "TELEPATHY_ACKNOWLEDGEMENT_ATTESTATION_MISMATCH",
+    "Telepathy acknowledgement attestation must bind the exact delivered message, route and addressed actor"
+  );
+  const acknowledged = Date.parse(attestation.acknowledged_at);
+  invariant(Number.isFinite(acknowledged) && acknowledged >= Date.parse(message.delivered_at) && acknowledged < Date.parse(message.expires_at), "TELEPATHY_ACK_TIME_INVALID", "Attested acknowledgement must be within the delivery window");
+  return Object.freeze({ ...message, acknowledgement_attestation_id: acknowledgementAttestationId, acknowledged_at: attestation.acknowledged_at, status: "ACKNOWLEDGED", ack_status: "ACKNOWLEDGED", side_effects_executed: false, receipt: "EXTERNAL_TRANSPORT_ACKNOWLEDGEMENT_ATTESTED_NO_ACTION_AUTHORITY" });
 }
 
 export async function completeKaiosTelepathyMessage({ message, result, resultStatus, completedAt }) {

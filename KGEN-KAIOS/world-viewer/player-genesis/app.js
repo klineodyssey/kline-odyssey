@@ -2,7 +2,6 @@ import { createPlayerGenesisRuntime } from "./player-genesis-runtime.js";
 import {
   createKaiosTelepathyMessage,
   routeKaiosTelepathyMessage,
-  acknowledgeKaiosTelepathyMessage,
   summarizeHumanRelayLaborLedger,
   HUMAN_RELAY_LABOR_RATE_CANDIDATE
 } from "../../../core/company/index.mjs";
@@ -241,9 +240,6 @@ $("telepathy-form").addEventListener("submit", async (event) => {
       deliveredAt: new Date(now.getTime() + 1).toISOString(),
       processedIdempotencyKeys: telepathyMessages.map((item) => item.idempotency_key)
     });
-    if (routed.status === "DELIVERED") {
-      routed = acknowledgeKaiosTelepathyMessage({ message: routed, acknowledgedByLifeId: targetRecord.life, acknowledgedByWorkerId: targetRecord.worker, acknowledgedAt: new Date(now.getTime() + 2).toISOString() });
-    }
     telepathyMessages.push(routed);
     localStorage.setItem(TELEPATHY_CACHE_KEY, JSON.stringify(telepathyMessages.slice(-40)));
     $("telepathy-request").value = "";

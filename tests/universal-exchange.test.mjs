@@ -133,7 +133,7 @@ import { verifyDigitalAntWalletBinding, verifyDigitalLifeWalletBinding, CODEX_GM
 import { TEMPLE_HEART_READ_ABI, TEMPLE_HEART_DRY_RUN_ABI, TEMPLE_HEART_VERIFIED_ACTIONS, readCoreHeartEvents } from "../core/integrations/temple-heart-12345.mjs";
 import { buildSharedWorkerStatus, createPublicReadProvider, inspectPhysicsThoughtOrgan, readCompanyPatrol, readFieldServicePatrol, readMotherEnginePatrol, readPublicRequestPatrol } from "../core/jobs/public-read-only-worker.mjs";
 
-test("Telepathy Bus routes, acknowledges and completes one internal message without persisting payload", async () => {
+test("Telepathy Bus rejects caller-supplied delivery and acknowledgement provenance", async () => {
   const message = await createKaiosTelepathyMessage({
     messageId: "MESSAGE_TELEPATHY_001",
     idempotencyKey: "IDEMPOTENCY_TELEPATHY_001",
@@ -150,16 +150,34 @@ test("Telepathy Bus routes, acknowledges and completes one internal message with
   });
   assert.equal(message.payload_persisted, false);
   assert.match(message.payload_hash, /^[a-f0-9]{64}$/);
-  const delivered = routeKaiosTelepathyMessage({
+  assert.throws(() => routeKaiosTelepathyMessage({
     message,
     route: { route_id: "ROUTE_INTERNAL_CODEX", route_type: "INTERNAL_COMPANY_RUNTIME", to_life_id: message.to_life_id, to_worker_id: message.to_worker_id, available: true },
     deliveredAt: "2026-08-30T00:01:00Z"
+  }), /caller-supplied route/i);
+  const forgedDelivered = Object.freeze({
+    ...message,
+    route: "ROUTE_INTERNAL_CODEX",
+    delivered_at: "2026-08-30T00:01:00Z",
+    status: "DELIVERED",
+    ack_status: "ACK_REQUIRED"
   });
-  const acknowledged = acknowledgeKaiosTelepathyMessage({ message: delivered, acknowledgedByLifeId: message.to_life_id, acknowledgedByWorkerId: message.to_worker_id, acknowledgedAt: "2026-08-30T00:02:00Z" });
-  const completed = await completeKaiosTelepathyMessage({ message: acknowledged, result: { status: "SAFE_SLICE_COMPLETE" }, resultStatus: "COMPLETED", completedAt: "2026-08-30T00:03:00Z" });
-  assert.equal(completed.status, "COMPLETED");
-  assert.equal(completed.side_effects_executed, false);
-  assert.match(completed.result_hash, /^[a-f0-9]{64}$/);
+  assert.throws(() => acknowledgeKaiosTelepathyMessage({
+    message: forgedDelivered,
+    acknowledgedByLifeId: message.to_life_id,
+    acknowledgedByWorkerId: message.to_worker_id,
+    acknowledgedAt: "2026-08-30T00:02:00Z"
+  }), /caller-supplied actors or timestamps/i);
+  assert.throws(() => acknowledgeKaiosTelepathyMessage({
+    message: forgedDelivered,
+    acknowledgementAttestationId: "ACKNOWLEDGEMENT_NOT_CONNECTED"
+  }), /not connected to the repository-owned registry/i);
+  await assert.rejects(() => completeKaiosTelepathyMessage({
+    message: forgedDelivered,
+    result: { status: "SAFE_SLICE_COMPLETE" },
+    resultStatus: "COMPLETED",
+    completedAt: "2026-08-30T00:03:00Z"
+  }), /acknowledged message/i);
 });
 
 test("Telepathy Bus fails closed for unavailable providers and suppresses replay", async () => {
