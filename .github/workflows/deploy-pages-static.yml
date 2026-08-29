@@ -53,7 +53,15 @@ jobs:
             echo "::error::Official Pages release source must already be reachable from origin/main."
             exit 1
           fi
-          changed_files="$(git diff --name-only origin/main...HEAD)"
+          if git rev-parse "$source_sha^" >/dev/null 2>&1; then
+            scan_base="$(git rev-parse "$source_sha^")"
+            changed_files="$(git diff --name-only "$scan_base" "$source_sha")"
+            release_diff_command=(git diff --unified=0 "$scan_base" "$source_sha")
+          else
+            scan_base=""
+            changed_files="$(git ls-tree -r --name-only "$source_sha")"
+            release_diff_command=(git show --format= --unified=0 --root "$source_sha")
+          fi
           printf '%s\n' "$changed_files"
 
           if printf '%s\n' "$changed_files" | grep -Eiq '(^|/)(\.env($|\.)|id_rsa|id_ed25519|.*\.pem$|.*\.key$|keystore|wallet-backup|seed-phrase|private-key|signer-credential)'; then
@@ -67,7 +75,7 @@ jobs:
           fi
 
           if [ -n "$changed_files" ]; then
-            git diff --unified=0 origin/main...HEAD \
+            "${release_diff_command[@]}" \
               | grep '^+' \
               | grep -Ev '^\+\+\+' \
               | grep -Eiq '(BEGIN (RSA|OPENSSH|EC) PRIVATE KEY|PRIVATE[_-]?KEY[[:space:]]*=|SEED[_-]?PHRASE[[:space:]]*=|MNEMONIC[[:space:]]*=|AWS_SECRET_ACCESS_KEY[[:space:]]*=|GITHUB_TOKEN[[:space:]]*=)' \
