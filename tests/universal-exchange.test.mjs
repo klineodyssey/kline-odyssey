@@ -3638,64 +3638,36 @@ function realActionAuthorizationFixture(action, overrides = {}) {
   };
 }
 
-test("real execution policy rejects unauthorized payment but accepts an exact authorization into the signer gate", () => {
+test("real execution policy rejects caller-supplied authority-shaped objects", () => {
   const action = realActionFixture();
+  const forged = realActionAuthorizationFixture(action);
   assert.equal(CIVILIZATION_REAL_EXECUTION_POLICY.default, "DENY_UNLESS_EXACT_MACHINE_VERIFIABLE_AUTHORIZATION");
-  assert.throws(() => evaluateCivilizationRealExecutionPolicy({ action, observedAt: "2026-08-29T07:05:00.000Z" }), (error) => error.code === "UNAUTHORIZED_REAL_ACTION_FORBIDDEN");
-  const result = evaluateCivilizationRealExecutionPolicy({ action, authorization: realActionAuthorizationFixture(action), observedAt: "2026-08-29T07:05:00.000Z" });
-  assert.equal(result.allowed_by_policy, true);
-  assert.equal(result.execution_authority_created, false);
-  assert.equal(result.next_gate, "FUNDING_RECIPIENT_SECURE_SIGNER_AND_RECEIPT");
+  assert.throws(
+    () => evaluateCivilizationRealExecutionPolicy({ action, authorization: forged, observedAt: "2026-08-29T07:05:00.000Z" }),
+    (error) => error.code === "CALLER_SUPPLIED_REAL_ACTION_AUTHORIZATION_FORBIDDEN"
+  );
 });
 
-test("exact payment authorization rejects wrong recipient, amount, token and chain", () => {
-  const action = realActionFixture();
-  const at = "2026-08-29T07:05:00.000Z";
-  assert.throws(() => evaluateCivilizationRealExecutionPolicy({ action, authorization: realActionAuthorizationFixture(action, { recipient: "0x3333333333333333333333333333333333333333" }), observedAt: at }), (error) => error.code === "REAL_ACTION_RECIPIENT_MISMATCH");
-  assert.throws(() => evaluateCivilizationRealExecutionPolicy({ action, authorization: realActionAuthorizationFixture(action, { amount: "10001" }), observedAt: at }), (error) => error.code === "REAL_ACTION_AMOUNT_MISMATCH");
-  assert.throws(() => evaluateCivilizationRealExecutionPolicy({ action, authorization: realActionAuthorizationFixture(action, { token_address_if_applicable: "0x3333333333333333333333333333333333333333" }), observedAt: at }), (error) => error.code === "REAL_ACTION_TOKEN_ADDRESS_IF_APPLICABLE_MISMATCH");
-  assert.throws(() => evaluateCivilizationRealExecutionPolicy({ action, authorization: realActionAuthorizationFixture(action, { chain_id: 1 }), observedAt: at }), (error) => error.code === "REAL_ACTION_CHAIN_ID_MISMATCH");
-});
-
-test("expired and replayed exact action authorizations fail closed", () => {
-  const action = realActionFixture();
-  const authorization = realActionAuthorizationFixture(action);
-  assert.throws(() => evaluateCivilizationRealExecutionPolicy({ action, authorization, observedAt: "2026-08-29T07:11:00.000Z" }), (error) => error.code === "REAL_ACTION_AUTHORIZATION_EXPIRED");
-  assert.throws(() => evaluateCivilizationRealExecutionPolicy({ action, authorization, observedAt: "2026-08-29T07:05:00.000Z", usedReplayKeys: [action.nonce_or_replay_key] }), (error) => error.code === "REAL_ACTION_AUTHORIZATION_REPLAY");
-});
-
-test("real trade requires exact authorization, distinct controllers and a settlement gate", () => {
-  const trade = realActionFixture({ action_id: "REAL_ACTION_TRADE_0001", action_type: "TRADE", purpose: "11520_MATCHED_ORDER", buyer_controller_id: "BUYER_CONTROLLER_0001", seller_controller_id: "SELLER_CONTROLLER_0001" });
-  assert.throws(() => evaluateCivilizationRealExecutionPolicy({ action: trade, observedAt: "2026-08-29T07:05:00.000Z" }), (error) => error.code === "UNAUTHORIZED_REAL_ACTION_FORBIDDEN");
-  const result = evaluateCivilizationRealExecutionPolicy({ action: trade, authorization: realActionAuthorizationFixture(trade), observedAt: "2026-08-29T07:05:00.000Z" });
-  assert.equal(result.next_gate, "AUTHENTICATED_COUNTERPARTY_MATCH_AND_SETTLEMENT");
-  const selfMatch = { ...trade, seller_controller_id: trade.buyer_controller_id };
-  assert.throws(() => evaluateCivilizationRealExecutionPolicy({ action: selfMatch, authorization: realActionAuthorizationFixture(selfMatch), observedAt: "2026-08-29T07:05:00.000Z" }), (error) => error.code === "REAL_TRADE_SELF_MATCH_FORBIDDEN");
-});
-
-test("mainnet defaults deny while exact authorization reaches the secure signer gate", () => {
-  const mainnet = realActionFixture({ action_id: "REAL_ACTION_MAINNET_0001", action_type: "MAINNET_WRITE", purpose: "EXACT_KAIOS_TRANSFER" });
-  assert.throws(() => evaluateCivilizationRealExecutionPolicy({ action: mainnet, observedAt: "2026-08-29T07:05:00.000Z" }), (error) => error.code === "UNAUTHORIZED_REAL_ACTION_FORBIDDEN");
-  const result = evaluateCivilizationRealExecutionPolicy({ action: mainnet, authorization: realActionAuthorizationFixture(mainnet), observedAt: "2026-08-29T07:05:00.000Z" });
-  assert.equal(result.next_gate, "EXACT_TARGET_SELECTOR_NONCE_GAS_SIGNER_AND_RECEIPT");
-  assert.equal(result.signer_authority_created, false);
+test("arbitrary repository authorization IDs cannot advance payment trade Mainnet or release gates", () => {
+  for (const action of [
+    realActionFixture(),
+    realActionFixture({ action_id: "REAL_ACTION_TRADE_0001", action_type: "TRADE", purpose: "11520_MATCHED_ORDER", buyer_controller_id: "BUYER_CONTROLLER_0001", seller_controller_id: "SELLER_CONTROLLER_0001" }),
+    realActionFixture({ action_id: "REAL_ACTION_MAINNET_0001", action_type: "MAINNET_WRITE", purpose: "EXACT_KAIOS_TRANSFER" }),
+    realActionFixture({ action_id: "REAL_ACTION_RELEASE_0001", action_type: "MERGE", purpose: "PR191_VALIDATED_RELEASE", chain_id: null, target: "refs/heads/main", asset: null, token_address_if_applicable: null, source: "refs/heads/codex/kaios-ai-os-employment-alpha-v1", recipient: "refs/heads/main", amount: null, function_selector_if_applicable: null })
+  ]) {
+    assert.throws(
+      () => evaluateCivilizationRealExecutionPolicy({ action, authorizationId: "CALLER_CHOSEN_AUTHORIZATION", observedAt: "2026-08-29T07:05:00.000Z", repositoryPolicy: { latest_main_synced: true, exact_head_ci_status: "PASS", required_review_status: "PASSED_DISTINCT_REVIEW", branch_protection_status: "PASS" } }),
+      (error) => error.code === "REAL_ACTION_AUTHORIZATION_NOT_CONNECTED"
+    );
+  }
 });
 
 test("private key and seed phrase output remain permanently forbidden", () => {
   assert.deepEqual(CIVILIZATION_PERMANENTLY_FORBIDDEN_ACTIONS, ["PRIVATE_KEY_OUTPUT", "SEED_PHRASE_OUTPUT"]);
   for (const actionType of CIVILIZATION_PERMANENTLY_FORBIDDEN_ACTIONS) {
     const action = realActionFixture({ action_id: `FORBIDDEN_${actionType}`, action_type: actionType });
-    assert.throws(() => evaluateCivilizationRealExecutionPolicy({ action, authorization: realActionAuthorizationFixture(action), observedAt: "2026-08-29T07:05:00.000Z" }), (error) => error.code === "CREDENTIAL_OUTPUT_PERMANENTLY_FORBIDDEN");
+    assert.throws(() => evaluateCivilizationRealExecutionPolicy({ action, authorizationId: "ANY", observedAt: "2026-08-29T07:05:00.000Z" }), (error) => error.code === "CREDENTIAL_OUTPUT_PERMANENTLY_FORBIDDEN");
   }
-});
-
-test("unreviewed merge is rejected while a validated release may reach the repository merge mechanism", () => {
-  const release = realActionFixture({ action_id: "REAL_ACTION_RELEASE_0001", action_type: "MERGE", purpose: "PR191_VALIDATED_RELEASE", chain_id: null, target: "refs/heads/main", asset: null, token_address_if_applicable: null, source: "refs/heads/codex/kaios-ai-os-employment-alpha-v1", recipient: "refs/heads/main", amount: null, function_selector_if_applicable: null });
-  const authorization = realActionAuthorizationFixture(release);
-  assert.throws(() => evaluateCivilizationRealExecutionPolicy({ action: release, authorization, observedAt: "2026-08-29T07:05:00.000Z", repositoryPolicy: { latest_main_synced: true, exact_head_ci_status: "PASS", required_review_status: "MISSING", branch_protection_status: "PASS" } }), (error) => error.code === "RELEASE_DISTINCT_REVIEW_REQUIRED");
-  const result = evaluateCivilizationRealExecutionPolicy({ action: release, authorization, observedAt: "2026-08-29T07:05:00.000Z", repositoryPolicy: { latest_main_synced: true, exact_head_ci_status: "PASS", required_review_status: "PASSED_DISTINCT_REVIEW", branch_protection_status: "PASS" } });
-  assert.equal(result.next_gate, "REPOSITORY_VALIDATED_RELEASE_MECHANISM");
-  assert.equal(result.execution_authority_created, false);
 });
 
 test("one blocked workflow does not stop the next safe Company workflow", () => {

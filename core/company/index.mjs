@@ -142,6 +142,11 @@ export const CANONICAL_KAIOS_PAYMENT_SIGNER_POLICIES = Object.freeze([]);
 // `chain_observation_verified=true` flag from self-authorizing PAID state.
 export const CANONICAL_KAIOS_PAYMENT_RECEIPT_ATTESTATIONS = Object.freeze([]);
 
+// Real-action authorization can only come from reviewed repository-owned records.
+// Keeping this allowlist empty prevents caller-supplied authority-shaped objects,
+// VERIFIED strings, arbitrary SHAs or timestamps from advancing an execution gate.
+export const CANONICAL_CIVILIZATION_REAL_ACTION_AUTHORIZATIONS = Object.freeze([]);
+
 export const CIVILIZATION_REAL_ACTION_TYPES = Object.freeze([
   "MERGE", "MAIN_PUSH", "RELEASE", "DEPLOYMENT", "PAYMENT", "PAYROLL", "TRADE",
   "TOKEN_TRANSFER", "TREASURY_OPERATION", "MAINNET_WRITE", "TESTNET_WRITE", "GOVERNANCE_EXECUTION"
@@ -815,26 +820,28 @@ function requireValidatedReleasePolicy(repositoryPolicy) {
 }
 
 export function evaluateCivilizationRealExecutionPolicy({
-  action, authorization = null, observedAt, usedReplayKeys = [], repositoryPolicy = null
+  action, authorizationId = null, authorization = null, observedAt, repositoryPolicy = null
 }) {
   requireId(action?.action_id, "real_action.action_id");
   requireEnum(action?.action_type, [...CIVILIZATION_REAL_ACTION_TYPES, ...CIVILIZATION_PERMANENTLY_FORBIDDEN_ACTIONS], "real_action.action_type");
   if (CIVILIZATION_PERMANENTLY_FORBIDDEN_ACTIONS.includes(action.action_type)) {
     invariant(false, "CREDENTIAL_OUTPUT_PERMANENTLY_FORBIDDEN", "Private keys and seed phrases can never be output, even with an authorization claim");
   }
-  invariant(authorization, "UNAUTHORIZED_REAL_ACTION_FORBIDDEN", "A real action requires exact machine-verifiable authorization");
-  requireId(authorization.authorization_id, "real_action.authorization_id");
-  requireId(authorization.authority, "real_action.authority");
-  requireArray(usedReplayKeys, "real_action.used_replay_keys");
-  invariant(authorization.status === "ACTIVE_ONE_EXACT_ACTION" && authorization.provenance_status === "MACHINE_VERIFIED_TRUSTED_AUTHORITY_ATTESTATION", "REAL_ACTION_AUTHORITY_PROVENANCE_REQUIRED", "Caller text or a self-asserted VERIFIED flag is not execution authority");
-  invariant(/^[0-9a-f]{64}$/i.test(String(authorization.policy_hash ?? "")), "REAL_ACTION_POLICY_HASH_INVALID", "Exact action authorization requires a SHA-256 policy hash");
-  invariant(authorization.repository_head_if_relevant === null || /^[0-9a-f]{40}$/i.test(String(authorization.repository_head_if_relevant)), "REAL_ACTION_REPOSITORY_HEAD_INVALID", "Repository-bound actions require a commit SHA or explicit null when not applicable");
+  invariant(authorization === null, "CALLER_SUPPLIED_REAL_ACTION_AUTHORIZATION_FORBIDDEN", "Caller-supplied authorization objects cannot establish repository-bound execution provenance");
+  invariant(authorizationId !== null, "UNAUTHORIZED_REAL_ACTION_FORBIDDEN", "A real action requires an exact repository-owned authorization");
+  requireId(authorizationId, "real_action.authorization_id");
+  const verifiedAuthorization = CANONICAL_CIVILIZATION_REAL_ACTION_AUTHORIZATIONS
+    .find((candidate) => candidate.authorization_id === authorizationId) ?? null;
+  invariant(verifiedAuthorization, "REAL_ACTION_AUTHORIZATION_NOT_CONNECTED", "No reviewed repository-owned real-action authorization matches the requested ID");
+  requireId(verifiedAuthorization.authority, "real_action.authority");
+  invariant(verifiedAuthorization.status === "ACTIVE_ONE_EXACT_ACTION" && verifiedAuthorization.provenance_status === "MACHINE_VERIFIED_TRUSTED_AUTHORITY_ATTESTATION", "REAL_ACTION_AUTHORITY_PROVENANCE_REQUIRED", "Repository authorization lacks trusted operational provenance");
+  invariant(/^[0-9a-f]{64}$/i.test(String(verifiedAuthorization.policy_hash ?? "")), "REAL_ACTION_POLICY_HASH_INVALID", "Exact action authorization requires a SHA-256 policy hash");
+  invariant(verifiedAuthorization.repository_head_if_relevant === null || /^[0-9a-f]{40}$/i.test(String(verifiedAuthorization.repository_head_if_relevant)), "REAL_ACTION_REPOSITORY_HEAD_INVALID", "Repository-bound actions require a commit SHA or explicit null when not applicable");
   const observed = parseEmploymentTime(observedAt, "real_action.observed_at");
-  const validFrom = parseEmploymentTime(authorization.valid_from, "real_action.authorization.valid_from");
-  const expiresAt = parseEmploymentTime(authorization.expires_at, "real_action.authorization.expires_at");
+  const validFrom = parseEmploymentTime(verifiedAuthorization.valid_from, "real_action.authorization.valid_from");
+  const expiresAt = parseEmploymentTime(verifiedAuthorization.expires_at, "real_action.authorization.expires_at");
   invariant(observed >= validFrom && observed <= expiresAt, "REAL_ACTION_AUTHORIZATION_EXPIRED", "Exact action authorization is outside its validity window");
-  invariant(!usedReplayKeys.includes(authorization.nonce_or_replay_key), "REAL_ACTION_AUTHORIZATION_REPLAY", "An exact action authorization may be used only once");
-  verifyExactRealActionBinding(action, authorization);
+  verifyExactRealActionBinding(action, verifiedAuthorization);
 
   if (action.action_type === "TRADE") {
     requireId(action.buyer_controller_id, "real_action.trade.buyer_controller_id");
@@ -856,16 +863,15 @@ export function evaluateCivilizationRealExecutionPolicy({
     policy_id: CIVILIZATION_REAL_EXECUTION_POLICY.policy_id,
     action_id: action.action_id,
     action_type: action.action_type,
-    authorization_id: authorization.authorization_id,
-    nonce_or_replay_key: authorization.nonce_or_replay_key,
+    authorization_id: verifiedAuthorization.authorization_id,
+    nonce_or_replay_key: verifiedAuthorization.nonce_or_replay_key,
     allowed_by_policy: true,
     execution_authority_created: false,
     signer_authority_created: false,
     next_gate: nextGate,
-    status: "EXACT_AUTHORIZATION_POLICY_ACCEPTED_AWAITING_ACTION_SPECIFIC_GATES"
+    status: "REPOSITORY_AUTHORIZATION_VERIFIED_AWAITING_ACTION_SPECIFIC_GATES"
   });
 }
-
 export function selectNextSafeCompanyWorkflow({ workflows }) {
   requireArray(workflows, "company_workflows");
   const ordered = workflows.map((workflow) => Object.freeze({ ...workflow })).sort((left, right) => Number(left.priority) - Number(right.priority));
