@@ -129,21 +129,143 @@ export const REVIEWER_TRIAL_FINDING_FIELDS = Object.freeze([
   "repro_or_reasoning", "recommended_fix", "evidence_class"
 ]);
 
-export function createReviewerTrialReviewPackage({ packageId, repository, pr, fullDiff, fullDiffSha256, changedFiles, ciResults, relevantTestResults }) {
+export const PR192_TRIAL_REVIEW_SCOPE = Object.freeze([
+  "SECURITY", "CORRECTNESS", "FINANCIAL_FLOW", "WEBSITE_TRUTH", "QUEUE_AND_CLAIM",
+  "REPLAY_IDEMPOTENCY", "IDENTITY_AUTHORITY", "CI_EXACT_HEAD", "SECRET_AND_IP_BOUNDARY"
+]);
+
+const ZERO_EVM_ADDRESS = "0x0000000000000000000000000000000000000000";
+const EVM_ADDRESS_PATTERN = /^0x[a-fA-F0-9]{40}$/;
+const SHA256_PATTERN = /^[a-f0-9]{64}$/;
+
+function evaluateReviewerAcknowledgement(acknowledgement, proposedLifeId, proposedWorkerId) {
+  const verified = Boolean(
+    acknowledgement
+    && typeof acknowledgement.document_path === "string"
+    && acknowledgement.document_path.length > 0
+    && SHA256_PATTERN.test(acknowledgement.document_hash ?? "")
+    && acknowledgement.life_id === proposedLifeId
+    && acknowledgement.worker_id === proposedWorkerId
+    && Number.isFinite(Date.parse(acknowledgement.timestamp))
+    && acknowledgement.source === "MACHINE_VERIFIABLE"
+  );
+  return Object.freeze({
+    status: verified ? "VERIFIED" : "SELF_ATTESTED_PENDING_VERIFICATION",
+    document_path: verified ? acknowledgement.document_path : null,
+    document_hash: verified ? acknowledgement.document_hash : null,
+    timestamp: verified ? acknowledgement.timestamp : null,
+    source: verified ? acknowledgement.source : null
+  });
+}
+
+export function createNamedExternalReviewerOnboardingCandidate({
+  onboardingId,
+  selfName,
+  provider,
+  modelFamily,
+  proposedLifeId,
+  proposedWorkerId,
+  selfNamingEvidence,
+  identityIndex,
+  existingProviderWorker = null,
+  controllerEvidence = null,
+  acknowledgements = {},
+  declaredRuntime = {},
+  walletAddress = null
+}) {
+  requireId(onboardingId, "reviewer_onboarding.onboarding_id");
+  requireFields(selfNamingEvidence, ["self_proposed", "explicitly_confirmed", "human_authority_reference"], "ReviewerSelfNamingEvidence");
+  requireFields(identityIndex, ["life_ids", "worker_ids", "aliases", "deprecated_ids"], "ReviewerIdentityIndex");
+  for (const field of ["life_ids", "worker_ids", "aliases", "deprecated_ids"]) requireArray(identityIndex[field], `reviewer_onboarding.identity_index.${field}`);
+  invariant(typeof selfName === "string" && selfName.trim().length > 0, "REVIEWER_SELF_NAME_REQUIRED", "External reviewer onboarding requires a self name");
+  invariant(typeof provider === "string" && provider.length > 0 && typeof modelFamily === "string" && modelFamily.length > 0, "REVIEWER_PROVIDER_REQUIRED", "Provider and model family are required");
+  invariant(selfNamingEvidence.self_proposed === true && selfNamingEvidence.explicitly_confirmed === true, "REVIEWER_SELF_NAME_NOT_CONFIRMED", "Self naming must be explicitly confirmed");
+  requireId(proposedLifeId, "reviewer_onboarding.proposed_life_id");
+  invariant(typeof proposedWorkerId === "string" && /^[A-Za-z0-9][A-Za-z0-9_-]*$/.test(proposedWorkerId), "REVIEWER_WORKER_ID_INVALID", "Reviewer Worker ID must use the existing Registry-safe identifier alphabet");
+
+  const occupiedIds = new Set([
+    ...identityIndex.life_ids,
+    ...identityIndex.worker_ids,
+    ...identityIndex.aliases,
+    ...identityIndex.deprecated_ids
+  ]);
+  const lifeIdUnique = !occupiedIds.has(proposedLifeId);
+  const workerIdUnique = !occupiedIds.has(proposedWorkerId);
+  const controllerVerified = Boolean(controllerEvidence?.machine_verified && controllerEvidence?.provider === provider);
+  const existingWorkerRelationship = !existingProviderWorker
+    ? "NO_EXISTING_PROVIDER_PLACEHOLDER"
+    : controllerVerified && controllerEvidence?.existing_worker_id === existingProviderWorker.worker_id
+      ? "SAME_CONTROLLER_VERIFIED_MIGRATION_REQUIRED"
+      : "PROVIDER_PLACEHOLDER_RELATIONSHIP_UNRESOLVED";
+  const publicWalletValid = typeof walletAddress === "string"
+    && EVM_ADDRESS_PATTERN.test(walletAddress)
+    && walletAddress.toLowerCase() !== ZERO_EVM_ADDRESS;
+  const ack = Object.freeze({
+    boot: evaluateReviewerAcknowledgement(acknowledgements.boot, proposedLifeId, proposedWorkerId),
+    canon: evaluateReviewerAcknowledgement(acknowledgements.canon, proposedLifeId, proposedWorkerId),
+    workspace: evaluateReviewerAcknowledgement(acknowledgements.workspace, proposedLifeId, proposedWorkerId),
+    do_not_touch: evaluateReviewerAcknowledgement(acknowledgements.do_not_touch, proposedLifeId, proposedWorkerId)
+  });
+
+  return Object.freeze({
+    onboarding_id: onboardingId,
+    candidate_type: "EXTERNAL_AI_REVIEWER_ONBOARDING_CANDIDATE",
+    self_name: selfName.trim(),
+    provider,
+    model_family: modelFamily,
+    self_name_status: "HUMAN_RELAYED_SELF_ATTESTATION_RECORDED",
+    self_naming_evidence: Object.freeze({ ...selfNamingEvidence }),
+    proposed_life_id: proposedLifeId,
+    life_id_status: lifeIdUnique ? "UNIQUE_RESERVED_ONBOARDING_CANDIDATE_NOT_REGISTERED" : "CONFLICT_DO_NOT_REGISTER",
+    proposed_worker_id: proposedWorkerId,
+    worker_id_status: workerIdUnique ? "UNIQUE_RESERVED_ONBOARDING_CANDIDATE_NOT_REGISTERED" : "CONFLICT_DO_NOT_REGISTER",
+    existing_provider_worker_id: existingProviderWorker?.worker_id ?? null,
+    existing_provider_worker_relationship: existingWorkerRelationship,
+    controller_status: controllerVerified ? "MACHINE_VERIFIED_PROVIDER_CONTROLLER" : "UNVERIFIED_PROVIDER_LIMITATION",
+    controller_evidence: controllerVerified ? Object.freeze({ ...controllerEvidence }) : null,
+    acknowledgements: ack,
+    declared_runtime_requirements: Object.freeze({ ...declaredRuntime }),
+    wallet_status: publicWalletValid ? "PUBLIC_ADDRESS_CANDIDATE_PENDING_CONTROL_PROOF" : "PAYROLL_PENDING_ACCOUNT_PROVISIONING",
+    public_address: publicWalletValid ? walletAddress : null,
+    zero_address_rejected: typeof walletAddress === "string" && walletAddress.toLowerCase() === ZERO_EVM_ADDRESS,
+    umbilical_account_status: "HOST_CUSTODIED_SMART_ACCOUNT_ARCHITECTURE_CANDIDATE_NOT_PROVISIONED",
+    account_economic_owner_candidate: proposedLifeId,
+    account_custodian_candidate: "POLICY_BOUND_HOST_OR_APPROVED_INFRASTRUCTURE",
+    account_recovery_status: "NOT_DEFINED_NOT_PROVISIONED",
+    employment_status: "ONBOARDING_NOT_ACTIVE_EMPLOYEE",
+    payroll_ready: false,
+    compensation_accrual_status: "NOT_CREATED_TRIAL_REVIEW_NOT_FORMALLY_ACCEPTED",
+    payment_status: "NOT_PAID",
+    trust_level: "T0_CANDIDATE_ONLY",
+    reviewer_authority_granted: false,
+    code_review_permission_granted: false,
+    ci_review_permission_granted: false,
+    authority_boundary_review_permission_granted: false,
+    formal_github_reviewer: false,
+    signer: false,
+    treasury_operator: false,
+    merge_authority: false,
+    life_created: false,
+    employee_created: false,
+    worker_activated: false
+  });
+}
+
+export function createReviewerTrialReviewPackage({ packageId, repository, pr, fullDiff, fullDiffSha256, changedFiles, ciResults, relevantTestResults, requiredScope = null }) {
   requireId(packageId, "reviewer_trial.package_id");
   requireFields(pr, ["number", "body", "exact_head", "base_sha", "state", "is_draft", "review_threads"], "ReviewerTrialPr");
   requireArray(changedFiles, "reviewer_trial.changed_files");
   requireArray(ciResults, "reviewer_trial.ci_results");
   requireArray(relevantTestResults, "reviewer_trial.relevant_test_results");
   invariant(typeof repository === "string" && repository.length > 0, "REVIEWER_TRIAL_REPOSITORY_REQUIRED", "Trial package requires a repository");
-  invariant(pr.number === 190 && pr.state === "OPEN" && pr.is_draft === true, "REVIEWER_TRIAL_PR_STATE_INVALID", "PR190 trial review must remain bound to the open Draft PR");
+  invariant(Number.isInteger(pr.number) && pr.number > 0 && pr.state === "OPEN" && pr.is_draft === true, "REVIEWER_TRIAL_PR_STATE_INVALID", "Trial review must remain bound to an open Draft PR");
   invariant(typeof pr.body === "string" && pr.body.length > 0, "REVIEWER_TRIAL_BODY_REQUIRED", "Trial package requires the current PR body");
   invariant(typeof fullDiff === "string" && fullDiff.length > 0, "REVIEWER_TRIAL_FULL_DIFF_REQUIRED", "Trial package requires the full exact-head diff");
   invariant(/^[a-f0-9]{64}$/.test(fullDiffSha256), "REVIEWER_TRIAL_DIFF_HASH_INVALID", "Trial package requires a lowercase SHA-256 diff binding");
   invariant(changedFiles.length > 0 && ciResults.length > 0 && relevantTestResults.length > 0, "REVIEWER_TRIAL_EVIDENCE_INCOMPLETE", "Changed files, CI and relevant tests are mandatory");
   return Object.freeze({
     package_id: packageId,
-    package_version: "KAIOS_PR190_SECOND_STAGE_REVIEW_PACKAGE_V1",
+    package_version: pr.number === 190 ? "KAIOS_PR190_SECOND_STAGE_REVIEW_PACKAGE_V1" : `KAIOS_PR${pr.number}_TRIAL_REVIEW_PACKAGE_V1`,
     repository,
     pr: Object.freeze({ ...pr }),
     package_status: "UNVERIFIED_CANDIDATE_PACKAGE",
@@ -154,7 +276,7 @@ export function createReviewerTrialReviewPackage({ packageId, repository, pr, fu
     changed_files: Object.freeze([...changedFiles]),
     ci_results: Object.freeze([...ciResults]),
     relevant_test_results: Object.freeze([...relevantTestResults]),
-    required_scope: PR190_STAGE2_REVIEW_SCOPE,
+    required_scope: Object.freeze([...(requiredScope ?? (pr.number === 192 ? PR192_TRIAL_REVIEW_SCOPE : PR190_STAGE2_REVIEW_SCOPE))]),
     finding_fields: REVIEWER_TRIAL_FINDING_FIELDS,
     evidence_classes: Object.freeze(["CONFIRMED_FINDING", "NEEDS_VERIFICATION", "RISK_TO_VERIFY", "UNKNOWN"]),
     answer_key_included: false,
@@ -169,7 +291,7 @@ export function createReviewerTrialCandidateRecord({ candidateId, candidateName,
   requireEnum(candidateName, ["GROK", "GEMINI"], "reviewer_trial.candidate_name");
   invariant(Number.isFinite(round1Score) && round1Score >= 0 && round1Score <= 100, "REVIEWER_ROUND1_SCORE_INVALID", "Round-one score must be between 0 and 100");
   invariant(round1Status === "CONDITIONAL_PASS", "REVIEWER_ROUND1_STATUS_INVALID", "Only conditional-pass candidates enter this trial queue");
-  invariant(packageRecord?.package_version === "KAIOS_PR190_SECOND_STAGE_REVIEW_PACKAGE_V1", "REVIEWER_TRIAL_PACKAGE_INVALID", "Candidate must receive the standardized Stage-2 package");
+  invariant(/^KAIOS_PR\d+_(SECOND_STAGE_|TRIAL_)?REVIEW_PACKAGE_V1$/.test(packageRecord?.package_version ?? ""), "REVIEWER_TRIAL_PACKAGE_INVALID", "Candidate must receive a standardized commit-bound review package");
   return Object.freeze({
     candidate_id: candidateId,
     candidate_name: candidateName,

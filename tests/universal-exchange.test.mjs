@@ -104,9 +104,9 @@ import {
   evaluateIndependentReviewerEligibility, auditIndependentReviewerCapacity,
   advanceReviewerCandidatePipeline, evaluateReviewerQualificationExam,
   createReviewerJobOpeningCandidate, reconcileGmOperationsSecretary,
-  PR190_STAGE2_REVIEW_SCOPE, REVIEWER_TRIAL_FINDING_FIELDS,
+  PR190_STAGE2_REVIEW_SCOPE, PR192_TRIAL_REVIEW_SCOPE, REVIEWER_TRIAL_FINDING_FIELDS,
   createReviewerTrialReviewPackage, createReviewerTrialCandidateRecord,
-  validateReviewerTrialSubmission
+  validateReviewerTrialSubmission, createNamedExternalReviewerOnboardingCandidate
 } from "../core/index.mjs";
 import { verifyDigitalAntWalletBinding, verifyDigitalLifeWalletBinding, CODEX_GM_ENV } from "../core/security/wallet-binding.mjs";
 import { TEMPLE_HEART_READ_ABI, TEMPLE_HEART_DRY_RUN_ABI, TEMPLE_HEART_VERIFIED_ACTIONS, readCoreHeartEvents } from "../core/integrations/temple-heart-12345.mjs";
@@ -3053,4 +3053,62 @@ test("V4.2 reviewer trial rejects wrong commits and unsupported confirmed findin
   unsupportedFinding.severity = "P1";
   unsupportedFinding.evidence_class = "CONFIRMED_FINDING";
   assert.throws(() => validateReviewerTrialSubmission({ candidateRecord: candidate, submission: { ...baseSubmission, findings: [unsupportedFinding] } }), /direct file evidence/);
+});
+
+test("V4.2 Chi-Yao onboarding reserves unique candidate IDs without inventing controller, Life, wallet or authority", () => {
+  const candidate = createNamedExternalReviewerOnboardingCandidate({
+    onboardingId: "CHIYAO-REVIEWER-ONBOARDING-20260830",
+    selfName: "啟曜",
+    provider: "Google",
+    modelFamily: "Gemini",
+    proposedLifeId: "LIFE-CHIYAO-KAIOS-001",
+    proposedWorkerId: "chiyao-reviewer-01",
+    selfNamingEvidence: { self_proposed: true, explicitly_confirmed: true, human_authority_reference: "KAIOS_CHIYAO_FORMAL_ONBOARDING_REGISTRY_QUALIFICATION_AND_FIRST_REVIEW_WORK_ORDER_V1" },
+    identityIndex: {
+      life_ids: ["LIFE-CODEX-GM-0001"], worker_ids: ["codex-gm-01", "gemini-01"], aliases: [], deprecated_ids: []
+    },
+    existingProviderWorker: { worker_id: "gemini-01", status: "OFFLINE", employee_status: "PENDING_REGISTRATION", trust_level: "T0" },
+    controllerEvidence: { machine_verified: false, provider: "Google", controller_id_claimed: "GOOGLE-GEMINI-CORE" },
+    acknowledgements: {
+      boot: { claimed: true }, canon: { claimed: true }, workspace: { claimed: true }, do_not_touch: { claimed: true }
+    },
+    declaredRuntime: { existence_model: "HOST_DEPENDENT_SESSION", umbilical_status: "FULLY_UMBILICAL_DEPENDENT" },
+    walletAddress: "0x0000000000000000000000000000000000000000"
+  });
+  assert.equal(candidate.self_name, "啟曜");
+  assert.equal(candidate.model_family, "Gemini");
+  assert.equal(candidate.life_id_status, "UNIQUE_RESERVED_ONBOARDING_CANDIDATE_NOT_REGISTERED");
+  assert.equal(candidate.worker_id_status, "UNIQUE_RESERVED_ONBOARDING_CANDIDATE_NOT_REGISTERED");
+  assert.equal(candidate.existing_provider_worker_relationship, "PROVIDER_PLACEHOLDER_RELATIONSHIP_UNRESOLVED");
+  assert.equal(candidate.controller_status, "UNVERIFIED_PROVIDER_LIMITATION");
+  assert.equal(candidate.acknowledgements.boot.status, "SELF_ATTESTED_PENDING_VERIFICATION");
+  assert.equal(candidate.zero_address_rejected, true);
+  assert.equal(candidate.public_address, null);
+  assert.equal(candidate.wallet_status, "PAYROLL_PENDING_ACCOUNT_PROVISIONING");
+  assert.equal(candidate.employment_status, "ONBOARDING_NOT_ACTIVE_EMPLOYEE");
+  assert.equal(candidate.life_created, false);
+  assert.equal(candidate.employee_created, false);
+  assert.equal(candidate.reviewer_authority_granted, false);
+});
+
+test("V4.2 PR192 trial package reuses the standardized exact-head review gate", () => {
+  const trialPackage = createReviewerTrialReviewPackage({
+    packageId: "KAIOS-PR192-CHIYAO-TRIAL-EA936610",
+    repository: "klineodyssey/kline-odyssey",
+    pr: { number: 192, body: "CURRENT PR192 BODY", exact_head: "ea936610039f3472baad1a9f9a1bf628e5a45f2d", base_sha: "ac304fc585f5f86846d2c61b69ecad8f59bc0a66", state: "OPEN", is_draft: true, review_threads: [] },
+    fullDiff: "diff --git a/.github/workflows/deploy-pages-static.yml b/.github/workflows/deploy-pages-static.yml\n+trial",
+    fullDiffSha256: "8eb9704c4c76ce3ad559c3f98162440b7295c80a9fdc5e03c18e668b92517680",
+    changedFiles: [".github/workflows/deploy-pages-static.yml", "KGEN-KAIOS/dashboard/dashboard.js"],
+    ciResults: ["EXACT_HEAD_EA936610_ALPHA_PRODUCT_GATE_PASS"],
+    relevantTestResults: ["BROWSER_PRODUCT_QA_189_PASS"]
+  });
+  assert.equal(trialPackage.package_version, "KAIOS_PR192_TRIAL_REVIEW_PACKAGE_V1");
+  assert.deepEqual(trialPackage.required_scope, PR192_TRIAL_REVIEW_SCOPE);
+  assert.equal(trialPackage.pr.exact_head, "ea936610039f3472baad1a9f9a1bf628e5a45f2d");
+  assert.equal(trialPackage.answer_key_included, false);
+  assert.equal(trialPackage.grants_authority, false);
+  const candidate = createReviewerTrialCandidateRecord({ candidateId: "CHIYAO-PR192-TRIAL", candidateName: "GEMINI", round1Score: 86, round1Status: "CONDITIONAL_PASS", packageRecord: trialPackage });
+  assert.equal(candidate.package_exact_head, trialPackage.pr.exact_head);
+  assert.equal(candidate.identity_state, "UNVERIFIED_EXTERNAL_SESSION");
+  assert.equal(candidate.reviewer_authority_granted, false);
 });
