@@ -157,6 +157,12 @@ export const KAIOS_PAYMENT_APPROVAL_MATRIX = Object.freeze({
   MARKET_SETTLEMENT: Object.freeze({ requestor: "11520_MATCHED_ORDER_RECEIPT", approver: "MARKET_SETTLEMENT_POLICY_NOT_CONNECTED", funding_authority: "MARKET_ESCROW_OR_BOUND_SOURCE_REQUIRED", signer: "ONE_EXACT_SECURE_SIGNER_NOT_CONNECTED", settlement_verifier: "11520_SETTLEMENT_ADAPTER_NOT_INTEGRATED" })
 });
 
+// A temporary Human payment designation is authority-bearing provenance.
+// Runtime callers may reference only a designation reviewed into this
+// repository-owned allowlist; they may never inject the designation record.
+// It remains empty until exact Human/governance provenance is connected.
+export const CANONICAL_KAIOS_TEMPORARY_HUMAN_PAYMENT_DESIGNATIONS = Object.freeze([]);
+
 // A signer policy may be referenced only after it is reviewed into this
 // repository-owned allowlist. Keeping it empty prevents a browser or caller
 // from converting an arbitrary JSON object into signing authority.
@@ -850,11 +856,26 @@ function verifyKaiosPaymentRecipientBinding({ recipientAddress, recipientIdentit
     invariant(normalizeKaiosPaymentAddress(recipientIdentityOrNode.registered_address, "registered_node_address") === normalizedRecipient, "KAIOS_PAYMENT_NODE_ADDRESS_MISMATCH", "Registered node address must equal the recipient");
     return Object.freeze({ recipient_type: recipientIdentityOrNode.recipient_type, identity_or_node_id: recipientIdentityOrNode.node_id, evidence_id: recipientIdentityOrNode.registry_evidence_id, evidence_status: recipientIdentityOrNode.registry_status });
   }
-  requireId(recipientIdentityOrNode.human_authority_reference, "kaios_payment.human_authority_reference");
-  invariant(recipientIdentityOrNode.payment_purpose === paymentPurpose && String(recipientIdentityOrNode.amount_kaios_wei) === String(amountKaiosWei), "KAIOS_PAYMENT_TEMPORARY_AUTHORITY_SCOPE_MISMATCH", "Temporary Human designation must bind the exact purpose and amount");
-  invariant(normalizeKaiosPaymentAddress(recipientIdentityOrNode.source_address, "temporary_designation.source_address") === sourceAddress && normalizeKaiosPaymentAddress(recipientIdentityOrNode.designated_address, "temporary_designation.designated_address") === normalizedRecipient, "KAIOS_PAYMENT_TEMPORARY_AUTHORITY_PARTY_MISMATCH", "Temporary Human designation must bind the exact source and recipient");
-  invariant(parseEmploymentTime(recipientIdentityOrNode.expires_at, "temporary_designation.expires_at") > parseEmploymentTime(createdAt, "kaios_payment.created_at"), "KAIOS_PAYMENT_TEMPORARY_AUTHORITY_EXPIRED", "Temporary Human designation must be unexpired when the request is created");
-  return Object.freeze({ recipient_type: recipientIdentityOrNode.recipient_type, identity_or_node_id: recipientIdentityOrNode.human_authority_reference, evidence_id: recipientIdentityOrNode.human_authority_reference, evidence_status: "EXACT_TEMPORARY_HUMAN_DESIGNATION_BOUND", expires_at: recipientIdentityOrNode.expires_at });
+  const callerSuppliedDesignationFields = [
+    "human_authority_reference", "payment_purpose", "amount_kaios_wei",
+    "source_address", "designated_address", "expires_at"
+  ];
+  invariant(
+    !callerSuppliedDesignationFields.some((field) => Object.prototype.hasOwnProperty.call(recipientIdentityOrNode, field)),
+    "CALLER_SUPPLIED_TEMPORARY_HUMAN_PAYMENT_DESIGNATION_FORBIDDEN",
+    "Temporary Human payment designation records must come from repository-owned provenance"
+  );
+  requireId(recipientIdentityOrNode.designation_id, "kaios_payment.temporary_human_designation_id");
+  const designation = CANONICAL_KAIOS_TEMPORARY_HUMAN_PAYMENT_DESIGNATIONS.find(
+    (candidate) => candidate.designation_id === recipientIdentityOrNode.designation_id
+  );
+  invariant(designation, "KAIOS_PAYMENT_TEMPORARY_HUMAN_DESIGNATION_NOT_CONNECTED", "Temporary Human payment designation is not connected to repository-owned provenance");
+  invariant(designation.status === "REPOSITORY_BOUND_EXACT_TEMPORARY_HUMAN_PAYMENT_DESIGNATION", "KAIOS_PAYMENT_TEMPORARY_HUMAN_DESIGNATION_INVALID", "Temporary Human designation must have reviewed repository-bound status");
+  requireId(designation.human_authority_reference, "kaios_payment.human_authority_reference");
+  invariant(designation.payment_purpose === paymentPurpose && String(designation.amount_kaios_wei) === String(amountKaiosWei), "KAIOS_PAYMENT_TEMPORARY_AUTHORITY_SCOPE_MISMATCH", "Temporary Human designation must bind the exact purpose and amount");
+  invariant(normalizeKaiosPaymentAddress(designation.source_address, "temporary_designation.source_address") === sourceAddress && normalizeKaiosPaymentAddress(designation.designated_address, "temporary_designation.designated_address") === normalizedRecipient, "KAIOS_PAYMENT_TEMPORARY_AUTHORITY_PARTY_MISMATCH", "Temporary Human designation must bind the exact source and recipient");
+  invariant(parseEmploymentTime(designation.expires_at, "temporary_designation.expires_at") > parseEmploymentTime(createdAt, "kaios_payment.created_at"), "KAIOS_PAYMENT_TEMPORARY_AUTHORITY_EXPIRED", "Temporary Human designation must be unexpired when the request is created");
+  return Object.freeze({ recipient_type: recipientIdentityOrNode.recipient_type, identity_or_node_id: designation.human_authority_reference, evidence_id: designation.designation_id, evidence_status: designation.status, expires_at: designation.expires_at });
 }
 
 export function createKaiosPaymentRequest({

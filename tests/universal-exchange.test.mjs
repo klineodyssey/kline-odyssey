@@ -3655,12 +3655,12 @@ test("civilization node payment requires registry address evidence", () => {
   assert.equal(payment.recipient_identity_or_node.identity_or_node_id, "RESOURCE_NODE_0001");
 });
 
-test("temporary Human-designated KAIOS address binds purpose amount source recipient and expiry", () => {
+test("temporary Human-designated KAIOS address requires repository-owned provenance", () => {
   const source = "0x1111111111111111111111111111111111111111";
   const recipient = "0x4444444444444444444444444444444444444444";
-  const payment = createKaiosPaymentRequest({ paymentId: "KAIOS_PAYMENT_0004", paymentPurpose: "PUBLIC_GOOD", companyId: "AI_ANT_COMPANY_0001", sourceAddress: source, recipientAddress: recipient, recipientIdentityOrNode: { recipient_type: "TEMPORARY_HUMAN_DESIGNATED_ADDRESS", human_authority_reference: "HUMAN_AUTHORITY_0001", payment_purpose: "PUBLIC_GOOD", amount_kaios_wei: "88", source_address: source, designated_address: recipient, expires_at: "2026-08-29T02:00:00.000Z" }, tokenAddress: KAIOS_MAINNET_TOKEN.contract_address, chainId: 56, amountKaiosWei: "88", fundingEvidence: { evidence_id: "FUNDING_EVIDENCE_0004", source_address: source, token_address: KAIOS_MAINNET_TOKEN.contract_address, chain_id: 56, verified_balance_kaios_wei: "88", observed_at: "2026-08-29T01:01:00.000Z", source_binding_status: "CANONICALLY_BOUND_PAYMENT_SOURCE" }, createdAt: "2026-08-29T01:02:00.000Z" });
-  assert.equal(payment.recipient_identity_or_node.evidence_status, "EXACT_TEMPORARY_HUMAN_DESIGNATION_BOUND");
-  assert.equal(payment.recipient_identity_or_node.expires_at, "2026-08-29T02:00:00.000Z");
+  const base = { paymentId: "KAIOS_PAYMENT_0004", paymentPurpose: "PUBLIC_GOOD", companyId: "AI_ANT_COMPANY_0001", sourceAddress: source, recipientAddress: recipient, tokenAddress: KAIOS_MAINNET_TOKEN.contract_address, chainId: 56, amountKaiosWei: "88", fundingEvidence: { evidence_id: "FUNDING_EVIDENCE_0004", source_address: source, token_address: KAIOS_MAINNET_TOKEN.contract_address, chain_id: 56, verified_balance_kaios_wei: "88", observed_at: "2026-08-29T01:01:00.000Z", source_binding_status: "CANONICALLY_BOUND_PAYMENT_SOURCE" }, createdAt: "2026-08-29T01:02:00.000Z" };
+  assert.throws(() => createKaiosPaymentRequest({ ...base, recipientIdentityOrNode: { recipient_type: "TEMPORARY_HUMAN_DESIGNATED_ADDRESS", human_authority_reference: "HUMAN_AUTHORITY_0001", payment_purpose: "PUBLIC_GOOD", amount_kaios_wei: "88", source_address: source, designated_address: recipient, expires_at: "2026-08-29T02:00:00.000Z" } }), (error) => error.code === "CALLER_SUPPLIED_TEMPORARY_HUMAN_PAYMENT_DESIGNATION_FORBIDDEN");
+  assert.throws(() => createKaiosPaymentRequest({ ...base, recipientIdentityOrNode: { recipient_type: "TEMPORARY_HUMAN_DESIGNATED_ADDRESS", designation_id: "HUMAN_PAYMENT_DESIGNATION_0001" } }), (error) => error.code === "KAIOS_PAYMENT_TEMPORARY_HUMAN_DESIGNATION_NOT_CONNECTED");
 });
 
 test("common KAIOS payment rail remains fail-closed without repository authority", () => {
