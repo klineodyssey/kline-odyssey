@@ -142,6 +142,33 @@ export const CANONICAL_KAIOS_PAYMENT_SIGNER_POLICIES = Object.freeze([]);
 // `chain_observation_verified=true` flag from self-authorizing PAID state.
 export const CANONICAL_KAIOS_PAYMENT_RECEIPT_ATTESTATIONS = Object.freeze([]);
 
+export const CIVILIZATION_REAL_ACTION_TYPES = Object.freeze([
+  "MERGE", "MAIN_PUSH", "RELEASE", "DEPLOYMENT", "PAYMENT", "PAYROLL", "TRADE",
+  "TOKEN_TRANSFER", "TREASURY_OPERATION", "MAINNET_WRITE", "TESTNET_WRITE", "GOVERNANCE_EXECUTION"
+]);
+
+export const CIVILIZATION_PERMANENTLY_FORBIDDEN_ACTIONS = Object.freeze([
+  "PRIVATE_KEY_OUTPUT", "SEED_PHRASE_OUTPUT"
+]);
+
+export const CIVILIZATION_REAL_EXECUTION_POLICY = Object.freeze({
+  policy_id: "KAIOS_CIVILIZATION_REAL_EXECUTION_POLICY_V1",
+  default: "DENY_UNLESS_EXACT_MACHINE_VERIFIABLE_AUTHORIZATION",
+  unauthorized_action: "PERMANENTLY_FORBIDDEN",
+  exact_authorized_action: "MAY_PROCEED_TO_ACTION_SPECIFIC_EXECUTION_GATES",
+  private_key_output: "PERMANENTLY_FORBIDDEN",
+  seed_phrase_output: "PERMANENTLY_FORBIDDEN",
+  business_approver_is_signer: false,
+  signer_is_settlement_verifier: false,
+  policy_evaluation_creates_execution_authority: false
+});
+
+export const EXACT_REAL_ACTION_BINDING_FIELDS = Object.freeze([
+  "action_id", "action_type", "actor", "purpose", "chain_id", "target", "asset", "token_address_if_applicable", "source",
+  "recipient", "amount", "function_selector_if_applicable", "nonce_or_replay_key", "policy_hash",
+  "repository_head_if_relevant"
+]);
+
 export const KAIOS_AI_OS_FIRST_REAL_EMPLOYMENT_TEST_JOB = Object.freeze({
   job_id: "KAIOS_AI_OS_FIRST_EMPLOYMENT_ORIENTATION",
   company_id: "AI_ANT_COMPANY_0001",
@@ -764,6 +791,92 @@ export function evaluateKaiosPaymentRailReadiness({ payment, authorityId = null,
   if (!signerPolicyId) blockers.push("EXACT_SECURE_SIGNER_POLICY_NOT_CONNECTED");
   if (payment?.payment_purpose === "PAYROLL" && payment?.funding_evidence?.source_binding_status !== "CANONICALLY_BOUND_PAYMENT_SOURCE") blockers.push("COMPANY_PAYROLL_SOURCE_NOT_BOUND");
   return Object.freeze({ payment_id: payment?.payment_id ?? null, ready: blockers.length === 0, blockers: Object.freeze(blockers), action_type: "ONE_EXACT_KAIOS_PAYMENT_ACTION", arbitrary_transfer: false, private_key_required_in_request: false, status: blockers.length ? "HOLD" : "READY_FOR_REPOSITORY_AUTHORITY_AND_SIGNER_VERIFICATION" });
+}
+
+function exactRealActionValue(value) {
+  if (value === null) return null;
+  if (typeof value === "number") return String(value);
+  return typeof value === "string" ? value.toLowerCase() : value;
+}
+
+function verifyExactRealActionBinding(action, authorization) {
+  for (const field of EXACT_REAL_ACTION_BINDING_FIELDS) {
+    invariant(Object.prototype.hasOwnProperty.call(action, field), "REAL_ACTION_BINDING_INCOMPLETE", `Real action is missing the explicit ${field} binding`);
+    invariant(Object.prototype.hasOwnProperty.call(authorization, field), "REAL_ACTION_AUTHORIZATION_BINDING_INCOMPLETE", `Authorization is missing the explicit ${field} binding`);
+    invariant(exactRealActionValue(authorization[field]) === exactRealActionValue(action[field]), `REAL_ACTION_${field.toUpperCase()}_MISMATCH`, `Authorization ${field} must exactly match the requested action`);
+  }
+}
+
+function requireValidatedReleasePolicy(repositoryPolicy) {
+  invariant(repositoryPolicy?.latest_main_synced === true, "RELEASE_LATEST_MAIN_SYNC_REQUIRED", "Validated release requires a fresh latest-main synchronization");
+  invariant(repositoryPolicy?.exact_head_ci_status === "PASS", "RELEASE_EXACT_HEAD_CI_REQUIRED", "Validated release requires exact-head CI PASS");
+  invariant(repositoryPolicy?.required_review_status === "PASSED_DISTINCT_REVIEW", "RELEASE_DISTINCT_REVIEW_REQUIRED", "Validated release requires the repository's distinct review");
+  invariant(repositoryPolicy?.branch_protection_status === "PASS", "RELEASE_BRANCH_PROTECTION_REQUIRED", "Validated release must satisfy repository branch protection");
+}
+
+export function evaluateCivilizationRealExecutionPolicy({
+  action, authorization = null, observedAt, usedReplayKeys = [], repositoryPolicy = null
+}) {
+  requireId(action?.action_id, "real_action.action_id");
+  requireEnum(action?.action_type, [...CIVILIZATION_REAL_ACTION_TYPES, ...CIVILIZATION_PERMANENTLY_FORBIDDEN_ACTIONS], "real_action.action_type");
+  if (CIVILIZATION_PERMANENTLY_FORBIDDEN_ACTIONS.includes(action.action_type)) {
+    invariant(false, "CREDENTIAL_OUTPUT_PERMANENTLY_FORBIDDEN", "Private keys and seed phrases can never be output, even with an authorization claim");
+  }
+  invariant(authorization, "UNAUTHORIZED_REAL_ACTION_FORBIDDEN", "A real action requires exact machine-verifiable authorization");
+  requireId(authorization.authorization_id, "real_action.authorization_id");
+  requireId(authorization.authority, "real_action.authority");
+  requireArray(usedReplayKeys, "real_action.used_replay_keys");
+  invariant(authorization.status === "ACTIVE_ONE_EXACT_ACTION" && authorization.provenance_status === "MACHINE_VERIFIED_TRUSTED_AUTHORITY_ATTESTATION", "REAL_ACTION_AUTHORITY_PROVENANCE_REQUIRED", "Caller text or a self-asserted VERIFIED flag is not execution authority");
+  invariant(/^[0-9a-f]{64}$/i.test(String(authorization.policy_hash ?? "")), "REAL_ACTION_POLICY_HASH_INVALID", "Exact action authorization requires a SHA-256 policy hash");
+  invariant(authorization.repository_head_if_relevant === null || /^[0-9a-f]{40}$/i.test(String(authorization.repository_head_if_relevant)), "REAL_ACTION_REPOSITORY_HEAD_INVALID", "Repository-bound actions require a commit SHA or explicit null when not applicable");
+  const observed = parseEmploymentTime(observedAt, "real_action.observed_at");
+  const validFrom = parseEmploymentTime(authorization.valid_from, "real_action.authorization.valid_from");
+  const expiresAt = parseEmploymentTime(authorization.expires_at, "real_action.authorization.expires_at");
+  invariant(observed >= validFrom && observed <= expiresAt, "REAL_ACTION_AUTHORIZATION_EXPIRED", "Exact action authorization is outside its validity window");
+  invariant(!usedReplayKeys.includes(authorization.nonce_or_replay_key), "REAL_ACTION_AUTHORIZATION_REPLAY", "An exact action authorization may be used only once");
+  verifyExactRealActionBinding(action, authorization);
+
+  if (action.action_type === "TRADE") {
+    requireId(action.buyer_controller_id, "real_action.trade.buyer_controller_id");
+    requireId(action.seller_controller_id, "real_action.trade.seller_controller_id");
+    invariant(action.buyer_controller_id !== action.seller_controller_id, "REAL_TRADE_SELF_MATCH_FORBIDDEN", "A real trade cannot match the same controller on both sides");
+  }
+
+  if (["MERGE", "MAIN_PUSH", "RELEASE"].includes(action.action_type)) requireValidatedReleasePolicy(repositoryPolicy);
+
+  const nextGate = ["PAYMENT", "PAYROLL", "TOKEN_TRANSFER", "TREASURY_OPERATION"].includes(action.action_type)
+    ? "FUNDING_RECIPIENT_SECURE_SIGNER_AND_RECEIPT"
+    : action.action_type === "TRADE"
+      ? "AUTHENTICATED_COUNTERPARTY_MATCH_AND_SETTLEMENT"
+      : ["MERGE", "MAIN_PUSH", "RELEASE"].includes(action.action_type)
+        ? "REPOSITORY_VALIDATED_RELEASE_MECHANISM"
+        : "EXACT_TARGET_SELECTOR_NONCE_GAS_SIGNER_AND_RECEIPT";
+
+  return Object.freeze({
+    policy_id: CIVILIZATION_REAL_EXECUTION_POLICY.policy_id,
+    action_id: action.action_id,
+    action_type: action.action_type,
+    authorization_id: authorization.authorization_id,
+    nonce_or_replay_key: authorization.nonce_or_replay_key,
+    allowed_by_policy: true,
+    execution_authority_created: false,
+    signer_authority_created: false,
+    next_gate: nextGate,
+    status: "EXACT_AUTHORIZATION_POLICY_ACCEPTED_AWAITING_ACTION_SPECIFIC_GATES"
+  });
+}
+
+export function selectNextSafeCompanyWorkflow({ workflows }) {
+  requireArray(workflows, "company_workflows");
+  const ordered = workflows.map((workflow) => Object.freeze({ ...workflow })).sort((left, right) => Number(left.priority) - Number(right.priority));
+  const blocked = ordered.filter((workflow) => workflow.status === "BLOCKED" || workflow.safe_to_execute !== true);
+  const selected = ordered.find((workflow) => workflow.status !== "COMPLETED" && workflow.status !== "BLOCKED" && workflow.safe_to_execute === true) ?? null;
+  return Object.freeze({
+    selected_workflow_id: selected?.workflow_id ?? null,
+    blocked_workflow_ids: Object.freeze(blocked.map((workflow) => workflow.workflow_id)),
+    company_stopped_by_single_blocker: false,
+    status: selected ? "NEXT_SAFE_WORKFLOW_SELECTED" : "NO_SAFE_ACTION_WITH_EVIDENCE"
+  });
 }
 
 const KAIOS_PAYMENT_PURPOSE_AUTHORITY_SCOPE = Object.freeze({

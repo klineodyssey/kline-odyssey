@@ -102,6 +102,7 @@ import {
   createFieldServiceDemandScan
   , KAIOS_AI_OS_EMPLOYMENT_ALPHA_JOB, KAIOS_AI_OS_FIRST_REAL_EMPLOYMENT_TEST_JOB, KAIOS_MAINNET_TOKEN,
   KAIOS_PAYMENT_PURPOSES, KAIOS_PAYMENT_APPROVAL_MATRIX, CANONICAL_KAIOS_PAYMENT_SIGNER_POLICIES, CANONICAL_KAIOS_PAYMENT_RECEIPT_ATTESTATIONS,
+  CIVILIZATION_REAL_EXECUTION_POLICY, CIVILIZATION_PERMANENTLY_FORBIDDEN_ACTIONS,
   CANONICAL_REPOSITORY_COMPANY_AUTHORITIES, COMPANY_OPERATIONAL_AUTHORITY_PROPOSAL_SCOPES,
   createRepositoryCompanyAuthorityProposal, createCompanyAuthorityReviewRequestPacket,
   COMPANY_PROVENANCE_ATTESTATION_REQUIRED_BINDINGS, createCompanyAuthorityProvenanceAttestationRequest,
@@ -118,6 +119,7 @@ import {
   submitCompanyWorkEvidence, reviewCompanyWorkEvidence, accrueCompanyCompensation,
   queueCompanyPayroll, authorizeCompanyPayrollFunding, recordCompanyPayrollSettlement, evaluateAtmPayrollAdvanceCandidate,
   createKaiosPaymentRequest, evaluateKaiosPaymentRailReadiness, recordKaiosPaymentSubmission, recordKaiosPaymentSettlement,
+  evaluateCivilizationRealExecutionPolicy, selectNextSafeCompanyWorkflow,
   appendEmploymentPhase1BCompanyEvent
 } from "../core/index.mjs";
 import { verifyDigitalAntWalletBinding, verifyDigitalLifeWalletBinding, CODEX_GM_ENV } from "../core/security/wallet-binding.mjs";
@@ -3604,6 +3606,105 @@ test("11520 website exposes truthful read-only KAIOS payment status and never pr
   assert.match(appSource, /COMMON KAIOS PAYMENT RAIL/);
   assert.match(appSource, /COMPANY_TREASURY_NOT_BOUND/);
   assert.match(appSource, /Paid before receipt/);
+  assert.match(appSource, /Exact authorized action/);
+  assert.match(appSource, /CIVILIZATION_REAL_EXECUTION_POLICY/);
   assert.match(appSource, /payroll\?\.paid && payroll\?\.settlement_receipt/);
   assert.doesNotMatch(appSource, /private[_ -]?key\s*[:=]/i);
+});
+
+function realActionFixture(overrides = {}) {
+  return {
+    action_id: "REAL_ACTION_PAYMENT_0001", action_type: "PAYMENT", actor: "AI_ANT_COMPANY_0001",
+    purpose: "PAYROLL", chain_id: 56, target: KAIOS_MAINNET_TOKEN.contract_address,
+    asset: "KAIOS", token_address_if_applicable: KAIOS_MAINNET_TOKEN.contract_address,
+    source: "0x1111111111111111111111111111111111111111",
+    recipient: "0x2222222222222222222222222222222222222222", amount: "10000",
+    function_selector_if_applicable: "0xa9059cbb", nonce_or_replay_key: "REAL_ACTION_NONCE_0001",
+    policy_hash: "a".repeat(64), repository_head_if_relevant: "b".repeat(40), ...overrides
+  };
+}
+
+function realActionAuthorizationFixture(action, overrides = {}) {
+  return {
+    authorization_id: "REAL_AUTHORIZATION_0001", authority: "HUMAN_AUTHORITY_BOUND_CONNECTOR",
+    status: "ACTIVE_ONE_EXACT_ACTION", provenance_status: "MACHINE_VERIFIED_TRUSTED_AUTHORITY_ATTESTATION",
+    valid_from: "2026-08-29T07:00:00.000Z", expires_at: "2026-08-29T07:10:00.000Z",
+    ...Object.fromEntries([
+      "action_id", "action_type", "actor", "purpose", "chain_id", "target", "asset", "token_address_if_applicable", "source",
+      "recipient", "amount", "function_selector_if_applicable", "nonce_or_replay_key", "policy_hash",
+      "repository_head_if_relevant"
+    ].map((field) => [field, action[field]])),
+    ...overrides
+  };
+}
+
+test("real execution policy rejects unauthorized payment but accepts an exact authorization into the signer gate", () => {
+  const action = realActionFixture();
+  assert.equal(CIVILIZATION_REAL_EXECUTION_POLICY.default, "DENY_UNLESS_EXACT_MACHINE_VERIFIABLE_AUTHORIZATION");
+  assert.throws(() => evaluateCivilizationRealExecutionPolicy({ action, observedAt: "2026-08-29T07:05:00.000Z" }), (error) => error.code === "UNAUTHORIZED_REAL_ACTION_FORBIDDEN");
+  const result = evaluateCivilizationRealExecutionPolicy({ action, authorization: realActionAuthorizationFixture(action), observedAt: "2026-08-29T07:05:00.000Z" });
+  assert.equal(result.allowed_by_policy, true);
+  assert.equal(result.execution_authority_created, false);
+  assert.equal(result.next_gate, "FUNDING_RECIPIENT_SECURE_SIGNER_AND_RECEIPT");
+});
+
+test("exact payment authorization rejects wrong recipient, amount, token and chain", () => {
+  const action = realActionFixture();
+  const at = "2026-08-29T07:05:00.000Z";
+  assert.throws(() => evaluateCivilizationRealExecutionPolicy({ action, authorization: realActionAuthorizationFixture(action, { recipient: "0x3333333333333333333333333333333333333333" }), observedAt: at }), (error) => error.code === "REAL_ACTION_RECIPIENT_MISMATCH");
+  assert.throws(() => evaluateCivilizationRealExecutionPolicy({ action, authorization: realActionAuthorizationFixture(action, { amount: "10001" }), observedAt: at }), (error) => error.code === "REAL_ACTION_AMOUNT_MISMATCH");
+  assert.throws(() => evaluateCivilizationRealExecutionPolicy({ action, authorization: realActionAuthorizationFixture(action, { token_address_if_applicable: "0x3333333333333333333333333333333333333333" }), observedAt: at }), (error) => error.code === "REAL_ACTION_TOKEN_ADDRESS_IF_APPLICABLE_MISMATCH");
+  assert.throws(() => evaluateCivilizationRealExecutionPolicy({ action, authorization: realActionAuthorizationFixture(action, { chain_id: 1 }), observedAt: at }), (error) => error.code === "REAL_ACTION_CHAIN_ID_MISMATCH");
+});
+
+test("expired and replayed exact action authorizations fail closed", () => {
+  const action = realActionFixture();
+  const authorization = realActionAuthorizationFixture(action);
+  assert.throws(() => evaluateCivilizationRealExecutionPolicy({ action, authorization, observedAt: "2026-08-29T07:11:00.000Z" }), (error) => error.code === "REAL_ACTION_AUTHORIZATION_EXPIRED");
+  assert.throws(() => evaluateCivilizationRealExecutionPolicy({ action, authorization, observedAt: "2026-08-29T07:05:00.000Z", usedReplayKeys: [action.nonce_or_replay_key] }), (error) => error.code === "REAL_ACTION_AUTHORIZATION_REPLAY");
+});
+
+test("real trade requires exact authorization, distinct controllers and a settlement gate", () => {
+  const trade = realActionFixture({ action_id: "REAL_ACTION_TRADE_0001", action_type: "TRADE", purpose: "11520_MATCHED_ORDER", buyer_controller_id: "BUYER_CONTROLLER_0001", seller_controller_id: "SELLER_CONTROLLER_0001" });
+  assert.throws(() => evaluateCivilizationRealExecutionPolicy({ action: trade, observedAt: "2026-08-29T07:05:00.000Z" }), (error) => error.code === "UNAUTHORIZED_REAL_ACTION_FORBIDDEN");
+  const result = evaluateCivilizationRealExecutionPolicy({ action: trade, authorization: realActionAuthorizationFixture(trade), observedAt: "2026-08-29T07:05:00.000Z" });
+  assert.equal(result.next_gate, "AUTHENTICATED_COUNTERPARTY_MATCH_AND_SETTLEMENT");
+  const selfMatch = { ...trade, seller_controller_id: trade.buyer_controller_id };
+  assert.throws(() => evaluateCivilizationRealExecutionPolicy({ action: selfMatch, authorization: realActionAuthorizationFixture(selfMatch), observedAt: "2026-08-29T07:05:00.000Z" }), (error) => error.code === "REAL_TRADE_SELF_MATCH_FORBIDDEN");
+});
+
+test("mainnet defaults deny while exact authorization reaches the secure signer gate", () => {
+  const mainnet = realActionFixture({ action_id: "REAL_ACTION_MAINNET_0001", action_type: "MAINNET_WRITE", purpose: "EXACT_KAIOS_TRANSFER" });
+  assert.throws(() => evaluateCivilizationRealExecutionPolicy({ action: mainnet, observedAt: "2026-08-29T07:05:00.000Z" }), (error) => error.code === "UNAUTHORIZED_REAL_ACTION_FORBIDDEN");
+  const result = evaluateCivilizationRealExecutionPolicy({ action: mainnet, authorization: realActionAuthorizationFixture(mainnet), observedAt: "2026-08-29T07:05:00.000Z" });
+  assert.equal(result.next_gate, "EXACT_TARGET_SELECTOR_NONCE_GAS_SIGNER_AND_RECEIPT");
+  assert.equal(result.signer_authority_created, false);
+});
+
+test("private key and seed phrase output remain permanently forbidden", () => {
+  assert.deepEqual(CIVILIZATION_PERMANENTLY_FORBIDDEN_ACTIONS, ["PRIVATE_KEY_OUTPUT", "SEED_PHRASE_OUTPUT"]);
+  for (const actionType of CIVILIZATION_PERMANENTLY_FORBIDDEN_ACTIONS) {
+    const action = realActionFixture({ action_id: `FORBIDDEN_${actionType}`, action_type: actionType });
+    assert.throws(() => evaluateCivilizationRealExecutionPolicy({ action, authorization: realActionAuthorizationFixture(action), observedAt: "2026-08-29T07:05:00.000Z" }), (error) => error.code === "CREDENTIAL_OUTPUT_PERMANENTLY_FORBIDDEN");
+  }
+});
+
+test("unreviewed merge is rejected while a validated release may reach the repository merge mechanism", () => {
+  const release = realActionFixture({ action_id: "REAL_ACTION_RELEASE_0001", action_type: "MERGE", purpose: "PR191_VALIDATED_RELEASE", chain_id: null, target: "refs/heads/main", asset: null, token_address_if_applicable: null, source: "refs/heads/codex/kaios-ai-os-employment-alpha-v1", recipient: "refs/heads/main", amount: null, function_selector_if_applicable: null });
+  const authorization = realActionAuthorizationFixture(release);
+  assert.throws(() => evaluateCivilizationRealExecutionPolicy({ action: release, authorization, observedAt: "2026-08-29T07:05:00.000Z", repositoryPolicy: { latest_main_synced: true, exact_head_ci_status: "PASS", required_review_status: "MISSING", branch_protection_status: "PASS" } }), (error) => error.code === "RELEASE_DISTINCT_REVIEW_REQUIRED");
+  const result = evaluateCivilizationRealExecutionPolicy({ action: release, authorization, observedAt: "2026-08-29T07:05:00.000Z", repositoryPolicy: { latest_main_synced: true, exact_head_ci_status: "PASS", required_review_status: "PASSED_DISTINCT_REVIEW", branch_protection_status: "PASS" } });
+  assert.equal(result.next_gate, "REPOSITORY_VALIDATED_RELEASE_MECHANISM");
+  assert.equal(result.execution_authority_created, false);
+});
+
+test("one blocked workflow does not stop the next safe Company workflow", () => {
+  const result = selectNextSafeCompanyWorkflow({ workflows: [
+    { workflow_id: "PR191_DISTINCT_REVIEW", priority: 0, status: "BLOCKED", safe_to_execute: false },
+    { workflow_id: "PR190_SAFE_ENGINEERING", priority: 1, status: "READY", safe_to_execute: true },
+    { workflow_id: "NO_EVIDENCE_TRADE", priority: 2, status: "READY", safe_to_execute: false }
+  ] });
+  assert.equal(result.selected_workflow_id, "PR190_SAFE_ENGINEERING");
+  assert.deepEqual(result.blocked_workflow_ids, ["PR191_DISTINCT_REVIEW", "NO_EVIDENCE_TRADE"]);
+  assert.equal(result.company_stopped_by_single_blocker, false);
 });

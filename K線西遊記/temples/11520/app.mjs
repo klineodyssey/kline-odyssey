@@ -1,21 +1,21 @@
-import { createBrowserUniverseStore, createUniverseRuntime, loadCanonicalSeed } from "../../../core/registry/universe-runtime.mjs?v=11520-v4.3-kaios-payment-rail";
-import { createListing } from "../../../core/market/index.mjs?v=11520-v4.3-kaios-payment-rail";
-import { buildPortfolio } from "../../../core/portfolio/index.mjs?v=11520-v4.3-kaios-payment-rail";
-import { createLifeDraft } from "../../../core/life/factory.mjs?v=11520-v4.3-kaios-payment-rail";
-import { calculateLifeAge } from "../../../core/life/index.mjs?v=11520-v4.3-kaios-payment-rail";
-import { calculateWorkAge, deriveWorkerHealth } from "../../../core/jobs/index.mjs?v=11520-v4.3-kaios-payment-rail";
-import { createKgenSwapAdapter, KGEN_SWAP_CONFIG } from "../../../core/integrations/kgen-pancakeswap-v2.mjs?v=11520-v4.3-kaios-payment-rail";
+import { createBrowserUniverseStore, createUniverseRuntime, loadCanonicalSeed } from "../../../core/registry/universe-runtime.mjs?v=11520-v4.4-real-execution-policy";
+import { createListing } from "../../../core/market/index.mjs?v=11520-v4.4-real-execution-policy";
+import { buildPortfolio } from "../../../core/portfolio/index.mjs?v=11520-v4.4-real-execution-policy";
+import { createLifeDraft } from "../../../core/life/factory.mjs?v=11520-v4.4-real-execution-policy";
+import { calculateLifeAge } from "../../../core/life/index.mjs?v=11520-v4.4-real-execution-policy";
+import { calculateWorkAge, deriveWorkerHealth } from "../../../core/jobs/index.mjs?v=11520-v4.4-real-execution-policy";
+import { createKgenSwapAdapter, KGEN_SWAP_CONFIG } from "../../../core/integrations/kgen-pancakeswap-v2.mjs?v=11520-v4.4-real-execution-policy";
 import {
   I18N_SUPPORTED_LOCALES, translateUi, normalizeUiLocale, validatePrimaryI18nCatalogs,
   detectVoiceCapabilities, normalizeVoiceError, createLocalHuaguoshanMembership,
   createFirstPlayerMission, completeFirstPlayerMission
-} from "../../../core/apps/index.mjs?v=11520-v4.3-kaios-payment-rail";
+} from "../../../core/apps/index.mjs?v=11520-v4.4-real-execution-policy";
 import {
   createPublicCivilizationDraftIntent, interpretPublicCivilizationIntent,
   confirmPublicCivilizationIntent, toPublicCivilizationRequest, routePublicCivilizationProject,
   qualifyPublicCivilizationRequest, createNonBindingEstimatePreview, appendPublicRequestHistoryEvent,
   KAIOS_AI_OS_EMPLOYMENT_ALPHA_JOB, KAIOS_AI_OS_FIRST_REAL_EMPLOYMENT_TEST_JOB, KAIOS_MAINNET_TOKEN,
-  KAIOS_PAYMENT_APPROVAL_MATRIX,
+  KAIOS_PAYMENT_APPROVAL_MATRIX, CIVILIZATION_REAL_EXECUTION_POLICY,
   createEmploymentIdentityChallenge,
   verifyEmploymentIdentityProof, createEmploymentApplication, scoreEmploymentInterview,
   createTrialEmploymentContract, createEmploymentAlphaMission, acceptEmploymentAlphaMission,
@@ -24,8 +24,8 @@ import {
   activateCompanyWorkerCandidate, createCompanyEmployeeMission, acceptCompanyEmployeeMission,
   submitCompanyWorkEvidence, reviewCompanyWorkEvidence, accrueCompanyCompensation,
   queueCompanyPayroll, evaluateAtmPayrollAdvanceCandidate, appendEmploymentPhase1BCompanyEvent
-} from "../../../core/company/index.mjs?v=11520-v4.3-kaios-payment-rail";
-import { readTempleHeart12345 } from "../../../core/integrations/temple-heart-12345.mjs?v=11520-v4.3-kaios-payment-rail";
+} from "../../../core/company/index.mjs?v=11520-v4.4-real-execution-policy";
+import { readTempleHeart12345 } from "../../../core/integrations/temple-heart-12345.mjs?v=11520-v4.4-real-execution-policy";
 
 const NAVIGATION = Object.freeze([
   ["HOME", "navigation.home"], ["REQUEST", "navigation.request"], ["LIFE", "navigation.life"], ["LIFE_FACTORY", "LIFE FACTORY"], ["APPS", "navigation.apps"], ["COMPANIES", "navigation.company"],
@@ -641,7 +641,7 @@ function kaiosPaymentStatusMarkup(state) {
   const matrix = KAIOS_PAYMENT_APPROVAL_MATRIX.PAYROLL;
   return `<div class="grid two">
     <article class="card"><div class="eyebrow">COMMON KAIOS PAYMENT RAIL</div><h3>${badge("PARTIAL_UNDER_REVIEW")}</h3>${kv("Purpose", "PAYROLL")}${kv("Company", payroll?.company_id ?? "AI_ANT_COMPANY_0001")}${kv("Token", KAIOS_MAINNET_TOKEN.contract_address)}${kv("Chain", KAIOS_MAINNET_TOKEN.chain_id)}${kv("Source", payroll?.funding_source_address ?? "COMPANY_TREASURY_NOT_BOUND")}${kv("Destination", payroll?.payroll_wallet_address ?? "VERIFIED_RECIPIENT_REQUIRED")}${kv("Amount", payroll?.payable_kaios_wei ?? "NOT_PAYABLE")}${kv("Approval status", payroll?.funding_authority_id ? "EXACT_AUTHORITY_RECORDED" : "NOT_CONNECTED")}${kv("Signer status", payroll?.signer_policy_id ? "ONE_TIME_POLICY_RECORDED" : "NOT_CONNECTED")}${kv("TX status", payroll?.transaction_hash ?? "NOT_SUBMITTED")}${kv("Receipt status", receipt?.receipt_status === 1 ? "VERIFIED_SUCCESS" : "NOT_RECEIVED")}</article>
-    <article class="card"><div class="eyebrow">SEPARATION OF DUTIES</div>${kv("Requestor", matrix.requestor)}${kv("Business approver", matrix.approver)}${kv("Funding authority", matrix.funding_authority)}${kv("Technical signer", matrix.signer)}${kv("Settlement verifier", matrix.settlement_verifier)}${kv("Paid before receipt", "FORBIDDEN")}${kv("Private key in website", "FORBIDDEN")}${kv("Arbitrary transfer", "FORBIDDEN")}</article>
+    <article class="card"><div class="eyebrow">SEPARATION OF DUTIES</div>${kv("Execution default", CIVILIZATION_REAL_EXECUTION_POLICY.default)}${kv("Exact authorized action", CIVILIZATION_REAL_EXECUTION_POLICY.exact_authorized_action)}${kv("Requestor", matrix.requestor)}${kv("Business approver", matrix.approver)}${kv("Funding authority", matrix.funding_authority)}${kv("Technical signer", matrix.signer)}${kv("Settlement verifier", matrix.settlement_verifier)}${kv("Paid before receipt", "FORBIDDEN")}${kv("Private key in website", "FORBIDDEN")}${kv("Arbitrary transfer", "FORBIDDEN")}</article>
   </div>`;
 }
 
