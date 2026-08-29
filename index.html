@@ -81,6 +81,25 @@
       backdrop-filter: blur(16px);
     }
 
+    .experimental-ribbon {
+      border-bottom: 1px solid rgba(255, 106, 74, 0.55);
+      background: linear-gradient(90deg, rgba(126, 25, 10, 0.96), rgba(58, 12, 8, 0.96));
+      color: #fff4e5;
+    }
+
+    .experimental-ribbon-inner {
+      width: min(100%, var(--max));
+      margin: 0 auto;
+      padding: 10px 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      font-weight: 800;
+    }
+
+    .experimental-ribbon a { color: #ffe59a; }
+
     .nav {
       width: min(100%, var(--max));
       margin: 0 auto;
@@ -797,6 +816,12 @@
   </style>
 </head>
 <body>
+  <aside class="experimental-ribbon" aria-label="KAIOS experimental release status">
+    <div class="experimental-ribbon-inner">
+      <span>EXPERIMENTAL · 官網是 KAIOS 公開持續試驗場；故障會直接揭露，未授權真實資產操作仍然禁止。</span>
+      <a href="./KGEN-KAIOS/dashboard/#moneyMap">查看 Build SHA、已知問題與 KAIOS Money Map</a>
+    </div>
+  </aside>
   <header class="site-header" aria-label="KLINE ODYSSEY primary navigation">
     <nav class="nav">
       <a class="brand" href="./" aria-label="KLINE ODYSSEY Home">

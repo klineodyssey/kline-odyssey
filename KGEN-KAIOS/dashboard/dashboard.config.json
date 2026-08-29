@@ -1,12 +1,89 @@
 {
-  "dashboard_id": "KAIOS-V7.2-READONLY-DASHBOARD",
-  "version": "KAIOS V7.2",
+  "dashboard_id": "KAIOS-PUBLIC-EXPERIMENTAL-LAB-AND-CIRCULATION-DASHBOARD",
+  "version": "KAIOS Public Experimental Lab",
   "mode": "read-only",
+  "release_channel": "OFFICIAL_PUBLIC_CONTINUOUS_EXPERIMENTAL_LAB",
+  "truth_labels": ["EXPERIMENTAL", "BROKEN", "UNDER_REPAIR", "UNDER_REVIEW", "NOT_CONNECTED", "SIMULATION", "LIVE"],
   "readiness_score": 86,
-  "base_main_commit": "d2584127b621546cad576d94bc976fbf88a2debc",
+  "base_main_commit": "ac304fc585f5f86846d2c61b69ecad8f59bc0a66",
   "pages_url": "https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/dashboard/",
   "repository": "https://github.com/klineodyssey/kline-odyssey",
   "refresh_interval_seconds": 0,
+  "public_chain_snapshot": {
+    "chain_id": 56,
+    "block_number": 118743165,
+    "block_hash": "0x307b4c200980a0bba413c458e5dc3d37b0a6a432b49a14e3ed1c575aaba01498",
+    "observed_at_utc": "2026-08-29T09:25:28Z",
+    "read_only": true,
+    "kaios_contract": "0xD4E67B3a69e41524c424150E6b6e921b01D036db",
+    "kgen_contract": "0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be",
+    "kaios_total_supply": "22213908.930416874731235",
+    "kgen_total_supply": "71976169.974243092224959062",
+    "settled_kgen_burned": "22213.908930416874731235",
+    "actual_kgen_burned": "23830.025756907775040938",
+    "pending_kgen_burn_to_settle": "1616.116826490900309703",
+    "pending_kaios_entitlement": "1616116.826490900309703000"
+  },
+  "major_pools": [
+    {"id":"K18888","label":"18888 Lingxiao Bank","address":"0x11d34c0F723aCd334B8F95076f73F07f06202aab","kaios":"22213020.930416874731235","status":"LIVE_BALANCE_READ_ONLY"},
+    {"id":"K8888","label":"8888 Gaolaozhuang Bank","address":"0x9EcAe137b3A307971EB77B4CDB3ba13aeeF5297C","kaios":"888","status":"LIVE_BALANCE_READ_ONLY"},
+    {"id":"K11520","label":"11520 Settlement","address":"0x17587F49dFDE4e400D03Ae81364AC2af8E1629Df","kaios":"0","status":"ADAPTER_NOT_INTEGRATED"},
+    {"id":"K12345","label":"12345 Temple Heart","address":"0xd0605F4EF10e5C1438F11AF9edc36926769239d6","kaios":"0","kgen":"1596","status":"HEART_CONTRACT"},
+    {"id":"PUBLIC_GOOD","label":"Human-directed provisional public-good receiver","address":"0xB73D6716005B37BEC742D64482fA26033eE1A4E1","kaios":"0","kgen":"735378.467588936466040620","status":"PROVISIONAL_NOT_CANONICAL_NODE_WALLET"},
+    {"id":"RESERVE_REDEMPTION","label":"KGEN bankWallet / Reserve Redemption","address":"0xA06eF53c9AD4Af739FD13Ca1Ded446437134b0EE","kaios":"0","kgen":"20","status":"KGEN_TAX_RECEIVER_NOT_KAIOS_BANK"}
+  ],
+  "money_flows": [
+    {"id":"KGEN_WHITE_HOLE_KAIOS","title":"KGEN → White Hole → KAIOS","steps":["AMM trade","0.10% true burn","totalSupply loss observed","permissionless monotonic settlement","1000 KAIOS per burned KGEN","18888 fixed treasury","receipt and accounting"],"status":"LIVE_SETTLEMENT_AVAILABLE_PENDING_AMOUNT"},
+    {"id":"PLAYER_REWARD","title":"KAIOS → Player Reward","steps":["verified mission","business policy","exact authorization","funded source","policy-bound signer","chain receipt","balance reconciliation"],"status":"NOT_CONNECTED"},
+    {"id":"EMPLOYEE_PAYROLL","title":"KAIOS → Employee Payroll","steps":["verified employment/work","payroll accrual","payable","funded payroll source","exact authorization","secure signer","receipt","accounting"],"status":"NOT_CONNECTED"},
+    {"id":"ATM","title":"KAIOS → ATM","steps":["ATM replenishment request","liquidity policy","exact source/ATM/amount","secure signer","receipt","ATM subledger"],"status":"CANDIDATE_NOT_FUNDED"},
+    {"id":"RESOURCE","title":"KAIOS → Natural Resource Node","steps":["registered node","service evidence","policy approval","node/subaccount binding","exact payment","receipt","resource ledger"],"status":"CANDIDATE_NODES_NO_WALLETS"},
+    {"id":"MARKET","title":"KAIOS → 11520 Settlement","steps":["authenticated order","no self-match","match","settlement authority","funded source","receipt","market accounting"],"status":"ADAPTER_NOT_INTEGRATED"},
+    {"id":"PUBLIC_GOOD","title":"KAIOS → Public Good","steps":["purpose-bound request","policy approval","registered or temporary bounded recipient","exact authorization","receipt","public-good ledger"],"status":"NO_COMMON_LIVE_PAYMENT_RAIL"}
+  ],
+  "approval_gates": [
+    {"id":"BANK_GOVERNANCE_PROPOSE","actor":"Mother","address":"0xCd60BF474e691F2484950a0276Eaf507616Ca4b9","approves":"governance proposal creation","does_not_approve":"payment receipt or business evidence","can_block":true,"failover":false},
+    {"id":"BANK_GOVERNANCE_APPROVE","actor":"Yudi","address":"0xc15E08834fCA9F2d3462a3f8f0BC30524D6dd756","approves":"distinct governance approval","does_not_approve":"proposal creation or settlement verification","can_block":true,"failover":false},
+    {"id":"BANK_GOVERNANCE_DELAY","actor":"BankGovernance contract","address":"0xa2792fBDCc8A8AaC364053431D44E0a8D335E166","approves":"3600-second timelock and exact call execution","does_not_approve":"off-chain business purpose","can_block":true,"failover":false},
+    {"id":"EMERGENCY_PAUSE","actor":"Guanyin","address":"0xEBEeAC6d09D2d28Db8010b0923442C9Eb2b702FE","approves":"emergency pause","does_not_approve":"normal spending or payroll","can_block":true,"failover":false},
+    {"id":"GM_BUSINESS","actor":"General Manager","address":null,"approves":"off-chain business preparation within granted policy","does_not_approve":"on-chain governance or signer authority by title alone","can_block":false,"failover":true},
+    {"id":"HUMAN_POLICY","actor":"Human Authority","address":null,"approves":"policy and bounded business authority","does_not_approve":"cryptographic transaction unless separately signed","can_block":true,"failover":false}
+  ],
+  "single_points_of_failure": [
+    {"id":"SPOF_MOTHER","type":"SINGLE_SIGNER","effect":"No new BankGovernance proposal","severity":"P0","candidate_recovery":"reviewed N-of-M proposer role or time-bound secondary proposer"},
+    {"id":"SPOF_YUDI","type":"SINGLE_SIGNER","effect":"No governance proposal approval","severity":"P0","candidate_recovery":"reviewed N-of-M approver role with separation of duties"},
+    {"id":"SPOF_PUBLICATION_MAIN","type":"SINGLE_BRANCH_RELEASE","effect":"Safe Draft builds remain hidden until main","severity":"P1","candidate_recovery":"exact-ref official experimental release workflow"},
+    {"id":"SPOF_PAYROLL_SOURCE","type":"UNBOUND_FUNDING_SOURCE","effect":"Real payroll cannot settle","severity":"P0","candidate_recovery":"bind a capped payroll source and one-exact-action signer policy"},
+    {"id":"SPOF_REVIEWER","type":"DISTINCT_REVIEW_CAPACITY","effect":"High-risk PRs remain Draft","severity":"P0","candidate_recovery":"qualify a distinct reviewer; never self-review"}
+  ],
+  "natural_resources": {
+    "candidate_node_count": 10,
+    "node_types": ["fish", "earthworm", "fungi", "grass", "mountain", "river", "shrimp", "soil", "tree", "water"],
+    "nodes_with_wallet": 0,
+    "nodes_without_wallet": 10,
+    "current_payment_status": "NOT_REGISTERED_FOR_REAL_PAYMENT",
+    "recommended_address_policy": "SMART_CONTRACT_OR_PROGRAMMATIC_LEDGER_SUBACCOUNT; DO_NOT_CREATE_ONE_EOA_PER_OBJECT"
+  },
+  "publication_policy": {
+    "public": ["public OS runtime", "public API/schema", "website/game UI", "public tests", "public documentation", "public chain addresses and aggregate balances"],
+    "internal": ["operational queue details not already intentionally public", "internal company reconciliation metadata"],
+    "confidential": ["private payroll details", "KYC", "private location", "non-public financial metadata"],
+    "secret": ["private keys", "seed phrases", "raw signer credentials", "API secrets", "passwords", "authentication tokens"],
+    "intellectual_property_protected": ["proprietary long/short engine", "private trading algorithms", "unpublished quant models", "private alpha strategies", "secret signal logic", "private datasets"],
+    "public_release_gate": "BUILD_SUCCESS_AND_NO_SECRET_OR_IP_PROTECTED_DIFF"
+  },
+  "gm_work_status": {
+    "latest_main": "ac304fc585f5f86846d2c61b69ecad8f59bc0a66",
+    "latest_public_website_sha": "ac304fc585f5f86846d2c61b69ecad8f59bc0a66",
+    "active_branch": "codex/public-lab-money-flow-audit",
+    "active_pr": "PENDING",
+    "now_working_on": "PUBLIC_EXPERIMENTAL_RELEASE_AND_END_TO_END_MONEY_FLOW_AUDIT",
+    "last_completed": "READ_ONLY_BSC_BLOCK_118743165_SNAPSHOT",
+    "waiting_review": "DISTINCT_REVIEW_REQUIRED_BEFORE_MERGE",
+    "waiting_external": "PAYROLL_SOURCE_AND_SIGNER_NOT_BOUND",
+    "broken_public_features": ["player payment not connected", "payroll not connected", "ATM not funded", "11520 settlement adapter not integrated"],
+    "ready_next": "PUBLISH_EXACT_SAFE_EXPERIMENTAL_BUILD_AFTER_CI"
+  },
   "sources": {
     "build_info": "./build-info.json",
     "worker_registry": "../worker_registry.json",

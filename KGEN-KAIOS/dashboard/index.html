@@ -3,29 +3,70 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>KAIOS V7.2 Read-Only Operations Dashboard</title>
-  <meta name="description" content="KGEN KAIOS V7.2 read-only operations dashboard for workers, WorkQueue, review pipeline, reports, and alerts.">
+  <title>KAIOS Public Experimental Lab &amp; Circulation Dashboard</title>
+  <meta name="description" content="KAIOS public experimental build truth, circulation, approval gates, single points of failure, workers and work queues.">
   <link rel="stylesheet" href="./dashboard.css">
 </head>
 <body>
   <header class="app-header">
     <div>
-      <p class="eyebrow">KGEN AI Operating System</p>
-      <h1>KAIOS V7.2 唯讀營運儀表板</h1>
-      <p class="subhead">讀取公開 Repository 檔案，顯示 Worker、WorkQueue、Review、Reports 與 Alerts。此頁不寫入 GitHub，不 claim 任務，不 merge。</p>
+      <p class="eyebrow">Official Public Continuous Experimental Lab</p>
+      <h1>KAIOS 公開核爆試驗場</h1>
+      <p class="subhead">公開顯示目前建置版本、已知故障、鏈上唯讀資金快照、資金流與單點故障。UI 可以壞且必須誠實揭露；未精確授權的真實資產行為一律 fail closed。</p>
     </div>
     <div class="header-actions" aria-label="Dashboard links">
       <a href="../README.md">KAIOS</a>
       <a href="../../KGEN-Organization/WorkOrders/WORK_QUEUE.md">WorkQueue</a>
       <a href="../../KGEN-AI-Company/reports/CODEX_REVIEW_LOG.md">Review Log</a>
       <a href="../decision/">Decision Center</a>
+      <a href="#moneyMap">KAIOS Money Map</a>
     </div>
   </header>
 
   <main>
     <section class="notice" id="readonlyNotice">
-      <strong>Readonly Mode</strong>
-      <span>Dashboard 僅讀取檔案與顯示狀態，不會修改 WorkQueue、建立 branch、寫入 report、執行 merge 或推送 main。</span>
+      <strong>EXPERIMENTAL · READ ONLY</strong>
+      <span id="releaseTruth">正在讀取公開 build SHA 與實驗狀態。公開故障不等於允許未授權付款、交易或鏈上寫入。</span>
+    </section>
+
+    <section class="panel experimental-panel" aria-labelledby="releaseTitle">
+      <div class="section-title inline-title">
+        <div><p class="eyebrow">Public Release Truth</p><h2 id="releaseTitle">官方實驗版狀態</h2></div>
+        <span class="pill danger" id="releaseMode">EXPERIMENTAL</span>
+      </div>
+      <div class="truth-grid">
+        <div><span>Build SHA</span><strong id="buildSha">Loading</strong></div>
+        <div><span>Source ref</span><strong id="sourceRef">Loading</strong></div>
+        <div><span>Last update</span><strong id="lastUpdate">Loading</strong></div>
+        <div><span>Known issues</span><strong id="knownIssueCount">Loading</strong></div>
+      </div>
+      <ul class="known-issues" id="knownIssues"><li>Loading</li></ul>
+    </section>
+
+    <section class="panel" id="moneyMap" aria-labelledby="moneyMapTitle">
+      <div class="section-title inline-title">
+        <div><p class="eyebrow">KAIOS Circulation Status</p><h2 id="moneyMapTitle">KAIOS Money Map</h2></div>
+        <span class="pill" id="chainSnapshot">Loading</span>
+      </div>
+      <p class="panel-note">餘額為標示區塊的公開鏈上唯讀快照，不是即時付款承諾。未連線流程會明確顯示 NOT_CONNECTED。</p>
+      <div class="pool-grid" id="majorPools"></div>
+      <div class="flow-list" id="moneyFlows"></div>
+    </section>
+
+    <section class="grid two-col">
+      <div class="panel" aria-labelledby="gatesTitle">
+        <div class="section-title"><p class="eyebrow">Approval Matrix</p><h2 id="gatesTitle">資金與治理關卡</h2></div>
+        <div class="gate-list" id="approvalGates"></div>
+      </div>
+      <div class="panel" aria-labelledby="spofTitle">
+        <div class="section-title"><p class="eyebrow">Failover Audit</p><h2 id="spofTitle">資金鏈單點故障</h2></div>
+        <div class="gate-list" id="singlePoints"></div>
+      </div>
+    </section>
+
+    <section class="panel" aria-labelledby="resourceTitle">
+      <div class="section-title"><p class="eyebrow">Natural Resource Economy</p><h2 id="resourceTitle">自然資源節點地址狀態</h2></div>
+      <div id="resourceSummary" class="next-task">Loading</div>
     </section>
 
     <section class="grid health-grid" aria-labelledby="healthTitle">
@@ -130,8 +171,8 @@
   </main>
 
   <footer class="app-footer">
-    <span>KAIOS V7.2 Read-Only Dashboard</span>
-    <span>GitHub Pages 靜態部署</span>
+    <span>KAIOS Public Experimental Lab · Read-only financial truth</span>
+    <span id="footerBuild">GitHub Pages static deployment</span>
   </footer>
 
   <script src="./dashboard.js" defer></script>

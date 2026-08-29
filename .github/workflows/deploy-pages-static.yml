@@ -2,6 +2,20 @@ name: Deploy Pages Static
 
 on:
   workflow_dispatch:
+    inputs:
+      release_ref:
+        description: Exact branch, tag, or SHA to publish as the official experimental build
+        required: false
+        default: main
+        type: string
+      release_mode:
+        description: Public truth label written into build-info.json
+        required: false
+        default: experimental
+        type: choice
+        options:
+          - experimental
+          - stable
   push:
     branches:
       - main
@@ -23,15 +37,50 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
 
     steps:
-      - name: Checkout main
+      - name: Checkout exact release source
         uses: actions/checkout@v4
         with:
-          ref: main
+          ref: ${{ github.event_name == 'workflow_dispatch' && inputs.release_ref || github.sha }}
+          fetch-depth: 0
 
-      - name: Build static site
+      - name: Public release secret and protected-IP gate
         shell: bash
         run: |
           set -euo pipefail
+
+          git fetch --no-tags origin main
+          changed_files="$(git diff --name-only origin/main...HEAD)"
+          printf '%s\n' "$changed_files"
+
+          if printf '%s\n' "$changed_files" | grep -Eiq '(^|/)(\.env($|\.)|id_rsa|id_ed25519|.*\.pem$|.*\.key$|keystore|wallet-backup|seed-phrase|private-key|signer-credential)'; then
+            echo "::error::Release diff contains a secret-bearing file name."
+            exit 1
+          fi
+
+          if printf '%s\n' "$changed_files" | grep -Eiq '(proprietary[-_ ]?(long[-_ ]?short|trading|quant|alpha|signal)|private[-_ ]?(trading|quant|alpha|signal)|unpublished[-_ ]?quant|secret[-_ ]?signal)'; then
+            echo "::error::Release diff contains an IP-protected path."
+            exit 1
+          fi
+
+          if [ -n "$changed_files" ]; then
+            git diff --unified=0 origin/main...HEAD \
+              | grep '^+' \
+              | grep -Ev '^\+\+\+' \
+              | grep -Eiq '(BEGIN (RSA|OPENSSH|EC) PRIVATE KEY|PRIVATE[_-]?KEY[[:space:]]*=|SEED[_-]?PHRASE[[:space:]]*=|MNEMONIC[[:space:]]*=|AWS_SECRET_ACCESS_KEY[[:space:]]*=|GITHUB_TOKEN[[:space:]]*=)' \
+              && { echo "::error::Release diff contains a credential-like value."; exit 1; } \
+              || true
+          fi
+
+      - name: Build static site
+        shell: bash
+        env:
+          RELEASE_MODE: ${{ github.event_name == 'workflow_dispatch' && inputs.release_mode || 'experimental' }}
+          RELEASE_SOURCE_REF: ${{ github.event_name == 'workflow_dispatch' && inputs.release_ref || github.ref_name }}
+        run: |
+          set -euo pipefail
+
+          SOURCE_SHA="$(git rev-parse HEAD)"
+          SOURCE_REF="${RELEASE_SOURCE_REF}"
 
           rm -rf _site
           mkdir -p _site
@@ -120,11 +169,14 @@ jobs:
           mkdir -p "_site/KGEN-KAIOS/dashboard"
           cat > "_site/KGEN-KAIOS/dashboard/build-info.json" <<EOF
           {
-            "main_commit": "${GITHUB_SHA}",
-            "branch": "${GITHUB_REF_NAME}",
+            "main_commit": "${SOURCE_SHA}",
+            "source_commit": "${SOURCE_SHA}",
+            "source_ref": "${SOURCE_REF}",
+            "branch": "${SOURCE_REF}",
             "workflow": "deploy-pages-static.yml",
             "generated_at": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
-            "mode": "read-only"
+            "mode": "${RELEASE_MODE}",
+            "channel": "official-public-experimental"
           }
           EOF
 

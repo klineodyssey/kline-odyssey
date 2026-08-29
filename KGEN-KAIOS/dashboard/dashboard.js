@@ -214,7 +214,7 @@
     }
 
     const latest = reviews[reviews.length - 1];
-    if (latest && /protected/i.test(latest.protectedPaths) && !/no protected|pass/i.test(latest.protectedPaths)) {
+    if (latest && /protected/i.test(latest.protectedPaths) && !/no protected|pass|zero diff/i.test(latest.protectedPaths)) {
       addAlert("danger", "Protected path violation", latest.protectedPaths);
     }
 
@@ -231,6 +231,61 @@
     $("mainCommit").textContent = buildInfo?.main_commit || config.base_main_commit || "WARN";
     $("lastReviewResult").textContent = latest ? `${latest.taskId}: ${latest.decision}` : "WARN";
     $("lastMerge").textContent = successful ? `${successful.taskId}: ${successful.decision}` : "WARN";
+  }
+
+  function renderPublicRelease(config, buildInfo) {
+    const status = config.gm_work_status || {};
+    const issues = status.broken_public_features || [];
+    const sourceSha = buildInfo?.source_commit || buildInfo?.main_commit || config.base_main_commit || "WARN";
+    const sourceRef = buildInfo?.source_ref || buildInfo?.branch || "local-preview";
+    const mode = String(buildInfo?.mode || "experimental").toUpperCase();
+    $("buildSha").textContent = sourceSha;
+    $("sourceRef").textContent = sourceRef;
+    $("lastUpdate").textContent = buildInfo?.generated_at || "LOCAL PREVIEW";
+    $("knownIssueCount").textContent = `${issues.length}`;
+    $("releaseMode").textContent = mode;
+    $("releaseTruth").textContent = `${mode} build ${sourceSha.slice(0, 12)} · failures are public; unauthorized real-asset execution remains denied.`;
+    $("knownIssues").innerHTML = issues.length
+      ? issues.map((issue) => `<li><strong>UNDER REPAIR</strong> ${escapeHtml(issue)}</li>`).join("")
+      : "<li><strong>NO DECLARED ISSUE</strong> This does not prove all features are healthy.</li>";
+    $("footerBuild").textContent = `Build ${sourceSha.slice(0, 12)} · ${sourceRef}`;
+  }
+
+  function renderMoneyMap(config) {
+    const snapshot = config.public_chain_snapshot || {};
+    $("chainSnapshot").textContent = snapshot.block_number ? `BSC #${snapshot.block_number}` : "NO SNAPSHOT";
+    $("majorPools").innerHTML = (config.major_pools || []).map((pool) => `
+      <article class="pool-card">
+        <p>${escapeHtml(pool.id)}</p>
+        <h3>${escapeHtml(pool.label)}</h3>
+        <code>${escapeHtml(pool.address)}</code>
+        <dl><dt>KAIOS</dt><dd>${escapeHtml(pool.kaios ?? "-")}</dd><dt>KGEN</dt><dd>${escapeHtml(pool.kgen ?? "-")}</dd></dl>
+        <span class="flow-status">${escapeHtml(pool.status)}</span>
+      </article>`).join("");
+    $("moneyFlows").innerHTML = (config.money_flows || []).map((flow) => `
+      <article class="flow-card">
+        <div><h3>${escapeHtml(flow.title)}</h3><span class="flow-status">${escapeHtml(flow.status)}</span></div>
+        <p>${(flow.steps || []).map(escapeHtml).join(" → ")}</p>
+      </article>`).join("");
+  }
+
+  function renderGatesAndRisk(config) {
+    $("approvalGates").innerHTML = (config.approval_gates || []).map((gate) => `
+      <article class="gate-card">
+        <h3>${escapeHtml(gate.actor)} · ${escapeHtml(gate.id)}</h3>
+        ${gate.address ? `<code>${escapeHtml(gate.address)}</code>` : ""}
+        <p><strong>Approves:</strong> ${escapeHtml(gate.approves)}</p>
+        <p><strong>Does not approve:</strong> ${escapeHtml(gate.does_not_approve)}</p>
+        <span class="flow-status">Can block: ${gate.can_block ? "YES" : "NO"} · Failover: ${gate.failover ? "YES" : "NO"}</span>
+      </article>`).join("");
+    $("singlePoints").innerHTML = (config.single_points_of_failure || []).map((item) => `
+      <article class="gate-card risk-card">
+        <h3>${escapeHtml(item.severity)} · ${escapeHtml(item.id)}</h3>
+        <p>${escapeHtml(item.effect)}</p>
+        <p><strong>Candidate recovery:</strong> ${escapeHtml(item.candidate_recovery)}</p>
+      </article>`).join("");
+    const resources = config.natural_resources || {};
+    $("resourceSummary").innerHTML = `<strong>${escapeHtml(resources.candidate_node_count ?? 0)} candidate nodes</strong> · wallets ${escapeHtml(resources.nodes_with_wallet ?? 0)} / without wallets ${escapeHtml(resources.nodes_without_wallet ?? 0)}<br><span>${escapeHtml((resources.node_types || []).join(", "))}</span><br><span>${escapeHtml(resources.recommended_address_policy || "NO POLICY")}</span>`;
   }
 
   function renderWorkers(workers) {
@@ -363,6 +418,9 @@
 
     evaluateAlerts(state.tasks, state.reviews, config, { buildInfo, workQueue, claimSchema, statusSchema });
     renderHealth(config, buildInfo, state.reviews);
+    renderPublicRelease(config, buildInfo);
+    renderMoneyMap(config);
+    renderGatesAndRisk(config);
     renderWorkers(state.workers);
     renderStatusGrid(state.tasks);
     renderTasks(state.tasks);
