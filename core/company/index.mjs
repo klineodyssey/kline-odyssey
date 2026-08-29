@@ -104,6 +104,38 @@ export const KAIOS_MAINNET_TOKEN = Object.freeze({
   decimals: 18
 });
 
+export const KAIOS_PAYMENT_PURPOSES = Object.freeze([
+  "PAYROLL",
+  "ATM_CASH_REPLENISHMENT",
+  "FIELD_SERVICE_COST",
+  "RESOURCE_PURCHASE",
+  "CARGO_PAYMENT",
+  "PLAYER_REWARD",
+  "APP_PURCHASE",
+  "MARKET_SETTLEMENT",
+  "PUBLIC_GOOD",
+  "COMPANY_OPERATING_EXPENSE"
+]);
+
+export const KAIOS_PAYMENT_RECIPIENT_TYPES = Object.freeze([
+  "PLAYER_OR_EMPLOYEE_WALLET",
+  "CIVILIZATION_NODE_OR_RESOURCE",
+  "TEMPORARY_HUMAN_DESIGNATED_ADDRESS"
+]);
+
+export const KAIOS_PAYMENT_APPROVAL_MATRIX = Object.freeze({
+  PAYROLL: Object.freeze({ requestor: "COMPANY_PAYROLL_RUNTIME_AFTER_DISTINCT_WORK_REVIEW", approver: "REPOSITORY_BOUND_SCOPE_PAYROLL_FUNDING_NOT_CONNECTED", funding_authority: "COMPANY_PAYROLL_SOURCE_NOT_BOUND", signer: "ONE_EXACT_SECURE_SIGNER_NOT_CONNECTED", settlement_verifier: "REPOSITORY_BOUND_SCOPE_PAYROLL_SETTLEMENT_VERIFY_NOT_CONNECTED" }),
+  PLAYER_REWARD: Object.freeze({ requestor: "VERIFIED_COMPANY_MISSION_RUNTIME", approver: "PURPOSE_SPECIFIC_REPOSITORY_AUTHORITY_NOT_CONNECTED", funding_authority: "BOUND_COMPANY_SOURCE_REQUIRED", signer: "ONE_EXACT_SECURE_SIGNER_NOT_CONNECTED", settlement_verifier: "DISTINCT_SETTLEMENT_VERIFIER_NOT_CONNECTED" }),
+  RESOURCE_OR_FIELD_SERVICE: Object.freeze({ requestor: "VERIFIED_FIELD_SERVICE_OR_RESOURCE_RUNTIME", approver: "PURPOSE_SPECIFIC_REPOSITORY_AUTHORITY_NOT_CONNECTED", funding_authority: "BOUND_COMPANY_SOURCE_REQUIRED", signer: "ONE_EXACT_SECURE_SIGNER_NOT_CONNECTED", settlement_verifier: "DISTINCT_SETTLEMENT_VERIFIER_NOT_CONNECTED" }),
+  PUBLIC_GOOD: Object.freeze({ requestor: "VERIFIED_PUBLIC_GOOD_REQUEST", approver: "HUMAN_OR_GOVERNANCE_POLICY_REQUIRED", funding_authority: "PUBLIC_GOOD_SOURCE_MUST_BE_BOUND", signer: "ONE_EXACT_SECURE_SIGNER_NOT_CONNECTED", settlement_verifier: "DISTINCT_SETTLEMENT_VERIFIER_NOT_CONNECTED" }),
+  MARKET_SETTLEMENT: Object.freeze({ requestor: "11520_MATCHED_ORDER_RECEIPT", approver: "MARKET_SETTLEMENT_POLICY_NOT_CONNECTED", funding_authority: "MARKET_ESCROW_OR_BOUND_SOURCE_REQUIRED", signer: "ONE_EXACT_SECURE_SIGNER_NOT_CONNECTED", settlement_verifier: "11520_SETTLEMENT_ADAPTER_NOT_INTEGRATED" })
+});
+
+// A signer policy may be referenced only after it is reviewed into this
+// repository-owned allowlist. Keeping it empty prevents a browser or caller
+// from converting an arbitrary JSON object into signing authority.
+export const CANONICAL_KAIOS_PAYMENT_SIGNER_POLICIES = Object.freeze([]);
+
 export const KAIOS_AI_OS_FIRST_REAL_EMPLOYMENT_TEST_JOB = Object.freeze({
   job_id: "KAIOS_AI_OS_FIRST_EMPLOYMENT_ORIENTATION",
   company_id: "AI_ANT_COMPANY_0001",
@@ -642,6 +674,143 @@ export function verifyEmploymentIdentityProof({ challenge, recoveredAddress, sig
   });
 }
 
+function normalizeKaiosPaymentAddress(address, field) {
+  invariant(/^0x[0-9a-fA-F]{40}$/.test(String(address ?? "")), "KAIOS_PAYMENT_ADDRESS_INVALID", `${field} requires a valid public EVM address`);
+  return String(address).toLowerCase();
+}
+
+function requirePositiveKaiosWei(value, field) {
+  invariant(/^[1-9][0-9]*$/.test(String(value ?? "")), "KAIOS_PAYMENT_AMOUNT_INVALID", `${field} must be a positive integer KAIOS wei amount`);
+  return BigInt(value);
+}
+
+function verifyKaiosPaymentRecipientBinding({ recipientAddress, recipientIdentityOrNode, paymentPurpose, amountKaiosWei, sourceAddress, createdAt }) {
+  requireEnum(recipientIdentityOrNode?.recipient_type, KAIOS_PAYMENT_RECIPIENT_TYPES, "kaios_payment.recipient_type");
+  const normalizedRecipient = normalizeKaiosPaymentAddress(recipientAddress, "recipient_address");
+  if (recipientIdentityOrNode.recipient_type === "PLAYER_OR_EMPLOYEE_WALLET") {
+    const proof = recipientIdentityOrNode.wallet_control_proof;
+    requireId(recipientIdentityOrNode.identity_id, "kaios_payment.recipient_identity_id");
+    invariant(proof?.status === "VERIFIED_LOCAL_WALLET_CONTROL" && proof.authentication_method === "EIP191_PERSONAL_SIGN", "KAIOS_PAYMENT_WALLET_CONTROL_PROOF_REQUIRED", "Player or Employee payment requires the existing EIP-191 wallet-control proof");
+    invariant(Number(proof.chain_id) === KAIOS_MAINNET_TOKEN.chain_id && normalizeKaiosPaymentAddress(proof.wallet_address, "wallet_control_proof.wallet_address") === normalizedRecipient, "KAIOS_PAYMENT_WALLET_CONTROL_MISMATCH", "Wallet-control proof must bind the exact chain and recipient");
+    return Object.freeze({ recipient_type: recipientIdentityOrNode.recipient_type, identity_or_node_id: recipientIdentityOrNode.identity_id, evidence_id: proof.proof_id, evidence_status: proof.status });
+  }
+  if (recipientIdentityOrNode.recipient_type === "CIVILIZATION_NODE_OR_RESOURCE") {
+    requireId(recipientIdentityOrNode.node_id, "kaios_payment.recipient_node_id");
+    requireId(recipientIdentityOrNode.registry_evidence_id, "kaios_payment.registry_evidence_id");
+    invariant(recipientIdentityOrNode.registry_status === "VERIFIED_REGISTERED_NODE_OR_CONTRACT", "KAIOS_PAYMENT_NODE_REGISTRY_EVIDENCE_REQUIRED", "Civilization node payment requires verified registry evidence");
+    invariant(normalizeKaiosPaymentAddress(recipientIdentityOrNode.registered_address, "registered_node_address") === normalizedRecipient, "KAIOS_PAYMENT_NODE_ADDRESS_MISMATCH", "Registered node address must equal the recipient");
+    return Object.freeze({ recipient_type: recipientIdentityOrNode.recipient_type, identity_or_node_id: recipientIdentityOrNode.node_id, evidence_id: recipientIdentityOrNode.registry_evidence_id, evidence_status: recipientIdentityOrNode.registry_status });
+  }
+  requireId(recipientIdentityOrNode.human_authority_reference, "kaios_payment.human_authority_reference");
+  invariant(recipientIdentityOrNode.payment_purpose === paymentPurpose && String(recipientIdentityOrNode.amount_kaios_wei) === String(amountKaiosWei), "KAIOS_PAYMENT_TEMPORARY_AUTHORITY_SCOPE_MISMATCH", "Temporary Human designation must bind the exact purpose and amount");
+  invariant(normalizeKaiosPaymentAddress(recipientIdentityOrNode.source_address, "temporary_designation.source_address") === sourceAddress && normalizeKaiosPaymentAddress(recipientIdentityOrNode.designated_address, "temporary_designation.designated_address") === normalizedRecipient, "KAIOS_PAYMENT_TEMPORARY_AUTHORITY_PARTY_MISMATCH", "Temporary Human designation must bind the exact source and recipient");
+  invariant(parseEmploymentTime(recipientIdentityOrNode.expires_at, "temporary_designation.expires_at") > parseEmploymentTime(createdAt, "kaios_payment.created_at"), "KAIOS_PAYMENT_TEMPORARY_AUTHORITY_EXPIRED", "Temporary Human designation must be unexpired when the request is created");
+  return Object.freeze({ recipient_type: recipientIdentityOrNode.recipient_type, identity_or_node_id: recipientIdentityOrNode.human_authority_reference, evidence_id: recipientIdentityOrNode.human_authority_reference, evidence_status: "EXACT_TEMPORARY_HUMAN_DESIGNATION_BOUND", expires_at: recipientIdentityOrNode.expires_at });
+}
+
+export function createKaiosPaymentRequest({
+  paymentId, paymentPurpose, companyId, sourceAddress, recipientAddress, recipientIdentityOrNode,
+  tokenAddress, chainId, amountKaiosWei, fundingEvidence, createdAt, existingPayments = []
+}) {
+  requireId(paymentId, "kaios_payment_id");
+  requireId(companyId, "kaios_payment.company_id");
+  requireEnum(paymentPurpose, KAIOS_PAYMENT_PURPOSES, "kaios_payment.payment_purpose");
+  requireArray(existingPayments, "kaios_payment.existing_payments");
+  invariant(!existingPayments.some((payment) => payment.payment_id === paymentId), "KAIOS_PAYMENT_REPLAY", "A payment ID may be created only once");
+  const normalizedSource = normalizeKaiosPaymentAddress(sourceAddress, "source_address");
+  const normalizedRecipient = normalizeKaiosPaymentAddress(recipientAddress, "recipient_address");
+  invariant(normalizedSource !== normalizedRecipient, "KAIOS_PAYMENT_SELF_TRANSFER_FORBIDDEN", "The common payment rail does not create self-transfers");
+  invariant(Number(chainId) === KAIOS_MAINNET_TOKEN.chain_id && String(tokenAddress).toLowerCase() === KAIOS_MAINNET_TOKEN.contract_address.toLowerCase(), "KAIOS_PAYMENT_TOKEN_OR_CHAIN_MISMATCH", "Payment requests are bound to canonical KAIOS on BSC chain 56");
+  const amount = requirePositiveKaiosWei(amountKaiosWei, "amount_kaios_wei");
+  const created = parseEmploymentTime(createdAt, "kaios_payment.created_at");
+  requireId(fundingEvidence?.evidence_id, "kaios_payment.funding_evidence_id");
+  const observed = parseEmploymentTime(fundingEvidence.observed_at, "kaios_payment.funding_observed_at");
+  invariant(observed <= created && created - observed <= 10 * 60 * 1000, "KAIOS_PAYMENT_FUNDING_EVIDENCE_STALE", "Funding evidence must be no more than ten minutes old at request creation");
+  invariant(Number(fundingEvidence.chain_id) === KAIOS_MAINNET_TOKEN.chain_id && String(fundingEvidence.token_address).toLowerCase() === KAIOS_MAINNET_TOKEN.contract_address.toLowerCase(), "KAIOS_PAYMENT_FUNDING_TOKEN_MISMATCH", "Funding evidence must bind canonical KAIOS on chain 56");
+  invariant(normalizeKaiosPaymentAddress(fundingEvidence.source_address, "funding_evidence.source_address") === normalizedSource, "KAIOS_PAYMENT_FUNDING_SOURCE_MISMATCH", "Funding evidence must bind the exact source address");
+  invariant(fundingEvidence.source_binding_status === "CANONICALLY_BOUND_PAYMENT_SOURCE", "KAIOS_PAYMENT_SOURCE_NOT_BOUND", "A balance alone does not make an address an authorized Company payment source");
+  invariant(BigInt(fundingEvidence.verified_balance_kaios_wei) >= amount, "KAIOS_PAYMENT_FUNDING_INSUFFICIENT", "Verified KAIOS source balance is insufficient");
+  const recipientBinding = verifyKaiosPaymentRecipientBinding({ recipientAddress: normalizedRecipient, recipientIdentityOrNode, paymentPurpose, amountKaiosWei: amount.toString(), sourceAddress: normalizedSource, createdAt });
+  return Object.freeze({
+    payment_id: paymentId,
+    payment_purpose: paymentPurpose,
+    company_id: companyId,
+    source_address: normalizedSource,
+    recipient_address: normalizedRecipient,
+    recipient_identity_or_node: recipientBinding,
+    token_address: KAIOS_MAINNET_TOKEN.contract_address,
+    chain_id: KAIOS_MAINNET_TOKEN.chain_id,
+    amount_kaios_wei: amount.toString(),
+    funding_evidence: Object.freeze({ evidence_id: fundingEvidence.evidence_id, verified_balance_kaios_wei: String(fundingEvidence.verified_balance_kaios_wei), observed_at: fundingEvidence.observed_at, source_binding_status: fundingEvidence.source_binding_status }),
+    authorization_id: null,
+    signer_policy_id: null,
+    created_at: createdAt,
+    submitted_tx: null,
+    receipt: null,
+    status: "CREATED_AWAITING_EXACT_AUTHORIZATION_AND_SIGNER"
+  });
+}
+
+export function evaluateKaiosPaymentRailReadiness({ payment, authorityId = null, signerPolicyId = null }) {
+  const blockers = [];
+  if (!payment || payment.status !== "CREATED_AWAITING_EXACT_AUTHORIZATION_AND_SIGNER") blockers.push("VALID_PAYMENT_REQUEST_REQUIRED");
+  if (!authorityId) blockers.push("EXACT_BUSINESS_AUTHORITY_NOT_CONNECTED");
+  if (!signerPolicyId) blockers.push("EXACT_SECURE_SIGNER_POLICY_NOT_CONNECTED");
+  if (payment?.payment_purpose === "PAYROLL" && payment?.funding_evidence?.source_binding_status !== "CANONICALLY_BOUND_PAYMENT_SOURCE") blockers.push("COMPANY_PAYROLL_SOURCE_NOT_BOUND");
+  return Object.freeze({ payment_id: payment?.payment_id ?? null, ready: blockers.length === 0, blockers: Object.freeze(blockers), action_type: "ONE_EXACT_KAIOS_PAYMENT_ACTION", arbitrary_transfer: false, private_key_required_in_request: false, status: blockers.length ? "HOLD" : "READY_FOR_REPOSITORY_AUTHORITY_AND_SIGNER_VERIFICATION" });
+}
+
+const KAIOS_PAYMENT_PURPOSE_AUTHORITY_SCOPE = Object.freeze({
+  PAYROLL: "PAYROLL_FUNDING",
+  ATM_CASH_REPLENISHMENT: "ATM_PAYROLL_ADVANCE"
+});
+
+function verifyExactKaiosPaymentConstraints(constraints, payment, errorCode) {
+  invariant(constraints?.action_type === "ONE_EXACT_KAIOS_PAYMENT_ACTION", errorCode, "KAIOS payment authority must allow exactly one bound action");
+  invariant(Number(constraints.chain_id) === payment.chain_id && String(constraints.token_address).toLowerCase() === payment.token_address.toLowerCase(), errorCode, "KAIOS payment authority token and chain must match the request");
+  invariant(String(constraints.source_address).toLowerCase() === payment.source_address && String(constraints.recipient_address).toLowerCase() === payment.recipient_address, errorCode, "KAIOS payment authority must bind the exact source and recipient");
+  invariant(String(constraints.amount_kaios_wei) === payment.amount_kaios_wei && constraints.payment_purpose === payment.payment_purpose, errorCode, "KAIOS payment authority must bind the exact amount and purpose");
+}
+
+export function recordKaiosPaymentSubmission({ payment, authorityId, authorizedBy, repositoryHead, signerPolicyId, submittedTx, submittedAt }) {
+  invariant(payment?.status === "CREATED_AWAITING_EXACT_AUTHORIZATION_AND_SIGNER", "KAIOS_PAYMENT_REQUEST_STATE_INVALID", "Only an unsubmitted canonical payment request can enter signer submission");
+  const requiredScope = KAIOS_PAYMENT_PURPOSE_AUTHORITY_SCOPE[payment.payment_purpose];
+  invariant(requiredScope, "KAIOS_PAYMENT_PURPOSE_AUTHORITY_NOT_CONNECTED", "This payment purpose has no repository-bound approval scope connected");
+  const authority = verifyRepositoryBoundCompanyAuthority({ authorityId, companyId: payment.company_id, actorId: authorizedBy, requiredScope, repositoryHead, at: submittedAt, errorCode: "KAIOS_PAYMENT_BUSINESS_AUTHORITY_NOT_CONNECTED" });
+  verifyExactKaiosPaymentConstraints(authority.constraints, payment, "KAIOS_PAYMENT_BUSINESS_AUTHORITY_SCOPE_MISMATCH");
+  requireId(signerPolicyId, "kaios_payment.signer_policy_id");
+  const signerPolicy = CANONICAL_KAIOS_PAYMENT_SIGNER_POLICIES.find((record) => record.signer_policy_id === signerPolicyId);
+  invariant(signerPolicy?.status === "ACTIVE_ONE_TIME" && signerPolicy.used !== true, "KAIOS_PAYMENT_SIGNER_NOT_CONNECTED", "An active unused repository-owned one-time signer policy is required");
+  verifyExactKaiosPaymentConstraints(signerPolicy, payment, "KAIOS_PAYMENT_SIGNER_SCOPE_MISMATCH");
+  invariant(parseEmploymentTime(signerPolicy.valid_from, "kaios_payment.signer_policy.valid_from") <= parseEmploymentTime(submittedAt, "kaios_payment.submitted_at") && parseEmploymentTime(submittedAt, "kaios_payment.submitted_at") <= parseEmploymentTime(signerPolicy.expires_at, "kaios_payment.signer_policy.expires_at"), "KAIOS_PAYMENT_SIGNER_POLICY_EXPIRED", "One-time signer policy must be current at submission");
+  invariant(/^0x[0-9a-f]{64}$/i.test(String(submittedTx ?? "")), "KAIOS_PAYMENT_TX_HASH_REQUIRED", "Signer submission requires the public transaction hash");
+  return Object.freeze({ ...payment, authorization_id: authority.authority_id, signer_policy_id: signerPolicy.signer_policy_id, submitted_tx: submittedTx.toLowerCase(), submitted_at: submittedAt, receipt: null, status: "SUBMITTED_AWAITING_RECEIPT" });
+}
+
+function verifyKaiosPaymentReceiptBinding({ sourceAddress, recipientAddress, amountKaiosWei, transactionHash, receipt }) {
+  invariant(receipt?.receipt_status === 1 && /^0x[0-9a-f]{64}$/i.test(String(receipt.transaction_hash ?? "")), "KAIOS_PAYMENT_SUCCESSFUL_RECEIPT_REQUIRED", "Paid status requires a successful public receipt");
+  invariant(receipt.transaction_hash.toLowerCase() === transactionHash.toLowerCase(), "KAIOS_PAYMENT_RECEIPT_TX_MISMATCH", "Receipt must bind the submitted transaction hash");
+  invariant(Number(receipt.chain_id) === KAIOS_MAINNET_TOKEN.chain_id && String(receipt.token_address).toLowerCase() === KAIOS_MAINNET_TOKEN.contract_address.toLowerCase(), "KAIOS_PAYMENT_RECEIPT_TOKEN_MISMATCH", "Receipt must bind canonical KAIOS on chain 56");
+  invariant(normalizeKaiosPaymentAddress(receipt.from, "kaios_payment.receipt.from") === sourceAddress && normalizeKaiosPaymentAddress(receipt.to, "kaios_payment.receipt.to") === recipientAddress, "KAIOS_PAYMENT_RECEIPT_PARTY_MISMATCH", "Receipt parties must match the authorized source and recipient");
+  invariant(String(receipt.amount_kaios_wei) === String(amountKaiosWei), "KAIOS_PAYMENT_RECEIPT_AMOUNT_MISMATCH", "Receipt amount must equal the exact authorized amount");
+  const before = BigInt(receipt.recipient_balance_before_kaios_wei);
+  const after = BigInt(receipt.recipient_balance_after_kaios_wei);
+  invariant(after - before === BigInt(amountKaiosWei), "KAIOS_PAYMENT_RECIPIENT_BALANCE_DELTA_MISMATCH", "Recipient balance delta must equal the exact KAIOS payment amount");
+  invariant(Number.isInteger(receipt.block_number) && receipt.block_number > 0 && /^0x[0-9a-f]{64}$/i.test(String(receipt.block_hash ?? "")) && Number.isInteger(receipt.confirmations) && receipt.confirmations >= 1, "KAIOS_PAYMENT_RECEIPT_BLOCK_EVIDENCE_REQUIRED", "Receipt requires block evidence and at least one confirmation");
+  invariant(receipt.chain_observation_verified === true, "KAIOS_PAYMENT_RECEIPT_RPC_VERIFICATION_REQUIRED", "Receipt fields must be independently verified from a chain observation");
+  return Object.freeze({ transaction_hash: receipt.transaction_hash.toLowerCase(), receipt_status: 1, block_number: receipt.block_number, block_hash: receipt.block_hash.toLowerCase(), confirmations: receipt.confirmations, recipient_balance_before_kaios_wei: before.toString(), recipient_balance_after_kaios_wei: after.toString(), chain_observation_verified: true });
+}
+
+export function recordKaiosPaymentSettlement({ payment, receipt, verifiedBy, verifiedAt, existingSettlements = [] }) {
+  requireId(verifiedBy, "kaios_payment.settlement_verifier_id");
+  requireArray(existingSettlements, "kaios_payment.existing_settlements");
+  invariant(payment?.status === "SUBMITTED_AWAITING_RECEIPT" && payment.authorization_id && payment.signer_policy_id && payment.submitted_tx, "KAIOS_PAYMENT_SUBMISSION_REQUIRED", "Settlement requires a separately authorized signer submission");
+  invariant(!existingSettlements.some((item) => item.payment_id === payment.payment_id || item.transaction_hash === payment.submitted_tx), "KAIOS_PAYMENT_SETTLEMENT_REPLAY", "Payment or transaction receipt may settle only once");
+  parseEmploymentTime(verifiedAt, "kaios_payment.receipt_verified_at");
+  const verifiedReceipt = verifyKaiosPaymentReceiptBinding({ sourceAddress: payment.source_address, recipientAddress: payment.recipient_address, amountKaiosWei: payment.amount_kaios_wei, transactionHash: payment.submitted_tx, receipt });
+  return Object.freeze({ ...payment, receipt: verifiedReceipt, verified_by: verifiedBy, verified_at: verifiedAt, paid: true, status: "SETTLED_WITH_VERIFIED_MAINNET_RECEIPT" });
+}
+
 export function createEmploymentApplication({ applicationId, job = KAIOS_AI_OS_EMPLOYMENT_ALPHA_JOB, identityProof, capabilities = [], submittedAt }) {
   requireId(applicationId, "employment_application_id");
   requireArray(capabilities, "employment_capabilities");
@@ -1046,7 +1215,7 @@ export function authorizeCompanyPayrollFunding({ payrollEntry, fundingEvidence, 
   const authorityVerification = verifyRepositoryBoundCompanyAuthority({ authorityId, companyId: payrollEntry?.company_id, actorId: authorizedBy, requiredScope: "PAYROLL_FUNDING", repositoryHead, at: authorizedAt, errorCode: "PAYROLL_FUNDING_AUTHORITY_NOT_CONNECTED" });
   invariant(payrollEntry?.status === "QUEUED_REAL_TEST_AWAITING_FUNDING" && payrollEntry.asset === "KAIOS", "PAYROLL_FUNDING_QUEUE_REQUIRED", "Funding authorization requires a queued real-test KAIOS payroll entry");
   requireId(fundingEvidence?.evidence_id, "payroll_funding_evidence_id");
-  invariant(authorityVerification.constraints?.action_type === "ONE_EXACT_PAYROLL_ACTION" && Number(authorityVerification.constraints.chain_id) === KAIOS_MAINNET_TOKEN.chain_id && String(authorityVerification.constraints.token_address).toLowerCase() === KAIOS_MAINNET_TOKEN.contract_address.toLowerCase(), "PAYROLL_FUNDING_EXACT_ACTION_REQUIRED", "Payroll funding authority must be restricted to one exact KAIOS payroll action on chain 56");
+  invariant(authorityVerification.constraints?.action_type === "ONE_EXACT_KAIOS_PAYMENT_ACTION" && authorityVerification.constraints.payment_purpose === "PAYROLL" && Number(authorityVerification.constraints.chain_id) === KAIOS_MAINNET_TOKEN.chain_id && String(authorityVerification.constraints.token_address).toLowerCase() === KAIOS_MAINNET_TOKEN.contract_address.toLowerCase(), "PAYROLL_FUNDING_EXACT_ACTION_REQUIRED", "Payroll funding authority must use the common one-exact-action KAIOS payment rail on chain 56");
   invariant(String(authorityVerification.constraints.amount_kaios_wei) === payrollEntry.accrued_kaios_wei && String(authorityVerification.constraints.recipient_address).toLowerCase() === payrollEntry.payroll_wallet_address, "PAYROLL_FUNDING_EXACT_ACTION_MISMATCH", "Payroll funding authority amount and recipient must match the queued payroll entry");
   invariant(Number(fundingEvidence.chain_id) === KAIOS_MAINNET_TOKEN.chain_id && String(fundingEvidence.token_address).toLowerCase() === KAIOS_MAINNET_TOKEN.contract_address.toLowerCase(), "PAYROLL_FUNDING_TOKEN_MISMATCH", "Funding evidence must bind the canonical KAIOS token on chain 56");
   invariant(/^0x[0-9a-f]{40}$/i.test(String(fundingEvidence.source_address ?? "")), "PAYROLL_FUNDING_SOURCE_INVALID", "Funding evidence requires a public source address");
@@ -1054,7 +1223,7 @@ export function authorizeCompanyPayrollFunding({ payrollEntry, fundingEvidence, 
   invariant(String(authorityVerification.constraints.source_address).toLowerCase() === String(fundingEvidence.source_address).toLowerCase(), "PAYROLL_FUNDING_SOURCE_MISMATCH", "Payroll funding authority must bind the verified source address");
   parseEmploymentTime(fundingEvidence.observed_at, "payroll_funding_observed_at");
   parseEmploymentTime(authorizedAt, "payroll_funding_authorized_at");
-  return Object.freeze({ ...payrollEntry, payable_kaios_wei: payrollEntry.accrued_kaios_wei, funded: true, payable: true, funding_evidence_id: fundingEvidence.evidence_id, funding_source_address: fundingEvidence.source_address.toLowerCase(), funding_observed_at: fundingEvidence.observed_at, funding_authority_id: authorityVerification.authority_id, funding_authorized_at: authorizedAt, status: "FUNDED_PAYABLE_REAL_TEST" });
+  return Object.freeze({ ...payrollEntry, payable_kaios_wei: payrollEntry.accrued_kaios_wei, funded: true, payable: true, funding_evidence_id: fundingEvidence.evidence_id, funding_source_address: fundingEvidence.source_address.toLowerCase(), funding_observed_at: fundingEvidence.observed_at, funding_authority_id: authorityVerification.authority_id, funding_authorized_at: authorizedAt, payment_rail_action_type: "ONE_EXACT_KAIOS_PAYMENT_ACTION", status: "FUNDED_PAYABLE_REAL_TEST" });
 }
 
 export function recordCompanyPayrollSettlement({ settlementId, payrollEntry, settlementReceipt, settledAt, verifiedBy, authorityId, repositoryHead }) {
@@ -1062,7 +1231,7 @@ export function recordCompanyPayrollSettlement({ settlementId, payrollEntry, set
   requireId(settlementId, "payroll_settlement_id");
   requireId(verifiedBy, "payroll_settlement_verifier_id");
   const authorityVerification = verifyRepositoryBoundCompanyAuthority({ authorityId, companyId: payrollEntry?.company_id, actorId: verifiedBy, requiredScope: "PAYROLL_SETTLEMENT_VERIFY", repositoryHead, at: settledAt, errorCode: "PAYROLL_SETTLEMENT_AUTHORITY_NOT_CONNECTED" });
-  invariant(authorityVerification.constraints?.action_type === "ONE_EXACT_PAYROLL_ACTION" && String(authorityVerification.constraints.amount_kaios_wei) === payrollEntry?.payable_kaios_wei && String(authorityVerification.constraints.recipient_address).toLowerCase() === payrollEntry?.payroll_wallet_address && String(authorityVerification.constraints.source_address).toLowerCase() === payrollEntry?.funding_source_address, "PAYROLL_SETTLEMENT_EXACT_ACTION_MISMATCH", "Settlement authority must bind the one exact payroll source, recipient and amount");
+  invariant(authorityVerification.constraints?.action_type === "ONE_EXACT_KAIOS_PAYMENT_ACTION" && authorityVerification.constraints.payment_purpose === "PAYROLL" && String(authorityVerification.constraints.amount_kaios_wei) === payrollEntry?.payable_kaios_wei && String(authorityVerification.constraints.recipient_address).toLowerCase() === payrollEntry?.payroll_wallet_address && String(authorityVerification.constraints.source_address).toLowerCase() === payrollEntry?.funding_source_address, "PAYROLL_SETTLEMENT_EXACT_ACTION_MISMATCH", "Settlement authority must bind the one exact common-rail payroll source, recipient and amount");
   invariant(payrollEntry?.payable === true && payrollEntry.funded === true, "PAYROLL_NOT_PAYABLE", "Payroll settlement requires separately verified funding and payable state");
   invariant(settlementReceipt?.receipt_status === 1 && /^0x[0-9a-f]{64}$/i.test(String(settlementReceipt.transaction_hash ?? "")), "PAYROLL_SETTLEMENT_RECEIPT_REQUIRED", "Paid status requires a successful settlement receipt");
   invariant(Number(settlementReceipt.chain_id) === KAIOS_MAINNET_TOKEN.chain_id && String(settlementReceipt.token_address).toLowerCase() === KAIOS_MAINNET_TOKEN.contract_address.toLowerCase(), "PAYROLL_SETTLEMENT_TOKEN_MISMATCH", "Payroll receipt must bind canonical KAIOS on chain 56");

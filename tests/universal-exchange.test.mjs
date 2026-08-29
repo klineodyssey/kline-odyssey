@@ -101,6 +101,7 @@ import {
   calculateFieldServiceQuote, validateFieldDeliveryEvidence, createWorkforceGap,
   createFieldServiceDemandScan
   , KAIOS_AI_OS_EMPLOYMENT_ALPHA_JOB, KAIOS_AI_OS_FIRST_REAL_EMPLOYMENT_TEST_JOB, KAIOS_MAINNET_TOKEN,
+  KAIOS_PAYMENT_PURPOSES, KAIOS_PAYMENT_APPROVAL_MATRIX, CANONICAL_KAIOS_PAYMENT_SIGNER_POLICIES,
   CANONICAL_REPOSITORY_COMPANY_AUTHORITIES, COMPANY_OPERATIONAL_AUTHORITY_PROPOSAL_SCOPES,
   createRepositoryCompanyAuthorityProposal, createCompanyAuthorityReviewRequestPacket,
   COMPANY_PROVENANCE_ATTESTATION_REQUIRED_BINDINGS, createCompanyAuthorityProvenanceAttestationRequest,
@@ -116,6 +117,7 @@ import {
   activateCompanyWorkerCandidate, createCompanyEmployeeMission, acceptCompanyEmployeeMission,
   submitCompanyWorkEvidence, reviewCompanyWorkEvidence, accrueCompanyCompensation,
   queueCompanyPayroll, authorizeCompanyPayrollFunding, recordCompanyPayrollSettlement, evaluateAtmPayrollAdvanceCandidate,
+  createKaiosPaymentRequest, evaluateKaiosPaymentRailReadiness, recordKaiosPaymentSubmission, recordKaiosPaymentSettlement,
   appendEmploymentPhase1BCompanyEvent
 } from "../core/index.mjs";
 import { verifyDigitalAntWalletBinding, verifyDigitalLifeWalletBinding, CODEX_GM_ENV } from "../core/security/wallet-binding.mjs";
@@ -3522,4 +3524,65 @@ test("V4.3 authority-review history rejects caller-forged operational provenance
     }),
     (error) => error.code === "COMPANY_AUTHORITY_REVIEW_CANDIDATE_NOT_AUTHORITY"
   );
+});
+
+test("common KAIOS payment rail declares bounded purposes and keeps signer policy disconnected", () => {
+  for (const purpose of ["PAYROLL", "ATM_CASH_REPLENISHMENT", "FIELD_SERVICE_COST", "RESOURCE_PURCHASE", "CARGO_PAYMENT", "PLAYER_REWARD", "APP_PURCHASE", "MARKET_SETTLEMENT", "PUBLIC_GOOD", "COMPANY_OPERATING_EXPENSE"]) {
+    assert.ok(KAIOS_PAYMENT_PURPOSES.includes(purpose));
+  }
+  assert.equal(CANONICAL_KAIOS_PAYMENT_SIGNER_POLICIES.length, 0);
+  assert.equal(KAIOS_PAYMENT_APPROVAL_MATRIX.PAYROLL.signer, "ONE_EXACT_SECURE_SIGNER_NOT_CONNECTED");
+});
+
+test("common KAIOS payment request binds canonical token, source funding and EIP-191 recipient", () => {
+  const source = "0x1111111111111111111111111111111111111111";
+  const recipient = "0x2222222222222222222222222222222222222222";
+  const challenge = createEmploymentIdentityChallenge({ challengeId: "PAYMENT_CHALLENGE_0001", actorId: "PLAYER_PAYMENT_0001", actorType: "HUMAN_PLAYER", walletAddress: recipient, chainId: 56, nonce: "PAYMENT_NONCE_00000001", issuedAt: "2026-08-29T01:00:00.000Z", expiresAt: "2026-08-29T01:10:00.000Z" });
+  const proof = verifyEmploymentIdentityProof({ challenge, recoveredAddress: recipient, signatureSha256: "a".repeat(64), verifiedAt: "2026-08-29T01:01:00.000Z" });
+  const payment = createKaiosPaymentRequest({ paymentId: "KAIOS_PAYMENT_0001", paymentPurpose: "PAYROLL", companyId: "AI_ANT_COMPANY_0001", sourceAddress: source, recipientAddress: recipient, recipientIdentityOrNode: { recipient_type: "PLAYER_OR_EMPLOYEE_WALLET", identity_id: proof.actor_id, wallet_control_proof: proof }, tokenAddress: KAIOS_MAINNET_TOKEN.contract_address, chainId: 56, amountKaiosWei: "10000", fundingEvidence: { evidence_id: "FUNDING_EVIDENCE_0001", source_address: source, token_address: KAIOS_MAINNET_TOKEN.contract_address, chain_id: 56, verified_balance_kaios_wei: "10000", observed_at: "2026-08-29T01:01:00.000Z", source_binding_status: "CANONICALLY_BOUND_PAYMENT_SOURCE" }, createdAt: "2026-08-29T01:02:00.000Z" });
+  assert.equal(payment.amount_kaios_wei, "10000");
+  assert.equal(payment.recipient_identity_or_node.evidence_status, "VERIFIED_LOCAL_WALLET_CONTROL");
+  assert.equal(payment.authorization_id, null);
+  assert.equal(payment.signer_policy_id, null);
+  assert.equal(payment.submitted_tx, null);
+  assert.equal(payment.receipt, null);
+  assert.equal(payment.status, "CREATED_AWAITING_EXACT_AUTHORIZATION_AND_SIGNER");
+  assert.deepEqual(evaluateKaiosPaymentRailReadiness({ payment }).blockers, ["EXACT_BUSINESS_AUTHORITY_NOT_CONNECTED", "EXACT_SECURE_SIGNER_POLICY_NOT_CONNECTED"]);
+});
+
+test("a funded balance does not turn an unbound wallet into a Company payment source", () => {
+  const recipient = "0x2222222222222222222222222222222222222222";
+  assert.throws(() => createKaiosPaymentRequest({ paymentId: "KAIOS_PAYMENT_0002", paymentPurpose: "PLAYER_REWARD", companyId: "AI_ANT_COMPANY_0001", sourceAddress: "0x1111111111111111111111111111111111111111", recipientAddress: recipient, recipientIdentityOrNode: { recipient_type: "PLAYER_OR_EMPLOYEE_WALLET", identity_id: "PLAYER_PAYMENT_0001", wallet_control_proof: { proof_id: "PROOF_0001", status: "VERIFIED_LOCAL_WALLET_CONTROL", authentication_method: "EIP191_PERSONAL_SIGN", chain_id: 56, wallet_address: recipient } }, tokenAddress: KAIOS_MAINNET_TOKEN.contract_address, chainId: 56, amountKaiosWei: "1", fundingEvidence: { evidence_id: "FUNDING_EVIDENCE_0002", source_address: "0x1111111111111111111111111111111111111111", token_address: KAIOS_MAINNET_TOKEN.contract_address, chain_id: 56, verified_balance_kaios_wei: "999999", observed_at: "2026-08-29T01:01:00.000Z", source_binding_status: "BALANCE_ONLY" }, createdAt: "2026-08-29T01:02:00.000Z" }), (error) => error.code === "KAIOS_PAYMENT_SOURCE_NOT_BOUND");
+});
+
+test("civilization node payment requires registry address evidence", () => {
+  const source = "0x1111111111111111111111111111111111111111";
+  const recipient = "0x3333333333333333333333333333333333333333";
+  const base = { paymentId: "KAIOS_PAYMENT_0003", paymentPurpose: "RESOURCE_PURCHASE", companyId: "AI_ANT_COMPANY_0001", sourceAddress: source, recipientAddress: recipient, tokenAddress: KAIOS_MAINNET_TOKEN.contract_address, chainId: 56, amountKaiosWei: "8", fundingEvidence: { evidence_id: "FUNDING_EVIDENCE_0003", source_address: source, token_address: KAIOS_MAINNET_TOKEN.contract_address, chain_id: 56, verified_balance_kaios_wei: "8", observed_at: "2026-08-29T01:01:00.000Z", source_binding_status: "CANONICALLY_BOUND_PAYMENT_SOURCE" }, createdAt: "2026-08-29T01:02:00.000Z" };
+  assert.throws(() => createKaiosPaymentRequest({ ...base, recipientIdentityOrNode: { recipient_type: "CIVILIZATION_NODE_OR_RESOURCE", node_id: "RESOURCE_NODE_0001", registry_evidence_id: "REGISTRY_EVIDENCE_0001", registry_status: "UNVERIFIED", registered_address: recipient } }), (error) => error.code === "KAIOS_PAYMENT_NODE_REGISTRY_EVIDENCE_REQUIRED");
+  const payment = createKaiosPaymentRequest({ ...base, recipientIdentityOrNode: { recipient_type: "CIVILIZATION_NODE_OR_RESOURCE", node_id: "RESOURCE_NODE_0001", registry_evidence_id: "REGISTRY_EVIDENCE_0001", registry_status: "VERIFIED_REGISTERED_NODE_OR_CONTRACT", registered_address: recipient } });
+  assert.equal(payment.recipient_identity_or_node.identity_or_node_id, "RESOURCE_NODE_0001");
+});
+
+test("temporary Human-designated KAIOS address binds purpose amount source recipient and expiry", () => {
+  const source = "0x1111111111111111111111111111111111111111";
+  const recipient = "0x4444444444444444444444444444444444444444";
+  const payment = createKaiosPaymentRequest({ paymentId: "KAIOS_PAYMENT_0004", paymentPurpose: "PUBLIC_GOOD", companyId: "AI_ANT_COMPANY_0001", sourceAddress: source, recipientAddress: recipient, recipientIdentityOrNode: { recipient_type: "TEMPORARY_HUMAN_DESIGNATED_ADDRESS", human_authority_reference: "HUMAN_AUTHORITY_0001", payment_purpose: "PUBLIC_GOOD", amount_kaios_wei: "88", source_address: source, designated_address: recipient, expires_at: "2026-08-29T02:00:00.000Z" }, tokenAddress: KAIOS_MAINNET_TOKEN.contract_address, chainId: 56, amountKaiosWei: "88", fundingEvidence: { evidence_id: "FUNDING_EVIDENCE_0004", source_address: source, token_address: KAIOS_MAINNET_TOKEN.contract_address, chain_id: 56, verified_balance_kaios_wei: "88", observed_at: "2026-08-29T01:01:00.000Z", source_binding_status: "CANONICALLY_BOUND_PAYMENT_SOURCE" }, createdAt: "2026-08-29T01:02:00.000Z" });
+  assert.equal(payment.recipient_identity_or_node.evidence_status, "EXACT_TEMPORARY_HUMAN_DESIGNATION_BOUND");
+  assert.equal(payment.recipient_identity_or_node.expires_at, "2026-08-29T02:00:00.000Z");
+});
+
+test("common KAIOS payment rail remains fail-closed without repository authority", () => {
+  const payment = { payment_id: "KAIOS_PAYMENT_0005", payment_purpose: "PAYROLL", company_id: "AI_ANT_COMPANY_0001", source_address: "0x1111111111111111111111111111111111111111", recipient_address: "0x2222222222222222222222222222222222222222", token_address: KAIOS_MAINNET_TOKEN.contract_address, chain_id: 56, amount_kaios_wei: "10000", funding_evidence: { source_binding_status: "CANONICALLY_BOUND_PAYMENT_SOURCE" }, authorization_id: null, signer_policy_id: null, submitted_tx: null, receipt: null, status: "CREATED_AWAITING_EXACT_AUTHORIZATION_AND_SIGNER" };
+  assert.throws(() => recordKaiosPaymentSubmission({ payment, authorityId: "AUTHORITY_0001", authorizedBy: "COMPANY_ACTOR_0001", repositoryHead: "a".repeat(40), signerPolicyId: "SIGNER_0001", submittedTx: `0x${"b".repeat(64)}`, submittedAt: "2026-08-29T01:05:00.000Z" }), (error) => error.code === "KAIOS_PAYMENT_BUSINESS_AUTHORITY_NOT_CONNECTED");
+  assert.throws(() => recordKaiosPaymentSettlement({ payment, receipt: {}, verifiedBy: "SETTLEMENT_REVIEWER_0001", verifiedAt: "2026-08-29T01:06:00.000Z" }), (error) => error.code === "KAIOS_PAYMENT_SUBMISSION_REQUIRED");
+});
+
+test("11520 website exposes truthful read-only KAIOS payment status and never pre-labels paid", async () => {
+  const appSource = await fs.readFile(new URL("../K線西遊記/temples/11520/app.mjs", import.meta.url), "utf8");
+  assert.match(appSource, /COMMON KAIOS PAYMENT RAIL/);
+  assert.match(appSource, /COMPANY_TREASURY_NOT_BOUND/);
+  assert.match(appSource, /Paid before receipt/);
+  assert.match(appSource, /payroll\?\.paid && payroll\?\.settlement_receipt/);
+  assert.doesNotMatch(appSource, /private[_ -]?key\s*[:=]/i);
 });

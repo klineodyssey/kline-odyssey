@@ -1,20 +1,21 @@
-import { createBrowserUniverseStore, createUniverseRuntime, loadCanonicalSeed } from "../../../core/registry/universe-runtime.mjs?v=11520-v4.2-employment-phase1b";
-import { createListing } from "../../../core/market/index.mjs?v=11520-v4.2-employment-phase1b";
-import { buildPortfolio } from "../../../core/portfolio/index.mjs?v=11520-v4.2-employment-phase1b";
-import { createLifeDraft } from "../../../core/life/factory.mjs?v=11520-v4.2-employment-phase1b";
-import { calculateLifeAge } from "../../../core/life/index.mjs?v=11520-v4.2-employment-phase1b";
-import { calculateWorkAge, deriveWorkerHealth } from "../../../core/jobs/index.mjs?v=11520-v4.2-employment-phase1b";
-import { createKgenSwapAdapter, KGEN_SWAP_CONFIG } from "../../../core/integrations/kgen-pancakeswap-v2.mjs?v=11520-v4.2-employment-phase1b";
+import { createBrowserUniverseStore, createUniverseRuntime, loadCanonicalSeed } from "../../../core/registry/universe-runtime.mjs?v=11520-v4.3-kaios-payment-rail";
+import { createListing } from "../../../core/market/index.mjs?v=11520-v4.3-kaios-payment-rail";
+import { buildPortfolio } from "../../../core/portfolio/index.mjs?v=11520-v4.3-kaios-payment-rail";
+import { createLifeDraft } from "../../../core/life/factory.mjs?v=11520-v4.3-kaios-payment-rail";
+import { calculateLifeAge } from "../../../core/life/index.mjs?v=11520-v4.3-kaios-payment-rail";
+import { calculateWorkAge, deriveWorkerHealth } from "../../../core/jobs/index.mjs?v=11520-v4.3-kaios-payment-rail";
+import { createKgenSwapAdapter, KGEN_SWAP_CONFIG } from "../../../core/integrations/kgen-pancakeswap-v2.mjs?v=11520-v4.3-kaios-payment-rail";
 import {
   I18N_SUPPORTED_LOCALES, translateUi, normalizeUiLocale, validatePrimaryI18nCatalogs,
   detectVoiceCapabilities, normalizeVoiceError, createLocalHuaguoshanMembership,
   createFirstPlayerMission, completeFirstPlayerMission
-} from "../../../core/apps/index.mjs?v=11520-v4.2-employment-phase1b";
+} from "../../../core/apps/index.mjs?v=11520-v4.3-kaios-payment-rail";
 import {
   createPublicCivilizationDraftIntent, interpretPublicCivilizationIntent,
   confirmPublicCivilizationIntent, toPublicCivilizationRequest, routePublicCivilizationProject,
   qualifyPublicCivilizationRequest, createNonBindingEstimatePreview, appendPublicRequestHistoryEvent,
   KAIOS_AI_OS_EMPLOYMENT_ALPHA_JOB, KAIOS_AI_OS_FIRST_REAL_EMPLOYMENT_TEST_JOB, KAIOS_MAINNET_TOKEN,
+  KAIOS_PAYMENT_APPROVAL_MATRIX,
   createEmploymentIdentityChallenge,
   verifyEmploymentIdentityProof, createEmploymentApplication, scoreEmploymentInterview,
   createTrialEmploymentContract, createEmploymentAlphaMission, acceptEmploymentAlphaMission,
@@ -23,8 +24,8 @@ import {
   activateCompanyWorkerCandidate, createCompanyEmployeeMission, acceptCompanyEmployeeMission,
   submitCompanyWorkEvidence, reviewCompanyWorkEvidence, accrueCompanyCompensation,
   queueCompanyPayroll, evaluateAtmPayrollAdvanceCandidate, appendEmploymentPhase1BCompanyEvent
-} from "../../../core/company/index.mjs?v=11520-v4.2-employment-phase1b";
-import { readTempleHeart12345 } from "../../../core/integrations/temple-heart-12345.mjs?v=11520-v4.2-employment-phase1b";
+} from "../../../core/company/index.mjs?v=11520-v4.3-kaios-payment-rail";
+import { readTempleHeart12345 } from "../../../core/integrations/temple-heart-12345.mjs?v=11520-v4.3-kaios-payment-rail";
 
 const NAVIGATION = Object.freeze([
   ["HOME", "navigation.home"], ["REQUEST", "navigation.request"], ["LIFE", "navigation.life"], ["LIFE_FACTORY", "LIFE FACTORY"], ["APPS", "navigation.apps"], ["COMPANIES", "navigation.company"],
@@ -634,6 +635,16 @@ function employmentPhase1BMissionsView() {
   return Promise.resolve(`${hero("MY MISSIONS", "Employee-bound evidence before compensation.", "A different reviewer must approve submitted evidence before compensation accrues.")}${state.mission ? `<article class="card"><div class="eyebrow">${html(state.mission.mission_id)}</div><h3>${badge(state.mission.status)}</h3>${kv("Employee", state.mission.employee_id)}${kv("Actor", state.mission.actor_id)}${kv("Route", `${state.mission.origin} → ${state.mission.destination}`)}${kv("Evidence", state.workEvidence?.status ?? "NOT_SUBMITTED")}${kv("Review", state.workReview?.decision ?? "NOT_REVIEWED")}${kv("Real payment", String(state.mission.real_payment))}<a class="button request-link" href="#/JOBS">OPEN MY JOB</a></article>` : empty("NO_ASSIGNED_MISSION")}`);
 }
 
+function kaiosPaymentStatusMarkup(state) {
+  const payroll = state.payrollQueue?.at(-1);
+  const receipt = payroll?.settlement_receipt ?? null;
+  const matrix = KAIOS_PAYMENT_APPROVAL_MATRIX.PAYROLL;
+  return `<div class="grid two">
+    <article class="card"><div class="eyebrow">COMMON KAIOS PAYMENT RAIL</div><h3>${badge("PARTIAL_UNDER_REVIEW")}</h3>${kv("Purpose", "PAYROLL")}${kv("Company", payroll?.company_id ?? "AI_ANT_COMPANY_0001")}${kv("Token", KAIOS_MAINNET_TOKEN.contract_address)}${kv("Chain", KAIOS_MAINNET_TOKEN.chain_id)}${kv("Source", payroll?.funding_source_address ?? "COMPANY_TREASURY_NOT_BOUND")}${kv("Destination", payroll?.payroll_wallet_address ?? "VERIFIED_RECIPIENT_REQUIRED")}${kv("Amount", payroll?.payable_kaios_wei ?? "NOT_PAYABLE")}${kv("Approval status", payroll?.funding_authority_id ? "EXACT_AUTHORITY_RECORDED" : "NOT_CONNECTED")}${kv("Signer status", payroll?.signer_policy_id ? "ONE_TIME_POLICY_RECORDED" : "NOT_CONNECTED")}${kv("TX status", payroll?.transaction_hash ?? "NOT_SUBMITTED")}${kv("Receipt status", receipt?.receipt_status === 1 ? "VERIFIED_SUCCESS" : "NOT_RECEIVED")}</article>
+    <article class="card"><div class="eyebrow">SEPARATION OF DUTIES</div>${kv("Requestor", matrix.requestor)}${kv("Business approver", matrix.approver)}${kv("Funding authority", matrix.funding_authority)}${kv("Technical signer", matrix.signer)}${kv("Settlement verifier", matrix.settlement_verifier)}${kv("Paid before receipt", "FORBIDDEN")}${kv("Private key in website", "FORBIDDEN")}${kv("Arbitrary transfer", "FORBIDDEN")}</article>
+  </div>`;
+}
+
 function employmentPhase1BAtmView() {
   const state = readEmploymentAlphaState();
   const payroll = state.payrollQueue?.at(-1);
@@ -641,7 +652,7 @@ function employmentPhase1BAtmView() {
   if (state.employee && payroll) {
     try { advance = evaluateAtmPayrollAdvanceCandidate({ employee: state.employee, payrollEntry: payroll, requestedKaiosWei: "1000000000000000000", availableLiquidityKaiosWei: "1000000000000000000" }); } catch { advance = null; }
   }
-  return Promise.resolve(`${hero("K12345 KAIOS ATM", "Accrued is not payable, and payable is not paid.", "The ATM interface evaluates a simulation advance only. Real withdrawal stays disabled until prefunded liquidity, authority and a deployed adapter exist.")}<div class="grid two"><article class="card"><div class="eyebrow">ATM PRODUCT</div><h3>${badge("UNDER_REVIEW")}</h3>${kv("Location", "K12345")}${kv("Liquidity", "PREFUNDED_ONLY")}${kv("Mainnet payout", "NOT_CONNECTED")}${kv("Arbitrary mint", "FORBIDDEN")}</article><article class="card"><div class="eyebrow">MY PAYROLL ACCOUNT</div><h3>${badge(payroll?.status ?? "NO_VERIFIED_PAYROLL")}</h3>${kv("Employee", payroll?.employee_id)}${kv("Address", payroll?.payroll_wallet_address)}${kv("Accrued", payroll ? "0.00000000000001 KAIOS" : "0 KAIOS")}${kv("Payable", payroll?.payable ? "0.00000000000001 KAIOS" : "0 KAIOS")}${kv("Paid", payroll?.paid && payroll?.settlement_receipt ? "0.00000000000001 KAIOS" : "0 KAIOS")}${kv("Advance candidate", advance?.status ?? "NOT_ELIGIBLE")}${kv("Real withdrawal", "DISABLED")}<button class="button" type="button" disabled>WITHDRAW KAIOS</button></article></div>`);
+  return Promise.resolve(`${hero("K12345 KAIOS ATM", "Accrued is not payable, and payable is not paid.", "The ATM interface evaluates a simulation advance only. Real withdrawal stays disabled until prefunded liquidity, authority and a deployed adapter exist.")}<div class="grid two"><article class="card"><div class="eyebrow">ATM PRODUCT</div><h3>${badge("UNDER_REVIEW")}</h3>${kv("Location", "K12345")}${kv("Liquidity", "PREFUNDED_ONLY")}${kv("Mainnet payout", "NOT_CONNECTED")}${kv("Arbitrary mint", "FORBIDDEN")}</article><article class="card"><div class="eyebrow">MY PAYROLL ACCOUNT</div><h3>${badge(payroll?.status ?? "NO_VERIFIED_PAYROLL")}</h3>${kv("Employee", payroll?.employee_id)}${kv("Address", payroll?.payroll_wallet_address)}${kv("Accrued", payroll ? "0.00000000000001 KAIOS" : "0 KAIOS")}${kv("Payable", payroll?.payable ? "0.00000000000001 KAIOS" : "0 KAIOS")}${kv("Paid", payroll?.paid && payroll?.settlement_receipt ? "0.00000000000001 KAIOS" : "0 KAIOS")}${kv("Advance candidate", advance?.status ?? "NOT_ELIGIBLE")}${kv("Real withdrawal", "DISABLED")}<button class="button" type="button" disabled>WITHDRAW KAIOS</button></article></div>${section("KAIOS PAYMENT STATUS", kaiosPaymentStatusMarkup(state))}`);
 }
 
 async function render() {
