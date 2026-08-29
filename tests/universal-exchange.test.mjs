@@ -123,11 +123,83 @@ import {
   queueCompanyPayroll, authorizeCompanyPayrollFunding, recordCompanyPayrollSettlement, evaluateAtmPayrollAdvanceCandidate,
   createKaiosPaymentRequest, evaluateKaiosPaymentRailReadiness, recordKaiosPaymentSubmission, recordKaiosPaymentSettlement,
   evaluateCivilizationRealExecutionPolicy, selectNextSafeCompanyWorkflow,
-  appendEmploymentPhase1BCompanyEvent
+  appendEmploymentPhase1BCompanyEvent,
+  createKaiosTelepathyMessage, routeKaiosTelepathyMessage,
+  acknowledgeKaiosTelepathyMessage, completeKaiosTelepathyMessage,
+  appendHumanRelayLaborEvent, summarizeHumanRelayLaborLedger,
+  HUMAN_RELAY_LABOR_RATE_CANDIDATE
 } from "../core/index.mjs";
 import { verifyDigitalAntWalletBinding, verifyDigitalLifeWalletBinding, CODEX_GM_ENV } from "../core/security/wallet-binding.mjs";
 import { TEMPLE_HEART_READ_ABI, TEMPLE_HEART_DRY_RUN_ABI, TEMPLE_HEART_VERIFIED_ACTIONS, readCoreHeartEvents } from "../core/integrations/temple-heart-12345.mjs";
 import { buildSharedWorkerStatus, createPublicReadProvider, inspectPhysicsThoughtOrgan, readCompanyPatrol, readFieldServicePatrol, readMotherEnginePatrol, readPublicRequestPatrol } from "../core/jobs/public-read-only-worker.mjs";
+
+test("Telepathy Bus routes, acknowledges and completes one internal message without persisting payload", async () => {
+  const message = await createKaiosTelepathyMessage({
+    messageId: "MESSAGE_TELEPATHY_001",
+    idempotencyKey: "IDEMPOTENCY_TELEPATHY_001",
+    fromLifeId: "LIFE-XUANYAO-SOL-0001",
+    fromWorkerId: "xuanyao-sol-01",
+    toLifeId: "LIFE-CODEX-GM-0001",
+    toWorkerId: "codex-gm-01",
+    messageType: "REQUEST",
+    payload: { request: "BUILD_ONE_SAFE_SLICE" },
+    createdAt: "2026-08-30T00:00:00Z",
+    expiresAt: "2026-08-30T01:00:00Z",
+    repositoryContext: "klineodyssey/kline-odyssey@HEAD",
+    authorityScope: ["SAFE_OFFCHAIN_ENGINEERING"]
+  });
+  assert.equal(message.payload_persisted, false);
+  assert.match(message.payload_hash, /^[a-f0-9]{64}$/);
+  const delivered = routeKaiosTelepathyMessage({
+    message,
+    route: { route_id: "ROUTE_INTERNAL_CODEX", route_type: "INTERNAL_COMPANY_RUNTIME", to_life_id: message.to_life_id, to_worker_id: message.to_worker_id, available: true },
+    deliveredAt: "2026-08-30T00:01:00Z"
+  });
+  const acknowledged = acknowledgeKaiosTelepathyMessage({ message: delivered, acknowledgedByLifeId: message.to_life_id, acknowledgedByWorkerId: message.to_worker_id, acknowledgedAt: "2026-08-30T00:02:00Z" });
+  const completed = await completeKaiosTelepathyMessage({ message: acknowledged, result: { status: "SAFE_SLICE_COMPLETE" }, resultStatus: "COMPLETED", completedAt: "2026-08-30T00:03:00Z" });
+  assert.equal(completed.status, "COMPLETED");
+  assert.equal(completed.side_effects_executed, false);
+  assert.match(completed.result_hash, /^[a-f0-9]{64}$/);
+});
+
+test("Telepathy Bus fails closed for unavailable providers and suppresses replay", async () => {
+  const message = await createKaiosTelepathyMessage({
+    messageId: "MESSAGE_TELEPATHY_002", idempotencyKey: "IDEMPOTENCY_TELEPATHY_002",
+    fromLifeId: "LIFE-CODEX-GM-0001", fromWorkerId: "codex-gm-01",
+    toLifeId: "LIFE-CHIYAO-KAIOS-001", toWorkerId: "chiyao-reviewer-01",
+    messageType: "REVIEW_REQUEST", payload: { pr: 192 },
+    createdAt: "2026-08-30T00:00:00Z", expiresAt: "2026-08-30T01:00:00Z",
+    repositoryContext: "klineodyssey/kline-odyssey@HEAD", authorityScope: ["DISTINCT_TECHNICAL_REVIEW_CANDIDATE"]
+  });
+  const blocked = routeKaiosTelepathyMessage({ message, route: { route_id: "ROUTE_GEMINI_UNAVAILABLE", route_type: "ROUTABLE_PROVIDER_CONTROLLER", to_life_id: message.to_life_id, to_worker_id: message.to_worker_id, available: false, blocker: "EXTERNAL_CHANNEL_UNAVAILABLE" }, deliveredAt: "2026-08-30T00:01:00Z" });
+  assert.equal(blocked.status, "BLOCKED");
+  assert.equal(blocked.receipt, "EXTERNAL_CHANNEL_UNAVAILABLE");
+  const replay = routeKaiosTelepathyMessage({ message, route: { route_id: "ROUTE_INTERNAL", route_type: "INTERNAL_COMPANY_RUNTIME", to_life_id: message.to_life_id, to_worker_id: message.to_worker_id, available: true }, deliveredAt: "2026-08-30T00:01:00Z", processedIdempotencyKeys: [message.idempotency_key] });
+  assert.equal(replay.status, "DUPLICATE_SUPPRESSED");
+  assert.equal(replay.side_effects_executed, false);
+});
+
+test("Human Relay ledger counts only repository-verified time and keeps rate pending", () => {
+  const unverified = appendHumanRelayLaborEvent([], {
+    relay_id: "RELAY_001", from_actor: "HUMAN_SHEN_YING_MING", to_actor: "LIFE-CODEX-GM-0001",
+    document_id: "WORK_ORDER_001", start_time: "2026-08-30T00:00:00Z", end_time: "2026-08-30T00:05:00Z",
+    round_trip_count: 1, status: "COMPLETED", evidence_id: "EVIDENCE_NOT_IN_REPOSITORY_ALLOWLIST"
+  });
+  const verified = appendHumanRelayLaborEvent(unverified, {
+    relay_id: "RELAY_002", from_actor: "HUMAN_SHEN_YING_MING", to_actor: "LIFE-CODEX-GM-0001",
+    document_id: "WORK_ORDER_002", start_time: "2026-08-30T00:10:00Z", end_time: "2026-08-30T00:17:30Z",
+    round_trip_count: 1, status: "COMPLETED", evidence_id: "RELAY_EVIDENCE_002"
+  }, { verifiedEvidenceIds: ["RELAY_EVIDENCE_002"] });
+  const summary = summarizeHumanRelayLaborLedger(verified);
+  assert.equal(summary.event_count, 2);
+  assert.equal(summary.verified_relay_events, 1);
+  assert.equal(summary.verified_relay_minutes, 7.5);
+  assert.equal(summary.unverified_relay_events, 1);
+  assert.equal(summary.human_relay_payable, "POLICY_REQUIRED");
+  assert.equal(summary.candidate_rate.amount_kaios_per_hour, "60");
+  assert.equal(HUMAN_RELAY_LABOR_RATE_CANDIDATE.payable, false);
+  assert.throws(() => summarizeHumanRelayLaborLedger(verified, "60"), /policy-required/);
+});
 
 const seed = JSON.parse(await fs.readFile(new URL("../core/data/canonical.json", import.meta.url), "utf8"));
 

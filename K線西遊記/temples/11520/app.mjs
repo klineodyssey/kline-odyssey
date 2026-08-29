@@ -205,6 +205,7 @@ function playerFirstMarkup() {
         <button class="button secondary" id="join-civilization" type="button">🏔 ${html(t("player.join"))}</button>
         <a class="button secondary" href="#/JOBS">🛠 ${html(t("player.work"))}</a>
         <a class="button secondary" href="#/MY_LIFE">✨ ${html(t("player.myAi"))}</a>
+        <a class="button secondary" href="../../../KGEN-KAIOS/world-viewer/player-genesis/">🌱 START LIFE</a>
       </div>
       <p class="voice-state" id="home-voice-status" role="status">${html(voiceCapabilities.recognition ? "VOICE_READY · USER_GESTURE_REQUIRED" : `${t("voice.unavailable")} · ${t("voice.textFallback")}`)}</p>
       <div id="join-panel" class="join-panel" ${member ? "" : "hidden"}>${member ? `<strong>${html(member.display_name)}</strong> · ${badge(member.tier)} · ${badge(member.badge.name)}<p>NON-FINANCIAL · ${html(member.badge.nft_status)} · LOCAL PROFILE</p><button class="button secondary" id="start-first-mission" type="button">${html(t("player.firstMission"))}: ${html(mission?.status ?? "START")}</button>` : ""}</div>

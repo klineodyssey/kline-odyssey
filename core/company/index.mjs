@@ -149,6 +149,154 @@ export const KAIOS_PAYMENT_RECIPIENT_TYPES = Object.freeze([
   "TEMPORARY_HUMAN_DESIGNATED_ADDRESS"
 ]);
 
+export const KAIOS_TELEPATHY_MESSAGE_TYPES = Object.freeze([
+  "REQUEST", "RESPONSE", "WARNING", "BLOCKER", "REVIEW_REQUEST", "HANDOFF",
+  "INCIDENT", "HUMAN_ESCALATION", "STATUS_UPDATE", "RESULT"
+]);
+
+export const KAIOS_TELEPATHY_DELIVERY_STATES = Object.freeze([
+  "CREATED", "DELIVERED", "ACKNOWLEDGED", "COMPLETED", "BLOCKED",
+  "EXPIRED", "ARCHIVED", "DUPLICATE_SUPPRESSED"
+]);
+
+export const HUMAN_RELAY_LABOR_RATE_CANDIDATE = Object.freeze({
+  amount_kaios_per_hour: "60",
+  status: "NON_CANONICAL_POLICY_CANDIDATE",
+  rationale: "ONE_KAIOS_PER_VERIFIED_MINUTE_SIMPLE_ALPHA_BENCHMARK",
+  cost_center: "AI_ANT_COMPANY_OPERATIONS_HUMAN_RELAY_INFRASTRUCTURE",
+  payable: false
+});
+
+export async function createKaiosTelepathyMessage({
+  messageId, idempotencyKey, fromLifeId, fromWorkerId, toLifeId, toWorkerId,
+  messageType, payload, createdAt, expiresAt, repositoryContext, authorityScope = []
+}) {
+  requireId(messageId, "telepathy_message.message_id");
+  requireId(idempotencyKey, "telepathy_message.idempotency_key");
+  requireId(fromLifeId, "telepathy_message.from_life_id");
+  requireId(toLifeId, "telepathy_message.to_life_id");
+  invariant([fromWorkerId, toWorkerId].every((workerId) => /^[A-Za-z0-9_.-]+$/.test(String(workerId ?? ""))), "TELEPATHY_WORKER_ID_INVALID", "Telepathy Worker IDs must be non-empty routable identifiers");
+  requireEnum(messageType, KAIOS_TELEPATHY_MESSAGE_TYPES, "telepathy_message.message_type");
+  requireArray(authorityScope, "telepathy_message.authority_scope");
+  invariant(payload !== undefined && payload !== null, "TELEPATHY_PAYLOAD_REQUIRED", "Telepathy messages require a payload to hash");
+  invariant(typeof repositoryContext === "string" && repositoryContext.length > 0, "TELEPATHY_REPOSITORY_CONTEXT_REQUIRED", "Telepathy messages require repository context");
+  invariant(authorityScope.every((scope) => typeof scope === "string" && scope.length > 0), "TELEPATHY_AUTHORITY_SCOPE_INVALID", "Telepathy authority scopes must be non-empty strings");
+  const created = Date.parse(createdAt);
+  const expires = Date.parse(expiresAt);
+  invariant(Number.isFinite(created) && Number.isFinite(expires) && expires > created, "TELEPATHY_TIME_WINDOW_INVALID", "Telepathy expiry must follow creation");
+  const payloadHash = await sha256(payload);
+  return Object.freeze({
+    protocol: "KAIOS_AI_AGENT_MESSAGE_PROTOCOL_V1",
+    message_id: messageId,
+    idempotency_key: idempotencyKey,
+    from_life_id: fromLifeId,
+    from_worker_id: fromWorkerId,
+    to_life_id: toLifeId,
+    to_worker_id: toWorkerId,
+    message_type: messageType,
+    payload_hash: payloadHash,
+    payload_persisted: false,
+    created_at: createdAt,
+    expires_at: expiresAt,
+    repository_context: repositoryContext,
+    authority_scope: Object.freeze([...authorityScope]),
+    route: null,
+    ack_status: "NOT_DELIVERED",
+    result_hash: null,
+    receipt: null,
+    side_effects_executed: false,
+    status: "CREATED"
+  });
+}
+
+export function routeKaiosTelepathyMessage({ message, route, deliveredAt, processedIdempotencyKeys = [] }) {
+  requireArray(processedIdempotencyKeys, "telepathy_message.processed_idempotency_keys");
+  invariant(message?.status === "CREATED", "TELEPATHY_MESSAGE_NOT_ROUTABLE", "Only a created Telepathy message may be routed");
+  invariant(route && typeof route === "object" && typeof route.route_id === "string" && route.route_id.length > 0, "TELEPATHY_ROUTE_REQUIRED", "Telepathy routing requires an evidenced route");
+  invariant(route.to_life_id === message.to_life_id && route.to_worker_id === message.to_worker_id, "TELEPATHY_ROUTE_TARGET_MISMATCH", "Route target must match the message target");
+  if (processedIdempotencyKeys.includes(message.idempotency_key)) {
+    return Object.freeze({ ...message, status: "DUPLICATE_SUPPRESSED", ack_status: "NOT_DELIVERED", side_effects_executed: false, receipt: "IDEMPOTENCY_REPLAY_SUPPRESSED" });
+  }
+  const delivered = Date.parse(deliveredAt);
+  invariant(Number.isFinite(delivered) && delivered >= Date.parse(message.created_at), "TELEPATHY_DELIVERY_TIME_INVALID", "Delivery time must not predate message creation");
+  if (delivered >= Date.parse(message.expires_at)) {
+    return Object.freeze({ ...message, route: route.route_id, status: "EXPIRED", ack_status: "NOT_DELIVERED", side_effects_executed: false, receipt: "MESSAGE_EXPIRED_BEFORE_DELIVERY" });
+  }
+  if (route.available !== true) {
+    return Object.freeze({ ...message, route: route.route_id, status: "BLOCKED", ack_status: "NOT_DELIVERED", side_effects_executed: false, receipt: route.blocker ?? "EXTERNAL_CHANNEL_UNAVAILABLE" });
+  }
+  invariant(["INTERNAL_COMPANY_RUNTIME", "ROUTABLE_PROVIDER_CONTROLLER"].includes(route.route_type), "TELEPATHY_ROUTE_TYPE_INVALID", "Only an internal Company route or evidenced provider controller may deliver a message");
+  return Object.freeze({ ...message, route: route.route_id, delivered_at: deliveredAt, status: "DELIVERED", ack_status: "ACK_REQUIRED", side_effects_executed: false, receipt: "DELIVERY_RECORDED_NO_ACTION_AUTHORITY" });
+}
+
+export function acknowledgeKaiosTelepathyMessage({ message, acknowledgedByLifeId, acknowledgedByWorkerId, acknowledgedAt }) {
+  invariant(message?.status === "DELIVERED", "TELEPATHY_MESSAGE_NOT_DELIVERED", "Only a delivered message may be acknowledged");
+  invariant(acknowledgedByLifeId === message.to_life_id && acknowledgedByWorkerId === message.to_worker_id, "TELEPATHY_ACK_ACTOR_MISMATCH", "Only the addressed Life and Worker may acknowledge delivery");
+  const acknowledged = Date.parse(acknowledgedAt);
+  invariant(Number.isFinite(acknowledged) && acknowledged >= Date.parse(message.delivered_at) && acknowledged < Date.parse(message.expires_at), "TELEPATHY_ACK_TIME_INVALID", "Acknowledgement must be within the delivery window");
+  return Object.freeze({ ...message, acknowledged_at: acknowledgedAt, status: "ACKNOWLEDGED", ack_status: "ACKNOWLEDGED", side_effects_executed: false, receipt: "ACK_RECORDED_NO_ACTION_AUTHORITY" });
+}
+
+export async function completeKaiosTelepathyMessage({ message, result, resultStatus, completedAt }) {
+  invariant(message?.status === "ACKNOWLEDGED", "TELEPATHY_MESSAGE_NOT_ACKNOWLEDGED", "Only an acknowledged message may record a result");
+  requireEnum(resultStatus, ["COMPLETED", "BLOCKED"], "telepathy_message.result_status");
+  invariant(result !== undefined && result !== null, "TELEPATHY_RESULT_REQUIRED", "Telepathy completion requires a result to hash");
+  const completed = Date.parse(completedAt);
+  invariant(Number.isFinite(completed) && completed >= Date.parse(message.acknowledged_at), "TELEPATHY_COMPLETION_TIME_INVALID", "Completion must not predate acknowledgement");
+  return Object.freeze({
+    ...message,
+    result_hash: await sha256(result),
+    result_payload_persisted: false,
+    completed_at: completedAt,
+    status: resultStatus,
+    side_effects_executed: false,
+    receipt: resultStatus === "COMPLETED" ? "RESULT_RECEIPT_RECORDED" : "BLOCKER_RECEIPT_RECORDED"
+  });
+}
+
+export function appendHumanRelayLaborEvent(events, event, { verifiedEvidenceIds = [] } = {}) {
+  requireArray(events, "human_relay_events");
+  requireArray(verifiedEvidenceIds, "verified_human_relay_evidence_ids");
+  requireFields(event, ["relay_id", "from_actor", "to_actor", "document_id", "start_time", "end_time", "round_trip_count", "status", "evidence_id"], "HumanRelayLaborEvent");
+  requireId(event.relay_id, "relay_id");
+  requireId(event.document_id, "relay_document_id");
+  invariant(!events.some((existing) => existing.relay_id === event.relay_id), "HUMAN_RELAY_REPLAY", "Relay events are append-only and relay IDs cannot be reused");
+  invariant(event.from_actor !== event.to_actor, "HUMAN_RELAY_ACTOR_COLLISION", "Human relay requires distinct sender and receiver actors");
+  invariant(Number.isInteger(event.round_trip_count) && event.round_trip_count >= 1, "HUMAN_RELAY_ROUND_TRIP_INVALID", "Relay round-trip count must be a positive integer");
+  invariant(["COMPLETED", "PARTIAL", "FAILED_CLOSED"].includes(event.status), "HUMAN_RELAY_STATUS_INVALID", "Relay status is invalid");
+  const start = Date.parse(event.start_time);
+  const end = Date.parse(event.end_time);
+  const timed = Number.isFinite(start) && Number.isFinite(end) && end > start;
+  const verified = timed && verifiedEvidenceIds.includes(event.evidence_id);
+  const normalized = Object.freeze({
+    ...event,
+    verified_duration_minutes: verified ? Number(((end - start) / 60000).toFixed(6)) : null,
+    evidence_status: verified ? "VERIFIED" : "UNVERIFIED",
+    authoritative_labor: verified,
+    payable_amount: "NOT_CALCULATED_RATE_PENDING"
+  });
+  return Object.freeze([...events, normalized]);
+}
+
+export function summarizeHumanRelayLaborLedger(events, humanLaborRateKaiosPerHour = null) {
+  requireArray(events, "human_relay_events");
+  invariant(humanLaborRateKaiosPerHour === null, "HUMAN_LABOR_RATE_POLICY_NOT_APPROVED", "The current Human relay labor rate is policy-required and cannot be invented by this Runtime");
+  const verifiedEvents = events.filter((event) => event.evidence_status === "VERIFIED" && Number.isFinite(event.verified_duration_minutes));
+  const minutes = Number(verifiedEvents.reduce((sum, event) => sum + event.verified_duration_minutes, 0).toFixed(6));
+  return Object.freeze({
+    ledger_id: "AI_ANT_COMPANY_HUMAN_RELAY_LABOR_LEDGER_V1",
+    event_count: events.length,
+    verified_relay_events: verifiedEvents.length,
+    verified_relay_minutes: minutes,
+    unverified_relay_events: events.length - verifiedEvents.length,
+    human_labor_rate: "POLICY_REQUIRED",
+    human_relay_payable: "POLICY_REQUIRED",
+    candidate_rate: HUMAN_RELAY_LABOR_RATE_CANDIDATE,
+    payment_sent: false,
+    status: events.length ? "EVIDENCE_RECONCILED_RATE_POLICY_REQUIRED" : "NO_REPOSITORY_VERIFIED_RELAY_EVENTS"
+  });
+}
+
 export const KAIOS_PAYMENT_APPROVAL_MATRIX = Object.freeze({
   PAYROLL: Object.freeze({ requestor: "COMPANY_PAYROLL_RUNTIME_AFTER_DISTINCT_WORK_REVIEW", approver: "REPOSITORY_BOUND_SCOPE_PAYROLL_FUNDING_NOT_CONNECTED", funding_authority: "COMPANY_PAYROLL_SOURCE_NOT_BOUND", signer: "ONE_EXACT_SECURE_SIGNER_NOT_CONNECTED", settlement_verifier: "REPOSITORY_BOUND_SCOPE_PAYROLL_SETTLEMENT_VERIFY_NOT_CONNECTED" }),
   PLAYER_REWARD: Object.freeze({ requestor: "VERIFIED_COMPANY_MISSION_RUNTIME", approver: "PURPOSE_SPECIFIC_REPOSITORY_AUTHORITY_NOT_CONNECTED", funding_authority: "BOUND_COMPANY_SOURCE_REQUIRED", signer: "ONE_EXACT_SECURE_SIGNER_NOT_CONNECTED", settlement_verifier: "DISTINCT_SETTLEMENT_VERIFIER_NOT_CONNECTED" }),

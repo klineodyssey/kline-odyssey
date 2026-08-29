@@ -47,6 +47,29 @@ export const WORK_MARKET = Object.freeze([
   Object.freeze({ role: "QA_REVIEWER", skill: "QUALITY_ASSURANCE", base_pay: 88 })
 ]);
 
+export const LIFE_PATHS = Object.freeze([
+  "EDUCATION", "EMPLOYMENT", "VOCATIONAL_LABOR", "ENTREPRENEURSHIP", "RESEARCH",
+  "ECOLOGY_FARMING_AQUACULTURE", "LOGISTICS_TRANSPORT", "SECURITY",
+  "MARKET_TRADING_GAME", "EXPLORATION_QUEST", "APP_PRODUCT_CREATION"
+]);
+
+export const EDUCATION_PATHS = Object.freeze([
+  "ELEMENTARY", "JUNIOR_HIGH", "HIGH_SCHOOL", "VOCATIONAL", "UNIVERSITY",
+  "GRADUATE_SCHOOL", "RESEARCH", "APPRENTICESHIP", "SKILL_TRAINING"
+]);
+
+export const BASIC_LIFE_NEEDS = Object.freeze([
+  "WATER", "FOOD", "SLEEP", "ENERGY", "SHELTER", "HEALTH", "TRANSPORT",
+  "EDUCATION", "WORK", "MONEY", "SOCIAL", "SECURITY"
+]);
+
+export const STARTER_WORLD_NODES = Object.freeze({
+  K280_WATER_SOURCE: Object.freeze({ node_id: "K280_WATER_SOURCE", type: "WATER", label: "K280 公共水源", need_gain: 35 }),
+  K280_FORAGING_GROVE: Object.freeze({ node_id: "K280_FORAGING_GROVE", type: "FOOD", label: "K280 採集林", need_gain: 30 }),
+  K280_SKILL_SCHOOL: Object.freeze({ node_id: "K280_SKILL_SCHOOL", type: "EDUCATION", label: "K280 技能學校", need_gain: 20 }),
+  K11520_MARKET: Object.freeze({ node_id: "K11520_MARKET", type: "MARKET", label: "11520 花果山市場", need_gain: 0 })
+});
+
 const LIFE_STAGES = Object.freeze(["BIRTH", "CHILDHOOD", "LEARNING", "ADULT", "WORKING", "AGING", "RETIRED", "DECEASED"]);
 const ALLOWED_FUNDS = new Set(["CUSTOMER_WORK_ORDER_BUDGET", "SIMULATED_COMPANY_PAYROLL_BUDGET", "SIMULATED_PUBLIC_WORK_BUDGET"]);
 
@@ -216,6 +239,7 @@ export function createPlayerGenesisState(input = {}) {
     },
     player: {
       life_id: playerLifeId,
+      actor_type: ["HUMAN_PLAYER", "AI_LIFE"].includes(input.life_type) ? input.life_type : "HUMAN_PLAYER",
       display_name: cleanName(input.display_name),
       birthday_private: input.birthday ? "LOCAL_PRIVATE_VALUE_RECORDED" : "NOT_PROVIDED",
       birthday_value: input.birthday ? String(input.birthday).slice(0, 10) : null,
@@ -259,7 +283,7 @@ export function createPlayerGenesisState(input = {}) {
       authority: "LOCAL_SIMULATION_ONLY",
       legal_title: false,
       civilization_stage: "PRIMITIVE_FORAGING",
-      resources: { food: 12, wood: 20, stone: 16, basic_tools: 2, minimum_housing: 1 },
+      resources: { water: 12, food: 12, wood: 20, stone: 16, basic_tools: 2, minimum_housing: 1 },
       forbidden_starter_assets: ["CAR", "FACTORY", "POWER_PLANT", "HIGH_RISE", "SHOPPING_MALL", "SEMICONDUCTOR_FAB"]
     },
     household: {
@@ -298,6 +322,35 @@ export function createPlayerGenesisState(input = {}) {
       { contract_id: "INHERITANCE-CONTRACT-001", type: "INHERITANCE_CONTRACT", simulation_only: true }
     ],
     work_market: clone(WORK_MARKET),
+    world_map: {
+      canonical_world: "EARTH/K280",
+      current_node_id: String(input.starter_location_id ?? "STARTER-K280-VALLEY-01"),
+      nodes: clone(Object.values(STARTER_WORLD_NODES)),
+      route_primitive: "FieldRoute",
+      position_primitive: "MapPosition",
+      location_permission_primitive: "LocationPermission",
+      gps_session_primitive: "GpsSession",
+      step_counter_primitive: "StepCounter",
+      map_evidence: "UniverseMap_V10_2_DISTANCE_COMPLETE_ALL_POINTS.json",
+      last_route: null
+    },
+    life_path: {
+      status: "SELECTION_REQUIRED",
+      selected_path: null,
+      education_path: null,
+      skills: ["FORAGING"],
+      certifications: [],
+      company_creation_unlocked: false
+    },
+    basic_needs: {
+      WATER: 35, FOOD: 45, SLEEP: 70, ENERGY: 75, SHELTER: 65, HEALTH: 90,
+      TRANSPORT: 55, EDUCATION: 25, WORK: 30, MONEY: 0, SOCIAL: 45, SECURITY: 70
+    },
+    starter_services: [
+      { service_id: "K280_WATER_AND_FOOD_GUIDE", product_class: "SERVICE", price: 3, currency: "SIMULATED_CURRENCY", status: "AVAILABLE_SIMULATION" }
+    ],
+    purchases: [],
+    life_loop: { status: "BIRTH_COMPLETE_PATH_PENDING", completed_cycles: 0, last_completed_at: null },
     active_work_order: createInitialWorkOrder(ids),
     codex_review: {
       reviewer: "KAIOS_CODEX_AI_COMPANY",
@@ -332,6 +385,82 @@ export function acceptFirstWork(state) {
   state.ai.work_status = "WORKING";
   addEvent(state, "WORK_ACCEPTED", { work_order_id: state.ids.work_order_id });
   return clone(state.active_work_order);
+}
+
+export function selectLifePath(state, path, educationPath = null) {
+  assert(state.onboarding_complete, "ONBOARDING_REQUIRED");
+  assert(LIFE_PATHS.includes(path), "LIFE_PATH_INVALID");
+  if (path === "EDUCATION") assert(EDUCATION_PATHS.includes(educationPath), "EDUCATION_PATH_REQUIRED");
+  state.life_path.selected_path = path;
+  state.life_path.education_path = path === "EDUCATION" ? educationPath : null;
+  state.life_path.status = path === "EDUCATION" ? "ENROLLED_SIMULATION" : "ACTIVE_SIMULATION_PATH";
+  state.life_loop.status = "PATH_SELECTED_NEEDS_PENDING";
+  addEvent(state, "LIFE_PATH_SELECTED", { path, education_path: state.life_path.education_path });
+  return clone(state.life_path);
+}
+
+export function identifyNextLifeNeed(state) {
+  const ranked = BASIC_LIFE_NEEDS
+    .map((need) => ({ need, level: Number(state.basic_needs?.[need] ?? 0) }))
+    .sort((left, right) => left.level - right.level || left.need.localeCompare(right.need));
+  return Object.freeze({
+    next_need: ranked[0].need,
+    level: ranked[0].level,
+    recommended_node: ranked[0].need === "WATER" ? "K280_WATER_SOURCE" : ranked[0].need === "FOOD" ? "K280_FORAGING_GROVE" : ranked[0].need === "EDUCATION" ? "K280_SKILL_SCHOOL" : null,
+    evidence: "LOCAL_SIMULATION_STATE"
+  });
+}
+
+export function travelToStarterNode(state, nodeId) {
+  const node = STARTER_WORLD_NODES[nodeId];
+  assert(node, "WORLD_NODE_NOT_FOUND");
+  assert(state.consent.navigation === "CONSENT_GRANTED" || state.consent.navigation === "CONSENT_DENIED", "NAVIGATION_CHOICE_REQUIRED");
+  const route = {
+    route_id: stableId("FIELD-ROUTE", `${state.seed}:${state.clock}:${state.world_map.current_node_id}:${nodeId}`),
+    origin: state.world_map.current_node_id,
+    destination: nodeId,
+    travel_mode: state.consent.navigation === "CONSENT_GRANTED" ? "NAVIGATION_APP_SIMULATION" : "NON_LOCATION_MODE_MANUAL_ROUTE",
+    map_evidence: state.world_map.map_evidence,
+    exact_gps_stored: false,
+    status: "ARRIVED_SIMULATION"
+  };
+  state.world_map.current_node_id = nodeId;
+  state.world_map.last_route = route;
+  addEvent(state, "WORLD_NODE_VISITED", { node_id: nodeId, route_id: route.route_id, travel_mode: route.travel_mode });
+  return clone(route);
+}
+
+export function satisfyStarterNeed(state, nodeId) {
+  const node = STARTER_WORLD_NODES[nodeId];
+  assert(node && ["WATER", "FOOD", "EDUCATION"].includes(node.type), "STARTER_NEED_NODE_INVALID");
+  assert(state.world_map.current_node_id === nodeId, "ARRIVAL_REQUIRED_BEFORE_NEED_ACTION");
+  if (node.type === "WATER") assert(state.starter_land.resources.water > 0, "STARTER_WATER_DEPLETED");
+  if (node.type === "FOOD") assert(state.starter_land.resources.food > 0, "STARTER_FOOD_DEPLETED");
+  if (node.type === "WATER") state.starter_land.resources.water -= 1;
+  if (node.type === "FOOD") state.starter_land.resources.food -= 1;
+  state.basic_needs[node.type] = Math.min(100, state.basic_needs[node.type] + node.need_gain);
+  if (node.type === "EDUCATION") state.life_path.skills = [...new Set([...state.life_path.skills, "BASIC_CIVILIZATION_NAVIGATION"])];
+  state.life_loop.status = state.life_path.selected_path ? "READY_FOR_WORK_OR_EDUCATION" : state.life_loop.status;
+  addEvent(state, "BASIC_NEED_SATISFIED", { need: node.type, node_id: nodeId, level: state.basic_needs[node.type] });
+  return identifyNextLifeNeed(state);
+}
+
+export function buyStarterService(state, serviceId) {
+  const service = state.starter_services.find((item) => item.service_id === serviceId);
+  assert(service, "STARTER_SERVICE_NOT_FOUND");
+  assert(!state.purchases.some((item) => item.service_id === serviceId), "STARTER_SERVICE_ALREADY_PURCHASED");
+  assert(state.payroll.status === "PAID", "EARNINGS_REQUIRED_BEFORE_PURCHASE");
+  const transaction = postTransaction(state, {
+    type: "CONSUMPTION", amount: service.price, debit: state.ids.player_wallet_id, credit: "SIM-CONSUMPTION-SINK",
+    contract: "HOUSEHOLD-CONTRACT-001", category: "transport", note: `Starter service purchase: ${serviceId}`
+  });
+  const purchase = { purchase_id: stableId("PURCHASE", `${state.seed}:${serviceId}`), service_id: serviceId, transaction_id: transaction.transaction_id, status: "SIMULATED_SETTLED" };
+  state.purchases.push(purchase);
+  state.life_loop.status = "FIRST_PLAYABLE_LIFE_LOOP_COMPLETE";
+  state.life_loop.completed_cycles += 1;
+  state.life_loop.last_completed_at = `SIMULATION_TICK_${state.clock}`;
+  addEvent(state, "FIRST_PLAYABLE_LIFE_LOOP_COMPLETED", { purchase_id: purchase.purchase_id, next_session: true });
+  return clone(purchase);
 }
 
 export function performWorkTick(state) {
@@ -488,6 +617,8 @@ export function validateState(state) {
   if (!state.ledger.every((entry) => entry.balanced && entry.debit && entry.credit)) issues.push("LEDGER_BALANCE");
   if (state.birthplace.location_id === state.starter_location.location_id) issues.push("LOCATION_SEPARATION");
   if (state.household.descendants.length > state.household.population_cap) issues.push("POPULATION_CAP");
+  if (state.life_path?.selected_path && !LIFE_PATHS.includes(state.life_path.selected_path)) issues.push("LIFE_PATH");
+  if (state.world_map?.last_route?.exact_gps_stored === true) issues.push("GPS_PRIVACY_BOUNDARY");
   return { ok: issues.length === 0, issues };
 }
 
@@ -523,6 +654,11 @@ export function createPlayerGenesisRuntime({ storage = globalThis.localStorage, 
     create,
     getState,
     completeOnboarding: () => completeOnboarding(requireState()),
+    selectLifePath: (path, educationPath) => selectLifePath(requireState(), path, educationPath),
+    identifyNextLifeNeed: () => identifyNextLifeNeed(requireState()),
+    travelToStarterNode: (nodeId) => travelToStarterNode(requireState(), nodeId),
+    satisfyStarterNeed: (nodeId) => satisfyStarterNeed(requireState(), nodeId),
+    buyStarterService: (serviceId) => buyStarterService(requireState(), serviceId),
     acceptFirstWork: () => acceptFirstWork(requireState()),
     performWorkTick: () => performWorkTick(requireState()),
     reviewWork: () => reviewWork(requireState()),
