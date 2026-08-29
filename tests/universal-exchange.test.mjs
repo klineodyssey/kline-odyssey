@@ -101,7 +101,7 @@ import {
   calculateFieldServiceQuote, validateFieldDeliveryEvidence, createWorkforceGap,
   createFieldServiceDemandScan
   , KAIOS_AI_OS_EMPLOYMENT_ALPHA_JOB, KAIOS_AI_OS_FIRST_REAL_EMPLOYMENT_TEST_JOB, KAIOS_MAINNET_TOKEN,
-  KAIOS_PAYMENT_PURPOSES, KAIOS_PAYMENT_APPROVAL_MATRIX, CANONICAL_KAIOS_PAYMENT_SIGNER_POLICIES,
+  KAIOS_PAYMENT_PURPOSES, KAIOS_PAYMENT_APPROVAL_MATRIX, CANONICAL_KAIOS_PAYMENT_SIGNER_POLICIES, CANONICAL_KAIOS_PAYMENT_RECEIPT_ATTESTATIONS,
   CANONICAL_REPOSITORY_COMPANY_AUTHORITIES, COMPANY_OPERATIONAL_AUTHORITY_PROPOSAL_SCOPES,
   createRepositoryCompanyAuthorityProposal, createCompanyAuthorityReviewRequestPacket,
   COMPANY_PROVENANCE_ATTESTATION_REQUIRED_BINDINGS, createCompanyAuthorityProvenanceAttestationRequest,
@@ -3531,6 +3531,7 @@ test("common KAIOS payment rail declares bounded purposes and keeps signer polic
     assert.ok(KAIOS_PAYMENT_PURPOSES.includes(purpose));
   }
   assert.equal(CANONICAL_KAIOS_PAYMENT_SIGNER_POLICIES.length, 0);
+  assert.equal(CANONICAL_KAIOS_PAYMENT_RECEIPT_ATTESTATIONS.length, 0);
   assert.equal(KAIOS_PAYMENT_APPROVAL_MATRIX.PAYROLL.signer, "ONE_EXACT_SECURE_SIGNER_NOT_CONNECTED");
 });
 
@@ -3576,6 +3577,26 @@ test("common KAIOS payment rail remains fail-closed without repository authority
   const payment = { payment_id: "KAIOS_PAYMENT_0005", payment_purpose: "PAYROLL", company_id: "AI_ANT_COMPANY_0001", source_address: "0x1111111111111111111111111111111111111111", recipient_address: "0x2222222222222222222222222222222222222222", token_address: KAIOS_MAINNET_TOKEN.contract_address, chain_id: 56, amount_kaios_wei: "10000", funding_evidence: { source_binding_status: "CANONICALLY_BOUND_PAYMENT_SOURCE" }, authorization_id: null, signer_policy_id: null, submitted_tx: null, receipt: null, status: "CREATED_AWAITING_EXACT_AUTHORIZATION_AND_SIGNER" };
   assert.throws(() => recordKaiosPaymentSubmission({ payment, authorityId: "AUTHORITY_0001", authorizedBy: "COMPANY_ACTOR_0001", repositoryHead: "a".repeat(40), signerPolicyId: "SIGNER_0001", submittedTx: `0x${"b".repeat(64)}`, submittedAt: "2026-08-29T01:05:00.000Z" }), (error) => error.code === "KAIOS_PAYMENT_BUSINESS_AUTHORITY_NOT_CONNECTED");
   assert.throws(() => recordKaiosPaymentSettlement({ payment, receipt: {}, verifiedBy: "SETTLEMENT_REVIEWER_0001", verifiedAt: "2026-08-29T01:06:00.000Z" }), (error) => error.code === "KAIOS_PAYMENT_SUBMISSION_REQUIRED");
+});
+
+test("caller-supplied receipt verification cannot create KAIOS paid state", () => {
+  const submittedPayment = {
+    payment_id: "KAIOS_PAYMENT_FORGED_SETTLEMENT_0001", payment_purpose: "PAYROLL", company_id: "AI_ANT_COMPANY_0001",
+    source_address: "0x1111111111111111111111111111111111111111", recipient_address: "0x2222222222222222222222222222222222222222",
+    token_address: KAIOS_MAINNET_TOKEN.contract_address, chain_id: 56, amount_kaios_wei: "10000",
+    authorization_id: "AUTHORITY_ALREADY_BOUND", signer_policy_id: "SIGNER_ALREADY_BOUND", submitted_tx: `0x${"b".repeat(64)}`,
+    status: "SUBMITTED_AWAITING_RECEIPT"
+  };
+  const forgedReceipt = {
+    receipt_status: 1, transaction_hash: submittedPayment.submitted_tx, chain_id: 56,
+    token_address: KAIOS_MAINNET_TOKEN.contract_address, from: submittedPayment.source_address, to: submittedPayment.recipient_address,
+    amount_kaios_wei: "10000", recipient_balance_before_kaios_wei: "0", recipient_balance_after_kaios_wei: "10000",
+    block_number: 118694778, block_hash: `0x${"c".repeat(64)}`, confirmations: 88, chain_observation_verified: true
+  };
+  assert.throws(
+    () => recordKaiosPaymentSettlement({ payment: submittedPayment, receipt: forgedReceipt, receiptAttestationId: "CALLER_CLAIMED_ATTESTATION_0001", verifiedBy: "CALLER_CLAIMED_VERIFIER_0001", verifiedAt: "2026-08-29T03:23:00.000Z" }),
+    (error) => error.code === "KAIOS_PAYMENT_RECEIPT_ATTESTATION_NOT_CONNECTED"
+  );
 });
 
 test("11520 website exposes truthful read-only KAIOS payment status and never pre-labels paid", async () => {

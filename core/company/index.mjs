@@ -136,6 +136,12 @@ export const KAIOS_PAYMENT_APPROVAL_MATRIX = Object.freeze({
 // from converting an arbitrary JSON object into signing authority.
 export const CANONICAL_KAIOS_PAYMENT_SIGNER_POLICIES = Object.freeze([]);
 
+// Receipt observations may become settlement truth only after a trusted
+// external observer has produced an exact, repository-owned attestation.
+// Keeping this allowlist empty prevents caller-supplied receipt fields or a
+// `chain_observation_verified=true` flag from self-authorizing PAID state.
+export const CANONICAL_KAIOS_PAYMENT_RECEIPT_ATTESTATIONS = Object.freeze([]);
+
 export const KAIOS_AI_OS_FIRST_REAL_EMPLOYMENT_TEST_JOB = Object.freeze({
   job_id: "KAIOS_AI_OS_FIRST_EMPLOYMENT_ORIENTATION",
   company_id: "AI_ANT_COMPANY_0001",
@@ -801,14 +807,31 @@ function verifyKaiosPaymentReceiptBinding({ sourceAddress, recipientAddress, amo
   return Object.freeze({ transaction_hash: receipt.transaction_hash.toLowerCase(), receipt_status: 1, block_number: receipt.block_number, block_hash: receipt.block_hash.toLowerCase(), confirmations: receipt.confirmations, recipient_balance_before_kaios_wei: before.toString(), recipient_balance_after_kaios_wei: after.toString(), chain_observation_verified: true });
 }
 
-export function recordKaiosPaymentSettlement({ payment, receipt, verifiedBy, verifiedAt, existingSettlements = [] }) {
+function verifyRepositoryBoundKaiosPaymentReceiptAttestation({ receiptAttestationId, payment, receipt, verifiedBy, verifiedAt }) {
+  requireId(receiptAttestationId, "kaios_payment.receipt_attestation_id");
+  const attestation = CANONICAL_KAIOS_PAYMENT_RECEIPT_ATTESTATIONS.find((record) => record.receipt_attestation_id === receiptAttestationId);
+  invariant(attestation?.status === "VERIFIED_REPOSITORY_BOUND_CHAIN_OBSERVATION", "KAIOS_PAYMENT_RECEIPT_ATTESTATION_NOT_CONNECTED", "A trusted repository-owned exact-receipt attestation is required; caller-supplied verification flags are not chain provenance");
+  invariant(attestation.transport_attested === true && attestation.detached_attestation_verified === true, "KAIOS_PAYMENT_RECEIPT_ATTESTATION_PROVENANCE_INVALID", "Receipt attestation requires an attested external transport and verified detached attestation");
+  invariant(attestation.verifier_id === verifiedBy, "KAIOS_PAYMENT_RECEIPT_ATTESTATION_VERIFIER_MISMATCH", "Settlement verifier must match the repository-owned receipt attestation");
+  invariant(attestation.payment_id === payment.payment_id && String(attestation.transaction_hash).toLowerCase() === payment.submitted_tx, "KAIOS_PAYMENT_RECEIPT_ATTESTATION_ACTION_MISMATCH", "Receipt attestation must bind the exact payment and submitted transaction");
+  invariant(Number(attestation.chain_id) === KAIOS_MAINNET_TOKEN.chain_id && String(attestation.token_address).toLowerCase() === KAIOS_MAINNET_TOKEN.contract_address.toLowerCase(), "KAIOS_PAYMENT_RECEIPT_ATTESTATION_TOKEN_MISMATCH", "Receipt attestation must bind canonical KAIOS on chain 56");
+  invariant(normalizeKaiosPaymentAddress(attestation.source_address, "kaios_payment.receipt_attestation.source_address") === payment.source_address && normalizeKaiosPaymentAddress(attestation.recipient_address, "kaios_payment.receipt_attestation.recipient_address") === payment.recipient_address, "KAIOS_PAYMENT_RECEIPT_ATTESTATION_PARTY_MISMATCH", "Receipt attestation must bind the exact source and recipient");
+  invariant(String(attestation.amount_kaios_wei) === payment.amount_kaios_wei, "KAIOS_PAYMENT_RECEIPT_ATTESTATION_AMOUNT_MISMATCH", "Receipt attestation must bind the exact payment amount");
+  invariant(Number(attestation.block_number) === Number(receipt?.block_number) && String(attestation.block_hash).toLowerCase() === String(receipt?.block_hash).toLowerCase(), "KAIOS_PAYMENT_RECEIPT_ATTESTATION_BLOCK_MISMATCH", "Receipt attestation must bind the exact observed block");
+  invariant(String(attestation.recipient_balance_before_kaios_wei) === String(receipt?.recipient_balance_before_kaios_wei) && String(attestation.recipient_balance_after_kaios_wei) === String(receipt?.recipient_balance_after_kaios_wei), "KAIOS_PAYMENT_RECEIPT_ATTESTATION_BALANCE_MISMATCH", "Receipt attestation must bind the exact recipient balance observation");
+  const verified = parseEmploymentTime(verifiedAt, "kaios_payment.receipt_verified_at");
+  invariant(parseEmploymentTime(attestation.observed_at, "kaios_payment.receipt_attestation.observed_at") <= verified, "KAIOS_PAYMENT_RECEIPT_ATTESTATION_TIME_INVALID", "Receipt attestation cannot postdate settlement verification");
+  return attestation;
+}
+
+export function recordKaiosPaymentSettlement({ payment, receipt, receiptAttestationId, verifiedBy, verifiedAt, existingSettlements = [] }) {
   requireId(verifiedBy, "kaios_payment.settlement_verifier_id");
   requireArray(existingSettlements, "kaios_payment.existing_settlements");
   invariant(payment?.status === "SUBMITTED_AWAITING_RECEIPT" && payment.authorization_id && payment.signer_policy_id && payment.submitted_tx, "KAIOS_PAYMENT_SUBMISSION_REQUIRED", "Settlement requires a separately authorized signer submission");
   invariant(!existingSettlements.some((item) => item.payment_id === payment.payment_id || item.transaction_hash === payment.submitted_tx), "KAIOS_PAYMENT_SETTLEMENT_REPLAY", "Payment or transaction receipt may settle only once");
-  parseEmploymentTime(verifiedAt, "kaios_payment.receipt_verified_at");
+  const receiptAttestation = verifyRepositoryBoundKaiosPaymentReceiptAttestation({ receiptAttestationId, payment, receipt, verifiedBy, verifiedAt });
   const verifiedReceipt = verifyKaiosPaymentReceiptBinding({ sourceAddress: payment.source_address, recipientAddress: payment.recipient_address, amountKaiosWei: payment.amount_kaios_wei, transactionHash: payment.submitted_tx, receipt });
-  return Object.freeze({ ...payment, receipt: verifiedReceipt, verified_by: verifiedBy, verified_at: verifiedAt, paid: true, status: "SETTLED_WITH_VERIFIED_MAINNET_RECEIPT" });
+  return Object.freeze({ ...payment, receipt: Object.freeze({ ...verifiedReceipt, receipt_attestation_id: receiptAttestation.receipt_attestation_id, repository_bound_chain_observation_verified: true }), verified_by: verifiedBy, verified_at: verifiedAt, paid: true, status: "SETTLED_WITH_VERIFIED_MAINNET_RECEIPT" });
 }
 
 export function createEmploymentApplication({ applicationId, job = KAIOS_AI_OS_EMPLOYMENT_ALPHA_JOB, identityProof, capabilities = [], submittedAt }) {
