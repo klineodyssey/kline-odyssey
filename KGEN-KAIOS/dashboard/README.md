@@ -18,6 +18,8 @@ This dashboard is the public status surface for the latest safe KAIOS experiment
 - Rollback uses the same workflow with an earlier reviewed exact SHA; it does not rewrite Git history.
 - A dirty Human `main` worktree is never cleaned, reset, stashed, or overwritten. GM engineering continues in an isolated worktree based on freshly fetched `origin/main`.
 
+The first exact-ref deployment attempt, GitHub Actions run `33246089502`, was rejected before any job step because the `github-pages` environment currently permits only branch `main`. No environment permission was changed. Therefore the public site remains at `ac304fc585f5f86846d2c61b69ecad8f59bc0a66`; PR #192 remains the newer experimental candidate and website drift is explicitly open. Safe resolution is either distinct review followed by the protected main release path, or a separately authorized and reviewed environment branch-policy change.
+
 ## Public chain snapshot
 
 Snapshot evidence is read-only BNB Smart Chain state at block `118743165`, block hash `0x307b4c200980a0bba413c458e5dc3d37b0a6a432b49a14e3ed1c575aaba01498`, observed `2026-08-29T09:25:28Z`.

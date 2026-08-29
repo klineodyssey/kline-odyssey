@@ -75,14 +75,17 @@
   "gm_work_status": {
     "latest_main": "ac304fc585f5f86846d2c61b69ecad8f59bc0a66",
     "latest_public_website_sha": "ac304fc585f5f86846d2c61b69ecad8f59bc0a66",
+    "latest_experimental_candidate_sha": "9f1813c07eb8c80db3789be0f25e2059179398ed",
+    "website_drift": true,
+    "failed_release_run": "https://github.com/klineodyssey/kline-odyssey/actions/runs/33246089502",
     "active_branch": "codex/public-lab-money-flow-audit",
     "active_pr": "https://github.com/klineodyssey/kline-odyssey/pull/192",
     "now_working_on": "PUBLIC_EXPERIMENTAL_RELEASE_AND_END_TO_END_MONEY_FLOW_AUDIT",
     "last_completed": "READ_ONLY_BSC_BLOCK_118743165_SNAPSHOT",
     "waiting_review": "DISTINCT_REVIEW_REQUIRED_BEFORE_MERGE",
-    "waiting_external": "PAYROLL_SOURCE_AND_SIGNER_NOT_BOUND",
+    "waiting_external": "GITHUB_PAGES_ENVIRONMENT_ALLOWS_MAIN_ONLY; DISTINCT_REVIEW_REQUIRED; PAYROLL_SOURCE_AND_SIGNER_NOT_BOUND",
     "broken_public_features": ["player payment not connected", "payroll not connected", "ATM not funded", "11520 settlement adapter not integrated"],
-    "ready_next": "PUBLISH_EXACT_SAFE_EXPERIMENTAL_BUILD_AFTER_CI"
+    "ready_next": "DISTINCT_REVIEW_PR192_THEN_VALIDATED_MAIN_RELEASE; OR EXPLICITLY_APPROVE_A_REVIEWED_ENVIRONMENT_BRANCH_POLICY_CHANGE"
   },
   "sources": {
     "build_info": "./build-info.json",
