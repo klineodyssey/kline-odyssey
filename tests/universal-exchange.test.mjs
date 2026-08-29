@@ -6,7 +6,9 @@ import {
   MemoryUniverseStore, createUniverseRuntime, resolveSpeciesCode, upgradeAppVersion,
   createListing, settleOrder, MissionEngine, completeAssetDream, assertLedgerSeparation,
   assertAppendOnlyChain, validateSpacecraft, ASSET_TYPES, createOrganRobotAsset,
-  evaluateOrganRobotCompatibility, activateOrganRobotTransplant, buildLifeDraft, assignLifeJob,
+  evaluateOrganRobotCompatibility, activateOrganRobotTransplant,
+  CANONICAL_ORGAN_OWNERSHIP_SETTLEMENT_ATTESTATIONS, CANONICAL_ORGAN_TRANSPLANT_ATTESTATIONS,
+  buildLifeDraft, assignLifeJob,
   validateKgenMarketSnapshot, validateSwapIntent, KGEN_SWAP_CONFIG, DigitalLifeBirthResolver,
   createBirthCertificate, createPendingBirthCertificate, createDigitalLifeBirthCertificateView, appendResolvedLifeBirth, calculateLifeAge,
   deriveHeartEligibility, createDigitalAntFinanceSnapshot, createSurvivalReserveProposal,
@@ -708,7 +710,7 @@ test("Universal asset and listing type enumerations support all first-day market
   for (const type of ["FIXED_PRICE", "AUCTION", "LICENSE", "SUBSCRIPTION", "RENTAL", "JOB", "SERVICE", "EQUITY", "REVENUE_SHARE"]) assert.ok(marketSource.includes(`\"${type}\"`));
 });
 
-test("Organ Robot remains a separate owned asset until compatibility and settlement permit transplant", () => {
+test("Organ Robot remains separate and fail-closed until repository-owned attestations exist", () => {
   const rights_manifest = { identity_right: "NOT_APPLICABLE", ownership_right: "TRANSFERABLE", control_right: "OWNER", use_right: "OWNER", license_right: "LICENSE_ONLY", revenue_right: "NONE", governance_right: "NONE", transfer_right: "OWNER", breeding_right: "NOT_APPLICABLE", data_right: "CONSENT_REQUIRED", expiration: null, restrictions: ["LIFE_IDENTITY_NOT_INCLUDED", "TRANSPLANT_REQUIRES_VERIFIED_SETTLEMENT"] };
   const asset = {
     asset_id: "NAVIGATION_ORGAN_ROBOT_000001", asset_type: "ORGAN_ROBOT", issuer_id: "AI_ANT_COMPANY_0001",
@@ -726,28 +728,25 @@ test("Organ Robot remains a separate owned asset until compatibility and settlem
   assert.equal(product.asset.asset_type, "ORGAN_ROBOT");
   assert.equal(product.organ.install_status, "OWNED_NOT_INSTALLED");
 
-  const incompatible = evaluateOrganRobotCompatibility({ organ, ownerLifeId: asset.owner_id, speciesId: "FISH", bodyInterface: "AQUATIC_V1", availableEnergy: 9, availableCompute: 9, securityEvidence: { status: "VERIFIED" } });
-  assert.equal(incompatible.status, "INCOMPATIBLE");
-  assert.equal(incompatible.ownership_preserved, true);
-  assert.deepEqual(incompatible.blockers, ["SPECIES_INCOMPATIBLE", "BODY_INTERFACE_INCOMPATIBLE"]);
-
   const compatible = evaluateOrganRobotCompatibility({ organ, ownerLifeId: asset.owner_id, speciesId: "HUMAN", bodyInterface: "HUMANOID_V1", availableEnergy: 2, availableCompute: 4, securityEvidence: { status: "VERIFIED" } });
   assert.equal(compatible.status, "READY_FOR_TRANSPLANT");
   assert.equal(compatible.automatic_installation, false);
-  assert.throws(() => activateOrganRobotTransplant({ organ, compatibility: compatible, bodyId: "BODY_0001", ownershipTransferReceipt: null, transplantEvidence: null }), (error) => error.code === "ORGAN_OWNERSHIP_RECEIPT_VERIFIER_REQUIRED");
+  assert.equal(CANONICAL_ORGAN_OWNERSHIP_SETTLEMENT_ATTESTATIONS.length, 0);
+  assert.equal(CANONICAL_ORGAN_TRANSPLANT_ATTESTATIONS.length, 0);
+
   assert.throws(() => activateOrganRobotTransplant({
-    organ, compatibility: compatible, bodyId: "BODY_0001", ownershipTransferReceipt: { receipt_id: "CALLER_CLAIM" }, transplantEvidence: { evidence_id: "CALLER_CLAIM" },
-    verifyOwnershipTransferReceipt: (_receipt, expected) => ({ ...expected, status: "VERIFIED_SETTLED", provenance_status: "CALLER_SUPPLIED", evidence_id: "CALLER_CLAIM" }),
-    verifyTransplantEvidence: (_evidence, expected) => ({ ...expected, status: "VERIFIED", provenance_status: "CALLER_SUPPLIED", evidence_id: "CALLER_CLAIM" })
-  }), (error) => error.code === "ORGAN_OWNERSHIP_SETTLEMENT_REQUIRED");
-  const installed = activateOrganRobotTransplant({
-    organ, compatibility: compatible, bodyId: "BODY_0001", ownershipTransferReceipt: { receipt_id: "ORDER_RECEIPT_0001" }, transplantEvidence: { evidence_id: "TRANSPLANT_0001" },
-    verifyOwnershipTransferReceipt: (_receipt, expected) => ({ ...expected, status: "VERIFIED_SETTLED", provenance_status: "REPOSITORY_BOUND_SETTLEMENT_ATTESTATION", evidence_id: "ORDER_RECEIPT_ATTESTATION_0001" }),
-    verifyTransplantEvidence: (_evidence, expected) => ({ ...expected, status: "VERIFIED", provenance_status: "REPOSITORY_BOUND_TRANSPLANT_ATTESTATION", evidence_id: "TRANSPLANT_ATTESTATION_0001" })
-  });
-  assert.equal(installed.install_status, "INSTALLED");
-  assert.equal(installed.installed_body_id, "BODY_0001");
-  assert.equal(installed.ownership_settlement_evidence_id, "ORDER_RECEIPT_ATTESTATION_0001");
+    organ, compatibility: compatible, bodyId: "BODY_0001",
+    ownershipSettlementAttestationId: "CALLER_CLAIMED_OWNERSHIP",
+    transplantAttestationId: "CALLER_CLAIMED_TRANSPLANT",
+    verifyOwnershipTransferReceipt: (_receipt, expected) => ({ ...expected, status: "VERIFIED_SETTLED", provenance_status: "REPOSITORY_BOUND_SETTLEMENT_ATTESTATION" }),
+    verifyTransplantEvidence: (_evidence, expected) => ({ ...expected, status: "VERIFIED", provenance_status: "REPOSITORY_BOUND_TRANSPLANT_ATTESTATION" })
+  }), (error) => error.code === "CALLER_SUPPLIED_ORGAN_ATTESTATION_VERIFIER_FORBIDDEN");
+
+  assert.throws(() => activateOrganRobotTransplant({
+    organ, compatibility: compatible, bodyId: "BODY_0001",
+    ownershipSettlementAttestationId: "CALLER_CHOSEN_OWNERSHIP_ID",
+    transplantAttestationId: "CALLER_CHOSEN_TRANSPLANT_ID"
+  }), (error) => error.code === "ORGAN_OWNERSHIP_SETTLEMENT_ATTESTATION_NOT_CONNECTED");
 });
 
 test("12345 integration names only functions present in formal Solidity source", async () => {

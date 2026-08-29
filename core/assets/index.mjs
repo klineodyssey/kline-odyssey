@@ -17,6 +17,9 @@ export const ORGAN_ROBOT_FIELDS = Object.freeze([
   "license_id", "ownership_rights", "install_status", "installed_body_id", "market_status"
 ]);
 
+export const CANONICAL_ORGAN_OWNERSHIP_SETTLEMENT_ATTESTATIONS = Object.freeze([]);
+export const CANONICAL_ORGAN_TRANSPLANT_ATTESTATIONS = Object.freeze([]);
+
 export const ASSET_FIELDS = Object.freeze([
   "asset_id", "asset_type", "issuer_id", "owner_id", "controller_id", "metadata_hash", "rights_manifest",
   "settlement_currency", "status", "location", "location_id", "civilization_id", "created_at", "updated_at"
@@ -75,15 +78,28 @@ export function evaluateOrganRobotCompatibility({ organ, ownerLifeId, speciesId,
   });
 }
 
-export function activateOrganRobotTransplant({ organ, compatibility, bodyId, ownershipTransferReceipt, transplantEvidence, verifyOwnershipTransferReceipt, verifyTransplantEvidence }) {
+export function activateOrganRobotTransplant({
+  organ,
+  compatibility,
+  bodyId,
+  ownershipSettlementAttestationId,
+  transplantAttestationId,
+  verifyOwnershipTransferReceipt,
+  verifyTransplantEvidence
+}) {
   validateOrganRobot(organ);
+  invariant(
+    verifyOwnershipTransferReceipt === undefined && verifyTransplantEvidence === undefined,
+    "CALLER_SUPPLIED_ORGAN_ATTESTATION_VERIFIER_FORBIDDEN",
+    "Caller-supplied Organ Robot attestation verifiers cannot establish repository-owned provenance"
+  );
   invariant(compatibility?.organ_id === organ.organ_id && compatibility.status === "READY_FOR_TRANSPLANT", "ORGAN_COMPATIBILITY_REQUIRED", "A compatible Organ Robot is required for transplant");
-  invariant(typeof verifyOwnershipTransferReceipt === "function", "ORGAN_OWNERSHIP_RECEIPT_VERIFIER_REQUIRED", "A trusted ownership receipt verifier is required");
-  invariant(typeof verifyTransplantEvidence === "function", "ORGAN_TRANSPLANT_EVIDENCE_VERIFIER_REQUIRED", "A trusted transplant evidence verifier is required");
-  const verifiedOwnership = verifyOwnershipTransferReceipt(ownershipTransferReceipt, Object.freeze({ asset_id: organ.organ_id, owner_life_id: organ.owner_life_id }));
-  const verifiedTransplant = verifyTransplantEvidence(transplantEvidence, Object.freeze({ organ_id: organ.organ_id, body_id: bodyId, owner_life_id: organ.owner_life_id }));
-  invariant(verifiedOwnership?.status === "VERIFIED_SETTLED" && verifiedOwnership.asset_id === organ.organ_id && verifiedOwnership.owner_life_id === organ.owner_life_id && verifiedOwnership.provenance_status === "REPOSITORY_BOUND_SETTLEMENT_ATTESTATION", "ORGAN_OWNERSHIP_SETTLEMENT_REQUIRED", "Repository-bound ownership settlement evidence is required before transplant");
-  invariant(verifiedTransplant?.status === "VERIFIED" && verifiedTransplant.body_id === bodyId && verifiedTransplant.organ_id === organ.organ_id && verifiedTransplant.provenance_status === "REPOSITORY_BOUND_TRANSPLANT_ATTESTATION", "ORGAN_TRANSPLANT_EVIDENCE_REQUIRED", "Repository-bound body transplant evidence is required");
+  const verifiedOwnership = CANONICAL_ORGAN_OWNERSHIP_SETTLEMENT_ATTESTATIONS.find((attestation) => attestation.attestation_id === ownershipSettlementAttestationId);
+  const verifiedTransplant = CANONICAL_ORGAN_TRANSPLANT_ATTESTATIONS.find((attestation) => attestation.attestation_id === transplantAttestationId);
+  invariant(Boolean(verifiedOwnership), "ORGAN_OWNERSHIP_SETTLEMENT_ATTESTATION_NOT_CONNECTED", "Repository-owned ownership settlement attestation is not connected");
+  invariant(Boolean(verifiedTransplant), "ORGAN_TRANSPLANT_ATTESTATION_NOT_CONNECTED", "Repository-owned transplant attestation is not connected");
+  invariant(verifiedOwnership.status === "VERIFIED_SETTLED" && verifiedOwnership.asset_id === organ.organ_id && verifiedOwnership.owner_life_id === organ.owner_life_id && verifiedOwnership.provenance_status === "REPOSITORY_BOUND_SETTLEMENT_ATTESTATION", "ORGAN_OWNERSHIP_SETTLEMENT_REQUIRED", "Repository-bound ownership settlement evidence is required before transplant");
+  invariant(verifiedTransplant.status === "VERIFIED" && verifiedTransplant.body_id === bodyId && verifiedTransplant.organ_id === organ.organ_id && verifiedTransplant.owner_life_id === organ.owner_life_id && verifiedTransplant.provenance_status === "REPOSITORY_BOUND_TRANSPLANT_ATTESTATION", "ORGAN_TRANSPLANT_EVIDENCE_REQUIRED", "Repository-bound body transplant evidence is required");
   return Object.freeze({ ...structuredClone(organ), install_status: "INSTALLED", installed_body_id: bodyId, ownership_settlement_evidence_id: verifiedOwnership.evidence_id, transplant_evidence_id: verifiedTransplant.evidence_id });
 }
 
