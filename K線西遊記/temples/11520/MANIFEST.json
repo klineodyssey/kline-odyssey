@@ -23,7 +23,7 @@
   "native_kgen_market_quote_status": "UNFROZEN_CANDIDATE",
   "native_kgen_market_price_status": "NATIVE_MARKET_PRICE_CANDIDATE",
   "native_kgen_market_self_match": "FAIL_CLOSED_SAME_OWNER_OR_CONTROLLER",
-  "native_kgen_market_actor_authority": "INDEPENDENT_VERIFIER_REQUIRED_CALLER_ASSERTED_IDENTITY_FORBIDDEN",
+  "native_kgen_market_actor_authority": "REPOSITORY_OWNED_EXACT_MARKET_PURPOSE_ATTESTATION_REQUIRED_PRODUCTION_NOT_CONNECTED",
   "native_kgen_market_cancel_authority": "VERIFIED_ACTOR_AND_CONTROLLER_EXACT_MATCH",
   "native_kgen_market_replay_policy": "ACTOR_BOUND_ORDER_AND_CANCEL_NONCE_REQUIRED",
   "native_kgen_market_settlement_attestation_registry": "REPOSITORY_OWNED_EMPTY_NOT_CONNECTED",

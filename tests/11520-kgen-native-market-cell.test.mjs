@@ -3,49 +3,32 @@ import { readFile } from "node:fs/promises";
 import test from "node:test";
 import { createKgenNativeMarketCell } from "../K線西遊記/temples/11520/modules/kgen-native-market-cell.mjs";
 
-const verifiedContexts = new WeakMap();
-let nextEvidence = 1;
 let nextActionNonce = 1;
+const TEST_MARKET_ID = "TEST_ONLY_11520_KGEN_NATIVE_MARKET";
 
 function actor(name, controller = `${name}-controller`, overrides = {}) {
-  const context = Object.freeze({
-    claimed_actor_id: overrides.claimed_actor_id ?? `claim:${name}`,
-    claimed_controller_id: overrides.claimed_controller_id ?? `claim:${controller}`,
-    opaque_nonce: nextEvidence
-  });
-  verifiedContexts.set(context, Object.freeze({
-    actor_id: overrides.actor_id ?? `life:${name}`,
-    controller_id: overrides.controller_id ?? `ctrl:${controller}`,
-    authentication_status: overrides.authentication_status ?? "VERIFIED",
-    authentication_method: overrides.authentication_method ?? "TEST_IDENTITY_REGISTRY",
-    evidence_id: overrides.evidence_id ?? `ACTOR-EVIDENCE-${nextEvidence++}`,
-    issued_at: overrides.issued_at ?? "2026-08-22T14:00:00.000Z",
-    expires_at: overrides.expires_at ?? null,
-    session_id: overrides.session_id ?? `SESSION-${name}-${nextEvidence}`
-  }));
-  return context;
+  if (overrides.expires_at) return "TEST-EXPIRED-ACTOR-PLACE";
+  if (overrides.actor_id) return controller === "one" ? "TEST-SAME-OWNER-C1-PLACE" : "TEST-SAME-OWNER-C2-PLACE";
+  if (name === "same") return controller === "seller-control" ? "TEST-SAME-OWNER-C1-PLACE" : "TEST-SAME-OWNER-C2-PLACE";
+  if (controller === "shared") return name === "alice" ? "TEST-SHARED-CONTROLLER-A-PLACE" : "TEST-SHARED-CONTROLLER-B-PLACE";
+  if (/seller|^s\d|price|best|attacker/.test(name)) return "TEST-ACTOR-B-PLACE";
+  return "TEST-ACTOR-A-PLACE";
 }
-
-function verifyActorContext(context) {
-  const verified = verifiedContexts.get(context);
-  if (!verified) throw new Error("UNTRUSTED_ACTOR_CONTEXT");
-  return verified;
+function cancelAttestationFor(id) {
+  if (id === "TEST-ACTOR-A-PLACE") return "TEST-ACTOR-A-CANCEL";
+  if (id === "TEST-ACTOR-B-PLACE") return "TEST-ACTOR-B-CANCEL";
+  return id;
 }
-
 function createMarket(options = {}) {
-  const market = createKgenNativeMarketCell({
-    verifyActorContext,
-    tickSize: "0.00000001",
-    lotSize: "0.00000001",
-    ...options
-  });
+  const market = createKgenNativeMarketCell({ marketId: TEST_MARKET_ID, tickSize: "0.00000001", lotSize: "0.00000001", ...options });
   return Object.freeze({
     ...market,
     placeOrder(input) {
-      return market.placeOrder({ ...input, nonce: input.nonce ?? `ORDER-NONCE-${nextActionNonce++}` });
+      const { actorContext, ...rest } = input;
+      return market.placeOrder({ ...rest, actorAttestationId: actorContext, nonce: input.nonce ?? `ORDER-NONCE-${nextActionNonce++}` });
     },
     cancelOrder(orderId, actorContext, nonce = `CANCEL-NONCE-${nextActionNonce++}`) {
-      return market.cancelOrder(orderId, actorContext, nonce);
+      return market.cancelOrder(orderId, cancelAttestationFor(actorContext), nonce);
     }
   });
 }
@@ -140,13 +123,17 @@ test("same controller across different owners fails closed", () => {
   assert.equal(market.getMarketState().matchedTradeCount, 0);
 });
 
-test("unauthenticated forged or unknown actor contexts are forbidden", () => {
-  const market = createMarket();
-  const issued = actor("alice");
-  assert.throws(() => market.placeOrder({ side: "BUY", price: "1", quantity: "1", actorContext: { ...issued } }), /ACTOR_CONTEXT_VERIFICATION_FAILED/);
-  assert.throws(() => market.placeOrder({ side: "BUY", price: "1", quantity: "1", owner: "life:alice", controller: "ctrl:alice" }), /ACTOR_CONTEXT_VERIFICATION_FAILED/);
-  const unknownMarket = createMarket({ verifyActorContext: () => ({ authentication_status: "UNKNOWN" }) });
-  assert.throws(() => unknownMarket.placeOrder({ side: "BUY", price: "1", quantity: "1", actorContext: {} }), /ACTOR_CONTEXT_NOT_VERIFIED/);
+test("caller-supplied actor authority cannot authorize production or test markets", () => {
+  assert.throws(() => createKgenNativeMarketCell({ verifyActorContext: () => ({ authentication_status: "VERIFIED" }) }), /CALLER_SUPPLIED_ACTOR_CONTEXT_VERIFIER_FORBIDDEN/);
+  assert.throws(() => createKgenNativeMarketCell({ actorAttestationRegistry: {} }), /CALLER_SUPPLIED_ACTOR_ATTESTATION_REGISTRY_FORBIDDEN/);
+  const production = createKgenNativeMarketCell();
+  assert.throws(
+    () => production.placeOrder({ side: "BUY", price: "1", quantity: "1", actorAttestationId: "TEST-ACTOR-A-PLACE", nonce: "ORDER-NONCE-PRODUCTION-1" }),
+    /ACTOR_CONTEXT_ATTESTATION_REGISTRY_NOT_CONNECTED/
+  );
+  const testMarket = createMarket();
+  assert.throws(() => testMarket.placeOrder({ side: "BUY", price: "1", quantity: "1", actorContext: { claimed_actor_id: "life:forged" } }), /verified actor evidence_id/);
+  assert.throws(() => testMarket.placeOrder({ side: "BUY", price: "1", quantity: "1", actorContext: "TEST-UNKNOWN-ACTOR-PLACE" }), /ACTOR_CONTEXT_ATTESTATION_NOT_FOUND/);
 });
 
 test("verified actor identifiers normalize before collision checks and ignore claimed labels", () => {
@@ -217,8 +204,8 @@ test("cancellation requires a verified actor context, not known identity strings
   const market = createMarket();
   const auth = actor("buyer");
   const placed = market.placeOrder({ side: "BUY", price: "0.00045", quantity: "5", actorContext: auth });
-  assert.throws(() => market.cancelOrder(placed.order.id), /ACTOR_CONTEXT_VERIFICATION_FAILED/);
-  assert.throws(() => market.cancelOrder(placed.order.id, { owner: placed.order.owner, controller: placed.order.controller }), /ACTOR_CONTEXT_VERIFICATION_FAILED/);
+  assert.throws(() => market.cancelOrder(placed.order.id), /verified actor evidence_id/);
+  assert.throws(() => market.cancelOrder(placed.order.id, { owner: placed.order.owner, controller: placed.order.controller }), /verified actor evidence_id/);
   assert.throws(() => market.cancelOrder(placed.order.id, actor("attacker")), /CANCEL_AUTHORIZATION_FAILED/);
   assert.equal(market.cancelOrder(placed.order.id, auth)?.remaining, "5");
   assert.equal(market.getOrderBook().bestBid, null);
@@ -258,7 +245,7 @@ test("failed forged crossing cannot change CT volume or resting liquidity", () =
       quantity: "2",
       actorContext: { claimed_actor_id: "life:forged", claimed_controller_id: "ctrl:forged" }
     }),
-    /ACTOR_CONTEXT_VERIFICATION_FAILED/
+    /verified actor evidence_id/
   );
   assert.equal(market.getMarketState().ct, null);
   assert.equal(market.getMarketState().matchedTradeCount, 0);
@@ -304,6 +291,7 @@ test("public 11520 UI exposes only the read-only native order-book boundary", as
   const appSource = await readFile(new URL("../K線西遊記/temples/11520/app.mjs", import.meta.url), "utf8");
   assert.match(appSource, /K11520 NATIVE ORDER BOOK · PUBLIC READ ONLY/);
   assert.match(appSource, /NO ACTIVE VERIFIED ORDERS · CT REMAINS NULL/);
-  assert.match(appSource, /PUBLIC_READ_ONLY_UI_HAS_NO_ACTOR_VERIFICATION_AUTHORITY/);
+  assert.match(appSource, /createKgenNativeMarketCell\(\);/);
+  assert.doesNotMatch(appSource, /verifyActorContext/);
   assert.doesNotMatch(appSource, /id="native-(?:place|cancel|settle)-order"/);
 });

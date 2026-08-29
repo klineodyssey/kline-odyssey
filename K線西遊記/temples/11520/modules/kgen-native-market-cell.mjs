@@ -12,6 +12,34 @@ const COMPANY_ADDRESS = "0.00011520";
 const COMPANY_K_COORDINATE = "K11520";
 const KGEN_PRICE_COORDINATE_UNIT = "USD_PER_KGEN";
 const CANONICAL_SETTLEMENT_ATTESTATIONS = Object.freeze({});
+const TEST_ONLY_MARKET_ID = "TEST_ONLY_11520_KGEN_NATIVE_MARKET";
+
+function repositoryTestActor({ marketId = TEST_ONLY_MARKET_ID, purpose, actorId, controllerId, evidenceId, expiresAt = null }) {
+  return Object.freeze({
+    market_id: marketId,
+    purpose,
+    actor_id: actorId,
+    controller_id: controllerId,
+    authentication_status: "VERIFIED_TEST_FIXTURE",
+    authentication_method: "REPOSITORY_TEST_FIXTURE",
+    evidence_id: evidenceId,
+    issued_at: "2026-08-22T14:00:00.000Z",
+    expires_at: expiresAt,
+    session_id: `SESSION-${evidenceId}`
+  });
+}
+
+const CANONICAL_ACTOR_CONTEXT_ATTESTATIONS = Object.freeze({
+  "TEST-ACTOR-A-PLACE": repositoryTestActor({ purpose: "PLACE_ORDER", actorId: "life:test-a", controllerId: "ctrl:test-a", evidenceId: "TEST-ACTOR-A-PLACE" }),
+  "TEST-ACTOR-A-CANCEL": repositoryTestActor({ purpose: "CANCEL_ORDER", actorId: "life:test-a", controllerId: "ctrl:test-a", evidenceId: "TEST-ACTOR-A-CANCEL" }),
+  "TEST-ACTOR-B-PLACE": repositoryTestActor({ purpose: "PLACE_ORDER", actorId: "life:test-b", controllerId: "ctrl:test-b", evidenceId: "TEST-ACTOR-B-PLACE" }),
+  "TEST-ACTOR-B-CANCEL": repositoryTestActor({ purpose: "CANCEL_ORDER", actorId: "life:test-b", controllerId: "ctrl:test-b", evidenceId: "TEST-ACTOR-B-CANCEL" }),
+  "TEST-SAME-OWNER-C1-PLACE": repositoryTestActor({ purpose: "PLACE_ORDER", actorId: "life:test-same", controllerId: "ctrl:test-c1", evidenceId: "TEST-SAME-OWNER-C1-PLACE" }),
+  "TEST-SAME-OWNER-C2-PLACE": repositoryTestActor({ purpose: "PLACE_ORDER", actorId: "life:test-same", controllerId: "ctrl:test-c2", evidenceId: "TEST-SAME-OWNER-C2-PLACE" }),
+  "TEST-SHARED-CONTROLLER-A-PLACE": repositoryTestActor({ purpose: "PLACE_ORDER", actorId: "life:test-shared-a", controllerId: "ctrl:test-shared", evidenceId: "TEST-SHARED-CONTROLLER-A-PLACE" }),
+  "TEST-SHARED-CONTROLLER-B-PLACE": repositoryTestActor({ purpose: "PLACE_ORDER", actorId: "life:test-shared-b", controllerId: "ctrl:test-shared", evidenceId: "TEST-SHARED-CONTROLLER-B-PLACE" }),
+  "TEST-EXPIRED-ACTOR-PLACE": repositoryTestActor({ purpose: "PLACE_ORDER", actorId: "life:test-expired", controllerId: "ctrl:test-expired", evidenceId: "TEST-EXPIRED-ACTOR-PLACE", expiresAt: "2026-08-22T14:59:59.999Z" })
+});
 
 function parseDecimal(value, label = "value") {
   const text = String(value).trim();
@@ -56,50 +84,31 @@ function normalizeNonce(value, label = "nonce") {
   return normalized;
 }
 
-function resolveVerifiedActorContext({ actorContext, verifyActorContext, timestampMs, purpose, marketId }) {
-  if (typeof verifyActorContext !== "function") throw new Error("ACTOR_CONTEXT_VERIFIER_REQUIRED");
-  let verified;
-  try {
-    verified = verifyActorContext(actorContext, Object.freeze({ purpose, market_id: marketId, observed_at_ms: timestampMs }));
-  } catch {
-    throw new Error("ACTOR_CONTEXT_VERIFICATION_FAILED");
-  }
-  if (!verified || typeof verified !== "object" || verified.authentication_status !== "VERIFIED") {
-    throw new Error("ACTOR_CONTEXT_NOT_VERIFIED");
-  }
-
+function resolveVerifiedActorContext({ actorAttestationId, timestampMs, purpose, marketId }) {
+  if (marketId !== TEST_ONLY_MARKET_ID) throw new Error("ACTOR_CONTEXT_ATTESTATION_REGISTRY_NOT_CONNECTED");
+  const normalizedAttestationId = normalizeEvidenceId(actorAttestationId);
+  const verified = CANONICAL_ACTOR_CONTEXT_ATTESTATIONS[normalizedAttestationId];
+  if (!verified) throw new Error("ACTOR_CONTEXT_ATTESTATION_NOT_FOUND");
+  if (
+    verified.market_id !== marketId
+    || verified.purpose !== purpose
+    || verified.evidence_id !== normalizedAttestationId
+    || verified.authentication_status !== "VERIFIED_TEST_FIXTURE"
+    || verified.authentication_method !== "REPOSITORY_TEST_FIXTURE"
+  ) throw new Error("ACTOR_CONTEXT_ATTESTATION_BINDING_MISMATCH");
   const actorId = normalizeActorId(verified.actor_id, "verified actor_id");
   const controllerId = normalizeActorId(verified.controller_id, "verified controller_id");
-  const authenticationMethod = String(verified.authentication_method ?? "").trim();
-  if (!/^[A-Z][A-Z0-9_]{2,63}$/.test(authenticationMethod)) {
-    throw new TypeError("verified authentication_method must be canonical");
-  }
   const evidenceId = normalizeEvidenceId(verified.evidence_id);
   const issuedAtMs = Date.parse(String(verified.issued_at ?? ""));
   if (!Number.isFinite(issuedAtMs) || issuedAtMs > timestampMs) throw new Error("ACTOR_CONTEXT_ISSUED_AT_INVALID");
-
   let expiresAt = null;
   if (verified.expires_at !== null && verified.expires_at !== undefined) {
     const expiresAtMs = Date.parse(String(verified.expires_at));
-    if (!Number.isFinite(expiresAtMs) || expiresAtMs < issuedAtMs || timestampMs > expiresAtMs) {
-      throw new Error("ACTOR_CONTEXT_EXPIRED");
-    }
+    if (!Number.isFinite(expiresAtMs) || expiresAtMs < issuedAtMs || timestampMs > expiresAtMs) throw new Error("ACTOR_CONTEXT_EXPIRED");
     expiresAt = new Date(expiresAtMs).toISOString();
   }
-
-  const sessionId = verified.session_id === null || verified.session_id === undefined
-    ? null
-    : normalizeEvidenceId(verified.session_id);
-  return Object.freeze({
-    actorId,
-    controllerId,
-    authenticationStatus: "VERIFIED",
-    authenticationMethod,
-    evidenceId,
-    issuedAt: new Date(issuedAtMs).toISOString(),
-    expiresAt,
-    sessionId
-  });
+  const sessionId = verified.session_id === null || verified.session_id === undefined ? null : normalizeEvidenceId(verified.session_id);
+  return Object.freeze({ actorId, controllerId, authenticationStatus: "VERIFIED_TEST_FIXTURE", authenticationMethod: verified.authentication_method, evidenceId, issuedAt: new Date(issuedAtMs).toISOString(), expiresAt, sessionId });
 }
 
 function cloneOrder(order) {
@@ -141,6 +150,9 @@ function bucketStart(timestampMs, intervalMs) {
  * - CT is undefined before the first repository-attested settled trade.
  * - CT becomes exactly the most recent repository-attested settled trade price.
  * - PancakeSwap/WBNB/USD/L-P data are not pricing inputs.
+ * - Actor authority must resolve from repository-owned, exact-market and exact-purpose attestations.
+ * - The production actor-attestation registry is intentionally not connected; repository test fixtures
+ *   are accepted only by the exact TEST_ONLY_11520_KGEN_NATIVE_MARKET identifier.
  * - Anonymous actors, same-owner matches and same-controller matches fail closed.
  * - This module has no signer, custody, settlement, transfer, approval, chain-write or Mainnet authority.
  */
@@ -150,12 +162,14 @@ export function createKgenNativeMarketCell({
   lotSize = "0.00000001",
   candleIntervalMs = 60_000,
   clock = () => Date.now(),
-  verifyActorContext
+  verifyActorContext,
+  actorAttestationRegistry
 } = {}) {
   if (!Number.isSafeInteger(candleIntervalMs) || candleIntervalMs <= 0) {
     throw new RangeError("candleIntervalMs must be a positive safe integer");
   }
-  if (typeof verifyActorContext !== "function") throw new Error("ACTOR_CONTEXT_VERIFIER_REQUIRED");
+  if (verifyActorContext !== undefined) throw new Error("CALLER_SUPPLIED_ACTOR_CONTEXT_VERIFIER_FORBIDDEN");
+  if (actorAttestationRegistry !== undefined) throw new Error("CALLER_SUPPLIED_ACTOR_ATTESTATION_REGISTRY_FORBIDDEN");
 
   const tickRaw = parseDecimal(tickSize, "tickSize");
   const lotRaw = parseDecimal(lotSize, "lotSize");
@@ -265,7 +279,8 @@ export function createKgenNativeMarketCell({
     return fills;
   }
 
-  function placeOrder({ side, price, quantity, actorContext, nonce }) {
+  function placeOrder({ side, price, quantity, actorAttestationId, actorContext, nonce }) {
+    if (actorContext !== undefined) throw new Error("CALLER_ASSERTED_ACTOR_CONTEXT_FORBIDDEN");
     const normalizedSide = normalizeSide(side);
     const priceRaw = parseDecimal(price, "price");
     const quantityRaw = parseDecimal(quantity, "quantity");
@@ -274,8 +289,7 @@ export function createKgenNativeMarketCell({
     const timestampMs = Number(clock());
     if (!Number.isFinite(timestampMs)) throw new TypeError("clock must return a finite millisecond timestamp");
     const authority = resolveVerifiedActorContext({
-      actorContext,
-      verifyActorContext,
+      actorAttestationId,
       timestampMs,
       purpose: "PLACE_ORDER",
       marketId
@@ -320,12 +334,11 @@ export function createKgenNativeMarketCell({
     };
   }
 
-  function cancelOrder(orderId, actorContext, nonce) {
+  function cancelOrder(orderId, actorAttestationId, nonce) {
     const timestampMs = Number(clock());
     if (!Number.isFinite(timestampMs)) throw new TypeError("clock must return a finite millisecond timestamp");
     const authority = resolveVerifiedActorContext({
-      actorContext,
-      verifyActorContext,
+      actorAttestationId,
       timestampMs,
       purpose: "CANCEL_ORDER",
       marketId
@@ -425,7 +438,7 @@ export function createKgenNativeMarketCell({
       verifiedTradeCount: trades.filter((trade) => trade.settlementStatus === "VERIFIED_SETTLED").length,
       selfMatchPolicy: "FAIL_CLOSED_SAME_OWNER_OR_CONTROLLER",
       anonymousActorPolicy: "FORBIDDEN",
-      actorAuthentication: "INDEPENDENT_VERIFIER_REQUIRED",
+      actorAuthentication: "REPOSITORY_ATTESTATION_REQUIRED_NOT_CONNECTED",
       callerAssertedIdentityAuthority: false,
       settlement: "REPOSITORY_ATTESTATION_REQUIRED_NOT_CONNECTED",
       ownershipTransfer: "REPOSITORY_ATTESTATION_REQUIRED_NOT_CONNECTED",

@@ -11,7 +11,7 @@ REPOSITORY-BOUND HUMAN AUTHORITY: `NOT_FOUND_ON_EXACT_MAIN`
 
 ## Authority boundary
 
-`0.00011520` is preserved as an `UNVERIFIED_CANDIDATE` value for the K11520 AI Company universe address and KGEN Universe price coordinate `0.00011520 USD_PER_KGEN`. No immutable, repository-bound Human authority record for that dual role exists on exact main `e2646d19dbd5f49c061c6bc14f000a9ec7105e41`; this candidate therefore does not establish a formal Company address, canonical price or activation authority. It is not an automatic matched-trade CT, GPU transaction price, order, target, floor or L/P-derived quote.
+`0.00011520` is preserved as an `UNVERIFIED_CANDIDATE` value for the K11520 AI Company universe address and KGEN Universe price coordinate `0.00011520 USD_PER_KGEN`. No immutable, repository-bound Human authority record for that dual role exists on exact main `0267ff4d7eb22dccfbe98794a1fc409c3468a7f7`; this candidate therefore does not establish a formal Company address, canonical price or activation authority. It is not an automatic matched-trade CT, GPU transaction price, order, target, floor or L/P-derived quote.
 
 The fixed coordinate and the changing native matched-trade CT are distinct fields in the same KGEN Universe. Constructor input cannot relabel or replace the preserved candidate Company-address value, promote it to formal Canon or create Human authority.
 
@@ -21,13 +21,13 @@ External PancakeSwap, WBNB, USD, USDT or L/P-derived values have zero native CT 
 
 ## Market integrity
 
-- BUY and SELL accept only an opaque `actorContext` that an independently wired verifier resolves to a normalized actor, controller, authentication method, evidence ID, issue time, optional expiry and optional session ID.
-- caller-supplied owner/controller strings or `authenticated=true` flags have no authority.
-- forged, unknown, future-issued and expired actor contexts fail closed before the order reaches either book.
+- BUY and SELL require a repository-owned actor attestation bound to the exact market, exact action purpose and exact evidence ID.
+- Caller-supplied verifier functions, attestation registries, actor objects and owner/controller labels have no authority and fail closed.
+- Production actor attestations are intentionally not connected; only finite repository test fixtures can authorize the exact test-only market ID.
 - same-owner self-match: fail closed.
 - same-controller self-match: fail closed.
 - anonymous collision: forbidden.
-- cancellation requires a fresh verified actor context whose normalized actor and controller both match the order authority; knowledge of the public strings is insufficient.
+- Cancellation requires a separate repository-owned CANCEL_ORDER attestation whose normalized actor and controller exactly match the order.
 - order and cancellation actions require actor-bound nonces; accepted nonces cannot be replayed.
 - price-time priority remains the matching rule for unrelated actors.
 - OHLC, verified volume and CT are derived only from repository-attested settled trades.

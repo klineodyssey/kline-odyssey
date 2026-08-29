@@ -34,11 +34,7 @@ const PLAYER_MISSION_KEY = "11520.firstMission.v4";
 const PLAYER_METRICS_KEY = "11520.playerMetrics.v4";
 let activeRecognition = null;
 
-const nativeKgenMarket = createKgenNativeMarketCell({
-  verifyActorContext() {
-    throw new Error("PUBLIC_READ_ONLY_UI_HAS_NO_ACTOR_VERIFICATION_AUTHORITY");
-  }
-});
+const nativeKgenMarket = createKgenNativeMarketCell();
 
 function readLocalJson(key, fallback = null) {
   try { return JSON.parse(localStorage.getItem(key)) ?? fallback; } catch { return fallback; }
