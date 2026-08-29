@@ -4,6 +4,7 @@ import { createKgenNativeMarketCell } from "../K線西遊記/temples/11520/modul
 
 const verifiedContexts = new WeakMap();
 let nextEvidence = 1;
+let nextActionNonce = 1;
 
 function actor(name, controller = `${name}-controller`, overrides = {}) {
   const context = Object.freeze({
@@ -31,11 +32,20 @@ function verifyActorContext(context) {
 }
 
 function createMarket(options = {}) {
-  return createKgenNativeMarketCell({
+  const market = createKgenNativeMarketCell({
     verifyActorContext,
     tickSize: "0.00000001",
     lotSize: "0.00000001",
     ...options
+  });
+  return Object.freeze({
+    ...market,
+    placeOrder(input) {
+      return market.placeOrder({ ...input, nonce: input.nonce ?? `ORDER-NONCE-${nextActionNonce++}` });
+    },
+    cancelOrder(orderId, actorContext, nonce = `CANCEL-NONCE-${nextActionNonce++}`) {
+      return market.cancelOrder(orderId, actorContext, nonce);
+    }
   });
 }
 
@@ -82,10 +92,11 @@ test("unmatched BUY/SELL quotes do not create CT", () => {
   assert.equal(state.bestBid, "0.00047");
   assert.equal(state.bestAsk, "0.00049");
   assert.equal(state.ct, null);
-  assert.equal(state.tradeCount, 0);
+  assert.equal(state.matchedTradeCount, 0);
+  assert.equal(state.verifiedTradeCount, 0);
 });
 
-test("crossed market creates trade and CT at resting maker price", () => {
+test("crossed paper market creates an unsettled match without CT", () => {
   let now = Date.parse("2026-08-22T15:01:00.000Z");
   const market = createMarket({ clock: () => now });
 
@@ -96,9 +107,12 @@ test("crossed market creates trade and CT at resting maker price", () => {
   assert.equal(result.fills.length, 1);
   assert.equal(result.fills[0].price, "0.00048");
   assert.equal(result.fills[0].quantity, "40");
-  assert.equal(market.getMarketState().ct, "0.00048");
-  assert.equal(market.getMarketState().nativeMatchedTradeCT, "0.00048");
-  assert.equal(market.getMarketState().tradeCount, 1);
+  assert.equal(result.fills[0].settlementStatus, "MATCHED_UNSETTLED");
+  assert.equal(result.fills[0].ctEligible, false);
+  assert.equal(market.getMarketState().ct, null);
+  assert.equal(market.getMarketState().nativeMatchedTradeCT, null);
+  assert.equal(market.getMarketState().matchedTradeCount, 1);
+  assert.equal(market.getMarketState().verifiedTradeCount, 0);
   assert.equal(market.getOrderBook().asks[0].remaining, "60");
 });
 
@@ -110,7 +124,7 @@ test("same owner self-match fails closed without CT or volume", () => {
     /SELF_MATCH_FORBIDDEN_SAME_OWNER/
   );
   assert.equal(market.getMarketState().ct, null);
-  assert.equal(market.getMarketState().tradeCount, 0);
+  assert.equal(market.getMarketState().matchedTradeCount, 0);
   assert.equal(market.getOrderBook().asks[0].remaining, "1");
 });
 
@@ -122,7 +136,7 @@ test("same controller across different owners fails closed", () => {
     /SELF_MATCH_FORBIDDEN_SAME_CONTROLLER/
   );
   assert.equal(market.getMarketState().ct, null);
-  assert.equal(market.getMarketState().tradeCount, 0);
+  assert.equal(market.getMarketState().matchedTradeCount, 0);
 });
 
 test("unauthenticated forged or unknown actor contexts are forbidden", () => {
@@ -174,7 +188,7 @@ test("price-time priority uses best price then oldest order", () => {
   assert.equal(fill.fills[1].quantity, "5");
 });
 
-test("OHLC is derived only from native matched trades", () => {
+test("OHLC and CT exclude native matches without verified settlement", () => {
   let now = Date.parse("2026-08-22T15:03:00.000Z");
   const market = createMarket({ clock: () => now, candleIntervalMs: 60_000 });
 
@@ -192,18 +206,10 @@ test("OHLC is derived only from native matched trades", () => {
   now += 1;
   market.placeOrder({ side: "BUY", price: "0.00047", quantity: "10", actorContext: actor("b3") });
 
-  const [candle] = market.getCandles();
-  assert.deepEqual(candle, {
-    startTime: "2026-08-22T15:03:00.000Z",
-    endTime: "2026-08-22T15:04:00.000Z",
-    open: "0.00048",
-    high: "0.0005",
-    low: "0.00047",
-    close: "0.00047",
-    volume: "30",
-    trades: 3
-  });
-  assert.equal(market.getMarketState().ct, "0.00047");
+  assert.deepEqual(market.getCandles(), []);
+  assert.equal(market.getMarketState().ct, null);
+  assert.equal(market.getMarketState().matchedTradeCount, 3);
+  assert.equal(market.getMarketState().verifiedTradeCount, 0);
 });
 
 test("cancellation requires a verified actor context, not known identity strings", () => {
@@ -229,7 +235,7 @@ test("expired actor context is rejected before order placement", () => {
   const expired = actor("expired", undefined, { expires_at: "2026-08-22T14:59:59.999Z" });
   assert.throws(() => market.placeOrder({ side: "BUY", price: "1", quantity: "1", actorContext: expired }), /ACTOR_CONTEXT_EXPIRED/);
   assert.equal(market.getMarketState().ct, null);
-  assert.equal(market.getMarketState().tradeCount, 0);
+  assert.equal(market.getMarketState().matchedTradeCount, 0);
 });
 
 test("caller cannot freeze quote status or emit formal native market price", () => {
@@ -254,7 +260,41 @@ test("failed forged crossing cannot change CT volume or resting liquidity", () =
     /ACTOR_CONTEXT_VERIFICATION_FAILED/
   );
   assert.equal(market.getMarketState().ct, null);
-  assert.equal(market.getMarketState().tradeCount, 0);
+  assert.equal(market.getMarketState().matchedTradeCount, 0);
   assert.equal(market.getCandles().length, 0);
   assert.equal(market.getOrderBook().asks[0].remaining, "2");
+});
+
+test("order nonce replay is rejected without duplicating liquidity", () => {
+  const market = createMarket();
+  const auth = actor("nonce-buyer");
+  const input = { side: "BUY", price: "1", quantity: "1", actorContext: auth, nonce: "ORDER-NONCE-REPLAY-1" };
+  market.placeOrder(input);
+  assert.throws(() => market.placeOrder(input), /ORDER_REPLAY_FORBIDDEN/);
+  assert.equal(market.getOrderBook().bids.length, 1);
+});
+
+test("cancel nonce replay is rejected", () => {
+  const market = createMarket();
+  const auth = actor("cancel-replay");
+  const placed = market.placeOrder({ side: "BUY", price: "1", quantity: "1", actorContext: auth });
+  market.cancelOrder(placed.order.id, auth, "CANCEL-NONCE-REPLAY-1");
+  assert.throws(() => market.cancelOrder(placed.order.id, auth, "CANCEL-NONCE-REPLAY-1"), /CANCEL_REPLAY_FORBIDDEN/);
+});
+
+test("caller-supplied settlement claims cannot update CT", () => {
+  const market = createMarket();
+  market.placeOrder({ side: "SELL", price: "1", quantity: "1", actorContext: actor("settlement-seller") });
+  const matched = market.placeOrder({ side: "BUY", price: "1", quantity: "1", actorContext: actor("settlement-buyer") });
+  assert.throws(
+    () => market.recordVerifiedSettlement({
+      tradeId: matched.fills[0].id,
+      attestationId: "CALLER-SUPPLIED-SETTLEMENT-1",
+      settlement_status: "VERIFIED_SETTLED",
+      receipt_status: "VERIFIED"
+    }),
+    /SETTLEMENT_ATTESTATION_REGISTRY_NOT_CONNECTED/
+  );
+  assert.equal(market.getMarketState().ct, null);
+  assert.equal(market.getMarketState().verifiedTradeCount, 0);
 });

@@ -11,6 +11,7 @@ const MARKET_CELL_COORDINATE_AUTHORITY = null;
 const COMPANY_ADDRESS = "0.00011520";
 const COMPANY_K_COORDINATE = "K11520";
 const KGEN_PRICE_COORDINATE_UNIT = "USD_PER_KGEN";
+const CANONICAL_SETTLEMENT_ATTESTATIONS = Object.freeze({});
 
 function parseDecimal(value, label = "value") {
   const text = String(value).trim();
@@ -43,6 +44,14 @@ function normalizeEvidenceId(value) {
   const normalized = String(value ?? "").trim();
   if (!/^[A-Za-z0-9][A-Za-z0-9:._-]{2,127}$/.test(normalized)) {
     throw new TypeError("verified actor evidence_id must be 3-128 canonical characters");
+  }
+  return normalized;
+}
+
+function normalizeNonce(value, label = "nonce") {
+  const normalized = String(value ?? "").trim();
+  if (!/^[A-Za-z0-9][A-Za-z0-9:._-]{7,127}$/.test(normalized)) {
+    throw new TypeError(`${label} must be 8-128 canonical characters`);
   }
   return normalized;
 }
@@ -100,6 +109,7 @@ function cloneOrder(order) {
     owner: order.owner,
     controller: order.controller,
     actorAuthority: { ...order.actorAuthority },
+    nonce: order.nonce,
     price: formatDecimal(order.price),
     quantity: formatDecimal(order.quantity),
     remaining: formatDecimal(order.remaining),
@@ -128,8 +138,8 @@ function bucketStart(timestampMs, intervalMs) {
  *   USD-per-KGEN price-coordinate value. This module establishes no
  *   repository-bound Human authority for that dual role.
  * - The fixed coordinate NEVER seeds, fixes or influences matched-trade CT.
- * - CT is undefined before the first valid matched trade.
- * - CT becomes exactly the most recent native 11520 matched trade price.
+ * - CT is undefined before the first repository-attested settled trade.
+ * - CT becomes exactly the most recent repository-attested settled trade price.
  * - PancakeSwap/WBNB/USD/L-P data are not pricing inputs.
  * - Anonymous actors, same-owner matches and same-controller matches fail closed.
  * - This module has no signer, custody, settlement, transfer, approval, chain-write or Mainnet authority.
@@ -153,6 +163,8 @@ export function createKgenNativeMarketCell({
   const asks = [];
   const trades = [];
   const candles = new Map();
+  const consumedActionKeys = new Set();
+  const consumedSettlementAttestations = new Set();
   let nextOrder = 1;
   let sequence = 1;
   let ct = null;
@@ -221,17 +233,19 @@ export function createKgenNativeMarketCell({
       takerController: taker.controller,
       makerActorEvidenceId: maker.actorAuthority.evidenceId,
       takerActorEvidenceId: taker.actorAuthority.evidenceId,
+      settlementStatus: "MATCHED_UNSETTLED",
+      settlementEvidence: null,
+      ownershipTransfer: null,
+      receipt: null,
+      ctEligible: false,
       timestampMs,
       timestamp: new Date(timestampMs).toISOString()
     };
     trades.push(trade);
-    ct = price;
-    updateCandle(trade);
     return trade;
   }
 
   function match(taker, timestampMs) {
-    assertNoSelfMatch(taker);
     const opposite = taker.side === "BUY" ? asks : bids;
     const fills = [];
 
@@ -251,7 +265,7 @@ export function createKgenNativeMarketCell({
     return fills;
   }
 
-  function placeOrder({ side, price, quantity, actorContext }) {
+  function placeOrder({ side, price, quantity, actorContext, nonce }) {
     const normalizedSide = normalizeSide(side);
     const priceRaw = parseDecimal(price, "price");
     const quantityRaw = parseDecimal(quantity, "quantity");
@@ -266,6 +280,9 @@ export function createKgenNativeMarketCell({
       purpose: "PLACE_ORDER",
       marketId
     });
+    const normalizedNonce = normalizeNonce(nonce, "order nonce");
+    const actionKey = `${marketId}:PLACE_ORDER:${authority.actorId}:${authority.controllerId}:${normalizedNonce}`;
+    if (consumedActionKeys.has(actionKey)) throw new Error("ORDER_REPLAY_FORBIDDEN");
 
     const order = {
       id: `O${nextOrder++}`,
@@ -280,6 +297,7 @@ export function createKgenNativeMarketCell({
         expiresAt: authority.expiresAt,
         sessionId: authority.sessionId
       },
+      nonce: normalizedNonce,
       price: priceRaw,
       quantity: quantityRaw,
       remaining: quantityRaw,
@@ -287,6 +305,8 @@ export function createKgenNativeMarketCell({
       sequence: sequence++
     };
 
+    assertNoSelfMatch(order);
+    consumedActionKeys.add(actionKey);
     const fills = match(order, timestampMs);
     if (order.remaining > 0n) {
       (normalizedSide === "BUY" ? bids : asks).push(order);
@@ -300,7 +320,7 @@ export function createKgenNativeMarketCell({
     };
   }
 
-  function cancelOrder(orderId, actorContext) {
+  function cancelOrder(orderId, actorContext, nonce) {
     const timestampMs = Number(clock());
     if (!Number.isFinite(timestampMs)) throw new TypeError("clock must return a finite millisecond timestamp");
     const authority = resolveVerifiedActorContext({
@@ -310,6 +330,10 @@ export function createKgenNativeMarketCell({
       purpose: "CANCEL_ORDER",
       marketId
     });
+    const normalizedNonce = normalizeNonce(nonce, "cancel nonce");
+    const actionKey = `${marketId}:CANCEL_ORDER:${authority.actorId}:${authority.controllerId}:${normalizedNonce}`;
+    if (consumedActionKeys.has(actionKey)) throw new Error("CANCEL_REPLAY_FORBIDDEN");
+    consumedActionKeys.add(actionKey);
     for (const book of [bids, asks]) {
       const index = book.findIndex((order) => order.id === orderId);
       if (index < 0) continue;
@@ -320,6 +344,42 @@ export function createKgenNativeMarketCell({
       return cloneOrder(book.splice(index, 1)[0]);
     }
     return null;
+  }
+
+  function recordVerifiedSettlement({ tradeId, attestationId }) {
+    const normalizedAttestationId = normalizeEvidenceId(attestationId);
+    if (consumedSettlementAttestations.has(normalizedAttestationId)) {
+      throw new Error("SETTLEMENT_ATTESTATION_REPLAY_FORBIDDEN");
+    }
+    const attestation = CANONICAL_SETTLEMENT_ATTESTATIONS[normalizedAttestationId];
+    if (!attestation) throw new Error("SETTLEMENT_ATTESTATION_REGISTRY_NOT_CONNECTED");
+    const trade = trades.find((candidate) => candidate.id === tradeId);
+    if (!trade) throw new Error("MATCHED_TRADE_NOT_FOUND");
+    if (trade.settlementStatus !== "MATCHED_UNSETTLED") throw new Error("TRADE_ALREADY_SETTLED");
+    if (
+      attestation.market_id !== marketId
+      || attestation.trade_id !== trade.id
+      || attestation.base_asset !== trade.baseAsset
+      || attestation.quote_asset !== trade.quoteAsset
+      || attestation.price !== trade.price
+      || attestation.quantity !== trade.quantity
+      || attestation.settlement_status !== "VERIFIED_SETTLED"
+      || attestation.ownership_transfer_status !== "VERIFIED_TRANSFERRED"
+      || attestation.receipt_status !== "VERIFIED"
+      || !attestation.receipt_id
+    ) {
+      throw new Error("SETTLEMENT_ATTESTATION_BINDING_MISMATCH");
+    }
+    consumedSettlementAttestations.add(normalizedAttestationId);
+    trade.settlementStatus = "VERIFIED_SETTLED";
+    trade.settlementEvidence = normalizedAttestationId;
+    trade.ownershipTransfer = Object.freeze({ status: "VERIFIED_TRANSFERRED", evidence_id: attestation.ownership_transfer_evidence_id });
+    trade.receipt = Object.freeze({ status: "VERIFIED", receipt_id: attestation.receipt_id });
+    trade.ctEligible = true;
+    ct = trade.priceRaw;
+    updateCandle(trade);
+    const { priceRaw, quantityRaw, ...serialized } = trade;
+    return Object.freeze(serialized);
   }
 
   function getOrderBook(depth = 20) {
@@ -361,12 +421,15 @@ export function createKgenNativeMarketCell({
       ctMeaning: "CURRENT_NATIVE_MATCHED_TRADE_PRICE_UNIVERSE_BOUNDARY",
       bestBid: book.bestBid,
       bestAsk: book.bestAsk,
-      tradeCount: trades.length,
+      matchedTradeCount: trades.length,
+      verifiedTradeCount: trades.filter((trade) => trade.settlementStatus === "VERIFIED_SETTLED").length,
       selfMatchPolicy: "FAIL_CLOSED_SAME_OWNER_OR_CONTROLLER",
       anonymousActorPolicy: "FORBIDDEN",
       actorAuthentication: "INDEPENDENT_VERIFIER_REQUIRED",
       callerAssertedIdentityAuthority: false,
-      settlement: "PAPER_IN_MEMORY_NO_ASSET_TRANSFER",
+      settlement: "REPOSITORY_ATTESTATION_REQUIRED_NOT_CONNECTED",
+      ownershipTransfer: "REPOSITORY_ATTESTATION_REQUIRED_NOT_CONNECTED",
+      receiptVerification: "REPOSITORY_ATTESTATION_REQUIRED_NOT_CONNECTED",
       chainWrite: false,
       signer: false
     });
@@ -395,6 +458,7 @@ export function createKgenNativeMarketCell({
   return Object.freeze({
     placeOrder,
     cancelOrder,
+    recordVerifiedSettlement,
     getOrderBook,
     getMarketState,
     getTrades,

@@ -11,11 +11,11 @@ REPOSITORY-BOUND HUMAN AUTHORITY: `NOT_FOUND_ON_EXACT_MAIN`
 
 ## Authority boundary
 
-`0.00011520` is preserved as an `UNVERIFIED_CANDIDATE` value for the K11520 AI Company universe address and KGEN Universe price coordinate `0.00011520 USD_PER_KGEN`. No immutable, repository-bound Human authority record for that dual role exists on exact main `d747b8c7bcf3b48172d42f9f3569b06ed512c09b`; this candidate therefore does not establish a formal Company address, canonical price or activation authority. It is not an automatic matched-trade CT, GPU transaction price, order, target, floor or L/P-derived quote.
+`0.00011520` is preserved as an `UNVERIFIED_CANDIDATE` value for the K11520 AI Company universe address and KGEN Universe price coordinate `0.00011520 USD_PER_KGEN`. No immutable, repository-bound Human authority record for that dual role exists on exact main `e2646d19dbd5f49c061c6bc14f000a9ec7105e41`; this candidate therefore does not establish a formal Company address, canonical price or activation authority. It is not an automatic matched-trade CT, GPU transaction price, order, target, floor or L/P-derived quote.
 
 The fixed coordinate and the changing native matched-trade CT are distinct fields in the same KGEN Universe. Constructor input cannot relabel or replace the preserved candidate Company-address value, promote it to formal Canon or create Human authority.
 
-`nativeMatchedTradeCT` is `null` before the first valid native 11520 matched trade. After a valid match, it is exactly the latest executed native trade price and is the current market / universe boundary. The compatibility field `ct` carries the same value.
+`nativeMatchedTradeCT` and `ct` remain `null` until a matched trade has repository-owned verified settlement evidence, verified ownership transfer and a verified receipt. A paper match alone is recorded as `MATCHED_UNSETTLED`, is not CT-eligible, and cannot update OHLC or verified volume. The canonical settlement-attestation registry is currently empty, so this branch cannot promote any match into CT.
 
 External PancakeSwap, WBNB, USD, USDT or L/P-derived values have zero native CT authority.
 
@@ -28,8 +28,9 @@ External PancakeSwap, WBNB, USD, USDT or L/P-derived values have zero native CT 
 - same-controller self-match: fail closed.
 - anonymous collision: forbidden.
 - cancellation requires a fresh verified actor context whose normalized actor and controller both match the order authority; knowledge of the public strings is insufficient.
+- order and cancellation actions require actor-bound nonces; accepted nonces cannot be replayed.
 - price-time priority remains the matching rule for unrelated actors.
-- OHLC and volume are derived only from executed native trades.
+- OHLC, verified volume and CT are derived only from repository-attested settled trades.
 
 ## Quote-unit boundary
 
@@ -56,6 +57,9 @@ This module is not imported by the active 11520 app and does not change the curr
 - token transfer: no
 - approval: no
 - settlement: no
+- settlement attestation registry: repository-owned and intentionally empty
+- ownership transfer: no
+- verified receipt: no
 - Mainnet transaction: no
 - deployment: no
 - governance execution: no
