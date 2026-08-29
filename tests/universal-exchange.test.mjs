@@ -103,7 +103,8 @@ import {
   , KAIOS_AI_OS_EMPLOYMENT_ALPHA_JOB, KAIOS_AI_OS_FIRST_REAL_EMPLOYMENT_TEST_JOB, KAIOS_MAINNET_TOKEN,
   CANONICAL_REPOSITORY_COMPANY_AUTHORITIES, COMPANY_OPERATIONAL_AUTHORITY_PROPOSAL_SCOPES,
   createRepositoryCompanyAuthorityProposal, createCompanyAuthorityReviewRequestPacket,
-  createReadOnlyGitHubRepositorySnapshotCandidate, verifyCompanyAuthorityReviewRequestSnapshotMatch,
+  createReadOnlyGitHubRepositorySnapshotCandidate, fetchReadOnlyGitHubPullRequestSnapshot,
+  verifyCompanyAuthorityReviewRequestSnapshotMatch,
   createCompanyAuthorityProposalReviewCandidate,
   verifyRepositoryBoundCompanyAuthority,
   createEmploymentIdentityChallenge,
@@ -3288,6 +3289,76 @@ test("V4.3 read-only GitHub snapshot candidate matches exact-head claims without
     }),
     (error) => error.code === "COMPANY_AUTHORITY_REVIEW_REQUEST_INTEGRITY_MISMATCH"
   );
+});
+
+test("V4.3 GitHub API transport verifies repository and exact-head CI without granting authority", async () => {
+  const originalFetch = globalThis.fetch;
+  const baseSha = "a".repeat(40);
+  const headSha = "b".repeat(40);
+  const mainSha = "9".repeat(40);
+  globalThis.fetch = async (url, options) => {
+    assert.equal(options.method, "GET");
+    assert.equal(options.headers["User-Agent"], "KAIOS-READ-ONLY-REPOSITORY-SNAPSHOT-V1");
+    const path = new URL(url).pathname;
+    const body = path.endsWith("/repos/klineodyssey/kline-odyssey")
+      ? { default_branch: "main" }
+      : path.endsWith("/pulls/191")
+        ? { base: { sha: baseSha }, head: { sha: headSha } }
+        : path.endsWith("/branches/main")
+          ? { commit: { sha: mainSha } }
+          : path.endsWith("/pulls/191/files")
+            ? [{ filename: "core/company/index.mjs" }, { filename: "tests/universal-exchange.test.mjs" }]
+            : path.endsWith("/actions/runs")
+              ? { workflow_runs: [
+                  { id: 101, name: "test-push", head_sha: headSha, status: "completed", conclusion: "success" },
+                  { id: 102, name: "test-pr", head_sha: headSha, status: "completed", conclusion: "success" }
+                ] }
+              : null;
+    assert.notEqual(body, null);
+    return { ok: true, status: 200, json: async () => body };
+  };
+  try {
+    const snapshot = await fetchReadOnlyGitHubPullRequestSnapshot({
+      snapshotId: "GITHUB_PR191_API_SNAPSHOT_001", repository: "klineodyssey/kline-odyssey",
+      prNumber: 191, observedAt: "2026-08-29T07:03:00.000Z"
+    });
+    assert.equal(snapshot.record_class, "VERIFIED_READ_ONLY_GITHUB_API_REPOSITORY_SNAPSHOT");
+    assert.equal(snapshot.source_transport_attested, true);
+    assert.equal(snapshot.repository_snapshot_verified, true);
+    assert.equal(snapshot.mutation_authority, false);
+
+    const proposal = createRepositoryCompanyAuthorityProposal({
+      proposalId: "COMPANY_AUTHORITY_PROPOSAL_API_TEST_001", companyId: "AI_ANT_COMPANY_0001",
+      candidateActorId: "COMPANY_OPERATOR_CANDIDATE_006", candidateControllerId: "COMPANY_CONTROLLER_CANDIDATE_006",
+      role: "COMPANY_EMPLOYMENT_OPERATOR_CANDIDATE", policyVersion: "KAIOS_FIRST_REAL_EMPLOYMENT_TEST_V1",
+      requestedScopes: ["COMPANY_INTERVIEW"], validFrom: "2026-08-29T07:01:00.000Z", validUntil: "2026-08-29T08:01:00.000Z",
+      evidence: ["PR_191_REVIEW_REQUIRED"], exactRepositoryVersion: headSha,
+      proposedBy: "COMPANY_GM_CLAIM_006", proposedAt: "2026-08-29T07:00:00.000Z"
+    });
+    const packet = await createCompanyAuthorityReviewRequestPacket({
+      requestId: "COMPANY_AUTHORITY_REVIEW_REQUEST_003", proposal, repository: snapshot.repository,
+      baseShaClaim: snapshot.base_sha, headShaClaim: snapshot.head_sha,
+      changedFilesClaim: snapshot.changed_files, ciRunIdsClaim: snapshot.checks.map((check) => check.run_id),
+      requiredReviewCapabilities: ["AUTHORITY_BOUNDARY_REVIEW", "CI_REVIEW"], requestedAt: "2026-08-29T07:04:00.000Z"
+    });
+    const match = await verifyCompanyAuthorityReviewRequestSnapshotMatch({
+      verificationId: "COMPANY_AUTHORITY_SNAPSHOT_MATCH_004", requestPacket: packet, snapshot,
+      verifiedAt: "2026-08-29T07:05:00.000Z"
+    });
+    assert.equal(match.repository_snapshot_verified, true);
+    assert.equal(match.exact_head_ci_verified, true);
+    assert.equal(match.proposal_provenance_verified, false);
+    assert.equal(match.reviewer_identity_verified, false);
+    assert.equal(match.counts_as_distinct_review, false);
+    assert.equal(match.activation_authorized, false);
+
+    const { store, registries } = await runtime();
+    const company = await registries.company.get("AI_ANT_COMPANY_0001");
+    const event = await appendEmploymentPhase1BCompanyEvent({ store, company, eventType: "COMPANY_AUTHORITY_REVIEW_SNAPSHOT_MATCH_CANDIDATE_CREATED", record: match, actorId: "GITHUB_READ_ONLY_OBSERVER", timestamp: match.verified_at });
+    assert.equal(event.event.payload.record_class, "PHASE_1B_SIMULATION_CANDIDATE");
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
 });
 
 test("V4.3 unverified governance review candidate is append-only and cannot activate authority", async () => {

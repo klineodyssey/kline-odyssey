@@ -253,9 +253,9 @@ export async function createCompanyAuthorityReviewRequestPacket({
   });
 }
 
-export async function createReadOnlyGitHubRepositorySnapshotCandidate({
+async function buildReadOnlyGitHubRepositorySnapshot({
   snapshotId, repository, mainSha, prNumber, baseSha, headSha, changedFiles,
-  checks, observedAt
+  checks, observedAt, adapterId, sourceTransportAttested
 }) {
   requireId(snapshotId, "github_repository_snapshot.snapshot_id");
   requireArray(changedFiles, "github_repository_snapshot.changed_files");
@@ -264,12 +264,12 @@ export async function createReadOnlyGitHubRepositorySnapshotCandidate({
   invariant([mainSha, baseSha, headSha].every((sha) => /^[0-9a-f]{40}$/i.test(String(sha ?? ""))), "GITHUB_REPOSITORY_SNAPSHOT_SHA_INVALID", "Repository snapshot requires SHA-shaped main, base and head values");
   invariant(Number.isInteger(prNumber) && prNumber > 0, "GITHUB_REPOSITORY_SNAPSHOT_PR_INVALID", "Repository snapshot requires a positive Pull Request number");
   invariant(changedFiles.length > 0 && new Set(changedFiles).size === changedFiles.length && changedFiles.every((path) => typeof path === "string" && path.length > 0 && !path.includes("..") && !path.startsWith("/") && !/^[A-Za-z]:/.test(path)), "GITHUB_REPOSITORY_SNAPSHOT_FILES_INVALID", "Repository snapshot requires unique repository-relative changed files");
-  invariant(checks.length > 0 && checks.every((check) => check && typeof check === "object" && /^[1-9][0-9]*$/.test(String(check.run_id)) && typeof check.name === "string" && check.name.length > 0 && /^[0-9a-f]{40}$/i.test(String(check.head_sha ?? "")) && ["QUEUED", "IN_PROGRESS", "COMPLETED"].includes(check.status) && [null, "SUCCESS", "FAILURE", "CANCELLED", "SKIPPED"].includes(check.conclusion ?? null)), "GITHUB_REPOSITORY_SNAPSHOT_CHECK_INVALID", "Repository snapshot checks require run ID, name, exact head, status and bounded conclusion");
+  invariant(checks.length > 0 && checks.every((check) => check && typeof check === "object" && /^[1-9][0-9]*$/.test(String(check.run_id)) && typeof check.name === "string" && check.name.length > 0 && /^[0-9a-f]{40}$/i.test(String(check.head_sha ?? "")) && ["QUEUED", "IN_PROGRESS", "COMPLETED"].includes(check.status) && [null, "SUCCESS", "FAILURE", "NEUTRAL", "CANCELLED", "SKIPPED", "TIMED_OUT", "ACTION_REQUIRED", "STARTUP_FAILURE", "STALE"].includes(check.conclusion ?? null)), "GITHUB_REPOSITORY_SNAPSHOT_CHECK_INVALID", "Repository snapshot checks require run ID, name, exact head, status and bounded conclusion");
   invariant(new Set(checks.map((check) => String(check.run_id))).size === checks.length, "GITHUB_REPOSITORY_SNAPSHOT_CHECK_DUPLICATE", "Repository snapshot check run IDs must be unique");
   parseEmploymentTime(observedAt, "github_repository_snapshot.observed_at");
   const payload = Object.freeze({
     snapshot_id: snapshotId,
-    adapter_id: "GITHUB_READ_ONLY_SNAPSHOT_ADAPTER_V1",
+    adapter_id: adapterId,
     repository,
     main_sha: String(mainSha).toLowerCase(),
     pr_number: prNumber,
@@ -285,22 +285,97 @@ export async function createReadOnlyGitHubRepositorySnapshotCandidate({
     })).sort((left, right) => left.run_id.localeCompare(right.run_id))),
     observed_at: observedAt
   });
+  const attested = sourceTransportAttested === true;
   return Object.freeze({
-    record_class: "UNATTESTED_READ_ONLY_GITHUB_REPOSITORY_SNAPSHOT_CANDIDATE",
+    record_class: attested
+      ? "VERIFIED_READ_ONLY_GITHUB_API_REPOSITORY_SNAPSHOT"
+      : "UNATTESTED_READ_ONLY_GITHUB_REPOSITORY_SNAPSHOT_CANDIDATE",
     ...payload,
     snapshot_payload_sha256: await sha256(payload),
     read_only: true,
     mutation_authority: false,
-    source_transport_attested: false,
-    repository_snapshot_verified: false,
-    status: "UNATTESTED_READ_ONLY_SNAPSHOT_CANDIDATE_NOT_PROVENANCE"
+    source_transport_attested: attested,
+    repository_snapshot_verified: attested,
+    status: attested
+      ? "VERIFIED_READ_ONLY_GITHUB_API_SNAPSHOT"
+      : "UNATTESTED_READ_ONLY_SNAPSHOT_CANDIDATE_NOT_PROVENANCE"
+  });
+}
+
+export async function createReadOnlyGitHubRepositorySnapshotCandidate(input) {
+  return buildReadOnlyGitHubRepositorySnapshot({
+    ...input,
+    adapterId: "GITHUB_READ_ONLY_SNAPSHOT_ADAPTER_V1",
+    sourceTransportAttested: false
+  });
+}
+
+async function fetchGitHubApiJson(path) {
+  const response = await globalThis.fetch(`https://api.github.com${path}`, {
+    method: "GET",
+    headers: Object.freeze({
+      Accept: "application/vnd.github+json",
+      "X-GitHub-Api-Version": "2022-11-28",
+      "User-Agent": "KAIOS-READ-ONLY-REPOSITORY-SNAPSHOT-V1"
+    })
+  });
+  invariant(response?.ok === true, "GITHUB_READ_ONLY_TRANSPORT_FAILED", `GitHub read-only API failed for ${path} with status ${response?.status ?? "UNKNOWN"}`);
+  return response.json();
+}
+
+async function fetchGitHubApiArrayPages(path) {
+  const records = [];
+  for (let page = 1; page <= 100; page += 1) {
+    const separator = path.includes("?") ? "&" : "?";
+    const batch = await fetchGitHubApiJson(`${path}${separator}per_page=100&page=${page}`);
+    invariant(Array.isArray(batch), "GITHUB_READ_ONLY_TRANSPORT_SHAPE_INVALID", `GitHub read-only API expected an array for ${path}`);
+    records.push(...batch);
+    if (batch.length < 100) return records;
+  }
+  invariant(false, "GITHUB_READ_ONLY_TRANSPORT_PAGINATION_LIMIT", "GitHub read-only API exceeded the 100-page safety limit");
+}
+
+export async function fetchReadOnlyGitHubPullRequestSnapshot({ snapshotId, repository, prNumber, observedAt }) {
+  requireId(snapshotId, "github_repository_snapshot.snapshot_id");
+  invariant(/^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/.test(String(repository ?? "")), "GITHUB_REPOSITORY_SNAPSHOT_REPOSITORY_INVALID", "Repository snapshot requires an owner/repository value");
+  invariant(Number.isInteger(prNumber) && prNumber > 0, "GITHUB_REPOSITORY_SNAPSHOT_PR_INVALID", "Repository snapshot requires a positive Pull Request number");
+  parseEmploymentTime(observedAt, "github_repository_snapshot.observed_at");
+  const encodedRepository = repository.split("/").map(encodeURIComponent).join("/");
+  const repositoryRecord = await fetchGitHubApiJson(`/repos/${encodedRepository}`);
+  invariant(typeof repositoryRecord.default_branch === "string" && repositoryRecord.default_branch.length > 0, "GITHUB_READ_ONLY_DEFAULT_BRANCH_MISSING", "GitHub repository response requires a default branch");
+  const pullRequest = await fetchGitHubApiJson(`/repos/${encodedRepository}/pulls/${prNumber}`);
+  const branch = await fetchGitHubApiJson(`/repos/${encodedRepository}/branches/${encodeURIComponent(repositoryRecord.default_branch)}`);
+  const files = await fetchGitHubApiArrayPages(`/repos/${encodedRepository}/pulls/${prNumber}/files`);
+  const runsResponse = await fetchGitHubApiJson(`/repos/${encodedRepository}/actions/runs?head_sha=${encodeURIComponent(pullRequest.head?.sha ?? "")}&per_page=100`);
+  invariant(Array.isArray(runsResponse.workflow_runs), "GITHUB_READ_ONLY_RUNS_SHAPE_INVALID", "GitHub Actions response requires workflow_runs");
+  const checks = runsResponse.workflow_runs
+    .filter((run) => String(run.head_sha ?? "").toLowerCase() === String(pullRequest.head?.sha ?? "").toLowerCase())
+    .map((run) => ({
+      run_id: String(run.id),
+      name: run.name,
+      head_sha: run.head_sha,
+      status: String(run.status ?? "").toUpperCase(),
+      conclusion: run.conclusion === null ? null : String(run.conclusion).toUpperCase()
+    }));
+  return buildReadOnlyGitHubRepositorySnapshot({
+    snapshotId,
+    repository,
+    mainSha: branch.commit?.sha,
+    prNumber,
+    baseSha: pullRequest.base?.sha,
+    headSha: pullRequest.head?.sha,
+    changedFiles: files.map((file) => file.filename),
+    checks,
+    observedAt,
+    adapterId: "GITHUB_API_READ_ONLY_TRANSPORT_V1",
+    sourceTransportAttested: true
   });
 }
 
 export async function verifyCompanyAuthorityReviewRequestSnapshotMatch({ verificationId, requestPacket, snapshot, verifiedAt }) {
   requireId(verificationId, "company_authority_snapshot_match.verification_id");
   invariant(requestPacket?.record_class === "UNVERIFIED_COMPANY_AUTHORITY_REVIEW_REQUEST_PACKET" && requestPacket.counts_as_distinct_review === false && requestPacket.activation_authorized === false, "COMPANY_AUTHORITY_SNAPSHOT_MATCH_REQUEST_REQUIRED", "Snapshot matching requires a non-authoritative review request packet");
-  invariant(snapshot?.record_class === "UNATTESTED_READ_ONLY_GITHUB_REPOSITORY_SNAPSHOT_CANDIDATE" && snapshot.read_only === true && snapshot.mutation_authority === false && snapshot.source_transport_attested === false, "COMPANY_AUTHORITY_SNAPSHOT_MATCH_CANDIDATE_REQUIRED", "Snapshot matching accepts only an unattested read-only snapshot candidate");
+  invariant(["UNATTESTED_READ_ONLY_GITHUB_REPOSITORY_SNAPSHOT_CANDIDATE", "VERIFIED_READ_ONLY_GITHUB_API_REPOSITORY_SNAPSHOT"].includes(snapshot?.record_class) && snapshot.read_only === true && snapshot.mutation_authority === false, "COMPANY_AUTHORITY_SNAPSHOT_MATCH_CANDIDATE_REQUIRED", "Snapshot matching accepts only a read-only GitHub snapshot record");
   parseEmploymentTime(verifiedAt, "company_authority_snapshot_match.verified_at");
   const expectedRequestPacketHash = await sha256({
     request_id: requestPacket.request_id,
@@ -333,6 +408,7 @@ export async function verifyCompanyAuthorityReviewRequestSnapshotMatch({ verific
   const claimedChecks = requestPacket.ci_run_ids_claim.map((runId) => snapshot.checks.find((check) => check.run_id === runId));
   invariant(claimedChecks.every(Boolean), "COMPANY_AUTHORITY_SNAPSHOT_CI_RUN_MISSING", "Every claimed CI run must exist in the observed snapshot candidate");
   invariant(claimedChecks.every((check) => check.head_sha === requestPacket.head_sha_claim && check.status === "COMPLETED" && check.conclusion === "SUCCESS"), "COMPANY_AUTHORITY_SNAPSHOT_EXACT_HEAD_CI_MISMATCH", "Every claimed CI run must be a successful completed run on the claimed exact head");
+  const transportAttested = snapshot.source_transport_attested === true && snapshot.repository_snapshot_verified === true;
   const matchPayload = Object.freeze({
     verification_id: verificationId,
     request_id: requestPacket.request_id,
@@ -352,15 +428,17 @@ export async function verifyCompanyAuthorityReviewRequestSnapshotMatch({ verific
     record_class: "UNATTESTED_COMPANY_AUTHORITY_REVIEW_SNAPSHOT_MATCH_CANDIDATE",
     ...matchPayload,
     match_payload_sha256: await sha256(matchPayload),
-    source_transport_attested: false,
-    repository_snapshot_verified: false,
+    source_transport_attested: transportAttested,
+    repository_snapshot_verified: transportAttested,
     proposal_provenance_verified: false,
-    exact_head_ci_verified: false,
+    exact_head_ci_verified: transportAttested,
     reviewer_identity_verified: false,
     reviewer_independence_verified: false,
     counts_as_distinct_review: false,
     activation_authorized: false,
-    status: "CLAIMS_MATCH_UNATTESTED_READ_ONLY_SNAPSHOT_AWAITING_TRUSTED_GITHUB_PROVENANCE"
+    status: transportAttested
+      ? "REPOSITORY_AND_EXACT_HEAD_CI_VERIFIED_AWAITING_DISTINCT_REVIEWER_AND_PROPOSAL_PROVENANCE"
+      : "CLAIMS_MATCH_UNATTESTED_READ_ONLY_SNAPSHOT_AWAITING_TRUSTED_GITHUB_PROVENANCE"
   });
 }
 
@@ -976,18 +1054,23 @@ export async function appendEmploymentPhase1BCompanyEvent({ store, company, even
       snapshot_integrity_match: record.snapshot_integrity_match,
       verified_at: record.verified_at
     });
+    const trustedReadOnlyMatch = record.source_transport_attested === true
+      && record.repository_snapshot_verified === true
+      && record.exact_head_ci_verified === true
+      && record.status === "REPOSITORY_AND_EXACT_HEAD_CI_VERIFIED_AWAITING_DISTINCT_REVIEWER_AND_PROPOSAL_PROVENANCE";
+    const untrustedReadOnlyMatch = record.source_transport_attested === false
+      && record.repository_snapshot_verified === false
+      && record.exact_head_ci_verified === false
+      && record.status === "CLAIMS_MATCH_UNATTESTED_READ_ONLY_SNAPSHOT_AWAITING_TRUSTED_GITHUB_PROVENANCE";
     invariant(
       record.record_class === "UNATTESTED_COMPANY_AUTHORITY_REVIEW_SNAPSHOT_MATCH_CANDIDATE"
-        && record.status === "CLAIMS_MATCH_UNATTESTED_READ_ONLY_SNAPSHOT_AWAITING_TRUSTED_GITHUB_PROVENANCE"
-        && record.source_transport_attested === false
-        && record.repository_snapshot_verified === false
         && record.proposal_provenance_verified === false
-        && record.exact_head_ci_verified === false
         && record.reviewer_identity_verified === false
         && record.reviewer_independence_verified === false
         && record.counts_as_distinct_review === false
         && record.activation_authorized === false
-        && record.match_payload_sha256 === expectedMatchHash,
+        && record.match_payload_sha256 === expectedMatchHash
+        && (trustedReadOnlyMatch || untrustedReadOnlyMatch),
       "COMPANY_AUTHORITY_SNAPSHOT_MATCH_NOT_PROVENANCE",
       "Snapshot match history accepts only an unattested non-authoritative match candidate"
     );
