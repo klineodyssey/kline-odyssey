@@ -116,16 +116,16 @@ No Session store, checkpoint writer, resume engine, scheduler, implementation ta
 
 ## GM Main Work Page
 
-Observed at `2026-08-29T16:09:56+08:00`; every later invocation must refresh these mutable values before acting.
+Observed at `2026-08-29T16:42:49+08:00`; every later invocation must refresh these mutable values before acting.
 
 | Field | Current evidence |
 |---|---|
-| `NOW_WORKING_ON` | `KAIOS-GM-AUTONOMOUS-BATCH-SOURCE-SYNC-001` |
-| `LAST_COMPLETED` | Exact-authorized real-execution policy evaluator and tests on PR #191 |
+| `NOW_WORKING_ON` | PR #191 independent review and external authority prerequisites |
+| `LAST_COMPLETED` | `KAIOS-GM-AUTONOMOUS-BATCH-SOURCE-SYNC-001`: heartbeat source, corrected batch policy, queue/handoff reconciliation and publication classification |
 | `BLOCKED` | Real applicant, reviewed operational authority, bound payroll source, exact signer, receipt verifier and distinct PR reviewer remain absent |
 | `WAITING_REVIEW` | PR #191 exact-head independent review |
 | `WAITING_EXTERNAL` | Real applicant wallet-control proof and action-specific authority infrastructure |
-| `READY_NEXT` | Reconcile the heartbeat source, publication classification and current PR/queue evidence |
+| `READY_NEXT` | Obtain distinct review of PR #191 exact head; continue the next conflict-free safe engineering workflow while external authority remains absent |
 | `LATEST_MAIN` | `4b698537c44df8a56a295d955d8e4844e957de41` |
 | `ACTIVE_BRANCH` | `codex/kaios-ai-os-employment-alpha-v1` |
 | `ACTIVE_PR` | `#191 / OPEN_DRAFT` |
