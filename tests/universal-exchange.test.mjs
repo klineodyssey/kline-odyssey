@@ -191,7 +191,7 @@ test("Telepathy Bus fails closed for unavailable providers and suppresses replay
   });
   const blocked = routeKaiosTelepathyMessage({ message, route: { route_id: "ROUTE_GEMINI_UNAVAILABLE", route_type: "ROUTABLE_PROVIDER_CONTROLLER", to_life_id: message.to_life_id, to_worker_id: message.to_worker_id, available: false, blocker: "EXTERNAL_CHANNEL_UNAVAILABLE" }, deliveredAt: "2026-08-30T00:01:00Z" });
   assert.equal(blocked.status, "BLOCKED");
-  assert.equal(blocked.receipt, "EXTERNAL_CHANNEL_UNAVAILABLE");
+  assert.equal(blocked.receipt, "TELEPATHY_DELIVERY_ROUTE_NOT_CONNECTED");
   const replay = routeKaiosTelepathyMessage({ message, route: { route_id: "ROUTE_INTERNAL", route_type: "INTERNAL_COMPANY_RUNTIME", to_life_id: message.to_life_id, to_worker_id: message.to_worker_id, available: true }, deliveredAt: "2026-08-30T00:01:00Z", processedIdempotencyKeys: [message.idempotency_key] });
   assert.equal(replay.status, "DUPLICATE_SUPPRESSED");
   assert.equal(replay.side_effects_executed, false);
