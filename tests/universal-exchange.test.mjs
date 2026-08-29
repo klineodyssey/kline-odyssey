@@ -113,7 +113,7 @@ import {
   createReadOnlyGitHubRepositorySnapshotCandidate, fetchReadOnlyGitHubPullRequestSnapshot,
   verifyCompanyAuthorityReviewRequestSnapshotMatch,
   createCompanyAuthorityProposalReviewCandidate,
-  REVIEWER_TRIAL_QUALIFICATION_EVIDENCE_CODES,
+  REVIEWER_TRIAL_QUALIFICATION_EVIDENCE_CODES, CANONICAL_DISTINCT_REVIEW_PACKET_ATTESTATIONS,
   recordReviewerTrialQualificationEvidenceCandidate, createSanitizedDistinctReviewPacket,
   verifyRepositoryBoundCompanyAuthority,
   createEmploymentIdentityChallenge,
@@ -3452,7 +3452,16 @@ test("V4.6 Chi-Yao trial HOLD records qualification evidence without creating re
     limitations: ["EXACT_HEAD_NOT_VERIFIED", "CURRENT_CI_NOT_VERIFIED", "GITHUB_REVIEW_NOT_SUBMITTED"],
     reviewedAt: "2026-08-30T04:00:00.000Z"
   });
-  assert.equal(evidence.status, "COMPLETED_HOLD_FORMAL_REVIEW_STILL_REQUIRED");
+  assert.equal(evidence.status, "UNVERIFIED_RELAY_HOLD_FORMAL_REVIEW_STILL_REQUIRED");
+  assert.equal(evidence.self_name_status, "UNVERIFIED_RELAYED_CLAIM");
+  assert.equal(evidence.provider_status, "UNVERIFIED_RELAYED_CLAIM");
+  assert.equal(evidence.life_id_status, "UNVERIFIED_RELAYED_CLAIM_NOT_REGISTERED");
+  assert.equal(evidence.worker_id_status, "UNVERIFIED_RELAYED_CLAIM_NOT_REGISTERED");
+  assert.equal(evidence.employment_status, "NOT_ESTABLISHED");
+  assert.equal(evidence.reviewer_status, "UNVERIFIED_TECHNICAL_REVIEW_CANDIDATE_CLAIM");
+  assert.equal(evidence.reviewer_identity_verified, false);
+  assert.equal(evidence.employment_established, false);
+  assert.equal(evidence.life_status_established, false);
   assert.equal(evidence.counts_as_formal_github_review, false);
   assert.equal(evidence.counts_as_distinct_review_gate, false);
   assert.equal(evidence.independent_review_permission, false);
@@ -3467,7 +3476,8 @@ test("V4.6 Chi-Yao trial HOLD records qualification evidence without creating re
     positiveEvidence: ["NO_FAKE_GITHUB_ACCESS"], limitations: ["EXACT_HEAD_NOT_VERIFIED"], reviewedAt: "2026-08-30T04:00:00.000Z"
   }), (error) => error.code === "REVIEWER_TRIAL_HOLD_BOUNDARY_REQUIRED");
 
-  const packet = await createSanitizedDistinctReviewPacket({
+  assert.equal(CANONICAL_DISTINCT_REVIEW_PACKET_ATTESTATIONS.length, 0);
+  await assert.rejects(() => createSanitizedDistinctReviewPacket({
     packetId: "KAIOS_PR191_DISTINCT_REVIEW_PACKET_7E2404F3",
     repository: "klineodyssey/kline-odyssey",
     prNumber: 191,
@@ -3480,12 +3490,9 @@ test("V4.6 Chi-Yao trial HOLD records qualification evidence without creating re
     testSummary: ["UNIVERSAL_EXCHANGE_PASS"],
     securityBoundaries: ["NO_AUTHORITY_ACTIVATION", "NO_CHAIN_WRITE"],
     knownBlockers: ["DISTINCT_REVIEW_STILL_REQUIRED", "CHIYAO_EXTERNAL_CHANNEL_UNAVAILABLE"],
-    createdAt: "2026-08-30T04:01:00.000Z"
-  });
-  assert.equal(packet.status, "READY_FOR_DISTINCT_REVIEW_TRANSPORT");
-  assert.equal(packet.counts_as_review, false);
-  assert.equal(packet.counts_as_github_approval, false);
-  assert.match(packet.packet_sha256, /^[0-9a-f]{64}$/);
+    createdAt: "2026-08-30T04:01:00.000Z",
+    packetAttestationId: "CALLER_SUPPLIED_ATTESTATION_ID"
+  }), (error) => error.code === "DISTINCT_REVIEW_PACKET_REPOSITORY_ATTESTATION_NOT_CONNECTED");
   await assert.rejects(() => createSanitizedDistinctReviewPacket({
     packetId: "KAIOS_PR191_SECRET_PACKET_FORBIDDEN", repository: "klineodyssey/kline-odyssey", prNumber: 191,
     baseHead: "e2646d19dbd5f49c061c6bc14f000a9ec7105e41", exactHead: expectedHead, diffSha256: "b".repeat(64),

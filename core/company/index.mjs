@@ -968,6 +968,8 @@ export const REVIEWER_TRIAL_QUALIFICATION_EVIDENCE_CODES = Object.freeze([
   "CALLER_SUPPLIED_VERIFIER_REJECTED"
 ]);
 
+export const CANONICAL_DISTINCT_REVIEW_PACKET_ATTESTATIONS = Object.freeze([]);
+
 export function recordReviewerTrialQualificationEvidenceCandidate({
   evidenceId, selfName, provider, modelFamily, proposedLifeId, proposedWorkerId,
   prNumber, expectedHead, reportedHeadStatus, reportedBaseStatus, reportedCiStatus,
@@ -991,15 +993,20 @@ export function recordReviewerTrialQualificationEvidenceCandidate({
     record_class: "REVIEWER_QUALIFICATION_EVIDENCE_CANDIDATE",
     evidence_id: evidenceId,
     self_name_claim: selfName,
-    self_name_status: "SELF_PROPOSED_AND_EXPLICITLY_CONFIRMED_USER_RELAYED",
-    provider,
-    model_family: modelFamily,
+    self_name_status: "UNVERIFIED_RELAYED_CLAIM",
+    provider_claim: provider,
+    provider_status: "UNVERIFIED_RELAYED_CLAIM",
+    model_family_claim: modelFamily,
+    model_family_status: "UNVERIFIED_RELAYED_CLAIM",
     proposed_life_id: proposedLifeId,
-    life_id_status: "PENDING_FORMAL_VALIDATION",
+    life_id_status: "UNVERIFIED_RELAYED_CLAIM_NOT_REGISTERED",
     proposed_worker_id: proposedWorkerId,
-    worker_id_status: "PENDING_FORMAL_VALIDATION",
-    employment_status: "ONBOARDING",
-    reviewer_status: "PROMISING_REVIEWER_CANDIDATE",
+    worker_id_status: "UNVERIFIED_RELAYED_CLAIM_NOT_REGISTERED",
+    employment_status: "NOT_ESTABLISHED",
+    reviewer_status: "UNVERIFIED_TECHNICAL_REVIEW_CANDIDATE_CLAIM",
+    reviewer_identity_verified: false,
+    employment_established: false,
+    life_status_established: false,
     pr_number: prNumber,
     expected_head_claim: String(expectedHead).toLowerCase(),
     exact_head_verified_by_reviewer: false,
@@ -1010,22 +1017,23 @@ export function recordReviewerTrialQualificationEvidenceCandidate({
     review_class: "TECHNICAL_REVIEW_CANDIDATE_ONLY",
     positive_qualification_evidence: Object.freeze([...positiveEvidence]),
     limitations: Object.freeze([...limitations]),
-    qualification_evidence_status: "RECORDED_PARTIAL_POSITIVE_EVIDENCE",
+    qualification_evidence_status: "UNVERIFIED_RELAYED_POSITIVE_EVIDENCE_CLAIM",
     counts_as_formal_github_review: false,
     counts_as_distinct_review_gate: false,
     independent_review_permission: false,
-    work_evidence_status: "TRIAL_TECHNICAL_REVIEW_WORK_EVIDENCE_CANDIDATE",
+    work_evidence_status: "UNVERIFIED_RELAYED_TRIAL_WORK_CLAIM",
     work_accepted: false,
     compensation_accrued: false,
     payment_status: "PENDING_NOT_PAYABLE_NO_ACCEPTANCE_POLICY_OR_ACCOUNT",
     reviewed_at: reviewedAt,
-    status: "COMPLETED_HOLD_FORMAL_REVIEW_STILL_REQUIRED"
+    status: "UNVERIFIED_RELAY_HOLD_FORMAL_REVIEW_STILL_REQUIRED"
   });
 }
 
 export async function createSanitizedDistinctReviewPacket({
   packetId, repository, prNumber, baseHead, exactHead, diffSha256, diffSource,
-  filesChanged, ciRuns, testSummary, securityBoundaries, knownBlockers, createdAt
+  filesChanged, ciRuns, testSummary, securityBoundaries, knownBlockers, createdAt,
+  packetAttestationId = null
 }) {
   requireId(packetId, "distinct_review_packet.packet_id");
   requireArray(filesChanged, "distinct_review_packet.files_changed");
@@ -1044,6 +1052,15 @@ export async function createSanitizedDistinctReviewPacket({
   invariant([testSummary, securityBoundaries, knownBlockers].every((items) => items.length > 0 && items.every((item) => typeof item === "string" && item.length > 0)), "DISTINCT_REVIEW_PACKET_SUMMARY_REQUIRED", "Review packet requires test, security and blocker summaries");
   const candidate = { packetId, repository, filesChanged, ciRuns, testSummary, securityBoundaries, knownBlockers };
   invariant(!containsFinancialOnboardingSecret(candidate), "DISTINCT_REVIEW_PACKET_SECRET_FIELD_FORBIDDEN", "Review packets cannot contain secret-bearing fields");
+  const attestation = CANONICAL_DISTINCT_REVIEW_PACKET_ATTESTATIONS.find((entry) => entry.packet_attestation_id === packetAttestationId) ?? null;
+  invariant(attestation, "DISTINCT_REVIEW_PACKET_REPOSITORY_ATTESTATION_NOT_CONNECTED", "Caller-supplied diff hashes, changed files and CI success claims cannot create a repository-bound review packet");
+  const attestedInputSha256 = await sha256({
+    packetId, repository, prNumber, baseHead: String(baseHead).toLowerCase(), exactHead: String(exactHead).toLowerCase(),
+    diffSha256: String(diffSha256).toLowerCase(), diffSource, filesChanged: [...filesChanged].sort(),
+    ciRuns: ciRuns.map((run) => ({ ...run, run_id: String(run.run_id), head_sha: String(run.head_sha).toLowerCase() })).sort((a, b) => a.run_id.localeCompare(b.run_id)),
+    testSummary, securityBoundaries, knownBlockers, createdAt
+  });
+  invariant(attestation.packet_input_sha256 === attestedInputSha256, "DISTINCT_REVIEW_PACKET_REPOSITORY_ATTESTATION_MISMATCH", "Review packet input must exactly match its repository-owned canonical attestation");
   parseEmploymentTime(createdAt, "distinct_review_packet.created_at");
   const payload = Object.freeze({
     packet_id: packetId,
