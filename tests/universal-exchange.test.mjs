@@ -3096,9 +3096,27 @@ test("V4.2 website exposes Company interview, employment, salary and honest simu
   const appSource = await fs.readFile(new URL("../K線西遊記/temples/11520/app.mjs", import.meta.url), "utf8");
   assert.match(htmlSource, /V4\.3 · Employment Phase 1C/);
   for (const label of ["COMPANY INTERVIEW", "COMPANY EMPLOYMENT DECISION", "EMPLOYMENT STATUS", "MY JOB \/ MISSION", "SALARY \/ PAYROLL QUEUE"]) assert.match(appSource, new RegExp(label));
-  assert.match(appSource, /No canonical hiring, Worker trust, payroll payment or transaction occurs/);
+  assert.match(appSource, /Company authority, employment, payroll and payment remain locked until their independent evidence gates pass/);
   assert.match(appSource, /Real withdrawal stays disabled/);
+  assert.match(appSource, /const job = KAIOS_AI_OS_FIRST_REAL_EMPLOYMENT_TEST_JOB/);
+  assert.match(appSource, /createEmploymentApplication\(\{ applicationId: .* job, identityProof:/);
+  assert.match(appSource, /APPLY FOR REAL TEST/);
+  assert.match(appSource, /REAL_MAINNET_MICROPAYMENT_INTEGRATION_TEST/);
+  assert.match(appSource, /0\.00000000000001 KAIOS · 10000 wei/);
+  assert.match(appSource, /Physical transport", "NO"/);
+  assert.match(appSource, /payroll\?\.paid && payroll\?\.settlement_receipt/);
   assert.doesNotMatch(appSource, /REAL_WITHDRAWAL_ENABLED/);
+});
+
+test("V4.3 first real employment application can complete the candidate safety self-check without changing authority", () => {
+  const challenge = createEmploymentIdentityChallenge({ challengeId: "REAL_UI_CHALLENGE_001", actorId: "REAL_UI_HUMAN_001", actorType: "HUMAN_PLAYER", walletAddress: "0x2222222222222222222222222222222222222222", chainId: 56, nonce: "realuinonce000000000000001", issuedAt: "2026-08-29T00:01:00.000Z", expiresAt: "2026-08-29T00:06:00.000Z" });
+  const identity = verifyEmploymentIdentityProof({ challenge, recoveredAddress: challenge.wallet_address, signatureSha256: "b".repeat(64), verifiedAt: "2026-08-29T00:02:00.000Z" });
+  const application = createEmploymentApplication({ applicationId: "REAL_UI_APPLICATION_001", job: KAIOS_AI_OS_FIRST_REAL_EMPLOYMENT_TEST_JOB, identityProof: identity, capabilities: ["COMPLETE_DIGITAL_ORIENTATION"], submittedAt: "2026-08-29T00:03:00.000Z" });
+  const selfCheck = scoreEmploymentInterview({ interviewId: "REAL_UI_SELF_CHECK_001", application, answers: { understands_simulation_boundary: true, accepts_evidence_requirement: true, accepts_no_private_key_request: true, accepts_no_fake_completion: true }, completedAt: "2026-08-29T00:04:00.000Z" });
+  assert.equal(application.job_id, "KAIOS_AI_OS_FIRST_EMPLOYMENT_ORIENTATION");
+  assert.equal(application.status, "SUBMITTED_REAL_TEST");
+  assert.equal(selfCheck.status, "CANDIDATE_SAFETY_SELF_CHECK_PASSED");
+  assert.equal(selfCheck.company_decision, null);
 });
 
 function repositoryCompanyAuthority({ actorId = "AI_ANT_COMPANY_HR_001", controllerId = "AI_ANT_COMPANY_HR_CONTROLLER_001", scopes = [] } = {}) {
@@ -3468,9 +3486,9 @@ test("V4.3 website exposes exact first-payroll readiness without claiming a real
   const appSource = await fs.readFile(new URL("../K線西遊記/temples/11520/app.mjs", import.meta.url), "utf8");
   assert.match(htmlSource, /V4\.3 · Employment Phase 1C/);
   assert.match(appSource, /0\.00000000000001 KAIOS · 10000 wei/);
-  assert.match(appSource, /Applicant wallet proof", "NOT_SUBMITTED/);
+  assert.match(appSource, /Applicant wallet proof", state\.identity\?\.status \?\? "NOT_SUBMITTED/);
   assert.match(appSource, /Payroll funding source", "NOT_BOUND/);
-  assert.match(appSource, /Website paid state", "LOCKED UNTIL RECEIPT/);
+  assert.match(appSource, /Website paid state", payroll\?\.paid === true && payroll\?\.settlement_receipt \? "PAID" : "LOCKED UNTIL RECEIPT/);
   assert.doesNotMatch(appSource, /PAYMENT_STATUS\s*=\s*["']PAID/);
 });
 

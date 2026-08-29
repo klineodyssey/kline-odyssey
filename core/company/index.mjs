@@ -653,7 +653,7 @@ export function createEmploymentApplication({ applicationId, job = KAIOS_AI_OS_E
 
 export function scoreEmploymentInterview({ interviewId, application, answers, completedAt }) {
   requireId(interviewId, "employment_interview_id");
-  invariant(application?.status === "SUBMITTED_ALPHA", "EMPLOYMENT_APPLICATION_REQUIRED", "Interview requires a submitted Alpha application");
+  invariant(["SUBMITTED_ALPHA", "SUBMITTED_REAL_TEST"].includes(application?.status), "EMPLOYMENT_APPLICATION_REQUIRED", "Candidate safety self-check requires a submitted employment application");
   parseEmploymentTime(completedAt, "completed_at");
   const normalized = Object.fromEntries(EMPLOYMENT_ALPHA_INTERVIEW_FIELDS.map((field) => [field, answers?.[field] === true]));
   const score = Object.values(normalized).filter(Boolean).length * 25;
