@@ -367,8 +367,8 @@ export async function fetchReadOnlyGitHubPullRequestSnapshot({ snapshotId, repos
     changedFiles: files.map((file) => file.filename),
     checks,
     observedAt,
-    adapterId: "GITHUB_API_READ_ONLY_TRANSPORT_V1",
-    sourceTransportAttested: true
+    adapterId: "GITHUB_API_READ_ONLY_TRANSPORT_UNATTESTED_V1",
+    sourceTransportAttested: false
   });
 }
 
