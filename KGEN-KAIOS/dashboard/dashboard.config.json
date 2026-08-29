@@ -15,6 +15,10 @@
     "block_hash": "0x307b4c200980a0bba413c458e5dc3d37b0a6a432b49a14e3ed1c575aaba01498",
     "observed_at_utc": "2026-08-29T09:25:28Z",
     "read_only": true,
+    "provenance_status": "UNATTESTED_READ_ONLY_CHAIN_SNAPSHOT_CANDIDATE",
+    "repository_bound_evidence": null,
+    "independently_verified": false,
+    "proves_deployment_or_authority": false,
     "kaios_contract": "0xD4E67B3a69e41524c424150E6b6e921b01D036db",
     "kgen_contract": "0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be",
     "kaios_total_supply": "22213908.930416874731235",
@@ -25,15 +29,15 @@
     "pending_kaios_entitlement": "1616116.826490900309703000"
   },
   "major_pools": [
-    {"id":"K18888","label":"18888 Lingxiao Bank","address":"0x11d34c0F723aCd334B8F95076f73F07f06202aab","kaios":"22213020.930416874731235","status":"LIVE_BALANCE_READ_ONLY"},
-    {"id":"K8888","label":"8888 Gaolaozhuang Bank","address":"0x9EcAe137b3A307971EB77B4CDB3ba13aeeF5297C","kaios":"888","status":"LIVE_BALANCE_READ_ONLY"},
+    {"id":"K18888","label":"18888 Lingxiao Bank","address":"0x11d34c0F723aCd334B8F95076f73F07f06202aab","kaios":"22213020.930416874731235","status":"UNATTESTED_READ_ONLY_BALANCE_CANDIDATE"},
+    {"id":"K8888","label":"8888 Gaolaozhuang Bank","address":"0x9EcAe137b3A307971EB77B4CDB3ba13aeeF5297C","kaios":"888","status":"UNATTESTED_READ_ONLY_BALANCE_CANDIDATE"},
     {"id":"K11520","label":"11520 Settlement","address":"0x17587F49dFDE4e400D03Ae81364AC2af8E1629Df","kaios":"0","status":"ADAPTER_NOT_INTEGRATED"},
-    {"id":"K12345","label":"12345 Temple Heart","address":"0xd0605F4EF10e5C1438F11AF9edc36926769239d6","kaios":"0","kgen":"1596","status":"HEART_CONTRACT"},
+    {"id":"K12345","label":"12345 Temple Heart","address":"0xd0605F4EF10e5C1438F11AF9edc36926769239d6","kaios":"0","kgen":"1596","status":"UNATTESTED_CONTRACT_CANDIDATE"},
     {"id":"PUBLIC_GOOD","label":"Human-directed provisional public-good receiver","address":"0xB73D6716005B37BEC742D64482fA26033eE1A4E1","kaios":"0","kgen":"735378.467588936466040620","status":"PROVISIONAL_NOT_CANONICAL_NODE_WALLET"},
     {"id":"RESERVE_REDEMPTION","label":"KGEN bankWallet / Reserve Redemption","address":"0xA06eF53c9AD4Af739FD13Ca1Ded446437134b0EE","kaios":"0","kgen":"20","status":"KGEN_TAX_RECEIVER_NOT_KAIOS_BANK"}
   ],
   "money_flows": [
-    {"id":"KGEN_WHITE_HOLE_KAIOS","title":"KGEN → White Hole → KAIOS","steps":["AMM trade","0.10% true burn","totalSupply loss observed","permissionless monotonic settlement","1000 KAIOS per burned KGEN","18888 fixed treasury","receipt and accounting"],"status":"LIVE_SETTLEMENT_AVAILABLE_PENDING_AMOUNT"},
+    {"id":"KGEN_WHITE_HOLE_KAIOS","title":"KGEN → White Hole → KAIOS","steps":["AMM trade","0.10% true burn","totalSupply loss observed","permissionless monotonic settlement","1000 KAIOS per burned KGEN","18888 fixed treasury","receipt and accounting"],"status":"CANONICAL_MODEL; LIVE_AVAILABILITY_NOT_VERIFIED"},
     {"id":"PLAYER_REWARD","title":"KAIOS → Player Reward","steps":["verified mission","business policy","exact authorization","funded source","policy-bound signer","chain receipt","balance reconciliation"],"status":"NOT_CONNECTED"},
     {"id":"EMPLOYEE_PAYROLL","title":"KAIOS → Employee Payroll","steps":["verified employment/work","payroll accrual","payable","funded payroll source","exact authorization","secure signer","receipt","accounting"],"status":"NOT_CONNECTED"},
     {"id":"ATM","title":"KAIOS → ATM","steps":["ATM replenishment request","liquidity policy","exact source/ATM/amount","secure signer","receipt","ATM subledger"],"status":"CANDIDATE_NOT_FUNDED"},

@@ -12,7 +12,7 @@ This dashboard is the public status surface for the latest safe KAIOS experiment
 ## Release channel
 
 - A push to `main` still publishes automatically.
-- A Human/authorized operator may dispatch `deploy-pages-static.yml` with an exact branch, tag, or SHA as `release_ref` and the `experimental` truth label.
+- A Human/authorized operator may dispatch `deploy-pages-static.yml` only with an exact tag or SHA already reachable from `origin/main`; an unmerged branch or commit is rejected even if the Pages environment policy later changes.
 - The workflow checks the release diff for secret-bearing paths, credential-like additions, and proprietary trading/quant/signal path names before copying the static site.
 - `build-info.json` binds the public page to the checked-out source commit and ref.
 - Rollback uses the same workflow with an earlier reviewed exact SHA; it does not rewrite Git history.
@@ -22,7 +22,7 @@ The first exact-ref deployment attempt, GitHub Actions run `33246089502`, was re
 
 ## Public chain snapshot
 
-Snapshot evidence is read-only BNB Smart Chain state at block `118743165`, block hash `0x307b4c200980a0bba413c458e5dc3d37b0a6a432b49a14e3ed1c575aaba01498`, observed `2026-08-29T09:25:28Z`.
+The dashboard carries an **unattested read-only BNB Smart Chain snapshot candidate** claiming block `118743165`, block hash `0x307b4c200980a0bba413c458e5dc3d37b0a6a432b49a14e3ed1c575aaba01498`, observed `2026-08-29T09:25:28Z`. No repository-bound receipt, trusted connector attestation, or independently reproducible evidence is committed, so these values do not prove a deployment, live settlement availability, authority, or current balance.
 
 | Item | Value |
 |---|---:|
@@ -39,9 +39,9 @@ No settlement, payment, trade, or chain write was executed to create this snapsh
 
 ## White-hole truth
 
-KGEN AMM buy/sell tax is 0.30%: 0.10% true burn, 0.10% bank receiver, 0.05% reward, and 0.05% AutoLP. Wallet-to-wallet transfers are untaxed. Only the 0.10% true-burn supply loss enters the white-hole accounting basis. KAIOS settlement observes cumulative KGEN supply loss, subtracts already-settled burn, multiplies the newly settled amount by 1,000, and issues only to fixed treasury 18888. The settlement is monotonic, replay-safe, and permissionless; permissionless execution is not permission to redirect funds.
+The canonical protocol model specifies KGEN AMM buy/sell tax at 0.30%: 0.10% true burn, 0.10% bank receiver, 0.05% reward, and 0.05% AutoLP. Wallet-to-wallet transfers are untaxed. Only the 0.10% true-burn supply loss enters the white-hole accounting basis. KAIOS settlement observes cumulative KGEN supply loss, subtracts already-settled burn, multiplies the newly settled amount by 1,000, and issues only to fixed treasury 18888. The settlement is monotonic, replay-safe, and permissionless; permissionless execution is not permission to redirect funds.
 
-The live KGEN `owner()` is BankGovernance `0xa2792fBDCc8A8AaC364053431D44E0a8D335E166`. The current KGEN `bankWallet()` is `0xA06eF53c9AD4Af739FD13Ca1Ded446437134b0EE`; this is the KGEN bank-tax / reserve-redemption receiver, not the 18888 KAIOS bank.
+The unattested snapshot candidate reports KGEN `owner()` as BankGovernance `0xa2792fBDCc8A8AaC364053431D44E0a8D335E166` and `bankWallet()` as `0xA06eF53c9AD4Af739FD13Ca1Ded446437134b0EE`. Until independently attested, these are candidate observations, not canonical deployment or authority proof; the latter is described as the KGEN bank-tax / reserve-redemption receiver, not the 18888 KAIOS bank.
 
 ## Governance and money-flow gates
 
