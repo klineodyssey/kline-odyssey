@@ -49,7 +49,7 @@ Until a quote asset/unit is independently frozen, any output is `NATIVE_MARKET_P
 
 ## Runtime / settlement boundary
 
-This module is not imported by the active 11520 app and does not change the current production runtime.
+The active 11520 app imports this module only to render a public read-only Experimental status and empty-order-book panel. The browser exposes no native order, cancellation, matching, settlement, ownership-transfer or receipt action, so this does not activate a trading runtime.
 
 - signer: no
 - private key: no

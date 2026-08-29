@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
 import test from "node:test";
 import { createKgenNativeMarketCell } from "../K線西遊記/temples/11520/modules/kgen-native-market-cell.mjs";
 
@@ -297,4 +298,12 @@ test("caller-supplied settlement claims cannot update CT", () => {
   );
   assert.equal(market.getMarketState().ct, null);
   assert.equal(market.getMarketState().verifiedTradeCount, 0);
+});
+
+test("public 11520 UI exposes only the read-only native order-book boundary", async () => {
+  const appSource = await readFile(new URL("../K線西遊記/temples/11520/app.mjs", import.meta.url), "utf8");
+  assert.match(appSource, /K11520 NATIVE ORDER BOOK · PUBLIC READ ONLY/);
+  assert.match(appSource, /NO ACTIVE VERIFIED ORDERS · CT REMAINS NULL/);
+  assert.match(appSource, /PUBLIC_READ_ONLY_UI_HAS_NO_ACTOR_VERIFICATION_AUTHORITY/);
+  assert.doesNotMatch(appSource, /id="native-(?:place|cancel|settle)-order"/);
 });
