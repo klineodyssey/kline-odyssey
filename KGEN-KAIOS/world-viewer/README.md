@@ -52,6 +52,31 @@ empty. Browser-to-GM and external-provider controller routes therefore remain
 visibly blocked. Human Relay evidence remains zero unless a repository-verified
 event and duration exist; its labor rate remains policy required.
 
+## KAIOS UX benchmark report
+
+The Player-first Civilization OS shell applies interaction patterns observed in
+current public products without copying their art, characters, logos, source or
+proprietary assets:
+
+| Public pattern | Evidence reviewed | KAIOS application |
+|---|---|---|
+| Task-first job search | LinkedIn Jobs supports natural-language search, job detail, a short Easy Apply flow, review, submit and tracked application stages | `JOBS` keeps application work inside the OS and exposes the next incomplete gate |
+| Persistent world controls | Roblox keeps experience controls, help and accessibility available inside the experience across desktop and mobile | Desktop uses a persistent global route bar; mobile uses a five-action bottom bar; reduced-motion remains supported |
+| Voice as a direct mode | Replika exposes voice through a direct Call action instead of a technical setup screen | The clearly identified AI companion offers one-step browser voice where available and always retains text fallback |
+| Order book truth | Coinbase Advanced separates order entry, open orders, the bid/ask book and live trade history | K11520 separates product/listing state from native Bid, Ask and CT; absent verified data renders `NULL` rather than a fabricated market |
+| First-thirty-second clarity | The reviewed products lead with the user task and defer operational detail | Home answers identity, location, needs, money, nearby actions and the next recommended action; CI/SHA/worker detail moved to `SYSTEM STATUS` |
+
+Primary references reviewed on 2026-08-30:
+
+- <https://www.linkedin.com/help/linkedin/answer/a512388/applying-for-jobs-on-linkedin?lang=en>
+- <https://www.linkedin.com/help/linkedin/answer/a511260/applying-for-a-job-on-linkedin?lang=en>
+- <https://en.help.roblox.com/hc/en-us/articles/203314230-In-experience-Settings-and-Help>
+- <https://help.replika.com/hc/en-us/articles/360046383391-How-do-I-call-my-Replika>
+- <https://help.coinbase.com/coinbase/trading-and-funding/advanced-trade/dashboard-overview>
+
+The benchmark is an information-architecture input only. It grants no exchange,
+employment, voice-provider, wallet, settlement or publication authority.
+
 ## Life Energy and Payroll
 
 `world-viewer/life-energy-payroll/` adds review-gated AI payroll escrow and

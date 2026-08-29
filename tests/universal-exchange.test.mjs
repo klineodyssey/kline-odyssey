@@ -5,7 +5,8 @@ import { createRequire } from "node:module";
 import {
   MemoryUniverseStore, createUniverseRuntime, resolveSpeciesCode, upgradeAppVersion,
   createListing, settleOrder, MissionEngine, completeAssetDream, assertLedgerSeparation,
-  assertAppendOnlyChain, validateSpacecraft, ASSET_TYPES, buildLifeDraft, assignLifeJob,
+  assertAppendOnlyChain, validateSpacecraft, ASSET_TYPES, createOrganRobotAsset,
+  evaluateOrganRobotCompatibility, activateOrganRobotTransplant, buildLifeDraft, assignLifeJob,
   validateKgenMarketSnapshot, validateSwapIntent, KGEN_SWAP_CONFIG, DigitalLifeBirthResolver,
   createBirthCertificate, createPendingBirthCertificate, createDigitalLifeBirthCertificateView, appendResolvedLifeBirth, calculateLifeAge,
   deriveHeartEligibility, createDigitalAntFinanceSnapshot, createSurvivalReserveProposal,
@@ -701,10 +702,52 @@ test("KGEN live adapter validates only the registered BSC pair and explicit user
 });
 
 test("Universal asset and listing type enumerations support all first-day markets", async () => {
-  assert.equal(ASSET_TYPES.length, 17);
-  for (const type of ["TOKEN", "LIFE", "APP", "COMPANY", "EQUITY", "JOB", "SERVICE", "LAND", "BUILDING", "FACTORY", "SPACECRAFT", "EQUIPMENT", "ENERGY", "DATA", "LICENSE", "CONTRACT", "GOODS"]) assert.ok(ASSET_TYPES.includes(type));
+  assert.equal(ASSET_TYPES.length, 20);
+  for (const type of ["TOKEN", "LIFE", "APP", "APP_TECHNOLOGY", "COMPANY", "EQUITY", "JOB", "SERVICE", "LAND", "BUILDING", "FACTORY", "SPACECRAFT", "EQUIPMENT", "ORGAN_ROBOT", "BODY_MODULE", "ENERGY", "DATA", "LICENSE", "CONTRACT", "GOODS"]) assert.ok(ASSET_TYPES.includes(type));
   const marketSource = await fs.readFile(new URL("../core/market/index.mjs", import.meta.url), "utf8");
   for (const type of ["FIXED_PRICE", "AUCTION", "LICENSE", "SUBSCRIPTION", "RENTAL", "JOB", "SERVICE", "EQUITY", "REVENUE_SHARE"]) assert.ok(marketSource.includes(`\"${type}\"`));
+});
+
+test("Organ Robot remains a separate owned asset until compatibility and settlement permit transplant", () => {
+  const rights_manifest = { identity_right: "NOT_APPLICABLE", ownership_right: "TRANSFERABLE", control_right: "OWNER", use_right: "OWNER", license_right: "LICENSE_ONLY", revenue_right: "NONE", governance_right: "NONE", transfer_right: "OWNER", breeding_right: "NOT_APPLICABLE", data_right: "CONSENT_REQUIRED", expiration: null, restrictions: ["LIFE_IDENTITY_NOT_INCLUDED", "TRANSPLANT_REQUIRES_VERIFIED_SETTLEMENT"] };
+  const asset = {
+    asset_id: "NAVIGATION_ORGAN_ROBOT_000001", asset_type: "ORGAN_ROBOT", issuer_id: "AI_ANT_COMPANY_0001",
+    owner_id: "LIFE_TEST_0001", controller_id: "LIFE_TEST_0001", metadata_hash: "a".repeat(64), rights_manifest,
+    settlement_currency: "KAIOS", status: "CANDIDATE", location: null, location_id: "K280", civilization_id: "KAIOS",
+    created_at: "2026-08-30T00:00:00.000Z", updated_at: "2026-08-30T00:00:00.000Z"
+  };
+  const organ = {
+    organ_id: asset.asset_id, app_id: "KAIOS_NAVIGATION_APP", manufacturer_id: asset.issuer_id, model: "NAV-1", version: "1.0.0",
+    owner_life_id: asset.owner_id, supported_species: ["HUMAN"], body_interfaces: ["HUMANOID_V1"], capabilities: ["NAVIGATION"],
+    energy_requirement: 2, compute_requirement: 4, maintenance_policy: "OWNER_FUNDED", license_id: "NAV_LICENSE_000001",
+    ownership_rights: ["OWN", "USE", "RESELL"], install_status: "OWNED_NOT_INSTALLED", installed_body_id: null, market_status: "NOT_LISTED"
+  };
+  const product = createOrganRobotAsset({ asset, organ });
+  assert.equal(product.asset.asset_type, "ORGAN_ROBOT");
+  assert.equal(product.organ.install_status, "OWNED_NOT_INSTALLED");
+
+  const incompatible = evaluateOrganRobotCompatibility({ organ, ownerLifeId: asset.owner_id, speciesId: "FISH", bodyInterface: "AQUATIC_V1", availableEnergy: 9, availableCompute: 9, securityEvidence: { status: "VERIFIED" } });
+  assert.equal(incompatible.status, "INCOMPATIBLE");
+  assert.equal(incompatible.ownership_preserved, true);
+  assert.deepEqual(incompatible.blockers, ["SPECIES_INCOMPATIBLE", "BODY_INTERFACE_INCOMPATIBLE"]);
+
+  const compatible = evaluateOrganRobotCompatibility({ organ, ownerLifeId: asset.owner_id, speciesId: "HUMAN", bodyInterface: "HUMANOID_V1", availableEnergy: 2, availableCompute: 4, securityEvidence: { status: "VERIFIED" } });
+  assert.equal(compatible.status, "READY_FOR_TRANSPLANT");
+  assert.equal(compatible.automatic_installation, false);
+  assert.throws(() => activateOrganRobotTransplant({ organ, compatibility: compatible, bodyId: "BODY_0001", ownershipTransferReceipt: null, transplantEvidence: null }), (error) => error.code === "ORGAN_OWNERSHIP_RECEIPT_VERIFIER_REQUIRED");
+  assert.throws(() => activateOrganRobotTransplant({
+    organ, compatibility: compatible, bodyId: "BODY_0001", ownershipTransferReceipt: { receipt_id: "CALLER_CLAIM" }, transplantEvidence: { evidence_id: "CALLER_CLAIM" },
+    verifyOwnershipTransferReceipt: (_receipt, expected) => ({ ...expected, status: "VERIFIED_SETTLED", provenance_status: "CALLER_SUPPLIED", evidence_id: "CALLER_CLAIM" }),
+    verifyTransplantEvidence: (_evidence, expected) => ({ ...expected, status: "VERIFIED", provenance_status: "CALLER_SUPPLIED", evidence_id: "CALLER_CLAIM" })
+  }), (error) => error.code === "ORGAN_OWNERSHIP_SETTLEMENT_REQUIRED");
+  const installed = activateOrganRobotTransplant({
+    organ, compatibility: compatible, bodyId: "BODY_0001", ownershipTransferReceipt: { receipt_id: "ORDER_RECEIPT_0001" }, transplantEvidence: { evidence_id: "TRANSPLANT_0001" },
+    verifyOwnershipTransferReceipt: (_receipt, expected) => ({ ...expected, status: "VERIFIED_SETTLED", provenance_status: "REPOSITORY_BOUND_SETTLEMENT_ATTESTATION", evidence_id: "ORDER_RECEIPT_ATTESTATION_0001" }),
+    verifyTransplantEvidence: (_evidence, expected) => ({ ...expected, status: "VERIFIED", provenance_status: "REPOSITORY_BOUND_TRANSPLANT_ATTESTATION", evidence_id: "TRANSPLANT_ATTESTATION_0001" })
+  });
+  assert.equal(installed.install_status, "INSTALLED");
+  assert.equal(installed.installed_body_id, "BODY_0001");
+  assert.equal(installed.ownership_settlement_evidence_id, "ORDER_RECEIPT_ATTESTATION_0001");
 });
 
 test("12345 integration names only functions present in formal Solidity source", async () => {
@@ -2969,15 +3012,20 @@ test("V4.0 8888 audit removes fake balances and creates only request drafts", as
   assert.doesNotMatch(bankUi, /KGEN_Wallet\.demoMode=true/);
 });
 
-test("V4.3 production shell preserves the concierge and uses fresh Employment gate assets", async () => {
+test("V4.5 production shell preserves the concierge and uses fresh Player-first assets", async () => {
   const htmlSource = await fs.readFile(new URL("../K線西遊記/temples/11520/index.html", import.meta.url), "utf8");
   const appSource = await fs.readFile(new URL("../K線西遊記/temples/11520/app.mjs", import.meta.url), "utf8");
   const cssSource = await fs.readFile(new URL("../K線西遊記/temples/11520/styles.css", import.meta.url), "utf8");
-  assert.match(htmlSource, /v=11520-v4\.3-real-employment-gates/);
-  assert.match(htmlSource, /styles\.css\?v=11520-v4\.3-real-employment-gates/);
+  assert.match(htmlSource, /v=11520-v4\.5-player-first-os/);
+  assert.match(htmlSource, /styles\.css\?v=11520-v4\.5-player-first-os/);
   assert.doesNotMatch(htmlSource, /v=11520-v4\.0-player-first/);
   assert.doesNotMatch(htmlSource, /v=11520-v3\.6-first-kgen/);
   for (const state of ["IDLE", "LISTENING", "THINKING", "SPEAKING", "SUCCESS", "ERROR"]) assert.match(appSource + cssSource, new RegExp(state));
+  for (const route of ["WORLD", "JOBS", "SCHOOL", "COMPANIES", "GAMES", "MARKET", "ATM", "WALLET", "AI", "DEVELOPER"]) assert.match(appSource, new RegExp(`\\[\"${route}\"`));
+  assert.match(htmlSource, /id="mobile-nav"/);
+  assert.match(appSource, /WHO AM I\?/);
+  assert.match(appSource, /CT stays NULL until a real match has valid settlement evidence/);
+  assert.match(appSource, /NAVIGATION_ORGAN_ROBOT_000001/);
   assert.match(cssSource, /2D FALLBACK/);
   assert.deepEqual(seed.next_stage.player_first_v4_0.entry_actions, ["VOICE", "TEXT", "EXPLORE", "JOIN", "WORK", "MY_AI"]);
 });
@@ -3188,10 +3236,10 @@ test("V4.2 review, compensation, payroll, settlement and ATM authority fail clos
   assert.throws(() => evaluateAtmPayrollAdvanceCandidate({}), (error) => error.code === "ATM_PAYROLL_AUTHORITY_NOT_CONNECTED");
 });
 
-test("V4.2 website exposes Company interview, employment, salary and honest simulation boundaries", async () => {
+test("V4.5 website preserves Company interview, employment, salary and honest simulation boundaries", async () => {
   const htmlSource = await fs.readFile(new URL("../K線西遊記/temples/11520/index.html", import.meta.url), "utf8");
   const appSource = await fs.readFile(new URL("../K線西遊記/temples/11520/app.mjs", import.meta.url), "utf8");
-  assert.match(htmlSource, /V4\.3 · Employment Phase 1C/);
+  assert.match(htmlSource, /KAIOS Civilization AI OS · Public Experimental/);
   for (const label of ["COMPANY INTERVIEW", "COMPANY EMPLOYMENT DECISION", "EMPLOYMENT STATUS", "MY JOB \/ MISSION", "SALARY \/ PAYROLL QUEUE"]) assert.match(appSource, new RegExp(label));
   assert.match(appSource, /Company authority, employment, payroll and payment remain locked until their independent evidence gates pass/);
   assert.match(appSource, /Real withdrawal stays disabled/);
@@ -3663,10 +3711,10 @@ test("V4.3 unverified governance review candidate is append-only and cannot acti
   assert.equal(history.filter((event) => event.event_type === "COMPANY_AUTHORITY_PROPOSAL_REVIEW_CANDIDATE" && event.payload.record_id === review.review_id).length, 1);
 });
 
-test("V4.3 website exposes exact first-payroll readiness without claiming a real applicant or receipt", async () => {
+test("V4.5 website exposes exact first-payroll readiness without claiming a real applicant or receipt", async () => {
   const htmlSource = await fs.readFile(new URL("../K線西遊記/temples/11520/index.html", import.meta.url), "utf8");
   const appSource = await fs.readFile(new URL("../K線西遊記/temples/11520/app.mjs", import.meta.url), "utf8");
-  assert.match(htmlSource, /V4\.3 · Employment Phase 1C/);
+  assert.match(htmlSource, /KAIOS Civilization AI OS · Public Experimental/);
   assert.match(appSource, /0\.00000000000001 KAIOS · 10000 wei/);
   assert.match(appSource, /Applicant wallet proof", state\.identity\?\.status \?\? "NOT_SUBMITTED/);
   assert.match(appSource, /Payroll funding source", "NOT_BOUND/);

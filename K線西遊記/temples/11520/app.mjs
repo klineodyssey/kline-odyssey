@@ -28,14 +28,24 @@ import {
 import { readTempleHeart12345 } from "../../../core/integrations/temple-heart-12345.mjs?v=11520-v4.4-real-execution-policy";
 
 const NAVIGATION = Object.freeze([
-  ["HOME", "navigation.home"], ["REQUEST", "navigation.request"], ["LIFE", "navigation.life"], ["LIFE_FACTORY", "LIFE FACTORY"], ["APPS", "navigation.apps"], ["COMPANIES", "navigation.company"],
-  ["TOKENS", "TOKENS"], ["JOBS", "JOBS"], ["MISSIONS", "MISSIONS"], ["ATM", "ATM"], ["MARKET", "MARKET"], ["SERVICES", "SERVICES"], ["PROPERTY", "PROPERTY"],
-  ["FACTORIES", "FACTORIES"], ["SPACECRAFT", "SPACECRAFT"], ["PORTFOLIO", "PORTFOLIO"],
-  ["MY_LIFE", "MY LIFE"], ["MY_COMPANY", "MY COMPANY"]
+  ["HOME", "HOME"], ["WORLD", "WORLD"], ["LIFE", "LIFE"], ["JOBS", "JOBS"], ["SCHOOL", "SCHOOL"],
+  ["COMPANIES", "COMPANY"], ["GAMES", "GAMES"], ["MARKET", "K11520"], ["ATM", "ATM"], ["WALLET", "WALLET"], ["AI", "AI"]
+]);
+
+const APP_LAUNCHER = Object.freeze([
+  ["REQUEST", "REQUEST"], ["LIFE_FACTORY", "LIFE FACTORY"], ["APPS", "APPS / ORGANS"], ["TOKENS", "TOKENS"],
+  ["MISSIONS", "MISSIONS"], ["SERVICES", "SERVICES"], ["PROPERTY", "PROPERTY"], ["FACTORIES", "FACTORIES"],
+  ["SPACECRAFT", "SPACECRAFT"], ["PORTFOLIO", "PORTFOLIO"], ["MY_LIFE", "MY LIFE"], ["MY_COMPANY", "MY COMPANY"],
+  ["DEVELOPER", "SYSTEM STATUS"]
+]);
+
+const MOBILE_NAVIGATION = Object.freeze([
+  ["WORLD", "WORLD"], ["MISSIONS", "MISSION"], ["AI", "AI"], ["WALLET", "WALLET"], ["MY_LIFE", "MY LIFE"]
 ]);
 
 const content = document.querySelector("#content");
 const nav = document.querySelector("#nav");
+const mobileNav = document.querySelector("#mobile-nav");
 let universe;
 let pendingPublicIntent = null;
 let lastGatewayReceipt = null;
@@ -92,6 +102,7 @@ function currentRoute() {
 
 function renderNav(active) {
   nav.innerHTML = NAVIGATION.map(([id, label]) => `<a class="${active === id ? "active" : ""}" href="#/${id}">${label.includes(".") ? html(t(label)) : html(label)}</a>`).join("");
+  mobileNav.innerHTML = MOBILE_NAVIGATION.map(([id, label]) => `<a class="${active === id ? "active" : ""}" href="#/${id}">${html(label)}</a>`).join("");
 }
 
 async function loadSharedWorkerStatus() {
@@ -213,6 +224,29 @@ function playerFirstMarkup() {
   </section>`;
 }
 
+function playerSituationMarkup() {
+  const member = readLocalJson(PLAYER_PROFILE_KEY);
+  const mission = readLocalJson(PLAYER_MISSION_KEY);
+  const employment = readEmploymentAlphaState();
+  const profileStatus = member ? member.display_name : "GUEST · START LIFE TO CREATE A LOCAL PROFILE";
+  const money = employment.payrollQueue?.at(-1)?.paid === true && employment.payrollQueue?.at(-1)?.settlement_receipt
+    ? "RECEIPT-VERIFIED KAIOS"
+    : "NO VERIFIED KAIOS PAYMENT";
+  const nextAction = !member ? "START LIFE" : !employment.identity ? "VERIFY A PUBLIC WALLET" : !employment.application ? "APPLY FOR A JOB" : mission?.status ?? "CONTINUE MY LIFE";
+  return `<div class="life-now-grid">
+    <article class="life-now-card"><span>WHO AM I?</span><strong>${html(profileStatus)}</strong></article>
+    <article class="life-now-card"><span>WHERE AM I?</span><strong>${html(member?.location_id ?? "LOCATION NOT CHOSEN")}</strong></article>
+    <article class="life-now-card"><span>WHAT DO I NEED?</span><strong>${html(member ? "CHECK WATER · FOOD · ENERGY" : "PROFILE · START LOCATION")}</strong></article>
+    <article class="life-now-card"><span>HOW MUCH MONEY?</span><strong>${html(money)}</strong></article>
+    <article class="life-now-card"><span>WHAT IS NEARBY?</span><strong>WORLD MAP · JOBS · SCHOOL · ATM · K11520</strong></article>
+    <article class="life-now-card next"><span>WHAT SHOULD I DO NEXT?</span><strong>${html(nextAction)}</strong></article>
+  </div>`;
+}
+
+function appLauncherMarkup() {
+  return `<div class="app-launcher">${APP_LAUNCHER.map(([id, label]) => `<a class="app-tile" href="#/${id}"><span>${html(label)}</span><small>OPEN</small></a>`).join("")}</div>`;
+}
+
 async function homeView() {
   const [lives, species, assets, companies, listings] = await Promise.all([
     universe.registries.life.list(), universe.registries.species.list(), universe.registries.asset.list(),
@@ -227,15 +261,36 @@ async function homeView() {
     ["KGEN AMM", "USER WALLET LIVE", "Runtime-verified PancakeSwap V2 pair"],
     ["11520 settlement", "MAINNET CONTRACT", "Adapter not integrated; no fabricated settlement"]
   ];
-  return `${playerFirstMarkup()}${hero("K11520 · EMPLOYMENT ALPHA V4.1", uiLocale === "zh-TW" ? "文明資產的公開市場、生命工廠與可操作工作入口。" : "A public market, Life Factory and playable employment entry for civilization assets.", uiLocale === "zh-TW" ? "連接公開錢包、應徵、面試、接受任務並取得明確標示的模擬 KAIOS；沒有證據就沒有薪資。" : "Connect a public wallet, apply, interview, accept a mission and earn clearly labelled simulated KAIOS; no evidence means no compensation.")}
+  return `${playerFirstMarkup()}${section("MY LIFE · RIGHT NOW", playerSituationMarkup())}${hero("KAIOS CIVILIZATION AI OS", uiLocale === "zh-TW" ? "從世界開始生活，不必先理解工程系統。" : "Start living in the world without learning the engineering system first.", uiLocale === "zh-TW" ? "探索世界、求學、找工作、完成任務、使用 K11520；所有真實金流仍依授權與收據驗證。" : "Explore, learn, find work, complete missions and use K11520; every real-money action remains authorization and receipt gated.")}
     <a class="card gateway-cta" href="#/REQUEST"><div><div class="eyebrow">${html(t("request.title"))}</div><h2>${html(t("request.cta"))}</h2><p>DRAFT → UNDERSTAND → CONFIRM → REQUEST</p></div><span aria-hidden="true">→</span></a>
-    ${section(t("status.title"), workerStatusMarkup())}
-    ${section("CFO FIELD SERVICE BUSINESS", fieldServiceMarkup())}
-    ${section("FIRST HEARTBEAT / FIRST KGEN", firstKgenEvidenceMarkup())}
-    ${section("HEART + HEAVEN FUEL CIVILIZATION", heartHeavenFuelMarkup())}
     <div class="grid">${cards.map(([name, value, note]) => `<article class="card"><div class="eyebrow">${html(name)}</div><div class="metric">${html(value)}</div><p>${html(note)}</p></article>`).join("")}</div>
-    ${section("Civilization path", `<div class="card path">${["12345", "DIGITAL ANT", "11520 LIFE LISTING", "AI LIFE APP", "AI ANT COMPANY", "KAIOS", "SPACECRAFT", "MARS", "KUFO", "CHIP INDUSTRY", "MARS CITY", "MARS MIGRATION"].map((item, index, all) => `<span>${html(item)}</span>${index < all.length - 1 ? "<i>→</i>" : ""}`).join("")}</div>`)}
-    ${section("12345 Heart read integration", `<article class="card" id="heart-status"><div class="eyebrow">REPOSITORY ABI · READ ONLY</div><h3>Checking provider capability…</h3><p>No write transaction will be created.</p></article>`)}`;
+    ${section("APP LAUNCHER", appLauncherMarkup())}`;
+}
+
+function worldView() {
+  return Promise.resolve(`${hero("KAIOS WORLD", "Where am I, and what can I reach next?", "This route reuses the existing K280 World Viewer and Player Genesis. It does not create a second map or claim real GPS without consent.")}<div class="grid two"><a class="card world-entry" href="../../../world-viewer/"><div class="eyebrow">K280 WORLD VIEWER</div><h3>OPEN WORLD MAP</h3><p>Land, roads, resources, companies, jobs and civilization layers.</p></a><a class="card world-entry" href="../../../KGEN-KAIOS/world-viewer/player-genesis/"><div class="eyebrow">PLAYER GENESIS</div><h3>START / CONTINUE LIFE</h3><p>Choose a start location, meet needs and complete one bounded life cycle.</p></a></div>`);
+}
+
+function schoolView() {
+  const paths = ["ELEMENTARY", "JUNIOR HIGH", "HIGH SCHOOL", "VOCATIONAL", "UNIVERSITY", "GRADUATE", "RESEARCH", "APPRENTICESHIP", "SKILL TRAINING"];
+  return Promise.resolve(`${hero("KAIOS SCHOOL", "Not qualified yet does not mean no future.", "Education is a Life path that can unlock skills and job eligibility. This public slice is a truthful curriculum browser; enrolment authority is not connected.")}${pills(paths)}${empty("CURRICULUM_CANDIDATE · ENROLMENT_NOT_CONNECTED")}`);
+}
+
+function gamesView() {
+  return Promise.resolve(`${hero("KAIOS GAMES", "Explore, learn and build a Life.", "Quests may grant XP, skills or items. Real KAIOS/KGEN rewards require the common payment rail and exact authorization.")}<div class="grid"><article class="card"><div class="eyebrow">LIFE QUEST</div><h3>FIRST CIVILIZATION LOOP</h3><p>Birth → water/food → education or work → mission → service purchase → save.</p>${badge("PLAYABLE_LOCAL_ALPHA")}</article><article class="card"><div class="eyebrow">MARKET GAME</div><h3>LONG / SHORT LAB</h3><p>Score and backtest are not guaranteed profit and do not create real settlement.</p>${badge("SIMULATION")}</article></div>`);
+}
+
+function walletView() {
+  const state = readEmploymentAlphaState();
+  return Promise.resolve(`${hero("MY WALLET", "Public address control, never private-key custody in the website.", "A wallet becomes a payroll or market address only after a signed control challenge. The browser stores no private key, seed phrase or raw signature.")}<article class="card"><div class="eyebrow">ACCOUNT STATUS</div><h3>${badge(state.identity?.status ?? "NOT_CONNECTED")}</h3>${kv("Actor", state.identity?.actor_id)}${kv("Public address", state.identity?.wallet_address)}${kv("Chain", state.identity?.chain_id ?? 56)}${kv("Verified payment", state.payrollQueue?.at(-1)?.settlement_receipt ? "RECEIPT PRESENT" : "NONE")}<a class="button request-link" href="#/JOBS">VERIFY / USE FOR EMPLOYMENT</a></article>`);
+}
+
+function aiCompanionView() {
+  return Promise.resolve(`${hero("KAIOS AI COMPANION", "Ask in natural language, then open the next useful action.", "Text, optional browser voice and a clearly identified AI avatar guide Life, jobs, navigation and the market. It cannot invent authority or settlement.")}<section class="player-first card">${conciergeAvatarMarkup()}<div><h2>I am an AI guide, not a human.</h2><p>Try: “我沒錢” → Jobs; “我要養魚” → World + School + Company + K11520.</p><div class="first-actions"><a class="button" href="#/JOBS">FIND WORK</a><a class="button secondary" href="#/WORLD">OPEN WORLD</a><a class="button secondary" href="#/MARKET">OPEN K11520</a><a class="button secondary" href="#/REQUEST">ASK SOMETHING ELSE</a></div></div></section>`);
+}
+
+function developerView() {
+  return Promise.resolve(`${hero("DEVELOPER / SYSTEM STATUS", "Engineering truth lives here, not in the player's first thirty seconds.", "Draft, CI, worker, finance and chain boundaries remain visible for operators and testers.")}${section(t("status.title"), workerStatusMarkup())}${section("CFO FIELD SERVICE BUSINESS", fieldServiceMarkup())}${section("FIRST HEARTBEAT / FIRST KGEN", firstKgenEvidenceMarkup())}${section("HEART + HEAVEN FUEL CIVILIZATION", heartHeavenFuelMarkup())}${section("12345 HEART READ", `<article class="card" id="heart-status"><div class="eyebrow">REPOSITORY ABI · READ ONLY</div><h3>CHECKING PROVIDER CAPABILITY</h3><p>No write transaction will be created.</p></article>`)}`);
 }
 
 function gatewayUnderstandingMarkup(draft, understanding) {
@@ -605,7 +660,17 @@ function atmView() {
 
 async function marketView() {
   const listings = await universe.registries.market.list();
-  return `${hero("K11520 MARKET", "Products become tradable only after evidence and settlement.", "This is the existing 11520 registry. The Employment Alpha does not create a second exchange, fake buyer, fake trade, CT, volume or revenue.")}${listings.length ? `<div class="grid">${listings.map((listing) => `<article class="card"><div class="eyebrow">${html(listing.listing_id)}</div><h3>${html(listing.asset_id)}</h3>${kv("Type", listing.listing_type)}${kv("Currency", listing.currency_id ?? "UNPRICED")}${kv("Price", listing.pricing_status === "UNPRICED" ? "UNPRICED" : listing.price)}${kv("Settlement", listing.settlement_status ?? "NOT_DEPLOYED")}<p>${badge(listing.status)}</p></article>`).join("")}</div>` : empty("NO_LISTINGS")}`;
+  const marketPairs = [
+    { pair: "KGEN / NATIVE QUOTE", bid: null, ask: null, ct: null, status: "MATCHING_ENGINE_UNDER_REVIEW" },
+    { pair: "KAIOS / NATIVE QUOTE", bid: null, ask: null, ct: null, status: "ORDER_BOOK_NOT_CONNECTED" },
+    { pair: "ORGAN ROBOT / KAIOS", bid: null, ask: null, ct: null, status: "ASSET_MODEL_CANDIDATE" }
+  ];
+  return `${hero("K11520 · UNIVERSAL EXCHANGE OF EVERYTHING", "Bid, Ask and CT come from this exchange—not from a fabricated price.", "One Universal Exchange core serves tokens, Apps, companies, equity, jobs, services, land, goods and Organ Robots through asset-specific validation and settlement adapters.")}
+    <div class="notice">UNDER REVIEW · NO LIVE ORDER ENTRY IN THIS BUILD · CT stays NULL until a real match has valid settlement evidence. External prices are reference data only.</div>
+    ${section("NATIVE PRICE DISCOVERY", `<div class="grid">${marketPairs.map((market) => `<article class="card market-cell"><div class="eyebrow">${html(market.pair)}</div><h3>${badge(market.status)}</h3>${kv("BEST BID", market.bid ?? "NULL · NO VALID BID")}${kv("BEST ASK", market.ask ?? "NULL · NO VALID ASK")}${kv("CT · LAST VERIFIED TRADE", market.ct ?? "NULL · NO SETTLED TRADE")}${kv("External price", "REFERENCE ONLY")}</article>`).join("")}</div>`) }
+    ${section("FOUR SEPARATE ASSETS", `<div class="grid"><article class="card"><div class="eyebrow">APP COMPANY</div><h3>MANUFACTURER / MAINTAINER</h3><p>A Company entity; buying equity does not buy its products.</p></article><article class="card"><div class="eyebrow">APP TECHNOLOGY</div><h3>CAPABILITY + LICENSE</h3><p>Technology rights are separate from a physical or digital Organ Robot unit.</p></article><article class="card"><div class="eyebrow">ORGAN ROBOT</div><h3>OWNABLE UNIT</h3><p>Ownership transfer does not auto-install. Species, body, energy, compute and security checks follow settlement.</p></article><article class="card"><div class="eyebrow">COMPANY EQUITY</div><h3>ECONOMIC RIGHT</h3><p>Equity follows its own rights policy and never transfers Life identity.</p></article></div>`) }
+    ${section("ORGAN ROBOT PRODUCT CANDIDATE", `<article class="card organ-product"><div class="eyebrow">NAVIGATION_ORGAN_ROBOT_000001</div><h3>${badge("NOT_LISTED · NOT_OWNED · NOT_INSTALLED")}</h3>${kv("App", "KAIOS_NAVIGATION_APP")}${kv("Manufacturer", "AI_ANT_COMPANY_0001 · CANDIDATE")}${kv("Compatibility", "SPECIES + BODY INTERFACE + ENERGY + COMPUTE + SECURITY")}${kv("Market", "LISTING_CANDIDATE")}${kv("Settlement", "NOT_CONNECTED")}${kv("Transplant", "BLOCKED UNTIL VERIFIED OWNERSHIP + COMPATIBILITY")}</article>`) }
+    ${section("CURRENT 11520 LISTINGS", listings.length ? `<div class="grid">${listings.map((listing) => `<article class="card"><div class="eyebrow">${html(listing.listing_id)}</div><h3>${html(listing.asset_id)}</h3>${kv("Type", listing.listing_type)}${kv("Currency", listing.currency_id ?? "UNPRICED")}${kv("Price", listing.pricing_status === "UNPRICED" ? "UNPRICED" : listing.price)}${kv("Settlement", listing.settlement_status ?? "NOT_DEPLOYED")}<p>${badge(listing.status)}</p></article>`).join("")}</div>` : empty("NO_LISTINGS"))}`;
 }
 
 async function employmentPhase1BJobsView() {
@@ -661,6 +726,12 @@ async function render() {
   renderNav(route.page === "MY_LIFE" ? "MY_LIFE" : route.page);
   const views = {
     HOME: homeView,
+    WORLD: worldView,
+    SCHOOL: schoolView,
+    GAMES: gamesView,
+    WALLET: walletView,
+    AI: aiCompanionView,
+    DEVELOPER: developerView,
     REQUEST: publicRequestGatewayView,
     LIFE: () => route.id ? lifeDetailView(route.id) : lifeMarketView(),
     LIFE_FACTORY: lifeFactoryView,
@@ -681,7 +752,7 @@ async function render() {
   };
   content.innerHTML = await (views[route.page] ?? views.HOME)();
   bindViewEvents(route);
-  if (route.page === "HOME") updateHeartStatus();
+  if (route.page === "DEVELOPER") updateHeartStatus();
 }
 
 function bindViewEvents(route) {
