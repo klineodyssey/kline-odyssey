@@ -3291,7 +3291,7 @@ test("V4.3 read-only GitHub snapshot candidate matches exact-head claims without
   );
 });
 
-test("V4.3 GitHub API transport verifies repository and exact-head CI without granting authority", async () => {
+test("V4.3 in-process GitHub API transport stays unattested and cannot grant provenance", async () => {
   const originalFetch = globalThis.fetch;
   const baseSha = "a".repeat(40);
   const headSha = "b".repeat(40);
@@ -3322,9 +3322,9 @@ test("V4.3 GitHub API transport verifies repository and exact-head CI without gr
       snapshotId: "GITHUB_PR191_API_SNAPSHOT_001", repository: "klineodyssey/kline-odyssey",
       prNumber: 191, observedAt: "2026-08-29T07:03:00.000Z"
     });
-    assert.equal(snapshot.record_class, "VERIFIED_READ_ONLY_GITHUB_API_REPOSITORY_SNAPSHOT");
-    assert.equal(snapshot.source_transport_attested, true);
-    assert.equal(snapshot.repository_snapshot_verified, true);
+    assert.equal(snapshot.record_class, "UNATTESTED_READ_ONLY_GITHUB_REPOSITORY_SNAPSHOT_CANDIDATE");
+    assert.equal(snapshot.source_transport_attested, false);
+    assert.equal(snapshot.repository_snapshot_verified, false);
     assert.equal(snapshot.mutation_authority, false);
 
     const proposal = createRepositoryCompanyAuthorityProposal({
@@ -3345,8 +3345,8 @@ test("V4.3 GitHub API transport verifies repository and exact-head CI without gr
       verificationId: "COMPANY_AUTHORITY_SNAPSHOT_MATCH_004", requestPacket: packet, snapshot,
       verifiedAt: "2026-08-29T07:05:00.000Z"
     });
-    assert.equal(match.repository_snapshot_verified, true);
-    assert.equal(match.exact_head_ci_verified, true);
+    assert.equal(match.repository_snapshot_verified, false);
+    assert.equal(match.exact_head_ci_verified, false);
     assert.equal(match.proposal_provenance_verified, false);
     assert.equal(match.reviewer_identity_verified, false);
     assert.equal(match.counts_as_distinct_review, false);
