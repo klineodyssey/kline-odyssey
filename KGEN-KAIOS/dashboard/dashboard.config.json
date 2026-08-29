@@ -75,7 +75,7 @@
   "gm_work_status": {
     "latest_main": "ac304fc585f5f86846d2c61b69ecad8f59bc0a66",
     "latest_public_website_sha": "ac304fc585f5f86846d2c61b69ecad8f59bc0a66",
-    "latest_experimental_candidate_sha": "9f1813c07eb8c80db3789be0f25e2059179398ed",
+    "experimental_candidate_source": "PR_192_HEAD_READ_FROM_GITHUB; BUILD_INFO_SOURCE_COMMIT_AFTER_RELEASE",
     "website_drift": true,
     "failed_release_run": "https://github.com/klineodyssey/kline-odyssey/actions/runs/33246089502",
     "active_branch": "codex/public-lab-money-flow-audit",
