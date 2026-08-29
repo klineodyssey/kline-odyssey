@@ -1,25 +1,25 @@
 {
   "metadata": {
     "version": "1.1",
-    "revision": "2026-08-27.1",
+    "revision": "2026-08-29.1",
     "status": "ACTIVE",
-    "last_updated": "2026-08-27",
+    "last_updated": "2026-08-29",
     "updated_by": "Codex",
     "reviewed_by": "Codex",
-    "source_commit": "80002b27b91fd951c470cfe32dc243162ea906af",
+    "source_commit": "ac304fc585f5f86846d2c61b69ecad8f59bc0a66",
     "task_id": "KAIOS-EXPIRED-CURSOR-R2-CLAIM-RECONCILIATION-001",
-    "change_reason": "Preserve prior audit history and record Human-directed non-disciplinary Cursor offboarding after an expired undelivered R2 claim.",
+    "change_reason": "Preserve prior audit history and record the Human correction from draft offboarding to leave without pay after an expired undelivered R2 claim.",
     "source_of_truth": true
   },
   "summary": {
-    "formal_employee_count": 1,
+    "formal_employee_count": 2,
     "unregistered_worker_count": 7,
-    "suspended_worker_count": 0,
+    "suspended_worker_count": 1,
     "revoked_worker_count": 0,
     "limited_autonomy_worker_count": 0,
     "protected_path_violation_count": 0,
     "governance_violation_event_count": 1,
-    "archived_worker_count": 1
+    "archived_worker_count": 0
   },
   "events": [
     {
@@ -63,6 +63,26 @@
       ],
       "immediate_action": "Close the R2 task, disable current Cursor queues and tools, archive the worker record, and retain append-only history.",
       "final_disposition": "ARCHIVED_REAPPLICATION_REQUIRED",
+      "related_report": "KGEN-AI-Company/reports/CODEX_REVIEW_LOG.md",
+      "current_effect": "SUPERSEDED_BY_WORKFORCE-UNPAID-SUSPENSION-2026-0001"
+    },
+    {
+      "event_id": "WORKFORCE-UNPAID-SUSPENSION-2026-0001",
+      "event_type": "EMPLOYMENT_STATUS_CORRECTION_LEAVE_WITHOUT_PAY",
+      "timestamp": "2026-08-29T21:42:00+08:00",
+      "worker_id": "cursor-01",
+      "detected_by": "human-primeforge",
+      "severity": "NONE",
+      "supersedes_event_id": "WORKFORCE-OFFBOARDING-2026-0001",
+      "result": "Worker remains employed as ACTIVE_SUSPENDED_UNPAID with T2 trust preserved; runtime is offline because the external service is unavailable; all current task, claim, tool and payroll activity remains disabled.",
+      "evidence": [
+        "Human clarified Cursor is not terminated or permanently resigned",
+        "R2 lease expired without delivery, review, acceptance or payment",
+        "Expired claim is released and inactive; task is OPEN and reassignable",
+        "Reactivation requires service availability, Boot, CURRENT sync, registry check, ACK revalidation if required and a fresh claim"
+      ],
+      "immediate_action": "Preserve employment and T2 trust, disable new assignment and auto-claim, suspend payroll with no work and no pay, and return the unperformed task to OPEN for reassignment.",
+      "final_disposition": "ACTIVE_SUSPENDED_UNPAID",
       "related_report": "KGEN-AI-Company/reports/CODEX_REVIEW_LOG.md"
     }
   ],

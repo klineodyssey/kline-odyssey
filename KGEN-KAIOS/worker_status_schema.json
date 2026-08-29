@@ -51,7 +51,7 @@
     "reviewer": { "type": "string", "minLength": 1 },
     "employee_status": {
       "type": "string",
-      "enum": ["ACTIVE", "TRUSTED", "SENIOR_TRUSTED", "PENDING_REGISTRATION", "SUSPENDED", "REVOKED", "ARCHIVED"]
+      "enum": ["ACTIVE", "TRUSTED", "SENIOR_TRUSTED", "ACTIVE_SUSPENDED_UNPAID", "PENDING_REGISTRATION", "SUSPENDED", "REVOKED", "ARCHIVED"]
     },
     "trust_level": { "type": "string", "enum": ["T0", "T1", "T2", "T3", "T4", "T5"] },
     "boot_acknowledged": { "type": "boolean" },
@@ -68,6 +68,7 @@
     "life_birthplace_code": { "type": "integer" },
     "availability_for_current_work": { "type": "string", "minLength": 1 },
     "availability_reason": { "type": "string", "minLength": 1 },
+    "payroll_status": { "type": "string", "minLength": 1 },
     "pending_rework_task_id": { "type": ["string", "null"] },
     "fresh_claim_required": { "type": "boolean" },
     "worker_class": { "type": "string", "minLength": 1 },

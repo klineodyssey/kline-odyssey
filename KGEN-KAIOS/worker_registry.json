@@ -2,12 +2,12 @@
   "metadata": {
     "version": "KAIOS_WORKER_REGISTRY_WITH_TRUST_V1_1",
     "status": "ACTIVE",
-    "updated": "2026-08-27",
+    "updated": "2026-08-29",
     "updated_by": "codex-gm-01",
     "reviewed_by": "codex-gm-01",
-    "source_commit": "80002b27b91fd951c470cfe32dc243162ea906af",
+    "source_commit": "ac304fc585f5f86846d2c61b69ecad8f59bc0a66",
     "task_id": "KAIOS-EXPIRED-CURSOR-R2-CLAIM-RECONCILIATION-001",
-    "change_reason": "Reconcile the expired undelivered R2 claim and the Human-directed non-disciplinary Cursor offboarding: close the task, archive cursor-01, remove active work authority, require a fresh application and interview before any future employment, and authorize no payment, merge or Mainnet action.",
+    "change_reason": "Reconcile the expired undelivered R2 claim and supersede the draft offboarding state with Human-directed leave without pay: keep cursor-01 employed but suspended unpaid and externally offline, preserve T2 trust and history, disable new assignments and auto-claims, and return the unperformed task to OPEN and reassignable without authorizing payment, merge or Mainnet action.",
     "source_of_truth": true
   },
   "claim_events": [
@@ -163,7 +163,46 @@
         "KGEN-KAIOS/workforce/agent_registry.json",
         "KGEN-KAIOS/workforce/WORKER_AUDIT_LOG.json"
       ],
-      "reason": "Human directed a non-disciplinary Cursor offboarding because the Cursor subscription is not being renewed and mobile work is being used instead. The unperformed task is closed without payment. Any future Cursor return requires a new application, interview, onboarding and new task."
+      "reason": "Draft Human-directed non-disciplinary offboarding record. This event is preserved as superseded history and corrected by sequence 4; it is not the current employment or task state."
+    },
+    {
+      "event_id": "CLAIM-EVENT-KAIOS-LIFE-ENERGY-PAYROLL-R2-001-004",
+      "event_type": "EMPLOYMENT_DECISION_CORRECTION_TASK_REOPENED",
+      "sequence": 4,
+      "claim_id": "CLAIM-KAIOS-LIFE-ENERGY-PAYROLL-R2-001-cursor-01",
+      "task_id": "KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-R2-001",
+      "parent_task_id": "KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-CANDIDATES-001",
+      "worker_id": "cursor-01",
+      "branch": "cursor-handoff/KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-R2-001",
+      "reviewer": "codex-gm-01",
+      "source_commit": "ac304fc585f5f86846d2c61b69ecad8f59bc0a66",
+      "previous_event_id": "CLAIM-EVENT-KAIOS-LIFE-ENERGY-PAYROLL-R2-001-003",
+      "recorded_by": "codex-gm-01",
+      "recorded_at": "2026-08-29T21:42:00+08:00",
+      "old_state": "CLOSED",
+      "new_state": "OPEN",
+      "classification": "HUMAN_EMPLOYMENT_CORRECTION_REOPENED_REASSIGNABLE",
+      "lease_expired": true,
+      "delivery_present": false,
+      "review_present": false,
+      "acceptance_present": false,
+      "payroll_state": "NOT_ELIGIBLE_NO_ACCEPTED_DELIVERY",
+      "payment_state": "NOT_SENT",
+      "claim_active": false,
+      "lease_active": false,
+      "task_reassignable": true,
+      "do_not_wake_cursor": true,
+      "cursor_employment_status": "ACTIVE_SUSPENDED_UNPAID",
+      "cursor_runtime_status": "OFFLINE_EXTERNAL_SERVICE_UNAVAILABLE",
+      "future_cursor_return_rule": "SERVICE_AVAILABLE_BOOT_CURRENT_SYNC_REGISTRY_CHECK_ACK_REVALIDATION_IF_REQUIRED_AND_FRESH_CLAIM",
+      "evidence_references": [
+        "KGEN-KAIOS/decision/decision_log.jsonl",
+        "KGEN-KAIOS/decision/decision_snapshot.json",
+        "KGEN-KAIOS/workforce/employee_roster.json",
+        "KGEN-KAIOS/workforce/agent_registry.json",
+        "KGEN-KAIOS/workforce/WORKER_AUDIT_LOG.json"
+      ],
+      "reason": "Human clarified that Cursor is not terminated or permanently resigned. Employment remains active but suspended without pay while the external Cursor service is unavailable. The expired claim stays released and inactive; the unperformed task returns to OPEN and may be reassigned under current task policy, but cursor-01 cannot receive new work or auto-claim until formal reactivation and a fresh claim."
     }
   ],
   "active_claims": [],
@@ -342,12 +381,13 @@
       "execution_base": "ff8fca3e610ac936e8998112255901a78296b238",
       "output_status": "CANDIDATE_REWORK_ONLY",
       "reviewer": "codex-gm-01",
-      "status": "CLOSED_NO_DELIVERY_WORKER_OFFBOARDED",
+      "status": "OPEN_REASSIGNABLE_CLAIM_RELEASED",
       "claim_id": "CLAIM-KAIOS-LIFE-ENERGY-PAYROLL-R2-001-cursor-01",
       "claim_event_ids": [
         "CLAIM-EVENT-KAIOS-LIFE-ENERGY-PAYROLL-R2-001-001",
         "CLAIM-EVENT-KAIOS-LIFE-ENERGY-PAYROLL-R2-001-002",
-        "CLAIM-EVENT-KAIOS-LIFE-ENERGY-PAYROLL-R2-001-003"
+        "CLAIM-EVENT-KAIOS-LIFE-ENERGY-PAYROLL-R2-001-003",
+        "CLAIM-EVENT-KAIOS-LIFE-ENERGY-PAYROLL-R2-001-004"
       ]
     }
   ],
@@ -357,9 +397,9 @@
       "task_id": "KAIOS-CURSOR-MICROBIAL-RESEARCH-001",
       "worker_id": "cursor-01",
       "reviewer": "codex-gm-01",
-      "status": "CANCELLED_WORKER_OFFBOARDED",
-      "claim_state": "CLOSED_NOT_CLAIMABLE",
-      "dispatch_state": "CANCELLED",
+      "status": "HOLD_WORKER_SUSPENDED_UNPAID",
+      "claim_state": "NOT_CLAIMED",
+      "dispatch_state": "HOLD",
       "preparation_source_commit": "7008e4f9449f6df050171cf47ec6ec56419925e9",
       "execution_base": null,
       "execution_base_binding": "SEPARATE_ACTIVATION_PR_MUST_BIND_EXACT_PREPARATION_MERGE_SHA",
@@ -456,23 +496,24 @@
     {
       "worker_id": "cursor-01",
       "worker_type": "Cursor",
-      "role": "Former Foundational Life Candidate Creator / Life Research Analyst / Documentation / QA Worker",
+      "role": "Foundational Life Candidate Creator / Life Research Analyst / Documentation / QA Worker",
       "permission": "pending_readonly",
       "worker_class": "FOUNDATIONAL_LIFE_CREATOR",
       "worker_classes": [
         "FOUNDATIONAL_LIFE_CREATOR",
         "LIFE_RESEARCH_ANALYST"
       ],
-      "workspace": "archived-cursor-worker-record",
+      "workspace": "suspended-cursor-worker-record",
       "current_task": null,
       "current_branch": null,
       "status": "OFFLINE",
-      "availability_for_current_work": "NOT_EMPLOYED",
-      "availability_reason": "HUMAN_DIRECTED_NON_DISCIPLINARY_OFFBOARDING_CURSOR_NOT_IN_USE",
+      "availability_for_current_work": "SUSPENDED_UNPAID",
+      "availability_reason": "CURSOR_EXTERNAL_SERVICE_UNAVAILABLE_SUBSCRIPTION_NOT_ACTIVE",
       "pending_rework_task_id": null,
       "fresh_claim_required": false,
-      "employee_status": "ARCHIVED",
-      "trust_level": "T0",
+      "employee_status": "ACTIVE_SUSPENDED_UNPAID",
+      "payroll_status": "SUSPENDED_NO_WORK_NO_PAY",
+      "trust_level": "T2",
       "heartbeat": "2026-08-16T12:49:02Z",
       "last_report": "KGEN-AI-Company/reports/CODEX_REVIEW_LOG.md",
       "allowed_branch_pattern": "cursor-handoff/<Task-ID>",
@@ -549,16 +590,24 @@
         "RIGHTS_AUTHORITY",
         "ECONOMY_AUTHORITY"
       ],
-      "dispatch_rule": "NO_DISPATCH_WHILE_ARCHIVED; REAPPLICATION_AND_INTERVIEW_REQUIRED",
+      "dispatch_rule": "NO_DISPATCH_OR_AUTO_CLAIM_WHILE_SUSPENDED_UNPAID; FRESH_CLAIM_REQUIRED_AFTER_REACTIVATION",
       "review_rule": "CODEX_FINAL_REVIEW_REQUIRED; CURSOR_SELF_APPROVAL_DENIED",
       "completion_rule": "CANDIDATE_ONLY; DRAFT_PR; STOP_AT_PENDING_CODEX_REVIEW",
       "closeout_rule": "CODEX_ONLY_AFTER_REVIEW; CURSOR_MUST_NOT_MARK_CANONICAL",
-      "recovery_rule": "PRESERVE_HISTORY; NO_AUTOMATIC_REACTIVATION; REQUIRE_NEW_APPLICATION_IDENTITY_CHECK_INTERVIEW_SANDBOX_TRIAL_ONBOARDING_AND_NEW_TASK",
+      "recovery_rule": "PRESERVE_HISTORY_AND_T2; REQUIRE_SERVICE_AVAILABLE_BOOT_CURRENT_SYNC_REGISTRY_CHECK_ACK_REVALIDATION_IF_REQUIRED_AND_FRESH_CLAIM",
       "boot_acknowledged": true,
       "canon_acknowledged": true,
       "workspace_policy_acknowledged": true,
       "do_not_touch_acknowledged": true,
-      "suspension": null,
+      "suspension": {
+        "type": "LEAVE_WITHOUT_PAY_TEMPORARILY_UNAVAILABLE",
+        "effective_at": "2026-08-29T21:42:00+08:00",
+        "reason": "CURSOR_EXTERNAL_SERVICE_UNAVAILABLE_SUBSCRIPTION_NOT_ACTIVE",
+        "new_task_assignment": false,
+        "auto_claim": false,
+        "payroll": "SUSPENDED_NO_WORK_NO_PAY",
+        "historical_work_preserved": true
+      },
       "autonomy_scope": "none"
     },
     {

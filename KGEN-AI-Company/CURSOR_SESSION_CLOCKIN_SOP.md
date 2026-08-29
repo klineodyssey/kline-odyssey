@@ -1,11 +1,11 @@
 # Cursor Session Clock-In SOP (方案 2)
 
-**Status:** DISABLED — `cursor-01` archived; reapplication and interview required
+**Status:** DISABLED — `cursor-01` on unpaid leave; external service unavailable
 **Human decision:** `HUMAN-AUTO-CLOCKIN-001` (2026-08-02)  
 **Worker:** `cursor-01`  
 **Reviewer:** `codex-gm-01`
 
-> Current gate (2026-08-27): Human directed non-disciplinary Cursor offboarding because Cursor is not currently in use. This historical SOP cannot clock in, claim, wake or dispatch `cursor-01`. A future Cursor return requires a new application, identity check, interview, sandbox trial, onboarding approval and new task.
+> Current gate (2026-08-29): Human placed `cursor-01` on leave without pay while the external Cursor service is unavailable. This SOP cannot clock in, claim, wake or dispatch `cursor-01` during suspension. Reactivation requires service availability, Boot, CURRENT sync, registry check, ACK revalidation if required and a fresh claim.
 
 ## Purpose
 
@@ -44,7 +44,7 @@ Codex-aligned rule (from `PRIMEFORGE_GENESIS_BOOT_SEQUENCE.md`): finish existing
    - `KGEN-Organization/WorkOrders/WORK_QUEUE.md` — **grep** for `Status: OPEN` + `CLAIMABLE` only; do not load full file into context unless a row matches.
 3. Emit **`CURSOR PREFLIGHT`** (short): worker ok?, main SHA, queue signals, stop_code if blocked.
 
-If registry invalid → output `REGISTRATION_REQUIRED` and **stop** (no file edits).
+If registry status is `ACTIVE_SUSPENDED_UNPAID` → output `WORKER_SUSPENDED_UNPAID` and **stop**. Other invalid registry states output `REGISTRATION_REQUIRED` and **stop** (no file edits).
 
 ---
 

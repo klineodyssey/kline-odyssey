@@ -54,7 +54,7 @@ jobs:
         run: find core -name '*.mjs' -print0 | xargs -0 -n1 node --check
       - name: Run Universal Exchange tests
         run: node --test tests/universal-exchange.test.mjs
-      - name: Validate Cursor R2 payroll and offboarding reconciliation
+      - name: Validate Cursor R2 claim and unpaid-suspension reconciliation
         run: |
           node KAIOS/economy/life-energy-payroll/life-energy-payroll-spec-validator.mjs
           python -m unittest KGEN-KAIOS/governance/cursor/tests/test_cursor_worker_registry_repair.py

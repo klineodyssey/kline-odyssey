@@ -2,7 +2,7 @@
   "metadata": {
     "version": "1.0",
     "status": "ACTIVE",
-    "last_updated": "2026-08-27",
+    "last_updated": "2026-08-29",
     "task_id": "KAIOS-EXPIRED-CURSOR-R2-CLAIM-RECONCILIATION-001"
   },
   "allowed_values": ["ALLOWED", "REVIEW_REQUIRED", "DENIED", "HUMAN_APPROVAL_REQUIRED"],
@@ -37,8 +37,8 @@
     {
       "worker_id": "cursor-01",
       "display_name": "Cursor Primary Worker",
-      "status": "ARCHIVED",
-      "trust_level": "T0",
+      "status": "ACTIVE_SUSPENDED_UNPAID",
+      "trust_level": "T2",
       "access": {
         "Git read": "DENIED",
         "Git commit": "DENIED",

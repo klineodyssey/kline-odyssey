@@ -5,7 +5,7 @@
   "worker_id": "cursor-01",
   "reviewer": "codex-gm-01",
   "branch": "cursor-handoff/KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-CANDIDATES-001",
-  "status": "R2_CLOSED_NO_DELIVERY_WORKER_OFFBOARDED",
+  "status": "R2_EXPIRED_UNDELIVERED_RELEASED_TASK_OPEN",
   "dispatch_mode": "MANUAL_HUMAN_INITIATION_ONLY",
   "queue_policy": "ONE_TASK_AT_A_TIME",
   "claim_created": true,
@@ -78,15 +78,16 @@
   "external_wake_workflow_allowed": false,
   "merge_allowed": false,
   "deploy_allowed": false,
-  "completion_rule": "TASK_CLOSED_NO_DELIVERY; NO_REACTIVATION; ANY_FUTURE_CURSOR_WORK_REQUIRES_NEW_APPLICATION_INTERVIEW_ONBOARDING_AND_NEW_TASK",
+  "completion_rule": "CLAIM_RELEASED_NO_DELIVERY; TASK_OPEN_REASSIGNABLE; CURSOR_REMAINS_SUSPENDED_UNPAID_UNTIL_SERVICE_REACTIVATION_AND_FRESH_CLAIM",
   "r2_reconciliation": {
     "claim_release_event_id": "CLAIM-EVENT-KAIOS-LIFE-ENERGY-PAYROLL-R2-001-002",
-    "task_close_event_id": "CLAIM-EVENT-KAIOS-LIFE-ENERGY-PAYROLL-R2-001-003",
+    "superseded_task_close_event_id": "CLAIM-EVENT-KAIOS-LIFE-ENERGY-PAYROLL-R2-001-003",
+    "employment_correction_event_id": "CLAIM-EVENT-KAIOS-LIFE-ENERGY-PAYROLL-R2-001-004",
     "claim_release_recorded_at": "2026-08-24T21:48:54Z",
-    "task_close_recorded_at": "2026-08-27T23:19:47+08:00",
+    "employment_correction_recorded_at": "2026-08-29T21:42:00+08:00",
     "old_state": "CLAIMED",
-    "new_task_state": "CLOSED",
-    "classification": "EXPIRED_UNDELIVERED_RELEASED_THEN_CLOSED_WORKER_OFFBOARDED",
+    "new_task_state": "OPEN",
+    "classification": "EXPIRED_UNDELIVERED_RELEASED_TASK_OPEN_CURSOR_SUSPENDED_UNPAID",
     "lease_expired": true,
     "delivery_present": false,
     "review_present": false,
@@ -95,10 +96,10 @@
     "payment_state": "NOT_SENT",
     "claim_active": false,
     "lease_active": false,
-    "task_reassignable": false,
-    "cursor_availability": "OFFBOARDED_NOT_EMPLOYED",
+    "task_reassignable": true,
+    "cursor_availability": "SUSPENDED_UNPAID_EXTERNAL_SERVICE_UNAVAILABLE",
     "do_not_wake_cursor": true,
-    "trust_changed": true,
+    "trust_changed": false,
     "employment_changed": true,
     "mainnet_write": false
   },
@@ -153,5 +154,5 @@
       "READY_FOR_REVIEW = YES/NO"
     ]
   },
-  "notes": "The delivered R1 branch is preserved as evidence and is not an R2 delivery. R2 expired without delivery, review, acceptance, payroll event or payment; its claim and lease were released without penalty. Human then directed non-disciplinary Cursor offboarding because Cursor is not currently in use. This R2 task is closed, not payable and not reassignable. Any future Cursor return requires a fresh application, interview, onboarding and new task. No payment, escrow release, integration, merge or Mainnet action is authorized."
+  "notes": "The delivered R1 branch is preserved as evidence and is not an R2 delivery. R2 expired without delivery, review, acceptance, payroll event or payment; its claim and lease are released and inactive without penalty. Human clarified that Cursor remains employed on unpaid leave while its external service is unavailable. This R2 task is OPEN and reassignable, but cursor-01 cannot receive new work or auto-claim during suspension. Reactivation requires service availability, Boot, CURRENT sync, registry check, ACK revalidation if required and a fresh claim. No payment, escrow release, integration, merge or Mainnet action is authorized."
 }

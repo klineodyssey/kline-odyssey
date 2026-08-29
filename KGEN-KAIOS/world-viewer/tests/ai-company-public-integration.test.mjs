@@ -91,7 +91,7 @@ test("public Cursor queue projection matches the canonical governance queue", as
   }
 });
 
-test("public Cursor queue is fail-closed after non-disciplinary offboarding", async () => {
+test("public Cursor queue is fail-closed during unpaid external-service suspension", async () => {
   const canonical = JSON.parse(await read(
     "KAIOS/life/forest-agriculture/KAIOS_CURSOR_CONTINUOUS_WORK_QUEUE.json"
   ));
@@ -105,8 +105,8 @@ test("public Cursor queue is fail-closed after non-disciplinary offboarding", as
     current_task: null,
     current_branch: null,
     status: "OFFLINE",
-    availability_for_current_work: "NOT_EMPLOYED",
-    availability_reason: "HUMAN_DIRECTED_NON_DISCIPLINARY_OFFBOARDING_CURSOR_NOT_IN_USE"
+    availability_for_current_work: "SUSPENDED_UNPAID",
+    availability_reason: "CURSOR_EXTERNAL_SERVICE_UNAVAILABLE_SUBSCRIPTION_NOT_ACTIVE"
   });
   const reconciliation = registry.claim_events.find(
     (event) => event.event_id === "CLAIM-EVENT-KAIOS-LIFE-ENERGY-PAYROLL-R2-001-002"
@@ -129,21 +129,31 @@ test("public Cursor queue is fail-closed after non-disciplinary offboarding", as
   assert.equal(taskClose.new_state, "CLOSED");
   assert.equal(taskClose.task_reassignable, false);
   assert.equal(taskClose.payment_state, "NOT_SENT");
+  const correction = registry.claim_events.find(
+    (event) => event.event_id === "CLAIM-EVENT-KAIOS-LIFE-ENERGY-PAYROLL-R2-001-004"
+  );
+  assert.equal(correction.event_type, "EMPLOYMENT_DECISION_CORRECTION_TASK_REOPENED");
+  assert.equal(correction.previous_event_id, taskClose.event_id);
+  assert.equal(correction.old_state, "CLOSED");
+  assert.equal(correction.new_state, "OPEN");
+  assert.equal(correction.task_reassignable, true);
+  assert.equal(correction.claim_active, false);
   const cursor = registry.workers.find((worker) => worker.worker_id === "cursor-01");
-  assert.equal(cursor.employee_status, "ARCHIVED");
-  assert.equal(cursor.trust_level, "T0");
+  assert.equal(cursor.employee_status, "ACTIVE_SUSPENDED_UNPAID");
+  assert.equal(cursor.payroll_status, "SUSPENDED_NO_WORK_NO_PAY");
+  assert.equal(cursor.trust_level, "T2");
   assert.equal(cursor.permission, "pending_readonly");
   assert.equal(cursor.dispatch_rule,
-    "NO_DISPATCH_WHILE_ARCHIVED; REAPPLICATION_AND_INTERVIEW_REQUIRED");
-  assert.equal(cursor.suspension, null);
+    "NO_DISPATCH_OR_AUTO_CLAIM_WHILE_SUSPENDED_UNPAID; FRESH_CLAIM_REQUIRED_AFTER_REACTIVATION");
+  assert.equal(cursor.suspension.type, "LEAVE_WITHOUT_PAY_TEMPORARILY_UNAVAILABLE");
   assert.equal(registry.prepared_tasks.length, 1);
   assert.deepEqual(projection.prepared_task, canonical.prepared_task);
   assert.deepEqual(projection.prepared_task, registry.prepared_tasks[0]);
   const prepared = projection.prepared_task;
   assert.equal(prepared.task_id, "KAIOS-CURSOR-MICROBIAL-RESEARCH-001");
-  assert.equal(prepared.status, "CANCELLED_WORKER_OFFBOARDED");
-  assert.equal(prepared.claim_state, "CLOSED_NOT_CLAIMABLE");
-  assert.equal(prepared.dispatch_state, "CANCELLED");
+  assert.equal(prepared.status, "HOLD_WORKER_SUSPENDED_UNPAID");
+  assert.equal(prepared.claim_state, "NOT_CLAIMED");
+  assert.equal(prepared.dispatch_state, "HOLD");
   assert.equal(prepared.execution_base, null);
   assert.equal(prepared.descendant_wildcard_allowed, false);
   assert.equal(prepared.branch_state, "NOT_CREATED");

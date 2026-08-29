@@ -2,7 +2,7 @@
   "metadata": {
     "version": "1.0",
     "status": "ACTIVE",
-    "last_updated": "2026-08-27",
+    "last_updated": "2026-08-29",
     "task_id": "KAIOS-EXPIRED-CURSOR-R2-CLAIM-RECONCILIATION-001",
     "privacy": "Logical paths only; no real local paths or secrets."
   },
@@ -44,17 +44,17 @@
     {
       "desk_id": "desk-cursor-01",
       "worker_id": "cursor-01",
-      "workspace_type": "ARCHIVED_FORMER_WORKER_RECORD",
-      "workspace_path": null,
+      "workspace_type": "SUSPENDED_WORKER_RECORD",
+      "workspace_path": "WORKSPACE_UNAVAILABLE_EXTERNAL_SERVICE_OFFLINE",
       "base_branch": "origin/main",
       "handoff_namespace": null,
       "allowed_paths": [],
       "protected_paths": ["contracts", "K線西遊記/temples/12345", "wallet", "bridge", "Runtime CURRENT", "final-whitepaper", "KGEN Token contract", "secrets"],
       "available_tools": [],
-      "restricted_tools": ["ALL_COMPANY_WORK_UNTIL_NEW_APPLICATION_INTERVIEW_AND_ONBOARDING"],
+      "restricted_tools": ["ALL_COMPANY_WORK_DURING_UNPAID_SUSPENSION"],
       "current_task": null,
       "claim_expires_at": null,
-      "health_status": "ARCHIVED_OFFBOARDED",
+      "health_status": "OFFLINE_EXTERNAL_SERVICE_UNAVAILABLE",
       "last_clean_check": null,
       "last_sync_commit": null
     }

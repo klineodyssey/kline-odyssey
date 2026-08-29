@@ -58,28 +58,29 @@ The worker must then stop without changing WorkQueue, creating a branch, editing
 | KAIOS-CANONICAL-ORGANISM-V0-1 | DONE | Codex | Codex | P1 | Life Architecture | `codex/kaios-canonical-organism-schema-v0-1` | `KGEN-KAIOS/organism/KAIOS_CANONICAL_ORGANISM_V0_1_BASELINE_MERGE_CLOSEOUT.md` |
 | LAND_VIEWER_SCHEMA_V2_COMPATIBILITY | DONE | Codex | Codex | P1 | Frontend | `codex/land-viewer-schema-v2-compatibility` | `KGEN-KAIOS/world-viewer/LAND_VIEWER_SCHEMA_V2_COMPATIBILITY_MERGE_CLOSEOUT.md` |
 | WORLD_VIEWER_ORGANISM_PACKAGE_INTEGRATION | HOLD | UNASSIGNED | Codex | P1 | Frontend | `NOT_CREATED` | `PENDING_SCOPE` |
-| KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-R2-001 | CLOSED | UNASSIGNED | codex-gm-01 | P0 | Payroll QA | `NONE` | `KGEN-AI-Company/reports/CURSOR_LIFE_ENERGY_PAYROLL_CANDIDATE_REPORT.md` |
+| KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-R2-001 | OPEN | UNASSIGNED | codex-gm-01 | P0 | Payroll QA | `NONE` | `KGEN-AI-Company/reports/CURSOR_LIFE_ENERGY_PAYROLL_CANDIDATE_REPORT.md` |
 | KGEN-MAP-4168-NAIHE-GENESIS-STATION-UI-001 | HOLD | Map / World Agent | codex-gm-01 | P2 | World Map | `NOT_CREATED` | `SPEC_HANDOFF_IN_CODEX_MANAGER_PROTOCOL` |
 | KGEN-BSCSCAN-LOGO-001 | DONE | Cursor + Codex | Codex | P1 | Token Metadata | `cursor/kgen-bscscan-logo-submission-v1` | `KGEN/registry/BscScan/KGEN_BSCSCAN_LOGO_SUBMISSION_V1_MERGE_CLOSEOUT.md` |
 
 ### KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-R2-001 - Payroll Candidate Rework
 
-- Status: CLOSED — expired undelivered; worker offboarded
+- Status: OPEN — expired undelivered claim released; task reassignable
 - Owner: UNASSIGNED
 - Reviewer: codex-gm-01
 - Priority: P0
 - Execution Base: `ff8fca3e610ac936e8998112255901a78296b238`
 - Prior Claim ID: `CLAIM-KAIOS-LIFE-ENERGY-PAYROLL-R2-001-cursor-01`
 - Prior Lease: `2026-08-16T12:49:02Z` through `2026-08-18T12:49:02Z` — expired and inactive
-- Claim release: `CLAIM-EVENT-KAIOS-LIFE-ENERGY-PAYROLL-R2-001-002` (`EXPIRED_UNDELIVERED_RELEASED`, task temporarily returned to `OPEN`)
-- Task close / offboarding: `CLAIM-EVENT-KAIOS-LIFE-ENERGY-PAYROLL-R2-001-003` (`CLOSED_NO_DELIVERY_WORKER_OFFBOARDED`)
+- Claim release: `CLAIM-EVENT-KAIOS-LIFE-ENERGY-PAYROLL-R2-001-002` (`EXPIRED_UNDELIVERED_RELEASED`, task returned to `OPEN`)
+- Superseded draft close: `CLAIM-EVENT-KAIOS-LIFE-ENERGY-PAYROLL-R2-001-003` (preserved history; not current state)
+- Employment/task correction: `CLAIM-EVENT-KAIOS-LIFE-ENERGY-PAYROLL-R2-001-004` (`HUMAN_EMPLOYMENT_CORRECTION_REOPENED_REASSIGNABLE`)
 - Delivery / Review / Acceptance: `NONE / NONE / NONE`
 - Payroll / Payment: `NOT_ELIGIBLE_NO_ACCEPTED_DELIVERY / NOT_SENT`
-- Employment: `cursor-01` is `ARCHIVED / T0 / NOT_EMPLOYED` by Human-directed non-disciplinary offboarding.
-- Reassignment: not permitted. Any future Cursor return requires a fresh application, identity check, interview, sandbox trial, onboarding approval and a new task; do not revive this claim or task.
+- Employment: `cursor-01` is `ACTIVE_SUSPENDED_UNPAID / T2`; runtime is `OFFLINE_EXTERNAL_SERVICE_UNAVAILABLE`; payroll is `SUSPENDED_NO_WORK_NO_PAY`.
+- Reassignment: permitted to another eligible worker under current task policy. Do not revive the expired Cursor claim. Cursor reactivation requires service availability, Boot, CURRENT sync, registry check, ACK revalidation if required and a fresh claim.
 - Exact task packet: `KAIOS/economy/life-energy-payroll/KAIOS_CURSOR_LIFE_ENERGY_PAYROLL_TASK_ENVELOPE.json`
 - Objective: fix only the 120-versus-80 approved-ledger replay defect and the two schema-invalid `candidate_metadata` fields.
-- Closeout: no R2 delivery, review, acceptance, payroll eligibility or payment. Preserve R1/R2 history; no payment, escrow release, merge, Canon change, contract change or Mainnet write.
+- Reconciliation: no R2 delivery, review, acceptance, payroll eligibility or payment. Preserve R1/R2 and superseded employment history; no payment, escrow release, merge, Canon change, contract change or Mainnet write.
 
 ### KGEN-MAP-4168-NAIHE-GENESIS-STATION-UI-001 - Naihe Genesis Station Handoff
 

@@ -1,12 +1,12 @@
 {
   "metadata": {
-    "version": "4.3",
+    "version": "4.4",
     "status": "ACTIVE",
-    "updated_at": "2026-08-27T05:42:35+08:00",
+    "updated_at": "2026-08-29T21:42:00+08:00",
     "manager": "codex-gm-01",
     "life_id": "LIFE-CODEX-GM-0001",
     "task_id": "KAIOS-EXPIRED-CURSOR-R2-CLAIM-RECONCILIATION-001",
-    "source_commit": "80002b27b91fd951c470cfe32dc243162ea906af",
+    "source_commit": "ac304fc585f5f86846d2c61b69ecad8f59bc0a66",
     "source_of_truth": true
   },
   "daily_operation": {
@@ -54,14 +54,18 @@
     "status": "NO_ACTIVE_CLAIM",
     "claim_id": null,
     "lease_expires_at": null,
-    "closed_task": "KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-R2-001",
-    "closed_task_status": "CLOSED_NO_DELIVERY_WORKER_OFFBOARDED",
+    "open_task": "KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-R2-001",
+    "open_task_status": "OPEN_REASSIGNABLE_CLAIM_RELEASED",
     "claim_release_event_id": "CLAIM-EVENT-KAIOS-LIFE-ENERGY-PAYROLL-R2-001-002",
-    "task_close_event_id": "CLAIM-EVENT-KAIOS-LIFE-ENERGY-PAYROLL-R2-001-003",
-    "cursor_availability": "OFFBOARDED_NOT_EMPLOYED",
-    "cursor_employee_status": "ARCHIVED",
-    "cursor_trust_level": "T0",
-    "cursor_reapplication_required": true,
+    "superseded_task_close_event_id": "CLAIM-EVENT-KAIOS-LIFE-ENERGY-PAYROLL-R2-001-003",
+    "employment_correction_event_id": "CLAIM-EVENT-KAIOS-LIFE-ENERGY-PAYROLL-R2-001-004",
+    "cursor_availability": "SUSPENDED_UNPAID_EXTERNAL_SERVICE_UNAVAILABLE",
+    "cursor_employee_status": "ACTIVE_SUSPENDED_UNPAID",
+    "cursor_runtime_status": "OFFLINE_EXTERNAL_SERVICE_UNAVAILABLE",
+    "cursor_payroll_status": "SUSPENDED_NO_WORK_NO_PAY",
+    "cursor_trust_level": "T2",
+    "cursor_reapplication_required": false,
+    "cursor_fresh_claim_required_after_reactivation": true,
     "map_handoff": "KGEN-MAP-4168-NAIHE-GENESIS-STATION-UI-001",
     "map_handoff_status": "HOLD_FOR_MAP_WORLD_AGENT"
   },
@@ -82,7 +86,7 @@
   },
   "publication": {
     "branch": "codex/KAIOS-EXPIRED-CURSOR-R2-CLAIM-RECONCILIATION-V1-001",
-    "draft_pr": null,
+    "draft_pr": 176,
     "publication_pending_at_snapshot": true,
     "mainnet_write": false
   }

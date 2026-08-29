@@ -15,9 +15,9 @@
 
 This folder is the machine-readable workforce layer for KAIOS. It does not replace AI Company, Agent Office, Organization, WorkQueue, or provenance. It adds the evidence required to decide whether a worker may register, claim a task, submit a handoff branch, and be reviewed by Codex.
 
-## Formal Employee Rule
+## Employment Record And Active Work Gate
 
-A worker is a formal KGEN employee only when all of these are true:
+A worker may hold a preserved employment record while suspended. A worker is eligible for active KGEN work only when all of these are true:
 
 - `worker_id` exists in `KGEN-KAIOS/worker_registry.json`
 - `employee_status` is `ACTIVE`, `TRUSTED`, or `SENIOR_TRUSTED`
@@ -27,7 +27,7 @@ A worker is a formal KGEN employee only when all of these are true:
 - Boot, Canon, Workspace Policy, WorkQueue, and DO_NOT_TOUCH acknowledgments are recorded
 - no suspension, ban, expired credential, or active blocking violation exists
 
-If any requirement is missing, the worker is treated as `UNREGISTERED_WORKER` and may not claim or modify formal KGEN work.
+`ACTIVE_SUSPENDED_UNPAID` preserves employment and trust but fails the active work gate. Such a worker may not claim or modify formal KGEN work until reactivation. Other missing requirements result in `UNREGISTERED_WORKER`.
 
 ## Files
 
@@ -76,7 +76,7 @@ No worker, including Senior Trusted workers, may bypass protected paths, contrac
 
 ## Current Workforce Snapshot
 
-The current roster is maintained in `employee_roster.json`. As of 2026-08-27, Codex is on duty, `cursor-01` is non-disciplinarily offboarded and `ARCHIVED`, the Human Operator is recorded separately, and other AI / Human candidates remain `REGISTERED_NOT_ACTIVATED` until onboarding and sandbox trial evidence exists. Historical Cursor work remains preserved, but future Cursor use requires a fresh application, identity check, interview, sandbox trial, onboarding approval and new task.
+The current roster is maintained in `employee_roster.json`. As of 2026-08-29, Codex is on duty, `cursor-01` remains employed as `ACTIVE_SUSPENDED_UNPAID` with its runtime offline because the external Cursor service is unavailable, the Human Operator is recorded separately, and other AI / Human candidates remain `REGISTERED_NOT_ACTIVATED` until onboarding and sandbox trial evidence exists. Historical Cursor work and T2 trust remain preserved. Reactivation requires service availability, Boot, CURRENT sync, registry check, ACK revalidation if required and a fresh claim.
 
 ## Workforce V2 Agent Model
 

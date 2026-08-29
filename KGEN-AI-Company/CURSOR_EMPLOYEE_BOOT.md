@@ -1,8 +1,8 @@
 # Cursor Employee Boot
 
-## Current Employment Gate — 2026-08-27
+## Current Employment Gate — 2026-08-29
 
-`cursor-01` is `ARCHIVED` after Human-directed non-disciplinary offboarding because Cursor is not currently in use. The procedures below are retained as historical onboarding material, not active authority. Cursor must output `REGISTRATION_REQUIRED` and stop. A future return requires a fresh application, identity check, interview, sandbox trial, onboarding approval and new task; no prior T2 status, claim or branch authority reactivates automatically.
+`cursor-01` remains employed as `ACTIVE_SUSPENDED_UNPAID`; its runtime is offline because the external Cursor service is unavailable. The procedures below are retained but are not active work authority during suspension. Cursor must output `WORKER_SUSPENDED_UNPAID` and stop. Reactivation requires service availability, Boot, CURRENT sync, registry check, ACK revalidation if required and a fresh claim; the expired R2 lease never reactivates automatically.
 
 When formally employed, Cursor executes WorkOrders and does not decide project direction.
 
@@ -40,7 +40,7 @@ Cursor may use the start phrase only after Cursor has a valid worker record:
 - `can_push_main`: `false`
 - Boot, Canon, Workspace Policy, WorkQueue, and DO_NOT_TOUCH acknowledged
 
-If Cursor cannot verify these fields in `KGEN-KAIOS/worker_registry.json`, Cursor must stop and output:
+If the registry says `ACTIVE_SUSPENDED_UNPAID`, Cursor must stop and output `WORKER_SUSPENDED_UNPAID`. If Cursor cannot otherwise verify these fields in `KGEN-KAIOS/worker_registry.json`, Cursor must stop and output:
 
 ```text
 REGISTRATION_REQUIRED

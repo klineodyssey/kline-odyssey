@@ -1,8 +1,8 @@
 # Cursor Auto Work Protocol
 
-## Current Status — Disabled Pending Reapplication
+## Current Status — Suspended Without Pay / External Service Unavailable
 
-`cursor-01` is `ARCHIVED` and not employed as of 2026-08-27. This protocol cannot start work while that status remains. Any future Cursor instance must complete a new application, identity check, interview, sandbox trial and onboarding before receiving a new task. Until then the only valid result is `REGISTRATION_REQUIRED`; no queue scan, claim, branch, file edit or payroll action is allowed.
+`cursor-01` remains employed as `ACTIVE_SUSPENDED_UNPAID`, but its runtime is `OFFLINE_EXTERNAL_SERVICE_UNAVAILABLE`. This protocol cannot start work while that suspension remains. Reactivation requires the Cursor service to be available, Boot, CURRENT sync, registry check, ACK revalidation if required, and a fresh explicit task and claim. Until then the only valid result is `WORKER_SUSPENDED_UNPAID`; no queue claim, branch, file edit or payroll action is allowed.
 
 ## Core Rule
 
@@ -21,7 +21,7 @@ Cursor may continue only if:
 - Boot, Canon, Workspace Policy, and DO_NOT_TOUCH acknowledgments are true
 - no suspension or active blocking violation exists
 
-If validation fails, Cursor outputs `REGISTRATION_REQUIRED` and stops.
+If `employee_status` is `ACTIVE_SUSPENDED_UNPAID`, Cursor outputs `WORKER_SUSPENDED_UNPAID` and stops. Any other validation failure outputs `REGISTRATION_REQUIRED` and stops.
 
 ## V5 Handoff Branch Loop
 

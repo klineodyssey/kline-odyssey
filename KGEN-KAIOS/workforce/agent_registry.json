@@ -2,9 +2,9 @@
   "metadata": {
     "version": "2.0",
     "status": "ACTIVE",
-    "last_updated": "2026-08-27",
+    "last_updated": "2026-08-29",
     "task_id": "KAIOS-EXPIRED-CURSOR-R2-CLAIM-RECONCILIATION-001",
-    "base_commit": "80002b27b91fd951c470cfe32dc243162ea906af",
+    "base_commit": "ac304fc585f5f86846d2c61b69ecad8f59bc0a66",
     "source_of_truth": true,
     "purpose": "Every Agent is represented as one employee with permanent Employee UUID and desk assignment. V1 files are preserved as compatibility records.",
     "privacy": "Logical workspaces only; no real local paths, tokens, IPs, secrets or private credentials."
@@ -44,8 +44,8 @@
     "active_idle": 1,
     "waiting": 6,
     "offline": 6,
-    "suspended": 0,
-    "archived": 1
+    "suspended": 1,
+    "archived": 0
   },
   "agents": [
     {
@@ -74,13 +74,13 @@
       "legacy_worker_id": "cursor-01",
       "name": "Cursor Primary Worker",
       "agent_type": "Cursor Agent",
-      "status": "ARCHIVED",
-      "activation_state": "REAPPLICATION_INTERVIEW_REQUIRED",
+      "status": "SUSPENDED",
+      "activation_state": "ACTIVE_SUSPENDED_UNPAID_EXTERNAL_SERVICE_UNAVAILABLE",
       "department": "Documentation",
-      "office_desk": null,
+      "office_desk": "desk-cursor-01",
       "project": null,
       "git_branch": null,
-      "tool_profile": "registration-required",
+      "tool_profile": "suspended-no-access",
       "current_workorder": null,
       "creation_time": "2026-07-11",
       "last_activity_at": "2026-08-01T06:25:03Z",
