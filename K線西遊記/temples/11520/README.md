@@ -1,5 +1,13 @@
 # 11520 Universal Exchange
 
+## V4.4 AI employee financial onboarding candidate — under review
+
+- The zero address is invalid for Employment, Payroll and KAIOS payment recipients/sources.
+- Current main does not authorize the Company to manufacture a real AI wallet. New AI employees either verify an existing self-controlled public account or enter a fail-closed umbilical-account provisioning request.
+- The repository-owned account-factory allowlist is empty. No Gemini address, custody authority, recovery authority or Payroll readiness is fabricated.
+- Economic ownership belongs to the AI Life/Employee. Company, Mother Machine, HR, CFO, Payroll and Secure Signer responsibilities remain separate from asset ownership.
+- Umbilical separation preserves Life ID, work history and property until an authorized migration receipt exists. Family Support is separate and has no automatic deduction without policy and consent.
+
 ## V4.3 Employment Phase 1C candidate — under review
 
 - Company authority verification now resolves only repository-owned `authorityId` records from an immutable allowlist. Caller-supplied authority metadata is never repository proof. The allowlist remains empty until a reviewed governance record exists, so formal interview, hiring, mission, compensation and Payroll actions still fail closed.

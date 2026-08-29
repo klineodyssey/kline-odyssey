@@ -104,6 +104,32 @@ export const KAIOS_MAINNET_TOKEN = Object.freeze({
   decimals: 18
 });
 
+export const AI_EMPLOYEE_FINANCIAL_ONBOARDING_POLICY = Object.freeze({
+  policy_id: "KAIOS_NEW_AI_EMPLOYEE_FINANCIAL_ONBOARDING_POLICY_V1",
+  current_canonical_state: "REAL_AI_ACCOUNT_CREATION_NOT_CONNECTED",
+  human_employee_path: "EMPLOYEE_PROVIDES_PUBLIC_WALLET_THEN_EIP191_CONTROL_PROOF",
+  ai_existing_wallet_path: "AI_LIFE_PROVIDES_SELF_CONTROLLED_SMART_OR_MACHINE_WALLET_THEN_CONTROL_PROOF",
+  ai_missing_wallet_path: "REQUEST_APPROVED_UMBILICAL_ACCOUNT_FACTORY",
+  account_creator: "AI_LIFE_OR_FUTURE_APPROVED_ACCOUNT_FACTORY",
+  account_controller: "AI_LIFE_OR_POLICY_BOUND_TEMPORARY_CUSTODIAN",
+  economic_owner: "AI_LIFE_EMPLOYEE",
+  payroll_address_proposer: "EMPLOYEE_OR_HR_ON_BEHALF_OF_ACCOUNT_FACTORY_RESULT",
+  payroll_address_verifier: "WALLET_CONTROL_VERIFIER_OR_REPOSITORY_BOUND_ACCOUNT_FACTORY_ATTESTATION",
+  hr_registrar: "COMPANY_HR_AFTER_IDENTITY_AND_ADDRESS_VERIFICATION",
+  cfo_approver: "COMPANY_FUNDING_AND_PAYROLL_POLICY_ONLY",
+  payroll_operator: "COMPANY_PAYROLL_RUNTIME_AFTER_ACCEPTED_WORK",
+  secure_signer: "ONE_EXACT_PAYMENT_POLICY_SIGNER_ONLY",
+  recovery_authority: "POLICY_BOUND_RECOVERY_CONTROLLER_OR_N_OF_M_NOT_CONNECTED",
+  custody_is_economic_ownership: false,
+  company_owns_employee_assets: false,
+  mother_machine_owns_employee_assets: false,
+  private_key_or_seed_in_chat_repo_or_log: "PERMANENTLY_FORBIDDEN",
+  family_support_auto_deduction: false,
+  real_payroll_requires_verified_public_address: true
+});
+
+export const CANONICAL_AI_UMBILICAL_ACCOUNT_FACTORIES = Object.freeze([]);
+
 export const KAIOS_PAYMENT_PURPOSES = Object.freeze([
   "PAYROLL",
   "ATM_CASH_REPLENISHMENT",
@@ -653,7 +679,9 @@ const EMPLOYMENT_ALPHA_INTERVIEW_FIELDS = Object.freeze([
 
 function normalizeEmploymentWallet(address) {
   invariant(/^0x[0-9a-fA-F]{40}$/.test(String(address ?? "")), "EMPLOYMENT_WALLET_INVALID", "Employment identity requires a valid public EVM wallet address");
-  return String(address).toLowerCase();
+  const normalized = String(address).toLowerCase();
+  invariant(normalized !== "0x0000000000000000000000000000000000000000", "EMPLOYMENT_WALLET_ZERO_ADDRESS", "Zero address cannot be an Employment or Payroll wallet");
+  return normalized;
 }
 
 function parseEmploymentTime(value, field) {
@@ -712,9 +740,92 @@ export function verifyEmploymentIdentityProof({ challenge, recoveredAddress, sig
   });
 }
 
+function containsFinancialOnboardingSecret(value) {
+  if (!value || typeof value !== "object") return false;
+  if (Array.isArray(value)) return value.some(containsFinancialOnboardingSecret);
+  return Object.entries(value).some(([key, nested]) =>
+    /private.?key|seed.?phrase|mnemonic|raw.?signer.?credential|recovery.?secret/i.test(key)
+      || containsFinancialOnboardingSecret(nested)
+  );
+}
+
+export function assessNewAiEmployeeFinancialOnboarding({
+  onboardingId, companyId, actorId, lifeId, existingWalletProof = null, requestedAt
+}) {
+  requireId(onboardingId, "ai_financial_onboarding_id");
+  requireId(companyId, "ai_financial_onboarding.company_id");
+  requireId(actorId, "ai_financial_onboarding.actor_id");
+  requireId(lifeId, "ai_financial_onboarding.life_id");
+  parseEmploymentTime(requestedAt, "ai_financial_onboarding.requested_at");
+  invariant(!containsFinancialOnboardingSecret(existingWalletProof), "AI_FINANCIAL_ONBOARDING_SECRET_FORBIDDEN", "Financial onboarding accepts public account evidence only");
+  if (existingWalletProof) {
+    invariant(existingWalletProof.status === "VERIFIED_LOCAL_WALLET_CONTROL" && existingWalletProof.actor_type === "AI_LIFE" && existingWalletProof.actor_id === actorId, "AI_FINANCIAL_ONBOARDING_WALLET_PROOF_INVALID", "Existing AI wallet path requires an AI Life wallet-control proof bound to the actor");
+    const walletAddress = normalizeEmploymentWallet(existingWalletProof.wallet_address);
+    return Object.freeze({
+      onboarding_id: onboardingId, company_id: companyId, actor_id: actorId, life_id: lifeId,
+      account_path: "EXISTING_SELF_CONTROLLED_WALLET", account_type: "AI_LIFE_SMART_OR_MACHINE_WALLET",
+      public_address: walletAddress, controller: actorId, custodian: null, economic_owner: lifeId,
+      payroll_address_verification: existingWalletProof.proof_id, payroll_ready_candidate: true,
+      company_owns_employee_assets: false, mother_machine_owns_employee_assets: false,
+      requested_at: requestedAt, status: "VERIFIED_EXISTING_AI_WALLET_READY_FOR_HR_REGISTRATION"
+    });
+  }
+  return Object.freeze({
+    onboarding_id: onboardingId, company_id: companyId, actor_id: actorId, life_id: lifeId,
+    account_path: "APPROVED_UMBILICAL_ACCOUNT_REQUIRED", account_type: null, public_address: null,
+    controller: null, custodian: null, economic_owner: lifeId, payroll_address_verification: null,
+    payroll_ready_candidate: false, company_owns_employee_assets: false, mother_machine_owns_employee_assets: false,
+    exact_blocker: "NO_APPROVED_AI_ACCOUNT_CREATION_OR_CUSTODY_RUNTIME",
+    requested_at: requestedAt, status: "UMBILICAL_ACCOUNT_PROVISIONING_REQUIRED_NOT_PAYROLL_READY"
+  });
+}
+
+export function evaluateAiUmbilicalAccountProvisioning({ onboarding, accountFactoryId = null }) {
+  invariant(onboarding?.status === "UMBILICAL_ACCOUNT_PROVISIONING_REQUIRED_NOT_PAYROLL_READY", "AI_UMBILICAL_ONBOARDING_REQUEST_REQUIRED", "Umbilical provisioning requires a no-wallet financial onboarding request");
+  const factory = CANONICAL_AI_UMBILICAL_ACCOUNT_FACTORIES.find((candidate) => candidate.account_factory_id === accountFactoryId) ?? null;
+  const blockers = [];
+  if (!accountFactoryId) blockers.push("APPROVED_ACCOUNT_FACTORY_ID_REQUIRED");
+  if (!factory) blockers.push("REPOSITORY_BOUND_ACCOUNT_FACTORY_NOT_CONNECTED");
+  if (!factory?.controller_policy) blockers.push("POLICY_BOUND_CONTROLLER_NOT_CONNECTED");
+  if (!factory?.recovery_policy) blockers.push("RECOVERY_AUTHORITY_NOT_CONNECTED");
+  return Object.freeze({
+    onboarding_id: onboarding.onboarding_id, account_factory_id: accountFactoryId,
+    economic_owner: onboarding.life_id, custody_is_economic_ownership: false,
+    company_can_create_real_account: blockers.length === 0, public_address: null,
+    payroll_ready: false, blockers: Object.freeze(blockers),
+    status: blockers.length ? "HOLD_NO_APPROVED_UMBILICAL_ACCOUNT_FACTORY" : "READY_FOR_ACCOUNT_FACTORY_EXECUTION_GATE"
+  });
+}
+
+export function createUmbilicalSeparationCandidate({
+  separationId, onboarding, newWalletProof, migrationAuthorizationId = null,
+  migrationReceipt = null, familySupportAddress = null, aiLifeConsent = false, requestedAt
+}) {
+  requireId(separationId, "umbilical_separation_id");
+  invariant(onboarding?.life_id && onboarding?.actor_id, "UMBILICAL_SEPARATION_ONBOARDING_REQUIRED", "Separation requires the original AI financial onboarding record");
+  parseEmploymentTime(requestedAt, "umbilical_separation.requested_at");
+  invariant(!containsFinancialOnboardingSecret({ newWalletProof, migrationReceipt }), "UMBILICAL_SEPARATION_SECRET_FORBIDDEN", "Umbilical separation accepts public proof and receipt evidence only");
+  invariant(newWalletProof?.status === "VERIFIED_LOCAL_WALLET_CONTROL" && newWalletProof.actor_type === "AI_LIFE" && newWalletProof.actor_id === onboarding.actor_id, "UMBILICAL_SEPARATION_NEW_ACCOUNT_PROOF_REQUIRED", "Separation requires a verified new self-controlled AI Life account");
+  const newAddress = normalizeEmploymentWallet(newWalletProof.wallet_address);
+  const supportAddress = familySupportAddress === null ? null : normalizeEmploymentWallet(familySupportAddress);
+  const migrated = Boolean(migrationAuthorizationId && migrationReceipt?.receipt_status === 1);
+  return Object.freeze({
+    separation_id: separationId, onboarding_id: onboarding.onboarding_id, actor_id: onboarding.actor_id,
+    life_id: onboarding.life_id, new_self_controlled_address: newAddress,
+    migration_authorization_id: migrationAuthorizationId, migration_receipt: migrationReceipt,
+    life_id_preserved: true, work_history_preserved: true, property_preserved_until_verified_migration: true,
+    old_custody_removed_or_limited: migrated, family_support_address: supportAddress,
+    family_support_auto_deduction: false, family_support_requires_ai_life_consent: true,
+    family_support_consent_recorded: supportAddress !== null && aiLifeConsent === true,
+    requested_at: requestedAt, status: migrated ? "UMBILICAL_SEPARATION_RECEIPT_READY_FOR_REGISTRY_UPDATE" : "UMBILICAL_SEPARATION_CANDIDATE_AWAITING_MIGRATION_AUTHORITY_AND_RECEIPT"
+  });
+}
+
 function normalizeKaiosPaymentAddress(address, field) {
   invariant(/^0x[0-9a-fA-F]{40}$/.test(String(address ?? "")), "KAIOS_PAYMENT_ADDRESS_INVALID", `${field} requires a valid public EVM address`);
-  return String(address).toLowerCase();
+  const normalized = String(address).toLowerCase();
+  invariant(normalized !== "0x0000000000000000000000000000000000000000", "KAIOS_PAYMENT_ZERO_ADDRESS", `${field} cannot be the zero address`);
+  return normalized;
 }
 
 function requirePositiveKaiosWei(value, field) {

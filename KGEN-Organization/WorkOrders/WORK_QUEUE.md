@@ -48,6 +48,18 @@ The worker must then stop without changing WorkQueue, creating a branch, editing
 
 ## General Manager WorkOrders
 
+### KAIOS-AI-EMPLOYEE-FINANCIAL-ONBOARDING-001 — Gemini umbilical Payroll account policy
+
+- Status: REVIEW
+- Owner: codex-gm-01
+- Priority: P0
+- Branch: `codex/kaios-ai-os-employment-alpha-v1`
+- PR: `#191`
+- Scope: reuse Employment, Wallet verification, Payroll and common KAIOS payment Rail; reject zero address; define generic existing-wallet/no-wallet paths, custody/economic-ownership separation, recovery and umbilical separation.
+- Current truth: no approved real AI Account Factory or custody/recovery Runtime is connected; Gemini Payroll remains blocked without a verified nonzero public account.
+- Safety: no private key, seed, account creation, payment, chain write, deployment or authority activation.
+- Review gate: exact-head CI and distinct review required before canonical promotion.
+
 | Task ID | Status | Owner | Reviewer | Priority | Department | Branch | Output Report |
 |---|---|---|---|---|---|---|---|
 | KAIOS-GM-V4-2026-0001 | DONE | Codex | Human PrimeForge | P1 | CEO_Codex | `codex/workforce-roster` | `KGEN-KAIOS/decision/decision_snapshot.json` |

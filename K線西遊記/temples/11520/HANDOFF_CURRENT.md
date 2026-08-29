@@ -1,5 +1,13 @@
 # 11520 Universal Exchange Current Handoff
 
+## V4.4 AI employee financial onboarding candidate — not yet active main
+
+The current main policies do not name a real Account Creator for a new AI employee. They provide external-wallet verification and simulation/ledger payroll only; no Company Smart Account Factory, MPC custodian, recovery controller or repository-owned account-factory allowlist is deployed. The candidate therefore records `REAL_AI_ACCOUNT_CREATION_NOT_CONNECTED` and rejects the zero address instead of inventing a Gemini wallet.
+
+The common onboarding path is now explicit. A Human supplies a public wallet and EIP-191 control proof. An AI Life with an existing self-controlled smart or machine wallet does the same. An AI Life without a wallet receives an `UMBILICAL_ACCOUNT_PROVISIONING_REQUIRED_NOT_PAYROLL_READY` record until a reviewed repository-bound factory, controller/custody policy and recovery policy exist. HR registers only verified public addresses; CFO approves Company funding policy, Payroll queues accepted compensation, and the Secure Signer signs only one exact authorized payment. None of those roles becomes the employee asset owner.
+
+Custody and ownership are separated: the AI Life/Employee is the economic owner, while a Mother Machine could only become a policy-bound temporary custodian in a future approved implementation. Company and Mother ownership flags remain false. Private keys, seeds, mnemonics and recovery secrets are rejected from onboarding records. Future umbilical separation requires proof of a new self-controlled account plus migration authority and receipt; Life ID, work history and property continuity are preserved. A Family Support address is a separate optional record and never creates an automatic salary deduction without formal policy and AI Life consent.
+
 ## V4.3 Employment Phase 1C candidate — not yet active main
 
 This Draft candidate extends the existing V4.1 Employment Alpha without creating a second Company OS, Event Store, Worker Registry, payroll system, mission runtime, wallet verifier or 11520 market. The candidate safety self-check remains a separate applicant attestation and cannot create a Company decision, Employee, Worker, trust level, signer or payment authority.

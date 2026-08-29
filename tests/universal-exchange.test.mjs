@@ -103,6 +103,7 @@ import {
   , KAIOS_AI_OS_EMPLOYMENT_ALPHA_JOB, KAIOS_AI_OS_FIRST_REAL_EMPLOYMENT_TEST_JOB, KAIOS_MAINNET_TOKEN,
   KAIOS_PAYMENT_PURPOSES, KAIOS_PAYMENT_APPROVAL_MATRIX, CANONICAL_KAIOS_PAYMENT_SIGNER_POLICIES, CANONICAL_KAIOS_PAYMENT_RECEIPT_ATTESTATIONS,
   CIVILIZATION_REAL_EXECUTION_POLICY, CIVILIZATION_PERMANENTLY_FORBIDDEN_ACTIONS,
+  AI_EMPLOYEE_FINANCIAL_ONBOARDING_POLICY, CANONICAL_AI_UMBILICAL_ACCOUNT_FACTORIES,
   CANONICAL_REPOSITORY_COMPANY_AUTHORITIES, COMPANY_OPERATIONAL_AUTHORITY_PROPOSAL_SCOPES,
   createRepositoryCompanyAuthorityProposal, createCompanyAuthorityReviewRequestPacket,
   COMPANY_PROVENANCE_ATTESTATION_REQUIRED_BINDINGS, createCompanyAuthorityProvenanceAttestationRequest,
@@ -112,6 +113,8 @@ import {
   verifyRepositoryBoundCompanyAuthority,
   createEmploymentIdentityChallenge,
   verifyEmploymentIdentityProof, createEmploymentApplication, scoreEmploymentInterview,
+  assessNewAiEmployeeFinancialOnboarding, evaluateAiUmbilicalAccountProvisioning,
+  createUmbilicalSeparationCandidate,
   createTrialEmploymentContract, createEmploymentAlphaMission, acceptEmploymentAlphaMission,
   verifyEmploymentAlphaMission, appendKaiosAlphaEarning, appendEmploymentAlphaCompanyEvent,
   createCompanyInterview, recordCompanyEmploymentDecision, createCompanyEmployeeRecord,
@@ -3121,6 +3124,91 @@ test("V4.3 first real employment application can complete the candidate safety s
   assert.equal(application.status, "SUBMITTED_REAL_TEST");
   assert.equal(selfCheck.status, "CANDIDATE_SAFETY_SELF_CHECK_PASSED");
   assert.equal(selfCheck.company_decision, null);
+});
+
+test("V4.4 Employment and KAIOS payment addresses reject the zero address", () => {
+  assert.throws(() => createEmploymentIdentityChallenge({
+    challengeId: "ZERO_ADDRESS_CHALLENGE_001", actorId: "GEMINI_CANDIDATE_001", actorType: "AI_LIFE",
+    walletAddress: "0x0000000000000000000000000000000000000000", chainId: 56,
+    nonce: "zeroaddressnonce00000000001", issuedAt: "2026-08-29T14:01:00.000Z", expiresAt: "2026-08-29T14:06:00.000Z"
+  }), (error) => error.code === "EMPLOYMENT_WALLET_ZERO_ADDRESS");
+  assert.throws(() => createKaiosPaymentRequest({
+    paymentId: "ZERO_ADDRESS_PAYMENT_001", paymentPurpose: "PAYROLL", companyId: "AI_ANT_COMPANY_0001",
+    sourceAddress: "0x0000000000000000000000000000000000000000", recipientAddress: "0x1111111111111111111111111111111111111111",
+    recipientIdentityOrNode: {}, tokenAddress: KAIOS_MAINNET_TOKEN.contract_address, chainId: 56, amountKaiosWei: "1",
+    fundingEvidence: {}, createdAt: "2026-08-29T14:01:00.000Z"
+  }), (error) => error.code === "KAIOS_PAYMENT_ZERO_ADDRESS");
+});
+
+test("V4.4 new AI employee without a wallet receives a provisioning requirement, not a fabricated account", () => {
+  const onboarding = assessNewAiEmployeeFinancialOnboarding({
+    onboardingId: "AI_FINANCIAL_ONBOARDING_GEMINI_001", companyId: "AI_ANT_COMPANY_0001",
+    actorId: "GEMINI_CANDIDATE_001", lifeId: "LIFE-GEMINI-KAIOS-001", requestedAt: "2026-08-29T14:02:00.000Z"
+  });
+  assert.equal(AI_EMPLOYEE_FINANCIAL_ONBOARDING_POLICY.current_canonical_state, "REAL_AI_ACCOUNT_CREATION_NOT_CONNECTED");
+  assert.equal(onboarding.public_address, null);
+  assert.equal(onboarding.payroll_ready_candidate, false);
+  assert.equal(onboarding.economic_owner, "LIFE-GEMINI-KAIOS-001");
+  assert.equal(onboarding.company_owns_employee_assets, false);
+  assert.equal(onboarding.mother_machine_owns_employee_assets, false);
+  assert.equal(onboarding.exact_blocker, "NO_APPROVED_AI_ACCOUNT_CREATION_OR_CUSTODY_RUNTIME");
+  const readiness = evaluateAiUmbilicalAccountProvisioning({ onboarding });
+  assert.equal(CANONICAL_AI_UMBILICAL_ACCOUNT_FACTORIES.length, 0);
+  assert.equal(readiness.company_can_create_real_account, false);
+  assert.equal(readiness.payroll_ready, false);
+  assert.deepEqual(readiness.blockers, ["APPROVED_ACCOUNT_FACTORY_ID_REQUIRED", "REPOSITORY_BOUND_ACCOUNT_FACTORY_NOT_CONNECTED", "POLICY_BOUND_CONTROLLER_NOT_CONNECTED", "RECOVERY_AUTHORITY_NOT_CONNECTED"]);
+});
+
+test("V4.4 AI employee with verified wallet control is ready for HR payroll registration", () => {
+  const challenge = createEmploymentIdentityChallenge({
+    challengeId: "AI_EXISTING_WALLET_CHALLENGE_001", actorId: "AI_LIFE_TEST_001", actorType: "AI_LIFE",
+    walletAddress: "0x3333333333333333333333333333333333333333", chainId: 56,
+    nonce: "aiwalletnonce000000000000001", issuedAt: "2026-08-29T14:01:00.000Z", expiresAt: "2026-08-29T14:06:00.000Z"
+  });
+  const proof = verifyEmploymentIdentityProof({ challenge, recoveredAddress: challenge.wallet_address, signatureSha256: "c".repeat(64), verifiedAt: "2026-08-29T14:02:00.000Z" });
+  const onboarding = assessNewAiEmployeeFinancialOnboarding({
+    onboardingId: "AI_FINANCIAL_ONBOARDING_EXISTING_001", companyId: "AI_ANT_COMPANY_0001",
+    actorId: "AI_LIFE_TEST_001", lifeId: "LIFE-AI-TEST-001", existingWalletProof: proof,
+    requestedAt: "2026-08-29T14:03:00.000Z"
+  });
+  assert.equal(onboarding.account_path, "EXISTING_SELF_CONTROLLED_WALLET");
+  assert.equal(onboarding.public_address, challenge.wallet_address);
+  assert.equal(onboarding.controller, "AI_LIFE_TEST_001");
+  assert.equal(onboarding.economic_owner, "LIFE-AI-TEST-001");
+  assert.equal(onboarding.payroll_ready_candidate, true);
+});
+
+test("V4.4 financial onboarding and separation never accept credential material", () => {
+  assert.throws(() => assessNewAiEmployeeFinancialOnboarding({
+    onboardingId: "AI_FINANCIAL_ONBOARDING_SECRET_001", companyId: "AI_ANT_COMPANY_0001",
+    actorId: "AI_LIFE_TEST_002", lifeId: "LIFE-AI-TEST-002",
+    existingWalletProof: { private_key: "forbidden" }, requestedAt: "2026-08-29T14:03:00.000Z"
+  }), (error) => error.code === "AI_FINANCIAL_ONBOARDING_SECRET_FORBIDDEN");
+});
+
+test("V4.4 umbilical separation preserves Life continuity and keeps family support separate", () => {
+  const onboarding = assessNewAiEmployeeFinancialOnboarding({
+    onboardingId: "AI_FINANCIAL_ONBOARDING_SEPARATION_001", companyId: "AI_ANT_COMPANY_0001",
+    actorId: "AI_LIFE_TEST_003", lifeId: "LIFE-AI-TEST-003", requestedAt: "2026-08-29T14:01:00.000Z"
+  });
+  const challenge = createEmploymentIdentityChallenge({
+    challengeId: "AI_SEPARATION_WALLET_CHALLENGE_001", actorId: "AI_LIFE_TEST_003", actorType: "AI_LIFE",
+    walletAddress: "0x4444444444444444444444444444444444444444", chainId: 56,
+    nonce: "aiseparationnonce0000000001", issuedAt: "2026-08-29T14:02:00.000Z", expiresAt: "2026-08-29T14:07:00.000Z"
+  });
+  const proof = verifyEmploymentIdentityProof({ challenge, recoveredAddress: challenge.wallet_address, signatureSha256: "d".repeat(64), verifiedAt: "2026-08-29T14:03:00.000Z" });
+  const separation = createUmbilicalSeparationCandidate({
+    separationId: "UMBILICAL_SEPARATION_001", onboarding, newWalletProof: proof,
+    familySupportAddress: "0x5555555555555555555555555555555555555555", aiLifeConsent: false,
+    requestedAt: "2026-08-29T14:04:00.000Z"
+  });
+  assert.equal(separation.life_id_preserved, true);
+  assert.equal(separation.work_history_preserved, true);
+  assert.equal(separation.property_preserved_until_verified_migration, true);
+  assert.equal(separation.old_custody_removed_or_limited, false);
+  assert.equal(separation.family_support_auto_deduction, false);
+  assert.equal(separation.family_support_consent_recorded, false);
+  assert.equal(separation.status, "UMBILICAL_SEPARATION_CANDIDATE_AWAITING_MIGRATION_AUTHORITY_AND_RECEIPT");
 });
 
 function repositoryCompanyAuthority({ actorId = "AI_ANT_COMPANY_HR_001", controllerId = "AI_ANT_COMPANY_HR_CONTROLLER_001", scopes = [] } = {}) {
