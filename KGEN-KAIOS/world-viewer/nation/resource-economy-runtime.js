@@ -25,6 +25,16 @@ const EVM_ADDRESS = /^0x[0-9a-fA-F]{40}$/;
 const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000";
 const KAIOS_BSC_TOKEN = "0xd4e67b3a69e41524c424150e6b6e921b01d036db";
 
+// These registries are deliberately repository-owned and empty until a separate,
+// reviewed connector installs exact attestations. Callers cannot mutate them.
+const RESOURCE_CUSTODY_ATTESTATIONS = new Map();
+const RESOURCE_EVENT_ATTESTATIONS = new Map();
+const RESOURCE_FUNDING_ATTESTATIONS = new Map();
+const RESOURCE_PAYMENT_AUTHORIZATIONS = new Map();
+const RESOURCE_PAYMENT_RAIL_RELEASES = new Map();
+const ISSUED_RESOURCE_CUSTODY_BINDINGS = new WeakSet();
+const ISSUED_RESOURCE_ENTITLEMENTS = new WeakSet();
+
 function requiredText(value, field) {
   if (typeof value !== "string" || value.trim() === "") {
     throw runtimeError(RUNTIME, "MISSING_RESOURCE_ACCOUNT_FIELD", `${field} is required`);
@@ -46,6 +56,23 @@ function normalizePublicAddress(value) {
     throw runtimeError(RUNTIME, "INVALID_PUBLIC_ADDRESS", "A non-zero public EVM address is required");
   }
   return address;
+}
+
+function resolveRepositoryAttestation(registry, attestationId, code, label) {
+  const id = requiredText(attestationId, "attestation_id");
+  const attestation = registry.get(id);
+  if (!attestation) {
+    throw runtimeError(RUNTIME, code, `${label} is not connected to a repository-owned attestation`);
+  }
+  return attestation;
+}
+
+function assertExactAttestation(attestation, claims, code) {
+  for (const [field, value] of Object.entries(claims)) {
+    if (String(attestation[field] ?? "") !== String(value ?? "")) {
+      throw runtimeError(RUNTIME, code, `${field} does not match the repository-owned attestation`);
+    }
+  }
 }
 
 export function createResourceNodeAccount({
@@ -96,17 +123,49 @@ export function createTemporaryCustodyBinding({
   validUntil,
   decisionId,
   migrationPolicy,
+  custodyAttestationId,
   walletControlProof
 } = {}) {
   const address = normalizePublicAddress(publicAddress);
+  if (walletControlProof !== undefined && walletControlProof !== null) {
+    throw runtimeError(RUNTIME, "CALLER_SUPPLIED_WALLET_CONTROL_PROOF_FORBIDDEN", "Wallet-control proof objects are untrusted caller claims");
+  }
+  const attestation = resolveRepositoryAttestation(
+    RESOURCE_CUSTODY_ATTESTATIONS,
+    custodyAttestationId,
+    "RESOURCE_CUSTODY_ATTESTATION_NOT_CONNECTED",
+    "Resource custody"
+  );
+  if (attestation.status !== "MACHINE_VERIFIED_REPOSITORY_BOUND_CUSTODY") {
+    throw runtimeError(RUNTIME, "RESOURCE_CUSTODY_ATTESTATION_INVALID", "Resource custody attestation is not machine verified");
+  }
+  assertExactAttestation(attestation, {
+    binding_id: bindingId,
+    node_id: nodeId,
+    node_name: nodeName,
+    canonical_location: canonicalLocation,
+    chain_id: Number(chainId),
+    public_address: address,
+    account_role: accountRole,
+    economic_owner: economicOwner,
+    custodian,
+    purpose,
+    asset,
+    max_amount_kaios_wei: String(maxAmountKaiosWei),
+    valid_from: validFrom,
+    valid_until: validUntil,
+    decision_id: decisionId,
+    migration_policy: migrationPolicy
+  }, "RESOURCE_CUSTODY_ATTESTATION_MISMATCH");
+  const proof = attestation.wallet_control_proof;
   if (Number(chainId) !== 56) throw runtimeError(RUNTIME, "INVALID_CHAIN", "Temporary KAIOS custody must bind BSC chain 56");
   if (accountRole !== "TEMPORARY_CUSTODY_RECEIVER") {
     throw runtimeError(RUNTIME, "INVALID_ACCOUNT_ROLE", "Temporary bindings must use TEMPORARY_CUSTODY_RECEIVER");
   }
-  if (!walletControlProof || walletControlProof.status !== "VERIFIED_PUBLIC_WALLET_CONTROL") {
-    throw runtimeError(RUNTIME, "WALLET_CONTROL_PROOF_REQUIRED", "Verified public wallet control evidence is required");
+  if (!proof || proof.status !== "MACHINE_VERIFIED_PUBLIC_WALLET_CONTROL") {
+    throw runtimeError(RUNTIME, "WALLET_CONTROL_PROOF_REQUIRED", "Repository-bound wallet control evidence is required");
   }
-  if (String(walletControlProof.address).toLowerCase() !== address.toLowerCase()) {
+  if (String(proof.address).toLowerCase() !== address.toLowerCase()) {
     throw runtimeError(RUNTIME, "WALLET_CONTROL_ADDRESS_MISMATCH", "Wallet proof must bind the proposed public address");
   }
   const owner = requiredText(economicOwner, "economic_owner");
@@ -119,7 +178,7 @@ export function createTemporaryCustodyBinding({
   if (!Number.isFinite(from) || !Number.isFinite(until) || until <= from) {
     throw runtimeError(RUNTIME, "INVALID_BINDING_WINDOW", "Temporary custody requires a bounded validity window");
   }
-  return snapshot({
+  const binding = snapshot({
     binding_id: requiredText(bindingId, "binding_id"),
     node_id: requiredText(nodeId, "node_id"),
     node_name: requiredText(nodeName, "node_name"),
@@ -136,10 +195,13 @@ export function createTemporaryCustodyBinding({
     valid_until: new Date(until).toISOString(),
     decision_id: requiredText(decisionId, "decision_id"),
     migration_policy: requiredText(migrationPolicy, "migration_policy"),
-    wallet_control_proof_id: requiredText(walletControlProof.proof_id, "wallet_control_proof_id"),
+    wallet_control_proof_id: requiredText(proof.proof_id, "wallet_control_proof_id"),
+    custody_attestation_id: requiredText(custodyAttestationId, "custody_attestation_id"),
     status: "ACTIVE_TEMPORARY_CUSTODY_CANDIDATE",
     transfers_resource_ownership: false
   });
+  ISSUED_RESOURCE_CUSTODY_BINDINGS.add(binding);
+  return binding;
 }
 
 export function createResourceValueEntitlement({
@@ -147,69 +209,105 @@ export function createResourceValueEntitlement({
   replayKey,
   accountId,
   policyId,
+  resourceEventAttestationId,
   event,
   amountKaiosWei,
   existingEntitlements = []
 } = {}) {
-  if (!event || event.status !== "VERIFIED_RESOURCE_EVENT") {
+  if (event !== undefined && event !== null) {
+    throw runtimeError(RUNTIME, "CALLER_SUPPLIED_RESOURCE_EVENT_FORBIDDEN", "Resource-event objects are untrusted caller claims");
+  }
+  const attestation = resolveRepositoryAttestation(
+    RESOURCE_EVENT_ATTESTATIONS,
+    resourceEventAttestationId,
+    "RESOURCE_EVENT_ATTESTATION_NOT_CONNECTED",
+    "Resource event"
+  );
+  if (attestation.status !== "MACHINE_VERIFIED_REPOSITORY_BOUND_RESOURCE_EVENT") {
+    throw runtimeError(RUNTIME, "RESOURCE_EVENT_ATTESTATION_INVALID", "Resource event attestation is not machine verified");
+  }
+  const resolvedEvent = attestation.event;
+  if (!resolvedEvent || resolvedEvent.status !== "VERIFIED_RESOURCE_EVENT") {
     throw runtimeError(RUNTIME, "VERIFIED_RESOURCE_EVENT_REQUIRED", "Resource existence alone cannot create a KAIOS entitlement");
   }
   for (const field of ["event_id", "node_id", "resource_type", "quantity", "quality", "world_state_evidence", "scarcity_evidence", "demand_evidence", "transport_evidence"]) {
-    if (event[field] === undefined || event[field] === null || event[field] === "") {
+    if (resolvedEvent[field] === undefined || resolvedEvent[field] === null || resolvedEvent[field] === "") {
       throw runtimeError(RUNTIME, "INCOMPLETE_RESOURCE_EVENT", `${field} is required for resource value evidence`);
     }
   }
   const normalizedEntitlementId = requiredText(entitlementId, "entitlement_id");
   const normalizedReplayKey = requiredText(replayKey, "replay_key");
+  if (String(attestation.replay_key) !== normalizedReplayKey || String(attestation.account_id) !== String(accountId) || String(attestation.policy_id) !== String(policyId) || String(attestation.amount_kaios_wei) !== String(amountKaiosWei)) {
+    throw runtimeError(RUNTIME, "RESOURCE_EVENT_ATTESTATION_MISMATCH", "Entitlement claims do not match the repository-owned resource event attestation");
+  }
   if (existingEntitlements.some((item) => item.entitlement_id === normalizedEntitlementId || item.replay_key === normalizedReplayKey)) {
     throw runtimeError(RUNTIME, "RESOURCE_ENTITLEMENT_REPLAY", "Entitlement ID and replay key must be unique");
   }
-  return snapshot({
+  const entitlement = snapshot({
     entitlement_id: normalizedEntitlementId,
     replay_key: normalizedReplayKey,
     account_id: requiredText(accountId, "account_id"),
     policy_id: requiredText(policyId, "policy_id"),
-    resource_event_id: event.event_id,
-    node_id: event.node_id,
-    resource_type: event.resource_type,
+    resource_event_attestation_id: requiredText(resourceEventAttestationId, "resource_event_attestation_id"),
+    resource_event_id: resolvedEvent.event_id,
+    node_id: resolvedEvent.node_id,
+    resource_type: resolvedEvent.resource_type,
     amount_kaios_wei: positiveWei(amountKaiosWei),
     accounting_classification: "RESOURCE_SETTLEMENT",
     status: "ACCRUED_PENDING_SETTLEMENT",
     paid: false
   });
+  ISSUED_RESOURCE_ENTITLEMENTS.add(entitlement);
+  return entitlement;
 }
 
 export function evaluateResourceSettlementReadiness({
   entitlement,
   custodyBinding,
+  fundingEvidenceAttestationId,
+  exactAuthorizationAttestationId,
+  paymentRailReleaseAttestationId,
   fundingEvidence,
   exactAuthorization,
   paymentRailAdapter,
   now = new Date()
 } = {}) {
   const blockers = [];
+  if (fundingEvidence !== undefined && fundingEvidence !== null) blockers.push("CALLER_SUPPLIED_FUNDING_EVIDENCE_FORBIDDEN");
+  if (exactAuthorization !== undefined && exactAuthorization !== null) blockers.push("CALLER_SUPPLIED_AUTHORIZATION_FORBIDDEN");
+  if (paymentRailAdapter !== undefined && paymentRailAdapter !== null) blockers.push("CALLER_SUPPLIED_PAYMENT_RAIL_ADAPTER_FORBIDDEN");
+  if (!ISSUED_RESOURCE_ENTITLEMENTS.has(entitlement)) blockers.push("REPOSITORY_ISSUED_ENTITLEMENT_REQUIRED");
+  if (!ISSUED_RESOURCE_CUSTODY_BINDINGS.has(custodyBinding)) blockers.push("REPOSITORY_ISSUED_CUSTODY_BINDING_REQUIRED");
+
+  const funding = RESOURCE_FUNDING_ATTESTATIONS.get(String(fundingEvidenceAttestationId ?? ""));
+  const authorization = RESOURCE_PAYMENT_AUTHORIZATIONS.get(String(exactAuthorizationAttestationId ?? ""));
+  const railRelease = RESOURCE_PAYMENT_RAIL_RELEASES.get(String(paymentRailReleaseAttestationId ?? ""));
+  if (!funding) blockers.push("RESOURCE_FUNDING_ATTESTATION_NOT_CONNECTED");
+  if (!authorization) blockers.push("RESOURCE_PAYMENT_AUTHORIZATION_NOT_CONNECTED");
+  if (!railRelease) blockers.push("COMMON_KAIOS_PAYMENT_RAIL_NOT_RELEASED");
+
   const nowMs = new Date(now).getTime();
-  const fundingBalance = /^[0-9]+$/.test(String(fundingEvidence?.balance_kaios_wei ?? "")) ? BigInt(fundingEvidence.balance_kaios_wei) : null;
+  const fundingBalance = /^[0-9]+$/.test(String(funding?.balance_kaios_wei ?? "")) ? BigInt(funding.balance_kaios_wei) : null;
   const entitlementAmount = /^[0-9]+$/.test(String(entitlement?.amount_kaios_wei ?? "")) ? BigInt(entitlement.amount_kaios_wei) : null;
   if (!entitlement || entitlement.status !== "ACCRUED_PENDING_SETTLEMENT" || entitlement.paid !== false) blockers.push("VALID_ENTITLEMENT_REQUIRED");
   if (!custodyBinding || custodyBinding.status !== "ACTIVE_TEMPORARY_CUSTODY_CANDIDATE") blockers.push("ACTIVE_CUSTODY_BINDING_REQUIRED");
   if (!Number.isFinite(nowMs) || nowMs < Date.parse(custodyBinding?.valid_from) || nowMs >= Date.parse(custodyBinding?.valid_until)) blockers.push("CUSTODY_BINDING_NOT_CURRENT");
   if (entitlementAmount !== null && /^[0-9]+$/.test(String(custodyBinding?.max_amount_kaios_wei ?? "")) && entitlementAmount > BigInt(custodyBinding.max_amount_kaios_wei)) blockers.push("CUSTODY_AMOUNT_CAP_EXCEEDED");
-  if (!fundingEvidence || fundingEvidence.status !== "VERIFIED" || fundingBalance === null || entitlementAmount === null || fundingBalance < entitlementAmount || !EVM_ADDRESS.test(String(fundingEvidence.source_address ?? ""))) blockers.push("VERIFIED_FUNDING_REQUIRED");
-  if (!exactAuthorization || exactAuthorization.action_type !== "ONE_EXACT_KAIOS_PAYMENT_ACTION") blockers.push("EXACT_AUTHORIZATION_REQUIRED");
-  if (exactAuthorization) {
-    if (Number(exactAuthorization.chain_id) !== 56) blockers.push("AUTHORIZATION_CHAIN_MISMATCH");
-    if (String(exactAuthorization.token_address).toLowerCase() !== KAIOS_BSC_TOKEN) blockers.push("AUTHORIZATION_TOKEN_MISMATCH");
-    if (!EVM_ADDRESS.test(String(exactAuthorization.source_address ?? "")) || String(exactAuthorization.source_address).toLowerCase() !== String(fundingEvidence?.source_address).toLowerCase()) blockers.push("AUTHORIZATION_SOURCE_MISMATCH");
-    if (String(exactAuthorization.recipient_address).toLowerCase() !== String(custodyBinding?.public_address).toLowerCase()) blockers.push("AUTHORIZATION_RECIPIENT_MISMATCH");
-    if (String(exactAuthorization.amount_kaios_wei) !== String(entitlement?.amount_kaios_wei)) blockers.push("AUTHORIZATION_AMOUNT_MISMATCH");
-    if (!["RESOURCE_PURCHASE", "RESOURCE_SETTLEMENT"].includes(exactAuthorization.purpose)) blockers.push("AUTHORIZATION_PURPOSE_MISMATCH");
-    if (exactAuthorization.replay_key !== entitlement?.replay_key) blockers.push("AUTHORIZATION_REPLAY_KEY_MISMATCH");
-    if (!requiredAuthorizationText(exactAuthorization.authorization_id) || !requiredAuthorizationText(exactAuthorization.signer_policy_id)) blockers.push("AUTHORIZATION_EVIDENCE_INCOMPLETE");
-    if (!exactAuthorization.valid_from || Date.parse(exactAuthorization.valid_from) > nowMs) blockers.push("AUTHORIZATION_NOT_YET_VALID");
-    if (!exactAuthorization.expires_at || Date.parse(exactAuthorization.expires_at) <= nowMs) blockers.push("AUTHORIZATION_EXPIRED");
+  if (!funding || funding.status !== "MACHINE_VERIFIED_REPOSITORY_BOUND_FUNDING" || fundingBalance === null || entitlementAmount === null || fundingBalance < entitlementAmount || !EVM_ADDRESS.test(String(funding.source_address ?? ""))) blockers.push("VERIFIED_FUNDING_REQUIRED");
+  if (!authorization || authorization.status !== "MACHINE_VERIFIED_REPOSITORY_BOUND_AUTHORIZATION" || authorization.action_type !== "ONE_EXACT_KAIOS_PAYMENT_ACTION") blockers.push("EXACT_AUTHORIZATION_REQUIRED");
+  if (authorization) {
+    if (Number(authorization.chain_id) !== 56) blockers.push("AUTHORIZATION_CHAIN_MISMATCH");
+    if (String(authorization.token_address).toLowerCase() !== KAIOS_BSC_TOKEN) blockers.push("AUTHORIZATION_TOKEN_MISMATCH");
+    if (!EVM_ADDRESS.test(String(authorization.source_address ?? "")) || String(authorization.source_address).toLowerCase() !== String(funding?.source_address).toLowerCase()) blockers.push("AUTHORIZATION_SOURCE_MISMATCH");
+    if (String(authorization.recipient_address).toLowerCase() !== String(custodyBinding?.public_address).toLowerCase()) blockers.push("AUTHORIZATION_RECIPIENT_MISMATCH");
+    if (String(authorization.amount_kaios_wei) !== String(entitlement?.amount_kaios_wei)) blockers.push("AUTHORIZATION_AMOUNT_MISMATCH");
+    if (!["RESOURCE_PURCHASE", "RESOURCE_SETTLEMENT"].includes(authorization.purpose)) blockers.push("AUTHORIZATION_PURPOSE_MISMATCH");
+    if (authorization.replay_key !== entitlement?.replay_key) blockers.push("AUTHORIZATION_REPLAY_KEY_MISMATCH");
+    if (!requiredAuthorizationText(authorization.authorization_id) || !requiredAuthorizationText(authorization.signer_policy_id)) blockers.push("AUTHORIZATION_EVIDENCE_INCOMPLETE");
+    if (!authorization.valid_from || Date.parse(authorization.valid_from) > nowMs) blockers.push("AUTHORIZATION_NOT_YET_VALID");
+    if (!authorization.expires_at || Date.parse(authorization.expires_at) <= nowMs) blockers.push("AUTHORIZATION_EXPIRED");
   }
-  if (!paymentRailAdapter || paymentRailAdapter.status !== "REVIEWED_RELEASED") blockers.push("COMMON_KAIOS_PAYMENT_RAIL_NOT_RELEASED");
+  if (!railRelease || railRelease.status !== "MACHINE_VERIFIED_REVIEWED_RELEASE") blockers.push("COMMON_KAIOS_PAYMENT_RAIL_NOT_RELEASED");
   return snapshot({
     status: blockers.length === 0 ? "READY_FOR_ACTION_SPECIFIC_SIGNER_GATE" : "BLOCKED",
     blockers: [...new Set(blockers)],

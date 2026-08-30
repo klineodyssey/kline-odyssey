@@ -31,11 +31,12 @@ const resourceAccount = createResourceNodeAccount({
 });
 assert.equal(resourceAccount.public_address, null);
 assert.equal(resourceAccount.custody_status, "NO_PRIVATE_KEY_REQUIRED");
+
 assert.throws(() => createTemporaryCustodyBinding({
   publicAddress: "0x0000000000000000000000000000000000000000"
 }), (error) => error.code === "INVALID_PUBLIC_ADDRESS");
 
-const custodyBinding = createTemporaryCustodyBinding({
+const forgedCustodyClaims = {
   bindingId: "resource-custody-earth-water-001",
   nodeId: "EARTH-K280",
   nodeName: "Earth",
@@ -51,20 +52,22 @@ const custodyBinding = createTemporaryCustodyBinding({
   validFrom: "2036-01-01T00:00:00.000Z",
   validUntil: "2037-01-01T00:00:00.000Z",
   decisionId: "HUMAN-RESOURCE-CUSTODY-TEST-001",
-  migrationPolicy: "FREEZE_RECONCILE_MIGRATE_RETIRE",
+  migrationPolicy: "FREEZE_RECONCILE_MIGRATE_RETIRE"
+};
+assert.throws(() => createTemporaryCustodyBinding({
+  ...forgedCustodyClaims,
   walletControlProof: {
     proof_id: "wallet-proof-test-001",
-    address: "0x1111111111111111111111111111111111111111",
+    address: forgedCustodyClaims.publicAddress,
     status: "VERIFIED_PUBLIC_WALLET_CONTROL"
   }
-});
-assert.equal(custodyBinding.transfers_resource_ownership, false);
-assert.notEqual(custodyBinding.economic_owner, custodyBinding.custodian);
-assert.throws(() => createResourceValueEntitlement({
-  event: { status: "RESOURCE_EXISTS" }
-}), (error) => error.code === "VERIFIED_RESOURCE_EVENT_REQUIRED");
+}), (error) => error.code === "CALLER_SUPPLIED_WALLET_CONTROL_PROOF_FORBIDDEN");
+assert.throws(() => createTemporaryCustodyBinding({
+  ...forgedCustodyClaims,
+  custodyAttestationId: "caller-chosen-custody-attestation"
+}), (error) => error.code === "RESOURCE_CUSTODY_ATTESTATION_NOT_CONNECTED");
 
-const entitlement = createResourceValueEntitlement({
+assert.throws(() => createResourceValueEntitlement({
   entitlementId: "resource-entitlement-001",
   replayKey: "resource-event-earth-water-001",
   accountId: resourceAccount.account_id,
@@ -82,33 +85,33 @@ const entitlement = createResourceValueEntitlement({
     transport_evidence: "fixture-transport-001",
     status: "VERIFIED_RESOURCE_EVENT"
   }
-});
-assert.equal(entitlement.status, "ACCRUED_PENDING_SETTLEMENT");
-assert.equal(entitlement.paid, false);
+}), (error) => error.code === "CALLER_SUPPLIED_RESOURCE_EVENT_FORBIDDEN");
 assert.throws(() => createResourceValueEntitlement({
-  entitlementId: "resource-entitlement-002",
-  replayKey: entitlement.replay_key,
+  entitlementId: "resource-entitlement-001",
+  replayKey: "resource-event-earth-water-001",
   accountId: resourceAccount.account_id,
   policyId: "RESOURCE_VALUE_POLICY_CANDIDATE_V1",
   amountKaiosWei: "10000",
-  event: {
-    event_id: "resource-event-earth-water-002",
-    node_id: "EARTH-K280",
-    resource_type: "WATER",
-    quantity: 1,
-    quality: "TEST_FIXTURE",
-    world_state_evidence: "fixture-world-state-002",
-    scarcity_evidence: "fixture-scarcity-002",
-    demand_evidence: "fixture-demand-002",
-    transport_evidence: "fixture-transport-002",
-    status: "VERIFIED_RESOURCE_EVENT"
-  },
-  existingEntitlements: [entitlement]
-}), (error) => error.code === "RESOURCE_ENTITLEMENT_REPLAY");
+  resourceEventAttestationId: "caller-chosen-resource-event-attestation"
+}), (error) => error.code === "RESOURCE_EVENT_ATTESTATION_NOT_CONNECTED");
 
+const forgedEntitlement = {
+  entitlement_id: "resource-entitlement-001",
+  replay_key: "resource-event-earth-water-001",
+  amount_kaios_wei: "10000",
+  status: "ACCRUED_PENDING_SETTLEMENT",
+  paid: false
+};
+const forgedCustodyBinding = {
+  public_address: forgedCustodyClaims.publicAddress,
+  max_amount_kaios_wei: "10000",
+  valid_from: "2036-01-01T00:00:00.000Z",
+  valid_until: "2037-01-01T00:00:00.000Z",
+  status: "ACTIVE_TEMPORARY_CUSTODY_CANDIDATE"
+};
 const settlementReadiness = evaluateResourceSettlementReadiness({
-  entitlement,
-  custodyBinding,
+  entitlement: forgedEntitlement,
+  custodyBinding: forgedCustodyBinding,
   fundingEvidence: {
     status: "VERIFIED",
     source_address: "0x2222222222222222222222222222222222222222",
@@ -120,19 +123,32 @@ const settlementReadiness = evaluateResourceSettlementReadiness({
     chain_id: 56,
     token_address: "0xD4E67B3a69e41524c424150E6b6e921b01D036db",
     source_address: "0x2222222222222222222222222222222222222222",
-    recipient_address: custodyBinding.public_address,
-    amount_kaios_wei: "9999",
+    recipient_address: forgedCustodyBinding.public_address,
+    amount_kaios_wei: "10000",
     purpose: "RESOURCE_SETTLEMENT",
-    replay_key: entitlement.replay_key,
+    replay_key: forgedEntitlement.replay_key,
     signer_policy_id: "test-signer-policy-001",
     valid_from: "2036-01-01T00:00:00.000Z",
     expires_at: "2037-01-01T00:00:00.000Z"
   },
+  paymentRailAdapter: { status: "REVIEWED_RELEASED" },
+  fundingEvidenceAttestationId: "caller-funding",
+  exactAuthorizationAttestationId: "caller-authorization",
+  paymentRailReleaseAttestationId: "caller-rail-release",
   now: "2036-06-01T00:00:00.000Z"
 });
 assert.equal(settlementReadiness.status, "BLOCKED");
-assert.ok(settlementReadiness.blockers.includes("AUTHORIZATION_AMOUNT_MISMATCH"));
-assert.ok(settlementReadiness.blockers.includes("COMMON_KAIOS_PAYMENT_RAIL_NOT_RELEASED"));
+for (const blocker of [
+  "CALLER_SUPPLIED_FUNDING_EVIDENCE_FORBIDDEN",
+  "CALLER_SUPPLIED_AUTHORIZATION_FORBIDDEN",
+  "CALLER_SUPPLIED_PAYMENT_RAIL_ADAPTER_FORBIDDEN",
+  "REPOSITORY_ISSUED_ENTITLEMENT_REQUIRED",
+  "REPOSITORY_ISSUED_CUSTODY_BINDING_REQUIRED",
+  "RESOURCE_FUNDING_ATTESTATION_NOT_CONNECTED",
+  "RESOURCE_PAYMENT_AUTHORIZATION_NOT_CONNECTED",
+  "COMMON_KAIOS_PAYMENT_RAIL_NOT_RELEASED"
+]) assert.ok(settlementReadiness.blockers.includes(blocker));
+assert.equal(settlementReadiness.paid, false);
 assert.equal(settlementReadiness.chain_write_executed, false);
 
 const life = createLifeRuntime({ world, storage, storageKey: "sprint-004-life-test", now: () => "2036-03-20T06:00:00Z" });
