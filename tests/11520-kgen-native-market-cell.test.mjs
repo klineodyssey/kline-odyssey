@@ -106,7 +106,18 @@ test("matched trade creates one exact settlement request packet without inventin
   market.placeOrder({ side: "SELL", price: "0.00048", quantity: "100", actorContext: actor("seller") });
   now += 1;
   const matched = market.placeOrder({ side: "BUY", price: "0.00050", quantity: "40", actorContext: actor("buyer") });
-  const packet = market.createSettlementRequestPacket({ tradeId: matched.fills[0].id, requestId: "SETTLEMENT-REQUEST-0001", replayKey: "SETTLEMENT-REPLAY-0001" });
+  const packet = market.createSettlementRequestPacket({
+    tradeId: matched.fills[0].id,
+    requestId: "SETTLEMENT-REQUEST-0001",
+    replayKey: "SETTLEMENT-REPLAY-0001",
+    chain_id: 56,
+    token_address: "0x1111111111111111111111111111111111111111",
+    source_address: "0x2222222222222222222222222222222222222222",
+    recipient_address: "0x3333333333333333333333333333333333333333",
+    authorization_id: "CALLER-AUTHORIZATION",
+    signer_policy_id: "CALLER-SIGNER",
+    receipt: { receipt_status: 1 }
+  });
   assert.equal(packet.trade_id, matched.fills[0].id);
   assert.equal(packet.buyer_life_id, "life:test-a");
   assert.equal(packet.seller_life_id, "life:test-b");
@@ -124,7 +135,7 @@ test("matched trade creates one exact settlement request packet without inventin
   assert.ok(packet.blockers.includes("QUOTE_ASSET_NOT_FROZEN"));
   assert.ok(packet.blockers.includes("SECURE_SIGNER_POLICY_NOT_CONNECTED"));
   assert.equal(market.getMarketState().ct, null);
-  assert.throws(() => market.createSettlementRequestPacket({ tradeId: matched.fills[0].id, requestId: "SETTLEMENT-REQUEST-0001", replayKey: "SETTLEMENT-REPLAY-0001" }), /SETTLEMENT_REQUEST_REPLAY_FORBIDDEN/);
+  assert.throws(() => market.createSettlementRequestPacket({ tradeId: matched.fills[0].id, requestId: "SETTLEMENT-REQUEST-0002", replayKey: "SETTLEMENT-REPLAY-0002" }), /SETTLEMENT_REQUEST_REPLAY_FORBIDDEN/);
 });
 
 test("settlement request packet rejects unknown trades and never accepts caller payment fields", () => {

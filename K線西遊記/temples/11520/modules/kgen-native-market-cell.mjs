@@ -179,7 +179,7 @@ export function createKgenNativeMarketCell({
   const candles = new Map();
   const consumedActionKeys = new Set();
   const consumedSettlementAttestations = new Set();
-  const consumedSettlementRequestKeys = new Set();
+  const consumedSettlementRequestTradeIds = new Set();
   let nextOrder = 1;
   let sequence = 1;
   let ct = null;
@@ -363,16 +363,15 @@ export function createKgenNativeMarketCell({
   function createSettlementRequestPacket({ tradeId, requestId, replayKey }) {
     const normalizedRequestId = normalizeEvidenceId(requestId);
     const normalizedReplayKey = normalizeNonce(replayKey, "settlement request replay key");
-    const actionKey = `${marketId}:SETTLEMENT_REQUEST:${normalizedRequestId}:${normalizedReplayKey}`;
-    if (consumedSettlementRequestKeys.has(actionKey)) throw new Error("SETTLEMENT_REQUEST_REPLAY_FORBIDDEN");
     const trade = trades.find((candidate) => candidate.id === tradeId);
     if (!trade) throw new Error("MATCHED_TRADE_NOT_FOUND");
+    if (consumedSettlementRequestTradeIds.has(trade.id)) throw new Error("SETTLEMENT_REQUEST_REPLAY_FORBIDDEN");
     if (trade.settlementStatus !== "MATCHED_UNSETTLED") throw new Error("SETTLEMENT_REQUEST_REQUIRES_UNSETTLED_MATCH");
     const quoteNumerator = trade.priceRaw * trade.quantityRaw;
     if (quoteNumerator % SCALE !== 0n) throw new Error("SETTLEMENT_QUOTE_AMOUNT_NOT_EXACT_AT_18_DECIMALS");
     const quoteAmountRaw = quoteNumerator / SCALE;
     const makerIsBuyer = trade.makerSide === "BUY";
-    consumedSettlementRequestKeys.add(actionKey);
+    consumedSettlementRequestTradeIds.add(trade.id);
     return Object.freeze({
       settlement_request_id: normalizedRequestId,
       settlement_request_replay_key: normalizedReplayKey,
