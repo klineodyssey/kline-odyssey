@@ -142,4 +142,4 @@ export async function createUniverseRuntime({ seed, store = new MemoryUniverseSt
   return Object.freeze({ store, registries, seed });
 }
 
-export function createBrowserUniverseStore(name) { return new IndexedDbUniverseStore(name); }
+export function createBrowserUniverseStore(name, options) { return new IndexedDbUniverseStore(name, options); }

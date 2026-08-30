@@ -24,6 +24,17 @@ test("official homepage exposes AI Company navigation, feature card, API and foo
   assert.match(html, /NO EXTERNAL AUTONOMY/);
 });
 
+test("official homepage is player-first and collapses the long mobile navigation", async () => {
+  const html = await read("index.html");
+  assert.match(html, /從這裡，開始你的文明人生/);
+  assert.match(html, /開始我的人生/);
+  assert.match(html, /class="nav-menu-toggle"/);
+  assert.match(html, /class="mobile-bottom-nav"/);
+  assert.match(html, /PUBLIC EXPERIMENTAL/);
+  assert.match(html, /BUILD SHA/);
+  assert.doesNotMatch(html, /Official Homepage V3\.0 Universe Portal/);
+});
+
 test("full World Viewer exposes the stable AI Company route", async () => {
   const html = await read("KGEN-KAIOS/world-viewer/index.html");
   assert.match(html, /world-viewer\/ai-company-v1\//);

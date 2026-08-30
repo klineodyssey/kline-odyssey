@@ -1,19 +1,19 @@
 ---
 TITLE: "KAIOS World Viewer Architecture Package"
-VERSION: "1.11.0"
-REVISION: "2026-07-17.9"
-STATUS: "SPRINT_010_COSMIC_TECHNOLOGY_ALPHA_COMPLETE"
+VERSION: "1.12.0"
+REVISION: "2026-08-30.1"
+STATUS: "RESOURCE_CIRCULATION_ACCOUNT_AND_ENTITLEMENT_CANDIDATE"
 ARCHITECTURE: "BASELINE_FROZEN_V1.0"
 IMPLEMENTATION: "COSMIC_TECHNOLOGY_ALPHA"
 WORKQUEUE: "KAIOS-WV-SPRINT-010_CLOSED"
 DEPLOYMENT: "STATIC_PAGES_COMPATIBLE"
-LAST_UPDATED: "2026-07-17"
+LAST_UPDATED: "2026-08-30"
 UPDATED_BY: "Codex / codex-gm-01"
 REVIEWED_BY: "Codex internal independent UI review; Human delegated approval"
 SOURCE_COMMIT: "321737a4bea92209d4bb7dccdd215b4efef4cf8d"
 TASK_ID: "KAIOS-WV-SPRINT-010"
 HUMAN_DECISION_ID: "HUMAN-SPRINT-010-COSMIC-TECHNOLOGY"
-CHANGE_REASON: "Add a research-gated fourteen-age Technology Tree, bounded Cosmic Material and Energy ledgers, reviewed vehicles and abilities, shared Pocket Time Cloaked UFO V2 gates, data-driven coordinates and synthetic Space Exploration."
+CHANGE_REASON: "Preserve the existing World Viewer and Resource Economy Runtime while adding fail-closed node accounts, temporary custody bindings, verified resource entitlements and a reviewed common-payment-rail settlement gate."
 ANCESTOR: "KGEN-KAIOS/V8.1/index.html; KGEN-KAIOS/land/LAND_RUNTIME_ARCHITECTURE_BASELINE.md"
 SOURCE_OF_TRUTH: false
 DOMAIN: KGENVERSE
@@ -28,6 +28,43 @@ CANONICAL_FILE: "KGEN-KAIOS/world-viewer/README.md"
 ---
 
 # KAIOS World Viewer V1
+
+## Resource blood circulation candidate
+
+The existing `nation/resource-economy-runtime.js` remains the single Resource
+Economy Runtime. It now also exposes bounded, off-chain candidates for:
+
+- programmatic node ledger accounts that require no EOA or per-object private key;
+- temporary public-address custody with chain, node, purpose, cap, expiry,
+  wallet-control evidence, economic-owner separation and migration policy;
+- verified resource-event entitlements with replay protection and the accounting
+  class `RESOURCE_SETTLEMENT` rather than payroll or company revenue; and
+- settlement readiness that remains blocked until the reviewed common KAIOS
+  Payment Rail, verified funding and one exact payment authorization all exist.
+
+No address is generated, no ownership is transferred, no entitlement is marked
+paid, and no chain write occurs in this candidate.
+
+### Canonical node audit (2026-08-30)
+
+| Requested label | CURRENT map evidence | Account state | Decision |
+|---|---|---|---|
+| `K888895 / 蟠桃園` | No such coordinate; CURRENT has `K88895 / 蟠桃園` | No registered node wallet | `LOCATION_CONFLICT` — do not bind |
+| `K88888 / 美洲大陸` | Present, including an older `美州大陸` spelling alias | No registered node wallet | Coordinate confirmed; canonical spelling needs alias preservation |
+| `K8888 / 美國` | CURRENT defines `K8888 / 高老莊` | Existing Gao Lao Zhuang bank proxy, not a United States resource account | `LOCATION_CONFLICT` — do not overwrite |
+| `K280` | `地球表面` | Ledger-only resource model available; no canonical resource receiver | Keep one Earth civilization identity |
+| `K16888` | Moon, Guanghan Palace and character/view aliases share the coordinate | No canonical resource receiver found | Alias review required before binding |
+| `K12345` | `五指山` and `小五指山` aliases | Temple Heart contract; KAIOS balance observed as zero | Not a resource settlement source |
+| `K11520` | `花果山` | Settlement proxy; KAIOS balance observed as zero | Adapter remains not connected |
+| `K18888` | `凌霄寶殿` | Bank proxy with observable KAIOS balance | Balance is not spending authority |
+
+The read-only BSC audit used chain `56` and KAIOS contract
+`0xD4E67B3a69e41524c424150E6b6e921b01D036db` (18 decimals). Observed balances
+at audit time were: K18888 `22213020930416874731235000` wei, K8888
+`888000000000000000000` wei, K11520 `0` wei and K12345 `0` wei. These
+observations do not identify a resource funding policy, signer, or transfer
+authority. K88895, K88888, K280 and K16888 have no canonical receiving address
+registered by this change.
 
 ## Player Genesis
 

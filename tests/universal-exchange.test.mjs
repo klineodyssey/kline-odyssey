@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import fs from "node:fs/promises";
 import { createRequire } from "node:module";
 import {
-  MemoryUniverseStore, createUniverseRuntime, resolveSpeciesCode, upgradeAppVersion,
+  MemoryUniverseStore, IndexedDbUniverseStore, createUniverseRuntime, resolveSpeciesCode, upgradeAppVersion,
   createListing, settleOrder, MissionEngine, completeAssetDream, assertLedgerSeparation,
   assertAppendOnlyChain, validateSpacecraft, ASSET_TYPES, buildLifeDraft, assignLifeJob,
   validateKgenMarketSnapshot, validateSwapIntent, KGEN_SWAP_CONFIG, DigitalLifeBirthResolver,
@@ -110,6 +110,18 @@ const seed = JSON.parse(await fs.readFile(new URL("../core/data/canonical.json",
 async function runtime() {
   return createUniverseRuntime({ seed: structuredClone(seed), store: new MemoryUniverseStore() });
 }
+
+test("11520 IndexedDB startup fails closed instead of hanging forever", async () => {
+  const originalIndexedDb = globalThis.indexedDB;
+  globalThis.indexedDB = { open: () => ({}) };
+  try {
+    const store = new IndexedDbUniverseStore("KGEN_11520_TIMEOUT_TEST", { openTimeoutMs: 20 });
+    await assert.rejects(store.ready(), /timed out after 20ms/);
+  } finally {
+    if (originalIndexedDb === undefined) delete globalThis.indexedDB;
+    else globalThis.indexedDB = originalIndexedDb;
+  }
+});
 
 test("V3.9 field service scan preserves zero-job truth without inventory evidence", () => {
   const scan = createFieldServiceDemandScan({ nodes: seed.next_stage.field_service_business_v3_9.verified_nodes });
@@ -2855,11 +2867,14 @@ test("V4.0 8888 audit removes fake balances and creates only request drafts", as
   assert.doesNotMatch(bankUi, /KGEN_Wallet\.demoMode=true/);
 });
 
-test("V4.0 production shell exposes animated concierge and fresh cache key", async () => {
+test("V4.0.1 production shell exposes animated concierge, safe boot fallback and fresh cache key", async () => {
   const htmlSource = await fs.readFile(new URL("../K線西遊記/temples/11520/index.html", import.meta.url), "utf8");
   const appSource = await fs.readFile(new URL("../K線西遊記/temples/11520/app.mjs", import.meta.url), "utf8");
   const cssSource = await fs.readFile(new URL("../K線西遊記/temples/11520/styles.css", import.meta.url), "utf8");
-  assert.match(htmlSource, /v=11520-v4\.0-player-first/);
+  assert.match(htmlSource, /v=11520-v4\.0\.1-safe-boot/);
+  assert.match(htmlSource, /MODULE_TIMEOUT/);
+  assert.match(htmlSource, /NO TRADE · CT = NULL/);
+  assert.match(appSource, /await store\.ready\(\)/);
   assert.doesNotMatch(htmlSource, /v=11520-v3\.6-first-kgen/);
   for (const state of ["IDLE", "LISTENING", "THINKING", "SPEAKING", "SUCCESS", "ERROR"]) assert.match(appSource + cssSource, new RegExp(state));
   assert.match(cssSource, /2D FALLBACK/);

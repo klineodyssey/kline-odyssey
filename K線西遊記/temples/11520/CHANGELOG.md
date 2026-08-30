@@ -1,5 +1,11 @@
 # 11520 Changelog
 
+## 4.0.1
+
+- Added a six-second module boot watchdog so a browser compatibility failure cannot leave players at an endless loading spinner.
+- Added bounded IndexedDB open/blocked handling and a memory-store fallback for local drafts; no authoritative state or settlement claim is created.
+- The fallback remains usable and explicitly reports `NOT CONNECTED`, `NO TRADE` and `CT = NULL`.
+
 ## 4.0.0
 
 - Repaired the Production Voice entry: controls are visible on first load, never silently disable, request microphone permission only after a user gesture, report browser/permission/network/no-speech errors, and always focus the text fallback when capture cannot run.

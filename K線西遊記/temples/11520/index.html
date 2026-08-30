@@ -3,14 +3,14 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="description" content="11520 V4.0 Player First — animated Wukong Hair concierge, voice/text request gateway, membership and first missions">
-  <title>11520 V4.0 · Player First Huaguoshan</title>
-  <link rel="stylesheet" href="./styles.css?v=11520-v4.0-player-first">
+  <meta name="description" content="11520 V4.0.1 Player First — safe boot, voice/text request gateway, membership and first missions">
+  <title>11520 V4.0.1 · Player First Huaguoshan</title>
+  <link rel="stylesheet" href="./styles.css?v=11520-v4.0.1-safe-boot">
 </head>
 <body>
   <a class="skip" id="skip-link" href="#content">跳至主要內容</a>
   <header class="topbar">
-    <div class="brand">11520 UNIVERSAL EXCHANGE <small>V4.0 · PLAYER FIRST HUAGUOSHAN</small></div>
+    <div class="brand">11520 UNIVERSAL EXCHANGE <small>V4.0.1 · PLAYER FIRST SAFE BOOT</small></div>
     <div class="top-controls"><label for="language-selector">LANGUAGE</label><select id="language-selector" aria-label="Interface language"><option value="zh-TW">繁中</option><option value="en">EN</option><option value="ja">日本語</option><option value="ko">한국어</option></select></div>
     <div class="system-status" id="system-status"><span class="badge active">DIGITAL ANT ALIVE</span><span class="badge deployed">KGEN MAINNET LIVE</span><span class="badge deployed">KAIOS MAINNET LIVE</span><span class="badge local">READ-ONLY PUBLIC WORKER</span></div>
   </header>
@@ -23,6 +23,23 @@
   </div>
   <footer>Data states are explicit. No simulated trades, volume, TVL, order book or ownership are presented as deployed facts.</footer>
   <script src="../12345/assets/ethers-5.7.2.umd.min.js"></script>
-  <script type="module" src="./app.mjs?v=11520-v4.0-player-first"></script>
+  <script>
+    window.__KAIOS_11520_BOOT__ = { status: "MODULE_LOADING", started_at: new Date().toISOString() };
+    document.documentElement.dataset.kaiosBoot = "MODULE_LOADING";
+    window.addEventListener("error", (event) => {
+      window.__KAIOS_11520_BOOT__ = { status: "MODULE_ERROR", message: event.message || "Unknown module error" };
+      document.documentElement.dataset.kaiosBoot = "MODULE_ERROR";
+      const target = document.querySelector("#content");
+      if (target) target.innerHTML = `<div class="notice error"><strong>11520 啟動失敗</strong><p>${String(event.message || "瀏覽器未能載入文明核心。請重新整理或改用支援 ES Modules 的瀏覽器。").replace(/[&<>\"']/g, (character) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;", "'": "&#039;" }[character]))}</p></div>`;
+    });
+    window.setTimeout(() => {
+      if (document.documentElement.dataset.kaiosBoot !== "READY") {
+        document.documentElement.dataset.kaiosBoot = "MODULE_TIMEOUT";
+        const target = document.querySelector("#content");
+        if (target) target.innerHTML = '<section class="card boot-fallback"><div class="eyebrow">SAFE COMPATIBILITY MODE</div><h1>KAIOS 仍可繼續</h1><p>這個瀏覽器未在預期時間載入 11520 文明核心。公開入口仍可使用；交易、付款與鏈上寫入均未執行。</p><div class="fallback-actions"><a class="button" href="../../../world-viewer/player-genesis/">開始我的人生</a><a class="button secondary" href="../../../world-viewer/">探索 K280 世界</a><a class="button secondary" href="../../../world-viewer/ai-company-v1/">查看工作與公司</a><button class="button secondary" type="button" onclick="location.reload()">重新載入 11520</button></div><p class="muted">狀態：MODULE_TIMEOUT · NOT CONNECTED · NO TRADE · CT = NULL</p></section>';
+      }
+    }, 6000);
+  </script>
+  <script type="module" src="./app.mjs?v=11520-v4.0.1-safe-boot"></script>
 </body>
 </html>

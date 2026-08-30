@@ -5,6 +5,12 @@ import { createBuildingRuntime } from "../building/building-runtime.js";
 import { createCivilizationRuntime } from "../civilization/civilization-runtime.js";
 import { RESOURCE_CATALOG, MARKETPLACE_CATEGORIES } from "../economy/economy-runtime.js";
 import { createLifeRuntime } from "../life/life-runtime.js";
+import {
+  createResourceNodeAccount,
+  createResourceValueEntitlement,
+  createTemporaryCustodyBinding,
+  evaluateResourceSettlementReadiness
+} from "../nation/resource-economy-runtime.js";
 
 const world = JSON.parse(await readFile(new URL("../data/synthetic-world.json", import.meta.url), "utf8"));
 const canonicalBefore = JSON.stringify(world);
@@ -14,6 +20,120 @@ const storage = {
   setItem(key, value) { storageValues.set(key, String(value)); },
   removeItem(key) { storageValues.delete(key); }
 };
+
+const resourceAccount = createResourceNodeAccount({
+  accountId: "resource-account-earth-water-001",
+  nodeId: "EARTH-K280",
+  nodeName: "Earth",
+  canonicalLocation: "K280",
+  resourceTypes: ["WATER"],
+  economicOwner: "CIVILIZATION_NODE:EARTH-K280"
+});
+assert.equal(resourceAccount.public_address, null);
+assert.equal(resourceAccount.custody_status, "NO_PRIVATE_KEY_REQUIRED");
+assert.throws(() => createTemporaryCustodyBinding({
+  publicAddress: "0x0000000000000000000000000000000000000000"
+}), (error) => error.code === "INVALID_PUBLIC_ADDRESS");
+
+const custodyBinding = createTemporaryCustodyBinding({
+  bindingId: "resource-custody-earth-water-001",
+  nodeId: "EARTH-K280",
+  nodeName: "Earth",
+  canonicalLocation: "K280",
+  chainId: 56,
+  publicAddress: "0x1111111111111111111111111111111111111111",
+  accountRole: "TEMPORARY_CUSTODY_RECEIVER",
+  economicOwner: "CIVILIZATION_NODE:EARTH-K280",
+  custodian: "HUMAN_ADDRESS_CONTROLLER:TEST_ONLY",
+  purpose: "RESOURCE_NODE_OPERATIONS",
+  asset: "KAIOS",
+  maxAmountKaiosWei: "10000",
+  validFrom: "2036-01-01T00:00:00.000Z",
+  validUntil: "2037-01-01T00:00:00.000Z",
+  decisionId: "HUMAN-RESOURCE-CUSTODY-TEST-001",
+  migrationPolicy: "FREEZE_RECONCILE_MIGRATE_RETIRE",
+  walletControlProof: {
+    proof_id: "wallet-proof-test-001",
+    address: "0x1111111111111111111111111111111111111111",
+    status: "VERIFIED_PUBLIC_WALLET_CONTROL"
+  }
+});
+assert.equal(custodyBinding.transfers_resource_ownership, false);
+assert.notEqual(custodyBinding.economic_owner, custodyBinding.custodian);
+assert.throws(() => createResourceValueEntitlement({
+  event: { status: "RESOURCE_EXISTS" }
+}), (error) => error.code === "VERIFIED_RESOURCE_EVENT_REQUIRED");
+
+const entitlement = createResourceValueEntitlement({
+  entitlementId: "resource-entitlement-001",
+  replayKey: "resource-event-earth-water-001",
+  accountId: resourceAccount.account_id,
+  policyId: "RESOURCE_VALUE_POLICY_CANDIDATE_V1",
+  amountKaiosWei: "10000",
+  event: {
+    event_id: "resource-event-earth-water-001",
+    node_id: "EARTH-K280",
+    resource_type: "WATER",
+    quantity: 1,
+    quality: "TEST_FIXTURE",
+    world_state_evidence: "fixture-world-state-001",
+    scarcity_evidence: "fixture-scarcity-001",
+    demand_evidence: "fixture-demand-001",
+    transport_evidence: "fixture-transport-001",
+    status: "VERIFIED_RESOURCE_EVENT"
+  }
+});
+assert.equal(entitlement.status, "ACCRUED_PENDING_SETTLEMENT");
+assert.equal(entitlement.paid, false);
+assert.throws(() => createResourceValueEntitlement({
+  entitlementId: "resource-entitlement-002",
+  replayKey: entitlement.replay_key,
+  accountId: resourceAccount.account_id,
+  policyId: "RESOURCE_VALUE_POLICY_CANDIDATE_V1",
+  amountKaiosWei: "10000",
+  event: {
+    event_id: "resource-event-earth-water-002",
+    node_id: "EARTH-K280",
+    resource_type: "WATER",
+    quantity: 1,
+    quality: "TEST_FIXTURE",
+    world_state_evidence: "fixture-world-state-002",
+    scarcity_evidence: "fixture-scarcity-002",
+    demand_evidence: "fixture-demand-002",
+    transport_evidence: "fixture-transport-002",
+    status: "VERIFIED_RESOURCE_EVENT"
+  },
+  existingEntitlements: [entitlement]
+}), (error) => error.code === "RESOURCE_ENTITLEMENT_REPLAY");
+
+const settlementReadiness = evaluateResourceSettlementReadiness({
+  entitlement,
+  custodyBinding,
+  fundingEvidence: {
+    status: "VERIFIED",
+    source_address: "0x2222222222222222222222222222222222222222",
+    balance_kaios_wei: "10000"
+  },
+  exactAuthorization: {
+    authorization_id: "resource-payment-authorization-001",
+    action_type: "ONE_EXACT_KAIOS_PAYMENT_ACTION",
+    chain_id: 56,
+    token_address: "0xD4E67B3a69e41524c424150E6b6e921b01D036db",
+    source_address: "0x2222222222222222222222222222222222222222",
+    recipient_address: custodyBinding.public_address,
+    amount_kaios_wei: "9999",
+    purpose: "RESOURCE_SETTLEMENT",
+    replay_key: entitlement.replay_key,
+    signer_policy_id: "test-signer-policy-001",
+    valid_from: "2036-01-01T00:00:00.000Z",
+    expires_at: "2037-01-01T00:00:00.000Z"
+  },
+  now: "2036-06-01T00:00:00.000Z"
+});
+assert.equal(settlementReadiness.status, "BLOCKED");
+assert.ok(settlementReadiness.blockers.includes("AUTHORIZATION_AMOUNT_MISMATCH"));
+assert.ok(settlementReadiness.blockers.includes("COMMON_KAIOS_PAYMENT_RAIL_NOT_RELEASED"));
+assert.equal(settlementReadiness.chain_write_executed, false);
 
 const life = createLifeRuntime({ world, storage, storageKey: "sprint-004-life-test", now: () => "2036-03-20T06:00:00Z" });
 const building = createBuildingRuntime({ world });

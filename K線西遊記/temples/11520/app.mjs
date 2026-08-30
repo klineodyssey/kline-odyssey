@@ -7,8 +7,8 @@ import {
   appendPublicRequestHistoryEvent, I18N_SUPPORTED_LOCALES, translateUi, normalizeUiLocale,
   validatePrimaryI18nCatalogs, detectVoiceCapabilities, deriveWorkerHealth, normalizeVoiceError,
   createLocalHuaguoshanMembership, createFirstPlayerMission, completeFirstPlayerMission
-} from "../../../core/index.mjs?v=11520-v4.0-player-first";
-import { readTempleHeart12345 } from "../../../core/integrations/temple-heart-12345.mjs?v=11520-v4.0-player-first";
+} from "../../../core/index.mjs?v=11520-v4.0.1-safe-boot";
+import { readTempleHeart12345 } from "../../../core/integrations/temple-heart-12345.mjs?v=11520-v4.0.1-safe-boot";
 
 const NAVIGATION = Object.freeze([
   ["HOME", "navigation.home"], ["REQUEST", "navigation.request"], ["LIFE", "navigation.life"], ["LIFE_FACTORY", "LIFE FACTORY"], ["APPS", "navigation.apps"], ["COMPANIES", "navigation.company"],
@@ -19,6 +19,7 @@ const NAVIGATION = Object.freeze([
 
 const content = document.querySelector("#content");
 const nav = document.querySelector("#nav");
+document.documentElement.dataset.kaiosBoot = "BOOT_START";
 let universe;
 let pendingPublicIntent = null;
 let lastGatewayReceipt = null;
@@ -176,7 +177,7 @@ function playerFirstMarkup() {
     : `${t("player.welcome")} ${t("player.prompt")}`;
   return `<section class="player-first card">
     ${conciergeAvatarMarkup()}
-    <div class="concierge-copy"><div class="eyebrow">WUKONG HAIR LIFE · PLAYER FIRST V4.0</div><h1>${html(welcome)}</h1><p>${html(uiLocale === "zh-TW" ? "先說出夢想；我會理解、確認、規劃，不會用畫面假裝完成。" : "Tell me the dream first. I will understand, confirm and plan it without pretending it is complete.")}</p>
+    <div class="concierge-copy"><div class="eyebrow">WUKONG HAIR LIFE · PLAYER FIRST V4.0.1</div><h1>${html(welcome)}</h1><p>${html(uiLocale === "zh-TW" ? "先說出夢想；我會理解、確認、規劃，不會用畫面假裝完成。" : "Tell me the dream first. I will understand, confirm and plan it without pretending it is complete.")}</p>
       <label class="sr-only" for="home-concierge-text">${html(t("request.cta"))}</label><textarea id="home-concierge-text" rows="3" maxlength="4000" placeholder="${html(t("request.cta"))}"></textarea>
       <div class="first-actions">
         <button class="button voice-start" type="button" data-target="#home-concierge-text">🎙 ${html(t("voice.start"))}</button>
@@ -208,7 +209,7 @@ async function homeView() {
     ["KGEN AMM", "USER WALLET LIVE", "Runtime-verified PancakeSwap V2 pair"],
     ["11520 settlement", "MAINNET CONTRACT", "Adapter not integrated; no fabricated settlement"]
   ];
-  return `${playerFirstMarkup()}${hero("K11520 · PLAYER FIRST RUNTIME V4.0", uiLocale === "zh-TW" ? "文明資產的公開市場與生命工廠。" : "A public market and Life Factory for civilization assets.", uiLocale === "zh-TW" ? "DIGITAL_ANT_0001 先守門，再照顧玩家、掃描真實需求；沒有證據就沒有訂單。" : "DIGITAL_ANT_0001 guards first, then helps players and scans verified demand; no evidence means no job.")}
+  return `${playerFirstMarkup()}${hero("K11520 · PLAYER FIRST RUNTIME V4.0.1", uiLocale === "zh-TW" ? "文明資產的公開市場與生命工廠。" : "A public market and Life Factory for civilization assets.", uiLocale === "zh-TW" ? "DIGITAL_ANT_0001 先守門，再照顧玩家、掃描真實需求；沒有證據就沒有訂單。" : "DIGITAL_ANT_0001 guards first, then helps players and scans verified demand; no evidence means no job.")}
     <a class="card gateway-cta" href="#/REQUEST"><div><div class="eyebrow">${html(t("request.title"))}</div><h2>${html(t("request.cta"))}</h2><p>DRAFT → UNDERSTAND → CONFIRM → REQUEST</p></div><span aria-hidden="true">→</span></a>
     ${section(t("status.title"), workerStatusMarkup())}
     ${section("CFO FIELD SERVICE BUSINESS", fieldServiceMarkup())}
@@ -967,13 +968,21 @@ async function boot() {
     document.documentElement.lang = uiLocale;
     const seed = await loadCanonicalSeed();
     let store;
-    try { store = createBrowserUniverseStore(); } catch { store = undefined; }
+    try {
+      store = createBrowserUniverseStore();
+      await store.ready();
+    } catch {
+      store = undefined;
+      document.documentElement.dataset.kaiosStorage = "MEMORY_FALLBACK";
+    }
     universe = await createUniverseRuntime({ seed, store });
     await loadSharedWorkerStatus();
     addEventListener("hashchange", render);
     bindLanguageRuntime();
     await render();
+    document.documentElement.dataset.kaiosBoot = "READY";
   } catch (error) {
+    document.documentElement.dataset.kaiosBoot = "RUNTIME_STOP";
     content.innerHTML = `<div class="notice error"><strong>RUNTIME STOP</strong><p>${html(error.message)}</p></div>`;
   }
 }

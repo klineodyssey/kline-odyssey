@@ -1,7 +1,7 @@
 {
   "product_id": "KGEN_11520_UNIVERSAL_EXCHANGE",
-  "version": "4.0.0",
-  "status": "PLAYER_FIRST_VOICE_3D_CONCIERGE_MEMBERSHIP_AND_8888_ENTRY",
+  "version": "4.0.1",
+  "status": "PLAYER_FIRST_SAFE_BOOT_AND_STORAGE_FALLBACK",
   "entrypoint": "index.html",
   "runtime": "app.mjs",
   "domain_core": "/core/index.mjs",
