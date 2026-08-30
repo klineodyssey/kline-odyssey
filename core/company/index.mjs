@@ -966,30 +966,40 @@ const KAIOS_REWARD_EVIDENCE_ACTIVITY = Object.freeze({
 export const CANONICAL_KAIOS_PLAYER_REWARD_EVENT_ATTESTATIONS = Object.freeze([]);
 export const CANONICAL_KAIOS_WALLET_CONTROL_ATTESTATIONS = Object.freeze([]);
 export const CANONICAL_KAIOS_ECONOMY_SNAPSHOT_ATTESTATIONS = Object.freeze([]);
-export const CANONICAL_KAIOS_RESOURCE_ACCOUNT_DESIGNATIONS = Object.freeze([
+export const KAIOS_RESOURCE_ACCOUNT_DESIGNATION_CANDIDATES = Object.freeze([
   Object.freeze({
     designation_id: "RESOURCE_ACCOUNT_DESIGNATION_K88895_V1",
-    status: "REPOSITORY_DESIGNATED_RESOURCE_ACCOUNT",
+    status: "DESIGNATION_CANDIDATE_REVIEW_REQUIRED",
     account_id: "RESOURCE_LEDGER_K88895",
     node_id: "K88895",
     node_name: "蟠桃園",
     canonical_location: "UniverseMap_V10_2_DISTANCE_COMPLETE_ALL_POINTS.json#P_88895p0_蟠桃園_R97",
     resource_types: Object.freeze(["CULTIVATION_LAND", "ORCHARD_PRODUCE"]),
     authority_scope: "OFFCHAIN_RESOURCE_ENTITLEMENT_LEDGER_ONLY",
+    human_decision_id: null,
+    can_accrue_entitlements: false,
     payment_authority: false,
     chain_write_authority: false
   }),
-  Object.freeze({ designation_id: "RESOURCE_ACCOUNT_DESIGNATION_K377_V1", status: "REPOSITORY_DESIGNATED_RESOURCE_ACCOUNT", account_id: "RESOURCE_LEDGER_K377", node_id: "K377", node_name: "三七七銀河峽谷", canonical_location: "UniverseMap_V10_2_DISTANCE_COMPLETE_ALL_POINTS.json#P_377p0_三七七銀河峽谷_R11", resource_types: Object.freeze(["WATER"]), authority_scope: "OFFCHAIN_RESOURCE_ENTITLEMENT_LEDGER_ONLY", payment_authority: false, chain_write_authority: false }),
-  Object.freeze({ designation_id: "RESOURCE_ACCOUNT_DESIGNATION_K5168_V1", status: "REPOSITORY_DESIGNATED_RESOURCE_ACCOUNT", account_id: "RESOURCE_LEDGER_K5168", node_id: "K5168", node_name: "金山銀礦", canonical_location: "UniverseMap_V10_2_DISTANCE_COMPLETE_ALL_POINTS.json#P_5168p0_金山銀礦_R22", resource_types: Object.freeze(["MINERAL"]), authority_scope: "OFFCHAIN_RESOURCE_ENTITLEMENT_LEDGER_ONLY", payment_authority: false, chain_write_authority: false }),
-  Object.freeze({ designation_id: "RESOURCE_ACCOUNT_DESIGNATION_K6888_V1", status: "REPOSITORY_DESIGNATED_RESOURCE_ACCOUNT", account_id: "RESOURCE_LEDGER_K6888", node_id: "K6888", node_name: "松樹國", canonical_location: "UniverseMap_V10_2_DISTANCE_COMPLETE_ALL_POINTS.json#P_6888p0_松樹國_R26", resource_types: Object.freeze(["FOREST_BIOMASS"]), authority_scope: "OFFCHAIN_RESOURCE_ENTITLEMENT_LEDGER_ONLY", payment_authority: false, chain_write_authority: false }),
-  Object.freeze({ designation_id: "RESOURCE_ACCOUNT_DESIGNATION_K7744_V1", status: "REPOSITORY_DESIGNATED_RESOURCE_ACCOUNT", account_id: "RESOURCE_LEDGER_K7744", node_id: "K7744", node_name: "流沙河", canonical_location: "UniverseMap_V10_2_DISTANCE_COMPLETE_ALL_POINTS.json#P_7744p0_流沙河_R28", resource_types: Object.freeze(["WATER"]), authority_scope: "OFFCHAIN_RESOURCE_ENTITLEMENT_LEDGER_ONLY", payment_authority: false, chain_write_authority: false }),
-  Object.freeze({ designation_id: "RESOURCE_ACCOUNT_DESIGNATION_K99999_V1", status: "REPOSITORY_DESIGNATED_RESOURCE_ACCOUNT", account_id: "RESOURCE_LEDGER_K99999", node_id: "K99999", node_name: "命運之神 / 銀河主脈", canonical_location: "UniverseMap_V10_2_DISTANCE_COMPLETE_ALL_POINTS.json#K99999", resource_types: Object.freeze(["WATER"]), authority_scope: "OFFCHAIN_RESOURCE_ENTITLEMENT_LEDGER_ONLY", payment_authority: false, chain_write_authority: false })
+  Object.freeze({ designation_id: "RESOURCE_ACCOUNT_DESIGNATION_K377_V1", status: "DESIGNATION_CANDIDATE_REVIEW_REQUIRED", account_id: "RESOURCE_LEDGER_K377", node_id: "K377", node_name: "三七七銀河峽谷", canonical_location: "UniverseMap_V10_2_DISTANCE_COMPLETE_ALL_POINTS.json#P_377p0_三七七銀河峽谷_R11", resource_types: Object.freeze(["WATER"]), authority_scope: "OFFCHAIN_RESOURCE_ENTITLEMENT_LEDGER_ONLY", human_decision_id: null, can_accrue_entitlements: false, payment_authority: false, chain_write_authority: false }),
+  Object.freeze({ designation_id: "RESOURCE_ACCOUNT_DESIGNATION_K5168_V1", status: "DESIGNATION_CANDIDATE_REVIEW_REQUIRED", account_id: "RESOURCE_LEDGER_K5168", node_id: "K5168", node_name: "金山銀礦", canonical_location: "UniverseMap_V10_2_DISTANCE_COMPLETE_ALL_POINTS.json#P_5168p0_金山銀礦_R22", resource_types: Object.freeze(["MINERAL"]), authority_scope: "OFFCHAIN_RESOURCE_ENTITLEMENT_LEDGER_ONLY", human_decision_id: null, can_accrue_entitlements: false, payment_authority: false, chain_write_authority: false }),
+  Object.freeze({ designation_id: "RESOURCE_ACCOUNT_DESIGNATION_K6888_V1", status: "DESIGNATION_CANDIDATE_REVIEW_REQUIRED", account_id: "RESOURCE_LEDGER_K6888", node_id: "K6888", node_name: "松樹國", canonical_location: "UniverseMap_V10_2_DISTANCE_COMPLETE_ALL_POINTS.json#P_6888p0_松樹國_R26", resource_types: Object.freeze(["FOREST_BIOMASS"]), authority_scope: "OFFCHAIN_RESOURCE_ENTITLEMENT_LEDGER_ONLY", human_decision_id: null, can_accrue_entitlements: false, payment_authority: false, chain_write_authority: false }),
+  Object.freeze({ designation_id: "RESOURCE_ACCOUNT_DESIGNATION_K7744_V1", status: "DESIGNATION_CANDIDATE_REVIEW_REQUIRED", account_id: "RESOURCE_LEDGER_K7744", node_id: "K7744", node_name: "流沙河", canonical_location: "UniverseMap_V10_2_DISTANCE_COMPLETE_ALL_POINTS.json#P_7744p0_流沙河_R28", resource_types: Object.freeze(["WATER"]), authority_scope: "OFFCHAIN_RESOURCE_ENTITLEMENT_LEDGER_ONLY", human_decision_id: null, can_accrue_entitlements: false, payment_authority: false, chain_write_authority: false }),
+  Object.freeze({ designation_id: "RESOURCE_ACCOUNT_DESIGNATION_K99999_V1", status: "DESIGNATION_CANDIDATE_REVIEW_REQUIRED", account_id: "RESOURCE_LEDGER_K99999", node_id: "K99999", node_name: "命運之神 / 銀河主脈", canonical_location: "UniverseMap_V10_2_DISTANCE_COMPLETE_ALL_POINTS.json#K99999", resource_types: Object.freeze(["WATER"]), authority_scope: "OFFCHAIN_RESOURCE_ENTITLEMENT_LEDGER_ONLY", human_decision_id: null, can_accrue_entitlements: false, payment_authority: false, chain_write_authority: false })
 ]);
+export const K88895_RESOURCE_ACCOUNT_DESIGNATION_CANDIDATE = KAIOS_RESOURCE_ACCOUNT_DESIGNATION_CANDIDATES[0];
+export const CANONICAL_KAIOS_RESOURCE_ACCOUNT_DESIGNATIONS = Object.freeze([]);
+export const CANONICAL_KAIOS_WORLD_RESOURCE_SCAN_ATTESTATIONS = Object.freeze([]);
 export const CANONICAL_KAIOS_RESOURCE_CUSTODY_DESIGNATIONS = Object.freeze([]);
 
-export function createK88895ResourceEconomyRuntime({ worldResourceScan, createdAt }) {
-  invariant(worldResourceScan?.scan_policy_id === CANONICAL_UNIVERSE_RESOURCE_SCAN_POLICY.policy_id, "CANONICAL_WORLD_RESOURCE_SCAN_REQUIRED", "K88895 resource economy requires the canonical world resource scan");
-  const node = worldResourceScan.nodes.find((item) => item.canonical_node_id === "K88895");
+export function createK88895ResourceEconomyRuntime({ worldResourceScan = null, worldResourceScanAttestationId = null, createdAt }) {
+  invariant(worldResourceScan == null, "CALLER_SUPPLIED_WORLD_RESOURCE_SCAN_FORBIDDEN", "K88895 resource economy cannot trust a caller-supplied world resource scan");
+  const scanAttestation = CANONICAL_KAIOS_WORLD_RESOURCE_SCAN_ATTESTATIONS.find((item) => item.attestation_id === worldResourceScanAttestationId);
+  invariant(scanAttestation, "WORLD_RESOURCE_SCAN_ATTESTATION_NOT_CONNECTED", "K88895 resource economy requires a repository-owned exact world resource scan attestation");
+  invariant(scanAttestation.status === "REPOSITORY_VERIFIED_CANONICAL_WORLD_RESOURCE_SCAN", "WORLD_RESOURCE_SCAN_ATTESTATION_STATUS_REQUIRED", "World resource scan attestation must be repository verified");
+  invariant(scanAttestation.scan_policy_id === CANONICAL_UNIVERSE_RESOURCE_SCAN_POLICY.policy_id, "WORLD_RESOURCE_SCAN_POLICY_BINDING_MISMATCH", "World resource scan attestation must bind the exact canonical scan policy");
+  invariant(scanAttestation.universe_map_version === CANONICAL_UNIVERSE_RESOURCE_SCAN_POLICY.universe_map_version, "WORLD_RESOURCE_SCAN_MAP_BINDING_MISMATCH", "World resource scan attestation must bind the exact CURRENT Universe Map version");
+  const node = scanAttestation.nodes.find((item) => item.canonical_node_id === "K88895");
   invariant(node && node.point_alias_ids.includes("P_88895p0_蟠桃園_R97"), "K88895_CANONICAL_NODE_REQUIRED", "K88895 resource economy must bind the canonical Peach Garden point");
   invariant(node.resource_candidates.includes("CULTIVATION_LAND") && node.resource_candidates.includes("ORCHARD_PRODUCE"), "K88895_CANONICAL_RESOURCE_CLASSES_REQUIRED", "K88895 requires the canonical cultivation and orchard candidate classes");
   const ledger = createResourceLedgerSubaccount({
@@ -1081,10 +1091,16 @@ const BATCH_RESOURCE_EVENT_TYPES = Object.freeze({
   FOREST_BIOMASS: Object.freeze(["FOREST_STATE_VERIFIED", "SUSTAINABLE_BIOMASS_HARVEST_VERIFIED"])
 });
 
-export function createCanonicalResourceEconomyBatchExpansion({ worldResourceScan, createdAt }) {
-  invariant(worldResourceScan?.scan_policy_id === CANONICAL_UNIVERSE_RESOURCE_SCAN_POLICY.policy_id, "CANONICAL_WORLD_RESOURCE_SCAN_REQUIRED", "Resource batch expansion requires the canonical world resource scan");
+export function createCanonicalResourceEconomyBatchExpansion({ worldResourceScan = null, worldResourceScanAttestationId = null, createdAt }) {
+  invariant(worldResourceScan == null, "CALLER_SUPPLIED_WORLD_RESOURCE_SCAN_FORBIDDEN", "Resource batch expansion cannot trust a caller-supplied world resource scan");
+  const scanAttestation = CANONICAL_KAIOS_WORLD_RESOURCE_SCAN_ATTESTATIONS.find((item) => item.attestation_id === worldResourceScanAttestationId);
+  invariant(scanAttestation, "WORLD_RESOURCE_SCAN_ATTESTATION_NOT_CONNECTED", "Resource batch expansion requires a repository-owned exact world resource scan attestation");
+  invariant(scanAttestation.status === "REPOSITORY_VERIFIED_CANONICAL_WORLD_RESOURCE_SCAN", "WORLD_RESOURCE_SCAN_ATTESTATION_STATUS_REQUIRED", "World resource scan attestation must be repository verified");
+  invariant(scanAttestation.scan_policy_id === CANONICAL_UNIVERSE_RESOURCE_SCAN_POLICY.policy_id, "WORLD_RESOURCE_SCAN_POLICY_BINDING_MISMATCH", "World resource scan attestation must bind the exact canonical scan policy");
+  invariant(scanAttestation.universe_map_version === CANONICAL_UNIVERSE_RESOURCE_SCAN_POLICY.universe_map_version, "WORLD_RESOURCE_SCAN_MAP_BINDING_MISMATCH", "World resource scan attestation must bind the exact CURRENT Universe Map version");
+  const worldResourceScan = scanAttestation;
   parseEmploymentTime(createdAt, "resource_batch.created_at");
-  const firstNode = createK88895ResourceEconomyRuntime({ worldResourceScan, createdAt });
+  const firstNode = createK88895ResourceEconomyRuntime({ worldResourceScanAttestationId, createdAt });
   const batchNodeIds = ["K377", "K5168", "K6888", "K7744", "K99999"];
   const expanded = batchNodeIds.map((nodeId) => {
     const node = worldResourceScan.nodes.find((item) => item.canonical_node_id === nodeId);
