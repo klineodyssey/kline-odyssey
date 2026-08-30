@@ -138,6 +138,7 @@ import {
   K18888_GENESIS_DEVELOPMENT_PORTFOLIO_POLICY, createGenesisDevelopmentPortfolioCandidate,
   createGenesisDevelopmentAllocationCandidate, scanCanonicalWorldResourceEconomy, createK88895ResourceEconomyRuntime,
   createCanonicalResourceEconomyBatchExpansion,
+  PUBLIC_GAME_NODE_ECONOMIC_AUDIT_POLICY, auditPublicGameNodeFunding,
   createKaiosCivilizationCirculationHealth,
   createResourceLedgerSubaccount, createTemporaryResourceCustodyBindingCandidate,
   evaluateCivilizationRealExecutionPolicy, selectNextSafeCompanyWorkflow,
@@ -4140,6 +4141,43 @@ test("canonical resource batch expands the same fail-closed runtime to five more
   assert.deepEqual(batch.white_bone_cave_discovery_work_order.asserted_resources, []);
   assert.equal(batch.white_bone_cave_discovery_work_order.authority_created, false);
   assert.equal(batch.next_resource_node, "K16888_WHITE_BONE_CAVE_DISCOVERY");
+});
+
+test("public game node audit discovers every route-backed node and creates unequal evidence-first funding work", async () => {
+  const universeMap = JSON.parse(await fs.readFile(new URL("../docs/maps/UniverseMap_V10_2_DISTANCE_COMPLETE_ALL_POINTS.json", import.meta.url), "utf8"));
+  const rootHomepageHtml = await fs.readFile(new URL("../index.html", import.meta.url), "utf8");
+  const galaxyPortalHtml = await fs.readFile(new URL("../K線西遊記/index.html", import.meta.url), "utf8");
+  const worldResourceScan = scanCanonicalWorldResourceEconomy({ universeMap });
+  const resourceEconomyBatch = createCanonicalResourceEconomyBatchExpansion({ worldResourceScan, createdAt: "2026-08-30T13:10:00.000Z" });
+  const genesisDevelopmentPortfolio = createGenesisDevelopmentPortfolioCandidate({ createdAt: "2026-08-30T13:10:00.000Z" });
+  const audit = await auditPublicGameNodeFunding({ rootHomepageHtml, galaxyPortalHtml, worldResourceScan, resourceEconomyBatch, genesisDevelopmentPortfolio, createdAt: "2026-08-30T13:11:00.000Z" });
+  assert.equal(PUBLIC_GAME_NODE_ECONOMIC_AUDIT_POLICY.auto_add_funding_candidate, true);
+  assert.equal(PUBLIC_GAME_NODE_ECONOMIC_AUDIT_POLICY.equal_amount_per_node_forbidden, true);
+  assert.equal(audit.source_hash.length, 64);
+  assert.equal(audit.public_game_node_count, 26);
+  assert.equal(audit.funded_nodes, 0);
+  assert.equal(audit.funded_or_budgeted_nodes, 4);
+  assert.deepEqual(audit.funded_or_budgeted_node_ids, ["K11520", "K12345", "K8888", "K8895"]);
+  assert.equal(audit.unfunded_public_nodes, 22);
+  assert.equal(audit.resource_connected_nodes, 0);
+  assert.equal(audit.market_connected_nodes, 0);
+  assert.equal(audit.player_reward_connected_nodes, 0);
+  assert.equal(audit.nodes_with_no_operational_economic_path, 26);
+  assert.equal(audit.nodes_with_planning_path, 26);
+  assert.equal(audit.newly_discovered_funding_candidates.length, 22);
+  assert.equal(audit.world_resource_development_queue.length, 26);
+  assert.ok(audit.unfunded_public_node_ids.includes("K18921"));
+  assert.ok(audit.unfunded_public_node_ids.includes("KAIOS_AI_COMPANY"));
+  assert.ok(audit.unfunded_public_node_ids.includes("AQUACULTURE_K280"));
+  assert.equal(audit.nodes.find((node) => node.node_id === "K11520").market_settlement_connected, false);
+  assert.equal(audit.nodes.find((node) => node.node_id === "K18921").funding_class, "LIQUIDITY_DEVELOPMENT_FUND");
+  assert.equal(audit.nodes.find((node) => node.node_id === "ECOSYSTEM_K280").funding_class, "RESOURCE_DEVELOPMENT_FUND");
+  assert.equal(audit.nodes.find((node) => node.node_id === "KAIOS_AI_COMPANY").gross_candidate_kaios_wei, null);
+  assert.equal(audit.highest_priority_unfunded_public_node, "K18921");
+  assert.equal(audit.watcher_connected, false);
+  assert.equal(audit.heartbeat_callable, true);
+  assert.equal(audit.real_kaios_paid, false);
+  assert.equal(audit.chain_write, false);
 });
 
 test("civilization circulation health exposes blockers without fabricating holders, trades or LP", async () => {

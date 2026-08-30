@@ -1147,6 +1147,157 @@ export function createCanonicalResourceEconomyBatchExpansion({ worldResourceScan
   });
 }
 
+export const PUBLIC_GAME_NODE_ECONOMIC_AUDIT_POLICY = Object.freeze({
+  policy_id: "KAIOS_PUBLIC_GAME_NODE_ECONOMIC_AUDIT_V1",
+  source_paths: Object.freeze(["index.html", "K線西遊記/index.html"]),
+  auto_add_funding_candidate: true,
+  equal_amount_per_node_forbidden: true,
+  no_player_means_investment_stage: true,
+  development_rate_bps: K18888_GENESIS_QE_POLICY.development_rate_bps,
+  funding_requires_evidence_based_estimate: true,
+  audit_trigger: "SOURCE_HASH_CHANGE_OR_COMPANY_HEARTBEAT",
+  real_payment_authority: false,
+  chain_write_authority: false
+});
+
+const PUBLIC_WORLD_ROUTE_RULES = Object.freeze({
+  "": Object.freeze({ node_id: "WORLD_K280", node_name: "KAIOS World Viewer", node_type: "WORLD_NODE", funding_class: "INFRASTRUCTURE_FUND" }),
+  "causal-runtime": Object.freeze({ node_id: "CAUSAL_RUNTIME_K280", node_name: "KAIOS 真實因果世界", node_type: "GAME_RUNTIME", funding_class: "INFRASTRUCTURE_FUND" }),
+  "player-genesis": Object.freeze({ node_id: "PLAYER_GENESIS_K280", node_name: "KAIOS Player Genesis", node_type: "PLAYER_SERVICE", funding_class: "PLAYER_REWARD_FUND" }),
+  "life-runtime": Object.freeze({ node_id: "LIFE_RUNTIME_K280", node_name: "KAIOS Life Runtime", node_type: "LIFE_SERVICE", funding_class: "AI_LIFE_DEVELOPMENT_FUND" }),
+  "ecosystem-v1": Object.freeze({ node_id: "ECOSYSTEM_K280", node_name: "KAIOS Ecosystem", node_type: "RESOURCE_GAME_NODE", funding_class: "RESOURCE_DEVELOPMENT_FUND" }),
+  "aquaculture-v1": Object.freeze({ node_id: "AQUACULTURE_K280", node_name: "KAIOS Aquaculture", node_type: "RESOURCE_GAME_NODE", funding_class: "RESOURCE_DEVELOPMENT_FUND" }),
+  "ai-company-v1": Object.freeze({ node_id: "KAIOS_AI_COMPANY", node_name: "KAIOS AI Company", node_type: "COMPANY", funding_class: "COMPANY_DEVELOPMENT_FUND" }),
+  "creator-marketplace": Object.freeze({ node_id: "CREATOR_MARKETPLACE_K280", node_name: "KAIOS Creator Marketplace", node_type: "MARKET", funding_class: "MARKET_DEVELOPMENT_FUND" }),
+  "life-energy-payroll": Object.freeze({ node_id: "LIFE_ENERGY_PAYROLL_K280", node_name: "KAIOS Life Energy and Payroll", node_type: "FINANCIAL_SERVICE", funding_class: "INFRASTRUCTURE_FUND" }),
+  "k280": Object.freeze({ node_id: "KAIOS_RAPTOR_K280_001", node_name: "K280 Digital Life World", node_type: "AI_LIFE_GAME_NODE", funding_class: "AI_LIFE_DEVELOPMENT_FUND" })
+});
+
+const TEMPLE_FUNDING_CLASS = Object.freeze({
+  K11520: "MARKET_DEVELOPMENT_FUND",
+  K12345: "AI_LIFE_DEVELOPMENT_FUND",
+  K18888: "INFRASTRUCTURE_FUND",
+  K18921: "LIQUIDITY_DEVELOPMENT_FUND",
+  K8888: "INFRASTRUCTURE_FUND",
+  K8895: "INFRASTRUCTURE_FUND"
+});
+
+export async function auditPublicGameNodeFunding({ rootHomepageHtml, galaxyPortalHtml, worldResourceScan, resourceEconomyBatch, genesisDevelopmentPortfolio, createdAt }) {
+  invariant(typeof rootHomepageHtml === "string" && rootHomepageHtml.length > 100, "PUBLIC_ROOT_HOMEPAGE_REQUIRED", "Public game node audit requires the official root homepage source");
+  invariant(typeof galaxyPortalHtml === "string" && galaxyPortalHtml.length > 100, "PUBLIC_GALAXY_PORTAL_REQUIRED", "Public game node audit requires the official Galaxy portal source");
+  invariant(worldResourceScan?.scan_policy_id === CANONICAL_UNIVERSE_RESOURCE_SCAN_POLICY.policy_id, "CANONICAL_WORLD_RESOURCE_SCAN_REQUIRED", "Public game node audit requires the canonical world resource scan");
+  invariant(resourceEconomyBatch?.batch_id === "KAIOS_CANONICAL_RESOURCE_ECONOMY_BATCH_V1", "RESOURCE_ECONOMY_BATCH_REQUIRED", "Public game node audit requires the current resource economy batch");
+  invariant(genesisDevelopmentPortfolio?.portfolio_id === K18888_GENESIS_DEVELOPMENT_PORTFOLIO_POLICY.policy_id, "GENESIS_DEVELOPMENT_PORTFOLIO_REQUIRED", "Public game node audit requires the current Genesis development portfolio");
+  parseEmploymentTime(createdAt, "public_game_node_audit.created_at");
+
+  const amountedByNode = new Map(genesisDevelopmentPortfolio.allocations.map((allocation) => [allocation.canonical_node_id, allocation]));
+  const resourceRuntimeByNode = new Map(resourceEconomyBatch.nodes.map((node) => [node.node_id, node]));
+  const publicNodes = [];
+  const seen = new Set();
+  const add = (node) => {
+    invariant(!seen.has(node.node_id), "PUBLIC_GAME_NODE_REPLAY", `Public game node ${node.node_id} may be registered only once`);
+    seen.add(node.node_id);
+    publicNodes.push(Object.freeze(node));
+  };
+
+  const templePattern = /<a class="node[^"]*" href="\.\/temples\/(\d+)\/index\.html[^"]*">[\s\S]*?<div class="id">[^<]+<\/div><div class="name">([^<]+)<\/div>/g;
+  for (const match of galaxyPortalHtml.matchAll(templePattern)) {
+    const nodeId = `K${match[1]}`;
+    const canonical = worldResourceScan.nodes.find((node) => node.canonical_node_id === nodeId);
+    invariant(canonical, "PUBLIC_TEMPLE_CANONICAL_NODE_REQUIRED", `Public temple ${nodeId} must resolve to the canonical Universe Map`);
+    const allocation = amountedByNode.get(nodeId) ?? null;
+    const resourceRuntime = resourceRuntimeByNode.get(nodeId) ?? null;
+    add({
+      node_id: nodeId,
+      node_name: match[2].trim(),
+      node_type: nodeId === "K11520" ? "MARKET" : nodeId === "K18888" || nodeId === "K8888" ? "BANK" : nodeId === "K18921" ? "LIQUIDITY_INFRASTRUCTURE" : "TEMPLE_OR_GAME_LOCATION",
+      world_location: canonical.point_alias_names.join(" / "),
+      public_route: `K線西遊記/temples/${match[1]}/index.html`,
+      canonical_point_aliases: canonical.point_alias_ids,
+      resource_status: resourceRuntime ? resourceRuntime.resource_profile.status : canonical.resource_status,
+      infrastructure_status: "PUBLIC_INTERFACE_PRESENT_ECONOMIC_INFRASTRUCTURE_AUDIT_REQUIRED",
+      population_status: "UNKNOWN",
+      player_status: "UNKNOWN",
+      ai_life_status: nodeId === "K12345" ? "DIGITAL_ANT_CANDIDATE_PRESENT_RUNTIME_DEPENDENCIES_PARTIAL" : "UNKNOWN",
+      company_status: "UNKNOWN_OR_NOT_APPLICABLE",
+      job_status: "GAP_AUDIT_REQUIRED",
+      service_status: "PUBLIC_INTERFACE_PRESENT_SERVICE_EVIDENCE_REQUIRED",
+      market_status: nodeId === "K11520" ? "MARKET_INTERFACE_PRESENT_VERIFIED_SETTLEMENT_NOT_CONNECTED" : "MARKET_PATH_AUDIT_REQUIRED",
+      kaios_account_status: resourceRuntime ? resourceRuntime.ledger.status : "NOT_CONNECTED",
+      kgen_path_status: resourceRuntime ? resourceRuntime.kgen_path.status : "NOT_CONNECTED",
+      operating_cost: "ESTIMATION_REQUIRED",
+      development_need: "AUDIT_REQUIRED",
+      resource_development_need: canonical.resource_candidates.length ? "VERIFIED_PROFILE_OR_DISCOVERY_REQUIRED" : "RESOURCE_DISCOVERY_REQUIRED",
+      infrastructure_need: "ESTIMATION_REQUIRED",
+      player_incentive_need: "ESTIMATION_REQUIRED",
+      liquidity_need: nodeId === "K11520" || nodeId === "K18921" ? "P0_EVIDENCE_AND_BUDGET_REQUIRED" : "ASSESSMENT_REQUIRED",
+      genesis_funding_eligibility: "ELIGIBLE_FOR_EVIDENCE_BASED_GENESIS_REVIEW",
+      genesis_funding_candidate_id: allocation?.allocation_id ?? `AUTO_GENESIS_CANDIDATE_${nodeId}_V1`,
+      gross_candidate_kaios_wei: allocation?.gross_development_capital_kaios_wei ?? null,
+      funding_class: allocation?.fund_class ?? TEMPLE_FUNDING_CLASS[nodeId] ?? "INFRASTRUCTURE_FUND",
+      funded: false,
+      budget_candidate_amounted: Boolean(allocation),
+      resource_economy_connected: Boolean(resourceRuntime),
+      market_settlement_connected: false,
+      player_reward_connected: false,
+      operational_economic_path_connected: false,
+      planning_economic_path_connected: true
+    });
+  }
+
+  const gameMatch = galaxyPortalHtml.match(/<a class="node[^"]*" href="\.\/game\/kline-5d\/index\.html">[\s\S]*?<div class="id">[^<]+<\/div><div class="name">([^<]+)<\/div>/);
+  invariant(gameMatch, "PUBLIC_5D_GAME_ROUTE_REQUIRED", "The public 5D Game route must remain discoverable");
+  add({ node_id: "GAME_KLINE_5D", node_name: gameMatch[1].trim(), node_type: "GAME_NODE", world_location: "PUBLIC_GAME_SURFACE", public_route: "K線西遊記/game/kline-5d/index.html", canonical_point_aliases: Object.freeze([]), resource_status: "RESOURCE_DISCOVERY_REQUIRED", infrastructure_status: "PUBLIC_INTERFACE_PRESENT_ECONOMIC_INFRASTRUCTURE_AUDIT_REQUIRED", population_status: "UNKNOWN", player_status: "UNKNOWN", ai_life_status: "UNKNOWN", company_status: "NOT_APPLICABLE", job_status: "MISSION_AND_REWARD_AUDIT_REQUIRED", service_status: "GAMEPLAY_PRESENT_ECONOMIC_SERVICE_NOT_CONNECTED", market_status: "MARKET_PATH_AUDIT_REQUIRED", kaios_account_status: "NOT_CONNECTED", kgen_path_status: "NOT_CONNECTED", operating_cost: "ESTIMATION_REQUIRED", development_need: "AUDIT_REQUIRED", resource_development_need: "DISCOVERY_REQUIRED", infrastructure_need: "ESTIMATION_REQUIRED", player_incentive_need: "P0_REWARD_DESIGN_REQUIRED", liquidity_need: "ASSESSMENT_REQUIRED", genesis_funding_eligibility: "ELIGIBLE_FOR_EVIDENCE_BASED_GENESIS_REVIEW", genesis_funding_candidate_id: "AUTO_GENESIS_CANDIDATE_GAME_KLINE_5D_V1", gross_candidate_kaios_wei: null, funding_class: "PLAYER_REWARD_FUND", funded: false, budget_candidate_amounted: false, resource_economy_connected: false, market_settlement_connected: false, player_reward_connected: false, operational_economic_path_connected: false, planning_economic_path_connected: true });
+
+  const routeSlugs = new Set();
+  for (const match of rootHomepageHtml.matchAll(/href="\.\/world-viewer\/(?:([a-z0-9-]+)\/)?"/g)) routeSlugs.add(match[1] ?? "");
+  invariant(Object.keys(PUBLIC_WORLD_ROUTE_RULES).every((slug) => routeSlugs.has(slug)), "PUBLIC_WORLD_ROUTE_DISCOVERY_INCOMPLETE", "Every official World Viewer game route must be discovered from the homepage");
+  for (const slug of Object.keys(PUBLIC_WORLD_ROUTE_RULES)) {
+    const rule = PUBLIC_WORLD_ROUTE_RULES[slug];
+    const existingCompanyCandidate = rule.node_id === "KAIOS_AI_COMPANY";
+    add({ node_id: rule.node_id, node_name: rule.node_name, node_type: rule.node_type, world_location: "EARTH/K280_OR_ASSOCIATED_PUBLIC_RUNTIME", public_route: `world-viewer/${slug ? `${slug}/` : ""}`, canonical_point_aliases: Object.freeze([]), resource_status: rule.node_type === "RESOURCE_GAME_NODE" ? "PUBLIC_SIMULATION_RESOURCE_PROFILE_NOT_CANONICAL_LEDGER_CONNECTED" : "RESOURCE_DISCOVERY_REQUIRED", infrastructure_status: "PUBLIC_INTERFACE_PRESENT_ECONOMIC_INFRASTRUCTURE_AUDIT_REQUIRED", population_status: "UNKNOWN", player_status: rule.node_type === "PLAYER_SERVICE" ? "PLAYER_ENTRY_PRESENT_ACTIVITY_UNKNOWN" : "UNKNOWN", ai_life_status: rule.node_type.includes("LIFE") || rule.node_type === "COMPANY" ? "PUBLIC_SIMULATION_PRESENT_AUTHORITY_PARTIAL" : "UNKNOWN", company_status: rule.node_type === "COMPANY" ? "AI_ANT_COMPANY_FORMING_TREASURY_NOT_BOUND" : "NOT_APPLICABLE_OR_UNKNOWN", job_status: rule.node_type === "COMPANY" ? "WORK_SYSTEM_PRESENT_CAPITAL_NOT_CONNECTED" : "GAP_AUDIT_REQUIRED", service_status: "PUBLIC_INTERFACE_PRESENT_SERVICE_EVIDENCE_REQUIRED", market_status: rule.node_type === "MARKET" ? "MARKET_INTERFACE_PRESENT_VERIFIED_SETTLEMENT_NOT_CONNECTED" : "MARKET_PATH_AUDIT_REQUIRED", kaios_account_status: "NOT_CONNECTED", kgen_path_status: "NOT_CONNECTED", operating_cost: "ESTIMATION_REQUIRED", development_need: "AUDIT_REQUIRED", resource_development_need: rule.node_type === "RESOURCE_GAME_NODE" ? "P0_CANONICAL_BINDING_REQUIRED" : "DISCOVERY_REQUIRED", infrastructure_need: "ESTIMATION_REQUIRED", player_incentive_need: rule.node_type === "PLAYER_SERVICE" || rule.node_type === "GAME_RUNTIME" ? "P0_REWARD_DESIGN_REQUIRED" : "ASSESSMENT_REQUIRED", liquidity_need: rule.node_type === "MARKET" ? "P0_EVIDENCE_AND_BUDGET_REQUIRED" : "ASSESSMENT_REQUIRED", genesis_funding_eligibility: "ELIGIBLE_FOR_EVIDENCE_BASED_GENESIS_REVIEW", genesis_funding_candidate_id: existingCompanyCandidate ? "CURRENT_CANDIDATE_KAIOS_AI_COMPANY_AND_AI_ANT_COMPANY" : `AUTO_GENESIS_CANDIDATE_${rule.node_id}_V1`, gross_candidate_kaios_wei: null, funding_class: rule.funding_class, funded: false, budget_candidate_amounted: false, resource_economy_connected: false, market_settlement_connected: false, player_reward_connected: false, operational_economic_path_connected: false, planning_economic_path_connected: true });
+  }
+
+  const nodes = Object.freeze(publicNodes.sort((a, b) => a.node_id.localeCompare(b.node_id)));
+  const unbudgeted = nodes.filter((node) => !node.budget_candidate_amounted);
+  const workQueue = Object.freeze(nodes.map((node) => Object.freeze({
+    work_item_id: `PUBLIC_NODE_ECONOMIC_HEALTH_${node.node_id}_V1`,
+    node_id: node.node_id,
+    priority: ["K11520", "K18888", "K18921", "PLAYER_GENESIS_K280", "KAIOS_AI_COMPANY"].includes(node.node_id) ? "P0" : node.node_type === "RESOURCE_GAME_NODE" || node.node_type === "FINANCIAL_SERVICE" ? "P1" : "P2",
+    gaps: Object.freeze(["OPERATING_COST", "INFRASTRUCTURE", "RESOURCE_OR_DISCOVERY", "JOBS", "SERVICES", "KAIOS_ACCOUNT", "KGEN_PATH", "MARKET_PATH", "PLAYER_INCENTIVE", "FUNDING_ESTIMATE"]),
+    funding_candidate_id: node.genesis_funding_candidate_id,
+    status: "OPEN_EVIDENCE_AND_ENGINEERING_REQUIRED"
+  })));
+  return Object.freeze({
+    audit_id: "KAIOS_PUBLIC_GAME_NODE_FUNDING_AUDIT_V1",
+    policy_id: PUBLIC_GAME_NODE_ECONOMIC_AUDIT_POLICY.policy_id,
+    source_hash: await sha256(`${rootHomepageHtml}\n${galaxyPortalHtml}\n${worldResourceScan.universe_map_version}`),
+    public_game_node_count: nodes.length,
+    funded_nodes: 0,
+    funded_or_budgeted_nodes: nodes.filter((node) => node.budget_candidate_amounted).length,
+    funded_or_budgeted_node_ids: Object.freeze(nodes.filter((node) => node.budget_candidate_amounted).map((node) => node.node_id)),
+    unfunded_public_nodes: unbudgeted.length,
+    unfunded_public_node_ids: Object.freeze(unbudgeted.map((node) => node.node_id)),
+    resource_connected_nodes: nodes.filter((node) => node.resource_economy_connected).length,
+    market_connected_nodes: nodes.filter((node) => node.market_settlement_connected).length,
+    player_reward_connected_nodes: nodes.filter((node) => node.player_reward_connected).length,
+    nodes_with_no_operational_economic_path: nodes.filter((node) => !node.operational_economic_path_connected).length,
+    nodes_with_planning_path: nodes.filter((node) => node.planning_economic_path_connected).length,
+    nodes,
+    newly_discovered_funding_candidates: Object.freeze(unbudgeted.map((node) => Object.freeze({ candidate_id: node.genesis_funding_candidate_id, node_id: node.node_id, funding_class: node.funding_class, gross_candidate_kaios_wei: null, amount_status: "EVIDENCE_BASED_ESTIMATE_REQUIRED", real_payment: false }))),
+    current_genesis_portfolio: Object.freeze(["K8888", "K8895", "K11520", "K12345_DIGITAL_ANT_0001", "K88895", "KAIOS_AI_COMPANY", "AI_ANT_COMPANY_0001"]),
+    world_resource_development_queue: workQueue,
+    highest_priority_unfunded_public_node: "K18921",
+    next_safe_action: "BUILD_K18921_LIQUIDITY_DEVELOPMENT_PROFILE_AND_EVIDENCE_BASED_BUDGET_CANDIDATE",
+    watcher_connected: false,
+    heartbeat_callable: true,
+    real_kaios_paid: false,
+    chain_write: false,
+    created_at: createdAt,
+    status: "PUBLIC_NODE_REGISTRY_AUDITED_AUTO_CANDIDATES_AND_WORK_QUEUE_CREATED_WATCHER_PENDING"
+  });
+}
+
 export function createKaiosPlayerRewardEntitlement({
   entitlementId, playerId, lifeId, eventType, eventId, eventEvidence = null,
   walletControlProof = null, rewardEventAttestationId = null,
