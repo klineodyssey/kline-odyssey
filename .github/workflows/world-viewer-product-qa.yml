@@ -208,7 +208,7 @@ jobs:
           python KGEN-KAIOS/world-viewer/tests/product_qa.py \
             --base-url http://127.0.0.1:8080/KGEN-KAIOS/world-viewer/index.html \
             --output-dir "$RUNNER_TEMP/world-viewer-product-qa" \
-            --baseline-dir KGEN-KAIOS/world-viewer/tests/baselines/sprint-010 \
+            --baseline-dir KGEN-KAIOS/world-viewer/tests/baselines/sprint-011 \
             --require-baselines \
             --max-diff-ratio 0.12 \
             --pixel-threshold 32
