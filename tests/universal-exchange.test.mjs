@@ -135,7 +135,8 @@ import {
   createKaiosPaymentRequest, evaluateKaiosPaymentRailReadiness, recordKaiosPaymentSubmission, recordKaiosPaymentSettlement,
   createKaiosPlayerRewardEntitlement, evaluateKaiosRewardBudgetSimulation,
   createKaiosLiquidityGenesisSimulation, createKaiosEconomyEvidenceSnapshot,
-  createGenesisDevelopmentAllocationCandidate, scanCanonicalWorldResourceEconomy,
+  K18888_GENESIS_DEVELOPMENT_PORTFOLIO_POLICY, createGenesisDevelopmentPortfolioCandidate,
+  createGenesisDevelopmentAllocationCandidate, scanCanonicalWorldResourceEconomy, createK88895ResourceEconomyRuntime,
   createKaiosCivilizationCirculationHealth,
   createResourceLedgerSubaccount, createTemporaryResourceCustodyBindingCandidate,
   evaluateCivilizationRealExecutionPolicy, selectNextSafeCompanyWorkflow,
@@ -4042,6 +4043,27 @@ test("K18888 Genesis QE keeps -10% development support balanced and separate fro
   );
 });
 
+test("K18888 Genesis development portfolio preserves four prior candidates without disbursement", () => {
+  assert.equal(K18888_GENESIS_DEVELOPMENT_PORTFOLIO_POLICY.candidates.length, 4);
+  const portfolio = createGenesisDevelopmentPortfolioCandidate({ createdAt: "2026-08-30T13:00:00.000Z" });
+  const byNode = Object.fromEntries(portfolio.allocations.map((item) => [item.canonical_node_id, item]));
+  assert.equal(byNode.K8888.gross_development_capital_kaios_wei, "108000000000000000000000");
+  assert.equal(byNode.K8888.recoverable_capital_kaios_wei, "97200000000000000000000");
+  assert.equal(byNode.K8888.conditional_development_subsidy_kaios_wei, "10800000000000000000000");
+  assert.ok(byNode.K8888.additional_controls.includes("CUSTOMER_DEPOSITS_MUST_NOT_BE_COLLATERAL"));
+  assert.equal(byNode.K8895.eligibility_status, "GENESIS_DEVELOPMENT_ELIGIBILITY_REVIEW_REQUIRED");
+  assert.equal(byNode.K11520.gross_development_capital_kaios_wei, "1080000000000000000000000");
+  assert.equal(byNode.K11520.commercial_credit_separate, true);
+  assert.equal(byNode.K12345.beneficiary_id, "DIGITAL_ANT_0001");
+  assert.equal(byNode.K12345.unrestricted_personal_eoa_cash, false);
+  assert.equal(portfolio.total_genesis_development_candidate_kaios_wei, "1404000000000000000000000");
+  assert.equal(portfolio.total_conditional_recoverable_kaios_wei, "1263600000000000000000000");
+  assert.equal(portfolio.total_conditional_subsidy_kaios_wei, "140400000000000000000000");
+  assert.equal(portfolio.subsidy_recognized, false);
+  assert.equal(portfolio.real_kaios_paid, false);
+  assert.equal(portfolio.chain_write, false);
+});
+
 test("canonical world scan groups coordinate aliases and keeps White Bone Cave resource truth unknown", async () => {
   const universeMap = JSON.parse(await fs.readFile(new URL("../docs/maps/UniverseMap_V10_2_DISTANCE_COMPLETE_ALL_POINTS.json", import.meta.url), "utf8"));
   const scan = scanCanonicalWorldResourceEconomy({ universeMap });
@@ -4066,6 +4088,36 @@ test("canonical world scan groups coordinate aliases and keeps White Bone Cave r
   const fakeMap = structuredClone(universeMap);
   fakeMap.version = "CALLER_INVENTED_MAP";
   assert.throws(() => scanCanonicalWorldResourceEconomy({ universeMap: fakeMap }), (error) => error.code === "CANONICAL_UNIVERSE_MAP_VERSION_REQUIRED");
+});
+
+test("K88895 activates one off-chain resource economy without inventing inventory, KGEN or payment", async () => {
+  const universeMap = JSON.parse(await fs.readFile(new URL("../docs/maps/UniverseMap_V10_2_DISTANCE_COMPLETE_ALL_POINTS.json", import.meta.url), "utf8"));
+  const worldResourceScan = scanCanonicalWorldResourceEconomy({ universeMap });
+  const runtime = createK88895ResourceEconomyRuntime({ worldResourceScan, createdAt: "2026-08-30T13:01:00.000Z" });
+  assert.equal(runtime.node_id, "K88895");
+  assert.deepEqual(runtime.resource_profile.resource_types, ["CULTIVATION_LAND", "ORCHARD_PRODUCE"]);
+  assert.equal(runtime.ledger.account_id, "RESOURCE_LEDGER_K88895");
+  assert.equal(runtime.ledger.account_type, "PROGRAMMATIC_LEDGER_SUBACCOUNT");
+  assert.equal(runtime.ledger.economic_owner, "K88895");
+  assert.equal(runtime.ledger.public_address, null);
+  assert.equal(runtime.ledger.eoa_private_key_created, false);
+  assert.equal(runtime.inventory_model.entries[0].verified_quantity, null);
+  assert.equal(runtime.inventory_model.entries[1].verified_quantity, "0");
+  assert.equal(runtime.production_model.auto_generated_output, false);
+  assert.equal(runtime.work_model.entitlement_capable, true);
+  assert.equal(runtime.work_model.paid, false);
+  assert.equal(runtime.kaios_path.entitlement_capable, true);
+  assert.equal(runtime.kaios_path.settlement_connected, false);
+  assert.equal(runtime.kgen_path.status, "NOT_CONNECTED");
+  assert.equal(runtime.market_path.exchange_id, "K11520");
+  assert.equal(runtime.market_path.listing_updates_ct, false);
+  assert.equal(runtime.genesis_development_allocation.recoverable_capital_kaios_wei, "90000000000000000000");
+  assert.equal(runtime.genesis_development_allocation.conditional_development_subsidy_kaios_wei, "10000000000000000000");
+  assert.equal(runtime.genesis_development_allocation.subsidy_recognized, false);
+  assert.equal(runtime.resource_economy_connected, true);
+  assert.equal(runtime.real_kaios_paid, false);
+  assert.equal(runtime.real_kgen_paid, false);
+  assert.equal(runtime.chain_write, false);
 });
 
 test("civilization circulation health exposes blockers without fabricating holders, trades or LP", async () => {
@@ -4104,7 +4156,11 @@ test("KAIOS Economy Dashboard stays UNKNOWN and rejects caller-supplied verified
 });
 
 test("resource accounts and temporary Human custody require repository-owned designations", () => {
-  assert.equal(CANONICAL_KAIOS_RESOURCE_ACCOUNT_DESIGNATIONS.length, 0);
+  assert.equal(CANONICAL_KAIOS_RESOURCE_ACCOUNT_DESIGNATIONS.length, 1);
+  const k88895 = createResourceLedgerSubaccount({ accountId: "RESOURCE_LEDGER_K88895", designationId: "RESOURCE_ACCOUNT_DESIGNATION_K88895_V1", createdAt: "2026-08-30T04:00:00.000Z" });
+  assert.equal(k88895.node_id, "K88895");
+  assert.equal(k88895.can_accrue_entitlements, true);
+  assert.equal(k88895.can_receive_chain_payment, false);
   assert.equal(CANONICAL_KAIOS_RESOURCE_CUSTODY_DESIGNATIONS.length, 0);
   assert.throws(
     () => createResourceLedgerSubaccount({ accountId: "RESOURCE_ACCOUNT_K88895", designationId: "CALLER_CHOSEN_RESOURCE_DESIGNATION", createdAt: "2026-08-30T04:00:00.000Z" }),

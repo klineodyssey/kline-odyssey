@@ -709,6 +709,98 @@ export function createGenesisDevelopmentAllocationCandidate({
   });
 }
 
+export const K18888_GENESIS_DEVELOPMENT_PORTFOLIO_POLICY = Object.freeze({
+  policy_id: "KAIOS_K18888_GENESIS_DEVELOPMENT_PORTFOLIO_V1",
+  allocation_policy_id: K18888_GENESIS_QE_POLICY.policy_id,
+  candidates: Object.freeze([
+    Object.freeze({
+      allocation_id: "K18888_GENESIS_K8888_0001",
+      canonical_node_id: "K8888",
+      beneficiary_id: "K8888",
+      fund_class: "INFRASTRUCTURE_FUND",
+      gross_capital_kaios_wei: "108000000000000000000000",
+      economic_purpose: "K8888 regional bank and ATM service infrastructure",
+      performance_condition: "Repository-reviewed segregated bank module, operating policy and development evidence",
+      evidence_refs: Object.freeze(["P_8888p0_高老莊_R30"]),
+      account_status: "SEGREGATED_BANK_INFRASTRUCTURE_ACCOUNT_REQUIRED",
+      additional_controls: Object.freeze(["CUSTOMER_DEPOSITS_MUST_NOT_BE_COLLATERAL"])
+    }),
+    Object.freeze({
+      allocation_id: "K18888_GENESIS_K8895_0001",
+      canonical_node_id: "K8895",
+      beneficiary_id: "K8895",
+      fund_class: "INFRASTRUCTURE_FUND",
+      gross_capital_kaios_wei: "108000000000000000000000",
+      economic_purpose: "K8895 entity, service infrastructure and development readiness",
+      performance_condition: "Repository-reviewed entity, capital purpose, development plan and segregated account",
+      evidence_refs: Object.freeze(["P_8895p0_雲棧洞_R31"]),
+      account_status: "ENTITY_AND_SEGREGATED_ACCOUNT_NOT_CONNECTED",
+      eligibility_status: "GENESIS_DEVELOPMENT_ELIGIBILITY_REVIEW_REQUIRED"
+    }),
+    Object.freeze({
+      allocation_id: "K18888_GENESIS_K11520_0001",
+      canonical_node_id: "K11520",
+      beneficiary_id: "K11520",
+      fund_class: "MARKET_DEVELOPMENT_FUND",
+      gross_capital_kaios_wei: "1080000000000000000000000",
+      economic_purpose: "K11520 universal exchange settlement and player market infrastructure",
+      performance_condition: "Repository-reviewed non-self-match, settlement escrow, receipt verification and CT controls",
+      evidence_refs: Object.freeze(["P_11520p0_花果山_R36"]),
+      account_status: "SEGREGATED_MARKET_SETTLEMENT_ESCROW_REQUIRED",
+      commercial_credit_separate: true
+    }),
+    Object.freeze({
+      allocation_id: "K18888_GENESIS_K12345_DIGITAL_ANT_0001",
+      canonical_node_id: "K12345",
+      beneficiary_id: "DIGITAL_ANT_0001",
+      fund_class: "AI_LIFE_DEVELOPMENT_FUND",
+      gross_capital_kaios_wei: "108000000000000000000000",
+      economic_purpose: "Digital Ant AI Life, segregated ATM, field service, resource and game economy development",
+      performance_condition: "Repository-reviewed segregated ATM module, verified service evidence and accountable use",
+      evidence_refs: Object.freeze(["P_12345p0_五指山_R37", "P_12345p0_小五指山_Rjson"]),
+      account_status: "SEGREGATED_ATM_ESCROW_OR_POLICY_ACCOUNT_REQUIRED",
+      unrestricted_personal_eoa_cash: false
+    })
+  ]),
+  real_kaios_paid: false,
+  chain_write: false
+});
+
+export function createGenesisDevelopmentPortfolioCandidate({ createdAt }) {
+  parseEmploymentTime(createdAt, "genesis_development_portfolio.created_at");
+  const allocations = K18888_GENESIS_DEVELOPMENT_PORTFOLIO_POLICY.candidates.map((candidate) => Object.freeze({
+    ...createGenesisDevelopmentAllocationCandidate({
+      allocationId: candidate.allocation_id,
+      fundClass: candidate.fund_class,
+      economicPurpose: candidate.economic_purpose,
+      beneficiaryId: candidate.beneficiary_id,
+      grossCapitalKaiosWei: candidate.gross_capital_kaios_wei,
+      performanceCondition: candidate.performance_condition,
+      evidenceRefs: [...candidate.evidence_refs],
+      createdAt
+    }),
+    canonical_node_id: candidate.canonical_node_id,
+    account_status: candidate.account_status,
+    eligibility_status: candidate.eligibility_status ?? "GENESIS_DEVELOPMENT_CANDIDATE",
+    additional_controls: candidate.additional_controls ?? Object.freeze([]),
+    commercial_credit_separate: candidate.commercial_credit_separate ?? false,
+    unrestricted_personal_eoa_cash: candidate.unrestricted_personal_eoa_cash ?? null
+  }));
+  const sum = (field) => allocations.reduce((total, item) => total + BigInt(item[field]), 0n).toString();
+  return Object.freeze({
+    portfolio_id: K18888_GENESIS_DEVELOPMENT_PORTFOLIO_POLICY.policy_id,
+    allocations: Object.freeze(allocations),
+    total_genesis_development_candidate_kaios_wei: sum("gross_development_capital_kaios_wei"),
+    total_conditional_recoverable_kaios_wei: sum("recoverable_capital_kaios_wei"),
+    total_conditional_subsidy_kaios_wei: sum("conditional_development_subsidy_kaios_wei"),
+    subsidy_recognized: false,
+    real_kaios_paid: false,
+    chain_write: false,
+    created_at: createdAt,
+    status: "PORTFOLIO_CANDIDATE_NOT_DISBURSED"
+  });
+}
+
 export const CANONICAL_UNIVERSE_RESOURCE_SCAN_POLICY = Object.freeze({
   policy_id: "KAIOS_CANONICAL_WORLD_RESOURCE_SCAN_V1_1",
   universe_map_version: "KLINE_UNIVERSE_MAP_V10_2_DISTANCE_COMPLETE_ALL_POINTS",
@@ -874,8 +966,109 @@ const KAIOS_REWARD_EVIDENCE_ACTIVITY = Object.freeze({
 export const CANONICAL_KAIOS_PLAYER_REWARD_EVENT_ATTESTATIONS = Object.freeze([]);
 export const CANONICAL_KAIOS_WALLET_CONTROL_ATTESTATIONS = Object.freeze([]);
 export const CANONICAL_KAIOS_ECONOMY_SNAPSHOT_ATTESTATIONS = Object.freeze([]);
-export const CANONICAL_KAIOS_RESOURCE_ACCOUNT_DESIGNATIONS = Object.freeze([]);
+export const CANONICAL_KAIOS_RESOURCE_ACCOUNT_DESIGNATIONS = Object.freeze([
+  Object.freeze({
+    designation_id: "RESOURCE_ACCOUNT_DESIGNATION_K88895_V1",
+    status: "REPOSITORY_DESIGNATED_RESOURCE_ACCOUNT",
+    account_id: "RESOURCE_LEDGER_K88895",
+    node_id: "K88895",
+    node_name: "蟠桃園",
+    canonical_location: "UniverseMap_V10_2_DISTANCE_COMPLETE_ALL_POINTS.json#P_88895p0_蟠桃園_R97",
+    resource_types: Object.freeze(["CULTIVATION_LAND", "ORCHARD_PRODUCE"]),
+    authority_scope: "OFFCHAIN_RESOURCE_ENTITLEMENT_LEDGER_ONLY",
+    payment_authority: false,
+    chain_write_authority: false
+  })
+]);
 export const CANONICAL_KAIOS_RESOURCE_CUSTODY_DESIGNATIONS = Object.freeze([]);
+
+export function createK88895ResourceEconomyRuntime({ worldResourceScan, createdAt }) {
+  invariant(worldResourceScan?.scan_policy_id === CANONICAL_UNIVERSE_RESOURCE_SCAN_POLICY.policy_id, "CANONICAL_WORLD_RESOURCE_SCAN_REQUIRED", "K88895 resource economy requires the canonical world resource scan");
+  const node = worldResourceScan.nodes.find((item) => item.canonical_node_id === "K88895");
+  invariant(node && node.point_alias_ids.includes("P_88895p0_蟠桃園_R97"), "K88895_CANONICAL_NODE_REQUIRED", "K88895 resource economy must bind the canonical Peach Garden point");
+  invariant(node.resource_candidates.includes("CULTIVATION_LAND") && node.resource_candidates.includes("ORCHARD_PRODUCE"), "K88895_CANONICAL_RESOURCE_CLASSES_REQUIRED", "K88895 requires the canonical cultivation and orchard candidate classes");
+  const ledger = createResourceLedgerSubaccount({
+    accountId: "RESOURCE_LEDGER_K88895",
+    designationId: "RESOURCE_ACCOUNT_DESIGNATION_K88895_V1",
+    createdAt
+  });
+  const allocation = createGenesisDevelopmentAllocationCandidate({
+    allocationId: "K18888_GENESIS_RESOURCE_K88895_0001",
+    fundClass: "RESOURCE_DEVELOPMENT_FUND",
+    economicPurpose: "K88895 cultivation, orchard production, work and K11520 market path",
+    beneficiaryId: "K88895",
+    grossCapitalKaiosWei: "100000000000000000000",
+    performanceCondition: "Repository-verified cultivation, production, inventory and market readiness evidence",
+    evidenceRefs: ["P_88895p0_蟠桃園_R97", "RESOURCE_ACCOUNT_DESIGNATION_K88895_V1"],
+    createdAt
+  });
+  return Object.freeze({
+    runtime_id: "KAIOS_RESOURCE_ECONOMY_K88895_V1",
+    node_id: "K88895",
+    node_name: "蟠桃園",
+    resource_profile: Object.freeze({
+      resource_types: Object.freeze(["CULTIVATION_LAND", "ORCHARD_PRODUCE"]),
+      source: "CANONICAL_UNIVERSE_MAP_GARDEN_CLASS",
+      status: "ACTIVE_OFFCHAIN_PROFILE_CANONICAL_CLASSES_ONLY"
+    }),
+    ledger,
+    inventory_model: Object.freeze({
+      entries: Object.freeze([
+        Object.freeze({ resource_type: "CULTIVATION_LAND", verified_quantity: null, unit: null, status: "AWAITING_VERIFIED_INVENTORY_EVIDENCE" }),
+        Object.freeze({ resource_type: "ORCHARD_PRODUCE", verified_quantity: "0", unit: "CANONICAL_PRODUCE_UNIT_PENDING", status: "NO_VERIFIED_HARVEST_EVENT" })
+      ]),
+      caller_supplied_inventory_authority: false,
+      status: "ACTIVE_EMPTY_AWAITING_VERIFIED_RESOURCE_EVENTS"
+    }),
+    production_model: Object.freeze({
+      accepted_event_types: Object.freeze(["CULTIVATION_COMPLETED", "ORCHARD_HARVEST_VERIFIED"]),
+      required_evidence: Object.freeze(["EVENT_ID", "NODE_ID", "RESOURCE_TYPE", "QUANTITY", "UNIT", "OBSERVED_AT", "EVIDENCE_HASH", "REPLAY_KEY"]),
+      auto_generated_output: false,
+      status: "READY_FOR_VERIFIED_OFFCHAIN_EVENTS"
+    }),
+    consumption_model: Object.freeze({
+      required_inputs: Object.freeze(["WATER", "WORK", "ENERGY", "TRANSPORT_AS_APPLICABLE"]),
+      input_sources_connected: false,
+      status: "MODEL_ACTIVE_INPUT_ROUTES_NOT_CONNECTED"
+    }),
+    work_model: Object.freeze({
+      work_types: Object.freeze(["CULTIVATION", "HARVEST", "MAINTENANCE", "TRANSPORT", "MARKET_SERVICE"]),
+      evidence_required: true,
+      entitlement_capable: true,
+      paid: false,
+      status: "READY_FOR_VERIFIED_WORK_ENTITLEMENTS"
+    }),
+    kaios_path: Object.freeze({
+      paths: Object.freeze(["RESOURCE_DEVELOPMENT", "VERIFIED_WORK", "VERIFIED_PRODUCTION", "SALE", "SERVICE", "PLAYER_ACTIVITY"]),
+      entitlement_capable: true,
+      settlement_connected: false,
+      paid: false,
+      status: "ENTITLEMENT_RUNTIME_CONNECTED_PAYMENT_GATE_NOT_CONNECTED"
+    }),
+    kgen_path: Object.freeze({
+      allowed_candidate_paths: Object.freeze(["QUEST", "WORK", "TRADE", "TEMPLE_RULE", "PURCHASE", "OTHER_CANONICAL_PATH"]),
+      canonical_evidence: null,
+      minted_or_distributed: false,
+      status: "NOT_CONNECTED"
+    }),
+    market_path: Object.freeze({
+      exchange_id: "K11520",
+      listing_requires_verified_inventory: true,
+      settlement_requires_common_kaios_payment_rail: true,
+      listing_updates_ct: false,
+      ct_requires_verified_settled_trade: true,
+      status: "READY_FOR_LISTING_AFTER_VERIFIED_INVENTORY_SETTLEMENT_NOT_CONNECTED"
+    }),
+    genesis_development_allocation: allocation,
+    resource_economy_connected: true,
+    connection_scope: "OFFCHAIN_PROFILE_LEDGER_EVENT_AND_ENTITLEMENT_RUNTIME",
+    real_kaios_paid: false,
+    real_kgen_paid: false,
+    chain_write: false,
+    created_at: createdAt,
+    status: "ACTIVE_OFFCHAIN_RESOURCE_ECONOMY_AWAITING_FIRST_VERIFIED_EVENT"
+  });
+}
 
 export function createKaiosPlayerRewardEntitlement({
   entitlementId, playerId, lifeId, eventType, eventId, eventEvidence = null,
