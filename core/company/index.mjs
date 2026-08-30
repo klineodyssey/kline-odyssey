@@ -1091,8 +1091,8 @@ const BATCH_RESOURCE_EVENT_TYPES = Object.freeze({
   FOREST_BIOMASS: Object.freeze(["FOREST_STATE_VERIFIED", "SUSTAINABLE_BIOMASS_HARVEST_VERIFIED"])
 });
 
-export function createCanonicalResourceEconomyBatchExpansion({ worldResourceScan = null, worldResourceScanAttestationId = null, createdAt }) {
-  invariant(worldResourceScan == null, "CALLER_SUPPLIED_WORLD_RESOURCE_SCAN_FORBIDDEN", "Resource batch expansion cannot trust a caller-supplied world resource scan");
+export function createCanonicalResourceEconomyBatchExpansion({ worldResourceScan: callerWorldResourceScan = null, worldResourceScanAttestationId = null, createdAt }) {
+  invariant(callerWorldResourceScan == null, "CALLER_SUPPLIED_WORLD_RESOURCE_SCAN_FORBIDDEN", "Resource batch expansion cannot trust a caller-supplied world resource scan");
   const scanAttestation = CANONICAL_KAIOS_WORLD_RESOURCE_SCAN_ATTESTATIONS.find((item) => item.attestation_id === worldResourceScanAttestationId);
   invariant(scanAttestation, "WORLD_RESOURCE_SCAN_ATTESTATION_NOT_CONNECTED", "Resource batch expansion requires a repository-owned exact world resource scan attestation");
   invariant(scanAttestation.status === "REPOSITORY_VERIFIED_CANONICAL_WORLD_RESOURCE_SCAN", "WORLD_RESOURCE_SCAN_ATTESTATION_STATUS_REQUIRED", "World resource scan attestation must be repository verified");
