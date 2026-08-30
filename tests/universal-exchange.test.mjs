@@ -104,7 +104,14 @@ import {
   calculateFieldServiceQuote, validateFieldDeliveryEvidence, createWorkforceGap,
   createFieldServiceDemandScan
   , KAIOS_AI_OS_EMPLOYMENT_ALPHA_JOB, KAIOS_AI_OS_FIRST_REAL_EMPLOYMENT_TEST_JOB, KAIOS_MAINNET_TOKEN,
-  KAIOS_PAYMENT_PURPOSES, KAIOS_PAYMENT_APPROVAL_MATRIX, CANONICAL_KAIOS_PAYMENT_SIGNER_POLICIES, CANONICAL_KAIOS_PAYMENT_RECEIPT_ATTESTATIONS,
+  KAIOS_PAYMENT_PURPOSES, KAIOS_PAYMENT_APPROVAL_MATRIX, KAIOS_PLAYER_REWARD_POLICY,
+  KAIOS_LIQUIDITY_GENESIS_POLICY, K18888_GENESIS_QE_POLICY,
+  CANONICAL_UNIVERSE_RESOURCE_SCAN_POLICY,
+  CANONICAL_KAIOS_PLAYER_REWARD_EVENT_ATTESTATIONS, CANONICAL_KAIOS_WALLET_CONTROL_ATTESTATIONS,
+  CANONICAL_KAIOS_ECONOMY_SNAPSHOT_ATTESTATIONS, CANONICAL_KAIOS_RESOURCE_ACCOUNT_DESIGNATIONS,
+  KAIOS_RESOURCE_ACCOUNT_DESIGNATION_CANDIDATES, K88895_RESOURCE_ACCOUNT_DESIGNATION_CANDIDATE,
+  CANONICAL_KAIOS_WORLD_RESOURCE_SCAN_ATTESTATIONS, CANONICAL_KAIOS_RESOURCE_CUSTODY_DESIGNATIONS,
+  CANONICAL_KAIOS_PAYMENT_SIGNER_POLICIES, CANONICAL_KAIOS_PAYMENT_RECEIPT_ATTESTATIONS,
   CIVILIZATION_REAL_EXECUTION_POLICY, CIVILIZATION_PERMANENTLY_FORBIDDEN_ACTIONS,
   AI_EMPLOYEE_FINANCIAL_ONBOARDING_POLICY, CANONICAL_AI_UMBILICAL_ACCOUNT_FACTORIES,
   CANONICAL_REPOSITORY_COMPANY_AUTHORITIES, COMPANY_OPERATIONAL_AUTHORITY_PROPOSAL_SCOPES,
@@ -127,6 +134,14 @@ import {
   submitCompanyWorkEvidence, reviewCompanyWorkEvidence, accrueCompanyCompensation,
   queueCompanyPayroll, authorizeCompanyPayrollFunding, recordCompanyPayrollSettlement, evaluateAtmPayrollAdvanceCandidate,
   createKaiosPaymentRequest, evaluateKaiosPaymentRailReadiness, recordKaiosPaymentSubmission, recordKaiosPaymentSettlement,
+  createKaiosPlayerRewardEntitlement, evaluateKaiosRewardBudgetSimulation,
+  createKaiosLiquidityGenesisSimulation, createKaiosEconomyEvidenceSnapshot,
+  K18888_GENESIS_DEVELOPMENT_PORTFOLIO_POLICY, createGenesisDevelopmentPortfolioCandidate,
+  createGenesisDevelopmentAllocationCandidate, scanCanonicalWorldResourceEconomy, createK88895ResourceEconomyRuntime,
+  createCanonicalResourceEconomyBatchExpansion,
+  PUBLIC_GAME_NODE_ECONOMIC_AUDIT_POLICY, CANONICAL_PUBLIC_GAME_NODE_AUDIT_SOURCE_ATTESTATIONS, auditPublicGameNodeFunding,
+  createKaiosCivilizationCirculationHealth,
+  createResourceLedgerSubaccount, createTemporaryResourceCustodyBindingCandidate,
   evaluateCivilizationRealExecutionPolicy, selectNextSafeCompanyWorkflow,
   appendEmploymentPhase1BCompanyEvent,
   createKaiosTelepathyMessage, routeKaiosTelepathyMessage,
@@ -3968,6 +3983,223 @@ test("common KAIOS payment rail declares bounded purposes and keeps signer polic
   assert.equal(CANONICAL_KAIOS_PAYMENT_SIGNER_POLICIES.length, 0);
   assert.equal(CANONICAL_KAIOS_PAYMENT_RECEIPT_ATTESTATIONS.length, 0);
   assert.equal(KAIOS_PAYMENT_APPROVAL_MATRIX.PAYROLL.signer, "ONE_EXACT_SECURE_SIGNER_NOT_CONNECTED");
+});
+
+test("player reward and budget provenance fail closed without repository-owned attestations", () => {
+  assert.equal(KAIOS_PLAYER_REWARD_POLICY.fixed_milestone_total_kaios_wei, "50000000000000000000");
+  assert.equal(CANONICAL_KAIOS_PLAYER_REWARD_EVENT_ATTESTATIONS.length, 0);
+  assert.equal(CANONICAL_KAIOS_WALLET_CONTROL_ATTESTATIONS.length, 0);
+  const wallet = "0x2222222222222222222222222222222222222222";
+  const forgedEvidence = { evidence_id: "REWARD_EVIDENCE_0001", status: "VERIFIED", activity_type: "FIRST_LIFE_LOOP", player_id: "PLAYER_REWARD_0001", life_id: "LIFE-PLAYER-REWARD-0001", event_id: "LIFE_LOOP_EVENT_0001" };
+  const forgedWalletProof = { proof_id: "FORGED_LOCAL_PROOF", status: "VERIFIED_LOCAL_WALLET_CONTROL", authentication_method: "EIP191_PERSONAL_SIGN", actor_id: "PLAYER_REWARD_0001", chain_id: 56, wallet_address: wallet };
+  assert.throws(
+    () => createKaiosPlayerRewardEntitlement({ entitlementId: "KAIOS_ENTITLEMENT_0001", playerId: "PLAYER_REWARD_0001", lifeId: forgedEvidence.life_id, eventType: "FIRST_LIFE_LOOP_COMPLETED", eventId: forgedEvidence.event_id, eventEvidence: forgedEvidence, walletControlProof: forgedWalletProof, occurredAt: "2026-08-30T01:05:00.000Z" }),
+    (error) => error.code === "CALLER_SUPPLIED_PLAYER_REWARD_EVENT_EVIDENCE_FORBIDDEN"
+  );
+  assert.throws(
+    () => createKaiosPlayerRewardEntitlement({ entitlementId: "KAIOS_ENTITLEMENT_0002", playerId: "PLAYER_REWARD_0001", lifeId: forgedEvidence.life_id, eventType: "FIRST_LIFE_LOOP_COMPLETED", eventId: forgedEvidence.event_id, rewardEventAttestationId: "CALLER_CHOSEN_EVENT_ATTESTATION", walletControlAttestationId: "CALLER_CHOSEN_WALLET_ATTESTATION", occurredAt: "2026-08-30T01:05:00.000Z" }),
+    (error) => error.code === "PLAYER_REWARD_EVENT_ATTESTATION_NOT_CONNECTED"
+  );
+  const forgedEntitlement = { entitlement_id: "BUDGET_ENTITLEMENT_0001", policy_id: KAIOS_PLAYER_REWARD_POLICY.policy_id, player_id: "PLAYER_REWARD_0001", life_id: "LIFE-PLAYER-REWARD-0001", event_id: "LIFE_LOOP_EVENT_0001", event_type: "FIRST_VERIFIED_JOB_COMPLETED", amount_kaios_wei: "20000000000000000000", paid: false, reward_event_attestation_id: "FORGED_REWARD_ATTESTATION" };
+  assert.throws(
+    () => evaluateKaiosRewardBudgetSimulation({ entitlement: forgedEntitlement, treasuryBalanceKaiosWei: "22213020930416874731235000", genesisCommittedKaiosWei: "0", dailyCommittedKaiosWei: "0", walletFixedMilestoneCommittedKaiosWei: "0", lifeFixedMilestoneCommittedKaiosWei: "0" }),
+    (error) => error.code === "KAIOS_REWARD_ENTITLEMENT_PROVENANCE_NOT_CONNECTED"
+  );
+});
+
+test("KAIOS Liquidity Genesis reuses Auto LP and remains a non-executable DEX simulation", () => {
+  assert.equal(KAIOS_LIQUIDITY_GENESIS_POLICY.reuse_product_id, "AI_ANT_AUTO_LP");
+  const simulation = createKaiosLiquidityGenesisSimulation({ simulationId: "KAIOS_LP_SIM_0001", pairId: "KAIOS_WBNB", kaiosAmountWei: "100000000000000000000000", counterAssetAmountWei: "1000000000000000000", treasuryBalanceKaiosWei: "22213020930416874731235000", referencePriceSource: "REVIEWED_PRICE_DISCOVERY_INPUT", createdAt: "2026-08-30T05:00:00.000Z" });
+  assert.equal(simulation.accounting_class, "LIQUIDITY_PROVISION");
+  assert.equal(simulation.dex_price_is_11520_ct, false);
+  assert.equal(simulation.real_lp_created, false);
+  assert.equal(simulation.chain_write, false);
+  assert.equal(simulation.lp_token_owner, "NOT_ASSIGNED_POLICY_REQUIRED");
+  assert.throws(() => createKaiosLiquidityGenesisSimulation({ simulationId: "KAIOS_LP_SIM_0002", pairId: "KAIOS_KGEN", kaiosAmountWei: "200000000000000000000001", counterAssetAmountWei: "1", treasuryBalanceKaiosWei: "22213020930416874731235000", referencePriceSource: "REVIEWED_PRICE_DISCOVERY_INPUT", createdAt: "2026-08-30T05:00:00.000Z" }), (error) => error.code === "KAIOS_LP_ALLOCATION_EXCEEDED");
+});
+
+test("K18888 Genesis QE keeps -10% development support balanced and separate from commercial credit", () => {
+  assert.equal(K18888_GENESIS_QE_POLICY.canonical_node_id, "K18888");
+  assert.equal(K18888_GENESIS_QE_POLICY.rejected_typo_node_id, "K18887");
+  assert.equal(K18888_GENESIS_QE_POLICY.rejected_typo_status, "TYPO_REJECTED_NOT_CREATED");
+  assert.equal(K18888_GENESIS_QE_POLICY.development_rate_bps, -1000);
+  assert.equal(K18888_GENESIS_QE_POLICY.commercial_credit_separate, true);
+  const allocation = createGenesisDevelopmentAllocationCandidate({
+    allocationId: "K18888_QE_RESOURCE_K16888_0001",
+    fundClass: "RESOURCE_DEVELOPMENT_FUND",
+    economicPurpose: "K16888 canonical resource discovery and ledger design",
+    beneficiaryId: "K16888",
+    grossCapitalKaiosWei: "100000000000000000000",
+    performanceCondition: "Repository-reviewed resource profile and ledger designation",
+    evidenceRefs: ["P_16888p0_白骨洞_廣寒宮_R48"],
+    createdAt: "2026-08-30T12:30:00.000Z"
+  });
+  assert.equal(allocation.gross_development_capital_kaios_wei, "100000000000000000000");
+  assert.equal(allocation.recoverable_capital_kaios_wei, "90000000000000000000");
+  assert.equal(allocation.conditional_development_subsidy_kaios_wei, "10000000000000000000");
+  assert.equal(allocation.ledger_events.length, 3);
+  assert.equal(allocation.subsidy_recognized, false);
+  assert.equal(allocation.real_kaios_distributed, false);
+  assert.throws(
+    () => createGenesisDevelopmentAllocationCandidate({ allocationId: "K18888_QE_COMMERCIAL_0001", fundClass: "COMMERCIAL_CREDIT", economicPurpose: "Commercial working capital", beneficiaryId: "COMPANY_0001", grossCapitalKaiosWei: "100", performanceCondition: "Revenue repayment", createdAt: "2026-08-30T12:30:00.000Z" }),
+    (error) => error.code === "COMMERCIAL_CREDIT_REQUIRES_SEPARATE_POLICY"
+  );
+});
+
+test("K18888 Genesis development portfolio preserves four prior candidates without disbursement", () => {
+  assert.equal(K18888_GENESIS_DEVELOPMENT_PORTFOLIO_POLICY.candidates.length, 4);
+  const portfolio = createGenesisDevelopmentPortfolioCandidate({ createdAt: "2026-08-30T13:00:00.000Z" });
+  const byNode = Object.fromEntries(portfolio.allocations.map((item) => [item.canonical_node_id, item]));
+  assert.equal(byNode.K8888.gross_development_capital_kaios_wei, "108000000000000000000000");
+  assert.equal(byNode.K8888.recoverable_capital_kaios_wei, "97200000000000000000000");
+  assert.equal(byNode.K8888.conditional_development_subsidy_kaios_wei, "10800000000000000000000");
+  assert.ok(byNode.K8888.additional_controls.includes("CUSTOMER_DEPOSITS_MUST_NOT_BE_COLLATERAL"));
+  assert.equal(byNode.K8895.eligibility_status, "GENESIS_DEVELOPMENT_ELIGIBILITY_REVIEW_REQUIRED");
+  assert.equal(byNode.K11520.gross_development_capital_kaios_wei, "1080000000000000000000000");
+  assert.equal(byNode.K11520.commercial_credit_separate, true);
+  assert.equal(byNode.K12345.beneficiary_id, "DIGITAL_ANT_0001");
+  assert.equal(byNode.K12345.unrestricted_personal_eoa_cash, false);
+  assert.equal(portfolio.total_genesis_development_candidate_kaios_wei, "1404000000000000000000000");
+  assert.equal(portfolio.total_conditional_recoverable_kaios_wei, "1263600000000000000000000");
+  assert.equal(portfolio.total_conditional_subsidy_kaios_wei, "140400000000000000000000");
+  assert.equal(portfolio.subsidy_recognized, false);
+  assert.equal(portfolio.real_kaios_paid, false);
+  assert.equal(portfolio.chain_write, false);
+});
+
+test("canonical world scan groups coordinate aliases and keeps White Bone Cave resource truth unknown", async () => {
+  const universeMap = JSON.parse(await fs.readFile(new URL("../docs/maps/UniverseMap_V10_2_DISTANCE_COMPLETE_ALL_POINTS.json", import.meta.url), "utf8"));
+  const scan = scanCanonicalWorldResourceEconomy({ universeMap });
+  assert.equal(scan.universe_map_version, CANONICAL_UNIVERSE_RESOURCE_SCAN_POLICY.universe_map_version);
+  assert.equal(scan.total_map_points, 123);
+  assert.equal(scan.total_canonical_world_nodes, 108);
+  assert.equal(scan.coordinate_alias_points, 15);
+  assert.equal(scan.resource_profile_complete, 0);
+  assert.equal(scan.resource_ledger_connected, 0);
+  assert.equal(scan.kaios_path_connected, 0);
+  assert.equal(scan.kgen_path_connected, 0);
+  assert.equal(scan.real_accounts_created, 0);
+  assert.equal(scan.white_bone_cave.canonical_node_id, "K16888");
+  assert.ok(scan.white_bone_cave.point_alias_ids.includes("P_16888p0_白骨洞_廣寒宮_R48"));
+  assert.ok(scan.white_bone_cave.point_alias_names.includes("白骨洞 / 廣寒宮"));
+  assert.deepEqual(scan.white_bone_cave.resource_candidates, []);
+  assert.equal(scan.white_bone_cave.resource_status, "DISCOVERY_REQUIRED");
+  assert.equal(scan.white_bone_cave.account_status, "CANDIDATE_NOT_REPOSITORY_DESIGNATED");
+  assert.equal(scan.white_bone_cave.eoa_private_key_created, false);
+  assert.equal(scan.white_bone_cave.kgen_path_status, "NOT_CONNECTED");
+  assert.equal(scan.white_bone_cave.kaios_path_status, "NOT_CONNECTED");
+  const fakeMap = structuredClone(universeMap);
+  fakeMap.version = "CALLER_INVENTED_MAP";
+  assert.throws(() => scanCanonicalWorldResourceEconomy({ universeMap: fakeMap }), (error) => error.code === "CANONICAL_UNIVERSE_MAP_VERSION_REQUIRED");
+});
+
+
+test("K88895 resource economy fails closed without repository-owned designation and scan attestations", async () => {
+  const universeMap = JSON.parse(await fs.readFile(new URL("../docs/maps/UniverseMap_V10_2_DISTANCE_COMPLETE_ALL_POINTS.json", import.meta.url), "utf8"));
+  const callerScan = scanCanonicalWorldResourceEconomy({ universeMap });
+  assert.equal(CANONICAL_KAIOS_WORLD_RESOURCE_SCAN_ATTESTATIONS.length, 0);
+  assert.throws(
+    () => createK88895ResourceEconomyRuntime({ worldResourceScan: callerScan, createdAt: "2026-08-30T13:01:00.000Z" }),
+    (error) => error.code === "CALLER_SUPPLIED_WORLD_RESOURCE_SCAN_FORBIDDEN"
+  );
+  assert.throws(
+    () => createK88895ResourceEconomyRuntime({ worldResourceScanAttestationId: "CALLER_CHOSEN_SCAN_ATTESTATION", createdAt: "2026-08-30T13:01:00.000Z" }),
+    (error) => error.code === "WORLD_RESOURCE_SCAN_ATTESTATION_NOT_CONNECTED"
+  );
+});
+
+test("canonical resource batch expansion rejects caller scans and unknown attestation IDs", async () => {
+  const universeMap = JSON.parse(await fs.readFile(new URL("../docs/maps/UniverseMap_V10_2_DISTANCE_COMPLETE_ALL_POINTS.json", import.meta.url), "utf8"));
+  const callerScan = scanCanonicalWorldResourceEconomy({ universeMap });
+  assert.throws(
+    () => createCanonicalResourceEconomyBatchExpansion({ worldResourceScan: callerScan, createdAt: "2026-08-30T13:02:00.000Z" }),
+    (error) => error.code === "CALLER_SUPPLIED_WORLD_RESOURCE_SCAN_FORBIDDEN"
+  );
+  assert.throws(
+    () => createCanonicalResourceEconomyBatchExpansion({ worldResourceScanAttestationId: "CALLER_CHOSEN_SCAN_ATTESTATION", createdAt: "2026-08-30T13:02:00.000Z" }),
+    (error) => error.code === "WORLD_RESOURCE_SCAN_ATTESTATION_NOT_CONNECTED"
+  );
+});
+test("public game node audit rejects caller sources and unknown repository attestation IDs", async () => {
+  assert.equal(PUBLIC_GAME_NODE_ECONOMIC_AUDIT_POLICY.auto_add_funding_candidate, true);
+  assert.equal(PUBLIC_GAME_NODE_ECONOMIC_AUDIT_POLICY.real_payment_authority, false);
+  assert.equal(PUBLIC_GAME_NODE_ECONOMIC_AUDIT_POLICY.chain_write_authority, false);
+  assert.equal(CANONICAL_PUBLIC_GAME_NODE_AUDIT_SOURCE_ATTESTATIONS.length, 0);
+  await assert.rejects(
+    auditPublicGameNodeFunding({
+      rootHomepageHtml: "<html>" + "x".repeat(101) + "</html>",
+      createdAt: "2026-08-30T13:11:00.000Z"
+    }),
+    (error) => error.code === "CALLER_SUPPLIED_PUBLIC_GAME_AUDIT_SOURCE_FORBIDDEN"
+  );
+  await assert.rejects(
+    auditPublicGameNodeFunding({
+      sourceAttestationId: "CALLER_CHOSEN_PUBLIC_GAME_AUDIT_SOURCE",
+      createdAt: "2026-08-30T13:11:00.000Z"
+    }),
+    (error) => error.code === "PUBLIC_GAME_AUDIT_SOURCE_ATTESTATION_NOT_CONNECTED"
+  );
+});
+test("civilization circulation health exposes blockers without fabricating holders, trades or LP", async () => {
+  const universeMap = JSON.parse(await fs.readFile(new URL("../docs/maps/UniverseMap_V10_2_DISTANCE_COMPLETE_ALL_POINTS.json", import.meta.url), "utf8"));
+  const worldResourceScan = scanCanonicalWorldResourceEconomy({ universeMap });
+  const economySnapshot = createKaiosEconomyEvidenceSnapshot({ snapshotId: "KAIOS_CIRCULATION_ECONOMY_0001", asOf: "2026-08-30T12:31:00.000Z" });
+  const health = createKaiosCivilizationCirculationHealth({ worldResourceScan, economySnapshot });
+  assert.equal(health.holder_count, "UNKNOWN");
+  assert.equal(health.ct, null);
+  assert.equal(health.resource_nodes, worldResourceScan.resource_nodes_found);
+  assert.equal(health.active_resource_nodes, 0);
+  assert.equal(health.public_investment_wei, "0");
+  assert.equal(health.fabricated_metrics, false);
+  assert.equal(health.real_payment_executed, false);
+  assert.equal(health.real_trade_executed, false);
+  assert.equal(health.real_lp_created, false);
+  assert.ok(health.broken_circulation_paths.includes("K18888_GENESIS_QE_BUDGET_AUTHORITY_NOT_CONNECTED"));
+  assert.equal(health.status, "BLOCKED_NO_VERIFIED_END_TO_END_CIRCULATION_EVIDENCE");
+});
+
+test("KAIOS Economy Dashboard stays UNKNOWN and rejects caller-supplied verified metrics", () => {
+  assert.equal(CANONICAL_KAIOS_ECONOMY_SNAPSHOT_ATTESTATIONS.length, 0);
+  const disconnected = createKaiosEconomyEvidenceSnapshot({ snapshotId: "ECONOMY_SNAPSHOT_0001", asOf: "2026-08-30T06:00:00.000Z" });
+  assert.equal(disconnected.holders.total, "UNKNOWN");
+  assert.equal(disconnected.market.ct, null);
+  assert.equal(disconnected.liquidity.lp_status, "NOT_CONNECTED");
+  assert.equal(disconnected.snapshot_attestation_id, null);
+  assert.throws(
+    () => createKaiosEconomyEvidenceSnapshot({ snapshotId: "ECONOMY_SNAPSHOT_0002", asOf: "2026-08-30T06:01:00.000Z", evidenceStatus: "REPOSITORY_OR_CHAIN_VERIFIED", holderRecords: [{ address: "0x1111111111111111111111111111111111111111", balance_kaios_wei: "1", evidence_status: "VERIFIED_CHAIN_INDEXER" }] }),
+    (error) => error.code === "CALLER_SUPPLIED_KAIOS_ECONOMY_EVIDENCE_FORBIDDEN"
+  );
+  assert.throws(
+    () => createKaiosEconomyEvidenceSnapshot({ snapshotId: "ECONOMY_SNAPSHOT_0003", asOf: "2026-08-30T06:02:00.000Z", snapshotAttestationId: "CALLER_CHOSEN_SNAPSHOT_ATTESTATION" }),
+    (error) => error.code === "KAIOS_ECONOMY_SNAPSHOT_ATTESTATION_NOT_CONNECTED"
+  );
+});
+
+test("resource accounts and temporary Human custody require repository-owned designations", () => {
+  assert.equal(CANONICAL_KAIOS_RESOURCE_ACCOUNT_DESIGNATIONS.length, 0);
+  assert.equal(KAIOS_RESOURCE_ACCOUNT_DESIGNATION_CANDIDATES.length, 6);
+  assert.equal(K88895_RESOURCE_ACCOUNT_DESIGNATION_CANDIDATE.status, "DESIGNATION_CANDIDATE_REVIEW_REQUIRED");
+  assert.equal(K88895_RESOURCE_ACCOUNT_DESIGNATION_CANDIDATE.human_decision_id, null);
+  assert.equal(K88895_RESOURCE_ACCOUNT_DESIGNATION_CANDIDATE.can_accrue_entitlements, false);
+  assert.throws(
+    () => createResourceLedgerSubaccount({ accountId: "RESOURCE_LEDGER_K88895", designationId: "RESOURCE_ACCOUNT_DESIGNATION_K88895_V1", createdAt: "2026-08-30T04:00:00.000Z" }),
+    (error) => error.code === "RESOURCE_ACCOUNT_DESIGNATION_NOT_CONNECTED"
+  );
+  assert.equal(CANONICAL_KAIOS_RESOURCE_CUSTODY_DESIGNATIONS.length, 0);
+  assert.throws(
+    () => createResourceLedgerSubaccount({ accountId: "RESOURCE_ACCOUNT_K88895", designationId: "CALLER_CHOSEN_RESOURCE_DESIGNATION", createdAt: "2026-08-30T04:00:00.000Z" }),
+    (error) => error.code === "RESOURCE_ACCOUNT_DESIGNATION_NOT_CONNECTED"
+  );
+  const forgedAccount = { account_id: "RESOURCE_ACCOUNT_K88895", designation_id: "FORGED_RESOURCE_DESIGNATION", account_type: "PROGRAMMATIC_LEDGER_SUBACCOUNT", node_id: "K88895", canonical_location: "CALLER_LOCATION" };
+  const forgedWalletProof = { proof_id: "FORGED_CUSTODY_PROOF", status: "VERIFIED_LOCAL_WALLET_CONTROL", authentication_method: "EIP191_PERSONAL_SIGN", actor_id: "HUMAN_RESOURCE_CUSTODIAN_0001", chain_id: 56, wallet_address: "0x5555555555555555555555555555555555555555" };
+  assert.throws(
+    () => createTemporaryResourceCustodyBindingCandidate({ bindingId: "RESOURCE_CUSTODY_BINDING_0001", resourceAccount: forgedAccount, publicAddress: forgedWalletProof.wallet_address, custodianId: forgedWalletProof.actor_id, walletControlProof: forgedWalletProof, purpose: "K88895_RESOURCE_OPERATIONS", maxAmountKaiosWei: "100", validFrom: "2026-08-30T04:01:00.000Z", validUntil: "2026-09-30T04:01:00.000Z", humanDecisionId: "CALLER_HUMAN_DECISION" }),
+    (error) => error.code === "CALLER_SUPPLIED_RESOURCE_CUSTODY_WALLET_CONTROL_FORBIDDEN"
+  );
+  assert.throws(
+    () => createTemporaryResourceCustodyBindingCandidate({ bindingId: "RESOURCE_CUSTODY_BINDING_0002", resourceAccount: forgedAccount, publicAddress: forgedWalletProof.wallet_address, custodianId: forgedWalletProof.actor_id, walletControlAttestationId: "CALLER_CHOSEN_WALLET_ATTESTATION", custodyDesignationId: "CALLER_CHOSEN_CUSTODY_DESIGNATION", purpose: "K88895_RESOURCE_OPERATIONS", maxAmountKaiosWei: "100", validFrom: "2026-08-30T04:01:00.000Z", validUntil: "2026-09-30T04:01:00.000Z" }),
+    (error) => error.code === "RESOURCE_CUSTODY_DESIGNATION_NOT_CONNECTED"
+  );
 });
 
 test("common KAIOS payment request binds canonical token, source funding and EIP-191 recipient", () => {
