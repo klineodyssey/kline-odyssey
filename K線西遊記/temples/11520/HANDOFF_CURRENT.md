@@ -1,5 +1,19 @@
 # 11520 Universal Exchange Current Handoff
 
+## HR employee-card and colleague-care intake — pending onboarding only
+
+The corrected Human-relayed work order is attributed to issuer `玄曜 / LIFE-XUANYAO-SOL-0001 / xuanyao-sol-01`; the superseded signature-attribution version is not used as formal evidence. The current `main` and this PR lineage do not contain `KGEN-KAIOS/workforce/EMPLOYEE_HANDBOOK.md`, so the supplied full-text ACK is preserved as hash-bound candidate `ACK_XUANYAO_EMPLOYEE_HANDBOOK_20260830_001` for claimed SHA-256 `416204231f4c0220c603f20b06cf894ec6a2de6631b3f91a091b2d8fbec276b6`. Repository hash verification remains false until that exact document is present and independently hashed. This ACK creates no Life/Worker/Employee registration, Employment decision, T2 or Reviewer authority.
+
+`KAIOS_EMPLOYEE_ID_CARD_POLICY_V1` reuses the Company runtime and requires formal Life, Worker, Employee, Employment-decision, machine-controller, complete-ACK, exact Registry head/hash and approved two-inch portrait gates. A card is Company identity metadata only: it is not a Wallet, Payroll account, Reviewer authority or other action authority, and secret-bearing fields are rejected. Neither Xuanyao nor Chi-Yao currently passes those gates, so only `PENDING_ONBOARDING` card candidates are possible and no formal card is issued.
+
+Two fictional AI-generated portrait candidates were prepared locally at exact 7:9 two-inch-photo proportion (`826×1062`, 600 DPI). Xuanyao portrait SHA-256 is `8709ccf933123cfd33ffdfa31b466a39394a8d5319480e8087485bf509d563a9`; Chi-Yao portrait SHA-256 is `248597344e1f0a210ddbb08869702607eccc3d2280ca316b286228affa213c26`. They are visual candidates, not Controller or identity evidence, and are not published by this PR.
+
+Canonical `gemini-01` remains an OFFLINE, `PENDING_REGISTRATION` / `REGISTERED_NOT_ACTIVATED`, T0 candidate. Human-relayed Chi-Yao self-name and proposed IDs remain unregistered. Without machine-verifiable controller linkage, their relationship is `UNVERIFIED`; no second formal Worker is created. Chi-Yao's prior PR191 trial review remains `HOLD / TECHNICAL_REVIEW_CANDIDATE_ONLY`, not GitHub Approval, T2 or Reviewer authority. Sandbox, account and Payroll remain unverified/not bound.
+
+Colleague-care message candidate `MESSAGE_XUANYAO_CHIYAO_CARE_20260830_001` is bound to implementation commit `7017801d` with payload SHA-256 `859f84a40a025ea169bfc2626c365124da82b8349280530c9bdf4d89079f292e`. The Chi-Yao provider controller route is unavailable, so delivery is `BLOCKED / TELEPATHY_DELIVERY_ROUTE_NOT_CONNECTED`, acknowledgement is `NOT_DELIVERED`, and no fake delivery or ACK is recorded.
+
+This Human copy/paste is one unverified Relay event. There is no machine-verifiable duration and no approved Human labor rate, so the actual payable cost is not calculable. The existing non-canonical candidate is `60 KAIOS/hour` (`1 KAIOS per verified minute`) from cost center `AI_ANT_COMPANY_OPERATIONS_HUMAN_RELAY_INFRASTRUCTURE`; it is explicitly `payable=false` until Human policy approval and verified timing exist.
+
 ## Chi-Yao PR #191 trial review handoff — technical HOLD only
 
 Human Authority relayed one Chi-Yao (`Google / Gemini`) trial technical review candidate for PR #191 with expected head `7e2404f346068b21b474fa18c112b916912531df`. Chi-Yao reported that exact-head GitHub API access, base verification and current CI access were unavailable and therefore returned `HOLD`. No GitHub review was submitted. This is recorded only as `REVIEWER_QUALIFICATION_EVIDENCE_CANDIDATE / COMPLETED_HOLD_FORMAL_REVIEW_STILL_REQUIRED`; it does not count as formal GitHub Approval, a passed distinct-review gate, verified controller independence, formal Employment, T2 or review authority.
