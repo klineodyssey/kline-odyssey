@@ -15,7 +15,8 @@ import {
   confirmPublicCivilizationIntent, toPublicCivilizationRequest, routePublicCivilizationProject,
   qualifyPublicCivilizationRequest, createNonBindingEstimatePreview, appendPublicRequestHistoryEvent,
   KAIOS_AI_OS_EMPLOYMENT_ALPHA_JOB, KAIOS_AI_OS_FIRST_REAL_EMPLOYMENT_TEST_JOB, KAIOS_MAINNET_TOKEN,
-  KAIOS_PAYMENT_APPROVAL_MATRIX, CIVILIZATION_REAL_EXECUTION_POLICY,
+  KAIOS_PAYMENT_APPROVAL_MATRIX, KAIOS_PLAYER_REWARD_POLICY, KAIOS_LIQUIDITY_GENESIS_POLICY,
+  CIVILIZATION_REAL_EXECUTION_POLICY, createKaiosEconomyEvidenceSnapshot,
   createEmploymentIdentityChallenge,
   verifyEmploymentIdentityProof, createEmploymentApplication, scoreEmploymentInterview,
   createTrialEmploymentContract, createEmploymentAlphaMission, acceptEmploymentAlphaMission,
@@ -34,6 +35,7 @@ const NAVIGATION = Object.freeze([
 
 const APP_LAUNCHER = Object.freeze([
   ["REQUEST", "REQUEST"], ["LIFE_FACTORY", "LIFE FACTORY"], ["APPS", "APPS / ORGANS"], ["TOKENS", "TOKENS"],
+  ["ECONOMY", "KAIOS ECONOMY"],
   ["MISSIONS", "MISSIONS"], ["SERVICES", "SERVICES"], ["PROPERTY", "PROPERTY"], ["FACTORIES", "FACTORIES"],
   ["SPACECRAFT", "SPACECRAFT"], ["PORTFOLIO", "PORTFOLIO"], ["MY_LIFE", "MY LIFE"], ["MY_COMPANY", "MY COMPANY"],
   ["DEVELOPER", "SYSTEM STATUS"]
@@ -277,7 +279,34 @@ function schoolView() {
 }
 
 function gamesView() {
-  return Promise.resolve(`${hero("KAIOS GAMES", "Explore, learn and build a Life.", "Quests may grant XP, skills or items. Real KAIOS/KGEN rewards require the common payment rail and exact authorization.")}<div class="grid"><article class="card"><div class="eyebrow">LIFE QUEST</div><h3>FIRST CIVILIZATION LOOP</h3><p>Birth → water/food → education or work → mission → service purchase → save.</p>${badge("PLAYABLE_LOCAL_ALPHA")}</article><article class="card"><div class="eyebrow">MARKET GAME</div><h3>LONG / SHORT LAB</h3><p>Score and backtest are not guaranteed profit and do not create real settlement.</p>${badge("SIMULATION")}</article></div>`);
+  const rewards = KAIOS_PLAYER_REWARD_POLICY.milestones;
+  const kaios = (wei) => `${Number(BigInt(wei) / 10n ** 18n)} KAIOS`;
+  return Promise.resolve(`${hero("KAIOS GAMES", "Explore, learn, earn and keep living.", "Verified play may create a real KAIOS entitlement. PAID appears only after bound funding, exact authorization, secure signing and a successful receipt.")}
+    <div class="notice">REWARD POLICY CANDIDATE · NOT AN AIRDROP · WALLET CONTROL + EVENT EVIDENCE + REPLAY PROTECTION REQUIRED</div>
+    <div class="grid">
+      <article class="card"><div class="eyebrow">STARTER BLOOD</div><h3>${kaios(rewards.GENESIS_ARRIVAL_VERIFIED.amount_kaios_wei)}</h3><p>Complete verified Genesis with a wallet-control proof.</p>${badge("ENTITLEMENT_CANDIDATE")}</article>
+      <article class="card"><div class="eyebrow">FIRST LIFE LOOP</div><h3>${kaios(rewards.FIRST_LIFE_LOOP_COMPLETED.amount_kaios_wei)}</h3><p>Birth → water/food → education or work → mission → service purchase → save.</p>${badge("PLAYABLE_LOCAL_ALPHA")}</article>
+      <article class="card"><div class="eyebrow">VERIFIED WORK</div><h3>${kaios(rewards.FIRST_VERIFIED_JOB_COMPLETED.amount_kaios_wei)}</h3><p>Complete one accepted job with evidence and independent work review.</p>${badge("PAYMENT_GATES_REQUIRED")}</article>
+      <article class="card"><div class="eyebrow">FIRST K11520 TRADE</div><h3>${kaios(rewards.FIRST_K11520_SETTLED_TRADE.amount_kaios_wei)}</h3><p>Only a non-self-matched trade with a verified settlement receipt qualifies.</p>${badge("NOT_CONNECTED")}</article>
+      <article class="card"><div class="eyebrow">DAILY QUEST</div><h3>${kaios(rewards.DAILY_QUEST_VERIFIED.amount_kaios_wei)}</h3><p>Up to ${KAIOS_PLAYER_REWARD_POLICY.daily_quest_limit} verified quests per UTC day. No wash activity or duplicate event IDs.</p>${badge("ENTITLEMENT_ONLY")}</article>
+      <article class="card"><div class="eyebrow">MARKET GAME</div><h3>LONG / SHORT LAB</h3><p>Score and backtest are not guaranteed profit and do not create real settlement.</p>${badge("SIMULATION")}</article>
+    </div>`);
+}
+
+function economyView() {
+  const snapshot = createKaiosEconomyEvidenceSnapshot({
+    snapshotId: "KAIOS_PUBLIC_ECONOMY_NOT_CONNECTED",
+    asOf: new Date().toISOString()
+  });
+  const kaios = (wei) => wei === "UNKNOWN" ? wei : `${Number(BigInt(wei) / 10n ** 18n).toLocaleString()} KAIOS`;
+  return Promise.resolve(`${hero("KAIOS CIRCULATION", "Holders grow through verified participation, not fake volume.", "This dashboard exposes only repository- or chain-verified evidence. Missing indexers remain UNKNOWN; DEX price never becomes K11520 CT.")}
+    <div class="notice">${snapshot.status} · NO VERIFIED DATA IS FABRICATED · REAL LP DEPOSIT DISABLED</div>
+    <div class="grid">
+      <article class="card"><div class="eyebrow">HOLDERS</div><h3>${snapshot.holders.total}</h3>${kv("Active", snapshot.holders.active)}${kv("Players", snapshot.holders.player)}${kv("AI Life", snapshot.holders.ai_life)}${kv("Employees", snapshot.holders.employee)}${kv("Resource accounts", snapshot.holders.resource_accounts)}${kv("Company accounts", snapshot.holders.company_accounts)}</article>
+      <article class="card"><div class="eyebrow">GENESIS REWARD BUDGET</div><h3>${kaios(snapshot.treasury.genesis_reward_budget_kaios_wei)}</h3>${kv("Daily global budget", kaios(snapshot.treasury.daily_reward_budget_kaios_wei))}${kv("Treasury minimum reserve", kaios(snapshot.treasury.minimum_reserve_kaios_wei))}${kv("Accrued", kaios(snapshot.circulation.accrued_kaios_wei))}${kv("Paid", kaios(snapshot.circulation.paid_kaios_wei))}${kv("Pause switch", KAIOS_PLAYER_REWARD_POLICY.pause_switch)}</article>
+      <article class="card"><div class="eyebrow">K11520 NATIVE MARKET</div><h3>CT ${snapshot.market.ct ?? "NULL"}</h3>${kv("Verified trades", snapshot.market.verified_trades)}${kv("Volume", kaios(snapshot.market.volume_kaios_wei))}${kv("Law", "LAST VERIFIED SETTLED TRADE")}${kv("Unsettled match changes CT", "NO")}</article>
+      <article class="card"><div class="eyebrow">DEX LIQUIDITY GENESIS</div><h3>${badge(KAIOS_LIQUIDITY_GENESIS_POLICY.status)}</h3>${pills(Object.keys(KAIOS_LIQUIDITY_GENESIS_POLICY.candidate_pairs))}${kv("Reuse product", KAIOS_LIQUIDITY_GENESIS_POLICY.reuse_product_id)}${kv("Max candidate KAIOS", kaios(KAIOS_LIQUIDITY_GENESIS_POLICY.maximum_kaios_genesis_allocation_wei))}${kv("LP owner", KAIOS_LIQUIDITY_GENESIS_POLICY.lp_owner_policy)}${kv("DEX price = CT", "NO")}${kv("Real LP created", "NO")}</article>
+    </div>`);
 }
 
 function walletView() {
@@ -729,6 +758,7 @@ async function render() {
     WORLD: worldView,
     SCHOOL: schoolView,
     GAMES: gamesView,
+    ECONOMY: economyView,
     WALLET: walletView,
     AI: aiCompanionView,
     DEVELOPER: developerView,

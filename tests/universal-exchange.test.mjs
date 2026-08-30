@@ -104,7 +104,9 @@ import {
   calculateFieldServiceQuote, validateFieldDeliveryEvidence, createWorkforceGap,
   createFieldServiceDemandScan
   , KAIOS_AI_OS_EMPLOYMENT_ALPHA_JOB, KAIOS_AI_OS_FIRST_REAL_EMPLOYMENT_TEST_JOB, KAIOS_MAINNET_TOKEN,
-  KAIOS_PAYMENT_PURPOSES, KAIOS_PAYMENT_APPROVAL_MATRIX, CANONICAL_KAIOS_PAYMENT_SIGNER_POLICIES, CANONICAL_KAIOS_PAYMENT_RECEIPT_ATTESTATIONS,
+  KAIOS_PAYMENT_PURPOSES, KAIOS_PAYMENT_APPROVAL_MATRIX, KAIOS_PLAYER_REWARD_POLICY,
+  KAIOS_LIQUIDITY_GENESIS_POLICY,
+  CANONICAL_KAIOS_PAYMENT_SIGNER_POLICIES, CANONICAL_KAIOS_PAYMENT_RECEIPT_ATTESTATIONS,
   CIVILIZATION_REAL_EXECUTION_POLICY, CIVILIZATION_PERMANENTLY_FORBIDDEN_ACTIONS,
   AI_EMPLOYEE_FINANCIAL_ONBOARDING_POLICY, CANONICAL_AI_UMBILICAL_ACCOUNT_FACTORIES,
   CANONICAL_REPOSITORY_COMPANY_AUTHORITIES, COMPANY_OPERATIONAL_AUTHORITY_PROPOSAL_SCOPES,
@@ -127,6 +129,9 @@ import {
   submitCompanyWorkEvidence, reviewCompanyWorkEvidence, accrueCompanyCompensation,
   queueCompanyPayroll, authorizeCompanyPayrollFunding, recordCompanyPayrollSettlement, evaluateAtmPayrollAdvanceCandidate,
   createKaiosPaymentRequest, evaluateKaiosPaymentRailReadiness, recordKaiosPaymentSubmission, recordKaiosPaymentSettlement,
+  createKaiosPlayerRewardEntitlement, evaluateKaiosRewardBudgetSimulation,
+  createKaiosLiquidityGenesisSimulation, createKaiosEconomyEvidenceSnapshot,
+  createResourceLedgerSubaccount, createTemporaryResourceCustodyBindingCandidate,
   evaluateCivilizationRealExecutionPolicy, selectNextSafeCompanyWorkflow,
   appendEmploymentPhase1BCompanyEvent,
   createKaiosTelepathyMessage, routeKaiosTelepathyMessage,
@@ -3968,6 +3973,117 @@ test("common KAIOS payment rail declares bounded purposes and keeps signer polic
   assert.equal(CANONICAL_KAIOS_PAYMENT_SIGNER_POLICIES.length, 0);
   assert.equal(CANONICAL_KAIOS_PAYMENT_RECEIPT_ATTESTATIONS.length, 0);
   assert.equal(KAIOS_PAYMENT_APPROVAL_MATRIX.PAYROLL.signer, "ONE_EXACT_SECURE_SIGNER_NOT_CONNECTED");
+});
+
+test("player reward policy grants visible KAIOS only for a verified wallet-bound event", () => {
+  assert.equal(KAIOS_PLAYER_REWARD_POLICY.fixed_milestone_total_kaios_wei, "50000000000000000000");
+  assert.equal(KAIOS_PLAYER_REWARD_POLICY.milestones.FIRST_VERIFIED_JOB_COMPLETED.amount_kaios_wei, "20000000000000000000");
+  const wallet = "0x2222222222222222222222222222222222222222";
+  const challenge = createEmploymentIdentityChallenge({ challengeId: "REWARD_CHALLENGE_0001", actorId: "PLAYER_REWARD_0001", actorType: "HUMAN_PLAYER", walletAddress: wallet, chainId: 56, nonce: "REWARD_NONCE_00000001", issuedAt: "2026-08-30T01:00:00.000Z", expiresAt: "2026-08-30T01:10:00.000Z" });
+  const proof = verifyEmploymentIdentityProof({ challenge, recoveredAddress: wallet, signatureSha256: "a".repeat(64), verifiedAt: "2026-08-30T01:01:00.000Z" });
+  const evidence = { evidence_id: "REWARD_EVIDENCE_0001", status: "VERIFIED", activity_type: "FIRST_LIFE_LOOP", player_id: proof.actor_id, life_id: "LIFE-PLAYER-REWARD-0001", event_id: "LIFE_LOOP_EVENT_0001", same_controller_self_match: false, wash_trade: false, fake_volume: false };
+  const entitlement = createKaiosPlayerRewardEntitlement({ entitlementId: "KAIOS_ENTITLEMENT_0001", playerId: proof.actor_id, lifeId: evidence.life_id, eventType: "FIRST_LIFE_LOOP_COMPLETED", eventId: evidence.event_id, eventEvidence: evidence, walletControlProof: proof, occurredAt: "2026-08-30T01:05:00.000Z" });
+  assert.equal(entitlement.amount_kaios_wei, "10000000000000000000");
+  assert.equal(entitlement.accounting_class, "GAME_REWARD_EXPENSE");
+  assert.equal(entitlement.payment_purpose, "PLAYER_REWARD");
+  assert.equal(entitlement.paid, false);
+  assert.equal(entitlement.receipt, null);
+  assert.equal(entitlement.status, "ACCRUED_AWAITING_BOUND_FUNDING_EXACT_AUTHORIZATION_SIGNER_AND_RECEIPT");
+  assert.throws(() => createKaiosPlayerRewardEntitlement({ entitlementId: "KAIOS_ENTITLEMENT_0002", playerId: proof.actor_id, lifeId: evidence.life_id, eventType: "FIRST_LIFE_LOOP_COMPLETED", eventId: evidence.event_id, eventEvidence: evidence, walletControlProof: proof, occurredAt: "2026-08-30T01:06:00.000Z", existingEntitlements: [entitlement] }), (error) => error.code === "PLAYER_REWARD_REPLAY");
+  assert.throws(() => createKaiosPlayerRewardEntitlement({ entitlementId: "KAIOS_ENTITLEMENT_0003", playerId: proof.actor_id, lifeId: evidence.life_id, eventType: "FIRST_LIFE_LOOP_COMPLETED", eventId: "LIFE_LOOP_EVENT_0002", eventEvidence: { ...evidence, event_id: "LIFE_LOOP_EVENT_0002", wash_trade: true }, walletControlProof: proof, occurredAt: "2026-08-30T01:07:00.000Z" }), (error) => error.code === "PLAYER_REWARD_INVALID_ACTIVITY");
+});
+
+test("first K11520 trade reward requires a successful settlement receipt", () => {
+  const wallet = "0x3333333333333333333333333333333333333333";
+  const challenge = createEmploymentIdentityChallenge({ challengeId: "REWARD_TRADE_CHALLENGE_0001", actorId: "PLAYER_REWARD_TRADE_0001", actorType: "HUMAN_PLAYER", walletAddress: wallet, chainId: 56, nonce: "REWARD_TRADE_NONCE_0001", issuedAt: "2026-08-30T02:00:00.000Z", expiresAt: "2026-08-30T02:10:00.000Z" });
+  const proof = verifyEmploymentIdentityProof({ challenge, recoveredAddress: wallet, signatureSha256: "b".repeat(64), verifiedAt: "2026-08-30T02:01:00.000Z" });
+  const evidence = { evidence_id: "REWARD_TRADE_EVIDENCE_0001", status: "VERIFIED", activity_type: "VERIFIED_11520_SETTLED_TRADE", player_id: proof.actor_id, life_id: "LIFE-PLAYER-TRADE-0001", event_id: "SETTLED_TRADE_EVENT_0001", same_controller_self_match: false, wash_trade: false, fake_volume: false };
+  assert.throws(() => createKaiosPlayerRewardEntitlement({ entitlementId: "KAIOS_TRADE_ENTITLEMENT_0001", playerId: proof.actor_id, lifeId: evidence.life_id, eventType: "FIRST_K11520_SETTLED_TRADE", eventId: evidence.event_id, eventEvidence: evidence, walletControlProof: proof, occurredAt: "2026-08-30T02:02:00.000Z" }), (error) => error.code === "PLAYER_REWARD_MARKET_RECEIPT_REQUIRED");
+  const entitlement = createKaiosPlayerRewardEntitlement({ entitlementId: "KAIOS_TRADE_ENTITLEMENT_0002", playerId: proof.actor_id, lifeId: evidence.life_id, eventType: "FIRST_K11520_SETTLED_TRADE", eventId: evidence.event_id, eventEvidence: { ...evidence, receipt_status: 1, transaction_hash: `0x${"c".repeat(64)}` }, walletControlProof: proof, occurredAt: "2026-08-30T02:02:00.000Z" });
+  assert.equal(entitlement.amount_kaios_wei, "5000000000000000000");
+  assert.equal(entitlement.paid, false);
+});
+
+test("daily player KAIOS reward is capped at five verified events per UTC day", () => {
+  const wallet = "0x4444444444444444444444444444444444444444";
+  const challenge = createEmploymentIdentityChallenge({ challengeId: "REWARD_DAILY_CHALLENGE_0001", actorId: "PLAYER_DAILY_0001", actorType: "HUMAN_PLAYER", walletAddress: wallet, chainId: 56, nonce: "REWARD_DAILY_NONCE_0001", issuedAt: "2026-08-30T03:00:00.000Z", expiresAt: "2026-08-30T03:10:00.000Z" });
+  const proof = verifyEmploymentIdentityProof({ challenge, recoveredAddress: wallet, signatureSha256: "d".repeat(64), verifiedAt: "2026-08-30T03:01:00.000Z" });
+  const existing = Array.from({ length: 5 }, (_, index) => ({ entitlement_id: `DAILY_ENTITLEMENT_${index}`, event_id: `DAILY_EVENT_${index}`, event_type: "DAILY_QUEST_VERIFIED", life_id: "LIFE-DAILY-0001", occurred_at: `2026-08-30T0${index + 1}:00:00.000Z` }));
+  const evidence = { evidence_id: "DAILY_EVIDENCE_0006", status: "VERIFIED", activity_type: "DAILY_QUEST", player_id: proof.actor_id, life_id: "LIFE-DAILY-0001", event_id: "DAILY_EVENT_0006", same_controller_self_match: false, wash_trade: false, fake_volume: false };
+  assert.throws(() => createKaiosPlayerRewardEntitlement({ entitlementId: "DAILY_ENTITLEMENT_0006", playerId: proof.actor_id, lifeId: evidence.life_id, eventType: "DAILY_QUEST_VERIFIED", eventId: evidence.event_id, eventEvidence: evidence, walletControlProof: proof, occurredAt: "2026-08-30T06:00:00.000Z", existingEntitlements: existing }), (error) => error.code === "PLAYER_REWARD_DAILY_LIMIT");
+});
+
+test("KAIOS Holder Genesis budget protects global limits, per-Life caps and Treasury reserve", () => {
+  assert.equal(KAIOS_PLAYER_REWARD_POLICY.global_genesis_reward_budget_kaios_wei, "500000000000000000000000");
+  assert.equal(KAIOS_PLAYER_REWARD_POLICY.daily_reward_budget_kaios_wei, "10000000000000000000000");
+  assert.equal(KAIOS_PLAYER_REWARD_POLICY.treasury_minimum_reserve_kaios_wei, "20000000000000000000000000");
+  const entitlement = { entitlement_id: "BUDGET_ENTITLEMENT_0001", policy_id: KAIOS_PLAYER_REWARD_POLICY.policy_id, event_type: "FIRST_VERIFIED_JOB_COMPLETED", amount_kaios_wei: "20000000000000000000", paid: false };
+  const simulation = evaluateKaiosRewardBudgetSimulation({ entitlement, treasuryBalanceKaiosWei: "22213020930416874731235000", genesisCommittedKaiosWei: "499000000000000000000000", dailyCommittedKaiosWei: "0", walletFixedMilestoneCommittedKaiosWei: "30000000000000000000", lifeFixedMilestoneCommittedKaiosWei: "30000000000000000000" });
+  assert.equal(simulation.policy_budget_simulation, "PASS");
+  assert.equal(simulation.may_enter_payment_rail, false);
+  assert.equal(simulation.real_transfer, false);
+  assert.throws(() => evaluateKaiosRewardBudgetSimulation({ entitlement, treasuryBalanceKaiosWei: "20000010000000000000000000", genesisCommittedKaiosWei: "499999000000000000000000", dailyCommittedKaiosWei: "0", walletFixedMilestoneCommittedKaiosWei: "50000000000000000000", lifeFixedMilestoneCommittedKaiosWei: "0" }), (error) => ["KAIOS_REWARD_GLOBAL_BUDGET_EXCEEDED", "KAIOS_REWARD_WALLET_CAP_EXCEEDED"].includes(error.code));
+  assert.throws(() => evaluateKaiosRewardBudgetSimulation({ entitlement, treasuryBalanceKaiosWei: "20000000000000000000000000", genesisCommittedKaiosWei: "0", dailyCommittedKaiosWei: "0", walletFixedMilestoneCommittedKaiosWei: "0", lifeFixedMilestoneCommittedKaiosWei: "0" }), (error) => error.code === "KAIOS_REWARD_TREASURY_RESERVE_VIOLATION");
+});
+
+test("KAIOS Liquidity Genesis reuses Auto LP and remains a non-executable DEX simulation", () => {
+  assert.equal(KAIOS_LIQUIDITY_GENESIS_POLICY.reuse_product_id, "AI_ANT_AUTO_LP");
+  const simulation = createKaiosLiquidityGenesisSimulation({ simulationId: "KAIOS_LP_SIM_0001", pairId: "KAIOS_WBNB", kaiosAmountWei: "100000000000000000000000", counterAssetAmountWei: "1000000000000000000", treasuryBalanceKaiosWei: "22213020930416874731235000", referencePriceSource: "REVIEWED_PRICE_DISCOVERY_INPUT", createdAt: "2026-08-30T05:00:00.000Z" });
+  assert.equal(simulation.accounting_class, "LIQUIDITY_PROVISION");
+  assert.equal(simulation.dex_price_is_11520_ct, false);
+  assert.equal(simulation.real_lp_created, false);
+  assert.equal(simulation.chain_write, false);
+  assert.equal(simulation.lp_token_owner, "NOT_ASSIGNED_POLICY_REQUIRED");
+  assert.throws(() => createKaiosLiquidityGenesisSimulation({ simulationId: "KAIOS_LP_SIM_0002", pairId: "KAIOS_KGEN", kaiosAmountWei: "200000000000000000000001", counterAssetAmountWei: "1", treasuryBalanceKaiosWei: "22213020930416874731235000", referencePriceSource: "REVIEWED_PRICE_DISCOVERY_INPUT", createdAt: "2026-08-30T05:00:00.000Z" }), (error) => error.code === "KAIOS_LP_ALLOCATION_EXCEEDED");
+});
+
+test("KAIOS Economy Dashboard shows UNKNOWN until evidence connects and excludes wash trades", () => {
+  const disconnected = createKaiosEconomyEvidenceSnapshot({ snapshotId: "ECONOMY_SNAPSHOT_0001", asOf: "2026-08-30T06:00:00.000Z" });
+  assert.equal(disconnected.holders.total, "UNKNOWN");
+  assert.equal(disconnected.market.ct, null);
+  assert.equal(disconnected.liquidity.lp_status, "NOT_CONNECTED");
+  const connected = createKaiosEconomyEvidenceSnapshot({
+    snapshotId: "ECONOMY_SNAPSHOT_0002", asOf: "2026-08-30T06:01:00.000Z", evidenceStatus: "REPOSITORY_OR_CHAIN_VERIFIED",
+    holderRecords: [
+      { address: "0x1111111111111111111111111111111111111111", holder_type: "PLAYER", balance_kaios_wei: "5000000000000000000", active: true, evidence_status: "VERIFIED_CHAIN_INDEXER" },
+      { address: "0x2222222222222222222222222222222222222222", holder_type: "AI_LIFE", balance_kaios_wei: "1000000000000000000", active: false, evidence_status: "VERIFIED_CHAIN_INDEXER" }
+    ],
+    entitlements: [{ paid: false, amount_kaios_wei: "10000000000000000000" }],
+    payments: [{ amount_kaios_wei: "5000000000000000000", receipt_status: 1, transaction_hash: `0x${"a".repeat(64)}`, direction: "TREASURY_TO_PLAYER" }],
+    trades: [
+      { status: "VERIFIED_SETTLED", receipt_status: 1, self_match: false, wash_trade: false, settlement_amount_kaios_wei: "3000000000000000000", price: "2.5" },
+      { status: "VERIFIED_SETTLED", receipt_status: 1, self_match: false, wash_trade: true, settlement_amount_kaios_wei: "999000000000000000000", price: "999" }
+    ],
+    resourceAccounts: [{ account_type: "PROGRAMMATIC_LEDGER_SUBACCOUNT" }], companyAccounts: [{}],
+    liquiditySnapshots: [{ depth: "EVIDENCE_DEPTH_0001", status: "VERIFIED_CHAIN_READ" }], treasuryBalanceKaiosWei: "22213020930416874731235000"
+  });
+  assert.equal(connected.holders.total, 2);
+  assert.equal(connected.holders.player, 1);
+  assert.equal(connected.holders.resource_accounts, 1);
+  assert.equal(connected.market.verified_trades, 1);
+  assert.equal(connected.market.volume_kaios_wei, "3000000000000000000");
+  assert.equal(connected.market.ct, "2.5");
+  assert.equal(connected.fabricated_metrics, false);
+});
+
+test("resource nodes use ledger subaccounts and temporary Human custody remains non-authoritative", () => {
+  const account = createResourceLedgerSubaccount({ accountId: "RESOURCE_ACCOUNT_K88895", nodeId: "K88895", nodeName: "蟠桃園", canonicalLocation: "UniverseMap_V10_2_DISTANCE_COMPLETE_ALL_POINTS.json#P_88895p0_蟠桃園_R97", resourceTypes: ["LAND", "WATER", "FRUIT"], createdAt: "2026-08-30T04:00:00.000Z" });
+  assert.equal(account.account_type, "PROGRAMMATIC_LEDGER_SUBACCOUNT");
+  assert.equal(account.economic_owner, "K88895");
+  assert.equal(account.public_address, null);
+  assert.equal(account.eoa_private_key_created, false);
+  assert.equal(account.can_receive_chain_payment, false);
+  const wallet = "0x5555555555555555555555555555555555555555";
+  const challenge = createEmploymentIdentityChallenge({ challengeId: "RESOURCE_CUSTODY_CHALLENGE_0001", actorId: "HUMAN_RESOURCE_CUSTODIAN_0001", actorType: "HUMAN_PLAYER", walletAddress: wallet, chainId: 56, nonce: "RESOURCE_CUSTODY_NONCE_01", issuedAt: "2026-08-30T04:00:00.000Z", expiresAt: "2026-08-30T04:10:00.000Z" });
+  const proof = verifyEmploymentIdentityProof({ challenge, recoveredAddress: wallet, signatureSha256: "e".repeat(64), verifiedAt: "2026-08-30T04:01:00.000Z" });
+  const binding = createTemporaryResourceCustodyBindingCandidate({ bindingId: "RESOURCE_CUSTODY_BINDING_0001", resourceAccount: account, publicAddress: wallet, custodianId: proof.actor_id, walletControlProof: proof, purpose: "K88895_RESOURCE_OPERATIONS", maxAmountKaiosWei: "100000000000000000000", validFrom: "2026-08-30T04:01:00.000Z", validUntil: "2026-09-30T04:01:00.000Z", humanDecisionId: "HUMAN_RESOURCE_ROUTE_DECISION_0001" });
+  assert.equal(binding.account_role, "TEMPORARY_CUSTODY_RECEIVER");
+  assert.equal(binding.economic_owner, "K88895");
+  assert.equal(binding.custodian, proof.actor_id);
+  assert.equal(binding.canonical_node_wallet, false);
+  assert.equal(binding.company_or_human_owns_node_assets, false);
+  assert.equal(binding.payment_authority, false);
+  assert.throws(() => createTemporaryResourceCustodyBindingCandidate({ bindingId: "RESOURCE_CUSTODY_BINDING_0002", resourceAccount: account, publicAddress: "0x6666666666666666666666666666666666666666", custodianId: proof.actor_id, walletControlProof: proof, purpose: "K88895_RESOURCE_OPERATIONS", maxAmountKaiosWei: "1", validFrom: "2026-08-30T04:01:00.000Z", validUntil: "2026-09-30T04:01:00.000Z", humanDecisionId: "HUMAN_RESOURCE_ROUTE_DECISION_0002" }), (error) => error.code === "RESOURCE_CUSTODY_WALLET_BINDING_MISMATCH");
 });
 
 test("common KAIOS payment request binds canonical token, source funding and EIP-191 recipient", () => {

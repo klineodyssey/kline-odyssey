@@ -564,6 +564,322 @@ export const KAIOS_PAYMENT_APPROVAL_MATRIX = Object.freeze({
   MARKET_SETTLEMENT: Object.freeze({ requestor: "11520_MATCHED_ORDER_RECEIPT", approver: "MARKET_SETTLEMENT_POLICY_NOT_CONNECTED", funding_authority: "MARKET_ESCROW_OR_BOUND_SOURCE_REQUIRED", signer: "ONE_EXACT_SECURE_SIGNER_NOT_CONNECTED", settlement_verifier: "11520_SETTLEMENT_ADAPTER_NOT_INTEGRATED" })
 });
 
+export const KAIOS_PLAYER_REWARD_POLICY = Object.freeze({
+  policy_id: "KAIOS_PLAYER_REWARD_POLICY_V1_CANDIDATE",
+  asset: "KAIOS",
+  chain_id: 56,
+  token_address: "0xD4E67B3a69e41524c424150E6b6e921b01D036db",
+  funding_source_status: "18888_BALANCE_OBSERVED_SOURCE_AUTHORITY_NOT_CONNECTED",
+  payment_purpose: "PLAYER_REWARD",
+  accounting_class: "GAME_REWARD_EXPENSE",
+  milestones: Object.freeze({
+    GENESIS_ARRIVAL_VERIFIED: Object.freeze({ amount_kaios_wei: "5000000000000000000", repeat: "ONCE_PER_LIFE" }),
+    FIRST_LIFE_LOOP_COMPLETED: Object.freeze({ amount_kaios_wei: "10000000000000000000", repeat: "ONCE_PER_LIFE" }),
+    FIRST_VERIFIED_JOB_COMPLETED: Object.freeze({ amount_kaios_wei: "20000000000000000000", repeat: "ONCE_PER_LIFE" }),
+    FIRST_K11520_SETTLED_TRADE: Object.freeze({ amount_kaios_wei: "5000000000000000000", repeat: "ONCE_PER_LIFE" }),
+    EARLY_PARTICIPATION_VERIFIED: Object.freeze({ amount_kaios_wei: "10000000000000000000", repeat: "ONCE_PER_LIFE" }),
+    DAILY_QUEST_VERIFIED: Object.freeze({ amount_kaios_wei: "1000000000000000000", repeat: "MAX_5_PER_UTC_DAY" })
+  }),
+  fixed_milestone_total_kaios_wei: "50000000000000000000",
+  global_genesis_reward_budget_kaios_wei: "500000000000000000000000",
+  daily_reward_budget_kaios_wei: "10000000000000000000000",
+  per_life_fixed_milestone_cap_kaios_wei: "50000000000000000000",
+  per_wallet_fixed_milestone_cap_kaios_wei: "50000000000000000000",
+  treasury_minimum_reserve_kaios_wei: "20000000000000000000000000",
+  daily_quest_limit: 5,
+  pause_switch: "PAUSED_UNTIL_REPOSITORY_BOUND_POLICY_AUTHORITY_AND_BUDGET_ATTESTATION",
+  arbitrary_airdrop: false,
+  sybil_farming: false,
+  wallet_control_proof_required: true,
+  exact_payment_authorization_required: true,
+  receipt_required_before_paid: true,
+  status: "CANDIDATE_ENTITLEMENT_POLICY_NOT_PAYMENT_AUTHORITY"
+});
+
+export const KAIOS_LIQUIDITY_GENESIS_POLICY = Object.freeze({
+  policy_id: "KAIOS_LIQUIDITY_GENESIS_V1_CANDIDATE",
+  reuse_product_id: "AI_ANT_AUTO_LP",
+  chain_id: 56,
+  kaios_token_address: KAIOS_PLAYER_REWARD_POLICY.token_address,
+  candidate_pairs: Object.freeze({
+    KAIOS_WBNB: Object.freeze({ counter_asset: "WBNB", counter_asset_address: "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c" }),
+    KAIOS_KGEN: Object.freeze({ counter_asset: "KGEN", counter_asset_address: "0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be" })
+  }),
+  maximum_kaios_genesis_allocation_wei: "200000000000000000000000",
+  treasury_minimum_reserve_kaios_wei: KAIOS_PLAYER_REWARD_POLICY.treasury_minimum_reserve_kaios_wei,
+  target_maximum_price_impact_bps: 300,
+  default_preview_slippage_bps: 100,
+  lp_owner_policy: "MULTISIG_OR_TIMELOCK_POLICY_REQUIRED",
+  withdrawal_authority: "ONE_EXACT_LP_WITHDRAWAL_AUTHORIZATION_REQUIRED",
+  emergency_pause: "POLICY_AND_INCIDENT_RESPONSE_REQUIRED",
+  market_integrity: Object.freeze(["NO_WASH_TRADE", "NO_SELF_MATCH", "NO_FAKE_VOLUME", "NO_SAME_CONTROLLER_ACTIVITY"]),
+  dex_price_role: "EXTERNAL_REFERENCE_ONLY_NEVER_11520_CT",
+  real_lp_deposit: false,
+  chain_write: false,
+  status: "DESIGN_AND_SIMULATION_ONLY_NO_LIQUIDITY_AUTHORITY"
+});
+
+const KAIOS_REWARD_EVIDENCE_ACTIVITY = Object.freeze({
+  GENESIS_ARRIVAL_VERIFIED: "GENESIS_ARRIVAL",
+  FIRST_LIFE_LOOP_COMPLETED: "FIRST_LIFE_LOOP",
+  FIRST_VERIFIED_JOB_COMPLETED: "VERIFIED_JOB_COMPLETION",
+  FIRST_K11520_SETTLED_TRADE: "VERIFIED_11520_SETTLED_TRADE",
+  EARLY_PARTICIPATION_VERIFIED: "EARLY_PARTICIPATION",
+  DAILY_QUEST_VERIFIED: "DAILY_QUEST"
+});
+
+export function createKaiosPlayerRewardEntitlement({
+  entitlementId, playerId, lifeId, eventType, eventId, eventEvidence,
+  walletControlProof, occurredAt, existingEntitlements = []
+}) {
+  requireId(entitlementId, "player_reward.entitlement_id");
+  requireId(playerId, "player_reward.player_id");
+  requireId(lifeId, "player_reward.life_id");
+  requireId(eventId, "player_reward.event_id");
+  requireEnum(eventType, Object.keys(KAIOS_PLAYER_REWARD_POLICY.milestones), "player_reward.event_type");
+  requireArray(existingEntitlements, "player_reward.existing_entitlements");
+  invariant(!existingEntitlements.some((item) => item.entitlement_id === entitlementId || item.event_id === eventId), "PLAYER_REWARD_REPLAY", "A verified game event may create only one KAIOS entitlement");
+  invariant(walletControlProof?.status === "VERIFIED_LOCAL_WALLET_CONTROL" && walletControlProof.authentication_method === "EIP191_PERSONAL_SIGN", "PLAYER_REWARD_WALLET_CONTROL_REQUIRED", "Player KAIOS entitlement requires the existing EIP-191 wallet-control proof");
+  invariant(walletControlProof.actor_id === playerId && Number(walletControlProof.chain_id) === KAIOS_PLAYER_REWARD_POLICY.chain_id, "PLAYER_REWARD_WALLET_BINDING_MISMATCH", "Wallet proof must bind the exact player and BSC chain 56");
+  const walletAddress = normalizeEmploymentWallet(walletControlProof.wallet_address);
+  requireId(eventEvidence?.evidence_id, "player_reward.evidence_id");
+  invariant(eventEvidence.status === "VERIFIED" && eventEvidence.activity_type === KAIOS_REWARD_EVIDENCE_ACTIVITY[eventType], "PLAYER_REWARD_EVENT_NOT_VERIFIED", "Reward entitlement requires verified evidence for the exact milestone");
+  invariant(eventEvidence.player_id === playerId && eventEvidence.life_id === lifeId && eventEvidence.event_id === eventId, "PLAYER_REWARD_EVENT_BINDING_MISMATCH", "Reward evidence must bind the exact player, Life and event");
+  invariant(eventEvidence.same_controller_self_match !== true && eventEvidence.wash_trade !== true && eventEvidence.fake_volume !== true, "PLAYER_REWARD_INVALID_ACTIVITY", "Self-match, wash trade and fake volume can never earn KAIOS");
+  if (eventType === "FIRST_K11520_SETTLED_TRADE") {
+    invariant(eventEvidence.receipt_status === 1 && /^0x[0-9a-fA-F]{64}$/.test(String(eventEvidence.transaction_hash ?? "")), "PLAYER_REWARD_MARKET_RECEIPT_REQUIRED", "First-trade reward requires a successful verified settlement receipt");
+  }
+  const occurred = parseEmploymentTime(occurredAt, "player_reward.occurred_at");
+  const rule = KAIOS_PLAYER_REWARD_POLICY.milestones[eventType];
+  if (rule.repeat === "ONCE_PER_LIFE") {
+    invariant(!existingEntitlements.some((item) => item.life_id === lifeId && item.event_type === eventType), "PLAYER_REWARD_MILESTONE_ALREADY_GRANTED", "This Life already has the one-time milestone entitlement");
+  } else {
+    const day = new Date(occurred).toISOString().slice(0, 10);
+    const dailyCount = existingEntitlements.filter((item) => item.life_id === lifeId && item.event_type === eventType && String(item.occurred_at).slice(0, 10) === day).length;
+    invariant(dailyCount < KAIOS_PLAYER_REWARD_POLICY.daily_quest_limit, "PLAYER_REWARD_DAILY_LIMIT", "Daily quest KAIOS entitlement limit has been reached");
+  }
+  return Object.freeze({
+    entitlement_id: entitlementId,
+    policy_id: KAIOS_PLAYER_REWARD_POLICY.policy_id,
+    player_id: playerId,
+    life_id: lifeId,
+    event_type: eventType,
+    event_id: eventId,
+    evidence_id: eventEvidence.evidence_id,
+    recipient_address: walletAddress,
+    wallet_control_proof_id: walletControlProof.proof_id,
+    asset: KAIOS_PLAYER_REWARD_POLICY.asset,
+    chain_id: KAIOS_PLAYER_REWARD_POLICY.chain_id,
+    token_address: KAIOS_PLAYER_REWARD_POLICY.token_address.toLowerCase(),
+    amount_kaios_wei: rule.amount_kaios_wei,
+    payment_purpose: KAIOS_PLAYER_REWARD_POLICY.payment_purpose,
+    accounting_class: KAIOS_PLAYER_REWARD_POLICY.accounting_class,
+    occurred_at: occurredAt,
+    paid: false,
+    payment_id: null,
+    receipt: null,
+    status: "ACCRUED_AWAITING_BOUND_FUNDING_EXACT_AUTHORIZATION_SIGNER_AND_RECEIPT"
+  });
+}
+
+export function evaluateKaiosRewardBudgetSimulation({
+  entitlement, treasuryBalanceKaiosWei, genesisCommittedKaiosWei,
+  dailyCommittedKaiosWei, walletFixedMilestoneCommittedKaiosWei,
+  lifeFixedMilestoneCommittedKaiosWei
+}) {
+  invariant(entitlement?.policy_id === KAIOS_PLAYER_REWARD_POLICY.policy_id && entitlement.paid === false, "KAIOS_REWARD_ENTITLEMENT_REQUIRED", "Budget simulation requires an unpaid KAIOS Player Reward entitlement");
+  const amount = requirePositiveKaiosWei(entitlement.amount_kaios_wei, "reward_budget.amount_kaios_wei");
+  const treasury = BigInt(treasuryBalanceKaiosWei);
+  const genesisCommitted = BigInt(genesisCommittedKaiosWei);
+  const dailyCommitted = BigInt(dailyCommittedKaiosWei);
+  const walletCommitted = BigInt(walletFixedMilestoneCommittedKaiosWei);
+  const lifeCommitted = BigInt(lifeFixedMilestoneCommittedKaiosWei);
+  for (const [field, value] of Object.entries({ treasury, genesisCommitted, dailyCommitted, walletCommitted, lifeCommitted })) invariant(value >= 0n, "KAIOS_REWARD_BUDGET_VALUE_INVALID", `${field} cannot be negative`);
+  const fixedMilestone = entitlement.event_type !== "DAILY_QUEST_VERIFIED";
+  invariant(genesisCommitted + amount <= BigInt(KAIOS_PLAYER_REWARD_POLICY.global_genesis_reward_budget_kaios_wei), "KAIOS_REWARD_GLOBAL_BUDGET_EXCEEDED", "Genesis reward budget would be exceeded");
+  if (!fixedMilestone) invariant(dailyCommitted + amount <= BigInt(KAIOS_PLAYER_REWARD_POLICY.daily_reward_budget_kaios_wei), "KAIOS_REWARD_DAILY_BUDGET_EXCEEDED", "Daily reward budget would be exceeded");
+  if (fixedMilestone) {
+    invariant(walletCommitted + amount <= BigInt(KAIOS_PLAYER_REWARD_POLICY.per_wallet_fixed_milestone_cap_kaios_wei), "KAIOS_REWARD_WALLET_CAP_EXCEEDED", "Per-wallet fixed milestone cap would be exceeded");
+    invariant(lifeCommitted + amount <= BigInt(KAIOS_PLAYER_REWARD_POLICY.per_life_fixed_milestone_cap_kaios_wei), "KAIOS_REWARD_LIFE_CAP_EXCEEDED", "Per-Life fixed milestone cap would be exceeded");
+  }
+  invariant(treasury >= amount && treasury - amount >= BigInt(KAIOS_PLAYER_REWARD_POLICY.treasury_minimum_reserve_kaios_wei), "KAIOS_REWARD_TREASURY_RESERVE_VIOLATION", "Reward would breach the Treasury minimum reserve");
+  return Object.freeze({
+    entitlement_id: entitlement.entitlement_id,
+    amount_kaios_wei: amount.toString(),
+    policy_budget_simulation: "PASS",
+    policy_pause_switch: KAIOS_PLAYER_REWARD_POLICY.pause_switch,
+    may_enter_payment_rail: false,
+    budget_attestation_required: true,
+    exact_payment_authorization_required: true,
+    real_transfer: false,
+    status: "SIMULATION_PASS_AWAITING_REPOSITORY_BOUND_BUDGET_ATTESTATION_AND_PAYMENT_GATES"
+  });
+}
+
+export function createKaiosLiquidityGenesisSimulation({
+  simulationId, pairId, kaiosAmountWei, counterAssetAmountWei,
+  treasuryBalanceKaiosWei, referencePriceSource, createdAt
+}) {
+  requireId(simulationId, "kaios_lp.simulation_id");
+  requireEnum(pairId, Object.keys(KAIOS_LIQUIDITY_GENESIS_POLICY.candidate_pairs), "kaios_lp.pair_id");
+  invariant(typeof referencePriceSource === "string" && referencePriceSource.trim().length >= 3, "KAIOS_LP_REFERENCE_REQUIRED", "LP simulation requires an explicit reference-price source");
+  parseEmploymentTime(createdAt, "kaios_lp.created_at");
+  const kaios = requirePositiveKaiosWei(kaiosAmountWei, "kaios_lp.kaios_amount_wei");
+  const counterAsset = requirePositiveKaiosWei(counterAssetAmountWei, "kaios_lp.counter_asset_amount_wei");
+  const treasury = BigInt(treasuryBalanceKaiosWei);
+  invariant(treasury >= 0n, "KAIOS_LP_TREASURY_BALANCE_INVALID", "Treasury balance cannot be negative");
+  invariant(kaios <= BigInt(KAIOS_LIQUIDITY_GENESIS_POLICY.maximum_kaios_genesis_allocation_wei), "KAIOS_LP_ALLOCATION_EXCEEDED", "LP candidate exceeds the maximum KAIOS Genesis allocation");
+  invariant(treasury >= kaios && treasury - kaios >= BigInt(KAIOS_LIQUIDITY_GENESIS_POLICY.treasury_minimum_reserve_kaios_wei), "KAIOS_LP_TREASURY_RESERVE_VIOLATION", "LP candidate would breach the Treasury minimum reserve");
+  const pair = KAIOS_LIQUIDITY_GENESIS_POLICY.candidate_pairs[pairId];
+  return Object.freeze({
+    simulation_id: simulationId,
+    policy_id: KAIOS_LIQUIDITY_GENESIS_POLICY.policy_id,
+    reuse_product_id: KAIOS_LIQUIDITY_GENESIS_POLICY.reuse_product_id,
+    pair_id: pairId,
+    chain_id: KAIOS_LIQUIDITY_GENESIS_POLICY.chain_id,
+    kaios_token_address: KAIOS_LIQUIDITY_GENESIS_POLICY.kaios_token_address.toLowerCase(),
+    counter_asset: pair.counter_asset,
+    counter_asset_address: pair.counter_asset_address.toLowerCase(),
+    kaios_amount_wei: kaios.toString(),
+    counter_asset_amount_wei: counterAsset.toString(),
+    reference_price_source: referencePriceSource,
+    target_maximum_price_impact_bps: KAIOS_LIQUIDITY_GENESIS_POLICY.target_maximum_price_impact_bps,
+    preview_slippage_bps: KAIOS_LIQUIDITY_GENESIS_POLICY.default_preview_slippage_bps,
+    accounting_class: "LIQUIDITY_PROVISION",
+    dex_price_is_11520_ct: false,
+    lp_token_owner: "NOT_ASSIGNED_POLICY_REQUIRED",
+    withdrawal_authority: KAIOS_LIQUIDITY_GENESIS_POLICY.withdrawal_authority,
+    chain_write: false,
+    real_lp_created: false,
+    created_at: createdAt,
+    status: "SIMULATION_ONLY_AWAITING_PRICE_BUDGET_GOVERNANCE_TREASURY_SIGNER_AND_RECEIPT"
+  });
+}
+
+export function createKaiosEconomyEvidenceSnapshot({
+  snapshotId, asOf, evidenceStatus = "NOT_CONNECTED", holderRecords = [],
+  entitlements = [], payments = [], trades = [], resourceAccounts = [],
+  companyAccounts = [], liquiditySnapshots = [], treasuryBalanceKaiosWei = null
+}) {
+  requireId(snapshotId, "kaios_economy.snapshot_id");
+  parseEmploymentTime(asOf, "kaios_economy.as_of");
+  for (const [field, value] of Object.entries({ holderRecords, entitlements, payments, trades, resourceAccounts, companyAccounts, liquiditySnapshots })) requireArray(value, `kaios_economy.${field}`);
+  const connected = evidenceStatus === "REPOSITORY_OR_CHAIN_VERIFIED";
+  const unknown = () => "UNKNOWN";
+  const verifiedHolders = connected ? holderRecords.filter((item) => item.evidence_status === "VERIFIED_CHAIN_INDEXER" && /^0x[0-9a-fA-F]{40}$/.test(String(item.address ?? "")) && BigInt(item.balance_kaios_wei ?? "0") > 0n) : [];
+  const uniqueHolders = new Map(verifiedHolders.map((item) => [item.address.toLowerCase(), item]));
+  const paid = connected ? payments.filter((item) => item.receipt_status === 1 && /^0x[0-9a-fA-F]{64}$/.test(String(item.transaction_hash ?? ""))) : [];
+  const settledTrades = connected ? trades.filter((item) => item.status === "VERIFIED_SETTLED" && item.receipt_status === 1 && item.self_match !== true && item.wash_trade !== true) : [];
+  const sum = (records, field) => records.reduce((total, item) => total + BigInt(item[field] ?? "0"), 0n).toString();
+  const holderCount = (type) => [...uniqueHolders.values()].filter((item) => item.holder_type === type).length;
+  return Object.freeze({
+    snapshot_id: snapshotId,
+    as_of: asOf,
+    evidence_status: evidenceStatus,
+    holders: Object.freeze({
+      total: connected ? uniqueHolders.size : unknown(),
+      active: connected ? [...uniqueHolders.values()].filter((item) => item.active === true).length : unknown(),
+      player: connected ? holderCount("PLAYER") : unknown(),
+      ai_life: connected ? holderCount("AI_LIFE") : unknown(),
+      employee: connected ? holderCount("EMPLOYEE") : unknown(),
+      resource_accounts: connected ? resourceAccounts.filter((item) => item.account_type === "PROGRAMMATIC_LEDGER_SUBACCOUNT").length : unknown(),
+      company_accounts: connected ? companyAccounts.length : unknown()
+    }),
+    circulation: Object.freeze({
+      accrued_kaios_wei: connected ? sum(entitlements.filter((item) => item.paid === false), "amount_kaios_wei") : unknown(),
+      paid_kaios_wei: connected ? sum(paid, "amount_kaios_wei") : unknown(),
+      recirculated_kaios_wei: connected ? sum(paid.filter((item) => item.direction === "PLAYER_TO_CIVILIZATION"), "amount_kaios_wei") : unknown()
+    }),
+    market: Object.freeze({
+      verified_trades: connected ? settledTrades.length : unknown(),
+      volume_kaios_wei: connected ? sum(settledTrades, "settlement_amount_kaios_wei") : unknown(),
+      ct: connected && settledTrades.length ? settledTrades.at(-1).price : null
+    }),
+    liquidity: Object.freeze({
+      dex_liquidity: connected && liquiditySnapshots.length ? liquiditySnapshots.at(-1).depth : unknown(),
+      lp_status: connected && liquiditySnapshots.length ? liquiditySnapshots.at(-1).status : "NOT_CONNECTED"
+    }),
+    treasury: Object.freeze({
+      balance_kaios_wei: connected && treasuryBalanceKaiosWei !== null ? BigInt(treasuryBalanceKaiosWei).toString() : unknown(),
+      genesis_reward_budget_kaios_wei: KAIOS_PLAYER_REWARD_POLICY.global_genesis_reward_budget_kaios_wei,
+      daily_reward_budget_kaios_wei: KAIOS_PLAYER_REWARD_POLICY.daily_reward_budget_kaios_wei,
+      minimum_reserve_kaios_wei: KAIOS_PLAYER_REWARD_POLICY.treasury_minimum_reserve_kaios_wei
+    }),
+    fabricated_metrics: false,
+    status: connected ? "EVIDENCE_SNAPSHOT" : "NOT_CONNECTED_SHOW_UNKNOWN"
+  });
+}
+
+export function createResourceLedgerSubaccount({ accountId, nodeId, nodeName, canonicalLocation, resourceTypes, createdAt }) {
+  requireId(accountId, "resource_account.account_id");
+  requireId(nodeId, "resource_account.node_id");
+  invariant(typeof nodeName === "string" && nodeName.trim().length > 0, "RESOURCE_NODE_NAME_REQUIRED", "Resource account requires the canonical node name");
+  invariant(typeof canonicalLocation === "string" && canonicalLocation.trim().length > 0, "RESOURCE_CANONICAL_LOCATION_REQUIRED", "Resource account requires a canonical location reference");
+  requireArray(resourceTypes, "resource_account.resource_types");
+  invariant(resourceTypes.length > 0 && new Set(resourceTypes).size === resourceTypes.length && resourceTypes.every((item) => /^[A-Z][A-Z0-9_]{1,63}$/.test(item)), "RESOURCE_TYPES_INVALID", "Resource account requires unique canonical resource types");
+  parseEmploymentTime(createdAt, "resource_account.created_at");
+  return Object.freeze({
+    account_id: accountId,
+    account_type: "PROGRAMMATIC_LEDGER_SUBACCOUNT",
+    node_id: nodeId,
+    node_name: nodeName,
+    canonical_location: canonicalLocation,
+    economic_owner: nodeId,
+    resource_types: Object.freeze([...resourceTypes]),
+    chain_id: 56,
+    public_address: null,
+    eoa_private_key_created: false,
+    can_accrue_entitlements: true,
+    can_receive_chain_payment: false,
+    created_at: createdAt,
+    status: "ACTIVE_LEDGER_ONLY_AWAITING_RESOURCE_SMART_ACCOUNT_OR_TEMPORARY_CUSTODY_ROUTE"
+  });
+}
+
+export function createTemporaryResourceCustodyBindingCandidate({
+  bindingId, resourceAccount, publicAddress, custodianId, walletControlProof,
+  purpose, asset = "KAIOS", maxAmountKaiosWei, validFrom, validUntil,
+  humanDecisionId, existingBindings = []
+}) {
+  requireId(bindingId, "resource_custody.binding_id");
+  invariant(resourceAccount?.account_type === "PROGRAMMATIC_LEDGER_SUBACCOUNT", "RESOURCE_LEDGER_ACCOUNT_REQUIRED", "Temporary custody must reference the canonical resource ledger subaccount");
+  requireId(custodianId, "resource_custody.custodian_id");
+  requireId(humanDecisionId, "resource_custody.human_decision_id");
+  requireArray(existingBindings, "resource_custody.existing_bindings");
+  invariant(!existingBindings.some((item) => item.binding_id === bindingId), "RESOURCE_CUSTODY_BINDING_REPLAY", "Temporary custody binding IDs are append-only and cannot be reused");
+  invariant(asset === "KAIOS", "RESOURCE_CUSTODY_ASSET_INVALID", "This temporary resource custody candidate is bound only to KAIOS");
+  invariant(typeof purpose === "string" && purpose.length >= 3, "RESOURCE_CUSTODY_PURPOSE_REQUIRED", "Temporary resource custody requires a bounded purpose");
+  const address = normalizeEmploymentWallet(publicAddress);
+  invariant(walletControlProof?.status === "VERIFIED_LOCAL_WALLET_CONTROL" && walletControlProof.authentication_method === "EIP191_PERSONAL_SIGN", "RESOURCE_CUSTODY_WALLET_CONTROL_REQUIRED", "Temporary Human custody requires public-address control proof");
+  invariant(walletControlProof.actor_id === custodianId && Number(walletControlProof.chain_id) === 56 && normalizeEmploymentWallet(walletControlProof.wallet_address) === address, "RESOURCE_CUSTODY_WALLET_BINDING_MISMATCH", "Custodian proof must bind the exact Human, address and chain");
+  const maximum = requirePositiveKaiosWei(maxAmountKaiosWei, "resource_custody.max_amount_kaios_wei");
+  const starts = parseEmploymentTime(validFrom, "resource_custody.valid_from");
+  const ends = parseEmploymentTime(validUntil, "resource_custody.valid_until");
+  invariant(ends > starts && ends - starts <= 90 * 24 * 60 * 60 * 1000, "RESOURCE_CUSTODY_VALIDITY_INVALID", "Temporary resource custody must expire within 90 days");
+  return Object.freeze({
+    binding_id: bindingId,
+    node_id: resourceAccount.node_id,
+    account_id: resourceAccount.account_id,
+    canonical_location: resourceAccount.canonical_location,
+    chain_id: 56,
+    public_address: address,
+    account_role: "TEMPORARY_CUSTODY_RECEIVER",
+    economic_owner: resourceAccount.node_id,
+    custodian: custodianId,
+    purpose,
+    asset,
+    max_amount_kaios_wei: maximum.toString(),
+    valid_from: validFrom,
+    valid_until: validUntil,
+    human_decision_id: humanDecisionId,
+    migration_policy: "FREEZE_ROUTE_RECONCILE_CREATE_VERIFIED_RESOURCE_ACCOUNT_MIGRATE_WITH_EXACT_AUTHORITY_RETIRE_TEMPORARY_ROUTE",
+    canonical_node_wallet: false,
+    company_or_human_owns_node_assets: false,
+    payment_authority: false,
+    status: "CANDIDATE_AWAITING_REPOSITORY_DESIGNATION_NOT_PAYMENT_AUTHORITY"
+  });
+}
+
 // A temporary Human payment designation is authority-bearing provenance.
 // Runtime callers may reference only a designation reviewed into this
 // repository-owned allowlist; they may never inject the designation record.
