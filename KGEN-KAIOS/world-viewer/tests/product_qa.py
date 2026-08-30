@@ -1487,7 +1487,20 @@ def run_login_and_consent(browser: Browser, args: argparse.Namespace, gate: Gate
             "consent-login",
             page.locator("#login-button").inner_text().strip() == "Mock login",
         )
-        page.locator("#login-button").click()
+        start_button = page.locator("#session-start-button")
+        gate.expect(
+            "login.mobile-start-visible",
+            "consent-login",
+            start_button.is_visible()
+            and start_button.is_enabled()
+            and "開始遊戲" in start_button.inner_text(),
+        )
+        gate.expect(
+            "login.offline-controls-hidden",
+            "consent-login",
+            not page.locator(".player-action-toolbar").is_visible(),
+        )
+        start_button.click()
         dialog = visible_consent_dialog(page)
         dialog_text = clean_text(dialog.inner_text())
         gate.expect(
@@ -1504,6 +1517,12 @@ def run_login_and_consent(browser: Browser, args: argparse.Namespace, gate: Gate
             "() => document.getElementById('login-button')?.textContent.trim() === 'End mock session'"
         )
         complete_genesis(page)
+        gate.expect(
+            "login.active-controls-visible",
+            "consent-login",
+            page.locator(".player-action-toolbar").is_visible()
+            and not start_button.is_visible(),
+        )
         declined = clean_text(page.locator("#starter-parcel-status").inner_text())
         gate.expect(
             "location.decline",

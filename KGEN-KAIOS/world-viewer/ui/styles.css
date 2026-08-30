@@ -196,6 +196,7 @@ button:focus-visible, canvas:focus-visible, [tabindex]:focus-visible {
 }
 .player-command-center[data-session="active"] { border-color: var(--accent); }
 .player-command-center[data-dirty="true"] #land-save-button { border-color: var(--amber); color: var(--amber); }
+.player-command-center[data-session="inactive"] .player-action-toolbar { display: none; }
 .player-hud { min-width: 0; display: grid; grid-template-columns: minmax(88px, 1fr) auto; align-items: center; gap: 9px; padding: 0 5px; }
 .player-hud__identity { min-width: 0; display: grid; gap: 2px; }
 .player-hud__identity span, .player-hud__readout dt { color: var(--muted); font-size: 8px; font-weight: 750; }
@@ -203,6 +204,19 @@ button:focus-visible, canvas:focus-visible, [tabindex]:focus-visible {
 .player-hud__readout { display: flex; gap: 9px; margin: 0; }
 .player-hud__readout div { min-width: 40px; display: grid; gap: 2px; }
 .player-hud__readout dd { margin: 0; max-width: 92px; overflow: hidden; font-size: 10px; font-weight: 700; text-overflow: ellipsis; white-space: nowrap; }
+.session-start-button {
+  min-width: 220px; min-height: var(--touch); padding: 6px 14px;
+  display: grid; place-content: center; gap: 2px;
+  border: 1px solid var(--accent); border-radius: 6px;
+  background: var(--accent); color: #07150c; cursor: pointer;
+  font: inherit; text-align: center;
+}
+.session-start-button strong { font-size: 13px; }
+.session-start-button span { font-size: 9px; font-weight: 650; }
+.session-start-button:hover { filter: brightness(1.06); }
+.session-start-button:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+.session-start-button:disabled { opacity: 0.5; cursor: wait; }
+.session-start-button[hidden] { display: none; }
 .player-action-toolbar { min-width: 0; display: flex; align-items: center; gap: 7px; }
 .command-group { display: flex; align-items: center; gap: 4px; }
 .land-command-group { padding-left: 7px; border-left: 1px solid var(--line); }
@@ -667,10 +681,10 @@ button:focus-visible, canvas:focus-visible, [tabindex]:focus-visible {
   .route-nav-mobile { display: inline; }
   .toolbar { gap: 3px; }
   .toolbar-separator, #world-button, #zoom-in-button, #zoom-out-button, #theme-button { display: none; }
-  .login-button { width: var(--touch); padding: 0; overflow: hidden; color: transparent; position: relative; }
+  .login-button { width: 62px; padding: 0; overflow: hidden; color: transparent; position: relative; }
   .login-button.is-authenticated { color: transparent; }
-  .login-button::after { content: "P"; color: var(--text); position: absolute; inset: 0; display: grid; place-items: center; font-weight: 800; }
-  .login-button.is-authenticated::after { content: "X"; color: var(--accent-strong); }
+  .login-button::after { content: "開始"; color: var(--text); position: absolute; inset: 0; display: grid; place-items: center; font-weight: 800; }
+  .login-button.is-authenticated::after { content: "離開"; color: var(--accent-strong); }
   .workspace { grid-template-columns: 1fr; }
   .mode-rail {
     position: absolute; z-index: 35; left: calc(8px + var(--safe-left)); right: calc(8px + var(--safe-right));
@@ -732,6 +746,7 @@ button:focus-visible, canvas:focus-visible, [tabindex]:focus-visible {
     width: auto; transform: none; grid-template-columns: 1fr; gap: 5px; padding: 6px;
   }
   .player-hud { min-height: 30px; grid-template-columns: minmax(92px, 1fr) auto; }
+  .session-start-button { width: 100%; min-width: 0; }
   .player-action-toolbar { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 5px 8px; }
   .walk-command-group { justify-content: flex-end; }
   .land-command-group { grid-column: 1 / -1; justify-content: center; padding: 4px 0 0; border-left: 0; border-top: 1px solid var(--line); }
