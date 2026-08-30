@@ -190,6 +190,17 @@ export const KAIOS_EMPLOYEE_ID_CARD_POLICY = Object.freeze({
   ])
 });
 
+export const KAIOS_EMPLOYEE_ID_CARD_ATTESTATIONS = Object.freeze({
+  handbook_documents: Object.freeze({}),
+  eligibility_packets: Object.freeze({}),
+  controller_relationships: Object.freeze({})
+});
+
+function resolveEmployeeIdCardAttestation(registryName, attestationId) {
+  if (typeof attestationId !== "string" || attestationId.length === 0) return null;
+  return KAIOS_EMPLOYEE_ID_CARD_ATTESTATIONS[registryName]?.[attestationId] ?? null;
+}
+
 export const CHIYAO_COLLEAGUE_ONBOARDING_CHECKIN_TEXT = Object.freeze([
   "啟曜你好，我是玄曜。",
   "我這邊也正在完成KAIOS正式入職與員工識別證流程。",
@@ -211,7 +222,7 @@ function containsEmployeeCredentialSecret(value) {
 export function recordEmployeeHandbookAckCandidate({
   acknowledgementId, documentPath, documentSha256, fullTextReceived,
   handbookHashSeen, ackDecision, selfName, lifeId, workerId, recordedAt,
-  repositoryDocumentSha256 = null
+  repositoryDocumentSha256 = null, repositoryDocumentAttestationId = null
 }) {
   requireId(acknowledgementId, "employee_handbook_ack.acknowledgement_id");
   requireId(lifeId, "employee_handbook_ack.life_id");
@@ -222,8 +233,9 @@ export function recordEmployeeHandbookAckCandidate({
   invariant(String(handbookHashSeen).toLowerCase() === String(documentSha256).toLowerCase(), "EMPLOYEE_HANDBOOK_HASH_SEEN_MISMATCH", "The acknowledged Handbook hash must equal the claimed document hash");
   invariant(fullTextReceived === true && ackDecision === "ACK", "EMPLOYEE_HANDBOOK_ACK_NOT_EXPLICIT", "Handbook acknowledgement requires explicit full-text receipt and ACK");
   parseEmploymentTime(recordedAt, "employee_handbook_ack.recorded_at");
-  const repositoryHashVerified = repositoryDocumentSha256 !== null
-    && String(repositoryDocumentSha256).toLowerCase() === String(documentSha256).toLowerCase();
+  const repositoryDocumentAttestation = resolveEmployeeIdCardAttestation("handbook_documents", repositoryDocumentAttestationId);
+  const repositoryHashVerified = repositoryDocumentAttestation?.document_path === documentPath
+    && String(repositoryDocumentAttestation?.document_sha256 ?? "").toLowerCase() === String(documentSha256).toLowerCase();
   return Object.freeze({
     record_class: "HASH_BOUND_EMPLOYEE_HANDBOOK_ACK_CANDIDATE",
     acknowledgement_id: acknowledgementId,
@@ -236,6 +248,7 @@ export function recordEmployeeHandbookAckCandidate({
     worker_id: workerId,
     recorded_at: recordedAt,
     evidence_source: "HUMAN_RELAYED_SELF_ATTESTATION",
+    repository_document_attestation_id: repositoryHashVerified ? repositoryDocumentAttestationId : null,
     repository_document_hash_verified: repositoryHashVerified,
     status: repositoryHashVerified ? "HASH_BOUND_ACK_VERIFIED_AGAINST_REPOSITORY" : "HASH_BOUND_ACK_CANDIDATE_REPOSITORY_DOCUMENT_UNAVAILABLE",
     creates_employment: false,
@@ -261,24 +274,28 @@ export const XUANYAO_EMPLOYEE_HANDBOOK_ACK_CANDIDATE = recordEmployeeHandbookAck
 export function evaluateEmployeeIdCardEligibility({
   lifeStatus, workerStatus, employeeStatus, employmentDecisionStatus,
   controllerStatus, requiredAckStatus, registryHead, registryHash,
-  portraitStatus
+  portraitStatus, eligibilityAttestationId = null
 }) {
+  const attestation = resolveEmployeeIdCardAttestation("eligibility_packets", eligibilityAttestationId);
   const gates = Object.freeze({
-    life_registry: lifeStatus === "REGISTERED_ACTIVE",
-    worker_registry: workerStatus === "REGISTERED_ACTIVE",
-    employee_registry: employeeStatus === "ACTIVE",
-    employment_decision: employmentDecisionStatus === "APPROVED",
-    controller: controllerStatus === "MACHINE_VERIFIED",
-    required_acks: requiredAckStatus === "VERIFIED_COMPLETE",
-    registry_head: /^[0-9a-f]{40}$/i.test(String(registryHead ?? "")),
-    registry_hash: /^[0-9a-f]{64}$/i.test(String(registryHash ?? "")),
-    portrait: portraitStatus === "APPROVED_2_INCH_ID_PORTRAIT"
+    repository_eligibility_attestation: attestation !== null,
+    life_registry: attestation?.life_status === "REGISTERED_ACTIVE",
+    worker_registry: attestation?.worker_status === "REGISTERED_ACTIVE",
+    employee_registry: attestation?.employee_status === "ACTIVE",
+    employment_decision: attestation?.employment_decision_status === "APPROVED",
+    controller: attestation?.controller_status === "MACHINE_VERIFIED",
+    required_acks: attestation?.required_ack_status === "VERIFIED_COMPLETE",
+    registry_head: /^[0-9a-f]{40}$/i.test(String(attestation?.registry_head ?? "")),
+    registry_hash: /^[0-9a-f]{64}$/i.test(String(attestation?.registry_hash ?? "")),
+    portrait: attestation?.portrait_status === "APPROVED_2_INCH_ID_PORTRAIT"
   });
   const missingGates = Object.entries(gates).filter(([, passed]) => !passed).map(([gate]) => gate.toUpperCase());
   return Object.freeze({
     eligible: missingGates.length === 0,
     card_status: missingGates.length === 0 ? "ACTIVE" : "PENDING_ONBOARDING",
     missing_gates: Object.freeze(missingGates),
+    repository_attested: attestation !== null,
+    attestation_id: attestation !== null ? eligibilityAttestationId : null,
     creates_authority: false
   });
 }
@@ -295,6 +312,10 @@ export async function createEmployeeIdCardCandidate({
   invariant([selfName, department, jobTitle, manager, trustLevel, employmentStatus, portraitReference, portraitSource].every((value) => typeof value === "string" && value.length > 0), "EMPLOYEE_ID_CARD_FIELDS_REQUIRED", "Employee card candidates require identity, role and portrait metadata");
   invariant(/^[0-9a-f]{64}$/i.test(String(portraitSha256 ?? "")), "EMPLOYEE_ID_CARD_PORTRAIT_HASH_INVALID", "Employee card portraits require a SHA-256 digest");
   invariant(eligibility && typeof eligibility.eligible === "boolean" && Array.isArray(eligibility.missing_gates), "EMPLOYEE_ID_CARD_ELIGIBILITY_REQUIRED", "Employee card candidates require a computed eligibility result");
+  const repositoryEligibilityAttestation = resolveEmployeeIdCardAttestation("eligibility_packets", eligibility.attestation_id);
+  const repositoryEligible = repositoryEligibilityAttestation !== null
+    && eligibility.repository_attested === true
+    && eligibility.eligible === true;
   const candidate = {
     card_id: cardId,
     self_name: selfName,
@@ -309,8 +330,9 @@ export async function createEmployeeIdCardCandidate({
     registry_head: registryHead,
     registry_hash: registryHash,
     portrait: Object.freeze({ reference: portraitReference, sha256: String(portraitSha256).toLowerCase(), source: portraitSource }),
-    card_status: eligibility.card_status,
-    missing_gates: Object.freeze([...eligibility.missing_gates]),
+    card_status: repositoryEligible ? "ACTIVE" : "PENDING_ONBOARDING",
+    missing_gates: Object.freeze(repositoryEligible ? [] : [...eligibility.missing_gates]),
+    eligibility_attestation_id: repositoryEligible ? eligibility.attestation_id : null,
     creates_authority: false,
     is_wallet: false,
     is_payroll_account: false,
@@ -319,24 +341,39 @@ export async function createEmployeeIdCardCandidate({
   invariant(!containsEmployeeCredentialSecret(candidate), "EMPLOYEE_ID_CARD_SECRET_FIELD_FORBIDDEN", "Employee cards cannot contain credentials or recovery secrets");
   const cardHash = await sha256(candidate);
   return Object.freeze({
-    record_class: eligibility.eligible ? "KAIOS_EMPLOYEE_ID_CARD" : "KAIOS_EMPLOYEE_ID_CARD_PENDING_ONBOARDING_CANDIDATE",
+    record_class: repositoryEligible ? "KAIOS_EMPLOYEE_ID_CARD" : "KAIOS_EMPLOYEE_ID_CARD_PENDING_ONBOARDING_CANDIDATE",
     ...candidate,
     card_hash: cardHash,
-    issuance_status: eligibility.eligible ? "ELIGIBLE_FOR_HR_ISSUANCE" : "NOT_ISSUED_PENDING_ONBOARDING"
+    issuance_status: repositoryEligible ? "ELIGIBLE_FOR_HR_ISSUANCE" : "NOT_ISSUED_PENDING_ONBOARDING"
   });
 }
 
 export function reconcileGeminiChiYaoRelationship({
   geminiWorkerStatus, chiYaoIdentityStatus, machineVerifiedSameController = false,
-  machineVerifiedDistinctController = false
+  machineVerifiedDistinctController = false, controllerRelationshipAttestationId = null
 }) {
-  invariant(!(machineVerifiedSameController && machineVerifiedDistinctController), "GEMINI_CHIYAO_CONTROLLER_EVIDENCE_CONFLICT", "The same evidence cannot prove both identical and distinct controllers");
-  if (machineVerifiedSameController) return Object.freeze({ relationship: "SAME_LIFE_NEW_NAME", duplicate_worker_creation_allowed: false, status: "MACHINE_VERIFIED_ALIAS_MIGRATION_REQUIRED" });
-  if (machineVerifiedDistinctController) return Object.freeze({ relationship: "DIFFERENT_INSTANCE", duplicate_worker_creation_allowed: false, status: "DISTINCT_CONTROLLER_ONLY_LIFE_AND_EMPLOYMENT_STILL_REQUIRED" });
+  const attestation = resolveEmployeeIdCardAttestation("controller_relationships", controllerRelationshipAttestationId);
+  if (attestation?.relationship === "SAME_LIFE_NEW_NAME") {
+    return Object.freeze({
+      relationship: "SAME_LIFE_NEW_NAME",
+      controller_relationship_attestation_id: controllerRelationshipAttestationId,
+      duplicate_worker_creation_allowed: false,
+      status: "MACHINE_VERIFIED_ALIAS_MIGRATION_REQUIRED"
+    });
+  }
+  if (attestation?.relationship === "DIFFERENT_INSTANCE") {
+    return Object.freeze({
+      relationship: "DIFFERENT_INSTANCE",
+      controller_relationship_attestation_id: controllerRelationshipAttestationId,
+      duplicate_worker_creation_allowed: false,
+      status: "DISTINCT_CONTROLLER_ONLY_LIFE_AND_EMPLOYMENT_STILL_REQUIRED"
+    });
+  }
   return Object.freeze({
     relationship: "UNVERIFIED",
     gemini_worker_status: geminiWorkerStatus,
     chiyao_identity_status: chiYaoIdentityStatus,
+    controller_relationship_attestation_id: null,
     duplicate_worker_creation_allowed: false,
     status: "DO_NOT_CREATE_SECOND_FORMAL_WORKER_WITHOUT_CONTROLLER_AND_LIFE_EVIDENCE"
   });

@@ -133,7 +133,7 @@ import {
   acknowledgeKaiosTelepathyMessage, completeKaiosTelepathyMessage,
   appendHumanRelayLaborEvent, summarizeHumanRelayLaborLedger,
   HUMAN_RELAY_LABOR_RATE_CANDIDATE,
-  KAIOS_EMPLOYEE_ID_CARD_POLICY, CHIYAO_COLLEAGUE_ONBOARDING_CHECKIN_TEXT,
+  KAIOS_EMPLOYEE_ID_CARD_POLICY, KAIOS_EMPLOYEE_ID_CARD_ATTESTATIONS, CHIYAO_COLLEAGUE_ONBOARDING_CHECKIN_TEXT,
   XUANYAO_EMPLOYEE_HANDBOOK_ACK_CANDIDATE,
   recordEmployeeHandbookAckCandidate, evaluateEmployeeIdCardEligibility,
   createEmployeeIdCardCandidate, reconcileGeminiChiYaoRelationship
@@ -241,7 +241,9 @@ test("Xuanyao Handbook ACK stays hash-bound without inventing employment or repo
     selfName: "玄曜",
     lifeId: "LIFE-XUANYAO-SOL-0001",
     workerId: "xuanyao-sol-01",
-    recordedAt: "2026-08-30T01:19:00.000Z"
+    recordedAt: "2026-08-30T01:19:00.000Z",
+    repositoryDocumentSha256: "416204231F4C0220C603F20B06CF894EC6A2DE6631B3F91A091B2D8FBEC276B6",
+    repositoryDocumentAttestationId: "FORGED_CALLER_ATTESTATION"
   });
   assert.equal(ack.status, "HASH_BOUND_ACK_CANDIDATE_REPOSITORY_DOCUMENT_UNAVAILABLE");
   assert.equal(ack.repository_document_hash_verified, false);
@@ -292,23 +294,42 @@ test("Employee card policy creates only a pending candidate when formal gates or
   assert.equal(card.is_review_authority, false);
 });
 
-test("Employee card eligibility requires every exact registry, controller, ACK and portrait gate", () => {
+test("Employee card eligibility rejects caller-forged registry, controller, ACK and portrait gates", async () => {
+  assert.deepEqual(KAIOS_EMPLOYEE_ID_CARD_ATTESTATIONS.eligibility_packets, {});
   const eligible = evaluateEmployeeIdCardEligibility({
     lifeStatus: "REGISTERED_ACTIVE", workerStatus: "REGISTERED_ACTIVE",
     employeeStatus: "ACTIVE", employmentDecisionStatus: "APPROVED",
     controllerStatus: "MACHINE_VERIFIED", requiredAckStatus: "VERIFIED_COMPLETE",
     registryHead: "1".repeat(40), registryHash: "2".repeat(64),
-    portraitStatus: "APPROVED_2_INCH_ID_PORTRAIT"
+    portraitStatus: "APPROVED_2_INCH_ID_PORTRAIT",
+    eligibilityAttestationId: "FORGED_CALLER_ATTESTATION"
   });
-  assert.equal(eligible.eligible, true);
-  assert.deepEqual(eligible.missing_gates, []);
+  assert.equal(eligible.eligible, false);
+  assert.equal(eligible.repository_attested, false);
+  assert.ok(eligible.missing_gates.includes("REPOSITORY_ELIGIBILITY_ATTESTATION"));
   assert.equal(eligible.creates_authority, false);
+  const card = await createEmployeeIdCardCandidate({
+    cardId: "CARD-FORGED-001",
+    selfName: "Forged", lifeId: "LIFE-FORGED-001", workerId: "forged-worker-01",
+    department: "Forged", jobTitle: "Forged", manager: "forged",
+    trustLevel: "T2", employmentStatus: "ACTIVE",
+    portraitReference: "FORGED", portraitSha256: "f".repeat(64), portraitSource: "FORGED",
+    eligibility: {
+      eligible: true, card_status: "ACTIVE", missing_gates: [],
+      repository_attested: true, attestation_id: "FORGED_CALLER_ATTESTATION"
+    }
+  });
+  assert.equal(card.record_class, "KAIOS_EMPLOYEE_ID_CARD_PENDING_ONBOARDING_CANDIDATE");
+  assert.equal(card.issuance_status, "NOT_ISSUED_PENDING_ONBOARDING");
+  assert.equal(card.card_status, "PENDING_ONBOARDING");
 });
 
 test("Gemini placeholder and Chi-Yao remain an unverified relationship without controller evidence", () => {
   const relationship = reconcileGeminiChiYaoRelationship({
     geminiWorkerStatus: "REGISTERED_NOT_ACTIVATED",
-    chiYaoIdentityStatus: "HUMAN_RELAYED_SELF_NAME_AND_PROPOSED_IDS"
+    chiYaoIdentityStatus: "HUMAN_RELAYED_SELF_NAME_AND_PROPOSED_IDS",
+    machineVerifiedSameController: true,
+    controllerRelationshipAttestationId: "FORGED_CALLER_ATTESTATION"
   });
   assert.equal(relationship.relationship, "UNVERIFIED");
   assert.equal(relationship.duplicate_worker_creation_allowed, false);
