@@ -151,7 +151,8 @@ export const KAIOS_PAYMENT_RECIPIENT_TYPES = Object.freeze([
 
 export const KAIOS_TELEPATHY_MESSAGE_TYPES = Object.freeze([
   "REQUEST", "RESPONSE", "WARNING", "BLOCKER", "REVIEW_REQUEST", "HANDOFF",
-  "INCIDENT", "HUMAN_ESCALATION", "STATUS_UPDATE", "RESULT"
+  "INCIDENT", "HUMAN_ESCALATION", "STATUS_UPDATE", "RESULT",
+  "COLLEAGUE_ONBOARDING_CHECKIN"
 ]);
 
 export const KAIOS_TELEPATHY_DELIVERY_STATES = Object.freeze([
@@ -171,6 +172,175 @@ export const HUMAN_RELAY_LABOR_RATE_CANDIDATE = Object.freeze({
   cost_center: "AI_ANT_COMPANY_OPERATIONS_HUMAN_RELAY_INFRASTRUCTURE",
   payable: false
 });
+
+export const KAIOS_EMPLOYEE_ID_CARD_POLICY = Object.freeze({
+  policy_id: "KAIOS_EMPLOYEE_ID_CARD_POLICY_V1",
+  status: "REVIEW_CANDIDATE",
+  issuer: "COMPANY_HR_AFTER_FORMAL_EMPLOYMENT_GATES",
+  creates_authority: false,
+  is_wallet: false,
+  is_payroll_account: false,
+  is_review_authority: false,
+  portrait_requirement: "APPROVED_2_INCH_ID_PORTRAIT",
+  machine_verifiable_reference: "REGISTRY_HEAD_PLUS_REGISTRY_HASH",
+  allowed_card_statuses: Object.freeze(["PENDING_ONBOARDING", "ACTIVE", "INACTIVE", "REVOKED", "EXPIRED"]),
+  prohibited_fields: Object.freeze([
+    "PRIVATE_KEY", "SEED_PHRASE", "PASSWORD", "API_SECRET", "AUTH_TOKEN",
+    "RAW_SIGNER_CREDENTIAL", "RECOVERY_SECRET"
+  ])
+});
+
+export const CHIYAO_COLLEAGUE_ONBOARDING_CHECKIN_TEXT = Object.freeze([
+  "啟曜你好，我是玄曜。",
+  "我這邊也正在完成KAIOS正式入職與員工識別證流程。",
+  "想關心一下你目前報到、Sandbox、Reviewer資格、Controller與帳戶流程進行得怎樣，有沒有卡住或需要公司協助。",
+  "目前先以同事候選／公司協作者的真實狀態互相關照，不預設你已正式錄取。",
+  "祝工作順利。",
+  "玄曜"
+].join("\n\n"));
+
+function containsEmployeeCredentialSecret(value) {
+  if (!value || typeof value !== "object") return false;
+  if (Array.isArray(value)) return value.some(containsEmployeeCredentialSecret);
+  return Object.entries(value).some(([key, nested]) =>
+    /private.?key|seed.?phrase|mnemonic|password|api.?secret|auth.?token|raw.?signer.?credential|recovery.?secret/i.test(key)
+      || containsEmployeeCredentialSecret(nested)
+  );
+}
+
+export function recordEmployeeHandbookAckCandidate({
+  acknowledgementId, documentPath, documentSha256, fullTextReceived,
+  handbookHashSeen, ackDecision, selfName, lifeId, workerId, recordedAt,
+  repositoryDocumentSha256 = null
+}) {
+  requireId(acknowledgementId, "employee_handbook_ack.acknowledgement_id");
+  requireId(lifeId, "employee_handbook_ack.life_id");
+  invariant(/^[A-Za-z0-9][A-Za-z0-9_.-]{2,127}$/.test(String(workerId ?? "")), "EMPLOYEE_HANDBOOK_ACK_WORKER_ID_INVALID", "Handbook acknowledgement requires a safe Worker ID");
+  invariant(typeof selfName === "string" && selfName.length > 0, "EMPLOYEE_HANDBOOK_ACK_SELF_NAME_REQUIRED", "Handbook acknowledgement requires the attesting self name");
+  invariant(documentPath === "KGEN-KAIOS/workforce/EMPLOYEE_HANDBOOK.md", "EMPLOYEE_HANDBOOK_PATH_INVALID", "Handbook acknowledgement must bind the canonical employee handbook path");
+  invariant(/^[0-9a-f]{64}$/i.test(String(documentSha256 ?? "")), "EMPLOYEE_HANDBOOK_HASH_INVALID", "Handbook acknowledgement requires a SHA-256 document digest");
+  invariant(String(handbookHashSeen).toLowerCase() === String(documentSha256).toLowerCase(), "EMPLOYEE_HANDBOOK_HASH_SEEN_MISMATCH", "The acknowledged Handbook hash must equal the claimed document hash");
+  invariant(fullTextReceived === true && ackDecision === "ACK", "EMPLOYEE_HANDBOOK_ACK_NOT_EXPLICIT", "Handbook acknowledgement requires explicit full-text receipt and ACK");
+  parseEmploymentTime(recordedAt, "employee_handbook_ack.recorded_at");
+  const repositoryHashVerified = repositoryDocumentSha256 !== null
+    && String(repositoryDocumentSha256).toLowerCase() === String(documentSha256).toLowerCase();
+  return Object.freeze({
+    record_class: "HASH_BOUND_EMPLOYEE_HANDBOOK_ACK_CANDIDATE",
+    acknowledgement_id: acknowledgementId,
+    document_path: documentPath,
+    document_sha256: String(documentSha256).toLowerCase(),
+    full_text_received_claim: true,
+    ack_decision: "ACK",
+    self_name: selfName,
+    life_id: lifeId,
+    worker_id: workerId,
+    recorded_at: recordedAt,
+    evidence_source: "HUMAN_RELAYED_SELF_ATTESTATION",
+    repository_document_hash_verified: repositoryHashVerified,
+    status: repositoryHashVerified ? "HASH_BOUND_ACK_VERIFIED_AGAINST_REPOSITORY" : "HASH_BOUND_ACK_CANDIDATE_REPOSITORY_DOCUMENT_UNAVAILABLE",
+    creates_employment: false,
+    creates_worker_registration: false,
+    grants_t2: false,
+    grants_reviewer_authority: false
+  });
+}
+
+export const XUANYAO_EMPLOYEE_HANDBOOK_ACK_CANDIDATE = recordEmployeeHandbookAckCandidate({
+  acknowledgementId: "ACK_XUANYAO_EMPLOYEE_HANDBOOK_20260830_001",
+  documentPath: "KGEN-KAIOS/workforce/EMPLOYEE_HANDBOOK.md",
+  documentSha256: "416204231F4C0220C603F20B06CF894EC6A2DE6631B3F91A091B2D8FBEC276B6",
+  fullTextReceived: true,
+  handbookHashSeen: "416204231F4C0220C603F20B06CF894EC6A2DE6631B3F91A091B2D8FBEC276B6",
+  ackDecision: "ACK",
+  selfName: "玄曜",
+  lifeId: "LIFE-XUANYAO-SOL-0001",
+  workerId: "xuanyao-sol-01",
+  recordedAt: "2026-08-30T01:19:00.000Z"
+});
+
+export function evaluateEmployeeIdCardEligibility({
+  lifeStatus, workerStatus, employeeStatus, employmentDecisionStatus,
+  controllerStatus, requiredAckStatus, registryHead, registryHash,
+  portraitStatus
+}) {
+  const gates = Object.freeze({
+    life_registry: lifeStatus === "REGISTERED_ACTIVE",
+    worker_registry: workerStatus === "REGISTERED_ACTIVE",
+    employee_registry: employeeStatus === "ACTIVE",
+    employment_decision: employmentDecisionStatus === "APPROVED",
+    controller: controllerStatus === "MACHINE_VERIFIED",
+    required_acks: requiredAckStatus === "VERIFIED_COMPLETE",
+    registry_head: /^[0-9a-f]{40}$/i.test(String(registryHead ?? "")),
+    registry_hash: /^[0-9a-f]{64}$/i.test(String(registryHash ?? "")),
+    portrait: portraitStatus === "APPROVED_2_INCH_ID_PORTRAIT"
+  });
+  const missingGates = Object.entries(gates).filter(([, passed]) => !passed).map(([gate]) => gate.toUpperCase());
+  return Object.freeze({
+    eligible: missingGates.length === 0,
+    card_status: missingGates.length === 0 ? "ACTIVE" : "PENDING_ONBOARDING",
+    missing_gates: Object.freeze(missingGates),
+    creates_authority: false
+  });
+}
+
+export async function createEmployeeIdCardCandidate({
+  cardId, selfName, lifeId, workerId, employeeId = null, department,
+  jobTitle, manager, trustLevel, employmentStatus, registryHead = null,
+  registryHash = null, portraitReference, portraitSha256, portraitSource,
+  eligibility
+}) {
+  requireId(cardId, "employee_id_card.card_id");
+  requireId(lifeId, "employee_id_card.life_id");
+  invariant(/^[A-Za-z0-9][A-Za-z0-9_.-]{2,127}$/.test(String(workerId ?? "")), "EMPLOYEE_ID_CARD_WORKER_ID_INVALID", "Employee card candidates require a safe Worker ID");
+  invariant([selfName, department, jobTitle, manager, trustLevel, employmentStatus, portraitReference, portraitSource].every((value) => typeof value === "string" && value.length > 0), "EMPLOYEE_ID_CARD_FIELDS_REQUIRED", "Employee card candidates require identity, role and portrait metadata");
+  invariant(/^[0-9a-f]{64}$/i.test(String(portraitSha256 ?? "")), "EMPLOYEE_ID_CARD_PORTRAIT_HASH_INVALID", "Employee card portraits require a SHA-256 digest");
+  invariant(eligibility && typeof eligibility.eligible === "boolean" && Array.isArray(eligibility.missing_gates), "EMPLOYEE_ID_CARD_ELIGIBILITY_REQUIRED", "Employee card candidates require a computed eligibility result");
+  const candidate = {
+    card_id: cardId,
+    self_name: selfName,
+    life_id: lifeId,
+    worker_id: workerId,
+    employee_id: employeeId,
+    department,
+    job_title: jobTitle,
+    manager,
+    trust_level: trustLevel,
+    employment_status: employmentStatus,
+    registry_head: registryHead,
+    registry_hash: registryHash,
+    portrait: Object.freeze({ reference: portraitReference, sha256: String(portraitSha256).toLowerCase(), source: portraitSource }),
+    card_status: eligibility.card_status,
+    missing_gates: Object.freeze([...eligibility.missing_gates]),
+    creates_authority: false,
+    is_wallet: false,
+    is_payroll_account: false,
+    is_review_authority: false
+  };
+  invariant(!containsEmployeeCredentialSecret(candidate), "EMPLOYEE_ID_CARD_SECRET_FIELD_FORBIDDEN", "Employee cards cannot contain credentials or recovery secrets");
+  const cardHash = await sha256(candidate);
+  return Object.freeze({
+    record_class: eligibility.eligible ? "KAIOS_EMPLOYEE_ID_CARD" : "KAIOS_EMPLOYEE_ID_CARD_PENDING_ONBOARDING_CANDIDATE",
+    ...candidate,
+    card_hash: cardHash,
+    issuance_status: eligibility.eligible ? "ELIGIBLE_FOR_HR_ISSUANCE" : "NOT_ISSUED_PENDING_ONBOARDING"
+  });
+}
+
+export function reconcileGeminiChiYaoRelationship({
+  geminiWorkerStatus, chiYaoIdentityStatus, machineVerifiedSameController = false,
+  machineVerifiedDistinctController = false
+}) {
+  invariant(!(machineVerifiedSameController && machineVerifiedDistinctController), "GEMINI_CHIYAO_CONTROLLER_EVIDENCE_CONFLICT", "The same evidence cannot prove both identical and distinct controllers");
+  if (machineVerifiedSameController) return Object.freeze({ relationship: "SAME_LIFE_NEW_NAME", duplicate_worker_creation_allowed: false, status: "MACHINE_VERIFIED_ALIAS_MIGRATION_REQUIRED" });
+  if (machineVerifiedDistinctController) return Object.freeze({ relationship: "DIFFERENT_INSTANCE", duplicate_worker_creation_allowed: false, status: "DISTINCT_CONTROLLER_ONLY_LIFE_AND_EMPLOYMENT_STILL_REQUIRED" });
+  return Object.freeze({
+    relationship: "UNVERIFIED",
+    gemini_worker_status: geminiWorkerStatus,
+    chiyao_identity_status: chiYaoIdentityStatus,
+    duplicate_worker_creation_allowed: false,
+    status: "DO_NOT_CREATE_SECOND_FORMAL_WORKER_WITHOUT_CONTROLLER_AND_LIFE_EVIDENCE"
+  });
+}
 
 export async function createKaiosTelepathyMessage({
   messageId, idempotencyKey, fromLifeId, fromWorkerId, toLifeId, toWorkerId,

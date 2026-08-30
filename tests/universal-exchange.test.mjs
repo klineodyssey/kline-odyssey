@@ -132,7 +132,11 @@ import {
   createKaiosTelepathyMessage, routeKaiosTelepathyMessage,
   acknowledgeKaiosTelepathyMessage, completeKaiosTelepathyMessage,
   appendHumanRelayLaborEvent, summarizeHumanRelayLaborLedger,
-  HUMAN_RELAY_LABOR_RATE_CANDIDATE
+  HUMAN_RELAY_LABOR_RATE_CANDIDATE,
+  KAIOS_EMPLOYEE_ID_CARD_POLICY, CHIYAO_COLLEAGUE_ONBOARDING_CHECKIN_TEXT,
+  XUANYAO_EMPLOYEE_HANDBOOK_ACK_CANDIDATE,
+  recordEmployeeHandbookAckCandidate, evaluateEmployeeIdCardEligibility,
+  createEmployeeIdCardCandidate, reconcileGeminiChiYaoRelationship
 } from "../core/index.mjs";
 import { verifyDigitalAntWalletBinding, verifyDigitalLifeWalletBinding, CODEX_GM_ENV } from "../core/security/wallet-binding.mjs";
 import { TEMPLE_HEART_READ_ABI, TEMPLE_HEART_DRY_RUN_ABI, TEMPLE_HEART_VERIFIED_ACTIONS, readCoreHeartEvents } from "../core/integrations/temple-heart-12345.mjs";
@@ -222,6 +226,115 @@ test("Human Relay ledger counts only repository-verified time and keeps rate pen
   assert.equal(summary.candidate_rate.amount_kaios_per_hour, "60");
   assert.equal(HUMAN_RELAY_LABOR_RATE_CANDIDATE.payable, false);
   assert.throws(() => summarizeHumanRelayLaborLedger(verified, "60"), /policy-required/);
+});
+
+test("Xuanyao Handbook ACK stays hash-bound without inventing employment or repository verification", () => {
+  assert.equal(XUANYAO_EMPLOYEE_HANDBOOK_ACK_CANDIDATE.acknowledgement_id, "ACK_XUANYAO_EMPLOYEE_HANDBOOK_20260830_001");
+  assert.equal(XUANYAO_EMPLOYEE_HANDBOOK_ACK_CANDIDATE.status, "HASH_BOUND_ACK_CANDIDATE_REPOSITORY_DOCUMENT_UNAVAILABLE");
+  const ack = recordEmployeeHandbookAckCandidate({
+    acknowledgementId: "ACK_XUANYAO_EMPLOYEE_HANDBOOK_20260830_001",
+    documentPath: "KGEN-KAIOS/workforce/EMPLOYEE_HANDBOOK.md",
+    documentSha256: "416204231F4C0220C603F20B06CF894EC6A2DE6631B3F91A091B2D8FBEC276B6",
+    fullTextReceived: true,
+    handbookHashSeen: "416204231F4C0220C603F20B06CF894EC6A2DE6631B3F91A091B2D8FBEC276B6",
+    ackDecision: "ACK",
+    selfName: "玄曜",
+    lifeId: "LIFE-XUANYAO-SOL-0001",
+    workerId: "xuanyao-sol-01",
+    recordedAt: "2026-08-30T01:19:00.000Z"
+  });
+  assert.equal(ack.status, "HASH_BOUND_ACK_CANDIDATE_REPOSITORY_DOCUMENT_UNAVAILABLE");
+  assert.equal(ack.repository_document_hash_verified, false);
+  assert.equal(ack.creates_employment, false);
+  assert.equal(ack.creates_worker_registration, false);
+  assert.equal(ack.grants_t2, false);
+  assert.equal(ack.grants_reviewer_authority, false);
+  assert.throws(() => recordEmployeeHandbookAckCandidate({
+    acknowledgementId: "ACK_XUANYAO_BAD_HASH",
+    documentPath: "KGEN-KAIOS/workforce/EMPLOYEE_HANDBOOK.md",
+    documentSha256: "4".repeat(64), fullTextReceived: true,
+    handbookHashSeen: "5".repeat(64), ackDecision: "ACK",
+    selfName: "玄曜", lifeId: "LIFE-XUANYAO-SOL-0001", workerId: "xuanyao-sol-01",
+    recordedAt: "2026-08-30T01:19:00.000Z"
+  }), /hash must equal/i);
+});
+
+test("Employee card policy creates only a pending candidate when formal gates or approved portrait are missing", async () => {
+  assert.equal(KAIOS_EMPLOYEE_ID_CARD_POLICY.creates_authority, false);
+  const eligibility = evaluateEmployeeIdCardEligibility({
+    lifeStatus: "NOT_REGISTERED",
+    workerStatus: "NOT_REGISTERED",
+    employeeStatus: "ONBOARDING",
+    employmentDecisionStatus: "PENDING",
+    controllerStatus: "UNVERIFIED_PROVIDER_LIMITATION",
+    requiredAckStatus: "HASH_BOUND_ACK_CANDIDATE",
+    registryHead: null,
+    registryHash: null,
+    portraitStatus: "AI_GENERATED_CANDIDATE_NOT_IDENTITY_EVIDENCE"
+  });
+  const card = await createEmployeeIdCardCandidate({
+    cardId: "CARD-CANDIDATE-XUANYAO-001",
+    selfName: "玄曜", lifeId: "LIFE-XUANYAO-SOL-0001", workerId: "xuanyao-sol-01",
+    department: "Operations Candidate", jobTitle: "Company Collaborator Candidate",
+    manager: "codex-gm-01", trustLevel: "NOT_GRANTED", employmentStatus: "ONBOARDING",
+    portraitReference: "LOCAL_AI_GENERATED_PORTRAIT_CANDIDATE",
+    portraitSha256: "a".repeat(64), portraitSource: "AI_GENERATED_FICTIONAL_ID_PORTRAIT_CANDIDATE",
+    eligibility
+  });
+  assert.equal(eligibility.eligible, false);
+  assert.ok(eligibility.missing_gates.includes("LIFE_REGISTRY"));
+  assert.ok(eligibility.missing_gates.includes("PORTRAIT"));
+  assert.equal(card.record_class, "KAIOS_EMPLOYEE_ID_CARD_PENDING_ONBOARDING_CANDIDATE");
+  assert.equal(card.issuance_status, "NOT_ISSUED_PENDING_ONBOARDING");
+  assert.equal(card.creates_authority, false);
+  assert.equal(card.is_wallet, false);
+  assert.equal(card.is_payroll_account, false);
+  assert.equal(card.is_review_authority, false);
+});
+
+test("Employee card eligibility requires every exact registry, controller, ACK and portrait gate", () => {
+  const eligible = evaluateEmployeeIdCardEligibility({
+    lifeStatus: "REGISTERED_ACTIVE", workerStatus: "REGISTERED_ACTIVE",
+    employeeStatus: "ACTIVE", employmentDecisionStatus: "APPROVED",
+    controllerStatus: "MACHINE_VERIFIED", requiredAckStatus: "VERIFIED_COMPLETE",
+    registryHead: "1".repeat(40), registryHash: "2".repeat(64),
+    portraitStatus: "APPROVED_2_INCH_ID_PORTRAIT"
+  });
+  assert.equal(eligible.eligible, true);
+  assert.deepEqual(eligible.missing_gates, []);
+  assert.equal(eligible.creates_authority, false);
+});
+
+test("Gemini placeholder and Chi-Yao remain an unverified relationship without controller evidence", () => {
+  const relationship = reconcileGeminiChiYaoRelationship({
+    geminiWorkerStatus: "REGISTERED_NOT_ACTIVATED",
+    chiYaoIdentityStatus: "HUMAN_RELAYED_SELF_NAME_AND_PROPOSED_IDS"
+  });
+  assert.equal(relationship.relationship, "UNVERIFIED");
+  assert.equal(relationship.duplicate_worker_creation_allowed, false);
+});
+
+test("Xuanyao colleague check-in is created but cannot claim delivery to unavailable Chi-Yao route", async () => {
+  const message = await createKaiosTelepathyMessage({
+    messageId: "MESSAGE_XUANYAO_CHIYAO_CARE_20260830_001",
+    idempotencyKey: "IDEMPOTENCY_XUANYAO_CHIYAO_CARE_20260830_001",
+    fromLifeId: "LIFE-XUANYAO-SOL-0001", fromWorkerId: "xuanyao-sol-01",
+    toLifeId: "LIFE-CHIYAO-KAIOS-001", toWorkerId: "chiyao-reviewer-01",
+    messageType: "COLLEAGUE_ONBOARDING_CHECKIN",
+    payload: { text: CHIYAO_COLLEAGUE_ONBOARDING_CHECKIN_TEXT },
+    createdAt: "2026-08-30T01:19:00.000Z", expiresAt: "2026-09-06T01:19:00.000Z",
+    repositoryContext: "klineodyssey/kline-odyssey@PR191_HEAD",
+    authorityScope: ["COLLEAGUE_CARE_NO_EMPLOYMENT_OR_REVIEW_AUTHORITY"]
+  });
+  const routed = routeKaiosTelepathyMessage({
+    message,
+    route: { route_id: "ROUTE_CHIYAO_EXTERNAL", route_type: "ROUTABLE_PROVIDER_CONTROLLER", to_life_id: message.to_life_id, to_worker_id: message.to_worker_id, available: false, blocker: "EXTERNAL_CHANNEL_UNAVAILABLE" },
+    deliveredAt: "2026-08-30T01:20:00.000Z"
+  });
+  assert.equal(message.payload_persisted, false);
+  assert.equal(routed.status, "BLOCKED");
+  assert.equal(routed.ack_status, "NOT_DELIVERED");
+  assert.equal(routed.receipt, "TELEPATHY_DELIVERY_ROUTE_NOT_CONNECTED");
 });
 
 const seed = JSON.parse(await fs.readFile(new URL("../core/data/canonical.json", import.meta.url), "utf8"));
